@@ -41,7 +41,10 @@ GLUI_Spinner *SPINNER_shooter_dz=NULL;
 GLUI_Spinner *SPINNER_shooter_nparts=NULL;
 GLUI_Spinner *SPINNER_shooter_fps=NULL;
 GLUI_Spinner *SPINNER_shooter_veldir=NULL;
-GLUI_Spinner *SPINNER_shooter_velmag=NULL;
+GLUI_Spinner *SPINNER_shooter_v_inf=NULL;
+GLUI_Spinner *SPINNER_shooter_u0=NULL;
+GLUI_Spinner *SPINNER_shooter_z0=NULL;
+GLUI_Spinner *SPINNER_shooter_p=NULL;
 GLUI_Spinner *SPINNER_shooter_duration=NULL;
 GLUI_Spinner *SPINNER_shooter_history=NULL;
 
@@ -144,8 +147,14 @@ extern "C" void glui_shooter_setup(int main_window){
   glui_shooter->add_radiobutton_to_group(RADIO_shooter_vel_type,"Use PLOT3D velocity data");
   glui_shooter->add_radiobutton_to_group(RADIO_shooter_vel_type,"Use specified Profile");
 
-  SPINNER_shooter_velmag=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"velocity magnitude (m/s)",
-    GLUI_SPINNER_FLOAT,&shooter_velmag,SHOOTER_VEL,SHOOTER_CB);
+  SPINNER_shooter_v_inf=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"terminal velocity, v_inf (m/s)",
+    GLUI_SPINNER_FLOAT,&shooter_v_inf,SHOOTER_VEL,SHOOTER_CB);
+  SPINNER_shooter_u0=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"reference velocity, U0 (m/s)",
+    GLUI_SPINNER_FLOAT,&shooter_u0,SHOOTER_VEL,SHOOTER_CB);
+  SPINNER_shooter_z0=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"reference elevation, Z0 (m)",
+    GLUI_SPINNER_FLOAT,&shooter_z0,SHOOTER_VEL,SHOOTER_CB);
+  SPINNER_shooter_p=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"decay, p",
+    GLUI_SPINNER_FLOAT,&shooter_p,SHOOTER_VEL,SHOOTER_CB);
   SPINNER_shooter_veldir=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"velocity direction (deg)",
     GLUI_SPINNER_FLOAT,&shooter_veldir,SHOOTER_VEL,SHOOTER_CB);
   SPINNER_shooter_veldir->set_float_limits(-180.0,180.0);
@@ -174,8 +183,8 @@ void SHOOTER_CB(int var){
       pi = 4.0*atan(1.0);
       ang = 2.0*pi*shooter_veldir/360.0;
       shooter_velz=0.0;
-      shooter_velx = shooter_velmag*cos(ang);
-      shooter_vely = shooter_velmag*sin(ang);
+      shooter_velx = shooter_u0*cos(ang);
+      shooter_vely = shooter_u0*sin(ang);
       break;
     case SHOOTER_XYZ:
       if(shooter_active==1){
@@ -221,11 +230,17 @@ void SHOOTER_CB(int var){
       break;
     case SHOOTER_VEL_TYPE:
       if(shooter_vel_type==1){
-        SPINNER_shooter_velmag->enable();
+        SPINNER_shooter_v_inf->enable();
+        SPINNER_shooter_u0->enable();
+        SPINNER_shooter_z0->enable();
+        SPINNER_shooter_p->enable();
         SPINNER_shooter_veldir->enable();
       }
       else{
-        SPINNER_shooter_velmag->disable();
+        SPINNER_shooter_v_inf->disable();
+        SPINNER_shooter_u0->disable();
+        SPINNER_shooter_z0->disable();
+        SPINNER_shooter_p->disable();
         SPINNER_shooter_veldir->disable();
      }
       break;
