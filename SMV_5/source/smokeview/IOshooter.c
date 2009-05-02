@@ -69,8 +69,11 @@ typedef struct {
 /* ------------------ get_vel ------------------------ */
 
 void get_shooter_vel(float *uvw, float *xyz){
-  uvw[0] = shooter_velx;
-  uvw[1] = shooter_vely;
+  float factor;
+
+  factor = pow(xyz[2]/shooter_z0,shooter_p);
+  uvw[0] = factor*shooter_velx;
+  uvw[1] = factor*shooter_vely;
   uvw[2] = shooter_velz;
 }
 
@@ -78,18 +81,25 @@ void get_shooter_vel(float *uvw, float *xyz){
 
 void increment_shooter_data(float dt){
   int i;
-  float *xyz, uvw[3];
+  float *xyz, *uvw, uvw_air[3];
+  float g=-9.8;
   
+  // dv/dt = g - |g|(v-v_a)/v_inf
+  // dx/dt = v
+
   shooter_time+=dt;
   for(i=0;i<shooter_nparts;i++){
     xyz = shootpointinfo[i].xyz;
-    get_shooter_vel(uvw,xyz);
-    if(i==0)printf("before xyz=%f %f %f\n",xyz[0],xyz[1],xyz[2]);
-    if(i==0)printf("before uvw=%f %f %f dt=%f\n",uvw[0],uvw[1],uvw[2],dt);
+    uvw = shootpointinfo[i].uvw;
+    get_shooter_vel(uvw_air,xyz);
+
+    uvw[0] += dt*(-abs(g)*(uvw[0]-uvw_air[0])/shooter_v_inf);
+    uvw[1] += dt*(-abs(g)*(uvw[1]-uvw_air[1])/shooter_v_inf);
+    uvw[2] += dt*(g-abs(g)*(uvw[2]-uvw_air[2])/shooter_v_inf);
+
     xyz[0] += dt*uvw[0];
     xyz[1] += dt*uvw[1];
     xyz[2] += dt*uvw[2];
-    if(i==0)printf("after xyz=%f %f %f\n",xyz[0],xyz[1],xyz[2]);
   }
   shooter_active=1;
 }
@@ -132,7 +142,6 @@ void draw_shooter(void){
 
 
   increment_shooter_data(0.01);
-  printf("shooter time %f\n",shooter_time);
   if(shooter_time>shooter_time_max){
     printf("initializing shooter data\n");
     init_shooter_data();

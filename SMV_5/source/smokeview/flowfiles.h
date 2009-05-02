@@ -13,7 +13,7 @@
 
 typedef struct _shootpointdata {
   struct _shootpointdata *prev;
-  float xyz[3], uvw[3], val;
+  float xyz[3], uvw[3], uvw_air[3], val;
 } shootpointdata;
 
 /* --------------------------  point ------------------------------------ */

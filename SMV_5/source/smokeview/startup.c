@@ -951,6 +951,10 @@ void initvars1(void){
   shooter_active=0;
   shooterpointsize=4.0;
   shooter_time_max=2.0;
+  shooter_v_inf=1.0;
+  shooter_u0=2.0;
+  shooter_z0=2.0;
+  shooter_p=1.0/7.0;
 #endif
   update_makeiblank_smoke3d=0;
   update_initcull=0;
