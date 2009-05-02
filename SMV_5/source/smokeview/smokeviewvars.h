@@ -369,6 +369,7 @@ SVEXTERN int showbounds,showmotion,showedit, showclip, showgluistereo, showtour,
 SVEXTERN int showshooter;
 SVEXTERN float shooter_xyz[3], shooter_dxyz[3], shooterpointsize;
 SVEXTERN float shooter_velx, shooter_vely, shooter_velz, shooter_time, shooter_time_max;
+SVEXTERN float shooter_u0, shooter_z0, shooter_p, shooter_v_inf;
 SVEXTERN float shooter_velmag, shooter_veldir, shooter_duration, shooter_history, shooter_active;
 SVEXTERN int shooter_fps,shooter_vel_type, shooter_nparts, show_shooter_points, max_shooter_frames, max_shooter_points;
 SVEXTERN shootpointdata *shootpointinfo;
