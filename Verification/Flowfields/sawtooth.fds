@@ -8,11 +8,10 @@ boundary conditions will be applied in such a way as to minimize the impact of
 
 &TIME T_END=60.0 / 
 
-&MISC SURF_DEFAULT='SLIP' /
-
-&SURF ID='BLOW', VEL=-0.7071, SLIP_FACTOR=1.0 /
-&SURF ID='SUCK', VEL= 0.7071, SLIP_FACTOR=1.0 /
-&SURF ID='SLIP', SLIP_FACTOR=1.0 /
+&SURF ID='BLOW RIGHT', VEL=-0.7071, VEL_T=0.0,0.7071 /
+&SURF ID='BLOW UP',    VEL=-0.7071, VEL_T=0.7071,0.0 /
+&SURF ID='SUCK RIGHT', VEL= 0.7071, VEL_T=0.0,0.7071 /
+&SURF ID='SUCK UP',    VEL= 0.7071, VEL_T=0.7071,0.0 /
 
 &OBST XB= 0.00, 0.05,-0.01, 0.01, 0.00, 0.05, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
 &OBST XB= 0.05, 0.10,-0.01, 0.01, 0.00, 0.10, SAWTOOTH=.FALSE., COLOR='EMERALD GREEN' /
@@ -57,10 +56,10 @@ boundary conditions will be applied in such a way as to minimize the impact of
 
 &SLCF PBY=0.0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
         
-&VENT XB= 0.00, 0.00,-0.01, 0.01, 0.10, 1.00, SURF_ID='BLOW' /
-&VENT XB= 0.10, 1.00,-0.01, 0.01, 0.00, 0.00, SURF_ID='BLOW' /
-&VENT XB= 0.00, 0.90,-0.01, 0.01, 1.00, 1.00, SURF_ID='SUCK' /
-&VENT XB= 1.00, 1.00,-0.01, 0.01, 0.00, 0.90, SURF_ID='SUCK' /
+&VENT XB= 0.00, 0.00,-0.01, 0.01, 0.10, 1.00, SURF_ID='BLOW RIGHT' /
+&VENT XB= 0.10, 1.00,-0.01, 0.01, 0.00, 0.00, SURF_ID='BLOW UP' /
+&VENT XB= 0.00, 0.90,-0.01, 0.01, 1.00, 1.00, SURF_ID='SUCK UP' /
+&VENT XB= 1.00, 1.00,-0.01, 0.01, 0.00, 0.90, SURF_ID='SUCK RIGHT' /
 
 &TAIL /
 

@@ -33,6 +33,15 @@ $RUNFDS Heat_Transfer heat_conduction_d           fire55 &
 $RUNFDS Heat_Transfer heat_conduction_kc          fire56 &
 $RUNFDS Heat_Transfer insulated_steel_column      fire57 &
 $RUNFDS Miscellaneous pyramid                     fire58 &
+$RUNFDS Flowfields moody_dpdx=-0p01_N16           fire70 &
+$RUNFDS Flowfields moody_dpdx=-0p01_N32           fire70 &
+$RUNFDS Flowfields moody_dpdx=-0p01_N8            fire71 &
+$RUNFDS Flowfields moody_dpdx=-100_N16            fire71 &
+$RUNFDS Flowfields moody_dpdx=-100_N32            fire72 &
+$RUNFDS Flowfields moody_dpdx=-100_N8             fire72 &
+$RUNFDS Flowfields moody_dpdx=-1_N16              fire73 &
+$RUNFDS Flowfields moody_dpdx=-1_N32              fire73 &
+$RUNFDS Flowfields moody_dpdx=-1_N8               fire74 &
 $RUNFDS NS_Analytical_Solution ns2d_16            fire59 &
 $RUNFDS NS_Analytical_Solution ns2d_16_nupt1      fire61 &
 $RUNFDS NS_Analytical_Solution ns2d_32            fire62 &
@@ -41,6 +50,9 @@ $RUNFDS NS_Analytical_Solution ns2d_64            fire64 &
 $RUNFDS NS_Analytical_Solution ns2d_64_nupt1      fire65 &
 $RUNFDS NS_Analytical_Solution ns2d_8             fire66 &
 $RUNFDS NS_Analytical_Solution ns2d_8_nupt1       fire67 &
+$RUNFDS Flowfields poiseuille_dpdx=-1_N16         fire74 &
+$RUNFDS Flowfields poiseuille_dpdx=-1_N32         fire75 &
+$RUNFDS Flowfields poiseuille_dpdx=-1_N8          fire75 &
 $RUNFDS Pressure_Effects door_crack               fire68 &
 $RUNFDS Pressure_Effects fan_test                 fire61 &
 $RUNFDS Pressure_Effects leak_test_2              fire62 &
