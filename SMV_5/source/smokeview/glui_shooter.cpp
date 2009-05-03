@@ -220,9 +220,8 @@ void SHOOTER_CB(int var){
       }
       break;
     case SHOOTER_APPLY:
-      max_shooter_frames=shooter_duration*shooter_fps;
-      max_shooter_frames*=(shooter_history*shooter_fps);
-      max_shooter_points=max_shooter_frames*shooter_nparts;
+      nshooter_frames=shooter_duration*shooter_fps;
+      max_shooter_points=nshooter_frames*shooter_nparts;
 
       if(allocate_shooter()==0){
         init_shooter_data();
