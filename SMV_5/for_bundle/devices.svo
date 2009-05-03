@@ -168,7 +168,7 @@ DEVICEDEF
  push 0.0 0.0 0.035052 translate 0.00635 drawsphere pop
  push 0.0 0.0 1.0 setcolor 
    0.0 0.0 0.0414 translate 0.012 drawsphere pop
-DEVICE
+DEVICEDEF
  door         // label, name of device
  0.0 3.0 getuservals 1.0 0.2 2.3 scale 1.0 drawcube
  NEWFRAME
