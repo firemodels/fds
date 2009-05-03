@@ -30,7 +30,7 @@ int SUB_portfrustum(int quad,
 
 EXTERNCPP void update_glui_plot3dtype(void);
 EXTERNCPP void update_glui_isotype(void);
-EXTERNCPP void init_device(device *devicei, float *xyz, float *xyzn, int state0);
+EXTERNCPP void init_device(device *devicei, float *xyz, float *xyzn, int state0,int nparams, float *params);
 EXTERNCPP void draw_devices_val(void);
 EXTERNCPP void getsmokesensors(void);
 EXTERNCPP float get_vecfactor(int *iveclengths);
