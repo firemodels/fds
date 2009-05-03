@@ -3654,7 +3654,7 @@ typedef struct {
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
-          init_device(devicecopy,xyz,xyznorm,0);
+          init_device(devicecopy,xyz,xyznorm,0,0,NULL);
 
           devicecopy++;
           ndeviceinfo++;
@@ -3705,6 +3705,8 @@ typedef struct {
       device *devicei;
       float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
       int state0=0;
+      int flag=0;
+      float params[NDEVICE_PARAMS]={0.0,0.0,0.0,0.0,0.0};
 
       devicei = deviceinfo + ndeviceinfo;
       devicei->type=DEVICE_DEVICE;
@@ -3715,8 +3717,16 @@ typedef struct {
         devicei->object = device_defs_backup[0];
       }
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %i",xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0);
-      init_device(devicei,xyz,xyzn,state0);
+      sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f %f %f",
+        xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,
+        &flag, params, params+1,params+2,params+3,params+4
+        );
+      if(flag==0){
+        init_device(devicei,xyz,xyzn,state0,0,NULL);
+      }
+      else{
+        init_device(devicei,xyz,xyzn,state0,NDEVICE_PARAMS,params);
+      }
       get_elevaz(devicei->xyznorm,&devicei->angle_elev,&devicei->angle_az);
 
       ndeviceinfo++;
@@ -3804,7 +3814,7 @@ typedef struct {
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
-          init_device(devicecopy,NULL,xyznorm,0);
+          init_device(devicecopy,NULL,xyznorm,0,0,NULL);
 
           devicecopy++;
           ndeviceinfo++;
@@ -3924,7 +3934,7 @@ typedef struct {
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
 
-          init_device(devicecopy,NULL,xyznorm,0);
+          init_device(devicecopy,NULL,xyznorm,0,0,NULL);
 
           devicecopy++;
           ndeviceinfo++;
@@ -4027,7 +4037,7 @@ typedef struct {
         }
         get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
-        init_device(devicecopy,xyz,xyznorm,0);
+        init_device(devicecopy,xyz,xyznorm,0,0,NULL);
 
         devicecopy++;
         ndeviceinfo++;

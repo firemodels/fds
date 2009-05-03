@@ -592,7 +592,7 @@ typedef struct _sv_object {
 } sv_object;
 
 /* --------------------------  device ------------------------------------ */
-
+#define NDEVICE_PARAMS 5
 typedef struct {
   int active;
   int screenijk[3], visval;
@@ -605,6 +605,8 @@ typedef struct {
   float act_time;
   float *act_times;
   int *state_values;
+  int use_params;
+  float params[NDEVICE_PARAMS];
   int istate_changes, nstate_changes, state0;
   int *showstatelist;
   sv_object *object;
