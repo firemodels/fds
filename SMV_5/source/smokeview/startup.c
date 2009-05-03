@@ -944,7 +944,7 @@ void initvars1(void){
   show_smokelighting=0;
 #endif
 #ifdef pp_SHOOTER
-  show_shooter_points=1;
+  show_shooter_points=0;
   shooter_history=10.0;
   shootpointinfo=NULL;
   shoottimeinfo=NULL;
@@ -955,6 +955,9 @@ void initvars1(void){
   shooter_u0=2.0;
   shooter_z0=2.0;
   shooter_p=1.0/7.0;
+  shooter_show=0;
+  shooter_timeslist=NULL;
+  //shooter_firstpass=0;
 #endif
   update_makeiblank_smoke3d=0;
   update_initcull=0;
