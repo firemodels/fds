@@ -3192,43 +3192,13 @@ the gas velocity at the surface is zero, and it increases rapidly through a boun
 millimeters thick to its ``free-stream''
 value. In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an
 empirical model is used to represent its effect on the overall flow field.
-In an LES calculation (default), the velocity at the wall
-is set to be a fraction of its value in the mesh cell adjacent to the
-wall. Consider a solid surface forming the lower boundary of the computational domain ($z=0$). The horizontal velocity components $u_{ij,1}$ and
-$v_{ij,1}$ are computed at the vertical faces of the first layer of gas phase grid cells above the solid surface. What should the
-values of $u_{ij,0}$ and $v_{ij,0}$ be set to such that the flow near the wall is impeded by the same amount as a
-real turbulent flow? Assuming that the numerical grid is too coarse to resolve the boundary layer (of nominal thickness $d$), and assuming
-a turbulent velocity profile
-\be U(z) = \left\{ \begin{array}{ll}  U_0  (z/d)^{1/7} &   z<d  \\
-                                      U_0              &   z>d \end{array} \right. \ee
-a simple slip boundary condition can be worked out such that
-\be u_{ij,0} = u_{ij,1} \; \left( 1- \frac{d}{\dz} \right)  \quad ; \quad  v_{ij,0} = v_{ij,1} \; \left( 1- \frac{d}{\dz} \right) \ee
-where $\dz$ is the height of the grid cell. For coarse grids,
-the boundary condition is very similar to a ``free-slip'' condition because $d << \dz$.
-
-Prior to FDS 5.3, the default boundary condition for LES calculations
-was where $u_{ij,0}$ and $v_{ij,0}$ were set to one-half the values of
-$u_{ij,1}$ and $v_{ij,1}$, respectively. Now, however, FDS assumes a default value of 0.01~m for $d$. This parameter can be reset using
-{\ct BOUNDARY\_LAYER\_THICKNESS} on the {\ct SURF} line. The boundary condition is now a function of the grid resolution.
-
 In a DNS calculation, this discussion is moot. The inner-wall ``ghost'' cell velocities are
 set so that the velocity at the wall surface is zero.
 
-Note that it is still possible to specify the tangential velocity conditions the old way.
-To alter the default mode, you can set a parameter called
-{\ct SLIP\_FACTOR} which ranges
-from -1 to 1. If a no-slip wall is desired, {\ct SLIP\_FACTOR=-1}. If
-a free-slip wall is desired, {\ct SLIP\_FACTOR=1}. Numbers in between
--1 and 1 can represent partial slip conditions, which may be
-appropriate for simulations involving large mesh cells.
-Prior to FDS~5.3, the default values for {\ct SLIP\_FACTOR} were 0.5 for LES and -1.0 for DNS.
-
 \begin{warning}
 \noindent
-It is not recommended that you change the default velocity boundary condition unless you are interested in
-its effect on the overall flow. Sometimes people represent various degrees of {\em surface roughness} via the
-{\ct SLIP\_FACTOR}. However, this should be done carefully using experimental data or empirical correlation as
-guidance.
+The parameter {\ct SLIP\_FACTOR} is no longer used to set the tangential velocity boundary condition, as of FDS version 5.4.0. To force
+a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line. Otherwise, no parameters need be set.
 \end{warning}
 
 \subsubsection{Louvered Vents}
@@ -3348,7 +3318,7 @@ interior of a tunnel, and a wind is blowing at one of the portals that affects t
 The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cal H$ is specified as
 \begin{eqnarray}
 {\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad  \mbox{(outgoing)}  \nonumber \\
-{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad                       \mbox{(incoming)} 
+{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad                       \mbox{(incoming)}
 \end{eqnarray}
 where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary.
 The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
@@ -4044,8 +4014,8 @@ divided by the volume of the layer.  $\rho_{s0}$ is the initial
 density of the layer. Thus, $\rho_{s,i}/\rho_{s0}$ is a quantity that
 increases as the $i$th material is produced as a residue of some other
 reaction, and decreases as the $i$th material decomposes.  If the
-layer is composed of only one material, then $\rho_{s,i}/\rho_{s0}$ is initially 1. 
-$n_{s,ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default. 
+layer is composed of only one material, then $\rho_{s,i}/\rho_{s0}$ is initially 1.
+$n_{s,ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default.
 If the value of $n_s$ is not known, it is a good starting point to assume $n_s=1$.
 
 The pre-exponential factor, $A_{ij}$, is prescribed under the name
@@ -5548,7 +5518,7 @@ Consider the short input file:
 The case is nothing more than hydrogen gas filling a box. The gas is injected through a 1~m by 1~m vent
 at a rate of 0.01667~kg/m$^2$/s and shut off after 3~m. The total mass of hydrogen at that point ought to be
 3~kg (see Fig.~\ref{gas_filling}). Notice that no properties were needed for the {\ct HYDROGEN} because it is
-a species whose properties have already been programmed into FDS. The background species in this case is 
+a species whose properties have already been programmed into FDS. The background species in this case is
 assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}, and
 the index 1 refers to the first, and only, gas species that is specified in the input file. The parameter
 {\ct MASS\_FILE=.TRUE.} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
@@ -5583,9 +5553,9 @@ $n$ species, FDS only solves transport equations for $n-1$ because it also solve
 total mass conservation. To set the properties of the implicitly defined {\ct BACKGROUND\_SPECIES}, use the
 {\ct MISC} line. If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW},
 and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEAT},
-{\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.  
+{\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.
 If either {\ct SPECIFIC\_HEAT} or {\ct ENTHALPY} is specified, then both must be specified.
-The {\ct REFERENCE\_TEMPERATURE} is the temperature that corresponds to the specified value 
+The {\ct REFERENCE\_TEMPERATURE} is the temperature that corresponds to the specified value
 of {\ct SPECIFIC\_ENTHALPY}.  In the absence of any of these parameters, the appropriate
 values of {\ct 'AIR'} are assumed.
 
@@ -9407,7 +9377,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ADIABATIC}                       & Logical         & Adiabatic thermal BC              &                     & {\ct .FALSE.}           \\ \hline
 {\ct BACKING}                         & Character       & Back boundary condition           &                     & {\ct 'VOID'}            \\ \hline
-{\ct BOUNDARY\_LAYER\_THICKNESS}      & Real            & See Section~\ref{info:Velocity_BC}&  m                  & 0.01                    \\ \hline
 {\ct BURN\_AWAY}                      & Logical         & See Section~\ref{info:BURN_AWAY}  &                     & {\ct .FALSE.}           \\ \hline
 {\ct CELL\_SIZE\_FACTOR}              & Real            & See Section~\ref{info:solid_phase_stability}  &         & 1.0                     \\ \hline
 {\ct COLOR    }                       & Character       & Surface Color                     &                     &                         \\ \hline
@@ -9445,7 +9414,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RGB(3)}                          & Int.~Triplet    & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
 %{\ct Roughness}                       & Real            & Wall roughness height             & m                   & 0. (DNS), 4.5E-5 (LES)  \\ \hline
 {\ct SHRINK}                          & Logical         & Shrinking material                &                     & {\ct .TRUE.}            \\ \hline
-{\ct SLIP\_FACTOR    }                & Real            & Velocity Slip Condition           &                     & 0.5                     \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
 {\ct SURFACE\_DENSITY}                & Real            & See Section~\ref{info:BURN_AWAY}  & kg/m$^2$            & 0.0                     \\ \hline
 {\ct TAU\_MF(I)}                      & Real Array      & Ramp time for species {\ct I}     & s                   & 1.     \\ \hline
