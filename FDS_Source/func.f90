@@ -840,13 +840,12 @@ IMPLICIT NONE
 CONTAINS
  
 
-SUBROUTINE SEARCH_OTHER_MESHES(NM,XX,YY,ZZ,NOM,IIO,JJO,KKO)
+SUBROUTINE SEARCH_OTHER_MESHES(XX,YY,ZZ,NOM,IIO,JJO,KKO)
 
-! Given the point (XX,YY,ZZ) of mesh NM, determine which other mesh it intersects and what its indices are.
+! Given the point (XX,YY,ZZ), determine which other mesh it intersects and what its indices are.
 
 REAL(EB), INTENT(IN) :: XX,YY,ZZ
 REAL(EB) :: XI,YJ,ZK
-INTEGER, INTENT(IN) :: NM
 INTEGER, INTENT(OUT) :: NOM,IIO,JJO,KKO
 TYPE (MESH_TYPE), POINTER :: M2
 
@@ -980,7 +979,7 @@ SORT_QUEUE: DO
       ! If the cell is outside the computational domain, check if it is in another mesh
 
       IF (II<1 .OR. II>M%IBAR .OR. JJ<1 .OR. JJ>M%JBAR .OR. KK<1 .OR. KK>M%KBAR) THEN
-         CALL SEARCH_OTHER_MESHES(NM,M%XC(II),M%YC(JJ),M%ZC(KK),NOM,IIO,JJO,KKO)
+         CALL SEARCH_OTHER_MESHES(M%XC(II),M%YC(JJ),M%ZC(KK),NOM,IIO,JJO,KKO)
          IF (NOM>0) M%PRESSURE_ZONE(II,JJ,KK) = I_ZONE
          CYCLE SEARCH_LOOP
       ENDIF
