@@ -677,17 +677,15 @@ that is, comments within the source code itself.  Plus, they must compile the co
 
 \chapter{The Basic Flow Solver}
 
-\section{Single Mesh, Non-reacting Periodic Test Cases}
 
-In this section we present test cases aimed at exercising the advective, pressure and viscous terms and the time integration for non-reacting flows with periodic
-boundary conditions in all directions (this eliminates the possibility of gravitational stratification).
-In Section \ref{ns2d} we present an analytical solution that is useful for confirming the convergence rates of the truncation errors in the discretization schemes.
-In Section \ref{decaying_isotropic_turbulence} we present a canonical flow for LES which tests that the subgrid stress model has been coded properly.
+In this chapter we present test cases aimed at exercising the advective, pressure, and viscous terms, as well as the time integration for non-reacting flows.
 
-\subsection{2D Analytical Solution to Navier-Stokes}
+
+\section{2D Analytical Solution to Navier-Stokes}
 \label{ns2d}
 
-Consider the 2D incompressible Navier-Stokes equations
+In this section we present an analytical solution that is useful for confirming the convergence rates of the truncation errors in the discretization of the terms in 
+the governing equations. Consider the 2D incompressible Navier-Stokes equations
 \begin{equation}
 \label{eqn_NS}
 \frac{\partial \mathbf{u}}{\partial t} + \mathbf{u} \cdot \nabla \mathbf{u} = - \nabla{p} + \nu \nabla^2 \mathbf{u} \,\mbox{,}
@@ -775,9 +773,10 @@ the corresponding location in space and time.  The figure confirms that the adve
 
 \clearpage
 
-\subsection{Decaying Isotropic Turbulence}
+\section{Decaying Isotropic Turbulence}
 \label{decaying_isotropic_turbulence}
 
+In this section we present a canonical flow for LES which tests that the subgrid stress model has been coded properly.
 In some cases the difference between verification and validation is not so clear.  Once a model is well-established and validated it may actually be used as a form of verification.  Granted, such a test is not as strong a verification as the convergence study shown in Section \ref{ns2d}.  Nevertheless, these tests are often quite useful in discovering problems within the code.  The case we examine in this section, decaying isotropic turbulence, is highly sensitive to errors in the advective and diffusive terms because the underlying physics is inherently three-dimensional and getting the problem right depends strongly on a delicate balance between vorticity dynamics and dissipation.  An even more subtle yet extremely powerful verification test is also presented in this section when we set both the molecular and turbulent viscosities to zero and confirm that the integrated kinetic energy within the domain remains constant.   In the absence of any form of viscosity, experience has shown that the slightest error in the advective terms or the pressure projection will cause the code to go unstable.  This verification is therefore stronger than one might initially expect.
 
 In this section we test the FDS model against the low Reynolds number (Re) data of Comte-Bellot and Corrsin (CBC) \cite{CBC}. Viscous effects are important in this data set for a well-resolved LES, testing the model's Re dependence.  Following \cite{SdBK}, we use a periodic box of side $L = 9 \times 2\pi$ centimeters ($\approx 0.566$ m) and $\nu = 1.5 \times 10^{-5}$ $\mbox{m}^2/\mbox{s}$ for the kinematic viscosity. The non-dimensional times for this data set are: $x/M = 42$ (initial condition), $98$, and $171$, where $M$ is the characteristic mesh spacing of the CBC wind tunnel and $x$ is the downstream location of the data station. Considering the mean velocity in the CBC wind tunnel experiment, these correspond to dimensional times of $t = 0.00$, $0.28$, and $0.66$ seconds in our simulations.
@@ -814,7 +813,7 @@ Overall, the agreement between the FDS simulations and the CBC data is satisfact
 
 \clearpage
 
-\subsection{The Dynamic Smagorinsky Model}
+\section{The Dynamic Smagorinsky Model}
 \label{dynamic_smagorinsky_model}
 
 In the previous section, all calculations were performed with a constant and uniform Smagorinsky coefficient, $C_s = 0.2$.  For the canonical case of homogeneous decaying isotropic turbulence -- \emph{at sufficiently high Reynolds number} -- this model is sufficient.  However, we noticed that, even for the isotropic turbulence problem, when the grid Reynolds number is low (i.e., the flow is well-resolved) the constant coefficient model tends to over predict the dissipation of kinetic energy (see Figure \ref{fig_cbc_energy}).  This is because the eddy viscosity does not converge to zero at the proper rate; so long as strain is present in the flow (the magnitude of the stain rate tensor is nonzero), the eddy viscosity will be nonzero.  This violates a guiding principle in LES development: that the method should converge to a DNS if the flow field is sufficiently resolved \cite{McDermott:2007}.
@@ -838,6 +837,21 @@ Next, in Figure \ref{fig_dynsmag_cbc}, we show results for the dynamic model ana
       \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/dynsmag_cbc_64_spectra.pdf} }
    \end{tabular*}
    \caption{\label{fig_dynsmag_cbc} \small Dynamic Smagorinsky model results (analogous to Figure \ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
+\end{figure}
+
+
+
+\clearpage
+
+\section{Velocity Boundary Condition}
+\label{velocity_bc}
+
+
+\begin{figure}[t]
+   \begin{center}
+      \includegraphics[height=3.00in]{FIGURES/moody.pdf}
+      \caption{\label{moody} Moody chart.}
+   \end{center}
 \end{figure}
 
 
