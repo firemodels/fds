@@ -2328,6 +2328,11 @@ void updatetimes(void){
       if(terri->loaded==1)ntimes+=terri->ntimes;
     }
   }
+#ifdef pp_SHOOTER
+  if(show_shooter_points!=0&&shooter_active==1&&shooter_show==1){
+    ntimes+=nshooter_frames;
+  }
+#endif
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
     if(touri->display==0)continue;
@@ -2404,6 +2409,13 @@ void updatetimes(void){
       }
     }
   }
+#ifdef pp_SHOOTER
+  if(show_shooter_points!=0&&shooter_active==1&&shooter_show==1){
+    for(i=0;i<nshooter_frames;i++){
+      *timescopy+=shoottimeinfo[i].time;
+    }
+  }
+#endif
 
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
@@ -2601,6 +2613,13 @@ void updatetimes(void){
 
       }
     }
+#ifdef pp_SHOOTER
+  if(show_shooter_points!=0&&shooter_active==1&&shooter_show==1){
+    FREEMEMORY(shooter_timeslist);
+    NewMemory((void **)&shooter_timeslist,nshooter_frames*sizeof(int));
+  }
+#endif
+
     for(i=0;i<nslice;i++){
       sd = sliceinfo + i;
       FREEMEMORY(sd->slicetimeslist);
@@ -3151,6 +3170,26 @@ void synctimes(void){
       }
       targtimeslist[n]=i;
     }
+
+  /* synchronize shooter times */
+#ifdef pp_SHOOTER
+  if(show_shooter_points!=0&&shooter_active==1&&shooter_show==1){
+    if(n==0){
+      istart=0;
+    }
+    else{
+      istart=shooter_timeslist[n-1];
+    }
+    i=istart;
+    while(shoottimeinfo[i].time<times[n]&&i<nshooter_frames){
+      i++;
+    }
+    if(i>=nshooter_frames){
+      i=nshooter_frames-1;
+    }
+    shooter_timeslist[n]=i;
+  }
+#endif
 
   /* synchronize slice times */
 
