@@ -515,16 +515,27 @@ Contains
 
 
     Call COUNT_EVAC_NODES
+    Write (lu_err,*) 'Evac: Counted evacuation nodes'
     Call READ_PERS
+    Write (lu_err,*) 'Evac: Read person classes'
     Call READ_STRS
+    Write (lu_err,*) 'Evac: Read stairs'
     Call READ_EXIT
+    Write (lu_err,*) 'Evac: Read exits'
     Call READ_DOOR    
+    Write (lu_err,*) 'Evac: Read doors'
     Call READ_CORR
+    Write (lu_err,*) 'Evac: Read corridors'
     Call READ_ENTRIES
+    Write (lu_err,*) 'Evac: Read entries'
     Call COLLECT_NODE_INFO
+    Write (lu_err,*) 'Evac: Collected node info '
     Call READ_EVAC_LINES
+    Write (lu_err,*) 'Evac: Read evac namelists'
     Call READ_EVHO
+    Write (lu_err,*) 'Evac: Read evho namelists'
     Call READ_EVSS
+    Write (lu_err,*) 'Evac: Read inclines'
 
     If (MYID /= Max(0,EVAC_PROCESS)) Return
 
@@ -727,25 +738,25 @@ Contains
          If (npc_evac > 0 ) Then
             Allocate(EVACUATION(NPC_EVAC),STAT=IZERO)
             Call ChkMemErr('READ','EVACUATION',IZERO)
-         Else
-            Allocate(EVACUATION(1),STAT=IZERO)
-            Call ChkMemErr('READ','EVACUATION',IZERO)
+         !Else
+         !   Allocate(EVACUATION(1),STAT=IZERO)
+         !   Call ChkMemErr('READ','EVACUATION',IZERO)
          End If
 
          If (n_holes > 0 ) Then
             Allocate(EVAC_HOLES(N_HOLES),STAT=IZERO)
             Call ChkMemErr('READ','EVAC_HOLES',IZERO)
-         Else 
-            Allocate(EVAC_HOLES(1),STAT=IZERO)
-            Call ChkMemErr('READ','EVAC_HOLES',IZERO)
+         !Else 
+         !   Allocate(EVAC_HOLES(1),STAT=IZERO)
+         !   Call ChkMemErr('READ','EVAC_HOLES',IZERO)
          End If
 
          If (n_sstands > 0 ) Then
             Allocate(EVAC_SSTANDS(N_SSTANDS),STAT=IZERO)
             Call ChkMemErr('READ','EVAC_SSTANDS',IZERO)
-         Else
-            Allocate(EVAC_SSTANDS(1),STAT=IZERO)
-            Call ChkMemErr('READ','EVAC_SSTANDS',IZERO)
+         !Else
+         !   Allocate(EVAC_SSTANDS(1),STAT=IZERO)
+         !   Call ChkMemErr('READ','EVAC_SSTANDS',IZERO)
          End If
 
          If (n_exits > 0 ) Then
@@ -767,17 +778,17 @@ Contains
          If (n_entrys > 0 ) Then
             Allocate(EVAC_ENTRYS(N_ENTRYS),STAT=IZERO)
             Call ChkMemErr('READ','EVAC_ENTRYS',IZERO)
-         Else
-            Allocate(EVAC_ENTRYS(1),STAT=IZERO)
-            Call ChkMemErr('READ','EVAC_ENTRYS',IZERO)
+         !Else
+         !   Allocate(EVAC_ENTRYS(1),STAT=IZERO)
+         !   Call ChkMemErr('READ','EVAC_ENTRYS',IZERO)
          End If
 
          If (n_corrs > 0 ) Then
             Allocate(EVAC_CORRS(N_CORRS),STAT=IZERO)
             Call ChkMemErr('READ','EVAC_CORRS',IZERO)
-         Else
-            Allocate(EVAC_CORRS(1),STAT=IZERO)
-            Call ChkMemErr('READ','EVAC_CORRS',IZERO)
+         !Else
+         !   Allocate(EVAC_CORRS(1),STAT=IZERO)
+         !   Call ChkMemErr('READ','EVAC_CORRS',IZERO)
          End If
 
          If (N_STRS > 0 ) Then
