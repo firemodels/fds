@@ -4411,8 +4411,8 @@ Contains
     Call ChkMemErr('Initialize_Evacuation','Color_Tmp',IZERO) 
 
     i_egrid = 0
-    EVAC_DOORS(:)%R_NTARGET = 5.0_EB
-    EVAC_EXITS(:)%R_NTARGET = 5.0_EB
+    If (n_doors > 0) EVAC_DOORS(:)%R_NTARGET = 5.0_EB
+    If (n_exits > 0) EVAC_EXITS(:)%R_NTARGET = 5.0_EB
     Do nom = 1, NMESHES
        n_change_doors  = 0 ! Count the initialization Nash Equilibrium iterations
        n_change_trials = 0 ! Count the initialization Nash Equilibrium iterations
@@ -5065,8 +5065,8 @@ Contains
        Do j = 0, i33_dim
           Group_List(j)%GROUP_I_FFIELDS(i_egrid) = 0
        End Do
-       EVAC_DOORS(:)%R_NTARGET = 5.0_EB
-       EVAC_EXITS(:)%R_NTARGET = 5.0_EB
+       If (n_doors > 0) EVAC_DOORS(:)%R_NTARGET = 5.0_EB
+       If (n_exits > 0) EVAC_EXITS(:)%R_NTARGET = 5.0_EB
        Do i = 1, N_HUMANS
           HR=>HUMAN(I)
           j = Max(0,HR%GROUP_ID)  ! Group index of the agent
