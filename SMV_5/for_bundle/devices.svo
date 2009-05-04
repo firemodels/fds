@@ -169,10 +169,12 @@ DEVICEDEF
  push 0.0 0.0 1.0 setcolor 
    0.0 0.0 0.0414 translate 0.012 drawsphere pop
 DEVICEDEF
- door         // label, name of device
- 0.0 3.0 getuservals 1.0 0.2 2.3 scale 1.0 drawcube
+ testdoor         // label, name of device
+ 90.0 rotatez 90.0 rotatex
+push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 3.0 3.0 getuservals 0.0 0.0 1.0 setcolor 1.0 drawcube pop // front half of door (user specified color)
+push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 0.0 0.0 1.0 setcolor 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
  NEWFRAME
- 0.01 0.01 0.01 scale 1.0 drawcube
+ 0.001 0.001 0.001 scale 1.0 drawcube // state 1, door disapears
    
    // ************ avatar definitions ********************
 
