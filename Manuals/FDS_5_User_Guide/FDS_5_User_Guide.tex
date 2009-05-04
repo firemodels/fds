@@ -2974,18 +2974,15 @@ condition parameters. If a particular {\ct SURF} line is to be applied
 as the default boundary condition, {\ct CONCRETE} for example,
 set {\ct SURF\_DEFAULT='CONCRETE'} on the {\ct MISC} line.
 
+Avoid using a Smokeview .smv file keyword for the {\ct ID}.  See the {\em User's Guide for
+Smokeview Version~5}~\cite{Smokeview_Users_Guide_5} for a listing of these keywords.
+
 \begin{notebox}
 \noindent
 The default boundary condition {\ct 'INERT'} does allow for heat loss and is not the same as an adiabatic surface.
 If you wish to define a surface as adiabatic, then you should set {\ct ADIABATIC=.TRUE.} on the {\ct SURF} line.
 \end{notebox}
 \index{SURF!ADIABATIC}
-
-\begin{notebox}
-\noindent
-Avoid using a Smokeview .smv file keyword for the {\ct ID}.  See the {\em User's Guide for
-Smokeview Version~5}~\cite{Smokeview_Users_Guide_5} for a listing of these keywords.
-\end{notebox}
 
 
 \subsection{Specifying a Fire with a Known Heat Release Rate}
@@ -5989,11 +5986,10 @@ Unless you declare {\ct MASSLESS=.TRUE.} on the {\ct PART} line, it is assumed t
 heat up and evaporation. To prevent evaporation, set {\ct EVAPORATE=.FALSE.} The particles will still heat up due to convection, but they will not
 shrink and no additional gaseous species need to be declared.
 
-\begin{warning}
-Note that the absorption of thermal radiation by water ({\ct WATER=.TRUE.}) or fuel droplets ({\ct FUEL=.TRUE.}) is handled in FDS with fairly well-established physical sub-models, the details
+Note that the absorption of thermal radiation by water ({\ct WATER=.TRUE.}) or fuel droplets ({\ct FUEL=.TRUE.}) is 
+handled in FDS with fairly well-established physical sub-models, the details 
 of which are contained in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 However, for arbitrary particles or droplets, there is no assumed radiative absorption.
-\end{warning}
 
 
 \section{Coloring Particles and Droplets}
