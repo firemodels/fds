@@ -9762,7 +9762,7 @@ Contains
     !
     If (.Not.Any(EVACUATION_GRID)) Return
     !
-    Allocate(ITEMP(Max(1,n_exits-n_co_exits)), STAT = IZERO)
+    Allocate(ITEMP(Max(1,n_exits-n_co_exits+n_doors)), STAT = IZERO)
     Call ChkMemErr('DUMP_EVAC_CSV','ITEMP', IZERO)
     !
     ! Output first the floors then the corridors
@@ -9782,18 +9782,21 @@ Contains
           ITEMP(ii) = EVAC_EXITS(i)%NTARGET(50)
        End If
     End Do
+    Do i = 1, n_doors
+       ii = ii + 1
+       ITEMP(ii) = EVAC_DOORS(i)%NTARGET(50)
+    End Do
     !
     If (n_dead >= 0) Then
        ! Write the 'fed' columns
-       Write(tcform,'(a,i4.4,a,a)') "(ES13.5E3,",n_cols, &
+       Write(tcform,'(a,i4.4,a,a)') "(ES13.5E3,",n_cols+1, &
             "(',',i8)", ",',',ES13.5E3,',',ES13.5E3)"
        Write (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
             (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
             (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
             (EVAC_EXITS(i)%ICOUNT, i = 1,n_exits), &
             (EVAC_DOORS(i)%ICOUNT, i = 1,n_doors), &
-            (ITEMP(i), i = 1,n_exits-n_co_exits), &
-            (EVAC_DOORS(i)%NTARGET(50), i = 1,n_doors), &
+            (ITEMP(i), i = 1,n_exits-n_co_exits+n_doors), &
             n_dead, fed_max, fed_max_alive
     Else
        ! Do not write the 'fed' columns
@@ -9803,8 +9806,7 @@ Contains
             (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
             (EVAC_EXITS(i)%ICOUNT, i = 1,n_exits), &
             (EVAC_DOORS(i)%ICOUNT, i = 1,n_doors), &
-            (ITEMP(i), i = 1,n_exits-n_co_exits), &
-            (EVAC_DOORS(i)%NTARGET(50), i = 1,n_doors)
+            (ITEMP(i), i = 1,n_exits-n_co_exits+n_doors)
     End If
     Deallocate(ITEMP)
     !
