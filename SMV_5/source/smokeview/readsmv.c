@@ -3705,8 +3705,7 @@ typedef struct {
       device *devicei;
       float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
       int state0=0;
-      int flag=0;
-      float params[NDEVICE_PARAMS]={0.0,0.0,0.0,0.0,0.0};
+      int nparams=0;
 
       devicei = deviceinfo + ndeviceinfo;
       devicei->type=DEVICE_DEVICE;
@@ -3716,16 +3715,27 @@ typedef struct {
       if(devicei->object==NULL){
         devicei->object = device_defs_backup[0];
       }
+      devicei->params=NULL;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %i %i %f %f %f %f %f",
-        xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,
-        &flag, params, params+1,params+2,params+3,params+4
-        );
-      if(flag==0){
+      sscanf(buffer,"%f %f %f %f %f %f %i %i",
+        xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams);
+
+      if(nparams<=0){
         init_device(devicei,xyz,xyzn,state0,0,NULL);
       }
       else{
-        init_device(devicei,xyz,xyzn,state0,NDEVICE_PARAMS,params);
+        float *params,*pc;
+        int nsize;
+
+        nsize = 6*((nparams-1)/6+1);
+        NewMemory((void **)&params,nsize*sizeof(float));
+        pc=params;
+        for(i=0;i<nsize/6;i++){
+          fgets(buffer,255,stream);
+          sscanf(buffer,"%f %f %f %f %f %f",pc,pc+1,pc+2,pc+3,pc+4,pc+5);
+          pc+=6;
+        }
+        init_device(devicei,xyz,xyzn,state0,nparams,params);
       }
       get_elevaz(devicei->xyznorm,&devicei->angle_elev,&devicei->angle_az);
 
