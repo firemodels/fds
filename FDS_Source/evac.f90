@@ -726,37 +726,58 @@ Contains
       EVAC_PROC_IF: If (MYID==Max(0,EVAC_PROCESS)) Then
          If (npc_evac > 0 ) Then
             Allocate(EVACUATION(NPC_EVAC),STAT=IZERO)
-            Call ChkMemErr('READ','EVACUATION',IZERO) 
+            Call ChkMemErr('READ','EVACUATION',IZERO)
+         Else
+            Allocate(EVACUATION(1),STAT=IZERO)
+            Call ChkMemErr('READ','EVACUATION',IZERO)
          End If
 
          If (n_holes > 0 ) Then
             Allocate(EVAC_HOLES(N_HOLES),STAT=IZERO)
-            Call ChkMemErr('READ','EVAC_HOLES',IZERO) 
+            Call ChkMemErr('READ','EVAC_HOLES',IZERO)
+         Else 
+            Allocate(EVAC_HOLES(1),STAT=IZERO)
+            Call ChkMemErr('READ','EVAC_HOLES',IZERO)
          End If
 
          If (n_sstands > 0 ) Then
             Allocate(EVAC_SSTANDS(N_SSTANDS),STAT=IZERO)
-            Call ChkMemErr('READ','EVAC_SSTANDS',IZERO) 
+            Call ChkMemErr('READ','EVAC_SSTANDS',IZERO)
+         Else
+            Allocate(EVAC_SSTANDS(1),STAT=IZERO)
+            Call ChkMemErr('READ','EVAC_SSTANDS',IZERO)
          End If
 
          If (n_exits > 0 ) Then
             Allocate(EVAC_EXITS(N_EXITS),STAT=IZERO)
+            Call ChkMemErr('READ','EVAC_EXITS',IZERO) 
+         Else
+            Allocate(EVAC_EXITS(1),STAT=IZERO)
             Call ChkMemErr('READ','EVAC_EXITS',IZERO) 
          End If
 
          If (n_doors > 0 ) Then
             Allocate(EVAC_DOORS(N_DOORS),STAT=IZERO)
             Call ChkMemErr('READ','EVAC_DOORS',IZERO) 
+         Else
+            Allocate(EVAC_DOORS(1),STAT=IZERO)
+            Call ChkMemErr('READ','EVAC_DOORS',IZERO) 
          End If
 
          If (n_entrys > 0 ) Then
             Allocate(EVAC_ENTRYS(N_ENTRYS),STAT=IZERO)
-            Call ChkMemErr('READ','EVAC_ENTRYS',IZERO) 
+            Call ChkMemErr('READ','EVAC_ENTRYS',IZERO)
+         Else
+            Allocate(EVAC_ENTRYS(1),STAT=IZERO)
+            Call ChkMemErr('READ','EVAC_ENTRYS',IZERO)
          End If
 
          If (n_corrs > 0 ) Then
             Allocate(EVAC_CORRS(N_CORRS),STAT=IZERO)
-            Call ChkMemErr('READ','EVAC_CORRS',IZERO) 
+            Call ChkMemErr('READ','EVAC_CORRS',IZERO)
+         Else
+            Allocate(EVAC_CORRS(1),STAT=IZERO)
+            Call ChkMemErr('READ','EVAC_CORRS',IZERO)
          End If
 
          If (N_STRS > 0 ) Then
@@ -4411,8 +4432,8 @@ Contains
     Call ChkMemErr('Initialize_Evacuation','Color_Tmp',IZERO) 
 
     i_egrid = 0
-    If (n_doors > 0) EVAC_DOORS(:)%R_NTARGET = 5.0_EB
-    If (n_exits > 0) EVAC_EXITS(:)%R_NTARGET = 5.0_EB
+    EVAC_DOORS(:)%R_NTARGET = 5.0_EB
+    EVAC_EXITS(:)%R_NTARGET = 5.0_EB
     Do nom = 1, NMESHES
        n_change_doors  = 0 ! Count the initialization Nash Equilibrium iterations
        n_change_trials = 0 ! Count the initialization Nash Equilibrium iterations
@@ -5065,8 +5086,8 @@ Contains
        Do j = 0, i33_dim
           Group_List(j)%GROUP_I_FFIELDS(i_egrid) = 0
        End Do
-       If (n_doors > 0) EVAC_DOORS(:)%R_NTARGET = 5.0_EB
-       If (n_exits > 0) EVAC_EXITS(:)%R_NTARGET = 5.0_EB
+       EVAC_DOORS(:)%R_NTARGET = 5.0_EB
+       EVAC_EXITS(:)%R_NTARGET = 5.0_EB
        Do i = 1, N_HUMANS
           HR=>HUMAN(I)
           j = Max(0,HR%GROUP_ID)  ! Group index of the agent
