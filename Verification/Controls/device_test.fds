@@ -32,6 +32,7 @@ Test various devices and actions upon activation.
       RTI=50.
       ACTIVATION_TEMPERATURE= 74.
       OFFSET= 0.05
+      DROPLET_VELOCITY=5.
       SPRAY_ANGLE=50.,55.
       PART_ID='water' /
 
