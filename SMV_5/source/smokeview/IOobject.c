@@ -399,10 +399,10 @@ void draw_devices(void){
     if(sensorrelsize!=1.0){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
     }
-    if(devicei->use_params==1){
+    if(devicei->nparams>0){
       int i;
 
-      for(i=0;i<NDEVICE_PARAMS;i++){
+      for(i=0;i<devicei->nparams;i++){
         valstack[i]=devicei->params[i];
       }
     }
@@ -2127,7 +2127,7 @@ float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2
 
 /* ----------------------- init_device ----------------------------- */
 
-void init_device(device *devicei, float *xyz, float *xyzn, int state0, int ndevice_params, float *params){
+void init_device(device *devicei, float *xyz, float *xyzn, int state0, int nparams, float *params){
   if(xyz!=NULL){
     devicei->xyz[0]=xyz[0];
     devicei->xyz[1]=xyz[1];
@@ -2144,12 +2144,12 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int ndevi
   devicei->act_time=-1.0;
   devicei->device_mesh=NULL;
   devicei->state0=state0;
-  devicei->use_params=0;
-  if(ndevice_params>0&&params!=NULL){
+  devicei->nparams=nparams;
+  devicei->params=params;
+  if(nparams>0&&params!=NULL){
     int i;
 
-    devicei->use_params=1;
-    for(i=0;i<ndevice_params;i++){
+    for(i=0;i<nparams;i++){
       devicei->params[i]=params[i];
     }
   }
