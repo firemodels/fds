@@ -1211,6 +1211,15 @@ void getsliceparams(void){
         ){
         sd->idir=1;
         position = meshi->xplt_orig[is1];
+        if(sd->cellcenter==1){
+          int is2;
+          float *xp;
+
+          is2=is1-1;
+          if(is2<0)is2=0;
+          xp = meshi->xplt_orig;
+          position = (xp[is1]+xp[is2])/2.0;
+        }
         if(is1>0){
           sd->delta=(meshi->xplt_orig[is1]-meshi->xplt_orig[is1-1])/2.0;
         }
@@ -1227,6 +1236,15 @@ void getsliceparams(void){
       if(sd->js1==sd->js2){
         sd->idir=2;
         position = meshi->yplt_orig[js1];
+        if(sd->cellcenter==1){
+          int js2;
+          float *yp;
+
+          js2=js1-1;
+          if(js2<0)js2=0;
+          yp = meshi->yplt_orig;
+          position = (yp[js1]+yp[js2])/2.0;
+        }
         if(js1>0){
           sd->delta=(meshi->yplt_orig[js1]-meshi->yplt_orig[js1-1])/2.0;
         }
@@ -1240,6 +1258,15 @@ void getsliceparams(void){
 
         sd->idir=3;
         position = meshi->zplt_orig[ks1];
+        if(sd->cellcenter==1){
+          int ks2;
+          float *zp;
+
+          ks2=ks1-1;
+          if(ks2<0)ks2=0;
+          zp = meshi->zplt_orig;
+          position = (zp[ks1]+zp[ks2])/2.0;
+        }
         if(ks1>0){
           sd->delta=(meshi->zplt_orig[ks1]-meshi->zplt_orig[ks1-1])/2.0;
         }
@@ -1990,9 +2017,9 @@ void drawslice_cellcenter(const slice *sd){
   if(sd->idir==1){
    int ii1, ii2;
 
-   ii1 = sd->is1;
-   ii2 = ii1 + 1;
-   if(ii2>nx-1)ii2=nx-1;
+   ii2 = sd->is1;
+   ii1 = ii2 - 1;
+   if(ii1<0)ii1=0;
    constval = (xplt[ii1]+xplt[ii2])/2.0;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
@@ -2026,9 +2053,9 @@ void drawslice_cellcenter(const slice *sd){
   else if(sd->idir==2){
    int jj1, jj2;
 
-   jj1 = sd->js1;
-   jj2 = jj1+1;
-   if(jj2>ny-1)jj2=ny-1;
+   jj2 = sd->js1;
+   jj1 = jj2-1;
+   if(jj1<0)jj1=0;
    constval = (yplt[jj1]+yplt[jj2])/2.0;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
@@ -2058,9 +2085,9 @@ void drawslice_cellcenter(const slice *sd){
   else if(sd->idir==3){
    int kk1, kk2;
 
-   kk1 = sd->ks1;
-   kk2 = sd->ks2;
-   if(kk2>nz-1)kk2=nz-1;
+   kk2 = sd->ks1;
+   kk1 = kk2-1;
+   if(kk1<0)kk1=0;
    constval = (zplt[kk1]+zplt[kk2])/2.0;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
@@ -2126,7 +2153,14 @@ void drawslice_cellcenter_interp(const slice *sd){
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   if(sd->idir==1){
-   constval = xplt[sd->is1]+offset_slice*sd->sliceoffset;
+   int ii1, ii2;
+
+   ii2 = sd->is1;
+   ii1 = ii2 - 1;
+   if(ii1<0)ii1=0;
+   constval = (xplt[ii1]+xplt[ii2])/2.0;
+
+   constval += offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
    if(sd->js1+1>maxj){
@@ -2175,7 +2209,13 @@ void drawslice_cellcenter_interp(const slice *sd){
    glEnd();
   }
   else if(sd->idir==2){
-   constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
+   int jj1, jj2;
+
+   jj2 = sd->js1;
+   jj1 = jj2 - 1;
+   if(jj1<0)jj1=0;
+   constval = (yplt[jj1]+yplt[jj2])/2.0;
+   constval += offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1+1; i<sd->is2; i++){
      float xmid;
@@ -2218,7 +2258,13 @@ void drawslice_cellcenter_interp(const slice *sd){
    glEnd();
   }
   else if(sd->idir==3){
-   constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset;
+   int kk1, kk2;
+
+   kk2 = sd->ks1;
+   kk1 = kk2 - 1;
+   if(kk1<0)kk1=0;
+   constval = (zplt[kk1]+zplt[kk2])/2.0;
+   constval += offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1+1; i<sd->is2; i++){
      float xmid;
