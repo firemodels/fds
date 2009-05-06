@@ -52,6 +52,7 @@ void update_glui_viewlist(void);
 void update_glui_cellcenter_interp(void);
 float gmod(float x, float y);
 void  OBJECT_CB(int flag);
+
 /* ------------------ WindowStatus ------------------------ */
 
 void WindowStatus(int state){
@@ -66,6 +67,186 @@ void WindowStatus(int state){
   default:
     ASSERT(FFALSE);
     break;
+  }
+}
+
+/* ------------------ mouse_edit_tour ------------------------ */
+
+void mouse_edit_tour(int button, int state, int x, int y){
+  int val, val1;
+  int mouse_x, mouse_y;
+  GLubyte r, g, b;
+
+  mouse_x=x; mouse_y=screenHeight-y;
+  glDisable(GL_BLEND);
+  glDisable(GL_DITHER);
+  glDisable(GL_FOG);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_1D);
+  glDisable(GL_TEXTURE_2D);
+  glShadeModel(GL_FLAT);
+
+  ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
+  glReadBuffer(GL_BACK);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_BLUE,  GL_UNSIGNED_BYTE, &b);
+
+  r = r>>nredshift;
+  g = g>>ngreenshift;
+  b = b>>nblueshift;
+
+  val1 = (r << (nbluebits+ngreenbits)) | (g << nbluebits) | b;
+  val = val1;
+  if(val!=0&&itourknots>=0&&itourknots<ntourknots&&tourknotskeylist!=NULL){
+    tourknotskeylist[itourknots]->selected=0;
+  }
+  if(val>0&&val<=ntourknots){
+  
+  /* need to start colors at 1 so that black (color 0,0,0) is not interpreted as a blockage */
+
+    val--;
+    itourknots=val;
+    if(tourknotskeylist!=NULL){
+      new_select(tourknotskeylist[itourknots]);
+      selected_tour=tourknotstourlist[itourknots];
+    }
+    else{
+      selected_tour=NULL;
+      itourknots=-1;
+    }
+    set_glui_keyframe();
+    update_tourcontrols();
+  }
+  glShadeModel(GL_SMOOTH);
+  glEnable(GL_BLEND);
+  glEnable(GL_LIGHTING);
+}
+
+/* ------------------ mouse_edit_blockage ------------------------ */
+
+void mouse_edit_blockage(int button, int state, int x, int y){
+  int val, val1;
+  int mouse_x, mouse_y;
+  GLubyte r, g, b;
+  int i;
+  mesh *meshi;
+  selectdata *sd;
+
+  mouse_x=x; mouse_y=screenHeight-y;
+  glDisable(GL_BLEND);
+  glDisable(GL_DITHER);
+  glDisable(GL_FOG);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_1D);
+  glDisable(GL_TEXTURE_2D);
+  glShadeModel(GL_FLAT);
+
+  ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
+  glReadBuffer(GL_BACK);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_BLUE,  GL_UNSIGNED_BYTE, &b);
+
+  r = r>>nredshift;
+  g = g>>ngreenshift;
+  b = b>>nblueshift;
+
+  val1 = (r << (nbluebits+ngreenbits)) | (g << nbluebits) | b;
+  val = val1;
+  
+  if(val>0&&val<=ntotalfaces){
+      /* need to start colors at 1 so that black (color 0,0,0) is not
+                interpreted as a blockage */
+    val--;
+    sd = selectfaceinfo + val;
+    highlight_block=sd->blockage;
+    highlight_mesh=sd->mesh;
+    update_highlight_mesh();
+    meshi = meshinfo + highlight_mesh;
+    update_rotation_index(highlight_mesh);
+    update_current_mesh(meshi);
+    bchighlight_old=bchighlight;
+    bchighlight = meshi->blockageinfoptrs[highlight_block];
+    for(i=0;i<6;i++){
+      surface_indices[i]=inv_sorted_surfidlist[bchighlight->surf_index[i]];
+    }
+
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_BLEND);
+    glEnable(GL_LIGHTING);
+
+    switch (sd->dir){
+      case DOWN_X:
+      case UP_X:
+        xyz_dir=0;
+        break;
+      case DOWN_Y:
+      case UP_Y:
+        xyz_dir=1;
+        break;
+      case DOWN_Z:
+      case UP_Z:
+        xyz_dir=2;
+        break;
+      default:
+        ASSERT(FFALSE);
+        break;
+    }
+    switch (sd->dir){
+      case DOWN_X:
+      case DOWN_Y:
+      case DOWN_Z:
+        which_face=0;
+        break;
+      case UP_X:
+      case UP_Y:
+      case UP_Z:
+        which_face=1;
+        break;
+      default:
+        ASSERT(FFALSE);
+        break;
+    }
+    update_xyzdir(xyz_dir);
+    update_blockvals(1);
+  }
+}
+
+
+/* ------------------ select_avatar ------------------------ */
+
+void mouse_select_avatar(int button, int state, int x, int y){
+  int val;
+  int mouse_x, mouse_y;
+  GLubyte r, g, b;
+
+  mouse_x=x; mouse_y=screenHeight-y;
+  glDisable(GL_BLEND);
+  glDisable(GL_DITHER);
+  glDisable(GL_FOG);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_1D);
+  glDisable(GL_TEXTURE_2D);
+  glShadeModel(GL_FLAT);
+
+  ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
+  glReadBuffer(GL_BACK);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_BLUE,  GL_UNSIGNED_BYTE, &b);
+
+  r = r>>nredshift;
+  g = g>>ngreenshift;
+  b = b>>nblueshift;
+
+  val = (r << (nbluebits+ngreenbits)) | (g << nbluebits) | b;
+  
+  if(val>0){
+    selected_avatar_tag=val;
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_BLEND);
+    glEnable(GL_LIGHTING);
   }
 }
 
@@ -107,131 +288,17 @@ void mouse(int button, int state, int x, int y){
     /* edit blockages */
 
     if(blockageSelect==1){
-      mouse_x=x; mouse_y=screenHeight-y;
-      glDisable(GL_BLEND);
-      glDisable(GL_DITHER);
-      glDisable(GL_FOG);
-      glDisable(GL_LIGHTING);
-      glDisable(GL_TEXTURE_1D);
-      glDisable(GL_TEXTURE_2D);
-      glShadeModel(GL_FLAT);
-
-
-      ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
-      glReadBuffer(GL_BACK);
-      glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
-      glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
-      glReadPixels(mouse_x,mouse_y,1,1,GL_BLUE,  GL_UNSIGNED_BYTE, &b);
-
-      r = r>>nredshift;
-      g = g>>ngreenshift;
-      b = b>>nblueshift;
-
-      val1 = (r << (nbluebits+ngreenbits)) | (g << nbluebits) | b;
-      val = val1;
-      if(val>0&&val<=ntotalfaces){
-      /* need to start colors at 1 so that black (color 0,0,0) is not
-                interpreted as a blockage */
-        val--;
-        sd = selectfaceinfo + val;
-        highlight_block=sd->blockage;
-        highlight_mesh=sd->mesh;
-        update_highlight_mesh();
-        meshi = meshinfo + highlight_mesh;
-        update_rotation_index(highlight_mesh);
-        update_current_mesh(meshi);
-        bchighlight_old=bchighlight;
-        bchighlight = meshi->blockageinfoptrs[highlight_block];
-        for(i=0;i<6;i++){
-          surface_indices[i]=inv_sorted_surfidlist[bchighlight->surf_index[i]];
-        }
-
-        glShadeModel(GL_SMOOTH);
-        glEnable(GL_BLEND);
-        glEnable(GL_LIGHTING);
-
-        switch (sd->dir){
-         case DOWN_X:
-         case UP_X:
-           xyz_dir=0;
-           break;
-         case DOWN_Y:
-         case UP_Y:
-           xyz_dir=1;
-           break;
-         case DOWN_Z:
-         case UP_Z:
-           xyz_dir=2;
-           break;
-         default:
-           ASSERT(FFALSE);
-           break;
-        }
-        switch (sd->dir){
-         case DOWN_X:
-         case DOWN_Y:
-         case DOWN_Z:
-           which_face=0;
-           break;
-         case UP_X:
-         case UP_Y:
-         case UP_Z:
-           which_face=1;
-           break;
-         default:
-           ASSERT(FFALSE);
-           break;
-        }
-        update_xyzdir(xyz_dir);
-        update_blockvals(1);
-      }
+      mouse_edit_blockage(button,state,x,y);
     }
+
     /* edit tours */
+
     if(edittour==1&&blockageSelect==0){
-      mouse_x=x; mouse_y=screenHeight-y;
-      glDisable(GL_BLEND);
-      glDisable(GL_DITHER);
-      glDisable(GL_FOG);
-      glDisable(GL_LIGHTING);
-      glDisable(GL_TEXTURE_1D);
-      glDisable(GL_TEXTURE_2D);
-      glShadeModel(GL_FLAT);
+      mouse_edit_tour(button, state, x, y);
+    }
 
-      ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
-      glReadBuffer(GL_BACK);
-      glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
-      glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
-      glReadPixels(mouse_x,mouse_y,1,1,GL_BLUE,  GL_UNSIGNED_BYTE, &b);
-
-      r = r>>nredshift;
-      g = g>>ngreenshift;
-      b = b>>nblueshift;
-
-      val1 = (r << (nbluebits+ngreenbits)) | (g << nbluebits) | b;
-      val = val1;
-      if(val!=0&&itourknots>=0&&itourknots<ntourknots&&tourknotskeylist!=NULL){
-        tourknotskeylist[itourknots]->selected=0;
-      }
-      if(val>0&&val<=ntourknots){
-      /* need to start colors at 1 so that black (color 0,0,0) is not
-                interpreted as a blockage */
-        val--;
-        itourknots=val;
-        if(tourknotskeylist!=NULL){
-          new_select(tourknotskeylist[itourknots]);
-          selected_tour=tourknotstourlist[itourknots];
-        }
-        else{
-          selected_tour=NULL;
-          itourknots=-1;
-        }
-        set_glui_keyframe();
-        update_tourcontrols();
-      }
-      glShadeModel(GL_SMOOTH);
-      glEnable(GL_BLEND);
-      glEnable(GL_LIGHTING);
-
+    if(select_avatar==1){
+      mouse_select_avatar(button, state, x, y);
     }
     GLUTPOSTREDISPLAY
     if( showtime==1 || showplot3d==1){

@@ -803,6 +803,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   blocknumber=parti->blocknumber;
   meshi=meshinfo+blocknumber;
+  
   if(parti->loaded==0&&flag==UNLOAD)return;
 
 
@@ -1304,12 +1305,28 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   GLUTPOSTREDISPLAY
 }
 
+/* ----------------------- drawselect_avatars ----------------------------- */
+
+void drawselect_avatars(void){
+  int i;
+
+  for(i=0;i<npartinfo;i++){
+    particle *parti;
+
+    parti = partinfo + i;
+    if(parti->loaded==0||parti->display==0)continue;
+    if(parti->evac==1){
+      drawEvac(parti);
+      sniffErrors("after drawEvac");
+    }
+  }
+}
+
 /* ------------------ drawEvac ------------------------ */
 
 void drawEvac(const particle *parti){
   drawPart(parti);
 }
-
 
 /* ------------------ drawPart5 ------------------------ */
 
@@ -1384,8 +1401,16 @@ void drawPart5(const particle *parti){
             int is_human_color;
 
             if(vis[j]==1){
+              int save_use_displaylist;
+
               glPushMatrix();
               glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]-parti->zoffset/xyzmaxdiff);
+              if(select_avatar==1&&selected_avatar_tag>0&&selected_avatar_tag==datacopy->tags[j]){
+                selected_avatar_pos[0]=xplts[sx[j]];
+                selected_avatar_pos[1]=yplts[sy[j]];
+                selected_avatar_pos[2]=zplts[sz[j]];
+                selected_avatar_angle = datacopy->avatar_angle[j];
+              }
               glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
                  
               az_angle=angle[j];
@@ -1433,7 +1458,33 @@ void drawPart5(const particle *parti){
               valstack[13]=0.0;
               valstack[14]=height[j]/2.0;
               nvalstack=15;
+              save_use_displaylist=avatar_types[avatar_type]->use_displaylist;
+              if(select_avatar==1&&show_mode==SELECT){
+                int tagval;
+
+                avatar_types[avatar_type]->select_mode=1;
+                select_avatar_color_ptr=select_avatar_color;
+                tagval=datacopy->tags[j];
+                select_avatar_color[0]=tagval>>(ngreenbits+nbluebits);
+                select_avatar_color[1]=tagval>>nbluebits;
+                select_avatar_color[2]=tagval&rgbmask[nbluebits-1];
+                avatar_types[avatar_type]->use_displaylist=0;
+              }
+              else{
+                if(selected_avatar_tag>0&&select_avatar==1&&datacopy->tags[j]==selected_avatar_tag){
+                  select_avatar_color_ptr=select_avatar_color;
+                  select_avatar_color[0]=255;
+                  select_avatar_color[1]=0;
+                  select_avatar_color[2]=0;
+                  avatar_types[avatar_type]->use_displaylist=0;
+                }
+                else{
+                  select_avatar_color_ptr=NULL;
+                  avatar_types[avatar_type]->select_mode=0;
+                }
+              }
               draw_SVOBJECT(avatar_types[avatar_type],0);
+              avatar_types[avatar_type]->use_displaylist=save_use_displaylist;
               glPopMatrix();
             }
           }

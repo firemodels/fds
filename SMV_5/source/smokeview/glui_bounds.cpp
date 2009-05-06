@@ -377,6 +377,8 @@ extern "C" void glui_bounds_setup(int main_window){
   if(nevac>0){
     glui_active=1;
     panel_evac = glui_bounds->add_rollout("Evacuation",false);
+    glui_bounds->add_checkbox_to_panel(panel_evac,"Select Avatar",&select_avatar);
+   // glui_bounds->add_checkbox_to_panel(panel_evac,"View from selected Avatar",&view_from_selected_avatar);
     SPINNER_evacframestep=glui_bounds->add_spinner_to_panel(panel_evac,"Frame Skip",GLUI_SPINNER_INT,&evacframeskip,
       FRAMELOADING,PART_CB);
     SPINNER_evacframestep->set_int_limits(0,100);

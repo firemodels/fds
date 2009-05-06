@@ -92,19 +92,19 @@ char IOobject_revision[]="$Revision$";
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected);
 float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2[3]);
 
-void drawcone(float d1, float height, float *rgbcolor);
-void drawtrunccone(float d1, float d2, float height, float *rgbcolor);
-void drawline(float *xyz1, float *xyz2, float *rgbcolor);
-void drawarc(float angle, float diameter, float *rgbcolor);
-void drawcircle(float diameter, float *rgbcolor);
-void drawpoint(float *rgbcolor);
-void drawsphere(float diameter, float *rgbcolor);
-void drawcube(float size, float *rgbcolor);
-void drawdisk(float diameter, float height, float *rgbcolor);
-void drawhexdisk(float diameter, float height, float *rgbcolor);
-void drawpolydisk(int nsides, float diameter, float height, float *rgbcolor);
-void drawring(float d_inner, float d_outer, float height, float *rgbcolor);
-void drawnotchplate(float diameter, float height, float notchheight, float direction, float *rgbcolor);
+void drawcone(float d1, float height, unsigned char *rgbcolor);
+void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);
+void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor);
+void drawarc(float angle, float diameter, unsigned char *rgbcolor);
+void drawcircle(float diameter, unsigned char *rgbcolor);
+void drawpoint(unsigned char *rgbcolor);
+void drawsphere(float diameter, unsigned char *rgbcolor);
+void drawcube(float size, unsigned char *rgbcolor);
+void drawdisk(float diameter, float height, unsigned char *rgbcolor);
+void drawhexdisk(float diameter, float height, unsigned char *rgbcolor);
+void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor);
+void drawring(float d_inner, float d_outer, float height, unsigned char *rgbcolor);
+void drawnotchplate(float diameter, float height, float notchheight, float direction, unsigned char *rgbcolor);
 void draw_SVOBJECT(sv_object *object, int iframe);
 sv_object *get_object(char *label);
 void free_object(sv_object *object);
@@ -464,8 +464,8 @@ void draw_SVOBJECT(sv_object *object, int iframe){
   int *op;
   float *arg;
   int iarg,iop;
-  float *rgbptr;
-  float rgbcolor[4];
+  unsigned char *rgbptr;
+  unsigned char rgbcolor[4];
   int displaylist_id=0;
   int op_skip=0;
 
@@ -474,10 +474,10 @@ void draw_SVOBJECT(sv_object *object, int iframe){
   ASSERT(framei->error==0||framei->error==1);
   if(framei->error!=0)framei=error_frame;
 
-  rgbcolor[0]=1.0;
-  rgbcolor[1]=0.0;
-  rgbcolor[2]=0.0;
-  rgbcolor[3]=1.0;
+  rgbcolor[0]=255;
+  rgbcolor[1]=0;
+  rgbcolor[2]=0;
+  rgbcolor[3]=255;
   rgbptr=rgbcolor;
   glPushMatrix();
   iarg = 0;
@@ -506,15 +506,23 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     }
   }
 
-  glEnable(GL_LIGHTING);
+  if(select_avatar_color_ptr==NULL){
+    glEnable(GL_LIGHTING);
 
-  glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
-  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
-  glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
 
-  glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_COLOR_MATERIAL);
+  }
 
   while(iop<framei->nops){
+    if(select_avatar_color_ptr==NULL){
+      rgbptr=rgbcolor;
+    }
+    else{
+      rgbptr=select_avatar_color_ptr;
+    }
     arg = framei->args + iarg;
     op = framei->ops + iop;
     switch (*op){
@@ -662,18 +670,23 @@ void draw_SVOBJECT(sv_object *object, int iframe){
           float grey;
 
           grey = color2bw(arg);
-          rgbcolor[0]=grey;
-          rgbcolor[1]=grey;
-          rgbcolor[2]=grey;
-          rgbcolor[3]=1.0;
+          rgbcolor[0]=255*grey;
+          rgbcolor[1]=255*grey;
+          rgbcolor[2]=255*grey;
+          rgbcolor[3]=255;
         }
         else{
-          rgbcolor[0]=arg[0];
-          rgbcolor[1]=arg[1];
-          rgbcolor[2]=arg[2];
-          rgbcolor[3]=1.0;
+          rgbcolor[0]=255*arg[0];
+          rgbcolor[1]=255*arg[1];
+          rgbcolor[2]=255*arg[2];
+          rgbcolor[3]=255;
         }
-        rgbptr=rgbcolor;
+        if(select_avatar_color_ptr==NULL){
+          rgbptr=rgbcolor;
+        }
+        else{
+          rgbptr=select_avatar_color_ptr;
+        }
       }
       iarg+=3;
       break;
@@ -691,11 +704,16 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       break;
     case SV_SETBW:
       if(op_skip==0&&iarg+SV_SETBW_NUMARGS<=framei->nargs){
-        rgbcolor[0]=arg[0];
-        rgbcolor[1]=arg[0];
-        rgbcolor[2]=arg[0];
-        rgbcolor[3]=1.0;
-        rgbptr=rgbcolor;
+        rgbcolor[0]=255*arg[0];
+        rgbcolor[1]=255*arg[0];
+        rgbcolor[2]=255*arg[0];
+        rgbcolor[3]=255;
+        if(select_avatar_color_ptr==NULL){
+          rgbptr=rgbcolor;
+        }
+        else{
+          rgbptr=select_avatar_color_ptr;
+        }
       }
       iarg+=1;
       break;
@@ -721,8 +739,10 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     iop++;
     if(op_skip>0)op_skip--;
   }
-  glDisable(GL_COLOR_MATERIAL);
-  glDisable(GL_LIGHTING);
+  if(select_avatar_color==NULL){
+    glDisable(GL_COLOR_MATERIAL);
+    glDisable(GL_LIGHTING);
+  }
 
   if(object->use_displaylist==1&&displaylist_id!=0){
     glEndList();
@@ -734,9 +754,9 @@ void draw_SVOBJECT(sv_object *object, int iframe){
 
 /* ----------------------- drawline ----------------------------- */
 
-void drawline(float *xyz1, float *xyz2, float *rgbcolor){
+void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor){
   glBegin(GL_LINES);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
   glVertex3fv(xyz1);
   glVertex3fv(xyz2);
   glEnd();
@@ -745,7 +765,7 @@ void drawline(float *xyz1, float *xyz2, float *rgbcolor){
 
 /* ----------------------- drawsphere ----------------------------- */
 
-void drawsphere(float diameter, float *rgbcolor){
+void drawsphere(float diameter, unsigned char *rgbcolor){
   int i,j;
   float *radsphere, *zsphere;
 
@@ -756,7 +776,7 @@ void drawsphere(float diameter, float *rgbcolor){
   glScalef(diameter/2.0,diameter/2.0,diameter/2.0);
 
   glBegin(GL_QUADS);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
   for(i=0;i<ncirc/2+1;i++){
     for(j=0;j<ncirc;j++){
       glNormal3f(radsphere[  i]*xcirc[  j],radsphere[  i]*ycirc[  j],zsphere[  i]);
@@ -778,21 +798,21 @@ void drawsphere(float diameter, float *rgbcolor){
 
 /* ----------------------- drawpoint ----------------------------- */
 
-void drawpoint(float *rgbcolor){
+void drawpoint(unsigned char *rgbcolor){
   glBegin(GL_POINTS);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
   glVertex3f(0.0,0.0,0.0);
   glEnd();
 }
 
 /* ----------------------- drawcircle ----------------------------- */
 
-void drawcircle(float diameter,float *rgbcolor){
+void drawcircle(float diameter,unsigned char *rgbcolor){
   int i;
 
   if(ncirc==0)initcircle(CIRCLE_SEGS);
   glBegin(GL_LINE_LOOP);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
   for(i=0;i<ncirc;i++){
     glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
   }
@@ -801,7 +821,7 @@ void drawcircle(float diameter,float *rgbcolor){
 
 /* ----------------------- drawarc ----------------------------- */
 
-void drawarc(float angle, float diameter,float *rgbcolor){
+void drawarc(float angle, float diameter,unsigned char *rgbcolor){
   int i, iarc;
 
   if(ncirc==0)initcircle(CIRCLE_SEGS);
@@ -809,7 +829,7 @@ void drawarc(float angle, float diameter,float *rgbcolor){
   if(iarc<2)iarc=2;
   if(iarc>CIRCLE_SEGS)iarc=CIRCLE_SEGS;
   glBegin(GL_LINE_LOOP);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
   for(i=0;i<iarc;i++){
     glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
   }
@@ -818,13 +838,13 @@ void drawarc(float angle, float diameter,float *rgbcolor){
 
 /* ----------------------- drawcube ----------------------------- */
 
-void drawcube(float size, float *rgbcolor){
+void drawcube(float size, unsigned char *rgbcolor){
   float s2;
 
   s2 = size/2.0;
 
   glBegin(GL_QUADS);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
 
   glNormal3f(0.0,0.0,-1.0);
@@ -868,12 +888,12 @@ void drawcube(float size, float *rgbcolor){
 
 /* ----------------------- drawring ----------------------------- */
 
-void drawring(float diam_inner, float diam_outer, float height, float *rgbcolor){
+void drawring(float diam_inner, float diam_outer, float height, unsigned char *rgbcolor){
   int i;
 
   if(ncirc==0)initcircle(CIRCLE_SEGS);
   glBegin(GL_QUADS);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   for(i=0;i<ncirc;i++){
     glNormal3f(xcirc[i],ycirc[i],0.0);
@@ -920,12 +940,12 @@ void drawring(float diam_inner, float diam_outer, float height, float *rgbcolor)
 
 /* ----------------------- drawdisk ----------------------------- */
 
-void drawdisk(float diameter, float height, float *rgbcolor){
+void drawdisk(float diameter, float height, unsigned char *rgbcolor){
   int i;
 
   if(ncirc==0)initcircle(CIRCLE_SEGS);
   glBegin(GL_QUADS);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   for(i=0;i<ncirc;i++){
     glNormal3f(xcirc[i],ycirc[i],0.0);
@@ -943,7 +963,7 @@ void drawdisk(float diameter, float height, float *rgbcolor){
   glEnd();
 
   glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   glNormal3f(0.0,0.0,-1.0);
   for(i=0;i<ncirc;i++){
@@ -963,7 +983,7 @@ void drawdisk(float diameter, float height, float *rgbcolor){
 
 /* ----------------------- drawhexdisk ----------------------------- */
 
-void drawpolydisk(int nsides, float diameter, float height, float *rgbcolor){
+void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor){
   int i;
 
   float x[33], y[33], xnorm[32], ynorm[32];
@@ -987,7 +1007,7 @@ void drawpolydisk(int nsides, float diameter, float height, float *rgbcolor){
   y[nsides] = y[0];
 
   glBegin(GL_QUADS);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   radius = diameter/2.0;
 
@@ -1004,7 +1024,7 @@ void drawpolydisk(int nsides, float diameter, float height, float *rgbcolor){
   glEnd();
 
   glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   glNormal3f(0.0,0.0,-1.0);
   for(i=0;i<nsides;i++){
@@ -1023,7 +1043,7 @@ void drawpolydisk(int nsides, float diameter, float height, float *rgbcolor){
 
 /* ----------------------- drawhexdisk ----------------------------- */
 
-void drawhexdisk(float diameter, float height, float *rgbcolor){
+void drawhexdisk(float diameter, float height, unsigned char *rgbcolor){
   int i;
 
   float x[7]={0.866,0.0,-0.866,-0.866,0.0 ,0.866,0.866};
@@ -1033,7 +1053,7 @@ void drawhexdisk(float diameter, float height, float *rgbcolor){
   float radius;
 
   glBegin(GL_QUADS);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   radius = diameter/2.0;
 
@@ -1050,7 +1070,7 @@ void drawhexdisk(float diameter, float height, float *rgbcolor){
   glEnd();
 
   glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   glNormal3f(0.0,0.0,-1.0);
   for(i=0;i<6;i++){
@@ -1069,7 +1089,7 @@ void drawhexdisk(float diameter, float height, float *rgbcolor){
 
 /* ----------------------- drawnotchplate ----------------------------- */
 
-void drawnotchplate(float diameter, float height, float notchheight, float direction, float *rgbcolor){
+void drawnotchplate(float diameter, float height, float notchheight, float direction, unsigned char *rgbcolor){
   int i;
   float diameter2;
 
@@ -1080,7 +1100,7 @@ void drawnotchplate(float diameter, float height, float notchheight, float direc
 
 
   glBegin(GL_QUADS);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   for(i=0;i<ncirc;i++){
     float xmid, ymid;
@@ -1190,7 +1210,7 @@ void drawnotchplate(float diameter, float height, float notchheight, float direc
   glEnd();
 
   glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   glNormal3f(0.0,0.0,-1.0);
   for(i=0;i<ncirc;i++){
@@ -1210,7 +1230,7 @@ void drawnotchplate(float diameter, float height, float notchheight, float direc
 
 /* ----------------------- drawcone ----------------------------- */
 
-void drawcone(float d1, float height, float *rgbcolor){
+void drawcone(float d1, float height, unsigned char *rgbcolor){
   int i;
   float dz;
 
@@ -1220,7 +1240,7 @@ void drawcone(float d1, float height, float *rgbcolor){
   dz = d1/height;
 
   glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   for(i=0;i<ncirc;i++){
     glNormal3f(xcirc[i],ycirc[i],dz);
@@ -1243,7 +1263,7 @@ void drawcone(float d1, float height, float *rgbcolor){
 
 /* ----------------------- drawtrunccone ----------------------------- */
 
-void drawtrunccone(float d1, float d2, float height, float *rgbcolor){
+void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor){
   int i;
   float dz;
 
@@ -1253,7 +1273,7 @@ void drawtrunccone(float d1, float d2, float height, float *rgbcolor){
   dz = -(d2-d1)/height;
 
   glBegin(GL_QUADS);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   for(i=0;i<ncirc;i++){
     glNormal3f(xcirc[i],ycirc[i],dz);
@@ -1271,7 +1291,7 @@ void drawtrunccone(float d1, float d2, float height, float *rgbcolor){
   glEnd();
 
   glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3fv(rgbcolor);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   glNormal3f(0.0,0.0,-1.0);
   for(i=0;i<ncirc;i++){
@@ -1344,6 +1364,7 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
 
   NewMemory( (void **)&object,sizeof(sv_object));
   object->use_displaylist=1;
+  object->select_mode=0;
   object->used=0;
   object->visible=visible;
   strcpy(object->label,label);
@@ -1381,6 +1402,7 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
 
   NewMemory( (void **)&object,sizeof(sv_object));
   object->use_displaylist=1;
+  object->select_mode=0;
   object->used=0;
   object->visible=visible;
   strcpy(object->label,label);
@@ -1652,6 +1674,7 @@ int read_device_defs(char *file){
   
       NewMemory((void **)&current_object,sizeof(sv_object));
       current_object->use_displaylist=1;
+      current_object->select_mode=0;
       strcpy(current_object->label,label);
       prev_object = device_def_last.prev;
       next_object = &device_def_last;

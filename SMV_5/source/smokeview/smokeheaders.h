@@ -47,6 +47,7 @@ EXTERNCPP inifiledata *insert_inifile(char *file);
 EXTERNCPP void keyboard(unsigned char key, int x, int y);
 EXTERNCPP void get_newscriptfilename(char *newscriptfilename);
 EXTERNCPP void init_avatar(void);
+EXTERNCPP void drawselect_avatars(void);
 #ifdef pp_GPU
 EXTERNCPP int log_base2(float xx);
 #endif
@@ -396,7 +397,7 @@ EXTERNCPP void setup_tour(void);
 EXTERNCPP void createtourpaths(void);
 EXTERNCPP void drawtours(void);
 EXTERNCPP void set_glui_keyframe(void);
-EXTERNCPP void drawselecttours(void);
+EXTERNCPP void drawselect_tours(void);
 EXTERNCPP void freetour(tourdata *touri);
 EXTERNCPP void inittour(tourdata *touri);
 EXTERNCPP void updatetourmenulabels(void);
@@ -607,7 +608,7 @@ EXTERNCPP void update_hidden_faces(void);
 EXTERNCPP void update_selectfaces(void);
 EXTERNCPP void update_selectblocks(void);
 EXTERNCPP void draw_faces(void);
-EXTERNCPP void draw_selectfaces(void);
+EXTERNCPP void drawselect_faces(void);
 EXTERNCPP void allocate_faces(void);
 EXTERNCPP void update_facelists(void);
 EXTERNCPP void update_faces(void);
