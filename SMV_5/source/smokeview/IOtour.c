@@ -382,9 +382,9 @@ void drawcir(float *center, float rad, float *color){
 }
 
 
-/* ------------------ drawselecttours ------------------------ */
+/* ------------------ drawselect_tours ------------------------ */
 
-void drawselecttours(void){
+void drawselect_tours(void){
   int i,j;
   tourdata *touri;
   keyframe *framej;

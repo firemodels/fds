@@ -586,6 +586,7 @@ typedef struct _sv_object {
   int visible;
   int used;
   int use_displaylist;
+  int select_mode;
   int nframes;
   sv_object_frame **obj_frames, first_frame, last_frame;
  struct _sv_object *prev, *next;
