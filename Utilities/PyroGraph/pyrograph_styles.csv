@@ -49,3 +49,8 @@ Index,Symbol_Style,Edge_Color,Fill_Color,Symbol_Size,Line_Color,Line_Style,Line_
 48,o,y,w,5,w,None,None
 49,^,k,k,5,w,None,None
 50,s,g,g,5,w,None,None
+51,o,k,w,1,w,None,None
+52,o,r,w,1,w,None,None
+53,o,g,w,1,w,None,None
+54,o,b,w,1,w,None,None
+55,o,y,w,1,w,None,None
