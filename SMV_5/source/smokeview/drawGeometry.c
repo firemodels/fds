@@ -1884,9 +1884,9 @@ void update_facelists(void){
   }
 }
 
-/* ------------------ draw_selectfaces ------------------------ */
+/* ------------------ drawselect_faces ------------------------ */
 
-void draw_selectfaces(){
+void drawselect_faces(){
   int i,j,k;
   mesh *meshi;
   float *vertices;
@@ -4242,9 +4242,11 @@ void drawBlockages(int mode, int trans_flag){
     if(xyz_clipplane!=0)glEnable(GL_CULL_FACE);
   }
   if(trans_flag!=DRAW_TRANSPARENT&&blocklocation!=BLOCKlocation_cad){
-    if(mode==SELECT&&blockageSelect==1){
-      draw_selectfaces();
-      return;
+    if(mode==SELECT){
+      if(blockageSelect==1){
+        drawselect_faces();
+        return;
+      }
     }
     else{
       draw_faces();

@@ -717,6 +717,17 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     }
   }
 
+  if(plotstate==DYNAMIC_PLOTS&&select_avatar==1&&selected_avatar_tag>0&&view_from_selected_avatar==1){
+    camera_current->eye[0]=selected_avatar_pos[0];
+    camera_current->eye[1]=selected_avatar_pos[1];
+    camera_current->eye[2]=selected_avatar_pos[2];
+    camera_current->direction_angle=selected_avatar_angle;
+    camera_current->view_angle=0.0;
+    update_camera(camera_current);
+    //camera_current->angle_zx[1]=0.0;
+    //camera_current->angle_zx[0]=0.0;
+  }
+
   eyexINI = camera_current->eye[0];
   eyeyINI = camera_current->eye[1];
   eyezINI = camera_current->eye[2];
@@ -1016,6 +1027,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   CheckMemory;
 
+  show_mode=mode;
+
   if(xyz_clipplane==1){
     if(clip_x==1)glDisable(GL_CLIP_PLANE0);
     if(clip_y==1)glDisable(GL_CLIP_PLANE1);
@@ -1261,13 +1274,24 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
      }
   } /* end of if(mode==RENDER) code segment */
 
+/* ++++++++++++++++++++++++ draw selected avatars +++++++++++++++++++++++++ */
 
-/* ++++++++++++++++++++++++ draw tours +++++++++++++++++++++++++ */
+  if(mode==SELECT){
+    if(select_avatar==1){
+      drawselect_avatars();
+      sniffErrors("after drawselect_avatars");
+      return;
+    }
+  }
 
-  if(mode==SELECT&&edittour==1&&ntours>0){
-    drawselecttours();
-    sniffErrors("after drawselecttours");
-    return;
+/* ++++++++++++++++++++++++ draw selected tours +++++++++++++++++++++++++ */
+
+  if(mode==SELECT){
+    if(edittour==1&&ntours>0){
+      drawselect_tours();
+      sniffErrors("after drawselect_tours");
+      return;
+    }
   }
 
 

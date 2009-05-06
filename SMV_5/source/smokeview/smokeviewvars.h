@@ -32,9 +32,13 @@
 #include "smokeheaders.h"
 #endif
 
+SVEXTERN int show_mode;
 SVEXTERN int cellcenter_interp, cellcenter_slice_active, cellcenter_bound_active;
 SVEXTERN int part5colorindex, show_tracers_always;
 SVEXTERN int navatar_colors;
+SVEXTERN int select_avatar, selected_avatar_tag, view_from_selected_avatar;
+SVEXTERN float selected_avatar_pos[3], selected_avatar_angle;
+SVEXTERN unsigned char select_avatar_color[4], *select_avatar_color_ptr;
 SVEXTERN float *avatar_colors;
 SVEXTERN int script_render_flag, script_itime;
 

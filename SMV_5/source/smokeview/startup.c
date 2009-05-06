@@ -963,9 +963,13 @@ void initvars1(void){
   update_initcull=0;
   sb_atstart=1;
   navatar_types=0;
+  select_avatar=0;
+  selected_avatar_tag=-1;
+  select_avatar_color_ptr=NULL;
   avatar_types=NULL;
   navatar_colors=0;
   avatar_colors=NULL;
+  view_from_selected_avatar=0;
   revision_fds=-1;
   revision_smv=getmaxrevision();
   force_isometric=0;
