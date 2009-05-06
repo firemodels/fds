@@ -25,3 +25,10 @@ pdflatex SMV_5_User_Guide
 bibtex SMV_5_User_Guide
 pdflatex SMV_5_User_Guide
 pdflatex SMV_5_User_Guide
+
+cd %svn_root%\Manuals\SMV_5_Verification_Guide
+
+pdflatex SMV_5_Verification_Guide
+bibtex SMV_5_Verification_Guide
+pdflatex SMV_5_Verification_Guide
+pdflatex SMV_5_Verification_Guide
