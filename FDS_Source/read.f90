@@ -7580,7 +7580,16 @@ MESH_LOOP: DO NM=1,NMESHES
                N_TERRAIN_SLCF   = N_TERRAIN_SLCF + 1
             ENDIF
          ENDIF
+         
+         ! disable cell centered for velocity
+         IF (QUANTITY=='VELOCITY'   .OR. &
+             QUANTITY=='U-VELOCITY' .OR. &
+             QUANTITY=='V-VELOCITY' .OR. &
+             QUANTITY=='W-VELOCITY') THEN
+             CELL_CENTERED = .FALSE.
+         ENDIF
          SL%CELL_CENTERED = CELL_CENTERED
+         
       ENDDO VECTORLOOP
   
    ENDDO SLCF_LOOP
