@@ -1484,6 +1484,7 @@ void drawPart5(const particle *parti){
                 }
               }
               draw_SVOBJECT(avatar_types[avatar_type],0);
+              select_avatar_color_ptr=NULL;
               avatar_types[avatar_type]->use_displaylist=save_use_displaylist;
               glPopMatrix();
             }
