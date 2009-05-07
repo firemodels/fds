@@ -36,11 +36,13 @@ Module EVAC
   Character(255), Parameter :: evacdate='$Date$'
   !
   Private
-  ! Public subprograms (called from the main program)
+  ! Public subprograms (called from the main program or read or dump)
   Public EVACUATE_HUMANS, INITIALIZE_EVACUATION, INIT_EVAC_GROUPS
   Public READ_EVAC, DUMP_EVAC, DUMP_EVAC_CSV, PREPARE_TO_EVACUATE
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_EVAC
   ! Public variables (needed in the main program):
+  ! Public variables (needed in the dump routine):
+  Public N_DOORS, N_EXITS, N_ENTRYS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE
   !
   Character(255):: EVAC_VERSION = '2.1.2'
   Character(255) :: EVAC_COMPILE_DATE
@@ -128,16 +130,16 @@ Module EVAC
   ! T_first: first person's exit time (saved for output)
   ! CHECK_FLOW: If true then the flow can not exceed Flow_max
   ! (&EXIT lines)
-  Type EVAC_EXIT_Type
-     Real(EB) :: T_first=0._EB, T_last=0._EB, Flow_max=0._EB, Width=0._EB
+  Type EVAC_EXIT_TYPE
+     Real(EB) :: T_first=0._EB, T_last=0._EB, Flow_max=0._EB, Width=0._EB, Height=2.0_EB
      Real(EB) :: X1=0._EB, X2=0._EB, Y1=0._EB, Y2=0._EB, Z1=0._EB, Z2=0._EB, &
           X=0._EB, Y=0._EB, Z=0._EB, Xsmoke=0._EB, Ysmoke=0._EB, Zsmoke=0._EB, &
           TIME_OPEN=0._EB, TIME_CLOSE=0._EB, R_NTARGET=0._EB
-     Integer :: IOR=0, ICOUNT=0, IMESH=0, INODE=0
+     Integer :: IOR=0, ICOUNT=0, IMESH=0, INODE=0, IMODE=1
      Integer, Dimension(50) :: NTARGET=0
      Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      Integer :: II=0, JJ=0, KK=0, FED_MESH=0
-     Logical :: CHECK_FLOW=.False., COUNT_ONLY=.False.
+     Logical :: CHECK_FLOW=.False., COUNT_ONLY=.False., SHOW=.True.
      Integer :: STR_INDX=0, STR_SUB_INDX=0
      Character(60) :: ID='null'
      Character(60) :: TO_NODE='null'
@@ -145,29 +147,31 @@ Module EVAC
      Character(26) :: VENT_FFIELD='null'
      Integer :: I_VENT_FFIELD=0, Avatar_Color_Index=0
      Integer, Dimension(3) :: RGB=-1
-  End Type EVAC_EXIT_Type
+     Real(EB), Dimension(3) :: ORIENTATION=0.0_EB
+  End Type EVAC_EXIT_TYPE
   !
   ! Like exit, but door will always put the persons to some
   ! other node. (Thus no count_only option.)
   ! (&DOOR lines)
-  Type EVAC_DOOR_Type
-     Real(EB) :: T_first=0._EB, T_last=0._EB, Flow_max=0._EB, Width=0._EB
+  Type EVAC_DOOR_TYPE
+     Real(EB) :: T_first=0._EB, T_last=0._EB, Flow_max=0._EB, Width=0._EB, Height=2.0_EB
      Real(EB) :: X1=0._EB, X2=0._EB, Y1=0._EB, Y2=0._EB, Z1=0._EB, Z2=0._EB, &
           X=0._EB, Y=0._EB, Z=0._EB, Xsmoke=0._EB, Ysmoke=0._EB, Zsmoke=0._EB, &
           TIME_OPEN=0._EB, TIME_CLOSE=0._EB, R_NTARGET=0._EB
-     Integer :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0
+     Integer :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0, IMODE=1
      Integer, Dimension(50) :: NTARGET=0
      Integer :: STR_INDX=0, STR_SUB_INDX=0
      Real(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      Integer :: II=0, JJ=0, KK=0, FED_MESH=0
-     Logical :: CHECK_FLOW=.False., EXIT_SIGN=.False., KEEP_XY=.False.
+     Logical :: CHECK_FLOW=.False., EXIT_SIGN=.False., KEEP_XY=.False., SHOW=.True.
      Character(60) :: ID='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
      Character(26) :: VENT_FFIELD='null'
      Integer :: I_VENT_FFIELD=0, Avatar_Color_Index=0
      Integer, Dimension(3) :: RGB=-1
-  End Type EVAC_DOOR_Type
+     Real(EB), Dimension(3) :: ORIENTATION=0.0_EB
+  End Type EVAC_DOOR_TYPE
   !
   ! Like door, but corr will model stairs (or corridors). 
   ! The parameters, like velocity as function of density etc.
@@ -213,19 +217,20 @@ Module EVAC
   ! (&ENTR lines)
   Type EVAC_ENTR_Type
      Real(EB) :: T_first=0._EB, T_last=0._EB, Flow=0._EB, Width=0._EB, T_Start=0._EB, T_Stop=0._EB
-     Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB
-     Integer :: IOR=0, ICOUNT=0, IPC=0, IMESH=0, INODE=0, &
+     Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, Height=2.0_EB, Z=0.0_EB
+     Integer :: IOR=0, ICOUNT=0, IPC=0, IMESH=0, INODE=0, IMODE=-1, &
           TO_INODE=0, N_Initial=0, Max_Humans=-1, &
           STR_INDX=0, STR_SUB_INDX=0
      Character(60) :: CLASS_NAME='null', ID='null'
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null', Max_Humans_Ramp
-     Logical :: After_Tpre=.False., No_Persons=.False.
+     Logical :: After_Tpre=.False., No_Persons=.False., SHOW=.True.
      Integer :: N_VENT_FFIELDS=0, Avatar_Color_Index=0
      Integer, Pointer, Dimension(:) :: I_DOOR_NODES =>NULL()
      Integer, Pointer, Dimension(:) :: I_VENT_FFIELDS =>NULL()
      Real(EB), Pointer, Dimension(:) :: P_VENT_FFIELDS =>NULL()
      Integer, Dimension(3) :: RGB=-1, AVATAR_RGB=-1
+     Real(EB), Dimension(3) :: ORIENTATION=0.0_EB
   End Type EVAC_ENTR_Type
   !
   ! coordinates. the person type ('soccer_fan' etc) are also
@@ -382,7 +387,7 @@ Contains
     Real(EB) :: MAX_FLOW, WIDTH, TIME_START, TIME_STOP, WIDTH1, &
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED, TIME_OPEN, TIME_CLOSE
     Real(EB) :: UBAR0, VBAR0
-    Logical :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, EXIT_SIGN, KEEP_XY, USE_V0
+    Logical :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, EXIT_SIGN, KEEP_XY, USE_V0, SHOW
     Logical :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA, &
          OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, OUTPUT_MOTIVE_ANGLE
     Integer, Dimension(3) :: RGB, AVATAR_RGB
@@ -405,20 +410,20 @@ Contains
     Integer, Dimension(8) :: t_rnd
     Integer, Dimension(:), Allocatable :: seed_rnd
 
-    Namelist /Exit/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
+    Namelist /EXIT/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, FYI, COUNT_ONLY, WIDTH, XYZ, VENT_FFIELD, &
          MESH_ID, COLOR_INDEX, XYZ_SMOKE, &
-         TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR
+         TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR, SHOW, HEIGHT
     Namelist /DOOR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, XYZ, VENT_FFIELD, &
          EXIT_SIGN, MESH_ID, COLOR_INDEX, XYZ_SMOKE, KEEP_XY, &
-         TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR
+         TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR, SHOW, HEIGHT
     Namelist /ENTR/ ID, XB, IOR, FLOW_FIELD_ID, MAX_FLOW, &
          FYI, WIDTH, QUANTITY, PERS_ID, TIME_START, &
          TIME_STOP, AFTER_REACTION_TIME, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, &
          MESH_ID, COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
-         AVATAR_COLOR, AVATAR_RGB, MAX_HUMANS, MAX_HUMANS_RAMP
+         AVATAR_COLOR, AVATAR_RGB, MAX_HUMANS, MAX_HUMANS_RAMP, SHOW, HEIGHT
     Namelist /CORR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, WIDTH1, WIDTH2, &
          EFF_WIDTH, EFF_LENGTH, MAX_HUMANS_INSIDE, FAC_SPEED, &
@@ -515,27 +520,27 @@ Contains
 
 
     Call COUNT_EVAC_NODES
-    Write (lu_err,*) 'Evac: Counted evacuation nodes'
+    ! Write (lu_err,*) 'Evac: Counted evacuation nodes'
     Call READ_PERS
-    Write (lu_err,*) 'Evac: Read person classes'
+    ! Write (lu_err,*) 'Evac: Read person classes'
     Call READ_STRS
-    Write (lu_err,*) 'Evac: Read stairs'
+    ! Write (lu_err,*) 'Evac: Read stairs'
     Call READ_EXIT
-    Write (lu_err,*) 'Evac: Read exits'
+    ! Write (lu_err,*) 'Evac: Read exits'
     Call READ_DOOR    
-    Write (lu_err,*) 'Evac: Read doors'
+    ! Write (lu_err,*) 'Evac: Read doors'
     Call READ_CORR
-    Write (lu_err,*) 'Evac: Read corridors'
+    ! Write (lu_err,*) 'Evac: Read corridors'
     Call READ_ENTRIES
-    Write (lu_err,*) 'Evac: Read entries'
+    ! Write (lu_err,*) 'Evac: Read entries'
     Call COLLECT_NODE_INFO
-    Write (lu_err,*) 'Evac: Collected node info '
+    ! Write (lu_err,*) 'Evac: Collected node info '
     Call READ_EVAC_LINES
-    Write (lu_err,*) 'Evac: Read evac namelists'
+    ! Write (lu_err,*) 'Evac: Read evac namelists'
     Call READ_EVHO
-    Write (lu_err,*) 'Evac: Read evho namelists'
+    ! Write (lu_err,*) 'Evac: Read evho namelists'
     Call READ_EVSS
-    Write (lu_err,*) 'Evac: Read inclines'
+    ! Write (lu_err,*) 'Evac: Read inclines'
 
     If (MYID /= Max(0,EVAC_PROCESS)) Return
 
@@ -1395,8 +1400,10 @@ Contains
          EVAC_MESH     = 'null'
          CHECK_FLOW    = .False.
          COUNT_ONLY    = .False.
+         SHOW          = .True.
          MAX_FLOW      = 0.0_EB
          WIDTH         = 0.0_EB
+         HEIGHT        = 2.0_EB
          TIME_OPEN     = -Huge(TIME_OPEN)
          TIME_CLOSE    = Huge(TIME_CLOSE)
          XYZ(:)        = Huge(XYZ)
@@ -1533,9 +1540,18 @@ Contains
          PEX%Flow_max   = 0.0_EB
          PEX%TIME_OPEN  = TIME_OPEN
          PEX%TIME_CLOSE = TIME_CLOSE
+         PEX%IMODE      = -1 ! Exit is open by default
+         If (TIME_OPEN>TIME_CLOSE) Then
+            PEX%IMODE=-1
+         Else
+            If (TIME_OPEN>T_BEGIN) PEX%IMODE=+2
+         End If
          If (CHECK_FLOW) PEX%Flow_max   = MAX_FLOW
          PEX%COUNT_ONLY = .False.
          If (COUNT_ONLY) PEX%COUNT_ONLY = .True.
+         PEX%SHOW = .True.
+         If (COUNT_ONLY ) PEX%SHOW = .False.
+         PEX%HEIGHT = HEIGHT
 
          !       PEX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX-1),7) + 1 ! 1-7 always
 
@@ -1546,17 +1562,20 @@ Contains
             Else
                PEX%Width = WIDTH
             End If
+            PEX%ORIENTATION(1)=Real(Sign(1,IOR),EB)
          Case (-2,+2)
             If (WIDTH <= 0.0_EB) Then
                PEX%Width = XB(2) - XB(1)
             Else
                PEX%Width = WIDTH
             End If
+            PEX%ORIENTATION(2)=Real(Sign(1,IOR),EB)
          Case (-3)
             If ( (XB(4)-XB(3)) <= 0.0_EB .Or. (XB(2)-XB(1)) <= 0.0_EB) Then
                Write(MESSAGE,'(A,I4,A)') 'ERROR: EXIT',N,' IOR=-3 but not 3-dim object'
                Call SHUTDOWN(MESSAGE)
             End If
+            PEX%ORIENTATION(3)=Real(Sign(1,IOR),EB)
          Case (0)
             If ( (XB(4)-XB(3)) <= 0.0_EB .Or. (XB(2)-XB(1)) <= 0.0_EB) Then
                Write(MESSAGE,'(A,I4,A)') 'ERROR: EXIT',N,' no IOR but not 3-dim object'
@@ -1613,6 +1632,9 @@ Contains
             Write(MESSAGE,'(A,A,A)') 'ERROR: EXIT line ',Trim(PEX%ID), ' problem with XYZ, no mesh found'
             Call SHUTDOWN(MESSAGE)
          End If
+
+         ! PEX%Z is used to plot the door on the correct height in Smokeview.
+         PEX%Z = PEX%Z + 0.5_EB*PEX%Height - EVACUATION_Z_OFFSET(PEX%IMESH)
 
          If (XYZ_SMOKE(1) < Huge(XYZ_SMOKE)) Then
             PEX%Xsmoke = XYZ_SMOKE(1)
@@ -1707,8 +1729,10 @@ Contains
          TO_NODE       = 'null'
          CHECK_FLOW    = .False.
          EXIT_SIGN     = .False.
+         SHOW          = .True.
          MAX_FLOW      = 0.0_EB
          WIDTH         = 0.0_EB
+         HEIGHT        = 2.0_EB
          TIME_OPEN     = -Huge(TIME_OPEN)
          TIME_CLOSE    = Huge(TIME_CLOSE)
          XYZ(:)        = Huge(XYZ)
@@ -1844,6 +1868,7 @@ Contains
          PDX%CHECK_FLOW = CHECK_FLOW
          PDX%EXIT_SIGN  = EXIT_SIGN
          PDX%KEEP_XY    = KEEP_XY
+         PDX%SHOW       = SHOW
          PDX%TO_NODE    = TO_NODE
          PDX%INODE      = 0
          PDX%INODE2     = 0
@@ -1853,7 +1878,14 @@ Contains
          PDX%Flow_max   = 0.0_EB
          PDX%TIME_OPEN  = TIME_OPEN
          PDX%TIME_CLOSE = TIME_CLOSE
+         PDX%IMODE      = -1 ! Door is open by default
+         If (TIME_OPEN>TIME_CLOSE) Then
+            PDX%IMODE=-1
+         Else
+            If (TIME_OPEN>T_BEGIN) PDX%IMODE=+2
+         End If
          If (CHECK_FLOW) PDX%Flow_max   = MAX_FLOW
+         PDX%HEIGHT = HEIGHT
 
          !       PDX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX-1),7) ! 1-7 always
 
@@ -1864,17 +1896,20 @@ Contains
             Else
                PDX%Width = WIDTH
             End If
+            PDX%ORIENTATION(1)=Real(Sign(1,IOR),EB)
          Case (-2,+2)
             If (WIDTH <= 0.0_EB) Then
                PDX%Width = XB(2) - XB(1)
             Else
                PDX%Width = WIDTH
             End If
+            PDX%ORIENTATION(2)=Real(Sign(1,IOR),EB)
          Case (-3)
             If ( (XB(4)-XB(3)) <= 0.0_EB .Or. (XB(2)-XB(1)) <= 0.0_EB) Then
                Write(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' IOR=-3 but not 3-dim object'
                Call SHUTDOWN(MESSAGE)
             End If
+            PDX%ORIENTATION(3)=Real(Sign(1,IOR),EB)
          Case (0)
             If ( (XB(4)-XB(3)) <= 0.0_EB .Or. (XB(2)-XB(1)) <= 0.0_EB) Then
                Write(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' no IOR but not 3-dim object'
@@ -1940,6 +1975,9 @@ Contains
             Write(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',Trim(PDX%ID), ' problem with XYZ, no mesh found'
             Call SHUTDOWN(MESSAGE)
          End If
+
+         ! PDX%Z is used to plot the door on the correct height in Smokeview.
+         PDX%Z = PDX%Z + 0.5_EB*PDX%Height - EVACUATION_Z_OFFSET(PDX%IMESH)
 
          ! Check, which fire grid and i,j,k (xyz)
          PDX_SmokeLoop: Do i = 1, nmeshes
@@ -2603,7 +2641,9 @@ Contains
          QUANTITY      = 'null'
          MAX_FLOW      = 0.0_EB
          WIDTH         = 0.0_EB
+         HEIGHT        = 2.0_EB
          AFTER_REACTION_TIME = .False.
+         SHOW          = .True.
          TIME_START          = -Huge(TIME_START)
          TIME_STOP           =  Huge(TIME_STOP)
          MAX_HUMANS    = -1
@@ -2689,6 +2729,8 @@ Contains
          PNX%T_Stop     = TIME_STOP
          PNX%Max_Humans = MAX_HUMANS
          PNX%Max_Humans_Ramp  = MAX_HUMANS_RAMP
+         PNX%HEIGHT = HEIGHT
+         PNX%SHOW   = SHOW
 
          ! Check that the entry is properly specified
 
@@ -2775,6 +2817,9 @@ Contains
          PNX%ID         = ID
          PNX%CLASS_NAME = PERS_ID
 
+         ! PNX%Z is used to plot the door on the correct height in Smokeview.
+         PNX%Z = 0.5_EB*(PNX%Z1+PNX%Z2) + 0.5_EB*PNX%Height - EVACUATION_Z_OFFSET(PNX%IMESH)
+
          PNX%IPC = 0
          Do ipc= 1, npc_pers
             pcp => evac_person_classes(ipc)
@@ -2788,17 +2833,20 @@ Contains
             Else
                PNX%Width = WIDTH
             End If
+            PNX%ORIENTATION(1)=-Real(Sign(1,IOR),EB)
          Case (-2,+2)
             If (WIDTH <= 0.0_EB) Then
                PNX%Width = XB(2) - XB(1)
             Else
                PNX%Width = WIDTH
             End If
+            PNX%ORIENTATION(2)=-Real(Sign(1,IOR),EB)
          Case (3)
             If ( (XB(4)-XB(3)) <= 0.0_EB .Or. (XB(2)-XB(1)) <= 0.0_EB) Then
                Write(MESSAGE,'(A,I4,A)') 'ERROR: ENTR',N,' IOR=3 but not 3-dim object'
                Call SHUTDOWN(MESSAGE)
             End If
+            PNX%ORIENTATION(3)=-Real(Sign(1,IOR),EB)
          Case (0)
             If ( (XB(4)-XB(3)) <= 0.0_EB .Or. (XB(2)-XB(1)) <= 0.0_EB) Then
                Write(MESSAGE,'(A,I4,A)') 'ERROR: ENTR',N,' no IOR but not 3-dim object'
@@ -4606,13 +4654,14 @@ Contains
     Real(EB), Intent(INOUT) :: T_Save
     !
     ! Local variables
-    Integer nm, nom, i, j, i1, j1, k1
-    Integer ios
+    Integer :: nm, nom, i, j, i1, j1, k1
+    Integer :: ios, IZERO
     Logical L_use_fed, L_fed_read, L_fed_save
     Real(EB) DT_Save
     Integer(4) ibar_tmp, jbar_tmp, kbar_tmp, n_tmp
     Real(FB) tmpout1, tmpout2, tmpout3, tmpout4, t_tmp, dt_tmp
     Real(FB) tmpout5, tmpout6, tmpout7, tmpout8
+    REAL(EB), Allocatable, Dimension(:) :: YY_GET
     !
     If (.Not. Any(EVACUATION_GRID)) Return
     If (ICYC < 1) Return
@@ -4662,6 +4711,8 @@ Contains
 
     If (L_use_fed) Then
        If (L_fed_save) Then
+          Allocate(YY_GET(1:Max(1,N_SPECIES)),STAT=IZERO)
+          Call ChkMemErr('EVAC_MESH_EXCHANGE', 'YY_GET',IZERO) 
           Write (LU_EVACFED) Real(T,FB), Real(DT_Save,FB)
        Else
           Read (LU_EVACFED,End=324,Iostat=ios) t_tmp, dt_tmp
@@ -4707,7 +4758,7 @@ Contains
                       nom = Abs(HUMAN_GRID(i,j)%IMESH)
                       CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                            HUMAN_GRID(i,j)%FED_CO_CO2_O2,HUMAN_GRID(i,j)%SOOT_DENS,&
-                           HUMAN_GRID(i,j)%TMP_G, HUMAN_GRID(i,j)%RADFLUX)
+                           HUMAN_GRID(i,j)%TMP_G, HUMAN_GRID(i,j)%RADFLUX, YY_GET)
                    End If
                    ! Save Fed, Soot, Temp(C), and Radflux
                    Write (LU_EVACFED) &
@@ -4748,7 +4799,7 @@ Contains
                 nom = EVAC_CORRS(i)%FED_MESH
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                          EVAC_CORRS(i)%FED_CO_CO2_O2(1),EVAC_CORRS(i)%SOOT_DENS(1),&
-                         EVAC_CORRS(i)%TMP_G(1), EVAC_CORRS(i)%RADFLUX(1))
+                         EVAC_CORRS(i)%TMP_G(1), EVAC_CORRS(i)%RADFLUX(1), YY_GET)
              Else
                 ! No fed_mesh found
                 EVAC_CORRS(i)%FED_CO_CO2_O2(1) = 0.0_EB
@@ -4764,7 +4815,7 @@ Contains
                 nom = EVAC_CORRS(i)%FED_MESH2
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                          EVAC_CORRS(i)%FED_CO_CO2_O2(2),EVAC_CORRS(i)%SOOT_DENS(2),&
-                         EVAC_CORRS(i)%TMP_G(2), EVAC_CORRS(i)%RADFLUX(2))
+                         EVAC_CORRS(i)%TMP_G(2), EVAC_CORRS(i)%RADFLUX(2), YY_GET)
              Else
                 ! No fed_mesh2 found
                 EVAC_CORRS(i)%FED_CO_CO2_O2(2) = 0.0_EB
@@ -4813,7 +4864,7 @@ Contains
                 nom = EVAC_DOORS(i)%FED_MESH
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                               EVAC_DOORS(i)%FED_CO_CO2_O2,EVAC_DOORS(i)%SOOT_DENS,&
-                              EVAC_DOORS(i)%TMP_G, EVAC_DOORS(i)%RADFLUX)
+                              EVAC_DOORS(i)%TMP_G, EVAC_DOORS(i)%RADFLUX, YY_GET)
              Else
                 ! No fed_mesh found
                 EVAC_DOORS(i)%FED_CO_CO2_O2 = 0.0_EB
@@ -4855,7 +4906,7 @@ Contains
                 nom = EVAC_EXITS(i)%FED_MESH
                 CALL GET_FIRE_CONDITIONS(nom,i1,j1,k1,&
                          EVAC_EXITS(i)%FED_CO_CO2_O2,EVAC_EXITS(i)%SOOT_DENS,&
-                         EVAC_EXITS(i)%TMP_G, EVAC_EXITS(i)%RADFLUX)
+                         EVAC_EXITS(i)%TMP_G, EVAC_EXITS(i)%RADFLUX, YY_GET)
              Else
                 ! No fed_mesh found
                 EVAC_EXITS(i)%FED_CO_CO2_O2 = 0.0_EB
@@ -4884,6 +4935,8 @@ Contains
              EVAC_EXITS(i)%RADFLUX = tmpout4
           End If                  ! Calculate and save FED
        End Do EXIT_LOOP
+
+       If (L_fed_save) Deallocate(YY_GET)
 
     End If                    ! l_use_fed
 
@@ -4987,7 +5040,7 @@ Contains
     Real(EB) :: rn, rnCF
     Real(EB) :: GaMe, GaTh, GaCM
     !
-    Integer :: i_old_ffield, IZERO
+    Integer :: i_old_ffield, IZERO, imode_old
     Character(26) :: name_old_ffield
     !
     Real(EB) :: P2P_Torque, Fc_x, Fc_y, Omega_new, angle, A1, Tc_z, Fc_x1, Fc_y1
@@ -5056,6 +5109,33 @@ Contains
     ! Blocks are used to speed the double loops over the agent-agent interactions.
     Allocate(BLOCK_GRID_N(1:IBAR,1:JBAR),STAT=IZERO)
     Call ChkMemErr('EVACUATE_HUMANS','BLOCK_GRID_N',IZERO)
+    ! Initialize some counters etc. for this main evac mesh.
+    Do i = 1, n_doors
+       If (EVAC_DOORS(i)%IMESH == nm) Then
+          If (EVAC_DOORS(i)%TIME_OPEN>EVAC_DOORS(i)%TIME_CLOSE) Then
+             imode_old=EVAC_DOORS(i)%IMODE
+             If (Tin>EVAC_DOORS(i)%TIME_CLOSE .And. Tin<EVAC_DOORS(i)%TIME_OPEN .And. imode_old==-1) EVAC_DOORS(i)%IMODE=+2
+             If (Tin>=EVAC_DOORS(i)%TIME_OPEN .And. imode_old==-2) EVAC_DOORS(i)%IMODE=+1
+          Else
+             imode_old=EVAC_DOORS(i)%IMODE
+             If (Tin>EVAC_DOORS(i)%TIME_OPEN .And. Tin<EVAC_DOORS(i)%TIME_CLOSE .And. imode_old==-2) EVAC_DOORS(i)%IMODE=+1
+             If (Tin>=EVAC_DOORS(i)%TIME_CLOSE .And. imode_old==-1) EVAC_DOORS(i)%IMODE=+2
+          End If
+       End If
+    End Do
+    Do i = 1, n_exits
+       If (EVAC_EXITS(i)%IMESH == nm .And. .Not.EVAC_EXITS(i)%COUNT_ONLY) Then
+          If (EVAC_EXITS(i)%TIME_OPEN>EVAC_EXITS(i)%TIME_CLOSE) Then
+             imode_old=EVAC_EXITS(i)%IMODE
+             If (Tin>EVAC_EXITS(i)%TIME_CLOSE .And. Tin<EVAC_EXITS(i)%TIME_OPEN .And. imode_old==-1) EVAC_EXITS(i)%IMODE=+2
+             If (Tin>=EVAC_EXITS(i)%TIME_OPEN .And. imode_old==-2) EVAC_EXITS(i)%IMODE=+1
+          Else
+             imode_old=EVAC_EXITS(i)%IMODE
+             If (Tin>EVAC_EXITS(i)%TIME_OPEN .And. Tin<EVAC_EXITS(i)%TIME_CLOSE .And. imode_old==-2) EVAC_EXITS(i)%IMODE=+1
+             If (Tin>=EVAC_EXITS(i)%TIME_CLOSE .And. imode_old==-1) EVAC_EXITS(i)%IMODE=+2
+          End If
+       End If
+    End Do
     ! 
     HUMAN_TIME_LOOP: Do While ( Dt_sum < DT )
        ! DT is the fds flow calculation time step.
@@ -5070,14 +5150,13 @@ Contains
        Dt_sum = Dt_sum + DTSP
        T = Tin - DT + Dt_sum     ! Current time for the agents
 
-       ! Initialize some counters etc. for this main evac mesh.
        Do i = 1, n_doors
-          If ( EVAC_DOORS(i)%IMESH == nm) Then
+          If (EVAC_DOORS(i)%IMESH == nm) Then
              EVAC_DOORS(i)%NTARGET(1:50) = 0
           End If
        End Do
        Do i = 1, n_exits
-          If ( EVAC_EXITS(i)%IMESH == nm) Then
+          If (EVAC_EXITS(i)%IMESH == nm) Then
              EVAC_EXITS(i)%NTARGET(1:50) = 0
           End If
        End Do
@@ -10245,15 +10324,16 @@ Contains
     Return
   End Subroutine Find_walls
 
-  SUBROUTINE GET_FIRE_CONDITIONS(NOM,I,J,K,fed_indx,soot_dens,gas_temp,rad_flux)
+  SUBROUTINE GET_FIRE_CONDITIONS(NOM,I,J,K,fed_indx,soot_dens,gas_temp,rad_flux, YY_GET)
     Implicit None
     !
     ! Passed variables
     INTEGER, INTENT(IN) :: I, J, K, NOM
     REAL(EB), INTENT(OUT) :: fed_indx, soot_dens, gas_temp, rad_flux
+    REAL(EB), INTENT(INOUT) :: YY_GET(1:N_SPECIES)
     !
     ! Local variables
-    REAL(EB) :: Y_MF_INT,YY_GET(1:N_SPECIES)
+    REAL(EB) :: Y_MF_INT
 
     ! Mass fraction array ==> soot density (mg/m3)
     ! Next is for soot (mg/m3)
@@ -10261,7 +10341,7 @@ Contains
     Call GET_MASS_FRACTION(YY_GET,SOOT_INDEX,Y_MF_INT)
     soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
     ! Calculate Purser's fractional effective dose (FED)
-    fed_indx = FED(MESHES(nom)%YY(I,J,K,:),MESHES(nom)%RSUM(I,J,K))
+    fed_indx = FED(YY_GET,MESHES(nom)%RSUM(I,J,K))
     ! Gas temperature, ind=5, C
     gas_temp  = MESHES(nom)%TMP(I,J,K)
     ! Rad flux, ind=18, kW/m2 (no -sigma*Tamb^4 term)
@@ -10539,13 +10619,15 @@ Contains
     End If
 
     Do i = 1, n_doors
-       If ( EVAC_DOORS(i)%TIME_OPEN > T .Or. EVAC_DOORS(i)%TIME_CLOSE < T) Then
+       ! If ( EVAC_DOORS(i)%TIME_OPEN > T .Or. EVAC_DOORS(i)%TIME_CLOSE < T) Then
+       If ( Abs(EVAC_DOORS(i)%IMODE)==2) Then
           Is_Visible_Door(i) = .False.
           Is_Known_Door(i) = .False.
        End If
     End Do
     Do i = 1, n_exits
-       If ( (EVAC_EXITS(i)%TIME_OPEN > T .Or. EVAC_EXITS(i)%TIME_CLOSE < T) .And. .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
+       ! If ( (EVAC_EXITS(i)%TIME_OPEN > T .Or. EVAC_EXITS(i)%TIME_CLOSE < T) .And. .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
+       If ( (Abs(EVAC_EXITS(i)%IMODE)==2) .And. .Not. EVAC_EXITS(i)%COUNT_ONLY ) Then
           Is_Visible_Door(n_doors+i) = .False.
           Is_Known_Door(n_doors+i) = .False.
        End If
