@@ -174,7 +174,7 @@ DEVICEDEF
 push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 3.0 3.0 getuservals 0.0 0.0 1.0 setcolor 1.0 drawcube pop // front half of door (user specified color)
 push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 0.0 0.0 1.0 setcolor 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
  NEWFRAME
- 0.001 0.001 0.001 scale 1.0 drawcube // state 1, door disapears
+ 0.001 0.001 0.001 scalexyz 1.0 drawcube // state 1, door disappears
    
    // ************ avatar definitions ********************
 
