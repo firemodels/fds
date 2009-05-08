@@ -139,7 +139,7 @@ mpi_intel_linux_64 : CCOMPL = icc
 mpi_intel_linux_64 : obj = fds5_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
-	
+
 intel_linux_32_db : FFLAGS = -m32 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0
 intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend -vec_report0
 intel_linux_32_db : FCOMPL = ifort
@@ -147,7 +147,7 @@ intel_linux_32_db : CCOMPL = icc
 intel_linux_32_db : obj = fds5_intel_linux_32_db
 intel_linux_32_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-	
+
 intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0
 intel_linux_64_db : CFLAGS = -m64 -Dpp_noappend -vec_report0
 intel_linux_64_db : FCOMPL = ifort
@@ -270,7 +270,7 @@ ibm_osx_ppc : CCOMPL = gcc
 ibm_osx_ppc : obj = fds5_osx_ppc_ibm
 ibm_osx_ppc : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-	
+
 #*** Lahey Compiler ***
 
 lahey_linux : FFLAGS = -O --tpp --staticlink --nap --nchk --npca --nsav --ntrace
@@ -280,7 +280,7 @@ lahey_linux : CCOMPL = gcc
 lahey_linux : obj = fds5_lahey
 lahey_linux : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-	
+
 lahey_linux_db : FFLAGS = --swm 3909 --wo --tpp --chk --f95 -g --warn --staticlink
 lahey_linux_db : CFLAGS = -O
 lahey_linux_db : FCOMPL = lf95
@@ -288,7 +288,7 @@ lahey_linux_db : CCOMPL = gcc
 lahey_linux_db : obj = fds5_lahey_db
 lahey_linux_db : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-	
+
 lahey_linux_mpi : FFLAGS = -O --tpp --staticlink --nap --nchk --npca --nsav --ntrace
 lahey_linux_mpi : CFLAGS = -O
 lahey_linux_mpi : FCOMPL = hf77
@@ -297,7 +297,7 @@ lahey_linux_mpi : INCLUDEDIR = /usr/local/include
 lahey_linux_mpi : obj = fds5_mpi_lahey
 lahey_linux_mpi : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
-	
+
 #*** Sun Solaris 10 f95 Compiler ***
 
 f95_solaris10 : FFLAGS   = -O2 -m64 -Bstatic
@@ -307,7 +307,7 @@ f95_solaris10 : CCOMPL   = cc
 f95_solaris10 : obj = fds5_solaris
 f95_solaris10 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-	
+
 f95_solaris10_mpi : INC_FLAGS = -I$(OPT)/SUNWhpc/HPC7.0/include/amd64
 f95_solaris10_mpi : LIB_FLAGS = -Bstatic -lfui -Bdynamic -L$(OPT)/SUNWspro/prod/lib/amd64 -L$(OPT)/SUNWhpc/HPC7.0/lib/amd64
 f95_solaris10_mpi : FFLAGS = -m64 $(INC_FLAGS)
@@ -422,9 +422,9 @@ evac.o : evac.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 ieva.f90
 pres.o : pres.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 pois.f90
 part.o : part.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
 vege.o : vege.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
-read.o : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90
+read.o : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 evac.f90
 init.o : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 pois.f90
-dump.o : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c 
+dump.o : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 evac.f90 smvv.f90 isob.c 
 main.o : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
 main_mpi.o : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
 
@@ -451,9 +451,9 @@ evac.obj : evac.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 ieva.f90
 pres.obj : pres.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 pois.f90
 part.obj : part.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
 vege.obj : vege.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
-read.obj : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90
+read.obj : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 evac.f90
 init.obj : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 pois.f90
-dump.obj : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c 
+dump.obj : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 evac.f90 smvv.f90 isob.c 
 main.obj : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
 main_mpi.obj : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
 
