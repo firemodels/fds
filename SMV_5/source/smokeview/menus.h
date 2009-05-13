@@ -5657,7 +5657,7 @@ static int in_menu=0;
   glutAddMenuEntry("NUMBER",10000);
   glutAddMenuEntry("One Frame",RenderOnce);
   if(RenderTime==1||touring==1){
-    if(render_double_state==0){
+   // if(render_double_state==0){
     glutAddMenuEntry("All Frames",1);
     glutAddMenuEntry("Every 2nd Frame",2);
     glutAddMenuEntry("Every 3rd Frame",3);
@@ -5666,7 +5666,7 @@ static int in_menu=0;
     glutAddMenuEntry("Every 10th Frame",10);
     glutAddMenuEntry("Every 20th Frame",20);
     glutAddMenuEntry("Cancel",RenderCancel);
-    }
+   // }
   }
    }
 
