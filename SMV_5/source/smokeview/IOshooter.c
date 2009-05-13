@@ -82,20 +82,26 @@ void get_shooter_vel(float *uvw, float *xyz){
 void increment_shooter_data(float dt){
   int i;
   float *xyz, *uvw, uvw_air[3];
-  float g=-9.8;
+  float g=9.8;
   
   // dv/dt = g - |g|(v-v_a)/v_inf
   // dx/dt = v
 
   shooter_time+=dt;
   for(i=0;i<shooter_nparts;i++){
+    float dvel[3];
+
     xyz = shootpointinfo[i].xyz;
     uvw = shootpointinfo[i].uvw;
     get_shooter_vel(uvw_air,xyz);
 
-    uvw[0] += dt*(-abs(g)*(uvw[0]-uvw_air[0])/shooter_v_inf);
-    uvw[1] += dt*(-abs(g)*(uvw[1]-uvw_air[1])/shooter_v_inf);
-    uvw[2] += dt*(g-abs(g)*(uvw[2]-uvw_air[2])/shooter_v_inf);
+    dvel[0] = uvw[0]-uvw_air[0];
+    dvel[1] = uvw[1]-uvw_air[1];
+    dvel[2] = uvw[2]-uvw_air[2];
+
+    uvw[0] -= g*dt*(    dvel[0]/shooter_v_inf);
+    uvw[1] -= g*dt*(    dvel[1]/shooter_v_inf);
+    uvw[2] -= g*dt*(1.0+dvel[2]/shooter_v_inf);
 
     xyz[0] += dt*uvw[0];
     xyz[1] += dt*uvw[1];
