@@ -129,7 +129,15 @@ DEVICEDEF
  0.0 0.0 1.0 setcolor
  push 0.0 0.0 0.015 translate 0.015 drawsphere pop
  pop
+DEVICEDEF // device for tree trunk
+ CYLINDER
+ 0.55 0.27 0.07 setcolor
+ 0.0 1.0 2.0 putuservals2stack 0.0 0.0 1.0 translate 1.0 2.0 getuservals 1.0 3.0 drawdisk
 DEVICEDEF
+ CONE
+ 0.0 1.0 0.0 setcolor
+ 0.0 1.0 2.0 putuservals2stack 0.0 0.0 1.0 translate 1.0 2.0 getuservals 1.0 3.0 drawcone
+DEVICEDEF // device for tree canopy
  smoke_detector
  0.8 0.8 0.8 setcolor
  push 0.0 0.0 -0.025 translate 0.127 0.05 drawdisk pop
