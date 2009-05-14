@@ -27,6 +27,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_SCALE      105
 #define SV_GETUSERVALS    106
 #define SV_PUTUSERVALS2STACK 107
+#define SV_OFFSETZ 108
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -36,6 +37,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_SCALE_NUMARGS      1
 #define SV_GETUSERVALS_NUMARGS   2
 #define SV_PUTUSERVALS2STACK_NUMARGS   3
+#define SV_OFFSETZ_NUMARGS 1
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -537,7 +539,7 @@ void draw_SVOBJECT(sv_object *object, int iframe){
         stackskip=arg[2]+0.5;
         if(iarg+2+nargs<=framei->nargs&&iargstart+nargs<SIZE_VALSTACK){
           for(i=0;i<nargs;i++){
-            arg[2+i+stackskip]=valstack[iargstart+i];
+            arg[3+i+stackskip]=valstack[iargstart+i];
           }
         }
       }
@@ -596,6 +598,10 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     case SV_TRANSLATE:
       if(op_skip==0&&iarg+SV_TRANSLATE_NUMARGS<=framei->nargs)glTranslatef(arg[0],arg[1],arg[2]);
       iarg+=3;
+      break;
+    case SV_OFFSETZ:
+      if(op_skip==0&&iarg+SV_OFFSETZ_NUMARGS<=framei->nargs)glTranslatef(0.0,0.0,arg[0]);
+      iarg++;
       break;
     case SV_ROTATEX:
       if(op_skip==0&&iarg+SV_ROTATEX_NUMARGS<=framei->nargs)glRotatef(arg[0],1.0,0.0,0.0);
@@ -1506,6 +1512,10 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
       if(strcmp(token,"translate")==0){
         iop=SV_TRANSLATE;
         reporterror(buffer_save,token,numargs,SV_TRANSLATE_NUMARGS);
+      }
+      else if(strcmp(token,"offsetz")==0){
+        iop=SV_OFFSETZ;
+        reporterror(buffer_save,token,numargs,SV_OFFSETZ_NUMARGS);
       }
       else if(strcmp(token,"rotatex")==0){
         iop=SV_ROTATEX;
