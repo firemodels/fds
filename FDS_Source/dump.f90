@@ -981,6 +981,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:) :: XLEVEL,YLEVEL,ZLEVEL
 CHARACTER(80) PROCESS_FN_SMV
 LOGICAL :: EX
 CHARACTER(100) :: MESSAGE
+REAL(EB) :: CROWN_HEIGHT
 
 ! If this is an MPI job and this is not the master node, open the .smv file only if this is not a RESTART case
 
@@ -1371,6 +1372,29 @@ DO N=1,N_DEVC
    WRITE(LU_SMV,'(/A)') 'DEVICE'
    WRITE(LU_SMV,'(A)') TRIM(PROPERTY(DV%PROP_INDEX)%SMOKEVIEW_ID)
    WRITE(LU_SMV,'(6F12.5)') DV%X,DV%Y,DV%Z,DV%ORIENTATION(1:3)
+ENDDO
+
+! Write out TREE info as a series of devices to .smv file
+
+! available information:
+!   VEG_FUEL_GEOM(N)  = FUEL_GEOM
+!   CROWN_W(N)        = CROWN_WIDTH
+!   CROWN_W_BOTTOM(N) = CROWN_WIDTH_BOTTOM
+!   CROWN_W_TOP(N)    = CROWN_WIDTH_TOP
+!   CROWN_B_H(N)      = CROWN_BASE_HEIGHT
+!   TREE_H(N)         = TREE_HEIGHT
+!   X_TREE(N) = XYZ(1)
+!   Y_TREE(N) = XYZ(2)
+!   Z_TREE(N) = XYZ(3)
+
+DO N=1,N_TREES
+   IF (VEG_FUEL_GEOM(N) == 'CONE' .OR. VEG_FUEL_GEOM(N) == 'CYLINDER') THEN
+      WRITE(LU_SMV,'(/A)') 'DEVICE'
+      WRITE(LU_SMV,'(A)') TRIM(VEG_FUEL_GEOM(N))
+      WRITE(LU_SMV,'(6F12.5,1x,I3,1x,I5)') X_TREE(N), Y_TREE(N), Z_TREE(N),0.0,0.0,-1.0,0,3
+      CROWN_HEIGHT = TREE_H(N)-CROWN_B_H(N)
+      WRITE(LU_SMV,'(3F12.5)') CROWN_B_H(N), CROWN_W(N), CROWN_HEIGHT
+   ENDIF
 ENDDO
 
 ! Write out EVACUATION DEVICE info to .smv file (EXIT and DOOR)
