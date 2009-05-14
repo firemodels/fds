@@ -1312,6 +1312,11 @@ object.
 orientation. (see above comment about number of {\tt push}\ and
 {\tt pop}\ commands).
 
+\hitem{PUTUSERVALS2STACK} The command, {\tt offset nvals stackskip getuservals}, copies {\tt nvals}\ values
+from an internal Smokeview array (starting at array index {\tt offset})
+to the device operand stack at offset {\tt stackskip}.  This allows one to modify
+the look of a device at run-time. This command is slightly more general {\tt GETUSERVALS} allowing one to place operands anywhere on the operand stack.
+
 \hitem{ROTATEX} The command, {\tt r rotatex}, rotates objects
 drawn afterwards {\tt r} degrees about the x axis.
 
