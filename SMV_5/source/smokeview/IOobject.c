@@ -26,6 +26,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_SCALEXYZ   104
 #define SV_SCALE      105
 #define SV_GETUSERVALS    106
+#define SV_PUTUSERVALS2STACK 107
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -34,6 +35,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_SCALEXYZ_NUMARGS   3
 #define SV_SCALE_NUMARGS      1
 #define SV_GETUSERVALS_NUMARGS   2
+#define SV_PUTUSERVALS2STACK_NUMARGS   3
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -526,6 +528,21 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     arg = framei->args + iarg;
     op = framei->ops + iop;
     switch (*op){
+    case SV_PUTUSERVALS2STACK:
+      if(op_skip==0&&iarg+SV_PUTUSERVALS2STACK_NUMARGS<=framei->nargs){
+        int i, nargs, iargstart, stackskip;
+
+        iargstart=arg[0]+0.5;
+        nargs=arg[1]+0.5;
+        stackskip=arg[2]+0.5;
+        if(iarg+2+nargs<=framei->nargs&&iargstart+nargs<SIZE_VALSTACK){
+          for(i=0;i<nargs;i++){
+            arg[2+i+stackskip]=valstack[iargstart+i];
+          }
+        }
+      }
+      iarg+=3;
+      break;
     case SV_GETUSERVALS:
       if(op_skip==0&&iarg+SV_GETUSERVALS_NUMARGS<=framei->nargs){
         int i, nargs, iargstart;
@@ -1606,6 +1623,11 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
         iop=SV_GETUSERVALS;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_GETUSERVALS_NUMARGS);
+      }
+      else if(strcmp(token,"putuservals2stack")==0){
+        iop=SV_PUTUSERVALS2STACK;
+        *use_displaylist=0;
+        reporterror(buffer_save,token,numargs,SV_PUTUSERVALS2STACK_NUMARGS);
       }
       else{
         iop=SV_ERR;
