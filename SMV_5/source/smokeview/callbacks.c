@@ -213,6 +213,53 @@ void mouse_edit_blockage(int button, int state, int x, int y){
   }
 }
 
+/* ------------------ mouse_select_device ------------------------ */
+
+void mouse_select_device(int button, int state, int x, int y){
+  int val;
+  int mouse_x, mouse_y;
+  GLubyte r, g, b;
+
+  mouse_x=x; mouse_y=screenHeight-y;
+  glDisable(GL_BLEND);
+  glDisable(GL_DITHER);
+  glDisable(GL_FOG);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_TEXTURE_1D);
+  glDisable(GL_TEXTURE_2D);
+  glShadeModel(GL_FLAT);
+
+  ShowScene(SELECT,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
+  glReadBuffer(GL_BACK);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_RED,   GL_UNSIGNED_BYTE, &r);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_GREEN, GL_UNSIGNED_BYTE, &g);
+  glReadPixels(mouse_x,mouse_y,1,1,GL_BLUE,  GL_UNSIGNED_BYTE, &b);
+
+  r = r>>nredshift;
+  g = g>>ngreenshift;
+  b = b>>nblueshift;
+
+  val = (r << (nbluebits+ngreenbits)) | (g << nbluebits) | b;
+  
+  if(val>0){
+    device *devicei;
+    float *xyz;
+
+    selected_device_tag=val;
+    devicei = deviceinfo + val-1;
+    xyz = devicei->xyz;
+
+    if(devicei->labelptr!=NULL){
+      printf("Selected Device: index=%i x=%f y=%f z=%f label=%s\n",val,xyz[0],xyz[1],xyz[2],devicei->labelptr);
+    }
+    else{
+      printf("Selected Device: index=%i x=%f y=%f z=%f label=null\n",val,xyz[0],xyz[1],xyz[2]);
+    }
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_BLEND);
+    glEnable(GL_LIGHTING);
+  }
+}
 
 /* ------------------ select_avatar ------------------------ */
 
@@ -299,6 +346,10 @@ void mouse(int button, int state, int x, int y){
 
     if(select_avatar==1){
       mouse_select_avatar(button, state, x, y);
+    }
+
+    if(select_device==1){
+      mouse_select_device(button, state, x, y);
     }
     GLUTPOSTREDISPLAY
     if( showtime==1 || showplot3d==1){

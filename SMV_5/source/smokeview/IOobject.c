@@ -380,10 +380,33 @@ void draw_devices(void){
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
   for(i=0;i<ndeviceinfo;i++){
+    int tagval;
+
     devicei = deviceinfo + i;
 
     if(devicei->object->visible==0)continue;
     if(isZoneFireModel==1&&strcmp(devicei->object->label,"target")==0&&visSensor==0)continue;
+
+    tagval=i+1;
+    if(select_device==1&&show_mode==SELECT){
+
+      select_device_color[0]=tagval>>(ngreenbits+nbluebits);
+      select_device_color[1]=tagval>>nbluebits;
+      select_device_color[2]=tagval&rgbmask[nbluebits-1];
+      select_device_color_ptr=select_device_color;
+    }
+    else{
+      if(selected_device_tag>0&&select_device==1&&selected_device_tag==tagval){
+        select_device_color_ptr=select_device_color;
+        select_device_color[0]=255;
+        select_device_color[1]=0;
+        select_device_color[2]=0;
+      }
+      else{
+        select_device_color_ptr=NULL;
+      }
+    }
+
     xyz = devicei->xyz;
     glPushMatrix();
     glTranslatef(xyz[0],xyz[1],xyz[2]);
@@ -514,7 +537,7 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     }
   }
 
-  if(select_avatar_color_ptr==NULL){
+  if(select_device_color_ptr==NULL){
     glEnable(GL_LIGHTING);
 
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -525,11 +548,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
   }
 
   while(iop<framei->nops){
-    if(select_avatar_color_ptr==NULL){
+    if(select_device_color_ptr==NULL){
       rgbptr=rgbcolor;
     }
     else{
-      rgbptr=select_avatar_color_ptr;
+      rgbptr=select_device_color_ptr;
     }
     arg = framei->args + iarg;
     op = framei->ops + iop;
@@ -716,11 +739,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
           rgbcolor[2]=255*arg[2];
           rgbcolor[3]=255;
         }
-        if(select_avatar_color_ptr==NULL){
+        if(select_device_color_ptr==NULL){
           rgbptr=rgbcolor;
         }
         else{
-          rgbptr=select_avatar_color_ptr;
+          rgbptr=select_device_color_ptr;
         }
       }
       iarg+=3;
@@ -743,11 +766,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
         rgbcolor[1]=255*arg[0];
         rgbcolor[2]=255*arg[0];
         rgbcolor[3]=255;
-        if(select_avatar_color_ptr==NULL){
+        if(select_device_color_ptr==NULL){
           rgbptr=rgbcolor;
         }
         else{
-          rgbptr=select_avatar_color_ptr;
+          rgbptr=select_device_color_ptr;
         }
       }
       iarg+=1;
@@ -774,7 +797,7 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     iop++;
     if(op_skip>0)op_skip--;
   }
-  if(select_avatar_color==NULL){
+  if(select_device_color==NULL){
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
@@ -2202,7 +2225,11 @@ float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2
 
 /* ----------------------- init_device ----------------------------- */
 
-void init_device(device *devicei, float *xyz, float *xyzn, int state0, int nparams, float *params){
+void init_device(device *devicei, float *xyz, float *xyzn, int state0, int nparams, float *params, char *labelptr){
+  devicei->labelptr=labelptr;
+  if(labelptr!=NULL){
+    strcpy(devicei->label,labelptr);
+  }
   if(xyz!=NULL){
     devicei->xyz[0]=xyz[0];
     devicei->xyz[1]=xyz[1];

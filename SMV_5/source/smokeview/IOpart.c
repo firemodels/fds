@@ -1463,28 +1463,28 @@ void drawPart5(const particle *parti){
                 int tagval;
 
                 avatar_types[avatar_type]->select_mode=1;
-                select_avatar_color_ptr=select_avatar_color;
+                select_device_color_ptr=select_device_color;
                 tagval=datacopy->tags[j];
-                select_avatar_color[0]=tagval>>(ngreenbits+nbluebits);
-                select_avatar_color[1]=tagval>>nbluebits;
-                select_avatar_color[2]=tagval&rgbmask[nbluebits-1];
+                select_device_color[0]=tagval>>(ngreenbits+nbluebits);
+                select_device_color[1]=tagval>>nbluebits;
+                select_device_color[2]=tagval&rgbmask[nbluebits-1];
                 avatar_types[avatar_type]->use_displaylist=0;
               }
               else{
                 if(selected_avatar_tag>0&&select_avatar==1&&datacopy->tags[j]==selected_avatar_tag){
-                  select_avatar_color_ptr=select_avatar_color;
-                  select_avatar_color[0]=255;
-                  select_avatar_color[1]=0;
-                  select_avatar_color[2]=0;
+                  select_device_color_ptr=select_device_color;
+                  select_device_color[0]=255;
+                  select_device_color[1]=0;
+                  select_device_color[2]=0;
                   avatar_types[avatar_type]->use_displaylist=0;
                 }
                 else{
-                  select_avatar_color_ptr=NULL;
+                  select_device_color_ptr=NULL;
                   avatar_types[avatar_type]->select_mode=0;
                 }
               }
               draw_SVOBJECT(avatar_types[avatar_type],0);
-              select_avatar_color_ptr=NULL;
+              select_device_color_ptr=NULL;
               avatar_types[avatar_type]->use_displaylist=save_use_displaylist;
               glPopMatrix();
             }

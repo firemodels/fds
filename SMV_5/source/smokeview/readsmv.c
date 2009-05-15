@@ -3654,7 +3654,7 @@ typedef struct {
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
-          init_device(devicecopy,xyz,xyznorm,0,0,NULL);
+          init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
 
           devicecopy++;
           ndeviceinfo++;
@@ -3706,6 +3706,7 @@ typedef struct {
       float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
       int state0=0;
       int nparams=0;
+      char *labelptr;
 
       devicei = deviceinfo + ndeviceinfo;
       devicei->type=DEVICE_DEVICE;
@@ -3720,8 +3721,23 @@ typedef struct {
       sscanf(buffer,"%f %f %f %f %f %f %i %i",
         xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams);
 
+      labelptr=strchr(buffer,'%');
+      if(labelptr!=NULL){
+        trim(labelptr);
+        if(strlen(labelptr)>1){
+          labelptr++;
+        }
+        else{
+          labelptr=NULL;
+        }
+      }
+      devicei->labelptr=labelptr;
+      if(labelptr!=NULL){
+        strcpy(devicei->label,labelptr);
+      }
+
       if(nparams<=0){
-        init_device(devicei,xyz,xyzn,state0,0,NULL);
+        init_device(devicei,xyz,xyzn,state0,0,NULL,NULL);
       }
       else{
         float *params,*pc;
@@ -3735,7 +3751,7 @@ typedef struct {
           sscanf(buffer,"%f %f %f %f %f %f",pc,pc+1,pc+2,pc+3,pc+4,pc+5);
           pc+=6;
         }
-        init_device(devicei,xyz,xyzn,state0,nparams,params);
+        init_device(devicei,xyz,xyzn,state0,nparams,params,NULL);
       }
       get_elevaz(devicei->xyznorm,&devicei->angle_elev,&devicei->angle_az);
 
@@ -3824,7 +3840,7 @@ typedef struct {
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
-          init_device(devicecopy,NULL,xyznorm,0,0,NULL);
+          init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
 
           devicecopy++;
           ndeviceinfo++;
@@ -3944,7 +3960,7 @@ typedef struct {
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
 
-          init_device(devicecopy,NULL,xyznorm,0,0,NULL);
+          init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
 
           devicecopy++;
           ndeviceinfo++;
@@ -4047,7 +4063,7 @@ typedef struct {
         }
         get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
-        init_device(devicecopy,xyz,xyznorm,0,0,NULL);
+        init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
 
         devicecopy++;
         ndeviceinfo++;
