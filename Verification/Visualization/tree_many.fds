@@ -1,4 +1,4 @@
-&HEAD CHID='tree_many', TITLE='Many trees SVN $Revision: 2954 $' /
+&HEAD CHID='tree_many', TITLE='Many trees SVN $Revision$' /
 
 This input file is for use with the fuel element model.
 
