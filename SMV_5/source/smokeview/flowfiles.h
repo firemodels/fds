@@ -597,6 +597,7 @@ typedef struct _sv_object {
 typedef struct {
   int active;
   int screenijk[3], visval;
+  char label[30], *labelptr;
   mesh *device_mesh;
   float xyz[3], eyedist;
   float val;
