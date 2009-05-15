@@ -3597,6 +3597,9 @@ void ShowDevicesMenu(int value){
       objecti->visible=0;
     }
   }
+  else if(value==-3){
+    select_device=1-select_device;
+  }
   updatemenu=1;
   GLUTPOSTREDISPLAY
 }
@@ -4643,6 +4646,14 @@ static int in_menu=0;
       }
     }
     glutAddMenuEntry("-",-999);
+    if(ndeviceinfo>0){
+    if(select_device==1){
+      glutAddMenuEntry("*Select",-3);
+    }
+    else{
+      glutAddMenuEntry("Select",-3);
+    }
+    }
     glutAddMenuEntry("Show All",-1);
     glutAddMenuEntry("Hide All",-2);
   }
@@ -5701,8 +5712,8 @@ static int in_menu=0;
   if(showmotion==1)glutAddMenuEntry("*Motion/View...  ALT+m",15);
   if(showmotion==0)glutAddMenuEntry("Motion/View...  ALT+m",15);
 #ifdef pp_SHOOTER
-  //if(showshooter==1)glutAddMenuEntry("*Particle Shooting...",27);
-  //if(showshooter==0)glutAddMenuEntry("Particle Shooting...",27);
+  if(showshooter==1)glutAddMenuEntry("*Particle Shooting...",27);
+  if(showshooter==0)glutAddMenuEntry("Particle Shooting...",27);
 #endif
   if(nsmoke3d>0){
     if(showbounds==1)glutAddMenuEntry("*Smoke3D Parameters...  ALT+s",20);

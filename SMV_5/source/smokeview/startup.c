@@ -962,10 +962,12 @@ void initvars1(void){
   update_makeiblank_smoke3d=0;
   update_initcull=0;
   sb_atstart=1;
+  select_device=0;
+  selected_device_tag=-1;
   navatar_types=0;
   select_avatar=0;
   selected_avatar_tag=-1;
-  select_avatar_color_ptr=NULL;
+  select_device_color_ptr=NULL;
   avatar_types=NULL;
   navatar_colors=0;
   avatar_colors=NULL;
