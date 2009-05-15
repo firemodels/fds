@@ -3726,18 +3726,16 @@ typedef struct {
         trim(labelptr);
         if(strlen(labelptr)>1){
           labelptr++;
+          labelptr=trim_front(labelptr);
+          if(strlen(labelptr)==0)labelptr=NULL;
         }
         else{
           labelptr=NULL;
         }
       }
-      devicei->labelptr=labelptr;
-      if(labelptr!=NULL){
-        strcpy(devicei->label,labelptr);
-      }
 
       if(nparams<=0){
-        init_device(devicei,xyz,xyzn,state0,0,NULL,NULL);
+        init_device(devicei,xyz,xyzn,state0,0,NULL,labelptr);
       }
       else{
         float *params,*pc;
@@ -3751,7 +3749,7 @@ typedef struct {
           sscanf(buffer,"%f %f %f %f %f %f",pc,pc+1,pc+2,pc+3,pc+4,pc+5);
           pc+=6;
         }
-        init_device(devicei,xyz,xyzn,state0,nparams,params,NULL);
+        init_device(devicei,xyz,xyzn,state0,nparams,params,labelptr);
       }
       get_elevaz(devicei->xyznorm,&devicei->angle_elev,&devicei->angle_az);
 
