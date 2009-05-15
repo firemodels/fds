@@ -40,7 +40,8 @@ SELECT CASE(FUNCTION_CODE)
       IF (PREDICTOR .OR. COMPUTE_VISCOSITY_TWICE) CALL VISCOSITY_BC(NM)
       IF (.NOT.CYLINDRICAL) CALL VELOCITY_FLUX(T,NM)
       IF (     CYLINDRICAL) CALL VELOCITY_FLUX_CYLINDRICAL(T,NM)
-      !CALL VELOCITY_FLUX_CONSERVATIVE ! experimental, currently only works for NMESHES=1
+      !CALL VELOCITY_FLUX_ADVECTIVE(NM)     ! experimental
+      !CALL VELOCITY_FLUX_CONSERVATIVE(NM)  ! experimental
 END SELECT
 
 TUSED(4,NM) = TUSED(4,NM) + SECOND() - TNOW
@@ -510,12 +511,11 @@ CALL NO_FLUX
 END SUBROUTINE VELOCITY_FLUX
 
 
-
-SUBROUTINE VELOCITY_FLUX_CONSERVATIVE !! RJM
+SUBROUTINE VELOCITY_FLUX_CONSERVATIVE(NM) !! RJM
  
-! Compute RHS of momentum equation in conservative form for periodic bcs
+! Compute RHS of momentum equation in conservative form
 
-REAL(EB) :: MUX,MUY,MUZ,RHOX,RHOY,RHOZ,DIVV, &
+REAL(EB) :: MUX,MUY,MUZ,RRHO,RHOX,RHOY,RHOZ,DDP, &
             UUP,VVP,WWP,UUN,UUT,VVE,VVT,WWE,WWN, &
             DUDX,DUDY,DUDZ, &
             DVDX,DVDY,DVDZ, &
@@ -523,7 +523,6 @@ REAL(EB) :: MUX,MUY,MUZ,RHOX,RHOY,RHOZ,DIVV, &
 INTEGER :: I,J,K,IP1,JP1,KP1,IM1,JM1,KM1,NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,TXX,TYY,TZZ,TXY,TXZ,TYZ
 
-NM = 1 ! periodic bcs only work for a single mesh
 CALL POINT_TO_MESH(NM)
  
 IF (PREDICTOR) THEN
@@ -552,29 +551,48 @@ TXY = 0._EB
 TXZ = 0._EB
 TYZ = 0._EB
 
-! Compute stress tensor components
+! Compute interior diagonal stress tensor components
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
       
-         IP1 = I+1
-         JP1 = J+1
-         KP1 = K+1
-         IF (IP1>IBAR) IP1=IP1-IBAR
-         IF (JP1>JBAR) JP1=JP1-JBAR
-         IF (KP1>KBAR) KP1=KP1-KBAR
-         
          IM1 = I-1
          JM1 = J-1
          KM1 = K-1
-         IF (IM1<1) IM1=IM1+IBAR
-         IF (JM1<1) JM1=JM1+JBAR
-         IF (KM1<1) KM1=KM1+KBAR
          
-         ! average face velocities for advective terms
+         ! diagonal components of velocity gradient tensor
+         DUDX = RDX(I)*(UU(I,J,K)-UU(IM1,J,K))
+         DVDY = RDY(J)*(VV(I,J,K)-VV(I,JM1,K))
+         DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,KM1))
+         
+         ! interpolate staggered velocity components to pcell center
          UUP = 0.5_EB*(UU(IM1,J,K)+UU(I,J,K))
          VVP = 0.5_EB*(VV(I,JM1,K)+VV(I,J,K))
-         WWP = 0.5_EB*(WW(I,J,KM1)+WW(I,J,K))        
+         WWP = 0.5_EB*(WW(I,J,KM1)+WW(I,J,K))
+         
+         ! divergence about the pcell
+         DDP = DUDX+DVDY+DWDZ
+         
+         ! component-normal advective and viscous flux
+         ! stored at cell center
+         TXX(I,J,K) = RHOP(I,J,K)*UUP*UUP - 2._EB*MU(I,J,K)*(DUDX-ONTH*DDP)
+         TYY(I,J,K) = RHOP(I,J,K)*VVP*VVP - 2._EB*MU(I,J,K)*(DVDY-ONTH*DDP)
+         TZZ(I,J,K) = RHOP(I,J,K)*WWP*WWP - 2._EB*MU(I,J,K)*(DWDZ-ONTH*DDP)
+         
+      ENDDO
+   ENDDO
+ENDDO
+
+! Compute interior off-diagonal stress tensor components
+DO K=1,KBM1
+   DO J=1,JBM1
+      DO I=1,IBM1
+      
+         IP1 = I+1
+         JP1 = J+1
+         KP1 = K+1
+
+         ! average face velocities for advective terms
          UUN = 0.5_EB*(UU(I,J,K)+UU(I,JP1,K))
          UUT = 0.5_EB*(UU(I,J,K)+UU(I,J,KP1))
          VVE = 0.5_EB*(VV(I,J,K)+VV(IP1,J,K))
@@ -583,9 +601,6 @@ DO K=1,KBAR
          WWN = 0.5_EB*(WW(I,J,K)+WW(I,JP1,K))
          
          ! velocity gradient tensor
-         DUDX = RDX(I)*(UU(I,J,K)-UU(IM1,J,K))
-         DVDY = RDY(J)*(VV(I,J,K)-VV(I,JM1,K))
-         DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,KM1))
          DUDY = RDYN(J)*(UU(I,JP1,K)-UU(I,J,K))
          DUDZ = RDZN(K)*(UU(I,J,KP1)-UU(I,J,K))
          DVDX = RDXN(I)*(VV(IP1,J,K)-VV(I,J,K))
@@ -603,15 +618,6 @@ DO K=1,KBAR
          RHOY = 0.25_EB*(RHOP(IP1,J,K)+RHOP(I,J,K)+RHOP(I,J,KP1)+RHOP(IP1,J,KP1))
          RHOZ = 0.25_EB*(RHOP(IP1,J,K)+RHOP(I,J,K)+RHOP(I,JP1,K)+RHOP(IP1,JP1,K))
          
-         ! divergence
-         DIVV = DUDX+DVDY+DWDZ !! if DIVV\=0, there is a problem
-         
-         ! component-normal advective and viscous flux
-         ! stored at cell center
-         TXX(I,J,K) = RHOP(I,J,K)*UUP*UUP - 2._EB*MU(I,J,K)*(DUDX-ONTH*DIVV)
-         TYY(I,J,K) = RHOP(I,J,K)*VVP*VVP - 2._EB*MU(I,J,K)*(DVDY-ONTH*DIVV)
-         TZZ(I,J,K) = RHOP(I,J,K)*WWP*WWP - 2._EB*MU(I,J,K)*(DWDZ-ONTH*DIVV)
-         
          ! off-diagonal tensor components
          ! stored at cell vertices
          TXY(I,J,K) = RHOZ*UUN*VVE - MUZ*(DUDY + DVDX)
@@ -621,49 +627,289 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-! Compute force term
+! Compute force term in x
 DO K=1,KBAR
    DO J=1,JBAR
-      DO I=1,IBAR
-         
+      DO I=0,IBAR
+      
          IP1 = I+1
-         JP1 = J+1
-         KP1 = K+1
-         IF (IP1>IBAR) IP1=IP1-IBAR
-         IF (JP1>JBAR) JP1=JP1-JBAR
-         IF (KP1>KBAR) KP1=KP1-KBAR
-         
-         IM1 = I-1
          JM1 = J-1
          KM1 = K-1
-         IF (IM1<1) IM1=IM1+IBAR
-         IF (JM1<1) JM1=JM1+JBAR
-         IF (KM1<1) KM1=KM1+KBAR
       
-         FVX(I,J,K) = ( RDXN(I)*(TXX(IP1,J,K)-TXX(I,J,K)) &
-                      + RDY(J) *(TXY(I,J,K)-TXY(I,JM1,K)) &
-                      + RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,KM1)) )/RHOP(I,J,K)
-                    
-         FVY(I,J,K) = ( RDX(I) *(TXY(I,J,K)-TXY(IM1,J,K)) &
-                      + RDYN(J)*(TYY(I,JP1,K)-TYY(I,J,K)) &
-                      + RDZ(K) *(TYZ(I,J,K)-TYZ(I,J,KM1)) )/RHOP(I,J,K)
-                    
-         FVZ(I,J,K) = ( RDX(I) *(TXZ(I,J,K)-TXZ(IM1,J,K)) &
-                      + RDY(J) *(TYZ(I,J,K)-TYZ(I,JM1,K)) &
-                      + RDZN(K)*(TZZ(I,J,KP1)-TZZ(I,J,K)) )/RHOP(I,J,K)
+         RRHO = 2._EB/( RHOP(I,J,K) + RHOP(IP1,J,K) )
+      
+         FVX(I,J,K) = RRHO*( RDXN(I)*(TXX(IP1,J,K)-TXX(I,J,K)) &
+                           + RDY(J) *(TXY(I,J,K)-TXY(I,JM1,K)) &
+                           + RDZ(K) *(TXZ(I,J,K)-TXZ(I,J,KM1)) &
+                           - FVEC(1)                           )
+      ENDDO
+   ENDDO
+ENDDO
+
+! Compute force term in y
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+      
+         IM1 = I-1
+         JP1 = J+1
+         KM1 = K-1
+      
+         RRHO = 2._EB/( RHOP(I,J,K) + RHOP(I,JP1,K) )
+      
+         FVY(I,J,K) = RRHO*( RDX(I) *(TXY(I,J,K)-TXY(IM1,J,K)) &
+                           + RDYN(J)*(TYY(I,JP1,K)-TYY(I,J,K)) &
+                           + RDZ(K) *(TYZ(I,J,K)-TYZ(I,J,KM1)) &
+                           - FVEC(2)                           )
+      ENDDO
+   ENDDO
+ENDDO
+
+! Compute force term in z
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+      
+         IM1 = I-1
+         JM1 = J-1
+         KP1 = K+1
+      
+         RRHO = 2._EB/( RHOP(I,J,K) + RHOP(I,J,KP1) )
+      
+         FVZ(I,J,K) = RRHO*( RDX(I) *(TXZ(I,J,K)-TXZ(IM1,J,K)) &
+                           + RDY(J) *(TYZ(I,J,K)-TYZ(I,JM1,K)) &
+                           + RDZN(K)*(TZZ(I,J,KP1)-TZZ(I,J,K)) &
+                           - FVEC(3)                           )
       ENDDO
    ENDDO
 ENDDO
 
 ! Baroclinic torque correction
-IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION
+!IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION
 
 ! apply periodicity
-FVX(0,:,:) = FVX(IBAR,:,:)
-FVY(:,0,:) = FVY(:,JBAR,:)
-FVZ(:,:,0) = FVZ(:,:,KBAR)
+!IF (FISHPAK_BC(1)==0) FVX(0,:,:) = FVX(IBAR,:,:)
+!IF (FISHPAK_BC(2)==0) FVY(:,0,:) = FVY(:,JBAR,:)
+!IF (FISHPAK_BC(3)==0) FVZ(:,:,0) = FVZ(:,:,KBAR)
  
 END SUBROUTINE VELOCITY_FLUX_CONSERVATIVE
+
+
+SUBROUTINE VELOCITY_FLUX_ADVECTIVE(NM) !! RJM
+ 
+! Compute RHS of momentum equation in advective form
+
+REAL(EB) :: MUX,MUY,MUZ,RRHO, &
+            DUDX,DUDXM,DUDXP,DUDY,DUDZ, &
+            DVDX,DVDY,DVDYM,DVDYP,DVDZ, &
+            DWDX,DWDY,DWDZ,DWDZM,DWDZP, &
+            TXXM,TXXP,DTXXDX,DTXYDY,DTXZDZ, &
+            TYYM,TYYP,DTXYDX,DTYYDY,DTYZDZ, &
+            TZZM,TZZP,DTXZDX,DTYZDY,DTZZDZ, &
+            TXZP,TXZM,TXYP,TXYM,TYZP,TYZM, &
+            VVX,WWX,UUY,WWY,UUZ,VVZ, &
+            ADVECTIVE_TERM,VISCOUS_TERM
+INTEGER :: I,J,K,NM,IC,IEXP,IEXM,IEYP,IEYM,IEZP,IEZM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,TXY,TXZ,TYZ,DP
+
+CALL POINT_TO_MESH(NM)
+ 
+IF (PREDICTOR) THEN
+   UU => U
+   VV => V
+   WW => W
+   DP => D  
+   RHOP => RHO
+ELSE
+   UU => US
+   VV => VS
+   WW => WS
+   DP => DS
+   RHOP => RHOS
+ENDIF
+
+TXY => WORK1
+TXZ => WORK2
+TYZ => WORK3
+TXY = 0._EB
+TXZ = 0._EB
+TYZ = 0._EB
+
+DO K=0,KBAR
+   DO J=0,JBAR
+      DO I=0,IBAR
+         DUDY = RDYN(J)*(UU(I,J+1,K)-UU(I,J,K))
+         DVDX = RDXN(I)*(VV(I+1,J,K)-VV(I,J,K))
+         DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
+         DWDX = RDXN(I)*(WW(I+1,J,K)-WW(I,J,K))
+         DVDZ = RDZN(K)*(VV(I,J,K+1)-VV(I,J,K))
+         DWDY = RDYN(J)*(WW(I,J+1,K)-WW(I,J,K))
+         MUX = 0.25_EB*(MU(I,J+1,K)+MU(I,J,K)+MU(I,J,K+1)+MU(I,J+1,K+1))
+         MUY = 0.25_EB*(MU(I+1,J,K)+MU(I,J,K)+MU(I,J,K+1)+MU(I+1,J,K+1))
+         MUZ = 0.25_EB*(MU(I+1,J,K)+MU(I,J,K)+MU(I,J+1,K)+MU(I+1,J+1,K))
+         TXY(I,J,K) = MUZ*(DVDX + DUDY)
+         TXZ(I,J,K) = MUY*(DUDZ + DWDX)
+         TYZ(I,J,K) = MUX*(DVDZ + DWDY)
+      ENDDO
+   ENDDO
+ENDDO
+
+! Compute x component force term
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+      
+         TXZP  = TXZ(I,J,K)
+         TXZM  = TXZ(I,J,K-1)
+         TXYP  = TXY(I,J,K)
+         TXYM  = TXY(I,J-1,K)
+         IC    = CELL_INDEX(I,J,K)
+         IEYP  = EDGE_INDEX(IC,8)
+         IEYM  = EDGE_INDEX(IC,6)
+         IEZP  = EDGE_INDEX(IC,12)
+         IEZM  = EDGE_INDEX(IC,10)
+         IF (TAU_E(IEYP,2)>-1.E5_EB) TXZP = TAU_E(IEYP,2)
+         IF (TAU_E(IEYM,1)>-1.E5_EB) TXZM = TAU_E(IEYM,1)
+         IF (TAU_E(IEZP,2)>-1.E5_EB) TXYP = TAU_E(IEZP,2)
+         IF (TAU_E(IEZM,1)>-1.E5_EB) TXYM = TAU_E(IEZM,1)
+         
+         RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))   
+         
+         DVDY  = (VV(I+1,J,K)-VV(I+1,J-1,K))*RDY(J)
+         DWDZ  = (WW(I+1,J,K)-WW(I+1,J,K-1))*RDZ(K)
+         DUDXP = DP(I+1,J,K)-DVDY-DWDZ
+         TXXP  = 2._EB*MU(I+1,J,K)*(DUDXP-ONTH*DP(I+1,J,K))
+         
+         DVDY  = (VV(I,J,K)-VV(I,J-1,K))*RDY(J)
+         DWDZ  = (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
+         DUDXM = DP(I,J,K)-DVDY-DWDZ
+         TXXM  = 2._EB*MU(I,J,K)*(DUDXM-ONTH*DP(I,J,K))
+         
+         DTXXDX= RDXN(I)*(TXXP-TXXM)
+         DTXYDY= RDY(J) *(TXYP-TXYM)
+         DTXZDZ= RDZ(K) *(TXZP-TXZM)
+         VISCOUS_TERM  = RRHO*(DTXXDX + DTXYDY + DTXZDZ)
+         
+         VVX = 0.25_EB*( VV(I,J,K) + VV(I+1,J,K) + VV(I+1,J-1,K) + VV(I,J-1,K) )
+         WWX = 0.25_EB*( WW(I,J,K) + WW(I+1,J,K) + WW(I+1,J,K-1) + WW(I,J,K-1) )
+         
+         DUDX = 0.5_EB*(DUDXM + DUDXP)
+         DUDY = 0.5_EB*RDY(J)*( UU(I,J+1,K)-UU(I,J-1,K) )
+         DUDZ = 0.5_EB*RDZ(K)*( UU(I,J,K+1)-UU(I,J,K-1) )
+         ADVECTIVE_TERM = UU(I,J,K)*DUDX + VVX*DUDY + WWX*DUDZ
+         
+         FVX(I,J,K) = ADVECTIVE_TERM - VISCOUS_TERM - RRHO*FVEC(1)       
+      ENDDO
+   ENDDO
+ENDDO
+
+! Compute y component force term
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+      
+         TYZP  = TYZ(I,J,K)
+         TYZM  = TYZ(I,J,K-1)
+         TXYP  = TXY(I,J,K)
+         TXYM  = TXY(I-1,J,K)
+         IC    = CELL_INDEX(I,J,K)
+         IEXP  = EDGE_INDEX(IC,4)
+         IEXM  = EDGE_INDEX(IC,2)
+         IEZP  = EDGE_INDEX(IC,12)
+         IEZM  = EDGE_INDEX(IC,11)
+         IF (TAU_E(IEXP,2)>-1.E5_EB) TYZP = TAU_E(IEXP,2)
+         IF (TAU_E(IEXM,1)>-1.E5_EB) TYZM = TAU_E(IEXM,1)
+         IF (TAU_E(IEZP,2)>-1.E5_EB) TXYP = TAU_E(IEZP,2)
+         IF (TAU_E(IEZM,1)>-1.E5_EB) TXYM = TAU_E(IEZM,1)
+         
+         RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J+1,K))
+         
+         DUDX  = (UU(I,J+1,K)-UU(I-1,J+1,K))*RDX(I)
+         DWDZ  = (WW(I,J+1,K)-WW(I,J+1,K-1))*RDZ(K)
+         DVDYP = DP(I,J+1,K)-DUDX-DWDZ
+         TYYP  = 2._EB*MU(I,J+1,K)*(DVDYP-ONTH*DP(I,J+1,K))
+         
+         DUDX  = (UU(I,J,K)-UU(I-1,J,K))*RDX(I)
+         DWDZ  = (WW(I,J,K)-WW(I,J,K-1))*RDZ(K)
+         DVDYM = DP(I,J,K)-DUDX-DWDZ
+         TYYM  = 2._EB*MU(I,J,K)*(DVDYM-ONTH*DP(I,J,K))
+         
+         DTXYDX= RDX(I) *(TXYP-TXYM)
+         DTYYDY= RDYN(J)*(TYYP-TYYM)
+         DTYZDZ= RDZ(K) *(TYZP-TYZM)
+         VISCOUS_TERM  = RRHO*(DTXYDX + DTYYDY + DTYZDZ)
+         
+         UUY = 0.25_EB*( UU(I,J,K) + UU(I,J+1,K) + UU(I-1,J+1,K) + UU(I-1,J,K) )
+         WWY = 0.25_EB*( WW(I,J,K) + WW(I,J+1,K) + WW(I,J+1,K-1) + WW(I,J,K-1) )
+         
+         DVDX = 0.5_EB*RDX(I)*( VV(I+1,J,K)-VV(I-1,J,K) )
+         DVDY = 0.5_EB*(DVDYM + DVDYP)
+         DVDZ = 0.5_EB*RDZ(K)*( VV(I,J,K+1)-VV(I,J,K-1) )
+         ADVECTIVE_TERM = UUY*DVDX + VV(I,J,K)*DVDY + WWY*DVDZ
+         
+         FVY(I,J,K) = ADVECTIVE_TERM - VISCOUS_TERM - RRHO*FVEC(2)          
+      ENDDO
+   ENDDO
+ENDDO
+
+! Compute z component force term
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         
+         TXZP  = TXZ(I,J,K)
+         TXZM  = TXZ(I-1,J,K)
+         TYZP  = TYZ(I,J,K)
+         TYZM  = TYZ(I,J-1,K)
+         IC    = CELL_INDEX(I,J,K)
+         IEXP  = EDGE_INDEX(IC,4)
+         IEXM  = EDGE_INDEX(IC,3)
+         IEYP  = EDGE_INDEX(IC,8)
+         IEYM  = EDGE_INDEX(IC,7)
+         IF (TAU_E(IEXP,2)>-1.E5_EB) TYZP = TAU_E(IEXP,2)
+         IF (TAU_E(IEXM,1)>-1.E5_EB) TYZM = TAU_E(IEXM,1)
+         IF (TAU_E(IEYP,2)>-1.E5_EB) TXZP = TAU_E(IEYP,2)
+         IF (TAU_E(IEYM,1)>-1.E5_EB) TXZM = TAU_E(IEYM,1)
+         
+         RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
+         
+         DUDX  = (UU(I,J,K+1)-UU(I-1,J,K+1))*RDX(I)
+         DVDY  = (VV(I,J,K+1)-VV(I,J-1,K+1))*RDY(J)
+         DWDZP = DP(I,J,K+1)-DUDX-DVDY
+         TZZP  = 2._EB*MU(I,J,K+1)*(DWDZP-ONTH*DP(I,J,K+1))
+         
+         DUDX  = (UU(I,J,K)-UU(I-1,J,K))*RDX(I)
+         DVDY  = (VV(I,J,K)-VV(I,J-1,K))*RDY(J)
+         DWDZM = DP(I,J,K)-DUDX-DVDY
+         TZZM  = 2._EB*MU(I,J,K)*(DWDZP-ONTH*DP(I,J,K))
+         
+         DTXZDX= RDX(I) *(TXZP-TXZM)
+         DTYZDY= RDY(J) *(TYZP-TYZM)
+         DTZZDZ= RDZN(K)*(TZZP-TZZM)
+         VISCOUS_TERM  = RRHO*(DTXZDX + DTYZDY + DTZZDZ)
+         
+         UUZ = 0.25_EB*( UU(I,J,K) + UU(I,J,K+1) + UU(I-1,J,K+1) + UU(I-1,J,K) )
+         VVZ = 0.25_EB*( VV(I,J,K) + VV(I,J,K+1) + VV(I,J-1,K+1) + VV(I,J-1,K) )
+         
+         DWDX = 0.5_EB*RDX(I)*( WW(I+1,J,K)-WW(I-1,J,K) )
+         DWDY = 0.5_EB*RDY(J)*( WW(I,J+1,K)-WW(I,J-1,K) )
+         DWDZ = 0.5_EB*(DWDZM + DWDZP)
+         ADVECTIVE_TERM = UUZ*DWDX + VVZ*DWDY + WW(I,J,K)*DWDZ
+         
+         FVZ(I,J,K) = ADVECTIVE_TERM - VISCOUS_TERM - RRHO*FVEC(3)
+      ENDDO
+   ENDDO
+ENDDO
+
+! Baroclinic torque correction
+ 
+!IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION
+
+! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
+ 
+CALL NO_FLUX
+ 
+END SUBROUTINE VELOCITY_FLUX_ADVECTIVE
  
  
 SUBROUTINE VELOCITY_FLUX_ISOTHERMAL(NM)
@@ -1405,7 +1651,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
-                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
                      VEL_INS = -VEL_GAS
                      DUIDXJ(ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
                      TAU_IJ_WALL(ICD) = MUA*DUIDXJ(ICD)
@@ -1413,7 +1659,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                CASE (WALL_MODEL) BOUNDARY_CONDITION
 
-                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
                      IIGM = IJKW(6,IWM)
                      JJGM = IJKW(7,IWM)
                      KKGM = IJKW(8,IWM)
