@@ -250,10 +250,10 @@ void mouse_select_device(int button, int state, int x, int y){
     xyz = devicei->xyz;
 
     if(devicei->labelptr!=NULL){
-      printf("Selected Device: index=%i x=%f y=%f z=%f label=%s\n",val,xyz[0],xyz[1],xyz[2],devicei->labelptr);
+      printf("Selected Device: index=%i location:(%f,%f,%f) label:%s\n",val,xyz[0],xyz[1],xyz[2],devicei->labelptr);
     }
     else{
-      printf("Selected Device: index=%i x=%f y=%f z=%f label=null\n",val,xyz[0],xyz[1],xyz[2]);
+      printf("Selected Device: index=%i location:(%f,%f,%f) label:null\n",val,xyz[0],xyz[1],xyz[2]);
     }
     glShadeModel(GL_SMOOTH);
     glEnable(GL_BLEND);

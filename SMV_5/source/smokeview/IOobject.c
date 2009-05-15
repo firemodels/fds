@@ -381,12 +381,14 @@ void draw_devices(void){
   glTranslatef(-xbar0,-ybar0,-zbar0);
   for(i=0;i<ndeviceinfo;i++){
     int tagval;
+    int save_use_displaylist;
 
     devicei = deviceinfo + i;
 
     if(devicei->object->visible==0)continue;
     if(isZoneFireModel==1&&strcmp(devicei->object->label,"target")==0&&visSensor==0)continue;
 
+    save_use_displaylist=devicei->object->use_displaylist;
     tagval=i+1;
     if(select_device==1&&show_mode==SELECT){
 
@@ -394,6 +396,7 @@ void draw_devices(void){
       select_device_color[1]=tagval>>nbluebits;
       select_device_color[2]=tagval&rgbmask[nbluebits-1];
       select_device_color_ptr=select_device_color;
+      devicei->object->use_displaylist=0;
     }
     else{
       if(selected_device_tag>0&&select_device==1&&selected_device_tag==tagval){
@@ -401,6 +404,7 @@ void draw_devices(void){
         select_device_color[0]=255;
         select_device_color[1]=0;
         select_device_color[2]=0;
+        devicei->object->use_displaylist=0;
       }
       else{
         select_device_color_ptr=NULL;
@@ -446,6 +450,7 @@ void draw_devices(void){
     else{
       draw_SVOBJECT(devicei->object,0);
     }
+    devicei->object->use_displaylist=save_use_displaylist;
     glPopMatrix();
   }
 
