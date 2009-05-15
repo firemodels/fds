@@ -2231,7 +2231,7 @@ float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2
 /* ----------------------- init_device ----------------------------- */
 
 void init_device(device *devicei, float *xyz, float *xyzn, int state0, int nparams, float *params, char *labelptr){
-  devicei->labelptr=labelptr;
+  devicei->labelptr=devicei->label;
   if(labelptr!=NULL){
     strcpy(devicei->label,labelptr);
   }
