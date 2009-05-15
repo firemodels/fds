@@ -1,7 +1,7 @@
 #!/bin/csh -f
 set scriptdir=$1
-set googledir=$scriptdir/to_google
-set makedir=$scriptdir/../Makefile
+set googledir=$scriptdir/../to_google
+set makedir=$scriptdir/..
 
 rm -f $googledir/fds5_intel_linux_32
 rm -f $googledir/fds5_mpi_intel_linux_32
