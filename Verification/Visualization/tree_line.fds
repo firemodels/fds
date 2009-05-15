@@ -1,14 +1,14 @@
 &HEAD CHID='tree_line', TITLE='One tree SVN $Revision$' /
 
 - Specify number of grid cells (IJK) and domain size (XB) in x,y,z directions
-&MESH IJK=160,30,60, XB=-4,12,-3,0,0,6 / 
-
-- Stretch the computation grid in the z direction
-&TRNZ IDERIV=1,CC=0.,PC=0.5 /
-&TRNZ IDERIV=2,CC=0.,PC=0.0 /
+xxxMESH IJK=160,30,60, XB=-4,12,-3,0,0,6 / 
+&MESH IJK=40,30,60, XB=-4.0, 0.0,-3.0,0.0,0.0,6.0 / 
+&MESH IJK=40,30,60, XB= 0.0, 4.0,-3.0,0.0,0.0,6.0 / 
+&MESH IJK=40,30,60, XB= 4.0, 8.0,-3.0,0.0,0.0,6.0 / 
+&MESH IJK=40,30,60, XB= 8.0,12.0,-3.0,0.0,0.0,6.0 / 
 
 -- Duration of simulation
-&TIME TWFIN=10. /
+&TIME TWFIN=100. /
 
 &MISC RADIATION=.TRUE.,BAROCLINIC=.TRUE. /
 

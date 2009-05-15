@@ -8,7 +8,7 @@
 &TRNZ IDERIV=2,CC=0.,PC=0.0 /
 
 -- Duration of simulation
-&TIME TWFIN=0. /
+&TIME TWFIN=60. /
 
 &MISC RADIATION=.TRUE.,BAROCLINIC=.TRUE. /
 
