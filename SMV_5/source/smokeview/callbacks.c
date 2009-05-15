@@ -249,7 +249,7 @@ void mouse_select_device(int button, int state, int x, int y){
     devicei = deviceinfo + val-1;
     xyz = devicei->xyz;
 
-    if(devicei->labelptr!=NULL){
+    if(devicei->labelptr!=NULL&&strcmp(devicei->labelptr,"null")!=0){
       printf("Selected Device: index=%i location:(%f,%f,%f) label:%s\n",val,xyz[0],xyz[1],xyz[2],devicei->labelptr);
     }
     else{
