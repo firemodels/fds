@@ -10378,7 +10378,7 @@ Contains
     Type (HUMAN_TYPE), Pointer :: HR
     !
     ! Local variables
-    Real(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn
+    Real(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn, dummy
     Real(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o
     Integer :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index
     Integer :: i, i_o, izero, nm_tmp
@@ -10389,6 +10389,7 @@ Contains
     Type (EVACUATION_Type), Pointer :: HPT =>NULL()
     Type (EVAC_ENTR_Type),  Pointer :: PNX =>NULL()
 
+    dummy = T
 
     If (imode < 2) Then
        nm_tmp = nm
