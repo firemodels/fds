@@ -3840,7 +3840,6 @@ COUNT_SURF_LOOP: DO
    IF (IOS==1) EXIT COUNT_SURF_LOOP
    READ(LU_INPUT,SURF,ERR=34,IOSTAT=IOS)
    N_SURF = N_SURF + 1
-   SURF_NAME(N_SURF) = ID
    34 IF (IOS>0) THEN
          WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with SURF number', N_SURF+1
          CALL SHUTDOWN(MESSAGE)
@@ -3853,11 +3852,23 @@ N_SURF_RESERVED = 4
 ALLOCATE(SURFACE(0:N_SURF+N_CABL+N_SURF_RESERVED),STAT=IZERO)
 CALL ChkMemErr('READ','SURFACE',IZERO) 
 
+! Count the SURF lines in the input file
+
+REWIND(LU_INPUT)
+NN = 0
+COUNT_SURF_LOOP_AGAIN: DO
+   CALL CHECKREAD('SURF',LU_INPUT,IOS)
+   IF (IOS==1) EXIT COUNT_SURF_LOOP_AGAIN
+   READ(LU_INPUT,SURF)
+   NN = NN+1
+   SURFACE(NN)%ID = ID
+ENDDO COUNT_SURF_LOOP_AGAIN
+
 ! Add an additional SURF entry for each CABLE
 
 DO N=1,N_CABL
    N_SURF = N_SURF+1
-   SURF_NAME(N_SURF) = PROPERTY(CABLE(N)%PROP_INDEX)%ID
+   SURFACE(N_SURF)%ID           = PROPERTY(CABLE(N)%PROP_INDEX)%ID
    SURFACE(N_SURF)%USER_DEFINED = .FALSE.
    SURFACE(N_SURF)%PROP_INDEX   = CABLE(N)%PROP_INDEX
    SURFACE(N_SURF)%CABL_INDEX   = N
@@ -3873,11 +3884,11 @@ PERIODIC_SURF_INDEX                = N_SURF + 4
 
 N_SURF                             = N_SURF + N_SURF_RESERVED
 
-SURF_NAME(INERT_SURF_INDEX)        = 'INERT'
-SURF_NAME(OPEN_SURF_INDEX)         = 'OPEN'
-SURF_NAME(MIRROR_SURF_INDEX)       = 'MIRROR'
-SURF_NAME(INTERPOLATED_SURF_INDEX) = 'INTERPOLATED'
-SURF_NAME(PERIODIC_SURF_INDEX)     = 'PERIODIC'
+SURFACE(INERT_SURF_INDEX)%ID       = 'INERT'
+SURFACE(OPEN_SURF_INDEX)%ID        = 'OPEN'
+SURFACE(MIRROR_SURF_INDEX)%ID      = 'MIRROR'
+SURFACE(INTERPOLATED_SURF_INDEX)%ID= 'INTERPOLATED'
+SURFACE(PERIODIC_SURF_INDEX)%ID    = 'PERIODIC'
 SURFACE(N_SURF-N_SURF_RESERVED+1:N_SURF)%USER_DEFINED = .FALSE.
 SURFACE(0)%USER_DEFINED               = .FALSE.
  
@@ -3939,17 +3950,17 @@ READ_SURF_LOOP: DO N=0,N_SURF
    LAYER_LOOP: DO IL=1,MAX_LAYERS
 
       IF (ADIABATIC .AND. MATL_ID(IL,1)/='null') THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SURF_NAME(N))//' is ADIABATIC and cannot have a MATL_ID'
+         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' is ADIABATIC and cannot have a MATL_ID'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    
       IF (THICKNESS(IL)>0._EB .AND. MATL_ID(IL,1)=='null') THEN
-         WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SURF_NAME(N))//' must have a MATL_ID for Layer ',IL
+         WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SF%ID)//' must have a MATL_ID for Layer ',IL
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    
       IF (THICKNESS(IL)<0._EB .AND. MATL_ID(IL,1)/='null') THEN
-         WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SURF_NAME(N))// ' must have a specified THICKNESS for Layer ',IL
+         WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SF%ID)// ' must have a specified THICKNESS for Layer ',IL
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    
@@ -4088,7 +4099,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
             ENDIF
          ENDDO
          IF (INDEX_LIST(N_LIST)<0) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'MATL: ',TRIM(NAME_LIST(N_LIST)),', on SURF: ',TRIM(SURF_NAME(N)),', does not exist'
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'MATL: ',TRIM(NAME_LIST(N_LIST)),', on SURF: ',TRIM(SF%ID),', does not exist'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
       ENDDO COUNT_LAYER_MATL
@@ -4175,7 +4186,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    DO NN=1,SF%N_MATL
       ML => MATERIAL(SF%MATL_INDEX(NN))
       IF (ML%N_REACTIONS>0 .AND. SF%TMP_IGN<5000._EB) THEN
-         WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SURF_NAME(N))// ' cannot have a REACting MATL and IGNITION_TEMPERATURE'
+         WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SF%ID)// ' cannot have a REACting MATL and IGNITION_TEMPERATURE'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       DO J=1,ML%N_REACTIONS
@@ -4190,12 +4201,12 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    ! Thermal boundary conditions
    IF (SF%ADIABATIC .AND. (SF%NET_HEAT_FLUX < 1.E12_EB .OR. SF%CONVECTIVE_HEAT_FLUX/=0._EB)) THEN
-         WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SURF_NAME(N))//&
+         WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SF%ID)//&
                                  ' cannot have both ADIABATIC and NET_HEAT_FLUX or CONVECTIVE_HEAT_FLUX'
          CALL SHUTDOWN(MESSAGE)
    ENDIF
    IF (SF%NET_HEAT_FLUX < 1.E12_EB .AND. SF%CONVECTIVE_HEAT_FLUX/=0._EB) THEN
-         WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SURF_NAME(N))// ' cannot have both NET_HEAT_FLUX or CONVECTIVE_HEAT_FLUX'
+         WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SF%ID)// ' cannot have both NET_HEAT_FLUX or CONVECTIVE_HEAT_FLUX'
          CALL SHUTDOWN(MESSAGE)
    ENDIF
    
@@ -4396,7 +4407,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    IF (SF%VOLUME_FLUX>0._EB .AND. SF%VOLUME_FLUX/=-999._EB) SUCKING = .TRUE.
 
    IF (BURNING .AND. (BLOWING .OR. SUCKING)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SURF_NAME(N))//' cannot have a specified velocity or volume flux'
+      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot have a specified velocity or volume flux'
       CALL SHUTDOWN(MESSAGE)
       ENDIF
  
@@ -4444,7 +4455,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    IF ((SF%SURFACE_DENSITY == 0._EB) .AND. SF%BURN_AWAY) THEN
-      WRITE(MESSAGE,'(A)') 'WARNING: SURF '//TRIM(SURF_NAME(N))//' has BURN_AWAY set but zero combustible density'
+      WRITE(MESSAGE,'(A)') 'WARNING: SURF '//TRIM(SF%ID)//' has BURN_AWAY set but zero combustible density'
       IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
    ENDIF   
 
@@ -4459,19 +4470,19 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    SF%SPECIES_BC_INDEX = NO_MASS_FLUX
 
    IF (ANY(SF%MASS_FRACTION>=0._EB) .AND. (ANY(SF%MASS_FLUX/=0._EB).OR.BURNING)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SURF_NAME(N))//' cannot specify mass fraction with mass flux and/or burning'
+      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot specify mass fraction with mass flux and/or burning'
       CALL SHUTDOWN(MESSAGE)
       ENDIF
    IF (ANY(SF%MASS_FRACTION>=0._EB) .AND. SUCKING) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SURF_NAME(N))//' cannot specify both mass fraction and outflow velocity'
+      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot specify both mass fraction and outflow velocity'
       CALL SHUTDOWN(MESSAGE)
       ENDIF
    IF (ANY(SF%LEAK_PATH>=0) .AND. (BLOWING .OR. SUCKING)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SURF_NAME(N))//' cannot leak and blow at the same time'
+      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot leak and blow at the same time'
       CALL SHUTDOWN(MESSAGE)
       ENDIF
    IF (ANY(SF%MASS_FLUX/=0._EB) .AND. (BLOWING .OR. SUCKING)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SURF_NAME(N))//' cannot have both a mass flux and specified velocity'
+      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot have both a mass flux and specified velocity'
       CALL SHUTDOWN(MESSAGE)
       ENDIF
 
@@ -5232,16 +5243,16 @@ MESH_LOOP: DO NM=1,NMESHES
                OB%IBC(:) = DEFAULT_SURF_INDEX
           
                DO NNN=0,N_SURF
-                  IF (SURF_ID    ==SURF_NAME(NNN)) OB%IBC(:)    = NNN
-                  IF (SURF_IDS(1)==SURF_NAME(NNN)) OB%IBC(3)    = NNN
-                  IF (SURF_IDS(2)==SURF_NAME(NNN)) OB%IBC(-2:2) = NNN
-                  IF (SURF_IDS(3)==SURF_NAME(NNN)) OB%IBC(-3)   = NNN
-                  IF (SURF_ID6(1)==SURF_NAME(NNN)) OB%IBC(-1)   = NNN
-                  IF (SURF_ID6(2)==SURF_NAME(NNN)) OB%IBC( 1)   = NNN
-                  IF (SURF_ID6(3)==SURF_NAME(NNN)) OB%IBC(-2)   = NNN
-                  IF (SURF_ID6(4)==SURF_NAME(NNN)) OB%IBC( 2)   = NNN
-                  IF (SURF_ID6(5)==SURF_NAME(NNN)) OB%IBC(-3)   = NNN
-                  IF (SURF_ID6(6)==SURF_NAME(NNN)) OB%IBC( 3)   = NNN
+                  IF (SURF_ID    ==SURFACE(NNN)%ID) OB%IBC(:)    = NNN
+                  IF (SURF_IDS(1)==SURFACE(NNN)%ID) OB%IBC(3)    = NNN
+                  IF (SURF_IDS(2)==SURFACE(NNN)%ID) OB%IBC(-2:2) = NNN
+                  IF (SURF_IDS(3)==SURFACE(NNN)%ID) OB%IBC(-3)   = NNN
+                  IF (SURF_ID6(1)==SURFACE(NNN)%ID) OB%IBC(-1)   = NNN
+                  IF (SURF_ID6(2)==SURFACE(NNN)%ID) OB%IBC( 1)   = NNN
+                  IF (SURF_ID6(3)==SURFACE(NNN)%ID) OB%IBC(-2)   = NNN
+                  IF (SURF_ID6(4)==SURFACE(NNN)%ID) OB%IBC( 2)   = NNN
+                  IF (SURF_ID6(5)==SURFACE(NNN)%ID) OB%IBC(-3)   = NNN
+                  IF (SURF_ID6(6)==SURFACE(NNN)%ID) OB%IBC( 3)   = NNN
                ENDDO
          
                ! Determine if the OBST is CONSUMABLE and check if POROUS inappropriately applied
@@ -6103,7 +6114,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
       VT%IBC = DEFAULT_SURF_INDEX
       DO NNN=0,N_SURF
-         IF (SURF_ID==SURF_NAME(NNN)) VT%IBC = NNN
+         IF (SURF_ID==SURFACE(NNN)%ID) VT%IBC = NNN
       ENDDO
 
       IF (SURF_ID=='OPEN')                            VT%TYPE_INDICATOR =  2
@@ -6973,7 +6984,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
    IF (DV%SURF_ID/='null') THEN
       DO NN=1,N_SURF
-         IF (SURF_NAME(NN)==DV%SURF_ID) DV%SURF_INDEX = NN
+         IF (SURFACE(NN)%ID==DV%SURF_ID) DV%SURF_INDEX = NN
       ENDDO
    ENDIF
 
@@ -7129,7 +7140,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             ENDIF
          ENDIF
          DO NNN=1,N_SURF
-            IF (SURF_NAME(NNN)==PY%ID) DV%SURF_INDEX = NNN
+            IF (SURFACE(NNN)%ID==PY%ID) DV%SURF_INDEX = NNN
          ENDDO
 
       CASE ('LAYER HEIGHT','UPPER TEMPERATURE','LOWER TEMPERATURE') 
@@ -8323,7 +8334,7 @@ INTEGER :: NS
 
 EXISTS = .FALSE.
 DO NS=0,N_SURF
-   IF (NAME==SURF_NAME(NS)) EXISTS = .TRUE.
+   IF (NAME==SURFACE(NS)%ID) EXISTS = .TRUE.
 ENDDO
 
 END SUBROUTINE CHECK_SURF_NAME
