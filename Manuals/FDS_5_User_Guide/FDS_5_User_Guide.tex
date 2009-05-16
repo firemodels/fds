@@ -1563,9 +1563,10 @@ ensuring that each mesh is processed each iteration. More details can
 be found in Section~\ref{info:multimesh}. The default value of {\ct SYNCHRONIZE} is {\ct .TRUE.}
 
 Finally, if you want to prevent FDS from automatically changing the time step, set \\
-{\ct LOCK\_TIME\_STEP=.FALSE.} \\
+{\ct LOCK\_TIME\_STEP=.TRUE.} \\
 on the {\ct TIME} line, in which case the specified
-time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
+time step, {\ct DT}, will not be adjusted. 
+This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
 numerical instabilities if the initial time step is set too high.
 
 
@@ -2372,8 +2373,10 @@ simulations failing due to numerical instabilities.
 \end{warning}
 
 \noindent
-If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP=.FALSE.} on the {\ct TIME} line, in which case the specified
-time step, {\ct DT}, will not be adjusted. This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
+If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP=.TRUE.} 
+on the {\ct TIME} line, in which case the specified
+time step, {\ct DT}, will not be adjusted. 
+This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
 numerical instabilities if the initial time step is set too high.
 
 
@@ -8892,7 +8895,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ISOTHERMAL}                & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}         &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES}                       & Logical       & Large Eddy Simulation                         &               & {\ct .TRUE.}      \\ \hline
-%{\ct LOCK\_TIME\_STEP}          & Logical       & Use constant time step                        &               & {\ct .FALSE.}     \\ \hline
 {\ct MW}                        & Real          & Molecular Weight (Section~\ref{info:SPEC})    &  g/mol        &                   \\ \hline
 {\ct NOISE}                     & Logical       & Toggle initial noise on and off               &               & {\ct .TRUE.}      \\ \hline
 %{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution             &               & 7                 \\ \hline
