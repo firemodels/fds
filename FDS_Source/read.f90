@@ -8015,6 +8015,12 @@ OUTPUT_QUANTITY(98)%UNITS = '1/m'
 OUTPUT_QUANTITY(98)%SHORT_NAME = 'OD'
 
 OUTPUT_QUANTITY(90:98)%SPEC_ID_REQUIRED = .TRUE.
+
+! Miscellaneous
+
+OUTPUT_QUANTITY(100)%NAME  = 'PRESSURE ZONE'                   
+OUTPUT_QUANTITY(100)%UNITS  = ' '                    
+OUTPUT_QUANTITY(100)%SHORT_NAME  = 'zone'
  
 ! Integrated Quantities
  
