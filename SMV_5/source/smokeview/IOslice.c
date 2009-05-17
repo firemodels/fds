@@ -2271,8 +2271,8 @@ void drawslice_cellcenter_interp(const slice *sd){
 
      n = (i-sd->is1)*sd->nslicej -1 + 1;
      n2 = n + sd->nslicej;
-     x1 = xplt[i];
-     x3 = xplt[i+1];
+     x1 = (xplt[i]+xplt[i-1])/2.0;
+     x3 = (xplt[i+1]+xplt[i])/2.0;
      xmid = (x1+x3)/2.0;
 
      for(j=sd->js1+1; j<sd->js2; j++){
