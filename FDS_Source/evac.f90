@@ -4541,7 +4541,7 @@ Contains
              If (Group_List(j)%GROUP_I_FFIELDS(i_egrid) == 0) Then
                 i_target_old = HR%I_Target
                 n_change_trials = n_change_trials + 1
-                Call Change_Target_Door(nom, nom, i, j, j1, i_egrid, 0, 0.0_EB, HR%X, HR%Y, i_target, color_index, i_new_ffield, HR)
+                Call Change_Target_Door(nom, nom, i, j, j1, i_egrid, 0, HR%X, HR%Y, i_target, color_index, i_new_ffield, HR)
                 If (Abs(i_target_old) .Ne. Abs(i_target)) Then
                    n_change_doors = n_change_doors + 1
                    i_tmp = i
@@ -5290,7 +5290,7 @@ Contains
                 If (rn > Exp(-DTSP/dt_group_door) ) Then
                    i_target_old = HR%I_Target 
                    n_change_trials = n_change_trials + 1
-                   Call Change_Target_Door(nm, nm, ie, j, j1, i_egrid, 1, T, HR%X, HR%Y, i_target, color_index, i_new_ffield, HR)
+                   Call Change_Target_Door(nm, nm, ie, j, j1, i_egrid, 1, HR%X, HR%Y, i_target, color_index, i_new_ffield, HR)
                    If (Abs(i_target_old) .Ne. Abs(i_target)) Then
                       n_change_doors = n_change_doors + 1
                       If (i_target > 0) Then
@@ -8061,7 +8061,7 @@ Contains
                If (j > 0) I_Target = Group_Known_Doors(j)%I_Target
             Else
 
-               Call Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, T, HR%X, HR%Y, I_Target, color_index, new_ffield_i, HR)
+               Call Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, HR%X, HR%Y, I_Target, color_index, new_ffield_i, HR)
 
                new_ffield_name = Trim(MESH_NAME(new_ffield_i))
                If ( j > 0 ) Then
@@ -10349,7 +10349,7 @@ Contains
 
   END SUBROUTINE GET_FIRE_CONDITIONS
 
-  Subroutine Change_Target_Door(nm, nm2, ie, j, j1, i_egrid, imode, T, xx, yy, I_Target, I_Color, I_Field, HR)
+  Subroutine Change_Target_Door(nm, nm2, ie, j, j1, i_egrid, imode, xx, yy, I_Target, I_Color, I_Field, HR)
     Implicit None
     !
     ! Door selection algorithm
@@ -10362,7 +10362,6 @@ Contains
     !   j1: lonely agent index
     !   i_egrid: main evacuation mesh index
     !   imode: 0= initialization, 1= evacuate_humans, 2= check_target_node
-    !   T: time
     !   xx: x co-ordinate of the agent
     !   yy: y co-ordinate of the agent
     !   
@@ -10373,12 +10372,12 @@ Contains
     !
     ! Passed variables
     Integer, Intent(IN) :: nm, nm2, ie, j, j1, i_egrid, imode
-    Real(EB), Intent(IN) :: T, xx, yy
+    Real(EB), Intent(IN) :: xx, yy
     Integer, Intent(OUT)  :: I_Target, I_Color, I_Field
     Type (HUMAN_TYPE), Pointer :: HR
     !
     ! Local variables
-    Real(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn, dummy
+    Real(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn
     Real(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o
     Integer :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index
     Integer :: i, i_o, izero, nm_tmp
@@ -10389,7 +10388,6 @@ Contains
     Type (EVACUATION_Type), Pointer :: HPT =>NULL()
     Type (EVAC_ENTR_Type),  Pointer :: PNX =>NULL()
 
-    dummy = T
 
     If (imode < 2) Then
        nm_tmp = nm
