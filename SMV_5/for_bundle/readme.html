@@ -20,6 +20,29 @@
 <h3>Release Notes</h3>
 
 <ul>
+<li>5.3.14 (build 3798) - May 18, 2009
+<ol>
+<li>enhancement: add an option to select a device and display information about it.
+<li>enhancement: implement offsetx, offsety and offsetz device keywords to simplify device definitions 
+if only one translation direction is required.
+<li>enhancement: implement the device script command, putuservals2stack, which is a general form of the  
+existing command, getuservals .  putuservals2stack allows one to put user arguments 
+anywhere on the stack rather than just at the top. (needed for defining "tree" devices)
+<li>enhancement: add an option to select an avatar (evacuation visualization) in order to easily 
+track its motion during the simluation - add preliminary code to change viewpoint to selected avatar.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=724&can=1&sort=-id">Issue 724</a>).
+<li>enhancement: change format of the DEVICE keyword in the .smv file keyword to allow an arbitrary number of user specified parameters
+<li>enhancement: implement a method for dynamically changing a device by adding parameters to the DEVICE entry in the .smv file
+<li>fix: fix the x coordinate location when drawing interpolated cell-centered slices
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=743&can=1&sort=-id">Issue 743</a>).
+<li>fix: fix render option menu display when render doubling option is active
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=741&can=1&sort=-id">Issue 741</a>).
+<li>fix: place interpolated cell centered slices at cell centers, 
+label slice menus using cell center locations
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=727&can=1&sort=-id">Issue 727</a>).
+<li>fix: fix subscript error in slice file spreadsheet output routine
+</ol>
+
 <li>5.3.13 (build 3798) - April 16, 2009
 <ol>
 <li>enhancement: add options to specify point sizes for PLOT3D isosurfaces and animated isosurfaces. 
