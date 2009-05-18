@@ -662,20 +662,34 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ! Compute source term KAPPA*4*SIGMA*TMP**4
 
-   BBF = 1._EB
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (WIDE_BAND_MODEL)  BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
-            KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-            IF (RADIATIVE_FRACTION>0._EB) THEN
-               KFST4_ALTERNATIVE = BBF*RADIATIVE_FRACTION*Q(I,J,K)
-               IF (KFST4_ALTERNATIVE > KFST4(I,J,K)) KFST4(I,J,K) = KFST4_ALTERNATIVE + KAPPA(I,J,K)*UII(I,J,K)
-            ENDIF
+   IF (WIDE_BAND_MODEL) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
+               KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+               IF (RADIATIVE_FRACTION>0._EB) THEN
+                  KFST4_ALTERNATIVE = BBF*RADIATIVE_FRACTION*Q(I,J,K)
+                  IF (KFST4_ALTERNATIVE > KFST4(I,J,K)) KFST4(I,J,K) = KFST4_ALTERNATIVE + KAPPA(I,J,K)*UIID(I,J,K,IBND)
+               ENDIF
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ELSE
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               KFST4(I,J,K) = KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+               IF (RADIATIVE_FRACTION>0._EB) THEN
+                  KFST4_ALTERNATIVE = RADIATIVE_FRACTION*Q(I,J,K)
+                  IF (KFST4_ALTERNATIVE > KFST4(I,J,K)) KFST4(I,J,K) = KFST4_ALTERNATIVE + KAPPA(I,J,K)*UII(I,J,K)
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Calculate extinction coefficient
  
