@@ -9384,8 +9384,13 @@ void writeini(int flag){
     if(revision_fds>0){
       fprintf(fileout,"# FDS Revision Number: %i\n",revision_fds);
     }
+#ifdef X64
+    fprintf(fileout,"# Platform: WIN64\n");
+#endif
 #ifdef WIN32
+#ifndef X64
     fprintf(fileout,"# Platform: WIN32\n");
+#endif
 #endif
 #ifdef pp_OSX
     fprintf(fileout,"# Platform: OS X\n");

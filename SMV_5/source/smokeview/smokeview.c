@@ -3712,7 +3712,11 @@ void version(void){
     }
     printf("Compile Date: %s\n",__DATE__);
 #ifdef WIN32
+#ifdef X64
+    printf("Platform: WIN64 ");
+#else
     printf("Platform: WIN32 ");
+#endif
 #ifdef pp_WIN_INTEL
     printf(" (Intel C/C++)\n");
 #else
