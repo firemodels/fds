@@ -14,6 +14,7 @@ set smvdir=to_google\%zipbase%
 
 echo
 echo filling distribution directory
+IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 copy smokeview64_test.exe %smvdir%\smokeview.exe
 copy smokezip_release.exe %smvdir%\smokezip.exe
