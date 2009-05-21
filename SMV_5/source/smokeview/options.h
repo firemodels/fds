@@ -39,14 +39,18 @@
 #define pp_COMPRESS
 #define pp_noappend
 #include "pragmas.h"
+#ifndef X64
 #define pp_GPU
 #define pp_CULL
+#endif
 // #define pp_GPU_BLANK
 #endif
 
 #define pp_MSCALE
 #define pp_RENDER
+#ifndef X64
 #define pp_THREAD
+#endif
 #define pp_SPHERE
 #define pp_ISOOUT
 #define pp_DRAWISO
