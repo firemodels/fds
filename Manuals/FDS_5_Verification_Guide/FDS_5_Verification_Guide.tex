@@ -3,7 +3,7 @@
 \usepackage[pdftex]{graphicx}
 %\usepackage{hyperref}
 
-%\usepackage{pdfsync}
+\usepackage{pdfsync}
 \usepackage[pdftex,
         colorlinks=true,
         urlcolor=linkblue,     % \href{...}{...} external (URL)
@@ -684,7 +684,7 @@ In this chapter we present test cases aimed at exercising the advective, pressur
 \section{2D Analytical Solution to Navier-Stokes}
 \label{ns2d}
 
-In this section we present an analytical solution that is useful for confirming the convergence rates of the truncation errors in the discretization of the terms in 
+In this section we present an analytical solution that is useful for confirming the convergence rates of the truncation errors in the discretization of the terms in
 the governing equations. Consider the 2D incompressible Navier-Stokes equations
 \begin{equation}
 \label{eqn_NS}
@@ -843,18 +843,153 @@ Next, in Figure \ref{fig_dynsmag_cbc}, we show results for the dynamic model ana
 
 \clearpage
 
-\section{Velocity Boundary Condition}
-\label{velocity_bc}
+\section{FDS Wall Flows Part I: Straight Channels}
+\label{fds_wall_flows1}
 
+%\begin{figure}[t]
+%   \begin{center}
+%      \includegraphics[height=5.00in]{FIGURES/moody.pdf}
+%      \caption{\label{moody} Moody chart.}
+%   \end{center}
+%\end{figure}
 
-\begin{figure}[t]
+Wall flows are notoriously challenging for large-eddy simulation (LES) \cite{Baggett:1997,Baggett:1998,Cabot:1995,Pope:2000,Sagaut:2001}.  In spite of their promise and sophistication, practical LES codes are resigned to \emph{model} the wall shear stress as opposed to \emph{resolving} the dynamically important length scales near the wall.
+
+In this work we introduce the Werner and Wengle (WW) wall model \cite{Werner:1991} into the NIST Fire Dynamics Simulator (FDS) as a practical first step in developing models for turbulent flow around complex geometry and over complex terrain.  Such models are required in order for FDS to accurately model, for example, tunnel fires, smoke transport in complex architectures, and wildland-urban interface (WUI) fires \cite{WUI}. As a minimum requirement, a wall model should accurately reproduce the mean wall stress for flow in a straight channel.  We verify that this is true for FDS by reproducing the Moody chart, a plot of friction factor versus Reynolds number for pipe flow \cite{Moody:1944}.
+
+The remainder of this article is organized as follows. In Section \ref{formulation} we describe the model formulation. In Section \ref{WW_model} we give an overview of the WW model.  Then, in Section \ref{results}, we conduct a verification study of the wall boundary conditions for laminar and turbulent flows in FDS.  From this study we are able to draw quantitative conclusions in Section \ref{conclusions} about the accuracy of the channel flow simulations.
+
+\subsection{Formulation}
+\label{formulation}
+
+Details of the FDS formulation are given in the Technical Guide \cite{FDS_Math_Guide_5}.  Here we provide only the salient components of the model necessary for treatment of constant density channel flow.
+
+The filtered continuity and momentum equations are:
+\begin{equation}
+\label{eqn_cont}
+\frac{\partial \bar{u}_i}{\partial x_i} = 0 \,\mbox{,}
+\end{equation}
+\begin{equation}
+\label{eqn_mom1}
+\frac{\partial \bar{u}_i}{\partial t} + \frac{\partial \bar{u}_i \bar{u}_j}{\partial x_j} = -\frac{1}{\rho} \left[ \frac{\mbox{d}p}{\mbox{d}x_i} + \frac{\partial \tilde{p}}{\partial x_i} + \frac{\partial \bar{\tau}_{ij}}{\partial x_j} + \frac{\partial \tau_{ij}^{sgs}}{\partial x_j} \right]\,\mbox{,}
+\end{equation}
+where $\tau_{ij}^{sgs} \equiv \rho(\overline{u_i u_j} - \bar{u}_i \bar{u}_j)$ is the subgrid-scale (sgs) stress tensor, here modeled by gradient diffusion with dynamic Smagorinsky \cite{Germano:1991} used for the eddy viscosity.  In this work we specify a constant pressure drop $\mbox{d}p/\mbox{d}x$ in the streamwise direction to drive the flow.  The hyrdrodynamic pressure $\tilde{p}$ is obtained from a Poisson equation which enforces (\ref{eqn_cont}).
+
+When (\ref{eqn_mom1}) is integrated over a cell adjacent to the wall in an LES it turns out that the most difficult term to handle is the viscous stress at the wall, e.g. $\bar{\tau}_{xz}|_{z=0}$, because the wall-normal gradient of the streamwise velocity component cannot be resolved.  Note that the sgs stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the sgs stress is of critical importance.  The fidelity of the sgs model still influences the wall stress, however, since other components of the sgs tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model.  In particular, it is important that the sgs model is \emph{convergent} (dynamic Smagorinsky \emph{is}, constant coefficient Smagorinsky \emph{is not}) so that as the grid is refined we can expect more accurate results from the simulation.
+
+The model used for $\tau_w = \bar{\tau}_{xz}|_{z=0}$ in this work is the Werner and Wengle model \cite{Werner:1991} which we describe in more detail below.
+
+\subsection{The Werner and Wengle Wall Model}
+\label{WW_model}
+
+An important scaling quantity in the near-wall region is the friction velocity, defined as $u^* \equiv \sqrt{\tau_w/\rho}$.  From the friction velocity we define the nondimensional streamwise velocity $u^+ \equiv u/u^*$ and nondimensional wall-normal distance $z^+ \equiv z/\ell$, where $\ell = \mu/(\rho u^*)$. The law of the wall is then given by \cite{Pope:2000,TennekesLumley}
+\begin{eqnarray}
+\label{eqn_visclayer} u^+ &=& z^+                \quad\hspace{1.77cm} \mbox{for} \quad z^+ < 5 \,\mbox{,} \\
+\label{eqn_loglaw}    u^+ &=& 2.4 \ln z^+ + 5.2  \quad \mbox{for} \quad z^+ > 30 \,\mbox{,}
+\end{eqnarray}
+The region $5 < z^+ < 30$, where both viscous and inertial stresses are important, is referred to as the buffer layer.  The upper range of the log law depends on the Reynolds number \cite{Pope:2000,Zagarola:1997}.
+
+Werner and Wengle \cite{Werner:1991} propose a simplification to the law of the wall to eliminate the mathematical difficulties of handling the buffer and log layers.  Furthermore, WW suppose that their simplified formula for the streamwise velocity holds \emph{instantaneously} within the LES.  The WW wall law is given by \cite{Sagaut:2001}
+\begin{eqnarray}
+\label{eqn_wwlam}  u^+ &=& z^+       \quad\hspace{.73cm} \mbox{for} \quad z^+ \le 11.81 \,\mbox{,}\\
+\label{eqn_wwturb} u^+ &=& A (z^+)^B \quad \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
+\end{eqnarray}
+
+where $A=8.3$ and $B=1/7$. Note that a power law has been substituted for the log law and the viscous sublayer and the power law region are matched within the buffer region.  A comparison of the log law and the power law is shown in Figure \ref{fig_lawofthewall}.  In the region $11.81 < z^+ < 10^3$ the power law is a good approximation to the log law and for $z^+>10^3$ the power law loosely exhibits wake region behavior for a flow with $\mbox{Re} \approx 5e5$ \cite{Pope:2000,Zagarola:1997}.  As we see below, this functional behavior has consequences for high Re flows.
+\begin{figure}
    \begin{center}
-      \includegraphics[height=3.00in]{FIGURES/moody.pdf}
-      \caption{\label{moody} Moody chart.}
+      \scalebox{0.8}{\includegraphics{FIGURES/lawofthewall.pdf}}
+      \caption{\label{fig_lawofthewall} \small The law of the wall.  We have omitted the buffer layer since it is not considered in the WW model.  For $z^+\le 11.81$ we have the viscous sublayer.  For $z^+>11.81$ we show a comparison of the log law (\ref{eqn_loglaw}) (red dashed line) and the WW power law (\ref{eqn_wwturb}) (blue solid line) with $A=8.3$ and $B=1/7$.}
+   \end{center}
+\end{figure}
+
+For the purposes of adapting the WW model to FDS we suppose that the first off-wall velocity component $\tilde{u}$ represents the WW profile averaged in the wall-normal direction (refer to Figure \ref{fig_nearwall_grid}).  The density is taken as the average of the neighboring cell values and uniform along the face.  The WW model as implemented in FDS is then given by
+\begin{eqnarray}
+\label{eqn_tauwlam} |\tau_w| &=& \displaystyle \frac{2 \bar{\mu} |\tilde{u}|}{\Delta z} \quad\hspace{4.29cm}\mbox{for} \quad z^+ \le 11.81 \,\mbox{,} \vspace{0.2cm}\\
+\label{eqn_tauwturb}|\tau_w| &=& \displaystyle \bar{\rho}\left[\alpha\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^\beta + \eta\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^B |\tilde{u}|\right]^\gamma       \quad \mbox{for} \quad z^+ > 11.81 \,\mbox{,} 
+\end{eqnarray}
+where
+\begin{displaymath}
+\begin{array}{lcl}
+\alpha &=& \displaystyle \frac{1-B}{2} A^{\frac{1+B}{1-B}} \vspace{0.2cm}\\
+\beta  &=& \displaystyle 1+B \vspace{0.2cm}\\
+\eta   &=& \displaystyle \frac{1+B}{A} \vspace{0.2cm}\\
+\gamma &=& \displaystyle \frac{2}{1+B} \vspace{0.1cm}\\
+\end{array}
+\end{displaymath}
+Note that $\bar{\mu}$ is the average of the \emph{molecular} viscosity from the neighboring cells.
+
+In order to decide which formula to use for the wall stress, (\ref{eqn_tauwlam}) or (\ref{eqn_tauwturb}), we must know $z^+$, which of course depends on $\tau_w$.  As a practical matter of implementation, given that most boundary layers in FDS are under-resolved, we first calculate $\tau_w$ from (\ref{eqn_tauwturb}); we then obtain $z^+ = \sqrt{\tau_w/\bar{\rho}}$ ; if $z^+>11.81$, then the computed value of $\tau_w$ is retained, else $\tau_w$ is taken from (\ref{eqn_tauwlam}), which actually involves no additional computation since the ghost cell value for the velocity is prescribed for a no-slip wall by default.
+\begin{figure}
+   \begin{center}
+      \scalebox{0.12}{\includegraphics{FIGURES/nearwall_grid.pdf}}
+      \caption{\label{fig_nearwall_grid} \small Near-wall grid.}
+   \end{center}
+\end{figure}
+
+\subsection{Results}
+\label{results}
+
+\subsubsection{Laminar}
+\label{laminar}
+
+As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2D laminar (Poiseuille) flow calculation of flow through a straight channel.  The FDS input files are stored in the repository \cite{FDS-SMV_repository} under {\tt FDS-SMV/Verification/Flowfields/poiseuille\_*}. The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.  The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.  The fluid density is $\rho = 1.2$ kg m$^{-3}$ and the viscosity is $0.025$ kg m$^{-1}$ s$^{-1}$.  The mean pressure drop is prescribed to be $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H \approx 160$.  The (Moody) friction factor $f$, which satisfies
+\begin{equation}
+\label{eqn_moodyf}
+\Delta p = f \frac{L}{H} \frac{1}{2} \rho \bar{u}^2 \,\mbox{,}
+\end{equation}
+is determined from the steady state mean velocity $\bar{u}$ which is output by FDS for the specified pressure drop.  The exact friction factor for this flow is $f_{exact} = 24/\mbox{Re}_H$.  The friction factor error $|f-f_{exact}|$ is plotted for a range of grid spacings $\Delta z = H/N_z$ in Figure \ref{fig_poiseuille_convergence} demonstrating second-order convergence of the laminar velocity field.
+\begin{figure}
+   \begin{center}
+      \scalebox{0.8}{\includegraphics{FIGURES/poiseuille_convergence.pdf}}
+      \caption{\label{fig_poiseuille_convergence} \small FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
    \end{center}
 \end{figure}
 
 
+\subsubsection{Turbulent}
+\label{turbulent}
+
+To verify the WW wall model for turbulent flow we perform 3D LES of a square channel with periodic boundaries in the streamwise direction and a constant and uniform mean pressure gradient driving the flow.  The problem set up is nearly identical to the laminar cases of the previous section, except here we perform 3D calculations and maintain cubic cells as we refine the grid: we hold the ratio 8:1:1 between $N_x$:$N_y$:$N_z$ for all cases.  The cases shown below are identified by their grid resolution in the $z$ direction.  The velocity field is initially at rest and develops in time to a steady state mean driven by the specified mean pressure gradient.  The presence of a steady state is the result of a balance between the streamwise pressure drop and the integrated wall stress from the WW model.  FDS outputs the planar average velocity in the streamwise direction and once a steady state is reached this value is used to compute the Reynolds number and the friction factor.  Table \ref{tab_zplus} provides a case matrix: nine cases for three values of specified pressure drop and three grid resolutions.  The nominal Reynolds number (obtained post-run) is listed along with the friction factor from the most refined FDS case and the friction factor computed (iteratively) from the Colebrook equation,
+\begin{equation}
+\label{eqn_colebrook}
+\frac{1}{\sqrt{f}} = -2.0 \log_{\scriptsize 10} \left( \frac{\varepsilon/D}{3.7} + \frac{2.51}{\mbox{Re}\sqrt{f}} \right) \,\mbox{,}
+\end{equation}
+which is a fit to the turbulent range of the Moody chart (see e.g. \cite{MYO}).  The parameter $\varepsilon/D$ is the relative roughness where $D$ is the hydraulic diameter of the pipe or channel and Re is the Reynolds number based on $D$.  For all the cases reported here the hydraulic diameter is equivalent to the channel height, $D=H$, and the walls of the channel are smooth, i.e. $\varepsilon=0$.  FDS input files are stored in the repository \cite{FDS-SMV_repository} as {\tt FDS-SMV/Verification/Flowfields/moody\_*}. To provide a qualitative picture of the flow field, Figure \ref{fig_channel_flow_setup} shows contours of streamwise velocity for the case $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ and $N_z=32$.
+\begin{table}
+\begin{center}
+\caption{\label{tab_zplus} \small Case matrix and friction factor results for turbulent channel flow.  The height of the first grid cell $\Delta z$ is given in viscous units $z^+$ for each case.  Additionally, the table gives the nominal Reynolds number Re$_H$ and the FDS friction factor results compared to the Colebrook equation (\ref{eqn_colebrook}).}
+\vspace{0.5cm}
+\begin{tabular}{|*{8}{l|}}
+\hline
+$\mbox{d}p/\mbox{d}x$   & \multicolumn{3}{c|}{$z^+$}&  Re$_H$  & $f$ FDS  & $f$ Colebrook & rel. error \\
+\hline (Pa/m)       & $N_z=8$ & $N_z=16$ & $N_z=32$ &          & $(N_z=32)$ & Eq. (\ref{eqn_colebrook}) & \% \\
+\hline\hline -0.01  & 190     & 95       & 47       & $5.9e4$  & 0.0212   & 0.0202        & 4.8        \\
+\hline       -1.    & $1.9e3$ & 950      & 470      & $7.5e5$  & 0.0128   & 0.0122        & 4.6        \\
+\hline       -100.  & $1.9e4$ & $9.5e3$  & $4.7e3$  & $9.8e6$  & 0.0077   & 0.0081        & 6.0\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+\begin{figure}
+   \begin{center}
+      \scalebox{0.6}{\includegraphics{FIGURES/channel_flow_setup.pdf}}
+      \caption{\label{fig_channel_flow_setup} \small LES of square channel flow with smooth walls and periodic streamwise boundaries using dynamic Smagorinsky and the Werner Wengle wall model.  For this image $N_z=32$ and the mean pressure drop is $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5e5$ and a friction factor of $f=0.0128$.}
+   \end{center}
+\end{figure}
+
+In Figure \ref{fig_fds_moody_chart} we replicate the Moody diagram for for both the laminar and turbulent cases presented in this work.  The laminar cases provide the exact result for two different Reynolds numbers and the turbulent cases are converging to the empirical values of the friction factor for smooth pipes. It is interesting the compare the turbulent results in Figure \ref{fig_fds_moody_chart} with the values of $z^+$ shown in Table \ref{tab_zplus}.  Notice from the table that the $z^+$ values for the $\mbox{d}p/\mbox{d}x=-100$ cases are in a range where the power law (\ref{eqn_wwturb}) deviates significantly from the log law (\ref{eqn_loglaw}) (see Figure \ref{fig_lawofthewall}) and this may explain why the results for this high Re case are somewhat grid sensitive.
+\begin{figure}
+   \begin{center}
+      \scalebox{0.9}{\includegraphics{FIGURES/fds_moody_chart.pdf}}
+      \caption{\label{fig_fds_moody_chart} \small The FDS Moody Chart. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are for turbulent flow at various levels of relative roughness $\varepsilon/D$ shown on the right axis.  Stars are DNS results from FDS at a single grid resolution ($N_z=64$) and the symbols are FDS results for 3D LES with dynamic Smagorinsky and the Werner Wengle wall model at three grid resolutions ($N_z=\{8,16,32\}$).}
+   \end{center}
+\end{figure}
+
+\subsection{Conclusions}
+\label{conclusions}
+
+In this work we have verified the FDS wall model for both laminar and turbulent flow through straight channels.  We have shown that for the laminar (DNS) case FDS is second-order accurate.  It is suggested elsewhere that, as a rule of thumb, 10 \% accuracy is the best that can be expected from friction factor calculations of turbulent flow \cite{MYO}.  We have adapted the Werner and Wengle wall model to variable density flows (though only constant density flows are tested here) for smooth walls and have shown that, when combined with the dynamic model for the eddy viscosity, FDS is capable of reproducing friction factors for a broad range of Reynolds numbers to within 6.0 \% relative accuracy.
 
 
 
