@@ -32,7 +32,7 @@ cd %svn_root%\smv_5\for_bundle\to_google
 
 Rem --------------- 64 bit Windows ----------------
 if not %upload_win64% == 1 goto endif_win64
-  set glabels=Type-Installer,Opsys-Windows,%level%
+  set glabels=Type-Installer,Opsys-Windows_64,%level%
   set dplatform=64 bit Windows
   set platform=win64
   set summary=Smokeview test for %dplatform% (SVN r%smv_revision%)
