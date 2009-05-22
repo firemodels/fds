@@ -1414,7 +1414,7 @@ Contains
          If (IOS == 1) Then
             Exit READ_EXIT_LOOP
          End If
-         Read(LU_INPUT,Exit,End=26,IOSTAT=IOS)
+         Read(LU_INPUT,NML=Exit,End=26,IOSTAT=IOS)
          !
          ! Old input used COLOR_INDEX, next lines are needed for that
          If (MYID==Max(0,EVAC_PROCESS) .And. COLOR_INDEX.Ne.-1) Write (LU_ERR,'(A,A)') &
