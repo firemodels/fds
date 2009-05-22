@@ -21,7 +21,8 @@ This step does not need to be performed every time.
 <li><a href="scripts/VIEW_SMV_VG.bat">View the Smokeview Verification Guide</a>
 </ul>
 
-<h3>Package and Upload Smokeview</h3>
+<h3>Build, Package and Upload Smokeview</h3>
+<strong>Note: Windows 32 and 64 bit versions of Smokeview are built using MS Visual Studio (each on their respective platforms)</strong>
 <ul>
 <li><a href="scripts/GET_smvsrc_svn_num.bat">Get revision number</a> Get the SVN revision number of the Smokeview source directory.
 <li>Increment the version number (<tt>SMVVERSION</tt> found in <tt>options.h</tt> .
@@ -46,7 +47,7 @@ The test suite is typically not run.
 Update the smv_revision and smv_version environment variables in the <tt>fds_smv_env.bat</tt> file.
 <li><a href="scripts/EDIT_notes.bat">Edit test release notes</a> 
 
-<table border=on>
+<p><table border=on>
 <tr><th colspan=2>Package and Upload</th></tr>
 <tr><th>win32</th><th>win64</th></tr>
 <td><a href="scripts/MAKEtest.bat">Package</a></td>
@@ -55,7 +56,6 @@ Update the smv_revision and smv_version environment variables in the <tt>fds_smv
     <td><a href="scripts/UPLOADtest64.bat">Upload</a></td></tr>
 </table>
 
-<li><a href="http://code.google.com/p/fds-smv/downloads/list">Check download page</a>
 </ul>
 </td>
 <td>
@@ -65,18 +65,38 @@ Update the smv_revision and smv_version environment variables in the <tt>fds_smv
 <li>Commit updated release notes and User's guide to the repository so that that the <em>packagers</em> have access to them on all platforms.
 <li><a href="scripts/EDIT_setup.bat">Update configuration file</a> 
 Update the smv_revision and smv_version environment variables in the <tt>fds_smv_env.bat</tt> file.
-<li><a href="scripts/MAKEwin32_smv.bat">Package Smokeview for 32 bit windows</a>
-<li><a href="scripts/MAKEosx32_smv.bat">Compile Smokeview for 32 bit OSX</a>
-<li><a href="scripts/MAKElinux32_smv.bat">Compile Smokeview for 32 bit Linux</a>
-<li><a href="scripts/MAKEdists.bat">Package Smokeview for Linux and OSX</a>
-<li><a href="scripts/UPLOADrelease.bat">Upload</a> Upload Smokeview installation/archive files to the download site.
-<li><a href="http://code.google.com/p/fds-smv/downloads/list">Check download page</a>
+
+<p><table border=on>
+<tr><th colspan=4>Build, Package and Upload Smokeview</th></tr>
+<tr><th>win64</th><th>win32</th><th>Linux 32</th><th>OSX 32</th></tr>
+
+<tr>
+<td align=center>-</td>
+<td align=center>-</td>
+<td><a href="scripts/MAKElinux32_smv.bat">Build</a></td>
+<td><a href="scripts/MAKEosx32_smv.bat">Build</a></td>
+</tr>
+
+<tr>
+<td><a href="scripts/MAKEwin64_smv.bat">Package</a></td>
+<td><a href="scripts/MAKEwin32_smv.bat">Package</a></td>
+<td colspan=2 align=center><a href="scripts/MAKEdists.bat">Package</a></td>
+</tr>
+
+<tr>
+<td><a href="scripts/UPLOADwin64release.bat">Upload</a></td>
+<td colspan=3 align=center><a href="scripts/UPLOADrelease.bat">Upload</a></td>
+</tr>
+
+</table>
 </ul>
-</td>
 </tr>
 </table>
 <h3>Other</h3>
-<a href="../FDS_Compilation/getting_started.html">Getting Started - setting up build scripts</a>
+<ul>
+<li><a href="http://code.google.com/p/fds-smv/downloads/list">Check download page</a>
+<li><a href="../FDS_Compilation/getting_started.html">Getting Started - setting up build scripts</a>
+</ul>
 
 <p><hr>
 
