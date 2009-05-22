@@ -2,11 +2,11 @@
 set version=%1
 REM
 REM This batch file creates a self unarchiving file containing
-REM a test version of smokeview and associated files
+REM a release version of smokeview and associated files
 REM
 REM usage: 
 REM  make_smv_release_win64 version
-REM    where version is of the from test_svn#
+REM    where version is of the from X.Y_svn#
 
 cd ..\for_bundle
 set zipbase=smv_%version%_win64
@@ -16,21 +16,23 @@ echo
 echo filling distribution directory
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
-copy smokeview64_test.exe %smvdir%\smokeview.exe
-copy smokezip64_test.exe %smvdir%\smokezip.exe
+mkdir %smvdir%\Documentation
+copy smokeview.ini %smvdir%\smokeview.ini
+copy smokeview64_release.exe %smvdir%\smokeview.exe
+copy smokezip64_release.exe %smvdir%\smokezip.exe
 copy devices.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
 copy pthreadVC.dll %smvdir%\.
-copy note.txt %smvdir%\.
+copy readme.html %smvdir%\Documentation\.
 
 echo
 echo winzipping distribution directory
 cd %smvdir%
-wzzip -a %zipbase%.zip *
+wzzip -a -r -P %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-c:\bin\winzip\wzipse32 %zipbase%.zip -d "c:\program files\nist\smokeview"
+c:\bin\winzip\wzipse32 %zipbase%.zip -d "c:\program files (x86)\nist\smokeview"
 copy %zipbase%.exe ..\.
 
 cd ..\..\..\scripts
