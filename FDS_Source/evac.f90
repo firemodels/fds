@@ -42,7 +42,8 @@ Module EVAC
   Public EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_EVAC
   ! Public variables (needed in the main program):
   ! Public variables (needed in the dump routine):
-  Public N_DOORS, N_EXITS, N_ENTRYS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE
+  Public N_DOORS, N_EXITS, N_ENTRYS, N_SSTANDS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_SSTANDS, & 
+       EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE, EVAC_SSTAND_TYPE
   !
   Character(255):: EVAC_VERSION = '2.1.2'
   Character(255) :: EVAC_COMPILE_DATE
@@ -52,11 +53,11 @@ Module EVAC
   ! i.e., they have same mass, speed, etc distributions and
   ! they are all put in the given rectangle.
   ! (&EVAC lines)
-  Type EVACUATION_Type
+  Type EVACUATION_TYPE
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB,T_START=0._EB, Angle=0._EB
      Character(60) :: CLASS_NAME='null', ID='null'
      Character(30) :: GRID_NAME='null'
-     Logical :: EVACFILE=.False., After_Tpre=.False., No_Persons=.False.
+     Logical :: EVACFILE=.False., After_Tpre=.False., No_Persons=.False., SHOW=.True.
      Integer :: N_INITIAL=0,SAMPLING=0, IPC=0, IMESH=0
      Integer :: GN_MIN=0, GN_MAX=0
      Integer :: N_VENT_FFIELDS=0, Avatar_Color_Index=0
@@ -64,18 +65,19 @@ Module EVAC
      Integer, Pointer, Dimension(:) :: I_DOOR_NODES =>NULL()
      Integer, Pointer, Dimension(:) :: I_VENT_FFIELDS =>NULL()
      Real(EB), Pointer, Dimension(:) :: P_VENT_FFIELDS =>NULL()
-  End Type EVACUATION_Type
+  End Type EVACUATION_TYPE
   !
   ! An evacuatio hole, i.e., a rectangle where humans should
   ! not be put.  This makes the &EVAC lines easier to define.
   ! (&EVHO lines)
-  Type EVAC_HOLE_Type
+  Type EVAC_HOLE_TYPE
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB
      Character(60) :: ID='null', PERS_ID='null', EVAC_ID='null'
      Character(30) :: GRID_NAME='null'
      Integer, Dimension(3) :: RGB=-1
+     Logical :: SHOW=.True.
      Integer :: IMESH=0
-  End Type EVAC_HOLE_Type
+  End Type EVAC_HOLE_TYPE
   !
   ! A spectator stand. IOR: which x,y line is the bottom line of the stand.
   ! ior=+1 x=x2, ior=-1 x=x1, ior=+2 y=y2, ior=-2 y=y1
@@ -84,14 +86,15 @@ Module EVAC
   Type EVAC_SSTAND_TYPE
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, H=0._EB, H0=0._EB, S=0._EB
      Real(EB) :: Esc_SpeedUp=0._EB, Esc_SpeedDn=0._EB
-     Real(EB) :: fac_v0_up=1._EB, fac_v0_down=1._EB, fac_v0_hori=1._EB
+     Real(EB) :: FAC_V0_UP=1._EB, FAC_V0_DOWN=1._EB, FAC_V0_HORI=1._EB
      Real(EB) :: cos_x=1._EB, cos_y=1._EB, sin_x=0._EB, sin_y=0._EB
      Character(60) :: ID='null'
      Character(26) :: GRID_NAME='null'
      Integer, Dimension(3) :: RGB=-1
      Integer :: IMESH=0, IOR=0
      Real(EB) :: UBAR0=0._EB, VBAR0=0._EB
-     Logical :: Use_v0=.False.
+     Logical :: Use_v0=.False., SHOW=.True.
+     Real(EB), Dimension(3) :: ORIENTATION=0.0_EB
   End Type EVAC_SSTAND_TYPE
   !
   ! Humans belong to some small group (1 to about 5 persons).  This type
@@ -112,7 +115,7 @@ Module EVAC
   !
   ! This defines a class of persons, e.g. soccer fan.
   ! (&PERS lines)
-  Type EVAC_PERS_Type
+  Type EVAC_PERS_TYPE
      Real(EB) :: D_mean=0._EB, D_para=0._EB, D_para2=0._EB, D_low=0._EB, D_high=0._EB
      Real(EB) :: V_mean=0._EB, V_para=0._EB, V_para2=0._EB, V_low=0._EB, V_high=0._EB
      Real(EB) :: Tau_mean=0._EB, Tau_para=0._EB, Tau_para2=0._EB, Tau_low=0._EB, Tau_high=0._EB
@@ -120,11 +123,12 @@ Module EVAC
      Real(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
      Real(EB) :: A=0._EB,B=0._EB,Lambda=0._EB,C_Young=0._EB,Gamma=0._EB,Kappa=0._EB
      Real(EB) :: r_torso=0._EB,r_shoulder=0._EB,d_shoulder=0._EB,m_iner=0._EB, Tau_iner=0._EB
+     Real(EB) :: FAC_V0_UP=-1._EB, FAC_V0_DOWN=-1._EB
      Character(60) :: ID='null'
      Integer :: I_DIA_DIST=0, I_VEL_DIST=0, I_PRE_DIST=0, I_DET_DIST=0, I_TAU_DIST=0
      Integer :: Avatar_Color_Index=0
      Integer, Dimension(3) :: RGB=-1, AVATAR_RGB=-1
-  End Type EVAC_PERS_Type
+  End Type EVAC_PERS_TYPE
   !
   ! Exit door type: this just count the number of persons
   ! T_first: first person's exit time (saved for output)
@@ -177,7 +181,7 @@ Module EVAC
   ! The parameters, like velocity as function of density etc.
   ! define if it is corridor or stairway
   ! (&CORR lines)
-  Type EVAC_CORR_Type
+  Type EVAC_CORR_TYPE
      Real(EB) :: T_first=0._EB, T_last=0._EB, Flow_max=0._EB, Width1=0._EB, Width2=0._EB
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, Width=0._EB
      Real(EB) :: Eff_Width=0._EB, Eff_Length=0._EB, Eff_Area=0._EB, Fac_Speed=0._EB
@@ -194,14 +198,14 @@ Module EVAC
      Character(60) :: TO_NODE='null'
      Character(30) :: GRID_NAME='null'
      Type (CORR_LL_Type), Pointer :: First =>NULL()
-  End Type EVAC_CORR_Type
+  End Type EVAC_CORR_TYPE
   ! 
   ! STRS is a construct to build a staircase. STRS consists of stairs and
   ! landings. 
-  Type EVAC_STRS_Type
+  Type EVAC_STRS_TYPE
      Real(EB) :: XB(6)
      Real(EB), Pointer, Dimension(:,:)   :: XB_NODE =>NULL(), XB_CORE =>NULL()
-     Real(EB) :: FAC_V0_HORI, FAC_V0_DOWN, FAC_V0_UP
+     Real(EB) :: FAC_V0_HORI=1._EB, FAC_V0_DOWN=1._EB, FAC_V0_UP=1._EB
      Integer :: ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0, N_CORES = 0
      Integer :: N_LANDINGS, N_NODES, N_NODES_OUT, N_NODES_IN
      Integer, Pointer, Dimension(:) :: NODE_IOR =>NULL(), NODE_TYPE =>NULL(), NODES_IN =>NULL()
@@ -209,13 +213,13 @@ Module EVAC
      Character(60) :: ID
      Character(24) :: MESH_ID
      Logical RIGHT_HANDED
-  End Type EVAC_STRS_Type
+  End Type EVAC_STRS_TYPE
   !
   ! This produces more humans on the floor specified by the
   ! coordinates. the person type ('soccer_fan' etc) are also
   ! defined here for these persons.
   ! (&ENTR lines)
-  Type EVAC_ENTR_Type
+  Type EVAC_ENTR_TYPE
      Real(EB) :: T_first=0._EB, T_last=0._EB, Flow=0._EB, Width=0._EB, T_Start=0._EB, T_Stop=0._EB
      Real(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, Height=2.0_EB, Z=0.0_EB
      Integer :: IOR=0, ICOUNT=0, IPC=0, IMESH=0, INODE=0, IMODE=-1, &
@@ -231,24 +235,24 @@ Module EVAC
      Real(EB), Pointer, Dimension(:) :: P_VENT_FFIELDS =>NULL()
      Integer, Dimension(3) :: RGB=-1, AVATAR_RGB=-1
      Real(EB), Dimension(3) :: ORIENTATION=0.0_EB
-  End Type EVAC_ENTR_Type
+  End Type EVAC_ENTR_TYPE
   !
   ! coordinates. the person type ('soccer_fan' etc) are also
   ! defined here for these persons.
-  Type EVAC_NODE_Type
+  Type EVAC_NODE_TYPE
      Integer :: Node_Index=0, IMESH=0
      Character(60) :: ID='null', Node_Type='null'
      Character(30) :: GRID_NAME='null'
-  End Type EVAC_NODE_Type
+  End Type EVAC_NODE_TYPE
   !
   ! Linked list, needed for the corridors
-  Type CORR_LL_Type
+  Type CORR_LL_TYPE
      Type (HUMAN_TYPE) :: HUMAN
      Real(EB) :: T_in=0._EB, T_out=0._EB
      Logical :: From1_To2=.False.
      Integer :: Index=0
      Type (CORR_LL_Type), Pointer :: Next =>NULL()
-  End Type CORR_LL_Type
+  End Type CORR_LL_TYPE
   !
   ! Pointers to the allocatable arrays so one can use these as
   ! shorthands to the array elements.
@@ -437,12 +441,12 @@ Contains
          AFTER_REACTION_TIME, GN_MIN, GN_MAX, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, MESH_ID, &
          COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
-         AVATAR_COLOR, AVATAR_RGB
-    Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR
+         AVATAR_COLOR, AVATAR_RGB, SHOW
+    Namelist /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR, SHOW
 
     Namelist /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, ESC_SPEED, EVAC_MESH, RGB, COLOR, &
-         UBAR0, VBAR0, USE_V0
+         UBAR0, VBAR0, USE_V0, SHOW
 
     Namelist /PERS/ FYI,ID,DIAMETER_DIST,VELOCITY_DIST, &
          PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST, &
@@ -470,7 +474,8 @@ Contains
          TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, CONST_CF, FAC_CF, &
          FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
          CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, &
-         FAC_DOOR_QUEUE, FAC_DOOR_WAIT, CF_MIN_B
+         FAC_DOOR_QUEUE, FAC_DOOR_WAIT, CF_MIN_B, &
+         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI
     !
     If (.Not. ANY(EVACUATION_GRID)) Then
        N_EVAC = 0
@@ -997,6 +1002,10 @@ Contains
          D_SHOULDER_MEAN = 0.19_EB
          TAU_ROT   = 0.2_EB
          M_INERTIA = -4.0_EB
+
+         ! If not given on PERS line, use those given on EVSS lines
+         FAC_V0_UP   = -1.0_EB
+         FAC_V0_DOWN = -1.0_EB
          !
          ! No read for default values
          If ( N > 0 ) Then
@@ -1186,7 +1195,7 @@ Contains
          PCP=>EVAC_PERSON_CLASSES(N)
          !
          ! Colors, integer RGB(3), e.g., (23,255,0)
-         If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+         If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'ROYAL BLUE 4'
          If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
          PCP%RGB = RGB
          PCP%AVATAR_RGB = AVATAR_RGB
@@ -1243,6 +1252,9 @@ Contains
          Else
             PCP%m_iner = M_INERTIA  ! kg m2
          End If
+
+         PCP%FAC_V0_UP = FAC_V0_UP
+         PCP%FAC_V0_DOWN = FAC_V0_DOWN
          !
       End Do READ_PERS_LOOP
 24    Rewind(LU_INPUT)
@@ -1414,7 +1426,7 @@ Contains
          If (IOS == 1) Then
             Exit READ_EXIT_LOOP
          End If
-         Read(LU_INPUT,NML=Exit,End=26,IOSTAT=IOS)
+         Read(LU_INPUT,EXIT,End=26,IOSTAT=IOS)
          !
          ! Old input used COLOR_INDEX, next lines are needed for that
          If (MYID==Max(0,EVAC_PROCESS) .And. COLOR_INDEX.Ne.-1) Write (LU_ERR,'(A,A)') &
@@ -1428,7 +1440,7 @@ Contains
          If (COLOR_INDEX == 7) COLOR = 'CYAN'   
 
          ! Colors, integer RGB(3), e.g., (23,255,0)
-         If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+         If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'FOREST GREEN'
          If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
          If (COLOR_METHOD == 4 .And. .Not.COUNT_ONLY) Then
             i_avatar_color = i_avatar_color + 1
@@ -1549,8 +1561,8 @@ Contains
          If (CHECK_FLOW) PEX%Flow_max   = MAX_FLOW
          PEX%COUNT_ONLY = .False.
          If (COUNT_ONLY) PEX%COUNT_ONLY = .True.
-         PEX%SHOW = .True.
-         If (COUNT_ONLY ) PEX%SHOW = .False.
+         PEX%SHOW = SHOW
+         If (COUNT_ONLY  ) PEX%SHOW = .False.
          PEX%HEIGHT = HEIGHT
 
          !       PEX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX-1),7) + 1 ! 1-7 always
@@ -1758,7 +1770,7 @@ Contains
          If (COLOR_INDEX == 7) COLOR = 'CYAN'   
          !
          ! Colors, integer RGB(3), e.g., (23,255,0)
-         If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+         If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'FOREST GREEN'
          If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
          If (COLOR_METHOD == 4) Then
             i_avatar_color = i_avatar_color + 1
@@ -2670,7 +2682,7 @@ Contains
          If (QUANTITY == 'CYAN')    AVATAR_COLOR = 'CYAN'   
          !
          ! Colors, integer RGB(3), e.g., (23,255,0)
-         If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+         If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'SKY BLUE'
          If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
          If (Any(AVATAR_RGB < 0) .And. AVATAR_COLOR=='null') AVATAR_COLOR = 'ROYAL BLUE 4'
          If (AVATAR_COLOR /= 'null') Call COLOR2RGB(AVATAR_RGB,AVATAR_COLOR)
@@ -2964,6 +2976,7 @@ Contains
          ANGLE                    = -1000.0_EB
          EVACFILE                 = .False.
          AFTER_REACTION_TIME      = .False.
+         SHOW                     = .True.
          TIME_START               = -99.0_EB
          TIME_STOP                = -99.0_EB
          GN_MIN                   = 1
@@ -3097,6 +3110,7 @@ Contains
          HPT%EVACFILE = EVACFILE
          HPT%IMESH = 0
          HPT%ID = Trim(ID)
+         HPT%SHOW   = SHOW
 
          ! Check which evacuation floor
          ii = 0
@@ -3203,6 +3217,7 @@ Contains
          PERS_ID       = 'null'
          MESH_ID       = 'null'
          EVAC_MESH     = 'null'
+         SHOW          = .True.
          !
          Call CHECKREAD('EVHO',LU_INPUT,IOS)
          If (IOS == 1) Then
@@ -3233,6 +3248,7 @@ Contains
          EHX%ID        = ID
          EHX%EVAC_ID   = EVAC_ID
          EHX%PERS_ID   = PERS_ID
+         EHX%SHOW      = SHOW
          ! 
          ! Check which evacuation floor
          ii = 0
@@ -3274,6 +3290,7 @@ Contains
       !
       ! Local variables
       Type (EVAC_SSTAND_Type), Pointer :: ESS=>NULL()
+      Real(EB) :: X, Y, Z
 
       READ_EVSS_LOOP: Do N = 1, N_SSTANDS
          If (MYID /= Max(0,EVAC_PROCESS)) Cycle READ_EVSS_LOOP
@@ -3295,6 +3312,7 @@ Contains
          UBAR0         = 0.0_EB
          VBAR0         = 0.0_EB
          USE_V0        = .False.
+         SHOW          = .True.
          !
          Call CHECKREAD('EVSS',LU_INPUT,IOS)
          If (IOS == 1) Then
@@ -3340,6 +3358,7 @@ Contains
          ESS%UBAR0  = UBAR0
          ESS%VBAR0  = VBAR0
          ESS%Use_v0 = USE_V0
+         ESS%SHOW   = SHOW
          ! 
          ! Check which evacuation floor
          ii = 0
@@ -3372,21 +3391,91 @@ Contains
             ESS%COS_Y = 1.0_EB
             ESS%SIN_X = Abs(ESS%H-ESS%H0)/ Sqrt((ESS%X2-ESS%X1)**2 + (ESS%H-ESS%H0)**2)
             ESS%SIN_Y = 0.0_EB
+            ESS%ORIENTATION(1) = IOR*(ESS%H-ESS%H0)/ Sqrt((ESS%X2-ESS%X1)**2 + (ESS%H-ESS%H0)**2)
+            ESS%ORIENTATION(2) = 0.0_EB
+            ESS%ORIENTATION(3) = ESS%COS_X
          Case(-2,+2)
             ESS%S = Sqrt((ESS%Y2-ESS%Y1)**2 + (ESS%H-ESS%H0)**2)
             ESS%COS_X = 1.0_EB
             ESS%COS_Y = Abs(ESS%Y2-ESS%Y1)/ Sqrt((ESS%Y2-ESS%Y1)**2 + (ESS%H-ESS%H0)**2)
             ESS%SIN_X = 0.0_EB
             ESS%SIN_Y = Abs(ESS%H-ESS%H0)/ Sqrt((ESS%Y2-ESS%Y1)**2 + (ESS%H-ESS%H0)**2)
+            ESS%ORIENTATION(1) = 0.0_EB
+            ESS%ORIENTATION(2) = 0.5_EB*IOR*(ESS%H-ESS%H0)/ Sqrt((ESS%Y2-ESS%Y1)**2 + (ESS%H-ESS%H0)**2)
+            ESS%ORIENTATION(3) = ESS%COS_Y
          Case Default
             Write(MESSAGE,'(A,I4,A)') 'ERROR: EVSS',N,' problem with IOR'
             Call SHUTDOWN(MESSAGE)
          End Select
 
          ! Colors, integer RGB(3), e.g., (23,255,0)
-         If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+         ! If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'BLACK'
+         If (Any(RGB < 0) .And. COLOR=='null') COLOR = 'AZURE 2'  ! RGB = 193 205 205
          If (COLOR /= 'null') Call COLOR2RGB(RGB,COLOR)
          ESS%RGB = RGB
+
+         ! Check if doors, exits and entrys are on the inclines.
+         ! If they are, change the 'z' so that Smokeview plots correctly.
+         DO I = 1, N_EXITS
+            IF (EVAC_EXITS(I)%IMESH /= ESS%IMESH) CYCLE
+            X = 0.5_EB*(EVAC_EXITS(I)%X1+EVAC_EXITS(I)%X2)
+            Y = 0.5_EB*(EVAC_EXITS(I)%Y1+EVAC_EXITS(I)%Y2)
+            Z = 0.0_EB
+            IF ( (ESS%X1 <= X .AND. ESS%X2 >= X) .AND. (ESS%Y1 <= Y .AND. ESS%Y2 >= Y)) THEN
+               SELECT CASE (ESS%IOR)
+                CASE(-1)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%X1-X)/ABS(ESS%X1-ESS%X2)
+                CASE(+1)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%X2-X)/ABS(ESS%X1-ESS%X2)
+                CASE(-2)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%Y1-Y)/ABS(ESS%Y1-ESS%Y2)
+                CASE(+2)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%Y2-Y)/ABS(ESS%Y1-ESS%Y2)
+                END SELECT
+                EVAC_EXITS(I)%Z = EVAC_EXITS(I)%Z + Z
+            END IF
+         END DO
+
+         DO I = 1, N_DOORS
+            IF (EVAC_DOORS(I)%IMESH /= ESS%IMESH) CYCLE
+            X = 0.5_EB*(EVAC_DOORS(I)%X1+EVAC_DOORS(I)%X2)
+            Y = 0.5_EB*(EVAC_DOORS(I)%Y1+EVAC_DOORS(I)%Y2)
+            Z = 0.0_EB
+            IF ( (ESS%X1 <= X .AND. ESS%X2 >= X) .AND. (ESS%Y1 <= Y .AND. ESS%Y2 >= Y)) THEN
+               SELECT CASE (ESS%IOR)
+                CASE(-1)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%X1-X)/ABS(ESS%X1-ESS%X2)
+                CASE(+1)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%X2-X)/ABS(ESS%X1-ESS%X2)
+                CASE(-2)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%Y1-Y)/ABS(ESS%Y1-ESS%Y2)
+                CASE(+2)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%Y2-Y)/ABS(ESS%Y1-ESS%Y2)
+                END SELECT
+                EVAC_DOORS(I)%Z = EVAC_DOORS(I)%Z + Z
+            END IF
+         END DO
+
+         DO I = 1, N_ENTRYS
+            IF (EVAC_ENTRYS(I)%IMESH /= ESS%IMESH) CYCLE
+            X = 0.5_EB*(EVAC_ENTRYS(I)%X1+EVAC_ENTRYS(I)%X2)
+            Y = 0.5_EB*(EVAC_ENTRYS(I)%Y1+EVAC_ENTRYS(I)%Y2)
+            Z = 0.0_EB
+            IF ( (ESS%X1 <= X .AND. ESS%X2 >= X) .AND. (ESS%Y1 <= Y .AND. ESS%Y2 >= Y)) THEN
+               SELECT CASE (ESS%IOR)
+                CASE(-1)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%X1-X)/ABS(ESS%X1-ESS%X2)
+                CASE(+1)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%X2-X)/ABS(ESS%X1-ESS%X2)
+                CASE(-2)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%Y1-Y)/ABS(ESS%Y1-ESS%Y2)
+                CASE(+2)
+                   Z = ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%Y2-Y)/ABS(ESS%Y1-ESS%Y2)
+                END SELECT
+                EVAC_ENTRYS(I)%Z = EVAC_ENTRYS(I)%Z + Z
+            END IF
+         END DO
+
       End Do READ_EVSS_LOOP
 31    Rewind(LU_INPUT)
 
@@ -5044,7 +5133,7 @@ Contains
     Character(26) :: name_old_ffield
     !
     Real(EB) :: P2P_Torque, Fc_x, Fc_y, Omega_new, angle, A1, Tc_z, Fc_x1, Fc_y1
-    Real(EB) :: Omega_max, Omega_0
+    Real(EB) :: Omega_max, Omega_0, FAC_V0_UP, FAC_V0_DOWN
     Real(EB), Dimension(6) :: y_tmp, x_tmp, r_tmp, v_tmp, u_tmp
     !
     ! Next are for the block list of the double agent-agent loop (speed up)
@@ -5479,30 +5568,46 @@ Contains
              If (ESS%Y2 < HR%Y) Cycle SS_Loop1
              cos_x = ESS%cos_x
              cos_y = ESS%cos_y
+             FAC_V0_UP   = ESS%FAC_V0_UP
+             FAC_V0_DOWN = ESS%FAC_V0_DOWN
+             IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP > 0.0_EB) THEN
+                IF ((ESS%H - ESS%H0) < 0.0_EB) THEN
+                   FAC_V0_DOWN = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
+                ELSE
+                   FAC_V0_UP = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
+                END IF
+             END IF
+             IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN > 0.0_EB) THEN
+                IF ((ESS%H - ESS%H0) < 0.0_EB) THEN
+                   FAC_V0_UP = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN 
+                ELSE
+                   FAC_V0_DOWN = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN 
+                END IF
+             END IF
              Select Case (ESS%IOR)
              Case(-1)
-                speed_xm = cos_x*HR%Speed*ESS%FAC_V0_DOWN
-                speed_xp = cos_x*HR%Speed*ESS%FAC_V0_UP
+                speed_xm = cos_x*HR%Speed*FAC_V0_DOWN
+                speed_xp = cos_x*HR%Speed*FAC_V0_UP
                 speed_ym = HR%Speed*ESS%FAC_V0_HORI
                 speed_yp = HR%Speed*ESS%FAC_V0_HORI
                 HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
              Case(+1)
-                speed_xm = cos_x*HR%Speed*ESS%FAC_V0_UP
-                speed_xp = cos_x*HR%Speed*ESS%FAC_V0_DOWN
+                speed_xm = cos_x*HR%Speed*FAC_V0_UP
+                speed_xp = cos_x*HR%Speed*FAC_V0_DOWN
                 speed_ym = HR%Speed*ESS%FAC_V0_HORI
                 speed_yp = HR%Speed*ESS%FAC_V0_HORI
                 HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
              Case(-2)
                 speed_xm = HR%Speed*ESS%FAC_V0_HORI
                 speed_xp = HR%Speed*ESS%FAC_V0_HORI
-                speed_ym = cos_y*HR%Speed*ESS%FAC_V0_DOWN
-                speed_yp = cos_y*HR%Speed*ESS%FAC_V0_UP
+                speed_ym = cos_y*HR%Speed*FAC_V0_DOWN
+                speed_yp = cos_y*HR%Speed*FAC_V0_UP
                 HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
              Case(+2)
                 speed_xm = HR%Speed*ESS%FAC_V0_HORI
                 speed_xp = HR%Speed*ESS%FAC_V0_HORI
-                speed_ym = cos_y*HR%Speed*ESS%FAC_V0_UP
-                speed_yp = cos_y*HR%Speed*ESS%FAC_V0_DOWN
+                speed_ym = cos_y*HR%Speed*FAC_V0_UP
+                speed_yp = cos_y*HR%Speed*FAC_V0_DOWN
                 HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
              End Select
              Exit SS_Loop1
@@ -6016,30 +6121,46 @@ Contains
              If (ESS%IMESH == nm .And. (ESS%X1 <= HR%X .And. ESS%X2 >= HR%X) .And. (ESS%Y1 <= HR%Y .And. ESS%Y2 >= HR%Y) ) Then
                 cos_x = ESS%cos_x
                 cos_y = ESS%cos_y
+                FAC_V0_UP   = ESS%FAC_V0_UP
+                FAC_V0_DOWN = ESS%FAC_V0_DOWN
+                IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP > 0.0_EB) THEN
+                   IF ((ESS%H - ESS%H0) < 0.0_EB) THEN
+                      FAC_V0_DOWN = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
+                   ELSE
+                      FAC_V0_UP = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
+                   END IF
+                END IF
+                IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN > 0.0_EB) THEN
+                   IF ((ESS%H - ESS%H0) < 0.0_EB) THEN
+                      FAC_V0_UP = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN 
+                   ELSE
+                      FAC_V0_DOWN = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_DOWN 
+                   END IF
+                END IF
                 Select Case (ESS%IOR)
                 Case(-1)
-                   speed_xm = cos_x*HR%Speed*ESS%FAC_V0_DOWN
-                   speed_xp = cos_x*HR%Speed*ESS%FAC_V0_UP
+                   speed_xm = cos_x*HR%Speed*FAC_V0_DOWN
+                   speed_xp = cos_x*HR%Speed*FAC_V0_UP
                    speed_ym = HR%Speed*ESS%FAC_V0_HORI
                    speed_yp = HR%Speed*ESS%FAC_V0_HORI
                    HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X1-HR%X)/Abs(ESS%X1-ESS%X2)
                 Case(+1)
-                   speed_xm = cos_x*HR%Speed*ESS%FAC_V0_UP
-                   speed_xp = cos_x*HR%Speed*ESS%FAC_V0_DOWN
+                   speed_xm = cos_x*HR%Speed*FAC_V0_UP
+                   speed_xp = cos_x*HR%Speed*FAC_V0_DOWN
                    speed_ym = HR%Speed*ESS%FAC_V0_HORI
                    speed_yp = HR%Speed*ESS%FAC_V0_HORI
                    HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%X2-HR%X)/Abs(ESS%X1-ESS%X2)
                 Case(-2)
                    speed_xm = HR%Speed*ESS%FAC_V0_HORI
                    speed_xp = HR%Speed*ESS%FAC_V0_HORI
-                   speed_ym = cos_y*HR%Speed*ESS%FAC_V0_DOWN
-                   speed_yp = cos_y*HR%Speed*ESS%FAC_V0_UP
+                   speed_ym = cos_y*HR%Speed*FAC_V0_DOWN
+                   speed_yp = cos_y*HR%Speed*FAC_V0_UP
                    HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y1-HR%Y)/Abs(ESS%Y1-ESS%Y2)
                 Case(+2)
                    speed_xm = HR%Speed*ESS%FAC_V0_HORI
                    speed_xp = HR%Speed*ESS%FAC_V0_HORI
-                   speed_ym = cos_y*HR%Speed*ESS%FAC_V0_UP
-                   speed_yp = cos_y*HR%Speed*ESS%FAC_V0_DOWN
+                   speed_ym = cos_y*HR%Speed*FAC_V0_UP
+                   speed_yp = cos_y*HR%Speed*FAC_V0_DOWN
                    HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*Abs(ESS%Y2-HR%Y)/Abs(ESS%Y1-ESS%Y2)
                 End Select
                 Exit SS_Loop2
