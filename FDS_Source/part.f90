@@ -154,6 +154,18 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
          ENDIF
          MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
       ENDIF
+
+      ! Process special particles that are associated with a particular SURFace type
+
+      IF (PC%SURF_INDEX>0) THEN
+         DR%WALL_INDEX = PC%WALL_INDEX_START + I - 1
+         XW(DR%WALL_INDEX) = DR%X
+         YW(DR%WALL_INDEX) = DR%Y
+         ZW(DR%WALL_INDEX) = DR%Z
+         IJKW(1,DR%WALL_INDEX) = II
+         IJKW(2,DR%WALL_INDEX) = JJ
+         IJKW(3,DR%WALL_INDEX) = KK
+      ENDIF
  
    ENDDO INITIALIZATION_LOOP
  
@@ -1229,9 +1241,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
    PART_CLASS_LOOP: DO N_PC = 1,N_PART
 
       PC => PARTICLE_CLASS(N_PC)
-      IF (.NOT.PC%EVAPORATE) CYCLE PART_CLASS_LOOP
+      IF (.NOT.PC%EVAPORATE)         CYCLE PART_CLASS_LOOP
       IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
-      IF (PC%TREE) CYCLE PART_CLASS_LOOP
+      IF (PC%TREE)                   CYCLE PART_CLASS_LOOP
+      IF (PC%SURF_INDEX>0)           CYCLE PART_CLASS_LOOP
+
       DROP_DEN = 0._EB
       DROP_TMP = 0._EB
       DROP_RAD = 0._EB
