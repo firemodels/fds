@@ -183,6 +183,46 @@ push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 3.0 3.0 getuservals 0.0 0.0 1.0 s
 push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 0.0 0.0 1.0 setcolor 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
  NEWFRAME
  0.001 0.001 0.001 scalexyz 1.0 drawcube // state 1, door disappears
+DEVICEDEF
+ evacdoor         // label, name of device
+ // Evacuation input: door namelist
+ push  6 3 getuservals 0.0 0.0 0.0 translate
+    0.133 0.545 0.133 setcolor  0.0 0.0 -0.6 translate 0.4 0.6 drawcone pop // draw an arrow
+    // after rotatex 0 0 1 tr ==> inside the door
+    // after rotatex 0 1 0 tr ==> right
+    // after rotatex 1 0 0 tr ==> up
+    // Note: getuservals: max 6 on same line, next should be on the next line in smv file
+ 90.0 rotatez 90.0 rotatex
+ push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 3.0 3.0 getuservals 0.0 0.0 1.0 setcolor
+    0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
+ push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 0.133 0.545 0.133 setcolor 
+    0.0 0.5 0.0 translate 1.0 drawcube pop // back half of door (forest green)
+NEWFRAME
+ 90.0 rotatez 90.0 rotatex
+ push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 3.0 3.0 getuservals 0.0 0.0 1.0 setcolor
+    1.0 drawcube pop // front half of door (user specified color)
+ push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 1.0 0.0 0.0 setcolor
+    0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (red)
+DEVICEDEF
+ evacincline         // label, name of device
+ // Evacuation input: evss namelist
+ 90.0 rotatez 90.0 rotatex
+ push  0.0 3.0 getuservals 1.0 0.1 2.3 scalexyz 3.0 3.0 getuservals 0.0 0.0 1.0 setcolor
+    0.0 0.5 0.0 translate 1.0 drawcube pop // incline (user specified color)
+DEVICEDEF
+ evacentr         // label, name of device
+ // Evacuation input: entr namelist
+ 90.0 rotatez 90.0 rotatex
+ push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 3.0 3.0 getuservals 0.0 0.0 1.0 setcolor
+    1.0 drawcube pop // front half of door (user specified color)
+ push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 0.529 0.808 0.922 setcolor
+    0.0 1.0 0.0 translate 1.0 drawcube pop // front half of door (sky blue 135 206 235) 
+NEWFRAME
+ 90.0 rotatez 90.0 rotatex
+ push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 3.0 3.0 getuservals 0.0 0.0 1.0 setcolor
+    0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
+ push  0.0 3.0 getuservals 1.0 0.2 2.3 scalexyz 1.0 0.0 0.0 setcolor
+    0.0 0.5 0.0 translate 1.0 drawcube pop // front half of door (red)
    
    // ************ avatar definitions ********************
 
