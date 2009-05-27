@@ -50,9 +50,11 @@ $RUNFDS NS_Analytical_Solution ns2d_64            fire64 &
 $RUNFDS NS_Analytical_Solution ns2d_64_nupt1      fire65 &
 $RUNFDS NS_Analytical_Solution ns2d_8             fire66 &
 $RUNFDS NS_Analytical_Solution ns2d_8_nupt1       fire67 &
-$RUNFDS Flowfields poiseuille_dpdx=-1_N16         fire74 &
-$RUNFDS Flowfields poiseuille_dpdx=-1_N32         fire75 &
-$RUNFDS Flowfields poiseuille_dpdx=-1_N8          fire75 &
+$RUNFDS Flowfields poiseuille_N8_mu025            fire74 &
+$RUNFDS Flowfields poiseuille_N16_mu025           fire75 &
+$RUNFDS Flowfields poiseuille_N32_mu025           fire75 &
+$RUNFDS Flowfields poiseuille_N64_mu025           fire76 &
+$RUNFDS Flowfields poiseuille_N64_mu0125          fire76 &
 $RUNFDS Pressure_Effects door_crack               fire68 &
 $RUNFDS Pressure_Effects fan_test                 fire61 &
 $RUNFDS Pressure_Effects leak_test_2              fire62 &
