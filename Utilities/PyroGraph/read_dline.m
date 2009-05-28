@@ -5,7 +5,7 @@
 close all
 clear all
 
-[M,T] = xlsread('verification_data_config_matlab.csv'); % M = num array, T = text array
+[M T] = xlsread('verification_data_config_matlab.csv'); % M = num array, T = cell array
 
 for k = 2:length(T(:,5))
     if strcmp((T(k,1)),'d')
