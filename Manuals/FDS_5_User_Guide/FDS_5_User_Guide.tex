@@ -1565,7 +1565,7 @@ be found in Section~\ref{info:multimesh}. The default value of {\ct SYNCHRONIZE}
 Finally, if you want to prevent FDS from automatically changing the time step, set \\
 {\ct LOCK\_TIME\_STEP=.TRUE.} \\
 on the {\ct TIME} line, in which case the specified
-time step, {\ct DT}, will not be adjusted. 
+time step, {\ct DT}, will not be adjusted.
 This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
 numerical instabilities if the initial time step is set too high.
 
@@ -2373,9 +2373,9 @@ simulations failing due to numerical instabilities.
 \end{warning}
 
 \noindent
-If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP=.TRUE.} 
+If you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP=.TRUE.}
 on the {\ct TIME} line, in which case the specified
-time step, {\ct DT}, will not be adjusted. 
+time step, {\ct DT}, will not be adjusted.
 This parameter is intended for diagnostic purposes only, for example, timing program execution. It can lead to
 numerical instabilities if the initial time step is set too high.
 
@@ -5989,8 +5989,8 @@ Unless you declare {\ct MASSLESS=.TRUE.} on the {\ct PART} line, it is assumed t
 heat up and evaporation. To prevent evaporation, set {\ct EVAPORATE=.FALSE.} The particles will still heat up due to convection, but they will not
 shrink and no additional gaseous species need to be declared.
 
-Note that the absorption of thermal radiation by water ({\ct WATER=.TRUE.}) or fuel droplets ({\ct FUEL=.TRUE.}) is 
-handled in FDS with fairly well-established physical sub-models, the details 
+Note that the absorption of thermal radiation by water ({\ct WATER=.TRUE.}) or fuel droplets ({\ct FUEL=.TRUE.}) is
+handled in FDS with fairly well-established physical sub-models, the details
 of which are contained in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 However, for arbitrary particles or droplets, there is no assumed radiative absorption.
 
@@ -6276,7 +6276,7 @@ properties of a given sprinkler. This file is no longer used.}
 
 Properties associated with sprinklers included in the {\ct PROP} group are:
 \begin{description}
-\item[{\ct RTI}] Response Time Index in units of $\sqrt{\hbox{m}\cdot \hbox{s}}$. (Default 165.)
+\item[{\ct RTI}] Response Time Index in units of $\sqrt{\hbox{m}\cdot \hbox{s}}$. (Default 100.)
 \item[{\ct C\_FACTOR}] in units of $\sqrt{\hbox{m/s}}$. (Default 0.)
 \item[{\ct ACTIVATION\_TEMPERATURE}] in units of $^\circ$C. (Default 74~$^\circ$C)
 \item[{\ct INITIAL\_TEMPERATURE}] of the link in units of $^\circ$C. (Default {\ct TMPA})
