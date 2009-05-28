@@ -57,10 +57,10 @@ if data_set == 2:
     print "\n** Processing Verification Data Set\n"
 
 ## Trainier Data
-if data_set == 4:
+if data_set == 3:
     data_directory = "../../Training/"
     output_directory = "../../Manuals/FDS_SMV_Training_Guide/datafigures/"
-    config_file_name = "Training_Examples_Data_Config_File.csv"
+    config_file_name = "training_data_config"
     print "\n** Processing Training Data Set\n"
 
 
