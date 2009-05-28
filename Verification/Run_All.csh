@@ -4,11 +4,11 @@ setenv FDS $SVNROOT/FDS_Compilation/intel_linux_32/fds5_intel_linux_32
 set RUNFDS=$SVNROOT/Utilities/Scripts/runfds.csh
 setenv BASEDIR `pwd`
 
-$RUNFDS Atmospheric_Effects lee_waves             fire31 &
-$RUNFDS Atmospheric_Effects stack_effect          fire32 &
-$RUNFDS Controls activate_vents                   fire33 &
-$RUNFDS Controls control_test                     fire34 &
-$RUNFDS Controls create_remove                    fire35 &
+$RUNFDS Atmospheric_Effects lee_waves             fire41 &
+$RUNFDS Atmospheric_Effects stack_effect          fire42 &
+$RUNFDS Controls activate_vents                   fire43 &
+$RUNFDS Controls control_test                     fire44 &
+$RUNFDS Controls create_remove                    fire45 &
 $RUNFDS Controls cycle_test                       fire41 &
 $RUNFDS Controls device_test                      fire42 &
 $RUNFDS Detectors aspiration_detector             fire43 &
@@ -87,16 +87,16 @@ $RUNFDS Radiation radiation_plane_layer_1_5       fire46 &
 $RUNFDS Radiation radiation_plane_layer_2_1       fire46 &
 $RUNFDS Radiation radiation_plane_layer_2_2       fire47 &
 $RUNFDS Radiation radiation_plane_layer_2_3       fire47 &
-$RUNFDS Radiation radiation_plane_layer_2_4       fire31 &
-$RUNFDS Radiation radiation_plane_layer_2_5       fire31 &
-$RUNFDS Radiation radiation_plane_layer_3_1       fire32 &
-$RUNFDS Radiation radiation_plane_layer_3_2       fire32 &
-$RUNFDS Radiation radiation_plane_layer_3_3       fire33 &
-$RUNFDS Radiation radiation_plane_layer_3_4       fire33 &
-$RUNFDS Radiation radiation_plane_layer_3_5       fire34 &
-$RUNFDS Radiation radiation_plane_layer_4_1       fire34 &
-$RUNFDS Radiation radiation_plane_layer_4_2       fire35 &
-$RUNFDS Radiation radiation_plane_layer_4_3       fire35 &
+$RUNFDS Radiation radiation_plane_layer_2_4       fire41 &
+$RUNFDS Radiation radiation_plane_layer_2_5       fire41 &
+$RUNFDS Radiation radiation_plane_layer_3_1       fire42 &
+$RUNFDS Radiation radiation_plane_layer_3_2       fire42 &
+$RUNFDS Radiation radiation_plane_layer_3_3       fire43 &
+$RUNFDS Radiation radiation_plane_layer_3_4       fire43 &
+$RUNFDS Radiation radiation_plane_layer_3_5       fire44 &
+$RUNFDS Radiation radiation_plane_layer_4_1       fire44 &
+$RUNFDS Radiation radiation_plane_layer_4_2       fire45 &
+$RUNFDS Radiation radiation_plane_layer_4_3       fire45 &
 $RUNFDS Radiation radiation_plane_layer_4_4       fire41 &
 $RUNFDS Radiation radiation_plane_layer_4_5       fire41 &
 $RUNFDS Radiation radiation_plane_layer_5_1       fire42 &
