@@ -79,9 +79,10 @@ void get_shooter_vel(float *uvw, float *xyz){
 
 /* ------------------ increment_shooter_data ------------------------ */
 
-void increment_shooter_data(float dt){
+void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt){
   int i;
-  float *xyz, *uvw, uvw_air[3];
+  float *xyzold, *uvwold, uvw_air[3];
+  float *xyznew, *uvwnew;
   float g=9.8;
   
   // dv/dt = g - |g|(v-v_a)/v_inf
@@ -91,21 +92,23 @@ void increment_shooter_data(float dt){
   for(i=0;i<shooter_nparts;i++){
     float dvel[3];
 
-    xyz = shootpointinfo[i].xyz;
-    uvw = shootpointinfo[i].uvw;
-    get_shooter_vel(uvw_air,xyz);
+    xyzold = pold[i].xyz;
+    uvwold = pold[i].uvw;
+    xyznew = pnew[i].xyz;
+    uvwnew = pnew[i].uvw;
+    get_shooter_vel(uvw_air,xyzold);
 
-    dvel[0] = uvw[0]-uvw_air[0];
-    dvel[1] = uvw[1]-uvw_air[1];
-    dvel[2] = uvw[2]-uvw_air[2];
+    dvel[0] = uvwold[0]-uvw_air[0];
+    dvel[1] = uvwold[1]-uvw_air[1];
+    dvel[2] = uvwold[2]-uvw_air[2];
 
-    uvw[0] -= g*dt*(    dvel[0]/shooter_v_inf);
-    uvw[1] -= g*dt*(    dvel[1]/shooter_v_inf);
-    uvw[2] -= g*dt*(1.0+dvel[2]/shooter_v_inf);
+    uvwnew[0] = uvwold[0] - g*dt*(    dvel[0]/shooter_v_inf);
+    uvwnew[1] = uvwold[1] - g*dt*(    dvel[1]/shooter_v_inf);
+    uvwnew[2] = uvwold[2] - g*dt*(1.0+dvel[2]/shooter_v_inf);
 
-    xyz[0] += dt*uvw[0];
-    xyz[1] += dt*uvw[1];
-    xyz[2] += dt*uvw[2];
+    xyznew[0] = xyzold[0] + dt*uvwnew[0];
+    xyznew[1] = xyzold[1] + dt*uvwnew[1];
+    xyznew[2] = xyzold[2] + dt*uvwnew[2];
   }
   shooter_active=1;
 }
@@ -120,8 +123,6 @@ void init_shooter_data(void){
   xmin = shooter_xyz[0]-shooter_dxyz[0]/2.0;
   ymin = shooter_xyz[1]-shooter_dxyz[1]/2.0;
   zmin = shooter_xyz[2]-shooter_dxyz[2]/2.0;
-  //shooter_firstpass=1;
-//  show_shooter=0;
   
   for(i=0;i<shooter_nparts;i++){
     xyz = shootpointinfo[i].xyz;
@@ -143,17 +144,48 @@ void init_shooter_data(void){
   shooter_time=0.0;
 }
 
+/* ------------------ solve_shooter_data ------------------------ */
+
+void solve_shooter_data(void){
+  int i;
+  float shooter_dt;
+
+  if(shooter_fps<1){
+    shooter_dt=1.0;
+  }
+  else{
+    shooter_dt=1.0/(float)shooter_fps;
+  }
+
+  init_shooter_data();
+  for(i=1;i<nshooter_frames;i++){
+    shootpointdata *pold, *pnew;
+
+    pold = shootpointinfo + (i-1)*shooter_nparts;
+    pnew = pold + shooter_nparts;
+    pnew->prev=pold;
+    increment_shooter_data(pold,pnew,shooter_dt);
+    shoottimeinfo[i].beg=pold;
+    shoottimeinfo[i].end=pnew-1;
+    shoottimeinfo[i].frame=i;
+    shoottimeinfo[i].time=i*shooter_dt;
+  }
+}
+
 /* ------------------ draw_shooter ------------------------ */
 
 void draw_shooter(void){
   int i;
+  int iframe;
+  shootpointdata *pb, *pe;
+  int nframes;
+
+  iframe = shooter_timeslist[itime];
+  pb = shoottimeinfo[iframe].beg;
+  pe = shoottimeinfo[iframe].end;
+  nframes = pe + 1 - pb;
 
 
-  increment_shooter_data(0.01);
-  if(shooter_time>shooter_time_max){
-    printf("initializing shooter data\n");
-    init_shooter_data();
-  }
   glPointSize(shooterpointsize);
 
   glPushMatrix();
@@ -162,10 +194,13 @@ void draw_shooter(void){
 
   //glColor4fv(static_color);
   glBegin(GL_POINTS);
-  for(i=0;i<shooter_nparts;i++){
+  for(i=0;i<nframes;i++){
     float *xyz;
+    shootpointdata *pbi;
 
-    xyz = shootpointinfo[i].xyz;
+    pbi = pb + i;
+
+    xyz = pbi->xyz;
     glVertex3fv(xyz);
   }
   glEnd();

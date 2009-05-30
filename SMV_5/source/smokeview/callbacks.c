@@ -2130,6 +2130,11 @@ void Idle(void){
           itime=itime_save;
         }
       }
+#ifdef pp_SHOOTER
+      if(shooter_firstframe==1&&visShooter!=0&&shooter_active==1){
+        itime=0;
+      }
+#endif
       checktimebound();
       UpdateTimeLabels();
     }

@@ -874,9 +874,9 @@ void DialogMenu(int value){
   switch (value){
 #ifdef pp_SHOOTER
   case 27:
-    showshooter=1-showshooter;
-    if(showshooter==1)show_shooter();
-    if(showshooter==0)hide_shooter();
+    showshooterDLG=1-showshooterDLG;
+    if(showshooterDLG==1)show_shooter();
+    if(showshooterDLG==0)hide_shooter();
     break;
 #endif
   case 25:
@@ -5712,8 +5712,8 @@ static int in_menu=0;
   if(showmotion==1)glutAddMenuEntry("*Motion/View...  ALT+m",15);
   if(showmotion==0)glutAddMenuEntry("Motion/View...  ALT+m",15);
 #ifdef pp_SHOOTER
-  if(showshooter==1)glutAddMenuEntry("*Particle Shooting...",27);
-  if(showshooter==0)glutAddMenuEntry("Particle Shooting...",27);
+  if(showshooterDLG==1)glutAddMenuEntry("*Particle Shooting...",27);
+  if(showshooterDLG==0)glutAddMenuEntry("Particle Shooting...",27);
 #endif
   if(nsmoke3d>0){
     if(showbounds==1)glutAddMenuEntry("*Smoke3D Parameters...  ALT+s",20);
