@@ -944,7 +944,7 @@ void initvars1(void){
   show_smokelighting=0;
 #endif
 #ifdef pp_SHOOTER
-  show_shooter_points=0;
+  visShooter=0;
   shooter_history=10.0;
   shootpointinfo=NULL;
   shoottimeinfo=NULL;
@@ -955,9 +955,9 @@ void initvars1(void){
   shooter_u0=2.0;
   shooter_z0=2.0;
   shooter_p=1.0/7.0;
-  shooter_show=0;
   shooter_timeslist=NULL;
-  //shooter_firstpass=0;
+  shooter_cont_update=0;
+  shooter_firstframe=0;
 #endif
   update_makeiblank_smoke3d=0;
   update_initcull=0;
@@ -1225,7 +1225,7 @@ void initvars1(void){
   allinterior=1;
   showbounds=0,showmotion=0,showedit=0, showclip=0, showgluistereo=0, showtour=0, showlabels=0, showcolorbar=0, showwui=0;
 #ifdef pp_SHOOTER
-  showshooter=0;
+  showshooterDLG=0;
 #endif
   showterrain=0;
   showgluitrainer=0;

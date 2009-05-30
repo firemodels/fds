@@ -27,6 +27,7 @@ extern "C" char glui_shooter_revision[]="$Revision$";
 // $Date$ $Author$
 
 GLUI_Panel *panel_shooter_frame=NULL;
+GLUI_Panel *panel_shooter_misc=NULL;
 GLUI_Panel *panel_shooter_frameA=NULL;
 GLUI_Panel *panel_shooter_frameB=NULL;
 GLUI_Panel *panel_shooter_velocity=NULL;
@@ -57,6 +58,8 @@ GLUI_Spinner *SPINNER_shooter_history=NULL;
 #define SHOOTER_XYZ 107
 #define SHOOTER_DXYZ 108
 #define SHOOTER_VEL 109
+#define SHOOTER_SHOW 110
+#define SHOOTER_FIRSTFRAME 111
 
 #define SAVE_SETTINGS 900
 #define SHOOTER_CLOSE 901
@@ -70,7 +73,7 @@ extern "C" void init_shooter_data(void);
 extern "C" void hide_shooter(void){
   if(glui_shooter!=NULL){
     glui_shooter->hide();
-    showshooter=0;
+    showshooterDLG=0;
     updatemenu=1;
   }
 }
@@ -80,7 +83,7 @@ extern "C" void hide_shooter(void){
 extern "C" void show_shooter(void){
   if(glui_shooter!=NULL){
     glui_shooter->show();
-    showshooter=1;
+    showshooterDLG=1;
     updatemenu=1;
   }
 }
@@ -90,7 +93,7 @@ extern "C" void show_shooter(void){
 extern "C" void glui_shooter_setup(int main_window){  
 
   glui_shooter = GLUI_Master.create_glui( "Particle Shooting",0,0,0 );
-  if(showshooter==0)glui_shooter->hide();
+  if(showshooterDLG==0)glui_shooter->hide();
 
 
   panel_shooter_frame=glui_shooter->add_panel("Initial Frame");
@@ -134,13 +137,12 @@ extern "C" void glui_shooter_setup(int main_window){
     GLUI_SPINNER_FLOAT,&shooter_duration,SHOOTER_DURATION,SHOOTER_CB);
   SPINNER_shooter_history=glui_shooter->add_spinner_to_panel(panel_shooter_frame,"history (s)",
     GLUI_SPINNER_FLOAT,&shooter_history,SHOOTER_HISTORY,SHOOTER_CB);
-  glui_shooter->add_checkbox_to_panel(panel_shooter_frame,"Show particles",&show_shooter_points);
 
   SHOOTER_CB(SHOOTER_NPARTS);
   SHOOTER_CB(SHOOTER_FPS);
   SHOOTER_CB(SHOOTER_DURATION);
 
-  panel_shooter_velocity=glui_shooter->add_panel("Initial Velocity");
+  panel_shooter_velocity=glui_shooter->add_panel("Velocity Profile");
   
   RADIO_shooter_vel_type=glui_shooter->add_radiogroup_to_panel(panel_shooter_velocity,&shooter_vel_type,
     SHOOTER_VEL_TYPE,SHOOTER_CB);
@@ -159,10 +161,15 @@ extern "C" void glui_shooter_setup(int main_window){
     GLUI_SPINNER_FLOAT,&shooter_veldir,SHOOTER_VEL,SHOOTER_CB);
   SPINNER_shooter_veldir->set_float_limits(-180.0,180.0);
 
+  panel_shooter_misc=glui_shooter->add_panel("Misc");
+  glui_shooter->add_button_to_panel(panel_shooter_misc,"Compute Tracks",SHOOTER_APPLY,SHOOTER_CB);
+  glui_shooter->add_column_to_panel(panel_shooter_misc,false);
+  glui_shooter->add_checkbox_to_panel(panel_shooter_misc,"Show particles",&visShooter,SHOOTER_SHOW,SHOOTER_CB);
+  glui_shooter->add_checkbox_to_panel(panel_shooter_misc,"Update continuously",&shooter_cont_update);
+  glui_shooter->add_checkbox_to_panel(panel_shooter_misc,"Show only first frame",&shooter_firstframe,SHOOTER_FIRSTFRAME,SHOOTER_CB);
+
   panel_shooter_win=glui_shooter->add_panel("",GLUI_PANEL_NONE);
 
-  glui_shooter->add_button_to_panel(panel_shooter_win,"Apply",SHOOTER_APPLY,SHOOTER_CB);
-  glui_shooter->add_column_to_panel(panel_shooter_win,false);
   glui_shooter->add_button_to_panel(panel_shooter_win,"Save Settings",SAVE_SETTINGS,SHOOTER_CB);
   glui_shooter->add_column_to_panel(panel_shooter_win,false);
   glui_shooter->add_button_to_panel(panel_shooter_win,"Close",SHOOTER_CLOSE,SHOOTER_CB);
@@ -177,29 +184,47 @@ extern "C" void glui_shooter_setup(int main_window){
 
 void SHOOTER_CB(int var){
   float pi,ang;
-
+  if(shooter_firstframe==1)itime=0;
   switch (var){
+    case SHOOTER_FIRSTFRAME:
+      break;
+    case SHOOTER_SHOW:
+      plotstate=getplotstate(DYNAMIC_PLOTS);
+      updatetimes();
+      break;
     case SHOOTER_VEL:
       pi = 4.0*atan(1.0);
       ang = 2.0*pi*shooter_veldir/360.0;
       shooter_velz=0.0;
       shooter_velx = shooter_u0*cos(ang);
       shooter_vely = shooter_u0*sin(ang);
+      if(shooter_cont_update==1){
+        SHOOTER_CB(SHOOTER_APPLY);
+      }
       break;
     case SHOOTER_XYZ:
       if(shooter_active==1){
         init_shooter_data();
+      }
+      if(shooter_cont_update==1){
+        SHOOTER_CB(SHOOTER_APPLY);
       }
       break;
     case SHOOTER_DXYZ:
       if(shooter_active==1){
         init_shooter_data();
       }
+      if(shooter_cont_update==1){
+        SHOOTER_CB(SHOOTER_APPLY);
+      }
       break;
     case SHOOTER_NPARTS:
       if(shooter_nparts<1&&SPINNER_shooter_nparts!=NULL){
         shooter_nparts=1;
         SPINNER_shooter_nparts->set_int_val(shooter_nparts);
+      }
+      if(shooter_cont_update==1){
+        SHOOTER_CB(SHOOTER_APPLY);
       }
       break;
     case SHOOTER_FPS:
@@ -210,6 +235,9 @@ void SHOOTER_CB(int var){
       if(shooter_active==1){
         init_shooter_data();
       }
+      if(shooter_cont_update==1){
+        SHOOTER_CB(SHOOTER_APPLY);
+      }
       break;
     case SHOOTER_HISTORY:
       break;
@@ -218,13 +246,18 @@ void SHOOTER_CB(int var){
         shooter_duration=1.0;
         SPINNER_shooter_duration->set_float_val(shooter_duration);
       }
+      if(shooter_cont_update==1){
+        SHOOTER_CB(SHOOTER_APPLY);
+      }
       break;
     case SHOOTER_APPLY:
       nshooter_frames=shooter_duration*shooter_fps;
       max_shooter_points=nshooter_frames*shooter_nparts;
 
       if(allocate_shooter()==0){
-        init_shooter_data();
+        solve_shooter_data();
+        plotstate=getplotstate(DYNAMIC_PLOTS);
+        updatetimes();
       }
       break;
     case SHOOTER_VEL_TYPE:
@@ -242,6 +275,9 @@ void SHOOTER_CB(int var){
         SPINNER_shooter_p->disable();
         SPINNER_shooter_veldir->disable();
      }
+      if(shooter_cont_update==1){
+        SHOOTER_CB(SHOOTER_APPLY);
+      }
       break;
     case SAVE_SETTINGS:
       writeini(LOCAL_INI);

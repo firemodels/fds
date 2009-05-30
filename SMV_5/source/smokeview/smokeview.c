@@ -1341,7 +1341,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 #ifdef pp_SHOOTER
 /* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
 
-  if(show_shooter_points!=0&&shooter_active==1){
+  if(showshooter!=0&&shooter_active==1){
     draw_shooter();
   }
 #endif
@@ -2007,6 +2007,9 @@ void updateLights(int pos){
 
 void updateShow(void){
   int i,evacflag,sliceflag,vsliceflag,partflag,patchflag,isoflag,smoke3dflag,tisoflag;
+#ifdef pp_SHOOTER
+  int shooter_flag;
+#endif
   int ii;
   slice *sd;
   vslice *vd;
@@ -2016,6 +2019,9 @@ void updateShow(void){
   particle *parti;
   showtime=0; showtime2=0; showplot3d=0; showpatch=0; 
   showslice=0; showvslice=0; showsmoke=0; showzone=0; showiso=0;
+#ifdef pp_SHOOTER
+  showshooter=0;
+#endif
   showevac=0;
   showevac_colorbar=0;
   showtarget=0;
@@ -2155,8 +2161,18 @@ void updateShow(void){
       break;
     }
   }
+#ifdef pp_SHOOTER
+  shooter_flag=0;
+  if(visShooter!=0&&shooter_active==1){
+    shooter_flag=1;
+  }
+#endif
+
   if( plotstate==DYNAMIC_PLOTS && 
     ( sliceflag==1 || vsliceflag==1 || partflag==1 || patchflag==1 ||
+#ifdef pp_SHOOTER
+    shooter_flag==1||
+#endif
     smoke3dflag==1|| showtour==1 || evacflag==1||
     (ReadZoneFile==1&&visZone==1&&visTimeZone==1)||
     (ReadTargFile==1&&visTarg==1)
@@ -2196,9 +2212,15 @@ void updateShow(void){
       showiso=1;
     }
     if(ReadTargFile==1&&visTarg==1)showtarget=1;
+#ifdef pp_SHOOTER
+    if(shooter_flag==1)showshooter=1;
+#endif    
   }
   if(showsmoke==1||showevac==1||showpatch==1||showslice==1||showvslice==1||showzone==1||showiso==1||showevac==1)RenderTime=1;
   if(showtour==1||show3dsmoke==1)RenderTime=1;
+#ifdef pp_SHOOTER
+  if(showshooter==1)RenderTime=1;
+#endif
   if(plotstate==STATIC_PLOTS&&ReadPlot3dFile==1&&plotn>0&&plotn<=numplot3dvars)showplot3d=1;
 
   numColorbars=0;
@@ -2354,6 +2376,7 @@ void updatetimes(void){
   float dt_MIN=100000.0;
 
   updateShow();  
+  CheckMemory;
   ntimes = 0;
   if(visTerrainType!=4){
     for(i=0;i<nterraininfo;i++){
@@ -2364,7 +2387,7 @@ void updatetimes(void){
     }
   }
 #ifdef pp_SHOOTER
-  if(show_shooter_points!=0&&shooter_active==1&&shooter_show==1){
+  if(visShooter!=0&&shooter_active==1){
     ntimes+=nshooter_frames;
   }
 #endif
@@ -2445,10 +2468,18 @@ void updatetimes(void){
     }
   }
 #ifdef pp_SHOOTER
-  if(show_shooter_points!=0&&shooter_active==1&&shooter_show==1){
+  if(visShooter!=0&&shooter_active==1){
     for(i=0;i<nshooter_frames;i++){
-      *timescopy+=shoottimeinfo[i].time;
+      float t_diff;
+
+      *timescopy++=shoottimeinfo[i].time;
+
+      t_diff = timescopy[-1]-timescopy[-2];
+      if(i>0&&t_diff<dt_MIN&&t_diff>0.0){
+        dt_MIN=t_diff;
+      }
     }
+    CheckMemory;
   }
 #endif
 
@@ -2649,7 +2680,7 @@ void updatetimes(void){
       }
     }
 #ifdef pp_SHOOTER
-  if(show_shooter_points!=0&&shooter_active==1&&shooter_show==1){
+  if(visShooter!=0&&shooter_active==1){
     FREEMEMORY(shooter_timeslist);
     NewMemory((void **)&shooter_timeslist,nshooter_frames*sizeof(int));
   }
@@ -3208,7 +3239,7 @@ void synctimes(void){
 
   /* synchronize shooter times */
 #ifdef pp_SHOOTER
-  if(show_shooter_points!=0&&shooter_active==1&&shooter_show==1){
+  if(visShooter!=0&&shooter_active==1){
     if(n==0){
       istart=0;
     }
@@ -3972,7 +4003,11 @@ int getplotstate(int choice){
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
         return DYNAMIC_PLOTS;
       }
-
+#ifdef pp_SHOOTER
+      if(visShooter!=0&&shooter_active==1){
+        return DYNAMIC_PLOTS;
+      }
+#endif
       if(choice!=DYNAMIC_PLOTS_NORECURSE)return getplotstate(STATIC_PLOTS_NORECURSE);
       break;
     default:

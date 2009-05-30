@@ -371,13 +371,14 @@ SVEXTERN int allexterior,showexterior;
 SVEXTERN int allinterior;
 SVEXTERN int showbounds,showmotion,showedit, showclip, showgluistereo, showtour, showlabels, showcolorbar, showwui;
 #ifdef pp_SHOOTER
-SVEXTERN int showshooter;
+SVEXTERN int showshooterDLG;
 SVEXTERN float shooter_xyz[3], shooter_dxyz[3], shooterpointsize;
 SVEXTERN float shooter_velx, shooter_vely, shooter_velz, shooter_time, shooter_time_max;
-SVEXTERN int shooter_show,shooter_firstpass;
+SVEXTERN int shooter_cont_update,shooter_firstframe;
 SVEXTERN float shooter_u0, shooter_z0, shooter_p, shooter_v_inf;
-SVEXTERN float shooter_velmag, shooter_veldir, shooter_duration, shooter_history, shooter_active;
-SVEXTERN int shooter_fps,shooter_vel_type, shooter_nparts, show_shooter_points, nshooter_frames, max_shooter_points;
+SVEXTERN float shooter_velmag, shooter_veldir, shooter_duration, shooter_history;
+SVEXTERN int shooter_active;
+SVEXTERN int shooter_fps,shooter_vel_type, shooter_nparts, visShooter, showshooter, nshooter_frames, max_shooter_points;
 SVEXTERN shootpointdata *shootpointinfo;
 SVEXTERN shoottimedata *shoottimeinfo;
 SVEXTERN int *shooter_timeslist;
