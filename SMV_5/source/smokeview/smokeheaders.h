@@ -185,7 +185,8 @@ EXTERNCPP void update_trainer_moves(void);
 
 EXTERNCPP void snap_view_angles(void);
 #ifdef pp_SHOOTER
-EXTERNCPP void increment_shooter_data(float dt);
+EXTERNCPP void solve_shooter_data(void);
+EXTERNCPP void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt);
 EXTERNCPP void show_shooter(void);
 EXTERNCPP void hide_shooter(void);
 EXTERNCPP void draw_shooter(void);
