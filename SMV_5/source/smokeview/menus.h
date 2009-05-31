@@ -5712,8 +5712,8 @@ static int in_menu=0;
   if(showmotion==1)glutAddMenuEntry("*Motion/View...  ALT+m",15);
   if(showmotion==0)glutAddMenuEntry("Motion/View...  ALT+m",15);
 #ifdef pp_SHOOTER
-  if(showshooterDLG==1)glutAddMenuEntry("*Particle Shooting...",27);
-  if(showshooterDLG==0)glutAddMenuEntry("Particle Shooting...",27);
+  if(showshooterDLG==1)glutAddMenuEntry("*Particle Tracking...",27);
+  if(showshooterDLG==0)glutAddMenuEntry("Particle Tracking...",27);
 #endif
   if(nsmoke3d>0){
     if(showbounds==1)glutAddMenuEntry("*Smoke3D Parameters...  ALT+s",20);
