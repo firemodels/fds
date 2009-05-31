@@ -212,6 +212,11 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   p->loaded=1;
   p->display=1;
   speedmax = -1.;
+#ifdef pp_SHOOTER
+  meshi->udata=NULL;
+  meshi->vdata=NULL;
+  meshi->wdata=NULL;
+#endif
   if(uindex!=-1||vindex!=-1||windex!=-1){
     vectorspresent=1;
     p->nvars=mxplot3dvars;
@@ -227,7 +232,12 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
       *sdata=sqrt((double)sum);
       sdata++; 
     }
-  }                        
+  }
+#ifdef pp_SHOOTER
+  if(uindex!=-1)meshi->udata=meshi->qdata + ntotal*uindex;
+  if(vindex!=-1)meshi->vdata=meshi->qdata + ntotal*vindex;
+  if(windex!=-1)meshi->wdata=meshi->qdata + ntotal*windex;
+#endif
 
 
   if(NewMemory((void **)&colorlabelp3,mxplot3dvars*sizeof(char **))==0||
@@ -1868,3 +1878,110 @@ void init_plot3dtimelist(void){
     }
   }
 }
+#ifdef pp_SHOOTER
+
+/* ------------------ get_plot3d_uvw  ------------------------ */
+
+void get_plot3d_uvw(float xyz[3], float uvw[3]){
+  int i;
+  float *xplt, *yplt, *zplt;
+
+  uvw[0]=0.0;
+  uvw[1]=0.0;
+  uvw[2]=0.0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int ibar, jbar, kbar;
+    float *udata,  *vdata, *wdata, *qdata;
+    int nx, ny, nxy;
+    int ix, iy, iz;
+    int ijk;
+
+    meshi = meshinfo + i;
+
+    xplt = meshi->xplt_orig;
+    yplt = meshi->yplt_orig;
+    zplt = meshi->zplt_orig;
+    if(xyz[0]<xplt[0]||xyz[1]<yplt[0]||xyz[2]<zplt[0])continue;
+
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
+    if(xyz[0]>xplt[ibar-1]||xyz[1]>yplt[jbar-1]||xyz[2]>zplt[kbar-1])continue;
+
+    nx = ibar+1;
+    ny = jbar+1;
+    nxy = nx*ny;
+
+    qdata = meshi->qdata;
+    udata = meshi->udata;
+    vdata = meshi->vdata;
+    wdata = meshi->wdata;
+
+    if(qdata==NULL)continue;
+    if(udata==NULL&&vdata==NULL&&wdata==NULL)continue;
+
+    ix = ibar*(xyz[0]-xplt[0])/(xplt[ibar]-xplt[0]);
+    if(ix<0)ix=0;
+    if(ix>ibar)ix=ibar;
+
+    iy = jbar*(xyz[1]-yplt[0])/(yplt[jbar]-yplt[0]);
+    if(iy<0)iy=0;
+    if(iy>jbar)iy=jbar;
+
+    iz = kbar*(xyz[2]-zplt[0])/(zplt[kbar]-zplt[0]);
+    if(iz<0)iz=0;
+    if(iz>kbar)iz=kbar;
+
+    ijk=ijknode(ix,iy,iz);
+
+    if(udata!=NULL){
+      uvw[0]=udata[ijk];
+    }
+
+    if(vdata!=NULL){
+      uvw[1]=vdata[ijk];
+    }
+
+    if(wdata!=NULL){
+      uvw[2]=wdata[ijk];
+    }
+  }
+}
+
+/* ------------------ inmesh ------------------------ */
+
+ mesh *inmesh(float xyz[3]){
+  int i;
+  mesh *meshi;
+  int n;
+  float xmin, ymin, zmin;
+  float xmax, ymax, zmax;
+  int ibar, jbar, kbar;
+
+  for(i=0;i<nmeshes;i++){
+    meshi = meshinfo + i;
+
+    ibar=meshi->ibar;
+    jbar=meshi->jbar;
+    kbar=meshi->kbar;
+    xmin=meshi->xplt_orig[0];
+    ymin=meshi->yplt_orig[0];
+    zmin=meshi->zplt_orig[0];
+    xmax=meshi->xplt_orig[ibar];
+    ymax=meshi->yplt_orig[jbar];
+    zmax=meshi->zplt_orig[kbar];
+
+    if(xyz[0]<xmin)continue;
+    if(xyz[1]<ymin)continue;
+    if(xyz[2]<zmin)continue;
+
+    if(xyz[0]>xmax)continue;
+    if(xyz[1]>ymax)continue;
+    if(xyz[2]>zmax)continue;
+    return meshi;
+  }
+  return NULL;
+}
+
+#endif

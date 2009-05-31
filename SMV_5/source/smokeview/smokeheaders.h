@@ -185,6 +185,8 @@ EXTERNCPP void update_trainer_moves(void);
 
 EXTERNCPP void snap_view_angles(void);
 #ifdef pp_SHOOTER
+EXTERNCPP mesh *inmesh(float xyz[3]);
+EXTERNCPP void get_plot3d_uvw(float xyz[3], float uvw[3]);
 EXTERNCPP void solve_shooter_data(void);
 EXTERNCPP void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt);
 EXTERNCPP void show_shooter(void);

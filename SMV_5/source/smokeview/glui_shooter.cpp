@@ -32,12 +32,19 @@ GLUI_Panel *panel_shooter_frameA=NULL;
 GLUI_Panel *panel_shooter_frameB=NULL;
 GLUI_Panel *panel_shooter_frameC=NULL;
 GLUI_Panel *panel_shooter_frameD=NULL;
+GLUI_Panel *panel_shooter_frameE=NULL;
+GLUI_Panel *panel_shooter_frameF=NULL;
+GLUI_Panel *panel_shooter_frameG=NULL;
+GLUI_Panel *panel_shooter_frameH=NULL;
 GLUI_Panel *panel_shooter_velocity=NULL;
 GLUI_Panel *panel_shooter_win=NULL;
 GLUI_RadioGroup *RADIO_shooter_vel_type=NULL;
 GLUI_Spinner *SPINNER_shooter_x=NULL;
 GLUI_Spinner *SPINNER_shooter_y=NULL;
 GLUI_Spinner *SPINNER_shooter_z=NULL;
+GLUI_Spinner *SPINNER_shooter_u=NULL;
+GLUI_Spinner *SPINNER_shooter_v=NULL;
+GLUI_Spinner *SPINNER_shooter_w=NULL;
 GLUI_Spinner *SPINNER_shooter_dx=NULL;
 GLUI_Spinner *SPINNER_shooter_dy=NULL;
 GLUI_Spinner *SPINNER_shooter_dz=NULL;
@@ -68,6 +75,7 @@ GLUI_RadioButton *RADIO_plot3dtype=NULL;
 #define SHOOTER_FIRSTFRAME 111
 #define SHOOTER_TIME 112
 #define SHOOTER_LOADPLOT3D 113
+#define SHOOTER_UVW 114
 
 #define SAVE_SETTINGS 900
 #define SHOOTER_CLOSE 901
@@ -101,15 +109,16 @@ extern "C" void show_shooter(void){
 
 extern "C" void glui_shooter_setup(int main_window){  
 
-  glui_shooter = GLUI_Master.create_glui( "Particle Shooting",0,0,0 );
+  glui_shooter = GLUI_Master.create_glui( "Particle Tracking",0,0,0 );
   if(showshooterDLG==0)glui_shooter->hide();
 
+  panel_shooter_frame=glui_shooter->add_panel("Starting Locations/Velocities");
 
-  panel_shooter_frame=glui_shooter->add_panel("Initial Frame");
+  panel_shooter_frameE=glui_shooter->add_panel_to_panel(panel_shooter_frame,"Positions",false);
 
-  panel_shooter_frameA=glui_shooter->add_panel_to_panel(panel_shooter_frame,"Center");
-  glui_shooter->add_column_to_panel(panel_shooter_frame,false);
-  panel_shooter_frameB=glui_shooter->add_panel_to_panel(panel_shooter_frame,"Size");
+  panel_shooter_frameA=glui_shooter->add_panel_to_panel(panel_shooter_frameE,"Center");
+  glui_shooter->add_column_to_panel(panel_shooter_frameE,false);
+  panel_shooter_frameB=glui_shooter->add_panel_to_panel(panel_shooter_frameE,"Size");
 
   SPINNER_shooter_x=glui_shooter->add_spinner_to_panel(panel_shooter_frameA,"x",
     GLUI_SPINNER_FLOAT,shooter_xyz,SHOOTER_XYZ,SHOOTER_CB);
@@ -135,24 +144,15 @@ extern "C" void glui_shooter_setup(int main_window){
     GLUI_SPINNER_FLOAT,shooter_dxyz+2,SHOOTER_DXYZ,SHOOTER_CB);
   SPINNER_shooter_dz->set_float_limits(0.0,zbarORIG-zbar0);
 
-  glui_shooter->add_spinner_to_panel(panel_shooter_frameA,"size",GLUI_SPINNER_FLOAT,&shooterpointsize);
-  SPINNER_shooter_nparts=glui_shooter->add_spinner_to_panel(panel_shooter_frame,"number of particles",
-    GLUI_SPINNER_INT,&shooter_nparts,SHOOTER_NPARTS,SHOOTER_CB);
+  panel_shooter_frameF=glui_shooter->add_panel_to_panel(panel_shooter_frame,"Velocities");
+  SPINNER_shooter_u=glui_shooter->add_spinner_to_panel(panel_shooter_frameF,"u",
+    GLUI_SPINNER_FLOAT,shooter_uvw,SHOOTER_UVW,SHOOTER_CB);
+  SPINNER_shooter_v=glui_shooter->add_spinner_to_panel(panel_shooter_frameF,"v",
+    GLUI_SPINNER_FLOAT,shooter_uvw+1,SHOOTER_UVW,SHOOTER_CB);
+  SPINNER_shooter_w=glui_shooter->add_spinner_to_panel(panel_shooter_frameF,"w",
+    GLUI_SPINNER_FLOAT,shooter_uvw+2,SHOOTER_UVW,SHOOTER_CB);
 
-  SPINNER_shooter_fps=glui_shooter->add_spinner_to_panel(panel_shooter_frame,"frames per second",
-    GLUI_SPINNER_INT,&shooter_fps,SHOOTER_FPS,SHOOTER_CB);
-
-  SPINNER_shooter_duration=glui_shooter->add_spinner_to_panel(panel_shooter_frame,"duration (s)",
-    GLUI_SPINNER_FLOAT,&shooter_duration,SHOOTER_DURATION,SHOOTER_CB);
-  SPINNER_shooter_history=glui_shooter->add_spinner_to_panel(panel_shooter_frame,"history (s)",
-    GLUI_SPINNER_FLOAT,&shooter_history,SHOOTER_HISTORY,SHOOTER_CB);
-  SPINNER_shooter_history->disable();
-
-  SHOOTER_CB(SHOOTER_NPARTS);
-  SHOOTER_CB(SHOOTER_FPS);
-  SHOOTER_CB(SHOOTER_DURATION);
-
-  panel_shooter_velocity=glui_shooter->add_panel("Velocities");
+  panel_shooter_velocity=glui_shooter->add_panel("Background Velocity Field");
   
   RADIO_shooter_vel_type=glui_shooter->add_radiogroup_to_panel(panel_shooter_velocity,&shooter_vel_type,
     SHOOTER_VEL_TYPE,SHOOTER_CB);
@@ -183,8 +183,6 @@ extern "C" void glui_shooter_setup(int main_window){
   }
 
   panel_shooter_frameD=glui_shooter->add_panel_to_panel(panel_shooter_velocity,"Power law");
-  SPINNER_shooter_v_inf=glui_shooter->add_spinner_to_panel(panel_shooter_frameD,"terminal velocity, v_inf (m/s)",
-    GLUI_SPINNER_FLOAT,&shooter_v_inf,SHOOTER_VEL,SHOOTER_CB);
   SPINNER_shooter_u0=glui_shooter->add_spinner_to_panel(panel_shooter_frameD,"reference velocity, U0 (m/s)",
     GLUI_SPINNER_FLOAT,&shooter_u0,SHOOTER_VEL,SHOOTER_CB);
   SPINNER_shooter_z0=glui_shooter->add_spinner_to_panel(panel_shooter_frameD,"reference elevation, Z0 (m)",
@@ -196,11 +194,33 @@ extern "C" void glui_shooter_setup(int main_window){
   SPINNER_shooter_veldir->set_float_limits(-180.0,180.0);
 
   panel_shooter_misc=glui_shooter->add_panel("Misc");
-  glui_shooter->add_button_to_panel(panel_shooter_misc,"Compute Tracks",SHOOTER_APPLY,SHOOTER_CB);
+  panel_shooter_frameG=glui_shooter->add_panel_to_panel(panel_shooter_misc,"",false);
   glui_shooter->add_column_to_panel(panel_shooter_misc,false);
-  glui_shooter->add_checkbox_to_panel(panel_shooter_misc,"Show particles",&visShooter,SHOOTER_SHOW,SHOOTER_CB);
-  glui_shooter->add_checkbox_to_panel(panel_shooter_misc,"Update continuously",&shooter_cont_update);
-  glui_shooter->add_checkbox_to_panel(panel_shooter_misc,"Show only first frame",&shooter_firstframe,SHOOTER_FIRSTFRAME,SHOOTER_CB);
+  panel_shooter_frameH=glui_shooter->add_panel_to_panel(panel_shooter_misc,"",false);
+
+  glui_shooter->add_checkbox_to_panel(panel_shooter_frameG,"Show particles",&visShooter,SHOOTER_SHOW,SHOOTER_CB);
+  glui_shooter->add_checkbox_to_panel(panel_shooter_frameG,"Update continuously",&shooter_cont_update);
+  glui_shooter->add_checkbox_to_panel(panel_shooter_frameG,"Show only first frame",&shooter_firstframe,SHOOTER_FIRSTFRAME,SHOOTER_CB);
+  SPINNER_shooter_v_inf=glui_shooter->add_spinner_to_panel(panel_shooter_frameG,"terminal velocity",
+    GLUI_SPINNER_FLOAT,&shooter_v_inf,SHOOTER_VEL,SHOOTER_CB);
+  glui_shooter->add_button_to_panel(panel_shooter_frameG,"Compute Tracks",SHOOTER_APPLY,SHOOTER_CB);
+
+  glui_shooter->add_spinner_to_panel(panel_shooter_frameH,"particle size",GLUI_SPINNER_FLOAT,&shooterpointsize);
+  SPINNER_shooter_nparts=glui_shooter->add_spinner_to_panel(panel_shooter_frameH,"number of particles",
+    GLUI_SPINNER_INT,&shooter_nparts,SHOOTER_NPARTS,SHOOTER_CB);
+
+  SPINNER_shooter_fps=glui_shooter->add_spinner_to_panel(panel_shooter_frameH,"frames per second",
+    GLUI_SPINNER_INT,&shooter_fps,SHOOTER_FPS,SHOOTER_CB);
+
+  SPINNER_shooter_duration=glui_shooter->add_spinner_to_panel(panel_shooter_frameH,"duration (s)",
+    GLUI_SPINNER_FLOAT,&shooter_duration,SHOOTER_DURATION,SHOOTER_CB);
+ // SPINNER_shooter_history=glui_shooter->add_spinner_to_panel(panel_shooter_frameH,"history (s)",
+ //   GLUI_SPINNER_FLOAT,&shooter_history,SHOOTER_HISTORY,SHOOTER_CB);
+ // SPINNER_shooter_history->disable();
+
+  SHOOTER_CB(SHOOTER_NPARTS);
+  SHOOTER_CB(SHOOTER_FPS);
+  SHOOTER_CB(SHOOTER_DURATION);
 
   panel_shooter_win=glui_shooter->add_panel("",GLUI_PANEL_NONE);
 
@@ -243,6 +263,7 @@ void SHOOTER_CB(int var){
         SHOOTER_CB(SHOOTER_APPLY);
       }
       break;
+    case SHOOTER_UVW:
     case SHOOTER_XYZ:
       if(shooter_active==1){
         init_shooter_data();
@@ -303,22 +324,20 @@ void SHOOTER_CB(int var){
       break;
     case SHOOTER_VEL_TYPE:
       if(shooter_vel_type==1){
-        SPINNER_shooter_v_inf->enable();
         SPINNER_shooter_u0->enable();
         SPINNER_shooter_z0->enable();
         SPINNER_shooter_p->enable();
         SPINNER_shooter_veldir->enable();
-        shooter_timelist->disable();
-        shooter_loadplot3d->disable();
+        if(shooter_timelist!=NULL)shooter_timelist->disable();
+        if(shooter_loadplot3d!=NULL)shooter_loadplot3d->disable();
       }
       else{
-        SPINNER_shooter_v_inf->disable();
         SPINNER_shooter_u0->disable();
         SPINNER_shooter_z0->disable();
         SPINNER_shooter_p->disable();
         SPINNER_shooter_veldir->disable();
-        shooter_timelist->enable();
-        shooter_loadplot3d->enable();
+        if(shooter_timelist!=NULL)shooter_timelist->enable();
+        if(shooter_loadplot3d!=NULL)shooter_loadplot3d->enable();
      }
       if(shooter_cont_update==1){
         SHOOTER_CB(SHOOTER_APPLY);

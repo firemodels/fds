@@ -13,6 +13,7 @@
 
 typedef struct _shootpointdata {
   struct _shootpointdata *prev;
+  int visible;
   float xyz[3], uvw[3], uvw_air[3], val;
 } shootpointdata;
 
@@ -388,7 +389,7 @@ typedef struct mesh_ {
   int nvents,ndummyvents;
   int nbptrs;
   int *iqdata;
-  float *qdata;
+  float *qdata, *udata, *vdata, *wdata;
   int *yzcolorbase, *xzcolorbase, *xycolorbase; 
   float *yzcolorfbase, *xzcolorfbase, *xycolorfbase;
   float *yzcolortbase, *xzcolortbase, *xycolortbase;
