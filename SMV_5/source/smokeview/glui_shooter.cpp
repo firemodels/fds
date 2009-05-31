@@ -30,6 +30,8 @@ GLUI_Panel *panel_shooter_frame=NULL;
 GLUI_Panel *panel_shooter_misc=NULL;
 GLUI_Panel *panel_shooter_frameA=NULL;
 GLUI_Panel *panel_shooter_frameB=NULL;
+GLUI_Panel *panel_shooter_frameC=NULL;
+GLUI_Panel *panel_shooter_frameD=NULL;
 GLUI_Panel *panel_shooter_velocity=NULL;
 GLUI_Panel *panel_shooter_win=NULL;
 GLUI_RadioGroup *RADIO_shooter_vel_type=NULL;
@@ -48,6 +50,10 @@ GLUI_Spinner *SPINNER_shooter_z0=NULL;
 GLUI_Spinner *SPINNER_shooter_p=NULL;
 GLUI_Spinner *SPINNER_shooter_duration=NULL;
 GLUI_Spinner *SPINNER_shooter_history=NULL;
+GLUI_Button *shooter_loadplot3d=NULL;
+
+GLUI_Listbox *shooter_timelist=NULL;
+GLUI_RadioButton *RADIO_plot3dtype=NULL;
 
 #define SHOOTER_VEL_TYPE 101
 #define SHOOTER_APPLY 102
@@ -60,6 +66,8 @@ GLUI_Spinner *SPINNER_shooter_history=NULL;
 #define SHOOTER_VEL 109
 #define SHOOTER_SHOW 110
 #define SHOOTER_FIRSTFRAME 111
+#define SHOOTER_TIME 112
+#define SHOOTER_LOADPLOT3D 113
 
 #define SAVE_SETTINGS 900
 #define SHOOTER_CLOSE 901
@@ -67,6 +75,7 @@ GLUI_Spinner *SPINNER_shooter_history=NULL;
 void SHOOTER_CB(int var);
 extern "C" int allocate_shooter(void);
 extern "C" void init_shooter_data(void);
+extern "C" void Plot3DListMenu(int val);
 
 /* ------------------ hide_glui_shooter ------------------------ */
 
@@ -137,27 +146,52 @@ extern "C" void glui_shooter_setup(int main_window){
     GLUI_SPINNER_FLOAT,&shooter_duration,SHOOTER_DURATION,SHOOTER_CB);
   SPINNER_shooter_history=glui_shooter->add_spinner_to_panel(panel_shooter_frame,"history (s)",
     GLUI_SPINNER_FLOAT,&shooter_history,SHOOTER_HISTORY,SHOOTER_CB);
+  SPINNER_shooter_history->disable();
 
   SHOOTER_CB(SHOOTER_NPARTS);
   SHOOTER_CB(SHOOTER_FPS);
   SHOOTER_CB(SHOOTER_DURATION);
 
-  panel_shooter_velocity=glui_shooter->add_panel("Velocity Profile");
+  panel_shooter_velocity=glui_shooter->add_panel("Velocities");
   
   RADIO_shooter_vel_type=glui_shooter->add_radiogroup_to_panel(panel_shooter_velocity,&shooter_vel_type,
     SHOOTER_VEL_TYPE,SHOOTER_CB);
-  glui_shooter->add_radiobutton_to_group(RADIO_shooter_vel_type,"Use PLOT3D velocity data");
-  glui_shooter->add_radiobutton_to_group(RADIO_shooter_vel_type,"Use specified Profile");
+  RADIO_plot3dtype=glui_shooter->add_radiobutton_to_group(RADIO_shooter_vel_type,"PLOT3D");
+  glui_shooter->add_radiobutton_to_group(RADIO_shooter_vel_type,"Power law");
+  if(nplot3dtimelist>0&&plot3dtimelist!=NULL){
+  }
+  else{
+    shooter_vel_type=1;
+    RADIO_shooter_vel_type->set_int_val(shooter_vel_type);
+    RADIO_plot3dtype->disable();
+  }
 
-  SPINNER_shooter_v_inf=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"terminal velocity, v_inf (m/s)",
+  if(nplot3dtimelist>0&&plot3dtimelist!=NULL){
+    int i;
+
+    panel_shooter_frameC=glui_shooter->add_panel_to_panel(panel_shooter_velocity,"PLOT3D");
+    shooter_loadplot3d=glui_shooter->add_button_to_panel(panel_shooter_frameC,"Load",SHOOTER_LOADPLOT3D,SHOOTER_CB);
+    shooter_timelist = glui_shooter->add_listbox_to_panel(panel_shooter_frameC,"time:",
+      &shooter_itime,SHOOTER_TIME,SHOOTER_CB);
+    for(i=0;i<nplot3dtimelist;i++){
+      char label[255];
+
+      sprintf(label,"%f",plot3dtimelist[i]);
+      trimzeros(label);
+      shooter_timelist->add_item(i,label);
+    }
+  }
+
+  panel_shooter_frameD=glui_shooter->add_panel_to_panel(panel_shooter_velocity,"Power law");
+  SPINNER_shooter_v_inf=glui_shooter->add_spinner_to_panel(panel_shooter_frameD,"terminal velocity, v_inf (m/s)",
     GLUI_SPINNER_FLOAT,&shooter_v_inf,SHOOTER_VEL,SHOOTER_CB);
-  SPINNER_shooter_u0=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"reference velocity, U0 (m/s)",
+  SPINNER_shooter_u0=glui_shooter->add_spinner_to_panel(panel_shooter_frameD,"reference velocity, U0 (m/s)",
     GLUI_SPINNER_FLOAT,&shooter_u0,SHOOTER_VEL,SHOOTER_CB);
-  SPINNER_shooter_z0=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"reference elevation, Z0 (m)",
+  SPINNER_shooter_z0=glui_shooter->add_spinner_to_panel(panel_shooter_frameD,"reference elevation, Z0 (m)",
     GLUI_SPINNER_FLOAT,&shooter_z0,SHOOTER_VEL,SHOOTER_CB);
-  SPINNER_shooter_p=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"decay, p",
+  SPINNER_shooter_p=glui_shooter->add_spinner_to_panel(panel_shooter_frameD,"decay, p",
     GLUI_SPINNER_FLOAT,&shooter_p,SHOOTER_VEL,SHOOTER_CB);
-  SPINNER_shooter_veldir=glui_shooter->add_spinner_to_panel(panel_shooter_velocity,"velocity direction (deg)",
+  SPINNER_shooter_veldir=glui_shooter->add_spinner_to_panel(panel_shooter_frameD,"velocity direction (deg)",
     GLUI_SPINNER_FLOAT,&shooter_veldir,SHOOTER_VEL,SHOOTER_CB);
   SPINNER_shooter_veldir->set_float_limits(-180.0,180.0);
 
@@ -186,6 +220,13 @@ void SHOOTER_CB(int var){
   float pi,ang;
   if(shooter_firstframe==1)itime=0;
   switch (var){
+    case SHOOTER_LOADPLOT3D:
+      printf("Loading PLOT3D data at time: %f\n",plot3dtimelist[shooter_itime]);
+      Plot3DListMenu(shooter_itime);
+      SHOOTER_CB(SHOOTER_APPLY);
+      break;
+    case SHOOTER_TIME:
+      break;
     case SHOOTER_FIRSTFRAME:
       break;
     case SHOOTER_SHOW:
@@ -267,6 +308,8 @@ void SHOOTER_CB(int var){
         SPINNER_shooter_z0->enable();
         SPINNER_shooter_p->enable();
         SPINNER_shooter_veldir->enable();
+        shooter_timelist->disable();
+        shooter_loadplot3d->disable();
       }
       else{
         SPINNER_shooter_v_inf->disable();
@@ -274,6 +317,8 @@ void SHOOTER_CB(int var){
         SPINNER_shooter_z0->disable();
         SPINNER_shooter_p->disable();
         SPINNER_shooter_veldir->disable();
+        shooter_timelist->enable();
+        shooter_loadplot3d->enable();
      }
       if(shooter_cont_update==1){
         SHOOTER_CB(SHOOTER_APPLY);

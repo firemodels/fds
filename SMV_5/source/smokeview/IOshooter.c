@@ -71,10 +71,20 @@ typedef struct {
 void get_shooter_vel(float *uvw, float *xyz){
   float factor;
 
-  factor = pow(xyz[2]/shooter_z0,shooter_p);
-  uvw[0] = factor*shooter_velx;
-  uvw[1] = factor*shooter_vely;
-  uvw[2] = shooter_velz;
+  if(shooter_vel_type==0&&plot3dtimelist!=NULL){
+    // plot3d velocities
+    factor = pow(xyz[2]/shooter_z0,shooter_p);
+    uvw[0] = factor*shooter_velx;
+    uvw[1] = factor*shooter_vely;
+    uvw[2] = shooter_velz;
+  }
+  else{
+    // power law velocities
+    factor = pow(xyz[2]/shooter_z0,shooter_p);
+    uvw[0] = factor*shooter_velx;
+    uvw[1] = factor*shooter_vely;
+    uvw[2] = shooter_velz;
+  }
 }
 
 /* ------------------ increment_shooter_data ------------------------ */

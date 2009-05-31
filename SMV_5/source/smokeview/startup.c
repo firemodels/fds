@@ -958,6 +958,7 @@ void initvars1(void){
   shooter_timeslist=NULL;
   shooter_cont_update=0;
   shooter_firstframe=0;
+  shooter_itime=0;
 #endif
   update_makeiblank_smoke3d=0;
   update_initcull=0;

@@ -1839,6 +1839,7 @@ int plot3dlistcompare( const void *arg1, const void *arg2 ){
   if(val1>val2)return 1;
   return 0;
 }
+
 /* ------------------ init_plot3dtimelist  ------------------------ */
 
 void init_plot3dtimelist(void){
@@ -1867,5 +1868,3 @@ void init_plot3dtimelist(void){
     }
   }
 }
-
-

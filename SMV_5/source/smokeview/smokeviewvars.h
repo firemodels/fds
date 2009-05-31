@@ -382,6 +382,7 @@ SVEXTERN int shooter_fps,shooter_vel_type, shooter_nparts, visShooter, showshoot
 SVEXTERN shootpointdata *shootpointinfo;
 SVEXTERN shoottimedata *shoottimeinfo;
 SVEXTERN int *shooter_timeslist;
+SVEXTERN int shooter_itime;
 #endif
 SVEXTERN int showgluitrainer;
 SVEXTERN int colorbarcycle;
