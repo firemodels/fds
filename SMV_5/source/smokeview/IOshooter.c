@@ -73,10 +73,7 @@ void get_shooter_vel(float *uvw, float *xyz){
 
   if(shooter_vel_type==0&&plot3dtimelist!=NULL){
     // plot3d velocities
-    factor = pow(xyz[2]/shooter_z0,shooter_p);
-    uvw[0] = factor*shooter_velx;
-    uvw[1] = factor*shooter_vely;
-    uvw[2] = shooter_velz;
+    get_plot3d_uvw(xyz, uvw);
   }
   else{
     // power law velocities
@@ -119,6 +116,8 @@ void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt
     xyznew[0] = xyzold[0] + dt*uvwnew[0];
     xyznew[1] = xyzold[1] + dt*uvwnew[1];
     xyznew[2] = xyzold[2] + dt*uvwnew[2];
+    pnew[i].visible=1;
+    if(inmesh(xyznew)==NULL)pnew[i].visible=0;
   }
   shooter_active=1;
 }
@@ -137,12 +136,13 @@ void init_shooter_data(void){
   for(i=0;i<shooter_nparts;i++){
     xyz = shootpointinfo[i].xyz;
     uvw = shootpointinfo[i].uvw;
+    shootpointinfo[i].visible=1;
     xyz[0] = xmin + shooter_dxyz[0]*(float)rand()/RAND_MAX;
     xyz[1] = ymin + shooter_dxyz[1]*(float)rand()/RAND_MAX;
     xyz[2] = zmin + shooter_dxyz[2]*(float)rand()/RAND_MAX;
-    uvw[0]=0.0;
-    uvw[1]=0.0;
-    uvw[2]=0.0;
+    uvw[0]=shooter_uvw[0];
+    uvw[1]=shooter_uvw[1];
+    uvw[2]=shooter_uvw[2];
     shootpointinfo[i].prev=NULL;
     shootpointinfo[i].val=0.0;
   }
@@ -211,7 +211,7 @@ void draw_shooter(void){
     pbi = pb + i;
 
     xyz = pbi->xyz;
-    glVertex3fv(xyz);
+    if(pbi->visible==1)glVertex3fv(xyz);
   }
   glEnd();
   glPopMatrix();
