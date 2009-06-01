@@ -228,6 +228,7 @@ LOGICAL :: POROUS_FLOOR
  
 INTEGER :: MAXIMUM_DROPLETS,N_PART,PARTICLE_TAG,N_EVAC,N_EVAP_INDICIES=0
 REAL(EB) :: FLUXMAX
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: MATRIX_BPLUS ! Moore-Penrose pseudo-inverse
  
 ! Number of initial value, pressure zone, and multiplier derived types
  
