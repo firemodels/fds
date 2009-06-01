@@ -357,16 +357,14 @@ DO K=1,KBAR
          IEYM  = EDGE_INDEX(IC,6)
          IEZP  = EDGE_INDEX(IC,12)
          IEZM  = EDGE_INDEX(IC,10)
-         IF (OME_E(IEYP,2)>-1.E5_EB) OMYP = OME_E(IEYP,2)
-         IF (OME_E(IEYM,1)>-1.E5_EB) OMYM = OME_E(IEYM,1)
-         IF (OME_E(IEZP,2)>-1.E5_EB) OMZP = OME_E(IEZP,2)
-         IF (OME_E(IEZM,1)>-1.E5_EB) OMZM = OME_E(IEZM,1)
-         IF (TAU_E(IEYP,2)>-1.E5_EB) TXZP = TAU_E(IEYP,2)
-         IF (TAU_E(IEYM,1)>-1.E5_EB) TXZM = TAU_E(IEYM,1)
-         IF (TAU_E(IEZP,2)>-1.E5_EB) TXYP = TAU_E(IEZP,2)
-         IF (TAU_E(IEZM,1)>-1.E5_EB) TXYM = TAU_E(IEZM,1)
-!! if (j==1 .and. i==4 .and. k==2) write(0,*) i,j,k,ieyp,ome_e(ieyp,2),tau_e(ieyp,2)
-!! if (j==1 .and. i==2 .and. k==5) write(0,*) i,j,k,ieym,ome_e(ieym,1),tau_e(ieym,1)
+         IF (OME_E(IEYP,-1)>-1.E5_EB) OMYP = OME_E(IEYP,-1)
+         IF (OME_E(IEYM, 1)>-1.E5_EB) OMYM = OME_E(IEYM, 1)
+         IF (OME_E(IEZP,-2)>-1.E5_EB) OMZP = OME_E(IEZP,-2)
+         IF (OME_E(IEZM, 2)>-1.E5_EB) OMZM = OME_E(IEZM, 2)
+         IF (TAU_E(IEYP,-1)>-1.E5_EB) TXZP = TAU_E(IEYP,-1)
+         IF (TAU_E(IEYM, 1)>-1.E5_EB) TXZM = TAU_E(IEYM, 1)
+         IF (TAU_E(IEZP,-2)>-1.E5_EB) TXYP = TAU_E(IEZP,-2)
+         IF (TAU_E(IEZM, 2)>-1.E5_EB) TXYM = TAU_E(IEZM, 2)
          WOMY  = EPSWP*WP*OMYP + EPSWM*WM*OMYM
          VOMZ  = EPSVP*VP*OMZP + EPSVM*VM*OMZM
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
@@ -415,14 +413,14 @@ DO K=1,KBAR
          IEXM  = EDGE_INDEX(IC,2)
          IEZP  = EDGE_INDEX(IC,12)
          IEZM  = EDGE_INDEX(IC,11)
-         IF (OME_E(IEXP,2)>-1.E5_EB) OMXP = OME_E(IEXP,2)
-         IF (OME_E(IEXM,1)>-1.E5_EB) OMXM = OME_E(IEXM,1)
-         IF (OME_E(IEZP,2)>-1.E5_EB) OMZP = OME_E(IEZP,2)
-         IF (OME_E(IEZM,1)>-1.E5_EB) OMZM = OME_E(IEZM,1)
-         IF (TAU_E(IEXP,2)>-1.E5_EB) TYZP = TAU_E(IEXP,2)
-         IF (TAU_E(IEXM,1)>-1.E5_EB) TYZM = TAU_E(IEXM,1)
-         IF (TAU_E(IEZP,2)>-1.E5_EB) TXYP = TAU_E(IEZP,2)
-         IF (TAU_E(IEZM,1)>-1.E5_EB) TXYM = TAU_E(IEZM,1)
+         IF (OME_E(IEXP,-2)>-1.E5_EB) OMXP = OME_E(IEXP,-2)
+         IF (OME_E(IEXM, 2)>-1.E5_EB) OMXM = OME_E(IEXM, 2)
+         IF (OME_E(IEZP,-1)>-1.E5_EB) OMZP = OME_E(IEZP,-1)
+         IF (OME_E(IEZM, 1)>-1.E5_EB) OMZM = OME_E(IEZM, 1)
+         IF (TAU_E(IEXP,-2)>-1.E5_EB) TYZP = TAU_E(IEXP,-2)
+         IF (TAU_E(IEXM, 2)>-1.E5_EB) TYZM = TAU_E(IEXM, 2)
+         IF (TAU_E(IEZP,-1)>-1.E5_EB) TXYP = TAU_E(IEZP,-1)
+         IF (TAU_E(IEZM, 1)>-1.E5_EB) TXYM = TAU_E(IEZM, 1)
          WOMX  = EPSWP*WP*OMXP + EPSWM*WM*OMXM
          UOMZ  = EPSUP*UP*OMZP + EPSUM*UM*OMZM
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J+1,K))
@@ -471,14 +469,14 @@ DO K=0,KBAR
          IEXM  = EDGE_INDEX(IC,3)
          IEYP  = EDGE_INDEX(IC,8)
          IEYM  = EDGE_INDEX(IC,7)
-         IF (OME_E(IEXP,2)>-1.E5_EB) OMXP = OME_E(IEXP,2)
-         IF (OME_E(IEXM,1)>-1.E5_EB) OMXM = OME_E(IEXM,1)
-         IF (OME_E(IEYP,2)>-1.E5_EB) OMYP = OME_E(IEYP,2)
-         IF (OME_E(IEYM,1)>-1.E5_EB) OMYM = OME_E(IEYM,1)
-         IF (TAU_E(IEXP,2)>-1.E5_EB) TYZP = TAU_E(IEXP,2)
-         IF (TAU_E(IEXM,1)>-1.E5_EB) TYZM = TAU_E(IEXM,1)
-         IF (TAU_E(IEYP,2)>-1.E5_EB) TXZP = TAU_E(IEYP,2)
-         IF (TAU_E(IEYM,1)>-1.E5_EB) TXZM = TAU_E(IEYM,1)
+         IF (OME_E(IEXP,-1)>-1.E5_EB) OMXP = OME_E(IEXP,-1)
+         IF (OME_E(IEXM, 1)>-1.E5_EB) OMXM = OME_E(IEXM, 1)
+         IF (OME_E(IEYP,-2)>-1.E5_EB) OMYP = OME_E(IEYP,-2)
+         IF (OME_E(IEYM, 2)>-1.E5_EB) OMYM = OME_E(IEYM, 2)
+         IF (TAU_E(IEXP,-1)>-1.E5_EB) TYZP = TAU_E(IEXP,-1)
+         IF (TAU_E(IEXM, 1)>-1.E5_EB) TYZM = TAU_E(IEXM, 1)
+         IF (TAU_E(IEYP,-2)>-1.E5_EB) TXZP = TAU_E(IEYP,-2)
+         IF (TAU_E(IEYM, 2)>-1.E5_EB) TXZM = TAU_E(IEYM, 2)
          UOMY  = EPSUP*UP*OMYP + EPSUM*UM*OMYM
          VOMX  = EPSVP*VP*OMXP + EPSVM*VM*OMXM
          RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
@@ -1136,10 +1134,10 @@ DO K= 1,KBAR
       IC    = CELL_INDEX(I,J,K)
       IEYP  = EDGE_INDEX(IC,8)
       IEYM  = EDGE_INDEX(IC,6)
-      IF (OME_E(IEYP,2)>-1.E5_EB) OMYP = OME_E(IEYP,2)
-      IF (OME_E(IEYM,1)>-1.E5_EB) OMYM = OME_E(IEYM,1)
-      IF (TAU_E(IEYP,2)>-1.E5_EB) TXZP = TAU_E(IEYP,2)
-      IF (TAU_E(IEYM,1)>-1.E5_EB) TXZM = TAU_E(IEYM,1)
+      IF (OME_E(IEYP,-1)>-1.E5_EB) OMYP = OME_E(IEYP,-1)
+      IF (OME_E(IEYM, 1)>-1.E5_EB) OMYM = OME_E(IEYM, 1)
+      IF (TAU_E(IEYP,-1)>-1.E5_EB) TXZP = TAU_E(IEYP,-1)
+      IF (TAU_E(IEYM, 1)>-1.E5_EB) TXZM = TAU_E(IEYM, 1)
       WOMY  = EPSWP*WP*OMYP + EPSWM*WM*OMYM
       RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I+1,J,K))
       AH    = RHO_0(K)*RRHO - 1._EB   
@@ -1174,10 +1172,10 @@ DO K=0,KBAR
       IC    = CELL_INDEX(I,J,K)
       IEYP  = EDGE_INDEX(IC,8)
       IEYM  = EDGE_INDEX(IC,7)
-      IF (OME_E(IEYP,2)>-1.E5_EB) OMYP = OME_E(IEYP,2)
-      IF (OME_E(IEYM,1)>-1.E5_EB) OMYM = OME_E(IEYM,1)
-      IF (TAU_E(IEYP,2)>-1.E5_EB) TXZP = TAU_E(IEYP,2)
-      IF (TAU_E(IEYM,1)>-1.E5_EB) TXZM = TAU_E(IEYM,1)
+      IF (OME_E(IEYP,-2)>-1.E5_EB) OMYP = OME_E(IEYP,-2)
+      IF (OME_E(IEYM, 2)>-1.E5_EB) OMYM = OME_E(IEYM, 2)
+      IF (TAU_E(IEYP,-2)>-1.E5_EB) TXZP = TAU_E(IEYP,-2)
+      IF (TAU_E(IEYM, 2)>-1.E5_EB) TXZM = TAU_E(IEYM, 2)
       UOMY  = EPSUP*UP*OMYP + EPSUM*UM*OMYM
       RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,K+1))
       AH    = 0.5_EB*(RHO_0(K)+RHO_0(K+1))*RRHO - 1._EB
@@ -1458,9 +1456,11 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE TURBULENCE, ONLY: WERNER_WENGLE_WALL_MODEL
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
-            UUP(2),UUM(2),DXX(2),TAU_IJ_WALL(2),DUIDXJ(2),PROFILE_FACTOR,VEL_GAS,VEL_INS
-INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,IPM,ICD,IVL,I_SGN,IS, &
+            UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),MU_DUIDXJ_0(2),DUIDXJ_0(2),PROFILE_FACTOR,VEL_GAS,VEL_INS, &
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2)
+INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
             VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP
+LOGICAL :: ALTERED_GRADIENT(-2:2)
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,RHOP,VEL_OTHER
 TYPE (SURFACE_TYPE), POINTER :: SF
@@ -1544,43 +1544,42 @@ EDGE_LOOP: DO IE=1,N_EDGES
    JJO(2) = IJKE(15,IE)
    KKO(2) = IJKE(16,IE)
 
-   ! Loop over all edges and assign tangential velocity components
+   ! Get the velocity components at the appropriate cell faces     
  
-   SIGN_LOOP: DO I_SGN=-1,1,2
+   COMPONENT: SELECT CASE(IEC)
+      CASE(1) COMPONENT    
+         UUP(1)  = VV(II,JJ,KK+1)
+         UUM(1)  = VV(II,JJ,KK)
+         UUP(2)  = WW(II,JJ+1,KK)
+         UUM(2)  = WW(II,JJ,KK)
+         DXX(1)  = DY(JJ)
+         DXX(2)  = DZ(KK)
+         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
+      CASE(2) COMPONENT  
+         UUP(1)  = WW(II+1,JJ,KK)
+         UUM(1)  = WW(II,JJ,KK)
+         UUP(2)  = UU(II,JJ,KK+1)
+         UUM(2)  = UU(II,JJ,KK)
+         DXX(1)  = DZ(KK)
+         DXX(2)  = DX(II)
+         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
+      CASE(3) COMPONENT 
+         UUP(1)  = UU(II,JJ+1,KK)
+         UUM(1)  = UU(II,JJ,KK)
+         UUP(2)  = VV(II+1,JJ,KK)
+         UUM(2)  = VV(II,JJ,KK)
+         DXX(1)  = DX(II)
+         DXX(2)  = DY(JJ)
+         MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
+   END SELECT COMPONENT
 
-      COMPONENT: SELECT CASE(IEC)
-         CASE(1) COMPONENT    
-            UUP(1)  = VV(II,JJ,KK+1)
-            UUM(1)  = VV(II,JJ,KK)
-            UUP(2)  = WW(II,JJ+1,KK)
-            UUM(2)  = WW(II,JJ,KK)
-            DXX(1)  = DY(JJ)
-            DXX(2)  = DZ(KK)
-            MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
-         CASE(2) COMPONENT  
-            UUP(1)  = WW(II+1,JJ,KK)
-            UUM(1)  = WW(II,JJ,KK)
-            UUP(2)  = UU(II,JJ,KK+1)
-            UUM(2)  = UU(II,JJ,KK)
-            DXX(1)  = DZ(KK)
-            DXX(2)  = DX(II)
-            MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
-         CASE(3) COMPONENT 
-            UUP(1)  = UU(II,JJ+1,KK)
-            UUM(1)  = UU(II,JJ,KK)
-            UUP(2)  = VV(II+1,JJ,KK)
-            UUM(2)  = VV(II,JJ,KK)
-            DXX(1)  = DX(II)
-            DXX(2)  = DY(JJ)
-            MUA      = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
-      END SELECT COMPONENT
-   
-      ! Loop over all possible orientations of edge
-   
-      TAU_IJ_WALL(1) = MUA*(UUP(2)-UUM(2))/DXX(1)
-      TAU_IJ_WALL(2) = MUA*(UUP(1)-UUM(1))/DXX(2)
-      DUIDXJ(1) = (UUP(2)-UUM(2))/DXX(1)
-      DUIDXJ(2) = (UUP(1)-UUM(1))/DXX(2)
+   ! Indicate that the velocity gradients in the two orthogonal directions have not been changed yet
+
+   ALTERED_GRADIENT = .FALSE.
+
+   ! Loop over all possible orientations of edge and reassign velocity gradients if appropriate
+
+   SIGN_LOOP: DO I_SGN=-1,1,2
    
       ORIENTATION_LOOP: DO IS=1,3
    
@@ -1630,8 +1629,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
 
                   VEL_INS = VEL_GAS
-                  DUIDXJ(ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
-                  TAU_IJ_WALL(ICD) = MUA*DUIDXJ(ICD)
+                  DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
+                  MU_DUIDXJ(I_SGN*ICD) = MUA*DUIDXJ(I_SGN*ICD)
+                  ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
 
                CASE (SPECIFIED_VELOCITY) BOUNDARY_CONDITION
 
@@ -1646,20 +1646,24 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = SF%VEL_T(2)
                   IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = SF%VEL_T(1)
                   VEL_INS = 2._EB*PROFILE_FACTOR*RAMP_T*VEL_T - VEL_GAS
-                  DUIDXJ(ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
-                  TAU_IJ_WALL(ICD) = MUA*DUIDXJ(ICD)
+                  DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
+                  MU_DUIDXJ(I_SGN*ICD) = MUA*DUIDXJ(I_SGN*ICD)
+                  ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
 
                CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
-                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
                      VEL_INS = -VEL_GAS
-                     DUIDXJ(ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
-                     TAU_IJ_WALL(ICD) = MUA*DUIDXJ(ICD)
+                     DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
+                     MU_DUIDXJ(I_SGN*ICD) = MUA*DUIDXJ(I_SGN*ICD)
+                     ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
                   ENDIF
 
                CASE (WALL_MODEL) BOUNDARY_CONDITION
 
-                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                     IF (IWM<1) IWM = IWP
+                     IF (IWP<1) IWP = IWM
                      IIGM = IJKW(6,IWM)
                      JJGM = IJKW(7,IWM)
                      KKGM = IJKW(8,IWM)
@@ -1670,8 +1674,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      MU_WALL  = 0.5_EB*(MU_DNS(IIGM,JJGM,KKGM) + MU_DNS(IIGP,JJGP,KKGP))
                      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,VEL_GAS,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
                      VEL_INS = -VEL_GAS
-                     DUIDXJ(ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
-                     TAU_IJ_WALL(ICD) = MU_WALL*VEL_GAS*SIGN(1,IOR)*(1._EB-SLIP_COEF)/DXX(ICD)
+                     DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
+                     MU_DUIDXJ(I_SGN*ICD) = MU_WALL*VEL_GAS*SIGN(1,IOR)*(1._EB-SLIP_COEF)/DXX(ICD)
+                     ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
                   ENDIF
 
             END SELECT BOUNDARY_CONDITION
@@ -1720,8 +1725,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   IF (ICD==1) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
                   IF (ICD==2) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
             END SELECT
-            DUIDXJ(ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
-            TAU_IJ_WALL(ICD) = MUA*SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
+            DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
+            MU_DUIDXJ(I_SGN*ICD) = MUA*SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
+            ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
    
          ENDIF INTERPOLATION_IF
    
@@ -1757,20 +1763,50 @@ EDGE_LOOP: DO IE=1,N_EDGES
                ENDIF
          END SELECT
    
+  !if (predictor .and. ii==11 .and. jj==10 .and. kk==12 .and. iec==2) write(0,*) kk,ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
+  !if (predictor .and. ii==11 .and. jj==10 .and. kk== 8 .and. iec==2) write(0,*) kk,ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
+  !if (predictor .and. ii==50 .and. jj==1 .and. kk==50 .and. iec==2) write(0,*) ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
       ENDDO ORIENTATION_LOOP
    
-      ! Save vorticity and viscous stress for use in momentum equation
-   
-      IF (IOR<0) IPM = 2
-      IF (IOR>0) IPM = 1
-   
-      OME_E(IE,IPM) = DUIDXJ(1) - DUIDXJ(2)
-      TAU_E(IE,IPM) = SUM(TAU_IJ_WALL)
-   !!if (ii==2 .and. jj==1 .and. kk==4 .and. iec==2) write(0,*) ii,kk,ie,ipm,ome_e(ie,ipm),tau_e(ie,ipm)
-   !!if (ii==4 .and. jj==1 .and. kk==2 .and. iec==2) write(0,*) ii,kk,ie,ipm,ome_e(ie,ipm),tau_e(ie,ipm)
-   
    ENDDO SIGN_LOOP
-   
+
+   ! Save vorticity and viscous stress for use in momentum equation
+
+   DUIDXJ_0(1)    = (UUP(2)-UUM(2))/DXX(1)
+   DUIDXJ_0(2)    = (UUP(1)-UUM(1))/DXX(2)
+   MU_DUIDXJ_0(1) = MUA*DUIDXJ_0(1)
+   MU_DUIDXJ_0(2) = MUA*DUIDXJ_0(2)
+
+   SIGN_LOOP_2: DO I_SGN=-1,1,2
+      ORIENTATION_LOOP_2: DO ICD=1,2
+         IF (ICD==1) ICDO=2
+         IF (ICD==2) ICDO=1
+         IF (ALTERED_GRADIENT(I_SGN*ICD)) THEN
+               DUIDXJ_USE(ICD) =    DUIDXJ(I_SGN*ICD)
+            MU_DUIDXJ_USE(ICD) = MU_DUIDXJ(I_SGN*ICD)
+         ELSEIF (ALTERED_GRADIENT(-I_SGN*ICD)) THEN
+               DUIDXJ_USE(ICD) =    DUIDXJ(-I_SGN*ICD)
+            MU_DUIDXJ_USE(ICD) = MU_DUIDXJ(-I_SGN*ICD)
+         ELSE
+               CYCLE
+     !         DUIDXJ_USE(ICD) =    DUIDXJ_0(ICD)
+     !      MU_DUIDXJ_USE(ICD) = MU_DUIDXJ_0(ICD)
+         ENDIF
+         IF (ALTERED_GRADIENT(I_SGN*ICDO)) THEN
+               DUIDXJ_USE(ICDO) =    DUIDXJ(I_SGN*ICDO)
+            MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ(I_SGN*ICDO)
+         ELSEIF (ALTERED_GRADIENT(-I_SGN*ICDO)) THEN
+               DUIDXJ_USE(ICDO) =    DUIDXJ(-I_SGN*ICDO)
+            MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ(-I_SGN*ICDO)
+         ELSE
+               DUIDXJ_USE(ICDO) =    DUIDXJ_0(ICDO)
+            MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ_0(ICDO)
+         ENDIF
+         OME_E(IE,I_SGN*ICD) =    DUIDXJ_USE(1) -    DUIDXJ_USE(2)
+         TAU_E(IE,I_SGN*ICD) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)
+      ENDDO ORIENTATION_LOOP_2
+   ENDDO SIGN_LOOP_2
+
 ENDDO EDGE_LOOP
 
 ! Store cell node averages of the velocity components in UVW_GHOST for use in Smokeview only
