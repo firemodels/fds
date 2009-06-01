@@ -1788,6 +1788,212 @@ ENDIF
 END SUBROUTINE WERNER_WENGLE_WALL_MODEL
 
 
+SUBROUTINE PERM3D(UP,VP,WP,Q,R,S,NC,UBAR,D1,D2,DIV)
+	IMPLICIT NONE
+	
+	INTEGER, INTENT(IN) :: NC					! NUMBER OF PARTICLES IN THE CELL
+	REAL, INTENT(IN) :: Q(NC),R(NC),S(NC)		! (Q,R,S) NORMALIZED POSITION OF PARTICLES
+	REAL, INTENT(IN) :: UBAR(12),D1(12),D2(12)	! PARABOLIC EDGE PARAMETERS
+	REAL, INTENT(OUT) :: UP(NC),VP(NC),WP(NC)		! RECONSTRUCTED VELOCITY
+	REAL, INTENT(OUT) :: DIV(NC)
+
+	INTEGER :: I
+	REAL :: Q1,Q2,R1,R2,S1,S2
+	REAL :: DUDX,DVDY,DWDZ
+	
+	! PARABOLIC EDGE RECONSTRUCTION METHOD (PERM) IN 3D, based on:
+	!
+	! R. McDermott and S. B. Pope. The parabolic edge reconstuction method (PERM) for Lagrangian
+	! particle advection. J. Comp. Phys., 227:5447-5491, 2008.
+
+	DO I = 1,NC 
+
+		Q1 = Q(I)-0.5_EB
+		Q2 = 0.5_EB*(Q1**2-0.25_EB)
+
+		UP(I) = (1-S(I))*( (1-R(I))*( UBAR(1) + Q1*D1(1) + Q2*D2(1) )		&
+		      +                R(I)*( UBAR(2) + Q1*D1(2) + Q2*D2(2) ) )		&
+		      +     S(I)*( (1-R(I))*( UBAR(3) + Q1*D1(3) + Q2*D2(3) )		&
+		      +                R(I)*( UBAR(4) + Q1*D1(4) + Q2*D2(4) ) )
+
+		R1 = R(I)-0.5_EB
+		R2 = 0.5_EB*(R1**2-0.25_EB)
+
+		VP(I) = (1-S(I))*( (1-Q(I))*( UBAR(5) + R1*D1(5) + R2*D2(5) )		&
+		      +                Q(I)*( UBAR(6) + R1*D1(6) + R2*D2(6) ) )		&
+		      +     S(I)*( (1-Q(I))*( UBAR(7) + R1*D1(7) + R2*D2(7) )		&
+		      +                Q(I)*( UBAR(8) + R1*D1(8) + R2*D2(8) ) )
+
+		S1 = S(I)-0.5_EB
+		S2 = 0.5_EB*(S1**2-0.25_EB)
+
+		WP(I) = (1-Q(I))*( (1-R(I))*( UBAR(9)  + S1*D1(9)  + S2*D2(9) )		&
+		      +                R(I)*( UBAR(10) + S1*D1(10) + S2*D2(10) ) )	&
+		      +     Q(I)*( (1-R(I))*( UBAR(11) + S1*D1(11) + S2*D2(11) )		&
+		      +                R(I)*( UBAR(12) + S1*D1(12) + S2*D2(12) ) )
+
+	END DO
+
+
+	! CHECK DIVERGENCE
+	DO I = 1,NC 
+
+		Q1 = Q(I)-0.5_EB
+		
+		DUDX = (1-S(I))*( (1-R(I))*( D1(1) + Q1*D2(1) )		&
+		     +                R(I)*( D1(2) + Q1*D2(2) ) )	&
+		     +     S(I)*( (1-R(I))*( D1(3) + Q1*D2(3) )		&
+		     +                R(I)*( D1(4) + Q1*D2(4) ) )
+
+		R1 = R(I)-0.5_EB
+		
+		DVDY = (1-S(I))*( (1-Q(I))*( D1(5) + R1*D2(5) )		&
+		     +                Q(I)*( D1(6) + R1*D2(6) ) )	&
+		     +     S(I)*( (1-Q(I))*( D1(7) + R1*D2(7) )		&
+		     +                Q(I)*( D1(8) + R1*D2(8) ) )
+
+		S1 = S(I)-0.5_EB
+		
+		DWDZ = (1-Q(I))*( (1-R(I))*( D1(9)  + S1*D2(9) )		&
+		     +                R(I)*( D1(10) + S1*D2(10) ) )		&
+		     +     Q(I)*( (1-R(I))*( D1(11) + S1*D2(11) )		&
+		     +                R(I)*( D1(12) + S1*D2(12) ) )
+
+		DIV(I) = DUDX + DVDY + DWDZ
+
+	END DO
+
+END SUBROUTINE PERM3D
+
+
+SUBROUTINE EDGE_PARAMETERS(UBAR,D1,D2,				&
+						   ULES,VLES,WLES,			&
+						   UHAT,VHAT,WHAT,			&
+						   DHAT,VEC_THETA)
+	IMPLICIT NONE
+
+	! DIMENSION VARIABLES
+
+	REAL, INTENT(OUT) :: UBAR(12),D1(12),D2(12)
+	REAL, INTENT(IN) :: ULES(0:1),VLES(0:1),WLES(0:1)
+	REAL, INTENT(IN) :: UHAT(0:1,0:1,0:1)
+	REAL, INTENT(IN) :: VHAT(0:1,0:1,0:1)
+	REAL, INTENT(IN) :: WHAT(0:1,0:1,0:1)
+	REAL, INTENT(IN) :: DHAT(12),VEC_THETA(8)
+
+	! LOCAL
+	REAL :: UU(0:1,0:1,0:1),VV(0:1,0:1,0:1),WW(0:1,0:1,0:1)
+	REAL :: VEC_A(8),VEC_B(8)
+	REAL :: DU(0:1),DV(0:1),DW(0:1)
+	REAL :: DCOR(12)
+
+	!===========================================================
+
+	! COMPUTE FINAL VERTEX VALUES
+
+	! U COMPONENT WEST FACE
+	DU(0) = ULES(0) - 0.25_EB*( UHAT(0,0,0) + UHAT(0,0,1) + UHAT(0,1,0) + UHAT(0,1,1) )
+	UU(0,0,0) = UHAT(0,0,0) + DU(0)
+	UU(0,0,1) = UHAT(0,0,1) + DU(0)
+	UU(0,1,0) = UHAT(0,1,0) + DU(0)
+	UU(0,1,1) = UHAT(0,1,1) + DU(0)
+
+	! U COMPONENT EAST FACE
+	DU(1) = ULES(1) - 0.25_EB*( UHAT(1,0,0) + UHAT(1,0,1) + UHAT(1,1,0) + UHAT(1,1,1) )
+	UU(1,0,0) = UHAT(1,0,0) + DU(1)
+	UU(1,0,1) = UHAT(1,0,1) + DU(1)
+	UU(1,1,0) = UHAT(1,1,0) + DU(1)
+	UU(1,1,1) = UHAT(1,1,1) + DU(1)
+
+	! V COMPONENT SOUTH FACE
+	DV(0) = VLES(0) - 0.25_EB*( VHAT(0,0,0) + VHAT(0,0,1) + VHAT(1,0,0) + VHAT(1,0,1) )
+	VV(0,0,0) = VHAT(0,0,0) + DV(0)
+	VV(0,0,1) = VHAT(0,0,1) + DV(0)
+	VV(1,0,0) = VHAT(1,0,0) + DV(0)
+	VV(1,0,1) = VHAT(1,0,1) + DV(0)
+
+	! V COMPONENT NORTH FACE
+	DV(1) = VLES(1) - 0.25_EB*( VHAT(0,1,0) + VHAT(0,1,1) + VHAT(1,1,0) + VHAT(1,1,1) )
+	VV(0,1,0) = VHAT(0,1,0) + DV(1)
+	VV(0,1,1) = VHAT(0,1,1) + DV(1)
+	VV(1,1,0) = VHAT(1,1,0) + DV(1)
+	VV(1,1,1) = VHAT(1,1,1) + DV(1)
+
+	! W COMPONENT BOTTOM FACE
+	DW(0) = WLES(0) - 0.25_EB*( WHAT(0,0,0) + WHAT(0,1,0) + WHAT(1,0,0) + WHAT(1,1,0) )
+	WW(0,0,0) = WHAT(0,0,0) + DW(0)
+	WW(0,1,0) = WHAT(0,1,0) + DW(0)
+	WW(1,0,0) = WHAT(1,0,0) + DW(0)
+	WW(1,1,0) = WHAT(1,1,0) + DW(0)
+
+	! W COMPONENT TOP FACE
+	DW(1) = WLES(1) - 0.25_EB*( WHAT(0,0,1) + WHAT(0,1,1) + WHAT(1,0,1) + WHAT(1,1,1) )
+	WW(0,0,1) = WHAT(0,0,1) + DW(1)
+	WW(0,1,1) = WHAT(0,1,1) + DW(1)
+	WW(1,0,1) = WHAT(1,0,1) + DW(1)
+	WW(1,1,1) = WHAT(1,1,1) + DW(1)
+	
+	! PARABOLIC EDGE VELOCITIES
+	UBAR(1) = 0.5_EB*( UU(1,0,0) + UU(0,0,0) )
+	UBAR(2) = 0.5_EB*( UU(1,1,0) + UU(0,1,0) )
+	UBAR(3) = 0.5_EB*( UU(1,0,1) + UU(0,0,1) )
+	UBAR(4) = 0.5_EB*( UU(1,1,1) + UU(0,1,1) )
+
+	UBAR(5) = 0.5_EB*( VV(0,1,0) + VV(0,0,0) )
+	UBAR(6) = 0.5_EB*( VV(1,1,0) + VV(1,0,0) )
+	UBAR(7) = 0.5_EB*( VV(0,1,1) + VV(0,0,1) )
+	UBAR(8) = 0.5_EB*( VV(1,1,1) + VV(1,0,1) )
+
+	UBAR(9)  = 0.5_EB*( WW(0,0,1) + WW(0,0,0) )
+	UBAR(10) = 0.5_EB*( WW(0,1,1) + WW(0,1,0) )
+	UBAR(11) = 0.5_EB*( WW(1,0,1) + WW(1,0,0) )
+	UBAR(12) = 0.5_EB*( WW(1,1,1) + WW(1,1,0) )
+
+	! FIRST-ORDER SLOPES
+	D1(1) = UU(1,0,0) - UU(0,0,0)
+	D1(2) = UU(1,1,0) - UU(0,1,0)
+	D1(3) = UU(1,0,1) - UU(0,0,1)
+	D1(4) = UU(1,1,1) - UU(0,1,1)
+
+	D1(5) = VV(0,1,0) - VV(0,0,0)
+	D1(6) = VV(1,1,0) - VV(1,0,0)
+	D1(7) = VV(0,1,1) - VV(0,0,1)
+	D1(8) = VV(1,1,1) - VV(1,0,1)
+
+	D1(9)  = WW(0,0,1) - WW(0,0,0)
+	D1(10) = WW(0,1,1) - WW(0,1,0)
+	D1(11) = WW(1,0,1) - WW(1,0,0)
+	D1(12) = WW(1,1,1) - WW(1,1,0)
+	
+	! A*D1
+	VEC_A(1)  = D1(1) + D1(5) + D1(9)
+	VEC_A(2)  = D1(3) + D1(7) + D1(9)
+	VEC_A(3)  = D1(2) + D1(5) + D1(10)
+	VEC_A(4)  = D1(4) + D1(7) + D1(10)
+	VEC_A(5)  = D1(1) + D1(6) + D1(11)
+	VEC_A(6)  = D1(3) + D1(8) + D1(11)
+	VEC_A(7)  = D1(2) + D1(6) + D1(12)
+	VEC_A(8)  = D1(4) + D1(8) + D1(12)
+
+	! B*DHAT
+	VEC_B(1)  = -DHAT(1) - DHAT(5) - DHAT(9)
+	VEC_B(2)  = -DHAT(3) - DHAT(7) + DHAT(9)
+	VEC_B(3)  = -DHAT(2) + DHAT(5) - DHAT(10)
+	VEC_B(4)  = -DHAT(4) + DHAT(7) + DHAT(10)
+	VEC_B(5)  =  DHAT(1) - DHAT(6) - DHAT(11)
+	VEC_B(6)  =  DHAT(3) - DHAT(8) + DHAT(11)
+	VEC_B(7)  =  DHAT(2) + DHAT(6) - DHAT(12)
+	VEC_B(8)  =  DHAT(4) + DHAT(8) + DHAT(12)
+	
+	VEC_B = 0.5_EB*VEC_B
+	
+	! SECOND-ORDER SLOPES
+	DCOR = MATMUL(MATRIX_BPLUS,(VEC_THETA - VEC_A - VEC_B))
+	D2 = DHAT + DCOR
+
+END SUBROUTINE EDGE_PARAMETERS
+
+
 SUBROUTINE GET_REV_turb(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
 CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
