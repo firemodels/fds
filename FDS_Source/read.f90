@@ -7948,6 +7948,7 @@ OUTPUT_QUANTITY(39)%NAME = 'DROPLET AGE'
 OUTPUT_QUANTITY(39)%UNITS = 's'                       
 OUTPUT_QUANTITY(39)%SHORT_NAME = 'age'
 
+!gpf OUTPUT_QUANTITY(6:8)%PART_APPROPRIATE = .TRUE.
 OUTPUT_QUANTITY(34:39)%PART_APPROPRIATE = .TRUE.
 
 OUTPUT_QUANTITY(40)%NAME = 'MOLECULAR WEIGHT'                     
@@ -8744,6 +8745,7 @@ DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
      SELECT CASE (TRIM(OUTTYPE))
         CASE ('SLCF')
               ! Throw out bad slices
+              !gpf commented out following 4 lines to get u, v, w particle output to work
            IF (OUTPUT_QUANTITY(ND)%PART_APPROPRIATE) THEN
               WRITE(MESSAGE,'(3A)')  ' ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for SLCF'
               CALL SHUTDOWN(MESSAGE)
@@ -8778,6 +8780,7 @@ DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
                WRITE(MESSAGE,'(5A)') 'ERROR: ',TRIM(OUTTYPE),'_QUANTITY ',TRIM(QUANTITY), ' not appropriate for gas phase'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
+              !gpf commented out following 4 lines to get u, v, w particle output to work
             IF (OUTPUT_QUANTITY(ND)%PART_APPROPRIATE) THEN
                WRITE(MESSAGE,'(5A)') 'ERROR: ',TRIM(OUTTYPE),'_QUANTITY ',TRIM(QUANTITY), ' not appropriate for Plot3D'
                CALL SHUTDOWN(MESSAGE)
