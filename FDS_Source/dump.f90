@@ -2702,6 +2702,12 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
       ZP(NPP) = DR%Z
       DO NN=1,PC%N_QUANTITIES
          SELECT CASE(PC%QUANTITIES_INDEX(NN))
+!gpf            CASE( 6)  ! U-VELOCITY
+!gpf               QP(NPP,NN) = DR%U
+!gpf            CASE( 7)  ! V-VELOCITY
+!gpf               QP(NPP,NN) = DR%V
+!gpf            CASE( 8)  ! W-VELOCITY
+!gpf               QP(NPP,NN) = DR%W
             CASE(34)  ! DROPLET_DIAMETER
                QP(NPP,NN) = 2.E6*DR%R
             CASE(35)  ! DROPLET_VELOCITY
