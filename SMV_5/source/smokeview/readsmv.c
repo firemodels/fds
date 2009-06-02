@@ -1070,16 +1070,43 @@ int readsmv(char *file){
         strcpy(labelj->shortlabel,shortdefaultlabel);
         labelj->unit=NULL;
 
+        partclassi->col_azimuth=-1;
+        partclassi->col_diameter=-1;
+        partclassi->col_elevation=-1;
+        partclassi->col_length=-1;
+        partclassi->col_u_vel=-1;
+        partclassi->col_v_vel=-1;
+        partclassi->col_w_vel=-1;
+        partclassi->vis_type=PART_POINTS;
         for(j=2;j<partclassi->ntypes;j++){
           labelj = partclassi->labels+j;
           labelj->longlabel=NULL;
           labelj->shortlabel=NULL;
           labelj->unit=NULL;
           readlabels(labelj,stream);
+          if(strcmp(labelj->shortlabel,"diameter")==0){
+            partclassi->col_diameter=j-2;
+          }
+          if(strcmp(labelj->shortlabel,"length")==0){
+            partclassi->col_length=j-2;
+          }
+          if(strcmp(labelj->shortlabel,"azimuth")==0){
+            partclassi->col_azimuth=j-2;
+          }
+          if(strcmp(labelj->shortlabel,"elevation")==0){
+            partclassi->col_elevation=j-2;
+          }
+          if(strcmp(labelj->shortlabel,"U-VEL")==0){
+            partclassi->col_u_vel=j-2;
+          }
+          if(strcmp(labelj->shortlabel,"V-VEL")==0){
+            partclassi->col_v_vel=j-2;
+          }
+          if(strcmp(labelj->shortlabel,"W-VEL")==0){
+            partclassi->col_w_vel=j-2;
+          }
         }
-
       }
-
       npartclassinfo++;
       continue;
     }
