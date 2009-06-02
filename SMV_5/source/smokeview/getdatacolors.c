@@ -195,6 +195,8 @@ void getBoundaryLabels(
 void getPart5Colors(particle *parti, int nlevel){
   int i,j,k,m;
   part5data *datacopy;
+  float *diameter_data, *length_data, *azimuth_data, *elevation_data;
+  float *u_vel_data, *v_vel_data, *w_vel_data;
 
   datacopy = parti->data5;
   for(i=0;i<parti->nframes;i++){
@@ -203,11 +205,12 @@ void getPart5Colors(particle *parti, int nlevel){
       part5class *partclassi;
       float *rvals;
       unsigned char *irvals;
+      float *dsx, *dsy, *dsz;
+      int flag;
 
       partclassi = parti->partclassptr[j];
       rvals = datacopy->rvals;
       irvals = datacopy->irvals;
-
       for(k=2;k<partclassi->ntypes;k++){
         part5prop *prop_id;
 
@@ -244,6 +247,96 @@ void getPart5Colors(particle *parti, int nlevel){
           }
         }
       }
+      //** do some data conversion if the right data columns are present
+      azimuth_data=NULL;
+      diameter_data=NULL;
+      elevation_data=NULL;
+      length_data=NULL;
+      u_vel_data=NULL;
+      v_vel_data=NULL;
+      w_vel_data=NULL;
+
+      if(partclassi->col_azimuth>=0){
+        azimuth_data=datacopy->rvals+partclassi->col_azimuth*datacopy->npoints;
+      }
+      if(partclassi->col_diameter>=0){
+        diameter_data=datacopy->rvals+partclassi->col_diameter*datacopy->npoints;
+      }
+      if(partclassi->col_elevation>=0){
+        elevation_data=datacopy->rvals+partclassi->col_elevation*datacopy->npoints;
+      }
+      if(partclassi->col_length>=0){
+        length_data=datacopy->rvals+partclassi->col_length*datacopy->npoints;
+      }
+      if(partclassi->col_u_vel>=0){
+        u_vel_data=datacopy->rvals+partclassi->col_u_vel*datacopy->npoints;
+      }
+      if(partclassi->col_v_vel>=0){
+        v_vel_data=datacopy->rvals+partclassi->col_v_vel*datacopy->npoints;
+      }
+      if(partclassi->col_w_vel>=0){
+        w_vel_data=datacopy->rvals+partclassi->col_w_vel*datacopy->npoints;
+      }
+      flag=0;
+      if(azimuth_data!=NULL&&elevation_data!=NULL&&length_data!=NULL){
+        flag=1;
+        dsx = datacopy->dsx;
+        dsy = datacopy->dsy;
+        dsz = datacopy->dsz;
+        for(m=0;m<datacopy->npoints;m++){
+          float az, elev, length;
+
+          az= azimuth_data[m]*PI/180.0;
+          elev = elevation_data[m]*PI/180.0;
+          length=length_data[m]/xyzmaxdiff;
+          dsx[m] = cos(az)*cos(elev)*length/2.0;
+          dsy[m] = sin(az)*cos(elev)*length/2.0;
+          dsz[m] =         sin(elev)*length/2.0;
+        }
+      }
+#define MAX(a, b) (a > b ? a : b)
+      if(u_vel_data!=NULL&&v_vel_data!=NULL&&w_vel_data!=NULL){
+        float denom;
+
+        part5prop *prop_U, *prop_V, *prop_W;
+        prop_U = get_part5prop(partclassi->labels[partclassi->col_u_vel+2].longlabel);
+        prop_V = get_part5prop(partclassi->labels[partclassi->col_v_vel+2].longlabel);
+        prop_W = get_part5prop(partclassi->labels[partclassi->col_w_vel+2].longlabel);
+        if(prop_U!=NULL&&prop_V!=NULL&&prop_W!=NULL){
+          float umax, vmax, wmax;
+
+          umax = MAX(fabs(prop_U->valmin),fabs(prop_U->valmax));
+          vmax = MAX(fabs(prop_V->valmin),fabs(prop_V->valmax));
+          wmax = MAX(fabs(prop_W->valmin),fabs(prop_W->valmax));
+
+          denom = sqrt(umax*umax+vmax*vmax+wmax*wmax);
+        }
+        else{
+          denom=1.0;
+        }
+
+        flag=1;
+        dsx = datacopy->dsx;
+        dsy = datacopy->dsy;
+        dsz = datacopy->dsz;
+        for(m=0;m<datacopy->npoints;m++){
+          dsx[m] = 0.05*u_vel_data[m]/denom;
+          dsy[m] = 0.05*v_vel_data[m]/denom;
+          dsz[m] = 0.05*w_vel_data[m]/denom;
+        }
+      }
+      if(flag==0){
+        FREEMEMORY(datacopy->dsx);
+        FREEMEMORY(datacopy->dsy);
+        FREEMEMORY(datacopy->dsz);
+      }
+      datacopy++;
+    }
+  }
+// erase data memory in a separate loop (so all "columns" are available when doing any conversions)
+  datacopy = parti->data5;
+  for(i=0;i<parti->nframes;i++){
+    for(j=0;j<parti->nclasses;j++){
       FREEMEMORY(datacopy->rvals);
       datacopy++;
     }

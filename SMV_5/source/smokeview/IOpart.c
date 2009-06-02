@@ -66,6 +66,9 @@ void freepart5data(part5data *datacopy){
   FREEMEMORY(datacopy->sx);
   FREEMEMORY(datacopy->sy);
   FREEMEMORY(datacopy->sz);
+  FREEMEMORY(datacopy->dsx);
+  FREEMEMORY(datacopy->dsy);
+  FREEMEMORY(datacopy->dsz);
   FREEMEMORY(datacopy->avatar_angle);
   FREEMEMORY(datacopy->avatar_width);
   FREEMEMORY(datacopy->avatar_height);
@@ -100,6 +103,9 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
   datacopy->sx=NULL;
   datacopy->sy=NULL;
   datacopy->sz=NULL;
+  datacopy->dsx=NULL;
+  datacopy->dsy=NULL;
+  datacopy->dsz=NULL;
   datacopy->avatar_angle=NULL;
   datacopy->avatar_width=NULL;
   datacopy->avatar_height=NULL;
@@ -742,6 +748,9 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
           NewMemory((void **)&datacopy->sx,npoints*sizeof(short));
           NewMemory((void **)&datacopy->sy,npoints*sizeof(short));
           NewMemory((void **)&datacopy->sz,npoints*sizeof(short));
+          NewMemory((void **)&datacopy->dsx,npoints*sizeof(float));
+          NewMemory((void **)&datacopy->dsy,npoints*sizeof(float));
+          NewMemory((void **)&datacopy->dsz,npoints*sizeof(float));
           if(parti->evac==1){
             NewMemory((void **)&datacopy->avatar_angle,npoints*sizeof(float));
             NewMemory((void **)&datacopy->avatar_width,npoints*sizeof(float));
@@ -1494,23 +1503,57 @@ void drawPart5(const particle *parti){
         else{
           glPointSize(partpointsize);
           if(offset_terrain==0){
-            glBegin(GL_POINTS);
-            if(show_default==1){
-              glColor4fv(datacopy->partclassbase->rgb);
-              for(j=0;j<datacopy->npoints;j++){
-                if(vis[j]==1)glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
-              }
-            }
-            else{
-              color=datacopy->irvals+itype*datacopy->npoints;
-              for(j=0;j<datacopy->npoints;j++){
-                if(vis[j]==1){
-                  glColor4fv(rgb_full[color[j]]);
-                  glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+            if(datacopy->partclassbase->vis_type==PART_POINTS){
+              glBegin(GL_POINTS);
+              if(show_default==1){
+                glColor4fv(datacopy->partclassbase->rgb);
+                for(j=0;j<datacopy->npoints;j++){
+                  if(vis[j]==1){
+                    glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+                  }
                 }
               }
+              else{
+                color=datacopy->irvals+itype*datacopy->npoints;
+                for(j=0;j<datacopy->npoints;j++){
+                  if(vis[j]==1){
+                    glColor4fv(rgb_full[color[j]]);
+                    glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+                  }
+                }
+              }
+              glEnd();
             }
-            glEnd();
+            if(datacopy->partclassbase->vis_type==PART_LINES
+              &&datacopy->dsx!=NULL&&datacopy->dsy!=NULL&&datacopy->dsz!=NULL
+              ){
+              float *dx, *dy, *dz;
+
+              dx = datacopy->dsx;
+              dy = datacopy->dsy;
+              dz = datacopy->dsz;
+              glBegin(GL_LINES);
+              if(show_default==1){
+                glColor4fv(datacopy->partclassbase->rgb);
+                for(j=0;j<datacopy->npoints;j++){
+                  if(vis[j]==1){
+                    glVertex3f(xplts[sx[j]]-dx[j],yplts[sy[j]]-dy[j],zplts[sz[j]]-dz[j]);
+                    glVertex3f(xplts[sx[j]]+dx[j],yplts[sy[j]]+dy[j],zplts[sz[j]]+dz[j]);
+                  }
+                }
+              }
+              else{
+                color=datacopy->irvals+itype*datacopy->npoints;
+                for(j=0;j<datacopy->npoints;j++){
+                  if(vis[j]==1){
+                    glColor4fv(rgb_full[color[j]]);
+                    glVertex3f(xplts[sx[j]]-dx[j],yplts[sy[j]]-dy[j],zplts[sz[j]]-dz[j]);
+                    glVertex3f(xplts[sx[j]]+dx[j],yplts[sy[j]]+dy[j],zplts[sz[j]]+dz[j]);
+                  }
+                }
+              }
+              glEnd();
+            }
           }
           else{
             glBegin(GL_POINTS);

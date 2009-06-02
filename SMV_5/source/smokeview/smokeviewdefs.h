@@ -11,6 +11,11 @@ void _sniffErrors(char *whereat);
 #define sniffErrors(f)
 #endif
 
+#define PART_POINTS 1
+#define PART_SPHERES 2
+#define PART_LINES 3
+#define PART_CYLINDERS 4
+
 #define DOUBLE_BUFFER 2
 #define SINGLE_BUFFER 1
 
