@@ -670,6 +670,9 @@ typedef struct _camera {
 typedef struct {
   char *name;
   int kind;
+  int col_diameter, col_length, col_azimuth, col_elevation;
+  int col_u_vel, col_v_vel, col_w_vel;
+  int vis_type;
   int maxpoints, ntypes;
   float *xyz, *rgb;
   flowlabels *labels;
@@ -704,6 +707,7 @@ typedef struct {
   float time;
   int npoints,n_rtypes, n_itypes;
   short *sx, *sy, *sz;
+  float *dsx, *dsy, *dsz;
   float *avatar_angle, *avatar_width, *avatar_depth, *avatar_height;
   int humancolor_varindex;
   int *tags,*sort_tags;

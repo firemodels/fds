@@ -2592,18 +2592,27 @@ void ParticlePropShowMenu(int value){
   }
   else{
     int iclass;
-    
+    int vistype;
 
-    iclass = -value - 10;
-    if(current_property!=NULL){
-      unsigned char *vis;
+    iclass =  (-value - 10)/5;
+    vistype = (-value - 10)%5;
+    if(vistype==0){
+      if(current_property!=NULL){
+        unsigned char *vis;
 
-      vis = current_property->class_vis;
-      vis[iclass] = 1 - vis[iclass];
-      if(scriptoutstream!=NULL){
-        fprintf(scriptoutstream,"PARTCLASSTYPE\n");
-        fprintf(scriptoutstream," %s\n",current_property->label->longlabel);
+        vis = current_property->class_vis;
+        vis[iclass] = 1 - vis[iclass];
+        if(scriptoutstream!=NULL){
+          fprintf(scriptoutstream,"PARTCLASSTYPE\n");
+          fprintf(scriptoutstream," %s\n",current_property->label->longlabel);
+        }
       }
+    }
+    else{
+      part5class *partclassj;
+
+      partclassj = partclassinfo + iclass;
+      partclassj->vis_type=vistype;
     }
 
   }
@@ -4791,7 +4800,42 @@ static int in_menu=0;
             strcpy(menulabel,"  ");
           }
           strcat(menulabel,partclassj->name);
-          glutAddMenuEntry(menulabel,-10-j);
+          glutAddMenuEntry(menulabel,-10-5*j);
+          if(partclassj->col_diameter>=0||partclassj->col_length>=0||
+             (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)
+            ){
+            if(partclassj->vis_type==PART_POINTS){
+              glutAddMenuEntry("      *Points",-10-5*j-PART_POINTS);
+            }
+            else{
+              glutAddMenuEntry("      Points",-10-5*j-PART_POINTS);
+            }
+            if(partclassj->col_diameter>=0){
+              if(partclassj->vis_type==PART_SPHERES){
+                glutAddMenuEntry("      *Spheres",-10-5*j-PART_SPHERES);
+              }
+              else{
+                glutAddMenuEntry("      Spheres",-10-5*j-PART_SPHERES);
+              }
+            }
+            if(partclassj->col_length>=0||
+              (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)){
+              if(partclassj->vis_type==PART_LINES){
+                glutAddMenuEntry("      *Lines",-10-5*j-PART_LINES);
+              }
+              else{
+                glutAddMenuEntry("      Lines",-10-5*j-PART_LINES);
+              }
+            }
+            if(partclassj->col_diameter>=0&&partclassj->col_length>=0){
+              if(partclassj->vis_type==PART_CYLINDERS){
+                glutAddMenuEntry("      *Cylinders",-10-5*j-PART_CYLINDERS);
+              }
+              else{
+                glutAddMenuEntry("      Cylinders",-10-5*j-PART_CYLINDERS);
+              }
+            }
+          }
         }
         break;
       }
@@ -4850,7 +4894,7 @@ static int in_menu=0;
             strcpy(menulabel,"  ");
           }
           strcat(menulabel,partclassj->name);
-          glutAddMenuEntry(menulabel,-10-j);
+          glutAddMenuEntry(menulabel,-10-5*j);
         }
         break;
       }
@@ -4859,7 +4903,7 @@ static int in_menu=0;
         glutAddMenuEntry("  Hide All Types",-3);
       }
     }
-}
+  }
 
 /* --------------------------------particle show menu -------------------------- */
 
