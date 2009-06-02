@@ -1,30 +1,31 @@
 % McDermott
-% 5-22-2009
+% 6-02-2009
 % read_dline.m
+%
+% Reads verification data configuration file.
 
 close all
 clear all
 
-[M T] = xlsread('../verification_data_config_matlab.csv'); % M = num array, T = cell array
+addpath('../functions')
+vdir = '../../../Verification/';
 
-for k = 2:length(T(:,5))
-    if strcmp((T(k,1)),'d')
-        [D H] = xlsread(['../../../Verification/',char(T(k,5))]);
-        C = textscan(char(T(k,8)),'%s','delimiter',',');
-        C = C{:}';
-        
-        for i=1:length(C)
-            for j=2:length(H)
-                if strcmp(C(i),H(j))
-                    plot(D(:,1),D(:,j)); hold on
-                end
-            end
-        end
+A = importdata('../verification_data_config_matlab.csv');
+H = textscan(A{1},'%q','delimiter',',');
+headers = H{:}';
 
-        xlabel(char(T(k,7)))
-        ylabel(char(T(k,8)))
-        hold off
-        clear D H C
-    end
-    %pause
+P = textscan(A{2},'%q','delimiter',',');
+parameters = P{:}';
+
+
+if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
+    
+    Quantity        = char(parameters(find(strcmp(headers,'Quantity'))));
+    Group           = char(parameters(find(strcmp(headers,'Group'))));
+    d1_Filename     = [vdir,char(parameters(find(strcmp(headers,'d1_Filename'))))];
+    d1_Col_Name_Row = str2num(char(parameters(find(strcmp(headers,'d1_Col_Name_Row')))))
+    
+    M = csvread(d1_Filename,2,0);
+    
+    plot(M(:,1),M(:,2))
 end
