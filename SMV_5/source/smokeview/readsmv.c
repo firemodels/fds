@@ -1084,16 +1084,16 @@ int readsmv(char *file){
           labelj->shortlabel=NULL;
           labelj->unit=NULL;
           readlabels(labelj,stream);
-          if(strcmp(labelj->shortlabel,"diameter")==0){
+          if(strcmp(labelj->shortlabel,"DIAMETER")==0){
             partclassi->col_diameter=j-2;
           }
-          if(strcmp(labelj->shortlabel,"length")==0){
+          if(strcmp(labelj->shortlabel,"LENGTH")==0){
             partclassi->col_length=j-2;
           }
-          if(strcmp(labelj->shortlabel,"azimuth")==0){
+          if(strcmp(labelj->shortlabel,"AZIMUTH")==0){
             partclassi->col_azimuth=j-2;
           }
-          if(strcmp(labelj->shortlabel,"elevation")==0){
+          if(strcmp(labelj->shortlabel,"ELEVATION")==0){
             partclassi->col_elevation=j-2;
           }
           if(strcmp(labelj->shortlabel,"U-VEL")==0){
