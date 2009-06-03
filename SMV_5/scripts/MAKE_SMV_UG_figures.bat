@@ -34,9 +34,8 @@ erase scriptfigures\*.version
 erase scriptfigures\*.png
 smokeview -version > scriptfigures\smokeview.version
 
-cd ..\..\Verification\Visualization
+cd %svn_root%\Verification\Visualization
 smokeview -runscript colorconv
-smokeview -runscript fire_line
 smokeview -runscript plume5a
 smokeview -runscript plume5b
 smokeview -runscript plume5c
@@ -46,3 +45,7 @@ smokeview -runscript smoke_test
 smokeview -runscript smoke_test2
 smokeview -runscript thouse5
 smokeview -runscript script_test
+
+cd %svn_root%\Verification\Wui
+smokeview -runscript fire_line
+
