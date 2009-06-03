@@ -1020,11 +1020,21 @@ int readsmv(char *file){
       float rgb_class[4];
       size_t len;
       part5class *partclassi;
+      char *device_ptr;
 
       partclassi = partclassinfo + npartclassinfo;
       partclassi->kind=PARTICLES;
       if(match(buffer,"CLASS_OF_HUMANS",15) == 1)partclassi->kind=HUMANS;
       fgets(buffer,255,stream);
+
+      device_ptr = get_label(buffer);
+      if(device_ptr!=NULL){
+        len = strlen(device_ptr);
+        NewMemory((void **)&partclassi->device,len+1);
+        STRCPY(partclassi->device,device_ptr);
+      }
+      partclassi->device=device_ptr;
+
       trim(buffer);
       len=strlen(buffer);
       partclassi->name=NULL;
@@ -1106,6 +1116,25 @@ int readsmv(char *file){
             partclassi->col_w_vel=j-2;
           }
         }
+      }
+      partclassi->diameter=1.0;
+      partclassi->length=1.0;
+      partclassi->azimuth=0.0;
+      partclassi->elevation=0.0;
+      partclassi->dx=0.0;
+      partclassi->dy=0.0;
+      partclassi->dz=0.0;
+      if(device_ptr!=NULL){
+        float diameter, length, azimuth, elevation;
+
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f",&diameter,&length,&azimuth,&elevation);
+        azimuth = azimuth*PI/180.0;
+        elevation = elevation*PI/180.0;
+        partclassi->diameter=diameter;
+        partclassi->length=length;
+        partclassi->azimuth=azimuth;
+        partclassi->elevation=elevation;
       }
       npartclassinfo++;
       continue;
@@ -4684,6 +4713,25 @@ typedef struct {
   xyzmaxdiff=xbar-xbar0;
   if(ybar-ybar0>xyzmaxdiff)xyzmaxdiff=ybar-ybar0;
   if(zbar-zbar0>xyzmaxdiff)xyzmaxdiff=zbar-zbar0;
+
+  for(i=0;i<npartclassinfo;i++){
+    part5class *partclassi;
+
+    partclassi = partclassinfo + i;
+
+    if(partclassi->device!=NULL){
+        float diameter, length, azimuth, elevation;
+       
+        partclassi->diameter/=xyzmaxdiff;
+        partclassi->length/=xyzmaxdiff;
+        length=partclassi->length;
+        azimuth=partclassi->azimuth;
+        elevation=partclassi->elevation;
+        partclassi->dx = cos(azimuth)*cos(elevation)*length/2.0;
+        partclassi->dy = sin(azimuth)*cos(elevation)*length/2.0;
+        partclassi->dz =              sin(elevation)*length/2.0;
+    }
+  }
 
 #ifdef pp_SHOOTER
   shooter_xyz[0]=xbar/2.0;
@@ -9556,3 +9604,34 @@ int file_exist(char *file){
   if(statfile!=0)return 0;
   return 1;
 }
+
+/* ------------------ get_label ------------------------ */
+
+char *get_label(char *buffer){
+  // find a label between two '%' characters or between % and the EOL 
+
+  char *labelbeg, *labelend;
+  int len;
+
+  labelbeg=strchr(buffer,'%');
+  if(labelbeg==NULL)return NULL;
+
+  len=strlen(labelbeg);
+  *labelbeg=0;
+  if(len<=1)return NULL;
+  labelbeg++;
+
+  labelend=strchr(labelbeg,'%');
+  if(labelend!=NULL)*labelend=0;
+
+  trim(labelbeg);
+  if(strlen(labelbeg)>0){
+    labelbeg=trim_front(labelbeg);
+    if(strlen(labelbeg)==0)labelbeg=NULL;
+  }
+  else{
+    labelbeg=NULL;
+  }
+  return labelbeg;
+}
+
