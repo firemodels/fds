@@ -129,6 +129,19 @@ DEVICEDEF
  0.0 0.0 1.0 setcolor
  push 0.0 0.0 0.015 translate 0.015 drawsphere pop
  pop
+
+// data layout for particle devices
+// 0->2  r,g,b color 
+// 3     diameter
+// 4     length
+DEVICEDEF // device for particle sphere
+ SPHERE
+ 0.0 3.0 getuservals 0.0 0.0 1.0 setcolor
+ 3.0 1.0 getuservals 0.1 drawsphere
+DEVICEDEF // device for particle tube
+ TUBE
+ 0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
+ 90.0 rotatey 3.0 2.0 getuservals 0.1 0.3 drawdisk
 DEVICEDEF // device for tree trunk
  CYLINDER
  0.55 0.27 0.07 setcolor
