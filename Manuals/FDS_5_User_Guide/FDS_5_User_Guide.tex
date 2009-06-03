@@ -2691,19 +2691,13 @@ created or removed at pre-determined times. See Section~\ref{info:create_remove}
 To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID}
 parameter respectively, to the {\ct HOLE} line.\index{HOLE!CTRL\_ID} \index{HOLE!DEVC\_ID}
 
-\begin{warning}
-\noindent
-Note that while single {\ct DEVC} or {\ct CTRL} can be used to control multiple items, a {\ct DEVC} or {\ct CTRL}
-that is being used for a {\ct HOLE} should not be used for anything else other than additional {\ct HOLE}s.
-\end{warning}
-
-If it is desired that the obstruction(s) to be cut out should have a different color
+If you want the obstruction that is to be cut out to have a different color
 than the original obstruction, set the {\ct COLOR} \index{HOLE!COLOR} or integer triplet
 {\ct RGB} \index{HOLE!RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}).
 
 When a {\ct HOLE} is in a {\ct .FALSE.} state, an obstruction is placed in the hole.
 To make this obstruction transparent, the {\ct TRANSPARENCY}\index{HOLE!TRANSPARENCY} parameter should be specified by
-a real number from 0-1. Note that if {\ct TRANSPARENCY} is specified, then either a {\ct COLOR} or {\ct RGB} triplet ought to be specified as well.
+a real number from 0 to 1. Note that if {\ct TRANSPARENCY} is specified, then either a {\ct COLOR} or {\ct RGB} triplet ought to be specified as well.
 A {\ct TRANSPARENCY} value near, but not equal to, zero can be used to simulate a window when the {\ct HOLE}'s {\ct INITIAL\_STATE=.FALSE.} When the {\ct DEVC} or {\ct CTRL}
 is activated and changes the state of the hole to {\ct .TRUE.}, the {\ct HOLE} is then open and completely transparent.
 See Section~\ref{info:create_remove} for an example.
