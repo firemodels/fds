@@ -4801,7 +4801,7 @@ static int in_menu=0;
           }
           strcat(menulabel,partclassj->name);
           glutAddMenuEntry(menulabel,-10-5*j);
-          if(partclassj->col_diameter>=0||partclassj->col_length>=0||
+          if(partclassj->col_diameter>=0||partclassj->col_length>=0||partclassj->device!=NULL||
              (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)
             ){
             if(partclassj->vis_type==PART_POINTS){
@@ -4810,7 +4810,7 @@ static int in_menu=0;
             else{
               glutAddMenuEntry("      Points",-10-5*j-PART_POINTS);
             }
-            if(partclassj->col_diameter>=0){
+            if(partclassj->col_diameter>=0||partclassj->device!=NULL){
               if(partclassj->vis_type==PART_SPHERES){
                 glutAddMenuEntry("      *Spheres",-10-5*j-PART_SPHERES);
               }
@@ -4818,7 +4818,7 @@ static int in_menu=0;
                 glutAddMenuEntry("      Spheres",-10-5*j-PART_SPHERES);
               }
             }
-            if(partclassj->col_length>=0||
+            if(partclassj->col_length>=0||partclassj->device!=NULL||
               (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)){
               if(partclassj->vis_type==PART_LINES){
                 glutAddMenuEntry("      *Lines",-10-5*j-PART_LINES);
@@ -4827,7 +4827,7 @@ static int in_menu=0;
                 glutAddMenuEntry("      Lines",-10-5*j-PART_LINES);
               }
             }
-            if(partclassj->col_diameter>=0&&partclassj->col_length>=0){
+            if((partclassj->col_diameter>=0&&partclassj->col_length>=0)||partclassj->device!=NULL){
               if(partclassj->vis_type==PART_CYLINDERS){
                 glutAddMenuEntry("      *Cylinders",-10-5*j-PART_CYLINDERS);
               }

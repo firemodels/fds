@@ -672,6 +672,9 @@ typedef struct {
   int kind;
   int col_diameter, col_length, col_azimuth, col_elevation;
   int col_u_vel, col_v_vel, col_w_vel;
+  float dx, dy, dz;
+  float diameter, length, azimuth, elevation;
+  char *device;
   int vis_type;
   int maxpoints, ntypes;
   float *xyz, *rgb;
