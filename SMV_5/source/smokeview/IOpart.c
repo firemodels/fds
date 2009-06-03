@@ -1524,21 +1524,13 @@ void drawPart5(const particle *parti){
               }
               glEnd();
             }
-            if(datacopy->partclassbase->vis_type==PART_LINES
-              &&datacopy->dsx!=NULL&&datacopy->dsy!=NULL&&datacopy->dsz!=NULL
-              ){
-              float *dx, *dy, *dz;
-
-              dx = datacopy->dsx;
-              dy = datacopy->dsy;
-              dz = datacopy->dsz;
-              glBegin(GL_LINES);
+            if(datacopy->partclassbase->vis_type==PART_SPHERES){
+              glBegin(GL_POINTS);
               if(show_default==1){
                 glColor4fv(datacopy->partclassbase->rgb);
                 for(j=0;j<datacopy->npoints;j++){
                   if(vis[j]==1){
-                    glVertex3f(xplts[sx[j]]-dx[j],yplts[sy[j]]-dy[j],zplts[sz[j]]-dz[j]);
-                    glVertex3f(xplts[sx[j]]+dx[j],yplts[sy[j]]+dy[j],zplts[sz[j]]+dz[j]);
+                    glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
                   }
                 }
               }
@@ -1547,8 +1539,78 @@ void drawPart5(const particle *parti){
                 for(j=0;j<datacopy->npoints;j++){
                   if(vis[j]==1){
                     glColor4fv(rgb_full[color[j]]);
-                    glVertex3f(xplts[sx[j]]-dx[j],yplts[sy[j]]-dy[j],zplts[sz[j]]-dz[j]);
-                    glVertex3f(xplts[sx[j]]+dx[j],yplts[sy[j]]+dy[j],zplts[sz[j]]+dz[j]);
+                    glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+                  }
+                }
+              }
+              glEnd();
+            }
+            if(datacopy->partclassbase->vis_type==PART_CYLINDERS){
+              glBegin(GL_POINTS);
+              if(show_default==1){
+                glColor4fv(datacopy->partclassbase->rgb);
+                for(j=0;j<datacopy->npoints;j++){
+                  if(vis[j]==1){
+                    glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+                  }
+                }
+              }
+              else{
+                color=datacopy->irvals+itype*datacopy->npoints;
+                for(j=0;j<datacopy->npoints;j++){
+                  if(vis[j]==1){
+                    glColor4fv(rgb_full[color[j]]);
+                    glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+                  }
+                }
+              }
+              glEnd();
+            }
+            if(datacopy->partclassbase->vis_type==PART_LINES
+              &&((datacopy->dsx!=NULL&&datacopy->dsy!=NULL&&datacopy->dsz!=NULL)||datacopy->partclassbase->device!=NULL)
+              ){
+              float *dxv, *dyv, *dzv;
+              float dx, dy, dz;
+              int flag=0;
+
+              if(datacopy->dsx!=NULL&&datacopy->dsy!=NULL&&datacopy->dsz!=NULL){
+                flag=1;
+                dxv = datacopy->dsx;
+                dyv = datacopy->dsy;
+                dzv = datacopy->dsz;
+              }
+              else{
+                dx = datacopy->partclassbase->dx;
+                dy = datacopy->partclassbase->dy;
+                dz = datacopy->partclassbase->dz;
+              }
+              glBegin(GL_LINES);
+              if(show_default==1){
+                glColor4fv(datacopy->partclassbase->rgb);
+                for(j=0;j<datacopy->npoints;j++){
+                  if(vis[j]==1){
+                    if(flag==1){
+                      dx = dxv[j];
+                      dy = dyv[j];
+                      dz = dzv[j];
+                    }
+                    glVertex3f(xplts[sx[j]]-dx,yplts[sy[j]]-dy,zplts[sz[j]]-dz);
+                    glVertex3f(xplts[sx[j]]+dx,yplts[sy[j]]+dy,zplts[sz[j]]+dz);
+                  }
+                }
+              }
+              else{
+                color=datacopy->irvals+itype*datacopy->npoints;
+                for(j=0;j<datacopy->npoints;j++){
+                  if(vis[j]==1){
+                    glColor4fv(rgb_full[color[j]]);
+                    if(flag==1){
+                      dx = dxv[j];
+                      dy = dyv[j];
+                      dz = dzv[j];
+                    }
+                    glVertex3f(xplts[sx[j]]-dx,yplts[sy[j]]-dy,zplts[sz[j]]-dz);
+                    glVertex3f(xplts[sx[j]]+dx,yplts[sy[j]]+dy,zplts[sz[j]]+dz);
                   }
                 }
               }
