@@ -142,6 +142,10 @@ DEVICEDEF // device for particle tube
  TUBE
  0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
  90.0 rotatey 3.0 2.0 getuservals 0.1 0.3 drawdisk
+DEVICEDEF // device for particle "egg"
+ EGG
+ 0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
+ 4.0 1.0 6.0 putuservals2stack 3.0 1.0 5.0 putuservals2stack 3.0 1.0 1.0 putuservals2stack 1.0 1.0 1.0 scalexyz 1.0 drawsphere
 DEVICEDEF // device for tree trunk
  CYLINDER
  0.55 0.27 0.07 setcolor
