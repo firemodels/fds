@@ -4800,41 +4800,45 @@ static int in_menu=0;
             strcpy(menulabel,"  ");
           }
           strcat(menulabel,partclassj->name);
-          glutAddMenuEntry(menulabel,-10-5*j);
           if(partclassj->col_diameter>=0||partclassj->col_length>=0||partclassj->device!=NULL||
              (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)
             ){
+              strcat(menulabel," drawn using:");
+            glutAddMenuEntry(menulabel,-10-5*j);
             if(partclassj->vis_type==PART_POINTS){
-              glutAddMenuEntry("      *Points",-10-5*j-PART_POINTS);
+              glutAddMenuEntry("      *points",-10-5*j-PART_POINTS);
             }
             else{
-              glutAddMenuEntry("      Points",-10-5*j-PART_POINTS);
+              glutAddMenuEntry("      points",-10-5*j-PART_POINTS);
             }
             if(partclassj->col_diameter>=0||partclassj->device!=NULL){
               if(partclassj->vis_type==PART_SPHERES){
-                glutAddMenuEntry("      *Spheres",-10-5*j-PART_SPHERES);
+                glutAddMenuEntry("      *spheres",-10-5*j-PART_SPHERES);
               }
               else{
-                glutAddMenuEntry("      Spheres",-10-5*j-PART_SPHERES);
+                glutAddMenuEntry("      spheres",-10-5*j-PART_SPHERES);
               }
             }
             if(partclassj->col_length>=0||partclassj->device!=NULL||
               (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)){
               if(partclassj->vis_type==PART_LINES){
-                glutAddMenuEntry("      *Lines",-10-5*j-PART_LINES);
+                glutAddMenuEntry("      *lines",-10-5*j-PART_LINES);
               }
               else{
-                glutAddMenuEntry("      Lines",-10-5*j-PART_LINES);
+                glutAddMenuEntry("      lines",-10-5*j-PART_LINES);
               }
             }
             if((partclassj->col_diameter>=0&&partclassj->col_length>=0)||partclassj->device!=NULL){
-              if(partclassj->vis_type==PART_CYLINDERS){
-                glutAddMenuEntry("      *Cylinders",-10-5*j-PART_CYLINDERS);
+              if(partclassj->vis_type==PART_TUBES){
+                glutAddMenuEntry("      *tubes",-10-5*j-PART_TUBES);
               }
               else{
-                glutAddMenuEntry("      Cylinders",-10-5*j-PART_CYLINDERS);
+                glutAddMenuEntry("      tubes",-10-5*j-PART_TUBES);
               }
             }
+          }
+          else{
+            glutAddMenuEntry(menulabel,-10-5*j);
           }
         }
         break;

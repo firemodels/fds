@@ -1503,6 +1503,9 @@ void drawPart5(const particle *parti){
         else{
           glPointSize(partpointsize);
           if(offset_terrain==0){
+
+            // *** draw particles as points
+
             if(datacopy->partclassbase->vis_type==PART_POINTS){
               glBegin(GL_POINTS);
               if(show_default==1){
@@ -1524,48 +1527,81 @@ void drawPart5(const particle *parti){
               }
               glEnd();
             }
+
+            // *** draw particles as spheres
+
             if(datacopy->partclassbase->vis_type==PART_SPHERES){
-              glBegin(GL_POINTS);
-              if(show_default==1){
-                glColor4fv(datacopy->partclassbase->rgb);
-                for(j=0;j<datacopy->npoints;j++){
-                  if(vis[j]==1){
-                    glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
-                  }
+              for(j=0;j<datacopy->npoints;j++){
+                float *colorptr;
+
+                if(vis[j]!=1)continue;
+                  
+                glPushMatrix();
+                glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+
+                glRotatef(datacopy->partclassbase->elevation,0.0,1.0,0.0);
+                glRotatef(datacopy->partclassbase->azimuth,0.0,0.0,1.0);
+
+              //  0->2   color
+              //  3      diameter
+              //  4      length
+
+                if(show_default==1){
+                  colorptr=datacopy->partclassbase->rgb;
                 }
-              }
-              else{
-                color=datacopy->irvals+itype*datacopy->npoints;
-                for(j=0;j<datacopy->npoints;j++){
-                  if(vis[j]==1){
-                    glColor4fv(rgb_full[color[j]]);
-                    glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
-                  }
+                else{
+                  color = datacopy->irvals+itype*datacopy->npoints;
+                  colorptr=rgb_full[color[j]];
                 }
+
+                valstack[0]=colorptr[0];
+                valstack[1]=colorptr[1];
+                valstack[2]=colorptr[2];
+                valstack[3]=datacopy->partclassbase->diameter;
+                valstack[4]=datacopy->partclassbase->length;
+                draw_SVOBJECT(datacopy->partclassbase->sphere,0);
+                glPopMatrix();
               }
-              glEnd();
             }
-            if(datacopy->partclassbase->vis_type==PART_CYLINDERS){
-              glBegin(GL_POINTS);
-              if(show_default==1){
-                glColor4fv(datacopy->partclassbase->rgb);
-                for(j=0;j<datacopy->npoints;j++){
-                  if(vis[j]==1){
-                    glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
-                  }
+
+            // *** draw particles as tubes
+
+            if(datacopy->partclassbase->vis_type==PART_TUBES){
+              for(j=0;j<datacopy->npoints;j++){
+                float *colorptr;
+
+                if(vis[j]!=1)continue;
+                  
+                glPushMatrix();
+                glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
+
+                glRotatef(-datacopy->partclassbase->elevation,0.0,1.0,0.0);
+                glRotatef(datacopy->partclassbase->azimuth,0.0,0.0,1.0);
+
+              //  0->2   color
+              //  3      diameter
+              //  4      length
+
+                if(show_default==1){
+                  colorptr=datacopy->partclassbase->rgb;
                 }
-              }
-              else{
-                color=datacopy->irvals+itype*datacopy->npoints;
-                for(j=0;j<datacopy->npoints;j++){
-                  if(vis[j]==1){
-                    glColor4fv(rgb_full[color[j]]);
-                    glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
-                  }
+                else{
+                  color = datacopy->irvals+itype*datacopy->npoints;
+                  colorptr=rgb_full[color[j]];
                 }
+
+                valstack[0]=colorptr[0];
+                valstack[1]=colorptr[1];
+                valstack[2]=colorptr[2];
+                valstack[3]=datacopy->partclassbase->diameter;
+                valstack[4]=datacopy->partclassbase->length;
+                draw_SVOBJECT(datacopy->partclassbase->tube,0);
+                glPopMatrix();
               }
-              glEnd();
             }
+
+            // *** draw particle as lines
+
             if(datacopy->partclassbase->vis_type==PART_LINES
               &&((datacopy->dsx!=NULL&&datacopy->dsy!=NULL&&datacopy->dsz!=NULL)||datacopy->partclassbase->device!=NULL)
               ){

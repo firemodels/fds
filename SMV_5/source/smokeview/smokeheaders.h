@@ -183,6 +183,7 @@ EXTERNCPP void hide_load_alert(void);
 EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 
+EXTERNCPP sv_object *get_object(char *label);
 EXTERNCPP char *get_label(char *buffer2);
 EXTERNCPP void snap_view_angles(void);
 #ifdef pp_SHOOTER
