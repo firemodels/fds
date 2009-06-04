@@ -1028,10 +1028,14 @@ int readsmv(char *file){
       fgets(buffer,255,stream);
 
       device_ptr = get_label(buffer);
+      partclassi->sphere=NULL;
+      partclassi->tube=NULL;
       if(device_ptr!=NULL){
         len = strlen(device_ptr);
         NewMemory((void **)&partclassi->device,len+1);
         STRCPY(partclassi->device,device_ptr);
+        partclassi->sphere=get_SVOBJECT_type("SPHERE");
+        partclassi->tube=get_SVOBJECT_type(device_ptr);
       }
       partclassi->device=device_ptr;
 
@@ -1129,8 +1133,6 @@ int readsmv(char *file){
 
         fgets(buffer,255,stream);
         sscanf(buffer,"%f %f %f %f",&diameter,&length,&azimuth,&elevation);
-        azimuth = azimuth*PI/180.0;
-        elevation = elevation*PI/180.0;
         partclassi->diameter=diameter;
         partclassi->length=length;
         partclassi->azimuth=azimuth;
@@ -4725,8 +4727,8 @@ typedef struct {
         partclassi->diameter/=xyzmaxdiff;
         partclassi->length/=xyzmaxdiff;
         length=partclassi->length;
-        azimuth=partclassi->azimuth;
-        elevation=partclassi->elevation;
+        azimuth = partclassi->azimuth*PI/180.0;
+        elevation = partclassi->elevation*PI/180.0;
         partclassi->dx = cos(azimuth)*cos(elevation)*length/2.0;
         partclassi->dy = sin(azimuth)*cos(elevation)*length/2.0;
         partclassi->dz =              sin(elevation)*length/2.0;
