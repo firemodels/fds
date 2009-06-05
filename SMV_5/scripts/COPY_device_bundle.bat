@@ -23,7 +23,7 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\SMV_5\for_bundle
-echo %ProgramFiles%\NIST\Smokeview
+echo copy devices.svo to %ProgramFiles%\NIST\Smokeview
 pause
 copy devices.svo "%ProgramFiles%"\NIST\Smokeview
 pause
