@@ -674,8 +674,8 @@ typedef struct {
   int col_u_vel, col_v_vel, col_w_vel;
   float dx, dy, dz;
   float diameter, length, azimuth, elevation;
-  char *device;
-  sv_object *sphere, *tube;
+  char *device_name;
+  sv_object *sphere, *smv_device;
   int vis_type;
   int maxpoints, ntypes;
   float *xyz, *rgb;

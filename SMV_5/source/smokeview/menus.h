@@ -4800,7 +4800,7 @@ static int in_menu=0;
             strcpy(menulabel,"  ");
           }
           strcat(menulabel,partclassj->name);
-          if(partclassj->col_diameter>=0||partclassj->col_length>=0||partclassj->device!=NULL||
+          if(partclassj->col_diameter>=0||partclassj->col_length>=0||partclassj->device_name!=NULL||
              (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)
             ){
               strcat(menulabel," drawn using:");
@@ -4811,7 +4811,7 @@ static int in_menu=0;
             else{
               glutAddMenuEntry("      points",-10-5*j-PART_POINTS);
             }
-            if(partclassj->col_diameter>=0||partclassj->device!=NULL){
+            if(partclassj->col_diameter>=0||partclassj->device_name!=NULL){
               if(partclassj->vis_type==PART_SPHERES){
                 glutAddMenuEntry("      *spheres",-10-5*j-PART_SPHERES);
               }
@@ -4819,7 +4819,7 @@ static int in_menu=0;
                 glutAddMenuEntry("      spheres",-10-5*j-PART_SPHERES);
               }
             }
-            if(partclassj->col_length>=0||partclassj->device!=NULL||
+            if(partclassj->col_length>=0||partclassj->device_name!=NULL||
               (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)){
               if(partclassj->vis_type==PART_LINES){
                 glutAddMenuEntry("      *lines",-10-5*j-PART_LINES);
@@ -4828,13 +4828,13 @@ static int in_menu=0;
                 glutAddMenuEntry("      lines",-10-5*j-PART_LINES);
               }
             }
-            if((partclassj->col_diameter>=0&&partclassj->col_length>=0)||partclassj->device!=NULL){
-              if(partclassj->vis_type==PART_TUBES){
-                glutAddMenuEntry("      *tubes",-10-5*j-PART_TUBES);
+            if(partclassj->smv_device!=NULL&&partclassj->device_name!=NULL){
+              strcpy(menulabel,"      "); 
+              if(partclassj->vis_type==PART_SMV_DEVICE){
+                strcat(menulabel,"*");
               }
-              else{
-                glutAddMenuEntry("      tubes",-10-5*j-PART_TUBES);
-              }
+              strcat(menulabel,partclassj->device_name);
+              glutAddMenuEntry(menulabel,-10-5*j-PART_SMV_DEVICE);
             }
           }
           else{

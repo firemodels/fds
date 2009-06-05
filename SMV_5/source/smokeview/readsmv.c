@@ -1029,15 +1029,27 @@ int readsmv(char *file){
 
       device_ptr = get_label(buffer);
       partclassi->sphere=NULL;
-      partclassi->tube=NULL;
+      partclassi->smv_device=NULL;
+      partclassi->device_name=NULL;
       if(device_ptr!=NULL){
-        len = strlen(device_ptr);
-        NewMemory((void **)&partclassi->device,len+1);
-        STRCPY(partclassi->device,device_ptr);
         partclassi->sphere=get_SVOBJECT_type("SPHERE");
-        partclassi->tube=get_SVOBJECT_type(device_ptr);
+
+        partclassi->smv_device=get_SVOBJECT_type(device_ptr);
+        if(partclassi->smv_device!=NULL){
+          len = strlen(device_ptr);
+          NewMemory((void **)&partclassi->device_name,len+1);
+          STRCPY(partclassi->device_name,device_ptr);
+        }
+        else{
+          char tube[10];
+
+          strcpy(tube,"TUBE");
+          len = strlen(tube);
+          NewMemory((void **)&partclassi->device_name,len+1);
+          STRCPY(partclassi->device_name,tube);
+          partclassi->smv_device=get_SVOBJECT_type(tube);
+        }
       }
-      partclassi->device=device_ptr;
 
       trim(buffer);
       len=strlen(buffer);
@@ -4721,7 +4733,7 @@ typedef struct {
 
     partclassi = partclassinfo + i;
 
-    if(partclassi->device!=NULL){
+    if(partclassi->device_name!=NULL){
         float diameter, length, azimuth, elevation;
        
         partclassi->diameter/=xyzmaxdiff;
