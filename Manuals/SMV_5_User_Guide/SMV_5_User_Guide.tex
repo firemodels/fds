@@ -1298,8 +1298,33 @@ is used to restore the origin and axis orientation.
 \hitem{GETUSERVALS} The command, {\tt offset nvals getuservals}, copies {\tt nvals}\ values
 from an internal Smokeview array (starting at array index {\tt offset})
 to the device operand stack to be used by the next keyword.  This allows one to modify
-the look of a device at run-time.
+the look of a device at run-time.  Note that the command {tt offset nvals getuservals}\ is equivalent to {\tt offset nvals 0 putuservals2stack}.
 
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=5.0in]{figures/getuservals}\\
+\end{center}
+\caption[Schematic of getuservals usage.]{Schematic of getuservals usage. The commands in the command argument list are taken from the first part of the example in Figure \ref{figeggexample}.
+The blue arrow illustrate which data the {\tt getuservals}\ command retrieves from the internal Smokeview memory buffer.  The black arrow illustrate that the {\tt getuservals}\ command copies this data back onto the command argument list just after the arguments of {\tt getuservals}.
+}
+ \label{figgetuservals}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{verbatim}
+// data layout for particle devices
+// 0->2  r,g,b color
+// 3     diameter
+// 4     length
+DEVICEDEF // device for particle "egg"
+ EGG
+ 0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
+ 4.0 1.0 6.0 putuservals2stack 3.0 1.0 5.0 putuservals2stack
+ 3.0 1.0 1.0 putuservals2stack 1.0 1.0 1.0 scalexyz 1.0 drawsphere
+\end{verbatim}
+\caption{Device definition for `EGG' used to illustrate the use of the Smokeview device commands {\tt getuservals}\ and {\tt putuservals2stack}.}
+ \label{figeggexample}
+\end{figure}
 
 \hitem{OFFSETX} The command, {\tt x offsetx}, translates
 objects drawn afterwards by x along the x axis.
@@ -1330,28 +1355,18 @@ to place operands anywhere on the operand stack.
 The following device definition (found in the {\tt devices.svo}\ file) for an {\tt EGG} (an ellipsoid or {\em squashed}\ sphere) uses the {\tt PUTUSERSVALS2STACK}\
 command to modify the shape and color of the tube using parameters obtained from FDS.  Smokeview copies color, diameter and length information from the {tt CLASS\_\_PARTICLES}\ keyword in the {\tt .smv}\ file to an internal memory buffer with offsets 0, 1 and 2 for red, green and blue colors, offset 3 for diameter and offset 4 for length.  These values are then copied as specified by the {\tt putuservals2stack}\ command onto the memory area uses by the smokeview device commands.
 
-For example, the command {\tt 4 1 6 putuservals2stack}\ in the example below and as illustrated in Figure \ref{figputuservals2stack} takes 1 value at offset 4 ({\tt length}) and copies it 6 positions ``down'' the command argument list which in the example below would be the first parameter of the {\tt scalexyz} command.  The command
-{\tt 3 1 5 putuservals2stack}\ takes 1 value at offset 3 ({\tt diameter}) and copies it 5 positions down the command argument list which in the example below would be the third argument of the {\tt scalexyz}\ command.  Finally, the command {\tt 3 1 1 putuservals2stack}\ takes one value at offset 3 (again {\tt diameter}) and copies it one position down the argument command list which is the second argument of {\tt scalexyz}.
+For example, the command {\tt 4 1 6 putuservals2stack}\ is used in the `EGG' Smokeview device definition given in Figure \ref{figeggexample}.  The data flow is illustrated in Figure \ref{figputuservals2stack}.  In particular,  the command {\tt 4 1 6 putuservals2stack}\ takes one value at offset 4 ({\tt length}) and copies it siz positions ``down'' the command argument list which is first parameter of the {\tt scalexyz} command.  The command
+{\tt 3 1 5 putuservals2stack}\ takes one value at offset 3 ({\tt diameter}) and copies it five positions down the command argument list which in the example below would be the third argument of the {\tt scalexyz}\ command.  Finally, the command {\tt 3 1 1 putuservals2stack}\ takes one value at offset 3 (again {\tt diameter}) and copies it one position down the argument command list which is the second argument of {\tt scalexyz}.
 
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=5.0in]{figures/putuservals2stack}\\
 \end{center}
-\caption{Schematic of putuservals2stack usage.}
+\caption[Schematic of putuservals2stack usage.]{Schematic of putuservals2stack usage. The commands in the command argument list are taken from the example in Figure \ref{figeggexample}.
+The blue arrows illustrate which data the {\tt putuservals2stack}\ command retrieves from the internal Smokeview memory buffer.  The black arrows illustrate where the {\tt putuservals2stack}\ command copies this data value back onto the command argument list. Note that the 6 in the first {\tt putuservals2stack}\ command indicates how many values to skip.
+}
  \label{figputuservals2stack}
 \end{figure}
-
-\begin{verbatim}
-// data layout for particle devices
-// 0->2  r,g,b color
-// 3     diameter
-// 4     length
-DEVICEDEF // device for particle "egg"
- EGG
- 0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
- 4.0 1.0 6.0 putuservals2stack 3.0 1.0 5.0 putuservals2stack
- 3.0 1.0 1.0 putuservals2stack 1.0 1.0 1.0 scalexyz 1.0 drawsphere
-\end{verbatim}
 
 \hitem{ROTATEX} The command, {\tt r rotatex}, rotates objects
 drawn afterwards {\tt r} degrees about the x axis.
