@@ -1566,7 +1566,7 @@ void drawPart5(const particle *parti){
 
             // *** draw particles as tubes
 
-            if(datacopy->partclassbase->vis_type==PART_TUBES){
+            if(datacopy->partclassbase->vis_type==PART_SMV_DEVICE){
               for(j=0;j<datacopy->npoints;j++){
                 float *colorptr;
 
@@ -1595,7 +1595,7 @@ void drawPart5(const particle *parti){
                 valstack[2]=colorptr[2];
                 valstack[3]=datacopy->partclassbase->diameter;
                 valstack[4]=datacopy->partclassbase->length;
-                draw_SVOBJECT(datacopy->partclassbase->tube,0);
+                draw_SVOBJECT(datacopy->partclassbase->smv_device,0);
                 glPopMatrix();
               }
             }
@@ -1603,7 +1603,7 @@ void drawPart5(const particle *parti){
             // *** draw particle as lines
 
             if(datacopy->partclassbase->vis_type==PART_LINES
-              &&((datacopy->dsx!=NULL&&datacopy->dsy!=NULL&&datacopy->dsz!=NULL)||datacopy->partclassbase->device!=NULL)
+              &&((datacopy->dsx!=NULL&&datacopy->dsy!=NULL&&datacopy->dsz!=NULL)||datacopy->partclassbase->device_name!=NULL)
               ){
               float *dxv, *dyv, *dzv;
               float dx, dy, dz;
