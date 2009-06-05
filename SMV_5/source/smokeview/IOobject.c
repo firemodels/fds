@@ -56,6 +56,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWPOLYDISK  210
 #define SV_DRAWPOINT     211
 #define SV_DRAWARC       212
+#define SV_DRAWCDISK     213
 
 #define SV_DRAWCUBE_NUMARGS      1
 #define SV_DRAWSPHERE_NUMARGS    1
@@ -70,6 +71,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWPOLYDISK_NUMARGS   3
 #define SV_DRAWPOINT_NUMARGS     0
 #define SV_DRAWARC_NUMARGS       2
+#define SV_DRAWCDISK_NUMARGS     2
 
 #define SV_PUSH       300
 #define SV_POP        301
@@ -108,6 +110,7 @@ void drawcircle(float diameter, unsigned char *rgbcolor);
 void drawpoint(unsigned char *rgbcolor);
 void drawsphere(float diameter, unsigned char *rgbcolor);
 void drawcube(float size, unsigned char *rgbcolor);
+void drawcdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawhexdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor);
@@ -673,6 +676,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       rgbptr=NULL;
       iarg+=2;
       break;
+    case SV_DRAWCDISK:
+      if(op_skip==0&&iarg+SV_DRAWCDISK_NUMARGS<=framei->nargs)drawcdisk(arg[0],arg[1], rgbptr);
+      rgbptr=NULL;
+      iarg+=2;
+      break;
     case SV_DRAWHEXDISK:
       if(op_skip==0&&iarg+SV_DRAWHEXDISK_NUMARGS<=framei->nargs)drawhexdisk(arg[0],arg[1], rgbptr);
       rgbptr=NULL;
@@ -1039,6 +1047,51 @@ void drawdisk(float diameter, float height, unsigned char *rgbcolor){
     glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height);
     glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height);
     glVertex3f(                    0.0,                    0.0, height);
+  }
+  glEnd();
+
+}
+
+
+/* ----------------------- drawcdisk ----------------------------- */
+
+void drawcdisk(float diameter, float height, unsigned char *rgbcolor){
+  int i;
+
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
+
+  glBegin(GL_QUADS);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+  for(i=0;i<ncirc;i++){
+    glNormal3f(xcirc[i],ycirc[i],0.0);
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,-height/2.00); // 1
+
+    glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
+    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,-height/2.0); // 2
+
+    glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
+    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height/2.0); // 3
+
+    glNormal3f(xcirc[i],ycirc[i],0.0);
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height/2.0); // 4
+  }
+  glEnd();
+
+  glBegin(GL_TRIANGLES);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+  glNormal3f(0.0,0.0,-1.0);
+  for(i=0;i<ncirc;i++){
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,-height/2.0);
+    glVertex3f(                    0.0,                    0.0,-height/2.0);
+    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,-height/2.0);
+  }
+  glNormal3f(0.0,0.0,1.0);
+  for(i=0;i<ncirc;i++){
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height/2.0);
+    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height/2.0);
+    glVertex3f(                    0.0,                    0.0, height/2.0);
   }
   glEnd();
 
@@ -1608,6 +1661,10 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
       else if(strcmp(token,"drawdisk")==0){
         iop=SV_DRAWDISK;
         reporterror(buffer_save,token,numargs,SV_DRAWDISK_NUMARGS);
+      }
+      else if(strcmp(token,"drawcdisk")==0){
+        iop=SV_DRAWCDISK;
+        reporterror(buffer_save,token,numargs,SV_DRAWCDISK_NUMARGS);
       }
       else if(strcmp(token,"drawhexdisk")==0){
         iop=SV_DRAWHEXDISK;
