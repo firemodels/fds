@@ -1172,12 +1172,17 @@ This chapter discusses two methods for Smokeview uses for representing smokeview
 The second method for visualizing smoke flow involves a method known as volumetric rendering.  Smoke flow is visualized using the optical properties of soot noting that that the amount of light obscured by smoke and hence its shade of grey depends on the amount of smoke between the observer and the background.  Smokeview then integrates the smoke opacity one grid plane at a time using a simple implementation of Beer's law in the video hardware.
 
 \section{Particles Systems}
+\subsection{Massless Particles}
 FDS uses particles as tracer elements to allow one to visualize flow.  FDS
 also uses particles as droplets to model fire suppression.  Particle positions are determined in FDS using the differential equation
 \begin{eqnarray*}
 \frac{dx_p}{dt}=V(x_p,t)
 \end{eqnarray*}
-where $x_p$ represents particle position and $V$ represents the velocity field.  Figures \ref{figpart} and \ref{figstreak}
+where $x_p$ represents particle position and $V$ represents the velocity field.  
+
+The assumption this model uses to compute particle flow is that the the drag force on the particle is large compared to $mg$, the force due to gravity.
+
+Figures \ref{figpart} and \ref{figstreak}
 shows particles represented as particles and
 as streaks.
 A particle streak represents where a particle is {\em now} and in the recent past.  The streak length is specified as time.
@@ -1221,6 +1226,8 @@ is completely open.  The upper half of the simulation on the right is obstructed
   }
 \label{figstreak}%
 \end{figure}
+
+\subsection{Tracking Particles/Objects with Mass}
 
 %
 % -------------------  Overview ------------------------
