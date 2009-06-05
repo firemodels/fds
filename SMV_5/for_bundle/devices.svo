@@ -141,11 +141,11 @@ DEVICEDEF // device for particle sphere
 DEVICEDEF // device for particle tube
  TUBE
  0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
- 90.0 rotatey 3.0 2.0 getuservals 0.1 0.3 drawdisk
+ 90.0 rotatey 3.0 2.0 getuservals 0.1 0.3 drawcdisk
 DEVICEDEF // device for particle tube
  CYLINDER
  0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
- 90.0 rotatey 3.0 2.0 getuservals 0.1 0.3 drawdisk
+ 90.0 rotatey 3.0 2.0 getuservals 0.1 0.3 drawcdisk
 DEVICEDEF // device for particle "egg"
  EGG
  0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
