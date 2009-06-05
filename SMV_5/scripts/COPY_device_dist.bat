@@ -22,5 +22,7 @@ goto:eof
 call %envfile%
 
 cd %ProgramFiles%\NIST\Smokeview
+echo copy devices.svo to %svn_root%\SMV_5\for_bundle\devices.svo
+pause
 copy devices.svo %svn_root%\SMV_5\for_bundle\devices.svo
 pause
