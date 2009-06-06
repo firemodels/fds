@@ -1763,8 +1763,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
                ENDIF
          END SELECT
    
-  !if (predictor .and. ii==11 .and. jj==10 .and. kk==12 .and. iec==2) write(0,*) kk,ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
-  !if (predictor .and. ii==11 .and. jj==10 .and. kk== 8 .and. iec==2) write(0,*) kk,ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
+  !if (predictor .and. ii==5 .and. jj==5 .and. kk==2 .and. iec==3) write(0,*) jj,ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
+  !if (predictor .and. ii==5 .and. jj==7 .and. kk==2 .and. iec==3) write(0,*) jj,ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
   !if (predictor .and. ii==50 .and. jj==1 .and. kk==50 .and. iec==2) write(0,*) ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
       ENDDO ORIENTATION_LOOP
    
@@ -1788,11 +1788,12 @@ EDGE_LOOP: DO IE=1,N_EDGES
                DUIDXJ_USE(ICD) =    DUIDXJ(-I_SGN*ICD)
             MU_DUIDXJ_USE(ICD) = MU_DUIDXJ(-I_SGN*ICD)
          ELSE
-               CYCLE
-     !         DUIDXJ_USE(ICD) =    DUIDXJ_0(ICD)
-     !      MU_DUIDXJ_USE(ICD) = MU_DUIDXJ_0(ICD)
+            CYCLE
          ENDIF
-         IF (ALTERED_GRADIENT(I_SGN*ICDO)) THEN
+         IF (ALTERED_GRADIENT(I_SGN*ICDO) .AND. ALTERED_GRADIENT(-I_SGN*ICDO)) THEN
+               DUIDXJ_USE(ICDO) =    0.5_EB*(DUIDXJ(I_SGN*ICDO)+   DUIDXJ(-I_SGN*ICDO))
+            MU_DUIDXJ_USE(ICDO) = 0.5_EB*(MU_DUIDXJ(I_SGN*ICDO)+MU_DUIDXJ(-I_SGN*ICDO))
+         ELSEIF (ALTERED_GRADIENT(I_SGN*ICDO)) THEN
                DUIDXJ_USE(ICDO) =    DUIDXJ(I_SGN*ICDO)
             MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ(I_SGN*ICDO)
          ELSEIF (ALTERED_GRADIENT(-I_SGN*ICDO)) THEN
