@@ -1186,7 +1186,7 @@ geometric objects should be placed.
 \newcommand{\infigr}[2]{
 \parpic[r]{
 \begin{tabular}{c}
-\includegraphics[height=\infigheight]{figures/#1}\\
+\includegraphics[height=\infigheight]{scriptfigures/#1}\\
 {\tiny\tt #2}
 \end{tabular}
 }
@@ -1194,7 +1194,7 @@ geometric objects should be placed.
 \newcommand{\infigl}[2]{
 \parpic[l]{
 \begin{tabular}{c}
-\includegraphics[height=\infigheight]{figures/#1}\\
+\includegraphics[height=\infigheight]{scriptfigures/#1}\\
 {\tiny\tt #2}
 \end{tabular}
 }
@@ -1203,13 +1203,13 @@ geometric objects should be placed.
 \paragraph{DRAWCIRCLE} The command, {\tt d drawcircle },
 draws a circle with diameter d.  The origin is located at the center of the circle.
 
-\infigr{cone}{0.50 0.30 drawcone}
+\infigr{drawcone}{0.50 0.30 drawcone}
 \paragraph{DRAWCONE}
 The command, {\tt d h drawcone}, draws a right circular cone where
 d is the diameter of the base and h is the height. The origin is
 located at the center of the cone's base.
 
-\infigl{cube}{0.25 drawcube}
+\infigl{drawcube}{0.25 drawcube}
 \paragraph{DRAWCUBE} The command, {\tt s drawcube},
 draws a cube where s is the length of the side.  The origin is
 located at the center of the cube.  An oblong box, a box with
@@ -1217,12 +1217,12 @@ different length sides, may be drawn by using {\tt scale}\ along
 with {\tt drawcube}.  For example, {\tt 1.0 2.0 4.0 scale 1.0
 drawcube}\ creates a box with dimensions $1\times 2\times 4$.
 
-\infigr{disk}{0.25 0.50 drawdisk}
+\infigr{drawdisk}{0.25 0.50 drawdisk}
 \paragraph{DRAWDISK} The command, {\tt d h drawdisk},
 draws a circular disk with diameter d and height h. The origin is
 located at the center of the disk's base.\vspace{0.25in}
 
-\infigl{hexdisk}{0.5 0.25 drawhexdisk}
+\infigl{drawhexdisk}{0.5 0.25 drawhexdisk}
 \paragraph{DRAWHEXDISK} The command, {\tt d h drawhexdisk},
 draws a hexagonal disk with diameter d and height h.  The origin
 is located at the center of the hexagon's base.
@@ -1252,19 +1252,19 @@ plate's base.
 (small square).  The command, {\tt s setpointsize}\ may be used to
 change the size of the point.  The default size is 1.0 .
 
-\infigl{polydisk}{5 0.35 0.15 drawpolydisk}
+\infigl{drawpolydisk}{5 0.35 0.15 drawpolydisk}
 \paragraph{DRAWPOLYDISK} The command, {\tt n d h drawpolydisk},
 draws an n-sided polygonal disk with diameter d and height h.  The
 origin is located at the center of the polygonal disk's base.  The
 example to the left is a pentagonal disk.
 
-\infigr{ring}{0.3 0.5 0.1 drawring}
+\infigr{drawring}{0.3 0.5 0.1 drawring}
 \paragraph{DRAWRING} The command, {\tt di do h drawring},
 draws a ring where {\tt di}\ and {\tt do}\ are the inner and outer
 ring diameters and h is the height of the ring. The origin is
 located at the center of the ring's base.
 
-\infigl{sphere}{0.25 drawsphere}
+\infigl{drawsphere}{0.25 drawsphere}
 \paragraph{DRAWSPHERE} The command, {\tt d drawsphere},
 draws a sphere with diameter d.  The origin is located at the
 center of the sphere. As with an oblong box, an ellipsoid may be
@@ -1273,7 +1273,7 @@ example, {\tt 1.0 2.0 4.0 scale 1.0 drawsphere}\ creates an
 ellipsoid with semi-major axes of length 1, 2 and 4. This is how
 the ball at the bottom of the heat detector in Figure \ref{figsprinkler}a is drawn.
 
-\infigr{truncatedcone}{0.5 0.2 0.4 drawtrunccone}
+\infigr{drawtrunccone}{0.5 0.2 0.4 drawtrunccone}
 \paragraph{DRAWTRUNCCONE} The command, {\tt d1 d2 h drawtrunccone},
 draws a right circular truncated cone where d1 is the diameter of
 the base, d2 is the diameter of the truncated portion of the cone
@@ -1298,7 +1298,7 @@ is used to restore the origin and axis orientation.
 \hitem{GETUSERVALS} The command, {\tt offset nvals getuservals}, copies {\tt nvals}\ values
 from an internal Smokeview buffer (starting at array index {\tt offset})
 to the device operand stack to be used by the next keyword.  This allows one to modify
-the look of a device at run-time.  Note that the command 
+the look of a device at run-time.  Note that the command
 {\tt offset nvals getuservals}\ is equivalent to {\tt offset nvals 0 putuservals2stack}.
 
 The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt getuservals}\ and {\tt putuservals2stack}\ commands to customize at run-time how the device is drawn.  For example, the command
@@ -1420,7 +1420,7 @@ translate}\ as translating the origin by (-x,-y,-z).
 \hitem{TRANSLATEMZD2} The command, {\tt z translatemzd2}, translates
 objects drawn afterwards by -z/2 along the z axis.
 Equivalently, one can think of think of {\tt z
-translatemzd2}\ as translating the origin by (0.0,0.0,z/2).  
+translatemzd2}\ as translating the origin by (0.0,0.0,z/2).
 This command may be used
 to move the origin from an object's base to its center.
 \elist
