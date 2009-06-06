@@ -30,6 +30,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETX 108
 #define SV_OFFSETY 109
 #define SV_OFFSETZ 110
+#define SV_TRANSLATEMZD2 111
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -42,6 +43,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETX_NUMARGS 1
 #define SV_OFFSETY_NUMARGS 1
 #define SV_OFFSETZ_NUMARGS 1
+#define SV_TRANSLATEMZD2_NUMARGS 1
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -633,6 +635,10 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     case SV_TRANSLATE:
       if(op_skip==0&&iarg+SV_TRANSLATE_NUMARGS<=framei->nargs)glTranslatef(arg[0],arg[1],arg[2]);
       iarg+=3;
+      break;
+    case SV_TRANSLATEMZD2:
+      if(op_skip==0&&iarg+SV_TRANSLATEMZD2_NUMARGS<=framei->nargs)glTranslatef(0.0,0.0,-arg[0]/2.0);
+      iarg++;
       break;
     case SV_OFFSETX:
       if(op_skip==0&&iarg+SV_OFFSETX_NUMARGS<=framei->nargs)glTranslatef(arg[0],0.0,0.0);
@@ -1605,6 +1611,10 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
       if(strcmp(token,"translate")==0){
         iop=SV_TRANSLATE;
         reporterror(buffer_save,token,numargs,SV_TRANSLATE_NUMARGS);
+      }
+      if(strcmp(token,"translatemzd2")==0){
+        iop=SV_TRANSLATEMZD2;
+        reporterror(buffer_save,token,numargs,SV_TRANSLATEMZD2_NUMARGS);
       }
       else if(strcmp(token,"offsetx")==0){
         iop=SV_OFFSETX;
