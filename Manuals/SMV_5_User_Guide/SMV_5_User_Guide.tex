@@ -1296,9 +1296,14 @@ is used to restore the origin and axis orientation.
 
 \blist
 \hitem{GETUSERVALS} The command, {\tt offset nvals getuservals}, copies {\tt nvals}\ values
-from an internal Smokeview array (starting at array index {\tt offset})
+from an internal Smokeview buffer (starting at array index {\tt offset})
 to the device operand stack to be used by the next keyword.  This allows one to modify
-the look of a device at run-time.  Note that the command {tt offset nvals getuservals}\ is equivalent to {\tt offset nvals 0 putuservals2stack}.
+the look of a device at run-time.  Note that the command 
+{\tt offset nvals getuservals}\ is equivalent to {\tt offset nvals 0 putuservals2stack}.
+
+The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt getuservals}\ and {\tt putuservals2stack}\ commands to customize at run-time how the device is drawn.  For example, the command
+{\tt 0.0 3.0 getuservals}, as illustrated in Figure \ref{figgetuservals}, copies three parameters from an internal Smokeview buffer starting at offset 0 onto the command argument stack for use by the command {\tt setcolor}, immediately after {\tt getuservals}.
+
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1352,7 +1357,7 @@ to the device operand stack at offset {\tt stackskip}.  This allows one to modif
 the look of a device at run-time. This command is slightly more general than {\tt GETUSERVALS} allowing one
 to place operands anywhere on the operand stack.
 
-The following device definition (found in the {\tt devices.svo}\ file) for an {\tt EGG} (an ellipsoid or {\em squashed}\ sphere) uses the {\tt PUTUSERSVALS2STACK}\
+The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt PUTUSERSVALS2STACK}\
 command to modify the shape and color of the tube using parameters obtained from FDS.  Smokeview copies color, diameter and length information from the {tt CLASS\_\_PARTICLES}\ keyword in the {\tt .smv}\ file to an internal memory buffer with offsets 0, 1 and 2 for red, green and blue colors, offset 3 for diameter and offset 4 for length.  These values are then copied as specified by the {\tt putuservals2stack}\ command onto the memory area uses by the smokeview device commands.
 
 For example, the command {\tt 4 1 6 putuservals2stack}\ is used in the `EGG' Smokeview device definition given in Figure \ref{figeggexample}.  The data flow is illustrated in Figure \ref{figputuservals2stack}.  In particular,  the command {\tt 4 1 6 putuservals2stack}\ takes one value at offset 4 ({\tt length}) and copies it siz positions ``down'' the command argument list which is first parameter of the {\tt scalexyz} command.  The command
@@ -1412,12 +1417,18 @@ objects drawn afterwards by x, y and z along the x, y and z axes
 respectively.  Equivalently, one can think of think of {\tt x y z
 translate}\ as translating the origin by (-x,-y,-z).
 
+\hitem{TRANSLATEMZD2} The command, {\tt z translatemzd2}, translates
+objects drawn afterwards by -z/2 along the z axis.
+Equivalently, one can think of think of {\tt z
+translatemzd2}\ as translating the origin by (0.0,0.0,z/2).  
+This command may be used
+to move the origin from an object's base to its center.
 \elist
 
 \section{Conditionals}
 Conditional commands ({\tt skipif}\ statements) may be used to exclude portions of a device
 definition  based upon variable values
-obtained using the {\tt getusers}\ command .  For example, a tree trunk may be drawn black if a temperature exceeds a specified value.  Four forms of the {\tt skipif}\ command are
+obtained using the {\tt getusers}\ or {\tt putuservals2stack} command .  For example, a tree trunk may be drawn black if a temperature exceeds a specified value.  Four forms of the {\tt skipif}\ command are
 implemented: {\tt skipifle, skipiflt, skipifge} and {\tt skipifgt}.
 The notation {\tt , gt, le} and {\tt lt} has the usual meaning of greater than or equal to, greater than, {\em etc.}.
 
