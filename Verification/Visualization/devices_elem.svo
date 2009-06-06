@@ -1,0 +1,61 @@
+// $Date: 2008-01-18 14:27:20 -0500 (Fri, 18 Jan 2008) $ 
+// $Revision$
+// $Author: gforney $
+
+DEVICEDEF
+ drawaxis
+ 8.0 setlinewidth
+ 1.0 0.0 0.0 setcolor
+ 0.0 0.0 0.0 0.6 0.0 0.0 drawline
+ 0.0 1.0 0.0 setcolor
+ 0.0 0.0 0.0 0.0 0.6 0.0 drawline
+ 0.0 0.0 1.0 setcolor
+ 0.0 0.0 0.0 0.0 0.0 0.6 drawline
+DEVICEDEF
+ drawcone
+ 1.0 0.8 0.4 setcolor
+ 0.50 0.30 drawcone
+DEVICEDEF
+ drawcube
+ 1.0 0.8 0.4 setcolor
+ 0.25 drawcube
+DEVICEDEF
+ drawdisk
+ 1.0 0.8 0.4 setcolor
+ 0.25 0.50 drawdisk
+DEVICEDEF
+ drawcdisk
+ 1.0 0.8 0.4 setcolor
+ 0.25 0.50 drawcdisk
+DEVICEDEF
+ drawhexdisk
+ 1.0 0.8 0.4 setcolor
+ 0.50 0.25 drawhexdisk
+DEVICEDEF
+ drawnotchplate
+ 1.0 0.8 0.4 setcolor
+ 0.5 0.1 0.2 1 drawnotchplate
+DEVICEDEF
+ drawnotchplate2
+ 1.0 0.8 0.4 setcolor
+ 0.5 0.1 0.2 -1 drawnotchplate
+DEVICEDEF
+ drawpolydisk
+ 1.0 0.8 0.4 setcolor
+ 5 0.35 0.15 drawpolydisk
+DEVICEDEF
+ drawring
+ 1.0 0.8 0.4 setcolor
+ 0.3 0.5 0.1 drawring
+DEVICEDEF
+ drawsphere
+ 1.0 0.8 0.4 setcolor
+ 0.25 drawsphere
+DEVICEDEF
+ drawtrunccone
+ 1.0 0.8 0.4 setcolor
+ 0.5 0.2 0.4 drawtrunccone
+
+
+
+ 
