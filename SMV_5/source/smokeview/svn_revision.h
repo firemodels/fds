@@ -19,6 +19,9 @@ extern char getdatacolors_revision[];
 #ifdef pp_SHOOTER
 extern char glui_shooter_revision[];
 #endif
+#ifdef pp_MESSAGE
+extern char glui_message_revision[];
+#endif
 extern char glui_3dsmoke_revision[];
 extern char glui_blockedit_revision[];
 extern char glui_bounds_revision[];

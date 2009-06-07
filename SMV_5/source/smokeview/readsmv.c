@@ -965,7 +965,6 @@ int readsmv(char *file){
 
   // read in device (.svo) definitions
 
-//  if(ndeviceinfo>0&&ndevice_defs==0){
     init_device_defs();
 
 

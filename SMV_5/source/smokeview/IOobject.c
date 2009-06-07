@@ -1981,7 +1981,17 @@ int read_device_defs(char *file){
 
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected){
   if(numargs_found==numargs_expected)return;
-  printf("*** Error:  %i arguments were found for the token \"%s\" while parsing: \"%s\".  %i arguments were expected.\n",numargs_found,token,buffer,numargs_expected);
+#ifdef pp_MESSAGE
+  {
+    char message[256];
+    sprintf(message,"***Error: %i arguments were found (%i expected) for the token \"%s\" while parsing: \"%s\".\n",
+      numargs_found,numargs_expected,token,buffer);
+    error_message(message);
+  }
+#else
+    printf("***Error: %i arguments were found (%i expected) for the token \"%s\" while parsing: \"%s\".\n",
+      numargs_found,numargs_expected,token,buffer);
+#endif
 }
 
 /* ----------------------- get_device_label ----------------------------- */

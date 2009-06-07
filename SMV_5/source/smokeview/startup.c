@@ -30,6 +30,9 @@ void glui_motion_setup(int main_window);
 #ifdef pp_SHOOTER
 void glui_shooter_setup(int main_window);
 #endif
+#ifdef pp_MESSAGE
+void glui_message_setup(int main_window);
+#endif
 void glui_bounds_setup(int main_window);
 void glui_labels_setup(int main_window);
 void glui_edit_setup(int main_window);
@@ -92,11 +95,29 @@ int initcase_c(int argc, char **argv){
   }
   switch (return_code){
     case 1:
+#ifdef pp_MESSAGE
+      {
+        char message[256];
+
+        sprintf(message,"Input file %s not found.\n",input_file);
+        warning_message(message);
+      }
+#else
       printf("Input file %s not found.\n",input_file);
+#endif
       pauseSV();
       return 1;
     case 2:
+#ifdef pp_MESSAGE
+      {
+        char message[256];
+
+        sprintf(message,"*** Fatal error: unable to allocate necessary memory\n");
+        abort_message(message);
+      }
+#else
       printf("*** Fatal error: unable to allocate necessary memory\n");
+#endif
       pauseSV();
       return 2;
     case 0:
@@ -358,6 +379,9 @@ void InitOpenGL(void){
   mainwindow_id=glutCreateWindow("");
   printf("   window created\n");
 
+#ifdef pp_MESSAGE
+  glui_message_setup(mainwindow_id);
+#endif
   printf("   defining callbacks\n");
   glutSpecialUpFunc(specialkeyboard_up);
   glutKeyboardUpFunc(keyboard_up);
@@ -2186,6 +2210,9 @@ int getmaxrevision(void){
   MAXREV(getdatacolors_revision);
 #ifdef pp_SHOOTER
   MAXREV(glui_shooter_revision);
+#endif
+#ifdef pp_MESSAGE
+  MAXREV(glui_message_revision);
 #endif
   MAXREV(glui_3dsmoke_revision);
   MAXREV(glui_blockedit_revision);
