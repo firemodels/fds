@@ -1,16 +1,13 @@
-// $Date: 2008-01-18 14:27:20 -0500 (Fri, 18 Jan 2008) $ 
+// $Date$ 
 // $Revision$
-// $Author: gforney $
+// $Author$
 
 DEVICEDEF
  drawaxis
- 30.0 setlinewidth
  1.0 0.0 0.0 setcolor
- 0.0 0.0 0.0 0.6 0.0 0.0 drawline
- 0.0 1.0 0.0 setcolor
- 0.0 0.0 0.0 0.0 0.6 0.0 drawline
- 0.0 0.0 1.0 setcolor
- 0.0 0.0 0.0 0.0 0.0 0.6 drawline
+ push 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
+ 0.0 1.0 0.123 setcolor
+ push 90.0 rotatey 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
 DEVICEDEF
  drawcone
  0.69 0.49 0.17 setcolor
