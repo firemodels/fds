@@ -183,6 +183,12 @@ EXTERNCPP void hide_load_alert(void);
 EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 
+#ifdef pp_MESSAGE
+EXTERNCPP void message_message(char *message);
+EXTERNCPP void warning_message(char *message);
+EXTERNCPP void error_message(char *message);
+EXTERNCPP void abort_message(char *message);
+#endif
 EXTERNCPP sv_object *get_object(char *label);
 EXTERNCPP char *get_label(char *buffer2);
 EXTERNCPP void snap_view_angles(void);
