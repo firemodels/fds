@@ -535,19 +535,21 @@ CONTAINS
 
 SUBROUTINE END_FDS
 
+CHARACTER(100) :: MESSAGE
+
 SELECT CASE(PROCESS_STOP_STATUS)
    CASE(NO_STOP)
-      WRITE(LU_ERR,'(A)') 'STOP: FDS completed successfully'
+      WRITE(MESSAGE,'(A)') 'STOP: FDS completed successfully'
       IF (STATUS_FILES) CLOSE(LU_NOTREADY,STATUS='DELETE')
    CASE(INSTABILITY_STOP)
-      WRITE(LU_ERR,'(A)') 'STOP: Numerical Instability'
+      WRITE(MESSAGE,'(A)') 'STOP: Numerical Instability'
    CASE(USER_STOP)
-      WRITE(LU_ERR,'(A)') 'STOP: FDS stopped by user'
+      WRITE(MESSAGE,'(A)') 'STOP: FDS stopped by user'
    CASE(SETUP_STOP)
-      WRITE(LU_ERR,'(A)') 'STOP: FDS improperly set-up'
+      WRITE(MESSAGE,'(A)') 'STOP: FDS improperly set-up'
 END SELECT
 
-STOP
+CALL SHUTDOWN(MESSAGE)
  
 END SUBROUTINE END_FDS
 
