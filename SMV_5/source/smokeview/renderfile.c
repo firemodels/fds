@@ -116,7 +116,16 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   printf("Rendering to: %s .",renderfile);
   RENDERfile = fopen(renderfile, "wb");
   if (RENDERfile == NULL) {
+#ifdef pp_MESSAGE
+    {
+      char message[256];
+
+      sprintf(message,"*** warning: unable to write to %s\n",renderfile);
+      warning_message(message);
+    }
+#else
     printf("*** warning: unable to write to %s\n",renderfile);
+#endif
     return 1;
   }
   RENDERimage = gdImageCreateTrueColor(2*screenWidth,2*screenHeight);
@@ -199,7 +208,16 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
   RENDERfile = fopen(RENDERfilename, "wb");
   if (RENDERfile == NULL) {
+#ifdef pp_MESSAGE
+    {
+      char message[256];
+
+      sprintf(message,"*** warning: unable to write to %s\n",RENDERfilename);
+      warning_message(message);
+    }
+#else
     printf("*** warning:  unable to write to %s\n",RENDERfilename);
+#endif
     return 1;
   }
   OpenGLimage = (GLubyte *) malloc(width * height * sizeof(GLubyte) * 3);

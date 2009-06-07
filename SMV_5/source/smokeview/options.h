@@ -80,6 +80,7 @@
 
 #ifdef pp_BETA
 #define pp_SHOOTER
+#define pp_MESSAGE
 #endif
 
 #ifdef pp_CULL

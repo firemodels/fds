@@ -123,7 +123,11 @@ void get_smokezippath(char *progdir, char **zippath){
 void abortSV(char *message){
   int i;
   if(message!=NULL&&strlen(message)>0){
+#ifdef pp_MESSAGE
+    abort_message(message);
+#else
     printf("%s\n",message);
+#endif
   }
   scanf("%i",&i);
 }
