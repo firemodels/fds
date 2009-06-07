@@ -3646,30 +3646,40 @@ installed. A very simple ``fan curve'' is given by:
 \be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}} \;
    \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
    \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
-where $A_{\hbox{\footnotesize duct}}$ is the area of the duct~(m$^2$), $U_{\hbox{\footnotesize max}}$ is
-the air velocity~(m/s), and $\Delta p_{\hbox{\footnotesize max}}$ is the maximum
-pressure difference the fan can operate upon. Figure~(\ref{fig:Fan_Curve} displays a typical fan curve.
+The volume flow in the absence of a pressure difference is given by the area of the duct times the velocity of the air.
+$A_{\hbox{\footnotesize duct}}$ is the area of the duct~(m$^2$), and $U_{\hbox{\footnotesize max}}$ is
+the air velocity~(m/s) in the absence of a pressure difference. The pressure difference, $\Delta p=p_1-p_2$, indicates the difference in
+pressure between the downstream compartment, or ``zone,'' and the upstream. The subscript 1 indicates downstream and 2 indicates upstream.
+The term, $\Delta p_{\hbox{\footnotesize max}}$, is the maximum
+pressure difference the fan can operate upon, and it is assumed to be a positive number. Figure~\ref{fig:Fan_Curve} displays a typical fan curve.
 
 \begin{figure}[ht!]
 \begin{center}
 \includegraphics[width=3.5in]{FIGURES/Fan_Curve}
-\caption{\bf Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}.}
+\caption{\bf Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}. Note that a volume flux greater than
+10 is brought about by a negative pressure difference; that is, when the downstream pressure is less than the upstream. Note also that when
+the pressure difference is greater than 500~Pa, the volume flow becomes negative; that is, the flow reverses.}
 \label{fig:Fan_Curve}
 \end{center}
 \end{figure}
 
-The ideal velocity of the fan, $U_{\hbox{\footnotesize max}}$, is
+The velocity of the fan in the absence of a pressure difference, $U_{\hbox{\footnotesize max}}$, is
 specified via the parameter {\ct VEL} on the appropriate {\ct SURF}
-line. Alternatively, the volume flow rate, $A_{\hbox{\footnotesize
-duct}} U_{\hbox{\footnotesize max}}$, can be specified using {\ct
-VOLUME\_FLUX}. Do not use both.  These parameters were already
+line. Alternatively, the volume flow rate, $A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}}$, can be specified using {\ct VOLUME\_FLUX}.
+Do not use both.  These parameters were already
 introduced in Section~\ref{info:SURF}. To simulate the behavior of a
-real fan, a few extra parameters need to be specified. To set $\Delta
-p_{\hbox{\footnotesize max}}$, the maximum operating over-pressure,
+real fan, a few extra parameters need to be specified. To set $\Delta p_{\hbox{\footnotesize max}}$, the maximum operating over-pressure,
 add {\ct MAX\_PRESSURE} to the {\ct SURF} line. Note that {\ct MAX\_PRESSURE}
-should always be positive and in units of Pa.  If in
-the simulation the computed pressure exceeds the specified {\ct MAX\_PRESSURE}, then there will be a backflow in the duct.
+should always be positive and in units of Pa.  If the pressure difference (downstream minus upstream)
+exceeds the specified {\ct MAX\_PRESSURE}, then there will be a backflow in the duct.
 \index{SURF!MAX\_PRESSURE}
+
+\begin{warning}
+Note that the rules governing the sign of {\ct VEL} or {\ct VOLUME\_FLUX} remain in force for fans that are subject to pressure differences between
+compartments. Simply note that the sign of either {\ct VEL} or {\ct VOLUME\_FLUX}
+defines ``upstream'' and ``downstream.'' Thus, the zone into which air is blown in the absence
+of a pressure difference is the downstream zone.
+\end{warning}
 
 \subsubsection{Example Case: {\bf fan\_test}}
 
