@@ -7,6 +7,8 @@ The purpose of this case is to test functionality of the droplet routine.
 
 &TIME T_END=60.0 /
 
+&MISC ALLOW_UNDERSIDE_DROPLETS=.TRUE. /
+
 &OBST XB=-1.5, 1.5,-1.5, 1.5, 1.0, 3.0, COLOR='TAN'  /  
 &OBST XB=-1.5, 1.5,-1.5, 1.5, 4.0, 6.0, COLOR='TAN'  /  
 &OBST XB=-1.5, 1.5,-1.5, 1.5, 7.0, 9.0, COLOR='TAN'  /  
