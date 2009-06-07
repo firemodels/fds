@@ -1173,14 +1173,12 @@ the thin (green) lines, where data is recorded in FDS.}
 
 \section{Geometric Objects}
 \label{svocommands} Each command used to draw elementary geometric
-objects consists of one or more arguments followed by the command
-{\em e.g.}\ {\tt 0.3 drawsphere}. Some portion of the object is
+objects consists of one or more arguments followed by the command, for example,
+the command sequence {\tt 0.3 drawsphere} draws a sphere with diameter 0.3 (all units as with FDS are in meters). 
+
+Some portion of the object is
 designated as the origin, {\em i.e.}\ with coordinate $(0,0,0)$.
-The location of the origin is needed when assembling geometric
-objects together to form more complex objects.  The transformation
-commands discussed in the next section are used to perform this
-assembly, specifying exactly where and with what orientation the
-geometric objects should be placed.
+The origin location is indicated by the intersection two cylinders, a red cylinder indicating the up or (0,0,1) direction, and a green cylinder indicating the {\em orientation}\ or (1,0,0) direction.  The origin location and orientation and up directions are used by the transformation commands described in the next section to assemble the elementary objects described in this section so that more complex parts may be created.
 
 
 \newcommand{\infigr}[2]{
@@ -1222,7 +1220,12 @@ drawcube}\ creates a box with dimensions $1\times 2\times 4$.
 draws a circular disk with diameter d and height h. The origin is
 located at the center of the disk's base.\vspace{0.25in}
 
-\infigl{drawhexdisk}{0.5 0.25 drawhexdisk}
+\infigl{drawcdisk}{0.25 0.50 drawcdisk}
+\paragraph{DRAWCDISK} The command, {\tt d h drawcdisk},
+draws a circular disk with diameter d and height h. The origin is
+located at the center of the disk.\vspace{0.25in}
+
+\infigr{drawhexdisk}{0.5 0.25 drawhexdisk}
 \paragraph{DRAWHEXDISK} The command, {\tt d h drawhexdisk},
 draws a hexagonal disk with diameter d and height h.  The origin
 is located at the center of the hexagon's base.
@@ -1232,10 +1235,10 @@ is located at the center of the hexagon's base.
 command, {\tt x1 y1 z1 x2 y2 z2 drawline}, draws a line between
 the points $(x_1,y_1,z_1)$ and $(x_2,y_2,z_2)$.\vspace{0.25in}
 
-\parpic[r]{
+\parpic[l]{
 \begin{tabular}{cc}
-\includegraphics[height=\infigheight]{figures/notchplate}&
-\includegraphics[height=\infigheight]{figures/pendent}\\
+\includegraphics[height=\infigheight]{scriptfigures/drawnotchplate}&
+\includegraphics[height=\infigheight]{scriptfigures/drawnotchplate2}\\
 {\tiny\tt  0.5 0.1 0.2 1 drawnotchplate}&
 {\tiny\tt 0.5 0.1 0.2 -1 drawnotchplate}
 \end{tabular}
