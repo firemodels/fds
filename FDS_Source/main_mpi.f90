@@ -902,21 +902,24 @@ SUBROUTINE END_FDS
 
 ! End the calculation gracefully, even if there is an error
 
+CHARACTER(100) :: MESSAGE
+
 CALL MPI_REDUCE(PROCESS_STOP_STATUS,STOP_STATUS,1,MPI_INTEGER,MPI_MAX,0,MPI_COMM_WORLD,IERR)
 CALL MPI_FINALIZE(IERR)
 
 IF (MYID==0) THEN
    SELECT CASE(STOP_STATUS)
       CASE(NO_STOP)
-         WRITE(LU_ERR,'(A)') 'STOP: FDS completed successfully'
+         WRITE(MESSAGE,'(A)') 'STOP: FDS completed successfully'
          IF (STATUS_FILES) CLOSE(LU_NOTREADY,STATUS='DELETE')
       CASE(INSTABILITY_STOP) 
-         WRITE(LU_ERR,'(A)') 'STOP: Numerical Instability'
+         WRITE(MESSAGE,'(A)') 'STOP: Numerical Instability'
       CASE(USER_STOP) 
-         WRITE(LU_ERR,'(A)') 'STOP: FDS stopped by user'
+         WRITE(MESSAGE,'(A)') 'STOP: FDS stopped by user'
       CASE(SETUP_STOP) 
-         WRITE(LU_ERR,'(A)') 'STOP: FDS was improperly set-up'
+         WRITE(MESSAGE,'(A)') 'STOP: FDS was improperly set-up'
    END SELECT
+   CALL SHUTDOWN(MESSAGE)
 ENDIF
 
 STOP
