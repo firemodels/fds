@@ -5787,6 +5787,8 @@ if it is not.
 
 \section{Controlling Particles and Droplets}
 
+\label{info:controlling_droplets}
+
 Depending on how the particles or droplets are introduced into the computational domain, the following are important
 parameters for controlling them:
 \begin{description}
@@ -5863,11 +5865,30 @@ quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY}
 allow you to control the rate at which droplets move horizontally or vertically (downward). The defaults are
 0.2~m/s and 0.5~m/s, respectively.
 
+There are some applications, like the suppression of racked storage commodities, where it is useful to allow water droplets to move horizontally
+along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and
+absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_DROPLETS=.TRUE.} on the
+{\ct MISC} line. It is normally false.
+
 \begin{warning}
 Be aware that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
 \end{warning}
 
+\noindent
+A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\bf cascade.fds}. Figure~\ref{cascade} shows a stream
+of water droplets impinging on the top of a box followed by the cascading of water droplets over the top edge.
 
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{lcr}
+\includegraphics[height=2.2in]{FIGURES/cascade_1} &
+\includegraphics[height=2.2in]{FIGURES/cascade_2} &
+\includegraphics[height=2.2in]{FIGURES/cascade_3}
+\end{tabular}
+\end{center}
+\caption[Example of water cascading over solid obstructions.]{Smokeview rendering of the {\bf cascade} test case.}
+\label{cascade}
+\end{figure}
 
 
 \section{Particle and Droplet Properties}
@@ -8851,6 +8872,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
 \hline \hline
 \endhead
+{\ct \footnotesize ALLOW\_UNDERSIDE\_DROPLETS} & Logical & See Section~\ref{info:controlling_droplets}    &               & {\ct .FALSE.}    \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE} & Real & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
 {\ct BACKGROUND\_SPECIES}       & Character     & See Section~\ref{info:SPEC}                   &               & {\ct 'AIR'}       \\ \hline
 {\ct BAROCLINIC}                & Logical       & Baroclinic torque correction                  &               & {\ct .FALSE.}     \\ \hline

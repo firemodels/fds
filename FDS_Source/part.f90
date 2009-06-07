@@ -1054,11 +1054,23 @@ DROPLET_LOOP: DO I=1,NLP
 
             ! Choose a direction for the droplets to move
 
-            DIRECTION: SELECT CASE(ABS(DR%IOR))
-               CASE (1:2) DIRECTION  
+            DIRECTION: SELECT CASE(DR%IOR)
+               CASE (-2:-1,1:2) DIRECTION  
                   DR%U = 0._EB
                   DR%V = 0._EB
                   DR%W = -PC%VERTICAL_VELOCITY 
+               CASE (-3) DIRECTION 
+                  IF (.NOT.ALLOW_UNDERSIDE_DROPLETS) THEN 
+                     DR%U = 0._EB
+                     DR%V = 0._EB
+                     DR%W = -PC%VERTICAL_VELOCITY
+                  ELSE 
+                     CALL RANDOM_NUMBER(RN)
+                     THETA_RN = TWOPI*RN
+                     DR%U = PC%HORIZONTAL_VELOCITY*COS(THETA_RN)
+                     DR%V = PC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
+                     DR%W = 0._EB
+                  ENDIF
                CASE(3) DIRECTION
                   CALL RANDOM_NUMBER(RN)
                   THETA_RN = TWOPI*RN
