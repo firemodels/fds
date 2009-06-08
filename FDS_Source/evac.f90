@@ -1485,11 +1485,11 @@ Contains
             End If
          End Do PEX_MeshLoop
          If (PEX%IMESH == 0) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: EXIT line ',Trim(PEX%ID), ' problem with IMESH, no mesh found'
+            Write(MESSAGE,'(A,A,A)') 'ERROR: EXIT line ',Trim(ID), ' problem with IMESH, no mesh found'
             Call SHUTDOWN(MESSAGE)
          End If
          If (ii > 1) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: EXIT line ',Trim(PEX%ID), ' not an unique mesh found '
+            Write(MESSAGE,'(A,A,A)') 'ERROR: EXIT line ',Trim(ID), ' not an unique mesh found '
             Call SHUTDOWN(MESSAGE)
          End If
  
@@ -1818,11 +1818,11 @@ Contains
             End If
          End Do PDX_MeshLoop
          If (PDX%IMESH == 0) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',Trim(PDX%ID), ' problem with IMESH, no mesh found'
+            Write(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',Trim(ID), ' problem with IMESH, no mesh found'
             Call SHUTDOWN(MESSAGE)
          End If
          If (ii > 1) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',Trim(PDX%ID), ' not an unique mesh found '
+            Write(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',Trim(ID), ' not an unique mesh found '
             Call SHUTDOWN(MESSAGE)
          End If
 
@@ -2772,11 +2772,11 @@ Contains
             End If
          End Do PNX_MeshLoop
          If (PNX%IMESH == 0) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',Trim(PNX%ID), ' problem with IMESH, no mesh found'
+            Write(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',Trim(ID), ' problem with IMESH, no mesh found'
             Call SHUTDOWN(MESSAGE)
          End If
          If (ii > 1) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',Trim(PNX%ID), ' not an unique mesh found '
+            Write(MESSAGE,'(A,A,A)') 'ERROR: ENTR line ',Trim(ID), ' not an unique mesh found '
             Call SHUTDOWN(MESSAGE)
          End If
 
@@ -3126,11 +3126,11 @@ Contains
             End If
          End Do HP_MeshLoop
          If (HPT%IMESH == 0) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',Trim(HPT%ID),' problem with IMESH, no mesh found'
+            Write(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',Trim(ID),' problem with IMESH, no mesh found'
             Call SHUTDOWN(MESSAGE)
          End If
          If (ii > 1) Then
-            Write(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',Trim(HPT%ID), ' not an unique mesh found '
+            Write(MESSAGE,'(A,A,A)') 'ERROR: EVAC line ',Trim(ID), ' not an unique mesh found '
             Call SHUTDOWN(MESSAGE)
          End If
 
