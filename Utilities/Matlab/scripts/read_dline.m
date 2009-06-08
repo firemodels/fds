@@ -20,7 +20,7 @@ H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
 %for i=2:length(A)
-    P = textscan(A{4},'%q','delimiter',',');
+    P = textscan(A{8},'%q','delimiter',',');
     parameters = P{:}';
     
     if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
@@ -32,7 +32,11 @@ headers = H{:}'; clear H
         S = parse(d1_Dep_Col_Name);
         for j=1:length(S)
             d1_Dep_Col = find(strcmp(H,S(j)));
-            K(1) = plot(M(:,d1_Ind_Col)/Scale_Ind,M(:,d1_Dep_Col)/Scale_Dep,'-'); hold on
+            if Plot_Type=='linear'
+                K(j) = plot(M(:,d1_Ind_Col)/Scale_Ind,M(:,d1_Dep_Col)/Scale_Dep,'-'); hold on
+            elseif Plot_Type=='loglog'
+                K(j) = loglog(M(:,d1_Ind_Col)/Scale_Ind,M(:,d1_Dep_Col)/Scale_Dep,'-'); hold on
+            end
         end
         
         [H M] = dvcread(d2_Filename);
@@ -40,13 +44,20 @@ headers = H{:}'; clear H
         S = parse(d2_Dep_Col_Name);
         for j=1:length(S)
             d2_Dep_Col = find(strcmp(H,S(j)));
-            K(2) = plot(M(:,d2_Ind_Col)/Scale_Ind,M(:,d2_Dep_Col)/Scale_Dep,'.:');
+            if Plot_Type=='linear'
+                K(length(S)+j) = plot(M(:,d2_Ind_Col)/Scale_Ind,M(:,d2_Dep_Col)/Scale_Dep,'--');
+            elseif Plot_Type=='loglog'
+                K(length(S)+j) = loglog(M(:,d2_Ind_Col)/Scale_Ind,M(:,d2_Dep_Col)/Scale_Dep,'--');
+            end
         end
         hold off
         
-        xlabel(Ind_Title)
-        ylabel(Dep_Title)
+        xlabel(Ind_Title,'interpreter','latex')
+        ylabel(Dep_Title,'interpreter','latex')
         axis([Min_Ind Max_Ind Min_Dep Max_Dep])
-        legend(K,d1_Key,d2_Key,'Location',Key_Position)
+        if size(Key_Position)>0
+            legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'interpreter','latex')
+        end
     end
+%    pause
 %end
