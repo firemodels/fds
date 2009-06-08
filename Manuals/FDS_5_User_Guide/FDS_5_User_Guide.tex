@@ -7873,12 +7873,12 @@ Special device type has been defined to simulate the PDPA measurement. The actua
 measurement are defined using an associated {\ct PROP}erty. Note that in FDS, the PDPA device cannot produce complete droplet size
 distributions, but only various mean properties.
 
-The PDPA device output is computed as
+The PDPA device output at time $t$ is computed as
 \be
 f(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} \left( \frac{\sum_i n_i d_i^m}{\sum_i n_i d_i^n}\right)^{1/(m-n)}x  dt
 \ee
-The summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS}.
-The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
+where $x$ is the quantity to be measured. The summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} and centered at 
+the location given by the device {\ct XYZ}. The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Use {\ct 'ALL'} to account for all particles.
 \item[{\ct PDPA\_START}] $t_s$, starting time of time integration in seconds. PDPA output is always a running average over time.
