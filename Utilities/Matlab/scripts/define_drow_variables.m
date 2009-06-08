@@ -7,6 +7,8 @@
 % keep 'read_dline.m' as clean as possible.  Note that the cell arrays
 % 'parameters' and 'headers' are defined in 'read_dline.m'.
 
+vdir = '../../../Verification/';
+
 Quantity          = str2num(char(parameters(find(strcmp(headers,'Quantity')))));
 Group             = char(parameters(find(strcmp(headers,'Group'))));
 d1_Filename       = [vdir,char(parameters(find(strcmp(headers,'d1_Filename'))))];
@@ -25,7 +27,7 @@ d2_Filename       = [vdir,char(parameters(find(strcmp(headers,'d2_Filename'))))]
 d2_Col_Name_Row   = str2num(char(parameters(find(strcmp(headers,'d2_Col_Name_Row')))));
 d2_Ind_Col_Name   = char(parameters(find(strcmp(headers,'d2_Ind_Col_Name'))));
 d2_Dep_Col_Name   = char(parameters(find(strcmp(headers,'d2_Dep_Col_Name'))));
-d2_Data_Row       = char(parameters(find(strcmp(headers,'d2_Data_Row'))));
+d2_Data_Row       = str2num(char(parameters(find(strcmp(headers,'d2_Data_Row')))));
 d2_Key            = char(parameters(find(strcmp(headers,'d2_Key'))));
 d2_Style          = str2num(char(parameters(find(strcmp(headers,'d2_Style')))));
 d2_Start          = str2num(char(parameters(find(strcmp(headers,'d2_Start')))));

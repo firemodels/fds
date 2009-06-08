@@ -11,20 +11,36 @@
 close all
 clear all
 
-vdir = '../../../Verification/';
+addpath('../functions')
 
 A = importdata('../verification_data_config_matlab.csv');
 H = textscan(A{1},'%q','delimiter',',');
-headers = H{:}';
+headers = H{:}'; clear H
 
-P = textscan(A{2},'%q','delimiter',',');
-parameters = P{:}';
-
-
-if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
+%for i=2:length(A)
+    P = textscan(A{3},'%q','delimiter',',');
+    parameters = P{:}';
     
-    define_drow_variables
-    
-    M = csvread(d1_Filename,2,0);   
-    plot(M(:,1),M(:,2))
-end
+    if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
+        
+        define_drow_variables
+        
+        [H M] = dvcread(d1_Filename);
+        d1_Ind_Col = find(strcmp(H,d1_Ind_Col_Name));
+        d1_Dep_Col = find(strcmp(H,d1_Dep_Col_Name));
+        K(1) = plot(M(:,d1_Ind_Col),M(:,d1_Dep_Col),'-'); hold on
+        clear H M
+        
+        [H M] = dvcread(d2_Filename);
+        d2_Ind_Col = find(strcmp(H,d2_Ind_Col_Name));
+        d2_Dep_Col = find(strcmp(H,d2_Dep_Col_Name));
+        K(2) = plot(M(:,d2_Ind_Col),M(:,d2_Dep_Col),'.:');
+        hold off
+        
+        xlabel(Ind_Title)
+        ylabel(Dep_Title)
+        axis([Min_Ind Max_Ind Min_Dep Max_Dep])
+        legend(K,d1_Key,d2_Key,'Location',Key_Position)
+    end
+%    pause
+%end
