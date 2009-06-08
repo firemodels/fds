@@ -94,7 +94,15 @@
 #endif
 #endif
 
-
+#define pp_WEBLINKS 0
+#ifdef WIN32
+#undef pp_WEBLINKS
+#define pp_WEBLINKS 1
+#endif
+#ifdef OSX
+#undef pp_WEBLINKS
+#define pp_WEBLINKS 1
+#endif
 
 
 
