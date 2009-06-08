@@ -19,8 +19,8 @@ A = importdata('../verification_data_config_matlab.csv');
 H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
-%for i=2:length(A)
-    P = textscan(A{8},'%q','delimiter',',');
+for i=2:length(A)
+    P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
     
     if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
@@ -29,25 +29,27 @@ headers = H{:}'; clear H
         
         [H M] = dvcread(d1_Filename);
         d1_Ind_Col = find(strcmp(H,d1_Ind_Col_Name));
-        S = parse(d1_Dep_Col_Name);
-        for j=1:length(S)
-            d1_Dep_Col = find(strcmp(H,S(j)));
+        S1 = parse(d1_Dep_Col_Name);
+        style = parse(d1_Style);
+        for j=1:length(S1)
+            d1_Dep_Col = find(strcmp(H,S1(j)));
             if Plot_Type=='linear'
-                K(j) = plot(M(:,d1_Ind_Col)/Scale_Ind,M(:,d1_Dep_Col)/Scale_Dep,'-'); hold on
+                K(j) = plot(M(:,d1_Ind_Col)/Scale_Ind,M(:,d1_Dep_Col)/Scale_Dep,char(style(j))); hold on
             elseif Plot_Type=='loglog'
-                K(j) = loglog(M(:,d1_Ind_Col)/Scale_Ind,M(:,d1_Dep_Col)/Scale_Dep,'-'); hold on
+                K(j) = loglog(M(:,d1_Ind_Col)/Scale_Ind,M(:,d1_Dep_Col)/Scale_Dep,char(style(j))); hold on
             end
         end
         
         [H M] = dvcread(d2_Filename);
         d2_Ind_Col = find(strcmp(H,d2_Ind_Col_Name));
-        S = parse(d2_Dep_Col_Name);
-        for j=1:length(S)
-            d2_Dep_Col = find(strcmp(H,S(j)));
+        S2 = parse(d2_Dep_Col_Name);
+        style = parse(d2_Style);
+        for j=1:length(S2)
+            d2_Dep_Col = find(strcmp(H,S2(j)));
             if Plot_Type=='linear'
-                K(length(S)+j) = plot(M(:,d2_Ind_Col)/Scale_Ind,M(:,d2_Dep_Col)/Scale_Dep,'--');
+                K(length(S1)+j) = plot(M(:,d2_Ind_Col)/Scale_Ind,M(:,d2_Dep_Col)/Scale_Dep,char(style(j)));
             elseif Plot_Type=='loglog'
-                K(length(S)+j) = loglog(M(:,d2_Ind_Col)/Scale_Ind,M(:,d2_Dep_Col)/Scale_Dep,'--');
+                K(length(S1)+j) = loglog(M(:,d2_Ind_Col)/Scale_Ind,M(:,d2_Dep_Col)/Scale_Dep,char(style(j)));
             end
         end
         hold off
@@ -59,5 +61,6 @@ headers = H{:}'; clear H
             legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'interpreter','latex')
         end
     end
-%    pause
-%end
+    clear S1 S2 K style H M
+    pause
+end
