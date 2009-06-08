@@ -1644,6 +1644,11 @@ void LevelMenu(int value){
 /* ------------------ HelpMenu ------------------------ */
 
 void HelpMenu(int value){
+#ifdef WIN32
+  if(value==-1){
+    system("start explorer http://code.google.com/p/fds-smv/issues/");
+  }
+#endif
 }
 
 
@@ -6002,6 +6007,13 @@ static int in_menu=0;
   {
     int displayblank=0;
   CREATEMENU(helpmenu,HelpMenu);
+#ifdef WIN32
+  glutAddMenuEntry("*** Open the FDS-Smokeview Issue Tracker to report a problem ***",-1);
+  glutAddMenuEntry("",1);
+#else
+  glutAddMenuEntry("*** Report a problem to the issue tracker at http://code.google.com/p/fds-smv/issues/",1);
+  glutAddMenuEntry("",1);
+#endif
   if(plotstate==DYNAMIC_PLOTS){
     glutAddMenuEntry("Animation keyboard commands",1);
     glutAddMenuEntry("  t: set/unset single time step mode",6);
