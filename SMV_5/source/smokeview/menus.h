@@ -1649,7 +1649,7 @@ void HelpMenu(int value){
 #endif
 
 #ifdef WIN32
-  strcpy(web_command,"start explorer");
+  strcpy(web_command,"start explorer ");
 #endif
 #ifdef OSX
   strcpy(web_command,"open ");
@@ -1666,6 +1666,10 @@ void HelpMenu(int value){
       break;
     case -3:
       strcat(web_command,"http://fire.nist.gov/fds/documentation.html");
+      system(web_command);
+      break;
+    case -4:
+      strcat(web_command,"http://fire.nist.gov/fds/");
       system(web_command);
       break;
   }
@@ -6033,12 +6037,14 @@ static int in_menu=0;
   glutAddMenuEntry("  Documentation",-3);
   glutAddMenuEntry("  Issue Tracker",-1);
   glutAddMenuEntry("  Updates",-2);
+  glutAddMenuEntry("  Website",-4);
   glutAddMenuEntry("",1);
 #else
   glutAddMenuEntry("Web Resources",1);
   glutAddMenuEntry("*** Download documentation at  http://fire.nist.gov/fds/documentation.html",1);
   glutAddMenuEntry("*** Report a problem at http://code.google.com/p/fds-smv/issues/",1);
   glutAddMenuEntry("*** Check for updates at http://code.google.com/p/fds-smv/downloads/",1);
+  glutAddMenuEntry("*** FDS/Smokeview website: http://fire.nist.gov/fds",1);
   glutAddMenuEntry("-",1);
 #endif
   if(plotstate==DYNAMIC_PLOTS){
@@ -6113,8 +6119,6 @@ static int in_menu=0;
     glutAddMenuEntry("    ALT:   up/down cursor: slide up/down",1);
     glutAddMenuEntry("     INSERT/HOME/PageUP: tilt down/reset/tilt up",1);
   }
-  glutAddMenuEntry("",1);
-  glutAddMenuEntry("URL: http://fire.nist.gov/fds",1);
   }
 
   /* -------------------------------- target menu -------------------------- */
