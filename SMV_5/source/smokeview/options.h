@@ -34,6 +34,7 @@
 
 
 #define _CRT_SECURE_NO_DEPRECATE
+
 #ifdef WIN32
 #define pp_memstatus
 #define pp_COMPRESS
@@ -47,9 +48,12 @@
 #endif
 
 #define pp_RENDER
+
 #ifndef X64
 #define pp_THREAD
 #endif
+
+#define pp_MESSAGE
 #define pp_SPHERE
 #define pp_ISOOUT
 #define pp_DRAWISO
@@ -79,7 +83,6 @@
 
 #ifdef pp_BETA
 #define pp_SHOOTER
-#define pp_MESSAGE
 #endif
 
 #ifdef pp_CULL
