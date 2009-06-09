@@ -8316,6 +8316,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct ADIABATIC SURFACE TEMPERATURE}             & See Section~\ref{info:AST}                    & $^\circ$C      & B,D          \\ \hline
 {\ct AMPUA}$^{**}$                              & See Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
 {\ct ASPIRATION}                                & See Section~\ref{info:aspiration_detector}    & \%             & D            \\ \hline
+{\ct AVERAGE SPECIFIC HEAT}                             & $\bar{c_p}$                                         & kJ/kg/K        & D,I,P,S      \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & See Section~\ref{info:PROF}                   & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
 {\ct CHAMBER OBSCURATION}                       & See Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
@@ -8480,12 +8481,13 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}    & Logical     & Do not do corner averaging        &           & {\ct .FALSE.}   \\ \hline
-{\ct FYI}               & Character   & Comment String (has no effect)    &           &                 \\ \hline
-{\ct PART\_ID}          & Character   & Particle identifier (if needed)   &           &                 \\ \hline
-{\ct PROP\_ID}          & Character   & Property identifier (if needed)   &           &                 \\ \hline
-{\ct QUANTITY}          & Character   & Quantity to visualize             &           &                 \\ \hline
-{\ct SPEC\_ID}          & Character   & Species identifier (if needed)    &           &                 \\ \hline
+{\ct CELL\_CENTERED}    & Logical     & Do not do corner averaging              &           & {\ct .FALSE.}   \\ \hline
+{\ct FYI}               & Character   & Comment String (has no effect)          &           &                 \\ \hline
+{\ct PART\_ID}          & Character   & Particle identifier (if needed)         &           &                 \\ \hline
+{\ct PROP\_ID}          & Character   & Property identifier (if needed)         &           &                 \\ \hline
+{\ct RECOUNT\_DRIP}     & Logical     & Adds mass to AWMPUA for each drop impact& .FALSE.   &                 \\ \hline
+{\ct QUANTITY}          & Character   & Quantity to visualize                   &           &                 \\ \hline
+{\ct SPEC\_ID}          & Character   & Species identifier (if needed)          &           &                 \\ \hline
 \end{longtable}
 
 
@@ -9071,7 +9073,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct GAMMA}                     & Real            & Specific heat ratio for vapor     &           & 1.4           \\ \hline
 {\ct GAMMA\_D}                  & Real            & Size distribution parameter       &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}      & Real            & Heat of Combustion                & kJ/kg     &               \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION}    & Real            & Latent Heat of Vaporization       & kJ/kg     & 2259.         \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION}    & Real            & Latent Heat of Vaporization       & kJ/kg     &               \\ \hline
+{\ct H\_V\_REFERENCE\_TEMPERATURE} & Real            & Temperature for Heat of Vaporization & $^\circ$C     & 0.         \\ \hline
 {\ct HORIZONTAL\_VELOCITY}      & Real            & Droplet speed, horizontal         & m/s       &  0.2          \\ \hline
 {\ct ID}                        & Character       & Identifier                        &           &               \\ \hline
 {\ct INITIAL\_TEMPERATURE}      & Real            & Initial Temperature               & $^\circ$C & {\ct TMPA}    \\ \hline
