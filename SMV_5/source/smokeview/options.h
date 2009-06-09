@@ -99,7 +99,7 @@
 #undef pp_WEBLINKS
 #define pp_WEBLINKS 1
 #endif
-#ifdef OSX
+#ifdef pp_OSX
 #undef pp_WEBLINKS
 #define pp_WEBLINKS 1
 #endif
