@@ -18,7 +18,7 @@ CONTAINS
 SUBROUTINE DIVERGENCE_PART_1(T,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_DIFFUSIVITY,GET_CONDUCTIVITY,GET_SPECIFIC_HEAT
+USE PHYSICAL_FUNCTIONS, ONLY: GET_DIFFUSIVITY,GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT
 
 ! Compute contributions to the divergence term
  
@@ -27,7 +27,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
           RHO_D_DYDX,RHO_D_DYDY,RHO_D_DYDZ,RHO_D,RHOP,H_RHO_D_DYDX,H_RHO_D_DYDY,H_RHO_D_DYDZ,RTRM
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP,FX,FY,FZ
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW, YSUM,YY_GET(1:N_SPECIES),ZZ_GET(1:N_MIX_SPECIES), &
-            HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,VDOT_LEAK,TIME_RAMP_FACTOR,ZONE_VOLUME,CP_MF,DELTA_P,PRES_RAMP_FACTOR
+            HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,VDOT_LEAK,TIME_RAMP_FACTOR,ZONE_VOLUME,CP_MF,DELTA_P,PRES_RAMP_FACTOR,&
+            H_G,H_G_A,TMP_G
 TYPE(SURFACE_TYPE), POINTER :: SF
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,I,J,K,IPZ,IOPZ
  
@@ -218,7 +219,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
 
    ! Compute del dot h_n*rho*D del Y_n only for non-mixture fraction cases
  
-   SPECIES_DIFFUSION: IF (.NOT.MIXTURE_FRACTION) THEN
+!   SPECIES_DIFFUSION: IF (.NOT.MIXTURE_FRACTION) THEN
+   SPECIES_DIFFUSION: IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) THEN
 
       H_RHO_D_DYDX => WORK4
       H_RHO_D_DYDY => WORK5
@@ -230,14 +232,29 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          DO J=0,JBAR
             DO I=0,IBAR
                !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_05'
-               ITMP = MIN(5000,NINT(.5_EB*(TMP(I+1,J,K)+TMP(I,J,K))))
-               HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
+               TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
+               ITMP = MIN(5000,NINT(TMP_G))
+               YY_GET=0._EB
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,ITMP)
+               YY_GET(N) = 1._EB
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
+               HDIFF = (H_G-H_G_A)*TMP_G
                H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
-               ITMP = MIN(5000,NINT(.5_EB*(TMP(I,J+1,K)+TMP(I,J,K))))
-               HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
+               TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
+               ITMP = MIN(5000,NINT(TMP_G))
+               YY_GET=0._EB
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,ITMP)
+               YY_GET(N) = 1._EB
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
+               HDIFF = (H_G-H_G_A)*TMP_G
                H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
-               ITMP = MIN(5000,NINT(.5_EB*(TMP(I,J,K+1)+TMP(I,J,K))))
-               HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
+               TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
+               ITMP = MIN(5000,NINT(TMP_G))
+               YY_GET=0._EB
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,ITMP)
+               YY_GET(N) = 1._EB
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
+               HDIFF = (H_G-H_G_A)*TMP_G
                H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
             ENDDO
          ENDDO
@@ -335,14 +352,19 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    
    ! Compute -Sum h_n del dot rho*D del Y_n
  
-   SPECIES_DIFFUSION_2: IF (.NOT.MIXTURE_FRACTION) THEN
+!   SPECIES_DIFFUSION_2: IF (.NOT.MIXTURE_FRACTION) THEN
+   SPECIES_DIFFUSION_2: IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) THEN
       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,HDIFF)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_11'
+               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_11'               
                ITMP = MIN(5000,INT(TMP(I,J,K)))
-               HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
+               YY_GET=0._EB
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,ITMP)
+               YY_GET(N) = 1._EB
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
+               HDIFF = (H_G-H_G_A)*TMP(I,J,K)
                DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
             ENDDO
          ENDDO
@@ -537,9 +559,10 @@ ENDIF
 
 ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Y_n
 
-SPECIES_DIFFUSION_3: IF (.NOT.MIXTURE_FRACTION) THEN
+!SPECIES_DIFFUSION_3: IF (.NOT.MIXTURE_FRACTION) THEN
    !$OMP DO COLLAPSE(4) PRIVATE(N,K,J,I)
    DO N=1,N_SPECIES
+      IF (SPECIES(N)%MODE == MIXTURE_FRACTION_SPECIES) CYCLE
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -550,7 +573,7 @@ SPECIES_DIFFUSION_3: IF (.NOT.MIXTURE_FRACTION) THEN
       ENDDO
    ENDDO
    !$OMP END DO
-ENDIF SPECIES_DIFFUSION_3
+!ENDIF SPECIES_DIFFUSION_3
 
 ! Add contribution of evaporating droplets
  
