@@ -381,6 +381,9 @@ void InitOpenGL(void){
 
 #ifdef pp_MESSAGE
   glui_message_setup(mainwindow_id);
+  error_message("error test");
+  warning_message("warning test");
+  abort_message("abort test");
 #endif
   printf("   defining callbacks\n");
   glutSpecialUpFunc(specialkeyboard_up);
@@ -1254,6 +1257,11 @@ void initvars1(void){
   showbounds=0,showmotion=0,showedit=0, showclip=0, showgluistereo=0, showtour=0, showlabels=0, showcolorbar=0, showwui=0;
 #ifdef pp_SHOOTER
   showshooterDLG=0;
+#endif
+#ifdef pp_MESSAGE
+  show_glui_warning=0;
+  show_glui_error=0;
+  show_glui_abort=0;
 #endif
   showterrain=0;
   showgluitrainer=0;
