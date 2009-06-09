@@ -1652,7 +1652,7 @@ void HelpMenu(int value){
   strcpy(web_command,"start explorer ");
 #endif
 #ifdef OSX
-  strcpy(web_command,"open ");
+  strcpy(web_command,"/usr/bin/open ");
 #endif
 #ifdef pp_WEBLINKS
   switch (value){
@@ -1673,6 +1673,9 @@ void HelpMenu(int value){
       system(web_command);
       break;
   }
+#ifdef pp_OSX
+  printf("command: %s\n",web_command);
+#endif
 #endif
 }
 
