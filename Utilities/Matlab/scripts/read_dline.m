@@ -14,12 +14,14 @@ close all
 clear all
 
 addpath('../functions')
+paper_width  = 6.0; % inches
+paper_height = 4.5; % inches
 
 A = importdata('../verification_data_config_matlab.csv');
 H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
-for i=2:length(A)
+for i=2:20 % set this range for the dlines you want to read
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
     
@@ -27,6 +29,7 @@ for i=2:length(A)
         
         define_drow_variables
         
+        % plot the experimental data or analytical solution
         [H M] = dvcread(d1_Filename);
         d1_Ind_Col = find(strcmp(H,d1_Ind_Col_Name));
         S1 = parse(d1_Dep_Col_Name);
@@ -39,7 +42,8 @@ for i=2:length(A)
                 K(j) = loglog(M(:,d1_Ind_Col)/Scale_Ind,M(:,d1_Dep_Col)/Scale_Dep,char(style(j))); hold on
             end
         end
-        
+
+        % plot the FDS data
         [H M] = dvcread(d2_Filename);
         d2_Ind_Col = find(strcmp(H,d2_Ind_Col_Name));
         S2 = parse(d2_Dep_Col_Name);
@@ -54,13 +58,26 @@ for i=2:length(A)
         end
         hold off
         
-        xlabel(Ind_Title,'interpreter','latex')
-        ylabel(Dep_Title,'interpreter','latex')
+        % format the legend and axis labels
+        set(gca,'FontName','Times')
+        set(gca,'FontSize',14)
+        xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',16)
+        ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',16)
         axis([Min_Ind Max_Ind Min_Dep Max_Dep])
         if size(Key_Position)>0
-            legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'interpreter','latex')
+            legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'Interpreter','LaTeX','FontSize',10)
         end
+        text(Title_Position(1)*(Max_Ind-Min_Ind)/Scale_Ind,Title_Position(2)*(Max_Dep-Min_Dep)/Scale_Dep,...
+            Plot_Title,'FontSize',16,'FontName','Times','Interpreter','LaTeX')
+        
+        % print to pdf
+        set(gcf,'PaperUnits','inches');
+        set(gcf,'PaperSize',[paper_width paper_height]);
+        set(gcf,'PaperPosition',[0 0 paper_width paper_height]); 
+        display(['Printing plot ',num2str(i),'...'])
+        print(gcf,'-dpdf',['../../../Manuals/',Plot_Filename])
+        
     end
     clear S1 S2 K style H M
-    pause
+
 end
