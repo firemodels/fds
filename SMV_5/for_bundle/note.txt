@@ -1,6 +1,9 @@
-1.  test show isosurface normal option
-2.  add widgets to File/BOunds Isosurface dialogbox panel for setting animated 
-isosurface point size and specifying the display type (hidden, solid, triangulated or points)
-3.  add widgets to File/BOunds Plot3D dialogbox panel for setting 
-isosurface point size and specifying the display type (solid, triangles or points)
-4. change default animated isosurface view type to "All levels solid"
+1.  test smokeview particle tracking
+2.  test alternate methods for visualizing particles (using lines to represent particle velocity)
+3.  modify CLASS_OF_PARTICLES keyword to set default particle geometry data
+4.  test tube and sphere particle drawing
+5.  make menu display of particle devices more general 
+6.  test drawcdisk device drawing command (disk drawn with origin at center rather than at base)
+7.  test dialog boxes for reporting errors (to make them more conspicuous while smoekview is starting up)
+8.  test option to open up the FDS-SMV issue tracker from the Smokeview (windows version) help menu
+9.  for 64 bit smokeview, build with large heap and stack size
