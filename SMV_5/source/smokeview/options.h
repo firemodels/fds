@@ -46,7 +46,6 @@
 // #define pp_GPU_BLANK
 #endif
 
-#define pp_MSCALE
 #define pp_RENDER
 #ifndef X64
 #define pp_THREAD
