@@ -36,6 +36,7 @@ smokeview -version > scriptfigures\smokeview.version
 
 cd %svn_root%\Verification\Visualization
 smokeview -runscript colorconv
+smokeview -runscript devices_elem
 smokeview -runscript plume5a
 smokeview -runscript plume5b
 smokeview -runscript plume5c
