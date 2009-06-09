@@ -3792,29 +3792,29 @@ void usage(char **argv){
 #ifdef pp_ALPHA
     printf(" pp_ALPHA");
 #endif
-#ifdef pp_release
-    printf(" pp_release");
-#endif
-#ifdef _DEBUG
-    printf(" _DEBUG");
-#endif
-#ifdef EGZ
-    printf(", EGZ");
-#endif
-#ifdef ISO_DEBUG
-    printf(", ISO_DEBUG");
-#endif
 #ifdef pp_COLOR
     printf(", pp_COLOR");
 #endif
 #ifdef pp_COMPRESS
     printf(", pp_COMPRESS");
 #endif
+#ifdef pp_CULL
+    printf(", pp_CULL");
+#endif
+#ifdef _DEBUG
+    printf(" _DEBUG");
+#endif
 #ifdef pp_DRAWISO
     printf(", pp_DRAWISO");
 #endif
+#ifdef EGZ
+    printf(", EGZ");
+#endif
 #ifdef pp_GPU
     printf(", pp_GPU");
+#endif
+#ifdef ISO_DEBUG
+    printf(", ISO_DEBUG");
 #endif
 #ifdef pp_LIGHT
     printf(", pp_LIGHT");
@@ -3822,14 +3822,26 @@ void usage(char **argv){
 #ifdef pp_memstatus
     printf(", pp_memstatus");
 #endif
+#ifdef pp_MESSAGE
+    printf(", pp_MESSAGE");
+#endif
+#ifdef pp_OPEN
+    printf(", pp_OPEN");
+#endif
 #ifdef pp_noappend
     printf(", pp_noappend");
 #endif
 #ifdef pp_OSX
     printf(", pp_OSX");
 #endif
+#ifdef pp_release
+    printf(" pp_release");
+#endif
 #ifdef pp_RENDER
     printf(", pp_RENDER");
+#endif
+#ifdef pp_SHOOTER
+    printf(", pp_SHOOTER");
 #endif
 #ifdef pp_SHOWLIGHT
     printf(", pp_SHOWLIGHT");
@@ -3839,6 +3851,15 @@ void usage(char **argv){
 #endif
 #ifdef pp_SPHERE
     printf(", pp_SPHERE");
+#endif
+#ifdef pp_THREAD
+    printf(", pp_THREAD");
+#endif
+#ifdef pp_TOUR
+    printf(", pp_TOUR");
+#endif
+#ifdef X64
+    printf(", X64");
 #endif
 #ifdef USE_ZLIB
     printf(", USE_ZLIB");
