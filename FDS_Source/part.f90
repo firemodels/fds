@@ -37,7 +37,9 @@ IF (EVACUATION_ONLY(NM)) RETURN  ! Don't waste time if an evac mesh
  
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
- 
+II=1
+JJ=1
+KK=1 
 PART_CLASS_LOOP: DO IPC=1,N_PART
  
 
@@ -97,7 +99,9 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
    ENDIF
 
    ! Assign properties to the initial droplets/particles
-      
+!   II=0
+!   JJ=1
+!   KK=1   
    MASS_SUM = 0._EB
    INITIALIZATION_LOOP: DO I=1,PC%N_INITIAL
       NLP = NLP + 1
@@ -107,6 +111,18 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
          DROPLET=>MESHES(NM)%DROPLET
       ENDIF
       DR=>DROPLET(NLP)
+!      II = II + 1
+!      IF (II > 20) THEN
+!         II = 1
+!         JJ = JJ + 1
+!      ENDIF
+!      IF (JJ > 20) THEN
+!         JJ = 1
+!         KK = KK + 1
+!      ENDIF
+!      DR%X = 0.5_EB*(X(II-1)+X(II))
+!      DR%Y = 0.5_EB*(Y(JJ-1)+Y(JJ))
+!      DR%Z = 0.5_EB*(Z(KK-1)+Z(KK))
       BLOCK_OUT_LOOP:  DO
          CALL RANDOM_NUMBER(RN)
          DR%X = X1 + RN*(X2-X1)
@@ -154,7 +170,7 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
          ENDIF
          MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
       ENDIF
-
+ 
       ! Process special particles that are associated with a particular SURFace type
 
       IF (PC%SURF_INDEX>0) THEN
@@ -166,7 +182,7 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
          IJKW(2,DR%WALL_INDEX) = JJ
          IJKW(3,DR%WALL_INDEX) = KK
       ENDIF
- 
+
    ENDDO INITIALIZATION_LOOP
  
    ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
@@ -683,7 +699,7 @@ USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP, AFILL2
 USE PHYSICAL_FUNCTIONS, ONLY : DRAG
  
 REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,SFAC,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
-            RD,T,C_DRAG,XI,YJ,ZK,MU_AIR,WE_G,SURFACE_TENSION,&
+            RD,T,C_DRAG,XI,YJ,ZK,MU_AIR,&
             DTSP,DTMIN,UBAR,VBAR,WBAR,BFAC,GRVT1,GRVT2,GRVT3,AUREL,AVREL,AWREL,CONST, &
             UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION(-3:3),R_NEW,SURFACE_DROPLET_DIAMETER
 LOGICAL :: HIT_SOLID
@@ -693,7 +709,6 @@ TYPE (DROPLET_TYPE), POINTER :: DR
 TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC
 
 SURFACE_DROPLET_DIAMETER = 0.001_EB  ! All droplets adjusted to this size when on solid (m)
-SURFACE_TENSION = 72.8E-3_EB
 
 GRVT1 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(1) 
 GRVT2 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(2) 
@@ -748,10 +763,9 @@ DROPLET_LOOP: DO I=1,NLP
 
    RVC = RDX(II)*RDY(JJ)*RDZ(KK)
    RD  = DR%R
+   IF (RD<=0._EB) CYCLE DROPLET_LOOP
    RDS = RD*RD
    RDC = RD*RDS
-
-   IF (RD<=0._EB) CYCLE DROPLET_LOOP
 
    UREL  = DR%U - UBAR
    VREL  = DR%V - VBAR
@@ -761,23 +775,6 @@ DROPLET_LOOP: DO I=1,NLP
    RHO_G = RHO(II,JJ,KK)
    MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
    DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
-
-   ! Drag coefficient
-
-   IF (DR%IOR==0 .AND. DR%RE>0) THEN
-
-      C_DRAG  = DRAG(DR%RE)
-
-      ! Secondary break-up
-   
-      IF (SECONDARY_BREAKUP) THEN
-         WE_G = RHO(II,JJ,KK)*QREL**2*RD*2/SURFACE_TENSION
-!         write(90,*) WE_G/sqrt(DR%RE)
-!         write(91,*) WE_G
-      ENDIF
-
-   ENDIF
-
    DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
       C_DRAG  = DRAG(DR%RE)
       IF (.NOT. PC%TREE) THEN
@@ -1080,9 +1077,9 @@ DROPLET_LOOP: DO I=1,NLP
                   DR%W = -PC%VERTICAL_VELOCITY 
                CASE (-3) DIRECTION 
                   IF (.NOT.ALLOW_UNDERSIDE_DROPLETS) THEN 
-                     DR%U = 0._EB
-                     DR%V = 0._EB
-                     DR%W = -PC%VERTICAL_VELOCITY
+                  DR%U = 0._EB
+                  DR%V = 0._EB
+                  DR%W = -PC%VERTICAL_VELOCITY 
                   ELSE 
                      CALL RANDOM_NUMBER(RN)
                      THETA_RN = TWOPI*RN
@@ -1090,12 +1087,6 @@ DROPLET_LOOP: DO I=1,NLP
                      DR%V = PC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
                      DR%W = 0._EB
                   ENDIF
-               CASE(3) DIRECTION
-                  CALL RANDOM_NUMBER(RN)
-                  THETA_RN = TWOPI*RN
-                  DR%U = PC%HORIZONTAL_VELOCITY*COS(THETA_RN)
-                  DR%V = PC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
-                  DR%W = 0._EB
             END SELECT DIRECTION
 
          ENDIF IF_HIT_SOLID
@@ -1143,6 +1134,7 @@ DROPLET_LOOP: DO I=1,NLP
       IF (DR%IOR/=0 .AND. BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
          DR%IOR = 0
          DR%WALL_INDEX = 0
+         IF (RECOUNT_DRIP) DR%SPLAT=.FALSE.
       ELSE
          DR%WALL_INDEX = WALL_INDEX(ICN,-DR%IOR)
       ENDIF
@@ -1167,13 +1159,13 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,GET_M
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN,DROP_RAD,DROP_TMP,MVAP_TOT
 REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS
-REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V, &
+REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             RVC,WGT,OMWGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
             T,PR_AIR,M_VAP,M_VAP_MAX,XI,YJ,ZK,RDT,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
-            CP,H_NEW,YY_GET(1:N_SPECIES), H_GAS,H_VAPOR,M_GAS_NEW,MW_GAS,CP1,CP2,VEL_REL
+            CP,H_NEW,YY_GET(1:N_SPECIES), H_GAS,H_VAPOR,M_GAS_NEW,MW_GAS,CP1,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_NEW,H_L_REF
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS,ITMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
@@ -1272,37 +1264,21 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
    PART_CLASS_LOOP: DO N_PC = 1,N_PART
 
       PC => PARTICLE_CLASS(N_PC)
-      IF (.NOT.PC%EVAPORATE)         CYCLE PART_CLASS_LOOP
+      IF (.NOT.PC%EVAPORATE) CYCLE PART_CLASS_LOOP
       IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
-      IF (PC%TREE)                   CYCLE PART_CLASS_LOOP
-
-      ! If the particle class is associated with a particular SURF, just get its temperature and cycle
-
-      IF (PC%SURF_INDEX>0) THEN
-         DO I=1,NLP
-            DR => DROPLET(I)
-            IF (DR%CLASS==N_PC) THEN
-               IW = DR%WALL_INDEX
-               DR%TMP = TMP_F(IW)
-            ENDIF
-         ENDDO
-         CYCLE PART_CLASS_LOOP
-      ENDIF
-
-      ! Initialize quantities common to the PARTICLE_CLASS
+      IF (PC%TREE) CYCLE PART_CLASS_LOOP
+      IF (PC%SURF_INDEX>0)           CYCLE PART_CLASS_LOOP
 
       DROP_DEN = 0._EB
       DROP_TMP = 0._EB
       DROP_RAD = 0._EB
-      C_DROP   = PC%C_P
       FTPR     = PC%FTPR
       TMP_MELT = PC%TMP_MELT
       TMP_BOIL = PC%TMP_V
       IGAS     = PC%SPEC_INDEX
       MW_DROP  = SPECIES(IGAS)%MW
-      H_V      = PC%H_V
-      DHOR     = H_V*MW_DROP/R0
-
+      H_V_REF  = PC%H_V(NINT(PC%H_V_REFERENCE_TEMPERATURE))
+      H_L_REF  = PC%C_P_BAR(NINT(TMP_MELT))*TMP_MELT
       ! Loop through all droplets in the class and determine the depth of the liquid film on each surface cell
 
       MASS_SUMMING_LOOP: DO I=1,NLP
@@ -1357,14 +1333,17 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          DT_SUBSTEP = DT/REAL(N_SUBSTEPS,EB) 
 
          TIME_ITERATION_LOOP: DO ITER=1,N_SUBSTEPS
-         
             ! Initialize droplet thermophysical data
 
             R_DROP   = DR%R
             M_DROP   = FTPR*R_DROP**3
             TMP_DROP = DR%TMP
+            ITMP      = NINT(TMP_DROP)
+            H_V      = PC%H_V(ITMP)
+            C_DROP   = PC%C_P(ITMP)
+            H_L      = PC%C_P_BAR(ITMP)*TMP_DROP-H_L_REF
             WGT      = DR%PWT
-               
+            DHOR     = H_V*MW_DROP/R0     
             ! Gas conditions
 
             TMP_G  = TMP(II,JJ,KK)
@@ -1446,7 +1425,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                DY_DTMP_DROP = 0._EB
                Y_DROP       = 0._EB
             ENDIF
-
             ! Update the droplet temperature semi_implicitly
     
             DENOM = 1._EB + (H_HEAT + H_WALL + H_MASS*RHO_G*H_V*DY_DTMP_DROP)*DT_SUBSTEP*A_DROP/(2._EB*M_DROP*C_DROP) 
@@ -1460,22 +1438,25 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
             Q_CON_GAS  = DT_SUBSTEP*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
             Q_CON_WALL = DT_SUBSTEP*A_DROP*H_WALL*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))
+            Q_TOT      = Q_RAD+Q_CON_GAS+Q_CON_WALL
+
             ! Compute the total amount of liquid evaporated
-  
             M_VAP = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
             M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP,M_VAP_MAX))
+            
             ! Evaporate completely small droplets
 
             IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  
                M_VAP  = M_DROP
-               Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
                IF (Q_TOT>0._EB) THEN
                   Q_FRAC = M_VAP*H_V/Q_TOT 
                   Q_CON_GAS  = Q_CON_GAS*Q_FRAC
                   Q_CON_WALL = Q_CON_WALL*Q_FRAC
                   Q_RAD      = Q_RAD*Q_FRAC
+                  Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
                ENDIF
             ENDIF
+            IF (M_VAP < M_DROP) TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP * (M_VAP+M_DROP))
 
             ! If the droplet temperature drops below its freezing point, just reset it
 
@@ -1486,12 +1467,12 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             IF (PC%EVAPORATE .AND. TMP_DROP_NEW>=TMP_BOIL) THEN  
                M_VAP  = MIN(M_VAP_MAX,M_DROP,M_VAP + (TMP_DROP_NEW - TMP_BOIL)*C_DROP*M_DROP/H_V)
                TMP_DROP_NEW = TMP_BOIL
-               Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
                IF (Q_TOT>0._EB) THEN
                   Q_FRAC = M_VAP*H_V/Q_TOT
                   Q_CON_GAS  = Q_CON_GAS*Q_FRAC
                   Q_CON_WALL = Q_CON_WALL*Q_FRAC
                   Q_RAD      = Q_RAD*Q_FRAC
+                  Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
                ENDIF
             ENDIF
 
@@ -1507,49 +1488,51 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*(Q_RAD+Q_CON_WALL)*RAW(IW)/DT_SUBSTEP
                WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*WGT*M_DROP*RAW(IW)/REAL(N_SUBSTEPS,EB) 
             ENDIF
-            
-            ITMP = MIN(5000,NINT(TMP_G))
-            YY_GET(:) = 0._EB
+            ITMP = MIN(5000,NINT(TMP_DROP_NEW))
+            YY_GET = 0._EB
             YY_GET(IGAS) = 1._EB
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,ITMP)
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP1,NINT(TMP_DROP_NEW))
+            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP1,ITMP)
+            ITMP = MIN(5000,NINT(TMP_G))
+            DELTA_H_G = CP1 * TMP_DROP_NEW
             YY_GET(:) = YY(II,JJ,KK,:)
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP)
-            !CP1 = H_V+C_DROP*(0.5_EB*(TMP_DROP_NEW+TMP_DROP)-TMP_MELT)
-            CP1 = H_V+C_DROP*(TMP_DROP_NEW-TMP_MELT)
-            CP2 = CP1 - CP2*TMP_G
-            H_VAPOR = WGT*M_VAP*CP2
-            H_GAS = M_GAS*CP*TMP_G
+            H_G_OLD = M_GAS*CP*TMP_G
             M_GAS_NEW = M_GAS + WGT*M_VAP
             RHO(II,JJ,KK) = M_GAS_NEW*RVC
-            H_NEW = (H_VAPOR+H_GAS-Q_CON_GAS*WGT)/M_GAS_NEW
-            
+            H_NEW = H_G_OLD + (DELTA_H_G * M_VAP - Q_CON_GAS) * WGT 
             YY(II,JJ,KK,:) = YY(II,JJ,KK,:) * M_GAS/M_GAS_NEW
             YY(II,JJ,KK,IGAS)= YY(II,JJ,KK,IGAS) + WGT*M_VAP/M_GAS_NEW
-
-            ! Compute contribution to the divergence
-!            D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) +(MW_RATIO *M_VAP + 2._EB*(M_VAP*(CP2 + VEL_REL**2 * 0.5_EB)-Q_CON_GAS*WGT)/ &
-!                                (H_NEW+CP*TMP_G) ) * 2._EB / (M_GAS_NEW+M_GAS) /DT_SUBSTEP
-            D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) +(MW_RATIO *M_VAP + 2._EB*(M_VAP*CP2-Q_CON_GAS)/ &
-                                (H_NEW+CP*TMP_G) ) * 2._EB * WGT / (M_GAS_NEW+M_GAS) /DT_SUBSTEP
-
-
+            TMP_G_I = TMP_G
             TEMPITER = .TRUE.
             ITERATE_TEMP: DO WHILE (TEMPITER)
                TEMPITER=.FALSE.
-               ITMP = MIN(5000,NINT(TMP_G))
+               ITMP = MIN(5000,NINT(TMP_G_I))
                IF (N_SPECIES == 0 ) THEN
-                  CP = Y2CPBAR_C(ITMP)
+                  CP2 = Y2CPBAR_C(ITMP)
                ELSE
                   YY_GET(:) = YY(II,JJ,KK,:)
-                  CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP)
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,ITMP)
                ENDIF
-               TMP_G = TMP_G+(H_NEW-CP*TMP_G)/CP
-               IF ((TMP(II,JJ,KK)-TMP_G) > 2._EB) TEMPITER = .TRUE.
-               TMP(II,JJ,KK) = TMP_G
+               TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(CP2*M_GAS_NEW)
+               IF ((TMP(II,JJ,KK)-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
+               TMP(II,JJ,KK) = TMP_G_I
             ENDDO ITERATE_TEMP
             TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
-            
+            YY_GET = 0._EB
+            YY_GET(IGAS) = 1._EB
+            ITMP = MIN(5000,NINT(TMP_DROP_NEW))
+            YY_GET = 0._EB
+            YY_GET(IGAS) = 1._EB
+            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP1,ITMP)
+            ITMP = MIN(5000,NINT(TMP_G))
+            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,ITMP)
+            DELTA_H_G = (CP1 * TMP_DROP_NEW - CP2 * TMP_G) 
+
+            ! Compute contribution to the divergence
+
+            D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
+                              (M_VAP*DELTA_H_G- Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
+
             CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(II,JJ,KK))
             
             ! Add fuel evaporation rate to running counter before adjusting its value
