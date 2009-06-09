@@ -381,9 +381,6 @@ void InitOpenGL(void){
 
 #ifdef pp_MESSAGE
   glui_message_setup(mainwindow_id);
-  error_message("error test");
-  warning_message("warning test");
-  abort_message("abort test");
 #endif
   printf("   defining callbacks\n");
   glutSpecialUpFunc(specialkeyboard_up);
