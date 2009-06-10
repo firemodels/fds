@@ -31,7 +31,7 @@ fclose(fid);
 % parse header line
 if irow>0
     C = textscan(textline_last,'%q','delimiter',',');
-    H = C{:}';
+    H = strtrim(C{:}');
 else
     H = [];
 end  
