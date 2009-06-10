@@ -13,12 +13,12 @@ VPATH = ../FDS_Source
 
 obj_serial = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
              ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o turb.o mass.o \
-             wall.o fire.o pres.o divg.o init.o velo.o main.o
+             wall.o fire.o pres.o divg.o init.o velo.o soot.o main.o
 objwin_serial = $(obj_serial:.o=.obj)
 
 obj_mpi = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
           ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o turb.o mass.o \
-          wall.o fire.o pres.o divg.o init.o velo.o main_mpi.o
+          wall.o fire.o pres.o divg.o init.o velo.o soot.o main_mpi.o
 objwin_mpi = $(obj_mpi:.o=.obj)
 
 # General Purpose Rules
@@ -454,8 +454,9 @@ vege.obj : vege.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
 read.obj : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 evac.f90
 init.obj : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 pois.f90
 dump.obj : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 evac.f90 smvv.f90 isob.c 
-main.obj : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
-main_mpi.obj : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
+soot.o : soot.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+main.obj : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90 soot.f90
+main_mpi.obj : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90 soot.f90
 
 
 #*** Clean Target to remove Object and Module files ***
