@@ -6,28 +6,35 @@
 %
 % Dependencies:
 %    define_drow_variables.m
-%    ../verification_data_config_matlab.csv OR ../validation_data_config_matlab.csv
+%    ../Verification_Data_Config_Matlab.csv OR ../Validation_Data_Config_Matlab.csv
 %    ../functions/dvcread.m
 %    ../functions/parse.m
 
 close all
 clear all
 
+% Here's what YOU need to do: set the following 2 lines...
+VV = 'Validation'; % set 'Verification' or 'Validation'
+drange = 3:3; % set this range for the dlines you want to read (we're all a little dranged!)
+% You're done. Run the script.
+
+cfil = ['../',VV,'_Data_Config_Matlab.csv'];
+vdir = ['../../../',VV,'/'];
+
 addpath('../functions')
 paper_width  = 6.0; % inches
 paper_height = 4.5; % inches
 
-A = importdata('../verification_data_config_matlab.csv');
+A = importdata(cfil);
 H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
-for i=2:20 % set this range for the dlines you want to read
+for i=drange 
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
     
     if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
         
-        vdir = '../../../Verification/';
         define_drow_variables
         
         % plot the experimental data or analytical solution
@@ -37,10 +44,17 @@ for i=2:20 % set this range for the dlines you want to read
         style = parse(d1_Style);
         for j=1:length(S1)
             d1_Dep_Col = find(strcmp(H,S1(j)));
+            if Flip_Axis=='no'
+                X = M(:,d1_Ind_Col)/Scale_Ind;
+                Y = M(:,d1_Dep_Col)/Scale_Dep;
+            else
+                X = M(:,d1_Dep_Col)/Scale_Dep;
+                Y = M(:,d1_Ind_Col)/Scale_Ind;
+            end
             if Plot_Type=='linear'
-                K(j) = plot(M(:,d1_Ind_Col)/Scale_Ind,M(:,d1_Dep_Col)/Scale_Dep,char(style(j))); hold on
+                K(j) = plot(X,Y,char(style(j))); hold on
             elseif Plot_Type=='loglog'
-                K(j) = loglog(M(:,d1_Ind_Col)/Scale_Ind,M(:,d1_Dep_Col)/Scale_Dep,char(style(j))); hold on
+                K(j) = loglog(X,Y,char(style(j))); hold on
             end
         end
 
@@ -51,10 +65,17 @@ for i=2:20 % set this range for the dlines you want to read
         style = parse(d2_Style);
         for j=1:length(S2)
             d2_Dep_Col = find(strcmp(H,S2(j)));
+            if Flip_Axis=='no'
+                X = M(:,d2_Ind_Col)/Scale_Ind;
+                Y = M(:,d2_Dep_Col)/Scale_Dep;
+            else
+                X = M(:,d2_Dep_Col)/Scale_Dep;
+                Y = M(:,d2_Ind_Col)/Scale_Ind;
+            end
             if Plot_Type=='linear'
-                K(length(S1)+j) = plot(M(:,d2_Ind_Col)/Scale_Ind,M(:,d2_Dep_Col)/Scale_Dep,char(style(j)));
+                K(length(S1)+j) = plot(X,Y,char(style(j)));
             elseif Plot_Type=='loglog'
-                K(length(S1)+j) = loglog(M(:,d2_Ind_Col)/Scale_Ind,M(:,d2_Dep_Col)/Scale_Dep,char(style(j)));
+                K(length(S1)+j) = loglog(X,Y,char(style(j)));
             end
         end
         hold off
@@ -80,6 +101,11 @@ for i=2:20 % set this range for the dlines you want to read
         print(gcf,'-dpdf',['../../../Manuals/',Plot_Filename])
         
     end
-    clear S1 S2 K style H M
+    clear S1 S2 K style H M X Y
 
 end
+display('Done!')
+display('Why?')
+why
+
+
