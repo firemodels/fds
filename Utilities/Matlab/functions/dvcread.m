@@ -13,7 +13,7 @@
 % text line, since in devc files the units are typically given by the first
 % line of text.
 
-function [H X] = dvcread(filename)
+function [H X] = dvcread(filename,header_row)
 
 fid = fopen(filename,'r+');
 
@@ -22,7 +22,7 @@ irow = -1;
 textline = [];
 while ierror==0
     irow = irow + 1;
-    textline_last = textline;
+    if irow==header_row; headers = textline; end
     textline = fgetl(fid);
     [X ierror]=str2num(textline);
 end
@@ -30,7 +30,7 @@ fclose(fid);
 
 % parse header line
 if irow>0
-    C = textscan(textline_last,'%q','delimiter',',');
+    C = textscan(headers,'%q','delimiter',',');
     H = strtrim(C{:}');
 else
     H = [];
