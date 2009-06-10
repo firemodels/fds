@@ -31,7 +31,7 @@ end
 %vdir = ['../../../Validation/'];
 %drange = 3:3;
 
-addpath('../functions')
+addpath('../scripts')
 paper_width  = 6.0; % inches
 paper_height = 4.5; % inches
 
