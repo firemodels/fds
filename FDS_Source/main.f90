@@ -28,7 +28,7 @@ USE SOOT
 USE OPENMP
 IMPLICIT NONE
  
-! Miscellaneous declarations
+! Miscellaneous variable declarations
 
 CHARACTER(255), PARAMETER :: mainid='$Id$'
 CHARACTER(255), PARAMETER :: mainrev='$Revision$'
