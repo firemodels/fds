@@ -6,11 +6,12 @@
 % a name linked to the header.  The purpose of adding this script is to
 % keep 'read_dline.m' as clean as possible.  Note that the cell arrays
 % 'parameters' and 'headers' are defined in 'read_dline.m'.
-
-vdir = '../../../Verification/';
+%
+% vdir = '../../../Verification/'; for example, is set in read_dline.
 
 Quantity          = str2num(char(parameters(find(strcmp(headers,'Quantity')))));
 Group             = char(parameters(find(strcmp(headers,'Group'))));
+Dataname          = char(parameters(find(strcmp(headers,'Dataname'))));
 d1_Filename       = [vdir,char(parameters(find(strcmp(headers,'d1_Filename'))))];
 d1_Col_Name_Row   = str2num(char(parameters(find(strcmp(headers,'d1_Col_Name_Row')))));
 d1_Ind_Col_Name   = char(parameters(find(strcmp(headers,'d1_Ind_Col_Name'))));
