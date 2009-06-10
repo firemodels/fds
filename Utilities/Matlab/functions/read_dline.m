@@ -39,7 +39,10 @@ A = importdata(cfil);
 H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
-for i=drange 
+Length_A = length(A);
+for i=drange
+    if i>Length_A; break; end
+    
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
     
@@ -112,7 +115,6 @@ for i=drange
         
     end
     clear S1 S2 K style H M X Y
-
 end
 display('Done!')
 display('Why?')
