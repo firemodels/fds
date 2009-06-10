@@ -2,11 +2,11 @@
 % 6-02-2009
 % read_dline.m
 %
-% Reads verification data configuration file.
+% Reads data configuration file.
 %
 % Dependencies:
 %    define_drow_variables.m
-%    ../verification_data_config_matlab.csv
+%    ../verification_data_config_matlab.csv OR ../validation_data_config_matlab.csv
 %    ../functions/dvcread.m
 %    ../functions/parse.m
 
@@ -27,6 +27,7 @@ for i=2:20 % set this range for the dlines you want to read
     
     if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
         
+        vdir = '../../../Verification/';
         define_drow_variables
         
         % plot the experimental data or analytical solution
@@ -71,6 +72,7 @@ for i=2:20 % set this range for the dlines you want to read
             Plot_Title,'FontSize',16,'FontName','Times','Interpreter','LaTeX')
         
         % print to pdf
+        set(gcf,'Visible','off');
         set(gcf,'PaperUnits','inches');
         set(gcf,'PaperSize',[paper_width paper_height]);
         set(gcf,'PaperPosition',[0 0 paper_width paper_height]); 
