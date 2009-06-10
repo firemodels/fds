@@ -7,7 +7,7 @@
 % keep 'read_dline.m' as clean as possible.  Note that the cell arrays
 % 'parameters' and 'headers' are defined in 'read_dline.m'.
 %
-% vdir = '../../../Verification/'; for example, is set in read_dline.
+% vdir = '../../../Verification/'; for example, is also set in read_dline.
 
 Quantity          = str2num(char(parameters(find(strcmp(headers,'Quantity')))));
 Group             = char(parameters(find(strcmp(headers,'Group'))));
