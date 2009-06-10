@@ -2642,7 +2642,7 @@ DO N = 1, N_PART
          PC%C_P_BAR(J) = (PC%C_P_BAR(J-1) * REAL(J-1,EB) + PC%C_P(J)) / REAL(J,EB)
       ENDIF
    ENDDO
-   IF (PC%H_V(1) < 0._EB) THEN
+   IF (PC%SPEC_INDEX>0 .AND. PC%H_V(1)<0._EB) THEN
       REF_TEMP = NINT(PC%H_V_REFERENCE_TEMPERATURE)
       YY_GET = 0._EB
       YY_GET(PC%SPEC_INDEX) = 1._EB
