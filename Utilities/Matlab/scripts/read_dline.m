@@ -18,7 +18,7 @@ clear all
 
 cfil = ['../validation_data_config_matlab.csv'];
 vdir = ['../../../Validation/'];
-drange = 1052:2000;
+drange = 3:41;
 
 addpath('../functions')
 paper_width  = 6.0; % inches
@@ -28,9 +28,8 @@ A = importdata(cfil);
 H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
-Length_A = length(A);
 for i=drange
-    if i>Length_A; break; end
+    if i>length(A); break; end
     
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
@@ -38,6 +37,7 @@ for i=drange
     if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
         
         define_drow_variables
+        Save_Quantity(i) = Quantity;
         
         % plot the experimental data or analytical solution
         [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
@@ -46,7 +46,8 @@ for i=drange
         style = parse(d1_Style);
         for j=1:length(S1)
             d1_Dep_Col = find(strcmp(H,S1(j)));
-            if Flip_Axis==0
+            Save_Measured_Metric(i) = max(M(:,d1_Dep_Col)/Scale_Dep);
+            if strcmp(Flip_Axis,'no')
                 X = M(:,d1_Ind_Col)/Scale_Ind;
                 Y = M(:,d1_Dep_Col)/Scale_Dep;
             else
@@ -67,7 +68,8 @@ for i=drange
         style = parse(d2_Style);
         for j=1:length(S2)
             d2_Dep_Col = find(strcmp(H,S2(j)));
-            if Flip_Axis==0
+            Save_Predicted_Metric(i) = max(M(:,d2_Dep_Col)/Scale_Dep);
+            if strcmp(Flip_Axis,'no')
                 X = M(:,d2_Ind_Col)/Scale_Ind;
                 Y = M(:,d2_Dep_Col)/Scale_Dep;
             else
@@ -85,7 +87,7 @@ for i=drange
         % format the legend and axis labels
         set(gca,'FontName','Times')
         set(gca,'FontSize',14)
-        if Flip_Axis==0
+        if strcmp(Flip_Axis,'no')
             xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',16)
             ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',16)
             axis([Min_Ind Max_Ind Min_Dep Max_Dep])
@@ -103,7 +105,6 @@ for i=drange
             legend boxoff
         end
         
-        
         % print to pdf
         set(gcf,'Visible','on');
         set(gcf,'PaperUnits','inches');
@@ -113,8 +114,9 @@ for i=drange
         print(gcf,'-dpdf',['../../../Manuals/',Plot_Filename])
         
     end
-    clear S1 S2 K style H M X Y
+    clear S1 S2 K style H M X Y P parameters
 end
+clear A
 display('Done!')
 display('Why? Because...')
 why
