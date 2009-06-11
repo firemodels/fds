@@ -5,7 +5,7 @@
 % cfil is the configuration file, for example, '../validation_data_config_matlab.csv'
 % vdir is the directory where the experimental data is stored, for example,
 %    '../../../Validation/'.
-% drange (optional) is a vector for the 'd lines' you want to read from the
+% drange (optional) is a vector for the 'd' lines you want to read from the
 %    config file.  For example, [2:5,7:8,10,12].
 %
 % Dependencies:
@@ -18,7 +18,7 @@ clear all
 
 cfil = ['../validation_data_config_matlab.csv'];
 vdir = ['../../../Validation/'];
-drange = 2:2000;
+drange = 1052:2000;
 
 addpath('../functions')
 paper_width  = 6.0; % inches
@@ -100,6 +100,7 @@ for i=drange
         end
         if size(Key_Position)>0
             legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'Interpreter','LaTeX','FontSize',10)
+            legend boxoff
         end
         
         
@@ -115,7 +116,7 @@ for i=drange
     clear S1 S2 K style H M X Y
 end
 display('Done!')
-display('Why?')
+display('Why? Because...')
 why
 
 
