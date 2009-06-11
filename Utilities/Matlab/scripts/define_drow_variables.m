@@ -10,7 +10,8 @@
 % vdir = '../../../Verification/'; for example, is also set in read_dline.
 
 Quantity          = parameters(find(strcmp(headers,'Quantity')));
-Group             = char(parameters(find(strcmp(headers,'Group'))));
+Group_Key_Label   = parameters(find(strcmp(headers,'Group_Key_Label')));
+Group_Style       = parameters(find(strcmp(headers,'Group_Style')));
 Dataname          = char(parameters(find(strcmp(headers,'Dataname'))));
 d1_Filename       = [vdir,char(parameters(find(strcmp(headers,'d1_Filename'))))];
 d1_Col_Name_Row   = str2num(char(parameters(find(strcmp(headers,'d1_Col_Name_Row')))));

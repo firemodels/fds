@@ -37,7 +37,9 @@ for i=drange
     if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
         
         define_drow_variables
-        Save_Quantity(i) = Quantity;
+        Save_Quantity(i)        = Quantity;
+        Save_Group_Style(i)     = Group_Style;
+        Save_Group_Key_Label(i) = Group_Key_Label;
         
         % plot the experimental data or analytical solution
         [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
