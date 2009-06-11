@@ -269,8 +269,13 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          JJG = IJKW(7,IW)
          KKG = IJKW(8,IW)
          IOR  = IJKW(4,IW)
-         ITMP = MIN(5000,NINT(TMP_F(IW)))
-         HDIFF = Y2H_G(ITMP,N)-Y2H_G_C(ITMP)
+         TMP_G = 0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW))
+         ITMP = MIN(5000,NINT(TMP_G))         
+         YY_GET=0._EB
+         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,ITMP)
+         YY_GET(N) = 1._EB
+         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
+         HDIFF = (H_G-H_G_A)*TMP_G
          RHO_D_DYDN = RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_W(IW,N))*RDN(IW)
          SELECT CASE(IOR)
             CASE( 1) 
@@ -397,7 +402,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = MIN(5000,NINT(TMP(I,J,K)))
                   YY_GET(:) = YYP(I,J,K,:)
-                  CALL GET_CONDUCTIVITY(YY_GET,KP(I,J,K),ITMP)     
+                  CALL GET_CONDUCTIVITY(YY_GET,KP(I,J,K),ITMP)    
                ENDDO
             ENDDO
          ENDDO
@@ -434,7 +439,7 @@ ENERGY: IF (.NOT.ISOTHERMAL) THEN
       KP = MU*CPOPR
  
    ENDIF K_DNS_OR_LES
- 
+
    ! Compute k*dT/dx, etc
 
    !$OMP PARALLEL
