@@ -9,7 +9,7 @@
 %
 % vdir = '../../../Verification/'; for example, is also set in read_dline.
 
-Quantity          = str2num(char(parameters(find(strcmp(headers,'Quantity')))));
+Quantity          = parameters(find(strcmp(headers,'Quantity')));
 Group             = char(parameters(find(strcmp(headers,'Group'))));
 Dataname          = char(parameters(find(strcmp(headers,'Dataname'))));
 d1_Filename       = [vdir,char(parameters(find(strcmp(headers,'d1_Filename'))))];
@@ -46,7 +46,7 @@ Scale_Ind         = str2num(char(parameters(find(strcmp(headers,'Scale_Ind')))))
 Min_Dep           = str2num(char(parameters(find(strcmp(headers,'Min_Dep')))));
 Max_Dep           = str2num(char(parameters(find(strcmp(headers,'Max_Dep')))));
 Scale_Dep         = str2num(char(parameters(find(strcmp(headers,'Scale_Dep')))));
-Flip_Axis         = str2num(char(parameters(find(strcmp(headers,'Flip_Axis')))));
+Flip_Axis         = char(parameters(find(strcmp(headers,'Flip_Axis'))));
 Title_Position    = str2num(char(parameters(find(strcmp(headers,'Title_Position')))));
 Key_Position      = char(parameters(find(strcmp(headers,'Key_Position'))));
 Plot_Width        = str2num(char(parameters(find(strcmp(headers,'Plot_Width')))));
