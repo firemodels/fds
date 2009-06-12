@@ -27,13 +27,21 @@ for j=qrange
     
     define_qrow_variables
     
+    k = 1;
     for i=drange
         if strcmp(Save_Quantity(i),Scatter_Plot_Title)
-            K(i) = plot(Save_Measured_Metric(i),Save_Predicted_Metric(i),...
+            Measured_Metric(k)  = Save_Measured_Metric(i);
+            Predicted_Metric(k) = Save_Predicted_Metric(i);
+            K(i) = plot(Measured_Metric(k),Predicted_Metric(k),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
+            k = k+1;
         end
     end
-    hold off
+    
+    % statistics
+    plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')                    % predicted = measured
+    plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+Sigma_2_E/100)],'k--') % + Sigma_2_E
+    plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-Sigma_2_E/100)],'k--') % - Sigma_2_E
     
     % format the legend and axis labels
     xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',16)
@@ -49,6 +57,13 @@ for j=qrange
     
     C = stripcell(Save_Group_Key_Label);
     [B I] = unique(C);
-    legend(K(I),Save_Group_Key_Label(I),'Location',Key_Position,'FontSize',12)
+    legend(K(I),C(I),'Location',Key_Position,'FontSize',12)
     legend boxoff
+    
+    hold off
+    clear Measured_Metric Predicted_Metric
 end
+
+
+
+
