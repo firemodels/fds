@@ -18,11 +18,11 @@ clear all
 
 cfil = ['../validation_data_config_matlab.csv'];
 vdir = ['../../../Validation/'];
-drange = 3:41;
+drange = 3:1055;
 
 addpath('../functions')
 paper_width  = 6.0; % inches
-paper_height = 4.5; % inches
+paper_height = 4.0; % inches
 
 A = importdata(cfil);
 H = textscan(A{1},'%q','delimiter',',');
@@ -39,12 +39,14 @@ for i=drange
         define_drow_variables
         
         % save for scatter plots
+        
         Save_Quantity(i)        = Quantity;
         Save_Group_Style(i)     = Group_Style;
         Save_Fill_Color(i)      = Fill_Color;
         Save_Group_Key_Label(i) = Group_Key_Label;
         
-        % plot the experimental data or analytical solution
+        % plot the experimental data or analytical solution (d1)
+        
         [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
         d1_Ind_Col = find(strcmp(H,d1_Ind_Col_Name));
         S1 = parse(d1_Dep_Col_Name);
@@ -66,7 +68,8 @@ for i=drange
             end
         end
 
-        % plot the FDS data
+        % plot the FDS or model data (d2)
+        
         [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
         d2_Ind_Col = find(strcmp(H,d2_Ind_Col_Name));
         S2 = parse(d2_Dep_Col_Name);
@@ -90,24 +93,26 @@ for i=drange
         hold off
         
         % format the legend and axis labels
+        
         set(gca,'FontName','Times')
         set(gca,'FontSize',14)
+        set(gca,'PlotBoxAspectRatio',[1,0.7,1])
         if strcmp(Flip_Axis,'no')
-            xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',16)
-            ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',16)
+            xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
+            ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)
             axis([Min_Ind Max_Ind Min_Dep Max_Dep])
-            text(Title_Position(1)*(Max_Ind-Min_Ind)/Scale_Ind,Title_Position(2)*(Max_Dep-Min_Dep)/Scale_Dep,...
-                Plot_Title,'FontSize',16,'FontName','Times','Interpreter','LaTeX')
+            text(Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind),Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep),...
+                Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
         else
-            xlabel(Dep_Title,'Interpreter','LaTeX','FontSize',16)
-            ylabel(Ind_Title,'Interpreter','LaTeX','FontSize',16)
+            xlabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)
+            ylabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
             axis([Min_Dep Max_Dep Min_Ind Max_Ind])
-            text(Title_Position(1)*(Max_Dep-Min_Dep)/Scale_Dep,Title_Position(2)*(Max_Ind-Min_Ind)/Scale_Ind,...
-                Plot_Title,'FontSize',16,'FontName','Times','Interpreter','LaTeX')
+            text(Min_Dep+Title_Position(1)*(Max_Dep-Min_Dep),Min_Ind+Title_Position(2)*(Max_Ind-Min_Ind),...
+                Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
         end
         if size(Key_Position)>0
-            legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'Interpreter','LaTeX','FontSize',10)
-            legend boxoff
+            legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'Interpreter','LaTeX','FontSize',12)
+            legend boxon
         end
         
         % print to pdf
