@@ -29,7 +29,8 @@ for j=qrange
     
     for i=drange
         if strcmp(Save_Quantity(i),Scatter_Plot_Title)
-            K(i) = plot(Save_Measured_Metric(i),Save_Predicted_Metric(i),char(Save_Group_Style(i))); hold on
+            K(i) = plot(Save_Measured_Metric(i),Save_Predicted_Metric(i),...
+                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
         end
     end
     hold off
