@@ -37,8 +37,11 @@ for i=drange
     if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
         
         define_drow_variables
+        
+        % save for scatter plots
         Save_Quantity(i)        = Quantity;
         Save_Group_Style(i)     = Group_Style;
+        Save_Fill_Color(i)      = Fill_Color;
         Save_Group_Key_Label(i) = Group_Key_Label;
         
         % plot the experimental data or analytical solution
