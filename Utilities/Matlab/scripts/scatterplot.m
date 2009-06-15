@@ -15,8 +15,8 @@ qfil = ['../scatterplot_config_matlab.csv'];
 qrange = 2:2;
 
 addpath('../functions')
-paper_width  = 4.5; % inches
-paper_height = 4.5; % inches
+paper_width  = 6.0; % inches
+paper_height = 4.0; % inches
 
 Q = importdata(qfil);
 H = textscan(Q{1},'%q','delimiter',',');
@@ -44,24 +44,32 @@ for j=qrange
     plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-Sigma_2_E/100)],'k--') % - Sigma_2_E
     
     % format the legend and axis labels
-    xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',16)
-    ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',16)
+    xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
+    ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)
     axis([Plot_Min Plot_Max Plot_Min Plot_Max])
     
     set(gca,'FontName','Times')
-    set(gca,'FontSize',14)
+    set(gca,'FontSize',12)
     set(gca,'YTick',get(gca,'XTick'))
     
-    text(Title_Position(1)*(Plot_Max-Plot_Min),Title_Position(2)*(Plot_Max-Plot_Min),...
-        Scatter_Plot_Title,'FontSize',16,'FontName','Times','Interpreter','LaTeX')
+    text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
+        Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
     
     C = stripcell(Save_Group_Key_Label);
     [B I] = unique(C);
     legend(K(I),C(I),'Location',Key_Position,'FontSize',12)
-    legend boxoff
+    legend boxon
     
     hold off
     clear Measured_Metric Predicted_Metric
+    
+    % print to pdf
+    set(gcf,'Visible','on');
+    set(gcf,'PaperUnits','inches');
+    set(gcf,'PaperSize',[paper_width paper_height]);
+    set(gcf,'PaperPosition',[0 0 paper_width paper_height]); 
+    display(['Printing scatter plot ',num2str(j),'...'])
+    print(gcf,'-dpdf',['../../../Manuals/',Plot_Filename])
 end
 
 
