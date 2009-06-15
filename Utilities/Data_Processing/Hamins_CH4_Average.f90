@@ -161,7 +161,7 @@ do i=1,nV
    if (i<=nR) then
       write(FID,"(3(e10.4,','),e10.4)") R(i),RaR(i),Z(i),RaV(i)
    else
-      write(FID,"(A,1(e10.4,','),e10.4)") ',,',Z(i),RaV(i)
+      write(FID,"(A,1(e10.4,','),e10.4)") 'NaN,NaN,',Z(i),RaV(i)
    endif
 enddo
 close(FID)
