@@ -1087,7 +1087,7 @@ CHARACTER(30) :: RAMP_GX,RAMP_GY,RAMP_GZ
 INTEGER :: NCG,N,NO,IC,JC,KC,NM,COARSE_I(10000),COARSE_MESH(10000),COARSE_J(10000),COARSE_K(10000)
 TYPE (MESH_TYPE), POINTER :: M2
 NAMELIST /MISC/ PR,SC,TMPA,GVEC,PRESSURE_RELAX_FACTOR,RELAXATION_FACTOR,FYI, &
-                CSMAG,CSMAG_WALL,RAMP_GX,RAMP_GY,RAMP_GZ,BAROCLINIC, &
+                CSMAG,RAMP_GX,RAMP_GY,RAMP_GZ,BAROCLINIC, &
                 LAPSE_RATE,ISOTHERMAL, &
                 P_INF,SURF_DEFAULT,EVAC_SURF_DEFAULT, &
                 C_FORCED,C_VERTICAL,C_HORIZONTAL,H_FIXED,RESTART,ASSUMED_GAS_TEMPERATURE, &
@@ -1178,7 +1178,6 @@ EVACUATION_MC_MODE       = .FALSE.
 ! LES parameters
  
 CSMAG                = 0.20_EB  ! Smagorinsky constant
-CSMAG_WALL           = 0.20_EB  ! Smagorinsky constant at solid walls
 PR                   = -1.0_EB  ! Turbulent Prandtl number
 SC                   = -1.0_EB  ! Turbulent Schmidt number
  
