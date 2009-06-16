@@ -1,0 +1,612 @@
+# Makefile for Fire Dynamics Simulator (FDS), Version 5
+
+# To use this makefile, select the appropriate compiler and OS from the list below. For example, to
+# compile the 64 bit parallel version (MPI) of FDS under Linux using the Intel compilers type:
+#
+# make intel_linux_mpi_64
+
+# The variable VPATH defines where the source code is relative to the current directory
+
+VPATH = ../FDS_Source
+
+# Definition of the Serial object variables
+obj_serial = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
+             ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o dump.o read.o turb.o mass.o \
+             wall.o fire.o pres.o divg.o init.o velo.o main.o
+
+# General Purpose Rules
+
+no_target:
+	@echo \******** You did not specify a make target \********
+	@echo Please read the comments at the top of the makefile
+
+
+# These settings are only usable if the Intel ThreadChecker is installed. Use this settings not for debugging
+# mathematical problems. Only use this settings to check the correctness of the OpenMP parallelization.
+# Static linking is not possible in these cases.
+
+
+FFLAGS = -m32 -O0 -g
+CFLAGS = -m32 -O0 -Dpp_noappend -vec_report0
+FCOMPL = ifort
+CCOMPL = icc
+obj = fds5_openmp_intel_linux_32_db
+
+
+#*** End Compiler Specific Rules ***
+
+# *** Object Dependencies ***
+
+isob : isob.c
+	$(CCOMPL) $(CFLAGS) -c isob.c
+smvv : smvv.f90
+	$(FCOMPL) $(FFLAGS) -c smvv.f90
+prec : prec.f90
+	$(FCOMPL) $(FFLAGS) -c prec.f90
+cons : cons.f90 prec.f90
+	$(FCOMPL) $(FFLAGS) -c cons.f90
+type : type.f90 prec.f90 cons.f90
+	$(FCOMPL) $(FFLAGS) -c type.f90
+devc : devc.f90 prec.f90
+	$(FCOMPL) $(FFLAGS) -c devc.f90
+pois : pois.f90 prec.f90
+	$(FCOMPL) $(FFLAGS) -c pois.f90
+mesh : mesh.f90 prec.f90 type.f90
+	$(FCOMPL) $(FFLAGS) -c mesh.f90
+func : func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -c func.f90
+turb : turb.f90 func.f90 prec.f90 cons.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -c turb.f90
+ctrl : ctrl.f90 prec.f90 cons.f90 type.f90 mesh.f90 func.f90
+	$(FCOMPL) $(FFLAGS) -c ctrl.f90
+irad : irad.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -c irad.f90
+ieva : ieva.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -c ieva.f90
+fire : fire.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -c fire.f90
+wall : wall.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -c wall.f90
+velo : velo.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
+	$(FCOMPL) $(FFLAGS) -c velo.f90
+divg : divg.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -c divg.f90
+mass : mass.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
+	$(FCOMPL) $(FFLAGS) -c mass.f90
+radi : radi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 irad.f90
+	$(FCOMPL) $(FFLAGS) -c radi.f90
+evac : evac.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 ieva.f90
+	$(FCOMPL) $(FFLAGS) -c evac.f90
+pres : pres.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 pois.f90
+	$(FCOMPL) $(FFLAGS) -c pres.f90
+part : part.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
+	$(FCOMPL) $(FFLAGS) -c part.f90
+vege : vege.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
+	$(FCOMPL) $(FFLAGS) -c vege.f90
+read : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 evac.f90
+	$(FCOMPL) $(FFLAGS) -c read.f90
+init : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 pois.f90
+	$(FCOMPL) $(FFLAGS) -c init.f90
+dump : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 evac.f90 smvv.f90 isob.c 
+	$(FCOMPL) $(FFLAGS) -c dump.f90
+main : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
+	$(FCOMPL) $(FFLAGS) -c main.f90
+
+fds5_openmp_intel_linux_32_db :
+	$(FCOMPL) $(FFLAGS) -o fds5_openmp_intel_linux_32_db $(obj_serial)
+
+#### With Intel ThreadChecker settings
+
+isob_TCheck : isob.c
+	$(CCOMPL) $(CFLAGS) -tcheck -openmp -c isob.c
+smvv_TCheck : smvv.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c smvv.f90
+prec_TCheck : prec.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c prec.f90
+cons_TCheck : cons.f90 prec.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c cons.f90
+type_TCheck : type.f90 prec.f90 cons.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c type.f90
+devc_TCheck : devc.f90 prec.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c devc.f90
+pois_TCheck : pois.f90 prec.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c pois.f90
+mesh_TCheck : mesh.f90 prec.f90 type.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c mesh.f90
+func_TCheck : func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c func.f90
+turb_TCheck : turb.f90 func.f90 prec.f90 cons.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c turb.f90
+ctrl_TCheck : ctrl.f90 prec.f90 cons.f90 type.f90 mesh.f90 func.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c ctrl.f90
+irad_TCheck : irad.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c irad.f90
+ieva_TCheck : ieva.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c ieva.f90
+fire_TCheck : fire.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c fire.f90
+wall_TCheck : wall.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c wall.f90
+velo_TCheck : velo.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c velo.f90
+divg_TCheck : divg.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c divg.f90
+mass_TCheck : mass.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c mass.f90
+radi_TCheck : radi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 irad.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c radi.f90
+evac_TCheck : evac.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 ieva.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c evac.f90
+pres_TCheck : pres.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 pois.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c pres.f90
+part_TCheck : part.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c part.f90
+vege_TCheck : vege.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c vege.f90
+read_TCheck : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 evac.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c read.f90
+init_TCheck : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 pois.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c init.f90
+dump_TCheck : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 evac.f90 smvv.f90 isob.c 
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c dump.f90
+main_TCheck : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -c main.f90
+
+fds5_openmp_intel_linux_32_db_TCheck :
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck $(obj_serial)
+
+all_without_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	make -f makefile_openmp_threadcheck fds5_openmp_intel_linux_32_db
+	make -f makefile_openmp_threadcheck clean
+
+all_with_TCheck:
+	make -f makefile_openmp_threadcheck isob_TCheck
+	make -f makefile_openmp_threadcheck smvv_TCheck
+	make -f makefile_openmp_threadcheck prec_TCheck
+	make -f makefile_openmp_threadcheck cons_TCheck
+	make -f makefile_openmp_threadcheck type_TCheck
+	make -f makefile_openmp_threadcheck devc_TCheck
+	make -f makefile_openmp_threadcheck pois_TCheck
+	make -f makefile_openmp_threadcheck mesh_TCheck
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb_TCheck
+	make -f makefile_openmp_threadcheck ctrl_TCheck
+	make -f makefile_openmp_threadcheck irad_TCheck
+	make -f makefile_openmp_threadcheck ieva_TCheck
+	make -f makefile_openmp_threadcheck fire_TCheck
+	make -f makefile_openmp_threadcheck wall_TCheck
+	make -f makefile_openmp_threadcheck velo_TCheck
+	make -f makefile_openmp_threadcheck divg_TCheck
+	make -f makefile_openmp_threadcheck mass_TCheck
+	make -f makefile_openmp_threadcheck radi_TCheck
+	make -f makefile_openmp_threadcheck evac_TCheck
+	make -f makefile_openmp_threadcheck pres_TCheck
+	make -f makefile_openmp_threadcheck part_TCheck
+	make -f makefile_openmp_threadcheck vege_TCheck
+	make -f makefile_openmp_threadcheck read_TCheck
+	make -f makefile_openmp_threadcheck init_TCheck
+	make -f makefile_openmp_threadcheck dump_TCheck
+	make -f makefile_openmp_threadcheck main_TCheck
+	make -f makefile_openmp_threadcheck fds5_openmp_intel_linux_32_db_TCheck
+	make -f makefile_openmp_threadcheck clean
+	
+all_pois_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois_TCheck
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_pois $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_turb_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb_TCheck
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_turb $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_fire_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire_TCheck
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_fire $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_wall_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall_TCheck
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_wall $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_velo_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo_TCheck
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_velo $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_divg_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg_TCheck
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_divg $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_mass_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass_TCheck
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_mass $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_radi_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi_TCheck
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_radi $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_pres_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres_TCheck
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_pres $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_part_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part_TCheck
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_part $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_dump_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire
+	make -f makefile_openmp_threadcheck wall
+	make -f makefile_openmp_threadcheck velo
+	make -f makefile_openmp_threadcheck divg
+	make -f makefile_openmp_threadcheck mass
+	make -f makefile_openmp_threadcheck radi
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres
+	make -f makefile_openmp_threadcheck part
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump_TCheck
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_dump $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+all_relevant_TCheck:
+	make -f makefile_openmp_threadcheck isob
+	make -f makefile_openmp_threadcheck smvv
+	make -f makefile_openmp_threadcheck prec
+	make -f makefile_openmp_threadcheck cons
+	make -f makefile_openmp_threadcheck type
+	make -f makefile_openmp_threadcheck devc
+	make -f makefile_openmp_threadcheck pois_TCheck
+	make -f makefile_openmp_threadcheck mesh
+	make -f makefile_openmp_threadcheck func_TCheck
+	make -f makefile_openmp_threadcheck turb_TCheck
+	make -f makefile_openmp_threadcheck ctrl
+	make -f makefile_openmp_threadcheck irad
+	make -f makefile_openmp_threadcheck ieva
+	make -f makefile_openmp_threadcheck fire_TCheck
+	make -f makefile_openmp_threadcheck wall_TCheck
+	make -f makefile_openmp_threadcheck velo_TCheck
+	make -f makefile_openmp_threadcheck divg_TCheck
+	make -f makefile_openmp_threadcheck mass_TCheck
+	make -f makefile_openmp_threadcheck radi_TCheck
+	make -f makefile_openmp_threadcheck evac
+	make -f makefile_openmp_threadcheck pres_TCheck
+	make -f makefile_openmp_threadcheck part_TCheck
+	make -f makefile_openmp_threadcheck vege
+	make -f makefile_openmp_threadcheck read
+	make -f makefile_openmp_threadcheck init
+	make -f makefile_openmp_threadcheck dump_TCheck
+	make -f makefile_openmp_threadcheck main
+	$(FCOMPL) $(FFLAGS) -tcheck -openmp -o fds5_openmp_intel_linux_32_db_TCheck_relevant $(obj_serial)
+	make -f makefile_openmp_threadcheck clean
+
+
+all_different_TCheck:
+	make -f makefile_openmp_threadcheck all_pois_TCheck
+	make -f makefile_openmp_threadcheck all_turb_TCheck
+	make -f makefile_openmp_threadcheck all_fire_TCheck
+	make -f makefile_openmp_threadcheck all_wall_TCheck
+	make -f makefile_openmp_threadcheck all_velo_TCheck
+	make -f makefile_openmp_threadcheck all_divg_TCheck
+	make -f makefile_openmp_threadcheck all_mass_TCheck
+	make -f makefile_openmp_threadcheck all_radi_TCheck
+	make -f makefile_openmp_threadcheck all_pres_TCheck
+	make -f makefile_openmp_threadcheck all_part_TCheck
+	make -f makefile_openmp_threadcheck all_dump_TCheck
+
+
+
+#*** Clean Target to remove Object and Module files ***
+
+.PHONY : clean
+clean:
+	-rm -f *.o *.mod *.obj 
