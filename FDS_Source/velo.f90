@@ -57,7 +57,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS,S12,S13,S23,DELTA,CS,YY_GET(1:N_SPECIES)
-INTEGER :: I,J,K,ITMP
+INTEGER :: I,J,K,ITMP,IIG,JJG,KKG,II,JJ,KK,IW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
  
@@ -153,31 +153,10 @@ IF (LES) THEN
    !$OMP END PARALLEL DO
 ENDIF
 
-END SUBROUTINE COMPUTE_VISCOSITY
-
-
-
-SUBROUTINE VISCOSITY_BC(NM)
-
-! Specify ghost cell values of the viscosity array MU
-
-INTEGER, INTENT(IN) :: NM
-REAL(EB) :: C_RATIO,MU_OTHER
-INTEGER :: IIG,JJG,KKG,II,JJ,KK,IW,IIO,JJO,KKO,NOM,N_INT_CELLS
-
-CALL POINT_TO_MESH(NM)
-
 ! Mirror viscosity into solids and exterior boundary cells
  
-IF (CSMAG==0._EB .OR. CSMAG_WALL>CSMAG .OR. DYNSMAG) THEN
-   C_RATIO = 1._EB
-ELSE
-   C_RATIO = (CSMAG_WALL/CSMAG)**2
-ENDIF
-
-!$OMP PARALLEL DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,NOM,MU_OTHER,KKO,JJO,IIO,N_INT_CELLS)
+!$OMP PARALLEL DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
 WALL_LOOP: DO IW=1,NWC
-   !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VISCOSITY_BC'
    IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP
    II  = IJKW(1,IW)
    JJ  = IJKW(2,IW)
@@ -187,23 +166,10 @@ WALL_LOOP: DO IW=1,NWC
    KKG = IJKW(8,IW)
    SELECT CASE(BOUNDARY_TYPE(IW))
       CASE(SOLID_BOUNDARY)
-         MU(IIG,JJG,KKG) = C_RATIO*MU(IIG,JJG,KKG)
+         MU(IIG,JJG,KKG) = MU(IIG,JJG,KKG)
          MU(II,JJ,KK) = MU(IIG,JJG,KKG)
       CASE(OPEN_BOUNDARY,MIRROR_BOUNDARY)
          MU(II,JJ,KK) = MU(IIG,JJG,KKG)
-      CASE(INTERPOLATED_BOUNDARY)
-         NOM = IJKW(9,IW)
-         MU_OTHER = 0._EB
-         DO KKO=IJKW(12,IW),IJKW(15,IW)
-            DO JJO=IJKW(11,IW),IJKW(14,IW)
-               DO IIO=IJKW(10,IW),IJKW(13,IW)
-                  MU_OTHER = MU_OTHER + OMESH(NOM)%MU(IIO,JJO,KKO)
-               ENDDO
-            ENDDO
-         ENDDO
-         N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
-         MU_OTHER = MU_OTHER/REAL(N_INT_CELLS,EB)
-         MU(II,JJ,KK) = MU_OTHER
    END SELECT
 ENDDO WALL_LOOP
 !$OMP END PARALLEL DO
@@ -234,6 +200,59 @@ IF (FISHPAK_BC(3)==0) THEN
    MU(:,:,KBP1) = MU(:,:,1)
 ENDIF
 
+END SUBROUTINE COMPUTE_VISCOSITY
+
+
+
+SUBROUTINE VISCOSITY_BC(NM)
+
+! Specify ghost cell values of the viscosity array MU
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB) :: MU_OTHER,DP_OTHER
+INTEGER :: IIG,JJG,KKG,II,JJ,KK,IW,IIO,JJO,KKO,NOM,N_INT_CELLS
+
+CALL POINT_TO_MESH(NM)
+
+! Mirror viscosity into solids and exterior boundary cells
+ 
+!$OMP PARALLEL DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,NOM,MU_OTHER,DP_OTHER,KKO,JJO,IIO,N_INT_CELLS)
+WALL_LOOP: DO IW=1,NWC
+   !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VISCOSITY_BC'
+   IF (IJKW(5,IW)/=INTERPOLATED_SURF_INDEX) CYCLE WALL_LOOP
+   II  = IJKW(1,IW)
+   JJ  = IJKW(2,IW)
+   KK  = IJKW(3,IW)
+   IIG = IJKW(6,IW)
+   JJG = IJKW(7,IW)
+   KKG = IJKW(8,IW)
+   NOM = IJKW(9,IW)
+   MU_OTHER = 0._EB
+   DP_OTHER = 0._EB
+   DO KKO=IJKW(12,IW),IJKW(15,IW)
+      DO JJO=IJKW(11,IW),IJKW(14,IW)
+         DO IIO=IJKW(10,IW),IJKW(13,IW)
+            MU_OTHER = MU_OTHER + OMESH(NOM)%MU(IIO,JJO,KKO)
+            IF (PREDICTOR) THEN
+               DP_OTHER = DP_OTHER + OMESH(NOM)%D(IIO,JJO,KKO)
+            ELSE
+               DP_OTHER = DP_OTHER + OMESH(NOM)%DS(IIO,JJO,KKO)
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+   N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
+   MU_OTHER = MU_OTHER/REAL(N_INT_CELLS,EB)
+   DP_OTHER = DP_OTHER/REAL(N_INT_CELLS,EB)
+   MU(II,JJ,KK) = MU_OTHER
+   IF (PREDICTOR) THEN
+      D(II,JJ,KK) = DP_OTHER
+   ELSE
+      DS(II,JJ,KK) = DP_OTHER
+   ENDIF
+ENDDO WALL_LOOP
+!$OMP END PARALLEL DO
+    
 END SUBROUTINE VISCOSITY_BC
 
 
@@ -505,8 +524,9 @@ IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION
 ! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
  
 CALL NO_FLUX
- 
+
 END SUBROUTINE VELOCITY_FLUX
+
 
 
 SUBROUTINE VELOCITY_FLUX_CONSERVATIVE(NM) !! RJM
@@ -1208,8 +1228,8 @@ SUBROUTINE NO_FLUX
 ! Set FVX,FVY,FVZ inside internal blockages to maintain no flux
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
-REAL(EB) :: RFODT
-INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR
+REAL(EB) :: RFODT,H_OTHER
+INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR,N_INT_CELLS,IIO,JJO,KKO,NOM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB
  
@@ -1225,6 +1245,26 @@ ENDIF
  
 RFODT = RELAXATION_FACTOR/DT
  
+! Exchange H at interpolated boundaries
+
+DO IW=1,NEWC
+   IF (IJKW(5,IW)/=INTERPOLATED_SURF_INDEX) CYCLE
+   II = IJKW(1,IW)
+   JJ = IJKW(2,IW)
+   KK = IJKW(3,IW)
+   NOM     = IJKW(9,IW)
+   H_OTHER = 0._EB
+   DO KKO=IJKW(12,IW),IJKW(15,IW)
+      DO JJO=IJKW(11,IW),IJKW(14,IW)
+         DO IIO=IJKW(10,IW),IJKW(13,IW)
+            H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
+         ENDDO
+      ENDDO
+   ENDDO
+   N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
+   H(II,JJ,KK) = H_OTHER/REAL(N_INT_CELLS,EB)
+ENDDO
+
 ! Drive velocity components inside solid obstructions towards zero
 
 !$OMP PARALLEL
@@ -1459,7 +1499,7 @@ REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),MU_DUIDXJ_0(2),DUIDXJ_0(2),PROFILE_FACTOR,VEL_GAS,VEL_INS, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2)
 INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
-            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP
+            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,IBCM,IBCP
 LOGICAL :: ALTERED_GRADIENT(-2:2)
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,RHOP,VEL_OTHER
@@ -1602,27 +1642,65 @@ EDGE_LOOP: DO IE=1,N_EDGES
          IF (IOR<0) THEN
             VEL_GAS = UUM(IVL)
             VEL_INS = UUP(IVL)
-            IWM = WALL_INDEX(ICMM,-IOR)
-            IF (ICD==1) IWP = WALL_INDEX(ICMP,-IOR)
-            IF (ICD==2) IWP = WALL_INDEX(ICPM,-IOR)
+            IWM  = WALL_INDEX(ICMM,-IOR)
+            IIGM = I_CELL(ICMM)
+            JJGM = J_CELL(ICMM)
+            KKGM = K_CELL(ICMM)
+            IF (ICD==1) THEN
+               IWP  = WALL_INDEX(ICMP,-IOR)
+               IIGP = I_CELL(ICMP)
+               JJGP = J_CELL(ICMP)
+               KKGP = K_CELL(ICMP)
+            ENDIF
+            IF (ICD==2) THEN
+               IWP  = WALL_INDEX(ICPM,-IOR)
+               IIGP = I_CELL(ICPM)
+               JJGP = J_CELL(ICPM)
+               KKGP = K_CELL(ICPM)
+            ENDIF
          ELSE
             VEL_GAS = UUP(IVL)
             VEL_INS = UUM(IVL)
-            IF (ICD==1) IWM = WALL_INDEX(ICPM,-IOR)
-            IF (ICD==2) IWM = WALL_INDEX(ICMP,-IOR)
-            IWP = WALL_INDEX(ICPP,-IOR)
+            IF (ICD==1) THEN
+               IWM  = WALL_INDEX(ICPM,-IOR)
+               IIGM = I_CELL(ICPM)
+               JJGM = J_CELL(ICPM)
+               KKGM = K_CELL(ICPM)
+            ENDIF
+            IF (ICD==2) THEN
+               IWM  = WALL_INDEX(ICMP,-IOR)
+               IIGM = I_CELL(ICMP)
+               JJGM = J_CELL(ICMP)
+               KKGM = K_CELL(ICMP)
+            ENDIF
+            IWP  = WALL_INDEX(ICPP,-IOR)
+            IIGP = I_CELL(ICPP)
+            JJGP = J_CELL(ICPP)
+            KKGP = K_CELL(ICPP)
          ENDIF
    
          ! Throw out edge orientations that need not be processed
    
          IF (BOUNDARY_TYPE(IWM)==NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
-   
+
          ! Decide whether or not to process edge using data interpolated from another mesh
    
          INTERPOLATION_IF: IF (NOM(ICD)==0 .OR. EDGE_TYPE(IE,ICD)/=INTERPOLATED_EDGE) THEN
 
-            SF => SURFACE(IJKW(5,MAX(IWM,IWP)))
+            ! Determine appropriate velocity BC by assessing each adjacent wall cell
+
+            IBCM = 0
+            IBCP = 0
+            IF (IWM>0) IBCM = IJKW(5,IWM)
+            IF (IWP>0) IBCP = IJKW(5,IWP)
+            SF => SURFACE(MAX(IBCM,IBCP))
             VELOCITY_BC_INDEX = SF%VELOCITY_BC_INDEX
+
+            ! Compute the viscosity in the two adjacent gas cells
+
+            MUA = 0.5_EB*(MU(IIGM,JJGM,KKGM) + MU(IIGP,JJGP,KKGP))
+ 
+            ! Choose the appropriate boundary condition to apply
                
             BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
 
@@ -1662,14 +1740,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE (WALL_MODEL) BOUNDARY_CONDITION
 
                   IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                     IF (IWM<1) IWM = IWP
-                     IF (IWP<1) IWP = IWM
-                     IIGM = IJKW(6,IWM)
-                     JJGM = IJKW(7,IWM)
-                     KKGM = IJKW(8,IWM)
-                     IIGP = IJKW(6,IWP)
-                     JJGP = IJKW(7,IWP)
-                     KKGP = IJKW(8,IWP)
                      RHO_WALL = 0.5_EB*(  RHOP(IIGM,JJGM,KKGM) +   RHOP(IIGP,JJGP,KKGP))
                      MU_WALL  = 0.5_EB*(MU_DNS(IIGM,JJGM,KKGM) + MU_DNS(IIGP,JJGP,KKGP))
                      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,VEL_GAS,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
@@ -1763,9 +1833,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
                ENDIF
          END SELECT
    
-  !if (predictor .and. ii==5 .and. jj==5 .and. kk==2 .and. iec==3) write(0,*) jj,ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
-  !if (predictor .and. ii==5 .and. jj==7 .and. kk==2 .and. iec==3) write(0,*) jj,ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
-  !if (predictor .and. ii==50 .and. jj==1 .and. kk==50 .and. iec==2) write(0,*) ie,ior,i_sgn*icd,DUIDXJ(I_SGN*ICD)
       ENDDO ORIENTATION_LOOP
    
    ENDDO SIGN_LOOP
@@ -1860,19 +1927,16 @@ CALL POINT_TO_MESH(NM)
 ! Point to the appropriate velocity field
 
 IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
-ELSE
    UU => US
    VV => VS
    WW => WS
+   D_CORR = 0._EB
+ELSE
+   UU => U
+   VV => V
+   WW => W
+   DS_CORR = 0._EB
 ENDIF
-
-! Zero out D_CORR
-
-IF (PREDICTOR) DS_CORR = 0._EB
-IF (CORRECTOR) D_CORR  = 0._EB
 
 ! Set ALMS relaxation factor
 
@@ -1887,7 +1951,7 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
 
    !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELO_24'
    
-   IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
+   IF (IJKW(5,IW)/=INTERPOLATED_SURF_INDEX) CYCLE EXTERNAL_WALL_LOOP
 
    II  = IJKW( 1,IW)
    JJ  = IJKW( 2,IW)
@@ -1903,8 +1967,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
 
    SELECT CASE(ABS(IOR))
       CASE(1)
-         IF (PREDICTOR) OM_UU => OM%U
-         IF (CORRECTOR) OM_UU => OM%US
+         IF (PREDICTOR) OM_UU => OM%US
+         IF (CORRECTOR) OM_UU => OM%U 
          DO KKO=IJKW(12,IW),IJKW(15,IW)
             DO JJO=IJKW(11,IW),IJKW(14,IW)
                DO IIO=IJKW(10,IW),IJKW(13,IW)
@@ -1913,8 +1977,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
             ENDDO
          ENDDO
       CASE(2)
-         IF (PREDICTOR) OM_VV => OM%V
-         IF (CORRECTOR) OM_VV => OM%VS
+         IF (PREDICTOR) OM_VV => OM%VS
+         IF (CORRECTOR) OM_VV => OM%V
          DO KKO=IJKW(12,IW),IJKW(15,IW)
             DO JJO=IJKW(11,IW),IJKW(14,IW)
                DO IIO=IJKW(10,IW),IJKW(13,IW)
@@ -1923,8 +1987,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
             ENDDO
          ENDDO
       CASE(3)
-         IF (PREDICTOR) OM_WW => OM%W
-         IF (CORRECTOR) OM_WW => OM%WS
+         IF (PREDICTOR) OM_WW => OM%WS
+         IF (CORRECTOR) OM_WW => OM%W
          DO KKO=IJKW(12,IW),IJKW(15,IW)
             DO JJO=IJKW(11,IW),IJKW(14,IW)
                DO IIO=IJKW(10,IW),IJKW(13,IW)
@@ -1967,8 +2031,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
             UU_AVG = 0.5_EB*(UU(0,JJ,KK) + UU_OTHER)
          ENDIF
          
-         IF (PREDICTOR) DS_CORR(IW) = (UU_AVG-UU(0,JJ,KK))*RDX(1)
-         IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(UU_AVG-UU(0,JJ,KK))*RDX(1)
+         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(UU_AVG-UU(0,JJ,KK))*RDX(1)
+         IF (CORRECTOR) DS_CORR(IW) = (UU_AVG-UU(0,JJ,KK))*RDX(1)
          UVW_SAVE(IW) = UU(0,JJ,KK)
          UU(0,JJ,KK)    = UU_AVG
 
@@ -1992,8 +2056,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
             UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK) + UU_OTHER)
          ENDIF
          
-         IF (PREDICTOR) DS_CORR(IW) = -(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
-         IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
+         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
+         IF (CORRECTOR) DS_CORR(IW) = -(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
          UVW_SAVE(IW) = UU(IBAR,JJ,KK)
          UU(IBAR,JJ,KK) = UU_AVG
 
@@ -2017,8 +2081,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
             VV_AVG = 0.5_EB*(VV(II,0,KK) + VV_OTHER)
          ENDIF
          
-         IF (PREDICTOR) DS_CORR(IW) = (VV_AVG-VV(II,0,KK))*RDY(1)
-         IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(VV_AVG-VV(II,0,KK))*RDY(1)
+         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(VV_AVG-VV(II,0,KK))*RDY(1)
+         IF (CORRECTOR) DS_CORR(IW) = (VV_AVG-VV(II,0,KK))*RDY(1)
          UVW_SAVE(IW) = VV(II,0,KK)
          VV(II,0,KK)    = VV_AVG
 
@@ -2042,8 +2106,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
             VV_AVG = 0.5_EB*(VV(II,JBAR,KK) + VV_OTHER)
          ENDIF
          
-         IF (PREDICTOR) DS_CORR(IW) = -(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
-         IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
+         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
+         IF (CORRECTOR) DS_CORR(IW) = -(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
          UVW_SAVE(IW) = VV(II,JBAR,KK)
          VV(II,JBAR,KK) = VV_AVG
 
@@ -2067,8 +2131,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
             WW_AVG = 0.5_EB*(WW(II,JJ,0) + WW_OTHER)
          ENDIF
          
-         IF (PREDICTOR) DS_CORR(IW) = (WW_AVG-WW(II,JJ,0))*RDZ(1)
-         IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(WW_AVG-WW(II,JJ,0))*RDZ(1)
+         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(WW_AVG-WW(II,JJ,0))*RDZ(1)
+         IF (CORRECTOR) DS_CORR(IW) = (WW_AVG-WW(II,JJ,0))*RDZ(1)
          UVW_SAVE(IW) = WW(II,JJ,0)
          WW(II,JJ,0)    = WW_AVG
 
@@ -2092,8 +2156,8 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
             WW_AVG = 0.5_EB*(WW(II,JJ,KBAR) + WW_OTHER)
          ENDIF
          
-         IF (PREDICTOR) DS_CORR(IW) = -(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
-         IF (CORRECTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
+         IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
+         IF (CORRECTOR) DS_CORR(IW) = -(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
          UVW_SAVE(IW) = WW(II,JJ,KBAR)
          WW(II,JJ,KBAR) = WW_AVG
    END SELECT
