@@ -280,13 +280,8 @@ MAIN_LOOP: DO
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
 
-   ! Force normal components of velocity to match at interpolated boundaries
-
-   DO NM=1,NMESHES
-      IF (ACTIVE_MESH(NM)) CALL MATCH_VELOCITY(NM)
-   ENDDO
-   
    ! Spectral energy output
+
    IF (NMESHES==1 .AND. PERIODIC_TEST==2 .AND. MINVAL(T)>=SPEC_CLOCK) CALL SPECTRAL_OUTPUT(MINVAL(T),1)
 
    ! Compute mass and momentum finite differences
@@ -377,9 +372,17 @@ MAIN_LOOP: DO
 
    CHANGE_TIME_STEP = .FALSE.
    
-   ! Do the tangential velocity boundary conditions
+   ! Exchange velocities and pressures
 
    CALL MESH_EXCHANGE(3)
+
+   ! Force normal components of velocity to match at interpolated boundaries
+
+   DO NM=1,NMESHES
+      IF (ACTIVE_MESH(NM) .AND. MESHES(NM)%MESH_LEVEL==0) CALL MATCH_VELOCITY(NM)
+   ENDDO
+
+   ! Do the tangential velocity boundary conditions
 
    VELOCITY_BC_LOOP_1: DO NM=1,NMESHES
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE VELOCITY_BC_LOOP_1
@@ -399,18 +402,11 @@ MAIN_LOOP: DO
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
 
-   ! Force normal component of predicted velocities to match at interpolated boundaries
-
-   DO NM=1,NMESHES
-      IF (ACTIVE_MESH(NM) .AND. MESHES(NM)%MESH_LEVEL==0) CALL MATCH_VELOCITY(NM)
-   ENDDO
-   
    ! Compute finite differences of predicted quantities
       
    COMPUTE_FINITE_DIFFERENCES_2: DO NM=1,NMESHES
       CALL OPEN_AND_CLOSE(T(NM),NM)
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_FINITE_DIFFERENCES_2
-  !!! CALL OPEN_AND_CLOSE(T(NM),NM)
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,1)
       IF (FLUX_LIMITER>=0) THEN
          CALL SCALARF(NM)
@@ -470,6 +466,12 @@ MAIN_LOOP: DO
    ! Exchange velocity and pressure at interpolated boundaries
 
    CALL MESH_EXCHANGE(6)
+
+   ! Force normal components of velocity to match at interpolated boundaries
+
+   DO NM=1,NMESHES
+      IF (ACTIVE_MESH(NM) .AND. MESHES(NM)%MESH_LEVEL==0) CALL MATCH_VELOCITY(NM)
+   ENDDO
 
    ! Apply tangential velocity boundary conditions and start dumping output data
 
@@ -687,6 +689,8 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
    ALLOCATE(M%OMESH(NOM)% RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    ALLOCATE(M%OMESH(NOM)%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
+   ALLOCATE(M%OMESH(NOM)%   D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
+   ALLOCATE(M%OMESH(NOM)%  DS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    ALLOCATE(M%OMESH(NOM)%  MU(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    ALLOCATE(M%OMESH(NOM)%   H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    ALLOCATE(M%OMESH(NOM)%   U(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
@@ -705,6 +709,8 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
 
    M%OMESH(NOM)% RHO = RHOA
    M%OMESH(NOM)%RHOS = RHOA
+   M%OMESH(NOM)%D    = 0._EB
+   M%OMESH(NOM)%DS   = 0._EB
    M%OMESH(NOM)%MU   = 0._EB
    M%OMESH(NOM)%H    = 0._EB
    M%OMESH(NOM)%U    = U0
@@ -829,6 +835,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (CODE==1 .AND. NIC(NOM,NM)>0) THEN
          M2%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= M%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
          M2%MU(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)  = M%MU(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+         M2%D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)   = M%D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
          IF (N_SPECIES>0) M2%YYS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,1:N_SPECIES)= M%YYS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,1:N_SPECIES)
       ENDIF 
 
@@ -874,6 +881,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (CODE==4 .AND. NIC(NOM,NM)>0) THEN
          M2%RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= M%RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
          M2%MU(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%MU(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+         M2%DS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%DS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
          IF (N_SPECIES>0) M2%YY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,1:N_SPECIES)= M%YY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,1:N_SPECIES)
       ENDIF
 
