@@ -4616,6 +4616,7 @@ Contains
        Group_List(1:)%Speed   = Group_List(1:)%Speed / Max(1,Group_List(1:)%GROUP_SIZE)
        i_tmp = 0
        i_tmp2 = -1
+       If (M%N_HUMANS < 1) Cycle
        Do While (.Not.(i_change_old == n_change_doors) .And. .Not.(i_tmp2 == i_tmp)) ! Iterate Nash equilibrium
           i_change_old = n_change_doors
           i_tmp = 0
