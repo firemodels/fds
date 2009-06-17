@@ -2,7 +2,16 @@
 % \usepackage[dvips]{graphicx}
 \usepackage{times} 
 \usepackage[pdftex]{graphicx}
-
+%
+% ToDo List for the User's Guide
+%
+% Issue 765: FDS+Evac, Documentation of EVAC_DT_FLOWFIELD vs EVAC_DT_MAX
+%            Clarify, make a separate paragraph, where the time steps are
+%            discussed.
+%
+% Issue 766: FDS+Evac, Documentation, Clarify input: FLOW_FIELD_ID
+%            Done.
+%
 %
 \usepackage[T1]{fontenc}
 \usepackage[latin1]{inputenc}
@@ -2459,7 +2468,7 @@ spread over many processors and computers.
   door selection algorithm of FDS+Evac is wanted to be used.  Remember
   to define slice output files at your
   evacuation mesh heights, \emph{e.g.}, \\
-  \verb|&SLCF PBZ=x.x, QUANTITY='VELOCITY',VECTOR=.TRUE./|
+  \verb|&SLCF PBZ=x.x,QUANTITY='VELOCITY',VECTOR=.TRUE.,EVACUATION=.TRUE./|
 %
 \item Run a short simulation (\Timtt{T\_END=1.0}).  Check the
   evacuation flow fields by using Smokeview, \emph{i.e.}, open the
@@ -3302,9 +3311,15 @@ namelist group is used to define the initial positions of the agents.
   of the agents seen in Smokeview if \Timts{COLOR\_METHOD=0}.  Note,
   that \Timts{AVATAR\_COLOR} overrides this option.
 %
-\item[\Timts{FLOW\_FIELD\_ID}] Specifies which evacuation flow field
-  the agents are following if there are no known nor visible doors
-  available at the main evacuation mesh, where the agents are placed.
+%\item[\Timts{FLOW\_FIELD\_ID}] Specifies which evacuation flow field
+%  the agents are following if there are no known nor visible doors
+%  available at the main evacuation mesh, where the agents are placed.
+\item[\Timts{FLOW\_FIELD\_ID}] The ID of a MESH namelist that defines
+  the evacuation flow field the agents are following if there are no
+  known nor visible doors available at the main evacuation mesh, where
+  the agents are placed.  By default it is the ID of the main
+  evacuation mesh, \emph{i.e.} the agents are ``flowing'' towards all the
+  exits.
 %
 \item[\Timts{KNOWN\_DOOR\_NAMES}] The \Timtt{ID} strings of the known
   doors and exits for the agents.
@@ -4123,7 +4138,7 @@ flow field meshes for this case besides the fire mesh.
 &SLCF PBX=2.40, QUANTITY='TEMPERATURE' /
 
  Next line could be used to plot the evacuation flow fields:
-&SLCF PBZ = 1.000, QUANTITY = 'VELOCITY', VECTOR = .TRUE. / 
+&SLCF PBZ=1.0, QUANTITY='VELOCITY', VECTOR=.TRUE., EVACUATION=.TRUE. / 
 
 &TAIL /
 
@@ -4472,8 +4487,8 @@ agents from the second floor are using when entering the first floor.
 &SLCF PBX=2.40, QUANTITY='TEMPERATURE' /
 
  Next lines could be used to plot the evacuation flow fields:
-&SLCF PBZ = 1.000, QUANTITY = 'VELOCITY', VECTOR = .TRUE. / 
-&SLCF PBZ = 3.600, QUANTITY = 'VELOCITY', VECTOR = .TRUE. / 
+&SLCF PBZ=1.0, QUANTITY='VELOCITY', VECTOR=.TRUE., EVACUATION=.TRUE. / 
+&SLCF PBZ=3.6, QUANTITY='VELOCITY', VECTOR=.TRUE., EVACUATION=.TRUE. / 
 
 &TAIL /
 \end{verbatim}
