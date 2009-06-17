@@ -53,7 +53,7 @@ for i=drange
         style = parse(d1_Style);
         for j=1:length(S1)
             d1_Dep_Col = find(strcmp(H,S1(j)));
-            Save_Measured_Metric(i) = max(M(:,d1_Dep_Col)/Scale_Dep);
+            Save_Measured_Metric(i) = max((M(:,d1_Dep_Col)-M(:,d1_Initial_Value))/Scale_Dep);
             if strcmp(Flip_Axis,'no')
                 X = M(:,d1_Ind_Col)/Scale_Ind;
                 Y = M(:,d1_Dep_Col)/Scale_Dep;
@@ -76,7 +76,7 @@ for i=drange
         style = parse(d2_Style);
         for j=1:length(S2)
             d2_Dep_Col = find(strcmp(H,S2(j)));
-            Save_Predicted_Metric(i) = max(M(:,d2_Dep_Col)/Scale_Dep);
+            Save_Predicted_Metric(i) = max((M(:,d2_Dep_Col)-M(:,d2_Initial_Value))/Scale_Dep);
             if strcmp(Flip_Axis,'no')
                 X = M(:,d2_Ind_Col)/Scale_Ind;
                 Y = M(:,d2_Dep_Col)/Scale_Dep;
