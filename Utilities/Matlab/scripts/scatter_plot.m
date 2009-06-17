@@ -1,6 +1,6 @@
 % R. McDermott
 % 6-11-2009
-% scatterplot.m
+% scatter_plot.m
 %
 % Generate scatter plots.  Must first run read_dline.m to generate
 % measured_metric and predicted_metric.
@@ -12,7 +12,7 @@
 close all
 
 qfil = ['../scatterplot_config_matlab.csv'];
-qrange = 2:2;
+qrange = [2:26];
 
 addpath('../functions')
 paper_width  = 6.0; % inches
@@ -32,7 +32,8 @@ for j=qrange
         if strcmp(Save_Quantity(i),Scatter_Plot_Title)
             Measured_Metric(k)  = Save_Measured_Metric(i);
             Predicted_Metric(k) = Save_Predicted_Metric(i);
-            K(i) = plot(Measured_Metric(k),Predicted_Metric(k),...
+            Group_Key_Label(k)  = Save_Group_Key_Label(i);
+            K(k) = plot(Measured_Metric(k),Predicted_Metric(k),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
             k = k+1;
         end
@@ -55,13 +56,13 @@ for j=qrange
     text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
         Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
     
-    C = stripcell(Save_Group_Key_Label);
+    C = stripcell(Group_Key_Label);
     [B I] = unique(C);
     legend(K(I),C(I),'Location',Key_Position,'FontSize',12)
     legend boxon
     
     hold off
-    clear Measured_Metric Predicted_Metric
+    clear Measured_Metric Predicted_Metric Group_Key_Label K
     
     % print to pdf
     set(gcf,'Visible','on');
