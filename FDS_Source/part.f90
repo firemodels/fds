@@ -743,9 +743,9 @@ DROPLET_LOOP: DO I=1,NLP
    IIX  = FLOOR(XI+.5_EB)
    JJY  = FLOOR(YJ+.5_EB)
    KKZ  = FLOOR(ZK+.5_EB)
-   UBAR = AFILL2(U,II-1,JJY,KKZ,XI-II+1,YJ-JJY+.5_EB,ZK-KKZ+.5_EB)
-   VBAR = AFILL2(V,IIX,JJ-1,KKZ,XI-IIX+.5_EB,YJ-JJ+1,ZK-KKZ+.5_EB)
-   WBAR = AFILL2(W,IIX,JJY,KK-1,XI-IIX+.5_EB,YJ-JJY+.5_EB,ZK-KK+1)
+   UBAR = AFILL2(U,II-1,JJY,KKZ,(DR%X-X(II-1))*RDX(II),YJ-JJY+.5_EB          ,ZK-KKZ+.5_EB)
+   VBAR = AFILL2(V,IIX,JJ-1,KKZ,XI-IIX+.5_EB          ,(DR%Y-Y(JJ-1))*RDY(JJ),ZK-KKZ+.5_EB)
+   WBAR = AFILL2(W,IIX,JJY,KK-1,XI-IIX+.5_EB          ,YJ-JJY+.5_EB          ,(DR%Z-Z(KK-1))*RDZ(KK))
     
    ! If the particle is just a massless tracer, just move it and go on to the next particle
 
@@ -881,7 +881,7 @@ DROPLET_LOOP: DO I=1,NLP
             DR%U = PC%HORIZONTAL_VELOCITY*COS(THETA_RN)
             DR%V = PC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
             DR%W = 0._EB
-            ENDIF
+         ENDIF
       ENDIF
     
       ! Where is the droplet now?
@@ -1087,6 +1087,12 @@ DROPLET_LOOP: DO I=1,NLP
                      DR%V = PC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
                      DR%W = 0._EB
                   ENDIF
+               CASE (3) DIRECTION
+                  CALL RANDOM_NUMBER(RN)
+                  THETA_RN = TWOPI*RN
+                  DR%U = PC%HORIZONTAL_VELOCITY*COS(THETA_RN)
+                  DR%V = PC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
+                  DR%W = 0._EB
             END SELECT DIRECTION
 
          ENDIF IF_HIT_SOLID
