@@ -12,7 +12,7 @@
 close all
 
 qfil = ['../scatterplot_config_matlab.csv'];
-qrange = [2:26];
+qrange = [2:28];
 
 addpath('../functions')
 paper_width  = 6.0; % inches
@@ -39,38 +39,45 @@ for j=qrange
         end
     end
     
-    % statistics
-    plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')                    % predicted = measured
-    plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+Sigma_2_E/100)],'k--') % + Sigma_2_E
-    plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-Sigma_2_E/100)],'k--') % - Sigma_2_E
+    if k>1
+        
+        % statistics
+        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')                    % predicted = measured
+        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+Sigma_2_E/100)],'k--') % + Sigma_2_E
+        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-Sigma_2_E/100)],'k--') % - Sigma_2_E
+        
+        % format the legend and axis labels
+        xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
+        ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)
+        axis([Plot_Min Plot_Max Plot_Min Plot_Max])
+        
+        set(gca,'FontName','Times')
+        set(gca,'FontSize',12)
+        set(gca,'YTick',get(gca,'XTick'))
+        
+        text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
+            Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
+        
+        C = stripcell(Group_Key_Label);
+        [B I] = unique(C);
+        legend(K(I),C(I),'Location',Key_Position,'FontSize',12)
+        legend boxon
+        
+        hold off
+        
+        % print to pdf
+        set(gcf,'Visible','on');
+        set(gcf,'PaperUnits','inches');
+        set(gcf,'PaperSize',[paper_width paper_height]);
+        set(gcf,'PaperPosition',[0 0 paper_width paper_height]);
+        display(['Printing scatter plot ',num2str(j),'...'])
+        print(gcf,'-dpdf',['../../../Manuals/',Plot_Filename])
+        
+    else
+        display(['No data for scatter plot ',Scatter_Plot_Title])
+    end
     
-    % format the legend and axis labels
-    xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
-    ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)
-    axis([Plot_Min Plot_Max Plot_Min Plot_Max])
-    
-    set(gca,'FontName','Times')
-    set(gca,'FontSize',12)
-    set(gca,'YTick',get(gca,'XTick'))
-    
-    text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
-        Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
-    
-    C = stripcell(Group_Key_Label);
-    [B I] = unique(C);
-    legend(K(I),C(I),'Location',Key_Position,'FontSize',12)
-    legend boxon
-    
-    hold off
     clear Measured_Metric Predicted_Metric Group_Key_Label K
-    
-    % print to pdf
-    set(gcf,'Visible','on');
-    set(gcf,'PaperUnits','inches');
-    set(gcf,'PaperSize',[paper_width paper_height]);
-    set(gcf,'PaperPosition',[0 0 paper_width paper_height]); 
-    display(['Printing scatter plot ',num2str(j),'...'])
-    print(gcf,'-dpdf',['../../../Manuals/',Plot_Filename])
 end
 
 
