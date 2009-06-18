@@ -22,7 +22,7 @@ drange = 3:1055;
 
 addpath('../functions')
 paper_width  = 6.0; % inches
-paper_height = 4.0; % inches
+paper_height = 4.5; % inches
 
 A = importdata(cfil);
 H = textscan(A{1},'%q','delimiter',',');
@@ -104,9 +104,12 @@ for i=drange
         
         % format the legend and axis labels
         
+        set(gca,'Units','inches')
         set(gca,'FontName','Times')
         set(gca,'FontSize',14)
-        set(gca,'PlotBoxAspectRatio',[1,0.7,1])
+        %set(gca,'PlotBoxAspectRatio',[1,0.7,1])
+        set(gca,'Position',[1,0.75,4.5,3.15])
+        
         if strcmp(Flip_Axis,'no')
             xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
             ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)

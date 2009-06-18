@@ -16,7 +16,7 @@ qrange = [2:28];
 
 addpath('../functions')
 paper_width  = 6.0; % inches
-paper_height = 4.0; % inches
+paper_height = 6.0; % inches
 
 Q = importdata(qfil);
 H = textscan(Q{1},'%q','delimiter',',');
@@ -51,9 +51,12 @@ for j=qrange
         ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)
         axis([Plot_Min Plot_Max Plot_Min Plot_Max])
         
+        set(gca,'Units','inches')
         set(gca,'FontName','Times')
         set(gca,'FontSize',12)
         set(gca,'YTick',get(gca,'XTick'))
+        %set(gca,'PlotBoxAspectRatio',[1,1,1])
+        set(gca,'Position',[1,1,4.5,4.5])
         
         text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
             Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
