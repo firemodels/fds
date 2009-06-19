@@ -83,6 +83,7 @@
 
 #ifdef pp_BETA
 #define pp_SHOOTER
+#define pp_TRANSFORMxxx
 #endif
 
 #ifdef pp_CULL
