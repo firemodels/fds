@@ -1612,7 +1612,7 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
         iop=SV_TRANSLATE;
         reporterror(buffer_save,token,numargs,SV_TRANSLATE_NUMARGS);
       }
-      if(strcmp(token,"translatemzd2")==0){
+      else if(strcmp(token,"translatemzd2")==0){
         iop=SV_TRANSLATEMZD2;
         reporterror(buffer_save,token,numargs,SV_TRANSLATEMZD2_NUMARGS);
       }
