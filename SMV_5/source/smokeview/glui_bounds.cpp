@@ -74,6 +74,10 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define OUTPUTSLICEDATA 20
 #define TRACERS 21
 #define PLOTISOTYPE 22
+#ifdef pp_TRANSFORM
+#define TRANSFORM_SLICE 23
+#define RESET_SLICE 24
+#endif
 
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
@@ -105,6 +109,9 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define DONT_UPDATEBOUNDS 0
 
 GLUI_Button *BUTTON_compress=NULL;
+#ifdef pp_TRANSFORM
+GLUI_Panel *panel_slice_transform=NULL;
+#endif
 GLUI_Panel *panel_script1=NULL;
 GLUI_Panel *panel_script1a=NULL;
 GLUI_Panel *panel_script1b=NULL;
@@ -469,6 +476,11 @@ extern "C" void glui_bounds_setup(int main_window){
       &slicechopmin, &slicechopmax,
       UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
       Slice_CB);
+#ifdef pp_TRANSFORM
+    panel_slice_transform=glui_bounds->add_rollout_to_panel(panel_slice,"Transform data",false);
+    glui_bounds->add_button_to_panel(panel_slice_transform,"Transform data",TRANSFORM_SLICE,Slice_CB);
+    glui_bounds->add_button_to_panel(panel_slice_transform,"Reset data",RESET_SLICE,Slice_CB);
+#endif
     SPINNER_sliceframestep=glui_bounds->add_spinner_to_panel(panel_slice,"Frame Skip",GLUI_SPINNER_INT,&sliceframeskip,FRAMELOADING,Slice_CB);
     SPINNER_sliceframestep->set_int_limits(0,100);
     glui_bounds->add_checkbox_to_panel(panel_slice,"Average Slice Data",&slice_average_flag);
@@ -1669,6 +1681,8 @@ extern "C" void Slice_CB(int var){
   }
 }
 
+/* ------------------ SETslicemin ------------------------ */
+
 void SETslicemin(int setslicemin, float slicemin){
   slicebounds[list_slice_index].setvalmin=setslicemin;
   slicebounds[list_slice_index].valmin=slicemin;
@@ -1776,36 +1790,54 @@ extern "C" void show_glui_bounds(void){
   glui_bounds->show();
 }
 
+/* ------------------ enable_boundary_glui ------------------------ */
+
 extern "C" void enable_boundary_glui(void){
   rollout_BOUNDARY->enable();
 }
+
+/* ------------------ disable_boundary_glui ------------------------ */
+
 extern "C" void disable_boundary_glui(void){
   rollout_BOUNDARY->disable();
 }
-/* ------------------ hide_glui_bounds ------------------------ */
+
+/* ------------------ update_overwrite ------------------------ */
 
 extern "C" void update_overwrite(void){
   if(check_overwrite_all!=NULL)check_overwrite_all->set_int_val(overwrite_all);
   if(check_compress_autoloaded!=NULL)check_compress_autoloaded->set_int_val(compress_autoloaded);
 }
 
+/* ------------------ hide_glui_bounds ------------------------ */
+
 extern "C" void hide_glui_bounds(void){
   if(glui_bounds!=NULL)glui_bounds->hide();
   showbounds=0;
 }
+
+/* ------------------ update_plot3d_display ------------------------ */
+
 extern "C" void update_plot3d_display(void){
   if(plot3d_display!=NULL)plot3d_display->set_int_val(p3cont2d);
 }
 
+/* ------------------ update2_glui_smoke3dframestep ------------------------ */
+
 extern "C" void update2_glui_smoke3dframestep(void){
   SPINNER2_smoke3dframestep->set_int_val(smoke3dframeskip);
 }
+
+/* ------------------ open_smokeplane ------------------------ */
 
 extern "C" void open_smokepanel(void){
   if(panel_smoke3d!=NULL){
     panel_smoke3d->open();
   }
 }
+
+/* ------------------ open_smokezippanel ------------------------ */
+
 extern "C" void open_smokezippanel(void){
   if(rollout_compress!=NULL){
     rollout_compress->open();
