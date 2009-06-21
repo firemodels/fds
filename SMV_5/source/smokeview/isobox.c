@@ -381,10 +381,20 @@ int edgelist2[15][16]={
     denom = val2 - val1;
     factor = 0.5;
     if(denom!=0.0)factor = -val1/denom;
-    if(factor<0.5){closestnodes[n]=nodeindexes[v1];}
-    else{closestnodes[n]=nodeindexes[v2];}
-    if(factor>1.0){/*factor=1;*/outofbounds=1;}
-    if(factor<0.0){/*factor=0.0;*/outofbounds=1;}
+    if(factor<0.5){
+      closestnodes[n]=nodeindexes[v1];
+    }
+    else{
+      closestnodes[n]=nodeindexes[v2];
+    }
+    if(factor>1.0){
+      /*factor=1;*/
+      outofbounds=1;
+    }
+    if(factor<0.0){
+      /*factor=0.0;*/
+      outofbounds=1;
+    }
     xx = xxval[v1]*(1.0-factor) + xxval[v2]*factor;
     yy = yyval[v1]*(1.0-factor) + yyval[v2]*factor;
     zz = zzval[v1]*(1.0-factor) + zzval[v2]*factor;
@@ -398,7 +408,9 @@ int edgelist2[15][16]={
     printf("*** warning - computed isosurface vertices are out of bounds for :\n");
     printf("case number=%i level=%f\n",casenum,level);
     printf("values=");
-    for(n=0;n<8;n++){printf("%f ",vals[n]);}
+    for(n=0;n<8;n++){
+      printf("%f ",vals[n]);
+    }
     printf("\n");
     printf("x=%f %f y=%f %f z=%f %f\n\n",x[0],x[1],y[0],y[1],z[1],z[2]);
   }
@@ -434,6 +446,7 @@ void calcNormal2(const unsigned short *v1,
   ReduceToUnit(out);
 
 }
+
 /* ------------------ calcNormal ------------------------ */
 
 void calcNormal(const float *xx, const float *yy, const float *zz, float *out){
@@ -612,6 +625,8 @@ int computerank( const void *arg1, const void *arg2 ){
   if(sortedlist[i]>sortedlist[j])return 1;
   return 0;
 }
+
+/* ------------------ order_closestnodes ------------------------ */
 
 int order_closestnodes( const void *arg1, const void *arg2 ){
   int i, j;
