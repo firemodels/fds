@@ -1087,8 +1087,8 @@ The algorithm may be summarized as follows:
 \item Use resulting 8 digit binary number $(0\rightarrow 255)$ to determine the case number to be plotted.
 \item Triangulate cube surface, storing vertex locations and edge numbers according to case
 \end{enumerate}
-\item Triangle decimation.  Eliminate any triangle with an interior angle less than     %$\theta_\mbox{crit}$.
-Do this by removing triangle vertices, replacing them with the average of the three vertices.  Then re-triangulate with the new vertex.
+\item Triangle decimation.  Eliminate any triangle that has two or more vertices that are {\em closest}\ to the same underlying FDS mesh node.
+Remove this triangle's vertices, replacing them with a vertex with coordinates that are the average of the coordinates of the three removed vertices.  Then re-triangulate using this new vertex.  This process is illustrated in Figure \ref{figdecimate}.
 \item For each vertex:
 \begin{enumerate}
 \item determine slope of triangle sharing vertex
@@ -1178,7 +1178,7 @@ also uses particles as droplets to model fire suppression.  Particle positions a
 \begin{eqnarray*}
 \frac{dx_p}{dt}=V(x_p,t)
 \end{eqnarray*}
-where $x_p$ represents particle position and $V$ represents the velocity field.  
+where $x_p$ represents particle position and $V$ represents the velocity field.
 
 The assumption this model uses to compute particle flow is that the the drag force on the particle is large compared to $mg$, the force due to gravity.
 
