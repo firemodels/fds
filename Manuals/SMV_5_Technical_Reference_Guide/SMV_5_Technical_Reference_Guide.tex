@@ -1087,13 +1087,13 @@ The algorithm may be summarized as follows:
 \item Use resulting 8 digit binary number $(0\rightarrow 255)$ to determine the case number to be plotted.
 \item Triangulate cube surface, storing vertex locations and edge numbers according to case
 \end{enumerate}
-\item Triangle decimation.  Eliminate any triangle that has two or more vertices that are {\em closest}\ to the same underlying FDS mesh node.
-Remove this triangle's vertices, replacing them with a vertex with coordinates that are the average of the coordinates of the three removed vertices.  Then re-triangulate using this new vertex.  This process is illustrated in Figure \ref{figdecimate}.
-\item For each vertex:
+\item Triangle decimation.  Eliminate any triangle that has two or more vertices {\em closest}\ to the same underlying FDS mesh node.
+If this is the case, then remove this triangle's vertices, replacing them with a vertex with coordinates that are the average of the coordinates of the three removed vertices.  Then re-triangulate using this new vertex.  This process is illustrated in Figure \ref{figdecimate}.
+\item Estimate normal directions.  For each vertex:
 \begin{enumerate}
-\item determine slope of triangle sharing vertex
-\item construct a weighted average of triangle slopes where weights sum to 1.0 and are inversely proportional to triangle area.
-\item store resulting average along with vertex data
+\item determine the slope of the triangle sharing the vertex
+\item construct a weighted average of triangle slopes where weights sum to 1.0 and are inversely proportional to triangle's area.
+\item store the resulting average along with vertex data
 \end{enumerate}
 \end{enumerate}
 
