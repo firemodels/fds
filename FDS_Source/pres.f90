@@ -27,7 +27,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:) :: UWP
 INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,DWWDT,DVVDT,DUUDT,HQ2,RFODT,U2,V2,W2,HFAC,H0RR(6),TNOW,DUMMY=0._EB, &
-            TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER,RR
+            TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER
 TYPE (VENTS_TYPE), POINTER :: VT
  
 IF (SOLID_PHASE_ONLY) RETURN
@@ -141,72 +141,26 @@ WALL_CELL_LOOP: DO IW=1,NEWC
          N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
          H_OTHER = H_OTHER/REAL(N_INT_CELLS,EB)
          
-         ALMS_IF: IF (ALMS) THEN
-            RR = ALMS_RELAXATION_FACTOR
-            
-            SELECT CASE(IOR)
-               CASE( 1)
-                     IF (H(1,J,K) > H_OTHER) THEN
-                        BXS(J,K) = RR*H(1,J,K) + (1._EB-RR)*H_OTHER
-                     ELSE
-                        BXS(J,K) = (1._EB-RR)*H(1,J,K) + RR*H_OTHER
-                     ENDIF
-               CASE(-1)
-                     IF (H(IBAR,J,K) > H_OTHER) THEN
-                        BXF(J,K) = RR*H(IBAR,J,K) + (1._EB-RR)*H_OTHER
-                     ELSE
-                        BXF(J,K) = (1._EB-RR)*H(IBAR,J,K) + RR*H_OTHER
-                     ENDIF
-               CASE( 2)
-                     IF (H(I,1,K) > H_OTHER) THEN
-                        BYS(I,K) = RR*H(I,1,K) + (1._EB-RR)*H_OTHER
-                     ELSE
-                        BYS(I,K) = (1._EB-RR)*H(I,1,K) + RR*H_OTHER
-                     ENDIF
-               CASE(-2)
-                     IF (H(I,JBAR,K) > H_OTHER) THEN
-                        BYF(I,K) = RR*H(I,JBAR,K) + (1._EB-RR)*H_OTHER
-                     ELSE
-                        BYF(I,K) = (1._EB-RR)*H(I,JBAR,K) + RR*H_OTHER
-                     ENDIF
-               CASE( 3)
-                     IF (H(I,J,1) > H_OTHER) THEN
-                        BZS(I,J) = RR*H(I,J,1) + (1._EB-RR)*H_OTHER
-                     ELSE
-                        BZS(I,J) = (1._EB-RR)*H(I,J,1) + RR*H_OTHER
-                     ENDIF
-               CASE(-3)
-                     IF (H(I,J,KBAR) > H_OTHER) THEN
-                        BZF(I,J) = RR*H(I,J,KBAR) + (1._EB-RR)*H_OTHER
-                     ELSE
-                        BZF(I,J) = (1._EB-RR)*H(I,J,KBAR) + RR*H_OTHER
-                     ENDIF
-            END SELECT
-            
-         ELSE ALMS_IF
-         
-            SELECT CASE(IOR)
-               CASE( 1)
-                     DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
-                     BXS(J,K) = (DX_OTHER*H(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER)
-               CASE(-1)
-                     DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
-                     BXF(J,K) = (DX_OTHER*H(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)
-               CASE( 2)
-                     DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
-                     BYS(I,K) = (DY_OTHER*H(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER)
-               CASE(-2)
-                     DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
-                     BYF(I,K) = (DY_OTHER*H(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)
-               CASE( 3)
-                     DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
-                     BZS(I,J) = (DZ_OTHER*H(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)
-               CASE(-3)
-                     DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
-                     BZF(I,J) = (DZ_OTHER*H(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)
-            END SELECT
-         
-         ENDIF ALMS_IF
+         SELECT CASE(IOR)
+            CASE( 1)
+               DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
+               BXS(J,K) = (DX_OTHER*H(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER)
+            CASE(-1)
+               DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
+               BXF(J,K) = (DX_OTHER*H(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)
+            CASE( 2)
+               DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
+               BYS(I,K) = (DY_OTHER*H(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER)
+            CASE(-2)
+               DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
+               BYF(I,K) = (DY_OTHER*H(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)
+            CASE( 3)
+               DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
+               BZS(I,J) = (DZ_OTHER*H(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)
+            CASE(-3)
+               DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
+               BZF(I,J) = (DZ_OTHER*H(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)
+         END SELECT
  
       ENDIF INTERPOLATED_ONLY
  

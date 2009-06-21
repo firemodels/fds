@@ -109,11 +109,6 @@ ELSE
    !$OMP END PARALLEL DO
 ENDIF
 
-! Store the DNS viscosity in its own array for later use
-
-CALL VISCOSITY_BC(NM)
-MU_DNS=MU
-
 ! Compute eddy viscosity using Smagorinsky model
 
 IF (LES) THEN
@@ -219,7 +214,7 @@ CALL POINT_TO_MESH(NM)
 !$OMP PARALLEL DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,NOM,MU_OTHER,DP_OTHER,KKO,JJO,IIO,N_INT_CELLS)
 WALL_LOOP: DO IW=1,NWC
    !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VISCOSITY_BC'
-   IF (IJKW(5,IW)/=INTERPOLATED_SURF_INDEX) CYCLE WALL_LOOP
+   IF (IJKW(9,IW)==0) CYCLE WALL_LOOP
    II  = IJKW(1,IW)
    JJ  = IJKW(2,IW)
    KK  = IJKW(3,IW)
@@ -1248,11 +1243,11 @@ RFODT = RELAXATION_FACTOR/DT
 ! Exchange H at interpolated boundaries
 
 DO IW=1,NEWC
-   IF (IJKW(5,IW)/=INTERPOLATED_SURF_INDEX) CYCLE
+   NOM = IJKW(9,IW)
+   IF (NOM==0) CYCLE
    II = IJKW(1,IW)
    JJ = IJKW(2,IW)
-   KK = IJKW(3,IW)
-   NOM     = IJKW(9,IW)
+   KK = IJKW(3,IW)   
    H_OTHER = 0._EB
    DO KKO=IJKW(12,IW),IJKW(15,IW)
       DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -1304,17 +1299,20 @@ ENDDO OBST_LOOP
  
 ! Add normal velocity to FVX, etc. for surface cells
 
-!$OMP DO PRIVATE(IW,II,JJ,KK,IOR) 
+!$OMP DO PRIVATE(IW,II,JJ,KK,IOR,NOM) 
 WALL_LOOP: DO IW=1,NWC
 !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_NO_FLUX_02' 
-IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) CYCLE WALL_LOOP
-IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
-II  = IJKW(1,IW)
-JJ  = IJKW(2,IW)
-KK  = IJKW(3,IW)
-IOR = IJKW(4,IW)
-SELECT CASE (BOUNDARY_TYPE(IW))
-   CASE (SOLID_BOUNDARY,POROUS_BOUNDARY)
+   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)         CYCLE WALL_LOOP
+   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
+   NOM = IJKW(9,IW)
+   IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .AND. NOM==0) CYCLE WALL_LOOP
+
+   II  = IJKW(1,IW)
+   JJ  = IJKW(2,IW)
+   KK  = IJKW(3,IW)
+   IOR = IJKW(4,IW)
+    
+   IF (NOM/=0 .OR. BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) THEN
       SELECT CASE(IOR)
          CASE( 1) 
             FVX(II,JJ,KK)   = -RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)) + RFODT*(UU(II,JJ,KK)   + UWS(IW))
@@ -1329,7 +1327,9 @@ SELECT CASE (BOUNDARY_TYPE(IW))
          CASE(-3) 
             FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)) + RFODT*(WW(II,JJ,KK-1) - UWS(IW))
       END SELECT
-   CASE (MIRROR_BOUNDARY)
+   ENDIF
+
+   IF (BOUNDARY_TYPE(IW)==MIRROR_BOUNDARY) THEN
       SELECT CASE(IOR)
          CASE( 1)
             FVX(II  ,JJ,KK) = 0._EB
@@ -1344,7 +1344,7 @@ SELECT CASE (BOUNDARY_TYPE(IW))
          CASE(-3)
             FVZ(II,JJ,KK-1) = 0._EB
       END SELECT
-END SELECT 
+   ENDIF
  
 ENDDO WALL_LOOP
 !$OMP END DO
@@ -1499,7 +1499,7 @@ REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),MU_DUIDXJ_0(2),DUIDXJ_0(2),PROFILE_FACTOR,VEL_GAS,VEL_INS, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2)
 INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
-            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,IBCM,IBCP
+            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,IBCM,IBCP,ITMP
 LOGICAL :: ALTERED_GRADIENT(-2:2)
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,RHOP,VEL_OTHER
@@ -1685,7 +1685,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ! Decide whether or not to process edge using data interpolated from another mesh
    
-         INTERPOLATION_IF: IF (NOM(ICD)==0 .OR. EDGE_TYPE(IE,ICD)/=INTERPOLATED_EDGE) THEN
+         INTERPOLATION_IF: IF (NOM(ICD)==0 .OR. (BOUNDARY_TYPE(IWM)/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=INTERPOLATED_BOUNDARY)) THEN
 
             ! Determine appropriate velocity BC by assessing each adjacent wall cell
 
@@ -1741,7 +1741,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                   IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
                      RHO_WALL = 0.5_EB*(  RHOP(IIGM,JJGM,KKGM) +   RHOP(IIGP,JJGP,KKGP))
-                     MU_WALL  = 0.5_EB*(MU_DNS(IIGM,JJGM,KKGM) + MU_DNS(IIGP,JJGP,KKGP))
+                     ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
+                     MU_WALL = Y2MU_C(ITMP)*SPECIES(0)%MW
                      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,VEL_GAS,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
                      VEL_INS = -VEL_GAS
                      DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
@@ -1788,12 +1789,15 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE(1)
                   IF (ICD==1) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
                   IF (ICD==2) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
+                  MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
                CASE(2)
                   IF (ICD==1) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
                   IF (ICD==2) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
+                  MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
                CASE(3)
                   IF (ICD==1) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
                   IF (ICD==2) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
+                  MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
             END SELECT
             DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
             MU_DUIDXJ(I_SGN*ICD) = MUA*SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
@@ -1871,7 +1875,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ_0(ICDO)
          ENDIF
          OME_E(IE,I_SGN*ICD) =    DUIDXJ_USE(1) -    DUIDXJ_USE(2)
-         TAU_E(IE,I_SGN*ICD) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)
+         TAU_E(IE,I_SGN*ICD) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)    
       ENDDO ORIENTATION_LOOP_2
    ENDDO SIGN_LOOP_2
 
@@ -1908,9 +1912,9 @@ SUBROUTINE MATCH_VELOCITY(NM)
 
 ! Force normal component of velocity to match at interpolated boundaries
 
-INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO,IIG,JJG,KKG,N_INT_CELLS
+INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO,IIG,JJG,KKG
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,TNOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER,H_OTHER,RR
+REAL(EB) :: UU_AVG,VV_AVG,WW_AVG,TNOW,DA_OTHER,UU_OTHER,VV_OTHER,WW_OTHER
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,OM_UU,OM_VV,OM_WW
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (MESH_TYPE), POINTER :: M2
@@ -1938,10 +1942,6 @@ ELSE
    DS_CORR = 0._EB
 ENDIF
 
-! Set ALMS relaxation factor
-
-IF (ALMS) RR = ALMS_RELAXATION_FACTOR
-
 ! Loop over all cell edges and determine the appropriate velocity BCs
 
 !$OMP PARALLEL DO PRIVATE(IW,II,JJ,KK,IOR,NOM,OM,M2,DA_OTHER,OM_UU,OM_VV,OM_WW,KKO,JJO,IIO) &
@@ -1950,7 +1950,7 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
 
    !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELO_24'
    
-   IF (IJKW(5,IW)/=INTERPOLATED_SURF_INDEX) CYCLE EXTERNAL_WALL_LOOP
+   IF (IJKW(9,IW)==0) CYCLE EXTERNAL_WALL_LOOP
 
    II  = IJKW( 1,IW)
    JJ  = IJKW( 2,IW)
@@ -1962,6 +1962,9 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
    NOM = IJKW( 9,IW)
    OM => OMESH(NOM)
    M2 => MESHES(NOM)
+   
+   ! Determine the area of the interpolated cell face
+   
    DA_OTHER = 0._EB
 
    SELECT CASE(ABS(IOR))
@@ -1997,20 +2000,12 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
          ENDDO
    END SELECT
    
-   ! add for ALMS
-   H_OTHER = 0._EB
-   DO KKO=IJKW(12,IW),IJKW(15,IW)
-      DO JJO=IJKW(11,IW),IJKW(14,IW)
-         DO IIO=IJKW(10,IW),IJKW(13,IW)
-            H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
-         ENDDO
-      ENDDO
-   ENDDO
-   N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
-   H_OTHER = H_OTHER/REAL(N_INT_CELLS,EB)
+   ! Determine the normal component of velocity from the other mesh and use it for average
 
    SELECT CASE(IOR)
+   
       CASE( 1)
+      
          UU_OTHER = 0._EB
          DO KKO=IJKW(12,IW),IJKW(15,IW)
             DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -2019,23 +2014,14 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         
-         IF (ALMS) THEN
-            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               UU_AVG = RR*UU(0,JJ,KK) + (1._EB-RR)*UU_OTHER
-            ELSE
-               UU_AVG = (1._EB-RR)*UU(0,JJ,KK) + RR*UU_OTHER
-            ENDIF
-         ELSE
-            UU_AVG = 0.5_EB*(UU(0,JJ,KK) + UU_OTHER)
-         ENDIF
-         
+         UU_AVG = 0.5_EB*(UU(0,JJ,KK) + UU_OTHER)
          IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(UU_AVG-UU(0,JJ,KK))*RDX(1)
          IF (CORRECTOR) DS_CORR(IW) = (UU_AVG-UU(0,JJ,KK))*RDX(1)
          UVW_SAVE(IW) = UU(0,JJ,KK)
-         UU(0,JJ,KK)    = UU_AVG
+         UU(0,JJ,KK)  = UU_AVG
 
       CASE(-1)
+         
          UU_OTHER = 0._EB
          DO KKO=IJKW(12,IW),IJKW(15,IW)
             DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -2044,23 +2030,14 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         
-         IF (ALMS) THEN
-            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               UU_AVG = RR*UU(IBAR,JJ,KK) + (1._EB-RR)*UU_OTHER
-            ELSE
-               UU_AVG = (1._EB-RR)*UU(IBAR,JJ,KK) + RR*UU_OTHER
-            ENDIF
-         ELSE
-            UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK) + UU_OTHER)
-         ENDIF
-         
+         UU_AVG = 0.5_EB*(UU(IBAR,JJ,KK) + UU_OTHER)
          IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
          IF (CORRECTOR) DS_CORR(IW) = -(UU_AVG-UU(IBAR,JJ,KK))*RDX(IBAR)
          UVW_SAVE(IW) = UU(IBAR,JJ,KK)
          UU(IBAR,JJ,KK) = UU_AVG
 
       CASE( 2)
+      
          VV_OTHER = 0._EB
          DO KKO=IJKW(12,IW),IJKW(15,IW)
             DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -2069,23 +2046,14 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         
-         IF (ALMS) THEN
-            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               VV_AVG = RR*VV(II,0,KK) + (1._EB-RR)*VV_OTHER
-            ELSE
-               VV_AVG = (1._EB-RR)*VV(II,0,KK) + RR*VV_OTHER
-            ENDIF
-         ELSE
-            VV_AVG = 0.5_EB*(VV(II,0,KK) + VV_OTHER)
-         ENDIF
-         
+         VV_AVG = 0.5_EB*(VV(II,0,KK) + VV_OTHER)
          IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(VV_AVG-VV(II,0,KK))*RDY(1)
          IF (CORRECTOR) DS_CORR(IW) = (VV_AVG-VV(II,0,KK))*RDY(1)
          UVW_SAVE(IW) = VV(II,0,KK)
-         VV(II,0,KK)    = VV_AVG
+         VV(II,0,KK)  = VV_AVG
 
       CASE(-2)
+      
          VV_OTHER = 0._EB
          DO KKO=IJKW(12,IW),IJKW(15,IW)
             DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -2094,23 +2062,14 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         
-         IF (ALMS) THEN
-            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               VV_AVG = RR*VV(II,JBAR,KK) + (1._EB-RR)*VV_OTHER
-            ELSE
-               VV_AVG = (1._EB-RR)*VV(II,JBAR,KK) + RR*VV_OTHER
-            ENDIF
-         ELSE
-            VV_AVG = 0.5_EB*(VV(II,JBAR,KK) + VV_OTHER)
-         ENDIF
-         
+         VV_AVG = 0.5_EB*(VV(II,JBAR,KK) + VV_OTHER)
          IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
          IF (CORRECTOR) DS_CORR(IW) = -(VV_AVG-VV(II,JBAR,KK))*RDY(JBAR)
-         UVW_SAVE(IW) = VV(II,JBAR,KK)
+         UVW_SAVE(IW)   = VV(II,JBAR,KK)
          VV(II,JBAR,KK) = VV_AVG
 
       CASE( 3)
+      
          WW_OTHER = 0._EB
          DO KKO=IJKW(12,IW),IJKW(15,IW)
             DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -2119,23 +2078,14 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         
-         IF (ALMS) THEN
-            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               WW_AVG = RR*WW(II,JJ,0) + (1._EB-RR)*WW_OTHER
-            ELSE
-               WW_AVG = (1._EB-RR)*WW(II,JJ,0) + RR*WW_OTHER
-            ENDIF
-         ELSE
-            WW_AVG = 0.5_EB*(WW(II,JJ,0) + WW_OTHER)
-         ENDIF
-         
+         WW_AVG = 0.5_EB*(WW(II,JJ,0) + WW_OTHER)
          IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) + 0.5*(WW_AVG-WW(II,JJ,0))*RDZ(1)
          IF (CORRECTOR) DS_CORR(IW) = (WW_AVG-WW(II,JJ,0))*RDZ(1)
          UVW_SAVE(IW) = WW(II,JJ,0)
-         WW(II,JJ,0)    = WW_AVG
+         WW(II,JJ,0)  = WW_AVG
 
       CASE(-3)
+      
          WW_OTHER = 0._EB
          DO KKO=IJKW(12,IW),IJKW(15,IW)
             DO JJO=IJKW(11,IW),IJKW(14,IW)
@@ -2144,21 +2094,12 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
                ENDDO
             ENDDO
          ENDDO
-         
-         IF (ALMS) THEN
-            IF ( H(IIG,JJG,KKG)>H_OTHER ) THEN
-               WW_AVG = RR*WW(II,JJ,KBAR) + (1._EB-RR)*WW_OTHER
-            ELSE
-               WW_AVG = (1._EB-RR)*WW(II,JJ,KBAR) + RR*WW_OTHER
-            ENDIF
-         ELSE
-            WW_AVG = 0.5_EB*(WW(II,JJ,KBAR) + WW_OTHER)
-         ENDIF
-         
+         WW_AVG = 0.5_EB*(WW(II,JJ,KBAR) + WW_OTHER)
          IF (PREDICTOR) D_CORR(IW) = DS_CORR(IW) - 0.5*(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
          IF (CORRECTOR) DS_CORR(IW) = -(WW_AVG-WW(II,JJ,KBAR))*RDZ(KBAR)
-         UVW_SAVE(IW) = WW(II,JJ,KBAR)
+         UVW_SAVE(IW)   = WW(II,JJ,KBAR)
          WW(II,JJ,KBAR) = WW_AVG
+         
    END SELECT
 
 ENDDO EXTERNAL_WALL_LOOP
