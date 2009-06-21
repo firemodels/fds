@@ -959,19 +959,14 @@ ELSE TRUE_PROJECTION
    
    ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
    
-   !! IF (NMESHES>1) THEN
-   !$OMP PARALLEL DO PRIVATE(IW,IIG,JJG,KKG)
    DO IW=1,NEWC
-      !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_30'
-      IF (IJKW(5,IW)/=INTERPOLATED_SURF_INDEX) CYCLE
+      IF (IJKW(9,IW)==0) CYCLE
       IIG = IJKW(6,IW)
       JJG = IJKW(7,IW)
       KKG = IJKW(8,IW)
       IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
       IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
    ENDDO
-   !$OMP END PARALLEL DO
-   !! ENDIF
    
 ENDIF TRUE_PROJECTION
 
