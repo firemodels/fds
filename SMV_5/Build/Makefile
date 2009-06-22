@@ -29,7 +29,7 @@ INC_DIR = $(SOURCE_DIR)/include2
 
 # Definition of the object variables
 
-obj = main.o IOscript.o IOshooter.o glui_shooter.o glui_wui.o csphere.o colorbar.o endian.o camera.o IOhrr.o IOwui.o IOobject.o IOtour.o glui_labels.o glui_tour.o smoothlabel.o getdatacolors.o smokeview.o output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o sv_api.o glui_3dsmoke.o glui_clip.o glui_stereo.o glui_blockedit.o glui_motion.o glui_bounds.o egz_stdio.o parseobst.o dmalloc.o objectedit.o assert.o compress3dc.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o glui_colorbar.o skybox.o blockage_test.o segtri.o string_util.o startup.o glui_trainer.o shaders.o getsizes.o getdata.o
+obj = main.o IOscript.o IOshooter.o glui_message.o glui_shooter.o glui_wui.o csphere.o colorbar.o endian.o camera.o IOhrr.o IOwui.o IOobject.o IOtour.o glui_labels.o glui_tour.o smoothlabel.o getdatacolors.o smokeview.o output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o sv_api.o glui_3dsmoke.o glui_clip.o glui_stereo.o glui_blockedit.o glui_motion.o glui_bounds.o egz_stdio.o parseobst.o dmalloc.o objectedit.o assert.o compress3dc.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o glui_colorbar.o skybox.o blockage_test.o segtri.o string_util.o startup.o glui_trainer.o shaders.o getsizes.o getdata.o
 objwin = $(obj:.o=.obj)
 
 # include file directory locations (should be the same for all builds)
@@ -97,6 +97,22 @@ intel_win_32 : exe       = smv5_win_32
 
 intel_win_32 : $(objwin)
 	$(CPP) -m32 -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBS)\smokeview_fort.lib $(IMAGELIBS)\pthreadVC.lib $(IMAGELIBS)\glui.lib $(IMAGELIBS)\glut32.lib $(IMAGELIBS)\glew32.lib $(IMAGELIBS)\gd.lib $(IMAGELIBS)\jpeg.lib $(IMAGELIBS)\png.lib $(IMAGELIBS)\zlib.lib
+
+# ------------- OSX TEST 32 ----------------
+#  OSX TEST running tiger (tiger)
+
+intel_osx_test_32 : IMAGELIBS = -L$(LIB_DIR)/lib_osx_intel_32
+intel_osx_test_32 : FORTLIBS  = /opt/intel/fc/10.1.006/lib
+intel_osx_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
+intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_OSX -I $(INC_DIR)/gd
+intel_osx_test_32 : CC        = icc 
+intel_osx_test_32 : CPP       = icpc
+intel_osx_test_32 : FC        = ifort
+intel_osx_test_32 : exe       = smv5_osx_test_32
+
+intel_osx_test_32 : $(obj)
+	g++ -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT $(IMAGELIBS) -lz -ljpeg -lpng -lgd -lglui $(FORTLIBS)/libifcoremt.a $(FORTLIBS)/libimf.a $(FORTLIBS)/libirc.a $(FORTLIBS)/libsvml.a
+
 
 # ------------- OSX 32 ----------------
 #  OSX running tiger (tiger)
