@@ -159,6 +159,22 @@ intel_linux_32_dbg : exe       = smv5_linux_32_dbg
 intel_linux_32_dbg : $(obj)
 	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -lXmu -lGLU -lGL -lm
 
+# ------------- Linux TEST 32 ----------------
+#  32 bit test linux (acrux)
+
+intel_linux_test_32 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_32
+intel_linux_test_32 : FORTLIBS  = /opt/intel/fc/10.1.021/lib
+intel_linux_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
+intel_linux_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_LINUX
+intel_linux_test_32 : CC        = icc 
+intel_linux_test_32 : CPP       = icpc
+intel_linux_test_32 : FC        = ifort
+intel_linux_test_32 : exe       = smv5_linux_test_32
+
+intel_linux_test_32 : $(obj)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS)/libifcore.a $(FORTLIBS)/libimf.a -lglui -lglut -lgd -ljpeg -lpng -lz -lXmu -lGLU -lGL -lm
+
+
 # ------------- Linux 32 ----------------
 #  32 bit linux (acrux)
 
