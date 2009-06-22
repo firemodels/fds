@@ -10,7 +10,9 @@
 #else
 #include <GL/glut.h>
 #endif
+#ifndef WIN32
 #include <openssl/rand.h>
+#endif
 #include <math.h>
 #include "flowfiles.h"
 #include "ASSERT.h"
