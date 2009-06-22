@@ -7,3 +7,4 @@
 7.  test dialog boxes for reporting errors (to make them more conspicuous while smoekview is starting up)
 8.  test option to open up the FDS-SMV issue tracker from the Smokeview (windows version) help menu
 9.  for 64 bit smokeview, build with large heap and stack size
+10. test device scaling fix - addresses issue 776
