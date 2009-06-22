@@ -48,14 +48,24 @@ Update the smv_revision and smv_version environment variables in the <tt>fds_smv
 <li><a href="scripts/EDIT_notes.bat">Edit test release notes</a> 
 
 <p><table border=on>
-<tr><th colspan=2>Package and Upload</th></tr>
-<tr><th>win32</th><th>win64</th></tr>
-<tr><td colspan=2 align=center>Build using Vis Studio</td></tr>
+<tr><th colspan=4>Build, Package and Upload</th></tr>
+<tr><th>win32</th><th>win64</th><th>Linux 32</th><th>OSX 32</th></tr>
+<tr>
+<td colspan=2 align=center>Build using Vis Studio</td>
+<td><a href="scripts/MAKElinux32_test_smv.bat">Build</a></td>
+<td><a href="scripts/MAKEosx32_test_smv.bat">Build</a></td>
+</tr>
 <tr>
 <td><a href="scripts/MAKEtest.bat">Package</a></td>
-<td><a href="scripts/MAKEtest64.bat">Package</a></td></tr>
+<td><a href="scripts/MAKEtest64.bat">Package</a></td>
+<td><a href="scripts/MAKElinuxtestdists.bat">Package</a></td>
+<td><a href="scripts/MAKEosxtest32.bat">Package</a></td>
+</tr>
 <tr><td><a href="scripts/UPLOADtest.bat">Upload</a></td>
-    <td><a href="scripts/UPLOADtest64.bat">Upload</a></td></tr>
+    <td><a href="scripts/UPLOADtest64.bat">Upload</a></td>
+    <td><a href="scripts/UPLOADlinuxtest.bat">Upload</a></td>
+    <td><a href="scripts/UPLOADosxtest.bat">Upload</a></td>
+</tr>
 </table>
 
 </ul>
@@ -73,8 +83,7 @@ Update the smv_revision and smv_version environment variables in the <tt>fds_smv
 <tr><th>win64</th><th>win32</th><th>Linux 32</th><th>OSX 32</th></tr>
 
 <tr>
-<td align=center>Build using<br>Vis Studio</td>
-<td align=center>Build using<br>Vis Studio</td>
+<td colspan=2 align=center>Build using Vis Studio</td>
 <td><a href="scripts/MAKElinux32_smv.bat">Build</a></td>
 <td><a href="scripts/MAKEosx32_smv.bat">Build</a></td>
 </tr>
