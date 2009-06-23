@@ -4034,13 +4034,13 @@ activation energy, {\ct E}, using the specified reference rate,
 reference temperature, and an assumed value of $A=1\times
 10^{13}$~s$^{-1}$. Essentially, this guarantees that the {\ct
 REFERENCE\_RATE} is achieved at the {\ct REFERENCE\_TEMPERATURE}. The
-default value of {\ct REFERENCE\_RATE} is 0.1~s$^{-1}$.  It is
+default value of {\ct REFERENCE\_RATE} is 0.001~s$^{-1}$.  It is
 suggested that unless you have information to the contrary, leave {\ct
 REFERENCE\_RATE} at its default value and just specify the {\ct
 REFERENCE\_TEMPERATURE}. Note that the {\ct REFERENCE\_TEMPERATURE} is
 {\em not} the same as an ignition temperature. Rather, it is simply
 the temperature at which the mass fraction of the $i$th material
-decreases at a rate of 0.1~s$^{-1}$. You should check the sensitivity
+decreases at a rate of 0.001~s$^{-1}$. You should check the sensitivity
 of these parameters following the procedure explained in
 Section~\ref{solid_phase_verification}.  \index{MATL!REFERENCE\_RATE}
 \index{MATL!REFERENCE\_TEMPERATURE}
@@ -8815,7 +8815,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NU\_GAS(:,II)}           & Real array  & Yields of species {\ct II}     & kg/kg            & 0.     \\ \hline
 {\ct NU\_RESIDUE}             & Real array  & Residue yields                 & kg/kg            & 0.     \\ \hline
 {\ct NU\_WATER}               & Real aray   & Water vapor yields             & kg/kg            & 0.     \\ \hline
-{\ct REFERENCE\_RATE}         & Real array  & Reaction rates at ref.~temp.   & s$^{-1}$         & 0.1    \\ \hline
+{\ct REFERENCE\_RATE}         & Real array  & Reaction rates at ref.~temp.   & s$^{-1}$         & 0.001  \\ \hline
 {\ct REFERENCE\_TEMPERATURE}  & Real array  & Reference temperatures         & $^\circ$C        &        \\ \hline
 {\ct RESIDUE}                 & Character   & {\ct IDs} of residue {\ct MATL} &                 &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat                  & kJ/kg/K          & 0.     \\ \hline
