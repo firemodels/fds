@@ -36,7 +36,7 @@ Rem --------------- 32 bit OSX ----------------
   set dplatform=32 bit OSX
   set platform=osx
   set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
-  set exe=smv_%version%_%platform%_%smv_revision%.tar.gz
+  set exe=smv_%version%_%smv_revision%_%platform%.tar.gz
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
