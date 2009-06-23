@@ -29,6 +29,6 @@ echo making Linux and OSX distribution archives
 plink %svn_logon% %scriptdir%/make_test_osx_dists.csh %version% %smv_revision%
 
 echo downloading MAC OSX test Smokeview files
-pscp %svn_logon%:%bundledir%/smv_%version%_osx_%smv_revision%.tar.gz ..\for_bundle\to_google\.
+pscp %svn_logon%:%bundledir%/smv_%version%_%smv_revision%_osx.tar.gz ..\for_bundle\to_google\.
 
 pause
