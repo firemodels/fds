@@ -135,7 +135,7 @@ intel_osx_32 : $(obj)
 gcc_linux_32 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_gcc_32
 gcc_linux_32 : FORTLIBS  = -L/opt/intel/fc/10.1.021/lib
 gcc_linux_32 : FFLAGS    = -O2 -m32 -D pp_noappend -ffree-form
-gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
+gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX -I($INC_DIR)/gd
 gcc_linux_32 : CC        = gcc
 gcc_linux_32 : CPP       = g++
 gcc_linux_32 : FC        = gfortran
@@ -181,7 +181,7 @@ intel_linux_test_32 : $(obj)
 intel_linux_32 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_32
 intel_linux_32 : FORTLIBS  = /opt/intel/fc/10.1.021/lib
 intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
-intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
+intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX -I $(INC_DIR)/gd
 intel_linux_32 : CC        = icc 
 intel_linux_32 : CPP       = icpc
 intel_linux_32 : FC        = ifort
