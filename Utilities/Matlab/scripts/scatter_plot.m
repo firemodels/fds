@@ -27,24 +27,41 @@ for j=qrange
     
     define_qrow_variables
     
-    k = 1;
+    clear Measured_Metric
+    clear Predicted_Metric
+    
+    k = 0;
     for i=drange
         if strcmp(Save_Quantity(i),Scatter_Plot_Title)
+            k = k+1;
             Measured_Metric(k)  = Save_Measured_Metric(i);
             Predicted_Metric(k) = Save_Predicted_Metric(i);
             Group_Key_Label(k)  = Save_Group_Key_Label(i);
             K(k) = plot(Measured_Metric(k),Predicted_Metric(k),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
-            k = k+1;
         end
     end
     
-    if k>1
+    if k>0
         
         % statistics
-        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')                    % predicted = measured
-        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+Sigma_2_E/100)],'k--') % + Sigma_2_E
-        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-Sigma_2_E/100)],'k--') % - Sigma_2_E
+        
+        E_bar = mean(log(Measured_Metric));
+        M_bar = mean(log(Predicted_Metric));
+        M_hat = M_bar - E_bar + log(Measured_Metric);
+        u  = sqrt( sum((log(Predicted_Metric)-M_hat).*(log(Predicted_Metric)-M_hat))/(k-1) );
+        Sigma_E = Sigma_2_E/200;
+        omega_M = sqrt( max(0,u*u - Sigma_E.^2) );
+        delta = exp(M_bar-E_bar+0.5*omega_M.^2);
+        Sigma_M = delta*omega_M;
+        
+        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')                    
+        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--') 
+        plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--') 
+        
+        plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')                    
+        plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--') 
+        plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--') 
         
         % format the legend and axis labels
         xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
@@ -60,6 +77,19 @@ for j=qrange
         
         text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
             Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
+  
+        text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
+            '$2 \, \sigma_E$=','FontSize',12,'FontName','Times','Interpreter','LaTeX')
+        text(Plot_Min+(Title_Position(1)+0.16)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
+            num2str(2*Sigma_E,2),'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+        text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
+            '$2 \, \sigma_M$=','FontSize',12,'FontName','Times','Interpreter','LaTeX')
+        text(Plot_Min+(Title_Position(1)+0.16)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
+            num2str(2*Sigma_M,2),'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+        text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
+            'Bias =','FontSize',12,'FontName','Times','Interpreter','LaTeX')
+        text(Plot_Min+(Title_Position(1)+0.16)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
+            num2str(delta,3),'FontSize',12,'FontName','Times','Interpreter','LaTeX')
         
         C = stripcell(Group_Key_Label);
         [B I] = unique(C);
