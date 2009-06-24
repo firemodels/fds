@@ -5,7 +5,7 @@ set SVNROOT=~/FDS-SMV
 
 set BINDIR=$SVNROOT/SMV_5/bin
 set FORBUNDLE=$SVNROOT/SMV_5/for_bundle
-set LINUXDIR=smv_$version\_linux\_$revision
+set LINUXDIR=smv_$version\_$revision\_linux
 
 cd $FORBUNDLE
 

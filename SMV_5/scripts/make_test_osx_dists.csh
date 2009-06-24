@@ -6,7 +6,7 @@ set OSXHOST=tiger.cfr.nist.gov
 
 set BINDIR=$SVNROOT/SMV_5/bin
 set FORBUNDLE=$SVNROOT/SMV_5/for_bundle
-set OSXDIR=smv_$version\_osx\_$revision
+set OSXDIR=smv_$version\_$revision\_osx
 
 cd $FORBUNDLE
 
