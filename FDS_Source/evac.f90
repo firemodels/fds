@@ -8,7 +8,7 @@
 ! appeared in an ACM publication and it is subject to their algorithms policy,
 ! see the comments at the start of the DCDFLIB in ieva.f90.
 !
-! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2008
+! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2009
 !
 !!!!!!!!!!!!!!
 !
@@ -3384,6 +3384,12 @@ Contains
             Call SHUTDOWN(MESSAGE)
          End If
 
+         If (Abs(ESS%H0-ESS%H) < 1.0E-3) Then
+            ESS%H = ESS%H0
+            IOR=1
+            ESS%IOR    = IOR
+         End If
+
          Select Case (IOR)
          Case(-1,+1)
             ESS%S = Sqrt((ESS%X2-ESS%X1)**2 + (ESS%H-ESS%H0)**2)
@@ -3877,52 +3883,60 @@ Contains
           ! Write the 'fed' columns
           n_dead = 0
           Open (LU_EVACCSV,file=FN_EVACCSV,form='formatted',status='replace')
-          Write (LU_EVACCSV,*) n_cols+3
+          ! June 2009: Changed the .csv file format to the fds5 style
+          ! first row: units (or variable class)
+          ! second row: variable name
+          ! third row-: data
+          ! Write (LU_EVACCSV,*) n_cols+3
           Write (tcform,'(a,i4.4,a)') "(",n_cols+3,"(a,','),a)"
-          Write (LU_EVACCSV,tcform) 'Time','Humans', &
-               ('Floor', i=1,n_egrids), &
-               ('Corridor', i=1,n_corrs), &
-               ('Exit', i=1,n_exits), &
-               ('Door', i=1,n_doors), &
-               ('Exit', i=1,n_exits-n_co_exits), &
-               ('Door', i=1,n_doors), &
-               'Fed','Fed','Fed'
-          Write (LU_EVACCSV,tcform) 'Time','Inside', &
-               ('Inside', i=1,n_egrids), &
-               ('Inside', i=1,n_corrs), &
-               ('Counter', i=1,n_exits), &
-               ('Counter', i=1,n_doors), &
-               ('Target', i=1,n_exits-n_co_exits), &
-               ('Target', i=1,n_doors), &
-               'Counter','Fed','Fed'
-          Write (LU_EVACCSV,tcform) 's','All Nodes', &
+          ! Write (LU_EVACCSV,tcform) 'Time','Humans', &
+          !      ('Floor', i=1,n_egrids), &
+          !      ('Corridor', i=1,n_corrs), &
+          !      ('Exit', i=1,n_exits), &
+          !      ('Door', i=1,n_doors), &
+          !      ('Exit', i=1,n_exits-n_co_exits), &
+          !      ('Door', i=1,n_doors), &
+          !      'Fed','Fed','Fed'
+          Write (LU_EVACCSV,tcform) 's','AgentsInside', &
+               ('AgentsInsideMesh', i=1,n_egrids), &
+               ('AgentsInsideCorr', i=1,n_corrs), &
+               ('ExitCounter', i=1,n_exits), &
+               ('DoorCounter', i=1,n_doors), &
+               ('TargetExitCounter', i=1,n_exits-n_co_exits), &
+               ('TargetDoorCounter', i=1,n_doors), &
+               'Agents','FED_Index','FED_Index'
+          Write (LU_EVACCSV,tcform) 'EVAC_Time','AllAgents', &
                (Trim(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
                (Trim(EVAC_CORRS(i)%ID), i=1,n_corrs), &
                (Trim(EVAC_EXITS(i)%ID), i=1,n_exits), &
                (Trim(EVAC_DOORS(i)%ID), i=1,n_doors), &
                (Trim(CTEMP(i)), i=1,n_exits-n_co_exits), &
                (Trim(EVAC_DOORS(i)%ID), i=1,n_doors), &
-               'Deads','FED_max','FED_max_alive'
+               'Number_of_Deads','FED_max','FED_max_alive'
        Else
           ! Do not write the 'fed' columns
           Open (LU_EVACCSV,file=FN_EVACCSV,form='formatted',status='replace')
-          Write (LU_EVACCSV,*) n_cols
+          ! June 2009: Changed the .csv file format to the fds5 style
+          ! first row: units (or variable class)
+          ! second row: variable name
+          ! third row-: data
+          ! Write (LU_EVACCSV,*) n_cols
           Write (tcform,'(a,i4.4,a)') "(",n_cols,"(a,','),a)"
-          Write (LU_EVACCSV,tcform) 'Time','Humans', &
-               ('Floor', i=1,n_egrids), &
-               ('Corridor', i=1,n_corrs), &
-               ('Exit', i=1,n_exits), &
-               ('Door', i=1,n_doors), &
-               ('Exit', i=1,n_exits-n_co_exits), &
-               ('Door', i=1,n_doors)
-          Write (LU_EVACCSV,tcform) 'Time','Inside', &
-               ('Inside', i=1,n_egrids), &
-               ('Inside', i=1,n_corrs), &
-               ('Counter', i=1,n_exits), &
-               ('Counter', i=1,n_doors), &
-               ('Target', i=1,n_exits-n_co_exits), &
-               ('Target', i=1,n_doors)
-          Write (LU_EVACCSV,tcform) 's','All Nodes', &
+          ! Write (LU_EVACCSV,tcform) 'Time','Humans', &
+          !      ('Floor', i=1,n_egrids), &
+          !      ('Corridor', i=1,n_corrs), &
+          !      ('Exit', i=1,n_exits), &
+          !      ('Door', i=1,n_doors), &
+          !      ('Exit', i=1,n_exits-n_co_exits), &
+          !      ('Door', i=1,n_doors)
+          Write (LU_EVACCSV,tcform) 's','AgentsInside', &
+               ('AgentsInsideMesh', i=1,n_egrids), &
+               ('AgentsInsideCorr', i=1,n_corrs), &
+               ('ExitCounter', i=1,n_exits), &
+               ('DoorCounter', i=1,n_doors), &
+               ('TargetExitCounter', i=1,n_exits-n_co_exits), &
+               ('TargetDoorCounter', i=1,n_doors)
+          Write (LU_EVACCSV,tcform) 'EVAC_Time','AllAgents', &
                (Trim(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
                (Trim(EVAC_CORRS(i)%ID), i=1,n_corrs), &
                (Trim(EVAC_EXITS(i)%ID), i=1,n_exits), &
@@ -9798,11 +9812,7 @@ Contains
              Case(246)  ! TOTAL_LINEFORCE, Human Pressure2: contact + social
                 QP(NPP,NN) = Real(HR%SumForces2 ,FB)
              Case(247)  ! COLOR, Human color index
-                If (Abs(HR%angle_old) < 0.01_EB) Then
-                   QP(NPP,NN) = Real(HR%COLOR_INDEX - 1,FB)
-                Else
-                   QP(NPP,NN) = Real(EVAC_AVATAR_NCOLOR - 1,FB) ! Cyan
-                End If
+                QP(NPP,NN) = Real(HR%COLOR_INDEX - 1,FB)
              Case(248)  ! MOTIVE_ANGLE, 
                 EVEL = Sqrt(HR%UBAR**2 + HR%VBAR**2)
                 If (EVEL > 0.0_EB) Then
