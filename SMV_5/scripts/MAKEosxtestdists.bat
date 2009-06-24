@@ -25,10 +25,7 @@ set version=%smv_version%
 set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
 
-echo making Linux and OSX distribution archives
+echo making OSX test distribution archive
 plink %svn_logon% %scriptdir%/make_test_osx_dists.csh %version% %smv_revision%
-
-echo downloading MAC OSX test Smokeview files
-pscp %svn_logon%:%bundledir%/smv_%version%_%smv_revision%_osx.tar.gz ..\for_bundle\to_google\.
 
 pause
