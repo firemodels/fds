@@ -16,9 +16,9 @@
 close all
 clear all
 
-cfil = ['../validation_data_config_matlab.csv'];
-vdir = ['../../../Validation/'];
-drange = 3:1055;
+cfil = ['../verification_data_config_matlab.csv'];
+vdir = ['../../../Verification/'];
+drange = 2:35;
 
 addpath('../functions')
 paper_width  = 6.0; % inches

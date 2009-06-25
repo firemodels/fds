@@ -12,7 +12,7 @@
 close all
 
 qfil = ['../scatterplot_config_matlab.csv'];
-qrange = [2:28];
+qrange = [2:2];
 
 addpath('../functions')
 paper_width  = 6.0; % inches
@@ -40,6 +40,13 @@ for j=qrange
             K(k) = plot(Measured_Metric(k),Predicted_Metric(k),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
         end
+    end
+    
+    if Scatter_Plot_Title=='Verification'
+        k = 1000
+        Measured_Metric = normrnd(1:1000,(Sigma_2_E/200)*(1:1000),[1 1000]);
+        Predicted_Metric = normrnd(1:1000,0.10*(1:1000),[1 1000]);
+        K = plot(Measured_Metric,Predicted_Metric,'ko'); hold on    
     end
     
     if k>0
