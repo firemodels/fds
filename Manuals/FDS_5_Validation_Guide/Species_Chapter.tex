@@ -275,36 +275,28 @@ dotted lines show experimental uncertainty.}
 
 \clearpage
 
-\section{NIST Reduced Scale Enclosure (RSE) Test Series}
+\section{NIST Reduced Scale Enclosure (RSE) Test Series, 1994}
 
 The RSE natural gas experiments were selected to assess the CO production capability rather than soot production.
 Nine fire sizes were simulated: 50~kW, 75~kW, 100~kW, 150~kW, 200~kW, 300~kW, 400~kW,
 500~kW, and 600~kW.  The experiments were modeled using properties of the natural gas supplied to the test facility.
 The model geometry included the compartment interior along with a 0.6~m deep region outside the door.
-Figure~\ref{RSE_Pitts_Species} shows the measured and predicted CO$_2$ and CO concentrations.  The measured values are
-from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.  The model matches the data up to a fire size of
-300~kW, including the location of the peak CO$_2$ concentration at 200~kW.  For larger fires the model predicts more
-CO surviving in the upper layer than measured, along with correspondingly lower CO$_2$ levels.
-As the compartment becomes under-ventilated, the model under-predicts
-CO$_2$ and over-predicts CO. The relative error increases as the compartment becomes more under-ventilated.  However,
-note that the under-prediction of CO$_2$ concentration in the rear (1.5~\%) is equivalent to the
-over-prediction of CO (1.7~\%).  This implies that part of the model error results from the assumption of
-infinitely fast chemistry for the first step.  Furthermore, since the model as implemented performs the two steps
-sequentially, higher CO is predicted where the first step consumes all of the available oxygen.  Note that
-the figure below uses prediction made by FDS 5.1.3.
+Figure~\ref{NIST_RSE_1994} shows the measured and predicted CO, CO$_2$ and O$_2$ concentrations.  The measured values are
+from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.  
 
 \begin{figure}[p]
-\begin{center}
-\begin{tabular}{l}
-\includegraphics[width=5.0in]{FIGURES/RSE_Pitts/RSE_Pitts_CO} \\
-\includegraphics[width=5.0in]{FIGURES/RSE_Pitts/RSE_Pitts_CO2}
-\end{tabular}
-\end{center}
-\caption[Summary of CO and CO$_2$ predictions, Pitts reduced-scale enclosure experiments.]
-{Summary of CO and CO$_2$ predictions for the Pitts reduced-scale enclosure experiments. Note that the calculations were
-performed using FDS version 5.1.3.}
-\label{RSE_Pitts_Species}
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Front} &
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO_Rear} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Front} &
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_CO2_Rear} \\
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Front} &
+\includegraphics[height=2.2in]{FIGURES/NIST_RSE_1994/NIST_RSE_1994_O2_Rear} 
+\end{tabular*}
+\label{NIST_RSE_1994}
+\caption[Summary of NIST Reduced Scale Enclosure (1994) experiments.]{Summary of NIST Reduced Scale Enclosure (1994) experiments.}
 \end{figure}
+
 
 \clearpage
 
