@@ -7,7 +7,8 @@ function [f_fds,Re_H]=friction_factor_calc(dpdx,H,filename)
 M = csvread(filename,2,0);
 
 ubar = M(:,2);
-mu = max(M(:,4));
+%mu = max(M(:,4));  % MU_DNS is no longer saved and dumped by FDS
+mu = 1.84e-5;
 rho = max(M(:,5));
 
 U = ubar(length(ubar));  % steady state mean velocity (planar averaged)
