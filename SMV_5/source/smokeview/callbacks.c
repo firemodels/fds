@@ -2391,7 +2391,7 @@ void update_current_mesh(mesh *meshi){
     }
   }
   else{
-    loaded_isomesh=current_mesh;
+    loaded_isomesh=NULL;
   }
   update_iso_showlevels();
   update_plot3dtitle();
