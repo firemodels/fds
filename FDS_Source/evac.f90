@@ -4054,7 +4054,7 @@ Contains
     Real(EB) RN, simoDX, simoDY, TNOW
     Real(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, &
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
-    Integer i,j,k,ii,jj,kk,ipc, izero, n_tmp, ie, nom
+    Integer i,j,k,ii,jj,kk,ipc, izero, n_tmp, ie, nom, I_OBST
     Integer i11, i22, group_size
     Logical pp_see_group, is_solid
     Integer jjj, iii, i44
@@ -4150,7 +4150,8 @@ Contains
                    II = Floor( M%CELLSI(Floor((X1-M%XS)*M%RDXINT)) + 1.0_EB  )
                    JJ = Floor( M%CELLSJ(Floor((Y1-M%YS)*M%RDYINT)) + 1.0_EB  )
                    KK = Floor( M%CELLSK(Floor((Z1-M%ZS)*M%RDZINT)) + 1.0_EB  )
-                   If ( M%SOLID(M%CELL_INDEX(II,JJ,KK)) ) Then
+                   I_OBST = OBST_INDEX_C(M%CELL_INDEX(II,JJ,KK))
+                   If ( M%SOLID(M%CELL_INDEX(II,JJ,KK) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) ) Then
                       HUMAN_GRID(i,j)%IMESH = 0 ! No smoke inside OBSTs
                    Else
                       HUMAN_GRID(i,j)%II = II
@@ -4164,7 +4165,8 @@ Contains
              ! No fire mesh is found
              HUMAN_GRID(i,j)%IMESH = 0
           End Do MESH_LOOP
-          If (.Not. SOLID(CELL_INDEX(i,j,1)) ) Then
+          I_OBST = OBST_INDEX_C(CELL_INDEX(I,J,1))
+          If (.Not. (SOLID(CELL_INDEX(i,j,1) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN)) ) Then
              HUMAN_GRID(i,j)%IMESH = HUMAN_GRID(i,j)%IMESH
           Else
              ! This grid cell is solid ==> No humans in this cell
@@ -4367,13 +4369,14 @@ Contains
                 x_tmp(3) = HR%X - Sin(HR%angle)*HR%d_shoulder
                 II = Floor( CELLSI(Floor((x_tmp(1)-XS)*RDXINT)) + 1.0_EB )
                 JJ = Floor( CELLSJ(Floor((y_tmp(1)-YS)*RDYINT)) + 1.0_EB )
-                Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+                I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+                Is_Solid = (Is_Solid .Or. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
                 II = Floor( CELLSI(Floor((x_tmp(3)-XS)*RDXINT)) + 1.0_EB )
                 JJ = Floor( CELLSJ(Floor((y_tmp(3)-YS)*RDYINT)) + 1.0_EB )
-                Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+                Is_Solid = (Is_Solid .Or. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
                 II = Floor( CELLSI(Floor((x_tmp(2)-XS)*RDXINT)) + 1.0_EB )
                 JJ = Floor( CELLSJ(Floor((y_tmp(2)-YS)*RDYINT)) + 1.0_EB )
-                Is_Solid = (Is_Solid .Or. SOLID(CELL_INDEX(II,JJ,KK)))
+                Is_Solid = (Is_Solid .Or. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
 
                 If (.Not.Is_Solid) Then
                    ! Check the distances to walls (not to wall corners)
@@ -4661,6 +4664,8 @@ Contains
                          ii = Min(50,Max(1,Int(evel)))
                          EVAC_EXITS(i_target-n_doors)%NTARGET(ii:50) = EVAC_EXITS(i_target-n_doors)%NTARGET(ii:50) + 1
                       End If
+                   Else  ! i_target < 0 means non-visible target door
+                      n_change_doors = n_change_doors - 1  ! do not iterate non-visible doors
                    End If
                    If (i_target_old > 0) Then
                       If (i_target_old <= n_doors ) Then
@@ -4688,16 +4693,15 @@ Contains
              End If            ! first member of a group or a lonely soul
           End Do              ! 1, n_humans
           If (n_change_doors-i_change_old == 1) Then
-             i_tmp2 = i_tmp
              Write(LU_EVACOUT,fmt='(a,2i10)') ' Init: Door Changes i_tmp ',  i_tmp, i_tmp2
+             i_tmp2 = i_tmp
           Else
              i_tmp2 = -1
           End If
           If (n_change_doors/Max(1,M%N_HUMANS) > 10*M%N_HUMANS) i_tmp2 = i_tmp
-          Write(LU_EVACOUT,fmt='(a,2i10)')' Init: Door Changes, Trials ',  n_change_doors,n_change_trials
           If (FAC_DOOR_QUEUE <= 0.001_EB) i_change_old = n_change_doors  ! Do not iterate the Nash equilibrium
        End Do         ! Nash iterations
-       If (FAC_DOOR_QUEUE > 0.001_EB) Write(LU_EVACOUT,fmt='(a,f10.4,a,i4)') &
+       If (FAC_DOOR_QUEUE > 0.001_EB) Write(LU_EVACOUT,fmt='(a,f14.2,a,i8)') &
             ' Init: Changes per agent ', Real(n_change_doors,EB)/Real(M%N_HUMANS,EB), &
             ', Nash iterations', n_change_trials/M%N_HUMANS
     End Do                  ! 1, nmeshes
@@ -5123,7 +5127,7 @@ Contains
     ! Local variables
     Integer, Parameter :: n_sectors = 2
     Real(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
-    Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1
+    Integer ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
     Integer  IE, tim_ic, tim_iw, NM_now, tim_iwx, tim_iwy, tim_iw2, tim_ic2, ibc
     Real(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, tim_dist
     Real(EB), Dimension(4) :: d_xy
@@ -5549,6 +5553,13 @@ Contains
           ! ========================================================
           ! Calculate persons prefered walking direction v0
           ! ========================================================
+          NM_STRS_MESH = .False.
+          StrsMeshLoop: Do N = 1, N_STRS
+             If (EVAC_STRS(N)%IMESH==NM_now) Then     
+                NM_STRS_MESH = .True.
+                Exit StrsMeshLoop
+             End If
+          End Do StrsMeshLoop
           If (TAU_CHANGE_V0 > 1.0E-12_EB) Then
              ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
              UBAR = HR%UBAR; VBAR = HR%VBAR
@@ -5781,6 +5792,9 @@ Contains
           ICN = CELL_INDEX(IIN,JJN,KKN)
           ICX = CELL_INDEX(IIN,JJ ,KKN)
           ICY = CELL_INDEX(II ,JJN,KKN)
+          I_OBST  = OBST_INDEX_C(CELL_INDEX(IIN,JJN,KKN))
+          I_OBSTX = OBST_INDEX_C(CELL_INDEX(IIN,JJ ,KKN))
+          I_OBSTY = OBST_INDEX_C(CELL_INDEX(II ,JJN,KKN))
           HR%X_old = HR%X
           HR%Y_old = HR%Y
 
@@ -5788,8 +5802,9 @@ Contains
           ! vent or a 'sucking vent' used to calculate the flow fields.
           ! This is just to be fail safe.  If the user input is correct, this
           ! should never happen.
-          If ( SOLID(ICN) ) Then
-             If ( Solid(ICX) .And. .Not. Solid(ICY) ) Then
+          If ( SOLID(ICN) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) Then
+             If ( (Solid(ICX).AND. .NOT.OBSTRUCTION(I_OBSTX)%HIDDEN) .And. .Not. &
+                  (Solid(ICY).AND. .NOT.OBSTRUCTION(I_OBSTY)%HIDDEN) ) Then
                 If ( ii < iin ) Then
                    tim_ic = cell_index(iin,jjn,kk)
                    Call Get_iw(iin,jjn,kk,-1,tim_iw)
@@ -5807,7 +5822,8 @@ Contains
                       HR%Y = HR%Y
                    End If
                 End If
-             Else If ( Solid(ICY) .And. .Not. Solid(ICX) ) Then
+             Else If ( (Solid(ICY).AND. .NOT.OBSTRUCTION(I_OBSTY)%HIDDEN) .And. .Not. &
+                  (Solid(ICX).AND. .NOT.OBSTRUCTION(I_OBSTX)%HIDDEN) ) Then
                 If ( jj < jjn ) Then
                    tim_ic = cell_index(iin,jjn,kk)
                    Call Get_iw(iin,jjn,kk,-2,tim_iw)
@@ -6644,11 +6660,27 @@ Contains
                 If (Sqrt(x_now**2 + y_now**2)-HR%Radius > P2P_DIST_MAX) Exit Loop_pxpy
                 tim_ic  = cell_index(ii,jj,kkn)   ! present
                 tim_iwx = wall_index(tim_ic, +1)  ! right
+                IF (tim_iwx>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IWX)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iwx = 0
+                END IF
                 tim_iwy = wall_index(tim_ic, +2)  ! up
+                IF (tim_iwy>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IWY)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iwy = 0
+                END IF
                 tim_ic  = cell_index(ii,jj+1,kkn) ! one cell up
                 tim_iw  = wall_index(tim_ic, +1)  ! up and right
+                IF (tim_iw>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IW)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iw = 0
+                END IF
                 tim_ic2 = cell_index(ii+1,jj,kkn) ! one cell right
                 tim_iw2 = wall_index(tim_ic2, +2) ! right and up
+                IF (tim_iw2>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IW2)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iw2 = 0
+                END IF
                 If (tim_iwy /= 0) Exit Loop_pxpy  ! 
                 If ( (tim_iwx==0).And.(tim_iwy==0).And.(tim_iw/=0 .Or. tim_iw2/=0) ) Then
                    If (tim_iw/=0) Then
@@ -6679,11 +6711,27 @@ Contains
                 If (Sqrt(x_now**2 + y_now**2)-HR%Radius > P2P_DIST_MAX) Exit Loop_mxpy
                 tim_ic  = cell_index(ii,jj,kkn)   ! present
                 tim_iwx = wall_index(tim_ic, -1)  ! left
+                IF (tim_iwx>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IWX)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iwx = 0
+                END IF
                 tim_iwy = wall_index(tim_ic, +2)  ! up
+                IF (tim_iwy>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IWY)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iwy = 0
+                END IF
                 tim_ic  = cell_index(ii,jj+1,kkn) ! one cell up
                 tim_iw  = wall_index(tim_ic, -1)  ! up and left 
+                IF (tim_iw>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IW)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iw = 0
+                END IF
                 tim_ic2 = cell_index(ii-1,jj,kkn) ! one cell left
                 tim_iw2 = wall_index(tim_ic2, +2) ! left and up
+                IF (tim_iw2>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IW2)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iw2 = 0
+                END IF
                 If (tim_iwy /= 0) Exit Loop_mxpy
                 If ( (tim_iwx==0).And.(tim_iwy==0).And.(tim_iw/=0 .Or. tim_iw2/=0) ) Then
                    If (tim_iw/=0) Then
@@ -6714,11 +6762,27 @@ Contains
                 If (Sqrt(x_now**2 + y_now**2)-HR%Radius > P2P_DIST_MAX) Exit Loop_pxmy
                 tim_ic  = cell_index(ii,jj,kkn)   ! present
                 tim_iwx = wall_index(tim_ic, +1)  ! right
+                IF (tim_iwx>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IWX)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iwx = 0
+                END IF
                 tim_iwy = wall_index(tim_ic, -2)  ! down
+                IF (tim_iwy>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IWY)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iwy = 0
+                END IF
                 tim_ic  = cell_index(ii,jj-1,kkn) ! one cell down
                 tim_iw  = wall_index(tim_ic, +1)  ! down and right
+                I_OBST = OBST_INDEX_W(tim_IW)
+                IF (tim_iw>0) THEN
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iw = 0
+                END IF
                 tim_ic2 = cell_index(ii+1,jj,kkn) ! one cell right
                 tim_iw2 = wall_index(tim_ic2, -2) ! right and down
+                IF (tim_iw2>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IW2)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iw2 = 0
+                END IF
                 If (tim_iwy /= 0) Exit Loop_pxmy
                 If ( (tim_iwx==0).And.(tim_iwy==0).And.(tim_iw/=0 .Or. tim_iw2/=0) ) Then
                    If (tim_iw/=0) Then
@@ -6749,11 +6813,27 @@ Contains
                 If (Sqrt(x_now**2+y_now**2)-HR%Radius > P2P_DIST_MAX) Exit Loop_mxmy
                 tim_ic  = cell_index(ii,jj,kkn)   ! present
                 tim_iwx = wall_index(tim_ic, -1)  ! left
+                IF (tim_iwx>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IWX)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iwx = 0
+                END IF
                 tim_iwy = wall_index(tim_ic, -2)  ! down
+                IF (tim_iwy>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IWY)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iwy = 0
+                END IF
                 tim_ic  = cell_index(ii,jj-1,kkn) ! once cell down
                 tim_iw  = wall_index(tim_ic, -1)  ! down and left
+                IF (tim_iw>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IW)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iw = 0
+                END IF
                 tim_ic2 = cell_index(ii-1,jj,kkn) ! one cell left
                 tim_iw2 = wall_index(tim_ic2, -2) ! left and down
+                IF (tim_iw2>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IW2)
+                   IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iw2 = 0
+                END IF
                 If (tim_iwy /= 0) Exit Loop_mxmy
                 If ( (tim_iwx==0).And.(tim_iwy==0).And.(tim_iw/=0 .Or. tim_iw2/=0) ) Then
                    If (tim_iw/=0) Then
@@ -7434,15 +7514,16 @@ Contains
       Integer, Intent(OUT) :: IW
       !
       ! Local variables
-      Integer :: ii, jj, kk, ic
+      Integer :: ii, jj, kk, ic, I_OBST
       !
       ii = IIin
       jj = JJin
       kk = KKin
 
       IC  = CELL_INDEX(II,JJ,KK)
+      I_OBST = OBST_INDEX_C(IC)
 
-      If (SOLID(IC)) Then
+      If (SOLID(IC) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) Then
          Select Case(IOR)
          Case(-1)
             If (II>0)      II = II-1
@@ -7995,7 +8076,7 @@ Contains
            xx1,yy1, max_fed, ave_K
       Integer  II, JJ, KK, ior, irnmax, irn, ie, izero, j1
       Real(EB), Dimension(6) :: r_tmp, x_tmp, y_tmp
-      Integer :: i_tmp, i_tim, iii, jjj
+      Integer :: i_tmp, i_tim, iii, jjj, I_OBST
       Logical :: PP_see_door, keep_xy2, NM_STRS_MESH
 
       Type (CORR_LL_TYPE), Pointer :: TmpCurrent =>NULL(), TmpLoop =>NULL()
@@ -8104,25 +8185,30 @@ Contains
             II = Floor( MFF%CELLSI(Floor((xx-MFF%XS)*MFF%RDXINT)) + 1.0_EB )
             JJ = Floor( MFF%CELLSJ(Floor((yy-MFF%YS)*MFF%RDYINT)) + 1.0_EB )
             KK = 1
+            I_OBST = MFF%OBST_INDEX_C(MFF%CELL_INDEX(II,JJ,KK))
 
             irn = irn + 1
 
-            If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK))) Cycle CheckPPForce
+            If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK)) .AND. .NOT.MFF%OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForce
             If ( Abs(ior) == 2 .And. .Not. keep_xy ) Then
                xx1 = xx - HR%Radius - 1.0_EB*HR%B
                II = Floor(MFF%CELLSI(Floor((xx1-MFF%XS)*MFF%RDXINT))+1.0_EB)
-               If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK))) Cycle CheckPPForce
+               I_OBST = MFF%OBST_INDEX_C(MFF%CELL_INDEX(II,JJ,KK))
+               If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK)) .AND. .NOT.MFF%OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForce
                xx1 = xx + HR%Radius + 1.0_EB*HR%B
                II = Floor(MFF%CELLSI(Floor((xx1-MFF%XS)*MFF%RDXINT))+1.0_EB)
-               If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK))) Cycle CheckPPForce
+               I_OBST = MFF%OBST_INDEX_C(MFF%CELL_INDEX(II,JJ,KK))
+               If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK)) .AND. .NOT.MFF%OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForce
             End If
             If ( Abs(ior) == 1 .And. .Not. keep_xy ) Then
                yy1 = yy - HR%Radius - 1.0_EB*HR%B
                JJ = Floor(MFF%CELLSJ(Floor((yy1-MFF%YS)*MFF%RDYINT))+1.0_EB)
-               If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK))) Cycle CheckPPForce
+               I_OBST = MFF%OBST_INDEX_C(MFF%CELL_INDEX(II,JJ,KK))
+               If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK)) .AND. .NOT.MFF%OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForce
                yy1 = yy + HR%Radius + 1.0_EB*HR%B
                JJ = Floor(MFF%CELLSJ(Floor((yy1-MFF%YS)*MFF%RDYINT))+1.0_EB)
-               If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK))) Cycle CheckPPForce
+               I_OBST = MFF%OBST_INDEX_C(MFF%CELL_INDEX(II,JJ,KK))
+               If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK)) .AND. .NOT.MFF%OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForce
             End If
 
             !
@@ -8318,7 +8404,8 @@ Contains
 
             irn = irn + 1
 
-            If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK))) Cycle CheckPPForceSTRS
+            I_OBST = MFF%OBST_INDEX_C(MFF%CELL_INDEX(II,JJ,KK))
+            If (MFF%SOLID(MFF%CELL_INDEX(II,JJ,KK)) .AND. .NOT.MFF%OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForceSTRS
 
             !
             d_max =  1.0_EB*HR%B
@@ -8510,22 +8597,27 @@ Contains
 
          irn = irn + 1
 
-         If (SOLID(CELL_INDEX(II,JJ,KK))) Cycle CheckPPForce
+         I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+         If (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForce
          If ( Abs(ior) == 2 ) Then
             xx1 = xx - HR%Radius - 1.0_EB*HR%B
             II = Floor(CELLSI(Floor((xx1-XS)*RDXINT))+1.0_EB)
-            If (SOLID(CELL_INDEX(II,JJ,KK))) Cycle CheckPPForce
+            I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+            If (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForce
             xx1 = xx + HR%Radius + 1.0_EB*HR%B
             II = Floor(CELLSI(Floor((xx1-XS)*RDXINT))+1.0_EB)
-            If (SOLID(CELL_INDEX(II,JJ,KK))) Cycle CheckPPForce
+            I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+            If (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForce
          End If
          If ( Abs(ior) == 1 ) Then
             yy1 = yy - HR%Radius - 1.0_EB*HR%B
             JJ = Floor(CELLSJ(Floor((yy1-YS)*RDYINT))+1.0_EB)
-            If (SOLID(CELL_INDEX(II,JJ,KK))) Cycle CheckPPForce
+            I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+            If (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForce
             yy1 = yy + HR%Radius + 1.0_EB*HR%B
             JJ = Floor(CELLSJ(Floor((yy1-YS)*RDYINT))+1.0_EB)
-            If (SOLID(CELL_INDEX(II,JJ,KK))) Cycle CheckPPForce
+            I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+            If (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.OBSTRUCTION(I_OBST)%HIDDEN) Cycle CheckPPForce
          End If
          !
          d_max = 1.0_EB*HR%B
@@ -10269,7 +10361,7 @@ Contains
     Integer, Intent(OUT) :: istat
     !
     ! Local variables
-    Integer :: ii, jj, iw, ic, ibc, is, i_end, iin, jjn, kkn
+    Integer :: ii, jj, iw, ic, ibc, is, i_end, iin, jjn, kkn, I_OBST
     Real(EB) :: dx, dy, d_mx, d_px, d_my, d_py
     Type (MESH_TYPE), Pointer :: M =>NULL()
 
@@ -10298,7 +10390,8 @@ Contains
        i_end = Min(M%IBAR,Max(1,i_end))
        ii = iin
        ic = M%cell_index(ii,jjn,kkn)  ! cell index
-       If (M%Solid(ic)) Then
+       I_OBST = M%OBST_INDEX_C(IC)
+       If (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) Then
           istat = -1
           Return
        End If
@@ -10315,7 +10408,8 @@ Contains
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
           d_mx = M%xw(iw)
-          If (M%Solid(ic)) Then
+          I_OBST = M%OBST_INDEX_C(IC)
+          If (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) Then
              Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              Call SHUTDOWN(MESSAGE)
           End If
@@ -10339,7 +10433,8 @@ Contains
        i_end = Min(M%IBAR,Max(1,i_end))
        ii = iin
        ic = M%cell_index(ii,jjn,kkn)  ! cell index
-       If (M%Solid(ic)) Then
+       I_OBST = M%OBST_INDEX_C(IC)
+       If (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) Then
           istat = -1
           Return
        End If
@@ -10356,7 +10451,8 @@ Contains
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
           d_px = M%xw(iw)
-          If (M%Solid(ic)) Then
+          I_OBST = M%OBST_INDEX_C(IC)
+          If (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) Then
              Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              Call SHUTDOWN(MESSAGE)
           End If
@@ -10380,7 +10476,8 @@ Contains
        i_end = Min(M%JBAR,Max(1,i_end))
        jj = jjn
        ic = M%cell_index(iin,jj,kkn)  ! cell index
-       If (M%Solid(ic)) Then
+       I_OBST = M%OBST_INDEX_C(IC)
+       If (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) Then
           istat = -1
           Return
        End If
@@ -10397,7 +10494,8 @@ Contains
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
           d_my = M%yw(iw)
-          If (M%Solid(ic)) Then
+          I_OBST = M%OBST_INDEX_C(IC)
+          If (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) Then
              Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              Call SHUTDOWN(MESSAGE)
           End If
@@ -10421,7 +10519,8 @@ Contains
        i_end = Min(M%JBAR,Max(1,i_end))
        jj = jjn
        ic = M%cell_index(iin,jj,kkn)  ! cell index
-       If (M%Solid(ic)) Then
+       I_OBST = M%OBST_INDEX_C(IC)
+       If (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) Then
           istat = -1
           Return
        End If
@@ -10438,7 +10537,8 @@ Contains
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
           d_py = M%yw(iw)
-          If (M%Solid(ic)) Then
+          I_OBST = M%OBST_INDEX_C(IC)
+          If (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) Then
              Write(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              Call SHUTDOWN(MESSAGE)
           End If
