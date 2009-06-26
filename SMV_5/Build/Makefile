@@ -34,7 +34,7 @@ objwin = $(obj:.o=.obj)
 
 # include file directory locations (should be the same for all builds)
 
-INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui
+INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui -I $(INC_DIR)/gd
 
 #*** General Purpose Rules ***
 
@@ -104,7 +104,7 @@ intel_win_32 : $(objwin)
 intel_osx_test_32 : IMAGELIBS = -L$(LIB_DIR)/lib_osx_intel_32
 intel_osx_test_32 : FORTLIBS  = /opt/intel/fc/10.1.006/lib
 intel_osx_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
-intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_OSX -I $(INC_DIR)/gd
+intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_OSX
 intel_osx_test_32 : CC        = icc 
 intel_osx_test_32 : CPP       = icpc
 intel_osx_test_32 : FC        = ifort
@@ -120,7 +120,7 @@ intel_osx_test_32 : $(obj)
 intel_osx_32 : IMAGELIBS = -L$(LIB_DIR)/lib_osx_intel_32
 intel_osx_32 : FORTLIBS  = /opt/intel/fc/10.1.006/lib
 intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
-intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -I $(INC_DIR)/gd
+intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
 intel_osx_32 : CC        = icc 
 intel_osx_32 : CPP       = icpc
 intel_osx_32 : FC        = ifort
@@ -135,7 +135,7 @@ intel_osx_32 : $(obj)
 gcc_linux_32 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_gcc_32
 gcc_linux_32 : FORTLIBS  = -L/opt/intel/fc/10.1.021/lib
 gcc_linux_32 : FFLAGS    = -O2 -m32 -D pp_noappend -ffree-form
-gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX -I($INC_DIR)/gd
+gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
 gcc_linux_32 : CC        = gcc
 gcc_linux_32 : CPP       = g++
 gcc_linux_32 : FC        = gfortran
@@ -150,7 +150,7 @@ gcc_linux_32 : $(obj)
 intel_linux_32_dbg : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_32
 intel_linux_32_dbg : FORTLIBS  = -L/opt/intel/fc/10.1.021/lib
 intel_linux_32_dbg : FFLAGS    = -O0 -m32 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
-intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -vec_report0 -D pp_LINUX $(INC_DIR)/gd
+intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -vec_report0 -D pp_LINUX
 intel_linux_32_dbg : CC        = icc 
 intel_linux_32_dbg : CPP       = icpc
 intel_linux_32_dbg : FC        = ifort
@@ -165,7 +165,7 @@ intel_linux_32_dbg : $(obj)
 intel_linux_test_32 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_32
 intel_linux_test_32 : FORTLIBS  = /opt/intel/fc/10.1.021/lib
 intel_linux_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
-intel_linux_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_LINUX $(INC_DIR)/gd
+intel_linux_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_LINUX
 intel_linux_test_32 : CC        = icc 
 intel_linux_test_32 : CPP       = icpc
 intel_linux_test_32 : FC        = ifort
@@ -181,7 +181,7 @@ intel_linux_test_32 : $(obj)
 intel_linux_32 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_32
 intel_linux_32 : FORTLIBS  = /opt/intel/fc/10.1.021/lib
 intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
-intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX -I $(INC_DIR)/gd
+intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
 intel_linux_32 : CC        = icc 
 intel_linux_32 : CPP       = icpc
 intel_linux_32 : FC        = ifort
@@ -196,7 +196,7 @@ intel_linux_32 : $(obj)
 intel_linux_64_dbg : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_64
 intel_linux_64_dbg : FORTLIBS  = -L/opt/intel/Compiler/11.0/074/lib/intel64
 intel_linux_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
-intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_LINUX $(INC_DIR)/gd
+intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_LINUX
 intel_linux_64_dbg : CC        = icc 
 intel_linux_64_dbg : CPP       = icpc
 intel_linux_64_dbg : FC        = ifort
@@ -211,7 +211,7 @@ intel_linux_64_dbg : $(obj)
 intel_linux_64 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_64
 intel_linux_64 : FORTLIBS  = -L/opt/intel/Compiler/11.0/074/lib/intel64
 intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend
-intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX $(INC_DIR)/gd
+intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX
 intel_linux_64 : CC        = icc 
 intel_linux_64 : CPP       = icpc
 intel_linux_64 : FC        = ifort
