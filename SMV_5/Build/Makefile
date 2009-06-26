@@ -27,6 +27,14 @@ BUILD_DIR = $(SOURCE_DIR)/../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
 INC_DIR = $(SOURCE_DIR)/include2
 
+# FORTRAN Library directories for various platforms
+
+WIN64FORTLIBDIR  = "C:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia64"
+WIN32FORTLIBDIR  = "C:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia32"
+OSX32FORTLIBDIR  = /opt/intel/fc/10.1.006/lib
+LINUX32FORTLIBDIR  = /opt/intel/fc/10.1.021/lib
+LINUX64FORTLIBDIR  = /opt/intel/Compiler/11.0/074/lib/intel64
+
 # Definition of the object variables
 
 obj = main.o IOscript.o IOshooter.o glui_message.o glui_shooter.o glui_wui.o csphere.o colorbar.o endian.o camera.o IOhrr.o IOwui.o IOobject.o IOtour.o glui_labels.o glui_tour.o smoothlabel.o getdatacolors.o smokeview.o output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o sv_api.o glui_3dsmoke.o glui_clip.o glui_stereo.o glui_blockedit.o glui_motion.o glui_bounds.o egz_stdio.o parseobst.o dmalloc.o objectedit.o assert.o compress3dc.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o glui_colorbar.o skybox.o blockage_test.o segtri.o string_util.o startup.o glui_trainer.o shaders.o getsizes.o getdata.o
@@ -63,14 +71,13 @@ no_target:
 
 # ********  rules for each platform supported *************
 
-
 # ------------- Win 64 ----------------
 #  64 bit windows
 
 intel_win_64 : INC = -I ../../source/include
 intel_win_64 : IMAGELIBS = $(LIB_DIR)/lib_win_intel_32
 intel_win_64 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-intel_win_64 : FORTLIBS  = "C:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia64"
+intel_win_64 : FORTLIBDIR  = $(WIN64FORTLIBDIR)
 intel_win_64 : FFLAGS    = -O2 -fpp -D pp_noappend /Qvec_report0
 intel_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D pp_WIN_INTEL /Qvec_report0
 intel_win_64 : CC        = icl
@@ -87,7 +94,7 @@ intel_win_64 : $(objwin)
 intel_win_32 : INC = -I ../../source/include
 intel_win_32 : IMAGELIBS = $(LIB_DIR)/lib_win_intel_32
 intel_win_32 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-intel_win_32 : FORTLIBS  = "C:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia32"
+intel_win_32 : FORTLIBDIR  = $(WIN32FORTLIBDIR)
 intel_win_32 : FFLAGS    = -O2 -fpp -D pp_noappend /Qvec_report0
 intel_win_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D pp_WIN_INTEL /Qvec_report0
 intel_win_32 : CC        = icl
@@ -102,7 +109,7 @@ intel_win_32 : $(objwin)
 #  OSX TEST running tiger (tiger)
 
 intel_osx_test_32 : IMAGELIBS = -L$(LIB_DIR)/lib_osx_intel_32
-intel_osx_test_32 : FORTLIBS  = /opt/intel/fc/10.1.006/lib
+intel_osx_test_32 : FORTLIBDIR  = $(OSX32FORTLIBDIR)
 intel_osx_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
 intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_OSX
 intel_osx_test_32 : CC        = icc 
@@ -111,14 +118,14 @@ intel_osx_test_32 : FC        = ifort
 intel_osx_test_32 : exe       = smv5_osx_test_32
 
 intel_osx_test_32 : $(obj)
-	g++ -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT $(IMAGELIBS) -lz -ljpeg -lpng -lgd -lglui $(FORTLIBS)/libifcoremt.a $(FORTLIBS)/libimf.a $(FORTLIBS)/libirc.a $(FORTLIBS)/libsvml.a
+	g++ -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT $(IMAGELIBS) -lz -ljpeg -lpng -lgd -lglui $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
 
 # ------------- OSX 32 ----------------
 #  OSX running tiger (tiger)
 
 intel_osx_32 : IMAGELIBS = -L$(LIB_DIR)/lib_osx_intel_32
-intel_osx_32 : FORTLIBS  = /opt/intel/fc/10.1.006/lib
+intel_osx_32 : FORTLIBDIR  = $(OSX32FORTLIBDIR)
 intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
 intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
 intel_osx_32 : CC        = icc 
@@ -127,13 +134,13 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smv5_osx_32
 
 intel_osx_32 : $(obj)
-	g++ -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT $(IMAGELIBS) -lz -ljpeg -lpng -lgd -lglui $(FORTLIBS)/libifcoremt.a $(FORTLIBS)/libimf.a $(FORTLIBS)/libirc.a $(FORTLIBS)/libsvml.a
+	g++ -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT $(IMAGELIBS) -lz -ljpeg -lpng -lgd -lglui $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
 # ------------- Linux 32 ----------------
 #  32 bit linux (acrux) using gnu compilers 
 
 gcc_linux_32 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_gcc_32
-gcc_linux_32 : FORTLIBS  = -L/opt/intel/fc/10.1.021/lib
+gcc_linux_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
 gcc_linux_32 : FFLAGS    = -O2 -m32 -D pp_noappend -ffree-form
 gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
 gcc_linux_32 : CC        = gcc
@@ -142,13 +149,13 @@ gcc_linux_32 : FC        = gfortran
 gcc_linux_32 : exe       = smv5_linux_32
 
 gcc_linux_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lXmu -lgfortran -lGLU -lGL -lm
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lXmu -lgfortran -lGLU -lGL -lm
 
 # ------------- Linux 32 DEBUG ----------------
 #  32 bit debug linux (acrux)
 
 intel_linux_32_dbg : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_32
-intel_linux_32_dbg : FORTLIBS  = -L/opt/intel/fc/10.1.021/lib
+intel_linux_32_dbg : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
 intel_linux_32_dbg : FFLAGS    = -O0 -m32 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
 intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -vec_report0 -D pp_LINUX
 intel_linux_32_dbg : CC        = icc 
@@ -157,13 +164,13 @@ intel_linux_32_dbg : FC        = ifort
 intel_linux_32_dbg : exe       = smv5_linux_32_dbg
 
 intel_linux_32_dbg : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -lXmu -lGLU -lGL -lm
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -lXmu -lGLU -lGL -lm
 
 # ------------- Linux TEST 32 ----------------
 #  32 bit test linux (acrux)
 
 intel_linux_test_32 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_32
-intel_linux_test_32 : FORTLIBS  = /opt/intel/fc/10.1.021/lib
+intel_linux_test_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
 intel_linux_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
 intel_linux_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_LINUX
 intel_linux_test_32 : CC        = icc 
@@ -172,14 +179,14 @@ intel_linux_test_32 : FC        = ifort
 intel_linux_test_32 : exe       = smv5_linux_test_32
 
 intel_linux_test_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS)/libifcore.a $(FORTLIBS)/libimf.a -lglui -lglut -lgd -ljpeg -lpng -lz -lXmu -lGLU -lGL -lm
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -lXmu -lGLU -lGL -lm
 
 
 # ------------- Linux 32 ----------------
 #  32 bit linux (acrux)
 
 intel_linux_32 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_32
-intel_linux_32 : FORTLIBS  = /opt/intel/fc/10.1.021/lib
+intel_linux_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
 intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
 intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
 intel_linux_32 : CC        = icc 
@@ -188,13 +195,13 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smv5_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS)/libifcore.a $(FORTLIBS)/libimf.a -lglui -lglut -lgd -ljpeg -lpng -lz -lXmu -lGLU -lGL -lm
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -lXmu -lGLU -lGL -lm
 
 # ------------- Linux 64 DEBUG ----------------
 # 64 bit debug linux (fire79)
 
 intel_linux_64_dbg : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_64
-intel_linux_64_dbg : FORTLIBS  = -L/opt/intel/Compiler/11.0/074/lib/intel64
+intel_linux_64_dbg : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
 intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_LINUX
 intel_linux_64_dbg : CC        = icc 
@@ -203,13 +210,13 @@ intel_linux_64_dbg : FC        = ifort
 intel_linux_64_dbg : exe       = smv5_linux_64_dbg
 
 intel_linux_64_dbg : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc -lXmu -lGLU -lGL -lm
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc -lXmu -lGLU -lGL -lm
 
 # ------------- Linux 64 ----------------
 # 64 bit linux (fire79)
 
 intel_linux_64 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_64
-intel_linux_64 : FORTLIBS  = -L/opt/intel/Compiler/11.0/074/lib/intel64
+intel_linux_64 : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend
 intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX
 intel_linux_64 : CC        = icc 
@@ -218,7 +225,7 @@ intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smv5_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) $(FORTLIBS) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc -lXmu -lGLU -lGL -lm
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc -lXmu -lGLU -lGL -lm
 
 #-------------- Clean Target to remove Object and Module files -----------
 
