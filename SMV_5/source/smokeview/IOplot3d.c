@@ -56,7 +56,7 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   int nloaded=0;
   int nx, ny, nz;
   int pn;
-  size_t plot3dfilelen;
+  FILE_SIZE plot3dfilelen;
   int local_starttime=0, local_stoptime=0, file_size=0;
   int local_starttime0=0, local_stoptime0=0;  
   float delta_time, delta_time0;

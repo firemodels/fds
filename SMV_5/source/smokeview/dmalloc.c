@@ -31,7 +31,7 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
 #ifdef _DEBUG
     if(size!=0&&size<=stat.dwAvailPhys-0.1*stat.dwTotalPhys){
       printf("*** Available Memory: %i M \n",
-            stat.dwAvailPhys/(1024*1024));
+           (int)stat.dwAvailPhys/(1024*1024));
     }
 #endif
     if(size!=0&&size>stat.dwAvailPhys-0.1*stat.dwTotalPhys){

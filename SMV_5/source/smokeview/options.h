@@ -47,6 +47,12 @@
 // #define pp_GPU_BLANK
 #endif
 
+#ifdef X64
+#define FILE_SIZE unsigned long
+#else
+#define FILE_SIZE unsigned int
+#endif
+
 #define pp_RENDER
 
 #ifndef X64
