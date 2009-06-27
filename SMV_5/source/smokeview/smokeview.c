@@ -3757,8 +3757,13 @@ void version(void){
 #ifdef pp_OSX
     printf("Platform: OS X\n");
 #endif
+#ifndef pp_LINUX64
 #ifdef pp_LINUX
     printf("Platform: LINUX\n");
+#endif
+#endif
+#ifdef pp_LINUX64
+    printf("Platform: LINUX64\n");
 #endif
 
 }
