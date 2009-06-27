@@ -964,7 +964,7 @@ void update_all_partvis2(void){
 
 void readpart(char *file, int ifile, int flag, int *errorcode){
   int nmax, n, i;
-  size_t lenfile;
+  FILE_SIZE lenfile;
   float *tcopy;
   unsigned char *isprinkcopy;
   int error=0;

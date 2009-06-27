@@ -559,7 +559,7 @@ end subroutine getdirval
 
 !  ------------------ getslicedata ------------------------ 
 
-subroutine getslicedata(slicefilename2,longlabel,shortlabel,units,&
+subroutine getslicedata(slicefilename,longlabel,shortlabel,units,&
             is1,is2,js1,js2,ks1,ks2,idir,qmin,qmax,qdata,times,nstepsmax,sliceframestep,&
 			endian,settmin_s,settmax_s,tmin_s,tmax_s)
 #ifdef pp_cvf
@@ -568,8 +568,7 @@ subroutine getslicedata(slicefilename2,longlabel,shortlabel,units,&
 
 implicit none
 
-character(len=*) :: slicefilename2, longlabel, shortlabel,units
-character(len=255) :: slicefilename
+character(len=*) :: slicefilename, longlabel, shortlabel,units
 
 real, intent(out) :: qmin, qmax
 real, intent(out), dimension(*) :: qdata
@@ -598,8 +597,6 @@ integer :: ii, kk
 integer :: joff, koff
 integer :: count
 
-slicefilename=""
-slicefilename=slicefilename2(1:len(slicefilename2))
 lu11 = 11
 joff = 0
 koff = 0

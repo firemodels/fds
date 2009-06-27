@@ -471,6 +471,8 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       }
     }
     else{
+      FILE_SIZE labellen=LABELLEN;
+
       if(NewMemory((void **)&sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps)==0||
          NewMemory((void **)&sd->slicetimes,sizeof(float)*sd->nsteps)==0){
         *errorcode=1;
@@ -482,7 +484,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
                    &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,&sd->idir,
                    &qmin,&qmax,sd->qslicedata,sd->slicetimes,&sd->nsteps,&sliceframestep, &endian,
                    &settmin_s,&settmax_s,&tmin_s,&tmax_s,
-                   slicefilelen,LABELLEN,LABELLEN,LABELLEN);
+                   slicefilelen,labellen,labellen,labellen);
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
     }
     local_stoptime = glutGet(GLUT_ELAPSED_TIME);

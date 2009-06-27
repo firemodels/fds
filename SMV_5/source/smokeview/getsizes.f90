@@ -767,7 +767,7 @@ end subroutine getsizes2
 
 !  ------------------ getsliceparms ------------------------ 
 
-subroutine getsliceparms(slicefilename2, endian, ip1, ip2, jp1, jp2, kp1, kp2, slice3d, error)
+subroutine getsliceparms(slicefilename, endian, ip1, ip2, jp1, jp2, kp1, kp2, slice3d, error)
 
 #ifdef pp_cvf
 !DEC$ ATTRIBUTES ALIAS:'_getsliceparms@44' :: getsliceparms
@@ -775,8 +775,7 @@ subroutine getsliceparms(slicefilename2, endian, ip1, ip2, jp1, jp2, kp1, kp2, s
 
 implicit none
 
-character(len=*) :: slicefilename2
-character(len=256) :: slicefilename
+character(len=*) :: slicefilename
 logical :: exists
 
 integer, intent(out) :: ip1, ip2, jp1, jp2, kp1, kp2, slice3d, error
@@ -787,9 +786,6 @@ character(len=30) :: longlbl, shortlbl, unitlbl
 
 
 integer :: lu11
-
-slicefilename=""
-slicefilename=slicefilename2(1:len(slicefilename2))
 
 ip1 = 0
 ip2 = 0
@@ -843,7 +839,7 @@ end subroutine getsliceparms
 
 !  ------------------ getslicesizes ------------------------ 
 
-subroutine getslicesizes(slicefilename2, nslicei, nslicej, nslicek, nsteps, sliceframestep,&
+subroutine getslicesizes(slicefilename, nslicei, nslicej, nslicek, nsteps, sliceframestep,&
    endian, error, settmin_s, settmax_s, tmin_s, tmax_s, &
    headersize, framesize, statfile)
 
@@ -853,8 +849,7 @@ subroutine getslicesizes(slicefilename2, nslicei, nslicej, nslicek, nsteps, slic
 
 implicit none
 
-character(len=*) :: slicefilename2
-character(len=255) :: slicefilename
+character(len=*) :: slicefilename
 logical :: exists
 
 integer, intent(out) :: nslicei, nslicej, nslicek, nsteps, error
@@ -875,8 +870,6 @@ logical :: connected, load
 integer :: idir, joff, koff
 integer :: count
 
-slicefilename=""
-slicefilename=slicefilename2(1:len(slicefilename2))
 error=0
 lu11 = 11
 nsteps = 0 
