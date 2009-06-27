@@ -53,7 +53,7 @@
 #define BIT64
 #endif
 
-#ifdef LINUX64
+#ifdef pp_LINUX64
 #undef BIT64
 #define BIT64
 #endif
