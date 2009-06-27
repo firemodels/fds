@@ -4,13 +4,13 @@
 
 #ifdef pp_WIN_INTEL
 #pragma warning (disable:810)		/* conversion from xx to yy may lose sig bits */
-#pragma warning (disable:869)		/* parameer was never referenced */
-#pragma warning (disable:4018)		/* signied/unsigned match */
+#pragma warning (disable:869)		/* parameter was never referenced */
+//#pragma warning (disable:4018)		/* signied/unsigned match */
 #pragma warning (disable:4206)		/* translation unit empty */
-#pragma warning (disable:4267)		/* size_t to int possible loss of data */
-#pragma warning (disable:4389)		/* signed/unsigned mis-match */
+//#pragma warning (disable:4267)		/* size_t to int possible loss of data */
+//#pragma warning (disable:4389)		/* signed/unsigned mis-match */
 #pragma warning (disable:1418)		/* external function definition with no prior declaration */
-#pragma warning (disable:1599)		/* declaration hides variable */
+// #pragma warning (disable:1599)		/* declaration hides variable */
 #pragma warning (disable:981)		/* operands are evaluated in unspecified order */
 #pragma warning (disable:1419)		/* external declaration in primary source file */
 #pragma warning (disable:1572)		/* floating-point equality and inequality comparisons are unreliable */
