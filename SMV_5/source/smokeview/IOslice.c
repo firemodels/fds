@@ -251,7 +251,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 /* ------------------ readslice ------------------------ */
 
 void readslice(char *file, int ifile, int flag, int *errorcode){
-  size_t slicefilelen;
+  unsigned int slicefilelen;
   float *xplt_local, *yplt_local, *zplt_local;
   int blocknumber;
   int error;
@@ -1170,7 +1170,7 @@ void getsliceparams(void){
   char *file;
   slice *sd,*sdold;
   int error;
-  size_t lenfile;
+  unsigned int  lenfile;
   float position;
   int is1, is2, js1, js2, ks1, ks2;
   int iblock;
