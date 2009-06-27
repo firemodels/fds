@@ -3380,10 +3380,8 @@ typedef struct {
         nslice--;
         break;
       }
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim(buffer);
 
+      trim(buffer);
       len=strlen(buffer);
       sd = sliceinfo+islice;
       NewMemory((void **)&sd->reg_file,(unsigned int)(len+1));
