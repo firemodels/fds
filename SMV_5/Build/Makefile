@@ -212,6 +212,21 @@ intel_linux_64_dbg : exe       = smv5_linux_64_dbg
 intel_linux_64_dbg : $(obj)
 	$(CPP) -m64 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc -lXmu -lGLU -lGL -lm
 
+# ------------- Linux 64 Test ----------------
+# 64 bit test linux (fire79)
+
+intel_linux_test_64 : IMAGELIBS = -L$(LIB_DIR)/lib_linux_intel_64
+intel_linux_test_64 : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
+intel_linux_test_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend
+intel_linux_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX -D pp_BETA
+intel_linux_test_64 : CC        = icc 
+intel_linux_test_64 : CPP       = icpc
+intel_linux_test_64 : FC        = ifort
+intel_linux_test_64 : exe       = smv5_linux_test_64
+
+intel_linux_test_64 : $(obj)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) $(IMAGELIBS) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc -lXmu -lGLU -lGL -lm
+
 # ------------- Linux 64 ----------------
 # 64 bit linux (fire79)
 
