@@ -48,7 +48,7 @@
 #endif
 
 #ifdef X64
-#define FILE_SIZE unsigned long
+#define FILE_SIZE unsigned long long
 #else
 #define FILE_SIZE unsigned int
 #endif
