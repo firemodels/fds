@@ -8,3 +8,4 @@
 8.  test option to open up the FDS-SMV issue tracker from the Smokeview (windows version) help menu
 9.  for 64 bit smokeview, build with large heap and stack size
 10. test device scaling fix - addresses issue 776
+11. test fix to allow slice files to load on 64 bit linux and windows smokeview's
