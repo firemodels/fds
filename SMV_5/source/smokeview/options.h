@@ -40,6 +40,7 @@
 #define pp_COMPRESS
 #define pp_noappend
 #include "pragmas.h"
+
 #ifndef X64
 #define pp_GPU
 #define pp_CULL
@@ -48,6 +49,16 @@
 #endif
 
 #ifdef X64
+#undef BIT64
+#define BIT64
+#endif
+
+#ifdef LINUX64
+#undef BIT64
+#define BIT64
+#endif
+
+#ifdef BIT64
 #define FILE_SIZE unsigned long long
 #else
 #define FILE_SIZE unsigned int
