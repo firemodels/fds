@@ -559,7 +559,7 @@ end subroutine getdirval
 
 !  ------------------ getslicedata ------------------------ 
 
-subroutine getslicedata(slicefilename,longlabel,shortlabel,units,&
+subroutine getslicedata(slicefilename2,longlabel,shortlabel,units,&
             is1,is2,js1,js2,ks1,ks2,idir,qmin,qmax,qdata,times,nstepsmax,sliceframestep,&
 			endian,settmin_s,settmax_s,tmin_s,tmax_s)
 #ifdef pp_cvf
@@ -568,7 +568,8 @@ subroutine getslicedata(slicefilename,longlabel,shortlabel,units,&
 
 implicit none
 
-character(len=*) :: slicefilename, longlabel, shortlabel,units
+character(len=*) :: slicefilename2, longlabel, shortlabel,units
+character(len=255) :: slicefilename
 
 real, intent(out) :: qmin, qmax
 real, intent(out), dimension(*) :: qdata
@@ -597,6 +598,8 @@ integer :: ii, kk
 integer :: joff, koff
 integer :: count
 
+slicefilename=""
+slicefilename=slicefilename2(1:len(slicefilename2))
 lu11 = 11
 joff = 0
 koff = 0
@@ -638,13 +641,13 @@ read(lu11,iostat=error)longlbl
 read(lu11,iostat=error)shortlbl
 read(lu11,iostat=error)unitlbl
 
-longlabel=trim(longlbl)//char(0)
+! longlabel=trim(longlbl)//char(0)
 
 lenshort = min(len_trim(shortlabel),6)
-shortlabel=shortlbl(1:lenshort)//char(0)
+! shortlabel=shortlbl(1:lenshort)//char(0)
 
 lenunits = min(len_trim(unitlbl),6)
-units=unitlbl(1:lenunits)//char(0)
+! units=unitlbl(1:lenunits)//char(0)
 
 read(lu11,iostat=error)ip1, ip2, jp1, jp2, kp1, kp2
 is1 = ip1 
