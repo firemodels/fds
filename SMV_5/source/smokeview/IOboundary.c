@@ -36,7 +36,7 @@ int getpatchindex(const patch *patchi);
 
 void readpatch(int ifile, int flag, int *errorcode){
   int error;
-  size_t lenfile;
+  FILE_SIZE lenfile;
   int patchfilenum;
   float *xyzpatchcopy;
   float *xyzpatch_ignitecopy;
@@ -187,8 +187,10 @@ void readpatch(int ifile, int flag, int *errorcode){
   lenfile = strlen(file);
 
   if(patchinfo[ifile].compression_type==0){
+    FILE_SIZE labellen=LABELLEN;
+
     FORTgetpatchsizes1(file,patchlonglabel,patchshortlabel,patchunit,&endian,&meshi->npatches,&headersize,&error,
-                       lenfile,LABELLEN,LABELLEN,LABELLEN);
+                       lenfile,labellen,labellen,labellen);
     if(error!=0){
       readpatch(ifile,UNLOAD,&error);
       *errorcode=1;
