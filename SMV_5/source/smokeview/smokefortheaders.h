@@ -70,7 +70,7 @@ STDCALL FORTfcreate_part5sizefile(char *part5file, char *part5sizefile, int *ang
                                   int lenpart5file, int lenpart5sizefile);
 
 STDCALL FORTgetsliceparms(char *file,int *endian,
-                          int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,int *slice3d, int *error,int lenfile);
+                          int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,int *slice3d, int *error,unsigned int lenfile);
 STDCALL FORTclosepart(void);
 STDCALL FORTclosepatch(void);
 STDCALL FORTclosezone(void);
@@ -116,13 +116,13 @@ STDCALL FORTgetslicesizes(char *slicefilename, int *nslicei, int *nslicej, int *
                           int *nsteps,int *sliceframestep, int *endian, int *error, 
                           int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p,
                           int *headersize, int *framesize, int *statfile,
-                          int slicefilelen);
+                          unsigned int slicefilelen);
 STDCALL FORTgetslicedata(char *slicefilename, char *longlabels, char *shortlabels, 
                          char *units, int *is1,int *is2,int *js1,int *js2, int *ks1,int *ks2,
                          int *idir, float *qslicemin,float *qslicemax,
                          float *qslicedata,float *slicetimes, int *nsteps, int *sliceframestep, int *endian,
                          int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p,
-                         int slicefilelen, int longlableslen, int shortlabelslen, int unitslen);
+                         unsigned int slicefilelen, unsigned int longlableslen, unsigned int shortlabelslen, unsigned int unitslen);
 STDCALL FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, int filelen);
 
 STDCALL FORTgetplot3dqa(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int filelen);
