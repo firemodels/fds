@@ -33,7 +33,7 @@ WIN64FORTLIBDIR  = "C:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia64"
 WIN32FORTLIBDIR  = "C:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia32"
 OSX32FORTLIBDIR  = /opt/intel/fc/10.1.006/lib
 LINUX32FORTLIBDIR  = /opt/intel/fc/10.1.021/lib
-LINUX64FORTLIBDIR  = /opt/intel/Compiler/11/lib/intel64
+LINUX64FORTLIBDIR  = /opt/intel/11/lib/intel64
 
 # Definition of the object variables
 
