@@ -9489,8 +9489,13 @@ void writeini(int flag){
 #ifdef pp_OSX
     fprintf(fileout,"# Platform: OS X\n");
 #endif
+#ifndef pp_LINUX64
 #ifdef pp_LINUX
     fprintf(fileout,"# Platform: LINUX\n");
+#endif
+#endif
+#ifdef pp_LINUX64
+    fprintf(fileout,"# Platform: LINUX64\n");
 #endif
 
     if(no_graphics==0){
