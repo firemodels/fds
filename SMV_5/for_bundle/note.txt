@@ -9,3 +9,4 @@
 9.  for 64 bit smokeview, build with large heap and stack size
 10. test device scaling fix - addresses issue 776
 11. test fix to allow slice files to load on 64 bit linux and windows smokeview's
+12. add sub-menus to isosurface, particles and 3d smoke file type to make it easier to load ALL files
