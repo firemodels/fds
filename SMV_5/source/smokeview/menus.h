@@ -6168,7 +6168,12 @@ static int in_menu=0;
     }
     glutAddMenuEntry("Unload All",-1);
 
-    CREATEMENU(particlesubmenu,ParticleMenu);
+    if(nmeshes==1){
+      CREATEMENU(particlemenu,ParticleMenu);
+    }
+    else{
+      CREATEMENU(particlesubmenu,ParticleMenu);
+    }
     for(ii=0;ii<npartinfo;ii++){
       i = partorderindex[ii];
       if(partinfo[i].evac==1)continue;
@@ -6181,19 +6186,18 @@ static int in_menu=0;
       }
       glutAddMenuEntry(menulabel,i);
     }
-
-    CREATEMENU(particlemenu,ParticleMenu);
     {
       int useitem;
       int atleastone=0;
       particle *parti, *partj;
 
       if(nmeshes>1){
+        CREATEMENU(particlemenu,ParticleMenu);
         if(npartinfo>0){
           if(partinfo->version==1){
             strcpy(menulabel,"Particles - All meshes");
             glutAddMenuEntry(menulabel,-11);
-            glutAddSubMenu("Particles - single mesh",particlesubmenu);
+            glutAddSubMenu("Particles - Single mesh",particlesubmenu);
             glutAddMenuEntry("-",-2);
           }
           else{
@@ -6216,16 +6220,13 @@ static int in_menu=0;
                 glutAddMenuEntry(menulabel,-useitem-10);
               }
             }
-            glutAddSubMenu("Particles - single mesh",particlesubmenu);
+            glutAddSubMenu("Particles - Single mesh",particlesubmenu);
             if(atleastone==1)glutAddMenuEntry("-",-2);
           }
         }
       }
     }
 
-    if(nmeshes<=1){
-      glutAddSubMenu("Particles - single mesh",particlesubmenu);
-    }
     if(npartloaded<=1){
       glutAddMenuEntry("Unload",-1);
     }
@@ -6720,7 +6721,12 @@ static int in_menu=0;
       int n_soot_menu=0, n_hrr_menu=0, n_water_menu=0;
 
       if(nsmoke3d>0){
-        CREATEMENU(loadsmoke3dsootmenu,LoadSmoke3DMenu);
+        if(nmeshes==1){
+          CREATEMENU(loadsmoke3dmenu,LoadSmoke3DMenu);
+        }
+        if(nmeshes>1){
+          CREATEMENU(loadsmoke3dsootmenu,LoadSmoke3DMenu);
+        }
         for(i=0;i<nsmoke3d;i++){
           smoke3di = smoke3dinfo + i;
           if(smoke3di->type!=1)continue;
@@ -6732,7 +6738,9 @@ static int in_menu=0;
           strcat(menulabel,smoke3di->menulabel);
           glutAddMenuEntry(menulabel,i);
         }
-        CREATEMENU(loadsmoke3dhrrmenu,LoadSmoke3DMenu);
+        if(nmeshes>1){
+          CREATEMENU(loadsmoke3dhrrmenu,LoadSmoke3DMenu);
+        }
         for(i=0;i<nsmoke3d;i++){
           smoke3di = smoke3dinfo + i;
           if(smoke3di->type!=2)continue;
@@ -6744,7 +6752,9 @@ static int in_menu=0;
           strcat(menulabel,smoke3di->menulabel);
           glutAddMenuEntry(menulabel,i);
         }
-        CREATEMENU(loadsmoke3dwatermenu,LoadSmoke3DMenu);
+        if(nmeshes>1){
+          CREATEMENU(loadsmoke3dwatermenu,LoadSmoke3DMenu);
+        }
         for(i=0;i<nsmoke3d;i++){
           smoke3di = smoke3dinfo + i;
           if(smoke3di->type!=3)continue;
@@ -6756,7 +6766,9 @@ static int in_menu=0;
           strcat(menulabel,smoke3di->menulabel);
           glutAddMenuEntry(menulabel,i);
         }
-        CREATEMENU(loadsmoke3dmenu,LoadSmoke3DMenu);
+        if(nmeshes>1){
+          CREATEMENU(loadsmoke3dmenu,LoadSmoke3DMenu);
+        }
         {
           int useitem;
           smoke3d *smoke3dj;
@@ -6780,9 +6792,11 @@ static int in_menu=0;
             }
             glutAddMenuEntry("-",-2);
           }
-          if(n_soot_menu>0)glutAddSubMenu("soot MASS FRACTION - single mesh",loadsmoke3dsootmenu);
-          if(n_hrr_menu>0)glutAddSubMenu("HRRPUV - single mesh",loadsmoke3dhrrmenu);
-          if(n_water_menu>0)glutAddSubMenu("Water - single mesh",loadsmoke3dwatermenu);
+          if(nmeshes>1){
+            if(n_soot_menu>0)glutAddSubMenu("soot MASS FRACTION - Single mesh",loadsmoke3dsootmenu);
+            if(n_hrr_menu>0)glutAddSubMenu("HRRPUV - Single mesh",loadsmoke3dhrrmenu);
+            if(n_water_menu>0)glutAddSubMenu("Water - Single mesh",loadsmoke3dwatermenu);
+          }
         }
         if(nsmoke3dloaded==1)glutAddMenuEntry("Unload",-1);
         if(nsmoke3dloaded>1)glutAddSubMenu("Unload",unloadsmoke3dmenu);
@@ -6936,7 +6950,45 @@ static int in_menu=0;
       }
       glutAddMenuEntry("Unload All",-1);
 
-      CREATEMENU(loadpatchmenu,LoadPatchMenu);
+      if(nmeshes>1&&loadpatchsubmenus==NULL){
+        nloadpatchsubmenus=0;
+        NewMemory((void **)&loadpatchsubmenus,npatch_files*sizeof(int));
+      }
+
+      if(nmeshes>1){
+        CREATEMENU(loadpatchsubmenus[nloadpatchsubmenus],LoadPatchMenu);
+        nloadpatchsubmenus++;
+      }
+      else{
+        CREATEMENU(loadpatchmenu,LoadPatchMenu);
+      }
+
+      for(ii=0;ii<npatch_files;ii++){
+        patch *patch1, *patch2;
+
+        i = patchorderindex[ii];
+        patch2 = patchinfo + i;
+        if(ii>0){
+          patch1 = patchinfo + patchorderindex[ii-1];
+          if(nmeshes>1&&strcmp(patch1->label.longlabel,patch2->label.longlabel)!=0){
+            CREATEMENU(loadpatchsubmenus[nloadpatchsubmenus],LoadPatchMenu);
+            nloadpatchsubmenus++;
+          }
+        }
+
+        if(patchinfo[i].loaded==1){
+          STRCPY(menulabel,check);
+          STRCAT(menulabel,patchinfo[i].menulabel);  
+        }
+        else{
+          STRCPY(menulabel,patchinfo[i].menulabel);
+        }
+        glutAddMenuEntry(menulabel,i);
+      }
+
+      if(nmeshes>1){
+        CREATEMENU(loadpatchmenu,LoadPatchMenu);
+      }
 
       {
         int useitem;
@@ -6960,20 +7012,32 @@ static int in_menu=0;
             }
           }
           glutAddMenuEntry("-",-2);
+
+          for(ii=0;ii<npatch_files;ii++){
+            patch *patch1, *patch2;
+
+            i = patchorderindex[ii];
+            patch2 = patchinfo + i;
+            if(ii==0){
+              nloadpatchsubmenus=0;
+              strcpy(menulabel,patch2->label.longlabel);
+              strcat(menulabel," - Single mesh");
+              glutAddSubMenu(menulabel,loadpatchsubmenus[nloadpatchsubmenus]);
+              nloadpatchsubmenus++;
+            }
+            else{
+              patch1 = patchinfo + patchorderindex[ii-1];
+              if(strcmp(patch1->label.longlabel,patch2->label.longlabel)!=0){
+                strcpy(menulabel,patch2->label.longlabel);
+                strcat(menulabel," - Single mesh");
+                glutAddSubMenu(menulabel,loadpatchsubmenus[nloadpatchsubmenus]);
+                nloadpatchsubmenus++;
+              }
+            }
+          }
         }
       }
 
-      for(ii=0;ii<npatch_files;ii++){
-        i = patchorderindex[ii];
-        if(patchinfo[i].loaded==1){
-          STRCPY(menulabel,check);
-          STRCAT(menulabel,patchinfo[i].menulabel);  
-        }
-        else{
-          STRCPY(menulabel,patchinfo[i].menulabel);
-        }
-        glutAddMenuEntry(menulabel,i);
-      }
       if(npatchloaded>1){
         glutAddSubMenu("Unload",unloadpatchmenu);
       }
@@ -7009,6 +7073,9 @@ static int in_menu=0;
         nisosubmenus++;
       }
 
+      if(nmeshes==1){
+        CREATEMENU(loadisomenu,LoadIsoMenu);
+      }
       for(ii=0;ii<niso;ii++){
         iso *iso1, *iso2;
 
@@ -7016,7 +7083,7 @@ static int in_menu=0;
         if(ii>0){
           iso1 = isoinfo + isoorderindex[ii-1];
           iso2 = isoinfo + isoorderindex[ii];
-          if(strcmp(iso1->label.longlabel,iso2->label.longlabel)!=0){
+          if(nmeshes>1&&strcmp(iso1->label.longlabel,iso2->label.longlabel)!=0){
             CREATEMENU(isosubmenus[nisosubmenus],LoadIsoMenu);
             nisosubmenus++;
           }
@@ -7031,12 +7098,12 @@ static int in_menu=0;
         glutAddMenuEntry(menulabel,i);
       }
 
-      CREATEMENU(loadisomenu,LoadIsoMenu);
       {
         int useitem;
         iso *isoi, *isoj;
 
         if(nmeshes>1){
+         CREATEMENU(loadisomenu,LoadIsoMenu);
           for(i=0;i<niso;i++){
             useitem=i;
             isoi = isoinfo + i;
@@ -7062,13 +7129,17 @@ static int in_menu=0;
             iso1 = isoinfo + i;
             if(ii==0){
               nisosubmenus=0;
-              glutAddSubMenu(iso1->label.longlabel,isosubmenus[nisosubmenus]);
+              strcpy(menulabel,iso1->label.longlabel);
+              strcat(menulabel," - Single mesh");
+              glutAddSubMenu(menulabel,isosubmenus[nisosubmenus]);
               nisosubmenus++;
             }
             else{
               iso2 = isoinfo + isoorderindex[ii-1];
               if(strcmp(iso1->label.longlabel,iso2->label.longlabel)!=0){
-                glutAddSubMenu(iso1->label.longlabel,isosubmenus[nisosubmenus]);
+                strcpy(menulabel,iso1->label.longlabel);
+                strcat(menulabel," - Single mesh");
+                glutAddSubMenu(menulabel,isosubmenus[nisosubmenus]);
                 nisosubmenus++;
               }
             }

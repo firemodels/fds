@@ -970,6 +970,7 @@ void initvars1(void){
 #ifdef pp_SHOOTER
   visShooter=0;
   isosubmenus=NULL;
+  loadpatchsubmenus=NULL;
   shooter_history=10.0;
   shootpointinfo=NULL;
   shoottimeinfo=NULL;
