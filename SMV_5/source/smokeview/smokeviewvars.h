@@ -962,6 +962,7 @@ SVEXTERN int nslicetypes;
 SVEXTERN int nvslicetypes;
 SVEXTERN int nisotypes;
 SVEXTERN int *isosubmenus, nisosubmenus;
+SVEXTERN int *loadpatchsubmenus, nloadpatchsubmenus;
 SVEXTERN int npatchtypes;
 SVEXTERN char **patchlabellist;
 SVEXTERN int *sliceindex;
