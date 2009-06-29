@@ -33,7 +33,7 @@ INC_DIR = $(SOURCE_DIR)/include2
 
 # SYSTEM libraries
 
-SYSTEMLIBS = -lptreads -lXmu -lGLU -lGL -lm
+SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
 
 # FORTRAN Library directories for various platforms
 
