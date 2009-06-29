@@ -4151,7 +4151,7 @@ Contains
                    JJ = Floor( M%CELLSJ(Floor((Y1-M%YS)*M%RDYINT)) + 1.0_EB  )
                    KK = Floor( M%CELLSK(Floor((Z1-M%ZS)*M%RDZINT)) + 1.0_EB  )
                    I_OBST = OBST_INDEX_C(M%CELL_INDEX(II,JJ,KK))
-                   If ( M%SOLID(M%CELL_INDEX(II,JJ,KK) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) ) Then
+                   If ( M%SOLID(M%CELL_INDEX(II,JJ,KK)) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN ) Then
                       HUMAN_GRID(i,j)%IMESH = 0 ! No smoke inside OBSTs
                    Else
                       HUMAN_GRID(i,j)%II = II
@@ -4166,7 +4166,7 @@ Contains
              HUMAN_GRID(i,j)%IMESH = 0
           End Do MESH_LOOP
           I_OBST = OBST_INDEX_C(CELL_INDEX(I,J,1))
-          If (.Not. (SOLID(CELL_INDEX(i,j,1) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN)) ) Then
+          If (.Not. (SOLID(CELL_INDEX(i,j,1)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN) ) Then
              HUMAN_GRID(i,j)%IMESH = HUMAN_GRID(i,j)%IMESH
           Else
              ! This grid cell is solid ==> No humans in this cell
