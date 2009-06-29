@@ -247,8 +247,6 @@ intel_linux_64 : CPP       = icpc
 intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smv5_linux_64
 
-SYSTEMLIBS = -lptreads -lXmu -lGLU -lGL -lm
-
 intel_linux_64 : $(obj)
 	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
