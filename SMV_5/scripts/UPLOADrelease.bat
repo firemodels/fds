@@ -29,6 +29,7 @@ Rem set level=Release-2_Minor
 set level=Release-3_Maintenance
 set upload_win32=1
 set upload_linux32=1
+set upload_linux64=1
 set upload_osx32=1
 
 set version=%smv_version%
@@ -62,6 +63,20 @@ if not %upload_linux32% == 1 goto endif_linux32
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
        googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
 :endif_linux32
+
+Rem --------------- 64 bit Linux ----------------
+
+if not %upload_linux64% == 1 goto endif_linux64
+  set glabels=Type-Archive,Opsys-Linux_64,%level%
+  set dplatform=64 bit Linux
+  set platform=linux64
+  set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
+  set exe=smv_%version%_%platform%.tar.gz
+  echo.
+  echo Uploading %summary% - %exe%
+  echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+       googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+:endif_linux64
 
 Rem --------------- 32 bit OSX ----------------
 
