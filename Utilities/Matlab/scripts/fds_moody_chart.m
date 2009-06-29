@@ -6,6 +6,8 @@ close all
 clear all
 
 addpath('../functions')
+paper_width  = 6.0; % inches
+paper_height = 4.5; % inches
 
 % % test Colebrook formula
 % Re = 1e5;
@@ -17,8 +19,6 @@ n = 100;
 Re = logspace(3.3,8,n);
 RR = [0,1e-5,1e-4,1e-3,1e-2,1e-1];
 tol = 1e-3;
-
-axes('Fontsize',12)
 
 for i=1:length(RR)
 
@@ -40,9 +40,15 @@ end
 Re_DNS = logspace(2,3.3);
 f_DNS = (24./Re_DNS);
 loglog(Re_DNS,f_DNS,'b-')
+
+set(gca,'Units','inches')
+set(gca,'FontName','Times')
+set(gca,'FontSize',12)
+set(gca,'Position',[1,0.75,4.5,3.45])
+
 axis([1e2 1e8 .005 .2]) % based on MYO
-xlabel('Re')
-ylabel('friction factor')
+xlabel('Re','Interpreter','LaTeX','FontSize',14)
+ylabel('$f$','Interpreter','LaTeX','FontSize',14,'Rotation',0.0)
 
 repository = '../../../Verification/Flowfields/';
 
@@ -71,19 +77,21 @@ dpdx = -100;
 [f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-100_N16_devc.csv']);H(2)=loglog(Re,f,'b^');
 [f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-100_N32_devc.csv']);H(3)=loglog(Re,f,'bo');
 
-%aa = get(gca,'Position') % 0.1300    0.1381    0.7750    0.7869
-set(gca,'Position',[0.1300    0.1381    0.75    0.7869])
-text(1.3e8,2e-1,'\epsilon/D','FontSize',12)
-text(1.3e8,.82e-2,num2str(RR(2)),'Interpreter','LaTeX','FontSize',12)
-text(1.3e8,1.2e-2,num2str(RR(3)),'Interpreter','LaTeX','FontSize',12)
-text(1.3e8,1.95e-2,num2str(RR(4)),'Interpreter','LaTeX','FontSize',12)
-text(1.3e8,3.85e-2,num2str(RR(5)),'Interpreter','LaTeX','FontSize',12)
-text(1.3e8,1.02e-1,num2str(RR(6)),'Interpreter','LaTeX','FontSize',12)
-legend(H,'N=8','N=16','N=32','Location','Southwest')
+text(1.3e8,2e-1,'$\varepsilon/D$','Interpreter','LaTeX','FontSize',12,'Fontname','Times')
+text(1.3e8,.82e-2,num2str(RR(2)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
+text(1.3e8,1.2e-2,num2str(RR(3)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
+text(1.3e8,1.95e-2,num2str(RR(4)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
+text(1.3e8,3.85e-2,num2str(RR(5)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
+text(1.3e8,1.02e-1,num2str(RR(6)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
+h = legend(H,'$N_z=8$','$N_z=16$','$N_z=32$','Location','Southwest');
+set(h,'Interpreter','LaTeX')
+% print to pdf
+set(gcf,'Visible','on');
 set(gcf,'PaperUnits','inches');
-set(gcf,'PaperSize',[6 4.5]);
-set(gcf,'PaperPositionMode','auto');
+set(gcf,'PaperSize',[paper_width paper_height]);
+set(gcf,'PaperPosition',[0 0 paper_width paper_height]);
 print(gcf,'-dpdf','../../../Manuals/FDS_5_Verification_Guide/FIGURES/fds_moody_chart')
 
-
+close all
+clear all
 
