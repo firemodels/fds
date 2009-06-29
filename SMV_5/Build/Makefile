@@ -132,7 +132,7 @@ intel_osx_test_32 : $(obj)
 # ------------- OSX 32 ----------------
 #  OSX running tiger (tiger)
 
-intel_osx_32 : IMAGELIB = $(LIB_DIR)/lib_osx_intel_32
+intel_osx_32 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_32
 intel_osx_32 : FORTLIBDIR  = $(OSX32FORTLIBDIR)
 intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
 intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
