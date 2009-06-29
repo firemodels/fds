@@ -30,12 +30,13 @@ rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
 tar cvf $LINUXDIR.tar $LINUXDIR/.
 gzip $LINUXDIR.tar
 
-#mkdir -p $LINUXDIR64
-#mkdir -p $LINUXDIR64/Documentation
-#cp readme.html $LINUXDIR64/Documentation/.
+rm -rf $LINUXDIR64
+mkdir -p $LINUXDIR64
+mkdir -p $LINUXDIR64/Documentation
+cp readme.html $LINUXDIR64/Documentation/.
 
-#cp $BINDIR/smv5_linux_64 $LINUXDIR64/.
-#cp $BINDIR/smokezip_linux $LINUXDIR64/.
-#rm -f $LINUXDIR64.tar $LINUXDIR64.tar.gz
-#tar cvf $LINUXDIR64.tar $LINUXDIR64/.
-#gzip $LINUXDIR64.tar
+cp $BINDIR/smv5_linux_64 $LINUXDIR64/.
+cp $BINDIR/smokezip_linux_64 $LINUXDIR64/.
+rm -f $LINUXDIR64.tar $LINUXDIR64.tar.gz
+tar cvf $LINUXDIR64.tar $LINUXDIR64/.
+gzip $LINUXDIR64.tar
