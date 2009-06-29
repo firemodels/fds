@@ -744,14 +744,10 @@ the corresponding location in space and time.  The figure confirms that the adve
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_error.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_error.pdf} }
+      \scalebox{1}{ \includegraphics[height=2.25in]{FIGURES/ns2d_error.pdf} } &
+      \scalebox{1}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_error.pdf} }
    \end{tabular*}
-   \caption{(Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the
-   advective terms in the FDS code are second-order accurate.  The triangles represent the rms error in the $u$-component for grid spacings of $\delta x = L/N$ where $L = 2\pi$ m
-   and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$~s
-   with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing
-   that the viscous terms in the FDS code are second-order accurate.}
+   \caption{(Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the advective terms in the FDS code are second-order accurate.  The triangles represent the rms error in the $u$-component for grid spacings of $\delta x = L/N$ where $L = 2\pi$ m and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$~s with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing that the viscous terms in the FDS code are second-order accurate.}
    \label{fig_ns2d_convergence}
 \end{figure}
 
@@ -918,12 +914,12 @@ In order to decide which formula to use for the wall stress, (\ref{eqn_tauwlam})
 \subsubsection{Laminar}
 \label{laminar}
 
-As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2D laminar (Poiseuille) flow calculation of flow through a straight channel.  The FDS input files are stored in the repository \cite{FDS-SMV_repository} under {\tt FDS-SMV/Verification/Flowfields/poiseuille\_*}. The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.  The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.  The fluid density is $\rho = 1.2$ kg m$^{-3}$ and the viscosity is $0.025$ kg m$^{-1}$ s$^{-1}$.  The mean pressure drop is prescribed to be $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H \approx 160$.  The (Moody) friction factor $f$, which satisfies
+As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2D laminar (Poiseuille) flow calculation of flow through a straight channel.  The FDS input files are stored in the repository \cite{FDS-SMV_repository} under {\tt poiseuille\_*}. The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.  The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.  The fluid density is $\rho = 1.2$ kg m$^{-3}$ and the viscosity is $0.025$ kg m$^{-1}$ s$^{-1}$.  The mean pressure drop is prescribed to be $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H \approx 160$.  The (Moody) friction factor $f$, which satisfies
 \begin{equation}
 \label{eqn_moodyf}
 \Delta p = f \frac{L}{H} \frac{1}{2} \rho \bar{u}^2 \,\mbox{,}
 \end{equation}
-is determined from the steady state mean velocity $\bar{u}$ which is output by FDS for the specified pressure drop.  The exact friction factor for this flow is $f_{exact} = 24/\mbox{Re}_H$.  The friction factor error $|f-f_{exact}|$ is plotted for a range of grid spacings $\Delta z = H/N_z$ in Figure \ref{fig_poiseuille_convergence} demonstrating second-order convergence of the laminar velocity field.
+is determined from the steady state mean velocity $\bar{u}$ which is output by FDS for the specified pressure drop.  The exact friction factor for this flow is $f_{exact} = 24/\mbox{Re}_H$.  The friction factor error $|f-f_{exact}|$ is plotted for a range of grid spacings $\delta z = H/N_z$ in Figure \ref{fig_poiseuille_convergence} demonstrating second-order convergence of the laminar velocity field.
 \begin{figure}
    \begin{center}
       \scalebox{0.8}{\includegraphics{FIGURES/poiseuille_convergence.pdf}}
@@ -940,7 +936,7 @@ To verify the WW wall model for turbulent flow we perform 3D LES of a square cha
 \label{eqn_colebrook}
 \frac{1}{\sqrt{f}} = -2.0 \log_{\scriptsize 10} \left( \frac{\varepsilon/D}{3.7} + \frac{2.51}{\mbox{Re}\sqrt{f}} \right) \,\mbox{,}
 \end{equation}
-which is a fit to the turbulent range of the Moody chart (see e.g. \cite{MYO}).  The parameter $\varepsilon/D$ is the relative roughness where $D$ is the hydraulic diameter of the pipe or channel and Re is the Reynolds number based on $D$.  For all the cases reported here the hydraulic diameter is equivalent to the channel height, $D=H$, and the walls of the channel are smooth, i.e. $\varepsilon=0$.  FDS input files are stored in the repository \cite{FDS-SMV_repository} as {\tt FDS-SMV/Verification/Flowfields/moody\_*}. To provide a qualitative picture of the flow field, Figure \ref{fig_channel_flow_setup} shows contours of streamwise velocity for the case $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ and $N_z=32$.
+which is a fit to the turbulent range of the Moody chart (see e.g. \cite{MYO}).  The parameter $\varepsilon/D$ is the relative roughness where $D$ is the hydraulic diameter of the pipe or channel and Re is the Reynolds number based on $D$.  For all the cases reported here the hydraulic diameter is equivalent to the channel height, $D=H$, and the walls of the channel are smooth, i.e. $\varepsilon=0$.  FDS input files are stored in the repository \cite{FDS-SMV_repository} as {\tt moody\_*}. To provide a qualitative picture of the flow field, Figure \ref{fig_channel_flow_setup} shows contours of streamwise velocity for the case $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ and $N_z=32$.
 \begin{table}
 \begin{center}
 \caption{\label{tab_zplus} \small Case matrix and friction factor results for turbulent channel flow.  The height of the first grid cell $\Delta z$ is given in viscous units $z^+$ for each case.  Additionally, the table gives the nominal Reynolds number Re$_H$ and the FDS friction factor results compared to the Colebrook equation (\ref{eqn_colebrook}).}
@@ -967,7 +963,7 @@ In Figure \ref{fig_fds_moody_chart} we replicate the Moody diagram for for both 
 \begin{figure}
    \begin{center}
       \scalebox{0.9}{\includegraphics{FIGURES/fds_moody_chart.pdf}}
-      \caption{\label{fig_fds_moody_chart} \small The FDS Moody Chart. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are for turbulent flow at various levels of relative roughness $\varepsilon/D$ shown on the right axis.  Stars are DNS results from FDS at a single grid resolution ($N_z=64$) and the symbols are FDS results for 3D LES with dynamic Smagorinsky and the Werner Wengle wall model at three grid resolutions ($N_z=\{8,16,32\}$).}
+      \caption{\label{fig_fds_moody_chart} \small The FDS Moody Chart: friction factor, $f$, versus Reynolds number, Re. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are for turbulent flow at various levels of relative roughness $\varepsilon/D$ shown on the right axis.  Stars are DNS results from FDS at a single grid resolution ($N_z=64$) and the symbols are FDS results for 3D LES with dynamic Smagorinsky and the Werner Wengle wall model at three grid resolutions ($N_z=\{8,16,32\}$).}
    \end{center}
 \end{figure}
 
