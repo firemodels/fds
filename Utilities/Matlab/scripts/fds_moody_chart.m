@@ -55,27 +55,28 @@ repository = '../../../Verification/Flowfields/';
 % gather FDS results (laminar)
 L = 1;
 dpdx = -1;
-[f_fds(1),Re_fds(1)] = friction_factor_calc(dpdx,.025,L,[repository,'poiseuille_N64_mu025_devc.csv']);
-[f_fds(2),Re_fds(2)] = friction_factor_calc(dpdx,.0125,L,[repository,'poiseuille_N64_mu0125_devc.csv']);
+[f_fds(1),Re_fds(1)] = friction_factor_calc(dpdx,L,[repository,'poiseuille_N64_mu025_devc.csv']);
+[f_fds(2),Re_fds(2)] = friction_factor_calc(dpdx,L,[repository,'poiseuille_N64_mu0125_devc.csv']);
 
 loglog(Re_fds,f_fds,'b*')
 
 % gather FDS results (turbulent)
 mu = 1.84e-5;
+
 dpdx = -.01;
-[f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-0p01_N8_devc.csv']);loglog(Re,f,'bsq')
-[f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-0p01_N16_devc.csv']);loglog(Re,f,'b^')
-[f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-0p01_N32_devc.csv']);loglog(Re,f,'bo')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N8_devc.csv'],mu);loglog(Re,f,'bsq')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N16_devc.csv'],mu);loglog(Re,f,'b^')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N32_devc.csv'],mu);loglog(Re,f,'bo')
 
 dpdx = -1;
-[f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-1_N8_devc.csv']);loglog(Re,f,'bsq')
-[f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-1_N16_devc.csv']);loglog(Re,f,'b^')
-[f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-1_N32_devc.csv']);loglog(Re,f,'bo')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'bsq')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'b^')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N32_devc.csv'],mu);loglog(Re,f,'bo')
 
 dpdx = -100;
-[f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-100_N8_devc.csv']);H(1)=loglog(Re,f,'bsq');
-[f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-100_N16_devc.csv']);H(2)=loglog(Re,f,'b^');
-[f,Re] = friction_factor_calc(dpdx,mu,L,[repository,'moody_dpdx=-100_N32_devc.csv']);H(3)=loglog(Re,f,'bo');
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N8_devc.csv'],mu);H(1)=loglog(Re,f,'bsq');
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N16_devc.csv'],mu);H(2)=loglog(Re,f,'b^');
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N32_devc.csv'],mu);H(3)=loglog(Re,f,'bo');
 
 text(1.3e8,2e-1,'$\varepsilon/D$','Interpreter','LaTeX','FontSize',12,'Fontname','Times')
 text(1.3e8,.82e-2,num2str(RR(2)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
