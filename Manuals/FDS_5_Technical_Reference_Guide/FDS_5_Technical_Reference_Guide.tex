@@ -2194,10 +2194,23 @@ The rate at which liquid fuel evaporates when burning is a function of
 the liquid temperature and the concentration of fuel vapor above the
 pool surface. According to the Clausius-Clapeyron relation, the volume fraction of the
 fuel vapor above the surface is a function of the liquid boiling temperature
-\be X_f = \exp \left[ -\frac{ h_v W_f}{\cal R} \left( \frac{1}{T_s}-\frac{1}{T_b} \right) \right]    \ee
+\be X_f = \exp \left[ -\frac{ h_v W_f}{\cal R} \left(\frac{1}{T_s}-\frac{1}{T_b} \right) \right]  
+\label{CC_liquid}  
+\ee 
 where $h_v$ is the heat of vaporization, $W_f$ is the
 molecular weight, $T_s$ is the surface temperature, and
-$T_b$ is the boiling temperature of the fuel~\cite{Prasad:1}.
+$T_b$ is the boiling temperature of the fuel~\cite{Prasad:1}. 
+
+In the beginning of the simulation, an initial guess is made for the
+fuel vapor mass flux
+\be
+\dot{m}''_i= \frac{\dot{V}''_i W_f}{{\cal R}T_a /p_0}
+\ee
+where $\dot{V}''_i$ is the initial vapor volume flux, defined by the
+user. By default, $\dot{V}''_i = 5\cdot10^{-4}$~m$^3/$m$^2$.
+During the simulation, the evaporation mass flux is updated based on
+the difference between current close-to-the-surface volume fraction of
+fuel vapor and the equilibrium value given by Eq.~\ref{CC_liquid}. 
 
 For simplicity, the liquid fuel itself is treated like a thermally-thick
 solid for the purpose of computing the heat conduction. There is no
