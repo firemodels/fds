@@ -171,10 +171,9 @@ ENDIF
 END SUBROUTINE INIT_TURB_ARRAYS
 
 
-SUBROUTINE spectral_output(TT,NM)
+SUBROUTINE SPECTRAL_OUTPUT(NM)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
-REAL(EB), INTENT(IN) :: TT
 INTEGER :: nn(3),N_LO(3),N_HI(3),ARRAY_LO(3),ARRAY_HI(3)
 REAL(EB),     POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HH
 COMPLEX(DPC), POINTER, DIMENSION(:,:,:) :: UUHT,VVHT,WWHT,KKHT
@@ -213,13 +212,21 @@ call complex_tke_f90(KKHT, UUHT, VVHT, WWHT, nn(1))
 
 ! total up the spectral energy for each mode and integrate over
 ! the resolved modes...
-call spectrum_f90(KKHT, nn(1), XF-XS, nint(100._EB*TT))
+call spectrum_f90(KKHT, nn(1), XF-XS, nint(100._EB*SPEC_CLOCK))
       
 IF (TURB_INIT) call sandia_out(UU,VV,WW,HH,nn(1))
-                      
-spec_clock = spec_clock + dt_spec
 
-END SUBROUTINE spectral_output
+IF (SPEC_CLOCK>=0.00_EB .AND. SPEC_CLOCK<0.28_EB) THEN
+   SPEC_CLOCK=0.28_EB
+   RETURN
+ENDIF
+IF (SPEC_CLOCK>=0.28_EB .AND. SPEC_CLOCK<0.66_EB) THEN
+   SPEC_CLOCK=0.66_EB
+   RETURN
+ENDIF
+IF (SPEC_CLOCK>=0.66_EB) SPEC_CLOCK=1.E9_EB
+
+END SUBROUTINE SPECTRAL_OUTPUT
 
 
 SUBROUTINE sandia_out(u,v,w,p,n)
