@@ -4063,6 +4063,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%Z0                   = Z0
    SF%MASS_FLUX_TOTAL      = MASS_FLUX_TOTAL
    
+   ! Set various logical parameters
+
+   IF (SF%VEL_T(1)/=0._EB .OR. SF%VEL_T(2)/=0._EB) SF%SPECIFIED_TANGENTIAL_VELOCITY = .TRUE.
 
    IF (SF%HRRPUA>0._EB .OR. SF%MLRPUA>0._EB) MIXTURE_FRACTION=.TRUE.
    
@@ -4273,7 +4276,7 @@ IGNITION_TEMPERATURE    = 5000._EB
 LAYER_DIVIDE            = -1._EB
 LEAK_PATH               = -1 
 MASS_FLUX               = 0._EB
-MASS_FLUX_TOTAL         = -999._EB
+MASS_FLUX_TOTAL         = 0._EB
 MASS_FRACTION           = -1._EB
 MATL_ID                 = 'null'
 MATL_MASS_FRACTION      = 0._EB
@@ -4310,8 +4313,8 @@ TMP_FRONT               = TMPA-TMPM
 TMP_INNER               = TMPA-TMPM
 TRANSPARENCY            = 1._EB
 VEL_T                   = 0._EB
-VEL                     = -999._EB
-VOLUME_FLUX             = -999._EB
+VEL                     = 0._EB
+VOLUME_FLUX             = 0._EB
 Z0                      = 10._EB
  
 END SUBROUTINE SET_SURF_DEFAULTS
@@ -4407,10 +4410,8 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       SF%PYROLYSIS_MODEL = PYROLYSIS_SPECIFIED
    ENDIF
 
-   IF (SF%VEL<0._EB .AND. SF%VEL/=-999._EB)                 BLOWING = .TRUE.
-   IF (SF%VEL>0._EB .AND. SF%VEL/=-999._EB)                 SUCKING = .TRUE.
-   IF (SF%VOLUME_FLUX<0._EB .AND. SF%VOLUME_FLUX/=-999._EB) BLOWING = .TRUE.
-   IF (SF%VOLUME_FLUX>0._EB .AND. SF%VOLUME_FLUX/=-999._EB) SUCKING = .TRUE.
+   IF (SF%VEL<0._EB .OR. SF%VOLUME_FLUX<0._EB) BLOWING = .TRUE.
+   IF (SF%VEL>0._EB .OR. SF%VOLUME_FLUX>0._EB) SUCKING = .TRUE.
 
    IF (BURNING .AND. (BLOWING .OR. SUCKING)) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot have a specified velocity or volume flux'
@@ -4502,7 +4503,6 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
  
    SF%VELOCITY_BC_INDEX = WALL_MODEL 
    IF (DNS) SF%VELOCITY_BC_INDEX = NO_SLIP_BC
-   IF (BLOWING .OR. SUCKING) SF%VELOCITY_BC_INDEX = SPECIFIED_VELOCITY 
    IF (SF%FREE_SLIP) SF%VELOCITY_BC_INDEX = FREE_SLIP_BC
 
    IF (N==OPEN_SURF_INDEX) THEN
