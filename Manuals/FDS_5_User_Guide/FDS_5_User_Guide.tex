@@ -4641,7 +4641,7 @@ the model.
 
 The initial value of the fuel vapor volume flux can be specified using
 the parameter {\ct INITIAL\_VAPOR\_FLUX}. Its default value is
-$5\cdot10^{-4}$~m$^3/$m$^2$. 
+$5\cdot10^{-4}$~m$^3/$(sm$^2$). 
 
 Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
 denotes the absorption in depth of thermal radiation. Liquids do not
@@ -8822,6 +8822,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FYI}                     & Character   & Comment String (has no effect) &                  &        \\ \hline
 {\ct HEAT\_OF\_COMBUSTION(:,II)}& Real array& Heats of combustion for species {\ct II}& kJ/kg   & 0.      \\ \hline
 {\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of reaction               & kJ/kg            & 0.     \\ \hline
+{\ct INITIAL\_VAPOR\_FLUX}    & Real        & Initial evaporation rate       & m$^2$/(sm$^2$)   & 5E-4   \\ \hline
 {\ct ID     }                 & Character   & IDentifier                     &                  &        \\ \hline
 {\ct THRESHOLD\_TEMPERATURE}  & Real array  & Threshold temperatures         & $^\circ$C        & -273.15 \\ \hline
 {\ct N\_REACTIONS}            & Character   & Number of Reactions            &                  & 0      \\ \hline
