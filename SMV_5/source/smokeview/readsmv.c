@@ -8751,8 +8751,6 @@ void writeini(int flag){
     fprintf(fileout,"SLICEDATAOUT\n");
     fprintf(fileout," %i \n",output_slicedata);
   }
-  fprintf(fileout,"V_BOUNDARY\n");
-  fprintf(fileout," %i %f %i %f\n",setpatchmin,patchmin,setpatchmax,patchmax);
   for(i=0;i<npatch_files;i++){
     if(patchinfo[i].firstshort==1){
       fprintf(fileout,"V_BOUNDARY\n");
