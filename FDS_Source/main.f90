@@ -142,6 +142,14 @@ ENDDO
 ! Initialize Mesh Exchange Arrays (All Nodes)
 
 CALL MESH_EXCHANGE(0)
+
+! Initialize turb arrays
+
+IF (PERIODIC_TEST==2 .OR. DYNSMAG .OR. CHECK_KINETIC_ENERGY) THEN
+   DO NM=1,NMESHES
+      CALL INIT_TURB_ARRAYS(NM)
+   ENDDO
+ENDIF
  
 ! Initialize the flow field with random noise to eliminate false symmetries
 
@@ -149,21 +157,16 @@ IF (NOISE .OR. PERIODIC_TEST>0) THEN
    DO NM=1,NMESHES
       IF (NOISE) CALL INITIAL_NOISE(NM)
       IF (PERIODIC_TEST==1) CALL ANALYTICAL_SOLUTION(NM)
-      IF (PERIODIC_TEST==2) CALL SANDIA_DAT(NM)
+      IF (PERIODIC_TEST==2) THEN
+         CALL SANDIA_DAT(NM)
+         IF (NM==1) CALL SPECTRAL_OUTPUT(1)
+      ENDIF
    ENDDO
    CALL MESH_EXCHANGE(6)
    PREDICTOR = .FALSE.
    CORRECTOR = .TRUE.
    DO NM=1,NMESHES
       CALL VELOCITY_BC(T_BEGIN,NM)
-   ENDDO
-ENDIF
-
-! Initialize turb arrays
-
-IF (PERIODIC_TEST==2 .OR. DYNSMAG .OR. CHECK_KINETIC_ENERGY) THEN
-   DO NM=1,NMESHES
-      CALL INIT_TURB_ARRAYS(NM)
    ENDDO
 ENDIF
 
@@ -279,10 +282,6 @@ MAIN_LOOP: DO
 
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
-
-   ! Spectral energy output
-
-   IF (NMESHES==1 .AND. PERIODIC_TEST==2 .AND. MINVAL(T)>=SPEC_CLOCK) CALL SPECTRAL_OUTPUT(MINVAL(T),1)
 
    ! Compute mass and momentum finite differences
    
@@ -1068,6 +1067,10 @@ REAL(EB), INTENT(IN) :: T
 REAL(EB) :: TNOW
 
 TNOW = SECOND()
+
+! Spectral energy output
+
+IF (NMESHES==1 .AND. PERIODIC_TEST==2 .AND. T>=SPEC_CLOCK) CALL SPECTRAL_OUTPUT(1)
 
 !rm->
 !Dump vegetation quantities
