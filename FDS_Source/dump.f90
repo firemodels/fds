@@ -2160,9 +2160,9 @@ SURFLOOP: DO N=0,N_SURF
  
    IF (SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE) &
                                   WRITE(LU_OUTPUT,'(A,F8.1)') '     Wall or Vent Temperature (C)', SF%TMP_FRONT - TMPM
-   IF (SF%VEL/=-999._EB)             WRITE(LU_OUTPUT,'(A,F8.3)') '     Normal Velocity (m/s)       ', SF%VEL
-   IF (SF%MASS_FLUX_TOTAL/=-999._EB) WRITE(LU_OUTPUT,'(A,F8.3)') '     Total Mass Flux (kg/m^2/s)  ', SF%MASS_FLUX_TOTAL
-   IF (SF%VOLUME_FLUX/=-999._EB)     WRITE(LU_OUTPUT,'(A,F8.3)') '     Volume Flux (m**3/s)        ', SF%VOLUME_FLUX
+   IF (SF%VEL/=0._EB)             WRITE(LU_OUTPUT,'(A,F8.3)') '     Normal Velocity (m/s)       ', SF%VEL
+   IF (SF%MASS_FLUX_TOTAL/=0._EB) WRITE(LU_OUTPUT,'(A,F8.3)') '     Total Mass Flux (kg/m^2/s)  ', SF%MASS_FLUX_TOTAL
+   IF (SF%VOLUME_FLUX/=0._EB)     WRITE(LU_OUTPUT,'(A,F8.3)') '     Volume Flux (m**3/s)        ', SF%VOLUME_FLUX
    IF (N_SPECIES>0 .AND. .NOT.MIXTURE_FRACTION) THEN
       DO NN=1,N_SPECIES
          IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU_OUTPUT,'(A,I1,A,8X,F6.3)') &

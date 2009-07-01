@@ -1496,7 +1496,7 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE TURBULENCE, ONLY: WERNER_WENGLE_WALL_MODEL
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
-            UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),MU_DUIDXJ_0(2),DUIDXJ_0(2),PROFILE_FACTOR,VEL_GAS,VEL_INS, &
+            UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),MU_DUIDXJ_0(2),DUIDXJ_0(2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2)
 INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
             VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,IBCM,IBCP,ITMP
@@ -1640,8 +1640,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ! IWM and IWP are the wall cell indices of the boundary on either side of the edge.
 
          IF (IOR<0) THEN
-            VEL_GAS = UUM(IVL)
-            VEL_INS = UUP(IVL)
+            VEL_GAS   = UUM(IVL)
+            VEL_GHOST = UUP(IVL)
             IWM  = WALL_INDEX(ICMM,-IOR)
             IIGM = I_CELL(ICMM)
             JJGM = J_CELL(ICMM)
@@ -1659,8 +1659,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
                KKGP = K_CELL(ICPM)
             ENDIF
          ELSE
-            VEL_GAS = UUP(IVL)
-            VEL_INS = UUM(IVL)
+            VEL_GAS   = UUP(IVL)
+            VEL_GHOST = UUM(IVL)
             IF (ICD==1) THEN
                IWM  = WALL_INDEX(ICPM,-IOR)
                IIGM = I_CELL(ICPM)
@@ -1685,7 +1685,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
          ! Decide whether or not to process edge using data interpolated from another mesh
    
-         INTERPOLATION_IF: IF (NOM(ICD)==0 .OR. (BOUNDARY_TYPE(IWM)/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=INTERPOLATED_BOUNDARY)) THEN
+         INTERPOLATION_IF: IF (NOM(ICD)==0 .OR. &
+                              (BOUNDARY_TYPE(IWM)/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=INTERPOLATED_BOUNDARY)) THEN
 
             ! Determine appropriate velocity BC by assessing each adjacent wall cell
 
@@ -1699,6 +1700,24 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ! Compute the viscosity in the two adjacent gas cells
 
             MUA = 0.5_EB*(MU(IIGM,JJGM,KKGM) + MU(IIGP,JJGP,KKGP))
+
+            ! Determine if there is a tangential velocity component
+
+            IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY) THEN
+               VEL_T = 0._EB
+            ELSE
+               IF (SF%T_IGN==T_BEGIN .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
+                  TSI = T
+               ELSE
+                  TSI=T-SF%T_IGN
+               ENDIF
+               PROFILE_FACTOR = 1._EB
+               IF (SF%PROFILE==ATMOSPHERIC) PROFILE_FACTOR = (MAX(0._EB,ZC(KK)-GROUND_LEVEL)/SF%Z0)**SF%PLE
+               RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
+               IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = SF%VEL_T(2)
+               IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = SF%VEL_T(1)
+               VEL_T = PROFILE_FACTOR*RAMP_T*VEL_T
+            ENDIF
  
             ! Choose the appropriate boundary condition to apply
                
@@ -1706,49 +1725,28 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
                CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
 
-                  VEL_INS = VEL_GAS
-                  DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
-                  MU_DUIDXJ(I_SGN*ICD) = MUA*DUIDXJ(I_SGN*ICD)
-                  ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
-
-               CASE (SPECIFIED_VELOCITY) BOUNDARY_CONDITION
-
-                  IF (SF%T_IGN==T_BEGIN .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
-                     TSI = T
-                  ELSE
-                     TSI=T-SF%T_IGN
-                  ENDIF
-                  PROFILE_FACTOR = 1._EB
-                  IF (SF%PROFILE==ATMOSPHERIC) PROFILE_FACTOR = (MAX(0._EB,ZC(KK)-GROUND_LEVEL)/SF%Z0)**SF%PLE
-                  RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
-                  IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = SF%VEL_T(2)
-                  IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = SF%VEL_T(1)
-                  VEL_INS = 2._EB*PROFILE_FACTOR*RAMP_T*VEL_T - VEL_GAS
-                  DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
+                  VEL_GHOST = VEL_GAS
+                  DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                   MU_DUIDXJ(I_SGN*ICD) = MUA*DUIDXJ(I_SGN*ICD)
                   ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
 
                CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
-                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                     VEL_INS = -VEL_GAS
-                     DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
-                     MU_DUIDXJ(I_SGN*ICD) = MUA*DUIDXJ(I_SGN*ICD)
-                     ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
-                  ENDIF
+                  VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+                  DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(I_SGN*ICD) = MUA*DUIDXJ(I_SGN*ICD)
+                  ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
 
                CASE (WALL_MODEL) BOUNDARY_CONDITION
 
-                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                     RHO_WALL = 0.5_EB*(  RHOP(IIGM,JJGM,KKGM) +   RHOP(IIGP,JJGP,KKGP))
-                     ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
-                     MU_WALL = Y2MU_C(ITMP)*SPECIES(0)%MW
-                     CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,VEL_GAS,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
-                     VEL_INS = -VEL_GAS
-                     DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
-                     MU_DUIDXJ(I_SGN*ICD) = MU_WALL*VEL_GAS*SIGN(1,IOR)*(1._EB-SLIP_COEF)/DXX(ICD)
-                     ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
-                  ENDIF
+                  RHO_WALL = 0.5_EB*(  RHOP(IIGM,JJGM,KKGM) +   RHOP(IIGP,JJGP,KKGP))
+                  ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
+                  MU_WALL = Y2MU_C(ITMP)*SPECIES(0)%MW
+                  CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
+                  VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+                  DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(I_SGN*ICD) = MU_WALL*(VEL_GAS-VEL_T)*SIGN(1,IOR)*(1._EB-SLIP_COEF)/DXX(ICD)
+                  ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
 
             END SELECT BOUNDARY_CONDITION
 
@@ -1787,20 +1785,20 @@ EDGE_LOOP: DO IE=1,N_EDGES
    
             SELECT CASE(IEC)
                CASE(1)
-                  IF (ICD==1) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
-                  IF (ICD==2) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
+                  IF (ICD==1) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
+                  IF (ICD==2) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
                   MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
                CASE(2)
-                  IF (ICD==1) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
-                  IF (ICD==2) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
+                  IF (ICD==1) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
+                  IF (ICD==2) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
                   MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
                CASE(3)
-                  IF (ICD==1) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
-                  IF (ICD==2) VEL_INS = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
+                  IF (ICD==1) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
+                  IF (ICD==2) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
                   MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
             END SELECT
-            DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
-            MU_DUIDXJ(I_SGN*ICD) = MUA*SIGN(1,IOR)*(VEL_GAS-VEL_INS)/DXX(ICD)
+            DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+            MU_DUIDXJ(I_SGN*ICD) = MUA*SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
             ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
    
          ENDIF INTERPOLATION_IF
@@ -1809,31 +1807,31 @@ EDGE_LOOP: DO IE=1,N_EDGES
    
          SELECT CASE(IEC)
             CASE(1)
-               IF (JJ==0    .AND. IOR== 2) WW(II,JJ,KK)   = VEL_INS
-               IF (JJ==JBAR .AND. IOR==-2) WW(II,JJ+1,KK) = VEL_INS
-               IF (KK==0    .AND. IOR== 3) VV(II,JJ,KK)   = VEL_INS
-               IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KK+1) = VEL_INS
+               IF (JJ==0    .AND. IOR== 2) WW(II,JJ,KK)   = VEL_GHOST
+               IF (JJ==JBAR .AND. IOR==-2) WW(II,JJ+1,KK) = VEL_GHOST
+               IF (KK==0    .AND. IOR== 3) VV(II,JJ,KK)   = VEL_GHOST
+               IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KK+1) = VEL_GHOST
                IF (CORRECTOR .AND. JJ>0 .AND. JJ<JBAR .AND. KK>0 .AND. KK<KBAR) THEN
-                 IF (ICD==1) W_Y(II,JJ,KK) = 0.5_EB*(VEL_INS+VEL_GAS)
-                 IF (ICD==2) V_Z(II,JJ,KK) = 0.5_EB*(VEL_INS+VEL_GAS)
+                 IF (ICD==1) W_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 IF (ICD==2) V_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
                ENDIF
             CASE(2)
-               IF (II==0    .AND. IOR== 1) WW(II,JJ,KK)   = VEL_INS
-               IF (II==IBAR .AND. IOR==-1) WW(II+1,JJ,KK) = VEL_INS
-               IF (KK==0    .AND. IOR== 3) UU(II,JJ,KK)   = VEL_INS
-               IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KK+1) = VEL_INS
+               IF (II==0    .AND. IOR== 1) WW(II,JJ,KK)   = VEL_GHOST
+               IF (II==IBAR .AND. IOR==-1) WW(II+1,JJ,KK) = VEL_GHOST
+               IF (KK==0    .AND. IOR== 3) UU(II,JJ,KK)   = VEL_GHOST
+               IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KK+1) = VEL_GHOST
                IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. KK>0 .AND. KK<KBAR) THEN
-                 IF (ICD==1) U_Z(II,JJ,KK) = 0.5_EB*(VEL_INS+VEL_GAS)
-                 IF (ICD==2) W_X(II,JJ,KK) = 0.5_EB*(VEL_INS+VEL_GAS)
+                 IF (ICD==1) U_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 IF (ICD==2) W_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
                ENDIF
             CASE(3)
-               IF (II==0    .AND. IOR== 1) VV(II,JJ,KK)   = VEL_INS
-               IF (II==IBAR .AND. IOR==-1) VV(II+1,JJ,KK) = VEL_INS
-               IF (JJ==0    .AND. IOR== 2) UU(II,JJ,KK)   = VEL_INS
-               IF (JJ==JBAR .AND. IOR==-2) UU(II,JJ+1,KK) = VEL_INS
+               IF (II==0    .AND. IOR== 1) VV(II,JJ,KK)   = VEL_GHOST
+               IF (II==IBAR .AND. IOR==-1) VV(II+1,JJ,KK) = VEL_GHOST
+               IF (JJ==0    .AND. IOR== 2) UU(II,JJ,KK)   = VEL_GHOST
+               IF (JJ==JBAR .AND. IOR==-2) UU(II,JJ+1,KK) = VEL_GHOST
                IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. JJ>0 .AND. JJ<JBAR) THEN
-                 IF (ICD==1) V_X(II,JJ,KK) = 0.5_EB*(VEL_INS+VEL_GAS)
-                 IF (ICD==2) U_Y(II,JJ,KK) = 0.5_EB*(VEL_INS+VEL_GAS)
+                 IF (ICD==1) V_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 IF (ICD==2) U_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
                ENDIF
          END SELECT
    
