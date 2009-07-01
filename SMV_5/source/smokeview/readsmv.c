@@ -8732,12 +8732,6 @@ void writeini(int flag){
   fprintf(fileout,"C_PARTICLES\n");
   fprintf(fileout," %i %f %i %f\n",setpartchopmin,partchopmin,setpartchopmax,partchopmax);
   if(nslice2>0){
-    fprintf(fileout,"V_SLICE\n");
-    i=0;
-    fprintf(fileout," %i %f %i %f\n",
-      slicebounds[i].setvalmin,slicebounds[i].valmin,
-      slicebounds[i].setvalmax,slicebounds[i].valmax
-      );
     for(i=0;i<nslice2;i++){
       fprintf(fileout,"V_SLICE\n");
       fprintf(fileout," %i %f %i %f %s\n",
@@ -8746,12 +8740,6 @@ void writeini(int flag){
         slicebounds[i].label->shortlabel
         );
     }
-    fprintf(fileout,"C_SLICE\n");
-    i=0;
-    fprintf(fileout," %i %f %i %f\n",
-      slicebounds[i].setchopmin,slicebounds[i].chopmin,
-      slicebounds[i].setchopmax,slicebounds[i].chopmax
-      );
     for(i=0;i<nslice2;i++){
       fprintf(fileout,"C_SLICE\n");
       fprintf(fileout," %i %f %i %f %s\n",
