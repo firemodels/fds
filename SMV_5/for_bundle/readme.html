@@ -20,7 +20,35 @@
 <h3>Release Notes</h3>
 
 <ul>
-<li>5.3.14 (build 3798) - May 18, 2009
+
+<li>5.4 (build 4315) - July 2, 2009
+<ol>
+<li> enhancement: implement error reporting dialog boxes.
+This makes errors occurring when Smokeview starts up more conspicuous.
+<li> enhancement: add an option to draw a user specified smokeview device at particle locations.
+Activated using the smokeview_id keyword on the FDS &PART line.
+<li> usability: rearrange file loading menus to make it easier to access menu items on systems (Linux) that do not allow menu scrolling.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=750&can=1&sort=-id">Issue 750</a>),
+<li> usability: use the ShellExecute system call to open web pages on Windows versions
+of Smokeview enabling the default
+brower to be used and web pages to be opened in <em>panels</em>
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=780&can=1&sort=-id">Issue 780</a>),
+<li> usability: added menu items for connecting to various FDS/Smokeview web sites.
+<li> usability: add a smokeview device command to translate by -dz/2
+ (used for changing the origin from the base to the center of an object)
+<li> usability: implement a device drawing command, drawcdisk,
+for drawing a disk with origin at the disk center rather than at the base
+<li>fix: fix issue with saving slice file min/max bounds in the .ini file
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=794&can=1&sort=-id">Issue 704</a>),
+<li>fix: fix definition of an internal variable, <tt>loaded_isomesh</tt>
+which should have been been defined to NULL when there are no iso-surfaces
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=789&can=1&sort=-id">Issue 789</a>),
+<li>fix: correct issue with drawing smokeview devices - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=775&can=1&sort=-id">Issue 775</a>),
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=776&can=1&sort=-id">Issue 776</a>)
+</ol>
+
+<p><li>5.3.14 (build 3993) - May 18, 2009
 <ol>
 <li>enhancement: add an option to select a device and display information about it.
 <li>enhancement: implement offsetx, offsety and offsetz device keywords to simplify device definitions 
