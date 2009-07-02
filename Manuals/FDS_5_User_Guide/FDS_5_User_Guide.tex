@@ -4590,7 +4590,7 @@ iterative result depending on the temperature and flow conditions. To
 initiate the evaporation, an initial value of the fuel vapor volume
 flux is needed. If the initial value is (relatively) high, the evaporation
 starts regardless of any ignition source, and the the fuel begins
-burning at once.  
+burning at once.
 
 Here is an example of a steel pan filled with a thin layer of ethanol. Note that the material
 properties are not all traceable to a measurement.
@@ -4634,14 +4634,14 @@ heat of vaporization. The gaseous fuel yield, {\ct NU\_FUEL}, is 0.97 instead of
 impurities in the liquid that do not take part in the combustion process.
 
 The thermal conductivity, density and specific heat are used to
-compute the loss of heat into the liquid via conduction using the 
+compute the loss of heat into the liquid via conduction using the
 same one-dimensional heat transfer equation that is used for solids. Obviously,
 the convection of the liquid is important, but is not considered in
 the model.
 
 The initial value of the fuel vapor volume flux can be specified using
 the parameter {\ct INITIAL\_VAPOR\_FLUX}. Its default value is
-$5\cdot10^{-4}$~m$^3/$(sm$^2$). 
+$5\cdot10^{-4}$~m$^3/$(sm$^2$).
 
 Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
 denotes the absorption in depth of thermal radiation. Liquids do not
@@ -6699,6 +6699,78 @@ in Fig.~\ref{aspiration_detector}.
 \label{aspiration_detector}
 \end{figure}
 
+
+
+\subsection{Electrical Cable Failure}
+\label{info:THIEF}
+
+Petra Andersson and Patrick Van Hees of the Swedish National Testing and Research Institute
+(SP) have proposed that the thermally-induced electrical failure (THIEF) of a cable can be predicted
+via a simple one-dimensional heat transfer calculation, under the assumption that the cable can
+be treated as a homogenous cylinder~\cite{Andersson:2005}. Their results for PVC
+cables were encouraging and suggested that the simplification of the analysis is reasonable and
+that it should extend to other types of cables. The assumptions underlying the THIEF model are as follows:
+\begin{enumerate}
+\item The heat penetration into a cable of circular cross section is largely in the radial direction.
+This greatly simplifies the analysis, and it is also conservative because it is assumed that
+the cable is completely surrounded by the heat source.
+\item The cable is homogenous in composition. In reality, a cable is constructed of several
+different types of polymeric materials, cellulosic fillers, and a conducting metal, most
+often copper.
+\item The thermal properties -- conductivity, specific heat, and density -- of the assumed
+homogenous cable are independent of temperature. In reality, both the thermal
+conductivity and specific heat of polymers are temperature-dependent, but this
+information is very difficult to obtain from manufacturers. 
+\item It is assumed that no decomposition reactions occur within the cable during its heating,
+and ignition and burning are not considered in the model. In fact, thermoplastic cables
+melt, thermosets form a char layer, and both off-gas volatiles up to and beyond the point
+of electrical failure.
+\item Electrical failure occurs when the temperature just inside the cable jacket reaches an
+experimentally determined value.
+\end{enumerate}
+Obviously, there are considerable assumptions inherent in the Andersson and Van Hees THIEF
+model, but their results for various polyvinyl chloride (PVC) cables suggested that it may be
+sufficient for engineering analyses of a wider variety of cables. The U.S. Nuclear Regulatory
+Commission sponsored a study of cable failure known as CAROLFIRE~\cite{CAROLFIRE}. The primary project objective of CAROLFIRE was to 
+characterize the various modes of electrical
+failure ({\em e.g.} hot shorts, shorts to ground) within bundles of power, control and instrument cables.
+A secondary objective of the project was to develop a simple model to predict thermally-induced
+electrical failure when a given interior region of the cable reaches an empirically
+determined threshold temperature. The measurements used for these purposes are described in
+Volume II of the CAROLFIRE test report. Volume III describes the modeling.
+
+The THIEF model can only predict the temperature profile within the cable as a function of time,
+given a time-dependent exposing temperature or heat flux. The model does not predict at what
+temperature the cable fails electrically. This information is gathered from experiment. The
+CAROLFIRE experimental program included bench-scale, single cable experiments in which
+temperature measurements were made on the surface of, and at various points within, cables
+subjected to a uniform heat flux. These experiments provided the link between internal cable
+temperature and electrical failure. The model can only predict the interior temperature and infer
+electrical failure when a given temperature is reached. It is presumed that the
+temperature of the centermost point in the cable is not necessarily the indicator of electrical
+failure. This analysis method uses the temperature just inside the cable jacket rather than the
+centermost temperature, as that is where electrical shorts in a multi-conductor cable are most
+likely to occur first.
+
+To use the THIEF model in FDS, add lines similar to the following to the input file:
+
+\footnotesize
+\begin{verbatim}
+&PROP ID='Acme Cable', QUANTITY='CABLE TEMPERATURE', CABLE_MASS_PER_LENGTH=0.529,
+      CABLE_FAILURE_TEMPERATURE=400., CABLE_DIAMETER=0.0163, 
+      CABLE_JACKET_THICKNESS=0.00152 /
+&DEVC XYZ=..., ID='Cable 1', PROP_ID='Acme Cable', ORIENTATION=0,0,1 /
+&DEVC XYZ=..., ID='Cable 2', PROP_ID='Acme Cable', ORIENTATION=1,0,1 /
+                                    .
+                                    .
+\end{verbatim}
+\normalsize
+
+\noindent
+Most of the terms are self-explanatory, and the logic is similar to that of a sprinkler. The THIEF
+model is invoked by the specific use of the {\ct QUANTITY='CABLE TEMPERATURE'}. The cable mass per
+unit length is in units of kg/m, failure temperature in $^\circ$C, diameter in m, jacket thickness in m. Note that
+you can use any orientation, rather than just the 6 coordinate directions. 
 
 
 
@@ -8968,7 +9040,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
 {\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
-%{\ct WERNER\_WENGLE\_WALL\_MODEL} & Logical       & Werner and Wengle model for viscous wall stress &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
 
@@ -9112,7 +9183,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VERTICAL\_VELOCITY}        & Real            & Droplet speed, vertical           & m/s       &  0.5          \\ \hline
 {\ct XB(6)}                     & Real array      & Initial particle location         & m         &               \\ \hline
 {\ct WATER}                     & Logical         & Water Droplet                     &           & {\ct .FALSE.} \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
@@ -9170,6 +9240,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BETA\_E}                           & Real          & Smoke detector parameter                  &                       & 1.0       \\ \hline
 {\ct BEAD\_DIAMETER}                    & Real          & Diameter of TC bead                       & m                     & 0.001     \\ \hline
 {\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of TC bead                     &                       & 0.85      \\ \hline
+{\ct CABLE\_DIAMETER}                   & Real          & See Section {info:THIEF}                  & m                     & 0.02      \\ \hline
+{\ct CABLE\_FAILURE\_TEMPERATURE}       & Real          & See Section {info:THIEF}                  & $^\circ$C             & 400       \\ \hline
+{\ct CABLE\_JACKET\_THICKNESS}          & Real          & See Section {info:THIEF}                  & m                     & 0.002     \\ \hline
+{\ct CABLE\_MASS\_PER\_LENGTH}          & Real          & See Section {info:THIEF}                  & kg/m                  & 0.5       \\ \hline
 {\ct C\_FACTOR}                         & Real          & Sprinkler activation parameter            &                       & 0.        \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}               & m/s                   & 1.0       \\ \hline
 {\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity                  & m/s                   & 0.0       \\ \hline
@@ -9197,7 +9271,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}                          & Character     & See Section~\ref{info:alternative_smoke}  &                       &           \\ \hline
 {\ct SPRAY\_ANGLE(2)}                   & Real          & Cone angles for water spray               & deg                   & 60.,75.   \\ \hline
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & {\ct TABL} for spray pattern              &                       &           \\ \hline
-%\end{tabular*}
 \end{longtable}
 
 
