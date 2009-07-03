@@ -69,7 +69,7 @@ Rem --------------- 64 bit Linux ----------------
 if not %upload_linux64% == 1 goto endif_linux64
   set glabels=Type-Archive,Opsys-Linux_64,%level%
   set dplatform=64 bit Linux
-  set platform=linux64
+  set platform=linux_64
   set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
   set exe=smv_%version%_%platform%.tar.gz
   echo.
