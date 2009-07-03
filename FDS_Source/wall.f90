@@ -911,6 +911,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
       ! Weighted average of wall and gas values
       ! Alvernative 1
       YPRSUM  = 0.2*(Y_MF_W/RSUM_W) + 0.8*(Y_MF_G/RSUM_G)
+!      YPRSUM  = 0.0*(Y_MF_W/RSUM_W) + 1.0*(Y_MF_G/RSUM_G)
       ! Alternative 2
 !      YY_S    = 0.2*Y_MF_W+0.8*Y_MF_G
 !      RSUM_S  = 0.2*RSUM_W+0.8*RSUM_G
@@ -923,7 +924,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          MFLUX = (ML%INIT_VAPOR_FLUX/(R0*TMPA/P_INF))*REACTION(1)%MW_FUEL/ML%ADJUST_BURN_RATE(1,I_FUEL)
       ENDIF
       ! Adjust MFLUX to reach equilibrium vapor pressure
-      IF (PPSURF/=PPCLAUS) THEN
+      IF (PPSURF/=PPCLAUS .AND. PPSURF>0._EB) THEN
          MFLUX = MFLUX*MIN(1.02_EB,MAX(0.98_EB,PPCLAUS/PPSURF))
       ENDIF
       IF (MFLUX > 0._EB .AND. TW(IW)>T) TW(IW) = T
