@@ -3602,7 +3602,11 @@ READ_MATL_LOOP: DO N=1,N_MATL
             IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          ENDIF
       ENDDO
-
+   ELSE NOT_BOILING ! Is liquid
+      IF (HEAT_OF_REACTION(1) == 0._EB) THEN
+         WRITE(MESSAGE,'(A,I2,A)') 'ERROR: HEAT_OF_REACTION should be greater than zero for liquid MATL ',N,'.'  
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
    ENDIF NOT_BOILING
 
    ! Error checking for thermal properties
