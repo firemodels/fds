@@ -12,7 +12,7 @@
 close all
 
 qfil = ['../scatterplot_config_matlab.csv'];
-qrange = [2:2];
+qrange = [3:27];
 
 addpath('../functions')
 paper_width  = 6.0; % inches
@@ -42,12 +42,12 @@ for j=qrange
         end
     end
     
-    if Scatter_Plot_Title=='Verification'
-        k = 1000
-        Measured_Metric = normrnd(1:1000,(Sigma_2_E/200)*(1:1000),[1 1000]);
-        Predicted_Metric = normrnd(1:1000,0.10*(1:1000),[1 1000]);
-        K = plot(Measured_Metric,Predicted_Metric,'ko'); hold on    
-    end
+%     if Scatter_Plot_Title=='Verification'
+%         k = 1000;
+%         Measured_Metric = normrnd(1:1000,(Sigma_2_E/200)*(1:1000),[1 1000]);
+%         Predicted_Metric = normrnd(1:1000,0.01*(1:1000),[1 1000]);
+%         K = plot(Measured_Metric,Predicted_Metric,'ko'); hold on    
+%     end
     
     if k>0
         
@@ -79,24 +79,19 @@ for j=qrange
         set(gca,'FontName','Times')
         set(gca,'FontSize',12)
         set(gca,'YTick',get(gca,'XTick'))
-        %set(gca,'PlotBoxAspectRatio',[1,1,1])
         set(gca,'Position',[1,1,4.5,4.5])
         
         text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
             Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
   
         text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
-            '$2 \, \sigma_E$=','FontSize',12,'FontName','Times','Interpreter','LaTeX')
-        text(Plot_Min+(Title_Position(1)+0.16)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
-            num2str(2*Sigma_E,2),'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+            ['$2 \, \sigma_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+        
         text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
-            '$2 \, \sigma_M$=','FontSize',12,'FontName','Times','Interpreter','LaTeX')
-        text(Plot_Min+(Title_Position(1)+0.16)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
-            num2str(2*Sigma_M,2),'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+            ['$2 \, \sigma_M$=',num2str(2*Sigma_M,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+        
         text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
-            'Bias =','FontSize',12,'FontName','Times','Interpreter','LaTeX')
-        text(Plot_Min+(Title_Position(1)+0.16)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
-            num2str(delta,3),'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+            ['Bias =',num2str(delta,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
         
         C = stripcell(Group_Key_Label);
         [B I] = unique(C);
