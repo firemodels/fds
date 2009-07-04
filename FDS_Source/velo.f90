@@ -1688,13 +1688,21 @@ EDGE_LOOP: DO IE=1,N_EDGES
          INTERPOLATION_IF: IF (NOM(ICD)==0 .OR. &
                               (BOUNDARY_TYPE(IWM)/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE(IWP)/=INTERPOLATED_BOUNDARY)) THEN
 
-            ! Determine appropriate velocity BC by assessing each adjacent wall cell
+            ! Determine appropriate velocity BC by assessing each adjacent wall cell. If the BCs are different on each
+            ! side of the edge, choose the one with the specified velocity, if there is one. If not, choose the max value of
+            ! boundary condition index, simply for consistency.
 
             IBCM = 0
             IBCP = 0
             IF (IWM>0) IBCM = IJKW(5,IWM)
             IF (IWP>0) IBCP = IJKW(5,IWP)
-            SF => SURFACE(MAX(IBCM,IBCP))
+            IF (SURFACE(IBCM)%SPECIFIED_NORMAL_VELOCITY) THEN
+               SF=>SURFACE(IBCM)
+            ELSEIF (SURFACE(IBCP)%SPECIFIED_NORMAL_VELOCITY) THEN
+               SF=>SURFACE(IBCP)
+            ELSE
+               SF => SURFACE(MAX(IBCM,IBCP))
+            ENDIF
             VELOCITY_BC_INDEX = SF%VELOCITY_BC_INDEX
 
             ! Compute the viscosity in the two adjacent gas cells
@@ -1747,6 +1755,11 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                   MU_DUIDXJ(I_SGN*ICD) = MU_WALL*(VEL_GAS-VEL_T)*SIGN(1,IOR)*(1._EB-SLIP_COEF)/DXX(ICD)
                   ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
+
+                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .NEQV. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                     DUIDXJ(I_SGN*ICD) = 0.5_EB*DUIDXJ(I_SGN*ICD)
+                     MU_DUIDXJ(I_SGN*ICD) = 0.5_EB*MU_DUIDXJ(I_SGN*ICD)
+                  ENDIF
 
             END SELECT BOUNDARY_CONDITION
 
