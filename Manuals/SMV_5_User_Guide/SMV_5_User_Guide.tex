@@ -3232,8 +3232,7 @@ should result in the same views.
 %------------------------ Summary ------------------------------------------------
 %---------------------------------------------------------------------------------
 
-\chapter{Summary and Future Work}
-\section{Summary}
+\chapter{Summary}
 Often fire modeling is looked upon with skepticism because of the
 perception that eye-catching images shroud the underlying physics.
 However, if the visualization is done well, it can be used to
@@ -3272,44 +3271,13 @@ occupant would see and not see. In this sense, Smokeview is not
 merely a {\em post-processor}, but rather an integral part of the
 analysis.
 
-\section{Future Work}
-Smokeview is a software tool used to gain insight into the results generated
-by fire modeling simulations such as the Fire Dynamics Simulator.  
-There are two general areas that need to be addressed in order to improve this tool.  
-First, to be able to improve the visualizations themselves - in particular, to do a better job of visualizing smoke and fire.
-The aim then of any work to add or improve visualization algorithms in Smokeview is allow one to provide more and better insight.
-Second, to be able to visualize the larger cases now made possible by the more powerful computers (faster with more memory) now commonly available.   Some possible areas of future research are described in more detail below.
+The purpose of Smokeview is to help one gain insight into the results
+of fire modeling simulations.
+Some areas of future work pertaining to the technical aspects of Smokeview include improving the visual modeling of smoke and fire and improving Smokeview's ability to handle larger cases.
+General strategies for improving Smokeview's ability to visualize cases and therefore to improve the understanding of computed fire flow are discussed in more detail in the Smokeview Technical Guide~\cite{Smokeview_Tech_Guide_5}.
 
 
-\subsection{Use More Physics}
-\blist
-\hitem{More Realistic Fire} Investigate techniques for visualizing fire more realistically by using information about the fire such as its temperature to color it more realistically.
 
-\hitem{More Realistic Smoke}\ Investigate algorithms for modeling the interaction of light and smoke. 
-The {\em transport} of light into and out of the smoke/fire ({\em ie scattering}) is another important factor that effects its appearance.  Light sources could consist of either man made lights or from the fire itself.  Work also needs to be done to generalize the wavelength of light used to visualize the scene, {\em ie} implementing an algorithm in Smokeview to simulate a thermal imager or infrared viewer.  \elist
-
-\subsection{Visualize Larger Cases}
-Techniques need to be investigated for visualizing larger cases more effectively.  Updating Smokeview to allow 64 bit memory addressing is just one option.  This is a brute force method.  Techniques are also required for honing or zeroing in on data of interest.  The fire line used in WUI (wildland urban interface) simulations is a good example of this.  A fire line in the context of Smokeview is simply a visual display of temperature only visible where the fire is located.  Additional techniques for visualizing large cases that need to be investigated include:
-
-\blist
-\hitem{Data Mining}\ Investigate methods for making it easier to probe or mine data, {\em ie}\ to retrieve data of particular interest.  Now FDS data is stored sequentially.  For large data sets one needs to be able to retrieve data at a particular time and region without reading the entire data set that comes before.  Put another way, with 64 bit comes much larger data files and longer read times.  We need to figure out how to load just part of the data efficiently to shorten time required to visualize cases.
-
-\hitem{Storing data more effectively}\ Investigate standardized methods for storing data more efficiently and more effectively.  Can we do it better and be practical?  The idea would be not to change how FDS outputs data but to consider whether a separate {\em filter}\ program that would convert FDS generated data into a different format that would enable other tools besides Smokeview to be able to visualize data, for example the visualization tool kit VTK~\cite{VTK}.
-
-\hitem{Parallelization} Smokeview presently has a limited ability to execute code in parallel using a technique known as multi-threading.    Smooth blockages if present, are smoothed in parallel using the pthreads library. Smokeview in this respect is multi-threaded.  Techniques will be investigated for performing the drawing or visualization in parallel.  This may be necessary as cases get larger and larger.  one technique for parallelizing the visualization is to use several video cards each one drawing a portion of the scene.
-\elist
-
-\subsection{Tools and Techniques}
-
-\blist
-
-\hitem{Video card computation}\ The computational power of the video card is already  being exploited by Smokeview to perform simple smoke computations.  
-It will need to be exploited even more in order to make the proposed fire coloring and smoke lighting computations practical.
-Techniques are being investigated for performing the computations needed to implement the more realistic fire and smoke computations discussed earlier, in particular CUDA~\cite{CUDA}.  Techniques such as these will be required it more complex visualization algorithms are to be effective.
-
-\hitem{Investigate Alternate Graphical User Interfaces (GUIs)}\ Investigate alternative GUIs (graphical user interfaces) for handling user interface issues.  The GUI used by Smokeview (GLUT) was not intended for developing user interfaces as complex as what Smokeview requires.  What is the cost in development time of developing an alternative?  One such alternative is FLTK (see http://www.fltk.org/ ) .  It has the virtue of begin cross-platform (not tied to windows), more "modern" than GLUT but most importantly fltk is under active development.
-
-\elist
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_mathcomp,../Bibliography/sv_fire,../Bibliography/sv_graphics}
 \addcontentsline{toc}{chapter}{References}
