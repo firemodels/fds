@@ -83,8 +83,6 @@ DO IW=1,NWC
    ENDIF
 ENDDO
 
-IF (.NOT.ALLOW_ZONE_BREAKS) CONNECTED_ZONES(:,:,NM) = .FALSE.
-
 ! Compute species-related finite difference terms
 
 IF (N_SPECIES > 0) THEN
@@ -771,7 +769,7 @@ SUBROUTINE DIVERGENCE_PART_2(NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_OLD,RTRM,DIV
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_OLD,RTRM
 REAL(EB) :: RDT,TNOW,P_EQUILIBRIUM_NUM,P_EQUILIBRIUM_DEN,RF
 REAL(EB), POINTER, DIMENSION(:) :: D_PBAR_DT_P
 INTEGER :: IW,IOR,II,JJ,KK,IIG,JJG,KKG,IC,I,J,K,IPZ,IOPZ,IOPZ2
@@ -915,61 +913,26 @@ ENDDO BC_LOOP
 
 ! Compute time derivative of the divergence, dD/dt
 
-TRUE_PROJECTION: IF (PROJECTION) THEN
+IF (PREDICTOR) THEN
+   DDDT = (DS-D)*RDT
+ELSE
+   D_OLD => WORK1
+   D_OLD = DDDT
+   DDDT  = (2._EB*DDDT-DS-D)*RDT
+   D     = D_OLD
+ENDIF
 
-   DIV=>WORK1
-   IF (PREDICTOR) THEN
-      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K = 1,KBAR
-         DO J = 1,JBAR
-            DO I = 1,IBAR
-               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_28'
-               DIV(I,J,K) = (U(I,J,K)-U(I-1,J,K))*RDX(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + (W(I,J,K)-W(I,J,K-1))*RDZ(K)
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END PARALLEL DO
-      DDDT = (DP-DIV)*RDT
-   ELSEIF (CORRECTOR) THEN
-      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K = 1,KBAR
-         DO J = 1,JBAR
-            DO I = 1,IBAR
-               !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_29'
-               DIV(I,J,K) = (U(I,J,K) -U(I-1,J,K)) *RDX(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
-                          + (US(I,J,K)-US(I-1,J,K))*RDX(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END PARALLEL DO
-      D = DDDT
-      DDDT = (2._EB*DP-DIV)*RDT
-   ENDIF
-   
-ELSE TRUE_PROJECTION
+! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
 
-   IF (PREDICTOR) THEN
-      DDDT = (DS-D)*RDT
-   ELSE
-      D_OLD => WORK1
-      D_OLD = DDDT
-      DDDT  = (2._EB*DDDT-DS-D)*RDT
-      D     = D_OLD
-   ENDIF
+DO IW=1,NEWC
+   IF (IJKW(9,IW)==0) CYCLE
+   IIG = IJKW(6,IW)
+   JJG = IJKW(7,IW)
+   KKG = IJKW(8,IW)
+   IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
+   IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
+ENDDO
    
-   ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
-   
-   DO IW=1,NEWC
-      IF (IJKW(9,IW)==0) CYCLE
-      IIG = IJKW(6,IW)
-      JJG = IJKW(7,IW)
-      KKG = IJKW(8,IW)
-      IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
-      IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
-   ENDDO
-   
-ENDIF TRUE_PROJECTION
-
 TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 END SUBROUTINE DIVERGENCE_PART_2
  
