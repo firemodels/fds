@@ -40,6 +40,7 @@ smokeview -runscript devices_elem
 smokeview -runscript plume5a
 smokeview -runscript plume5b
 smokeview -runscript plume5c
+smokeview -runscript plume5c_bounddef
 smokeview -runscript sillytexture
 smokeview -runscript smoke_sensor
 smokeview -runscript smoke_test
