@@ -1,0 +1,34 @@
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=5.0in]{figures/3point_line_smooth}
+\end{center}
+\caption{Setup for determining the slope of a smooth curve passing through three points.}
+\label{figlinesmooth}%
+\end{figure}
+
+The use of harmonic averages to construct average normal vectors at isosurface vertices is justified by the following two
+dimensional example.  As illustrated in Figure \ref{figlinesmooth},
+consider the quadratic curve $y(x)=A+Bx+Cx^2$ constrained by $y(-\Delta x_2)=0$, $y(0)=1$ and $y(\Delta x_1)=0$ .  The slope of this
+curve at $x=0$ is given by $y'(0)=B$.  Likewise, the slope of the vector perpendicular to this curve at $x=0$ is
+$-1/B$.  The coefficient $B$ may be determined from the two simultaneous equations $y(\Delta
+x_1)=0$ and  $(y(-\Delta x_2)=0$ (note that $A=1$ since $y(0)=1$) or
+\begin{eqnarray*}
+1+B\Delta x_1 + C \Delta x_1^2 &= &0\\
+1-B\Delta x_2 + C \Delta x_2^2 &= &0
+\end{eqnarray*}
+which has solution
+\begin{eqnarray*}
+B&=&\frac{\Delta x_1^2-\Delta x_2^2}{\Delta x_1\Delta x_2(\Delta x_1+\Delta x_2)}=
+\frac{\Delta x_1-\Delta x_2}{\Delta x_1\Delta x_2}\\
+\end{eqnarray*}
+The slope $N$ of the normal at $x=0$ is then given by
+\begin{eqnarray*}
+N=-\frac{1}{B}&=&\frac{1}{1/\Delta x_1-1/\Delta x_2}
+\end{eqnarray*}
+The slope $N_1$ of the normal to the line segment between $(0,1)$ and $(\Delta x_1,0)$ is $N_1=\Delta x_1$.
+The slope $N_2$ of the normal to the line segment between $(-\Delta x_2,0)$ and (0,1) is $N_2=-\Delta x_2$.
+Therefore the average slope $N$ may be expressed in terms of $N_1$ and $N_2$ as
+\begin{eqnarray*}
+N=\frac{1}{1/N_1+1/N_2}
+\end{eqnarray*}
