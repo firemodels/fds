@@ -15,11 +15,12 @@ Smoke Concentration,Measured Density (mg/m$^3$),Predicted Density (mg/m$^3$),0,4
 Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.1,0.015 0.94,SouthEast,4,9,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Carbon_Monoxide_Concentration
 Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0,5,0.015 0.94,SouthEast,4,10,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Velocity
 Open Compartment Over-Pressure,Measured Pressure Drop (Pa),Predicted Pressure Drop (Pa),0,5,0.015 0.94,SouthEast,4,40,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Open_Compartment_Pressure
+WTC Insulated Steel Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,0.015 0.94,SouthEast,4,14,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Insulated_Steel_Temperature
 WTC Steel Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,0.015 0.94,SouthEast,4,14,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Steel_Temperature
 WTC Wall and Ceiling Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.015 0.94,SouthEast,4,14,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/WTC_Surface_Temperature
 HGL Temperature Steckler Compartment,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,300,0.015 0.94,SouthEast,4,14,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_Steckler
 Doorway Velocity Steckler Compartment,Measured Velocity (m/s),Predicted Velocity (m/s),0,5,0.015 0.94,SouthEast,4,10,no,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Velocity_Steckler
-INERIS Hydrogen Experiments,Measured Hydrogen Volume Fraction,Predicted Hydrogen Volume Fraction,0,0.25,0.015 0.94,SouthEast,4,10,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/INERIS_H2
+Hydrogen Concentration,Measured Hydrogen Volume Fraction,Predicted Hydrogen Volume Fraction,0,0.25,0.015 0.94,SouthEast,4,10,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Hydrogen
 Temperatures (SP 2009 AST Experiments),Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.015 0.94,SouthEast,4,14,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/SP_Temperature
 Actuated Sprinklers,Measured Actuations,Predicted Actuations,0,20,0.015 0.94,SouthEast,4,0,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/UL_NFPRF_Actuations
 Oxygen Concentration NIST FSE 2008,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.25,0.015 0.94,SouthEast,4,9,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Oxygen_Concentration
