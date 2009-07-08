@@ -5972,7 +5972,11 @@ static int in_menu=0;
 #endif
     char menulabel[256];
 
+#ifdef BIT64
+    sprintf(menulabel,"  Smokeview (64 bit) revision:%i",revision_smv);
+#else
     sprintf(menulabel,"  Smokeview revision:%i",revision_smv);
+#endif
     glutAddMenuEntry(menulabel,1);
     if(revision_fds>0){
       sprintf(menulabel,"  FDS revision:%i",revision_fds);
