@@ -1071,9 +1071,9 @@ marching cube algorithm~\cite{marchingcubes}\ modified to remove
 ambiguities. A decimation procedure is used to reduce the number
 of resulting triangles by collapsing nodes of triangles with large
 aspect ratios and re-triangulating. This makes the isosurface look
-better and also reduces storage requirements. Figure \ref{figiso}
+better and also reduces storage requirements. Figures \ref{figisoa} and \ref{figisob}
 illustrates the use of isosurfaces for visualizing the
-stoichimetric mixture fraction.
+stoichimetric mixture fraction. These figures show different ways of drawing isosurfaces.
 
 \paragraph{Isosurface uncertainty} Data used to generate isosurfaces has uncertainty, therefore the location of the isosurface
 also has uncertainty.  Bounds for this uncertainty may be expressed in terms of data uncertainty and data variation (the smaller the variation the larger the uncertainty.
@@ -1084,7 +1084,7 @@ The Smokeview verification guide~\cite{Smokeview_Verification_Guide_5} shows tha
 \frac{\max(|\Delta T_1|,|\Delta T_2|)}{|T_2-T_1|}
 \end{eqnarray*}
 
-\noindent where $\Delta T_1$ and $\Delta T_2$ are the uncertainty in $T_1$ and $T_2$.
+\noindent where $\Delta T_1$ and $\Delta T_2$ are the uncertainty in $T_1$ and $T_2$ at $x_1$ and $x_2$ respectively.
 
 \paragraph{Algorithm for generating an Isosurface} The algorithm for generating an isosurface may be summarized as follows:
 \begin{enumerate}
@@ -1112,21 +1112,21 @@ If this is the case, then remove this triangle's vertices, replacing them with a
 \end{center}
 \caption{Snapshot of an isosurface of temperature at 100 \degC\ (212 \degF).
   }
-\label{figiso}%
+\label{figisoa}%
 \end{figure}
 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
 \includegraphics[height=4.0in]{figures/plume5a_iso_lines}\\
-line view\\
+outline view\\
 \includegraphics[height=4.0in]{figures/plume5a_iso_solid}\\
 solid view
 \end{tabular}
 \end{center}
 \caption{Snapshot of an isosurface of temperature at 100 \degC\ (212 \degF).
   }
-\label{figiso}%
+\label{figisob}%
 \end{figure}
 
 \begin{figure}[\figoptions]
@@ -1553,28 +1553,41 @@ A second compression scheme is used by Smokezip to compress FDS files even more 
 
 \chapter{Future Work}
 
-Smokeview is a software tool used to gain insight into the results generated
-by fire modeling simulations such as the Fire Dynamics Simulator.
-There are two general areas that need to be addressed in order to improve this tool.
-First, to be able to improve the visualizations themselves - in particular, to do a better job of visualizing smoke and fire.
-The aim then of any work to add or improve visualization algorithms in Smokeview is allow one to provide more and better insight.
-Second, to be able to visualize the larger cases now made possible by the more powerful computers (faster with more memory) now commonly available.   Some possible areas of future research are described in more detail in the following sections.
+Smokeview is a software tool used to gain insight into results generated
+by fire models such as the Fire Dynamics Simulator or CFAST.
+Two general areas of research need to be addressed in order to improve this tool. First, scenarios with a large number of grid cells need to be visualized more effectively and efficiently and second, some visualization algorithms need to be improved and others need to be added in order to more effectively interpret fire modeling data.
+Some areas of research to accomplish these goals are described in more detail in the following sections.
 
 
 \section{Visualize Cases more Realistically}
-Realism is a metric used to gauge qualitatively how accurate the smoke and fire is being modeled. Realism itself is not the primary goal.  By applying more physics to the problem of visualizing smoke and fire the presumption is that the results will not only be more realistic but more accurate.
+Realism is a metric used when using Smokeview to gauge qualitatively the accuracy of the fire and smoke display. Realism itself is not the primary goal, however.  Realism is a side effect of the application of more physics.
+The primary goal is to strive for a more accurate representation of the underlying data which in turn requires the use of more physics.
 \begin{itemize}
 \item Investigate techniques for visualizing fire more realistically by using information about the fire such as its temperature to color it more realistically.
 
 \item Investigate algorithms for modeling the interaction of light and smoke.
-The {\em transport} of light into and out of the smoke/fire ({\em ie scattering}) is another important factor that effects its appearance.  Light sources could consist of either man made lights or from the fire itself.  Work also needs to be done to generalize the wavelength of light used to visualize the scene, {\em ie} implementing an algorithm in Smokeview to simulate a thermal imager or infrared viewer.  
+The {\em transport} of light into and out of the smoke/fire ({\em ie scattering}) is another important factor that effects its appearance.  Light sources could consist of either man made lights or from the fire itself.  Work also needs to be done to generalize the wavelength of light used to visualize the scene, {\em ie} implementing an algorithm in Smokeview to simulate a thermal imager or infrared viewer.
+\end{itemize}
+
+\section{Fire Computations in Smokeview}
+The original conception of FDS and Smokeview was that FDS would perform fire computations and Smokeview would visualize them.
+This distinction became blurred with the addition in Smokeview of the 3D smoke visualization algorithms.
+Further blurring the distinction, pre-visualization steps are performed in FDS, to convert soot density to a smoke opacity.
+
+Additional fire computations are planned for Smokeview.  The user will gain insight into the fire phenomena much more quickly by being able to manipulate and solve their problem in real time.  Two examples are detailed below.
+
+\begin{itemize}
+\item  Investigate methods for modeling the motion of fire brands using either wind fields computed by FDS or wind fields defined in Smokeview.
+This allows one to define the initial position and distribution of fire brands and to note where they land.
+\item Implement a level set method proposed by Rehm and McDermott~\cite{Rehm:LevelSet} for tracking a fire line.  The method would take into account terrain ({\em ie}\ non-level ground) defined by the user.
 \end{itemize}
 
 \section{Visualize Larger Cases}
 Techniques need to be investigated for visualizing larger cases more effectively.  Updating Smokeview to allow 64 bit memory addressing is just one option.  This is a brute force method.  Techniques are also required for honing or zeroing in on data of interest.  The fire line used to visualize WUI (wildland urban interface) simulations is a good example of this.  A fire line in the context of Smokeview is simply a visual display of temperature only visible where the fire is located.  Additional techniques for visualizing large cases that need to be investigated include:
 
 \begin{itemize}
-\item Investigate methods for making it easier to probe or mine data, {\em ie}\ to retrieve data of particular interest.  Now FDS data is stored sequentially.  For large data sets one needs to be able to retrieve data at a particular time and region without reading the entire data set that comes before.  Put another way, with 64 bit comes much larger data files and longer read times.  We need to figure out how to load just part of the data efficiently to shorten time required to visualize cases.
+\item Investigate methods for making it easier to probe or mine data, {\em ie}\ to retrieve data of particular interest.  Now FDS data is stored sequentially.  For large data sets one needs to retrieve data efficiently at a particular time and region without reading the entire data set.
+    User defined spatial and temporal data subsets need to be loaded efficiently in order to shorten the time required to visualize cases.
 
 \item Investigate standardized methods for storing data more efficiently and more effectively.  Can we do it better and be practical?  The idea would be not to change how FDS outputs data but to consider whether a separate {\em filter}\ program that would convert FDS generated data into a different format that would enable other tools besides Smokeview to be able to visualize data, for example the visualization tool kit VTK~\cite{VTK}.
 
@@ -1585,7 +1598,7 @@ Techniques need to be investigated for visualizing larger cases more effectively
 
 \begin{itemize}
 
-\item Investigate methods for using the video card to perform scientific compoutations.
+\item Investigate methods for using the video card to perform scientific computations.
 The computational power of the video card is already  being exploited by Smokeview to perform simple smoke computations.
 It will need to be exploited even more in order to make the proposed fire coloring and smoke lighting computations practical.
 Techniques are being investigated for performing the computations needed to implement the more realistic fire and smoke computations discussed earlier, in particular CUDA~\cite{CUDA}.  Techniques such as these will be required it more complex visualization algorithms are to be effective.
@@ -1598,7 +1611,7 @@ Techniques are being investigated for performing the computations needed to impl
 % -------------------  References ------------------------
 %
 
-\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_mathcomp,../Bibliography/sv_fire,../Bibliography/sv_graphics}
+\bibliography{../Bibliography/FDS_general,../Bibliography/FDS_refs,../Bibliography/FDS_mathcomp,../Bibliography/sv_fire,../Bibliography/sv_graphics}
 
 \addcontentsline{toc}{chapter}{Bibliography}
 
@@ -1618,7 +1631,7 @@ Techniques are being investigated for performing the computations needed to impl
 \label{smvprogstruct}
 
 This chapter gives an overview of the program structure for Smokeview.
-Smokeview consists of about 80,000 lines of code.  Most of it is
+Smokeview consists of about 85,000 lines of code.  Most of it is
 written in C using standard libraries such as
 OpenGL~\cite{OpenGLRed} for implementing the graphics, GLUT~\cite{OpenGLGlut} for providing a
 simple menu based user interface and interacting with the host operating system.

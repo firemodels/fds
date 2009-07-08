@@ -217,7 +217,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1017-3 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-3, 58 pages (July 2009) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-3, 60 pages (July 2009) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -392,11 +392,21 @@ The FDS input files used for the verification cases are documented in Appendix \
 
 \chapter{Data File Tests}
 
-The tests in this chapter verify whether visualization types such as surface contours (boundary files), isosurfaces, particles, slice files, 3D smoke files, PLOT3D files and fire lines (for WUI simulations) are working as intended.
-These verifications use
-the FDS input files {\tt plume5c.fds}\ (see Appendix \ref{FDSplume5c}) and {\tt fireline.fds} (see Appendix \ref{FDSfireline}) to generate the simulation data.  The verification figures are generated automatically using the Smokeview script files {\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}) and {\tt fireline.ssf}\ (see Appendix \ref{SSFfireline}).  The use of scripting allows the figures and hence this document to be updated easily as changes are made in FDS, Smokeview or the FDS input data files.  This allows the verification process to be ongoing.
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=3.0in]{scriptfigures/plume5c_bounddef_init}
+\end{center}
+ \caption{The temperatures in the plume5c.fds case are initialized to 600~\degC\ in
+ the region outlined in blue.
+ }
+\label{figbounddef}%
+\end{figure}
 
-The {\tt plume5c.fds}\ test case is a simple fire plume with two blockages to make the smoke flow more complex.  A portion of the gas phase and the upper blockage are both initialized to 600~\degC\ (rather than 20~\degC) in order to test the conversion of a known temperature data to the correct color (as shown in the colorbar).  The {\tt fireline.fds}\ test case is a terrain test case.  The center of the case has a {\em hill}.  The fire line data displayed conforms to this hill.
+The tests in this chapter verify whether visualization types such as surface contours (boundary files), isosurfaces, particles, slice files, 3D smoke files, PLOT3D files and fire lines (for WUI simulations) are working as intended.  These verifications use the FDS input files {\tt plume5c.fds}\ (see Appendix \ref{FDSplume5c}) and {\tt fireline.fds} (see Appendix \ref{FDSfireline}) to generate the simulation data.  {\tt plume5c.fds}, models a simple fire plume with two blockages to make the smoke flow more complex.  The upper blockage is initialized to 600~\degC.   The gas phase is initialized to 600~\degC\ in the interior region colored blue as illustrated in Figure \ref{figbounddef} in order to verify that this temperature is converted to the proper color (as shown in the colorbar).
+The {\tt fireline.fds}\ test case is a terrain test case.  The center of the case has a {\em hill}.  The fire line data displayed conforms to this hill.
+
+The verification figures are generated automatically using the Smokeview script files {\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}) and {\tt fireline.ssf}\ (see Appendix \ref{SSFfireline}).  The use of scripting allows the figures and hence this document to be updated easily as changes are made in FDS, Smokeview or the FDS input data files.  This allows the verification process to be ongoing.
+
 
 
 \section{Surface contours (Boundary Files)}
@@ -430,7 +440,7 @@ The images for this test were created automatically by running the smokeview scr
 \section{Iso-surfaces}
 An isosurface is a surface in 3-D space that defines constant values of a dependent variable.
 Figures \ref{figisotest} and \ref{figisotest2} present images verifying the display of isosurfaces.
-A series of temperature isosurfaces are drawn at at 0.0, 10.0 and 30.0
+A series of temperature isosurfaces are drawn at 0.0, 10.0 and 30.0
 seconds.  A portion of the interior gas temperature is initialized to 600.0~\degC\ hence the rectangular block that appears in the $t=0.0$ images.
 The first column in figure \ref{figisotest2}\ presents the iso-surface using points.  The second column presents the iso-surface using triangulated outlines.
 The first column in figure \ref{figisotest}\ presents the iso-surface using a solid surface.  The second column also presents the iso-surface using a solid surface but also includes normal vectors.
@@ -476,12 +486,21 @@ The images for this test were created automatically by running the smokeview scr
 \end{figure}
 
 \subsection{Sensitivity Analysis}
-Given that the data used to generate isosurfaces has uncertainty, an important question then is
-how sensitive is the isosurface location to uncertainty in the data used to define it?  This question may be addressed by noting that the key step in constructing an isosurface is solving an inverse interpolation problem.   That is, determining the location between two grid nodes where interpolated data takes on a particular value (the isosurface level being constructed).
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=3.0in]{figures/linear_interpolationiso}
+\end{center}
+ \caption{A portion of an iso-surface defined by $f(x,y,z)=T_m$ (for some function $f$) crossing a line segment at $(x_m,y,z)$.
+  }
+\label{figisointerpiso}%
+\end{figure}
+
+Given that data used to generate an isosurface has uncertainty, an important question to consider is how sensitive is the isosurface location to uncertainty in the data used to define it?
+Figure \ref{figisointerpiso} shows a portion of an iso-surface, $f(x,y,z)=T_m$, passing through a line segment at $(x_m,y,z)$.  The line segment is defined by endpoints $(x_1,y,z)$ and $(x_2,y,z)$.  The key step in constructing an isosurface is solving an inverse interpolation problem.   That is, determining the location, $(x_m,y,z)$ between two grid nodes, $(x_1,y,z)$ and $(x_2,y,z)$ where interpolated data takes on a particular value (the isosurface level, $T_m$, being constructed).
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[height=4.0in]{figures/linear_interpolation}
+\includegraphics[height=3.0in]{figures/linear_interpolation}
 \end{center}
  \caption[Inverse linear interpolation setup.]{Inverse linear interpolation setup.
  The dependent data values $T_1$ and $T_2$ are known at locations $x_1$ and $x_2$.
@@ -491,7 +510,7 @@ how sensitive is the isosurface location to uncertainty in the data used to defi
 \label{figisointerp}%
 \end{figure}
 
-Suppose (as illustrated in Figure \ref{figisointerp}) that $(x_1,T_1)$ and $(x_2,T_2)$ represent two known data location, data value pairs and that $T_m$ is also known satisfying $T_1\le T_m \le T_2$.  The inverse interpolation problem then is to find the location $x_m$ that takes on the data value $T_m$.  The location $x_m$ is given by
+Suppose, as illustrated in Figure \ref{figisointerp}, that $(x_1,y,z)$, $T_1$ and $(x_2,y,z)$, $T_2$ represent two known data location, data value pairs and that $T_m$ is also known satisfying $T_1\le T_m \le T_2$.  The inverse interpolation problem then is to find the location $(x_m,y,z)$ that takes on the data value $T_m$.  The location $x_m$ is given by
 \begin{eqnarray*}
 x_m=(1-\alpha)x_1+\alpha x_2
 \end{eqnarray*}
@@ -517,7 +536,7 @@ and
 \palphattwo&=&-\frac{T_m-T_1}{(T_2-T_1)^2}
 \label{eq:senslast}
 \end{eqnarray}
-Equation (\ref{eq:sensitivity}) may be re-written using terms in equations (\ref{eq:sensfirst}) to (\ref{eq:senslast}) to obtain
+Equation (\ref{eq:sensitivity}) may be re-written using terms in equations (\ref{eq:sensfirst}) through (\ref{eq:senslast}) to obtain
 \begin{eqnarray}
 \frac{\Delta x_m}{x_2-x_1}&=&\frac{T_m-T_2}{(T_2-T_1)^2}\Delta T_1-
 \frac{T_m-T_1}{(T_2-T_1)^2}\Delta T_2
@@ -531,8 +550,8 @@ Equation (\ref{eq:sensitivity}) may be re-written using terms in equations (\ref
 to the relative errors of $T_1$ and $T_2$ in terms of the interpolation parameter $\alpha$.
 The error $\Delta x_m$ may then be bounded to obtain
 \begin{eqnarray}
-\left|\frac{\Delta x_m}{x_2-x_1}\right|\le
-\frac{\max(|\Delta T_1|,|\Delta T_2|)}{|T_2-T_1|}
+|\Delta x_m|\le
+|x_2-x_1|\frac{\max(|\Delta T_1|,|\Delta T_2|)}{|T_2-T_1|}
 \end{eqnarray}
 \noindent Uncertainty in isosurface location is then proportional to the magnitude of data uncertainty, $\max(|\Delta T_1|,|\Delta T_2|)$, and inversely proportional to the data variation, $|T_2-T_1|$.
 
