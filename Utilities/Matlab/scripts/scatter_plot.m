@@ -38,7 +38,7 @@ for j=qrange
             Predicted_Metric(k) = Save_Predicted_Metric(i);
             Group_Key_Label(k)  = Save_Group_Key_Label(i);
             K(k) = plot(Measured_Metric(k),Predicted_Metric(k),...
-                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
+                char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i)),'MarkerSize',4); hold on
         end
     end
     
