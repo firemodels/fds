@@ -1,0 +1,5 @@
+RENDERDIR
+ ..\..\Manuals\SMV_5_Verification_Guide\scriptfigures
+RENDERONCE
+ plume5c_bounddef_init
+ 
