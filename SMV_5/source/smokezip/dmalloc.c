@@ -21,9 +21,9 @@ char dmalloc_revision[]="$Revision$";
 #ifdef pp_memstatus
 #ifdef WIN32
 void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physmemused, unsigned int *totalmem){
-  MEMORYSTATUS stat;
+  MEMORYSTATUSEX stat;
 
-    GlobalMemoryStatus (&stat);
+    GlobalMemoryStatusEx (&stat);
     if(availmem!=NULL)*availmem=stat.dwMemoryLoad;
     if(totalmem!=NULL)*totalmem=stat.dwTotalPhys/(1024*1024);
     if(physmemused!=NULL)*physmemused=(stat.dwTotalPhys-stat.dwAvailPhys)/(1024*1024);
