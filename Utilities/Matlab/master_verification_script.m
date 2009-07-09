@@ -8,15 +8,14 @@
 % creates all the pdfs for the section on the Werner and Wengle wall
 % model.  Also, add your script to the master list below.
 %
-% If you create and use any customized functions, please store these in
-% the 'functions' directory.
-%
 % To remain backward compatible with the PyroGraph script we have
-% included the script read_dline.m.  To utilize this script, add the
+% included the script dataplot.m.  To utilize this script, add the
 % appropriate parameters to a 'd' line in
 % verification_data_config_matlab.csv.
 
-addpath 'functions'
+close all
+clear all
+
 addpath 'scripts'
 
 [saved_data,drange] = dataplot('verification');
