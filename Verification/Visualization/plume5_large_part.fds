@@ -1,0 +1,43 @@
+&HEAD CHID='plume5_large_part',TITLE='Plume case SVN $Revision$' /
+
+ simple plume calculation to generate a large particle file for teseting the 64 bit smokeview
+
+&MESH IJK=32,32,64 XB=0.0,1.6,0.0,1.6,0.0,3.2 /
+
+&TIME TWFIN=10. /  Total simulation time
+
+&DUMP NFRAMES=1000 /
+
+&PART ID='drops', QUANTITIES(1:1)='DROPLET_TEMPERATURE',SAMPLING_FACTOR=1, COLOR='RED', EVAPORATE=.FALSE.,DT_INSERT=0.01 /
+&PART ID='tracers',MASSLESS=.TRUE., SAMPLING_FACTOR=1 DT_INSERT=0.01 /  Description of massless tracer particles. Apply at a
+                                                             solid surface with the PART_ID='tracers'
+
+&SURF ID='BURNER',HRRPUA=600.0,PART_ID='tracers' /  Ignition source
+&SURF ID='PARTICLES', PART_ID='drops', VEL=-1., PARTICLE_MASS_FLUX=100.0 /
+
+&VENT XB=0.5,1.1,0.5,1.1,0.1,0.1,SURF_ID='BURNER' /  fire source on kitchen stove
+&OBST XB=0.5,1.1,0.5,1.1,0.0,0.1 /
+&OBST XB=0.3,0.6,0.3,0.6,0.8,1.1 ,SURF_ID='PARTICLES' /
+&OBST XB=0.9,1.2,0.3,0.6,0.8,1.1 ,SURF_ID='PARTICLES' /
+&OBST XB=0.3,0.6,0.9,1.2,0.8,1.1 ,SURF_ID='PARTICLES' /
+&OBST XB=0.9,1.2,0.9,1.2,0.8,1.1 ,SURF_ID='PARTICLES' /
+&OBST XB=0.3,0.6,0.3,0.6,1.4,1.7 ,SURF_ID='PARTICLES' /
+&OBST XB=0.9,1.2,0.3,0.6,1.4,1.7 ,SURF_ID='PARTICLES' /
+&OBST XB=0.3,0.6,0.9,1.2,1.4,1.7 ,SURF_ID='PARTICLES' /
+&OBST XB=0.9,1.2,0.9,1.2,1.4,1.7 ,SURF_ID='PARTICLES' /
+&OBST XB=0.3,0.6,0.3,0.6,2.0,2.3 ,SURF_ID='PARTICLES' /
+&OBST XB=0.9,1.2,0.3,0.6,2.0,2.3 ,SURF_ID='PARTICLES' /
+&OBST XB=0.3,0.6,0.9,1.2,2.0,2.3 ,SURF_ID='PARTICLES' /
+&OBST XB=0.9,1.2,0.9,1.2,2.0,2.3 ,SURF_ID='PARTICLES' /
+&OBST XB=0.3,0.6,0.3,0.6,2.6,2.9 ,SURF_ID='PARTICLES' /
+&OBST XB=0.9,1.2,0.3,0.6,2.6,2.9 ,SURF_ID='PARTICLES' /
+&OBST XB=0.3,0.6,0.9,1.2,2.6,2.9 ,SURF_ID='PARTICLES' /
+&OBST XB=0.9,1.2,0.9,1.2,2.6,2.9 ,SURF_ID='PARTICLES' /
+
+&VENT XB=0.0,0.0,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=1.6,1.6,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,0.0,0.0,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,1.6,1.6,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,0.0,1.6,3.2,3.2,SURF_ID='OPEN'/
+
+
