@@ -77,7 +77,7 @@ EXTERNCPP void UnloadSmokeShaders(void);
 #endif
 EXTERNCPP void update_glui_wui(void);
 EXTERNCPP int have_terrain_slice(void);
-EXTERNCPP void getfile_size(const char *filename, int *filesize);
+EXTERNCPP void getfile_size(const char *filename, FILE_SIZE *filesize);
 EXTERNCPP void getfile_modtime(char *filename, time_t *modtime);
 EXTERNCPP float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc);
 EXTERNCPP void update_camera_ypos(camera *camera_data);
