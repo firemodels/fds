@@ -9583,7 +9583,7 @@ void getfile_modtime(char *filename, time_t *modtime){
 
 /* ------------------ getfile_size ------------------------ */
 
-void getfile_size(const char *filename, int *filesize){
+void getfile_size(const char *filename, FILE_SIZE *filesize){
   STRUCTSTAT statbuffer;
   int statfile;
 

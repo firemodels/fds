@@ -65,7 +65,8 @@ void readpatch(int ifile, int flag, int *errorcode){
   int npatchloaded;
   int ncompressed_buffer;
   char *file;
-  int local_starttime=0, local_stoptime=0, file_size=0;
+  int local_starttime=0, local_stoptime=0;
+  FILE_SIZE file_size=0;
   int local_starttime0=0, local_stoptime0=0;  
   float delta_time, delta_time0;
 
@@ -915,7 +916,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   if(file_size!=0&&delta_time>0.0){
     float loadrate;
 
-    loadrate = (file_size*8.0/1000000.0)/delta_time;
+    loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
     printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
     (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
   }

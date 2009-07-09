@@ -120,7 +120,7 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
 
 /* ------------------ getpart5data ------------------------ */
 
-void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_all, float *delta_time, int *file_size){
+void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_all, float *delta_time, FILE_SIZE *file_size){
   FILE *PART5FILE;
   int one;
   int endianswitch=0;
@@ -802,7 +802,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   int nf_all;
   int local_starttime0, local_stoptime0;
   float delta_time0, delta_time;
-  int file_size;
+  FILE_SIZE file_size;
 
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
 
@@ -936,7 +936,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   if(file_size!=0&&delta_time>0.0){
     float loadrate;
 
-    loadrate = (file_size*8.0/1000000.0)/delta_time;
+    loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
     printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s",
     (float)file_size/1000000.,delta_time,loadrate);
   }
