@@ -5,7 +5,6 @@
 close all
 clear all
 
-addpath('../functions')
 paper_width  = 6.0; % inches
 paper_height = 4.5; % inches
 

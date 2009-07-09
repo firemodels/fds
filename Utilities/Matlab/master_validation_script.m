@@ -7,10 +7,12 @@
 %
 % See also: dataplot, scatplot
 
-addpath 'functions'
+close all
+clear all
+
 addpath 'scripts'
 
-[saved_data,drange] = dataplot('validation');
+[saved_data,drange] = dataplot('validation',[2:3]);
 scatplot(saved_data,drange)
 
 
