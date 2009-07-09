@@ -36,7 +36,9 @@
 #define _CRT_SECURE_NO_DEPRECATE
 
 #ifdef WIN32
+#ifndef X64
 #define pp_memstatus
+#endif
 #define pp_COMPRESS
 #define pp_noappend
 #include "pragmas.h"
