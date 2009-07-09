@@ -19,12 +19,15 @@ static int checkmemoryflag=1;
 // svn revision character string
 char dmalloc_revision[]="$Revision$";
 
+
+/* ------------------ _memorystatus ------------------------ */
+
 #ifdef pp_memstatus
 #ifdef WIN32
 void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physmemused, unsigned int *totalmem){
-  MEMORYSTATUSEX stat;
+  MEMORYSTATUS stat;
 
-    GlobalMemoryStatusEx (&stat);
+    GlobalMemoryStatus(&stat);
     if(availmem!=NULL)*availmem=stat.dwMemoryLoad;
     if(totalmem!=NULL)*totalmem=stat.dwTotalPhys/(1024*1024);
     if(physmemused!=NULL)*physmemused=(stat.dwTotalPhys-stat.dwAvailPhys)/(1024*1024);
@@ -42,6 +45,8 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
 }
 #endif
 #endif
+
+/* ------------------ initMM ------------------------ */
 
 void initMM(void){
   
