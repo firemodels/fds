@@ -33,15 +33,15 @@ Save_Group_Key_Label  = saved_data{:,4};
 Save_Measured_Metric  = saved_data{:,5};
 Save_Predicted_Metric = saved_data{:,6};
 
-qfil = ['../scatterplot_config_matlab.csv'];
+qfil = [pwd,'/scatterplot_config_matlab.csv'];
 
 if nargin==3
     qrange = varargin{1};
 else
-    qrange = [3:100];
+    qrange = [2:100];
 end
 
-addpath('../scripts')
+%addpath('../scripts')
 paper_width  = 6.0; % inches
 paper_height = 6.0; % inches
 
@@ -69,12 +69,12 @@ for j=qrange
         end
     end
     
-%     if Scatter_Plot_Title=='Verification'
-%         k = 1000;
-%         Measured_Metric = normrnd(1:1000,(Sigma_2_E/200)*(1:1000),[1 1000]);
-%         Predicted_Metric = normrnd(0.5*(1:1000),0.02*(1:1000),[1 1000]);
-%         K = plot(Measured_Metric,Predicted_Metric,'ko'); hold on    
-%     end
+    if strcmp(Scatter_Plot_Title,'Verification')
+        k = 1000;
+        Measured_Metric = normrnd(1:1000,(Sigma_2_E/200)*(1:1000),[1 1000]);
+        Predicted_Metric = normrnd(0.5*(1:1000),0.02*(1:1000),[1 1000]);
+        K = plot(Measured_Metric,Predicted_Metric,'ko'); hold on    
+    end
     
     if k>0
         
@@ -93,11 +93,11 @@ for j=qrange
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--') 
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--') 
         
-%        if Model_Error=='yes'
+        if strcmp(Model_Error,'yes')
             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')
             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--')
             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--')
-%        end
+        end
         
         % format the legend and axis labels
         xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
@@ -116,18 +116,20 @@ for j=qrange
         text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
             ['$2 \, \sigma_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
         
- %       if Model_Error=='yes'
+        if strcmp(Model_Error,'yes')
             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
                 ['$2 \, \sigma_M$=',num2str(2*Sigma_M,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
             
             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
                 ['Bias =',num2str(delta,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
-%        end
+        end
         
-        C = stripcell(Group_Key_Label);
-        [B I] = unique(C);
-        legend(K(I),C(I),'Location',Key_Position,'FontSize',12)
-        legend boxon
+        if strcmp(Scatter_Plot_Title,'Verification')==0
+            C = stripcell(Group_Key_Label);
+            [B I] = unique(C);
+            legend(K(I),C(I),'Location',Key_Position,'FontSize',12)
+            legend boxon
+        end
         
         hold off
         
@@ -137,7 +139,7 @@ for j=qrange
         set(gcf,'PaperSize',[paper_width paper_height]);
         set(gcf,'PaperPosition',[0 0 paper_width paper_height]);
         display(['Printing scatter plot ',num2str(j),'...'])
-        print(gcf,'-dpdf',['../../../Manuals/',Plot_Filename])
+        print(gcf,'-dpdf',[pwd,'/../../Manuals/',Plot_Filename])
         
     else
         display(['No data for scatter plot ',Scatter_Plot_Title])

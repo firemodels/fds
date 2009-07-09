@@ -34,20 +34,20 @@ if nargin<1|nargin>2;
 end
 if nargin>=1
     if strcmp(varargin{1},'verification')|strcmp(varargin{1},'Verification')
-        cfil = ['../verification_data_config_matlab.csv'];
-        vdir = ['../../../Verification/'];
+        cfil = [pwd,'/verification_data_config_matlab.csv'];
+        vdir = [pwd,'/../../Verification/'];
     elseif strcmp(varargin{1},'validation')|strcmp(varargin{1},'Validation')
-        cfil = ['../validation_data_config_matlab.csv'];
-        vdir = ['../../../Validation/'];
+        cfil = [pwd,'/validation_data_config_matlab.csv'];
+        vdir = [pwd,'/../../Validation/'];
     end
 end
 if nargin==2
     drange = varargin{2};
 else
-    drange = 2:1055;
+    drange = 2:2000;
 end
 
-addpath('../scripts')
+%addpath('../scripts')
 paper_width  = 6.0; % inches
 paper_height = 4.5; % inches
 
@@ -169,7 +169,7 @@ for i=drange
         set(gcf,'PaperSize',[paper_width paper_height]);
         set(gcf,'PaperPosition',[0 0 paper_width paper_height]); 
         display(['Printing plot ',num2str(i),'...'])
-        print(gcf,'-dpdf',['../../../Manuals/',Plot_Filename])
+        print(gcf,'-dpdf',[pwd,'/../../Manuals/',Plot_Filename])
         
     end
     clear S1 S2 K style H M X Y P parameters
