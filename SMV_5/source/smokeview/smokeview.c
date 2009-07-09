@@ -3498,7 +3498,7 @@ void Args(int argc, char **argv){
   char *temp;
   char buffer[255];
   int iarg;
-  struct stat statbuffer;
+  STRUCTSTAT statbuffer;
   size_t len_memory;
   char *argi;
   char SMVFILENAME[1024];
@@ -3594,7 +3594,7 @@ void Args(int argc, char **argv){
   STRCAT(caseinifilename,ini_ext);
 
   if(smvfilename==NULL){
-    struct stat statbuffer;
+    STRUCTSTAT statbuffer;
 
     NewMemory((void **)&smvfilename,(unsigned int)(len+6));
     FREEMEMORY(smvmenufile);
@@ -3606,7 +3606,7 @@ void Args(int argc, char **argv){
 
       STRCPY(scriptbuffer,fdsprefix);
       STRCAT(scriptbuffer,".ssf");
-      if(default_script==NULL&&stat(scriptbuffer,&statbuffer)==0){
+      if(default_script==NULL&&STAT(scriptbuffer,&statbuffer)==0){
         default_script = insert_scriptfile(scriptbuffer);
       }
     }
@@ -3624,7 +3624,7 @@ void Args(int argc, char **argv){
     NewMemory((void **)&fds_filein,strlen(fdsprefix)+6);
     STRCPY(fds_filein,fdsprefix);
     STRCAT(fds_filein,".data");
-    if(stat(fds_filein,&statbuffer)!=0){
+    if(STAT(fds_filein,&statbuffer)!=0){
       FREEMEMORY(fds_filein);
     }
     if(fds_filein!=NULL){

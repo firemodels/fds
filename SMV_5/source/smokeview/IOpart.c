@@ -613,7 +613,7 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
   char *reg_file, *size_file;
   int i;
   int stat_sizefile, stat_regfile;
-  struct stat stat_sizefile_buffer, stat_regfile_buffer;
+  STRUCTSTAT stat_sizefile_buffer, stat_regfile_buffer;
   int nframes_all;
 
   reg_file=parti->reg_file;
@@ -623,8 +623,8 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
 
   parti->nframes=0;
 
-  stat_sizefile=stat(size_file,&stat_sizefile_buffer);
-  stat_regfile=stat(reg_file,&stat_regfile_buffer);
+  stat_sizefile=STAT(size_file,&stat_sizefile_buffer);
+  stat_regfile=STAT(reg_file,&stat_regfile_buffer);
   if(stat_regfile!=0)return;
 
   // create a size file if 1) the size does not exist
@@ -971,7 +971,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   int bytesperpoint;
   int skip;
   int statfile,statfile2;
-  struct stat statbuffer,statbuffer2;
+  STRUCTSTAT statbuffer,statbuffer2;
   char partsizefile[1024],buffer[1024];
   FILE *sizefile;
   int readpartsize=1;
@@ -1052,8 +1052,8 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   FORTgetsizes(file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian,&staticframe0,&error,lenfile);
   STRCPY(partsizefile,file);
   STRCAT(partsizefile,".sz");
-  statfile=stat(file,&statbuffer);
-  statfile2=stat(partsizefile,&statbuffer2);
+  statfile=STAT(file,&statbuffer);
+  statfile2=STAT(partsizefile,&statbuffer2);
   if(statfile==0&&statfile2==0&&difftime(statbuffer2.st_mtime,statbuffer.st_mtime)>0){
     sizefile=fopen(partsizefile,"r");
     if(sizefile!=NULL){
