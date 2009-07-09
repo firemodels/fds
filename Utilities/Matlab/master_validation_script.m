@@ -3,10 +3,14 @@
 % master_validation_script.m
 %
 % This script processes the plots that are specified in the file 
-% validation_data_config_matlab.csv. 
+% validation_data_config_matlab.csv.
+%
+% See also: dataplot, scatplot
 
-cd functions
-[saved_data,drange] = dataplot('validation',[2:1055]);
-scatplot(saved_data,drange,3:40)
+addpath 'functions'
+addpath 'scripts'
+
+[saved_data,drange] = dataplot('validation');
+scatplot(saved_data,drange)
 
 

@@ -16,7 +16,8 @@
 % appropriate parameters to a 'd' line in
 % verification_data_config_matlab.csv.
 
-cd functions
-[saved_data,drange] = dataplot('verification',[2:100]);
-cd ..
+addpath 'functions'
+addpath 'scripts'
+
+[saved_data,drange] = dataplot('verification');
 run scripts/wall_model
