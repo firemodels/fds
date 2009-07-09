@@ -179,7 +179,7 @@ void trimzeros(char *line){
   /* ------------------ getfileinfo ------------------------ */
 
 int getfileinfo(char *filename, char *source_dir, int *filesize){
-  struct stat statbuffer;
+  STRUCTSTAT statbuffer;
   int statfile;
   char buffer[1024];
 
@@ -191,7 +191,7 @@ int getfileinfo(char *filename, char *source_dir, int *filesize){
     strcat(buffer,filename);
   }
   if(filesize!=NULL)*filesize=0;
-  statfile=stat(buffer,&statbuffer);
+  statfile=STAT(buffer,&statbuffer);
   if(statfile!=0)return statfile;
   if(filesize!=NULL)*filesize=statbuffer.st_size;
   return statfile;
