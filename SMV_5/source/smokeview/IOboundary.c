@@ -47,7 +47,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   int i, j, k;
   int headersize, framesize;
   int statfile;
-  struct stat statbuffer;
+  STRUCTSTAT statbuffer;
   int nbb;
   int ibartemp,jbartemp,kbartemp;
   float *xplttemp,*yplttemp,*zplttemp;
@@ -236,7 +236,7 @@ void readpatch(int ifile, int flag, int *errorcode){
     loadpatchbysteps=0;
     if(flag==LOAD){
       mxpatch_frames = mxframes+51;
-      statfile=stat(file,&statbuffer);
+      statfile=STAT(file,&statbuffer);
       if(statfile==0&&framesize!=0){
         {
           int file_frames;
@@ -3123,7 +3123,7 @@ void updatepatchmenulabels(void){
   int i;
   patch *patchi;
   char label[128];
-  struct stat statbuffer;
+  STRUCTSTAT statbuffer;
 
   if(npatch_files>0){
     FREEMEMORY(patchorderindex);
@@ -3141,7 +3141,7 @@ void updatepatchmenulabels(void){
         STRCAT(patchi->menulabel,", ");
         STRCAT(patchi->menulabel,label);
       }
-      if(stat(patchi->comp_file,&statbuffer)==0){
+      if(STAT(patchi->comp_file,&statbuffer)==0){
         patchi->file=patchi->comp_file;
         patchi->compression_type=1;
       }

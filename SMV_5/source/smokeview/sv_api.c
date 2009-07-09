@@ -75,7 +75,7 @@ void svWINAPI sv_grid(int val){
 
 void get_smokezippath(char *progdir, char **zippath){
   size_t len;
-  struct stat statbuffer;
+  STRUCTSTAT statbuffer;
 
   if(progdir!=NULL){
     len=strlen(progdir);
@@ -87,12 +87,12 @@ void get_smokezippath(char *progdir, char **zippath){
     strcat(*zippath,"smokezip");
 #endif
   }
-  if(stat(*zippath,&statbuffer)==0)return;
+  if(STAT(*zippath,&statbuffer)==0)return;
   FREEMEMORY(*zippath);
 #ifdef WIN32
   NewMemory((void **)zippath,28);
   strcpy(*zippath,"c:\\nist\\fds\\smokezip.exe");
-  if(stat(*zippath,&statbuffer)==0)return;
+  if(STAT(*zippath,&statbuffer)==0)return;
   FREEMEMORY(*zippath);
 #else
   NewMemory((void **)zippath,28);
@@ -101,7 +101,7 @@ void get_smokezippath(char *progdir, char **zippath){
   strcat(*zippath,"bin");
   strcat(*zippath,dirseparator);
   strcat(*zippath,"smokezip");
-  if(stat(*zippath,&statbuffer)==0)return;
+  if(STAT(*zippath,&statbuffer)==0)return;
   FREEMEMORY(*zippath);
   NewMemory((void **)zippath,28);
   strcpy(*zippath,dirseparator);
@@ -112,7 +112,7 @@ void get_smokezippath(char *progdir, char **zippath){
   strcat(*zippath,"bin");
   strcat(*zippath,dirseparator);
   strcat(*zippath,"smokezip");
-  if(stat(*zippath,&statbuffer)==0)return;
+  if(STAT(*zippath,&statbuffer)==0)return;
   FREEMEMORY(*zippath);
 #endif
   return;
