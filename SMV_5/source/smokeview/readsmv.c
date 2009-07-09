@@ -143,7 +143,7 @@ int readsmv(char *file){
   char *VVEL="V-VEL";
   char *WVEL="W-VEL";
   int i, j, k;
-  struct stat statbuffer,statbuffer2;
+  STRUCTSTAT statbuffer,statbuffer2;
   texture *texti,*textj;
   cadgeom *cd;
   surface *surfi;
@@ -571,7 +571,7 @@ int readsmv(char *file){
       buffer3=trim_front(buffer);
       trim(buffer3);
       len=strlen(buffer3);
-      if(stat(buffer3,&statbuffer)==0){
+      if(STAT(buffer3,&statbuffer)==0){
         FREEMEMORY(databasefilename);
         if(NewMemory((void **)&databasefilename,(unsigned int)(len+1))==0)break;
         strcpy(databasefilename,buffer3);
@@ -1367,7 +1367,7 @@ typedef struct {
       cadgeominfo[ncadgeom].order=NULL;
       cadgeominfo[ncadgeom].quad=NULL;
       cadgeominfo[ncadgeom].file=NULL;
-      if(stat(buffer,&statbuffer)==0){
+      if(STAT(buffer,&statbuffer)==0){
         if(NewMemory((void **)&cadgeominfo[ncadgeom].file,(unsigned int)(len+1))==0)return 2;
         STRCPY(cadgeominfo[ncadgeom].file,buffer);
         printf("   reading cad file: %s\n",buffer);
@@ -1486,13 +1486,13 @@ typedef struct {
         if(NewMemory((void **)&smoke3di->comp_file,(unsigned int)(len+1))==0)return 2;
         STRCPY(smoke3di->comp_file,buffer2);
 
-        if(stat(smoke3di->comp_file,&statbuffer)==0){
+        if(STAT(smoke3di->comp_file,&statbuffer)==0){
           smoke3di->file=smoke3di->comp_file;
         }
         else{
           smoke3di->file=smoke3di->reg_file;
         }
-        if(stat(smoke3di->file,&statbuffer)==0){
+        if(STAT(smoke3di->file,&statbuffer)==0){
           if(readlabels(&smoke3di->label,stream)==2)return 2;
           if(strcmp(smoke3di->label.longlabel,"HRRPUV")==0){
             show_hrrcutoff_active=1;
@@ -1524,7 +1524,7 @@ typedef struct {
         if(NewMemory((void **)&smoke3di->light_file,(unsigned int)(len+1))==0)return 2;
         STRCPY(smoke3di->light_file,buffer2);
 
-        if(stat(smoke3di->light_file,&statbuffer)==0){
+        if(STAT(smoke3di->light_file,&statbuffer)==0){
           FILE *light_stream;
 
           light_stream=fopen(smoke3di->light_file,"rb");
@@ -1606,16 +1606,16 @@ typedef struct {
         int found_texture;
 
         found_texture=0;
-        if(smokeviewbindir!=NULL&&stat(buffer3,&statbuffer)!=0){
+        if(smokeviewbindir!=NULL&&STAT(buffer3,&statbuffer)!=0){
           STRCPY(texturebuffer,smokeviewbindir);
           STRCAT(texturebuffer,buffer3);
-          if(stat(texturebuffer,&statbuffer)==0){
+          if(STAT(texturebuffer,&statbuffer)==0){
             if(NewMemory((void **)&surfi->texturefile,strlen(texturebuffer)+1)==0)return 2;
             STRCPY(surfi->texturefile,texturebuffer);
             found_texture=1;
           }
         }
-        if(stat(buffer3,&statbuffer)==0){
+        if(STAT(buffer3,&statbuffer)==0){
           len=strlen(buffer3);
           if(NewMemory((void **)&surfi->texturefile,(unsigned int)(len+1))==0)return 2;
           STRCPY(surfi->texturefile,buffer3);
@@ -1734,10 +1734,10 @@ typedef struct {
       zonei->display=0;
 
       full_name=buffer;
-      if(stat(full_name,&statbuffer)!=0)full_name=NULL;
+      if(STAT(full_name,&statbuffer)!=0)full_name=NULL;
 
       last_name=lastname(buffer);
-      if(stat(last_name,&statbuffer)!=0)last_name=NULL;
+      if(STAT(last_name,&statbuffer)!=0)last_name=NULL;
 
       if(full_name!=NULL&&last_name!=NULL){
         if(strcmp(last_name,full_name)==0){
@@ -2183,7 +2183,7 @@ typedef struct {
       p->display=0;
 
       STRCPY(plot3dinfo[iplot3d].file,buffer);
-      if(stat(buffer,&statbuffer)!=0){
+      if(STAT(buffer,&statbuffer)!=0){
         for(n=0;n<5;n++){
           if(readlabels(&plot3dinfo[iplot3d].label[n],stream)==2)return 2;
         }
@@ -3081,13 +3081,13 @@ typedef struct {
       STRCPY(parti->comp_file,buffer);
       STRCAT(parti->comp_file,".svz");
 
-      if(stat(parti->comp_file,&statbuffer)==0){
+      if(STAT(parti->comp_file,&statbuffer)==0){
         parti->compression_type=1;
         parti->file=parti->comp_file;
       }
       else{
         parti->compression_type=0;
-        if(stat(parti->reg_file,&statbuffer)==0){
+        if(STAT(parti->reg_file,&statbuffer)==0){
           parti->file=parti->reg_file;
         }
         else{
@@ -3159,7 +3159,7 @@ typedef struct {
           NewMemory((void **)&parti->partclassptr,sizeof(part5class *));
             parti->partclassptr[i]=partclassinfo + parti->nclasses;
         }
-        if(parti->file==NULL||stat(parti->file,&statbuffer)!=0){
+        if(parti->file==NULL||STAT(parti->file,&statbuffer)!=0){
           npartinfo--;
         }
         else{
@@ -3167,7 +3167,7 @@ typedef struct {
         }
       }
       else{
-        if(stat(buffer,&statbuffer)==0){
+        if(STAT(buffer,&statbuffer)==0){
           if( readlabels(&parti->label,stream)==2 )return 2;
           ipart++;
         }
@@ -3207,7 +3207,7 @@ typedef struct {
         if(NewMemory((void **)&targfilename,(unsigned int)(len+1))==0)return 2;
         STRCPY(targfilename,buffer);
       }
-      if(stat(buffer,&statbuffer)==0){
+      if(STAT(buffer,&statbuffer)==0){
         itarg++;
       }
       else{
@@ -3281,7 +3281,7 @@ typedef struct {
       FREEMEMORY(fds_filein);
       if(NewMemory((void **)&fds_filein,(unsigned int)(len+1))==0)return 2;
       STRCPY(fds_filein,buffer);
-      if(stat(fds_filein,&statbuffer)!=0){
+      if(STAT(fds_filein,&statbuffer)!=0){
         FreeMemory(fds_filein);
         fds_filein=NULL;
       }
@@ -3306,7 +3306,7 @@ typedef struct {
         NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
         STRCPY(hrrfilename,chidfilebase);
         STRCAT(hrrfilename,"_hrr.csv");
-        if(stat(hrrfilename,&statbuffer)!=0){
+        if(STAT(hrrfilename,&statbuffer)!=0){
           FREEMEMORY(hrrfilename);
         }
       }
@@ -3331,7 +3331,7 @@ typedef struct {
     NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
     STRCPY(hrrfilename,chidfilebase);
     STRCAT(hrrfilename,"_hrr.csv");
-    if(stat(hrrfilename,&statbuffer)!=0){
+    if(STAT(hrrfilename,&statbuffer)!=0){
       FREEMEMORY(hrrfilename);
     }
   }
@@ -3400,11 +3400,11 @@ typedef struct {
       STRCAT(sd->size_file,".sz");
 
       sd->compression_type=0;
-      if(stat(sd->rle_file,&statbuffer)==0){
+      if(STAT(sd->rle_file,&statbuffer)==0){
         sd->compression_type=2;
         sd->file=sd->rle_file;
       }
-      if(stat(sd->comp_file,&statbuffer)==0){
+      if(STAT(sd->comp_file,&statbuffer)==0){
         sd->compression_type=1;
         sd->file=sd->comp_file;
       }
@@ -3439,7 +3439,7 @@ typedef struct {
         meshi = meshinfo + blocknumber;
         sd->mesh_type=meshi->mesh_type;
       }
-      if(stat(sd->file,&statbuffer)==0){
+      if(STAT(sd->file,&statbuffer)==0){
         if(sd->terrain==1){
           if(readlabels_terrain(&sd->label,stream)==2)return 2;
         }
@@ -3514,7 +3514,7 @@ typedef struct {
       STRCPY(patchi->size_file,buffer);
 //      STRCAT(patchi->size_file,".szz"); when we actully use file check both .sz and .szz extensions
 
-      if(stat(patchi->comp_file,&statbuffer)==0){
+      if(STAT(patchi->comp_file,&statbuffer)==0){
         patchi->compression_type=1;
         patchi->file=patchi->comp_file;
       }
@@ -3528,7 +3528,7 @@ typedef struct {
       patchi->loaded=0;
       patchi->display=0;
       meshinfo[blocknumber].patchfilenum=-1;
-      if(stat(patchi->file,&statbuffer)==0){
+      if(STAT(patchi->file,&statbuffer)==0){
         if(patchi->cellcenter==1){
           if(readlabels_cellcenter(&patchi->label,stream)==2)return 2;
         }
@@ -3614,7 +3614,7 @@ typedef struct {
       STRCPY(isoi->size_file,buffer);
       STRCAT(isoi->size_file,".sz");
 
-      if(stat(isoi->comp_file,&statbuffer)==0){
+      if(STAT(isoi->comp_file,&statbuffer)==0){
         get_isolevels=1;
         isoi->compression_type=1;
         niso_compressed++;
@@ -3623,7 +3623,7 @@ typedef struct {
         getcisolevels(isoi->file,&isoi->levels,&isoi->nlevels);
         iiso++;
       }
-      else if(stat(isoi->reg_file,&statbuffer2)==0){
+      else if(STAT(isoi->reg_file,&statbuffer2)==0){
         get_isolevels=1;
         isoi->compression_type=0;
         isoi->file=isoi->reg_file;
@@ -6198,7 +6198,7 @@ int match(char *buffer, const char *key, unsigned int lenkey){
 /* ------------------ readini ------------------------ */
 
 int readini(int scriptconfigfile){
-  struct stat statbuff1, statbuff2, statbuff3, statbuff4;
+  STRUCTSTAT statbuff1, statbuff2, statbuff3, statbuff4;
   int statfile1=-1, statfile2=-1, statfile3=-1, statfile4=-1;
   char smvprogini[1024];
   char *smvprogini_ptr=NULL;
@@ -6218,13 +6218,13 @@ int readini(int scriptconfigfile){
   
   // check if configuration files exist
 
-  if(smokeviewini!=NULL)statfile1=stat(smokeviewini,&statbuff1);
+  if(smokeviewini!=NULL)statfile1=STAT(smokeviewini,&statbuff1);
   if(smvprogini_ptr!=NULL){
-    statfile2=stat(smvprogini_ptr,&statbuff2);
+    statfile2=STAT(smvprogini_ptr,&statbuff2);
     if(statfile2!=0)smvprogini_ptr=NULL;
   }
-  if(INIfile!=NULL)statfile3=stat(INIfile,&statbuff3);
-  if(caseinifilename!=NULL)statfile4=stat(caseinifilename,&statbuff4);
+  if(INIfile!=NULL)statfile3=STAT(INIfile,&statbuff3);
+  if(caseinifilename!=NULL)statfile4=STAT(caseinifilename,&statbuff4);
 
   // check if config files read in earlier were modifed later
 
@@ -9570,12 +9570,12 @@ void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
 /* ------------------ getfile_modtime ------------------------ */
 
 void getfile_modtime(char *filename, time_t *modtime){
-  struct stat statbuffer;
+  STRUCTSTAT statbuffer;
   int statfile;
 
   *modtime=0;
   if(filename==NULL)return;
-  statfile=stat(filename,&statbuffer);
+  statfile=STAT(filename,&statbuffer);
   if(statfile!=0)return;
   *modtime = statbuffer.st_mtime;
   return;
@@ -9584,12 +9584,12 @@ void getfile_modtime(char *filename, time_t *modtime){
 /* ------------------ getfile_size ------------------------ */
 
 void getfile_size(const char *filename, int *filesize){
-  struct stat statbuffer;
+  STRUCTSTAT statbuffer;
   int statfile;
 
   *filesize=0;
   if(filename==NULL)return;
-  statfile=stat(filename,&statbuffer);
+  statfile=STAT(filename,&statbuffer);
   if(statfile!=0)return;
   *filesize = statbuffer.st_size;
   return;
@@ -9598,11 +9598,11 @@ void getfile_size(const char *filename, int *filesize){
 /* ------------------ file_exit ------------------------ */
 
 int file_exist(char *file){
-  struct stat statbuffer;
+  STRUCTSTAT statbuffer;
   int statfile;
 
   if(file==NULL)return 0;
-  statfile=stat(file,&statbuffer);
+  statfile=STAT(file,&statbuffer);
   if(statfile!=0)return 0;
   return 1;
 }

@@ -316,10 +316,10 @@ unsigned char *readpicture(char *filename, int *width, int *height){
   unsigned char *returncode;
   char *filebuffer=NULL;
   int allocated;
-  struct stat statbuffer;
+  STRUCTSTAT statbuffer;
 
   if(filename==NULL)return NULL;
-  if(stat(filename,&statbuffer)==0){
+  if(STAT(filename,&statbuffer)==0){
     filebuffer=filename;
     allocated=0;
   }
@@ -337,7 +337,7 @@ unsigned char *readpicture(char *filename, int *width, int *height){
       strcpy(filebuffer,texturedir);
       strcat(filebuffer,dirseparator);
       strcat(filebuffer,filename);
-      if(stat(filebuffer,&statbuffer)!=0){
+      if(STAT(filebuffer,&statbuffer)!=0){
         FREEMEMORY(filebuffer);
         printf("Texture file:%s unavailable\n",filebuffer);
         return NULL;

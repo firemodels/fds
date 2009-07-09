@@ -261,7 +261,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   int ii;
   float qmin, qmax;
   int headersize, framesize, statfile;
-  struct stat statbuffer;
+  STRUCTSTAT statbuffer;
   char slicelonglabels[31], sliceshortlabels[31], sliceunits[31];
   slice *sd;
   vslice *vd;
@@ -395,7 +395,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     slicefilelen = strlen(file);
     if(settmax_s==0&&settmin_s==0){
-      statfile=stat(file,&statbuffer);
+      statfile=STAT(file,&statbuffer);
     }
     if(sd->compression_type==0){
       FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->nsteps, &sliceframestep, &endian,&error,

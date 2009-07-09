@@ -5739,16 +5739,16 @@ void makeiblank_smoke3d(void){
 
  int getsmoke3dversion(smoke3d *smoke3di){
 
-    struct stat statbuffer;
+   STRUCTSTAT statbuffer;
    EGZ_FILE *SMOKE3DFILE=NULL;
    int nxyz[8];
    char *file;
 
-   if(stat(smoke3di->comp_file,&statbuffer)==0){
+   if(STAT(smoke3di->comp_file,&statbuffer)==0){
      smoke3di->file=smoke3di->comp_file;
    }
    else{
-     if(stat(smoke3di->reg_file,&statbuffer)==0){
+     if(STAT(smoke3di->reg_file,&statbuffer)==0){
        smoke3di->file=smoke3di->reg_file;
      }
      else{

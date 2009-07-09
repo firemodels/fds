@@ -7282,7 +7282,7 @@ static int in_menu=0;
 
     if(script_recording==NULL){
       scriptfiledata *scriptfile;
-      struct stat statbuffer;
+      STRUCTSTAT statbuffer;
       int nscripts=0;
 
       nscripts=0;
@@ -7294,7 +7294,7 @@ static int in_menu=0;
         if(file==NULL)continue;
         len = strlen(file);
         if(len<=0)continue;
-        if(stat(file,&statbuffer)!=0)continue;
+        if(STAT(file,&statbuffer)!=0)continue;
 
         nscripts++;
       }
@@ -7309,7 +7309,7 @@ static int in_menu=0;
           if(file==NULL)continue;
           len = strlen(file);
           if(len<=0)continue;
-          if(stat(file,&statbuffer)!=0)continue;
+          if(STAT(file,&statbuffer)!=0)continue;
 
           strcpy(menulabel,"  ");
           strcat(menulabel,file);
