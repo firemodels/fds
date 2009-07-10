@@ -1,6 +1,7 @@
 #!/bin/csh -f
 setenv SVNROOT ~/FDS-SMV
 set VDIR=$SVNROOT/Validation
+$VDIR/Beyler_Hood/FDS_Output_Files/Process_Output.csh
 $VDIR/Flame_Height/FDS_Output_Files/Process_Output.csh
 $VDIR/FM_SNL/FDS_Output_Files/Process_Output.csh
 $VDIR/Hamins_CH4/FDS_Output_Files/Process_Output.csh
@@ -9,6 +10,7 @@ $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
 $VDIR/NBS_Multi-Room/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_He_2009/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_NRC/FDS_Output_Files/Process_Output.csh
+$VDIR/NIST_RSE_1994/FDS_Output_Files/Process_Output.csh
 $VDIR/NRL_HAI/FDS_Output_Files/Process_Output.csh
 $VDIR/Restivo_Experiment/FDS_Output_Files/Process_Output.csh
 $VDIR/Smyth_Slot_Burner/FDS_Output_Files/Process_Output.csh
