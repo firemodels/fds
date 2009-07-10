@@ -85,11 +85,12 @@ for i=drange
             d1_Dep_Col = find(strcmp(H,S1(j)));
             clear indices
             indices = find(d1_Comp_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_Comp_End);
-            if Metric=='max'
+            if strcmp(Metric,'max')
                 Save_Measured_Metric(i) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
-            end
-            if Metric=='min'
+            elseif strcmp(Metric,'min')
                 Save_Measured_Metric(i) = d1_Initial_Value-min(M(indices,d1_Dep_Col));
+            else
+                Save_Measured_Metric(i) = 0;
             end
             clear indices
             indices = find(d1_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_End);
@@ -117,11 +118,12 @@ for i=drange
             d2_Dep_Col = find(strcmp(H,S2(j)));
             clear indices
             indices = find(d2_Comp_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_Comp_End);
-            if Metric=='max'
+            if strcmp(Metric,'max')
                 Save_Predicted_Metric(i) = max(M(indices,d2_Dep_Col))-d2_Initial_Value;
-            end
-            if Metric=='min'
+            elseif strcmp(Metric,'min')
                 Save_Predicted_Metric(i) = d2_Initial_Value-min(M(indices,d2_Dep_Col));
+            else
+                Save_Predicted_Metric(i) = 0;
             end
             clear indices
             indices = find(d2_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_End);
