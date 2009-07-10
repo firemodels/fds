@@ -48,7 +48,7 @@ o2ave = o2ave / 100._8
 co2ave = co2ave / 100._8
 coave = coave / 100._8
 
-OPEN(11,FILE='Belyer_Hood_FDS.csv')
+OPEN(11,FILE='Beyler_Hood_FDS.csv')
 WRITE(11,*) "Q-5,CO2-5,CO-5,O2-5,C3H8-5,Q--10,CO2--10,CO--10,O2--10,C3H8--10,Q-0,CO2-0,CO-0,O2-0,C3H8-0"
 WRITE(11,*) 7.92,",",co2ave(1),",",coave(1),",",o2ave(1),",",fave(1),",", &
             8.21,",",co2ave(5),",",coave(5),",",o2ave(5),",",fave(5),",", &
