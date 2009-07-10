@@ -39,6 +39,9 @@ if nargin>=1
     elseif strcmp(varargin{1},'validation')|strcmp(varargin{1},'Validation')
         cfil = [pwd,'/validation_data_config_matlab.csv'];
         vdir = [pwd,'/../../Validation/'];
+    elseif strcmp(varargin{1},'training')
+        cfil = [pwd,'/training_data_config_matlab.csv'];
+        vdir = [pwd,'/../../Training/'];
     end
 end
 if nargin==2
