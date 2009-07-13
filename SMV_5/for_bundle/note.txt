@@ -1,13 +1,1 @@
-1.  test smokeview particle tracking
-2.  test alternate methods for visualizing particles (using lines to represent particle velocity)
-3.  modify CLASS_OF_PARTICLES keyword to set default particle geometry data
-4.  test tube and sphere particle drawing
-5.  make menu display of particle devices more general 
-6.  test drawcdisk device drawing command (disk drawn with origin at center rather than at base)
-7.  test dialog boxes for reporting errors (to make them more conspicuous while smoekview is starting up)
-8.  test option to open up the FDS-SMV issue tracker from the Smokeview (windows version) help menu
-9.  for 64 bit smokeview, build with large heap and stack size
-10. test device scaling fix - addresses issue 776
-11. test fix to allow slice files to load on 64 bit linux and windows smokeview's
-12. add sub-menus to isosurface, particles and 3d smoke file type to make it easier to load ALL files
-13. test fix for slice file min/max .ini settings
+1.  test double size rendering - addresses issue 808
