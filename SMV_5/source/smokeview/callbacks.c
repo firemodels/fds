@@ -1149,6 +1149,9 @@ void keyboard(unsigned char key, int x, int y){
       render_double=2;
       rflag=1;
     }
+    else{
+      render_double=0;
+    }
     if(scriptoutstream!=NULL){
       if(ntimes>0){
         float timeval;
@@ -2007,8 +2010,6 @@ void Display(void){
         if(screenbuffers[1]!=NULL)free(screenbuffers[1]);
         if(screenbuffers[2]!=NULL)free(screenbuffers[2]);
         if(screenbuffers[3]!=NULL)free(screenbuffers[3]);
-
-        render_double=0;
       }
 #endif
     }
