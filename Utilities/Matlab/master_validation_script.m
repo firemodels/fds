@@ -12,7 +12,7 @@ clear all
 
 addpath 'scripts'
 
-[saved_data,drange] = dataplot('validation',[2:3]);
+[saved_data,drange] = dataplot('validation');
 scatplot(saved_data,drange)
 
 
