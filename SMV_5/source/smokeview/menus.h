@@ -1272,6 +1272,7 @@ void RenderMenu(int value){
     render_double_state=4;
     break;
   case RenderCancel:
+    render_double=0;
     render_double_state=0;
     RenderState(0);
     break;
