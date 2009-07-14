@@ -2,6 +2,7 @@
 setenv SVNROOT ~/FDS-SMV
 set VDIR=$SVNROOT/Validation
 $VDIR/Beyler_Hood/FDS_Output_Files/Process_Output.csh
+$VDIR/CAROLFIRE/FDS_Output_Files/Process_Output.csh
 $VDIR/Flame_Height/FDS_Output_Files/Process_Output.csh
 $VDIR/FM_SNL/FDS_Output_Files/Process_Output.csh
 $VDIR/Hamins_CH4/FDS_Output_Files/Process_Output.csh
