@@ -8,7 +8,6 @@
 
 &SURF ID='HOT',TMP_FRONT=325.,COLOR='GRAY',RAMP_T='shroud' /
 &RAMP ID='shroud',T=   0.,F=0. /
-&RAMP ID='shroud',T=  82.,F=0. /
 &RAMP ID='shroud',T=  31.,F=0.58 /
 &RAMP ID='shroud',T=  55.,F=1. /
 &RAMP ID='shroud',T=  75.,F=1.08 /
