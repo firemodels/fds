@@ -1787,7 +1787,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 }
 
-/* ------------------ update_rotation_index ------------------------ */
+/* ------------------ Render ------------------------ */
 
 void Render(int view_mode){
   if(RenderOnceNow==0&&RenderGif !=0
@@ -2217,7 +2217,7 @@ void updateShow(void){
 #endif    
   }
   if(showsmoke==1||showevac==1||showpatch==1||showslice==1||showvslice==1||showzone==1||showiso==1||showevac==1)RenderTime=1;
-  if(showtour==1||show3dsmoke==1)RenderTime=1;
+  if(showtour==1||show3dsmoke==1||touring==1)RenderTime=1;
 #ifdef pp_SHOOTER
   if(showshooter==1)RenderTime=1;
 #endif
