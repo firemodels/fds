@@ -190,6 +190,7 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   /* free up memory used by both OpenGL and GIF images */
 
   gdImageDestroy(RENDERimage);
+  printf(" Completed\n");
   return 0;
 }
 

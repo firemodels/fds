@@ -13,6 +13,7 @@
 char menu_revision[]="$Revision$";
 void ScriptMenu(int var);
 void add_scriptlist(char *file, int id);
+void update_glui_render();
 
 #ifdef WIN32
 
@@ -1209,6 +1210,8 @@ void RenderState(int onoff){
     }
   }
   else{
+    render_double=0;
+    render_double_state=0;
     RenderGif=0;
     screenWidth=saveW;
     screenHeight=saveH;
@@ -5758,6 +5761,7 @@ static int in_menu=0;
   glutAddMenuEntry("-",10000);
   glutAddMenuEntry("NUMBER",10000);
   glutAddMenuEntry("One Frame",RenderOnce);
+  update_glui_render();
   if(RenderTime==1||touring==1){
    // if(render_double_state==0){
     glutAddMenuEntry("All Frames",1);
@@ -5800,8 +5804,8 @@ static int in_menu=0;
   }
   if(showbounds==1)glutAddMenuEntry("*File/Bound/Script Settings...  ALT+f",14);
   if(showbounds==0)glutAddMenuEntry("File/Bound/Script Settings...  ALT+f",14);
-  if(showmotion==1)glutAddMenuEntry("*Motion/View...  ALT+m",15);
-  if(showmotion==0)glutAddMenuEntry("Motion/View...  ALT+m",15);
+  if(showmotion==1)glutAddMenuEntry("*Motion/View/Render...  ALT+m",15);
+  if(showmotion==0)glutAddMenuEntry("Motion/View/Render...  ALT+m",15);
 #ifdef pp_SHOOTER
   if(showshooterDLG==1)glutAddMenuEntry("*Particle Tracking...",27);
   if(showshooterDLG==0)glutAddMenuEntry("Particle Tracking...",27);
@@ -7277,7 +7281,7 @@ static int in_menu=0;
     if(periodic_value!=5)glutAddMenuEntry("Reload every 5 min",5);
     if(periodic_value==10)glutAddMenuEntry("*Reload every 10 min",10);
     if(periodic_value!=10)glutAddMenuEntry("Reload every 10 min",10);
-    glutAddMenuEntry("Cancel",-1);
+    glutAddMenuEntry("Stop Rendering",-1);
 
     CREATEMENU(scriptmenu,ScriptMenu);
 

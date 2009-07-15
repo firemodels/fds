@@ -1981,35 +1981,52 @@ void Display(void){
 #ifdef pp_RENDER
       else{
         GLubyte *screenbuffers[4];
+        int renderdoublenow=0;
 
-        glDrawBuffer(GL_BACK);
+        if(RenderOnceNow==1){
+          renderdoublenow=1;
+        }
+    
+        if(plotstate==DYNAMIC_PLOTS && ntimes > 0){
+          if(itime>=0&&itime<ntimes&&
+            ((render_frame[itime] == 0&&showstereo==0)||(render_frame[itime]<2&&showstereo!=0))
+            ){
+            render_frame[itime]++;
+            renderdoublenow=1;
+          }
+        }
 
-        ShowScene(RENDER,VIEW_CENTER,1,
-          0,0,screenWidth,screenHeight);
-        screenbuffers[0]=getscreenbuffer();
-        if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
+        if(renderdoublenow==1){
+          glDrawBuffer(GL_BACK);
 
-        ShowScene(RENDER,VIEW_CENTER,1,
-          screenWidth,0,screenWidth,screenHeight);
-        screenbuffers[1]=getscreenbuffer();
-        if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
+          ShowScene(RENDER,VIEW_CENTER,1,0,0,screenWidth,screenHeight);
+          screenbuffers[0]=getscreenbuffer();
+          if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
 
-        ShowScene(RENDER,VIEW_CENTER,1,
-          0,screenHeight,screenWidth,screenHeight);
-        screenbuffers[2]=getscreenbuffer();
-        if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
+          ShowScene(RENDER,VIEW_CENTER,1,screenWidth,0,screenWidth,screenHeight);
+          screenbuffers[1]=getscreenbuffer();
+          if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
 
-        ShowScene(RENDER,VIEW_CENTER,1,
-          screenWidth,screenHeight,screenWidth,screenHeight);
-        screenbuffers[3]=getscreenbuffer();
-        if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
+          ShowScene(RENDER,VIEW_CENTER,1,0,screenHeight,screenWidth,screenHeight);
+          screenbuffers[2]=getscreenbuffer();
+          if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
 
-        mergescreenbuffers(screenbuffers);
+          ShowScene(RENDER,VIEW_CENTER,1,screenWidth,screenHeight,screenWidth,screenHeight);
+          screenbuffers[3]=getscreenbuffer();
+          if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
 
-        if(screenbuffers[0]!=NULL)free(screenbuffers[0]);
-        if(screenbuffers[1]!=NULL)free(screenbuffers[1]);
-        if(screenbuffers[2]!=NULL)free(screenbuffers[2]);
-        if(screenbuffers[3]!=NULL)free(screenbuffers[3]);
+          mergescreenbuffers(screenbuffers);
+
+          if(screenbuffers[0]!=NULL)free(screenbuffers[0]);
+          if(screenbuffers[1]!=NULL)free(screenbuffers[1]);
+          if(screenbuffers[2]!=NULL)free(screenbuffers[2]);
+          if(screenbuffers[3]!=NULL)free(screenbuffers[3]);
+        }
+        if(renderdoublenow==0||RenderOnceNow==1){
+          ASSERT(RenderSkip>0);
+          RenderState(0);
+          RenderSkip=1;
+        }
       }
 #endif
     }
