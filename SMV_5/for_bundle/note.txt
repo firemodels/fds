@@ -1,1 +1,2 @@
 1.  test double size rendering - addresses issue 808
+2.  test rendering addition to Motion/View/Rendering dialog box - addresses issue 808
