@@ -55,12 +55,23 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define WINDOWSIZE_LIST 17
 #define SNAPVIEW 21
 
+#define RENDER_TYPE 0
+#define RENDER_SIZE_LIST 1
+#define RENDER_SKIP_LIST 2
+#define RENDER_START 3
+#define RENDER_STOP 4
+
 void EYEVIEW_CB(int var);
 void BUTTON_hide2_CB(int var);
 void BUTTON_Reset_CB(int var);
 void TRANSLATE_CB(int var);
 
 GLUI_Listbox *meshlist1=NULL;
+GLUI_Listbox *render_size_list=NULL;
+GLUI_Listbox *render_skip_list=NULL;
+GLUI_Button *render_start=NULL ;
+GLUI_Button *render_stop=NULL ;
+
 GLUI *glui_motion=NULL;
 GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
 GLUI_Panel *panel_blockageview=NULL;
@@ -72,6 +83,7 @@ GLUI_Panel *panel_translate2=NULL,*panel_translate3=NULL;
 GLUI_Rollout *panel_projection=NULL;
 GLUI_Panel *panel_anglebuttons=NULL;
 GLUI_RadioGroup *projection_radio=NULL,*eyeview_radio=NULL;
+GLUI_RadioGroup *render_type_radio=NULL;
 GLUI_RadioGroup *eyelevel_radio=NULL;
 GLUI_Translation *rotate_zx=NULL,*eyerotate_z=NULL;
 GLUI_Translation *translate_z=NULL,*translate_xy=NULL;
@@ -80,6 +92,7 @@ GLUI_Button *eyerotate90_z=NULL,*eyelevel=NULL, *floorlevel=NULL, *reset_saved_v
 GLUI_Button *replace_view=NULL,*add_view=NULL,*delete_view=NULL;
 GLUI_Button *startup_button=NULL,*cycle_views_button=NULL;
 GLUI_Rollout *reset_panel=NULL;
+GLUI_Rollout *render_panel=NULL;
 GLUI_Panel *reset_panel1=NULL;
 GLUI_Panel *reset_panel2=NULL;
 GLUI_EditText *edit_view_label=NULL;
@@ -98,15 +111,20 @@ GLUI_Spinner *SPINNER_scalez=NULL;
 GLUI_Spinner *SPINNER_nearclip=NULL;
 GLUI_Spinner *SPINNER_farclip=NULL;
 
+void RENDER_CB(int var);
 void enable_disable_views(void);
+
+/* ------------------ gluiIdle ------------------------ */
 
 extern "C" void gluiIdle(void){
   GLUI_Master.set_glutIdleFunc(Idle);
 }
+
+/* ------------------ gluiIdelNULL ------------------------ */
+
 extern "C" void gluiIdleNULL(void){
   GLUI_Master.set_glutIdleFunc(NULL);
 }
-
 
 /* ------------------ reset_glui_view ------------------------ */
 
@@ -192,7 +210,7 @@ extern "C" void glui_motion_setup(int main_window){
   eye_xyz=camera_current->eye;
 
   if(glui_motion!=NULL)glui_motion->close();
-  glui_motion = GLUI_Master.create_glui("Motion/View",0,0,0);
+  glui_motion = GLUI_Master.create_glui("Motion/View/Render",0,0,0);
   if(showmotion==0)glui_motion->hide();
 
   panel_motion = glui_motion->add_rollout("Motion");
@@ -293,6 +311,33 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_window_height->set_int_limits(100,max_screenHeight);
   window_update=glui_motion->add_button_to_panel(panel_projection,"Apply",WINDOW_RESIZE,TRANSLATE_CB);
 
+  render_panel = glui_motion->add_rollout("Render",false);
+  render_type_radio=glui_motion->add_radiogroup_to_panel(render_panel,&renderfiletype,RENDER_TYPE,RENDER_CB);
+  glui_motion->add_radiobutton_to_group(render_type_radio,"PNG");
+  glui_motion->add_radiobutton_to_group(render_type_radio,"JPEG");
+
+  render_size_index=RenderWindow; 
+  render_size_list = glui_motion->add_listbox_to_panel(render_panel,"Size:",&render_size_index,RENDER_SIZE_LIST,RENDER_CB);
+  render_size_list->add_item(Render320,"320x240");
+  render_size_list->add_item(Render640,"640x480");
+  render_size_list->add_item(RenderWindow,"Current");
+  render_size_list->add_item(Render2Window,"2*Current");
+  render_size_list->set_int_val(render_size_index);
+
+  render_skip_index=RenderOnce; 
+  render_skip_list = glui_motion->add_listbox_to_panel(render_panel,"Frames:",&render_skip_index,RENDER_SKIP_LIST,RENDER_CB);
+  render_skip_list->add_item(RenderOnce,"One");
+  render_skip_list->add_item(1,"All");
+  render_skip_list->add_item(2,"Every 2nd");
+  render_skip_list->add_item(3,"Every 3rd");
+  render_skip_list->add_item(4,"Every 4th");
+  render_skip_list->add_item(5,"Every 5th");
+  render_skip_list->add_item(10,"Every 10th");
+  render_skip_list->add_item(20,"Every 20th");
+
+  render_start=glui_motion->add_button_to_panel(render_panel,"Start",RENDER_START,RENDER_CB);
+  render_stop=glui_motion->add_button_to_panel(render_panel,"Stop",RENDER_STOP,RENDER_CB);
+  
   reset_panel = glui_motion->add_rollout("Viewpoints",false);
 
   reset_panel1 = glui_motion->add_panel_to_panel(reset_panel,"",false);
@@ -1037,3 +1082,45 @@ void EYEVIEW_CB(int var){
   handle_eyeview(0);
 }
 
+/* ------------------ RENDER_CB ------------------------ */
+
+void RENDER_CB(int var){
+  updatemenu=1;
+  switch (var){
+    case RENDER_TYPE:
+      break;
+    case RENDER_SIZE_LIST:
+      RenderMenu(render_size_index);
+      break;
+    case RENDER_SKIP_LIST:
+      break;
+    case RENDER_START:
+      if(render_size_index==Render2Window){
+        RENDER_CB(RENDER_SIZE_LIST);
+      }
+      if(RenderTime==1||touring==1){
+        RenderMenu(render_skip_index);
+      }
+      else{
+        render_skip_index = RenderOnce;
+        render_skip_list->set_int_val(render_skip_index);
+        RenderMenu(render_skip_index);
+      }
+      break;
+    case RENDER_STOP:
+      RenderMenu(RenderCancel);
+      break;
+  }
+}
+
+/* ------------------ update_glui_render ------------------------ */
+
+extern "C" void update_glui_render(void){
+  if(RenderTime==1&&RenderTimeOld==0){
+    if(render_skip_list!=NULL&&render_skip_index==RenderOnce){
+      render_skip_index=1;
+      render_skip_list->set_int_val(render_skip_index);
+    }
+  }
+  RenderTimeOld=RenderTime;
+}
