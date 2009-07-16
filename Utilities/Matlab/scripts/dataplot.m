@@ -53,13 +53,17 @@ else
     drange = 2:2000;
 end
 
-%addpath('../scripts')
-paper_width  = 6.0; % inches
-paper_height = 4.5; % inches
+% get the plot style parameters
+
+plot_style
+
+% read the configuration file
 
 A = importdata(cfil);
 H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
+
+% process the "d" lines one by one
 
 for i=drange
     if i>length(A); break; end
@@ -147,31 +151,26 @@ for i=drange
         
         % format the legend and axis labels
         
-        set(gca,'Units','inches')
-        set(gca,'FontName','Times')
-        set(gca,'FontSize',14)
-        %set(gca,'PlotBoxAspectRatio',[1,0.7,1])
-        set(gca,'Position',[1,0.75,4.5,3.15])
-        
         if strcmp(Flip_Axis,'no')
-            xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
-            ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)
+            xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
+            ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             axis([Min_Ind Max_Ind Min_Dep Max_Dep])
             text(Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind),Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep),...
-                Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
+                Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter','LaTeX')
         else
-            xlabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)
-            ylabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
+            xlabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
+            ylabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             axis([Min_Dep Max_Dep Min_Ind Max_Ind])
             text(Min_Dep+Title_Position(1)*(Max_Dep-Min_Dep),Min_Ind+Title_Position(2)*(Max_Ind-Min_Ind),...
-                Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
+                Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter','LaTeX')
         end
         if size(Key_Position)>0
-            legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'Interpreter','LaTeX','FontSize',12)
+            legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'Interpreter','LaTeX','FontSize',Key_Font_Size)
             legend boxon
         end
         
         % print to pdf
+        
         set(gcf,'Visible','on');
         set(gcf,'PaperUnits','inches');
         set(gcf,'PaperSize',[paper_width paper_height]);
@@ -182,9 +181,11 @@ for i=drange
     end
     clear S1 S2 K style H M X Y P parameters
 end
+
 clear A
 
 % pack data for use in scatter plot
+
 saved_data = [{Save_Quantity'},...
               {Save_Group_Style'},...
               {Save_Fill_Color'},...

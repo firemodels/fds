@@ -217,7 +217,7 @@ cylindrical coordinates.
 \begin{center}
 \begin{tabular}{c}
 \includegraphics[width=5.0in]{FIGURES/ScatterPlots/Steel_Temperature} \\
-\includegraphics[width=5.0in]{FIGURES/ScatterPlots/Insulated_Steel_Temperature} 
+\includegraphics[width=5.0in]{FIGURES/ScatterPlots/Insulated_Steel_Temperature}
 \vspace{0.25in}
 \end{tabular}
 \end{center}
@@ -250,7 +250,7 @@ This is equivalent to saying that the net heat flux to this (hypothetical) surfa
 This definition of the AST forms the theory behind the plate thermometer, a 10~cm by 10~cm thin metal plate with an insulated backing that is designed to
 measure the AST, albeit with a slight time lag due to the fact that it is not a perfect insulator.
 
-FDS calculates the AST by solving the following equation implicitly for $T_{\hbox{\tiny AST}}$: 
+FDS calculates the AST by solving the following equation implicitly for $T_{\hbox{\tiny AST}}$:
 \be \dot{q}_r'' + \dot{q}_c'' = \epsilon \, \left( \sigma T_{\hbox{\tiny AST}}^4 - \sigma T_s^4 \right) + h (T_{\hbox{\tiny AST}} - T_s)  \label{AST_gas} \ee
 Equation~(\ref{AST_gas}) is simply Eq.~(\ref{heat_flux}) minus Eq.~(\ref{AST_solid}). As such, it shows that the AST can be regarded as an {\em effective} gas temperature for
 the purpose of providing boundary conditions for a detailed heat conduction calculation within the solid.
@@ -537,6 +537,76 @@ temperatures can often be explained in terms of comparable errors in the predict
 {Summary of cable surface temperature predictions for the NIST/NRC test series.}
 \end{figure}
 
+
+
+\clearpage
+
+\section{CAROLFIRE Cable Temperatures}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_01} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_02} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_03} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_07} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_09} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_11} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_12} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_13} 
+\end{tabular*}
+\label{CAROLFIRE_Thermoset_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_17} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_19} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_20} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_22} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_23} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_24} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_27} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_28} 
+\end{tabular*}
+\label{CAROLFIRE_Thermoset_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_04} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_05} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_06} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_08} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_10} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_14} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_15} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_16}
+\end{tabular*}
+\label{CAROLFIRE_Thermoplastic_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_21} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_25} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_26} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_29} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_30} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_63} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_65} &
+\end{tabular*}
+\label{CAROLFIRE_Thermoplastic_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_62} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_64} \\
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_18} &
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_31}
+\end{tabular*}
+\label{CAROLFIRE_Special_1}
+\end{figure}
 
 
 
