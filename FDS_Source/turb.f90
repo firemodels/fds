@@ -384,7 +384,7 @@ REAL(EB) :: rk, temp, vsum, rkx, rky, rkz, etot
 REAL(EB) :: vt(0:n)
 
 CHARACTER*6 :: ext
-CHARACTER*18 :: filename
+CHARACTER*30 :: filename
 
 ! for dimensional wavenumbers
 REAL(EB) :: wn(0:n)
@@ -461,7 +461,7 @@ write(6,*) ' '
 ! this matches the Comte-Bellot/Corrsin units
 
 write(ext,1) iFVfilenum
-filename = 'spec' // TRIM(ext) // '.dat'
+filename = TRIM(CHID) // '_spec_' // TRIM(ext) // '.dat'
 
 file_num = GET_FILE_NUMBER()
 open (unit=file_num, file=filename, status='unknown', form='formatted')
