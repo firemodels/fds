@@ -255,6 +255,10 @@ uncertainty were reported as 0.44 and 0.40 for heptane and toluene, respectively
 \label{NIST_NRC_Drawing}
 \end{sidewaysfigure}
 
+
+
+
+
 \clearpage
 
 
@@ -547,15 +551,65 @@ during both the release phase and the subsequent diffusion phase (5160~s) at var
 
 \section{Helium Release in a Reduced Scale Garage Geometry}
 
-FDS simulations were performed to predict the helium release and dispersion in a reduced scale garage geometry. An 
-approximately quarter scale two-car residential garage with interior dimensions of 1.5~m by 1.5~m by 0.745~m was 
-constructed with 1.25~cm thick plexiglas. Helium gas (used as a surrogate for hydrogen, due to safety concerns) was release 
-through a burner that 20.7~cm tall and the exit diameter was 3.6~cm. Helium flow through the burner was controlled through a  mass 
-flow controller and the specified flow rate for 1~hour and 4~hour releases were 14.95~L/min and 3.74~L/min, 
-respectively (flow rate was scaled to represent the emptying of a 5~kg of hydrogen fuel tank in 1 or 4 hours). 
-Idealized leaks were chosen to have areas that provide minimum ventilation 
-requirements for residential garages. The leaks consisted of either a single 2.4~cm square opening in the center of one face, or 
-two equal openings (each opening was 2.15~cm square) centered horizontally, at the top and bottom of the front face. 
+FDS simulations were performed to predict the helium release and dispersion in a reduced scale garage geometry. An
+approximately quarter scale two-car residential garage with interior dimensions of 1.5~m by 1.5~m by 0.745~m was
+constructed with 1.25~cm thick plexiglas. Helium gas (used as a surrogate for hydrogen, due to safety concerns) was release
+through a burner that 20.7~cm tall and the exit diameter was 3.6~cm. Helium flow through the burner was controlled through a  mass
+flow controller and the specified flow rate for 1~hour and 4~hour releases were 14.95~L/min and 3.74~L/min,
+respectively (flow rate was scaled to represent the emptying of a 5~kg of hydrogen fuel tank in 1 or 4 hours).
+Idealized leaks were chosen to have areas that provide minimum ventilation
+requirements for residential garages. The leaks consisted of either a single 2.4~cm square opening in the center of one face, or
+two equal openings (each opening was 2.15~cm square) centered horizontally, at the top and bottom of the front face.
+
+\clearpage
+
+\section{Cable Response to Live Fire -- CAROLFIRE}
+
+CAROLFIRE was a project sponsored by the U.S. Nuclear Regulatory Commission to study the fire-induced thermal
+response and functional behavior of electrical cables~\cite{CAROLFIRE}.
+The primary objective of CAROLFIRE was to characterize the various modes of electrical
+failure ({\em e.g.} hot shorts, shorts to ground) within bundles of power, control and instrument cables.
+A secondary objective of the project was to test a simple model to predict \underline{th}ermally-\underline{i}nduced
+\underline{e}lectrical \underline{f}ailure (THIEF). The measurements used for these purposes were conducted at Sandia National Laboratories and are described in
+Volume II of the CAROLFIRE test report. In brief, there were two series of experiments. The first were conducted within
+a heated cylindrical enclosure known as the Penlight apparatus. Single and bundled cables were exposed to various heat fluxes and the 
+electrical failure modes recorded. The second series of experiments involved cables within trays in a semi-enclosed space under which a gas-fueled burner
+created a hot layer to force cable failure.
+
+Petra Andersson and Patrick Van Hees of the Swedish National Testing and Research Institute
+(SP) proposed that a cable's thermally-induced electrical failure can be predicted
+via a one-dimensional heat transfer calculation, under the assumption that the cable can
+be treated as a homogenous cylinder~\cite{Andersson:2005}. Their results for PVC
+cables were encouraging and suggested that the simplification of the analysis is reasonable and
+that it should extend to other types of cables. 
+The assumptions underlying the THIEF model are as follows:
+\begin{enumerate}
+\item The heat penetration into a cable of circular cross section is largely in the radial direction.
+This greatly simplifies the analysis, and it is also conservative because it is assumed that
+the cable is completely surrounded by the heat source.
+\item The cable is homogenous in composition. In reality, a cable is constructed of several
+different types of polymeric materials, cellulosic fillers, and a conducting metal, most
+often copper.
+\item The thermal properties – conductivity, specific heat, and density – of the assumed
+homogenous cable are independent of temperature. In reality, both the thermal
+conductivity and specific heat of polymers are temperature-dependent, but this
+information is very difficult to obtain from manufacturers. More discussion of this
+assumption is found below.
+\item It is assumed that no decomposition reactions occur within the cable during its heating,
+and ignition and burning are not considered in the model. In fact, thermoplastic cables
+melt, thermosets form a char layer, and both off-gas volatiles up to and beyond the point
+of electrical failure.
+\item Electrical failure occurs when the temperature just inside the cable jacket reaches an
+experimentally determined value.
+\end{enumerate}
+Because the CAROLFIRE Penlight experiments tested single cables that were heated uniformly
+on all sides, the one-dimensional THIEF model accurately predicted the times for the
+temperature inside the cable jacket to reach ``threshold'' values that are typically observed when
+the cable fails electrically.
+
+
+
+
 
 \clearpage
 
