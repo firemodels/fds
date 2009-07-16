@@ -36,12 +36,15 @@ if nargin>=1
     if strcmp(varargin{1},'verification')|strcmp(varargin{1},'Verification')
         cfil = [pwd,'/verification_data_config_matlab.csv'];
         vdir = [pwd,'/../../Verification/'];
+        plotdir = [pwd,'/../../Manuals/'];
     elseif strcmp(varargin{1},'validation')|strcmp(varargin{1},'Validation')
         cfil = [pwd,'/validation_data_config_matlab.csv'];
         vdir = [pwd,'/../../Validation/'];
+        plotdir = [pwd,'/../../Manuals/'];
     elseif strcmp(varargin{1},'training')
         cfil = [pwd,'/training_data_config_matlab.csv'];
         vdir = [pwd,'/../../Training/'];
+        plotdir = [pwd,'/../../Manuals/FDS_SMV_Training_Guide/datafigures/'];
     end
 end
 if nargin==2
@@ -174,7 +177,7 @@ for i=drange
         set(gcf,'PaperSize',[paper_width paper_height]);
         set(gcf,'PaperPosition',[0 0 paper_width paper_height]); 
         display(['Printing plot ',num2str(i),'...'])
-        print(gcf,'-dpdf',[pwd,'/../../Manuals/',Plot_Filename])
+        print(gcf,'-dpdf',[plotdir,Plot_Filename])
         
     end
     clear S1 S2 K style H M X Y P parameters
