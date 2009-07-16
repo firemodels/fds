@@ -6266,6 +6266,10 @@ applications, the output file will be split into appropriately sized smaller
 files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.}
 \index{DUMP!COLUMN\_DUMP\_LIMIT} on the {\ct DUMP} line.
 
+By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds. This time increment is specified on the {\ct DUMP} line. Also, by default,
+a time-averaged value is written out for each quantity of interest. To prevent FDS from time-averaging the {\ct DEVC} output, add
+{\ct TIME\_AVERAGED=.FALSE.} to the {\ct DEVC} line.
+
 
 \begin{warning}
 All devices must have a specified {\ct QUANTITY}.  Some special devices (Section~\ref{info:PROP}) have their {\ct QUANTITY}
@@ -6720,7 +6724,7 @@ often copper.
 \item The thermal properties -- conductivity, specific heat, and density -- of the assumed
 homogenous cable are independent of temperature. In reality, both the thermal
 conductivity and specific heat of polymers are temperature-dependent, but this
-information is very difficult to obtain from manufacturers. 
+information is very difficult to obtain from manufacturers.
 \item It is assumed that no decomposition reactions occur within the cable during its heating,
 and ignition and burning are not considered in the model. In fact, thermoplastic cables
 melt, thermosets form a char layer, and both off-gas volatiles up to and beyond the point
@@ -6731,7 +6735,7 @@ experimentally determined value.
 Obviously, there are considerable assumptions inherent in the Andersson and Van Hees THIEF
 model, but their results for various polyvinyl chloride (PVC) cables suggested that it may be
 sufficient for engineering analyses of a wider variety of cables. The U.S. Nuclear Regulatory
-Commission sponsored a study of cable failure known as CAROLFIRE~\cite{CAROLFIRE}. The primary project objective of CAROLFIRE was to 
+Commission sponsored a study of cable failure known as CAROLFIRE~\cite{CAROLFIRE}. The primary project objective of CAROLFIRE was to
 characterize the various modes of electrical
 failure ({\em e.g.} hot shorts, shorts to ground) within bundles of power, control and instrument cables.
 A secondary objective of the project was to develop a simple model to predict thermally-induced
@@ -6757,7 +6761,7 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 \footnotesize
 \begin{verbatim}
 &PROP ID='Acme Cable', QUANTITY='CABLE TEMPERATURE', CABLE_MASS_PER_LENGTH=0.529,
-      CABLE_FAILURE_TEMPERATURE=400., CABLE_DIAMETER=0.0163, 
+      CABLE_FAILURE_TEMPERATURE=400., CABLE_DIAMETER=0.0163,
       CABLE_JACKET_THICKNESS=0.00152 /
 &DEVC XYZ=..., ID='Cable 1', PROP_ID='Acme Cable', ORIENTATION=0,0,1 /
 &DEVC XYZ=..., ID='Cable 2', PROP_ID='Acme Cable', ORIENTATION=1,0,1 /
@@ -6770,7 +6774,7 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 Most of the terms are self-explanatory, and the logic is similar to that of a sprinkler. The THIEF
 model is invoked by the specific use of the {\ct QUANTITY='CABLE TEMPERATURE'}. The cable mass per
 unit length is in units of kg/m, failure temperature in $^\circ$C, diameter in m, jacket thickness in m. Note that
-you can use any orientation, rather than just the 6 coordinate directions. 
+you can use any orientation, rather than just the 6 coordinate directions.
 
 
 
@@ -8683,6 +8687,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct SPEC\_ID}         & Character       & Species identifier (if needed)                                   &       &         \\ \hline
 {\ct STATISTICS}       & Character       & See Section~\ref{info:statistics}                                &       &         \\ \hline
 {\ct SURF\_ID}         & Character       & See Section~\ref{info:statistics}                                &       &         \\ \hline
+{\ct TIME\_AVERAGED}   & Logical         & See Section~\ref{info:out:DEVC}                                  &       &  {\ct .TRUE.}       \\ \hline
 {\ct TRIP\_DIRECTION}  & Integer         & Sign of derivative at first state change                         &       &  1      \\ \hline
 {\ct XB(6)}            & Real Sextuplet  & Coordinates of non-point measurement                             & m     &         \\ \hline
 {\ct XYZ}              & Real Triplet    & Physical coordinates                                             & m     &         \\ \hline
