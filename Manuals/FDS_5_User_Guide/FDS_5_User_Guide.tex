@@ -2948,7 +2948,7 @@ materials applied to that surface.
 \end{warning}
 \index{SURF!THICNKNESS}
 
-\section{Describing the Bounding Surfaces: The \texorpdfstring{{\tt SURF}}{SURF} Namelist Group (Table \ref{tbl:SURF})}
+\section{Bounding Surfaces: The \texorpdfstring{{\tt SURF}}{SURF} Namelist Group (Table \ref{tbl:SURF})}
 \label{info:SURF}\index{SURF}
 
 {\ct SURF} is the namelist group (Table \ref{tbl:SURF}) that defines
@@ -2981,7 +2981,7 @@ If you wish to define a surface as adiabatic, then you should set {\ct ADIABATIC
 \index{SURF!ADIABATIC}
 
 
-\subsection{Specifying a Fire with a Known Heat Release Rate}
+\subsection{Fire with a Known Heat Release Rate}
 \index{HRRPUA} \index{Fire from Heat Release Rate}
 
 Solids and liquid fuels can be modeled by specifying their relevant
@@ -3082,7 +3082,30 @@ result in FDS defining {\ct NET\_HEAT\_FLUX=0}.
 \index{SURF!ADIABATIC}
 
 
-\subsection{Fans and other Velocity Boundary Conditions}
+\subsection{Tangential Velocity Boundary Conditions at Solid Surfaces}
+\label{info:WALL_MODEL}
+
+As a gas flows past a solid obstruction, it ``sticks'' to the surface and forms a boundary layer. Ideally,
+the gas velocity at the surface is zero, and it increases rapidly through a boundary layer that is only a few
+millimeters thick to its ``free-stream''
+value. In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an
+empirical model is used to represent its effect on the overall flow field.
+For a DNS (Direct Numerical Simulation), this discussion is moot. The inner-wall ``ghost'' cell velocities are
+set so that the velocity at the wall surface is zero. In other words, the velocity gradient at the wall is computed directly from
+the resolved velocity vectors near the wall. For an LES (Large Eddy Simulation), the Werner-Wengle wall model is applied. See
+the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for details.
+
+\begin{warning}
+\noindent
+The parameter {\ct SLIP\_FACTOR} is no longer used to set the tangential velocity boundary condition, as of FDS version 5.4.0. To force
+a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line. To force a no-slip boundary condition,
+set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line. Otherwise, no parameters need be set -- the appropriate wall model will be applied, depending on
+whether the calculation is a DNS or LES.
+\end{warning}
+
+
+
+\subsection{Simple Vents, Fans and Heaters}
 \index{Volume Flux} \index{Mass Flux}
 \index{SURF!VOLUME\_FLUX}
 \index{SURF!VEL}
@@ -3176,23 +3199,6 @@ rate (m$^3$/s), via the parameter {\ct MASS\_FLUX\_TOTAL}.
 for an outflow is adjusted based on the local density.
 \index{SURF!MASS\_FLUX\_TOTAL}
 
-\subsubsection{Tangential Velocity Boundary Conditions}
-\index{tangential velocity}
-\index{boundary layer}
-
-As a gas flows past a solid obstruction, it ``sticks'' to the surface and forms a boundary layer. Ideally,
-the gas velocity at the surface is zero, and it increases rapidly through a boundary layer that is only a few
-millimeters thick to its ``free-stream''
-value. In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an
-empirical model is used to represent its effect on the overall flow field.
-In a DNS calculation, this discussion is moot. The inner-wall ``ghost'' cell velocities are
-set so that the velocity at the wall surface is zero.
-
-\begin{warning}
-\noindent
-The parameter {\ct SLIP\_FACTOR} is no longer used to set the tangential velocity boundary condition, as of FDS version 5.4.0. To force
-a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line. Otherwise, no parameters need be set.
-\end{warning}
 
 \subsubsection{Louvered Vents}
 
@@ -9506,6 +9512,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct E\_COEFFICIENT}                  & Real            & Extinguishing coefficient         & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct EMISSIVITY}                      & Real            & Emissivity                        &                     & 0.9                     \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
+{\ct FREE\_SLIP}                      & Logical         & See Section~\ref{info:WALL_MODEL} &                     & {\ct .FALSE.}           \\ \hline
 {\ct FYI}                             & Character       & Comment String                    &                     &                         \\ \hline
 {\ct GEOMETRY}                        & Character       & Geometry type                     &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION }         & Real            & For specified HRR only            & kJ/kg               & 0.                      \\ \hline
@@ -9522,6 +9529,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 1.E12                   \\ \hline
 {\ct MLRPUA }                         & Real            & Mass loss rate per unit area      & kg/m$^2$s           & 0.                      \\ \hline
 {\ct NET\_HEAT\_FLUX}                 & Real            & Net flux at surface               & kW/m$^2$            & 0.                      \\ \hline
+{\ct NO\_SLIP}                        & Logical         & See Section~\ref{info:WALL_MODEL} &                     & {\ct .FALSE.}           \\ \hline
 {\ct NPPC}                            & Integer         & Number of particles per cell      &                     & 1                       \\ \hline
 {\ct PARTICLE\_MASS\_FLUX}            & Real            & See Section~\ref{info:particle_flux} & kg/m$^2$ s       & 0.                      \\ \hline
 {\ct PART\_ID}                        & Character       & Lagrangian Particle ID            &                     &                         \\ \hline
