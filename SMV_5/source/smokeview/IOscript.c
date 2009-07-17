@@ -524,7 +524,7 @@ int compile_script(char *scriptfile){
       cleanbuffer(buffer,buffer2);
       sscanf(buffer,"%i",&scripti->ival);
       if(scripti->ival<1)scripti->ival=1;
-      if(scripti->ival>10)scripti->ival=10;
+      if(scripti->ival>20)scripti->ival=20;
 
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
