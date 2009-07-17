@@ -14,3 +14,4 @@ Label_Font_Size = 14;
 set(gca,'Units','inches')
 set(gca,'FontName','Times')
 set(gca,'Position',[1,0.75,plot_width,plot_height])
+set(gcf,'DefaultLineLineWidth',1.5)

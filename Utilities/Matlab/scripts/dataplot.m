@@ -151,6 +151,11 @@ for i=drange
         
         % format the legend and axis labels
         
+        set(gca,'Units','inches')
+        set(gca,'FontName','Times')
+        set(gca,'Position',[1,0.75,plot_width,plot_height])
+        set(gcf,'DefaultLineLineWidth',1.5)
+     
         if strcmp(Flip_Axis,'no')
             xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)

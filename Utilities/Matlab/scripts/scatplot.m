@@ -41,7 +41,6 @@ else
     qrange = [2:100];
 end
 
-%addpath('../scripts')
 paper_width  = 6.0; % inches
 paper_height = 6.0; % inches
 
@@ -59,6 +58,7 @@ for j=qrange
     
     k = 0;
     for i=drange
+        if i>length(Save_Quantity); break; end
         if strcmp(Save_Quantity(i),Scatter_Plot_Title)
             k = k+1;
             Measured_Metric(k)  = Save_Measured_Metric(i);
