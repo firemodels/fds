@@ -3384,13 +3384,22 @@ void RenderFrame(int view_mode){
     strcat(renderfile,script_renderfile);
     use_script_filename=1;
   }
-  if(current_script_command!=NULL&&current_script_command->cval!=NULL){
+  if(current_script_command!=NULL&&current_script_command->command==SCRIPT_RENDERDIR&&current_script_command->cval!=NULL){
     strcpy(renderfile,"");
     if(script_dir_path!=NULL){
       strcat(renderfile,script_dir_path);
     }
     strcat(renderfile,current_script_command->cval);
     use_script_filename=1;
+  }
+  if(current_script_command!=NULL&&current_script_command->command==SCRIPT_RENDERALL&&current_script_command->cval!=NULL){
+    strcpy(renderfile2,"");
+    if(script_dir_path!=NULL){
+      strcat(renderfile2,script_dir_path);
+    }
+    strcat(renderfile2,current_script_command->cval);
+    renderfile_prefix=renderfile2;
+    use_script_filename=2;
   }
 
   if(view_mode==VIEW_LEFT&&(showstereo==2||showstereo==3))return;
@@ -3413,7 +3422,7 @@ void RenderFrame(int view_mode){
   }
 
   glFlush();
-  if(use_script_filename==0&&RenderTime==1){
+  if((use_script_filename==0||use_script_filename==2)&&RenderTime==1){
     switch (view_mode){
     case VIEW_CENTER:
       sprintf(renderfile,"%s_%04i",renderfile_prefix,itime/RenderSkip);
