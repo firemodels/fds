@@ -30,11 +30,11 @@ DO i=1,12
    OPEN(11,FILE=infile(i))
    READ(11,*)
    READ(11,*)
-   READ(11,*)
    DO k=1,1000
-      READ(11,*) time(k),fuel(1:4,k),o2(1:4,k),co2(1:4,k),co(1:4,k),n2(1:4,k),h2o(1:4,k),c(1:4,k),&
+      READ(11,*,end=100) time(k),fuel(1:4,k),o2(1:4,k),co2(1:4,k),co(1:4,k),n2(1:4,k),h2o(1:4,k),c(1:4,k),&
                  t(1:4,k),wv(1:4,k),nv(1:4,k)
    ENDDO
+100 continue
    DO k=901,1000
       fave(i) =fave(i)   +0.25_8*SUM(fuel(1:4,k))
       o2ave(i) =o2ave(i) +0.25_8*SUM(o2(1:4,k))
@@ -49,19 +49,21 @@ co2ave = co2ave / 100._8
 coave = coave / 100._8
 
 OPEN(12,FILE='Beyler_Hood_FDS.csv')
-WRITE(12,*) "Q-5,CO2-5,CO-5,O2-5,C3H8-5,Q--10,CO2--10,CO--10,O2--10,C3H8--10,Q-0,CO2-0,CO-0,O2-0,C3H8-0"
-WRITE(12,*) 7.92,",",co2ave(1),",",coave(1),",",o2ave(1),",",fave(1),",", &
-            8.21,",",co2ave(5),",",coave(5),",",o2ave(5),",",fave(5),",", &
-            8.21,",",co2ave(9),",",coave(9),",",o2ave(9),",",fave(9)
-WRITE(12,*) 13.53,",",co2ave(2),",",coave(2),",",o2ave(2),",",fave(2),",", &
-            13.53,",",co2ave(6),",",coave(6),",",o2ave(6),",",fave(6),",", &
-            13.53,",",co2ave(10),",",coave(10),",",o2ave(10),",",fave(10)
-WRITE(12,*) 18.25,",",co2ave(3),",",coave(3),",",o2ave(3),",",fave(3),",", &
-            18.25,",",co2ave(7),",",coave(7),",",o2ave(7),",",fave(7),",", &
-            18.25,",",co2ave(11),",",coave(11),",",o2ave(11),",",fave(11)
-WRITE(12,*) 24.3,",",co2ave(4),",",coave(4),",",o2ave(4),",",fave(4),",", &
-            24.3,",",co2ave(8),",",coave(8),",",o2ave(8),",",fave(8),",", &
-            31.52,",",co2ave(12),",",coave(12),",",o2ave(12),",",fave(12)                        
+WRITE(12,'(a)') "FDS Q (5 cm),FDS CO2 (5 cm),FDS CO (5 cm),FDS O2 (5 cm),FDS C3H8 (5 cm),FDS Q (-10 cm),FDS CO2 (-10 cm)," // &
+            "FDS CO (-10 cm),FDS O2 (-10 cm),FDS C3H8 (-10 cm),FDS Q (0 cm),FDS CO2 (0 cm),FDS CO (0 cm),FDS O2 (0 cm)," // &
+            "FDS C3H8 (0 cm)"
+WRITE(12,"(14(e9.3,','),e9.3)")  7.92,co2ave(1),coave(1),o2ave(1),fave(1), &
+                                 8.21,co2ave(5),coave(5),o2ave(5),fave(5), & 
+                                 8.21,co2ave(9),coave(9),o2ave(9),fave(9)
+WRITE(12,"(14(e9.3,','),e9.3)") 13.53,co2ave(2),coave(2),o2ave(2),fave(2), &
+                                13.53,co2ave(6),coave(6),o2ave(6),fave(6), &
+                                13.53,co2ave(10),coave(10),o2ave(10),fave(10)
+WRITE(12,"(14(e9.3,','),e9.3)") 18.25,co2ave(3),coave(3),o2ave(3),fave(3), &
+                                18.25,co2ave(7),coave(7),o2ave(7),fave(7), &
+                                18.25,co2ave(11),coave(11),o2ave(11),fave(11)
+WRITE(12,"(14(e9.3,','),e9.3)") 24.3,co2ave(4),coave(4),o2ave(4),fave(4), &
+                                24.3,co2ave(8),coave(8),o2ave(8),fave(8), &
+                                31.52,co2ave(12),coave(12),o2ave(12),fave(12)                        
 CLOSE (12)
 
 END PROGRAM

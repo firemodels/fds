@@ -1,5 +1,5 @@
 &HEAD CHID='Beyler_Hood_propane-1825-19-0',TITLE='Beyler Hood Tests, 18.25 kW propane, 19 cm burner, 0 cm seperation'/
-&MESH XB=-0.45,0.45,-0.45,0.45,-0.3,0.6,IJK=64,64,64/
+&MESH XB=-0.60,0.60,-0.60,0.60,-0.24,0.48,IJK=80,80,48/
 &TIME TWFIN=300./
 &MISC SURF_DEFAULT='INS',CO_PRODUCTION=.TRUE. /
 
