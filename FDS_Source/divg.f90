@@ -769,7 +769,7 @@ SUBROUTINE DIVERGENCE_PART_2(NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_OLD,RTRM,DIV
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
 REAL(EB) :: RDT,TNOW,P_EQUILIBRIUM_NUM,P_EQUILIBRIUM_DEN,RF
 REAL(EB), POINTER, DIMENSION(:) :: D_PBAR_DT_P
 INTEGER :: IW,IOR,II,JJ,KK,IIG,JJG,KKG,IC,I,J,K,IPZ,IOPZ,IOPZ2
@@ -949,10 +949,10 @@ ELSE TRUE_PROJECTION
    IF (PREDICTOR) THEN
       DDDT = (DS-D)*RDT
    ELSE
-      D_OLD => WORK1
-      D_OLD = DDDT
-      DDDT  = (2._EB*DDDT-DS-D)*RDT
-      D     = D_OLD
+      D_NEW => WORK1
+      D_NEW = DP
+      DDDT  = (2._EB*D_NEW-DS-D)*RDT
+      D     = D_NEW
    ENDIF
    
    ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
