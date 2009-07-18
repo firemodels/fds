@@ -7,7 +7,7 @@ set INDIR=../FDS_Input_Files
 set OUTDIR=../FDS_Output_Files
 cd $INDIR
 foreach var (hrr devc)
-foreach type (00leak 00open 00case3)
+foreach type (00leak 00open 00case3 00case1)
 set file=MCFRS_Flashover_$type\_$var.csv
 set fileout=$OUTDIR/$file
 echo Copying $file to $fileout
