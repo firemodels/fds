@@ -108,16 +108,18 @@ using realistic smoke and fire. Front and side views are compared from
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{c}
- \includegraphics[width=3.5in]{datafigures/MCFRS_Flashover_00leak_hrr}\\
- a) vent/door always closed except for leaks\\
- \includegraphics[width=3.5in]{datafigures/MCFRS_Flashover_00case3_hrr}\\
- b) vent/door opening/closing corresponding to experiment 3\\
+\begin{tabular}{cc}
+ \includegraphics[width=3.5in]{datafigures/MCFRS_Flashover_00leak_hrr}&
+ \includegraphics[width=3.5in]{datafigures/MCFRS_Flashover_00case1_hrr}\\
+ a) vent/door always closed except for leaks&
+ b) vent/door opening/closing corresponding to experiment 1\\
+ \includegraphics[width=3.5in]{datafigures/MCFRS_Flashover_00case3_hrr}&
  \includegraphics[width=3.5in]{datafigures/MCFRS_Flashover_00open_hrr}\\
- b) vent/door always open\\
+ c) vent/door opening/closing corresponding to experiment 3&
+ d) vent/door always open\\
 \end{tabular}
 \end{center}
-\caption {FDS heat release rate results for Flashover trainer cases with three ventilation conditions.}
+\caption {FDS heat release rate results for Flashover trainer cases with four ventilation conditions.}
 \label{figflashoverhrr}%
 \end{figure}
 
@@ -154,7 +156,7 @@ always sealed except for leaks&case 3 opening/closing&always open
 \end{tabular}
 \end{center}
 \caption {Comparison FDS computed and experimental temperatures as a function of time
-at 3 locations within the MCFRS flashover trainer for two ventilation conditions; open and sealed except for leaks. 
+at 3 locations within the MCFRS flashover trainer for two ventilation conditions; open and sealed except for leaks.
 See Figure \ref{figflashoverplan}a for location details.}
 \label{figflashovertempa}%
 \end{figure}
@@ -175,3 +177,52 @@ at 3 locations within the MCFRS flashover trainer at 60 s, 120 s and 180 s.  See
 \label{figflashovertempa}%
 \end{figure}
 
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case1_temp_0060}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case3_temp_0060}\\
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case1_temp_0120}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case3_temp_0120}\\
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case1_temp_0180}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case3_temp_0180}\\
+\end{tabular}
+\end{center}
+\caption {FDS temperatures as a function of height
+at 3 locations within the MCFRS flashover trainer at 60 s, 120 s and 180 s.  See Figure \ref{figflashoverplan}a for location details.}
+\label{figflashovertempb}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00leak_temp_0360}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00open_temp_0360}\\
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00leak_temp_0720}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00open_temp_0720}\\
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00leak_temp_1080}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00open_temp_1080}\\
+\end{tabular}
+\end{center}
+\caption {FDS temperatures as a function of height
+at 3 locations within the MCFRS flashover trainer at 360 s, 720 s and 1080 s for leak and open ventilation conditions.  See Figure \ref{figflashoverplan}a for location details.}
+\label{figflashovertempa}%
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case1_temp_0360}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case3_temp_0360}\\
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case1_temp_0720}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case3_temp_0720}\\
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case1_temp_1080}&
+\includegraphics[width=3.0in]{datafigures/MCFRS_Flashover_00case3_temp_1080}\\
+\end{tabular}
+\end{center}
+\caption {FDS temperatures as a function of height
+at 3 locations within the MCFRS flashover trainer at 360 s, 720 s and 1080 s for test 1 and test 3 ventilation conditions.  See Figure \ref{figflashoverplan}a for location details.}
+\label{figflashovertempb}%
+\end{figure}
