@@ -6,7 +6,7 @@ set fds2ascii=~/bin/fds2ascii_linux
 
 cd ../FDS_Input_Files
 
-foreach time (0060 0120 0180)
+foreach time (0060 0120 0180 0360 0720 1080)
 foreach type (00leak 00open 00case3 00case1)
 #foreach time (0060 0120 0180 0240 0300 0360 0420 0480 0540 0600 0660 0720 0780 0840 0900 0960 1020 1080 1140 1200 1260 1320 1380 1440 1500 1560)
 #foreach type (00case3m2)
