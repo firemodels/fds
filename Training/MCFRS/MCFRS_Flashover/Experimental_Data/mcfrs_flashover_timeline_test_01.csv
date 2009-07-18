@@ -1,0 +1,19 @@
+start,event,,,,
+0,Ignition,,d1open,d2open,ventclosed
+60,Door closed,,d1closed,d2closed,
+245,Door Opened Partially,,d1open,,
+405,Door Opened,,,d2open,
+600,Door Closed,,d1closed,d2closed,
+620,Vent Opened,,,,ventopen
+670,Vent Closed,,,,ventclosed
+795,Door Opened,,d1open,d2open,
+857,Vent Opened,,,,ventopen
+1064,Vent Closed,,,,ventclosed
+1120,Door Closed,,d1closed,d2closed,
+1145,Door Opened Partially,,d1open,,
+1165,Vent Opened,,,,ventopen
+1405,Vent Closed,,,,ventclosed
+1500,Vent Opened,,,,ventopen
+1560,Door Opened,,,d2open,
+1560,Vent Closed,,,,ventclosed
+1600,Back Door Opened,,,,
