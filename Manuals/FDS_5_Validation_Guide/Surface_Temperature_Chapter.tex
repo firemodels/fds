@@ -543,6 +543,21 @@ temperatures can often be explained in terms of comparable errors in the predict
 
 \section{CAROLFIRE Cable Temperatures}
 
+On the following pages are predictions of the THIEF (thermally-induced electrical failure) model compared to 35
+experiments conducted in a heated cylindrical ``shroud.'' The shroud temperature is input into the model, and
+the cable temperature (and in some cases that of the steel conduit enclosing the cable) is predicted. Note that the cables
+generally fall into two categories -- thermoset and thermoplastic. Thermoset cables form a char layer when burned and typically
+fail electrically at temperatures near 400~$^\circ$C. Thermoplastic cables typically melt and then burn, leaving little residue
+behind except the conductors. These cables typically fail at about 250~$^\circ$C~\cite{CAROLFIRE}. Some cables, as in
+Tests~18 and 31, do not fall into either category. The thermoset cables were exposed to temperatures in the neighborhood of
+480~$^\circ$C, and the thermoplastics were exposed to temperatures near 300~$^\circ$C.
+
+Note in the plots to follow that the objective of the calculation is to predict the cable temperature just inside of the
+jacket until the cable fails electrically. In some experiments, the short-circuiting of the cable led to ignition of the
+pyrolyzates. This behavior is not captured in the model, which is why some of the experimental data shows a rapid rise in
+temperature at a certain point in the test. In almost all cases, electrical failure occurred very shortly, or at about the
+same time, as ignition.
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_01} &
@@ -552,7 +567,7 @@ temperatures can often be explained in terms of comparable errors in the predict
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_09} &
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_11} \\
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_12} &
-\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_13} 
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_13}
 \end{tabular*}
 \label{CAROLFIRE_Thermoset_1}
 \end{figure}
@@ -566,7 +581,7 @@ temperatures can often be explained in terms of comparable errors in the predict
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_23} &
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_24} \\
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_27} &
-\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_28} 
+\includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_28}
 \end{tabular*}
 \label{CAROLFIRE_Thermoset_2}
 \end{figure}

@@ -5,8 +5,8 @@
 close all
 clear all
 
-paper_width  = 6.0; % inches
-paper_height = 4.5; % inches
+%paper_width  = 6.0; % inches
+%paper_height = 4.5; % inches
 
 dpdx = -1;
 L = 1;
@@ -25,13 +25,16 @@ H(1)=loglog(dz,error,'b*-','Linewidth',1.5); hold on
 H(2)=loglog(dz,dz,'k--','Linewidth',1.5);
 H(3)=loglog(dz,dz.^2,'k-','Linewidth',1.5);
 
-set(gca,'Units','inches')
-set(gca,'FontName','Times')
-set(gca,'FontSize',14)
-set(gca,'Position',[1,0.75,4.5,3.45])
+plot_style
 
-xlabel('$\delta \!z$','Interpreter','LaTeX')
-ylabel('friction factor error')
+%set(gca,'Units','inches')
+set(gca,'FontName','Times')
+%set(gca,'FontSize',14)
+%set(gca,'Position',[1,0.75,4.5,3.45])
+axis([0.01 0.2 0.00001 1])
+
+xlabel('Grid Spacing, $\delta \!z$ (m)','Interpreter','LaTeX')
+ylabel('Friction Factor Error')
 h = legend(H,'FDS','$O(\delta \!z)$','$O(\delta \!z^2)$','Location','Southeast');
 set(h,'Interpreter','LaTeX')
 set(gcf,'PaperUnits','inches');
