@@ -155,18 +155,32 @@ for i=drange
         set(gca,'FontName','Times')
         set(gca,'Position',[1,0.75,plot_width,plot_height])
         set(gcf,'DefaultLineLineWidth',1.5)
+        
+        if Plot_Type=='linear' & strcmp(Flip_Axis,'no')
+            X_Title_Position = Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind);
+            Y_Title_Position = Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep);
+        elseif Plot_Type=='linear' & strcmp(Flip_Axis,'yes')
+            X_Title_Position = Min_Dep+Title_Position(1)*(Max_Dep-Min_Dep);
+            Y_Title_Position = Min_Ind+Title_Position(2)*(Max_Ind-Min_Ind);
+        elseif Plot_Type=='loglog' & strcmp(Flip_Axis,'no')
+            X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
+            Y_Title_Position = 10^(log10(Min_Dep)+Title_Position(2)*(log10(Max_Dep)-log10(Min_Dep)));
+        elseif Plot_Type=='loglog' & strcmp(Flip_Axis,'yes')
+            X_Title_Position = 10^(log10(Min_Dep)+Title_Position(1)*(log10(Max_Dep)-log10(Min_Dep)));
+            Y_Title_Position = 10^(log10(Min_Ind)+Title_Position(2)*(log10(Max_Ind)-log10(Min_Ind)));
+        end
      
         if strcmp(Flip_Axis,'no')
             xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             axis([Min_Ind Max_Ind Min_Dep Max_Dep])
-            text(Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind),Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep),...
+            text(X_Title_Position,Y_Title_Position,...
                 Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter','LaTeX')
         else
             xlabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             ylabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             axis([Min_Dep Max_Dep Min_Ind Max_Ind])
-            text(Min_Dep+Title_Position(1)*(Max_Dep-Min_Dep),Min_Ind+Title_Position(2)*(Max_Ind-Min_Ind),...
+            text(X_Title_Position,Y_Title_Position,...
                 Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter','LaTeX')
         end
         if size(Key_Position)>0

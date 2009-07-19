@@ -5,8 +5,8 @@
 close all
 clear all
 
-paper_width  = 6.0; % inches
-paper_height = 4.5; % inches
+%paper_width  = 6.0; % inches
+%paper_height = 4.5; % inches
 
 % % test Colebrook formula
 % Re = 1e5;
@@ -40,14 +40,14 @@ Re_DNS = logspace(2,3.3);
 f_DNS = (24./Re_DNS);
 loglog(Re_DNS,f_DNS,'b-')
 
-set(gca,'Units','inches')
+plot_style
+
 set(gca,'FontName','Times')
-set(gca,'FontSize',12)
-set(gca,'Position',[1,0.75,4.5,3.45])
+set(gca,'Position',[0.75,0.75,4.5,3.45])
 
 axis([1e2 1e8 .005 .2]) % based on MYO
-xlabel('Re','Interpreter','LaTeX','FontSize',14)
-ylabel('$f$','Interpreter','LaTeX','FontSize',14,'Rotation',0.0)
+xlabel('Re','Interpreter','LaTeX','FontSize',Label_Font_Size)
+ylabel('$f$','Interpreter','LaTeX','FontSize',Label_Font_Size,'Rotation',0.0)
 
 repository = '../../../Verification/Flowfields/';
 
@@ -63,26 +63,26 @@ loglog(Re_fds,f_fds,'b*')
 mu = 1.84e-5;
 
 dpdx = -.01;
-[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N8_devc.csv'],mu);loglog(Re,f,'bsq')
-[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N16_devc.csv'],mu);loglog(Re,f,'b^')
-[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N32_devc.csv'],mu);loglog(Re,f,'bo')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N8_devc.csv'],mu);loglog(Re,f,'ksq')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N16_devc.csv'],mu);loglog(Re,f,'r^')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N32_devc.csv'],mu);loglog(Re,f,'go')
 
 dpdx = -1;
-[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'bsq')
-[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'b^')
-[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N32_devc.csv'],mu);loglog(Re,f,'bo')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'ksq')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'r^')
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N32_devc.csv'],mu);loglog(Re,f,'go')
 
 dpdx = -100;
-[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N8_devc.csv'],mu);H(1)=loglog(Re,f,'bsq');
-[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N16_devc.csv'],mu);H(2)=loglog(Re,f,'b^');
-[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N32_devc.csv'],mu);H(3)=loglog(Re,f,'bo');
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N8_devc.csv'],mu);H(1)=loglog(Re,f,'ksq');
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N16_devc.csv'],mu);H(2)=loglog(Re,f,'r^');
+[f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N32_devc.csv'],mu);H(3)=loglog(Re,f,'go');
 
-text(1.3e8,2e-1,'$\varepsilon/D$','Interpreter','LaTeX','FontSize',12,'Fontname','Times')
-text(1.3e8,.82e-2,num2str(RR(2)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
-text(1.3e8,1.2e-2,num2str(RR(3)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
-text(1.3e8,1.95e-2,num2str(RR(4)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
-text(1.3e8,3.85e-2,num2str(RR(5)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
-text(1.3e8,1.02e-1,num2str(RR(6)),'Interpreter','LaTeX','FontSize',12,'Fontname','Times')
+text(1.3e8,2e-1,'$\varepsilon/D$','Interpreter','LaTeX','FontSize',Key_Font_Size,'Fontname','Times')
+text(1.3e8,.82e-2,num2str(RR(2)),'Interpreter','LaTeX','FontSize',Key_Font_Size,'Fontname','Times')
+text(1.3e8,1.2e-2,num2str(RR(3)),'Interpreter','LaTeX','FontSize',Key_Font_Size,'Fontname','Times')
+text(1.3e8,1.95e-2,num2str(RR(4)),'Interpreter','LaTeX','FontSize',Key_Font_Size,'Fontname','Times')
+text(1.3e8,3.85e-2,num2str(RR(5)),'Interpreter','LaTeX','FontSize',Key_Font_Size,'Fontname','Times')
+text(1.3e8,1.02e-1,num2str(RR(6)),'Interpreter','LaTeX','FontSize',Key_Font_Size,'Fontname','Times')
 h = legend(H,'$N_z=8$','$N_z=16$','$N_z=32$','Location','Southwest');
 set(h,'Interpreter','LaTeX')
 % print to pdf
