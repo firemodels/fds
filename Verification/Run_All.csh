@@ -55,6 +55,12 @@ $RUNFDS Flowfields poiseuille_N16_mu025           fire75 &
 $RUNFDS Flowfields poiseuille_N32_mu025           fire75 &
 $RUNFDS Flowfields poiseuille_N64_mu025           fire76 &
 $RUNFDS Flowfields poiseuille_N64_mu0125          fire76 &
+$RUNFDS Decaying_Isotropic_Turbulence mu0_32      fire77 &
+$RUNFDS Decaying_Isotropic_Turbulence csmag0_32   fire77 &
+$RUNFDS Decaying_Isotropic_Turbulence csmag_32    fire77 &
+$RUNFDS Decaying_Isotropic_Turbulence csmag_64    fire77 &
+$RUNFDS Decaying_Isotropic_Turbulence dsmag_32    fire78 &
+$RUNFDS Decaying_Isotropic_Turbulence dsmag_64    fire78 &
 $RUNFDS Pressure_Effects door_crack               fire68 &
 $RUNFDS Pressure_Effects fan_test                 fire61 &
 $RUNFDS Pressure_Effects leak_test_2              fire62 &
