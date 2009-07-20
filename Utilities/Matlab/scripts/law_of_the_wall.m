@@ -23,6 +23,8 @@ end
 
 figure
 plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gcf,'DefaultLineLineWidth',Line_Width)
 semilogx(zp,up,'b-'); hold on
 semilogy(zp,uu,'r--')

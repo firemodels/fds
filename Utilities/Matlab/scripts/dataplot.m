@@ -53,9 +53,12 @@ else
     drange = 2:2000;
 end
 
-% get the plot style parameters
+% set the plot style parameters
 
 plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+set(gcf,'DefaultLineLineWidth',Line_Width)
 
 % read the configuration file
 
@@ -149,13 +152,6 @@ for i=drange
         end
         hold off
         
-        % format the legend and axis labels
-        
-        set(gca,'Units','inches')
-        set(gca,'FontName','Times')
-        set(gca,'Position',[1,0.75,plot_width,plot_height])
-        set(gcf,'DefaultLineLineWidth',1.5)
-        
         if Plot_Type=='linear' & strcmp(Flip_Axis,'no')
             X_Title_Position = Min_Ind+Title_Position(1)*(Max_Ind-Min_Ind);
             Y_Title_Position = Min_Dep+Title_Position(2)*(Max_Dep-Min_Dep);
@@ -175,13 +171,13 @@ for i=drange
             ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             axis([Min_Ind Max_Ind Min_Dep Max_Dep])
             text(X_Title_Position,Y_Title_Position,...
-                Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter','LaTeX')
+                Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
         else
             xlabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             ylabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             axis([Min_Dep Max_Dep Min_Ind Max_Ind])
             text(X_Title_Position,Y_Title_Position,...
-                Plot_Title,'FontSize',Title_Font_Size,'FontName','Times','Interpreter','LaTeX')
+                Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
         end
         if size(Key_Position)>0
             legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'Interpreter','LaTeX','FontSize',Key_Font_Size)
@@ -190,10 +186,10 @@ for i=drange
         
         % print to pdf
         
-        set(gcf,'Visible','on');
-        set(gcf,'PaperUnits','inches');
-        set(gcf,'PaperSize',[paper_width paper_height]);
-        set(gcf,'PaperPosition',[0 0 paper_width paper_height]); 
+        set(gcf,'Visible',Figure_Visibility);
+        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]); 
         display(['Printing plot ',num2str(i),'...'])
         print(gcf,'-dpdf',[plotdir,Plot_Filename])
         

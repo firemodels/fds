@@ -6,7 +6,7 @@
 %
 % Some things you might want to set in your script...
 %
-% set(gca,'Units','inches')
+% set(gca,'Units',Plot_Units)
 % set(gca,'FontName',Font_Name)
 % set(gca,'FontSize',Title_Font_Size)
 % set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
@@ -23,15 +23,15 @@ Line_Width      = 1.5;
 
 % plot properties
 Plot_Units      = 'inches';
-Plot_Width      = 4.5;  % inches
-Plot_Height     = 3.15; % inches
-Plot_X          = 1;
+Plot_Width      = 4.5;
+Plot_Height     = 3.15;
+Plot_X          = 0.75;
 Plot_Y          = 0.75;
 
 % paper properties
 Paper_Units     = 'inches';
-Paper_Width     = 6.0;  % inches
-Paper_Height    = 4.5;  % inches
+Paper_Width     = 6.0;
+Paper_Height    = 4.5;
 
 % print properties
 Figure_Visibility = 'on';
