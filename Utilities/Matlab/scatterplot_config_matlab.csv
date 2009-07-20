@@ -23,6 +23,6 @@ Doorway Velocity Steckler Compartment,Measured Velocity (m/s),Predicted Velocity
 Hydrogen Concentration,Measured Hydrogen Volume Fraction,Predicted Hydrogen Volume Fraction,0,0.25,0.015 0.94,SouthEast,4,10,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Hydrogen
 Temperatures (SP 2009 AST Experiments),Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.015 0.94,SouthEast,4,14,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/SP_Temperature
 Actuated Sprinklers,Measured Actuations,Predicted Actuations,0,20,0.015 0.94,SouthEast,4,0,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/UL_NFPRF_Actuations
-"Oxygen, NIST FSE 2008",Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.25,0.015 0.94,SouthEast,4,9,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Oxygen_Concentration
+"Oxygen, NIST FSE 2008",Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.25,0.015 0.94,SouthEast,4,9,no,FDS_5_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Oxygen_Concentration
 "Carbon Monoxide, NIST FSE 2008",Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.1,0.015 0.94,SouthEast,4,9,no,FDS_5_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Carbon_Monoxide_Concentration
-"Carbon Dioxide, NIST FSE 2008",Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.1,0.015 0.94,SouthEast,4,9,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Carbon_Dioxide_Concentration
+"Carbon Dioxide, NIST FSE 2008",Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.2,0.015 0.94,SouthEast,4,9,no,FDS_5_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Carbon_Dioxide_Concentration
