@@ -420,6 +420,7 @@ ENDDO
  
 DO J=1,JBAR
    DO I=1,IBAR
+      IF (EVACUATION_ONLY(NM)) CYCLE
       IF (NBC==3 .OR. NBC==4)  H(I,J,0)    = H(I,J,1)    - DZETA*BZS(I,J)
       IF (NBC==3 .OR. NBC==2)  H(I,J,KBP1) = H(I,J,KBAR) + DZETA*BZF(I,J)
       IF (NBC==1 .OR. NBC==2)  H(I,J,0)    =-H(I,J,1)    + 2._EB*BZS(I,J)
@@ -433,7 +434,7 @@ ENDDO
 
 ! ************************* Check the Solution *************************
  
-IF (CHECK_POISSON) THEN     
+IF (CHECK_POISSON .AND. .NOT.EVACUATION_ONLY(NM)) THEN     
    POIS_ERR = 0.
    DO K=1,KBAR
       DO J=1,JBAR
