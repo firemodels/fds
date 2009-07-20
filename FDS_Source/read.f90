@@ -387,6 +387,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
             IF (EVACUATION)  SYNC_TIME_STEP(NM)  = .FALSE.
             IF (EVAC_HUMANS) EVACUATION_GRID(NM) = .TRUE.
             IF (EVACUATION)  EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET
+            IF (EVACUATION)  M%NEWC = 2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
             IF (M%JBAR==1) TWO_D = .TRUE.
             IF (TWO_D .AND. M%JBAR/=1) THEN
                WRITE(MESSAGE,'(A)') 'ERROR: IJK(2) must be 1 for all grids in 2D Calculation'
@@ -421,6 +422,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
             M%JBAR2 = JBAR2
             M%KBAR2 = KBAR2
 
+            EVAC_IF_NOT: IF (.NOT.EVACUATION_ONLY(NM)) THEN
             ALLOCATE(M%I_LO(M%IBAR2))
             ALLOCATE(M%I_HI(M%IBAR2))
             ALLOCATE(M%J_LO(M%JBAR2))
@@ -442,6 +444,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                M%K_LO(K) = K_MG(K-1) + 1
                M%K_HI(K) = K_MG(K)
             ENDDO
+            ENDIF EVAC_IF_NOT
 
             ! Process Physical Coordinates
 
@@ -526,6 +529,7 @@ MESH_LOOP: DO NM=1,NMESHES
    DO N=1,3
       T%NOC(N) = 0
       TRNLOOP: DO
+         IF (EVACUATION_ONLY(NM)) EXIT TRNLOOP
          SELECT CASE (N)
             CASE(1)
                CALL CHECKREAD('TRNX',LU_INPUT,IOS)
@@ -5062,6 +5066,7 @@ MESH_LOOP: DO NM=1,NMESHES
       REMOVABLE   = .TRUE.
       IF (.NOT.EVACUATION_ONLY(NM)) EVACUATION = .FALSE.
       IF (     EVACUATION_ONLY(NM)) EVACUATION = .TRUE.
+      IF (     EVACUATION_ONLY(NM)) REMOVABLE = .FALSE.
  
       ! Read the OBST line
 
@@ -5299,7 +5304,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                VOL_SPECIFIED = (OB%X2-OB%X1)*(OB%Y2-OB%Y1)*(OB%Z2-OB%Z1)
                VOL_ADJUSTED  = (X(OB%I2)-X(OB%I1))*(Y(OB%J2)-Y(OB%J1))*(Z(OB%K2)-Z(OB%K1))
-               IF (VOL_SPECIFIED>0._EB) THEN
+               IF (VOL_SPECIFIED>0._EB .AND..NOT.EVACUATION_ONLY(NM)) THEN
                   OB%VOLUME_ADJUST = VOL_ADJUSTED/VOL_SPECIFIED
                ELSE
                   OB%VOLUME_ADJUST = 0._EB
@@ -5321,7 +5326,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   OB%REMOVABLE = .TRUE.
                ENDIF
          
-               IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.      
+               IF (OB%CONSUMABLE .AND..NOT.EVACUATION_ONLY(NM))    OB%REMOVABLE = .TRUE.      
 
                ! Choose obstruction color index
 
@@ -5380,7 +5385,7 @@ MESH_LOOP: DO NM=1,NMESHES
  
                ! Smooth obstacles if desired
           
-               IF (.NOT.SAWTOOTH) THEN
+               IF (.NOT.SAWTOOTH .AND..NOT.EVACUATION_ONLY(NM)) THEN
                   OB%TYPE_INDICATOR = 3
                   OB%SAWTOOTH = .FALSE.
                ENDIF
@@ -5414,7 +5419,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
    N_OBST_O = N_OBST
    DO N=1,N_OBST_O
       OB => OBSTRUCTION(N)
-      IF (OB%CONSUMABLE) THEN
+      IF (OB%CONSUMABLE .AND..NOT.EVACUATION_ONLY(NM)) THEN
 
          N_NEW_OBST = MAX(1,OB%I2-OB%I1)*MAX(1,OB%J2-OB%J1)*MAX(1,OB%K2-OB%K1)
          IF (N_NEW_OBST > 1) THEN
@@ -5493,6 +5498,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
    CELL_COUNT = 0
  
    DO K=0,KBP1
+      IF (EVACUATION_ONLY(NM) .AND. .NOT.(K==1)) CYCLE
       DO J=0,JBP1
          DO I=0,1
             IF (CELL_INDEX(I,J,K)==0) THEN
@@ -5510,6 +5516,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
    ENDDO
  
    DO K=0,KBP1
+      IF (EVACUATION_ONLY(NM) .AND. .NOT.(K==1)) CYCLE
       DO I=0,IBP1
          DO J=0,1
             IF (CELL_INDEX(I,J,K)==0) THEN
@@ -5529,12 +5536,14 @@ MESH_LOOP_3: DO NM=1,NMESHES
    DO J=0,JBP1
       DO I=0,IBP1
          DO K=0,1
+            IF (EVACUATION_ONLY(NM) .AND. .NOT.(K==1)) CYCLE
             IF (CELL_INDEX(I,J,K)==0) THEN
                CELL_COUNT = CELL_COUNT + 1
                CELL_INDEX(I,J,K) = CELL_COUNT
             ENDIF
          ENDDO
          DO K=KBAR,KBP1
+            IF (EVACUATION_ONLY(NM) .AND. .NOT.(K==1)) CYCLE
             IF (CELL_INDEX(I,J,K)==0) THEN
                CELL_COUNT = CELL_COUNT + 1
                CELL_INDEX(I,J,K) = CELL_COUNT
@@ -5546,6 +5555,7 @@ MESH_LOOP_3: DO NM=1,NMESHES
    DO N=1,N_OBST
       OB=>OBSTRUCTION(N)
       DO K=OB%K1,OB%K2+1
+         IF (EVACUATION_ONLY(NM) .AND. .NOT.(K==1)) CYCLE
          DO J=OB%J1,OB%J2+1
             DO I=OB%I1,OB%I2+1
                IF (CELL_INDEX(I,J,K)==0) THEN

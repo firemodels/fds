@@ -4150,7 +4150,7 @@ Contains
                    II = Floor( M%CELLSI(Floor((X1-M%XS)*M%RDXINT)) + 1.0_EB  )
                    JJ = Floor( M%CELLSJ(Floor((Y1-M%YS)*M%RDYINT)) + 1.0_EB  )
                    KK = Floor( M%CELLSK(Floor((Z1-M%ZS)*M%RDZINT)) + 1.0_EB  )
-                   I_OBST = OBST_INDEX_C(M%CELL_INDEX(II,JJ,KK))
+                   I_OBST = M%OBST_INDEX_C(M%CELL_INDEX(II,JJ,KK))
                    If ( M%SOLID(M%CELL_INDEX(II,JJ,KK)) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN ) Then
                       HUMAN_GRID(i,j)%IMESH = 0 ! No smoke inside OBSTs
                    Else
@@ -4166,7 +4166,7 @@ Contains
              HUMAN_GRID(i,j)%IMESH = 0
           End Do MESH_LOOP
           I_OBST = OBST_INDEX_C(CELL_INDEX(I,J,1))
-          If (.Not. (SOLID(CELL_INDEX(i,j,1)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN) ) Then
+          If (.Not. (SOLID(CELL_INDEX(i,j,1)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN)) Then
              HUMAN_GRID(i,j)%IMESH = HUMAN_GRID(i,j)%IMESH
           Else
              ! This grid cell is solid ==> No humans in this cell
@@ -6773,8 +6773,8 @@ Contains
                 END IF
                 tim_ic  = cell_index(ii,jj-1,kkn) ! one cell down
                 tim_iw  = wall_index(tim_ic, +1)  ! down and right
-                I_OBST = OBST_INDEX_W(tim_IW)
                 IF (tim_iw>0) THEN
+                   I_OBST = OBST_INDEX_W(tim_IW)
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) tim_iw = 0
                 END IF
                 tim_ic2 = cell_index(ii+1,jj,kkn) ! one cell right
@@ -10177,6 +10177,15 @@ Contains
           iw  = M%WALL_INDEX(ic, isy*2) ! main direction
           iw1 = M%WALL_INDEX(ic ,isx*1) ! sideways
           iw2 = M%WALL_INDEX(ic2,isy*2) ! side + main direction
+          IF (iw >0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw ))%HIDDEN .AND. M%OBST_INDEX_W(iw )>0) iw  = 0
+          END IF
+          IF (iw1>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw1))%HIDDEN .AND. M%OBST_INDEX_W(iw1)>0) iw1 = 0
+          END IF
+          IF (iw2>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw2))%HIDDEN .AND. M%OBST_INDEX_W(iw2)>0) iw2 = 0
+          END IF
           ! iw is zero, if there is no solid boundary
           ! from (i,j)==>(i,jnew):    iw and iw2 are zero, iw1 does not matter
           !                           ic=ic2 ==> iw=iw2
@@ -10201,6 +10210,15 @@ Contains
           iw  = M%WALL_INDEX(ic, isx*1) ! main direction
           iw1 = M%WALL_INDEX(ic ,isy*2) ! sideways
           iw2 = M%WALL_INDEX(ic2,isx*1) ! side + main direction
+          IF (iw >0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw ))%HIDDEN .AND. M%OBST_INDEX_W(iw )>0) iw  = 0
+          END IF
+          IF (iw1>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw1))%HIDDEN .AND. M%OBST_INDEX_W(iw1)>0) iw1 = 0
+          END IF
+          IF (iw2>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw2))%HIDDEN .AND. M%OBST_INDEX_W(iw2)>0) iw2 = 0
+          END IF
           ! iw is zero, if there is no solid boundary
           ! from (i,j)==>(inew,j):    iw and iw2 are zero, iw1 does not matter
           !                           ic=ic2 ==> iw=iw2
@@ -10281,6 +10299,15 @@ Contains
           iw  = M%WALL_INDEX(ic, isy*2) ! main direction
           iw1 = M%WALL_INDEX(ic ,isx*1) ! sideways
           iw2 = M%WALL_INDEX(ic2,isy*2) ! side + main direction
+          IF (iw >0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw ))%HIDDEN .AND. M%OBST_INDEX_W(iw )>0) iw  = 0
+          END IF
+          IF (iw1>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw1))%HIDDEN .AND. M%OBST_INDEX_W(iw1)>0) iw1 = 0
+          END IF
+          IF (iw2>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw2))%HIDDEN .AND. M%OBST_INDEX_W(iw2)>0) iw2 = 0
+          END IF
           ! iw is zero, if there is no solid boundary
           ! from (i,j)==>(i,jnew):    iw and iw2 are zero, iw1 does not matter
           !                           ic=ic2 ==> iw=iw2
@@ -10313,6 +10340,15 @@ Contains
           iw  = M%WALL_INDEX(ic, isx*1) ! main direction
           iw1 = M%WALL_INDEX(ic ,isy*2) ! sideways
           iw2 = M%WALL_INDEX(ic2,isx*1) ! side + main direction
+          IF (iw >0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw ))%HIDDEN .AND. M%OBST_INDEX_W(iw )>0) iw  = 0
+          END IF
+          IF (iw1>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw1))%HIDDEN .AND. M%OBST_INDEX_W(iw1)>0) iw1 = 0
+          END IF
+          IF (iw2>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw2))%HIDDEN .AND. M%OBST_INDEX_W(iw2)>0) iw2 = 0
+          END IF
           ! iw is zero, if there is no solid boundary
           ! from (i,j)==>(inew,j):    iw and iw2 are zero, iw1 does not matter
           !                           ic=ic2 ==> iw=iw2
@@ -10396,10 +10432,16 @@ Contains
           Return
        End If
        iw = M%wall_index(ic, is*1)      ! wall index
+       IF (iw>0) THEN
+          IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+       END IF
        Do While (iw==0 .And. ii/=i_end)
           ii = ii + is
           ic = M%cell_index(ii,jjn,kkn)  ! cell index
           iw = M%wall_index(ic, is*1)      ! wall index
+          IF (iw>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+          END IF
        End Do
 
        If (iw /= 0) Then
@@ -10439,10 +10481,16 @@ Contains
           Return
        End If
        iw = M%wall_index(ic, is*1)      ! wall index
+       IF (iw>0) THEN
+          IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+       END IF
        Do While (iw==0 .And. ii/=i_end)
           ii = ii + is
           ic = M%cell_index(ii,jjn,kkn)  ! cell index
           iw = M%wall_index(ic, is*1)      ! wall index
+          IF (iw>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+          END IF
        End Do
 
        If (iw /= 0) Then
@@ -10482,10 +10530,16 @@ Contains
           Return
        End If
        iw = M%wall_index(ic, is*2)      ! wall index
+       IF (iw>0) THEN
+          IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+       END IF
        Do While (iw==0 .And. jj/=i_end)
           jj = jj + is
           ic = M%cell_index(iin,jj,kkn)  ! cell index
           iw = M%wall_index(ic, is*2)      ! wall index
+          IF (iw>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+          END IF
        End Do
 
        If (iw /= 0) Then
@@ -10525,10 +10579,16 @@ Contains
           Return
        End If
        iw = M%wall_index(ic, is*2)      ! wall index
+       IF (iw>0) THEN
+          IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+       END IF
        Do While (iw==0 .And. jj/=i_end)
           jj = jj + is
           ic = M%cell_index(iin,jj,kkn)  ! cell index
           iw = M%wall_index(ic, is*2)      ! wall index
+          IF (iw>0) THEN
+             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+          END IF
        End Do
 
        If (iw /= 0) Then
