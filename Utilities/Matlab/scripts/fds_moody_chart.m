@@ -5,9 +5,6 @@
 close all
 clear all
 
-%paper_width  = 6.0; % inches
-%paper_height = 4.5; % inches
-
 % % test Colebrook formula
 % Re = 1e5;
 % RR = 0;
@@ -41,9 +38,10 @@ f_DNS = (24./Re_DNS);
 loglog(Re_DNS,f_DNS,'b-')
 
 plot_style
-
-set(gca,'FontName','Times')
+set(gca,'Units',Plot_Units)
+set(gca,'FontName',Font_Name)
 set(gca,'Position',[0.75,0.75,4.5,3.45])
+set(gcf,'DefaultLineLineWidth',Line_Width)
 
 axis([1e2 1e8 .005 .2]) % based on MYO
 xlabel('Re','Interpreter','LaTeX','FontSize',Label_Font_Size)
@@ -86,12 +84,10 @@ text(1.3e8,1.02e-1,num2str(RR(6)),'Interpreter','LaTeX','FontSize',Key_Font_Size
 h = legend(H,'$N_z=8$','$N_z=16$','$N_z=32$','Location','Southwest');
 set(h,'Interpreter','LaTeX')
 % print to pdf
-set(gcf,'Visible','on');
-set(gcf,'PaperUnits','inches');
-set(gcf,'PaperSize',[paper_width paper_height]);
-set(gcf,'PaperPosition',[0 0 paper_width paper_height]);
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../../Manuals/FDS_5_Verification_Guide/FIGURES/fds_moody_chart')
 
-close all
-clear all
 
