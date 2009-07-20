@@ -10,6 +10,7 @@ $VDIR/INERIS_H2/FDS_Output_Files/Process_Output.csh
 $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
 $VDIR/NBS_Multi-Room/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_He_2009/FDS_Output_Files/Process_Output.csh
+$VDIR/NIST_FSE_2008/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_NRC/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_RSE_1994/FDS_Output_Files/Process_Output.csh
 $VDIR/NRL_HAI/FDS_Output_Files/Process_Output.csh
