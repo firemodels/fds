@@ -23,19 +23,23 @@ end
 
 figure
 plot_style
-semilogx(zp,up,'b-', 'Linewidth',1.5); hold on
-semilogy(zp,uu,'r--','Linewidth',1.5)
-set(gca,'FontName','Times')
-text(1.5,8,'$u^+ = z^+$','Fontsize',Title_Font_Size,'FontName','Times','Interpreter','LaTeX')
-text(200,15,'$u^+ = 2.4 {\rm ln} z^+ + 5.2$','Fontsize',Title_Font_Size,'Interpreter','LaTeX','Color',[1 0 0])
-text(500,30,'$u^+ = A(z^+)^B$','Fontsize',Title_Font_Size,'Interpreter','LaTeX','Color',[0 0 1])
+set(gcf,'DefaultLineLineWidth',Line_Width)
+semilogx(zp,up,'b-'); hold on
+semilogy(zp,uu,'r--')
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Title_Font_Size)
+text(1.5,8,'$u^+ = z^+$','FontSize',Title_Font_Size,'Interpreter','LaTeX')
+text(200,15,'$u^+ = 2.4 {\rm ln} z^+ + 5.2$','FontSize',Title_Font_Size,'Interpreter','LaTeX','Color',[1 0 0])
+text(500,30,'$u^+ = A(z^+)^B$','FontSize',Title_Font_Size,'Interpreter','LaTeX','Color',[0 0 1])
 line([11.81 11.81],[0 20],'LineStyle','--')
-text(15,5,'$z^+ = 11.81$','Fontsize',Title_Font_Size,'Interpreter','LaTeX');
-xlabel('$z^+$','Fontsize',Title_Font_Size,'Interpreter','LaTeX')
-ylabel('$u^+$','Fontsize',Title_Font_Size,'Interpreter','LaTeX')
-set(gcf,'Visible','on');
-set(gcf,'PaperSize',[paper_width paper_height]);
-set(gcf,'PaperPosition',[0 0 paper_width paper_height]);
+text(15,5,'$z^+ = 11.81$','FontSize',Title_Font_Size,'Interpreter','LaTeX');
+xlabel('$z^+$','FontSize',Title_Font_Size,'Interpreter','LaTeX')
+ylabel('$u^+$','FontSize',Title_Font_Size,'Interpreter','LaTeX')
+
+% print pdf
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../../Manuals/FDS_5_Verification_Guide/FIGURES/lawofthewall')
 
 % % check FDS parameters

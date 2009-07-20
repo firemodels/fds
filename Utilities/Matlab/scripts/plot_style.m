@@ -3,15 +3,35 @@
 % plot_style.m
 %
 % Preferred style for FDS and Smokeview plots 
+%
+% Some things you might want to set in your script...
+%
+% set(gca,'Units','inches')
+% set(gca,'FontName',Font_Name)
+% set(gca,'FontSize',Title_Font_Size)
+% set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+% set(gcf,'DefaultLineLineWidth',Line_Width)
 
-paper_width     = 6.0;  % inches
-paper_height    = 4.5;  % inches
-plot_width      = 4.5;  % inches
-plot_height     = 3.15; % inches
+% font properties
+Font_Name       = 'Times';
 Key_Font_Size   = 12;
 Title_Font_Size = 14;
 Label_Font_Size = 14;
-set(gca,'Units','inches')
-set(gca,'FontName','Times')
-set(gca,'Position',[1,0.75,plot_width,plot_height])
-set(gcf,'DefaultLineLineWidth',1.5)
+
+% line properties
+Line_Width      = 1.5;
+
+% plot properties
+Plot_Units      = 'inches';
+Plot_Width      = 4.5;  % inches
+Plot_Height     = 3.15; % inches
+Plot_X          = 1;
+Plot_Y          = 0.75;
+
+% paper properties
+Paper_Units     = 'inches';
+Paper_Width     = 6.0;  % inches
+Paper_Height    = 4.5;  % inches
+
+% print properties
+Figure_Visibility = 'on';
