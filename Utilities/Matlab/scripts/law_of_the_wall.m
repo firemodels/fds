@@ -27,8 +27,8 @@ semilogx(zp,up,'b-', 'Linewidth',1.5); hold on
 semilogy(zp,uu,'r--','Linewidth',1.5)
 set(gca,'FontName','Times')
 text(1.5,8,'$u^+ = z^+$','Fontsize',Title_Font_Size,'FontName','Times','Interpreter','LaTeX')
-text(200,15,'$u^+ = 2.4 {\rm ln} z^+ + 5.2$','Fontsize',Title_Font_Size,'Interpreter','LaTeX')
-text(500,30,'$u^+ = A(z^+)^B$','Fontsize',Title_Font_Size,'Interpreter','LaTeX')
+text(200,15,'$u^+ = 2.4 {\rm ln} z^+ + 5.2$','Fontsize',Title_Font_Size,'Interpreter','LaTeX','Color',[1 0 0])
+text(500,30,'$u^+ = A(z^+)^B$','Fontsize',Title_Font_Size,'Interpreter','LaTeX','Color',[0 0 1])
 line([11.81 11.81],[0 20],'LineStyle','--')
 text(15,5,'$z^+ = 11.81$','Fontsize',Title_Font_Size,'Interpreter','LaTeX');
 xlabel('$z^+$','Fontsize',Title_Font_Size,'Interpreter','LaTeX')
