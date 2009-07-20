@@ -23,6 +23,8 @@ H(2)=loglog(dz,dz,'k--','Linewidth',1.5);
 H(3)=loglog(dz,dz.^2,'k-','Linewidth',1.5);
 
 plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([0.01 0.2 0.00001 1])
@@ -31,6 +33,8 @@ xlabel('Grid Spacing, $\delta \!z$ (m)','Interpreter','LaTeX')
 ylabel('Friction Factor Error')
 h = legend(H,'FDS','$O(\delta \!z)$','$O(\delta \!z^2)$','Location','Southeast');
 set(h,'Interpreter','LaTeX')
+
+% print to pdf
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);

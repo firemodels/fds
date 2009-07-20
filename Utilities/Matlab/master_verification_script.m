@@ -19,4 +19,5 @@ clear all
 addpath 'scripts'
 
 [saved_data,drange] = dataplot('verification');
+run scripts/turb_model
 run scripts/wall_model
