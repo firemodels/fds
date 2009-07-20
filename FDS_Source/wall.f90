@@ -416,7 +416,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
                DD    = RHODW(IW,N)*RDN(IW)
                YY_G  = YYP(IIG,JJG,KKG,N)
                DENOM = DD + (.5_EB*UN+EPSB)*RHO_W(IW)
-               YY_W(IW,N) = ( YY_G*(DD + (EPSB-.5_EB*UN)*RHO_G) ) / DENOM
+               YY_WALL = ( YY_G*(DD + (EPSB-.5_EB*UN)*RHO_G) ) / DENOM
             ENDIF
             IF (DNS) YY_W(IW,N) = 2._EB*YY_WALL - YYP(IIG,JJG,KKG,N)
             IF (LES) YY_W(IW,N) =       YY_WALL
