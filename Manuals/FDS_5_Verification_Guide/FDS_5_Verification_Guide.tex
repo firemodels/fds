@@ -706,8 +706,8 @@ As mentioned, with $\nu=0$ the solution is periodic in time and this figure demo
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_64_0000.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_64_1001.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/ns2d_64_0000.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/ns2d_64_1001.pdf} }
    \end{tabular*}
    \caption{Initial and final states of the $u$-component of velocity.}
    \label{fig_ns2d_smv}
@@ -720,10 +720,10 @@ of velocity, $(x_{N/2},\bar{y}_{N/2})$, which is different in each case, $N =\{8
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_8_nupt1.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_16_nupt1.pdf} } \\
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_32_nupt1.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/ns2d_64_nupt1.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/ns2d_8_nupt1.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/ns2d_16_nupt1.pdf} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/ns2d_32_nupt1.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/ns2d_64_nupt1.pdf} }
    \end{tabular*}
    \caption{Time history of the $u$-component of velocity half a grid cell below the center of the domain for a range of grid resolutions.
    The domain is a square of side $L = 2\pi$ m.  The $N \times N$ grid is uniform.  Progressing from left to right and top to bottom we have resolutions $N =\{8,16,32,64\}$
@@ -744,8 +744,8 @@ the corresponding location in space and time.  The figure confirms that the adve
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1}{ \includegraphics[height=2.25in]{FIGURES/ns2d_error.pdf} } &
-      \scalebox{1}{ \includegraphics[height=2.25in]{FIGURES/ns2d_nupt1_error.pdf} }
+      \scalebox{1}{ \includegraphics[width=3.2in]{FIGURES/ns2d_error.pdf} } &
+      \scalebox{1}{ \includegraphics[width=3.2in]{FIGURES/ns2d_nupt1_error.pdf} }
    \end{tabular*}
    \caption{(Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the advective terms in the FDS code are second-order accurate.  The triangles represent the rms error in the $u$-component for grid spacings of $\delta x = L/N$ where $L = 2\pi$ m and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$~s with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing that the viscous terms in the FDS code are second-order accurate.}
    \label{fig_ns2d_convergence}
@@ -758,7 +758,7 @@ the corresponding location in space and time.  The figure confirms that the adve
 \section{Decaying Isotropic Turbulence}
 \label{decaying_isotropic_turbulence}
 
-In this section we present a canonical flow for LES which tests that the subgrid stress model has been coded properly.
+In this section we present a canonical flow for LES which tests whether the subgrid stress model has been coded properly.
 In some cases the difference between verification and validation is not so clear.  Once a model is well-established and validated it may actually be used as a form of verification.  Granted, such a test is not as strong a verification as the convergence study shown in Section \ref{ns2d}.  Nevertheless, these tests are often quite useful in discovering problems within the code.  The case we examine in this section, decaying isotropic turbulence, is highly sensitive to errors in the advective and diffusive terms because the underlying physics is inherently three-dimensional and getting the problem right depends strongly on a delicate balance between vorticity dynamics and dissipation.  An even more subtle yet extremely powerful verification test is also presented in this section when we set both the molecular and turbulent viscosities to zero and confirm that the integrated kinetic energy within the domain remains constant.   In the absence of any form of viscosity, experience has shown that the slightest error in the advective terms or the pressure projection will cause the code to go unstable.  This verification is therefore stronger than one might initially expect.
 
 In this section we test the FDS model against the low Reynolds number (Re) data of Comte-Bellot and Corrsin (CBC) \cite{CBC}. Viscous effects are important in this data set for a well-resolved LES, testing the model's Re dependence.  Following \cite{SdBK}, we use a periodic box of side $L = 9 \times 2\pi$ centimeters ($\approx 0.566$ m) and $\nu = 1.5 \times 10^{-5}$ $\mbox{m}^2/\mbox{s}$ for the kinematic viscosity. The non-dimensional times for this data set are: $x/M = 42$ (initial condition), $98$, and $171$, where $M$ is the characteristic mesh spacing of the CBC wind tunnel and $x$ is the downstream location of the data station. Considering the mean velocity in the CBC wind tunnel experiment, these correspond to dimensional times of $t = 0.00$, $0.28$, and $0.66$ seconds in our simulations.
@@ -770,8 +770,8 @@ To provide the reader with a qualitative sense of the flow, Figure \ref{fig_cbc_
 The decay curves for two grid resolutions are shown plotted on the left in Figure \ref{fig_cbc_energy}.  For an LES code such as FDS which uses a physically-based subgrid model, an important verification test is to run this periodic isotropic turbulence simulation in the absence of both molecular and turbulent viscosity.  For so-called ``energy-conserving'' explicit numerics the integrated energy will remain nearly constant in time.  This is demonstrated by the blue line in the top-left plot in Figure \ref{fig_cbc_energy}.  The deviations from identical energy conservation (to machine precision) are due solely to the time discretization (the spatial terms are conservative as discussed in \cite{Morinishi}) and converge to zero as the time step goes to the zero.  Note that strict energy conservation requires implicit time integration \cite{Ham,McDermott:2007b} and, as shown by the red curve on the same plot where only molecular viscosity is present in the simulation, this cost is unwarranted given that the molecular dissipation rate clearly overshadows the relatively insignificant amount of numerical dissipation caused by the explicit method.  The FDS result using the Smagorinsky eddy viscosity (the black solid line) matches the CBC data (red open circles) well for the $32^3$ case (top-left).  However, the FDS results are slightly too dissipative in the $64^3$ case (bottom-left).  This is due to a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased.
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/cbc_0000.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/cbc_0085.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/cbc_0000.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/cbc_0085.pdf} }
    \end{tabular*}
    \caption{\label{fig_cbc_smv} \small Initial and final states of the isotropic turbulence field.}
 \end{figure}
@@ -780,12 +780,12 @@ To the right of each decay curve plot in Figure \ref{fig_cbc_energy} is the corr
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/energy_decay_32.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/cbc_spectra_32.pdf} } \\
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/energy_decay_64.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/cbc_spectra_64.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/csmag_32_decay.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/csmag_32_spectra.pdf} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/csmag_64_decay.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/csmag_64_spectra.pdf} }
    \end{tabular*}
-   \caption{\label{fig_cbc_energy} \small (Left) Time histories of integrated kinetic energy corresponding to the grid resolutions on the right side of the figure.  In the $32^3$ case (top), the CBC data (open circles) are obtained by applying a filter to the CBC energy spectra at the Nyquist limit for an $N=32$ grid.  Similarly, for the $64^3$ case (bottom), the CBC data are obtained from filtered spectra for an $N=64$ grid.  Notice that the integrated FDS results for the $32^3$ case compare better with the filtered CBC data than the $64^3$ results.  This is a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased. (Right) Energy spectra for the $32^3$ case (top) and the $64^3$ case (bottom).  The solid black lines are the spectral data of Comte-Bellot and Corrsin at three different points in time corresponding to downstream positions in the turbulent wind tunnel.  The initial condition for the velocity field (spectra shown as black dots) in the FDS simulation is prescribed such that the energy spectrum matches the initial CBC data.  The FDS energy spectra corresponding to the subsequent CBC data are shown by the red and blue dots.  }
+   \caption{\label{fig_cbc_energy} \small (Left) Time histories of integrated kinetic energy corresponding to the grid resolutions on the right side of the figure.  In the $32^3$ case (top), the CBC data (open circles) are obtained by applying a filter to the CBC energy spectra at the Nyquist limit for an $N=32$ grid.  Similarly, for the $64^3$ case (bottom), the CBC data are obtained from filtered spectra for an $N=64$ grid.  Notice that the integrated FDS results for the $32^3$ case compare better with the filtered CBC data than the $64^3$ results.  This is a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased. (Right) Energy spectra for the $32^3$ case (top) and the $64^3$ case (bottom).  The solid black lines are the spectral data of Comte-Bellot and Corrsin at three different points in time corresponding to downstream positions in the turbulent wind tunnel.  The initial condition for the velocity field (spectra shown as black dots) in the FDS simulation is prescribed such that the energy spectrum matches the initial CBC data.  The FDS energy spectra corresponding to the subsequent CBC data are shown by the red and blue dots. The vertical dashed line represents the wavenumber of the grid Nyquist limit. }
 \end{figure}
 
 Overall, the agreement between the FDS simulations and the CBC data is satisfactory and any discrepancies can be explained by limitations of the model.  Therefore, as a verification the results here are positive in that nothing points to coding errors.
@@ -813,10 +813,10 @@ Next, in Figure \ref{fig_dynsmag_cbc}, we show results for the dynamic model ana
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/dynsmag_cbc_32_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/dynsmag_cbc_32_spectra.pdf} } \\
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/dynsmag_cbc_64_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[height=2.25in]{FIGURES/dynsmag_cbc_64_spectra.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/dsmag_32_decay.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/dsmag_32_spectra.pdf} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/dsmag_64_decay.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/dsmag_64_spectra.pdf} }
    \end{tabular*}
    \caption{\label{fig_dynsmag_cbc} \small Dynamic Smagorinsky model results (analogous to Figure \ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
@@ -857,7 +857,7 @@ The filtered continuity and momentum equations are:
 \end{equation}
 where $\tau_{ij}^{sgs} \equiv \rho(\overline{u_i u_j} - \bar{u}_i \bar{u}_j)$ is the subgrid-scale (sgs) stress tensor, here modeled by gradient diffusion with dynamic Smagorinsky \cite{Germano:1991} used for the eddy viscosity.  In this work we specify a constant pressure drop $\mbox{d}p/\mbox{d}x$ in the streamwise direction to drive the flow.  The hyrdrodynamic pressure $\tilde{p}$ is obtained from a Poisson equation which enforces (\ref{eqn_cont}).
 
-When (\ref{eqn_mom1}) is integrated over a cell adjacent to the wall in an LES it turns out that the most difficult term to handle is the viscous stress at the wall, e.g. $\bar{\tau}_{xz}|_{z=0}$, because the wall-normal gradient of the streamwise velocity component cannot be resolved.  Note that the sgs stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the sgs stress is of critical importance.  The quality of the sgs model still influences the wall stress, however, since other components of the sgs tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model.  In particular, it is important that the sgs model is \emph{convergent} (dynamic Smagorinsky \emph{is}, constant coefficient Smagorinsky \emph{is not}) so that as the grid is refined we can expect more accurate results from the simulation.
+When (\ref{eqn_mom1}) is integrated over a cell adjacent to the wall in an LES it turns out that the most difficult term to handle is the viscous stress at the wall, e.g. $\bar{\tau}_{xz}|_{z=0}$, because the wall-normal gradient of the streamwise velocity component cannot be resolved.  Note that the sgs stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the sgs stress is of critical importance.  The quality of the sgs model still influences the wall stress, however, since other components of the sgs tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model.  In particular, it is important that the sgs model is \emph{convergent} (in the sense that the LES formulation reduces to a DNS as the filter width becomes small) so that as the grid is refined we can expect more accurate results from the simulation.
 
 The model used for $\tau_w = \bar{\tau}_{xz}|_{z=0}$ in this work is the Werner and Wengle model \cite{Werner:1991} which we describe in more detail below.
 
@@ -879,7 +879,7 @@ Werner and Wengle \cite{Werner:1991} propose a simplification to the law of the 
 where $A=8.3$ and $B=1/7$. Note that a power law has been substituted for the log law and the viscous sublayer and the power law region are matched within the buffer region.  A comparison of the log law and the power law is shown in Figure \ref{fig_lawofthewall}.  In the region $11.81 < z^+ < 10^3$ the power law is a good approximation to the log law and for $z^+>10^3$ the power law loosely exhibits wake region behavior for a flow with $\mbox{Re} \approx 5e5$ \cite{Pope:2000,Zagarola:1997}.  As we see below, this functional behavior has consequences for high Re flows.
 \begin{figure}
    \begin{center}
-      \scalebox{0.8}{\includegraphics{FIGURES/lawofthewall.pdf}}
+      \scalebox{.7}{\includegraphics{FIGURES/lawofthewall.pdf}}
       \caption{\label{fig_lawofthewall} \small The law of the wall.  We have omitted the buffer layer since it is not considered in the WW model.  For $z^+\le 11.81$ we have the viscous sublayer.  For $z^+>11.81$ we show a comparison of the log law (\ref{eqn_loglaw}) (red dashed line) and the WW power law (\ref{eqn_wwturb}) (blue solid line) with $A=8.3$ and $B=1/7$.}
    \end{center}
 \end{figure}
@@ -922,7 +922,7 @@ As verification of the no-slip boundary condition and further verification of th
 is determined from the steady state mean velocity $\bar{u}$ which is output by FDS for the specified pressure drop.  The exact friction factor for this flow is $f_{exact} = 24/\mbox{Re}_H$.  The friction factor error $|f-f_{exact}|$ is plotted for a range of grid spacings $\delta z = H/N_z$ in Figure \ref{fig_poiseuille_convergence} demonstrating second-order convergence of the laminar velocity field.
 \begin{figure}
    \begin{center}
-      \scalebox{0.8}{\includegraphics{FIGURES/poiseuille_convergence.pdf}}
+      \scalebox{.7}{\includegraphics{FIGURES/poiseuille_convergence.pdf}}
       \caption{\label{fig_poiseuille_convergence} \small FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
    \end{center}
 \end{figure}
@@ -945,9 +945,9 @@ which is a fit to the turbulent range of the Moody chart (see e.g. \cite{MYO}). 
 \hline
 $\mbox{d}p/\mbox{d}x$   & \multicolumn{3}{c|}{$z^+$}&  Re$_H$  & $f$ FDS  & $f$ Colebrook & rel. error \\
 \hline (Pa/m)       & $N_z=8$ & $N_z=16$ & $N_z=32$ &          & $(N_z=32)$ & Eq. (\ref{eqn_colebrook}) & \% \\
-\hline\hline -0.01  & 190     & 95       & 47       & $5.9e4$  & 0.0212   & 0.0202        & 4.8        \\
-\hline       -1.    & $1.9e3$ & 950      & 470      & $7.5e5$  & 0.0128   & 0.0122        & 4.6        \\
-\hline       -100.  & $1.9e4$ & $9.5e3$  & $4.7e3$  & $9.8e6$  & 0.0077   & 0.0081        & 6.0\\
+\hline\hline -0.01  & 190              & 95         & 47       & $5.9\times 10^4$  & 0.0212   & 0.0202        & 4.8        \\
+\hline       -1.    & $1.9\times 10^3$ & 950        & 470      & $7.5\times 10^5$  & 0.0128   & 0.0122        & 4.6        \\
+\hline       -100.  & $1.9\times 10^4$ & $9.5\times 10^3$  & $4.7\times 10^3$  & $9.8\times 10^6$  & 0.0077   & 0.0081        & 6.0\\
 \hline
 \end{tabular}
 \end{center}
@@ -955,7 +955,7 @@ $\mbox{d}p/\mbox{d}x$   & \multicolumn{3}{c|}{$z^+$}&  Re$_H$  & $f$ FDS  & $f$ 
 \begin{figure}
    \begin{center}
       \scalebox{0.6}{\includegraphics{FIGURES/channel_flow_setup.pdf}}
-      \caption{\label{fig_channel_flow_setup} \small LES of square channel flow with smooth walls and periodic streamwise boundaries using dynamic Smagorinsky and the Werner Wengle wall model.  For this image $N_z=32$ and the mean pressure drop is $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5e5$ and a friction factor of $f=0.0128$.}
+      \caption{\label{fig_channel_flow_setup} \small LES of square channel flow with smooth walls and periodic streamwise boundaries using dynamic Smagorinsky and the Werner Wengle wall model.  For this image $N_z=32$ and the mean pressure drop is $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5\times 10^5$ and a friction factor of $f=0.0128$.}
    \end{center}
 \end{figure}
 
@@ -1141,10 +1141,10 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/heat_conduction_a} &
-\includegraphics[height=2.2in]{FIGURES/heat_conduction_b} \\
-\includegraphics[height=2.2in]{FIGURES/heat_conduction_c} &
-\includegraphics[height=2.2in]{FIGURES/heat_conduction_d}
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_a} &
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_b} \\
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_c} &
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_d}
 \end{tabular*}
 
 
@@ -1187,8 +1187,8 @@ lines are FDS results and the dark lines are the HEATING results. An example inp
 
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/heat_conduction_kc_surf} &
-\includegraphics[height=2.2in]{FIGURES/heat_conduction_kc_back}
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_kc_surf} &
+\includegraphics[width=3.2in]{FIGURES/heat_conduction_kc_back}
 \end{tabular*}
 
 
@@ -1317,8 +1317,8 @@ of about 2~\%. The energy gained by the air is over-predicted by about 8~\%.
 \vspace{0.1in}
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/water_evaporation_enthalpy} &
-\includegraphics[height=2.2in]{FIGURES/water_evaporation_humidity}
+\includegraphics[width=3.2in]{FIGURES/water_evaporation_enthalpy} &
+\includegraphics[width=3.2in]{FIGURES/water_evaporation_humidity}
 \end{tabular*}
 
 
