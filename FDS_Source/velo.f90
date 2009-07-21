@@ -78,25 +78,26 @@ ENDIF
 
 ! Compute viscosity for DNS using primitive species/mixture fraction
 
+!$OMP PARALLEL PRIVATE(CS) SHARED(MU,TMP,YYP)
 IF (N_SPECIES == 0 .OR. EVACUATION_ONLY(NM)) THEN
-   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,ITMP) SHARED(TMP)
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_COMPUTE_VISCOSITY_01'
+            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_COMPUTE_VISCOSITY_01'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = MIN(5000,NINT(TMP(I,J,K)))
             MU(I,J,K)=Y2MU_C(ITMP)*SPECIES(0)%MW
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END PARALLEL DO
+   !$OMP END DO
 ELSE
-   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YY_GET) SHARED(MU,TMP,YYP)
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YY_GET) 
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_COMPUTE_VISCOSITY_02'
+            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_COMPUTE_VISCOSITY_02'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = MIN(5000,NINT(TMP(I,J,K)))
             YY_GET(:) = YYP(I,J,K,:)
@@ -104,7 +105,7 @@ ELSE
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END PARALLEL DO
+   !$OMP END DO
 ENDIF
 
 ! Compute eddy viscosity using Smagorinsky model
@@ -112,12 +113,11 @@ ENDIF
 IF (LES .OR. EVACUATION_ONLY(NM)) THEN
    CS = CSMAG
    IF (EVACUATION_ONLY(NM)) CS = 0.9_EB
-   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,DELTA,DUDX,DVDY,DWDZ,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,S12,S13,S23,SS) &
-   !$OMP FIRSTPRIVATE(CS)
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DELTA,DUDX,DVDY,DWDZ,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,S12,S13,S23,SS)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_COMPUTE_VISCOSITY_03'
+            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_COMPUTE_VISCOSITY_03'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             IF (TWO_D) THEN
                DELTA = SQRT(DX(I)*DZ(K))
@@ -143,13 +143,14 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END PARALLEL DO
+   !$OMP END DO
 ENDIF
 
 ! Mirror viscosity into solids and exterior boundary cells
  
-!$OMP PARALLEL DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
+!$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
 WALL_LOOP: DO IW=1,NWC
+   !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VISCOSITY_BC'
    IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP
    II  = IJKW(1,IW)
    JJ  = IJKW(2,IW)
@@ -165,8 +166,9 @@ WALL_LOOP: DO IW=1,NWC
          MU(II,JJ,KK) = MU(IIG,JJG,KKG)
    END SELECT
 ENDDO WALL_LOOP
-!$OMP END PARALLEL DO
-    
+!$OMP END DO
+
+!$OMP WORKSHARE
 MU(   0,0:JBP1,   0) = MU(   1,0:JBP1,1)
 MU(IBP1,0:JBP1,   0) = MU(IBAR,0:JBP1,1)
 MU(IBP1,0:JBP1,KBP1) = MU(IBAR,0:JBP1,KBAR)
@@ -179,19 +181,27 @@ MU(0,   0,0:KBP1)    = MU(   1,   1,0:KBP1)
 MU(IBP1,0,0:KBP1)    = MU(IBAR,   1,0:KBP1)
 MU(IBP1,JBP1,0:KBP1) = MU(IBAR,JBAR,0:KBP1)
 MU(0,JBP1,0:KBP1)    = MU(   1,JBAR,0:KBP1)
+!$OMP END WORKSHARE
 
 IF (FISHPAK_BC(1)==0) THEN
+   !$OMP WORKSHARE
    MU(0,:,:) = MU(IBAR,:,:)
    MU(IBP1,:,:) = MU(1,:,:)
+   !$OMP END WORKSHARE
 ENDIF
 IF (FISHPAK_BC(2)==0) THEN
+   !$OMP WORKSHARE
    MU(:,0,:) = MU(:,JBAR,:)
    MU(:,JBP1,:) = MU(:,1,:)
+   !$OMP END WORKSHARE
 ENDIF
 IF (FISHPAK_BC(3)==0) THEN
+   !$OMP WORKSHARE
    MU(:,:,0) = MU(:,:,KBAR)
    MU(:,:,KBP1) = MU(:,:,1)
+   !$OMP END WORKSHARE
 ENDIF
+!$OMP END PARALLEL
 
 END SUBROUTINE COMPUTE_VISCOSITY
 
@@ -211,7 +221,7 @@ CALL POINT_TO_MESH(NM)
  
 !$OMP PARALLEL DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,NOM,MU_OTHER,DP_OTHER,KKO,JJO,IIO,N_INT_CELLS)
 WALL_LOOP: DO IW=1,NWC
-   !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VISCOSITY_BC'
+   !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VISCOSITY_BC'
    IF (IJKW(9,IW)==0) CYCLE WALL_LOOP
    II  = IJKW(1,IW)
    JJ  = IJKW(2,IW)
@@ -290,12 +300,12 @@ OMZ => WORK6
 
 ! Compute vorticity and stress tensor components
 
-!$OMP PARALLEL PRIVATE(GX,GY,GZ,PMDT,MPDT)
+!$OMP PARALLEL
 !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DUDY,DVDX,DUDZ,DWDX,DVDZ,DWDY,MUX,MUY,MUZ)
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
-         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_FLUX_01'
+         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_FLUX_01'
          DUDY = RDYN(J)*(UU(I,J+1,K)-UU(I,J,K))
          DVDX = RDXN(I)*(VV(I+1,J,K)-VV(I,J,K))
          DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
@@ -314,10 +324,11 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
-!$OMP END DO
+!$OMP END DO NOWAIT
 
 ! Compute gravity components
 
+!$OMP SINGLE PRIVATE(I)
 IF (.NOT.SPATIAL_GRAVITY_VARIATION) THEN
    GX(0:IBAR) = EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(1)
    GY(0:IBAR) = EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(2)
@@ -339,15 +350,17 @@ ELSE
    PMDT = -0.5_EB*DT
    MPDT =  0.5_EB*DT
 ENDIF
+!$OMP END SINGLE
  
 ! Compute x-direction flux term FVX
 
 !$OMP DO COLLAPSE(3) &
-!$OMP PRIVATE(K,J,I,WP,WM,VP,VM,EPSWP,EPSWM,EPSVP,EPSVM,WOMY,VOMZ,RRHO,AH,DVDY,DWDZ,TXXP,TXXM,DTXXDX,DTXYDY,DTXZDZ,VTRM)
+!$OMP PRIVATE(K,J,I,WP,WM,VP,VM,EPSWP,EPSWM,EPSVP,EPSVM,OMYP,OMYM,OMZP,OMZM,TXZP,TXZM,TXYP,TXYM,IC,IEYP,IEYM,IEZP,IEZM) &
+!$OMP PRIVATE(WOMY,VOMZ,RRHO,AH,DVDY,DWDZ,TXXP,TXXM,DTXXDX,DTXYDY,DTXZDZ,VTRM)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
-         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_FLUX_03'
+         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_FLUX_03'
          WP    = WW(I,J,K)   + WW(I+1,J,K)
          WM    = WW(I,J,K-1) + WW(I+1,J,K-1)
          VP    = VV(I,J,K)   + VV(I+1,J,K)
@@ -400,7 +413,8 @@ ENDDO
 ! Compute y-direction flux term FVY
 
 !$OMP DO COLLAPSE(3) &
-!$OMP PRIVATE(K,J,I,UP,UM,WP,WM,EPSUP,EPSUM,EPSWP,EPSWM,WOMX,UOMZ,RRHO,AH,DUDX,DWDZ,TYYP,TYYM,DTXYDX,DTYYDY,DTYZDZ,VTRM)
+!$OMP PRIVATE(K,J,I,UP,UM,WP,WM,EPSUP,EPSUM,EPSWP,EPSWM,OMXP,OMXM,OMZP,OMZM,TYZP,TYZM,TXYP,TXYM,IC,IEXP,IEXM,IEZP,IEZM) &
+!$OMP PRIVATE(WOMX,UOMZ,RRHO,AH,DUDX,DWDZ,TYYP,TYYM,DTXYDX,DTYYDY,DTYZDZ,VTRM)
 DO K=1,KBAR
    DO J=0,JBAR
       DO I=1,IBAR
@@ -456,7 +470,8 @@ ENDDO
 ! Compute z-direction flux term FVZ
 
 !$OMP DO COLLAPSE(3) &
-!$OMP PRIVATE(K,J,I,UP,UM,VP,VM,EPSUP,EPSUM,EPSVP,EPSVM,UOMY,VOMX,RRHO,AH,DUDX,DVDY,TZZP,TZZM,DTXZDX,DTYZDY,DTZZDZ,VTRM) 
+!$OMP PRIVATE(K,J,I,UP,UM,VP,VM,EPSUP,EPSUM,EPSVP,EPSVM,OMYP,OMYM,OMXP,OMXM,TXZP,TXZM,TYZP,TYZM,IC,IEXP,IEXM,IEYP,IEYM) &
+!$OMP PRIVATE(UOMY,VOMX,RRHO,AH,DUDX,DVDY,TZZP,TZZM,DTXZDX,DTYZDY,DTZZDZ,VTRM) 
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -507,7 +522,7 @@ DO K=0,KBAR
       ENDDO
    ENDDO   
 ENDDO
-!$OMP END DO
+!$OMP END DO NOWAIT
 !$OMP END PARALLEL
  
 ! Baroclinic torque correction
@@ -552,12 +567,12 @@ OMZ => WORK6
 
 
 ! Compute vorticity and stress tensor components
-!$OMP PARALLEL PRIVATE(PMDT,MPDT)
+!$OMP PARALLEL
 !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DUDY,DVDX,DUDZ,DWDX,DVDZ,DWDY)  
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
-         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_FLUX_ISOTHERMAL_01'
+         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_FLUX_ISOTHERMAL_01'
          DUDY = RDYN(J)*(UU(I,J+1,K)-UU(I,J,K))
          DVDX = RDXN(I)*(VV(I+1,J,K)-VV(I,J,K))
          DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
@@ -570,10 +585,11 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
-!$OMP END DO
+!$OMP END DO NOWAIT
  
 ! Upwind/Downwind bias factors
- 
+
+!$OMP SINGLE
 IF (PREDICTOR) THEN
    PMDT =  0.5_EB*DT
    MPDT = -0.5_EB*DT
@@ -581,6 +597,7 @@ ELSE
    PMDT = -0.5_EB*DT
    MPDT =  0.5_EB*DT
 ENDIF
+!$OMP END SINGLE
  
 ! Compute x-direction flux term FVX
 
@@ -588,7 +605,7 @@ ENDIF
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
-         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_FLUX_ISOTHERMAL_03'
+         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_FLUX_ISOTHERMAL_03'
          WP    = WW(I,J,K)   + WW(I+1,J,K)
          WM    = WW(I,J,K-1) + WW(I+1,J,K-1)
          VP    = VV(I,J,K)   + VV(I+1,J,K)
@@ -691,12 +708,12 @@ OMY => WORK5
  
 ! Compute vorticity and stress tensor components
 
-!$OMP PARALLEL PRIVATE(GX,GZ,PMDT,MPDT,J,I0)
+!$OMP PARALLEL
 !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DUDZ,DWDX,MUY)  
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
-         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_FLUX_CYLINDRICAL_01'
+         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_FLUX_CYLINDRICAL_01'
          DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
          DWDX = RDXN(I)*(WW(I+1,J,K)-WW(I,J,K))
          OMY(I,J,K) = DUDZ - DWDX
@@ -705,10 +722,11 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
-!$OMP END DO
+!$OMP END DO NOWAIT
  
 ! Compute gravity components
- 
+
+!$OMP SINGLE
 GX  = 0._EB
 GZ  = EVALUATE_RAMP(T,DUMMY,I_RAMP_GZ)*GVEC(3)
  
@@ -731,11 +749,14 @@ ELSE
 ENDIF
  
 J = 1
+!$OMP END SINGLE
+
+
 !$OMP DO COLLAPSE(2) &
-!$OMP PRIVATE(K,I,WP,WM,EPSWP,EPSWM,WOMY,RRHO,AH,DWDZ,TXXP,TXXM,DTXXDX,DTXZDZ,DMUDX,VTRM) 
+!$OMP PRIVATE(K,I,WP,WM,EPSWP,EPSWM,OMYP,OMYM,TXZP,TXZM,IC,IEYP,IEYM,WOMY,RRHO,AH,DWDZ,TXXP,TXXM,DTXXDX,DTXZDZ,DMUDX,VTRM) 
 DO K= 1,KBAR
    DO I=I0,IBAR
-      !$ IF ((K == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_FLUX_CYLINDRICAL_03' 
+      !!$ IF ((K == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_FLUX_CYLINDRICAL_03' 
       WP    = WW(I,J,K)   + WW(I+1,J,K)
       WM    = WW(I,J,K-1) + WW(I+1,J,K-1)
       EPSWP = 1._EB + WP*MPDT*RDZN(K)
@@ -768,10 +789,10 @@ ENDDO
 !$OMP END DO NOWAIT
 ! Compute z-direction flux term FVZ
  
-J = 1
+!J = 1 !not needed, J = 1 is declared before FVX-calculation
 
 !$OMP DO COLLAPSE(2) &
-!$OMP PRIVATE(K,I,UP,UM,EPSUP,EPSUM,UOMY,RRHO,AH,DUDX,TZZP,TZZM,DTXZDX,DTZZDZ,VTRM)
+!$OMP PRIVATE(K,I,UP,UM,EPSUP,EPSUM,OMYP,OMYM,TXZP,TXZM,IC,IEYP,IEYM,UOMY,RRHO,AH,DUDX,TZZP,TZZM,DTXZDX,DTZZDZ,VTRM)
 DO K=0,KBAR
    DO I=1,IBAR
       UP    = UU(I,J,K)   + UU(I,J,K+1)
@@ -840,7 +861,10 @@ RFODT = RELAXATION_FACTOR/DT
  
 ! Exchange H at interpolated boundaries
 
+!$OMP PARALLEL
+!$OMP DO PRIVATE(IW,NOM,II,JJ,KK,H_OTHER,KKO,JJO,IIO,N_INT_CELLS)
 DO IW=1,NEWC
+   !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_NO_FLUX_01'
    NOM = IJKW(9,IW)
    IF (NOM==0) CYCLE
    II = IJKW(1,IW)
@@ -857,13 +881,14 @@ DO IW=1,NEWC
    N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
    H(II,JJ,KK) = H_OTHER/REAL(N_INT_CELLS,EB)
 ENDDO
+!$OMP END DO
 
 ! Drive velocity components inside solid obstructions towards zero
 
-!$OMP PARALLEL
+
 !$OMP DO PRIVATE(N,OB,K,J,I,IC1,IC2) 
 OBST_LOOP: DO N=1,N_OBST
-   !$ IF ((N == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_NO_FLUX_01'
+   !!$ IF ((N == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_NO_FLUX_02'
    OB=>OBSTRUCTION(N)
    DO K=OB%K1+1,OB%K2
       DO J=OB%J1+1,OB%J2
@@ -897,9 +922,9 @@ ENDDO OBST_LOOP
  
 ! Add normal velocity to FVX, etc. for surface cells
 
-!$OMP DO PRIVATE(IW,II,JJ,KK,IOR,NOM) 
+!$OMP DO PRIVATE(IW,NOM,II,JJ,KK,IOR) 
 WALL_LOOP: DO IW=1,NWC
-!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_NO_FLUX_02' 
+!!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_NO_FLUX_03' 
    IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)         CYCLE WALL_LOOP
    IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
    NOM = IJKW(9,IW)
@@ -982,7 +1007,7 @@ ENDIF
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
-         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_PREDICTOR'
+         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_PREDICTOR'
          US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(HT(I+1,J,K)-HT(I,J,K)) )
       ENDDO
    ENDDO
@@ -1007,7 +1032,7 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
-!$OMP END DO
+!$OMP END DO NOWAIT
 !$OMP END PARALLEL
 IF (EVACUATION_ONLY(NM)) WS = 0._EB
 
@@ -1052,7 +1077,7 @@ ENDIF
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
-         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_CORRECTOR'
+         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_CORRECTOR'
          U(I,J,K) = .5_EB*( U(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + RDXN(I)*(HT(I+1,J,K)-HT(I,J,K))) )
       ENDDO
    ENDDO
@@ -1077,7 +1102,7 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
-!$OMP END DO
+!$OMP END DO NOWAIT
 !$OMP END PARALLEL
 IF (EVACUATION_ONLY(NM)) W = 0._EB
 
@@ -1128,31 +1153,43 @@ ELSE
    RHOP => RHO
 ENDIF
 
-! Set OME_E and TAU_E to very negative number
-
-TAU_E = -1.E6_EB
-OME_E = -1.E6_EB
 
 ! Set the boundary velocity place holder to some large negative number
 
 IF (CORRECTOR) THEN
-   UVW_GHOST = -1.E6_EB
+   
    U_Y => WORK1
    U_Z => WORK2
    V_X => WORK3
    V_Z => WORK4
    W_X => WORK5
    W_Y => WORK6
+   !$OMP PARALLEL WORKSHARE
    U_Y = -1.E6_EB
    U_Z = -1.E6_EB
    V_X = -1.E6_EB
    V_Z = -1.E6_EB
    W_X = -1.E6_EB
    W_Y = -1.E6_EB
+   UVW_GHOST = -1.E6_EB
+   !$OMP END PARALLEL WORKSHARE
 ENDIF
+
+!$OMP PARALLEL
+
+! Set OME_E and TAU_E to very negative number
+
+!$OMP WORKSHARE
+TAU_E = -1.E6_EB
+OME_E = -1.E6_EB
+!$OMP END WORKSHARE
 
 ! Loop over all cell edges and determine the appropriate velocity BCs
 
+!$OMP DO PRIVATE(IE,II,JJ,KK,IEC,ICMM,ICPM,ICMP,ICPP,NOM,IIO,JJO,KKO,UUP,UUM,DXX,MUA,I_SGN,IS,IOR,ICD,IVL,IBCM,IBCP,ITMP) &
+!$OMP PRIVATE(VEL_GAS,VEL_GHOST,IWP,IWM,SF,VELOCITY_BC_INDEX,TSI,PROFILE_FACTOR,RAMP_T,VEL_T,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP) &
+!$OMP PRIVATE(RHO_WALL,MU_WALL,OM,VEL_OTHER,WGT,OMW,ICDO,MU_DUIDXJ,DUIDXJ,DUIDXJ_0,MU_DUIDXJ_0,MU_DUIDXJ_USE,DUIDXJ_USE) &
+!$OMP PRIVATE(ALTERED_GRADIENT,SLIP_COEF)
 EDGE_LOOP: DO IE=1,N_EDGES
 
    IF (EDGE_TYPE(IE,1)==NULL_EDGE .AND. EDGE_TYPE(IE,2)==NULL_EDGE) CYCLE EDGE_LOOP
@@ -1491,15 +1528,16 @@ EDGE_LOOP: DO IE=1,N_EDGES
    ENDDO SIGN_LOOP_2
 
 ENDDO EDGE_LOOP
+!$OMP END DO
 
 ! Store cell node averages of the velocity components in UVW_GHOST for use in Smokeview only
 
 IF (CORRECTOR) THEN
-   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,IC)
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,IC)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
-            !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_BC_02'
+            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_BC_02'
             IC = CELL_INDEX(I,J,K) 
             IF (IC==0) CYCLE
             IF (U_Y(I,J,K)  >-1.E5_EB) UVW_GHOST(IC,1) = U_Y(I,J,K) 
@@ -1511,8 +1549,9 @@ IF (CORRECTOR) THEN
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END PARALLEL DO
+   !$OMP END DO NOWAIT
 ENDIF
+!$OMP END PARALLEL
 
 TUSED(4,NM)=TUSED(4,NM)+SECOND()-TNOW
 END SUBROUTINE VELOCITY_BC 
@@ -1555,11 +1594,11 @@ ENDIF
 
 ! Loop over all cell edges and determine the appropriate velocity BCs
 
-!$OMP PARALLEL DO PRIVATE(IW,II,JJ,KK,IOR,NOM,OM,M2,DA_OTHER,OM_UU,OM_VV,OM_WW,KKO,JJO,IIO) &
+!$OMP PARALLEL DO PRIVATE(IW,II,JJ,KK,IOR,IIG,JJG,KKG,NOM,OM,M2,DA_OTHER,OM_UU,OM_VV,OM_WW,KKO,JJO,IIO) &
 !$OMP PRIVATE(UU_OTHER,VV_OTHER,WW_OTHER,UU_AVG,VV_AVG,WW_AVG)
 EXTERNAL_WALL_LOOP: DO IW=1,NEWC
 
-   !$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELO_24'
+   !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELO_24'
    
    IF (IJKW(9,IW)==0) CYCLE EXTERNAL_WALL_LOOP
 
@@ -1727,6 +1766,8 @@ SUBROUTINE CHECK_STABILITY(NM,CODE)
 INTEGER, INTENT(IN) :: NM,CODE
 REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,DMAX,RDMAX
 INTEGER  :: I,J,K
+REAL(EB) :: P_UVWMAX,P_MU_MAX !private variables for OpenMP-Code
+INTEGER  :: P_ICFL,P_JCFL,P_KCFL,P_I_VN,P_J_VN,P_K_VN !private variables for OpenMP-Code
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
 
 SELECT CASE(CODE)
@@ -1747,59 +1788,157 @@ UVWMAX = 0._EB
 VN     = 0._EB
 MUTRM  = 1.E-9_EB
 R_DX2  = 1.E-9_EB
+
+! Strategie for OpenMP version of CFL/VN number determination
+! - find max CFL/VN number for each thread (P_UVWMAX/P_MU_MAX)
+! - save I,J,K of each P_UVWMAX/P_MU_MAX in P_ICFL... for each thread
+! - compare sequentially all P_UVWMAX/P_MU_MAX and find the global maximum
+! - save P_ICFL... of the "winning" thread in the global ICFL... variable
  
 ! Determine max CFL number from all grid cells
 
 SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
 
    CASE(0)
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               UODX = ABS(UU(I,J,K))*RDXN(I)
-               VODY = ABS(VV(I,J,K))*RDYN(J)
-               WODZ = ABS(WW(I,J,K))*RDZN(K)
-               UVW  = MAX(UODX,VODY,WODZ)
-               IF (UVW>=UVWMAX) THEN
-                  UVWMAX = UVW 
-                  ICFL=I
-                  JCFL=J
-                  KCFL=K
-               ENDIF
-            ENDDO 
-         ENDDO   
-      ENDDO
-      
+      IF (USE_OPENMP) THEN
+         P_UVWMAX = UVWMAX
+         !$OMP PARALLEL DEFAULT(NONE) PRIVATE(P_ICFL,P_JCFL,P_KCFL) &
+         !$OMP FIRSTPRIVATE(P_UVWMAX) SHARED(UVWMAX,ICFL,JCFL,KCFL,UU,VV,WW,RDXN,RDYN,RDZN,IBAR,JBAR,KBAR)
+         !$OMP DO COLLAPSE(2) PRIVATE(K,J,I,UODX,VODY,WODZ,UVW)
+         DO K=0,KBAR
+            DO J=0,JBAR
+               DO I=0,IBAR
+                  UODX = ABS(UU(I,J,K))*RDXN(I)
+                  VODY = ABS(VV(I,J,K))*RDYN(J)
+                  WODZ = ABS(WW(I,J,K))*RDZN(K)
+                  UVW  = MAX(UODX,VODY,WODZ)
+                  IF (UVW>=P_UVWMAX) THEN
+                     P_UVWMAX = UVW
+                     P_ICFL = I
+                     P_JCFL = J
+                     P_KCFL = K
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+         !$OMP END DO NOWAIT
+         !$OMP CRITICAL
+         IF (P_UVWMAX>=UVWMAX) THEN
+            UVWMAX = P_UVWMAX
+            ICFL=P_ICFL
+            JCFL=P_JCFL
+            KCFL=P_KCFL
+         ENDIF
+         !$OMP END CRITICAL
+         !$OMP END PARALLEL
+      ELSE !NO OpenMP using
+         DO K=0,KBAR
+            DO J=0,JBAR
+               DO I=0,IBAR
+                  UODX = ABS(UU(I,J,K))*RDXN(I)
+                  VODY = ABS(VV(I,J,K))*RDYN(J)
+                  WODZ = ABS(WW(I,J,K))*RDZN(K)
+                  UVW  = MAX(UODX,VODY,WODZ)
+                  IF (UVW>=UVWMAX) THEN
+                     UVWMAX = UVW
+                     ICFL=I
+                     JCFL=J
+                     KCFL=K
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
+
    CASE(1)
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
-               IF (UVW>=UVWMAX) THEN
-                  UVWMAX = UVW 
-                  ICFL=I
-                  JCFL=J
-                  KCFL=K
-               ENDIF
-            ENDDO 
-         ENDDO   
-      ENDDO
+      IF (USE_OPENMP) THEN
+         P_UVWMAX = UVWMAX
+         !$OMP PARALLEL DEFAULT(NONE) PRIVATE(P_ICFL,P_JCFL,P_KCFL) &
+         !$OMP FIRSTPRIVATE(P_UVWMAX) SHARED(UVWMAX,ICFL,JCFL,KCFL,UU,VV,WW,RDXN,RDYN,RDZN,IBAR,JBAR,KBAR)
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,UVW)
+         DO K=0,KBAR
+            DO J=0,JBAR
+               DO I=0,IBAR
+                  UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  IF (UVW>=P_UVWMAX) THEN
+                     P_UVWMAX = UVW
+                     P_ICFL=I
+                     P_JCFL=J
+                     P_KCFL=K
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+         !$OMP END DO NOWAIT
+         !$OMP CRITICAL
+         IF (P_UVWMAX>=UVWMAX) THEN
+            UVWMAX = P_UVWMAX
+            ICFL=P_ICFL
+            JCFL=P_JCFL
+            KCFL=P_KCFL
+         ENDIF
+         !$OMP END CRITICAL
+         !$OMP END PARALLEL
+      ELSE !No OpenMP using
+         DO K=0,KBAR
+            DO J=0,JBAR
+               DO I=0,IBAR
+                  UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  IF (UVW>=UVWMAX) THEN
+                     UVWMAX = UVW
+                     ICFL=I
+                     JCFL=J
+                     KCFL=K
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
       
    CASE(2)
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
-               IF (UVW>=UVWMAX) THEN
-                  UVWMAX = UVW 
-                  ICFL=I
-                  JCFL=J
-                  KCFL=K
-               ENDIF
-            ENDDO 
-         ENDDO   
-      ENDDO
-      
+      IF (USE_OPENMP) THEN
+         P_UVWMAX = UVWMAX
+         !$OMP PARALLEL DEFAULT(NONE) PRIVATE(P_ICFL,P_JCFL,P_KCFL) &
+         !$OMP FIRSTPRIVATE(P_UVWMAX) SHARED(UVWMAX,ICFL,JCFL,KCFL,UU,VV,WW,RDXN,RDYN,RDZN,IBAR,JBAR,KBAR)
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,UVW)
+         DO K=0,KBAR
+            DO J=0,JBAR
+               DO I=0,IBAR
+                  UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  IF (UVW>=P_UVWMAX) THEN
+                     P_UVWMAX = UVW
+                     P_ICFL=I
+                     P_JCFL=J
+                     P_KCFL=K
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+         !$OMP END DO NOWAIT
+         !$OMP CRITICAL
+         IF (P_UVWMAX>=UVWMAX) THEN
+            UVWMAX = P_UVWMAX
+            ICFL=P_ICFL
+            JCFL=P_JCFL
+            KCFL=P_KCFL
+         ENDIF
+         !$OMP END CRITICAL
+         !$OMP END PARALLEL
+      ELSE !NO OpenMP usage
+         DO K=0,KBAR
+            DO J=0,JBAR
+               DO I=0,IBAR
+                  UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  IF (UVW>=UVWMAX) THEN
+                     UVWMAX = UVW
+                     ICFL=I
+                     JCFL=J
+                     KCFL=K
+                  ENDIF
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF
 END SELECT SELECT_VELOCITY_NORM
 
 CFL = DT*UVWMAX
@@ -1824,20 +1963,50 @@ PARABOLIC_IF: IF (DNS .OR. CELL_SIZE<0.005_EB .OR. DYNSMAG) THEN
       ENDIF
       MUTRM = MAX(RPR,RSC)*Y2MU_C(NINT(TMPA))*SPECIES(0)%MW
    ELSE INCOMPRESSIBLE_IF
-      MU_MAX = 0._EB   
-      DO K=1,KBAR
-         DO J=1,JBAR
-            IILOOP: DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IILOOP
-               IF (MU(I,J,K)/RHOP(I,J,K)>=MU_MAX) THEN
-                  MU_MAX = MU(I,J,K)/RHOP(I,J,K) !! RJM
-                  I_VN=I
-                  J_VN=J
-                  K_VN=K
-               ENDIF
-            ENDDO IILOOP
-         ENDDO  
-      ENDDO  
+      MU_MAX = 0._EB
+      IF (USE_OPENMP) THEN
+         P_MU_MAX = MU_MAX
+         !$OMP PARALLEL PRIVATE(P_I_VN,P_J_VN,P_K_VN) FIRSTPRIVATE(P_MU_MAX)
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               IILOOP_OpenMP: DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IILOOP_OpenMP
+                  IF (MU(I,J,K)/RHOP(I,J,K)>=P_MU_MAX) THEN
+                     P_MU_MAX = MU(I,J,K)/RHOP(I,J,K) !! RJM
+                     P_I_VN=I
+                     P_J_VN=J
+                     P_K_VN=K
+                  ENDIF
+               ENDDO IILOOP_OpenMP
+            ENDDO
+         ENDDO
+         !$OMP END DO NOWAIT
+         !$OMP CRITICAL
+         IF (P_MU_MAX>=MU_MAX) THEN
+            MU_MAX = P_MU_MAX
+            I_VN=P_I_VN
+            J_VN=P_J_VN
+            K_VN=P_K_VN
+         ENDIF
+         !$OMP END CRITICAL
+         !$OMP END PARALLEL
+      ELSE !No OpenMP
+         DO K=1,KBAR
+            DO J=1,JBAR
+               IILOOP: DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IILOOP
+                  IF (MU(I,J,K)/RHOP(I,J,K)>=MU_MAX) THEN
+                     MU_MAX = MU(I,J,K)/RHOP(I,J,K) !! RJM
+                     I_VN=I
+                     J_VN=J
+                     K_VN=K
+                  ENDIF
+               ENDDO IILOOP
+            ENDDO  
+         ENDDO    
+      ENDIF
+
       IF (TWO_D) THEN
          R_DX2 = RDX(I_VN)**2 + RDZ(K_VN)**2
       ELSE
@@ -1904,7 +2073,7 @@ ENDIF
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         !$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_BAROCLINIC'
+         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_BAROCLINIC'
          U2 = 0.25_EB*(UU(I,J,K)+UU(I-1,J,K))**2
          V2 = 0.25_EB*(VV(I,J,K)+VV(I,J-1,K))**2
          W2 = 0.25_EB*(WW(I,J,K)+WW(I,J,K-1))**2
@@ -1991,7 +2160,7 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
-!$OMP END DO
+!$OMP END DO NOWAIT
 !$OMP END PARALLEL
  
 END SUBROUTINE BAROCLINIC_CORRECTION
