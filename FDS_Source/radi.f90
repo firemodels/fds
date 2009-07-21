@@ -573,16 +573,28 @@ ELSE
    UPDATE_INTENSITY = .FALSE.
 ENDIF
 
-IF (WIDE_BAND_MODEL) QR = 0._EB
-IF (UPDATE_INTENSITY) QRADIN = 0._EB
+IF (WIDE_BAND_MODEL) THEN
+   !$OMP PARALLEL WORKSHARE
+   QR = 0._EB
+   !$OMP END PARALLEL WORKSHARE
+ENDIF
+IF (UPDATE_INTENSITY) THEN
+   !$OMP PARALLEL WORKSHARE
+   QRADIN = 0._EB
+   !$OMP END PARALLEL WORKSHARE
+ENDIF
  
 ! Loop over spectral bands
  
 BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
- 
+   
+   !$OMP PARALLEL
+   !$OMP WORKSHARE
    KAPPAW = 0._EB
    KFST4W = 0._EB
    SCAEFF = 0._EB
+   !$OMP END WORKSHARE
+   !$OMP END PARALLEL
  
    ! Calculate fraction on ambient black body radiation
  
@@ -599,7 +611,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          BBF = 1._EB
       ELSE
          BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),RADTMP)
-      ENDIF      
+      ENDIF     
+      !$OMP PARALLEL
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,N,PC,EVAP_INDEX,NCSDROP,QVAL) 
       DO K=1,KBAR
          DO J=1,JBAR
             ZLOOPM: DO I=1,IBAR
@@ -623,7 +637,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO ZLOOPM
          ENDDO
       ENDDO
+      !$OMP END DO
+      !$OMP WORKSHARE
       QR_W = 0._EB
+      !$OMP END WORKSHARE
+      !$OMP END PARALLEL
    ENDIF IF_DROPLETS_INCLUDED
 
    ! Compute raised vegetation absorption and emission source term 
@@ -646,9 +664,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
    ! Compute absorption coefficient KAPPA
  
+   !$OMP PARALLEL
+   !$OMP WORKSHARE
    KAPPA = KAPPA0
+   !$OMP END WORKSHARE
 
    IF (KAPPA_ARRAY) THEN
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,TYY,YY_GET)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -659,11 +681,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
    ENDIF
 
    ! Compute source term KAPPA*4*SIGMA*TMP**4
 
    IF (WIDE_BAND_MODEL) THEN
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,BBF,KFST4_ALTERNATIVE)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -677,7 +701,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
    ELSE
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,KFST4_ALTERNATIVE)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -690,26 +716,40 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
    ENDIF
 
    ! Calculate extinction coefficient
- 
+   
+   !$OMP WORKSHARE
    EXTCOE = KAPPA + KAPPAW + SCAEFF*RSA_RAT
+   !$OMP END WORKSHARE
+   !$OMP END PARALLEL
 
    ! Update intensity field
  
    INTENSITY_UPDATE: IF (UPDATE_INTENSITY) THEN
+
+      !$OMP PARALLEL
  
       IF (WIDE_BAND_MODEL) THEN
+         !$OMP WORKSHARE
          UIIOLD = UIID(:,:,:,IBND)
+         !$OMP END WORKSHARE
       ELSE
+         !$OMP WORKSHARE
          UIIOLD = UII
+         !$OMP END WORKSHARE
       ENDIF
+      !$OMP WORKSHARE
       UII = 0._EB
+      !$OMP END WORKSHARE
 
       ! Compute boundary condition intensity emissivity*sigma*Tw**4/pi or emissivity*QRADOUT/pi for wall with internal radiation
- 
+      !$OMP SINGLE
       BBF = 1.0_EB
+      !$OMP END SINGLE
+      !$OMP DO PRIVATE(IW,IBC,SF) FIRSTPRIVATE(BBF)
       DO IW = 1,NWC
          IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP_F(IW))
          IBC = IJKW(5,IW)
@@ -717,14 +757,18 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          IF (.NOT. SF%INTERNAL_RADIATION) QRADOUT(IW) = E_WALL(IW)*SIGMA*TMP_F(IW)**4
          OUTRAD_W(IW) = BBF*RPI*QRADOUT(IW)
       ENDDO
+      !$OMP END DO
 
       ! Compute boundary condition term incoming radiation integral
  
+      !$OMP DO PRIVATE(IW,IOR)
       DO IW = 1,NWC
          IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE
          IOR = IJKW(4,IW)
          INRAD_W(IW) = SUM(-DLN(IOR,:)* WALL(IW)%ILW(:,IBND),1, DLN(IOR,:)<0._EB)
       ENDDO
+      !$OMP END DO
+      !$OMP END PARALLEL
  
       ! If updating intensities first time, sweep ALL angles
  
@@ -736,24 +780,38 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ! Update counters inside the radiation routine
  
          ANGLE_INC_COUNTER = MOD(ANGLE_INC_COUNTER,ANGLE_INCREMENT) + 1
+         !$OMP PARALLEL
          IF (WIDE_BAND_MODEL) THEN
+            !$OMP WORKSHARE
             UIID(:,:,:,IBND) = 0._EB
+            !$OMP END WORKSHARE
          ELSE
+            !$OMP WORKSHARE
             UIID(:,:,:,ANGLE_INC_COUNTER) = 0._EB
+            !$OMP END WORKSHARE
          ENDIF
  
          ! Set the bounds and increment for the angleloop. Step downdard because in cylindrical case the Nth angle 
          ! boundary condition comes from (N+1)th angle.
- 
+          
+         !$OMP SINGLE
          NSTART    = NRA - ANGLE_INC_COUNTER + 1
          NEND      = 1
          NSTEP     = -ANGLE_INCREMENT
+         !$OMP END SINGLE
+
+         !$OMP WORKSHARE
          IL(:,:,:) = BBFA*RPI_SIGMA*TMPA4
+         !$OMP END WORKSHARE
+         !$OMP END PARALLEL
 
          ANGLE_LOOP: DO N = NSTART,NEND,NSTEP  ! Sweep through control angles
+
+            !$OMP PARALLEL
  
             ! Boundary conditions: Intensities leaving the boundaries.
- 
+            
+            !$OMP DO PRIVATE(IW,IOR,II,JJ,KK)
             WALL_LOOP1: DO IW=1,NWC
                IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP1
                IOR = IJKW(4,IW)
@@ -778,9 +836,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   IL(II,JJ,KK) = WALL(IW)%ILW(N,IBND)
                ENDIF
             ENDDO WALL_LOOP1
+            !$OMP END DO
  
             ! Determine sweep direction in physical space
  
+            !$OMP SINGLE
             ISTART = 1
             JSTART = 1
             KSTART = 1
@@ -805,10 +865,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                KEND   = 1
                KSTEP  = -1
             ENDIF
+            !$OMP END SINGLE
  
             GEOMETRY: IF (CYLINDRICAL) THEN  ! Sweep in axisymmetric geometry
-
+               !$OMP SINGLE
                J = 1
+               !$OMP END SINGLE
+               !$OMP DO COLLAPSE(2) FIRSTPRIVATE(J) PRIVATE(K,I,IC,ILXU,ILYU,ILZU,RU,RD,RP,VC,AXU,AXD,AYU,AYD,AZ,IW,RAP)
                CKLOOP: DO K=KSTART,KEND,KSTEP
                   CILOOP: DO I=ISTART,IEND,ISTEP
                      IC = CELL_INDEX(I,J,K)
@@ -857,10 +920,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                                  VC*RSA(N)*RFPI*( KFST4(I,J,K)+KFST4W(I,J,K) +RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
                   ENDDO CILOOP
                ENDDO CKLOOP
+               !$OMP END DO
 
             ELSEIF (TWO_D) THEN GEOMETRY  ! Sweep in 2D cartesian geometry
-
+               !$OMP SINGLE
                J = 1
+               !$OMP END SINGLE
+               !$OMP DO COLLAPSE(2) FIRSTPRIVATE(J) PRIVATE(K,I,IC,ILXU,ILZU,VC,AX,AZ,IW,RAP)
                K2LOOP: DO K=KSTART,KEND,KSTEP
                   I2LOOP: DO I=ISTART,IEND,ISTEP
                      IC = CELL_INDEX(I,J,K)
@@ -887,9 +953,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                                  VC*RSA(N)*RFPI*(KFST4(I,J,K)+KFST4W(I,J,K) +  RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) ) 
                   ENDDO I2LOOP
                ENDDO K2LOOP
+               !$OMP END DO
 
             ELSE GEOMETRY  ! Sweep in 3D cartesian geometry
 
+               !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,IC,ILXU,ILYU,ILZU,VC,AX,AY,AZ,IW,RAP)
                KLOOP: DO K=KSTART,KEND,KSTEP
                   JLOOP: DO J=JSTART,JEND,JSTEP
                      ILOOP: DO I=ISTART,IEND,ISTEP
@@ -928,11 +996,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      ENDDO ILOOP
                   ENDDO JLOOP
                ENDDO KLOOP
+               !$OMP END DO
  
             ENDIF GEOMETRY
  
             ! Boundary values: Incoming radiation
- 
+            
+            !$OMP DO PRIVATE(IW,IOR,IIG,JJG,KKG)
             WALL_LOOP2: DO IW=1,NWC
                IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY)   CYCLE WALL_LOOP2     
                IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)   CYCLE WALL_LOOP2  
@@ -947,11 +1017,15 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                WALL(IW)%ILW(N,IBND) = IL(IIG,JJG,KKG)
                INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 2
             ENDDO WALL_LOOP2
+            !$OMP END DO
  
             ! Copy the Y-downwind intensities to Y-upwind in cylindrical case
  
             IF (CYLINDRICAL) THEN
+               !$OMP SINGLE
                J=1
+               !$OMP END SINGLE
+               !$OMP DO COLLAPSE(2) FIRSTPRIVATE(J) PRIVATE(K,I,IC,IWUP,IWDOWN)
                CKLOOP2: DO K=1,KBAR
                CILOOP2: DO I=1,IBAR
                   IC = CELL_INDEX(I,J,K)
@@ -965,15 +1039,21 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   ENDIF
                ENDDO CILOOP2
                ENDDO CKLOOP2
+               !$OMP END DO
             ENDIF
  
             ! Calculate integrated intensity UIID
  
             IF (WIDE_BAND_MODEL) THEN
+               !$OMP WORKSHARE
                UIID(:,:,:,IBND) = UIID(:,:,:,IBND) + RSA(N)*IL
+               !$OMP END WORKSHARE
             ELSE
+               !$OMP WORKSHARE
                UIID(:,:,:,ANGLE_INC_COUNTER) = UIID(:,:,:,ANGLE_INC_COUNTER) + RSA(N)*IL
+               !$OMP END WORKSHARE
             ENDIF
+            !$OMP END PARALLEL
  
             ! Interpolate boundary intensities onto other meshes
  
@@ -1002,18 +1082,26 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
       ! Compute incoming flux on walls 
 
+      !$OMP PARALLEL DO PRIVATE(IW,IBC)
       DO IW=1,NWC
          IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE 
          IBC = IJKW(5,IW)
          QRADIN(IW)  = QRADIN(IW) + E_WALL(IW)*(INRAD_W(IW)+SURFACE(IBC)%EXTERNAL_FLUX/NUMBER_SPECTRAL_BANDS)
       ENDDO 
+      !$OMP END PARALLEL DO
    ENDIF INTENSITY_UPDATE
  
    ! Save source term for the energy equation (QR = -DIV Q)
 
    IF (WIDE_BAND_MODEL) THEN
+      !$OMP PARALLEL WORKSHARE
       QR = QR + KAPPA*UIID(:,:,:,IBND)-KFST4
-      IF (NLP>0 .AND. N_EVAP_INDICIES>0) QR_W = QR_W + KAPPAW*UIID(:,:,:,IBND) - KFST4W
+      !$OMP END PARALLEL WORKSHARE
+      IF (NLP>0 .AND. N_EVAP_INDICIES>0) THEN
+         !$OMP PARALLEL WORKSHARE
+         QR_W = QR_W + KAPPAW*UIID(:,:,:,IBND) - KFST4W
+         !$OMP END PARALLEL WORKSHARE
+      ENDIF
    ENDIF
 
 ENDDO BAND_LOOP
@@ -1059,6 +1147,7 @@ IF (GAS_CELL_RAD_FLUX) THEN
 ENDIF
 
 IF (VIRTUAL_PARTICLES) THEN
+   !$OMP PARALLEL DO PRIVATE(I,DR,PC,IW)
    DROPLET_LOOP: DO I=1,NLP
       DR => DROPLET(I)
       PC => PARTICLE_CLASS(DR%CLASS)
@@ -1068,6 +1157,7 @@ IF (VIRTUAL_PARTICLES) THEN
                                   SURFACE(PC%SURF_INDEX)%EXTERNAL_FLUX/NUMBER_SPECTRAL_BANDS)
       ENDIF
    ENDDO DROPLET_LOOP
+   !$OMP END PARALLEL DO
 ENDIF
 
 END SUBROUTINE RADIATION_FVM
