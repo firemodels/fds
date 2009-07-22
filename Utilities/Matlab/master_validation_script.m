@@ -14,5 +14,6 @@ addpath 'scripts'
 
 [saved_data,drange] = dataplot('validation');
 scatplot(saved_data,drange)
+run beyler_hood
 
 
