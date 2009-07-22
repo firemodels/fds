@@ -1383,11 +1383,17 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
 
                CASE (WALL_MODEL) BOUNDARY_CONDITION
-
-                  RHO_WALL = 0.5_EB*(  RHOP(IIGM,JJGM,KKGM) +   RHOP(IIGP,JJGP,KKGP))
-                  ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
-                  MU_WALL = Y2MU_C(ITMP)*SPECIES(0)%MW
-                  CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
+               
+                  IF ( SOLID(CELL_INDEX(IIGM,JJGM,KKGM)) .OR. SOLID(CELL_INDEX(IIGP,JJGP,KKGP)) ) THEN
+                     MU_WALL = MUA
+                     SLIP_COEF=-1._EB
+                  ELSE
+                     ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
+                     MU_WALL = Y2MU_C(ITMP)*SPECIES(0)%MW
+                     RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
+                     CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
+                  ENDIF
+                                   
                   VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                   DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                   MU_DUIDXJ(I_SGN*ICD) = MU_WALL*(VEL_GAS-VEL_T)*SIGN(1,IOR)*(1._EB-SLIP_COEF)/DXX(ICD)
