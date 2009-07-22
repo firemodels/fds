@@ -1561,9 +1561,9 @@ Some areas of research to accomplish these goals are described in more detail in
 
 \section{Visualize Cases more Realistically}
 Realism is a metric used when using Smokeview to gauge qualitatively the accuracy of the fire and smoke display. Realism itself is not the primary goal, however.  Realism is a side effect of the application of more physics.
-The primary goal is to strive for a more accurate representation of the underlying data which in turn requires the use of more physics.
+The primary goal is to gain a better understanding of the data.  This requires a more accurate representation of the underlying data which in turn requires the use of more physics.
 \begin{itemize}
-\item Investigate techniques for visualizing fire more realistically by using information about the fire such as its temperature to color it more realistically.
+\item Investigate techniques for visualizing fire more realistically by using information about the fire such as its temperature and composition (soot and various gas species) to color it more realistically.  Flame temperatures need to be modeled directly by FDS in order in order to use the black body temperature curve to obtain flame color.  Further, the resolution of the computation needs to be consistent with the desired resolution of the flame image.
 
 \item Investigate algorithms for modeling the interaction of light and smoke.
 The {\em transport} of light into and out of the smoke/fire ({\em ie scattering}) is another important factor that effects its appearance.  Light sources could consist of either man made lights or from the fire itself.  Work also needs to be done to generalize the wavelength of light used to visualize the scene, {\em ie} implementing an algorithm in Smokeview to simulate a thermal imager or infrared viewer.
