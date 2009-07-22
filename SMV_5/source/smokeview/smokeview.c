@@ -3384,7 +3384,7 @@ void RenderFrame(int view_mode){
     strcat(renderfile,script_renderfile);
     use_script_filename=1;
   }
-  if(current_script_command!=NULL&&current_script_command->command==SCRIPT_RENDERDIR&&current_script_command->cval!=NULL){
+  if(current_script_command!=NULL&&current_script_command->command==SCRIPT_RENDERONCE&&current_script_command->cval!=NULL){
     strcpy(renderfile,"");
     if(script_dir_path!=NULL){
       strcat(renderfile,script_dir_path);
