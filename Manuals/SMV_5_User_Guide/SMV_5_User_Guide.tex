@@ -835,8 +835,8 @@ appropriate radio button in the {\em Motion/View}\ dialog box.
 
 The scene may be rotated or translated while in world view, either
 directly with the mouse or by using controls contained in the
-{\em scene movement}\ dialog box. This dialog box is opened from the
-\fbox{Dialogs$>$Motion/View}\ menu item and is illustrated in
+{\em Motion/View/Render}\ dialog box. This dialog box is opened from the
+\fbox{Dialogs$>$Motion/View/Render}\ menu item and is illustrated in
 Figure \ref{figMOTION}. Clicking on the scene and dragging the
 mouse horizontally, vertically or a combination of both results in
 scene rotation or translation depending upon whether
@@ -848,10 +848,10 @@ movement.
 \centerline{
 \includegraphics[width=2.38888in]{figures/figMOTION}
 }
-\caption[Motion/View Dialog Box.]{Motion/View Dialog Box. Rotate or translate
+\caption[Motion/View/Render Dialog Box - Motion, Window Properties and Viewpoint Regions.]{Motion/View Dialog/Render Box - Motion, Window Properties and Viewpoint Regions. Rotate or translate
 the scene by clicking an {\em arrow}\ and dragging the mouse. The
-Motion/View Dialog Box is invoked by selecting
-\frameit{Dialogs$>$Motion/View}. }
+Motion/View/Render Dialog Box is invoked by selecting
+\frameit{Dialogs$>$Motion/View/Render}. }
 \label{figMOTION}
 \end{figure}
 %\end{wrapfigure}
@@ -875,12 +875,12 @@ effect on the scene while the \frameit{ALT} key is depressed.
 
 \elist
 
-The {\em Motion/View}\ dialog box, illustrated in Figure \ref{figMOTION}\, may be used to move the scene in a
+The {\em Motion/View/Render}\ dialog box, illustrated in Figure \ref{figMOTION}\, may be used to move the scene in a
 more controlled manner. For example, buttons in the {\em Motion}\ region allows one to translate or rotate the scene.
 The \frameit{Horizontal} button allows one to translate the scene horizontally in a left/right or in/out
 direction while the \frameit{Vertical}\ button allows one to translate the scene in an up/down direction.
 
-Controls in the {\em Window Properties} region of the {\em Motion/View}\ dialog box
+Controls in the {\em Window Properties} region of the {\em Motion/View/Render}\ dialog box
 allow one to change the scene magnification or zoom factor and the
 projection method used to draw objects (perspective or size preserving).
 These two projection methods differ in how objects are displayed
@@ -888,6 +888,17 @@ at a distance.  A perspective projection for-shortens or draws an
 object smaller when drawn at a distance. An isometric or size preserving projection
 on the other hand draws an objects the same size regardless of
 where it is drawn in the scene.
+
+\begin{figure}[\figoptions]
+\centerline{
+\includegraphics[width=2.38888in]{figures/figMOTION2}
+}
+\caption[Motion/View/Render Dialog Box - Render and Scaling/Depth regions.]{Motion/View Dialog/Render Box. Render and Scaling/Depth regions.}
+\label{figMOTIONb}
+\end{figure}
+%\end{wrapfigure}
+
+Controls in the {\em Render} and {\em Scaling Depth} regions, as illustrated in Figure \ref{figMOTIONb}, allow one to render images using either PNG or JPEG file formats and to scale the Smokeview scene (say for visualizing tunnel scenarios) in any or all of the coordinate directions.
 
 The \frameit{zoom}\ and \frameit{aperture} edit boxes allow one to
 change the magnification of the scene or equivalently the angle of
@@ -3855,6 +3866,27 @@ The \frameit{Dialogs}\ menu, illustrated in Figure
 setting various Smokeview features.
 
 \blist
+\hitem{Clip Geometry}Open the dialog box for
+clipping the geometry allowing one to see past exterior
+portions of the scene.
+
+\hitem{Compression/Smokezip}Open the dialog box for compressing the FDS case being visualized using the external program Smokezip.
+
+\hitem{Display}Open the dialog box for setting various
+parameters that control how the Smokeview scene appears.
+
+\hitem{Edit Geometry}Open the dialog box for editing \fds\ blockages.
+
+\hitem{File/Bound/Script Settings}Open the dialog box for specifying data bounds.
+
+\hitem{Motion/View/Render}Open the dialog box for controlling scene movement.
+To use the movement arrows, click and hold the mouse in one
+of the arrows then move the mouse to achieve the desired
+movement.
+
+\hitem{Smoke3D Parameters}Open the dialog box for specifying controlling the look
+of the 3D smoke.
+
 \hitem{Stereo 3-D}Provides stereo 3-D output on systems
 equipped with supported video cards.  Stereo 3-D requires a
 computer graphics card, monitor, software drivers and
@@ -3862,25 +3894,6 @@ shuttered glasses.  This option only appears if \smokeview\
 is started from the command line using the {\tt\em
 -stereo} command line option and if a video card
 supporting quad buffering (left and right front buffer, and left and right back buffer) is supported.
-
-\hitem{Clip Geometry}Open the dialog box for
-clipping the geometry allowing one to see past exterior
-portions of the scene.
-
-\hitem{Display}Open the dialog box for setting various
-parameters that control how the Smokeview scene appears.
-
-\hitem{Edit Geometry}Open the dialog box for editing \fds\ blockages.
-
-\hitem{File/Bound Settings}Open the dialog box for specifying data bounds.
-
-\hitem{Motion/View}Open the dialog box for controlling scene movement.
-To use the movement arrows, click and hold the mouse in one
-of the arrows then move the mouse to achieve the desired
-movement.
-
-\hitem{Smoke3D Parameters}Open the dialog box for specifying controlling the look
-of the 3D smoke.
 
 \hitem{Tours}This menu item opens up the {\em Edit Tour}\ dialog
 box and shows the path over which the tours occur.
