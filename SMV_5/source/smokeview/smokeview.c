@@ -2444,10 +2444,9 @@ void updatetimes(void){
     }
   }
 
-  if(ntimes==0)return;
   CheckMemory;
   FREEMEMORY(times);
-  NewMemory((void **)&times,ntimes*sizeof(float));
+  if(ntimes>0)NewMemory((void **)&times,ntimes*sizeof(float));
   timescopy=times;
 
   if(visTerrainType!=4){
@@ -2603,7 +2602,7 @@ void updatetimes(void){
     }
   }
 
-  qsort( (float *)times, (size_t)ntimes, sizeof( float ), compare );
+  if(ntimes>0)qsort( (float *)times, (size_t)ntimes, sizeof( float ), compare );
   n2=1;ntimes2=ntimes;
   for(n=1;n<ntimes;n++){
     if(fabs(times[n]-times[n-1])>dt_MIN/10.0){
@@ -2615,19 +2614,18 @@ void updatetimes(void){
     }
   }
   ntimes=ntimes2;
-  if(ntimes>0){
-    FREEMEMORY(render_frame);
-    NewMemory((void **)&render_frame,ntimes*sizeof(int));
+  FREEMEMORY(render_frame);
+    if(ntimes>0)NewMemory((void **)&render_frame,ntimes*sizeof(int));
     for(i=0;i<npartinfo;i++){
       parti=partinfo+i;
       FREEMEMORY(parti->ptimeslist);
-      NewMemory((void **)&parti->ptimeslist,ntimes*sizeof(int));
+      if(ntimes>0)NewMemory((void **)&parti->ptimeslist,ntimes*sizeof(int));
     }
     for(i=0;i<ntours;i++){
       touri=tourinfo + i;
       if(touri->display==0)continue;
       FREEMEMORY(touri->path_timeslist);
-      NewMemory((void **)&touri->path_timeslist,ntimes*sizeof(int));
+      if(ntimes>0)NewMemory((void **)&touri->path_timeslist,ntimes*sizeof(int));
     }
     if(visTerrainType!=4){
       for(i=0;i<nterraininfo;i++){
@@ -2636,18 +2634,18 @@ void updatetimes(void){
         terri = terraininfo + i;
         if(terri->loaded==0)continue;
         FREEMEMORY(terri->timeslist);
-        NewMemory((void **)&terri->timeslist,ntimes*sizeof(int));
+        if(ntimes>0)NewMemory((void **)&terri->timeslist,ntimes*sizeof(int));
       }
     }
     if(hrrinfo!=NULL){
+      FREEMEMORY(hrrinfo->timeslist);
+      FREEMEMORY(hrrinfo->times);
+      FREEMEMORY(hrrinfo->hrrval);
       if(hrrinfo->loaded==1&&hrrinfo->display==1&&ntimes>0){
         int jstart=0;
 
-        FREEMEMORY(hrrinfo->timeslist);
         NewMemory((void **)&hrrinfo->timeslist,ntimes*sizeof(int));
-        FREEMEMORY(hrrinfo->times);
         NewMemory((void **)&hrrinfo->times,ntimes*sizeof(float));
-        FREEMEMORY(hrrinfo->hrrval);
         NewMemory((void **)&hrrinfo->hrrval,ntimes*sizeof(float));
         hrrinfo->ntimes=ntimes;
         for(i=0;i<ntimes;i++){
@@ -2676,20 +2674,19 @@ void updatetimes(void){
             hrrinfo->hrrval[i]=hrrinfo->hrrval_csv[hrrinfo->ntimes_csv-1];
           }
         }
-
       }
     }
 #ifdef pp_SHOOTER
-  if(visShooter!=0&&shooter_active==1){
     FREEMEMORY(shooter_timeslist);
-    NewMemory((void **)&shooter_timeslist,nshooter_frames*sizeof(int));
-  }
+    if(visShooter!=0&&shooter_active==1){
+      NewMemory((void **)&shooter_timeslist,nshooter_frames*sizeof(int));
+    }
 #endif
 
     for(i=0;i<nslice;i++){
       sd = sliceinfo + i;
       FREEMEMORY(sd->slicetimeslist);
-      NewMemory((void **)&sd->slicetimeslist,ntimes*sizeof(int));
+      if(ntimes>0)NewMemory((void **)&sd->slicetimeslist,ntimes*sizeof(int));
     }
     {
       smoke3d *smoke3di;
@@ -2697,14 +2694,14 @@ void updatetimes(void){
       for(i=0;i<nsmoke3d;i++){
         smoke3di = smoke3dinfo + i;
         FREEMEMORY(smoke3di->timeslist);
-        NewMemory((void **)&smoke3di->timeslist,ntimes*sizeof(int));
+        if(ntimes>0)NewMemory((void **)&smoke3di->timeslist,ntimes*sizeof(int));
       }
     }
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
       if(meshi->isotimes==NULL)continue;
       FREEMEMORY(meshi->isotimeslist);
-      NewMemory((void **)&meshi->isotimeslist,  ntimes*sizeof(int));  
+      if(ntimes>0)NewMemory((void **)&meshi->isotimeslist,  ntimes*sizeof(int));  
     }
 
     for(i=0;i<nmeshes;i++){
@@ -2712,27 +2709,29 @@ void updatetimes(void){
     }
     for(i=0;i<nmeshes;i++){
       if(meshinfo[i].patchtimes==NULL)continue;
-      NewMemory((void **)&meshinfo[i].patchtimeslist,ntimes*sizeof(int));
+      if(ntimes>0)NewMemory((void **)&meshinfo[i].patchtimeslist,ntimes*sizeof(int));
     }
 
     FREEMEMORY(zonetlist); 
-    NewMemory((void **)&zonetlist,     ntimes*sizeof(int));
+    if(ntimes>0)NewMemory((void **)&zonetlist,     ntimes*sizeof(int));
 
     FREEMEMORY(targtimeslist);
-    NewMemory((void **)&targtimeslist,  ntimes*sizeof(int));
+    if(ntimes>0)NewMemory((void **)&targtimeslist,  ntimes*sizeof(int));
 
     if(ntotal_smooth_blockages>0){
       for(i=0;i<nmeshes;i++){
         meshi=meshinfo+i;
         FREEMEMORY(meshi->showsmoothtimelist);
-        NewMemory((void **)&meshi->showsmoothtimelist,ntimes*sizeof(smoothblockage *));
+        if(ntimes>0)NewMemory((void **)&meshi->showsmoothtimelist,ntimes*sizeof(smoothblockage *));
       }
     }
 
-
-  for(n=0;n<ntimes;n++){render_frame[n]=0;}
-    ResizeMemory((void **)&times,ntimes*sizeof(float));
-  }
+    for(n=0;n<ntimes;n++){
+      render_frame[n]=0;
+    }
+    if(ntimes==0)FREEMEMORY(times);
+    if(ntimes>0)ResizeMemory((void **)&times,ntimes*sizeof(float));
+  
   izone=0; itime=0;
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;
@@ -2808,15 +2807,9 @@ void updatetimes(void){
     }
   }
 
-  /* determine visibility of each smooth blockage */
-
-//  for(i=0;i<nmeshes;i++){
-//    meshi=meshinfo+i;
-//  }
-  
-  synctimes();
+  if(ntimes>0)synctimes();
   updatefaces=1;
-  UpdateTimeLabels();
+  if(ntimes>0)UpdateTimeLabels();
 }
 
 /* ------------------ getindex ------------------------ */
