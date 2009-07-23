@@ -3739,7 +3739,11 @@ void version(void){
     printf("\n");
     printf("%s\n\n",TITLERELEASE);
     printf("Version: %s\n",SMVVERSION);
-    printf("Smokeview Revision Number: %i\n",svn_num);
+#ifdef BIT64
+    printf("Smokeview (64 bit) Revision Number: %i\n",svn_num);
+#else
+    printf("Smokeview (32 bit) Revision Number: %i\n",svn_num);
+#endif
     if(revision_fds>0){
       printf("FDS Revision Number: %i\n",revision_fds);
     }
