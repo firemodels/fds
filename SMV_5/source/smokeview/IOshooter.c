@@ -89,36 +89,68 @@ void get_shooter_vel(float *uvw, float *xyz){
 
 /* ------------------ increment_shooter_data ------------------------ */
 
-void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt){
+void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dtstep){
   int i;
   float *xyzold, *uvwold, uvw_air[3];
   float *xyznew, *uvwnew;
   float g=9.8;
-  
+  float dt;
+  int nsteps;
+
   // dv/dt = g - |g|(v-v_a)/v_inf
   // dx/dt = v
 
-  shooter_time+=dt;
+  shooter_time+=dtstep;
   for(i=0;i<shooter_nparts;i++){
     float dvel[3];
+    mesh *meshpoint;
+    float grid_vel,tstep;
 
     xyzold = pold[i].xyz;
     uvwold = pold[i].uvw;
     xyznew = pnew[i].xyz;
     uvwnew = pnew[i].uvw;
-    get_shooter_vel(uvw_air,xyzold);
 
-    dvel[0] = uvwold[0]-uvw_air[0];
-    dvel[1] = uvwold[1]-uvw_air[1];
-    dvel[2] = uvwold[2]-uvw_air[2];
+    xyznew[0] = xyzold[0];
+    xyznew[1] = xyzold[1];
+    xyznew[2] = xyzold[2];
+    uvwnew[0] = uvwold[0];
+    uvwnew[1] = uvwold[1];
+    uvwnew[2] = uvwold[2];
 
-    uvwnew[0] = uvwold[0] - g*dt*(    dvel[0]/shooter_v_inf);
-    uvwnew[1] = uvwold[1] - g*dt*(    dvel[1]/shooter_v_inf);
-    uvwnew[2] = uvwold[2] - g*dt*(1.0+dvel[2]/shooter_v_inf);
+    for(tstep=0.0;tstep<dtstep;tstep+=dt){
+      float dvelmin;
 
-    xyznew[0] = xyzold[0] + dt*uvwnew[0];
-    xyznew[1] = xyzold[1] + dt*uvwnew[1];
-    xyznew[2] = xyzold[2] + dt*uvwnew[2];
+      get_shooter_vel(uvw_air,xyznew);
+      meshpoint = getmesh(xyznew);
+      if(meshpoint==NULL)meshpoint=meshinfo;
+      grid_vel =  sqrt(uvwnew[0]*uvwnew[0]+uvwnew[1]*uvwnew[1]+uvwnew[2]*uvwnew[2]);
+      if(grid_vel<0.01)grid_vel=0.01;
+      dt = min(meshpoint->cellsize/grid_vel,dtstep-tstep);
+
+      dvel[0] = uvwnew[0]-uvw_air[0];
+      dvel[1] = uvwnew[1]-uvw_air[1];
+      dvel[2] = uvwnew[2]-uvw_air[2];
+
+      dvelmin = min(abs(dvel[0]),abs(dvel[1]));
+      dvelmin = min(abs(1.0+dvel[2]),dvelmin);
+      if(shooter_v_inf>0.01){
+        dt = min(dt,0.1*shooter_v_inf/dvelmin);
+        uvwnew[0] -= g*dt*(    dvel[0]/shooter_v_inf);
+        uvwnew[1] -= g*dt*(    dvel[1]/shooter_v_inf);
+        uvwnew[2] -= g*dt*(1.0+dvel[2]/shooter_v_inf);
+      }
+      else{
+        uvwnew[0] = uvw_air[0];
+        uvwnew[1] = uvw_air[1];
+        uvwnew[2] = uvw_air[2];
+      }
+      dt=max(0.01,0.0);
+
+      xyznew[0] += dt*uvwnew[0];
+      xyznew[1] += dt*uvwnew[1];
+      xyznew[2] += dt*uvwnew[2];
+    }
     pnew[i].visible=1;
     if(inmesh(xyznew)==NULL)pnew[i].visible=0;
   }
