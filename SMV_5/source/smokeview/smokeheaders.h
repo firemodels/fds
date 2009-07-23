@@ -71,6 +71,7 @@ EXTERNCPP int init_cull_exts(void);
 #ifdef pp_GPU
 void getDepthTexture( void );
 void createDepthTexture( void );
+EXTERNCPP mesh *getmesh(float *xyz);
 EXTERNCPP int init_shaders(void);
 EXTERNCPP void LoadSmokeShaders(void);
 EXTERNCPP void UnloadSmokeShaders(void);

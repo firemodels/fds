@@ -76,6 +76,7 @@ GLUI_RadioButton *RADIO_plot3dtype=NULL;
 #define SHOOTER_TIME 112
 #define SHOOTER_LOADPLOT3D 113
 #define SHOOTER_UVW 114
+#define SHOOTER_TERMINAL_VEL 115
 
 #define SAVE_SETTINGS 900
 #define SHOOTER_CLOSE 901
@@ -202,7 +203,7 @@ extern "C" void glui_shooter_setup(int main_window){
   glui_shooter->add_checkbox_to_panel(panel_shooter_frameG,"Update continuously",&shooter_cont_update);
   glui_shooter->add_checkbox_to_panel(panel_shooter_frameG,"Show only first frame",&shooter_firstframe,SHOOTER_FIRSTFRAME,SHOOTER_CB);
   SPINNER_shooter_v_inf=glui_shooter->add_spinner_to_panel(panel_shooter_frameG,"terminal velocity",
-    GLUI_SPINNER_FLOAT,&shooter_v_inf,SHOOTER_VEL,SHOOTER_CB);
+    GLUI_SPINNER_FLOAT,&shooter_v_inf,SHOOTER_TERMINAL_VEL,SHOOTER_CB);
   glui_shooter->add_button_to_panel(panel_shooter_frameG,"Compute Tracks",SHOOTER_APPLY,SHOOTER_CB);
 
   glui_shooter->add_spinner_to_panel(panel_shooter_frameH,"particle size",GLUI_SPINNER_FLOAT,&shooterpointsize);
@@ -252,6 +253,15 @@ void SHOOTER_CB(int var){
     case SHOOTER_SHOW:
       plotstate=getplotstate(DYNAMIC_PLOTS);
       updatetimes();
+      break;
+    case SHOOTER_TERMINAL_VEL:
+      if(shooter_v_inf<0.0){
+        shooter_v_inf=0.0;
+        SPINNER_shooter_v_inf->set_float_val(shooter_v_inf);
+      }
+      if(shooter_cont_update==1){
+        SHOOTER_CB(SHOOTER_APPLY);
+      }
       break;
     case SHOOTER_VEL:
       pi = 4.0*atan(1.0);
