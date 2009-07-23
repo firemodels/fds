@@ -21,6 +21,29 @@
 
 <ul>
 
+<li>5.4.2 (build 4446) - July 23, 2009
+<ol>
+
+<li> usability: add functionality to the to the Motion/View (now Motion/View/Render) dialog box to render smokeview scenes 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=808&can=1&sort=-id">Issue 808</a>),
+<li> usability: identify Smokeview as either 32 or 64 bit in help menu and in the -version command line output.
+<li> fix: fix problem with the RENDERALL script command
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=814&can=1&sort=-id">Issue 814</a>),
+<li> fix: fix memory leak in the internal Smokeview routine, updatetimes().
+<li> fix: fix problem with render file naming that occurs when using the RENDERALL script command 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=814&can=1&sort=-id">Issue 814</a>),
+<li> fix: correct problem with double size rendering
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=808&can=1&sort=-id">Issue 808</a>),
+<li> fix: fix various issues occuring with 64 bit versions of smokeview
+<ul>
+<li> disable memory status check on win64 systems
+<li> make the system calls GlobalSystemStatus(...) and status(...) 64 bit friendly
+<li> make the system call status(...) 64 bit friendly
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=803&can=1&sort=-id">Issue 803</a>),
+<li> declare file_size using variable type that converts to unsigned long long (64 bits) on 64 bit systems
+</ul>
+</ol>
+
 <li>5.4 (build 4315) - July 2, 2009
 <ol>
 <li> enhancement: implement error reporting dialog boxes.
