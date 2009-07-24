@@ -71,8 +71,10 @@ for j=qrange
     
     if strcmp(Scatter_Plot_Title,'Verification')
         k = 1000;
-        Measured_Metric = normrnd(1:1000,(Sigma_2_E/200)*(1:1000),[1 1000]);
-        Predicted_Metric = normrnd(0.5*(1:1000),0.02*(1:1000),[1 1000]);
+        %Measured_Metric = normrnd(1:1000,(Sigma_2_E/200)*(1:1000),[1 1000]);
+        %Predicted_Metric = normrnd(0.5*(1:1000),0.02*(1:1000),[1 1000]);
+        Measured_Metric = [1:k].*(1 + (Sigma_2_E/200)*randn(1,k));
+        Predicted_Metric = 0.5*[1:k].*(1 + 0.02*randn(1,k));
         K = plot(Measured_Metric,Predicted_Metric,'ko'); hold on    
     end
     
