@@ -34,9 +34,6 @@ set bindir=FDS-SMV/SMV_5/bin
 
 plink %svn_logon% %scriptdir%/make_smv_linux32.csh %smv_revision%
 
-echo downloading compilation results for 32 bit Linux Smokeview
-pscp %svn_logon%:%bindir%/make_intel_linux_32.out %svn_root%\SMV_5\for_bundle\to_google\make_intel_linux_32.out
-
 echo.
 echo compilation complete
 pause
