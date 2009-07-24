@@ -12,6 +12,9 @@ erase "%todir%"\setup.bat
 Rem assoc .smv=smokeview.Document>Nul
 Rem ftype smokeview.Document=%bindir%\smokeview.exe %1 >Nul
 echo.
+echo Setting Path for FDS
+%fromdir%\fds5_setup.exe
+echo.
 echo Installation Complete.  
 echo Press any key to continue . . . 
 pause>NUL
