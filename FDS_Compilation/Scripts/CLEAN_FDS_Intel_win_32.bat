@@ -21,21 +21,15 @@ call %envfile%
 echo.
 echo cleaning intel_win_32
 cd %svn_root%\FDS_Compilation\intel_win_32
-set out=intel_win_32.out
-date /t | tee %out%
-time /t | tee -a %out%
-echo Cleaning intel_win_32 | tee -a %out%
+echo Cleaning intel_win_32
 
-make -f ..\makefile clean | tee -a %out%
+make -f ..\makefile clean
 
 echo.
 echo cleaning mpi_intel_win_32
 cd %svn_root%\FDS_Compilation\mpi_intel_win_32
-set out=%svn_root%\FDS_Compilation\mpi_intel_win_32\mpi_intel_win_32.out
-date /t | tee %out%
-time /t | tee -a %out%
-echo Cleaning mpi_intel_win_32 | tee -a %out%
+echo Cleaning mpi_intel_win_32
 
-make -f ..\makefile clean | tee -a %out%
+make -f ..\makefile clean
 
 pause
