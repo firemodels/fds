@@ -318,26 +318,25 @@ f95_solaris10_mpi : obj = fds5_mpi_solaris
 f95_solaris10_mpi : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-#*** Sun Solaris 11 f95 Compiler - AMD64 Opteron(tm) Processor ***
+#*** Sun Solaris (SunOS 5.11) f95 Compiler - AMD64 Opteron(tm) Processor *** 
 
-f95_solaris11 : FFLAGS   = -fast -xarch=sse3a -xtarget=opteron -m64 -xchip=native -xipo=2 -Bstatic
-f95_solaris11 : CFLAGS   = -fast -xarch=sse3a -xtarget=opteron -m64 -xchip=native -xipo=2
-f95_solaris11 : FCOMPL   = f95
-f95_solaris11 : CCOMPL   = cc
-f95_solaris11 : obj = fds5_solaris11
-f95_solaris11 : $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+f95_solaris11 : FFLAGS   = -xarch=sse2a -m64 -xchip=native -Bstatic 
+f95_solaris11 : CFLAGS   = -xarch=sse2a -m64 -xchip=native 
+f95_solaris11 : FCOMPL   = f95 
+f95_solaris11 : CCOMPL   = cc 
+f95_solaris11 : obj = fds5_solaris11 
+f95_solaris11 : $(obj_serial) 
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial) 
 
-f95_solaris11_mpi : INC_FLAGS = -I$(OPT)/SUNWhpc/HPC8.2/include/amd64
-f95_solaris11_mpi : LIB_FLAGS = -Bstatic -lfui -Bdynamic -L$(OPT)/ SUNWspro/prod/lib/amd64 -L$(OPT)/SUNWhpc/HPC8.1/lib/amd64 
-f95_solaris11_mpi : FFLAGS = -m64 $(INC_FLAGS) 
-f95_solaris11_mpi : CFLAGS = -m64 
+f95_solaris11_mpi : INC_FLAGS=-I/opt/SUNWhpc/HPC8.2/sun/include/amd64 
+f95_solaris11_mpi : LIB_FLAGS=-Bstatic -L/usr/lib/amd64/ld.so.1 -L/opt/sunstudio12.1/lib/amd64 -L/opt/SUNWhpc/HPC8.2/sun/lib/amd64 
+f95_solaris11_mpi : FFLAGS = -xarch=sse2a -m64 -xchip=native $(INC_FLAGS) 
+f95_solaris11_mpi : CFLAGS = -xarch=sse2a -m64 -xchip=native 
 f95_solaris11_mpi : FCOMPL = mpif90 
 f95_solaris11_mpi : CCOMPL = cc 
 f95_solaris11_mpi : obj = fds5_mpi_solaris11 
-f95_solaris11_mpi : $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
-
+f95_solaris11_mpi : $(obj_mpi) 
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
 
 #*** Portland Group Compiler***
 
