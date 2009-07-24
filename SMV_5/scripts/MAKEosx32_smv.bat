@@ -34,9 +34,6 @@ set bindir=FDS-SMV/SMV_5/bin
 
 plink %svn_logon% %scriptdir%/ssh_command.csh tiger.cfr.nist.gov %scriptdir% make_smv_osx.csh %smv_revision%
 
-echo downloading compilation results for 32 bit MAC OSX Smokeview
-pscp %svn_logon%:%bindir%/make_intel_osx_32.out %svn_root%\SMV_5\for_bundle\to_google\make_intel_osx_32.out
-
 echo.
 echo compilation complete
 pause
