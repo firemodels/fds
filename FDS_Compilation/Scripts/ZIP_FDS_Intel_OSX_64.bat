@@ -2,7 +2,7 @@
 
 Rem Batch file used to create a self-extracting archive containing FDS
 
-set envfile=%homedrive%\%homepath%\fds_smv_env.bat
+set envfile="%homedrive%\%homepath%\"fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
@@ -34,7 +34,7 @@ plink %svn_logon% %scriptdir%/bundle_osx_64.csh %linux_svn_root% %linux_svn_root
 echo.
 echo downloading 64 bit OSX fds files
 pscp %svn_logon%:%scriptdir%/../to_google/fds5_intel_osx_64 %fdsrootdir%\fds5_intel_osx_64
-Rem pscp %svn_logon%:%scriptdir%/../to_google/fds5_mpi_intel_osx_64 %fdsrootdir%\fds5_mpi_intel_osx_64
+pscp %svn_logon%:%scriptdir%/../to_google/fds5_mpi_intel_osx_64 %fdsrootdir%\fds5_mpi_intel_osx_64
 
 echo.
 echo winzipping distribution directory
