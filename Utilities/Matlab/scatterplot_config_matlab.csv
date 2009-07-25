@@ -2,7 +2,7 @@ Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Posi
 Verification,Measured Value,Predicted Value,0,1000,0.015 0.94,SouthEast,4,10,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Verification
 Hot Gas Layer Temperature,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,800,0.015 0.94,SouthEast,4,14,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature
 Hot Gas Layer Depth,Measured Layer Depth (m),Predicted Layer Depth (m),0,20,0.015 0.94,SouthEast,4,13,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/HGL_Depth
-Ceiling Jet Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.015 0.94,SouthEast,4,16,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Ceiling_Jet_Temperature
+Ceiling Jet Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.015 0.94,SouthEast,4,10,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Ceiling_Jet_Temperature
 Plume Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,500,0.015 0.94,SouthEast,4,14,no,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Plume_Temperature
 Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.15,0.015 0.94,SouthEast,4,9,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Oxygen_Concentration
 Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.15,0.015 0.94,SouthEast,4,9,yes,FDS_5_Validation_Guide/FIGURES/ScatterPlots/Carbon_Dioxide_Concentration

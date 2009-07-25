@@ -166,6 +166,8 @@ for i=drange
             Y_Title_Position = 10^(log10(Min_Ind)+Title_Position(2)*(log10(Max_Ind)-log10(Min_Ind)));
         end
      
+        set(gca,'FontName',Font_Name)
+        
         if strcmp(Flip_Axis,'no')
             xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
