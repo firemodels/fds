@@ -11,7 +11,7 @@ echo Setting Path for FDS
 "%CD%"\set_fds5_path.exe
 echo.
 erase "%CD%"\set_fds5_path.exe
-erase "%CD%"\setup.bat
+erase "%CD%"\wrapup.bat
 echo Installation Complete.  
 echo Press any key to continue . . . 
 pause>NUL
