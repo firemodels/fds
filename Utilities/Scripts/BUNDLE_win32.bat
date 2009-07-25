@@ -77,7 +77,7 @@ echo.
 echo Copying readme_examples.html to the Examples directory
 copy %bundleinfo%\readme_examples.html %out_examples%\readme_examples.html
 
-copy %bundleinfo%\setup.bat %out_bundle%\FDS5\setup.bat
+copy %bundleinfo%\wrapup.bat %out_bundle%\FDS5\wrapup.bat
 copy %bundleinfo%\set_fds5_path.exe %out_bundle%\FDS5\set_fds5_path.exe
 
 Rem compress bundle directory
@@ -95,6 +95,6 @@ cd %to_google%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
-Rem c:\bin\winzip\wzipse32 %basename%.zip -d "c:\program files\fds5xxx"
-c:\bin\winzip\wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -m %bundleinfo%\message.txt %basename%.zip -c setup.bat
+c:\bin\winzip\wzipse32 %basename%.zip -d "c:\program files\fds5" -c wrapup.bat
+Rem c:\bin\winzip\wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -mokcancel %bundleinfo%\message.txt %basename%.zip -c wrapup.bat
 pause
