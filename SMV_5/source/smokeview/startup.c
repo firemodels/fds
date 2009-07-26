@@ -78,6 +78,9 @@ int initcase_c(int argc, char **argv){
     if(strcmp(inputfilename_ext,".svd")==0){
       input_file=trainer_filename;
     }
+    else if(strcmp(inputfilename_ext,".smt")==0){
+      input_file=test_filename;
+    }
     else{
       input_file=smvfilename;
     }
@@ -2126,6 +2129,7 @@ void initvars0(void){
   targfilename=NULL;
   sorted_surfidlist=NULL,inv_sorted_surfidlist=NULL;
   trainer_filename=NULL;
+  test_filename=NULL;
 #ifdef pp_ISOOUT
   filename_sb=NULL;
   STREAM_SB=NULL;

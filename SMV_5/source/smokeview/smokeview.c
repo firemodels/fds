@@ -3560,6 +3560,7 @@ void Args(int argc, char **argv){
   STRCPY(fdsprefix,argi);
   FREEMEMORY(smvfilename);
   FREEMEMORY(trainer_filename);
+  FREEMEMORY(test_filename);
 #ifdef pp_ISOOUT
   FREEMEMORY(filename_sb)
 #endif
@@ -3574,13 +3575,17 @@ void Args(int argc, char **argv){
       STRCPY(inputfilename_ext,c_ext);
       to_lower(inputfilename_ext);
 
-      if(c_ext!=NULL&&(strcmp(inputfilename_ext,".smv")==0||strcmp(inputfilename_ext,".svd")==0)){
+      if(c_ext!=NULL&&(strcmp(inputfilename_ext,".smv")==0||strcmp(inputfilename_ext,".svd")==0||strcmp(inputfilename_ext,".smt")==0)){
         c_ext[0]=0;
         STRCPY(fdsprefix,argi);
         FREEMEMORY(trainer_filename);
         NewMemory((void **)&trainer_filename,(unsigned int)(len+7));
         STRCPY(trainer_filename,argi);
         STRCAT(trainer_filename,".svd");
+        FREEMEMORY(test_filename);
+        NewMemory((void **)&test_filename,(unsigned int)(len+7));
+        STRCPY(test_filename,argi);
+        STRCAT(test_filename,".smt");
       }
     }
   }
@@ -3638,6 +3643,11 @@ void Args(int argc, char **argv){
     NewMemory((void **)&trainer_filename,(unsigned int)(len+6));
     STRCPY(trainer_filename,fdsprefix);
     STRCAT(trainer_filename,".svd");
+  }
+  if(test_filename==NULL){
+    NewMemory((void **)&test_filename,(unsigned int)(len+6));
+    STRCPY(test_filename,fdsprefix);
+    STRCAT(test_filename,".svd");
   }
 #ifdef pp_ISOOUT
   if(filename_sb==NULL){
