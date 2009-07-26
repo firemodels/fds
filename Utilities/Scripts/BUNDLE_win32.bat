@@ -62,16 +62,22 @@ copy %in_smv%\smokeview.ini %out_bin%\.
 Rem Include documentation in the bundle only if the variable, docs_include_in_bundles,
 Rem is not set to 0.  This variable is defined in the fds_smv_env.bat setup  file
 
+echo.
+echo Copying FDS and Smokeview users guide to the Documentation directory
+
+copy %in_pdf%\FDS_5_User_Guide.pdf        %out_doc%\.
+copy %in_pdf%\SMV_5_User_Guide.pdf        %out_doc%\.
+copy "%bundleinfo%\FDS Web Site.url"      %out_doc%\.
+copy "%bundleinfo%\FDS Development Web Site.url"       %out_doc%\.
+
 if %docs_include_in_bundle% EQU 0 goto end_docs
 echo.
-echo Copying documentation and readme_docs.html to the Documentation directory
+echo Copying all other documentation to the Documentation directory
 copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_doc%\.
 copy %in_pdf%\FDS_5_Validation_Guide.pdf          %out_doc%\.
+copy %in_pdf%\FDS_5_Verification_Guide.pdf        %out_doc%\.
 copy %in_pdf%\SMV_5_Verification_Guide.pdf        %out_doc%\.
 copy %in_pdf%\SMV_5_Technical_Reference_Guide.pdf %out_doc%\.
-copy %in_pdf%\SMV_5_User_Guide.pdf                %out_doc%\.
-copy %in_pdf%\FDS_5_User_Guide.pdf                %out_doc%\.
-copy %in_pdf%\FDS_5_Verification_Guide.pdf        %out_doc%\.
 :end_docs
 
 copy %bundleinfo%\readme_docs.html %out_doc%\readme_docs.html
@@ -83,6 +89,7 @@ echo Copying readme_examples.html to the Examples directory
 copy %bundleinfo%\readme_examples.html %out_examples%\readme_examples.html
 
 copy %bundleinfo%\wrapup.bat %out_bundle%\FDS5\wrapup.bat
+copy %bundleinfo%\shortcut.exe %out_bundle%\FDS5\shortcut.exe
 copy %bundleinfo%\set_fds5_path.exe %out_bundle%\FDS5\set_fds5_path.exe
 
 Rem compress bundle directory
