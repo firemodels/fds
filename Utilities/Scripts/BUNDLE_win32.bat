@@ -31,6 +31,11 @@ set out_bin=%out_bundle%\FDS5\bin
 set out_doc=%out_bundle%\FDS5\Documentation
 set out_examples=%out_bundle%\FDS5\Examples
 
+set fds5=fds5t.exe
+set fds5mpi=fds5t_mpi.exe
+set smokeview=smokeviewt.exe
+set smokezip=smokezipt.exe
+
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 
 Rem erase the temporary bundle directory if it already exists
@@ -45,12 +50,12 @@ Rem Copy FDS, Smokeview and other needed files to the bin  directory
 
 echo.
 echo Copying files to bin directory
-copy %in_fds%\fds5_win_32.exe %out_bin%\fds5.exe
-copy %in_fds_mpi%\fds5_win_mpi_32 %out_bin%\fds5_mpi.exe
-copy %in_smv%\smokeview_release.exe %out_bin%\smokeview.exe
+copy %in_fds%\fds5_win_32.exe %out_bin%\%fds5%
+copy %in_fds_mpi%\fds5_win_mpi_32 %out_bin%\%fds5mpi%
+copy %in_smv%\smokeview_release.exe %out_bin%\%smokeview%
 copy %in_smv%\devices.svo %out_bin%\.
 copy %in_smv%\pthreadVC.dll %out_bin%\.
-copy %in_smv%\smokezip_release.exe %out_bin%\smokezip.exe
+copy %in_smv%\smokezip_release.exe %out_bin%\%smokezip%
 copy %in_smv%\glew32.dll %out_bin%\.
 copy %in_smv%\smokeview.ini %out_bin%\.
 
