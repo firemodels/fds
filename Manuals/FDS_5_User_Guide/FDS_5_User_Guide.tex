@@ -6620,6 +6620,14 @@ is the distance within the mesh cell that is traversed by the beam.
 \end{verbatim}
 \normalsize
 
+Since a single {\ct DEVC} cannot span more than one mesh, having a beam detector that crosses multiple meshes will require post processing by the user.  Break the beam detector into multiple {\ct DEVC} inputs, one for each mesh that the beam crosses.  The total obscuration is given by
+
+\be
+  \hbox{Obscuration}  = \left(1 -  \prod_{i=1}^N {1-output_i/100};  \right) \times 100  \; \; \hbox{\%}
+\ee
+
+where $output_i$ is the FDS output for the beam detector {\ct DEVC}.
+
 \subsubsection{Example Case: {\bf beam\_detector}}
 
 A 10~m x 10~m x 4~m compartment is filled with 0.006~kg/kg of
