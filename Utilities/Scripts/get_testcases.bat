@@ -24,10 +24,11 @@ set testdir=verification_%verification_revision%
 
 if exist Examples rmdir /s /q Examples
 svn export https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification Examples
-if exist %testdir%.zip erase %testdir%.zip
-Rem rmdir /S /Q Examples\Decaying_Isotropic_Turbulence
-wzzip -a -r -P -x@%excludefile% %testdir%.zip Examples
-if exist %testdir%.exe erase %testdir%.exe
-c:\bin\winzip\wzipse32 %testdir%.zip -d "c:\program files\nist\"
-erase %testdir%.zip
+cd Examples
+if exist ..\%testdir%.zip erase ..\%testdir%.zip
+wzzip -a -r -P ..\%testdir%.zip *
+if exist ..\%testdir%.exe erase ..\%testdir%.exe
+Rem c:\bin\winzip\wzipse32 ..\%testdir%.zip -d "c:\program files\nist\Examples"
+c:\bin\winzip\wzipse32 ..\%testdir%.zip -d "c:\program files\fds5\Examples"
+erase ..\%testdir%.zip
 pause
