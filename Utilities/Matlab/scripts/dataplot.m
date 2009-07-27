@@ -56,8 +56,6 @@ end
 % set the plot style parameters
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gcf,'DefaultLineLineWidth',Line_Width)
 
 % read the configuration file
@@ -185,6 +183,9 @@ for i=drange
             legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'Interpreter','LaTeX','FontSize',Key_Font_Size)
             legend boxon
         end
+        set(gca,'FontName',Font_Name)
+        set(gca,'Units',Plot_Units)
+        set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
         
         % print to pdf
         
