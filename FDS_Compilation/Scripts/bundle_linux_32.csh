@@ -2,7 +2,7 @@
 #
 # this script is called from windows which passes in the directory containing this script
 #
-set fds_smvroot=$1
+set fds_smvroot=~/$1
 set makedir=$fds_smvroot/FDS_Compilation
 set scriptdir=$makedir/Scripts
 set googledir=$makedir/to_google
@@ -18,6 +18,7 @@ mkdir $bundledir/bin
 mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
 
+echo Copying files
 cp $makedir/intel_linux_32/fds5_intel_linux_32 $bundledir/bin/.
 cp $makedir/mpi_intel_linux_32/fds5_mpi_intel_linux_32 $bundledir/bin/.
 cp $smvbindir/smv5_linux_32 $bundledir/bin/.
@@ -29,7 +30,9 @@ cp $mandir/SMV_5_User_Guide.pdf $bundledir/Documentation/.
 
 cp $bundle_setup/readme_examples.html $bundledir/Examples/.
 
+echo Building archive
 rm -rf $googledir/$bundledir.tar
 rm -rf $googledir/$bundledir.tar.gz
 tar cvf $googledir/$bundledir.tar $bundledir/.
+echo Compressing archive
 gzip    $googledir/$bundledir.tar
