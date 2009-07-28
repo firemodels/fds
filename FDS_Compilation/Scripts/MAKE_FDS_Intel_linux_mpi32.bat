@@ -1,7 +1,7 @@
 @echo off
 Title Building Parallel FDS for 32 bit Linux
 
-Rem Batch file used to build a 32 bit version of FDS
+Rem Batch file used to build a 32 bit mpi version of FDS
 
 set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -19,8 +19,10 @@ Rem location of batch files used to set up Intel compilation environment
 
 call %envfile%
 
-set makefds=%linux_svn_root%/FDS_Compilation/mpi_intel_linux_32
+set target=mpi_intel_linux_32
+set fdsdir=%linux_svn_root%/FDS_Compilation/mpi_intel_linux_32
+set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts
 
-plink %svn_logon% %makefds%/make_fds.csh %makefds%
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% fire78
 
 pause

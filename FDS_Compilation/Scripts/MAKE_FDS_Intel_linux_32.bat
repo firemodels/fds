@@ -19,8 +19,10 @@ Rem location of batch files used to set up Intel compilation environment
 
 call %envfile%
 
-set makefds=%linux_svn_root%/FDS_Compilation/intel_linux_32
+set target=intel_linux_32
+set fdsdir=%linux_svn_root%/FDS_Compilation/intel_linux_32
+set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts
 
-plink %svn_logon% %makefds%/make_fds.csh %makefds%
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% fire78
 
 pause
