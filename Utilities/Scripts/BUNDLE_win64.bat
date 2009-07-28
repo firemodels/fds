@@ -25,7 +25,7 @@ set in_fds_mpi=%svn_root%\FDS_Compilation\mpi_intel_win_64
 set in_smv=%svn_root%\SMV_5\for_bundle\
 
 set to_google=%svn_root%\Utilities\to_google
-set basename=bundle_fds_%fds_version%_smv_%smv_version%_win64
+set basename=FDS_%fds_version%_SMV_%smv_version%_win64
 set out_bundle=%to_google%\%basename%
 set out_bin=%out_bundle%\FDS5\bin
 set out_doc=%out_bundle%\FDS5\Documentation
@@ -53,8 +53,8 @@ Rem Copy FDS, Smokeview and other needed files to the bin  directory
 echo.
 echo Copying files to bin directory
 copy %in_fds%\fds5_win_64.exe %out_bin%\%fds5%
-copy %in_fds_mpi%\fds5_win_mpi_64 %out_bin%\%fds5mpi%
-copy %in_smv%\smokeview_release.exe %out_bin%\%smokeview%
+copy %in_fds_mpi%\fds5_win_mpi_64.exe %out_bin%\%fds5mpi%
+copy %in_smv%\smokeview64_release.exe %out_bin%\%smokeview%
 copy %in_smv%\devices.svo %out_bin%\.
 copy %in_smv%\pthreadVC.dll %out_bin%\.
 copy %in_smv%\smokezip_release.exe %out_bin%\%smokezip%
