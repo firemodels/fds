@@ -19,10 +19,10 @@ Rem location of batch files used to set up Intel compilation environment
 call %envfile%
 
 set bundledir=FDS_%fds_version%-SMV_%smv_version%_linux_64
-plink %svn_logon% %linux_svn_root%/FDS_Compilation/Scripts/bundle_linux_64.csh %linux_svn_root% %bundledir%
+plink %svn_logon% %linux_svn_root%/Utilities/Scripts/bundle_linux_64.csh %linux_svn_root% %bundledir%
 
 echo Downloading compressed archive to:
 echo   %svn_root%\Utilities\to_google\%bundledir%.tar.gz
-pscp %svn_logon%:%linux_svn_root%/FDS_Compilation/to_google/%bundledir%.tar.gz %svn_root%/Utilities/to_google/.
+pscp %svn_logon%:%linux_svn_root%/Utilities/to_google/%bundledir%.tar.gz %svn_root%/Utilities/to_google/.
 
 pause
