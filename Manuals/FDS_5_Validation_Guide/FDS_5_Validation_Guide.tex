@@ -10,7 +10,7 @@
         citecolor=linkred,     % citation number colors
         linkcolor=linknavy,    % \ref{...} and \pageref{...}
         pdftitle={Fire Dynamics Simulator (Version 5) User's Guide},
-        pdfauthor={Kevin McGrattan, Bryan Klein, Simo Hostikka, Jason Floyd},
+        pdfauthor={Kevin McGrattan, Randall McDermott, Simo Hostikka, Jason Floyd},
         pdfsubject={User Guide},
         pdfkeywords={FDS, Fire Model, NIST, BFRL},
         pdfproducer={pdflatex},
@@ -160,7 +160,7 @@ Technical Reference Guide \\ \LARGE Volume 3: Validation}
 Kevin McGrattan \\
 Simo Hostikka \\
 Jason Floyd \\
-Bryan Klein \\
+Randall McDermott \\
 Kuldeep Prasad}
 
 \vfill
@@ -191,8 +191,8 @@ Technical Reference Guide \\ \LARGE Volume 3: Validation }
 \normalsize
 \flushright{
 Kevin McGrattan \\
-Bryan Klein
-Kuldeep Prasad\\
+Randall McDermott \\
+Kuldeep Prasad \\
 {\em Fire Research Division} \\
 {\em Building and Fire Research Laboratory}  \\
 \hspace{1.in} \\
@@ -262,6 +262,9 @@ University in 1987 and a doctorate at the Courant Institute of New
 York University in 1991. He joined the NIST staff in 1992 and has
 since worked on the development of fire models, most notably the Fire
 Dynamics Simulator.
+\item[Randall McDermott] joined the research staff of the Building and Fire Research Lab in 2008. He received a bachelors of science from the University of Tulsa in 
+Chemical Engineering in 1994 and a doctorate at the University of Utah in 2005. 
+His research interests include subgrid-scale models and numerical methods for large-eddy simulation, adaptive mesh refinement, and Lagrangian particle methods.
 \item[Simo Hostikka] is a Senior Research Scientist at VTT Technical
 Research Centre of Finland. He received a master of science
 (technology) degree in 1997 and a doctorate in 2008 from
@@ -278,16 +281,10 @@ currently funded by NIST under grant 60NANB5D1205 from the Fire
 Research Grants Program (15 USC 278f).  He is the principal developer
 of the multi-parameter mixture fraction combustion model and control
 logic within FDS.
-\item[Bryan Klein] is an Information Technology Specialist in the
-Building and Fire Research Laboratory of NIST.  Before coming to NIST,
-Bryan worked for five years with Western Fire Center, Inc., performing a
-wide range of activities including fire modeling, data acquisition programming,
-and quantitative fire measurements. His current focus is on FDS development and
-user support, along with experimental model validation work.
 \item[Kuldeep Prasad] is a Research Engineer in the Building and Fire Research
 Laboratory at NIST. He received a bachelors of technology degree from Indian
-Institute of Technology, Kanpur in 1986 and doctorate at the Georgia Institute of
-Technology in 1991. He joined the NIST staff in 2001 and has developed the multi mesh
+Institute of Technology, Kanpur in 1986, and a doctorate at the Georgia Institute of
+Technology in 1991. He joined the NIST staff in 2001 and has developed the multi-mesh
 data structures and algorithms for coupling the meshes in the Fire Dynamics Simulator.
 \end{description}
 
@@ -318,6 +315,9 @@ the ``NBS Multi-Room Test Series,'' a set of three room
 fire experiments conducted at the National Bureau of Standards (now
 NIST) in the mid-1980's.
 
+Bryan Klein of NIST assisted in the development of techniques to automatically generate the plots that
+are found throughout this Guide.
+
 Thanks to Bill Pitts, Nelson Bryner, and Erik Johnsson of NIST for their contribution of data for the
 ''NIST Reduced Scale Enclosure Experiments.''
 
@@ -331,6 +331,7 @@ validation of the model for various applications.
 David Sheppard, currently of the Bureau of Alcohol, Tobacco and Firearms (ATF), conducted the
 experiments referred to as the ``UL/NFPRF Test Series'' on behalf of the Fire Protection Research Foundation (then known as
 the National Fire Protection Research Foundation) while working at Underwriters Labs in Northbrook, Illinois.
+Sheppard, along with Bryan Klein of NIST, conducted the experiments referred to as the ``ATF Corridors'' series in 2008.
 
 Thanks to Jerry Back, Craig Beyler and Phil DiNenno of Hughes Associates and Pat Tatem of
 the Naval Research Laboratory for their contribution
