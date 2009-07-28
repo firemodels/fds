@@ -4,8 +4,7 @@
 #
 set fds_smvroot=~/$1
 set makedir=$fds_smvroot/FDS_Compilation
-set scriptdir=$makedir/Scripts
-set googledir=$makedir/to_google
+set googledir=$fds_smvroot/Utilities/to_google
 set bundledir=$2
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
 set mandir=$fds_smvroot/Manuals/All_PDF_Files
@@ -22,6 +21,7 @@ echo Copying files
 cp $makedir/intel_linux_32/fds5_intel_linux_32 $bundledir/bin/.
 cp $makedir/mpi_intel_linux_32/fds5_mpi_intel_linux_32 $bundledir/bin/.
 cp $smvbindir/smv5_linux_32 $bundledir/bin/.
+cp $smvbindir/smokezip_linux $bundledir/bin/.
 cp $smvbindir/smokeview.ini $bundledir/bin/.
 
 cp $bundle_setup/readme_docs.html $bundledir/Documentation/.
