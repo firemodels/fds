@@ -7,7 +7,7 @@
         citecolor=linkred,     % citation number colors
         linkcolor=linknavy,    % \ref{...} and \pageref{...}
         pdftitle={Fire Dynamics Simulator (Version 5) User's Guide},
-        pdfauthor={Kevin McGrattan, Bryan Klein, Simo Hostikka, Jason Floyd},
+        pdfauthor={Kevin McGrattan, Simo Hostikka, Jason Floyd},
         pdfsubject={User Guide},
         pdfkeywords={FDS, Fire Model, NIST, BFRL},
         pdfproducer={pdflatex},
@@ -267,7 +267,6 @@
 \large
 \flushright{
 Kevin McGrattan \\
-Bryan Klein \\
 Simo Hostikka \\
 Jason Floyd \\
  }
@@ -303,7 +302,6 @@ VTT Technical Research Centre of Finland  }
 \normalsize
 \flushright{
 Kevin McGrattan \\
-Bryan Klein \\
 {\em NIST Building and Fire Research Laboratory} \\
 {\em Gaithersburg, Maryland, USA}  \\
 \hspace{1in} \\
@@ -434,12 +432,6 @@ currently funded by NIST under grant 60NANB5D1205 from the Fire
 Research Grants Program (15 USC 278f).  He is the principal developer
 of the multi-parameter mixture fraction combustion model and control
 logic within FDS.
-\item[Bryan Klein] is an Information Technology Specialist in the
-Building and Fire Research Laboratory of NIST.  Before coming to NIST,
-Bryan worked for five years with Western Fire Center, Inc., performing a
-wide range of activities including fire modeling, data acquisition programming,
-and quantitative fire measurements. His current focus is on FDS development and
-user support, along with experimental model validation work.
 \end{description}
 
 
@@ -454,6 +446,9 @@ At NIST, thanks to Dan Madrzykowski, Doug Walton, Bob Vettori, Dave Stroup, Stev
 who have used FDS and Smokeview as part of several investigations of fire fighter line of duty deaths.
 As part of these studies, they have provided valuable information on the model's usability and accuracy
 when compared to large scale measurements made during fire reconstructions.
+
+Bryan Klein of NIST assisted in adding cross-referencing functionality to this document, making it easier to 
+view electronically.
 
 The US Nuclear Regulatory Commission has provided financial support for the maintenance and development of FDS,
 along with valuable insights into how fire models are used as part of probabilistic risk assessments of nuclear
@@ -1229,6 +1224,35 @@ should be posted to the Issue Tracker and not the Discussion Group.
 \end{warning}
 
 
+\section{Known Issues}
+\label{info:Known_Issues}
+
+As a result of collecting feedback from FDS users over roughly a decade, we have identified a number of features in FDS that can be problematic for a 
+variety of reasons.
+Table~\ref{tbl:Known_Issues} lists these features that are either under development, or that have been cited a number of
+times by users who have observed spurious behavior, inconsistent or inaccurate results, fragility, and so on. For those interested in
+FDS model development, this list is ripe for further research. For those who use FDS for engineering applications, these may be features to avoid until
+they can be made more reliable and robust.
+
+\begin{sidewaystable}[ht]
+\caption[FDS features with known issues or problems.]{Parameters or features known to have problems related to accuracy, numerical stability, robustness,
+sensitivity, and so on.}
+\label{tbl:Known_Issues}
+\begin{tabular}{|p{2.in}|p{2.1in}|p{2.1in}|p{2.1in}|}
+\hline
+Feature & Description & Symptom of Problem & Recommendation \\
+\hline \hline
+{\ct BAROCLINIC}     & Restores the baroclinic torque term to the momentum equation   & Erratic fluid motion, numerical instability in multiple mesh simulations    & Reconfigure meshes    \\ \hline
+{\ct CO\_PRODUCTION} & Algorithm to predict CO production    & Inaccuracies found in comparison to experiments       & Research usage only    \\ \hline
+Liquid Fuels         & Pyrolysis model of evaporating liquid fuel  & Inaccuracies found in comparison to experiments; physical and numerical sensitivity  & Research usage only    \\ \hline
+{\ct PRESSURE\_CORRECTION} & Improve accuracy of pressure solver over multiple meshes  & Erratic fluid motion  & Do not use if results are unphysical    \\ \hline
+\end{tabular}
+\end{sidewaystable}
+
+
+
+
+
 
 \part{Writing an FDS Input File}
 \label{info:inputfilecreation}
@@ -1341,7 +1365,9 @@ properly into the text file.
 
 \begin{warning}
 \noindent
-Note that depending on compiler and operating system, some text file encodings may not work on all systems.  If file reading errors occur and no typographical errors can be found in the input file, try saving the input file using a different encoding.  It does not appear that current Fortran compilers support the UTF-8 encoding standard for reading Namelist inputs.
+Note that depending on compiler and operating system, some text file encodings may not work on all systems.  
+If file reading errors occur and no typographical errors can be found in the input file, try saving the input file using a different encoding.  
+It does not appear that current Fortran compilers support the UTF-8 encoding standard for reading Namelist inputs.
 \end{warning}
 
 
@@ -1500,7 +1526,11 @@ simulation. It is simply descriptive text that is passed to various output files
 
 {\ct TIME} is the name of a group of parameters time define the time
 duration of the simulation and the initial time step used to advance
-the solution of the discretized equations. Usually, only the
+the solution of the discretized equations. 
+
+\subsection{Basics}
+
+Usually, only the
 duration of the simulation is required on this line, via the
 parameter {\ct T\_END} (Time End)\index{TIME!T\_END}. The default is 1 s.
 Note: {\ct TWFIN} will still work but it has been deprecated,
@@ -1591,6 +1621,9 @@ All FDS calculations must be performed within a domain that is made up
 of rectilinear volumes called {\em meshes}. Each mesh is divided into rectangular {\em cells},
 the number of which depends on the desired resolution of the flow dynamics.
 {\ct MESH} is the namelist group that defines the computational domain.
+
+\subsection{Basics}
+
 A mesh is a single right parallelepiped, {\em i.e.} a box.
 The coordinate system within a mesh conforms to the right hand rule.
 The origin point of a mesh is defined by the first, third
@@ -2020,7 +2053,10 @@ only what values worked well for that particular set of models.
 \section{Miscellaneous Parameters: The \texorpdfstring{{\tt MISC}}{MISC} Namelist Group (Table \ref{tbl:MISC})}
 \label{info:MISC}\index{MISC}
 
-{\ct MISC} is the namelist group of global miscellaneous input parameters.
+{\ct MISC} is the namelist group of global miscellaneous input parameters. It contains parameters that do not logically fit into any other category.
+
+\subsection{Basics}
+
 Only one {\ct MISC} line should be entered in the data file. For example, the input line
 
 \footnotesize
@@ -2058,7 +2094,7 @@ The default is {\ct 'INERT'},non-reacting solid boundary fixed at TMPA. You do n
 convenient to start the flow immediately, like in an outdoor simulation involving wind.
 \end{description}
 
-\subsection{Stopping and Restarting Calculations}
+\subsection{Special Topic: Stopping and Restarting Calculations}
 \label{info:restart}\index{Restart}
 
 An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events
@@ -2444,7 +2480,11 @@ chapter describes how to assign properties to the boundaries.
 \section{Creating Obstructions: The \texorpdfstring{{\tt OBST}}{OBST} Namelist Group (Table \ref{tbl:OBST})}
 \label{info:OBST}\index{OBST}
 
-The namelist group {\ct OBST} contains parameters used to define obstructions.
+The namelist group {\ct OBST} contains parameters used to define obstructions. The entire geometry of the model is made up entirely
+of rectangular solids, each one introduced on a single line in the input file.
+
+\subsection{Basics}
+
 Each {\ct OBST} line contains the coordinates of a rectangular
 solid within the flow domain. This solid is defined by two points
 ($x_1$,$y_1$,$z_1$) and ($x_2$,$y_2$,$z_2$) that are entered on the
@@ -2722,7 +2762,12 @@ Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only
 
 Whereas the {\ct OBST} group is used to specify obstructions within the
 computational domain, the {\ct VENT} group (Table \ref{tbl:VENT}) is used to prescribe planes
-adjacent to obstructions or external walls. The vents are chosen in a
+adjacent to obstructions or external walls. Note that the label {\ct VENT} is used for historical reasons -- this group of parameters has
+evolved well beyond its initial role as simply allowing for air to be blown into, or sucked out of, the computational domain. 
+
+\subsection{Basics}
+
+The vents are chosen in a
 similar manner to the obstructions, with the sextuplet {\ct XB}
 denoting a plane abutting a solid surface. Two of the six coordinates must
 be the same, denoting a plane as opposed to a solid.
@@ -3661,7 +3706,7 @@ pressure difference the fan can operate upon, and it is assumed to be a positive
 \begin{figure}[ht!]
 \begin{center}
 \includegraphics[width=3.5in]{FIGURES/Fan_Curve}
-\caption{\bf Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}. Note that a volume flux greater than
+\caption[Example of a fan curve.]{Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}. Note that a volume flux greater than
 10 is brought about by a negative pressure difference; that is, when the downstream pressure is less than the upstream. Note also that when
 the pressure difference is greater than 500~Pa, the volume flow becomes negative; that is, the flow reverses.}
 \label{fig:Fan_Curve}
@@ -5234,7 +5279,7 @@ In both cases, the mixture fraction combustion model is used. In fact, the mere 
 parameters automatically invokes the mixture fraction model. Do not specify explicitly gas species like
 oxygen if you have also specified heat release rates or solid phase reaction rates.
 
-\subsection{The Basics}
+\subsection{Basics}
 
 A single {\ct REAC} line is used with the mixture fraction model. If the {\ct REAC} line is not found in the input file, propane will
 be used as the surrogate fuel, and all burning rates will be adjusted accordingly.
@@ -5616,7 +5661,7 @@ absorptivity.
 
 \clearpage
 
-\section{Finite-Rate Combustion}
+\section{Special Topic: Finite-Rate Combustion}
 \label{info:finite}
 
 Usually, FDS uses mixture fraction concepts to describe combustion. However, FDS can also explicitly track gas species and

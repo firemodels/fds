@@ -3,7 +3,7 @@
 
 Model predictions are subject to two forms of uncertainty, {\em intrinsic} and {\em extrinsic}. Extrinsic uncertainty refers to the measured or postulated parameters that constitute the
 model input. Intrinsic uncertainty refers to the model itself.
-For the sake of clarity, we will use the word {\em uncertainty} in regard to the measured model inputs, and the word {\em error} in regards to the mathematical model itself. 
+For the sake of clarity, we will use the word {\em uncertainty} in regard to the measured model inputs, and the word {\em error} in regards to the mathematical model itself.
 The reason for this is two-fold. For one,
 it helps to differentiate various terms that are used to quantify model accuracy; but, more importantly, it highlights the subtle distinction between the roles of the model
 and of the modeler. For example, if the modeler chooses 10~MW to be the heat release rate of a hypothetical fire, we do not say it is wrong, but rather uncertain because there
@@ -15,13 +15,6 @@ this chapter.
 
 A fire model validation study typically consists of comparing a point measurements made during a compartment fire experiment with corresponding model predictions.
 Figure~\ref{temp_history} is a typical result of such an exercise, and given that usually dozens of point measurements are made during each experiment,
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[height=2.5in]{FIGURES/sample_time_history}
-\end{center}
-\caption[Sample time history plots.]{Example of a typical time history comparison of model prediction and experimental measurement.}
-\label{temp_history}
-\end{figure}
 and potentially dozens of experiments are conducted as part of a test series, we can expect hundreds of such plots for any given quantity of interest. In many cases, these
 plots in themselves provide sufficient information for a potential model user or authority having jurisdiction (AHJ) to decide if the model is sufficiently accurate for the
 given application. Because there is no consensus ``acceptance criteria'' within the fire protection community to indicate what constitutes sufficient accuracy, the
@@ -31,17 +24,18 @@ usually want the model to predict as accurately as possible, even though they ma
 In any case, there is certainly no reason why we cannot develop a process to quantify the accuracy of the model that goes beyond simply
 publishing hundreds of plots like the one shown in Fig.~\ref{temp_history}.
 
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.5in]{FIGURES/sample_time_history}
+\end{center}
+\caption[Sample time history plots.]{Example of a typical time history comparison of model prediction and experimental measurement.}
+\label{temp_history}
+\end{figure}
+
 To this end, we first have to decide how to condense all the data represented by these plots into a more tractable form. Specifically, we
 have to decide on a metric with which to compare two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999} discuss various possible metrics. The most commonly used metric is simply to compare the peak measured value against the peak
 predicted value. If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
 this exercise is a pair of numbers for each plot, $(E_i,M_i)$, that can be depicted graphically as shown in Fig.~\ref{scatterplot}. Now, at least, we have
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[height=3.in]{FIGURES/scatterplot}
-\end{center}
-\caption[Sample scatter plot.]{Example of a typical scatter plot of model predictions and experimental measurements.}
-\label{scatterplot}
-\end{figure}
 condensed hundreds of plots into just one, but we still have the problem of quantifying the degree of scatter in the results. At this stage in the analysis, the
 diagonal line on the plot shown in Fig.~\ref{scatterplot} only indicates where a prediction and measurement agree. But because the model has error, and
 the measurement has uncertainty, it cannot be said that the model is perfect if its predictions agree exactly with measurements. There needs to be a way of quantifying
@@ -51,9 +45,17 @@ horizontal bar associated with each point represents the uncertainty in the meas
 is not a simple task to quantify these values, nor can it be said that the vertical bar is the result solely of model error. As will be discussed below, any
 experiment involves measurements of elevated temperatures, heat flux, {\em etc.}, resulting from the fire, but also measurements of parameters, like the
 heat release rate and material properties, that are then fed into the model as input. Uncertainty in these input parameters combines with the error in the model
-itself to form the vertical uncertainty/error bar associated with each point in Fig.~\ref{scatterplot}. Decoupling the error from the uncertainty 
+itself to form the vertical uncertainty/error bar associated with each point in Fig.~\ref{scatterplot}. Decoupling the error from the uncertainty
 is the subject of analysis below. Before presenting this
 analysis, however, we must first discuss in more detail what we mean by experimental uncertainty and model error.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=3.in]{FIGURES/scatterplot}
+\end{center}
+\caption[Sample scatter plot.]{Example of a typical scatter plot of model predictions and experimental measurements.}
+\label{scatterplot}
+\end{figure}
 
 
 \section{Model Error}
@@ -201,6 +203,7 @@ and whose relative error is 0.15. In other words, we create a hypothetical set o
 What we have created are 1000 pairs of $(E_i,M_i)$ based on a given experimental uncertainty, $\widetilde{\sigma}_E$, and an assumed set of ``true'' values. A graphical
 representation of the data is shown in Fig.~\ref{scatterplot_1000}. Note that the experimental uncertainty bounds are represented by thick, dashed lines, and the model
 bias and relative error is shown by the lighter, dashed lines. Each are expressed as 95~\% confidence intervals ($2 \, \widetilde{\sigma}$).
+
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[height=3.0in]{FIGURES/scatterplot_1000}
@@ -209,10 +212,12 @@ bias and relative error is shown by the lighter, dashed lines. Each are expresse
 experimental uncertainty is represented by the solid diagonal and thicker dashed lines. The model error is represented by the thinner diagonal and dashed lines.}
 \label{scatterplot_1000}
 \end{figure}
+
 The statistical procedure outlined above ought to provide estimates of the values of the bias factor, $\delta$, and the model error, $\widetilde{\sigma}_M$, whose
 values we used in creating the data in the first place. The results of six random trials are shown in Table~\ref{trials}. It is not expected that the
 estimates will be exact because they are based on truncated Taylor series approximations. However, given the fact that the experimental uncertainty estimate,
 $\widetilde{\sigma}_E$, is often only a gross approximation in its own right, the accuracy of the procedure is more than adequate.
+
 \begin{table}[ht!]
 \caption{Estimated bias and relative error from six trials used to verify the analysis. }
 \begin{center}
@@ -270,6 +275,7 @@ analyzed following the procedure spelled out above, which provides us with a bia
 predictions of this particular quantity. Let us say, for the sake of argument, that the bias factor is 1.05; that is, on average, the model has been shown to over-predict
 surface temperatures by 5~\%. Let us also say that the relative error has been calculated and it is 0.15~.
 Now, consider the graph shown in Fig.~\ref{bell_curve}.
+
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=5.in]{FIGURES/bell_curve}
@@ -277,19 +283,20 @@ Now, consider the graph shown in Fig.~\ref{bell_curve}.
 \caption[Demonstration of model error.]{Plot showing how one might make use of the model error.}
 \label{bell_curve}
 \end{figure}
+
 The vertical lines indicate the temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
 model (350~$^\circ$C). The bell curve is a normal distribution obtained from Eq.~(\ref{truth}) above. Its mean is 20+(350-20)/1.05 and its standard deviation
 is 0.15(350-20)/1.05 . Notice that the statistical analysis
 above assumes that the measured and predicted quantity, in this case surface temperature, is reported as a change above or below its ambient value, which is
-20~$^\circ$C in this case. The shaded area beneath the bell curve is the probability (0.08 in this case) that the ``true'' temperature would exceed 400~$^\circ$C. 
+20~$^\circ$C in this case. The shaded area beneath the bell curve is the probability (0.08 in this case) that the ``true'' temperature would exceed 400~$^\circ$C.
 This means that there is an 8~\% chance that the cables could
-become damaged {\em based solely on the fact that the model is not a perfect representation of reality.} 
+become damaged {\em based solely on the fact that the model is not a perfect representation of reality.}
 
 The obvious question to ask at this point is what do we do if we cannot assume that the specified fire, material properties, and other input parameters are
 known exactly? How does that affect our estimate of the likelihood of cable damage? The procedure above has only provided a way of expressing the model
 error. What about the so-called ``user effects''? What if the specified fire in the electrical cabinet is actually chosen from a distribution of heat release rates?
 What if the material properties of the cables are not known exactly? Assuming one could quantify the uncertainty of all of the input parameters, and assuming that the model error
-and the input uncertainty are uncorrelated, it is possible to combine the two following the procedure that was described above that is used to determine the combined 
+and the input uncertainty are uncorrelated, it is possible to combine the two following the procedure that was described above that is used to determine the combined
 experimental uncertainty. Of
 course, the uncertainty associated with the input parameters would need to be quantified and propagated through the model. The end result would be a widening of
 the distribution shown in Fig.~\ref{bell_curve} and an increase in the likelihood of cable damage, assuming that the parameters used in the ``base case'' were
