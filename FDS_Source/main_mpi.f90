@@ -74,6 +74,10 @@ CALL MPI_GET_PROCESSOR_NAME(PNAME, PNAMELEN, IERR)
 MPI_WALL_TIME_START = MPI_WTIME()
  
 WRITE(LU_ERR,'(A,I3,A,I3,A,A)') 'Process ',MYID,' of ',NUMPROCS-1,' is running on ',PNAME(1:PNAMELEN)
+ 
+! Check for OpenMP
+
+CALL OPENMP_CHECK
 
 ! Start wall clock timing
 

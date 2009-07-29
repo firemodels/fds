@@ -1874,11 +1874,11 @@ WRITE(LU_ERR,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
 IF (.NOT.PARALLEL)   WRITE(LU_ERR,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
 IF (PARALLEL)        WRITE(LU_ERR,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
 
-! ADD OpenMP Information
-IF (.NOT. USE_OPENMP) WRITE (LU_ERR,'(/A/)')      ' No OpenMP-Version'
-IF (USE_OPENMP) WRITE(LU_ERR,'(/A/)')             ' OpenMP-Version'
-IF (USE_OPENMP) WRITE(LU_ERR,'(A,I3/)')           ' Number of used OpenMP-Threads: ',OPENMP_AVAILABLE_THREADS
-! END OpenMP Information
+! Version and OpenMP Information
+
+IF (.NOT. USE_OPENMP) WRITE (LU_ERR,'(/A/)')      ' OpenMP Disabled'
+IF (USE_OPENMP) WRITE(LU_ERR,'(/A/)')             ' OpenMP Enabled'
+IF (USE_OPENMP) WRITE(LU_ERR,'(A,I3/)')           ' Number of OpenMP threads: ',OPENMP_AVAILABLE_THREADS
 
 WRITE(LU_ERR,'(A,I4/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
 WRITE(LU_ERR,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
@@ -1891,11 +1891,11 @@ WRITE(LU_OUTPUT,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
 IF (.NOT.PARALLEL)   WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
 IF (PARALLEL)        WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
 
-! ADD OpenMP Information
-IF (.NOT. USE_OPENMP) WRITE (LU_OUTPUT,'(/A/)')      ' No OpenMP-Version'
-IF (USE_OPENMP) WRITE(LU_OUTPUT,'(/A/)')             ' OpenMP-Version'
-IF (USE_OPENMP) WRITE(LU_OUTPUT,'(A,I3/)')           ' Number of used OpenMP-Threads: ',OPENMP_AVAILABLE_THREADS
-! END OpenMP Information
+! ADD Version and OpenMP Information
+
+IF (.NOT. USE_OPENMP) WRITE (LU_OUTPUT,'(/A/)')      ' OpenMP Disabled'
+IF (USE_OPENMP) WRITE(LU_OUTPUT,'(/A/)')             ' OpenMP Enabled'
+IF (USE_OPENMP) WRITE(LU_OUTPUT,'(A,I3/)')           ' Number of OpenMP threads: ',OPENMP_AVAILABLE_THREADS
 
 WRITE(LU_OUTPUT,'(A,I4/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
 WRITE(LU_OUTPUT,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
