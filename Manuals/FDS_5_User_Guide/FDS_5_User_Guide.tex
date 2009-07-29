@@ -447,7 +447,7 @@ who have used FDS and Smokeview as part of several investigations of fire fighte
 As part of these studies, they have provided valuable information on the model's usability and accuracy
 when compared to large scale measurements made during fire reconstructions.
 
-Bryan Klein of NIST assisted in adding cross-referencing functionality to this document, making it easier to 
+Bryan Klein of NIST assisted in adding cross-referencing functionality to this document, making it easier to
 view electronically.
 
 The US Nuclear Regulatory Commission has provided financial support for the maintenance and development of FDS,
@@ -1227,7 +1227,7 @@ should be posted to the Issue Tracker and not the Discussion Group.
 \section{Known Issues}
 \label{info:Known_Issues}
 
-As a result of collecting feedback from FDS users over roughly a decade, we have identified a number of features in FDS that can be problematic for a 
+As a result of collecting feedback from FDS users over roughly a decade, we have identified a number of features in FDS that can be problematic for a
 variety of reasons.
 Table~\ref{tbl:Known_Issues} lists these features that are either under development, or that have been cited a number of
 times by users who have observed spurious behavior, inconsistent or inaccurate results, fragility, and so on. For those interested in
@@ -1365,8 +1365,8 @@ properly into the text file.
 
 \begin{warning}
 \noindent
-Note that depending on compiler and operating system, some text file encodings may not work on all systems.  
-If file reading errors occur and no typographical errors can be found in the input file, try saving the input file using a different encoding.  
+Note that depending on compiler and operating system, some text file encodings may not work on all systems.
+If file reading errors occur and no typographical errors can be found in the input file, try saving the input file using a different encoding.
 It does not appear that current Fortran compilers support the UTF-8 encoding standard for reading Namelist inputs.
 \end{warning}
 
@@ -1526,7 +1526,7 @@ simulation. It is simply descriptive text that is passed to various output files
 
 {\ct TIME} is the name of a group of parameters time define the time
 duration of the simulation and the initial time step used to advance
-the solution of the discretized equations. 
+the solution of the discretized equations.
 
 \subsection{Basics}
 
@@ -2763,7 +2763,7 @@ Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only
 Whereas the {\ct OBST} group is used to specify obstructions within the
 computational domain, the {\ct VENT} group (Table \ref{tbl:VENT}) is used to prescribe planes
 adjacent to obstructions or external walls. Note that the label {\ct VENT} is used for historical reasons -- this group of parameters has
-evolved well beyond its initial role as simply allowing for air to be blown into, or sucked out of, the computational domain. 
+evolved well beyond its initial role as simply allowing for air to be blown into, or sucked out of, the computational domain.
 
 \subsection{Basics}
 
@@ -9964,7 +9964,7 @@ identifies the version of the entire repository rather than of a specific file (
 A record of version number when a specific file was last changed is maintained.
 
 As an open source program, any individual can obtain a copy of the repository or retrieve specific versions
-repository.  Only Team Members described in the previous chapter can commit changes to the repository.
+repository.  Only the FDS and Smokeview developers can commit changes to the repository.
 
 The current location of the FDS repository is \href{http://code.google.com/p/fds-smv/source/checkout}
 {{\ct http://fds-smv.googlecode.com/svn/trunk/}}. The repository contains the following files:
@@ -9976,69 +9976,10 @@ The current location of the FDS repository is \href{http://code.google.com/p/fds
 \item Scripts and post-processing utilities used for software testing
 \item Web pages and wikis
 \end{enumerate}
+The wikis are particularly useful in describing the details of how you go about working with the Repository assets. 
 
 
-\section{How to Acquire Example Input Files}
-\index{Download Verification Files}
 
-Example input files for FDS can be found in the FDS-SMV project Subversion repository.  There are a few ways to get a copy of these files,
-two different approaches will be covered here. The first is via the SVN Command Line Client and the second is to Download Individual Files from the Web Interface.
-Note: Some of these files are used for example input throughout this document.
-
-\begin{description}
-\item[{\bf Command Line SVN Client}]
-There are two methods for using the command line client, both methods have an optional step to keep the files up to date with the latest version in the repository over time.
-The first method using SVN Checkout (co) is useful if you want to able to easily update the files on your local machine.
-The downside of this method is that there will be '.svn' files within each directory that are used to check the local versions when the optional Update command is later used.
-The SVN Export command will make a 'clean' copy the files and folders from the repository to your local computer, where 'clean' in this context
-means that there will not be '.svn' files in the directories.  The disadvantage of this method is that you cannot use the standard 'svn update' command to
-get the latest versions from the repository after check out.  Instead you will have to either force an overwrite of the existing files or remove
-the Verification directory and run the export command again.  Both methods will require that you download and install the \href{http://subversion.tigris.org}{{Subversion}}
-command line client for your Operating System.
-
-{\bf METHOD 1: SVN Checkout}
-\begin{enumerate}
-\item From the command line (Terminal) change to the directory where you want the new directory of files to appear and enter the following command into the shell prompt.
-\footnotesize
-\begin{verbatim}
-svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification Verification
-\end{verbatim}
-\normalsize
-\item {\bf Optional}: Run the following svn command from within the Verification directory when you want to update your local copy of the files to the latest versions of the test cases in the repository.
-\footnotesize
-\begin{verbatim}
-svn update
-\end{verbatim}
-\normalsize
-\end{enumerate}
-
-{\bf METHOD 2: SVN Export}
-\begin{enumerate}
-\item From the command line (Terminal) change to the directory where you want the new directory of files to appear and enter the following command into the shell prompt.
-\footnotesize
-\begin{verbatim}
-svn export http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification
-\end{verbatim}
-\normalsize
-\item {\bf Optional}: Run the following svn command from the directory where the Verification directory exists when you want to overwrite the local copy of the files to the latest versions of the test cases in the repository.  You could also just delete the local Verification directory and run the command above again.  Note the '--force' option in the export command.
-\footnotesize
-\begin{verbatim}
-svn export --force http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification
-\end{verbatim}
-\normalsize
-\end{enumerate}
-
-\item[{\bf Download Individual Files From Web Interface}]
-This method is not the most efficient way to get all of the test cases to your local computer.
-Instead, it is a convenient way to review the individual files online within the repository browser, and to selectively download only the files that you are interested in.
-\begin{enumerate}
-\item Go to the FDS-SMV Project Site \href{http://fds-smv.googlecode.com}{{\ct http://fds-smv.googlecode.com}}.
-Navigate to the Source Tab and then click Browse between 'Checkout' and 'Changes' next to the 'Search Trunk' text box.
-You can also click this \href{http://code.google.com/p/fds-smv/source/browse/trunk/FDS/trunk/Verification/}{{\ct Link to Verification}}, to go directly to the Verification directory in the repository.
-\item Navigate through the repository directories and click on the 'casename'.fds files that you want to review and download.
-\item To download a file you are interested in, right click the 'View raw file' link in the 'File info' section to the right of the page and save it to your local machine.
-\end{enumerate}
-\end{description}
 
 
 \chapter{Compiling FDS}
@@ -10123,6 +10064,7 @@ fire.f90   & Combustion routines \\ \hline
 pres.f90   & Spatial discretization of pressure (Poisson) equation \\ \hline
 divg.f90   & Compute the flow divergence \\ \hline
 init.f90   & Initialize variables and Poisson solver \\ \hline
+turb.f90   & Experimental routines, mostly involving the turbulence model \\ \hline
 velo.f90   & Momentum equations \\ \hline
 vege.f90   & Experimental vegetation model \\ \hline
 main.f90 {\bf or} main\_mpi.f90   & Main programs, serial and parallel versions \\ \hline
