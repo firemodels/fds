@@ -26,7 +26,7 @@ set in_smv=%svn_root%\SMV_5\for_bundle\
 
 set to_google=%svn_root%\Utilities\to_google
 set basename=bundle_fds_%fds_version%_smv_%smv_version%_win32
-set out_bundle=%to_google%\%basename%
+set out_bundle=%to_google%\%basename%\FDS
 set out_bin=%out_bundle%\FDS5\bin
 set out_doc=%out_bundle%\FDS5\Documentation
 set out_examples=%out_bundle%\FDS5\Examples
@@ -97,8 +97,8 @@ Rem compress bundle directory
 
 cd %to_google%
 if exist %basename%.zip erase %basename%.zip
-cd %basename%\fds5\
-wzzip -a -r -P ..\..\%basename%.zip *
+cd %basename%\fds\fds5\
+wzzip -a -r -P ..\..\..\%basename%.zip *
 
 Rem create an installation file from the zipped bundle directory
 
@@ -108,6 +108,6 @@ cd %to_google%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
-c:\bin\winzip\wzipse32 %basename%.zip -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\program files\fds5" -c wrapup.bat
+c:\bin\winzip\wzipse32 %basename%.zip -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\program files\FDS\FDS5" -c wrapup.bat
 Rem c:\bin\winzip\wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -mokcancel %bundleinfo%\message.txt %basename%.zip -c wrapup.bat
 pause
