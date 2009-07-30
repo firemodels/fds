@@ -6,14 +6,17 @@ set fds_smvroot=~/$1
 set scp_fds_smvroot=$1
 set makedir=$scp_fds_smvroot/FDS_Compilation
 set googledir=$fds_smvroot/Utilities/to_google
-set bundledir=$2
+set bundlebase=$2
+set bundledir=$bundlebase/FDS/FDS5
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
 set mandir=$fds_smvroot/Manuals/All_PDF_Files
 set smvbindir=$scp_fds_smvroot/SMV_5/bin
-set osxhost=devi1.nist.gov
+set osxhost=tiger.cfr.nist.gov
 
 cd $googledir
-rm -rf $bundledir
+rm -rf $bundlebase
+mkdir $bundlebase
+mkdir $bundlebase/FDS
 mkdir $bundledir
 mkdir $bundledir/bin
 mkdir $bundledir/Documentation
@@ -33,8 +36,9 @@ cp $mandir/SMV_5_User_Guide.pdf $bundledir/Documentation/.
 cp $bundle_setup/readme_examples.html $bundledir/Examples/.
 
 echo Building archive
-rm -rf $googledir/$bundledir.tar
-rm -rf $googledir/$bundledir.tar.gz
-tar cvf $googledir/$bundledir.tar $bundledir/.
+rm -rf $googledir/$bundlebase.tar
+rm -rf $googledir/$bundlebase.tar.gz
+cd $googledir/$bundlebase
+tar cvf ../$bundlebase.tar .
 echo Compressing archive
-gzip    $googledir/$bundledir.tar
+gzip    ../$bundlebase.tar
