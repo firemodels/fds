@@ -25,7 +25,7 @@ set in_fds_mpi=%svn_root%\FDS_Compilation\mpi_intel_win_32
 set in_smv=%svn_root%\SMV_5\for_bundle\
 
 set to_google=%svn_root%\Utilities\to_google
-set basename=bundle_fds_%fds_version%_smv_%smv_version%_win32
+set basename=FDS_%fds_version%_SMV_%smv_version%_win32
 set out_bundle=%to_google%\%basename%\FDS
 set out_bin=%out_bundle%\FDS5\bin
 set out_doc=%out_bundle%\FDS5\Documentation
