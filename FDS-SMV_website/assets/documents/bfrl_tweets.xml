@@ -3,7 +3,7 @@
 <ModulePrefs title="Cover It Feed" />
 <Content type="html"><![CDATA[
 
-<iframe src="http://www.coveritlive.com/index2.php/option=com_altcaster/task=viewaltcast/altcast_code=a3ebecc5f0/height=550/width=470" scrolling="no" height="550px" width="470px" frameBorder ="0" ><a href="http://www.coveritlive.com/mobile.php?option=com_mobile&task=viewaltcast&altcast_code=a3ebecc5f0" >Demo for Kelly</a></iframe>
+<iframe src="http://www.coveritlive.com/index2.php/option=com_altcaster/task=viewaltcast/altcast_code=62ea314beb/height=550/width=470" scrolling="no" height="550px" width="470px" frameBorder="0" ><a href="http://www.coveritlive.com/mobile.php?option=com_mobile&task=viewaltcast&altcast_code=62ea314beb" >Pre-Workshop Testing</a></iframe>
 
 ]]></Content>
 </Module>
