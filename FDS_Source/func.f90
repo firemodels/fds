@@ -904,6 +904,7 @@ DO K=K1,K2
                M%SOLID(IC)        = .TRUE.
                M%OBST_INDEX_C(IC) = OBST_INDEX
          END SELECT
+         IF (OBST_INDEX==0) M%EXTERIOR(IC) = .TRUE.
       ENDDO
    ENDDO
 ENDDO
