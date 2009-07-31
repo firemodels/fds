@@ -33,10 +33,10 @@ set out_examples=%out_bundle%\FDS5\Examples
 
 Rem Remove t's when when script is ready for prime time.
 
-set fds5=fds5t.exe
-set fds5mpi=fds5t_mpi.exe
-set smokeview=smokeviewt.exe
-set smokezip=smokezipt.exe
+set fds5=fds5.exe
+set fds5mpi=fds5_mpi.exe
+set smokeview=smokeview.exe
+set smokezip=smokezip.exe
 
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 
