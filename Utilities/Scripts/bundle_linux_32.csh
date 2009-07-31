@@ -32,6 +32,7 @@ cp $mandir/FDS_5_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_5_User_Guide.pdf $bundledir/Documentation/.
 
 cp $bundle_setup/readme_examples.html $bundledir/Examples/.
+svn export --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification $bundledir/Examples/.
 
 echo Building archive
 rm -rf $googledir/$bundlebase.tar
