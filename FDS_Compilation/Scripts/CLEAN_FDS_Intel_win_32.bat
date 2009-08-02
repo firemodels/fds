@@ -23,13 +23,13 @@ echo cleaning intel_win_32
 cd %svn_root%\FDS_Compilation\intel_win_32
 echo Cleaning intel_win_32
 
-make -f ..\makefile clean
+make -f ..\makefile winclean
 
 echo.
 echo cleaning mpi_intel_win_32
 cd %svn_root%\FDS_Compilation\mpi_intel_win_32
 echo Cleaning mpi_intel_win_32
 
-make -f ..\makefile clean
+make -f ..\makefile winclean
 
 pause
