@@ -7,7 +7,7 @@ bin = .
 
 # Definition of the object variables
 
-obj = main.obj dmalloc.o assert.o
+obj = main.obj dmalloc.o assert.o utilities.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
@@ -28,17 +28,17 @@ no_target:
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -O2 /Qvec_report0
-intel_win_32 : CC        = icl
-intel_win_32 : CPP       = icl
-intel_win_32 : FC        = ifort
-intel_win_32 : exe       = set_fds_path.exe
+CFLAGS    = -O2 /Qvec_report0 /nologo
+CC        = icl
+CPP       = icl
+FC        = ifort
+exe       = set_path.exe
 
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) 
 
-install	:	set_fds_path.exe
-	copy set_fds_path.exe ..\Scripts\bundle_setup\set_fds_path.exe
+install	:	$(exe)
+	copy $(exe) ..\Scripts\bundle_setup\$(exe)
 
 #-------------- Clean Target to remove Object and Module files -----------
 
