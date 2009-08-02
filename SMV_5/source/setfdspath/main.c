@@ -181,6 +181,8 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
       break;
     case CLEAN_SYSTEM_PATH:
       if(clean_old_fds==1){
+        int old_fds_found=0;
+
         token=strtok(tokens,";");
         strcpy(fullpath,"");
         while(token!=NULL){
@@ -190,6 +192,7 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
             STRSTR(token,"smokeview")!=NULL)
             ){
             token=strtok(NULL,";");
+            old_fds_found=1;
             continue;
           }
           strcat(fullpath,token);
@@ -197,20 +200,24 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           if(token!=NULL)strcat(fullpath,";");
         }
         trim(fullpath);
-        {
+        if(old_fds_found==1){
           int lenstr;
 
           lenstr = strlen(fullpath);
           if(fullpath[lenstr-1]==';'){
             fullpath[lenstr-1]=0;
           }
+          strcpy(command,"reg add \"hkey_local_machine\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\" /v Path /t REG_EXPAND_SZ /f /d "); 
+          strcat(command,"\"");
+          strcat(command,fullpath);
+          strcat(command,"\"");
+          printf("  pre 5.4 FDS/Smokeview path entries were found and are being removed\n");
+          if(show_debug==1)printf("executing: %s\n\n",command);
+          system(command);
         }
-        strcpy(command,"reg add \"hkey_local_machine\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\" /v Path /t REG_EXPAND_SZ /f /d "); 
-        strcat(command,"\"");
-        strcat(command,fullpath);
-        strcat(command,"\"");
-        if(show_debug==1)printf("executing: %s\n\n",command);
-        system(command);
+        else{
+          printf("  pre 5.4 FDS/Smokeview path entries were not found.\n");
+        }
       }
       break;
   }
