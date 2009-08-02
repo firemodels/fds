@@ -41,12 +41,12 @@ mkdir "%USERPROFILE%\Start Menu\Programs\FDS5"
 echo.
 echo Adding %CD% to the path variable for user: %USERNAME%
 
-call "%CD%"\set_path.exe -a "%CD%" -d
+call "%CD%"\set_path.exe -a "%CD%\bin"
 
 echo.
-echo Removing pre 5.4 FDS/Smokeview path entries from the system path
+echo Looking for pre 5.4 FDS/Smokeview path entries in the system path
 
-call "%CD%"\set_path.exe -r -d
+call "%CD%"\set_path.exe -r
 
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
