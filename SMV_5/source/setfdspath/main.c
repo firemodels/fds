@@ -1,9 +1,9 @@
-// $Date: 2009-03-01 08:51:14 -0500 (Sun, 01 Mar 2009) $ 
-// $Revision: 3426 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
-#include "options.h"
 #define INMAIN
+#include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,12 +11,22 @@
 #include <ctype.h>
 #include "MALLOC.h"
 #include "ASSERT.h"
+#include "svn_revision.h"
 
+char main_revision[]="$Revision$";
+
+#define BUFFER_SIZE 2050
+
+int clean_old_fds=0;
+int show_user_path=0;
+int show_system_path=0;
+int show_debug=0;
 
 char *trim_front(char *line);
-void usage(char *program_name);
+void usage(void);
+void version(void);
 void trim(char *line);
-int parse_path_key(int flag, char *newentry);
+char *parse_path_key(int flag, char *path_buffer, char *newentry);
 int STRCMP(const char *s1, const char *s2);
 char *STRSTR(char *c, const char *key);
 
@@ -26,14 +36,19 @@ int main(int argc, char **argv){
 
   char *arg;
   int i;
-  int clean_old_fds=0;
-  char *newentry,*program_name;
-  
+  char *newentry=NULL,*program_name;
+  char pathbuffer[BUFFER_SIZE], command[BUFFER_SIZE+100];
+  char *path;
+
+#define ADD_USER_PATH 0
+#define CLEAN_SYSTEM_PATH 1
+#define DELETE_FILE 2
+
+  initMM();
   program_name=argv[0];
-  newentry=argv[1];
 
   if(argc==1){
-    usage(program_name);
+    usage();
     return 1;
   }
  
@@ -42,188 +57,198 @@ int main(int argc, char **argv){
     if(arg[0]!='-'||strlen(arg)<=1)break;
 
     switch(arg[1]){
-      case 'c':
+      case 'a':
+        newentry=argv[i+1];
+        i++;
+        break;
+      case 'd':
+        show_debug=1;
+        break;
+      case 'r':
         clean_old_fds=1;
         break;
+      case 'u':
+        show_user_path=1;
+        break;
+      case 'v':
+        version();
+        return 0;
+        break;
+      case 's':
+        show_system_path=1;
+        break;
+      default:
+        usage();
+        return 1;
     }
   }
 
-  // add newentry to end of local path
+  // user path
 
-  system("reg query hkey_current_user\\Environment /v Path > local_path.txt"); 
+  if(newentry!=NULL||show_user_path==1){
+    strcpy(command,"reg query hkey_current_user\\Environment /v Path > local_path.txt"); 
+    if(show_debug==1)printf("executing: %s\n\n",command);
+    system(command);
+    path=parse_path_key(ADD_USER_PATH,pathbuffer,newentry);
+    _unlink("local_path.txt");
+    if(path!=NULL&&(show_user_path==1||show_debug==1)){
+      printf("User path: %s\n\n",path);
+    }
+  }
 
-  if(parse_path_key(0,newentry)==1)return 1;
-  if(clean_old_fds==0)return 0;
+  // system path
 
-  system("reg query \"hkey_local_machine\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\" /v Path > local_path.txt"); 
-  if(parse_path_key(1,NULL)==1)return 1;
+  if(clean_old_fds==1||show_system_path==1){
+    strcpy(command,"reg query \"hkey_local_machine\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\" /v Path > local_path.txt"); 
+    if(show_debug==1)printf("executing: %s\n\n",command);
+    system(command);
+    path=parse_path_key(CLEAN_SYSTEM_PATH,pathbuffer,NULL);
+    _unlink("local_path.txt");
+    if(path!=NULL&&(show_system_path==1||show_debug==1)){
+      printf("System path: %s\n\n",path);
+    }
+  }
 
   return 0;
 }
 
 /* ------------------ parse_path_key ------------------------ */
 
-int parse_path_key(int flag, char *newentry){
-  char buffer[1024],tokens[1024], command[1024];
+char *parse_path_key(int flag, char *buffer, char *newentry){
+  char tokens[BUFFER_SIZE], command[BUFFER_SIZE+100];
   FILE *stream=NULL;
-  char *fullpath,*token;
+  char *fullpath=NULL,*token;
+  int newentry_present;
+  int offset=0;
+  int offset_type=0;
 
   stream=fopen("local_path.txt","r");
-  if(stream==NULL)return 1;
+  if(stream==NULL)return NULL;
 
-  if(fgets(buffer,1024,stream)==NULL){
+  if(fgets(buffer,BUFFER_SIZE,stream)==NULL){
     fclose(stream);
-    return 1;
+    return NULL;
   }
 
   while(STRSTR(buffer,"Path")==NULL){
-    if(fgets(buffer,1024,stream)==NULL){
+    if(fgets(buffer,BUFFER_SIZE,stream)==NULL){
       fclose(stream);
-      return 1;
+      return NULL;
     }
   }
 
   fullpath=STRSTR(buffer,"REG_EXPAND_SZ");
+  offset=sizeof("REG_EXPAND_SZ");
+  if(fullpath!=NULL)offset_type=1;
+  if(fullpath==NULL){
+    fullpath=STRSTR(buffer,"REG_SZ");
+    if(fullpath!=NULL)offset_type=2;
+    offset=sizeof("REG_SZ");
+  }
   if(fullpath==NULL){
     fclose(stream);
-    return 1;
+    return NULL;
   }
   trim(fullpath);
-  fullpath+=sizeof("REG_EXPAND_SZ");
+  fullpath+=offset;
   fullpath=trim_front(fullpath);
   strcpy(tokens,fullpath);
-  if(flag==0&&newentry!=NULL){
-    token=strtok(tokens,";");
-    while(token!=NULL){
-      if(newentry!=NULL&&STRCMP(token,newentry)==0){
-        stream=NULL;
-        return 1;
+  switch (flag){
+    case ADD_USER_PATH:
+      token=strtok(tokens,";");
+      newentry_present=0;
+      while(token!=NULL){
+        if(newentry!=NULL&&STRCMP(token,newentry)==0)newentry_present=1;
+        token=strtok(NULL,";");
       }
-      token=strtok(NULL,";");
-    }
-    strcat(fullpath,";");
-    strcat(fullpath,newentry);
-    strcpy(command,"reg add hkey_current_user\\Environment /v Path /t REG_EXPAND_SZ /f /d "); 
-    strcat(command,"\"");
-    strcat(command,fullpath);
-    strcat(command,"\"");
-    system(command);
-  }
-  if(flag==1&&newentry==NULL){
-    token=strtok(tokens,";");
-    strcpy(fullpath,"");
-    while(token!=NULL){
-      if(STRSTR(token,"NIST")!=NULL&&STRSTR(token,"FDS")!=NULL)continue;
-      strcat(fullpath,";");
-      strcat(fullpath,token);
-      token=strtok(NULL,";");
-    }
-    strcpy(command,"reg add hkey_current_user\\Environment /v Path /t REG_EXPAND_SZ /f /d "); 
-    strcat(command,"\"");
-    strcat(command,fullpath);
-    strcat(command,"\"");
-    system(command);
+      // don't add a path entry if the entry is already in the user path
+      if(newentry!=NULL&&newentry_present==0){
+        strcat(fullpath,";");
+        strcat(fullpath,newentry);
+        strcpy(command,"reg add hkey_current_user\\Environment /v Path /t ");
+        if(offset_type==1){
+          strcat(command,"REG_EXPAND_SZ /f /d "); 
+        }
+        if(offset_type==2){
+          strcat(command,"REG_SZ /f /d "); 
+        }
+        strcat(command,"\"");
+        strcat(command,fullpath);
+        strcat(command,"\"");
+        if(show_debug==1)printf("executing: %s\n\n",command);
+        system(command);
+      }
+      break;
+    case CLEAN_SYSTEM_PATH:
+      if(clean_old_fds==1){
+        token=strtok(tokens,";");
+        strcpy(fullpath,"");
+        while(token!=NULL){
+          if(STRSTR(token,"NIST")!=NULL&&(
+            STRSTR(token,"fds")!=NULL||
+            STRSTR(token,"utilities")!=NULL||
+            STRSTR(token,"smokeview")!=NULL)
+            ){
+            token=strtok(NULL,";");
+            continue;
+          }
+          strcat(fullpath,token);
+          token=strtok(NULL,";");
+          if(token!=NULL)strcat(fullpath,";");
+        }
+        trim(fullpath);
+        {
+          int lenstr;
+
+          lenstr = strlen(fullpath);
+          if(fullpath[lenstr-1]==';'){
+            fullpath[lenstr-1]=0;
+          }
+        }
+        strcpy(command,"reg add \"hkey_local_machine\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\" /v Path /t REG_EXPAND_SZ /f /d "); 
+        strcat(command,"\"");
+        strcat(command,fullpath);
+        strcat(command,"\"");
+        if(show_debug==1)printf("executing: %s\n\n",command);
+        system(command);
+      }
+      break;
   }
 
-  unlink("local_path.txt");
   fclose(stream);
-  return 0;
+  return fullpath;
 }
 
-/* ------------------ trim ------------------------ */
+/* ------------------ version ------------------------ */
 
-void trim(char *line){
-  char *blank=" ";
-  const char *c;
-  const char *lf="\n", *cr="\r";
-  size_t len, i;
-  
-  len = strlen(line);
-  c = line+len-1;
-  for(i=0; i<len; i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,lf,1)!=0&&strncmp(c,cr,1)!=0){
-      c++; 
-      line[c-line]='\0';
-      return;
-    }
-    c--;
-  }
-  *line='\0';
-}
+void version(void){
+    int svn_num;
 
-/* ------------------ trim_front ------------------------ */
-
-char *trim_front(char *line){
-  char *blank=" ";
-  char *tab="\t";
-  const char *c;
-  size_t i,len;
-
-  c = line;
-  len=strlen(line);
-  for(i=0;i<len;i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,tab,1)!=0)return line+i;
-    c++;
-  }
-  return line;
+    svn_num=getmaxrevision();    // get svn revision number
+    printf("\n");
+    printf("set_path %s - %s\n\n",VERSION,__DATE__);
+    printf("Version: %s\n",VERSION);
+    printf("Revision Number: %i\n",svn_num);
+    printf("Compile Date: %s\n",__DATE__);
 }
 
 /* ------------------ usage ------------------------ */
 
-void usage(char *program_name){
-  printf("%s\n",program_name);
-  printf("  Add the FDS bin directory to the system path and/or remove\n");
-  printf("  previus FDS bin directories from the system path\n");
+void usage(void){
+  int max_revision;
+
+  max_revision = getmaxrevision();
+
+  printf("set_path SVN:revision:%i\n",max_revision);
+  printf("  Add the FDS bin directory to the user path and/or remove previous FDS bin\n");
+  printf("  directories from the system path.  All parameters are optional.\n\n");
   printf("Usage:\n\n");
-  printf("  %s [-r] path_entry\n\n",program_name);
-  printf("  path_entry - location of FDS and Smokeview executables\n");
-  printf("  -r  - remove pre FDS 5.4 directories from the system path\n");
-}
-
-/* ------------------ STRCMP ------------------------ */
-
-int STRCMP(const char *s1, const char *s2){
-  while (toupper(*s1) == toupper(*s2++)){
-		if (*s1++ == 0)return (0);
-  }
-	return (toupper(*(const unsigned char *)s1) - toupper(*(const unsigned char *)(s2 - 1)));
-}
-
-/* ------------------ STRSTR ------------------------ */
-
-char *STRSTR(char *c, const char *key){
-  char *C,*CCOPY,*CC,*cc,*result;
-  char *KEY,*KEYCOPY,*KEY2;
-  size_t i, len,len2;
-  int diff;
-
-  if(c==NULL||key==NULL)return NULL;
-  len=strlen(c);
-  len2=strlen(key);
-  if(len<1||len2<1)return NULL;
-  if(NewMemory((void **)&C,(unsigned int)(len+1))==0)return NULL;
-  CC=C;
-  cc=c;
-  CCOPY=C;
-  if(NewMemory((void **)&KEY,(unsigned int)(len2+1))==0){
-    FreeMemory(C);
-    return NULL;
-  }
-  KEY2=KEY;
-  KEYCOPY=KEY;
-  for(i=0;i<len;i++){
-    *CC++=(char)toupper(*cc++);
-  }
-  for(i=0;i<len2;i++){
-    *KEY2++=(char)toupper(*key++);
-  }
-  *CC='\0';
-  *KEY2='\0';
-  result = strstr(C,KEY);
-  if(result!=NULL)diff = result - C;
-  FREEMEMORY(CCOPY);
-  FREEMEMORY(KEYCOPY);
-  if(result==NULL)return NULL;
-  return c + diff;
-
+  printf("  set_path [-a path_entry][-d][-r][-s][-u][-v]\n\n");
+  printf("where\n\n");
+  printf("  -a path_entry - add the directory, path_entry, to the user path\n");
+  printf("  -d - turn on debug printing\n");
+  printf("  -r - remove pre FDS 5.4 directories from the system path\n");
+  printf("  -s - show the system path\n");
+  printf("  -u - show the user path\n");
+  printf("  -v - show versioning information\n");
 }

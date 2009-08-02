@@ -1,8 +1,8 @@
 #ifndef MALLOC_DEFINED
 #define MALLOC_DEFINED
-// $Date: 2008-01-21 21:58:19 -0500 (Mon, 21 Jan 2008) $ 
-// $Revision: 1224 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #ifndef pp_OSX
 #include <malloc.h>
