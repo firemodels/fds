@@ -157,7 +157,6 @@ void trimmzeros(char *line){
   line[bufstart]='\0';
 }
 
-
 /* ------------------ STRSTR ------------------------ */
 
 char *STRSTR(char *c, const char *key){
