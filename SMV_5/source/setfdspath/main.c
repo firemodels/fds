@@ -14,7 +14,7 @@
 
 
 char *trim_front(char *line);
-void usage(char *prog);
+void usage(char *program_name);
 void trim(char *line);
 int parse_path_key(int flag, char *newentry);
 int STRCMP(const char *s1, const char *s2);
@@ -27,18 +27,16 @@ int main(int argc, char **argv){
   char *arg;
   int i;
   int clean_old_fds=0;
-  char *newentry,*prog;
+  char *newentry,*program_name;
   
-  prog=argv[0];
+  program_name=argv[0];
   newentry=argv[1];
 
-  /*
   if(argc==1){
-    usage(prog);
+    usage(program_name);
     return 1;
   }
-  */
-
+ 
   for(i=1;i<argc;i++){
     arg=argv[i];
     if(arg[0]!='-'||strlen(arg)<=1)break;
@@ -131,6 +129,7 @@ int parse_path_key(int flag, char *newentry){
   fclose(stream);
   return 0;
 }
+
 /* ------------------ trim ------------------------ */
 
 void trim(char *line){
@@ -171,11 +170,14 @@ char *trim_front(char *line){
 
 /* ------------------ usage ------------------------ */
 
-void usage(char *prog){
-
-  printf("\n");
-  printf("  setfdspath\n\n");
-  printf("  -b  - dummy option\n");
+void usage(char *program_name){
+  printf("%s\n",program_name);
+  printf("  Add the FDS bin directory to the system path and/or remove\n");
+  printf("  previus FDS bin directories from the system path\n");
+  printf("Usage:\n\n");
+  printf("  %s [-r] path_entry\n\n",program_name);
+  printf("  path_entry - location of FDS and Smokeview executables\n");
+  printf("  -r  - remove pre FDS 5.4 directories from the system path\n");
 }
 
 /* ------------------ STRCMP ------------------------ */
