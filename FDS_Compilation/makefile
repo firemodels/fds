@@ -498,3 +498,7 @@ main_mpi.obj : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f9
 .PHONY : clean
 clean:
 	-rm -f *.o *.mod *.obj 
+
+.PHONY : winclean
+winclean:
+	-erase *.mod *.obj 
