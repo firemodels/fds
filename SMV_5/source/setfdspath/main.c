@@ -177,6 +177,8 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
         strcat(command,"\"");
         if(show_debug==1)printf("executing: %s\n\n",command);
         system(command);
+        printf("  The directory, %s, was added to the user PATH variable.\n");
+        printf("  You need to re-boot your computer when this installation completes.\n");
       }
       break;
     case CLEAN_SYSTEM_PATH:
@@ -211,7 +213,8 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           strcat(command,"\"");
           strcat(command,fullpath);
           strcat(command,"\"");
-          printf("  pre 5.4 FDS/Smokeview path entries were found and are being removed\n");
+          printf("  pre 5.4 FDS/Smokeview path entries were found and are being removed.\n");
+          printf("  You need to re-boot your computer when this installation completes.\n");
           if(show_debug==1)printf("executing: %s\n\n",command);
           system(command);
         }
