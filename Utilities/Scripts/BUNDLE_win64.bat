@@ -22,6 +22,7 @@ Rem define variables used by script
 set in_pdf=%svn_root%\Manuals\All_PDF_Files
 set in_fds=%svn_root%\FDS_Compilation\intel_win_64
 set in_fds_mpi=%svn_root%\FDS_Compilation\mpi_intel_win_64
+set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_smv=%svn_root%\SMV_5\for_bundle\
 
 set to_google=%svn_root%\Utilities\to_google
@@ -30,8 +31,6 @@ set out_bundle=%to_google%\%basename%\FDS
 set out_bin=%out_bundle%\FDS5\bin
 set out_doc=%out_bundle%\FDS5\Documentation
 set out_examples=%out_bundle%\FDS5\Examples
-
-Rem Remove t's when when script is ready for prime time.
 
 set fds5=fds5.exe
 set fds5mpi=fds5_mpi.exe
@@ -54,6 +53,7 @@ echo.
 echo Copying files to bin directory
 copy %in_fds%\fds5_win_64.exe %out_bin%\%fds5%
 copy %in_fds_mpi%\fds5_win_mpi_64.exe %out_bin%\%fds5mpi%
+copy %in_fds2ascii%\fds2ascii.exe %out_bin%\fds2ascii.exe
 copy %in_smv%\smokeview64_release.exe %out_bin%\%smokeview%
 copy %in_smv%\devices.svo %out_bin%\.
 copy %in_smv%\pthreadVC.dll %out_bin%\.
@@ -65,13 +65,16 @@ Rem Include documentation in the bundle only if the variable, docs_include_in_bu
 Rem is not set to 0.  This variable is defined in the fds_smv_env.bat setup  file
 
 echo.
-echo Copying FDS and Smokeview users guide to the Documentation directory
+echo Copying FDS and Smokeview users guide and other documentation 
+echo to the Documentation directory
 
 copy %in_pdf%\FDS_5_User_Guide.pdf        %out_doc%\.
 copy %in_pdf%\SMV_5_User_Guide.pdf        %out_doc%\.
 copy %bundleinfo%\readme_docs.html        %out_doc%\readme_docs.html
 copy "%bundleinfo%\FDS Web Site.url"      %out_doc%\.
 copy "%bundleinfo%\FDS Development Web Site.url"       %out_doc%\.
+copy %in_smv%\readme.html %out_doc%\readme_smokeview.html
+copy %bundleinfo%\readme_fds.url %out_doc%\readme_fds.url
 
 if %docs_include_in_bundle% EQU 0 goto end_docs
 echo.
