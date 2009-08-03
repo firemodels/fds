@@ -22,7 +22,7 @@ cd %svn_root%\Utilities\to_google
 set glabels=Type-Installer,Opsys-Windows,%fds_google_level%
 set dplatform=32 bit Windows
 set platform=win32
-set summary=Bundled FDS and Smokeview for %dplatform% (SVN r%fds_revision%)
+set summary=Bundled FDS and Smokeview for %dplatform% (SVN r%fds_revision%,%smv_revision%)
 set exe=FDS_%fds_version%_SMV_%smv_version%_%platform%.exe
 
 echo Uploading %exe%
