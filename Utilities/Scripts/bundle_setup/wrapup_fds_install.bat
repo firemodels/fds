@@ -9,13 +9,11 @@ exit
 echo.
 echo FDS and Smokeview wrapup installation script
 echo.
-echo This installation of FDS and Smokeview requires that path
-echo entries for pre version 5.4 installaions be removed from
-echo the system path.  
+echo ***Note*** This wrapup script removes entries in the system path for
+echo pre 5.4 versions of FDS and Smokeview.  Only path entries will be
+echo changed, program and data files WILL NOT be removed.
 echo.
-echo Program files WILL NOT be removed.
-echo.
-echo Press any key to proceed or CTRL C to abort this installation.
+echo Press any key to proceed or CTRL C to abort
 pause>NUL
 
 echo.  
@@ -24,8 +22,8 @@ echo Proceeding...
 echo.
 echo Associating the smv file extension with smokeview.exe
 
-ftype smtDoc="%CD%\bin\smokeviewt.exe" "%%1" >Nul
-assoc .smt=smtDoc>Nul
+ftype smvDoc="%CD%\bin\smokeview.exe" "%%1" >Nul
+assoc .smv=smvDoc>Nul
 
 echo. 
 echo Adding FDS and Smokeview shortcuts to the Start menu.
@@ -34,12 +32,12 @@ mkdir "%USERPROFILE%\Start Menu\Programs\FDS5"
 "%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Documentation.lnk"  /T:"%CD%"\Documentation /A:C >NUL
 "%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS version.lnk"     /T:"%CD%"\bin\fds5.exe /A:C >NUL
 "%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Smokeview.lnk"      /T:"%CD%"\bin\smokeview.exe /A:C >NUL
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Web Site.lnk"    /T:"%CD%\Documentation\FDS Web Site.url" /A:C >NUL
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Discussion Group.lnk"  /T:"%CD%\Documentation\FDS and Smokeview Discussion Group.url" /A:C >NUL
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Development Web Site.lnk"  /T:"%CD%\Documentation\FDS Development Web Site.url" /A:C >NUL
+"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS-Smokeview on the Web.lnk"    /T:"%CD%\Documentation\FDS Web Site.url" /A:C >NUL
+"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS-Smokeview Discussion Group.lnk"  /T:"%CD%\Documentation\FDS and Smokeview Discussion Group.url" /A:C >NUL
+"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS-Smokeview Development Web Site.lnk"  /T:"%CD%\Documentation\FDS Development Web Site.url" /A:C >NUL
 
 echo.
-echo Adding %CD% to the path variable for user: %USERNAME%
+echo Adding the directory %CD% to the user path variable for: %USERNAME%
 
 call "%CD%"\set_path.exe -a "%CD%\bin"
 
@@ -52,8 +50,7 @@ erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
 
 echo.
-echo Installation Complete.  
-echo Press any key to continue . . . 
+echo Press any key to complete the installation.
 pause>NUL
-erase "%CD%"\wrapup.bat
+erase "%CD%"\wrapup_fds_install.bat
 
