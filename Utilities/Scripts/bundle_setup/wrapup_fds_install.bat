@@ -1,15 +1,15 @@
 @echo off
 
 IF not EXIST placeholder.txt goto dircheck
-echo ***error: wrapup script running in wrong directory.
+echo ***error: This script is running in wrong directory.
 pause
 exit
 :dircheck
 
 echo.
-echo FDS and Smokeview wrapup installation script
+echo FDS and Smokeview installation
 echo.
-echo ***Note*** This wrapup script removes entries in the system path for
+echo ***Note*** This installation removes entries in the system path for
 echo pre 5.4 versions of FDS and Smokeview.  Only path entries will be
 echo changed, program and data files WILL NOT be removed.
 echo.
@@ -29,12 +29,9 @@ echo.
 echo Adding FDS and Smokeview shortcuts to the Start menu.
 rmdir /q /s "%USERPROFILE%\Start Menu\Programs\FDS5"
 mkdir "%USERPROFILE%\Start Menu\Programs\FDS5"
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Documentation.lnk"  /T:"%CD%"\Documentation /A:C >NUL
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS version.lnk"     /T:"%CD%"\bin\fds5.exe /A:C >NUL
+"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Documentation and Updates.lnk"  /T:"%CD%"\Documentation /A:C >NUL
+"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS (version only).lnk"     /T:"%CD%"\bin\fds5.exe /A:C >NUL
 "%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Smokeview.lnk"      /T:"%CD%"\bin\smokeview.exe /A:C >NUL
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS-Smokeview on the Web.lnk"    /T:"%CD%\Documentation\FDS Web Site.url" /A:C >NUL
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS-Smokeview Discussion Group.lnk"  /T:"%CD%\Documentation\FDS and Smokeview Discussion Group.url" /A:C >NUL
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS-Smokeview Development Web Site.lnk"  /T:"%CD%\Documentation\FDS Development Web Site.url" /A:C >NUL
 
 echo.
 echo Adding the directory %CD% to the user path variable for: %USERNAME%

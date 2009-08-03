@@ -70,11 +70,11 @@ echo to the Documentation directory
 
 copy %in_pdf%\FDS_5_User_Guide.pdf        %out_doc%\.
 copy %in_pdf%\SMV_5_User_Guide.pdf        %out_doc%\.
-copy %bundleinfo%\readme_docs.html        %out_doc%\readme_docs.html
+copy %bundleinfo%\readme_docs.html        "%out_doc%\Documentation and Update notes.html"
 copy "%bundleinfo%\FDS Web Site.url"      %out_doc%\.
 copy "%bundleinfo%\FDS Development Web Site.url"       %out_doc%\.
-copy %in_smv%\readme.html %out_doc%\readme_smokeview.html
-copy %bundleinfo%\readme_fds.url %out_doc%\readme_fds.url
+copy %in_smv%\readme.html "%out_doc%\Smokeview release notes.html"
+copy %bundleinfo%\readme_fds.url "%out_doc%\FDS release notes.url"
 
 if %docs_include_in_bundle% EQU 0 goto end_docs
 echo.
@@ -90,7 +90,7 @@ Rem Copy readme_examples file to Examples directory to let user download all exa
 
 echo.
 echo Copying readme_examples.html and the examples to the Examples directory
-copy %bundleinfo%\readme_examples.html %out_examples%\readme_examples.html
+copy %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
 svn export --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
 
 copy %bundleinfo%\wrapup_fds_install.bat %out_bundle%\FDS5\wrapup_fds_install.bat
