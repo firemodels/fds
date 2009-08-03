@@ -1,3 +1,4 @@
+
 \chapter{Surface Temperature}
 
 All solid surfaces in an FDS model are assigned thermal boundary conditions.
@@ -6,8 +7,6 @@ usually handled with empirical correlations, although it is possible
 to compute directly the heat and mass transfer when performing a
 Direct Numerical Simulation (DNS). Heat conduction into a solid surface is calculated via a one-dimensional solution of
 the heat equation in either cartesian or cylindrical coordinates. The latter is useful for cables.
-
-
 
 \section{WTC Test Series, Steel Structural Members and ``Slug'' Calorimeters}
 
@@ -28,6 +27,8 @@ inserted into each slug at various locations. All four temperatures for each slu
 
 In FDS, rectangular obstructions were used to model the slugs, but the one-dimensional heat conduction calculation was performed using
 cylindrical coordinates.
+
+\newpage
 
 
 
@@ -216,9 +217,8 @@ cylindrical coordinates.
 \begin{figure}[p]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=5.0in]{FIGURES/ScatterPlots/Steel_Temperature} \\
-\includegraphics[width=5.0in]{FIGURES/ScatterPlots/Insulated_Steel_Temperature}
-\vspace{0.25in}
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Steel_Temperature} \\
+\includegraphics[width=4.0in]{FIGURES/ScatterPlots/Insulated_Steel_Temperature}
 \end{tabular}
 \end{center}
 \caption[Summary of steel temperature predictions, WTC test series.]
@@ -259,6 +259,8 @@ FDS calculates the AST using Eq.~(\ref{AST_gas}) and the plate thermometer tempe
 two layer solid of metal and insulating material. In the experiments, the plate thermometer temperature was obtained from a thermocouple attached to the back side of
 the thin metal plate, and the AST was derived from the measured plate thermometer temperature by a back calculation involving only the thermal lag due to the
 plate, not the insulation material.
+
+\newpage
 
 
 \begin{figure}[p]
@@ -422,6 +424,8 @@ The superposition of gas temperature, heat flux and surface temperature in the f
 provides information about how cables heat up in fires.  Favorable or unfavorable predictions of cable surface
 temperatures can often be explained in terms of comparable errors in the prediction of the thermal environment in the vicinity of the cable.
 
+\newpage
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/NIST_NRC/NIST_NRC_01_v5_Cable_B_Temp} &
@@ -558,6 +562,8 @@ pyrolyzates. This behavior is not captured in the model, which is why some of th
 temperature at a certain point in the test. In almost all cases, electrical failure occurred very shortly, or at about the
 same time, as ignition.
 
+\newpage
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/CAROLFIRE/CAROLFIRE_PT_01} &
@@ -654,6 +660,8 @@ TCW4IN              & 0.05      & 0.07      & 3.83      \\ \hline
 \end{center}
 \label{WTC_Ceiling}
 \end{table}
+
+\newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -815,6 +823,8 @@ TC East U-4-2     & 21.66 & 5.70 & 2.42     & TC Ceiling U-8-2  & 18.71 & 3.54  
 \end{center}
 \label{NIST_NRC_Wall_Coords}
 \end{table}
+
+\newpage
 
 
 \begin{figure}[p]
