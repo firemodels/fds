@@ -3,6 +3,21 @@
 # this script is called by bundle_platform_size.csh
 # where platform may be linux or osx and size may be 32 or 64
 
+if $?fdshost then
+set scp_fds_smvroot=$fds_smvroot
+else
+set scp_fds_smvroot=~/$fds_smvroot
+endif
+set fds_smvroot=~/$fds_smvroot
+set makedir=$scp_fds_smvroot/FDS_Compilation
+set googledir=$fds_smvroot/Utilities/to_google
+set bundledir=$bundlebase/FDS/FDS5
+set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
+set mandir=$fds_smvroot/Manuals/All_PDF_Files
+set smvbindir=$scp_fds_smvroot/SMV_5/bin
+set forbundle=$fds_smvroot/SMV_5/for_bundle
+set fds2asciidir=$fds_smvroot/Utilities/fds2ascii
+
 cd $googledir
 rm -rf $bundlebase
 mkdir $bundlebase
@@ -24,7 +39,7 @@ cp $makedir/$fds5mpidir/$fds5mpi $bundledir/bin/.
 cp $smvbindir/$smokeview $bundledir/bin/.
 cp $smvbindir/$smokezip $bundledir/bin/.
 endif
-cp $smvbindir/smokeview.ini $bundledir/bin/.
+cp $forbundle/smokeview.ini $bundledir/bin/.
 cp $fds2asciidir/$fds2ascii $bundledir/bin/.
 
 echo Copying documentation
