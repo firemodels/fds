@@ -17,6 +17,8 @@ char main_revision[]="$Revision$";
 
 #define BUFFER_SIZE 2050
 
+int add_user_path=0;
+int remove_user_path=0;
 int clean_old_fds=0;
 int show_user_path=0;
 int show_system_path=0;
@@ -43,6 +45,7 @@ int main(int argc, char **argv){
 #define ADD_USER_PATH 0
 #define CLEAN_SYSTEM_PATH 1
 #define DELETE_FILE 2
+#define REMOVE_USER_PATH 3
 
   initMM();
   program_name=argv[0];
@@ -58,6 +61,14 @@ int main(int argc, char **argv){
 
     switch(arg[1]){
       case 'a':
+        if(remove_user_path==0){
+          add_user_path=1;
+          newentry=argv[i+1];
+        }
+        i++;
+        break;
+      case 'c':
+        remove_user_path=1;
         newentry=argv[i+1];
         i++;
         break;
@@ -83,19 +94,33 @@ int main(int argc, char **argv){
     }
   }
 
-  // user path
+  // add or show user path
 
-  if(newentry!=NULL||show_user_path==1){
+  if((newentry!=NULL&&add_user_path==1)||show_user_path==1){
     strcpy(command,"reg query hkey_current_user\\Environment /v Path > local_path.txt"); 
     if(show_debug==1)printf("executing: %s\n\n",command);
     system(command);
-    path=parse_path_key(ADD_USER_PATH,pathbuffer,newentry);
+    if(newentry!=NULL&&add_user_path==1){
+      path=parse_path_key(ADD_USER_PATH,pathbuffer,newentry);
+    }
+    else{
+      path=parse_path_key(ADD_USER_PATH,pathbuffer,NULL);
+    }
     _unlink("local_path.txt");
     if(path!=NULL&&(show_user_path==1||show_debug==1)){
       printf("User path: %s\n\n",path);
     }
   }
 
+  // remove user path
+
+  if(newentry!=NULL&&remove_user_path==1){
+    strcpy(command,"reg query hkey_current_user\\Environment /v Path > local_path.txt"); 
+    if(show_debug==1)printf("executing: %s\n\n",command);
+    system(command);
+    path=parse_path_key(REMOVE_USER_PATH,pathbuffer,newentry);
+    _unlink("local_path.txt");
+  }
   // system path
 
   if(clean_old_fds==1||show_system_path==1){
@@ -177,8 +202,52 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
         strcat(command,"\"");
         if(show_debug==1)printf("executing: %s\n\n",command);
         system(command);
-        printf("  The directory, %s, was added to the user PATH variable.\n");
+        printf("  The directory, %s, was added to the user PATH variable.\n",newentry);
         printf("  You need to re-boot your computer when this installation completes.\n");
+      }
+      break;
+    case REMOVE_USER_PATH:
+      if(remove_user_path==1){
+        int old_fds_found=0;
+
+        token=strtok(tokens,";");
+        strcpy(fullpath,"");
+        while(token!=NULL){
+          if(STRSTR(token,newentry)!=NULL){
+            token=strtok(NULL,";");
+            old_fds_found=1;
+            continue;
+          }
+          strcat(fullpath,token);
+          token=strtok(NULL,";");
+          if(token!=NULL)strcat(fullpath,";");
+        }
+        trim(fullpath);
+        if(old_fds_found==1){
+          int lenstr;
+
+          lenstr = strlen(fullpath);
+          if(fullpath[lenstr-1]==';'){
+            fullpath[lenstr-1]=0;
+          }
+          strcpy(command,"reg add hkey_current_user\\Environment /v Path /t ");
+          if(offset_type==1){
+            strcat(command,"REG_EXPAND_SZ /f /d "); 
+          }
+          if(offset_type==2){
+            strcat(command,"REG_SZ /f /d "); 
+          }
+          strcat(command,"\"");
+          strcat(command,fullpath);
+          strcat(command,"\"");
+          if(show_debug==1)printf("executing: %s\n\n",command);
+          system(command);
+          printf("  The directory, %s, was removed from the USER path entry\n",newentry);
+          printf("  You need to re-boot your computer before this change takes effect.\n");
+        }
+        if(old_fds_found==0){
+          printf("  Path entry %s not found in user path,\n",newentry);
+        }
       }
       break;
     case CLEAN_SYSTEM_PATH:
@@ -253,9 +322,10 @@ void usage(void){
   printf("  Add the FDS bin directory to the user path and/or remove previous FDS bin\n");
   printf("  directories from the system path.  All parameters are optional.\n\n");
   printf("Usage:\n\n");
-  printf("  set_path [-a path_entry][-d][-r][-s][-u][-v]\n\n");
+  printf("  set_path [-a path_entry][-c][-d][-r][-s][-u][-v]\n\n");
   printf("where\n\n");
   printf("  -a path_entry - add the directory, path_entry, to the user path\n");
+  printf("  -c - cancel or remove path entry defined by current working directory\n");
   printf("  -d - turn on debug printing\n");
   printf("  -r - remove pre FDS 5.4 directories from the system path\n");
   printf("  -s - show the system path\n");
