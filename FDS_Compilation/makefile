@@ -422,12 +422,20 @@ gnu_mpi_32 : obj = fds5_gnu_mpi_32
 gnu_mpi_32 : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-gnu_linux_mpi_64 : FFLAGS = -O3 -unroll -static -frecord-marker=4 
-gnu_linux_mpi_64 : CFLAGS = -O3 -unroll -static 
-gnu_linux_mpi_64 : FCOMPL = mpif90 
-gnu_linux_mpi_64 : CCOMPL = mpicc 
-gnu_linux_mpi_64 : obj = fds5_mpi_linux_64 
-gnu_linux_mpi_64 : setup $(obj_mpi) 
+gnu_linux_64 : FFLAGS = -O3 -unroll -static -frecord-marker=4
+gnu_linux_64 : CFLAGS = -O3 -unroll -static
+gnu_linux_64 : FCOMPL = gfortran
+gnu_linux_64 : CCOMPL = gcc
+gnu_linux_64 : obj = fds5_gnu_linux_64
+gnu_linux_64 : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+
+mpi_gnu_linux_64 : FFLAGS = -O3 -unroll -static -frecord-marker=4 
+mpi_gnu_linux_64 : CFLAGS = -O3 -unroll -static 
+mpi_gnu_linux_64 : FCOMPL = mpif90 
+mpi_gnu_linux_64 : CCOMPL = mpicc 
+mpi_gnu_linux_64 : obj = fds5_mpi_gnu_linux_64 
+mpi_gnu_linux_64 : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
 
 
