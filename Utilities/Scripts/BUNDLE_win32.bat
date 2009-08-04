@@ -79,6 +79,7 @@ copy "%bundleinfo%\FDS_Release_Notes.htm"        "%out_guides%\FDS_Release_Notes
 
 copy "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
 copy "%bundleinfo%\FDS_Web_Site.url"          "%out_web%\Official_Web_Site.url"
+copy "%bundleinfo%\Updates.url"               "%out_web%\Updates.url"
 copy "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
 
 if %docs_include_in_bundle% EQU 0 goto end_docs
