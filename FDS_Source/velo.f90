@@ -1124,7 +1124,7 @@ REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),MU_DUIDXJ_0(2),DUIDXJ_0(2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2)
 INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
-            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,IBCM,IBCP,ITMP
+            VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,IBCM,IBCP,ITMP,ICD_SGN
 LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,U_Y,U_Z,V_X,V_Z,W_X,W_Y,RHOP,VEL_OTHER
@@ -1198,7 +1198,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
    PROCESS_EDGE = .FALSE.
    DO IS=5,8
-      IF (.NOT.EXTERIOR(IJKE(IS,IE)) .AND. .NOT.SOLID(IJKE(IS,IE))) PROCESS_EDGE = .TRUE.
+      IF (.NOT.EXTERIOR(IJKE(IS,IE)) .AND. .NOT.SOLID(IJKE(IS,IE))) THEN
+         PROCESS_EDGE = .TRUE.
+         EXIT
+      ENDIF
    ENDDO
    IF (.NOT.PROCESS_EDGE) CYCLE EDGE_LOOP
 
@@ -1271,34 +1274,36 @@ EDGE_LOOP: DO IE=1,N_EDGES
          IF (IS==IEC) CYCLE ORIENTATION_LOOP
 
          IOR = I_SGN*IS
-   
+         ICD_SGN = I_SGN * ICD
          ! Determine Index_Coordinate_Direction
          ! IEC=1, ICD=1 refers to DWDY; ICD=2 refers to DVDZ
          ! IEC=2, ICD=1 refers to DUDZ; ICD=2 refers to DWDX
          ! IEC=3, ICD=1 refers to DVDX; ICD=2 refers to DUDY
 
-         IF (ABS(IOR)>IEC) ICD = ABS(IOR)-IEC
-         IF (ABS(IOR)<IEC) ICD = ABS(IOR)-IEC+3
-         IF (ICD==1) IVL=2  ! Used to pick the appropriate velocity component
-         IF (ICD==2) IVL=1
+         IF (IS>IEC) ICD = IS-IEC
+         IF (IS<IEC) ICD = IS-IEC+3
+         IF (ICD==1) THEN ! Used to pick the appropriate velocity component
+            IVL=2
+         ELSE !ICD==2
+            IVL=1
+         ENDIF
    
          ! IWM and IWP are the wall cell indices of the boundary on either side of the edge.
 
          IF (IOR<0) THEN
             VEL_GAS   = UUM(IVL)
             VEL_GHOST = UUP(IVL)
-            IWM  = WALL_INDEX(ICMM,-IOR)
+            IWM  = WALL_INDEX(ICMM,IS)
             IIGM = I_CELL(ICMM)
             JJGM = J_CELL(ICMM)
             KKGM = K_CELL(ICMM)
             IF (ICD==1) THEN
-               IWP  = WALL_INDEX(ICMP,-IOR)
+               IWP  = WALL_INDEX(ICMP,IS)
                IIGP = I_CELL(ICMP)
                JJGP = J_CELL(ICMP)
                KKGP = K_CELL(ICMP)
-            ENDIF
-            IF (ICD==2) THEN
-               IWP  = WALL_INDEX(ICPM,-IOR)
+            ELSE ! ICD==2
+               IWP  = WALL_INDEX(ICPM,IS)
                IIGP = I_CELL(ICPM)
                JJGP = J_CELL(ICPM)
                KKGP = K_CELL(ICPM)
@@ -1311,8 +1316,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IIGM = I_CELL(ICPM)
                JJGM = J_CELL(ICPM)
                KKGM = K_CELL(ICPM)
-            ENDIF
-            IF (ICD==2) THEN
+            ELSE ! ICD==2
                IWM  = WALL_INDEX(ICMP,-IOR)
                IIGM = I_CELL(ICMP)
                JJGM = J_CELL(ICMP)
@@ -1379,16 +1383,16 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
 
                   VEL_GHOST = VEL_GAS
-                  DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                  MU_DUIDXJ(I_SGN*ICD) = MUA*DUIDXJ(I_SGN*ICD)
-                  ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
                CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
                   VEL_GHOST = 2._EB*VEL_T - VEL_GAS
-                  DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                  MU_DUIDXJ(I_SGN*ICD) = MUA*DUIDXJ(I_SGN*ICD)
-                  ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
                CASE (WALL_MODEL) BOUNDARY_CONDITION
                
@@ -1403,13 +1407,13 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   ENDIF
                                    
                   VEL_GHOST = 2._EB*VEL_T - VEL_GAS
-                  DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                  MU_DUIDXJ(I_SGN*ICD) = MU_WALL*(VEL_GAS-VEL_T)*SIGN(1,IOR)*(1._EB-SLIP_COEF)/DXX(ICD)
-                  ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
+                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                  MU_DUIDXJ(ICD_SGN) = MU_WALL*(VEL_GAS-VEL_T)*I_SGN*(1._EB-SLIP_COEF)/DXX(ICD)
+                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
                   IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .NEQV. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                     DUIDXJ(I_SGN*ICD) = 0.5_EB*DUIDXJ(I_SGN*ICD)
-                     MU_DUIDXJ(I_SGN*ICD) = 0.5_EB*MU_DUIDXJ(I_SGN*ICD)
+                     DUIDXJ(ICD_SGN) = 0.5_EB*DUIDXJ(ICD_SGN)
+                     MU_DUIDXJ(ICD_SGN) = 0.5_EB*MU_DUIDXJ(ICD_SGN)
                   ENDIF
 
             END SELECT BOUNDARY_CONDITION
@@ -1421,26 +1425,44 @@ EDGE_LOOP: DO IE=1,N_EDGES
             IF (PREDICTOR) THEN
                SELECT CASE(IEC)
                   CASE(1)
-                     IF (ICD==1) VEL_OTHER => OM%WS
-                     IF (ICD==2) VEL_OTHER => OM%VS
+                     IF (ICD==1) THEN
+                        VEL_OTHER => OM%WS
+                     ELSE
+                        VEL_OTHER => OM%VS
+                     ENDIF !ICD==2
                   CASE(2)
-                     IF (ICD==1) VEL_OTHER => OM%US
-                     IF (ICD==2) VEL_OTHER => OM%WS
-                  CASE(3)
-                     IF (ICD==1) VEL_OTHER => OM%VS
-                     IF (ICD==2) VEL_OTHER => OM%US
+                     IF (ICD==1) THEN
+                        VEL_OTHER => OM%US
+                     ELSE !ICD==2
+                        VEL_OTHER => OM%WS
+                     ENDIF
+                  CASE(3) !ICD==2
+                     IF (ICD==1) THEN
+                        VEL_OTHER => OM%VS
+                     ELSE
+                        VEL_OTHER => OM%US
+                     ENDIF
                END SELECT
             ELSE
                SELECT CASE(IEC)
-                  CASE(1)
-                     IF (ICD==1) VEL_OTHER => OM%W 
-                     IF (ICD==2) VEL_OTHER => OM%V 
-                  CASE(2)
-                     IF (ICD==1) VEL_OTHER => OM%U 
-                     IF (ICD==2) VEL_OTHER => OM%W 
+                  CASE(1) !ICD==2
+                     IF (ICD==1) THEN
+                        VEL_OTHER => OM%W
+                     ELSE
+                        VEL_OTHER => OM%V
+                     ENDIF
+                  CASE(2) !ICD==2
+                     IF (ICD==1) THEN
+                        VEL_OTHER => OM%U
+                     ELSE !ICD==2
+                        VEL_OTHER => OM%W
+                     ENDIF
                   CASE(3)
-                     IF (ICD==1) VEL_OTHER => OM%V 
-                     IF (ICD==2) VEL_OTHER => OM%U 
+                     IF (ICD==1) THEN
+                        VEL_OTHER => OM%V
+                     ELSE !ICD==2
+                        VEL_OTHER => OM%U
+                     ENDIF
                END SELECT
             ENDIF
    
@@ -1449,21 +1471,30 @@ EDGE_LOOP: DO IE=1,N_EDGES
    
             SELECT CASE(IEC)
                CASE(1)
-                  IF (ICD==1) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
-                  IF (ICD==2) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
+                  IF (ICD==1) THEN
+                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
+                  ELSE !ICD=2
+                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
+                  ENDIF
                   MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
                CASE(2)
-                  IF (ICD==1) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
-                  IF (ICD==2) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
+                  IF (ICD==1) THEN
+                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
+                  ELSE !ICD==2
+                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
+                  ENDIF
                   MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
                CASE(3)
-                  IF (ICD==1) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
-                  IF (ICD==2) VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
+                  IF (ICD==1) THEN
+                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
+                  ELSE !ICD==2
+                     VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
+                  ENDIF
                   MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
             END SELECT
-            DUIDXJ(I_SGN*ICD) = SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-            MU_DUIDXJ(I_SGN*ICD) = MUA*SIGN(1,IOR)*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-            ALTERED_GRADIENT(I_SGN*ICD) = .TRUE.
+            DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+            MU_DUIDXJ(ICD_SGN) = MUA*I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+            ALTERED_GRADIENT(ICD_SGN) = .TRUE.
    
          ENDIF INTERPOLATION_IF
    
@@ -1476,8 +1507,11 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF (KK==0    .AND. IOR== 3) VV(II,JJ,KK)   = VEL_GHOST
                IF (KK==KBAR .AND. IOR==-3) VV(II,JJ,KK+1) = VEL_GHOST
                IF (CORRECTOR .AND. JJ>0 .AND. JJ<JBAR .AND. KK>0 .AND. KK<KBAR) THEN
-                 IF (ICD==1) W_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
-                 IF (ICD==2) V_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 IF (ICD==1) THEN
+                    W_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 ELSE !ICD==2
+                    V_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 ENDIF
                ENDIF
             CASE(2)
                IF (II==0    .AND. IOR== 1) WW(II,JJ,KK)   = VEL_GHOST
@@ -1485,8 +1519,11 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF (KK==0    .AND. IOR== 3) UU(II,JJ,KK)   = VEL_GHOST
                IF (KK==KBAR .AND. IOR==-3) UU(II,JJ,KK+1) = VEL_GHOST
                IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. KK>0 .AND. KK<KBAR) THEN
-                 IF (ICD==1) U_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
-                 IF (ICD==2) W_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 IF (ICD==1) THEN
+                    U_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 ELSE !ICD==2
+                    W_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 ENDIF
                ENDIF
             CASE(3)
                IF (II==0    .AND. IOR== 1) VV(II,JJ,KK)   = VEL_GHOST
@@ -1494,8 +1531,11 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF (JJ==0    .AND. IOR== 2) UU(II,JJ,KK)   = VEL_GHOST
                IF (JJ==JBAR .AND. IOR==-2) UU(II,JJ+1,KK) = VEL_GHOST
                IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. JJ>0 .AND. JJ<JBAR) THEN
-                 IF (ICD==1) V_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
-                 IF (ICD==2) U_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 IF (ICD==1) THEN
+                    V_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 ELSE !ICD==2
+                    U_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
+                 ENDIF
                ENDIF
          END SELECT
    
@@ -1512,26 +1552,31 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
    SIGN_LOOP_2: DO I_SGN=-1,1,2
       ORIENTATION_LOOP_2: DO ICD=1,2
-         IF (ICD==1) ICDO=2
-         IF (ICD==2) ICDO=1
-         IF (ALTERED_GRADIENT(I_SGN*ICD)) THEN
-               DUIDXJ_USE(ICD) =    DUIDXJ(I_SGN*ICD)
-            MU_DUIDXJ_USE(ICD) = MU_DUIDXJ(I_SGN*ICD)
-         ELSEIF (ALTERED_GRADIENT(-I_SGN*ICD)) THEN
-               DUIDXJ_USE(ICD) =    DUIDXJ(-I_SGN*ICD)
-            MU_DUIDXJ_USE(ICD) = MU_DUIDXJ(-I_SGN*ICD)
+         IF (ICD==1) THEN
+            ICDO=2
+         ELSE !ICD==2)
+            ICDO=1
+         ENDIF
+         ICD_SGN = I_SGN*ICD
+         IF (ALTERED_GRADIENT(ICD_SGN)) THEN
+               DUIDXJ_USE(ICD) =    DUIDXJ(ICD_SGN)
+            MU_DUIDXJ_USE(ICD) = MU_DUIDXJ(ICD_SGN)
+         ELSEIF (ALTERED_GRADIENT(-ICD_SGN)) THEN
+               DUIDXJ_USE(ICD) =    DUIDXJ(-ICD_SGN)
+            MU_DUIDXJ_USE(ICD) = MU_DUIDXJ(-ICD_SGN)
          ELSE
             CYCLE
          ENDIF
-         IF (ALTERED_GRADIENT(I_SGN*ICDO) .AND. ALTERED_GRADIENT(-I_SGN*ICDO)) THEN
-               DUIDXJ_USE(ICDO) =    0.5_EB*(DUIDXJ(I_SGN*ICDO)+   DUIDXJ(-I_SGN*ICDO))
-            MU_DUIDXJ_USE(ICDO) = 0.5_EB*(MU_DUIDXJ(I_SGN*ICDO)+MU_DUIDXJ(-I_SGN*ICDO))
-         ELSEIF (ALTERED_GRADIENT(I_SGN*ICDO)) THEN
-               DUIDXJ_USE(ICDO) =    DUIDXJ(I_SGN*ICDO)
-            MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ(I_SGN*ICDO)
-         ELSEIF (ALTERED_GRADIENT(-I_SGN*ICDO)) THEN
-               DUIDXJ_USE(ICDO) =    DUIDXJ(-I_SGN*ICDO)
-            MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ(-I_SGN*ICDO)
+         ICD_SGN = I_SGN*ICDO
+         IF (ALTERED_GRADIENT(ICD_SGN) .AND. ALTERED_GRADIENT(-ICD_SGN)) THEN
+               DUIDXJ_USE(ICDO) =    0.5_EB*(DUIDXJ(ICD_SGN)+   DUIDXJ(-ICD_SGN))
+            MU_DUIDXJ_USE(ICDO) = 0.5_EB*(MU_DUIDXJ(ICD_SGN)+MU_DUIDXJ(-ICD_SGN))
+         ELSEIF (ALTERED_GRADIENT(ICD_SGN)) THEN
+               DUIDXJ_USE(ICDO) =    DUIDXJ(ICD_SGN)
+            MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ(ICD_SGN)
+         ELSEIF (ALTERED_GRADIENT(-ICD_SGN)) THEN
+               DUIDXJ_USE(ICDO) =    DUIDXJ(-ICD_SGN)
+            MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ(-ICD_SGN)
          ELSE
                DUIDXJ_USE(ICDO) =    DUIDXJ_0(ICDO)
             MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ_0(ICDO)
