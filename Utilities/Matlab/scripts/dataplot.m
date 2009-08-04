@@ -57,6 +57,9 @@ end
 
 plot_style
 set(gcf,'DefaultLineLineWidth',Line_Width)
+set(gca,'FontName',Font_Name)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 % read the configuration file
 
@@ -82,7 +85,7 @@ for i=drange
         Save_Group_Style(i)     = Group_Style;
         Save_Fill_Color(i)      = Fill_Color;
         Save_Group_Key_Label(i) = Group_Key_Label;
-        
+                
         % plot the experimental data or analytical solution (d1)
         
         [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
@@ -164,8 +167,6 @@ for i=drange
             Y_Title_Position = 10^(log10(Min_Ind)+Title_Position(2)*(log10(Max_Ind)-log10(Min_Ind)));
         end
      
-        set(gca,'FontName',Font_Name)
-        
         if strcmp(Flip_Axis,'no')
             xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
             ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
@@ -183,9 +184,6 @@ for i=drange
             legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'Interpreter','LaTeX','FontSize',Key_Font_Size)
             legend boxon
         end
-        set(gca,'FontName',Font_Name)
-        set(gca,'Units',Plot_Units)
-        set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
         
         % print to pdf
         

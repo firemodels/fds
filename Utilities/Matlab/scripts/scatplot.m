@@ -87,6 +87,7 @@ for j=qrange
         M_hat = M_bar - E_bar + log(Measured_Metric);
         u  = sqrt( sum((log(Predicted_Metric)-M_hat).*(log(Predicted_Metric)-M_hat))/(k-1) );
         Sigma_E = Sigma_2_E/200;
+        Sigma_E = min(u/sqrt(2),Sigma_E);
         omega_M = sqrt( max(0,u*u - Sigma_E.^2) );
         delta = exp(M_bar-E_bar+0.5*omega_M.^2);
         Sigma_M = delta*omega_M;
