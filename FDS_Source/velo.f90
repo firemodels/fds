@@ -1268,13 +1268,11 @@ EDGE_LOOP: DO IE=1,N_EDGES
    ! Loop over all possible orientations of edge and reassign velocity gradients if appropriate
 
    SIGN_LOOP: DO I_SGN=-1,1,2
-   
       ORIENTATION_LOOP: DO IS=1,3
-   
          IF (IS==IEC) CYCLE ORIENTATION_LOOP
 
          IOR = I_SGN*IS
-         ICD_SGN = I_SGN * ICD
+
          ! Determine Index_Coordinate_Direction
          ! IEC=1, ICD=1 refers to DWDY; ICD=2 refers to DVDZ
          ! IEC=2, ICD=1 refers to DUDZ; ICD=2 refers to DWDX
@@ -1287,9 +1285,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ELSE !ICD==2
             IVL=1
          ENDIF
-   
+         ICD_SGN = I_SGN * ICD   
          ! IWM and IWP are the wall cell indices of the boundary on either side of the edge.
-
          IF (IOR<0) THEN
             VEL_GAS   = UUM(IVL)
             VEL_GHOST = UUP(IVL)
@@ -1327,7 +1324,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
             JJGP = J_CELL(ICPP)
             KKGP = K_CELL(ICPP)
          ENDIF
-   
          ! Throw out edge orientations that need not be processed
    
          IF (BOUNDARY_TYPE(IWM)==NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
@@ -1359,7 +1355,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
             MUA = 0.5_EB*(MU(IIGM,JJGM,KKGM) + MU(IIGP,JJGP,KKGP))
 
             ! Determine if there is a tangential velocity component
-
             IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY) THEN
                VEL_T = 0._EB
             ELSE
@@ -1377,23 +1372,19 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ENDIF
  
             ! Choose the appropriate boundary condition to apply
-               
             BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
 
                CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
-
                   VEL_GHOST = VEL_GAS
                   DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                   MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                   ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-
                CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
                   VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                   DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                   MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                   ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-
                CASE (WALL_MODEL) BOUNDARY_CONDITION
                
                   IF ( SOLID(CELL_INDEX(IIGM,JJGM,KKGM)) .OR. SOLID(CELL_INDEX(IIGP,JJGP,KKGP)) ) THEN
@@ -1405,7 +1396,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
                      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
                   ENDIF
-                                   
                   VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                   DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                   MU_DUIDXJ(ICD_SGN) = MU_WALL*(VEL_GAS-VEL_T)*I_SGN*(1._EB-SLIP_COEF)/DXX(ICD)
@@ -1415,11 +1405,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      DUIDXJ(ICD_SGN) = 0.5_EB*DUIDXJ(ICD_SGN)
                      MU_DUIDXJ(ICD_SGN) = 0.5_EB*MU_DUIDXJ(ICD_SGN)
                   ENDIF
-
             END SELECT BOUNDARY_CONDITION
 
          ELSE INTERPOLATION_IF  ! Use data from another mesh
-   
+ 
             OM => OMESH(ABS(NOM(ICD)))
    
             IF (PREDICTOR) THEN
@@ -1468,7 +1457,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
    
             WGT = EDGE_INTERPOLATION_FACTOR(IE,ICD)
             OMW = 1._EB-WGT
-   
+
             SELECT CASE(IEC)
                CASE(1)
                   IF (ICD==1) THEN
@@ -1497,7 +1486,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ALTERED_GRADIENT(ICD_SGN) = .TRUE.
    
          ENDIF INTERPOLATION_IF
-   
          ! Set ghost cell values at edge of computational domain
    
          SELECT CASE(IEC)
@@ -1538,13 +1526,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
                  ENDIF
                ENDIF
          END SELECT
-   
       ENDDO ORIENTATION_LOOP
    
    ENDDO SIGN_LOOP
-
    ! Save vorticity and viscous stress for use in momentum equation
-
    DUIDXJ_0(1)    = (UUP(2)-UUM(2))/DXX(1)
    DUIDXJ_0(2)    = (UUP(1)-UUM(1))/DXX(2)
    MU_DUIDXJ_0(1) = MUA*DUIDXJ_0(1)
@@ -1581,8 +1566,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
                DUIDXJ_USE(ICDO) =    DUIDXJ_0(ICDO)
             MU_DUIDXJ_USE(ICDO) = MU_DUIDXJ_0(ICDO)
          ENDIF
-         OME_E(IE,I_SGN*ICD) =    DUIDXJ_USE(1) -    DUIDXJ_USE(2)
-         TAU_E(IE,I_SGN*ICD) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)    
+         OME_E(IE,ICD_SGN) =    DUIDXJ_USE(1) -    DUIDXJ_USE(2)
+         TAU_E(IE,ICD_SGN) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)    
       ENDDO ORIENTATION_LOOP_2
    ENDDO SIGN_LOOP_2
 
