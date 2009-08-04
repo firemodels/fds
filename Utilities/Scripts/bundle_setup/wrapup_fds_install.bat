@@ -29,9 +29,9 @@ echo.
 echo Adding FDS and Smokeview shortcuts to the Start menu.
 rmdir /q /s "%USERPROFILE%\Start Menu\Programs\FDS5"
 mkdir "%USERPROFILE%\Start Menu\Programs\FDS5"
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Documentation and Updates.lnk"  /T:"%CD%"\Documentation /A:C >NUL
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS (version only).lnk"     /T:"%CD%"\bin\fds5.exe /A:C >NUL
-"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Smokeview.lnk"      /T:"%CD%"\bin\smokeview.exe /A:C >NUL
+"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Guides_and_Release_Notes.lnk"  /T:"%CD%\Documentation\Guides_and_Release_Notes" /A:C >NUL
+"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web.lnk"  /T:"%CD%\Documentation\FDS_on_the_Web" /A:C >NUL
+"%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
 
 echo.
 echo Adding the directory %CD% to the user path variable for: %USERNAME%
