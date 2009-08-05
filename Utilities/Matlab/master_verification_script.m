@@ -18,6 +18,6 @@ clear all
 
 addpath 'scripts'
 
-[saved_data,drange] = dataplot('verification');
-run scripts/turb_model
-run scripts/wall_model
+[saved_data,drange] = dataplot('verification',[24:25]);
+%run scripts/turb_model
+%run scripts/wall_model

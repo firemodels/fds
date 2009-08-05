@@ -428,8 +428,7 @@ doctorate from the Nuclear Engineering Program of the University of
 Maryland. After graduating, he won a National Research Council
 Post-Doctoral Fellowship at the Building and Fire Research Laboratory
 of NIST, where he developed the combustion algorithm within FDS. He is
-currently funded by NIST under grant 70NANB8H8161 from the Fire
-Research Grants Program (15 USC 278f).  He is the principal developer
+currently funded by the Fire Research Grants Program.  He is the principal developer
 of the multi-parameter mixture fraction combustion model and control
 logic within FDS.
 \end{description}
@@ -4243,7 +4242,7 @@ related to convection, combustion, and apparatus-specific phenomena.
 
 \subsubsection{Example Case: {\bf thermoplastic}}
 
-The term ``thermoplastic'' is often applied to materials that
+The term ``thermoplastic'' is often used to describe materials that
 essentially heat up and gasify without leaving any solid residue. The
 term is used here merely to indicate the class of materials for which
 the pyrolysis can be modeled with a single reaction that converts
@@ -4251,10 +4250,9 @@ solid to gaseous fuel.
 
 The purpose of this example is to demonstrate how the solid phase
 pyrolysis model works in FDS. Essentially, the gas phase calculation
-is shut off except for the imposition of a 50~kW/m$^2$ ``virtual''
+is shut off except for the imposition of a 50~kW/m$^2$ ``external''
 heat flux. The solid in this example is a slab of plastic, similar in
-composition to PMMA. The solid is described by the following {\ct
-SURF} line:
+composition to PMMA. The solid is described by the following {\ct SURF} line:
 
 \scriptsize
 \begin{verbatim}
@@ -4279,52 +4277,60 @@ the material are conveyed via the {\ct MATL} line:
       DENSITY=500.
       N_REACTIONS=1
       NU_FUEL=1.
-      HEAT_OF_REACTION=1578.
-      HEAT_OF_COMBUSTION=25200.
+      HEAT_OF_REACTION=1500.
+      HEAT_OF_COMBUSTION=25000.
+      REFERENCE_RATE=0.1          
       REFERENCE_TEMPERATURE=330. /
 \end{verbatim} \normalsize
 
 \noindent
 Notice that in addition to $k$, $\rho$ and $c$, there is one reaction
-specified, the {\em yield} of which is 100~\% fuel gas ({\ct
-NU\_FUEL=1.}).  The phase change from solid to gas {\em consumes}
-energy at a rate of 1,578~kJ/kg. Although not relevant in this
+specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_FUEL=1.}).  
+The phase change from solid to gas {\em consumes}
+energy at a rate of 1,500~kJ/kg. Although not relevant in this
 example, the burning of these fuel gases would {\em produce} energy at
-a rate of 25,200~kJ/kg. The reaction nominally takes place at
+a rate of 25,000~kJ/kg. The reaction nominally takes place at
 330~$^\circ$C, a necessary parameter for the pyrolysis model described above.
 
-The plots below show the surface temperature and heat flux as
-functions of time.  Note that the default emissivity of the material
-surface is 0.9, meaning that only 45~kW/m$^2$ out of the initial
-50~kW/m$^2$ is actually heating the solid. Some of this energy heats
-up the solid to about 350~$^\circ$C at the surface, some is radiated
-away (about 8~kW/m$^2$), some is used to convert the solid material
-into a gas, and is plotted here as the product of the burning rate and
-the heat of reaction.
+The plots shown in Fig.~\ref{thermoplastic} contain the results of the FDS simulation along with
+what is referred to as ``simple theory.'' By this, we mean that if all of the external heat flux were
+used to raise the solid temperature to 330~$^\circ$C and then convert the solid to fuel gas, 
+the results would be as shown by the ``simple theory.'' Of course, the simple theory neglects heat losses
+through the solid and losses via radiation from the surface. Because it neglects these losses, the
+simple theory should be regarded as producing an upper bound on the burning rate.
 
-The slab is 0.025~m thick, with a density of 500~kg/m$^3$. This means there is 12.5~kg/m$^2$ of fuel present, which if divided by the
-burning rate (about 0.018~kg/m$^2$/s) yields a burning time of about 700~s. After this, the material is ``burned away.'' See Fig.~\ref{thermoplastic}.
+Because there is no solid residue produced by the single reaction, the sample thickness will gradually 
+decrease to zero. Note that this does not necessarily mean that the solid obstruction should disappear entirely from
+the computational domain, but rather that the fuel should be consumed. The parameter {\ct BURN\_AWAY} 
+is used to indicate that the solid ought to be completely removed, but because in this simple test case the
+sample is aligned with the external boundary of the computational domain, the parameter {\ct BURN\_AWAY}
+would have no effect.
+The slab is originally 0.025~m thick, with a density of 500~kg/m$^3$. 
+This means there is 12.5~kg/m$^2$ of fuel present, which if divided by the
+burning rate (about 0.018~kg/m$^2$/s) yields a burning time of about 700~s. 
+After this, the fuel is consumed. 
 
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Surface_Temperature} &
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Fluxes} \\
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Burning_Rate} &
-\includegraphics[width=3.2in]{FIGURES/thermoplastic_Thickness}
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_temperature} &
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_heat_flux} \\
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_burn_rate} &
+\includegraphics[width=3.2in]{FIGURES/thermoplastic_thickness}
 \end{tabular*}
 \caption[Output of {\bf thermoplastic} test case.]{Output of {\bf thermoplastic} test case.}
 \label{thermoplastic}
 \end{figure}
 
+\newpage
 
 \subsubsection{Example Case: {\bf charring\_solid}}
 
-This example just exercises the solid phase algorithm in
-FDS. Essentially, the gas phase is shut off except for the imposition
-of a 50~kW/m$^2$ ``virtual'' heat flux. The reaction mechanism is
+This example just uses the solid phase algorithm. 
+Essentially, the gas phase is shut off except for the imposition
+of a 50~kW/m$^2$ ``external'' heat flux. The reaction mechanism is
 fairly complicated, as it includes various solids like cellulose,
-char, and ash. Each are input via {\ct MATL} lines as follows:
+char, and water. The sample itself is described via a single {\ct SURF} line:
 
 \scriptsize
 \begin{verbatim}
@@ -4336,18 +4342,27 @@ char, and ash. Each are input via {\ct MATL} lines as follows:
       MATL_ID(2,1) = 'CASI'
       THICKNESS(1:2)  =  0.01,0.01
       EXTERNAL_FLUX = 50. /
+\end{verbatim} \normalsize
 
-&MATL ID               = 'CELLULOSE'
-      CONDUCTIVITY_RAMP = 'k_cell'
-      SPECIFIC_HEAT    = 2.3
-      DENSITY          = 400.
-      N_REACTIONS      = 1
-      A                = 2.8E19
-      E                = 2.424E5
-      HEAT_OF_REACTION = 0.
-      NU_RESIDUE       = 1.0
-      RESIDUE          = 'ACTIVE'/
+\noindent
+The sample consists of two layers. The first is a combination of cellulose, water and lignin. There
+are {\ct MATL} lines for each. Both cellulose and water have reaction parameters. Cellulose undergoes
+an endothermic reaction to form an ``active'' solid, and water evaporates. Lignin does not change form, at least
+not in this model. The second layer of the sample is a non-reacting slab of calcium silicate board. Note the
+two parameters on the {\ct SURF} line called {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. The former
+tells FDS not to stretch the solid phase nodes used to solve the heat conduction equation. The latter tells FDS
+to use cells half the size of what it would use by default, based on the thermal properties. The intent of these
+two parameters is to increase the spatial resolution of the solid phase mesh to increase the accuracy of the 
+calculation. These kinds of parameters are typically not specified by the user, 
+but a sensitivity analysis might indicate that
+they ought to be, especially when the reaction sequence is complicated as it is here.
 
+Upon conversion of the virgin cellulose to its ``active'' component, this latter solid material undergoes
+two reactions that occur at two different temperatures. The following {\ct MATL} line describes what is to
+happen:
+
+\scriptsize
+\begin{verbatim}
 &MATL ID                    = 'ACTIVE'
       EMISSIVITY            = 1.0
       CONDUCTIVITY_RAMP     = 'k_cell'
@@ -4360,61 +4375,22 @@ char, and ash. Each are input via {\ct MATL} lines as follows:
       NU_RESIDUE(1:2)       = 0.35,    0.0
       NU_FUEL(1:2)          = 0.65,    1.0
       RESIDUE(1)            = 'CHAR' /
-
-&MATL ID               = 'WATER'
-      EMISSIVITY       = 1.0
-      DENSITY          = 1000.
-      CONDUCTIVITY     = 0.6
-      SPECIFIC_HEAT    = 4.19
-      N_REACTIONS      = 1
-      A                = 1E20
-      E                = 1.62E+05
-      NU_WATER         = 1.0
-      HEAT_OF_REACTION = 2260. /
-
-&MATL ID                = 'CASI'
-      CONDUCTIVITY_RAMP = 'k_CASI'
-      DENSITY           = 200.
-      SPECIFIC_HEAT     = 1.0 /
-
-&MATL ID               = 'LIGNIN'
-      EMISSIVITY       = 1.0
-      DENSITY          = 550.
-      CONDUCTIVITY     = 0.1
-      SPECIFIC_HEAT    = 1.1 /
-
-&MATL ID               = 'CHAR'
-      EMISSIVITY       = 1.0
-      DENSITY          = 140.
-      CONDUCTIVITY_RAMP = 'k_char'
-      SPECIFIC_HEAT    = 1.1 /
-
-&RAMP ID='k_cell', T= 20., F=0.15 /
-&RAMP ID='k_cell', T=500., F=0.29 /
-
-&RAMP ID='k_char', T= 20., F=0.08 /
-&RAMP ID='k_char', T=900., F=0.25 /
-
-&RAMP ID='k_CASI', T= 20., F=0.06 /
-&RAMP ID='k_CASI', T=400., F=0.25 /
 \end{verbatim} \normalsize
 
-\noindent
-Note the edition of the parameter {\ct EXTERNAL\_FLUX} on the {\ct
-SURF} line. This produces a 50~kW/m$^2$ flux on the sample, without
-any additional input lines in the file. It is just to test the solid
-phase model and should not be copied into an actual fire simulation.
+\noindent Notice that the reaction parameters are arrays containing the appropriate information for each reaction,
+referred to by the numbers 1 and 2. The first reaction converts 35~\% (by mass) of the ``active'' solid to 
+char, and 65~\% to fuel gases. The second reaction converts all the mass to fuel gases.
 
-Figure~\ref{charring_solid} shows the surface temperature and burning rate
+Figure~\ref{charring_solid} shows the surface temperature and burning rate of the sample
 under the 50~kW/m$^2$ external heat flux. The burning rate peaks
 at the start of the simulation, decreases throughout the burning
-phase, and then peaks again at the end due to presence of an external
+phase, and then increases again at the end due to presence of an external
 backing material. The initial peak is typical of char-forming solids.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/charring_solid_Surface_Temperature} &
-\includegraphics[width=3.2in]{FIGURES/charring_solid_Burning_Rate}
+\includegraphics[width=3.2in]{FIGURES/charring_solid_temperature} &
+\includegraphics[width=3.2in]{FIGURES/charring_solid_burn_rate}
 \end{tabular*}
 \caption[Output of {\bf charring\_solid} test case.]{Output of {\bf charring\_solid} test case.}
 \label{charring_solid}

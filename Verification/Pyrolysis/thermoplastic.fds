@@ -27,8 +27,9 @@ The plastic properties and surface designation
       DENSITY=500.
       N_REACTIONS=1
       NU_FUEL=1.
-      HEAT_OF_REACTION=1578.
-      HEAT_OF_COMBUSTION=25200.
+      HEAT_OF_REACTION=1500.
+      HEAT_OF_COMBUSTION=25000.
+      REFERENCE_RATE=0.1   
       REFERENCE_TEMPERATURE=330. /
 
 &SURF ID='PMMA SLAB'
@@ -52,11 +53,11 @@ Open up the domain on all sides except the bottom (ZMIN)
 
 Output
 
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NET HEAT FLUX',    ID='flux' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', ID='temp' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE',     ID='burn' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='GAUGE HEAT FLUX',  ID='gauge' /
-&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL THICKNESS',   ID='thick' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='NET HEAT FLUX',    ID='Net Heat Flux' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', ID='Surface Temperature' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE',     ID='Burn Rate' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='GAUGE HEAT FLUX',  ID='External Heat Flux' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL THICKNESS',   ID='Thickness' /
 
 &PROF XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='TEMPERATURE',      ID='Temperature' / 
 
