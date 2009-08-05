@@ -121,11 +121,9 @@ Open up the domain on all sides except the bottom (ZMIN)
 
 Output
 
-&DEVC XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='NET HEAT FLUX', ID='flux' /
-&DEVC XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', ID='temp' /
-&DEVC XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE', ID='burn' /
-&DEVC XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='GAUGE HEAT FLUX', ID='gauge' /
-&DEVC XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='INCIDENT HEAT FLUX', ID='incid' /
+&DEVC XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='NET HEAT FLUX', ID='Net Heat Flux' /
+&DEVC XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE', ID='Surface Temperature' /
+&DEVC XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE', ID='Burn Rate' /
 
 &PROF XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY = 'DENSITY' / 
 &PROF XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY = 'TEMPERATURE' / 
