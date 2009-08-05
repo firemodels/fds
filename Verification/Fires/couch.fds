@@ -18,6 +18,7 @@ The case is meant as a teaching tool and to test functionality.
       DENSITY               = 100.0
       N_REACTIONS           = 1
       NU_FUEL               = 1.
+      REFERENCE_RATE        = 0.1  
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
@@ -29,6 +30,7 @@ The case is meant as a teaching tool and to test functionality.
       DENSITY               = 40.0
       N_REACTIONS           = 1
       NU_FUEL               = 1.
+      REFERENCE_RATE        = 0.1  
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
