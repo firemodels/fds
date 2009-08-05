@@ -16,6 +16,7 @@ of box_burn_away_hrr.csv file.
       DENSITY              = 20.
       N_REACTIONS          = 1
       NU_FUEL              = 1.
+      REFERENCE_RATE       = 0.1    
       REFERENCE_TEMPERATURE= 200. /
 
 &SURF ID                   = 'FOAM SLAB'
