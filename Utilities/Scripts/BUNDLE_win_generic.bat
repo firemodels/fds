@@ -63,6 +63,8 @@ copy "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
 copy "%bundleinfo%\FDS_Web_Site.url"          "%out_web%\Official_Web_Site.url"
 copy "%bundleinfo%\Updates.url"               "%out_web%\Updates.url"
 copy "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
+copy "%bundleinfo%\discussion_group.url"          "%out_web%\Discussion_Group.url"
+copy "%bundleinfo%\issue_tracker.url"          "%out_web%\Issue_Tracker.url"
 
 if %docs_include_in_bundle% EQU 0 goto end_docs
 echo.
@@ -79,7 +81,7 @@ Rem Copy readme_examples file to Examples directory to let user download all exa
 echo.
 echo Copying readme_examples.html and the examples to the Examples directory
 copy %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
-svn export --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
+svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
 
 copy %bundleinfo%\wrapup_fds_install.bat %out_bundle%\FDS5\wrapup_fds_install.bat
 copy %bundleinfo%\shortcut.exe %out_bundle%\FDS5\shortcut.exe
