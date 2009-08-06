@@ -226,6 +226,7 @@ SVEXTERN camera camera_list_first, camera_list_last, **camera_list;
 SVEXTERN int ncamera_list,i_view_list,init_camera_list_flag;
 SVEXTERN int camera_max_id;
 SVEXTERN int startup,startup_view_ini,selected_view;
+SVEXTERN char label_startup_view[256];
 SVEXTERN char *camera_label, *colorbar_label;
 
 SVEXTERN int visPatchType[7];
