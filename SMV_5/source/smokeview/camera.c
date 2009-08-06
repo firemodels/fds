@@ -322,3 +322,29 @@ void delete_camera(camera *cam){
   FREEMEMORY(cam);
   updatemenu=1;
 }
+
+/* ------------------ get_camera ------------------------ */
+
+camera *get_camera(char *name){
+  camera *cam,*ca;
+
+  for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
+    if(strcmp(ca->name,name)==0){
+      return ca;
+    }
+  }
+  return NULL;
+}
+
+/* ------------------ get_camera_label ------------------------ */
+
+char *get_camera_label(int index){
+  camera *cam,*ca;
+
+  for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
+    if(ca->view_id==index){
+      return ca->name;
+    }
+  }
+  return NULL;
+}
