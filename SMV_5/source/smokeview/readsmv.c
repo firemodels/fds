@@ -7734,9 +7734,14 @@ int readini2(char *inifile, int localfile){
       isoframeskip=isoframestep-1;
       continue;
     }
-    if(match(buffer,"STARTUPVIEW",11)==1){
+    if(match(buffer,"LABELSTARTUPVIEW",16)==1){
+      char *front;
+      camera *ca;
+
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&startup_view_ini,&menu_view_number);
+      front=trim_front(buffer);
+      trim(front);
+      strcpy(label_startup_view,front);
       updategluiview=1;
       continue;
     }
@@ -9144,8 +9149,15 @@ void writeini(int flag){
   fprintf(fileout," %f\n",eyezfactor);
   fprintf(fileout,"EYEVIEW\n");
   fprintf(fileout," %i\n",eyeview);
-  fprintf(fileout,"STARTUPVIEW\n");
-  fprintf(fileout," %i %i\n",startup_view_ini,menu_view_number);
+  {
+    char *label;
+
+    label = get_camera_label(startup_view_ini);
+    if(label!=NULL){
+      fprintf(fileout,"LABELSTARTUPVIEW\n");
+      fprintf(fileout," %s\n",label);
+    }
+  }
   fprintf(fileout,"VIEWTIMES\n");
   fprintf(fileout," %f %f %i\n",view_tstart,view_tstop,view_ntimes);
   fprintf(fileout,"TIMEOFFSET\n");
