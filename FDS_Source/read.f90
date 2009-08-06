@@ -460,6 +460,10 @@ MESH_LOOP: DO N=1,NMESHES_READ
                WRITE(MESSAGE,'(A,I2)') 'ERROR: ZMIN > ZMAX on MESH ', NM
                CALL SHUTDOWN(MESSAGE)
             ENDIF
+            IF (EVACUATION .AND. XB5 == XB6) THEN
+               WRITE(MESSAGE,'(A,I2)') 'ERROR: ZMIN = ZMAX on evacuation MESH ', NM
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
 
             M%XS    = XB1
             M%XF    = XB2
@@ -5183,6 +5187,16 @@ MESH_LOOP: DO NM=1,NMESHES
                OB%Y2 = XB4
                OB%Z1 = XB5
                OB%Z2 = XB6
+
+               ! Thicken evacuation mesh obstructions in the z direction
+
+               IF (EVACUATION_ONLY(NM) .AND. EVACUATION) THEN
+                  OB%Z1 = ZS
+                  OB%Z2 = ZF
+                  XB5   = ZS
+                  XB6   = ZF
+               ENDIF
+
                OB%I1 = NINT( GINV(XB1-XS,1,NM)*RDXI   ) 
                OB%I2 = NINT( GINV(XB2-XS,1,NM)*RDXI   )
                OB%J1 = NINT( GINV(XB3-YS,2,NM)*RDETA  ) 
@@ -5205,13 +5219,6 @@ MESH_LOOP: DO NM=1,NMESHES
                   OB%K2 = MIN(OB%K1+1,KBAR)
                ENDIF
 
-               ! Thicken evacuation mesh obstructions in the z direction
-
-               IF (EVACUATION_ONLY(NM) .AND. EVACUATION .AND. OB%K1==OB%K2) THEN
-                  OB%K1 = GINV(.5_EB*(XB5+XB6)-ZS,3,NM)*RDZETA
-                  OB%K2 = MIN(OB%K1+1,KBAR)
-               ENDIF
- 
                ! Throw out obstructions that are too small
  
                IF ((OB%I1==OB%I2.AND.OB%J1==OB%J2) .OR. (OB%I1==OB%I2.AND.OB%K1==OB%K2) .OR. (OB%J1==OB%J2.AND.OB%K1==OB%K2)) THEN
@@ -6122,6 +6129,19 @@ MESH_LOOP_1: DO NM=1,NMESHES
       VT%K1 = NINT( GINV(XB(5)-ZS,3,NM)*RDZETA )
       VT%K2 = NINT( GINV(XB(6)-ZS,3,NM)*RDZETA )
  
+      ! Thicken evacuation mesh vents in the z direction
+
+      IF (EVACUATION_ONLY(NM) .AND. EVACUATION .AND. VT%K1==VT%K2) THEN
+         VT%K1 = GINV(.5_EB*(XB(5)+XB(6))-ZS,3,NM)*RDZETA
+         VT%K2 = KBAR
+         XB(5) = ZS
+         XB(6) = ZF
+         IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
+            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Evacuation VENT',NN,' must be a vertical plane'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
+      ENDIF
+
       IF (XB(1)==XB(2)) THEN
          IF (VT%J1==VT%J2 .OR. VT%K1==VT%K2) REJECT_VENT=.TRUE.
       ENDIF
