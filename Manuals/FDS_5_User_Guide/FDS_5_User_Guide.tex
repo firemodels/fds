@@ -2290,7 +2290,7 @@ An example of an axially-symmetric helium plume is shown in Figure~\ref{helium_p
 \scriptsize
 \noindent
 \begin{minipage}{1.1in}
-\includegraphics[height=2in]{FIGURES/helium_2d.jpg}
+\includegraphics[height=2in]{FIGURES/helium_2d}
 \end{minipage}
 \hfill
 \begin{minipage}{5.5in}
@@ -2596,7 +2596,7 @@ Note that the same rules apply for the $z$ direction as well. In situations wher
 parameters {\ct DX0}, {\ct DY0}, and {\ct DZ0}.
 
 \begin{figure}[t]
-\includegraphics[width=\textwidth]{FIGURES/pyramid_s0000}
+\includegraphics[width=\textwidth]{FIGURES/pyramid}
 \caption{\bf An example of the multiplier functionality.}
 \label{fig:mult}
 \end{figure}
@@ -2676,7 +2676,7 @@ the air velocity on the bottom set of obstructions is not affected as much by th
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=3in]{FIGURES/sawtooth.jpg}
+\includegraphics[width=3in]{FIGURES/sawtooth}
 \end{center}
 \caption[Simple example of {\ct SAWTOOTH=.FALSE.}]{Simple example of {\ct SAWTOOTH=.FALSE.}}
 \label{sawtooth}
@@ -3371,41 +3371,34 @@ drive a flow into the domain. However, a fire-driven flow of sufficient strength
 
 \subsubsection{Example Case: {\bf pressure\_boundary}}
 
-This case just demonstrates how to do a time-dependent pressure boundary. It is a 10~m long, 1~m wide, 1~m tall tunnel with a fire in the middle and a pressure boundary
-imposed on the right side ($x=10$).
+The following lines, taken from the sample case, {\bf pressure\_boundary}, demonstrates how to do 
+a time-dependent pressure boundary at the end of a tunnel. The tunnel is 10~m long, 1~m wide, 1~m tall 
+with a fire in the middle and a pressure boundary imposed on the right side. The left side ({\ct XMIN}) is
+just an {\ct OPEN} boundary with no pressure specified. It is assumed to be at ambient pressure.
 
 \scriptsize
 \begin{verbatim}
-&HEAD CHID='pressure_boundary', TITLE='Simple tunnel with pressure boundary, SVN $Revision$' /
-
-&MESH IJK=100,10,10, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
-
-&TIME TWFIN=60. /
-
-&SURF ID='FIRE', HRRPUA=2000., COLOR='RED' /
-&VENT XB=4.7,5.3,0.2,0.8,0.0,0.0, SURF_ID='FIRE' /
-
 &VENT MB = 'XMIN' SURF_ID = 'OPEN' /
 &VENT MB = 'XMAX' SURF_ID = 'OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind_ramp' /
-
 &RAMP ID='wind_ramp', T= 0., F= 1. /
-&RAMP ID='wind_ramp', T=30., F= 1. /
-&RAMP ID='wind_ramp', T=31., F=-1. /
-
-&SLCF PBY=0.5, QUANTITY='VELOCITY', VECTOR=.TRUE. /
-&SLCF PBY=0.5, QUANTITY='H' /
-&SLCF PBY=0.5, QUANTITY='PRESSURE' /
-&SLCF PBY=0.5, QUANTITY='TEMPERATURE' /
-
-&TAIL /
+&RAMP ID='wind_ramp', T=15., F= 1. /
+&RAMP ID='wind_ramp', T=16., F=-1. /
 \end{verbatim}\normalsize
 
 \noindent
-This snapshot from Smokeview was taken during the time period when there was a positive pressure imposed at the right portal of the tunnel. The fire leans to the
-left because of the preferential flow in that direction.
-\begin{center}
-\includegraphics[width=\textwidth]{FIGURES/pressure_boundary.jpg}
-\end{center}
+Figure~\ref{pressure_boundary} shows two snapshots from Smokeview taken before and after the time when the positive pressure is 
+imposed at the right portal of a tunnel. The fire leans to the
+left because of the preferential flow in that direction. It leans back to the right when the positive pressure
+is directed to become negative.
+
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{FIGURES/pressure_boundary_left}
+\includegraphics[width=\textwidth]{FIGURES/pressure_boundary_right}
+\caption[Example of positive pressure at a tunnel entrance.]{Snapshots from the sample case {\bf pressure\_boundary}
+showing a fire in a tunnel leaning left, then right, due to a positive, then negative, pressure imposed at
+the right portal.}
+\label{pressure_boundary}
+\end{figure}
 
 
 
@@ -4398,7 +4391,7 @@ backing material. The initial peak is typical of char-forming solids.
 
 
 
-\subsubsection{Example Case: couch}
+\subsubsection{Example Case: couch and room\_fire}
 
 In residential fires, upholstered furniture makes up a significant
 fraction of the combustible load. A single couch can generate several
@@ -4415,6 +4408,7 @@ At the very least, we want the upholstery to be described as fabric covering foa
       DENSITY               = 100.0
       N_REACTIONS           = 1
       NU_FUEL               = 1.
+      REFERENCE_RATE        = 0.1 
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
@@ -4426,6 +4420,7 @@ At the very least, we want the upholstery to be described as fabric covering foa
       DENSITY               = 40.0
       N_REACTIONS           = 1
       NU_FUEL               = 1.
+      REFERENCE_RATE        = 0.1 
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
@@ -4452,6 +4447,22 @@ as consisting of two layers, with a thickness of 2~mm for the {\ct FABRIC}
 and 10~cm for the {\ct FOAM}. The 10~cm is chosen to be the
 same as the mesh cell size.
 
+The same couch model is included in a room-scale fire simulation, known as the
+{\bf room\_fire} test case. Figure~\ref{room_fire} shows the fire after 5 and 10~minutes, respectively.
+Note that after 5 minutes, the couch is fully-involved, and after 10~minutes the room has flashed over.
+Only the reaction zone of the fire is shown; the smoke is hidden so that you can see the fire progressing
+from the couch to the doorway at the right of the scene. This door is the only opening to the compartment,
+and after 10~minutes, the flames can be seen flowing out.
+
+\begin{figure}[p]
+\includegraphics[width=\textwidth]{FIGURES/room_fire_300} 
+\includegraphics[width=\textwidth]{FIGURES/room_fire_600}
+\caption[Output of {\bf room\_fire} test case.]{Output of {\bf room\_fire} test case showing fire after
+5 and 10 minutes, respectively.}
+\label{room_fire}
+\end{figure}
+
+\newpage
 
 \subsubsection{Example Case: cable\_tray}
 
@@ -6669,8 +6680,8 @@ Using the optical depth of 0.626~m$^{-1}$ and the path length of
 10~m, the expected total obscuration is 99.81~\%, which is the
 result computed by FDS for each of the three detectors.
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/beam_detector_nosmoke.jpg} &
-\includegraphics[width=3.2in]{FIGURES/beam_detector_smoke.jpg}
+\includegraphics[width=3.2in]{FIGURES/beam_detector_nosmoke} &
+\includegraphics[width=3.2in]{FIGURES/beam_detector_smoke}
 \end{tabular*}
 
 
