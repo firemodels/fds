@@ -1,0 +1,8 @@
+RENDERDIR
+ ../../Manuals/FDS_5_User_Guide/FIGURES
+LOADFILE
+ helium_2d_04.sf
+SETTIMEVAL
+ 0.835005
+RENDERONCE
+ helium_2d

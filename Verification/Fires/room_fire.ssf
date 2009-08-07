@@ -1,7 +1,7 @@
 RENDERDIR
  ../../Manuals/FDS_5_User_Guide/FIGURES
 SETVIEWPOINT
- view 2
+ view 3
 LOADFILE
  room_fire_02.s3d
 SETTIMEVAL
@@ -9,7 +9,7 @@ SETTIMEVAL
 RENDERONCE
  room_fire_300
 SETTIMEVAL
- 459.000000
+ 600.000000
 RENDERONCE
- room_fire_460
+ room_fire_600
  

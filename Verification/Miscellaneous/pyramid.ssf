@@ -1,0 +1,7 @@
+RENDERDIR
+ ../../Manuals/FDS_5_User_Guide/FIGURES
+SETVIEWPOINT
+ view 1
+RENDERONCE
+ pyramid
+ 
