@@ -3276,7 +3276,7 @@ void LoadPlot3dMenu(int value){
     if(scriptoutstream!=NULL&&loadplot3dall==0){
       fprintf(scriptoutstream,"LOADPLOT3D\n");
       fprintf(scriptoutstream," %i %f\n",
-        plot3dinfo[value].blocknumber,plot3dinfo[value].time);
+        plot3dinfo[value].blocknumber+1,plot3dinfo[value].time);
     }
     readplot(plot3dfile,value,LOAD,&errorcode);
   }
