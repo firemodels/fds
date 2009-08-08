@@ -101,6 +101,7 @@ EXTERNCPP sv_object *get_SVOBJECT_type(char *label);
 EXTERNCPP int read_device_defs(char *file);
 EXTERNCPP void freeall_objects(void);
 
+EXTERNCPP int get_plot3d_index(mesh *meshi, int dir, float val);
 EXTERNCPP int plot3dlistcompare( const void *arg1, const void *arg2 );
 EXTERNCPP int plot3dcompare( const void *arg1, const void *arg2 );
 EXTERNCPP void update_plot_xyz(mesh *current_mesh);

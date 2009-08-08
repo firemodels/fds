@@ -97,6 +97,9 @@ void glui_script_disable(void);
 // LOADPLOT3D
 //  mesh number (int) time (float)
 
+// SHOWPLOT3DDATA
+//  mesh number (int) orientation (int)  plot3d type (int) value (0/1) (int) position (float)
+
 // UNLOADALL
 
 // ---------- controlling scene -----------
@@ -297,6 +300,9 @@ void init_scripti(scriptdata *scripti, int command){
   scripti->cval=NULL;
   scripti->fval=0.0;
   scripti->ival=0;
+  scripti->ival2=0;
+  scripti->ival3=0;
+  scripti->ival4=0;
 }
 
 /* ------------------ compile_script ------------------------ */
@@ -381,6 +387,10 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"PARTCLASSTYPE",13) == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"SHOWPLOT3DDATA",14) == 1){
       nscriptinfo++;
       continue;
     }
@@ -633,6 +643,16 @@ int compile_script(char *scriptfile){
       len=strlen(buffer);
       NewMemory((void **)&scripti->cval,len+1);
       strcpy(scripti->cval,buffer);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"SHOWPLOT3DDATA",14) == 1){
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_SHOWPLOT3DDATA);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      sscanf(buffer2,"%i %i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->fval);
 
       nscriptinfo++;
       continue;
@@ -998,8 +1018,61 @@ void script_partclasscolor(scriptdata *scripti){
   }
 }
 
+/* ------------------ script_showplot3ddata ------------------------ */
 
+void script_showplot3ddata(scriptdata *scripti){
+  int i;
+  mesh *meshi;
+  int imesh, dir, p_index, showhide;
+  float val;
 
+  imesh = scripti->ival-1;
+  if(imesh<0||imesh>nmeshes-1)return;
+
+  meshi = meshinfo + imesh;
+  update_current_mesh(meshi);
+
+  dir = scripti->ival2;
+  if(dir<1)dir=1;
+  if(dir>3)dir=3;
+
+  p_index = scripti->ival3;
+  if(p_index<1)p_index=1;
+  if(p_index>5)p_index=5;
+
+  showhide = scripti->ival4;
+  val = scripti->fval;
+
+  switch (dir){
+    case 1:
+      updateshowstep(showhide,DIRX);
+      meshi->plotx=get_plot3d_index(meshi, dir, val);
+      break;
+    case 2:
+      updateshowstep(showhide,DIRY);
+      meshi->ploty=get_plot3d_index(meshi, dir, val);
+      break;
+    case 3:
+      updateshowstep(showhide,DIRZ);
+      meshi->plotz=get_plot3d_index(meshi, dir, val);
+      break;
+  }
+  updateplotslice(dir);
+
+  if(showhide==1){
+    plotn = p_index;
+    if(plotn<1){
+      plotn=numplot3dvars;
+    }
+    if(plotn>numplot3dvars){
+      plotn=1;
+    }
+    updateallplotslices();
+    if(visiso==1)updatesurface();
+    updateplot3dlistindex();
+  }
+
+}
 /* ------------------ script_partclasstype ------------------------ */
 
 void script_partclasstype(scriptdata *scripti){
@@ -1038,6 +1111,7 @@ void script_loadinifile(scriptdata *scripti){
   scriptinifilename2=NULL;
 
 }
+
 /* ------------------ script_loadfile ------------------------ */
 
 void script_loadfile(scriptdata *scripti){
@@ -1128,17 +1202,20 @@ void script_loadplot3d(scriptdata *scripti){
   int blocknum;
 
   time = scripti->fval;
-  blocknum = scripti->ival;
+  blocknum = scripti->ival-1;
 
   for(i=0;i<nplot3d;i++){
     plot3d *plot3di;
 
     plot3di = plot3dinfo + i;
-    if(plot3di->blocknumber+1==blocknum&&fabs(plot3di->time-time)<0.5){
+    if(plot3di->blocknumber==blocknum&&fabs(plot3di->time-time)<0.5){
       LoadPlot3dMenu(i);
     }
   }
-  update_menu();
+  updatecolors(-1);
+  set_labels_controls();
+
+  //update_menu();
 }
 
 /* ------------------ script_loadvfile ------------------------ */
@@ -1265,6 +1342,9 @@ int run_script(void){
       break;
     case SCRIPT_PARTCLASSCOLOR:
       script_partclasscolor(scripti);
+      break;
+    case SCRIPT_SHOWPLOT3DDATA:
+      script_showplot3ddata(scripti);
       break;
     case SCRIPT_PARTCLASSTYPE:
       script_partclasstype(scripti);

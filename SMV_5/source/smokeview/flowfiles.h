@@ -35,7 +35,7 @@ typedef struct _inifiledata {
   char *file;
 } inifiledata;
 
-/* --------------------------  scriptdata ------------------------------------ */
+/* --------------------------  scriptfiledata ------------------------------------ */
 
 typedef struct _scriptfiledata {
   struct _scriptfiledata *prev, *next;
@@ -44,9 +44,11 @@ typedef struct _scriptfiledata {
   char *file;
 } scriptfiledata;
 
+/* --------------------------  scriptdata ------------------------------------ */
+
 typedef struct {
   int command;
-  int ival;
+  int ival,ival2,ival3,ival4;
   char *cval;
   float fval;
 } scriptdata;
