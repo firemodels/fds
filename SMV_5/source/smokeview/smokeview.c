@@ -37,6 +37,7 @@
 
 // svn revision character string
 char smokeview_revision[]="$Revision$";
+int can_write_to_dir(char *dir);
 
 
  /* ------------------------ SUB_portortho ------------------------- */
@@ -3367,7 +3368,34 @@ void synctimes(void){
 }
 
 #ifdef pp_RENDER
-/* ------------------ RenderFrame ------------------------ */
+
+  /* ------------------ can_write_to_dir ------------------------ */
+
+int can_write_to_dir(char *dir){
+  char full_name[1024];
+  char *temp_name;
+  FILE *stream;
+
+  if(dir==NULL)return 0;
+
+  temp_name=tmpnam(NULL);
+  if(temp_name==NULL)return 0;
+
+  if(strcmp(dir,".")==0||strlen(dir)==0){
+    strcpy(full_name,temp_name);
+  }
+  else{
+    strcpy(full_name,dir);
+    strcpy(full_name,dirseparator);
+    strcpy(full_name,temp_name);
+  }
+  stream=fopen(full_name,"wb");
+  if(stream==NULL)return 0;
+  fclose(stream);
+  return 1;
+}
+
+  /* ------------------ RenderFrame ------------------------ */
 
 void RenderFrame(int view_mode){
   char renderfile[1024],renderfile2[1024];
@@ -3375,113 +3403,129 @@ void RenderFrame(int view_mode){
   char *ext;
   char *renderfile_prefix;
   int use_script_filename=0;
-
-  renderfile_prefix=fdsprefix;
-  if(current_script_command==NULL&&strlen(script_renderfile)>0){
-    strcpy(renderfile,"");
-    if(strlen(script_renderdir)>0){
-      strcat(renderfile,script_renderdir);
-    }
-    strcat(renderfile,script_renderfile);
-    use_script_filename=1;
-  }
-  if(current_script_command!=NULL&&current_script_command->command==SCRIPT_RENDERONCE&&current_script_command->cval!=NULL){
-    strcpy(renderfile,"");
-    if(script_dir_path!=NULL){
-      strcat(renderfile,script_dir_path);
-    }
-    strcat(renderfile,current_script_command->cval);
-    use_script_filename=1;
-  }
-  if(current_script_command!=NULL&&current_script_command->command==SCRIPT_RENDERALL&&current_script_command->cval!=NULL){
-    strcpy(renderfile2,"");
-    if(script_dir_path!=NULL){
-      strcat(renderfile2,script_dir_path);
-    }
-    strcat(renderfile2,current_script_command->cval);
-    renderfile_prefix=renderfile2;
-    use_script_filename=2;
-  }
+  char renderfile_name[1024], renderfile_dir[1024], renderfile_full[1024], renderfile_suffix[1024], *renderfile_ext;
+  char *temp_name;
+  int use_scriptfile;
 
   if(view_mode==VIEW_LEFT&&(showstereo==2||showstereo==3))return;
+
+// construct filename for image to be rendered
+
+  strcpy(renderfile_dir,"");
+  strcpy(renderfile_suffix,"");
+  use_scriptfile=0;
+
+  // filename base
+
+  if(current_script_command==NULL){
+    strcpy(renderfile_name,fdsprefix);
+  }
+  else{
+    if(
+      (current_script_command->command==SCRIPT_RENDERONCE||current_script_command->command==SCRIPT_RENDERALL)&&
+       current_script_command->cval!=NULL
+       ){
+        strcpy(renderfile_name,current_script_command->cval);
+        use_scriptfile=1;
+    }
+    else{
+      strcpy(renderfile_name,fdsprefix);
+    }
+    if(script_dir_path!=NULL&&strlen(script_dir_path)>0){
+      if(strlen(script_dir_path)==2&&script_dir_path[0]=='.'&&script_dir_path[1]==dirseparator[0]){
+      }
+      else{
+        strcpy(renderfile_dir,script_dir_path);
+      }
+    }
+  }
+  
+  // directory
+
+  if(can_write_to_dir(renderfile_dir)==0){
+    if(can_write_to_dir(smokeviewtempdir)==1){
+      strcpy(renderfile_dir,smokeviewtempdir);
+    }
+    else{
+      printf("unable to output render file\n");
+      return;
+    }
+  }
+
+  // filename suffix
+
+  if(use_scriptfile==0){
+    int image_num;
+    char suffix[20];
+
+    if(RenderTime==0){
+      image_num=seqnum;
+      strcpy(renderfile_suffix,"_s");
+    }
+    else{
+      image_num=itime/RenderSkip;
+      strcpy(renderfile_suffix,"_");
+    }
+    switch (view_mode){
+    case VIEW_CENTER:
+      sprintf(suffix,"%04i",image_num);
+      if(RenderTime==0)seqnum++;
+      break;
+    case VIEW_LEFT:
+      sprintf(suffix,"%04i_L",image_num);
+      break;
+    case VIEW_RIGHT:
+      if(showstereo==2||showstereo==3||showstereo==4){
+        sprintf(suffix,"%04i",image_num);
+      }
+      else{
+        sprintf(suffix,"%04i_R",image_num);
+      }
+      if(RenderTime==0)seqnum++;
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+    }
+    strcat(renderfile_suffix,suffix);
+  }
+
+  // filename extension
+
   switch (renderfiletype){
   case 0:
-    ext=ext_png;
+    renderfile_ext=ext_png;
     break;
   case 1:
-    ext=ext_jpg;
+    renderfile_ext=ext_jpg;
     break;
 #ifdef pp_GDGIF
   case 2:
-    ext=ext_gif;
+    renderfile_ext=ext_gif;
     break;
 #endif
   default:
     renderfiletype=2;
-    ext=ext_png;
+    renderfile_ext=ext_png;
     break;
   }
 
-  glFlush();
-  if((use_script_filename==0||use_script_filename==2)&&RenderTime==1){
-    switch (view_mode){
-    case VIEW_CENTER:
-      sprintf(renderfile,"%s_%04i",renderfile_prefix,itime/RenderSkip);
-      break;
-    case VIEW_LEFT:
-      sprintf(renderfile,"%s_%04i_L",renderfile_prefix,itime/RenderSkip);
-      break;
-    case VIEW_RIGHT:
-      if(showstereo==2||showstereo==3||showstereo==4){
-        sprintf(renderfile,"%s_%04i",renderfile_prefix,itime/RenderSkip);
-      }
-      else{
-        sprintf(renderfile,"%s_%04i_R",renderfile_prefix,itime/RenderSkip);
-      }
-      break;
-    default:
-      ASSERT(FFALSE);
-      break;
-    }
-  }
-  if(use_script_filename==0&&RenderTime==0){
-    switch (view_mode){
-    case VIEW_CENTER:
-      sprintf(renderfile,"%s_s%04i",renderfile_prefix,seqnum);
-      seqnum++;
-      break;
-    case VIEW_LEFT:
-      sprintf(renderfile,"%s_s%04i_L",renderfile_prefix,seqnum);
-      break;
-    case VIEW_RIGHT:
-      if(showstereo==2||showstereo==3||showstereo==4){
-        sprintf(renderfile,"%s_s%04i",renderfile_prefix,seqnum);
-      }
-      else{
-        sprintf(renderfile,"%s_s%04i_R",renderfile_prefix,seqnum);
-      }
-      seqnum++;
-      break;
-    default:
-      ASSERT(FFALSE);
-      break;
-    }
-  }
-  strcat(renderfile,ext);
+  // form full filename from parts
 
-  // if there is a tempdir see if we need to use it
-
-  if(use_script_filename==0&&smokeviewtempdir!=NULL){
-    stream=fopen(renderfile,"wb");
-    if(stream==NULL){
-      strcpy(renderfile2,smokeviewtempdir);
-      strcat(renderfile2,renderfile);
-      stream=fopen(renderfile2,"wb");
-      if(stream!=NULL)strcpy(renderfile,renderfile2);
+  strcpy(renderfile_full,"");
+  if(strlen(renderfile_dir)>0){
+    strcat(renderfile_full,renderfile_dir);
+    if(renderfile_dir[strlen(renderfile_dir)-1]!=dirseparator[0]){
+      strcat(renderfile_full,dirseparator);
     }
-    if(stream!=NULL)fclose(stream);
   }
-  SVimage2file(renderfile,renderfiletype,screenWidth,screenHeight);
+  strcat(renderfile_full,renderfile_name);
+  if(strlen(renderfile_suffix)>0)strcat(renderfile_full,renderfile_suffix);
+  strcat(renderfile_full,renderfile_ext);
+
+  // render image
+
+  SVimage2file(renderfile_full,renderfiletype,screenWidth,screenHeight);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }
