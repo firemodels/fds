@@ -1210,7 +1210,6 @@ void drawplot3d(mesh *meshi){
 
 }
 
-
 /* ------------------ updatesurface ------------------------ */
 
 void updatesurface(void){
@@ -1298,6 +1297,39 @@ void updateallplotslices(void){
   }
   update_current_mesh(gbsave);
     
+}
+
+/* ------------------ get_plot3d_index ------------------------ */
+
+int get_plot3d_index(mesh *meshi, int dir, float val){
+  float valmin,valdiff;
+  int i, ivalmin, nvals;
+  float *xyz;
+
+  switch (dir){
+    case 1:
+      xyz = meshi->xplt_orig;
+      nvals = meshi->ibar;
+      break;
+    case 2:
+      xyz = meshi->yplt_orig;
+      nvals = meshi->jbar;
+      break;
+    case 3:
+      xyz = meshi->zplt_orig;
+      nvals = meshi->kbar;
+      break;
+  }
+  
+  ivalmin=0;
+  valmin = fabs(xyz[0]- val);
+  for(i=1;i<=nvals;i++){
+    if(fabs(xyz[i]-val)<valmin){
+      valmin = fabs(xyz[i]-val);
+      ivalmin = i;
+    }
+  }
+  return ivalmin;
 }
 
 /* ------------------ update_plot_xyz ------------------------ */
