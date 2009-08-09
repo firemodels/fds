@@ -97,8 +97,11 @@ void glui_script_disable(void);
 // LOADPLOT3D
 //  mesh number (int) time (float)
 
+// PLOT3DPROPS
+//  plot3d type (int) showvector (0/1) (int) vector length index (int) plot3d display type (int)
+
 // SHOWPLOT3DDATA
-//  mesh number (int) orientation (int)  plot3d type (int) value (0/1) (int) position (float)
+//  mesh number (int) orientation (int)  value (0/1) (int) position (float)
 
 // UNLOADALL
 
@@ -394,6 +397,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"PLOT3DPROPS",11) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"LOADTOUR",8) == 1){
       nscriptinfo++;
       continue;
@@ -647,12 +654,22 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"PLOT3DPROPS",11) == 1){
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_PLOT3DPROPS);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      sscanf(buffer2,"%i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4);
+
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"SHOWPLOT3DDATA",14) == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_SHOWPLOT3DDATA);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
-      sscanf(buffer2,"%i %i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->fval);
+      sscanf(buffer2,"%i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->fval);
 
       nscriptinfo++;
       continue;
@@ -1018,6 +1035,56 @@ void script_partclasscolor(scriptdata *scripti){
   }
 }
 
+
+/* ------------------ script_plot3dprops ------------------------ */
+
+void script_plot3dprops(scriptdata *scripti){
+  int i, p_index;
+
+  p_index = scripti->ival;
+  if(p_index<1)p_index=1;
+  if(p_index>5)p_index=5;
+
+  visVector = scripti->ival2;
+  if(visVector!=1)visVector=0;
+
+  iveclengths = scripti->ival3;
+
+  plotn = p_index;
+  if(plotn<1){
+    plotn=numplot3dvars;
+  }
+  if(plotn>numplot3dvars){
+    plotn=1;
+  }
+  updateallplotslices();
+  if(visiso==1)updatesurface();
+  updateplot3dlistindex();
+
+  vecfactor = get_vecfactor(&iveclengths);
+  printf("iveclengths=%i\n",iveclengths);
+
+  p3cont2d = scripti->ival4;
+  if(p3cont2d<0)p3cont2d=0;
+  if(p3cont2d>2)p3cont2d=2;
+  update_plot3d_display();
+
+  if(visVector==1&&ReadPlot3dFile==1){
+    mesh *gbsave,*gbi;
+
+    gbsave=current_mesh;
+    for(i=0;i<nmeshes;i++){
+      gbi = meshinfo + i;
+      if(gbi->plot3dfilenum==-1)continue;
+      update_current_mesh(gbi);
+      updateplotslice(1);
+      updateplotslice(2);
+      updateplotslice(3);
+    }
+    update_current_mesh(gbsave);
+  }
+}
+
 /* ------------------ script_showplot3ddata ------------------------ */
 
 void script_showplot3ddata(scriptdata *scripti){
@@ -1036,11 +1103,7 @@ void script_showplot3ddata(scriptdata *scripti){
   if(dir<1)dir=1;
   if(dir>3)dir=3;
 
-  p_index = scripti->ival3;
-  if(p_index<1)p_index=1;
-  if(p_index>5)p_index=5;
-
-  showhide = scripti->ival4;
+  showhide = scripti->ival3;
   val = scripti->fval;
 
   switch (dir){
@@ -1059,20 +1122,8 @@ void script_showplot3ddata(scriptdata *scripti){
   }
   updateplotslice(dir);
 
-  if(showhide==1){
-    plotn = p_index;
-    if(plotn<1){
-      plotn=numplot3dvars;
-    }
-    if(plotn>numplot3dvars){
-      plotn=1;
-    }
-    updateallplotslices();
-    if(visiso==1)updatesurface();
-    updateplot3dlistindex();
-  }
-
 }
+
 /* ------------------ script_partclasstype ------------------------ */
 
 void script_partclasstype(scriptdata *scripti){
@@ -1345,6 +1396,9 @@ int run_script(void){
       break;
     case SCRIPT_SHOWPLOT3DDATA:
       script_showplot3ddata(scripti);
+      break;
+    case SCRIPT_PLOT3DPROPS:
+      script_plot3dprops(scripti);
       break;
     case SCRIPT_PARTCLASSTYPE:
       script_partclasstype(scripti);

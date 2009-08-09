@@ -1079,6 +1079,7 @@ void keyboard(unsigned char key, int x, int y){
       default:
         visVector=1-visVector;
         if(vectorspresent==0)visVector=0;
+        updateglui();
         break;
     }
     return;
@@ -1161,6 +1162,8 @@ void keyboard(unsigned char key, int x, int y){
         fprintf(scriptoutstream," %f\n",timeval);
       }
       else{
+        int show_plot3dkeywords=0;
+
         for(i=0;i<nmeshes;i++){
           mesh *meshi;
           plot3d *plot3di;
@@ -1171,6 +1174,7 @@ void keyboard(unsigned char key, int x, int y){
 
           plot3di = plot3dinfo + meshi->plot3dfilenum;
           if(plot3di->display==0)continue;
+          show_plot3dkeywords=1;
           xp = meshi->xplt_orig;
           yp = meshi->yplt_orig;
           zp = meshi->zplt_orig;
@@ -1180,6 +1184,10 @@ void keyboard(unsigned char key, int x, int y){
           fprintf(scriptoutstream," %i 2 %i %i %f\n",i+1,plotn,meshi->visy,yp[meshi->ploty]);
           fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
           fprintf(scriptoutstream," %i 3 %i %i %f\n",i+1,plotn,meshi->visz,zp[meshi->plotz]);
+        }
+        if(show_plot3dkeywords==1){
+          fprintf(scriptoutstream,"PLOT3DPROPS\n");
+          fprintf(scriptoutstream," %i %i %i %i\n",plotn,visVector,iveclengths,p3cont2d);
         }
       }
       if(rflag==0){
