@@ -103,6 +103,8 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define SAVE_FILE_LIST 93
 #define LOAD_FILES 92
 
+#define UPDATE_VECTOR 101
+
 #define TRUNCATEBOUNDS 1
 #define DONT_TRUNCATEBOUNDS 0
 #define UPDATEBOUNDS 1
@@ -112,6 +114,12 @@ GLUI_Button *BUTTON_compress=NULL;
 #ifdef pp_TRANSFORM
 GLUI_Panel *panel_slice_transform=NULL;
 #endif
+GLUI_Panel *panel_pan1=NULL;
+GLUI_Panel *panel_pan2=NULL;
+GLUI_Panel *panel_pan3=NULL;
+GLUI_Panel *panel_contours=NULL;
+GLUI_Panel *panel_isosurface=NULL;
+GLUI_Panel *panel_vector=NULL;
 GLUI_Panel *panel_script1=NULL;
 GLUI_Panel *panel_script1a=NULL;
 GLUI_Panel *panel_script1b=NULL;
@@ -163,6 +171,7 @@ GLUI_Checkbox *showtracer_checkbox=NULL;
 GLUI_Checkbox *CHECKBOX_cellcenter_slice_interp=NULL;
 GLUI_Checkbox *CHECKBOX_skip_subslice=NULL;
 
+GLUI_Spinner *SPINNER_plot3d_vectorpointsize=NULL,*SPINNER_plot3d_vectorlinewidth=NULL;
 GLUI_Spinner *SPINNER_sliceaverage=NULL;
 GLUI_Spinner *SPINNER_boundframestep=NULL;
 GLUI_Spinner *SPINNER_sliceframestep=NULL;
@@ -401,29 +410,41 @@ extern "C" void glui_bounds_setup(int main_window){
     for(i=0;i<mxplot3dvars;i++){
       glui_bounds->add_radiobutton_to_group(p3rlist,plot3dinfo[0].label[i].shortlabel);
     }
-    glui_bounds->add_separator_to_panel(panel_plot3d);
-    plot3d_display=glui_bounds->add_radiogroup_to_panel(panel_plot3d,&p3cont2d,UPDATEPLOT,PLOT3D_CB);
+    panel_pan3 = glui_bounds->add_panel_to_panel(panel_plot3d,"",GLUI_PANEL_NONE);
+    panel_contours = glui_bounds->add_panel_to_panel(panel_pan3,"Contours");
+    plot3d_display=glui_bounds->add_radiogroup_to_panel(panel_contours,&p3cont2d,UPDATEPLOT,PLOT3D_CB);
     glui_bounds->add_radiobutton_to_group(plot3d_display,"Shaded Contours");
     glui_bounds->add_radiobutton_to_group(plot3d_display,"Stepped Contours");
     glui_bounds->add_radiobutton_to_group(plot3d_display,"Line Contours");
+    
+    //glui_bounds->add_column_to_panel(panel_pan3);
+    panel_vector = glui_bounds->add_panel_to_panel(panel_pan3,"Vector");
+    glui_bounds->add_checkbox_to_panel(panel_vector,"Show Vectors",&visVector,UPDATEPLOT,PLOT3D_CB);
+    SPINNER_plot3d_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_vector,"Point size",GLUI_SPINNER_FLOAT,&vectorpointsize,UPDATE_VECTOR,PLOT3D_CB);
+    SPINNER_plot3d_vectorpointsize->set_float_limits(1.0,10.0);
+    SPINNER_plot3d_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_vector,"Line width",GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,PLOT3D_CB);
+    SPINNER_plot3d_vectorlinewidth->set_float_limits(1.0,10.0);
 
-    glui_bounds->add_separator_to_panel(panel_plot3d);
+    panel_isosurface = glui_bounds->add_panel_to_panel(panel_plot3d,"Isosurface");
+    panel_pan1 = glui_bounds->add_panel_to_panel(panel_isosurface,"",GLUI_PANEL_NONE);
 
-    glui_bounds->add_checkbox_to_panel(panel_plot3d,"Show Isosurface",&visiso,PLOTISO,PLOT3D_CB);
-    plot3d_isotype=glui_bounds->add_radiogroup_to_panel(panel_plot3d,&p3dsurfacetype,PLOTISOTYPE,PLOT3D_CB);
+    glui_bounds->add_checkbox_to_panel(panel_pan1,"Show Isosurface",&visiso,PLOTISO,PLOT3D_CB);
+    SPINNER_plot3dpointsize=glui_bounds->add_spinner_to_panel(panel_pan1,"Point size",GLUI_SPINNER_FLOAT,
+      &plot3dpointsize);
+    SPINNER_plot3dpointsize->set_float_limits(1.0,10.0);
+
+    SPINNER_plot3dlinewidth=glui_bounds->add_spinner_to_panel(panel_pan1,"Line width",GLUI_SPINNER_FLOAT,
+      &plot3dlinewidth);
+    SPINNER_plot3dlinewidth->set_float_limits(1.0,10.0);
+//    glui_bounds->add_column_to_panel(panel_isosurface);
+    panel_pan2 = glui_bounds->add_panel_to_panel(panel_isosurface,"",GLUI_PANEL_NONE);
+    plot3d_isotype=glui_bounds->add_radiogroup_to_panel(panel_pan2,&p3dsurfacetype,PLOTISOTYPE,PLOT3D_CB);
     plot3d_iso_hidden=glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Hidden");
     glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Solid");
     glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Outline");
     glui_bounds->add_radiobutton_to_group(plot3d_isotype,"Points");
     plot3d_iso_hidden->disable();
 
-    SPINNER_plot3dpointsize=glui_bounds->add_spinner_to_panel(panel_plot3d,"Point size",GLUI_SPINNER_FLOAT,
-      &plot3dpointsize);
-    SPINNER_plot3dpointsize->set_float_limits(1.0,10.0);
-
-    SPINNER_plot3dlinewidth=glui_bounds->add_spinner_to_panel(panel_plot3d,"Line width",GLUI_SPINNER_FLOAT,
-      &plot3dlinewidth);
-    SPINNER_plot3dlinewidth->set_float_limits(1.0,10.0);
 
     p3min_temp=p3min[0];
     p3max_temp=p3max[0];
@@ -495,11 +516,11 @@ extern "C" void glui_bounds_setup(int main_window){
     GLUI_Panel *panel_vector=NULL;
 
     panel_vector=glui_bounds->add_panel_to_panel(panel_slice,"Vector");
-    SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_vector,"particle size",GLUI_SPINNER_FLOAT,
-      &vectorpointsize);
+    SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_vector,"Point size",GLUI_SPINNER_FLOAT,
+      &vectorpointsize,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorpointsize->set_float_limits(1.0,10.0);
-    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_vector,"line width",GLUI_SPINNER_FLOAT,
-      &vectorlinewidth);
+    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_vector,"Line width",GLUI_SPINNER_FLOAT,
+      &vectorlinewidth,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
     }
 
@@ -733,6 +754,12 @@ void PLOT3D_CB(int var){
   int i;
 
   switch (var){
+  case UPDATE_VECTOR:
+    if(SPINNER_vectorpointsize!=NULL&&SPINNER_vectorlinewidth!=NULL){
+      SPINNER_vectorpointsize->set_float_val(vectorpointsize);
+      SPINNER_vectorlinewidth->set_float_val(vectorlinewidth);
+    }
+    break;
   case CHOPUPDATE:
     updatechopcolors();
     break;
@@ -1513,6 +1540,12 @@ extern "C" void Slice_CB(int var){
   ASSERT(con_slice_min!=NULL);
   ASSERT(con_slice_max!=NULL);
   switch (var){
+  case UPDATE_VECTOR:
+    if(SPINNER_plot3d_vectorpointsize!=NULL&&SPINNER_plot3d_vectorlinewidth!=NULL){
+      SPINNER_plot3d_vectorpointsize->set_float_val(vectorpointsize);
+      SPINNER_plot3d_vectorlinewidth->set_float_val(vectorlinewidth);
+    }
+    break;
   case OUTPUTSLICEDATA:
     if(output_slicedata==1){
       init_slicedata=1;
