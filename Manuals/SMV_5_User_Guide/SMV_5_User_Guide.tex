@@ -1981,6 +1981,41 @@ PARTCLASSTYPE
    type (char)
 \end{verbatim}
 
+\hitem{LOADPLOT3D}Load a plot3D file for a given mesh at a specified time.
+Usaage:
+\begin{verbatim}
+LOADPLOT3D
+  mesh number (an integer form 1 to the number of meshes) time (float)
+\end{verbatim}
+
+\hitem{PLOT3DPROPS}Specifies PLOT3D plot properties that apply to all PLOT3D plots currently being displayed.
+Usage:
+\begin{verbatim}
+PLOT3DPROPS
+  plot3d type (int) showvector (0/1) (int) vector length index (int) plot3d display type (int)
+\end{verbatim}
+where
+\begin{itemize}
+\item plot3d type - is an integer from 1 to the number of PLOT3D file components (usually 5),
+\item showvector - is 1 to draw vectors, 0 otherwise
+\item vector length index, is an integer index from 0 to 6 pointing to an internal Smokeview array used to determine vector size.
+\item plot3d display type - is 0 for stepped contours, 1 for line contours and 2 for continuous contours
+\end{itemize}
+
+\hitem{SHOWPLOT3DDATA}Specifies a particular PLOT3D plot to be displayed (mesh number, whether visible or not, orientation and position)
+Usage:
+\begin{verbatim}
+SHOWPLOT3DDATA
+  mesh number (int) plane orientation (int)  display show/hide (0/1) (int) position (float)
+\end{verbatim}
+where
+\begin{itemize}
+\item mesh number - the mesh number (ranges from 1 to the number of meshes),
+\item orientation - direction or orientation of the plane being plotted, 1 for YZ planes, 2 for XZ planes and 3 for XY planes
+\item display - 0 if PLOT3D plane is hidden, 1 if it is displayed
+\item position - position of PLOT3D plane
+\end{itemize}
+
 \hitem{LOADISO}Load an iso-surface file of a given type.  The type is the same as what Smokeview displays in the Load menus for iso-surface files.
 Usage:
 \begin{verbatim}
