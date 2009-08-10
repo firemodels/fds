@@ -1179,11 +1179,14 @@ void keyboard(unsigned char key, int x, int y){
           yp = meshi->yplt_orig;
           zp = meshi->zplt_orig;
           fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
-          fprintf(scriptoutstream," %i 1 %i %i %f\n",i+1,plotn,meshi->visx,xp[meshi->plotx]);
+          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,1, plotn,meshi->visx,xp[meshi->plotx]);
           fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
-          fprintf(scriptoutstream," %i 2 %i %i %f\n",i+1,plotn,meshi->visy,yp[meshi->ploty]);
+          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,2, plotn,meshi->visy,yp[meshi->ploty]);
           fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
-          fprintf(scriptoutstream," %i 3 %i %i %f\n",i+1,plotn,meshi->visz,zp[meshi->plotz]);
+          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,3, plotn,meshi->visz,zp[meshi->plotz]);
+          fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
+          fprintf(scriptoutstream," %i %i %i %i %i\n",i+1,4, plotn,visiso,plotiso[plotn-1]);
+
         }
         if(show_plot3dkeywords==1){
           fprintf(scriptoutstream,"PLOT3DPROPS\n");

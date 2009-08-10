@@ -306,6 +306,7 @@ void init_scripti(scriptdata *scripti, int command){
   scripti->ival2=0;
   scripti->ival3=0;
   scripti->ival4=0;
+  scripti->ival5=0;
 }
 
 /* ------------------ compile_script ------------------------ */
@@ -669,7 +670,10 @@ int compile_script(char *scriptfile){
       init_scripti(scripti,SCRIPT_SHOWPLOT3DDATA);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
-      sscanf(buffer2,"%i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->fval);
+      sscanf(buffer2,"%i %i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->fval);
+      if(scripti->ival2==4){
+        sscanf(buffer2,"%i %i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->ival5);
+      }
 
       nscriptinfo++;
       continue;
@@ -1092,6 +1096,7 @@ void script_showplot3ddata(scriptdata *scripti){
   mesh *meshi;
   int imesh, dir, p_index, showhide;
   float val;
+  int isolevel;
 
   imesh = scripti->ival-1;
   if(imesh<0||imesh>nmeshes-1)return;
@@ -1101,9 +1106,11 @@ void script_showplot3ddata(scriptdata *scripti){
 
   dir = scripti->ival2;
   if(dir<1)dir=1;
-  if(dir>3)dir=3;
+  if(dir>4)dir=4;
 
-  showhide = scripti->ival3;
+  plotn=scripti->ival3;
+
+  showhide = scripti->ival4;
   val = scripti->fval;
 
   switch (dir){
@@ -1118,6 +1125,13 @@ void script_showplot3ddata(scriptdata *scripti){
     case 3:
       updateshowstep(showhide,DIRZ);
       meshi->plotz=get_plot3d_index(meshi, dir, val);
+      break;
+    case 4:
+      isolevel=scripti->ival5;
+      plotiso[plotn-1]=isolevel;
+      updateshowstep(showhide,ISO);
+      updatesurface();
+      updatemenu=1;  
       break;
   }
   updateplotslice(dir);
