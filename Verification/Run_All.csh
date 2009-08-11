@@ -69,6 +69,8 @@ $RUNFDS Pressure_Effects pressure_boundary        fire64 &
 $RUNFDS Pressure_Effects pressure_rise            fire65 &
 $RUNFDS Pressure_Effects zone_break               fire66 &
 $RUNFDS Pressure_Effects zone_shape               fire67 &
+$RUNFDS Pyrolysis birch_tga_1step_2               fire68 &
+$RUNFDS Pyrolysis birch_tga_1step_20              fire68 &
 $RUNFDS Pyrolysis charring_solid                  fire68 &
 $RUNFDS Pyrolysis enthalpy                        fire51 &
 $RUNFDS Pyrolysis specified_hrr                   fire52 &
