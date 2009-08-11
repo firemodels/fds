@@ -1139,6 +1139,7 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 \end{tabular}
 \end{center}
 
+\begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{FIGURES/heat_conduction_a} &
@@ -1146,6 +1147,9 @@ D     &  10.0     & 10000        &  1            &  10           & 0.1     \\ \h
 \includegraphics[width=3.2in]{FIGURES/heat_conduction_c} &
 \includegraphics[width=3.2in]{FIGURES/heat_conduction_d}
 \end{tabular*}
+\caption[The {\bf heat\_conduction} test cases.]{Comparison of heat conduction calculations with analytical solutions.}
+\label{heat_conduction}
+\end{figure}
 
 
 \clearpage
@@ -1185,11 +1189,15 @@ lines are FDS results and the dark lines are the HEATING results. An example inp
       THICKNESS=0.01 /
 \end{verbatim} \normalsize
 
+\begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{FIGURES/heat_conduction_kc_surf} &
 \includegraphics[width=3.2in]{FIGURES/heat_conduction_kc_back}
 \end{tabular*}
+\caption[The {\bf heat\_conduction\_kc} test case.]{Comparison of heat conduction calculations with a finite-element model.}
+\label{heat_conduction_kc}
+\end{figure}
 
 
 
@@ -1236,9 +1244,13 @@ analytical solution is:
 \end{eqnarray}
 The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $K_{bc} = 0.262$ are shown here:
 
+\begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.5in]{FIGURES/two_step_solid_reaction}
 \end{center}
+\caption[The {\bf two\_step\_solid\_reaction} test case.]{Comparison of a two-step solid pyrolysis calculation with an analytical solution.}
+\label{two_step_solid_reaction}
+\end{figure}
 
 
 
@@ -1254,9 +1266,13 @@ initial material, having emissivity of 1.0, is converted to another
 material, having emissivity of 0.0, at a constant rate of 0.1~s$^{-1}$. As a
 result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s.
 
+\begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.5in]{FIGURES/emissivity}
 \end{center}
+\caption[The {\bf emissivity} test case.]{Testing the emissivity of solid materials.}
+\label{emissivity}
+\end{figure}
 
 
 \clearpage
@@ -1280,14 +1296,38 @@ The density and conductivity of both materials are
 30~kg/m$^3$ and 10~W/m/K, respectively. The emissivity of front and back is 1.  The specific heat of material A changes from
 1.0~kJ/kg/K to 0.1~kJ/kg/K above 80~$^\circ$C, while the specific heat of material B is constant at 1.0~kJ/kg/K. The slab is 1~mm thick.
 
+\begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.5in]{FIGURES/enthalpy}
 \end{center}
+\caption[The {\bf enthalpy} test case.]{Testing the enthalpy of solid materials.}
+\label{enthalpy}
+\end{figure}
 
 \noindent
 Note that the ``analytical'' solution is actually a simple numerical integration of the equations above with a small time step to ensure accuracy.
 This example tests a number of features, including the reaction rate, mass weighted specific heats, and radiation boundary conditions. Note that the
 convective heat transfer has been turned off, and the correct steady-state temperature is calculated by FDS.
+
+
+\clearpage
+
+\section{Using TGA Data (\texorpdfstring{{\bf birch\_tga}}{birch\_tga})}
+\label{birch_tga}
+
+This is an example of a comparison of a candidate solid phase model with TGA (Thermo-gravimetric Analysis) data. The sample cases
+called {\bf birch\_tga\_1step\_2} and {\bf birch\_tga\_1step\_20} simulate two standard TGA experiments in which small samples of birch wood are heated up slowly at constant 
+rates of 2~$^\circ$C/min and 20~$^\circ$C/min, respectively. The model of the wood only involves one reaction that converts virgin wood to char and fuel gases. There is
+also a reaction in the simulation that does nothing more than evaporate the small amount of moisture in the wood. This evaporation is evident in
+Fig.~\ref{birch_tga} near the temperature of 100~$^\circ$C. 
+
+\begin{figure}[ht]
+   \begin{center}
+      \includegraphics[width=3.5in]{FIGURES/birch_tga}
+      \caption[An example of TGA data.]{Comparison of a solid phase model of birch wood with TGA data.}
+   \end{center}
+   \label{birch_tga}
+\end{figure}
 
 
 
