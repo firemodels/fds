@@ -32,6 +32,7 @@ legend('Exp. 2 K/min','Exp. 20 K/min','FDS 2 K/min','FDS 20 K/min')
 
 % print pdf
 set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../../Manuals/FDS_5_Verification_Guide/FIGURES/birch_tga')
