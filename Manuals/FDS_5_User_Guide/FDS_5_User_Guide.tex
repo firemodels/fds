@@ -23,7 +23,7 @@
 \usepackage{graphpap}
 \usepackage{rotating}
 \usepackage{epsfig,psfrag}
-%\usepackage{wrapfig}
+\usepackage{wrapfig}
 %\usepackage{picins}
 \usepackage{geometry}
 \usepackage{tabularx}
@@ -1245,6 +1245,7 @@ Feature & Description & Symptom of Problem & Recommendation \\
 {\ct CO\_PRODUCTION} & Algorithm to predict CO production    & Inaccuracies found in comparison to experiments       & Research usage only    \\ \hline
 Liquid Fuels         & Pyrolysis model of evaporating liquid fuel  & Inaccuracies found in comparison to experiments; physical and numerical sensitivity  & Research usage only    \\ \hline
 {\ct PRESSURE\_CORRECTION} & Improve accuracy of pressure solver over multiple meshes  & Erratic fluid motion  & Do not use if results are unphysical    \\ \hline
+Solid Fuels     & Pyrolysis model of solid fuel  & Results in FDS 5.4 and beyond different than previous versions  & Read Section \ref{info:solid_pyrolysis}   \\ \hline
 \end{tabular}
 \end{sidewaystable}
 
@@ -4093,36 +4094,33 @@ solid phase pyrolysis, for example ``Thermal Decomposition of Polymers,'' by Hir
 
 \subsubsection{The Reaction Mechanism}
 
-A solid object might contain multiple layers with multiple material
-components per layer. The solid object is described by a {\ct SURF}
-line which contains the names of the various {\ct MATL}s it is
-composed of.  Each {\ct MATL} can undergo several reactions that may
-occur at different temperatures and consume different amounts of heat.
-Each individual reaction can produce a (single) solid {\ct RESIDUE},
+A solid surface in FDS can consist of multiple layers with multiple material
+components per layer. The material components are described via {\ct MATL} lines and are specified on the {\ct SURF}
+line that describes the structure of the solid.  Each {\ct MATL} can undergo several reactions that may
+occur at different temperatures.
+In the model, each reaction can produce a (single) solid {\ct RESIDUE},
 water vapor, and/or fuel gas. For example, the evaporation of water
 from a solid material is described by the ``reaction'' that converts
-liquid water to water vapor. This reaction occurs close to 100~$^\circ$C and
+liquid water to water vapor. This reaction occurs in the neighborhood of 100~$^\circ$C and
 produces only water vapor. It does not produce a solid {\ct RESIDUE}
 nor fuel gas. However, a pyrolyzing solid might undergo a reaction
-that produces a solid {\ct RESIDUE}, water vapor, {\em and} fuel gas.
+that produces a solid {\ct RESIDUE}, water vapor, {\em and} fuel gas, all as part of the single reaction step.
 
 For each {\ct MATL} entry in the input file, decide how many reactions
 it can undergo. It may not undergo any -- it may only just heat
 up. However, if it is to change form via one or more reactions,
-designate the number of reactions with the integer {\ct N\_REACTIONS}. It is very important that you designate {\ct N\_REACTIONS} 
+designate the number of reactions with the integer {\ct N\_REACTIONS}. It is very important that you designate {\ct N\_REACTIONS}
 or else FDS will ignore all parameters associated with
-reactions. Note, that quite often the empirical observation of multiple
-reactions does not imply {\ct N\_REACTIONS} > 1, but is caused by the
-fact that the examined sample is a mixture of multiple materials
-reacting at different temperatures.   Currently, the maximum number of
+reactions. Note that experimental evidence of multiple
+reactions does not imply that a single material is undergoing multiple reactions, but rather that 
+multiple material components are undergoing individual reactions at distinct temperatures.  Currently, the maximum number of
 reactions for each material is 10 and the chain of consecutive
 reactions may contain up to 20 steps.
 
-Next, decide what each reaction produces: a (single) solid {\ct
-RESIDUE}, water vapor, and/or fuel gas. This information is conveyed
+Each reaction produces a (single) solid {\ct RESIDUE}, water vapor, and/or fuel gas. This information is conveyed
 to FDS via the {\em yields}: {\ct NU\_RESIDUE(j)}, {\ct NU\_WATER(j)},
-and {\ct NU\_FUEL(j)}, respectively. Here, {\ct j} indicates which
-reaction the parameters pertain to. If, like the evaporation of water,
+and {\ct NU\_FUEL(j)}, respectively. The integer {\ct j} indicates to which
+reaction the parameters apply. If, like the evaporation of water,
 only water vapor is produced, set {\ct NU\_WATER(j)=1.0} and the other
 two to zero. The yields are all zero by default. If {\ct
 NU\_RESIDUE(j)} is non-zero, then you {\em must} indicate what the
@@ -4139,13 +4137,10 @@ because it has essentially disappeared from that particular surface.
 A more general way to specify gaseous yields is to use the parameter {\ct NU\_GAS},
 as explained in Section~\ref{nu_gas}.
 
-\subsubsection{The Reaction Rate}
+\subsubsection{The Reaction Rates}
 
-Now you must specify at what temperature the reaction occurs, and how
-fast the reaction occurs at that temperature.  The reaction rate at
-the temperature, $T_s$, of the $i$th material ({\em i.e.} the {\ct
-MATL} that you are currently describing) undergoing its $j$th reaction
-is given by:
+For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate.  The reaction rate at
+the temperature, $T_s$, of the $i$th material undergoing its $j$th reaction is given by:
 \be
   r_{ij} =
   \dod{ }{t} \left( \frac{\rho_{s,i}}{\rho_{s0}} \right) =
@@ -4153,12 +4148,11 @@ is given by:
   A_{ij} \; \exp\left(-\frac{E_{ij}}{RT_s} \right) \;
   \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}  \label{rr}
 \ee
-$\rho_{s,i}$ is the density of the $i$th material within that
-particular layer, in the sense of the mass of the $i$th material
+$\rho_{s,i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component
 divided by the volume of the layer.  $\rho_{s0}$ is the initial
 density of the layer. Thus, $\rho_{s,i}/\rho_{s0}$ is a quantity that
-increases as the $i$th material is produced as a residue of some other
-reaction, and decreases as the $i$th material decomposes.  If the
+increases if the $i$th material component is produced as a residue of some other
+reaction, or decreases if the $i$th component decomposes.  If the
 layer is composed of only one material, then $\rho_{s,i}/\rho_{s0}$ is initially 1.
 $n_{s,ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, and is 1 by default.
 If the value of $n_s$ is not known, it is a good starting point to assume $n_s=1$.
@@ -4166,34 +4160,49 @@ If the value of $n_s$ is not known, it is a good starting point to assume $n_s=1
 The pre-exponential factor, $A_{ij}$, is prescribed under the name
 {\ct A(j)}, with units of s$^{-1}$. $E_{ij}$, the activation energy,
 is prescribed via {\ct E(j)} in units of kJ/kmol. Remember that 1~kcal
-is 4.184~kJ, and be careful with factors of 1000.  $A$ and $E$ are not
-readily accessible for most real materials.  However, if they are
-known, specify both. Avoid specifying just one because they act as a
-pair.  If $A$ and $E$ are not known, which is usually the case,
-specify {\ct REFERENCE\_RATE} (s$^{-1}$) and {\ct
-REFERENCE\_TEMPERATURE} ($^\circ$C). This directs FDS to calculate the
-activation energy, {\ct E}, using the specified reference rate,
-reference temperature, and an assumed value of $A=1\times
-10^{13}$~s$^{-1}$. Essentially, this guarantees that the {\ct
-REFERENCE\_RATE} is achieved at the {\ct REFERENCE\_TEMPERATURE}. The
-default value of {\ct REFERENCE\_RATE} is 0.001~s$^{-1}$.  It is
-suggested that unless you have information to the contrary, leave {\ct
-REFERENCE\_RATE} at its default value and just specify the {\ct
-REFERENCE\_TEMPERATURE}. Note that the {\ct REFERENCE\_TEMPERATURE} is
-{\em not} the same as an ignition temperature. Rather, it is simply
-the temperature at which the mass fraction of the $i$th material
-decreases at a rate of 0.001~s$^{-1}$. You should check the sensitivity
-of these parameters following the procedure explained in
-Section~\ref{solid_phase_verification}.  \index{MATL!REFERENCE\_RATE}
-\index{MATL!REFERENCE\_TEMPERATURE}
+is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify
+only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
+experiments, like TGA (Thermo-Gravimetric Analysis).  
 
 \begin{figure}[ht]
-\includegraphics[width=3.5in]{FIGURES/pyrolysis}
+\center{\includegraphics[width=4.0in]{FIGURES/pyrolysis}}
 \caption[Simple demonstration of pyrolysis model.]{The curve at left (blue) shows the mass loss for a solid material
 undergoing a slow heating. At right, the green curve shows the reaction rate, which is the first derivative of the
 mass loss curve.}
 \label{pyrolysis}
 \end{figure}
+
+It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known, there are several parameters that can
+be used by FDS to derive effective values. The most important parameter to specify in place of $A$ and $E$ is
+the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plots shown in Fig.~\ref{pyrolysis}. These curves represent
+the results of a hypothetical TGA experiment.\footnote{The blue curve (Mass Fraction) in Fig.~\ref{pyrolysis} is the solution, $Y(t)$, of the ordinary differential
+equation 
+\be \frac{dY}{dt} = -A \, Y \, \exp(-E/RT) \quad ; \quad Y(0)=1  \ee
+The temperature, $T(t)$ is a linearly increasing function of time, in this case 5~K/min, typical of a TGA experiment. The green
+curve (Reaction Rate) represents the function, $-dY/dt$.}
+The Mass Fraction (blue curve) is the normalized density of the material which decreases as the sample is slowly heated, in this case at a rate
+of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time. Where this curve peaks is referred to in FDS
+as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain backward compatibility with earlier versions of
+FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is
+{\em not} the same as an ignition temperature, nor is it necessarily the surface temperature of the burning solid. Rather, it is simply
+the temperature at which the mass fraction of the $i$th material
+decreases at its maximum rate within the context of a TGA or similar experimental apparatus. 
+
+Two additional parameters can be specified along with {\ct REFERENCE\_TEMPERATURE} to better define the range of temperatures over
+which pyrolysis occurs. First, the {\ct TGA\_HEATING\_RATE} is the rate at which the temperature of the TGA (or equivalent) test apparatus was increased, in units
+of K/min. Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green curve (Reaction Rate) is equal to the heating rate (in units of K/s). Second, the
+{\ct TGA\_HEATING\_RANGE} is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value
+is 80~$^\circ$C. These two parameters merely help to fine tune the shape of the curve, assuming some sort of experiment has been done to indicate at what temperature, and
+over what temperature range, the reaction takes place. As with $A$ and $E$ above, if this information is not available, only specify the 
+{\ct REFERENCE\_TEMPERATURE}.
+
+
+\begin{warning}
+\noindent Note that versions of FDS from 5.0 through 5.3 used a slightly different definition of {\ct REFERENCE\_TEMPERATURE} in addition to 
+a parameter called {\ct REFERENCE\_RATE}. The latter has been removed and its use in FDS 5.4 and beyond will result in an immediate error message.
+\end{warning} 
+
+
 
 \subsubsection{Special Topic: The ``Threshold'' Temperature}
 
@@ -4385,7 +4394,6 @@ the material are conveyed via the {\ct MATL} line:
       NU_FUEL=1.
       HEAT_OF_REACTION=1500.
       HEAT_OF_COMBUSTION=25000.
-      REFERENCE_RATE=0.1
       REFERENCE_TEMPERATURE=330. /
 \end{verbatim} \normalsize
 
@@ -4521,7 +4529,6 @@ At the very least, we want the upholstery to be described as fabric covering foa
       DENSITY               = 100.0
       N_REACTIONS           = 1
       NU_FUEL               = 1.
-      REFERENCE_RATE        = 0.1
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
@@ -4533,7 +4540,6 @@ At the very least, we want the upholstery to be described as fabric covering foa
       DENSITY               = 40.0
       N_REACTIONS           = 1
       NU_FUEL               = 1.
-      REFERENCE_RATE        = 0.1
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
@@ -8983,7 +8989,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NU\_GAS(:,II)}           & Real array  & Yields of species {\ct II}     & kg/kg            & 0.     \\ \hline
 {\ct NU\_RESIDUE}             & Real array  & Residue yields                 & kg/kg            & 0.     \\ \hline
 {\ct NU\_WATER}               & Real aray   & Water vapor yields             & kg/kg            & 0.     \\ \hline
-{\ct REFERENCE\_RATE}         & Real array  & Reaction rates at ref.~temp.   & s$^{-1}$         & 0.001  \\ \hline
 {\ct REFERENCE\_TEMPERATURE}  & Real array  & Reference temperatures         & $^\circ$C        &        \\ \hline
 {\ct RESIDUE}                 & Character   & {\ct IDs} of residue {\ct MATL} &                 &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat                  & kJ/kg/K          & 0.     \\ \hline
