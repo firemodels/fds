@@ -21,7 +21,7 @@ set(gca,'Position',[Plot_X-.15,Plot_Y,Plot_Width,Plot_Height])
 % Solve the ODE dY/dT=f(T,Y)
 
 options = odeset('RelTol',1e-10,'AbsTol',1e-8);
-[T,Y] = ode15s(@reaction_rate,[473 673],1.,options);
+[T,Y] = ode15s(@reaction_rate,[373 673],1.,options);
 
 % Compute dY/dT
 
@@ -35,24 +35,25 @@ dYdT(length(Y)) = 0.;
 
 dTdt = 5./60.;
 TC = T-273;
-[AX,H1,H2] = plotyy(TC,Y,TC,-dYdT*dTdt,'plot'); hold on
+[AX,H1,H2] = plotyy(TC,Y,TC,-dYdT*dTdt*1000,'plot'); hold on
 
 set(gca,'FontName',Font_Name)
 set(AX(1),'FontName',Font_Name)
 set(AX(2),'FontName',Font_Name)
 xlabel('Temperature ($^\circ$C)','Interpreter','LaTeX','FontSize',Label_Font_Size)
 set(get(AX(1),'Ylabel'),'String','Mass Fraction','Interpreter','LaTeX','FontSize',Label_Font_Size) 
-set(get(AX(2),'Ylabel'),'String','Reaction Rate (s$^{-1}$)','Interpreter','LaTeX','FontSize',Label_Font_Size) 
+set(get(AX(2),'Ylabel'),'String','Reaction Rate (s$^{-1}$) $\times$ 10$^3$','Interpreter','LaTeX','FontSize',Label_Font_Size) 
 set(AX(1),'YLim',[0 1.1])
-set(AX(2),'YLim',[0 0.011])
+set(AX(2),'YLim',[0 2.2])
 set(AX(1),'YTickMode','manual')
 set(AX(2),'YTickMode','manual')
-set(AX(1),'YTick',[0 0.2 0.4 0.6 0.8 1.])
-set(AX(2),'YTick',[0 0.002 0.004 0.006 0.008 0.01])
+set(AX(1),'YTick',[0 0.2 0.4 0.6 0.8 1.0])
+set(AX(2),'YTick',[0 0.4 0.8 1.2 1.6 2.0])
 set(H1,'LineStyle','-')
 set(H2,'LineStyle','-')
 
-line([300. 300.],[0 2],'LineStyle','--','Color','black')
+line([300. 300.],[0.00 0.96],'LineStyle','--','Color','black','LineWidth',1)
+%line([300. 400.],[0.96 0.96],'LineStyle','--','Color','black','LineWidth',1)
 
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
