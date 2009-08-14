@@ -27,7 +27,6 @@ many different ways of representing a complicated fuel source.
       N_REACTIONS           = 1
       HEAT_OF_REACTION      = 2500.
       HEAT_OF_COMBUSTION    = 25000.
-      REFERENCE_RATE        = 0.1  
       REFERENCE_TEMPERATURE = 330.
       NU_FUEL               = 1.0 /
 
