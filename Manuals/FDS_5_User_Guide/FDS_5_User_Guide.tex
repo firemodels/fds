@@ -3875,7 +3875,12 @@ material component.
 
 \begin{warning}
 \noindent
-When a {\ct SURF} is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} is at the face of the {\ct OBST}, with the other {\ct MATL\_ID}s being applied in succession with the final {\ct MATL\_ID} being applied on the opposite face of the {\ct OBST}.  If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation from the +x face to the -x face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer calculation from the -x face to the +x face.  To avoid this the user would need to specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
+When a {\ct SURF} is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} is at the face of the {\ct OBST}, with the 
+other {\ct MATL\_ID}s being applied in succession with the final {\ct MATL\_ID} being applied on the opposite face of the {\ct OBST}.  
+If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation 
+from the +x face to the -x face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer 
+calculation from the -x face to the +x face.  To avoid this the user would need to specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} 
+and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
 \end{warning}
 
 
@@ -4112,7 +4117,7 @@ up. However, if it is to change form via one or more reactions,
 designate the number of reactions with the integer {\ct N\_REACTIONS}. It is very important that you designate {\ct N\_REACTIONS}
 or else FDS will ignore all parameters associated with
 reactions. Note that experimental evidence of multiple
-reactions does not imply that a single material is undergoing multiple reactions, but rather that 
+reactions does not imply that a single material is undergoing multiple reactions, but rather that
 multiple material components are undergoing individual reactions at distinct temperatures.  Currently, the maximum number of
 reactions for each material is 10 and the chain of consecutive
 reactions may contain up to 20 steps.
@@ -4162,8 +4167,11 @@ The pre-exponential factor, $A_{ij}$, is prescribed under the name
 is prescribed via {\ct E(j)} in units of kJ/kmol. Remember that 1~kcal
 is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify
 only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
-experiments, like TGA (Thermo-Gravimetric Analysis).  
+experiments, like TGA (Thermo-Gravimetric Analysis).
 
+It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known, there are several parameters that can
+be used by FDS to derive effective values. The most important parameter to specify in place of $A$ and $E$ is
+the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plots shown in Fig.~\ref{pyrolysis}. These curves represent
 \begin{figure}[ht]
 \center{\includegraphics[width=4.0in]{FIGURES/pyrolysis}}
 \caption[Simple demonstration of pyrolysis model.]{The curve at left (blue) shows the mass loss for a solid material
@@ -4171,12 +4179,8 @@ undergoing a slow heating. At right, the green curve shows the reaction rate, wh
 mass loss curve.}
 \label{pyrolysis}
 \end{figure}
-
-It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known, there are several parameters that can
-be used by FDS to derive effective values. The most important parameter to specify in place of $A$ and $E$ is
-the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plots shown in Fig.~\ref{pyrolysis}. These curves represent
 the results of a hypothetical TGA experiment.\footnote{The blue curve (Mass Fraction) in Fig.~\ref{pyrolysis} is the solution, $Y(t)$, of the ordinary differential
-equation 
+equation
 \be \frac{dY}{dt} = -A \, Y \, \exp(-E/RT) \quad ; \quad Y(0)=1  \ee
 The temperature, $T(t)$ is a linearly increasing function of time, in this case 5~K/min, typical of a TGA experiment. The green
 curve (Reaction Rate) represents the function, $-dY/dt$.}
@@ -4186,22 +4190,43 @@ as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature''
 FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is
 {\em not} the same as an ignition temperature, nor is it necessarily the surface temperature of the burning solid. Rather, it is simply
 the temperature at which the mass fraction of the $i$th material
-decreases at its maximum rate within the context of a TGA or similar experimental apparatus. 
+decreases at its maximum rate within the context of a TGA or similar experimental apparatus.
 
-Two additional parameters can be specified along with {\ct REFERENCE\_TEMPERATURE} to better define the range of temperatures over
-which pyrolysis occurs. First, the {\ct TGA\_HEATING\_RATE} is the rate at which the temperature of the TGA (or equivalent) test apparatus was increased, in units
+Two additional parameters can be specified along with {\ct REFERENCE\_TEMPERATURE} ($T_p$) to help to fine tune the shape of the reaction rate curve, 
+assuming some sort of experiment has been done to indicate at what temperature, and
+over what temperature range, the reaction takes place. First, the {\ct TGA\_HEATING\_RATE} ($\dot{T}$) is the rate at which the 
+temperature of the TGA (or equivalent) test apparatus was increased, in units
 of K/min. Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green curve (Reaction Rate) is equal to the heating rate (in units of K/s). Second, the
-{\ct TGA\_HEATING\_RANGE} is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value
-is 80~$^\circ$C. These two parameters merely help to fine tune the shape of the curve, assuming some sort of experiment has been done to indicate at what temperature, and
-over what temperature range, the reaction takes place. As with $A$ and $E$ above, if this information is not available, only specify the 
-{\ct REFERENCE\_TEMPERATURE}.
-
+{\ct TGA\_PYROLYSIS\_RANGE} ($\Delta T$) is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value
+is 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_p$, from which $E$, then $A$, can be calculated to ensure that
+the peak reaction rate occurs at the specified {\ct REFERENCE\_TEMPERATURE}.
+\begin{eqnarray}
+   r_p &=& 2 \, \Delta T \, T_p \\
+   E &=& \frac{r_p \, R \, T_p^2}{Y_p \, \dot{T}} \\
+   A &=& \frac{E \, \dot{T}}{R \, T_p^2} \, e^{E/R \, T_p}
+\end{eqnarray}
+Note that $Y_p$ is the mass fraction (blue curve in Fig.~\ref{pyrolysis}) at the temperature where the reaction rate is its maximum. It is 0.4 by default and not
+adjustable.
+When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}. 
 
 \begin{warning}
-\noindent Note that versions of FDS from 5.0 through 5.3 used a slightly different definition of {\ct REFERENCE\_TEMPERATURE} in addition to 
+\noindent Note that versions of FDS from 5.0 through 5.3 used a slightly different definition of {\ct REFERENCE\_TEMPERATURE} in addition to
 a parameter called {\ct REFERENCE\_RATE}. The latter has been removed and its use in FDS 5.4 and beyond will result in an immediate error message.
-\end{warning} 
+\end{warning}
 
+\subsubsection{The Heat of Reaction}
+
+Equation~(\ref{rr}) describes the rate of the reaction as a function
+of temperature.  Most solid phase reactions require energy; that is,
+they are {\em endothermic}. The amount of energy consumed, per unit
+mass of reactant that is converted into something else, is specified
+by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy
+difference between the products and the reactant. A positive value
+indicates that the reaction is {\em endothermic}; that is, the
+reaction takes energy out of the system. Usually the {\ct
+HEAT\_OF\_REACTION} is accurately known only for simple phase change
+reactions like the vaporization of water. For other reactions, it must
+be determined empirically.
 
 
 \subsubsection{Special Topic: The ``Threshold'' Temperature}
@@ -4216,28 +4241,13 @@ reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
 is equal to 0 at temperatures below $T_{thr,ij}$ and 1 at temperatures above.
 $n_{t,j}$ is prescribed under the name {\ct N\_T(j)}.
 
-
-
 \begin{warning}
 \noindent
 Remember that all temperatures are specified in degrees Celsius, but are then converted to
 degrees Kelvin within the program. Thus, the formulae in this section ought to be interpreted in terms of the absolute temperature.
 \end{warning}
 
-\subsubsection{The Heat of Reaction}
 
-One last issue before a few examples -- the most important one of
-all. Equation~(\ref{rr}) describes the rate of the reaction as a function
-of temperature.  Most solid phase reactions require energy; that is,
-they are {\em endothermic}. The amount of energy consumed, per unit
-mass of reactant that is converted into something else, is specified
-by the {\ct HEAT\_OF\_REACTION(j)}. Technically, this is the enthalpy
-difference between the products and the reactant. A positive value
-indicates that the reaction is {\em endothermic}; that is, the
-reaction takes energy out of the system. Usually the {\ct
-HEAT\_OF\_REACTION} is accurately known only for simple phase change
-reactions like the vaporization of water. For other reactions, it must
-be determined empirically.
 
 
 
@@ -8968,31 +8978,33 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\
 \hline \hline
 \endhead
-{\ct A}                       & Real array  & Pre-exponential factors        &    1/s           & 1E13   \\ \hline
-{\ct ABSORPTION\_COEFFICIENT} & Real        & Absorption Coefficient         &    1/m           & 50000. \\ \hline
-{\ct BOILING\_TEMPERATURE}    & Real        & Boiling temperature            & $^\circ$C        & 5000.  \\ \hline
-{\ct CONDUCTIVITY}            & Real        & Thermal conductivity           & W/m/K            & 0.     \\ \hline
-{\ct CONDUCTIVITY\_RAMP}      & Character   & Ramp ID for conductivity       &                  &        \\ \hline
-{\ct DENSITY}                 & Real        & Solid mass per unit volume     & kg/m$^3$         & 0.     \\ \hline
-{\ct E}                       & Real array  & Activation energies            & kJ/kmol          &        \\ \hline
-{\ct EMISSIVITY    }          & Real        & Emissivity                     &                  & 0.9    \\ \hline
-{\ct FYI}                     & Character   & Comment String (has no effect) &                  &        \\ \hline
-{\ct HEAT\_OF\_COMBUSTION(:,II)}& Real array& Heats of combustion for species {\ct II}& kJ/kg   & 0.      \\ \hline
-{\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of reaction               & kJ/kg            & 0.     \\ \hline
-{\ct INITIAL\_VAPOR\_FLUX}    & Real        & Initial evaporation rate       & m$^2$/(sm$^2$)   & 5E-4   \\ \hline
-{\ct ID     }                 & Character   & IDentifier                     &                  &        \\ \hline
-{\ct THRESHOLD\_TEMPERATURE}  & Real array  & Threshold temperatures         & $^\circ$C        & -273.15 \\ \hline
-{\ct N\_REACTIONS}            & Character   & Number of Reactions            &                  & 0      \\ \hline
-{\ct N\_S}                    & Real array  & Exponents of mass fraction     &                  & 1.     \\ \hline
-{\ct N\_T}                    & Real array  & Exponents of temperature       &                  & 0.     \\ \hline
-{\ct NU\_FUEL}                & Real array  & Fuel yields                    & kg/kg            & 0.     \\ \hline
-{\ct NU\_GAS(:,II)}           & Real array  & Yields of species {\ct II}     & kg/kg            & 0.     \\ \hline
-{\ct NU\_RESIDUE}             & Real array  & Residue yields                 & kg/kg            & 0.     \\ \hline
-{\ct NU\_WATER}               & Real aray   & Water vapor yields             & kg/kg            & 0.     \\ \hline
-{\ct REFERENCE\_TEMPERATURE}  & Real array  & Reference temperatures         & $^\circ$C        &        \\ \hline
-{\ct RESIDUE}                 & Character   & {\ct IDs} of residue {\ct MATL} &                 &        \\ \hline
-{\ct SPECIFIC\_HEAT}          & Real        & Specific heat                  & kJ/kg/K          & 0.     \\ \hline
-{\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat      &                  &        \\ \hline
+{\ct A}                       & Real array  & Pre-exponential factors                   &    1/s            & 1E13   \\ \hline
+{\ct ABSORPTION\_COEFFICIENT} & Real        & Absorption Coefficient                    &    1/m            & 50000. \\ \hline
+{\ct BOILING\_TEMPERATURE}    & Real        & Boiling temperature                       & $^\circ$C         & 5000.  \\ \hline
+{\ct CONDUCTIVITY}            & Real        & Thermal conductivity                      & W/m/K             & 0.     \\ \hline
+{\ct CONDUCTIVITY\_RAMP}      & Character   & Ramp ID for conductivity                  &                   &        \\ \hline
+{\ct DENSITY}                 & Real        & Solid mass per unit volume                & kg/m$^3$          & 0.     \\ \hline
+{\ct E}                       & Real array  & Activation energies                       & kJ/kmol           &        \\ \hline
+{\ct EMISSIVITY    }          & Real        & Emissivity                                &                   & 0.9    \\ \hline
+{\ct FYI}                     & Character   & Comment String (has no effect)            &                   &        \\ \hline
+{\ct HEAT\_OF\_COMBUSTION(:,II)}& Real array& Heats of combustion for species {\ct II}  & kJ/kg             & 0.     \\ \hline
+{\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of reaction                         & kJ/kg             & 0.     \\ \hline
+{\ct INITIAL\_VAPOR\_FLUX}    & Real        & Initial evaporation rate                  & m$^2$/(sm$^2$)    & 5E-4   \\ \hline
+{\ct ID     }                 & Character   & IDentifier                                &                   &        \\ \hline
+{\ct THRESHOLD\_TEMPERATURE}  & Real array  & Threshold temperatures                    & $^\circ$C         & -273.15 \\ \hline
+{\ct N\_REACTIONS}            & Character   & Number of Reactions                       &                   & 0      \\ \hline
+{\ct N\_S}                    & Real array  & Exponents of mass fraction                &                   & 1.     \\ \hline
+{\ct N\_T}                    & Real array  & Exponents of temperature                  &                   & 0.     \\ \hline
+{\ct NU\_FUEL}                & Real array  & Fuel yields                               & kg/kg             & 0.     \\ \hline
+{\ct NU\_GAS(:,II)}           & Real array  & Yields of species {\ct II}                & kg/kg             & 0.     \\ \hline
+{\ct NU\_RESIDUE}             & Real array  & Residue yields                            & kg/kg             & 0.     \\ \hline
+{\ct NU\_WATER}               & Real aray   & Water vapor yields                        & kg/kg             & 0.     \\ \hline
+{\ct REFERENCE\_TEMPERATURE}  & Real array  & Reference temperatures                    & $^\circ$C         &        \\ \hline
+{\ct RESIDUE}                 & Character   & {\ct IDs} of residue {\ct MATL}           &                   &        \\ \hline
+{\ct SPECIFIC\_HEAT}          & Real        & Specific heat                             & kJ/kg/K           & 0.     \\ \hline
+{\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat                 &                   &        \\ \hline
+{\ct TGA\_HEATING\_RATE}      & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
+{\ct TGA\_PYROLYSIS\_RANGE}   & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
