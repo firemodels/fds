@@ -26,7 +26,6 @@ All material properties are completely fabricated.
       DENSITY               = 100.0
       N_REACTIONS           = 1
       NU_FUEL               = 1.
-      REFERENCE_RATE        = 0.1
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
@@ -38,7 +37,6 @@ All material properties are completely fabricated.
       DENSITY               = 40.0
       N_REACTIONS           = 1
       NU_FUEL               = 1.
-      REFERENCE_RATE        = 0.1
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
@@ -56,7 +54,6 @@ All material properties are completely fabricated.
       DENSITY               = 750.
       N_REACTIONS           = 1
       NU_FUEL               = 1.
-      REFERENCE_RATE        = 0.1
       REFERENCE_TEMPERATURE = 290.
       HEAT_OF_COMBUSTION    = 22300.
       HEAT_OF_REACTION      = 2000. /

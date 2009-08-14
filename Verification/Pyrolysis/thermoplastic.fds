@@ -29,7 +29,6 @@ The plastic properties and surface designation
       NU_FUEL=1.
       HEAT_OF_REACTION=1500.
       HEAT_OF_COMBUSTION=25000.
-      REFERENCE_RATE=0.1   
       REFERENCE_TEMPERATURE=330. /
 
 &SURF ID='PMMA SLAB'
