@@ -19,35 +19,5 @@ echo Creating figures for the Smokeview User's guide
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Manuals\SMV_5_User_Guide
-
-erase scriptfigures\*.png
-erase scriptfigures\*.help
-erase scriptfigures\*.version
-
-smokeview -help > scriptfigures\smokeview.help
-smokeview -version > scriptfigures\smokeview.version
-smokezip -help > scriptfigures\smokezip.help
-
-cd %svn_root%\Manuals\SMV_5_Verification_Guide
-erase scriptfigures\*.version
-erase scriptfigures\*.png
-smokeview -version > scriptfigures\smokeview.version
-
-cd %svn_root%\Verification\Visualization
-smokeview -runscript colorconv
-smokeview -runscript devices_elem
-smokeview -runscript plume5a
-smokeview -runscript plume5b
-smokeview -runscript plume5c
-smokeview -runscript plume5c_bounddef
-smokeview -runscript sillytexture
-smokeview -runscript smoke_sensor
-smokeview -runscript smoke_test
-smokeview -runscript smoke_test2
-smokeview -runscript thouse5
-smokeview -runscript script_test
-
-cd %svn_root%\Verification\Wui
-smokeview -runscript fire_line
-
+cd %svn_root%\Verification
+call SMV_Generate_test_pictures.bat
