@@ -33,6 +33,16 @@ float MIN(float x,float y){
     return y;
   }
 }
+
+float MAX(float x,float y){
+  if(x>y){
+    return x;
+  }
+  else{
+    return y;
+  }
+}
+
 /* ------------------ allocate_shooter ------------------------ */
 
 int  allocate_shooter(void){
@@ -153,7 +163,7 @@ void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt
         uvwnew[1] = uvw_air[1];
         uvwnew[2] = uvw_air[2];
       }
-      dt=max(0.01,0.0);
+      dt=MAX(0.01,0.0);
 
       xyznew[0] += dt*uvwnew[0];
       xyznew[1] += dt*uvwnew[1];
