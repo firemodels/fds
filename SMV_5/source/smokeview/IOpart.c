@@ -1355,6 +1355,9 @@ void drawPart5(const particle *parti){
 
   if(current_property==NULL)return;
   ipframe=parti->iframe;
+  if(ipframe<0){
+    ipframe=0;
+    } //xxx need to check this - why is ipframe < 0 ???
   nclasses = parti->nclasses;
   datacopy = parti->data5+nclasses*ipframe;
   CheckMemory;
