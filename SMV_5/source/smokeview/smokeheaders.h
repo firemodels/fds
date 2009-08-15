@@ -71,11 +71,11 @@ EXTERNCPP int init_cull_exts(void);
 #ifdef pp_GPU
 void getDepthTexture( void );
 void createDepthTexture( void );
-EXTERNCPP mesh *getmesh(float *xyz);
 EXTERNCPP int init_shaders(void);
 EXTERNCPP void LoadSmokeShaders(void);
 EXTERNCPP void UnloadSmokeShaders(void);
 #endif
+EXTERNCPP mesh *getmesh(float *xyz);
 EXTERNCPP void update_glui_wui(void);
 EXTERNCPP int have_terrain_slice(void);
 EXTERNCPP void getfile_size(const char *filename, FILE_SIZE *filesize);
