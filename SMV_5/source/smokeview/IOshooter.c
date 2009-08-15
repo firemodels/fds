@@ -25,6 +25,14 @@
 char IOshooter_revision[]="$Revision$";
 // $Date$ $Author$
 
+float MIN(float x,float y){
+  if(x<y){
+    return x;
+  }
+  else{
+    return y;
+  }
+}
 /* ------------------ allocate_shooter ------------------------ */
 
 int  allocate_shooter(void){
@@ -126,16 +134,16 @@ void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt
       if(meshpoint==NULL)meshpoint=meshinfo;
       grid_vel =  sqrt(uvwnew[0]*uvwnew[0]+uvwnew[1]*uvwnew[1]+uvwnew[2]*uvwnew[2]);
       if(grid_vel<0.01)grid_vel=0.01;
-      dt = min(meshpoint->cellsize/grid_vel,dtstep-tstep);
+      dt = MIN(meshpoint->cellsize/grid_vel,dtstep-tstep);
 
       dvel[0] = uvwnew[0]-uvw_air[0];
       dvel[1] = uvwnew[1]-uvw_air[1];
       dvel[2] = uvwnew[2]-uvw_air[2];
 
-      dvelmin = min(abs(dvel[0]),abs(dvel[1]));
-      dvelmin = min(abs(1.0+dvel[2]),dvelmin);
+      dvelmin = MIN(abs(dvel[0]),abs(dvel[1]));
+      dvelmin = MIN(abs(1.0+dvel[2]),dvelmin);
       if(shooter_v_inf>0.01){
-        dt = min(dt,0.1*shooter_v_inf/dvelmin);
+        dt = MIN(dt,0.1*shooter_v_inf/dvelmin);
         uvwnew[0] -= g*dt*(    dvel[0]/shooter_v_inf);
         uvwnew[1] -= g*dt*(    dvel[1]/shooter_v_inf);
         uvwnew[2] -= g*dt*(1.0+dvel[2]/shooter_v_inf);
