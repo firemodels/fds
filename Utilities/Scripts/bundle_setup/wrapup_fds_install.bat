@@ -34,7 +34,7 @@ mkdir "%USERPROFILE%\Start Menu\Programs\FDS5"
 mkdir "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web"
 copy "%CD%\Documentation\FDS_on_the_Web\D*"          "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web"
 copy "%CD%\Documentation\FDS_on_the_Web\O*"          "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web"
-copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"        %USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web\Discussion_Group.url"
+copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"        "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web\Discussion_Group.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"          "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web\Issue_Tracker.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Updates.url" "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web\Updates.url"  
 
