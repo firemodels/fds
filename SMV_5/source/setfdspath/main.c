@@ -137,6 +137,27 @@ int main(int argc, char **argv){
   return 0;
 }
 
+/* ------------------ add_percen ------------------------ */
+
+int add_percen(char *fullpath){
+  char fullpath_copy[BUFFER_SIZE];
+  size_t i,i2;
+  int found=0;
+
+  if(fullpath==NULL||strlen(fullpath)==0)return 1;
+  strcpy(fullpath_copy,fullpath);
+  i2=0;
+  for(i=0;i<strlen(fullpath_copy);i++){
+    if(fullpath_copy[i]=='%'){
+      fullpath[i2++]='%';
+      found=1;
+    }
+    fullpath[i2++]=fullpath_copy[i];
+  }
+  fullpath[i2]=0;
+  return found;
+}
+
 /* ------------------ parse_path_key ------------------------ */
 
 char *parse_path_key(int flag, char *buffer, char *newentry){
@@ -188,10 +209,14 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
       }
       // don't add a path entry if the entry is already in the user path
       if(newentry!=NULL&&newentry_present==0){
+        int percen;
+        FILE *streamcom;
+
         strcat(fullpath,";");
         strcat(fullpath,newentry);
         strcpy(command,"reg add hkey_current_user\\Environment /v Path /t ");
-        if(offset_type==1){
+        percen=add_percen(fullpath);
+        if(offset_type==1||percen==1){
           strcat(command,"REG_EXPAND_SZ /f /d "); 
         }
         if(offset_type==2){
@@ -201,7 +226,14 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
         strcat(command,fullpath);
         strcat(command,"\"");
         if(show_debug==1)printf("executing: %s\n\n",command);
-        system(command);
+        streamcom=fopen("setpath.bat","w");
+        if(streamcom!=NULL){
+          fprintf(streamcom,"@echo off\n");
+          fprintf(streamcom,"%s",command);
+          fclose(streamcom);
+          system("setpath.bat");
+          _unlink("setpath.bat");
+        }
         printf("  The directory, %s, was added to the user PATH variable.\n",newentry);
         printf("  You need to re-boot your computer when this installation completes.\n");
       }
@@ -223,15 +255,17 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           if(token!=NULL)strcat(fullpath,";");
         }
         trim(fullpath);
-        if(old_fds_found==1){
-          int lenstr;
+        if(old_fds_found==0){
+          int lenstr, percen;
+          FILE *streamcom;
 
           lenstr = strlen(fullpath);
           if(fullpath[lenstr-1]==';'){
             fullpath[lenstr-1]=0;
           }
           strcpy(command,"reg add hkey_current_user\\Environment /v Path /t ");
-          if(offset_type==1){
+          percen=add_percen(fullpath);
+          if(offset_type==1||percen==1){
             strcat(command,"REG_EXPAND_SZ /f /d "); 
           }
           if(offset_type==2){
@@ -241,7 +275,14 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           strcat(command,fullpath);
           strcat(command,"\"");
           if(show_debug==1)printf("executing: %s\n\n",command);
-          system(command);
+          streamcom=fopen("setpath.bat","w");
+          if(streamcom!=NULL){
+            fprintf(streamcom,"@echo off\n");
+            fprintf(streamcom,"%s",command);
+            fclose(streamcom);
+            system("setpath.bat");
+            _unlink("setpath.bat");
+          }
           printf("  The directory, %s, was removed from the USER path entry\n",newentry);
           printf("  You need to re-boot your computer before this change takes effect.\n");
         }
@@ -273,6 +314,7 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
         trim(fullpath);
         if(old_fds_found==1){
           int lenstr;
+          FILE *streamcom;
 
           lenstr = strlen(fullpath);
           if(fullpath[lenstr-1]==';'){
@@ -280,12 +322,20 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           }
           strcpy(command,"reg add \"hkey_local_machine\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\" /v Path /t REG_EXPAND_SZ /f /d "); 
           strcat(command,"\"");
+          add_percen(fullpath);
           strcat(command,fullpath);
           strcat(command,"\"");
           printf("  pre 5.4 FDS/Smokeview path entries were found and are being removed.\n");
           printf("  You need to re-boot your computer when this installation completes.\n");
           if(show_debug==1)printf("executing: %s\n\n",command);
-          system(command);
+          streamcom=fopen("setpath.bat","w");
+          if(streamcom!=NULL){
+            fprintf(streamcom,"@echo off\n");
+            fprintf(streamcom,"%s",command);
+            fclose(streamcom);
+            system("setpath.bat");
+            _unlink("setpath.bat");
+          }
         }
         else{
           printf("  pre 5.4 FDS/Smokeview path entries were not found.\n");
