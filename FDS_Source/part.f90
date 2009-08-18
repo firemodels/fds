@@ -37,9 +37,7 @@ IF (EVACUATION_ONLY(NM)) RETURN  ! Don't waste time if an evac mesh
  
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
-II=1
-JJ=1
-KK=1 
+
 PART_CLASS_LOOP: DO IPC=1,N_PART
  
 
@@ -99,9 +97,6 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
    ENDIF
 
    ! Assign properties to the initial droplets/particles
-!   II=0
-!   JJ=1
-!   KK=1   
    MASS_SUM = 0._EB
    INITIALIZATION_LOOP: DO I=1,PC%N_INITIAL
       NLP = NLP + 1
@@ -111,18 +106,6 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
          DROPLET=>MESHES(NM)%DROPLET
       ENDIF
       DR=>DROPLET(NLP)
-!      II = II + 1
-!      IF (II > 20) THEN
-!         II = 1
-!         JJ = JJ + 1
-!      ENDIF
-!      IF (JJ > 20) THEN
-!         JJ = 1
-!         KK = KK + 1
-!      ENDIF
-!      DR%X = 0.5_EB*(X(II-1)+X(II))
-!      DR%Y = 0.5_EB*(Y(JJ-1)+Y(JJ))
-!      DR%Z = 0.5_EB*(Z(KK-1)+Z(KK))
       BLOCK_OUT_LOOP:  DO
          CALL RANDOM_NUMBER(RN)
          DR%X = X1 + RN*(X2-X1)
@@ -689,7 +672,7 @@ USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP, AFILL2
 USE PHYSICAL_FUNCTIONS, ONLY : DRAG
  
 REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,SFAC,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
-            RD,T,C_DRAG,XI,YJ,ZK,MU_AIR,&
+            RD,T,C_DRAG,XI,YJ,ZK,MU_AIR,WE_G,SURFACE_TENSION,&
             DTSP,DTMIN,UBAR,VBAR,WBAR,BFAC,GRVT1,GRVT2,GRVT3,AUREL,AVREL,AWREL,CONST, &
             UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION(-3:3),R_NEW,SURFACE_DROPLET_DIAMETER
 LOGICAL :: HIT_SOLID
@@ -699,6 +682,7 @@ TYPE (DROPLET_TYPE), POINTER :: DR
 TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC
 
 SURFACE_DROPLET_DIAMETER = 0.001_EB  ! All droplets adjusted to this size when on solid (m)
+SURFACE_TENSION = 72.8E-3_EB
 
 GRVT1 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(1) 
 GRVT2 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(2) 
@@ -772,6 +756,11 @@ DROPLET_LOOP: DO I=1,NLP
    DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
    DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
       C_DRAG  = DRAG(DR%RE)
+      
+      !Secondary break-up
+      IF (SECONDARY_BREAKUP) THEN
+         WE_G=RHO(II,JJ,KK)*QREL**2*2._EB/SURFACE_TENSION
+      ENDIF
       IF (.NOT. PC%TREE) THEN
          SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
          DR%A_X  = SFAC*UREL*RVC
@@ -1269,7 +1258,21 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
       IF (.NOT.PC%EVAPORATE) CYCLE PART_CLASS_LOOP
       IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
       IF (PC%TREE) CYCLE PART_CLASS_LOOP
-      IF (PC%SURF_INDEX>0)           CYCLE PART_CLASS_LOOP
+
+      ! If the particle class is associated with a particular SURF, just get its temperature and cycle
+      
+      IF (PC%SURF_INDEX>0) THEN
+         DO I=1,NLP
+            DR=>DROPLET(I)
+            IF (DR%CLASS==N_PC) THEN
+               IW = DR%WALL_INDEX
+               DR%TMP = TMP_F(IW)
+            ENDIF
+         ENDDO
+         CYCLE PART_CLASS_LOOP
+      ENDIF
+
+      ! Initialize quantities common to the PARTICLE_CLASS 
 
       DROP_DEN = 0._EB
       DROP_TMP = 0._EB
