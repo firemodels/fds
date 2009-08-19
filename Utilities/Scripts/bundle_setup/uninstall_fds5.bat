@@ -18,7 +18,7 @@ echo.
 echo Proceeding...
 
 echo.
-echo removing association between .smv and smokeview
+echo removing association between .smv and Smokeview
 
 assoc .smv=
 Rem ftype smvDoc=
@@ -31,7 +31,7 @@ rmdir /q /s "%USERPROFILE%\Start Menu\Programs\FDS5"
 cd ..\bin
 echo.
 echo Removing directory %CD% from the user path variable for: %USERNAME%
-call ..\Uninstall\set_path.exe -u "%CD%"
+call ..\Uninstall\set_path.exe -c "%CD%"
 
 echo.
 echo Uninstall Complete.  Press any key to continue.
