@@ -11,6 +11,7 @@ set in_smv=%svn_root%\SMV_5\for_bundle\
 set to_google=%svn_root%\Utilities\to_google
 set out_bundle=%to_google%\%basename%\FDS
 set out_bin=%out_bundle%\FDS5\bin
+set out_uninstall=%out_bundle%\FDS5\Uninstall
 set out_doc=%out_bundle%\FDS5\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
@@ -32,6 +33,7 @@ mkdir %out_doc%
 mkdir %out_guides%
 mkdir %out_web%
 mkdir %out_examples%
+mkdir %out_uninstall%
 
 Rem Copy FDS, Smokeview and other needed files to the bin  directory
 
@@ -46,6 +48,11 @@ copy %in_smv%\pthreadVC.dll           %out_bin%\.
 copy %in_smv%\smokezip_release.exe    %out_bin%\%smokezip%
 copy %in_smv%\glew32.dll              %out_bin%\.
 copy %in_smv%\smokeview.ini           %out_bin%\.
+
+echo.
+echo Copying Uninstaller to Uninstall directory
+copy "%bundleinfo%\uninstall_fds5.bat"             "%out_uninstall%\Uninstall.bat"
+copy "%bundleinfo%\set_path.exe"                   "%out_uninstall%\set_path.exe"
 
 Rem Include documentation in the bundle only if the variable, docs_include_in_bundles,
 Rem is not set to 0.  This variable is defined in the fds_smv_env.bat setup  file
