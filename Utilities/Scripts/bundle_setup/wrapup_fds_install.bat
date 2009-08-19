@@ -32,8 +32,9 @@ if exist "%USERPROFILE%\Start Menu\Programs\FDS5" rmdir /q /s "%USERPROFILE%\Sta
 mkdir "%USERPROFILE%\Start Menu\Programs\FDS5"
 
 mkdir "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web"
-copy "%CD%\Documentation\FDS_on_the_Web\D*"          "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web"
-copy "%CD%\Documentation\FDS_on_the_Web\O*"          "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web"
+copy "%CD%\Documentation\FDS_on_the_Web\Developer_Web_Site.url"          "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web\Developer_Web_Site.url"
+copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"          "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web\Discussion_Group.url"
+copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"          "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web\Official_Web_Site.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"        "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web\Discussion_Group.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"          "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web\Issue_Tracker.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Updates.url" "%USERPROFILE%\Start Menu\Programs\FDS5\FDS_on_the_Web\Updates.url"  
@@ -47,7 +48,8 @@ mkdir "%USERPROFILE%\Start Menu\Programs\FDS5\User_Guides_and_Release_Notes"
 "%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
 
 echo.
-echo Adding the directory %CD% to the user path variable for: %USERNAME%
+echo Adding the directory %CD% to the user path
+echo   for: %USERNAME%
 
 call "%CD%"\set_path.exe -a "%CD%\bin"
 

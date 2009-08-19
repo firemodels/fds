@@ -255,7 +255,7 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           if(token!=NULL)strcat(fullpath,";");
         }
         trim(fullpath);
-        if(old_fds_found==0){
+        if(old_fds_found==1){
           int lenstr, percen;
           FILE *streamcom;
 
@@ -325,8 +325,8 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           add_percen(fullpath);
           strcat(command,fullpath);
           strcat(command,"\"");
-          printf("  pre 5.4 FDS/Smokeview path entries were found and are being removed.\n");
-          printf("  You need to re-boot your computer when this installation completes.\n");
+          printf("  Found and being removed.\n");
+          printf("  A re-boot is required after this installation completes.\n");
           if(show_debug==1)printf("executing: %s\n\n",command);
           streamcom=fopen("setpath.bat","w");
           if(streamcom!=NULL){
@@ -338,7 +338,7 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           }
         }
         else{
-          printf("  pre 5.4 FDS/Smokeview path entries were not found.\n");
+          printf("  Not found.\n");
         }
       }
       break;
