@@ -18,6 +18,21 @@ set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X-.15,Plot_Y,Plot_Width,Plot_Height])
 
+% Set global reaction rate parameters
+
+global dTdt
+global R0
+global E
+global A
+
+dTdt = 5./60.;
+R0 = 8314.3;
+T_0 = 300.+273.;
+delta_T = 80.;
+r_0=2*dTdt/delta_T;
+E=r_0*R0*T_0*T_0/(dTdt*0.4);
+A=(E./(R0.*T_0.*T_0))*dTdt*exp(E./(R0.*T_0));
+
 % Solve the ODE dY/dT=f(T,Y)
 
 options = odeset('RelTol',1e-10,'AbsTol',1e-8);
