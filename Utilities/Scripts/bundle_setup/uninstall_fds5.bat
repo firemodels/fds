@@ -28,10 +28,10 @@ echo Removing FDS and Smokeview shortcuts from the Start menu.
 rmdir /q /s "%USERPROFILE%\Start Menu\Programs\FDS5"
 
 
-cd ..\bin
+cd ..
 echo.
-echo Removing directory %CD% from the user path variable for: %USERNAME%
-call ..\Uninstall\set_path.exe -c "%CD%"
+echo Removing %CD%\bin from the User Path for: %USERNAME%
+call Uninstall\set_path.exe -c "%CD%\bin"
 
 echo.
 echo Uninstall Complete.  Press any key to continue.

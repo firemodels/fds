@@ -226,16 +226,16 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
         strcat(command,fullpath);
         strcat(command,"\"");
         if(show_debug==1)printf("executing: %s\n\n",command);
-        streamcom=fopen("setpath.bat","w");
+        streamcom=fopen("setpath_addnew.bat","w");
         if(streamcom!=NULL){
           fprintf(streamcom,"@echo off\n");
           fprintf(streamcom,"%s",command);
           fclose(streamcom);
-          system("setpath.bat");
-          _unlink("setpath.bat");
+//          system("setpath_addnew.bat");
+//          _unlink("setpath_addnew.bat");
         }
-        printf("  The directory, %s, was added to the user PATH variable.\n",newentry);
-        printf("  You need to re-boot your computer when this installation completes.\n");
+        printf("  %s, was added to the User Path\n",newentry);
+        printf("A re-boot is required after this installation completes.\n");
       }
       break;
     case REMOVE_USER_PATH:
@@ -275,19 +275,19 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           strcat(command,fullpath);
           strcat(command,"\"");
           if(show_debug==1)printf("executing: %s\n\n",command);
-          streamcom=fopen("setpath.bat","w");
+          streamcom=fopen("setpath_removenew.bat","w");
           if(streamcom!=NULL){
             fprintf(streamcom,"@echo off\n");
             fprintf(streamcom,"%s",command);
             fclose(streamcom);
-            system("setpath.bat");
-            _unlink("setpath.bat");
+//            system("setpath_removenew.bat");
+//            _unlink("setpath_removenew.bat");
           }
-          printf("  The directory, %s, was removed from the USER path entry\n",newentry);
-          printf("  You need to re-boot your computer before this change takes effect.\n");
+          printf("  %s, was removed from the User Path\n",newentry);
+          printf("A re-boot is required to complete the installation.\n");
         }
         if(old_fds_found==0){
-          printf("  Path entry %s not found in user path,\n",newentry);
+          printf("  %s not found in the User Path,\n",newentry);
         }
       }
       break;
@@ -326,19 +326,19 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           strcat(command,fullpath);
           strcat(command,"\"");
           printf("  Found and being removed.\n");
-          printf("  A re-boot is required after this installation completes.\n");
+          printf("A re-boot is required after this installation completes.\n");
           if(show_debug==1)printf("executing: %s\n\n",command);
-          streamcom=fopen("setpath.bat","w");
+          streamcom=fopen("setpath_removeold.bat","w");
           if(streamcom!=NULL){
             fprintf(streamcom,"@echo off\n");
             fprintf(streamcom,"%s",command);
             fclose(streamcom);
-            system("setpath.bat");
-            _unlink("setpath.bat");
+//            system("setpath_removeold.bat");
+//            _unlink("setpath_removeold.bat");
           }
         }
         else{
-          printf("  Not found.\n");
+          printf("  None found.\n");
         }
       }
       break;
