@@ -98,7 +98,10 @@ int main(int argc, char **argv){
 
   if((newentry!=NULL&&add_user_path==1)||show_user_path==1){
     strcpy(command,"reg query hkey_current_user\\Environment /v Path > local_path.txt"); 
-    if(show_debug==1)printf("executing: %s\n\n",command);
+    if(show_debug==1){
+      if(add_user_path==1)printf("*** Querying user path (add_user_path=1)\n");
+      printf("executing: %s\n\n",command);
+    }
     system(command);
     if(newentry!=NULL&&add_user_path==1){
       path=parse_path_key(ADD_USER_PATH,pathbuffer,newentry);
@@ -116,16 +119,23 @@ int main(int argc, char **argv){
 
   if(newentry!=NULL&&remove_user_path==1){
     strcpy(command,"reg query hkey_current_user\\Environment /v Path > local_path.txt"); 
-    if(show_debug==1)printf("executing: %s\n\n",command);
+    if(show_debug==1){
+      printf("*** Querying user path (remove_user_path=1)\n");
+      printf("executing: %s\n\n",command);
+    }
     system(command);
     path=parse_path_key(REMOVE_USER_PATH,pathbuffer,newentry);
     _unlink("local_path.txt");
   }
+
   // system path
 
   if(clean_old_fds==1||show_system_path==1){
     strcpy(command,"reg query \"hkey_local_machine\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment\" /v Path > local_path.txt"); 
-    if(show_debug==1)printf("executing: %s\n\n",command);
+    if(show_debug==1){
+      printf("*** Querying system path\n");
+      printf("executing: %s\n\n",command);
+    }
     system(command);
     path=parse_path_key(CLEAN_SYSTEM_PATH,pathbuffer,NULL);
     _unlink("local_path.txt");
@@ -169,9 +179,13 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
   int offset_type=0;
 
   stream=fopen("local_path.txt","r");
-  if(stream==NULL)return NULL;
+  if(stream==NULL){
+    printf("*** Error: unable to open local_path.txt to retrieve path info\n");
+    return NULL;
+  }
 
   if(fgets(buffer,BUFFER_SIZE,stream)==NULL){
+    printf("*** Error: local_path.txt is empty\n");
     fclose(stream);
     return NULL;
   }
@@ -201,6 +215,9 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
   strcpy(tokens,fullpath);
   switch (flag){
     case ADD_USER_PATH:
+      if(show_debug==1){
+        printf("ADD_USER_PATH\n");
+      }
       token=strtok(tokens,";");
       newentry_present=0;
       while(token!=NULL){
@@ -212,6 +229,9 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
         int percen;
         FILE *streamcom;
 
+        if(show_debug==1){
+          printf("%s not found in User Path - so add it\n",newentry);
+        }
         strcat(fullpath,";");
         strcat(fullpath,newentry);
         strcpy(command,"reg add hkey_current_user\\Environment /v Path /t ");
@@ -231,14 +251,27 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           fprintf(streamcom,"@echo off\n");
           fprintf(streamcom,"%s",command);
           fclose(streamcom);
-//          system("setpath_addnew.bat");
-//          _unlink("setpath_addnew.bat");
+          system("setpath_addnew.bat");
+          _unlink("setpath_addnew.bat");
         }
         printf("  %s, was added to the User Path\n",newentry);
         printf("A re-boot is required after this installation completes.\n");
       }
+      else{
+        if(show_debug==1){
+          if(newentry!=NULL){
+            printf("%s was found in the User Path - so will not be added\n");
+          }
+          else{
+            printf("*** error the path entry variable is NULL\n");
+          }
+        }
+      }
       break;
     case REMOVE_USER_PATH:
+      if(show_debug==1){
+        printf("REMOVE_USER_PATH\n");
+      }
       if(remove_user_path==1){
         int old_fds_found=0;
 
@@ -259,6 +292,9 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           int lenstr, percen;
           FILE *streamcom;
 
+          if(show_debug==1){
+            printf("old FDS path found\n");
+          }
           lenstr = strlen(fullpath);
           if(fullpath[lenstr-1]==';'){
             fullpath[lenstr-1]=0;
@@ -280,8 +316,11 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
             fprintf(streamcom,"@echo off\n");
             fprintf(streamcom,"%s",command);
             fclose(streamcom);
-//            system("setpath_removenew.bat");
-//            _unlink("setpath_removenew.bat");
+            system("setpath_removenew.bat");
+            _unlink("setpath_removenew.bat");
+          }
+          else{
+            printf("*** Error unable to create the file setpath_removenew.bat\n");
           }
           printf("  %s, was removed from the User Path\n",newentry);
           printf("A re-boot is required to complete the installation.\n");
@@ -295,6 +334,9 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
       if(clean_old_fds==1){
         int old_fds_found=0;
 
+      if(show_debug==1){
+        printf("CLEAN_SYSTEM_PATH\n");
+      }
         token=strtok(tokens,";");
         strcpy(fullpath,"");
         while(token!=NULL){
@@ -316,6 +358,9 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
           int lenstr;
           FILE *streamcom;
 
+          if(show_debug==1){
+            printf("Old FDS path enty was found in the system path\n");
+          }
           lenstr = strlen(fullpath);
           if(fullpath[lenstr-1]==';'){
             fullpath[lenstr-1]=0;
@@ -333,8 +378,11 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
             fprintf(streamcom,"@echo off\n");
             fprintf(streamcom,"%s",command);
             fclose(streamcom);
-//            system("setpath_removeold.bat");
-//            _unlink("setpath_removeold.bat");
+            system("setpath_removeold.bat");
+            _unlink("setpath_removeold.bat");
+          }
+          else{
+            printf("***error unable to create the file setpath_removeold.bat\n");
           }
         }
         else{
