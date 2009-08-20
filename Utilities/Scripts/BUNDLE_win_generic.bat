@@ -90,9 +90,9 @@ echo Copying readme_examples.html and the examples to the Examples directory
 copy %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
 svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
 
-copy %bundleinfo%\wrapup_fds_install.bat %out_bundle%\FDS5\wrapup_fds_install.bat
-copy %bundleinfo%\shortcut.exe %out_bundle%\FDS5\shortcut.exe
-copy %bundleinfo%\set_path.exe %out_bundle%\FDS5\set_path.exe
+copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\FDS5\wrapup_fds_install.bat"
+copy "%bundleinfo%\shortcut.exe" "%out_bundle%\FDS5\shortcut.exe"
+copy "%bundleinfo%\set_path.exe" "%out_bundle%\FDS5\set_path.exe"
 
 Rem compress bundle directory
 

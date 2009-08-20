@@ -48,13 +48,12 @@ mkdir "%USERPROFILE%\Start Menu\Programs\FDS5\User_Guides_and_Release_Notes"
 "%CD%\shortcut.exe" /F:"%USERPROFILE%\Start Menu\Programs\FDS5\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
 
 echo.
-echo Adding the directory %CD% to the user path
-echo   for: %USERNAME%
+echo Adding %CD%\bin to the User Path for: %USERNAME%
 
 call "%CD%"\set_path.exe -a "%CD%\bin"
 
 echo.
-echo Looking for pre 5.4 FDS/Smokeview path entries in the system path
+echo Remove pre 5.4 FDS/Smokeview entries (if present) from the System Path
 
 call "%CD%"\set_path.exe -r
 
