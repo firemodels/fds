@@ -700,6 +700,11 @@ DROPLET_LOOP: DO I=1,NLP
    DR => DROPLET(I)
    PC => PARTICLE_CLASS(DR%CLASS)
 
+   RD  = DR%R
+   IF (RD<=0._EB) CYCLE DROPLET_LOOP
+   RDS = RD*RD
+   RDC = RD*RDS
+
    ! Determine the current coordinates of the particle
 
    XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
@@ -717,106 +722,23 @@ DROPLET_LOOP: DO I=1,NLP
       CYCLE DROPLET_LOOP
    ENDIF
 
-   ! Interpolate the nearest velocity components of the gas
+   DR%A_X    = 0._EB
+   DR%A_Y    = 0._EB
+   DR%A_Z    = 0._EB
 
-   IIX  = FLOOR(XI+.5_EB)
-   JJY  = FLOOR(YJ+.5_EB)
-   KKZ  = FLOOR(ZK+.5_EB)
-   UBAR = AFILL2(U,II-1,JJY,KKZ,(DR%X-X(II-1))*RDX(II),YJ-JJY+.5_EB          ,ZK-KKZ+.5_EB)
-   VBAR = AFILL2(V,IIX,JJ-1,KKZ,XI-IIX+.5_EB          ,(DR%Y-Y(JJ-1))*RDY(JJ),ZK-KKZ+.5_EB)
-   WBAR = AFILL2(W,IIX,JJY,KK-1,XI-IIX+.5_EB          ,YJ-JJY+.5_EB          ,(DR%Z-Z(KK-1))*RDZ(KK))
-    
-   ! If the particle is just a massless tracer, just move it and go on to the next particle
-
-   IF (PC%MASSLESS) THEN
-      DR%U = UBAR
-      DR%V = VBAR
-      DR%W = WBAR
-      DR%X = DR%X + DR%U*DT
-      DR%Y = DR%Y + DR%V*DT
-      DR%Z = DR%Z + DR%W*DT
-      CYCLE DROPLET_LOOP
-   ENDIF
-
-   ! Calculate the particle velocity components and the amount of momentum to transfer to the gas
-
-   RVC = RDX(II)*RDY(JJ)*RDZ(KK)
-   RD  = DR%R
-   IF (RD<=0._EB) CYCLE DROPLET_LOOP
-   RDS = RD*RD
-   RDC = RD*RDS
-
-   UREL  = DR%U - UBAR
-   VREL  = DR%V - VBAR
-   WREL  = DR%W - WBAR
-   QREL  = MAX(1.E-6_EB,SQRT(UREL*UREL + VREL*VREL + WREL*WREL))
-   TMP_G = MAX(TMPMIN,TMP(II,JJ,KK))
-   RHO_G = RHO(II,JJ,KK)
-   MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
-   DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
-   DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
-      C_DRAG  = DRAG(DR%RE)
-      
-      !Secondary break-up
-      IF (SECONDARY_BREAKUP) THEN
-         WE_G=RHO(II,JJ,KK)*QREL**2*2._EB/SURFACE_TENSION
-      ENDIF
-      IF (.NOT. PC%TREE) THEN
-         SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
-         DR%A_X  = SFAC*UREL*RVC
-         DR%A_Y  = SFAC*VREL*RVC
-         DR%A_Z  = SFAC*WREL*RVC
-      ELSE
-         SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
-         DR%A_X  = SFAC*UREL
-         DR%A_Y  = SFAC*VREL
-         DR%A_Z  = SFAC*WREL
-      ENDIF
-
-      IF (.NOT.PC%STATIC) THEN
-         CONST   = 8._EB*PC%DENSITY*RD/(3._EB*RHO_G*C_DRAG*QREL)
-         BFAC    = EXP(-DT/CONST)
-         IF (SPATIAL_GRAVITY_VARIATION) THEN
-            GRVT1 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GX)*GVEC(1) 
-            GRVT2 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GY)*GVEC(2) 
-            GRVT3 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GZ)*GVEC(3) 
-         ENDIF
-         AUREL   = CONST*GRVT1
-         AVREL   = CONST*GRVT2
-         AWREL   = CONST*GRVT3
-         DR%U    = UBAR + (UREL+AUREL)*BFAC - AUREL
-         DR%V    = VBAR + (VREL+AVREL)*BFAC - AVREL
-         DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
-      ENDIF
-   ELSE DRAG_CALC ! No drag
-      DR%A_X  = 0._EB
-      DR%A_Y  = 0._EB
-      DR%A_Z  = 0._EB
-   ENDIF DRAG_CALC
-
-   ! If the particle does not move, but does drag, go on to the next particle
-
-   IF (PC%STATIC) CYCLE DROPLET_LOOP
- 
    ! Decide how many time steps to use in tracking particle
+   ! Now using initial droplet velocity -> more iterations
     
    DTMIN = DT
    UVW = MAX( ABS(DR%U)*RDX(II),ABS(DR%V)*RDY(JJ),ABS(DR%W)*RDZ(KK) )
    IF (UVW/=0._EB) DTMIN = MIN(DTMIN,1._EB/UVW)
-    
-   NITER = 1
-   DTSP  = DT
-   NLOOP: DO N=0,3
-      IF (DTMIN<DT*0.5_EB**N) THEN
-         NITER = 2**(N+1)
-         DTSP =  DT*0.5_EB**(N+1)
-      ENDIF
-   ENDDO NLOOP
+   NITER = MAX(1,CEILING(DT/DTMIN))
+   DTSP  = DT/REAL(NITER,EB)
     
    ! Iterate over a single time step
     
    SUB_TIME_STEP_ITERATIONS: DO N=1,NITER
-    
+
       ! Get current particle coordinates
 
       IF (N>1) THEN
@@ -828,8 +750,85 @@ DROPLET_LOOP: DO I=1,NLP
          KK = FLOOR(ZK+1._EB)
          IC = CELL_INDEX(II,JJ,KK)
       ENDIF
+
+      ! Interpolate the nearest velocity components of the gas
+
+      IIX  = FLOOR(XI+.5_EB)
+      JJY  = FLOOR(YJ+.5_EB)
+      KKZ  = FLOOR(ZK+.5_EB)
+      UBAR = AFILL2(U,II-1,JJY,KKZ,(DR%X-X(II-1))*RDX(II),YJ-JJY+.5_EB          ,ZK-KKZ+.5_EB)
+      VBAR = AFILL2(V,IIX,JJ-1,KKZ,XI-IIX+.5_EB          ,(DR%Y-Y(JJ-1))*RDY(JJ),ZK-KKZ+.5_EB)
+      WBAR = AFILL2(W,IIX,JJY,KK-1,XI-IIX+.5_EB          ,YJ-JJY+.5_EB          ,(DR%Z-Z(KK-1))*RDZ(KK))
     
-      ! Update droplet position
+     ! If the particle is just a massless tracer, just move it and go on to the next particle
+
+      IF (PC%MASSLESS) THEN
+         DR%U = UBAR
+         DR%V = VBAR
+         DR%W = WBAR
+         DR%X = DR%X + DR%U*DTSP
+         DR%Y = DR%Y + DR%V*DTSP
+         DR%Z = DR%Z + DR%W*DTSP
+         CYCLE DROPLET_LOOP
+      ENDIF
+
+
+      ! Calculate the particle velocity components and the amount of momentum to transfer to the gas
+
+      RVC = RDX(II)*RDY(JJ)*RDZ(KK)
+
+      UREL  = DR%U - UBAR
+      VREL  = DR%V - VBAR
+      WREL  = DR%W - WBAR
+      QREL  = MAX(1.E-6_EB,SQRT(UREL*UREL + VREL*VREL + WREL*WREL))
+      TMP_G = MAX(TMPMIN,TMP(II,JJ,KK))
+      RHO_G = RHO(II,JJ,KK)
+      MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
+      DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
+      DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
+         C_DRAG  = DRAG(DR%RE)
+         !Secondary break-up
+         IF (SECONDARY_BREAKUP) THEN
+            WE_G=RHO(II,JJ,KK)*QREL**2*2._EB/SURFACE_TENSION
+         ENDIF
+         IF (.NOT. PC%TREE) THEN
+            SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
+            DR%A_X  = (REAL(N-1,EB)*DR%A_X + SFAC*UREL*RVC)/REAL(N,EB)
+            DR%A_Y  = (REAL(N-1,EB)*DR%A_Y + SFAC*VREL*RVC)/REAL(N,EB)
+            DR%A_Z  = (REAL(N-1,EB)*DR%A_Z + SFAC*WREL*RVC)/REAL(N,EB)
+         ELSE
+            SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
+            DR%A_X  = SFAC*UREL
+            DR%A_Y  = SFAC*VREL
+            DR%A_Z  = SFAC*WREL
+         ENDIF
+
+         IF (.NOT.PC%STATIC) THEN
+            CONST   = 8._EB*PC%DENSITY*RD/(3._EB*RHO_G*C_DRAG*QREL)
+            BFAC    = EXP(-DTSP/CONST)
+            IF (SPATIAL_GRAVITY_VARIATION) THEN
+               GRVT1 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GX)*GVEC(1) 
+               GRVT2 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GY)*GVEC(2) 
+               GRVT3 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GZ)*GVEC(3) 
+            ENDIF
+            AUREL   = CONST*GRVT1
+            AVREL   = CONST*GRVT2
+            AWREL   = CONST*GRVT3
+            DR%U    = UBAR + (UREL+AUREL)*BFAC - AUREL
+            DR%V    = VBAR + (VREL+AVREL)*BFAC - AVREL
+            DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
+         ENDIF
+      ELSE DRAG_CALC ! No drag
+         DR%A_X  = 0._EB
+         DR%A_Y  = 0._EB
+         DR%A_Z  = 0._EB
+      ENDIF DRAG_CALC
+
+      ! If the particle does not move, but does drag, go on to the next particle
+
+      IF (PC%STATIC) CYCLE DROPLET_LOOP
+    
+     ! Update droplet position
 
       X_OLD = DR%X
       Y_OLD = DR%Y
@@ -936,6 +935,11 @@ DROPLET_LOOP: DO I=1,NLP
             DR%IOR= 2
             HIT_SOLID = .TRUE.
             STEP_FRACTION(DR%IOR) = MAX(0._EB,(Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD))
+         ENDIF
+
+         IF (DR%IOR/=0 .AND. .NOT.ALLOW_SURFACE_DROPLETS) THEN
+            DR%R = 0.9_EB*PC%KILL_RADIUS
+            CYCLE DROPLET_LOOP
          ENDIF
 
          IML = MINLOC(STEP_FRACTION,DIM=1)
@@ -1061,9 +1065,10 @@ DROPLET_LOOP: DO I=1,NLP
                   DR%W = -PC%VERTICAL_VELOCITY 
                CASE (-3) DIRECTION 
                   IF (.NOT.ALLOW_UNDERSIDE_DROPLETS) THEN 
-                  DR%U = 0._EB
-                  DR%V = 0._EB
-                  DR%W = -PC%VERTICAL_VELOCITY 
+                     DR%U   = 0._EB
+                     DR%V   = 0._EB
+                     DR%W   = -PC%VERTICAL_VELOCITY
+                     DR%IOR = 0
                   ELSE 
                      CALL RANDOM_NUMBER(RN)
                      THETA_RN = TWOPI*RN
@@ -1132,7 +1137,6 @@ DROPLET_LOOP: DO I=1,NLP
    ENDDO SUB_TIME_STEP_ITERATIONS
 
 ENDDO DROPLET_LOOP
-!$OMP END PARALLEL DO
 
 ! Remove out-of-bounds particles
  
