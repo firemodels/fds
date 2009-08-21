@@ -1,3 +1,4 @@
+
 \documentclass[11pt]{book}
 \usepackage{times,mathptm}
 \usepackage[pdftex]{graphicx}
@@ -23,7 +24,7 @@
 \usepackage{graphpap}
 \usepackage{rotating}
 \usepackage{epsfig,psfrag}
-\usepackage{wrapfig}
+%\usepackage{wrapfig}
 %\usepackage{picins}
 \usepackage{geometry}
 \usepackage{tabularx}
@@ -4201,7 +4202,7 @@ of K/min. Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under 
 is 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_p$, from which $E$, then $A$, can be calculated to ensure that
 the peak reaction rate occurs at the specified {\ct REFERENCE\_TEMPERATURE}.
 \begin{eqnarray}
-   r_p &=& 2 \, \Delta T \, T_p \\
+   r_p &=& \frac{2 \, \dot{T}} {\Delta T} \\
    E &=& \frac{r_p \, R \, T_p^2}{Y_p \, \dot{T}} \\
    A &=& \frac{E \, \dot{T}}{R \, T_p^2} \, e^{E/R \, T_p}
 \end{eqnarray}
