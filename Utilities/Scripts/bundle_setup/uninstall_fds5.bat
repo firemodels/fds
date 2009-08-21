@@ -7,24 +7,19 @@ exit
 :dircheck
 
 echo.
-echo FDS and Smokeview uninstall script
-echo.
-echo This script removes path entries for the current FDS/Smokeview installation
+echo Uninstall FDS and Smokeview
 echo.
 echo Press any key to proceed or CTRL C to abort
 pause>NUL
 
-echo.  
-echo Proceeding...
-
 echo.
-echo removing association between .smv and Smokeview
+echo Removing the association between .smv and Smokeview
 
 assoc .smv=
 Rem ftype smvDoc=
 
 echo. 
-echo Removing FDS and Smokeview shortcuts from the Start menu.
+echo Removing the FDS entry from the Start menu.
 rmdir /q /s "%USERPROFILE%\Start Menu\Programs\FDS5"
 
 
