@@ -23,6 +23,7 @@ set smokeview=smokeview.exe
 set smokezip=smokezip.exe
 
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
+set wikify=%svn_root%\Utilities\Scripts\wikify.py
 
 Rem erase the temporary bundle directory if it already exists
 
@@ -86,10 +87,22 @@ copy %in_pdf%\SMV_5_Technical_Reference_Guide.pdf %out_guides%\.
 Rem Copy readme_examples file to Examples directory to let user download all examples
 
 echo.
-echo Copying readme_examples.html and the examples to the Examples directory
+echo Copying readme_examples.html to the Examples directory
 copy %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
+echo.
+echo Getting the Verification cases from the repository
 svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
 
+echo.
+echo Getting the FDS release notes from the repository
+svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki "%bundleinfo%\FDS_Release_Notes.wiki"
+
+echo.
+echo Converting the FDS release notes from wiki to html format
+"%wikify%" -r "%bundleinfo%\FDS_Release_Notes.wiki" > "%out_guides%\FDS_Release_Notes.htm"
+
+echo.
+echo Copying wrapup scripts for use in final installation
 copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\FDS5\wrapup_fds_install.bat"
 copy "%bundleinfo%\shortcut.exe" "%out_bundle%\FDS5\shortcut.exe"
 copy "%bundleinfo%\set_path.exe" "%out_bundle%\FDS5\set_path.exe"
