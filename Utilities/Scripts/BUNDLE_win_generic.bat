@@ -66,6 +66,7 @@ copy %in_pdf%\FDS_5_User_Guide.pdf               %out_guides%\.
 copy %in_pdf%\SMV_5_User_Guide.pdf               %out_guides%\.
 copy "%in_smv%\readme.html"                      "%out_guides%\Smokeview_release_notes.html"
 copy "%bundleinfo%\FDS_Release_Notes.htm"        "%out_guides%\FDS_Release_Notes.htm"
+copy "%bundleinfo%\Latest_Documentation.url"     "%out_guides%\Latest_Documentation.url"
 
 copy "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
 copy "%bundleinfo%\FDS_Web_Site.url"          "%out_web%\Official_Web_Site.url"
