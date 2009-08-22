@@ -258,6 +258,7 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
         printf("A re-boot is required after this installation completes.\n");
       }
       else{
+        printf("  Not added, already present.\n");
         if(show_debug==1){
           if(newentry!=NULL){
             printf("%s was found in the User Path - so will not be added\n");
