@@ -3876,11 +3876,11 @@ material component.
 
 \begin{warning}
 \noindent
-When a {\ct SURF} is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} is at the face of the {\ct OBST}, with the 
-other {\ct MATL\_ID}s being applied in succession with the final {\ct MATL\_ID} being applied on the opposite face of the {\ct OBST}.  
-If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation 
-from the +x face to the -x face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer 
-calculation from the -x face to the +x face.  To avoid this the user would need to specify a second {\ct SURF} that has the reverse {\ct MATL\_ID} 
+When a {\ct SURF} is applied to the face of an {\ct OBST}, the first {\ct MATL\_ID} is at the face of the {\ct OBST}, with the
+other {\ct MATL\_ID}s being applied in succession with the final {\ct MATL\_ID} being applied on the opposite face of the {\ct OBST}.
+If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation
+from the +x face to the -x face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
+calculation from the -x face to the +x face.  To avoid this the user would need to specify a second {\ct SURF} that has the reverse {\ct MATL\_ID}
 and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
 \end{warning}
 
@@ -4174,7 +4174,7 @@ It is very important to keep in mind that $A$ and $E$ are not available for most
 be used by FDS to derive effective values. The most important parameter to specify in place of $A$ and $E$ is
 the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plots shown in Fig.~\ref{pyrolysis}. These curves represent
 \begin{figure}[ht]
-\center{\includegraphics[width=4.0in]{FIGURES/pyrolysis}}
+\center{\includegraphics[width=4.0in]{FIGURES/pyrolysis_1}}
 \caption[Simple demonstration of pyrolysis model.]{The curve at left (blue) shows the mass loss for a solid material
 undergoing a slow heating. At right, the green curve shows the reaction rate, which is the first derivative of the
 mass loss curve.}
@@ -4193,9 +4193,9 @@ FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is
 the temperature at which the mass fraction of the $i$th material
 decreases at its maximum rate within the context of a TGA or similar experimental apparatus.
 
-Two additional parameters can be specified along with {\ct REFERENCE\_TEMPERATURE} ($T_p$) to help to fine tune the shape of the reaction rate curve, 
+Two additional parameters can be specified along with {\ct REFERENCE\_TEMPERATURE} ($T_p$) to help to fine tune the shape of the reaction rate curve,
 assuming some sort of experiment has been done to indicate at what temperature, and
-over what temperature range, the reaction takes place. First, the {\ct TGA\_HEATING\_RATE} ($\dot{T}$) is the rate at which the 
+over what temperature range, the reaction takes place. First, the {\ct TGA\_HEATING\_RATE} ($\dot{T}$) is the rate at which the
 temperature of the TGA (or equivalent) test apparatus was increased, in units
 of K/min. Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green curve (Reaction Rate) is equal to the heating rate (in units of K/s). Second, the
 {\ct TGA\_PYROLYSIS\_RANGE} ($\Delta T$) is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value
@@ -4208,12 +4208,73 @@ the peak reaction rate occurs at the specified {\ct REFERENCE\_TEMPERATURE}.
 \end{eqnarray}
 Note that $Y_p$ is the mass fraction (blue curve in Fig.~\ref{pyrolysis}) at the temperature where the reaction rate is its maximum. It is 0.4 by default and not
 adjustable.
-When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}. 
+When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}.
 
 \begin{warning}
 \noindent Note that versions of FDS from 5.0 through 5.3 used a slightly different definition of {\ct REFERENCE\_TEMPERATURE} in addition to
 a parameter called {\ct REFERENCE\_RATE}. The latter has been removed and its use in FDS 5.4 and beyond will result in an immediate error message.
 \end{warning}
+
+The solid phase reaction represented by Fig.~\ref{pyrolysis} is very simple -- a single, homogenous material is heated and gasified completely. In general, real materials are not
+so simple. First, they consist of more than one material, each of which react over a particular temperature interval, and some of which leave behind a solid residue.
+Some material components may even undergo multiple reactions that form different residues, like woods that form various amounts of tar, char, and ash, depending on the
+rate of heating. Figure~\ref{pyrolysis_2}
+demonstrates a more complicated material than the one previously described. It is a hypothetical material that contains 10~\% (by mass) water and 90~\% combustible material.
+The water evaporates in the neighborhood of 100~$^\circ$C and the rest pyrolyzes in the neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a
+solid residue.
+
+\begin{figure}[ht]
+\center{\includegraphics[width=4.0in]{FIGURES/pyrolysis_2}}
+\caption[A more complicated demonstration of the pyrolysis model.]{The mass loss (blue curve) and reaction rate (green curve) for a material that
+contains 10~\% water (by mass) that evaporates off near 100~$^\circ$C, and 90~\% combustible that pyrolyzes near 300~$^\circ$C, leaving a 20~\% (by mass)
+residue behind.}
+\label{pyrolysis_2}
+\end{figure}
+
+The input lines for this reaction would consist of the parameters listed below.
+Note that the only parameters shown are those that describe the reaction mechanism, and that each of these parameters
+can be found either from visual inspection of the the mass loss (blue) curve or the reaction rate (green) curve.
+The thermal properties of each material would also be needed for
+an actual FDS simulation, but are not relevant in the context of a TGA or similar experiment that involves a slow heating of a small sample
+of material.
+
+\footnotesize
+\begin{verbatim}
+&SURF ID                      = 'SAMPLE'
+    ...
+    MATL_ID(1,1:2)            = 'stuff', 'water'
+    MATL_MASS_FRACTION(1,1:2) = 0.9,0.1 /
+
+&MATL ID                  = 'water'
+    ...
+    N_REACTIONS           = 1
+    REFERENCE_TEMPERATURE = 100.
+    TGA_PYROLYSIS_RANGE   = 10.
+    NU_WATER              = 1.
+    HEAT_OF_REACTION      = ... /
+
+&MATL ID                    = 'stuff'
+    ...
+    N_REACTIONS           = 1
+    REFERENCE_TEMPERATURE = 300.
+    TGA_PYROLYSIS_RANGE   = 80.
+    NU_FUEL               = 0.8
+    NU_RESIDUE            = 0.2
+    RESIDUE               = 'ash'
+    HEAT_OF_REACTION      = ... /
+
+&MATL ID                  = 'ash'
+      ... /
+\end{verbatim} \normalsize
+
+\noindent The full set
+of parameters for these cases are listed in {\bf pyrolysis\_1.fds} and {\bf pyrolysis\_2.fds}. Those interested in testing potential solid phase reaction
+mechanisms ought to use these test cases as templates.
+
+
+
+
+
 
 \subsubsection{The Heat of Reaction}
 
