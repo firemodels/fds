@@ -1,0 +1,56 @@
+&HEAD CHID='pyrolysis_1', TITLE='TGA example case for Users Guide, SVN $Revision$' / 
+
+&MESH IJK = 3,1,4, XB = -2,2,-0.5,0.5,0,1 / 
+
+&TIME TWFIN=9600., WALL_INCREMENT=1, DT=0.2 /
+
+&MISC SOLID_PHASE_ONLY=.TRUE., H_FIXED=0. /
+
+&RADI NUMBER_RADIATION_ANGLES = 20 /
+&REAC ID='NO REACTION', Y_O2_INFTY=0.01 /  No gas phase reaction
+&DUMP DT_PL3D = 10000000., DT_DEVC=60. /
+
+
+&VENT MB='XMIN', SURF_ID='HOT' /
+&VENT MB='XMAX', SURF_ID='HOT' /
+&VENT MB='ZMAX', SURF_ID='HOT' /
+&VENT XB = -2,-1,-0.5,0.5,0.0,0.0, SURF_ID = 'HOT' /
+&VENT XB = 1,2,-0.5,0.5,0.0,0.0, SURF_ID = 'HOT' /
+
+&VENT XB = -1,1,-0.5,0.5,0.0,0.0, SURF_ID = 'SAMPLE' /
+
+&SURF ID        = 'SAMPLE'
+	COLOR     = 'RED'
+	BACKING   = 'INSULATED' 
+	THICKNESS = 0.00001
+	MATL_ID   = 'stuff' /  
+
+&MATL ID                    = 'stuff'
+	EMISSIVITY 	          = 1.0
+	DENSITY 	          = 500.
+	CONDUCTIVITY          = 0.20
+	SPECIFIC_HEAT         = 1.0 
+	N_REACTIONS	          = 1
+	REFERENCE_TEMPERATURE = 300.
+	NU_FUEL 	          = 1.
+	HEAT_OF_REACTION      = 1000. /
+
+&SURF ID         = 'HOT'
+	EMISSIVITY = 1.0
+	RGB        = 250,0,0
+	TMP_FRONT  = 820.
+	RAMP_T     = 'T_RAMP' /
+
+&RAMP ID = 'T_RAMP' T = 0.,    F = 0. /
+&RAMP ID = 'T_RAMP' T = 9600., F = 1.0 /
+
+24000	= 2 K/min
+9600	= 5 K/min
+4800	= 10 K/min
+2400	= 20 K/min
+
+&DEVC XYZ = 0.0,0.0,0.0,IOR = 3, QUANTITY = 'SURFACE DENSITY',  TIME_AVERAGED=.FALSE. /
+&DEVC XYZ = 0.0,0.0,1.0,IOR =-3, QUANTITY = 'WALL TEMPERATURE', TIME_AVERAGED=.FALSE. /
+&DEVC XYZ = 0.0,0.0,0.0,IOR = 3, QUANTITY = 'WALL TEMPERATURE', TIME_AVERAGED=.FALSE. /
+
+&TAIL /
