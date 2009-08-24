@@ -73,6 +73,8 @@ $RUNFDS Pyrolysis birch_tga_1step_2               fire68 &
 $RUNFDS Pyrolysis birch_tga_1step_20              fire68 &
 $RUNFDS Pyrolysis charring_solid                  fire68 &
 $RUNFDS Pyrolysis enthalpy                        fire51 &
+$RUNFDS Pyrolysis pyrolysis_1                     fire51 &
+$RUNFDS Pyrolysis pyrolysis_2                     fire51 &
 $RUNFDS Pyrolysis specified_hrr                   fire52 &
 $RUNFDS Pyrolysis thermoplastic                   fire53 &
 $RUNFDS Pyrolysis two_step_solid_reaction         fire54 &

@@ -23,7 +23,7 @@ global residue
 
 addpath('../../../Verification/Pyrolysis')
 
-show_fds = 0;
+show_fds = 1;
 
 for i_plot=1:2
     
@@ -71,9 +71,9 @@ for i_plot=1:2
     % Calculate A and E
     
     for i=1:n_components
-        Y_p=max(0.01,0.4*Y_0(i));
-        r_p(i)=Y_0(i)*2*dTdt*(1.-residue(i))/delta_T(i);
-        E(i)=r_p(i)*R0*T_p(i)*T_p(i)/(dTdt*Y_p);
+        Y_p=0.4;
+        r_p(i)=2*dTdt*(1.-residue(i))/delta_T(i);
+        E(i)=(r_p(i)/Y_p)*R0*T_p(i)*T_p(i)/dTdt;
         A(i)=(r_p(i)/Y_p)*exp(E(i)./(R0.*T_p(i)));
     end
 
@@ -104,7 +104,7 @@ for i_plot=1:2
         else
             FDS = csvread('pyrolysis_2_devc.csv',2,0);
         end
-        h=plot(FDS(:,3),FDS(:,2)/FDS(1,2),'bo');
+        h=plot(FDS(:,3),FDS(:,2)/FDS(1,2),'b--');
     end
 
     % Plot attributes
@@ -128,7 +128,7 @@ for i_plot=1:2
     
     for i=1:n_components
         axes(AX(2));
-        line([T_p(i)-273 T_p(i)-273],[0.00 r_p(i)*1000],'LineStyle','--','Color','black','LineWidth',1)
+        line([T_p(i)-273 T_p(i)-273],[0.00 Y_0(i)*r_p(i)*1000],'LineStyle','--','Color','black','LineWidth',1)
     end
     
     % Create the PDF files
