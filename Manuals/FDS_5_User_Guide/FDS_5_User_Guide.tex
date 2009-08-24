@@ -4190,24 +4190,25 @@ of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fr
 as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain backward compatibility with earlier versions of
 FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is
 {\em not} the same as an ignition temperature, nor is it necessarily the surface temperature of the burning solid. Rather, it is simply
-the temperature at which the mass fraction of the $i$th material
+the temperature at which the mass fraction of the material
 decreases at its maximum rate within the context of a TGA or similar experimental apparatus.
 
 Two additional parameters can be specified along with {\ct REFERENCE\_TEMPERATURE} ($T_p$) to help to fine tune the shape of the reaction rate curve,
 assuming some sort of experiment has been done to indicate at what temperature, and
-over what temperature range, the reaction takes place. First, the {\ct TGA\_HEATING\_RATE} ($\dot{T}$) is the rate at which the
+over what temperature range, the reaction takes place. First, the {\ct HEATING\_RATE} ($\dot{T}$) is the rate at which the
 temperature of the TGA (or equivalent) test apparatus was increased, in units
 of K/min. Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green curve (Reaction Rate) is equal to the heating rate (in units of K/s). Second, the
-{\ct TGA\_PYROLYSIS\_RANGE} ($\Delta T$) is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value
+{\ct PYROLYSIS\_RANGE} ($\Delta T$) is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value
 is 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_p$, from which $E$, then $A$, can be calculated to ensure that
 the peak reaction rate occurs at the specified {\ct REFERENCE\_TEMPERATURE}.
 \begin{eqnarray}
-   r_p &=& \frac{2 \, \dot{T}} {\Delta T} \\
-   E &=& \frac{r_p \, R \, T_p^2}{Y_p \, \dot{T}} \\
-   A &=& \frac{E \, \dot{T}}{R \, T_p^2} \, e^{E/R \, T_p}
+   r_p &=& \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_r) \\
+   E &=& \frac{r_p}{Y_p} \, \frac{R \, T_p^2}{\dot{T}} \\
+   A &=& \frac{r_p}{Y_p} \, e^{E/R \, T_p}
 \end{eqnarray}
-Note that $Y_p$ is the mass fraction (blue curve in Fig.~\ref{pyrolysis}) at the temperature where the reaction rate is its maximum. It is 0.4 by default and not
-adjustable.
+Note that $\nu_r$ is the yield of solid residue. 
+Note also that $Y_p$ is the mass fraction (blue curve in Fig.~\ref{pyrolysis}) at the temperature where the reaction rate is its maximum. It is 0.4 by default and not
+adjustable. 
 When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}.
 
 \begin{warning}
@@ -4249,15 +4250,15 @@ of material.
     ...
     N_REACTIONS           = 1
     REFERENCE_TEMPERATURE = 100.
-    TGA_PYROLYSIS_RANGE   = 10.
+    PYROLYSIS_RANGE       = 10.
     NU_WATER              = 1.
     HEAT_OF_REACTION      = ... /
 
-&MATL ID                    = 'stuff'
+&MATL ID                  = 'stuff'
     ...
     N_REACTIONS           = 1
     REFERENCE_TEMPERATURE = 300.
-    TGA_PYROLYSIS_RANGE   = 80.
+    PYROLYSIS_RANGE       = 80.
     NU_FUEL               = 0.8
     NU_RESIDUE            = 0.2
     RESIDUE               = 'ash'
@@ -9040,7 +9041,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\
 \hline \hline
 \endhead
-{\ct A}                       & Real array  & Pre-exponential factors                   &    1/s            & 1E13   \\ \hline
+{\ct A}                       & Real array  & Pre-exponential factors                   &    1/s            &        \\ \hline
 {\ct ABSORPTION\_COEFFICIENT} & Real        & Absorption Coefficient                    &    1/m            & 50000. \\ \hline
 {\ct BOILING\_TEMPERATURE}    & Real        & Boiling temperature                       & $^\circ$C         & 5000.  \\ \hline
 {\ct CONDUCTIVITY}            & Real        & Thermal conductivity                      & W/m/K             & 0.     \\ \hline
@@ -9049,24 +9050,24 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct E}                       & Real array  & Activation energies                       & kJ/kmol           &        \\ \hline
 {\ct EMISSIVITY    }          & Real        & Emissivity                                &                   & 0.9    \\ \hline
 {\ct FYI}                     & Character   & Comment String (has no effect)            &                   &        \\ \hline
+{\ct HEATING\_RATE}           & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
 {\ct HEAT\_OF\_COMBUSTION(:,II)}& Real array& Heats of combustion for species {\ct II}  & kJ/kg             & 0.     \\ \hline
 {\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of reaction                         & kJ/kg             & 0.     \\ \hline
-{\ct INITIAL\_VAPOR\_FLUX}    & Real        & Initial evaporation rate                  & m$^2$/(sm$^2$)    & 5E-4   \\ \hline
+{\ct INITIAL\_VAPOR\_FLUX}    & Real        & Initial evaporation rate                  & m$^2$/(sm$^2$)    & 0.0005   \\ \hline
 {\ct ID     }                 & Character   & IDentifier                                &                   &        \\ \hline
 {\ct THRESHOLD\_TEMPERATURE}  & Real array  & Threshold temperatures                    & $^\circ$C         & -273.15 \\ \hline
 {\ct N\_REACTIONS}            & Character   & Number of Reactions                       &                   & 0      \\ \hline
 {\ct N\_S}                    & Real array  & Exponents of mass fraction                &                   & 1.     \\ \hline
 {\ct N\_T}                    & Real array  & Exponents of temperature                  &                   & 0.     \\ \hline
-{\ct NU\_FUEL}                & Real array  & Fuel yields                               & kg/kg             & 0.     \\ \hline
+{\ct NU\_FUEL}                & Real array  & Fuel gas yields                           & kg/kg             & 0.     \\ \hline
 {\ct NU\_GAS(:,II)}           & Real array  & Yields of species {\ct II}                & kg/kg             & 0.     \\ \hline
 {\ct NU\_RESIDUE}             & Real array  & Residue yields                            & kg/kg             & 0.     \\ \hline
 {\ct NU\_WATER}               & Real aray   & Water vapor yields                        & kg/kg             & 0.     \\ \hline
-{\ct REFERENCE\_TEMPERATURE}  & Real array  & Reference temperatures                    & $^\circ$C         &        \\ \hline
+{\ct PYROLYSIS\_RANGE}        & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
+{\ct REFERENCE\_TEMPERATURE}  & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &        \\ \hline
 {\ct RESIDUE}                 & Character   & {\ct IDs} of residue {\ct MATL}           &                   &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat                             & kJ/kg/K           & 0.     \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat                 &                   &        \\ \hline
-{\ct TGA\_HEATING\_RATE}      & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
-{\ct TGA\_PYROLYSIS\_RANGE}   & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
