@@ -8,14 +8,14 @@ echo   (will take several hours depending on computer speed)
 set wui="%CD%\Wui"
 set vis="%CD%\Visualization"
 
-echo "Press <CTRL> c to abort"
-echo "Press any other key to start FDS cases"
+echo Press CTRL c to abort
+echo Press any other key to start FDS cases
 pause>NUL
 
 
 
 cd %wui%
-fds5 fireline.fds
+fds5 fire_line.fds
 
 cd %vis%
 fds5 colorconv.fds
