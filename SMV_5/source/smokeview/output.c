@@ -83,12 +83,30 @@ void outputLargeText(float x, float y, const char *string){
 
 void outputText(float x, float y, const char *string){
   int len, i;
+  int length,height;
+  unsigned char text_background[20*10000][4];
+  
 
   if(string==NULL)return;
   glColor3fv(foregroundcolor);
   glRasterPos2f(x, y);
+  length=glutBitmapLength(large_font,string);
+  for(i=0;i<length*large_font_height;i++){
+//    text_background[i][0]=backgroundcolor[0]*255;
+//    text_background[i][1]=backgroundcolor[1]*255;
+//    text_background[i][2]=backgroundcolor[2]*255;
+    text_background[i][0]=0;
+    text_background[i][1]=255;
+    text_background[i][2]=0;
+    text_background[i][3]=255;
+  }
+
   len = (int) strlen(string);
-  for (i = 0; i < len; i++)glutBitmapCharacter(large_font,string[i]);
+  for (i = 0; i < len; i++){
+    glutBitmapCharacter(large_font,string[i]);
+  }
+  glRasterPos2f(x, y);
+  glDrawPixels(length,large_font_height,GL_RGBA,GL_UNSIGNED_BYTE,text_background);
 }
 
 /* ------------------ outputBarText ------------------------ */
