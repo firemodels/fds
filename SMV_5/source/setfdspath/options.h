@@ -8,4 +8,5 @@
 
  /* ------------------ options ------------------------ */
 
-#
+
+#pragma warning (disable:1419)		/* external declaration in primary source file */

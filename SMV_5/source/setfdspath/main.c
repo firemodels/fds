@@ -38,7 +38,7 @@ int main(int argc, char **argv){
 
   char *arg;
   int i;
-  char *newentry=NULL,*program_name;
+  char *newentry=NULL;
   char pathbuffer[BUFFER_SIZE], command[BUFFER_SIZE+100];
   char *path;
 
@@ -48,7 +48,6 @@ int main(int argc, char **argv){
 #define REMOVE_USER_PATH 3
 
   initMM();
-  program_name=argv[0];
 
   if(argc==1){
     usage();
@@ -97,6 +96,9 @@ int main(int argc, char **argv){
   // add or show user path
 
   if((newentry!=NULL&&add_user_path==1)||show_user_path==1){
+    strcpy(command,"reg query hkey_current_user\\Environment /v Path >NUL 2>NUL || reg add hkey_current_user\\Environment /v Path /t REG_EXPAND_SZ >NUL 2>NUL"); 
+    system(command);
+
     strcpy(command,"reg query hkey_current_user\\Environment /v Path > local_path.txt"); 
     if(show_debug==1){
       if(add_user_path==1)printf("*** Querying user path (add_user_path=1)\n");
@@ -143,7 +145,6 @@ int main(int argc, char **argv){
       printf("System path: %s\n\n",path);
     }
   }
-
   return 0;
 }
 
@@ -232,7 +233,7 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
         if(show_debug==1){
           printf("%s not found in User Path - so add it\n",newentry);
         }
-        strcat(fullpath,";");
+        if(strlen(fullpath)>0)strcat(fullpath,";");
         strcat(fullpath,newentry);
         strcpy(command,"reg add hkey_current_user\\Environment /v Path /t ");
         percen=add_percen(fullpath);
@@ -261,7 +262,7 @@ char *parse_path_key(int flag, char *buffer, char *newentry){
         printf("  Not added, already present.\n");
         if(show_debug==1){
           if(newentry!=NULL){
-            printf("%s was found in the User Path - so will not be added\n");
+            printf("%s was found in the User Path - so will not be added\n",newentry);
           }
           else{
             printf("*** error the path entry variable is NULL\n");
