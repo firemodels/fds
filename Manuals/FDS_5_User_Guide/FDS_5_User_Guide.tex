@@ -372,15 +372,14 @@ Mail: Stop SSOP, Washington, DC 20402-0001 }
 
 \chapter{Preface}
 
-This Guide describes how to use the Fire Dynamics Simulator (FDS). Most of the content pertains to version 5, although some features
-have been added since the release of FDS 5.0. The current version is 5.3.
+This Guide describes how to use the Fire Dynamics Simulator (FDS) version 5. Because new features are added periodically, check
+the current version number on the inside front jacket of this manual.
 
-Note that this Guide does not provide the background theory for FDS. A three volume set of companion documents, referred to
+Note that this Guide does not provide the background theory for FDS. A four volume set of companion documents, referred to
 collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}, contains details about the governing
-equations and numerical methods, model verification, and experimental validation.
+equations and numerical methods, model verification, experimental validation, and configuration management.
 The FDS User's Guide contains limited information on how to operate Smokeview, the companion
-visualization program for FDS. Its full capability is described in the ``User's Guide for
-Smokeview Version~5''~\cite{Smokeview_Users_Guide_5}.
+visualization program for FDS. Its full capability is described in the Smokeview User's Guide~\cite{Smokeview_Users_Guide_5}.
 
 
 \chapter{Disclaimer}
@@ -564,7 +563,7 @@ Robin Zevotek                           & C\&S Engineers, Life Safety Services, 
 
 
 
-\part{Running FDS}
+\part{The Basics of FDS}
 
 
 \chapter{Introduction}
@@ -577,8 +576,8 @@ The formulation of the equations and the numerical algorithm are contained the F
 
 Smokeview is a separate visualization program that is used to display the
 results of an FDS simulation.
-A detailed description of Smokeview is found in the
-{\em User's Guide for Smokeview Version 5}~\cite{Smokeview_Users_Guide_5}.
+A detailed description of Smokeview is found in
+a separate user's guide~\cite{Smokeview_Users_Guide_5}.
 
 
 \section{Features of FDS}
@@ -745,8 +744,9 @@ FDS and Smokeview can be found at the web site.
 \index{Download}
 Detailed instructions on how to download executables, manuals, source-code and related utilities,
 can be found on the FDS-SMV Website
-\href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}} for more information.
-The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac OS X, and Linux.
+\href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}}.
+The typical FDS/Smokeview distribution consists of an installation package or compressed archive,
+which is available for MS Windows, Mac OS X, and Linux.
 For other operating systems, consult the web site.
 
 \begin{warning}
@@ -757,7 +757,7 @@ place so that it is not overwritten during the updated installation.
 
 \section{Computer Hardware Requirements}
 \index{System Requirements!Hardware}
-FDS requires a fast CPU and a substantial amount of random-access memory (RAM) to run efficiently.
+FDS requires a fast CPU\footnote{Central Processing Unit} and a substantial amount of random-access memory (RAM) to run efficiently.
 For minimum specifications, the system should have a 1~GHz CPU, and at least 512~MB RAM.
 The CPU speed will determine how long the computation will take to finish, while the amount
 of RAM will determine how many mesh cells can be held in memory.
@@ -789,18 +789,22 @@ It is not recommended to run FDS/Smokeview under any version of MS Windows
 released prior to Windows 2000.
 
 \item[{\bf Mac OS X}]
-A Mac OS X FDS .zip archive is available for both the PowerPC and Intel architectures.
+A Mac OS X zip archive is available for Intel architectures.
 Mac OS X 10.4.x or better is recommended, versions of OS X prior to 10.4.x are not
 officially supported. Users can always download the latest version of FDS source and
 compile FDS for other versions of OS X (See Appendix~\ref{info:compilation} for details).
 
-\item[{\bf Unix, Linux}]
-Unix, Linux users can run FDS and Smokeview by downloading the appropriate pre-compiled
+\item[{\bf Linux}]
+Linux users can run FDS and Smokeview by downloading the appropriate pre-compiled
 executables and installing them wherever they see fit. If the pre-compiled
 FDS executable does not work (usually because of library incompatibilities),
 the FDS source code can be downloaded and compiled using a Fortran 90 and
 C compiler (See Appendix~\ref{info:compilation} for details). If Smokeview
-does not work on the Linux or Unix workstation, you should use a Windows or Mac PC to view FDS output.
+does not work on the Linux workstation, you can use the Windows version to view FDS output.
+
+\item[{\bf Unix}]
+There are no pre-compiled versions of FDS for the various flavors of Unix. However, the advice for Linux applies
+equally as well to Unix.
 
 \item[{\bf FDS in Parallel}] \index{System Requirements!MPI}For those wishing to run FDS in parallel,
 MPI (Message Passing Interface) must be installed on each of the
@@ -871,6 +875,10 @@ Screen output can be redirected to a file via the alternative command
 \begin{verbatim}
 fds5 job_name.fds > job_name.err
 \end{verbatim}
+Note that it is also possible to associate the extention ``fds'' with the FDS executable directly, thereby making FDS run by
+double-clicking on the input file. If you do this, note that error messages will be written to the .out file. Also, if you
+associate the input file with the FDS executable, be careful not to accidently double-click on the input file when trying to edit it.
+This action will cause previously generated output files to be over-written.
 
 
 
@@ -892,8 +900,6 @@ To run the job in the background:
 \begin{verbatim}
 fds5 job_name.fds >& job_name.err &
 \end{verbatim}
-
-
 Note that in the latter case, the screen output is stored in the file
 {\bf job\_name.err} and the detailed diagnostics are saved automatically
 in a file {\bf CHID.out}, where {\ct CHID} is a character string, usually
@@ -921,19 +927,27 @@ network connections of a given set of computers.
 
 FDS uses MPI (Message-Passing Interface)~\cite{Gropp:1} to allow
 multiple computers to run a single FDS job. The main idea is that you must break up the FDS domain into multiple meshes, and then
-the flow field in each mesh is computed by a different ``process.''
+the flow field in each mesh is computed as a different {\em process.}
 Note the subtle difference between these
-terms -- a ``process'' does not have the same meaning as a ``processor.'' The former can be thought of as a ``task'' that you would see in
-the Windows Task Manager or by executing the ``top'' command on a Linux/Unix machine. The latter refers to the computer itself. A single
-processor may run multiple processes, for example. The computation on a given FDS mesh is thought of as an individual ``process,'' and
-MPI handles the transfer of information between these processes. Usually, each mesh is assigned its own process in a parallel calculation, although it is also possible
-assign multiple meshes to a single process.\footnote{Assigning multiple meshes to a single process was introduced in FDS version 5.3.}
-In this way, large meshes can be computed on dedicated processors, while
-smaller meshes can be clustered together in a single process running on a single processor, without the need for MPI message passing between themselves.
+terms -- a {\em process} does not have the same meaning as a {\em processor}.
+The {\em process} can be thought of as a ``task'' that you would see in
+the Windows Task Manager or by executing the ``top'' command on a Linux/Unix machine. The {\em processor} refers to the
+computer hardware. A single
+{\em processor} may run multiple {\em processes}, for example.
+The computation on a given FDS mesh is thought of as an individual {\em process}, and
+MPI handles the transfer of information between these {\em processes}.
+Usually, each mesh is assigned its own {\em process} in a parallel calculation,
+although it is also possible
+assign multiple meshes to a single {\em process}.\footnote{Assigning multiple meshes to a single process was introduced in FDS version 5.3.}
+In this way, large meshes can be computed on dedicated {\em processors}, while
+smaller meshes can be clustered together in a single {\em process} running on a single {\em processor},
+without the need for MPI message passing between themselves.
 
 Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, whereas MPI refers to its processes by the numbers
-0, 1, 2, and so on. Thus, Mesh 1 is assigned to Process 0; Mesh 2 to Process 1, and so on. As a user, you never actually number the meshes or the processes yourself, but
-error statements from FDS or from MPI might refer to the meshes or processes by number. As an example, if a five mesh FDS case is run in parallel, the first printout (usually to the screen unless
+0, 1, 2, and so on. Thus, Mesh 1 is assigned to Process 0; Mesh 2 to Process 1, and so on.
+As a user, you never actually number the meshes or the processes yourself, but
+error statements from FDS or from MPI might refer to the meshes or processes by number.
+As an example, if a five mesh FDS case is run in parallel, the first printout (usually to the screen unless
 otherwise directed) is:
 
 \footnotesize
@@ -1083,7 +1097,7 @@ For example, do not attempt to simulate a fire spreading through an entire floor
 building unless you have simulated the burning of the various combustibles with relatively small calculations.
 
 Along with the FDS User's Guide, there are resources available on the Internet.
-These include an ``Issue Tracker,'' that allows you to report bugs, feature requests and ask specific clarifying questions,
+These include an ``Issue Tracker,'' that allows you to report bugs, request new features, and ask specific clarifying questions,
 and ``Group Discussions,'' which support more general topics than just specific problems.
 Before using these on-line resources, it is important to first try to solve your own
 problems by performing simple test calculations, or debugging your input file. The next few sections
@@ -1114,7 +1128,7 @@ might already have addressed your problem, and telling us what version you are u
 
 \section{Common Error Statements}
 \index{Support!Error Statements}
-An FDS calculation may end before the user-prescribed time limit.
+An FDS calculation may end before the specified time limit.
 Following is a list of common error statements and how to diagnose the problems:
 \begin{description}
 \item[{\bf Input File Errors}:] \index{Support!Error Statements!Input File}
@@ -1151,13 +1165,15 @@ for anyone but the originator of the input file to diagnose the problem.
 The calculation might be using more RAM than the machine
 has, or the output files could have used up all the available disk space. In these situations, the
 computer may or may not produce an intelligible error message. Sometimes the computer is just
-unresponsive. It is the user's responsibility to ensure that the computer has adequate resources to
+unresponsive. It is your responsibility to ensure that the computer has adequate resources to
 do the calculation. Remember, there is no limit to how big or how long FDS calculations can be -- it
 depends on the resources of the computer. For any new simulation, try running the case with a modest-sized mesh,
 and gradually make refinements until the computer can no longer handle it. Then back off
 somewhat on the size of the calculation so that the computer can comfortably run the
 case. Trying to run with 90~\% to 100~\% of computer resources is risky.
-In fact, for a typical Windows PC with 4 GB RAM, only 2 GB will be available to FDS, based on user feedback.
+In fact, for a typical 32~bit Windows PC with 4 GB RAM, only 2 GB will be available to FDS, based on user feedback.
+If you want to run bigger cases, consider buying a computer with a 64~bit operating system or break up the
+calculation into multiple meshes and use parallel processing.
 
 \item[{\bf Run-Time Errors}:] \index{Support!Error Statements!Run-Time}
 An error occurs either within the computer operating system or the
@@ -1306,7 +1322,7 @@ end the record with a ``/'' or else the data will not be understood. Do not add 
 parameters and values appropriate for that group. Otherwise, FDS will stop immediately upon execution.
 
 Parameters within a namelist record can be separated by either commas, spaces, or line breaks. It is a good idea to use
-commas or line breaks. Some machines do not recognize the spaces.
+commas or line breaks, and never use tab stops. Some machines do not recognize the spaces or the length of the tab stops.
 Comments and notes can be written into the file so long as nothing comes
 before the {\ct \&} except a space and nothing comes between the ampersand
 {\ct \&} and the slash {\ct /} except appropriate parameters corresponding
@@ -1391,7 +1407,8 @@ as the last line at the end of the input file. This completes the file from {\ct
 this last line. It just forces the ``end of file'' character past relevant input.
 
 Another general rule of thumb when writing input files is to only add to the file parameters that are to change from their
-default value. That way, you can more easily distinguish between what you want and what FDS wants. Add comments liberally to the file, so long as
+default value. That way, you can more easily distinguish between what you want and what FDS wants.
+Add comments liberally to the file, so long as
 these comments do not fall within the namelist records.
 
 The general structure of an input file is shown below, with many
@@ -1470,6 +1487,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 {\ct MATL}  & Material Property            & \ref{info:MATL} & \ref{tbl:MATL}  \\ \hline
 {\ct MESH}  & Mesh Parameters              & \ref{info:MESH} & \ref{tbl:MESH}  \\ \hline
 {\ct MISC}  & Miscellaneous                & \ref{info:MISC} & \ref{tbl:MISC}  \\ \hline
+{\ct MULT}  & Multiplier Parameters        & \ref{info:MULT} & \ref{tbl:MULT}  \\ \hline
 {\ct OBST}  & Obstruction                  & \ref{info:OBST} & \ref{tbl:OBST}  \\ \hline
 {\ct PART}  & Lagrangian Particle          & \ref{info:PART} & \ref{tbl:PART}  \\ \hline
 {\ct PROF}  & Profile Output               & \ref{info:PROF} & \ref{tbl:PROF}  \\ \hline
@@ -1533,8 +1551,8 @@ the solution of the discretized equations.
 
 Usually, only the
 duration of the simulation is required on this line, via the
-parameter {\ct T\_END} (Time End)\index{TIME!T\_END}. The default is 1 s.
-Note: {\ct TWFIN} will still work but it has been deprecated,
+parameter {\ct T\_END}. The default is 1 s.
+Note: the older {\ct TWFIN} will still work but it has been deprecated,
 it is recommended that {\ct T\_END} be used now instead.
 
 For example, the following line will instruct FDS to run the simulation for 5400 seconds.
@@ -1545,25 +1563,20 @@ For example, the following line will instruct FDS to run the simulation for 5400
 \end{verbatim}
 
 \normalsize
-If {\ct T\_END} is set to zero, only the set-up work is performed,
+\noindent If {\ct T\_END} is set to zero, only the set-up work is performed,
 allowing you to quickly check the geometry in Smokeview.
 
 If you want the time line to start at a number other than zero, you can use the parameter
-{\ct T\_BEGIN} (Time Begin)\index{TIME!T\_BEGIN} to specify the time written to file for the first time step.
-This would be useful for matching time lines of experimental data or or video recordings.
+{\ct T\_BEGIN} to specify the time written to file for the first time step.
+This would be useful for matching time lines of experimental data or video recordings.
 
 \begin{warning}
-This does not run any of the simulation prior to the {\ct T\_BEGIN} value.
-It is only used to offset the reported starting time from zero.
-\end{warning}
-
-\begin{warning}
-Time based {\ct RAMP}s are evaluated using the actual time if the {\ct RAMP} activation time is the same as
-{\ct T\_BEGIN}; otherwise, the are evaluated using the time from when the {\ct RAMP} activates.  Therefore, if you are
-setting {\ct T\_BEGIN} in order to test a time based {\ct CTRL} or {\ct DEVC} that is ultimately
+Time-based {\ct RAMP}s are evaluated using the actual time if the {\ct RAMP} activation time is the same as
+{\ct T\_BEGIN}; otherwise, they are evaluated using the time from when the {\ct RAMP} activates.  Therefore, if you are
+setting {\ct T\_BEGIN} in order to test a time-based {\ct CTRL} or {\ct DEVC} that is ultimately
 linked to a {\ct RAMP}, then you should set {\ct T\_BEGIN} to be slightly less than the time the {\ct RAMP} will activate.
-For example if you were testing a {\ct VENT} that is to open at 10 s whose {\ct SURF\_ID} uses a {\ct RAMP},
- {\ct T\_BEGIN} should be set slightly less than 10 s.
+For example if you are testing a {\ct VENT} that is to open at 10~s whose {\ct SURF\_ID} uses a {\ct RAMP},
+{\ct T\_BEGIN} should be set slightly less than 10~s.
 \end{warning}
 
 \subsection{Special Topic: Controlling the Time Step}
@@ -1649,7 +1662,7 @@ uniformity of the mesh (See Section~\ref{info:TRNX}).\index{TRNX,TRNY,TRNZ}
 
 Any obstructions or vents that extend beyond the boundary of the mesh
 are cut off at the boundary. There is no penalty for defining objects
-outside of the mesh, and these objects will not appear in Smokeview either.
+outside of the mesh, and these objects will not appear in Smokeview.
 
 \begin{warning}
 \noindent
@@ -1695,7 +1708,7 @@ No boundary conditions should be set at the planes $y=\hbox{\ct YMIN=XB(3)}$ or
 $y=\hbox{\ct YMAX=XB(4)}$, nor at $r=\hbox{\ct XMIN=XB(1)}$ in an axially-symmetric
 calculation in which $r=\hbox{\ct XB(1)=0}$. For better visualizations, the difference between
 {\ct XB(4)} and {\ct XB(3)} should be small so that the Smokeview rendering appears to be in 2-D.
-An example of an axially-symmetric helium plume ({\bf helium\_2d}) is given in the V\&V Guide.
+An example of an axially-symmetric helium plume ({\bf helium\_2d}) is given in Section~\ref{baroclinic_torque}.
 
 
 \subsection{Multiple Meshes and Parallel Processing}
@@ -1704,7 +1717,7 @@ An example of an axially-symmetric helium plume ({\bf helium\_2d}) is given in t
 
 \begin{figure}[ht!]
 \includegraphics[width=\textwidth]{FIGURES/hallways.jpg}
-\caption{\bf An example of a multiple-mesh geometry.}
+\caption{An example of a multiple-mesh geometry.}
 \label{fig:domain}
 \end{figure}
 
@@ -1721,13 +1734,14 @@ in terms of the overall coordinate system and need not apply to any one particul
 Each mesh checks the coordinates of all the geometric
 entities and decides whether or not they are to be included.
 
-To run FDS in parallel, you {\bf must} break up the computational domain into
+To run FDS in parallel using MPI (Message Passing Interface), you {\bf must} break up the computational domain into
 multiple meshes so that the workload can be divided among the available processors.
 In general, it is better to run multiple mesh cases with the parallel version of FDS if you have the
 computers available, but be aware that two computers will not necessarily finish the job in half the time as one. For the
 parallel version to work well, there has to be a comparable number of cells in each mesh, or otherwise most of the computers will sit idle
 waiting for the one with the largest mesh to finish processing each time step. You can use multiple meshes even when running the serial version of FDS,
-in which case one CPU will serially process each mesh, one by one. Why do this? For one, if you set \\ {\ct SYNCHRONIZE=.FALSE.} \\ on the {\ct TIME} line,
+in which case one CPU will serially process each mesh, one by one. Why do this?
+For one, if you set \\ {\ct SYNCHRONIZE=.FALSE.} \\ on the {\ct TIME} line,
 then in each mesh, the governing equations will be solved with a time
 step based on the flow speed within that particular mesh. Because each
 mesh can have different time steps, this technique can save CPU time by
@@ -1763,9 +1777,11 @@ mesh to a single process, and it is possible to assign more than one process to 
 
 \noindent
 The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to the given process. In this case, only four processes are to be started, numbered
-0 through 3. Note that the processes need to be invoked in ascending order, starting with 0. Why would you do this? Suppose you only have four processors available for this
-job. By starting only four processes instead of six, you can save time because 'mesh2' and 'mesh3' can communicate directly with each other without having to transmit data
-using MPI calls over the network. Same goes for 'mesh5' and 'mesh6'.
+0 through 3. Note that the processes need to be invoked in ascending order, starting with 0. Why would you do this?
+Suppose you only have four processors available for this
+job. By starting only four processes instead of six, you can save time because `mesh2' and `mesh3'
+can communicate directly with each other without having to transmit data
+using MPI calls over the network. Same goes for `mesh5' and `mesh6'.
 In essence, it is as if these mesh pairs are neighbors and need not send mail to each other via the postal system. The letters can just be
 walked next door.
 
@@ -1778,7 +1794,6 @@ the rules of prescribing multiple meshes are similar, with some issues to keep i
 abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}. The requirement of integral mesh
 alignment is new starting with FDS version 5.1. It is a more restrictive requirement than in previous versions because it was becoming too
 difficult to maintain complete flexibility in alignment while trying to improve the accuracy of the methodology.
-
 \begin{figure}[p]
 \begin{picture}(325,600)(0,-20)
 \setlength{\unitlength}{0.02in}
@@ -1830,10 +1845,9 @@ difficult to maintain complete flexibility in alignment while trying to improve 
 \put(230, 50){\parbox{1.9in}{This is no longer allowed in FDS 5.1 and higher.}}
 \end{picture}
 
-\caption{\bf Rules concerning alignment of meshes.}
+\caption{Rules governing the alignment of meshes.}
 \label{fig:meshes}
 \end{figure}
-
 The following rules of thumb should also be followed when setting up a multiple mesh calculation:
 \begin{itemize}
 \item Avoid putting mesh boundaries where critical action is expected,
@@ -1902,14 +1916,14 @@ However, it is possible to specify that the cells be non-uniform in one or two
 \begin{minipage}[t]{3.1in}
 \includegraphics[width=3.1in]{FIGURES/piece_wise_linear}
 \vspace{-.2in}
-\caption{\bf Piecewise-Linear Transformation.}
+\caption{Piecewise-Linear Mesh Transformation.}
 \label{fig:grid2}
 \end{minipage}
 \hfill
 \begin{minipage}[t]{3.1in}
 \includegraphics[width=3.1in]{FIGURES/polygonal}
 \vspace{-.2in}
-\caption{\bf Polynomial Transformation.}
+\caption{Polynomial Mesh Transformation.}
 \label{fig:grid1}
 \end{minipage}
 \end{figure}
@@ -2038,13 +2052,9 @@ calculation. It is better to assess the quality of the mesh in terms
 of this non-dimensional parameter, rather than an absolute mesh cell size.
 For example, a cell size of 10~cm may be ``adequate,'' in some sense,
 for evaluating the spread of smoke and heat through a building from a
-sizable fire, but may not be appropriate to study a very small, smoldering source.
+sizable fire, but may not be appropriate to study a very small, smoldering source\footnote{For the validation study sponsored by the
+U.S. Nuclear Regulatory Commission~\cite{NUREG_1824}, the $D^*/\dx$ values ranged from 4 to 16.}.
 
-As an example, in the mesh sensitivity study for NUREG 1824~\cite{NUREG_1824}, the $D^*/\dx$ values ranged from 4 to 16.
-These values were used to adequately resolve plume dynamics,
-along with other geometrical characteristics of the models as well.
-This range does not indicate what values to use for all models,
-only what values worked well for that particular set of models.
 
 
 
@@ -2075,7 +2085,9 @@ The {\ct MISC} parameters vary in scope and degree of importance. Here is a part
 guide.
 
 \begin{description}
-\item[{\ct DNS}] A logical parameter that, if {\ct .TRUE.}, directs FDS to perform a Direct Numerical Simulation, as opposed to the default Large Eddy Simulation (LES).
+\item[{\ct DNS}] A logical parameter that, if {\ct .TRUE.}, directs FDS to perform a Direct Numerical Simulation,
+as opposed to the default Large Eddy Simulation (LES). This feature is appropriate only for simulations that use mesh cells that are
+on the order of a millimeter or less in size, or for diagnostic purposes.
 \item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
 \item[{\ct HUMIDITY}] Relative humidity, in units of \%. This need only be specified if there is a source of water in the simulation other than the fire
 itself. Otherwise, water vapor is not explicitly tracked. Default 40~\%.
@@ -2089,7 +2101,8 @@ and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE
 \item[{\ct RADIATION}] A logical parameter indicating whether radiation transport ought to be calculated. The default is {\ct .TRUE.}
 \item[{\ct SUPPRESSION}] A logical parameter indicating whether FDS should include gas phase flame extinction. The default is {\ct .TRUE.}
 \item[{\ct SURF\_DEFAULT}] The {\ct SURF} line that is to be applied to all boundaries, unless otherwise specified.
-The default is {\ct 'INERT'},non-reacting solid boundary fixed at TMPA. You do not need to define {\ct 'INERT'} via a {\ct SURF} line.
+The default is {\ct 'INERT'}, a non-reacting solid boundary whose temperature is fixed at {\ct TMPA}.
+You do not need to define {\ct 'INERT'} via a {\ct SURF} line.
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
 \item[{\ct U0, V0, W0}] Initial values of the gas velocity in each of the coordinate directions. Normally, these are all 0~m/s, but there are a few applications where it is
 convenient to start the flow immediately, like in an outdoor simulation involving wind.
@@ -2243,7 +2256,7 @@ mesh interface must conform to the more coarse of the two. Otherwise, volume can
 
 
 \subsection{Special Topic: Restoring the Baroclinic Vorticity}
-\index{baroclinic torque}
+\index{baroclinic_torque}
 
 There is an approximation made when solving for the pressure where it is assumed that
 \be
@@ -2335,19 +2348,29 @@ strategies before including any fire or HVAC \index{HVAC} functionality. Slowly 
 
 \subsubsection{Example Case: stack\_effect}
 
-If the interior temperature of a building is at a different temperature than the surrounding atmosphere, upward or downward air flows within shafts
-or stairwells connected to the ambient via leakage paths will occur.  This phenomena is known as the stack effect.  The {\bf stack\_effect} test case
-is a 2D simulation of a 304~m tall building initialized to a temperature of 20~$^\circ$ with the surround ambient temperature initialized to
-10~$^\circ$. Two small openings in the building are defined 2.5~m above the ground floor of the building and 2.5~m below the roof of the building.
-
-The initial density stratification is defined by assuming a lapse rate of 0~$^\circ$C/m. \be
+If the interior temperature of a building is at a different temperature than the surrounding atmosphere, upward or
+downward air flows within shafts
+or stairwells connected to the ambient via leakage paths will occur.
+This phenomena is known as the {\em stack effect}.  The {\bf stack\_effect} test case
+is a 2D simulation of a 304~m tall building initialized to a temperature of 20~$^\circ$C with the surrounding ambient
+temperature initialized to
+10~$^\circ$C. Two small openings in the building are defined 2.5~m above the ground floor of the building
+and 2.5~m below the roof of the building.
+The initial density stratification is defined by assuming a lapse rate of 0~$^\circ$C/m.
+\be
    \rho_0(z) = \rho_\infty \, e^{ \frac{g W}{{\cal R}_0 T_0} z}
-\ee Applying this to the external and internal locations at the lower and upper vents results in densities of 1.2392, 1.1969, 1.1954, and
-1.1546~kg/m$^3$, respectively.  FDS computes the same values to within machine precision.  Since the openings in the building are equally spaced over
-its height, the neutral plane of the building will be close to its midpoint. The pressure gradient across the building's wall can be computed as \be
+\ee
+Applying this to the external and internal locations at the lower and upper vents results in densities of 1.2392, 1.1969, 1.1954, and
+1.1546~kg/m$^3$, respectively.  FDS computes the same values to within machine precision.  Since the openings in the building
+are equally spaced over
+its height, the neutral plane of the building will be close to its midpoint.
+The pressure gradient across the building's wall can be computed as
+\be
    \delta P = \frac{W P_0 g} {R_{0}} \left( \frac {1}{T_{ambient}} - \frac {1}{T_{building}} \right) h
-\ee where h is the distance from the neutral plane.  Using this pressure gradient in Bernoulli's equation (and assuming it remains constant) results
-in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10.13~m/s or an error of 0.5~\%.
+\ee
+where $h$ is the distance from the neutral plane.  Using this pressure gradient in
+Bernoulli's equation (and assuming it remains constant) results
+in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10.13~m/s, an error of 0.5~\%.
 
 
 
@@ -2371,7 +2394,7 @@ the thermal conductivity and material diffusivity, are related to the turbulent 
 The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be
 constant for a given scenario. Although it is not recommended for most calculations, you can modify
 $C_s=0.2$, $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct CSMAG}, {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed
-discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
+discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5}.
 
 
 
@@ -2435,7 +2458,7 @@ rectangular region of the domain. If so, add lines of the form
 \end{verbatim}
 
 \normalsize
-Here, within the region whose bounds are given by the sextuplet {\ct XB},
+\noindent Here, within the region whose bounds are given by the sextuplet {\ct XB},
 the initial temperature shall be 30~$^\circ$C instead of the ambient.
 This construct can also be used for {\ct DENSITY} or
 {\ct MASS\_FRACTION(N)} where {\ct N} indicates the {\ct N}th species listed in the input file.
@@ -2473,8 +2496,32 @@ and vents from which air or fuel can be
 either injected into, or drawn from, the flow domain.
 A boundary condition needs to be assigned to each obstruction
 and vent describing its thermal properties. A fire is just one type of
-boundary condition. This chapter describes how to build the model. The next
-chapter describes how to assign properties to the boundaries.
+boundary condition. This chapter describes how to build the model.
+
+
+\section{Bounding Surfaces: The \texorpdfstring{{\tt SURF}}{SURF} Namelist Group (Table \ref{tbl:SURF})}
+\label{info:SURF}\index{SURF}
+
+Before describing how to build up the geometry, it is first necessary to explain how to describe what these bounding surfaces
+consist of. {\ct SURF} is the namelist group that defines
+the structure of all solid surfaces or openings within or
+bounding the flow domain. Boundary conditions for obstructions and vents are
+prescribed by referencing the appropriate {\ct SURF} line(s) whose
+parameters are described in this section.
+
+The default boundary condition for all solid surfaces is that of a
+inert wall with the temperature fixed at {\ct TMPA}, and is referred to as {\ct 'INERT'}. If only this
+boundary condition is needed, there is no need to add any {\ct SURF} lines
+to the input file. If additional boundary conditions are desired,
+they are to be listed one boundary condition at a time.
+Each {\ct SURF} line consists of an identification string {\ct ID='...'} to
+allow references to it by an obstruction or vent. Thus, on each
+{\ct OBST} and {\ct VENT} line that are to be described below, the character string {\ct SURF\_ID='...'}
+indicates the {\ct ID} of the {\ct SURF} line containing the desired boundary
+condition parameters. If a particular {\ct SURF} line is to be applied
+as the default boundary condition, {\ct CONCRETE} for example,
+set {\ct SURF\_DEFAULT='CONCRETE'} on the {\ct MISC} line.
+
 
 
 
@@ -2489,7 +2536,8 @@ of rectangular solids, each one introduced on a single line in the input file.
 Each {\ct OBST} line contains the coordinates of a rectangular
 solid within the flow domain. This solid is defined by two points
 ($x_1$,$y_1$,$z_1$) and ($x_2$,$y_2$,$z_2$) that are entered on the
-{\ct OBST} line in terms of the sextuplet {\ct XB = X1, X2, Y1, Y2, Z1, Z2}.
+{\ct OBST} line in terms of the sextuplet \\
+{\ct XB = X1, X2, Y1, Y2, Z1, Z2} \\
 In addition to the coordinates, the boundary conditions for the obstruction
 can be specified with the parameter {\ct SURF\_ID}, which designates which
 {\ct SURF} group (Section~\ref{info:SURF}) to apply at the surface of the obstruction.
@@ -2599,7 +2647,7 @@ parameters {\ct DX0}, {\ct DY0}, and {\ct DZ0}.
 
 \begin{figure}[t]
 \includegraphics[width=\textwidth]{FIGURES/pyramid}
-\caption{\bf An example of the multiplier functionality.}
+\caption{An example of the multiplier function.}
 \label{fig:mult}
 \end{figure}
 
@@ -2685,7 +2733,7 @@ the air velocity on the bottom set of obstructions is not affected as much by th
 \end{figure}
 
 
-
+\newpage
 
 \section{Creating Voids: The \texorpdfstring{{\tt HOLE}}{HOLE} Namelist Group (Table \ref{tbl:HOLE})}
 \label{info:HOLE}\index{HOLE}
@@ -2757,6 +2805,7 @@ Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only
 \end{warning}
 
 
+\newpage
 
 \section{Applying Surface Properties: The \texorpdfstring{{\tt VENT}}{VENT} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:VENT} \index{VENT}
@@ -2780,7 +2829,7 @@ given wall cell, FDS will output a warning message and ignore the subsequent lin
 will be applied)
 \end{warning}
 
-The term ``{\ct VENT}'' is somewhat misleading. Taken literally, a
+\noindent The term ``{\ct VENT}'' is somewhat misleading. Taken literally, a
 {\ct VENT} can be used to model components of the ventilation system in
 a building, like a diffuser or a return.
 In these cases, the {\ct VENT} coordinates form a plane on a
@@ -2884,6 +2933,7 @@ notation is handy.
 Note that the mirror image of a scene is {\bf not} shown in Smokeview.
 \end{warning}
 
+\noindent
 A word of warning about {\ct MIRROR} boundaries in FDS. In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundaries are often used as a way of
 saving on computation time. However, because FDS is an LES (Large Eddy Simulation) model, the use of symmetry boundaries should be considered carefully. The reason for this is that
 an LES model does not compute a time-averaged solution of the N-S equations. In other words, for a RANS model, a fire plume is represented as an axially-symmetric flow field because
@@ -2933,11 +2983,159 @@ the direction in which the {\ct VENT} is facing.
 
 
 
-\chapter{Boundary Conditions}
-\index{boundary conditions}
+\clearpage
 
-This chapter describes how to specify the properties of the objects
-that make up the bounding surfaces of the flow domain. {\bf This is
+\section{Coloring Obstructions, Vents, Surfaces and Meshes}
+\label{info:colors}\index{Colors}
+\index{SURF!COLOR}
+\index{SURF!RGB}
+Colors for many items within FDS can be prescribed in two ways; a triplet of
+integers after keyword {\ct RGB} or one of many {\ct COLOR} name character strings.
+
+The three {\ct RGB} integer numbers range from 0 to 255, indicating the amount of Red, Green and Blue
+that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name EXACTLY as it
+is listed in the color tables here in this document and on the FDS website.
+
+Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names
+for a variety of colors. A complete listing of all 500+ colors that can be
+specified by name after the {\ct COLOR} keyword is available on the FDS website.
+If the {\ct COLOR} name is not listed in the table on the website, then that name does not exist to FDS.
+
+It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line because as
+the geometries of FDS simulations become more complex, it is very useful
+to use color as a spot check to determine if the desired
+surface properties have been assigned throughout the room or building under study.
+
+For example, if you desire that all surfaces associated with a
+given {\ct SURF} line be colored the same way, prescribe a triplet of
+integers called {\ct RGB} on the {\ct SURF} line. The following {\ct SURF} line;
+\footnotesize
+\begin{verbatim}
+&SURF ID='UPHOLSTERY',...,RGB=0,255,0 /
+\end{verbatim}
+\normalsize
+will cause the furnishings with a ``SURF'' of ``UPHOLSTERY'' to be colored green in Smokeview.
+It is best to avoid using the primary colors because these same colors are
+used by Smokeview to draw color contours.
+
+Obstructions and vents may be colored individually (over-riding the
+{\ct SURF} line's {\ct RGB}) by specifying {\ct COLOR} value to any of
+the listed names in Table~\ref{tab:colors} or {\ct 'INVISIBLE'} on
+the respective {\ct OBST} or {\ct VENT} line. Using {\ct 'INVISIBLE'}
+causes the vent or obstruction to not be drawn.
+
+Colors may also be specified using the integer triplet {\ct RGB} on an {\ct OBST} or {\ct VENT} line to gain
+a wider color palette. The use of {\ct RGB} is preferable, especially
+to create colors that do not clash with the pastel colors used to
+show temperatures, concentrations, {\em etc.} See Table \ref{tab:colors}
+for a list of color names and RGB values.
+
+
+\begin{table}[p]
+\begin{center}
+\caption{Sample of Color Definitions (A complete list is included on the website) }
+\label{tab:colors}
+\vspace{0.1in}
+\begin{tabular}{|c|c|c|c|c|c||c|c|c|c|}
+\hline
+Name & &  R  & G & B & Name & & R & G & B   \\ \hline \hline
+{\ct AQUAMARINE} & \textcolor{AQUAMARINE} {$\blacksquare$} & 127& 255& 212& {\ct MAROON} &  \textcolor{MAROON} {$\blacksquare$} & 128& 0& 0  \\ \hline
+{\ct ANTIQUE WHITE} & \textcolor{ANTIQUE WHITE} {$\blacksquare$} & 250& 235& 215& {\ct MELON} &  \textcolor{MELON} {$\blacksquare$} & 227& 168& 105  \\ \hline
+{\ct BEIGE} & \textcolor{BEIGE} {$\blacksquare$} & 245& 245& 220& {\ct MIDNIGHT BLUE} &  \textcolor{MIDNIGHT BLUE} {$\blacksquare$} & 25& 25& 112  \\ \hline
+{\ct BLACK} & \textcolor{BLACK} {$\blacksquare$} & 0& 0& 0& {\ct MINT} &  \textcolor{MINT} {$\blacksquare$} & 189& 252& 201  \\ \hline
+{\ct BLUE} & \textcolor{BLUE} {$\blacksquare$} & 0& 0& 255& {\ct NAVY} &  \textcolor{NAVY} {$\blacksquare$} & 0& 0& 128  \\ \hline
+{\ct BLUE VIOLET} & \textcolor{BLUE VIOLET} {$\blacksquare$} & 138& 43& 226& {\ct OLIVE} &  \textcolor{OLIVE} {$\blacksquare$} & 128& 128& 0  \\ \hline
+{\ct BRICK} & \textcolor{BRICK} {$\blacksquare$} & 156& 102& 31& {\ct OLIVE DRAB} &  \textcolor{OLIVE DRAB} {$\blacksquare$} & 107& 142& 35  \\ \hline
+{\ct BROWN} & \textcolor{BROWN} {$\blacksquare$} & 165& 42& 42& {\ct ORANGE} &  \textcolor{ORANGE} {$\blacksquare$} & 255& 128& 0  \\ \hline
+{\ct BURNT SIENNA} & \textcolor{BURNT SIENNA} {$\blacksquare$} & 138& 54& 15& {\ct ORANGE RED} &  \textcolor{ORANGE RED} {$\blacksquare$} & 255& 69& 0  \\ \hline
+{\ct BURNT UMBER} & \textcolor{BURNT UMBER} {$\blacksquare$} & 138& 51& 36& {\ct ORCHID} &  \textcolor{ORCHID} {$\blacksquare$} & 218& 112& 214  \\ \hline
+{\ct CADET BLUE} & \textcolor{CADET BLUE} {$\blacksquare$} & 95& 158& 160& {\ct PINK} &  \textcolor{PINK} {$\blacksquare$} & 255& 192& 203  \\ \hline
+{\ct CHOCOLATE} & \textcolor{CHOCOLATE} {$\blacksquare$} & 210& 105& 30& {\ct POWDER BLUE} &  \textcolor{POWDER BLUE} {$\blacksquare$} & 176& 224& 230  \\ \hline
+{\ct COBALT} & \textcolor{COBALT} {$\blacksquare$} & 61& 89& 171& {\ct PURPLE} &  \textcolor{PURPLE} {$\blacksquare$} & 128& 0& 128  \\ \hline
+{\ct CORAL} & \textcolor{CORAL} {$\blacksquare$} & 255& 127& 80& {\ct RASPBERRY} &  \textcolor{RASPBERRY} {$\blacksquare$} & 135& 38& 87  \\ \hline
+{\ct CYAN} & \textcolor{CYAN} {$\blacksquare$} & 0& 255& 255& {\ct RED} &  \textcolor{RED} {$\blacksquare$} & 255& 0& 0  \\ \hline
+{\ct DIMGRAY } & \textcolor{DIMGRAY } {$\blacksquare$} & 105& 105& 105& {\ct ROYAL BLUE} &  \textcolor{ROYAL BLUE} {$\blacksquare$} & 65& 105& 225  \\ \hline
+{\ct EMERALD GREEN} & \textcolor{EMERALD GREEN} {$\blacksquare$} & 0& 201& 87& {\ct SALMON} &  \textcolor{SALMON} {$\blacksquare$} & 250& 128& 114  \\ \hline
+{\ct FIREBRICK} & \textcolor{FIREBRICK} {$\blacksquare$} & 178& 34& 34& {\ct SANDY BROWN} &  \textcolor{SANDY BROWN} {$\blacksquare$} & 244& 164& 96  \\ \hline
+{\ct FLESH} & \textcolor{FLESH} {$\blacksquare$} & 255& 125& 64& {\ct SEA GREEN} &  \textcolor{SEA GREEN} {$\blacksquare$} & 84& 255& 159  \\ \hline
+{\ct FOREST GREEN} & \textcolor{FOREST GREEN} {$\blacksquare$} & 34& 139& 34& {\ct SEPIA} &  \textcolor{SEPIA} {$\blacksquare$} & 94& 38& 18  \\ \hline
+{\ct GOLD } & \textcolor{GOLD } {$\blacksquare$} & 255& 215& 0& {\ct SIENNA} &  \textcolor{SIENNA} {$\blacksquare$} & 160& 82& 45  \\ \hline
+{\ct GOLDENROD} & \textcolor{GOLDENROD} {$\blacksquare$} & 218& 165& 32& {\ct SILVER} &  \textcolor{SILVER} {$\blacksquare$} & 192& 192& 192  \\ \hline
+{\ct GRAY} & \textcolor{GRAY} {$\blacksquare$} & 128& 128& 128& {\ct SKY BLUE} &  \textcolor{SKY BLUE} {$\blacksquare$} & 135& 206& 235  \\ \hline
+{\ct GREEN} & \textcolor{GREEN} {$\blacksquare$} & 0& 255& 0& {\ct SLATEBLUE} &  \textcolor{SLATEBLUE} {$\blacksquare$} & 106& 90& 205  \\ \hline
+{\ct GREEN YELLOW} & \textcolor{GREEN YELLOW} {$\blacksquare$} & 173& 255& 47& {\ct SLATE GRAY} &  \textcolor{SLATE GRAY} {$\blacksquare$} & 112& 128& 144  \\ \hline
+{\ct HONEYDEW} & \textcolor{HONEYDEW} {$\blacksquare$} & 240& 255& 240& {\ct SPRING GREEN} &  \textcolor{SPRING GREEN} {$\blacksquare$} & 0& 255& 127  \\ \hline
+{\ct HOT PINK} & \textcolor{HOT PINK} {$\blacksquare$} & 255& 105& 180& {\ct STEEL BLUE} &  \textcolor{STEEL BLUE} {$\blacksquare$} & 70& 130& 180  \\ \hline
+{\ct INDIAN RED} & \textcolor{INDIAN RED} {$\blacksquare$} & 205& 92& 92& {\ct TAN} &  \textcolor{TAN} {$\blacksquare$} & 210& 180& 140  \\ \hline
+{\ct INDIGO} & \textcolor{INDIGO} {$\blacksquare$} & 75& 0& 130& {\ct TEAL} &  \textcolor{TEAL} {$\blacksquare$} & 0& 128& 128  \\ \hline
+{\ct IVORY} & \textcolor{IVORY} {$\blacksquare$} & 255& 255& 240& {\ct THISTLE} &  \textcolor{THISTLE} {$\blacksquare$} & 216& 191& 216  \\ \hline
+{\ct IVORY BLACK} & \textcolor{IVORY BLACK} {$\blacksquare$} & 41& 36& 33& {\ct TOMATO } &  \textcolor{TOMATO } {$\blacksquare$} & 255& 99& 71  \\ \hline
+{\ct KELLY GREEN} & \textcolor{KELLY GREEN} {$\blacksquare$} & 0& 128& 0& {\ct TURQUOISE} &  \textcolor{TURQUOISE} {$\blacksquare$} & 64& 224& 208  \\ \hline
+{\ct KHAKI} & \textcolor{KHAKI} {$\blacksquare$} & 240& 230& 140& {\ct VIOLET} &  \textcolor{VIOLET} {$\blacksquare$} & 238& 130& 238  \\ \hline
+{\ct LAVENDER} & \textcolor{LAVENDER} {$\blacksquare$} & 230& 230& 250& {\ct VIOLET RED} &  \textcolor{VIOLET RED} {$\blacksquare$} & 208& 32& 144  \\ \hline
+{\ct LIME GREEN} & \textcolor{LIME GREEN} {$\blacksquare$} & 50& 205& 50& {\ct WHITE} &  \textcolor{WHITE} {$\blacksquare$} & 255& 255& 255  \\ \hline
+{\ct MAGENTA} & \textcolor{MAGENTA} {$\blacksquare$} & 255& 0& 255& {\ct YELLOW} &  \textcolor{YELLOW} {$\blacksquare$} & 255& 255& 0  \\ \hline
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\subsection{Texture Mapping}
+\label{info:texture_map}
+\index{Surface Texture Maps}
+\index{SURF!TEXTURE\_MAP}
+There are various ways of prescribing the color of various objects
+within the computational domain, but there is also a way of pasting
+images onto the obstructions for the purpose of making the Smokeview
+images more realistic. This technique is known as ``texture mapping.''
+For example, to apply a wood paneling image to a wall,
+add to the {\ct SURF} line defining the physical properties of the
+paneling the text
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='wood paneling',...,TEXTURE_MAP='paneling.jpg',TEXTURE_WIDTH=1.,
+      TEXTURE_HEIGHT=2. /
+\end{verbatim}
+\normalsize
+Assuming that a JPEG file called {\bf paneling.jpg} exists in the
+working directory, Smokeview should read it and display the image
+wherever the paneling is used (SGI Users: use rgb files instead of jpg).
+Note that the image does not appear when Smokeview is first invoked. It is an option controlled by
+the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH}
+and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image.
+\index{SURF!TEXTURE\_HEIGHT} \index{SURF!TEXTURE\_WIDTH} In this case,
+the JPEG image is of a 1 m wide by 2 m high piece of
+paneling. Smokeview replicates the image as often as necessary to
+make it appear that the paneling is applied where desired.
+Consider carefully how the image repeats itself when
+applied in a scene. If the image has no obvious pattern, there is no
+problem with the image being repeated. If the image has an obvious
+direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to
+the {\ct VENT} or {\ct OBST} line to which a texture map
+should be applied. For example,
+
+\footnotesize
+\begin{verbatim}
+&OBST XB=1.0,2.0,3.0,4.0,5.0,7.0,SURF_ID='wood paneling',
+      TEXTURE_ORIGIN=1.0,3.0,5.0 /
+\end{verbatim}
+\normalsize
+applies paneling to an obstruction whose dimensions are 1 m by
+1 m by 2 m, such that the image of the paneling is positioned
+at the point (1.0,3.0,5.0). The default value of {\ct TEXTURE\_ORIGIN}
+is (0,0,0), and the global default can be changed by added a
+{\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line.
+
+
+
+
+
+
+\chapter{Fire and Thermal Boundary Conditions}
+
+This chapter describes how to specify the thermal properties of solid objects. {\bf This is
 the most challenging part of setting up the simulation.} Why?  First,
 for both real and simulated fires, the growth of the fire is very
 sensitive to the thermal properties of the surrounding
@@ -2955,7 +3153,7 @@ By default, the outer boundary of the computational domain is assumed
 to be a solid boundary that is maintained at ambient temperature. The
 same is true for any obstructions that are added to the scene. To
 specify the properties of solids, use the namelist group {\ct SURF}
-(Section~\ref{info:SURF}). Starting in FDS 5, solids are assumed to
+(Section~\ref{info:SURF}). Starting in FDS~5, solids are assumed to
 consist of layers which can be made of different materials.  The
 properties of each material required are designated via the {\ct MATL}
 namelist group (Section~\ref{info:MATL}).  These properties indicate how
@@ -2992,91 +3190,9 @@ the {\ct OBST} line describes the overall geometric structure, the {\ct SURF} li
 characteristics of the surfaces of the geometry which includes the thickness of the layers of
 materials applied to that surface.
 \end{warning}
-\index{SURF!THICNKNESS}
-
-\section{Bounding Surfaces: The \texorpdfstring{{\tt SURF}}{SURF} Namelist Group (Table \ref{tbl:SURF})}
-\label{info:SURF}\index{SURF}
-
-{\ct SURF} is the namelist group (Table \ref{tbl:SURF}) that defines
-the structure of all solid surfaces or openings within or
-bounding the flow domain. Boundary conditions for obstructions and vents are \index{boundary conditions}
-prescribed by referencing the appropriate {\ct SURF} line(s) whose
-parameters are described in this section.
-
-The default boundary condition for all solid surfaces is that of a
-inert wall with the temperature fixed at TMPA, and is referred to as {\ct 'INERT'}. If only this
-boundary condition is needed, there is no need to add any {\ct SURF} lines
-to the input file. If additional boundary conditions are desired,
-they are to be listed one boundary condition at a time.
-Each {\ct SURF} line consists of an identification string {\ct ID='...'} to
-allow references to it by an obstruction or vent. Thus, on each
-{\ct OBST} and {\ct VENT} line, the character string {\ct SURF\_ID='...'}
-indicates the {\ct ID} of the {\ct SURF} line containing the desired boundary
-condition parameters. If a particular {\ct SURF} line is to be applied
-as the default boundary condition, {\ct CONCRETE} for example,
-set {\ct SURF\_DEFAULT='CONCRETE'} on the {\ct MISC} line.
-
-Avoid using a Smokeview .smv file keyword for the {\ct ID}.  See the {\em User's Guide for
-Smokeview Version~5}~\cite{Smokeview_Users_Guide_5} for a listing of these keywords.
-
-\begin{notebox}
-\noindent
-The default boundary condition {\ct 'INERT'} does allow for heat loss and is not the same as an adiabatic surface.
-If you wish to define a surface as adiabatic, then you should set {\ct ADIABATIC=.TRUE.} on the {\ct SURF} line.
-\end{notebox}
-\index{SURF!ADIABATIC}
-
-
-\subsection{Fire with a Known Heat Release Rate}
-\index{HRRPUA} \index{Fire from Heat Release Rate}
-
-Solids and liquid fuels can be modeled by specifying their relevant
-properties via the {\ct MATL} namelist group. However, if you simply
-want to specify a fire of a given heat release rate (HRR),
-you need not specify any material properties. A specified fire is
-basically modeled as the ejection of gaseous fuel
-from a solid surface or vent. This is essentially a burner, with a
-specified Heat Release Rate Per Unit Area, {\ct HRRPUA}, in units of
-kW/m$^2$. For example
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='FIRE',HRRPUA=500. /
-\end{verbatim}
-\normalsize
-
-\noindent
-applies 500~kW/m$^2$ to any surface with the attribute
-{\ct SURF\_ID='FIRE'}. See the discussion of {\bf Time Dependent Conditions}
-in Section~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
-
-An alternative to {\ct HRRPUA} with the exact same functionality is
-{\ct MLRPUA}, except this parameter \index{MLRPUA}
-specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
-{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line. With either,
-the stoichiometry of the gas phase reaction is set by the
-parameters on the {\ct REAC} line. All of the
-species associated with the combustion process are accounted for
-by way of the mixture fraction variable and should not be
-explicitly prescribed. The exception to this rule is
-where a non-reacting gas is introduced into the domain that merely serves
-as a diluent, like CO$_2$ from an extinguisher or H$_2$O from evaporated
-sprinkler droplets (see Section~\ref{info:SPEC} for details).
-If a finite rate combustion model is desired instead of the default mixture
-fraction model, see Section~\ref{info:finite}.
-
-\begin{warning}
-Specifying {\ct HRRPUA} or {\ct MLRPUA} automatically invokes the mixture fraction
-combustion model.
-\end{warning}
-
-
 
 \subsection{Simple Thermal Boundary Conditions}
-\label{info:thermalboundary} \index{fixed surface temperature}
-\index{SURF!TMP\_FRONT}
-\index{SURF!CONVECTIVE\_HEAT\_FLUX}
-\index{SURF!EMISSIVITY}
+\label{info:thermalboundary}
 
 Usually, the thermal properties of a solid boundary are specified via the
 {\ct MATL} namelist group, which is in turn invoked by the {\ct SURF} entry via
@@ -3128,329 +3244,52 @@ result in FDS defining {\ct NET\_HEAT\_FLUX=0}.
 \index{SURF!ADIABATIC}
 
 
-\subsection{Tangential Velocity Boundary Conditions at Solid Surfaces}
-\label{info:WALL_MODEL}
+\subsection{Fire with a Known Heat Release Rate}
 
-As a gas flows past a solid obstruction, it ``sticks'' to the surface and forms a boundary layer. Ideally,
-the gas velocity at the surface is zero, and it increases rapidly through a boundary layer that is only a few
-millimeters thick to its ``free-stream''
-value. In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an
-empirical model is used to represent its effect on the overall flow field.
-For a DNS (Direct Numerical Simulation), this discussion is moot. The inner-wall ``ghost'' cell velocities are
-set so that the velocity at the wall surface is zero. In other words, the velocity gradient at the wall is computed directly from
-the resolved velocity vectors near the wall. For an LES (Large Eddy Simulation), the Werner-Wengle wall model is applied. See
-the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for details.
-
-\begin{warning}
-\noindent
-The parameter {\ct SLIP\_FACTOR} is no longer used to set the tangential velocity boundary condition, as of FDS version 5.4.0. To force
-a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line. To force a no-slip boundary condition,
-set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line. Otherwise, no parameters need be set -- the appropriate wall model will be applied, depending on
-whether the calculation is a DNS or LES.
-\end{warning}
-
-
-
-\subsection{Simple Vents, Fans and Heaters}
-\index{Volume Flux} \index{Mass Flux}
-\index{SURF!VOLUME\_FLUX}
-\index{SURF!VEL}
-\label{info:Velocity_BC}
-
-For most applications, the ventilation system of a building is described in FDS using
-velocity {\em boundary conditions}. For example, fresh air can be blown into, and smoke can
-be drawn from, a compartment by specifying a velocity in the {\em normal} direction to a solid
-surface. However, there are various other facets of velocity boundary conditions that are described below.
-
-\subsubsection{Supply and Exhaust Vents}
-
-The easiest way to describe a supply or exhaust fan is to create a {\ct VENT} positioned on a solid surface with
-a {\ct SURF\_ID} with some form of specified velocity or volume flow rate.
-The normal component of velocity is usually specified directly via the parameter
-{\ct VEL}. If {\ct VEL} is negative, the flow is directed {\em into} the
-computational domain, {\em i.e.}, a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the
-domain, {\em i.e.}, an exhaust vent. For example, the lines
+Solids and liquid fuels can be modeled by specifying their relevant
+properties via the {\ct MATL} namelist group. However, if you simply
+want to specify a fire of a given heat release rate (HRR),
+you need not specify any material properties. A specified fire is
+basically modeled as the ejection of gaseous fuel
+from a solid surface or vent. This is essentially a burner, with a
+specified Heat Release Rate Per Unit Area, {\ct HRRPUA}, in units of
+kW/m$^2$. For example
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='SUPPLY', VEL=-1.2, COLOR='BLUE' /
-&VENT XB=5.0,5.0,1.0,1.4,2.0,2.4, SURF_ID='SUPPLY' /
+&SURF ID='FIRE',HRRPUA=500. /
 \end{verbatim}
 \normalsize
 
 \noindent
-create a {\ct VENT} that {\em supplies} air at a velocity of 1.2~m/s through an area of nominally 0.16~m$^2$, depending on the
-realignment of the {\ct VENT} onto the FDS mesh. Regardless of the
-orientation of the plane $x=5$, the flow will be directed {\em into} the room because of the sign of {\ct VEL}.
-In this example the {\ct VENT} may not be exactly
-0.16~m$^2$ in area because it may not align exactly with the computational mesh. If this is the case then
-{\ct VOLUME\_FLUX} can be prescribed instead of {\ct VEL}. The units
-are m$^3$/s. If the flow is entering the computational domain, {\ct VOLUME\_FLUX}
-should be a negative number, the same convention as for {\ct VEL}. Note that a {\ct SURF}
-with a {\ct VOLUME\_FLUX} prescribed can be invoked by either a
-{\ct VENT} or an {\ct OBST}, but be aware that in the latter case, the resulting
-velocity on the face or faces of the obstruction will be given by the specified
-{\ct VOLUME\_FLUX} divided by the area of that particular face. For example:
+applies 500~kW/m$^2$ to any surface with the attribute
+{\ct SURF\_ID='FIRE'}. See the discussion of {\bf Time Dependent Conditions}
+in Section~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
 
-\footnotesize
-\begin{verbatim}
-&SURF ID='SUPPLY', VOLUME_FLUX=-5.0, COLOR='GREEN' /
-&OBST XB=..., SURF_ID6='BRICK','SUPPLY','BRICK','BRICK','BRICK','BRICK' /
-\end{verbatim}
-\normalsize
-
-\noindent
-dictates that the forward $x$-facing surface of the obstruction is to have a velocity
-equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) flowing into the
-computational domain.
+An alternative to {\ct HRRPUA} with the exact same functionality is
+{\ct MLRPUA}, except this parameter \index{MLRPUA}
+specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
+{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line. With either,
+the stoichiometry of the gas phase reaction is set by the
+parameters on the {\ct REAC} line. All of the
+species associated with the combustion process are accounted for
+by way of the mixture fraction variable and should not be
+explicitly prescribed. The exception to this rule is
+where a non-reacting gas is introduced into the domain that merely serves
+as a diluent, like CO$_2$ from an extinguisher or H$_2$O from evaporated
+sprinkler droplets (see Section~\ref{info:SPEC} for details).
+If a finite rate combustion model is desired instead of the default mixture
+fraction model, see Section~\ref{info:finite}.
 
 \begin{warning}
-\noindent
-Note that either {\ct VEL} or {\ct VOLUME\_FLUX} should be prescribed,
-not both.  The choice depends on whether an exact velocity is desired at a
-given vent, or whether the given volume flux is desired.
+Specifying {\ct HRRPUA} or {\ct MLRPUA} automatically invokes the mixture fraction
+combustion model.
 \end{warning}
 
-
-\subsubsection{Heaters}
-
-You can create a simple heating vent by changing the temperature of the incoming air
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50. /
-\end{verbatim}
-\normalsize
-
-\noindent
-The {\ct VENT} with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C
-air at 1.2 m/s into the flow domain. Making {\ct VEL} positive would
-suck air out, in which case {\ct TMP\_FRONT} would not be necessary.
-
-\begin{warning}
-\noindent
-Note that if {\ct HRRPUA} or solid phase reaction parameters are
-specified, no velocity should be prescribed. The combustible gases
-are ejected at a velocity computed by FDS.
-\end{warning}
-
-
-\subsubsection{Total Mass Flux}
-
-Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at
-a solid surface. However, you may wish to control the mass flow rate (kg/s), as opposed to the volume flow
-rate (m$^3$/s), via the parameter {\ct MASS\_FLUX\_TOTAL}.
-{\ct MASS\_FLUX\_TOTAL} uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
-{\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
-for an outflow is adjusted based on the local density.
-\index{SURF!MASS\_FLUX\_TOTAL}
-
-
-\subsubsection{Louvered Vents}
-
-Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the
-incoming air stream.
-It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow.
-The normal component is specified with {\ct VEL} as described above. The tangential is prescribed
-via a pair of real numbers {\ct VEL\_T} representing the desired tangential
-velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='LOUVER', VEL=-1.2, VEL_T=0.5,-0.3 /
-\end{verbatim}
-\normalsize
-
-\noindent
-is a boundary condition for a louvered \index{louver}vent that pushes air into the
-space with a normal velocity of 1.2~m/s and a tangential velocity
-of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either
-the $y$ or $z$ direction, depending on what the normal direction is.
-
-In cases of limited mesh resolution, it may not be possible to describe a louvered vent or
-slot diffuser using {\ct VEL\_T} because there may not be enough mesh cells spanning the
-opening. In these cases, you might consider simply specifying a flat plate obstruction in front of the
-{\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral
-directions.
-
-\subsubsection{Jet Fans}
-\index{SURF!POROUS}
-
-Fans do not have to be mounted on a solid wall, like a supply or an exhaust fan.
-If you just want to blow gases in a particular direction, create a thin (zero cells thick)
-{\ct OBST}struction and apply to it, via {\ct SURF\_ID} only, a {\ct SURF} line that has
-the parameter {\ct POROUS=.TRUE.} along with the other velocity parameters described above.
-This allows hot, smokey gases to pass through the
-obstruction, much like a free-standing fan. These obstructions are merely
-flat plates, by necessity. The velocity {\ct VEL} associated with a
-{\ct POROUS} surface is meant to represent the velocity in the
-positive or negative coordinate direction, as indicated by its
-sign. {\bf This is different than the convention used when the {\ct SURF}
-is attached to a solid wall}.
-
-You may also want to construct a {\em shroud} around the fan using four flat plates arranged to form
-a short passageway that draws gases in one side and expels them out the other. The plate representing the
-fan itself can be positioned about halfway along the passage.
-
-\begin{warning}
-A {\ct SURF} with {\ct POROUS=.TRUE.} can only be applied to an {\ct OBST}ruction. It has no meaning when
-applied to a {\ct VENT}.
-\end{warning}
-
-
-\subsubsection{Fan Curves}
-
-The above strategies for specifying various parts of a ventilation system have not considered the fact
-that a real ventilation system is affected by pressure changes between compartments. This topic is taken up
-in Section~\ref{info:Fan_Curves}.
-
-
-
-\subsection{Species and Species Mass Flux Boundary Conditions}
-\index{SURF!MASS\_FLUX}
-\index{SURF!MASS\_FRACTION}
-
-
-There are two species boundary conditions that can be specified
-(see Section~\ref{info:SPEC} for details on inputting and using species).
-These boundary conditions are {\ct MASS\_FLUX(N)} and {\ct MASS\_FRACTION(N)}
-where {\ct N} refers to a given species is via its place in the
-input file. For example, the second listed species is {\ct N=2}.
-If a simple no-flux condition is desired at a solid wall, do not set
-anything. If the mass fraction of the {\ct N}th species is to be some
-value at a forced flow boundary ({\ct VEL} or {\ct MASS\_FLUX\_TOTAL}) set
-{\ct MASS\_FRACTION(N)} equal to the desired mass fraction on the appropriate
-{\ct SURF} line.
-If the mass flux of the {\ct N}th species is desired, set
-{\ct MASS\_FLUX(N)} instead of {\ct MASS\_FRACTION(N)}.
-If {\ct MASS\_FLUX(N)}
-is set, no {\ct VEL} should be set. It is automatically
-calculated based on the mass flux.
-The inputs {\ct MASS\_FLUX(N)} (and typically {\ct MASS\_FRACTION(N)}) should only be used
-for inflow boundary conditions.  {\ct MASS\_FLUX(N)} should be positive with
-units of kg/m$^2$/s.
-
-\begin{warning}
-\noindent
-Note that specifying {\ct MASS\_FRACTION(N)}, sets the "ghost" cell values for the species
-mass fractions.  Since the mass conservation equation is an advection-diffusion equation,
-if the specified velocity is small, then the diffusion term can dominate resulting in an unintended
-mass flux of species.  To obtain a guaranteed mass flux of a species, you should use {\ct MASS\_FLUX(N)}
-\end{warning}
-
-
-
-\subsection{Special Topic: Pressure Boundary Conditions}
-\label{info:pressure_boundary}
-\index{VENT!DYNAMIC\_PRESSURE}
-\index{VENT!PRESSURE\_RAMP}
-
-In some situations, it is more convenient to specify a pressure, rather than a velocity, at a boundary. Suppose, for example, that you are modeling the
-interior of a tunnel, and a wind is blowing at one of the portals that affects the overall flow within the tunnel. If (and only if) the portal is defined using an
-{\ct OPEN} vent, then the {\em dynamic pressure} at the boundary can be specified like this:
-
-\footnotesize
-\begin{verbatim}
-&VENT XB=..., SURF_ID='OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind' /
-&RAMP ID='wind', T= 0.0, F=1.0 /
-&RAMP ID='wind', T=30.0, F=0.5 /
-            .
-            .
-\end{verbatim}
-\normalsize
-
-\noindent
-The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cal H$ is specified as
-\begin{eqnarray}
-{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad  \mbox{(outgoing)}  \nonumber \\
-{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad                       \mbox{(incoming)}
-\end{eqnarray}
-where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary.
-The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
-need to ramp the pressure up or down starting at zero, like you do for various other ramps.
-The net effect of a positive dynamic pressure at an otherwise quiescent boundary is to
-drive a flow into the domain. However, a fire-driven flow of sufficient strength can push back against this incoming flow.
-
-\subsubsection{Example Case: {\bf pressure\_boundary}}
-
-The following lines, taken from the sample case, {\bf pressure\_boundary}, demonstrates how to do
-a time-dependent pressure boundary at the end of a tunnel. The tunnel is 10~m long, 1~m wide, 1~m tall
-with a fire in the middle and a pressure boundary imposed on the right side. The left side ({\ct XMIN}) is
-just an {\ct OPEN} boundary with no pressure specified. It is assumed to be at ambient pressure.
-
-\scriptsize
-\begin{verbatim}
-&VENT MB = 'XMIN' SURF_ID = 'OPEN' /
-&VENT MB = 'XMAX' SURF_ID = 'OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind_ramp' /
-&RAMP ID='wind_ramp', T= 0., F= 1. /
-&RAMP ID='wind_ramp', T=15., F= 1. /
-&RAMP ID='wind_ramp', T=16., F=-1. /
-\end{verbatim}\normalsize
-
-\noindent
-Figure~\ref{pressure_boundary} shows two snapshots from Smokeview taken before and after the time when the positive pressure is
-imposed at the right portal of a tunnel. The fire leans to the
-left because of the preferential flow in that direction. It leans back to the right when the positive pressure
-is directed to become negative.
-
-\begin{figure}[ht]
-\includegraphics[width=\textwidth]{FIGURES/pressure_boundary_left}
-\includegraphics[width=\textwidth]{FIGURES/pressure_boundary_right}
-\caption[Example of positive pressure at a tunnel entrance.]{Snapshots from the sample case {\bf pressure\_boundary}
-showing a fire in a tunnel leaning left, then right, due to a positive, then negative, pressure imposed at
-the right portal.}
-\label{pressure_boundary}
-\end{figure}
-
-
-
-\subsection{Special Topic: Fires and Flows in the Outdoors}
-\label{info:stratification}
-\index{outdoor fires}
-\index{atmospheric stratification}
-\index{SURF!PLE}
-\index{SURF!Z0}
-\index{SURF!PROFILE}
-\index{MISC!GROUND\_LEVEL}
-
-Simulating a fire in the outdoors is not much different than a fire
-indoors, but there are a few issues that need to be addressed.
-First, the velocity of the wind profile at any exterior boundary will be a top hat (constant) by default,
-but the parameter {\ct PROFILE} on the {\ct SURF} line
-can yield other profiles.
-For example, {\ct PROFILE='PARABOLIC'} produces a parabolic profile with
-{\ct VEL} being the maximum velocity,
-and {\ct 'ATMOSPHERIC'} produces a typical atmospheric wind
-profile of the form $u=u_0 (z/z_0)^p$. If an atmospheric profile is
-prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$.
-{\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather some
-height where the wind speed is measured, like an elevated weather station. It is assumed that
-the ground is located at $z=0$. To change this assumption, set {\ct GROUND\_LEVEL} on the {\ct MISC} line to be
-the appropriate value of $z$. Be careful not to apply an atmospheric velocity profile below {\ct GROUND\_LEVEL} or
-FDS will stop with an error.
-
-Another useful parameter for outdoor simulations is the temperature
-lapse rate of the atmosphere. Typically, in the first few hundred meters
-of the atmosphere, the temperature decreases several degrees Celsius
-per kilometer. These few degrees are important when considering the rise
-of smoke since the temperature of the smoke decreases rapidly as it
-rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the
-{\ct MISC} line in units of $^\circ$C/m. A negative sign indicates that the
-temperature {\em decreases} with height.
-This need only be set for outdoor calculations where the height of the
-domain is tens or hundreds of meters.
-The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
-
-By default, FDS assumes that the density and pressure decrease with height, regardless of the
-application or domain size. For most simulations, this effect is negligible, but it can be
-turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line.
 
 
 \subsection{Special Topic: A Radially-Spreading Fire}
 \label{info:spread}
-\index{radial fire spread}
-\index{SURF!RAMP\_Q}
-\index{SURF!HRRPUA}
 
 Sometimes it is desired that a fire spread radially at some specified
 rate. Rather than trying to design material properties
@@ -3486,368 +3325,24 @@ Some trial and error is probably required to find the {\ct SPREAD\_RATE} that
 leads to a desired time history of the heat release rate.
 
 
-\subsection{Special Topic: Non-Planar Walls and Targets}
-\index{non-planar geometries}
-\index{SURF!GEOMETRY}
-All obstructions in FDS are assumed to conform to the rectilinear
-mesh, and all bounding surfaces are assumed to be flat
-planes. However, many objects, like cables, pipes, and ducts, are not
-flat. Even though these objects have to be represented in FDS as
-``boxes,'' you can still perform the internal heat transfer
-calculation as if the object were really cylindrical or spherical. For
-example, the input lines:
-
-\footnotesize
-\begin{verbatim}
-&OBST XB=0.0,5.0,1.1,1.2,3.4,3.5, SURF_ID='CABLE' /
-&SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
-\end{verbatim} \normalsize
-
-\noindent
-can be used to model a power cable that is 5~m long, cylindrical in
-cross section, 2~cm in diameter. The heat transfer calculation is
-still one-dimensional; that is, it is assumed that there is a uniform
-heat flux all about the object. This can be somewhat confusing because
-the cable is represented as an obstruction of square cross section,
-with a separate heat transfer calculation performed at each face, and
-no communication among the four faces. Obviously, this is not an ideal
-way to do solid phase heat transfer, but it does provide a reasonable
-bounding surface temperature for the gas phase calculation. More
-detailed assessment of a cable would require a two or
-three-dimensional heat conduction calculation, which is not included
-in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
-
-
-
-
-
-
-
-\clearpage
-
-\section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
-\label{info:ZONE} \index{ZONE} \index{pressure leakage}
-
-The basic FDS equation set assumes pressure
-to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation, $\tp(\bx,t)$. Most
-often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced pressure field that
-FDS calculates at each time step. Originally (FDS v.~1-4), it was possible to create a single, sealed
-compartment whose walls conformed to the exterior of the computational domain. A fire or fan could
-increase (or decrease) the background pressure in this single compartment, and a leakage area could
-be defined between the compartment and the ambient exterior. Flow through the ``cracks'' was simply
-a function of the background pressure via the usual empirical rules.
-This idea has been generalized starting in FDS 5. Now, you can specify any number of sealed compartments within the computational
-domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose
-flow rates are tied to the pressure of the adjacent zones.
-
-\subsection{Specifying Pressure Zones}
-
-A pressure zone can by any region within the computational domain that is separated from the rest of the domain, or the exterior,
-by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is
-necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
-
-\footnotesize
-\begin{verbatim}
-&ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5 /
-\end{verbatim}
-\normalsize
-
-\noindent
-This means that the rectangular region, $0.3<x<1.2$, $0.4<y<2.9$, $0.3<z<4.5$, is assumed to be within a sealed compartment. There can be multiple {\ct ZONE}s
-declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file.
-By default, the exterior of the computational
-domain is ``Zone~0.'' If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be ``Zone~1.''
-
-There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the
-domain that is bordered by solid obstructions. If the sealed region is not rectangular, FDS will extend the specified {\ct ZONE} boundaries to
-conform to the non-rectangular domain.~\footnote{The extension of pressure zones to non-rectangular regions is a feature that started with
-FDS version 5.3.1.} It is possible to ``break'' pressure zones by removing
-obstructions between them.\footnote{The ability to open pressure zones became available in FDS starting with version 5.3.0. Prior versions prevented it by issuing an
-error statement.} An example of how to break pressure zones is given in Section~\ref{zone_break}.
-Second, pressure zones {\bf can} span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. Also, if the {\ct ZONE} does span multiple
-meshes, make sure that the specified rectangular coordinates do so as well. This allows FDS to determine the actual extent of the {\ct ZONE} independently for each
-mesh.
-
-Note that if you plan to have one zone open up to another via the removal of an obstruction, make sure that the coordinates of the two
-zones abut (i.e. touch) even if the one of the zones includes the solid obstruction that separates them. FDS recognizes that a zone boundary has been removed when
-two adjacent cells belonging to two different zones have no solid obstruction between them. It is recommended that you extend at least one
-of the zone boundaries {\em into} the solid obstruction separating the two zones. That way, when the obstruction is removed, the newly created
-gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at
-which point the zones will merge and no longer have distinct background pressures.
-
-
-\subsection{Leaks}
-\label{info:Leaks}
-
-The volume flow, $\dot{V}$, through a leak of area $A_L$ is given by
-\be  \dot{V}_{\hbox{\footnotesize leak}} = A_L \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
-where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and
-$\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
-to be 1. Leakage is inherently a subgrid-scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
-numerical mesh. It is sometimes possible to ``lump'' the leaks into a single mesh-resolvable hole, but this is problematic
-for two reasons. First, the leakage area rarely corresponds neatly to the area of a single mesh cell-sized hole. Second, the
-flow speeds through the hole can be large and cause numerical instabilities.
-
-A better way to handle leakage is by exploiting pressure zones. A pressure zone is a user-specified volume within the computational domain that is
-entirely surrounded by solid obstructions. For example, the interior of a closed room can be, and should be, declared a pressure zone. Leakage from one
-compartment to another is then designated on the input lines defining the individual pressure {\ct ZONE}s:
-
-\footnotesize
-\begin{verbatim}
-&ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5, LEAK_AREA(0)=0.0001 /
-&ZONE XB=2.3,5.8,1.4,2.9,6.8,9.7, LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
-\end{verbatim}
-\normalsize
-
-\noindent
-The first line designates a region of the computational domain to be ``Pressure Zone'' 1. Note that the order of the {\ct ZONE} lines is important; that is, the order
-implicitly defines Zone~1, Zone~2, {\em etc.}
-Zone 0 is by default the ambient pressure exterior.
-In this example, a leak exists between Zone 1 and the exterior Zone 0, and the area of the leak
-is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone 2 leaks to Zone 1 (and vis verse)
-with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be connected for a leak to occur.
-At least one of the obstructions that form the walls of Zone 1 must have the attribute
-{\ct LEAK\_PATH=1,0}, meaning that the leak between Zones 1 and 0 is uniformly distributed
-over solids defined with:
-\index{SURF!LEAK\_PATH}
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='whatever',..., LEAK_PATH=1,0 /
-\end{verbatim}
-\normalsize
-
-\noindent
-Likewise, the boundaries of Zone 1 and Zone 2 must include solids whose {\ct SURF} properties include {\ct LEAK\_PATH=1,2}, but these solids need not form a boundary between the
-two zones. The {\ct SURF}aces with the {\ct LEAK\_PATH} attribute lump all of the
-leakage over these areas. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant.
-
-
-\subsubsection{Example Case: {\bf pressure\_rise}}
-
-This example tests several basic features of FDS. A narrow channel, 3~m long, 0.002~m wide, and 1~m tall, has air injected at a rate of
-0.1~kg/m$^2$/s over an area of 0.2~m by 0.002~m for 60 s, with a linear ramp-up and ramp-down over 1 s. The total mass of air in the channel at the
-start is 0.00718~kg. The total mass of air injected is 0.00244~kg. The domain is assumed two-dimensional, the walls are adiabatic, and {\ct
-STRATIFICATION} is set to {\ct .FALSE.} simply to remove the slight change in pressure and density with height.
-The domain is divided into three meshes, each 1~m long and each with identical gridding.  We expect the pressure,
-temperature and density to rise during the 60~s injection period. Afterwards, the
-temperature, density, and pressure should remain constant, according to the equation of state.
-The figures below show the results of this calculation.  The density matches exactly showing
-that FDS is injecting the appropriate amount of mass. The steady state values of the pressure, density and temperature are consistent with
-the ideal values.
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{FIGURES/pressure_rise_T} &
-\includegraphics[height=2.2in]{FIGURES/pressure_rise_P} \\
-\includegraphics[height=2.2in]{FIGURES/pressure_rise_R} &
-\end{tabular*}
-\caption[Output of {\bf pressure\_rise} test case.]{Output of {\bf pressure\_rise} test case.}
-\label{pressure_rise}
-\end{figure}
-
-
-\subsubsection{Example Case: {\bf zone\_break}}
-
-In the
-example case called {\bf zone\_break}, three simple compartments are initially isolated from each other and from the ambient environment outside. Air
-is blown into compartment~1 at a constant rate for 5~s, increasing its pressure approximately 9500~Pa. At 10~s, compartment~1 is opened to compartment~2, decreasing the
-overall pressure in the two compartments to roughly one-third the original value because the volume of the combined pressure zone has been roughly tripled.
-At 15~s, the pressure is further decreased by opening a door to compartment~3, and, finally, at 20~s the pressure returns to ambient following the opening
-of a door to the outside. Figure~\ref{zone_break} displays the pressure within each compartment.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3.1in]{FIGURES/zone_break}
-\end{center}
-\caption[Output of {\bf zone\_break} test case.]{Output of {\bf zone\_break} test case.}
-\label{zone_break}
-\end{figure}
-
-\noindent
-Notice that the pressure within each compartment does not come to equilibrium instantaneously. Rather, a relaxation factor is applied by FDS to bring the zones
-into equilibrium over several seconds. This is done for several reasons. First, in reality doors and windows do not magically disappear as they do in FDS. It takes
-a finite amount of time to fully open them, and the slowing of the pressure increase/decrease is a simple way to simulate the effect.
-Second, relatively large pressure differences between zones wreak havoc with flow solvers, especially ones like FDS that
-use a low Mach number approximation. To maintain numerical stability, FDS gradually brings the pressures into equilibrium. This second point ought to be seen as a warning:
-
-\begin{warning}
-\noindent Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that
-are very important in such analyses. The zone breaking functionality described in this example is only intended to be used for relatively small pressure differences (<0.1~atm)
-between compartments. Real buildings cannot withstand substantially larger pressures anyway.
-\end{warning}
-
-
-
-\subsection{Fan Curves}
-\label{info:Fan_Curves}
-
-In Section~\ref{info:Velocity_BC} there is a discussion of velocity boundary conditions,
-in which a fan is modeled simply as a solid boundary that blows or
-sucks air, regardless of the surrounding pressure field. In reality, fans operate based on
-the pressure drop across the duct or manifold in which they are
-installed. A very simple ``fan curve'' is given by:
-\be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}} \;
-   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
-   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
-The volume flow in the absence of a pressure difference is given by the area of the duct times the velocity of the air.
-$A_{\hbox{\footnotesize duct}}$ is the area of the duct~(m$^2$), and $U_{\hbox{\footnotesize max}}$ is
-the air velocity~(m/s) in the absence of a pressure difference. The pressure difference, $\Delta p=p_1-p_2$, indicates the difference in
-pressure between the downstream compartment, or ``zone,'' and the upstream. The subscript 1 indicates downstream and 2 indicates upstream.
-The term, $\Delta p_{\hbox{\footnotesize max}}$, is the maximum
-pressure difference the fan can operate upon, and it is assumed to be a positive number. Figure~\ref{fig:Fan_Curve} displays a typical fan curve.
-
-\begin{figure}[ht!]
-\begin{center}
-\includegraphics[width=3.5in]{FIGURES/Fan_Curve}
-\caption[Example of a fan curve.]{Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}. Note that a volume flux greater than
-10 is brought about by a negative pressure difference; that is, when the downstream pressure is less than the upstream. Note also that when
-the pressure difference is greater than 500~Pa, the volume flow becomes negative; that is, the flow reverses.}
-\label{fig:Fan_Curve}
-\end{center}
-\end{figure}
-
-The velocity of the fan in the absence of a pressure difference, $U_{\hbox{\footnotesize max}}$, is
-specified via the parameter {\ct VEL} on the appropriate {\ct SURF}
-line. Alternatively, the volume flow rate, $A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}}$, can be specified using {\ct VOLUME\_FLUX}.
-Do not use both.  These parameters were already
-introduced in Section~\ref{info:SURF}. To simulate the behavior of a
-real fan, a few extra parameters need to be specified. To set $\Delta p_{\hbox{\footnotesize max}}$, the maximum operating over-pressure,
-add {\ct MAX\_PRESSURE} to the {\ct SURF} line. Note that {\ct MAX\_PRESSURE}
-should always be positive and in units of Pa.  If the pressure difference (downstream minus upstream)
-exceeds the specified {\ct MAX\_PRESSURE}, then there will be a backflow in the duct.
-\index{SURF!MAX\_PRESSURE}
-
-\begin{warning}
-Note that the rules governing the sign of {\ct VEL} or {\ct VOLUME\_FLUX} remain in force for fans that are subject to pressure differences between
-compartments. Simply note that the sign of either {\ct VEL} or {\ct VOLUME\_FLUX}
-defines ``upstream'' and ``downstream.'' Thus, the zone into which air is blown in the absence
-of a pressure difference is the downstream zone.
-\end{warning}
-
-\subsubsection{Example Case: {\bf fan\_test}}
-
-Here is an example how fans can be specified.  In it, two simple
-compartments share a common wall. Both compartments are considered as
-separate ``pressure zones.'' Two fans are mounted in the Partition
-Wall, blowing in opposite directions. The relevant input lines are:
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='BLOW LEFT',  POROUS=.TRUE., VEL=-0.2, DUCT_PATH=1,2, MAX_PRESSURE=1000. /
-&SURF ID='BLOW RIGHT', POROUS=.TRUE., VEL= 0.4, DUCT_PATH=2,1, MAX_PRESSURE=1000. /
-
-&ZONE XB=-3.0, 0.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 1
-&ZONE XB= 0.0, 3.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 2
-
-&OBST XB= 0.0, 0.0,-1.0, 1.0, 0.0, 2.0 / Partition Wall
-
-&HOLE XB=-0.1, 0.1,-0.1, 0.1, 0.4, 0.6 /
-&OBST XB= 0.0, 0.0,-0.1, 0.1, 0.4, 0.6, ..., SURF_ID='BLOW RIGHT', PERMIT_HOLE=.FALSE. /
-
-&HOLE XB=-0.1, 0.1,-0.1, 0.1, 1.4, 1.6 /
-&OBST XB= 0.0, 0.0,-0.1, 0.1, 1.4, 1.6, ..., SURF_ID='BLOW LEFT', PERMIT_HOLE=.FALSE. /
-\end{verbatim}
-\normalsize
-
-\noindent
-The volume flow through the fans is given by the expression:
-\be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
-U_{\hbox{\footnotesize max}} \;
-   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
-   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
-where $A_{\hbox{\footnotesize duct}}$ is the area of the duct~(both are 0.04~m$^2$), $U_{\hbox{\footnotesize max}}$ is the air velocity~(0.4~m/s from
-Zone~1 to Zone~2 and 0.2~m/s from Zone~2 to Zone~1), and $\Delta p_{\hbox{\footnotesize max}}$ is the maximum pressure difference the fan can operate
-upon (in this case both fans use 1000~Pa).
-
-In steady state, the volume flow from compartment to compartment (or Zone to Zone) should be equal and opposite in sign. \be (0.04 \; \hbox{m}^2)
-(0.4 \; \hbox{m/s})  \;
-   \sqrt{ \frac{ |p_2-p_1-1000 \; \hbox{Pa}|}{1000 \; \hbox{Pa}}  } =
-   (0.04 \; \hbox{m}^2) (0.2 \; \hbox{m/s})  \;
-   \sqrt{ \frac{ |p_1-p_2-1000 \; \hbox{Pa}|}{1000 \; \hbox{Pa}}  } \ee
-The solution is $p_2=300$~Pa and $p_1=-300$~Pa (see Fig.~\ref{fan_test}). Note that the sign of the Volume Flow in FDS has to do with whether the flow is moving in the plus or
-minus coordinate direction. This convention can make these types of calculations a bit tricky.
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.1in]{FIGURES/fan_test_Pressure} &
-\includegraphics[width=3.1in]{FIGURES/fan_test_Volume_Flow}
-\end{tabular*}
-\caption[Fan curve example.]{Pressure and volume flow for the {\bf fan\_test}.}
-\label{fan_test}
-\end{figure}
-
-Consider a few of the extra parameters. The attribute {\ct POROUS=.TRUE.} allows hot, smokey gases to pass through the
-obstructions that represent the fans. These obstructions are merely
-flat plates, by necessity. The velocity {\ct VEL} associated with a
-{\ct POROUS} surface is meant to represent the velocity in the
-positive or negative coordinate direction, as indicated by its
-sign. This is different than the convention used when the {\ct SURF}
-is assigned to a solid wall. The {\ct DUCT\_PATH} defines the pressure
-{\ct ZONE}s downstream and upstream of the fan, respectively. The fan
-represented by the the {\ct SURF} line {\ct ID='BLOW LEFT'}, for example, blows air {\em into} {\ct ZONE}~1
-and draws air {\em out of} {\ct ZONE}~2 in the absence of a pressure difference between the compartments. The negative value of {\ct VEL} indicates
-that the fan blows in the negative coordinate direction, into {\ct ZONE}~1 and out of {\ct ZONE}~2, and this is consistent with the order of the {\ct ZONE}s listed by {\ct DUCT\_PATH}.
-In short, {\ct DUCT\_PATH} and {\ct VEL} must be coordinated.
-
-The {\ct HOLE}s in the Partition Wall serve only to carve out space for the obstructions
-that represent the fans. Note the obstructions have zero thickness, as
-required by the {\ct POROUS} surface. The attribute {\ct PERMIT\_HOLE=.FALSE.} tells FDS not to reject the obstructions because
-they are embedded within the Partition Wall.
-
-
-\subsubsection{Example Cases: {\bf leak\_test} and {\bf leak\_test\_2}}
-
-In the following examples, both leaks and fans are demonstrated. A simple compartment (3.6~m by 2.4~m by 2.4~m) has a small fan at one end and
-one leak under the door at the other end. It is
-assumed for this example that the compartment is contained within a larger compartment that is perfectly sealed. The fan draws air into the
-compartment from the plenum space, increasing the pressure inside and decreasing it outside.  A steady state is achieved when the volume flow into
-and out of the compartment falls into balance.
-
-The volume flow rate of the fan is given by the ``fan curve'' \be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
-U_{\hbox{\footnotesize max}} \;
-   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
-   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
-where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.16$~m$^2$, $U_{\hbox{\scriptsize max}}=0.1$~m/s, and $\Delta
-p_{\hbox{\scriptsize max}}=1000$~Pa. The volume flow due to the leak is given by: \be \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}}
-\sqrt{ \frac{ 2 \Delta p}{ \rho_\infty} } \ee where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho_\infty=1.2$~kg/m$^3$. After 5~min the
-pressure difference is 938.2~Pa. The theoretical value, obtained by equating the fan and leak volume flow rates and solving for $\Delta_p$, is
-938.9~Pa. The slight difference is due to the fact that the solid boundaries within the interior of the computational domain admit a slight volume
-flux related to details of the numerical solver.
-
-Just for fun, we add another leak to the compartment, only this time the leak is to the exterior of the entire computational domain, an infinite void
-at ambient pressure. Now the fan flow rate ought to balance the sum of the flow rates from the two leaks. After 5~min, the pressure difference is
-935.2~Pa. The two cases are summarized in Fig.~\ref{leak_test}.
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{FIGURES/leak_test} &
-\includegraphics[height=2.2in]{FIGURES/leak_test_2}
-\end{tabular*}
-\caption[Pressure rise in sealed compartment.]{Output of the leak test cases.}
-\label{leak_test}
-\end{figure}
-
-
-
-
-
-
 
 
 \clearpage
 
 
 \section{Describing Real Materials: The \texorpdfstring{{\tt MATL}}{MATL} Namelist Group}
-\label{info:MATL}\index{MATL}\index{Material layers}
-\index{SURF!MATL\_ID}
-\index{SURF!THICKNESS}
+\label{info:MATL}
 
-A solid boundary can consist of multiple layers of different
+A solid boundary can consist of
+multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different
 materials, and each layer can consist of multiple material
-components. These combinations of layers and material components are
-specified on the {\ct SURF} line via the array called {\ct
-MATL\_ID(IL,IC)}. The argument {\ct IL} is an integer indicating the
+components.
+
+\subsection{Structure of Solid Boundaries}
+
+Material layers and components are
+specified on the {\ct SURF} line via the array called {\ct MATL\_ID(IL,IC)}.
+The argument {\ct IL} is an integer indicating the
 layer index, starting at 1, the layer at the exterior boundary. The
 argument {\ct IC} is an integer indicating the component index. For
 example, {\ct MATL\_ID(2,3)='BRICK'} indicates that the third material
@@ -3871,7 +3366,8 @@ materials are often listed as in the following example:
 \normalsize
 
 \noindent
-Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the materials in multiple layers, with each layer consisting of only a single
+Without arguments, the parameter {\ct MATL\_ID} is assumed to be a list of the materials in multiple layers,
+with each layer consisting of only a single
 material component.
 
 \begin{warning}
@@ -3885,17 +3381,10 @@ and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite face
 \end{warning}
 
 
-\begin{warning}
-\noindent
-The maximum number of material layers is 20. The maximum number of material components is 20.
-\end{warning}
-
 Mixtures of solid materials within the same layer can be defined using
 the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same
 two indices as the {\ct MATL\_ID} keyword. For example, if the
 brick layer contains some additional water, the input could look like this:
-\index{SURF!MATL\_MASS\_FRACTION}
-\index{SURF!MATL\_ID}
 
 \footnotesize
 \begin{verbatim}
@@ -3939,12 +3428,39 @@ filled with water. If the water is taken away, there is only about
 partially void wall, a higher density should be used for the pure
 brick.
 
+\subsubsection{Special Topic: Non-Planar Walls and Targets}
+
+All obstructions in FDS are assumed to conform to the rectilinear
+mesh, and all bounding surfaces are assumed to be flat
+planes. However, many objects, like cables, pipes, and ducts, are not
+flat. Even though these objects have to be represented in FDS as
+``boxes,'' you can still perform the internal heat transfer
+calculation as if the object were really cylindrical or spherical. For
+example, the input lines:
+
+\footnotesize
+\begin{verbatim}
+&OBST XB=0.0,5.0,1.1,1.2,3.4,3.5, SURF_ID='CABLE' /
+&SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
+\end{verbatim} \normalsize
+
+\noindent
+can be used to model a power cable that is 5~m long, cylindrical in
+cross section, 2~cm in diameter. The heat transfer calculation is
+still one-dimensional; that is, it is assumed that there is a uniform
+heat flux all about the object. This can be somewhat confusing because
+the cable is represented as an obstruction of square cross section,
+with a separate heat transfer calculation performed at each face, and
+no communication among the four faces. Obviously, this is not an ideal
+way to do solid phase heat transfer, but it does provide a reasonable
+bounding surface temperature for the gas phase calculation. More
+detailed assessment of a cable would require a two or
+three-dimensional heat conduction calculation, which is not included
+in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
+
+
 
 \subsection{Thermal Properties}
-\index{MATL!CONDUCTIVITY}
-\index{MATL!DENSITY}
-\index{MATL!SPECIFIC\_HEAT}
-\index{MATL!EMISSIVITY}
 
 For any solid material, specify its thermal
 {\ct CONDUCTIVITY} (W/m$\cdot$K), {\ct DENSITY} (kg/m$^3$),
@@ -4206,9 +3722,9 @@ the peak reaction rate occurs at the specified {\ct REFERENCE\_TEMPERATURE}.
    E &=& \frac{r_p}{Y_p} \, \frac{R \, T_p^2}{\dot{T}} \\
    A &=& \frac{r_p}{Y_p} \, e^{E/R \, T_p}
 \end{eqnarray}
-Note that $\nu_r$ is the yield of solid residue. 
+Note that $\nu_r$ is the yield of solid residue.
 Note also that $Y_p$ is the mass fraction (blue curve in Fig.~\ref{pyrolysis}) at the temperature where the reaction rate is its maximum. It is 0.4 by default and not
-adjustable. 
+adjustable.
 When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}.
 
 \begin{warning}
@@ -5193,150 +4709,634 @@ will depend upon the type of TABL and those requirements are provided in the app
 \end{warning}
 
 
+
+
+
+\chapter{Ventilation}
+
+This chapter mainly describes how to specify velocity boundary conditions. For fire applications, this is essentially how
+a ventilation system is modeled.
+
+
+\section{Simple Vents, Fans and Heaters}
+\index{Volume Flux} \index{Mass Flux}
+\index{SURF!VOLUME\_FLUX}
+\index{SURF!VEL}
+\label{info:Velocity_BC}
+
+For most applications, the ventilation system of a building is described in FDS using
+velocity {\em boundary conditions}. For example, fresh air can be blown into, and smoke can
+be drawn from, a compartment by specifying a velocity in the {\em normal} direction to a solid
+surface. However, there are various other facets of velocity boundary conditions that are described below.
+
+\subsection{Supply and Exhaust Vents}
+
+The easiest way to describe a supply or exhaust fan is to create a {\ct VENT} positioned on a solid surface with
+a {\ct SURF\_ID} with some form of specified velocity or volume flow rate.
+The normal component of velocity is usually specified directly via the parameter
+{\ct VEL}. If {\ct VEL} is negative, the flow is directed {\em into} the
+computational domain, {\em i.e.}, a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the
+domain, {\em i.e.}, an exhaust vent. For example, the lines
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='SUPPLY', VEL=-1.2, COLOR='BLUE' /
+&VENT XB=5.0,5.0,1.0,1.4,2.0,2.4, SURF_ID='SUPPLY' /
+\end{verbatim}
+\normalsize
+
+\noindent
+create a {\ct VENT} that {\em supplies} air at a velocity of 1.2~m/s through an area of nominally 0.16~m$^2$, depending on the
+realignment of the {\ct VENT} onto the FDS mesh. Regardless of the
+orientation of the plane $x=5$, the flow will be directed {\em into} the room because of the sign of {\ct VEL}.
+In this example the {\ct VENT} may not be exactly
+0.16~m$^2$ in area because it may not align exactly with the computational mesh. If this is the case then
+{\ct VOLUME\_FLUX} can be prescribed instead of {\ct VEL}. The units
+are m$^3$/s. If the flow is entering the computational domain, {\ct VOLUME\_FLUX}
+should be a negative number, the same convention as for {\ct VEL}. Note that a {\ct SURF}
+with a {\ct VOLUME\_FLUX} prescribed can be invoked by either a
+{\ct VENT} or an {\ct OBST}, but be aware that in the latter case, the resulting
+velocity on the face or faces of the obstruction will be given by the specified
+{\ct VOLUME\_FLUX} divided by the area of that particular face. For example:
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='SUPPLY', VOLUME_FLUX=-5.0, COLOR='GREEN' /
+&OBST XB=..., SURF_ID6='BRICK','SUPPLY','BRICK','BRICK','BRICK','BRICK' /
+\end{verbatim}
+\normalsize
+
+\noindent
+dictates that the forward $x$-facing surface of the obstruction is to have a velocity
+equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) flowing into the
+computational domain.
+
+\begin{warning}
+\noindent
+Note that either {\ct VEL} or {\ct VOLUME\_FLUX} should be prescribed,
+not both.  The choice depends on whether an exact velocity is desired at a
+given vent, or whether the given volume flux is desired.
+\end{warning}
+
+
+\subsection{Heaters}
+
+You can create a simple heating vent by changing the temperature of the incoming air
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50. /
+\end{verbatim}
+\normalsize
+
+\noindent
+The {\ct VENT} with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C
+air at 1.2 m/s into the flow domain. Making {\ct VEL} positive would
+suck air out, in which case {\ct TMP\_FRONT} would not be necessary.
+
+\begin{warning}
+\noindent
+Note that if {\ct HRRPUA} or solid phase reaction parameters are
+specified, no velocity should be prescribed. The combustible gases
+are ejected at a velocity computed by FDS.
+\end{warning}
+
+
+\subsection{Total Mass Flux}
+
+Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at
+a solid surface. However, you may wish to control the mass flow rate (kg/s), as opposed to the volume flow
+rate (m$^3$/s), via the parameter {\ct MASS\_FLUX\_TOTAL}.
+{\ct MASS\_FLUX\_TOTAL} uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
+{\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
+for an outflow is adjusted based on the local density.
+\index{SURF!MASS\_FLUX\_TOTAL}
+
+
+\subsection{Louvered Vents}
+
+Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the
+incoming air stream.
+It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow.
+The normal component is specified with {\ct VEL} as described above. The tangential is prescribed
+via a pair of real numbers {\ct VEL\_T} representing the desired tangential
+velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='LOUVER', VEL=-1.2, VEL_T=0.5,-0.3 /
+\end{verbatim}
+\normalsize
+
+\noindent
+is a boundary condition for a louvered \index{louver}vent that pushes air into the
+space with a normal velocity of 1.2~m/s and a tangential velocity
+of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either
+the $y$ or $z$ direction, depending on what the normal direction is.
+
+In cases of limited mesh resolution, it may not be possible to describe a louvered vent or
+slot diffuser using {\ct VEL\_T} because there may not be enough mesh cells spanning the
+opening. In these cases, you might consider simply specifying a flat plate obstruction in front of the
+{\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral
+directions.
+
+\subsection{Jet Fans}
+\index{SURF!POROUS}
+
+Fans do not have to be mounted on a solid wall, like a supply or an exhaust fan.
+If you just want to blow gases in a particular direction, create a thin (zero cells thick)
+{\ct OBST}struction and apply to it, via {\ct SURF\_ID} only, a {\ct SURF} line that has
+the parameter {\ct POROUS=.TRUE.} along with the other velocity parameters described above.
+This allows hot, smokey gases to pass through the
+obstruction, much like a free-standing fan. These obstructions are merely
+flat plates, by necessity. The velocity {\ct VEL} associated with a
+{\ct POROUS} surface is meant to represent the velocity in the
+positive or negative coordinate direction, as indicated by its
+sign. {\bf This is different than the convention used when the {\ct SURF}
+is attached to a solid wall}.
+
+You may also want to construct a {\em shroud} around the fan using four flat plates arranged to form
+a short passageway that draws gases in one side and expels them out the other. The plate representing the
+fan itself can be positioned about halfway along the passage.
+
+\begin{warning}
+A {\ct SURF} with {\ct POROUS=.TRUE.} can only be applied to an {\ct OBST}ruction. It has no meaning when
+applied to a {\ct VENT}.
+\end{warning}
+
+
+
+
+
+\section{Species and Species Mass Flux Boundary Conditions}
+\index{SURF!MASS\_FLUX}
+\index{SURF!MASS\_FRACTION}
+
+
+There are two species boundary conditions that can be specified
+(see Section~\ref{info:SPEC} for details on inputting and using species).
+These boundary conditions are {\ct MASS\_FLUX(N)} and {\ct MASS\_FRACTION(N)}
+where {\ct N} refers to a given species is via its place in the
+input file. For example, the second listed species is {\ct N=2}.
+If a simple no-flux condition is desired at a solid wall, do not set
+anything. If the mass fraction of the {\ct N}th species is to be some
+value at a forced flow boundary ({\ct VEL} or {\ct MASS\_FLUX\_TOTAL}) set
+{\ct MASS\_FRACTION(N)} equal to the desired mass fraction on the appropriate
+{\ct SURF} line.
+If the mass flux of the {\ct N}th species is desired, set
+{\ct MASS\_FLUX(N)} instead of {\ct MASS\_FRACTION(N)}.
+If {\ct MASS\_FLUX(N)}
+is set, no {\ct VEL} should be set. It is automatically
+calculated based on the mass flux.
+The inputs {\ct MASS\_FLUX(N)} (and typically {\ct MASS\_FRACTION(N)}) should only be used
+for inflow boundary conditions.  {\ct MASS\_FLUX(N)} should be positive with
+units of kg/m$^2$/s.
+
+\begin{warning}
+\noindent
+Note that specifying {\ct MASS\_FRACTION(N)}, sets the "ghost" cell values for the species
+mass fractions.  Since the mass conservation equation is an advection-diffusion equation,
+if the specified velocity is small, then the diffusion term can dominate resulting in an unintended
+mass flux of species.  To obtain a guaranteed mass flux of a species, you should use {\ct MASS\_FLUX(N)}
+\end{warning}
+
+
+
+\section{Special Topic: Pressure Boundary Conditions}
+\label{info:pressure_boundary}
+\index{VENT!DYNAMIC\_PRESSURE}
+\index{VENT!PRESSURE\_RAMP}
+
+In some situations, it is more convenient to specify a pressure, rather than a velocity, at a boundary. Suppose, for example, that you are modeling the
+interior of a tunnel, and a wind is blowing at one of the portals that affects the overall flow within the tunnel. If (and only if) the portal is defined using an
+{\ct OPEN} vent, then the {\em dynamic pressure} at the boundary can be specified like this:
+
+\footnotesize
+\begin{verbatim}
+&VENT XB=..., SURF_ID='OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind' /
+&RAMP ID='wind', T= 0.0, F=1.0 /
+&RAMP ID='wind', T=30.0, F=0.5 /
+            .
+            .
+\end{verbatim}
+\normalsize
+
+\noindent
+The use of a {\em dynamic pressure} boundary affects the FDS algorithm as follows.  At {\ct OPEN} boundaries, the hydrodynamic pressure (head) $\cal H$ is specified as
+\begin{eqnarray}
+{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty + {|\mathbf{u}|^2}/2 \quad  \mbox{(outgoing)}  \nonumber \\
+{\cal H} &=& \mbox{\ct DYNAMIC\_PRESSURE}/\rho_\infty \quad                       \mbox{(incoming)}
+\end{eqnarray}
+where $\rho_\infty$ is the ambient density and $\mathbf{u}$ is the most recent value of the velocity on the boundary.
+The {\ct PRESSURE\_RAMP} allows you to alter the pressure as a function of time. Note that you do not
+need to ramp the pressure up or down starting at zero, like you do for various other ramps.
+The net effect of a positive dynamic pressure at an otherwise quiescent boundary is to
+drive a flow into the domain. However, a fire-driven flow of sufficient strength can push back against this incoming flow.
+
+\subsubsection{Example Case: {\bf pressure\_boundary}}
+
+The following lines, taken from the sample case, {\bf pressure\_boundary}, demonstrates how to do
+a time-dependent pressure boundary at the end of a tunnel. The tunnel is 10~m long, 1~m wide, 1~m tall
+with a fire in the middle and a pressure boundary imposed on the right side. The left side ({\ct XMIN}) is
+just an {\ct OPEN} boundary with no pressure specified. It is assumed to be at ambient pressure.
+
+\scriptsize
+\begin{verbatim}
+&VENT MB = 'XMIN' SURF_ID = 'OPEN' /
+&VENT MB = 'XMAX' SURF_ID = 'OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind_ramp' /
+&RAMP ID='wind_ramp', T= 0., F= 1. /
+&RAMP ID='wind_ramp', T=15., F= 1. /
+&RAMP ID='wind_ramp', T=16., F=-1. /
+\end{verbatim}\normalsize
+
+\noindent
+Figure~\ref{pressure_boundary} shows two snapshots from Smokeview taken before and after the time when the positive pressure is
+imposed at the right portal of a tunnel. The fire leans to the
+left because of the preferential flow in that direction. It leans back to the right when the positive pressure
+is directed to become negative.
+
+\begin{figure}[ht]
+\includegraphics[width=\textwidth]{FIGURES/pressure_boundary_left}
+\includegraphics[width=\textwidth]{FIGURES/pressure_boundary_right}
+\caption[Example of positive pressure at a tunnel entrance.]{Snapshots from the sample case {\bf pressure\_boundary}
+showing a fire in a tunnel leaning left, then right, due to a positive, then negative, pressure imposed at
+the right portal.}
+\label{pressure_boundary}
+\end{figure}
+
+
+
+\section{Special Topic: Fires and Flows in the Outdoors}
+\label{info:stratification}
+\index{outdoor fires}
+\index{atmospheric stratification}
+\index{SURF!PLE}
+\index{SURF!Z0}
+\index{SURF!PROFILE}
+\index{MISC!GROUND\_LEVEL}
+
+Simulating a fire in the outdoors is not much different than a fire
+indoors, but there are a few issues that need to be addressed.
+First, the velocity of the wind profile at any exterior boundary will be a top hat (constant) by default,
+but the parameter {\ct PROFILE} on the {\ct SURF} line
+can yield other profiles.
+For example, {\ct PROFILE='PARABOLIC'} produces a parabolic profile with
+{\ct VEL} being the maximum velocity,
+and {\ct 'ATMOSPHERIC'} produces a typical atmospheric wind
+profile of the form $u=u_0 (z/z_0)^p$. If an atmospheric profile is
+prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$.
+{\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather some
+height where the wind speed is measured, like an elevated weather station. It is assumed that
+the ground is located at $z=0$. To change this assumption, set {\ct GROUND\_LEVEL} on the {\ct MISC} line to be
+the appropriate value of $z$. Be careful not to apply an atmospheric velocity profile below {\ct GROUND\_LEVEL} or
+FDS will stop with an error.
+
+Another useful parameter for outdoor simulations is the temperature
+lapse rate of the atmosphere. Typically, in the first few hundred meters
+of the atmosphere, the temperature decreases several degrees Celsius
+per kilometer. These few degrees are important when considering the rise
+of smoke since the temperature of the smoke decreases rapidly as it
+rises. The {\ct LAPSE\_RATE} of the atmosphere can be specified on the
+{\ct MISC} line in units of $^\circ$C/m. A negative sign indicates that the
+temperature {\em decreases} with height.
+This need only be set for outdoor calculations where the height of the
+domain is tens or hundreds of meters.
+The default value of the {\ct LAPSE\_RATE} is 0~$^\circ$C/m.
+
+By default, FDS assumes that the density and pressure decrease with height, regardless of the
+application or domain size. For most simulations, this effect is negligible, but it can be
+turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line.
+
+
+\section{Tangential Velocity Boundary Conditions at Solid Surfaces}
+\label{info:WALL_MODEL}
+
+As a gas flows past a solid obstruction, it ``sticks'' to the surface and forms a boundary layer. Ideally,
+the gas velocity at the surface is zero, and it increases rapidly through a boundary layer that is only a few
+millimeters thick to its ``free-stream''
+value. In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an
+empirical model is used to represent its effect on the overall flow field.
+For a DNS (Direct Numerical Simulation), this discussion is moot. The inner-wall ``ghost'' cell velocities are
+set so that the velocity at the wall surface is zero. In other words, the velocity gradient at the wall is computed directly from
+the resolved velocity vectors near the wall. For an LES (Large Eddy Simulation), the Werner-Wengle wall model is applied. See
+the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for details.
+
+\begin{warning}
+\noindent
+The parameter {\ct SLIP\_FACTOR} is no longer used to set the tangential velocity boundary condition, as of FDS version 5.4.0. To force
+a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line. To force a no-slip boundary condition,
+set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line. Otherwise, no parameters need be set -- the appropriate wall model will be applied, depending on
+whether the calculation is a DNS or LES.
+\end{warning}
+
+
 \clearpage
 
-\section{Coloring Obstructions, Vents, Surfaces and Meshes}
-\label{info:colors}\index{Colors}
-\index{SURF!COLOR}
-\index{SURF!RGB}
-Colors for many items within FDS can be prescribed in two ways; a triplet of
-integers after keyword {\ct RGB} or one of many {\ct COLOR} name character strings.
+\section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
+\label{info:ZONE} \index{ZONE} \index{pressure leakage}
 
-The three {\ct RGB} integer numbers range from 0 to 255, indicating the amount of Red, Green and Blue
-that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name EXACTLY as it
-is listed in the color tables here in this document and on the FDS website.
+The basic FDS equation set assumes pressure
+to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation, $\tp(\bx,t)$. Most
+often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced pressure field that
+FDS calculates at each time step. Originally (FDS v.~1-4), it was possible to create a single, sealed
+compartment whose walls conformed to the exterior of the computational domain. A fire or fan could
+increase (or decrease) the background pressure in this single compartment, and a leakage area could
+be defined between the compartment and the ambient exterior. Flow through the ``cracks'' was simply
+a function of the background pressure via the usual empirical rules.
+This idea has been generalized starting in FDS 5. Now, you can specify any number of sealed compartments within the computational
+domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose
+flow rates are tied to the pressure of the adjacent zones.
 
-Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names
-for a variety of colors. A complete listing of all 500+ colors that can be
-specified by name after the {\ct COLOR} keyword is available on the FDS website.
-If the {\ct COLOR} name is not listed in the table on the website, then that name does not exist to FDS.
+\subsection{Specifying Pressure Zones}
 
-It is highly recommended that colors be assigned to surfaces via the {\ct SURF} line because as
-the geometries of FDS simulations become more complex, it is very useful
-to use color as a spot check to determine if the desired
-surface properties have been assigned throughout the room or building under study.
+A pressure zone can by any region within the computational domain that is separated from the rest of the domain, or the exterior,
+by solid obstructions. There is currently no algorithm within FDS to identify these zones based solely on your specified obstructions. Consequently, it is
+necessary that you identify these zones explicitly in the input file. The basic syntax for a pressure {\ct ZONE} is:
 
-For example, if you desire that all surfaces associated with a
-given {\ct SURF} line be colored the same way, prescribe a triplet of
-integers called {\ct RGB} on the {\ct SURF} line. The following {\ct SURF} line;
 \footnotesize
 \begin{verbatim}
-&SURF ID='UPHOLSTERY',...,RGB=0,255,0 /
+&ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5 /
 \end{verbatim}
 \normalsize
-will cause the furnishings with a ``SURF'' of ``UPHOLSTERY'' to be colored green in Smokeview.
-It is best to avoid using the primary colors because these same colors are
-used by Smokeview to draw color contours.
 
-Obstructions and vents may be colored individually (over-riding the
-{\ct SURF} line's {\ct RGB}) by specifying {\ct COLOR} value to any of
-the listed names in Table~\ref{tab:colors} or {\ct 'INVISIBLE'} on
-the respective {\ct OBST} or {\ct VENT} line. Using {\ct 'INVISIBLE'}
-causes the vent or obstruction to not be drawn.
+\noindent
+This means that the rectangular region, $0.3<x<1.2$, $0.4<y<2.9$, $0.3<z<4.5$, is assumed to be within a sealed compartment. There can be multiple {\ct ZONE}s
+declared. The indices of the zones, which are required for the specification of leaks and fans, are determined simply by the order in which they are specified in the input file.
+By default, the exterior of the computational
+domain is ``Zone~0.'' If there are no {\ct OPEN} boundaries, the entire computational domain will be assumed to be ``Zone~1.''
 
-Colors may also be specified using the integer triplet {\ct RGB} on an {\ct OBST} or {\ct VENT} line to gain
-a wider color palette. The use of {\ct RGB} is preferable, especially
-to create colors that do not clash with the pastel colors used to
-show temperatures, concentrations, {\em etc.} See Table \ref{tab:colors}
-for a list of color names and RGB values.
+There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the
+domain that is bordered by solid obstructions. If the sealed region is not rectangular, FDS will extend the specified {\ct ZONE} boundaries to
+conform to the non-rectangular domain.~\footnote{The extension of pressure zones to non-rectangular regions is a feature that started with
+FDS version 5.3.1.} It is possible to ``break'' pressure zones by removing
+obstructions between them.\footnote{The ability to open pressure zones became available in FDS starting with version 5.3.0. Prior versions prevented it by issuing an
+error statement.} An example of how to break pressure zones is given in Section~\ref{zone_break}.
+Second, pressure zones {\bf can} span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. Also, if the {\ct ZONE} does span multiple
+meshes, make sure that the specified rectangular coordinates do so as well. This allows FDS to determine the actual extent of the {\ct ZONE} independently for each
+mesh.
+
+Note that if you plan to have one zone open up to another via the removal of an obstruction, make sure that the coordinates of the two
+zones abut (i.e. touch) even if the one of the zones includes the solid obstruction that separates them. FDS recognizes that a zone boundary has been removed when
+two adjacent cells belonging to two different zones have no solid obstruction between them. It is recommended that you extend at least one
+of the zone boundaries {\em into} the solid obstruction separating the two zones. That way, when the obstruction is removed, the newly created
+gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at
+which point the zones will merge and no longer have distinct background pressures.
 
 
-\begin{table}[p]
+\subsection{Leaks}
+\label{info:Leaks}
+
+The volume flow, $\dot{V}$, through a leak of area $A_L$ is given by
+\be  \dot{V}_{\hbox{\footnotesize leak}} = A_L \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
+where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and
+$\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
+to be 1. Leakage is inherently a subgrid-scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
+numerical mesh. It is sometimes possible to ``lump'' the leaks into a single mesh-resolvable hole, but this is problematic
+for two reasons. First, the leakage area rarely corresponds neatly to the area of a single mesh cell-sized hole. Second, the
+flow speeds through the hole can be large and cause numerical instabilities.
+
+A better way to handle leakage is by exploiting pressure zones. A pressure zone is a user-specified volume within the computational domain that is
+entirely surrounded by solid obstructions. For example, the interior of a closed room can be, and should be, declared a pressure zone. Leakage from one
+compartment to another is then designated on the input lines defining the individual pressure {\ct ZONE}s:
+
+\footnotesize
+\begin{verbatim}
+&ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5, LEAK_AREA(0)=0.0001 /
+&ZONE XB=2.3,5.8,1.4,2.9,6.8,9.7, LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
+\end{verbatim}
+\normalsize
+
+\noindent
+The first line designates a region of the computational domain to be ``Pressure Zone'' 1. Note that the order of the {\ct ZONE} lines is important; that is, the order
+implicitly defines Zone~1, Zone~2, {\em etc.}
+Zone 0 is by default the ambient pressure exterior.
+In this example, a leak exists between Zone 1 and the exterior Zone 0, and the area of the leak
+is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone 2 leaks to Zone 1 (and vis verse)
+with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be connected for a leak to occur.
+At least one of the obstructions that form the walls of Zone 1 must have the attribute
+{\ct LEAK\_PATH=1,0}, meaning that the leak between Zones 1 and 0 is uniformly distributed
+over solids defined with:
+\index{SURF!LEAK\_PATH}
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='whatever',..., LEAK_PATH=1,0 /
+\end{verbatim}
+\normalsize
+
+\noindent
+Likewise, the boundaries of Zone 1 and Zone 2 must include solids whose {\ct SURF} properties include {\ct LEAK\_PATH=1,2}, but these solids need not form a boundary between the
+two zones. The {\ct SURF}aces with the {\ct LEAK\_PATH} attribute lump all of the
+leakage over these areas. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant.
+
+
+\subsubsection{Example Case: {\bf pressure\_rise}}
+
+This example tests several basic features of FDS. A narrow channel, 3~m long, 0.002~m wide, and 1~m tall, has air injected at a rate of
+0.1~kg/m$^2$/s over an area of 0.2~m by 0.002~m for 60 s, with a linear ramp-up and ramp-down over 1 s. The total mass of air in the channel at the
+start is 0.00718~kg. The total mass of air injected is 0.00244~kg. The domain is assumed two-dimensional, the walls are adiabatic, and {\ct
+STRATIFICATION} is set to {\ct .FALSE.} simply to remove the slight change in pressure and density with height.
+The domain is divided into three meshes, each 1~m long and each with identical gridding.  We expect the pressure,
+temperature and density to rise during the 60~s injection period. Afterwards, the
+temperature, density, and pressure should remain constant, according to the equation of state.
+The figures below show the results of this calculation.  The density matches exactly showing
+that FDS is injecting the appropriate amount of mass. The steady state values of the pressure, density and temperature are consistent with
+the ideal values.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{FIGURES/pressure_rise_T} &
+\includegraphics[height=2.2in]{FIGURES/pressure_rise_P} \\
+\includegraphics[height=2.2in]{FIGURES/pressure_rise_R} &
+\end{tabular*}
+\caption[Output of {\bf pressure\_rise} test case.]{Output of {\bf pressure\_rise} test case.}
+\label{pressure_rise}
+\end{figure}
+
+
+\subsubsection{Example Case: {\bf zone\_break}}
+
+In the
+example case called {\bf zone\_break}, three simple compartments are initially isolated from each other and from the ambient environment outside. Air
+is blown into compartment~1 at a constant rate for 5~s, increasing its pressure approximately 9500~Pa. At 10~s, compartment~1 is opened to compartment~2, decreasing the
+overall pressure in the two compartments to roughly one-third the original value because the volume of the combined pressure zone has been roughly tripled.
+At 15~s, the pressure is further decreased by opening a door to compartment~3, and, finally, at 20~s the pressure returns to ambient following the opening
+of a door to the outside. Figure~\ref{zone_break} displays the pressure within each compartment.
+
+\begin{figure}[ht]
 \begin{center}
-\caption{Sample of Color Definitions (A complete list is included on the website) }
-\label{tab:colors}
-\vspace{0.1in}
-\begin{tabular}{|c|c|c|c|c|c||c|c|c|c|}
-\hline
-Name & &  R  & G & B & Name & & R & G & B   \\ \hline \hline
-{\ct AQUAMARINE} & \textcolor{AQUAMARINE} {$\blacksquare$} & 127& 255& 212& {\ct MAROON} &  \textcolor{MAROON} {$\blacksquare$} & 128& 0& 0  \\ \hline
-{\ct ANTIQUE WHITE} & \textcolor{ANTIQUE WHITE} {$\blacksquare$} & 250& 235& 215& {\ct MELON} &  \textcolor{MELON} {$\blacksquare$} & 227& 168& 105  \\ \hline
-{\ct BEIGE} & \textcolor{BEIGE} {$\blacksquare$} & 245& 245& 220& {\ct MIDNIGHT BLUE} &  \textcolor{MIDNIGHT BLUE} {$\blacksquare$} & 25& 25& 112  \\ \hline
-{\ct BLACK} & \textcolor{BLACK} {$\blacksquare$} & 0& 0& 0& {\ct MINT} &  \textcolor{MINT} {$\blacksquare$} & 189& 252& 201  \\ \hline
-{\ct BLUE} & \textcolor{BLUE} {$\blacksquare$} & 0& 0& 255& {\ct NAVY} &  \textcolor{NAVY} {$\blacksquare$} & 0& 0& 128  \\ \hline
-{\ct BLUE VIOLET} & \textcolor{BLUE VIOLET} {$\blacksquare$} & 138& 43& 226& {\ct OLIVE} &  \textcolor{OLIVE} {$\blacksquare$} & 128& 128& 0  \\ \hline
-{\ct BRICK} & \textcolor{BRICK} {$\blacksquare$} & 156& 102& 31& {\ct OLIVE DRAB} &  \textcolor{OLIVE DRAB} {$\blacksquare$} & 107& 142& 35  \\ \hline
-{\ct BROWN} & \textcolor{BROWN} {$\blacksquare$} & 165& 42& 42& {\ct ORANGE} &  \textcolor{ORANGE} {$\blacksquare$} & 255& 128& 0  \\ \hline
-{\ct BURNT SIENNA} & \textcolor{BURNT SIENNA} {$\blacksquare$} & 138& 54& 15& {\ct ORANGE RED} &  \textcolor{ORANGE RED} {$\blacksquare$} & 255& 69& 0  \\ \hline
-{\ct BURNT UMBER} & \textcolor{BURNT UMBER} {$\blacksquare$} & 138& 51& 36& {\ct ORCHID} &  \textcolor{ORCHID} {$\blacksquare$} & 218& 112& 214  \\ \hline
-{\ct CADET BLUE} & \textcolor{CADET BLUE} {$\blacksquare$} & 95& 158& 160& {\ct PINK} &  \textcolor{PINK} {$\blacksquare$} & 255& 192& 203  \\ \hline
-{\ct CHOCOLATE} & \textcolor{CHOCOLATE} {$\blacksquare$} & 210& 105& 30& {\ct POWDER BLUE} &  \textcolor{POWDER BLUE} {$\blacksquare$} & 176& 224& 230  \\ \hline
-{\ct COBALT} & \textcolor{COBALT} {$\blacksquare$} & 61& 89& 171& {\ct PURPLE} &  \textcolor{PURPLE} {$\blacksquare$} & 128& 0& 128  \\ \hline
-{\ct CORAL} & \textcolor{CORAL} {$\blacksquare$} & 255& 127& 80& {\ct RASPBERRY} &  \textcolor{RASPBERRY} {$\blacksquare$} & 135& 38& 87  \\ \hline
-{\ct CYAN} & \textcolor{CYAN} {$\blacksquare$} & 0& 255& 255& {\ct RED} &  \textcolor{RED} {$\blacksquare$} & 255& 0& 0  \\ \hline
-{\ct DIMGRAY } & \textcolor{DIMGRAY } {$\blacksquare$} & 105& 105& 105& {\ct ROYAL BLUE} &  \textcolor{ROYAL BLUE} {$\blacksquare$} & 65& 105& 225  \\ \hline
-{\ct EMERALD GREEN} & \textcolor{EMERALD GREEN} {$\blacksquare$} & 0& 201& 87& {\ct SALMON} &  \textcolor{SALMON} {$\blacksquare$} & 250& 128& 114  \\ \hline
-{\ct FIREBRICK} & \textcolor{FIREBRICK} {$\blacksquare$} & 178& 34& 34& {\ct SANDY BROWN} &  \textcolor{SANDY BROWN} {$\blacksquare$} & 244& 164& 96  \\ \hline
-{\ct FLESH} & \textcolor{FLESH} {$\blacksquare$} & 255& 125& 64& {\ct SEA GREEN} &  \textcolor{SEA GREEN} {$\blacksquare$} & 84& 255& 159  \\ \hline
-{\ct FOREST GREEN} & \textcolor{FOREST GREEN} {$\blacksquare$} & 34& 139& 34& {\ct SEPIA} &  \textcolor{SEPIA} {$\blacksquare$} & 94& 38& 18  \\ \hline
-{\ct GOLD } & \textcolor{GOLD } {$\blacksquare$} & 255& 215& 0& {\ct SIENNA} &  \textcolor{SIENNA} {$\blacksquare$} & 160& 82& 45  \\ \hline
-{\ct GOLDENROD} & \textcolor{GOLDENROD} {$\blacksquare$} & 218& 165& 32& {\ct SILVER} &  \textcolor{SILVER} {$\blacksquare$} & 192& 192& 192  \\ \hline
-{\ct GRAY} & \textcolor{GRAY} {$\blacksquare$} & 128& 128& 128& {\ct SKY BLUE} &  \textcolor{SKY BLUE} {$\blacksquare$} & 135& 206& 235  \\ \hline
-{\ct GREEN} & \textcolor{GREEN} {$\blacksquare$} & 0& 255& 0& {\ct SLATEBLUE} &  \textcolor{SLATEBLUE} {$\blacksquare$} & 106& 90& 205  \\ \hline
-{\ct GREEN YELLOW} & \textcolor{GREEN YELLOW} {$\blacksquare$} & 173& 255& 47& {\ct SLATE GRAY} &  \textcolor{SLATE GRAY} {$\blacksquare$} & 112& 128& 144  \\ \hline
-{\ct HONEYDEW} & \textcolor{HONEYDEW} {$\blacksquare$} & 240& 255& 240& {\ct SPRING GREEN} &  \textcolor{SPRING GREEN} {$\blacksquare$} & 0& 255& 127  \\ \hline
-{\ct HOT PINK} & \textcolor{HOT PINK} {$\blacksquare$} & 255& 105& 180& {\ct STEEL BLUE} &  \textcolor{STEEL BLUE} {$\blacksquare$} & 70& 130& 180  \\ \hline
-{\ct INDIAN RED} & \textcolor{INDIAN RED} {$\blacksquare$} & 205& 92& 92& {\ct TAN} &  \textcolor{TAN} {$\blacksquare$} & 210& 180& 140  \\ \hline
-{\ct INDIGO} & \textcolor{INDIGO} {$\blacksquare$} & 75& 0& 130& {\ct TEAL} &  \textcolor{TEAL} {$\blacksquare$} & 0& 128& 128  \\ \hline
-{\ct IVORY} & \textcolor{IVORY} {$\blacksquare$} & 255& 255& 240& {\ct THISTLE} &  \textcolor{THISTLE} {$\blacksquare$} & 216& 191& 216  \\ \hline
-{\ct IVORY BLACK} & \textcolor{IVORY BLACK} {$\blacksquare$} & 41& 36& 33& {\ct TOMATO } &  \textcolor{TOMATO } {$\blacksquare$} & 255& 99& 71  \\ \hline
-{\ct KELLY GREEN} & \textcolor{KELLY GREEN} {$\blacksquare$} & 0& 128& 0& {\ct TURQUOISE} &  \textcolor{TURQUOISE} {$\blacksquare$} & 64& 224& 208  \\ \hline
-{\ct KHAKI} & \textcolor{KHAKI} {$\blacksquare$} & 240& 230& 140& {\ct VIOLET} &  \textcolor{VIOLET} {$\blacksquare$} & 238& 130& 238  \\ \hline
-{\ct LAVENDER} & \textcolor{LAVENDER} {$\blacksquare$} & 230& 230& 250& {\ct VIOLET RED} &  \textcolor{VIOLET RED} {$\blacksquare$} & 208& 32& 144  \\ \hline
-{\ct LIME GREEN} & \textcolor{LIME GREEN} {$\blacksquare$} & 50& 205& 50& {\ct WHITE} &  \textcolor{WHITE} {$\blacksquare$} & 255& 255& 255  \\ \hline
-{\ct MAGENTA} & \textcolor{MAGENTA} {$\blacksquare$} & 255& 0& 255& {\ct YELLOW} &  \textcolor{YELLOW} {$\blacksquare$} & 255& 255& 0  \\ \hline
-\hline
-\end{tabular}
+\includegraphics[width=3.1in]{FIGURES/zone_break}
 \end{center}
-\end{table}
+\caption[Output of {\bf zone\_break} test case.]{Output of {\bf zone\_break} test case.}
+\label{zone_break}
+\end{figure}
+
+\noindent
+Notice that the pressure within each compartment does not come to equilibrium instantaneously. Rather, a relaxation factor is applied by FDS to bring the zones
+into equilibrium over several seconds. This is done for several reasons. First, in reality doors and windows do not magically disappear as they do in FDS. It takes
+a finite amount of time to fully open them, and the slowing of the pressure increase/decrease is a simple way to simulate the effect.
+Second, relatively large pressure differences between zones wreak havoc with flow solvers, especially ones like FDS that
+use a low Mach number approximation. To maintain numerical stability, FDS gradually brings the pressures into equilibrium. This second point ought to be seen as a warning:
+
+\begin{warning}
+\noindent Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that
+are very important in such analyses. The zone breaking functionality described in this example is only intended to be used for relatively small pressure differences (<0.1~atm)
+between compartments. Real buildings cannot withstand substantially larger pressures anyway.
+\end{warning}
 
 
-\subsection{Texture Mapping}
-\label{info:texture_map}
-\index{Surface Texture Maps}
-\index{SURF!TEXTURE\_MAP}
-There are various ways of prescribing the color of various objects
-within the computational domain, but there is also a way of pasting
-images onto the obstructions for the purpose of making the Smokeview
-images more realistic. This technique is known as ``texture mapping.''
-For example, to apply a wood paneling image to a wall,
-add to the {\ct SURF} line defining the physical properties of the
-paneling the text
+
+\subsection{Fan Curves}
+\label{info:Fan_Curves}
+
+In Section~\ref{info:Velocity_BC} there is a discussion of velocity boundary conditions,
+in which a fan is modeled simply as a solid boundary that blows or
+sucks air, regardless of the surrounding pressure field. In reality, fans operate based on
+the pressure drop across the duct or manifold in which they are
+installed. A very simple ``fan curve'' is given by:
+\be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}} \;
+   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
+   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
+The volume flow in the absence of a pressure difference is given by the area of the duct times the velocity of the air.
+$A_{\hbox{\footnotesize duct}}$ is the area of the duct~(m$^2$), and $U_{\hbox{\footnotesize max}}$ is
+the air velocity~(m/s) in the absence of a pressure difference. The pressure difference, $\Delta p=p_1-p_2$, indicates the difference in
+pressure between the downstream compartment, or ``zone,'' and the upstream. The subscript 1 indicates downstream and 2 indicates upstream.
+The term, $\Delta p_{\hbox{\footnotesize max}}$, is the maximum
+pressure difference the fan can operate upon, and it is assumed to be a positive number. Figure~\ref{fig:Fan_Curve} displays a typical fan curve.
+
+\begin{figure}[ht!]
+\begin{center}
+\includegraphics[width=3.5in]{FIGURES/Fan_Curve}
+\caption[Example of a fan curve.]{Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}.
+Note that a volume flux greater than
+10 is brought about by a negative pressure difference; that is, when the downstream pressure is less than the upstream. Note also that when
+the pressure difference is greater than 500~Pa, the volume flow becomes negative; that is, the flow reverses.}
+\label{fig:Fan_Curve}
+\end{center}
+\end{figure}
+
+The velocity of the fan in the absence of a pressure difference, $U_{\hbox{\footnotesize max}}$, is
+specified via the parameter {\ct VEL} on the appropriate {\ct SURF}
+line. Alternatively, the volume flow rate, $A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}}$, can be specified using {\ct VOLUME\_FLUX}.
+Do not use both.  These parameters were already
+introduced in Section~\ref{info:SURF}. To simulate the behavior of a
+real fan, a few extra parameters need to be specified. To set $\Delta p_{\hbox{\footnotesize max}}$, the maximum operating over-pressure,
+add {\ct MAX\_PRESSURE} to the {\ct SURF} line. Note that {\ct MAX\_PRESSURE}
+should always be positive and in units of Pa.  If the pressure difference (downstream minus upstream)
+exceeds the specified {\ct MAX\_PRESSURE}, then there will be a backflow in the duct.
+\index{SURF!MAX\_PRESSURE}
+
+\begin{warning}
+Note that the rules governing the sign of {\ct VEL} or {\ct VOLUME\_FLUX} remain in force for fans that are subject to pressure differences between
+compartments. Simply note that the sign of either {\ct VEL} or {\ct VOLUME\_FLUX}
+defines ``upstream'' and ``downstream.'' Thus, the zone into which air is blown in the absence
+of a pressure difference is the downstream zone.
+\end{warning}
+
+\subsubsection{Example Case: {\bf fan\_test}}
+
+Here is an example how fans can be specified.  In it, two simple
+compartments share a common wall. Both compartments are considered as
+separate ``pressure zones.'' Two fans are mounted in the Partition
+Wall, blowing in opposite directions. The relevant input lines are:
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='wood paneling',...,TEXTURE_MAP='paneling.jpg',TEXTURE_WIDTH=1.,
-      TEXTURE_HEIGHT=2. /
-\end{verbatim}
-\normalsize
-Assuming that a JPEG file called {\bf paneling.jpg} exists in the
-working directory, Smokeview should read it and display the image
-wherever the paneling is used (SGI Users: use rgb files instead of jpg).
-Note that the image does not appear when Smokeview is first invoked. It is an option controlled by
-the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH}
-and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image.
-\index{SURF!TEXTURE\_HEIGHT} \index{SURF!TEXTURE\_WIDTH} In this case,
-the JPEG image is of a 1 m wide by 2 m high piece of
-paneling. Smokeview replicates the image as often as necessary to
-make it appear that the paneling is applied where desired.
-Consider carefully how the image repeats itself when
-applied in a scene. If the image has no obvious pattern, there is no
-problem with the image being repeated. If the image has an obvious
-direction, the real triplet {\ct TEXTURE\_ORIGIN} should be added to
-the {\ct VENT} or {\ct OBST} line to which a texture map
-should be applied. For example,
+&SURF ID='BLOW LEFT',  POROUS=.TRUE., VEL=-0.2, DUCT_PATH=1,2, MAX_PRESSURE=1000. /
+&SURF ID='BLOW RIGHT', POROUS=.TRUE., VEL= 0.4, DUCT_PATH=2,1, MAX_PRESSURE=1000. /
 
-\footnotesize
-\begin{verbatim}
-&OBST XB=1.0,2.0,3.0,4.0,5.0,7.0,SURF_ID='wood paneling',
-      TEXTURE_ORIGIN=1.0,3.0,5.0 /
+&ZONE XB=-3.0, 0.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 1
+&ZONE XB= 0.0, 3.0,-1.0, 1.0, 0.0, 2.0 /  Pressure Zone 2
+
+&OBST XB= 0.0, 0.0,-1.0, 1.0, 0.0, 2.0 / Partition Wall
+
+&HOLE XB=-0.1, 0.1,-0.1, 0.1, 0.4, 0.6 /
+&OBST XB= 0.0, 0.0,-0.1, 0.1, 0.4, 0.6, ..., SURF_ID='BLOW RIGHT', PERMIT_HOLE=.FALSE. /
+
+&HOLE XB=-0.1, 0.1,-0.1, 0.1, 1.4, 1.6 /
+&OBST XB= 0.0, 0.0,-0.1, 0.1, 1.4, 1.6, ..., SURF_ID='BLOW LEFT', PERMIT_HOLE=.FALSE. /
 \end{verbatim}
 \normalsize
-applies paneling to an obstruction whose dimensions are 1 m by
-1 m by 2 m, such that the image of the paneling is positioned
-at the point (1.0,3.0,5.0). The default value of {\ct TEXTURE\_ORIGIN}
-is (0,0,0), and the global default can be changed by added a
-{\ct TEXTURE\_ORIGIN} statement to the {\ct MISC} line.
+
+\noindent
+The volume flow through the fans is given by the expression:
+\be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
+U_{\hbox{\footnotesize max}} \;
+   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
+   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
+where $A_{\hbox{\footnotesize duct}}$ is the area of the duct~(both are 0.04~m$^2$), $U_{\hbox{\footnotesize max}}$ is the air velocity~(0.4~m/s from
+Zone~1 to Zone~2 and 0.2~m/s from Zone~2 to Zone~1), and $\Delta p_{\hbox{\footnotesize max}}$ is the maximum pressure difference the fan can operate
+upon (in this case both fans use 1000~Pa).
+
+In steady state, the volume flow from compartment to compartment (or Zone to Zone) should be equal and opposite in sign. \be (0.04 \; \hbox{m}^2)
+(0.4 \; \hbox{m/s})  \;
+   \sqrt{ \frac{ |p_2-p_1-1000 \; \hbox{Pa}|}{1000 \; \hbox{Pa}}  } =
+   (0.04 \; \hbox{m}^2) (0.2 \; \hbox{m/s})  \;
+   \sqrt{ \frac{ |p_1-p_2-1000 \; \hbox{Pa}|}{1000 \; \hbox{Pa}}  } \ee
+The solution is $p_2=300$~Pa and $p_1=-300$~Pa (see Fig.~\ref{fan_test}). Note that the sign of the Volume Flow in FDS has to do with whether the flow is moving in the plus or
+minus coordinate direction. This convention can make these types of calculations a bit tricky.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.1in]{FIGURES/fan_test_Pressure} &
+\includegraphics[width=3.1in]{FIGURES/fan_test_Volume_Flow}
+\end{tabular*}
+\caption[Output of the {\bf fan\_test} example.]{Pressure and volume flow for the {\bf fan\_test}.}
+\label{fan_test}
+\end{figure}
+
+Consider a few of the extra parameters. The attribute {\ct POROUS=.TRUE.} allows hot, smokey gases to pass through the
+obstructions that represent the fans. These obstructions are merely
+flat plates, by necessity. The velocity {\ct VEL} associated with a
+{\ct POROUS} surface is meant to represent the velocity in the
+positive or negative coordinate direction, as indicated by its
+sign. This is different than the convention used when the {\ct SURF}
+is assigned to a solid wall. The {\ct DUCT\_PATH} defines the pressure
+{\ct ZONE}s downstream and upstream of the fan, respectively. The fan
+represented by the the {\ct SURF} line {\ct ID='BLOW LEFT'}, for example, blows air {\em into} {\ct ZONE}~1
+and draws air {\em out of} {\ct ZONE}~2 in the absence of a pressure difference between the compartments. The negative value of {\ct VEL} indicates
+that the fan blows in the negative coordinate direction, into {\ct ZONE}~1 and out of {\ct ZONE}~2, and this is consistent with the order of the {\ct ZONE}s listed by {\ct DUCT\_PATH}.
+In short, {\ct DUCT\_PATH} and {\ct VEL} must be coordinated.
+
+The {\ct HOLE}s in the Partition Wall serve only to carve out space for the obstructions
+that represent the fans. Note the obstructions have zero thickness, as
+required by the {\ct POROUS} surface. The attribute {\ct PERMIT\_HOLE=.FALSE.} tells FDS not to reject the obstructions because
+they are embedded within the Partition Wall.
+
+
+\subsubsection{Example Cases: {\bf leak\_test} and {\bf leak\_test\_2}}
+
+In the following examples, both leaks and fans are demonstrated. A simple compartment (3.6~m by 2.4~m by 2.4~m) has a small fan at one end and
+one leak under the door at the other end. It is
+assumed for this example that the compartment is contained within a larger compartment that is perfectly sealed. The fan draws air into the
+compartment from the plenum space, increasing the pressure inside and decreasing it outside.  A steady state is achieved when the volume flow into
+and out of the compartment falls into balance.
+
+The volume flow rate of the fan is given by the ``fan curve'' \be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
+U_{\hbox{\footnotesize max}} \;
+   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
+   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
+where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.16$~m$^2$, $U_{\hbox{\scriptsize max}}=0.1$~m/s, and $\Delta
+p_{\hbox{\scriptsize max}}=1000$~Pa. The volume flow due to the leak is given by: \be \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}}
+\sqrt{ \frac{ 2 \Delta p}{ \rho_\infty} } \ee where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho_\infty=1.2$~kg/m$^3$. After 5~min the
+pressure difference is 938.2~Pa. The theoretical value, obtained by equating the fan and leak volume flow rates and solving for $\Delta_p$, is
+938.9~Pa. The slight difference is due to the fact that the solid boundaries within the interior of the computational domain admit a slight volume
+flux related to details of the numerical solver.
+
+Just for fun, we add another leak to the compartment, only this time the leak is to the exterior of the entire computational domain, an infinite void
+at ambient pressure. Now the fan flow rate ought to balance the sum of the flow rates from the two leaks. After 5~min, the pressure difference is
+935.2~Pa. The two cases are summarized in Fig.~\ref{leak_test}.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{FIGURES/leak_test} &
+\includegraphics[height=2.2in]{FIGURES/leak_test_2}
+\end{tabular*}
+\caption[Pressure rise in sealed compartment.]{Output of the leak test cases.}
+\label{leak_test}
+\end{figure}
+
+
 
 
 
