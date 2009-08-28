@@ -1813,7 +1813,7 @@ REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,DMAX,RDMAX
 INTEGER  :: I,J,K
 REAL(EB) :: P_UVWMAX,P_MU_MAX !private variables for OpenMP-Code
 INTEGER  :: P_ICFL,P_JCFL,P_KCFL,P_I_VN,P_J_VN,P_K_VN !private variables for OpenMP-Code
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,DP
 
 SELECT CASE(CODE)
    CASE(1)
@@ -1821,11 +1821,13 @@ SELECT CASE(CODE)
       VV => MESHES(NM)%V
       WW => MESHES(NM)%W
       RHOP => MESHES(NM)%RHO
+      DP => MESHES(NM)%D
    CASE(2)
       UU => MESHES(NM)%US
       VV => MESHES(NM)%VS
       WW => MESHES(NM)%WS
       RHOP => MESHES(NM)%RHOS
+      DP => MESHES(NM)%DS
 END SELECT
  
 CHANGE_TIME_STEP(NM) = .FALSE.
@@ -1991,8 +1993,16 @@ CFL = DT*UVWMAX
 ! Find minimum time step allowed by divergence constraint
 
 RDMAX = HUGE(1._EB)
+DMAX = 0._EB
 IF (CFL_VELOCITY_NORM>0) THEN
-   DMAX = MAXVAL(D)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            DMAX = MAX(DMAX,DP(I,J,K))
+         ENDDO
+      ENDDO
+   ENDDO
+   !!DMAX = MAXVAL(D)
    IF (DMAX>0._EB) RDMAX = CFL_MAX/DMAX
 ENDIF
  
