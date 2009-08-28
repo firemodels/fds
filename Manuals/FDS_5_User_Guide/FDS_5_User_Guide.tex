@@ -789,14 +789,14 @@ It is not recommended to run FDS/Smokeview under any version of MS Windows
 released prior to Windows 2000.
 
 \item[{\bf Mac OS X}]
-A Mac OS X zip archive is available for Intel architectures.
+A zip archive is available for Intel architectures.
 Mac OS X 10.4.x or better is recommended, versions of OS X prior to 10.4.x are not
 officially supported. Users can always download the latest version of FDS source and
 compile FDS for other versions of OS X (See Appendix~\ref{info:compilation} for details).
 
 \item[{\bf Linux}]
-Linux users can run FDS and Smokeview by downloading the appropriate pre-compiled
-executables and installing them wherever they see fit. If the pre-compiled
+Pre-compiled executables are available that can be installed in an appropriate directory. Note that
+the installation package is simply an archive and no path variables are set. If the pre-compiled
 FDS executable does not work (usually because of library incompatibilities),
 the FDS source code can be downloaded and compiled using a Fortran 90 and
 C compiler (See Appendix~\ref{info:compilation} for details). If Smokeview
@@ -806,7 +806,7 @@ does not work on the Linux workstation, you can use the Windows version to view 
 There are no pre-compiled versions of FDS for the various flavors of Unix. However, the advice for Linux applies
 equally as well to Unix.
 
-\item[{\bf FDS in Parallel}] \index{System Requirements!MPI}For those wishing to run FDS in parallel,
+\item[{\bf FDS in Parallel}] For those wishing to run FDS in parallel,
 MPI (Message Passing Interface) must be installed on each of the
 computers within the network that will be used for FDS computations.
 Information about installing MPI on different computer platforms is given on the FDS website.
@@ -1175,7 +1175,7 @@ In fact, for a typical 32~bit Windows PC with 4 GB RAM, only 2 GB will be availa
 If you want to run bigger cases, consider buying a computer with a 64~bit operating system or break up the
 calculation into multiple meshes and use parallel processing.
 
-\item[{\bf Run-Time Errors}:] \index{Support!Error Statements!Run-Time}
+\item[{\bf Run-Time Errors}:]
 An error occurs either within the computer operating system or the
 FDS program. An error message is printed out by the operating system of
 the computer onto the screen or into the diagnostic output file. This
@@ -1188,7 +1188,7 @@ Before reporting the error to the Issue Tracker, try to systematically simplify 
 input file until the error goes away. This process usually brings to light some feature of the
 calculation responsible for the problem and helps in the debugging.
 
-\item[{\bf File Writing Errors}:] \index{Support!Error Statements!READONLY}
+\item[{\bf File Writing Errors}:]
 Occasionally, especially on Windows machines, FDS fails because it is not permitted to write to a file. A typical error statement reads:
 \footnotesize
 \begin{verbatim}
@@ -1199,9 +1199,9 @@ the calculation, you can try adding the phrase \\ {\ct FLUSH\_FILE\_BUFFERS=.FAL
 This will prevent FDS from attempting to flush the contents of the internal buffers, something it does to make it possible to view the FDS output
 in Smokeview during the FDS simulation.
 
-\item[{\bf Poisson Initialization}:] \index{Support!Error Statements!Poisson}
+\item[{\bf Poisson Initialization}:]
 Sometimes at the very start of a calculation, an error
-appears stating that there is a problem with the ``Poisson initialization.''\index{Poisson initialization} The equation for
+appears stating that there is a problem with the ``Poisson initialization.'' The equation for
 pressure in FDS is known as the Poisson equation. The Poisson solver consists of large system
 of linear equations that must be initialized at the start of the calculation.
 Most often, an error in the initialization step is due to a mesh {\ct IJK} dimension
@@ -1277,14 +1277,14 @@ Solid Fuels     & Pyrolysis model of solid fuel  & Results in FDS 5.4 and beyond
 
 
 \chapter{The Basic Structure of an Input File}
-\label{info:fdsBasic} \index{Input File!Overview}
+\label{info:fdsBasic}
 
 
 \section{Naming the Job}
 
 The operation of FDS is based on a single input text\footnote{ASCII -- American Standard Code
 for Information Interchange} file containing parameters organized into {\em namelist}
-\footnote{A {\em namelist} is a Fortran input record.} groups. \index{Namelist Group}
+\footnote{A {\em namelist} is a Fortran input record.} groups.
 The input file provides FDS  with all of the necessary information to
 describe the scenario.
 The input file is saved with a name such as {\bf job\_name.fds},
@@ -1396,7 +1396,7 @@ in some systematic way. Typically, general information is listed near the top of
 obstructions, devices, and so on, are listed below. FDS scans the entire input file each time it processes a particular namelist group.
 With some text editors, it has been noticed that the last line of the file is often not read by FDS because of the presence of an
 ``end of file'' character.
-To ensure that FDS reads the entire input file, add \index{TAIL}
+To ensure that FDS reads the entire input file, add
 
 \footnotesize
 \begin{verbatim}
@@ -1470,7 +1470,7 @@ table containing all of the keywords for each group.
 \vspace{\baselineskip}
 \begin{table}[ht]
 \begin{center}
-\caption{Namelist Group Reference Table}\index{Namelist Groups Table}
+\caption{Namelist Group Reference Table}
 \label{tbl:namelistgroups}
 \begin{tabular}{|c|l|c|c|}
 \hline
@@ -1514,7 +1514,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 
 
 \section{Naming the Job: The \texorpdfstring{{\tt HEAD}}{HEAD} Namelist Group (Table \ref{tbl:HEAD})}
-\label{info:HEAD}\index{HEAD}
+\label{info:HEAD}
 
 The first thing to do when setting up an input file is to give the
 job a name.  The name of the job is important because often a project
@@ -1529,19 +1529,19 @@ two parameters, as in this example:
 \normalsize
 
 \begin{description}
-\item {\ct CHID}\index{HEAD!CHID} is a string of 30 characters or less used to tag the output files.
+\item {\ct CHID} is a string of 30 characters or less used to tag the output files.
 If, for example, {\ct CHID='WTC\_05\_v5'}, it is convenient to
 name the input data file {\ct WTC\_05\_v5.fds} so that the input file
 can be associated with the output files. No periods or spaces are allowed in
 {\ct CHID} because the output files are tagged with suffixes that
 are meaningful to certain computer operating systems.
-\item {\ct TITLE}\index{HEAD!TITLE} is a string of 60 characters or less that describes the
+\item {\ct TITLE} is a string of 60 characters or less that describes the
 simulation. It is simply descriptive text that is passed to various output files.
 \end{description}
 
 
 \section{Simulation Time: The \texorpdfstring{{\tt TIME}}{TIME} Namelist Group (Table \ref{tbl:TIME})}
-\label{info:TIME}\index{TIME}
+\label{info:TIME}
 
 {\ct TIME} is the name of a group of parameters time define the time
 duration of the simulation and the initial time step used to advance
@@ -1582,7 +1582,7 @@ For example if you are testing a {\ct VENT} that is to open at 10~s whose {\ct S
 \subsection{Special Topic: Controlling the Time Step}
 
 The initial time step size can be specified with
-{\ct DT}\index{TIME!DT}. This parameter is normally set automatically by dividing the size of a mesh cell by the
+{\ct DT}. This parameter is normally set automatically by dividing the size of a mesh cell by the
 characteristic velocity of the flow.
 During the calculation, the time step is adjusted so that the CFL (Courant, Friedrichs, Lewy) condition is
 satisfied. The default value of {\ct DT} is $5 \, (\dx \, \dy \, \dz)^\ot/\sqrt{gH}$ s, where
@@ -1600,7 +1600,7 @@ recorded in the output file {\bf job\_name.out}.
 \end{warning}
 
 \noindent
-One additional parameter in the {\ct TIME} group is {\ct SYNCHRONIZE}\index{TIME!SYNCHRONIZE} , a
+One additional parameter in the {\ct TIME} group is {\ct SYNCHRONIZE}, a
 logical flag ({\ct .TRUE.} or {\ct .FALSE.}) indicating that in a
 multi-mesh computation the time step for each mesh should be the same, thus
 ensuring that each mesh is processed each iteration. More details can
@@ -1629,7 +1629,7 @@ warms up a compartment to a nearly equilibrium state at which point time-average
 \newpage
 
 \section{Computational Meshes: The \texorpdfstring{{\tt MESH}}{MESH} Namelist Group (Table \ref{tbl:MESH})}
-\label{info:MESH}\index{MESH}
+\label{info:MESH}
 
 All FDS calculations must be performed within a domain that is made up
 of rectilinear volumes called {\em meshes}. Each mesh is divided into rectangular {\em cells},
@@ -1641,7 +1641,7 @@ the number of which depends on the desired resolution of the flow dynamics.
 A mesh is a single right parallelepiped, {\em i.e.} a box.
 The coordinate system within a mesh conforms to the right hand rule.
 The origin point of a mesh is defined by the first, third
-and fifth values of the real number sextuplet, {\ct XB}\index{MESH!XB}, and the opposite
+and fifth values of the real number sextuplet, {\ct XB}, and the opposite
 corner is defined by the second, fourth and sixth values.
 For example,
 
@@ -1655,10 +1655,10 @@ For example,
 defines a mesh that spans the volume starting at the origin and extending 1~m in the positive
 $x$ direction, 2~m in the positive $y$ direction, and 3~m in the positive $z$ direction.
 The mesh is subdivided into uniform cells via the parameter
-{\ct IJK}\index{MESH!IJK}. In this example, the mesh is divided into 10~cm cubes.
+{\ct IJK}. In this example, the mesh is divided into 10~cm cubes.
 If it is desired that the mesh cells in a particular direction not be uniform in size,
 then the namelist groups {\ct TRNX}, {\ct TRNY} and/or {\ct TRNZ} may be used to alter the
-uniformity of the mesh (See Section~\ref{info:TRNX}).\index{TRNX,TRNY,TRNZ}
+uniformity of the mesh (See Section~\ref{info:TRNX}).
 
 Any obstructions or vents that extend beyond the boundary of the mesh
 are cut off at the boundary. There is no penalty for defining objects
@@ -1696,7 +1696,7 @@ down to 2's, 3's and 5's:
 
 
 \subsection{Two-Dimensional and Axially-Symmetric Calculations}
-\label{info:2D} \index{2D Calculations} \index{Axially-Symmetric Calculations}
+\label{info:2D}
 
 The governing equations solved in FDS are written in terms of a
 three dimensional Cartesian coordinate system. However,
@@ -1712,7 +1712,7 @@ An example of an axially-symmetric helium plume ({\bf helium\_2d}) is given in S
 
 
 \subsection{Multiple Meshes and Parallel Processing}
-\label{info:multimesh}\index{Multiple Meshes}
+\label{info:multimesh}
 
 
 \begin{figure}[ht!]
@@ -1760,7 +1760,7 @@ cost anything since that processor would have been idle anyway. The benefit is t
 there is a tighter connection between meshes.
 It is also possible to synchronize the time step in only a select set of meshes. To do
 this, add {\ct SYNCHRONIZE=.TRUE.} to the appropriate {\ct MESH} lines and then add
-{\ct SYNCHRONIZE=.FALSE.} to the {\ct TIME} line.\index{MESH!SYNCHRONIZE}
+{\ct SYNCHRONIZE=.FALSE.} to the {\ct TIME} line.
 
 Usually in a multi-mesh calculation, each mesh is assigned its own process, and each process its own processor. However, it is possible to assign more than one
 mesh to a single process, and it is possible to assign more than one process to a single processor. Consider a case that involves six meshes:
@@ -1893,7 +1893,7 @@ whether the loss of information moving from a fine to a coarse mesh is tolerable
 
 \subsubsection{Efficiency of the Parallel Calculation}
 
-When running a case with multiple meshes in parallel, the efficiency of the \index{multi-mesh efficiency}
+When running a case with multiple meshes in parallel, the efficiency of the
 calculation can be checked as follows: (1) Set {\ct SYNCHRONIZE=.TRUE.} on the
 {\ct TIME} line, (2) Let the program run several hundred time steps, (3) Calculate
 the difference in wall clock time between two 100 iteration print outs in
@@ -1908,7 +1908,7 @@ parallel code is working well.
 
 
 \subsection{Mesh Stretching: The \texorpdfstring{{\tt TRNX}}{TRNX}, \texorpdfstring{{\tt TRNY}}{TRNY} and/or \texorpdfstring{{\tt TRNZ}}{TRNZ} Namelist Groups (Table \ref{tbl:TRNX})}
-\label{info:TRNX}\index{TRNX,TRNY,TRNZ}
+\label{info:TRNX}
 
 By default the mesh cells that fill the computational domain are uniform in size.
 However, it is possible to specify that the cells be non-uniform in one or two
@@ -1985,8 +1985,8 @@ connecting points ({\ct CC},{\ct PC}), in increasing order, as specified by the 
 \end{verbatim} \normalsize
 
 \noindent
-The parameter {\ct CC} refers to the Computational Coordinate\index{TRNX,TRNY,TRNZ!CC}, $\xi$, located
-on the horizontal axis; {\ct PC} is the Physical Coordinate\index{TRNX,TRNY,TRNZ!PC}, $x$, located on
+The parameter {\ct CC} refers to the Computational Coordinate, $\xi$, located
+on the horizontal axis; {\ct PC} is the Physical Coordinate, $x$, located on
 the vertical axis.  The slopes of the
 line segments in the plot indicate whether the mesh is being stretched (slopes greater
 than 1) or shrunk (slopes less than 1). The tricky part about this
@@ -2028,7 +2028,6 @@ the mesh boundaries.
 \end{warning}
 
 \subsection{Choosing Optimum Mesh Dimensions}
-\index{mesh dimensions}
 
 A common question asked by new FDS users is, ``What size mesh should I use?''
 The answer is not easy because it depends considerably on what you are trying
@@ -2062,7 +2061,7 @@ U.S. Nuclear Regulatory Commission~\cite{NUREG_1824}, the $D^*/\dx$ values range
 
 \clearpage
 \section{Miscellaneous Parameters: The \texorpdfstring{{\tt MISC}}{MISC} Namelist Group (Table \ref{tbl:MISC})}
-\label{info:MISC}\index{MISC}
+\label{info:MISC}
 
 {\ct MISC} is the namelist group of global miscellaneous input parameters. It contains parameters that do not logically fit into any other category.
 
@@ -2109,7 +2108,7 @@ convenient to start the flow immediately, like in an outdoor simulation involvin
 \end{description}
 
 \subsection{Special Topic: Stopping and Restarting Calculations}
-\label{info:restart}\index{Restart}
+\label{info:restart}
 
 An important {\ct MISC} parameter is called {\ct RESTART}. Normally, a simulation consists of a sequence of events
 starting from ambient conditions. However, there are occasions
@@ -2172,7 +2171,7 @@ restart.
 \subsection{Special Topic: Defying Gravity}
 \label{info:GVEC}
 
-Most users of FDS assume that the acceleration of gravity\index{gravity} points in the negative $z$ direction, or more simply, downward.
+Most users of FDS assume that the acceleration of gravity points in the negative $z$ direction, or more simply, downward.
 However, to change the direction of gravity to model
 a sloping roof or tunnel, for example, specify the gravity
 vector on the {\ct MISC} line with a triplet of numbers of the form
@@ -2224,8 +2223,6 @@ lines with a {\ct T}.
 
 \subsection{Special Topic: Improving the Pressure Solver}
 \label{info:pressurecorrection}
-\index{MISC:PRESSURE\_CORRECTION}
-\index{DUMP:CHECK\_VOLUME\_FLOW}
 
 FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is
 assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of
@@ -2256,7 +2253,7 @@ mesh interface must conform to the more coarse of the two. Otherwise, volume can
 
 
 \subsection{Special Topic: Restoring the Baroclinic Vorticity}
-\index{baroclinic_torque}
+\label{baroclinic_torque}
 
 There is an approximation made when solving for the pressure where it is assumed that
 \be
@@ -2337,14 +2334,14 @@ An example of an axially-symmetric helium plume is shown in Figure~\ref{helium_p
 
 
 \subsection{Special Topic: Stack Effect}
-\label{info:stackeffect} \index{stack effect}
+\label{info:stackeffect}
 
 Tall buildings often experience buoyancy-induced air movement due to temperature differences
 between inside and outside, known as {\em stack effect}. To simulate this phenomenon in FDS, you must
 include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
 is important to capture the pressure and density decrease in the atmosphere based on the specified
 temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line. Experiment with different meshing
-strategies before including any fire or HVAC \index{HVAC} functionality. Slowly build in complexity.
+strategies before including any fire or HVAC functionality. Slowly build in complexity.
 
 \subsubsection{Example Case: stack\_effect}
 
@@ -2376,7 +2373,7 @@ in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10
 
 
 \subsection{Special Topic: Large Eddy Simulation Parameters}
-\label{info:LES} \index{Large Eddy Simulation}
+\label{info:LES}
 
 In default mode, FDS uses the Smagorinsky form of Large Eddy Simulation (LES) to model subgrid-scale turbulence.
 The viscosity $\mu$ is modeled
@@ -2444,7 +2441,7 @@ numerical instabilities if the initial time step is set too high.
 
 
 \section{Special Topic: Unusual Initial Conditions: The \texorpdfstring{{\tt INIT}}{INIT} Namelist Group (Table \ref{tbl:INIT})}
-\label{info:INIT}\index{INIT}
+\label{info:INIT}
 
 Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is
 assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This
@@ -2464,7 +2461,7 @@ This construct can also be used for {\ct DENSITY} or
 {\ct MASS\_FRACTION(N)} where {\ct N} indicates the {\ct N}th species listed in the input file.
 
 The {\ct INIT} construct may be useful in examining the influence of
-stack effect \index{stack effect} in a building, where the temperature
+stack effect in a building, where the temperature
 is different inside and out.
 
 Note that a solid obstruction can be given an initial temperature via the
@@ -2474,7 +2471,7 @@ can be prescribed via {\ct U0}, {\ct V0}, and {\ct W0} on the {\ct MISC} line.
 
 
 \section{Special Topic: Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
-\label{info:CLIP}\index{CLIP}
+\label{info:CLIP}
 
 On rare occasions you might need to set upper or lower bounds on the density, temperature, or species mass fractions. The parameters
 listed in Table~\ref{tbl:CLIP} are for diagnostic purposes only.
@@ -2500,7 +2497,7 @@ boundary condition. This chapter describes how to build the model.
 
 
 \section{Bounding Surfaces: The \texorpdfstring{{\tt SURF}}{SURF} Namelist Group (Table \ref{tbl:SURF})}
-\label{info:SURF}\index{SURF}
+\label{info:SURF}
 
 Before describing how to build up the geometry, it is first necessary to explain how to describe what these bounding surfaces
 consist of. {\ct SURF} is the namelist group that defines
@@ -2526,7 +2523,7 @@ set {\ct SURF\_DEFAULT='CONCRETE'} on the {\ct MISC} line.
 
 
 \section{Creating Obstructions: The \texorpdfstring{{\tt OBST}}{OBST} Namelist Group (Table \ref{tbl:OBST})}
-\label{info:OBST}\index{OBST}
+\label{info:OBST}
 
 The namelist group {\ct OBST} contains parameters used to define obstructions. The entire geometry of the model is made up entirely
 of rectangular solids, each one introduced on a single line in the input file.
@@ -2682,8 +2679,7 @@ bounds ({\ct XB}) of the mesh, not the number of cells.
 
 \subsection{Non-rectangular Geometry and Sloped Ceilings}
 \label{info:SAWTOOTH}
-\index{Sawtooth}
-\index{Sloped Ceilings}
+
 The efficiency of FDS is due to the simplicity of its numerical mesh.
 However, there are situations in which certain geometric features do
 not conform to the rectangular mesh, such as a sloped ceiling or roof. In these cases,
@@ -2736,10 +2732,10 @@ the air velocity on the bottom set of obstructions is not affected as much by th
 \newpage
 
 \section{Creating Voids: The \texorpdfstring{{\tt HOLE}}{HOLE} Namelist Group (Table \ref{tbl:HOLE})}
-\label{info:HOLE}\index{HOLE}
+\label{info:HOLE}
 
 The {\ct HOLE} namelist group is used to define parameters (Table \ref{tbl:HOLE}) to carve a hole
-out of an existing obstruction or set of obstructions. \index{HOLE!XB}To do this, add lines of the form
+out of an existing obstruction or set of obstructions. To do this, add lines of the form
 
 \footnotesize
 \begin{verbatim}
@@ -2777,21 +2773,21 @@ that the hole is to punch through the entire obstruction.
 When a {\ct HOLE} is created, the affected obstruction(s) are either rejected, or
 created or removed at pre-determined times. See Section~\ref{info:create_remove} for details.
 To allow a hole to be controlled with either the {\ct CTRL} or {\ct DEVC} namelist groups, you will need to add the {\ct CTRL\_ID} or {\ct DEVC\_ID}
-parameter respectively, to the {\ct HOLE} line.\index{HOLE!CTRL\_ID} \index{HOLE!DEVC\_ID}
+parameter respectively, to the {\ct HOLE} line.
 
 If you want the obstruction that is to be cut out to have a different color
-than the original obstruction, set the {\ct COLOR} \index{HOLE!COLOR} or integer triplet
-{\ct RGB} \index{HOLE!RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}).
+than the original obstruction, set the {\ct COLOR} or integer triplet
+{\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}).
 
 When a {\ct HOLE} is in a {\ct .FALSE.} state, an obstruction is placed in the hole.
-To make this obstruction transparent, the {\ct TRANSPARENCY}\index{HOLE!TRANSPARENCY} parameter should be specified by
+To make this obstruction transparent, the {\ct TRANSPARENCY} parameter should be specified by
 a real number from 0 to 1. Note that if {\ct TRANSPARENCY} is specified, then either a {\ct COLOR} or {\ct RGB} triplet ought to be specified as well.
 A {\ct TRANSPARENCY} value near, but not equal to, zero can be used to simulate a window when the {\ct HOLE}'s {\ct INITIAL\_STATE=.FALSE.} When the {\ct DEVC} or {\ct CTRL}
 is activated and changes the state of the hole to {\ct .TRUE.}, the {\ct HOLE} is then open and completely transparent.
 See Section~\ref{info:create_remove} for an example.
 
 If an obstruction is not to be punctured by a {\ct HOLE}, add
-{\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.\index{OBST!PERMIT\_HOLE}
+{\ct PERMIT\_HOLE=.FALSE.} to the {\ct OBST} line.
 
 \begin{warning}
 \noindent
@@ -2808,7 +2804,7 @@ Note that a {\ct HOLE} has no effect on a {\ct VENT} or a mesh boundary. It only
 \newpage
 
 \section{Applying Surface Properties: The \texorpdfstring{{\tt VENT}}{VENT} Namelist Group (Table \ref{tbl:VENT})}
-\label{info:VENT} \index{VENT}
+\label{info:VENT}
 
 Whereas the {\ct OBST} group is used to specify obstructions within the
 computational domain, the {\ct VENT} group (Table \ref{tbl:VENT}) is used to prescribe planes
@@ -2865,7 +2861,7 @@ Section~\ref{info:Velocity_BC} for instructions on specifying different types of
 
 \noindent
 An easy way to specify an entire external wall is to replace {\ct XB} with
-{\ct MB} (Mesh Boundary)\index{MB - Mesh Boundary}, a character string whose value is one of the following:
+{\ct MB} (Mesh Boundary), a character string whose value is one of the following:
 {\ct 'XMAX'}, {\ct 'XMIN'}, {\ct 'YMAX'}, {\ct 'YMIN'}, {\ct 'ZMAX'} or
 {\ct 'ZMIN'} denoting the planes $x=\hbox{\ct XMAX}$, $x=\hbox{\ct XMIN}$,
 $y=\hbox{\ct YMAX}$, $y=\hbox{\ct YMIN}$, $z=\hbox{\ct ZMAX}$
@@ -2971,7 +2967,7 @@ to its desired location. Then, by toggling the ``q'' key in Smokeview, you can e
 {\ct VENT} exactly where you specified it, as opposed to where FDS repositioned it. This trick also works where the faces of two
 obstructions overlap.
 
-If an error message appears requesting that \index{Troubleshooting!VENT Orientation}
+If an error message appears requesting that
 the orientation of a vent be specified, first check to make sure that the vent is a plane.
 If the vent is a plane, then the orientation can be forced by specifying the parameter {\ct IOR}.
 If the normal direction of the {\ct VENT} is in the positive $x$ direction, set {\ct IOR=1}.
@@ -2986,9 +2982,8 @@ the direction in which the {\ct VENT} is facing.
 \clearpage
 
 \section{Coloring Obstructions, Vents, Surfaces and Meshes}
-\label{info:colors}\index{Colors}
-\index{SURF!COLOR}
-\index{SURF!RGB}
+\label{info:colors}
+
 Colors for many items within FDS can be prescribed in two ways; a triplet of
 integers after keyword {\ct RGB} or one of many {\ct COLOR} name character strings.
 
@@ -3083,8 +3078,7 @@ Name & &  R  & G & B & Name & & R & G & B   \\ \hline \hline
 
 \subsection{Texture Mapping}
 \label{info:texture_map}
-\index{Surface Texture Maps}
-\index{SURF!TEXTURE\_MAP}
+
 There are various ways of prescribing the color of various objects
 within the computational domain, but there is also a way of pasting
 images onto the obstructions for the purpose of making the Smokeview
@@ -3104,9 +3098,8 @@ working directory, Smokeview should read it and display the image
 wherever the paneling is used (SGI Users: use rgb files instead of jpg).
 Note that the image does not appear when Smokeview is first invoked. It is an option controlled by
 the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH}
-and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image.
-\index{SURF!TEXTURE\_HEIGHT} \index{SURF!TEXTURE\_WIDTH} In this case,
-the JPEG image is of a 1 m wide by 2 m high piece of
+and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image. In this case,
+the JPEG image is of a 1~m wide by 2~m high piece of
 paneling. Smokeview replicates the image as often as necessary to
 make it appear that the paneling is applied where desired.
 Consider carefully how the image repeats itself when
@@ -3210,30 +3203,6 @@ surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FL
 {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or
 {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
 
-Fixed temperature or fixed heat flux boundary conditions are
-easy to apply, but only of limited usefulness in real fire scenarios.
-In most cases, walls, ceilings and floors are made up of several layers
-of lining materials.
-
-It is assumed that the innermost layer backs up to an air gap at ambient
-temperature (like a sheet of gypsum board attached to wood studs), or
-it backs up to an insulated material in which case no heat is lost to
-the backing material, or it backs up to the room on the other side of
-the wall. By default, it is assumed that the wall liner backs up to an air gap
-({\ct BACKING='VOID'}). If the wall liner is assumed to back up
-against an insulating material, like a sheet of steel attached to a
-fiber insulating board, the expression {\ct BACKING='INSULATED'} on
-the {\ct SURF} line prevents any heat loss from the back side of the material.
-\index{SURF!BACKING}
-
-Finally, if it is desired that the heat transfer
-through the wall into the space behind the wall, the attribute
-{\ct BACKING='EXPOSED'} should be listed. This feature only works
-if the wall is less than or equal to one mesh cell thick, and if there is a non-zero volume
-of computational domain on the other side of the wall. Obviously, if
-the wall is an external boundary of the domain, the heat is lost
-to the void.
-
 For some special applications, it is often desired that a solid
 surface be adiabatic, that is, there is no net heat transfer
 (radiative and convective) from the gas to the solid. For this case,
@@ -3241,7 +3210,7 @@ all that must be prescribed on the {\ct SURF} line is {\ct
 ADIABATIC=.TRUE.}, nothing else.  FDS will compute a wall temperature
 so that the sum of the convective and radiative fluxes is zero.  Specifying a surface as {\ct ADIABATIC} will
 result in FDS defining {\ct NET\_HEAT\_FLUX=0}.
-\index{SURF!ADIABATIC}
+
 
 
 \subsection{Fire with a Known Heat Release Rate}
@@ -3267,7 +3236,7 @@ applies 500~kW/m$^2$ to any surface with the attribute
 in Section~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
 
 An alternative to {\ct HRRPUA} with the exact same functionality is
-{\ct MLRPUA}, except this parameter \index{MLRPUA}
+{\ct MLRPUA}, except this parameter
 specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
 {\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line. With either,
 the stoichiometry of the gas phase reaction is set by the
@@ -3333,7 +3302,11 @@ leads to a desired time history of the heat release rate.
 \section{Describing Real Materials: The \texorpdfstring{{\tt MATL}}{MATL} Namelist Group}
 \label{info:MATL}
 
-A solid boundary can consist of
+Specified temperature or heat flux boundary conditions are
+easy to apply, but only of limited usefulness in real fire scenarios.
+In most cases, walls, ceilings and floors are made up of several layers
+of lining materials. The {\ct MATL} namelist group is used to define the properties of the materials that make
+up boundary solid surfaces. A solid boundary can consist of
 multiple layers\footnote{The maximum number of material layers is 20. The maximum number of material components is 20.} of different
 materials, and each layer can consist of multiple material
 components.
@@ -3428,6 +3401,32 @@ filled with water. If the water is taken away, there is only about
 partially void wall, a higher density should be used for the pure
 brick.
 
+\subsubsection{Back Side Boundary Conditions}
+
+The layers of a solid boundary are listed in the order from the surface to the interior. By default,
+this innermost layer is assumed to back up to an air gap at ambient
+temperature. This is true even if the obstruction forms a wall in the model that backs up to another
+compartment. A good example of the default back side boundary condition is a sheet of gypsum board attached to wood studs.
+It is assumed that the back side of the gypsum board is an ambient temperature void space within the wall. It does not
+matter if the obstruction on which the boundary condition is applied is thick or thin.
+
+There are other back side boundary conditions that can be applied. One is to assume that the wall
+backs up to an insulated material in which case no heat is lost to
+the backing material. The expression {\ct BACKING='INSULATED'} on
+the {\ct SURF} line prevents any heat loss from the back side of the material. Use of this condition
+means that you  do not have to specify properties of the inner insulating material because it is assumed to
+be perfectly insulated.
+
+If the wall is assumed to back up to the room on the other side of
+the wall and you want FDS to calculate the heat transfer
+through the wall into the space behind the wall, the attribute
+{\ct BACKING='EXPOSED'} should be listed on the {\ct SURF} line. This feature only works
+if the wall is less than or equal to one mesh cell thick, and if there is a non-zero volume
+of computational domain on the other side of the wall. Obviously, if
+the wall is an external boundary of the domain, the heat is lost
+to an ambient temperature void.
+
+
 \subsubsection{Special Topic: Non-Planar Walls and Targets}
 
 All obstructions in FDS are assumed to conform to the rectilinear
@@ -3511,10 +3510,6 @@ highlighted in the individual sections below.
 
 
 \subsection{Solid Fuels that Burn at a Specified Rate}
-\index{SURF!HEAT\_OF\_VAPORIZATION}
-\index{SURF!HRRPUA}
-\index{SURF!IGNITION\_TEMPERATURE}
-\index{SURF!RAMP\_Q}
 
 FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely
 on the availability of material properties and the appropriateness of the underlying pyrolysis model. This
@@ -3845,7 +3840,7 @@ no convective heat transfer. There are several parameters that allow you do this
 gas phase calculation is essentially being shut off, you just need 4
 cells in each direction ({\ct IJK=4,4,4}) for the pressure solver to
 function properly.
-\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1}\index{TIME!WALL\_INCREMENT} to force FDS
+\item On the {\ct TIME} line, set {\ct WALL\_INCREMENT=1} to force FDS
 to update the solid phase every time step (normally it does this every
 other time step), and set {\ct DT} to whatever value appropriate for
 the solid phase calculation. Since there is no gas phase calculation
@@ -3863,7 +3858,7 @@ needed, you may turn off combustion by creating a {\ct REAC} line with only
 {\ct Y\_O2\_INFTY=0.01}. This sets the background oxygen mass fraction
 to 0.01, too low to support any burning.
 \item Generate {\ct MATL} lines, plus a single {\ct SURF} line, as you
-normally would, except add {\ct EXTERNAL\_FLUX} \index{SURF!EXTERNAL\_FLUX} to the {\ct SURF}
+normally would, except add {\ct EXTERNAL\_FLUX} to the {\ct SURF}
 line. This is simply a ``virtual'' source that heats the solid. Think
 of this as a perfect radiant panel or cone calorimeter.
 \item Assign the {\ct SURF\_ID} to a {\ct VENT} that spans the bottom
@@ -3922,18 +3917,17 @@ produce the proper amount of energy, it is very important to specify a
 rate of fuel gases is automatically adjusted so that the effective
 mass loss rate multiplied by the single, global, gas phase heat of
 combustion produces the expected heat release rate.
-\index{MATL!HEAT\_OF\_COMBUSTION}  If, for example, the {\ct
-HEAT\_OF\_COMBUSTION} specified on the {\ct REAC} line is twice that
+If, for example, the {\ct HEAT\_OF\_COMBUSTION} specified on the {\ct REAC} line is twice that
 specified on the {\ct MATL} line, the mass of contained within wall
 cell will be decremented by that determined by the pyrolysis model,
-but the mass added to gas phase would be reduced by 50 \%. A different
+but the mass added to gas phase would be reduced by 50~\%. A different
 value of heat of combustion can be specified for each reaction and
-each gaseous species using the notation {\ct
-HEAT\_OF\_COMBUSTION(j,s)}, as explained in Section~\ref{nu_gas}.
+each gaseous species using the notation {\ct HEAT\_OF\_COMBUSTION(j,s)}, as explained in Section~\ref{nu_gas}.
 
 \subsubsection{Fuel Burnout}
 
-The burnout time of a reacting solid fuel is calculated automatically based on the layer {\ct THICKNESS}, component {\ct DENSITY}, and the calculated burning rate.
+The burnout time of a reacting solid fuel is calculated automatically based on the
+layer {\ct THICKNESS}, component {\ct DENSITY}, and the calculated burning rate.
 
 
 
@@ -4240,7 +4234,6 @@ most cases by a bench-scale measurement device like the cone calorimeter.
 
 
 \subsection{Liquid Fuels}
-\index{Liquid Fuels}
 
 For a liquid fuel, the thermal properties are similar to those of a solid
 material, with a few exceptions. The evaporation rate of the fuel
@@ -4288,7 +4281,7 @@ properties are not all traceable to a measurement.
 \end{verbatim} \normalsize
 
 \noindent
-The inclusion of {\ct BOILING\_TEMPERATURE} \index{MATL!BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
+The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
 pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the
 phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent
 heat of vaporization. The gaseous fuel yield, {\ct NU\_FUEL}, is 0.97 instead of 1 to account for
@@ -4324,7 +4317,6 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 
 \subsection{Special topic: Yields of Gaseous Species (NU\_GAS)}
 \label{nu_gas}
-\index{MATL!NU\_GAS}
 
 The yields of fuel and water gases are usually specified
 with the parameters {\ct NU\_FUEL} and {\ct NU\_WATER} on the {\ct MATL} line.
@@ -4411,8 +4403,6 @@ layers for other surfaces.
 
 
 \subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
-\index{SURF!BURN\_AWAY}
-\index{SURF!SURFACE\_DENSITY}
 \label{info:BURN_AWAY}
 
 If a burning object is to disappear from the calculation once it is consumed, set {\ct BURN\_AWAY=.TRUE.} on the corresponding
@@ -4459,9 +4449,7 @@ calculation ought to be:
 
 
 \subsection{Special Topic: Initial and Backside Boundary Conditions}
-\index{initial solid temperature}
-\index{SURF!TMP\_BACK}
-\index{SURF!TMP\_INNER}
+
 By default, the initial temperature of the solid material is set to
 ambient temperature. Use {\ct TMP\_INNER} on the {\ct SURF} line to
 specify a different initial temperature.
@@ -4480,8 +4468,6 @@ properties (via the {\ct MATL\_ID} keyword).
 
 \subsection{Special Topic: Numerical Accuracy and Stability}
 \label{info:solid_phase_stability}
-\index{SURF!CELL\_SIZE\_FACTOR}
-\index{SURF!STRETCH\_FACTOR}
 
 To compute the temperature and reactions inside the solids, FDS solves
 the one-dimensional heat transfer equation numerically. The size of
@@ -4502,14 +4488,17 @@ on the {\ct SURF} line to have a perfectly uniform mesh. Values
 between 1 and 2 give different levels of stretching.  The size of
 all the mesh cells can be scaled by setting {\ct CELL\_SIZE\_FACTOR}
 less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR=0.5} makes the
-mesh cells half the size. Setting {\ct WALL\_INCREMENT=1}\index{TIME!WALL\_INCREMENT} on the
+mesh cells half the size. Setting {\ct WALL\_INCREMENT=1} on the
 {\ct TIME} line forces the solid phase temperatures to be solved on every
 time step.
 
-\index{SURF!SHRINK} If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
-the surface is going to shrink when the surface reacts. The shrinking behavior can be prevented in the numerical model by setting {\ct SHRINK=.FALSE.}
-on the {\ct SURF} line.  However, setting {\ct SHRINK=.FALSE.} may introduce numerical problems in the wall solver. When all the material of
-a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux
+If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
+the surface is going to shrink when the surface reacts. The shrinking behavior can be prevented in the numerical model
+by setting {\ct SHRINK=.FALSE.}
+on the {\ct SURF} line.  However, setting {\ct SHRINK=.FALSE.} may introduce numerical problems in the wall solver.
+When all the material of
+a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is
+set to {\ct TMP\_BACK}, convective heat flux
 to zero and burning rate to zero.
 
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
@@ -4519,194 +4508,6 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 
 
 
-\clearpage
-
-\section{User-Specified Functions: The \texorpdfstring{{\tt RAMP}}{RAMP} and \texorpdfstring{{\tt TABL}}{TABL} Namelist Groups}
-\label{info:RAMP}\index{RAMP}
-\label{info:TABL}\index{TABL}
-
-Many of the parameters specified in the input file are fixed constants. However, there are several parameters that may vary in
-time, temperature, or space. These functions can be complex, thus you have to have some way to convey them. The namelist group
-{\ct RAMP} and {\ct TABL}, as it names imply, allow you to control the behavior of selected parameters.  {\ct RAMP} allows you
-to specify a function with one independent variable (such as time) is mapped to one dependent variable (such as velocity).
-{\ct TABL} allows for the specification of a mapping from multiple independent variables (such as a solid angle) to multiple
-dependent variables (such as a sprinkler flow rate and droplet speed).
-
-\subsection{Time-Dependent Functions}
-
-At the start of any calculation, the temperature is ambient
-everywhere, the flow velocity is zero everywhere, nothing is burning,
-and the mass fractions of all species are uniform.  When the
-calculation starts temperatures, velocities, burning rates, {\em
-etc.}, are ramped-up from their starting values because nothing can
-happen instantaneously. By default, everything is ramped-up to their
-prescribed values in roughly 1~s. However, control the rate at which
-things turn on, or turn off, by specifying time histories for the
-boundary conditions that are listed on a given {\ct SURF} line.  The
-above boundary conditions can be made time-dependent using either
-prescribed functions or user-defined functions.  The parameters {\ct
-TAU\_Q}, {\ct TAU\_T}, and {\ct TAU\_V} indicate that the heat release
-rate ({\ct HRRPUA}); surface temperature ({\ct TMP\_FRONT}); and/or
-normal velocity ({\ct VEL}, {\ct VOLUME\_FLUX}), or {\ct
-MASS\_FLUX\_TOTAL} are to ramp up to their prescribed values in {\ct
-TAU} seconds and remain there.  If {\ct TAU\_Q} is positive, then the
-heat release rate ramps up like tanh$(t/\tau)$. If negative, then the
-HRR ramps up like $(t/\tau)^2$. If the fire ramps up following a $t^2$
-curve, it remains constant after {\ct TAU\_Q} seconds.  These rules
-apply to {\ct TAU\_T} and {\ct TAU\_V} as well.  The default value for
-all {\ct TAU}s is 1~s.  If something other than a tanh or $t^2$ ramp
-up is desired, then a user-defined burning history must be input. To
-do this, set {\ct RAMP\_Q}, {\ct RAMP\_T} or {\ct RAMP\_V} equal to a
-character string designating the ramp function to use for that
-particular surface type, then somewhere in the input file generate
-lines of the form:
-\index{SURF!RAMP\_Q}
-\index{SURF!RAMP\_T}
-\index{SURF!RAMP\_V}
-
-\footnotesize
-\begin{verbatim}
- &RAMP ID='rampname1', T= 0.0, F=0.0 /
- &RAMP ID='rampname1', T= 5.0, F=0.5 /
- &RAMP ID='rampname1', T=10.0, F=0.7 /
-                    .
-                    .
-                    .
- &RAMP ID='rampname2', T= 0.0, F=0.0 /
- &RAMP ID='rampname2', T=10.0, F=0.3 /
- &RAMP ID='rampname2', T=20.0, F=0.8 /
-                    .
-                    .
-                    .
-\end{verbatim}
-\normalsize
-
-\noindent
-
-Here, {\ct T} is the time, and {\ct F} indicates the fraction of the heat
-release rate, wall temperature, velocity, mass fraction, {\em etc.}, to apply.
-Linear interpolation is used to fill in intermediate time points.
-
-\begin{warning}
-\noindent
-Note that each set of {\ct RAMP} lines must have a unique {\ct ID} and that the lines must
-be listed with monotonically increasing {\ct T}.
-\end{warning}
-
-\begin{warning}
-\noindent
-Note that the {\ct TAU}s and the {\ct RAMP}s are mutually exclusive. For a given
-surface quantity, both cannot be prescribed.
-\end{warning}
-
-As an example, the simple blowing vent from above can be controlled via the lines:
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='BLOWER',VEL=-1.2,TMP_FRONT=50., RAMP_V='BLOWER RAMP', RAMP_T='HEATER RAMP' /
-&RAMP ID='BLOWER RAMP',T= 0.0,F=0.0 /
-&RAMP ID='BLOWER RAMP',T=10.0,F=1.0 /
-&RAMP ID='BLOWER RAMP',T=80.0,F=1.0 /
-&RAMP ID='BLOWER RAMP',T=90.0,F=0.0 /
-&RAMP ID='HEATER RAMP',T= 0.0,F=0.0 /
-&RAMP ID='HEATER RAMP',T=20.0,F=1.0 /
-&RAMP ID='HEATER RAMP',T=30.0,F=1.0 /
-&RAMP ID='HEATER RAMP',T=40.0,F=0.0 /
-\end{verbatim}
-\normalsize
-
-\noindent
-Now the temperature and velocity of the incoming air stream would
-follow the same ramp functions.
-
-\begin{warning}
-\noindent
-Note that the temperature and
-velocity can be independently controlled by assigning different
-{\ct RAMP}s to {\ct RAMP\_T} and {\ct RAMP\_V}, respectively.
-\end{warning}
-
-Use {\ct TAU\_MF(N)} or {\ct RAMP\_MF(N)}
-to control the ramp-ups for either the mass
-fraction or mass flux of species {\ct N}.
-The mass fraction of species $N$ at the surface is given by
-$$ Y_N(t) = Y_N(0) + f(t) \left( Y_N - Y_N(0) \right) $$ where
-$Y_N(0)$ is the ambient mass fraction of species {\ct N} ({\ct
-MASS\_FRACTION\_0} in the {\ct N}th {\ct SPEC} namelist line is used
-to prescribe $Y_N(0)$), $Y_N$ is the desired mass fraction to which
-the function $f(t)$ is ramping ({\ct MASS\_FRACTION(N)} specified in
-the {\ct SURF} line is used to prescribe $Y_N$).  The function $f(t)$
-is either a $\tanh$, $t^2$, or user-defined function. For a
-user-defined function, indicate the name of the ramp function with
-{\ct RAMP\_MF(N)}, a character string.
-\index{SURF!RAMP\_MF}
-\index{SURF!TAU\_MF}
-\index{SURF!MASS\_FRACTION}
-
-\subsection{Temperature-Dependent Functions}
-
-Thermal properties like conductivity and specific heat can vary significantly with temperature. In such cases, use
-the {\ct RAMP} function like this:
-
-\footnotesize
-\begin{verbatim}
-&MATL ID                 = 'STEEL'
-      FYI                = 'A242 Steel'
-      SPECIFIC_HEAT_RAMP = 'c_steel'
-      CONDUCTIVITY_RAMP  = 'k_steel'
-      DENSITY            = 7850. /
-
-&RAMP ID='c_steel', T= 20., F=0.45   /
-&RAMP ID='c_steel', T=377., F=0.60   /
-&RAMP ID='c_steel', T=677., F=0.85   /
-
-&RAMP ID='k_steel', T= 20., F=48.    /
-&RAMP ID='k_steel', T=677., F=30.    /
-\end{verbatim}
-\normalsize
-
-\noindent
-Note that here (as opposed to time ramps) the parameter {\ct F} is the actual physical quantity, not just
-a fraction of some other quantity. Thus, if {\ct CONDUCTIVITY\_RAMP} is used, there should be no
-value of {\ct CONDUCTIVITY} given. Note also that for values of temperature, {\ct T}, below and above the
-given range, FDS will assume a constant value equal to the first or last {\ct F} specified.
-
-\begin{warning}
-\noindent
-Note that each set of {\ct RAMP} lines must have a unique {\ct ID} and that the lines must
-be listed with monotonically increasing {\ct T}.
-\end{warning}
-
-Use {\ct TAU\_T} or {\ct RAMP\_T}
-to control the ramp-ups for surface temperature.
-The surface temperature will be computed as
-$$ T_W(t) = {\ct TAMB} + f(t) \left( {\ct TMP\_FRONT} - {\ct TAMB} \right) $$
-
-where $T_W(t)$ is the surface temperature to be applied, $f(t)$ is the result of evaluating the
-{\ct RAMP\_T} at time $t$, {\ct TAMB} is the input specified on the {\ct MISC} line, and {\ct TMP\_FRONT} is the
-input specified on the {\ct SURF} line that the {\ct RAMP\_T} is for.
-
-\subsection{Tabular Functions}
-
-Some input quantities, such as a sprinkler spray pattern, vary multi-dimensionally. In such cases, use
-the {\ct TABL} namelist group. The format of the {\ct TABL} lines is application-specific, but in general look like this:
-
-\footnotesize
-\begin{verbatim}
-&TABL ID='TABLE1', TABLE_DATA=40,50, 85, 95,10,0.5 /
-&TABL ID='TABLE1', TABLE_DATA=40,50,185,195,10,0.5 /
-\end{verbatim}
-\normalsize
-
-\noindent
-A detailed description of the various table entries is given in the sections that describe quantities that use such
-tables. Currently, only sprinklers and nozzles use this group of parameters to define a complex spray pattern.
-
-\begin{warning}
-\noindent
-Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Specific requirements on ordering the lines
-will depend upon the type of TABL and those requirements are provided in the appropriate section in this guide.
-\end{warning}
 
 
 
@@ -4719,9 +4520,6 @@ a ventilation system is modeled.
 
 
 \section{Simple Vents, Fans and Heaters}
-\index{Volume Flux} \index{Mass Flux}
-\index{SURF!VOLUME\_FLUX}
-\index{SURF!VEL}
 \label{info:Velocity_BC}
 
 For most applications, the ventilation system of a building is described in FDS using
@@ -4810,7 +4608,7 @@ rate (m$^3$/s), via the parameter {\ct MASS\_FLUX\_TOTAL}.
 {\ct MASS\_FLUX\_TOTAL} uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
 {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
 for an outflow is adjusted based on the local density.
-\index{SURF!MASS\_FLUX\_TOTAL}
+
 
 
 \subsection{Louvered Vents}
@@ -4829,7 +4627,7 @@ velocity components in the other two coordinate directions ($x$ or $y$ should pr
 \normalsize
 
 \noindent
-is a boundary condition for a louvered \index{louver}vent that pushes air into the
+is a boundary condition for a louvered vent that pushes air into the
 space with a normal velocity of 1.2~m/s and a tangential velocity
 of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either
 the $y$ or $z$ direction, depending on what the normal direction is.
@@ -4841,7 +4639,6 @@ opening. In these cases, you might consider simply specifying a flat plate obstr
 directions.
 
 \subsection{Jet Fans}
-\index{SURF!POROUS}
 
 Fans do not have to be mounted on a solid wall, like a supply or an exhaust fan.
 If you just want to blow gases in a particular direction, create a thin (zero cells thick)
@@ -4869,9 +4666,6 @@ applied to a {\ct VENT}.
 
 
 \section{Species and Species Mass Flux Boundary Conditions}
-\index{SURF!MASS\_FLUX}
-\index{SURF!MASS\_FRACTION}
-
 
 There are two species boundary conditions that can be specified
 (see Section~\ref{info:SPEC} for details on inputting and using species).
@@ -4904,8 +4698,6 @@ mass flux of species.  To obtain a guaranteed mass flux of a species, you should
 
 \section{Special Topic: Pressure Boundary Conditions}
 \label{info:pressure_boundary}
-\index{VENT!DYNAMIC\_PRESSURE}
-\index{VENT!PRESSURE\_RAMP}
 
 In some situations, it is more convenient to specify a pressure, rather than a velocity, at a boundary. Suppose, for example, that you are modeling the
 interior of a tunnel, and a wind is blowing at one of the portals that affects the overall flow within the tunnel. If (and only if) the portal is defined using an
@@ -4968,12 +4760,6 @@ the right portal.}
 
 \section{Special Topic: Fires and Flows in the Outdoors}
 \label{info:stratification}
-\index{outdoor fires}
-\index{atmospheric stratification}
-\index{SURF!PLE}
-\index{SURF!Z0}
-\index{SURF!PROFILE}
-\index{MISC!GROUND\_LEVEL}
 
 Simulating a fire in the outdoors is not much different than a fire
 indoors, but there are a few issues that need to be addressed.
@@ -5033,7 +4819,7 @@ whether the calculation is a DNS or LES.
 \clearpage
 
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
-\label{info:ZONE} \index{ZONE} \index{pressure leakage}
+\label{info:ZONE}
 
 The basic FDS equation set assumes pressure
 to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation, $\tp(\bx,t)$. Most
@@ -5116,7 +4902,6 @@ with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area 
 At least one of the obstructions that form the walls of Zone 1 must have the attribute
 {\ct LEAK\_PATH=1,0}, meaning that the leak between Zones 1 and 0 is uniformly distributed
 over solids defined with:
-\index{SURF!LEAK\_PATH}
 
 \footnotesize
 \begin{verbatim}
@@ -5337,6 +5122,170 @@ at ambient pressure. Now the fan flow rate ought to balance the sum of the flow 
 \end{figure}
 
 
+
+
+
+\chapter{User-Specified Functions: The \texorpdfstring{{\tt RAMP}}{RAMP} and \texorpdfstring{{\tt TABL}}{TABL} Namelist Groups}
+\label{info:RAMP}
+\label{info:TABL}
+
+Many of the parameters specified in the input file are fixed constants. However, there are several parameters that may vary in
+time, temperature, or space. These functions can be complex, thus you have to have some way to convey them. The namelist group
+{\ct RAMP} and {\ct TABL}, as it names imply, allow you to control the behavior of selected parameters.  {\ct RAMP} allows you
+to specify a function with one independent variable (such as time) is mapped to one dependent variable (such as velocity).
+{\ct TABL} allows for the specification of a mapping from multiple independent variables (such as a solid angle) to multiple
+dependent variables (such as a sprinkler flow rate and droplet speed).
+
+\section{Time-Dependent Functions}
+
+At the start of any calculation, the temperature is ambient
+everywhere, the flow velocity is zero everywhere, nothing is burning,
+and the mass fractions of all species are uniform.  When the
+calculation starts temperatures, velocities, burning rates, {\em
+etc.}, are ramped-up from their starting values because nothing can
+happen instantaneously. By default, everything is ramped-up to their
+prescribed values in roughly 1~s. However, control the rate at which
+things turn on, or turn off, by specifying time histories for the
+boundary conditions that are listed on a given {\ct SURF} line.  The
+above boundary conditions can be made time-dependent using either
+prescribed functions or user-defined functions.  The parameters {\ct
+TAU\_Q}, {\ct TAU\_T}, and {\ct TAU\_V} indicate that the heat release
+rate ({\ct HRRPUA}); surface temperature ({\ct TMP\_FRONT}); and/or
+normal velocity ({\ct VEL}, {\ct VOLUME\_FLUX}), or {\ct
+MASS\_FLUX\_TOTAL} are to ramp up to their prescribed values in {\ct
+TAU} seconds and remain there.  If {\ct TAU\_Q} is positive, then the
+heat release rate ramps up like tanh$(t/\tau)$. If negative, then the
+HRR ramps up like $(t/\tau)^2$. If the fire ramps up following a $t^2$
+curve, it remains constant after {\ct TAU\_Q} seconds.  These rules
+apply to {\ct TAU\_T} and {\ct TAU\_V} as well.  The default value for
+all {\ct TAU}s is 1~s.  If something other than a tanh or $t^2$ ramp
+up is desired, then a user-defined burning history must be input. To
+do this, set {\ct RAMP\_Q}, {\ct RAMP\_T} or {\ct RAMP\_V} equal to a
+character string designating the ramp function to use for that
+particular surface type, then somewhere in the input file generate
+lines of the form:
+
+\footnotesize
+\begin{verbatim}
+ &RAMP ID='rampname1', T= 0.0, F=0.0 /
+ &RAMP ID='rampname1', T= 5.0, F=0.5 /
+ &RAMP ID='rampname1', T=10.0, F=0.7 /
+                    .
+                    .
+                    .
+ &RAMP ID='rampname2', T= 0.0, F=0.0 /
+ &RAMP ID='rampname2', T=10.0, F=0.3 /
+ &RAMP ID='rampname2', T=20.0, F=0.8 /
+                    .
+                    .
+                    .
+\end{verbatim}
+\normalsize
+
+\noindent
+Here, {\ct T} is the time, and {\ct F} indicates the fraction of the heat
+release rate, wall temperature, velocity, mass fraction, {\em etc.}, to apply.
+Linear interpolation is used to fill in intermediate time points.
+Note that each set of {\ct RAMP} lines must have a unique {\ct ID} and that the lines must
+be listed with monotonically increasing {\ct T}.
+Note also that the {\ct TAU}s and the {\ct RAMP}s are mutually exclusive. For a given
+surface quantity, both cannot be prescribed.
+
+As an example, the simple blowing vent from above can be controlled via the lines:
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='BLOWER',VEL=-1.2,TMP_FRONT=50., RAMP_V='BLOWER RAMP', RAMP_T='HEATER RAMP' /
+&RAMP ID='BLOWER RAMP', T= 0.0, F=0.0 /
+&RAMP ID='BLOWER RAMP', T=10.0, F=1.0 /
+&RAMP ID='BLOWER RAMP', T=80.0, F=1.0 /
+&RAMP ID='BLOWER RAMP', T=90.0, F=0.0 /
+&RAMP ID='HEATER RAMP', T= 0.0, F=0.0 /
+&RAMP ID='HEATER RAMP', T=20.0, F=1.0 /
+&RAMP ID='HEATER RAMP', T=30.0, F=1.0 /
+&RAMP ID='HEATER RAMP', T=40.0, F=0.0 /
+\end{verbatim}
+\normalsize
+
+\noindent
+Now the temperature and velocity of the incoming air stream would
+follow the same ramp functions. Note that the temperature and
+velocity can be independently controlled by assigning different
+{\ct RAMP}s to {\ct RAMP\_T} and {\ct RAMP\_V}, respectively.
+
+Use {\ct TAU\_T} or {\ct RAMP\_T}
+to control the ramp-ups for surface temperature.
+The surface temperature will be computed as
+\be T_W(t) = {\ct TAMB} + f(t) \left( {\ct TMP\_FRONT} - {\ct TAMB} \right) \ee
+where $T_W(t)$ is the surface temperature to be applied, $f(t)$ is the result of evaluating the
+{\ct RAMP\_T} at time $t$, {\ct TAMB} is the input specified on the {\ct MISC} line, and {\ct TMP\_FRONT} is the
+input specified on the {\ct SURF} line that the {\ct RAMP\_T} is for.
+
+Use {\ct TAU\_MF(N)} or {\ct RAMP\_MF(N)}
+to control the ramp-ups for either the mass
+fraction or mass flux of species {\ct N}.
+The mass fraction of species $N$ at the surface is given by
+$$ Y_N(t) = Y_N(0) + f(t) \left( Y_N - Y_N(0) \right) $$ where
+$Y_N(0)$ is the ambient mass fraction of species {\ct N} ({\ct
+MASS\_FRACTION\_0} in the {\ct N}th {\ct SPEC} namelist line is used
+to prescribe $Y_N(0)$), $Y_N$ is the desired mass fraction to which
+the function $f(t)$ is ramping ({\ct MASS\_FRACTION(N)} specified in
+the {\ct SURF} line is used to prescribe $Y_N$).  The function $f(t)$
+is either a $\tanh$, $t^2$, or user-defined function. For a
+user-defined function, indicate the name of the ramp function with
+{\ct RAMP\_MF(N)}, a character string.
+
+\section{Temperature-Dependent Functions}
+
+Thermal properties like conductivity and specific heat can vary significantly with temperature. In such cases, use
+the {\ct RAMP} function like this:
+
+\footnotesize
+\begin{verbatim}
+&MATL ID                 = 'STEEL'
+      FYI                = 'A242 Steel'
+      SPECIFIC_HEAT_RAMP = 'c_steel'
+      CONDUCTIVITY_RAMP  = 'k_steel'
+      DENSITY            = 7850. /
+
+&RAMP ID='c_steel', T= 20., F=0.45   /
+&RAMP ID='c_steel', T=377., F=0.60   /
+&RAMP ID='c_steel', T=677., F=0.85   /
+
+&RAMP ID='k_steel', T= 20., F=48.    /
+&RAMP ID='k_steel', T=677., F=30.    /
+\end{verbatim}
+\normalsize
+
+\noindent
+Note that here (as opposed to time ramps) the parameter {\ct F} is the actual physical quantity, not just
+a fraction of some other quantity. Thus, if {\ct CONDUCTIVITY\_RAMP} is used, there should be no
+value of {\ct CONDUCTIVITY} given. Note also that for values of temperature, {\ct T}, below and above the
+given range, FDS will assume a constant value equal to the first or last {\ct F} specified.
+
+
+
+\section{Tabular Functions}
+
+Some input quantities, such as a sprinkler spray pattern, vary multi-dimensionally. In such cases, use
+the {\ct TABL} namelist group. The format of the {\ct TABL} lines is application-specific, but in general look like this:
+
+\footnotesize
+\begin{verbatim}
+&TABL ID='TABLE1', TABLE_DATA=40,50, 85, 95,10,0.5 /
+&TABL ID='TABLE1', TABLE_DATA=40,50,185,195,10,0.5 /
+\end{verbatim}
+\normalsize
+
+\noindent
+A detailed description of the various table entries is given in the sections that describe quantities that use such
+tables. Currently, only sprinklers and nozzles use this group of parameters to define a complex spray pattern.
+
+\begin{warning}
+\noindent
+Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Specific requirements on ordering the lines
+will depend upon the type of TABL and those requirements are provided in the appropriate section in this guide.
+\end{warning}
 
 
 
