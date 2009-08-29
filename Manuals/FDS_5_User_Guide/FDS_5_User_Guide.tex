@@ -17,6 +17,7 @@
         bookmarksopen=true,
         plainpages=false]{hyperref}
 \usepackage{color}
+\usepackage{amsmath}
 \definecolor{linknavy}{rgb}{0,0,0.50196}
 \definecolor{linkred}{rgb}{1,0,0}
 \definecolor{linkblue}{rgb}{0,0,1}
@@ -570,7 +571,7 @@ Robin Zevotek                           & C\&S Engineers, Life Safety Services, 
 
 The software described in this document, Fire Dynamics Simulator (FDS), is a computational
 fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the
-Navier-Stokes equations\index{Navier-Stokes} appropriate for low-speed, thermally-driven flow
+Navier-Stokes equations appropriate for low-speed, thermally-driven flow
 with an emphasis on smoke and heat transport from fires.
 The formulation of the equations and the numerical algorithm are contained the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
 
@@ -590,9 +591,8 @@ been aimed at solving practical fire problems in fire protection engineering, wh
 at the same time providing a tool to study fundamental fire dynamics and combustion.
 
 \begin{description}
-\index{Features}
 \item[Hydrodynamic Model]
-FDS solves numerically a form of the Navier-Stokes\index{Navier-Stokes} equations appropriate
+FDS solves numerically a form of the Navier-Stokes equations appropriate
 for low-speed, thermally-driven flow with an emphasis on
 smoke and heat transport from fires. The core algorithm is an
 explicit predictor-corrector scheme, second order accurate in space
@@ -661,7 +661,6 @@ Direct Numerical Simulation (DNS).
 FDS 5 differs from previous versions in its treatment of solid boundaries and
 gas phase combustion. Among the more important changes are:
 \begin{description}
-\index{Features!Recent Changes}
 \item[{\bf Multi-Step Combustion}] Previous versions of FDS have assumed only one gas
 phase reaction. Now, multiple-step reaction schemes are available to describe local
 extinction, CO production, among various other phenomena. The most important improvements to the combustion model are a more
@@ -741,7 +740,6 @@ FDS and Smokeview can be found at the web site.
 
 \section{How to Acquire FDS and Smokeview}
 \label{info:acquire}
-\index{Download}
 Detailed instructions on how to download executables, manuals, source-code and related utilities,
 can be found on the FDS-SMV Website
 \href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}}.
@@ -756,7 +754,7 @@ place so that it is not overwritten during the updated installation.
 \end{warning}
 
 \section{Computer Hardware Requirements}
-\index{System Requirements!Hardware}
+
 FDS requires a fast CPU\footnote{Central Processing Unit} and a substantial amount of random-access memory (RAM) to run efficiently.
 For minimum specifications, the system should have a 1~GHz CPU, and at least 512~MB RAM.
 The CPU speed will determine how long the computation will take to finish, while the amount
@@ -775,7 +773,7 @@ A Gigabit or 1000 Mbps network will further reduce latency and improve data tran
 
 
 \section{Computer Operating System (OS) and Software Requirements}
-\index{System Requirements!Operating System}
+
 The goal of making FDS and Smokeview publicly available has been to enable
 practicing fire protection engineers to perform fairly sophisticated
 fire simulations at a reasonable cost. Thus, FDS and Smokeview have been
@@ -831,7 +829,7 @@ learning how to create new input files.
 
 
 \section{Starting an FDS Calculation}
-\index{Running FDS}
+
 FDS can be run from the command prompt, or with a third party Graphical User Interface (GUI).
 In the discussion to follow, it is assumed that FDS is being run from the command prompt.
 FDS can be run on a single computer, using only one CPU, or it can be run on multiple
@@ -849,7 +847,7 @@ file in serial mode to ensure that it is properly set up.
 
 
 \subsection{Starting an FDS Calculation (Single Processor Version)}
-\index{Running FDS!Serial}
+
 Sample input files are provided with the program for new users who
 are encouraged to first run a sample calculation before attempting to
 write an input file. Assuming that an input file called {\bf job\_name.fds}
@@ -910,7 +908,6 @@ to run jobs in the background so as to free the console for other uses.
 
 \subsection{Starting an FDS Calculation (Multiple Processor Version)}
 \label{info:parallelprocessing}
-\index{Running FDS!Parallel}
 
 Running FDS across a network using multiple processors and multiple
 banks of memory (RAM) is more difficult than running the single
@@ -988,7 +985,7 @@ MPICH2, a free implementation of MPI from Argonne National Laboratory,
 USA.
 
 \subsubsection{MPICH2}
-\index{Running FDS!Parallel!MPICH2}
+
 With MPICH2, a parallel FDS calculation can be invoked either
 from the command line or by using a Graphical User Interface
 (GUI). After the MPICH2 libraries are installed on each computer and
@@ -1023,7 +1020,7 @@ systems of the various machines.
 
 
 \subsubsection{LAM-MPI}
-\index{Running FDS!Parallel!LAM-MPI}
+
 On the Linux cluster in the Building and Fire Research Lab at NIST, LAM-MPI, a free implementation from Indiana University,
 is installed.\footnote{\href{http://www.lam-mpi.org}{{\ct http://www.lam-mpi.org}}}
 With LAM/MPI, the computers to be used are linked prior to the actual execution of FDS with a separate
@@ -1051,14 +1048,14 @@ and there are bound to be painful growth spurts in the years ahead.
 
 
 \section{Monitoring Progress}
-\index{Output Files!.out}
+
 Diagnostics for a given calculation are written into a file called {\bf CHID.out}.
 The CPU usage and simulation time are written here, so you can see how
 far along the program has progressed. At any time during a calculation,
 Smokeview can be run and the progress can be checked visually.
 To stop a calculation before its scheduled time, either
 kill the process, or preferably create a file in the same directory as
-the output files called {\bf CHID.stop}\index{Output Files!.stop}. The existence of this
+the output files called {\bf CHID.stop}. The existence of this
 file stops the program gracefully, causing it to dump out the
 latest flow variables for viewing in Smokeview.
 
@@ -1076,7 +1073,6 @@ control functions as described in Section~\ref{info:CTRL}.
 
 
 \chapter{User Support}
-\index{Support}
 
 It is not unusual over the course of a
 project to run into various problems, some related to FDS, some related to your computer.
@@ -1104,7 +1100,6 @@ problems by performing simple test calculations, or debugging your input file. T
 provide a list of error statements and suggestions on how to solve problems.
 
 \section{The Version Number}
-\index{Support!Version Number}
 
 If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of
 FDS comes with a version number like 5.2.6, where the first number is the {\em major} release, the second is the {\em minor} release, and the
@@ -1127,11 +1122,11 @@ might already have addressed your problem, and telling us what version you are u
 
 
 \section{Common Error Statements}
-\index{Support!Error Statements}
+
 An FDS calculation may end before the specified time limit.
 Following is a list of common error statements and how to diagnose the problems:
 \begin{description}
-\item[{\bf Input File Errors}:] \index{Support!Error Statements!Input File}
+\item[{\bf Input File Errors}:]
 The most common errors in FDS are due to mis-typed input statements.
 These errors result in the immediate halting of the program and a statement like, ``ERROR: Problem
 with the HEAD line.'' For these errors, check the line in the input file named in the error statement.
@@ -1145,7 +1140,7 @@ Make sure the text file on a Unix/Linux machine was not created on a DOS machine
 Make sure that all the parameters listed are still being used -- new versions of FDS often drop or
 change parameters to force you to re-examine old input files.
 
-\item [{\bf Numerical Instability Errors}:] \index{Support!Error Statements!Numerical Instability}
+\item [{\bf Numerical Instability Errors}:]
 It is possible that during an FDS calculation the flow
 velocity at some location in the domain can increase due to numerical error causing the time step
 size to decrease to a point where logic in the code decides that the results are unphysical
@@ -1161,7 +1156,7 @@ flow field. There are various ways to solve the problem, depending on the situat
 Try to diagnose and fix the problem before reporting it. It is difficult
 for anyone but the originator of the input file to diagnose the problem.
 
-\item[{\bf Inadequate Computer Resources}:] \index{Support!Error Statements!Inadequate Resources}
+\item[{\bf Inadequate Computer Resources}:]
 The calculation might be using more RAM than the machine
 has, or the output files could have used up all the available disk space. In these situations, the
 computer may or may not produce an intelligible error message. Sometimes the computer is just
@@ -1212,7 +1207,6 @@ checking the {\ct MESH} lines in the input file.
 
 
 \section{Support Requests and Bug Tracking}
-\index{Support!Issue Reporting}
 
 Because FDS development is on-going, problems will inevitably occur
 with various routines and features. The developers need to know if a certain
@@ -3685,17 +3679,28 @@ It is very important to keep in mind that $A$ and $E$ are not available for most
 be used by FDS to derive effective values. The most important parameter to specify in place of $A$ and $E$ is
 the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plots shown in Fig.~\ref{pyrolysis}. These curves represent
 \begin{figure}[ht]
-\center{\includegraphics[width=4.0in]{FIGURES/pyrolysis_1}}
+\noindent
+\begin{minipage}{3.5in}
+\includegraphics[width=3.5in]{FIGURES/pyrolysis_1}
+\end{minipage}
+\hfill
+\begin{minipage}{3.0in}
+\begin{align*}
+   \frac{dY}{dt} &= -A \, Y \, \exp(-E/RT)               & Y(0) &=1 \\
+   \frac{dT}{dt} &= \frac{5}{60} \quad \mathrm{K/s}      & T(0) &= 20+273 \; \mathrm{K} \\
+\end{align*}
+\begin{align*}
+   T_p &= 300+273 \quad \hbox{K}  \\
+   \Delta T &= 80 \quad \hbox{K}  \\
+   \nu_r &= 0 \\
+\end{align*}
+\end{minipage}
 \caption[Simple demonstration of pyrolysis model.]{The curve at left (blue) shows the mass loss for a solid material
 undergoing a slow heating. At right, the green curve shows the reaction rate, which is the first derivative of the
 mass loss curve.}
 \label{pyrolysis}
-\end{figure}
-the results of a hypothetical TGA experiment.\footnote{The blue curve (Mass Fraction) in Fig.~\ref{pyrolysis} is the solution, $Y(t)$, of the ordinary differential
-equation
-\be \frac{dY}{dt} = -A \, Y \, \exp(-E/RT) \quad ; \quad Y(0)=1  \ee
-The temperature, $T(t)$ is a linearly increasing function of time, in this case 5~K/min, typical of a TGA experiment. The green
-curve (Reaction Rate) represents the function, $-dY/dt$.}
+\end{figure} \normalsize
+the results of a hypothetical TGA experiment.
 The Mass Fraction (blue curve) is the normalized density of the material which decreases as the sample is slowly heated, in this case at a rate
 of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time. Where this curve peaks is referred to in FDS
 as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain backward compatibility with earlier versions of
@@ -4315,51 +4320,6 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 
 
 
-\subsection{Special topic: Yields of Gaseous Species (NU\_GAS)}
-\label{nu_gas}
-
-The yields of fuel and water gases are usually specified
-with the parameters {\ct NU\_FUEL} and {\ct NU\_WATER} on the {\ct MATL} line.
-However, the yield of any explicitly-defined (via the {\ct SPEC} line) gas species
-can be specified using the parameter {\ct NU\_GAS(j,k)}, where {\ct j} refers to the {\ct j}'th reaction
-of the material and {\ct k} refers to the {\ct k}'th explicitly-defined gas species.
-{\ct NU\_GAS} can also be used to specify the yields of the
-mixture fraction and water vapor, assuming each is implicitly-defined and its order in the list of
-species is obtained from the output file {\bf CHID.out}.
-
-For consistency, the {\ct HEAT\_OF\_COMBUSTION(j,k)} can also be specified
-separately for each reaction and species. These values are
-used only if the corresponding heat of combustion for the gaseous
-species is greater than zero.
-
-In the example below, the pyrolysis of wood is included within a simulation that uses
-a finite-rate reaction instead of the default mixture fraction model. Notice in this case that
-all of the gas species (except for the background nitrogen) are explicitly defined, and as a result, FDS
-needs to be told explicitly what gaseous species are produced by the solid phase reactions. In this case, 82~\% of the
-mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted to solid {\ct 'CHAR'}.
-
-\footnotesize
-\begin{verbatim}
-&SPEC ID = 'PYROLYZATE', MW=53.6 /
-&SPEC ID = 'OXYGEN', MASS_FRACTION_0 = 0.23 /
-&SPEC ID = 'WATER VAPOR' /
-&SPEC ID = 'CARBON DIOXIDE' /
-
-&MATL ID = 'WOOD'
-      EMISSIVITY              = 0.9
-      CONDUCTIVITY            = 0.2
-      SPECIFIC_HEAT           = 1.3
-      DENSITY                 = 570.
-      N_REACTIONS             = 1
-      A                       = 1.89E10
-      E                       = 1.51E5
-      N_S                     = 1.0
-      NU_RESIDUE              = 0.18
-      NU_GAS(1,1:4)           = 0.82,0,0,0
-      HEAT_OF_REACTION        = 430.
-      HEAT_OF_COMBUSTION(1,1) = 14500.
-      RESIDUE                 = 'CHAR' /
-\end{verbatim} \normalsize
 
 
 \subsection{Special topic: Two-Sided Burning}
@@ -5009,7 +4969,6 @@ real fan, a few extra parameters need to be specified. To set $\Delta p_{\hbox{\
 add {\ct MAX\_PRESSURE} to the {\ct SURF} line. Note that {\ct MAX\_PRESSURE}
 should always be positive and in units of Pa.  If the pressure difference (downstream minus upstream)
 exceeds the specified {\ct MAX\_PRESSURE}, then there will be a backflow in the duct.
-\index{SURF!MAX\_PRESSURE}
 
 \begin{warning}
 Note that the rules governing the sign of {\ct VEL} or {\ct VOLUME\_FLUX} remain in force for fans that are subject to pressure differences between
@@ -5304,27 +5263,32 @@ reaction as a surrogate for all the potential fuel sources.
 
 The gas phase reaction can be described in two ways. By default, a so-called {\em mixture fraction} model is used to account for the evolution of
 the fuel gas from its surface of origin through the combustion process. The alternative is what is referred to as the {\em finite-rate}
-approach, where all of the individual gas species involved in the combustion process are defined and tracked individually. This is a
+approach, where all of the individual gas species involved in the combustion process are defined and tracked individually, and the combustion process
+is modeled as one or more finite-rate reactions of these species. This is a
 costlier and more complicated approach than the {\em mixture fraction} model. This chapter describes both methods, with an emphasis on the more
 commonly used mixture fraction model.
 
 
 \section{Mixture Fraction Combustion: The \texorpdfstring{{\tt REAC}}{REAC} Namelist Group}
-\label{info:REAC}\index{REAC}
+\label{info:REAC}
 
 
-There are two ways of designating a fire: the first is to specify a
-Heat Release Rate Per Unit Area {\ct HRRPUA} on a
-{\ct SURF} line. The other is to specify a
-{\ct HEAT\_OF\_REACTION}, along with other thermal parameters on a {\ct MATL} line,
-in which case the burning rate of the fuel depends on the net heat feedback to the surface.
-In both cases, the mixture fraction combustion model is used. In fact, the mere presence of these
-parameters automatically invokes the mixture fraction model. Do not specify explicitly gas species like
-oxygen if you have also specified heat release rates or solid phase reaction rates.
+There are two ways of modeling a fire. The first is to {\em specify} explicitly a
+Heat Release Rate Per Unit Area, {\ct HRRPUA}, on a
+{\ct SURF} line and then apply the {\ct SURF\_ID} to an obstruction or vent.
+This essentially creates a gas burner whose fuel flow rate you explicitly control. The other way to model a fire is to specify solid phase
+thermal and pyrolysis properties on one or more {\ct MATL} lines, assemble these materials via a {\ct SURF} line, and then apply this
+boundary condition to obstructions or vents. In this case the burning rate of the fuel depends on the net heat feedback to the surface.
+In both cases, however, the mixture fraction combustion model is used by default. In fact, the mere presence of these
+parameters automatically invokes the mixture fraction model\footnote{There is an exception to this rule. It is possible to use the finite-rate
+combustion model in conjuction with a pyrolysis model that generates the specified gaseous fuel species.}.
+Do not specify explicitly gas species like
+oxygen if you have also specified the heat release rate per unit area, {\ct HRRPUA}, or solid phase reaction rates.
 
 \subsection{Basics}
 
-A single {\ct REAC} line is used with the mixture fraction model. If the {\ct REAC} line is not found in the input file, propane will
+The stoichiometry of the gas phase combustion reaction or reactions is specified using the {\ct REAC} namelist group. For the default mixture fraction
+model, only a single {\ct REAC} line is needed. If the {\ct REAC} line is not found in the input file, propane will
 be used as the surrogate fuel, and all burning rates will be adjusted accordingly.
 If you only specify the fire's heat release
 rate with {\ct HRRPUA}, then the reaction parameters may not
@@ -5358,7 +5322,8 @@ Note that the various {\ct YIELD}s are for well-ventilated, post-flame condition
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
 \begin{description}
-\item[{\ct ID}] A character string naming the reaction.
+\item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
+label the {\ct REAC} line to more easily identify the fuel species.
 \item[{\ct C, H, O, N, OTHER}] The fuel chemical formula. All numbers are positive.
 (Mixture Fraction only, default values are those of propane)
 \item[{\ct MW\_OTHER}] Average molecular weight for {\ct OTHER} (g/mol).
@@ -5376,15 +5341,14 @@ monoxide, $y_{CO}$. (Mixture Fraction only, default 0.0)
 \item[{\ct HEAT\_OF\_COMBUSTION}] $\Delta H$ (kJ/kg). The amount of
 energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
 specified, it is assumed to be
-$$ \Delta H \approx \frac{\nu_{O_2} \; W_{O_2} } { \nu_{f} \; W_{f} } \; \;
-   \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  $$
+\be \Delta H \approx \frac{\nu_{O_2} \; W_{O_2} } { \nu_{f} \; W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
 \item[{\ct EPUMO2}] The amount of energy released per unit mass of oxygen consumed. (kJ/kg)
 Default is 13,100 kJ/kg.  Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are
 specified that FDS will ignore the value for {\ct EPUMO2}.
 \item[{\ct IDEAL}] Logical value indicating whether or not the {\ct EPUMO2} or {\ct  HEAT\_OF\_COMBUSTION}
 values represent values for complete combustion ({\ct .TRUE.}) or for incomplete combustion ({\ct .FALSE.}),
-i.e. the values account for the specified $y_{CO}$, $y_{H_2}$, and $y_s$.  If {\ct IDEAL}, then
-FDS will internally adjust $\Delta H$ to account for products of incomplete combustion.
+i.e. the values account for the specified $y_{CO}$, $y_{H_2}$, and $y_s$.  If {\ct IDEAL=.TRUE.}, then
+FDS will internally adjust $\Delta H$ to account for products of incomplete combustion. The default value is {\ct .FALSE.}
 \end{description}
 
 \noindent
@@ -5432,18 +5396,17 @@ A few sample {\ct REAC} lines are given here. The values are for demonstration o
 \subsection{Special Topic: Heat of Combustion}
 \label{info:combustion}
 
-By default the {\ct EPUMO2} value is combined with
-the stoichiometric parameters listed
-on the {\ct REAC} line to compute the heat of combustion.  Specifying the
-{\ct HEAT\_OF\_COMBUSTION} will override that computation.
+By default, the Energy Per Unit Mass of Oxygen, {\ct EPUMO2}, is used to compute the heat of combustion according to
+Eq.~(\ref{EPUMO2}).  Specifying the
+{\ct HEAT\_OF\_COMBUSTION} will override this computation.
 However, if heats of reaction have been specified on the
 {\ct MATL} line and
 the heat of combustion of the material differs from that specified by
-the governing reaction, then add a
+the governing gas phase reaction, then add a
 {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) to the {\ct MATL} line.
 With the mixture fraction combustion
 model, it is assumed that there is only one fuel. However, in a realistic
-fire scenario, there may be many fuels originating from the various
+fire scenario, there may be many fuel gases generated by the various
 burning objects in the building. Specify
 the stoichiometry of the predominant reaction via the {\ct REAC}
 namelist group. If the stoichiometry of the burning material
@@ -5463,12 +5426,13 @@ suppression algorithm has been implemented in FDS that attempts to
 gauge whether or not a flame is viable at the fuel-oxygen interface. The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
 contains more details about how the mechanism works. The only
 parameters you can control are the Limiting
-Oxygen Index {\ct X\_O2\_LL},
+Oxygen Index, {\ct X\_O2\_LL},
 and the {\ct CRITICAL\_FLAME\_TEMPERATURE}. Both are
 set on the {\ct REAC} line.
 The default values are 0.15 (volume fraction) and 1427~$^\circ$C, respectively.
-To eliminate any gas phase suppression, set {\ct X\_O2\_LL} to 0. To turn off suppression completely,
-set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
+To eliminate any gas phase suppression, set {\ct X\_O2\_LL} to 0, or turn off suppression completely
+by setting {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line. This latter approach saves on computing time because it
+prevents FDS from entering the suppression algorithm altogether.
 
 \subsubsection{Example Case: door\_crack}
 
@@ -5483,8 +5447,8 @@ door, increase the oxygen supply, at least near these openings, and the fuel-ric
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{FIGURES/door_crack_Pressure} &
-\includegraphics[height=2.2in]{FIGURES/door_crack_HRR}
+\includegraphics[height=2.5in]{FIGURES/door_crack_Pressure} &
+\includegraphics[height=2.5in]{FIGURES/door_crack_HRR}
 \end{tabular*}
 \caption[Output of {\bf door\_crack} test case.]{Output of {\bf door\_crack} test case.}
 \end{figure}
@@ -5495,13 +5459,13 @@ While this case has a number of interesting physical effects, and it {\em verifi
 of 0.25~atm without some sort of relief. The fan and the crack under the door obey simple formulae based on pressure differences, but these assumptions have limits.
 \item It is likely that the fire in this scenario would indeed extinguish itself as the oxygen volume fraction decreased below about 15~\%. {\bf But,} its re-ignition at the door crack
 and fan grill would depend on the presence of a spark or hot spot of some sort. FDS continues to flow fuel into the compartment past the point of local extinction, but the compartment
-cools. The default combustion algorithm in FDS assumes that in every grid cell there is a ``virtual spark plug'' that initiates combustion if the local ratio of fuel and oxygen are
-appropriate.
+cools. The default combustion algorithm in FDS assumes that in every grid cell there is a ``virtual spark plug'' that initiates combustion if fuel and oxygen are
+present.
 \end{itemize}
 
 
 \subsection{Special Topic: CO Production}
-\index{CO Production}
+
 An algorithm has been implemented that computes the combustion as a two step reaction that
 predicts the formation and destruction of CO.  The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
 contains more details about how the mechanism works. This algorithm is used when
@@ -5514,7 +5478,7 @@ Thus, even if using this model, you must specify the {\ct CO\_YIELD} that is exp
 \begin{warning}
 \noindent
 Note that when active, this algorithm requires the use of three parameters
-for the mixture fraction vs. the two parameters used when it is disabled and will therefore
+for the mixture fraction compared to the default two and will therefore
 increase run times and memory usage accordingly.  If the simulation you are
 performing will not result in an under-ventilated fire, then there will be of
 little if any benefit to enabling the CO production algorithm.
@@ -5533,7 +5497,9 @@ In an LES simulation, the heat release rate is computed as
 Here, $\tau$ is a mixing time scale~\cite{Raman:CF} given by
 \be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \ee
 The coefficient, $C$, is taken as 0.1 in FDS by default, based on comparisons to various flame height correlations. It is given by
-{\ct C\_EDC} on the {\ct REAC} line. If you do not want to use this model, set {\ct EDDY\_DISSIPATION=.FALSE.} on the {\ct REAC} line, in which
+{\ct C\_EDC} on the {\ct REAC} line. If you do not want to use this model, set \\
+{\ct EDDY\_DISSIPATION=.FALSE.} \\
+on the {\ct REAC} line, in which
 case $\tau$ becomes the time step, $\dt$.
 
 There are two additional bounds on the local heat release rate per unit volume. One is based on an empirically determined maximum heat release rate
@@ -5552,7 +5518,7 @@ Here, $\tau'$ is an averaging time that should be larger than the pulsation peri
 \clearpage
 
 \section{Extra Gas Species: The \texorpdfstring{{\tt SPEC}}{SPEC} Namelist Group}
-\label{info:SPEC}\index{SPEC}
+\label{info:SPEC}
 
 Normally when you specify a fire via either {\ct HRRPUA} on the {\ct SURF} line or
 reaction parameters on the {\ct MATL} line, the mixture fraction combustion model
@@ -5645,7 +5611,7 @@ the index 1 refers to the first, and only, gas species that is specified in the 
 
 
 
-\subsection{Gas Species Properties}
+\subsection{Special Topic: Gas Species Properties}
 
 Gases whose properties are hardwired in FDS are listed in
 Table~\ref{tab:gasspecies}. The physical properties
@@ -5702,9 +5668,57 @@ will be computed.  The keyword {\ct ABSORBING} can be specified on the {\ct SPEC
 species is not in the recognized list, then it will be assumed to be a fuel when invoking RADCAL to compute its
 absorptivity.
 
-\clearpage
 
-\section{Special Topic: Finite-Rate Combustion}
+\subsection{Special Topic: Yields of Gaseous Species (NU\_GAS)}
+\label{nu_gas}
+
+The yields of fuel and water gases are usually specified
+with the parameters {\ct NU\_FUEL} and {\ct NU\_WATER} on the {\ct MATL} line.
+However, the yield of any explicitly-defined (via the {\ct SPEC} line) gas species
+can be specified using the parameter {\ct NU\_GAS(j,k)}, where {\ct j} refers to the {\ct j}'th reaction
+of the material and {\ct k} refers to the {\ct k}'th explicitly-defined gas species.
+{\ct NU\_GAS} can also be used to specify the yields of the
+mixture fraction and water vapor, assuming each is implicitly-defined and its order in the list of
+species is obtained from the output file {\bf CHID.out}.
+
+For consistency, the {\ct HEAT\_OF\_COMBUSTION(j,k)} can also be specified
+separately for each reaction and species. These values are
+used only if the corresponding heat of combustion for the gaseous
+species is greater than zero.
+
+In the example below, the pyrolysis of wood is included within a simulation that uses
+a finite-rate reaction instead of the default mixture fraction model. Notice in this case that
+all of the gas species (except for the background nitrogen) are explicitly defined, and as a result, FDS
+needs to be told explicitly what gaseous species are produced by the solid phase reactions. In this case, 82~\% of the
+mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted to solid {\ct 'CHAR'}.
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID = 'PYROLYZATE', MW=53.6 /
+&SPEC ID = 'OXYGEN', MASS_FRACTION_0 = 0.23 /
+&SPEC ID = 'WATER VAPOR' /
+&SPEC ID = 'CARBON DIOXIDE' /
+
+&MATL ID = 'WOOD'
+      EMISSIVITY              = 0.9
+      CONDUCTIVITY            = 0.2
+      SPECIFIC_HEAT           = 1.3
+      DENSITY                 = 570.
+      N_REACTIONS             = 1
+      A                       = 1.89E10
+      E                       = 1.51E5
+      N_S                     = 1.0
+      NU_RESIDUE              = 0.18
+      NU_GAS(1,1:4)           = 0.82,0,0,0
+      HEAT_OF_REACTION        = 430.
+      HEAT_OF_COMBUSTION(1,1) = 14500.
+      RESIDUE                 = 'CHAR' /
+\end{verbatim} \normalsize
+
+
+
+
+\subsection{Special Topic: Finite-Rate Combustion}
 \label{info:finite}
 
 Usually, FDS uses mixture fraction concepts to describe combustion. However, FDS can also explicitly track gas species and
@@ -5717,18 +5731,14 @@ Note: you may use the finite-rate reaction scheme in an
 LES calculation, but because the temperature in a large scale calculation
 is smeared out over a mesh cell, some of the reaction parameters may need
 to be modified to account for the lower temperatures.
-
 \item The {\ct BACKGROUND\_SPECIES} on the {\ct MISC} line is normally
 set to be {\ct 'NITROGEN'}.
-
 \item The namelist group {\ct SPEC} is used to specify each additional
 species. Do not enter a {\ct SPEC} line for the background species.
-
 \item Read Section~\ref{info:SPEC} for a description of the boundary
 conditions for the gas species.
-
 \item The {\ct REAC} namelist group is used to designate the fuel and the reaction rate
-parameters.  For a finite-rate reaction you can specify multiple {\ct REAC}lines.  Note that
+parameters.  For a finite-rate reaction you can specify multiple {\ct REAC} lines.  Note that
 FDS will evaluate the reactions in the order they are listed in the input file. %Jason add tech man ref
 \begin{description}
 \item[{\ct FUEL}] Character string indicating which of the listed
@@ -5741,11 +5751,11 @@ units of cm$^3$/mole/s.
 units of kJ/kmol.
 \item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where
 negative values indicate reactants and positive values indicate products.  Note that the background species
-cannot participate in the reaction.
+cannot participate in the reaction. This means that {\ct NU(0)} is not a valid input parameter.
 \item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}.
-Note that a {\ct SPEC} can be given an {\ct N\_S} but not a {\ct NU}, i.e the rate equation can
-be dependent on a species that does not participate directly in the reaction.  Note that the background species
-cannot participate in the reaction.
+Note that it is possible that a given {\ct SPEC} can be assigned a value of {\ct N\_S} greater than zero and a value of {\ct NU} equal to zero. In other words,
+the rate equation can be dependent on a species that does not participate directly in the reaction.  Note also that the background species
+cannot participate in the reaction. This means that {\ct N\_S(0)} is not a valid input parameter.
 \item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion the chemical reaction in units of kJ/kg. (Default 40,000 kJ/kg)
 \end{description}
 
@@ -5755,50 +5765,43 @@ cannot participate in the reaction.
 \clearpage
 
 \section{Radiation Transport: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
-\label{info:RADI}\index{RADI}
-\index{RADI!RADIATIVE\_FRACTION}
+\label{info:RADI}
 
 For most FDS simulations, thermal radiation transport is computed by default and you need not set any
 parameters to make this happen. However, there are situations where it is important to be aware of
 issues related to the radiative transport solver. The most important issue involves the fraction of energy released from the
 fire as thermal radiation, commonly referred to as the {\em radiative fraction}. It is a function of both the flame temperature
 and chemical composition, neither of which are reliably calculated in a large
-scale fire calculation because the flame sheet is not well-resolved on the mesh.
-In calculations in which the mesh cells are on the order of a centimeter and
+scale fire calculation because the flame sheet is not well-resolved.
+In calculations in which the mesh cells are on the order of a centimeter or
 larger, the temperature near the flame surface cannot be relied upon when
 computing the source term in the radiation transport equation, especially
 because of the $T^4$ dependence.
-To compensate, if you prescribe a non-zero
-value of {\ct RADIATIVE\_FRACTION} on the {\ct RADI} line, a mesh cell cut by the flame
-radiates that fraction of the chemical energy being released into it.
+As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct RADI} line allows you to specify explicitly the
+fraction of the total combustion energy that is released in the form of thermal radiation.
 Some of that energy may be reabsorbed elsewhere, yielding a net radiative
-loss that is less than {\ct RADIATIVE\_FRACTION}, depending mainly on the size of
+loss from the fire or compartment that is less than the {\ct RADIATIVE\_FRACTION}, depending mainly on the size of
 the fire and the soot loading. If it is desired to use the radiation transport
 equation as is, then {\ct RADIATIVE\_FRACTION} ought to be set to zero,
 and the source term in the radiative transport equation is then based solely
 on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is
 0.35 for an LES calculation, and zero for DNS.
 
-\index{RADI!NUMBER\_RADIATION\_ANGLES}
-\index{RADI!TIME\_STEP\_INCREMENT}
-\index{RADI!ANGLE\_INCRMENT}
 There are several ways to improve the performance of the Finite Volume
 Method in solving the radiation transport equation (RTE), most of which
 increase the computation time. The solver has two modes of
-operation -- a gray gas model (default) and a wide band model~\cite{FDS_Tech_Guide_5}.
-Modifications to these models can be made via a namelist group called
-{\ct RADI}. If running in gray gas mode (default), increase the number
+operation -- a gray gas model (default) and a wide band model~\cite{FDS_Math_Guide_5}.
+Modifications to these models can be made via parameters on the
+{\ct RADI} line. If running in gray gas mode (default), increase the number
 of angles from the default 100 with the integer parameter
 {\ct NUMBER\_RADIATION\_ANGLES}. The frequency of calls to the radiation
-solver can be reduced from every 3 time steps with integer
+solver can be reduced from every 3 time steps with integer called
 {\ct TIME\_STEP\_INCREMENT}. The increment over which the angles are
-updated can be reduced from 5 with the integer {\ct ANGLE\_INCREMENT}.
+updated can be reduced from 5 with the integer called {\ct ANGLE\_INCREMENT}.
 Briefly, if {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are
 both set to 1, the radiation field is completely updated in a single
 time step, but the cost of the calculation increases significantly.
 
-\index{RADI!NMIEANG}
-\index{RADI!RADTMP}
 A few parameters affecting the absorption of radiation by water
 droplets are as follows: {\ct RADTMP} is the assumed radiative source temperature.
 It is used in the computation of the mean scattering
@@ -5810,9 +5813,6 @@ of the better accuracy is seen in the initialization phase,
 not during the actual simulation. The default value for {\ct NMIEANG}
 is 15.
 
-\index{RADI!WIDE\_BAND\_MODEL}
-\index{RADI!CH4\_BANDS}
-\index{ABSORPTION\_COEFFICIENT}
 If the optional six band model is desired,
 set {\ct WIDE\_BAND\_MODEL=.TRUE.}. It is recommended that this option
 only be used when the fuel is relatively non-sooting because it
@@ -5823,7 +5823,6 @@ Reference Guide for more details. Note also that when
 output quantity becomes practically useless, because it then
 corresponds to one individual band of the spectrum.
 
-\index{MISC!RADIATION}
 It is possible to turn off the radiation transport
 solver (saving roughly 20 \% in CPU time) by adding the statement
 {\ct RADIATION=.FALSE.} to the {\ct MISC} line. For isothermal
@@ -5834,7 +5833,6 @@ input on the {\ct RADI} line. This radiated energy completely
 disappears from the calculation. More on this feature can be found in
 Section~\ref{info:combustion}.
 
-\index{RADI!KAPPA0}
 In simulations with no combustion nor radiating species, it is
 possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
 
@@ -5844,10 +5842,11 @@ possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on 
 \clearpage
 
 \chapter{Particles and Droplets: The \texorpdfstring{{\tt PART}}{PART} Namelist Group}
-\label{info:PART}\index{PART}
+\label{info:PART}
 
 Lagrangian particles\footnote{Throughout this section, the terms ``droplets'' and ``particles'' are used interchangeably. From the point of view of
-FDS, they are all Lagrangian particles; that is, point elements that are not bound by the structure of the underlying grid.} are used in FDS as water or liquid fuel
+FDS, they are all Lagrangian particles; that is, point elements that are not bound by the structure of the underlying grid.} are used in FDS to represent
+water or liquid fuel
 droplets, flow tracers, and various other objects that are not defined or confined by the numerical mesh. Sometimes the
 particles have mass, sometimes they do not. Some evaporate,
 absorb radiation, {\em etc.}
@@ -5865,8 +5864,6 @@ smoke particles were implicitly defined. Shortcuts for defining water droplets a
 
 Properties of different types of
 Lagrangian particles are designated via the {\ct PART} namelist group.
-Much like {\ct SURF} lines contain the properties of a solid surface or
-vent, {\ct PART} lines contain information about particles and droplets.
 Once a particular type of particle or droplet has been described using
 a {\ct PART} line, then the name of that particle or droplet type is invoked
 elsewhere in the input file via the parameter {\ct PART\_ID}. There are no reserved {\ct PART\_ID}s -- all must be defined.
@@ -5887,7 +5884,7 @@ that defines the properties of the material, for example
 &SURF ...,PART_ID='my smoke' /
 \end{verbatim}
 \normalsize
-or the {\ct PART} type can be invoked from a {\ct PROP} line to change
+or the {\ct PART\_ID} can be invoked from a {\ct PROP} line to change
 the properties of the droplets ejected by a sprinkler or nozzle, for example
 
 \footnotesize
@@ -5896,20 +5893,15 @@ the properties of the droplets ejected by a sprinkler or nozzle, for example
 \end{verbatim}
 \normalsize
 
-\noindent
-Note that a surface on which particles are specified must have a non-zero normal velocity directed into the
-computational domain. This happens automatically if the surface is burning, but must be specified
-if it is not.
-\index{SURF!PART\_ID}
 
-
-
-\section{Controlling Particles and Droplets}
-
+\section{Particle and Droplet Insertion}
 \label{info:controlling_droplets}
 
-Depending on how the particles or droplets are introduced into the computational domain, the following are important
-parameters for controlling them:
+
+\subsection{Controlling the Number of Particles and Droplets}
+
+Regardless of how the particles or droplets are introduced into the computational domain, the following are important
+parameters for controlling their number:
 \begin{description}
 \item[{\ct DT\_INSERT}] Time increment in seconds between the introduction of a ``batch'' of particles or droplets.
 The number per ``batch'' depends on how they are introduced.
@@ -5922,7 +5914,8 @@ is 10 for all other types of particles. {\ct MASSLESS} particles are discussed i
 trying to reduce the number of droplets or particles in a simulation.
 \end{description}
 
-\subsubsection{Particles Introduced at a Solid Surface}
+
+\subsection{Particles Introduced at a Solid Surface}
 \label{info:particle_flux}
 
 If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line.
@@ -5944,11 +5937,13 @@ of 0.1~kg/m$^2$/s. FDS will adjust the mass flux if the obstruction or vent dime
 {\ct ID}s have no meaning other than as identifiers. The particles are colored red in Smokeview, but can also be colored according to their
 diameter, temperature, or age.
 
-\index{SURF!NPPC}
-\index{SURF!PARTICLE\_MASS\_FLUX}
+Note that a surface on which particles are specified must have a non-zero normal velocity directed into the
+computational domain. This happens automatically if the surface is burning, but must be specified
+if it is not.
 
-\subsubsection{Droplets Introduced at a Sprinkler or Nozzle}
-\index{PART!DROPLETS\_PER\_SECOND}
+
+
+\subsection{Droplets Introduced at a Sprinkler or Nozzle}
 
 {\ct DROPLETS\_PER\_SECOND} is the  number of droplets inserted every
 second per active sprinkler or nozzle (Default 5000). Note that this parameter only affects sprinklers and nozzles.
@@ -5957,13 +5952,13 @@ of droplets used to represent the flow. Also note that the number of droplets in
 
 \begin{warning}
 Note that {\ct DROPLETS\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the
-liquid mass is distributed more uniformly over the droplets. If this parameter is too small, it can lead to a grainy, or uneven evaporation pattern, sometimes even to the
+liquid mass is distributed more uniformly over the droplets. If this parameter is too small, it can lead to a non-physical evaporation pattern, sometimes even to the
 point of causing a numerical instability. If you encounter a numerical instability shortly after the activation of a sprinkler or nozzle, consider increasing
 {\ct DROPLETS\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more
 droplets created per second than the number that can be simulated.
 \end{warning}
 
-\subsubsection{Particles or Droplets Introduced Initially}
+\subsection{Particles or Droplets Introduced at the Start of the Calculation}
 
 Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, {\ct NUMBER\_INITIAL\_DROPLETS}
 is the number of particles/droplets within the computational domain at the start of the simulation.
@@ -5975,7 +5970,7 @@ and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also,
 certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format
 for {\ct XB} is the same as that used on the {\ct OBST} line.
 
-\subsubsection{Droplets that Strike Solid Surfaces}
+\subsection{Droplets that Strike Solid Surfaces}
 
 When a droplet strikes a solid surface, it sticks and is reassigned a new speed and direction. If the surface is
 horizontal, the direction is randomly chosen. If vertical, the direction is downwards.
@@ -6012,14 +6007,32 @@ of water droplets impinging on the top of a box followed by the cascading of wat
 
 \section{Particle and Droplet Properties}
 
+
+\subsection{Thermal Properties}
+
 For Lagrangian particles that are not {\ct MASSLESS}, the following parameters should be
-included on the {\ct PART} line.
+included on the {\ct PART} line to indicate how they heat up and possibly evaporate. It is assumed by default that non-massless particles are
+liquid droplets, but you can specify {\ct EVAPORATE=.FALSE.} to change this.
 \begin{description}
 \item[{\ct DENSITY}] The density of the liquid or solid droplet/particle.
 (Default 1000~kg/m$^3$)
 \item[{\ct SPECIFIC\_HEAT}] Specific heat of liquid or solid droplet/particle.
 (Default 4.184~kJ/kg/K)
-\item[{\ct DIAMETER}] Median volumetric diameter of droplets/particles, with the
+\item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet.
+(Default 100~$^\circ$C)
+\item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet.
+(Default 0~$^\circ$C)
+\item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet.
+(Default {\ct TMPA})
+\item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet.
+(Default 2259~kJ/kg)
+\end{description}
+Notice that the default thermal properties are that of water, and also notice that there is no specified thermal conductivity because the
+droplets are assumed to be thermally-thin.
+
+\subsection{Size Distribution}
+
+The {\ct DIAMETER} is the median volumetric diameter of the droplets or particles, with the
 distribution assumed to be a combination of Rosin-Rammler and log-normal (Default 500~$\mu$m). The
 width of the distribution is controlled by the parameter {\ct GAMMA\_D} (default 2.4)
 The Rosin-Rammler/log-normal distribution is given by
@@ -6040,23 +6053,20 @@ instabilities that can occur when droplets get very, very small. The default {\c
 To prevent FDS from generating a distribution of droplets/particles altogether, set
 {\ct MONODISPERSE=.TRUE.} on the {\ct PART} line, in which case every droplet or particle will be assigned the
 same {\ct DIAMETER}.
-\end{description}
 
-\noindent
-The following parameters pertain to the evaporation of liquid droplets. It is assumed by default that non-massless particles are
-liquid droplets, but you can specify {\ct EVAPORATE=.FALSE.} to change this. Details are in the next section.
+\subsection{Color}
 
-
-\begin{description}
-\item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet.
-(Default 100~$^\circ$C)
-\item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet.
-(Default 0~$^\circ$C)
-\item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet.
-(Default {\ct TMPA})
-\item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet.
-(Default 2259~kJ/kg)
-\end{description}
+The parameter {\ct QUANTITIES} is an array of character strings indicating which
+scalar quantities should be used to color the particles or droplets when viewed as an
+animation. The choices are \\
+{\ct 'DROPLET\_TEMPERATURE'} ($^\circ$C) \\
+{\ct 'DROPLET\_DIAMETER'} ($\mu$m) \\
+{\ct 'DROPLET\_VELOCITY'} (m/s) \\
+{\ct 'DROPLET\_MASS'} (kg) \\
+{\ct 'DROPLET\_AGE'} (s) \\
+As a default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then
+Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or
+{\ct COLOR}. By default, water droplets are colored blue and fuel droplets yellow. All others are colored black.
 
 
 
@@ -6066,9 +6076,9 @@ liquid droplets, but you can specify {\ct EVAPORATE=.FALSE.} to change this. Det
 There are several useful attributes that you can assign to particles or droplets, usually via a simple logical parameter. Be aware with each of these parameters that
 specifying it as {\ct .TRUE.} may cause other parameters to be functionally useless, or may cause conflicts that FDS may or may not detect. A good rule of thumb is always to
 ask yourself what is the basic information that {\em must} be conveyed to the program, and stick to that. For example, if the particles are to be {\ct MASSLESS}, there is no
-point in declaring anything else except maybe a {\ct COLOR} for Smokeview.
+point in declaring thermal properties because they are only to be used a flow tracers in Smokeview.
 
-\subsubsection{Massless Particles}
+\subsection{Massless Particles}
 
 The simplest use of Lagrangian particles is for visualization, in which case the
 particles are considered massless tracers. In this case, the particles are
@@ -6088,21 +6098,24 @@ colored by gas phase quantities, but rather by properties of the particle itself
 {\ct 'DROPLET\_TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
 rather than the local gas temperature.
 
-Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be silly since {\ct MASSLESS} particles are for visualization only.
+Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be pointless
+since {\ct MASSLESS} particles are for visualization only.
 
 
-\subsubsection{Static Particles or Droplets}
+\subsection{Static Particles or Droplets}
 
 {\ct STATIC} is a logical parameter indicating whether particles move or just serve
 as obstructions or clutter. Setting {\ct STATIC=.TRUE.} only makes sense in conjunction with a non-zero value of
 {\ct NUMBER\_INITIAL\_DROPLETS}. The default value of {\ct STATIC} is {\ct .FALSE.}
 
 
-\subsubsection{Water Droplets}
+\subsection{Water Droplets}
 
 {\ct WATER=.TRUE.} declares that the liquid droplets evaporate
-into {\ct WATER VAPOR}, a separate gas phase species that is {\em automatically} added to the calculation by this command. By default, {\ct WATER=.FALSE.}, even though the default
-properties of droplets are that of water. Setting {\ct WATER=.TRUE.} instructs FDS to add {\ct WATER VAPOR} as an explicitly defined species, and it also invokes appropriate constants
+into {\ct 'WATER VAPOR'}, a separate gas species that is {\em automatically} added to the calculation by this command.
+By default, {\ct WATER=.FALSE.}, even though the default
+properties of droplets are that of water. Setting {\ct WATER=.TRUE.} instructs FDS to add {\ct 'WATER VAPOR'} as an explicitly defined species,
+and it also invokes appropriate constants
 related to the absorption of thermal radiation by the water droplets.
 It also causes the droplets to be colored blue in Smokeview.
 
@@ -6110,45 +6123,13 @@ If the liquid droplets are to evaporate into some other gaseous species, you mus
 designate the appropriate {\ct SPEC\_ID} on the {\ct PART} line.
 
 
-\subsubsection{Fuel Droplets}
+\subsection{Fuel Droplets}
 
 {\ct FUEL=.TRUE.} indicates that the liquid droplets evaporate
-into fuel gas and burn. In this case, add the {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) of the fuel. Fuel droplets are colored yellow by default in Smokeview.
+into fuel gas and burn. In this case, add the {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) of the fuel to the {\ct PART} line. Fuel droplets are colored yellow by default in Smokeview.
 This feature only works for a mixture fraction-based combustion calculation, in which case the droplets evaporate into an equivalent amount of fuel
 vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}.
-
-\subsubsection{Particles that do not Evaporate}
-
-Unless you declare {\ct MASSLESS=.TRUE.} on the {\ct PART} line, it is assumed that the particle or droplet has mass and thermal properties that dictate its
-heat up and evaporation. To prevent evaporation, set {\ct EVAPORATE=.FALSE.} The particles will still heat up due to convection, but they will not
-shrink and no additional gaseous species need to be declared.
-
-Note that the absorption of thermal radiation by water ({\ct WATER=.TRUE.}) or fuel droplets ({\ct FUEL=.TRUE.}) is
-handled in FDS with fairly well-established physical sub-models, the details
-of which are contained in the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
-However, for arbitrary particles or droplets, there is no assumed radiative absorption.
-
-
-\section{Coloring Particles and Droplets}
-
-The parameter {\ct QUANTITIES} is an array of character strings indicating which
-scalar quantities should be used to color the particles or droplets when viewed as an
-animation. The choices are {\ct 'DROPLET\_TEMPERATURE'} ($^\circ$C), {\ct 'DROPLET\_DIAMETER'} ($\mu$m),
-{\ct 'DROPLET\_VELOCITY'} (m/s), {\ct 'DROPLET\_MASS'} (kg), {\ct 'DROPLET\_AGE'} (s).
-As a default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then
-Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or
-{\ct COLOR}. By default, water droplets are colored blue and fuel droplets yellow. All others are colored black.
-
-
-
-
-\section{Special Topic: Droplet Fuel Sprays}
-
-The evaporation of water droplets from sprinklers has been
-generalized so that a liquid fuel spray
-nozzle can be modeled. Fuel evaporation is triggered by the inclusion of the
-phrase {\ct FUEL=.TRUE.} on the appropriate {\ct PART} line.
-The spray nozzle characteristics are specified
+If a spray nozzle is used to generate the fuel droplets, its characteristics are specified
 in the same way as those for a sprinkler.
 
 \subsubsection{Example Case: spray\_burner}
@@ -6211,20 +6192,29 @@ at ambient temperature is enough to start the combustion process. In some sense,
 
 Note also that this feature is subject to mesh
 dependence. If the mesh cells are too coarse, the
-evaporating fuel is diluted to such a degree that it
-never burns. Proper resolution depends on the type of
+evaporating fuel can be diluted to such a degree that it
+may not burn. Proper resolution depends on the type of
 fuel and the amount of fuel being ejected from the
-nozzle.
+nozzle. Always test your burner at the resolution of your overall simulation.
 
-\begin{warning}
-Simulations with both fuel and water droplets are possible, unlike versions of FDS prior to 5.
-\end{warning}
+
+
+\subsection{Solid Particles that do not Evaporate}
+
+Unless you declare {\ct MASSLESS=.TRUE.} on the {\ct PART} line, it is assumed that the particle or droplet has mass and thermal properties that govern its
+heating and evaporation. To prevent evaporation, set {\ct EVAPORATE=.FALSE.} The particles will still heat up due to convection, but they will not
+shrink and no additional gaseous species need to be declared.
+
+Note that the absorption of thermal radiation by water ({\ct WATER=.TRUE.}) or fuel droplets ({\ct FUEL=.TRUE.}) is
+handled in FDS with fairly well-established physical sub-models, the details
+of which are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5}.
+However, for arbitrary particles or droplets, there is no assumed radiative absorption.
+
 
 
 \section{Special Topic: Suppression by Water (Mixture Fraction Model Only)}
 \label{info:suppression}
-\index{Sprinkler Suppression}
-\index{SURF!E\_COEFFICIENT}
+
 Modeling suppression of a fire by a water spray is challenging because
 the relevant physical mechanisms occur at length scales smaller than a
 single mesh cell. In the gas phase, flames are extinguished due to lowered
@@ -6239,7 +6229,8 @@ need to set any additional suppression parameters. It is assumed that
 water impinging on the fuel surface takes energy away from the
 pyrolysis process and thereby reduces the burning rate of the fuel.
 If the surface has been assigned a {\ct HRRPUA} (Heat Release Rate Per Unit Area),
-a parameter needs to be specified that governs the suppression of the fire by water.
+a parameter needs to be specified that governs the suppression of the fire by water because this type of simulated
+fire essentially acts like a gas burner whose flow rate is explicitly specified.
 An empirical way to account for fire suppression by water
 is to characterize the reduction of the pyrolysis rate in terms
 of an exponential function. The local mass loss rate of the
@@ -6258,7 +6249,7 @@ algorithm is invoked when the fuel is complicated, like a cartoned commodity.
 
 
 
-\clearpage
+
 
 \chapter{Devices and Control Logic}
 
@@ -6270,15 +6261,13 @@ quantity of the simulated environment, like a thermocouple, or they can represen
 of a complex sensor, like a smoke detector,
 and in some cases they can trigger events to happen, like a timer.
 
-Past versions of FDS used device specific namelist groups, like {\ct SPRK},
+Versions of FDS prior to FDS~5 used device-specific namelist groups, like {\ct SPRK},
 {\ct HEAT}, {\ct SMOD}, and {\ct THCP}, but the number and variety
 of fire-specific sensing and measurement devices continues to expand, and
 the data structures in FDS could not easily accommodate all possibilities.
 In addition, the logic associated with sensor activation and
 subsequent actions, like a vent opening, had become too complicated and prone to bugs.
-Devices are now specified with a new format that streamlines and expands the possibilities of sensor profiles.
-
-Starting in FDS 5, all devices, in the broadest sense of the word,
+Starting in FDS~5, all devices, in the broadest sense of the word,
 are designated via the namelist group {\ct DEVC}.
 In addition, advanced functionality and properties are accommodated
 via additional namelists groups called {\ct CTRL} (Control) and
@@ -6288,7 +6277,7 @@ via additional namelists groups called {\ct CTRL} (Control) and
 
 
 \section{Device Location and Orientation: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group (Table \ref{tbl:DEVC})}
-\label{info:DEVC} \index{DEVC} \index{DEVC}
+\label{info:DEVC}
 
 Regardless of the specific properties, each device needs to be sited either at a point within the computational domain, or
 over a span of the domain, like a beam smoke detector. For example, a sprinkler is sited within the domain with a line like:
@@ -6301,11 +6290,11 @@ over a span of the domain, like a beam smoke detector. For example, a sprinkler 
 
 \noindent
 The physical coordinates of the
-device are given by a triplet of real numbers {\ct XYZ} \index{DEVC!XYZ}.
+device are given by a triplet of real numbers, {\ct XYZ}.
 The properties of the device are contained on the {\ct PROP} line
-{\ct PROP\_ID}\index{DEVC!PROP\_ID}, which will be explained below for each of the
+designated by {\ct PROP\_ID}, which will be explained below for each of the
 special devices included in FDS.
-The character string {\ct ID} \index{DEVC!ID}is merely a descriptor to identify the
+The character string {\ct ID} is merely a descriptor to identify the
 device in the output files, and if any action is tied to its activation.
 
 Not all devices need to be associated with a particular set of properties via the {\ct PROP\_ID}. For example, pointwise
@@ -6318,22 +6307,22 @@ output quantities are specified with a single {\ct DEVC} line, like
 \normalsize
 
 \noindent
-which tells FDS to record the temperature at the given point as a function of time. The {\ct ID} is a label in the output file.
+which tells FDS to record the temperature at the given point as a function of time. The {\ct ID} is a label in the output file whose name
+is {\bf CHID\_devc.csv}.
 
 Some devices have a particular orientation which can be specified
 with various parameters; {\ct IOR}, {\ct ORIENTATION}, {\ct ROTATION}.
-{\ct IOR} or the Index of Orientation\index{DEVC!IOR}, is necessary for any device that is
+{\ct IOR} or the Index of Orientation, is necessary for any device that is
 placed on the surface of a solid. The values $\pm$1 or $\pm$2 or $\pm$3 indicate the direction
-that the device ``points'', where 1 is parallel to the X axis, 2 is parallel to the Y axis
-and 3 is parallel to the Z axis.
+that the device ``points'', where 1 is parallel to the $x$-axis, 2 is parallel to the $y$-axis
+and 3 is parallel to the $z$-axis.
 
-{\ct ORIENTATION}\index{DEVC!ORIENTATION} is used for devices that are not on a surface
+{\ct ORIENTATION} is used for devices that are not on a surface
 and require a directional specification, like a sprinkler. {\ct ORIENTATION} is specified with a
 triplet of real number values that indicate the components of the direction vector.
 The default value of {\ct ORIENTATION} is (0,0,-1).
-
 For example, a default downward-directed sprinkler spray can be redirected in other direction.
-If you were to prescribe,
+If you were to specify
 
 \footnotesize
 \begin{verbatim}
@@ -6350,15 +6339,14 @@ For other devices, the {\ct ORIENTATION} would only change the way the device is
 \section{Device Output}
 \label{info:out:DEVC}
 
-Each device has a {\ct QUANTITY} \index{DEVC!QUANTITY}associated with it.
+Each device has a {\ct QUANTITY} associated with it.
 The output file for all {\ct DEVC} quantities is a comma-delimited
-ASCII file called {\bf CHID\_devc.csv} \index{Output Files!\_devc.csv}
-(See Section~\ref{out:DEVC} for output file format.)
+ASCII file called {\bf CHID\_devc.csv}
+(See Section~\ref{out:DEVC} for output file format).
 This file can be imported into most spread sheet software packages.
 If the number of {\ct DEVC} lines exceeds 256, the limit of some spreadsheet
 applications, the output file will be split into appropriately sized smaller
-files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.}
-\index{DUMP!COLUMN\_DUMP\_LIMIT} on the {\ct DUMP} line.
+files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.} on the {\ct DUMP} line.
 
 By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds. This time increment is specified on the {\ct DUMP} line. Also, by default,
 a time-averaged value is written out for each quantity of interest. To prevent FDS from time-averaging the {\ct DEVC} output, add
@@ -6368,13 +6356,15 @@ a time-averaged value is written out for each quantity of interest. To prevent F
 \begin{warning}
 All devices must have a specified {\ct QUANTITY}.  Some special devices (Section~\ref{info:PROP}) have their {\ct QUANTITY}
 specified on a {\ct PROP} line.
-A {\ct QUANTITY} specified on a {\ct PROP} line associated with a {\ct DEVC} line will override an {\ct QUANTITY}
+A {\ct QUANTITY} specified on a {\ct PROP} line associated with a {\ct DEVC} line will override a {\ct QUANTITY}
 specified on the {\ct DEVC} line.
 \end{warning}
 
 
+\newpage
+
 \section{Special Devices and their Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
-\label{info:PROP} \index{PROP}
+\label{info:PROP}
 
 Many devices are fairly easy to describe, like a point measurement, with only a few parameters which can be included on the
 {\ct DEVC} line. However, for more complicated devices, it is inconvenient to list all of the properties on each and every
@@ -6389,7 +6379,6 @@ The best way to describe the {\ct PROP} group is to list the various special dev
 
 \subsection{Sprinklers}
 \label{info:sprinklers}
-\index{Device!Sprinkler} \index{sprinkler}
 
 Here is a very simple example of sprinkler:
 
@@ -6409,7 +6398,7 @@ are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean n
 another, so try to use {\ct ID}s that are as meaningful to you as possible.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does}
 have a specific meaning to FDS, directing it to compute the activation of
 the device using the standard RTI algorithm. The various sprinkler properties will be discussed below.
-\footnote{Past versions of FDS used a separate file to store
+\footnote{Prior to FDS~5, a separate file was used to store
 properties of a given sprinkler. This file is no longer used.}
 
 Properties associated with sprinklers included in the {\ct PROP} group are:
@@ -6433,7 +6422,7 @@ up and are transported independently of each other. (Default 0.05~m)
 by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the the droplet velocity is computed by dividing the
 flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often
 the user must fine-tune {\ct DROPLET\_VELOCITY} in order to reproduce certain spray profile.
-The {\ct ORIFICE\_DIAMETER} input is not used, if either {\ct DROPLET\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is given.
+The {\ct ORIFICE\_DIAMETER} input is not used if either {\ct DROPLET\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is specified.
 \item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed.
 The angles outline a conical spray pattern relative to the
 south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}.
@@ -6442,29 +6431,26 @@ the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, a
 the sprinkler is (0,0,-1), the default. The droplets are uniformly distributed within this belt.
 \item[{\ct SPRAY\_PATTERN\_TABLE}] Name of a set of {\ct TABL} lines containing the description of the spray pattern.
 \item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets.
-See Section~\ref{info:PART} for additional details.
+See Chapter~\ref{info:PART} for additional details.
 \item[{\ct PRESSURE\_RAMP}] The name of the {\ct RAMP} lines specifying the dependence of pipe pressure on the
 number of active sprinklers and nozzles.
 \end{description}
 
 \noindent
 Be aware that sprinklers produce many droplets that need to be
-tracked in the calculation. To limit the burden, sprinkler droplets disappear when they hit the
+tracked in the calculation. To limit the computational cost, sprinkler droplets disappear when they hit the
 lower boundary of the computational domain, regardless of whether it is solid
 or not. To stop FDS from removing sprinkler droplets from the lower boundary of the computational domain,
 add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} (Section~\ref{info:MISC}) line. Be aware, however, that
 droplets that land on the floor continue to move horizontally in randomly selected
 directions; bouncing off obstructions, and consuming CPU time.
 
-\noindent
-For more information about sprinklers, their activation and spray dynamics, is included in the FDS
-Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
+For more information about sprinklers, their activation and spray dynamics, read the FDS
+Technical Reference Guide~\cite{FDS_Math_Guide_5}.
 
 
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
 \label{info:spraypattern}
-\index{Spray Pattern}
-\index{sprinkler!Spray Pattern}
 
 If a more complex spray pattern is desired than can be achieved by using {\ct SPRAY\_ANGLE}, {\ct DROPLET\_VELOCITY},
 and {\ct FLOW\_RATE}, then a {\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL})
@@ -6488,7 +6474,7 @@ point of insertion.
 {\ct FRAC} the fraction of the total flow rate of liquid that should emerge from that particular solid angle.
 
 In the test case called {\bf bucket\_test\_2}, the spray pattern is defined as two jets, each with a velocity of 10~m/s and a flow rate
-of 60~L/min. The first jet contains 0.2 of the total, the second, 0.8 of the total.
+of 60~L/min. The first jet contains 0.2 of the total flow, the second, 0.8 of the total.
 The jets are centered at points 30$^\circ$ below the ``equator,'' and are separated by 180$^\circ$.
 
 \footnotesize
@@ -6505,8 +6491,7 @@ The jets are centered at points 30$^\circ$ below the ``equator,'' and are separa
 
 \begin{warning}
 \noindent
-Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Specific requirements on ordering the lines
-will depend upon the type of TABL and those requirements are provided in the appropriate section in this guide. Also note that
+Note that each set of {\ct TABL} lines must have a unique {\ct ID}.  Also note that
 the {\ct TABL} lines can be specified in any order.
 \end{warning}
 
@@ -6515,10 +6500,8 @@ the {\ct TABL} lines can be specified in any order.
 
 \subsubsection{Special Topic: Varying Pipe Pressure}
 \label{info:pressureramp}
-\index{Pipe Pressure}
-\index{Sprinkler!Pipe Pressure}
 
-In real sprinkler systems, the pipe pressure is affected by the number of open nozzles. Typically,
+In real sprinkler systems, the pipe pressure is affected by the number of actuated sprinklers. Typically,
 the pressure is higher than the design value when the first sprinkler activates, and decreases towards the design
 value and below that when more and more sprinklers are activated. The pipe pressure has an effect on flow rate,
 droplet velocity and droplet size distribution.
@@ -6548,22 +6531,22 @@ activates, 10.0 atm when two sprinklers are active, and 8.0 atm when three or mo
 number of active sprinklers, FDS accounts for all active sprinklers or nozzles with {\ct PART\_ID} associated with them.
 
 When pressure ramps are used, both {\ct FLOW\_RATE} and {\ct DROPLET\_VELOCITY} are associated with the
-{\ct OPERATING\_PRESSURE}. At leat two of the following three parameters affecting the flow rate should then be specified: {\ct FLOW\_RATE},
-{\ct K\_FACTOR} and {\ct OPERATING\_PRESSURE}. The flow rate is then given by $ \dm_w = K \sqrt{p}$ and droplet velocity
+{\ct OPERATING\_PRESSURE}. Specify either the {\ct FLOW\_RATE}, or the
+{\ct K\_FACTOR} and {\ct OPERATING\_PRESSURE}. In the latter case, the flow rate is given by $ \dm_w = K \sqrt{p}$ and droplet velocity
 by $v = C \sqrt{p}$.  If spray pattern table is used, the coefficient $C$ is determined separately for each line of the
 table. The median diameter of the particle size distribution is scaled as
 $d_m(p) = d_m(p_o)(p_o/p)^{1/3}$, where $p_o$ is the {\ct OPERATING\_PRESSURE}
-and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} at the corresponding {\ct PART} line.
+and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} on the corresponding {\ct PART} line.
 
 
 \subsection{Nozzles}
 \label{info:nozzles}
-\index{Device!Spray Nozzle}
 
 Nozzles are very much like sprinklers, only they do not activate based on the standard RTI model.
-To simulate a nozzle that activates at a given time, for example,
+To simulate a nozzle that activates at a given time,
 specify a {\ct QUANTITY} and {\ct SETPOINT} directly on the {\ct DEVC} line.
 The following lines:
+
 \footnotesize
 \begin{verbatim}
 &DEVC XYZ=23.91,21.28,0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME',
@@ -6576,17 +6559,14 @@ The following lines:
 \normalsize
 
 \noindent
-designate two nozzles of the same type, one which activates at zero seconds, the other at 5 s. Note that nozzles must have an
-associated {\ct PROP} line. The parameter {\ct PART\_ID} tells FDS to spray liquid droplets.
-
-
+designate two nozzles of the same type, one which activates at time zero, the other at 5~s. Note that nozzles must have a designated
+{\ct PROP\_ID}, and the {\ct PROP} line must have a designated {\ct PART\_ID} to describe the liquid droplets.
 
 
 \subsection{Heat Detectors}
 \label{info:heat_detectors}
-\index{Device!Heat Detector}
 
-{\ct QUANTITY='LINK TEMPERATURE'}, as in this example, defines a heat detector, which uses essentially the same activation algorithm as a sprinkler, without the water spray.
+{\ct QUANTITY='LINK TEMPERATURE'} defines a heat detector, which uses essentially the same activation algorithm as a sprinkler, without the water spray.
 
 \footnotesize
 \begin{verbatim}
@@ -6605,7 +6585,6 @@ $\sqrt{\hbox{m}\cdot \hbox{s}}$.
 
 \subsection{Smoke Detectors}
 \label{info:smoke_detector}
-\index{Device!Smoke Detector}
 
 A smoke detector is defined in the input file with an entry similar to:
 
@@ -6660,11 +6639,10 @@ Heskestad Ionization          & ---         & ---          &  1.8               
 
 By default, FDS assumes that the smoke from a fire is generated in direct proportion to the heat release rate. A value
 of {\ct SOOT\_YIELD=0.01} on the {\ct REAC} line means that the smoke generation rate is 0.01 of the fuel burning rate. The
-``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the mixture fraction
-variables that are explicitly tracked.
+``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the mixture fraction.
 
 Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of
-the HRR (or even in lieu of an actual fire, like a smouldering source). You also want to define a mass extinction coefficient for the
+the HRR (or even in lieu of an actual fire, like a smouldering source). You might also want to define a mass extinction coefficient for the
 smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using
 the ``SMOKE3D'' feature in Smokeview. Use the following lines:
 
@@ -6684,23 +6662,22 @@ the ``SMOKE3D'' feature in Smokeview. Use the following lines:
 \noindent
 The same smoke detector model is used that was described above. Only now, the mass fraction of your species {\ct 'MY SMOKE'} is used in the
 algorithm, rather than that associated with the mixture fraction. Note that your species will not participate in the radiation calculation. It
-will merely serve as a surrogate for smoke.
-
+will merely serve as a surrogate for smoke. Note also that if you specify explicitly a smoke surrogate, you should set {\ct SOOT\_YIELD=0} on the
+{\ct REAC} line to prevent FDS from including smoke as a mixture fraction species.
 
 
 
 \subsection{Beam Detection Systems}
 \label{info:beam_detector}
-\index{Device!Beam Detector}
 
-A beam detector can be defined by specifying the endpoints {\ct (x1,y1,z1),(x2,y2,z2)}, of the beam, using {\ct XB}, and the total
-total \% obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which mesh
-cells lie along the path specified by the two endpoints.  The beam detector response is evaluated as
+A beam detector can be defined by specifying the endpoints, {\ct (x1,y1,z1) and (x2,y2,z2)}, of the beam and the
+total percent obscuration at which the detector activates.  The two endpoints must lie in the same mesh.  FDS determines which mesh
+cells lie along the linear path defined by the two endpoints.  The beam detector response is evaluated as
 \be
   \hbox{Obscuration}  = \left(1 - \exp \left( -K_m \sum_{i=1}^N {\rho_{soot,i}\; \Delta x_i} \right)  \right) \times 100  \; \; \hbox{\%}
 \ee
-where $i$ is a mesh cell along the path of the beam, $\rho_{soot,i}$ is the soot density of the mesh cell, and $ \Delta x_i$
-is the distance within the mesh cell that is traversed by the beam.
+where $i$ is a mesh cell along the path of the beam, $\rho_{soot,i}$ is the soot density of the mesh cell, $ \Delta x_i$
+is the distance within the mesh cell that is traversed by the beam, and $K_m$ is the mass extinction coefficient. The line in the input file has the form:
 
 \footnotesize
 \begin{verbatim}
@@ -6708,44 +6685,50 @@ is the distance within the mesh cell that is traversed by the beam.
 \end{verbatim}
 \normalsize
 
-Since a single {\ct DEVC} cannot span more than one mesh, having a beam detector that crosses multiple meshes will require post processing by the user.  Break the beam detector into multiple {\ct DEVC} inputs, one for each mesh that the beam crosses.  The total obscuration is given by
-
+\noindent
+Since a single linear path cannot span more than one mesh, having a beam detector that crosses multiple meshes will require post processing.
+Break the beam detector path into multiple {\ct DEVC} lines, one for each mesh that the beam crosses.  The total obscuration is given by
 \be
-  \hbox{Obscuration}  = \left(1 -  \prod_{i=1}^N {1-output_i/100};  \right) \times 100  \; \; \hbox{\%}
+  \hbox{Obscuration}  = \left[ 1 -  \prod_{i=1}^N \left( 1-output_i/100 \right)  \right] \times 100  \quad \hbox{\%}
 \ee
-
-where $output_i$ is the FDS output for the beam detector {\ct DEVC}.
+where $output_i$ is the FDS output for the beam detector of the $i$th path and the symbol, $\prod$, indicates a product rather than a sum.
 
 \subsubsection{Example Case: {\bf beam\_detector}}
 
-A 10~m x 10~m x 4~m compartment is filled with 0.006~kg/kg of
-{\ct MIXTURE\_FRACTION\_2} with the default soot yield
-0.01~kg/kg.  This results in an initial soot density of 71.9~mg/m$^3$
-which using the default mass extinction coefficient of
-8700~m$^2$/kg results in an optical depth of 0.626~m$^{-1}$.  The
-compartment has a series of obstructions placed at varying depths that are
-multiples of 1~m.  Using the correlation for the output quantity
-{\ct visibility}, one obtains a visibility distance of 4.8~m.
-When viewing the smoke levels with Smokeview, one can just barely see
-the fifth obstacle which is at a distance of 5~m.
-Smokeview, therefore, is properly displaying the obscuration of the
-initial soot density.  Three beam detectors are also
+A 10~m by 10~m by 4~m compartment is filled with smoke, represented as 0.006~kg/kg of
+the mixture fraction species variable, {\ct MIXTURE\_FRACTION\_2}\footnote{In its default mode, the mixture fraction combustion
+model requires transport equations for two gas species -- {\ct MIXTURE\_FRACTION\_1} and {\ct MIXTURE\_FRACTION\_2}. The first
+is just the fuel gas, the second is a combination of the products of combustion.}. The default soot yield is
+0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$.
+Using the default mass extinction coefficient of
+8700~m$^2$/kg, the optical depth is calculated to be 0.626~m$^{-1}$.  The
+compartment has a series of obstructions located at increasing distance from the front in increments of
+1~m.  The correlation for the output quantity
+{\ct VISIBILITY}, Eq.~(\ref{vis}), produces a visibility distance of 4.8~m.
+When viewing the smoke levels with Smokeview, you should just barely see
+the fifth obstacle which is at a distance of 5~m from the front of the compartment.
+If this is the case, Smokeview is properly displaying the obscuration of the
+smoke.  Three beam detectors are also
 placed in the compartment.  These all have a path length of 10~m,
 but are at different orientations within the compartment.
 Using the optical depth of 0.626~m$^{-1}$ and the path length of
 10~m, the expected total obscuration is 99.81~\%, which is the
 result computed by FDS for each of the three detectors.
+
+\begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{FIGURES/beam_detector_nosmoke} &
 \includegraphics[width=3.2in]{FIGURES/beam_detector_smoke}
 \end{tabular*}
+\caption[Example of a beam detector.]{Output of the {\bf beam\_detector} test case.}
+\label{beam_detector}
+\end{figure}
 
 
 
 
 \subsection{Aspiration Detection Systems}
 \label{info:aspiration_detector}
-\index{Device!Aspiration Detector}
 
 An aspiration detection system groups together a series of soot measurement devices.
 An aspiration system consists of a sampling pipe network that draws air from a series of locations to a central point
@@ -6769,9 +6752,9 @@ used to specify the central detector:
 \normalsize
 
 \noindent
-where the {\ct DEVC\_ID} is used at each sampling point to reference the central detector, {\ct FLOWRATE} \index{DEVC!FLOWRATE}is the gas
-flow rate in kg/s, {\ct DELAY} \index{DEVC!DELAY}is the transport time (in seconds) from the sampling location to the central detector,
-{\ct BYPASS\_FLOWRATE} \index{DEVC!BYPASS\_FLOWRATE}is the flow rate in kg/s of any air drawn into the system from outside the computational
+where the {\ct DEVC\_ID} is used at each sampling point to reference the central detector, {\ct FLOWRATE} is the gas
+flow rate in kg/s, {\ct DELAY} is the transport time (in seconds) from the sampling location to the central detector,
+{\ct BYPASS\_FLOWRATE} is the flow rate in kg/s of any air drawn into the system from outside the computational
 domain (accounts for portions of the sampling network lying outside the domain defined by the {\ct MESH}
 inputs), and {\ct SETPOINT} is the alarm threshold obscuration in units of \%/m. The output of the aspiration system is
 computed as
@@ -6787,8 +6770,8 @@ A cubical compartment, 2~m on a side has a three
 sampling location aspiration system.  The three locations
 have equal flow rates of 0.3~kg/s, and
 transport times of 50, 100, and 150~s, respectively.  No bypass flow rate is
-specified for the aspiration detector.  1~kg/s of combustion products with {\ct SOOT\_YIELD=0.001} is input into
-the bottom of the compartment and 1~kg/s of total mass is removed from the top of the compartment.
+specified for the aspiration detector.  Combustion products are forced into the bottom of the compartment at a rate of 1~kg/s. The {\ct SOOT\_YIELD=0.001}.
+Mass is removed from the top of the compartment at a rate of 1~kg/s.
 The aspiration detector shows an increasing obscuration over time.  There is a delay of slightly over 50~s in
 the initial increase which results from the 50~s transport time for the first sampling location plus a short
 period of time to transport the combustion products to the sampling location.  The detector response has three plateaus
@@ -6798,9 +6781,9 @@ $3.493 \times 10^{-4}$~kg/m$^3$.  Using this value the plateaus are computed as 
 in Fig.~\ref{aspiration_detector}.
 
 \begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{FIGURES/aspiration_detector} &
-\end{tabular*}
+\begin{center}
+\includegraphics[width=4.in]{FIGURES/aspiration_detector}
+\end{center}
 \caption[Output of {\bf aspiration\_detector} test case.]{Output of {\bf aspiration\_detector} test case.}
 \label{aspiration_detector}
 \end{figure}
@@ -6885,7 +6868,7 @@ you can use any orientation, rather than just the 6 coordinate directions.
 
 \section{Basic Control Logic}
 \label{info:basic_control}
-\index{Controls!Using DEVC}
+
 Devices can be used to control various actions, like creating and removing obstructions, or activating and deactivating
 fans and vents. Every device has an associated {\ct QUANTITY}, whether it is included directly on the {\ct DEVC} line or
 indirectly on the optional {\ct PROP} line. Using the {\ct DEVC} parameter {\ct SETPOINT}, you can trigger an action to
@@ -6906,7 +6889,6 @@ is {\ct .FALSE.} For example, if an obstruction associated with the device is to
 If you desire to control FDS using more complex logic than can be provided
 by the use of a single device and its setpoint, control functions can be specified using the {\ct CTRL} input.
 See Section \ref{info:CTRL} for more on {\ct CTRL} functions.
-
 The simplest example of a device is just a timer:
 
 \footnotesize
@@ -6916,14 +6898,14 @@ The simplest example of a device is just a timer:
 \normalsize
 
 \noindent
-Anything associated with the device via the parameter, {\ct DEVC\_ID='my clock'}, will change its state at 30 seconds. For example,
+Anything associated with the device via the parameter, {\ct DEVC\_ID='my clock'}, will change its state at 30~s. For example,
 if the text were added to an {\ct OBST} line, that obstruction would change from its {\ct INITIAL\_STATE} of {\ct .FALSE.} to {\ct .TRUE.} after
-30 s. In other words, it would be created at 30 s instead of at the start of the simulation. This is a simple way to open a door or window.
+30~s. In other words, it would be created at 30~s instead of at the start of the simulation. This is a simple way to open a door or window.
 
 
 \subsection{Creating and Removing Obstructions}
 \label{info:create_remove}
-\index{Controls!Create and Remove Obstructions}
+
 In many fire scenarios, the opening or closing of a door or window
 can lead to dramatic changes in the course of the fire. Sometimes these
 actions are taken intentionally, sometimes as a result of the fire.
@@ -6998,29 +6980,29 @@ the {\ct VENT} via its {\ct SURF\_ID}. For example, to control a fan with the de
 \normalsize
 
 \noindent
-Note that at 30 seconds, the ``state'' of the {\ct 'FAN'} changes from {\ct .FALSE.} to {\ct .TRUE.}, or more simply, the {\ct 'FAN'} turns on. Since there
-is no explicit time function associated with the {\ct 'FAN'}, the default 1 second ramp-up will begin at 30 seconds instead of at 0 seconds.
+Note that at 30~s, the ``state'' of the {\ct 'FAN'} changes from {\ct .FALSE.} to {\ct .TRUE.}, or more simply, the {\ct 'FAN'} turns on. Since there
+is no explicit time function associated with the {\ct 'FAN'}, the default 1~s ramp-up will begin at 30~s instead of at 0~s.
 
-If in this example {\ct INITIAL\_STATE=.TRUE.}, then the fan should ``deactivate,'' or turn off at 30 seconds. Essentially, ``activation'' of a {\ct VENT} causes all associated
+If in this example {\ct INITIAL\_STATE=.TRUE.}, then the fan should ``deactivate,'' or turn off at 30~s. Essentially, ``activation'' of a {\ct VENT} causes all associated
 time functions to be delayed until the device {\ct SETPOINT} is reached. ``Deactivation'' of a {\ct VENT} turns off all time functions. Usually this means
 that the parameters on the {\ct SURF} line are all nullified, so it is a good idea to check the functionality with a simple example.
 
 
 \begin{warning}
 Until further notice, a {\ct 'MIRROR'} or {\ct 'OPEN'} {\ct VENT} should not be activated or deactivated.
-The reason for this restriction is that abrupt changes in pressure can cause numerical instabilities.
+You can, however, place an obstruction in front of an {\ct 'OPEN'} {\ct VENT} and then create it or remove it to model the closing or opening of a door or
+window.
 \end{warning}
 
 
 
-\clearpage
+\newpage
 
 \section{Advanced Control Functions: The \texorpdfstring{{\tt CTRL}}{CTRL} Namelist Group}
-\label{info:CTRL} \index{CTRL}
-\index{Controls}
+\label{info:CTRL}
 
 There are many systems whose functionality cannot be described by a simple device with a single ``setpoint.''
-Consider for example, a typical HVAC\index{HVAC} system.  It is controlled by a thermostat that is given a temperature setpoint.
+Consider for example, a typical HVAC system.  It is controlled by a thermostat that is given a temperature setpoint.
 The system turns on when the temperature goes below the setpoint by some
 amount and then turns off when the temperature rises above that same setpoint by some amount.
 This behavior can not be defined by merely specifying a single setpoint.
@@ -7029,19 +7011,17 @@ increasing or decreasing temperature activates the system.  For the HVAC example
 lower edge of the deadband activates heating; crossing the upper edge activates cooling.
 
 While HVAC is not the primary purpose of FDS, there are numerous situations where a system responds to
-the fire in non-trivial way.  The {\ct CTRL} \index{CTRL}input is used to define these more complicated behaviors.
+the fire in a non-trivial way.  The {\ct CTRL} input is used to define these more complicated behaviors.
 A control function will take as input the outputs of one or more devices and/or control functions.
 In this manner, complicated behaviors can be simulated by making functions of other functions.  For most of the
 control function types, the logical value output of the devices and control functions and the time they last changed
 state are used as the inputs.
 
-For any input that a  {\ct DEVC\_ID} can be specified for (such as {\ct OBST} or {\ct VENT}), a {\ct CTRL\_ID} can be
+For any object for which a {\ct DEVC\_ID} can be specified (such as {\ct OBST} or {\ct VENT}), a {\ct CTRL\_ID} can be
 specified instead.
-
 \begin{table}[h!]
-\index{Controls!Function List}
 \caption{Control function types for {\ct CTRL}}
-\label{tab:funcvalues} \index{CTRL!FUNCTION\_TYPE}
+\label{tab:funcvalues}
 \begin{center}
 \begin{tabular}{|l||l|}
 \hline
@@ -7059,14 +7039,13 @@ Function Type                     & Description   \\ \hline \hline
 \end{tabular}
 \end{center}
 \end{table}
-
-A control is identified by the {\ct ID} \index{CTRL!ID}parameter.  The inputs to the control are identified
-by the {\ct INPUT\_ID} \index{CTRL!INPUT\_ID}parameter.  {\ct INPUT\_ID} would be passed one or more {\ct ID} strings
+A control is identified by the {\ct ID} parameter.  The inputs to the control are identified
+by the {\ct INPUT\_ID} parameter.  {\ct INPUT\_ID} would be passed one or more {\ct ID} strings
 from either devices or other controls.
 
 
 If you want to design a system of controls and devices that involves multiple changes of state,
-include the attribute {\ct LATCH=.FALSE.} \index{CTRL!LATCH}on the relevant {\ct DEVC} or {\ct CTRL} input lines.
+include the attribute {\ct LATCH=.FALSE.} on the relevant {\ct DEVC} or {\ct CTRL} input lines.
 By default, devices and controls may only change state once, like a sprinkler activating or
 smoke detector alarming. {\ct LATCH=.TRUE.} by default for both devices and controls.
 
@@ -7090,12 +7069,12 @@ of four smoke detectors in a room has activated. Use input lines of the form:
 \normalsize
 
 \noindent
-The {\ct INITIAL\_STATE} \index{CTRL!INITIAL\_STATE}of the control function {\ct SD} is {\ct .TRUE.},
+The {\ct INITIAL\_STATE} of the control function {\ct SD} is {\ct .TRUE.},
 meaning that the obstruction exists initially. The ``change of state'' means that the obstruction is
-removed when \underline{any} \index{CTRL!FUNCTION\_TYPE!ANY} smoke detector alarms.  By default, the {\ct INITIAL\_STATE}
+removed when \underline{any} smoke detector alarms.  By default, the {\ct INITIAL\_STATE}
 of the control function {\ct SD} is {\ct .FALSE.}, meaning that the obstruction does not exist initially.
 
-Suppose that now you want the obstruction to be created (a door is closed, for example) after all \index{CTRL!FUNCTION\_TYPE!ALL}
+Suppose that now you want the obstruction to be created (a door is closed, for example) after all
 four smoke detectors in a room have activated. Use a control line of the form:
 
 \footnotesize
@@ -7105,10 +7084,7 @@ four smoke detectors in a room have activated. Use a control line of the form:
 \normalsize
 
 \noindent
-
-The control functions {\ct AT\_LEAST} and {\ct ONLY} are generalizations of {\ct ANY} and {\ct ALL}.
-
-For example,
+The control functions {\ct AT\_LEAST} and {\ct ONLY} are generalizations of {\ct ANY} and {\ct ALL}. For example,
 
 \footnotesize
 \begin{verbatim}
@@ -7118,13 +7094,9 @@ For example,
 \normalsize
 \noindent
 changes the state from {\ct .FALSE.} to {\ct .TRUE.} when \underline{at least}
-\index{CTRL!FUNCTION\_TYPE!AT\_LEAST}3 detectors activate.
-
-Note that in this example, and the example below, the parameter {\ct N} \index{CTRL!N}is used to
+3 detectors activate. Note that in this example, and the example below, the parameter {\ct N} is used to
 specify the number of activated or ``TRUE'' inputs required for the conditions
-of the Control Function to be satisfied.
-
-The control function,
+of the Control Function to be satisfied. The control function,
 
 \footnotesize
 \begin{verbatim}
@@ -7134,13 +7106,12 @@ The control function,
 \normalsize
 \noindent
 changes the state from {\ct .FALSE.} to {\ct .TRUE.} when 3,
-and \underline{only} \index{CTRL!FUNCTION\_TYPE!ONLY}3, detectors activate.
+and \underline{only} 3, detectors activate.
 
 
 \subsection{Control Function: \texorpdfstring{{\tt TIME\_DELAY}}{TIME\_DELAY}}
 
-There is often a time delay \index{CTRL!FUNCTION\_TYPE!TIME\_DELAY}\index{CTRL!DELAY}
-between when a device activates, and when some other action occurs, like in a dry pipe sprinkler system.
+There is often a time delay between when a device activates and when some other action occurs, like in a dry pipe sprinkler system.
 
 \footnotesize
 \begin{verbatim}
@@ -7153,28 +7124,21 @@ between when a device activates, and when some other action occurs, like in a dr
 \normalsize
 
 \noindent
-This relationship between a sprinkler \index{sprinkler}and its pipes means that the sprinkler spray is controlled (in this case delayed) by the
-{\ct dry pipe}, which adds 30 s to the activation time of {\ct Spk\_29}, measured by  {\ct Spk\_29\_link},
-before water can flow out of the head. %A more complicated function is given by the lines:
-
-%\footnotesize
-%\begin{verbatim}
-%&DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler', ID='Spk_29', CTRL_ID='dry pipe' /
-%&CTRL ID='dry pipe', FUNCTION_TYPE='CYCLING', INPUT_ID='Spk_29', CYCLE_TIME=30., CYCLES=5 /
-%\end{verbatim}
-%\normalsize
-
-%\noindent
-%Here, the sprinkler will cycle on and off 5 times for 30 s each time.
-
+This relationship between a sprinkler and its pipes means that the sprinkler spray is controlled (in this case delayed) by the
+{\ct 'dry pipe'}, which adds 30~s to the activation time of {\ct Spk\_29}, measured by  {\ct Spk\_29\_link},
+before water can flow out of the head.
 
 
 \subsection{Control Function: \texorpdfstring{{\tt DEADBAND}}{DEADBAND}}
 
-This control function behaves like an HVAC thermostat.  It can operating in one of two modes analagous to heating or cooling.  The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function, a {\ct DEADBAND}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'}, the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops below the lower value in {\ct DEADBAND} and reverts when it increases past the upper value, i.e. like a heating system.  The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e. like a cooling system.
+This control function behaves like an HVAC thermostat.  It can operate in one of two modes analagous to heating or cooling.
+The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function,
+a {\ct DEADBAND}, and the mode of operation by {\ct ON\_BOUND}.  If  {\ct ON\_BOUND='LOWER'},
+the function changes state from its {\ct INITIAL\_VALUE} when the value of the {\ct INPUT\_ID} drops
+below the lower value in {\ct DEADBAND} and reverts when it increases past the upper value, i.e. like a heating system.
+The reverse will occur if {\ct ON\_BOUND='UPPER'}, i.e. like a cooling system.
 
-For an HVAC\index{HVAC} example, the following lines of input would set up a simple thermostat\index{thermostat}:
-\index{CTRL!FUNCTION\_TYPE!DEADBAND}
+For an HVAC example, the following lines of input would set up a simple thermostat:
 
 \footnotesize
 \begin{verbatim}
@@ -7186,32 +7150,32 @@ For an HVAC\index{HVAC} example, the following lines of input would set up a sim
 \end{verbatim} \normalsize
 
 \noindent
-Here, we want to control the {\ct VENT} that simulates the {\ct FAN}\index{fan}, which blows hot air
+Here, we want to control the {\ct VENT} that simulates the {\ct FAN}, which blows hot air
 into the room. A {\ct DEVC} called {\ct TC} is positioned in the room to measure the {\ct TEMPERATURE}.
-The {\ct thermostat} uses a {\ct SETPOINT}\index{CTRL!SETPOINT} to turn on the
-{\ct FAN} when the temperature falls below 23~$^\circ$C ({\ct ON\_BOUND='LOWER'}) \index{CTRL!ON\_BOUND}
+The {\ct thermostat} uses a {\ct SETPOINT} to turn on the
+{\ct FAN} when the temperature falls below 23~$^\circ$C ({\ct ON\_BOUND='LOWER'})
 and it turns off when the temperature rises above 27~$^\circ$C.
 
 \begin{warning}
-Note that a deadband controller needs to have {\ct LATCH} set to {\ct .FALSE.} .
+Note that a deadband controller needs to have {\ct LATCH} set to {\ct .FALSE.}
 \end{warning}
 
 \subsection{Control Function: \texorpdfstring{{\tt RESTART} and {\tt KILL}} {RESTARTKILL} }
 
-There are times when one only wishes to run a simulation until some
+There are times when you might only want to run a simulation until some
 goal is reached.  Previously this could generally only be done by
 constantly monitoring the simulation's output and manually stopping
-the calculation when one observed  the goal being met.  By using the
-{\ct KILL} \index{CTRL!FUNCTION\_TYPE!KILL}control function this can be done automatically.
+the calculation when you determine that the goal has been reached.  The
+{\ct KILL} control function can do this automatically.
 
-Additionally there are analyses where one wishes to create some
-baseline condition and the run multiple permutations of that baseline.
-For example one may wish to run a series of simulations where
-different mitigation strategies are tried once a detector alarms.  By
-using the {\ct RESTART} \index{CTRL!FUNCTION\_TYPE!RESTART}
-control function, one can cause a restart file
+Additionally there are analyses where you might want to create some
+baseline condition and then run multiple permutations of that baseline.
+For example, you might want to run a series of simulations where
+different mitigation strategies are tested once a detector alarms.
+Using the {\ct RESTART}
+control function, you can cause a restart file
 to be created once a desired condition is met.  The simulation can
-continue and the restart files can be copied to have the {\ct CHID} of
+continue and the restart files can be copied to have the job identifying string, {\ct CHID}, of
 the various permutations (providing of course that the usual
 restrictions on the use of restart files are followed).
 For example, the lines
@@ -7226,8 +7190,8 @@ For example, the lines
 \end{verbatim} \normalsize
 
 \noindent
-will lead to the job being stopped gracefully, with restart files output, when the temperature at a given point rises above
-1000~$^\circ$C; or to just restart files being output when the velocity at a given point exceeds 10~m/s.
+will ``kill'' the job and output restart files when the temperature at the given point rises above
+1000~$^\circ$C; or just force restart files to be output when the velocity at a given point exceeds 10~m/s.
 
 
 
@@ -7239,14 +7203,14 @@ the devices and control functions and the time they last changed
 state are taken as inputs.  A {\ct CUSTOM} function uses the numerical output of a {\ct DEVC} along with
 a {\ct RAMP} to determine the output of the function.  When the {\ct RAMP} output for the {\ct DEVC} value is negative, the
 {\ct CTRL} will have the value of its {\ct INITIAL\_STATE}.  When the {\ct RAMP} output for the {\ct DEVC} value is positive, the
-{\ct CTRL} will have the opposite value of its {\ct INITIAL\_STATE}. In the case below, the {\ct CUSTOM} \index{CTRL!FUNCTION\_TYPE!CUSTOM}
+{\ct CTRL} will have the opposite value of its {\ct INITIAL\_STATE}. In the case below, the {\ct CUSTOM}
 control function uses the numerical output of a timer device as its input.  The function returns true (the default value for
 {\ct INITIAL\_STATE} is {\ct .FALSE.}) when the {\ct F} parameter
-in the ramp specified with {\ct RAMP\_ID}\index{CTRL!RAMP\_ID} is a positive value and
+in the ramp specified with {\ct RAMP\_ID} is a positive value and
 false when the {\ct RAMP} {\ct F} value is negative.
 In this case, the control would start false and would switch to
-true when the timer reaches 60 seconds.  It would then stay in a true
-state until the timer reaches 120 seconds and would then change back to false.
+true when the timer reaches 60~s.  It would then stay in a true
+state until the timer reaches 120~s and would then change back to false.
 
 \begin{warning}
 Note that when using control functions the {\ct ID}s assigned to both the
@@ -7255,7 +7219,7 @@ same {\ct ID} for both a control function and a device.
 \end{warning}
 
 \noindent
-In the HVAC\index{HVAC}
+In the HVAC
 example above, we could set the system to function
 on a fixed cycle by using a {\ct CUSTOM} control function based on time:
 
@@ -7298,7 +7262,7 @@ case before trying a case to make sure that FDS indeed is doing what is intended
 
 \subsection{Combining Control Functions: A Pre-Action Sprinkler System}
 
-For a pre-action sprinkler system\index{pre-action sprinkler system}, the normally
+For a pre-action sprinkler system, the normally
 dry sprinkler pipes are flooded when a detection event occurs. For this example, the detection event is
 when two of four smoke detectors alarm.  It takes 30~s to flood the piping network.
 The nozzle is a {\ct DEVC} named {\ct 'NOZZLE 1'} controlled by the {\ct CTRL} named {\ct 'nozzle trigger'}.
@@ -7322,7 +7286,7 @@ specified with {\ct QUANTITY='CONTROL'}.
 
 \subsection{Combining Control Functions: A Dry Pipe Sprinkler System}
 
-For a dry-pipe sprinkler system\index{dry-pipe sprinkler system}, the normally
+For a dry-pipe sprinkler system, the normally
 dry sprinkler pipes are pressurized with gas.  When a link activates in a sprinkler head, the pressure drop allows
 water to flow into the pipe network.  For this example it takes 30~s to flood the piping network once a sprinkler link
 has activated.  The sequence of events required for operation is first {\ct ANY} of the links must activate which
@@ -7351,7 +7315,7 @@ control functions, will then flow water.
 
 \chapter{Output Data}
 \label{info:outputdata}
-\index{Output}
+
 Before a calculation is started, carefully consider
 what information should be saved. All output quantities must be specified
 at the start of the calculation. In most cases, there is no way to
@@ -7388,7 +7352,7 @@ particles no longer are ejected automatically from burning surfaces.
 
 
 \section{Output Control Parameters: The \texorpdfstring{{\tt DUMP}}{DUMP} Namelist Group}
-\label{info:DUMP}\index{DUMP}
+\label{info:DUMP}
 
 The namelist group {\ct DUMP} contains parameters (Table \ref{tbl:DUMP}) that control the rate at which output files
 are written, and various other global parameters associated with output files.
@@ -7438,8 +7402,7 @@ the input file most of the FDS output data. A considerable amount of the input f
 
 
 \subsection{Device Output: The \texorpdfstring{{\tt DEVC}}{DEVC} Namelist Group}
-\index{Output!Point Measurements}
-\index{Output!Integrated Measurements}
+
 
 For many commonly used measurement devices there is no need to associate a
 specific {\ct PROP} line to the {\ct DEVC} entry. In such cases, use the character string
@@ -7513,7 +7476,7 @@ the centroid of the designated plane or volume.
 
 
 \subsection{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
-\label{info:PROF} \index{PROF}
+\label{info:PROF}
 
 FDS uses a fine, non-uniform, one-dimensional mesh at each boundary
 cell to compute heat transfer within a solid. The parameters
@@ -7524,8 +7487,6 @@ physical quantity to monitor, {\ct IOR} the orientation,
 and {\ct ID} an identifying character string. Here is an example of
 how you would use this feature to get a time history of temperature
 profiles within a given solid obstruction:
-\index{PROF!XYZ}
-\index{PROF!IOR}
 
 \footnotesize
 \begin{verbatim}
@@ -7533,9 +7494,8 @@ profiles within a given solid obstruction:
 \end{verbatim} \normalsize
 
 \noindent
-\index{PROF!QUANTITY}
-Other possible quantities are the total density of the wall ({\ct
-QUANTITY = 'DENSITY'}) or densities of solid material components ({\ct QUANTITY = 'MATL\_ID'}), where {\ct MATL\_ID} is the name of the
+Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of
+solid material components ({\ct QUANTITY = 'MATL\_ID'}), where {\ct MATL\_ID} is the name of the
 material.
 
 Each {\ct PROF} line creates a separate file. This may be more than is
@@ -7585,7 +7545,7 @@ calculation.
 
 
 \subsection{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}
-\label{info:SLCF}\index{SLCF}
+\label{info:SLCF}
 
 The {\ct SLCF} (``slice file'') namelist group parameters (Table~\ref{tbl:SLCF})
 allows you to record various gas phase quantities
@@ -7595,12 +7555,12 @@ The sextuplet {\ct XB} indicates the boundaries of the ``slice'' plane.
 {\ct XB} is prescribed as in the {\ct OBST} or {\ct VENT} groups, with
 the possibility that 0, 2, or 4 out of the 6 values be the same to
 indicate a volume, plane or line, respectively. A handy trick is to
-specify, for example, {\ct PBY=5.3} instead of {\ct XB} if it is desired\index{SLCF!PBX,PBY,PBZ}
+specify, for example, {\ct PBY=5.3} instead of {\ct XB} if it is desired
 that the entire plane $y=5.3$ slicing through the domain be saved.
 {\ct PBX} and {\ct PBZ} control planes perpendicular to the
 $x$ and $z$ axes, respectively.
 
-Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} \index{SLCF!VECTOR}If two {\ct SLCF}
+Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} If two {\ct SLCF}
 entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity
 component slices will be created.
 
@@ -7610,7 +7570,7 @@ set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-center
 feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes. Note also that this
 feature should only be used for scalar quantities that are computed at cell centers, like temperatures, mass fractions, {\em etc.}
 
-Slice file information is recorded in files (See Section~\ref{out:SLCF}) \index{Output!Slice File}
+Slice file information is recorded in files (See Section~\ref{out:SLCF})
 labeled {\bf CHID\_$n$.sf}, where $n$ is the index of the slice file.
 A short fortran program {\bf fds2ascii.f} produces a text file from a line,
 plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
@@ -7621,14 +7581,13 @@ plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
 
 
 \subsection{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
-\label{info:BNDF}\index{BNDF}
+\label{info:BNDF}
 
-The {\ct BNDF} (``boundary file'') \index{Output!Boundary File}
-\index{BNDF} namelist group parameters allows you
+The {\ct BNDF} (``boundary file'') namelist group parameters allows you
 to record surface quantities at all solid obstructions. As with
 the {\ct SLCF} group, each quantity is prescribed with a separate
 {\ct BNDF} line, and the output files are of the form {\bf CHID\_$n$.bf}.
-No physical coordinates need be specified, however, just {\ct QUANTITY}\index{BNDF!QUANTITY}.
+No physical coordinates need be specified, however, just {\ct QUANTITY}.
 See Table \ref{tab:output}. For certain output quantities, additional parameters need to be specified via
 the {\ct PROP} namelist group. In such cases, add the character string, {\ct PROP\_ID}, to the {\ct BNDF} line
 to tell FDS where to find the necessary extra information.
@@ -7652,9 +7611,9 @@ feature is mainly useful for diagnostics because it enables you to visualize the
 
 
 \subsection{Animated Isosurfaces: The \texorpdfstring{{\tt ISOF}}{ISOF} Namelist Group}
-\label{info:ISOF} \index{ISOF}
+\label{info:ISOF}
 
-The {\ct ISOF} (``ISOsurface File'') \index{Output!Isosurface File}namelist group is used to specify the output of
+The {\ct ISOF} (``ISOsurface File'') namelist group is used to specify the output of
 gas phase scalar quantities, as three dimensional animated contours.
 For example, a 300~$^\circ$C temperature isosurface shows where the gas temperature is
 300~$^\circ$C.
@@ -7678,7 +7637,7 @@ anyway. However, {\ct soot density} or {\ct oxygen} demand substantial amounts o
 
 
 \subsection{Plot3D Static Data Dumps}
-\label{info:PL3D}\index{Output!Plot3D}
+\label{info:PL3D}
 
 By default, flow field data in Plot3D format is output 5 times a run.
 Five quantities are written out to a file at one instant in time. The default specification is:
@@ -7722,7 +7681,6 @@ obtained elsewhere.
 \subsection{SMOKE3D: Realistic Smoke and Fire}
 
 \label{info:SMOKE3D}
-\index{Output!Smoke and Fire}
 
 When you do a fire simulation using the default mixture fraction combustion model, FDS automatically creates two output files that are rendered by
 Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'MASS FRACTION'} of {\ct 'soot'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume)
@@ -7763,7 +7721,7 @@ of the output quantities can be produced in a variety of ways.
 
 
 \subsection{Heat Release Rate}
-\label{info:HRR} \index{Output Files!\_hrr.csv}
+\label{info:HRR}
 
 Quantities associated with the overall energy budget are reported in
 the comma delimited file {\bf CHID\_hrr.csv}.  This file is
@@ -7989,7 +7947,7 @@ in buckets and the total mass determined at the end of a given time period. The 
 given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.
 
 Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$,
-is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line). \index{POROUS\_FLOOR!output issues}
+is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line).
 In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from
 the simulation for the purpose of saving CPU time.
 
@@ -8057,7 +8015,6 @@ the air, in units of kg/m$^3$.  {\ct 'DROPLET FLUX X'},  {\ct 'DROPLET FLUX Y'},
 of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
 
 \subsubsection{Local Spray Properties}
-\index{Output!PDPA output}
 \label{PDPA}
 
 Detailed experimental measurements of sprays are often performed using \underline{P}hase \underline{D}oppler \underline{P}article
@@ -8102,7 +8059,7 @@ time 5.0 s.
 
 
 \subsection{Interfacing with Structural Models}
-\label{info:AST} \index{Output!Adiabatic Surface Temperature}
+\label{info:AST}
 
 FDS solves a one-dimensional heat conduction equation for each
 boundary cell marking the interface between gas and solid, assuming
@@ -8145,7 +8102,7 @@ response) than FDS can provide.
 
 
 \subsection{Useful Solid Phase Outputs}
-\label{info:material_components} \index{Output!Material Components}
+\label{info:material_components}
 
 In addition to the {\ct PROF}ile output, there are various additional quantities that are useful for monitoring reacting
 surfaces. For example, {\ct 'WALL THICKNESS'} gives the overall thickness of the solid surface
@@ -8169,33 +8126,27 @@ density represents the mass of {\ct 'wood'} per unit volume of the mixture. Note
 
 \subsection{Fractional Effective Dose (FED)}
 \label{info:FED}
-\index{Output!FED}
 
 The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapasitation
 due to the combustion gases.  The present version of FDS uses only the concentrations of the gases CO, CO${}_2$, and O${}_2$ to
 calculate the FED value as
-%
 \be
-\mathrm{FED}_\mathrm{tot} = \mathrm{FED}_\mathrm{CO} \times
-\mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
+\mathrm{FED}_\mathrm{tot} = \mathrm{FED}_\mathrm{CO} \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
 \ee
 The fraction of an incapacitating dose of CO is calculated as
 \be
-\mathrm{FED}_\mathrm{CO} = 4.607 \cdot 10^{-7} (C_\mathrm{CO})^{1.036}
-\ t
+\mathrm{FED}_\mathrm{CO} = 4.607 \times 10^{-7} \, (C_\mathrm{CO})^{1.036} \ t
 \ee
 where $t$ is time in seconds and $C_\mathrm{CO}$ is the CO concentration (ppm).  The fraction of an incapacitating dose of low
 O${}_2$ hypoxia is calculated as
 \be
-\mathrm{FED}_\mathrm{O_2} =  \frac{t}{60 \exp \left [ 8.13-0.54 (20.9 -
-  C_\mathrm{O_2}) \right ] }
+\mathrm{FED}_\mathrm{O_2} =  \frac{t}{60 \exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}) \right ] }
 \ee
 where $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent).  The hyperventilation factor induced by carbon dioxide
 is calculated as
 \be
 \mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1930 \, C_\mathrm{CO_2} +  2.0004 ) }{7.1}
 \ee
-%
 where $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (percent).
 
 Note that the spatial integration features (Section~\ref{info:statistics}) cannot be used with FED output because FED makes
@@ -8204,7 +8155,6 @@ measurement.
 
 \subsection{Spatially-Integrated Outputs}
 \label{info:statistics}
-\index{Output!Statistics}
 
 A useful feature of a device ({\ct DEVC}) is to specify an output quantity along with a desired statistic. For example,
 
@@ -8328,7 +8278,6 @@ on the orientation of the door.
 
 \subsection{Temporally-Integrated Outputs}
 \label{info:time_integral}
-\index{Output!Time integral}
 
 In addition to the spatial statistics, a time integral of an {\ct DEVC} output can be computed by specifying
 {\ct STATISTICS = 'TIME INTEGRAL'} on the {\ct DEVC} line. This produces a discrete analog of
@@ -8380,7 +8329,7 @@ the actual volume fraction of CO, and the second line reports the output of a ga
 \normalsize
 
 \section{Extracting Numbers from the Output Data Files}
-\label{info:fds2ascii} \index{Output!fds2ascii}
+\label{info:fds2ascii}
 
 Often it is desired to present results of calculations in some form other
 than those offered by Smokeview. In this case, there is a short
@@ -8389,7 +8338,6 @@ called {\bf fds2ascii.exe}. To run the program, just type
 \begin{verbatim}
 fds2ascii
 \end{verbatim}
-\index{fds2ascii}
 at the command prompt. You will be asked a series of questions
 about which type of output file to process, what time interval to
 time average the data, and so forth. A single file is produced
@@ -8438,7 +8386,7 @@ be output to a file listed at the end of the session.
 
 \clearpage
 \section{Summary of Frequently-Used Output Quantities}
-\label{info:outputquantities} \index{Output!Summary of Quantities}
+\label{info:outputquantities}
 
 Table~\ref{tab:output}, spread over the following pages, summarizes the various Output Quantities.
 The column ``File Type'' lists the allowed output files for the quantities. ``B'' is for Boundary ({\ct BNDF}),
@@ -9857,7 +9805,7 @@ The syntax for these lines is fairly similar to past versions, with the followin
 \item Control parameters like {\ct T\_ACTIVATE}, {\ct HEAT\_REMOVE}, {\em etc.}, are now consolidated into {\ct DEVC\_ID} and
 {\ct CTRL\_ID}. In brief,
 any change to an obstruction, vent, or hole is tied to a specific device or control function. See Sections~\ref{info:DEVC} and
-\ref{info:CTRL} for details.\index{OBST!CTRL\_ID}\index{VENT!CTRL\_ID}\index{HOLE!CTRL\_ID}
+\ref{info:CTRL} for details.
 \end{itemize}
 
 
@@ -10579,8 +10527,4 @@ between 256 and 65536 (inclusive) and four bytes if {\ct ntriangles} is greater 
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
-%\printindex
-
 \end{document}
-
-% Just a test comment
