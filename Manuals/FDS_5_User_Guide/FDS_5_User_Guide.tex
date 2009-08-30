@@ -3293,7 +3293,7 @@ leads to a desired time history of the heat release rate.
 \clearpage
 
 
-\section{Describing Real Materials: The \texorpdfstring{{\tt MATL}}{MATL} Namelist Group}
+\section{Heat Conduction in Solids}
 \label{info:MATL}
 
 Specified temperature or heat flux boundary conditions are
@@ -3395,64 +3395,6 @@ filled with water. If the water is taken away, there is only about
 partially void wall, a higher density should be used for the pure
 brick.
 
-\subsubsection{Back Side Boundary Conditions}
-
-The layers of a solid boundary are listed in the order from the surface to the interior. By default,
-this innermost layer is assumed to back up to an air gap at ambient
-temperature. This is true even if the obstruction forms a wall in the model that backs up to another
-compartment. A good example of the default back side boundary condition is a sheet of gypsum board attached to wood studs.
-It is assumed that the back side of the gypsum board is an ambient temperature void space within the wall. It does not
-matter if the obstruction on which the boundary condition is applied is thick or thin.
-
-There are other back side boundary conditions that can be applied. One is to assume that the wall
-backs up to an insulated material in which case no heat is lost to
-the backing material. The expression {\ct BACKING='INSULATED'} on
-the {\ct SURF} line prevents any heat loss from the back side of the material. Use of this condition
-means that you  do not have to specify properties of the inner insulating material because it is assumed to
-be perfectly insulated.
-
-If the wall is assumed to back up to the room on the other side of
-the wall and you want FDS to calculate the heat transfer
-through the wall into the space behind the wall, the attribute
-{\ct BACKING='EXPOSED'} should be listed on the {\ct SURF} line. This feature only works
-if the wall is less than or equal to one mesh cell thick, and if there is a non-zero volume
-of computational domain on the other side of the wall. Obviously, if
-the wall is an external boundary of the domain, the heat is lost
-to an ambient temperature void.
-
-
-\subsubsection{Special Topic: Non-Planar Walls and Targets}
-
-All obstructions in FDS are assumed to conform to the rectilinear
-mesh, and all bounding surfaces are assumed to be flat
-planes. However, many objects, like cables, pipes, and ducts, are not
-flat. Even though these objects have to be represented in FDS as
-``boxes,'' you can still perform the internal heat transfer
-calculation as if the object were really cylindrical or spherical. For
-example, the input lines:
-
-\footnotesize
-\begin{verbatim}
-&OBST XB=0.0,5.0,1.1,1.2,3.4,3.5, SURF_ID='CABLE' /
-&SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
-\end{verbatim} \normalsize
-
-\noindent
-can be used to model a power cable that is 5~m long, cylindrical in
-cross section, 2~cm in diameter. The heat transfer calculation is
-still one-dimensional; that is, it is assumed that there is a uniform
-heat flux all about the object. This can be somewhat confusing because
-the cable is represented as an obstruction of square cross section,
-with a separate heat transfer calculation performed at each face, and
-no communication among the four faces. Obviously, this is not an ideal
-way to do solid phase heat transfer, but it does provide a reasonable
-bounding surface temperature for the gas phase calculation. More
-detailed assessment of a cable would require a two or
-three-dimensional heat conduction calculation, which is not included
-in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
-
-
-
 \subsection{Thermal Properties}
 
 For any solid material, specify its thermal
@@ -3492,23 +3434,179 @@ the radiation penetrate and absorb into the solid. Correspondingly,
 the emission of the material is based on the internal temperatures,
 not just the surface.
 
-\subsubsection{Fuel Burnout}
-
-The thermal properties of a solid or liquid fuel determine the length of time for which it can burn. In general, the
-burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_s$, and the
-layer thickness, $\delta_s$:
-\be t_b = \frac{\rho_s \, \delta_s}{\dm''} \ee
-However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be
-highlighted in the individual sections below.
 
 
 
-\subsection{Solid Fuels that Burn at a Specified Rate}
+\subsection{Back Side Boundary Conditions}
+
+The layers of a solid boundary are listed in the order from the surface to the interior. By default,
+this innermost layer is assumed to back up to an air gap at ambient
+temperature. This is true even if the obstruction forms a wall in the model that backs up to another
+compartment. A good example of the default back side boundary condition is a sheet of gypsum board attached to wood studs.
+It is assumed that the back side of the gypsum board is an ambient temperature void space within the wall. It does not
+matter if the obstruction on which the boundary condition is applied is thick or thin.
+
+There are other back side boundary conditions that can be applied. One is to assume that the wall
+backs up to an insulated material in which case no heat is lost to
+the backing material. The expression {\ct BACKING='INSULATED'} on
+the {\ct SURF} line prevents any heat loss from the back side of the material. Use of this condition
+means that you  do not have to specify properties of the inner insulating material because it is assumed to
+be perfectly insulated.
+
+If the wall is assumed to back up to the room on the other side of
+the wall and you want FDS to calculate the heat transfer
+through the wall into the space behind the wall, the attribute
+{\ct BACKING='EXPOSED'} should be listed on the {\ct SURF} line. This feature only works
+if the wall is less than or equal to one mesh cell thick, and if there is a non-zero volume
+of computational domain on the other side of the wall. Obviously, if
+the wall is an external boundary of the domain, the heat is lost
+to an ambient temperature void.
+
+
+\subsection{Initial and Back Side Temperature}
+
+By default, the initial temperature of the solid material is set to
+ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to
+specify a different initial temperature.
+Also, the back side temperature boundary condition of a solid can be
+set using the parameter {\ct TMP\_BACK} on the {\ct SURF}
+line. {\ct TMP\_BACK} is not the actual back side surface temperature,
+but rather the gas temperature to which the back side surface is exposed. This
+parameter has no meaning for surfaces with {\ct BACKING='EXPOSED'} or
+{\ct BACKING='INSULATED'}.
+
+\begin{warning}
+\noindent
+Note that the parameters {\ct TMP\_INNER} and {\ct TMP\_BACK} are only meaningful for solids with specified {\ct THICKNESS} and material
+properties (via the {\ct MATL\_ID} keyword).
+\end{warning}
+
+
+
+\subsection{Walls with Different Materials Front and Back}
+\label{info:EXPOSED}
+
+If you apply the attribute {\ct BACKING='EXPOSED'} on a {\ct SURF} line that is applied to a zero or one-cell thick
+obstruction, FDS calculates the heat conduction through the entire {\ct THICKNESS} and it uses the gas phase temperature
+and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction, so be
+careful how you specify multiple layers. If the layering is symmetric, the same {\ct SURF} line can be applied to both sides. However,
+if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply one to each side. For example, a hollow box column that is
+made of steel and covered on the outside by a layer of insulation material and a layer of plastic on top of the insulation material,
+would have to be described with two {\ct SURF} lines like the following:
+
+\footnotesize
+\begin{verbatim}
+&SURF ID                 = 'COLUMN EXTERIOR'
+      COLOR              = 'ANTIQUE WHITE'
+      BACKING            = 'EXPOSED'
+      MATL_ID(1:2,1)     = 'PLASTIC','INSULATION','STEEL'
+      THICKNESS(1:2)     = 0.002,0.036,0.0063 /
+
+&SURF ID                 = 'COLUMN INTERIOR'
+      COLOR              = 'BLACK'
+      BACKING            = 'EXPOSED'
+      MATL_ID(1:2,1)     = 'STEEL','INSULATION','PLASTIC'
+      THICKNESS(1:2)     = 0.0063,0.036,0.002 /
+\end{verbatim} \normalsize
+
+\noindent
+If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate {\ct MATL} lines,
+then you need to indicate which side of the column would generate the fuel vapor. In this case, the steel is impermeable; thus you should add the parameter
+{\ct LAYER\_DIVIDE=2.0} to the {\ct SURF} line labelled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the
+two first layers ({\ct 'PLASTIC'} and {\ct 'INSULATION'}) are to be driven out of that surface.
+You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF} line labelled {\ct 'COLUMN INTERIOR'} to indicate that no fuel
+vapors are to driven into the interior of the column. In fact, values from 0.0 to 1.0 would work equally because the material
+{\ct 'STEEL'} would not generate any fuel vapors.
+
+By default, {\ct LAYER\_DIVIDE} is 0.5 times the number of layers for surfaces with {\ct EXPOSED} backing, and equal to the number of
+layers for other surfaces.
+
+
+
+
+
+
+
+\subsection{Special Topic: Non-Planar Walls and Targets}
+
+All obstructions in FDS are assumed to conform to the rectilinear
+mesh, and all bounding surfaces are assumed to be flat
+planes. However, many objects, like cables, pipes, and ducts, are not
+flat. Even though these objects have to be represented in FDS as
+``boxes,'' you can still perform the internal heat transfer
+calculation as if the object were really cylindrical or spherical. For
+example, the input lines:
+
+\footnotesize
+\begin{verbatim}
+&OBST XB=0.0,5.0,1.1,1.2,3.4,3.5, SURF_ID='CABLE' /
+&SURF ID='CABLE', MATL_ID='PVC', GEOMETRY='CYLINDRICAL', THICKNESS=0.01 /
+\end{verbatim} \normalsize
+
+\noindent
+can be used to model a power cable that is 5~m long, cylindrical in
+cross section, 2~cm in diameter. The heat transfer calculation is
+still one-dimensional; that is, it is assumed that there is a uniform
+heat flux all about the object. This can be somewhat confusing because
+the cable is represented as an obstruction of square cross section,
+with a separate heat transfer calculation performed at each face, and
+no communication among the four faces. Obviously, this is not an ideal
+way to do solid phase heat transfer, but it does provide a reasonable
+bounding surface temperature for the gas phase calculation. More
+detailed assessment of a cable would require a two or
+three-dimensional heat conduction calculation, which is not included
+in FDS. Use {\ct GEOMETRY='SPHERICAL'} to describe a spherical object.
+
+
+\subsection{Special Topic: Solid Phase Numerical Gridding Issues}
+\label{info:solid_phase_stability}
+
+To compute the temperature and reactions inside the solids, FDS solves
+the one-dimensional heat transfer equation numerically. The size of
+the mesh cells on the surface of the solid is automatically chosen
+using a rule that makes the cell size smaller than the square root of
+the material diffusivity $(k/\rho c)$. By default, the solid mesh
+cells increase towards the middle of the material layer and are smallest
+on the layer boundaries.
+
+The default parameters are usually appropriate for simple heat
+transfer calculations but sometimes the use of pyrolysis reactions
+makes the temperatures and burning rate fluctuate. The numerical
+stability of the solid phase solution may then be improved by making
+the mesh density more uniform inside the material and by making the
+mesh cells smaller. Adjustments may also be needed in case of
+extremely transient heat transfer situations. Use {\ct STRETCH\_FACTOR=1.}
+on the {\ct SURF} line to have a perfectly uniform mesh. Values
+between 1 and 2 give different levels of stretching.  The size of
+all the mesh cells can be scaled by setting {\ct CELL\_SIZE\_FACTOR}
+less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR=0.5} makes the
+mesh cells half the size. Setting {\ct WALL\_INCREMENT=1} on the
+{\ct TIME} line forces the solid phase temperatures to be solved on every
+time step.
+
+If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
+the surface is going to shrink when the surface reacts. The shrinking behavior can be prevented in the numerical model
+by setting {\ct SHRINK=.FALSE.}
+on the {\ct SURF} line.  However, setting {\ct SHRINK=.FALSE.} may introduce numerical problems in the wall solver.
+When all the material of
+a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is
+set to {\ct TMP\_BACK}, convective heat flux
+to zero and burning rate to zero.
+
+See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
+
+
+\clearpage
+
+\section{Pyrolysis Models}
 
 FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely
 on the availability of material properties and the appropriateness of the underlying pyrolysis model. This
 section provides a description of the parameters that describe a burning solid material when the burning rate is known. In other
 words, you use these parameters to {\em specify} the burning rate.
+
+
+\subsection{Solid Fuels that Burn at a Specified Rate}
 
 Real objects, like furnishings, office equipment, and so on, are
 often difficult to describe via the {\ct SURF} and {\ct MATL}
@@ -3578,17 +3676,6 @@ a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal proper
 those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on
 the conditions of the surrounding environment.
 
-\subsubsection{Fuel Burnout}
-
-If a heat release rate {\ct RAMP} function is not included for a solid fuel that burns at a specified rate, the surface will continue to
-burn at the specified rate indefinitely with no fuel burnout.  If detailed heat release rate versus time data is not available, you
-can estimate the burnout time for a surface using the heat of combustion, $\Delta H$,
-material density, $\rho_s$, material thickness, $\delta_s$, and {\ct HRRPUA}, $\dq_f''$:
-\be t_{b} = \frac{\rho_s \, \delta_s \, \Delta H}{\dq''_f} \ee
-
-\begin{warning}
-\noindent Note that FDS does not automatically calculate the burnout time for solid fuels with specified heat release rates.
-\end{warning}
 
 
 
@@ -3657,7 +3744,8 @@ the temperature, $T_s$, of the $i$th material undergoing its $j$th reaction is g
   \dod{ }{t} \left( \frac{\rho_{s,i}}{\rho_{s0}} \right) =
   \left(\frac{\rho_{s,i}}{\rho_{s0}} \right)^{n_{s,ij}}
   A_{ij} \; \exp\left(-\frac{E_{ij}}{RT_s} \right) \;
-  \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}  \label{rr}
+  % \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}
+  \label{rr}
 \ee
 $\rho_{s,i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component
 divided by the volume of the layer.  $\rho_{s0}$ is the initial
@@ -3669,7 +3757,7 @@ $n_{s,ij}$ is the reaction order and prescribed under the name {\ct N\_S(j)}, an
 If the value of $n_s$ is not known, it is a good starting point to assume $n_s=1$.
 
 The pre-exponential factor, $A_{ij}$, is prescribed under the name
-{\ct A(j)}, with units of s$^{-1}$. $E_{ij}$, the activation energy,
+{\ct A(j)} on the {\ct MATL} line of the $i$th material, with units of s$^{-1}$. $E_{ij}$, the activation energy,
 is prescribed via {\ct E(j)} in units of kJ/kmol. Remember that 1~kcal
 is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify both $A$ and $E$, or neither. Do not specify
 only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
@@ -3677,29 +3765,7 @@ experiments, like TGA (Thermo-Gravimetric Analysis).
 
 It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known, there are several parameters that can
 be used by FDS to derive effective values. The most important parameter to specify in place of $A$ and $E$ is
-the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plots shown in Fig.~\ref{pyrolysis}. These curves represent
-\begin{figure}[ht]
-\noindent
-\begin{minipage}{3.5in}
-\includegraphics[width=3.5in]{FIGURES/pyrolysis_1}
-\end{minipage}
-\hfill
-\begin{minipage}{3.0in}
-\begin{align*}
-   \frac{dY}{dt} &= -A \, Y \, \exp(-E/RT)               & Y(0) &=1 \\
-   \frac{dT}{dt} &= \frac{5}{60} \quad \mathrm{K/s}      & T(0) &= 20+273 \; \mathrm{K} \\
-\end{align*}
-\begin{align*}
-   T_p &= 300+273 \quad \hbox{K}  \\
-   \Delta T &= 80 \quad \hbox{K}  \\
-   \nu_r &= 0 \\
-\end{align*}
-\end{minipage}
-\caption[Simple demonstration of pyrolysis model.]{The curve at left (blue) shows the mass loss for a solid material
-undergoing a slow heating. At right, the green curve shows the reaction rate, which is the first derivative of the
-mass loss curve.}
-\label{pyrolysis}
-\end{figure} \normalsize
+the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plot shown in Fig.~\ref{pyrolysis}. These curves represent
 the results of a hypothetical TGA experiment.
 The Mass Fraction (blue curve) is the normalized density of the material which decreases as the sample is slowly heated, in this case at a rate
 of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time. Where this curve peaks is referred to in FDS
@@ -3709,6 +3775,32 @@ FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is
 the temperature at which the mass fraction of the material
 decreases at its maximum rate within the context of a TGA or similar experimental apparatus.
 
+\begin{figure}[ht]
+\noindent
+\begin{minipage}{3.5in}
+\includegraphics[width=3.5in]{FIGURES/pyrolysis_1}
+\end{minipage}
+\hfill
+\begin{minipage}{3.0in}
+\begin{align*}
+   \frac{dY}{dt} &= -A \, Y \, \exp(-E/RT)                             & Y(0) &=1 \\
+   \frac{dT}{dt} &= \frac{5}{60} \; \frac{\mathrm{K}}{\mathrm{s}}      & T(0) &= 20+273 \; \mathrm{K} \\
+\end{align*}
+\begin{align*}
+   T_p &= 300+273 \; \mathrm{K}  \\
+   \Delta T &= 80 \; \mathrm{K}  \\
+   \nu_r &= 0 \\
+\end{align*}
+\end{minipage}
+\caption[Simple demonstration of pyrolysis model.]{The blue curve represents the normalized mass, $Y=\rho_s/\rho_{s0}$, of a solid material
+undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-dY/dt$. The system of ordinary differential equations that
+describe the transformation is shown at right. Note that the parameters $T_p$, $\Delta T$, and $\nu_r$ represent the ``reference'' temperature,
+pyrolysis temperature range, and residue yield of the single reaction. From these parameters, values of $A$ and $E$ can be estimated using
+the formulae in Eqs.~(\ref{r_p})-(\ref{A}).}
+\label{pyrolysis}
+\end{figure} \normalsize
+
+
 Two additional parameters can be specified along with {\ct REFERENCE\_TEMPERATURE} ($T_p$) to help to fine tune the shape of the reaction rate curve,
 assuming some sort of experiment has been done to indicate at what temperature, and
 over what temperature range, the reaction takes place. First, the {\ct HEATING\_RATE} ($\dot{T}$) is the rate at which the
@@ -3717,15 +3809,53 @@ of K/min. Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under 
 {\ct PYROLYSIS\_RANGE} ($\Delta T$) is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value
 is 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_p$, from which $E$, then $A$, can be calculated to ensure that
 the peak reaction rate occurs at the specified {\ct REFERENCE\_TEMPERATURE}.
-\begin{eqnarray}
-   r_p &=& \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_r) \\
-   E &=& \frac{r_p}{Y_p} \, \frac{R \, T_p^2}{\dot{T}} \\
-   A &=& \frac{r_p}{Y_p} \, e^{E/R \, T_p}
-\end{eqnarray}
+\begin{align}
+   r_p &= \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_r) \label{r_p} \\
+   E &= \frac{r_p}{Y_p} \, \frac{R \, T_p^2}{\dot{T}} \label{E} \\
+   A &= \frac{r_p}{Y_p} \, e^{E/R \, T_p} \label{A}
+\end{align}
 Note that $\nu_r$ is the yield of solid residue.
 Note also that $Y_p$ is the mass fraction (blue curve in Fig.~\ref{pyrolysis}) at the temperature where the reaction rate is its maximum. It is 0.4 by default and not
-adjustable.
-When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}.
+adjustable. When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}.
+
+For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} would have the form:
+
+\footnotesize
+\begin{verbatim}
+&MATL ID                       = 'My Fuel'
+      ...
+      HEAT_OF_COMBUSTION       = ...
+      N_REACTIONS              = 1
+      NU_FUEL(1)               = 1.
+      REFERENCE_TEMPERATURE(1) = 350.
+      HEAT_OF_REACTION(1)      = ... /
+\end{verbatim}
+\normalsize
+
+\noindent
+Note that the argument {\ct (1)} has been added to the reaction parameters to
+emphasize the fact that these parameters are stored in arrays of
+length equal to {\ct N\_REACTIONS}. If there is only one reaction, you
+need not include the {\ct (1)}, but it is a good habit to get into.
+Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released
+per unit mass of fuel gas that mixes with oxygen and combusts.  This
+has nothing to do with the pyrolysis process, so why is it specified
+here? The answer is that there can be only one {\em gas phase}
+reaction of fuel and oxygen in FDS, but there can be dozens of
+different materials and dozens of {\em solid phase} reactions. To
+ensure that the fuel vapors from different materials combust to
+produce the proper amount of energy, it is very important to specify a
+{\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss
+rate of fuel gases is automatically adjusted so that the effective
+mass loss rate multiplied by the single, global, gas phase heat of
+combustion produces the expected heat release rate.
+If, for example, the {\ct HEAT\_OF\_COMBUSTION} specified on the {\ct REAC} line is twice that
+specified on the {\ct MATL} line, the mass of contained within wall
+cell will be decremented by that determined by the pyrolysis model,
+but the mass added to gas phase would be reduced by 50~\%. A different
+value of heat of combustion can be specified for each reaction and
+each gaseous species using the notation {\ct HEAT\_OF\_COMBUSTION(j,s)}, as explained in Section~\ref{nu_gas}.
+
 
 \begin{warning}
 \noindent Note that versions of FDS from 5.0 through 5.3 used a slightly different definition of {\ct REFERENCE\_TEMPERATURE} in addition to
@@ -3733,7 +3863,7 @@ a parameter called {\ct REFERENCE\_RATE}. The latter has been removed and its us
 \end{warning}
 
 The solid phase reaction represented by Fig.~\ref{pyrolysis} is very simple -- a single, homogenous material is heated and gasified completely. In general, real materials are not
-so simple. First, they consist of more than one material, each of which react over a particular temperature interval, and some of which leave behind a solid residue.
+so simple. First, they consist of more than one material component, each of which can react over a particular temperature interval, and some of which leave behind a solid residue.
 Some material components may even undergo multiple reactions that form different residues, like woods that form various amounts of tar, char, and ash, depending on the
 rate of heating. Figure~\ref{pyrolysis_2}
 demonstrates a more complicated material than the one previously described. It is a hypothetical material that contains 10~\% (by mass) water and 90~\% combustible material.
@@ -3741,10 +3871,31 @@ The water evaporates in the neighborhood of 100~$^\circ$C and the rest pyrolyzes
 solid residue.
 
 \begin{figure}[ht]
-\center{\includegraphics[width=4.0in]{FIGURES/pyrolysis_2}}
-\caption[A more complicated demonstration of the pyrolysis model.]{The mass loss (blue curve) and reaction rate (green curve) for a material that
-contains 10~\% water (by mass) that evaporates off near 100~$^\circ$C, and 90~\% combustible that pyrolyzes near 300~$^\circ$C, leaving a 20~\% (by mass)
-residue behind.}
+\noindent
+\begin{minipage}{3.5in}
+\includegraphics[width=3.5in]{FIGURES/pyrolysis_2}
+\end{minipage}
+\hfill
+\begin{minipage}{3.0in}
+\footnotesize
+\begin{align*}
+   \frac{dY_1}{dt} &= -A_{1,1} \, Y_1 \, \exp(-E_{1,1}/RT)                  & Y_1(0) &=0.1 \\
+   \frac{dY_2}{dt} &= -A_{2,1} \, Y_2 \, \exp(-E_{2,1}/RT)                  & Y_2(0) &=0.9 \\
+   \frac{dY_3}{dt} &= -\nu_{r,2,1} \frac{dY_2}{dt}                    & Y_3(0) &=0.0 \\
+   \frac{dT}{dt}   &= \frac{5}{60} \; \frac{\mathrm{K}}{\mathrm{s}} & T(0) &= 20+273 \; \mathrm{K} \\
+\end{align*}
+\begin{align*}
+   T_{p,1,1} &= 100+273 \; \mathrm{K}  & T_{p,2,1} &= 300+273 \; \mathrm{K} \\
+   \Delta T_{1,2} &= 10 \; \mathrm{K}    & \Delta T_{2,1} &= 80 \; \mathrm{K} \\
+   \nu_{r,1,1} &= 0                    & \nu_{r,2,1} &= 0.2 \\
+\end{align*}
+\end{minipage} \normalsize
+\caption[A more complicated demonstration of the pyrolysis model.]{The blue curve represents the combined mass fraction, $\sum Y_i$, and the green
+curve the net reaction rate, $-d/dt(\sum Y_i)$, for a material that contains 10~\% water (by mass) that evaporates at a temperature of 100~$^\circ$C,
+and 90~\% combustible material that pyrolyzes at 300~$^\circ$C, leaving a 20~\% (by mass) residue behind. Note that the numbered subscripts refer
+to the material component and the reaction, respectively. In this case, there are three material components, and the first two each undergo a single
+reaction. The third material component is formed as a residue of the reaction of the second material. The system of ordinary differential equations that governs
+the transformation of the materials is shown at right.}
 \label{pyrolysis_2}
 \end{figure}
 
@@ -3808,29 +3959,192 @@ reactions like the vaporization of water. For other reactions, it must
 be determined empirically.
 
 
-\subsubsection{Special Topic: The ``Threshold'' Temperature}
+%\subsubsection{Special Topic: The ``Threshold'' Temperature}
 
-$T_{thr,ij}$ is an optional ``threshold'' temperature that
-allows the definition of non-Arrhenius pyrolysis functions and
-ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
-By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero;
-thus, the last term of Equation~\ref{rr} does not affect the pyrolysis rate.
-The term can be used to describe a threshold temperature for the pyrolysis
-reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
-is equal to 0 at temperatures below $T_{thr,ij}$ and 1 at temperatures above.
-$n_{t,j}$ is prescribed under the name {\ct N\_T(j)}.
+%$T_{thr,ij}$ is an optional ``threshold'' temperature that
+%allows the definition of non-Arrhenius pyrolysis functions and
+%ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
+%By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero;
+%thus, the last term of Equation~\ref{rr} does not affect the pyrolysis rate.
+%The term can be used to describe a threshold temperature for the pyrolysis
+%reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
+%is equal to 0 at temperatures below $T_{thr,ij}$ and 1 at temperatures above.
+%$n_{t,j}$ is prescribed under the name {\ct N\_T(j)}.
+
+%\begin{warning}
+%\noindent
+%Remember that all temperatures are specified in degrees Celsius, but are then converted to
+%degrees Kelvin within the program. Thus, the formulae in this section ought to be interpreted in terms of the absolute temperature.
+%\end{warning}
+
+
+
+
+
+
+
+
+
+
+
+\subsection{Liquid Fuels}
+
+For a liquid fuel, the thermal properties are similar to those of a solid
+material, with a few exceptions. The evaporation rate of the fuel
+is governed by the Clausius-Clapeyron equation (see FDS Technical Reference
+Guide for details). The drawback of this approach is that the fuel
+mass flux is not an explicit function of temperature, but rather an
+iterative result depending on the temperature and flow conditions. To
+initiate the evaporation, an initial value of the fuel vapor volume
+flux is needed. If the initial value is (relatively) high, the evaporation
+starts regardless of any ignition source, and the the fuel begins
+burning at once.
+
+Here is an example of a steel pan filled with a thin layer of ethanol. Note that the material
+properties are not all traceable to a measurement.
+
+\footnotesize
+\begin{verbatim}
+&MATL ID                     = 'ETHANOL LIQUID'
+      EMISSIVITY             = 1.0
+      NU_FUEL                = 0.97
+      HEAT_OF_REACTION       = 880.
+      CONDUCTIVITY           = 0.17
+      SPECIFIC_HEAT          = 2.45
+      DENSITY                = 787.
+      ABSORPTION_COEFFICIENT = 40.
+      BOILING_TEMPERATURE    = 76. /
+
+&MATL ID            = 'STEEL'
+      EMISSIVITY    = 1.0
+      DENSITY       = 7850.
+      CONDUCTIVITY  = 45.8
+      SPECIFIC_HEAT = 0.46 /
+
+&MATL ID            = 'CONCRETE'
+      DENSITY       = 2200.
+      CONDUCTIVITY  = 1.2
+      SPECIFIC_HEAT = 0.88 /
+
+&SURF ID        = 'ETHANOL POOL'
+      FYI       = '4 kg of ethanol in a 0.7 m x 0.8 m pan'
+      COLOR     = 'YELLOW'
+      MATL_ID   = 'ETHANOL LIQUID','STEEL','CONCRETE'
+      THICKNESS = 0.0091,0.001,0.05
+      TMP_INNER = 18. /
+\end{verbatim} \normalsize
+
+\noindent
+The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
+pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the
+phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent
+heat of vaporization. The gaseous fuel yield, {\ct NU\_FUEL}, is 0.97 instead of 1 to account for
+impurities in the liquid that do not take part in the combustion process.
+
+The thermal conductivity, density and specific heat are used to
+compute the loss of heat into the liquid via conduction using the
+same one-dimensional heat transfer equation that is used for solids. Obviously,
+the convection of the liquid is important, but is not considered in
+the model.
+
+The initial value of the fuel vapor volume flux can be specified using
+the parameter {\ct INITIAL\_VAPOR\_FLUX}. Its default value is
+$5\cdot10^{-4}$~m$^3/$(sm$^2$).
+
+Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
+denotes the absorption in depth of thermal radiation. Liquids do not
+just absorb radiation at the surface, but rather over a thin layer
+near the surface. Its effect on the burning rate is significant.
 
 \begin{warning}
 \noindent
-Remember that all temperatures are specified in degrees Celsius, but are then converted to
-degrees Kelvin within the program. Thus, the formulae in this section ought to be interpreted in terms of the absolute temperature.
+In the current implementation of the liquid fuel model, the
+evaporation rate is strongly grid dependent. Thus, it should be used
+with caution.
 \end{warning}
 
 
 
 
+\subsection{Fuel Burnout}
 
-\subsubsection{Testing Your Pyrolysis Model}
+The thermal properties of a solid or liquid fuel determine the length of time for which it can burn. In general, the
+burnout time is a function of the mass loss rate, $\dot{m}''$, the density, $\rho_s$, and the
+layer thickness, $\delta_s$:
+\be t_b = \frac{\rho_s \, \delta_s}{\dm''} \ee
+However, each type of pyrolysis model handles fuel burnout in a slightly different way. These differences will be
+highlighted in the individual sections below.
+
+\subsubsection{Solid Fuel Burnout}
+
+If a heat release rate {\ct RAMP} function is not included for a solid fuel that burns at a specified rate, the surface will continue to
+burn at the specified rate indefinitely with no fuel burnout.  If detailed heat release rate versus time data is not available, you
+can estimate the burnout time for a surface using the heat of combustion, $\Delta H$,
+material density, $\rho_s$, material thickness, $\delta_s$, and {\ct HRRPUA}, $\dq_f''$:
+\be t_{b} = \frac{\rho_s \, \delta_s \, \Delta H}{\dq''_f} \ee
+Use the {\ct RAMP} function to stop the burning once the calculated burnout time is reached.
+
+
+The burnout time of a reacting solid fuel is calculated automatically by FDS based on the
+layer {\ct THICKNESS}, component {\ct DENSITY}, and the calculated burning rate.
+
+
+\subsubsection{Liquid Fuel Burnout}
+
+The burnout time of a liquid fuel is calculated automatically based on the liquid layer {\ct THICKNESS}, liquid {\ct DENSITY}, and the calculated burning rate.
+
+
+\subsubsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
+\label{info:BURN_AWAY}
+
+If a burning object is to disappear from the calculation once it is consumed, set {\ct BURN\_AWAY=.TRUE.} on the corresponding
+{\ct SURF} line. The solid object disappears from the calculation cell by cell, as the mass contained by each mesh cells is consumed
+either by the pyrolysis reactions or by the prescribed HRR.  The mass of each mesh cell is the cell face area multiplied by the
+surface density of the {\ct SURF} type.
+
+The following issues should be kept in mind when using {\ct BURN\_AWAY}:
+\begin{itemize}
+\item  For reacting surfaces, the surface density is computed as a sum of the layer densities multiplied by the layer thicknesses.
+This value can be over-ridden by setting {\ct SURFACE\_DENSITY} on the {\ct SURF} line. For surfaces with prescribed HRR
+({\ct HRRPUA}), {\ct SURFACE\_DENSITY} parameter is the only way of defining the mass of the object.
+\item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant
+amount of extra memory has to be set aside to store additional surface information as the rectangular block is
+eaten away.
+\item If {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the entire object, not just a face of the object
+because it is unclear how to handle edges of solid obstructions that have different {\ct SURF\_ID}s on different faces.
+\item If the volume of the obstruction changes because it has to conform to the uniform mesh,
+FDS does {\bf not} adjust the burning rate to account for this as it does with various quantities associated with areas,
+like {\ct HRRPUA}.
+\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be applied to the {\ct OBST} rather than the {\ct SURF} line. This parameter is used
+to determine the combustible mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted
+object. This parameter over-rides all other parameters from which a combustible mass would be calculated.
+\item The mass of the object is based on the densities of the all material components ({\ct MATL}), but it is only consumed by mass fluxes of
+the {\bf known} species. If the sum of the gaseous yields (Section~\ref{nu_gas}) is less than one, it will take longer to consume the mass.
+\end{itemize}
+
+\subsubsection{Example Case: box\_burn\_away}
+
+This is a silly example of a solid block of ``foam'' that is pyrolyzed
+until it is completely consumed. The heat flux is generated by placing
+hot surfaces around the box. There is no combustion.  The properties
+of the block of foam were chosen simply to assure a quick
+calculation. The objective of the test is to check that the integrated
+burning rate is consistent with the material properties of the block.
+The block is 0.4~m on a side, with a density of 20~kg/m$^3$.  The
+integrated burning rate (written to box\_burn\_away\_hrr.csv) for a 60 s
+calculation ought to be:
+\be
+(0.4)^3 \; \hbox{m}^3 \times 20 \; \hbox{kg/m}^3 = 1.28 \; \hbox{kg}
+\ee
+
+
+
+
+
+
+\newpage
+
+\section{Testing Your Pyrolysis Model}
 \label{solid_phase_verification}
 
 Real materials that can burn can be very complicated. Undoubtedly, the {\ct SURF} and {\ct MATL} lines in the
@@ -3882,59 +4196,6 @@ that the calculation and the experiment are not necessarily perfectly
 matched. The calculation is designed to eliminate uncertainties
 related to convection, combustion, and apparatus-specific phenomena.
 \end{enumerate}
-
-
-
-\subsubsection{Examples}
-
-Here is an example of a material that burns in the neighborhood of 350~$^\circ$C,
-converting all its mass to fuel gases ({\ct NU\_FUEL=1.}).
-
-\footnotesize
-\begin{verbatim}
-&MATL ID                       = 'My Fuel'
-      FYI                      = 'Properties completely fabricated'
-      SPECIFIC_HEAT            = 1.0
-      CONDUCTIVITY             = 0.1
-      DENSITY                  = 100.0
-      HEAT_OF_COMBUSTION       = 15000.
-      N_REACTIONS              = 1
-      NU_FUEL(1)               = 1.
-      REFERENCE_TEMPERATURE(1) = 350.
-      HEAT_OF_REACTION(1)      = 3000. /
-\end{verbatim}
-\normalsize
-
-\noindent
-Note that the argument {\ct (1)} has been added to the reaction parameters to
-emphasize the fact that these parameters are stored in arrays of
-length equal to {\ct N\_REACTIONS}. If there is only one reaction, you
-need not include the {\ct (1)}, but it is a good habit to get into.
-Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released
-per unit mass of fuel gas that mixes with oxygen and combusts.  This
-has nothing to do with the pyrolysis process, so why is it specified
-here? The answer is that there can be only one {\em gas phase}
-reaction of fuel and oxygen in FDS, but there can be dozens of
-different materials and dozens of {\em solid phase} reactions. To
-ensure that the fuel vapors from different materials combust to
-produce the proper amount of energy, it is very important to specify a
-{\ct HEAT\_OF\_COMBUSTION} for each material. That way, the mass loss
-rate of fuel gases is automatically adjusted so that the effective
-mass loss rate multiplied by the single, global, gas phase heat of
-combustion produces the expected heat release rate.
-If, for example, the {\ct HEAT\_OF\_COMBUSTION} specified on the {\ct REAC} line is twice that
-specified on the {\ct MATL} line, the mass of contained within wall
-cell will be decremented by that determined by the pyrolysis model,
-but the mass added to gas phase would be reduced by 50~\%. A different
-value of heat of combustion can be specified for each reaction and
-each gaseous species using the notation {\ct HEAT\_OF\_COMBUSTION(j,s)}, as explained in Section~\ref{nu_gas}.
-
-\subsubsection{Fuel Burnout}
-
-The burnout time of a reacting solid fuel is calculated automatically based on the
-layer {\ct THICKNESS}, component {\ct DENSITY}, and the calculated burning rate.
-
-
 
 
 
@@ -4231,239 +4492,6 @@ would probably not improve upon the given model. The properties given in this ex
 are almost completely fabricated. What is important here are the
 {\ct HEAT\_OF\_REACTION} and {\ct REFERENCE\_TEMPERATURE}, obtained in
 most cases by a bench-scale measurement device like the cone calorimeter.
-
-
-
-
-
-
-
-\subsection{Liquid Fuels}
-
-For a liquid fuel, the thermal properties are similar to those of a solid
-material, with a few exceptions. The evaporation rate of the fuel
-is governed by the Clausius-Clapeyron equation (see FDS Technical Reference
-Guide for details). The drawback of this approach is that the fuel
-mass flux is not an explicit function of temperature, but rather an
-iterative result depending on the temperature and flow conditions. To
-initiate the evaporation, an initial value of the fuel vapor volume
-flux is needed. If the initial value is (relatively) high, the evaporation
-starts regardless of any ignition source, and the the fuel begins
-burning at once.
-
-Here is an example of a steel pan filled with a thin layer of ethanol. Note that the material
-properties are not all traceable to a measurement.
-
-\footnotesize
-\begin{verbatim}
-&MATL ID                     = 'ETHANOL LIQUID'
-      EMISSIVITY             = 1.0
-      NU_FUEL                = 0.97
-      HEAT_OF_REACTION       = 880.
-      CONDUCTIVITY           = 0.17
-      SPECIFIC_HEAT          = 2.45
-      DENSITY                = 787.
-      ABSORPTION_COEFFICIENT = 40.
-      BOILING_TEMPERATURE    = 76. /
-
-&MATL ID            = 'STEEL'
-      EMISSIVITY    = 1.0
-      DENSITY       = 7850.
-      CONDUCTIVITY  = 45.8
-      SPECIFIC_HEAT = 0.46 /
-
-&MATL ID            = 'CONCRETE'
-      DENSITY       = 2200.
-      CONDUCTIVITY  = 1.2
-      SPECIFIC_HEAT = 0.88 /
-
-&SURF ID        = 'ETHANOL POOL'
-      FYI       = '4 kg of ethanol in a 0.7 m x 0.8 m pan'
-      COLOR     = 'YELLOW'
-      MATL_ID   = 'ETHANOL LIQUID','STEEL','CONCRETE'
-      THICKNESS = 0.0091,0.001,0.05
-      TMP_INNER = 18. /
-\end{verbatim} \normalsize
-
-\noindent
-The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
-pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the
-phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent
-heat of vaporization. The gaseous fuel yield, {\ct NU\_FUEL}, is 0.97 instead of 1 to account for
-impurities in the liquid that do not take part in the combustion process.
-
-The thermal conductivity, density and specific heat are used to
-compute the loss of heat into the liquid via conduction using the
-same one-dimensional heat transfer equation that is used for solids. Obviously,
-the convection of the liquid is important, but is not considered in
-the model.
-
-The initial value of the fuel vapor volume flux can be specified using
-the parameter {\ct INITIAL\_VAPOR\_FLUX}. Its default value is
-$5\cdot10^{-4}$~m$^3/$(sm$^2$).
-
-Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
-denotes the absorption in depth of thermal radiation. Liquids do not
-just absorb radiation at the surface, but rather over a thin layer
-near the surface. Its effect on the burning rate is significant.
-
-\begin{warning}
-\noindent
-In the current implementation of the liquid fuel model, the
-evaporation rate is strongly grid dependent. Thus, it should be used
-with caution.
-\end{warning}
-
-\subsubsection{Fuel Burnout}
-
-The burnout time of a liquid fuel is calculated automatically based on the liquid layer {\ct THICKNESS}, liquid {\ct DENSITY}, and the calculated burning rate.
-
-
-
-
-
-\subsection{Special topic: Two-Sided Burning}
-\label{info:EXPOSED}
-
-If you apply the attribute {\ct BACKING='EXPOSED'} on a {\ct SURF} line that is applied to a zero or one-cell thick
-obstruction, FDS calculates the heat conduction through the entire {\ct THICKNESS} and it uses the gas phase temperature
-and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction, so be
-careful how you specify multiple layers. If the layering is symmetric, the same {\ct SURF} line can be applied to both sides. However,
-if the layering is not symmetric, you must create two separate {\ct SURF} lines and apply one to each side. For example, a hollow box column that is
-made of steel and covered on the outside by a layer of insulation material and a layer of plastic on top of the insulation material,
-would have to be described with two {\ct SURF} lines like the following:
-
-\footnotesize
-\begin{verbatim}
-&SURF ID                 = 'COLUMN EXTERIOR'
-      COLOR              = 'ANTIQUE WHITE'
-      BACKING            = 'EXPOSED'
-      MATL_ID(1:2,1)     = 'PLASTIC','INSULATION','STEEL'
-      THICKNESS(1:2)     = 0.002,0.036,0.0063 /
-
-&SURF ID                 = 'COLUMN INTERIOR'
-      COLOR              = 'BLACK'
-      BACKING            = 'EXPOSED'
-      MATL_ID(1:2,1)     = 'STEEL','INSULATION','PLASTIC'
-      THICKNESS(1:2)     = 0.0063,0.036,0.002 /
-\end{verbatim} \normalsize
-
-\noindent
-If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate {\ct MATL} lines,
-then you need to indicate which side of the column would generate the fuel vapor. In this case, the steel is impermeable; thus you should add the parameter
-{\ct LAYER\_DIVIDE=2.0} to the {\ct SURF} line labelled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the
-two first layers ({\ct 'PLASTIC'} and {\ct 'INSULATION'}) are to be driven out of that surface.
-You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF} line labelled {\ct 'COLUMN INTERIOR'} to indicate that no fuel
-vapors are to driven into the interior of the column. In fact, values from 0.0 to 1.0 would work equally because the material
-{\ct 'STEEL'} would not generate any fuel vapors.
-
-By default, {\ct LAYER\_DIVIDE} is 0.5 times the number of layers for surfaces with {\ct EXPOSED} backing, and equal to the number of
-layers for other surfaces.
-
-
-
-\subsection{Special topic: Making Fuels Disappear (BURN\_AWAY)}
-\label{info:BURN_AWAY}
-
-If a burning object is to disappear from the calculation once it is consumed, set {\ct BURN\_AWAY=.TRUE.} on the corresponding
-{\ct SURF} line. The solid object disappears from the calculation cell by cell, as the mass contained by each mesh cells is consumed
-either by the pyrolysis reactions or by the prescribed HRR.  The mass of each mesh cell is the cell face area multiplied by the
-surface density of the {\ct SURF} type.
-
-The following issues should be kept in mind when using {\ct BURN\_AWAY}:
-\begin{itemize}
-\item  For reacting surfaces, the surface density is computed as a sum of the layer densities multiplied by the layer thicknesses.
-This value can be over-ridden by setting {\ct SURFACE\_DENSITY} on the {\ct SURF} line. For surfaces with prescribed HRR
-({\ct HRRPUA}), {\ct SURFACE\_DENSITY} parameter is the only way of defining the mass of the object.
-\item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant
-amount of extra memory has to be set aside to store additional surface information as the rectangular block is
-eaten away.
-\item If {\ct BURN\_AWAY} is prescribed, the {\ct SURF} should be applied to the entire object, not just a face of the object
-because it is unclear how to handle edges of solid obstructions that have different {\ct SURF\_ID}s on different faces.
-\item If the volume of the obstruction changes because it has to conform to the uniform mesh,
-FDS does {\bf not} adjust the burning rate to account for this as it does with various quantities associated with areas,
-like {\ct HRRPUA}.
-\item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be applied to the {\ct OBST} rather than the {\ct SURF} line. This parameter is used
-to determine the combustible mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted
-object. This parameter over-rides all other parameters from which a combustible mass would be calculated.
-\item The mass of the object is based on the densities of the all material components ({\ct MATL}), but it is only consumed by mass fluxes of
-the {\bf known} species. If the sum of the gaseous yields (Section~\ref{nu_gas}) is less than one, it will take longer to consume the mass.
-\end{itemize}
-
-\subsubsection{Example Case: box\_burn\_away}
-
-This is a silly example of a solid block of ``foam'' that is pyrolyzed
-until it is completely consumed. The heat flux is generated by placing
-hot surfaces around the box. There is no combustion.  The properties
-of the block of foam were chosen simply to assure a quick
-calculation. The objective of the test is to check that the integrated
-burning rate is consistent with the material properties of the block.
-The block is 0.4~m on a side, with a density of 20~kg/m$^3$.  The
-integrated burning rate (written to box\_burn\_away\_hrr.csv) for a 60 s
-calculation ought to be:
-\be
-(0.4)^3 \; \hbox{m}^3 \times 20 \; \hbox{kg/m}^3 = 1.28 \; \hbox{kg}
-\ee
-
-
-
-
-\subsection{Special Topic: Initial and Backside Boundary Conditions}
-
-By default, the initial temperature of the solid material is set to
-ambient temperature. Use {\ct TMP\_INNER} on the {\ct SURF} line to
-specify a different initial temperature.
-Also, the backside temperature boundary condition of a solid can be
-set using the parameter {\ct TMP\_BACK} on the {\ct SURF}
-line. {\ct TMP\_BACK} is not the actual backside surface temperature,
-but the gas temperature that the surface transfer heat with. This
-parameter has no meaning for surfaces with {\ct BACKING='EXPOSED'} or
-{\ct BACKING='INSULATED'}.
-
-\begin{warning}
-\noindent
-Note that the parameters {\ct TMP\_INNER} and {\ct TMP\_BACK} are only meaningful for solids with specified {\ct THICKNESS} and material
-properties (via the {\ct MATL\_ID} keyword).
-\end{warning}
-
-\subsection{Special Topic: Numerical Accuracy and Stability}
-\label{info:solid_phase_stability}
-
-To compute the temperature and reactions inside the solids, FDS solves
-the one-dimensional heat transfer equation numerically. The size of
-the mesh cells on the surface of the solid is automatically chosen
-using a rule that makes the cell size smaller than the square root of
-the material diffusivity $(k/\rho c)$. By default, the solid mesh
-cells increase towards the middle of the material layer and are smallest
-on the layer boundaries.
-
-The default parameters are usually appropriate for simple heat
-transfer calculations but sometimes the use of pyrolysis reactions
-makes the temperatures and burning rate fluctuate. The numerical
-stability of the solid phase solution may then be improved by making
-the mesh density more uniform inside the material and by making the
-mesh cells smaller. Adjustments may also be needed in case of
-extremely transient heat transfer situations. Use {\ct STRETCH\_FACTOR=1.}
-on the {\ct SURF} line to have a perfectly uniform mesh. Values
-between 1 and 2 give different levels of stretching.  The size of
-all the mesh cells can be scaled by setting {\ct CELL\_SIZE\_FACTOR}
-less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR=0.5} makes the
-mesh cells half the size. Setting {\ct WALL\_INCREMENT=1} on the
-{\ct TIME} line forces the solid phase temperatures to be solved on every
-time step.
-
-If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
-the surface is going to shrink when the surface reacts. The shrinking behavior can be prevented in the numerical model
-by setting {\ct SHRINK=.FALSE.}
-on the {\ct SURF} line.  However, setting {\ct SHRINK=.FALSE.} may introduce numerical problems in the wall solver.
-When all the material of
-a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is
-set to {\ct TMP\_BACK}, convective heat flux
-to zero and burning rate to zero.
-
-See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
-
-
 
 
 
@@ -5084,7 +5112,7 @@ at ambient pressure. Now the fan flow rate ought to balance the sum of the flow 
 
 
 
-\chapter{User-Specified Functions: The \texorpdfstring{{\tt RAMP}}{RAMP} and \texorpdfstring{{\tt TABL}}{TABL} Namelist Groups}
+\chapter{User-Specified Functions}
 \label{info:RAMP}
 \label{info:TABL}
 
@@ -5841,7 +5869,7 @@ possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on 
 
 \clearpage
 
-\chapter{Particles and Droplets: The \texorpdfstring{{\tt PART}}{PART} Namelist Group}
+\chapter{Particles and Droplets}
 \label{info:PART}
 
 Lagrangian particles\footnote{Throughout this section, the terms ``droplets'' and ``particles'' are used interchangeably. From the point of view of
@@ -8952,10 +8980,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of reaction                         & kJ/kg             & 0.     \\ \hline
 {\ct INITIAL\_VAPOR\_FLUX}    & Real        & Initial evaporation rate                  & m$^2$/(sm$^2$)    & 0.0005   \\ \hline
 {\ct ID     }                 & Character   & IDentifier                                &                   &        \\ \hline
-{\ct THRESHOLD\_TEMPERATURE}  & Real array  & Threshold temperatures                    & $^\circ$C         & -273.15 \\ \hline
+%{\ct THRESHOLD\_TEMPERATURE}  & Real array  & Threshold temperatures                    & $^\circ$C         & -273.15 \\ \hline
 {\ct N\_REACTIONS}            & Character   & Number of Reactions                       &                   & 0      \\ \hline
 {\ct N\_S}                    & Real array  & Exponents of mass fraction                &                   & 1.     \\ \hline
-{\ct N\_T}                    & Real array  & Exponents of temperature                  &                   & 0.     \\ \hline
+%{\ct N\_T}                    & Real array  & Exponents of temperature                  &                   & 0.     \\ \hline
 {\ct NU\_FUEL}                & Real array  & Fuel gas yields                           & kg/kg             & 0.     \\ \hline
 {\ct NU\_GAS(:,II)}           & Real array  & Yields of species {\ct II}                & kg/kg             & 0.     \\ \hline
 {\ct NU\_RESIDUE}             & Real array  & Residue yields                            & kg/kg             & 0.     \\ \hline
