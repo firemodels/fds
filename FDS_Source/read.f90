@@ -5091,6 +5091,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (.NOT.EVACUATION_ONLY(NM)) EVACUATION = .FALSE.
       IF (     EVACUATION_ONLY(NM)) EVACUATION = .TRUE.
       IF (     EVACUATION_ONLY(NM)) REMOVABLE = .FALSE.
+      IF (EVACUATION_ONLY(NM).AND. .NOT.ALL(EVACUATION_ONLY)) OUTLINE = .TRUE.
  
       ! Read the OBST line
 
@@ -5395,6 +5396,7 @@ MESH_LOOP: DO NM=1,NMESHES
                ! Make obstruction invisible if it's within a finer mesh
  
                DO NOM=1,NM-1
+                  IF (EVACUATION_ONLY(NOM)) CYCLE
                   IF (XB1>MESHES(NOM)%XS .AND. XB2<MESHES(NOM)%XF .AND. &
                       XB3>MESHES(NOM)%YS .AND. XB4<MESHES(NOM)%YF .AND. &
                       XB5>MESHES(NOM)%ZS .AND. XB6<MESHES(NOM)%ZF) OB%COLOR_INDICATOR=-2

@@ -1600,8 +1600,8 @@ CONTAINS
          IF (COUNT_ONLY) PEX%COUNT_ONLY = .TRUE.
          PEX%EVAC_ID = EVAC_ID
          PEX%PERS_ID = PERS_ID
+         IF (COUNT_ONLY  ) SHOW = .FALSE.
          PEX%SHOW    = SHOW
-         IF (COUNT_ONLY  ) PEX%SHOW = .FALSE.
          PEX%HEIGHT = HEIGHT
 
          !       PEX%COLOR_INDEX = Mod(Max(0,COLOR_INDEX-1),7) + 1 ! 1-7 always
