@@ -2650,7 +2650,21 @@ parameters {\ct DX0}, {\ct DY0}, and {\ct DZ0}.
 \label{fig:mult}
 \end{figure}
 
-A slightly more complicated use of this feature is demonstrated by the following short input file:
+A generalization of this idea is to replace the parameters, {\ct DX}, {\ct DY}, and {\ct DZ}, with a sextuplet called {\ct DXB}. 
+The six entries in {\ct DXB} increment the respective values of the obstruction coordinates given by {\ct XB}. For example,
+define the lower $y$ bound of the original obstruction by {\ct XB(3,0)}. The $n$th obstruction would be: 
+
+\footnotesize
+\begin{verbatim}
+XB(3,N) = XB(3,0) + N*DXB(3)
+\end{verbatim}
+\normalsize
+
+\noindent
+Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct N}. This more flexible input scheme allows you to create, for example,
+a slanted roof in which the individual roof segments shorten as they ascend to the top. 
+This feature is demonstrated by the following short input file that creates a hollowed out pyramid using the four perimeter obstructions that form the
+outline of its base:
 
 \footnotesize
 \begin{verbatim}
@@ -3703,17 +3717,7 @@ solid phase pyrolysis, for example ``Thermal Decomposition of Polymers,'' by Hir
 A solid surface in FDS can consist of multiple layers with multiple material
 components per layer. The material components are described via {\ct MATL} lines and are specified on the {\ct SURF}
 line that describes the structure of the solid.  Each {\ct MATL} can undergo several reactions that may
-occur at different temperatures.
-In the model, each reaction can produce a (single) solid {\ct RESIDUE},
-water vapor, and/or fuel gas. For example, the evaporation of water
-from a solid material is described by the ``reaction'' that converts
-liquid water to water vapor. This reaction occurs in the neighborhood of 100~$^\circ$C and
-produces only water vapor. It does not produce a solid {\ct RESIDUE}
-nor fuel gas. However, a pyrolyzing solid might undergo a reaction
-that produces a solid {\ct RESIDUE}, water vapor, {\em and} fuel gas, all as part of the single reaction step.
-
-For each {\ct MATL} entry in the input file, decide how many reactions
-it can undergo. It may not undergo any -- it may only just heat
+occur at different temperatures. It may not undergo any -- it may only just heat
 up. However, if it is to change form via one or more reactions,
 designate the number of reactions with the integer {\ct N\_REACTIONS}. It is very important that you designate {\ct N\_REACTIONS}
 or else FDS will ignore all parameters associated with
@@ -3723,15 +3727,20 @@ multiple material components are undergoing individual reactions at distinct tem
 reactions for each material is 10 and the chain of consecutive
 reactions may contain up to 20 steps.
 
-Each reaction produces a (single) solid {\ct RESIDUE}, water vapor, and/or fuel gas. This information is conveyed
+For a given {\ct MATL}, the $j$th reaction can produce a (single) solid whose name is {\ct RESIDUE(j)},
+plus water vapor, and/or fuel gas. For example, the evaporation of water
+from a solid material is described by the ``reaction'' that converts
+liquid water to water vapor. This reaction occurs in the neighborhood of 100~$^\circ$C and
+produces only water vapor. It does not produce a solid {\ct RESIDUE}
+nor fuel gas. However, a pyrolyzing solid might undergo a reaction
+that produces a solid {\ct RESIDUE}, water vapor, {\em and} fuel gas, all as part of the single reaction step.
+This information is conveyed
 to FDS via the {\em yields}: {\ct NU\_RESIDUE(j)}, {\ct NU\_WATER(j)},
 and {\ct NU\_FUEL(j)}, respectively. The integer {\ct j} indicates to which
 reaction the parameters apply. If, like the evaporation of water,
 only water vapor is produced, set {\ct NU\_WATER(j)=1.0} and the other
-two to zero. The yields are all zero by default. If {\ct
-NU\_RESIDUE(j)} is non-zero, then you {\em must} indicate what the
-solid residue is via {\ct RESIDUE(j)}, the {\ct ID} of another {\ct
-MATL} that is also listed in the input file. Ideally, the sum of the
+two to zero. The yields are all zero by default. If {\ct NU\_RESIDUE(j)} is non-zero, then you {\em must} indicate what the
+solid residue is via {\ct RESIDUE(j)}, the {\ct ID} of another {\ct MATL} that is also listed in the input file. Ideally, the sum of the
 yields should add to 1, meaning that the mass of the reactant is
 conserved. However, there are times when it is convenient to have the
 yields sum to something less than one. For example, the spalling or
@@ -3745,19 +3754,20 @@ as explained in Section~\ref{nu_gas}.
 
 \subsubsection{The Reaction Rates}
 
-For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate.  The reaction rate at
-the temperature, $T_s$, of the $i$th material undergoing its $j$th reaction is given by:
+For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate. The general evolution equation for 
+a material undergoing one or more reactions is: 
 \be
-  r_{ij} =
-  \dod{ }{t} \left( \frac{\rho_{s,i}}{\rho_{s0}} \right) =
-  \left(\frac{\rho_{s,i}}{\rho_{s0}} \right)^{n_{s,ij}}
-  A_{ij} \; \exp\left(-\frac{E_{ij}}{RT_s} \right) \;
+  \dod{Y_{s,i}}{t} = - \sum_{j=1}^{N_{r,i}} r_{ij} + \sum_{i'=1}^{N_m} \sum_{j=1}^{N_{r,i'}} \nu_{s,i'j} \; r_{i'j} \quad (i' \neq i)  \quad ; \quad
+  r_{ij} = A_{ij} \; Y_{s,i}^{n_{s,ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_s} \right) \quad ; \quad Y_{s,i} = \left( \frac{\rho_{s,i}}{\rho_{s0}} \right) 
   % \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}
   \label{rr}
 \ee
+The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_s$, of the $i$th material undergoing its $j$th reaction.
+The second term on the right of the equation represents the contributions of other materials producing the $i$th material as a residue with a yield
+of $\nu_{s,i'j}$. This term is denoted by {\ct NU\_RESIDUE(j)} on the $i'$-th {\ct MATL} line.
 $\rho_{s,i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component
 divided by the volume of the layer.  $\rho_{s0}$ is the initial
-density of the layer. Thus, $\rho_{s,i}/\rho_{s0}$ is a quantity that
+density of the layer. Thus, $Y_{s,i}=\rho_{s,i}/\rho_{s0}$ is a quantity that
 increases if the $i$th material component is produced as a residue of some other
 reaction, or decreases if the $i$th component decomposes.  If the
 layer is composed of only one material, then $\rho_{s,i}/\rho_{s0}$ is initially 1.
@@ -3797,12 +3807,12 @@ decreases at its maximum rate within the context of a TGA or similar experimenta
 \begin{align*}
    T_p &= 300+273 \; \mathrm{K}  \\
    \Delta T &= 80 \; \mathrm{K}  \\
-   \nu_r &= 0 \\
+   \nu_s &= 0 \\
 \end{align*}
 \end{minipage}
 \caption[Simple demonstration of pyrolysis model.]{The blue curve represents the normalized mass, $Y=\rho_s/\rho_{s0}$, of a solid material
 undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-dY/dt$. The system of ordinary differential equations that
-describe the transformation is shown at right. Note that the parameters $T_p$, $\Delta T$, and $\nu_r$ represent the ``reference'' temperature,
+describe the transformation is shown at right. Note that the parameters $T_p$, $\Delta T$, and $\nu_s$ represent the ``reference'' temperature,
 pyrolysis temperature range, and residue yield of the single reaction. From these parameters, values of $A$ and $E$ can be estimated using
 the formulae in Eqs.~(\ref{r_p})-(\ref{A}).}
 \label{pyrolysis}
@@ -3818,7 +3828,7 @@ of K/min. Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under 
 is 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_p$, from which $E$, then $A$, can be calculated to ensure that
 the peak reaction rate occurs at the specified {\ct REFERENCE\_TEMPERATURE}.
 \begin{align}
-   r_p &= \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_r) \label{r_p} \\
+   r_p &= \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_s) \label{r_p} \\
    E &= \frac{r_p}{Y_p} \, \frac{R \, T_p^2}{\dot{T}} \label{E} \\
    A &= \frac{r_p}{Y_p} \, e^{E/R \, T_p} \label{A}
 \end{align}
@@ -3889,13 +3899,13 @@ solid residue.
 \begin{align*}
    \frac{dY_1}{dt} &= -A_{1,1} \, Y_1 \, \exp(-E_{1,1}/RT)                  & Y_1(0) &=0.1 \\
    \frac{dY_2}{dt} &= -A_{2,1} \, Y_2 \, \exp(-E_{2,1}/RT)                  & Y_2(0) &=0.9 \\
-   \frac{dY_3}{dt} &= -\nu_{r,2,1} \frac{dY_2}{dt}                    & Y_3(0) &=0.0 \\
-   \frac{dT}{dt}   &= \frac{5}{60} \; \frac{\mathrm{K}}{\mathrm{s}} & T(0) &= 20+273 \; \mathrm{K} \\
+   \frac{dY_3}{dt} &= -\nu_{s,2,1} \frac{dY_2}{dt}                          & Y_3(0) &=0.0 \\
+   \frac{dT}{dt}   &= \frac{5}{60} \; \frac{\mathrm{K}}{\mathrm{s}} & T(0)  &= 20+273 \; \mathrm{K} \\
 \end{align*}
 \begin{align*}
    T_{p,1,1} &= 100+273 \; \mathrm{K}  & T_{p,2,1} &= 300+273 \; \mathrm{K} \\
    \Delta T_{1,2} &= 10 \; \mathrm{K}    & \Delta T_{2,1} &= 80 \; \mathrm{K} \\
-   \nu_{r,1,1} &= 0                    & \nu_{r,2,1} &= 0.2 \\
+   \nu_{s,1,1} &= 0                    & \nu_{s,2,1} &= 0.2 \\
 \end{align*}
 \end{minipage} \normalsize
 \caption[A more complicated demonstration of the pyrolysis model.]{The blue curve represents the combined mass fraction, $\sum Y_i$, and the green
