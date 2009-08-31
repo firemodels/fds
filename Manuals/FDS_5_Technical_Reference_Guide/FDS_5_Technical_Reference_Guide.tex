@@ -26,7 +26,7 @@
         citecolor=linkred,     % citation number colors
         linkcolor=linknavy,    % \ref{...} and \pageref{...}
         pdftitle={Fire Dynamics Simulator (Version 5) User's Guide},
-        pdfauthor={Kevin McGrattan, Bryan Klein, Simo Hostikka, Jason Floyd},
+        pdfauthor={Kevin McGrattan, Simo Hostikka, Jason Floyd},
         pdfsubject={User Guide},
         pdfkeywords={FDS, Fire Model, NIST, BFRL},
         pdfproducer={pdflatex},
@@ -47,6 +47,7 @@
 \usepackage{longtable}
 \usepackage{lscape}
 \usepackage{amssymb}
+\usepackage{amsmath}
 \usepackage{makeidx} % Create index at end of document
 \usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography and index in the ToC
 \usepackage{float}
@@ -291,16 +292,13 @@ Mail: Stop SSOP, Washington, DC 20402-0001 }
 
 \chapter{Preface}
 
-The use of fire models currently extends beyond the fire research laboratories
-and into the engineering, fire service and legal communities.
-Surveys~\cite{Olenick:2,Friedman:1} of available fire models
-show a significant increase in number
-over the last decade. Sufficient evaluation of any model is necessary to
-ensure that users can judge the adequacy of its technical basis, appropriateness of its
-use, and confidence level of its predictions. This document
+This document
 provides the theoretical basis for the Fire Dynamics Simulator (FDS), following the general framework set forth in
 the ``Standard Guide for
 Evaluating the Predictive Capability of Deterministic Fire Models,'' ASTM~E~1355~\cite{ASTM:E1355}.
+It is the first of a four volume set of companion documents, referred to
+collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}. Volumes 2, 3 and 4 describe the model 
+verification, experimental validation, and configuration management, respectively.
 
 A separate document, {\em Fire Dynamics Simulator, User's Guide}~\cite{FDS_Users_Guide_5} describes how the FDS software is
 actually used.
@@ -1124,16 +1122,16 @@ where $k$ is the thermal conductivity.
 The term $\epsilon$ in the sensible enthalpy equation is known
 as the {\em dissipation rate}. It is the rate at which kinetic energy is transferred to thermal energy due to the
 viscosity of the fluid:
-\begin{eqnarray}
-\epsilon &\equiv& \btau_{ij} \cdot \nabla \bu \quad =  \quad
+\begin{align}
+\epsilon &\equiv \btau_{ij} \cdot \nabla \bu \quad =  \quad
    \mu \left( 2 \; \bS_{ij} \cdot \bS_{ij}
-                  - \frac{2}{3} (\nabla \cdot \bu)^2 \right) \\
-  &=& \mu \left[ 2 \left(\dod{u}{x}\right)^2
- + 2 \left(\dod{v}{y}\right)^2 + 2 \left(\dod{w}{z}\right)^2 + \right. \\
-& & \left.
+                  - \frac{2}{3} (\nabla \cdot \bu)^2 \right)  \nonumber \\
+  &= \mu \left[ 2 \left(\dod{u}{x}\right)^2
+ + 2 \left(\dod{v}{y}\right)^2 + 2 \left(\dod{w}{z}\right)^2 + \right. \nonumber \\
+&  \left.
   \left(\dod{v}{x}+\dod{u}{y}\right)^2 + \left(\dod{w}{y}+\dod{v}{z}\right)^2
  + \left(\dod{u}{z}+\dod{w}{x}\right)^2 - \frac{2}{3}
-   \left(\dod{u}{x}+\dod{v}{y} + \dod{w}{z} \right)^2  \right]  \label{dissipation} \end{eqnarray}
+   \left(\dod{u}{x}+\dod{v}{y} + \dod{w}{z} \right)^2  \right]  \label{dissipation} \end{align}
 This term is usually neglected because it is very small relative to the heat release rate of
 the fire. However, it is included here because it plays a role in the discussion of large eddy simulation.
 
@@ -1210,7 +1208,7 @@ of the modified Equation of State~(\ref{state}), and then substituting terms fro
 and energy conservation equations. As shown in Appendix \ref{app_divergence}, for the $m$th zone with background pressure $\bp_m$, the divergence may be written as
 \begin{equation}
 \label{eqn_divfromeos}
-\nabla \cdot \bu = {\cal D} + {\cal P}\dod{\bp_m}{t} \,\mbox{,}  \label{phi}
+\nabla \cdot \bu = {\cal D} + {\cal P}\dod{\bp_m}{t} \,\mbox{,} 
 \end{equation}
 where
 \begin{equation}
@@ -1218,11 +1216,15 @@ where
 \mathcal{P} = \frac{1}{\overline{p}_m}\left( \frac{\mathcal{R}}{\overline{W} c_p} - 1 \right)
 \end{equation}
 and
-\begin{eqnarray}
+\begin{align}
 \label{eqn_fdsD1}
-\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
-&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
-\end{eqnarray}
+\mathcal{D} &= \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + 
+\frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - 
+\frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
+&+ \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - 
+\Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + 
+\dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
+\end{align}
 Contributions to the divergence of the flow include the heat release rate of the fire, $\dq'''$, heat losses to evaporating droplets,
 $\dq_b'''$, the net heat flux from thermal conduction and radiation, $\nabla \cdot \dbq''$, updrafts of air over considerable heights of
 the atmosphere, the net mass flux from gas species diffusion and production, and global pressure changes. The change in the background
@@ -2013,7 +2015,7 @@ equation is written
 \be
   \rho_s c_s \; \dod{T_s}{t} = \frac{1}{r} \, \dod{}{r}
   \left(rk_s \dod{T_s}{r} \right)+\dq_s'''
-  \label{1dheatcyl} \quad ; \quad
+  \quad ; \quad
   \rho_s c_s \; \dod{T_s}{t} = \frac{1}{r^2} \, \dod{}{r}
   \left(r^2k_s \dod{T_s}{r} \right)+\dq_s'''
   \label{1dheatcyl}
@@ -2619,27 +2621,20 @@ term of the droplets. $\Phi(\bs,\bs')$ is a scattering phase function
 that gives the scattered intensity from direction $\bs'$ to $\bs$.
 The local absorption and scattering coefficients are calculated
 from the local droplet number density $N(\bx)$ and mean diameter $d_m(\bx)$ as
-\be
-\begin{array}{l}
-\kappa_d(\bx,\la) = N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_a(r,\la) \; dr \\
-\sigma_d(\bx,\la) = N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_s(r,\la) \; dr
-\end{array}\ee
+\begin{align}
+\kappa_d(\bx,\la) &= N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_a(r,\la) \; dr \\
+\sigma_d(\bx,\la) &= N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_s(r,\la) \; dr
+\end{align}
 where $r$ is the droplet radius and $C_a$ and $C_s$ are absorption and
 scattering cross sections, respectively, given by Mie theory.
 The droplet number density function $f(r,d_m)$ is assumed to have
 the same form as the initial droplet size distribution, but a
 mean diameter depending on the location $\bx$. For the numerical
 implementation, the above equations are written in the form
-\be
-\begin{array}{l}
-\kappa_d(\bx,\la) = A_d(\bx)\int_0^\infty
-    \frac{f(r,d_m(\bx))\;C_a(r,\la)}
-    {\pi(d_m(\bx)/2)^2} \; dr \\
-\sigma_d(\bx,\la) = A_d(\bx)\int_0^\infty
-    \frac{f(r,d_m(\bx)) \; C_s(r,\la)}
-    {\pi(d_m(\bx)/2)^2} \; dr \\
-\end{array}
-\ee
+\begin{align}
+\kappa_d(\bx,\la) &= A_d(\bx)\int_0^\infty \frac{f(r,d_m(\bx)) \; C_a(r,\la)} {\pi(d_m(\bx)/2)^2} \; dr \\
+\sigma_d(\bx,\la) &= A_d(\bx)\int_0^\infty \frac{f(r,d_m(\bx)) \; C_s(r,\la)} {\pi(d_m(\bx)/2)^2} \; dr
+\end{align}
 where $A_d$ is the total cross sectional area per unit volume of the
 droplets. $A_d$ is approximated as
 \be
@@ -2743,9 +2738,9 @@ the local gas phase vapor mass fraction, $Y_g$, the (assumed uniform) liquid tem
 and the local gas temperature, $T_g$. If the droplet is attached to a surface, $T_s$ is the solid temperature.
 The mass and energy transfer between the gas and the liquid can be described by the
 following set of equations~\cite{Cheremisinoff:1}
-\begin{eqnarray}
-\frac{dm_l}{dt}               & = & - A \; h_m \, \rho \, (Y_l - Y_g) \\ [0.1in]
-m_l \; c_l \; \frac{dT_l}{dt} & = &   A \, h  \, (T_g-T_l) + A \, h_s \, (T_s-T_l) + \dq_r + \frac{dm_l}{dt} \; h_v  \label{droplet_temp}   \end{eqnarray}
+\begin{align}
+\frac{dm_l}{dt}               & =  - A \; h_m \, \rho \, (Y_l - Y_g) \\
+m_l \; c_l \; \frac{dT_l}{dt} & =    A \, h  \, (T_g-T_l) + A \, h_s \, (T_s-T_l) + \dq_r + \frac{dm_l}{dt} \; h_v  \label{droplet_temp}   \end{align}
 Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the
 film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
 $\rho$ is the gas density, $c_l$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_s$ is the heat transfer coefficient between the liquid and the
