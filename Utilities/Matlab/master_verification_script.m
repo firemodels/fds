@@ -23,3 +23,5 @@ run scripts/turb_model
 run scripts/wall_model
 run scripts/pyrolysis
 run scripts/birch_tga
+
+display('verification scripts completed successfully!')

@@ -153,6 +153,6 @@ for j=qrange
     clear Measured_Metric Predicted_Metric Group_Key_Label K
 end
 
-
+display('scatplot completed successfully!')
 
 

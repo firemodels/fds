@@ -21,3 +21,5 @@ addpath 'scripts'
 set(gcf,'DefaultLineLineWidth',2.0)
 
 [saved_data,drange] = dataplot('training');
+
+display('training scripts completed successfully!')
