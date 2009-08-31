@@ -16,4 +16,4 @@ addpath 'scripts'
 scatplot(saved_data,drange)
 beyler_hood
 
-
+display('validation scripts completed successfully!')

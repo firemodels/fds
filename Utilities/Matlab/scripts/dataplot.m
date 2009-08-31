@@ -211,8 +211,6 @@ saved_data = [{Save_Quantity'},...
               {Save_Measured_Metric'},...
               {Save_Predicted_Metric'}];
               
-display('Done!')
-display('Why? Because...')
-why
+display('dataplot completed successfully!')
 
 
