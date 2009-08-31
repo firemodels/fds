@@ -2650,9 +2650,9 @@ parameters {\ct DX0}, {\ct DY0}, and {\ct DZ0}.
 \label{fig:mult}
 \end{figure}
 
-A generalization of this idea is to replace the parameters, {\ct DX}, {\ct DY}, and {\ct DZ}, with a sextuplet called {\ct DXB}. 
+A generalization of this idea is to replace the parameters, {\ct DX}, {\ct DY}, and {\ct DZ}, with a sextuplet called {\ct DXB}.
 The six entries in {\ct DXB} increment the respective values of the obstruction coordinates given by {\ct XB}. For example,
-define the lower $y$ bound of the original obstruction by {\ct XB(3,0)}. The $n$th obstruction would be: 
+define the lower $y$ bound of the original obstruction by {\ct XB(3,0)}. The $n$th obstruction would be:
 
 \footnotesize
 \begin{verbatim}
@@ -2662,7 +2662,7 @@ XB(3,N) = XB(3,0) + N*DXB(3)
 
 \noindent
 Notice that we use {\ct N\_LOWER} and {\ct N\_UPPER} to denote the range of {\ct N}. This more flexible input scheme allows you to create, for example,
-a slanted roof in which the individual roof segments shorten as they ascend to the top. 
+a slanted roof in which the individual roof segments shorten as they ascend to the top.
 This feature is demonstrated by the following short input file that creates a hollowed out pyramid using the four perimeter obstructions that form the
 outline of its base:
 
@@ -3754,11 +3754,11 @@ as explained in Section~\ref{nu_gas}.
 
 \subsubsection{The Reaction Rates}
 
-For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate. The general evolution equation for 
-a material undergoing one or more reactions is: 
+For each reaction that each material component undergoes you must specify kinetic parameters of the reaction rate. The general evolution equation for
+a material undergoing one or more reactions is:
 \be
   \dod{Y_{s,i}}{t} = - \sum_{j=1}^{N_{r,i}} r_{ij} + \sum_{i'=1}^{N_m} \sum_{j=1}^{N_{r,i'}} \nu_{s,i'j} \; r_{i'j} \quad (i' \neq i)  \quad ; \quad
-  r_{ij} = A_{ij} \; Y_{s,i}^{n_{s,ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_s} \right) \quad ; \quad Y_{s,i} = \left( \frac{\rho_{s,i}}{\rho_{s0}} \right) 
+  r_{ij} = A_{ij} \; Y_{s,i}^{n_{s,ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_s} \right) \quad ; \quad Y_{s,i} = \left( \frac{\rho_{s,i}}{\rho_{s0}} \right)
   % \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}
   \label{rr}
 \ee
@@ -3977,24 +3977,23 @@ reactions like the vaporization of water. For other reactions, it must
 be determined empirically.
 
 
-%\subsubsection{Special Topic: The ``Threshold'' Temperature}
+\subsubsection{Special Topic: The ``Threshold'' Temperature}
 
-%$T_{thr,ij}$ is an optional ``threshold'' temperature that
-%allows the definition of non-Arrhenius pyrolysis functions and
-%ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
-%By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero;
-%thus, the last term of Equation~\ref{rr} does not affect the pyrolysis rate.
-%The term can be used to describe a threshold temperature for the pyrolysis
-%reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
-%is equal to 0 at temperatures below $T_{thr,ij}$ and 1 at temperatures above.
-%$n_{t,j}$ is prescribed under the name {\ct N\_T(j)}.
-
-%\begin{warning}
-%\noindent
-%Remember that all temperatures are specified in degrees Celsius, but are then converted to
-%degrees Kelvin within the program. Thus, the formulae in this section ought to be interpreted in terms of the absolute temperature.
-%\end{warning}
-
+In FDS, the reaction rate expression in Eq.~(\ref{rr}) includes an optional term:
+\be
+  r_{ij} = A_{ij} \; Y_{s,i}^{n_{s,ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_s} \right) \;
+  \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}
+  \label{rr2}
+\ee
+$T_{thr,ij}$ is an optional ``threshold'' temperature that
+allows the definition of non-Arrhenius pyrolysis functions and
+ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
+By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero;
+thus, the last term of Equation~\ref{rr} does not affect the pyrolysis rate.
+The term can be used to describe a threshold temperature for the pyrolysis
+reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
+is equal to 0 at temperatures below $T_{thr,ij}$ and 1 at temperatures above.
+$n_{t,j}$ is prescribed under the name {\ct N\_T(j)}.
 
 
 
@@ -8998,10 +8997,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of reaction                         & kJ/kg             & 0.     \\ \hline
 {\ct INITIAL\_VAPOR\_FLUX}    & Real        & Initial evaporation rate                  & m$^2$/(sm$^2$)    & 0.0005   \\ \hline
 {\ct ID     }                 & Character   & IDentifier                                &                   &        \\ \hline
-%{\ct THRESHOLD\_TEMPERATURE}  & Real array  & Threshold temperatures                    & $^\circ$C         & -273.15 \\ \hline
+{\ct THRESHOLD\_TEMPERATURE}  & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15 \\ \hline
 {\ct N\_REACTIONS}            & Character   & Number of Reactions                       &                   & 0      \\ \hline
-{\ct N\_S}                    & Real array  & Exponents of mass fraction                &                   & 1.     \\ \hline
-%{\ct N\_T}                    & Real array  & Exponents of temperature                  &                   & 0.     \\ \hline
+{\ct N\_S}                    & Real array  & See Section~\ref{info:solid_pyrolysis}    &                   & 1.     \\ \hline
+{\ct N\_T}                    & Real array  & See Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
 {\ct NU\_FUEL}                & Real array  & Fuel gas yields                           & kg/kg             & 0.     \\ \hline
 {\ct NU\_GAS(:,II)}           & Real array  & Yields of species {\ct II}                & kg/kg             & 0.     \\ \hline
 {\ct NU\_RESIDUE}             & Real array  & Residue yields                            & kg/kg             & 0.     \\ \hline
