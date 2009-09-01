@@ -51,16 +51,17 @@ void trim(char *line){
 char *trim_front(char *line){
   char *blank=" ";
   char *tab="\t";
+  char *lf="\n";
   const char *c;
   size_t i,len;
 
   c = line;
   len=strlen(line);
   for(i=0;i<len;i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,tab,1)!=0)return line+i;
+    if(strncmp(c,blank,1)!=0&&strncmp(c,tab,1)!=0&&strncmp(c,lf,1)!=0)return line+i;
     c++;
   }
-  return line;
+  return line+len;
 }
 
 /* ------------------ STRCMP ------------------------ */
