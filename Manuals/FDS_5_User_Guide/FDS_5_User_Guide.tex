@@ -3783,14 +3783,14 @@ is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify 
 only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
 experiments, like TGA (Thermo-Gravimetric Analysis).
 
-It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known, 
+It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known,
 there are several parameters that can be used by FDS to derive effective values. The most important parameter to specify in place of $A$ and $E$ is
 the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plot shown in Fig.~\ref{pyrolysis}. These curves represent
 the results of a hypothetical TGA experiment.
 The Mass Fraction (blue curve) is the normalized density of the material which decreases as the sample is slowly heated, in this case at a rate
 of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time. Where this curve peaks is referred to in FDS
 as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain backward compatibility with earlier versions of
-FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily 
+FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily
 the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material
 decreases at its maximum rate within the context of a TGA or similar experimental apparatus.
 
@@ -3828,17 +3828,17 @@ apparatus was increased, in units of K/min. Its default value is 5~K/min. In Fig
 approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value is
 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_p$, from which $E$, then $A$, can be calculated
 to ensure that the peak reaction rate occurs at the specified {\ct REFERENCE\_TEMPERATURE}.
-\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method, 
+\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method,
 do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MATL} line.}
 \begin{align}
    r_p &= \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_s) \label{r_p} \\
    E &= \frac{r_p}{Y_p} \, \frac{R \, T_p^2}{\dot{T}} \label{E} \\
    A &= \frac{r_p}{Y_p} \, e^{E/R \, T_p} \label{A}
 \end{align}
-In above, $\nu_r$ is the yield of solid residue and $Y_p$ is the mass fraction (blue curve in Fig.~\ref{pyrolysis}) at 
-the temperature where the reaction rate is its maximum. It is 0.4 by default and not adjustable. When in doubt about the values of 
-these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}. Note that FDS will automatically calculate $A$ and $E$ using the above formulas. 
-Do not specify $A$ and $E$ is you specify {\ct REFERENCE\_TEMPERATURE}. 
+In above, $\nu_r$ is the yield of solid residue and $Y_p$ is the mass fraction (blue curve in Fig.~\ref{pyrolysis}) at
+the temperature where the reaction rate is its maximum. It is 0.4 by default and not adjustable. When in doubt about the values of
+these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}. Note that FDS will automatically calculate $A$ and $E$ using the above formulas.
+Do not specify $A$ and $E$ is you specify {\ct REFERENCE\_TEMPERATURE}.
 
 For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} would have the form:
 
@@ -3884,12 +3884,12 @@ each gaseous species using the notation {\ct HEAT\_OF\_COMBUSTION(j,s)}, as expl
 a parameter called {\ct REFERENCE\_RATE}. The latter has been removed and its use in FDS 5.4 and beyond will result in an immediate error message.
 \end{warning}
 
-The solid phase reaction represented by Fig.~\ref{pyrolysis} is very simple -- a single, homogenous material is heated and gasified completely. 
-In general, real materials are not so simple. First, they consist of more than one material component, each of which can react over a particular 
-temperature interval, and some of which leave behind a solid residue. Some material components may even undergo multiple reactions that 
-form different residues, like woods that form various amounts of tar, char, and ash, depending on the rate of heating. 
-Figure~\ref{pyrolysis_2} demonstrates a more complicated material than the one previously described. It is a hypothetical material that 
-contains 10~\% (by mass) water and 90~\% solid material. The water evaporates in the neighborhood of 100~$^\circ$C and the solid pyrolyzes in the 
+The solid phase reaction represented by Fig.~\ref{pyrolysis} is very simple -- a single, homogenous material is heated and gasified completely.
+In general, real materials are not so simple. First, they consist of more than one material component, each of which can react over a particular
+temperature interval, and some of which leave behind a solid residue. Some material components may even undergo multiple reactions that
+form different residues, like woods that form various amounts of tar, char, and ash, depending on the rate of heating.
+Figure~\ref{pyrolysis_2} demonstrates a more complicated material than the one previously described. It is a hypothetical material that
+contains 10~\% (by mass) water and 90~\% solid material. The water evaporates in the neighborhood of 100~$^\circ$C and the solid pyrolyzes in the
 neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a solid residue.
 
 \begin{figure}[ht]
@@ -3921,12 +3921,16 @@ the transformation of the materials is shown at right.}
 \label{pyrolysis_2}
 \end{figure}
 
-The input lines for this reaction would consist of the parameters listed below.
+The key input lines for this reaction are shown in Fig.~\ref{pyrolysis_2_inputs}.
 Note that the only parameters shown are those that describe the reaction mechanism, and that each of these parameters
 can be found either from visual inspection of the the mass loss (blue) curve or the reaction rate (green) curve.
-The thermal properties of each material would also be needed for an actual FDS simulation, but are not relevant in the context of a 
-TGA or similar experiment that involves a slow heating of a small sample of material.
+The thermal properties of each material would also be needed for an actual FDS simulation, but are not relevant in the context of a
+TGA or similar experiment that involves a slow heating of a small sample of material. \noindent The full set of parameters for these cases are listed in {\bf pyrolysis\_1.fds} 
+and {\bf pyrolysis\_2.fds}.
+Those interested in testing potential solid phase reaction mechanisms ought to use these test cases as templates.
 
+\begin{figure}[ht]
+\begin{minipage}{\textwidth}
 \footnotesize
 \begin{verbatim}
 &SURF ID                      = 'SAMPLE'
@@ -3955,13 +3959,16 @@ TGA or similar experiment that involves a slow heating of a small sample of mate
 &MATL ID                  = 'ash'
       ... /
 \end{verbatim} \normalsize
+\end{minipage}
+\caption[Input parameters for sample case {\bf pyrolysis\_2}.]{Input parameters for sample case {\bf pyrolysis\_2}.}
+\label{pyrolysis_2_inputs}
+\end{figure}
 
-\noindent The full set of parameters for these cases are listed in {\bf pyrolysis\_1.fds} and {\bf pyrolysis\_2.fds}. 
-Those interested in testing potential solid phase reaction mechanisms ought to use these test cases as templates.
 
 
 
 
+\newpage
 
 
 \subsubsection{The Heat of Reaction}
@@ -4019,9 +4026,11 @@ flux is needed. If the initial value is (relatively) high, the evaporation
 starts regardless of any ignition source, and the the fuel begins
 burning at once.
 
-Here is an example of a steel pan filled with a thin layer of ethanol. Note that the material
+Figure~\ref{ethanol_inputs} contains the key input parameters to describe a steel pan filled with a thin layer of ethanol. Note that the material
 properties are not all traceable to a measurement.
 
+\begin{figure}[ht]
+\begin{minipage}{\textwidth}
 \footnotesize
 \begin{verbatim}
 &MATL ID                     = 'ETHANOL LIQUID'
@@ -4052,6 +4061,10 @@ properties are not all traceable to a measurement.
       THICKNESS = 0.0091,0.001,0.05
       TMP_INNER = 18. /
 \end{verbatim} \normalsize
+\end{minipage}
+\caption[Input parameters for sample case {\bf ethanol\_pan}.]{Input parameters for sample case {\bf ethanol\_pan}.}
+\label{ethanol_inputs}
+\end{figure}
 
 \noindent
 The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
@@ -4268,8 +4281,8 @@ what is referred to as ``simple theory.'' By this, we mean that if all of the ex
 used to raise the solid temperature to 330~$^\circ$C and then convert the solid to fuel gas,
 the results would be as shown by the ``simple theory.'' Of course, the simple theory neglects heat losses
 through the solid and losses via radiation from the surface. Because it neglects these losses, the
-simple theory should be regarded as producing an upper bound on the burning rate. Note that the small discontinuities in the FDS burning rate 
-and temperature curves are numerical rather than physical. 
+simple theory should be regarded as producing an upper bound on the burning rate. Note that the small discontinuities in the FDS burning rate
+and temperature curves are numerical rather than physical.
 
 Because there is no solid residue produced by the single reaction, the sample thickness will gradually
 decrease to zero. Note that this does not necessarily mean that the solid obstruction should disappear entirely from
@@ -9333,10 +9346,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BETA\_E}                           & Real          & Smoke detector parameter                  &                       & 1.0       \\ \hline
 {\ct BEAD\_DIAMETER}                    & Real          & Diameter of TC bead                       & m                     & 0.001     \\ \hline
 {\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of TC bead                     &                       & 0.85      \\ \hline
-{\ct CABLE\_DIAMETER}                   & Real          & See Section {info:THIEF}                  & m                     & 0.02      \\ \hline
-{\ct CABLE\_FAILURE\_TEMPERATURE}       & Real          & See Section {info:THIEF}                  & $^\circ$C             & 400       \\ \hline
-{\ct CABLE\_JACKET\_THICKNESS}          & Real          & See Section {info:THIEF}                  & m                     & 0.002     \\ \hline
-{\ct CABLE\_MASS\_PER\_LENGTH}          & Real          & See Section {info:THIEF}                  & kg/m                  & 0.5       \\ \hline
+{\ct CABLE\_DIAMETER}                   & Real          & See Section~\ref{info:THIEF}              & m                     & 0.02      \\ \hline
+{\ct CABLE\_FAILURE\_TEMPERATURE}       & Real          & See Section~\ref{info:THIEF}              & $^\circ$C             & 400       \\ \hline
+{\ct CABLE\_JACKET\_THICKNESS}          & Real          & See Section~\ref{info:THIEF}              & m                     & 0.002     \\ \hline
+{\ct CABLE\_MASS\_PER\_LENGTH}          & Real          & See Section~\ref{info:THIEF}              & kg/m                  & 0.5       \\ \hline
 {\ct C\_FACTOR}                         & Real          & Sprinkler activation parameter            &                       & 0.        \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}               & m/s                   & 1.0       \\ \hline
 {\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity                  & m/s                   & 0.0       \\ \hline
