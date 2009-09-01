@@ -17,6 +17,7 @@ set mandir=$fds_smvroot/Manuals/All_PDF_Files
 set smvbindir=$scp_fds_smvroot/SMV_5/bin
 set forbundle=$fds_smvroot/SMV_5/for_bundle
 set fds2asciidir=$fds_smvroot/Utilities/fds2ascii
+set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
 
 cd $googledir
 rm -rf $bundlebase
@@ -43,9 +44,22 @@ cp $forbundle/smokeview.ini $bundledir/bin/.
 cp $fds2asciidir/$fds2ascii $bundledir/bin/.
 
 echo Copying documentation
-cp $bundle_setup/readme_docs.html $bundledir/Documentation/.
+cp $bundle_setup/Overview.html $bundledir/Documentation/.
 cp $mandir/FDS_5_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_5_User_Guide.pdf $bundledir/Documentation/.
+
+echo
+echo Getting the FDS release notes from the repository
+svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki $bundle_setup/FDS_Release_Notes.wiki
+
+echo.
+echo Converting the FDS release notes from wiki to html format
+$wikify -r $bundle_setup/FDS_Release_Notes.wiki > $bundledir/Documentation/FDS_Release_Notes.html
+
+echo
+echo Copying Smokeview release from  the repository
+cp $forbundle/readme.html $bundledir/Documentation/SMV_Release_Notes.html
+
 
 echo Obtaining example files from the repository
 cp $bundle_setup/readme_examples.html $bundledir/Examples/.
