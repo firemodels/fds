@@ -11,7 +11,7 @@ representative of any particular material.
 
 &MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
-&TIME T_END=900., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
+&TIME T_END=2000., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
 
 &MISC SOLID_PHASE_ONLY=.TRUE., H_FIXED=0.0 /  No convective heat transfer
 
@@ -22,14 +22,17 @@ representative of any particular material.
 The plastic properties and surface designation
 
 &MATL ID='PMMA'
-      CONDUCTIVITY=0.25
-      SPECIFIC_HEAT=1.0
-      DENSITY=500.
+      CONDUCTIVITY=0.21
+      SPECIFIC_HEAT=1.5
+      DENSITY=1190.
       N_REACTIONS=1
       NU_FUEL=1.
       HEAT_OF_REACTION=1500.
       HEAT_OF_COMBUSTION=25000.
       REFERENCE_TEMPERATURE=330. /
+      CONDUCTIVITY=0.25
+      SPECIFIC_HEAT=1.0
+      DENSITY=500.
 
 &SURF ID='PMMA SLAB'
       COLOR='BLACK'
