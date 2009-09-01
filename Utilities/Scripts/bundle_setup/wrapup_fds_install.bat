@@ -13,7 +13,7 @@ echo Removing pre 5.4 FDS/Smokeview entries (if present) from the System Path.
 echo Press any key to proceed or CTRL C to abort
 pause>NUL
 
-call "%CD%"\set_path.exe -r
+call "%CD%\set_path.exe" -r
 
 echo.
 echo Associating the smv file extension with smokeview.exe
@@ -49,7 +49,7 @@ copy "%CD%\Documentation\Guides_and_Release_Notes\Latest_Documentation.url"     
 echo.
 echo Adding %CD%\bin to the User Path (if absent) for: %USERNAME%
 
-call "%CD%"\set_path.exe -a "%CD%\bin"
+call "%CD%\set_path.exe" -a "%CD%\bin"
 
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
