@@ -297,7 +297,7 @@ provides the theoretical basis for the Fire Dynamics Simulator (FDS), following 
 the ``Standard Guide for
 Evaluating the Predictive Capability of Deterministic Fire Models,'' ASTM~E~1355~\cite{ASTM:E1355}.
 It is the first of a four volume set of companion documents, referred to
-collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}. Volumes 2, 3 and 4 describe the model 
+collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}. Volumes 2, 3 and 4 describe the model
 verification, experimental validation, and configuration management, respectively.
 
 A separate document, {\em Fire Dynamics Simulator, User's Guide}~\cite{FDS_Users_Guide_5} describes how the FDS software is
@@ -1208,7 +1208,7 @@ of the modified Equation of State~(\ref{state}), and then substituting terms fro
 and energy conservation equations. As shown in Appendix \ref{app_divergence}, for the $m$th zone with background pressure $\bp_m$, the divergence may be written as
 \begin{equation}
 \label{eqn_divfromeos}
-\nabla \cdot \bu = {\cal D} + {\cal P}\dod{\bp_m}{t} \,\mbox{,} 
+\nabla \cdot \bu = {\cal D} + {\cal P}\dod{\bp_m}{t} \,\mbox{,}
 \end{equation}
 where
 \begin{equation}
@@ -1218,11 +1218,11 @@ where
 and
 \begin{align}
 \label{eqn_fdsD1}
-\mathcal{D} &= \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + 
-\frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - 
+\mathcal{D} &= \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} +
+\frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} -
 \frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
-&+ \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - 
-\Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + 
+&+ \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' -
+\Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha +
 \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
 \end{align}
 Contributions to the divergence of the flow include the heat release rate of the fire, $\dq'''$, heat losses to evaporating droplets,
@@ -3131,63 +3131,71 @@ tensor $\tau_{xx}$, $\tau_{yy}$, and $\tau_{zz}$; the external force
 components $(f_x,f_y,f_z)$; and the Courant numbers
 $\epsilon_u$, $\epsilon_v$, and $\epsilon_w$ are located at their
 respective cell faces.
-\begin{eqnarray}
-F_{\x,ijk} &=&  \left(
+\begin{align}
+F_{\x,ijk} &=  \left(
  \frac{1\mp\epsilon_w}{2} w_{i+\ha,jk} \; \om_{y,ijk} +
  \frac{1\pm\epsilon_w}{2} w_{i+\ha,j,k-1} \; \om_{y,ij,k-1} \right) \nonumber \\
-          & & - \left(
+          &  - \left(
  \frac{1\mp\epsilon_v}{2} v_{i+\ha,jk} \; \om_{z,ijk} +
  \frac{1\pm\epsilon_v}{2} v_{i+\ha,j-1,k} \; \om_{z,i,j-1,k} \right) \nonumber\\
-           & & - \frac{1}{\rho_{i+\ha,jk}} \left( f_{x,ijk}
+           &  - \frac{1}{\rho_{i+\ha,jk}} \left( f_{x,ijk}
   + \frac{\tau_{xx,i+1,jk}-\tau_{xx,ijk}}{\dx}
   + \frac{\tau_{xy,ijk}-\tau_{xy,i,j-1,k}}{\dy}
   + \frac{\tau_{xz,ijk}-\tau_{xz,i,j,k-1}}{\dz}  \right)  \\
-F_{\y,ijk} &=& \left(
+F_{\y,ijk} &= \left(
  \frac{1\mp\epsilon_u}{2} u_{i,j+\ha,k} \; \om_{z,ijk} +
  \frac{1\pm\epsilon_u}{2} u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right) \nonumber \\
-           & & - \left(
+           &  - \left(
  \frac{1\mp\epsilon_w}{2} w_{i,j+\ha,k} \; \om_{x,ijk}+
  \frac{1\pm\epsilon_w}{2} w_{i,j+\ha,k-1} \; \om_{x,ij,k-1} \right) \nonumber \\
-           & & - \frac{1}{\rho_{i,j+\ha,k}} \left( f_{y,ijk}
+           &  - \frac{1}{\rho_{i,j+\ha,k}} \left( f_{y,ijk}
   + \frac{\tau_{yx,ijk}-\tau_{yx,i-1,jk}}{\dx}
   + \frac{\tau_{yy,i,j+1,k}-\tau_{yy,ijk}}{\dy}
   + \frac{\tau_{yz,ijk}-\tau_{yz,i,j,k-1}}{\dz} \right) \\
-F_{\z,ijk} &=&  \left(
+F_{\z,ijk} &=  \left(
  \frac{1\mp\epsilon_v}{2} v_{ij,k+\ha} \; \om_{x,ijk} +
  \frac{1\pm\epsilon_v}{2} v_{i,j-1,k+\ha} \; \om_{x,i,j-1,k} \right)\nonumber \\
-           & & -\left(
+           &  -\left(
  \frac{1\mp\epsilon_u}{2} u_{ij,k+\ha} \; \om_{y,ijk} +
  \frac{1\pm\epsilon_u}{2} u_{i-1,j,k+\ha} \; \om_{y,i-1,jk} \right) \nonumber \\
-           & & - \frac{1}{\rho_{ij,k+\ha}} \left( f_{z,ijk}
+           &  - \frac{1}{\rho_{ij,k+\ha}} \left( f_{z,ijk}
   + \frac{\tau_{zx,ijk}-\tau_{zx,i-1,jk}}{\dx}
   + \frac{\tau_{zy,ijk}-\tau_{zy,i,j-1,k}}{\dy}
-  + \frac{\tau_{zz,ij,k+1}-\tau_{zz,ijk}}{\dz} \right) \\
-\om_{x,ijk} &=& \frac{\hw_{i,j+1,k}-\hw_{ijk}}{\dy} -
+  + \frac{\tau_{zz,ij,k+1}-\tau_{zz,ijk}}{\dz} \right) 
+\end{align}
+
+\noindent The components of the vorticity vector are:
+\begin{align}
+\om_{x,ijk} &= \frac{\hw_{i,j+1,k}-\hw_{ijk}}{\dy} -
              \frac{\hv_{ij,k+1}-\hv_{ijk}}{ \dz}  \\
-\om_{y,ijk} &=& \frac{\hu_{ij,k+1}-\hu_{ijk}}{\dz} -
+\om_{y,ijk} &= \frac{\hu_{ij,k+1}-\hu_{ijk}}{\dz} -
              \frac{\hw_{i+1,jk}-\hw_{ijk}}{\dx}  \\
-\om_{z,ijk} &=& \frac{\hv_{i+1,jk}- \hv_{ijk}}{\dx} -
-             \frac{\hu_{i,j+1,k}-\hu_{ijk}}{ \dy} \\
-\tau_{xx,ijk} &=& \mu_{ijk} \left( \ft (\nabla \cdot \bu)_{ijk} - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\
-\tau_{yy,ijk} &=& \mu_{ijk} \left( \ft (\nabla \cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\
-\tau_{zz,ijk} &=& \mu_{ijk} \left( \ft (\nabla \cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} \right)  \\
-\tau_{xy,ijk} &=& \tau_{yx,ijk}
+\om_{z,ijk} &= \frac{\hv_{i+1,jk}- \hv_{ijk}}{\dx} -
+             \frac{\hu_{i,j+1,k}-\hu_{ijk}}{ \dy}
+\end{align}
+\noindent The components of the viscous stress tensor are:
+\begin{align}
+\tau_{xx,ijk} &= \mu_{ijk} \left( \ft (\nabla \cdot \bu)_{ijk} - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\
+\tau_{yy,ijk} &= \mu_{ijk} \left( \ft (\nabla \cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\
+\tau_{zz,ijk} &= \mu_{ijk} \left( \ft (\nabla \cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} \right)  \\
+\tau_{xy,ijk} &= \tau_{yx,ijk}
         = \mu_{i+\ha,j+\ha,k} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy}
                          + \frac{v_{i+1,jk} -v_{ijk}}{\dx} \right) \\
-\tau_{xz,ijk} &=& \tau_{zx,ijk}
+\tau_{xz,ijk} &= \tau_{zx,ijk}
         =\mu_{i+\ha,j,k+\ha} \left( \frac{u_{ij,k+1}-u_{ijk}}{\dz}
                         + \frac{w_{i+1,jk}-w_{ijk}}{\dx} \right) \\
-\tau_{yz,ijk} &=& \tau_{zy,ijk}
+\tau_{yz,ijk} &= \tau_{zy,ijk}
         =\mu_{i,j+\ha,k+\ha} \left( \frac{v_{ij,k+1}-v_{ijk}}{\dz}
-                        + \frac{w_{i,j+1,k}-w_{ijk}}{\dy} \right) \\
-\epsilon_u &=& \frac{u \, \dt}{\dx} \\
-\epsilon_v &=& \frac{v \, \dt}{\dy} \\
-\epsilon_w &=& \frac{w \, \dt}{\dz}
-\end{eqnarray}
-The variables $\epsilon_u$, $\epsilon_v$ and $\epsilon_w$ are local
+                        + \frac{w_{i,j+1,k}-w_{ijk}}{\dy} \right) 
+\end{align}
+
+\noindent The variables $\epsilon_u$, $\epsilon_v$ and $\epsilon_w$ are local
 Courant numbers evaluated at the same locations as the velocity component
 immediately following them, and serve to bias the differencing of
 the convective terms in the upwind direction.
+\be
+\epsilon_u = \frac{u \, \dt}{\dx} \quad ; \quad \epsilon_v = \frac{v \, \dt}{\dy} \quad ; \quad \epsilon_w = \frac{w \, \dt}{\dz}
+\ee
 The subscript $i+\ha$ indicates that a variable is an average of its
 values at the $i$th and the $(i+1)$th cell.
 By construction, the divergence defined in Eq.~(\ref{divdis})
