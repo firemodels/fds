@@ -59,13 +59,20 @@ Rem Include documentation in the bundle only if the variable, docs_include_in_bu
 Rem is not set to 0.  This variable is defined in the fds_smv_env.bat setup  file
 
 echo.
+echo Getting the FDS release notes from the repository
+svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki "%bundleinfo%\FDS_Release_Notes.wiki"
+
+echo.
+echo Converting the FDS release notes from wiki to html format
+"%wikify%" -r "%bundleinfo%\FDS_Release_Notes.wiki" > "%out_guides%\FDS_Release_Notes.htm"
+
+echo.
 echo Copying FDS and Smokeview users guide and other documentation 
 echo to the Documentation directory
 
 copy %in_pdf%\FDS_5_User_Guide.pdf               %out_guides%\.
 copy %in_pdf%\SMV_5_User_Guide.pdf               %out_guides%\.
 copy "%in_smv%\readme.html"                      "%out_guides%\Smokeview_release_notes.html"
-copy "%bundleinfo%\FDS_Release_Notes.htm"        "%out_guides%\FDS_Release_Notes.htm"
 copy "%bundleinfo%\Latest_Documentation.url"     "%out_guides%\Latest_Documentation.url"
 
 copy "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
@@ -93,14 +100,6 @@ copy %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
 echo.
 echo Getting the Verification cases from the repository
 svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
-
-echo.
-echo Getting the FDS release notes from the repository
-svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki "%bundleinfo%\FDS_Release_Notes.wiki"
-
-echo.
-echo Converting the FDS release notes from wiki to html format
-"%wikify%" -r "%bundleinfo%\FDS_Release_Notes.wiki" > "%out_guides%\FDS_Release_Notes.htm"
 
 echo.
 echo Copying wrapup scripts for use in final installation
