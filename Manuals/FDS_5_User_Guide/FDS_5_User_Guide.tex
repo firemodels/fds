@@ -477,6 +477,8 @@ improve the functionality of the model in the area of forensic science.
 Paul Hart of Swiss Re, GAP Services, and Pravinray Gandhi of Underwriters Laboratories provided useful suggestions about
 water droplet transport on solid objects.
 
+Dr.~Chris Lautenberger of University of California, Berkeley, has helped in development and improving the documentation of the pyrolysis models.
+
 Finally, on the following pages is a list of individuals and organizations who have volunteered their time and effort to
 ``beta test'' FDS and Smokeview prior to its official release. Their contribution is invaluable because there is simply no other way
 to test all of the various features of the model.
@@ -3781,16 +3783,15 @@ is 4.184~kJ, and be careful with factors of 1000. For a given reaction, specify 
 only one of these two parameters. Typically, these parameters only have meaning when both are derived from a common set of
 experiments, like TGA (Thermo-Gravimetric Analysis).
 
-It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known, there are several parameters that can
-be used by FDS to derive effective values. The most important parameter to specify in place of $A$ and $E$ is
+It is very important to keep in mind that $A$ and $E$ are not available for most real materials. If $A$ and $E$ are not known, 
+there are several parameters that can be used by FDS to derive effective values. The most important parameter to specify in place of $A$ and $E$ is
 the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plot shown in Fig.~\ref{pyrolysis}. These curves represent
 the results of a hypothetical TGA experiment.
 The Mass Fraction (blue curve) is the normalized density of the material which decreases as the sample is slowly heated, in this case at a rate
 of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time. Where this curve peaks is referred to in FDS
 as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain backward compatibility with earlier versions of
-FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is
-{\em not} the same as an ignition temperature, nor is it necessarily the surface temperature of the burning solid. Rather, it is simply
-the temperature at which the mass fraction of the material
+FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily 
+the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material
 decreases at its maximum rate within the context of a TGA or similar experimental apparatus.
 
 \begin{figure}[ht]
@@ -3819,22 +3820,25 @@ the formulae in Eqs.~(\ref{r_p})-(\ref{A}).}
 \end{figure} \normalsize
 
 
-Two additional parameters can be specified along with {\ct REFERENCE\_TEMPERATURE} ($T_p$) to help to fine tune the shape of the reaction rate curve,
-assuming some sort of experiment has been done to indicate at what temperature, and
-over what temperature range, the reaction takes place. First, the {\ct HEATING\_RATE} ($\dot{T}$) is the rate at which the
-temperature of the TGA (or equivalent) test apparatus was increased, in units
-of K/min. Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green curve (Reaction Rate) is equal to the heating rate (in units of K/s). Second, the
-{\ct PYROLYSIS\_RANGE} ($\Delta T$) is the approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value
-is 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_p$, from which $E$, then $A$, can be calculated to ensure that
-the peak reaction rate occurs at the specified {\ct REFERENCE\_TEMPERATURE}.
+Two additional parameters can be specified along with {\ct REFERENCE\_TEMPERATURE} ($T_p$) to help to fine tune the shape of the
+reaction rate curve, assuming some sort of experiment has been done to indicate at what temperature, and over what temperature range, the
+reaction takes place. First, the {\ct HEATING\_RATE} ($\dot{T}$) is the rate at which the temperature of the TGA (or equivalent) test
+apparatus was increased, in units of K/min. Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green curve
+(Reaction Rate) is equal to the heating rate (in units of K/s). Second, the {\ct PYROLYSIS\_RANGE} ($\Delta T$) is the
+approximate width (in degrees Celsius or Kelvin) of the green curve, assuming its shape to be roughly triangular. Its default value is
+80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_p$, from which $E$, then $A$, can be calculated
+to ensure that the peak reaction rate occurs at the specified {\ct REFERENCE\_TEMPERATURE}.
+\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method, 
+do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MATL} line.}
 \begin{align}
    r_p &= \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_s) \label{r_p} \\
    E &= \frac{r_p}{Y_p} \, \frac{R \, T_p^2}{\dot{T}} \label{E} \\
    A &= \frac{r_p}{Y_p} \, e^{E/R \, T_p} \label{A}
 \end{align}
-Note that $\nu_r$ is the yield of solid residue.
-Note also that $Y_p$ is the mass fraction (blue curve in Fig.~\ref{pyrolysis}) at the temperature where the reaction rate is its maximum. It is 0.4 by default and not
-adjustable. When in doubt about the values of these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}.
+In above, $\nu_r$ is the yield of solid residue and $Y_p$ is the mass fraction (blue curve in Fig.~\ref{pyrolysis}) at 
+the temperature where the reaction rate is its maximum. It is 0.4 by default and not adjustable. When in doubt about the values of 
+these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}. Note that FDS will automatically calculate $A$ and $E$ using the above formulas. 
+Do not specify $A$ and $E$ is you specify {\ct REFERENCE\_TEMPERATURE}. 
 
 For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} would have the form:
 
@@ -3845,7 +3849,7 @@ For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} wou
       HEAT_OF_COMBUSTION       = ...
       N_REACTIONS              = 1
       NU_FUEL(1)               = 1.
-      REFERENCE_TEMPERATURE(1) = 350.
+      REFERENCE_TEMPERATURE(1) = 300.
       HEAT_OF_REACTION(1)      = ... /
 \end{verbatim}
 \normalsize
@@ -3880,13 +3884,13 @@ each gaseous species using the notation {\ct HEAT\_OF\_COMBUSTION(j,s)}, as expl
 a parameter called {\ct REFERENCE\_RATE}. The latter has been removed and its use in FDS 5.4 and beyond will result in an immediate error message.
 \end{warning}
 
-The solid phase reaction represented by Fig.~\ref{pyrolysis} is very simple -- a single, homogenous material is heated and gasified completely. In general, real materials are not
-so simple. First, they consist of more than one material component, each of which can react over a particular temperature interval, and some of which leave behind a solid residue.
-Some material components may even undergo multiple reactions that form different residues, like woods that form various amounts of tar, char, and ash, depending on the
-rate of heating. Figure~\ref{pyrolysis_2}
-demonstrates a more complicated material than the one previously described. It is a hypothetical material that contains 10~\% (by mass) water and 90~\% combustible material.
-The water evaporates in the neighborhood of 100~$^\circ$C and the rest pyrolyzes in the neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a
-solid residue.
+The solid phase reaction represented by Fig.~\ref{pyrolysis} is very simple -- a single, homogenous material is heated and gasified completely. 
+In general, real materials are not so simple. First, they consist of more than one material component, each of which can react over a particular 
+temperature interval, and some of which leave behind a solid residue. Some material components may even undergo multiple reactions that 
+form different residues, like woods that form various amounts of tar, char, and ash, depending on the rate of heating. 
+Figure~\ref{pyrolysis_2} demonstrates a more complicated material than the one previously described. It is a hypothetical material that 
+contains 10~\% (by mass) water and 90~\% solid material. The water evaporates in the neighborhood of 100~$^\circ$C and the solid pyrolyzes in the 
+neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a solid residue.
 
 \begin{figure}[ht]
 \noindent
@@ -3910,7 +3914,7 @@ solid residue.
 \end{minipage} \normalsize
 \caption[A more complicated demonstration of the pyrolysis model.]{The blue curve represents the combined mass fraction, $\sum Y_i$, and the green
 curve the net reaction rate, $-d/dt(\sum Y_i)$, for a material that contains 10~\% water (by mass) that evaporates at a temperature of 100~$^\circ$C,
-and 90~\% combustible material that pyrolyzes at 300~$^\circ$C, leaving a 20~\% (by mass) residue behind. Note that the numbered subscripts refer
+and 90~\% solid material that pyrolyzes at 300~$^\circ$C, leaving a 20~\% (by mass) residue behind. Note that the numbered subscripts refer
 to the material component and the reaction, respectively. In this case, there are three material components, and the first two each undergo a single
 reaction. The third material component is formed as a residue of the reaction of the second material. The system of ordinary differential equations that governs
 the transformation of the materials is shown at right.}
@@ -3920,9 +3924,8 @@ the transformation of the materials is shown at right.}
 The input lines for this reaction would consist of the parameters listed below.
 Note that the only parameters shown are those that describe the reaction mechanism, and that each of these parameters
 can be found either from visual inspection of the the mass loss (blue) curve or the reaction rate (green) curve.
-The thermal properties of each material would also be needed for
-an actual FDS simulation, but are not relevant in the context of a TGA or similar experiment that involves a slow heating of a small sample
-of material.
+The thermal properties of each material would also be needed for an actual FDS simulation, but are not relevant in the context of a 
+TGA or similar experiment that involves a slow heating of a small sample of material.
 
 \footnotesize
 \begin{verbatim}
@@ -3953,9 +3956,8 @@ of material.
       ... /
 \end{verbatim} \normalsize
 
-\noindent The full set
-of parameters for these cases are listed in {\bf pyrolysis\_1.fds} and {\bf pyrolysis\_2.fds}. Those interested in testing potential solid phase reaction
-mechanisms ought to use these test cases as templates.
+\noindent The full set of parameters for these cases are listed in {\bf pyrolysis\_1.fds} and {\bf pyrolysis\_2.fds}. 
+Those interested in testing potential solid phase reaction mechanisms ought to use these test cases as templates.
 
 
 
@@ -4223,17 +4225,11 @@ related to convection, combustion, and apparatus-specific phenomena.
 
 \subsubsection{Example Case: {\bf thermoplastic}}
 
-The term ``thermoplastic'' is often used to describe materials that
-essentially heat up and gasify without leaving any solid residue. The
-term is used here merely to indicate the class of materials for which
-the pyrolysis can be modeled with a single reaction that converts
+The term ``thermoplastic'' is often used to describe materials that essentially heat up and gasify without leaving any solid residue. The
+term is used here merely to indicate the class of materials for which the pyrolysis can be modeled with a single reaction that converts
 solid to gaseous fuel.
 
-The purpose of this example is to demonstrate how the solid phase
-pyrolysis model works in FDS. Essentially, the gas phase calculation
-is shut off except for the imposition of a 50~kW/m$^2$ ``external''
-heat flux. The solid in this example is a slab of plastic, similar in
-composition to PMMA. The solid is described by the following {\ct SURF} line:
+The purpose of this example is to demonstrate how the solid phase pyrolysis model works in FDS. Essentially, the gas phase calculation is shut off except for the imposition of a 50~kW/m$^2$ ``external'' heat flux. The solid in this example is a slab of plastic, similar in composition to PMMA. The solid is described by the following {\ct SURF} line:
 
 \scriptsize
 \begin{verbatim}
@@ -4253,9 +4249,9 @@ the material are conveyed via the {\ct MATL} line:
 \scriptsize
 \begin{verbatim}
 &MATL ID='PMMA'
-      CONDUCTIVITY=0.25
-      SPECIFIC_HEAT=1.0
-      DENSITY=500.
+      CONDUCTIVITY=0.21
+      SPECIFIC_HEAT=1.5
+      DENSITY=1190.
       N_REACTIONS=1
       NU_FUEL=1.
       HEAT_OF_REACTION=1500.
@@ -4264,20 +4260,16 @@ the material are conveyed via the {\ct MATL} line:
 \end{verbatim} \normalsize
 
 \noindent
-Notice that in addition to $k$, $\rho$ and $c$, there is one reaction
-specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_FUEL=1.}).
-The phase change from solid to gas {\em consumes}
-energy at a rate of 1,500~kJ/kg. Although not relevant in this
-example, the burning of these fuel gases would {\em produce} energy at
-a rate of 25,000~kJ/kg. The reaction nominally takes place at
-330~$^\circ$C, a necessary parameter for the pyrolysis model described above.
+Notice that in addition to $k$, $\rho$ and $c$, there is one reaction specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_FUEL=1.}).
+The phase change from solid to gas {\em consumes} energy at a rate of 1,500~kJ/kg. Although not relevant in this example, the burning of these fuel gases would {\em produce} energy at a rate of 25,000~kJ/kg. The reaction nominally takes place at 330~$^\circ$C, a necessary parameter for the pyrolysis model described above.
 
 The plots shown in Fig.~\ref{thermoplastic} contain the results of the FDS simulation along with
 what is referred to as ``simple theory.'' By this, we mean that if all of the external heat flux were
 used to raise the solid temperature to 330~$^\circ$C and then convert the solid to fuel gas,
 the results would be as shown by the ``simple theory.'' Of course, the simple theory neglects heat losses
 through the solid and losses via radiation from the surface. Because it neglects these losses, the
-simple theory should be regarded as producing an upper bound on the burning rate.
+simple theory should be regarded as producing an upper bound on the burning rate. Note that the small discontinuities in the FDS burning rate 
+and temperature curves are numerical numerical rather than physical. 
 
 Because there is no solid residue produced by the single reaction, the sample thickness will gradually
 decrease to zero. Note that this does not necessarily mean that the solid obstruction should disappear entirely from
@@ -4285,9 +4277,9 @@ the computational domain, but rather that the fuel should be consumed. The param
 is used to indicate that the solid ought to be completely removed, but because in this simple test case the
 sample is aligned with the external boundary of the computational domain, the parameter {\ct BURN\_AWAY}
 would have no effect.
-The slab is originally 0.025~m thick, with a density of 500~kg/m$^3$.
-This means there is 12.5~kg/m$^2$ of fuel present, which if divided by the
-burning rate (about 0.018~kg/m$^2$/s) yields a burning time of about 700~s.
+The slab is originally 0.025~m thick, with a density of 1190~kg/m$^3$.
+This means there is 29.75~kg/m$^2$ of fuel present, which if divided by the
+burning rate (about 0.018~kg/m$^2$/s) yields a burning time of about 1700~s.
 After this, the fuel is consumed.
 
 
