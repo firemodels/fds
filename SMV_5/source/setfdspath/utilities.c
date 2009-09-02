@@ -28,17 +28,15 @@ int imax(int a, int b){
 /* ------------------ trim ------------------------ */
 
 void trim(char *line){
-  char *blank=" ";
-  const char *c;
-  const char *lf="\n", *cr="\r";
   size_t len, i;
+  unsigned char *c;
   
   len = strlen(line);
-  c = line+len-1;
+  c = (unsigned char *)(line+len-1);
   for(i=0; i<len; i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,lf,1)!=0&&strncmp(c,cr,1)!=0){
+    if(isspace(*c)==0){
       c++; 
-      line[c-line]='\0';
+      line[c-(unsigned char *)line]='\0';
       return;
     }
     c--;
@@ -49,16 +47,13 @@ void trim(char *line){
 /* ------------------ trim_front ------------------------ */
 
 char *trim_front(char *line){
-  char *blank=" ";
-  char *tab="\t";
-  char *lf="\n";
-  const char *c;
+  unsigned char *c;
   size_t i,len;
 
-  c = line;
+  c = (unsigned char *)line;
   len=strlen(line);
   for(i=0;i<len;i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,tab,1)!=0&&strncmp(c,lf,1)!=0)return line+i;
+    if(isspace(*c)==0)return line+i;
     c++;
   }
   return line+len;
