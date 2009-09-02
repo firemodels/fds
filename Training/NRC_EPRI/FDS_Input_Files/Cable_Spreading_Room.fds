@@ -1,0 +1,252 @@
+&HEAD CHID='Cable_Spreading_Room', TITLE='Trash can fire in Cable Spreading Room' /
+
+&MESH IJK= 40, 36,40, XB=31.0,35.0,14.9,18.5,0.0,4.0 /
+&MESH IJK=155, 25,20, XB= 0.0,31.0,-1.5, 3.5,0.0,4.0 /
+&MESH IJK=155, 25,20, XB= 0.0,31.0, 3.5, 8.5,0.0,4.0 /
+&MESH IJK=155, 25,20, XB= 0.0,31.0, 8.5,13.5,0.0,4.0 /
+&MESH IJK=155, 25,20, XB= 0.0,31.0,13.5,18.5,0.0,4.0 /
+&MESH IJK= 20, 82,20, XB=31.0,35.0,-1.5,14.9,0.0,4.0 /
+&MESH IJK= 25,100,20, XB=35.0,40.0,-1.5,18.5,0.0,4.0 /
+
+&TIME T_END=3600. /
+
+General construction
+
+&MISC SURF_DEFAULT='CONCRETE WALL' /
+
+&MATL ID            = 'CONCRETE'
+      SPECIFIC_HEAT = 1.2
+      CONDUCTIVITY  = 1.4
+      DENSITY       = 2240. /
+                     
+&SURF ID            = 'CONCRETE WALL'
+      COLOR         = 'GRAY'
+      MATL_ID       = 'CONCRETE'
+      THICKNESS     = 0.5 /
+
+&OBST XB=16.3,23.7, 6.6,12.0, 0.0, 4.0, SURF_ID='CONCRETE WALL' /
+&OBST XB= 0.0,40.0,-0.5, 0.0, 0.0, 4.0, SURF_ID='CONCRETE WALL' / 
+
+Cables
+
+&MATL ID            = 'PE/PVC'
+      SPECIFIC_HEAT = 1.289
+      CONDUCTIVITY  = 0.192
+      DENSITY       = 1380.
+      EMISSIVITY    = 0.95 /
+
+&PROP ID            = 'PE/PVC CABLE'
+      QUANTITY      = 'CABLE TEMPERATURE'
+      CABLE_DIAMETER = 0.015
+      CABLE_JACKET_THICKNESS = 0.0015
+      CABLE_MASS_PER_LENGTH = 0.4
+      CABLE_FAILURE_TEMPERATURE = 200. /
+
+&MATL ID            = 'COPPER'
+      SPECIFIC_HEAT = 0.38
+      CONDUCTIVITY  = 387.
+      DENSITY       = 8940.   /
+
+&SURF ID                        = 'CABLE'
+      COLOR                     = 'BLACK'
+      MATL_ID(1,1:2)            = 'PE/PVC','COPPER'
+      MATL_MASS_FRACTION(1,1:2) = 0.33,0.67
+      THICKNESS                 = 0.025
+      BACKING                   = 'EXPOSED' /
+
+&SURF ID                        = 'BURNING CABLE'
+      COLOR                     = 'BLACK'
+      MATL_ID(1,1:2)            = 'PE/PVC','COPPER'
+      MATL_MASS_FRACTION(1,1:2) = 0.33,0.67
+      IGNITION_TEMPERATURE      = 200.
+      HEAT_OF_VAPORIZATION      = 3000.
+      HRRPUA                    = 265.
+      RAMP_Q                    = 'cable fire ramp'
+      THICKNESS                 = 0.025
+      BACKING                   = 'EXPOSED' /
+
+&RAMP ID='cable fire ramp', T=   0., F=0. /
+&RAMP ID='cable fire ramp', T=   5., F=1. /
+&RAMP ID='cable fire ramp', T=2382., F=1. /
+&RAMP ID='cable fire ramp', T=2383., F=0. /
+
+&SURF ID            = 'TRAY'
+      COLOR         = 'SILVER'
+      MATL_ID       = 'STEEL'
+      THICKNESS     = 0.003 /
+
+&MULT ID='trays', DY=2., J_UPPER=7 /
+
+&OBST XB= 3.0,37.0, 2.0, 2.6, 1.8, 1.9, SURF_IDS = 'CABLE','TRAY','CABLE', MULT_ID='trays' /
+&OBST XB= 3.0,37.0, 2.0, 2.6, 2.1, 2.2, SURF_IDS = 'CABLE','TRAY','CABLE', MULT_ID='trays' /
+&OBST XB= 3.0,37.0, 2.0, 2.6, 2.3, 2.4, SURF_IDS = 'CABLE','TRAY','CABLE', MULT_ID='trays' /
+&OBST XB= 3.0,37.0, 2.0, 2.6, 2.6, 2.7, SURF_IDS = 'CABLE','TRAY','CABLE', MULT_ID='trays' /
+&OBST XB= 3.0,37.0, 2.0, 2.6, 2.8, 2.9, SURF_IDS = 'CABLE','TRAY','CABLE', MULT_ID='trays' /
+&OBST XB= 3.0,37.0, 2.0, 2.6, 3.1, 3.2, SURF_IDS = 'CABLE','TRAY','CABLE', MULT_ID='trays' /
+
+ VENT XB=32.7,33.3,16.0,16.6, 1.9, 1.9, SURF_ID  = 'BURNING CABLE', DEVC_ID='Temp_Cable_1_FDS' /
+ VENT XB=32.5,33.5,16.0,16.6, 2.2, 2.2, SURF_ID  = 'BURNING CABLE', DEVC_ID='Temp_Cable_2_FDS' /
+ VENT XB=32.3,33.7,16.0,16.6, 2.4, 2.4, SURF_ID  = 'BURNING CABLE', DEVC_ID='Temp_Cable_3_FDS' /
+ VENT XB=32.2,33.8,16.0,16.6, 2.7, 2.7, SURF_ID  = 'BURNING CABLE', DEVC_ID='Temp_Cable_4_FDS' /
+ VENT XB=32.0,34.0,16.0,16.6, 2.9, 2.9, SURF_ID  = 'BURNING CABLE', DEVC_ID='Temp_Cable_5_FDS' /
+ VENT XB=31.8,34.2,16.0,16.6, 3.2, 3.2, SURF_ID  = 'BURNING CABLE', DEVC_ID='Temp_Cable_6_FDS' /
+
+Fire
+
+&REAC ID='Cellulose'
+      C = 2.
+      H = 2. 
+      HEAT_OF_COMBUSTION=20000.
+      SOOT_YIELD=0.015 /
+
+&SURF ID     = 'FIRE'
+      COLOR  = 'ORANGE'
+      RAMP_Q = 'fire ramp'
+      HRRPUA = 361.1 /
+
+&RAMP ID='fire ramp', T=   0., F=0.000 /
+&RAMP ID='fire ramp', T=  30., F=0.002 /
+&RAMP ID='fire ramp', T=  60., F=0.010 /
+&RAMP ID='fire ramp', T=  90., F=0.023 /
+&RAMP ID='fire ramp', T= 120., F=0.040 /
+&RAMP ID='fire ramp', T= 150., F=0.063 /
+&RAMP ID='fire ramp', T= 180., F=0.090 /
+&RAMP ID='fire ramp', T= 210., F=0.123 /
+&RAMP ID='fire ramp', T= 240., F=0.160 /
+&RAMP ID='fire ramp', T= 270., F=0.203 /
+&RAMP ID='fire ramp', T= 300., F=0.250 /
+&RAMP ID='fire ramp', T= 330., F=0.303 /
+&RAMP ID='fire ramp', T= 360., F=0.360 /
+&RAMP ID='fire ramp', T= 390., F=0.423 /
+&RAMP ID='fire ramp', T= 420., F=0.490 /
+&RAMP ID='fire ramp', T= 450., F=0.562 /
+&RAMP ID='fire ramp', T= 480., F=0.640 /
+&RAMP ID='fire ramp', T= 510., F=0.723 /
+&RAMP ID='fire ramp', T= 540., F=0.810 /
+&RAMP ID='fire ramp', T= 570., F=0.902 /
+&RAMP ID='fire ramp', T= 600., F=1.000 /
+&RAMP ID='fire ramp', T=1170., F=1.000 /
+&RAMP ID='fire ramp', T=1171., F=0.000 /
+
+&OBST XB= 32.7, 33.3, 16.0, 16.6, 0.00, 0.8, SURF_IDS = 'FIRE','DUCT STEEL','DUCT STEEL' /
+
+Ventilation
+
+&MATL ID            = 'STEEL'
+      SPECIFIC_HEAT = 0.465
+      CONDUCTIVITY  = 54.0
+      DENSITY       = 7850.0 /
+
+&SURF ID            = 'DOOR'
+      COLOR         = 'BROWN'
+      MATL_ID       = 'STEEL'
+      THICKNESS     = 0.1 /
+
+&HOLE XB= 5.0, 7.0,-0.6, 0.1, 0.0, 2.0 /
+&HOLE XB=33.0,35.0,-0.6, 0.1, 0.0, 2.0 / 
+
+&DEVC XYZ=0.0,0.0,0.0, ID='Door Timer', QUANTITY='TIME', SETPOINT=600., INITIAL_STATE=.TRUE./
+&OBST XB= 5.0, 7.0,-0.5, 0.0, 0.0, 2.0, PERMIT_HOLE=.FALSE., SURF_ID='DOOR', DEVC_ID='Door Timer' / 
+&OBST XB=33.0,35.0,-0.5, 0.0, 0.0, 2.0, PERMIT_HOLE=.FALSE., SURF_ID='DOOR' / 
+
+&VENT XB= 0.0, 0.0,-1.5,-0.5, 0.0, 4.0, SURF_ID='OPEN' /
+&VENT XB=40.0,40.0,-1.5,-0.5, 0.0, 4.0, SURF_ID='OPEN' /
+&VENT XB= 0.0,40.0,-1.5,-1.5, 0.0, 4.0, SURF_ID='OPEN' /
+
+&SURF ID            = 'SUPPLY'
+      COLOR         = 'BLUE'
+      VOLUME_FLUX   = -0.7 / 
+
+&SURF ID            = 'RETURN'
+      COLOR         = 'GREEN'
+      VOLUME_FLUX   = 0.7 / 
+
+&SURF ID            = 'DUCT STEEL'
+      COLOR         = 'GRAY'
+      MATL_ID       = 'STEEL'
+      THICKNESS     = 0.002 /
+
+&OBST XB=10.0,10.6, 2.9, 3.5, 2.4, 4.0, SURF_ID = 'DUCT STEEL'/
+&OBST XB=10.0,10.6, 2.9, 3.5, 2.2, 2.2, SURF_ID = 'DUCT STEEL'/
+&VENT XB=10.0,10.6, 2.9, 3.5, 2.4, 2.4, SURF_ID = 'SUPPLY', CTRL_ID='Any Detector' /
+
+&OBST XB=29.4,30.0, 2.9, 3.5, 2.4, 4.0, SURF_ID = 'DUCT STEEL'/
+&OBST XB=29.4,30.0, 2.9, 3.5, 2.2, 2.2, SURF_ID = 'DUCT STEEL'/
+&VENT XB=29.4,30.0, 2.9, 3.5, 2.4, 2.4, SURF_ID = 'SUPPLY', CTRL_ID='Any Detector' /
+
+&OBST XB=10.0,10.6,14.9,15.5, 2.4, 4.0, SURF_ID = 'DUCT STEEL'/
+&VENT XB=10.0,10.6,14.9,15.5, 2.4, 2.4, SURF_ID = 'RETURN', CTRL_ID='Any Detector' /
+
+&OBST XB=29.4,30.0,14.9,15.5, 2.4, 4.0, SURF_ID = 'DUCT STEEL'/
+&VENT XB=29.4,30.0,14.9,15.5, 2.4, 2.4, SURF_ID = 'RETURN', CTRL_ID='Any Detector' /
+
+General obstructions
+
+&OBST XB= 3.0,37.0, 0.3, 1.2, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0, 1.5, 2.4, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0, 3.9, 4.8, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0, 5.2, 6.1, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0, 6.4, 7.3, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0, 7.6, 8.5, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0,10.0,10.9, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0,11.2,12.1, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0,12.4,13.3, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0,13.6,14.5, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0,16.1,17.0, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0,17.3,18.2, 3.4, 4.0, SURF_ID = 'DUCT STEEL' /
+
+&OBST XB= 3.0,37.0, 0.5, 1.5, 2.2, 2.8, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0, 4.8, 5.7, 2.2, 2.8, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0,12.8,13.7, 2.2, 2.8, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 3.0,37.0,17.0,18.0, 2.2, 2.8, SURF_ID = 'DUCT STEEL' /
+
+Output
+
+&DUMP DT_DEVC=15., DT_HRR=15. /
+
+&PROP ID='Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8, ACTIVATION_OBSCURATION = 4.9 /
+
+&DEVC ID='Smoke1',  XYZ= 4.0, 15.5, 4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke2',  XYZ=11.9, 15.5, 4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke3',  XYZ=19.8, 15.5, 4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke4',  XYZ=27.7, 15.5, 4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke5',  XYZ=35.7, 15.5, 4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke6',  XYZ= 4.0, 9.4,  4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke7',  XYZ=11.9, 9.4,  4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke8',  XYZ=27.7, 9.4,  4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke9',  XYZ=35.7, 9.4,  4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke10', XYZ= 4.0, 3.3,  4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke11', XYZ=11.9, 3.3,  4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke12', XYZ=19.8, 3.3,  4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke13', XYZ=27.7, 3.3,  4.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke14', XYZ=35.7, 3.3,  4.0, PROP_ID='Smoke Detector' /
+
+&CTRL ID='Any Detector', FUNCTION_TYPE='ANY', INPUT_ID='Smoke1','Smoke2','Smoke3','Smoke4','Smoke5','Smoke6',
+      'Smoke7','Smoke8','Smoke9','Smoke10','Smoke11','Smoke12','Smoke13','Smoke14', INITIAL_STATE=.TRUE. /
+
+&DEVC QUANTITY='UPPER TEMPERATURE',ID='HGL_Temp_FDS',   XB=30.,30.,10.,10.,0.0,4.0 /
+&DEVC QUANTITY='LAYER HEIGHT',     ID='HGL_Height_FDS', XB=30.,30.,10.,10.,0.0,4.0 /
+
+&DEVC ID='Temp_Cable_1_FDS', PROP_ID='PE/PVC CABLE', XYZ=33.,16.3,1.75, ORIENTATION=0,0,-1, SETPOINT=200. /
+&DEVC ID='Temp_Cable_2_FDS', PROP_ID='PE/PVC CABLE', XYZ=33.,16.3,2.05, ORIENTATION=0,0,-1, SETPOINT=200. /
+&DEVC ID='Temp_Cable_3_FDS', PROP_ID='PE/PVC CABLE', XYZ=33.,16.3,2.25, ORIENTATION=0,0,-1, SETPOINT=200. /
+&DEVC ID='Temp_Cable_4_FDS', PROP_ID='PE/PVC CABLE', XYZ=33.,16.3,2.55, ORIENTATION=0,0,-1, SETPOINT=200. /
+&DEVC ID='Temp_Cable_5_FDS', PROP_ID='PE/PVC CABLE', XYZ=33.,16.3,2.75, ORIENTATION=0,0,-1, SETPOINT=200. /
+&DEVC ID='Temp_Cable_6_FDS', PROP_ID='PE/PVC CABLE', XYZ=33.,16.3,3.05, ORIENTATION=0,0,-1, SETPOINT=200. /
+
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Cable_A_FDS', XB=30,36,15,18,2.25,2.45, STATISTICS='MAX', SURF_ID='CABLE' /
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Cable_B_FDS', XB=30,36,15,18,3.05,3.25, STATISTICS='MAX', SURF_ID='CABLE' /
+
+Smokeview output
+
+&BNDF QUANTITY='GAUGE HEAT FLUX'/
+&BNDF QUANTITY='WALL TEMPERATURE'/
+&BNDF QUANTITY='BURNING RATE'/
+
+&SLCF PBY=16.25, VECTOR=.TRUE., QUANTITY='TEMPERATURE' /
+&SLCF PBY=15.25, VECTOR=.TRUE., QUANTITY='TEMPERATURE' /
+&SLCF PBY= 3.25, VECTOR=.TRUE., QUANTITY='TEMPERATURE' /
+
+End the file
+
+&TAIL /
