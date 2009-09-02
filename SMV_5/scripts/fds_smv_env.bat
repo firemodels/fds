@@ -35,34 +35,35 @@ Rem ----------------------------------------------------------------------
 
 Rem ----------- version and revision numbers -------------
 
-set smv_version=test
-set smv_revision=3758
+Rem ------ Smokeview version and revision numbers ---------
 
-set fds_version=5.3.1
-set fds_revision=3729
+set smv_version=5.4.3
+set smv_revision=4599
 
-Rem this parameter is not needed now but am keeping it around in case we change our minds
-Rem about releasing docs on the download page
+Rem ------ FDS version and revision numbers ---------
 
-set docs_revision=3533
+set fds_version=5.4.0
+set fds_revision=4629
 
-set verification_revision=3685
+Rem ------ Verification case revision number ---------
+
+set verification_revision=4584
 
 Rem ----------- for uploading to Google Code -----------------
+
+Rem *** FDS - comment 2 of the following 3 lines
+Rem    (the uncommented line is used for specifying type of Google upload)
+
+Rem set fds_google_level=Release-1_Major
+Rem set fds_google_level=Release-2_Minor
+set     fds_google_level=Release-3_Maintenance
 
 Rem *** Smokeview - comment 2 of the following 3 lines
 Rem    (the uncommented line is used for specifying type of Google upload)
 
 Rem set smv_google_level=Release-1_Major
-Rem set smv_google_level=Release-2_Minor
-set     smv_google_level=Release-3_Maintenance
-
-Rem *** Docs - comment 2 of the following 3 lines
-Rem    (the uncommented line is used for specifying type of Google upload)
-
-Rem set docs_google_level=Release-1_Major
-Rem docs_google_level=Release-2_Minor
-    set     docs_google_level=Release-3_Maintenance
+set smv_google_level=Release-2_Minor
+Rem set     smv_google_level=Release-3_Maintenance
 
 Rem Example cases - comment 2 of the following 3 lines
 Rem    (the uncommented line is used for specifying type of Google upload)
@@ -71,23 +72,17 @@ Rem set verification_google_level=Release-1_Major
 Rem set verification_google_level=Release-2_Minor
 set     verification_google_level=Release-3_Maintenance
 
-Rem FDS - comment 2 of the following 3 lines
-Rem    (the uncommented line is used for specifying type of Google upload)
-
-Rem set fds_google_level=Release-1_Major
-Rem set fds_google_level=Release-2_Minor
-set     fds_google_level=Release-3_Maintenance
-
-
 Rem --------------------------------------
 Rem --- should not need to edit below ----
 Rem --------------------------------------
 
 set svn_logon=%linux_username%@%linux_hostname%
 
+set homedir="%homedrive%%homepath%"
+
 Rem put your google password into a file named gc.passwd located in
 Rem   the directory below (your windows home directory found by simply
 Rem   opening a winows command shell)
 
-set google_password_dir=%homedrive%\%homepath%\
+set google_password_dir=%homedir%
 
