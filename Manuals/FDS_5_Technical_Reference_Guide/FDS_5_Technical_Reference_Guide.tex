@@ -350,52 +350,56 @@ fire services communities:
 
 FDS is supported financially via internal funding at both NIST and
 VTT, Finland. In addition, support is provided by other agencies of
-the US Federal Government, most notably the Nuclear Regulatory Agency
-Office of Research. The US NRC Office of Research has funded key
+the US Federal Government:
+\begin{itemize}
+\item The US Nuclear Regulatory Commission Office of Research has funded key
 validation experiments, the preparation of the FDS manuals, and the
 development of various sub-models that are of importance in the area
 of nuclear power plant safety. Special thanks to Mark Salley and Jason
 Dreisbach for their efforts and support.  The Office of Nuclear
-Material Safety and Safeguards, another branch of the NRC, has
+Material Safety and Safeguards, another branch of the US NRC, has
 supported modeling studies of tunnel fires under the direction of
 Chris Bajwa and Allen Hansen.
+\item The Micro-Gravity Combustion Program of the National Aeronautics and Space
+Administration (NASA) has supported several projects that directly or indirectly benefited FDS development.
+\item The US Forest Service has supported the development of sub-models in FDS designed to simulate the spread of
+fire in the Wildland Urban Interface (WUI). Special thanks to Mark Finney and Tony Bova for their support.
+\item The Minerals Management Service of the US Department of the Interior funded research at NIST aimed at 
+characterizing the burning behavior of oil spilled on the open sea or ice. Part of this research led to the development
+of the ALOFT (A Large Outdoor Fire plume Trajectory) model, a forerunner of FDS. Special thanks to Joe Mullin for his
+encouragement of the modeling efforts.
+\end{itemize}
 
-Another source of support for FDS development has been the Microgravity Combustion Program of the National Aeronautics and Space
-Administration (NASA).
-
-Originally, the basic hydrodynamic solver was designed by Ronald Rehm
+\noindent The following individuals and organizations played a role in the development of the underlying mathematical model of FDS.
+\begin{itemize}
+\item Originally, the basic hydrodynamic solver was designed by Ronald Rehm
 and Howard Baum with programming help from Darcy Barnett, Dan Lozier
 and Hai Tang of the Computing and Applied Mathematics Laboratory
 (CAML) at NIST, and Dan Corley of the Building and Fire Research
 Laboratory (BFRL). Jim Sims of CAML developed the original
 visualization software.  The direct pressure solver was written by
 Roland Sweet of the National Center for Atmospheric Research (NCAR),
-Boulder, Colorado.  Kuldeep Prasad added the multiple-mesh data
+Boulder, Colorado.  
+\item Kuldeep Prasad added the multiple-mesh data
 structures, paving the way for parallel processing.   Charles Bouldin
 devised the basic framework of the parallel version of the code.
-
-At NIST, Glenn Forney developed the visualization tool Smokeview that
-not only made the public release possible, but it also serves as the
-principal diagnostic tool for the continuing development of
-FDS.
-
-William Grosshandler and Tom Cleary, both currently at NIST, developed
+\item William Grosshandler and Tom Cleary, both currently at NIST, developed
 an enhancement to the smoke detector activation algorithm, originally
 conceived by Gunnar Heskestad of Factory Mutual. Steve
 Olenick of Combustion Science and Engineering (CSE) implemented the
 smoke detector model into FDS.
-
-William Grosshandler is also the developer of RadCal, a library of
+\item William Grosshandler is also the developer of RadCal, a library of
 subroutines that have been incorporated in FDS to provide the
 radiative properties of gases and smoke.
-
-Prof.~Nick Dembsey of Worcester Polytechnic Institute (WPI) has provided valuable feedback about the pyrolysis model used within FDS.
-
-Professor Fred Mowrer of the University of Maryland provided a simple
+\item Prof.~Nick Dembsey of Worcester Polytechnic Institute (WPI) has provided valuable feedback about the pyrolysis model used within FDS.
+\item Professor Fred Mowrer, formerly of the University of Maryland, provided a simple
 of model of gas phase extinction to FDS.
-
-Chris Lautenburger of the University of California, Berkeley, and Jose Torero and Guillermo Rein of the University of Edinburg. have
+\item Chris Lautenburger of the University of California, Berkeley, and Jose Torero and Guillermo Rein of the University of Edinburgh, have
 provided valuable insight in the development of the solid phase model.
+\item Susanne Kilian of hhpberlin (Germany) has provided valuable guidance on improvements to the FDS pressure solver.
+\item Christian Rogsch of the University of Wuppertal (Germany) implemented the OpenMP calls in the FDS source code, allowing the program to 
+exploit multiple processors/cores on a single computer.
+\end{itemize}
 
 
 
@@ -3161,7 +3165,7 @@ F_{\z,ijk} &=  \left(
            &  - \frac{1}{\rho_{ij,k+\ha}} \left( f_{z,ijk}
   + \frac{\tau_{zx,ijk}-\tau_{zx,i-1,jk}}{\dx}
   + \frac{\tau_{zy,ijk}-\tau_{zy,i,j-1,k}}{\dy}
-  + \frac{\tau_{zz,ij,k+1}-\tau_{zz,ijk}}{\dz} \right) 
+  + \frac{\tau_{zz,ij,k+1}-\tau_{zz,ijk}}{\dz} \right)
 \end{align}
 
 \noindent The components of the vorticity vector are:
@@ -3186,7 +3190,7 @@ F_{\z,ijk} &=  \left(
                         + \frac{w_{i+1,jk}-w_{ijk}}{\dx} \right) \\
 \tau_{yz,ijk} &= \tau_{zy,ijk}
         =\mu_{i,j+\ha,k+\ha} \left( \frac{v_{ij,k+1}-v_{ijk}}{\dz}
-                        + \frac{w_{i,j+1,k}-w_{ijk}}{\dy} \right) 
+                        + \frac{w_{i,j+1,k}-w_{ijk}}{\dy} \right)
 \end{align}
 
 \noindent The variables $\epsilon_u$, $\epsilon_v$ and $\epsilon_w$ are local
