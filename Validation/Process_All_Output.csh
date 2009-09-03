@@ -5,6 +5,7 @@ $VDIR/ATF_Corridors/FDS_Output_Files/Process_Output.csh
 $VDIR/Beyler_Hood/FDS_Output_Files/Process_Output.csh
 $VDIR/CAROLFIRE/FDS_Output_Files/Process_Output.csh
 $VDIR/Flame_Height/FDS_Output_Files/Process_Output.csh
+$VDIR/FM_Parallel_Panels/FDS_Output_Files/Process_Output.csh
 $VDIR/FM_SNL/FDS_Output_Files/Process_Output.csh
 $VDIR/Hamins_CH4/FDS_Output_Files/Process_Output.csh
 $VDIR/INERIS_H2/FDS_Output_Files/Process_Output.csh
