@@ -102,6 +102,7 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_transparent 6
 #define LABELS_fontsize 7
 #define LABELS_ticks 8
+#define LABELS_sensorsize 20
 
 #define LABELS_particleshow    10
 #define LABELS_sliceshow       11
@@ -172,8 +173,7 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_radiobutton_to_group(RADIO_fontsize,"small font");
   glui_labels->add_radiobutton_to_group(RADIO_fontsize,"large font");
 
-  SPINNER_sensorrelsize=glui_labels->add_spinner_to_panel(panel_label1,"Sensor Scaling",GLUI_SPINNER_FLOAT,&sensorrelsize);
-  SPINNER_sensorrelsize->set_float_limits(sensorrelsizeMIN,sensorrelsizeMAX,GLUI_LIMIT_CLAMP);
+  SPINNER_sensorrelsize=glui_labels->add_spinner_to_panel(panel_label1,"Sensor Scaling",GLUI_SPINNER_FLOAT,&sensorrelsize,LABELS_sensorsize,Labels_CB);
 
   panel_user_tick = glui_labels->add_rollout("User Tick Settings",false);
 
@@ -422,6 +422,14 @@ extern "C" void show_glui_labels(void){
 void Labels_CB(int var){
   updatemenu=1;
   switch (var){
+  case LABELS_sensorsize:
+    if(sensorrelsize<sensorrelsizeMIN){
+      sensorrelsize=sensorrelsizeMIN;
+      if(SPINNER_sensorrelsize!=NULL){
+        SPINNER_sensorrelsize->set_float_val(sensorrelsize);
+      }
+    }
+    break;
   case SAVE_SETTINGS:
     writeini(LOCAL_INI);
     break;

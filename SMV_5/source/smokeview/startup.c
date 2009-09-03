@@ -1397,7 +1397,6 @@ void initvars1(void){
   sprinklerabssize=0.076f, sensorabssize=0.038f, heatabssize=0.076f;
   sensorrelsize=1.0;
   sensorrelsizeMIN=0.0;
-  sensorrelsizeMAX=10.0;
 
   linewidth=2.0, ventlinewidth=2.0, highlight_linewidth=4.0;
   sliceoffset_factor=0.1f, ventoffset_factor=0.1f;

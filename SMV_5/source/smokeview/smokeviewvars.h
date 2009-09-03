@@ -499,7 +499,7 @@ SVEXTERN float isopointsize, isolinewidth;
 SVEXTERN float plot3dpointsize, plot3dlinewidth;
 SVEXTERN float vectorlinewidth;
 SVEXTERN float sprinklerabssize, sensorabssize, heatabssize;
-SVEXTERN float sensorrelsize,sensorrelsizeMIN,sensorrelsizeMAX;
+SVEXTERN float sensorrelsize,sensorrelsizeMIN;
 
 SVEXTERN float linewidth, ventlinewidth, highlight_linewidth;
 SVEXTERN float sliceoffset_factor, ventoffset_factor;
