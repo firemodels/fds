@@ -1871,15 +1871,11 @@ CHARACTER(30) :: QUANTITY
  
 WRITE(LU_ERR,'(/A/)')      ' Fire Dynamics Simulator'
 WRITE(LU_ERR,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
-IF (.NOT.PARALLEL)   WRITE(LU_ERR,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
-IF (PARALLEL)        WRITE(LU_ERR,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
-
-! Version and OpenMP Information
-
-IF (.NOT. USE_OPENMP) WRITE (LU_ERR,'(/A/)')      ' OpenMP Disabled'
-IF (USE_OPENMP) WRITE(LU_ERR,'(/A/)')             ' OpenMP Enabled'
-IF (USE_OPENMP) WRITE(LU_ERR,'(A,I3/)')           ' Number of OpenMP threads: ',OPENMP_AVAILABLE_THREADS
-
+IF (.NOT.PARALLEL .AND. .NOT.USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING)," MPI Disabled; OpenMP Disabled"
+IF (     PARALLEL .AND. .NOT.USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING)," MPI Enabled; OpenMP Disabled"
+IF (.NOT.PARALLEL .AND.      USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING)," MPI Disabled; OpenMP Enabled"
+IF (     PARALLEL .AND.      USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING)," MPI Enabled; OpenMP Enabled"
+IF (USE_OPENMP .AND. .NOT.PARALLEL) WRITE(LU_ERR,'(A,I3/)')           ' Number of available threads: ',OPENMP_AVAILABLE_THREADS
 WRITE(LU_ERR,'(A,I4/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
 WRITE(LU_ERR,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
 WRITE(LU_ERR,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)

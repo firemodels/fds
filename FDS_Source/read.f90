@@ -55,15 +55,25 @@ CALL GET_INPUT_FILE
 IF (FN_INPUT(1:1)==' ') THEN
    IF (MYID==0) THEN
       WRITE(LU_ERR,'(/A)') "Fire Dynamics Simulator"
-      IF (.NOT.PARALLEL)   WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING)," Serial"
-      IF (PARALLEL)        WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING)," Parallel"
+      IF (.NOT.PARALLEL .AND. .NOT.USE_OPENMP)   &
+         WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING),"; MPI Disabled; OpenMP Disabled"
+      IF (     PARALLEL .AND. .NOT.USE_OPENMP)   &
+         WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING),"; MPI Enabled; OpenMP Disabled"
+      IF (.NOT.PARALLEL .AND.      USE_OPENMP)   &
+         WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING),"; MPI Disabled; OpenMP Enabled"
+      IF (     PARALLEL .AND.      USE_OPENMP)   &
+         WRITE(LU_ERR,'(/A,A,A)') "Version: ",TRIM(VERSION_STRING),"; MPI Enabled; OpenMP Enabled"
+   ENDIF
+   IF (USE_OPENMP .and. .NOT.PARALLEL) &
+      WRITE(LU_ERR,'(A,I3)') 'Number of available OpenMP threads: ',OPENMP_AVAILABLE_THREADS
+   IF (MYID==0) THEN
       WRITE(LU_ERR,'(A,I4)') "SVN Revision Number: ",SVN_REVISION_NUMBER
       WRITE(LU_ERR,'(A,A)') "Compile Date: ",TRIM(COMPILE_DATE)
       WRITE(LU_ERR,'(/A)')  "Consult FDS Users Guide Chapter, Running FDS, for further instructions."
       WRITE(LU_ERR,'(/A)')  "Hit Enter to Escape..."
+      READ(5,*,ERR=2,END=2)
    ENDIF
-   READ(5,*)
-   STOP
+ 2 STOP
 ENDIF
 
 ! Stop FDS if the input file cannot be found in the current directory
