@@ -54,7 +54,7 @@ intel_win_32 : FFLAGS = -O2 /Qvec_report0
 intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 intel_win_32 : FCOMPL = ifort
 intel_win_32 : CCOMPL = cl
-intel_win_32 : obj = fds5_win_32
+intel_win_32 : obj = fds5
 intel_win_32 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
 
@@ -62,7 +62,7 @@ openmp_intel_win_32 : FFLAGS = -O2 /Qvec_report0 /Qopenmp /Qopenmp-link:static
 openmp_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 openmp_intel_win_32 : FCOMPL = ifort
 openmp_intel_win_32 : CCOMPL = cl
-openmp_intel_win_32 : obj = fds5_openmp_win_32
+openmp_intel_win_32 : obj = fds5_openmp
 openmp_intel_win_32 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
 
@@ -72,8 +72,18 @@ mpi_intel_win_32 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE)
 mpi_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 mpi_intel_win_32 : FCOMPL = ifort
 mpi_intel_win_32 : CCOMPL = cl
-mpi_intel_win_32 : obj = fds5_win_mpi_32
+mpi_intel_win_32 : obj = fds5_mpi
 mpi_intel_win_32 : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
+
+openmp_mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
+openmp_mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
+openmp_mpi_intel_win_32 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE) /Qopenmp /Qopenmp-link:static
+openmp_mpi_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
+openmp_mpi_intel_win_32 : FCOMPL = ifort
+openmp_mpi_intel_win_32 : CCOMPL = cl
+openmp_mpi_intel_win_32 : obj = fds5_openmp_mpi
+openmp_mpi_intel_win_32 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
 
  #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
@@ -106,7 +116,7 @@ mpi_intel_win_64 : obj = fds5_win_mpi_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
 
-# Intel Compiler, version 11
+# Intel Compiler for Linux, version 11
 
 intel_linux_32 : FFLAGS = -m32 -O3 -static -vec_report0
 intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
@@ -191,6 +201,7 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 # These settings are only usable if the Intel ThreadChecker is installed. Use this settings not for debugging
 # mathematical problems. Only use this settings to check the correctness of the OpenMP parallelization.
 # Static linking is not possible in these cases.
+
 openmp_intel_linux_32_db : FFLAGS = -m32 -O0 -g -tcheck -openmp
 openmp_intel_linux_32_db : CFLAGS = -m32 -O0 -Dpp_noappend -vec_report0
 openmp_intel_linux_32_db : FCOMPL = ifort
