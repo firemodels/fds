@@ -2,6 +2,13 @@
 % 6-02-2009
 % dvcread.m
 %
+% function [H X] = dvcread(filename,header_row)
+%
+% header_row = row where header names are stored; names converted to H
+% vector.
+%
+% X = matrix of numeric data; columns correspond to entries in H.
+%
 % Read a _devc.csv file for V&V processing.  The idea is to create the
 % basic equivalent of csvread, except that we need also to read the header
 % lines.  In principle, xlsread should handle this but we have experienced
