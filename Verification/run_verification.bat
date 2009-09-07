@@ -40,6 +40,9 @@ cd ..
 cd SMV_Script_Example
 for %%i in (*.fds) do %1 %%i
 cd ..
+cd Species
+for %%i in (*.fds) do %1 %%i
+cd ..
 cd Sprinklers_and_Sprays
 for %%i in (*.fds) do %1 %%i
 cd ..
