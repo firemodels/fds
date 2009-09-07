@@ -2459,10 +2459,9 @@ rectangular region of the domain. If so, add lines of the form
 \end{verbatim}
 
 \normalsize
-\noindent Here, within the region whose bounds are given by the sextuplet {\ct XB},
-the initial temperature shall be 30~$^\circ$C instead of the ambient.
-This construct can also be used for {\ct DENSITY} or
-{\ct MASS\_FRACTION(N)} where {\ct N} indicates the {\ct N}th species listed in the input file.
+\noindent Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial temperature shall be 30~$^\circ$C instead of the ambient. 
+This construct can also be used for {\ct DENSITY} or {\ct MASS\_FRACTION(N)} where {\ct N} indicates the {\ct N}th species listed in the input file. 
+Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line.
 
 The {\ct INIT} construct may be useful in examining the influence of
 stack effect in a building, where the temperature
