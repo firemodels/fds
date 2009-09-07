@@ -1,0 +1,159 @@
+Verification test for 
+ All material properties etc. are completely fabricated.
+
+ This is a verifiaction test case for the gas phase DEVC output
+ quantity FED, which calculates the Fractional Effective Dose 
+ (FED) index.  The present version of FDS uses only the concentrations
+ of the gases CO, CO2, and O2 to calculate the FED value.  Note also,
+ that the present version only inlcudes the hyperventilation factor
+ of CO2, not its toxic effects.  CO2 starts to be an asphyxiant at
+ consentrations of approx. 5 percent.
+
+ The FED formulas are taken from Purser  (The SFPE Handbook, 4th Ed.)
+ and these are in the function 'FED' in func.f90:
+
+ FED_dose = FED_LCO*FED_VCO2 + FED_LO2
+
+ CO:  (3.317E-5*RMV*t)/D
+      [RMV]=ltr/min, D=30% COHb concentration at incapacitation
+
+ VCO2: CO2-induced hyperventilation
+       exp(0.1903*c_CO2(%) + 2.0004)
+
+ LO2: low oxygen
+ t_Io = exp(8.13-0.54(20.9-%O2)), time in minutes
+ F_Io = dt/t_Io
+ 
+&HEAD CHID='FED_Device', TITLE='Verification of FED Device, SVN $Revision: 3324 $'/
+
+ The fire mesh, this test case uses constant gas properties, 
+
+&MESH IJK= 20,5,5, XB= 0.0,8.0, 0.0,2.0, 0.0,2.0 /
+
+&TIME T_END=100.0, DT=0.1 /
+
+&DUMP SMOKE3D=.FALSE.,
+      NFRAMES=200,
+      DT_PART=1000000.0,
+      DT_HRR= 1000000.0,
+      DT_SLCF=1.0,
+      DT_BNDF=1000000.0,
+      DT_PL3D=1000000.0,
+      DT_ISOF=1000000.0 /
+
+&MISC TMPA=20.0, 
+      BACKGROUND_SPECIES=’AIR’,
+      NOISE=.FALSE.,
+      RADIATION=.FALSE. /
+
+
+&REAC ID         = 'POLYURETHANE'
+      SOOT_YIELD = 0.0
+      CO_YIELD   = 0.0
+      N          = 1.0
+      C          = 6.3
+      H          = 7.1
+      O          = 2.1  /
+
+&SPEC ID='CARBON DIOXIDE' /
+&SPEC ID='CARBON MONOXIDE' /
+&SPEC ID='NITROGEN' /
+
+&OBST XB = 2,2.4,0,2,0,2 /
+&OBST XB = 4,4.4,0,2,0,2 /
+&OBST XB = 6,6.4,0,2,0,2 /
+
+Region 1: O2 effect
+
+ Concentrations for this test case:
+    CO2: 0.000 mol/mol
+    CO:  0.000 mol/mol (1000 ppm)
+    O2:  0.120 mol/mol
+    N2:  0.880 mol/mol
+
+ Mass Fractions (Rest is 'air': 0.21 mol/mol O2 + 0.79 mol/mol N2)
+    CO2: 0.000000 g/g
+    CO:  0.000000 g/g
+    O2:  0.000000 g/g
+    N2:  0.421347 g/g
+
+&INIT XB = 0,2,0,2,0,2 	MASS_FRACTION(3)=0.421347 /
+
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'carbon dioxide',  ID='CO2 1'/
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'carbon monoxide', ID='CO 1' /
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'oxygen',          ID='O2 1' /
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='FED', ID='FED O2' /
+
+
+Region 2: CO effect
+
+ Wanted concentrations for this test case:
+    CO2: 0.000 mol/mol
+    CO:  0.001 mol/mol (1000 ppm)
+    O2:  0.210 mol/mol
+    N2:  0.790 mol/mol
+
+    Mass Fractions (Rest is 'air': 0.21 mol/mol O2 + 0.79 mol/mol N2)
+    CO2: 0.000000 g/g
+    CO:  0.000971 g/g
+    O2:  0.000000 g/g
+    N2:  0.000000 g/g
+
+&INIT XB = 2,4,0,2,0,2 	MASS_FRACTION(2)=0.00097090 / /
+
+&DEVC XYZ= 3.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'carbon dioxide',  ID='CO2 CO'/
+&DEVC XYZ= 3.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'carbon monoxide', ID='CO CO' /
+&DEVC XYZ= 3.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'oxygen',          ID='O2 CO' /
+&DEVC XYZ= 3.0,1.0,1.0, QUANTITY='FED', ID='FED CO' /
+
+
+
+Region 3: CO and CO2 effect
+
+ Wanted concentrations for this test case:
+    CO2: 0.034305 mol/mol
+    CO:  0.001 mol/mol (1000 ppm)
+    O2:  0.210 mol/mol
+    N2:  0.762 mol/mol
+
+    Mass Fractions (Rest is 'air': 0.21 mol/mol O2 + 0.79 mol/mol N2)
+    CO2: 0.05135685 g/g
+    CO:  0.00095268 g/g
+    O2:  0.01088775 g/g
+    N2:  0.00000000 g/g
+
+&INIT XB = 4,6,0,2,0,2 	MASS_FRACTION(1)=0.05135685 
+                       	MASS_FRACTION(2)=0.00095268 
+                        MASS_FRACTION(3)=0.01088775 /
+
+&DEVC XYZ= 5.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'carbon dioxide',  ID='CO2 CO2+CO'/
+&DEVC XYZ= 5.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'carbon monoxide', ID='CO CO2+CO' /
+&DEVC XYZ= 5.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'oxygen',          ID='O2 CO2+CO' /
+&DEVC XYZ= 5.0,1.0,1.0, QUANTITY='FED', ID='FED CO2+CO' /
+
+
+
+Region 4: All gases
+
+ Wanted concentrations for this test case:
+    CO2: 0.020 mol/mol
+    CO:  0.001 mol/mol (1000 ppm)
+    O2:  0.150 mol/mol
+    N2:  0.829 mol/mol (the rest)
+
+    Mass Fractions (Rest is 'air': 0.21 mol/mol O2 + 0.79 mol/mol N2)
+    CO2: 0.030429 g/g
+    CO:  0.000968 g/g
+    O2:  0.000000 g/g
+    N2:  0.256084 g/g
+
+&INIT XB = 6,8,0,2,0,2 	MASS_FRACTION(1)=0.030429
+                        MASS_FRACTION(2)=0.000968 
+                        MASS_FRACTION(3)=0.256084 /
+
+&DEVC XYZ= 7.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'carbon dioxide',  ID='CO2 All'/
+&DEVC XYZ= 7.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'carbon monoxide', ID='CO All' /
+&DEVC XYZ= 7.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'oxygen',          ID='O2 All' /
+&DEVC XYZ= 7.0,1.0,1.0, QUANTITY='FED', ID='FED All' /
+
+&TAIL /
