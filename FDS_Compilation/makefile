@@ -66,6 +66,14 @@ openmp_intel_win_32 : obj = fds5_openmp
 openmp_intel_win_32 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
 
+openmp_intel_win_32_db : FFLAGS = /debug:full /traceback /check:bounds /libs:static /threads /fpe:0 /Qvec_report0 /Qopenmp /Qopenmp-link:static /Qtcheck
+openmp_intel_win_32_db : CFLAGS = -Dpp_noappend
+openmp_intel_win_32_db : FCOMPL = ifort
+openmp_intel_win_32_db : CCOMPL = cl
+openmp_intel_win_32_db : obj = fds5_openmp_db
+openmp_intel_win_32_db : setup_win $(objwin_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
+
 mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
 mpi_intel_win_32 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE)
