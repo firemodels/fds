@@ -1115,6 +1115,50 @@ integral function (order 3) of optical depth, $\tau$. The exact solutions and FD
 
 
 
+\chapter{Species and Combustion}
+
+This chapter contains examples that test the computations related to species concentrations, gas properties and combustion.
+
+\section{Fractional Effective Dose (FED)(\texorpdfstring{{\bf FED\_Device}}{FED\_Device}) }
+
+The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapasitation
+due to the combustion gases.  The present version of FDS uses only the concentrations of the gases CO, CO${}_2$, and O${}_2$ to
+calculate the FED value as
+\be
+\mathrm{FED}_\mathrm{tot} = \mathrm{FED}_\mathrm{CO} \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
+\ee
+The fraction of an incapacitating dose of CO is calculated as
+\be
+\mathrm{FED}_\mathrm{CO} = 4.607 \times 10^{-7} \, (C_\mathrm{CO})^{1.036} \ t
+\ee
+where $t$ is time in seconds and $C_\mathrm{CO}$ is the CO concentration (ppm).  The fraction of an incapacitating dose of low
+O${}_2$ hypoxia is calculated as
+\be
+\mathrm{FED}_\mathrm{O_2} =  \frac{t}{60 \exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}) \right ] }
+\ee
+where $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent).  The hyperventilation factor induced by carbon dioxide
+is calculated as
+\be
+\mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1930 \, C_\mathrm{CO_2} +  2.0004 ) }{7.1}
+\ee
+where $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (percent).
+
+The FED values were computed from specified constant gas concentrations using an external spreadsheet. The gas concentrations are listed in the 
+following table and the FDS and spreadsheet predictions of FED values are compared in the figures below.
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{FIGURES/FED_Device_O2} &
+\includegraphics[width=3.2in]{FIGURES/FED_Device_CO} \\
+\includegraphics[width=3.2in]{FIGURES/FED_Device_CO2_CO} &
+\includegraphics[width=3.2in]{FIGURES/FED_Device_All}
+\end{tabular*}
+\caption[The {\bf FED\_Device} test cases.]{Comparison of FED index predictions with spreadsheet computations.}
+\label{FED_Device}
+\end{figure}
+
+
+
 
 \chapter{Heat Conduction}
 
