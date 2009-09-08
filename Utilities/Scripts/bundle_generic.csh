@@ -29,16 +29,19 @@ mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
 
 echo Copying program files
-if $?fdshost then
-scp $fdshost\:$makedir/$fds5dir/$fds5 $bundledir/bin/.
-scp $fdshost\:$makedir/$fds5mpidir/$fds5mpi $bundledir/bin/.
+if $?smvhost then
 scp $fdshost\:$smvbindir/$smokeview $bundledir/bin/.
 scp $fdshost\:$smvbindir/$smokezip $bundledir/bin/.
 else
-cp $makedir/$fds5dir/$fds5 $bundledir/bin/.
-cp $makedir/$fds5mpidir/$fds5mpi $bundledir/bin/.
 cp $smvbindir/$smokeview $bundledir/bin/.
 cp $smvbindir/$smokezip $bundledir/bin/.
+endif
+if $?fdshost then
+scp $fdshost\:$makedir/$fds5dir/$fds5 $bundledir/bin/.
+scp $fdshost\:$makedir/$fds5mpidir/$fds5mpi $bundledir/bin/.
+else
+cp $makedir/$fds5dir/$fds5 $bundledir/bin/.
+cp $makedir/$fds5mpidir/$fds5mpi $bundledir/bin/.
 endif
 cp $forbundle/smokeview.ini $bundledir/bin/.
 cp $fds2asciidir/$fds2ascii $bundledir/bin/.
@@ -52,7 +55,7 @@ echo
 echo Getting the FDS release notes from the repository
 svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki $bundle_setup/FDS_Release_Notes.wiki
 
-echo.
+echo 
 echo Converting the FDS release notes from wiki to html format
 $wikify -r $bundle_setup/FDS_Release_Notes.wiki > $bundledir/Documentation/FDS_Release_Notes.html
 
