@@ -7372,7 +7372,7 @@ int readini2(char *inifile, int localfile){
       }
     if(match(buffer,"FLIP",4)==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&flip);
+      sscanf(buffer,"%i ",&background_flip);
       continue;
       }
     if(match(buffer,"COLORBARFLIP",12)==1){
@@ -8617,7 +8617,7 @@ void writeini(int flag){
 /*  extern GLfloat iso_ambient[4], iso_specular[4], iso_shininess;*/
 
   fprintf(fileout,"FLIP\n");
-  fprintf(fileout," %i\n",flip);
+  fprintf(fileout," %i\n",background_flip);
   fprintf(fileout,"TIMEBARCOLOR\n");
   fprintf(fileout," %f %f %f\n",timebarcolor[0],timebarcolor[1],timebarcolor[2]);
   fprintf(fileout,"SETBW\n");

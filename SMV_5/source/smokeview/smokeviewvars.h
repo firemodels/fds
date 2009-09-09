@@ -513,7 +513,7 @@ SVEXTERN int rgb_green, rgb_magenta, rgb_cyan, rgb_black;
 SVEXTERN int numColorbars;
 SVEXTERN int setbw,colorbarflip;
 SVEXTERN int setbwSAVE;
-SVEXTERN int flip;
+SVEXTERN int background_flip;
 SVEXTERN float transparentlevel;
 SVEXTERN int transparentflag,transparentflagVOL;
 SVEXTERN int transparentflagSAVE;
