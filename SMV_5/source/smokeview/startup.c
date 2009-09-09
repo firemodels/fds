@@ -1409,7 +1409,7 @@ void initvars1(void){
   numColorbars=0;
   setbw=0,colorbarflip=0;
   setbwSAVE=setbw;
-  flip=1;
+  background_flip=1;
   transparentlevel=0.8f;
   transparentflag=1;
   transparentflagVOL=1;

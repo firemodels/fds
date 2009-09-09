@@ -389,7 +389,6 @@ void ColorBarMenu(int value){
       break;
     case -4:
       colorbarcycle=0;
-      //flip=0;
       setbw=0;
       break;
     case -5:
@@ -426,7 +425,7 @@ void ShadeMenu(int value){
   GLUTPOSTREDISPLAY
   switch (value){
    case 1:
-    flip = 1-flip;
+    background_flip = 1-background_flip;
     updatecolors(-1);
     set_labels_controls();
     break;
@@ -440,7 +439,6 @@ void ShadeMenu(int value){
       colorbartype=colorbartype_save;
       ColorBarMenu(colorbartype);
     }
-//    flip=setbw;
     updatecolors(-1);
     set_labels_controls();
   break;
@@ -459,7 +457,7 @@ void ShadeMenu(int value){
     break;
   case 6:
     colorbarcycle=0;
-    flip=0;
+    background_flip=0;
     setbw=0;
     updatecolors(-1);
     break;
@@ -5245,7 +5243,7 @@ static int in_menu=0;
   CREATEMENU(shademenu,ShadeMenu);
     glutAddSubMenu("Colorbars",colorbarmenu);
 
-  if(flip==1){
+  if(background_flip==1){
     glutAddMenuEntry("*Flip background",1);
   }
   else{
