@@ -206,7 +206,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   panel_smoke = glui_3dsmoke->add_panel_to_panel(panel_overall,"Smoke");
   panel_smoke->set_alignment(GLUI_ALIGN_LEFT);
-  SPINNER_smoke3d_smoke_shade=glui_3dsmoke->add_spinner_to_panel(panel_smoke,"Gray Level",GLUI_SPINNER_INT,&smoke_shade,SMOKE_SHADE,SMOKE_3D_CB);
+  SPINNER_smoke3d_smoke_shade=glui_3dsmoke->add_spinner_to_panel(panel_smoke,"Grey Level",GLUI_SPINNER_INT,&smoke_shade,SMOKE_SHADE,SMOKE_3D_CB);
   SPINNER_smoke3d_smoke_shade->set_int_limits(0,255);
 #ifdef pp_GPU
   SPINNER_smoke3d_rthick=glui_3dsmoke->add_spinner_to_panel(panel_smoke,"Thickness",
