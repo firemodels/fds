@@ -30,8 +30,8 @@ mkdir $bundledir/Examples
 
 echo Copying program files
 if $?smvhost then
-scp $fdshost\:$smvbindir/$smokeview $bundledir/bin/.
-scp $fdshost\:$smvbindir/$smokezip $bundledir/bin/.
+scp $smvhost\:$smvbindir/$smokeview $bundledir/bin/.
+scp $smvhost\:$smvbindir/$smokezip $bundledir/bin/.
 else
 cp $smvbindir/$smokeview $bundledir/bin/.
 cp $smvbindir/$smokezip $bundledir/bin/.
