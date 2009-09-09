@@ -29,6 +29,9 @@ mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
 
 echo Copying program files
+if $?INTELLIB then
+cp -r $bundle_setup/$INTELLIB $bundledir/bin/.
+endif
 if $?smvhost then
 scp $smvhost\:$smvbindir/$smokeview $bundledir/bin/.
 scp $smvhost\:$smvbindir/$smokezip $bundledir/bin/.
