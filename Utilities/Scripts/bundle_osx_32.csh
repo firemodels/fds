@@ -4,7 +4,7 @@
 #
 setenv fds_smvroot $1
 setenv bundlebase $2
-setenv fdshost devi1.cfr.nist.gov
+setenv fdshost devi1.nist.gov
 setenv smvhost tiger.cfr.nist.gov
 
 setenv smokeview smv5_osx_32
