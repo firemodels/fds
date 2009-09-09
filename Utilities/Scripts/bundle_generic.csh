@@ -29,9 +29,15 @@ mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
 
 echo Copying program files
+
+# share libraries for INTEL build
 if $?INTELLIB then
+cp $bundle_setup/README_LINUX.txt $bundledir/bin/.
 cp -r $bundle_setup/$INTELLIB $bundledir/bin/.
 endif
+
+# smokeview
+
 if $?smvhost then
 scp $smvhost\:$smvbindir/$smokeview $bundledir/bin/.
 scp $smvhost\:$smvbindir/$smokezip $bundledir/bin/.
@@ -39,9 +45,13 @@ else
 cp $smvbindir/$smokeview $bundledir/bin/.
 cp $smvbindir/$smokezip $bundledir/bin/.
 endif
+
+# FDS 
+
 if $?fdshost then
 scp $fdshost\:$makedir/$fds5dir/$fds5 $bundledir/bin/.
 scp $fdshost\:$makedir/$fds5mpidir/$fds5mpi $bundledir/bin/.
+cp $bundle_setup/FDS-SMV_5_OSX_Launcher.app.zip $bundledir/bin/.
 else
 cp $makedir/$fds5dir/$fds5 $bundledir/bin/.
 cp $makedir/$fds5mpidir/$fds5mpi $bundledir/bin/.
