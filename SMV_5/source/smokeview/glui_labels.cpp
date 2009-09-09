@@ -152,8 +152,8 @@ extern "C" void glui_labels_setup(int main_window){
 
   glui_labels->add_column_to_panel(panel_label1,true);
 
-  CHECKBOX_labels_flip=glui_labels->add_checkbox_to_panel(panel_label1,"Flip Background",&flip,LABELS_flip,Labels_CB);
-  CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(panel_label1,"Color",&setbw,LABELS_shade,Labels_CB);
+  CHECKBOX_labels_flip=glui_labels->add_checkbox_to_panel(panel_label1,"Flip Background",&background_flip,LABELS_flip,Labels_CB);
+  CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(panel_label1,"Shades of Grey",&setbw,LABELS_shade,Labels_CB);
 
   if(nface_transparent>0){
     panel_transparency = glui_labels->add_panel_to_panel(panel_label1,"Transparency");
@@ -460,7 +460,7 @@ void Labels_CB(int var){
     LabelMenu(5);
     break;
   case LABELS_flip:
-    flip = 1 - flip;
+    background_flip = 1 - background_flip;
     ShadeMenu(1);
     break;
   case LABELS_shade:
@@ -707,7 +707,7 @@ extern "C" void set_labels_controls(){
 #endif
   if(CHECKBOX_labels_labels!=NULL)CHECKBOX_labels_labels->set_int_val(visLabels);
 
-  if(CHECKBOX_labels_flip!=NULL)CHECKBOX_labels_flip->set_int_val(flip);
+  if(CHECKBOX_labels_flip!=NULL)CHECKBOX_labels_flip->set_int_val(background_flip);
   if(CHECKBOX_labels_transparent!=NULL)CHECKBOX_labels_transparent->set_int_val(transparentflag);
   if(CHECKBOX_labels_shade!=NULL)CHECKBOX_labels_shade->set_int_val(setbw);
   if(RADIO_fontsize!=NULL)RADIO_fontsize->set_int_val(fontindex);

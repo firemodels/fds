@@ -1624,7 +1624,7 @@ void updatecolors(int changecolorindex){
   rgb_blue=nrgb+2;
   rgb_red=nrgb+3;
 
-  if(flip==0){
+  if(background_flip==0){
     for(i=0;i<3;i++){
       foregroundcolor[i]=foregroundbasecolor[i];
       backgroundcolor[i]=backgroundbasecolor[i];
