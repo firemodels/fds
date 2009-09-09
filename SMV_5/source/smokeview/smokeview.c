@@ -349,21 +349,24 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
   {
     timebarheight=(int)(0.75*dwinH);
     if(screenWidth<screenHeight){
-    if(SUB_portortho(quad,
-      fontWoffset+titlesafe_offset, fontHoffset+titlesafe_offset, screenWidth-dwinWW-2*fontWoffset-2*titlesafe_offset, timebarheight,
-      0.0,1.0,0.0,0.75*(double)ratio,
-      s_left, s_down, s_width, s_height)==0)return;
+      if(SUB_portortho(quad,
+        fontWoffset+titlesafe_offset, fontHoffset+titlesafe_offset, screenWidth-dwinWW-2*fontWoffset-2*titlesafe_offset, timebarheight,
+        0.0,1.0,0.0,0.75*(double)ratio,
+        s_left, s_down, s_width, s_height)==0){
+          return;
+      }
 
       xtemp=1.0;
     }
-     else{
-    if(SUB_portortho(quad,
-      fontWoffset+titlesafe_offset, fontHoffset+titlesafe_offset, screenWidth-dwinWW-2*fontWoffset-2*titlesafe_offset, timebarheight,
-      0.0,ratio,0.,0.75,
-      s_left, s_down, s_width, s_height)==0)return;
-
-       xtemp=ratio;
-     }
+    else{
+      if(SUB_portortho(quad,
+        fontWoffset+titlesafe_offset, fontHoffset+titlesafe_offset, screenWidth-dwinWW-2*fontWoffset-2*titlesafe_offset, timebarheight,
+        0.0,ratio,0.,0.75,
+        s_left, s_down, s_width, s_height)==0){
+          return;
+      }
+      xtemp=ratio;
+    }
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
