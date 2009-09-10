@@ -54,7 +54,7 @@ intel_win_32 : FFLAGS = -O2 /Qvec_report0
 intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 intel_win_32 : FCOMPL = ifort
 intel_win_32 : CCOMPL = cl
-intel_win_32 : obj = fds5
+intel_win_32 : obj = fds5_win_32
 intel_win_32 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
 
@@ -80,7 +80,7 @@ mpi_intel_win_32 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE)
 mpi_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 mpi_intel_win_32 : FCOMPL = ifort
 mpi_intel_win_32 : CCOMPL = cl
-mpi_intel_win_32 : obj = fds5_mpi
+mpi_intel_win_32 : obj = fds5_win_mpi_32
 mpi_intel_win_32 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
 
