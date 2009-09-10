@@ -28,11 +28,14 @@ set scriptdir=%linux_svn_root%/Utilities/Scripts/
 set linux_fdsdir=%linux_svn_root%
 
 echo.
-echo Updating the Linux repository, %linux_svn_root%, to the latest revision
+echo Updating the acrux Linux repository, %linux_svn_root%, to the latest revision
 plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% acrux.cfr.nist.gov
 
 echo.
-echo Updating the OSX repository, %linux_svn_root%, to the latest revision
+echo Updating the tiger OSX repository, %linux_svn_root%, to the latest revision
 plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% tiger.cfr.nist.gov
 
+echo.
+echo Updating the devi1 OSX repository, %linux_svn_root%, to the latest revision
+plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% devi1.nist.cfr.nist.gov
 pause
