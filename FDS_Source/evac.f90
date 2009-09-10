@@ -2796,7 +2796,7 @@ CONTAINS
          IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
          IF (ANY(AVATAR_RGB < 0) .AND. AVATAR_COLOR=='null') AVATAR_COLOR = 'ROYAL BLUE 4'
          IF (AVATAR_COLOR /= 'null') CALL COLOR2RGB(AVATAR_RGB,AVATAR_COLOR)
-         IF (COLOR_METHOD == 0 .AND. MAX_FLOW > 0.0_EB) THEN
+         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW > 0.0_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) THEN
             i_avatar_color = i_avatar_color + 1
             EVAC_AVATAR_RGB(1:3,i_avatar_color) = AVATAR_RGB
          END IF
@@ -2804,8 +2804,8 @@ CONTAINS
 
          IF (MAX_HUMANS < 0) MAX_HUMANS = HUGE(MAX_HUMANS)
          IF (MAX_FLOW <= 0.0_EB) MAX_HUMANS = 0
-         IF (MAX_HUMANS_RAMP/='null') THEN
-            CALL GET_RAMP_INDEX(MAX_HUMANS_RAMP,'TIME',NR)
+         IF (Trim(MAX_HUMANS_RAMP)/='null') THEN
+            CALL GET_RAMP_INDEX(Trim(MAX_HUMANS_RAMP),'TIME',NR)
             MAX_HUMANS = -NR
          ENDIF 
 
@@ -2813,7 +2813,8 @@ CONTAINS
 
          PNX%RGB = RGB
          PNX%AVATAR_RGB =AVATAR_RGB
-         IF (COLOR_METHOD == 0 .AND. MAX_FLOW > 0.0_EB) PNX%Avatar_Color_Index = i_avatar_color
+         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW > 0.0_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) &
+              PNX%Avatar_Color_Index = i_avatar_color
 
          IF (EVAC_MESH /= 'null') THEN
             MESH_ID = EVAC_MESH
@@ -8628,7 +8629,7 @@ CONTAINS
       istat = 1
       PNX => EVAC_ENTRYS(I_entry)
       IF (PNX%IMESH /= NM ) RETURN
-      IF (PNX%Flow <= 0.0_EB ) RETURN
+      ! IF (PNX%Flow <= 0.0_EB ) RETURN
       IF (PNX%T_Start > Tin) RETURN
       IF (PNX%T_Stop < Tin) RETURN
       IF (PNX%Max_Humans < 0) THEN
@@ -8636,9 +8637,9 @@ CONTAINS
          IF (PNX%ICOUNT >= INT(EVALUATE_RAMP(Tin,0._EB,NR))) RETURN
       ELSE
          IF (PNX%ICOUNT >= PNX%Max_Humans) RETURN
+         IF ( (Tin-PNX%T_last) < (1.0_EB/Max(0.0001_EB,PNX%Flow)) ) RETURN
       ENDIF
       MFF => MESHES(NM)
-      IF ( (Tin-PNX%T_last) < (1.0_EB/PNX%Flow) ) RETURN
       X1  = PNX%X1
       X2  = PNX%X2
       Y1  = PNX%Y1
