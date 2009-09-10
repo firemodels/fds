@@ -5,7 +5,7 @@
 setenv fds_smvroot $1
 setenv bundlebase $2
 
-setenv INTELLIB INTEL_LIB32
+setenv INTELLIB lib32
 setenv smokeview smv5_linux_32
 setenv smokezip smokezip_linux
 setenv fds5 fds5_intel_linux_32
