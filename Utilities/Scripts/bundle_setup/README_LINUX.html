@@ -1,0 +1,36 @@
+<html>
+
+<head>
+<TITLE>Linux Install Notes</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" >
+<h2>Linux Install Notes</h2>
+<p><hr size="1">
+The Linux version of Smokeview links to shared libraries. As a result,
+the environmental variable, <tt>LD_LIBRARY_PATH</tt>, needs to be created (or modified
+if it already exists). 
+
+<p>If you are using the csh or tcsh command shells, the 32 bit version of Smokeview 
+and installed FDS and Smokeview in your home directory
+use the following command:
+
+<p><tt>setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:~/FDS/FDS5/bin/lib32</tt>
+
+<p>Change 32 to 64 if you are using the 64 bit version of Smokeview.
+
+<p>If instead you are using the bash shell use the following command:
+
+<p><tt>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/FDS/FDS5/bin/lib32</tt>
+
+<hr>
+<p><address>
+<A HREF="http://www.bfrl.nist.gov" >Building and Fire Research Laboratory</A><BR>
+<a href="http://www.nist.gov" >National Institute of Standards and Technology</a><br>
+Gaithersburg, MD 20899
+</address>
+
+
+</BODY>
+</HTML>
+
+
