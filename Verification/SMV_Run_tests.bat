@@ -7,12 +7,13 @@ echo   (will take several hours depending on computer speed)
 
 set wui="%CD%\Wui"
 set vis="%CD%\Visualization"
+set smvug="%CD%\..\Manuals\SMV_5_User_Guide\"
 
 echo Press CTRL c to abort
 echo Press any other key to start FDS cases
 pause>NUL
 
-
+echo | fds5 2> %smvug%\scriptfigures\fds5.version
 
 cd %wui%
 fds5 fire_line.fds
