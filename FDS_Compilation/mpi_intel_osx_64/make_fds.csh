@@ -1,7 +1,6 @@
 #!/bin/csh -f
 set mssg="64 bit MPI OSX FDS"
 set target=mpi_intel_osx_64
-set out=$target.out
 set objdir=.
 if($#argv>0)then
   set objdir=$1
