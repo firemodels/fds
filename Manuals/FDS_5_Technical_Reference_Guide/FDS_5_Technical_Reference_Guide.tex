@@ -3902,6 +3902,17 @@ The convective and radiative fluxes at the next time step are approximated
   T_{s,\ha}^{n+1} - T_{s,\ha}^n \right)  \end{eqnarray}
 The wall temperature is defined $T_w \equiv T_{s,\ha}=(T_{s,0}+T_{s,1})/2$.
 
+The size of any solid phase mesh cell and the number of solid phase mesh cells 
+can reduce during the course of a calculation. As the solid material is consumed (converted into gaseous fuel), its density 
+can become less than the virgin material density. The volume of each solid phase cell is reduced such that the cell density is 
+equal to the density of the virgin material. 
+The cell size is not changed if some of the components of a cell are not reacting at all, or if the component is
+leaving a solid residue. 
+If the cell size gets below a pre-defined threshold (1.0E-6 m) then the cell is completely removed. 
+Cell removal can result in a reduction in the number of solid phase mesh cells during the course of a simulation. Following cell shrinking
+or cell removal, the solid phase mesh is re-gridded and the mass and enthalpy values are interpolated from the old mesh to the new mesh.
+
+
 
 \subsection{Convective Heat Transfer to Solid Objects}
 
