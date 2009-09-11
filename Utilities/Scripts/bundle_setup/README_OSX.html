@@ -1,0 +1,34 @@
+<html>
+
+<head>
+<TITLE>OSX Install Notes</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" >
+<h2>OSX Install Notes</h2>
+<p><hr size="1">
+The parallel (MPI) versions of FDS running under OSX require openmpi libraries to link  to at runtime.
+These libraries may be obtained from the FDS/Smokeview download site.
+
+<h3>Installing the Openmpi  libraries</h3>
+<ul>
+<li>Download the 32, 64 or both Openmpi libraries using the following links.
+<ul>
+<li><a href="http://fds-smv.googlecode.com/files/openmpi32_osx.tar.gz">openmpi32_osx.tar.gz</a> - 32 bit OSX Openmpi 1.3.3 libraries
+<li><a href="http://fds-smv.googlecode.com/files/openmpi64_osx.tar.gz">openmpi64_osx.tar.gz</a> - 64 bit OSX Openmpi 1.3.3 libraries
+</ul>
+<li>Uncompress and untar the downloaded library archive.
+<li>Define the environmental variable <tt>DYLD_LIBRARY_PATH</tt> to point the lib directory within the library.
+<p>Example: If you place the 32 bit library in your home directory and use csh or tcsh as your command shell you would use the command
+<p><tt>setenv DYLD_LIBRARY_PATH ~/openmpi-1.3.3_32/lib</tt>
+</ul>
+
+<hr>
+<p><address>
+<A HREF="http://www.bfrl.nist.gov" >Building and Fire Research Laboratory</A><BR>
+<a href="http://www.nist.gov" >National Institute of Standards and Technology</a><br>
+Gaithersburg, MD 20899
+</address>
+
+
+</BODY>
+</HTML>
