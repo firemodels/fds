@@ -32,7 +32,7 @@ echo Copying program files
 
 # share libraries for INTEL build
 if $?INTELLIB then
-cp $bundle_setup/README_LINUX.txt $bundledir/bin/.
+cp $bundle_setup/README_LINUX.html $bundledir/bin/.
 cp -r $bundle_setup/$INTELLIB $bundledir/bin/.
 endif
 
