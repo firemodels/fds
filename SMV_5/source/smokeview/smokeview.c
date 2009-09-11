@@ -3389,8 +3389,8 @@ int can_write_to_dir(char *dir){
   }
   else{
     strcpy(full_name,dir);
-    strcpy(full_name,dirseparator);
-    strcpy(full_name,temp_name);
+    strcat(full_name,dirseparator);
+    strcat(full_name,temp_name);
   }
   stream=fopen(full_name,"wb");
   if(stream==NULL)return 0;
