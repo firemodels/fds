@@ -1,26 +1,35 @@
 
 \chapter{Quantifying Model Error}
 
-Model predictions are subject to two forms of uncertainty, {\em intrinsic} and {\em extrinsic}. Extrinsic uncertainty refers to the measured or postulated parameters that constitute the
-model input. Intrinsic uncertainty refers to the model itself.
-For the sake of clarity, we will use the word {\em uncertainty} in regard to the measured model inputs, and the word {\em error} in regards to the mathematical model itself.
-The reason for this is two-fold. For one,
+The predictions of any mathematical model are subject to two forms of uncertainty. The first is associated with the uncertainty of the input parameters.
+The second is associated with the various assumptions and approximations of the mathematical formulation itself.
+For the sake of clarity, we will use the word {\em uncertainty} in regard to the input parameters, and the word {\em error} in regards
+to the mathematical formulation. The reason for this is two-fold. For one,
 it helps to differentiate various terms that are used to quantify model accuracy; but, more importantly, it highlights the subtle distinction between the roles of the model
 and of the modeler. For example, if the modeler chooses 10~MW to be the heat release rate of a hypothetical fire, we do not say it is wrong, but rather uncertain because there
 is no easy way to know for sure just how big the fire is going to be. The model, on the other hand, includes assumptions and approximations that make its predictions less
 accurate for the sake of practicality. If the model is well-designed, the error associated with its formulation will be relatively small. Exactly how small is the subject of
-this chapter.
+the discussion below.
+
+Our objective here is to outline a process by which to quantify the model error. Our strategy is {\em not} to decompose the model into its many parts and systematically assess
+the error of each. Such an exercise would be extremely difficult, especially for a computational fluid dynamics (CFD) model, and the results would probably be subject to the same
+degree of error as the model itself. Instead, we take the traditional approach in which model predictions are compared with experimental measurements. However, unlike many
+model validation studies performed to date, we suggest a method by which the model {\em error} can be distinguished from the model input {\em uncertainty}. The difference
+between model prediction and experimental measurement is a combination of the two, and because the input
+uncertainty is easier to quantify than the model error, we can estimate the error by ``subtracting off,'' in the broad sense, the input uncertainty from the reported
+difference between prediction and measurement. The quotation marks in the previous sentence indicate that model error and input uncertainty do not simply add together,
+and to decouple them requires some statistical analysis that will be described below.
 
 \section{The Validation Process}
 
-A fire model validation study typically consists of comparing a point measurements made during a compartment fire experiment with corresponding model predictions.
-Figure~\ref{temp_history} is a typical result of such an exercise, and given that usually dozens of point measurements are made during each experiment,
+A fire model validation study typically consists of comparing point measurements from one or more fire experiments with corresponding model predictions.
+Figure~\ref{temp_history} is a typical result for a single point measurement, and given that usually dozens of such measurements are made during each experiment,
 and potentially dozens of experiments are conducted as part of a test series, we can expect hundreds of such plots for any given quantity of interest. In many cases, these
 plots in themselves provide sufficient information for a potential model user or authority having jurisdiction (AHJ) to decide if the model is sufficiently accurate for the
 given application. Because there is no consensus ``acceptance criteria'' within the fire protection community to indicate what constitutes sufficient accuracy, the
-judgment is left to end user or AHJ. It can be argued that this is as it should be because each application is different. For example, some regulatory
-authorities prefer models that consistently over-predict the severity of the fire, and as such the model serves as a ``screening tool.'' Design engineers, however,
-usually want the model to predict as accurately as possible, even though they may apply some form of safety factor to the results.
+judgment is left to end user or AHJ. It can be argued that this is as it should be because each situation is different. For example, some regulatory
+authorities prefer models that consistently over-predict the severity of the fire, in which case the model serves as a ``screening tool.'' Design engineers, however,
+usually prefer that the model predict the outcome of the fire as accurately as possible, even though they may apply some form of safety factor to the results.
 In any case, there is certainly no reason why we cannot develop a process to quantify the accuracy of the model that goes beyond simply
 publishing hundreds of plots like the one shown in Fig.~\ref{temp_history}.
 
@@ -33,10 +42,11 @@ publishing hundreds of plots like the one shown in Fig.~\ref{temp_history}.
 \end{figure}
 
 To this end, we first have to decide how to condense all the data represented by these plots into a more tractable form. Specifically, we
-have to decide on a metric with which to compare two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999} discuss various possible metrics. The most commonly used metric is simply to compare the peak measured value against the peak
-predicted value. If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
-this exercise is a pair of numbers for each plot, $(E_i,M_i)$, that can be depicted graphically as shown in Fig.~\ref{scatterplot}. Now, at least, we have
-condensed hundreds of plots into just one, but we still have the problem of quantifying the degree of scatter in the results. At this stage in the analysis, the
+have to decide on a metric with which to compare two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999}
+discuss various possible metrics. A commonly used metric is simply the difference between the peak measured and predicted values.
+If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
+this exercise is a pair of numbers for each plot, $(E_i,M_i)$, that can be depicted graphically as shown in Fig.~\ref{scatterplot}. This plot
+condenses hundreds of plots into just one, but we still have the problem of quantifying the degree of scatter in the results. At this stage in the analysis, the
 diagonal line on the plot shown in Fig.~\ref{scatterplot} only indicates where a prediction and measurement agree. But because the model has error, and
 the measurement has uncertainty, it cannot be said that the model is perfect if its predictions agree exactly with measurements. There needs to be a way of quantifying
 both the error and uncertainty before any conclusions can be drawn.
@@ -45,7 +55,7 @@ horizontal bar associated with each point represents the uncertainty in the meas
 is not a simple task to quantify these values, nor can it be said that the vertical bar is the result solely of model error. As will be discussed below, any
 experiment involves measurements of elevated temperatures, heat flux, {\em etc.}, resulting from the fire, but also measurements of parameters, like the
 heat release rate and material properties, that are then fed into the model as input. Uncertainty in these input parameters combines with the error in the model
-itself to form the vertical uncertainty/error bar associated with each point in Fig.~\ref{scatterplot}. Decoupling the error from the uncertainty
+to form the vertical uncertainty/error bar associated with each point in Fig.~\ref{scatterplot}. Decoupling the error from the uncertainty
 is the subject of analysis below. Before presenting this
 analysis, however, we must first discuss in more detail what we mean by experimental uncertainty and model error.
 
@@ -60,42 +70,42 @@ analysis, however, we must first discuss in more detail what we mean by experime
 
 \section{Model Error}
 
-A computational fluid dynamics (CFD) model like FDS is essentially a numerical algorithm that solves the Navier-Stokes equations.
+A deterministic fire model is based on fundamental conservation laws of mass, momentum and energy, applied either to entire compartments or smaller control
+volumes that make up the compartments. A CFD model may use millions of control volumes to compute the solution of the Navier-Stokes equations.
 However, it does not actually solve the Navier-Stokes equations, but rather an approximate form of these equations. The approximation involves simplifying
-physical assumptions, like the low-Mach number approximation and the large eddy simulation (LES) technique of representing subgrid-scale turbulence.
-But the most critical approximation is the discretization of the governing equations. For example, the partial derivative of the density, $\rho$,
-with respect to the coordinate direction, $x$, is written in approximate form as:
+physical assumptions, like the various techniques for treating subgrid-scale turbulence.
+The most critical approximation is the discretization of the governing equations. For example, the partial derivative of the density, $\rho$,
+with respect to the spatial coordinate, $x$, can be written in approximate form as:
 \be \frac{\partial \rho}{\partial x} = \frac{\rho_{i+1} - \rho_{i-1}}{2 \, \dx} + \mathcal{O}(\dx^2) \ee
 where $\dx$ is the grid spacing chosen by the model user.
 The second term on the right represents all the terms of order $\dx^2$ and higher in the Taylor series expansion and are known collectively as the
 {\em discretization error}. These extra terms are simply dropped from
 the equation set, the argument being that they become smaller and smaller with decreasing grid cell size, $\dx$. The effect of these neglected terms is captured, to
-some extent, by the subgrid-scale turbulence model, but that is yet another approximation of the real thing. What effect do these approximations have on
+some extent, by the subgrid-scale turbulence model, but that is yet another approximation of the true physics. What effect do these approximations have on
 the predicted results? It is very difficult to determine based on an analysis of the discretized equations. At best, one can demonstrate convergence towards some
 analytical solution of the non-turbulent Navier-Stokes equations at a rate determined by the spatial and temporal differencing schemes, but this still does not answer a
-question like, ``What is the error of an FDS prediction of the gas temperature at a particular location in the room at a particular point in time?''
+question like, ``What is the error of the model prediction of the gas temperature at a particular location in the room at a particular point in time?''
 
-To make matters worse, there are literally dozens of subroutines that make up a model like FDS, from its radiation solver, solid phase heat transfer routines, pyrolysis model,
+To make matters worse, there are literally dozens of subroutines that make up a CFD fire model, from its radiation solver, solid phase heat transfer routines, pyrolysis model,
 empirical mass, momentum and energy transfer routines at the wall, and so on. A careful, systematic error analysis of the combination of all these routines is
-nearly impossible. Indeed the complexity of the analysis would approach that of FDS itself. For this reason, we rely on comparisons of FDS predictions to as many
-experiments as possible as a means of quantifying model error. That is the primary focus of this entire guide, and the first step in the process of quantifying the
-model error is to quantify the uncertainty of the measurements against which the model predictions are to be compared. This is the subject of the next section.
+nearly impossible. Indeed the complexity of the analysis would approach that of the model itself. For this reason, we rely on comparisons of model predictions to as many
+experiments as possible as a means of quantifying model error. However, before we can definitively quantify the error, we first must quantify the uncertainty of the
+measurements against which the model predictions are to be compared. This is the subject of the next section.
 
 
 \section{Experimental Uncertainty}
 
-The test reports for the experiments described in the previous chapter include little uncertainty analysis, in general. Quite a
-few include none whatsoever.
+For various reasons, documented fire experiments, especially full-scale experiments, contain fairly limited discussion of uncertainty. Some contain none at all.
 However, in order to assess the accuracy of the model whose predictions have been compared to these measurements, there must be some estimate of the
-combined effect of the uncertainty in the reported experimental conditions, like the heat release rate of the fire,
+combined effect of the uncertainty in the reported test parameters, like the heat release rate of the fire,
 and the reported measurements of the quantities of interest, like the hot gas layer (HGL)
-temperature or heat flux. Otherwise, the difference between model and measurement would simply have to be attributed as model error and there is no point in
+temperature, heat flux, and so forth. Otherwise, the difference between model and measurement would simply have to be attributed as model error and there is no point in
 continuing this exercise.
 
 Rather than throwing out several decades worth of fire test data, there are ways that we can estimate the uncertainty of the measurements based on work
 that has been done to quantify the accuracy of such devices as heat flux gauges, oxygen-depletion calorimeters, thermocouples and gas sensors.
 In a recent fire model validation study conducted by the U.S.~Nuclear Regulatory Commission~\cite{NUREG_1824}, Hamins estimated the combined
-uncertainty of the quantities of interest for the large scale fire experiments under consideration. Referring to Fig.~\ref{scatterplot}, there were
+uncertainty of the quantities of interest for the large scale fire experiments involved in the study. Referring to Fig.~\ref{scatterplot}, there were
 two uncertainty estimates needed for each quantity. The first was an estimate, expressed in the form of a 95~\% confidence interval, of the
 uncertainty in the measured quantity itself. For example, reported gas and surface temperatures were made with thermocouples of various designs (bare-bead,
 shielded, aspirated) with different size beads, metals, and so on. For each, one can estimate the uncertainty in the reported measurement. Next, the
@@ -149,7 +159,7 @@ $M_i$ and $E_i$, respectively, where $i$ ranges from 1 to $n$. Without loss of g
 ambient value of these quantities is zero. With this information, {\em and only this information}, we seek to quantify the model error.
 
 In addition to assuming that the experimental uncertainty and the model error can be expressed in relative terms, we also assume that
-the experimental and model data is normally distributed. Given the complexity of both the model and the experiment, it is hard to justify
+they are normally distributed. Given the complexity of both the model and the experiment, it is hard to justify
 any particular distribution. In fact, the very reason why we have developed this method of quantifying model error based on validation
 experiments is because the model algorithm itself is too complicated to work with directly as a means of estimating the error.
 
@@ -192,17 +202,39 @@ Below, we describe how one might make use of this formula in practice. First, ho
 
 \section{Verifying the Procedure}
 
-The statistical analysis described in the previous section is difficult to understand without a fairly good background in Bayesian analysis.
-However, the calculation itself is no more difficult than determining means and standard deviations of a few columns of numbers and it can be easily
-done with a simple spreadsheet program.
-In fact, to verify this procedure, we generate 1000 random numbers between 0 and 1000. We say that these numbers represent the ``true'' temperatures, $\theta_i$, from 1000 fire
-experiments. Of course, we would never know the true temperatures -- this is only done for verification purposes. Next, for each $\theta_i$, we randomly choose an
-experimental measurement, $E_i$, from a normal distribution whose mean is $\theta_i$ and whose relative uncertainty, $\widetilde{\sigma}_E=0.07$, obtained from Table~\ref{Uncertainty},
-``HGL Temperature.'' Finally, for each $\theta_i$ we randomly choose a model prediction, $M_i$, from a normal distribution whose mean is $1.05 \, \theta_i$
-and whose relative error is 0.15. In other words, we create a hypothetical set of measurements and predictions with known distributions.
-What we have created are 1000 pairs of $(E_i,M_i)$ based on a given experimental uncertainty, $\widetilde{\sigma}_E$, and an assumed set of ``true'' values. A graphical
-representation of the data is shown in Fig.~\ref{scatterplot_1000}. Note that the experimental uncertainty bounds are represented by thick, dashed lines, and the model
-bias and relative error is shown by the lighter, dashed lines. Each are expressed as 95~\% confidence intervals ($2 \, \widetilde{\sigma}$).
+The statistical analysis described in the previous section is difficult to understand without a fairly good background in Bayesian analysis. However,
+the calculation itself is no more difficult than determining means and standard deviations of a few columns of numbers and it can be easily done with
+a simple spreadsheet program.
+
+To better illustrate the process, and also to verify this procedure, suppose we generate 1000 uniformly distributed
+random numbers, $\theta_i$, between 0 and 1000. We say that these numbers represent a particular quantity of interest, like a gas temperature at a particular
+point and at a particular time, and we also say that these values
+have no uncertainty -- they are the ``truth.'' Of course, we can never know the true values, but for this hypothetical exercise assume we can. Next, for each
+$\theta_i$, we randomly choose a value that is to represent a hypothetical measurement, $E_i$, from a normal distribution whose mean is $\theta_i$
+and whose relative uncertainty, $\widetilde{\sigma}_E$, is assumed known. In the same way, we randomly choose a value that is to represent a hypothetical
+model prediction, $M_i$, from a normal distribution whose mean is $\delta \, \theta_i$ and whose relative error, $\widetilde{\sigma}_M$, is
+specified for this hypothetical exercise.
+What we have now created are 1000 pairs of $(E_i,M_i)$ with which we can test the procedure outlined in the previous section. In other words, we ought to be
+able to take our 1000 pairs of values, and the experimental uncertainty, $\widetilde{\sigma}_E$, and calculate the model bias, $\delta$, and relative error,
+$\widetilde{\sigma}_M$.
+
+We consider two examples. For the first example, assume that the model has no bias ($\delta=1$) and that the relative uncertainty of the measurements and the
+relative error of the model are both 0.1, or 10~\%. The scatter plot on the left side of Fig.~\ref{xx} displays the model predicted values compared to the
+true values. The dashed lines indicate the 95~\% confidence interval; that is, it is expected that 95~\% of the points should fall between these
+lines, whose slopes are plus and minus 20~\% ($2\, \widetilde{\sigma}_M$) of the diagonal line. Of course, this plot cannot exist in a real situation, because the true
+values are never known. Instead, the only way to present the data is via the scatter plot on the right side of Fig.~{xx}. Here, the measured values, $E_i$, are
+compared with the predicted values, $M_i$. The same dashed lines are carried over from the plot on the left. Because the predicted values are being compared
+with measurements that have uncertainty, it appears that the model error is greater than it actually is. In this hypothetical example, the model is
+assumed to be as accurate as the measurements, yet the comparison makes it seem as if the model is less accurate than the experiments. The procedure outlined
+above, which makes use of only the measured and predicted values, is able to extract from the data the fact that the hypothetical model has a
+relative error of 10~\%, not the roughly 15~\% that one would infer from the plot if the experimental uncertainty were not taken into account.
+
+For the second example, we make our hypothetical model predictions and experimental measurements more realistic. Assume now that the
+measured value is the HGL temperature, and that the relative uncertainty of the measured values, $\widetilde{\sigma}_E=0.07$, is obtained from Table~\ref{Uncertainty}.
+We assume the model has a bias factor of 1.05 and its relative error is 0.15 in order to generate a set of hypothetical model predictions.
+A graphical representation of the data is shown in Fig.~\ref{scatterplot_1000}. Note that the
+experimental uncertainty bounds are represented by thick, dashed lines, and the model bias and relative error is shown by the lighter, dashed lines.
+Each are expressed as 95~\% confidence intervals ($2 \, \widetilde{\sigma}$).
 
 \begin{figure}[ht]
 \begin{center}
@@ -214,7 +246,7 @@ experimental uncertainty is represented by the solid diagonal and thicker dashed
 \end{figure}
 
 The statistical procedure outlined above ought to provide estimates of the values of the bias factor, $\delta$, and the model error, $\widetilde{\sigma}_M$, whose
-values we used in creating the data in the first place. The results of six random trials are shown in Table~\ref{trials}. It is not expected that the
+values we used in creating the hypothetical model predictions. The results of six random trials are shown in Table~\ref{trials}. It is not expected that the
 estimates will be exact because they are based on truncated Taylor series approximations. However, given the fact that the experimental uncertainty estimate,
 $\widetilde{\sigma}_E$, is often only a gross approximation in its own right, the accuracy of the procedure is more than adequate.
 
@@ -238,28 +270,13 @@ Exact   & 1.05             &    0.15            \\ \hline \hline
 
 
 
-\section{Limitations}
 
-The above verification exercise is valuable in assuring that the procedure works as designed, but it also points out a few issues that need to be addressed. First, any
-statistical procedure is based on the law of averages, or, in other words, more data is better than less. It is usually not possible to conduct a large number of
-fire experiments
-to assess the accuracy of the model in predicting each quantity of interest. Sometimes we only have a few data points with which to estimate the model error. Worse yet,
-we may not have the necessary information about the experimental procedure to estimate the uncertainty of the reported measurements. In such cases, it may be better
-to simply present the comparison of model prediction and experimental measurement as a series of plots like Fig.~\ref{temp_history}, or in the form of a scatter plot
-(Fig.~\ref{scatterplot}) without any uncertainty or error bars. The value of the entire validation process as outlined above is that it is possible at any step
-along the way to simply stop and accept the raw output of the study as the basis for making an assessment of the model. The uncertainty analysis is useful only to
-the extent that sufficient experimental data with quantified uncertainty estimates is available. It does more harm than good to attempt to quantify the model error
-with insufficient means to do so.
-
-Another concern with the above procedure is that an over-estimate of the experimental uncertainty will naturally result in an under-estimate of the model error. Keep
-in mind that the model can never be declared more accurate than the experimental measurements against which it is compared. This rule is demonstrated
-mathematically by Eq.~(\ref{model_error}) where it is observed that an over-estimate of the experimental uncertainty, $\tilde{\sigma}_E$, can result in
-the square root of a negative number, an imaginary number.
 
 \section{Making Use of the Model Error}
 
-The previous sections describes a method of quantifying the model error by comparing its predictions with experimental measurements. But how does one make use of this
-information? This is best answered with an example. Suppose the model is being used to estimate the likelihood that electrical control cables could be damaged due to
+The previous sections describes a method of quantifying the model error by comparing its predictions with experimental measurements. But how does one make use the computed
+model bias and relative error? This is best answered with an example. Suppose the model is being used to estimate the likelihood that
+electrical control cables could be damaged due to
 a fire in a particular compartment. Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C. It is also assumed that the fire is
 ignited within an electrical cabinet and the heat release rate of the fire is a specified function of time, and that all other input
 parameters for the model are known and provided. Finally, it is assumed, for the time being, that there is no uncertainty
@@ -273,9 +290,9 @@ with similar thermal characteristics as the cables in question. How ``similar'' 
 various parameters, like the thermal inertia of the object, the size of the fire, the size of the compartment, and so on. Next, the results of the validation study can be
 analyzed following the procedure spelled out above, which provides us with a bias factor, $\delta$, and relative error, $\tilde{\sigma}_M$, for the model
 predictions of this particular quantity. Let us say, for the sake of argument, that the bias factor is 1.05; that is, on average, the model has been shown to over-predict
-surface temperatures by 5~\%. Let us also say that the relative error has been calculated and it is 0.15~.
+surface temperatures by 5~\%. Let us also say that the relative error has been calculated and it is 0.15~. These are the same values that were assumed in the second example
+of the previous section.
 Now, consider the graph shown in Fig.~\ref{bell_curve}.
-
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=5.in]{FIGURES/bell_curve}
@@ -283,8 +300,7 @@ Now, consider the graph shown in Fig.~\ref{bell_curve}.
 \caption[Demonstration of model error.]{Plot showing how one might make use of the model error.}
 \label{bell_curve}
 \end{figure}
-
-The vertical lines indicate the temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
+The vertical lines indicate the ``threshold'' temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
 model (350~$^\circ$C). The bell curve is a normal distribution obtained from Eq.~(\ref{truth}) above. Its mean is 20+(350-20)/1.05 and its standard deviation
 is 0.15(350-20)/1.05 . Notice that the statistical analysis
 above assumes that the measured and predicted quantity, in this case surface temperature, is reported as a change above or below its ambient value, which is
@@ -304,11 +320,35 @@ all taken as the mean values of their respective distributions. In fact, dependi
 the model error.
 
 
+\section{Limitations}
+
+The above verification exercises are valuable in assuring that the procedure works as designed, but it also points out a few issues that need to be addressed. First, any
+statistical procedure is based on the law of averages, or, in other words, more data is better than less. It is usually not possible to conduct a large number of
+fire experiments
+to assess the accuracy of the model in predicting each quantity of interest. Sometimes we only have a few data points with which to estimate the model error. Worse yet,
+we may not have the necessary information about the experimental procedure to estimate the uncertainty of the reported measurements. In such cases, it may be better
+to simply present the comparison of model prediction and experimental measurement as a series of plots like Fig.~\ref{temp_history}, or in the form of a scatter plot
+(Fig.~\ref{scatterplot}) without any uncertainty or error bars. The value of the entire validation process as outlined above is that it is possible at any step
+along the way to simply stop and accept the raw output of the study as the basis for making an assessment of the model. The uncertainty analysis and error
+quantification is valid only to
+the extent that sufficient experimental data with quantified uncertainty estimates is available. It does more harm than good to attempt to quantify the model error
+with insufficient means to do so.
+
+Another concern with the above procedure is that an over-estimate of the experimental uncertainty will naturally result in an under-estimate of the model error. Keep
+in mind that the model can never be declared more accurate than the experimental measurements against which it is compared. This rule is demonstrated
+mathematically by Eq.~(\ref{model_error}) where it is observed that an over-estimate of the experimental uncertainty, $\tilde{\sigma}_E$, can result in
+the square root of a negative number, an imaginary number. In the case that the computed model error is less than the estimated experimental uncertainty, then the
+latter must be re-evaluated, or the number of data points needs to be seriously questioned.
+
+
+
 \section{Conclusion}
 
-This chapter outlines a procedure to estimate model error by way of comparisons of model predictions with experimental measurements whose uncertainty has been
+We have outlined a procedure to estimate model error by way of comparisons of model predictions with experimental measurements whose uncertainty has been
 quantified. For clarity of presentation, issues associated with the selection of experiments, metrics of comparison, and presentation of results, have not been
-discussed in detail because these decisions are application-specific and best left to the end user or AHJ. The procedure is not a dramatic departure from current
+discussed in detail because these decisions are application-specific and best left to the end user or AHJ. The overall procedure is not a dramatic departure from current
 methods of model validation, but it does present a very tractable method of distinguishing the model {\em error} from the {\em uncertainty} of the model inputs and the measurements
 against which the model is compared. Too often these various forms of uncertainty are lumped together, in which case there is no way to know what part of the model, if
-any, needs improvement.
+any, needs improvement. For this reason, this methodology is of tremendous value to model developers because, in a sense, it strips away what are often referred to as
+``user effects'' to reveal inadequacies of the model itself. The goal of the model developers is to reduce the model error as much as possible, even though
+uncertainties in the input parameters may never be eliminated completely.
