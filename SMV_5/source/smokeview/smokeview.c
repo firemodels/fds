@@ -192,137 +192,136 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
   float mesh_left;
   char slicelabel[255];
   float mesh_bot;
+  int portview_left;
+  float val_right,val_top;
 
   mesh_left=0.9;
   if(fontindex==LARGE_FONT)mesh_left=0.7;
-  if(visColorLabels==1){
-    int portview_left;
-    float val_right,val_top;
+ 
+  portview_left=screenWidth-dwinW-fontWoffset-titlesafe_offset;
+  if(screenWidth<screenHeight){
+    val_right=1.0;
+    val_top=ratio;
+    if(SUB_portortho(quad,
+      portview_left,
+      titlesafe_offset,
+      dwinW, 
+      dwinH-fontHoffset,
+      0.,1.0,0.,(double)ratio,
+      s_left, s_down, s_width, s_height)==0)return;
+  }
+  else{
+    val_right=ratio;
+    val_top=1.0;
+    if(SUB_portortho(quad,
+      portview_left,
+      titlesafe_offset,
+      dwinW, 
+      dwinH-fontHoffset,
+      0.,(double)ratio,0.0,1.0,
+      s_left, s_down, s_width, s_height)==0)return;
+  }
 
-    portview_left=screenWidth-dwinW-fontWoffset-titlesafe_offset;
-    if(screenWidth<screenHeight){
-      val_right=1.0;
-      val_top=ratio;
-      if(SUB_portortho(quad,
-        portview_left,
-        titlesafe_offset,
-        dwinW, 
-        dwinH-fontHoffset,
-        0.,1.0,0.,(double)ratio,
-        s_left, s_down, s_width, s_height)==0)return;
-    }
-    else{
-      val_right=ratio;
-      val_top=1.0;
-      if(SUB_portortho(quad,
-        portview_left,
-        titlesafe_offset,
-        dwinW, 
-        dwinH-fontHoffset,
-        0.,(double)ratio,0.0,1.0,
-        s_left, s_down, s_width, s_height)==0)return;
-    }
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
   
     
-    if(visBlocklabel==1&&nmeshes>1){
-      int labellength;
+  if(visBlocklabel==1&&nmeshes>1){
+    int labellength;
+    char meshlabel[255];
 
-      sprintf(slicelabel,"mesh: %i",highlight_mesh+1);
-      labellength=glutBitmapLength(large_font, (const unsigned char *)slicelabel);
-      mesh_left=val_right-val_right*labellength/(float)dwinW;
-      mesh_bot=val_top-val_top*large_font_height/(float)(dwinH-fontHoffset);
-      outputText(mesh_left,mesh_bot, slicelabel);
-    }
-    if((showplot3d==1||visGrid==1)&&current_mesh->visx==1){
-        {
-          float plotval;
-          int iplotval;
-          char buff_label[128];
+    sprintf(meshlabel,"mesh: %i",highlight_mesh+1);
+    labellength=glutBitmapLength(large_font, (const unsigned char *)slicelabel);
+    mesh_left=val_right-val_right*labellength/(float)dwinW;
+    mesh_bot=val_top-val_top*large_font_height/(float)(dwinH-fontHoffset);
+    outputText(mesh_left,mesh_bot, slicelabel);
+  }
+  if((showplot3d==1||visGrid==1)&&current_mesh->visx==1){
+    {
+      float plotval;
+      int iplotval;
+      char buff_label[128];
 
-          iplotval=current_mesh->plotx;
-          plotval=current_mesh->xplt_orig[iplotval];
-          if(plotval>0.0){
-            plotval=(int)(plotval*100+0.5);
-          }
-          else{
-            plotval=(int)(plotval*100-0.5);
-          }
-          plotval/=100;
+      iplotval=current_mesh->plotx;
+      plotval=current_mesh->xplt_orig[iplotval];
+      if(plotval>0.0){
+        plotval=(int)(plotval*100+0.5);
+      }
+      else{
+        plotval=(int)(plotval*100-0.5);
+      }
+      plotval/=100;
           
-          sprintf(buff_label,"%f",plotval);
-          trimzeros(buff_label);
-          strcat(buff_label," m");
-          if(cursorPlot3D==1){
-            sprintf(slicelabel,"*x: %i, ",iplotval);
-          }
-          else{
-            sprintf(slicelabel,"x: %i, ",iplotval);
-          }
-          strcat(slicelabel,buff_label);
-        }
-      if(visgridloc==1)outputText(mesh_left-0.5,0.6f, slicelabel);
+      sprintf(buff_label,"%f",plotval);
+      trimzeros(buff_label);
+      strcat(buff_label," m");
+      if(cursorPlot3D==1){
+        sprintf(slicelabel,"*x: %i, ",iplotval);
+      }
+      else{
+        sprintf(slicelabel,"x: %i, ",iplotval);
+      }
+      strcat(slicelabel,buff_label);
     }
-    if((showplot3d==1||visGrid==1)&&current_mesh->visy==1){
-        {
-          float plotval;
-          int iplotval;
-          char buff_label[128];
+    if(visgridloc==1)outputText(mesh_left-0.5,0.6f, slicelabel);
+  }
+  if((showplot3d==1||visGrid==1)&&current_mesh->visy==1){
+    {
+      float plotval;
+      int iplotval;
+      char buff_label[128];
 
-          iplotval=current_mesh->ploty;
-          plotval=current_mesh->yplt_orig[iplotval];
-          if(plotval>0.0){
-            plotval=(int)(plotval*100+0.5);
-          }
-          else{
-            plotval=(int)(plotval*100-0.5);
-          }
-          plotval/=100;
+      iplotval=current_mesh->ploty;
+      plotval=current_mesh->yplt_orig[iplotval];
+      if(plotval>0.0){
+        plotval=(int)(plotval*100+0.5);
+      }
+      else{
+        plotval=(int)(plotval*100-0.5);
+      }
+      plotval/=100;
           
-          sprintf(buff_label,"%f",plotval);
-          trimzeros(buff_label);
-          strcat(buff_label," m");
-          if(cursorPlot3D==1){
-            sprintf(slicelabel,"*y: %i, ",iplotval);
-          }
-          else{
-            sprintf(slicelabel,"y: %i, ",iplotval);
-          }
-          strcat(slicelabel,buff_label);
-        }
-      if(visgridloc==1)outputText(mesh_left-0.5,0.35f, slicelabel);
+      sprintf(buff_label,"%f",plotval);
+      trimzeros(buff_label);
+      strcat(buff_label," m");
+      if(cursorPlot3D==1){
+        sprintf(slicelabel,"*y: %i, ",iplotval);
+      }
+      else{
+        sprintf(slicelabel,"y: %i, ",iplotval);
+      }
+      strcat(slicelabel,buff_label);
     }
-    if((showplot3d==1||visGrid==1)&&current_mesh->visz==1){
-        {
-          float plotval;
-          int iplotval;
-          char buff_label[128];
+    if(visgridloc==1)outputText(mesh_left-0.5,0.35f, slicelabel);
+  }
+  if((showplot3d==1||visGrid==1)&&current_mesh->visz==1){
+    {
+      float plotval;
+      int iplotval;
+      char buff_label[128];
 
-          iplotval=current_mesh->plotz;
-          plotval=current_mesh->zplt_orig[iplotval];
-          if(plotval>0.0){
-            plotval=(int)(plotval*100+0.5);
-          }
-          else{
-            plotval=(int)(plotval*100-0.5);
-          }
-          plotval/=100;
+      iplotval=current_mesh->plotz;
+      plotval=current_mesh->zplt_orig[iplotval];
+      if(plotval>0.0){
+        plotval=(int)(plotval*100+0.5);
+      }
+      else{
+        plotval=(int)(plotval*100-0.5);
+      }
+      plotval/=100;
           
-          sprintf(buff_label,"%f",plotval);
-          trimzeros(buff_label);
-          strcat(buff_label," m");
-          if(cursorPlot3D==1){
-            sprintf(slicelabel,"*z: %i, ",iplotval);
-          }
-          else{
-            sprintf(slicelabel,"z: %i, ",iplotval);
-          }
-          strcat(slicelabel,buff_label);
-        }
-      if(visgridloc==1)outputText(mesh_left-.5,0.1f, slicelabel);
+      sprintf(buff_label,"%f",plotval);
+      trimzeros(buff_label);
+      strcat(buff_label," m");
+      if(cursorPlot3D==1){
+        sprintf(slicelabel,"*z: %i, ",iplotval);
+      }
+      else{
+        sprintf(slicelabel,"z: %i, ",iplotval);
+      }
+      strcat(slicelabel,buff_label);
     }
+    if(visgridloc==1)outputText(mesh_left-.5,0.1f, slicelabel);
   }
 }
 
@@ -679,11 +678,11 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     left=0.;
     up=screenHeight;
     down=0;
-    if(visColorLabels==1)right=screenWidth-dwinWW;
+    if(visColorLabels==1||(visBlocklabel==1&&nmeshes>1))right=screenWidth-dwinWW;
     if(visTitle==1)up=screenHeight-1.1*ntitles*dwinH/4.0;
   }
 
-  if((visTimeLabels==1&&showtime==1)||(showtime==1&&(visFramerate==1||benchmark==1))
+  if((visTimeLabels==1&&showtime==1)||(showtime==1&&(visFramerate==1||benchmark==1))||(visGrid==1&&visgridloc==1)
 #ifdef pp_memstatus
       ||visAvailmemory==1
 #endif
