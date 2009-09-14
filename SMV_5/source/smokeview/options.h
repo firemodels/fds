@@ -29,7 +29,7 @@
 #endif
 
 #ifdef pp_release
-#define SMVVERSION "5.4.3"
+#define SMVVERSION "5.4.4"
 #endif
 
 
