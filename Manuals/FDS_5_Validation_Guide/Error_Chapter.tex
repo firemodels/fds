@@ -1,5 +1,6 @@
 
 \chapter{Quantifying Model Error}
+%\section{Introduction}
 
 The predictions of any mathematical model are subject to two forms of uncertainty. The first is associated with the uncertainty of the input parameters.
 The second is associated with the various assumptions and approximations of the mathematical formulation itself.
@@ -33,7 +34,7 @@ usually prefer that the model predict the outcome of the fire as accurately as p
 In any case, there is certainly no reason why we cannot develop a process to quantify the accuracy of the model that goes beyond simply
 publishing hundreds of plots like the one shown in Fig.~\ref{temp_history}.
 
-\begin{figure}[ht]
+\begin{figure}[t]
 \begin{center}
 \includegraphics[height=2.5in]{FIGURES/sample_time_history}
 \end{center}
@@ -59,7 +60,7 @@ to form the vertical uncertainty/error bar associated with each point in Fig.~\r
 is the subject of analysis below. Before presenting this
 analysis, however, we must first discuss in more detail what we mean by experimental uncertainty and model error.
 
-\begin{figure}[ht]
+\begin{figure}[t]
 \begin{center}
 \includegraphics[height=3.in]{FIGURES/scatterplot}
 \end{center}
@@ -127,7 +128,7 @@ qualitative assessment of dozens of scatter plots similar to that shown in Fig.~
 about the diagonal line, or some other off-diagonal line due to an assumed bias in the model predictions. This assessment is a critical component of the
 analysis described in the next section.
 
-\begin{table}[ht!]
+\begin{table}[t]
 \caption{Summary of Hamins' uncertainty estimates~\cite{NUREG_1824}. }
 \begin{center}
 \begin{tabular}{|l|c|}
@@ -219,50 +220,66 @@ able to take our 1000 pairs of values, and the experimental uncertainty, $\widet
 $\widetilde{\sigma}_M$.
 
 We consider two examples. For the first example, assume that the model has no bias ($\delta=1$) and that the relative uncertainty of the measurements and the
-relative error of the model are both 0.1, or 10~\%. The scatter plot on the left side of Fig.~\ref{xx} displays the model predicted values compared to the
+relative error of the model are both 0.1, or 10~\%. The scatter plot on the left side of Fig.~\ref{Case_1_Scatter} displays the model predicted values compared to the
 true values. The dashed lines indicate the 95~\% confidence interval; that is, it is expected that 95~\% of the points should fall between these
 lines, whose slopes are plus and minus 20~\% ($2\, \widetilde{\sigma}_M$) of the diagonal line. Of course, this plot cannot exist in a real situation, because the true
-values are never known. Instead, the only way to present the data is via the scatter plot on the right side of Fig.~{xx}. Here, the measured values, $E_i$, are
+values are never known. Instead, the only way to present the data is via the scatter plot on the right side of Fig.~\ref{Case_1_Scatter}. Here, the measured values, $E_i$, are
 compared with the predicted values, $M_i$. The same dashed lines are carried over from the plot on the left. Because the predicted values are being compared
 with measurements that have uncertainty, it appears that the model error is greater than it actually is. In this hypothetical example, the model is
 assumed to be as accurate as the measurements, yet the comparison makes it seem as if the model is less accurate than the experiments. The procedure outlined
 above, which makes use of only the measured and predicted values, is able to extract from the data the fact that the hypothetical model has a
 relative error of 10~\%, not the roughly 15~\% that one would infer from the plot if the experimental uncertainty were not taken into account.
 
+\begin{figure}[t]
+\begin{center}
+\includegraphics[height=3.2in]{FIGURES/Case_1_Scatter_T_vs_M}
+\includegraphics[height=3.2in]{FIGURES/Case_1_Scatter_E_vs_M}
+\end{center}
+\caption[Verification of the model error calculation, Case 1.]{(Left) A comparison of predicted and ``true'' values for 1000 hypothetical
+experiments in which the model predictions and experimental measurements have the same accuracy.
+(Right) The same data, except now the predicted values are compared to measured values. On both plots, the uncertainty bounds apply to both
+the predicted and measured values.}
+\label{Case_1_Scatter}
+\end{figure}
+
+
 For the second example, we make our hypothetical model predictions and experimental measurements more realistic. Assume now that the
 measured value is the HGL temperature, and that the relative uncertainty of the measured values, $\widetilde{\sigma}_E=0.07$, is obtained from Table~\ref{Uncertainty}.
-We assume the model has a bias factor of 1.05 and its relative error is 0.15 in order to generate a set of hypothetical model predictions.
-A graphical representation of the data is shown in Fig.~\ref{scatterplot_1000}. Note that the
+We assume the model has a bias factor of 1.03 and its relative error is 0.10 in order to generate a set of hypothetical model predictions.
+A graphical representation of the data is shown in Fig.~\ref{Case_2_Scatter}. Note that the
 experimental uncertainty bounds are represented by thick, dashed lines, and the model bias and relative error is shown by the lighter, dashed lines.
 Each are expressed as 95~\% confidence intervals ($2 \, \widetilde{\sigma}$).
 
-\begin{figure}[ht]
+\begin{figure}[t]
 \begin{center}
-\includegraphics[height=3.0in]{FIGURES/scatterplot_1000}
+\includegraphics[height=3.2in]{FIGURES/Case_2_Scatter_T_vs_M}
+\includegraphics[height=3.2in]{FIGURES/Case_2_Scatter_E_vs_M}
 \end{center}
-\caption[Scatter plot for verification of model error calculation.]{Scatter plot showing 1000 pairs of experimental measurements and model predictions. The
-experimental uncertainty is represented by the solid diagonal and thicker dashed lines. The model error is represented by the thinner diagonal and dashed lines.}
-\label{scatterplot_1000}
+\caption[Verification of the model error calculation, Case 2.]{(Left) A comparison of predicted and ``true'' values for 1000 hypothetical
+experiments in which the model predictions have a bias factor of 1.03 and a relative error of 0.10; and the experimental measurements have an relative uncertainty of 0.07.
+(Right) The same data, except now the predicted values are compared to measured values. On both plots, the uncertainty bounds are the same.}
+\label{Case_2_Scatter}
 \end{figure}
 
 The statistical procedure outlined above ought to provide estimates of the values of the bias factor, $\delta$, and the model error, $\widetilde{\sigma}_M$, whose
-values we used in creating the hypothetical model predictions. The results of six random trials are shown in Table~\ref{trials}. It is not expected that the
+values we used in creating the hypothetical model predictions. The results of seven random trials are shown in Table~\ref{trials}. It is not expected that the
 estimates will be exact because they are based on truncated Taylor series approximations. However, given the fact that the experimental uncertainty estimate,
 $\widetilde{\sigma}_E$, is often only a gross approximation in its own right, the accuracy of the procedure is more than adequate.
 
-\begin{table}[ht!]
+\begin{table}[t]
 \caption{Estimated bias and relative error from six trials used to verify the analysis. }
 \begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
 Trial   & Bias Factor      & Relative Error \\ \hline \hline
-Exact   & 1.05             &    0.15            \\ \hline \hline
-1       & 1.045            &    0.1605            \\ \hline
-2       & 1.053            &    0.1562            \\ \hline
-3       & 1.056            &    0.1552            \\ \hline
-4       & 1.060            &    0.1592            \\ \hline
-5       & 1.060            &    0.1466            \\ \hline
-6       & 1.053            &    0.1585            \\ \hline
+Exact   & 1.030            &    0.100            \\ \hline \hline
+1       & 1.030            &    0.103            \\ \hline
+2       & 1.035            &    0.102            \\ \hline
+3       & 1.033            &    0.105            \\ \hline
+4       & 1.037            &    0.104            \\ \hline
+5       & 1.041            &    0.105            \\ \hline
+6       & 1.034            &    0.101            \\ \hline
+7       & 1.034            &    0.103            \\ \hline
 \end{tabular}
 \end{center}
 \label{trials}
@@ -289,11 +306,11 @@ Before we can answer this question, we need to consider past experiments for whi
 with similar thermal characteristics as the cables in question. How ``similar'' the experiment is to the hypothetical scenario under study can be quantified by way of
 various parameters, like the thermal inertia of the object, the size of the fire, the size of the compartment, and so on. Next, the results of the validation study can be
 analyzed following the procedure spelled out above, which provides us with a bias factor, $\delta$, and relative error, $\tilde{\sigma}_M$, for the model
-predictions of this particular quantity. Let us say, for the sake of argument, that the bias factor is 1.05; that is, on average, the model has been shown to over-predict
-surface temperatures by 5~\%. Let us also say that the relative error has been calculated and it is 0.15~. These are the same values that were assumed in the second example
+predictions of this particular quantity. Let us say, for the sake of argument, that the bias factor is 1.03; that is, on average, the model has been shown to over-predict
+surface temperatures by 3~\%. Let us also say that the relative error has been calculated and it is 0.10~. These are the same values that were assumed in the second example
 of the previous section.
 Now, consider the graph shown in Fig.~\ref{bell_curve}.
-\begin{figure}[ht]
+\begin{figure}[t]
 \begin{center}
 \includegraphics[width=5.in]{FIGURES/bell_curve}
 \end{center}
@@ -301,11 +318,11 @@ Now, consider the graph shown in Fig.~\ref{bell_curve}.
 \label{bell_curve}
 \end{figure}
 The vertical lines indicate the ``threshold'' temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
-model (350~$^\circ$C). The bell curve is a normal distribution obtained from Eq.~(\ref{truth}) above. Its mean is 20+(350-20)/1.05 and its standard deviation
-is 0.15(350-20)/1.05 . Notice that the statistical analysis
+model (350~$^\circ$C). The bell curve is a normal distribution obtained from Eq.~(\ref{truth}) above. Its mean is 20+(350-20)/1.03 and its standard deviation
+is 0.10(350-20)/1.03 . Notice that the statistical analysis
 above assumes that the measured and predicted quantity, in this case surface temperature, is reported as a change above or below its ambient value, which is
-20~$^\circ$C in this case. The shaded area beneath the bell curve is the probability (0.08 in this case) that the ``true'' temperature would exceed 400~$^\circ$C.
-This means that there is an 8~\% chance that the cables could
+20~$^\circ$C in this case. The shaded area beneath the bell curve is the probability (0.03 in this case) that the ``true'' temperature would exceed 400~$^\circ$C.
+This means that there is an 3~\% chance that the cables could
 become damaged {\em based solely on the fact that the model is not a perfect representation of reality.}
 
 The obvious question to ask at this point is what do we do if we cannot assume that the specified fire, material properties, and other input parameters are
