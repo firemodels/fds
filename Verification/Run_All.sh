@@ -131,5 +131,43 @@ $RUNFDS Sprinklers_and_Sprays particle_colors
 $RUNFDS Sprinklers_and_Sprays water_cooling       
 $RUNFDS Sprinklers_and_Sprays water_evaporation   
 $RUNFDS Sprinklers_and_Sprays water_fuel_sprays   
+$RUNFDS Visualization centered_hrr_time        
+$RUNFDS Visualization colorbar                 
+$RUNFDS Visualization colorconv               &
+$RUNFDS Visualization colorconv_large             
+$RUNFDS Visualization devices_elem                
+$RUNFDS Visualization lt1                        &
+$RUNFDS Visualization lt2                         
+$RUNFDS Visualization plume5a                     
+$RUNFDS Visualization plume5b                    &
+$RUNFDS Visualization plume5c_bounddef            
+$RUNFDS Visualization plume5c                     
+$RUNFDS Visualization plume5_large                
+$RUNFDS Visualization plume5_large_part           
+$RUNFDS Visualization pplume5                     
+$RUNFDS Visualization pthouse5                    
+$RUNFDS Visualization script_slice_test           
+$RUNFDS Visualization script_test                 
+$RUNFDS Visualization sillytexture               
+$RUNFDS Visualization smoke_sensor                &
+$RUNFDS Visualization smoke_test2                  &
+$RUNFDS Visualization smoke_test                  
+$RUNFDS Visualization smooth_test2                
+$RUNFDS Visualization smooth_test3                
+$RUNFDS Visualization smooth_test                 
+$RUNFDS Visualization sprinkler_many              
+$RUNFDS Visualization stereo_test                 
+$RUNFDS Visualization thouse5                     
+$RUNFDS Visualization threshold                   
+$RUNFDS Visualization thresholdm                  
+$RUNFDS Visualization transparency                
+$RUNFDS Wui brand2                                
+$RUNFDS Wui brand                                 
+$RUNFDS Wui fire_line                             
+$RUNFDS Wui fire_line.ini                         
+$RUNFDS Wui fire_line.ssf                         
+$RUNFDS Wui tree_line                             
+$RUNFDS Wui tree_many                             
+$RUNFDS Wui tree_one                              
 
 echo FDS cases submitted

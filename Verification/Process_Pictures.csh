@@ -23,5 +23,21 @@ cd ..
 cd Sprinklers_and_Sprays
 $RUNSMV -runscript cascade
 cd ..
+cd Visualization
+$RUNSMV -runscript colorconv
+$RUNSMV -runscript devices_elem
+$RUNSMV -runscript plume5a
+$RUNSMV -runscript plume5b
+$RUNSMV -runscript plume5c
+$RUNSMV -runscript plume5c_bounddef
+$RUNSMV -runscript sillytexture
+$RUNSMV -runscript smoke_sensor
+$RUNSMV -runscript smoke_test
+$RUNSMV -runscript smoke_test2
+$RUNSMV -runscript thouse5
+$RUNSMV -runscript script_test
+cd ..
+cd Wui
+$RUNSMV -runscript fire_line
 
 
