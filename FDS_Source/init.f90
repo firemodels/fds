@@ -2242,7 +2242,7 @@ USE CONTROL_VARIABLES, ONLY : CONTROL
 USE DEVICE_VARIABLES, ONLY : DEVICE
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: T_BEGIN_TMP
-INTEGER  :: N,II,JJ,KK,IW,IOR
+INTEGER  :: N,II,JJ,KK,IW,IC
 INTEGER, INTENT(IN) :: NM
 LOGICAL :: CREATE_OBST,REMOVE_OBST,ACTIVATE_VENT,DEACTIVATE_VENT
 CHARACTER(12) :: SV_LABEL
@@ -2355,41 +2355,36 @@ VENT_LOOP: DO N=1,N_VENT
 
    IF (.NOT.ACTIVATE_VENT .AND. .NOT.DEACTIVATE_VENT) CYCLE VENT_LOOP
 
-   ! Look through all boundary cells looking for those that conform to the given VENT
+   ! Find the wall indices (IW) for the vent and set the activation time (TW) for each one
 
-   SEARCH: DO IW=1,NWC
-      II  = IJKW(1,IW)
-      JJ  = IJKW(2,IW)
-      KK  = IJKW(3,IW)
-      IOR = IJKW(4,IW)
-      IF (IOR/=VT%IOR) CYCLE SEARCH
-      SELECT CASE(ABS(IOR))
-         CASE(1)
-            IF (IOR== 1 .AND.  II/=VT%I1)   CYCLE SEARCH
-            IF (IOR==-1 .AND.  II/=VT%I1+1) CYCLE SEARCH
-            IF (JJ<VT%J1+1 .OR. JJ>VT%J2)   CYCLE SEARCH
-            IF (KK<VT%K1+1 .OR. KK>VT%K2)   CYCLE SEARCH
-         CASE(2)
-            IF (IOR== 2 .AND.  JJ/=VT%J1)   CYCLE SEARCH
-            IF (IOR==-2 .AND.  JJ/=VT%J1+1) CYCLE SEARCH
-            IF (II<VT%I1+1 .OR. II>VT%I2)   CYCLE SEARCH
-            IF (KK<VT%K1+1 .OR. KK>VT%K2)   CYCLE SEARCH
-         CASE(3)
-            IF (IOR== 3 .AND.  KK/=VT%K1)   CYCLE SEARCH
-            IF (IOR==-3 .AND.  KK/=VT%K1+1) CYCLE SEARCH
-            IF (II<VT%I1+1 .OR. II>VT%I2)   CYCLE SEARCH
-            IF (JJ<VT%J1+1 .OR. JJ>VT%J2)   CYCLE SEARCH
-      END SELECT
-      IF (ACTIVATE_VENT) THEN
-         IF (VT%X0>-1.E5_EB) THEN
-            TW(IW) = T + SQRT((M%XW(IW)-VT%X0)**2 +(M%YW(IW)-VT%Y0)**2 +(M%ZW(IW)-VT%Z0)**2)/VT%FIRE_SPREAD_RATE
-         ELSE
-            TW(IW) = T        
-         ENDIF
-      ELSE
-         TW(IW) = 1000000._EB
-      ENDIF
-   ENDDO SEARCH
+   DO KK=VT%K1+1,MAX(VT%K1+1,VT%K2)
+      DO JJ=VT%J1+1,MAX(VT%J1+1,VT%J2)
+         DO II=VT%I1+1,MAX(VT%I1+1,VT%I2)
+            SELECT CASE(VT%IOR)
+               CASE(1:)
+                  IC = CELL_INDEX(II,JJ,KK)
+               CASE(-1)
+                  IC = CELL_INDEX(II-1,JJ,KK)
+               CASE(-2)
+                  IC = CELL_INDEX(II,JJ-1,KK)
+               CASE(-3)
+                  IC = CELL_INDEX(II,JJ,KK-1)
+            END SELECT
+            IW = WALL_INDEX(IC,-VT%IOR)
+            IF (IW==0) CYCLE
+
+            IF (ACTIVATE_VENT) THEN
+               IF (VT%X0>-1.E5_EB) THEN
+                  TW(IW) = T + SQRT((XW(IW)-VT%X0)**2 +(YW(IW)-VT%Y0)**2 +(ZW(IW)-VT%Z0)**2)/VT%FIRE_SPREAD_RATE
+               ELSE
+                  TW(IW) = T        
+               ENDIF
+            ELSE
+               TW(IW) = 1000000._EB
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
 
    ! Write message to .smv file
 
