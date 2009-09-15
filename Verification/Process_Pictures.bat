@@ -20,5 +20,22 @@ cd ..
 cd Sprinklers_and_Sprays
 smokeview -runscript cascade
 cd ..
+cd Visualization
+smokeview -runscript colorconv
+smokeview -runscript devices_elem
+smokeview -runscript plume5a
+smokeview -runscript plume5b
+smokeview -runscript plume5c
+smokeview -runscript plume5c_bounddef
+smokeview -runscript sillytexture
+smokeview -runscript smoke_sensor
+smokeview -runscript smoke_test
+smokeview -runscript smoke_test2
+smokeview -runscript thouse5
+smokeview -runscript script_test
+cd ..
+cd Wui
+smokeview -runscript fire_line
+
 
 
