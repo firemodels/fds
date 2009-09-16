@@ -1,34 +1,16 @@
- FDS+Evac version: FDS 5.3.1, Evac 2.1.2
- All material properties etc. are completely fabricated.
+ FDS+Evac version: FDS 5.4.1, Evac 2.2.0
 
  Two floor evacuation test case, the rooms have two doors.
  See the FDS+Evac Guide, Chapter "Sample Input Files"
 
-&HEAD CHID='evac_smv_testcase2', TITLE='Test 2, only evac'  / 
+&HEAD CHID='evac_smv_testcase2', TITLE='Test 2, evac meshes only'  / 
 
- Fire and evacuation calculations are done simultaneously, i.e.,
- both fire and evacuation meshes are defined.
+ No evacuation meshes at all, i.e., just fire calculation. 
+
  Fire mesh(es).
- MESH IJK=54,50,25, XB= -0.2,10.6,  0.0,10.0, 0.0,5.0 /
+ MESH IJK=22,20,10, XB= -0.2,10.6,  0.0,10.0, 0.0,5.0 /
 
- Two floors both with 2 exit doors, thus, we need:
-     two main evac grids  (EVACUATION=.TRUE., EVAC_HUMANS=.TRUE.)
-     four door flow grids (EVACUATION=.TRUE., EVAC_HUMANS=.FALSE.)
- Note: EVAC_HUMANS=.FALSE. is the default, so door flow fields
-       below do not have it.
- Note: main evacuation grid and the door flow grids should have same XB and IJK.
-
- Main evacuation grid for this floor. This grid contains the humans.
- Note: the z-coordinates (0.4,1.6) define that level, where OBST are
-       picked automatically to the evacuation geometry. If there are other
-       regions, where humans can not walk, then one should put additional 
-       evacuation OBSTs there. One can also use evacuation HOLEs to modifiy
-       the evacuation geometry.
- Note: the mid z-coordinate z_human=0.5*(0.4,1.6)=1.0 defines the level of 
-       the evacuation mesh.  The smoke information for humans is taken from
-       this level, so you might want this level to be around the head
-       height (i.e., about 1.6 m).
-
+ Evacuation meshes
 &MESH IJK=60,54,1, XB= -0.4,11.6, -0.4,10.4, 0.4,1.6, EVAC_Z_OFFSET=1.0, 
       EVACUATION=.TRUE., EVAC_HUMANS=.TRUE., ID='MainEvacGrid' /
 &MESH IJK=54,54,1, XB= -0.4,10.4, -0.4,10.4, 3.0,4.2, EVAC_Z_OFFSET=1.0, 
@@ -36,7 +18,6 @@
 
  Additional door flow fields.
  Note: main evacuation grid and the door flow grids should have same XB and IJK.
-
 &MESH IJK=60,54,1, XB= -0.4,11.6, -0.4,10.4, 0.4,1.6,
       EVACUATION=.TRUE., ID='LeftExitGrid' /
 &MESH IJK=60,54,1, XB= -0.4,11.6, -0.4,10.4, 0.4,1.6, 
@@ -47,19 +28,19 @@
 &MESH IJK=54,54,1, XB= -0.4,10.4, -0.4,10.4, 3.0,4.2, 
       EVACUATION=.TRUE., ID='RightDoorGrid2' /
 
-&TIME T_END=60.0, DT=0.05 / 
+&TIME T_END=30.0, DT=0.05 / 
 
 &MISC SURF_DEFAULT='WALL',
-      EVAC_SURF_DEFAULT = 'EVAC_WALL' / 
+      EVAC_SURF_DEFAULT= 'EVAC_WALL' / 
 
 &DUMP SMOKE3D=.TRUE.,
-      NFRAMES=60,
+      NFRAMES=30,
       DT_PART=0.5,
       DT_HRR=1.0,
       DT_SLCF=1.0,
-      DT_BNDF=5.0,
-      DT_PL3D=100.0,
-      DT_ISOF=5.0 /
+      DT_BNDF=1000.0,
+      DT_PL3D=1000.0,
+      DT_ISOF=1000.0 /
 
 &REAC ID         = 'POLYURETHANE'
       FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
@@ -126,12 +107,6 @@
 &HOLE XB= -0.21, 0.01,  7.39,  8.61, 2.60, 4.60, EVACUATION=.TRUE. / Left Door, 2nd floor
 &HOLE XB=  9.99,10.21,  2.39,  3.61, 2.60, 4.60, EVACUATION=.TRUE. / Right Door, 2nd floor
 
- An exit namelist defines an exit door. It should be a plane.
-
- Note: The main evacuation grid (of this floor) should have all the doors
-       'open', i.e., boundnary condition should be 'OUTFLOW'. Otherwise
-       humans can not go through these walls.
-
  This vent is not at an outer boundary of the domain nor at a solid
  object, thus, there should be an OBST behind it (FDS5 restriction).
 &VENT XB= -0.20,-0.20,  4.40,5.60, 0.40,1.60, SURF_ID='OUTFLOW', 
@@ -158,7 +133,8 @@
 &EXIT ID='LeftExit', IOR=-1,
       FYI= 'Comment line',
       VENT_FFIELD='LeftExitGrid',
-      COLOR='YELLOW',
+      COLOR='YELLOW', HEIGHT=2.0, SHOW=.TRUE.,
+      TIME_OPEN=7.2,TIME_CLOSE=12.2,
       XYZ= 0.20, 5.00, 1.00,
       XB= -0.20,-0.20,  4.40,5.60, 0.40,1.60 /
 &VENT XB= -0.20,-0.20,  4.40,5.60, 0.40,1.60, SURF_ID='OUTFLOW', 
@@ -167,11 +143,18 @@
 &EXIT ID='RightExit', IOR=+1,
       FYI= 'Comment line',
       VENT_FFIELD='RightExitGrid',
-      COLOR='BLUE',
+      COLOR='BLUE', HEIGHT=2.0, SHOW=.TRUE.,
+      TIME_CLOSE=7.2,TIME_OPEN=12.2,
       XYZ= 11.40, 5.00, 1.00,
       XB= 11.60,11.60,  4.40,5.60, 0.40,1.60 /
 &VENT XB= 11.60,11.60,  4.40,5.60, 0.40,1.60, SURF_ID='OUTFLOW', 
       MESH_ID='RightExitGrid', EVACUATION=.TRUE./ Right Exit Fan
+
+&EVSS ID='Incline1', IOR=-1,
+      XB= 10.00,11.60,  4.40,5.60, 0.40,1.60,
+      HEIGHT0=0.0, HEIGHT=2.0,
+      FAC_V0_UP=0.4, FAC_V0_DOWN=0.6, FAC_V0_HORI=1.0,
+      COLOR='GRAY' /
 
  Next is just a counter, i.e., it just produces a column in
  the CHID_evac.csv file.
@@ -185,7 +168,7 @@
 &DOOR ID='LeftDoor2nd', IOR=-1,
       FYI= 'Comment line',
       VENT_FFIELD='LeftDoorGrid2',
-      COLOR='RED',
+      COLOR='RED', HEIGHT=2.0, SHOW=.TRUE.,
       EXIT_SIGN=.TRUE.,
       TO_NODE= 'LeftCorr',
       XYZ= 0.2, 8.00, 3.6,
@@ -200,13 +183,14 @@
       TO_NODE='LeftCorrExit' /
 &EXIT ID='LeftCorrExit',
       FYI='A dummy exit, the end point to a corridor object',
+      SHOW=.FALSE.,
       IOR=-1,
       XB= -0.40,-0.40,  7.40,8.60, 0.40,1.60 /
       
 &DOOR ID='RightDoor2nd', IOR=+1,
       FYI= 'Comment line',
       VENT_FFIELD='RightDoorGrid2',
-      COLOR='GREEN',
+      COLOR='GREEN', HEIGHT=2.0, SHOW=.FALSE.,
       EXIT_SIGN=.TRUE.,
       TO_NODE= 'RightCorr',
       XYZ= 9.8, 3.00, 3.6,
@@ -228,83 +212,39 @@
 &OBST XB=10.20,10.40,  1.00,2.20,  0.40,1.60, 
       EVACUATION=.TRUE., RGB=30,150,20 / Left Door, 2nd
 
- Evacuation calculation, human properties
-
- Note: DENS_INIT and COLOR_METHOD are given only on one
-       PERS-line. If tehy are given on many PERS-lines then
-       the last values read in are used.
-
- COLOR_METHOD: How Smokeview draws humans:
-   -1: (default) Default colors in Smokeview
-    0: The color given at the EVAC/ENTR-line
-    3: The color given at the PERS-line
-    4: The color of the target door
-
- DET_EVAC_DIST and PRE_EVAC_DIST: Distributions for the detection time and
-    for the pre-evacuation time. Total time used by a human before starting to
-    move towards an exit door is t = t_det + t_pre, i.e., pre_evac time means the time
-    after the detection and before the egress movement.
-
-    0 = no distribution, _MEAN is used
-    1 = uniform distribution, _LOW and _HIGH are used
-    2 = normal distribution, _MEAN is the mean, _PARA is the
-        std.dev., _LOW and _HIGH are the cut offs, i.e., the
-        values are within the interval (_LOW,_HIGH). If _LOW 
-        is not given ==> _LOW=0.0. If _HIGH is not given,
-        then _HIGH is a 'very large' number.
-    3 = Gamma, Parameters: (ave,alpha,beta) ave not used
-        _MEAN, _PARA, _PARA2
-    4 = Normal, Parameters: (ave,sigma) (not truncated)
-        _MEAN, _PARA 
-    5 = LogNormal mean and variance of log(x) should be given
-        Parameters: (ave,sigma) of ln(x)
-        _MEAN, _PARA
-    6 =  Beta, Parameters: (ave,a,b) ave not used
-        _MEAN, _PARA, _PARA2
-    7 = Triangular, Parameters: (peak,min,max)
-        _MEAN, _LOW, _HIGH
-    8 = Weibull  (alpha=1: Exponential), Parameters: (ave,alpha,lambda)
-        _MEAN, _PARA, _PARA2
-    9 = Gumbel, Parameters: (ave,alpha)
-        _MEAN, _PARA
-
 &PERS ID='Adult',
       FYI='Male+Female diameter and velocity',
       DEFAULT_PROPERTIES='Adult',
       PRE_EVAC_DIST=1,PRE_LOW=1.0,PRE_HIGH=2.0,
-      DET_EVAC_DIST=0,DET_MEAN=0.0,DET_LOW=5.00,DET_HIGH=15.0,
-      TDET_SMOKE_DENS=0.1 ,
-      HUMAN_SMOKE_HEIGHT=1.60,
+      DET_EVAC_DIST=0,DET_MEAN=0.0,
+      TDET_SMOKE_DENS=0.1 , HUMAN_SMOKE_HEIGHT=1.60,
       DENS_INIT= 4.0, NOT_RANDOM=.TRUE.,
       OUTPUT_SPEED=.TRUE.,
-      OUTPUT_FED=.TRUE.,
-      COLOR_METHOD = 0 /
+      OUTPUT_FED=.TRUE., COLOR_METHOD = 0 /
 
 &PERS ID='Male',
       FYI='Male diameter and velocity',
       DEFAULT_PROPERTIES='Male',
       PRE_EVAC_DIST=1,PRE_LOW=1.0,PRE_HIGH=2.0,
-      DET_EVAC_DIST=0,DET_MEAN=0.0,DET_LOW=5.00,DET_HIGH=15.0 /
+      DET_EVAC_DIST=0,DET_MEAN=0.0, /
 
 &PERS ID='Female',
       FYI='Female diameter and velocity',
       DEFAULT_PROPERTIES='Female',
       PRE_EVAC_DIST=1,PRE_LOW=1.0,PRE_HIGH=2.0,
-      DET_EVAC_DIST=0,DET_MEAN=0.0,DET_LOW=5.00,DET_HIGH=15.0 /
+      DET_EVAC_DIST=0,DET_MEAN=0.0, /
 
 &PERS ID='Child',
       FYI='Child diameter and velocity',
       DEFAULT_PROPERTIES='Child',
       PRE_EVAC_DIST=1,PRE_LOW=1.0,PRE_HIGH=2.0,
-      DET_EVAC_DIST=0,DET_MEAN=0.0,DET_LOW=5.00,DET_HIGH=15.0 /
+      DET_EVAC_DIST=0,DET_MEAN=0.0, /
 
 &PERS ID='Elderly',
       FYI='Elderly diameter and velocity',
       DEFAULT_PROPERTIES='Elderly',
       PRE_EVAC_DIST=1,PRE_LOW=1.0,PRE_HIGH=2.0,
-      DET_EVAC_DIST=1,DET_MEAN=10.0,DET_LOW=5.00,DET_HIGH=15.0 /
-
- Initial positions of the humans
+      DET_EVAC_DIST=1,DET_MEAN=10.0, /
 
  1st Floor:
  These humans will go to the left exit, if it is not blocked by smoke.
@@ -377,11 +317,10 @@
 
  Fire calculation output.
 
- BNDF QUANTITY='WALL_TEMPERATURE' / 
 &SLCF PBX=3.50, QUANTITY='TEMPERATURE' /
 
  Next lines could be used to plot the evacuation flow fields:
- SLCF PBZ = 1.000, QUANTITY = 'VELOCITY', VECTOR = .TRUE. / 
- SLCF PBZ = 3.600, QUANTITY = 'VELOCITY', VECTOR = .TRUE. / 
+ SLCF PBZ = 1.000, QUANTITY = 'VELOCITY', VECTOR = .TRUE., EVACUATION=.TRUE. / 
+ SLCF PBZ = 3.600, QUANTITY = 'VELOCITY', VECTOR = .TRUE., EVACUATION=.TRUE. / 
 
 &TAIL /
