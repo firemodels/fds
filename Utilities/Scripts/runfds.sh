@@ -1,4 +1,8 @@
 #!/bin/bash -f
+#
+# This script tries to run the case, $infile.fds
+# If this file does not exist it tries to run $infile.fdv
+#
 scratchdir=$SVNROOT/Utilities/Scripts/tmp
 dir=$1
 infile=$2
@@ -18,7 +22,10 @@ if ! [ -d $fulldir ]; then
   exit
 fi
 if ! [ -e $fulldir/$in ]; then
-  echo "The fds input  file, $fulldir/$in does not exit. Run aborted."
+in=$infile.fdv
+fi
+if ! [ -e $fulldir/$in ]; then
+  echo "The fds input  files, $fulldir/$infile.fds and $fulldir/$infile.fdv do not exit. Run aborted."
   exit
 fi
 if [ $STOPFDS ]; then
