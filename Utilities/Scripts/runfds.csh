@@ -1,4 +1,8 @@
 #!/bin/csh -f
+#
+# This script tries to run the case, $infile.fds
+# If this file does not exist it tries to run $infile.fdv
+#
 set scratchdir=$SVNROOT/Utilities/Scripts/tmp
 set dir=$1
 set infile=$2
@@ -19,7 +23,10 @@ if(! -d $fulldir) then
   exit
 endif
 if(! -e $fulldir/$in) then
-  echo "The fds input  file, $fulldir/$in does not exit. Run aborted."
+  set in=$infile.fdv
+endif
+if(! -e $fulldir/$in) then
+  echo "The fds input  files, $fulldir/$infile.fds or $fulldir/$infile.fdv do not exit. Run aborted."
   exit
 endif
 if($?STOPFDS) then
