@@ -4,9 +4,6 @@ cd ..
 cd Controls
 for %%i in (*.fds) do %1 %%i
 cd ..
-cd Decaying_Isotropic_Turbulence
-for %%i in (*.fds) do %1 %%i
-cd ..
 cd Detectors
 for %%i in (*.fds) do %1 %%i
 cd ..
@@ -35,9 +32,6 @@ cd Pyrolysis
 for %%i in (*.fds) do %1 %%i
 cd ..
 cd Radiation
-for %%i in (*.fds) do %1 %%i
-cd ..
-cd SMV_Script_Example
 for %%i in (*.fds) do %1 %%i
 cd ..
 cd Species
