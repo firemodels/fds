@@ -1906,7 +1906,8 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
          DO K=0,KBAR
             DO J=0,JBAR
                DO I=0,IBAR
-                  UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  !!UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  UVW = ABS(UU(I,J,K)*RDXN(I)) + ABS(VV(I,J,K)*RDYN(J)) + ABS(WW(I,J,K)*RDZN(K))
                   IF (UVW>=P_UVWMAX) THEN
                      P_UVWMAX = UVW
                      P_ICFL=I
@@ -1930,7 +1931,8 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
          DO K=0,KBAR
             DO J=0,JBAR
                DO I=0,IBAR
-                  UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  !!UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  UVW = ABS(UU(I,J,K)*RDXN(I)) + ABS(VV(I,J,K)*RDYN(J)) + ABS(WW(I,J,K)*RDZN(K))
                   IF (UVW>=UVWMAX) THEN
                      UVWMAX = UVW
                      ICFL=I
@@ -1951,7 +1953,8 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
          DO K=0,KBAR
             DO J=0,JBAR
                DO I=0,IBAR
-                  UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  !!UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  UVW = SQRT( (UU(I,J,K)*RDXN(I))**2 + (VV(I,J,K)*RDYN(J))**2 + (WW(I,J,K)*RDZN(K))**2 )
                   IF (UVW>=P_UVWMAX) THEN
                      P_UVWMAX = UVW
                      P_ICFL=I
@@ -1975,7 +1978,8 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
          DO K=0,KBAR
             DO J=0,JBAR
                DO I=0,IBAR
-                  UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  !!UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
+                  UVW = SQRT( (UU(I,J,K)*RDXN(I))**2 + (VV(I,J,K)*RDYN(J))**2 + (WW(I,J,K)*RDZN(K))**2 )
                   IF (UVW>=UVWMAX) THEN
                      UVWMAX = UVW
                      ICFL=I
