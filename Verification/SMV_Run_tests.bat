@@ -16,18 +16,18 @@ pause>NUL
 echo | fds5 2> %smvug%\scriptfigures\fds5.version
 
 cd %wui%
-fds5 fire_line.fdv
+fds5 fire_line.fds
 
 cd %vis%
-fds5 colorconv.fdv
-fds5 plume5a.fdv
-fds5 plume5b.fdv
-fds5 plume5c.fdv
-fds5 plume5c_bounddef.fdv
-fds5 sillytexture.fdv
-fds5 script_test.fdv
-fds5 smoke_sensor.fdv
-fds5 smoke_test.fdv
-fds5 smoke_test2.fdv
-fds5 thouse5.fdv
+fds5 colorconv.fds
+fds5 plume5a.fds
+fds5 plume5b.fds
+fds5 plume5c.fds
+fds5 plume5c_bounddef.fds
+fds5 sillytexture.fds
+fds5 script_test.fds
+fds5 smoke_sensor.fds
+fds5 smoke_test.fds
+fds5 smoke_test2.fds
+fds5 thouse5.fds
 

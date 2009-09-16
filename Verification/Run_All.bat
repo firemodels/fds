@@ -50,7 +50,17 @@ cd Timing_Benchmarks
 for %%i in (*.fds) do %1 %%i
 cd ..
 cd Visualization
-for %%i in (*.fdv) do %1 %%i
+%1 colorconv.fds
+%1 plume5a.fds
+%1 plume5b.fds
+%1 plume5c.fds
+%1 plume5c_bounddef.fds
+%1 sillytexture.fds
+%1 script_test.fds
+%1 smoke_sensor.fds
+%1 smoke_test.fds
+%1 smoke_test2.fds
+%1 thouse5.fds
 cd ..
 cd Wui
-for %%i in (*.fdv) do %1 %%i
+%1 fire_line.fds
