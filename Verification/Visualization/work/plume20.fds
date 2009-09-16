@@ -1,14 +1,12 @@
-&HEAD CHID='centered_hrr_time',TITLE='Plume case SVN $Revision$' /
+&HEAD CHID='plume20',TITLE='Plume case SVN $Revision: 2954 $' /
 
- simple plume calculation to test CENTERED_HRR_TIME and CENTERED_DEVC_TIME keywords.
- These keywords offsets the times output to their respective csv files by DT_HRR/2.0 and DT_DEVC/2 .
- As a result, these times are recorded at the center of the averaging window
+ simple plume calculation to demonstrate basic Smokeview functions
 
 &MESH IJK=16,16,16, XB=0.0,1.6,0.0,1.6,0.0,3.2 /
 
 &TIME TWFIN=120. /  Total simulation time
 
-&DUMP NFRAMES=2000 DT_HRR=5.0, CENTERED_HRR_TIME=.TRUE., DT_DEVC=5.0, CENTERED_DEVC_TIME=.TRUE. /
+&DUMP NFRAMES=2000 DT_HRR=5.0, CENTRAL_AVERAGE_HRR_TIME=.TRUE. /
 
 &SURF ID='BURNER',HRRPUA=1111.112, RAMP_Q='FIRE_RAMP' /  Ignition source
 &RAMP ID='FIRE_RAMP', T=0.0 F=1.0 /
@@ -33,12 +31,4 @@
 &SLCF PBZ=3.2,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBZ=4.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2, QUANTITY='TEMPERATURE',VECTOR=.TRUE. / 
-
-&DEVC ID='TC01', QUANTITY='THERMOCOUPLE', XYZ=0.8, 0.8, 0.5/
-&DEVC ID='TC02', QUANTITY='THERMOCOUPLE', XYZ=0.8, 0.8, 1.0/
-&DEVC ID='TC03', QUANTITY='THERMOCOUPLE', XYZ=0.8, 0.8, 1.5/
-&DEVC ID='TC04', QUANTITY='THERMOCOUPLE', XYZ=0.8, 0.8, 2.0/
-&DEVC ID='TC05', QUANTITY='THERMOCOUPLE', XYZ=0.8, 0.8, 2.5/
-&DEVC ID='TC06', QUANTITY='THERMOCOUPLE', XYZ=0.8, 0.8, 3.0/
-
 
