@@ -6160,7 +6160,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
  
       ! Thicken evacuation mesh vents in the z direction
 
-      IF (EVACUATION_ONLY(NM) .AND. EVACUATION .AND. VT%K1==VT%K2) THEN
+      IF (EVACUATION_ONLY(NM) .AND. EVACUATION .AND. VT%K1==VT%K2 .AND. .NOT.REJECT_VENT) THEN
          VT%K1 = GINV(.5_EB*(XB(5)+XB(6))-ZS,3,NM)*RDZETA
          VT%K2 = KBAR
          XB(5) = ZS
