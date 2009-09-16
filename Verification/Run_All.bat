@@ -54,6 +54,7 @@ cd Visualization
 %1 plume5a.fds
 %1 plume5b.fds
 %1 plume5c.fds
+%1 plume5c_bounddef.fds
 %1 sillytexture.fds
 %1 script_test.fds
 %1 smoke_sensor.fds

@@ -23,6 +23,7 @@ fds5 colorconv.fds
 fds5 plume5a.fds
 fds5 plume5b.fds
 fds5 plume5c.fds
+fds5 plume5c_bounddef.fds
 fds5 sillytexture.fds
 fds5 script_test.fds
 fds5 smoke_sensor.fds
