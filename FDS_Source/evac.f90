@@ -5276,7 +5276,7 @@ CONTAINS
     REAL(EB) :: RN, RNCF
     REAL(EB) :: GAME, GATH, GACM
     !
-    INTEGER :: I_OLD_FFIELD, IZERO, IMODE_OLD
+    INTEGER :: I_OLD_FFIELD, IZERO, IMODE_OLD, I_STRS_DOOR
     CHARACTER(26) :: NAME_OLD_FFIELD
     !
     REAL(EB) :: P2P_TORQUE, FC_X, FC_Y, OMEGA_NEW, ANGLE, A1, TC_Z, FC_X1, FC_Y1
@@ -5694,12 +5694,12 @@ CONTAINS
              ! Stairs mesh: next subroutine call is needed to set up the targets etc correctly,
              ! but UBAR,VBAR are not needed.
              IF (NM_STRS_MESH) CALL FIND_PREFERED_DIRECTION(I, N, T,T_BEGIN, L_DEAD, NM_STRS_MESH, &
-                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM)
+                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
              ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
              UBAR = HR%UBAR; VBAR = HR%VBAR
           ELSE
              CALL FIND_PREFERED_DIRECTION(I, N, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM)
+                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
           END IF
           ! ========================================================
           ! Prefered walking direction V0 is now (UBAR,VBAR)
@@ -6241,7 +6241,7 @@ CONTAINS
           ! Calculate persons prefered walking direction
           ! ========================================================
           CALL FIND_PREFERED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-               IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM)
+               IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
           ! ========================================================
           ! The prefered walking direction V0 is (UBAR,VBAR)
           ! ========================================================
@@ -6781,6 +6781,29 @@ CONTAINS
           ! Add forces from the door case
           CALL DOOR_FORCES(NM, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, P2P_DIST_MAX, D_XY,&
                P2P_U, P2P_V, SOCIAL_F, CONTACT_F, P2P_TORQUE, FOUNDWALL_XY)
+      
+          IF (NM_STRS_MESH .AND. ABS(HR%SKIP_WALL_FORCE_IOR)>0 .AND. I_STRS_DOOR>0) THEN
+             IF (I_STRS_DOOR > N_DOORS) THEN
+                X11 = EVAC_EXITS(I_STRS_DOOR-N_DOORS)%X1
+                Y11 = EVAC_EXITS(I_STRS_DOOR-N_DOORS)%Y1
+             ELSE
+                X11 = EVAC_DOORS(I_STRS_DOOR)%X1
+                Y11 = EVAC_DOORS(I_STRS_DOOR)%Y1
+             END IF
+             ! x1, y1 agent,  x11, y11, coordiantes of the corner
+             CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
+                  CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT)
+             IF (I_STRS_DOOR > N_DOORS) THEN
+                X11 = EVAC_EXITS(I_STRS_DOOR-N_DOORS)%X2
+                Y11 = EVAC_EXITS(I_STRS_DOOR-N_DOORS)%Y2
+             ELSE
+                X11 = EVAC_DOORS(I_STRS_DOOR)%X2
+                Y11 = EVAC_DOORS(I_STRS_DOOR)%Y2
+             END IF
+             ! x1, y1 agent,  x11, y11, coordiantes of the corner
+             CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
+                  CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT)
+          END IF
 
           ! Add wall corner - person forces
           ! Top right corner (X > X_HUMAN, Y > Y_HUMAN)
@@ -7172,7 +7195,7 @@ CONTAINS
   CONTAINS
 
     SUBROUTINE FIND_PREFERED_DIRECTION(I, NOUT, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-         II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM)
+         II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
       IMPLICIT NONE
       !
       ! Calculate the prefered walking direction
@@ -7192,19 +7215,20 @@ CONTAINS
       !   UBAR,VBAR: The prefered walking direction
       !   HR_TAU: Translational motion tau
       !   TPRE: Pre-movement time
+      !   I_STRS_DOOR: In STRS mesh the target door/exit index
       !
       ! Passed variables
       INTEGER, INTENT(IN) :: II, JJ, IIX, JJY, I, NM
       REAL(EB), INTENT(IN) :: XI, YJ, ZK, T, T_BEGIN
       LOGICAL, INTENT(IN) :: L_DEAD
-      INTEGER, INTENT(OUT) :: NOUT
+      INTEGER, INTENT(OUT) :: NOUT, I_STRS_DOOR
       LOGICAL, INTENT(INOUT) :: NM_STRS_MESH
       REAL(EB), INTENT(INOUT) :: HR_TAU
       REAL(EB), INTENT(OUT) :: UBAR, VBAR, TPRE
       !
       ! Local variables
       INTEGER :: N,NM_NOW, STRS_INDX, DOOR_IOR, KKZ, J, I1, J1
-      REAL(EB) :: X_TARGET, Y_TARGET, DOOR_WIDTH, DOOR_DIST, EVEL
+      REAL(EB) :: X_TARGET, Y_TARGET, DOOR_WIDTH, DOOR_DIST, EVEL, X1,X2,Y1,Y2
       LOGICAL :: NM_STRS_MESHS, STRAIGHT_LINE_TO_TARGET
       TYPE (MESH_TYPE), POINTER :: MFF=>NULL()
       TYPE (HUMAN_TYPE), POINTER :: HR=>NULL()
@@ -7237,11 +7261,14 @@ CONTAINS
 
       ! Check if going straight line to target
       STRAIGHT_LINE_TO_TARGET = .FALSE.
+      I_STRS_DOOR = 0
+      HR%SKIP_WALL_FORCE_IOR = 0
       IF (NM_STRS_MESH) THEN
          IF (HR%I_TARGET == 0) THEN
             CALL FIND_TARGET_NODE_IN_STRS(STRP,HR)
          END IF
          N = HR%I_TARGET
+         I_STRS_DOOR = N ! Which door is the target is needed in door post forces
          IF (N>N_DOORS) THEN
             N = N - N_DOORS
             IF (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) THEN
@@ -7250,6 +7277,8 @@ CONTAINS
                Y_TARGET = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
                DOOR_WIDTH = EVAC_EXITS(N)%WIDTH
                DOOR_IOR   = EVAC_EXITS(N)%IOR
+               X1=EVAC_EXITS(N)%X1 ; X2=EVAC_EXITS(N)%X2
+               Y1=EVAC_EXITS(N)%Y1 ; Y2=EVAC_EXITS(N)%Y2
             END IF
          ELSE IF (N>0) THEN
             IF (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) THEN
@@ -7258,25 +7287,54 @@ CONTAINS
                Y_TARGET = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
                DOOR_WIDTH = EVAC_DOORS(N)%WIDTH
                DOOR_IOR   = EVAC_DOORS(N)%IOR
+               X1=EVAC_DOORS(N)%X1 ; X2=EVAC_DOORS(N)%X2
+               Y1=EVAC_DOORS(N)%Y1 ; Y2=EVAC_DOORS(N)%Y2
             END IF
          END IF
       END IF
       IF (STRAIGHT_LINE_TO_TARGET) THEN
+!!$         UBAR = X_TARGET-HR%X
+!!$         VBAR = Y_TARGET-HR%Y
+!!$         DOOR_DIST = SQRT((X_TARGET-HR%X)**2+(Y_TARGET-HR%Y)**2)
+!!$         IF ( DOOR_DIST < 0.5_EB*DOOR_WIDTH ) THEN
+!!$            SELECT CASE(DOOR_IOR)
+!!$            CASE(-1,+1)
+!!$               UBAR = SIGN(1.0_EB,UBAR)
+!!$               VBAR = 0._EB
+!!$               HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
+!!$            CASE(-2,+2)
+!!$               UBAR = 0._EB
+!!$               VBAR = SIGN(1.0_EB,VBAR)
+!!$               HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)*2
+!!$            END SELECT
+!!$         END IF
          UBAR = X_TARGET-HR%X
          VBAR = Y_TARGET-HR%Y
          DOOR_DIST = SQRT((X_TARGET-HR%X)**2+(Y_TARGET-HR%Y)**2)
-         IF ( DOOR_DIST < 0.5_EB*DOOR_WIDTH ) THEN
-            SELECT CASE(DOOR_IOR)
-            CASE(-1,+1)
-               UBAR = SIGN(1.0_EB,UBAR)
-               VBAR = 0._EB
-               HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
-            CASE(-2,+2)
-               UBAR = 0._EB
-               VBAR = SIGN(1.0_EB,VBAR)
-               HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)*2
-            END SELECT
-         END IF
+         SELECT CASE(DOOR_IOR)
+         CASE(-1,+1)
+            IF ((HR%Y > Y1) .AND. (HR%Y < Y2)) THEN
+               !IF ( DOOR_DIST < 0.5_EB*DOOR_WIDTH ) THEN
+               IF ((HR%Y > Y1+HR%Radius) .AND. (HR%Y < Y2-HR%Radius)) THEN
+                  !UBAR = SIGN(1.0_EB,UBAR)
+                  UBAR = -DOOR_IOR
+                  VBAR = 0._EB
+                  ! HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
+               END IF
+               HR%SKIP_WALL_FORCE_IOR = -DOOR_IOR
+            END IF
+         CASE(-2,+2)
+            IF ((HR%X > X1) .AND. (HR%X < X2)) THEN
+               !IF ( DOOR_DIST < 0.5_EB*DOOR_WIDTH ) THEN
+               IF ((HR%X > X1+HR%Radius) .AND. (HR%X < X2-HR%Radius)) THEN
+                  UBAR = 0._EB
+                  !VBAR = SIGN(1.0_EB,VBAR)
+                  VBAR = -DOOR_IOR
+                  ! HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)*2
+               END IF
+               HR%SKIP_WALL_FORCE_IOR = -DOOR_IOR*2
+            END IF
+         END SELECT
       ELSE IF (NM_STRS_MESH) THEN 
          CALL STRS_U_AND_V(STRP,HR%STR_SUB_INDX,HR%X,HR%Y,HR%STRS_DIRECTION,UBAR,VBAR)
       ELSE
@@ -8964,7 +9022,6 @@ CONTAINS
       INTEGER :: is, idir, iin, jjn, istat
       REAL(EB) :: CosPhiFac, dist, dist1, dist2
 
-      
       ! Check if there are doors (vents with vel >0)
       DO ii = 1, N_VENT
          IF (ABS(VENTS(ii)%IOR)>2 .OR. SURFACE(VENTS(ii)%IBC)%VEL<=0) CYCLE
