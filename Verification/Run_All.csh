@@ -136,6 +136,7 @@ $RUNFDS Visualization colorconv                   fire41 &
 $RUNFDS Visualization plume5a                     fire42 &
 $RUNFDS Visualization plume5b                     fire43 &
 $RUNFDS Visualization plume5c                     fire43 &
+$RUNFDS Visualization plume5c_bounddef            fire43 &
 $RUNFDS Visualization sillytexture                fire45 &
 $RUNFDS Visualization script_test                 fire45 &
 $RUNFDS Visualization smoke_sensor                fire45 &
