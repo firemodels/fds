@@ -1,0 +1,24 @@
+&HEAD CHID='plume5aa',TITLE='Plume case SVN $Revision: 2954 $' /
+
+ simple plume calculation to demonstrate basic Smokeview functions
+
+&MESH IJK=32,32,64, XB=0.0,1.6,0.0,1.6,0.0,3.2 /
+
+&TIME TWFIN=10. /  Total simulation time
+
+&DUMP NFRAMES=200 /
+
+&SURF ID='BURNER',HRRPUA=600.0,PART_ID='tracers' /  Ignition source
+
+&VENT XB=0.5,1.1,0.5,1.1,0.1,0.1,SURF_ID='BURNER' /  fire source on kitchen stove
+&OBST XB=0.5,1.1,0.5,1.1,0.0,0.1 /
+
+&VENT XB=0.0,0.0,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=1.6,1.6,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,0.0,0.0,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,1.6,1.6,0.0,3.2,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,0.0,1.6,3.2,3.2,SURF_ID='OPEN'/
+
+&PART ID='tracers',MASSLESS=.TRUE., SAMPLING_FACTOR=1 /  Description of massless tracer particles. Apply at a
+                                                             solid surface with the PART_ID='tracers'
+
