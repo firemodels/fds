@@ -13,6 +13,11 @@ usage to test something, then the MESH IJK could be doubled (and so
 on).  Note that the memory (fds5.4.0, svn3895) is mainly used for the
 evacuation meshes.
 
+   fds5.4.1, svn 4746:
+   fire + no evac:  65 340 K RAM (Peak Memory usage, winXP32, testcase0)
+   fire + evac:    217 928 K RAM (Peak Memory usage, winXP32, testcase1)
+   no fire + evac: 156 972 K RAM (Peak Memory usage, winXP32, testcase2)
+
 evac_memory_test0.fds
 
    One fire mesh, no evacuation meshes
@@ -21,11 +26,6 @@ evac_memory_test1.fds
 
    One fire mesh, one main evacuation mesh, four additional evacuation
    meshes (for each door)
-
-   fds5.4.0, svn3895:
-   fire + evac: 616 472 K RAM (Peak Memory usage, winXP32)
-   no fire + evac: 556 404  (Peak Memory usage, winXP32, test2 below)
-   fire + no evac: 63 596  (Peak Memory usage, winXP32, test0 above)
 
 evac_memory_test2.fds
 
