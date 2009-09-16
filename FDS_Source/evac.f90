@@ -647,7 +647,7 @@ CONTAINS
          END IF
          READ(LU_INPUT,NML=ENTR,END=227,ERR=228,IOSTAT=IOS)
          N_ENTRYS = N_ENTRYS + 1
-         IF (COLOR_METHOD == 0 .AND. MAX_FLOW > 0) THEN
+         IF (COLOR_METHOD == 0 .AND. (MAX_FLOW > 0.0_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) THEN
             EVAC_AVATAR_NCOLOR = EVAC_AVATAR_NCOLOR + 1
          END IF
 228      IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with ENTR line')
@@ -3682,66 +3682,70 @@ CONTAINS
          END IF
       END DO
 
-   DO N = 1,N_DOORS
-      PDX => EVAC_DOORS(N)
-      ! Check if door leads to Stairs
-       PDX%STR_INDX = 0
-       PDX%STR_SUB_INDX = 0
-       CheckDoorStrLoop: DO i = 1, N_STRS
-         STRP=>EVAC_STRS(i)
-         IF (STRP%IMESH==PDX%IMESH .OR. STRP%IMESH==PDX%IMESH2) THEN
-            PDX%STR_INDX = i
-            DO j = 1,STRP%N_NODES
-               IF ( Is_Within_Bounds(PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2, &
-                    STRP%XB_NODE(j,1), STRP%XB_NODE(j,2), STRP%XB_NODE(j,3),STRP%XB_NODE(j,4), &
-                    STRP%XB_NODE(j,5), STRP%XB_NODE(j,6), 0._EB, 0._EB, 0._EB)) THEN
-                  PDX%STR_SUB_INDX = j
-                  EXIT CheckDoorStrLoop
-               END IF
-            END DO
-         END IF
-       END DO CheckDoorStrLoop
-    END DO
+      DO N = 1,N_DOORS
+         PDX => EVAC_DOORS(N)
+         ! Check if door leads to Stairs
+         PDX%STR_INDX = 0
+         PDX%STR_SUB_INDX = 0
+         CheckDoorStrLoop: DO i = 1, N_STRS
+            STRP=>EVAC_STRS(i)
+            IF (STRP%IMESH==PDX%IMESH .OR. STRP%IMESH==PDX%IMESH2) THEN
+               PDX%STR_INDX = i
+               DO j = 1,STRP%N_NODES
+                  IF ( Is_Within_Bounds(PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2, &
+                       STRP%XB_NODE(j,1), STRP%XB_NODE(j,2), STRP%XB_NODE(j,3),STRP%XB_NODE(j,4), &
+                       STRP%XB_NODE(j,5), STRP%XB_NODE(j,6), 0._EB, 0._EB, 0._EB)) THEN
+                     PDX%STR_SUB_INDX = j
+                     EXIT CheckDoorStrLoop
+                  END IF
+               END DO
+            END IF
+         END DO CheckDoorStrLoop
+      END DO
 
-    ! Create list  of incoming nodes for STairs
-    DO N = 1,N_STRS
-      STRP => EVAC_STRS(N)
-      STRP%N_NODES_IN = 0
-      STRP%N_NODES_OUT = 0
-      NODES_TMP = 0
-      DO I = 1,N_NODES
-         SELECT CASE (EVAC_NODE_List(I)%Node_type)
-         CASE ('Door')
-            J = EVAC_NODE_List(I)%Node_index
-            IF (EVAC_DOORS(J)%IMESH2 == STRP%IMESH) THEN
-               STRP%N_NODES_IN = STRP%N_NODES_IN + 1
-               NODES_TMP(STRP%N_NODES_IN) = I
+      ! Create list  of incoming nodes for Stairs
+      DO N = 1,N_STRS
+         STRP => EVAC_STRS(N)
+         STRP%N_NODES_IN = 0
+         STRP%N_NODES_OUT = 0
+         NODES_TMP = 0
+         DO I = 1,N_NODES
+            SELECT CASE (EVAC_NODE_List(I)%Node_type)
+            CASE ('Door')
+               J = EVAC_NODE_List(I)%Node_index
+               IF (EVAC_DOORS(J)%IMESH2 == STRP%IMESH) THEN
+                  STRP%N_NODES_IN = STRP%N_NODES_IN + 1
+                  NODES_TMP(STRP%N_NODES_IN) = I
+               END IF
+            CASE ('Entry')
+               J = EVAC_NODE_List(I)%Node_index
+               IF (EVAC_ENTRYS(J)%IMESH == STRP%IMESH) THEN
+                  STRP%N_NODES_IN = STRP%N_NODES_IN + 1
+                  NODES_TMP(STRP%N_NODES_IN) = I
+               END IF
+            END SELECT
+         END DO
+         ALLOCATE(STRP%NODES_IN(1:STRP%N_NODES_IN),STAT=IZERO)
+         CALL ChkMemErr('Read_Evac','STRP%NODES_IN',IZERO) 
+         STRP%NODES_IN = NODES_TMP(1:STRP%N_NODES_IN)
+         ! Create List of outgoing nodes for stairs
+         NODES_TMP = 0
+         DO I = NMESHES+1,N_NODES
+            IF (EVAC_NODE_List(I)%Node_type == 'Entry') CYCLE
+            IF (EVAC_NODE_List(I)%Node_type == 'Stair') CYCLE
+            ! count only exits should not be counted here
+            IF (EVAC_NODE_List(I)%Node_type == 'Exit') THEN
+               IF (EVAC_EXITS(EVAC_NODE_List(I)%Node_Index)%COUNT_ONLY) CYCLE
+            ENDIF
+            IF (EVAC_NODE_List(I)%IMESH == STRP%IMESH) THEN
+               STRP%N_NODES_OUT = STRP%N_NODES_OUT + 1
+               NODES_TMP(STRP%N_NODES_OUT) = I
             END IF
-         CASE ('Entry')
-            J = EVAC_NODE_List(I)%Node_index
-            IF (EVAC_ENTRYS(J)%IMESH == STRP%IMESH) THEN
-               STRP%N_NODES_IN = STRP%N_NODES_IN + 1
-               NODES_TMP(STRP%N_NODES_IN) = I
-            END IF
-         END SELECT
+         END DO
+         ALLOCATE(STRP%NODES_OUT(1:STRP%N_NODES_OUT),STAT=IZERO)
+         CALL ChkMemErr('Read_Evac','STRP%NODES_OUT',IZERO) 
+         STRP%NODES_OUT = NODES_TMP(1:STRP%N_NODES_OUT)
       END DO
-      ALLOCATE(STRP%NODES_IN(1:STRP%N_NODES_IN),STAT=IZERO)
-      CALL ChkMemErr('Read_Evac','STRP%NODES_IN',IZERO) 
-      STRP%NODES_IN = NODES_TMP(1:STRP%N_NODES_IN)
-      ! Create List of outgoing nodes for stairs
-      NODES_TMP = 0
-      DO I = NMESHES+1,N_NODES
-         IF (EVAC_NODE_List(I)%Node_type == 'Entry') CYCLE
-         IF (EVAC_NODE_List(I)%Node_type == 'Stair') CYCLE
-         IF (EVAC_NODE_List(I)%IMESH == STRP%IMESH) THEN
-            STRP%N_NODES_OUT = STRP%N_NODES_OUT + 1
-            NODES_TMP(STRP%N_NODES_OUT) = I
-         END IF
-      END DO
-      ALLOCATE(STRP%NODES_OUT(1:STRP%N_NODES_OUT),STAT=IZERO)
-      CALL ChkMemErr('Read_Evac','STRP%NODES_OUT',IZERO) 
-      STRP%NODES_OUT = NODES_TMP(1:STRP%N_NODES_OUT)
-    END DO
 
     END SUBROUTINE CHECK_EVAC_NODES
 
@@ -5252,7 +5256,7 @@ CONTAINS
     INTEGER, PARAMETER :: N_SECTORS = 2
     REAL(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
     INTEGER ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
-    INTEGER  IE, TIM_IC, TIM_IW, NM_NOW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, IBC
+    INTEGER  IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, IBC
     REAL(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, TIM_DIST
     REAL(EB), DIMENSION(4) :: D_XY
     LOGICAL, DIMENSION(4) :: FOUNDWALL_XY
@@ -5512,7 +5516,7 @@ CONTAINS
              ! If the group is not yet together, they are not moving towards the exit.
              IF (GROUP_LIST(J)%COMPLETE == 0) CYCLE CHANGE_DOOR_LOOP
 
-             ! AGents start to move towards the exit after the pre-evacuation (reaction) time.
+             ! Agents start to move towards the exit after the pre-evacuation (reaction) time.
              IF (J == 0 .AND. T < HR%TPRE+HR%TDET) CYCLE CHANGE_DOOR_LOOP   ! LONELY AGENTS
              IF (J > 0 .AND. T < GROUP_LIST(J)%TPRE + GROUP_LIST(J)%TDOOR) CYCLE CHANGE_DOOR_LOOP ! GROUPS
 
@@ -5678,18 +5682,24 @@ CONTAINS
           ! Calculate persons prefered walking direction V0
           ! ========================================================
           NM_STRS_MESH = .FALSE.
-          STRSMESHLOOP: DO N = 1, N_STRS
-             IF (EVAC_STRS(N)%IMESH==NM_NOW) THEN     
+          N = 0
+          STRSMESHLOOP: DO J = 1, N_STRS
+             IF (EVAC_STRS(J)%IMESH==NM) THEN     
                 NM_STRS_MESH = .TRUE.
+                N = J
                 EXIT STRSMESHLOOP
              END IF
           END DO STRSMESHLOOP
           IF (TAU_CHANGE_V0 > 1.0E-12_EB) THEN
+             ! Stairs mesh: next subroutine call is needed to set up the targets etc correctly,
+             ! but UBAR,VBAR are not needed.
+             IF (NM_STRS_MESH) CALL FIND_PREFERED_DIRECTION(I, N, T,T_BEGIN, L_DEAD, NM_STRS_MESH, &
+                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM)
              ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
              UBAR = HR%UBAR; VBAR = HR%VBAR
           ELSE
              CALL FIND_PREFERED_DIRECTION(I, N, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE)
+                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM)
           END IF
           ! ========================================================
           ! Prefered walking direction V0 is now (UBAR,VBAR)
@@ -6231,7 +6241,7 @@ CONTAINS
           ! Calculate persons prefered walking direction
           ! ========================================================
           CALL FIND_PREFERED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-               IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE)
+               IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM)
           ! ========================================================
           ! The prefered walking direction V0 is (UBAR,VBAR)
           ! ========================================================
@@ -6396,7 +6406,7 @@ CONTAINS
              IF (BLOCK_LIST(IE) == I) CYCLE P2PLOOP
              HRE => HUMAN(BLOCK_LIST(IE))
              ! In stairs, only consider humans at the same, next and previous sub nodes (landings, stairs)
-             IF (ABS(HRE%STR_SUB_INDX - HR%STR_SUB_INDX)>1) CYCLE P2PLOOP
+             IF (NM_STRS_MESH .AND. ABS(HRE%STR_SUB_INDX - HR%STR_SUB_INDX)>1) CYCLE P2PLOOP
              P2P_DIST = ((HRE%X-X1)**2 + (HRE%Y-Y1)**2)
              IF (P2P_DIST > (MAX(P2P_SUUNTA_MAX,P2P_DIST_MAX)+HR%RADIUS+HRE%RADIUS)**2) CYCLE P2PLOOP
              P2P_DIST = SQRT(P2P_DIST)
@@ -7162,7 +7172,7 @@ CONTAINS
   CONTAINS
 
     SUBROUTINE FIND_PREFERED_DIRECTION(I, NOUT, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-         II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE)
+         II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM)
       IMPLICIT NONE
       !
       ! Calculate the prefered walking direction
@@ -7175,6 +7185,7 @@ CONTAINS
       !   II,JJ: The grid cell indices of the agent
       !   IIX,JJY: The grid cell indices of the agent for the velocity
       !   XI,YJ,ZK: The grid cell coordinates of the agent for the velocity
+      !   NM: The main evacuation mesh index
       ! Outputs:
       !   NOUT: The index of the stairs mesh (if the agent is on stairs)
       !   NM_STRS_MESH: True, if the mesh is a stair mesh
@@ -7183,7 +7194,7 @@ CONTAINS
       !   TPRE: Pre-movement time
       !
       ! Passed variables
-      INTEGER, INTENT(IN) :: II, JJ, IIX, JJY, I
+      INTEGER, INTENT(IN) :: II, JJ, IIX, JJY, I, NM
       REAL(EB), INTENT(IN) :: XI, YJ, ZK, T, T_BEGIN
       LOGICAL, INTENT(IN) :: L_DEAD
       INTEGER, INTENT(OUT) :: NOUT
@@ -7192,7 +7203,7 @@ CONTAINS
       REAL(EB), INTENT(OUT) :: UBAR, VBAR, TPRE
       !
       ! Local variables
-      INTEGER :: N,MN_NOW, STRS_INDX, DOOR_IOR, KKZ, J, I1, J1
+      INTEGER :: N,NM_NOW, STRS_INDX, DOOR_IOR, KKZ, J, I1, J1
       REAL(EB) :: X_TARGET, Y_TARGET, DOOR_WIDTH, DOOR_DIST, EVEL
       LOGICAL :: NM_STRS_MESHS, STRAIGHT_LINE_TO_TARGET
       TYPE (MESH_TYPE), POINTER :: MFF=>NULL()
@@ -7212,7 +7223,8 @@ CONTAINS
       ! Determine if the mesh is a stairs-mesh
       NM_STRS_MESH = .FALSE.
       STRSMESHLOOP: DO N = 1, N_STRS
-         IF (EVAC_STRS(N)%IMESH==NM_NOW) THEN     
+         IF (EVAC_STRS(N)%IMESH==NM) THEN     
+            NM_NOW = NM
             NM_STRS_MESH = .TRUE.
             STRS_INDX = N
             STRP=>EVAC_STRS(N)
@@ -8598,7 +8610,8 @@ CONTAINS
          HR=>HUMAN(I)
          IF (I > N_HUMANS-IKILL) EXIT DROP_LOOP
          IF (HR%X > XS .AND. HR%X < XF .AND. HR%Y > YS .AND. HR%Y < YF) CYCLE DROP_LOOP
-         WRITE(LU_ERR,'(A, 3F8.2, I3)') 'WARNING: Person removed at coord: ', HR%X,HR%Y,HR%Z,HR%SKIP_WALL_FORCE_IOR
+         WRITE(LU_ERR,'(A,I6,A,3F8.2,I3)') 'WARNING: Agent n:o ',HR%ILABEL,' removed at coord: ', &
+              HR%X,HR%Y,HR%Z,HR%SKIP_WALL_FORCE_IOR
          HUMAN(I) = HUMAN(N_HUMANS-IKILL)
          IKILL = IKILL + 1
       END DO DROP_LOOP
