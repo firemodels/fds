@@ -1,4 +1,4 @@
-&HEAD CHID='threshold',TITLE='Test of threshold temperature display SVN $Revision$' /
+&HEAD CHID='threshold',TITLE='Test of threshold temperature display SVN $Revision: 2453 $' /
 
 &MESH IJK=16,16,16 XB=0.0,1.6,0.0,1.6,0.0,1.6 /
 

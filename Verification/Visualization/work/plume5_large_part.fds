@@ -1,4 +1,4 @@
-&HEAD CHID='plume5_large_part',TITLE='Plume case SVN $Revision$' /
+&HEAD CHID='plume5_large_part',TITLE='Plume case SVN $Revision: 4350 $' /
 
  simple plume calculation to generate a large particle file for teseting the 64 bit smokeview
 

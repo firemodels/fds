@@ -1,17 +1,21 @@
-&HEAD CHID='plume5_large',TITLE='Plume case SVN $Revision$' /
+&HEAD CHID='meshview',TITLE='Test of mesh blockage hiding SVN $Revision: 2954 $' /
 
  simple plume calculation to demonstrate basic Smokeview functions
 
-&MESH IJK=128,128,256 XB=0.0,1.6,0.0,1.6,0.0,3.2 /
+&MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,0.0,0.8 /
+&MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,0.8,1.6 /
+&MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,1.6,2.4 /
+&MESH IJK=32,32,16, XB=0.0,1.6,0.0,1.6,2.4,3.2 /
 
 &TIME TWFIN=10. /  Total simulation time
 
-&DUMP NFRAMES=400 /
+&DUMP NFRAMES=200 /
 
 &SURF ID='BURNER',HRRPUA=600.0,PART_ID='tracers' /  Ignition source
 
-&VENT XB=0.5,1.1,0.5,1.1,0.1,0.1,SURF_ID='BURNER' /  fire source on kitchen stove
-&OBST XB=0.5,1.1,0.5,1.1,0.0,0.1 /
+&VENT XB=0.5,1.1,0.5,1.1,2.8,2.8,SURF_ID='BURNER' /  fire source on kitchen stove
+
+&OBST XB=0.5,1.1,0.5,1.1,0.0,2.8 /
 
 &VENT XB=0.0,0.0,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
 &VENT XB=1.6,1.6,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
@@ -32,7 +36,7 @@
 &SLCF PBZ=1.6,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBZ=3.2,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBZ=4.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
-&SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2, QUANTITY='TEMPERATURE' / 
+&SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2, QUANTITY='TEMPERATURE',VECTOR=.TRUE. / 
 
 &BNDF QUANTITY='GAUGE_HEAT_FLUX' /   Common surface quantities. Good for monitoring fire spread.
 &BNDF QUANTITY='BURNING_RATE' /
