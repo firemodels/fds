@@ -109,7 +109,8 @@ openmp_intel_linux_32 : obj = fds5_openmp_intel_linux_32
 openmp_intel_linux_32 : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-openmp_intel_linux_32_db : FFLAGS = -m32 -static -vec_report0 -check -warn unused -auto -WB -traceback -g -fltconsistency -fp-model:strict
+### -check produces a runtime-error in the debug version
+openmp_intel_linux_32_db : FFLAGS = -m32 -static -vec_report0 -warn unused -auto -WB -traceback -g -fltconsistency
 openmp_intel_linux_32_db : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
 openmp_intel_linux_32_db : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_intel_linux_32_db : FOPTIMIZATIONFLAGS = -O0
@@ -117,6 +118,16 @@ openmp_intel_linux_32_db : FCOMPL = ifort
 openmp_intel_linux_32_db : CCOMPL = icc
 openmp_intel_linux_32_db : obj = fds5_openmp_intel_linux_32_db
 openmp_intel_linux_32_db : setup $(obj_serial)
+	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
+openmp_intel_linux_32_tcheck : FFLAGS = -m32 -g
+openmp_intel_linux_32_tcheck : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
+openmp_intel_linux_32_tcheck : FOPENMPFLAGS = -openmp -tcheck 
+openmp_intel_linux_32_tcheck : FOPTIMIZATIONFLAGS = -O0
+openmp_intel_linux_32_tcheck : FCOMPL = ifort
+openmp_intel_linux_32_tcheck : CCOMPL = icc
+openmp_intel_linux_32_tcheck : obj = fds5_openmp_intel_linux_32_tcheck
+openmp_intel_linux_32_tcheck : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 openmp_mpi_intel_linux_32 : FFLAGS = -m32 -vec_report0
@@ -139,14 +150,25 @@ openmp_intel_linux_64 : obj = fds5_openmp_intel_linux_64
 openmp_intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-openmp_intel_linux_64_db : FFLAGS = -m64 -static -vec_report0 -check -warn unused -auto -WB -traceback -g -fltconsistency -fp-model:strict
-openmp_intel_linux_64_db : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
+### -check produces a runtime-error in the debug version
+openmp_intel_linux_64_db : FFLAGS = -m64 -static -vec_report0 -warn unused -auto -WB -traceback -g -fltconsistency
+openmp_intel_linux_64_db : CFLAGS = -m64 -O0 -Dpp_noappend -vec_report0
 openmp_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_intel_linux_64_db : FOPTIMIZATIONFLAGS = -O0
 openmp_intel_linux_64_db : FCOMPL = ifort
 openmp_intel_linux_64_db : CCOMPL = icc
 openmp_intel_linux_64_db : obj = fds5_openmp_intel_linux_64_db
 openmp_intel_linux_64_db : setup $(obj_serial)
+	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
+openmp_intel_linux_64_tcheck : FFLAGS = -m64 -g
+openmp_intel_linux_64_tcheck : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
+openmp_intel_linux_64_tcheck : FOPENMPFLAGS = -openmp -tcheck
+openmp_intel_linux_64_tcheck : FOPTIMIZATIONFLAGS = -O0
+openmp_intel_linux_64_tcheck : FCOMPL = ifort
+openmp_intel_linux_64_tcheck : CCOMPL = icc
+openmp_intel_linux_64_tcheck : obj = fds5_openmp_intel_linux_64_tcheck
+openmp_intel_linux_64_tcheck : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 openmp_mpi_intel_linux_64 : FFLAGS = -m64 -vec_report0

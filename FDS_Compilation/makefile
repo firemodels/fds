@@ -58,22 +58,6 @@ intel_win_32 : obj = fds5_win_32
 intel_win_32 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
 
-openmp_intel_win_32 : FFLAGS = -O2 /Qvec_report0 /Qopenmp /Qopenmp-link:static
-openmp_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
-openmp_intel_win_32 : FCOMPL = ifort
-openmp_intel_win_32 : CCOMPL = cl
-openmp_intel_win_32 : obj = fds5_openmp
-openmp_intel_win_32 : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
-
-openmp_intel_win_32_db : FFLAGS = /debug:full /traceback /check:bounds /libs:static /threads /fpe:0 /Qvec_report0 /Qopenmp /Qopenmp-link:static /Qtcheck
-openmp_intel_win_32_db : CFLAGS = -Dpp_noappend
-openmp_intel_win_32_db : FCOMPL = ifort
-openmp_intel_win_32_db : CCOMPL = cl
-openmp_intel_win_32_db : obj = fds5_openmp_db
-openmp_intel_win_32_db : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
-
 mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
 mpi_intel_win_32 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE)
@@ -82,16 +66,6 @@ mpi_intel_win_32 : FCOMPL = ifort
 mpi_intel_win_32 : CCOMPL = cl
 mpi_intel_win_32 : obj = fds5_win_mpi_32
 mpi_intel_win_32 : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
-
-openmp_mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
-openmp_mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
-openmp_mpi_intel_win_32 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE) /Qopenmp /Qopenmp-link:static
-openmp_mpi_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
-openmp_mpi_intel_win_32 : FCOMPL = ifort
-openmp_mpi_intel_win_32 : CCOMPL = cl
-openmp_mpi_intel_win_32 : obj = fds5_openmp_mpi
-openmp_mpi_intel_win_32 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
 
  #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
@@ -104,14 +78,6 @@ intel_win_64 : FCOMPL = ifort
 intel_win_64 : CCOMPL = icl
 intel_win_64 : obj = fds5_win_64
 intel_win_64 : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F100000000 $(objwin_serial)
-
-openmp_intel_win_64 : FFLAGS = -O2 /Qvec_report0 /Qopenmp /Qopenmp-link:static
-openmp_intel_win_64 : CFLAGS = -O2 -Dpp_noappend /Qvec_report0
-openmp_intel_win_64 : FCOMPL = ifort
-openmp_intel_win_64 : CCOMPL = icl
-openmp_intel_win_64 : obj = fds5_openmp_win_64
-openmp_intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F100000000 $(objwin_serial)
 
 mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
@@ -142,22 +108,6 @@ intel_linux_64 : obj = fds5_intel_linux_64
 intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-openmp_intel_linux_32 : FFLAGS = -m32 -O3 -static -vec_report0 -openmp -openmp-link static
-openmp_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
-openmp_intel_linux_32 : FCOMPL = ifort
-openmp_intel_linux_32 : CCOMPL = icc
-openmp_intel_linux_32 : obj = fds5_openmp_intel_linux_32
-openmp_intel_linux_32 : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-
-openmp_intel_linux_64 : FFLAGS = -m64 -O3 -static -vec_report0 -openmp -openmp-link static
-openmp_intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
-openmp_intel_linux_64 : FCOMPL = ifort
-openmp_intel_linux_64 : CCOMPL = icc
-openmp_intel_linux_64 : obj = fds5_openmp_intel_linux_64
-openmp_intel_linux_64 : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-
 mpi_intel_linux_32 : FFLAGS = -m32 -O3 -vec_report0
 mpi_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
 mpi_intel_linux_32 : FCOMPL = mpif77
@@ -172,14 +122,6 @@ mpi_intel_linux_64 : FCOMPL = mpif77
 mpi_intel_linux_64 : CCOMPL = icc
 mpi_intel_linux_64 : obj = fds5_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
-
-openmp_mpi_intel_linux_32 : FFLAGS = -m32 -O3 -vec_report0 -openmp -openmp-link static
-openmp_mpi_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
-openmp_mpi_intel_linux_32 : FCOMPL = mpif77
-openmp_mpi_intel_linux_32 : CCOMPL = icc
-openmp_mpi_intel_linux_32 : obj = fds5_openmp_mpi_intel_linux_32
-openmp_mpi_intel_linux_32 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 intel_linux_32_db : FFLAGS = -m32 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0
@@ -213,26 +155,6 @@ mpi_intel_linux_64_db : CCOMPL = icc
 mpi_intel_linux_64_db : obj = fds5_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
-
-# These settings are only usable if the Intel ThreadChecker is installed. Use this settings not for debugging
-# mathematical problems. Only use this settings to check the correctness of the OpenMP parallelization.
-# Static linking is not possible in these cases.
-
-openmp_intel_linux_32_db : FFLAGS = -m32 -O0 -g -tcheck -openmp
-openmp_intel_linux_32_db : CFLAGS = -m32 -O0 -Dpp_noappend -vec_report0
-openmp_intel_linux_32_db : FCOMPL = ifort
-openmp_intel_linux_32_db : CCOMPL = icc
-openmp_intel_linux_32_db : obj = fds5_openmp_intel_linux_32_db
-openmp_intel_linux_32_db : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
-
-openmp_intel_linux_64_db : FFLAGS = -m64 -O0 -g -tcheck -openmp
-openmp_intel_linux_64_db : CFLAGS = -m64 -O0 -Dpp_noappend -vec_report0
-openmp_intel_linux_64_db : FCOMPL = ifort
-openmp_intel_linux_64_db : CCOMPL = icc
-openmp_intel_linux_64_db : obj = fds5_openmp_intel_linux_64_db
-openmp_intel_linux_64_db : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 # OS X
 osx32_libdir = /opt/intel/Compiler/11.0/056/lib
