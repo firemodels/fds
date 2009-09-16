@@ -48,7 +48,7 @@ axis([1e2 1e8 .005 .2]) % based on MYO
 xlabel('Re','Interpreter','LaTeX','FontSize',Label_Font_Size)
 ylabel('$f$','Interpreter','LaTeX','FontSize',Label_Font_Size,'Rotation',0.0)
 
-repository = '../../../Verification/Flowfields/';
+repository = '../../../Validation/Moody_Chart/FDS_Output_Files/';
 
 % gather FDS results (laminar)
 L = 1;
