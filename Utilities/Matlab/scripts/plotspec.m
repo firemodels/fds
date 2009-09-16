@@ -14,7 +14,8 @@
 function [] = plotspec(chid,N)
 
 close all
-addpath('../../../Verification/Decaying_Isotropic_Turbulence')
+addpath('../../../Validation/Decaying_Isotropic_Turbulence/FDS_Output_Files')
+addpath('../../../Validation/Decaying_Isotropic_Turbulence/Experimental_Data')
 
 % set FDS standard plot format
 plot_style
