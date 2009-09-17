@@ -7674,6 +7674,30 @@ int readini2(char *inifile, int localfile){
       updatemenu=1;
       continue;
       }
+    if(localfile==1&&match(buffer,"SHOWDEVICES",11)==1){
+      sv_object *dv_typei;
+      char *dev_label;
+      int ndevices_ini;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&ndevices_ini);
+
+      if(ndevices_ini>0){
+        for(i=0;i<ndevice_defs;i++){
+          dv_typei = device_defs[i];
+          dv_typei->visible=0;
+        }
+        for(i=0;i<ndevices_ini;i++){
+          fgets(buffer,255,stream);
+          trim(buffer);
+          dev_label=trim_front(buffer);
+          dv_typei=get_object(dev_label);
+          if(dv_typei!=NULL){
+            dv_typei->visible=1;
+          }
+        }
+      }
+    }
     if(localfile==1&&match(buffer,"XYZCLIP",7)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&xyz_clipplane);
@@ -8828,6 +8852,28 @@ void writeini(int flag){
   fprintf(fileout," %i\n",show_tracers_always);
 
   if(flag==LOCAL_INI){
+    {
+      int ndevice_vis=0;
+      sv_object *dv_typei;
+
+      for(i=0;i<ndevice_defs;i++){
+        dv_typei = device_defs[i];
+        if(dv_typei->used==1&&dv_typei->visible==1){
+          ndevice_vis++;
+        }
+      }
+      if(ndevice_vis>0){
+        fprintf(fileout,"SHOWDEVICES\n");
+        fprintf(fileout," %i\n",ndevice_vis);
+        for(i=0;i<ndevice_defs;i++){
+          dv_typei = device_defs[i];
+          if(dv_typei->used==1&&dv_typei->visible==1){
+            fprintf(fileout," %s\n",dv_typei->label);
+          }
+        }
+      }
+    }
+
     put_startup_smoke3d(fileout);
     fprintf(fileout,"LOADFILESATSTARTUP\n");
     fprintf(fileout," %i\n",loadfiles_at_startup);
