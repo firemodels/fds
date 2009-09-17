@@ -6,6 +6,10 @@ set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 set BASEDIR=%CD%
 %svn_drive%
 
+echo You are about to run the Verification Test Suite.
+echo Press any key begin.
+pause > Nul
+
 call ./FDS_Cases.bat
 
 echo FDS cases submitted
