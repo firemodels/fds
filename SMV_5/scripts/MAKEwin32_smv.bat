@@ -29,9 +29,5 @@ set bundledir=FDS-SMV/SMV_5/for_bundle
 
 call make_smv_release_win32.bat %version%
 
-echo uploading Windows Smokeview files
-pscp  ..\for_bundle\smokeview_release.exe %svn_logon%:%bundledir%/.
-pscp  ..\for_bundle\smokezip_release.exe %svn_logon%:%bundledir%/.
-
 echo win32 Smokeview build finished
 pause
