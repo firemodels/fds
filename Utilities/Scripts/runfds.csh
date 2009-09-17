@@ -37,5 +37,4 @@ $FDS $in >& $out
 EOF
 chmod +x $scriptfile
 echo Running $in on $host
-ssh -n $host $scriptfile
-rm $scriptfile
+(ssh -n $host $scriptfile ; rm $scriptfile ) &
