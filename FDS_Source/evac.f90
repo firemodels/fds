@@ -6000,8 +6000,8 @@ CONTAINS
        ! Check if persons are leaving this mesh via doors/exits
        ! and put these persons to the target.
        ! ========================================================
-       IF (N_HUMANS > 0) CALL CHECK_DOORS(T,NM)
        IF (N_HUMANS > 0) CALL CHECK_EXITS(T,NM)
+       IF (N_HUMANS > 0) CALL CHECK_DOORS(T,NM)
 
        ! ========================================================
        ! Check if persons are entering this mesh via a corr.
@@ -7329,10 +7329,10 @@ CONTAINS
                IF ((HR%X > X1+HR%Radius) .AND. (HR%X < X2-HR%Radius)) THEN
                   UBAR = 0._EB
                   !VBAR = SIGN(1.0_EB,VBAR)
-                  VBAR = -DOOR_IOR
+                  VBAR = -DOOR_IOR/2
                   ! HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)*2
                END IF
-               HR%SKIP_WALL_FORCE_IOR = -DOOR_IOR*2
+               HR%SKIP_WALL_FORCE_IOR = -DOOR_IOR
             END IF
          END SELECT
       ELSE IF (NM_STRS_MESH) THEN 
@@ -7531,7 +7531,7 @@ CONTAINS
                ISKNOWNDOOR = .TRUE.
             ELSE
                DO ID = 1, PNX%N_VENT_FFIELDS
-                  IF (I == EVAC_NODE_LIST(PNX%I_DOOR_NODES(II))%NODE_INDEX) THEN
+                  IF (I == EVAC_NODE_LIST(PNX%I_DOOR_NODES(ID))%NODE_INDEX) THEN
                      ISKNOWNDOOR = .TRUE.
                      EXIT
                   END IF
