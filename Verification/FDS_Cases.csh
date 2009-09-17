@@ -1,4 +1,13 @@
 #!/bin/csh -f
+
+# To generate a batch file used to run the below cases on Windows 
+# do the following
+
+# 1. make a copy of this file and call it FDS_Cases.bat
+# 2. open FDS_Cases.bat in a text editor and change every
+#    occurrence of $RUNFDS to %RUNFDS%
+# 3. Then run the batch file Run_All.bat
+
 $RUNFDS Atmospheric_Effects lee_waves             fire41
 $RUNFDS Atmospheric_Effects stack_effect          fire42
 $RUNFDS Controls activate_vents                   fire43
