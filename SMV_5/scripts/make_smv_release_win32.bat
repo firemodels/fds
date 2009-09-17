@@ -18,7 +18,7 @@ IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 mkdir %smvdir%\Documentation
 copy smokeview.ini %smvdir%\smokeview.ini
-copy smokeview_release.exe %smvdir%\smokeview.exe
+copy smokeview32_release.exe %smvdir%\smokeview.exe
 copy smokezip_release.exe %smvdir%\smokezip.exe
 copy devices.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
@@ -32,7 +32,7 @@ wzzip -a -r -P %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-c:\bin\winzip\wzipse32 %zipbase%.zip -d "c:\program files\nist\smokeview"
+c:\bin\winzip\wzipse32 %zipbase%.zip -d "c:\program files\fds\fds5\bin"
 copy %zipbase%.exe ..\.
 
 cd ..\..\..\scripts

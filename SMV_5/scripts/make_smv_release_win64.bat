@@ -32,7 +32,7 @@ wzzip -a -r -P %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-c:\bin\winzip\wzipse32 %zipbase%.zip -d "c:\program files (x86)\nist\smokeview"
+c:\bin\winzip\wzipse32 %zipbase%.zip -d "c:\program files\fds\fds5\bin"
 copy %zipbase%.exe ..\.
 
 cd ..\..\..\scripts
