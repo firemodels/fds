@@ -344,7 +344,7 @@ SUBROUTINE COMBUSTION_MF2
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_SPECIFIC_GAS_CONSTANT,GET_AVERAGE_SPECIFIC_HEAT
 REAL(EB) :: Y_FU_0,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DELTA2,& 
             Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,F_TO_CO,DELTAH_CO,DELTAH_F,DYCO,HFAC_CO,RHOX,H_F_0,H_G_0,H_G_N, &
-            X_FU,X_O2,X_FU_0,X_O2_0,X_FU_S,X_O2_S,X_FU_N,X_O2_N,CO_TO_O2, &
+            X_FU,X_O2,X_FU_0,X_O2_0,X_FU_S,X_O2_S,X_FU_N,X_O2_N,CO_TO_O2, DYAIR, &
             Y_FU_MAX,TMP_F_MIN,Y_F_CORR,Z_2_MIN,Z_2_MIN_FAC,WGT,OMWGT,Q_BOUND_1,Q_BOUND_2,Q_BOUND_3,YY_GET(1:N_SPECIES)
 REAL(EB), PARAMETER :: Y_FU_MIN=1.E-10_EB,Y_O2_MIN=1.E-10_EB,X_O2_MIN=1.E-16_EB,X_FU_MIN=1.E-16_EB,Y_CO_MIN=1.E-10_EB
 INTEGER :: NODETS,I,J,K,II,JJ,KK,IOR,IC,IW,IWA(-3:3),ITMP,ICFT
@@ -399,8 +399,9 @@ DO K=1,KBAR
          IF (Y_FU_0<=Y_FU_MIN) CYCLE
          Y_O2_0  = Y_O2(I,J,K)
          IF (Y_O2_0<=Y_O2_MIN) CYCLE
-         DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)         
-         IF_SUPPRESSION: IF (SUPPRESSION) THEN  ! Determine if combustion can yield critical flame temperature
+         DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO) 
+         
+         IF_SUPPRESSION2: IF (SUPPRESSION) THEN  ! Determine if combustion can yield critical flame temperature
             ITMP = NINT(MIN(5000._EB,TMP(I,J,K)))
             YY_GET = 0._EB
             YY_GET(I_FUEL) = 1._EB
@@ -409,13 +410,14 @@ DO K=1,KBAR
             YY_GET(I_FUEL) = 0._EB
             YY_GET = YY_GET / (1 - Y_FU_0)
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_0,ITMP)
-            YY_GET = YY(I,J,K,:)
-            YY_GET(I_FUEL) = YY_GET(I_FUEL) - DYF
-            YY_GET(I_PROG_F) = YY_GET(I_PROG_F) + DYF
+            DYAIR = DYF / (1-Y_FU_0) * RN%O2_F_RATIO
+            YY_GET(I_PROG_F) = YY_GET(I_PROG_F)*DYAIR + DYF
+            YY_GET(I_PROG_CO) = YY_GET(I_PROG_CO)*DYAIR
+            YY_GET = YY_GET / SUM(YY_GET)
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_N,ICFT)
-            IF ( (DYF*H_F_0 + (1._EB-DYF)*MIN(1._EB,DYF * RN%O2_F_RATIO/Y_O2_0)*H_G_0)*TMP(I,J,K) + DYF*DELTAH_F < &
-             (DYF+(1._EB-DYF)*MIN(1._EB,DYF * RN%O2_F_RATIO/Y_O2_0))*H_G_N*RN%CRIT_FLAME_TMP) CYCLE
-         ENDIF IF_SUPPRESSION
+            IF ( (DYF*H_F_0 + DYAIR*H_G_0)*TMP(I,J,K) + DYF*DELTAH_F < (DYF+DYAIR)*H_G_N*RN%CRIT_FLAME_TMP) CYCLE
+         ENDIF IF_SUPPRESSION2
+                        
          IF (LES .AND. EDDY_DISSIPATION) THEN
             IF (.NOT.TWO_D) THEN
                DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
@@ -424,7 +426,13 @@ DO K=1,KBAR
             ENDIF
             MIX_TIME(I,J,K) = C_EDC*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
          ENDIF
-         Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
+         IF (Y_FU_0 < Y_O2_0/RN%O2_F_RATIO) THEN
+            DYF = Y_FU_0 * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
+         ELSE
+            DYF = Y_O2_0/RN%O2_F_RATIO * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
+         ENDIF
+         Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F
+!         Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
          Q_BOUND_2 = Q_UPPER
          IF (LES) THEN
             Q_BOUND_3 = (HRRPUV_AVERAGE-OMWGT*Q_AVG(I,J,K))/WGT
