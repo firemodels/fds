@@ -7682,19 +7682,17 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&ndevices_ini);
 
-      if(ndevices_ini>0){
-        for(i=0;i<ndevice_defs;i++){
-          dv_typei = device_defs[i];
-          dv_typei->visible=0;
-        }
-        for(i=0;i<ndevices_ini;i++){
-          fgets(buffer,255,stream);
-          trim(buffer);
-          dev_label=trim_front(buffer);
-          dv_typei=get_object(dev_label);
-          if(dv_typei!=NULL){
-            dv_typei->visible=1;
-          }
+      for(i=0;i<ndevice_defs;i++){
+        dv_typei = device_defs[i];
+        dv_typei->visible=0;
+      }
+      for(i=0;i<ndevices_ini;i++){
+        fgets(buffer,255,stream);
+        trim(buffer);
+        dev_label=trim_front(buffer);
+        dv_typei=get_object(dev_label);
+        if(dv_typei!=NULL){
+          dv_typei->visible=1;
         }
       }
     }
@@ -8862,14 +8860,12 @@ void writeini(int flag){
           ndevice_vis++;
         }
       }
-      if(ndevice_vis>0){
-        fprintf(fileout,"SHOWDEVICES\n");
-        fprintf(fileout," %i\n",ndevice_vis);
-        for(i=0;i<ndevice_defs;i++){
-          dv_typei = device_defs[i];
-          if(dv_typei->used==1&&dv_typei->visible==1){
-            fprintf(fileout," %s\n",dv_typei->label);
-          }
+      fprintf(fileout,"SHOWDEVICES\n");
+      fprintf(fileout," %i\n",ndevice_vis);
+      for(i=0;i<ndevice_defs;i++){
+        dv_typei = device_defs[i];
+        if(dv_typei->used==1&&dv_typei->visible==1){
+          fprintf(fileout," %s\n",dv_typei->label);
         }
       }
     }
