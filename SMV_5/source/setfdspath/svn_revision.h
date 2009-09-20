@@ -11,6 +11,4 @@
 #define VERSION "1.0"
 EXTERN int getmaxrevision(void);
 
-extern char assert_revision[];
-extern char dmalloc_revision[];
 extern char main_revision[];
