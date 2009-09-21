@@ -2472,7 +2472,7 @@ void EvacMenu(int value){
   else{
     if(value==-1){
       for(i=0;i<npartinfo;i++){
-        if(partinfo[value].evac==0)continue;
+        if(partinfo[i].evac==0)continue;
         readpart("",i,UNLOAD,&errorcode);
       }
     }
