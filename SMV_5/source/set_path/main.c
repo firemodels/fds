@@ -22,8 +22,8 @@ int remove_path=0;
 int display_path=0;
 int act_on_user_path=1;
 int act_on_system_path=0;
-int prompt_user=0;
-int test_mode=1;
+int prompt_user_flag=0;
+int test_mode=0;
 char path_type[10];
 
 
@@ -35,6 +35,52 @@ char *parse_path_key(int flag, char *path_buffer, char *newentry);
 int STRCMP(const char *s1, const char *s2);
 char *STRSTR(char *c, const char *key);
 
+/* ------------------ backup_path ------------------------ */
+
+void backup_path(char *path_type, char *pathbuffer){
+  FILE *stream;
+  char file[256],filebase[256];
+  int i;
+
+  strcpy(filebase,path_type);
+  strcat(filebase,"_path_backup");
+  for(i=0;i<=100;i++){
+    if(i==0){
+      strcpy(file,filebase);
+      strcat(file,".txt");
+    }
+    else{
+      sprintf(file,"%s_%03i.txt",filebase,i);
+    }
+    stream=fopen(file,"r");
+    if(stream==NULL)break;
+    fclose(stream);
+  }
+
+  stream=fopen(file,"w");
+  if(stream!=NULL){
+    fprintf(stream,"%s Path\n",path_type);
+    fprintf(stream,"%s\n",pathbuffer);
+    fclose(stream);
+  }
+}
+
+/* ------------------ prompt_user ------------------------ */
+
+int prompt_user(char *path_type, char *pathbuffer){
+  int answer=0;
+  char c_answer[10], *c_answer_ptr;
+
+  c_answer_ptr=c_answer;
+  printf("Set %s path to:\n\n",path_type);
+  printf("%s ?\n",pathbuffer);
+  printf("y=yes, n=no\n");
+  scanf("%s",c_answer);
+  c_answer_ptr=trim_front(c_answer);
+  if(c_answer_ptr!=NULL&&strlen(c_answer_ptr)>0&&toupper(c_answer_ptr[0])=='Y')answer=1;
+  return answer;
+}
+
 /* ------------------ main ------------------------ */
 
 int main(int argc, char **argv){
@@ -42,7 +88,7 @@ int main(int argc, char **argv){
   char *arg;
   int i;
   char *newentry=NULL;
-  char pathbuffer[BUFFER_SIZE], *pathbuffer_ptr;
+  char pathbuffer[BUFFER_SIZE];
   char tokens[BUFFER_SIZE], newpath[BUFFER_SIZE], *token;
   int newentry_present;
 
@@ -52,7 +98,7 @@ int main(int argc, char **argv){
 #define ADD_SYSTEM_PATH 0
 #define REMOVE_SYSTEM_PATH 1
 
-  pathbuffer_ptr=pathbuffer;
+  strcpy(path_type,"User");
   if(argc==1){
     usage();
     return 1;
@@ -89,7 +135,7 @@ int main(int argc, char **argv){
         strcpy(path_type,"System");
         break;
       case 'p':
-        prompt_user=1;
+        prompt_user_flag=1;
         break;
       case 't':
         test_mode=1;
@@ -105,6 +151,7 @@ int main(int argc, char **argv){
   }
 
   if(test_mode==1)display_path=1;
+  if(remove_path==0&&add_path==0)display_path=1;
 
   // get the path (user or system)
 
@@ -112,7 +159,7 @@ int main(int argc, char **argv){
     if(reg_path(REG_GET,REG_USER_PATH,pathbuffer)==0)return 1;
     if(display_path==1){
       if(strlen(pathbuffer)>0){
-        printf("User path: %s\n\n",pathbuffer);
+        printf("User path:\n%s\n",pathbuffer);
       }
     }
   }
@@ -120,7 +167,7 @@ int main(int argc, char **argv){
     if(reg_path(REG_GET,REG_SYSTEM_PATH,pathbuffer)==0)return 1;
     if(display_path==1){
       if(strlen(pathbuffer)>0){
-        printf("System path: %s\n\n",pathbuffer);
+        printf("System path:\n%s\n",pathbuffer);
       }
     }
   }
@@ -128,7 +175,6 @@ int main(int argc, char **argv){
     usage();
     return 0;
   }
-
   if(add_path==1&&newentry!=NULL){
     strcpy(tokens,pathbuffer);
     token=strtok(tokens,";");
@@ -142,28 +188,23 @@ int main(int argc, char **argv){
     }
     if(newentry_present==0){
       int answer=0;
-      char c_answer[10], *c_answer_ptr;
 
-      if(strlen(pathbuffer)>0)strcat(pathbuffer,";");
-      strcat(pathbuffer,newentry);
-      if(prompt_user==1){
-        printf(" Set %s path to:\n",path_type);
-        printf("%s\n",pathbuffer);
-        printf("y=yes, n=no\n");
-        scanf("%s",c_answer);
-        c_answer_ptr=trim_front(c_answer);
-        if(c_answer_ptr!=NULL&&strlen(c_answer_ptr)>0&&toupper(c_answer_ptr[0])=='Y')answer=1;
+      if(prompt_user_flag==1){
+        answer = prompt_user(path_type,pathbuffer);
       }
-      if(prompt_user==0||answer==1){
+      if(prompt_user_flag==0||answer==1){
+        backup_path(path_type,pathbuffer);
+        if(strlen(pathbuffer)>0)strcat(pathbuffer,";");
+        strcat(pathbuffer,newentry);
         if(act_on_user_path==1){
           if(reg_path(REG_SET,REG_USER_PATH,pathbuffer)==0)return 1;
         }
         else{
           if(reg_path(REG_SET,REG_SYSTEM_PATH,pathbuffer)==0)return 1;
         }
-      }
-      if(display_path==1){
-        printf("%s path: %s\n",path_type,pathbuffer);
+        if(display_path==1){
+          printf("\n%s path set to:\n%s\n",path_type,pathbuffer);
+        }
       }
     }
   }
@@ -187,15 +228,11 @@ int main(int argc, char **argv){
       int answer=0;
       char c_answer[10], *c_answer_ptr;
 
-      if(prompt_user==1){
-        printf(" Set %s path to:\n",path_type);
-        printf("%s\n",pathbuffer);
-        printf("y=yes, n=no\n");
-        scanf("%s",c_answer);
-        c_answer_ptr=trim_front(c_answer);
-        if(c_answer_ptr!=NULL&&strlen(c_answer_ptr)>0&&toupper(c_answer_ptr[0])=='Y')answer=1;
+      if(prompt_user_flag==1){
+        answer = prompt_user(path_type,newpath);
       }
-      if(prompt_user==0||answer==1){
+      if(prompt_user_flag==0||answer==1){
+        backup_path(path_type,pathbuffer);
         if(act_on_user_path==1){
           if(reg_path(REG_SET,REG_USER_PATH,newpath)==0)return 1;
         }
@@ -205,7 +242,7 @@ int main(int argc, char **argv){
       }
     }
     if(display_path==1){
-      printf("%s path: %s\n",path_type,newpath);
+      printf("\n%s path set to:\n%s\n",path_type,newpath);
     }
   }
   return 0;
@@ -245,18 +282,22 @@ int reg_path(int setget, int pathtype, char *path){
   switch (setget) {
     case REG_GET:
       lRet = RegOpenKeyEx( hTree, reg_path, 0, KEY_QUERY_VALUE, &hKey );
-      if(lRet!=ERROR_SUCCESS){
-        printf("RegOpenKeyEx error: %i\n",(int)lRet);
-        return 0;
-      }
-      dwBufLen=sizeof(temp);
-      lRet = RegQueryValueEx( hKey, PATH, NULL, NULL, (BYTE*)&temp, &dwBufLen );
       switch (lRet){
         case ERROR_FILE_NOT_FOUND:
           printf("%s path not present\n",path_type);
           strcpy(path,"");
           dwBufLen=0;
+          return 0;
           break;
+        case ERROR_SUCCESS:
+          break;
+        default:
+          printf("RegOpenKeyEx error: %i\n",(int)lRet);
+          return 0;
+      }
+      dwBufLen=sizeof(temp);
+      lRet = RegQueryValueEx( hKey, PATH, NULL, NULL, (BYTE*)&temp, &dwBufLen );
+      switch (lRet){
         case ERROR_SUCCESS:
           strncpy(path,temp,dwBufLen);
           path[dwBufLen]=0;
@@ -283,15 +324,16 @@ int reg_path(int setget, int pathtype, char *path){
           path[lenpath-1]='\0';
         }
       }
-      if(display_path==1){
+      if(test_mode==1){
         printf("Setting %s path to: %s\n",path_type,path);
       }
-      if(test_mode==0){
+      else{
         lRet = RegSetValueEx(hKey,PATH,0,REG_EXPAND_SZ,(LPBYTE)path,strlen(path)+1);
-      }
-      if(lRet!=ERROR_SUCCESS){
-        printf("RegSetValueEx error: %i\n",(int)lRet);
-        return 0;
+        lRet=ERROR_SUCCESS;
+        if(lRet!=ERROR_SUCCESS){
+          printf("RegSetValueEx error: %i\n",(int)lRet);
+          return 0;
+        }
       }
       lRet = RegCloseKey( hKey);
       if(lRet!=ERROR_SUCCESS){
@@ -328,12 +370,13 @@ void usage(void){
   printf("Usage:\n\n");
   printf("  set_path [-s][-u] [-a path_entry] [-r path_entry] [-d][-p][-v]\n\n");
   printf("where\n\n");
-  printf("  -a path_entry - add path_entry to the User or System path\n");
-  printf("  -r path_entry - remove any entry from the Path containing path_entry\n");
-  printf("  -d - display path \n");
-  printf("  -p - prompt user before making changes\n");
-  printf("  -s - perform action on the System path\n");
-  printf("  -u - perform action on the User path\n");
-  printf("  -t - test mode, show but do not change Path variables\n");
+  printf("  -a entry - append entry to the path variable being modified\n");
+  printf("  -r label - remove any entry containing label from the path\n");
+  printf("             variable being modified\n");
+  printf("  -s - modify the System path\n");
+  printf("  -u - modify the User path (default)\n");
+  printf("  -d - display path before and after changes are made\n");
+  printf("  -p - prompt user before making any changes\n");
+  printf("  -t - test, show but do not change Path variables\n");
   printf("  -v - show versioning information\n");
 }
