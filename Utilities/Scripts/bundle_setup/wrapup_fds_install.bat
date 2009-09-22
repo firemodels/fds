@@ -13,7 +13,7 @@ echo Removing pre 5.4 FDS/Smokeview entries (if present) from the System Path.
 echo Press any key to proceed or CTRL C to abort
 pause>NUL
 
-call "%CD%\set_path.exe" -r
+call "%CD%\set_path.exe" -s -r "nist\fds"
 
 echo.
 echo Associating the smv file extension with smokeview.exe
