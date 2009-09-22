@@ -1216,7 +1216,7 @@ FLUXMAX              = 100._EB      ! Maximum momentum flux btw. gas and particl
 THICKEN_OBSTRUCTIONS = .FALSE.
 CFL_MAX              = 1.0_EB       ! Stability bounds
 CFL_MIN              = 0.8_EB
-VN_MAX               = 1.0_EB
+VN_MAX               = 0.9_EB
 VN_MIN               = 0.8_EB
  
 REWIND(LU_INPUT)
@@ -1232,10 +1232,14 @@ ENDDO MISC_LOOP
 
 IF (FDS6) THEN
    CFL_VELOCITY_NORM=1
-   FLUX_LIMITER=2
-   DYNSMAG=.TRUE.
+   IF (DNS) THEN
+      FLUX_LIMITER=4
+   ELSE
+      FLUX_LIMITER=2
+      DYNSMAG=.TRUE.
+   ENDIF
    BAROCLINIC=.TRUE.
-   CHECK_KINETIC_ENERGY=.TRUE.
+   !!CHECK_KINETIC_ENERGY=.TRUE.
    PROJECTION=.TRUE.
 ENDIF
  
