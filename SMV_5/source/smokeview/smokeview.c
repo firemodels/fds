@@ -3375,13 +3375,13 @@ void synctimes(void){
 
 int can_write_to_dir(char *dir){
   char full_name[1024];
-  char *temp_name;
+  char temp_name[1024];
   FILE *stream;
 
   if(dir==NULL)return 0;
 
-  temp_name=tmpnam(NULL);
-  if(temp_name==NULL)return 0;
+  strcpy(temp_name,fdsprefix);
+  strcat(temp_name,".write_test");
 
   if(strcmp(dir,".")==0||strlen(dir)==0){
     strcpy(full_name,temp_name);
