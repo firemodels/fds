@@ -6945,6 +6945,7 @@ static int in_menu=0;
 /* --------------------------------load patch menu -------------------------- */
 
     if(npatch_files>0){
+      nloadpatchsubmenus=0;
       CREATEMENU(unloadpatchmenu,UnloadPatchMenu);
       for(ii=0;ii<npatch_files;ii++){
         patch *patchi;
@@ -6958,7 +6959,6 @@ static int in_menu=0;
       glutAddMenuEntry("Unload All",-1);
 
       if(nmeshes>1&&loadpatchsubmenus==NULL){
-        nloadpatchsubmenus=0;
         NewMemory((void **)&loadpatchsubmenus,npatch_files*sizeof(int));
       }
 
