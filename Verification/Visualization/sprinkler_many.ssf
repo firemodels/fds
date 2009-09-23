@@ -1,0 +1,17 @@
+RENDERDIR
+  ..\..\Manuals\SMV_5_Verification_Guide\scriptfigures
+SETVIEWPOINT
+ view1
+RENDERONCE
+ sprink_many_view1 
+RENDERONCE
+ sprink_many_view1 
+SETVIEWPOINT
+ view2
+RENDERONCE
+ sprink_many_view2 
+SETVIEWPOINT
+ view3
+RENDERONCE
+ sprink_many_view3
+ 

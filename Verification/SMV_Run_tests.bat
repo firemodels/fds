@@ -31,4 +31,5 @@ fds5 smoke_test.fds
 fds5 smoke_test2.fds
 fds5 thouse5.fds
 fds5 transparency.fds
+fds5 sprinkler_many.fds
 
