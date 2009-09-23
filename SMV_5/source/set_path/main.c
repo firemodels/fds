@@ -24,6 +24,9 @@ int act_on_user_path=1;
 int act_on_system_path=0;
 int prompt_user_flag=0;
 int test_mode=0;
+int path_summary=0;
+int batch_mode=0;
+
 char path_type[10];
 
 
@@ -72,7 +75,7 @@ int prompt_user(char *path_type, char *pathbuffer){
   char c_answer[10], *c_answer_ptr;
 
   c_answer_ptr=c_answer;
-  printf("Set %s path to:\n\n",path_type);
+  printf("\nSet %s path to:\n",path_type);
   printf("%s ?\n",pathbuffer);
   printf("y=yes, n=no\n");
   scanf("%s",c_answer);
@@ -118,6 +121,12 @@ int main(int argc, char **argv){
       case 'd':
         display_path=1;
         break;
+      case 'b':
+        batch_mode=1;
+        break;
+      case 'm':
+        path_summary=1;
+        break;
       case 'r':
         remove_path=1;
         add_path=0;
@@ -150,6 +159,9 @@ int main(int argc, char **argv){
     }
   }
 
+  if(batch_mode==0&&remove_path==1){
+    prompt_user_flag=1;
+  }
   if(test_mode==1)display_path=1;
   if(remove_path==0&&add_path==0)display_path=1;
 
@@ -186,7 +198,12 @@ int main(int argc, char **argv){
       }
       token=strtok(NULL,";");
     }
-    if(newentry_present==0){
+    if(newentry_present==1){
+      if(path_summary==1){
+        printf("The directory %s was not found in the %s path.\n",newentry,path_type);
+      }
+    }
+    else{
       int answer=0;
 
       if(prompt_user_flag==1){
@@ -201,6 +218,9 @@ int main(int argc, char **argv){
         }
         else{
           if(reg_path(REG_SET,REG_SYSTEM_PATH,pathbuffer)==0)return 1;
+        }
+        if(path_summary==1){
+          printf("The directory %s was added to the %s path.\n",newentry,path_type);
         }
         if(display_path==1){
           printf("\n%s path set to:\n%s\n",path_type,pathbuffer);
@@ -239,10 +259,18 @@ int main(int argc, char **argv){
         else{
           if(reg_path(REG_SET,REG_SYSTEM_PATH,newpath)==0)return 1;
         }
+        if(path_summary==1){
+          printf("All directories containing %s were removed from the %s path.\n",newentry,path_type);
+        }
+      }
+      if(display_path==1){
+        printf("\n%s path set to:\n%s\n",path_type,newpath);
       }
     }
-    if(display_path==1){
-      printf("\n%s path set to:\n%s\n",path_type,newpath);
+    else{
+      if(path_summary==1){
+        printf("Directories containing %s were not found in the %s path.\n",newentry,path_type);
+      }
     }
   }
   return 0;
@@ -373,10 +401,12 @@ void usage(void){
   printf("  -a entry - append entry to the path variable being modified\n");
   printf("  -r label - remove any entry containing label from the path\n");
   printf("             variable being modified\n");
-  printf("  -s - modify the System path\n");
-  printf("  -u - modify the User path (default)\n");
+  printf("  -s - add/remove/display entries in the System path\n");
+  printf("  -u - add/remove/display entries in the User path (default)\n");
+  printf("  -m - display a summary message changes made or made to the path\n");
   printf("  -d - display path before and after changes are made\n");
-  printf("  -p - prompt user before making any changes\n");
+  printf("  -b - batch or script mode.  Override prompt option when set_path is run from a script\n");
+  printf("  -p - prompt user before making any changes (default when path entries are being removed)\n");
   printf("  -t - test, show but do not change Path variables\n");
   printf("  -v - show versioning information\n");
 }
