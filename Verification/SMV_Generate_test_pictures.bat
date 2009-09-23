@@ -23,6 +23,7 @@ erase scriptfigures\*.png
 smokeview -version > scriptfigures\smokeview.version
 
 cd %vis%
+smokeview -runscript colorbar
 smokeview -runscript colorconv
 smokeview -runscript devices_elem
 smokeview -runscript plume5a
