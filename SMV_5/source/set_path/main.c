@@ -200,7 +200,7 @@ int main(int argc, char **argv){
     }
     if(newentry_present==1){
       if(path_summary==1){
-        printf("The directory %s was not found in the %s path.\n",newentry,path_type);
+        printf("The directory %s is already present in the %s path.\n",newentry,path_type);
       }
     }
     else{
@@ -221,6 +221,7 @@ int main(int argc, char **argv){
         }
         if(path_summary==1){
           printf("The directory %s was added to the %s path.\n",newentry,path_type);
+          printf("Reboot your computer so the path change may take effect.\n");
         }
         if(display_path==1){
           printf("\n%s path set to:\n%s\n",path_type,pathbuffer);
@@ -261,6 +262,7 @@ int main(int argc, char **argv){
         }
         if(path_summary==1){
           printf("All directories containing %s were removed from the %s path.\n",newentry,path_type);
+          printf("Reboot your computer so the path change may take effect.\n");
         }
       }
       if(display_path==1){
