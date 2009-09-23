@@ -36,6 +36,7 @@ smokeview -runscript smoke_test2
 smokeview -runscript thouse5
 smokeview -runscript script_test
 smokeview -runscript transparency
+smokeview -runscript sprinkler_many
 
 cd %wui%
 smokeview -runscript fire_line

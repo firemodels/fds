@@ -877,7 +877,7 @@ Comparing the Smokeview generated smoke levels with theoretical values one finds
 
 \chapter{Other Tests}
 \section{Obstacles}
-Figures \ref{figobsttest} and \ref{figtransparency} tests obstacle display.  
+Figures \ref{figobsttest} and \ref{figtransparency} tests obstacle display.
 Figure \ref{figobsttest} shows obstacles drawn three different ways, as solids, as outlines or hidden.
 Figure \ref{figtransparency} shows obstacles drawn transparently.
 
@@ -911,6 +911,23 @@ Figure \ref{figtransparency} shows obstacles drawn transparently.
  \caption{Transparency view test.}
 \label{figobsttest}%
 \end{figure}
+
+\section{Devices}
+Figure \ref{figsprinkmany} tests multiple device display.  This figure shows all vents displayed, only vents that are not of type open displayed of hides all vents.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.0in]{scriptfigures/sprink_many_view1}&
+ \includegraphics[width=2.0in]{scriptfigures/sprink_many_view2}&
+ \includegraphics[width=2.0in]{scriptfigures/sprink_many_view3}\\
+
+ \end{tabular}
+\end{center}
+ \caption{Device view test.}
+\label{figsprinkmany}%
+\end{figure}
+
 
 \section{Vents}
 Figure \ref{figventtest} tests vent display.  This figure shows all vents displayed, only vents that are not of type open displayed of hides all vents.
@@ -1024,6 +1041,14 @@ Some areas of future work pertaining to the verification of Smokeview include im
 \label{FDSsmoketest2}
 \fdsinput{smoke_test2.fds}
 
+%\section{sprinkler\_many}
+%\label{FDSspinklermany}
+%\fdsinput{sprinkler_many.fds}
+
+\section{transparency}
+\label{FDStransparency}
+\fdsinput{transparency.fds}
+
 \section{colorconv}
 \label{FDScolorconv}
 \fdsinput{colorconv.fds}
@@ -1049,6 +1074,14 @@ Some areas of future work pertaining to the verification of Smokeview include im
 \section{smoke\_test2}
 \label{SSFsmoketest2}
 \fdsinput{smoke_test2.ssf}
+
+\section{sprinkler\_many}
+\label{SSFspinklermany}
+\fdsinput{sprinkler_many.ssf}
+
+\section{transparency}
+\label{SSFtransparency}
+\fdsinput{transparency.ssf}
 
 \section{colorconv}
 \label{SSFcolorconv}
