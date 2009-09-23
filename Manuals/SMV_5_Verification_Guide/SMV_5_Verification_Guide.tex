@@ -983,9 +983,21 @@ The images for this test were created automatically by running the smokeview scr
 &&&\raisebox{0.0in}[0pt]{\includegraphics[height=8.0in]{figures/colorbar_20_100}}\\
 \end{tabular}
 \end{center}
- \caption[Color conversion test.]{Color conversion test.  Temperature between 20~\degC\ and 100~\degC\ are
+ \caption[Color conversion test 1.]{Color conversion test.  Temperature between 20~\degC\ and 100~\degC\ are
  converted to colors between blue and red.}
 \label{figcolorconv}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+ \includegraphics[width=2.0in]{scriptfigures/colorbar_low}&
+ \includegraphics[width=2.0in]{scriptfigures/colorbar_med}&
+  \includegraphics[width=2.0in]{scriptfigures/colorbar_high}\\
+ \end{tabular}
+\end{center}
+ \caption{Color conversion test 2.}
+\label{figcolorconv2}%
 \end{figure}
 
 \section{GPU Test}
@@ -1049,6 +1061,10 @@ Some areas of future work pertaining to the verification of Smokeview include im
 \label{FDStransparency}
 \fdsinput{transparency.fds}
 
+\section{colorbar}
+\label{FDScolorbar}
+\fdsinput{colorbar.fds}
+
 \section{colorconv}
 \label{FDScolorconv}
 \fdsinput{colorconv.fds}
@@ -1082,6 +1098,10 @@ Some areas of future work pertaining to the verification of Smokeview include im
 \section{transparency}
 \label{SSFtransparency}
 \fdsinput{transparency.ssf}
+
+\section{colorbar}
+\label{SSFcolorbar}
+\fdsinput{colorbar.ssf}
 
 \section{colorconv}
 \label{SSFcolorconv}
