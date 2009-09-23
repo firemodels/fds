@@ -26,7 +26,7 @@ rmdir /q /s "%USERPROFILE%\Start Menu\Programs\FDS5"
 cd ..
 echo.
 echo Removing %CD%\bin from the User Path for: %USERNAME%
-call Uninstall\set_path.exe -r "%CD%\bin"
+call Uninstall\set_path.exe -m -r "%CD%\bin"
 
 echo.
 echo Uninstall Complete.  Press any key to continue.
