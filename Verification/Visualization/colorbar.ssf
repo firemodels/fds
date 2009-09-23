@@ -1,0 +1,37 @@
+RENDERDIR
+ ..\..\Manuals\SMV_5_Verification_Guide\scriptfigures
+LOADFILE
+ colorbar_01.sf
+SETTIMEVAL
+ 9.961175
+LOADINIFILE
+ colorbar_low.ini
+SETVIEWPOINT
+ view1
+SETVIEWPOINT
+ view1
+RENDERONCE
+ colorbar_low
+RENDERONCE
+ colorbar_low
+LOADINIFILE
+ colorbar_med.ini
+SETVIEWPOINT
+ view1
+SETVIEWPOINT
+ view1
+RENDERONCE
+ colorbar_med
+RENDERONCE
+ colorbar_med
+LOADINIFILE
+ colorbar_high.ini
+SETVIEWPOINT
+ view1
+SETVIEWPOINT
+ view1
+RENDERONCE
+ colorbar_high
+RENDERONCE
+ colorbar_high
+ 
