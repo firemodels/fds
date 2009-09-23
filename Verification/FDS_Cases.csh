@@ -126,6 +126,7 @@ $RUNFDS Visualization script_test                 fire45
 $RUNFDS Visualization smoke_sensor                fire45
 $RUNFDS Visualization smoke_test                  fire46
 $RUNFDS Visualization smoke_test2                 fire45
+$RUNFDS Visualization sprinkler_many              fire47
 $RUNFDS Visualization transparency                fire47
 $RUNFDS Visualization thouse5                     fire47
 $RUNFDS Wui fire_line                             fire51
