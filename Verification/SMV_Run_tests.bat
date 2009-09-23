@@ -19,6 +19,7 @@ cd %wui%
 fds5 fire_line.fds
 
 cd %vis%
+fds5 colorbar.fds
 fds5 colorconv.fds
 fds5 plume5a.fds
 fds5 plume5b.fds
@@ -30,6 +31,6 @@ fds5 smoke_sensor.fds
 fds5 smoke_test.fds
 fds5 smoke_test2.fds
 fds5 thouse5.fds
-fds5 transparency.fds
 fds5 sprinkler_many.fds
+fds5 transparency.fds
 
