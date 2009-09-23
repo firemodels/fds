@@ -116,8 +116,8 @@ $RUNFDS Sprinklers_and_Sprays water_cooling       fire56
 $RUNFDS Sprinklers_and_Sprays water_evaporation   fire56
 $RUNFDS Sprinklers_and_Sprays water_fuel_sprays   fire57
 
-$RUNFDS Visualization colorconv                   fire41
-$RUNFDS Visualization plume5a                     fire42
+$RUNFDS Visualization colorconv                   fire43
+$RUNFDS Visualization plume5a                     fire43
 $RUNFDS Visualization plume5b                     fire43
 $RUNFDS Visualization plume5c                     fire43
 $RUNFDS Visualization plume5c_bounddef            fire43
@@ -126,5 +126,6 @@ $RUNFDS Visualization script_test                 fire45
 $RUNFDS Visualization smoke_sensor                fire45
 $RUNFDS Visualization smoke_test                  fire46
 $RUNFDS Visualization smoke_test2                 fire45
+$RUNFDS Visualization transparency                fire47
 $RUNFDS Visualization thouse5                     fire47
 $RUNFDS Wui fire_line                             fire51
