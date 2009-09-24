@@ -364,7 +364,7 @@ Chris Bajwa and Allen Hansen.
 Administration (NASA) has supported several projects that directly or indirectly benefited FDS development.
 \item The US Forest Service has supported the development of sub-models in FDS designed to simulate the spread of
 fire in the Wildland Urban Interface (WUI). Special thanks to Mark Finney and Tony Bova for their support.
-\item The Minerals Management Service of the US Department of the Interior funded research at NIST aimed at 
+\item The Minerals Management Service of the US Department of the Interior funded research at NIST aimed at
 characterizing the burning behavior of oil spilled on the open sea or ice. Part of this research led to the development
 of the ALOFT (A Large Outdoor Fire plume Trajectory) model, a forerunner of FDS. Special thanks to Joe Mullin for his
 encouragement of the modeling efforts.
@@ -379,7 +379,7 @@ and Hai Tang of the Computing and Applied Mathematics Laboratory
 Laboratory (BFRL). Jim Sims of CAML developed the original
 visualization software.  The direct pressure solver was written by
 Roland Sweet of the National Center for Atmospheric Research (NCAR),
-Boulder, Colorado.  
+Boulder, Colorado.
 \item Kuldeep Prasad added the multiple-mesh data
 structures, paving the way for parallel processing.   Charles Bouldin
 devised the basic framework of the parallel version of the code.
@@ -397,7 +397,7 @@ of model of gas phase extinction to FDS.
 \item Chris Lautenburger of the University of California, Berkeley, and Jose Torero and Guillermo Rein of the University of Edinburgh, have
 provided valuable insight in the development of the solid phase model.
 \item Susanne Kilian of hhpberlin (Germany) has provided valuable guidance on improvements to the FDS pressure solver.
-\item Christian Rogsch of the University of Wuppertal (Germany) implemented the OpenMP calls in the FDS source code, allowing the program to 
+\item Christian Rogsch of the University of Wuppertal (Germany) implemented the OpenMP calls in the FDS source code, allowing the program to
 exploit multiple processors/cores on a single computer.
 \end{itemize}
 
@@ -3902,15 +3902,11 @@ The convective and radiative fluxes at the next time step are approximated
   T_{s,\ha}^{n+1} - T_{s,\ha}^n \right)  \end{eqnarray}
 The wall temperature is defined $T_w \equiv T_{s,\ha}=(T_{s,0}+T_{s,1})/2$.
 
-The size of any solid phase mesh cell and the number of solid phase mesh cells 
-can reduce during the course of a calculation. As the solid material is consumed (converted into gaseous fuel), its density 
-can become less than the virgin material density. The volume of each solid phase cell is reduced such that the cell density is 
-equal to the density of the virgin material. 
-The cell size is not changed if some of the components of a cell are not reacting at all, or if the component is
-leaving a solid residue. 
-If the cell size gets below a pre-defined threshold (1.0E-6 m) then the cell is completely removed. 
-Cell removal can result in a reduction in the number of solid phase mesh cells during the course of a simulation. Following cell shrinking
-or cell removal, the solid phase mesh is re-gridded and the mass and enthalpy values are interpolated from the old mesh to the new mesh.
+The size and number of solid phase cells
+can change during the course of a calculation as solid material is converted to gas. The size of each cell is reduced such that the cell density remains
+equal to the density of the virgin material.
+If the cell size gets below a pre-defined threshold (1~$\mu$m), the cell is completely removed.
+Following cell shrinking or cell removal, the solid phase mesh is re-gridded and the mass and enthalpy values are interpolated from the old mesh to the new mesh.
 
 
 
