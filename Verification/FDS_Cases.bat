@@ -108,6 +108,7 @@
 
 %RUNFDS% Visualization colorbar                    fire41
 %RUNFDS% Visualization colorconv                   fire41
+%RUNFDS% Visualization devices_elem                fire41
 %RUNFDS% Visualization plume5a                     fire43
 %RUNFDS% Visualization plume5b                     fire43
 %RUNFDS% Visualization plume5c                     fire43
