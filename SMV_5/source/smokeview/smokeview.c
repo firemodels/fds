@@ -3394,6 +3394,8 @@ int can_write_to_dir(char *dir){
   stream=fopen(full_name,"wb");
   if(stream==NULL)return 0;
   fclose(stream);
+  remove(full_name);
+
   return 1;
 }
 
