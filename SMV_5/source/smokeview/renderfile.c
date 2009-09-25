@@ -32,6 +32,170 @@ char renderfile_revision[]="$Revision$";
 //void pauseSV(void);
 
 
+  /* ------------------ can_write_to_dir ------------------------ */
+
+int can_write_to_dir(char *dir){
+  char full_name[1024];
+  char temp_name[1024];
+  FILE *stream;
+
+  if(dir==NULL)return 0;
+
+  strcpy(temp_name,fdsprefix);
+  strcat(temp_name,".write_test");
+
+  if(strcmp(dir,".")==0||strlen(dir)==0){
+    strcpy(full_name,temp_name);
+  }
+  else{
+    strcpy(full_name,dir);
+    strcat(full_name,dirseparator);
+    strcat(full_name,temp_name);
+  }
+  stream=fopen(full_name,"wb");
+  if(stream==NULL)return 0;
+  fclose(stream);
+  remove(full_name);
+
+  return 1;
+}
+
+  /* ------------------ RenderFrame ------------------------ */
+
+void RenderFrame(int view_mode){
+  char renderfile[1024],renderfile2[1024];
+  FILE *stream;
+  char *ext;
+  char *renderfile_prefix;
+  int use_script_filename=0;
+  char renderfile_name[1024], renderfile_dir[1024], renderfile_full[1024], renderfile_suffix[1024], *renderfile_ext;
+  char *temp_name;
+  int use_scriptfile;
+
+  if(view_mode==VIEW_LEFT&&(showstereo==2||showstereo==3))return;
+
+// construct filename for image to be rendered
+
+  strcpy(renderfile_dir,"");
+  strcpy(renderfile_suffix,"");
+  use_scriptfile=0;
+
+  // filename base
+
+  if(current_script_command==NULL){
+    strcpy(renderfile_name,fdsprefix);
+  }
+  else{
+    if(
+      (current_script_command->command==SCRIPT_RENDERONCE||current_script_command->command==SCRIPT_RENDERALL)&&
+       current_script_command->cval!=NULL
+       ){
+        strcpy(renderfile_name,current_script_command->cval);
+        use_scriptfile=1;
+    }
+    else{
+      strcpy(renderfile_name,fdsprefix);
+    }
+    if(script_dir_path!=NULL&&strlen(script_dir_path)>0){
+      if(strlen(script_dir_path)==2&&script_dir_path[0]=='.'&&script_dir_path[1]==dirseparator[0]){
+      }
+      else{
+        strcpy(renderfile_dir,script_dir_path);
+      }
+    }
+  }
+  
+  // directory
+
+  if(can_write_to_dir(renderfile_dir)==0){
+    if(can_write_to_dir(smokeviewtempdir)==1){
+      strcpy(renderfile_dir,smokeviewtempdir);
+    }
+    else{
+      printf("unable to output render file\n");
+      return;
+    }
+  }
+
+  // filename suffix
+
+  if(use_scriptfile==0){
+    int image_num;
+    char suffix[20];
+
+    if(RenderTime==0){
+      image_num=seqnum;
+      strcpy(renderfile_suffix,"_s");
+    }
+    else{
+      image_num=itime/RenderSkip;
+      strcpy(renderfile_suffix,"_");
+    }
+    switch (view_mode){
+    case VIEW_CENTER:
+      sprintf(suffix,"%04i",image_num);
+      if(RenderTime==0)seqnum++;
+      break;
+    case VIEW_LEFT:
+      sprintf(suffix,"%04i_L",image_num);
+      break;
+    case VIEW_RIGHT:
+      if(showstereo==2||showstereo==3||showstereo==4){
+        sprintf(suffix,"%04i",image_num);
+      }
+      else{
+        sprintf(suffix,"%04i_R",image_num);
+      }
+      if(RenderTime==0)seqnum++;
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+    }
+    strcat(renderfile_suffix,suffix);
+  }
+
+  // filename extension
+
+  switch (renderfiletype){
+  case 0:
+    renderfile_ext=ext_png;
+    break;
+  case 1:
+    renderfile_ext=ext_jpg;
+    break;
+#ifdef pp_GDGIF
+  case 2:
+    renderfile_ext=ext_gif;
+    break;
+#endif
+  default:
+    renderfiletype=2;
+    renderfile_ext=ext_png;
+    break;
+  }
+
+  // form full filename from parts
+
+  strcpy(renderfile_full,"");
+  if(strlen(renderfile_dir)>0){
+    strcat(renderfile_full,renderfile_dir);
+    if(renderfile_dir[strlen(renderfile_dir)-1]!=dirseparator[0]){
+      strcat(renderfile_full,dirseparator);
+    }
+  }
+  strcat(renderfile_full,renderfile_name);
+  if(strlen(renderfile_suffix)>0)strcat(renderfile_full,renderfile_suffix);
+  strcat(renderfile_full,renderfile_ext);
+
+  // render image
+
+  SVimage2file(renderfile_full,renderfiletype,screenWidth,screenHeight);
+  if(RenderTime==1&&output_slicedata==1){
+    output_Slicedata();
+  }
+}
+
 /* ------------------ getscreenbuffer --------- */
 GLubyte *getscreenbuffer(void){
 
