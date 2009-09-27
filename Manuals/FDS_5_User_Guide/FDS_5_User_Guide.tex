@@ -814,11 +814,9 @@ does not work on the Linux workstation, you can use the Windows version to view 
 There are no pre-compiled versions of FDS for the various flavors of Unix. However, the advice for Linux applies
 equally as well to Unix.
 
-\item[{\bf FDS in Parallel}] For those wishing to run FDS in parallel,
+\item[{\bf FDS in Parallel}] For those wishing to use multiple computers to run a single FDS calculation,
 MPI (Message Passing Interface) must be installed on each of the
 computers within the network that will be used for FDS computations.
-Information about installing MPI on different computer platforms is given on the FDS website.
-See the Development section of the website for more information.
 \end{description}
 
 
@@ -2459,8 +2457,8 @@ rectangular region of the domain. If so, add lines of the form
 \end{verbatim}
 
 \normalsize
-\noindent Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial temperature shall be 30~$^\circ$C instead of the ambient. 
-This construct can also be used for {\ct DENSITY} or {\ct MASS\_FRACTION(N)} where {\ct N} indicates the {\ct N}th species listed in the input file. 
+\noindent Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial temperature shall be 30~$^\circ$C instead of the ambient.
+This construct can also be used for {\ct DENSITY} or {\ct MASS\_FRACTION(N)} where {\ct N} indicates the {\ct N}th species listed in the input file.
 Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line.
 
 The {\ct INIT} construct may be useful in examining the influence of
@@ -3924,7 +3922,7 @@ The key input lines for this reaction are shown in Fig.~\ref{pyrolysis_2_inputs}
 Note that the only parameters shown are those that describe the reaction mechanism, and that each of these parameters
 can be found either from visual inspection of the the mass loss (blue) curve or the reaction rate (green) curve.
 The thermal properties of each material would also be needed for an actual FDS simulation, but are not relevant in the context of a
-TGA or similar experiment that involves a slow heating of a small sample of material. \noindent The full set of parameters for these cases are listed in {\bf pyrolysis\_1.fds} 
+TGA or similar experiment that involves a slow heating of a small sample of material. \noindent The full set of parameters for these cases are listed in {\bf pyrolysis\_1.fds}
 and {\bf pyrolysis\_2.fds}.
 Those interested in testing potential solid phase reaction mechanisms ought to use these test cases as templates.
 
