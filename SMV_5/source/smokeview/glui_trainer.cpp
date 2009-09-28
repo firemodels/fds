@@ -153,7 +153,9 @@ extern "C" void glui_trainer_setup(int main_window){
   BUTTON_temp = glui_trainer->add_button_to_panel(panel_smokeview,"Temperature",LOAD_TEMP,TRAINER_CB);
   if(AnySlices("TEMPERATURE")==0)BUTTON_temp->disable();
   BUTTON_oxy = glui_trainer->add_button_to_panel(panel_smokeview,"Oxygen",LOAD_OXY,TRAINER_CB);
-  if(AnySlices("oxygen")==0)BUTTON_oxy->disable();
+  if(AnySlices("oxygen")==0&&AnySlices("oxygen VOLUME FRACTION")==0){
+    BUTTON_oxy->disable();
+  }
   
   panel_explore = glui_trainer->add_panel("Explore",true);
 

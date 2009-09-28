@@ -68,13 +68,13 @@ void TrainerViewMenu(int value){
   case 2:  // temperature slices
 //    LoadSmoke3DMenu(-1);
     HideAllSmoke();
-    ShowAllSlices("TEMPERATURE");
+    ShowAllSlices("TEMPERATURE",NULL);
     trainerload=2;
     break;
   case 3:  //  oxygen slices
 //    LoadSmoke3DMenu(-1);
     HideAllSmoke();
-    ShowAllSlices("OXYGEN");
+    ShowAllSlices("OXYGEN","OXYGEN VOLUME FRACTION");
     trainerload=3;
     break;
   case 998: // unload
@@ -3074,16 +3074,20 @@ void HideAllSmoke(void){
 
 /* ------------------ ShowAllSlices ------------------------ */
 
-void ShowAllSlices(char *type){
+void ShowAllSlices(char *type1, char *type2){
   int i;
 
   glutSetCursor(GLUT_CURSOR_WAIT);
   for(i=0;i<nslice;i++){
     sliceinfo[i].display=0;
-    if(STRCMP(sliceinfo[i].label.longlabel,type)!=0||
-       sliceinfo[i].loaded==0)continue;
-    sliceinfo[i].display=1;
-    islicetype=sliceinfo[i].type;
+    if(sliceinfo[i].loaded==0)continue;
+    if(
+      type1!=NULL&&STRCMP(sliceinfo[i].label.longlabel,type1)==0||
+      type2!=NULL&&STRCMP(sliceinfo[i].label.longlabel,type2)==0
+      ){
+      sliceinfo[i].display=1;
+      islicetype=sliceinfo[i].type;
+    }
   }
   updatemenu=1;  
   GLUTPOSTREDISPLAY
@@ -7472,7 +7476,8 @@ static int in_menu=0;
         if(trainerload==2)glutAddMenuEntry("*Temperature",2);
         if(trainerload!=2)glutAddMenuEntry("Temperature",2);
       }
-      if(AnySlices("oxygen")==1){
+      if(AnySlices("oxygen")==1||
+         AnySlices("oxygen VOLUME FRACTION")==1){
         if(trainerload==3)glutAddMenuEntry("*Oxygen",3);
         if(trainerload!=3)glutAddMenuEntry("Oxygen",3);
       }
