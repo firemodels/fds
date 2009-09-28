@@ -970,7 +970,8 @@ TRUE_PROJECTION: IF (PROJECTION) THEN
          DO J = 1,JBAR
             DO I = 1,IBAR
                !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_28'
-               DIV(I,J,K) = (R(I)*U(I,J,K)-R(I-1)*U(I-1,J,K))*RDX(I)*RRN(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + (W(I,J,K)-W(I,J,K-1))*RDZ(K)
+               DIV(I,J,K) = (R(I)*U(I,J,K)-R(I-1)*U(I-1,J,K))*RDX(I)*RRN(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + &
+                            (W(I,J,K)-W(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
       ENDDO
@@ -984,8 +985,10 @@ TRUE_PROJECTION: IF (PROJECTION) THEN
          DO J = 1,JBAR
             DO I = 1,IBAR
                !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_29'
-               DIV(I,J,K) = (R(I)*U(I,J,K) -R(I-1)*U(I-1,J,K)) *RDX(I)*RRN(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
-                          + (R(I)*US(I,J,K)-R(I-1)*US(I-1,J,K))*RDX(I)*RRN(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
+               DIV(I,J,K) = (R(I)*U(I,J,K) -R(I-1)*U(I-1,J,K)) *RDX(I)*RRN(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + &
+                            (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
+                          + (R(I)*US(I,J,K)-R(I-1)*US(I-1,J,K))*RDX(I)*RRN(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + &
+                            (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
       ENDDO
