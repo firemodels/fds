@@ -144,7 +144,7 @@ EXTERNCPP void delete_camera(camera *cam1);
 EXTERNCPP void ShowAllSmoke(void);
 EXTERNCPP void HideAllSmoke(void);
 EXTERNCPP void HideAllSlices(void);
-EXTERNCPP void ShowAllSlices(char *type);
+EXTERNCPP void ShowAllSlices(char *type1, char *type2);
 EXTERNCPP void UnloadSliceMenu(int value);
 EXTERNCPP void ViewpointMenu(int value);
 EXTERNCPP void FrameRateMenu(int var);
