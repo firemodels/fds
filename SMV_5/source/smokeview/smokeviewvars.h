@@ -247,7 +247,7 @@ SVEXTERN int trainer_inside;
 SVEXTERN int from_glui_trainer;
 SVEXTERN int trainer_path_old;
 SVEXTERN int trainer_outline;
-SVEXTERN int trainer_viewpoints;
+SVEXTERN int trainer_viewpoints,ntrainer_viewpoints;
 SVEXTERN int trainer_realtime;
 SVEXTERN int trainer_path;
 SVEXTERN float trainer_xzy[3],trainer_ab[2];
