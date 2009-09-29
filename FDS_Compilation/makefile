@@ -306,23 +306,23 @@ f95_solaris11_mpi : $(obj_mpi)
 #*** Portland Group Compiler***
 
 # AMD Opteron 64Bit PC
-pgi_linux : FFLAGS = -fast -tp k8-64 -Mstandard
-pgi_linux : CFLAGS = -fast -tp k8-64
-pgi_linux : FCOMPL = pgf90
-pgi_linux : CCOMPL = pgcc
-pgi_linux : LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
-pgi_linux : obj = fds5_pgi_Opteron64
-pgi_linux : $(obj_serial)
+pgi_linux_64 : FFLAGS = -fast -tp k8-64 -Mstandard
+pgi_linux_64 : CFLAGS = -fast -tp k8-64
+pgi_linux_64 : FCOMPL = pgf90
+pgi_linux_64 : CCOMPL = pgcc
+pgi_linux_64 : LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
+pgi_linux_64 : obj = fds5_pgi_Opteron64
+pgi_linux_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 # AMD Opteron 64Bit PC
-pgi_linux_mpi : FFLAGS = -fast -tp k8-64 -Mstandard
-pgi_linux_mpi : CFLAGS = -fast -tp k8-64
-pgi_linux_mpi : FCOMPL = mpif77
-pgi_linux_mpi : CCOMPL = mpicc
-pgi_linux_mpi : LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
-pgi_linux_mpi : obj = fds5_mpi_pgi_Opteron64
-pgi_linux_mpi : $(obj_mpi)
+mpi_pgi_linux_64: FFLAGS = -fast -tp k8-64 -Mstandard
+mpi_pgi_linux_64: CFLAGS = -fast -tp k8-64
+mpi_pgi_linux_64: FCOMPL = mpif77
+mpi_pgi_linux_64: CCOMPL = mpicc
+mpi_pgi_linux_64: LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
+mpi_pgi_linux_64: obj = fds5_mpi_pgi_Opteron64
+mpi_pgi_linux_64: $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 #XLF-Compiler, IBM Power6 Core, OpenMP, full optimized settings
