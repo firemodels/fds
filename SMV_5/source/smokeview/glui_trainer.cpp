@@ -30,6 +30,7 @@ void TRAINER_CB(int var);
 
 #define MOVETYPE 200
 #define TRAINERPATH 201
+#define TOGGLE_VIEW 203
 #define TRAINER_PAUSE 212
 #define TRAINER_LEFTRIGHT_INOUT 221
 #define TRAINER_UPDOWN 223
@@ -48,6 +49,7 @@ GLUI_Panel *panel_explore=NULL;
 GLUI_Panel *panel_manual=NULL;//, *panel_automatic=NULL;
 GLUI_Panel *panel_move=NULL,*panel_rotate2=NULL;
 GLUI_Button *BUTTON_smoke3d=NULL, *BUTTON_temp=NULL, *BUTTON_oxy=NULL, *BUTTON_unload=NULL;
+GLUI_Button *BUTTON_toggle_view=NULL;
 GLUI_Translation *TRANS_updown=NULL,*TRANS_leftright_inout=NULL;
 GLUI_Translation *TRANS_az_elev=NULL;
 GLUI_StaticText *STATIC_alert=NULL;
@@ -179,9 +181,10 @@ extern "C" void glui_trainer_setup(int main_window){
 
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
       char line[256];
+      printf("label=%s id=%i\n",ca->name,ca->view_id);
       if(strcmp(ca->name,"internal")==0)continue;
       if(strcmp(ca->name,"external")==0){
-        strcpy(line,"Outside");
+        strcpy(line,"Default");
         LIST_viewpoint->add_item(ca->view_id,line);
         LIST_viewpoint->add_item(-1,"-");
       }
@@ -189,8 +192,11 @@ extern "C" void glui_trainer_setup(int main_window){
         strcpy(line,ca->name);
         LIST_viewpoint->add_item(ca->view_id,line);
       }
+      if(ca->view_id>=1)ntrainer_viewpoints++;
     }
   }
+  BUTTON_toggle_view = glui_trainer->add_button_to_panel(panel_explore,"Toggle View",TOGGLE_VIEW,TRAINER_CB);
+  if(ntrainer_viewpoints<=2)BUTTON_toggle_view->disable();
 
   CHECKBOX_outline = glui_trainer->add_checkbox_to_panel(panel_explore,"Show walls",&trainer_outline,TRAINEROUTLINE,TRAINER_CB);
   CHECKBOX_pause = glui_trainer->add_checkbox_to_panel(panel_explore,"Pause",&trainer_pause,TRAINER_PAUSE,TRAINER_CB);
@@ -275,6 +281,15 @@ void TRAINER_CB(int var){
     stept=trainer_pause;
     keyboard('t',0,0);
     break;
+  case TOGGLE_VIEW:
+    if(ntrainer_viewpoints<=0)break;
+    trainer_viewpoints--;
+    if(trainer_viewpoints<2){
+      trainer_viewpoints=ntrainer_viewpoints;
+    }
+    LIST_viewpoint->set_int_val(trainer_viewpoints);
+    TRAINER_CB(TRAINERVIEWPOINTS);
+  break;
   case TRAINERVIEWPOINTS:
     if(trainer_viewpoints!=-1){
       ResetMenu(trainer_viewpoints);

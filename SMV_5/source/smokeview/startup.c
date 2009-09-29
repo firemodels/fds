@@ -1094,6 +1094,7 @@ void initvars1(void){
   trainer_path_old=-3;
   trainer_outline=1;
   trainer_viewpoints=-1;
+  ntrainer_viewpoints=0;
   trainer_realtime=1;
   trainer_path=0;
   trainer_xzy[0]=0.0;
