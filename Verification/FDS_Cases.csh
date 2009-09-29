@@ -9,12 +9,12 @@
 # 3. Then run the batch file Run_All.bat
 
 $RUNFDS Atmospheric_Effects lee_waves             fire41
-$RUNFDS Atmospheric_Effects stack_effect          fire42
+$RUNFDS Atmospheric_Effects stack_effect          fire41
 $RUNFDS Controls activate_vents                   fire43
 $RUNFDS Controls control_test                     fire44
 $RUNFDS Controls create_remove                    fire45
 $RUNFDS Controls cycle_test                       fire41
-$RUNFDS Controls device_test                      fire42
+$RUNFDS Controls device_test                      fire41
 $RUNFDS Detectors aspiration_detector             fire43
 $RUNFDS Detectors beam_detector                   fire44
 $RUNFDS Fires box_burn_away                       fire45
@@ -69,8 +69,8 @@ $RUNFDS Radiation radiation_box_100_2000          fire58
 $RUNFDS Radiation radiation_box_100__300          fire59
 $RUNFDS Radiation radiation_box_100___50          fire41
 $RUNFDS Radiation radiation_box__20_1000          fire41
-$RUNFDS Radiation radiation_box__20__100          fire42
-$RUNFDS Radiation radiation_box__20_2000          fire42
+$RUNFDS Radiation radiation_box__20__100          fire41
+$RUNFDS Radiation radiation_box__20_2000          fire41
 $RUNFDS Radiation radiation_box__20__300          fire43
 $RUNFDS Radiation radiation_box__20___50          fire43
 $RUNFDS Radiation radiation_plane_layer_1_1       fire44
@@ -83,8 +83,8 @@ $RUNFDS Radiation radiation_plane_layer_2_2       fire47
 $RUNFDS Radiation radiation_plane_layer_2_3       fire47
 $RUNFDS Radiation radiation_plane_layer_2_4       fire41
 $RUNFDS Radiation radiation_plane_layer_2_5       fire41
-$RUNFDS Radiation radiation_plane_layer_3_1       fire42
-$RUNFDS Radiation radiation_plane_layer_3_2       fire42
+$RUNFDS Radiation radiation_plane_layer_3_1       fire41
+$RUNFDS Radiation radiation_plane_layer_3_2       fire41
 $RUNFDS Radiation radiation_plane_layer_3_3       fire43
 $RUNFDS Radiation radiation_plane_layer_3_4       fire43
 $RUNFDS Radiation radiation_plane_layer_3_5       fire44
@@ -93,8 +93,8 @@ $RUNFDS Radiation radiation_plane_layer_4_2       fire45
 $RUNFDS Radiation radiation_plane_layer_4_3       fire45
 $RUNFDS Radiation radiation_plane_layer_4_4       fire41
 $RUNFDS Radiation radiation_plane_layer_4_5       fire41
-$RUNFDS Radiation radiation_plane_layer_5_1       fire42
-$RUNFDS Radiation radiation_plane_layer_5_2       fire42
+$RUNFDS Radiation radiation_plane_layer_5_1       fire41
+$RUNFDS Radiation radiation_plane_layer_5_2       fire41
 $RUNFDS Radiation radiation_plane_layer_5_3       fire43
 $RUNFDS Radiation radiation_plane_layer_5_4       fire43
 $RUNFDS Radiation radiation_plane_layer_5_5       fire44
