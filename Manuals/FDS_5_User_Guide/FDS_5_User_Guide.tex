@@ -8375,6 +8375,22 @@ the actual volume fraction of CO, and the second line reports the output of a ga
 \end{verbatim}
 \normalsize
 
+
+\subsection{Gas Velocity}
+\label{info:velocity}
+
+The gas velocity components, $u$, $v$, and $w$, can be output as slice ({\ct SLCF}), point device ({\ct DEVC}), isosurface ({\ct ISOF}), or Plot3D quantities using
+the names {\ct 'U-VELOCITY'}, {\ct 'V-VELOCITY'}, and {\ct 'W-VELOCITY'}.
+The total velocity is specified as just {\ct 'VELOCITY'}. Normally, the velocity is always positive, but you can use the parameter {\ct VELO\_INDEX} with a value
+of 1, 2 or 3 to indicate that the velocity ought to have the same sign as $u$, $v$, or $w$, respectively. This is handy if you are comparing velocity predictions
+with measurements. For Plot3D files, add {\ct PLOT3D\_VELO\_INDEX(N)=...} to the {\ct DUMP} line, where {\ct N} refers to the Plot3D quantity 1, 2, 3, 4 or 5.
+
+
+
+
+
+
+
 \section{Extracting Numbers from the Output Data Files}
 \label{info:fds2ascii}
 
@@ -8571,7 +8587,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct V-VELOCITY}                                & $v$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct W-VELOCITY}                                & $w$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct UPPER TEMPERATURE}                         & See Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
-{\ct VELOCITY}                                  & $\sqrt{u^2+v^2+w^2}$                          & m/s            & D,I,P,S      \\ \hline
+{\ct VELOCITY}$^{***}$                          & $\sqrt{u^2+v^2+w^2}$                          & m/s            & D,I,P,S      \\ \hline
 {\ct VISCOSITY}                                 & $\mu$                                         & kg/m/s         & D,I,P,S      \\ \hline
 {\ct VISIBILITY}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & See Section~\ref{info:flows}                  & m$^3$/s        & D            \\ \hline
@@ -8584,7 +8600,9 @@ remember that all output quantity names ought to be in single quotes.
 \noindent
 \begin{tabbing}
 $^*$    \hspace{0.2in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
-$^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}.
+$^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
+$^{***}$               \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
+                       \> Use the indices 2 and 3 for $v$ and $w$, respectively.
 \end{tabbing}
 
 
@@ -8786,6 +8804,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct SURF\_ID}         & Character       & See Section~\ref{info:statistics}                                &       &         \\ \hline
 {\ct TIME\_AVERAGED}   & Logical         & See Section~\ref{info:out:DEVC}                                  &       &  {\ct .TRUE.}       \\ \hline
 {\ct TRIP\_DIRECTION}  & Integer         & Sign of derivative at first state change                         &       &  1      \\ \hline
+{\ct VELO\_INDEX}      & Integer         & See Section~\ref{info:velocity}                                  &       &  0      \\ \hline
 {\ct XB(6)}            & Real Sextuplet  & Coordinates of non-point measurement                             & m     &         \\ \hline
 {\ct XYZ}              & Real Triplet    & Physical coordinates                                             & m     &         \\ \hline
 %\end{tabular*}
@@ -8836,6 +8855,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct NFRAMES}                   & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
 {\ct PLOT3D\_QUANTITY(5)}       & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
 {\ct PLOT3D\_SPEC\_ID(5)}       & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
+{\ct PLOT3D\_VELO\_INDEX}       & Integer~Quint & See Section~\ref{info:velocity}                                  &       &  0      \\ \hline
 %{\ct RENDER\_FILE}              & Character    & Name of render file from dxf2fds  &           &                                   \\ \hline
 {\ct SMOKE3D}                   & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                      \\ \hline
 {\ct SMOKE3D\_QUANTITY}         & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
@@ -8962,6 +8982,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct REDUCE\_TRIANGLES}     & Integer       & Smokeview parameter                   &       & 1       \\ \hline
 {\ct SPEC\_ID}              & Character     & Species indicator (if needed)         &       &         \\ \hline
 {\ct VALUE(I)}              & Real Array    & Contour value(s)                      &       &         \\ \hline
+{\ct VELO\_INDEX}           & Integer       & See Section~\ref{info:velocity}       &       &  0      \\ \hline
 \end{longtable}
 
 
@@ -9531,6 +9552,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}          & Character         & Species identifier (if needed)         &           &     \\ \hline
 %{\ct TWO\_BYTE    }     & Logical           & Save as 2 byte real                    &           & {\ct .FALSE.}    \\ \hline
 {\ct VECTOR    }        & Logical           & Include flow vectors                   &           & {\ct .FALSE.}    \\ \hline
+{\ct VELO\_INDEX}       & Integer           & See Section~\ref{info:velocity}        &           &  0      \\ \hline
 {\ct XB(6)}             & Real Sextuplet    & Min/Max coordinates of region to save  & m         &     \\ \hline
 \end{longtable}
 
