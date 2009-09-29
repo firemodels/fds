@@ -359,6 +359,8 @@ void TRAINER_CB(int var){
     }
     TrainerViewMenu(2);
     updatechopcolors();
+    colorbarflip=1;
+    ColorBarMenu(-2);
     break;
   case LOAD_OXY:
 // kind of a hack, having to put in code seg twice, but this is required to get data chopping to work
@@ -376,6 +378,8 @@ void TRAINER_CB(int var){
     }
     TrainerViewMenu(3);
     updatechopcolors();
+    colorbarflip=0;
+    ColorBarMenu(-2);
     break;
   }
 }
