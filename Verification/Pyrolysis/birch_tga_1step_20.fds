@@ -41,7 +41,6 @@
 	NU_WATER        = 1.0
 	HEAT_OF_REACTION = 2260. /
 
-E and N_S from Lautenbergers (fsj09) pine
 &MATL ID = 'BIRCH'
 	EMISSIVITY 	= 1.0
 	DENSITY 	= 550.
