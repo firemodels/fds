@@ -444,22 +444,26 @@ WALL_CELL_LOOP: DO IW=1,NWC
          ENDIF
 
          DO N=1,N_SPECIES
-            IF (UWS(IW)<0._EB .AND. SF%MASS_FRACTION(N) > 0._EB) THEN
-               YY_WALL = SPECIES(N)%YY0 + EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*(SF%MASS_FRACTION(N)-SPECIES(N)%YY0)
-            ELSEIF (UWS(IW)>0._EB) THEN
-               YY_WALL = YYP(IIG,JJG,KKG,N)
-            ELSE  ! This is usually where air is blown into a compartment and we don't want gain or loss of species N
-               RHO_G = RHOP(IIG,JJG,KKG)
-               UN = -UWS(IW)
-               IF (PREDICTOR) EPSB = -.5_EB*UN**2*DT*RDN(IW)
-               IF (CORRECTOR) EPSB =  .5_EB*UN**2*DT*RDN(IW)
-               DD    = RHODW(IW,N)*RDN(IW)
-               YY_G  = YYP(IIG,JJG,KKG,N)
-               DENOM = DD + (.5_EB*UN+EPSB)*RHO_W(IW)
-               YY_WALL = ( YY_G*(DD + (EPSB-.5_EB*UN)*RHO_G) ) / DENOM
-            ENDIF
-            IF (DNS) YY_W(IW,N) = 2._EB*YY_WALL - YYP(IIG,JJG,KKG,N)
-            IF (LES) YY_W(IW,N) =       YY_WALL
+            IF_FLUX_LIMITER: IF (FLUX_LIMITER>=0) THEN
+               YY_W(IW,N) = SPECIES(N)%YY0 + EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*(SF%MASS_FRACTION(N)-SPECIES(N)%YY0)
+            ELSE IF_FLUX_LIMITER
+               IF (UWS(IW)<0._EB .AND. SF%MASS_FRACTION(N) > 0._EB) THEN
+                  YY_WALL = SPECIES(N)%YY0 + EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*(SF%MASS_FRACTION(N)-SPECIES(N)%YY0)
+               ELSEIF (UWS(IW)>0._EB) THEN
+                  YY_WALL = YYP(IIG,JJG,KKG,N)
+               ELSE  ! This is usually where air is blown into a compartment and we don't want gain or loss of species N
+                  RHO_G = RHOP(IIG,JJG,KKG)
+                  UN = -UWS(IW)
+                  IF (PREDICTOR) EPSB = -.5_EB*UN**2*DT*RDN(IW)
+                  IF (CORRECTOR) EPSB =  .5_EB*UN**2*DT*RDN(IW)
+                  DD    = RHODW(IW,N)*RDN(IW)
+                  YY_G  = YYP(IIG,JJG,KKG,N)
+                  DENOM = DD + (.5_EB*UN+EPSB)*RHO_W(IW)
+                  YY_WALL = ( YY_G*(DD + (EPSB-.5_EB*UN)*RHO_G) ) / DENOM
+               ENDIF
+               IF (DNS) YY_W(IW,N) = 2._EB*YY_WALL - YYP(IIG,JJG,KKG,N)
+               IF (LES) YY_W(IW,N) =       YY_WALL
+            ENDIF IF_FLUX_LIMITER
          ENDDO
  
       CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
