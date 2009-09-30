@@ -1,18 +1,21 @@
 
-\chapter{Quantifying Model Error}
-%\section{Introduction}
+%\chapter{Quantifying Model Error}
+\section{Introduction}
 
-The predictions of any mathematical model are subject to two forms of uncertainty. The first is associated with the uncertainty of the input parameters.
-The second is associated with the various assumptions and approximations of the mathematical formulation itself.
-For the sake of clarity, we will use the word {\em uncertainty} in regard to the input parameters, and the word {\em error} in regards
-to the mathematical formulation. The reason for this is two-fold. For one,
+There are various definitions of model validation.
+For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capability of
+Deterministic Fire Models,''~\cite{ASTM:E1355} defines it as ``the process of determining the degree to which a calculation method
+is an accurate representation of the real world from the perspective of the intended uses of the calculation method.'' 
+The accuracy of a model is a complicated function of its inputs and its equations.
+For the sake of clarity, we will use the word {\em uncertainty} in regard to the inputs, and the word {\em error} in regards
+to the equations. The reason for this is two-fold. For one,
 it helps to differentiate various terms that are used to quantify model accuracy; but, more importantly, it highlights the subtle distinction between the roles of the model
-and of the modeler. For example, if the modeler chooses 10~MW to be the heat release rate of a hypothetical fire, we do not say it is wrong, but rather uncertain because there
-is no easy way to know for sure just how big the fire is going to be. The model, on the other hand, includes assumptions and approximations that make its predictions less
-accurate for the sake of practicality. If the model is well-designed, the error associated with its formulation will be relatively small. Exactly how small is the subject of
-the discussion below.
+and of the modeler. For example, if the modeler chooses to input 10~MW as the heat release rate of a hypothetical fire, we do not say it is wrong, but rather uncertain because there
+is no easy way to know for sure just how big the fire is going to be. The mathematical model, on the other hand, includes assumptions and approximations that make its predictions less
+accurate for the sake of practical implementation. 
 
-Our objective here is to outline a process by which to quantify the model error. Our strategy is {\em not} to decompose the model into its many parts and systematically assess
+Our focus at present is not the input uncertainty, but rather the quantification of the model error.
+Our strategy is {\em not} to decompose the model into its many parts and systematically assess
 the error of each. Such an exercise would be extremely difficult, especially for a computational fluid dynamics (CFD) model, and the results would probably be subject to the same
 degree of error as the model itself. Instead, we take the traditional approach in which model predictions are compared with experimental measurements. However, unlike many
 model validation studies performed to date, we suggest a method by which the model {\em error} can be distinguished from the model input {\em uncertainty}. The difference
@@ -21,9 +24,36 @@ uncertainty is easier to quantify than the model error, we can estimate the erro
 difference between prediction and measurement. The quotation marks in the previous sentence indicate that model error and input uncertainty do not simply add together,
 and to decouple them requires some statistical analysis that will be described below.
 
+
+\section{Model Error}
+
+A deterministic fire model is based on fundamental conservation laws of mass, momentum and energy, applied either to entire compartments or smaller control
+volumes that make up the compartments. A CFD model may use millions of control volumes to compute the solution of the Navier-Stokes equations.
+However, it does not actually solve the Navier-Stokes equations, but rather an approximate form of these equations. The approximation involves simplifying
+physical assumptions, like the various techniques for treating subgrid-scale turbulence.
+The most critical approximation is the discretization of the governing equations. For example, the partial derivative of the density, $\rho$,
+with respect to the spatial coordinate, $x$, can be written in approximate form as:
+\be \frac{\partial \rho}{\partial x} = \frac{\rho_{i+1} - \rho_{i-1}}{2 \, \dx} + \mathcal{O}(\dx^2) \ee
+where $\dx$ is the grid spacing chosen by the model user.
+The second term on the right represents all the terms of order $\dx^2$ and higher in the Taylor series expansion and are known collectively as the
+{\em discretization error}. These extra terms are simply dropped from
+the equation set, the argument being that they become smaller and smaller with decreasing grid cell size, $\dx$. The effect of these neglected terms is captured, to
+some extent, by the subgrid-scale turbulence model, but that is yet another approximation of the true physics. What effect do these approximations have on
+the predicted results? It is very difficult to determine based on an analysis of the discretized equations. At best, one can demonstrate convergence towards some
+analytical solution of the non-turbulent Navier-Stokes equations at a rate determined by the spatial and temporal differencing schemes, but this still does not answer a
+question like, ``What is the error of the model prediction of the gas temperature at a particular location in the room at a particular point in time?''
+
+To make matters worse, there are literally dozens of subroutines that make up a CFD fire model, from its radiation solver, solid phase heat transfer routines, pyrolysis model,
+empirical mass, momentum and energy transfer routines at the wall, and so on. A careful, systematic error analysis of the combination of all these routines is
+nearly impossible. Indeed the complexity of the analysis would approach that of the model itself. For this reason, we rely on comparisons of model predictions to as many
+experiments as possible as a means of quantifying model error. However, before we can definitively quantify the error, we first must quantify the uncertainty of the
+measurements against which the model predictions are to be compared. This is discussed below.
+
+
 \section{The Validation Process}
 
-A fire model validation study typically consists of comparing point measurements from one or more fire experiments with corresponding model predictions.
+Because it is impractical to dissect a complicated fire model into its many components and assess the accuracy of each individually,
+a fire model validation study typically consists of comparing point measurements from a wide variety of fire experiments with corresponding model predictions.
 Figure~\ref{temp_history} is a typical result for a single point measurement, and given that usually dozens of such measurements are made during each experiment,
 and potentially dozens of experiments are conducted as part of a test series, we can expect hundreds of such plots for any given quantity of interest. In many cases, these
 plots in themselves provide sufficient information for a potential model user or authority having jurisdiction (AHJ) to decide if the model is sufficiently accurate for the
@@ -58,7 +88,7 @@ experiment involves measurements of elevated temperatures, heat flux, {\em etc.}
 heat release rate and material properties, that are then fed into the model as input. Uncertainty in these input parameters combines with the error in the model
 to form the vertical uncertainty/error bar associated with each point in Fig.~\ref{scatterplot}. Decoupling the error from the uncertainty
 is the subject of analysis below. Before presenting this
-analysis, however, we must first discuss in more detail what we mean by experimental uncertainty and model error.
+analysis, however, we must first discuss in more detail the subject of experimental uncertainty.
 
 \begin{figure}[t]
 \begin{center}
@@ -69,29 +99,7 @@ analysis, however, we must first discuss in more detail what we mean by experime
 \end{figure}
 
 
-\section{Model Error}
 
-A deterministic fire model is based on fundamental conservation laws of mass, momentum and energy, applied either to entire compartments or smaller control
-volumes that make up the compartments. A CFD model may use millions of control volumes to compute the solution of the Navier-Stokes equations.
-However, it does not actually solve the Navier-Stokes equations, but rather an approximate form of these equations. The approximation involves simplifying
-physical assumptions, like the various techniques for treating subgrid-scale turbulence.
-The most critical approximation is the discretization of the governing equations. For example, the partial derivative of the density, $\rho$,
-with respect to the spatial coordinate, $x$, can be written in approximate form as:
-\be \frac{\partial \rho}{\partial x} = \frac{\rho_{i+1} - \rho_{i-1}}{2 \, \dx} + \mathcal{O}(\dx^2) \ee
-where $\dx$ is the grid spacing chosen by the model user.
-The second term on the right represents all the terms of order $\dx^2$ and higher in the Taylor series expansion and are known collectively as the
-{\em discretization error}. These extra terms are simply dropped from
-the equation set, the argument being that they become smaller and smaller with decreasing grid cell size, $\dx$. The effect of these neglected terms is captured, to
-some extent, by the subgrid-scale turbulence model, but that is yet another approximation of the true physics. What effect do these approximations have on
-the predicted results? It is very difficult to determine based on an analysis of the discretized equations. At best, one can demonstrate convergence towards some
-analytical solution of the non-turbulent Navier-Stokes equations at a rate determined by the spatial and temporal differencing schemes, but this still does not answer a
-question like, ``What is the error of the model prediction of the gas temperature at a particular location in the room at a particular point in time?''
-
-To make matters worse, there are literally dozens of subroutines that make up a CFD fire model, from its radiation solver, solid phase heat transfer routines, pyrolysis model,
-empirical mass, momentum and energy transfer routines at the wall, and so on. A careful, systematic error analysis of the combination of all these routines is
-nearly impossible. Indeed the complexity of the analysis would approach that of the model itself. For this reason, we rely on comparisons of model predictions to as many
-experiments as possible as a means of quantifying model error. However, before we can definitively quantify the error, we first must quantify the uncertainty of the
-measurements against which the model predictions are to be compared. This is the subject of the next section.
 
 
 \section{Experimental Uncertainty}
@@ -134,17 +142,17 @@ analysis described in the next section.
 \begin{tabular}{|l|c|}
 \hline
 Measured Quantity               & Combined Relative       \\
-                                & Uncertainty, $2 \, \widetilde{\sigma}_E$ (\%)       \\ \hline \hline
-HGL Temperature                 & 14    \\ \hline
-HGL Depth                       & 13    \\ \hline
-Ceiling Jet Temperature         & 16    \\ \hline
-Plume Temperature               & 14    \\ \hline
-Gas Concentrations              & 9     \\ \hline
-Smoke Concentration             & 33    \\ \hline
-Pressure with Ventilation       & 80    \\ \hline
-Pressure without Ventilation    & 40    \\ \hline
-Heat Flux                       & 20    \\ \hline
-Surface Temperature             & 14    \\ \hline
+                                & Uncertainty, $2 \, \widetilde{\sigma}_E$       \\ \hline \hline
+HGL Temperature                 & 0.14    \\ \hline
+HGL Depth                       & 0.13    \\ \hline
+Ceiling Jet Temperature         & 0.16    \\ \hline
+Plume Temperature               & 0.14    \\ \hline
+Gas Concentrations              & 0.09     \\ \hline
+Smoke Concentration             & 0.33    \\ \hline
+Pressure with Ventilation       & 0.80    \\ \hline
+Pressure without Ventilation    & 0.40    \\ \hline
+Heat Flux                       & 0.20    \\ \hline
+Surface Temperature             & 0.14    \\ \hline
 \end{tabular}
 \end{center}
 \label{Uncertainty}
@@ -158,47 +166,55 @@ the combined experimental uncertainty as a way to characterize the accuracy of t
 The set of model predictions and the corresponding set of experimental measurements are denoted
 $M_i$ and $E_i$, respectively, where $i$ ranges from 1 to $n$. Without loss of generality, assume that the
 ambient value of these quantities is zero. With this information, {\em and only this information}, we seek to quantify the model error.
-
-In addition to assuming that the experimental uncertainty and the model error can be expressed in relative terms, we also assume that
-they are normally distributed. Given the complexity of both the model and the experiment, it is hard to justify
+First, we make two important assumptions:
+\begin{enumerate}
+\item All uncertainties and errors can be expressed in relative terms, and
+\item All uncertainties and errors are assumed to be normally distributed.
+\end{enumerate}
+Given the complexity of the models and the experiments, it would be difficult to justify
 any particular distribution. In fact, the very reason why we have developed this method of quantifying model error based on validation
 experiments is because the model algorithm itself is too complicated to work with directly as a means of estimating the error.
 
 With these assumptions in mind, we proceed with the statistical analysis of the data.
-First, assume that $E|\theta \sim N(\theta,\sigma_E^2)$, meaning that the probability distribution\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
-with mean, $\mu$, and standard deviation, $\sigma$.}  of $E$
-is conditional on a particular value of $\theta$. This is the usual way of defining a likelihood function. The parameter $\theta$ is the ``true'' value of the quantity under
-consideration. In short, we are assuming that the experimental measurement has no bias and its standard deviation, $\sigma_E$, has been
-determined following the procedure described in the
-previous section. Table~\ref{Uncertainty} lists the relative experimental uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$, for the various quantities of interest.
-In the analysis to follow, it is convenient to work with $\ln(E)$ because the standard deviation of $\ln(E)$ is approximately $\widetilde{\sigma}_E$.
-We can use the usual delta method~\cite{Oehlert:1992} to obtain the approximate distribution $\ln(E)|\theta \sim N(\ln(\theta),\widetilde{\sigma}_E^2)$.
-Using a Bayesian argument with a non-informative prior on $\ln(\theta)$, we obtain the posterior distribution as $\ln(\theta) \sim N(\ln(E),\widetilde{\sigma}_E^2)$ .
+First, assume that the experimental measurements, $E_i$, are normally distributed\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
+with mean, $\mu$, and standard deviation, $\sigma$.} about the ``true'' values, $\theta_i$, and there is no systematic bias:
+\be E|\theta \sim N(\theta,\sigma_E^2) \label{expunc} \ee
+The notation $E|\theta$ means that $E$ is conditional on a particular value of $\theta$. 
+This is the usual way of defining a likelihood function. Table~\ref{Uncertainty} lists the relative experimental 
+uncertainty values, $\widetilde{\sigma}_E=\sigma_E/\theta$, for the various quantities of interest. 
+It is convenient to use the so-called ``delta method''~\cite{Oehlert:1992} to obtain the approximate distribution 
+\be \ln(E)|\theta \sim N \left( \ln(\theta),\widetilde{\sigma}_E^2 \right) \label{eeq} \ee
+Using a Bayesian argument with a non-informative prior on $\ln(\theta)$, we obtain the posterior distribution as 
+\be \ln(\theta) \sim N \left( \ln(E),\widetilde{\sigma}_E^2 \right) \label{thetaeq} \ee
+The assumption of a non-informative prior implies that we do not have sufficient information about the distribution of 
+$E$ or $\theta$ to assume anything else. 
 
-Next, assume that $M|\theta \sim N(\delta \, \theta,\sigma_M^2)$ , where $\delta$ is a systematic multiplicative bias and $\sigma_M$ is the model-intrinsic uncertainty,
-{\em i.e.} model error.
-Again, using the log transformation we obtain $\ln(M)|\theta \sim N(\ln(\delta)+\ln(\theta)-\omega_M^2/2,\omega_M^2)$
-where $\omega_M=\sigma_M/(\theta \, \delta)$. Note that the estimate of the mean includes an extra term in the Taylor series expansion to obtain a more precise estimate of
-$\delta$. Because $\ln(\theta)$ is random, and we have its posterior distribution from above, we can obtain the marginal density
-(that is, for any $\theta$) of $\ln(M) \sim N(\ln(\delta)+\ln(E)-\omega_M^2/2,\omega_M^2+\widetilde{\sigma}_E^2)$.
 
-What we need now is a way to estimate $\delta$, the bias factor, and $\omega_M$, the relative error, of the model predictions. First, define:
+In a similar manner, assume that the model predictions are normally distributed about the ``true'' value multiplied by a bias factor, $\delta$: 
+\be M|\theta \sim N \left(\delta \, \theta,\sigma_M^2 \right) \ee 
+The standard deviation, $\sigma_M$, is the model-intrinsic uncertainty, {\em i.e.} model error. This and the bias factor, $\delta$, are the parameters
+that we seek to quantify.
+Again, using the log transformation we obtain 
+\be \ln(M)|\theta \sim N \left(\ln(\delta)+\ln(\theta)-\frac{\omega_M^2}{2} \; , \; \omega_M^2 \right) \quad ; \quad \omega_M=\frac{\sigma_M}{\theta \, \delta} \ee
+Note that the estimate of the mean includes an extra term in the Taylor series expansion to obtain a more precise estimate of
+$\delta$. Because $\ln(\theta)$ is random, and we have its posterior distribution from Eq.~(\ref{thetaeq}), we can obtain the marginal distribution
+\be \ln(M) \sim N \left( \ln(\delta)+\ln(E)-\frac{\omega_M^2}{2} \; , \; \omega_M^2+\widetilde{\sigma}_E^2 \right) \ee
+Notice that we have expressed the {\em total relative uncertainty} of the model predictions as a combination of model error and experimental uncertainty.
+What we need now is a way to estimate this error and the bias factor, $\delta$. First, define:
 \be \overline{M} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(M_i)  \quad ; \quad \overline{E} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(E_i) \ee
-Next, define
-\be \widehat{M}_i = \overline{M}-\overline{E} + \ln(E_i) \ee
-The least squares estimate of the standard deviation of $\ln(M_i)$ is
-\be u(M) = \sqrt{\omega_M^2+\widetilde{\sigma}_E^2} \approx \sqrt{ \frac{1}{n-1} \sum_{i=1}^n \, \left[ \ln(M_i)-\widehat{M}_i \right]^2 } \ee
+The least squares estimate of the standard deviation of $\ln(M)$ is
+\be u(M) = \sqrt{\omega_M^2+\widetilde{\sigma}_E^2} \approx \sqrt{ \frac{1}{n-1} \sum_{i=1}^n \, \left[ (\ln(M_i)-\overline{M}) - (\ln(E_i) - \overline{E})  \right]^2 } \ee
 Note that $u(M)$ is the {\em total relative uncertainty} of $M$.
 Next, compute
 \be \widehat{\omega}_M = \sqrt{u(M)^2-\widetilde{\sigma}_E^2} \label{model_error} \ee
 An estimate of $\ln(\delta)$ is $\overline{M}-\overline{E}+\widehat{\omega}_M^2/2$, and, thus, the estimate of $\delta$ is
-\be \widehat{\delta} = \exp(\overline{M}-\overline{E}+\widehat{\omega}_M^2/2) \ee
+\be \widehat{\delta} = \exp \left( \overline{M}-\overline{E}+\frac{\widehat{\omega}_M^2}{2} \right) \ee
 The model-intrinsic component, {\em i.e.} the model error, $\widetilde{\sigma}_M$, can be estimated as follows
-\be \widetilde{\sigma}_M = \widehat{\delta} \, \widehat{\omega}_M \label{model_error2} \ee
-
+\be \widetilde{\sigma}_M = \widehat{\delta} \; \widehat{\omega}_M \label{model_error2} \ee
 In essence, this procedure gives us a way to estimate the ``true'' value, $\theta$, using only a predicted value, $M$, and the bias factor and relative error
 for that particular quantity that have been obtained using past validation experiments. The ``truth'' is a random variable with the following distribution:
-\be \theta \sim N \left( M/\delta,(M \, \widetilde{\sigma}_M/\delta)^2 \right) \label{truth} \ee
+\be \theta \sim N \left( \frac{M}{\delta} \; , \; \left( \frac{M \, \widetilde{\sigma}_M}{\delta} \right)^2 \right) \label{truth} \ee
+This is essentially a recipe for estimating the error associated with a model prediction, $M$. 
 Below, we describe how one might make use of this formula in practice. First, however, we need to verify the accuracy of the procedure just described.
 
 \section{Verifying the Procedure}
