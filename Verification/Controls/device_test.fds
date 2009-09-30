@@ -19,7 +19,7 @@ Test various devices and actions upon activation.
 &PART ID='water', WATER=.TRUE.,    SAMPLING_FACTOR=1 /
 
 &PROP ID='Acme Smoke'
-      QUANTITY='spot obscuration' /
+      QUANTITY='CHAMBER OBSCURATION' /
 
 &PROP ID='Acme Heat',         
       QUANTITY='LINK TEMPERATURE', 
