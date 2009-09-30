@@ -217,7 +217,7 @@ entities, materials, or equipment are necessarily the best available for the pur
 
 \large
 \flushright{\bf National Institute of Standards and Technology Special Publication 1017-3 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-3, 64 pages (September 2009) \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1017-3, 69 pages (September 2009) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -877,9 +877,11 @@ Comparing the Smokeview generated smoke levels with theoretical values one finds
 
 \chapter{Other Tests}
 \section{Obstacles}
-Figures \ref{figobsttest} and \ref{figtransparency} tests obstacle display.
-Figure \ref{figobsttest} shows obstacles drawn three different ways, as solids, as outlines or hidden.
-Figure \ref{figtransparency} shows obstacles drawn transparently.
+Figures \ref{figobsttest} and \ref{figtransparency} tests different methods for displaying obstacles.
+Figure \ref{figobsttest} shows obstacles drawn as solids, as outlines or hidden.
+Figure \ref{figtransparency} shows obstacles drawn transparently. The left view shows the opaque obstacle drawn in front (and blocking) a portion of the transparent obstacle behind.  The center view shows both obstacles unobscured.  The right view shows the transparent blockage drawn in front with the opaque blockage visible behind.
+The images for this test were created automatically by running the smokeview script,
+{\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -903,17 +905,19 @@ Figure \ref{figtransparency} shows obstacles drawn transparently.
  \includegraphics[width=2.0in]{scriptfigures/transparency_left}&
  \includegraphics[width=2.0in]{scriptfigures/transparency_center}&
  \includegraphics[width=2.0in]{scriptfigures/transparency_right}\\
- left&
- center&
- right\\
+ left view - opaque obstacle in front&
+ center view - both obstacles visible&
+ right view - transparent obstacle in front\\
  \end{tabular}
 \end{center}
  \caption{Transparency view test.}
-\label{figobsttest}%
+\label{figtransparency}%
 \end{figure}
 
 \section{Devices}
-Figure \ref{figsprinkmany} tests multiple device display.  This figure shows all vents displayed, only vents that are not of type open displayed of hides all vents.
+The case illustrated in Figure \ref{figsprinkmany} tests how good Smokeview can display many devices. This Figure shows a series of sprinklers with three different levels of detail.  Smokeview should be able to smoothly move this scene on computers with good video cards.
+The images for this test were created automatically by running the smokeview script, 
+{\tt sprinkler\_many.ssf}\ (see Appendix \ref{SSFspinklermany}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -930,7 +934,9 @@ Figure \ref{figsprinkmany} tests multiple device display.  This figure shows all
 
 
 \section{Vents}
-Figure \ref{figventtest} tests vent display.  This figure shows all vents displayed, only vents that are not of type open displayed of hides all vents.
+Figure \ref{figventtest} tests vent display.  This figure shows three different levels of vent visibility: all vents displayed, only non-open vents displayed and all vents hidden.
+The images for this test were created automatically by running the smokeview script,
+{\tt plume5c.ssf}\ (see Appendix \ref{SSFplume5c}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -939,8 +945,8 @@ Figure \ref{figventtest} tests vent display.  This figure shows all vents displa
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_noopen}&
  \includegraphics[height=\figheightD]{scriptfigures/plume5c_novents}\\
  show all vents&
- show only vents that are not open vents&
- vents hidden\\
+ show only open vents&
+ hide all vents\\
 
  \end{tabular}
 \end{center}
@@ -961,6 +967,8 @@ The input file, {\tt colorconv.fds}\ (see Appendix \ref{FDScolorconv}), for this
 initially the left half of the domain (it is a 2D case) is 20~\degC\ and the right half is 100~\degC.
 The images for this test were created automatically by running the smokeview script, {\tt colorconv.ssf}\ (see Appendix \ref{SSFcolorconv}).
 
+A second color conversion test involves the use of the colorbar to highlight portions of the data.  The case was set up so that the vertical slice aligns with the colorbar.  The gas temperatures were defined to increase from 20~\degC\ to 100~\degC\ from the floor to the ceiling.  As a result, when one selects the colorbar, the selected region in the colorbar should match the selected region in the vertical slice.
+The images for this test were created automatically by running the smokeview script, {\tt colorbar.ssf}\ (see Appendix \ref{SSFcolorbar}).
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -996,7 +1004,8 @@ The images for this test were created automatically by running the smokeview scr
  \includegraphics[height=2.75in]{scriptfigures/colorbar_high}\\
  \end{tabular}
 \end{center}
- \caption{Color conversion test 2.}
+ \caption[Color conversion test 2.]{Color conversion test.  Temperature between 20~\degC\ and 100~\degC\ are
+ converted to colors between blue and red.  The highlighted region in the colorbar matches the highlighted region in the vertical slice.  }
 \label{figcolorconv2}%
 \end{figure}
 
