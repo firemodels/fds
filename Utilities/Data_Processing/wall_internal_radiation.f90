@@ -19,7 +19,7 @@ open(11,file='wall_internal_radiation.tex',form='formatted',status='replace')
 write(11,'(a)') "\begin{center}"
 write(11,'(a)') "\begin{tabular}{|c|c|c|} \hline"
 write(11,'(a)') "$\tau$      & $S(\tau)$   & FDS \\"
-write(11,'(a)') "(m$^{-1}$)  & (kW/m$^2$)  & (kW/m$^2$) \\ \hline\hline"
+write(11,'(a)') "            & (kW/m$^2$)  & (kW/m$^2$) \\ \hline\hline"
 write(11,'(a,f5.3,a)') "0.01        & 2.897       &",-flux(1)," \\"
 write(11,'(a,f5.2,a)') "0.1         & 24.94       &",-flux(2)," \\"
 write(11,'(a,f5.2,a)') "0.5         & 82.95       &",-flux(3)," \\"

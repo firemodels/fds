@@ -17,12 +17,14 @@ S = Sb*[1-2*E_3(tau)]
 where Sb is the blackbody radiation sigma*1273.15^4 and E_3(tau) is
 the third-order exponential integral function of optical depth tau.
 
-tau   Exact 	FDS 	Error (%)
-0.01  2.8970	2.9495	1.8
-0.1   24.9403	26.980	8.2
-0.5   82.9457   93.897	13.
-1.0   116.2891	128.41	10.
-10.   148.9698  148.97	0.0001
+tau = kappa * L
+
+tau   kappa (1/m) Exact 	FDS 	Error (%)
+0.01  0.1	  2.8970	2.9495	1.8
+0.1   1.0	  24.9403	26.980	8.2
+0.5   5.0	  82.9457   	93.897	13.
+1.0   10.0	  116.2891	128.41	10.
+10.   100.0	  148.9698  	148.97	0.0001
 
 References
 
