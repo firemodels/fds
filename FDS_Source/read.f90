@@ -5107,7 +5107,6 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (.NOT.EVACUATION_ONLY(NM)) EVACUATION = .FALSE.
       IF (     EVACUATION_ONLY(NM)) EVACUATION = .TRUE.
       IF (     EVACUATION_ONLY(NM)) REMOVABLE = .FALSE.
-      IF (EVACUATION_ONLY(NM).AND. .NOT.ALL(EVACUATION_ONLY)) OUTLINE = .TRUE.
  
       ! Read the OBST line
 
@@ -5314,6 +5313,7 @@ MESH_LOOP: DO NM=1,NMESHES
  
                OB%IBC(:) = DEFAULT_SURF_INDEX
           
+               NNNN = 0
                DO NNN=0,N_SURF
                   IF (SURF_ID    ==SURFACE(NNN)%ID) OB%IBC(:)    = NNN
                   IF (SURF_IDS(1)==SURFACE(NNN)%ID) OB%IBC(3)    = NNN
@@ -5325,7 +5325,18 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (SURF_ID6(4)==SURFACE(NNN)%ID) OB%IBC( 2)   = NNN
                   IF (SURF_ID6(5)==SURFACE(NNN)%ID) OB%IBC(-3)   = NNN
                   IF (SURF_ID6(6)==SURFACE(NNN)%ID) OB%IBC( 3)   = NNN
+                  IF (TRIM(SURFACE(NNN)%ID)==TRIM(EVAC_SURF_DEFAULT)) NNNN = NNN
                ENDDO
+
+               ! Fire + evacuation calculation: draw obsts as outlines by default
+
+               IF (.NOT.OUTLINE .AND. EVACUATION_ONLY(NM) .AND. .NOT.ALL(EVACUATION_ONLY)) THEN
+                  IF (SURFACE(NNNN)%TRANSPARENCY < 0.99999_EB .AND. .NOT.OUTLINE) THEN
+                     OUTLINE = .FALSE.
+                  ELSE
+                     OUTLINE = .TRUE.
+                  ENDIF
+               ENDIF
          
                ! Determine if the OBST is CONSUMABLE and check if POROUS inappropriately applied
          
@@ -5403,6 +5414,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
                ! Only allow the use of BULK_DENSITY if the obstruction has a non-zero volume
 
+               IF (EVACUATION_ONLY(NM)) BULK_DENSITY = -1._EB
                OB%BULK_DENSITY = BULK_DENSITY
                IF (OB%VOLUME_ADJUST==0._EB .AND. BULK_DENSITY>0._EB) THEN
                   WRITE(MESSAGE,'(A,I4,A)') 'ERROR: OBSTruction ',NN,' has no volume and thus cannot have a BULK_DENSITY'
@@ -5413,6 +5425,7 @@ MESH_LOOP: DO NM=1,NMESHES
  
                DO NOM=1,NM-1
                   IF (EVACUATION_ONLY(NOM)) CYCLE
+                  IF (EVACUATION_ONLY(NM)) CYCLE
                   IF (XB1>MESHES(NOM)%XS .AND. XB2<MESHES(NOM)%XF .AND. &
                       XB3>MESHES(NOM)%YS .AND. XB4<MESHES(NOM)%YF .AND. &
                       XB5>MESHES(NOM)%ZS .AND. XB6<MESHES(NOM)%ZF) OB%COLOR_INDICATOR=-2
@@ -5427,6 +5440,7 @@ MESH_LOOP: DO NM=1,NMESHES
                   OB%SHOW_BNDF(:) = BNDF_FACE(:)
                   IF (BNDF_OBST) OB%SHOW_BNDF(:) = .TRUE.
                ENDIF
+               IF (EVACUATION_ONLY(NM)) OB%SHOW_BNDF(:) = .FALSE.
  
                ! Smooth obstacles if desired
           

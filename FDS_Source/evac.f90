@@ -797,7 +797,7 @@ CONTAINS
          !   Call ChkMemErr('READ','EVAC_ENTRYS',IZERO)
          END IF
 
-         IF (n_corrs > 0 ) THEN
+         IF (N_CORRS > 0 ) THEN
             ALLOCATE(EVAC_CORRS(N_CORRS),STAT=IZERO)
             CALL ChkMemErr('READ','EVAC_CORRS',IZERO)
          !Else
@@ -2928,8 +2928,8 @@ CONTAINS
          IF ( ABS(XB(1)-PNX%X1)>1.E-4_EB .OR. ABS(XB(2)-PNX%X2)>1.E-4_EB .OR. &
               ABS(XB(3)-PNX%Y1)>1.E-4_EB .OR. ABS(XB(4)-PNX%Y2)>1.E-4_EB ) THEN
             WRITE(LU_ERR,fmt='(a,a,a,a)') ' WARNING: Entr ',TRIM(ID),' XB adjusted to mesh ',TRIM(MESH_NAME(nm))
-            WRITE(LU_ERR,fmt='(a,6f12.4)') 'Old XB:', PNX%X1,PNX%X2,PNX%Y1,PNX%Y2,PNX%Z1,PNX%Z2
-            WRITE(LU_ERR,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+            WRITE(LU_ERR,fmt='(a,6f12.4)') ' Old XB:', PNX%X1,PNX%X2,PNX%Y1,PNX%Y2,PNX%Z1,PNX%Z2
+            WRITE(LU_ERR,fmt='(a,6f12.4)') ' New XB:', XB(1:6)
          END IF
 
          II = (I1+I2)/2
@@ -3703,7 +3703,7 @@ CONTAINS
          END DO CheckDoorStrLoop
       END DO
 
-      ! Create list  of incoming nodes for Stairs
+      ! Create list of incoming nodes for Stairs
       DO N = 1,N_STRS
          STRP => EVAC_STRS(N)
          STRP%N_NODES_IN = 0
@@ -5276,7 +5276,7 @@ CONTAINS
     REAL(EB) :: RN, RNCF
     REAL(EB) :: GAME, GATH, GACM
     !
-    INTEGER :: I_OLD_FFIELD, IZERO, IMODE_OLD, I_STRS_DOOR
+    INTEGER :: I_OLD_FFIELD, IZERO, IMODE_OLD, I_STRS_DOOR, NM_STRS_INDEX
     CHARACTER(26) :: NAME_OLD_FFIELD
     !
     REAL(EB) :: P2P_TORQUE, FC_X, FC_Y, OMEGA_NEW, ANGLE, A1, TC_Z, FC_X1, FC_Y1
@@ -5341,6 +5341,15 @@ CONTAINS
        WRITE(MESSAGE,'(A,I6)') 'ERROR: EVACUATE_HUMANS, No mesh found ',NM
        CALL SHUTDOWN(MESSAGE)
     END IF
+    NM_STRS_MESH = .FALSE.
+    NM_STRS_INDEX = 0
+    CHECK_STRS_LOOPM0: DO I = 1, N_STRS
+       IF (EVAC_STRS(I)%IMESH == NM) THEN
+          NM_STRS_MESH = .TRUE.
+          NM_STRS_INDEX = I
+          EXIT CHECK_STRS_LOOPM0
+       END IF
+    END DO CHECK_STRS_LOOPM0
     !
     ! Blocks are used to speed the double loops over the agent-agent interactions.
     ALLOCATE(BLOCK_GRID_N(1:IBAR,1:JBAR),STAT=IZERO)
@@ -5426,13 +5435,17 @@ CONTAINS
           GROUP_LIST(J)%TDET       = MIN(GROUP_LIST(J)%TDET,HR%TDET)
           I_TMP = HR%I_TARGET
           IF (I_TMP > 0 .AND. I_TMP <= N_DOORS ) THEN
-             EVEL = SQRT((HR%X- EVAC_DOORS(I_TMP)%X)**2 + (HR%Y-EVAC_DOORS(I_TMP)%Y)**2)
-             EVAC_DOORS(I_TMP)%R_NTARGET = MAX(EVEL,EVAC_DOORS(I_TMP)%R_NTARGET)
+             IF ((NM_STRS_MESH .AND. HR%STR_SUB_INDX==EVAC_DOORS(I_TMP)%STR_SUB_INDX) .OR. .NOT.NM_STRS_MESH) THEN
+                EVEL = SQRT((HR%X- EVAC_DOORS(I_TMP)%X)**2 + (HR%Y-EVAC_DOORS(I_TMP)%Y)**2)
+                EVAC_DOORS(I_TMP)%R_NTARGET = MAX(EVEL,EVAC_DOORS(I_TMP)%R_NTARGET)
+             END IF
           END IF
           I_TMP = I_TMP - N_DOORS
           IF (I_TMP > 0 .AND. I_TMP <= N_EXITS ) THEN
-             EVEL = SQRT((HR%X-EVAC_EXITS(I_TMP)%X)**2 + (HR%Y-EVAC_EXITS(I_TMP)%Y)**2)
-             EVAC_EXITS(I_TMP)%R_NTARGET = MAX(EVEL,EVAC_EXITS(I_TMP)%R_NTARGET)
+             IF ((NM_STRS_MESH .AND. HR%STR_SUB_INDX==EVAC_EXITS(I_TMP)%STR_SUB_INDX) .OR. .NOT.NM_STRS_MESH) THEN
+                EVEL = SQRT((HR%X-EVAC_EXITS(I_TMP)%X)**2 + (HR%Y-EVAC_EXITS(I_TMP)%Y)**2)
+                EVAC_EXITS(I_TMP)%R_NTARGET = MAX(EVEL,EVAC_EXITS(I_TMP)%R_NTARGET)
+             END IF
           END IF
        END DO
 
@@ -5453,17 +5466,21 @@ CONTAINS
                SQRT((HR%X - GROUP_LIST(J)%GROUP_X)**2 + (HR%Y - GROUP_LIST(J)%GROUP_Y)**2))
           I_TMP = HR%I_TARGET
           IF (I_TMP > 0 .AND. I_TMP <= N_DOORS ) THEN
-             EVEL = SQRT((HR%X- EVAC_DOORS(I_TMP)%X)**2 + (HR%Y-EVAC_DOORS(I_TMP)%Y)**2)
-             EVEL = 50.0_EB*EVEL/EVAC_DOORS(I_TMP)%R_NTARGET + 1.0_EB
-             IE = MIN(50,MAX(1,INT(EVEL)))
-             EVAC_DOORS(I_TMP)%NTARGET(IE:50) = EVAC_DOORS(I_TMP)%NTARGET(IE:50) + 1
+             IF ((NM_STRS_MESH .AND. HR%STR_SUB_INDX==EVAC_DOORS(I_TMP)%STR_SUB_INDX) .OR. .NOT.NM_STRS_MESH) THEN
+                EVEL = SQRT((HR%X- EVAC_DOORS(I_TMP)%X)**2 + (HR%Y-EVAC_DOORS(I_TMP)%Y)**2)
+                EVEL = 50.0_EB*EVEL/EVAC_DOORS(I_TMP)%R_NTARGET + 1.0_EB
+                IE = MIN(50,MAX(1,INT(EVEL)))
+                EVAC_DOORS(I_TMP)%NTARGET(IE:50) = EVAC_DOORS(I_TMP)%NTARGET(IE:50) + 1
+             END IF
           END IF
           I_TMP = I_TMP - N_DOORS
           IF (I_TMP > 0 .AND. I_TMP <= N_EXITS ) THEN
-             EVEL = SQRT((HR%X-EVAC_EXITS(I_TMP)%X)**2 + (HR%Y-EVAC_EXITS(I_TMP)%Y)**2)
-             EVEL = 50.0_EB*EVEL/EVAC_EXITS(I_TMP)%R_NTARGET + 1.0_EB
-             IE = MIN(50,MAX(1,INT(EVEL)))
-             EVAC_EXITS(I_TMP)%NTARGET(IE:50) = EVAC_EXITS(I_TMP)%NTARGET(IE:50) + 1
+             IF ((NM_STRS_MESH .AND. HR%STR_SUB_INDX==EVAC_EXITS(I_TMP)%STR_SUB_INDX) .OR. .NOT.NM_STRS_MESH) THEN
+                EVEL = SQRT((HR%X-EVAC_EXITS(I_TMP)%X)**2 + (HR%Y-EVAC_EXITS(I_TMP)%Y)**2)
+                EVEL = 50.0_EB*EVEL/EVAC_EXITS(I_TMP)%R_NTARGET + 1.0_EB
+                IE = MIN(50,MAX(1,INT(EVEL)))
+                EVAC_EXITS(I_TMP)%NTARGET(IE:50) = EVAC_EXITS(I_TMP)%NTARGET(IE:50) + 1
+             END IF
           END IF
        END DO
 
@@ -5500,13 +5517,13 @@ CONTAINS
        ! ========================================================
        ! Change target door?
        ! ========================================================
-       IF (T > 0.0_EB) THEN
+       IF (T > 0.0_EB .AND. .NOT.NM_STRS_MESH) THEN
           CHANGE_DOOR_LOOP: DO IE = 1, N_HUMANS
              HR => HUMAN(IE)
-             ! Check and cycle if in stairs
-             CHECK_STRS_LOOP0: DO N = 1, N_STRS
-                IF (EVAC_STRS(N)%IMESH == HR%IMESH) CYCLE CHANGE_DOOR_LOOP
-             END DO CHECK_STRS_LOOP0
+!!$             ! Check and cycle if in stairs
+!!$             CHECK_STRS_LOOP0: DO N = 1, N_STRS
+!!$                IF (EVAC_STRS(N)%IMESH == HR%IMESH) CYCLE CHANGE_DOOR_LOOP
+!!$             END DO CHECK_STRS_LOOP0
 
              I_OLD_FFIELD    = HR%I_FFIELD
              NAME_OLD_FFIELD = TRIM(MESH_NAME(I_OLD_FFIELD))
@@ -5529,7 +5546,7 @@ CONTAINS
                    CALL CHANGE_TARGET_DOOR(NM, NM, IE, J, J1, I_EGRID, 1, HR%X, HR%Y, I_TARGET, COLOR_INDEX, I_NEW_FFIELD, HR)
                    IF (ABS(I_TARGET_OLD) .NE. ABS(I_TARGET)) THEN
                       N_CHANGE_DOORS = N_CHANGE_DOORS + 1
-                      IF (I_TARGET > 0) THEN
+                      IF (I_TARGET > 0) THEN  ! The door is visible, if i_target > 0, if < 0 not visible
                          IF (I_TARGET <= N_DOORS ) THEN
                             EVEL = SQRT((HR%X-EVAC_DOORS(I_TARGET)%X)**2 + (HR%Y-EVAC_DOORS(I_TARGET)%Y)**2)
                             EVEL = 50.0_EB*EVEL/EVAC_DOORS(I_TARGET)%R_NTARGET + 1.0_EB
@@ -5681,15 +5698,16 @@ CONTAINS
           ! ========================================================
           ! Calculate persons prefered walking direction V0
           ! ========================================================
-          NM_STRS_MESH = .FALSE.
-          N = 0
-          STRSMESHLOOP: DO J = 1, N_STRS
-             IF (EVAC_STRS(J)%IMESH==NM) THEN     
-                NM_STRS_MESH = .TRUE.
-                N = J
-                EXIT STRSMESHLOOP
-             END IF
-          END DO STRSMESHLOOP
+          N = NM_STRS_INDEX
+!!$          NM_STRS_MESH = .FALSE.
+!!$          N = 0
+!!$          STRSMESHLOOP: DO J = 1, N_STRS
+!!$             IF (EVAC_STRS(J)%IMESH==NM) THEN     
+!!$                NM_STRS_MESH = .TRUE.
+!!$                N = J
+!!$                EXIT STRSMESHLOOP
+!!$             END IF
+!!$          END DO STRSMESHLOOP
           IF (TAU_CHANGE_V0 > 1.0E-12_EB) THEN
              ! Stairs mesh: next subroutine call is needed to set up the targets etc correctly,
              ! but UBAR,VBAR are not needed.
@@ -6240,6 +6258,7 @@ CONTAINS
           ! ========================================================
           ! Calculate persons prefered walking direction
           ! ========================================================
+          N = NM_STRS_INDEX
           CALL FIND_PREFERED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
                IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
           ! ========================================================
@@ -7209,30 +7228,31 @@ CONTAINS
       !   IIX,JJY: The grid cell indices of the agent for the velocity
       !   XI,YJ,ZK: The grid cell coordinates of the agent for the velocity
       !   NM: The main evacuation mesh index
-      ! Outputs:
       !   NOUT: The index of the stairs mesh (if the agent is on stairs)
       !   NM_STRS_MESH: True, if the mesh is a stair mesh
+      ! Outputs:
       !   UBAR,VBAR: The prefered walking direction
       !   HR_TAU: Translational motion tau
       !   TPRE: Pre-movement time
       !   I_STRS_DOOR: In STRS mesh the target door/exit index
       !
       ! Passed variables
-      INTEGER, INTENT(IN) :: II, JJ, IIX, JJY, I, NM
+      INTEGER, INTENT(IN) :: II, JJ, IIX, JJY, I, NM, NOUT
       REAL(EB), INTENT(IN) :: XI, YJ, ZK, T, T_BEGIN
-      LOGICAL, INTENT(IN) :: L_DEAD
-      INTEGER, INTENT(OUT) :: NOUT, I_STRS_DOOR
-      LOGICAL, INTENT(INOUT) :: NM_STRS_MESH
+      LOGICAL, INTENT(IN) :: L_DEAD, NM_STRS_MESH
+      INTEGER, INTENT(OUT) :: I_STRS_DOOR
       REAL(EB), INTENT(INOUT) :: HR_TAU
       REAL(EB), INTENT(OUT) :: UBAR, VBAR, TPRE
       !
       ! Local variables
       INTEGER :: N,NM_NOW, STRS_INDX, DOOR_IOR, KKZ, J, I1, J1
       REAL(EB) :: X_TARGET, Y_TARGET, DOOR_WIDTH, DOOR_DIST, EVEL, X1,X2,Y1,Y2
-      LOGICAL :: NM_STRS_MESHS, STRAIGHT_LINE_TO_TARGET
+      LOGICAL :: NM_STRS_MESHS, STRAIGHT_LINE_TO_TARGET, Is_Known_Door_tmp
       TYPE (MESH_TYPE), POINTER :: MFF=>NULL()
       TYPE (HUMAN_TYPE), POINTER :: HR=>NULL()
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
+      INTEGER :: I_TARGET_TMP, INODE, I_TARGET_OLD, III, N_QUEUE
+      REAL(EB) :: DIST_TO_DOOR, DIST_TO_DOOR_TMP, X_NODE, Y_NODE, WIDTH, T_TMP1
 
       HR=>HUMAN(I)
       KKZ = 1
@@ -7245,17 +7265,23 @@ CONTAINS
       END IF
       ! 
       ! Determine if the mesh is a stairs-mesh
-      NM_STRS_MESH = .FALSE.
-      STRSMESHLOOP: DO N = 1, N_STRS
-         IF (EVAC_STRS(N)%IMESH==NM) THEN     
-            NM_NOW = NM
-            NM_STRS_MESH = .TRUE.
-            STRS_INDX = N
-            STRP=>EVAC_STRS(N)
-            NOUT = N
-            EXIT STRSMESHLOOP
-         END IF
-      END DO STRSMESHLOOP
+      IF (NM_STRS_MESH) THEN
+         N = NOUT
+         NM_NOW = NM
+         STRS_INDX = N
+         STRP=>EVAC_STRS(N)
+      END IF
+!!$      NM_STRS_MESH = .FALSE.
+!!$      STRSMESHLOOP: DO N = 1, N_STRS
+!!$         IF (EVAC_STRS(N)%IMESH==NM) THEN     
+!!$            NM_NOW = NM
+!!$            NM_STRS_MESH = .TRUE.
+!!$            STRS_INDX = N
+!!$            STRP=>EVAC_STRS(N)
+!!$            NOUT = N
+!!$            EXIT STRSMESHLOOP
+!!$         END IF
+!!$      END DO STRSMESHLOOP
 
       MFF=>MESHES(NM_NOW)  ! Pointer to the flow field mesh
 
@@ -7267,12 +7293,198 @@ CONTAINS
          IF (HR%I_TARGET == 0) THEN
             CALL FIND_TARGET_NODE_IN_STRS(STRP,HR)
          END IF
-         N = HR%I_TARGET
+         N = ABS(HR%I_TARGET)
+         IF (N>N_DOORS) THEN
+            N = N - N_DOORS
+            IF (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) THEN
+               STRAIGHT_LINE_TO_TARGET = .TRUE.
+            END IF
+         ELSE IF (N>0) THEN
+            IF (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) THEN
+               STRAIGHT_LINE_TO_TARGET = .TRUE.
+            END IF
+         END IF
+         ! Test if this agent should update the exit door (exp. distribution)
+         RN = 2.0_EB
+         IF (HR%I_TARGET > 0 .AND. STRAIGHT_LINE_TO_TARGET) THEN
+            ! The agent is at the final landing and has already chosen the closest door once
+            CALL RANDOM_NUMBER(RN)
+         END IF
+         IF (STRAIGHT_LINE_TO_TARGET .AND. RN > EXP(-DTSP/TAU_CHANGE_DOOR)) THEN
+            ! Find the target among the nodes leading out of the strs (doors and exits)
+            I_TARGET_OLD = HR%I_TARGET
+            DIST_TO_DOOR = HUGE(DIST_TO_DOOR)
+
+            NODES_OUT_LOOP: DO J = 1, STRP%N_NODES_OUT
+               INODE = STRP%NODES_OUT(J)
+
+               SELECT CASE(EVAC_NODE_LIST(INODE)%NODE_TYPE)
+               CASE('Door')
+                  IF (EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%STR_SUB_INDX /= HR%STR_SUB_INDX) CYCLE NODES_OUT_LOOP
+
+                  ! Group index=0: the agent is from an entry line (no evac line)
+                  ! J  =  MAX(0,HR%GROUP_ID)   ! Group index
+                  ! J1 = -MIN(0,HR%GROUP_ID)   ! Lonely agent index
+                  Is_Known_Door_tmp = .FALSE.
+                  IF ( HR%GROUP_ID /= 0 ) THEN
+                     IF ( HR%GROUP_ID < 0 ) THEN
+                        ! A lonely soul
+                        DO iii = 1, Human_Known_Doors(-HR%GROUP_ID)%N_nodes
+                           IF (EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%INODE == &
+                                Human_Known_Doors(-HR%GROUP_ID)%I_nodes(iii)) Is_Known_Door_tmp = .TRUE.
+                        END DO
+                     ELSE
+                        ! A member of a group
+                        DO iii = 1, Group_Known_Doors(HR%GROUP_ID)%N_nodes
+                           IF (EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%INODE == &
+                                Group_Known_Doors(HR%GROUP_ID)%I_nodes(iii)) Is_Known_Door_tmp = .TRUE.
+                        END DO
+                     END IF
+                  ELSE
+                     ! The agent is from an entry line. P_door= 0.0 or 1.0, known doors
+                     ! i_door_nodes: <0 exit number, >0 door number
+                     DO iii = 1, EVAC_ENTRYS(ABS(HR%IEL))%N_VENT_FFIELDS 
+                        IF (EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%INODE == EVAC_ENTRYS(ABS(HR%IEL))%I_DOOR_NODES(iii) &
+                             .AND. EVAC_ENTRYS(ABS(HR%IEL))%P_VENT_FFIELDS(III)>0.5_EB ) Is_Known_Door_tmp = .TRUE.
+                     END DO
+                  END IF
+
+                  ! IF (.NOT. EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%EXIT_SIGN) CYCLE NODES_IN_LOOP
+                  ! Put here a check: If a known door for this agent, then exit_sign = T or F are good.
+                  ! If not known door, then exit_sign=T only counted as a possible door.
+                  X_NODE = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X
+                  Y_NODE = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y
+                  I_TARGET_TMP = EVAC_NODE_LIST(INODE)%NODE_INDEX
+                  DIST_TO_DOOR_TMP = 50.0_EB*SQRT( (X_NODE-HR%X)**2 + (Y_NODE-HR%Y)**2 ) / &
+                       EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%R_NTARGET + 1.0_EB
+                  III = MIN(50,MAX(1,INT(DIST_TO_DOOR_TMP)-1))
+                  WIDTH   = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%WIDTH
+                  N_QUEUE = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%NTARGET(III)
+               CASE('Exit')
+                  ! Next check is actually not needed, because count_only exits are not counted as STR nodes.
+                  IF (EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%COUNT_ONLY) CYCLE NODES_OUT_LOOP
+                  IF (EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%STR_SUB_INDX /= HR%STR_SUB_INDX) CYCLE NODES_OUT_LOOP
+
+                  ! Group index=0: the agent is from an entry line (no evac line)
+                  ! J  =  MAX(0,HR%GROUP_ID)   ! Group index
+                  ! J1 = -MIN(0,HR%GROUP_ID)   ! Lonely agent index
+                  Is_Known_Door_tmp = .FALSE.
+                  IF ( HR%GROUP_ID /= 0 ) THEN
+                     IF ( HR%GROUP_ID < 0 ) THEN
+                        ! A lonely soul
+                        DO iii = 1, Human_Known_Doors(-HR%GROUP_ID)%N_nodes
+                           IF (EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%INODE == &
+                                Human_Known_Doors(-HR%GROUP_ID)%I_nodes(iii)) Is_Known_Door_tmp = .TRUE.
+                        END DO
+                     ELSE
+                        ! A member of a group
+                        DO iii = 1, Group_Known_Doors(HR%GROUP_ID)%N_nodes
+                           IF (EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%INODE == &
+                                Group_Known_Doors(HR%GROUP_ID)%I_nodes(iii)) Is_Known_Door_tmp = .TRUE.
+                        END DO
+                     END IF
+                  ELSE
+                     ! The agent is from an entry line. P_door= 0.0 or 1.0, known doors
+                     ! i_door_nodes: <0 exit number, >0 door number
+                     DO iii = 1, EVAC_ENTRYS(ABS(HR%IEL))%N_VENT_FFIELDS 
+                        IF (EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%INODE == EVAC_ENTRYS(ABS(HR%IEL))%I_DOOR_NODES(iii) &
+                             .AND. EVAC_ENTRYS(ABS(HR%IEL))%P_VENT_FFIELDS(III)>0.5_EB ) Is_Known_Door_tmp = .TRUE.
+                     END DO
+                  END IF
+
+                  X_NODE = EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X
+                  Y_NODE = EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y
+                  I_TARGET_TMP = EVAC_NODE_LIST(INODE)%NODE_INDEX + N_DOORS
+                  DIST_TO_DOOR_TMP = 50.0_EB*SQRT( (X_NODE-HR%X)**2 + (Y_NODE-HR%Y)**2 ) / &
+                       EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%R_NTARGET + 1.0_EB
+                  III = MIN(50,MAX(1,INT(DIST_TO_DOOR_TMP)-1))
+                  WIDTH   = EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%WIDTH
+                  N_QUEUE = EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%NTARGET(III)
+               CASE DEFAULT
+                  WRITE(LU_ERR,*) 'ERROR (DEBUG): Unknown node type in Find_prefered_direction nodes_out_loop'
+               END SELECT
+               ! It is assumed that exit sign is on either side of the door
+               DIST_TO_DOOR_TMP = 0.0_EB
+               IF (.NOT.Is_Known_Door_tmp) DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + 1000.0_EB
+               IF (Trim(EVAC_NODE_LIST(INODE)%NODE_TYPE)=='Door') THEN
+                  IF (.NOT.EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%EXIT_SIGN .AND. .NOT.Is_Known_Door_tmp) THEN
+                     DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + 1000.0_EB ! Penalty for floor ==> door ==> stairs doors
+                  END IF
+               END IF
+               IF (FAC_DOOR_QUEUE > 0.001_EB) THEN
+                  DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + SQRT( (X_NODE-HR%X)**2 + (Y_NODE-HR%Y)**2 )
+                  T_TMP1 = MIN(1.5_EB*PI*DIST_TO_DOOR_TMP**2/(FAC_DOOR_QUEUE*WIDTH), REAL(N_QUEUE,EB)/(FAC_DOOR_QUEUE*WIDTH))
+                  DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + (DIST_TO_DOOR_TMP/HR%SPEED) +  T_TMP1
+                  IF (I_TARGET_TMP == I_TARGET_OLD) DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP*FAC_DOOR_WAIT
+                  IF (DIST_TO_DOOR_TMP < DIST_TO_DOOR) THEN
+                     DIST_TO_DOOR = MAX(0.0_EB,DIST_TO_DOOR_TMP)
+                     HR%I_TARGET = ABS(I_TARGET_TMP)  ! i_target > 0: A good target door is found
+                  END IF
+               ELSE
+                  DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + SQRT( (X_NODE-HR%X)**2 + (Y_NODE-HR%Y)**2 )
+                  IF (I_TARGET_TMP == I_TARGET_OLD) DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP*FAC_DOOR_WAIT
+                  IF (DIST_TO_DOOR_TMP < DIST_TO_DOOR) THEN
+                     DIST_TO_DOOR = MAX(0.0_EB,DIST_TO_DOOR_TMP)
+                     HR%I_TARGET = ABS(I_TARGET_TMP)  ! i_target > 0: A good target door is found
+                  END IF
+               END IF
+            END DO NODES_OUT_LOOP
+            DIST_TO_DOOR = HUGE(DIST_TO_DOOR)
+            ! i_target > 0: A good target door is already found in NODES_OUT
+            ! Prefer NODES_OUT doors over NODES_IN doors
+            IF (HR%I_TARGET <= 0) THEN
+               NODES_IN_LOOP: DO J = 1, STRP%N_NODES_IN
+                  INODE = STRP%NODES_IN(J)
+                  SELECT CASE(EVAC_NODE_LIST(INODE)%NODE_TYPE)
+                  CASE('Door')
+                     IF (EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%STR_SUB_INDX /= HR%STR_SUB_INDX) CYCLE NODES_IN_LOOP
+                     X_NODE = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X
+                     Y_NODE = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y
+                     I_TARGET_TMP = EVAC_NODE_LIST(INODE)%NODE_INDEX
+                     DIST_TO_DOOR_TMP = 50.0_EB*SQRT( (X_NODE-HR%X)**2 + (Y_NODE-HR%Y)**2 ) / &
+                          EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%R_NTARGET + 1.0_EB
+                     III = MIN(50,MAX(1,INT(DIST_TO_DOOR_TMP)-1))
+                     WIDTH   = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%WIDTH
+                     N_QUEUE = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%NTARGET(III)
+                     !CASE('Exit')
+                  CASE DEFAULT
+                     WRITE(LU_ERR,*) 'ERROR (DEBUG): Unknown node type in Find_prefered_direction nodes_in_loop'
+                  END SELECT
+                  ! It is assumed that exit sign is on either side of the door
+                  IF (EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%EXIT_SIGN) THEN
+                     DIST_TO_DOOR_TMP = 1000.0_EB ! Penalty for floor ==> door ==> stairs doors
+                  ELSE
+                     DIST_TO_DOOR_TMP = 0.0_EB
+                  END IF
+                  IF (FAC_DOOR_QUEUE > 0.001_EB) THEN
+                     DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + SQRT( (X_NODE-HR%X)**2 + (Y_NODE-HR%Y)**2 )
+                     T_TMP1 = MIN(1.5_EB*PI*DIST_TO_DOOR_TMP**2/(FAC_DOOR_QUEUE*WIDTH), REAL(N_QUEUE,EB)/(FAC_DOOR_QUEUE*WIDTH))
+                     DIST_TO_DOOR_TMP = (DIST_TO_DOOR_TMP/HR%SPEED) +  T_TMP1
+                     IF (I_TARGET_TMP == I_TARGET_OLD) DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP*FAC_DOOR_WAIT
+                     IF (DIST_TO_DOOR_TMP < DIST_TO_DOOR) THEN
+                        DIST_TO_DOOR = MAX(0.0_EB,DIST_TO_DOOR_TMP)
+                        HR%I_TARGET = ABS(I_TARGET_TMP)  ! i_target > 0: A good target door is found
+                     END IF
+                  ELSE
+                     DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + SQRT( (X_NODE-HR%X)**2 + (Y_NODE-HR%Y)**2 )
+                     IF (I_TARGET_TMP == I_TARGET_OLD) DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP*FAC_DOOR_WAIT
+                     !IF (.NOT.Is_Known_Door_tmp) DIST_TO_DOOR_TMP = DIST_TO_DOOR_TMP + 100000.0_EB
+                     IF (DIST_TO_DOOR_TMP < DIST_TO_DOOR) THEN
+                        DIST_TO_DOOR = MAX(0.0_EB,DIST_TO_DOOR_TMP)
+                        HR%I_TARGET = ABS(I_TARGET_TMP)  ! i_target > 0: A good target door is found
+                     END IF
+                  END IF
+               END DO NODES_IN_LOOP
+            END IF
+         END IF
+
+         N = ABS(HR%I_TARGET)
          I_STRS_DOOR = N ! Which door is the target is needed in door post forces
          IF (N>N_DOORS) THEN
             N = N - N_DOORS
             IF (EVAC_EXITS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) THEN
                STRAIGHT_LINE_TO_TARGET = .TRUE.
+               HR%I_TARGET = ABS(HR%I_TARGET)
                X_TARGET = (EVAC_EXITS(N)%X1 + EVAC_EXITS(N)%X2)/2.0_EB
                Y_TARGET = (EVAC_EXITS(N)%Y1 + EVAC_EXITS(N)%Y2)/2.0_EB
                DOOR_WIDTH = EVAC_EXITS(N)%WIDTH
@@ -7283,6 +7495,7 @@ CONTAINS
          ELSE IF (N>0) THEN
             IF (EVAC_DOORS(N)%STR_SUB_INDX == HR%STR_SUB_INDX) THEN
                STRAIGHT_LINE_TO_TARGET = .TRUE.
+               HR%I_TARGET = ABS(HR%I_TARGET)
                X_TARGET = (EVAC_DOORS(N)%X1 + EVAC_DOORS(N)%X2)/2.0_EB
                Y_TARGET = (EVAC_DOORS(N)%Y1 + EVAC_DOORS(N)%Y2)/2.0_EB
                DOOR_WIDTH = EVAC_DOORS(N)%WIDTH
@@ -7314,25 +7527,21 @@ CONTAINS
          SELECT CASE(DOOR_IOR)
          CASE(-1,+1)
             IF ((HR%Y > Y1) .AND. (HR%Y < Y2)) THEN
-               !IF ( DOOR_DIST < 0.5_EB*DOOR_WIDTH ) THEN
+               IF (UBAR==0.0_EB) UBAR = HR%UBAR  ! used old one if at the door line
+               HR%SKIP_WALL_FORCE_IOR = SIGN(1.0_EB,UBAR)
                IF ((HR%Y > Y1+HR%Radius) .AND. (HR%Y < Y2-HR%Radius)) THEN
-                  !UBAR = SIGN(1.0_EB,UBAR)
-                  UBAR = -DOOR_IOR
+                  UBAR = SIGN(1.0_EB,UBAR)
                   VBAR = 0._EB
-                  ! HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
                END IF
-               HR%SKIP_WALL_FORCE_IOR = -DOOR_IOR
             END IF
          CASE(-2,+2)
             IF ((HR%X > X1) .AND. (HR%X < X2)) THEN
-               !IF ( DOOR_DIST < 0.5_EB*DOOR_WIDTH ) THEN
+               IF (VBAR==0.0_EB) VBAR = HR%VBAR  ! used old one if at the door line
+               HR%SKIP_WALL_FORCE_IOR = SIGN(1.0_EB,VBAR)*2
                IF ((HR%X > X1+HR%Radius) .AND. (HR%X < X2-HR%Radius)) THEN
                   UBAR = 0._EB
-                  !VBAR = SIGN(1.0_EB,VBAR)
-                  VBAR = -DOOR_IOR/2
-                  ! HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)*2
+                  VBAR = SIGN(1.0_EB,VBAR)
                END IF
-               HR%SKIP_WALL_FORCE_IOR = -DOOR_IOR
             END IF
          END SELECT
       ELSE IF (NM_STRS_MESH) THEN 
@@ -7506,14 +7715,19 @@ CONTAINS
     SUBROUTINE FIND_TARGET_NODE_IN_STRS(SP,HP)
       IMPLICIT NONE
       !
+      ! This subroutine sets
+      !   HP%I_TARGET: the target door/exit index (now <0, not visible status is returned)
+      !   HP%STRS_DIRECTION: +1 or -1
+      !
       ! Passed variables
       TYPE (EVAC_STRS_TYPE), POINTER :: SP
       TYPE (HUMAN_TYPE), POINTER :: HP
       !
       ! Local variables
-      LOGICAL ISKNOWNDOOR,FINALTARGETFOUND
-      INTEGER :: I_TARGET = 0, I, ID, FINAL_NODE, IG, IN, INODE
-      REAL(EB) Z_NODE, Z_FINAL, DZ_NODE, DZ_FINAL, Z_FINAL_UNKNOWN,DZ_TMP1, DZ_TMP2, DZ_NODE_ACTUAL
+      LOGICAL ISKNOWNDOOR, FINALTARGETFOUND
+      INTEGER :: I_TARGET = 0, I, ID, FINAL_NODE, IG, IN, INODE, STR_SUB_INDX
+      REAL(EB) :: Z_NODE, Z_FINAL, DZ_NODE, DZ_FINAL, Z_FINAL_UNKNOWN,DZ_TMP1, DZ_TMP2, DZ_NODE_ACTUAL
+      REAL(EB) :: DIST_TO_DOOR, X_NODE, Y_NODE, DIST_TO_DOOR_TMP
       TYPE (EVAC_ENTR_TYPE), POINTER :: PNX =>NULL()
 
       FINALTARGETFOUND = .FALSE.
@@ -7567,23 +7781,28 @@ CONTAINS
       ! Find the target among the nodes leading out of the strs (doors and exits)
       FINALTARGETFOUND = .FALSE.
       DZ_TMP2 = HUGE(1.0_EB)
+      DIST_TO_DOOR = HUGE(DIST_TO_DOOR)
       FINDTARGETNODELOOP: DO I = 1,SP%N_NODES_OUT
          INODE = SP%NODES_OUT(I)
          DZ_NODE = -1._EB * SIGN(1.0_EB,DZ_FINAL) ! Initialize dz_node to different direction than final target
          SELECT CASE(EVAC_NODE_LIST(INODE)%NODE_TYPE)
          CASE('Door')
             Z_NODE = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Z1
+            X_NODE = 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X1+EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X2)
+            Y_NODE = 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y1+EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y2)
          CASE('Exit')
             Z_NODE = EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Z1
+            X_NODE = 0.5_EB*(EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X1+EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X2)
+            Y_NODE = 0.5_EB*(EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y1+EVAC_EXITS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y2)
          CASE DEFAULT
             WRITE(LU_ERR,*) 'ERROR (DEBUG): Unknown node type in find_target_node_in_strs'
          END SELECT
          DZ_NODE = Z_NODE - HP%Z
          IF (SIGN(1.0_EB,DZ_NODE)==SIGN(1.0_EB,DZ_FINAL)) THEN
             DZ_TMP1 = ABS(DZ_FINAL)-ABS(DZ_NODE)
-            IF ( DZ_TMP1 < DZ_TMP2) THEN
+            IF ( DZ_TMP1 < DZ_TMP2 ) THEN
                FINALTARGETFOUND = .TRUE.
-               HP%I_TARGET = EVAC_NODE_LIST(SP%NODES_OUT(I))%NODE_INDEX
+               HP%I_TARGET = -EVAC_NODE_LIST(SP%NODES_OUT(I))%NODE_INDEX
                DZ_TMP2 = DZ_TMP1
                DZ_NODE_ACTUAL = DZ_NODE
             END IF
@@ -7592,30 +7811,39 @@ CONTAINS
 
       ! Find the target among the nodes leading in to the strs, i.e. doors
       IF (.NOT.FINALTARGETFOUND) THEN
-      FINDTARGETNODELOOP2: DO I = 1,SP%N_NODES_IN
-         INODE = SP%NODES_IN(I)
-         DZ_NODE = -1._EB * SIGN(1.0_EB,DZ_FINAL) ! Initialize dz_node to different direction than final target
-         SELECT CASE(EVAC_NODE_LIST(INODE)%NODE_TYPE)
-         CASE('Door')
-            Z_NODE = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Z1
-         CASE('Exit')
-!            Z_NODE = EVAC_EXITS(EVAC_NODE_LIST(SP%NODES_IN(I))%NODE_INDEX)%Z1
-         CASE('Entry')
-!            Z_NODE = EVAC_ENTRYS(EVAC_NODE_LIST(SP%NODES_IN(I))%NODE_INDEX)%Z1
-         CASE DEFAULT
-            WRITE(LU_ERR,*) 'ERROR (DEBUG): Unknown node type in find_target_node_in_strs'
-         END SELECT
-         DZ_NODE = Z_NODE - HP%Z
-         IF (SIGN(1.0_EB,DZ_NODE)==SIGN(1.0_EB,DZ_FINAL)) THEN
-            DZ_TMP1 = ABS(DZ_FINAL-DZ_NODE)
-            IF ( DZ_TMP1 < DZ_TMP2) THEN
-               FINALTARGETFOUND = .TRUE.
-               HP%I_TARGET = EVAC_NODE_LIST(INODE)%NODE_INDEX
-               DZ_TMP2 = DZ_TMP1
-               DZ_NODE_ACTUAL = DZ_NODE
+         DIST_TO_DOOR = HUGE(DIST_TO_DOOR)
+         FINDTARGETNODELOOP2: DO I = 1,SP%N_NODES_IN
+            INODE = SP%NODES_IN(I)
+            DZ_NODE = -1._EB * SIGN(1.0_EB,DZ_FINAL) ! Initialize dz_node to different direction than final target
+            SELECT CASE(EVAC_NODE_LIST(INODE)%NODE_TYPE)
+            CASE('Door')
+               Z_NODE = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Z1
+               X_NODE = 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X1+EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X2)
+               Y_NODE = 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y1+EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y2)
+               STR_SUB_INDX = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%STR_SUB_INDX
+            CASE('Exit')
+               !            Z_NODE = EVAC_EXITS(EVAC_NODE_LIST(SP%NODES_IN(I))%NODE_INDEX)%Z1
+            CASE('Entry')
+               !            Z_NODE = EVAC_ENTRYS(EVAC_NODE_LIST(SP%NODES_IN(I))%NODE_INDEX)%Z1
+            CASE DEFAULT
+               WRITE(LU_ERR,*) 'ERROR (DEBUG): Unknown node type in find_target_node_in_strs'
+            END SELECT
+            DZ_NODE = Z_NODE - HP%Z
+            IF (SIGN(1.0_EB,DZ_NODE)==SIGN(1.0_EB,DZ_FINAL)) THEN
+               DZ_TMP1 = ABS(DZ_FINAL-DZ_NODE)
+               IF (HP%STR_SUB_INDX==STR_SUB_INDX) THEN
+                  DIST_TO_DOOR_TMP = (X_NODE-HP%X)**2 + (Y_NODE-HP%Y)**2
+               ELSE
+                  DIST_TO_DOOR_TMP = -1.0_EB
+               END IF
+               IF ( DZ_TMP1 < DZ_TMP2) THEN
+                     FINALTARGETFOUND = .TRUE.
+                     HP%I_TARGET = -EVAC_NODE_LIST(INODE)%NODE_INDEX
+                     DZ_TMP2 = DZ_TMP1
+                     DZ_NODE_ACTUAL = DZ_NODE
+               END IF
             END IF
-         END IF
-      END DO FINDTARGETNODELOOP2
+         END DO FINDTARGETNODELOOP2
       END IF
       IF (DZ_NODE_ACTUAL >= 0._EB) THEN
          HP%STRS_DIRECTION = 1
@@ -10413,7 +10641,6 @@ CONTAINS
     ! This function returns true, if the two points have a line-of-sight.
     ! This function does use smoke information, i.e., it sees if
     ! there are obstacles and/or too much smoke between the two points.
-    ! NOTE: This works only for thick OBSTs (at least one grid cell thick)
     ! Inputs:  nm: mesh index, r1 an r2 should belong to the same mesh
     !          idoor: index of the  door/exit
     !          itarget: the current target door of the agent
