@@ -211,24 +211,45 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       IOR = IJKW(4,IW)
       SELECT CASE(IOR) 
          CASE( 1)
-            IF (FLUX_LIMITER>=0) FX(IIG-1,JJG,KKG,N) = -RHO_D_DYDN
             RHO_D_DYDX(IIG-1,JJG,KKG) = 0._EB
          CASE(-1)
-            IF (FLUX_LIMITER>=0) FX(IIG,JJG,KKG,N) = RHO_D_DYDN
             RHO_D_DYDX(IIG,JJG,KKG)   = 0._EB
          CASE( 2)
-            IF (FLUX_LIMITER>=0) FY(IIG,JJG-1,KKG,N) = -RHO_D_DYDN
             RHO_D_DYDY(IIG,JJG-1,KKG) = 0._EB
          CASE(-2)
-            IF (FLUX_LIMITER>=0) FY(IIG,JJG,KKG,N) = RHO_D_DYDN
             RHO_D_DYDY(IIG,JJG,KKG)   = 0._EB
          CASE( 3)
-            IF (FLUX_LIMITER>=0) FZ(IIG,JJG,KKG-1,N) = -RHO_D_DYDN
             RHO_D_DYDZ(IIG,JJG,KKG-1) = 0._EB
          CASE(-3)
-            IF (FLUX_LIMITER>=0) FZ(IIG,JJG,KKG,N) = RHO_D_DYDN
             RHO_D_DYDZ(IIG,JJG,KKG)   = 0._EB
       END SELECT
+      
+      IF (FLUX_LIMITER>=0) THEN
+         IBC = IJKW(5,IW)
+         SF => SURFACE(IBC)
+         IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FRACTION) THEN
+            ! This modification is required because, in the case of SPECIFIED_MASS_FRACTION,
+            ! YY_W refers to the mass fraction on the boundary, not the ghost cell; so DN is
+            ! half of its value at an interpolated boundary, for instance, and the scalar
+            ! gradient is doubled.
+            RHO_D_DYDN = 2._EB*RHO_D_DYDN
+         ENDIF
+         SELECT CASE(IOR) 
+            CASE( 1)
+               FX(IIG-1,JJG,KKG,N) = -RHO_D_DYDN
+            CASE(-1)
+               FX(IIG,JJG,KKG,N) = RHO_D_DYDN
+            CASE( 2)
+               FY(IIG,JJG-1,KKG,N) = -RHO_D_DYDN
+            CASE(-2)
+               FY(IIG,JJG,KKG,N) = RHO_D_DYDN
+            CASE( 3)
+               FZ(IIG,JJG,KKG-1,N) = -RHO_D_DYDN
+            CASE(-3)
+               FZ(IIG,JJG,KKG,N) = RHO_D_DYDN
+          END SELECT
+      ENDIF
+      
    ENDDO WALL_LOOP
    !$OMP END DO
 

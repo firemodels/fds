@@ -1511,6 +1511,35 @@ WALL_LOOP: DO IW=1,NWC
             CASE(-3)
                FZ(II,JJ,KK-1,0) = -SUM(MASSFLUX(IW,:))
          END SELECT
+         
+      CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER
+      
+         SELECT CASE(IOR)
+            CASE( 1)
+               ZZ(2) = RHO_W(IW)
+               ZZ(3) = RHOP(IIG,JJG,KKG)
+               FX(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)*R(II)
+            CASE(-1)
+               ZZ(2) = RHOP(IIG,JJG,KKG)
+               ZZ(3) = RHO_W(IW)
+               FX(II-1,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)*R(II-1)
+            CASE( 2)   
+               ZZ(2) = RHO_W(IW)
+               ZZ(3) = RHOP(IIG,JJG,KKG)
+               FY(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+            CASE(-2)
+               ZZ(2) = RHOP(IIG,JJG,KKG)
+               ZZ(3) = RHO_W(IW)
+               FY(II,JJ-1,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+            CASE( 3)
+               ZZ(2) = RHO_W(IW)
+               ZZ(3) = RHOP(IIG,JJG,KKG)
+               FZ(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+            CASE(-3)
+               ZZ(2) = RHOP(IIG,JJG,KKG)
+               ZZ(3) = RHO_W(IW)
+               FZ(II,JJ,KK-1,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+         END SELECT
             
       CASE DEFAULT METHOD_OF_MASS_TRANSFER
              
@@ -1518,51 +1547,27 @@ WALL_LOOP: DO IW=1,NWC
             CASE( 1)
                ZZ(2) = RHO_W(IW)
                ZZ(3) = RHOP(IIG,JJG,KKG)
-               IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                  FX(II,JJ,KK,0) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)*R(II)
-               ELSE
-                  FX(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)*R(II)
-               ENDIF
+               FX(II,JJ,KK,0) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)*R(II)
             CASE(-1)
                ZZ(2) = RHOP(IIG,JJG,KKG)
                ZZ(3) = RHO_W(IW)
-               IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                  FX(II-1,JJ,KK,0) = UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1)*R(II-1)
-               ELSE
-                  FX(II-1,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)*R(II-1)
-               ENDIF
+               FX(II-1,JJ,KK,0) = UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1)*R(II-1)
             CASE( 2)   
                ZZ(2) = RHO_W(IW)
                ZZ(3) = RHOP(IIG,JJG,KKG)
-               IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                  FY(II,JJ,KK,0) = VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
-               ELSE
-                  FY(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
-               ENDIF
+               FY(II,JJ,KK,0) = VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
             CASE(-2)
                ZZ(2) = RHOP(IIG,JJG,KKG)
                ZZ(3) = RHO_W(IW)
-               IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                  FY(II,JJ-1,KK,0) = VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
-               ELSE
-                  FY(II,JJ-1,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
-               ENDIF
+               FY(II,JJ-1,KK,0) = VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
             CASE( 3)
                ZZ(2) = RHO_W(IW)
                ZZ(3) = RHOP(IIG,JJG,KKG)
-               IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                  FZ(II,JJ,KK,0) = WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
-               ELSE
-                  FZ(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
-               ENDIF
+               FZ(II,JJ,KK,0) = WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
             CASE(-3)
                ZZ(2) = RHOP(IIG,JJG,KKG)
                ZZ(3) = RHO_W(IW)
-               IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                  FZ(II,JJ,KK-1,0) = WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
-               ELSE
-                  FZ(II,JJ,KK-1,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
-               ENDIF
+               FZ(II,JJ,KK-1,0) = WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
          END SELECT
       
    END SELECT METHOD_OF_MASS_TRANSFER
@@ -1687,57 +1692,62 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   FZ(II,JJ,KK-1,N) = -MASSFLUX(IW,N)
             END SELECT
             
-         CASE DEFAULT METHOD_OF_MASS_TRANSFER2
+         CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER2
                
             SELECT CASE(IOR)
                CASE( 1)
                   ZZ(2) = RHO_W(IW)*YY_W(IW,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
-                  IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                     FX(II,JJ,KK,N) = (FX(II,JJ,KK,N) + UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1))*R(II)
-                  ELSE
-                     FX(II,JJ,KK,N) = (FX(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1))*R(II)
-                  ENDIF
+                  FX(II,JJ,KK,N) = (FX(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1))*R(II)
                CASE(-1)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(3) = RHO_W(IW)*YY_W(IW,N)
-                  IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                     FX(II-1,JJ,KK,N) = (FX(II-1,JJ,KK,N) + UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1))*R(II-1)
-                  ELSE
-                     FX(II-1,JJ,KK,N) = (FX(II-1,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1))*R(II-1)
-                  ENDIF
+                  FX(II-1,JJ,KK,N) = (FX(II-1,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1))*R(II-1)
                CASE( 2)   
                   ZZ(2) = RHO_W(IW)*YY_W(IW,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
-                  IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                     FY(II,JJ,KK,N) = FY(II,JJ,KK,N) + VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
-                  ELSE
-                     FY(II,JJ,KK,N) = FY(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
-                  ENDIF
+                  FY(II,JJ,KK,N) = FY(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
                CASE(-2)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(3) = RHO_W(IW)*YY_W(IW,N)
-                  IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                     FY(II,JJ-1,KK,N) = FY(II,JJ-1,KK,N) + VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
-                  ELSE
-                     FY(II,JJ-1,KK,N) = FY(II,JJ-1,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
-                  ENDIF
+                  FY(II,JJ-1,KK,N) = FY(II,JJ-1,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
                CASE( 3)
                   ZZ(2) = RHO_W(IW)*YY_W(IW,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
-                  IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                     FZ(II,JJ,KK,N) = FZ(II,JJ,KK,N) + WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
-                  ELSE
-                     FZ(II,JJ,KK,N) = FZ(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
-                  ENDIF
+                  FZ(II,JJ,KK,N) = FZ(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
                CASE(-3)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(3) = RHO_W(IW)*YY_W(IW,N)
-                  IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
-                     FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
-                  ELSE
-                     FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
-                  ENDIF
+                  FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,1)
+            END SELECT
+            
+         CASE DEFAULT METHOD_OF_MASS_TRANSFER2 ! handles SPECIFIED_MASS_FRACTION also
+
+            SELECT CASE(IOR)
+               CASE( 1)
+                  ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
+                  FX(II,JJ,KK,N) = (FX(II,JJ,KK,N) + UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1))*R(II)
+               CASE(-1)
+                  ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
+                  ZZ(3) = RHO_W(IW)*YY_W(IW,N)
+                  FX(II-1,JJ,KK,N) = (FX(II-1,JJ,KK,N) + UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1))*R(II-1)
+               CASE( 2)   
+                  ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
+                  FY(II,JJ,KK,N) = FY(II,JJ,KK,N) + VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
+               CASE(-2)
+                  ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
+                  ZZ(3) = RHO_W(IW)*YY_W(IW,N)
+                  FY(II,JJ-1,KK,N) = FY(II,JJ-1,KK,N) + VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
+               CASE( 3)
+                  ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
+                  FZ(II,JJ,KK,N) = FZ(II,JJ,KK,N) + WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
+               CASE(-3)
+                  ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
+                  ZZ(3) = RHO_W(IW)*YY_W(IW,N)
+                  FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
             END SELECT
       
       END SELECT METHOD_OF_MASS_TRANSFER2
