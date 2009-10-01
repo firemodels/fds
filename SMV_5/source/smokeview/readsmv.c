@@ -3538,7 +3538,7 @@ typedef struct {
         ipatch++;
       }
       else{
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        if(trainer_mode==0)printf("*** Warning: the file, %s, does not exist.\n",buffer);
         if(readlabels(&patchi->label,stream)==2)return 2;
         npatch_files--;
       }
@@ -3633,7 +3633,7 @@ typedef struct {
       }
       else{
         get_isolevels=0;
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        if(trainer_mode==0)printf("*** Warning: the file, %s, does not exist.\n",buffer);
         if(readlabels(&isoi->label,stream)==2)return 2;
         niso--;
       }
