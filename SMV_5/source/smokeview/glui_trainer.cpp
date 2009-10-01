@@ -346,6 +346,7 @@ void TRAINER_CB(int var){
         touri = tourinfo + i;
         touri->display=0;
       }
+      viewtourfrompath=1;
       TourMenu(trainer_path);
     }
     trainer_path_old=trainer_path;
