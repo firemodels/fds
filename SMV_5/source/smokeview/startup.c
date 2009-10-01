@@ -75,6 +75,8 @@ int initcase_c(int argc, char **argv){
   Args(argc, argv); 
   return_code=-1;
   if(strcmp(inputfilename_ext,".svd")==0||demo_option==1){
+    trainer_mode=1;
+    trainer_active=1;
     if(strcmp(inputfilename_ext,".svd")==0){
       input_file=trainer_filename;
     }
@@ -86,8 +88,6 @@ int initcase_c(int argc, char **argv){
     }
     return_code=readsmv(input_file);
     if(return_code==0){
-      trainer_mode=1;
-      trainer_active=1;
       show_trainer();
       show_load_alert();
     }

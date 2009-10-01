@@ -1335,7 +1335,7 @@ void handle_eyeview(int flag){
   updatemenu=1;
   switch (eyeview){
   case WORLD_CENTERED:
-      printf("world centered\n");
+      if(trainer_mode==0)printf("world centered\n");
       if(showtrainer==0&&flag==0&&eyeview_old==EYE_CENTERED){
         ResetView(RESTORE_EXTERIOR_VIEW);
       }
@@ -1346,11 +1346,11 @@ void handle_eyeview(int flag){
          ResetView(RESTORE_EXTERIOR_VIEW);
        }
        update_glui_speed();
-      printf("eye centered\n");
+      if(trainer_mode==0)printf("eye centered\n");
       break;
   case WORLD_CENTERED_LEVEL:
     angle_zx[1]=0.0;
-    printf("world centered, level rotations\n");
+    if(trainer_mode==0)printf("world centered, level rotations\n");
     if(showtrainer==0&&flag==0&&eyeview_old==EYE_CENTERED){
       ResetView(RESTORE_EXTERIOR_VIEW);
     }
@@ -1359,17 +1359,19 @@ void handle_eyeview(int flag){
     ASSERT(FFALSE);
     break;
   }
-    showhide_translate(eyeview);
-    eyeview_old = eyeview;
-    return;
+  showhide_translate(eyeview);
+  eyeview_old = eyeview;
+  return;
 }
 
 /* ------------------ update_clipplanes ------------------------ */
 
 void update_clipplanes(void){
-  if(xyz_clipplane==0)printf("clipping off\n");
-  if(xyz_clipplane==1)printf("clipping blockages + data\n");
-  if(xyz_clipplane==2)printf("clipping blockages\n");
+  if(trainer_mode==0){
+    if(xyz_clipplane==0)printf("clipping off\n");
+    if(xyz_clipplane==1)printf("clipping blockages + data\n");
+    if(xyz_clipplane==2)printf("clipping blockages\n");
+  }
   if(xyz_clipplane==0){
     glDisable(GL_CLIP_PLANE0);
     glDisable(GL_CLIP_PLANE1);

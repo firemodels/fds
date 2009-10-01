@@ -181,7 +181,7 @@ extern "C" void glui_trainer_setup(int main_window){
 
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
       char line[256];
-      printf("label=%s id=%i\n",ca->name,ca->view_id);
+
       if(strcmp(ca->name,"internal")==0)continue;
       if(strcmp(ca->name,"external")==0){
         strcpy(line,"Default");
