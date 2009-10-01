@@ -6210,7 +6210,7 @@ void initcullplane(int cullflag){
                 norm[1]=0.0;
                 dx = meshi->xplt_orig[1]-meshi->xplt_orig[0];
                 dz = meshi->zplt_orig[1]-meshi->zplt_orig[0];
-                factor= dz*dz+dy*dy;
+                factor= dz*dz+dx*dx;
                 if(factor==0.0){
                   factor=1.0;
                 }
@@ -6276,7 +6276,7 @@ void initcullplane(int cullflag){
                 norm[1]=0.0;
                 dx = meshi->xplt_orig[1]-meshi->xplt_orig[0];
                 dz = meshi->zplt_orig[1]-meshi->zplt_orig[0];
-                factor= dz*dz+dy*dy;
+                factor= dz*dz+dx*dx;
                 if(factor==0.0){
                   factor=1.0;
                 }
