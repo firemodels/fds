@@ -69,6 +69,7 @@
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0 /  Show 3D contours of temperature at 200 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=620.0 /  Show 3D contours of temperature at 620 C
 &ISOF QUANTITY='MIXTURE_FRACTION',VALUE(1)=0.07 /  Show 3D contours of mixture fraction at 0.07
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0, COLOR_QUANTITY='VELOCITY' /  Show 3D contours of temperature at 200 C
 
 &PART ID='tracers',MASSLESS=.TRUE.,
    QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY'
