@@ -336,9 +336,13 @@ typedef struct {
   int dataflag;
   int type;
   int num_memblocks;
-  flowlabels label;
+  int setvalmin, setvalmax;
+  float valmin, valmax;
+  int firstshort;
+  flowlabels surface_label, color_label;
   int blocknumber,display,loaded;
   float tmin,tmax;
+  float valmin_data, valmax_data;
   float *levels;
   int nlevels;
   char menulabel[128];

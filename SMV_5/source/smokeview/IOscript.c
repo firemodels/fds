@@ -879,7 +879,7 @@ void script_loadiso(scriptdata *scripti){
 
     isoi = isoinfo + i;
     len = strlen(scripti->cval);
-    imatch = match_upper(isoi->label.longlabel,scripti->cval,len);
+    imatch = match_upper(isoi->surface_label.longlabel,scripti->cval,len);
     if(imatch==1||imatch==2){
       readiso(isoi->file,i,LOAD,&errorcode);
     }

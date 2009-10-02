@@ -479,6 +479,7 @@ EXTERNCPP void antialias(int flag);
 EXTERNCPP void saveview(void);
 EXTERNCPP void savelastview(void);
 EXTERNCPP void setslicebounds(int islicetype);
+EXTERNCPP void setisobounds(int islicetype);
 EXTERNCPP void local2globalpatchbounds(const char *key);
 EXTERNCPP void global2localpatchbounds(const char *key);
 EXTERNCPP int getplotstate(int choice);
@@ -518,7 +519,9 @@ EXTERNCPP void drawpatch_threshold_cellcenter(const mesh *meshi);
 
 EXTERNCPP void Render(int view_mode);
 EXTERNCPP void updateslicebounds(void);
+EXTERNCPP void updateisobounds(void);
 EXTERNCPP void updateallslicecolors(int islicetype,int *errorcode);
+EXTERNCPP void updateallisocolors(int iisotype,int *errorcode);
 EXTERNCPP void updatevslicetypes(void);
 EXTERNCPP int getvsliceindex(const vslice *vd);
 EXTERNCPP int getvslicetype(const vslice *vd);
@@ -549,6 +552,7 @@ EXTERNCPP void ZoomMenu(int value);
 EXTERNCPP void setClipPlanes(int mode);
 EXTERNCPP void unsetClipPlanes(void);
 EXTERNCPP void setslicecolors(float slicemin, float slicemax, slice *sd, int *errorcode);
+EXTERNCPP void setisocolors(float isomin, float isomax, iso *sd, int *errorcode);
 EXTERNCPP void drawslice(const slice *sd);
 EXTERNCPP void drawslice_cellcenter(const slice *sd);
 EXTERNCPP void drawslice_texture(const slice *sd);
@@ -741,11 +745,20 @@ EXTERNCPP void getPlot3DColors(int iplot, int settmin, float *ttmin, int settmax
               char **labels,char **scale, float *tlevels, float *tlevels256);
 EXTERNCPP float getsliceval(slice *sd, unsigned char ival);
 EXTERNCPP void updateallslicelabels(int slicetype, int *errorcode);
+EXTERNCPP void updateallisolabels(int slicetype, int *errorcode);
 EXTERNCPP void setslicelabels(float smin, float smax, 
                     slice *sd, int *errorcode);
 EXTERNCPP void getSliceLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
 EXTERNCPP void getSliceColors(const float *t, int nt, unsigned char *it,
+              float tmin, float tmax, 
+              int ndatalevel, int nlevel,
+              char labels[12][11],char **scale, float *tlevels2);
+EXTERNCPP void setisolabels(float smin, float smax, 
+                    iso *sd, int *errorcode);
+EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
+              char labels[12][11],char **scale, float *tlevels256);
+EXTERNCPP void getIsoColors(const float *t, int nt, unsigned char *it,
               float tmin, float tmax, 
               int ndatalevel, int nlevel,
               char labels[12][11],char **scale, float *tlevels2);
