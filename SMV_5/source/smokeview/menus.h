@@ -3331,7 +3331,7 @@ void LoadIsoMenu(int value){
     if(scriptoutstream!=NULL){
       script_iso=1;
       fprintf(scriptoutstream,"LOADISO\n");
-      fprintf(scriptoutstream," %s\n",isoii->label.longlabel);
+      fprintf(scriptoutstream," %s\n",isoii->surface_label.longlabel);
     }
     for(i=0;i<niso;i++){
       isoi = isoinfo + i;
@@ -5106,7 +5106,7 @@ static int in_menu=0;
           sprintf(levellabel,"%f ",loaded_isomesh->isolevels[i]);
         }
         if(loaded_isomesh->isofilenum!=-1){
-          STRCAT(levellabel,isoinfo[loaded_isomesh->isofilenum].label.unit);
+          STRCAT(levellabel,isoinfo[loaded_isomesh->isofilenum].surface_label.unit);
         }
         else{
           STRCAT(levellabel,"");
@@ -5163,11 +5163,11 @@ static int in_menu=0;
       if(iso2!=NULL){
         glutAddMenuEntry("-",999);
         STRCPY(menulabel,"Show All ");
-        STRCAT(menulabel,iso2->label.longlabel);
+        STRCAT(menulabel,iso2->surface_label.longlabel);
         STRCAT(menulabel," isosurfaces");
         glutAddMenuEntry(menulabel,10001);
         STRCPY(menulabel,"Hide All ");
-        STRCAT(menulabel,iso2->label.longlabel);
+        STRCAT(menulabel,iso2->surface_label.longlabel);
         STRCAT(menulabel," isosurfaces");
         glutAddMenuEntry(menulabel,10002);
       }
@@ -5180,7 +5180,7 @@ static int in_menu=0;
       if(visAIso==3)glutAddMenuEntry("*Points",3);
       hmesh=meshinfo+highlight_mesh;
       if(hmesh->isofilenum!=-1){
-        STRCPY(levellabel,isoinfo[hmesh->isofilenum].label.shortlabel);
+        STRCPY(levellabel,isoinfo[hmesh->isofilenum].surface_label.shortlabel);
         STRCAT(levellabel," Levels");
         glutAddSubMenu(levellabel,isolevelmenu);
       }
@@ -7094,7 +7094,7 @@ static int in_menu=0;
         if(ii>0){
           iso1 = isoinfo + isoorderindex[ii-1];
           iso2 = isoinfo + isoorderindex[ii];
-          if(nmeshes>1&&strcmp(iso1->label.longlabel,iso2->label.longlabel)!=0){
+          if(nmeshes>1&&strcmp(iso1->surface_label.longlabel,iso2->surface_label.longlabel)!=0){
             CREATEMENU(isosubmenus[nisosubmenus],LoadIsoMenu);
             nisosubmenus++;
           }
@@ -7120,13 +7120,13 @@ static int in_menu=0;
             isoi = isoinfo + i;
             for(j=0;j<i;j++){
               isoj = isoinfo + j;
-              if(strcmp(isoi->label.longlabel,isoj->label.longlabel)==0){
+              if(strcmp(isoi->surface_label.longlabel,isoj->surface_label.longlabel)==0){
                 useitem=-1;
                 break;
               }
             }
             if(useitem!=-1){
-              strcpy(menulabel,isoi->label.longlabel);
+              strcpy(menulabel,isoi->surface_label.longlabel);
               strcat(menulabel," - All meshes");
               glutAddMenuEntry(menulabel,-useitem-10);
             }
@@ -7140,15 +7140,15 @@ static int in_menu=0;
             iso1 = isoinfo + i;
             if(ii==0){
               nisosubmenus=0;
-              strcpy(menulabel,iso1->label.longlabel);
+              strcpy(menulabel,iso1->surface_label.longlabel);
               strcat(menulabel," - Single mesh");
               glutAddSubMenu(menulabel,isosubmenus[nisosubmenus]);
               nisosubmenus++;
             }
             else{
               iso2 = isoinfo + isoorderindex[ii-1];
-              if(strcmp(iso1->label.longlabel,iso2->label.longlabel)!=0){
-                strcpy(menulabel,iso1->label.longlabel);
+              if(strcmp(iso1->surface_label.longlabel,iso2->surface_label.longlabel)!=0){
+                strcpy(menulabel,iso1->surface_label.longlabel);
                 strcat(menulabel," - Single mesh");
                 glutAddSubMenu(menulabel,isosubmenus[nisosubmenus]);
                 nisosubmenus++;

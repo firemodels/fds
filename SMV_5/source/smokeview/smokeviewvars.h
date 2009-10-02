@@ -146,8 +146,8 @@ SVEXTERN GLfloat diffuselight[4];
 
 SVEXTERN GLint screenWidth2, screenHeight2;
 
-SVEXTERN int list_p3_index,list_slice_index,list_patch_index;
-SVEXTERN int list_p3_index_old, list_slice_index_old, list_patch_index_old;
+SVEXTERN int list_p3_index,list_slice_index,list_patch_index,list_iso_index;
+SVEXTERN int list_p3_index_old, list_slice_index_old, list_patch_index_old,list_iso_index_old;
 
 SVEXTERN float glui_block_xmin, glui_block_ymin, glui_block_zmin;
 SVEXTERN float glui_block_xmax, glui_block_ymax, glui_block_zmax;
@@ -343,6 +343,10 @@ SVEXTERN float partchopmin,  partchopmax;
 SVEXTERN float slicechopmin, slicechopmax;
 SVEXTERN int setpatchchopmin, setpatchchopmax;
 SVEXTERN float patchchopmin,  patchchopmax;
+SVEXTERN int setisomin, setisomax;
+SVEXTERN float isomin, isomax;
+SVEXTERN int setisochopmin, setisochopmax;
+SVEXTERN float isochopmin, isochopmax;
 
 SVEXTERN int vis_onlythreshold, vis_threshold, canshow_threshold, activate_threshold;
 SVEXTERN int settmin_p, settmin_b, settmin_s, settmin_z, settmin_i;
@@ -408,7 +412,7 @@ SVEXTERN int npartinfo, nslice, nvslice, nslice2, npatch2, nplot3d, npatch_files
 SVEXTERN int nevac;
 SVEXTERN int current_particle_type,last_particle_type;
 SVEXTERN int nsmoke3d;
-SVEXTERN int niso;
+SVEXTERN int niso, niso2;
 SVEXTERN int ntrnx, ntrny, ntrnz,npdim,nmeshes,clip_mesh;
 SVEXTERN int nobst,nvent,noffset;
 SVEXTERN int nlabels,visLabels,nlabelssmv;
@@ -913,7 +917,7 @@ SVEXTERN int nmultivslices;
 SVEXTERN int *sliceorderindex,*vsliceorderindex,*partorderindex;
 SVEXTERN int *patchorderindex,*isoorderindex,*plot3dorderindex;
 SVEXTERN int showfiles;
-SVEXTERN databounds *slicebounds;
+SVEXTERN databounds *slicebounds, *isobounds;
 SVEXTERN vslice *vsliceinfo;
 SVEXTERN int force_redisplay;
 SVEXTERN int setp3min_temp, setp3max_temp;
@@ -968,7 +972,7 @@ SVEXTERN int *isosubmenus, nisosubmenus;
 SVEXTERN int *loadpatchsubmenus, nloadpatchsubmenus;
 SVEXTERN int npatchtypes;
 SVEXTERN char **patchlabellist;
-SVEXTERN int *sliceindex;
+SVEXTERN int *sliceindex, *isoindex;
 
 SVEXTERN int have_vents_int;
 SVEXTERN int nface_outlines, nface_textures, nface_transparent;

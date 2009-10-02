@@ -399,7 +399,7 @@ int readsmv(char *file){
   
   if(niso>0){
     for(i=0;i<niso;i++){
-      freelabels(&isoinfo[i].label);
+      freelabels(&isoinfo[i].surface_label);
       FREEMEMORY(isoinfo[i].file);
     }
     FREEMEMORY(isoinfo);
@@ -3596,6 +3596,9 @@ typedef struct {
       isoi->comp_buffer=NULL;
       isoi->comp_bufferframe=NULL;
       isoi->full_bufferframe=NULL;
+      isoi->color_label.longlabel=NULL;
+      isoi->color_label.shortlabel=NULL;
+      isoi->color_label.unit=NULL;
 
       len=strlen(buffer);
       buffer[len-1]='\0';
@@ -3619,22 +3622,31 @@ typedef struct {
         isoi->compression_type=1;
         niso_compressed++;
         isoi->file=isoi->comp_file;
-        if(readlabels(&isoi->label,stream)==2)return 2;
+        if(readlabels(&isoi->surface_label,stream)==2)return 2;
         getcisolevels(isoi->file,&isoi->levels,&isoi->nlevels);
+        if(dataflag==1){
+          if(readlabels(&isoi->color_label,stream)==2)return 2;
+        }
         iiso++;
       }
       else if(STAT(isoi->reg_file,&statbuffer2)==0){
         get_isolevels=1;
         isoi->compression_type=0;
         isoi->file=isoi->reg_file;
-        if(readlabels(&isoi->label,stream)==2)return 2;
+        if(readlabels(&isoi->surface_label,stream)==2)return 2;
         getisolevels(isoi->file,dataflag,&isoi->levels,&isoi->nlevels);
+        if(dataflag==1){
+          if(readlabels(&isoi->color_label,stream)==2)return 2;
+        }
         iiso++;
       }
       else{
         get_isolevels=0;
         if(trainer_mode==0)printf("*** Warning: the file, %s, does not exist.\n",buffer);
-        if(readlabels(&isoi->label,stream)==2)return 2;
+        if(readlabels(&isoi->surface_label,stream)==2)return 2;
+        if(dataflag==1){
+          if(readlabels(&isoi->color_label,stream)==2)return 2;
+        }
         niso--;
       }
       if(get_isolevels==1){
@@ -3647,15 +3659,21 @@ typedef struct {
           int len_long;
           char *long_label, *unit_label;
 
-          long_label = isoi->label.longlabel;
-          unit_label = isoi->label.unit;
+          long_label = isoi->surface_label.longlabel;
+          unit_label = isoi->surface_label.unit;
           len_long = strlen(long_label)+strlen(unit_label)+len_clevels+3+1;
+          if(dataflag==1)len_long+=(strlen(isoi->color_label.longlabel)+15+1);
           ResizeMemory((void **)&long_label,(unsigned int)len_long);
-          isoi->label.longlabel=long_label;
+          isoi->surface_label.longlabel=long_label;
           strcat(long_label,": ");
           strcat(long_label,clevels);
           strcat(long_label," ");
           strcat(long_label,unit_label);
+          if(dataflag==1){
+            strcat(long_label," (Colored by: ");
+            strcat(long_label,isoi->color_label.longlabel);
+            strcat(long_label,")");
+          }
         }
       }
       continue;
@@ -5090,6 +5108,48 @@ typedef struct {
     endian = endian_data;
   }
 
+  if(niso>0){
+    FREEMEMORY(isoindex);
+    FREEMEMORY(isobounds);
+    if(NewMemory((void*)&isoindex,niso*sizeof(int))==0)return 2;
+    if(NewMemory((void*)&isobounds,niso*sizeof(databounds))==0)return 2;
+    niso2=0;
+    for(i=0;i<niso;i++){
+      iso *isoi;
+
+      isoi = isoinfo + i;
+      if(isoi->dataflag==0)continue;
+      isoi->firstshort=1;
+      isoi->setvalmin=0;
+      isoi->setvalmax=0;
+      isoi->valmin=1.0;
+      isoi->valmax=0.0;
+      isoindex[niso2]=i;
+      isobounds[niso2].datalabel=isoi->color_label.shortlabel;
+      isobounds[niso2].setvalmin=0;
+      isobounds[niso2].setvalmax=0;
+      isobounds[niso2].valmin=1.0;
+      isobounds[niso2].valmax=0.0;
+      isobounds[niso2].setchopmax=0;
+      isobounds[niso2].setchopmin=0;
+      isobounds[niso2].chopmax=0.0;
+      isobounds[niso2].chopmin=1.0;
+      isobounds[niso2].label=&isoi->color_label;
+      niso2++;
+      for(n=0;n<i;n++){
+        iso *ison;
+
+        ison = isoinfo + n;
+        if(ison->dataflag==0)continue;
+        if(strcmp(isoi->color_label.shortlabel,ison->color_label.shortlabel)==0){
+          isoi->firstshort=0;
+          niso2--;
+          break;
+        }
+      }
+    }
+  }
+
   if(nslice>0){
     FREEMEMORY(sliceindex);
     FREEMEMORY(slicebounds);
@@ -6041,7 +6101,6 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
     strcpy(buffer,"*");
   }
 
-
   len=strlen(buffer);
   buffer[len-1]='\0';
   trim(buffer);
@@ -6887,6 +6946,54 @@ int readini2(char *inifile, int localfile){
           slicebounds[i].setchopmax=setvalmax;
           slicebounds[i].chopmin=valmin;
           slicebounds[i].chopmax=valmax;
+        }
+      }
+      continue;
+    }
+    if(match(buffer,"V_ISO",5)==1){
+      fgets(buffer,255,stream);
+      strcpy(buffer2,"");
+      sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
+      if(strcmp(buffer2,"")!=0){
+        for(i=0;i<niso2;i++){
+          if(strcmp(isobounds[i].datalabel,buffer2)!=0)continue;
+          isobounds[i].setvalmin=setvalmin;
+          isobounds[i].setvalmax=setvalmax;
+          isobounds[i].valmin=valmin;
+          isobounds[i].valmax=valmax;
+          break;
+        }
+      }
+      else{
+        for(i=0;i<niso2;i++){
+          isobounds[i].setvalmin=setvalmin;
+          isobounds[i].setvalmax=setvalmax;
+          isobounds[i].valmin=valmin;
+          isobounds[i].valmax=valmax;
+        }
+      }
+      continue;
+    }
+    if(match(buffer,"C_ISO",5)==1){
+      fgets(buffer,255,stream);
+      strcpy(buffer2,"");
+      sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
+      if(strcmp(buffer,"")!=0){
+        for(i=0;i<niso2;i++){
+          if(strcmp(isobounds[i].datalabel,buffer2)!=0)continue;
+          isobounds[i].setchopmin=setvalmin;
+          isobounds[i].setchopmax=setvalmax;
+          isobounds[i].chopmin=valmin;
+          isobounds[i].chopmax=valmax;
+          break;
+        }
+      }
+      else{
+        for(i=0;i<niso2;i++){
+          isobounds[i].setchopmin=setvalmin;
+          isobounds[i].setchopmax=setvalmax;
+          isobounds[i].chopmin=valmin;
+          isobounds[i].chopmax=valmax;
         }
       }
       continue;
@@ -8776,6 +8883,24 @@ void writeini(int flag){
     }
     fprintf(fileout,"SLICEDATAOUT\n");
     fprintf(fileout," %i \n",output_slicedata);
+  }
+  if(niso2>0){
+    for(i=0;i<niso2;i++){
+      fprintf(fileout,"V_ISO\n");
+      fprintf(fileout," %i %f %i %f %s\n",
+        isobounds[i].setvalmin,isobounds[i].valmin,
+        isobounds[i].setvalmax,isobounds[i].valmax,
+        isobounds[i].label->shortlabel
+        );
+    }
+    for(i=0;i<niso2;i++){
+      fprintf(fileout,"C_ISO\n");
+      fprintf(fileout," %i %f %i %f %s\n",
+        isobounds[i].setchopmin,isobounds[i].chopmin,
+        isobounds[i].setchopmax,isobounds[i].chopmax,
+        isobounds[i].label->shortlabel
+        );
+    }
   }
   for(i=0;i<npatch_files;i++){
     if(patchinfo[i].firstshort==1){
