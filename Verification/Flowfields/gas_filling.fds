@@ -4,9 +4,6 @@ Ensure that the right amount of mass has been added.
 &HEAD CHID='gas_filling', TITLE='Fill an Empty Room with Hydrogen, SVN $Revision$' /
 &MESH IJK=32,32,15, XB=-3.2,3.2,-3.2,3.2,0.0,3.0 /
 &TIME T_END=300.0 /
-
-&MISC SC=0.1 /
-
 &SPEC ID='HYDROGEN' /
 &SURF ID='LEAK', MASS_FLUX(1)=0.01667, RAMP_MF(1)='leak_ramp' /
 &RAMP ID='leak_ramp', T=  0., F=0.0 /
