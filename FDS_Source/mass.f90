@@ -1171,6 +1171,8 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
          ENDDO
       ENDDO
    ENDDO
+   
+   !!CALL CHECK_MASS_FRACTION
 
    ! Predict background pressure at next time step
 
@@ -1279,6 +1281,8 @@ ELSEIF (CORRECTOR) THEN
       ENDDO
    ENDDO
    
+   !!CALL CHECK_MASS_FRACTION
+   
    IF (BAROCLINIC) THEN
       ! Set global min and max for rho
       RHO_LOWER_GLOBAL = MIN(RHO_LOWER_GLOBAL,MINVAL_GASPHASE(RHO))
@@ -1357,6 +1361,15 @@ REAL(EB) :: ZZ(4)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,YYP,FX,FY,FZ
 TYPE (SURFACE_TYPE), POINTER :: SF
+
+! Notes:
+!
+! At the moment (FDS 5.4.2) it is critical that SCALARF stay WITHIN the CHANGE_TIME_STEP loop.  I am writing
+! myself this note because everytime I go back and try to debug something I wonder why SCALARF just does not
+! sit outside this loop in the same way as MASS_FINITE_DIFFERENCES.  The reason is that DIVERGENCE_PART_1
+! initializes the FX (flux) arrays and adds the diffusive flux to this array.  So, if SCALARF is computed
+! outside the CHANGE_TIME_STEP loop and we happen to iterate on the loop then we clear the advective flux
+! and we are left with only the diffusive flux.
 
 CALL POINT_TO_MESH(NM)
 
