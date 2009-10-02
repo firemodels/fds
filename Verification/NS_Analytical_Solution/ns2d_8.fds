@@ -12,8 +12,6 @@ Note that the time and space bounds are 2*pi.
       PERIODIC_TEST=1, CHECK_POISSON=.TRUE.,
       FISHPAK_BC(1)=0, FISHPAK_BC(3)=0 /
 
- DUMP HEADERS=.FALSE. /
-
 &VENT MB='XMIN', SURF_ID='PERIODIC' /
 &VENT MB='XMAX', SURF_ID='PERIODIC' /
 &VENT MB='ZMIN', SURF_ID='PERIODIC' /
