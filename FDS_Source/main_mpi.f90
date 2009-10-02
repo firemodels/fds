@@ -552,14 +552,6 @@ MAIN_LOOP: DO
       IF (FLUX_LIMITER<0 .AND. (.NOT.ISOTHERMAL .OR. N_SPECIES>0)) CALL MASS_FINITE_DIFFERENCES(NM)
    ENDDO COMPUTE_FINITE_DIFFERENCES_1
 
-   IF (FLUX_LIMITER>=0) THEN
-      DO NM=1,NMESHES
-         IF (PROCESS(NM)/=MYID)    CYCLE
-         IF (.NOT.ACTIVE_MESH(NM)) CYCLE
-         CALL SCALARF(NM)
-      ENDDO
-   ENDIF
-
    ! Estimate quantities at next time step, and decrease/increase time step if necessary based on CFL condition
 
    FIRST_PASS = .TRUE.
@@ -579,6 +571,7 @@ MAIN_LOOP: DO
          IF (PROCESS(NM)/=MYID)    CYCLE COMPUTE_DENSITY_LOOP
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DENSITY_LOOP
          IF (FLUX_LIMITER>=0) THEN
+            CALL SCALARF(NM) ! leave this here
             CALL DENSITY_TVD(NM)
          ELSE
             IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) CALL DENSITY(NM)
