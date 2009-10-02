@@ -1216,7 +1216,7 @@ FLUXMAX              = 100._EB      ! Maximum momentum flux btw. gas and particl
 THICKEN_OBSTRUCTIONS = .FALSE.
 CFL_MAX              = 1.0_EB       ! Stability bounds
 CFL_MIN              = 0.8_EB
-VN_MAX               = 0.9_EB
+VN_MAX               = 1.0_EB
 VN_MIN               = 0.8_EB
  
 REWIND(LU_INPUT)
@@ -1232,6 +1232,8 @@ ENDDO MISC_LOOP
 
 IF (FDS6) THEN
    CFL_VELOCITY_NORM=1
+   VN_MAX=0.5_EB
+   VN_MIN=0.4_EB
    IF (DNS) THEN
       FLUX_LIMITER=4
    ELSE
