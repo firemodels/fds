@@ -1294,7 +1294,7 @@ void initvars1(void){
   nevac=0;
   current_particle_type=-1,last_particle_type=-2;
   nsmoke3d=0;
-  niso=0;
+  niso=0, niso2=0;
   ntrnx=0, ntrny=0, ntrnz=0,npdim=0,nmeshes=0,clip_mesh=0;
   nobst=0,nvent=0,noffset=0;
   nlabels=0,visLabels=0,nlabelssmv=0;
@@ -2070,6 +2070,7 @@ void initvars0(void){
   sliceorderindex=NULL,vsliceorderindex=NULL,partorderindex=NULL;
   patchorderindex=NULL,isoorderindex=NULL,plot3dorderindex=NULL;
   slicebounds=NULL;
+  isobounds=NULL;
   vsliceinfo=NULL;
   smoke3dinfo=NULL;
   labelinfo=NULL;
@@ -2184,6 +2185,7 @@ void initvars0(void){
   times=NULL;
   patchlabellist=NULL;
   sliceindex=NULL;
+  isoindex=NULL;
   face_transparent=NULL;
   deviceinfo=NULL;
   FontMenu(fontindex);
