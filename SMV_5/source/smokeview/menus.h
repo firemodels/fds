@@ -7159,7 +7159,6 @@ static int in_menu=0;
        }
      }
 
-
       if(nisoloaded>1){
         glutAddSubMenu("Unload",unloadisomenu);
       }

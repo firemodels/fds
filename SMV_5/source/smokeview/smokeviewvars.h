@@ -763,7 +763,7 @@ SVEXTERN char a_partscale[31];
 SVEXTERN char *zonescale;
 SVEXTERN char a_zonescale[31];
 SVEXTERN int islicetype,islicetype_save,ipatchtype;
-SVEXTERN int iisotype;
+SVEXTERN int iisotype,iisottype;
 SVEXTERN char **colorlabelpart;
 SVEXTERN char **colorlabelpatch;
 SVEXTERN char **colorlabelzone;
