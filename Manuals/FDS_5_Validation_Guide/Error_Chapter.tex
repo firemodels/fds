@@ -1,18 +1,18 @@
 
-%\chapter{Quantifying Model Error}
-\section{Introduction}
+\chapter{Quantifying Model Error}
+%\section{Introduction}
 
 There are various definitions of model validation.
 For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capability of
 Deterministic Fire Models,''~\cite{ASTM:E1355} defines it as ``the process of determining the degree to which a calculation method
-is an accurate representation of the real world from the perspective of the intended uses of the calculation method.'' 
+is an accurate representation of the real world from the perspective of the intended uses of the calculation method.''
 The accuracy of a model is a complicated function of its inputs and its equations.
 For the sake of clarity, we will use the word {\em uncertainty} in regard to the inputs, and the word {\em error} in regards
 to the equations. The reason for this is two-fold. For one,
 it helps to differentiate various terms that are used to quantify model accuracy; but, more importantly, it highlights the subtle distinction between the roles of the model
 and of the modeler. For example, if the modeler chooses to input 10~MW as the heat release rate of a hypothetical fire, we do not say it is wrong, but rather uncertain because there
 is no easy way to know for sure just how big the fire is going to be. The mathematical model, on the other hand, includes assumptions and approximations that make its predictions less
-accurate for the sake of practical implementation. 
+accurate for the sake of practical implementation.
 
 Our focus at present is not the input uncertainty, but rather the quantification of the model error.
 Our strategy is {\em not} to decompose the model into its many parts and systematically assess
@@ -161,12 +161,9 @@ Surface Temperature             & 0.14    \\ \hline
 
 \section{Calculating Model Error}
 
-We are now ready to describe a method of extracting an estimate of the model error from a set of measured and predicted values, with only an estimate of
-the combined experimental uncertainty as a way to characterize the accuracy of the measurements.
-The set of model predictions and the corresponding set of experimental measurements are denoted
-$M_i$ and $E_i$, respectively, where $i$ ranges from 1 to $n$. Without loss of generality, assume that the
-ambient value of these quantities is zero. With this information, {\em and only this information}, we seek to quantify the model error.
-First, we make two important assumptions:
+We are now ready to describe a method for calculating the model error using the estimated experimental uncertainties
+listed in Table~\ref{Uncertainty}.
+We make two important assumptions:
 \begin{enumerate}
 \item All uncertainties and errors can be expressed in relative terms, and
 \item All uncertainties and errors are assumed to be normally distributed.
@@ -176,34 +173,50 @@ any particular distribution. In fact, the very reason why we have developed this
 experiments is because the model algorithm itself is too complicated to work with directly as a means of estimating the error.
 
 With these assumptions in mind, we proceed with the statistical analysis of the data.
-First, assume that the experimental measurements, $E_i$, are normally distributed\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
-with mean, $\mu$, and standard deviation, $\sigma$.} about the ``true'' values, $\theta_i$, and there is no systematic bias:
+Assume that the set of model predictions and the corresponding set of experimental measurements are denoted
+$M_i$ and $E_i$, respectively, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers
+expressing the increase in the value of a quantity above its ambient.
+We assume that a given experimental measurement, $E_i$, is normally
+distributed\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
+with mean, $\mu$, and standard deviation, $\sigma$.} about the ``true'' value, $\theta_i$, and there is no systematic bias:
 \be E|\theta \sim N(\theta,\sigma_E^2) \label{expunc} \ee
-The notation $E|\theta$ means that $E$ is conditional on a particular value of $\theta$. 
-This is the usual way of defining a likelihood function. Table~\ref{Uncertainty} lists the relative experimental 
-uncertainty values, $\widetilde{\sigma}_E=\sigma_E/\theta$, for the various quantities of interest. 
-It is convenient to use the so-called ``delta method''~\cite{Oehlert:1992} to obtain the approximate distribution 
+The notation $E|\theta$ means that $E$ is conditional on a particular value of $\theta$.
+This is the usual way of defining a likelihood function. Table~\ref{Uncertainty} lists the relative experimental
+uncertainty values, $\widetilde{\sigma}_E=\sigma_E/\theta$, for the various quantities of interest.
+It is convenient to use the so-called delta method\footnote{Given the random variable $X \sim N(\mu,\sigma^2)$, the delta method
+says that $g(X) \sim N \left( g(\mu) \, , \, (g'(\mu) \, \sigma)^2\right)$~\cite{Oehlert:1992}.} to obtain the approximate distribution
 \be \ln(E)|\theta \sim N \left( \ln(\theta),\widetilde{\sigma}_E^2 \right) \label{eeq} \ee
-Using a Bayesian argument with a non-informative prior on $\ln(\theta)$, we obtain the posterior distribution as 
-\be \ln(\theta) \sim N \left( \ln(E),\widetilde{\sigma}_E^2 \right) \label{thetaeq} \ee
-The assumption of a non-informative prior implies that we do not have sufficient information about the distribution of 
-$E$ or $\theta$ to assume anything else. 
+Note that by applying the natural log to the random variable, we can express its variance in terms of the
+relative uncertainty, $\sigma_E/\theta$. This is convenient because we have assumed that the relative experimental
+uncertainty is constant for a given quantity of interest.
+Using a Bayesian argument\footnote{Bayes theorem states that the posterior distribution is the product of
+the prior distribution, the likelihood function, and a normalizing constant: $f(\theta|E)=C \, f(\theta) \, f(E|\theta)$.}
+with a non-informative prior on $\ln(\theta)$, we obtain the posterior distribution as
+\be \ln(\theta)|E \sim N \left( \ln(E),\widetilde{\sigma}_E^2 \right) \label{thetaeq} \ee
+The assumption of a non-informative prior implies that we do not have sufficient information about the distribution of
+$\theta$ to assume anything other than unity.
 
 
-In a similar manner, assume that the model predictions are normally distributed about the ``true'' value multiplied by a bias factor, $\delta$: 
-\be M|\theta \sim N \left(\delta \, \theta,\sigma_M^2 \right) \ee 
-The standard deviation, $\sigma_M$, is the model-intrinsic uncertainty, {\em i.e.} model error. This and the bias factor, $\delta$, are the parameters
+In a similar manner, assume that the model predictions are normally distributed about the ``true'' value
+multiplied by a bias factor, $\delta$:
+\be M|\theta \sim N \left(\delta \, \theta,\sigma_M^2 \right) \ee
+The standard deviation, $\sigma_M$, is the model-intrinsic uncertainty, {\em i.e.} model error.
+This and the bias factor, $\delta$, are the parameters
 that we seek to quantify.
-Again, using the log transformation we obtain 
-\be \ln(M)|\theta \sim N \left(\ln(\delta)+\ln(\theta)-\frac{\omega_M^2}{2} \; , \; \omega_M^2 \right) \quad ; \quad \omega_M=\frac{\sigma_M}{\theta \, \delta} \ee
+Again, using the log transformation we obtain
+\be \ln(M)|\theta \sim N \left(\ln(\delta)+\ln(\theta)-\frac{\omega_M^2}{2} \; , \;
+    \omega_M^2 \right) \quad ; \quad \omega_M=\frac{\sigma_M}{\theta \, \delta} \ee
 Note that the estimate of the mean includes an extra term in the Taylor series expansion to obtain a more precise estimate of
-$\delta$. Because $\ln(\theta)$ is random, and we have its posterior distribution from Eq.~(\ref{thetaeq}), we can obtain the marginal distribution
+$\delta$. Because $\ln(\theta)$ is random, and we have its posterior distribution from Eq.~(\ref{thetaeq}),
+we can obtain the marginal distribution
 \be \ln(M) \sim N \left( \ln(\delta)+\ln(E)-\frac{\omega_M^2}{2} \; , \; \omega_M^2+\widetilde{\sigma}_E^2 \right) \ee
-Notice that we have expressed the {\em total relative uncertainty} of the model predictions as a combination of model error and experimental uncertainty.
+Notice that we have expressed the {\em total relative uncertainty} of the model predictions as a
+combination of model error and experimental uncertainty.
 What we need now is a way to estimate this error and the bias factor, $\delta$. First, define:
 \be \overline{M} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(M_i)  \quad ; \quad \overline{E} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(E_i) \ee
 The least squares estimate of the standard deviation of $\ln(M)$ is
-\be u(M) = \sqrt{\omega_M^2+\widetilde{\sigma}_E^2} \approx \sqrt{ \frac{1}{n-1} \sum_{i=1}^n \, \left[ (\ln(M_i)-\overline{M}) - (\ln(E_i) - \overline{E})  \right]^2 } \ee
+\be u(M) = \sqrt{\omega_M^2+\widetilde{\sigma}_E^2} \approx \sqrt{ \frac{1}{n-1} \sum_{i=1}^n \,
+     \left[ (\ln(M_i)-\overline{M}) - (\ln(E_i) - \overline{E})  \right]^2 } \ee
 Note that $u(M)$ is the {\em total relative uncertainty} of $M$.
 Next, compute
 \be \widehat{\omega}_M = \sqrt{u(M)^2-\widetilde{\sigma}_E^2} \label{model_error} \ee
@@ -214,7 +227,7 @@ The model-intrinsic component, {\em i.e.} the model error, $\widetilde{\sigma}_M
 In essence, this procedure gives us a way to estimate the ``true'' value, $\theta$, using only a predicted value, $M$, and the bias factor and relative error
 for that particular quantity that have been obtained using past validation experiments. The ``truth'' is a random variable with the following distribution:
 \be \theta \sim N \left( \frac{M}{\delta} \; , \; \left( \frac{M \, \widetilde{\sigma}_M}{\delta} \right)^2 \right) \label{truth} \ee
-This is essentially a recipe for estimating the error associated with a model prediction, $M$. 
+This is essentially a recipe for estimating the error associated with a model prediction, $M$.
 Below, we describe how one might make use of this formula in practice. First, however, we need to verify the accuracy of the procedure just described.
 
 \section{Verifying the Procedure}
