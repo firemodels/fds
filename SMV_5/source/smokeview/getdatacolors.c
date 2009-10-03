@@ -987,13 +987,13 @@ void drawColorBars(float ybump){
   float barbot=-0.5f;
   float right[3],left[3],bottom[4];
   int ileft=0;
-  int leftzone, leftsmoke, leftslice, leftpatch;
+  int leftzone, leftsmoke, leftslice, leftpatch, leftiso;
   float yy,yy2;
   int iposition;
   float position;
   float tttval, tttmin, tttmax;
   float val;
-  char slicelabel[256], p3dlabel[256], boundarylabel[256], partlabel[256], zonelabel[256];
+  char slicelabel[256], p3dlabel[256], boundarylabel[256], partlabel[256], zonelabel[256],isolabel[256];
   char unitlabel[256];
   float *p3lev;
   databounds *sb;
@@ -1001,10 +1001,14 @@ void drawColorBars(float ybump){
 
   int sliceunitclass,sliceunittype;
   int sliceflag=0;
+  int isoflag=0;
   float *slicefactor=NULL;
-  float slicerange;
+  float slicerange,isorange;
   char slicecolorlabel[256];
   char *slicecolorlabel_ptr=NULL;
+  float *isofactor=NULL;
+  char isocolorlabel[256];
+  char *isocolorlabel_ptr=NULL;
 
   int plot3dunitclass, plot3dunittype;
   int plot3dflag=0;
@@ -1131,6 +1135,7 @@ void drawColorBars(float ybump){
   leftslice=0;
   leftpatch=0;
   leftzone=0;
+  leftiso=0;
   if(showevac_colorbar==1||showsmoke==1){
     if(parttype!=0){
       leftsmoke=ileft;
@@ -1141,9 +1146,14 @@ void drawColorBars(float ybump){
     leftslice=ileft;
     ileft++;
   }
+  if(showiso_colorbar==1){
+    leftiso=ileft;
+    ileft++;
+  }
   if(showpatch==1){
     leftpatch=ileft;
   }
+
   strcpy(partshortlabel2,"");
   strcpy(partunitlabel2,"");
   if(showevac_colorbar==1||showsmoke==1){
@@ -1193,6 +1203,24 @@ void drawColorBars(float ybump){
     outputBarText(right[leftslice],bottom[2],color1,unitlabel);
     outputBarText(right[leftslice],bottom[3],color1,sb->scale);
   }
+  if(showiso_colorbar==1){
+    sb = isobounds + iisottype;
+    strcpy(unitlabel,sb->label->unit);
+    /*
+    getunitinfo(sb->label->shortlabel,&isounitclass,&isounittype);
+    if(isounitclass>=0&&isounitclass<nunitclasses){
+      if(isounittype>0){
+        isoflag=1;
+        isofactor=unitclasses[isounitclass].units[isounittype].scale;
+        strcpy(unitlabel,unitclasses[isounitclass].units[isounittype].unit);
+      }
+    }
+    */
+    outputBarText(right[leftiso],bottom[0],color1,"Iso");
+    outputBarText(right[leftiso],bottom[1],color1,sb->label->shortlabel);
+    outputBarText(right[leftiso],bottom[2],color1,unitlabel);
+    outputBarText(right[leftiso],bottom[3],color1,sb->scale);
+  }
   if(showpatch==1){
     patchi = patchinfo + patchtypes[ipatchtype];
     strcpy(unitlabel,patchi->label.unit);
@@ -1241,7 +1269,36 @@ void drawColorBars(float ybump){
 
   }
   if(showiso_colorbar==1){
-    // put code here to draw iso-surface value labels
+    sb = isobounds + iisottype;
+    tttmin = sb->levels256[0];
+    tttmax = sb->levels256[255];
+    isorange=tttmax-tttmin;
+    iposition=-1;
+    if(global_changecolorindex!=-1){
+      tttval = sb->levels256[valindex];
+      num2string(isolabel,tttval,isorange);
+      isocolorlabel_ptr=isolabel;
+      if(isoflag==1){
+        scalefloat2string(tttval,isocolorlabel, isofactor, isorange);
+        isocolorlabel_ptr=isocolorlabel;
+      }
+      position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
+      iposition = get_label_position(position,dyfont,barbot);
+      outputBarText(right[leftiso],position,color2,isocolorlabel_ptr);
+    }
+    for (i=0; i<nrgb-1; i++){
+      float vert_position;
+
+      vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+      if(iposition==i)continue;
+      isocolorlabel_ptr=&(sb->colorlabels[i+1][0]);
+      if(isoflag==1){
+        val = tttmin + i*isorange/(nrgb-2);
+        scalefloat2string(val,isocolorlabel, isofactor, isorange);
+        isocolorlabel_ptr=isocolorlabel;
+      }
+      outputBarText(right[leftiso],vert_position,color1,isocolorlabel_ptr);
+    }
   }
   if(showevac_colorbar==1||(showsmoke==1&&parttype!=0)){
     float *partlevels256_ptr;
