@@ -531,6 +531,7 @@ EXTERNCPP void updateslicetypes(void);
 EXTERNCPP int getsliceindex(const slice *sd);
 EXTERNCPP void updatesliceboundlabels(void);
 EXTERNCPP int getisotype(const iso *isoi);
+EXTERNCPP int getisottype(const iso *isoi);
 EXTERNCPP int getisoindex(const iso *isoi);
 EXTERNCPP void update_isotype(void);
 EXTERNCPP void updateisotypes(void);

@@ -260,7 +260,9 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
 	*nisosteps += 1;
   }
   EGZ_FSEEK(*isostreamptr,beg,SEEK_SET);
-
+  if(dataflag==1&&axissmooth==1){
+      smoothlabel(tmin,tmax,nrgb);
+  }
 }
 
 /* ------------------ readiso ------------------------ */
@@ -728,15 +730,11 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   iisotype=getisotype(ib);
 
   if(ib->dataflag==1){
-    if(ib->compression_type==0){
-      updateisobounds();
-      list_iso_index=iisotype;
-      setisobounds(iisotype);
-      updateallisocolors(iisotype,errorcode);
-    }
-    else{
-      updateallisolabels(iisotype,errorcode);
-    }
+    int errorcode;
+
+    iisottype = getisottype(ib);
+    setisolabels(ib->tmin, ib->tmax, ib, &errorcode);
+    CheckMemory;
   }
 
   updatetimes();
@@ -2052,12 +2050,28 @@ int getisotype(const iso *isoi){
 
   for(j=0;j<nisotypes;j++){
     isoi2 = isoinfo+isotypes[j];
-    if(isoi->dataflag==0&&isoi2->dataflag==0){
-      if(strcmp(isoi->surface_label.longlabel,isoi2->surface_label.longlabel)==0)return j;
-    }
-    if(isoi->dataflag==1&&isoi2->dataflag==1){
-      if(strcmp(isoi->color_label.longlabel,isoi2->color_label.longlabel)==0)return j;
-    }
+
+    if(strcmp(isoi->surface_label.longlabel,isoi2->surface_label.longlabel)==0)return j;
+  }
+  return -1;
+}
+
+/* ------------------ getisottype ------------------------ */
+
+int getisottype(const iso *isoi){
+  iso *isoi2;
+  int j;
+  int jj;
+
+  if(isoi->dataflag==0)return -1;
+  jj = 0;
+  for(j=0;j<niso;j++){
+    isoi2 = isoinfo+j;
+
+    if(isoi2->dataflag==0)continue;
+    if(isoi2->firstshort==0)continue;
+    if(strcmp(isoi->color_label.longlabel,isoi2->color_label.longlabel)==0)return jj;
+    jj++;
   }
   return -1;
 }
@@ -2194,8 +2208,8 @@ void setisolabels(float smin, float smax,
   int isotype;
   databounds *sb;
 
-  isotype=getisotype(sd);
-  sb = slicebounds + isotype;
+  isotype=getisottype(sd);
+  sb = isobounds + isotype;
   sb->label=&(sd->color_label);
 
 
@@ -2205,182 +2219,4 @@ void setisolabels(float smin, float smax,
   getIsoLabels(smin,smax,nrgb,
                 sb->colorlabels,&scale,sb->levels256);
 }
-
-/* ------------------ setisobounds ------------------------ */
-
-void setisobounds(int isotype){
-  if(isotype>=0&&isotype<niso2){
-    isomin=isobounds[isotype].valmin;
-    isomax=isobounds[isotype].valmax;
-    setisomin=isobounds[isotype].setvalmin;
-    setisomax=isobounds[isotype].setvalmax;
-    isochopmin=isobounds[isotype].chopmin;
-    isochopmax=isobounds[isotype].chopmax;
-    setisochopmin=isobounds[isotype].setchopmin;
-    setisochopmax=isobounds[isotype].setchopmax;
-  }
-}
-
-/* ------------------ updateisobounds ------------------------ */
-
-void updateisobounds(void){
-  int i, j;
-  float valmin, valmax;
-  float valmin_data, valmax_data;
-  int minflag, maxflag;
-  int minflag2, maxflag2;
-  int jj;
-
-  for(i=0;i<niso2;i++){
-    minflag=0; maxflag=0;
-    minflag2=0; maxflag2=0;
-    for(j=0;j<niso;j++){
-      if(isoinfo[j].loaded==0)continue;
-      if(isoinfo[j].type!=i)continue;
-      if(isobounds[i].setvalmin!=SET_MIN){
-        if(minflag==0){
-          valmin=isoinfo[j].valmin;
-          minflag=1;
-        }
-        else{
-          if(isoinfo[j].valmin<valmin)valmin=isoinfo[j].valmin;
-        }
-      }
-      if(minflag2==0){
-        valmin_data=isoinfo[j].valmin_data;
-        minflag2=1;
-      }
-      else{
-        if(isoinfo[j].valmin_data<valmin_data)valmin_data=isoinfo[j].valmin_data;
-      }
-    }
-    for(j=0;j<niso;j++){
-      if(isoinfo[j].loaded==0)continue;
-      if(isoinfo[j].type!=i)continue;
-      if(isobounds[i].setvalmax!=SET_MAX){
-        if(maxflag==0){
-          valmax=isoinfo[j].valmax;
-          maxflag=1;
-        }
-        else{
-          if(isoinfo[j].valmax>valmax)valmax=isoinfo[j].valmax;
-        }
-      }
-      if(maxflag2==0){
-        valmax_data=isoinfo[j].valmax_data;
-        maxflag2=1;
-      }
-      else{
-        if(isoinfo[j].valmax_data>valmax_data)valmax_data=isoinfo[j].valmax_data;
-      }
-    }
-    if(minflag==1)isobounds[i].valmin=valmin;
-    if(maxflag==1)isobounds[i].valmax=valmax;
-    if(minflag2==1)isobounds[i].valmin_data=valmin_data;
-    if(maxflag2==1)isobounds[i].valmax_data=valmax_data;
-  }
-}
-
-/* ------------------ updateallisolabels ------------------------ */
-
-void updateallisolabels(int isotype, int *errorcode){
-  int i;
-  float valmin, valmax;
-  int setvalmin, setvalmax;
-  int ii;
-  iso *sd;
-
-  *errorcode=0;
-
-  setvalmin=isobounds[isotype].setvalmin;
-  setvalmax=isobounds[isotype].setvalmax;
-  if(setvalmin==1){
-    valmin=isobounds[isotype].valmin;
-  }
-  else{
-    valmin=isobounds[isotype].valmin_data;
-    isobounds[isotype].valmin=valmin;
-  }
-  if(setvalmax==1){
-    valmax=isobounds[isotype].valmax;
-  }
-  else{
-    valmax=isobounds[isotype].valmax_data;
-    isobounds[isotype].valmax=valmax;
-  }
-  for(i=0;i<niso;i++){
-    if(isoinfo[i].loaded==0)continue;
-    sd = isoinfo + i;
-    if(sd->type!=isotype)continue;
-    setisolabels(valmin,valmax,sd,errorcode);
-    if(*errorcode!=0)return;
-  }
-  setisobounds(isotype);
-  updateglui();
-}
-
-/* ------------------ updateallisocolors ------------------------ */
-
-void updateallisocolors(int isotype, int *errorcode){
-  int i;
-  float valmin, valmax;
-  int setvalmin, setvalmax;
-  int ii;
-  iso *sd;
-
-  *errorcode=0;
-
-  setvalmin=isobounds[isotype].setvalmin;
-  setvalmax=isobounds[isotype].setvalmax;
-  if(setvalmin==1){
-    valmin=isobounds[isotype].valmin;
-  }
-  else{
-    valmin=isobounds[isotype].valmin_data;
-    isobounds[isotype].valmin=valmin;
-  }
-  if(setvalmax==1){
-    valmax=isobounds[isotype].valmax;
-  }
-  else{
-    valmax=isobounds[isotype].valmax_data;
-    isobounds[isotype].valmax=valmax;
-  }
-  for(i=0;i<niso;i++){
-    sd = isoinfo + i;
-    if(sd->loaded==0)continue;
-    if(sd->type!=isotype)continue;
-    setisocolors(valmin,valmax,sd,errorcode);
-    if(*errorcode!=0)return;
-  }
-  setisobounds(isotype);
-  updateglui();
-}
-
-/* ------------------ setisocolors ------------------------ */
-
-void setisocolors(float smin, float smax, 
-                    iso *sd, int *errorcode){
-  char *scale;
-  int isotype;
-  databounds *sb;
-
-  isotype=getisotype(sd);
-  sb = isobounds + isotype;
-  sb->label=&(sd->color_label);
-
-
-  *errorcode=0;
-  printf("computing iso color levels \n");
-  scale=sb->scale;
-//  getIsoColors(sd->qisodata,sd->nisototal,sd->isolevel,
-//                smin,smax,
-//                nrgb_full,nrgb,
-//                sb->colorlabels,&scale,sb->levels256);
-}
-
-
-
-
-
 
