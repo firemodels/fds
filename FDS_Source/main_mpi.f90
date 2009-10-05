@@ -347,6 +347,7 @@ IF (NOISE .OR. PERIODIC_TEST>0) THEN
    CORRECTOR = .TRUE.
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
+      CALL MATCH_VELOCITY(NM)
       CALL VELOCITY_BC(T_BEGIN,NM)
    ENDDO
 ENDIF
@@ -570,11 +571,13 @@ MAIN_LOOP: DO
       COMPUTE_DENSITY_LOOP: DO NM=1,NMESHES
          IF (PROCESS(NM)/=MYID)    CYCLE COMPUTE_DENSITY_LOOP
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DENSITY_LOOP
-         IF (FLUX_LIMITER>=0) THEN
-            CALL SCALARF(NM) ! leave this here
-            CALL DENSITY_TVD(NM)
-         ELSE
-            IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) CALL DENSITY(NM)
+         IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
+            IF (FLUX_LIMITER>=0) THEN
+               CALL SCALARF(NM) ! leave this here
+               CALL DENSITY_TVD(NM)
+            ELSE
+               CALL DENSITY(NM)
+            ENDIF
          ENDIF
       ENDDO COMPUTE_DENSITY_LOOP
       
@@ -726,14 +729,6 @@ MAIN_LOOP: DO
 
    CALL POST_RECEIVES(4)
 
-   IF (FLUX_LIMITER>=0) THEN
-      DO NM=1,NMESHES
-         IF (PROCESS(NM)/=MYID)    CYCLE
-         IF (.NOT.ACTIVE_MESH(NM)) CYCLE
-         CALL SCALARF(NM)
-      ENDDO
-   ENDIF
-
    ! Finite differences for mass and momentum equations for the second half of the time step
 
    COMPUTE_FINITE_DIFFERENCES_2: DO NM=1,NMESHES
@@ -742,11 +737,11 @@ MAIN_LOOP: DO
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_FINITE_DIFFERENCES_2
   !!! CALL OPEN_AND_CLOSE(T(NM),NM)   ! Doors, windows, etc.
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,1)
-      IF (FLUX_LIMITER>=0) THEN
-         CALL DENSITY_TVD(NM)
-      ELSE
-         IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
-            CALL MASS_FINITE_DIFFERENCES(NM)
+      IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
+         IF (FLUX_LIMITER>=0) THEN
+            CALL SCALARF(NM) ! leave this here
+            CALL DENSITY_TVD(NM)
+         ELSE
             CALL DENSITY(NM)
          ENDIF
       ENDIF
