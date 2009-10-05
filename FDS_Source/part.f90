@@ -105,7 +105,7 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
          CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
          DROPLET=>MESHES(NM)%DROPLET
       ENDIF
-      DR=>DROPLET(NLP)
+      DR=>DROPLET(NLP)     
       BLOCK_OUT_LOOP:  DO
          CALL RANDOM_NUMBER(RN)
          DR%X = X1 + RN*(X2-X1)
@@ -701,7 +701,7 @@ DROPLET_LOOP: DO I=1,NLP
    PC => PARTICLE_CLASS(DR%CLASS)
 
    RD  = DR%R
-   IF (.NOT.PC%MASSLESS .AND. RD<=0._EB) CYCLE DROPLET_LOOP
+   IF (.NOT. PC%MASSLESS .AND. RD<=0._EB) CYCLE DROPLET_LOOP
    RDS = RD*RD
    RDC = RD*RDS
 
@@ -751,84 +751,83 @@ DROPLET_LOOP: DO I=1,NLP
          IC = CELL_INDEX(II,JJ,KK)
       ENDIF
 
-      ! Interpolate the nearest velocity components of the gas
+   ! Interpolate the nearest velocity components of the gas
 
-      IIX  = FLOOR(XI+.5_EB)
-      JJY  = FLOOR(YJ+.5_EB)
-      KKZ  = FLOOR(ZK+.5_EB)
-      UBAR = AFILL2(U,II-1,JJY,KKZ,(DR%X-X(II-1))*RDX(II),YJ-JJY+.5_EB          ,ZK-KKZ+.5_EB)
-      VBAR = AFILL2(V,IIX,JJ-1,KKZ,XI-IIX+.5_EB          ,(DR%Y-Y(JJ-1))*RDY(JJ),ZK-KKZ+.5_EB)
-      WBAR = AFILL2(W,IIX,JJY,KK-1,XI-IIX+.5_EB          ,YJ-JJY+.5_EB          ,(DR%Z-Z(KK-1))*RDZ(KK))
+   IIX  = FLOOR(XI+.5_EB)
+   JJY  = FLOOR(YJ+.5_EB)
+   KKZ  = FLOOR(ZK+.5_EB)
+   UBAR = AFILL2(U,II-1,JJY,KKZ,(DR%X-X(II-1))*RDX(II),YJ-JJY+.5_EB          ,ZK-KKZ+.5_EB)
+   VBAR = AFILL2(V,IIX,JJ-1,KKZ,XI-IIX+.5_EB          ,(DR%Y-Y(JJ-1))*RDY(JJ),ZK-KKZ+.5_EB)
+   WBAR = AFILL2(W,IIX,JJY,KK-1,XI-IIX+.5_EB          ,YJ-JJY+.5_EB          ,(DR%Z-Z(KK-1))*RDZ(KK))
     
-     ! If the particle is just a massless tracer, just move it and go on to the next particle
+   ! If the particle is just a massless tracer, just move it and go on to the next particle
 
-      IF (PC%MASSLESS) THEN
-         DR%U = UBAR
-         DR%V = VBAR
-         DR%W = WBAR
-         DR%X = DR%X + DR%U*DTSP
-         DR%Y = DR%Y + DR%V*DTSP
-         DR%Z = DR%Z + DR%W*DTSP
-         CYCLE DROPLET_LOOP
+   IF (PC%MASSLESS) THEN
+      DR%U = UBAR
+      DR%V = VBAR
+      DR%W = WBAR
+      DR%X = DR%X + DR%U*DTSP
+      DR%Y = DR%Y + DR%V*DTSP
+      DR%Z = DR%Z + DR%W*DTSP
+      CYCLE DROPLET_LOOP
+   ENDIF
+
+   ! Calculate the particle velocity components and the amount of momentum to transfer to the gas
+
+   RVC = RDX(II)*RDY(JJ)*RDZ(KK)
+
+   UREL  = DR%U - UBAR
+   VREL  = DR%V - VBAR
+   WREL  = DR%W - WBAR
+   QREL  = MAX(1.E-6_EB,SQRT(UREL*UREL + VREL*VREL + WREL*WREL))
+   TMP_G = MAX(TMPMIN,TMP(II,JJ,KK))
+   RHO_G = RHO(II,JJ,KK)
+   MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
+   DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
+   DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
+      C_DRAG  = DRAG(DR%RE)     
+      !Secondary break-up
+      IF (SECONDARY_BREAKUP) THEN
+         WE_G=RHO(II,JJ,KK)*QREL**2*2._EB/SURFACE_TENSION
+      ENDIF
+      IF (.NOT. PC%TREE) THEN
+         SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
+         DR%A_X  = (REAL(N-1,EB)*DR%A_X + SFAC*UREL*RVC)/REAL(N,EB)
+         DR%A_Y  = (REAL(N-1,EB)*DR%A_Y + SFAC*VREL*RVC)/REAL(N,EB)
+         DR%A_Z  = (REAL(N-1,EB)*DR%A_Z + SFAC*WREL*RVC)/REAL(N,EB)
+      ELSE
+         SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
+         DR%A_X  = SFAC*UREL
+         DR%A_Y  = SFAC*VREL
+         DR%A_Z  = SFAC*WREL
       ENDIF
 
-
-      ! Calculate the particle velocity components and the amount of momentum to transfer to the gas
-
-      RVC = RDX(II)*RDY(JJ)*RDZ(KK)
-
-      UREL  = DR%U - UBAR
-      VREL  = DR%V - VBAR
-      WREL  = DR%W - WBAR
-      QREL  = MAX(1.E-6_EB,SQRT(UREL*UREL + VREL*VREL + WREL*WREL))
-      TMP_G = MAX(TMPMIN,TMP(II,JJ,KK))
-      RHO_G = RHO(II,JJ,KK)
-      MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
-      DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
-      DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
-         C_DRAG  = DRAG(DR%RE)
-         !Secondary break-up
-         IF (SECONDARY_BREAKUP) THEN
-            WE_G=RHO(II,JJ,KK)*QREL**2*2._EB/SURFACE_TENSION
+      IF (.NOT.PC%STATIC) THEN
+         CONST   = 8._EB*PC%DENSITY*RD/(3._EB*RHO_G*C_DRAG*QREL)
+         BFAC    = EXP(-DTSP/CONST)
+         IF (SPATIAL_GRAVITY_VARIATION) THEN
+            GRVT1 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GX)*GVEC(1) 
+            GRVT2 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GY)*GVEC(2) 
+            GRVT3 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GZ)*GVEC(3) 
          ENDIF
-         IF (.NOT. PC%TREE) THEN
-            SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
-            DR%A_X  = (REAL(N-1,EB)*DR%A_X + SFAC*UREL*RVC)/REAL(N,EB)
-            DR%A_Y  = (REAL(N-1,EB)*DR%A_Y + SFAC*VREL*RVC)/REAL(N,EB)
-            DR%A_Z  = (REAL(N-1,EB)*DR%A_Z + SFAC*WREL*RVC)/REAL(N,EB)
-         ELSE
-            SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
-            DR%A_X  = SFAC*UREL
-            DR%A_Y  = SFAC*VREL
-            DR%A_Z  = SFAC*WREL
-         ENDIF
+         AUREL   = CONST*GRVT1
+         AVREL   = CONST*GRVT2
+         AWREL   = CONST*GRVT3
+         DR%U    = UBAR + (UREL+AUREL)*BFAC - AUREL
+         DR%V    = VBAR + (VREL+AVREL)*BFAC - AVREL
+         DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
+      ENDIF
+   ELSE DRAG_CALC ! No drag
+      DR%A_X  = 0._EB
+      DR%A_Y  = 0._EB
+      DR%A_Z  = 0._EB
+   ENDIF DRAG_CALC
 
-         IF (.NOT.PC%STATIC) THEN
-            CONST   = 8._EB*PC%DENSITY*RD/(3._EB*RHO_G*C_DRAG*QREL)
-            BFAC    = EXP(-DTSP/CONST)
-            IF (SPATIAL_GRAVITY_VARIATION) THEN
-               GRVT1 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GX)*GVEC(1) 
-               GRVT2 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GY)*GVEC(2) 
-               GRVT3 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GZ)*GVEC(3) 
-            ENDIF
-            AUREL   = CONST*GRVT1
-            AVREL   = CONST*GRVT2
-            AWREL   = CONST*GRVT3
-            DR%U    = UBAR + (UREL+AUREL)*BFAC - AUREL
-            DR%V    = VBAR + (VREL+AVREL)*BFAC - AVREL
-            DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
-         ENDIF
-      ELSE DRAG_CALC ! No drag
-         DR%A_X  = 0._EB
-         DR%A_Y  = 0._EB
-         DR%A_Z  = 0._EB
-      ENDIF DRAG_CALC
+   ! If the particle does not move, but does drag, go on to the next particle
 
-      ! If the particle does not move, but does drag, go on to the next particle
-
-      IF (PC%STATIC) CYCLE DROPLET_LOOP
+   IF (PC%STATIC) CYCLE DROPLET_LOOP
     
-     ! Update droplet position
+      ! Update droplet position
 
       X_OLD = DR%X
       Y_OLD = DR%Y
@@ -1065,10 +1064,10 @@ DROPLET_LOOP: DO I=1,NLP
                   DR%W = -PC%VERTICAL_VELOCITY 
                CASE (-3) DIRECTION 
                   IF (.NOT.ALLOW_UNDERSIDE_DROPLETS) THEN 
-                     DR%U   = 0._EB
-                     DR%V   = 0._EB
-                     DR%W   = -PC%VERTICAL_VELOCITY
-                     DR%IOR = 0
+                  DR%U = 0._EB
+                  DR%V = 0._EB
+                  DR%W = -PC%VERTICAL_VELOCITY 
+                  DR%IOR = 0
                   ELSE 
                      CALL RANDOM_NUMBER(RN)
                      THETA_RN = TWOPI*RN
@@ -1161,7 +1160,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
-            CP,H_NEW,YY_GET(1:N_SPECIES),M_GAS_NEW,MW_GAS,CP1,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_REF
+            CP,H_NEW,YY_GET(1:N_SPECIES),M_GAS_NEW,MW_GAS,CP1,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_REF,GAMMA_G
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,ITER,N_SUBSTEPS,ITMP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
@@ -1201,52 +1200,6 @@ IF (N_EVAP_INDICIES>0) THEN
    MVAP_TOT => WORK7
    MVAP_TOT = 0._EB
 ENDIF
-
-!DO KK=1,KBAR
-!   DO JJ=1,JBAR
-!      DO II=1,IBAR
-!         TMP_G=TMP(II,JJ,KK)
-!         RHO_G=RHO(II,JJ,KK)
-!         ITMP = MIN(5000,NINT(TMP_G))
-!         YY_GET(1) = 1._EB
-!         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP1,ITMP)
-!         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,300)
-!         H_VAPOR = M_VAP * CP2 * 300._EB
-!         YY_GET(:) = YY(II,JJ,KK,:)
-!         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP)
-!         H_GAS = RHO_G * TMP_G * CP
-!         CP2 = CP2*300._EB - CP1*TMP_G
-!         CALL GET_MOLECULAR_WEIGHT(YY_GET,MW_RATIO)
-!         MW_RATIO = MW_RATIO / SPECIES(1)%MW
-!         U2 = 0.25_EB*(U(II-1,JJ,KK)+U(II,JJ,KK))**2
-!         V2 = 0.25_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))**2
-!         W2 = 0.25_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))**2
-!         VEL = U2+V2+W2
-!         M_VAP = 0.01_EB
-!         RHO(II,JJ,KK) = RHO_G + M_VAP
-!         H_NEW = (H_GAS + H_VAPOR) / RHO_G
-!         YY(II,JJ,KK,1) = (YY(II,JJ,KK,1) * RHO_G + M_VAP)/RHO(II,JJ,KK)
-!         D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) +(MW_RATIO +  2._EB*(CP2 + VEL * 0.5_EB) / (H_NEW + CP * TMP_G) ) * M_VAP * & 
-!                            2._EB / (RHO(II,JJ,KK)+RHO_G) * RDT
-                            
-!         TEMPITER = .TRUE.
-!         ITERATE_TEMP: DO WHILE (TEMPITER)
-!            TEMPITER=.FALSE.
-!            ITMP = MIN(5000,NINT(TMP_G))
-!            YY_GET(:) = YY(II,JJ,KK,:)
-!            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP)
-!            TMP_G = TMP_G+(H_NEW-CP*TMP_G)/CP
-!            IF ((TMP(II,JJ,KK)-TMP_G) > 2._EB) TEMPITER = .TRUE.
-!            TMP(II,JJ,KK) = TMP_G
-!         ENDDO ITERATE_TEMP
-         
-!         TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
-                            
-!      ENDDO
-!   ENDDO
-!ENDDO
-
-!RETURN
 
 ! Loop over all types of evaporative species
 
@@ -1455,7 +1408,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP,M_VAP_MAX))
             
             ! Evaporate completely small droplets
-
             IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  
                M_VAP  = M_DROP
                IF (Q_TOT>0._EB) THEN
@@ -1466,7 +1418,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                   Q_TOT  = Q_RAD+Q_CON_GAS+Q_CON_WALL
                ENDIF
             ENDIF
-            IF (M_VAP < M_DROP) TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP * (M_VAP+M_DROP))
+            IF (M_VAP < M_DROP) TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP * (M_DROP - M_VAP))
 
             ! If the droplet temperature drops below its freezing point, just reset it
 
@@ -1498,12 +1450,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*(Q_RAD+Q_CON_WALL)*RAW(IW)/DT_SUBSTEP
                WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*WGT*M_DROP*RAW(IW)/REAL(N_SUBSTEPS,EB) 
             ENDIF
-            ITMP = MIN(5000,NINT(TMP_DROP_NEW))
-            YY_GET = 0._EB
-            YY_GET(IGAS) = 1._EB
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP1,ITMP)
-            ITMP = MIN(5000,NINT(TMP_G))
-            DELTA_H_G = CP1 * TMP_DROP_NEW
+            DELTA_H_G = (H_L + H_V)
             YY_GET(:) = YY(II,JJ,KK,:)
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP)
             H_G_OLD = M_GAS*CP*TMP_G
@@ -1527,24 +1474,20 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                IF ((TMP(II,JJ,KK)-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
                TMP(II,JJ,KK) = TMP_G_I
             ENDDO ITERATE_TEMP
+
+            CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(II,JJ,KK))
+            GAMMA_G = CP2/(CP2 - RSUM(II,JJ,KK))                      
             TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
             YY_GET = 0._EB
             YY_GET(IGAS) = 1._EB
-            ITMP = MIN(5000,NINT(TMP_DROP_NEW))
-            YY_GET = 0._EB
-            YY_GET(IGAS) = 1._EB
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP1,ITMP)
             ITMP = MIN(5000,NINT(TMP_G))
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,ITMP)
-            DELTA_H_G = (CP1 * TMP_DROP_NEW - CP2 * TMP_G) 
-
+            DELTA_H_G = (DELTA_H_G - CP2 * TMP_G) 
             ! Compute contribution to the divergence
 
             D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
-                              (M_VAP*DELTA_H_G- Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
+                               (M_VAP*DELTA_H_G- Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP / GAMMA_G
 
-            CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(II,JJ,KK))
-            
             ! Add fuel evaporation rate to running counter before adjusting its value
 
             IF (IGAS>0 .AND. IGAS==I_FUEL) FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP
