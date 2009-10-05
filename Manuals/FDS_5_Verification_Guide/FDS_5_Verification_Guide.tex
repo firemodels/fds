@@ -1408,15 +1408,7 @@ within the box is stirred to maintain uniform conditions, and there are no
 leaks or heat losses. Initially, the air temperature is 20~$^\circ$C,
 the median volumetric diameter of the droplets is 100~$\mu$m,
 the water temperature is 90~$^\circ$C, and the total mass of water droplets is 0.2~kg.
-It is expected that a steady-state will be achieved after about 10~s.
-The initial energy content, the sum of the enthalpy of the water and air,
-is 75.3~kJ + 540.1~kJ = 615.4~kJ.  After a short period of time, 0.0246~kg of water evaporates,
-the mass fraction of water vapor rises to 0.0205~kg/kg, and the
-air temperature increases to 22.3~$^\circ$C.
-At this point the energy content of the water droplets and humid air is 16.2~kJ + 604.9~kJ = 621.1~kJ.
-
-At 22.3~$^\circ$C, the expected mass fraction of water vapor is 0.0201~kg/kg, but the predicted value is 0.0205~kg/kg, an over-prediction
-of about 2~\%. The energy gained by the air is over-predicted by about 8~\%.
+It is expected that a steady-state will be achieved after about 10~s.  During evaporation the gas temperature increases slightly as the water droplets are intially warmer than the gas.  The plot on the left below shows the enthalpy of the gas, the enthalpy of the liquid water, and the sum of the two.  The summed enthalpy should not change over the simulation time.  The plot on the left shows the relative humidity.  Ideally it should be equal to 100 \%, but since FDS does not currently compute condensation a slight overshoot is not unexpected.
 
 \vspace{0.1in}
 \noindent
