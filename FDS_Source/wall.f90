@@ -570,33 +570,33 @@ WALL_CELL_LOOP: DO IW=1,NWC
 
    END SELECT METHOD_OF_MASS_TRANSFER
    
-   ! pure periodic bcs for single mesh case
-   IF (FISHPAK_BC(1)==0) THEN
-      RHOP(0,:,:) = RHOP(IBAR,:,:)
-      RHOP(IBP1,:,:) = RHOP(1,:,:)
-   ENDIF
-   IF (FISHPAK_BC(2)==0) THEN
-      RHOP(:,0,:) = RHOP(:,JBAR,:)
-      RHOP(:,JBP1,:) = RHOP(:,1,:)
-   ENDIF
-   IF (FISHPAK_BC(3)==0) THEN
-      RHOP(:,:,0) = RHOP(:,:,KBAR)
-      RHOP(:,:,KBP1) = RHOP(:,:,1)
-   ENDIF
-   DO N=1,N_SPECIES
-      IF (FISHPAK_BC(1)==0) THEN
-         YYP(0,:,:,N) = YYP(IBAR,:,:,N)
-         YYP(IBP1,:,:,N) = YYP(1,:,:,N)
-      ENDIF
-      IF (FISHPAK_BC(2)==0) THEN
-         YYP(:,0,:,N) = YYP(:,JBAR,:,N)
-         YYP(:,JBP1,:,N) = YYP(:,1,:,N)
-      ENDIF
-      IF (FISHPAK_BC(3)==0) THEN
-         YYP(:,:,0,N) = YYP(:,:,KBAR,N)
-         YYP(:,:,KBP1,N) = YYP(:,:,1,N)
-      ENDIF
-   ENDDO
+!   ! pure periodic bcs for single mesh case
+!   IF (FISHPAK_BC(1)==0) THEN
+!      RHOP(0,:,:) = RHOP(IBAR,:,:)
+!      RHOP(IBP1,:,:) = RHOP(1,:,:)
+!   ENDIF
+!   IF (FISHPAK_BC(2)==0) THEN
+!      RHOP(:,0,:) = RHOP(:,JBAR,:)
+!      RHOP(:,JBP1,:) = RHOP(:,1,:)
+!   ENDIF
+!   IF (FISHPAK_BC(3)==0) THEN
+!      RHOP(:,:,0) = RHOP(:,:,KBAR)
+!      RHOP(:,:,KBP1) = RHOP(:,:,1)
+!   ENDIF
+!   DO N=1,N_SPECIES
+!      IF (FISHPAK_BC(1)==0) THEN
+!         YYP(0,:,:,N) = YYP(IBAR,:,:,N)
+!         YYP(IBP1,:,:,N) = YYP(1,:,:,N)
+!      ENDIF
+!      IF (FISHPAK_BC(2)==0) THEN
+!         YYP(:,0,:,N) = YYP(:,JBAR,:,N)
+!         YYP(:,JBP1,:,N) = YYP(:,1,:,N)
+!      ENDIF
+!      IF (FISHPAK_BC(3)==0) THEN
+!         YYP(:,:,0,N) = YYP(:,:,KBAR,N)
+!         YYP(:,:,KBP1,N) = YYP(:,:,1,N)
+!      ENDIF
+!   ENDDO
 
    ! Only set species mass fraction in the ghost cell if it is solid
     
