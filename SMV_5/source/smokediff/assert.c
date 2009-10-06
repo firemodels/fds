@@ -1,13 +1,13 @@
-// $Date: 2007-10-09 15:35:36 -0400 (Tue, 09 Oct 2007) $ 
-// $Revision: 824 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 // svn revision character string
-char assert_revision[]="$Revision: 824 $";
+char assert_revision[]="$Revision$";
 
 
 void _Assert(char *filename, unsigned linenumber){

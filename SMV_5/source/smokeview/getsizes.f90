@@ -764,7 +764,6 @@ close(lu10)
 return
 end subroutine getsizes2
 
-
 !  ------------------ getsliceparms ------------------------ 
 
 subroutine getsliceparms(slicefilename, endian, ip1, ip2, jp1, jp2, kp1, kp2, slice3d, error)
@@ -952,3 +951,77 @@ close(lu11)
 return
 
 end subroutine getslicesizes
+
+!  ------------------ openslice ------------------------ 
+
+subroutine openslice(slicefilename, unit, endian, is1, is2, js1, js2, ks1, ks2, error)
+
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_openslice@44' :: openslice
+#endif
+
+implicit none
+
+character(len=*) :: slicefilename
+logical :: exists
+
+integer, intent(in) :: endian, unit
+integer, intent(out) :: is1, is2, js1, js2, ks1, ks2
+integer, intent(out) :: error
+logical :: connected
+character(len=30) :: longlbl, shortlbl, unitlbl
+
+
+integer :: lu11
+
+error=0
+lu11 = unit
+inquire(unit=lu11,opened=connected)
+if(connected)close(lu11)
+
+inquire(file=trim(slicefilename),exist=exists)
+if(exists)then
+#ifdef pp_cvf
+if(endian.eq.1)then
+  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+ else
+  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
+endif
+#elif pp_LAHEY
+if(endian.eq.1)then
+  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",convert="BIG_ENDIAN")
+ else
+  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
+endif
+#else
+  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
+#endif
+ else
+  error=1
+  return
+endif
+read(lu11,iostat=error)longlbl
+read(lu11,iostat=error)shortlbl
+read(lu11,iostat=error)unitlbl
+
+read(lu11,iostat=error)is1, is2, js1, js2, ks1, ks2
+
+return
+end subroutine openslice
+
+!  ------------------ closeslice ------------------------ 
+
+subroutine closefortranfile(unit)
+
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_closefortranfile@4' :: closefortranfile
+#endif
+
+implicit none
+
+integer, intent(in) :: unit
+
+close(unit)
+
+return
+end subroutine closefortranfile

@@ -1,6 +1,6 @@
-// $Date: 2009-07-09 11:08:46 -0400 (Thu, 09 Jul 2009) $ 
-// $Revision: 4355 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #include "options.h"
 #include <sys/stat.h>
@@ -13,7 +13,7 @@
 #include "MALLOC.h"
 
 // svn revision character string
-char utilities_revision[]="$Revision: 4355 $";
+char utilities_revision[]="$Revision$";
 
 /* ------------------ match ------------------------ */
 
@@ -202,4 +202,15 @@ void fullfile(char *fileout, char *dir, char *file){
   if(dir!=NULL)strcat(fileout,dir);
   strcat(fileout,file);
 }
+
+/* ------------------ getendian ------------------------ */
+
+int getendian(void){
+  short val;
+  char *cval;
+  val=1;
+  cval = (char *)&val+1;
+  return (int)(*cval);
+}
+
 
