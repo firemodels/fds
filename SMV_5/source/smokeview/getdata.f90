@@ -556,7 +556,6 @@ endif
 return
 end subroutine getdirval
 
-
 !  ------------------ getslicedata ------------------------ 
 
 subroutine getslicedata(slicefilename,longlabel,shortlabel,units,&
@@ -741,6 +740,103 @@ close(lu11)
 return
 end subroutine getslicedata
 
+!  ------------------ getsliceframe ------------------------ 
+
+subroutine getsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,error)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_getslicedata@40' :: getslicedata
+#endif
+
+implicit none
+
+real, intent(out), dimension(*) :: qframe
+real, intent(out) :: time
+integer, intent(out) :: error
+integer, intent(in) :: lu11, is1, is2, js1, js2, ks1, ks2
+
+integer :: i,j,k
+integer :: nxsp, nysp, nzsp
+
+nxsp = is2 + 1 - is1
+nysp = js2 + 1 - js1
+nzsp = ks2 + 1 - ks1  
+
+read(lu11,iostat=error)time
+if(error.ne.0)return
+read(lu11,iostat=error)(((qframe(1+i+j*nxsp+k*nxsp*nysp),i=0,nxsp-1),j=0,nysp-1),k=0,nzsp-1)
+
+999 continue
+
+return
+end subroutine getsliceframe
+
+!  ------------------ outsliceheader ------------------------ 
+
+subroutine outsliceheader(slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_outsliceheader@40' :: outsliceheader
+#endif
+
+implicit none
+
+character(len=*) :: slicefilename
+integer, intent(in) :: unit
+integer, intent(in) :: ip1, ip2, jp1, jp2, kp1, kp2
+integer, intent(out) :: error
+
+character(len=30) :: longlbl, shortlbl, unitlbl
+integer :: lu11
+logical :: connected
+
+lu11 = unit
+inquire(unit=lu11,opened=connected)
+if(connected)close(lu11)
+
+open(unit=lu11,file=trim(slicefilename),form="unformatted")
+
+longlbl= "                              "
+shortlbl="                              "
+unitlbl= "                              "
+write(lu11,iostat=error)longlbl
+write(lu11,iostat=error)shortlbl
+write(lu11,iostat=error)unitlbl
+
+write(lu11,iostat=error)ip1, ip2, jp1, jp2, kp1, kp2
+
+end subroutine outsliceheader
+
+!  ------------------ getsliceframe ------------------------ 
+
+subroutine outsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,error)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_outsliceframe@40' :: outsliceframe
+#endif
+
+implicit none
+
+real, intent(in), dimension(*) :: qframe
+real, intent(in) :: time
+integer, intent(out) :: error
+integer, intent(in) :: lu11, is1, is2, js1, js2, ks1, ks2
+
+integer :: i,j,k
+integer :: nxsp, nysp, nzsp
+
+nxsp = is2 + 1 - is1
+nysp = js2 + 1 - js1
+nzsp = ks2 + 1 - ks1  
+
+write(lu11,iostat=error)time
+if(error.ne.0)return
+write(lu11,iostat=error)(((qframe(1+i+j*nxsp+k*nxsp*nysp),i=0,nxsp-1),j=0,nysp-1),k=0,nzsp-1)
+
+999 continue
+
+return
+end subroutine outsliceframe
+
+!  ------------------ getplot3dqa ------------------------ 
+
 subroutine getplot3dqa(qfilename,nx,ny,nz,qq,error)
 
 #ifdef pp_cvf
@@ -796,8 +892,8 @@ do i = 1, nx
 end do
 return 
 
-
 end subroutine getplot3dqa
+
 !  ------------------ getplot3dq ------------------------ 
 
 subroutine getplot3dq(qfilename,nx,ny,nz,qq,error,endian,isotest)
@@ -880,8 +976,6 @@ if(isotest.eq.0)then
   error = 0
 endif
 close(u_in)
-
-
 
 return
 end subroutine getplot3dq

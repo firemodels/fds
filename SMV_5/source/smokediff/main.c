@@ -1,6 +1,6 @@
-// $Date: 2009-03-01 08:51:14 -0500 (Sun, 01 Mar 2009) $ 
-// $Revision: 3426 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #include "options.h"
 #define INMAIN
@@ -14,7 +14,7 @@
 //dummy change to bump version number to 1.0.0
 
 // svn revision character string
-char main_revision[]="$Revision: 3426 $";
+char main_revision[]="$Revision$";
 
 
 /* ------------------ main ------------------------ */
@@ -106,8 +106,7 @@ int main(int argc, char **argv){
     }
     return 1;
   }
-  fullfile(smv_out,destdir,smoke1);
-  strcat(smv_out,"_diff.smv");
+  make_outfile(smv_out,destdir,smoke1,".smv");
 
   stream_out=fopen(smv_out,"w");
   if(stream_out==NULL){
@@ -124,7 +123,9 @@ int main(int argc, char **argv){
   if(stream_out==NULL||stream_in1==NULL||stream_in2==NULL)return 1;
 
   caseinfo[0].dir=sourcedir1;
+  caseinfo[0].endian=0;
   caseinfo[1].dir=sourcedir2;
+  caseinfo[1].endian=0;
 
   readsmv(stream_in1, stream_out, caseinfo);
   fclose(stream_in1);
