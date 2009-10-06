@@ -1410,15 +1410,19 @@ are assumed adiabatic, meaning that there are no leaks or heat losses. The air
 within the box is stirred to maintain uniform conditions. Initially, the air temperature is 20~$^\circ$C,
 the median volumetric diameter of the droplets is 100~$\mu$m,
 the water temperature is 90~$^\circ$C, and the total mass of water droplets is 0.2~kg.
-It is expected that a steady-state will be achieved after about 5~s.  
+It is expected that a steady-state will be achieved after about 5~s.
 Figure~\ref{water_evaporation} displays the average enthalpy, humidity, density, pressure, temperature and mass of water of the gas. The horizontal lines denote the
-expected initial and steady-state values, respectively. 
+expected initial and steady-state values, respectively.
 The plot of enthalpy includes the gas (reference temperature is 0~K) and the liquid water droplets (reference temperature is 0~$^\circ$C).
 The decrease in the enthalpy of the water droplets should equal the increase in the enthalpy of the gas minus the work performed due to increasing pressure. It is the internal
-energy of the system that is conserved:
-\be \Delta e = \Delta h - \Delta(p/\rho) \ee
-Because the volume of the enclosure is 1~m$^3$, the enthalpy decrease of the liquid water droplets is equal to the enthalpy gain of the gas minus the pressure increase if the
-pressure is expressed in units of kPa.
+energy of the system that is conserved. The internal energy can be expressed in terms of the enthalpy, pressure and density:
+\be e = h - \frac{p}{\rho} \ee
+In differential form:
+\be de = dh - \frac{1}{\rho} \; dp - p \; d \left(\frac{1}{\rho} \right) = dh - v \; dp - p \; dv \ee
+Multiplying by mass and noting that the volume, $V$, is constant yields:
+\be dE = dH - V \; dp \ee
+The enthalpy decrease of the liquid water droplets is equal to the enthalpy gain of the gas (both expressed in kJ) minus the pressure increase times the volume in units of kPa
+and m$^3$, respectively.
 Finally, note that in this example the water droplets evaporate until the air is saturated. Thus, the relative humidity should be equal to 100~\%, but since FDS does not currently compute condensation, a slight overshoot is not unexpected.
 
 \begin{figure}[ht]
