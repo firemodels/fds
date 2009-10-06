@@ -1486,7 +1486,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ! Compute contribution to the divergence
 
             D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
-                               (M_VAP*DELTA_H_G- Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP / GAMMA_G
+                               (M_VAP*DELTA_H_G- Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP 
 
             ! Add fuel evaporation rate to running counter before adjusting its value
 
