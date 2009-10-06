@@ -67,7 +67,11 @@ IF (EVACUATION_ONLY(NM)) H0RR(1:6) = 0._EB
 ! LBC, MBC and NBC are codes used be Poisson solver to denote type
 ! of boundary condition at x, y and z boundaries. See Crayfishpak
 ! manual for details.
- 
+
+!$OMP PARALLEL
+!$OMP DO PRIVATE(IW,I,J,K,IOR,DUUDT,DVVDT,DWWDT,NOM,H_OTHER,KKO,JJO,IIO) &
+!$OMP PRIVATE(N_INT_CELLS,DX_OTHER,DY_OTHER,DZ_OTHER,H_EXTERNAL,VT,TSI,TIME_RAMP_FACTOR) &
+!$OMP PRIVATE(U2,V2,W2,HQ2)
 WALL_CELL_LOOP: DO IW=1,NEWC
  
    I   = IJKW(1,IW)
@@ -248,6 +252,7 @@ WALL_CELL_LOOP: DO IW=1,NEWC
    ENDIF IF_DIRICHLET
  
 ENDDO WALL_CELL_LOOP
+!$OMP END DO
 
 ! Compute the RHS of the Poisson equation
  
@@ -255,6 +260,7 @@ SELECT CASE(IPS)
 
    CASE(:1,4,7)
       IF (CYLINDRICAL) THEN
+         !$OMP DO COLLAPSE(2) PRIVATE(K,I,TRM1,TRM3,TRM4)
          DO K=1,KBAR
             DO I=1,IBAR
                TRM1 = (R(I-1)*FVX(I-1,1,K)-R(I)*FVX(I,1,K))*RDX(I)*RRN(I)
@@ -263,8 +269,10 @@ SELECT CASE(IPS)
                PRHS(I,1,K) = TRM1 + TRM3 + TRM4
             ENDDO
          ENDDO
+         !$OMP END DO NOWAIT
       ENDIF
       IF (.NOT.CYLINDRICAL) THEN
+         !$OMP DO COLLAPSE(3) PRIVATE(TRM1,TRM2,TRM3,TRM4)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -276,9 +284,11 @@ SELECT CASE(IPS)
                ENDDO
             ENDDO
          ENDDO
+         !$OMP END DO NOWAIT
       ENDIF
  
    CASE(2)  ! Switch x and y
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,TRM1, TRM2,TRM3,TRM4)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -290,10 +300,14 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO NOWAIT
+      !$OMP WORKSHARE
       BZST = TRANSPOSE(BZS)
       BZFT = TRANSPOSE(BZF)
+      !$OMP END WORKSHARE
  
    CASE(3,6)  ! Switch x and z
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,TRM1,TRM2,TRM3,TRM4)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -305,14 +319,18 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO NOWAIT
+      !$OMP WORKSHARE
       BXST = TRANSPOSE(BXS)
       BXFT = TRANSPOSE(BXF)
       BYST = TRANSPOSE(BYS)
       BYFT = TRANSPOSE(BYF)
       BZST = TRANSPOSE(BZS)
       BZFT = TRANSPOSE(BZF)
+      !$OMP END WORKSHARE
  
    CASE(5)  ! Switch y and z
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,TRM1,TRM2,TRM3,TRM4)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -324,10 +342,14 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO NOWAIT
+      !$OMP WORKSHARE
       BXST = TRANSPOSE(BXS)
       BXFT = TRANSPOSE(BXF)
+      !$OMP END WORKSHARE
 
 END SELECT
+!$OMP END PARALLEL
 
 ! Call the Poisson solver
  
@@ -354,8 +376,10 @@ END SELECT
  
 ! Put output of Poisson solver into the H array
 
+!$OMP PARALLEL
 SELECT CASE(IPS)
    CASE(:1,4,7)
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -363,7 +387,9 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
-   CASE(2)  
+      !$OMP END DO
+   CASE(2)
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -371,7 +397,9 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
    CASE(3,6)
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -379,7 +407,9 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
-   CASE(5) 
+      !$OMP END DO
+   CASE(5)
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -387,10 +417,12 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
+      !$OMP END DO
 END SELECT 
 
 ! Apply boundary conditions to H
- 
+
+!$OMP DO COLLAPSE(2) PRIVATE(K,J)
 DO K=1,KBAR
    DO J=1,JBAR
       IF (LBC==3 .OR. LBC==4)             H(0,J,K)    = H(1,J,K)    - DXI*BXS(J,K)
@@ -404,7 +436,9 @@ DO K=1,KBAR
       ENDIF
    ENDDO
 ENDDO
- 
+!$OMP END DO NOWAIT
+
+!$OMP DO COLLAPSE(2) PRIVATE(K,I)
 DO K=1,KBAR
    DO I=1,IBAR
       IF (MBC==3 .OR. MBC==4) H(I,0,K)    = H(I,1,K)    - DETA*BYS(I,K)
@@ -417,7 +451,9 @@ DO K=1,KBAR
       ENDIF
    ENDDO
 ENDDO
- 
+!$OMP END DO NOWAIT
+
+!$OMP DO COLLAPSE(2) PRIVATE(J,I)
 DO J=1,JBAR
    DO I=1,IBAR
       IF (EVACUATION_ONLY(NM)) CYCLE
@@ -431,6 +467,8 @@ DO J=1,JBAR
       ENDIF
    ENDDO
 ENDDO
+!$OMP END DO NOWAIT
+!$OMP END PARALLEL
 
 ! ************************* Check the Solution *************************
  
