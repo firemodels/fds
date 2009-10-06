@@ -1102,10 +1102,10 @@ the wall heat fluxes are given in the table below.
 \label{wall_internal_radiation}
 
 
-In-depth absorption of thermal radiation in a solid is computed using a two-flux model.  In this example, the accuracy of the two-flux model 
-is tested in the computation of the emissive flux from a homogenous layer of material (thickness $L=$~0.1~m) at 1273.15~K temperature, 
-surrounded by an ambient temperature of 10~K. The absorption coefficient $\kappa$ is varied to cover a range [0.01, 10] of optical depth 
-$\tau = \kappa L$. 
+In-depth absorption of thermal radiation in a solid is computed using a two-flux model.  In this example, the accuracy of the two-flux model
+is tested in the computation of the emissive flux from a homogenous layer of material (thickness $L=$~0.1~m) at 1273.15~K temperature,
+surrounded by an ambient temperature of 10~K. The absorption coefficient $\kappa$ is varied to cover a range [0.01, 10] of optical depth
+$\tau = \kappa L$.
 
 The exact solutions for radiative flux are the analytical solutions of plane layer emission~\cite{Zeldovich:1}
 \be S(\tau) = S_b\left[1-2E_3(\tau)\right] \ee
@@ -1144,7 +1144,7 @@ is calculated as
 \ee
 where $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (percent).
 
-The FED values were computed from specified constant gas concentrations using an external spreadsheet. The gas concentrations are listed in the 
+The FED values were computed from specified constant gas concentrations using an external spreadsheet. The gas concentrations are listed in the
 following table and the FDS and spreadsheet predictions of FED values are compared in the figures below.
 \begin{figure}[ht]
 \noindent
@@ -1398,24 +1398,42 @@ Fig.~\ref{fig_birch_tga} near the temperature of 100~$^\circ$C.
 
 \chapter{Droplets}
 
+
+
+
 \section{Water Droplet Evaporation (\texorpdfstring{{\bf water\_evaporation}}{water\_evaporation}) }
 \label{water_evaporation}
 
 The test case called {\bf water\_evaporation} involves stationary
 water droplets in a box with dimensions of 1~m on a side. The walls of the box
-are assumed adiabatic. The air
-within the box is stirred to maintain uniform conditions, and there are no
-leaks or heat losses. Initially, the air temperature is 20~$^\circ$C,
+are assumed adiabatic, meaning that there are no leaks or heat losses. The air
+within the box is stirred to maintain uniform conditions. Initially, the air temperature is 20~$^\circ$C,
 the median volumetric diameter of the droplets is 100~$\mu$m,
 the water temperature is 90~$^\circ$C, and the total mass of water droplets is 0.2~kg.
-It is expected that a steady-state will be achieved after about 10~s.  During evaporation the gas temperature increases slightly as the water droplets are intially warmer than the gas.  The plot on the left below shows the enthalpy of the gas, the enthalpy of the liquid water, and the sum of the two.  The summed enthalpy should not change over the simulation time.  The plot on the left shows the relative humidity.  Ideally it should be equal to 100 \%, but since FDS does not currently compute condensation a slight overshoot is not unexpected.
+It is expected that a steady-state will be achieved after about 5~s.  
+Figure~\ref{water_evaporation} displays the average enthalpy, humidity, density, pressure, temperature and mass of water of the gas. The horizontal lines denote the
+expected initial and steady-state values, respectively. 
+The plot of enthalpy includes the gas (reference temperature is 0~K) and the liquid water droplets (reference temperature is 0~$^\circ$C).
+The decrease in the enthalpy of the water droplets should equal the increase in the enthalpy of the gas minus the work performed due to increasing pressure. It is the internal
+energy of the system that is conserved:
+\be \Delta e = \Delta h - \Delta(p/\rho) \ee
+Because the volume of the enclosure is 1~m$^3$, the enthalpy decrease of the liquid water droplets is equal to the enthalpy gain of the gas minus the pressure increase if the
+pressure is expressed in units of kPa.
+Finally, note that in this example the water droplets evaporate until the air is saturated. Thus, the relative humidity should be equal to 100~\%, but since FDS does not currently compute condensation, a slight overshoot is not unexpected.
 
-\vspace{0.1in}
+\begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{FIGURES/water_evaporation_enthalpy} &
-\includegraphics[width=3.2in]{FIGURES/water_evaporation_humidity}
+\includegraphics[width=3.2in]{FIGURES/water_evaporation_humidity} \\
+\includegraphics[width=3.2in]{FIGURES/water_evaporation_density} &
+\includegraphics[width=3.2in]{FIGURES/water_evaporation_temperature} \\
+\includegraphics[width=3.2in]{FIGURES/water_evaporation_pressure} &
+\includegraphics[width=3.2in]{FIGURES/water_evaporation_water_mass}
 \end{tabular*}
+\caption[Sample case {\bf water\_evaporation}.]{Output of the test case called {\bf water\_evaporation}.}
+\label{water_evaporation}
+\end{figure}
 
 
 
