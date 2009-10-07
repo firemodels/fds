@@ -7,7 +7,7 @@ bin = .
 
 # Definition of the object variables
 
-obj = main.obj dmalloc.o assert.o utilities.o readsmv.o
+obj = main.obj dmalloc.o assert.o utilities.o readsmv.o IOdslice.o IOdplot.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***

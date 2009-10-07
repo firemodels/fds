@@ -158,6 +158,8 @@ int getmaxrevision(void){
   MAXREV(readsmv_revision);
   MAXREV(dmalloc_revision);
   MAXREV(assert_revision);
+  MAXREV(IOdslice_revision);
+  MAXREV(IOdplot_revision);
   return max_revision;
 }
 
@@ -216,4 +218,20 @@ int getendian(void){
   return (int)(*cval);
 }
 
+/* ------------------ make_fileout ------------------------ */
 
+void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
+  char filecopy[1024], *file1_noext;
+
+  strcpy(filecopy,file1);
+  file1_noext=strstr(filecopy,ext);
+  strcpy(outfile,"");
+  if(file1_noext==NULL)return;
+  file1_noext[0]='\0';
+  if(destdir!=NULL){
+    strcpy(outfile,destdir);
+  }
+  strcat(outfile,filecopy);
+  strcat(outfile,"_diff");
+  strcat(outfile,ext);
+}
