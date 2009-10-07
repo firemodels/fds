@@ -347,6 +347,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       plot3di = plot3dinfo + iplot3d;
       plot3di->plot3dmesh=plot3dmesh;
+      plot3di->time=time;
       trim(buffer);
       strcpy(plot3di->keyword,buffer);
 

@@ -969,7 +969,16 @@ if(isotest.eq.0)then
     do k = 1, nz
       r2 = sqrt(float((i-nx/2)**2 + (j-ny/2)**2 + (k-nz/2)**2))
       qval = r2
-      qq(i,j,k,1:5) = qval
+      if(isotest.eq.1)then
+        qq(i,j,k,1) = 0.0
+        qq(i,j,k,2) = 0.0
+        qq(i,j,k,3:5) = qval
+      endif
+      if(isotest.eq.2)then
+        qq(i,j,k,1)=qval
+        qq(i,j,k,2)=1.1*qval
+        qq(i,j,k,3:5)=1.1*qval
+      endif
     end do
     end do
   end do
