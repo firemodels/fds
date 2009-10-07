@@ -20,6 +20,7 @@ set out_examples=%out_bundle%\FDS5\Examples
 set fds5=fds5.exe
 set fds5mpi=fds5_mpi.exe
 set smokeview=smokeview.exe
+set smokediff=smokediff.exe
 set smokezip=smokezip.exe
 
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
@@ -44,6 +45,7 @@ copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\%fds5%
 copy %fdsmpidir%\fds5_win_mpi_%platform%.exe %out_bin%\%fds5mpi%
 copy %in_fds2ascii%\fds2ascii.exe     %out_bin%\.
 copy %in_smv%\smokeview%platform%_release.exe   %out_bin%\%smokeview%
+copy %in_smv%\smokediff32_release.exe   %out_bin%\%smokediff%
 copy %in_smv%\devices.svo             %out_bin%\.
 copy %in_smv%\pthreadVC.dll           %out_bin%\.
 copy %in_smv%\smokezip_release.exe    %out_bin%\%smokezip%
