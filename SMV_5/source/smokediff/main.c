@@ -50,7 +50,7 @@ int main(int argc, char **argv){
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
       case 'h':
-        usage(prog);
+        usage();
         return 1;
         break;
       case 's':
@@ -73,7 +73,7 @@ int main(int argc, char **argv){
         i++;
         break;
       default:
-        usage(prog);
+        usage();
         return 1;
       }
     }
@@ -154,7 +154,7 @@ char *setdir(char *argdir){
 
 /* ------------------ usage ------------------------ */
 
-void usage(char *prog){
+void usage(void){
   char pp[2];
   char smv_version[100];
   int svn_num;
@@ -164,14 +164,16 @@ void usage(char *prog){
 
   strcpy(pp,"%");
   printf("\n");
-  printf("  smokediff %s (%i) - %s\n\n",smv_version,svn_num,__DATE__);
-  printf("  smokediff compares two FDS cases by subtracting corresponding slice\n");
-  printf("  files referenced in two .smv files specified on the command line.\n");
-  printf("  PLOT3D files are also differenced.  A new .smv file is generated.\n");
-  printf("  Mesh dimensions in the two cases must be identical, though the number\n");
-  printf("  of grid cells need not be.  Usage:\n\n");
-  printf("  %s [-h] smv_case1 smv_case2\n",prog);
-  printf("  -h  - display this message\n\n");
-  printf("  smv_case1,smv_case2 - Two smokeview cases to compare.  smokediff\n");
-  printf("        generates an .smv file named smv_case1_diff.smv\n\n");
+  printf("  smokediff [-h] [-s1 dir1] [-s2 dir2] [-d dir] smv_case1 smv_case2\n");
+  printf("    version: %s (revision %i) - %s\n\n",smv_version,svn_num,__DATE__);
+  printf("  smokediff compares two FDS cases by differencing corresponding slice\n");
+  printf("  files referenced in smv_case1.smv and smv_case2.smv.  PLOT3D files are\n");
+  printf("  also differenced.  Results may be viewed in Smokeview by viewing\n");
+  printf("  smv_case1_diff.smv.  Dimensions and number of grid cells must be identical\n");
+  printf("  for any mesh common to smv_case1 and smv_case2.\n\n");
+  printf("  -h  - display this message\n");
+  printf("  -s1 dir1 - directory containing case smv_case1.smv\n");
+  printf("  -s2 dir2 - directory containing case smv_case2.smv\n");
+  printf("  -d  dir - directory containing created differenced files\n");
+  printf("  smv_case1,smv_case2 - Two smokeview cases to compare.\n");
 }
