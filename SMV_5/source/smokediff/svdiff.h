@@ -35,6 +35,16 @@ typedef struct _slice {
   flowlabels label;
 } slice;
 
+typedef struct _plot3d {
+  char keyword[255];
+  char *file;
+  float time;
+  struct _plot3d *plot3d2;
+  float xmin, xmax, ymin, ymax, zmin, zmax;
+  mesh *plot3dmesh;
+  flowlabels labels[5];
+} plot3d;
+
 #ifdef WIN32
 #define STDCALL extern void _stdcall
 #else
@@ -68,10 +78,11 @@ typedef struct _slice {
 typedef struct {
   slice *sliceinfo;
   mesh *meshinfo;
+  plot3d *plot3dinfo;
   char *dir;
   int endian;
   int nmeshes;
-  int nslice_files;
+  int nslice_files, nplot3d_files;
 } casedata;
 
 int getendian(void);
@@ -89,8 +100,11 @@ int readlabels(flowlabels *flowlabel, FILE *stream);
 char *setdir(char *argdir);
 int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase);
 void setup_slice(FILE *stream_out);
+void setup_plot3d(FILE *stream_out);
+plot3d *getplot3d(plot3d *plot3din, casedata *case2);
 slice *getslice(slice *slicein, casedata *case2);
 void diff_slices(void);
+void diff_plot3ds(void);
 void fullfile(char *fileout, char *dir, char *file);
 void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 
@@ -101,6 +115,8 @@ void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 #define FORTgetsliceframe getsliceframe
 #define FORToutsliceframe outsliceframe
 #define FORToutsliceheader outsliceheader
+#define FORTgetplot3dq getplot3dq
+#define FORTplot3dout plot3dout
 #else
 #define FORTgetsliceparms getsliceparms_
 #define FORTclosefortranfile closefortranfile_
@@ -108,6 +124,8 @@ void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 #define FORTgetsliceframe getsliceframe_
 #define FORToutsliceframe outsliceframe_
 #define FORToutsliceheader outsliceheader_
+#define FORTgetplot3dq getplot3dq_
+#define FORTplot3dout plot3dout_
 #endif
 STDCALL FORTgetsliceframe(int *lu11,
                           int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
@@ -125,6 +143,9 @@ STDCALL FORToutsliceframe(int *unit3,
 STDCALL FORToutsliceheader(char *outfile,int *unit3,
                              int *is1a,int *is2a,int *js1a,int *js2a,int *ks1a,int *ks2a,
                              int *error1,int len);
+STDCALL FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, int len);
+STDCALL FORTplot3dout(char *outfile,int *nx,int *ny,int *nz,float *qout,int *error3,int lenout);
+
 
 
 EXTERN char dirseparator[3];

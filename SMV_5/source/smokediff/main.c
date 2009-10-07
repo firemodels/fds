@@ -131,6 +131,8 @@ int main(int argc, char **argv){
   fclose(stream_in1);
   readsmv(stream_in2, NULL, caseinfo+1);
   fclose(stream_in2);
+  setup_plot3d(stream_out);
+  diff_plot3ds();
   setup_slice(stream_out);
   diff_slices();
   fclose(stream_out);
