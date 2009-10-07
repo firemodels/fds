@@ -80,7 +80,7 @@ int getmaxrevision(void);
 int imax(int a, int b);
 int getrevision(char *svn);
 void version(void);
-void usage(char *prog);
+void usage(void);
 int getfileinfo(char *filename, char *source_dir, int *filesize);
 int match(const char *buffer, const char *key, unsigned int lenkey);
 void trim(char *line);
