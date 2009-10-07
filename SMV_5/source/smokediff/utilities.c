@@ -155,6 +155,9 @@ int getmaxrevision(void){
 
   MAXREV(main_revision);
   MAXREV(utilities_revision);
+  MAXREV(readsmv_revision);
+  MAXREV(dmalloc_revision);
+  MAXREV(assert_revision);
   return max_revision;
 }
 

@@ -112,8 +112,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       NewMemory((void **)&yp,sizeof(float)*(jbar+1));
       NewMemory((void **)&zp,sizeof(float)*(kbar+1));
       meshi->ibar=ibar;
-      meshi->ibar=ibar;      
-      meshi->ibar=ibar;
+      meshi->jbar=jbar;      
+      meshi->kbar=kbar;
       meshi->xplt=xp;
       meshi->yplt=yp;
       meshi->zplt=zp;
@@ -608,7 +608,7 @@ void diff_slices(void){
       printf("*** problem writing out header for %s\n",fullfile1);
       continue;
     }
-    printf("differencing %s\n",fullfile1);
+    printf("differencing %s and %s\n",fullfile1,fullfile2);
     for(;;){
       FORTgetsliceframe(&unit1,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframe1,&error1);
       FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2,qframe2,&error2);
