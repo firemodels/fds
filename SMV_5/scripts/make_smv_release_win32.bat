@@ -19,6 +19,7 @@ mkdir %smvdir%
 mkdir %smvdir%\Documentation
 copy smokeview.ini %smvdir%\smokeview.ini
 copy smokeview32_release.exe %smvdir%\smokeview.exe
+copy smokediff32_release.exe %smvdir%\smokediff.exe
 copy smokezip_release.exe %smvdir%\smokezip.exe
 copy devices.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
