@@ -25,6 +25,7 @@ int main(int argc, char **argv){
   char smoke1[1024], smoke2[1024], smv_out[1024];
   FILE *stream_out, *stream_in1, *stream_in2;
   int i;
+  int open_smokeview=0;
 
 #ifdef WIN32
   strcpy(dirseparator,"\\");
@@ -54,6 +55,10 @@ int main(int argc, char **argv){
         return 1;
         break;
       case 's':
+        if(arg[2]=='m'&&arg[3]=='v'){
+          open_smokeview=1;
+          break;
+        }
         if(i+1>=argc)break;
         if(arg[2]=='1'){
           sourcedir1=setdir(argv[i+1]);
@@ -136,6 +141,14 @@ int main(int argc, char **argv){
   setup_slice(stream_out);
   diff_slices();
   fclose(stream_out);
+  if(open_smokeview==1){
+    char command[1024];
+
+    strcpy(command,"smokeview ");
+    strcat(command,smv_out);
+    system(command);
+  }
+
   return 0;
 }
        
@@ -166,7 +179,7 @@ void usage(void){
 
   strcpy(pp,"%");
   printf("\n");
-  printf("  smokediff [-h] [-s1 dir1] [-s2 dir2] [-d dir] smv_case1 smv_case2\n");
+  printf("  smokediff [-smv] [-h] [-s1 dir1] [-s2 dir2] [-d dir] smv_case1 smv_case2\n");
   printf("    version: %s (revision %i) - %s\n\n",smv_version,svn_num,__DATE__);
   printf("  smokediff compares two FDS cases by differencing corresponding slice\n");
   printf("  files referenced in smv_case1.smv and smv_case2.smv.  PLOT3D files are\n");
@@ -176,6 +189,7 @@ void usage(void){
   printf("  -h  - display this message\n");
   printf("  -s1 dir1 - directory containing case smv_case1.smv\n");
   printf("  -s2 dir2 - directory containing case smv_case2.smv\n");
-  printf("  -d  dir - directory containing created differenced files\n");
+  printf("  -d  dir  - directory containing created differenced files\n");
+  printf("  -smv       - view case in smokeview when differencing is complete\n");
   printf("  smv_case1,smv_case2 - Two smokeview cases to compare.\n");
 }

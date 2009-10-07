@@ -64,6 +64,7 @@ plot3d *getplot3d(plot3d *plot3din, casedata *case2){
 
     plot3dout = case2->plot3dinfo + i;
     meshout = plot3dout->plot3dmesh;
+    if(fabs(plot3din->time-plot3dout->time)>0.01)continue;
     if(strcmp(plot3din->labels[0].longlabel,plot3dout->labels[0].longlabel)!=0)continue;
     if(strcmp(plot3din->labels[1].longlabel,plot3dout->labels[1].longlabel)!=0)continue;
     if(strcmp(plot3din->labels[2].longlabel,plot3dout->labels[2].longlabel)!=0)continue;
@@ -104,8 +105,8 @@ void diff_plot3ds(void){
     plot3d1 = plot3di;
     if(plot3di->plot3d2==NULL)continue;
     plot3d2 = plot3di->plot3d2;
-    file1 = plot3di->file;
-    file2 = plot3di->plot3d2->file;
+    file1 = plot3d1->file;
+    file2 = plot3d2->file;
     fullfile(fullfile1,sourcedir1,file1);
     fullfile(fullfile2,sourcedir2,file2);
 
@@ -138,7 +139,9 @@ void diff_plot3ds(void){
     len2=strlen(fullfile2);
     lenout=strlen(outfile);
     printf("subtracting %s from %s\n",fullfile1,fullfile2);
+    isotest=0;
     FORTgetplot3dq(fullfile1,&nx,&ny,&nz,qframe1,&error1,&endian,&isotest,len1);
+    isotest=0;
     FORTgetplot3dq(fullfile2,&nx,&ny,&nz,qframe2,&error2,&endian,&isotest,len2);
     for(i=0;i<nq;i++){
       qout[i]=qframe2[i]-qframe1[i];
