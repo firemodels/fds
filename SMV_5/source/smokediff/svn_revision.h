@@ -9,3 +9,5 @@ extern char utilities_revision[];
 extern char readsmv_revision[];
 extern char dmalloc_revision[];
 extern char assert_revision[];
+extern char IOdslice_revision[];
+extern char IOdplot_revision[];

@@ -979,3 +979,40 @@ close(u_in)
 
 return
 end subroutine getplot3dq
+
+!  ------------------ plot3dout ------------------------ 
+
+subroutine plot3dout(outfile, nx, ny, nz, qout, error3)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_plot3dout@28' :: plot3dout
+#endif
+implicit none
+
+character(len=*), intent(in) :: outfile
+real, dimension(nx,ny,nz,5)  :: qout
+integer, intent(in) :: nx, ny, nz
+integer, intent(out) :: error3
+
+integer :: u_out
+logical :: connected
+integer :: i, j, k, n
+real :: dummy
+
+error3 = 0
+
+u_out=13
+inquire(unit=u_out,opened=connected)
+if(connected)close(u_out)
+
+dummy = 0.0
+open(unit=u_out,file=trim(outfile),form="unformatted",action="write",iostat=error3)
+if(error3.ne.0)return
+
+write(u_out,iostat=error3)nx, ny, nz
+write(u_out,iostat=error3)dummy, dummy, dummy, dummy
+write(u_out,iostat=error3)((((qout(i,j,k,n),i=1,nx),j=1,ny),k=1,nz),n=1,5)
+close(u_out)
+
+return
+end subroutine plot3dout
+
