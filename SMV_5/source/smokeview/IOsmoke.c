@@ -55,11 +55,11 @@ if(show_smoketest==0){\
   value[1]=alphaf_ptr[n12]; \
   value[2]=alphaf_ptr[n22]; \
   value[3]=alphaf_ptr[n21]; \
+  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   ivalue[0]=n11<<2;  \
   ivalue[1]=n12<<2;  \
   ivalue[2]=n22<<2;  \
   ivalue[3]=n21<<2;  \
-  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
   }                                                      \
@@ -231,6 +231,7 @@ else{\
   value[1]=alphaf_in[n12];\
   value[2]=alphaf_in[n22];\
   value[3]=alphaf_in[n21];\
+  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   SETBVALS \
   if(adjustalphaflag==2||adjustalphaflag==3){\
     if(iblank_smoke3d[n11]==0)value[0]=0;\
