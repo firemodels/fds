@@ -76,44 +76,44 @@ int setSmokeShaders() {
     "  float s_shade;"
 #endif
 	"  int draw_hrr;"
-    "  if(hrrcutoff>0.0&&hrr>hrrcutoff){"
+  "  if(hrrcutoff>0.0&&hrr>hrrcutoff){"
 	"    draw_hrr=1;"
 	"  }"
 	"  else{"
 	"    draw_hrr=0;"
 	"  }"
-    "  if(draw_hrr==1){"
-    "    newcolor = firecolor;"
-    "  }"
+  "  if(draw_hrr==1){"
+  "    newcolor = firecolor;"
+  "  }"
 	"  else if(draw_hrr==0&&is_smoke==0){"
 	"    newcolor = vec4(vec3(firecolor),0.0);"
 	"  }"
 	"  else if(draw_hrr==0&&is_smoke==1){"
-    "    alpha=smoke_alpha/256.0;"
-    "    if(adjustalphaflag==1||adjustalphaflag==2){"
-    "      r=aspectratio;"
-    "      term1 = alpha*r;"
-    "      term2 = -term1*alpha*(r-1.0)/2.0;"
-    "      term3 = -term2*alpha*(r-2.0)/3.0;"
-    "      term4 = -term3*alpha*(r-3.0)/4.0;"
-    "      alpha = term1+term2+term3+term4;"
-    "    }"
+  "    alpha=smoke_alpha/256.0;"
+  "    if(adjustalphaflag==1||adjustalphaflag==2){"
+  "      r=aspectratio;"
+  "      term1 = alpha*r;"
+  "      term2 = -term1*alpha*(r-1.0)/2.0;"
+  "      term3 = -term2*alpha*(r-2.0)/3.0;"
+  "      term4 = -term3*alpha*(r-3.0)/4.0;"
+  "      alpha = term1+term2+term3+term4;"
+  "    }"
     // newcolor.a *= (1.0 - pow(1.0-gl_Color.a,aspectratio*top/bottom));
-    "    alpha /= smoke3d_rthick;"
+  "    alpha /= smoke3d_rthick;"
 #ifdef pp_LIGHT
-    "    s_color = smoke_color/255.0;"
-    "    newcolor = vec4(s_color,s_color,s_color,alpha);"
+  "    s_color = smoke_color/255.0;"
+  "    newcolor = vec4(s_color,s_color,s_color,alpha);"
 #else
-    "    s_shade = smoke_shade/255.0;"
-    "    newcolor = vec4(s_shade,s_shade,s_shade,alpha);"
+  "    s_shade = smoke_shade/255.0;"
+  "    newcolor = vec4(s_shade,s_shade,s_shade,alpha);"
 #endif
-    "  }"
+  "  }"
 #ifdef pp_GPU_BLANK
-    "  fblank=blank;"
+  "  fblank=blank;"
 #endif
-    "  gl_Position = ftransform();"
-    "}"
-  };
+  "  gl_Position = ftransform();"
+  "}"
+};
 
   v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
   f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);

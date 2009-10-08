@@ -1316,18 +1316,14 @@ void mergesmoke3dcolors(void){
       }
       if(firecolor!=NULL&&watercolor==NULL){
         for(j=0;j<smoke3di->nchars_uncompressed;j++){
+          *mergecolor++=fire[0];
+          *mergecolor++=fire[1];
+          *mergecolor++=fire[2];
+          mergecolor++;
           if(firecolor[j]>i_hrrpuv_cutoff){
-            *mergecolor++=fire[0];
-            *mergecolor++=fire[1];
-            *mergecolor++=fire[2];
-            mergecolor++;
             *mergealpha++=fire_alpha;
           }
           else{
-            *mergecolor++=0;
-            *mergecolor++=0;
-            *mergecolor++=0;
-            mergecolor++;
             *mergealpha++=0;
           }
         }
@@ -1335,18 +1331,14 @@ void mergesmoke3dcolors(void){
       }
       if(firecolor==NULL&&watercolor!=NULL){
         for(j=0;j<smoke3di->nchars_uncompressed;j++){
+          *mergecolor++=water[0];
+          *mergecolor++=water[1];
+          *mergecolor++=water[2];
+          mergecolor++;
           if(watercolor[j]>20){
-            *mergecolor++=water[0];
-            *mergecolor++=water[1];
-            *mergecolor++=water[2];
-            mergecolor++;
             *mergealpha++=watercolor[j];
           }
           else{
-            *mergecolor++=0;
-            *mergecolor++=0;
-            *mergecolor++=0;
-            mergecolor++;
             *mergealpha++=0;
           }
         }
