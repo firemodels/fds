@@ -91,6 +91,7 @@ void diff_slices(void){
     int i;
     int len;
     float f1, f2, dt;
+    int slicetest1,slicetest2;
 
     slicei = caseinfo->sliceinfo+j;
     slice1 = slicei;
@@ -117,6 +118,12 @@ void diff_slices(void){
 
     unit1=11;
     len1=strlen(fullfile1);
+    slicetest1=0;
+    slicetest2=0;
+    if(test_mode==1){
+      slicetest1=1;
+      slicetest2=2;
+    }
     FORTopenslice(fullfile1,&unit1,&caseinfo->endian,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&error1,len1);
     unit2=12;
     len2=strlen(fullfile2);
@@ -161,9 +168,9 @@ void diff_slices(void){
     error1=1;
     error2a=1;
     error2b=1;
-    FORTgetsliceframe(&unit1,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframe1,&error1);
-    if(error1==0)FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2a,qframe2a,&error2a);
-    if(error2a==0)FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2b,qframe2b,&error2b);
+    FORTgetsliceframe(&unit1,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframe1,&slicetest1,&error1);
+    if(error1==0)FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2a,qframe2a,&slicetest2,&error2a);
+    if(error2a==0)FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2b,qframe2b,&slicetest2,&error2b);
     if(error1!=0||error2a!=0||error2b!=0){
       FORTclosefortranfile(&unit1);
       FORTclosefortranfile(&unit2);
@@ -181,7 +188,7 @@ void diff_slices(void){
           qframe2a[i]=qframe2b[i];
         }
         time2a=time2b;
-        FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2b,qframe2b,&error2a);
+        FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2b,qframe2b,&slicetest2,&error2a);
         if(error2a!=0)break;
       }
       if(error2a!=0)break;
@@ -197,7 +204,7 @@ void diff_slices(void){
       }
       FORToutsliceframe(&unit3,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframeout,&error1);
       if(error1!=0)break;
-      FORTgetsliceframe(&unit1,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframe1,&error1);
+      FORTgetsliceframe(&unit1,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframe1,&slicetest1,&error1);
       if(error1!=0)break;
     }
 
