@@ -33,6 +33,7 @@ int main(int argc, char **argv){
   strcpy(dirseparator,"/");
 #endif
 
+  test_mode=0;
   sourcedir1=NULL;
   sourcedir2=NULL;
   destdir=NULL;
@@ -50,6 +51,9 @@ int main(int argc, char **argv){
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
+      case 't':
+        test_mode=1;
+        break;
       case 'h':
         usage();
         return 1;

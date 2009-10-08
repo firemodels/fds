@@ -138,10 +138,11 @@ void diff_plot3ds(void){
     len1=strlen(fullfile1);
     len2=strlen(fullfile2);
     lenout=strlen(outfile);
+    isotest=0;
     printf("subtracting %s from %s\n",fullfile1,fullfile2);
-    isotest=0;
+    if(test_mode==1)isotest=1;
     FORTgetplot3dq(fullfile1,&nx,&ny,&nz,qframe1,&error1,&endian,&isotest,len1);
-    isotest=0;
+    if(test_mode==1)isotest=2;
     FORTgetplot3dq(fullfile2,&nx,&ny,&nz,qframe2,&error2,&endian,&isotest,len2);
     for(i=0;i<nq;i++){
       qout[i]=qframe2[i]-qframe1[i];

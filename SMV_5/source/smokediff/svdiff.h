@@ -129,7 +129,7 @@ void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 #endif
 STDCALL FORTgetsliceframe(int *lu11,
                           int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
-                          float *time,float *qframe,int *error);
+                          float *time,float *qframe,int *slicetest, int *error);
 STDCALL FORTgetsliceparms(char *file,int *endian,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,
                           int *slice3d, int *error,FILE_SIZE lenfile);
@@ -151,4 +151,5 @@ STDCALL FORTplot3dout(char *outfile,int *nx,int *ny,int *nz,float *qout,int *err
 EXTERN char dirseparator[3];
 EXTERN casedata caseinfo[2];
 EXTERN char *sourcedir1, *sourcedir2, *destdir;
+EXTERN int test_mode;
 

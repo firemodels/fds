@@ -742,9 +742,9 @@ end subroutine getslicedata
 
 !  ------------------ getsliceframe ------------------------ 
 
-subroutine getsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,error)
+subroutine getsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,testslice,error)
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_getslicedata@40' :: getslicedata
+!DEC$ ATTRIBUTES ALIAS:'_getslicedata@44' :: getslicedata
 #endif
 
 implicit none
@@ -753,9 +753,13 @@ real, intent(out), dimension(*) :: qframe
 real, intent(out) :: time
 integer, intent(out) :: error
 integer, intent(in) :: lu11, is1, is2, js1, js2, ks1, ks2
+integer, intent(in) :: testslice
 
 integer :: i,j,k
 integer :: nxsp, nysp, nzsp
+real :: val,factor
+integer :: index
+real :: ii, jj, kk
 
 nxsp = is2 + 1 - is1
 nysp = js2 + 1 - js1
@@ -764,6 +768,22 @@ nzsp = ks2 + 1 - ks1
 read(lu11,iostat=error)time
 if(error.ne.0)return
 read(lu11,iostat=error)(((qframe(1+i+j*nxsp+k*nxsp*nysp),i=0,nxsp-1),j=0,nysp-1),k=0,nzsp-1)
+if(testslice.eq.1.or.testslice.eq.2)then
+  factor=1.0
+  if(testslice.eq.2)factor=1.1
+  do k = 0, nzsp-1
+    kk = 2.0*((nzsp-1)/2.0-k)/(nzsp-1.0)
+    do j = 0, nysp-1
+      jj = 2.0*((nysp-1)/2.0-j)/(nysp-1.0)
+      do i = 0, nxsp-1
+        ii = 2.0*((nxsp-1)/2.0-i)/(nxsp-1.0)
+        val = factor*(time-20.0)*(ii*ii + jj*jj + kk*kk)/20.0
+        index = 1+i+j*nxsp+k*nxsp*nysp
+        qframe(index) = val
+      end do
+    end do
+  end do
+endif
 
 999 continue
 
