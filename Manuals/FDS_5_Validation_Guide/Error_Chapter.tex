@@ -181,49 +181,46 @@ distributed\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
 with mean, $\mu$, and standard deviation, $\sigma$.} about the ``true'' value, $\theta_i$, and there is no systematic bias:
 \be E|\theta \sim N(\theta,\sigma_E^2) \label{expunc} \ee
 The notation $E|\theta$ means that $E$ is conditional on a particular value of $\theta$.
-This is the usual way of defining a likelihood function. Table~\ref{Uncertainty} lists the relative experimental
-uncertainty values, $\widetilde{\sigma}_E=\sigma_E/\theta$, for the various quantities of interest.
+This is the usual way of defining a likelihood function.
 It is convenient to use the so-called delta method\footnote{Given the random variable $X \sim N(\mu,\sigma^2)$, the delta method
 says that $g(X) \sim N \left( g(\mu) \, , \, (g'(\mu) \, \sigma)^2\right)$~\cite{Oehlert:1992}.} to obtain the approximate distribution
 \be \ln(E)|\theta \sim N \left( \ln(\theta),\widetilde{\sigma}_E^2 \right) \label{eeq} \ee
-Note that by applying the natural log to the random variable, we can express its variance in terms of the
-relative uncertainty, $\sigma_E/\theta$. This is convenient because we have assumed that the relative experimental
-uncertainty is constant for a given quantity of interest.
-Using a Bayesian argument\footnote{Bayes theorem states that the posterior distribution is the product of
-the prior distribution, the likelihood function, and a normalizing constant: $f(\theta|E)=C \, f(\theta) \, f(E|\theta)$.}
+The purpose of applying the natural log to the random variable is so that we can express its variance in terms of the
+relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. This is convenient because we have assumed that the relative
+uncertainty is constant for each quantity of interest. The quantities and uncertainty values are listed in Table~\ref{Uncertainty}.
+Using a Bayesian argument\footnote{The form of Bayes theorem used here states that the posterior distribution is the product of
+the prior distribution and the likelihood function, normalized by their integral: $f(\theta|E)= p(\theta) \, f(E|\theta)/\int p(\theta) \, f(E|\theta) \, d\theta$.
+A constant prior is also known as a Jeffreys prior.}
 with a non-informative prior on $\ln(\theta)$, we obtain the posterior distribution as
 \be \ln(\theta)|E \sim N \left( \ln(E),\widetilde{\sigma}_E^2 \right) \label{thetaeq} \ee
-The assumption of a non-informative prior implies that we do not have sufficient information about the distribution of
+The assumption of a non-informative prior implies that we do not have sufficient information about the prior distribution of
 $\theta$ to assume anything other than unity.
 
-
-In a similar manner, assume that the model predictions are normally distributed about the ``true'' value
+We cannot assume, as in the case of the experimental measurements, that the model predictions have no systematic bias. Instead, we
+assume that the model predictions are normally distributed about the true values
 multiplied by a bias factor, $\delta$:
 \be M|\theta \sim N \left(\delta \, \theta,\sigma_M^2 \right) \ee
 The standard deviation, $\sigma_M$, is the model-intrinsic uncertainty, {\em i.e.} model error.
-This and the bias factor, $\delta$, are the parameters
-that we seek to quantify.
+This and the bias factor, $\delta$, are the parameters that we seek to quantify.
 Again, using the log transformation we obtain
-\be \ln(M)|\theta \sim N \left(\ln(\delta)+\ln(\theta)-\frac{\omega_M^2}{2} \; , \;
-    \omega_M^2 \right) \quad ; \quad \omega_M=\frac{\sigma_M}{\theta \, \delta} \ee
+\be \ln(M)|\theta \sim N \left(\ln(\delta)+\ln(\theta)-\frac{1}{2} \frac{\widetilde{\sigma}_M^2}{\delta^2} \; , \;
+    \frac{\widetilde{\sigma}_M^2}{\delta^2} \right) \quad ; \quad \widetilde{\sigma}_M=\frac{\sigma_M}{\theta} \ee
 Note that the estimate of the mean includes an extra term in the Taylor series expansion to obtain a more precise estimate of
 $\delta$. Because $\ln(\theta)$ is random, and we have its posterior distribution from Eq.~(\ref{thetaeq}),
 we can obtain the marginal distribution
-\be \ln(M) \sim N \left( \ln(\delta)+\ln(E)-\frac{\omega_M^2}{2} \; , \; \omega_M^2+\widetilde{\sigma}_E^2 \right) \ee
+\be \ln(M) \sim N \left( \ln(\delta)+\ln(E)-\frac{1}{2} \frac{\widetilde{\sigma}_M^2}{\delta^2} \; , \; \frac{\widetilde{\sigma}_M^2}{\delta^2} +\widetilde{\sigma}_E^2 \right) \ee
 Notice that we have expressed the {\em total relative uncertainty} of the model predictions as a
 combination of model error and experimental uncertainty.
 What we need now is a way to estimate this error and the bias factor, $\delta$. First, define:
 \be \overline{M} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(M_i)  \quad ; \quad \overline{E} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(E_i) \ee
 The least squares estimate of the standard deviation of $\ln(M)$ is
-\be u(M) = \sqrt{\omega_M^2+\widetilde{\sigma}_E^2} \approx \sqrt{ \frac{1}{n-1} \sum_{i=1}^n \,
+\be u(M) = \sqrt{\frac{\widetilde{\sigma}_M^2}{\delta^2}+\widetilde{\sigma}_E^2} \approx \sqrt{ \frac{1}{n-1} \sum_{i=1}^n \,
      \left[ (\ln(M_i)-\overline{M}) - (\ln(E_i) - \overline{E})  \right]^2 } \ee
 Note that $u(M)$ is the {\em total relative uncertainty} of $M$.
-Next, compute
-\be \widehat{\omega}_M = \sqrt{u(M)^2-\widetilde{\sigma}_E^2} \label{model_error} \ee
-An estimate of $\ln(\delta)$ is $\overline{M}-\overline{E}+\widehat{\omega}_M^2/2$, and, thus, the estimate of $\delta$ is
-\be \widehat{\delta} = \exp \left( \overline{M}-\overline{E}+\frac{\widehat{\omega}_M^2}{2} \right) \ee
-The model-intrinsic component, {\em i.e.} the model error, $\widetilde{\sigma}_M$, can be estimated as follows
-\be \widetilde{\sigma}_M = \widehat{\delta} \; \widehat{\omega}_M \label{model_error2} \ee
+Next, compute the estimate for the model error:
+\be \frac{\widetilde{\sigma}_M}{\delta} \approx \sqrt{u(M)^2-\widetilde{\sigma}_E^2} \label{model_error} \ee
+An estimate of $\ln(\delta)$ is $\overline{M}-\overline{E}+\widetilde{\sigma}_M^2/2\delta^2$, and, thus, the estimate of $\delta$ is
+\be \delta \approx \exp \left( \overline{M}-\overline{E}+\frac{\widetilde{\sigma}_M^2}{2 \delta^2} \right) \ee
 In essence, this procedure gives us a way to estimate the ``true'' value, $\theta$, using only a predicted value, $M$, and the bias factor and relative error
 for that particular quantity that have been obtained using past validation experiments. The ``truth'' is a random variable with the following distribution:
 \be \theta \sim N \left( \frac{M}{\delta} \; , \; \left( \frac{M \, \widetilde{\sigma}_M}{\delta} \right)^2 \right) \label{truth} \ee
@@ -285,7 +282,8 @@ Each are expressed as 95~\% confidence intervals ($2 \, \widetilde{\sigma}$).
 \includegraphics[height=3.2in]{FIGURES/Case_2_Scatter_E_vs_M}
 \end{center}
 \caption[Verification of the model error calculation, Case 2.]{(Left) A comparison of predicted and ``true'' values for 1000 hypothetical
-experiments in which the model predictions have a bias factor of 1.03 and a relative error of 0.10; and the experimental measurements have an relative uncertainty of 0.07.
+experiments. The short dashed lines indicate the bias, $\delta=1.03$, and the relative error, $2\widetilde{\sigma}_M=0.20$, of the model predictions.
+The solid, off-diagonal lines indicate the relative uncertainty, $2\widetilde{\sigma}_E=0.14$ of the experimental measurements.
 (Right) The same data, except now the predicted values are compared to measured values. On both plots, the uncertainty bounds are the same.}
 \label{Case_2_Scatter}
 \end{figure}
@@ -347,10 +345,10 @@ Now, consider the graph shown in Fig.~\ref{bell_curve}.
 \label{bell_curve}
 \end{figure}
 The vertical lines indicate the ``threshold'' temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
-model (350~$^\circ$C). The bell curve is a normal distribution obtained from Eq.~(\ref{truth}) above. Its mean is 20+(350-20)/1.03 and its standard deviation
-is 0.10(350-20)/1.03 . Notice that the statistical analysis
-above assumes that the measured and predicted quantity, in this case surface temperature, is reported as a change above or below its ambient value, which is
-20~$^\circ$C in this case. The shaded area beneath the bell curve is the probability (0.03 in this case) that the ``true'' temperature would exceed 400~$^\circ$C.
+model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
+The bell curve is a normal distribution obtained from Eq.~(\ref{truth}) above. Its mean and standard deviation are
+\be 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} \quad ; \quad  \widetilde{\sigma}_M \, \frac{M}{\delta} = 0.10 \, \frac{330}{1.03} \ee
+respectively. The shaded area beneath the bell curve is the probability (0.03 in this case) that the ``true'' temperature can exceed 400~$^\circ$C.
 This means that there is an 3~\% chance that the cables could
 become damaged {\em based solely on the fact that the model is not a perfect representation of reality.}
 
