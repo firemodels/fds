@@ -231,10 +231,10 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
     char meshlabel[255];
 
     sprintf(meshlabel,"mesh: %i",highlight_mesh+1);
-    labellength=glutBitmapLength(large_font, (const unsigned char *)slicelabel);
+    labellength=glutBitmapLength(large_font, (const unsigned char *)meshlabel);
     mesh_left=val_right-val_right*labellength/(float)dwinW;
     mesh_bot=val_top-val_top*large_font_height/(float)(dwinH-fontHoffset);
-    outputText(mesh_left,mesh_bot, slicelabel);
+    outputText(mesh_left,mesh_bot, meshlabel);
   }
   if((showplot3d==1||visGrid==1)&&current_mesh->visx==1){
     {
@@ -263,7 +263,9 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       }
       strcat(slicelabel,buff_label);
     }
-    if(visgridloc==1)outputText(mesh_left-0.5,0.6f, slicelabel);
+    if(visgridloc==1){
+      outputText(mesh_left-0.5,0.6f, slicelabel);
+    }
   }
   if((showplot3d==1||visGrid==1)&&current_mesh->visy==1){
     {
