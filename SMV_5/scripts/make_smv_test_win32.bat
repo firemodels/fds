@@ -17,7 +17,7 @@ echo filling distribution directory
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 copy smokeview_test.exe %smvdir%\smokeview.exe
-copy smokediff32_test.exe %smvdir%\smokediff.exe
+copy smokediff32_release.exe %smvdir%\smokediff.exe
 copy smokezip_release.exe %smvdir%\smokezip.exe
 copy devices.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
