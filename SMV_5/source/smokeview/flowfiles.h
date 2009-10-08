@@ -940,6 +940,7 @@ typedef struct _smoke3d {
   unsigned char *smokeframe_in, *smokeframe_out, **smokeframe_comp_list;
   unsigned char *smokeview_tmp;
   unsigned char *smoke_comp_all;
+  unsigned char *smoke_state_list;
   smokedata smoke, light;
 #ifdef pp_LIGHT
   int ncomp_light_total;

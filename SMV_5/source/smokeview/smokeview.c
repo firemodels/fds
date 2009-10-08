@@ -1528,6 +1528,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
         if(smoke3di->d_display==0)continue;
+        if(smoke3di->smoke_state_list[smoke3di->iframe]==0)continue;
+
         if(usegpu==1){
           drawsmoke3dGPU(smoke3di);
         }
