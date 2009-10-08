@@ -407,7 +407,9 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     return;
   }
   CheckMemory;
-  if(NewMemory((void **)&smoke3di->smokeframe_comp_list,smoke3di->n_times_full*sizeof(unsigned char *))==0||
+  if(
+     NewMemory((void **)&smoke3di->smokeframe_comp_list,smoke3di->n_times_full*sizeof(unsigned char *))==0||
+     NewMemory((void **)&smoke3di->smoke_state_list,smoke3di->n_times_full*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeframe_in,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeview_tmp,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeframe_out,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
@@ -417,6 +419,9 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
      *errorcode=1;
      printf("*** error: problems allocating memory for 3d smoke file: %s\n",smoke3di->file);
      return;
+  }
+  for(i=0;i<smoke3di->n_times_full;i++){
+    smoke3di->smoke_state_list[i]=2;
   }
 
 #ifdef pp_LIGHT
@@ -1044,6 +1049,7 @@ void freesmoke3d(smoke3d *smoke3di){
   FREEMEMORY(smoke3di->lightframe_comp_list);
   FREEMEMORY(smoke3di->lightview_tmp);
 #endif
+  FREEMEMORY(smoke3di->smoke_state_list);
   FREEMEMORY(smoke3di->smoke_comp_all);
   FREEMEMORY(smoke3di->smokeframe_comp_list);
   FREEMEMORY(smoke3di->smokeview_tmp);
@@ -1086,6 +1092,18 @@ void updatesmoke3d(smoke3d *smoke3di){
   default:
     ASSERT(FFALSE);
     break;
+  }
+  if(smoke3di->smoke_state_list[iframe]==2){
+    int i;
+    unsigned char *smokeframe_in;
+
+    smokeframe_in = smoke3di->smokeframe_in;
+    smoke3di->smoke_state_list[iframe]=0;
+    for(i=0;i<smoke3di->nchars_uncompressed;i++){
+      if(smokeframe_in[i]==0)continue;
+      smoke3di->smoke_state_list[iframe]=1;
+      break;
+    }
   }
   ASSERT(countout==smoke3di->nchars_uncompressed);
 }
@@ -4467,6 +4485,7 @@ void drawsmoke3dCULL(void){
       }
       sniffErrors("in drawsmoke3dcull 4");
       smoke3di=meshi->cull_smoke3d;
+
       firecolor=smoke3di->hrrpuv_color;
       if(fire_halfdepth<=0.0){
         fire_alpha=256.0;
@@ -4474,17 +4493,17 @@ void drawsmoke3dCULL(void){
       else{
         fire_alpha=256*(1.0-pow(0.5,meshi->dx/fire_halfdepth));
       }
-    {
-      float fire_color[4];
-      float *firecolor;
+      {
+        float fire_color[4];
+        float *firecolor;
 
-      fire_color[0]=(float)fire_red/256.0;
-      fire_color[1]=(float)fire_green/256.0;
-      fire_color[2]=(float)fire_blue/256.0;
-      fire_color[3]=(float)fire_alpha/256.0;
-      firecolor=fire_color;
-      glUniform4fv(GPU_firecolor,1,firecolor);
-    }
+        fire_color[0]=(float)fire_red/256.0;
+        fire_color[1]=(float)fire_green/256.0;
+        fire_color[2]=(float)fire_blue/256.0;
+        fire_color[3]=(float)fire_alpha/256.0;
+        firecolor=fire_color;
+        glUniform4fv(GPU_firecolor,1,firecolor);
+      }
 
       xplt=meshi->xplt;
       yplt=meshi->yplt;
@@ -4517,54 +4536,56 @@ void drawsmoke3dCULL(void){
       }
       glUniform1f(GPU_hrrcutoff,(float)i_hrrcutoff);
       switch (meshi->smokedir){
-      case 1:
-      case -1:
-        aspectratio=meshi->dx;
-        break;
-      case 2:
-      case -2:
-        aspectratio=meshi->dy;
-        break;
-      case 3:
-      case -3:
-        aspectratio=meshi->dz;
-        break;
-      case 4:
-      case -4:
-      case 5:
-      case -5:
-        aspectratio=meshi->dxy;
-        break;
-      case 6:
-      case -6:
-      case 7:
-      case -7:
-        aspectratio = meshi->dyz;
-        break;
-      case 8:
-      case -8:
-      case 9:
-      case -9:
-        aspectratio = meshi->dxz;
-        break;
-      }
-	  {
-	    smoke3d *sooti=NULL;
+        case 1:
+        case -1:
+          aspectratio=meshi->dx;
+          break;
+        case 2:
+        case -2:
+          aspectratio=meshi->dy;
+          break;
+        case 3:
+        case -3:
+          aspectratio=meshi->dz;
+          break;
+        case 4:
+        case -4:
+        case 5:
+        case -5:
+          aspectratio=meshi->dxy;
+          break;
+        case 6:
+        case -6:
+        case 7:
+        case -7:
+          aspectratio = meshi->dyz;
+          break;
+        case 8:
+        case -8:
+        case 9:
+        case -9:
+          aspectratio = meshi->dxz;
+          break;
+        }
+	    {
+	      smoke3d *sooti=NULL;
 
-		if(smoke3di->soot_index>=0){
-		  sooti = smoke3dinfo + smoke3di->soot_index;
-		}
-		if(sooti!=NULL&&sooti->display==1){
+        if(smoke3di->soot_index>=0){
+          sooti = smoke3dinfo + smoke3di->soot_index;
+        }
+        if(sooti!=NULL&&sooti->display==1){
           is_smoke=1;
         }
         else{
           is_smoke=0;
         }
-	  }
+	    }
       glUniform1f(GPU_aspectratio,aspectratio);
       glUniform1i(GPU_is_smoke,is_smoke);
       glBegin(GL_TRIANGLES);
     }
+
+    if(smoke3di->smoke_state_list[smoke3di->iframe]==0)continue;
     switch (meshi->smokedir){
 
   // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
