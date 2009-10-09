@@ -509,7 +509,7 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_sliceframestep=glui_bounds->add_spinner_to_panel(panel_slice,"Frame Skip",GLUI_SPINNER_INT,&sliceframeskip,FRAMELOADING,Slice_CB);
     SPINNER_sliceframestep->set_int_limits(0,100);
     CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Averaged Slice Data",&slice_average_flag,AVERAGE_DATA,Slice_CB);
-    CHECKBOX_turb_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Turbulence Resolution",&slice_turbprop_flag,TURB_DATA,Slice_CB);
+    //CHECKBOX_turb_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Turbulence Resolution",&slice_turbprop_flag,TURB_DATA,Slice_CB);
     SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(panel_slice,"Time Interval",GLUI_SPINNER_FLOAT,&slice_average_interval);
     {
       float tttmax=120.0;
@@ -1548,7 +1548,7 @@ extern "C" void Slice_CB(int var){
   case AVERAGE_DATA:
     if(slice_average_flag==1&&slice_turbprop_flag==1){
       slice_turbprop_flag=0;
-      CHECKBOX_turb_slice->set_int_val(slice_turbprop_flag);
+      if(CHECKBOX_turb_slice!=NULL)CHECKBOX_turb_slice->set_int_val(slice_turbprop_flag);
     }
     break;
   case TURB_DATA:
