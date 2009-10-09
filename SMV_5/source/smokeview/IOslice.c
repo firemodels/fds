@@ -923,8 +923,6 @@ int slicecompare( const void *arg1, const void *arg2 ){
 
   slicei = sliceinfo + *(int *)arg1;
   slicej = sliceinfo + *(int *)arg2;
-  if(slicei->volslice==0&&slicej->volslice==1)return -1;
-  if(slicei->volslice==1&&slicej->volslice==0)return -1;
   if(slicei->mesh_type<slicej->mesh_type)return -1;
   if(slicei->mesh_type>slicej->mesh_type)return 1;
   delta = slicei->delta;
@@ -948,6 +946,9 @@ int slicecompare( const void *arg1, const void *arg2 ){
   }
   if(strcmp(slicei->label.longlabel,slicej->label.longlabel)<0)return -1;
   if(strcmp(slicei->label.longlabel,slicej->label.longlabel)>0)return 1;
+  if(slicei->volslice>slicej->volslice)return -1;
+  if(slicei->volslice<slicej->volslice)return 1;
+
   if(slicei->idir<slicej->idir)return -1;
   if(slicei->idir>slicej->idir)return 1;
   if(slicei->position+delta<slicej->position)return -1;
@@ -970,8 +971,6 @@ int vslicecompare( const void *arg1, const void *arg2 ){
   slicej = sliceinfo + vslicej->ival;
   delta = slicei->delta;
 
-  if(slicei->volslice==0&&slicej->volslice==1)return -1;
-  if(slicei->volslice==1&&slicej->volslice==0)return -1;
   if(slicei->mesh_type<slicej->mesh_type)return -1;
   if(slicei->mesh_type>slicej->mesh_type)return 1;
 
@@ -994,6 +993,8 @@ int vslicecompare( const void *arg1, const void *arg2 ){
   if(slicej->delta>delta)delta=slicej->delta;
   if(strcmp(slicei->label.longlabel,slicej->label.longlabel)<0)return -1;
   if(strcmp(slicei->label.longlabel,slicej->label.longlabel)>0)return 1;
+  if(slicei->volslice<slicej->volslice)return -1;
+  if(slicei->volslice>slicej->volslice)return 1;
   if(slicei->idir<slicej->idir)return -1;
   if(slicei->idir>slicej->idir)return 1;
   if(slicei->position+delta<slicej->position)return -1;
@@ -2735,8 +2736,8 @@ void drawvolslice_texture(const slice *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(iblank_y[ijk(i,sd->js1,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
+       if(iblank_y[ijk(i,meshi->ploty,k)]!=2)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,meshi->ploty,k)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
@@ -3011,8 +3012,8 @@ void drawvolslice_terrain(const slice *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(iblank_y[ijk(i,sd->js1,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
+       if(iblank_y[ijk(i,meshi->ploty,k)]!=2)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,meshi->ploty,k)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
@@ -3242,7 +3243,7 @@ void drawvolslice(const slice *sd){
      x3 = xplt[i+1];
      for(k=sd->ks1; k<sd->ks2; k++){
        n++; n2++; 
-       if(iblank_y[ijk(i,sd->js1,k)]!=2)continue;
+       if(iblank_y[ijk(i,meshi->ploty,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
        i11 = 4*sd->slicepoint[n];
        i31 = 4*sd->slicepoint[n2];
