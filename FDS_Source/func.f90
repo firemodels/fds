@@ -1438,19 +1438,35 @@ END SUBROUTINE GET_VISCOSITY
 
 
 
-REAL(EB) FUNCTION DRAG(RE)
+REAL(EB) FUNCTION DRAG(RE,DRAG_LAW)
  
-! Droplet drag coefficient
+! drag coefficient
 
-REAL(EB) :: RE
- 
-IF (RE<=1._EB) THEN
-   DRAG = 24._EB/RE
-ELSEIF (RE>1._EB .AND. RE<1000._EB) THEN
-   DRAG = 24._EB*(1._EB+0.15_EB*RE**0.687_EB)/RE
-ELSEIF (RE>=1000._EB) THEN
-   DRAG = 0.44_EB
-ENDIF
+CHARACTER(30), INTENT(IN) :: DRAG_LAW
+REAL(EB), INTENT(IN) :: RE
+
+SELECT CASE(DRAG_LAW)
+
+   CASE('sphere')
+      IF (RE<=1._EB) THEN
+         DRAG = 24._EB/RE
+      ELSEIF (RE>1._EB .AND. RE<1000._EB) THEN
+         !!DRAG = 24._EB*(1._EB+0.15_EB*RE**0.687_EB)/RE
+         DRAG = 24._EB*(0.85_EB+0.15_EB*RE**0.687_EB)/RE ! smoother curve (RJM)
+      ELSEIF (RE>=1000._EB) THEN
+         DRAG = 0.44_EB
+      ENDIF
+      
+   CASE('cylinder')
+      IF (RE<=1._EB) THEN
+         DRAG = 10._EB/(RE**0.8_EB)
+      ELSEIF (RE>1._EB .AND. RE<1000._EB) THEN
+         DRAG = 10._EB*(0.6_EB+0.4_EB*RE**0.8_EB)/RE
+      ELSEIF (RE>=1000._EB) THEN
+         DRAG = 1._EB
+      ENDIF
+      
+END SELECT
  
 END FUNCTION DRAG
 
