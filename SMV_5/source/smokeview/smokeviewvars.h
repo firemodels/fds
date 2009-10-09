@@ -257,7 +257,7 @@ SVEXTERN int fontsize_save;
 SVEXTERN int showtrainer;
 SVEXTERN int trainer_mode;
 SVEXTERN int trainer_active;
-SVEXTERN int slice_average_flag;
+SVEXTERN int slice_average_flag,slice_turbprop_flag;
 SVEXTERN int show_slice_average,vis_slice_average;
 SVEXTERN float slice_average_interval;
 

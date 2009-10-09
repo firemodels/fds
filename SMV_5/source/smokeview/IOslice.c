@@ -37,7 +37,7 @@ int getslicerledata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
                             float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
 int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
-int correlate_slice_data(float *data_out, float *u, float *v, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
+int auto_turbprop_slice_data(float *data_out, float *u, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
 int getsliceheader(char *comp_file, char *size_file, int compression_type, 
                    int framestep, int set_tmin, int set_tmax, float tmin, float tmax,
                    int *nx, int *ny, int *nz, int *nsteps, int *ntotal, float *valmin, float *valmax);
@@ -506,6 +506,24 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         sd->compression_type==1||
         sd->compression_type==2||
         average_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes,slice_average_interval)==1
+        ){
+        show_slice_average=0; // averaging failed
+      }
+    }
+    if(slice_turbprop_flag==1){
+      int data_per_timestep;
+      int ndata;
+      int ntimes;
+
+      data_per_timestep=sd->nslicei*sd->nslicej*sd->nslicek;
+      ntimes=sd->nsteps;
+      ndata = data_per_timestep*ntimes;
+      show_slice_average=1;
+
+      if(
+        sd->compression_type==1||
+        sd->compression_type==2||
+        auto_turbprop_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes,slice_average_interval)==1
         ){
         show_slice_average=0; // averaging failed
       }
@@ -4188,44 +4206,42 @@ void init_Slicedata(void){
   }
 }
 
-/* ------------------ correlate_slice_data ------------------------ */
+/* ------------------ auto_turbprop_slice_data ------------------------ */
 
-int correlate_slice_data(float *data_out, float *u, float *v, int ndata, int data_per_timestep, float *times, int ntimes, float average_time){
+int auto_turbprop_slice_data(float *data_out, float *u, int ndata, int data_per_timestep, float *times, int ntimes, float average_time){
   float *u_avg, *u_prime;
-  float *v_avg, *v_prime;
-  float denom;
+  float *uu_avg;
   int i;
 
   // <u'v'>/<u><v>
 
   NewMemory((void **)&u_avg,ndata*sizeof(float));
-  NewMemory((void **)&v_avg,ndata*sizeof(float));
+  NewMemory((void **)&uu_avg,ndata*sizeof(float));
   NewMemory((void **)&u_prime,ndata*sizeof(float));
-  NewMemory((void **)&v_prime,ndata*sizeof(float));
 
   average_slice_data(u_avg,u, ndata, data_per_timestep, times, ntimes, average_time);
-  average_slice_data(v_avg,v, ndata, data_per_timestep, times, ntimes, average_time);
 
   for(i=0;i<ndata;i++){
+    uu_avg[i]=u[i]*u[i];
     u_prime[i]=u[i]-u_avg[i];
-    v_prime[i]=v[i]-v_avg[i];
-    u_prime[i]*=v_prime[i];
+    u_prime[i]*=u_prime[i];
   }
+
   average_slice_data(u_prime,u_prime, ndata, data_per_timestep, times, ntimes, average_time);
+  average_slice_data(uu_avg,uu_avg, ndata, data_per_timestep, times, ntimes, average_time);
+
   for(i=0;i<ndata;i++){
-    denom=u_avg[i]*v_avg[i];
-    if(denom==0.0){
+    if(uu_avg[i]==0.0){
       data_out[i]=0.0;
     }
     else{
-      data_out[i]=u_prime[i]/denom;
+      data_out[i]=u_prime[i]/uu_avg[i];
     }
   }
 
   FREEMEMORY(u_avg);
   FREEMEMORY(u_prime);
-  FREEMEMORY(v_avg);
-  FREEMEMORY(v_prime);
+  FREEMEMORY(uu_avg);
 
   return 0;
 }
