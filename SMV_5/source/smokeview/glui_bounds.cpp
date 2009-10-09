@@ -78,6 +78,8 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define TRANSFORM_SLICE 23
 #define RESET_SLICE 24
 #endif
+#define AVERAGE_DATA 201
+#define TURB_DATA 202
 
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
@@ -170,6 +172,8 @@ GLUI_Checkbox *con_part_setchopmin=NULL, *con_part_setchopmax=NULL;
 GLUI_Checkbox *showtracer_checkbox=NULL;
 GLUI_Checkbox *CHECKBOX_cellcenter_slice_interp=NULL;
 GLUI_Checkbox *CHECKBOX_skip_subslice=NULL;
+GLUI_Checkbox *CHECKBOX_turb_slice=NULL;
+GLUI_Checkbox *CHECKBOX_average_slice=NULL;
 
 GLUI_Spinner *SPINNER_plot3d_vectorpointsize=NULL,*SPINNER_plot3d_vectorlinewidth=NULL;
 GLUI_Spinner *SPINNER_sliceaverage=NULL;
@@ -504,7 +508,8 @@ extern "C" void glui_bounds_setup(int main_window){
 #endif
     SPINNER_sliceframestep=glui_bounds->add_spinner_to_panel(panel_slice,"Frame Skip",GLUI_SPINNER_INT,&sliceframeskip,FRAMELOADING,Slice_CB);
     SPINNER_sliceframestep->set_int_limits(0,100);
-    glui_bounds->add_checkbox_to_panel(panel_slice,"Average Slice Data",&slice_average_flag);
+    CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Averaged Slice Data",&slice_average_flag,AVERAGE_DATA,Slice_CB);
+    CHECKBOX_turb_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Turbulence Resolution",&slice_turbprop_flag,TURB_DATA,Slice_CB);
     SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(panel_slice,"Time Interval",GLUI_SPINNER_FLOAT,&slice_average_interval);
     {
       float tttmax=120.0;
@@ -1540,6 +1545,18 @@ extern "C" void Slice_CB(int var){
   ASSERT(con_slice_min!=NULL);
   ASSERT(con_slice_max!=NULL);
   switch (var){
+  case AVERAGE_DATA:
+    if(slice_average_flag==1&&slice_turbprop_flag==1){
+      slice_turbprop_flag=0;
+      CHECKBOX_turb_slice->set_int_val(slice_turbprop_flag);
+    }
+    break;
+  case TURB_DATA:
+    if(slice_average_flag==1&&slice_turbprop_flag==1){
+      slice_average_flag=0;
+      CHECKBOX_average_slice->set_int_val(slice_average_flag);
+    }
+    break;
   case UPDATE_VECTOR:
     if(SPINNER_plot3d_vectorpointsize!=NULL&&SPINNER_plot3d_vectorlinewidth!=NULL){
       SPINNER_plot3d_vectorpointsize->set_float_val(vectorpointsize);
