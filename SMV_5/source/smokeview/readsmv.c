@@ -6604,8 +6604,10 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SLICEAVERAGE",12)==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i",&slice_average_flag,&slice_average_interval,&vis_slice_average);
+      sscanf(buffer,"%i %f %i %i",&slice_average_flag,&slice_average_interval,&vis_slice_average,&slice_turbprop_flag);
       if(slice_average_flag!=1)slice_average_flag=0;
+      if(slice_turbprop_flag!=1)slice_turbprop_flag=0;
+      if(slice_average_flag==1)slice_turbprop_flag=0;
       if(slice_average_interval<0.0)slice_average_interval=0.0;
       continue;
     }
@@ -8958,7 +8960,7 @@ void writeini(int flag){
   fprintf(fileout,"SMOKE3DFRAMESTEP\n");
   fprintf(fileout," %i\n",smoke3dframestep);
   fprintf(fileout,"SLICEAVERAGE\n");
-  fprintf(fileout," %i %f %i\n",slice_average_flag,slice_average_interval,vis_slice_average);
+  fprintf(fileout," %i %f %i %i\n",slice_average_flag,slice_average_interval,vis_slice_average,slice_turbprop_flag);
   fprintf(fileout,"SMOKE3DZIPSTEP\n");
   fprintf(fileout," %i\n",smoke3dzipstep);
   fprintf(fileout,"ISOZIPSTEP\n");
