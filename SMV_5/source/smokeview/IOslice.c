@@ -36,7 +36,8 @@ int getslicezlibdata(char *file,
 int getslicerledata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
                             float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
-int average_slice_data(float *data, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
+int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
+int correlate_slice_data(float *data_out, float *u, float *v, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
 int getsliceheader(char *comp_file, char *size_file, int compression_type, 
                    int framestep, int set_tmin, int set_tmax, float tmin, float tmax,
                    int *nx, int *ny, int *nz, int *nsteps, int *ntotal, float *valmin, float *valmax);
@@ -501,7 +502,11 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       ndata = data_per_timestep*ntimes;
       show_slice_average=1;
 
-      if(sd->compression_type==1||sd->compression_type==2||average_slice_data(sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes,slice_average_interval)==1){
+      if(
+        sd->compression_type==1||
+        sd->compression_type==2||
+        average_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes,slice_average_interval)==1
+        ){
         show_slice_average=0; // averaging failed
       }
     }
@@ -4183,9 +4188,51 @@ void init_Slicedata(void){
   }
 }
 
+/* ------------------ correlate_slice_data ------------------------ */
+
+int correlate_slice_data(float *data_out, float *u, float *v, int ndata, int data_per_timestep, float *times, int ntimes, float average_time){
+  float *u_avg, *u_prime;
+  float *v_avg, *v_prime;
+  float denom;
+  int i;
+
+  // <u'v'>/<u><v>
+
+  NewMemory((void **)&u_avg,ndata*sizeof(float));
+  NewMemory((void **)&v_avg,ndata*sizeof(float));
+  NewMemory((void **)&u_prime,ndata*sizeof(float));
+  NewMemory((void **)&v_prime,ndata*sizeof(float));
+
+  average_slice_data(u_avg,u, ndata, data_per_timestep, times, ntimes, average_time);
+  average_slice_data(v_avg,v, ndata, data_per_timestep, times, ntimes, average_time);
+
+  for(i=0;i<ndata;i++){
+    u_prime[i]=u[i]-u_avg[i];
+    v_prime[i]=v[i]-v_avg[i];
+    u_prime[i]*=v_prime[i];
+  }
+  average_slice_data(u_prime,u_prime, ndata, data_per_timestep, times, ntimes, average_time);
+  for(i=0;i<ndata;i++){
+    denom=u_avg[i]*v_avg[i];
+    if(denom==0.0){
+      data_out[i]=0.0;
+    }
+    else{
+      data_out[i]=u_prime[i]/denom;
+    }
+  }
+
+  FREEMEMORY(u_avg);
+  FREEMEMORY(u_prime);
+  FREEMEMORY(v_avg);
+  FREEMEMORY(v_prime);
+
+  return 0;
+}
+
 /* ------------------ average_slice_data ------------------------ */
 
-int average_slice_data(float *data, int ndata, int data_per_timestep, float *times, int ntimes, float average_time){
+int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_timestep, float *times, int ntimes, float average_time){
 
 #define IND(itime,ival) (itime)*data_per_timestep + (ival)
   float *datatemp=NULL;
@@ -4193,7 +4240,7 @@ int average_slice_data(float *data, int ndata, int data_per_timestep, float *tim
   float average_timed2;
   int i, j, k;
 
-  if(data==NULL)return 1;
+  if(data_in==NULL||data_out==NULL)return 1;
   if(ndata<data_per_timestep||data_per_timestep<1||ntimes<1||average_time<0.0)return 1;
   if(ndata!=data_per_timestep*ntimes)return 1;
 
@@ -4222,7 +4269,7 @@ int average_slice_data(float *data, int ndata, int data_per_timestep, float *tim
     naverage = above + 1 - below;
     for(k=0;k<data_per_timestep;k++){
       for(j=below;j<=above;j++){
-        datatemp[IND(i,k)]+=data[IND(j,k)];
+        datatemp[IND(i,k)]+=data_in[IND(j,k)];
       }
     }
     for(k=0;k<data_per_timestep;k++){
@@ -4230,7 +4277,7 @@ int average_slice_data(float *data, int ndata, int data_per_timestep, float *tim
     }
   }
   for(i=0;i<ndata;i++){
-    data[i]=datatemp[i];
+    data_out[i]=datatemp[i];
   }
   FREEMEMORY(datatemp);
   return 0;
