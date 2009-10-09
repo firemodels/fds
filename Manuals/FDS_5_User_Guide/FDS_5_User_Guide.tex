@@ -16,6 +16,7 @@
         pdfpagemode=UseNone,
         bookmarksopen=true,
         plainpages=false]{hyperref}
+\usepackage{pdfsync}
 \usepackage{tocloft}
 \usepackage{color}
 \usepackage{amsmath}
@@ -9275,6 +9276,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR}                     & Character       & Default color of droplets         &           & {\ct 'BLACK'} \\ \hline
 {\ct DENSITY}                   & Real            & Droplet density                   & kg/m$^3$  & 1000.         \\ \hline
 {\ct DIAMETER}                  & Real            & Median Volumetric Diameter        & $\mu$m    & 500.          \\ \hline
+{\ct DRAG\_LAW}                 & Character       & Geometry for drag correlation     &           & {\ct 'sphere'}\\ \hline
 {\ct DROPLETS\_PER\_SECOND}     & Integer         & Drops per second per head         &           & 5000          \\ \hline
 {\ct DT\_INSERT}                & Real            & Time between insertions           & s         & 0.01          \\ \hline
 {\ct EVAPORATE}                 & Logical         & Assume liquid evaporation         &           & {\ct .TRUE.}  \\ \hline
@@ -9303,7 +9305,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPECIFIC\_HEAT}            & Real            & Droplet specific heat             & kJ/kg/K   & 4.184         \\ \hline
 {\ct STATIC}                    & Logical         & Stationary Particles              &           & {\ct .FALSE.} \\ \hline
 %{\ct TREE}                      & Logical         & Particles are leaves              &           & {\ct .FALSE.} \\ \hline
-{\ct VAPORIZATION\_TEMPERATURE} & Real            & Liquid Droplet Boiling Temp       & $^\circ$C & 100.          \\ \hline
+{\ct USER\_DRAG\_COEFFICIENT}   & Real            & Constant drag coefficient         &           & -1.           \\ \hline
 {\ct VERTICAL\_VELOCITY}        & Real            & Droplet speed, vertical           & m/s       &  0.5          \\ \hline
 {\ct XB(6)}                     & Real array      & Initial particle location         & m         &               \\ \hline
 {\ct WATER}                     & Logical         & Water Droplet                     &           & {\ct .FALSE.} \\ \hline
