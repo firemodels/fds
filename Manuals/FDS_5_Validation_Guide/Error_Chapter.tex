@@ -207,7 +207,7 @@ Again, using the log transformation we obtain
     \frac{\widetilde{\sigma}_M^2}{\delta^2} \right) \quad ; \quad \widetilde{\sigma}_M=\frac{\sigma_M}{\theta} \ee
 Note that the estimate of the mean includes an extra term in the Taylor series expansion to obtain a more precise estimate of
 $\delta$. Because $\ln(\theta)$ is random, and we have its posterior distribution from Eq.~(\ref{thetaeq}),
-we can obtain the marginal distribution
+we can obtain the marginal distribution\footnote{$f(M)= \int f(M|\theta) \, f(\theta) \; d\theta$}
 \be \ln(M) \sim N \left( \ln(\delta)+\ln(E)-\frac{1}{2} \frac{\widetilde{\sigma}_M^2}{\delta^2} \; , \; \frac{\widetilde{\sigma}_M^2}{\delta^2} +\widetilde{\sigma}_E^2 \right) \ee
 Notice that we have expressed the {\em total relative uncertainty} of the model predictions as a
 combination of model error and experimental uncertainty.
