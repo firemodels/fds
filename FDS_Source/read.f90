@@ -2795,7 +2795,7 @@ READ_PART_LOOP: DO N=1,N_PART
    VEG_MOIST_MPV_MIN        = 0.01_EB*VEG_MOISTURE
    VEG_REMOVE_CHARRED       = .TRUE.
    VEG_STEM                 = .FALSE.
-   DRAG_LAW                 = 'sphere'
+   DRAG_LAW                 = 'SPHERE'
    USER_DRAG_COEFFICIENT    = -1._EB
  
    ! Read the PART line from the input file or set up special PARTICLE_CLASS class for water droplets or tracers
@@ -2926,13 +2926,13 @@ READ_PART_LOOP: DO N=1,N_PART
    PC%VERTICAL_VELOCITY   = VERTICAL_VELOCITY
    PC%HORIZONTAL_VELOCITY = HORIZONTAL_VELOCITY
    PC%USER_DRAG_COEFFICIENT = USER_DRAG_COEFFICIENT
-   IF (USER_DRAG_COEFFICIENT>=0._EB) DRAG_LAW = 'user'
+   IF (USER_DRAG_COEFFICIENT>=0._EB) DRAG_LAW = 'USER'
    SELECT CASE(DRAG_LAW)
-      CASE('sphere')
+      CASE('SPHERE')
          PC%DRAG_LAW = SPHERE_DRAG
-      CASE('cylinder')
+      CASE('CYLINDER')
          PC%DRAG_LAW = CYLINDER_DRAG
-      CASE('user')
+      CASE('USER')
          PC%DRAG_LAW = USER_DRAG
       CASE DEFAULT
          WRITE(MESSAGE,'(A,I4,A)') 'ERROR: unrecognized drag law on PART line'
