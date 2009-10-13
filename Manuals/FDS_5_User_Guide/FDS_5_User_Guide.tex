@@ -6088,7 +6088,8 @@ The Rosin-Rammler/log-normal distribution is given by
    \frac{1}{\sqrt{2\pi}} {\displaystyle \int_0^d} \, \frac{1}{\sigma\, d'} \,
    e^{-\frac{[\ln(d'/d_m)]^2}{2\sigma^2}} \; dd'       & (d \le d_m) \\
    1 - e^{-0.693 \left(\frac{d}{d_m}\right)^\gamma }  & (d_m < d)
-   \end{array} \right.  \ee
+   \end{array} \right.
+\ee
 Note that the parameter $\sigma$ is given the value
 $\sigma=2/(\sqrt{2\pi} \, (\ln\,2) \; \gamma)=1.15/\gamma$
 which ensures that the two functions are smoothly joined at $d=d_m$. You can also add a value for {\ct SIGMA\_D} to the {\ct PART} line if you want to
@@ -6101,6 +6102,11 @@ instabilities that can occur when droplets get very, very small. The default {\c
 To prevent FDS from generating a distribution of droplets/particles altogether, set
 {\ct MONODISPERSE=.TRUE.} on the {\ct PART} line, in which case every droplet or particle will be assigned the
 same {\ct DIAMETER}.
+
+\subsection{Drag}
+
+For massive particles the default drag law (i.e., the drag coefficient correlation as a function of Reynolds number [based on particle diameter]) is that of a sphere.  To invoke the cylinder drag law set {\ct DRAG\_LAW$=$`CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable, the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.  The {\ct USER\_DRAG\_COEFFICIENT} trumps the {\ct DRAG\_LAW}.
+
 
 \subsection{Color}
 
@@ -9276,7 +9282,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR}                     & Character       & Default color of droplets         &           & {\ct 'BLACK'} \\ \hline
 {\ct DENSITY}                   & Real            & Droplet density                   & kg/m$^3$  & 1000.         \\ \hline
 {\ct DIAMETER}                  & Real            & Median Volumetric Diameter        & $\mu$m    & 500.          \\ \hline
-{\ct DRAG\_LAW}                 & Character       & Geometry for drag correlation     &           & {\ct 'sphere'}\\ \hline
+{\ct DRAG\_LAW}                 & Character       & Geometry for drag correlation     &           & {\ct 'SPHERE'}\\ \hline
 {\ct DROPLETS\_PER\_SECOND}     & Integer         & Drops per second per head         &           & 5000          \\ \hline
 {\ct DT\_INSERT}                & Real            & Time between insertions           & s         & 0.01          \\ \hline
 {\ct EVAPORATE}                 & Logical         & Assume liquid evaporation         &           & {\ct .TRUE.}  \\ \hline
