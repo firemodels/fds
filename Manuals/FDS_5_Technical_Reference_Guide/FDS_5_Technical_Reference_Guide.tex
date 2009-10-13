@@ -2574,18 +2574,23 @@ where $C_D$ is the drag coefficient, $r_d$ is the droplet radius,
 $\bu_d$ is the velocity of the droplet, $\bu$ is the
 velocity of the gas, $\rho$ is the density of the gas,
 and $\dx \, \dy \, \dz$ is the volume of the grid cell.
-The trajectory of an individual droplet is governed by the equation
-\be \frac{d}{dt} (m_d \bu_d) = m_d\, \bg - \ha \rho\,C_D \, \pi  r_d^2 \,
-    (\bu_d-\bu) |\bu_d-\bu| \ee
-where $m_d$ is the mass of the droplet.
-The drag coefficient is a function of the local Reynolds number (based on droplet diameter)
+The acceleration of an individual droplet is governed by the equation
+\be 
+    \frac{d}{dt} (m_d \bu_d) = m_d\, \bg - \ha \rho\,C_D \, \pi  r_d^2 \,
+    (\bu_d-\bu) |\bu_d-\bu|
+\ee
+where $m_d$ is the mass of the droplet.  The trajectory of the droplet is governed by the equation
+\be
+    \frac{d \bx_d}{dt} = \bu_d
+\ee
+The drag coefficient (default based on a sphere) is a function of the local Reynolds number (based on droplet diameter)
 \begin{eqnarray}
  C_D &=& \left\{ \begin{array}{ll}
-     24/\RE_D                                       & \RE_D < 1    \\
-     24\left(1+0.15 \, \RE_D^{0.687} \right)/\RE_D  & 1 < \RE_D < 1000 \\
-     0.44                                           & 1000 < \RE_D
+     24/\RE_d                                       & \RE_d < 1    \\
+     24\left(0.85+0.15 \, \RE_d^{0.687} \right)/\RE_d  & 1 < \RE_d < 1000 \\
+     0.44                                           & 1000 < \RE_d
      \end{array} \right.  \\
-\RE_D &=& \frac{\rho \, |\bu_d-\bu| \, 2 r_d}{\mu(T)} \end{eqnarray}
+\RE_d &=& \frac{\rho \, |\bu_d-\bu| \, 2 r_d}{\mu(T)} \end{eqnarray}
 where $\mu(T)$ is the dynamic viscosity of air at temperature $T$.
 
 
