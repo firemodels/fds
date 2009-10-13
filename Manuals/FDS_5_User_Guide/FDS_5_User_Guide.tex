@@ -3521,22 +3521,22 @@ would have to be described with two {\ct SURF} lines like the following:
 &SURF ID                 = 'COLUMN EXTERIOR'
       COLOR              = 'ANTIQUE WHITE'
       BACKING            = 'EXPOSED'
-      MATL_ID(1:2,1)     = 'PLASTIC','INSULATION','STEEL'
-      THICKNESS(1:2)     = 0.002,0.036,0.0063 /
+      MATL_ID(1:3,1)     = 'PLASTIC','INSULATION','STEEL'
+      THICKNESS(1:3)     = 0.002,0.036,0.0063 /
 
 &SURF ID                 = 'COLUMN INTERIOR'
       COLOR              = 'BLACK'
       BACKING            = 'EXPOSED'
-      MATL_ID(1:2,1)     = 'STEEL','INSULATION','PLASTIC'
-      THICKNESS(1:2)     = 0.0063,0.036,0.002 /
+      MATL_ID(1:3,1)     = 'STEEL','INSULATION','PLASTIC'
+      THICKNESS(1:3)     = 0.0063,0.036,0.002 /
 \end{verbatim} \normalsize
 
 \noindent
 If, in addition, the insulation material and plastic are combustible, and their burning properties are specified on the appropriate {\ct MATL} lines,
 then you need to indicate which side of the column would generate the fuel vapor. In this case, the steel is impermeable; thus you should add the parameter
-{\ct LAYER\_DIVIDE=2.0} to the {\ct SURF} line labelled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the
+{\ct LAYER\_DIVIDE=2.0} to the {\ct SURF} line labeled {\ct 'COLUMN EXTERIOR'} to indicate that fuel vapors formed by the heating of the
 two first layers ({\ct 'PLASTIC'} and {\ct 'INSULATION'}) are to be driven out of that surface.
-You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF} line labelled {\ct 'COLUMN INTERIOR'} to indicate that no fuel
+You need to also specify {\ct LAYER\_DIVIDE=0.0} on the {\ct SURF} line labeled {\ct 'COLUMN INTERIOR'} to indicate that no fuel
 vapors are to driven into the interior of the column. In fact, values from 0.0 to 1.0 would work equally because the material
 {\ct 'STEEL'} would not generate any fuel vapors.
 
