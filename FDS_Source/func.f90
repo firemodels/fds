@@ -1442,12 +1442,12 @@ REAL(EB) FUNCTION DRAG(RE,DRAG_LAW)
  
 ! drag coefficient
 
-CHARACTER(30), INTENT(IN) :: DRAG_LAW
+INTEGER, INTENT(IN) :: DRAG_LAW
 REAL(EB), INTENT(IN) :: RE
 
 SELECT CASE(DRAG_LAW)
 
-   CASE('sphere')
+   CASE(SPHERE_DRAG)
       IF (RE<=1._EB) THEN
          DRAG = 24._EB/RE
       ELSEIF (RE>1._EB .AND. RE<1000._EB) THEN
@@ -1457,7 +1457,7 @@ SELECT CASE(DRAG_LAW)
          DRAG = 0.44_EB
       ENDIF
       
-   CASE('cylinder')
+   CASE(CYLINDER_DRAG)
       IF (RE<=1._EB) THEN
          DRAG = 10._EB/(RE**0.8_EB)
       ELSEIF (RE>1._EB .AND. RE<1000._EB) THEN
