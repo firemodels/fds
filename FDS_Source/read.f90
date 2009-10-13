@@ -2926,14 +2926,18 @@ READ_PART_LOOP: DO N=1,N_PART
    PC%VERTICAL_VELOCITY   = VERTICAL_VELOCITY
    PC%HORIZONTAL_VELOCITY = HORIZONTAL_VELOCITY
    PC%USER_DRAG_COEFFICIENT = USER_DRAG_COEFFICIENT
-   PC%DRAG_LAW              = DRAG_LAW
-   IF (USER_DRAG_COEFFICIENT>=0._EB) PC%DRAG_LAW = 'user'
-   IF (.NOT.(PC%DRAG_LAW=='sphere'   .OR. &
-             PC%DRAG_LAW=='cylinder' .OR. &
-             PC%DRAG_LAW=='user')) THEN
-      WRITE(MESSAGE,'(A,I4,A)') 'ERROR: unrecognized drag law on PART line'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
+   IF (USER_DRAG_COEFFICIENT>=0._EB) DRAG_LAW = 'user'
+   SELECT CASE(DRAG_LAW)
+      CASE('sphere')
+         PC%DRAG_LAW = SPHERE_DRAG
+      CASE('cylinder')
+         PC%DRAG_LAW = CYLINDER_DRAG
+      CASE('user')
+         PC%DRAG_LAW = USER_DRAG
+      CASE DEFAULT
+         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: unrecognized drag law on PART line'
+         CALL SHUTDOWN(MESSAGE)
+   END SELECT
  
    ! Vegetation propeties
 
