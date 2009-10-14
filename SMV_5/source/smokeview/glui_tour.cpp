@@ -61,7 +61,7 @@ GLUI_Spinner *SPINNER_globaltourtension=NULL;
 GLUI_Spinner *SPINNER_tourtension=NULL;
 GLUI_Spinner *SPINNER_tourbias=NULL;
 GLUI_Spinner *SPINNER_tourcontinuity=NULL;
-//GLUI_Spinner *SPINNER_tourzoom=NULL;
+GLUI_Spinner *SPINNER_tourzoom=NULL;
 GLUI_Spinner *SPINNER_elev_path=NULL;
 GLUI_Button *BUTTON_settings=NULL,*BUTTONnext_tour=NULL,*BUTTONprev_tour=NULL;
 GLUI_EditText *EDITlabel=NULL;
@@ -189,6 +189,7 @@ extern "C" void glui_tour_setup(int main_window){
   SPINNER_az_path=glui_tour->add_spinner_to_panel(panel_movedir,"Azimuth:",GLUI_SPINNER_FLOAT,&tour_az_path,KEYFRAME_tXYZ,TOUR_CB);
   SPINNER_elev_path=glui_tour->add_spinner_to_panel(panel_movedir,"Elevation:",GLUI_SPINNER_FLOAT,&tour_elev_path,KEYFRAME_tXYZ,TOUR_CB);
   SPINNER_elev_path->set_float_limits(-90.0,90.0);
+  SPINNER_tourzoom=glui_tour->add_spinner_to_panel(panel_movedir,"Zoom:",GLUI_SPINNER_FLOAT,&tour_zoom,KEYFRAME_tXYZ,TOUR_CB);
   
  // if(tour_constant_vel==0){
  //   SPINNER_t->enable();
@@ -375,7 +376,7 @@ extern "C" void set_glui_keyframe(){
   if(SPINNER_tourbias!=NULL)SPINNER_tourbias->set_float_val(tour_bias);
   if(SPINNER_tourcontinuity!=NULL)SPINNER_tourcontinuity->set_float_val(tour_continuity);
   SPINNER_tourtension->set_float_val(tour_tension);
-//    SPINNER_tourzoom->set_float_val(tour_zoom);
+  SPINNER_tourzoom->set_float_val(tour_zoom);
   SPINNER_viewx->set_float_val(tour_viewx);
   SPINNER_viewy->set_float_val(tour_viewy);
   SPINNER_viewz->set_float_val(tour_viewz);
