@@ -8106,9 +8106,6 @@ int readini2(char *inifile, int localfile){
     {
       int nkeyframes;
       float key_time, key_xyz[3], key_az_path, key_view[3], params[3], zzoom, key_elev_path;
-#ifdef pp_TOUR
-      float key_az_scene, key_elev_scene;
-#endif
       float t_globaltension, key_bank;
       int t_globaltension_flag;
       int viewtype,uselocalspeed;
@@ -8549,10 +8546,6 @@ typedef struct {
                 key_bank=0.0;
                 key_az_path = 0.0;
                 key_elev_path=0.0;
-#ifdef pp_TOUR
-                key_az_scene = 0.0;
-                key_elev_scene=0.0;
-#endif
                 viewtype=0;
                 zzoom=1.0;
                 uselocalspeed=0;
@@ -8571,11 +8564,7 @@ typedef struct {
                   params,params+1,params+2,
                   &zzoom,&uselocalspeed);
                 }
-#ifdef pp_TOUR
-                else if(viewtype==1){
-#else
                 else{
-#endif
                   sscanf(buffer,"%f %f %f %f %i %f %f %f %f %f %f %f %i",
                   &key_time,
                   key_xyz,key_xyz+1,key_xyz+2,
@@ -8583,26 +8572,10 @@ typedef struct {
                   params,params+1,params+2,
                   &zzoom,&uselocalspeed);
                 }
-#ifdef pp_TOUR
-                else{
-                  sscanf(buffer,"%f %f %f %f %i %f %f %f %f %f %f %f %i",
-                  &key_time,
-                  key_xyz,key_xyz+1,key_xyz+2,
-                  &viewtype, &key_az_scene, &key_elev_scene,&key_bank, 
-                  params,params+1,params+2,
-                  &zzoom,&uselocalspeed);
-                }
-#endif
                 if(zzoom<0.25)zzoom=0.25;
                 if(zzoom>4.00)zzoom=4.0;
-#ifdef pp_TOUR
-                addedframe=add_frame(thisframe, key_time, key_xyz, 
-                  key_az_path, key_elev_path, key_az_scene, key_elev_scene,
-                  key_bank, params, viewtype,zzoom,key_view);
-#else
                 addedframe=add_frame(thisframe, key_time, key_xyz, key_az_path, key_elev_path, 
                   key_bank, params, viewtype,zzoom,key_view);
-#endif
                 thisframe=addedframe;
                 touri->keyframe_times[j]=key_time;
               }
@@ -9559,11 +9532,7 @@ void writeini(int flag){
                 framei->tension, framei->bias, framei->continuity,
                 framei->nodeval.zoom);
             }
-#ifdef pp_TOUR
-            else if(framei->viewtype==1){
-#else
             else{
-#endif
               sprintf(buffer,"%f %f %f %f %f %f %f ",
                 xbar0+framei->nodeval.aview[0]*xyzmaxdiff,
                 ybar0+framei->nodeval.aview[1]*xyzmaxdiff,
@@ -9571,14 +9540,6 @@ void writeini(int flag){
                 framei->tension, framei->bias, framei->continuity,
                 framei->nodeval.zoom);
             }
-#ifdef pp_TOUR
-            else{
-              sprintf(buffer,"%f %f %f %f %f %f %f ",
-                framei->az_scene,framei->nodeval.elev_scene,framei->bank,
-                framei->tension, framei->bias, framei->continuity,
-                framei->nodeval.zoom);
-            }
-#endif
             trimmzeros(buffer);
             fprintf(fileout,"%s %i\n",buffer,uselocalspeed);
           }
