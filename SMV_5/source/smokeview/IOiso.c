@@ -22,6 +22,7 @@
 // svn revision character string
 char IOiso_revision[]="$Revision$";
 
+void sync_isobounds(int isottype);
 void unloadiso(mesh *gb);
 
 /* ------------------ getisoheader ------------------------ */
@@ -733,6 +734,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
     int errorcode;
 
     iisottype = getisottype(ib);
+    sync_isobounds(iisottype);
     setisolabels(ib->tmin, ib->tmax, ib, &errorcode);
     CheckMemory;
   }
@@ -2078,7 +2080,7 @@ int getisottype(const iso *isoi){
 
 /* ------------------ update_isotype ------------------------ */
 
-void update_isotype(){
+void update_isotype(void){
   int i;
   iso *isoi;
 
@@ -2220,3 +2222,94 @@ void setisolabels(float smin, float smax,
                 sb->colorlabels,&scale,sb->levels256);
 }
 
+/* ------------------ sync_isobounds ------------------------ */
+
+void sync_isobounds(int isottype){
+  int i,j,ii,kk,ncount;
+  isosurface *asurface;
+  int firsttime=1;
+  float tmin, tmax;
+
+  // find number of iso-surfaces with values 
+
+  ncount=0;
+  for(i=0;i<niso;i++){
+    iso *isoi;
+
+    isoi = isoinfo + i;
+    if(isoi->loaded==0||isoi->type!=iisotype||isoi->dataflag==0)continue;
+    if(iisottype!=getisottype(isoi))continue;
+    ncount++;
+  }
+  if(ncount<=1)return;
+
+  // find min and max bounds for valued iso-surfaces
+
+  for(i=0;i<niso;i++){
+    iso *isoi;
+    mesh *meshi;
+
+    isoi = isoinfo + i;
+    if(isoi->loaded==0||isoi->type!=iisotype||isoi->dataflag==0)continue;
+    if(iisottype!=getisottype(isoi))continue;
+    if(firsttime==1){
+      firsttime=0;
+      tmin=isoi->tmin;
+      tmax=isoi->tmax;
+    }
+    else{
+      if(tmin<isoi->tmin)isoi->tmin=tmin;
+      if(tmax>isoi->tmax)isoi->tmax=tmax;
+    }
+  }
+
+  // set min and max bounds for valued iso-surfaces
+
+  for(i=0;i<niso;i++){
+    iso *isoi;
+    mesh *meshi;
+
+    isoi = isoinfo + i;
+    if(isoi->loaded==0||isoi->type!=iisotype||isoi->dataflag==0)continue;
+    if(iisottype!=getisottype(isoi))continue;
+    isoi->tmin=tmin;
+    isoi->tmax=tmax;
+  }
+
+  // rescale all data
+
+  for(i=0;i<niso;i++){
+    iso *isoi;
+    mesh *meshi;
+
+    isoi = isoinfo + i;
+    if(isoi->loaded==0||isoi->type!=iisotype||isoi->dataflag==0)continue;
+    if(iisottype!=getisottype(isoi))continue;
+    
+    meshi = meshinfo + isoi->blocknumber;
+    asurface=meshi->animatedsurfaces;
+
+    for(ii=0;ii<meshi->nisosteps;ii++){
+      for(j=0;j<meshi->nisolevels;j++){
+        float tcolor, tcolor0, tcolorfactor;
+
+        if(isoi->tmax>isoi->tmin){
+          tcolor0 = (asurface->tmin-isoi->tmin)/(isoi->tmax-isoi->tmin);
+          tcolorfactor = (asurface->tmax-asurface->tmin)/65535.;
+          tcolorfactor /= (isoi->tmax-isoi->tmin);
+        }
+        else{
+          tcolor0=0.5;
+          tcolorfactor=0.0;
+        }
+        for(kk=0;kk<asurface->nvertices;kk++){
+          tcolor = tcolor0 + asurface->tvertices[kk]*tcolorfactor;
+          if(tcolor<0.0)tcolor=0.0;
+          if(tcolor>1.0)tcolor=1.0;
+          asurface->color8[kk] = (unsigned char)(tcolor*255);
+        }
+        asurface++;
+      }
+    }
+  }
+}
