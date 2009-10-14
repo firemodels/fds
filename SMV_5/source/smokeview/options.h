@@ -80,10 +80,6 @@
 #define USE_ZLIB
 //#define NO_GLUTPOSTDISPLAY
 
-#ifdef pp_ALPHA2
-#define pp_TOUR
-#endif
-
 #ifdef NO_GLUTPOSTDISPLAY
 #define GLUTPOSTREDISPLAY
 #else

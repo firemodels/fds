@@ -403,11 +403,7 @@ EXTERNCPP void create_tourlist(void);
 EXTERNCPP void delete_tourlist(void);
 EXTERNCPP void updateviewtour(void);
 EXTERNCPP void update_tourcontrols(void);
-#ifdef pp_TOUR
-EXTERNCPP void adjustviewangle(keyframe *kf,int viewtype);
-#else
 EXTERNCPP void adjustviewangle(keyframe *kf,float *azimuth, float *elevation);
-#endif
 EXTERNCPP void setup_tour(void);
 EXTERNCPP void createtourpaths(void);
 EXTERNCPP void drawtours(void);
@@ -426,15 +422,8 @@ EXTERNCPP tourdata *add_tour(char *label);
 EXTERNCPP void init_circulartour(void);
 EXTERNCPP keyframe *delete_frame(keyframe *step);
 EXTERNCPP void ReallocTourMemory(void);
-#ifdef pp_TOUR
-EXTERNCPP keyframe *add_frame(keyframe *framei, float time, float *xyz, 
-                              float key_azimuth, float elevation, float key_azimuth2, float elevation2,
-                              float bank,
-                    float params[3],int viewtype,float zoom,float view[3]);
-#else
 EXTERNCPP keyframe *add_frame(keyframe *framei, float time, float *xyz, float key_azimuth, float elevation, float bank,
                     float params[3],int viewtype,float zoom,float view[3]);
-#endif
 EXTERNCPP void hide_glui_trainer(void);
 EXTERNCPP void show_glui_stereo(void);
 EXTERNCPP void hide_glui_stereo(void);
