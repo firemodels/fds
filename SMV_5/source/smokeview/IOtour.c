@@ -1022,7 +1022,8 @@ void init_circulartour(void){
   float key_time;
   float angle_local;
   float f1;
-  float A, B, a, b, minAB, denom, cosangle, sinangle;
+  float A, B, rad, cosangle, sinangle;
+  float max_xyz, dx, dy, dz;
   float pi;
   keyframe *thisframe,*addedframe;
 
@@ -1041,12 +1042,14 @@ void init_circulartour(void){
   key_view[0]=(xbar0+xbarORIG)/2.0;
   key_view[1]=(ybar0+ybarORIG)/2.0;
   key_view[2]=(zbar0+zbarORIG)/2.0;
-  A = xbarORIG - xbar0;
-  B = ybarORIG - ybar0;
-  minAB = A;
-  if(B<minAB)minAB=B;
-  a = A/2.0 + minAB;
-  b = B/2.0 + minAB;
+  dx = fabs(xbarORIG - xbar0)/2.0;
+  dy = fabs(ybarORIG - ybar0)/2.0;
+  dz = fabs(zbarORIG-zbar0)/2.0;
+  max_xyz=dx;
+  if(dy>max_xyz)max_xyz=dy;
+  if(dz>max_xyz)max_xyz=dz;
+
+  rad = max_xyz+max_xyz/tan(20.0/180.0*3.14159);
   elev_path=0.0;
 
   thisframe=&touri->first_frame;
@@ -1059,10 +1062,9 @@ void init_circulartour(void){
     angle_local = 2.0*pi*(float)j/(float)(nkeyframes-1);
     cosangle = cos(angle_local);
     sinangle = sin(angle_local);
-    denom = sqrt(b*b*cosangle*cosangle+a*a*sinangle*sinangle);
 
-    key_xyz[0] = key_view[0] + a*b*cosangle/denom;
-    key_xyz[1] = key_view[1] + a*b*sinangle/denom;
+    key_xyz[0] = key_view[0] + rad*cosangle;
+    key_xyz[1] = key_view[1] + rad*sinangle;
     key_xyz[2] = key_view[2];
     f1 = (float)j/(float)(nkeyframes-1);
     key_time = view_tstart*(1.0-f1) + view_tstop*f1;
