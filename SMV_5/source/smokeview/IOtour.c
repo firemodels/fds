@@ -26,9 +26,6 @@ void drawcir(float *center, float rad, float *color);
 //void TourMenu(int val);
 float hermiteeye(float f1, int i, keyframe *kf1, keyframe *kf2, float *slope);
 float hermiteview(float t, int i, keyframe *kf1, keyframe *kf2, float *slope);
-#ifdef pp_TOUR
-float linearview(float t, int i, keyframe *kf1, keyframe *kf2);
-#endif
 void draw_SVOBJECT(sv_object *object, int iframe);
 
 /* ------------------ freetour ------------------------ */
@@ -554,11 +551,6 @@ void createtourpaths(void){
         keyj->d_eye[4]=key2->nodeval.zoom - key1->nodeval.zoom;
 
         keyj->d_eye[5]=key2->nodeval.elev_path - key1->nodeval.elev_path;
-#ifdef pp_TOUR
-        keyj->d_eye[6]=key2->az_scene - key1->az_scene;
-        keyj->d_eye[7]=key2->nodeval.elev_scene - key1->nodeval.elev_scene;
-#endif
-
 
         keyj->s_aview[0]=0.0;
         keyj->s_aview[1]=0.0;
@@ -577,10 +569,6 @@ void createtourpaths(void){
         keyj->s_eye[4]=key1->nodeval.zoom - key0->nodeval.zoom;
 
         keyj->s_eye[5]=key1->nodeval.elev_path - key0->nodeval.elev_path;
-#ifdef pp_TOUR
-        keyj->s_eye[6]=key1->az_scene - key0->az_scene;
-        keyj->s_eye[7]=key1->nodeval.elev_scene - key0->nodeval.elev_scene;
-#endif
 
         keyj->d_eye[0]=0.0;
         keyj->d_eye[1]=0.0;
@@ -613,10 +601,6 @@ void createtourpaths(void){
         keyj->s_eye[3]=sfactor*(s1*(key1->az_path -           key0->az_path) +           s2*(key2->az_path-          key1->az_path));
         keyj->s_eye[4]=sfactor*(s1*(key1->nodeval.zoom -      key0->nodeval.zoom) +      s2*(key2->nodeval.zoom-     key1->nodeval.zoom));
         keyj->s_eye[5]=sfactor*(s1*(key1->nodeval.elev_path - key0->nodeval.elev_path) + s2*(key2->nodeval.elev_path-key1->nodeval.elev_path));
-#ifdef pp_TOUR
-        keyj->s_eye[6]=sfactor*(s1*(key1->az_scene -           key0->az_scene) +           s2*(key2->az_scene-          key1->az_scene));
-        keyj->s_eye[7]=sfactor*(s1*(key1->nodeval.elev_scene - key0->nodeval.elev_scene) + s2*(key2->nodeval.elev_scene-key1->nodeval.elev_scene));
-#endif
         keyj->s_aview[0]=sfactor*(s1*(aview1[0] - aview0[0]) + s2*(aview2[0]-aview1[0]));
         keyj->s_aview[1]=sfactor*(s1*(aview1[1] - aview0[1]) + s2*(aview2[1]-aview1[1]));
         keyj->s_aview[2]=sfactor*(s1*(aview1[2] - aview0[2]) + s2*(aview2[2]-aview1[2]));
@@ -629,12 +613,6 @@ void createtourpaths(void){
         keyj->d_eye[4]=dfactor*(d1*(key1->nodeval.zoom -      key0->nodeval.zoom) +      d2*(key2->nodeval.zoom-     key1->nodeval.zoom));
         keyj->d_eye[5]=dfactor*(d1*(key1->nodeval.elev_path - key0->nodeval.elev_path) + d2*(key2->nodeval.elev_path-key1->nodeval.elev_path));
 
-#ifdef pp_TOUR
-        keyj->d_eye[6]=dfactor*(d1*(key1->az_scene -           key0->az_scene) +           d2*(key2->az_scene-          key1->az_scene));
-        keyj->d_eye[7]=dfactor*(d1*(key1->nodeval.elev_scene - key0->nodeval.elev_scene) + d2*(key2->nodeval.elev_scene-key1->nodeval.elev_scene));
-#endif
-
-
         keyj->d_aview[0]=dfactor*(d1*(aview1[0] - aview0[0]) + d2*(aview2[0]-aview1[0]));
         keyj->d_aview[1]=dfactor*(d1*(aview1[1] - aview0[1]) + d2*(aview2[1]-aview1[1]));
         keyj->d_aview[2]=dfactor*(d1*(aview1[2] - aview0[2]) + d2*(aview2[2]-aview1[2]));
@@ -645,11 +623,7 @@ void createtourpaths(void){
     for(keyj=(touri->first_frame).next;keyj->next!=NULL;keyj=keyj->next){
       keyj->keyview_x=keyj->d_eye[0];
       keyj->keyview_y=keyj->d_eye[1];
-#ifdef pp_TOUR
-      adjustviewangle(keyj,keyj->viewtype);
-#else
       if(keyj->viewtype==1)adjustviewangle(keyj,&dummy,&dummy);
-#endif
     }
 
     // evaluate quantities along path - determine distances
@@ -690,17 +664,9 @@ void createtourpaths(void){
       }
       eye[2] = hermiteeye(f1,2,kf1,kf2,&dummy);
       eye[3] = hermiteeye(f1,3,kf1,kf2,&dummy);
-#ifdef pp_TOUR
-      aview[0] = linearview(f1,0,kf1,kf2);
-      aview[1] = linearview(f1,1,kf1,kf2);
-      aview[2] = linearview(f1,2,kf1,kf2);
-      viewx=aview[0];
-      viewy=aview[1];
-#else
       aview[0] = hermiteview(f1,0,kf1,kf2,&dummy);
       aview[1] = hermiteview(f1,1,kf1,kf2,&dummy);
       aview[2] = hermiteview(f1,2,kf1,kf2,&dummy);
-#endif
 
       pj->elev_path = hermiteeye(f1,5,kf1,kf2,&dummy);
       pj->zoom   = hermiteeye(f1,4,kf1,kf2,&dummy);
@@ -863,20 +829,6 @@ void createtourpaths(void){
         oview[1]=eye[1]+dy2;
         oview[2]=eye[2]+dz;
       }
-#ifdef pp_TOUR
-      else if((kf1->viewtype==2&&kf2->viewtype!=1)||(kf2->viewtype==2&&kf1->viewtype!=1)){
-        float scene_az, scene_elev;
-
-        scene_elev = hermiteeye(f1,6,kf1,kf2,&dummy)*pi/180.0;
-        scene_az = hermiteeye(f1,7,kf1,kf2,&dummy)*pi/180.0;
-        dx = sin(scene_az)*cos(scene_elev)/10.0;
-        dy = cos(scene_az)*cos(scene_elev)/10.0;
-        dz = sin(scene_elev)/10.0;
-        oview[0]=eye[0]+dx;
-        oview[1]=eye[1]+dy;
-        oview[2]=eye[2]+dz;
-      }
-#endif
       else{
         dx = aview[0]-eye[0];
         dy = aview[1]-eye[1];
@@ -925,16 +877,6 @@ float hermiteeye(float t, int i, keyframe *kf1, keyframe *kf2, float *slope){
     p0 = kf1->nodeval.zoom;
     p1 = kf2->nodeval.zoom;
     break;
-#ifdef pp_TOUR
-  case 6:
-    p0=kf1->nodeval.elev_scene;
-    p1=kf2->nodeval.elev_scene;
-    break;
-  case 7:
-    p0 = kf1->az_scene;
-    p1 = kf2->az_scene;
-    break;
-#endif
 
   default:
     p0 = kf1->nodeval.eye[i];
@@ -949,21 +891,7 @@ float hermiteeye(float t, int i, keyframe *kf1, keyframe *kf2, float *slope){
   return val;
 
 }
-#ifdef pp_TOUR
 
-/* ------------------ lineareye ------------------------ */
-
-float linearview(float t, int i, keyframe *kf1, keyframe *kf2){
-  float p0, p1, m0, m1, val;
-  float t3, t2;
-
-  p0 = kf1->nodeval.aview[i];
-  p1 = kf2->nodeval.aview[i];
-  val = (1.0-t)*p0 + t*p1;
-  return val;
-
-}
-#endif
 /* ------------------ hermiteye ------------------------ */
 
 float hermiteview(float t, int i, keyframe *kf1, keyframe *kf2, float *slope){
@@ -1005,34 +933,15 @@ void defaulttour(void){
 }
 
 /* ------------------ addframe ------------------------ */
-#ifdef pp_TOUR
-keyframe *add_frame(keyframe *framei, float time, float *eye, 
-                    float key_az_path, float key_az_scene,float elev_path, float elev_scene,
-                    float bank, float params[3],
-                    int viewtype,float zoom,float view[3]){
-#else
 keyframe *add_frame(keyframe *framei, float time, float *eye, float key_az_path, float elev_path, float bank, float params[3],
                     int viewtype,float zoom,float view[3]){
-#endif
   keyframe *frame,*framen;
   float *feye, *faview;
-#ifdef pp_TOUR
-  int viewtype1, viewtype2, viewtype3;
-#endif
 
   NewMemory((void **)&frame,sizeof(keyframe));
   feye = frame->nodeval.eye;
   faview = frame->nodeval.aview;
-#ifdef pp_TOUR
-  viewtype1=0;
-  viewtype2=0;
-  viewtype3=0;
-  if(viewtype==0)viewtype2=1;
-  if(viewtype==1)viewtype1=1;
-  if(viewtype==2)viewtype3=1;
-#else
   if(viewtype!=0)viewtype=1;
-#endif
 
   framen=framei->next;
   if(framen==NULL){
@@ -1047,10 +956,6 @@ keyframe *add_frame(keyframe *framei, float time, float *eye, float key_az_path,
 
   frame->az_path=key_az_path;
   frame->nodeval.elev_path=elev_path;
-#ifdef pp_TOUR
-  frame->az_scene=key_az_scene;
-  frame->nodeval.elev_scene=elev_scene;
-#endif
   frame->bank=bank;
   feye[0]=(eye[0]-xbar0)/xyzmaxdiff;
   feye[1]=(eye[1]-ybar0)/xyzmaxdiff;
@@ -1069,11 +974,6 @@ keyframe *add_frame(keyframe *framei, float time, float *eye, float key_az_path,
   frame->continuity=0.0;         // no longer using continuity
   frame->tension=params[0];
   frame->viewtype=viewtype;
-#ifdef pp_TOUR
-  frame->viewtype1=viewtype1;
-  frame->viewtype2=viewtype2;
-  frame->viewtype3=viewtype3;
-#endif
   frame->nodeval.zoom=zoom;
   frame->keyview_x=0.0;
   frame->keyview_y=0.0;
@@ -1117,9 +1017,6 @@ void new_select(keyframe *newselect){
 void init_circulartour(void){
   int nkeyframes,j;
   float key_az_path, elev_path, key_bank, params[3],key_view[3], key_xyz[3], zoom;
-#ifdef pp_TOUR
-  float key_az_scene, elev_scene;
-#endif
   int viewtype=0;
   tourdata *touri;
   float key_time;
@@ -1151,11 +1048,6 @@ void init_circulartour(void){
   a = A/2.0 + minAB;
   b = B/2.0 + minAB;
   elev_path=0.0;
-#ifdef pp_TOUR
-  elev_scene=0.0;
-  key_az_scene=0.0;
-#endif
-
 
   thisframe=&touri->first_frame;
   for(j=0;j<nkeyframes;j++){
@@ -1177,14 +1069,8 @@ void init_circulartour(void){
 
     viewtype=1;
     zoom=1.0;
-#ifdef pp_TOUR
-    addedframe=add_frame(thisframe, key_time, key_xyz, 
-      key_az_path, elev_path, key_az_scene, elev_scene,
-      key_bank, params, viewtype,zoom,key_view);
-#else
     addedframe=add_frame(thisframe, key_time, key_xyz, 
       key_az_path, elev_path, key_bank, params, viewtype,zoom,key_view);
-#endif
     thisframe=addedframe;
     touri->keyframe_times[j]=key_time;
   }
@@ -1197,9 +1083,6 @@ tourdata *add_tour(char *label){
   tourdata *tourtemp=NULL,*touri;
   int nkeyframes;
   float key_az_path, elev_path, key_bank, params[3],key_view[3], key_xyz[3], zoom;
-#ifdef pp_TOUR
-  float key_az_scene, elev_scene;
-#endif
   int viewtype=0;
   float key_time;
   int i;
@@ -1232,10 +1115,6 @@ tourdata *add_tour(char *label){
   key_az_path = 0.0;
   key_bank = 0.0;
   elev_path=0.0;
-#ifdef pp_TOUR
-  key_az_scene=0.0;
-  elev_scene=0.0;
-#endif
   params[0] = 0.0;
   params[1] = 0.0;
   params[2] = 0.0;
@@ -1247,14 +1126,8 @@ tourdata *add_tour(char *label){
   key_xyz[2] = (zbar0 + zbarORIG)/2.0;
   key_time = view_tstart;
   thisframe=&touri->first_frame;
-#ifdef pp_TOUR
-  addedframe=add_frame(thisframe,key_time, key_xyz, 
-    key_az_path, elev_path, key_az_scene, elev_scene, 
-    key_bank, params, viewtype,zoom,key_view);
-#else
   addedframe=add_frame(thisframe,key_time, key_xyz, key_az_path, elev_path, key_bank, 
     params, viewtype,zoom,key_view);
-#endif
   touri->keyframe_times[0]=key_time;
 
   key_xyz[0] = xbarORIG + 1.0;
@@ -1262,14 +1135,8 @@ tourdata *add_tour(char *label){
   key_xyz[2] = (zbar0 + zbarORIG)/2.0;
   key_time = view_tstop;
   thisframe=addedframe;
-#ifdef pp_TOUR
-  add_frame(thisframe,key_time, key_xyz, 
-    key_az_path, elev_path, key_az_scene, elev_scene, 
-    key_bank, params, viewtype,zoom,key_view);
-#else
   add_frame(thisframe,key_time, key_xyz, key_az_path, elev_path, key_bank,
     params, viewtype,zoom,key_view);
-#endif
   touri->keyframe_times[1]=key_time;
   touri->display=1;
 
@@ -1394,116 +1261,6 @@ void setup_tour(void){
 }
 
 /* ------------------ adjustviewangle ------------------------ */
-#ifdef pp_TOUR
-void adjustviewangle(keyframe *kf, int viewtype){
-  float dx_aview, dy_aview, dz_aview;
-  float dx_keyview, dy_keyview;
-  float distxy_aview, distxy_keyview;
-  float angle_keyview, angle_aview;
-  float elev_path, az_path;
-  float elev_scene, az_scene;
-  float elev, az;
-  float *eye, *aview;
-
-  
-  eye = kf->nodeval.eye;
-  aview = kf->nodeval.aview;
-
-  switch (viewtype){
-    case 0: // path relative view direction known (azimuth, elevation relative to path)
-      elev_path = kf->nodeval.elev_path;
-      az_path = kf->az_path;
-
-      dx_keyview = kf->keyview_x;
-      dy_keyview = kf->keyview_y;
-      distxy_keyview = sqrt(dx_keyview*dx_keyview+dy_keyview*dy_keyview);
-      if(distxy_keyview<=0.0)return;
-      dx_keyview /= distxy_keyview;
-      dy_keyview /= distxy_keyview;
-      angle_keyview = 180.0*atan2(dx_keyview,dy_keyview)/PI;
-
-      az_scene = angle_keyview + az_path;
-      if(az_scene>180.0)az_scene = 360.0 - az_scene;
-      if(az_scene<-180.0)az_scene += 360.0;
-      elev_scene = elev_path;
-      
-      dx_aview=sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
-      dy_aview=cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
-      dz_aview=sin(elev_scene*PI/180.0);
-
-      aview[0]=eye[0] + dx_aview/10.0;
-      aview[1]=eye[1] + dy_aview/10.0;
-      aview[2]=eye[2] + dz_aview/10.0;
-
-      kf->az_scene=az_scene;
-      kf->nodeval.elev_scene=elev_scene;
-      break;
-
-    case 1: // absolute (x,y,z) view direction known
-      dx_keyview = kf->keyview_x;
-      dy_keyview = kf->keyview_y;
-      distxy_keyview = sqrt(dx_keyview*dx_keyview+dy_keyview*dy_keyview);
-      if(distxy_keyview<=0.0)return;
-      dx_keyview /= distxy_keyview;
-      dy_keyview /= distxy_keyview;
-
-      dx_aview = aview[0] - eye[0];
-      dy_aview = aview[1] - eye[1];
-      dz_aview = aview[2] - eye[2];
-
-      distxy_aview = sqrt(dx_aview*dx_aview+dy_aview*dy_aview);
-      if(distxy_aview<=0.0)return;
-      dx_aview /= distxy_aview;
-      dy_aview /= distxy_aview;
-      dz_aview /= distxy_aview;
-
-      angle_aview = 180.0*atan2(dx_aview,dy_aview)/PI;
-      angle_keyview = 180.0*atan2(dx_keyview,dy_keyview)/PI;
-      az = angle_aview - angle_keyview;
-      if(az>180.0)az = 360.0 - az;
-      if(az<-180.0)az = az + 360.0;
-      elev=atan(dz_aview)*180.0/PI;
-
-      kf->nodeval.elev_path=elev;
-      kf->az_path=az;
-
-      kf->az_scene=angle_aview;
-      kf->nodeval.elev_scene=elev;
-      break;
-    
-    case 2: // absolute view angles known (azimuth, elevation, relative to scene)
-      az_scene = kf->az_scene;
-      elev_scene = kf->nodeval.elev_scene;
-
-      dx_aview = sin(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
-      dy_aview = cos(az_scene*PI/180.0)*cos(elev_scene*PI/180.0);
-      dz_aview = sin(elev_scene*PI/180.0);
-
-      aview[0]=eye[0]+dx_aview/10.0;
-      aview[1]=eye[1]+dy_aview/10.0;
-      aview[2]=eye[2]+dz_aview/10.0;
-
-      dx_keyview = kf->keyview_x;
-      dy_keyview = kf->keyview_y;
-      distxy_keyview = sqrt(dx_keyview*dx_keyview+dy_keyview*dy_keyview);
-      if(distxy_keyview<=0.0)return;
-      dx_keyview /= distxy_keyview;
-      dy_keyview /= distxy_keyview;
-
-      angle_aview = 180.0*atan2(dx_aview,dy_aview)/PI;
-      angle_keyview = 180.0*atan2(dx_keyview,dy_keyview)/PI;
-      az_path = angle_aview - angle_keyview;
-      if(az_path>180.0)az_path = 360.0 - az_path;
-      if(az_path<-180.0)az_path += 360.0;
-      elev_path = elev_scene;
-
-      kf->nodeval.elev_path=elev_path;
-      kf->az_path=az_path;
-
-      break;
-  }
-}
-#else
 void adjustviewangle(keyframe *kf, float *az_path, float *elev_path){
   float dx, dy, dz;
   float dx2, dy2;
@@ -1548,7 +1305,6 @@ void adjustviewangle(keyframe *kf, float *az_path, float *elev_path){
   *az_path=az;
   *elev_path = elev;
 }
-#endif
 
 /* ------------------ adjusttourtimes ------------------------ */
 

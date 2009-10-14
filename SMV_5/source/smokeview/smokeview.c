@@ -3774,9 +3774,6 @@ void usage(char **argv){
 #ifdef pp_THREAD
     printf(", pp_THREAD");
 #endif
-#ifdef pp_TOUR
-    printf(", pp_TOUR");
-#endif
 #ifdef X64
     printf(", X64");
 #endif
