@@ -1,6 +1,6 @@
 
-\chapter{Quantifying Model Error}
-%\section{Introduction}
+%\chapter{Quantifying Model Error}
+\section{Introduction}
 
 There are various definitions of model validation.
 For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capability of
@@ -183,7 +183,7 @@ with mean, $\mu$, and standard deviation, $\sigma$.} about the ``true'' value, $
 The notation $E|\theta$ means that $E$ is conditional on a particular value of $\theta$.
 This is the usual way of defining a likelihood function.
 It is convenient to use the so-called delta method\footnote{Given the random variable $X \sim N(\mu,\sigma^2)$, the delta method
-says that $g(X) \sim N \left( g(\mu) \, , \, (g'(\mu) \, \sigma)^2\right)$~\cite{Oehlert:1992}.} to obtain the approximate distribution
+says that approximately $g(X) \sim N \left( g(\mu) \, , \, (g'(\mu) \, \sigma)^2\right)$~\cite{Oehlert:1992}.} to obtain the approximate distribution
 \be \ln(E)|\theta \sim N \left( \ln(\theta),\widetilde{\sigma}_E^2 \right) \label{eeq} \ee
 The purpose of applying the natural log to the random variable is so that we can express its variance in terms of the
 relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. This is convenient because we have assumed that the relative
@@ -193,7 +193,7 @@ the prior distribution and the likelihood function, normalized by their integral
 A constant prior is also known as a Jeffreys prior.}
 with a non-informative prior on $\ln(\theta)$, we obtain the posterior distribution as
 \be \ln(\theta)|E \sim N \left( \ln(E),\widetilde{\sigma}_E^2 \right) \label{thetaeq} \ee
-The assumption of a non-informative prior implies that we do not have sufficient information about the prior distribution of
+The assumption of a non-informative prior implies that we do not have sufficient information about the prior distribution ({\em i.e.} the true value) of
 $\theta$ to assume anything other than unity.
 
 We cannot assume, as in the case of the experimental measurements, that the model predictions have no systematic bias. Instead, we
@@ -220,10 +220,10 @@ Note that $u(M)$ is the {\em total relative uncertainty} of $M$.
 Next, compute the estimate for the model error:
 \be \frac{\widetilde{\sigma}_M}{\delta} \approx \sqrt{u(M)^2-\widetilde{\sigma}_E^2} \label{model_error} \ee
 An estimate of $\ln(\delta)$ is $\overline{M}-\overline{E}+\widetilde{\sigma}_M^2/2\delta^2$, and, thus, the estimate of $\delta$ is
-\be \delta \approx \exp \left( \overline{M}-\overline{E}+\frac{\widetilde{\sigma}_M^2}{2 \delta^2} \right) \ee
+\be \hat{\delta} \approx \exp \left( \overline{M}-\overline{E}+\frac{\widetilde{\sigma}_M^2}{2 \delta^2} \right) \ee
 In essence, this procedure gives us a way to estimate the ``true'' value, $\theta$, using only a predicted value, $M$, and the bias factor and relative error
 for that particular quantity that have been obtained using past validation experiments. The ``truth'' is a random variable with the following distribution:
-\be \theta \sim N \left( \frac{M}{\delta} \; , \; \left( \frac{M \, \widetilde{\sigma}_M}{\delta} \right)^2 \right) \label{truth} \ee
+\be \theta \sim N \left( \frac{M}{\hat{\delta}} \; , \; \left( \frac{M \, \widetilde{\sigma}_M}{\hat{\delta}} \right)^2 \right) \label{truth} \ee
 This is essentially a recipe for estimating the error associated with a model prediction, $M$.
 Below, we describe how one might make use of this formula in practice. First, however, we need to verify the accuracy of the procedure just described.
 
@@ -242,7 +242,7 @@ and whose relative uncertainty, $\widetilde{\sigma}_E$, is assumed known. In the
 model prediction, $M_i$, from a normal distribution whose mean is $\delta \, \theta_i$ and whose relative error, $\widetilde{\sigma}_M$, is
 specified for this hypothetical exercise.
 What we have now created are 1000 pairs of $(E_i,M_i)$ with which we can test the procedure outlined in the previous section. In other words, we ought to be
-able to take our 1000 pairs of values, and the experimental uncertainty, $\widetilde{\sigma}_E$, and calculate the model bias, $\delta$, and relative error,
+able to take our 1000 pairs of values, and the experimental uncertainty, $\widetilde{\sigma}_E$, and estimate the model bias, $\hat{\delta}$, and relative error,
 $\widetilde{\sigma}_M$.
 
 We consider two examples. For the first example, assume that the model has no bias ($\delta=1$) and that the relative uncertainty of the measurements and the
@@ -332,7 +332,7 @@ cables could actually reach temperatures greater than 400~$^\circ$C?
 Before we can answer this question, we need to consider past experiments for which model predictions have been compared to measured surface temperatures of objects
 with similar thermal characteristics as the cables in question. How ``similar'' the experiment is to the hypothetical scenario under study can be quantified by way of
 various parameters, like the thermal inertia of the object, the size of the fire, the size of the compartment, and so on. Next, the results of the validation study can be
-analyzed following the procedure spelled out above, which provides us with a bias factor, $\delta$, and relative error, $\tilde{\sigma}_M$, for the model
+analyzed following the procedure spelled out above, which provides us with an estimate of the bias factor, $\delta$, and relative error, $\tilde{\sigma}_M$, for the model
 predictions of this particular quantity. Let us say, for the sake of argument, that the bias factor is 1.03; that is, on average, the model has been shown to over-predict
 surface temperatures by 3~\%. Let us also say that the relative error has been calculated and it is 0.10~. These are the same values that were assumed in the second example
 of the previous section.
