@@ -131,6 +131,19 @@ ENDDO READLOOP
 END SUBROUTINE CHECKREAD
 
 
+SUBROUTINE CHECK_XB(XB)
+REAL(EB) :: DUMMY,XB(6)
+INTEGER  :: I
+DO I=1,5,2
+   IF (XB(I)>XB(I+1)) THEN
+      DUMMY   = XB(I)
+      XB(I)   = XB(I+1)
+      XB(I+1) = DUMMY
+   ENDIF
+ENDDO
+END SUBROUTINE CHECK_XB
+
+
 SUBROUTINE COLOR2RGB(RGB,COLOR)
 
 ! Translate character string of a color name to RGB value
