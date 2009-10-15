@@ -6008,8 +6008,8 @@ droplets created per second than the number that can be simulated.
 
 \subsection{Particles or Droplets Introduced at the Start of the Calculation}
 
-Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, {\ct NUMBER\_INITIAL\_DROPLETS}
-is the number of particles/droplets within the computational domain at the start of the simulation.
+Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, add {\ct NUMBER\_INITIAL\_DROPLETS}
+to the {\ct PART} line to indicate the number of particles/droplets within the computational domain at the start of the simulation.
 Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which
 specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do
 not confuse this parameter with {\ct DENSITY}, explained in the next section. For example, water has a
@@ -6017,6 +6017,16 @@ not confuse this parameter with {\ct DENSITY}, explained in the next section. Fo
 and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a
 certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format
 for {\ct XB} is the same as that used on the {\ct OBST} line.
+
+If there is more than one rectangular volume in which you want to introduce initial droplets or particles, use {\ct INIT} lines of the form:
+
+\footnotesize
+\begin{verbatim}
+&PART ID='drops', DIAMETER=750., SAMPLING_FACTOR=1, COLOR='RED', EVAPORATE=.FALSE. /
+&INIT PART_ID='drops', XB=..., NUMBER_INITIAL_DROPLETS=1000, MASS_PER_VOLUME=3.5 /
+&INIT PART_ID='drops', XB=..., NUMBER_INITIAL_DROPLETS=2000, MASS_PER_VOLUME=2.5 /
+\end{verbatim} \normalsize
+
 
 \subsection{Droplets that Strike Solid Surfaces}
 
@@ -6105,7 +6115,10 @@ same {\ct DIAMETER}.
 
 \subsection{Drag}
 
-For massive particles the default drag law (i.e., the drag coefficient correlation as a function of Reynolds number [based on particle diameter]) is that of a sphere.  To invoke the cylinder drag law set {\ct DRAG\_LAW$=$`CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable, the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.  The {\ct USER\_DRAG\_COEFFICIENT} trumps the {\ct DRAG\_LAW}.
+For massive particles the default drag law (i.e., the drag coefficient correlation as a function of Reynolds number [based on particle diameter]) is that of a sphere.  
+To invoke the cylinder drag law set {\ct DRAG\_LAW$=$`CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable, 
+the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.  
+The {\ct USER\_DRAG\_COEFFICIENT} trumps the {\ct DRAG\_LAW}.
 
 
 \subsection{Color}
@@ -8954,10 +8967,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
-{\ct DENSITY}               & Real              & Initial value of density                          & kg/m$^3$      & Ambient       \\ \hline
-{\ct MASS\_FRACTION(II)}    & Real Array        & Initial value of species {\ct II}                 & kg/kg         & Ambient       \\ \hline
-{\ct TEMPERATURE}           & Real              & Initial value of temperature                      & $^\circ$C     & {\ct TMPA}    \\ \hline
-{\ct XB(6)}                 & Real Sextuplet    & Coordinates                                       & m             &               \\ \hline
+{\ct DENSITY}                   & Real              & Initial value of density                          & kg/m$^3$      & Ambient       \\ \hline
+{\ct MASS\_FRACTION(II)}        & Real Array        & Initial value of species {\ct II}                 & kg/kg         & Ambient       \\ \hline
+{\ct MASS\_PER\_VOLUME}         & Real              & Mass per volume of particles or droplets          & kg/m$^3$      & 1             \\ \hline
+{\ct NUMBER\_INITIAL\_DROPLETS} & Integer           & Number of particles or droplets                   &               & 0             \\ \hline
+{\ct PART\_ID}                  & Character         & ID of particle class                              &               &               \\ \hline
+{\ct TEMPERATURE}               & Real              & Initial value of temperature                      & $^\circ$C     & {\ct TMPA}    \\ \hline
+{\ct XB(6)}                     & Real Sextuplet    & Coordinates                                       & m             &               \\ \hline
 \end{longtable}
 
 
