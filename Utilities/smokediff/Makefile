@@ -1,13 +1,15 @@
-SOURCE_DIR = ../../SMV_5/source/
+SOURCE_DIR = ../../../SMV_5/source/
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/setfdspath
+VPATH = $(SOURCE_DIR)/smokediff
 bin = .
+
+LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
 
 # Definition of the object variables
 
-obj = main.obj dmalloc.o assert.o utilities.o readsmv.o IOdslice.o IOdplot.o
+obj = main.o dmalloc.o assert.o utilities.o readsmv.o IOdslice.o IOdplot.o getsizes.o getdata.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
@@ -22,24 +24,42 @@ no_target:
 	$(CC) -c $(CFLAGS) $(FILTERC) $<
 .c.o:
 	$(CC) -c $(CFLAGS) $(FILTERC) $<
+.F90.o:
+	$(FC) -c $(FFLAGS) $(FILTERF) $<
+.f90.obj:
+	$(FC) -c $(FFLAGS) $(FILTERF) $<
+.f90.o:
+	$(FC) -c $(FFLAGS) $(FILTERF) $<
+
+
 
 # ********  rules for each platform supported *************
 
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
-CC        = icl
-CPP       = icl
-FC        = ifort
-exe       = smokediff.exe
+intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
+intel_win_32 : CC        = icl
+intel_win_32 : CPP       = icl
+intel_win_32 : FC        = ifort
+intel_win_32 : exe       = smokediff.exe
 
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) smokeview_fort.lib
 
-install	:	$(exe)
-	copy $(exe) ..\Scripts\bundle_setup\$(exe)
+# ------------- Linux 32 ----------------
+#  32 bit linux
 
+intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
+intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
+intel_linux_32 : FORTLIBDIR = $(LINUX32FORTLIBDIR)
+intel_linux_32 : CC        = icc
+intel_linux_32 : CPP       = icc
+intel_linux_32 : FC        = ifort
+intel_linux_32 : exe       = smokediff_linux_32
+
+intel_linux_32 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR)
 #-------------- Clean Target to remove Object and Module files -----------
 
 .PHONY : clean
