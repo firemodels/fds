@@ -26,11 +26,12 @@ USE PHYSICAL_FUNCTIONS, ONLY : DROPLET_SIZE_DISTRIBUTION
 USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_DROPLETS
  
 REAL(EB) RN,MASS_SUM,LL,UL,BIN_SIZE,TNOW
-REAL(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2
-INTEGER I,J,II,JJ,KK,IL,IU,IPC,STRATUM
+REAL(EB) BLOCK_VOLUME,X1,X2,Y1,Y2,Z1,Z2,MASS_PER_VOLUME
+INTEGER I,J,II,JJ,KK,IL,IU,IPC,STRATUM,IB,N_INITIAL
 INTEGER, INTENT(IN) :: NM
 TYPE (DROPLET_TYPE), POINTER :: DR
 TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC
+TYPE (INITIALIZATION_TYPE), POINTER :: IN
 
 IF (N_PART==0) RETURN            ! Don't waste time if no particles
 IF (EVACUATION_ONLY(NM)) RETURN  ! Don't waste time if an evac mesh
@@ -68,117 +69,145 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
          PC%W_CDF(I) = PC%CDF(IU) - PC%CDF(IL)
       ENDDO STRATIFY
    ENDIF IF_SIZE_DISTRIBUTION
- 
-   ! If there is a specified number of initial droplets/particles, initialize
- 
+
+   ! Do not process tree particles
+
    IF (PC%TREE)         CYCLE PART_CLASS_LOOP
-   IF (PC%N_INITIAL==0) CYCLE PART_CLASS_LOOP
  
-   IF (PC%X1 == 0.0_EB .AND. PC%X2 == 0.0_EB .AND. PC%Y1 == 0.0_EB .AND. PC%Y2 == 0.0_EB .AND.  &
-       PC%Z1 == 0.0_EB .AND. PC%Z2 == 0.0_EB) THEN
-      X1 = XS 
-      X2 = XF
-      Y1 = YS 
-      Y2 = YF
-      Z1 = ZS 
-      Z2 = ZF
-      VOL2 = (XF - XS) * (YF - YS) * (ZF - ZS)
-      VOL1 = VOL2
-   ELSE
-      IF (PC%X1>XF .OR. PC%X2<XS .OR. PC%Y1>YF .OR. PC%Y2<YS .OR. PC%Z1>ZF .OR. PC%Z2<ZS) CYCLE PART_CLASS_LOOP
-      X1 = MAX(PC%X1,XS) 
-      X2 = MIN(PC%X2,XF)
-      Y1 = MAX(PC%Y1,YS) 
-      Y2 = MIN(PC%Y2,YF)
-      Z1 = MAX(PC%Z1,ZS) 
-      Z2 = MIN(PC%Z2,ZF)
-      VOL2 = (PC%X2 - PC%X1) * (PC%Y2 - PC%Y1) * (PC%Z2 - PC%Z1)
-      VOL1 = (X2 - X1) * (Y2 - Y1) * (Z2 - Z1)
-   ENDIF
+   ! Loop over all INIT lines and look for instances where this particle class is being invoked
 
-   ! Assign properties to the initial droplets/particles
-   MASS_SUM = 0._EB
-   INITIALIZATION_LOOP: DO I=1,PC%N_INITIAL
-      NLP = NLP + 1
-      PARTICLE_TAG = PARTICLE_TAG + NMESHES
-      IF (NLP>NLPDIM) THEN
-         CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
-         DROPLET=>MESHES(NM)%DROPLET
-      ENDIF
-      DR=>DROPLET(NLP)     
-      BLOCK_OUT_LOOP:  DO
-         CALL RANDOM_NUMBER(RN)
-         DR%X = X1 + RN*(X2-X1)
-         CALL RANDOM_NUMBER(RN)
-         DR%Y = Y1 + RN*(Y2-Y1)
-         CALL RANDOM_NUMBER(RN)
-         DR%Z = Z1 + RN*(Z2-Z1)
-         II = CELLSI(FLOOR((DR%X-XS)*RDXINT)) + 1._EB
-         JJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT)) + 1._EB
-         KK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT)) + 1._EB
-         IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT BLOCK_OUT_LOOP
-      ENDDO BLOCK_OUT_LOOP
-      DR%U   = 0._EB                     ! No initial velocity
-      DR%V   = 0._EB
-      DR%W   = 0._EB
-      DR%TMP = PC%TMP_INITIAL            ! Initial temperature
-      DR%T   = 0._EB                     ! Insertion time is 0
-      DR%R   = 0._EB                     ! Radius is zero unless DIAMETER has been specified
-      DR%PWT = 1._EB                     ! Weighting factor is one unless changed below
-      DR%IOR = 0                         ! Orientation of solid surface (0 means the droplet/particle is not attached)
-      DR%CLASS = IPC                     ! Class identifier
-      DR%TAG   = PARTICLE_TAG            ! Unique integer tag
-      IF (MOD(NLP,PC%SAMPLING)==0) THEN  ! Decide whether to show or not show in Smokeview
-         DR%SHOW = .TRUE.    
+   INIT_LOOP: DO IB=0,N_INIT
+ 
+      IF (IB==0) THEN
+         N_INITIAL = PC%NUMBER_INITIAL_DROPLETS
+         MASS_PER_VOLUME = PC%MASS_PER_VOLUME
+         X1 = PC%X1
+         X2 = PC%X2
+         Y1 = PC%Y1
+         Y2 = PC%Y2
+         Z1 = PC%Z1
+         Z2 = PC%Z2
       ELSE
-         DR%SHOW = .FALSE.    
+         IN => INITIALIZATION(IB)
+         IF (IN%PART_INDEX/=IPC) CYCLE INIT_LOOP
+         N_INITIAL = IN%NUMBER_INITIAL_DROPLETS
+         MASS_PER_VOLUME = IN%MASS_PER_VOLUME
+         X1 = IN%X1
+         X2 = IN%X2
+         Y1 = IN%Y1
+         Y2 = IN%Y2
+         Z1 = IN%Z1
+         Z2 = IN%Z2
       ENDIF
-      DR%SPLAT   = .FALSE.
-      DR%WALL_INDEX = 0
+
+      IF (N_INITIAL==0) CYCLE INIT_LOOP
  
-      IF (PC%DIAMETER>0._EB) THEN
-         IF (PC%MONODISPERSE) THEN
-            DR%R   = 0.5_EB*PC%DIAMETER
-            DR%PWT = 1._EB
-         ELSE
-            CALL RANDOM_NUMBER(RN)            
-            STRATUM = NINT(REAL(NSTRATA,EB)*RN+0.5_EB)
-            IL = PC%IL_CDF(STRATUM)
-            IU = PC%IU_CDF(STRATUM)
-            CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
-            DR%PWT = PC%W_CDF(STRATUM)
-            IF (2._EB*DR%R > PC%MAXIMUM_DIAMETER) THEN
-               DR%PWT = DR%PWT*DR%R**3/(0.5_EB*PC%MAXIMUM_DIAMETER)**3
-               DR%R = 0.5_EB*PC%MAXIMUM_DIAMETER
-            ENDIF
+      IF (X1==0._EB .AND. X2==0._EB .AND. Y1==0._EB .AND. Y2==0._EB .AND. Z1==0._EB .AND. Z2==0._EB) THEN
+         X1 = XS 
+         X2 = XF
+         Y1 = YS 
+         Y2 = YF
+         Z1 = ZS 
+         Z2 = ZF
+      ELSE
+         IF (X1>XF .OR. X2<XS .OR. Y1>YF .OR. Y2<YS .OR. Z1>ZF .OR. Z2<ZS) CYCLE INIT_LOOP
+         X1 = MAX(X1,XS) 
+         X2 = MIN(X2,XF)
+         Y1 = MAX(Y1,YS) 
+         Y2 = MIN(Y2,YF)
+         Z1 = MAX(Z1,ZS) 
+         Z2 = MIN(Z2,ZF)
+      ENDIF
+   
+      BLOCK_VOLUME = (X2-X1)*(Y2-Y1)*(Z2-Z1)
+   
+      ! Assign properties to the initial droplets/particles
+   
+      MASS_SUM = 0._EB
+      INSERT_PARTICLE_LOOP: DO I=1,N_INITIAL
+         NLP = NLP + 1
+         PARTICLE_TAG = PARTICLE_TAG + NMESHES
+         IF (NLP>NLPDIM) THEN
+            CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
+            DROPLET=>MESHES(NM)%DROPLET
          ENDIF
-         MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
-      ENDIF
- 
-      ! Process special particles that are associated with a particular SURFace type
+         DR=>DROPLET(NLP)     
+         BLOCK_OUT_LOOP:  DO
+            CALL RANDOM_NUMBER(RN)
+            DR%X = X1 + RN*(X2-X1)
+            CALL RANDOM_NUMBER(RN)
+            DR%Y = Y1 + RN*(Y2-Y1)
+            CALL RANDOM_NUMBER(RN)
+            DR%Z = Z1 + RN*(Z2-Z1)
+            II = CELLSI(FLOOR((DR%X-XS)*RDXINT)) + 1._EB
+            JJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT)) + 1._EB
+            KK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT)) + 1._EB
+            IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT BLOCK_OUT_LOOP
+         ENDDO BLOCK_OUT_LOOP
+         DR%U   = 0._EB                     ! No initial velocity
+         DR%V   = 0._EB
+         DR%W   = 0._EB
+         DR%TMP = PC%TMP_INITIAL            ! Initial temperature
+         DR%T   = 0._EB                     ! Insertion time is 0
+         DR%R   = 0._EB                     ! Radius is zero unless DIAMETER has been specified
+         DR%PWT = 1._EB                     ! Weighting factor is one unless changed below
+         DR%IOR = 0                         ! Orientation of solid surface (0 means the droplet/particle is not attached)
+         DR%CLASS = IPC                     ! Class identifier
+         DR%TAG   = PARTICLE_TAG            ! Unique integer tag
+         IF (MOD(NLP,PC%SAMPLING)==0) THEN  ! Decide whether to show or not show in Smokeview
+            DR%SHOW = .TRUE.    
+         ELSE
+            DR%SHOW = .FALSE.    
+         ENDIF
+         DR%SPLAT   = .FALSE.
+         DR%WALL_INDEX = 0
+    
+         IF (PC%DIAMETER>0._EB) THEN
+            IF (PC%MONODISPERSE) THEN
+               DR%R   = 0.5_EB*PC%DIAMETER
+               DR%PWT = 1._EB
+            ELSE
+               CALL RANDOM_NUMBER(RN)            
+               STRATUM = NINT(REAL(NSTRATA,EB)*RN+0.5_EB)
+               IL = PC%IL_CDF(STRATUM)
+               IU = PC%IU_CDF(STRATUM)
+               CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
+               DR%PWT = PC%W_CDF(STRATUM)
+               IF (2._EB*DR%R > PC%MAXIMUM_DIAMETER) THEN
+                  DR%PWT = DR%PWT*DR%R**3/(0.5_EB*PC%MAXIMUM_DIAMETER)**3
+                  DR%R = 0.5_EB*PC%MAXIMUM_DIAMETER
+               ENDIF
+            ENDIF
+            MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
+         ENDIF
+    
+         ! Process special particles that are associated with a particular SURFace type
+   
+         IF (PC%SURF_INDEX>0) THEN
+            DR%WALL_INDEX = PC%WALL_INDEX_START + I - 1
+            XW(DR%WALL_INDEX) = DR%X
+            YW(DR%WALL_INDEX) = DR%Y
+            ZW(DR%WALL_INDEX) = DR%Z
+            IJKW(1,DR%WALL_INDEX) = II
+            IJKW(2,DR%WALL_INDEX) = JJ
+            IJKW(3,DR%WALL_INDEX) = KK
+         ENDIF
+   
+      ENDDO INSERT_PARTICLE_LOOP
+    
+      ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
 
-      IF (PC%SURF_INDEX>0) THEN
-         DR%WALL_INDEX = PC%WALL_INDEX_START + I - 1
-         XW(DR%WALL_INDEX) = DR%X
-         YW(DR%WALL_INDEX) = DR%Y
-         ZW(DR%WALL_INDEX) = DR%Z
-         IJKW(1,DR%WALL_INDEX) = II
-         IJKW(2,DR%WALL_INDEX) = JJ
-         IJKW(3,DR%WALL_INDEX) = KK
-      ENDIF
+      IF (PC%DIAMETER>0._EB) DROPLET(NLP-N_INITIAL+1:NLP)%PWT = &
+         DROPLET(NLP-N_INITIAL+1:NLP)%PWT*MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
 
-   ENDDO INITIALIZATION_LOOP
- 
-   ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
-
-   IF (PC%DIAMETER>0._EB) DROPLET(NLP-PC%N_INITIAL+1:NLP)%PWT = &
-      DROPLET(NLP-PC%N_INITIAL+1:NLP)%PWT*PC%MASS_PER_VOLUME*VOL1/MASS_SUM
+   ENDDO INIT_LOOP
 
 ENDDO PART_CLASS_LOOP
 
 TUSED(8,NM)=TUSED(8,NM)+SECOND()-TNOW
 END SUBROUTINE INITIALIZE_DROPLETS
  
+
 
 SUBROUTINE INSERT_DROPLETS_AND_PARTICLES(T,NM)
 
