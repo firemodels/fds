@@ -3277,6 +3277,26 @@ casename.ini file does not exist. The algorithms for determining
 the data mappings used by Smokeview and Smokezip are identical so it
 should result in the same views.
 
+\chapter{Differencing - Using Smokediff to compare two FDS cases}
+
+Two FDS cases with the same geometry may be compared using the stand-alone
+program smokediff.  Smokediff examines two .smv files files looking for slice and plot3d files containing the same type of data and located in the same region in space and/or time.  Smokediff then subtracts the data in one file from the corresponding data in the other generating a new .smv file and new differenced slice and Plot3d data files.  To compare the two .smv files, {\tt casename1.smv}\ and {\tt casename2.smv}\ one would use the command
+
+\begin{verbatim}
+smokediff -smv casename1 casename2
+\end{verbatim}
+
+which opens smokeview to examine the differenced data after smokediff completes.  Other usage options for smokediff are detailed below
+
+{
+\scriptsize
+\verbatiminput{scriptfigures/smokediff.help}
+}
+
+
+
+
+
 %---------------------------------------------------------------------------------
 %------------------------ Summary ------------------------------------------------
 %---------------------------------------------------------------------------------

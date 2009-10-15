@@ -16,6 +16,8 @@ erase scriptfigures\*.version
 smokeview -help > scriptfigures\smokeview.help
 smokeview -version > scriptfigures\smokeview.version
 smokezip -help > scriptfigures\smokezip.help
+smokediff -help > scriptfigures\smokediff.help
+smokediff -v > scriptfigures\smokediff.version
 
 cd %smvvg%
 erase scriptfigures\*.version
