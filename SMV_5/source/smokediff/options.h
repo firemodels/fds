@@ -41,13 +41,6 @@
 #undef pp_release
 #define pp_release
 
-#ifdef pp_ALPHA
-#undef pp_release
-#define pp_LIGHT
-#define SMDiffVERSION "experimental"
-//#define pp_RLETEST
-#endif
-
 #ifdef pp_BETA
 #undef pp_release
 #define SMDiffVERSION "test"
