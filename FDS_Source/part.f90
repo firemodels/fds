@@ -404,7 +404,6 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
          SHIFT1=SHIFT1+SHIFT2
          XTMP = VLEN * COS(SHIFT1)
          YTMP = VLEN * SIN(SHIFT1)
-!         DROPLET_SPEED = PY%DROPLET_VELOCITY
  
          ! Compute initial position and velocity of droplets
  
@@ -836,6 +835,7 @@ DROPLET_LOOP: DO I=1,NLP
       X_OLD = DR%X
       Y_OLD = DR%Y
       Z_OLD = DR%Z
+      ! pc = predictor corrector update of X
       DR%X  = DR%X + DR%U*DTSP
       DR%Y  = DR%Y + DR%V*DTSP
       DR%Z  = DR%Z + DR%W*DTSP
@@ -871,7 +871,6 @@ DROPLET_LOOP: DO I=1,NLP
       ENDIF
     
       ! Where is the droplet now?
-    
       XI  = CELLSI(FLOOR((DR%X-XS)*RDXINT))
       YJ  = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
       ZK  = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
@@ -882,7 +881,6 @@ DROPLET_LOOP: DO I=1,NLP
       IF (JJN<0 .OR. JJN>JBP1) CYCLE DROPLET_LOOP
       IF (KKN<0 .OR. KKN>KBP1) CYCLE DROPLET_LOOP
       ICN = CELL_INDEX(IIN,JJN,KKN)
-
       IF (IC==0 .OR. ICN==0) CYCLE SUB_TIME_STEP_ITERATIONS
 
       IF (DR%X<XS .AND. BOUNDARY_TYPE(WALL_INDEX(IC,-1))/=SOLID_BOUNDARY) CYCLE DROPLET_LOOP
@@ -962,7 +960,7 @@ DROPLET_LOOP: DO I=1,NLP
                IOR_FIRST =  3
          END SELECT
          DR%WALL_INDEX = WALL_INDEX(IC,-IOR_FIRST)
-         
+
          ! If no solids boundaries of original cell have been crossed, check boundaries of new grid cell
     
          IF (DR%WALL_INDEX==0) THEN
@@ -1048,7 +1046,6 @@ DROPLET_LOOP: DO I=1,NLP
             DR%X = X_OLD + MINVAL(STEP_FRACTION)*DTSP*DR%U
             DR%Y = Y_OLD + MINVAL(STEP_FRACTION)*DTSP*DR%V
             DR%Z = Z_OLD + MINVAL(STEP_FRACTION)*DTSP*DR%W
-
             XI  = CELLSI(FLOOR((DR%X-XS)*RDXINT))
             YJ  = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
             ZK  = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
@@ -1056,8 +1053,15 @@ DROPLET_LOOP: DO I=1,NLP
             JJN = FLOOR(YJ+1._EB)
             KKN = FLOOR(ZK+1._EB)
             ICN = CELL_INDEX(IIN,JJN,KKN)
-
             IF (IOR_OLD==DR%IOR) CYCLE SUB_TIME_STEP_ITERATIONS
+
+         ! Check if droplet has not found surface. Simply remove for now. Todo: search algorith
+
+            IW = WALL_INDEX(ICN, -DR%IOR)
+            IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) THEN
+               DR%R = 0.9_EB*PC%KILL_RADIUS
+               CYCLE DROPLET_LOOP
+            ENDIF
 
             ! Choose a direction for the droplets to move
 
@@ -1092,41 +1096,37 @@ DROPLET_LOOP: DO I=1,NLP
 
       ! Check if droplets that were attached to a solid are still attached after the time update
 
-      IW = 0
+      IW = WALL_INDEX(ICN, -DR%IOR)
+      
       SELECT CASE(DR%IOR)
          CASE( 1)
-            IW = WALL_INDEX(ICN,-1)
             IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
                DR%X = DR%X - 0.2_EB*DX(II)
                DR%W = -DR%W
             ENDIF
          CASE(-1)
-            IW = WALL_INDEX(ICN, 1)
             IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
                DR%X = DR%X + 0.2_EB*DX(II)
                DR%W = -DR%W
             ENDIF
          CASE( 2)
-            IW = WALL_INDEX(ICN,-2)
             IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
                DR%Y = DR%Y - 0.2_EB*DY(JJ)
                DR%W = -DR%W
             ENDIF
          CASE(-2)
-            IW = WALL_INDEX(ICN, 2)
             IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
                DR%Y = DR%Y + 0.2_EB*DY(JJ)
                DR%W = -DR%W
             ENDIF
          CASE( 3)
-            IW = WALL_INDEX(ICN,-3)
             IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN  ! Particle has reached the edge of a horizontal surface
                DR%U = -DR%U
                DR%V = -DR%V
                DR%Z =  DR%Z - 0.2_EB*DZ(KK)
             ENDIF
          CASE(-3)
-            IW = WALL_INDEX(ICN, 3)
+
       END SELECT
 
       IF (DR%IOR/=0 .AND. BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
@@ -1317,7 +1317,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             RHO_G  = RHO(II,JJ,KK)
             MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
             M_GAS  = RHO_G/RVC        
-            M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT!limit to avoid diveregence errors
+            M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT !limit to avoid diveregence errors
             K_AIR  = CPOPR*MU_AIR
             IF (IGAS>0) THEN
                Y_GAS = YY(II,JJ,KK,IGAS)
@@ -1514,9 +1514,9 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             DROP_TMP(II,JJ,KK) = DROP_TMP(II,JJ,KK) + DEN_ADD*DR%TMP
             DROP_RAD(II,JJ,KK) = DROP_RAD(II,JJ,KK) + DEN_ADD*DR%R
          ENDIF
-         
+
       ENDDO DROPLET_LOOP
-      
+
       ! Calculate cumulative quantities for droplet "clouds"
 
       WGT   = .5_EB
