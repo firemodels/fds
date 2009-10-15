@@ -134,12 +134,12 @@ void diff_slices(void){
       FORTclosefortranfile(&unit1);
       FORTclosefortranfile(&unit2);
       if(error1!=0||error2a!=0){
-        if(error1=0)printf("*** problem opening %s\n",fullfile1);
-        if(error2a=0)printf("*** problem opening %s\n",fullfile2);
+        if(error1==0)printf("*** problem opening %s\n",fullfile1);
+        if(error2a==0)printf("*** problem opening %s\n",fullfile2);
       }
       if(is1a!=is1b||js1a!=js1b||ks1a!=ks1b||
          is2a!=is2b||js2a!=js2b||ks2a!=ks2b){
-        printf("*** integer slice bounds do not match for\n",fullfile1);
+        printf("*** integer slice bounds do not match for %s\n",fullfile1);
         printf("    %i %i %i %i %i %i\n",is1a, is2a, js1a, js2a, ks1a, ks2a);
         printf("    %i %i %i %i %i %i\n",is1b, is2b, js1b, js2b, ks1b, ks2b);
         printf(" %f %f %f %f %f %f\n",slice1->xmin,slice1->xmax,slice1->ymin,slice1->ymax,slice1->zmin,slice1->zmax);
