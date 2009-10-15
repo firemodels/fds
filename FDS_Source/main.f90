@@ -1076,7 +1076,10 @@ IF (NMESHES==1 .AND. PERIODIC_TEST==2 .AND. T>=SPEC_CLOCK) CALL SPECTRAL_OUTPUT(
 
 !rm->
 !Dump vegetation quantities
-CALL DUMP_VEG(T)
+IF (T>=VEG_CLOCK) THEN
+   CALL DUMP_VEG(T)
+   VEG_CLOCK = VEG_CLOCK + DT_VEG
+ENDIF
 !rm<-
 
 ! Dump out HRR info
