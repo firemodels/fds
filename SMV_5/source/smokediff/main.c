@@ -16,9 +16,6 @@
 // svn revision character string
 char main_revision[]="$Revision$";
 
-void version(void);
-
-
 /* ------------------ main ------------------------ */
 
 int main(int argc, char **argv){
@@ -205,41 +202,4 @@ void usage(void){
   printf("  smv_case1,smv_case2 - Two smokeview cases to compare.\n");
 }
 
-
-/* ------------------ version ------------------------ */
-
-void version(void){
-    int svn_num;
-
-    svn_num=getmaxrevision();    // get svn revision number
-    printf("\nSmokediff %s - %s\n",SMDiffVERSION,__DATE__);
-    printf("\n");
-    printf("Version: %s\n",SMDiffVERSION);
-    printf("Smokediff Revision Number: %i\n",svn_num);
-    printf("Compile Date: %s\n",__DATE__);
-#ifdef WIN32
-#ifdef X64
-    printf("Platform: WIN64 ");
-#else
-    printf("Platform: WIN32 ");
-#endif
-#ifdef pp_WIN_INTEL
-    printf(" (Intel C/C++)\n");
-#else
-    printf(" (MSVS C/C++)\n");
-#endif
-#endif
-#ifdef pp_OSX
-    printf("Platform: OS X\n");
-#endif
-#ifndef pp_LINUX64
-#ifdef pp_LINUX
-    printf("Platform: LINUX\n");
-#endif
-#endif
-#ifdef pp_LINUX64
-    printf("Platform: LINUX64\n");
-#endif
-
-}
 
