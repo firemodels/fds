@@ -6,6 +6,7 @@ VPATH = $(SOURCE_DIR)/smokediff
 bin = .
 
 LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
+OSX32FORTLIBDIR = /opt/intel/fc/10.1.006/lib
 
 # Definition of the object variables
 
@@ -60,6 +61,21 @@ intel_linux_32 : exe       = smokediff_linux_32
 
 intel_linux_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR)
+
+# ------------- OSX 32 ----------------
+#  32 bit OSX
+
+intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
+intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
+intel_osx_32 : FORTLIBDIR = $(OSX32FORTLIBDIR)
+intel_osx_32 : CC        = icc
+intel_osx_32 : CPP       = icc
+intel_osx_32 : FC        = ifort
+intel_osx_32 : exe       = smokediff_osx_32
+
+intel_osx_32 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+
 #-------------- Clean Target to remove Object and Module files -----------
 
 .PHONY : clean
