@@ -360,6 +360,7 @@ ZONE_LOOP: DO N=1,N_ZONE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
+            IF (M%PRESSURE_ZONE(I,J,K)>0) CYCLE
             IF (M%XC(I) > PZ%X1 .AND. M%XC(I) < PZ%X2 .AND. &
                 M%YC(J) > PZ%Y1 .AND. M%YC(J) < PZ%Y2 .AND. &
                 M%ZC(K) > PZ%Z1 .AND. M%ZC(K) < PZ%Z2) THEN 
@@ -368,10 +369,7 @@ ZONE_LOOP: DO N=1,N_ZONE
                    IF (PZ%LEAK_AREA(IOPZ) > 0._EB) ACTUAL_LEAK_AREA(N,IOPZ) = PZ%LEAK_AREA(IOPZ)
                    IF (PZ%LEAK_AREA(IOPZ) > 0._EB) ACTUAL_LEAK_AREA(IOPZ,N) = PZ%LEAK_AREA(IOPZ)
                 ENDDO
-                IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K))) THEN
-                   CALL ASSIGN_PRESSURE_ZONE(NM,M%XC(I),M%YC(J),M%ZC(K),N)
-                   CYCLE ZONE_LOOP
-                ENDIF
+                IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K))) CALL ASSIGN_PRESSURE_ZONE(NM,M%XC(I),M%YC(J),M%ZC(K),N)
             ENDIF
          ENDDO
       ENDDO
