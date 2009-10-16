@@ -159,6 +159,7 @@ int getmaxrevision(void){
   MAXREV(dmalloc_revision);
   MAXREV(assert_revision);
   MAXREV(IOdslice_revision);
+  MAXREV(IOdboundary_revision);
   MAXREV(IOdplot_revision);
   return max_revision;
 }

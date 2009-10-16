@@ -18,12 +18,13 @@ char readsmv_revision[]="$Revision$";
 int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
   
   int igrid,ipdim;
-  int islice,iplot3d;
+  int islice,iplot3d,iboundary;
   char buffer[255];
   mesh *meshinfo;
   slice *sliceinfo;
+  boundary *boundaryinfo;
   plot3d *plot3dinfo;
-  int nmeshes, nslice_files, nplot3d_files;
+  int nmeshes, nslice_files, nplot3d_files, nboundary_files;
   int itrnx, itrny, itrnz;
 
   igrid=0;
@@ -31,6 +32,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
   nmeshes=0;
   nslice_files=0;
   nplot3d_files=0;
+  nboundary_files=0;
   itrnx=0;
   itrny=0;
   itrnz=0;
@@ -47,6 +49,12 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       match(buffer,"SLCT",4) == 1
       ){
       nslice_files++;
+      continue;
+    }
+    if(match(buffer,"BNDF",4) == 1||
+       match(buffer,"BNDC",4) == 1
+       ){
+      nboundary_files++;
       continue;
     }
     if(
@@ -93,6 +101,21 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     }
   }
 
+  // allocate memory for boundary file info
+
+  if(nboundary_files>0){
+    boundary *boundaryi;
+    int i;
+
+    NewMemory((void **)&boundaryinfo,nboundary_files*sizeof(boundary));
+    smvcase->nboundary_files=nboundary_files;
+    smvcase->boundaryinfo=boundaryinfo;
+    for(i=0;i<nboundary_files;i++){
+      boundaryi = boundaryinfo + i;
+      boundaryi->file=NULL;
+    }
+  }
+
   // allocate memory for plot3d file info
 
   if(nplot3d_files>0){
@@ -103,6 +126,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
   islice=0;
   iplot3d=0;
+  iboundary=0;
   ipdim=0;
   igrid=0;
   rewind(streamsmv);
@@ -462,6 +486,75 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       }
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"BNDF",4) == 1||
+       match(buffer,"BNDC",4) == 1
+       ){
+      int version=0;
+      int len;
+      int filesize;
+      boundary *boundaryi;
+      int meshnumber=0;
+      mesh *boundarymesh;
+      char full_file[1024];
+
+      len=strlen(buffer);
+      if(len>4){
+        sscanf(buffer+4,"%i %i",&meshnumber,&version);
+      }
+
+      boundaryi = boundaryinfo + iboundary;
+
+      boundarymesh = smvcase->meshinfo+meshnumber-1;
+      boundaryi->boundarymesh = boundarymesh;
+      trim(buffer);
+
+      strcpy(boundaryi->keyword,buffer);
+
+      boundaryi->version=version;
+
+      if(match(buffer,"BNDF",4) == 1){
+        boundaryi->boundarytype=1;
+      }
+      if(match(buffer,"BNDC",4) == 1){
+        boundaryi->boundarytype=2;
+      }
+
+      if(fgets(buffer,255,streamsmv)==NULL)break;
+      trim(buffer);
+      if(strlen(buffer)<=0)break;
+      fullfile(full_file,smvcase->dir,buffer);
+      if(getfileinfo(full_file,NULL,&filesize)==0){
+        int lenfile;
+       // int endian;
+
+        NewMemory((void **)&boundaryi->file,(unsigned int)(strlen(buffer)+1));
+        STRCPY(boundaryi->file,buffer);
+        if(readlabels(&boundaryi->label,streamsmv)==2){
+          printf("*** Warning: problem reading SLCF entry\n");
+          break;
+        }
+        boundaryi->filesize=filesize;
+        lenfile=strlen(full_file);
+//        FORTgetboundaryparms(full_file,&endian,&is1,&is2,&js1,&js2,&ks1,&ks2,&boundaryi->volboundary,&error,lenfile);
+
+        boundaryi->boundary2=NULL;
+
+        iboundary++;
+      }
+      else{
+        printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        if(readlabels(&boundaryinfo[iboundary].label,streamsmv)==2)break;
+        nboundary_files--;
+        smvcase->nboundary_files=nboundary_files;
+      }
+      continue;
+    }
+
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ vis keywords not differenced++++++++++
