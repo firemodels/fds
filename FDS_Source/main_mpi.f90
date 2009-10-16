@@ -741,6 +741,7 @@ MAIN_LOOP: DO
             CALL SCALARF(NM) ! leave this here
             CALL DENSITY_TVD(NM)
          ELSE
+            CALL MASS_FINITE_DIFFERENCES(NM)
             CALL DENSITY(NM)
          ENDIF
       ENDIF
