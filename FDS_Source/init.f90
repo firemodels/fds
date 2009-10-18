@@ -360,7 +360,7 @@ ZONE_LOOP: DO N=1,N_ZONE
    DO K=0,KBP1
       DO J=0,JBP1
          DO I=0,IBP1
-            IF (M%PRESSURE_ZONE(I,J,K)>0) CYCLE
+            IF (M%PRESSURE_ZONE(I,J,K)==N) CYCLE
             IF (M%XC(I) > PZ%X1 .AND. M%XC(I) < PZ%X2 .AND. &
                 M%YC(J) > PZ%Y1 .AND. M%YC(J) < PZ%Y2 .AND. &
                 M%ZC(K) > PZ%Z1 .AND. M%ZC(K) < PZ%Z2) THEN 
