@@ -6,9 +6,9 @@ setenv BASEDIR `pwd`
 
 $RUNFDS Current_Results csmag0_32 fire41 &
 $RUNFDS Current_Results csmag_32  fire41 &
-$RUNFDS Current_Results csmag_64  fire42 &
-$RUNFDS Current_Results dsmag_32  fire42 &
-$RUNFDS Current_Results dsmag_64  fire43 &
-$RUNFDS Current_Results mu0_32    fire43 &
+$RUNFDS Current_Results csmag_64  fire43 &
+$RUNFDS Current_Results dsmag_32  fire43 &
+$RUNFDS Current_Results dsmag_64  fire44 &
+$RUNFDS Current_Results mu0_32    fire44 &
 
 echo FDS cases submitted
