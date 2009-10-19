@@ -10,7 +10,6 @@
 
 <h3>Most Recent Documentation/Downloads</h3>
 
-
 <ul>
 
 <li><a href="http://code.google.com/p/fds-smv/downloads/list">Downloads</a><br>
@@ -21,6 +20,27 @@
 <h3>Release Notes</h3>
 
 <ul>
+<li>5.4.6 (build 4951) - October 18, 2009
+
+<ol>
+<li> enhancement: allow one to specify a zoom factor when defining a tour
+<li> enhancement: add support for drawing an isosurface with one variable and coloring it with a 2nd.
+<li> usability: speed up 3d smoke/fire drawing by skipping over meshes that do not contain any smoke or fire -
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=894&can=1&sort=-id">Issue 894</a>),
+<li> usability: improve the default circular tour so that the entire scene is visible when viewed from the tour path.
+<li> usability: force tours to be viewed from tour path when demonstrator/trainer option is active
+<li> usability: re-order some calcuations to speed up 3d smoke and fire drawing
+<li> usability: reduce and simplify some print out when the demonstrator mode of smokeview is used
+<li> usability: add viewpoint toggle button to trainer dialog box
+<li> usability: flip oxygen colorbar when displaying trainer cases
+<li> usability: improve slice file load menu ordering
+<li> fix: fix typo in smoke culling routine causing variable to be used before it was defined
+<li> fix: make GPU and non-GPU drawing of fire (HRRPUV) 
+( transition from fire to non-fire region using (fire_color,fire_alpha) -> (fire_color,0) rather than (fire_color,fire_alpha) -> (black,0) )
+<li> fix: fix blockage clipping when drawing 3d slices in y plane
+<li> fix: fix mesh label output - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=890&can=1&sort=-id">Issue 890</a>),
+</ol>
 
 <li>5.4.5 (build 4828) - September 27, 2009
 
