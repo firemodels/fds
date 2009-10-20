@@ -1025,3 +1025,91 @@ close(unit)
 
 return
 end subroutine closefortranfile
+
+
+!  ------------------ getboundaryheader1 ------------------------ 
+
+subroutine getboundaryheader1(boundaryfilename,boundaryunitnumber,endian,npatch,error)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_getboundaryheader1@24' :: getboundaryheader1
+#endif
+implicit none
+
+character(len=*), intent(in) :: boundaryfilename
+integer, intent(in) :: boundaryunitnumber, endian
+integer, intent(out) :: npatch, error
+
+character(len=30) :: patchlonglabel, patchshortlabel, patchunit
+
+integer :: lu15, lenshort, lenunits
+logical :: exists
+logical :: isopen
+
+error=0
+lu15 = boundaryunitnumber
+inquire(unit=lu15,opened=isopen)
+
+if(isopen)close(lu15)
+inquire(file=trim(boundaryfilename),exist=exists)
+if(exists)then
+#ifdef pp_cvf
+if(endian.eq.1)then
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+ else
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",shared)
+endif
+#elif pp_LAHEY
+if(endian.eq.1)then
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",convert="BIG_ENDIAN")
+ else
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
+endif
+#else
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
+#endif
+ else
+  write(6,*)'The boundary file name, ',trim(boundaryfilename),' does not exist'
+  error=1
+  return
+endif
+
+if(error.eq.0)read(lu15,iostat=error)patchlonglabel
+if(error.eq.0)read(lu15,iostat=error)patchshortlabel
+if(error.eq.0)read(lu15,iostat=error)patchunit
+if(error.eq.0)read(lu15,iostat=error)npatch
+if(error.ne.0)close(lu15)
+
+return
+end subroutine getboundaryheader1
+
+!  ------------------ getboundaryheader2 ------------------------ 
+
+subroutine getboundaryheader2(boundaryunitnumber,version,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchdir)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_getboundaryheader2@40' :: getboundaryheader2
+#endif
+implicit none
+integer, intent(in) :: boundaryunitnumber, version, npatch
+integer, intent(out), dimension(npatch) :: pi1, pi2, pj1, pj2, pk1, pk2, patchdir
+
+integer :: n, lu15
+integer :: i1, i2, j1, j2, k1, k2
+
+lu15 = boundaryunitnumber
+do n = 1, npatch
+  if(version.eq.0)then
+    read(lu15)i1, i2, j1, j2, k1, k2
+   else
+    read(lu15)i1, i2, j1, j2, k1, k2, patchdir(n)
+  endif
+  pi1(n)=i1
+  pi2(n)=i2
+  pj1(n)=j1
+  pj2(n)=j2
+  pk1(n)=k1
+  pk2(n)=k2
+end do
+close(lu15)
+
+return
+end subroutine getboundaryheader2
