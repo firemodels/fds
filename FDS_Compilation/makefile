@@ -132,7 +132,7 @@ mpi_intel_linux_64 : obj = fds5_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-intel_linux_32_db : FFLAGS = -m32 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0
+intel_linux_32_db : FFLAGS = -m32 -check all -warn all -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0 -ftrapuv -debug full
 intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend -vec_report0
 intel_linux_32_db : FCOMPL = ifort
 intel_linux_32_db : CCOMPL = icc
