@@ -529,18 +529,56 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       if(strlen(buffer)<=0)break;
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
-        int lenfile;
-       // int endian;
+        int lenfile, endian, npatches, error, boundaryunitnumber;
 
         NewMemory((void **)&boundaryi->file,(unsigned int)(strlen(buffer)+1));
         STRCPY(boundaryi->file,buffer);
         if(readlabels(&boundaryi->label,streamsmv)==2){
-          printf("*** Warning: problem reading SLCF entry\n");
+          printf("*** Warning: problem reading BNDF entry\n");
           break;
         }
         boundaryi->filesize=filesize;
         lenfile=strlen(full_file);
-//        FORTgetboundaryparms(full_file,&endian,&is1,&is2,&js1,&js2,&ks1,&ks2,&boundaryi->volboundary,&error,lenfile);
+        endian=getendian();
+        boundaryunitnumber=15;
+        FORTgetboundaryheader1(boundaryi->file,&boundaryunitnumber,&endian, &npatches, &error, lenfile);
+        if(npatches>0){
+          int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2, *patchdir, *patch2index, *patchsize, *qoffset;
+          int i;
+
+          NewMemory((void **)&pi1,npatches*sizeof(int));
+          NewMemory((void **)&pi2,npatches*sizeof(int));
+          NewMemory((void **)&pj1,npatches*sizeof(int));
+          NewMemory((void **)&pj2,npatches*sizeof(int));
+          NewMemory((void **)&pk1,npatches*sizeof(int));
+          NewMemory((void **)&pk2,npatches*sizeof(int));
+          NewMemory((void **)&patchdir,npatches*sizeof(int));
+          NewMemory((void **)&patch2index,npatches*sizeof(int));
+          NewMemory((void **)&patchsize,npatches*sizeof(int));
+          NewMemory((void **)&qoffset,npatches*sizeof(int));
+          boundaryi->pi1=pi1;
+          boundaryi->pi2=pi2;
+          boundaryi->pj1=pj1;
+          boundaryi->pj2=pj2;
+          boundaryi->pk1=pk1;
+          boundaryi->pk2=pk2;
+          boundaryi->patchdir=patchdir;
+          boundaryi->patch2index=patch2index;
+          boundaryi->npatches=npatches;
+          boundaryi->patchsize=patchsize;
+          boundaryi->qoffset=qoffset;
+          FORTgetboundaryheader2(&boundaryunitnumber, &version, &npatches, pi1, pi2, pj1, pj2, pk1, pk2, patchdir);
+          for(i=0;i<npatches;i++){
+            boundaryi->patchsize[i] = (pi2[i]+1-pi1[i])*(pj2[i]+1-pj1[i])*(pk2[i]+1-pk1[i]);
+            if(i==0){
+              boundaryi->qoffset[i]=0;
+            }
+            else{
+              boundaryi->qoffset[i]=boundaryi->qoffset[i-1]+boundaryi->patchsize[i-1];
+            }
+          }
+          CheckMemory;
+       }
 
         boundaryi->boundary2=NULL;
 
@@ -566,8 +604,6 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(match(buffer,"ISOF",4) == 1||
        match(buffer,"TISOF",5)==1||
        match(buffer,"SMOKE3D",7)==1||
-       match(buffer,"BNDF",4)==1||
-       match(buffer,"BNDC",4)==1||
        match(buffer,"PART",4)==1||
        match(buffer,"EVAC",4)==1||
        match(buffer,"PRT5",4)==1||

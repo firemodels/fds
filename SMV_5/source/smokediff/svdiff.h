@@ -27,7 +27,8 @@ typedef struct _boundary {
   struct _boundary *boundary2;
   int filesize;
   int npatches;
-  int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2;
+  int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2, *patchdir;
+  int *patch2index, *patchsize, *qoffset;
   char keyword[255];
   int boundarytype;
   mesh *boundarymesh;
@@ -108,16 +109,19 @@ void version(void);
 void usage(void);
 int getfileinfo(char *filename, char *source_dir, int *filesize);
 int match(const char *buffer, const char *key, unsigned int lenkey);
+int mesh_match(mesh *mesh1, mesh *mesh2);
 void trim(char *line);
 char *trim_front(char *line);
 int readlabels(flowlabels *flowlabel, FILE *stream);
 char *setdir(char *argdir);
 int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase);
+void setup_boundary(FILE *stream_out);
 void setup_slice(FILE *stream_out);
 void setup_plot3d(FILE *stream_out);
 plot3d *getplot3d(plot3d *plot3din, casedata *case2);
 slice *getslice(slice *slicein, casedata *case2);
 boundary *getboundary(boundary *boundaryin, casedata *case2);
+void diff_boundaryes(void);
 void diff_slices(void);
 void diff_plot3ds(void);
 void fullfile(char *fileout, char *dir, char *file);
@@ -127,23 +131,47 @@ void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 #define FORTgetsliceparms getsliceparms
 #define FORTclosefortranfile closefortranfile
 #define FORTopenslice openslice
-#define FORTopenboundary openboundary
 #define FORTgetsliceframe getsliceframe
 #define FORToutsliceframe outsliceframe
 #define FORToutsliceheader outsliceheader
 #define FORTgetplot3dq getplot3dq
 #define FORTplot3dout plot3dout
+#define FORTgetboundaryheader1 getboundaryheader1
+#define FORTgetboundaryheader2 getboundaryheader2
+#define FORTopenboundary openboundary
+#define FORTgetpatchdata getpatchdata
+#define FORToutboundaryheader outboundaryheader
+#define FORToutpatchframe outpatchframe
 #else
 #define FORTgetsliceparms getsliceparms_
 #define FORTclosefortranfile closefortranfile_
 #define FORTopenslice openslice_
-#define FORTopenboundary openboundary_
 #define FORTgetsliceframe getsliceframe_
 #define FORToutsliceframe outsliceframe_
 #define FORToutsliceheader outsliceheader_
 #define FORTgetplot3dq getplot3dq_
 #define FORTplot3dout plot3dout_
+#define FORTgetboundaryheader1 getboundaryheader1_
+#define FORTgetboundaryheader2 getboundaryheader2_
+#define FORTopenboundary openboundary_
+#define FORTgetpatchdata getpatchdata_
+#define FORToutboundaryheader outboundaryheader_
+#define FORToutpatchframe outpatchframe_
 #endif
+STDCALL FORToutpatchframe(int *lunit, int *npatch,
+                          int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2,
+                          float *patchtime, float *pqq, int *error);
+STDCALL FORToutboundaryheader(char *outfile, int *unit3, int *npatches,
+                              int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2,
+                              int *patchdir, int *error1, FILE_SIZE len);
+STDCALL FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
+                         float *patchtimes,float *pqq, int *error);
+STDCALL FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
+                         int *endian, int *version, int *error, FILE_SIZE len);
+STDCALL FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
+                               int *endian, int *npatch, int *error, FILE_SIZE lenfile);
+STDCALL FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
+                               int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
 STDCALL FORTgetsliceframe(int *lu11,
                           int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                           float *time,float *qframe,int *slicetest, int *error);
@@ -152,8 +180,6 @@ STDCALL FORTgetsliceparms(char *file,int *endian,
                           int *slice3d, int *error,FILE_SIZE lenfile);
 STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian, 
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
-                      int *error, FILE_SIZE lenfile);
-STDCALL FORTopenboundary(char *boundaryfilename, int *unit, int *endian, 
                       int *error, FILE_SIZE lenfile);
 STDCALL FORTclosefortranfile(int *unit);
 STDCALL FORToutsliceframe(int *unit3,
