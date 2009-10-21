@@ -23,6 +23,7 @@ int main(int argc, char **argv){
   char *smv1=NULL, *smv2=NULL, *prog=NULL, *arg;
   char smoke1[1024], smoke2[1024], smv_out[1024];
   FILE *stream_out, *stream_in1, *stream_in2;
+  int no_plot3d=0, no_slice=0, no_boundary=0;
   int i;
   int open_smokeview=0;
 
@@ -56,6 +57,21 @@ int main(int argc, char **argv){
       case 'h':
         usage();
         return 1;
+        break;
+      case 'n':
+        if(arg[2]=='p'){
+          no_plot3d=1;
+        }
+        else if(arg[2]=='s'){
+          no_slice=1;
+        }
+        else if(arg[2]=='b'){
+          no_boundary=1;
+        }
+        else{
+          usage();
+          return 1;
+        }
         break;
       case 's':
         if(arg[2]=='m'&&arg[3]=='v'){
@@ -141,12 +157,23 @@ int main(int argc, char **argv){
 
   readsmv(stream_in1, stream_out, caseinfo);
   fclose(stream_in1);
+
   readsmv(stream_in2, NULL, caseinfo+1);
   fclose(stream_in2);
-  setup_plot3d(stream_out);
-  diff_plot3ds();
-  setup_slice(stream_out);
-  diff_slices();
+
+  if(no_plot3d==0){
+    setup_plot3d(stream_out);
+    diff_plot3ds();
+  }
+  if(no_slice==0){
+    setup_slice(stream_out);
+    diff_slices();
+  }
+  if(no_boundary==0){
+    setup_boundary(stream_out);
+    diff_boundaryes();
+  }
+
   fclose(stream_out);
   if(open_smokeview==1){
     char command[1024];
@@ -186,7 +213,7 @@ void usage(void){
 
   strcpy(pp,"%");
   printf("\n");
-  printf("  smokediff [-smv] [-h] [-v] [-s1 dir1] [-s2 dir2] [-d dir] smv_case1 smv_case2\n");
+  printf("  smokediff [-smv] [-h] [-v] [-s1 dir1] [-s2 dir2] [-d dir] [-nb] [-np] [-ns] smv_case1 smv_case2\n");
   printf("    version: %s (revision %i) - %s\n\n",smv_version,svn_num,__DATE__);
   printf("  smokediff compares two FDS cases by differencing corresponding slice\n");
   printf("  files referenced in smv_case1.smv and smv_case2.smv.  PLOT3D files are\n");
@@ -198,6 +225,9 @@ void usage(void){
   printf("  -s1 dir1 - directory containing case smv_case1.smv\n");
   printf("  -s2 dir2 - directory containing case smv_case2.smv\n");
   printf("  -d  dir  - directory containing created differenced files\n");
+  printf("  -nb      - do not difference boundary files\n");
+  printf("  -np      - do not difference Plot3d files\n");
+  printf("  -ns      - do not difference slice files\n");
   printf("  -smv       - view case in smokeview when differencing is complete\n");
   printf("  smv_case1,smv_case2 - Two smokeview cases to compare.\n");
 }
