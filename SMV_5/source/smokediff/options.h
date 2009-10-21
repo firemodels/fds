@@ -9,6 +9,8 @@
 #pragma float_control( precise, on)
 #pragma float_control( except, on )
 #endif
+
+#ifdef WIN_INTEL
 #pragma warning (disable:4996)		
 #pragma warning (disable:4701)		
 #pragma warning (disable:4310)		
@@ -31,6 +33,7 @@
 #pragma warning (disable:494)		/* omission of "class"is nonstandard */
 #pragma warning (disable:444)		/* destructor for base class */
 #pragma warning (disable:2259)		/* non-pointer conversion from "double" to "float" ma lose significant bits */
+#endif
 
 #define _CRT_SECURE_NO_WARNINGS
 #endif

@@ -744,7 +744,7 @@ end subroutine getslicedata
 
 subroutine getsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,testslice,error)
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_getslicedata@44' :: getslicedata
+!DEC$ ATTRIBUTES ALIAS:'_getsliceframe@44' :: getsliceframe
 #endif
 
 implicit none
