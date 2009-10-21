@@ -8,57 +8,6 @@
 #endif
 
 
-/* --------------------------  flowlabels ------------------------------------ */
-
-typedef struct {
-  char *longlabel, *shortlabel, *unit;
-} flowlabels;
-
-typedef struct {
-  int ibar, jbar, kbar;
-  float xbar0, xbar, ybar0, ybar, zbar0, zbar;
-  float dx, dy, dz;
-  float *xplt, *yplt, *zplt;
-} mesh;
-
-typedef struct _boundary {
-  char *file;
-  int version;
-  struct _boundary *boundary2;
-  int filesize;
-  int npatches;
-  int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2, *patchdir;
-  int *patch2index, *patchsize, *qoffset;
-  char keyword[255];
-  int boundarytype;
-  mesh *boundarymesh;
-  flowlabels label;
-} boundary;
-
-typedef struct _slice {
-  char *file;
-  int is1, is2, js1, js2, ks1, ks2;
-  float xmin, xmax, ymin, ymax, zmin, zmax;
-  int filesize;
-  int version;
-  int volslice;
-  struct _slice *slice2;
-  char keyword[255];
-  int slicetype;
-  mesh *slicemesh;
-  flowlabels label;
-} slice;
-
-typedef struct _plot3d {
-  char keyword[255];
-  char *file;
-  float time;
-  struct _plot3d *plot3d2;
-  float xmin, xmax, ymin, ymax, zmin, zmax;
-  mesh *plot3dmesh;
-  flowlabels labels[5];
-} plot3d;
-
 #ifdef WIN32
 #define STDCALL extern void _stdcall
 #else
@@ -88,6 +37,57 @@ typedef struct _plot3d {
 #else
 #define FILE_SIZE unsigned int
 #endif
+
+/* --------------------------  flowlabels ------------------------------------ */
+
+typedef struct {
+  char *longlabel, *shortlabel, *unit;
+} flowlabels;
+
+typedef struct {
+  int ibar, jbar, kbar;
+  float xbar0, xbar, ybar0, ybar, zbar0, zbar;
+  float dx, dy, dz;
+  float *xplt, *yplt, *zplt;
+} mesh;
+
+typedef struct _boundary {
+  char *file;
+  int version;
+  struct _boundary *boundary2;
+  FILE_SIZE filesize;
+  int npatches;
+  int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2, *patchdir;
+  int *patch2index, *patchsize, *qoffset;
+  char keyword[255];
+  int boundarytype;
+  mesh *boundarymesh;
+  flowlabels label;
+} boundary;
+
+typedef struct _slice {
+  char *file;
+  int is1, is2, js1, js2, ks1, ks2;
+  float xmin, xmax, ymin, ymax, zmin, zmax;
+  FILE_SIZE filesize;
+  int version;
+  int volslice;
+  struct _slice *slice2;
+  char keyword[255];
+  int slicetype;
+  mesh *slicemesh;
+  flowlabels label;
+} slice;
+
+typedef struct _plot3d {
+  char keyword[255];
+  char *file;
+  float time;
+  struct _plot3d *plot3d2;
+  float xmin, xmax, ymin, ymax, zmin, zmax;
+  mesh *plot3dmesh;
+  flowlabels labels[5];
+} plot3d;
 
 typedef struct {
   slice *sliceinfo;
@@ -193,7 +193,7 @@ STDCALL FORTplot3dout(char *outfile,int *nx,int *ny,int *nz,float *qout,int *err
 
 
 
-EXTERN char dirseparator[3];
+EXTERN char dirseparator[3], pp[2];
 EXTERN casedata caseinfo[2];
 EXTERN char *sourcedir1, *sourcedir2, *destdir;
 EXTERN int test_mode;

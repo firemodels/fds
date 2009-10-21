@@ -193,7 +193,7 @@ void diff_boundaryes(void){
     if(stream==NULL)continue;
     fclose(stream);
 
-    printf("subtracting %s from %s\n",fullfile1,fullfile2);
+    printf("Subtracting %s from %s\n",fullfile1,fullfile2);
 
     unit1=11;
     len1=strlen(fullfile1);
@@ -205,6 +205,9 @@ void diff_boundaryes(void){
 
     if(error1==0&&error2==0){
       int ii,len3;
+      FILE_SIZE size_sofar;
+      float fraction_complete;
+      int percent_complete;
 
       ii=0;
       for(i=0;i<boundary1->npatches;i++){
@@ -225,8 +228,11 @@ void diff_boundaryes(void){
       }
       unit3=15;
       len3=strlen(outfile);
+      size_sofar=0;
       FORToutboundaryheader(outfile,&unit3,&boundary1->npatches,
         p3i1,p3i2,p3j1,p3j2,p3k1,p3k2,patchdir3,&error1,len3);
+      printf("  Progress: ");
+      percent_complete=0;
       for(;;){
         int iq;
 
@@ -250,11 +256,18 @@ void diff_boundaryes(void){
           for(kk=0;kk<boundaryi->patchsize[i];kk++){
             pqq3[iq++]=pq2[kk]-pq1[kk];
           }
-          FORToutpatchframe(&unit3, &boundary1->npatches,
-                          p3i1, p3i2, p3j1, p3j2, p3k1, p3k2,
-                          &patchtime1, pqq3, &error3);
+        }
+        FORToutpatchframe(&unit3, &boundary1->npatches,
+                        p3i1, p3i2, p3j1, p3j2, p3k1, p3k2,
+                        &patchtime1, pqq3, &error3);
+        size_sofar+=nsize1*sizeof(float);
+        fraction_complete=(float)size_sofar/(float)boundary1->filesize;
+        if((int)(fraction_complete*100)>percent_complete+10){
+          if(percent_complete<100)percent_complete+=10;
+          printf("%i%s ",percent_complete,pp);
         }
       }
+      printf("\n");
     }
 
     FREEMEMORY(pqq1);
