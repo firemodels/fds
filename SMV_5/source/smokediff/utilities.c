@@ -22,6 +22,27 @@ int match(const char *buffer, const char *key, unsigned int lenkey){
   return(0);
 }
 
+
+/* ------------------ match ------------------------ */
+
+int mesh_match(mesh *mesh1, mesh *mesh2){
+  int ibar, jbar, kbar;
+
+  if(mesh1->ibar!=mesh2->ibar)return 0;
+  if(mesh1->jbar!=mesh2->jbar)return 0;
+  if(mesh1->kbar!=mesh2->kbar)return 0;
+  ibar=mesh1->ibar;
+  jbar=mesh1->jbar;
+  kbar=mesh1->kbar;
+  if(fabs(mesh1->xplt[0]-mesh2->xplt[0])>mesh1->dx)return 0;
+  if(fabs(mesh1->yplt[0]-mesh2->yplt[0])>mesh1->dy)return 0;
+  if(fabs(mesh1->zplt[0]-mesh2->zplt[0])>mesh1->dz)return 0;
+  if(fabs(mesh1->xplt[ibar]-mesh2->xplt[ibar])>mesh1->dx)return 0;
+  if(fabs(mesh1->yplt[jbar]-mesh2->yplt[jbar])>mesh1->dy)return 0;
+  if(fabs(mesh1->zplt[kbar]-mesh2->zplt[kbar])>mesh1->dz)return 0;
+  return 1;
+}
+
 /* ------------------ trim_front ------------------------ */
 
 char *trim_front(char *line){
