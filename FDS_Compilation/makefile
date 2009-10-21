@@ -50,6 +50,14 @@ setup_win:
  #    ..\Scripts\iclvars ia32
  #    ..\Scripts\ifortvars ia32
 
+intel_win_32_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /Qtrapuv /fp:strict /fp:except /traceback /check:all
+intel_win_32_db : CFLAGS = -Dpp_noappend
+intel_win_32_db : FCOMPL = ifort
+intel_win_32_db : CCOMPL = cl
+intel_win_32_db : obj = fds5_win_32
+intel_win_32_db : setup_win $(objwin_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
+
 intel_win_32 : FFLAGS = -O2 /Qvec_report0
 intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 intel_win_32 : FCOMPL = ifort
