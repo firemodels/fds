@@ -496,7 +496,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
        ){
       int version=0;
       int len;
-      int filesize;
+      FILE_SIZE filesize;
       boundary *boundaryi;
       int meshnumber=0;
       mesh *boundarymesh;
