@@ -1113,3 +1113,69 @@ close(lu15)
 
 return
 end subroutine getboundaryheader2
+
+!  ------------------ openboundary ------------------------ 
+
+subroutine openboundary(boundaryfilename,boundaryunitnumber,endian,version,error)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_openboundary@24' :: openboundary
+#endif
+implicit none
+
+character(len=*), intent(in) :: boundaryfilename
+integer, intent(in) :: boundaryunitnumber, endian,version
+integer, intent(out) :: error
+
+character(len=30) :: patchlonglabel, patchshortlabel, patchunit
+
+integer :: lu15, lenshort, lenunits
+logical :: exists
+logical :: isopen
+integer :: npatch,n
+integer :: i1, i2, j1, j2, k1, k2, patchdir
+
+error=0
+lu15 = boundaryunitnumber
+inquire(unit=lu15,opened=isopen)
+
+if(isopen)close(lu15)
+inquire(file=trim(boundaryfilename),exist=exists)
+if(exists)then
+#ifdef pp_cvf
+if(endian.eq.1)then
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+ else
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",shared)
+endif
+#elif pp_LAHEY
+if(endian.eq.1)then
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",convert="BIG_ENDIAN")
+ else
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
+endif
+#else
+  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
+#endif
+ else
+  write(6,*)'The boundary file name, ',trim(boundaryfilename),' does not exist'
+  error=1
+  return
+endif
+
+if(error.eq.0)read(lu15,iostat=error)patchlonglabel
+if(error.eq.0)read(lu15,iostat=error)patchshortlabel
+if(error.eq.0)read(lu15,iostat=error)patchunit
+if(error.eq.0)read(lu15,iostat=error)npatch
+
+do n = 1, npatch
+  if(version.eq.0)then
+    if(error.eq.0)read(lu15,iostat=error)i1, i2, j1, j2, k1, k2
+   else
+    if(error.eq.0)read(lu15,iostat=error)i1, i2, j1, j2, k1, k2, patchdir
+  endif
+end do
+
+if(error.ne.0)close(lu15)
+
+return
+end subroutine openboundary
