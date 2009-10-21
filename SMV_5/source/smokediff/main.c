@@ -32,6 +32,8 @@ int main(int argc, char **argv){
 #else
   strcpy(dirseparator,"/");
 #endif
+  strcpy(pp,"%");
+
 
   test_mode=0;
   sourcedir1=NULL;
@@ -228,7 +230,7 @@ void usage(void){
   printf("  -nb      - do not difference boundary files\n");
   printf("  -np      - do not difference Plot3d files\n");
   printf("  -ns      - do not difference slice files\n");
-  printf("  -smv       - view case in smokeview when differencing is complete\n");
+  printf("  -smv     - view case in smokeview when differencing is complete\n");
   printf("  smv_case1,smv_case2 - Two smokeview cases to compare.\n");
 }
 

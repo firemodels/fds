@@ -139,15 +139,19 @@ void diff_plot3ds(void){
     len2=strlen(fullfile2);
     lenout=strlen(outfile);
     isotest=0;
-    printf("subtracting %s from %s\n",fullfile1,fullfile2);
+    printf("Subtracting %s from %s\n",fullfile1,fullfile2);
     if(test_mode==1)isotest=1;
+    printf("  Progress: reading %s,",fullfile1);
     FORTgetplot3dq(fullfile1,&nx,&ny,&nz,qframe1,&error1,&endian,&isotest,len1);
     if(test_mode==1)isotest=2;
+    printf(" reading %s,",fullfile2);
     FORTgetplot3dq(fullfile2,&nx,&ny,&nz,qframe2,&error2,&endian,&isotest,len2);
+    printf(" differencing data,");
     for(i=0;i<nq;i++){
       qout[i]=qframe2[i]-qframe1[i];
     }
     FORTplot3dout(outfile,&nx,&ny,&nz,qout,&error3,lenout);
+    printf(" completed.\n");
     FREEMEMORY(qframe1);
     FREEMEMORY(qframe2);
     FREEMEMORY(qout);

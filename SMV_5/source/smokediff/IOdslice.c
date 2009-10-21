@@ -92,6 +92,9 @@ void diff_slices(void){
     int len;
     float f1, f2, dt;
     int slicetest1,slicetest2;
+    float fraction_complete;
+    FILE_SIZE size_sofar;
+    int percent_complete;
 
     slicei = caseinfo->sliceinfo+j;
     slice1 = slicei;
@@ -164,7 +167,7 @@ void diff_slices(void){
       printf("*** problem writing out header for %s\n",fullfile1);
       continue;
     }
-    printf("subtracting %s from %s\n",fullfile1,fullfile2);
+    printf("Subtracting %s from %s\n",fullfile1,fullfile2);
     error1=1;
     error2a=1;
     error2b=1;
@@ -181,8 +184,17 @@ void diff_slices(void){
       FREEMEMORY(qframeout);
       continue;
     }
+    printf("  Progress: ");
+    percent_complete=0;
+    size_sofar=0;
     for(;;){
 
+      size_sofar+=nqframe1*sizeof(float);
+      fraction_complete=(float)size_sofar/(float)slice1->filesize;
+      if((int)(fraction_complete*100)>percent_complete+10){
+        if(percent_complete<100)percent_complete+=10;
+        printf("%i%s ",percent_complete,pp);
+      }
       while(time1>time2b){
         for(i=0;i<nqframe1;i++){
           qframe2a[i]=qframe2b[i];
@@ -207,7 +219,7 @@ void diff_slices(void){
       FORTgetsliceframe(&unit1,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframe1,&slicetest1,&error1);
       if(error1!=0)break;
     }
-
+    printf("\n");
 
     FORTclosefortranfile(&unit1);
     FORTclosefortranfile(&unit2);
