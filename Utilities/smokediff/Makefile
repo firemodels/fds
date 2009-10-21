@@ -2,7 +2,7 @@ SOURCE_DIR = ../../../SMV_5/source/
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/smokediff
+VPATH = $(SOURCE_DIR)/smokediff $(SOURCE_DIR)/smokeview
 bin = .
 
 LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
@@ -10,8 +10,8 @@ OSX32FORTLIBDIR = /opt/intel/fc/10.1.006/lib
 
 # Definition of the object variables
 
-obj = main.o dmalloc.o assert.o utilities.o readsmv.o IOdslice.o IOdplot.o getsizes.o getdata.o
-objwin = main.obj dmalloc.obj assert.obj utilities.obj readsmv.obj IOdslice.obj IOdplot.obj
+obj = main.o dmalloc.o assert.o utilities.o readsmv.o IOdboundary.o IOdslice.o IOdplot.o getsizes.o getdata.o
+objwin = main.obj dmalloc.obj assert.obj utilities.obj readsmv.obj IOdboundary.obj IOdslice.obj IOdplot.obj getdata.obj getsizes.obj
 
 #*** General Purpose Rules ***
 
@@ -36,17 +36,30 @@ no_target:
 
 # ********  rules for each platform supported *************
 
+# ------------- MS Win 32 ----------------
+#  32 bit windows (ms visual studio C compiler)
+
+ms_win_32 : CFLAGS    = -O2 -D WIN32
+ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5
+ms_win_32 : CC        = cl
+ms_win_32 : CPP       = cl
+ms_win_32 : FC        = ifort
+ms_win_32 : exe       = smokediff.exe
+ms_win_32 : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin)
+
 # ------------- Win 32 ----------------
 #  32 bit windows
 
 intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
+intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
 intel_win_32 : exe       = smokediff.exe
 
 intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) ../smokeview_fort.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin)
 
 # ------------- Linux 32 ----------------
 #  32 bit linux
