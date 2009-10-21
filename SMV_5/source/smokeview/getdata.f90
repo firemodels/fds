@@ -77,14 +77,14 @@ end subroutine getxyzdata
 
 !  ------------------ getpatchdata ------------------------ 
 
-subroutine getpatchdata(npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,error)
+subroutine getpatchdata(lunit,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,error)
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_getpatchdata@40' :: getpatchdata
+!DEC$ ATTRIBUTES ALIAS:'_getpatchdata@44' :: getpatchdata
 #endif
 implicit none
 
 
-integer, intent(in) :: npatch
+integer, intent(in) :: npatch,lunit
 integer, intent(in), dimension(*) :: pi1, pi2, pj1, pj2, pk1, pk2
 real, intent(out), dimension(*) :: pqq
 integer, intent(out) :: error
@@ -92,7 +92,7 @@ real, intent(out) :: patchtime
 
 integer :: i, i1, i2, j1, j2, k1, k2, size, ibeg, iend, lu15, ii
 
-lu15 = 15
+lu15 = lunit
 read(lu15,iostat=error)patchtime
 if(error.ne.0)then
   close(lu15)
@@ -855,6 +855,76 @@ write(lu11,iostat=error)(((qframe(1+i+j*nxsp+k*nxsp*nysp),i=0,nxsp-1),j=0,nysp-1
 return
 end subroutine outsliceframe
 
+!  ------------------ outboundaryheader ------------------------ 
+
+subroutine outboundaryheader(boundaryfilename,boundaryunitnumber,npatches,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,error)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_outboundaryheader@48' :: outboundaryheader
+#endif
+implicit none
+
+character(len=*), intent(in) :: boundaryfilename
+integer, intent(in) :: boundaryunitnumber, npatches
+integer, intent(in), dimension(npatches) :: pi1, pi2, pj1, pj2, pk1, pk2, patchdir
+integer, intent(out) :: error
+
+character(len=30) :: blank
+integer :: n, lu15
+
+error=0
+lu15 = boundaryunitnumber
+open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="write")
+
+blank="                              "
+write(lu15)blank
+write(lu15)blank
+write(lu15)blank
+write(lu15)npatches
+
+do n = 1, npatches
+  write(lu15)pi1(n), pi2(n), pj1(n), pj2(n), pk1(n), pk2(n), patchdir(n)
+end do
+
+return
+end subroutine outboundaryheader
+
+!  ------------------ outpatchframe ------------------------ 
+
+subroutine outpatchframe(lunit,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,error)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_outpatchframe@44' :: outpatchframe
+#endif
+implicit none
+
+
+integer, intent(in) :: npatch,lunit
+integer, intent(in), dimension(*) :: pi1, pi2, pj1, pj2, pk1, pk2
+real, intent(in), dimension(*) :: pqq
+integer, intent(out) :: error
+real, intent(in) :: patchtime
+
+integer :: i, i1, i2, j1, j2, k1, k2, size, ibeg, iend, lu15, ii
+
+error=0
+lu15 = lunit
+write(lu15)patchtime
+ibeg = 1
+do i = 1, npatch
+  i1 = pi1(i)
+  i2 = pi2(i)
+  j1 = pj1(i)
+  j2 = pj2(i)
+  k1 = pk1(i)
+  k2 = pk2(i)
+  size = (i2+1-i1)*(j2+1-j1)*(k2+1-k1)
+  iend = ibeg + size - 1
+  write(lu15)(pqq(ii),ii=ibeg,iend)
+  ibeg = iend + 1
+end do
+return
+
+end subroutine outpatchframe
+
 !  ------------------ getplot3dqa ------------------------ 
 
 subroutine getplot3dqa(qfilename,nx,ny,nz,qq,error)
@@ -1044,4 +1114,3 @@ close(u_out)
 
 return
 end subroutine plot3dout
-
