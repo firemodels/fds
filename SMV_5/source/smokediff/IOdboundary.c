@@ -232,6 +232,7 @@ void diff_boundaryes(void){
       FORToutboundaryheader(outfile,&unit3,&boundary1->npatches,
         p3i1,p3i2,p3j1,p3j2,p3k1,p3k2,patchdir3,&error1,len3);
       printf("  Progress: ");
+      fflush(stdout);
       percent_complete=0;
       for(;;){
         int iq;
@@ -265,9 +266,11 @@ void diff_boundaryes(void){
         if((int)(fraction_complete*100)>percent_complete+10){
           if(percent_complete<100)percent_complete+=10;
           printf("%i%s ",percent_complete,pp);
+          fflush(stdout);
         }
       }
       printf("\n");
+      fflush(stdout);
     }
 
     FREEMEMORY(pqq1);
