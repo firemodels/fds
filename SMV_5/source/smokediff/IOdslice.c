@@ -185,6 +185,8 @@ void diff_slices(void){
       continue;
     }
     printf("  Progress: ");
+    fflush(stdout);
+
     percent_complete=0;
     size_sofar=0;
     for(;;){
@@ -194,6 +196,7 @@ void diff_slices(void){
       if((int)(fraction_complete*100)>percent_complete+10){
         if(percent_complete<100)percent_complete+=10;
         printf("%i%s ",percent_complete,pp);
+        fflush(stdout);
       }
       while(time1>time2b){
         for(i=0;i<nqframe1;i++){
@@ -220,6 +223,7 @@ void diff_slices(void){
       if(error1!=0)break;
     }
     printf("\n");
+    fflush(stdout);
 
     FORTclosefortranfile(&unit1);
     FORTclosefortranfile(&unit2);

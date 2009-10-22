@@ -157,9 +157,13 @@ int main(int argc, char **argv){
   caseinfo[1].dir=sourcedir2;
   caseinfo[1].endian=0;
 
+  printf("reading %s\n",smoke1);
+  fflush(stdout);
   readsmv(stream_in1, stream_out, caseinfo);
   fclose(stream_in1);
 
+  printf("reading %s\n",smoke2);
+  fflush(stdout);
   readsmv(stream_in2, NULL, caseinfo+1);
   fclose(stream_in2);
 
