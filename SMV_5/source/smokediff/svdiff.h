@@ -121,9 +121,9 @@ void setup_plot3d(FILE *stream_out);
 plot3d *getplot3d(plot3d *plot3din, casedata *case2);
 slice *getslice(slice *slicein, casedata *case2);
 boundary *getboundary(boundary *boundaryin, casedata *case2);
-void diff_boundaryes(void);
-void diff_slices(void);
-void diff_plot3ds(void);
+void diff_boundaryes(FILE *stream_out);
+void diff_slices(FILE *stream_out);
+void diff_plot3ds(FILE *stream_out);
 void fullfile(char *fileout, char *dir, char *file);
 void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 

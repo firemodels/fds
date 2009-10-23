@@ -69,10 +69,11 @@ slice *getslice(slice *slicein, casedata *case2){
 
 /* ------------------ diff_slices ------------------------ */
 
-void diff_slices(void){
+void diff_slices(FILE *stream_out){
   int j;
 
   for(j=0;j<caseinfo->nslice_files;j++){
+    float valmin, valmax;
     char *file1, *file2;
     char fullfile1[1024], fullfile2[1024], outfile[1024];
     slice *slicei, *slice1, *slice2;
@@ -189,6 +190,8 @@ void diff_slices(void){
 
     percent_complete=0;
     size_sofar=0;
+    valmin = 1000000000.0;
+    valmax = -valmin;
     for(;;){
 
       size_sofar+=nqframe1*sizeof(float);
@@ -216,6 +219,8 @@ void diff_slices(void){
       }
       for(i=0;i<nqframe1;i++){
         qframeout[i]=f1*qframe2a[i]+f2*qframe2b[i]-qframe1[i];
+        if(qframe1[i]<valmin)valmin=qframe1[i];
+        if(qframe1[i]>valmax)valmax=qframe1[i];
       }
       FORToutsliceframe(&unit3,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframeout,&error1);
       if(error1!=0)break;
@@ -224,6 +229,10 @@ void diff_slices(void){
     }
     printf("\n");
     fflush(stdout);
+
+    fprintf(stream_out,"MINMAXSLCF\n");
+    fprintf(stream_out,"  %s\n",slice1->label.shortlabel);
+    fprintf(stream_out,"  %f %f\n",valmin,valmax);
 
     FORTclosefortranfile(&unit1);
     FORTclosefortranfile(&unit2);

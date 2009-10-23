@@ -169,15 +169,15 @@ int main(int argc, char **argv){
 
   if(no_plot3d==0){
     setup_plot3d(stream_out);
-    diff_plot3ds();
+    diff_plot3ds(stream_out);
   }
   if(no_slice==0){
     setup_slice(stream_out);
-    diff_slices();
+    diff_slices(stream_out);
   }
   if(no_boundary==0){
     setup_boundary(stream_out);
-    diff_boundaryes();
+    diff_boundaryes(stream_out);
   }
 
   fclose(stream_out);
