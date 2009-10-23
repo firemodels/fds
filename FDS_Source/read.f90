@@ -3390,7 +3390,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
       IF (K_FACTOR < 0._EB) K_FACTOR = 10.0_EB
    ENDIF
 
-   IF (PART_ID /='null') THEN
+   IF (PART_ID /='null' .AND. PDPA_RADIUS == 0.0_EB) THEN
       IF ((FLOW_RATE>0._EB .AND. K_FACTOR<=0._EB .AND. OPERATING_PRESSURE<=0._EB) .OR. &
           (FLOW_RATE<0._EB .AND. K_FACTOR>=0._EB .AND. OPERATING_PRESSURE<=0._EB) .OR. &
           (FLOW_RATE<0._EB .AND. K_FACTOR<=0._EB .AND. OPERATING_PRESSURE>0._EB)) THEN
@@ -3466,7 +3466,7 @@ ORIFICE_DIAMETER         = 0.0_EB      ! m
 PART_ID                  = 'null'
 PDPA_START               = T_BEGIN
 PDPA_END                 = T_END + 1.0_EB
-PDPA_RADIUS              = 0.1_EB
+PDPA_RADIUS              = 0.0_EB
 PDPA_M                   = 0
 PDPA_N                   = 0
 PRESSURE_RAMP           = 'null'
