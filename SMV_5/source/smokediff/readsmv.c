@@ -642,6 +642,9 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     }
     continue;
   }
+  if(stream_out!=NULL){
+    fprintf(stream_out,"SMOKEDIFF\n");
+  }
   return 0;
 }
 
