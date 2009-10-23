@@ -959,6 +959,7 @@ SVEXTERN targpos *target_positions;
 SVEXTERN blockagedata *bchighlight,*bchighlight_old;
 SVEXTERN cadgeom *cadgeominfo;
 
+SVEXTERN int smokediff;
 SVEXTERN int render_size_index;
 SVEXTERN int render_skip_index;
 SVEXTERN int buffertype;
