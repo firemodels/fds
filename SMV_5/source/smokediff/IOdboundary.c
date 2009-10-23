@@ -109,7 +109,7 @@ int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout){
 
 /* ------------------ diff_slices ------------------------ */
 
-void diff_boundaryes(void){
+void diff_boundaryes(FILE *stream_out){
   int j;
 
   for(j=0;j<caseinfo->nboundary_files;j++){
@@ -208,6 +208,7 @@ void diff_boundaryes(void){
       FILE_SIZE size_sofar;
       float fraction_complete;
       int percent_complete;
+      float valmin, valmax;
 
       ii=0;
       for(i=0;i<boundary1->npatches;i++){
@@ -234,6 +235,8 @@ void diff_boundaryes(void){
       printf("  Progress: ");
       fflush(stdout);
       percent_complete=0;
+      valmin=1000000000.0;
+      valmax=-valmin;
       for(;;){
         int iq;
 
@@ -256,6 +259,8 @@ void diff_boundaryes(void){
           pq2 = pqq2 + boundary2->qoffset[jj];
           for(kk=0;kk<boundaryi->patchsize[i];kk++){
             pqq3[iq++]=pq2[kk]-pq1[kk];
+            if(pq1[kk]<valmin)valmin=pq1[kk];
+            if(pq1[kk]>valmax)valmax=pq1[kk];
           }
         }
         FORToutpatchframe(&unit3, &boundary1->npatches,
@@ -271,6 +276,9 @@ void diff_boundaryes(void){
       }
       printf("\n");
       fflush(stdout);
+      fprintf(stream_out,"MINMAXBNDF\n");
+      fprintf(stream_out,"  %s\n",boundary1->label.shortlabel);
+      fprintf(stream_out,"  %f %f\n",valmin,valmax);
     }
 
     FREEMEMORY(pqq1);

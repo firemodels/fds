@@ -83,10 +83,11 @@ plot3d *getplot3d(plot3d *plot3din, casedata *case2){
 
 /* ------------------ diff_plot3ds ------------------------ */
 
-void diff_plot3ds(void){
+void diff_plot3ds(FILE *stream_out){
   int j;
   char *file1, *file2;
   char fullfile1[1024], fullfile2[1024], outfile[1024];
+  float valmin, valmax;
 
   for(j=0;j<caseinfo->nplot3d_files;j++){
     plot3d *plot3di, *plot3d1, *plot3d2;
@@ -99,6 +100,8 @@ void diff_plot3ds(void){
     int error1, error2, error3;
     int endian;
     int i;
+    int n;
+    int nn;
 
     endian = getendian();
     plot3di = caseinfo->plot3dinfo+j;
@@ -155,9 +158,25 @@ void diff_plot3ds(void){
     printf(" differencing data,");
     fflush(stdout);
 
+    valmin=1000000000.0;
+    valmax=-valmin;
     for(i=0;i<nq;i++){
       qout[i]=qframe2[i]-qframe1[i];
     }
+    nn=0;
+    fprintf(stream_out,"MINMAXPL3D\n");
+    for(n=0;n<5;n++){
+      valmin=1000000000.0;
+      valmax=-valmin;
+      for(i=0;i<nq/5;i++){
+        if(qframe1[nn]<valmin)valmin=qframe1[nn];
+        if(qframe1[nn]>valmax)valmax=qframe1[nn];
+        nn++;
+      }
+      fprintf(stream_out,"  %s\n",plot3d1->labels[n].shortlabel);
+      fprintf(stream_out,"  %f %f\n",valmin,valmax);
+    }
+
     FORTplot3dout(outfile,&nx,&ny,&nz,qout,&error3,lenout);
     printf(" completed.\n");
     fflush(stdout);
