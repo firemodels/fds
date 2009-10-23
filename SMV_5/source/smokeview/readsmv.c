@@ -479,6 +479,10 @@ int readsmv(char *file){
       The keywords TRNX, TRNY, TRNZ, GRID, PDIM, OBST and VENT are not required 
       BUT if any one these keywords are present then the number of each MUST be equal 
     */
+    if(match(buffer,"SMOKEDIFF",9) == 1){
+      smokediff=1;
+      continue;
+    }
     if(match(buffer,"AVATAR_COLOR",12) == 1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&navatar_colors);
@@ -8037,8 +8041,8 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
+    /*
     if(match(buffer,"UNIT",4)==1&&match(buffer,"UNITS",5)!=1){
-      /* free memory first */
       nunitclasses_ini++;
       if(nunitclasses_ini==1){
         NewMemory((void **)&unitclasses_ini,nunitclasses_ini*sizeof(f_units));
@@ -8069,6 +8073,7 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
+    */
     if(match(buffer,"SMOOTHLINES",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&antialiasflag);
@@ -9212,6 +9217,7 @@ void writeini(int flag){
       }
     }
   }
+  /*
   for(nn=0;nn<nunitclasses;nn++){
     f_units *uc;
 
@@ -9231,6 +9237,7 @@ void writeini(int flag){
       fprintf(fileout," %f %f\n",scale[0],scale[1]);
     }
   }
+  */
   if(flag==LOCAL_INI){
     fprintf(fileout,"MSCALE\n");
     fprintf(fileout," %f %f %f\n",mscale[0],mscale[1],mscale[2]);

@@ -128,6 +128,12 @@ int initcase_c(int argc, char **argv){
     default:
       ASSERT(FFALSE);
   }
+
+  /* initialize units */
+
+  InitUnits();
+  CheckMemory;
+
   readini(0);
 
   if(sb_atstart==1){
@@ -182,8 +188,6 @@ int initcase_c(int argc, char **argv){
 
 void sv_startup_c(int argc, char **argv){
   int i;
-  f_unit *units;
-  f_units *ut;
   char *smoketempdir;
   size_t lensmoketempdir,lensmokebindir;
 #ifdef pp_OSX
@@ -271,33 +275,37 @@ void sv_startup_c(int argc, char **argv){
   }
   InitOpenGL();
 
-  /* initialize units */
+  NewMemory((void **)&rgbptr,MAXRGB*sizeof(float *));
+  for(i=0;i<MAXRGB;i++){
+    rgbptr[i]=&rgb[i][0];
+  }
+}
 
-#ifdef COMMENT
-typedef struct {
-  char unit[10];   /* m/s, mph etc - appears in color bar */
-  float scale[2];  /* newval=scale[0]*oldval+scale[1] */
-} f_unit;
+/* ------------------ Init_Units ------------------------ */
 
-typedef struct {
-  int nunits;
-  char unitclass[30]; /* ie: velocity, temperature */
-  char unittype[80]; /* list of equivalent units separated by ';' ie: U-VEL;V-VEL;W-VEL */
+void InitUnits(void){
+  int i;
   f_unit *units;
-} f_units;
-#endif
-
+  f_units *ut;
 
   nunitclasses_default=2;
   NewMemory((void **)&unitclasses_default,nunitclasses_default*sizeof(f_units));
-
   
   for(i=0;i<nunitclasses_default;i++){
     unitclasses_default[i].submenuid=0;
   }
   ut=unitclasses_default;
 
-  ut->nunits=3;
+  // temperature units
+
+  if(smokediff==1){
+    ut->diff_index=3;
+    ut->nunits=4;
+  }
+  else{
+    ut->diff_index=-1;
+    ut->nunits=3;
+  }
   ut->active=0;
   strcpy(ut->unitclass,"temperature");
   ut->nunittypes=2;
@@ -311,15 +319,38 @@ typedef struct {
   units[0].scale[1]=0.0;
   strcpy(units[1].unit,"F");
   units[1].scale[0]=1.8;
-  units[1].scale[1]=32.0;
+  if(smokediff==1){
+    units[1].scale[1]=0.0;
+  }
+  else{
+    units[1].scale[1]=32.0;
+  }
   strcpy(units[2].unit,"K");
   units[2].scale[0]=1.0;
-  units[2].scale[1]=273.15;
+  if(smokediff==1){
+    units[2].scale[1]=273.15;
+  }
+  else{
+    units[2].scale[1]=0.0;
+  }
+  if(smokediff==1){
+    strcpy(units[3].unit,"diff %");
+    units[3].scale[0]=0.1667;
+    units[3].scale[1]=0.0;
+  }
 
+  // velocity units
 
   ut = unitclasses_default+1;
   ut->active=0;
-  ut->nunits=3;
+  if(smokediff==1){
+    ut->diff_index=3;
+    ut->nunits=4;
+  }
+  else{
+    ut->diff_index=-1;
+    ut->nunits=3;
+  }
   strcpy(ut->unitclass,"velocity");
   ut->nunittypes=4;
   strcpy(ut->unittypes[0],"U-VEL");
@@ -338,11 +369,12 @@ typedef struct {
   strcpy(units[2].unit,"f/s");
   units[2].scale[0]=3.2808333333;
   units[2].scale[1]=0.0;
-
-  NewMemory((void **)&rgbptr,MAXRGB*sizeof(float *));
-  for(i=0;i<MAXRGB;i++){
-    rgbptr[i]=&rgb[i][0];
+  if(smokediff==1){
+    strcpy(units[3].unit,"diff %");
+    units[3].scale[0]=0.16667;
+    units[3].scale[1]=0.0;
   }
+  CheckMemory;
 }
 
 /* ------------------ InitOpenGL ------------------------ */
@@ -1275,6 +1307,7 @@ void initvars1(void){
   colorbarpoint=0;
   vectorspresent=0;
 
+  smokediff=0;
   smoke3d_cvis=1.0;
   show_smokesensors=1;
   test_smokesensors=0;
