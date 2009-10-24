@@ -86,7 +86,7 @@ plot3d *getplot3d(plot3d *plot3din, casedata *case2){
 void diff_plot3ds(FILE *stream_out){
   int j;
   char *file1, *file2;
-  char fullfile1[1024], fullfile2[1024], outfile[1024];
+  char fullfile1[1024], fullfile2[1024], outfile[1024], outfile2[1024];
   float valmin, valmax;
 
   for(j=0;j<caseinfo->nplot3d_files;j++){
@@ -127,6 +127,7 @@ void diff_plot3ds(FILE *stream_out){
     if(stream==NULL)continue;
     fclose(stream);
 
+    make_outfile(outfile2,NULL,plot3d1->file,".q");
 
     plot3dmesh = plot3d1->plot3dmesh;
     nx = plot3dmesh->ibar+1;
@@ -165,6 +166,7 @@ void diff_plot3ds(FILE *stream_out){
     }
     nn=0;
     fprintf(stream_out,"MINMAXPL3D\n");
+    fprintf(stream_out,"  %s\n",outfile2);
     for(n=0;n<5;n++){
       valmin=1000000000.0;
       valmax=-valmin;
@@ -173,7 +175,6 @@ void diff_plot3ds(FILE *stream_out){
         if(qframe1[nn]>valmax)valmax=qframe1[nn];
         nn++;
       }
-      fprintf(stream_out,"  %s\n",plot3d1->labels[n].shortlabel);
       fprintf(stream_out,"  %f %f\n",valmin,valmax);
     }
 
