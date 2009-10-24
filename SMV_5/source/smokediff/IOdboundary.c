@@ -114,7 +114,7 @@ void diff_boundaryes(FILE *stream_out){
 
   for(j=0;j<caseinfo->nboundary_files;j++){
     char *file1, *file2;
-    char fullfile1[1024], fullfile2[1024], outfile[1024];
+    char fullfile1[1024], fullfile2[1024], outfile[1024], outfile2[1024];
     boundary *boundaryi, *boundary1, *boundary2;
     FILE *stream;
     int unit1, unit2, unit3;
@@ -192,6 +192,7 @@ void diff_boundaryes(FILE *stream_out){
     stream=fopen(outfile,"w");
     if(stream==NULL)continue;
     fclose(stream);
+    make_outfile(outfile2,NULL,boundary1->file,".bf");
 
     printf("Subtracting %s from %s\n",fullfile1,fullfile2);
 
@@ -277,7 +278,7 @@ void diff_boundaryes(FILE *stream_out){
       printf("\n");
       fflush(stdout);
       fprintf(stream_out,"MINMAXBNDF\n");
-      fprintf(stream_out,"  %s\n",boundary1->label.shortlabel);
+      fprintf(stream_out,"  %s\n",outfile2);
       fprintf(stream_out,"  %f %f\n",valmin,valmax);
     }
 

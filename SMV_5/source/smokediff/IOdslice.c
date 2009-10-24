@@ -75,7 +75,7 @@ void diff_slices(FILE *stream_out){
   for(j=0;j<caseinfo->nslice_files;j++){
     float valmin, valmax;
     char *file1, *file2;
-    char fullfile1[1024], fullfile2[1024], outfile[1024];
+    char fullfile1[1024], fullfile2[1024], outfile[1024],  outfile2[1024];
     slice *slicei, *slice1, *slice2;
     FILE *stream;
     int unit1, unit2, unit3;
@@ -119,6 +119,8 @@ void diff_slices(FILE *stream_out){
     stream=fopen(outfile,"w");
     if(stream==NULL)continue;
     fclose(stream);
+
+    make_outfile(outfile2,NULL,slice1->file,".sf");
 
     unit1=11;
     len1=strlen(fullfile1);
@@ -231,7 +233,7 @@ void diff_slices(FILE *stream_out){
     fflush(stdout);
 
     fprintf(stream_out,"MINMAXSLCF\n");
-    fprintf(stream_out,"  %s\n",slice1->label.shortlabel);
+    fprintf(stream_out,"  %s\n",outfile2);
     fprintf(stream_out,"  %f %f\n",valmin,valmax);
 
     FORTclosefortranfile(&unit1);
