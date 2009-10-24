@@ -709,6 +709,14 @@ int readsmv(char *file){
       nsmoke3d++;
       continue;
     }
+    if(
+      match(buffer,"MINMAXBNDF",10) == 1||
+      match(buffer,"MINMAXPL3D",10) == 1||
+      match(buffer,"MINMAXSLCF",10) == 1
+      ){
+      do_pass4=1;
+      continue;
+    }
     if(match(buffer,"BNDF",4) == 1|| match(buffer,"BNDC",4) == 1){
       npatch_files++;
       continue;
@@ -4330,6 +4338,91 @@ typedef struct {
     if(fgets(buffer,255,stream)==NULL)break;
     if(strncmp(buffer," ",1)==0)continue;
 
+    if(match(buffer,"MINMAXBNDF",10) == 1){
+      int i;
+      char *file_ptr, file[1024];
+      float valmin, valmax;
+
+      fgets(buffer,255,stream);
+      strcpy(file,buffer);
+      file_ptr = file;
+      trim(file);
+      file_ptr = trim_front(file);
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f",&valmin,&valmax);
+
+      for(i=0;i<npatch_files;i++){
+        patch *patchi;
+
+        patchi = patchinfo + i;
+        if(strcmp(file_ptr,patchi->file)==0){
+          patchi->diff_valmin=valmin;
+          patchi->diff_valmax=valmax;
+          patchi->diff_diff=valmax-valmin;
+          break;
+        }
+      }
+      continue;
+    }
+    if(match(buffer,"MINMAXPL3D",10) == 1){
+      int i,j;
+      char *file_ptr, file[1024];
+      float valmin[5], valmax[5];
+
+      fgets(buffer,255,stream);
+      strcpy(file,buffer);
+      file_ptr = file;
+      trim(file);
+      file_ptr = trim_front(file);
+
+      for(i=0;i<5;i++){
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f",valmin +i,valmax+i);
+      }
+
+      for(i=0;i<nplot3d;i++){
+        plot3d *plot3di;
+
+        plot3di = plot3dinfo + i;
+        if(strcmp(file_ptr,plot3di->file)==0){
+          for(j=0;j<5;j++){
+            plot3di->diff_valmin[j]=valmin[j];
+            plot3di->diff_valmax[j]=valmax[j];
+            plot3di->diff_diff[j]=valmax[j]-valmin[j];
+          }
+          break;
+        }
+      }
+      continue;
+    }
+    if(match(buffer,"MINMAXSLCF",10) == 1){
+      int i;
+      char *file_ptr, file[1024];
+      float valmin, valmax;
+
+      fgets(buffer,255,stream);
+      strcpy(file,buffer);
+      file_ptr = file;
+      trim(file);
+      file_ptr = trim_front(file);
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f",&valmin,&valmax);
+
+      for(i=0;i<nslice;i++){
+        slice *slicei;
+
+        slicei = sliceinfo + i;
+        if(strcmp(file_ptr,slicei->file)==0){
+          slicei->diff_valmin=valmin;
+          slicei->diff_valmax=valmax;
+          slicei->diff_diff=valmax-valmin;
+          break;
+        }
+      }
+      continue;
+    }
     if(autoterrain==1&&match(buffer,"OBST",4) == 1){
       mesh *meshi;
       int nxcell;

@@ -33,7 +33,6 @@ int getpatchindex(const patch *patchi);
 
 /* ------------------ readpatch ------------------------ */
 
-
 void readpatch(int ifile, int flag, int *errorcode){
   int error;
   FILE_SIZE lenfile;
@@ -136,6 +135,7 @@ void readpatch(int ifile, int flag, int *errorcode){
 
   if(flag==UNLOAD){
     update_patchtype();
+    update_unit_defs();
     updatetimes();
     meshi->npatches=0;
     {
@@ -906,6 +906,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   if(patchinfo[ifile].compression_type==1)disable_boundary_glui();
   updatetimes();
+  update_unit_defs();
 #ifdef _DEBUG
   printf("After boundary file load: ");
   PrintMemoryInfo;
