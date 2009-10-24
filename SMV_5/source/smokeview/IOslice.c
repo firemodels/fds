@@ -382,6 +382,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       }
 
       updateglui();
+      update_unit_defs();
       updatetimes();
 #ifdef _DEBUG
       printf("After slice unload: ");
@@ -682,6 +683,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   if(sd->vloaded==0)sd->display=1;
   islicetype=getslicetype(sd);
   plotstate=getplotstate(DYNAMIC_PLOTS);
+  update_unit_defs();
   updatetimes();
 
   if(sd->compression_type==0){
@@ -718,16 +720,18 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
 
-  if(file_size!=0&&delta_time>0.0){
-    float loadrate;
+  if(flag!=RESETBOUNDS){
+    if(file_size!=0&&delta_time>0.0){
+      float loadrate;
 
-    loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
-    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
-    (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
-  }
-  else{
-    printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
-    (float)file_size/1000000.,delta_time,delta_time0-delta_time);
+      loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
+      printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+      (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
+    }
+    else{
+      printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+      (float)file_size/1000000.,delta_time,delta_time0-delta_time);
+    }
   }
 
   if(update_fire_line==0&&strcmp(sd->label.shortlabel,"Fire line")==0){

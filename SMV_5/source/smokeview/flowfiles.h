@@ -810,6 +810,7 @@ typedef struct {
   float valmin, valmax;
   float globalmin, globalmax;
   float valmin_data, valmax_data;
+  float diff_valmin,  diff_valmax, diff_diff;
   flowlabels label;
   float *qslicedata, *slicetimes, *qslice;
   unsigned char *qslicedata_compressed;
@@ -956,6 +957,7 @@ typedef struct {
   int num_memblocks;
   int setvalmin, setvalmax;
   float valmin, valmax;
+  float diff_valmin, diff_valmax, diff_diff;
   int blocknumber,loaded,display;
   flowlabels label;
   char scale[31];
@@ -971,6 +973,7 @@ typedef struct {
   float time;
   int num_memblocks;
   int u, v, w, nvars;
+  float diff_valmin[5], diff_valmax[5], diff_diff[5];
   int blocknumber,loaded,display;
   flowlabels label[6];
   char menulabel[256],longlabel[256];
