@@ -4342,6 +4342,7 @@ typedef struct {
       int i;
       char *file_ptr, file[1024];
       float valmin, valmax;
+      float percentile_min, percentile_max;
 
       fgets(buffer,255,stream);
       strcpy(file,buffer);
@@ -4350,15 +4351,15 @@ typedef struct {
       file_ptr = trim_front(file);
 
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f",&valmin,&valmax);
+      sscanf(buffer,"%f %f %f %f",&valmin,&valmax,&percentile_min,&percentile_max);
 
       for(i=0;i<npatch_files;i++){
         patch *patchi;
 
         patchi = patchinfo + i;
         if(strcmp(file_ptr,patchi->file)==0){
-          patchi->diff_valmin=valmin;
-          patchi->diff_valmax=valmax;
+          patchi->diff_valmin=percentile_min;
+          patchi->diff_valmax=percentile_max;
           break;
         }
       }
@@ -4368,6 +4369,7 @@ typedef struct {
       int i,j;
       char *file_ptr, file[1024];
       float valmin[5], valmax[5];
+      float percentile_min[5], percentile_max[5];
 
       fgets(buffer,255,stream);
       strcpy(file,buffer);
@@ -4377,7 +4379,7 @@ typedef struct {
 
       for(i=0;i<5;i++){
         fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f",valmin +i,valmax+i);
+        sscanf(buffer,"%f %f %f %f",valmin +i,valmax+i, percentile_min+i,percentile_max+i);
       }
 
       for(i=0;i<nplot3d_files;i++){
@@ -4386,8 +4388,8 @@ typedef struct {
         plot3di = plot3dinfo + i;
         if(strcmp(file_ptr,plot3di->file)==0){
           for(j=0;j<5;j++){
-            plot3di->diff_valmin[j]=valmin[j];
-            plot3di->diff_valmax[j]=valmax[j];
+            plot3di->diff_valmin[j]=percentile_min[j];
+            plot3di->diff_valmax[j]=percentile_max[j];
           }
           break;
         }
@@ -4398,6 +4400,7 @@ typedef struct {
       int i;
       char *file_ptr, file[1024];
       float valmin, valmax;
+      float percentile_min, percentile_max;
 
       fgets(buffer,255,stream);
       strcpy(file,buffer);
@@ -4406,15 +4409,15 @@ typedef struct {
       file_ptr = trim_front(file);
 
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f",&valmin,&valmax);
+      sscanf(buffer,"%f %f %f %f",&valmin,&valmax,&percentile_min,&percentile_max);
 
       for(i=0;i<nslice_files;i++){
         slice *slicei;
 
         slicei = sliceinfo + i;
         if(strcmp(file_ptr,slicei->file)==0){
-          slicei->diff_valmin=valmin;
-          slicei->diff_valmax=valmax;
+          slicei->diff_valmin=percentile_min;
+          slicei->diff_valmax=percentile_max;
           break;
         }
       }
