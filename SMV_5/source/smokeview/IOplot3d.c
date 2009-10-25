@@ -150,6 +150,7 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
     PrintMemoryInfo;
 #endif
     updatetimes();
+    update_unit_defs();
     return;
   }
   if(ReadPlot3dFile==0){
@@ -352,6 +353,7 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   PrintMemoryInfo;
 #endif
   updatetimes();
+  update_unit_defs();
   IDLE();
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
