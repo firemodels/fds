@@ -181,7 +181,7 @@ void bench_out(float localframerate){
     if(parti->loaded==0||parti->display==0)continue;
     fprintf(fileout,"      %s\n",parti->file);
   }
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     slicei=sliceinfo+i;
     slicei->benchvis=0;
     if(slicei->loaded==1&&slicei->display==1)slicei->benchvis=1;
@@ -199,7 +199,7 @@ void bench_out(float localframerate){
     if(w!=NULL)w->benchvis=1;
     if(val!=NULL)val->benchvis=1;
   }
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     slicei=sliceinfo+i;
     if(slicei->benchvis==0)continue;
     fprintf(fileout,"      %s\n",slicei->file);

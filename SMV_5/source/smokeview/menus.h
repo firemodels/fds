@@ -684,13 +684,13 @@ void ShowHideSliceMenu(int value){
   if(value<0){
     switch (value){
     case SHOW_ALL:
-      for(i=0;i<nslice;i++){
+      for(i=0;i<nslice_files;i++){
         sliceinfo[i].display=1;
       }
       show_all_slices=1;
       break;
     case HIDE_ALL:
-      for(i=0;i<nslice;i++){
+      for(i=0;i<nslice_files;i++){
         sliceinfo[i].display=0;
       }
       show_all_slices=0;
@@ -1308,7 +1308,7 @@ void RenderMenu(int value){
     }
     RenderState(1);
     itime=0;
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       sd=sliceinfo+i;
       sd->islice=0;
     }
@@ -2099,7 +2099,7 @@ void LoadUnloadMenu(int value){
     if(hrrfilename!=NULL){
       readhrr(UNLOAD, &errorcode);
     }
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nplot3d_files;i++){
@@ -2131,7 +2131,7 @@ void LoadUnloadMenu(int value){
       readhrr(LOAD, &errorcode);
     }
     islicetype_save=islicetype;
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       sliceinfo[i].reload=1;
     }
     for(i=0;i<nterraininfo;i++){
@@ -2888,7 +2888,7 @@ void UnloadSliceMenu(int value){
     readslice("",value,UNLOAD,&errorcode);
   }
   else{
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
   }
@@ -3016,7 +3016,7 @@ int AnySmoke(char *type){
 int AnySlices(char *type){
   int i;
 
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     if(STRCMP(sliceinfo[i].label.longlabel,type)==0)return 1;
   }
   return 0;
@@ -3028,7 +3028,7 @@ void HideAllSlices(void){
   int i;
 
   glutSetCursor(GLUT_CURSOR_WAIT);
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     sliceinfo[i].display=0;
   }
   updatemenu=1;  
@@ -3078,7 +3078,7 @@ void ShowAllSlices(char *type1, char *type2){
   int i;
 
   glutSetCursor(GLUT_CURSOR_WAIT);
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     sliceinfo[i].display=0;
     if(sliceinfo[i].loaded==0)continue;
     if(
@@ -3158,7 +3158,7 @@ void LoadSliceMenu(int value){
     readslice(file,value,LOAD,&errorcode);
   }
   else{
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
   }
@@ -3911,7 +3911,7 @@ static int in_menu=0;
   nsmoke3dloaded=0;
   nsliceloaded=0;
   nvsliceloaded=0;
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     sd = sliceinfo + i;
     if(sd->loaded==1)nsliceloaded++;
   }
@@ -5303,7 +5303,7 @@ static int in_menu=0;
       glutAddMenuEntry(menulabel,HIDE_ALL);
     }
   }
-  if(nslice>0&&nmultislices<nslice){
+  if(nslice_files>0&&nmultislices<nslice_files){
     CREATEMENU(showmultislicemenu,ShowMultiSliceMenu);
     for(i=0;i<nmultislices;i++){
       mslicei = multisliceinfo + i;
@@ -5333,7 +5333,7 @@ static int in_menu=0;
   if(nsliceloaded==0){
     sd_shown=NULL;
   }
-  if(nslice>0&&nsliceloaded>0){
+  if(nslice_files>0&&nsliceloaded>0){
     CREATEMENU(showhideslicemenu,ShowHideSliceMenu);
     for(ii=0;ii<nslice_loaded;ii++){
       i = slice_loaded_list[ii];
@@ -5593,7 +5593,7 @@ static int in_menu=0;
 
   if(nsliceloaded>0){
     glutAddSubMenu("Animated Slices",showhideslicemenu);
-    if(nmultislices<nslice){
+    if(nmultislices<nslice_files){
       glutAddSubMenu("Animated Multi-Slices",showmultislicemenu);
     }
   }
@@ -5789,7 +5789,7 @@ static int in_menu=0;
   if(showclip==1)glutAddMenuEntry("*Clip Geometry...  ALT+c",18);
   if(showclip==0)glutAddMenuEntry("Clip Geometry...  ALT+c",18);
 #ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice>0)){
+  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice_files>0)){
     if(showbounds==1)glutAddMenuEntry("*Compression/Smokezip...  ALT+z",24);
     if(showbounds==0)glutAddMenuEntry("Compression/Smokezip...  ALT+z",24);
   }
@@ -6544,9 +6544,9 @@ static int in_menu=0;
       glutAddSubMenu("Unload Terrain",unloadterrainmenu);
     }
   }
-    if(nslice>0){
+    if(nslice_files>0){
 
-      if(nmultislices<nslice){
+      if(nmultislices<nslice_files){
         CREATEMENU(unloadmultislicemenu,UnloadMultiSliceMenu);
         nmultisliceloaded=0;
         for(i=0;i<nmultislices;i++){
@@ -6625,7 +6625,7 @@ static int in_menu=0;
 
       }
       CREATEMENU(unloadslicemenu,UnloadSliceMenu);
-      for(i=0;i<nslice;i++){
+      for(i=0;i<nslice_files;i++){
         sd = sliceinfo + sliceorderindex[i];
         if(sd->loaded==1){
           STRCPY(menulabel,sd->menulabel2);  
@@ -6636,7 +6636,7 @@ static int in_menu=0;
 
 //*** this is where I would put the "sub-slice" menus ordered by type
       nloadsubslicemenu=1;
-      for(i=1;i<nslice;i++){
+      for(i=1;i<nslice_files;i++){
         slice *sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
@@ -6648,7 +6648,7 @@ static int in_menu=0;
         loadsubslicemenu[i]=0;
       }
       iloadsubslicemenu=0;
-      for(i=0;i<nslice;i++){
+      for(i=0;i<nslice_files;i++){
         slice *sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
@@ -6668,7 +6668,7 @@ static int in_menu=0;
       }
       CREATEMENU(loadslicemenu,LoadSliceMenu);
       iloadsubslicemenu=0;
-      for(i=0;i<nslice;i++){
+      for(i=0;i<nslice_files;i++){
         slice *sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
@@ -7197,7 +7197,7 @@ static int in_menu=0;
 /* -------------------------------- compress menu -------------------------- */
 
 #ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice>0)){
+  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice_files>0)){
     CREATEMENU(compressmenu,CompressMenu);
     glutAddMenuEntry("Compression Options",999);  // -c
     if(overwrite_all==1){
@@ -7356,7 +7356,7 @@ static int in_menu=0;
       if(manual_terrain==1&&nterraininfo>0){
         glutAddSubMenu("Terrain",loadterrainmenu);
       }
-      if(nslice>0&&nmultislices<nslice){
+      if(nslice_files>0&&nmultislices<nslice_files){
         strcpy(loadmenulabel,"Multi-Slices");
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
@@ -7372,7 +7372,7 @@ static int in_menu=0;
         }
         glutAddSubMenu(loadmenulabel,loadmultivslicemenu);
       }
-      if(nslice>0){
+      if(nslice_files>0){
         strcpy(loadmenulabel,"Slice File");
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
@@ -7457,7 +7457,7 @@ static int in_menu=0;
       glutAddSubMenu("Configuration files",smokeviewinimenu);
       glutAddSubMenu("Script Options",scriptmenu);
 #ifdef pp_COMPRESS
-      if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice>0)){
+      if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice_files>0)){
         glutAddSubMenu("Compression",compressmenu);
       }
 #endif

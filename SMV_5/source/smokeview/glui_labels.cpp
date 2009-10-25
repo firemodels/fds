@@ -135,7 +135,7 @@ extern "C" void glui_labels_setup(int main_window){
   if(ntotal_blockages>0||isZoneFireModel==0){
     CHECKBOX_labels_gridloc=glui_labels->add_checkbox_to_panel(panel_label1,"Grid Loc",&visgridloc,LABELS_label,Labels_CB);
   }
-  if(nslice>0)CHECKBOX_labels_average=glui_labels->add_checkbox_to_panel(panel_label1,"Average",&vis_slice_average,LABELS_label,Labels_CB);
+  if(nslice_files>0)CHECKBOX_labels_average=glui_labels->add_checkbox_to_panel(panel_label1,"Average",&vis_slice_average,LABELS_label,Labels_CB);
   glui_labels->add_column_to_panel(panel_label1,false);
 
 
@@ -219,7 +219,7 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+2);
   SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+2);
   
-  if((npartinfo>0)||nslice>0||nvslice>0||niso>0||npatch_files||nsmoke3d>0||nplot3d_files>0){
+  if((npartinfo>0)||nslice_files>0||nvslice>0||niso>0||npatch_files||nsmoke3d>0||nplot3d_files>0){
     panel_showhide = glui_labels->add_rollout("Show/Hide Loaded Files",false);
 
     RADIO_showhide = glui_labels->add_radiogroup_to_panel(panel_showhide,&showhide_option);
@@ -232,7 +232,7 @@ extern "C" void glui_labels_setup(int main_window){
     if(nevac>0){}
     if(npartinfo>0&&nevac!=npartinfo)Button_PART=glui_labels->add_button_to_panel(panel_showhide,"Particle",LABELS_particleshow,Labels_CB);
     if(nevac>0)Button_EVAC=glui_labels->add_button_to_panel(panel_showhide,"Evacuation",LABELS_evacshow,Labels_CB);
-    if(nslice>0)Button_SLICE=glui_labels->add_button_to_panel(panel_showhide,"Slice",LABELS_sliceshow,Labels_CB);
+    if(nslice_files>0)Button_SLICE=glui_labels->add_button_to_panel(panel_showhide,"Slice",LABELS_sliceshow,Labels_CB);
     if(nvslice>0)Button_VSLICE=glui_labels->add_button_to_panel(panel_showhide,"Vector",LABELS_vsliceshow,Labels_CB);
     if(niso>0)Button_ISO=glui_labels->add_button_to_panel(panel_showhide,"Isosurface",LABELS_isosurfaceshow,Labels_CB);
     if(npatch_files>0)Button_BOUNDARY=glui_labels->add_button_to_panel(panel_showhide,"Boundary",LABELS_boundaryshow,Labels_CB);
@@ -279,7 +279,7 @@ extern "C" void update_fileload(void){
   }
 
   nsliceloaded=0;
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     slicei = sliceinfo+i;
     if(slicei->loaded==1){
       nsliceloaded++;

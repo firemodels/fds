@@ -349,8 +349,8 @@ int readsmv(char *file){
 
   //*** free slice data
 
-  if(nslice>0){
-    for(i=0;i<nslice;i++){
+  if(nslice_files>0){
+    for(i=0;i<nslice_files;i++){
       slice *sd;
       sd = sliceinfo + i;
       freelabels(&sliceinfo[i].label);
@@ -370,7 +370,7 @@ int readsmv(char *file){
     nmultislices=0;
     FREEMEMORY(sliceinfo);
   }
-  nslice=0;
+  nslice_files=0;
 
   //*** free multi-vector slice data
 
@@ -702,7 +702,7 @@ int readsmv(char *file){
         (match(buffer,"SLFL",4) == 1)||
         (match(buffer,"SLCT",4) == 1)
       ){
-      nslice++;
+      nslice_files++;
       continue;
     }
     if(match(buffer,"SMOKE3D",7) == 1){
@@ -878,11 +878,11 @@ int readsmv(char *file){
   FREEMEMORY(sliceinfo);
   FREEMEMORY(slicetypes);
   FREEMEMORY(vslicetypes);
-  if(nslice>0){
-    if(NewMemory( (void **)&vsliceinfo, 3*nslice*sizeof(vslice) )==0||
-       NewMemory( (void **)&sliceinfo,  nslice*sizeof(slice)    )==0||
-       NewMemory( (void **)&slicetypes, nslice*sizeof(int)      )==0||
-       NewMemory( (void **)&vslicetypes,3*nslice*sizeof(int)    )==0){return 2;}
+  if(nslice_files>0){
+    if(NewMemory( (void **)&vsliceinfo, 3*nslice_files*sizeof(vslice) )==0||
+       NewMemory( (void **)&sliceinfo,  nslice_files*sizeof(slice)    )==0||
+       NewMemory( (void **)&slicetypes, nslice_files*sizeof(int)      )==0||
+       NewMemory( (void **)&vslicetypes,3*nslice_files*sizeof(int)    )==0){return 2;}
   }
   if(nsmoke3d>0){
     if(NewMemory( (void **)&smoke3dinfo, nsmoke3d*sizeof(smoke3d))==0)return 2;
@@ -3389,7 +3389,7 @@ typedef struct {
         blocknumber--;
       }
       if(fgets(buffer,255,stream)==NULL){
-        nslice--;
+        nslice_files--;
         break;
       }
 
@@ -3465,7 +3465,7 @@ typedef struct {
       }
       else{
         if(readlabels(&sd->label,stream)==2)return 2;
-        nslice--;
+        nslice_files--;
       }
       continue;
     }
@@ -4408,7 +4408,7 @@ typedef struct {
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f",&valmin,&valmax);
 
-      for(i=0;i<nslice;i++){
+      for(i=0;i<nslice_files;i++){
         slice *slicei;
 
         slicei = sliceinfo + i;
@@ -4689,8 +4689,8 @@ typedef struct {
   */
 
   FREEMEMORY(slice_loaded_list);
-  if(nslice>0){
-    NewMemory((void **)&slice_loaded_list,nslice*sizeof(int));
+  if(nslice_files>0){
+    NewMemory((void **)&slice_loaded_list,nslice_files*sizeof(int));
   }
   FREEMEMORY(patch_loaded_list);
   if(npatch_files>0){
@@ -5244,13 +5244,13 @@ typedef struct {
     }
   }
 
-  if(nslice>0){
+  if(nslice_files>0){
     FREEMEMORY(sliceindex);
     FREEMEMORY(slicebounds);
-    if(NewMemory((void*)&sliceindex,nslice*sizeof(int))==0)return 2;
-    if(NewMemory((void*)&slicebounds,nslice*sizeof(databounds))==0)return 2;
+    if(NewMemory((void*)&sliceindex,nslice_files*sizeof(int))==0)return 2;
+    if(NewMemory((void*)&slicebounds,nslice_files*sizeof(databounds))==0)return 2;
     nslice2=0;
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       slice *slicei;
 
       slicei = sliceinfo + i;
@@ -9743,7 +9743,7 @@ void update_loaded_lists(void){
   patch *patchi;
 
   nslice_loaded=0;
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     slicei = sliceinfo + i;
     if(slicei->loaded==1){
       slice_loaded_list[nslice_loaded]=i;
