@@ -4359,7 +4359,6 @@ typedef struct {
         if(strcmp(file_ptr,patchi->file)==0){
           patchi->diff_valmin=valmin;
           patchi->diff_valmax=valmax;
-          patchi->diff_diff=valmax-valmin;
           break;
         }
       }
@@ -4389,7 +4388,6 @@ typedef struct {
           for(j=0;j<5;j++){
             plot3di->diff_valmin[j]=valmin[j];
             plot3di->diff_valmax[j]=valmax[j];
-            plot3di->diff_diff[j]=valmax[j]-valmin[j];
           }
           break;
         }
@@ -4417,7 +4415,6 @@ typedef struct {
         if(strcmp(file_ptr,slicei->file)==0){
           slicei->diff_valmin=valmin;
           slicei->diff_valmax=valmax;
-          slicei->diff_diff=valmax-valmin;
           break;
         }
       }
