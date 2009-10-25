@@ -1065,15 +1065,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     reset_glui_view(startup_view_ini);
     updategluiview=0;
   }
-  if(unitclasses_ini!=NULL){
-    nunitclasses=nunitclasses_ini;
-    unitclasses=unitclasses_ini;
-  }
-  else{
-    nunitclasses=nunitclasses_default;
-    unitclasses=unitclasses_default;
-  }
-
   if(menusmooth==1&&smoothing_blocks==0&&updatesmoothblocks==1){
     smooth_blockages();
   }
@@ -2889,90 +2880,6 @@ void drawTimeBar(void){
   glVertex2f(xleft,ytop);
   glEnd();
 
-}
-
-/* ------------------ unit_type_match ------------------------ */
-
-int unit_type_match(char *unit_type, f_units *unit_class){
-  int i;
-
-  for(i=0;i<unit_class->nunittypes;i++){
-    if(strcmp(unit_class->unittypes[i],unit_type)==0)return 1;
-  }
-  return 0;
-}
-
-/* ------------------ update_unit_defs ------------------------ */
-
-void update_unit_defs(void){
-  int i, j;
-
-  if(smokediff==0)return;
-  for(i=0;i<nunitclasses;i++){
-    char *datatype;
-    float valmin, valmax, diff_maxmin;
-    int firstminmax, diff_index;
-
-    firstminmax=1;
-    datatype=unitclasses[i].unitclass;
-    for(j=0;j<npatch_files;j++){
-      patch *patchj;
-      
-      patchj = patchinfo + j;
-      if(patchj->loaded==0||patchj->display==0)continue;
-      if(unit_type_match(patchj->label.shortlabel,unitclasses+i)==0)continue;
-      if(firstminmax==1){
-        firstminmax=0;
-        valmin=patchj->diff_valmin;
-        valmax=patchj->diff_valmax;
-      }
-      else{
-        if(patchj->diff_valmin<valmin)valmin=patchj->diff_valmin;
-        if(patchj->diff_valmax>valmax)valmax=patchj->diff_valmax;
-      }
-    }
-    for(j=0;j<nslice;j++){
-      slice *slicej;
-      
-      slicej = sliceinfo + j;
-      if(slicej->loaded==0||slicej->display==0)continue;
-      if(strcmp(slicej->label.shortlabel,datatype)!=0)continue;
-      if(firstminmax==1){
-        firstminmax=0;
-        valmin=slicej->diff_valmin;
-        valmax=slicej->diff_valmax;
-      }
-      else{
-        if(slicej->diff_valmin<valmin)valmin=slicej->diff_valmin;
-        if(slicej->diff_valmax>valmax)valmax=slicej->diff_valmax;
-      }
-    }
-    diff_index=unitclasses[i].diff_index;
-    if(diff_index!=-1&&firstminmax==0){
-      diff_maxmin=valmax-valmin;
-      if(diff_maxmin!=0.0){
-        unitclasses[i].units[diff_index].scale[0]=100.0/diff_maxmin;
-      }
-    }
-  }
-
-}
-
-/* ------------------ getunitinfo ------------------------ */
-
-void getunitinfo(const char *shortlabel, int *unitclass, int *unittype){
-  int i,j;
-  *unitclass=-1;
-  *unittype=-1;
-  for(i=0;i<nunitclasses;i++){
-    for(j=0;j<unitclasses[i].nunittypes;j++){
-      if(STRCMP(unitclasses[i].unittypes[j],shortlabel)==0){
-        *unitclass=i;
-        *unittype=unitclasses[i].active;
-        return;
-      }
-    }
-  }
 }
 
 /* ------------------ setsmokeviewvars ------------------------ */

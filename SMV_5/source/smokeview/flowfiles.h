@@ -1027,6 +1027,8 @@ typedef struct {
 typedef struct {
   char unit[10];   /* m/s, mph etc - appears in color bar */
   float scale[2];  /* newval=scale[0]*oldval+scale[1] */
+  char rel_val[20];
+  int rel_defined;
 } f_unit;
 
 /* --------------------------  f_units ------------------------------------ */
