@@ -132,6 +132,8 @@ int initcase_c(int argc, char **argv){
   /* initialize units */
 
   InitUnits();
+  init_unit_defs();
+
   CheckMemory;
 
   readini(0);
@@ -279,102 +281,6 @@ void sv_startup_c(int argc, char **argv){
   for(i=0;i<MAXRGB;i++){
     rgbptr[i]=&rgb[i][0];
   }
-}
-
-/* ------------------ Init_Units ------------------------ */
-
-void InitUnits(void){
-  int i;
-  f_unit *units;
-  f_units *ut;
-
-  nunitclasses_default=2;
-  NewMemory((void **)&unitclasses_default,nunitclasses_default*sizeof(f_units));
-  
-  for(i=0;i<nunitclasses_default;i++){
-    unitclasses_default[i].submenuid=0;
-  }
-  ut=unitclasses_default;
-
-  // temperature units
-
-  if(smokediff==1){
-    ut->diff_index=3;
-    ut->nunits=4;
-  }
-  else{
-    ut->diff_index=-1;
-    ut->nunits=3;
-  }
-  ut->active=0;
-  strcpy(ut->unitclass,"temperature");
-  ut->nunittypes=2;
-  strcpy(ut->unittypes[0],"temp");
-  strcpy(ut->unittypes[1],"d_temp");
-
-  NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
-  units=ut->units;
-  strcpy(units[0].unit,"C");
-  units[0].scale[0]=1.0;
-  units[0].scale[1]=0.0;
-  strcpy(units[1].unit,"F");
-  units[1].scale[0]=1.8;
-  if(smokediff==1){
-    units[1].scale[1]=0.0;
-  }
-  else{
-    units[1].scale[1]=32.0;
-  }
-  strcpy(units[2].unit,"K");
-  units[2].scale[0]=1.0;
-  if(smokediff==1){
-    units[2].scale[1]=273.15;
-  }
-  else{
-    units[2].scale[1]=0.0;
-  }
-  if(smokediff==1){
-    strcpy(units[3].unit,"diff %");
-    units[3].scale[0]=0.1667;
-    units[3].scale[1]=0.0;
-  }
-
-  // velocity units
-
-  ut = unitclasses_default+1;
-  ut->active=0;
-  if(smokediff==1){
-    ut->diff_index=3;
-    ut->nunits=4;
-  }
-  else{
-    ut->diff_index=-1;
-    ut->nunits=3;
-  }
-  strcpy(ut->unitclass,"velocity");
-  ut->nunittypes=4;
-  strcpy(ut->unittypes[0],"U-VEL");
-  strcpy(ut->unittypes[1],"V-VEL");
-  strcpy(ut->unittypes[2],"W-VEL");
-  strcpy(ut->unittypes[3],"Speed");
-
-  NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
-  units=ut->units;
-  strcpy(units[0].unit,"m/s");
-  units[0].scale[0]=1.0;
-  units[0].scale[1]=0.0;
-  strcpy(units[1].unit,"mph");
-  units[1].scale[0]=2.236931818;
-  units[1].scale[1]=0.0;
-  strcpy(units[2].unit,"f/s");
-  units[2].scale[0]=3.2808333333;
-  units[2].scale[1]=0.0;
-  if(smokediff==1){
-    strcpy(units[3].unit,"diff %");
-    units[3].scale[0]=0.16667;
-    units[3].scale[1]=0.0;
-  }
-  CheckMemory;
 }
 
 /* ------------------ InitOpenGL ------------------------ */
@@ -2304,5 +2210,6 @@ int getmaxrevision(void){
   MAXREV(string_util_revision);
   MAXREV(sv_api_revision);
   MAXREV(shaders_revision);
+  MAXREV(unit_revision);
   return max_revision;
 }

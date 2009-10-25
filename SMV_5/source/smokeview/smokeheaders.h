@@ -656,6 +656,7 @@ EXTERNCPP int initcase_c(int argc, char **argv);
 
 EXTERNCPP void freecadinfo(void);
 
+EXTERNCPP void init_unit_defs(void);
 EXTERNCPP void InitUnits(void);
 EXTERNCPP void readcad2geom(cadgeom *cd);
 EXTERNCPP void readcadgeom(cadgeom *cd);
