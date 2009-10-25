@@ -420,7 +420,7 @@ void InitOpenGL(void){
         parti->autoload=0;
       }
     }
-    for(i=0;i<nplot3d;i++){
+    for(i=0;i<nplot3d_files;i++){
       plot3d *plot3di;
 
       plot3di = plot3dinfo + i;
@@ -503,7 +503,7 @@ void InitOpenGL(void){
       parti->autoload=0;
     }
 
-    for(i=0;i<nplot3d;i++){
+    for(i=0;i<nplot3d_files;i++){
       plot3d *plot3di;
 
       plot3di = plot3dinfo + i;
@@ -577,7 +577,7 @@ void InitOpenGL(void){
    // startup plot3d
 
    nstartup=0;
-   for(i=0;i<nplot3d;i++){
+   for(i=0;i<nplot3d_files;i++){
       plot3d *plot3di;
 
       plot3di = plot3dinfo + i;
@@ -587,7 +587,7 @@ void InitOpenGL(void){
    if(nstartup!=0){
      fprintf(fileout,"PLOT3DAUTO\n");
      fprintf(fileout," %i \n",nstartup);
-     for(i=0;i<nplot3d;i++){
+     for(i=0;i<nplot3d_files;i++){
         plot3d *plot3di;
 
         plot3di = plot3dinfo + i;
@@ -727,7 +727,7 @@ void InitOpenGL(void){
 
   void get_startup_plot3d(int seq_id){
     int i;
-    for(i=0;i<nplot3d;i++){
+    for(i=0;i<nplot3d_files;i++){
       plot3d *plot3di;
 
       plot3di = plot3dinfo + i;
@@ -826,7 +826,7 @@ void InitOpenGL(void){
     int errorcode;
 
 //    show_load_alert();
-    for(i=0;i<nplot3d;i++){
+    for(i=0;i<nplot3d_files;i++){
       plot3d *plot3di;
 
       plot3di = plot3dinfo + i;
@@ -1230,7 +1230,7 @@ void initvars1(void){
   ntc_total=0, nspr_total=0, nheat_total=0;
   n_devices=0;
 
-  npartinfo=0, nslice=0, nvslice=0, nslice2=0, npatch2=0, nplot3d=0, npatch_files=0;
+  npartinfo=0, nslice=0, nvslice=0, nslice2=0, npatch2=0, nplot3d_files=0, npatch_files=0;
   nevac=0;
   current_particle_type=-1,last_particle_type=-2;
   nsmoke3d=0;

@@ -350,7 +350,7 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
       for (n=0;n<NBUCKETS;n++){
         buckets[n]=0;
       }
-      for(i=0;i<nplot3d;i++){
+      for(i=0;i<nplot3d_files;i++){
         p = plot3dinfo+i;
         if(p->loaded==0||p->display==0)continue;
         meshi=meshinfo+p->blocknumber;
