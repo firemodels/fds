@@ -304,14 +304,14 @@ int readsmv(char *file){
   }
   nzone=0;
 
-  if(nplot3d>0){
-    for(i=0;i<nplot3d;i++){
+  if(nplot3d_files>0){
+    for(i=0;i<nplot3d_files;i++){
       for(n=0;n<6;n++)freelabels(&plot3dinfo[i].label[n]);
       FREEMEMORY(plot3dinfo[i].file);
     }
     FREEMEMORY(plot3dinfo);
   }
-  nplot3d=0;
+  nplot3d_files=0;
   if(nsmoke3d>0){
     {
       smoke3d *smoke3di;
@@ -518,7 +518,7 @@ int readsmv(char *file){
       continue;
     }
     if(match(buffer,"PL3D",4) == 1){
-      nplot3d++;
+      nplot3d_files++;
       continue;
    
     }
@@ -893,8 +893,8 @@ int readsmv(char *file){
 #endif
 
   FREEMEMORY(plot3dinfo);
-  if(nplot3d>0){
-    if(NewMemory((void **)&plot3dinfo,nplot3d*sizeof(plot3d))==0)return 2;
+  if(nplot3d_files>0){
+    if(NewMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d))==0)return 2;
   }
   FREEMEMORY(patchinfo);
   FREEMEMORY(patchtypes);
@@ -2178,7 +2178,7 @@ typedef struct {
         time=-1.0;
       }
       if(fgets(buffer,255,stream)==NULL){
-        nplot3d--;
+        nplot3d_files--;
         break;
       }
       len=strlen(buffer);
@@ -2199,7 +2199,7 @@ typedef struct {
         for(n=0;n<5;n++){
           if(readlabels(&plot3dinfo[iplot3d].label[n],stream)==2)return 2;
         }
-        nplot3d--;
+        nplot3d_files--;
       }
       else{
         plot3dinfo[iplot3d].u = -1;
@@ -4380,7 +4380,7 @@ typedef struct {
         sscanf(buffer,"%f %f",valmin +i,valmax+i);
       }
 
-      for(i=0;i<nplot3d;i++){
+      for(i=0;i<nplot3d_files;i++){
         plot3d *plot3di;
 
         plot3di = plot3dinfo + i;

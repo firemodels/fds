@@ -406,7 +406,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /* Plot3D file bounds */
 
-  if(nplot3d>0){
+  if(nplot3d_files>0){
     glui_active=1;
     panel_plot3d = glui_bounds->add_rollout("Plot3D",false);
 
@@ -883,7 +883,7 @@ void PLOT3D_CB(int var){
    break;
   case FILERELOAD:
    PLOT3D_CB(FILEUPDATE);
-   for(i=0;i<nplot3d;i++){
+   for(i=0;i<nplot3d_files;i++){
      if(plot3dinfo[i].loaded==0)continue;
      LoadPlot3dMenu(i);
    }
@@ -959,7 +959,7 @@ extern "C" void updateplot3dlistindex(void){
   p3chopmax_temp = p3chopmax[i];
   setp3chopmin_temp = setp3chopmin[i];
   setp3chopmax_temp = setp3chopmax[i];
-  if(nplot3d>0){
+  if(nplot3d_files>0){
     PLOT3D_CB(SETVALMIN);
     PLOT3D_CB(SETVALMAX);
     PLOT3D_CB(SETCHOPMINVAL);
@@ -1829,7 +1829,7 @@ extern "C" void show_glui_bounds(void){
     PART_CB(SETVALMIN);
     PART_CB(SETVALMAX);
   }
-  if(nplot3d>0){
+  if(nplot3d_files>0){
     PLOT3D_CB(SETVALMIN);
     PLOT3D_CB(SETVALMAX);
   }

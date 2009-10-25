@@ -134,7 +134,7 @@ void init_unit_defs(void){
       add_unit_class(&patchj->label);
     }
   }
-  for(j=0;j<nplot3d;j++){
+  for(j=0;j<nplot3d_files;j++){
     plot3d *plot3dj;
     char *shortlabel;
     int n;
@@ -201,7 +201,7 @@ void update_unit_defs(void){
 
     firstplot3d=1;
     datatype=unitclasses[i].unitclass;
-    for(j=0;j<nplot3d;j++){
+    for(j=0;j<nplot3d_files;j++){
       plot3d *plot3dj;
       int n;
       

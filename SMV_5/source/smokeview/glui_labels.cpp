@@ -219,7 +219,7 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+2);
   SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+2);
   
-  if((npartinfo>0)||nslice>0||nvslice>0||niso>0||npatch_files||nsmoke3d>0||nplot3d>0){
+  if((npartinfo>0)||nslice>0||nvslice>0||niso>0||npatch_files||nsmoke3d>0||nplot3d_files>0){
     panel_showhide = glui_labels->add_rollout("Show/Hide Loaded Files",false);
 
     RADIO_showhide = glui_labels->add_radiogroup_to_panel(panel_showhide,&showhide_option);
@@ -237,7 +237,7 @@ extern "C" void glui_labels_setup(int main_window){
     if(niso>0)Button_ISO=glui_labels->add_button_to_panel(panel_showhide,"Isosurface",LABELS_isosurfaceshow,Labels_CB);
     if(npatch_files>0)Button_BOUNDARY=glui_labels->add_button_to_panel(panel_showhide,"Boundary",LABELS_boundaryshow,Labels_CB);
     if(nsmoke3d>0)Button_3DSMOKE=glui_labels->add_button_to_panel(panel_showhide,"3D Smoke",LABELS_3dsmokeshow,Labels_CB);
-    if(nplot3d>0)Button_PLOT3D=glui_labels->add_button_to_panel(panel_showhide,"Plot3D",LABELS_PLOT3D,Labels_CB);
+    if(nplot3d_files>0)Button_PLOT3D=glui_labels->add_button_to_panel(panel_showhide,"Plot3D",LABELS_PLOT3D,Labels_CB);
 
     update_showhidebuttons();
   }
@@ -319,7 +319,7 @@ extern "C" void update_fileload(void){
   }
 
   nplot3dloaded=0;
-  for(i=0;i<nplot3d;i++){
+  for(i=0;i<nplot3d_files;i++){
     plot3di = plot3dinfo+i;
     if(plot3di->loaded==1){
       nplot3dloaded++;

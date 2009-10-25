@@ -285,7 +285,7 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   updateglui();
   }
   for (nn=0;nn<numplot3dvars;nn++){
-    if(nplot3d>0){
+    if(nplot3d_files>0){
       shortp3label[nn] = plot3dinfo[ifile].label[nn].shortlabel;
       unitp3label[nn] = plot3dinfo[ifile].label[nn].unit;
     }
@@ -1289,7 +1289,7 @@ void updateallplotslices(void){
   plot3d *p;
   mesh *gbsave;
   gbsave=current_mesh;
-  for(i=0;i<nplot3d;i++){
+  for(i=0;i<nplot3d_files;i++){
     p=plot3dinfo+i;
     if(p->loaded==0)continue;
     update_current_mesh(meshinfo+p->blocknumber);
@@ -1839,15 +1839,15 @@ void updateplot3dmenulabels(void){
   plot3d *plot3di;
   char label[128];
 
-  if(nplot3d>0){
+  if(nplot3d_files>0){
     FREEMEMORY(plot3dorderindex);
-    NewMemory((void **)&plot3dorderindex,sizeof(int)*nplot3d);
-    for(i=0;i<nplot3d;i++){
+    NewMemory((void **)&plot3dorderindex,sizeof(int)*nplot3d_files);
+    for(i=0;i<nplot3d_files;i++){
       plot3dorderindex[i]=i;
     }
-    qsort( (int *)plot3dorderindex, (size_t)nplot3d, sizeof(int), plot3dcompare );
+    qsort( (int *)plot3dorderindex, (size_t)nplot3d_files, sizeof(int), plot3dcompare );
 
-    for(i=0;i<nplot3d;i++){
+    for(i=0;i<nplot3d_files;i++){
       plot3di = plot3dinfo + i;
       STRCPY(plot3di->menulabel,plot3di->longlabel);
       STRCPY(plot3di->menulabel,"");
@@ -1893,18 +1893,18 @@ void init_plot3dtimelist(void){
   float lasttime,val;
 
   nplot3dtimelist=0;
-  if(plot3dtimelist==NULL&&nplot3d>0){
-    NewMemory((void **)&plot3dtimelist,nplot3d*sizeof(float));
+  if(plot3dtimelist==NULL&&nplot3d_files>0){
+    NewMemory((void **)&plot3dtimelist,nplot3d_files*sizeof(float));
   }
   if(plot3dtimelist==NULL)return;
 
-  for(i=0;i<nplot3d;i++){
+  for(i=0;i<nplot3d_files;i++){
     plot3di = plot3dinfo + i;
     plot3dtimelist[i]=plot3di->time;
   }
-  qsort( (float *)plot3dtimelist, (size_t)nplot3d, sizeof(int), plot3dlistcompare );
+  qsort( (float *)plot3dtimelist, (size_t)nplot3d_files, sizeof(int), plot3dlistcompare );
   lasttime=-999999.0;
-  for(i=0;i<nplot3d;i++){
+  for(i=0;i<nplot3d_files;i++){
     val=plot3dtimelist[i];
     if(fabs((double)(val-lasttime))>0.1){
       nplot3dtimelist++;
