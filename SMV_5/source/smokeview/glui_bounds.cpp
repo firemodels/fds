@@ -467,7 +467,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /*  Slice File Bounds   */
 
-  if(nslice>0){
+  if(nslice_files>0){
     int index;
 
     glui_active=1;
@@ -476,7 +476,7 @@ extern "C" void glui_bounds_setup(int main_window){
     slice_rlist = glui_bounds->add_radiogroup_to_panel(panel_slice,&list_slice_index,FILETYPEINDEX,Slice_CB);
 
     index=0;
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       if(sliceinfo[i].firstshort==1){
         GLUI_RadioButton *RADIO_slicetype;
 
@@ -540,7 +540,7 @@ extern "C" void glui_bounds_setup(int main_window){
     Slice_CB(FILETYPEINDEX);
   }
 #ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice>0)){
+  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice_files>0)){
     glui_bounds->add_separator();
     rollout_compress=glui_bounds->add_rollout("Compress Files (Smokezip)",false);
     check_erase_all=glui_bounds->add_checkbox_to_panel(rollout_compress,"Erase compressed files",
@@ -553,7 +553,7 @@ extern "C" void glui_bounds_setup(int main_window){
     check_multi_task=glui_bounds->add_checkbox_to_panel(rollout_compress,"Multi-thread Compression",
       &mt_compress);
 #endif
-    if(nslice>0){
+    if(nslice_files>0){
       SPINNER_slicezipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"Slice Frame Skip",GLUI_SPINNER_INT,&slicezipskip,
         FRAMELOADING,Slice_CB);
       SPINNER_slicezipstep->set_int_limits(0,100);
@@ -1720,7 +1720,7 @@ extern "C" void Slice_CB(int var){
     break;
   case FILERELOAD:
     Slice_CB(FILEUPDATE);
-    if(slicefilenum>=0&&slicefilenum<nslice){
+    if(slicefilenum>=0&&slicefilenum<nslice_files){
       LoadSliceMenu(slicefilenum);
     }
     else{
@@ -1811,7 +1811,7 @@ void BUTTON_hide_CB(int var){
 
 extern "C" void show_glui_bounds(void){
   int islice, ipatch;
-  if(nslice>0){
+  if(nslice_files>0){
     islice=slice_rlist->get_int_val();
     setslicebounds(islice);
     Slice_CB(SETVALMIN);
@@ -1834,7 +1834,7 @@ extern "C" void show_glui_bounds(void){
     PLOT3D_CB(SETVALMAX);
   }
 
-  if(nslice>0||npatch_files>0)updateglui();
+  if(nslice_files>0||npatch_files>0)updateglui();
 
   updatechar();
   glui_bounds->show();

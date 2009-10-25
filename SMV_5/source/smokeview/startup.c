@@ -468,7 +468,7 @@ void InitOpenGL(void){
         isoi->autoload=0;
       }
     }
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       slice *slicei;
 
       slicei = sliceinfo + i;
@@ -534,7 +534,7 @@ void InitOpenGL(void){
 
       isoi->autoload=0;
     }
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       slice *slicei;
 
       slicei = sliceinfo + i;
@@ -643,7 +643,7 @@ void InitOpenGL(void){
    // startup slice
 
    nstartup=0;
-   for(i=0;i<nslice;i++){
+   for(i=0;i<nslice_files;i++){
       slice *slicei;
 
       slicei = sliceinfo + i;
@@ -653,7 +653,7 @@ void InitOpenGL(void){
    if(nstartup!=0){
      fprintf(fileout,"SLICEAUTO\n");
      fprintf(fileout," %i \n",nstartup);
-     for(i=0;i<nslice;i++){
+     for(i=0;i<nslice_files;i++){
         slice *slicei;
 
         slicei = sliceinfo + i;
@@ -790,7 +790,7 @@ void InitOpenGL(void){
 
   void get_startup_slice(int seq_id){
     int i;
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       slice *slicei;
 
       slicei = sliceinfo + i;
@@ -862,7 +862,7 @@ void InitOpenGL(void){
       }
     }
     // note:  only slices that are NOT a part of a vector slice will be loaded here
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       slice *slicei;
 
       slicei = sliceinfo + i;
@@ -1230,7 +1230,7 @@ void initvars1(void){
   ntc_total=0, nspr_total=0, nheat_total=0;
   n_devices=0;
 
-  npartinfo=0, nslice=0, nvslice=0, nslice2=0, npatch2=0, nplot3d_files=0, npatch_files=0;
+  npartinfo=0, nslice_files=0, nvslice=0, nslice2=0, npatch2=0, nplot3d_files=0, npatch_files=0;
   nevac=0;
   current_particle_type=-1,last_particle_type=-2;
   nsmoke3d=0;

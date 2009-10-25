@@ -2412,7 +2412,7 @@ void updatetimes(void){
     if(parti->loaded==0)continue;
     ntimes += parti->nframes;
   }
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     sd=sliceinfo+i;
     if(sd->loaded==1||sd->vloaded==1){
       ntimes+=sd->nsteps;
@@ -2521,7 +2521,7 @@ void updatetimes(void){
     }
   }
 
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     sd = sliceinfo + i;
     if(sd->loaded==1||sd->vloaded==1){
       for(n=0;n<sd->nsteps;n++){
@@ -2694,7 +2694,7 @@ void updatetimes(void){
     }
 #endif
 
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       sd = sliceinfo + i;
       FREEMEMORY(sd->slicetimeslist);
       if(ntimes>0)NewMemory((void **)&sd->slicetimeslist,ntimes*sizeof(int));
@@ -2748,7 +2748,7 @@ void updatetimes(void){
     meshi=meshinfo+i;
     meshi->ipatch=0;
   }
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     sd = sliceinfo + i;
     sd->islice=0; 
   }
@@ -3772,7 +3772,7 @@ void checktimebound(void){
 
   if(timedrag==0&&itime>ntimes-1||timedrag==1&&itime<0){
     izone=0;itime=0;iframe=iframebeg;
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       sd=sliceinfo+i;
       sd->islice=0;
     }
@@ -3792,7 +3792,7 @@ void checktimebound(void){
       parti=partinfo+i;
       parti->iframe=parti->nframes-1;
     }
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       sd=sliceinfo+i;
       sd->islice=sd->nsteps-1;
     }
