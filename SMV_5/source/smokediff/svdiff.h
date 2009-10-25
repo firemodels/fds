@@ -38,6 +38,18 @@
 #define FILE_SIZE unsigned int
 #endif
 
+
+/* --------------------------  flowlabels ------------------------------------ */
+
+#define NBUCKETS 100000
+#define INIT_HISTOGRAM 0
+#define UPDATE_HISTOGRAM 1
+typedef struct {
+  int buckets[NBUCKETS];
+  float valmin, valmax;
+  int ntotal;
+} bucketdata;
+
 /* --------------------------  flowlabels ------------------------------------ */
 
 typedef struct {
@@ -61,6 +73,7 @@ typedef struct _boundary {
   int *patch2index, *patchsize, *qoffset;
   char keyword[255];
   int boundarytype;
+  bucketdata *bucket;
   mesh *boundarymesh;
   flowlabels label;
 } boundary;
@@ -76,6 +89,7 @@ typedef struct _slice {
   char keyword[255];
   int slicetype;
   mesh *slicemesh;
+  bucketdata *bucket;
   flowlabels label;
 } slice;
 
@@ -85,6 +99,7 @@ typedef struct _plot3d {
   float time;
   struct _plot3d *plot3d2;
   float xmin, xmax, ymin, ymax, zmin, zmax;
+  bucketdata *buckets[5];
   mesh *plot3dmesh;
   flowlabels labels[5];
 } plot3d;
@@ -100,6 +115,8 @@ typedef struct {
   int nslice_files, nplot3d_files, nboundary_files;
 } casedata;
 
+void update_data_hist(float *vals, int nvals, bucketdata *bucket, int flag);
+float get_hist_val(bucketdata *bucket, float cdf);
 int getendian(void);
 void getSMDiffversion(char *SMDiffversion);
 int getmaxrevision(void);

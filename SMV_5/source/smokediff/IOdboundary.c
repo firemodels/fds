@@ -210,6 +210,9 @@ void diff_boundaryes(FILE *stream_out){
       float fraction_complete;
       int percent_complete;
       float valmin, valmax;
+      float valmin_percentile, valmax_percentile;
+      int nvals;
+      float cdf01, cdf99;
 
       ii=0;
       for(i=0;i<boundary1->npatches;i++){
@@ -238,6 +241,8 @@ void diff_boundaryes(FILE *stream_out){
       percent_complete=0;
       valmin=1000000000.0;
       valmax=-valmin;
+      nvals=0;
+      update_data_hist(NULL, nvals, boundary1->bucket, INIT_HISTOGRAM);
       for(;;){
         int iq;
 
@@ -258,12 +263,13 @@ void diff_boundaryes(FILE *stream_out){
 
           pq1 = pqq1 + boundary1->qoffset[i];
           pq2 = pqq2 + boundary2->qoffset[jj];
-          for(kk=0;kk<boundaryi->patchsize[i];kk++){
+          for(kk=0;kk<boundary1->patchsize[i];kk++){
             pqq3[iq++]=pq2[kk]-pq1[kk];
             if(pq1[kk]<valmin)valmin=pq1[kk];
             if(pq1[kk]>valmax)valmax=pq1[kk];
           }
         }
+        update_data_hist(pqq1, nsize1, boundary1->bucket, UPDATE_HISTOGRAM);
         FORToutpatchframe(&unit3, &boundary1->npatches,
                         p3i1, p3i2, p3j1, p3j2, p3k1, p3k2,
                         &patchtime1, pqq3, &error3);
@@ -277,9 +283,14 @@ void diff_boundaryes(FILE *stream_out){
       }
       printf("\n");
       fflush(stdout);
+      cdf01=0.01;
+      cdf99=0.99;
+      valmin_percentile = get_hist_val(boundary1->bucket, cdf01);
+      valmax_percentile = get_hist_val(boundary1->bucket, cdf99);
+
       fprintf(stream_out,"MINMAXBNDF\n");
       fprintf(stream_out,"  %s\n",outfile2);
-      fprintf(stream_out,"  %f %f\n",valmin,valmax);
+      fprintf(stream_out,"  %f %f %f %f\n",valmin,valmax,valmin_percentile,valmax_percentile);
     }
 
     FREEMEMORY(pqq1);

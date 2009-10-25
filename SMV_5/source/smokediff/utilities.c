@@ -257,3 +257,127 @@ void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
   strcat(outfile,"_diff");
   strcat(outfile,ext);
 }
+
+/* ------------------ get_hist_val ------------------------ */
+
+float get_hist_val(bucketdata *bucket, float cdf){
+  int cutoff, count;
+  int i;
+  float returnval;
+
+  cutoff = cdf*bucket->ntotal;
+  count=0;
+  for(i=0;i<NBUCKETS;i++){
+    count+=bucket->buckets[i];
+    if(count>cutoff){
+      returnval = bucket->valmin + (float)(i+0.5)*(bucket->valmax-bucket->valmin)/(float)NBUCKETS;
+      return returnval;
+    }
+  }
+  return bucket->valmax;
+}
+
+/* ------------------ update_data_hist ------------------------ */
+
+void update_data_hist(float *vals, int nvals, bucketdata *bucket, int flag){
+  int i;
+  float oldvals[NBUCKETS];
+  float valmin, valmax;
+  int remap=0;
+
+  if(vals==NULL){
+    if(flag==INIT_HISTOGRAM){
+      for(i=0;i<NBUCKETS;i++){
+        bucket->buckets[i]=0;
+      }
+      bucket->ntotal=0;
+      bucket->valmin=100000000000.0;
+      bucket->valmax=-bucket->valmin;
+    }
+    return;
+  }
+
+  // find min and max of vals array
+
+  valmin = vals[0];
+  valmax = valmin;
+  for(i=1;i<nvals;i++){
+    if(vals[i]<valmin)valmin=vals[i];
+    if(vals[i]>valmax)valmax=vals[i];
+  }
+
+  if(flag==INIT_HISTOGRAM){
+    for(i=0;i<NBUCKETS;i++){
+      bucket->buckets[i]=0;
+    }
+    bucket->ntotal=0;
+    bucket->valmax=valmax;
+    bucket->valmin=valmin;
+  }
+
+  if(flag==UPDATE_HISTOGRAM){
+
+    // update min and max
+
+    if(valmin>bucket->valmin){
+      valmin=bucket->valmin;
+      remap=1;
+    }
+    if(valmax<bucket->valmax){
+      valmax=bucket->valmax;
+      remap=1;
+    }
+  }
+  if(flag==UPDATE_HISTOGRAM&&remap==1){
+    float dbucket;
+
+    // map old bucket array using new min/max bounds
+
+    for(i=0;i<NBUCKETS;i++){
+      oldvals[i]=0;
+    }
+    dbucket = (bucket->valmax-bucket->valmin)/(float)NBUCKETS;
+    for(i=0;i<NBUCKETS;i++){
+      float val;
+      int ival;
+
+      if(bucket->buckets[i]==0)continue;
+      val = bucket->valmin + (float)(i+0.5)*dbucket;
+      if(valmax==valmin){
+        ival=0;
+      }
+      else{
+        ival = NBUCKETS*(val-valmin)/(valmax-valmin);
+      }
+      if(ival<0)ival=0;
+      if(ival>NBUCKETS-1)ival=NBUCKETS-1;
+      oldvals[ival]+=bucket->buckets[i];
+    }
+    for(i=0;i<NBUCKETS;i++){
+      bucket->buckets[i]=oldvals[i];
+    }
+    bucket->valmin=valmin;
+    bucket->valmax=valmax;
+  }
+
+  // update bucket with vals passed in
+
+  for(i=0;i<nvals;i++){
+    int ival;
+
+    if(valmax==valmin){
+      ival=0;
+    }
+    else{
+      ival = NBUCKETS*(vals[i]-bucket->valmin)/(bucket->valmax-bucket->valmin);
+    }
+    if(ival<0)ival=0;
+    if(ival>NBUCKETS-1)ival=NBUCKETS-1;
+    bucket->buckets[ival]++;
+  }
+  bucket->valmin=valmin;
+  bucket->valmax=valmax;
+  bucket->ntotal+=nvals;
+}
+
+
