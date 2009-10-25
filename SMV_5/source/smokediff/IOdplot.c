@@ -168,14 +168,27 @@ void diff_plot3ds(FILE *stream_out){
     fprintf(stream_out,"MINMAXPL3D\n");
     fprintf(stream_out,"  %s\n",outfile2);
     for(n=0;n<5;n++){
+      int nvals;
+      float cdf01, cdf99, valmin_percentile, valmax_percentile;
+
       valmin=1000000000.0;
       valmax=-valmin;
+
       for(i=0;i<nq/5;i++){
         if(qframe1[nn]<valmin)valmin=qframe1[nn];
         if(qframe1[nn]>valmax)valmax=qframe1[nn];
         nn++;
       }
-      fprintf(stream_out,"  %f %f\n",valmin,valmax);
+
+      nvals=0;
+      update_data_hist(NULL, nvals, plot3d1->buckets[n], INIT_HISTOGRAM);
+      nvals=nq/5;
+      update_data_hist(qframe1+n*nvals, nvals, plot3d1->buckets[n], INIT_HISTOGRAM);
+      cdf01=0.01;
+      cdf99=0.99;
+      valmin_percentile = get_hist_val(plot3d1->buckets[n], cdf01);
+      valmax_percentile = get_hist_val(plot3d1->buckets[n], cdf99);
+      fprintf(stream_out,"  %f %f %f %f\n",valmin,valmax,valmin_percentile,valmax_percentile);
     }
 
     FORTplot3dout(outfile,&nx,&ny,&nz,qout,&error3,lenout);
