@@ -6440,14 +6440,6 @@ int readini(int scriptconfigfile){
     scriptinifilename2=NULL;
   }
   updateglui();
-  if(unitclasses_ini!=NULL){
-    unitclasses=unitclasses_ini;
-    nunitclasses=nunitclasses_ini;
-  }
-  else{
-    unitclasses=unitclasses_default;
-    nunitclasses=nunitclasses_default;
-  }
   if(showall_textures==1)TextureShowMenu(-1);
   if(ncolorbars<=ndefaultcolorbars){
     initdefaultcolorbars();
