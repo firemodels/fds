@@ -1185,7 +1185,7 @@ void script_loadfile(scriptdata *scripti){
 
   printf("Script: loading file %s",scripti->cval);
   printf("\n");
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     slice *sd;
 
     sd = sliceinfo + i;

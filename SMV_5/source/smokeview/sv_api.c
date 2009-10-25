@@ -191,7 +191,7 @@ void svWINAPI sv_unload(void){
     for(i=0;i<nterraininfo;i++){
       readterrain("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nplot3d_files;i++){

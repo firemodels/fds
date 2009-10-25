@@ -1087,7 +1087,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"H",1)==0){
     int nslice_loaded=0, nvslice_loaded=0;
 
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       slice *sd;
 
       sd = sliceinfo + i;

@@ -112,7 +112,7 @@ void init_unit_defs(void){
     nunitclasses=nunitclasses_default;
   }
   if(smokediff==0)return;
-  for(j=0;j<nslice;j++){
+  for(j=0;j<nslice_files;j++){
     slice *slicej;
     char *shortlabel;
       
@@ -182,7 +182,7 @@ void update_unit_defs(void){
     }
 
     firstslice=1;
-    for(j=0;j<nslice;j++){
+    for(j=0;j<nslice_files;j++){
       slice *slicej;
       
       slicej = sliceinfo + j;

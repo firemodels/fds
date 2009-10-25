@@ -1216,7 +1216,7 @@ void update_terrain(int allocate_memory, float vertical_factor){
 int have_terrain_slice(void){
   int i;
 
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     slice *slicei;
 
     slicei = sliceinfo + i;

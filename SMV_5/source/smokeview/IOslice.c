@@ -1017,7 +1017,7 @@ void updateslicemenulabels(void){
   slice *sd,*sdold;
   float delta;
 
-  if(nslice>0){
+  if(nslice_files>0){
     mslicei = multisliceinfo;
     sd = sliceinfo + sliceorderindex[0];
     STRCPY(mslicei->menulabel,sd->slicedir);
@@ -1053,7 +1053,7 @@ void updateslicemenulabels(void){
     else if(sd->compression_type==2){
       STRCAT(sd->menulabel," (RLE)");
     }
-    for(i=1;i<nslice;i++){
+    for(i=1;i<nslice_files;i++){
       mesh *meshi;
 
       sdold = sliceinfo + sliceorderindex[i - 1];
@@ -1092,7 +1092,7 @@ void updateslicemenulabels(void){
         STRCAT(sd->menulabel," (RLE)");
       }
     } 
-    for(i=0;i<nslice;i++){
+    for(i=0;i<nslice_files;i++){
       sd = sliceinfo + i;
       STRCPY(sd->menulabel2,sd->label.longlabel);
       STRCAT(sd->menulabel2,", ");
@@ -1208,7 +1208,7 @@ void getsliceparams(void){
   mesh *meshi;
   multislice *mslicei;
 
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     sd = sliceinfo + i;
     file = sd->file;
     lenfile = strlen(file);
@@ -1316,13 +1316,13 @@ void getsliceparams(void){
       trimzeros(sd->slicedir);
     }
   }
-  if(nslice>0){
+  if(nslice_files>0){
     FREEMEMORY(sliceorderindex);
-    NewMemory((void **)&sliceorderindex,sizeof(int)*nslice);
-    for(i=0;i<nslice;i++){
+    NewMemory((void **)&sliceorderindex,sizeof(int)*nslice_files);
+    for(i=0;i<nslice_files;i++){
       sliceorderindex[i]=i;
     }
-    qsort( (int *)sliceorderindex, (size_t)nslice, sizeof(int), slicecompare );
+    qsort( (int *)sliceorderindex, (size_t)nslice_files, sizeof(int), slicecompare );
 
     for(i=0;i<nmultislices;i++){
       mslicei = multisliceinfo + i;
@@ -1331,17 +1331,17 @@ void getsliceparams(void){
     FREEMEMORY(multisliceinfo);
     nmultislices=0;
 
-    NewMemory((void **)&multisliceinfo,sizeof(multislice)*nslice);
+    NewMemory((void **)&multisliceinfo,sizeof(multislice)*nslice_files);
 
     nmultislices=1;
     mslicei = multisliceinfo;
     mslicei->islices=NULL;
-    NewMemory((void **)&mslicei->islices,sizeof(int)*nslice);
+    NewMemory((void **)&mslicei->islices,sizeof(int)*nslice_files);
     mslicei->nslices=1;
     sd = sliceinfo + sliceorderindex[0];
     mslicei->islices[0] = sliceorderindex[0];
     mslicei->type=sd->type;
-    for(i=1;i<nslice;i++){
+    for(i=1;i<nslice_files;i++){
       sdold = sliceinfo + sliceorderindex[i - 1];
       sd = sliceinfo + sliceorderindex[i];
       if(new_multi(sdold,sd)==1){
@@ -1351,7 +1351,7 @@ void getsliceparams(void){
         mslicei->type=sd->type;
         mslicei->mesh_type=sd->mesh_type;
         mslicei->islices=NULL;
-        NewMemory((void **)&mslicei->islices,sizeof(int)*nslice);
+        NewMemory((void **)&mslicei->islices,sizeof(int)*nslice_files);
       }
       mslicei->nslices++;
       mslicei->islices[mslicei->nslices-1]=sliceorderindex[i];
@@ -1380,7 +1380,7 @@ void updatevslices(void){
   /* update vector slices */
 
   nvslice=0;
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     vd = vsliceinfo + nvslice;
     sdi = sliceinfo+i;
     vd->iu=-1;
@@ -1392,7 +1392,7 @@ void updatevslices(void){
     if(strncmp(sdi->label.shortlabel,"U-VEL",5)==0)sdi->vec_comp=1;
     if(strncmp(sdi->label.shortlabel,"V-VEL",5)==0)sdi->vec_comp=2;
     if(strncmp(sdi->label.shortlabel,"W-VEL",5)==0)sdi->vec_comp=3;
-    for(j=0;j<nslice;j++){
+    for(j=0;j<nslice_files;j++){
       sdj = sliceinfo+j;
       if(sdi->blocknumber!=sdj->blocknumber)continue;
       if(sdi->is1!=sdj->is1||sdi->is2!=sdj->is2||sdi->js1!=sdj->js1)continue;
@@ -1551,11 +1551,11 @@ void updateslicetypes(void){
   slice *sd;
 
   nslicetypes = 0;
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     sd = sliceinfo+i;
     if(getsliceindex(sd)==-1)slicetypes[nslicetypes++]=i;
   }
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     sd = sliceinfo+i;
     sd->type=getslicetype(sd);
   }
@@ -1635,7 +1635,7 @@ void updatesliceboundlabels(){
   databounds *sb;
   slice *sd;
 
-  for(i=0;i<nslice;i++){
+  for(i=0;i<nslice_files;i++){
     sd = sliceinfo + i;
     j = getslicetype(sd);
     sb = slicebounds + j;
