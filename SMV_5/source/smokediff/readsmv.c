@@ -378,6 +378,12 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       fgets(buffer,255,streamsmv);
       trim(buffer);
       NewMemory((void **)&plot3di->file,(unsigned int)(strlen(buffer)+1));
+      NewMemory((void **)&plot3di->buckets[0],sizeof(bucketdata));
+      NewMemory((void **)&plot3di->buckets[1],sizeof(bucketdata));
+      NewMemory((void **)&plot3di->buckets[2],sizeof(bucketdata));
+      NewMemory((void **)&plot3di->buckets[3],sizeof(bucketdata));
+      NewMemory((void **)&plot3di->buckets[4],sizeof(bucketdata));
+      
       CheckMemory;
       strcpy(plot3di->file,buffer);
       CheckMemory;
@@ -454,6 +460,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         int endian;
 
         NewMemory((void **)&slicei->file,(unsigned int)(strlen(buffer)+1));
+        NewMemory((void **)&slicei->bucket,sizeof(bucketdata));
         STRCPY(slicei->file,buffer);
         if(readlabels(&slicei->label,streamsmv)==2){
           printf("*** Warning: problem reading SLCF entry\n");
@@ -532,6 +539,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         int lenfile, endian, npatches, error, boundaryunitnumber;
 
         NewMemory((void **)&boundaryi->file,(unsigned int)(strlen(buffer)+1));
+        NewMemory((void **)&boundaryi->bucket,sizeof(bucketdata));
         STRCPY(boundaryi->file,buffer);
         if(readlabels(&boundaryi->label,streamsmv)==2){
           printf("*** Warning: problem reading BNDF entry\n");
