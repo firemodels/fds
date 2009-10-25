@@ -1242,7 +1242,7 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
-  for(i=0;i<nplot3d;i++){
+  for(i=0;i<nplot3d_files;i++){
     plot3d *plot3di;
 
     plot3di = plot3dinfo + i;
@@ -1269,7 +1269,7 @@ void script_loadplot3d(scriptdata *scripti){
   time = scripti->fval;
   blocknum = scripti->ival-1;
 
-  for(i=0;i<nplot3d;i++){
+  for(i=0;i<nplot3d_files;i++){
     plot3d *plot3di;
 
     plot3di = plot3dinfo + i;
