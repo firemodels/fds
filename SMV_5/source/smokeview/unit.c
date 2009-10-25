@@ -134,6 +134,20 @@ void init_unit_defs(void){
       add_unit_class(&patchj->label);
     }
   }
+  for(j=0;j<nplot3d;j++){
+    plot3d *plot3dj;
+    char *shortlabel;
+    int n;
+      
+    plot3dj = plot3dinfo + j;
+    for(n=0;n<5;n++){
+      shortlabel = plot3dj->label[n].shortlabel;
+      unitclass = get_unit_class(shortlabel);
+      if(unitclass==NULL){
+        add_unit_class(&plot3dj->label[n]);
+      }
+    }
+  }
   CheckMemory;
 }
 
@@ -146,7 +160,7 @@ void update_unit_defs(void){
   for(i=0;i<nunitclasses;i++){
     char *datatype;
     float valmin, valmax, diff_maxmin;
-    int firstslice, firstpatch, diff_index;
+    int firstslice, firstpatch, firstplot3d, diff_index;
 
     firstpatch=1;
     datatype=unitclasses[i].unitclass;
@@ -166,6 +180,7 @@ void update_unit_defs(void){
         if(patchj->diff_valmax>valmax)valmax=patchj->diff_valmax;
       }
     }
+
     firstslice=1;
     for(j=0;j<nslice;j++){
       slice *slicej;
@@ -183,8 +198,34 @@ void update_unit_defs(void){
         if(slicej->diff_valmax>valmax)valmax=slicej->diff_valmax;
       }
     }
+
+    firstplot3d=1;
+    datatype=unitclasses[i].unitclass;
+    for(j=0;j<nplot3d;j++){
+      plot3d *plot3dj;
+      int n;
+      
+      plot3dj = plot3dinfo + j;
+      if(plot3dj->loaded==0||plot3dj->display==0)continue;
+      for(n=0;n<5;n++){
+        char *shortlabel;
+
+        shortlabel = plot3dj->label[n].shortlabel;
+        if(unit_type_match(shortlabel,unitclasses+i)==0)continue;
+        if(firstplot3d==1){
+          firstplot3d=0;
+          valmin=plot3dj->diff_valmin[n];
+          valmax=plot3dj->diff_valmax[n];
+        }
+         else{
+          if(plot3dj->diff_valmin[n]<valmin)valmin=plot3dj->diff_valmin[n];
+          if(plot3dj->diff_valmax[n]>valmax)valmax=plot3dj->diff_valmax[n];
+        }
+      }
+    }
+
     diff_index=unitclasses[i].diff_index;
-    if(diff_index!=-1&&(firstslice==0||firstpatch==0)){
+    if(diff_index!=-1&&(firstslice==0||firstpatch==0||firstplot3d==0)){
       int idiff;
 
       diff_maxmin=valmax-valmin;
