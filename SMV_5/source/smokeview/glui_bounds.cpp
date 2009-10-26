@@ -230,7 +230,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /*  3d smoke   */
 
-  if(nsmoke3d>0){
+  if(nsmoke3d_files>0){
     panel_smoke3d = glui_bounds->add_rollout("3D Smoke",false);
   
     SPINNER2_smoke3dframestep=glui_bounds->add_spinner_to_panel(panel_smoke3d,"Frame Skip",GLUI_SPINNER_INT,&smoke3dframeskip,
@@ -289,7 +289,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /*  Iso File Load Bounds   */
 
-  if(niso>0){
+  if(niso_files>0){
     panel_iso = glui_bounds->add_rollout("Isosurface",false);
     SPINNER_isoframestep=glui_bounds->add_spinner_to_panel(panel_iso,"Frame Skip",GLUI_SPINNER_INT,&isoframeskip,
       FRAMELOADING,Iso_CB);
@@ -317,7 +317,7 @@ extern "C" void glui_bounds_setup(int main_window){
 //SVEXTERN part5prop *part5propinfo;
 //SVEXTERN int npart5prop;
 
-  if(npartinfo>0&&nevac!=npartinfo){
+  if(npart_files>0&&nevac!=npart_files){
     glui_active=1;
     panel_part = glui_bounds->add_rollout("Particle",false);
     if(npart5prop>0){
@@ -540,7 +540,7 @@ extern "C" void glui_bounds_setup(int main_window){
     Slice_CB(FILETYPEINDEX);
   }
 #ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice_files>0)){
+  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
     glui_bounds->add_separator();
     rollout_compress=glui_bounds->add_rollout("Compress Files (Smokezip)",false);
     check_erase_all=glui_bounds->add_checkbox_to_panel(rollout_compress,"Erase compressed files",
@@ -558,12 +558,12 @@ extern "C" void glui_bounds_setup(int main_window){
         FRAMELOADING,Slice_CB);
       SPINNER_slicezipstep->set_int_limits(0,100);
     }
-    if(niso>0){
+    if(niso_files>0){
       SPINNER_isozipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"ISO Frame Skip",GLUI_SPINNER_INT,&isozipskip,
         FRAMELOADING,Iso_CB);
       SPINNER_isozipstep->set_int_limits(0,100);
     }
-    if(nsmoke3d>0){
+    if(nsmoke3d_files>0){
       SPINNER_smoke3dzipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"3D Smoke Frame Skip",GLUI_SPINNER_INT,&smoke3dzipskip,
         FRAMELOADING,Smoke3D_CB);
       SPINNER_smoke3dzipstep->set_int_limits(0,100);
@@ -1825,7 +1825,7 @@ extern "C" void show_glui_bounds(void){
     Bound_CB(SETVALMIN);
     Bound_CB(SETVALMAX);
   }
-  if(npartinfo>0&&npartinfo!=nevac){
+  if(npart_files>0&&npart_files!=nevac){
     PART_CB(SETVALMIN);
     PART_CB(SETVALMAX);
   }

@@ -408,7 +408,7 @@ void InitOpenGL(void){
         vslicei->autoload=0;
       }
     }
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       particle *parti;
 
       parti = partinfo + i;
@@ -432,7 +432,7 @@ void InitOpenGL(void){
         plot3di->autoload=0;
       }
     }
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       smoke3d *smoke3di;
 
       smoke3di = smoke3dinfo + i;
@@ -456,7 +456,7 @@ void InitOpenGL(void){
         patchi->autoload=0;
       }
     }
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -495,7 +495,7 @@ void InitOpenGL(void){
       vslicei->autoload=0;
     }
 
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       particle *parti;
 
       parti = partinfo + i;
@@ -511,7 +511,7 @@ void InitOpenGL(void){
       plot3di->autoload=0;
     }
 
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       smoke3d *smoke3di;
 
       smoke3di = smoke3dinfo + i;
@@ -527,7 +527,7 @@ void InitOpenGL(void){
       patchi->autoload=0;
     }
 
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -555,7 +555,7 @@ void InitOpenGL(void){
    // startup particle
 
    nstartup=0;
-   for(i=0;i<npartinfo;i++){
+   for(i=0;i<npart_files;i++){
       particle *parti;
 
       parti = partinfo + i;
@@ -565,7 +565,7 @@ void InitOpenGL(void){
    if(nstartup!=0){
      fprintf(fileout,"PARTAUTO\n");
      fprintf(fileout," %i \n",nstartup);
-     for(i=0;i<npartinfo;i++){
+     for(i=0;i<npart_files;i++){
         particle *parti;
 
         parti = partinfo + i;
@@ -599,7 +599,7 @@ void InitOpenGL(void){
    // startup iso
 
    nstartup=0;
-   for(i=0;i<niso;i++){
+   for(i=0;i<niso_files;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -609,7 +609,7 @@ void InitOpenGL(void){
    if(nstartup!=0){
      fprintf(fileout,"ISOAUTO\n");
      fprintf(fileout," %i \n",nstartup);
-     for(i=0;i<niso;i++){
+     for(i=0;i<niso_files;i++){
         iso *isoi;
 
         isoi = isoinfo + i;
@@ -664,7 +664,7 @@ void InitOpenGL(void){
    // startup smoke
 
    nstartup=0;
-   for(i=0;i<nsmoke3d;i++){
+   for(i=0;i<nsmoke3d_files;i++){
       smoke3d *smoke3di;
 
       smoke3di = smoke3dinfo + i;
@@ -674,7 +674,7 @@ void InitOpenGL(void){
    if(nstartup!=0){
      fprintf(fileout,"S3DAUTO\n");
      fprintf(fileout," %i \n",nstartup);
-     for(i=0;i<nsmoke3d;i++){
+     for(i=0;i<nsmoke3d_files;i++){
         smoke3d *smoke3di;
 
         smoke3di = smoke3dinfo + i;
@@ -712,7 +712,7 @@ void InitOpenGL(void){
 
   void get_startup_part(int seq_id){
     int i;
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       particle *parti;
 
       parti = partinfo + i;
@@ -757,7 +757,7 @@ void InitOpenGL(void){
 
   void get_startup_smoke(int seq_id){
     int i;
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       smoke3d *smoke3di;
 
       smoke3di = smoke3dinfo + i;
@@ -774,7 +774,7 @@ void InitOpenGL(void){
 
   void get_startup_iso(int seq_id){
     int i;
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -838,14 +838,14 @@ void InitOpenGL(void){
         readplot(plot3di->file,i,LOAD,&errorcode);
       }
     }
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       particle *parti;
 
       parti = partinfo + i;
       if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
       if(parti->autoload==1)readpart(parti->file,i,LOAD,&errorcode);
     }
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -878,7 +878,7 @@ void InitOpenGL(void){
       if(terri->autoload==0&&terri->loaded==1)readterrain(terri->file,i,UNLOAD,&errorcode);
       if(terri->autoload==1&&terri->loaded==0)readslice(terri->file,i,LOAD,&errorcode);
     }
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       smoke3d *smoke3di;
 
       smoke3di = smoke3dinfo + i;
@@ -1230,11 +1230,11 @@ void initvars1(void){
   ntc_total=0, nspr_total=0, nheat_total=0;
   n_devices=0;
 
-  npartinfo=0, nslice_files=0, nvslice=0, nslice2=0, npatch2=0, nplot3d_files=0, npatch_files=0;
+  npart_files=0, nslice_files=0, nvslice=0, nslice2=0, npatch2=0, nplot3d_files=0, npatch_files=0;
   nevac=0;
   current_particle_type=-1,last_particle_type=-2;
-  nsmoke3d=0;
-  niso=0, niso2=0;
+  nsmoke3d_files=0;
+  niso_files=0, niso_bounds=0;
   ntrnx=0, ntrny=0, ntrnz=0,npdim=0,nmeshes=0,clip_mesh=0;
   nobst=0,nvent=0,noffset=0;
   nlabels=0,visLabels=0,nlabelssmv=0;

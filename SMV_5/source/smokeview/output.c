@@ -176,7 +176,7 @@ void bench_out(float localframerate){
   }
   fprintf(fileout,"   Files displayed:\n");
 
-  for(i=0;i<npartinfo;i++){
+  for(i=0;i<npart_files;i++){
     parti=partinfo+i;
     if(parti->loaded==0||parti->display==0)continue;
     fprintf(fileout,"      %s\n",parti->file);
@@ -204,7 +204,7 @@ void bench_out(float localframerate){
     if(slicei->benchvis==0)continue;
     fprintf(fileout,"      %s\n",slicei->file);
   }
-  for(i=0;i<nsmoke3d;i++){
+  for(i=0;i<nsmoke3d_files;i++){
     smoke3di=smoke3dinfo+i;
     if(smoke3di->loaded==0||smoke3di->display==0)continue;
     fprintf(fileout,"      %s\n",smoke3di->file);
@@ -214,7 +214,7 @@ void bench_out(float localframerate){
     if(patchi->loaded==0||patchi->display==0)continue;
     fprintf(fileout,"      %s\n",patchi->file);
   }
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     isoi=isoinfo+i;
     if(isoi->loaded==0||isoi->display==0)continue;
     fprintf(fileout,"      %s\n",isoi->file);

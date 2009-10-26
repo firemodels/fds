@@ -335,7 +335,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       iso *isoi;
 
       loaded_isomesh=NULL;
-      for(i=0;i<niso;i++){
+      for(i=0;i<niso_files;i++){
         isoi=isoinfo+i;
         if(isoi->loaded==1){
           loaded_isomesh=meshinfo+isoi->blocknumber;
@@ -2021,11 +2021,11 @@ void updateisotypes(void){
   iso *isoi;
 
   nisotypes = 0;
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     isoi = isoinfo+i;
     if(getisoindex(isoi)==-1)isotypes[nisotypes++]=i;
   }
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     isoi = isoinfo+i;
     isoi->type=getisotype(isoi);
   }
@@ -2067,7 +2067,7 @@ int getisottype(const iso *isoi){
 
   if(isoi->dataflag==0)return -1;
   jj = 0;
-  for(j=0;j<niso;j++){
+  for(j=0;j<niso_files;j++){
     isoi2 = isoinfo+j;
 
     if(isoi2->dataflag==0)continue;
@@ -2085,13 +2085,13 @@ void update_isotype(void){
   iso *isoi;
 
 
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     isoi = isoinfo + i;
     if(isoi->loaded==0)continue;
     if(isoi->display==1&&isoi->type==iisotype)return;
   }
 
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     isoi = isoinfo + i;
     if(isoi->loaded==0)continue;
     if(isoi->display==1){
@@ -2127,15 +2127,15 @@ void updateisomenulabels(void){
   iso *isoi;
   char label[128];
 
-  if(niso>0){
+  if(niso_files>0){
     FREEMEMORY(isoorderindex);
-    NewMemory((void **)&isoorderindex,sizeof(int)*niso);
-    for(i=0;i<niso;i++){
+    NewMemory((void **)&isoorderindex,sizeof(int)*niso_files);
+    for(i=0;i<niso_files;i++){
       isoorderindex[i]=i;
     }
-    qsort( (int *)isoorderindex, (size_t)niso, sizeof(int), isocompare );
+    qsort( (int *)isoorderindex, (size_t)niso_files, sizeof(int), isocompare );
 
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       isoi = isoinfo + i;
       STRCPY(isoi->menulabel,isoi->surface_label.longlabel);
       if(nmeshes>1){
@@ -2233,7 +2233,7 @@ void sync_isobounds(int isottype){
   // find number of iso-surfaces with values 
 
   ncount=0;
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     iso *isoi;
 
     isoi = isoinfo + i;
@@ -2245,7 +2245,7 @@ void sync_isobounds(int isottype){
 
   // find min and max bounds for valued iso-surfaces
 
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     iso *isoi;
     mesh *meshi;
 
@@ -2265,7 +2265,7 @@ void sync_isobounds(int isottype){
 
   // set min and max bounds for valued iso-surfaces
 
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     iso *isoi;
     mesh *meshi;
 
@@ -2278,7 +2278,7 @@ void sync_isobounds(int isottype){
 
   // rescale all data
 
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     iso *isoi;
     mesh *meshi;
 
