@@ -849,7 +849,7 @@ void script_loadparticles(scriptdata *scripti){
   printf("Script: loading particles files");
   printf("\n");
 
-  for(i=0;i<npartinfo;i++){
+  for(i=0;i<npart_files;i++){
     particle *parti;
 
     parti = partinfo + i;
@@ -872,7 +872,7 @@ void script_loadiso(scriptdata *scripti){
   printf("Script: loading isosurface files of type: %s",scripti->cval);
   printf("\n");
 
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     iso *isoi;
     int len;
     int imatch;
@@ -898,7 +898,7 @@ void script_load3dsmoke(scriptdata *scripti){
   printf("Script: loading smoke3d files of type: %s",scripti->cval);
   printf("\n");
 
-  for(i=0;i<nsmoke3d;i++){
+  for(i=0;i<nsmoke3d_files;i++){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;
@@ -1204,7 +1204,7 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
-  for(i=0;i<npartinfo;i++){
+  for(i=0;i<npart_files;i++){
     particle *parti;
 
     parti = partinfo + i;
@@ -1213,7 +1213,7 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     iso *isoi;
 
     isoi = isoinfo + i;
@@ -1222,7 +1222,7 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
-  for(i=0;i<nsmoke3d;i++){
+  for(i=0;i<nsmoke3d_files;i++){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;

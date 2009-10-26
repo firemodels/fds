@@ -954,7 +954,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 void update_all_partvis2(void){
   particle *parti;
   int i;
-  for(i=0;i<npartinfo;i++){
+  for(i=0;i<npart_files;i++){
     parti = partinfo + i;
     if(parti->loaded==1)update_all_partvis(parti);
   }
@@ -1151,7 +1151,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
 
   printf("Loading particle data: %s\n",file);
   FORTgetdata1(&parttype,&error);
-  if(partfilenum>=0&&partfilenum<npartinfo){
+  if(partfilenum>=0&&partfilenum<npart_files){
     partshortlabel=partinfo[partfilenum].label.shortlabel;
     partunitlabel=partinfo[partfilenum].label.unit;
   }
@@ -1319,7 +1319,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
 void drawselect_avatars(void){
   int i;
 
-  for(i=0;i<npartinfo;i++){
+  for(i=0;i<npart_files;i++){
     particle *parti;
 
     parti = partinfo + i;
@@ -1961,15 +1961,15 @@ void updatepartmenulabels(void){
   char label[128];
   int lenlabel;
 
-  if(npartinfo>0){
+  if(npart_files>0){
     FREEMEMORY(partorderindex);
-    NewMemory((void **)&partorderindex,sizeof(int)*npartinfo);
-    for(i=0;i<npartinfo;i++){
+    NewMemory((void **)&partorderindex,sizeof(int)*npart_files);
+    for(i=0;i<npart_files;i++){
       partorderindex[i]=i;
     }
-    qsort( (int *)partorderindex, (size_t)npartinfo, sizeof(int), partcompare );
+    qsort( (int *)partorderindex, (size_t)npart_files, sizeof(int), partcompare );
 
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       parti = partinfo + i;
       STRCPY(parti->menulabel,"");
       if(parti->evac==1){

@@ -900,7 +900,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     if(active_smokesensors==1){
       get_world_eyepos(modelview_scratch, world_eyepos);
     }
-    if(nsmoke3d>0&&show3dsmoke==1){
+    if(nsmoke3d_files>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
       sniffErrors("after getsmokedir");
 #ifdef pp_CULL
@@ -1172,7 +1172,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       particle *parti;
 
       if(staticframe0==0||iframe!=0){
-        for(i=0;i<npartinfo;i++){
+        for(i=0;i<npart_files;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->display==0)continue;
           if(parti->evac==1){
@@ -1186,7 +1186,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         }
       }
       if(visStaticSmoke==1&&staticframe0==1){
-        for(i=0;i<npartinfo;i++){
+        for(i=0;i<npart_files;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->display==0)continue;
           drawStaticPart(parti);
@@ -1198,7 +1198,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw evacuation +++++++++++++++++++++++++ */
 
     if(showevac==1){
-      for(i=0;i<npartinfo;i++){
+      for(i=0;i<npart_files;i++){
         particle *parti;
 
         parti = partinfo + i;
@@ -1518,7 +1518,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         drawsmoke3dCULL();
     }
     else{
-      for(i=0;i<nsmoke3d;i++){
+      for(i=0;i<nsmoke3d_files;i++){
         smoke3d *smoke3di;
 
         smoke3di = smoke3dinfo + i;
@@ -1535,7 +1535,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       }
     }
 #else
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       smoke3d *smoke3di;
 
       smoke3di = smoke3dinfo + i;
@@ -2095,7 +2095,7 @@ void updateShow(void){
   {
     smoke3d *smoke3di;
 
-    for(ii=0;ii<nsmoke3d;ii++){
+    for(ii=0;ii<nsmoke3d_files;ii++){
       smoke3di = smoke3dinfo + ii;
       if(smoke3di->loaded==1&&smoke3di->display==1){
         smoke3dflag=1;
@@ -2118,7 +2118,7 @@ void updateShow(void){
   isoflag=0;
   tisoflag=0;
   if(visTimeIso==1){
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       isoi = isoinfo+i;
       if(isoi->loaded==0)continue;
       if(isoi->display==1&&isoi->type==iisotype){
@@ -2152,7 +2152,7 @@ void updateShow(void){
   }
   partflag=0;
   if(visSmoke==1&&visTimeSmoke==1){
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       parti = partinfo + i;
       if(parti->evac==1)continue;
       if(parti->loaded==0||parti->display==0)continue;
@@ -2164,7 +2164,7 @@ void updateShow(void){
   }
   evacflag=0;
   if(visEvac==1&&visTimeEvac==1){
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       parti = partinfo + i;
       if(parti->evac==0)continue;
       if(parti->loaded==0||parti->display==0)continue;
@@ -2407,7 +2407,7 @@ void updatetimes(void){
     if(touri->display==0)continue;
     ntimes += touri->npath;
   }
-  for(i=0;i<npartinfo;i++){
+  for(i=0;i<npart_files;i++){
     parti = partinfo + i;
     if(parti->loaded==0)continue;
     ntimes += parti->nframes;
@@ -2447,7 +2447,7 @@ void updatetimes(void){
     smoke3d *smoke3di;
 
     if(Read3DSmoke3DFile==1&&vis3DSmoke3D==1){
-      for(i=0;i<nsmoke3d;i++){
+      for(i=0;i<nsmoke3d_files;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0)continue;
         ntimes += smoke3di->n_times;
@@ -2507,7 +2507,7 @@ void updatetimes(void){
     }
   }
 
-  for(i=0;i<npartinfo;i++){
+  for(i=0;i<npart_files;i++){
     parti = partinfo + i;
     if(parti->loaded==0)continue;
     for(n=0;n<parti->nframes;n++){
@@ -2578,7 +2578,7 @@ void updatetimes(void){
     }
   }
   if(ReadIsoFile==1&&visAIso!=0){
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       ib = isoinfo+i;
       if(ib->loaded==0)continue;
       meshi=meshinfo + ib->blocknumber;
@@ -2597,7 +2597,7 @@ void updatetimes(void){
     smoke3d *smoke3di;
 
     if(Read3DSmoke3DFile==1&&vis3DSmoke3D==1){
-      for(i=0;i<nsmoke3d;i++){
+      for(i=0;i<nsmoke3d_files;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0)continue;
         for(n=0;n<smoke3di->n_times;n++){
@@ -2627,7 +2627,7 @@ void updatetimes(void){
   ntimes=ntimes2;
   FREEMEMORY(render_frame);
     if(ntimes>0)NewMemory((void **)&render_frame,ntimes*sizeof(int));
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       parti=partinfo+i;
       FREEMEMORY(parti->ptimeslist);
       if(ntimes>0)NewMemory((void **)&parti->ptimeslist,ntimes*sizeof(int));
@@ -2702,7 +2702,7 @@ void updatetimes(void){
     {
       smoke3d *smoke3di;
 
-      for(i=0;i<nsmoke3d;i++){
+      for(i=0;i<nsmoke3d_files;i++){
         smoke3di = smoke3dinfo + i;
         FREEMEMORY(smoke3di->timeslist);
         if(ntimes>0)NewMemory((void **)&smoke3di->timeslist,ntimes*sizeof(int));
@@ -2930,7 +2930,7 @@ void Init(void){
     initcontour(&meshi->plot3dcontour3,rgbptr,nrgb+1);
   }
 
-  if(set_no_part!=1&&nopart!=1&&npartinfo>0){
+  if(set_no_part!=1&&nopart!=1&&npart_files>0){
     readpart(partinfo[0].file,0,LOAD,&errorcode);
   }
   for(i=0;i<nmeshes;i++){
@@ -3187,7 +3187,7 @@ void synctimes(void){
 
   /* synchronize particle times */
 
-    for(j=0;j<npartinfo;j++){
+    for(j=0;j<npart_files;j++){
       parti=partinfo+j;
       if(parti->loaded==0)continue;
       if(n==0){
@@ -3269,7 +3269,7 @@ void synctimes(void){
     {
       smoke3d *smoke3di;
 
-      for(jj=0;jj<nsmoke3d;jj++){
+      for(jj=0;jj<nsmoke3d_files;jj++){
         smoke3di = smoke3dinfo + jj;
         if(smoke3di->loaded==0)continue;
          if(n==0){
@@ -3788,7 +3788,7 @@ void checktimebound(void){
   }
   if(timedrag==0&&itime<0||timedrag==1&&itime>ntimes-1){
     izone=nzonet-1;itime=ntimes-1;
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       parti=partinfo+i;
       parti->iframe=parti->nframes-1;
     }
@@ -3883,12 +3883,12 @@ int getplotstate(int choice){
         if(patchi->display==0||patchi->type!=ipatchtype)continue;
         return DYNAMIC_PLOTS;
       }
-      for(i=0;i<npartinfo;i++){
+      for(i=0;i<npart_files;i++){
         parti = partinfo + i;
         if(parti->loaded==0||parti->display==0)continue;
         return DYNAMIC_PLOTS;
       }
-      for(i=0;i<niso;i++){
+      for(i=0;i<niso_files;i++){
         isoi = isoinfo + i;
         if(isoi->loaded==0)continue;
         if(isoi->display==0)continue;
@@ -3909,7 +3909,7 @@ int getplotstate(int choice){
         if(touri->display==0)continue;
         return DYNAMIC_PLOTS;
       }
-      for(i=0;i<nsmoke3d;i++){
+      for(i=0;i<nsmoke3d_files;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
         return DYNAMIC_PLOTS;

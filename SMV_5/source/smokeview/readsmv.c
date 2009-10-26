@@ -312,11 +312,11 @@ int readsmv(char *file){
     FREEMEMORY(plot3dinfo);
   }
   nplot3d_files=0;
-  if(nsmoke3d>0){
+  if(nsmoke3d_files>0){
     {
       smoke3d *smoke3di;
 
-      for(i=0;i<nsmoke3d;i++){
+      for(i=0;i<nsmoke3d_files;i++){
         smoke3di = smoke3dinfo + i;
         freesmoke3d(smoke3di);
 #ifdef pp_LIGHT
@@ -326,12 +326,12 @@ int readsmv(char *file){
         FREEMEMORY(smoke3di->reg_file);
       }
       FREEMEMORY(smoke3dinfo);
-      nsmoke3d=0;
+      nsmoke3d_files=0;
     }
   }
 
-  if(npartinfo>0){
-    for(i=0;i<npartinfo;i++){
+  if(npart_files>0){
+    for(i=0;i<npart_files;i++){
       freelabels(&partinfo[i].label);
       FREEMEMORY(partinfo[i].partclassptr);
       FREEMEMORY(partinfo[i].reg_file);
@@ -340,7 +340,7 @@ int readsmv(char *file){
     }
     FREEMEMORY(partinfo);
   }
-  npartinfo=0;
+  npart_files=0;
 
   ntarg_files=0;
 
@@ -397,14 +397,14 @@ int readsmv(char *file){
   }
   npatch_files=0;
   
-  if(niso>0){
-    for(i=0;i<niso;i++){
+  if(niso_files>0){
+    for(i=0;i<niso_files;i++){
       freelabels(&isoinfo[i].surface_label);
       FREEMEMORY(isoinfo[i].file);
     }
     FREEMEMORY(isoinfo);
   }
-  niso=0;
+  niso_files=0;
 
   freecadinfo();
 
@@ -694,7 +694,7 @@ int readsmv(char *file){
     if(match(buffer,"PART",4) == 1||match(buffer,"EVAC",4)==1
       ||match(buffer,"PRT5",4)==1||match(buffer,"EVA5",4)==1
       ){
-      npartinfo++;
+      npart_files++;
       continue;
     }
     if( (match(buffer,"SLCF",4) == 1)||
@@ -706,7 +706,7 @@ int readsmv(char *file){
       continue;
     }
     if(match(buffer,"SMOKE3D",7) == 1){
-      nsmoke3d++;
+      nsmoke3d_files++;
       continue;
     }
     if(
@@ -722,7 +722,7 @@ int readsmv(char *file){
       continue;
     }
     if(match(buffer,"ISOF",4) == 1||match(buffer,"TISOF",5)==1){
-      niso++;
+      niso_files++;
       continue;
     }
     if(match(buffer,"ROOM",4) == 1){
@@ -865,8 +865,8 @@ int readsmv(char *file){
   // define labels and memory for default colorbars
 
   FREEMEMORY(partinfo);
-  if(npartinfo!=0){
-    if(NewMemory((void **)&partinfo,npartinfo*sizeof(particle))==0)return 2;
+  if(npart_files!=0){
+    if(NewMemory((void **)&partinfo,npart_files*sizeof(particle))==0)return 2;
   }
 
   FREEMEMORY(targinfo);
@@ -884,8 +884,8 @@ int readsmv(char *file){
        NewMemory( (void **)&slicetypes, nslice_files*sizeof(int)      )==0||
        NewMemory( (void **)&vslicetypes,3*nslice_files*sizeof(int)    )==0){return 2;}
   }
-  if(nsmoke3d>0){
-    if(NewMemory( (void **)&smoke3dinfo, nsmoke3d*sizeof(smoke3d))==0)return 2;
+  if(nsmoke3d_files>0){
+    if(NewMemory( (void **)&smoke3dinfo, nsmoke3d_files*sizeof(smoke3d))==0)return 2;
   }
 
 #ifndef pp_OSX
@@ -913,9 +913,9 @@ int readsmv(char *file){
   }
   FREEMEMORY(isoinfo);
   FREEMEMORY(isotypes);
-  if(niso>0){
-    if(NewMemory((void **)&isoinfo,niso*sizeof(iso))==0)return 2;
-    if(NewMemory((void **)&isotypes,niso*sizeof(int))==0)return 2;
+  if(niso_files>0){
+    if(NewMemory((void **)&isoinfo,niso_files*sizeof(iso))==0)return 2;
+    if(NewMemory((void **)&isotypes,niso_files*sizeof(int))==0)return 2;
   }
   FREEMEMORY(roominfo);
   if(nrooms>0){
@@ -1435,7 +1435,7 @@ typedef struct {
         blocknumber--;
       }
       if(fgets(buffer,255,stream)==NULL){
-        nsmoke3d--;
+        nsmoke3d_files--;
         break;
       }
       len=strlen(buffer);
@@ -1513,7 +1513,7 @@ typedef struct {
         }
         else{
           if(readlabels(&smoke3di->label,stream)==2)return 2;
-          nsmoke3d--;
+          nsmoke3d_files--;
         }
         smoke3di->version=getsmoke3dversion(smoke3di);
         if(strncmp(smoke3di->label.shortlabel,"soot",4)==0){
@@ -3072,7 +3072,7 @@ typedef struct {
       parti->seq_id=nn_part;
       parti->autoload=0;
       if(fgets(buffer,255,stream)==NULL){
-        npartinfo--;
+        npart_files--;
         break;
       }
       len=strlen(buffer);
@@ -3172,7 +3172,7 @@ typedef struct {
             parti->partclassptr[i]=partclassinfo + parti->nclasses;
         }
         if(parti->file==NULL||STAT(parti->file,&statbuffer)!=0){
-          npartinfo--;
+          npart_files--;
         }
         else{
           ipart++;
@@ -3185,7 +3185,7 @@ typedef struct {
         }
         else{
           if(readlabels(&parti->label,stream)==2)return 2;
-          npartinfo--;
+          npart_files--;
         }
       }
       continue;
@@ -3591,7 +3591,7 @@ typedef struct {
         blocknumber--;
       }
       if(fgets(buffer,255,stream)==NULL){
-        niso--;
+        niso_files--;
         break;
       }
 
@@ -3659,7 +3659,7 @@ typedef struct {
         if(dataflag==1){
           if(readlabels(&isoi->color_label,stream)==2)return 2;
         }
-        niso--;
+        niso_files--;
       }
       if(get_isolevels==1){
         int len_clevels;
@@ -5205,13 +5205,13 @@ typedef struct {
     endian = endian_data;
   }
 
-  if(niso>0){
+  if(niso_files>0){
     FREEMEMORY(isoindex);
     FREEMEMORY(isobounds);
-    if(NewMemory((void*)&isoindex,niso*sizeof(int))==0)return 2;
-    if(NewMemory((void*)&isobounds,niso*sizeof(databounds))==0)return 2;
-    niso2=0;
-    for(i=0;i<niso;i++){
+    if(NewMemory((void*)&isoindex,niso_files*sizeof(int))==0)return 2;
+    if(NewMemory((void*)&isobounds,niso_files*sizeof(databounds))==0)return 2;
+    niso_bounds=0;
+    for(i=0;i<niso_files;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -5221,18 +5221,18 @@ typedef struct {
       isoi->setvalmax=0;
       isoi->valmin=1.0;
       isoi->valmax=0.0;
-      isoindex[niso2]=i;
-      isobounds[niso2].datalabel=isoi->color_label.shortlabel;
-      isobounds[niso2].setvalmin=0;
-      isobounds[niso2].setvalmax=0;
-      isobounds[niso2].valmin=1.0;
-      isobounds[niso2].valmax=0.0;
-      isobounds[niso2].setchopmax=0;
-      isobounds[niso2].setchopmin=0;
-      isobounds[niso2].chopmax=0.0;
-      isobounds[niso2].chopmin=1.0;
-      isobounds[niso2].label=&isoi->color_label;
-      niso2++;
+      isoindex[niso_bounds]=i;
+      isobounds[niso_bounds].datalabel=isoi->color_label.shortlabel;
+      isobounds[niso_bounds].setvalmin=0;
+      isobounds[niso_bounds].setvalmax=0;
+      isobounds[niso_bounds].valmin=1.0;
+      isobounds[niso_bounds].valmax=0.0;
+      isobounds[niso_bounds].setchopmax=0;
+      isobounds[niso_bounds].setchopmin=0;
+      isobounds[niso_bounds].chopmax=0.0;
+      isobounds[niso_bounds].chopmin=1.0;
+      isobounds[niso_bounds].label=&isoi->color_label;
+      niso_bounds++;
       for(n=0;n<i;n++){
         iso *ison;
 
@@ -5240,7 +5240,7 @@ typedef struct {
         if(ison->dataflag==0)continue;
         if(strcmp(isoi->color_label.shortlabel,ison->color_label.shortlabel)==0){
           isoi->firstshort=0;
-          niso2--;
+          niso_bounds--;
           break;
         }
       }
@@ -7046,7 +7046,7 @@ int readini2(char *inifile, int localfile){
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
       if(strcmp(buffer2,"")!=0){
-        for(i=0;i<niso2;i++){
+        for(i=0;i<niso_bounds;i++){
           if(strcmp(isobounds[i].datalabel,buffer2)!=0)continue;
           isobounds[i].setvalmin=setvalmin;
           isobounds[i].setvalmax=setvalmax;
@@ -7056,7 +7056,7 @@ int readini2(char *inifile, int localfile){
         }
       }
       else{
-        for(i=0;i<niso2;i++){
+        for(i=0;i<niso_bounds;i++){
           isobounds[i].setvalmin=setvalmin;
           isobounds[i].setvalmax=setvalmax;
           isobounds[i].valmin=valmin;
@@ -7070,7 +7070,7 @@ int readini2(char *inifile, int localfile){
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
       if(strcmp(buffer,"")!=0){
-        for(i=0;i<niso2;i++){
+        for(i=0;i<niso_bounds;i++){
           if(strcmp(isobounds[i].datalabel,buffer2)!=0)continue;
           isobounds[i].setchopmin=setvalmin;
           isobounds[i].setchopmax=setvalmax;
@@ -7080,7 +7080,7 @@ int readini2(char *inifile, int localfile){
         }
       }
       else{
-        for(i=0;i<niso2;i++){
+        for(i=0;i<niso_bounds;i++){
           isobounds[i].setchopmin=setvalmin;
           isobounds[i].setchopmax=setvalmax;
           isobounds[i].chopmin=valmin;
@@ -8949,8 +8949,8 @@ void writeini(int flag){
     fprintf(fileout,"SLICEDATAOUT\n");
     fprintf(fileout," %i \n",output_slicedata);
   }
-  if(niso2>0){
-    for(i=0;i<niso2;i++){
+  if(niso_bounds>0){
+    for(i=0;i<niso_bounds;i++){
       fprintf(fileout,"V_ISO\n");
       fprintf(fileout," %i %f %i %f %s\n",
         isobounds[i].setvalmin,isobounds[i].valmin,
@@ -8958,7 +8958,7 @@ void writeini(int flag){
         isobounds[i].label->shortlabel
         );
     }
-    for(i=0;i<niso2;i++){
+    for(i=0;i<niso_bounds;i++){
       fprintf(fileout,"C_ISO\n");
       fprintf(fileout," %i %f %i %f %s\n",
         isobounds[i].setchopmin,isobounds[i].chopmin,
