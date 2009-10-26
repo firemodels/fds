@@ -129,7 +129,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   int i;
 
   
-  if(nsmoke3d<=0)return;
+  if(nsmoke3d_files<=0)return;
   SPINNER_smoke3d_hrrpuv_cutoffptr=(GLUI_Spinner **)malloc(nmeshes*sizeof(GLUI_Spinner *));
   
   glui_3dsmoke=glui_bounds;
@@ -222,7 +222,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   {
     int use_light_checkbox=0;
 
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       smoke3d *smoke3di;
 
       smoke3di = smoke3dinfo + i;

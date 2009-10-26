@@ -200,16 +200,16 @@ void svWINAPI sv_unload(void){
     for(i=0;i<npatch_files;i++){
       readpatch(i,UNLOAD,&errorcode);
     }
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       readpart("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       readiso("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nzone;i++){
       readzone("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
     }
     glutDetachMenu(GLUT_RIGHT_BUTTON);

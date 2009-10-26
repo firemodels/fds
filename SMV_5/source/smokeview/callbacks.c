@@ -624,7 +624,7 @@ void keyboard(unsigned char key, int x, int y){
   }
 #endif
 #ifdef _DEBUG 
-  if(nsmoke3d>0&&strncmp((const char *)&key2,"l",1)==0){
+  if(nsmoke3d_files>0&&strncmp((const char *)&key2,"l",1)==0){
     smokecullflag=1-smokecullflag;
     if(smokecullflag==0){
       smokedrawtest=1-smokedrawtest;
@@ -633,7 +633,7 @@ void keyboard(unsigned char key, int x, int y){
     update_smoke3dflags();
     return;
   }
-  if(nsmoke3d>0&&strncmp((const char *)&key2,"n",1)==0){
+  if(nsmoke3d_files>0&&strncmp((const char *)&key2,"n",1)==0){
     adjustalphaflag++;
     if(adjustalphaflag>3)adjustalphaflag=0;
     printf("adjustalphaflag=%i\n",adjustalphaflag);
@@ -715,7 +715,7 @@ void keyboard(unsigned char key, int x, int y){
   }
 #ifdef pp_CULL
   if(strncmp((const char *)&key2,"C",1)==0){
-    if(nsmoke3d>0&&cullactive==1){
+    if(nsmoke3d_files>0&&cullactive==1){
       cullsmoke=1-cullsmoke;
       update_smoke3dflags();
       initcull(cullsmoke);
@@ -725,7 +725,7 @@ void keyboard(unsigned char key, int x, int y){
   }
 #endif
 #ifdef pp_GPU
-  if(nsmoke3d>0&&strncmp((const char *)&key2,"G",1)==0){
+  if(nsmoke3d_files>0&&strncmp((const char *)&key2,"G",1)==0){
     if(gpuactive==1)usegpu=1-usegpu;
     update_smoke3dflags();
     print_gpu_cull_state();
@@ -2219,7 +2219,7 @@ void update_framenumber(int changetime){
     itimeold=itime;
 //    redisplay=1;
     if(showsmoke==1||showevac==1){
-      for(i=0;i<npartinfo;i++){
+      for(i=0;i<npart_files;i++){
         parti = partinfo+i;
         if(parti->loaded==1){
           if(parti->ptimeslist==NULL)continue;
@@ -2242,7 +2242,7 @@ void update_framenumber(int changetime){
       smoke3d *smoke3di;
 
       if(show3dsmoke==1){
-        for(i=0;i<nsmoke3d;i++){
+        for(i=0;i<nsmoke3d_files;i++){
           smoke3di = smoke3dinfo + i;
           if(smoke3di->loaded==0||smoke3di->display==0)continue;
           smoke3di->iframe=smoke3di->timeslist[itime];
@@ -2251,7 +2251,7 @@ void update_framenumber(int changetime){
             updatesmoke3d(smoke3di);
           }
         }
-        if(nsmoke3d>0)mergesmoke3dcolors();
+        if(nsmoke3d_files>0)mergesmoke3dcolors();
       }
     }
     if(showpatch==1){
@@ -2278,7 +2278,7 @@ void update_framenumber(int changetime){
       mesh *meshi;
 
       CheckMemory;
-      for(i=0;i<niso;i++){
+      for(i=0;i<niso_files;i++){
         isoi = isoinfo + i;
         if(isoi->loaded==0)continue;
         meshi = meshinfo + isoi->blocknumber;
@@ -2436,7 +2436,7 @@ void update_current_mesh(mesh *meshi){
   current_mesh=meshi;
   if(isoinfo!=NULL&&current_mesh->isofilenum==-1){
     loaded_isomesh=NULL;
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       isoi = isoinfo + i;
       if(isoi->loaded==0)continue;
       loaded_isomesh = meshinfo+isoi->blocknumber;

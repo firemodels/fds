@@ -478,13 +478,13 @@ void Smoke3DShowMenu(int value){
     switch (value){
     case SHOW_ALL:
       plotstate=DYNAMIC_PLOTS;
-      for(i=0;i<nsmoke3d;i++){
+      for(i=0;i<nsmoke3d_files;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==1)smoke3di->display=1;
       }
       break;
     case HIDE_ALL:
-      for(i=0;i<nsmoke3d;i++){
+      for(i=0;i<nsmoke3d_files;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==1)smoke3di->display=0;
       }
@@ -583,12 +583,12 @@ void IsoShowMenu(int value){
     else if(value>=10001){
       if(value==10001){
         plotstate=DYNAMIC_PLOTS;
-        for(i=0;i<niso;i++){
+        for(i=0;i<niso_files;i++){
           isoinfo[i].display=1;
         }
       }
       else if(value==10002){
-        for(i=0;i<niso;i++){
+        for(i=0;i<niso_files;i++){
           isoinfo[i].display=0;
         }
       }
@@ -1355,7 +1355,7 @@ void EvacShowMenu(int value){
     switch (value){
     case 3:
       visEvac=1;
-      for(i=0;i<npartinfo;i++){
+      for(i=0;i<npart_files;i++){
         parti = partinfo + i;
         if(parti->loaded==0||parti->evac==0)continue;
         parti->display=1;
@@ -1363,7 +1363,7 @@ void EvacShowMenu(int value){
       break;
     case 4:
       visEvac=0;
-      for(i=0;i<npartinfo;i++){
+      for(i=0;i<npart_files;i++){
         parti = partinfo + i;
         if(parti->loaded==0||parti->evac==0)continue;
         parti->display=0;
@@ -1378,7 +1378,7 @@ void EvacShowMenu(int value){
     switch (value){
     case 3:
       visEvac=1;
-      for(i=0;i<npartinfo;i++){
+      for(i=0;i<npart_files;i++){
         parti = partinfo + i;
         if(parti->loaded==0||parti->evac==0)continue;
         parti->display=1;
@@ -1401,7 +1401,7 @@ void ParticleShowMenu(int value){
   particle *parti;
   int i;
 
-  if(npartinfo==0)return;
+  if(npart_files==0)return;
   if(value==999)return;
   ASSERTFLAG(visSmoke);
   ASSERTFLAG(visEvac);
@@ -1435,7 +1435,7 @@ void ParticleShowMenu(int value){
         visSprinkPart=1; 
         visSmokePart=2; 
         visStaticSmoke=1; 
-        for(i=0;i<npartinfo;i++){
+        for(i=0;i<npart_files;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->evac==1)continue;
           parti->display=1;
@@ -1448,7 +1448,7 @@ void ParticleShowMenu(int value){
         visSprinkPart=0; 
         visSmokePart=0; 
         visStaticSmoke=0;
-        for(i=0;i<npartinfo;i++){
+        for(i=0;i<npart_files;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->evac==1)continue;
           parti->display=0;
@@ -1459,7 +1459,7 @@ void ParticleShowMenu(int value){
         break;
     }
     /*
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       parti = partinfo + i;
       if(parti->loaded==0||parti->evac==1)continue;
       parti->display_droplet=0;
@@ -1489,7 +1489,7 @@ void ParticleShowMenu(int value){
         visSprinkPart=1; 
         visSmokePart=2; 
         visStaticSmoke=1; 
-        for(i=0;i<npartinfo;i++){
+        for(i=0;i<npart_files;i++){
           parti = partinfo + i;
           if(parti->loaded==0)continue;
           parti->display=1;
@@ -1503,7 +1503,7 @@ void ParticleShowMenu(int value){
         break;
     }
     /*
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       parti = partinfo + i;
       if(parti->loaded==0||parti->evac==1)continue;
       parti->display_droplet=0;
@@ -2108,16 +2108,16 @@ void LoadUnloadMenu(int value){
     for(i=0;i<npatch_files;i++){
       readpatch(i,UNLOAD,&errorcode);
     }
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       readpart("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       readiso("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nzone;i++){
       readzone("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
     }
     //plotstate=DYNAMIC_PLOTS;
@@ -2160,17 +2160,17 @@ void LoadUnloadMenu(int value){
       i = patch_loaded_list[ii];
       readpatch(i,LOAD,&errorcode);
     }
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       if(smoke3dinfo[i].loaded==1){
         readsmoke3d(i,LOAD,&errorcode);
       }
     }
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       if(partinfo[i].loaded==1){
         readpart(partinfo[i].file,i,LOAD,&errorcode);
       }
     }
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -2454,7 +2454,7 @@ void EvacMenu(int value){
   if(value==-11){
     int i;
 
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       particle *parti;
 
       parti=partinfo + i;
@@ -2471,7 +2471,7 @@ void EvacMenu(int value){
   }
   else{
     if(value==-1){
-      for(i=0;i<npartinfo;i++){
+      for(i=0;i<npart_files;i++){
         if(partinfo[i].evac==0)continue;
         readpart("",i,UNLOAD,&errorcode);
       }
@@ -2501,7 +2501,7 @@ void update_streakvalue(float value){
       break;
     }
   }
-  for(i=0;i<npartinfo;i++){
+  for(i=0;i<npart_files;i++){
     parti = partinfo + i;
     if(parti->loaded==1)break;
   }
@@ -2685,7 +2685,7 @@ void ParticleMenu(int value){
   }
   else{
     if(value==-1){
-      for(i=0;i<npartinfo;i++){
+      for(i=0;i<npart_files;i++){
         if(partinfo[i].evac==1)continue;
         readpart("",i,UNLOAD,&errorcode);
       }
@@ -2697,7 +2697,7 @@ void ParticleMenu(int value){
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADPARTICLES\n");
       }
-      for(i=0;i<npartinfo;i++){
+      for(i=0;i<npart_files;i++){
         parti = partinfo + i;
         if(parti->evac==1)continue;
         if(parti->version==1||strcmp(parti->label.longlabel,partj->label.longlabel)==0){
@@ -2781,7 +2781,7 @@ void UnloadIsoMenu(int value){
     readiso("",value,UNLOAD,&errorcode);
   }
   else{
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       readiso("",i,UNLOAD,&errorcode);
     }
   }
@@ -2815,7 +2815,7 @@ void UnloadEvacMenu(int value){
     readpart("",value,UNLOAD,&errorcode);
   }
   else{
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       if(partinfo[i].evac==0)continue;
       readpart("",i,UNLOAD,&errorcode);
     }
@@ -2833,7 +2833,7 @@ void UnloadPartMenu(int value){
     readpart("",value,UNLOAD,&errorcode);
   }
   else{
-    for(i=0;i<npartinfo;i++){
+    for(i=0;i<npart_files;i++){
       if(partinfo[i].evac==1)continue;
       readpart("",i,UNLOAD,&errorcode);
     }
@@ -2940,7 +2940,7 @@ void UnLoadSmoke3DMenu(int value){
   updatemenu=1;
   if(value<0){
     value= -value;
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       smoke3di = smoke3dinfo + i;
       if(smoke3di->loaded==1&&smoke3di->type==value){
         readsmoke3d(i,UNLOAD,&errorcode);
@@ -2971,13 +2971,13 @@ void LoadSmoke3DMenu(int value){
 
   }
   else if(value==-1){
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
     }
   }
   if(value==-9){
     lock_allsmoke=1;
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       smoke3di = smoke3dinfo + i;
       if(smoke3di->loaded==1)continue;
       readsmoke3d(i,LOAD,&errorcode);
@@ -2991,7 +2991,7 @@ void LoadSmoke3DMenu(int value){
       fprintf(scriptoutstream,"LOAD3DSMOKE\n");
       fprintf(scriptoutstream," %s\n",smoke3dj->label.longlabel);
     }
-    for(i=0;i<nsmoke3d;i++){
+    for(i=0;i<nsmoke3d_files;i++){
       smoke3di = smoke3dinfo + i;
       if(strcmp(smoke3di->label.shortlabel,smoke3dj->label.shortlabel)==0){
         readsmoke3d(i,LOAD,&errorcode);
@@ -3007,7 +3007,7 @@ void LoadSmoke3DMenu(int value){
 
 int AnySmoke(char *type){
 
-  if(nsmoke3d>0)return 1;
+  if(nsmoke3d_files>0)return 1;
   return 0;
 }
 
@@ -3040,13 +3040,13 @@ void HideAllSlices(void){
 
 void ShowAllSmoke(void){
   int i;
-  for(i=0;i<nsmoke3d;i++){
+  for(i=0;i<nsmoke3d_files;i++){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==1)smoke3di->display=1;
   }
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     iso *isoi;
 
     isoi = isoinfo + i;
@@ -3058,13 +3058,13 @@ void ShowAllSmoke(void){
 
 void HideAllSmoke(void){
   int i;
-  for(i=0;i<nsmoke3d;i++){
+  for(i=0;i<nsmoke3d_files;i++){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==1)smoke3di->display=0;
   }
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     iso *isoi;
 
     isoi = isoinfo + i;
@@ -3320,7 +3320,7 @@ void LoadIsoMenu(int value){
     readiso(file,value,LOAD,&errorcode);
   }
   if(value==-1){
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       isoii = isoinfo + i;
       if(isoii->loaded==1)readiso("",i,UNLOAD,&errorcode);
     }
@@ -3333,7 +3333,7 @@ void LoadIsoMenu(int value){
       fprintf(scriptoutstream,"LOADISO\n");
       fprintf(scriptoutstream," %s\n",isoii->surface_label.longlabel);
     }
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       isoi = isoinfo + i;
       if(isoii->type!=isoi->type)continue;
       LoadIsoMenu(i);
@@ -3915,7 +3915,7 @@ static int in_menu=0;
     sd = sliceinfo + i;
     if(sd->loaded==1)nsliceloaded++;
   }
-  for(i=0;i<nsmoke3d;i++){
+  for(i=0;i<nsmoke3d_files;i++){
     smoke3d *smoke3di;
 
     smoke3di=smoke3dinfo+i;
@@ -3980,7 +3980,7 @@ static int in_menu=0;
   npart4loaded=0;
   npartloaded=0;
   nevacloaded=0;
-  for(i=0;i<npartinfo;i++){
+  for(i=0;i<npart_files;i++){
     particle *parti;
 
     parti = partinfo+i;
@@ -4001,7 +4001,7 @@ static int in_menu=0;
   }
 
   nisoloaded=0;
-  for(i=0;i<niso;i++){
+  for(i=0;i<niso_files;i++){
     iso *isoi;
 
     isoi = isoinfo + i;
@@ -4959,9 +4959,9 @@ static int in_menu=0;
 
 /* --------------------------------particle show menu -------------------------- */
 
-  if(npartinfo>0&&nevac!=npartinfo){
+  if(npart_files>0&&nevac!=npart_files){
     CREATEMENU(particleshowmenu,ParticleShowMenu);
-    for(ii=0;ii<npartinfo;ii++){
+    for(ii=0;ii<npart_files;ii++){
       particle *parti;
 
       i = partorderindex[ii];
@@ -5028,7 +5028,7 @@ static int in_menu=0;
 
   if(nevac>0){
     CREATEMENU(evacshowmenu,EvacShowMenu);
-    for(ii=0;ii<npartinfo;ii++){
+    for(ii=0;ii<npart_files;ii++){
       particle *parti;
 
       i = partorderindex[ii];
@@ -5066,11 +5066,11 @@ static int in_menu=0;
   }
 
   /* --------------------------------smoke3d showmenu -------------------------- */
-  if(nsmoke3d>0&&Read3DSmoke3DFile==1){
+  if(nsmoke3d_files>0&&Read3DSmoke3DFile==1){
     {
       if(nsmoke3dloaded>0){
         CREATEMENU(smoke3dshowmenu,Smoke3DShowMenu);
-        for(i=0;i<nsmoke3d;i++){
+        for(i=0;i<nsmoke3d_files;i++){
           smoke3d *smoke3di;
 
           smoke3di = smoke3dinfo + i;
@@ -5080,7 +5080,7 @@ static int in_menu=0;
           strcat(menulabel,smoke3di->menulabel);
           glutAddMenuEntry(menulabel,i);
         }
-        if(nsmoke3d>1){
+        if(nsmoke3d_files>1){
           glutAddMenuEntry("-",-999);
           glutAddMenuEntry("Show All",SHOW_ALL);
           glutAddMenuEntry("Hide All",HIDE_ALL);
@@ -5091,7 +5091,7 @@ static int in_menu=0;
 
 /* --------------------------------iso level menu -------------------------- */
 
-  if(loaded_isomesh!=NULL&&niso>0&&ReadIsoFile==1){
+  if(loaded_isomesh!=NULL&&niso_files>0&&ReadIsoFile==1){
     CREATEMENU(isolevelmenu,IsoShowMenu);
     if(loaded_isomesh->nisolevels>0&&loaded_isomesh->showlevels!=NULL){
       showflag=1;
@@ -5136,12 +5136,12 @@ static int in_menu=0;
 
 /* --------------------------------iso show menu -------------------------- */
 
-    if(niso>0&&ReadIsoFile==1){
+    if(niso_files>0&&ReadIsoFile==1){
       mesh *hmesh;
 
       CREATEMENU(isoshowmenu,IsoShowMenu);
       iso2=NULL;
-      for(ii=0;ii<niso;ii++){
+      for(ii=0;ii<niso_files;ii++){
         iso *isoi;
 
         i = isoorderindex[ii];
@@ -5496,7 +5496,7 @@ static int in_menu=0;
     int ii;
 
     if(npart5loaded>0){
-      for(ii=0;ii<npartinfo;ii++){
+      for(ii=0;ii<npart_files;ii++){
         particle *parti;
 
         parti = partinfo + ii;
@@ -5544,7 +5544,7 @@ static int in_menu=0;
   }
   if(ReadIsoFile==1){
     int niso_loaded=0;
-    for(i=0;i<niso;i++){
+    for(i=0;i<niso_files;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -5789,7 +5789,7 @@ static int in_menu=0;
   if(showclip==1)glutAddMenuEntry("*Clip Geometry...  ALT+c",18);
   if(showclip==0)glutAddMenuEntry("Clip Geometry...  ALT+c",18);
 #ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice_files>0)){
+  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
     if(showbounds==1)glutAddMenuEntry("*Compression/Smokezip...  ALT+z",24);
     if(showbounds==0)glutAddMenuEntry("Compression/Smokezip...  ALT+z",24);
   }
@@ -5812,7 +5812,7 @@ static int in_menu=0;
   if(showshooterDLG==1)glutAddMenuEntry("*Particle Tracking...",27);
   if(showshooterDLG==0)glutAddMenuEntry("Particle Tracking...",27);
 #endif
-  if(nsmoke3d>0){
+  if(nsmoke3d_files>0){
     if(showbounds==1)glutAddMenuEntry("*Smoke3D Parameters...  ALT+s",20);
     if(showbounds==0)glutAddMenuEntry("Smoke3D Parameters...  ALT+s",20);
   }
@@ -6171,9 +6171,9 @@ static int in_menu=0;
 
   /* --------------------------------particle menu -------------------------- */
 
-  if(npartinfo>0&&nevac!=npartinfo){
+  if(npart_files>0&&nevac!=npart_files){
     CREATEMENU(unloadpartmenu,UnloadPartMenu);
-    for(ii=0;ii<npartinfo;ii++){
+    for(ii=0;ii<npart_files;ii++){
       particle *parti;
 
       i = partorderindex[ii];
@@ -6191,7 +6191,7 @@ static int in_menu=0;
     else{
       CREATEMENU(particlesubmenu,ParticleMenu);
     }
-    for(ii=0;ii<npartinfo;ii++){
+    for(ii=0;ii<npart_files;ii++){
       i = partorderindex[ii];
       if(partinfo[i].evac==1)continue;
       if(partinfo[i].loaded==1){
@@ -6210,7 +6210,7 @@ static int in_menu=0;
 
       if(nmeshes>1){
         CREATEMENU(particlemenu,ParticleMenu);
-        if(npartinfo>0){
+        if(npart_files>0){
           if(partinfo->version==1){
             strcpy(menulabel,"Particles - All meshes");
             glutAddMenuEntry(menulabel,-11);
@@ -6218,7 +6218,7 @@ static int in_menu=0;
             glutAddMenuEntry("-",-2);
           }
           else{
-            for(i=0;i<npartinfo;i++){
+            for(i=0;i<npart_files;i++){
               useitem=i;
               parti = partinfo + i;
               if(parti->evac==1)continue;
@@ -6254,7 +6254,7 @@ static int in_menu=0;
 
   if(nevac>0){
     CREATEMENU(unloadevacmenu,UnloadEvacMenu);
-    for(ii=0;ii<npartinfo;ii++){
+    for(ii=0;ii<npart_files;ii++){
       particle *parti;
 
       i = partorderindex[ii];
@@ -6270,7 +6270,7 @@ static int in_menu=0;
     {
       int nevacs=0,nevacloaded=0;
 
-      for(ii=0;ii<npartinfo;ii++){
+      for(ii=0;ii<npart_files;ii++){
         particle *parti;
 
         parti = partinfo + ii;
@@ -6284,7 +6284,7 @@ static int in_menu=0;
         glutAddMenuEntry(menulabel,-11);
         glutAddMenuEntry("-",-2);
       }
-      for(ii=0;ii<npartinfo;ii++){
+      for(ii=0;ii<npart_files;ii++){
         i = partorderindex[ii];
         if(partinfo[i].evac==0)continue;
         if(partinfo[i].loaded==1){
@@ -6703,7 +6703,7 @@ static int in_menu=0;
         {
           int nsootloaded=0,nhrrloaded=0,nwaterloaded=0;
 
-          for(i=0;i<nsmoke3d;i++){
+          for(i=0;i<nsmoke3d_files;i++){
             smoke3di=smoke3dinfo + i;
             if(smoke3di->loaded==0)continue;
             switch (smoke3di->type){
@@ -6726,7 +6726,7 @@ static int in_menu=0;
           if(nwaterloaded>1)glutAddMenuEntry("water - All meshes",-3);
           if(nsootloaded>1||nhrrloaded>1||nwaterloaded>1)glutAddMenuEntry("-",999);
         }
-        for(i=0;i<nsmoke3d;i++){
+        for(i=0;i<nsmoke3d_files;i++){
           smoke3di=smoke3dinfo+i;
           if(smoke3di->loaded==0)continue;
           glutAddMenuEntry(smoke3di->menulabel,i);
@@ -6737,14 +6737,14 @@ static int in_menu=0;
       smoke3d *smoke3di;
       int n_soot_menu=0, n_hrr_menu=0, n_water_menu=0;
 
-      if(nsmoke3d>0){
+      if(nsmoke3d_files>0){
         if(nmeshes==1){
           CREATEMENU(loadsmoke3dmenu,LoadSmoke3DMenu);
         }
         if(nmeshes>1){
           CREATEMENU(loadsmoke3dsootmenu,LoadSmoke3DMenu);
         }
-        for(i=0;i<nsmoke3d;i++){
+        for(i=0;i<nsmoke3d_files;i++){
           smoke3di = smoke3dinfo + i;
           if(smoke3di->type!=1)continue;
           n_soot_menu++;
@@ -6758,7 +6758,7 @@ static int in_menu=0;
         if(nmeshes>1){
           CREATEMENU(loadsmoke3dhrrmenu,LoadSmoke3DMenu);
         }
-        for(i=0;i<nsmoke3d;i++){
+        for(i=0;i<nsmoke3d_files;i++){
           smoke3di = smoke3dinfo + i;
           if(smoke3di->type!=2)continue;
           n_hrr_menu++;
@@ -6772,7 +6772,7 @@ static int in_menu=0;
         if(nmeshes>1){
           CREATEMENU(loadsmoke3dwatermenu,LoadSmoke3DMenu);
         }
-        for(i=0;i<nsmoke3d;i++){
+        for(i=0;i<nsmoke3d_files;i++){
           smoke3di = smoke3dinfo + i;
           if(smoke3di->type!=3)continue;
           n_water_menu++;
@@ -6791,7 +6791,7 @@ static int in_menu=0;
           smoke3d *smoke3dj;
 
           if(nmeshes>1){
-            for(i=0;i<nsmoke3d;i++){
+            for(i=0;i<nsmoke3d_files;i++){
               useitem=i;
               smoke3di=smoke3dinfo + i;
               for(j=0;j<i;j++){
@@ -7065,9 +7065,9 @@ static int in_menu=0;
 
 /* --------------------------------load iso menu -------------------------- */
 
-    if(niso>0){
+    if(niso_files>0){
       CREATEMENU(unloadisomenu,UnloadIsoMenu);
-      for(ii=0;ii<niso;ii++){
+      for(ii=0;ii<niso_files;ii++){
         iso *isoi;
 
         i = isoorderindex[ii];
@@ -7078,11 +7078,11 @@ static int in_menu=0;
       }
       glutAddMenuEntry("Unload All",-1);
 
-      if(niso>0){
+      if(niso_files>0){
         int i;
 
         if(isosubmenus==NULL){
-          NewMemory((void **)&isosubmenus,niso*sizeof(int));
+          NewMemory((void **)&isosubmenus,niso_files*sizeof(int));
         }
         nisosubmenus=0;
 
@@ -7093,7 +7093,7 @@ static int in_menu=0;
       if(nmeshes==1){
         CREATEMENU(loadisomenu,LoadIsoMenu);
       }
-      for(ii=0;ii<niso;ii++){
+      for(ii=0;ii<niso_files;ii++){
         iso *iso1, *iso2;
 
         i = isoorderindex[ii];
@@ -7121,7 +7121,7 @@ static int in_menu=0;
 
         if(nmeshes>1){
          CREATEMENU(loadisomenu,LoadIsoMenu);
-          for(i=0;i<niso;i++){
+          for(i=0;i<niso_files;i++){
             useitem=i;
             isoi = isoinfo + i;
             for(j=0;j<i;j++){
@@ -7139,7 +7139,7 @@ static int in_menu=0;
           }
           glutAddMenuEntry("-",-2);
 
-          for(ii=0;ii<niso;ii++){
+          for(ii=0;ii<niso_files;ii++){
             iso *iso1, *iso2;
 
             i = isoorderindex[ii];
@@ -7197,7 +7197,7 @@ static int in_menu=0;
 /* -------------------------------- compress menu -------------------------- */
 
 #ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice_files>0)){
+  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
     CREATEMENU(compressmenu,CompressMenu);
     glutAddMenuEntry("Compression Options",999);  // -c
     if(overwrite_all==1){
@@ -7345,7 +7345,7 @@ static int in_menu=0;
       glutAddMenuEntry("Open Smokeview (.smv) file",3);
 #endif
       strcpy(steplabel,"error: steplabel not defined");
-      if(nsmoke3d>0){
+      if(nsmoke3d_files>0){
         strcpy(loadmenulabel,"3D Smoke");
         if(smoke3dframeskip>0){
           sprintf(steplabel,"/Skip %i",smoke3dframeskip);
@@ -7388,7 +7388,7 @@ static int in_menu=0;
         }
         glutAddSubMenu(loadmenulabel,vslicemenu);
       }
-      if(niso>0){
+      if(niso_files>0){
         strcpy(loadmenulabel,"Isosurface File");
         if(isoframeskip>0){
           sprintf(steplabel,"/Skip %i",isoframeskip);
@@ -7404,8 +7404,8 @@ static int in_menu=0;
         }
         glutAddSubMenu(loadmenulabel,loadpatchmenu);
       }
-      if(npartinfo>0){
-        if(nevac!=npartinfo){
+      if(npart_files>0){
+        if(nevac!=npart_files){
           strcpy(loadmenulabel,"Particle File");
           if(partframeskip>0||partpointskip>0){
             if(partframeskip>0&&partpointskip>0){
@@ -7457,7 +7457,7 @@ static int in_menu=0;
       glutAddSubMenu("Configuration files",smokeviewinimenu);
       glutAddSubMenu("Script Options",scriptmenu);
 #ifdef pp_COMPRESS
-      if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d>0||nslice_files>0)){
+      if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
         glutAddSubMenu("Compression",compressmenu);
       }
 #endif

@@ -408,11 +408,11 @@ SVEXTERN float pref,pamb,tamb;
 SVEXTERN int ntc_total, nspr_total, nheat_total;
 SVEXTERN int n_devices;
 
-SVEXTERN int npartinfo, nslice_files, nvslice, nslice2, npatch2, nplot3d_files, npatch_files;
+SVEXTERN int npart_files, nslice_files, nvslice, nslice2, npatch2, nplot3d_files, npatch_files;
 SVEXTERN int nevac;
 SVEXTERN int current_particle_type,last_particle_type;
-SVEXTERN int nsmoke3d;
-SVEXTERN int niso, niso2;
+SVEXTERN int nsmoke3d_files;
+SVEXTERN int niso_files, niso_bounds;
 SVEXTERN int ntrnx, ntrny, ntrnz,npdim,nmeshes,clip_mesh;
 SVEXTERN int nobst,nvent,noffset;
 SVEXTERN int nlabels,visLabels,nlabelssmv;
