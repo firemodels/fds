@@ -95,6 +95,17 @@ plume temperature above 9~m.'' Similar results were found for experiments conduc
 are included in Section~\ref{VTT_plume}. Both of these studies point out the sensitivity of the centerline plume temperature close to the flame tip to the prediction of the
 flame height. FDS does not use a flame height correlation, but rather predicts the flame height based on the fuel stoichiometry and fluid dynamics of the turbulent plume.
 
+Hurley and Munguia~\cite{Hurley:GCR09-921,Hurley:JFPE2009} compared FDS (version 4) simulations with plume and ceiling
+jet measurements from a series of full-scale tests
+conducted by Underwriters Laboratories. The tests were conducted in a 36.6~m by 36.6~m
+compartment with ceiling heights ranging from 3~m to 12.2~m. Heat release rates
+followed a modified t-squared growth profile. Thermocouples attached to brass disks were used to
+simulate thermal detectors.
+The FDS simulations were conducted with a grid spacing of 10~cm. A convergence study found
+that grid-size convergence was achieved outside of the plume region. However, grid
+convergence was not achieved in the plume region at this grid spacing. Outside of the plume
+region, FDS predictions were within a factor of 1.9 of the test data.
+
 
 
 \subsection{Pool Fires}
@@ -341,17 +352,17 @@ experimental data and concluded  that FDS has  the ability to predict the  atten
 between   the  droplets  is   weak.''  However,  modeling interacting sprays would require a more costly coalescence model. They also note that  the
 results of the model were  sensitive to grid size, angular discretization, and droplet sampling.
 
-O'Grady and Novozhilov~\cite{OGrady:CST} compared the predictions of FDS version 4 
+O'Grady and Novozhilov~\cite{OGrady:CST} compared the predictions of FDS version 4
 against full-scale fire tests performed at SP Sweden involving a 1.5~MW steady-state fire with two different
-sprinkler flow rates~\cite{Ingason:1}. 
+sprinkler flow rates~\cite{Ingason:1}.
 The authors reported results for gas temperatures and the tangential flow velocity in the
 ceiling jet. With the sprinkler off, the average relative prediction error away from the fire
 was of the order of 12~\% for the temperature (with respect to excess temperature in the
 ceiling jet) and 6~\% for velocity. For the two different sprinkler operating conditions,
-the relative errors were 7~\% to 8~\% for velocity and 10~\% to 15~\% for the temperature. 
+the relative errors were 7~\% to 8~\% for velocity and 10~\% to 15~\% for the temperature.
 Sensitivity of the model to a range of input parameters was investigated.
 The model demonstrated moderate sensitivity to the spray parameters,
-such as spray cone configuration, initial droplet velocities, and droplet sizes.  
+such as spray cone configuration, initial droplet velocities, and droplet sizes.
 On the other hand, the sensitivity to other parameters such as
 sprinkler atomization length and rms of droplet size distribution was low.
 
@@ -405,7 +416,8 @@ ventilation and smoke exhaust system.
 The ability of  version 1 of FDS to  accurately predict smoke detector activation was studied by D'Souza~\cite{DSouza:1}. The smoke transport model
 within FDS  was tested and compared with UL~217 test data.  The second step  in this research was  to further validate  the model with full-scale
 multi-compartment fire tests.  The results  indicated that FDS is capable of predicting  smoke detector activation when used with smoke  detector
-lag correlations  that  correct  for  the time  delay associated with smoke having to penetrate the detector housing. A follow-up paper by
+lag correlations  that  correct  for  the time  delay associated with smoke having to penetrate the detector housing. A follow-up report by 
+Roby~{\em et al.}~\cite{CSE_GCR} and paper by
 Zhang~{\em et al.}~\cite{Zhang:FSJ2008} describes the implementation and validation of the smoke detector algorithm currently incorporated in FDS.
 
 Another study of smoke detector  activation was carried out by Brammer at  the University  of Canterbury,  New  Zealand~\cite{Brammer:1}. Two fire
@@ -418,6 +430,8 @@ Cleary~\cite{Cleary:1} also provided a comparison between FDS computed gas  velo
 locations.   The research concluded  that multi-room  fire simulations with the FDS model can accurately predict the conditions that a sensor might
 experience during a real fire  event.  The FDS model was able to predict the smoke and gas concentrations, heat, and flow velocities at various
 detector locations to within 15~\% of measurements.
+
+
 
 
 \subsection{Combustion Model}
