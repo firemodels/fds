@@ -1,6 +1,6 @@
-// $Date: 2009-10-15 13:47:38 -0400 (Thu, 15 Oct 2009) $ 
-// $Revision: 4936 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #include "options.h"
 #include <stdio.h>
@@ -11,7 +11,7 @@
 #include "MALLOC.h"
 
 // svn revision character string
-char IOdboundary_revision[]="$Revision: 4936 $";
+char IOdboundary_revision[]="$Revision$";
 
 int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout);
 
