@@ -1100,7 +1100,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TM
                             CHANGE_TIME_STEP,ISOTHERMAL,TMPA, N_ZONE,MIXTURE_FRACTION_SPECIES, LU_ERR, &
                             GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,FLUX_LIMITER, &
                             RHO_LOWER_GLOBAL,RHO_UPPER_GLOBAL,RSUM0,BAROCLINIC,CHECK_KINETIC_ENERGY, &
-                            CYLINDRICAL
+                            CYLINDRICAL,CLIP_MASS_FRACTION,TUSED
 REAL(EB) :: TNOW,YY_GET(1:N_SPECIES)
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
@@ -1165,14 +1165,25 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
          DO J=1,JBAR
             DO I=1,IBAR
                YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
-               YYS(I,J,K,N) = MIN(1._EB,YYS(I,J,K,N))
-               YYS(I,J,K,N) = MAX(0._EB,YYS(I,J,K,N))
             ENDDO
          ENDDO
       ENDDO
    ENDDO
    
-   !!CALL CHECK_MASS_FRACTION
+   IF (CLIP_MASS_FRACTION) THEN
+      DO N=1,N_SPECIES
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  YYS(I,J,K,N) = MIN(YYS(I,J,K,N),1._EB)
+                  YYS(I,J,K,N) = MAX(YYS(I,J,K,N),0._EB)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+   ELSE
+      CALL CHECK_MASS_FRACTION
+   ENDIF
 
    ! Predict background pressure at next time step
 
@@ -1274,14 +1285,25 @@ ELSEIF (CORRECTOR) THEN
          DO J=1,JBAR
             DO I=1,IBAR
                YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YYS(I,J,K,N) )/RHO(I,J,K)
-               YY(I,J,K,N) = MAX(YY(I,J,K,N),0._EB)
-               YY(I,J,K,N) = MIN(YY(I,J,K,N),1._EB)
             ENDDO
          ENDDO
       ENDDO
    ENDDO
    
-   !!CALL CHECK_MASS_FRACTION
+   IF (CLIP_MASS_FRACTION) THEN
+      DO N=1,N_SPECIES
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  YY(I,J,K,N) = MAX(YY(I,J,K,N),0._EB)
+                  YY(I,J,K,N) = MIN(YY(I,J,K,N),1._EB)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+   ELSE
+      CALL CHECK_MASS_FRACTION
+   ENDIF
    
    IF (BAROCLINIC) THEN
       ! Set global min and max for rho
@@ -1348,16 +1370,16 @@ END SUBROUTINE DENSITY_TVD
 
 
 SUBROUTINE SCALARF(NM)
-
+USE COMP_FUNCTIONS, ONLY: SECOND
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN_BOUNDARY, &
                             LU_ERR,INTERPOLATED_BOUNDARY,MYID,NO_MASS_FLUX,SOLID_BOUNDARY,INTERPOLATED_SURF_INDEX,  &
                             OPEN_SURF_INDEX,MIRROR_BOUNDARY,MIRROR_SURF_INDEX,SPECIFIED_MASS_FLUX,INFLOW_OUTFLOW,   &
-                            CYLINDRICAL,INTERPOLATED_BC
+                            CYLINDRICAL,INTERPOLATED_BC,TUSED
 
 ! Computes the scalar advective and diffusive flux
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K,N,II,JJ,KK,IOR,IW,IIG,JJG,KKG,ICM,ICP,IBC,METHOD_ID
-REAL(EB) :: ZZ(4)
+REAL(EB) :: ZZ(4),TNOW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,YYP,FX,FY,FZ
 TYPE (SURFACE_TYPE), POINTER :: SF
@@ -1371,6 +1393,7 @@ TYPE (SURFACE_TYPE), POINTER :: SF
 ! outside the CHANGE_TIME_STEP loop and we happen to iterate on the loop then we clear the advective flux
 ! and we are left with only the diffusive flux.
 
+TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
 
 FX => SCALAR_SAVE1
@@ -1769,6 +1792,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
 
 ENDDO SPECIES_LOOP
 
+TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
 END SUBROUTINE SCALARF
 
 
