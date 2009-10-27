@@ -124,8 +124,8 @@ void diff_boundaryes(FILE *stream_out){
     int *p2i1, *p2i2, *p2j1, *p2j2, *p2k1, *p2k2;
     int *p3i1, *p3i2, *p3j1, *p3j2, *p3k1, *p3k2;
     int *patchdir3;
-    float *pqq1, *pqq2, *pqq3;
-    float patchtime1, patchtime2;
+    float *pqq1, *pqq2a, *pqq2b, *pqq2out, *pqq3;
+    float patchtime1, patchtime2a, patchtime2b;
     int nsize1, nsize2, nsize3;
     int npatches3;
     int i;
@@ -168,7 +168,9 @@ void diff_boundaryes(FILE *stream_out){
     }
 
     NewMemory((void **)&pqq1,nsize1*sizeof(float));
-    NewMemory((void **)&pqq2,nsize2*sizeof(float));
+    NewMemory((void **)&pqq2a,nsize2*sizeof(float));
+    NewMemory((void **)&pqq2b,nsize2*sizeof(float));
+    NewMemory((void **)&pqq2out,nsize2*sizeof(float));
     NewMemory((void **)&pqq3,nsize3*sizeof(float));
     
     NewMemory((void **)&p3i1,npatches3*sizeof(int));
@@ -243,15 +245,39 @@ void diff_boundaryes(FILE *stream_out){
       valmax=-valmin;
       nvals=0;
       init_buckets(boundary1->bucket);
+
+      FORTgetpatchdata(&unit1, &boundary1->npatches, 
+        p1i1, p1i2, p1j1, p1j2, p1k1, p1k2, &patchtime1, pqq1, &error1);
+      FORTgetpatchdata(&unit2, &boundary2->npatches, 
+        p2i1, p2i2, p2j1, p2j2, p2k1, p2k2, &patchtime2a, pqq2a, &error2);
+      if(error2==0)FORTgetpatchdata(&unit2, &boundary2->npatches, 
+        p2i1, p2i2, p2j1, p2j2, p2k1, p2k2, &patchtime2b, pqq2b, &error2);
       for(;;){
         int iq;
+        float f1, f2, dt;
 
-        FORTgetpatchdata(&unit1, &boundary1->npatches, 
-          p1i1, p1i2, p1j1, p1j2, p1k1, p1k2, &patchtime1, pqq1, &error1);
-        if(error1!=0)break;
-        FORTgetpatchdata(&unit2, &boundary2->npatches, 
-          p2i1, p2i2, p2j1, p2j2, p2k1, p2k2, &patchtime2, pqq2, &error2);
+        if(error1!=0||error2!=0)break;
+
+        while(patchtime1>patchtime2b){
+          for(i=0;i<nsize2;i++){
+            pqq2a[i]=pqq2b[i];
+          }
+          patchtime2a=patchtime2b;
+          FORTgetpatchdata(&unit2, &boundary2->npatches, 
+            p2i1, p2i2, p2j1, p2j2, p2k1, p2k2, &patchtime2b, pqq2b, &error2);
+          if(error2!=0)break;
+        }
         if(error2!=0)break;
+        dt = patchtime2b - patchtime2a;
+        f1 = 1.0;
+        f2 = 0.0;
+        if(dt!=0.0){
+          f1 = (patchtime2b - patchtime1)/dt;
+          f2 = (patchtime1-patchtime2a)/dt;
+        }
+        for(i=0;i<nsize2;i++){
+          pqq2out[i]=f1*pqq2a[i]+f2*pqq2b[i];
+        }
 
         iq=0;
         for(i=0;i<boundary1->npatches;i++){
@@ -262,7 +288,7 @@ void diff_boundaryes(FILE *stream_out){
           if(jj==-1)continue;
 
           pq1 = pqq1 + boundary1->qoffset[i];
-          pq2 = pqq2 + boundary2->qoffset[jj];
+          pq2 = pqq2out + boundary2->qoffset[jj];
           for(kk=0;kk<boundary1->patchsize[i];kk++){
             pqq3[iq++]=pq2[kk]-pq1[kk];
             if(pq1[kk]<valmin)valmin=pq1[kk];
@@ -280,6 +306,9 @@ void diff_boundaryes(FILE *stream_out){
           printf("%i%s ",percent_complete,pp);
           fflush(stdout);
         }
+
+        FORTgetpatchdata(&unit1, &boundary1->npatches, 
+          p1i1, p1i2, p1j1, p1j2, p1k1, p1k2, &patchtime1, pqq1, &error1);
       }
       printf("\n");
       fflush(stdout);
@@ -294,7 +323,9 @@ void diff_boundaryes(FILE *stream_out){
     }
 
     FREEMEMORY(pqq1);
-    FREEMEMORY(pqq2);
+    FREEMEMORY(pqq2a);
+    FREEMEMORY(pqq2b);
+    FREEMEMORY(pqq2out);
     FREEMEMORY(pqq3);
     FREEMEMORY(p3i1);
     FREEMEMORY(p3i2);
