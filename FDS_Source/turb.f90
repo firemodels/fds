@@ -1749,7 +1749,7 @@ DO K = N_LO(3),N_HI(3)
          K_SGS = (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2
          K_TOT = K_LES + K_SGS
          
-         IF (K_TOT>0) THEN
+         IF (K_TOT>0._EB) THEN
             MTR(I,J,K) = K_SGS/K_TOT
          ELSE
             MTR(I,J,K) = 0._EB
@@ -3100,3 +3100,150 @@ END SUBROUTINE LOCATE_MESH
 
 END MODULE EMBEDDED_MESH_METHOD
 
+
+MODULE COMPLEX_GEOMETRY
+
+USE PRECISION_PARAMETERS
+USE GLOBAL_CONSTANTS
+USE MESH_VARIABLES
+USE MESH_POINTERS
+
+IMPLICIT NONE
+
+PRIVATE
+PUBLIC :: INIT_IBM,VELTAN2D
+ 
+CONTAINS
+
+SUBROUTINE INIT_IBM(T,NM)
+USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: NM
+REAL(EB), INTENT(IN) :: T
+INTEGER :: IZERO,I,J,K,MIN_I,MAX_I,MIN_J,MAX_J,MIN_K,MAX_K
+TYPE (MESH_TYPE), POINTER :: M
+TYPE (GEOMETRY_TYPE), POINTER :: G
+REAL(EB) :: DELTA_X,DELTA_Y,DELTA_Z,X_MIN,Y_MIN,Z_MIN,X_MAX,Y_MAX,Z_MAX,R2
+INTEGER, POINTER, DIMENSION(:,:,:) :: U_MASK,V_MASK,W_MASK
+
+M => MESHES(NM)
+
+IF (T==0._EB) THEN
+   ALLOCATE(M%IBM_SAVE1(0:IBAR,0:JBAR,0:KBAR),STAT=IZERO)
+   CALL ChkMemErr('INIT_IBM','IBM_SAVE1',IZERO)
+   ALLOCATE(M%IBM_SAVE2(0:IBAR,0:JBAR,0:KBAR),STAT=IZERO)
+   CALL ChkMemErr('INIT_IBM','IBM_SAVE2',IZERO)
+   ALLOCATE(M%IBM_SAVE3(0:IBAR,0:JBAR,0:KBAR),STAT=IZERO)
+   CALL ChkMemErr('INIT_IBM','IBM_SAVE3',IZERO)
+ENDIF
+
+CALL POINT_TO_MESH(NM)
+
+U_MASK => IBM_SAVE1
+V_MASK => IBM_SAVE2
+W_MASK => IBM_SAVE3
+U_MASK = 1._EB
+V_MASK = 1._EB
+W_MASK = 1._EB
+
+! assume uniform mesh spacing for now
+DELTA_X = DX(1)
+DELTA_Y = DY(1)
+DELTA_Z = DZ(1)
+
+G => GEOMETRY(1)
+
+! oscillating sphere
+
+G%X = G%X0
+G%Y = G%Y0
+G%Z = G%Z0 + 0.2_EB*SIN(T)
+
+G%W = 0.2_EB*COS(T)
+
+! find bounding box
+
+X_MIN = MIN(G%X-G%RADIUS,XS)
+Y_MIN = MIN(G%Y-G%RADIUS,YS)
+Z_MIN = MIN(G%Z-G%RADIUS,ZS)
+
+X_MAX = MAX(G%X+G%RADIUS,XF)
+Y_MAX = MAX(G%Y+G%RADIUS,YF)
+Z_MAX = MAX(G%Z+G%RADIUS,ZF)
+
+MIN_I = FLOOR((X_MIN-XS)/DELTA_X)
+MIN_J = FLOOR((Y_MIN-YS)/DELTA_Y)
+MIN_K = FLOOR((Z_MIN-ZS)/DELTA_Z)
+
+MAX_I = CEILING((X_MAX-XS)/DELTA_X)
+MAX_J = CEILING((Y_MAX-YS)/DELTA_Y)
+MAX_K = CEILING((Z_MAX-ZS)/DELTA_Z)
+
+R2 = G%RADIUS**2
+
+DO K=MIN_K,MAX_K
+   DO J=MIN_J,MAX_J
+      DO I=MIN_I,MAX_I
+         
+         IF ( (( X(I)-G%X)**2+(YC(J)-G%Y)**2+(ZC(K)-G%Z)**2)<=R2 ) U_MASK(I,J,K) = 0._EB
+         IF ( ((XC(I)-G%X)**2+( Y(J)-G%Y)**2+(ZC(K)-G%Z)**2)<=R2 ) V_MASK(I,J,K) = 0._EB
+         IF ( ((XC(I)-G%X)**2+(YC(J)-G%Y)**2+( Z(K)-G%Z)**2)<=R2 ) W_MASK(I,J,K) = 0._EB
+      
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE INIT_IBM
+
+
+REAL(EB) FUNCTION VELTAN2D(U_VEC,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: U_VEC(2),N_VEC(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
+INTEGER, INTENT(IN) :: I_VEL
+REAL(EB) :: C(2,2),S_VEC(2),US,UN,US_WALL,UN_WALL,DPDS,DTSNDN,DUSDS,DUSDN,TSN,TSN_WALL
+
+! wall velocity
+US_WALL = 0._EB
+UN_WALL = 0._EB
+
+! streamwise unit vector
+S_VEC = (/N_VEC(2),-N_VEC(1)/)
+
+! directional cosines
+C(1,1) = S_VEC(1)
+C(1,2) = -S_VEC(2)
+C(2,1) = S_VEC(2)
+C(2,2) = S_VEC(1)
+
+! transform velocity
+US = C(1,1)*U_VEC(1) + C(2,1)*U_VEC(2)
+UN = C(1,2)*U_VEC(1) + C(2,2)*U_VEC(2)
+
+! transform pressure gradient
+DPDS = C(1,1)*GRADP(1) + C(2,1)*GRADP(2)
+
+! transform stress tensor
+TSN = C(1,1)*C(1,2)*TAU_IJ(1,1) + C(1,1)*C(2,2)*TAU_IJ(1,2) &
+    + C(2,1)*C(1,2)*TAU_IJ(2,1) + C(2,1)*C(2,2)*TAU_IJ(2,2)
+TSN_WALL = -MU*(US-US_WALL)/DN !! or WW based on US, MU and DN
+DTSNDN = (TSN - TSN_WALL)/DN
+
+! transform velocity gradient tensor
+DUSDS = C(1,1)*C(1,1)*GRADU(1,1) + C(1,1)*C(2,1)*GRADU(1,2) &
+      + C(2,1)*C(1,1)*GRADU(2,1) + C(2,1)*C(2,1)*GRADU(2,2)
+      
+DUSDN = C(1,1)*C(1,2)*GRADU(1,1) + C(1,1)*C(2,2)*GRADU(1,2) &
+      + C(2,1)*C(1,2)*GRADU(2,1) + C(2,1)*C(2,2)*GRADU(2,2)
+
+! update boundary layer equations
+US = US - DT*( US*DUSDS + UN*DUSDN + RRHO*(DPDS + DTSNDN) )
+UN = UN_WALL + DN*(DIVU-DUSDS)
+
+! transform velocity back to Cartesian component I_VEL
+VELTAN2D = C(I_VEL,1)*US + C(I_VEL,2)*UN
+
+END FUNCTION VELTAN2D
+
+
+END MODULE COMPLEX_GEOMETRY
