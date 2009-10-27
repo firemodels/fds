@@ -181,9 +181,9 @@ void diff_plot3ds(FILE *stream_out){
       }
 
       nvals=0;
-      update_data_hist(NULL, nvals, plot3d1->buckets[n], INIT_HISTOGRAM);
+      init_buckets(plot3d1->buckets[n]);
       nvals=nq/5;
-      update_data_hist(qframe1+n*nvals, nvals, plot3d1->buckets[n], INIT_HISTOGRAM);
+      update_buckets(qframe1+n*nvals, nvals, plot3d1->buckets[n]);
       cdf01=0.01;
       cdf99=0.99;
       valmin_percentile = get_hist_val(plot3d1->buckets[n], cdf01);
