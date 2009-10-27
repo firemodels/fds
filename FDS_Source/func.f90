@@ -1815,6 +1815,34 @@ RR = 1._EB-R
 SS = 1._EB-S
 AFILL2 = ((PP*A111+P*A211)*RR+(PP*A121+P*A221)*R)*SS+ ((PP*A112+P*A212)*RR+(PP*A122+P*A222)*R)*S
 END FUNCTION AFILL2
+
+
+REAL(EB) FUNCTION INTERP2D(X_DATA,Y_DATA,U_DATA,X_INTERP,Y_INTERP)
+! Inverse distance interpolation in 2D.
+!  
+!   (2) o     (3) o /
+!                  /
+!            x    /   x=X_INTERP,Y_INTERP
+!                /
+!   (1) o   (4) o
+!              /
+REAL(EB), INTENT(IN) :: X_DATA(4),Y_DATA(4),U_DATA(4),X_INTERP,Y_INTERP
+REAL(EB) :: R,RR,SUM
+INTEGER :: N
+INTERP2D = 0._EB
+DO N=1,4
+   R = SQRT( (X_INTERP-X_DATA(N))**2 + (Y_INTERP-Y_DATA(N))**2 )
+   IF (R==0._EB) THEN
+      INTERP2D = U_DATA(N)
+      RETURN
+   ELSE
+      RR = 1._EB/R
+      INTERP2D = INTERP2D + RR*U_DATA(N)
+      SUM = SUM + RR
+   ENDIF
+ENDDO
+INTERP2D = INTERP2D/SUM
+END FUNCTION INTERP2D
  
 
 REAL(EB) FUNCTION POLYVAL(N,TEMP,COEF)
