@@ -1,6 +1,9 @@
 // $Date$ 
 // $Revision$
 // $Author$
+
+//************************** pre-processing directives ****************************************
+
 #ifdef INMAIN
 #define EXTERN
 #else
@@ -38,15 +41,15 @@
 #define FILE_SIZE unsigned int
 #endif
 
+//************************** data structures ****************************************
 
 /* --------------------------  flowlabels ------------------------------------ */
 
 #define NBUCKETS 100000
-#define INIT_HISTOGRAM 0
-#define UPDATE_HISTOGRAM 1
 typedef struct {
   int buckets[NBUCKETS];
   float valmin, valmax;
+  int minmax_defined;
   int ntotal;
 } bucketdata;
 
@@ -115,7 +118,10 @@ typedef struct {
   int nslice_files, nplot3d_files, nboundary_files;
 } casedata;
 
-void update_data_hist(float *vals, int nvals, bucketdata *bucket, int flag);
+//************************** headers ****************************************
+
+void init_buckets(bucketdata *bucket);
+void update_buckets(float *vals, int nvals, bucketdata *bucket);
 float get_hist_val(bucketdata *bucket, float cdf);
 int getendian(void);
 void getSMDiffversion(char *SMDiffversion);
@@ -208,7 +214,7 @@ STDCALL FORToutsliceheader(char *outfile,int *unit3,
 STDCALL FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, int len);
 STDCALL FORTplot3dout(char *outfile,int *nx,int *ny,int *nz,float *qout,int *error3,int lenout);
 
-
+//************************** global variables ****************************************
 
 EXTERN char dirseparator[3], pp[2];
 EXTERN casedata caseinfo[2];

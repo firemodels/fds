@@ -242,7 +242,7 @@ void diff_boundaryes(FILE *stream_out){
       valmin=1000000000.0;
       valmax=-valmin;
       nvals=0;
-      update_data_hist(NULL, nvals, boundary1->bucket, INIT_HISTOGRAM);
+      init_buckets(boundary1->bucket);
       for(;;){
         int iq;
 
@@ -269,7 +269,7 @@ void diff_boundaryes(FILE *stream_out){
             if(pq1[kk]>valmax)valmax=pq1[kk];
           }
         }
-        update_data_hist(pqq1, nsize1, boundary1->bucket, UPDATE_HISTOGRAM);
+        update_buckets(pqq1, nsize1, boundary1->bucket);
         FORToutpatchframe(&unit3, &boundary1->npatches,
                         p3i1, p3i2, p3j1, p3j2, p3k1, p3k2,
                         &patchtime1, pqq3, &error3);
