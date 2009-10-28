@@ -4217,53 +4217,71 @@ SELECT CASE(IND)
 
    CASE(231) ! PDPA
       GAS_PHASE_OUTPUT = 0._EB
-      IF ( (PY%PDPA_START<=T) .AND.(PY%PDPA_END>=T) ) THEN
-         IF ((PY%PDPA_M-PY%PDPA_N) /= 0) THEN
-            EXPON = 1._EB/(PY%PDPA_M-PY%PDPA_N)
-         ELSE
+      IF ( ((PY%PDPA_START<=T) .AND.(PY%PDPA_END>=T)) .OR. .NOT.PY%PDPA_INTEGRATE ) THEN
+         IF ((PY%PDPA_M-PY%PDPA_N) == 0) THEN
             EXPON = 1._EB
-         ENDIF
-         IF (PY%QUANTITY == 'ENTHALPY') THEN
-            DLOOP: DO I=1,NLP
-               DR=>DROPLET(I)
-               IPC=DR%CLASS
-               PC=>PARTICLE_CLASS(IPC)
-               IF (PY%PART_ID/=PC%ID .AND. PY%PART_ID/='ALL') CYCLE DLOOP
-               IF ((DR%X-DV%X)**2+(DR%Y-DV%Y)**2+(DR%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP
-               GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT + FOTH*PI*DR%R**3*PC%DENSITY*DR%PWT* &
-                                  (PC%C_P_BAR(NINT(DR%TMP))*DR%TMP - PC%C_P_BAR(NINT(PC%TMP_MELT))*PC%TMP_MELT)
-            ENDDO DLOOP          
-            GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT * 0.001_EB  
+         ELSEIF ((PY%QUANTITY=='MASS CONCENTRATION') .OR. &
+                 (PY%QUANTITY=='ENTHALPY')           .OR. &
+                 (PY%QUANTITY=='DROPLET FLUX X')     .OR. &
+                 (PY%QUANTITY=='DROPLET FLUX Y')     .OR. &
+                 (PY%QUANTITY=='DROPLET FLUX Z')) THEN
+            EXPON = 1._EB
          ELSE
-            IF (PY%QUANTITY == 'NUMBER CONCENTRATION') DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*PY%PDPA_RADIUS**3
-            DLOOP2: DO I=1,NLP
-               DR=>DROPLET(I)
-               IPC=DR%CLASS
-               PC=>PARTICLE_CLASS(IPC)
-               IF (PY%PART_ID/=PC%ID .AND. PY%PART_ID/='ALL') CYCLE DLOOP2
-               IF ((DR%X-DV%X)**2+(DR%Y-DV%Y)**2+(DR%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP2
-               SELECT CASE(PY%QUANTITY)
-                  CASE('U-VELOCITY') 
-                     VEL = DR%U
-                  CASE('V-VELOCITY') 
-                     VEL = DR%V
-                  CASE('W-VELOCITY') 
-                     VEL = DR%W
-                  CASE('VELOCITY') 
-                     VEL = SQRT(DR%U**2 + DR%V**2 + DR%W**2)
-                  CASE('TEMPERATURE')
-                     VEL = DR%TMP - TMPM
-                  CASE DEFAULT
-                     VEL = 1.0_EB
-               END SELECT
-               ! Compute numerator and denumerator
-               DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M * VEL
-               IF (PY%QUANTITY /= 'NUMBER CONCENTRATION') THEN
-                  DV%PDPA_DENUM = DV%PDPA_DENUM + DR%PWT*(2._EB*DR%R)**PY%PDPA_N
-               ENDIF
-            ENDDO DLOOP2
-            IF (DV%PDPA_DENUM > 0._EB) GAS_PHASE_OUTPUT = (DV%PDPA_NUMER/DV%PDPA_DENUM)**EXPON         
+            EXPON = 1._EB/(PY%PDPA_M-PY%PDPA_N)
          ENDIF
+         IF (.NOT.PY%PDPA_INTEGRATE) THEN
+            DV%PDPA_NUMER = 0._EB
+            DV%PDPA_DENUM = 0._EB
+         ENDIF
+         IF (PY%QUANTITY == 'NUMBER CONCENTRATION') DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*PY%PDPA_RADIUS**3
+         IF (PY%QUANTITY == 'MASS CONCENTRATION' .OR. &
+             PY%QUANTITY == 'ENTHALPY'           .OR. &
+             PY%QUANTITY == 'DROPLET FLUX X'     .OR. &
+             PY%QUANTITY == 'DROPLET FLUX Y'     .OR. &
+             PY%QUANTITY == 'DROPLET FLUX Z') &
+            DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*(2._EB*PY%PDPA_RADIUS)**3
+         DLOOP: DO I=1,NLP
+            DR=>DROPLET(I)
+            IPC=DR%CLASS
+            PC=>PARTICLE_CLASS(IPC)
+            IF (PY%PART_ID/=PC%ID .AND. PY%PART_ID/='ALL') CYCLE DLOOP
+            IF ((DR%X-DV%X)**2+(DR%Y-DV%Y)**2+(DR%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP
+            SELECT CASE(PY%QUANTITY)
+               CASE('U-VELOCITY') 
+                  VEL = DR%U
+               CASE('V-VELOCITY')
+                  VEL = DR%V
+               CASE('W-VELOCITY')
+                  VEL = DR%W
+               CASE('VELOCITY') 
+                  VEL = SQRT(DR%U**2 + DR%V**2 + DR%W**2)
+               CASE('DROPLET FLUX X') 
+                  VEL = PC%FTPR*DR%U
+               CASE('DROPLET FLUX Y') 
+                  VEL = PC%FTPR*DR%V
+               CASE('DROPLET FLUX Z') 
+                  VEL = PC%FTPR*DR%W
+               CASE('MASS CONCENTRATION') 
+                  VEL = PC%FTPR
+               CASE('TEMPERATURE')
+                  VEL = DR%TMP - TMPM
+               CASE('ENTHALPY')
+                  VEL = 0.001_EB*PC%FTPR*(PC%C_P_BAR(NINT(DR%TMP))*DR%TMP - PC%C_P_BAR(NINT(PC%TMP_MELT))*PC%TMP_MELT)
+               CASE DEFAULT
+                  VEL = 1.0_EB
+            END SELECT
+            ! Compute numerator and denumerator
+            DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M * VEL
+            IF ((PY%QUANTITY /= 'NUMBER CONCENTRATION') .AND. &
+                (PY%QUANTITY /= 'MASS CONCENTRATION') .AND. &
+                (PY%QUANTITY /= 'DROPLET FLUX X') .AND. &
+                (PY%QUANTITY /= 'DROPLET FLUX Y') .AND. &
+                (PY%QUANTITY /= 'DROPLET FLUX Z') .AND. &
+                (PY%QUANTITY /= 'ENTHALPY')) THEN
+               DV%PDPA_DENUM = DV%PDPA_DENUM + DR%PWT*(2._EB*DR%R)**PY%PDPA_N
+            ENDIF
+         ENDDO DLOOP
+         IF (DV%PDPA_DENUM > 0._EB) GAS_PHASE_OUTPUT = (DV%PDPA_NUMER/DV%PDPA_DENUM)**EXPON         
       ENDIF
    END SELECT
 
