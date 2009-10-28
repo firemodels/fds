@@ -109,7 +109,11 @@ ELSE
    !$OMP END DO
 ENDIF
 
-IF (STORE_MU_DNS) MU_DNS = MU
+IF (STORE_MU_DNS) THEN
+   !$OMP WORKSHARE
+   MU_DNS = MU
+   !$OMP END WORKSHARE
+ENDIF
 
 ! Compute eddy viscosity using Smagorinsky model
 
