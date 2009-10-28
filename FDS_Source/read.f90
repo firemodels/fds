@@ -1224,6 +1224,7 @@ CFL_MAX              = 1.0_EB       ! Stability bounds
 CFL_MIN              = 0.8_EB
 VN_MAX               = 1.0_EB
 VN_MIN               = 0.8_EB
+
  
 REWIND(LU_INPUT)
 MISC_LOOP: DO 
@@ -1238,8 +1239,6 @@ ENDDO MISC_LOOP
 
 IF (FDS6) THEN
    CFL_VELOCITY_NORM=2
-   !!VN_MAX=0.5_EB
-   !!VN_MIN=0.4_EB
    IF (DNS) THEN
       FLUX_LIMITER=4
    ELSE
@@ -1247,11 +1246,15 @@ IF (FDS6) THEN
       DYNSMAG=.TRUE.
    ENDIF
    BAROCLINIC=.TRUE.
-   !!CHECK_KINETIC_ENERGY=.TRUE.
    PROJECTION=.TRUE.
    STORE_MU_DNS=.TRUE.
    CHECK_VN=.TRUE.
    CLIP_MASS_FRACTION=.TRUE.
+   ! reread the line to pick up any user-specified options
+   REWIND(LU_INPUT)
+   CALL CHECKREAD('MISC',LU_INPUT,IOS)
+   READ(LU_INPUT,MISC)
+   REWIND(LU_INPUT)
 ENDIF
 
 ! Temperature conversions
@@ -2006,7 +2009,14 @@ EC_LL = VISIBILITY_FACTOR/MAXIMUM_VISIBILITY
 
 ! Change units of combustion quantities
 
-IF (FDS6) HRRPUV_AVERAGE = 1.E10_EB ! effectively remove this bound
+IF (FDS6) THEN
+   HRRPUV_AVERAGE = 1.E10_EB ! effectively remove this bound
+   ! reread the line in case the user has specified HRRPUV_AVERAGE
+   REWIND(LU_INPUT)
+   CALL CHECKREAD('REAC',LU_INPUT,IOS)
+   READ(LU_INPUT,REAC)
+   REWIND(LU_INPUT)
+ENDIF
 HRRPUV_AVERAGE = HRRPUV_AVERAGE*1000._EB   ! W/m3
 HRRPUA_SHEET   = HRRPUA_SHEET*  1000._EB   ! W/m2
 
