@@ -2268,14 +2268,22 @@ typedef struct {
       float vent_area;
       int roomfrom, roomto, face;
       roomdata *roomi;
+      float color[4];
 
       nzvents++;
       zvi = zventinfo + nzvents - 1;
       if(match(buffer,"VFLOWGEOM",9)==1)zonevent_orien=1;
       zvi->vent_orien=zonevent_orien;
       if(fgets(buffer,255,stream)==NULL)break;
+      color[0]=1.0;
+      color[1]=0.0;
+      color[2]=1.0;
+      color[3]=1.0;
       if(zonevent_orien==0){
-        sscanf(buffer,"%i %i %i %f %f %f %f",&roomfrom,&roomto, &face,&width,&ventoffset,&bottom,&top);
+        sscanf(buffer,"%i %i %i %f %f %f %f %f %f %f",
+          &roomfrom,&roomto, &face,&width,&ventoffset,&bottom,&top,
+          color,color+1,color+2
+          );
         
         if(roomfrom<1||roomfrom>nrooms)roomfrom=nrooms+1;
         roomi = roominfo + roomfrom-1;
@@ -2318,7 +2326,10 @@ typedef struct {
         float xcen, ycen;
         int r_from, r_to;
 
-        sscanf(buffer,"%i %i %i %f %i",&r_from,&r_to,&face,&vent_area,&hvent_type);
+        sscanf(buffer,"%i %i %i %f %i %f %f %f",
+          &r_from,&r_to,&face,&vent_area,&hvent_type,
+          color,color+1,color+2
+          );
         zvi->dir=face;
         roomfrom=r_from;
         roomto=r_to;
@@ -2357,6 +2368,7 @@ typedef struct {
         zvi->area=vent_area;
         zvi->face=face;
       }
+      zvi->color=getcolorptr(color);
       CheckMemory;
       continue;
     }
@@ -6468,8 +6480,6 @@ int readini2(char *inifile, int localfile){
   int i;
   int j;
   int tempval;
-  float ventcolor_temp[4];
-  float blockcolor_temp[4];
 
   updatemenu=1;
   updatefacelists=1;
@@ -7585,6 +7595,8 @@ int readini2(char *inifile, int localfile){
       continue;
       }
     if(match(buffer,"VENTCOLOR",9)==1){
+      float ventcolor_temp[4];
+
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",ventcolor_temp,ventcolor_temp+1,ventcolor_temp+2);
       ventcolor_temp[3]=1.0;
@@ -7639,6 +7651,8 @@ int readini2(char *inifile, int localfile){
       continue;
       }
     if(match(buffer,"BLOCKCOLOR",10)==1){
+      float blockcolor_temp[4];
+
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",blockcolor_temp,blockcolor_temp+1,blockcolor_temp+2);
       blockcolor_temp[3]=1.0;

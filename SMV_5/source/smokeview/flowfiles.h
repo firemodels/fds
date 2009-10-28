@@ -1009,6 +1009,7 @@ typedef struct {
   int dir;
   roomdata *room1, *room2;
   float area;
+  float *color;
   float vdata[20];
   int itempdata[20];
   int vent_orien, vent_type, face;
