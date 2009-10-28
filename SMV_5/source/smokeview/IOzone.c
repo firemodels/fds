@@ -372,12 +372,12 @@ void drawroomgeom(void){
 
   if(visVents==1){
     glLineWidth(ventlinewidth);
-    glColor4fv(ventcolor);
     for(i=0;i<nzvents;i++){
       zvent *zvi;
 
       zvi = zventinfo + i;
 
+      glColor4fv(zvi->color);
       idir=zvi->dir;
       x1=zvi->x1;
       x2=zvi->x2;
