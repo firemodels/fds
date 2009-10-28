@@ -332,6 +332,11 @@ int reg_path(int setget, int pathtype, char *path){
           strncpy(path,temp,dwBufLen);
           path[dwBufLen]=0;
           break;
+        case 2:
+          strcpy(path," ");
+          dwBufLen=0;
+          path[dwBufLen]=0;
+          break;
         default:
           printf("RegQueryValueEx error: %i\n",(int)lRet);
           return 0;
