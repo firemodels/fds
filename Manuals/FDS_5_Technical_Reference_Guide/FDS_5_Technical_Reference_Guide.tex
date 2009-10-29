@@ -1201,7 +1201,7 @@ In this case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref
 It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 \be
    \bp_0(z) = p_\infty  \left( \frac{T_0(z)}{T_\infty} \right)^{\frac{\overline{W}g}{\R \Gamma}}
-   \label{pstrat}
+   \label{pstrat2}
 \ee
 
 
@@ -1212,19 +1212,19 @@ of the modified Equation of State~(\ref{state}), and then substituting terms fro
 and energy conservation equations. As shown in Appendix \ref{app_divergence}, for the $m$th zone with background pressure $\bp_m$, the divergence may be written as
 \begin{equation}
 \label{eqn_divfromeos}
-\nabla \cdot \bu = {\cal D} + {\cal P}\dod{\bp_m}{t} \,\mbox{,}
+\nabla \cdot \bu = {\cal D} - {\cal P}\; \dod{\bp_m}{t}
 \end{equation}
 where
 \begin{equation}
 \label{eqn_fdsP1}
-\mathcal{P} = \frac{1}{\overline{p}_m}\left( \frac{\mathcal{R}}{\overline{W} c_p} - 1 \right)
+\mathcal{P} = \frac{1}{\overline{p}_m}\left( 1 - \frac{\mathcal{R}}{\overline{W} c_p}  \right)
 \end{equation}
 and
 \begin{align}
 \label{eqn_fdsD1}
 \mathcal{D} &= \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} +
 \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} -
-\frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
+\frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  + \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
 &+ \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' -
 \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha +
 \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
@@ -1235,7 +1235,7 @@ the atmosphere, the net mass flux from gas species diffusion and production, and
 pressure with time, $\partial \bp_m/\partial t$, is non-zero only if
 it assumed that the compartment is tightly sealed, in which case the background pressure, $\bp_m$, can no longer be assumed constant due to
 the increase (or decrease) in mass and thermal energy within the enclosure. The time derivative of the background pressure of the $m$th
-pressure zone, $\Omega_m$, is found by integrating Eq.~(\ref{phi}) over the zone volume:
+pressure zone, $\Omega_m$, is found by integrating Eq.~(\ref{eqn_divfromeos}) over the zone volume:
 \begin{equation}
 \dod{\bp_m}{t} = \left( \int_{\Omega_m} {\cal D} \, dV - \int_{\partial \Omega_m} \bu \cdot d\bS \right) \Big/ \int_{\Omega_m} {\cal P} \, dV  \label{concon}
 \end{equation}
@@ -1287,6 +1287,63 @@ to be made clear below, must be treated differently than the other pressure term
 In neither of these cases is the Boussinesq approximation
 invoked -- the fluid is still considered thermally-expandable; the divergence is non-zero; and the mass and
 energy equations are not modified.
+
+\subsubsection{Velocity Boundary Conditions}
+\label{WW_model}
+
+When the momentum equation is integrated over a cell adjacent to the wall in an LES it turns out that the most difficult term to
+handle is the viscous stress at the wall, e.g. $\bar{\tau}_{xz}|_{z=0}$, because the wall-normal gradient of the streamwise velocity component cannot be resolved.
+Note that the sgs stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number
+where the viscous terms are negligible and the sgs stress is of critical importance.  The fidelity of the sgs model still influences the wall stress, however,
+since other components of the sgs tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model.
+The model used for $\tau_w = \bar{\tau}_{xz}|_{z=0}$ in FDS is the Werner and Wengle model \cite{Werner:1991} which we now describe.
+
+An important scaling quantity in the near-wall region is the friction velocity, defined as $u^* \equiv \sqrt{\tau_w/\rho}$.
+From the friction velocity we define the nondimensional streamwise velocity $u^+ \equiv u/u^*$ and nondimensional wall-normal distance $z^+ \equiv z/\ell$,
+where $\ell = \mu/(\rho u^*)$. The law of the wall is then given by \cite{Pope:2000,TennekesLumley}
+\begin{equationarray}{rcll}
+\label{eqn_visclayer} u^+ &=& z^+               & \mbox{for} \quad z^+ < 5 \\
+\label{eqn_loglaw}    u^+ &=& 2.4 \ln z^+ + 5.2 & \mbox{for} \quad z^+ > 30 \,\mbox{,}
+\end{equationarray}
+The region $5 < z^+ < 30$, where both viscous and inertial stresses are important, is referred to as the buffer layer.  The upper range of the log law depends on the Reynolds number \cite{Pope:2000,Zagarola:1997}.
+
+Werner and Wengle \cite{Werner:1991} propose a simplification to the law of the wall to eliminate the mathematical difficulties of handling the buffer and log layers.  Furthermore, WW suppose that their simplified formula for the streamwise velocity holds \emph{instantaneously} within the LES.  The WW wall law is given by \cite{Sagaut:2001}
+\begin{equationarray}{rcll}
+\label{eqn_wwlam}  u^+ &=& z^+       & \mbox{for} \quad z^+ \le 11.81 \\
+\label{eqn_wwturb} u^+ &=& A (z^+)^B & \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
+\end{equationarray}
+where $A=8.3$ and $B=1/7$. Note that a power law has been substituted for the log law and the viscous sublayer and the power law region are matched within the buffer region.  A comparison of the log law and the power law is shown in Figure \ref{fig_lawofthewall}.  In the region $11.81 < z^+ < 10^3$ the power law is a good approximation to the log law and for $z^+>10^3$ the power law loosely exhibits wake region behavior for a flow with $\mbox{Re} \approx 5e5$ \cite{Pope:2000,Zagarola:1997}.  As we see below, this functional behavior has consequences for high Re flows.
+\begin{figure}
+   \begin{center}
+      \scalebox{0.8}{\includegraphics{FIGURES/lawofthewall.pdf}}
+      \caption{\label{fig_lawofthewall} \small The law of the wall.  We have omitted the buffer layer since it is not considered in the WW model.  For $z^+\le 11.81$ we have the viscous sublayer.  For $z^+>11.81$ we show a comparison of the log law (\ref{eqn_loglaw}) (red dashed line) and the WW power law (\ref{eqn_wwturb}) (blue solid line) with $A=8.3$ and $B=1/7$.}
+   \end{center}
+\end{figure}
+
+For the purposes of adapting the WW model to FDS we suppose that the first off-wall velocity component $\tilde{u}$ represents the WW profile averaged in the wall-normal direction (refer to Figure \ref{fig_nearwall_grid}).  The density is taken as the average of the neighboring cell values and uniform along the face.  The WW model as implemented in FDS is then given by
+\begin{equationarray}{rcll}
+\label{eqn_tauwlam} |\tau_w| &=& \frac{2 \bar{\mu} |\tilde{u}|}{\Delta z} & \mbox{for} \quad z^+ \le 11.81 \vspace{0.2cm}\\
+\label{eqn_tauwturb}|\tau_w| &=& \bar{\rho}\left[\alpha\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^\beta + \eta\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^B |\tilde{u}|\right]^\gamma                           & \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
+\end{equationarray}
+where
+\begin{equationarray}{rcl}
+\alpha &=& \frac{1-B}{2} A^{\frac{1+B}{1-B}} \vspace{0.2cm}\\
+\beta  &=& 1+B \vspace{0.2cm}\\
+\eta   &=& \frac{1+B}{A} \vspace{0.2cm}\\
+\gamma &=& \frac{2}{1+B}
+\end{equationarray}
+Note that $\bar{\mu}$ is the average of the \emph{molecular} viscosity from the neighboring cells.  A detailed derivation of (\ref{eqn_tauwturb}) is given in Appendix \ref{app_WWderivation}.
+
+In order to decide which formula to use for the wall stress, (\ref{eqn_tauwlam}) or (\ref{eqn_tauwturb}), we must know $z^+$, which of course depends on $\tau_w$.  As a practical matter of implementation, given that most boundary layers in FDS are under-resolved, we first calculate $\tau_w$ from (\ref{eqn_tauwturb}); we then obtain $z^+ = \sqrt{\tau_w/\bar{\rho}}$ ; if $z^+>11.81$, then the computed value of $\tau_w$ is retained, else $\tau_w$ is taken from (\ref{eqn_tauwlam}), which actually involves no additional computation since the ghost cell value for the velocity is prescribed for a no-slip wall by default.
+
+\begin{figure}
+   \begin{center}
+      \scalebox{0.12}{\includegraphics{FIGURES/nearwall_grid.pdf}}
+      \caption{\label{fig_nearwall_grid} \small Near-wall grid.}
+   \end{center}
+\end{figure}
+
+
 
 \subsection{The Equation for Pressure (Poisson's Equation)}
 
@@ -1431,7 +1488,7 @@ diffusing into species $\beta$ is given by
 \quad \quad \frac{\hbox{m$^2$}}{s} \ee
 where $W_{\alpha \beta}=2(1/W_\alpha+1/W_\beta)^{-1}$, $\sigma_{\alpha \beta}=(\sigma_\alpha+\sigma_\beta)/2$, and
 $\Omega_D$ is the diffusion collision integral, an empirical
-function of the temperature $T$~\cite{Poling:1}.
+function of the temperature, $T$~\cite{Poling:1}.
 It is assumed that nitrogen is the dominant species in any combustion
 scenario considered here, thus the diffusion coefficient in the
 species mass conservation equations is that of the given species diffusing
@@ -1439,58 +1496,6 @@ into nitrogen
 \be (\rho D)_{\alpha,\hbox{\tiny DNS}} = \rho \;  D_{\alpha 0} \ee
 where species 0 is nitrogen.
 
-\subsection{Enthalpy and Specific Heat}
-\label{HandCp}
-
-Enthalpy, $h$, and specific heat, $c_p$ are computed by doing a mass weighted average of the values for $h$ or $c_p$ for the individual species present.  The species values are obtained by table lookup using the nearest integer to the local temperature.  Values for $h$ and $c_p$ were obtained from the NIST JANAF tables $T$~\cite{NIST JANAF:1}.
-
-\subsection{The Werner and Wengle Wall Model}
-\label{WW_model}
-
-When the momentum equation is integrated over a cell adjacent to the wall in an LES it turns out that the most difficult term to handle is the viscous stress at the wall, e.g. $\bar{\tau}_{xz}|_{z=0}$, because the wall-normal gradient of the streamwise velocity component cannot be resolved.  Note that the sgs stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number where the viscous terms are negligible and the sgs stress is of critical importance.  The fidelity of the sgs model still influences the wall stress, however, since other components of the sgs tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model. The model used for $\tau_w = \bar{\tau}_{xz}|_{z=0}$ in FDS is the Werner and Wengle model \cite{Werner:1991} which we now describe.
-
-An important scaling quantity in the near-wall region is the friction velocity, defined as $u^* \equiv \sqrt{\tau_w/\rho}$.  From the friction velocity we define the nondimensional streamwise velocity $u^+ \equiv u/u^*$ and nondimensional wall-normal distance $z^+ \equiv z/\ell$, where $\ell = \mu/(\rho u^*)$. The law of the wall is then given by \cite{Pope:2000,TennekesLumley}
-\begin{equationarray}{rcll}
-\label{eqn_visclayer} u^+ &=& z^+               & \mbox{for} \quad z^+ < 5 \\
-\label{eqn_loglaw}    u^+ &=& 2.4 \ln z^+ + 5.2 & \mbox{for} \quad z^+ > 30 \,\mbox{,}
-\end{equationarray}
-The region $5 < z^+ < 30$, where both viscous and inertial stresses are important, is referred to as the buffer layer.  The upper range of the log law depends on the Reynolds number \cite{Pope:2000,Zagarola:1997}.
-
-Werner and Wengle \cite{Werner:1991} propose a simplification to the law of the wall to eliminate the mathematical difficulties of handling the buffer and log layers.  Furthermore, WW suppose that their simplified formula for the streamwise velocity holds \emph{instantaneously} within the LES.  The WW wall law is given by \cite{Sagaut:2001}
-\begin{equationarray}{rcll}
-\label{eqn_wwlam}  u^+ &=& z^+       & \mbox{for} \quad z^+ \le 11.81 \\
-\label{eqn_wwturb} u^+ &=& A (z^+)^B & \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
-\end{equationarray}
-where $A=8.3$ and $B=1/7$. Note that a power law has been substituted for the log law and the viscous sublayer and the power law region are matched within the buffer region.  A comparison of the log law and the power law is shown in Figure \ref{fig_lawofthewall}.  In the region $11.81 < z^+ < 10^3$ the power law is a good approximation to the log law and for $z^+>10^3$ the power law loosely exhibits wake region behavior for a flow with $\mbox{Re} \approx 5e5$ \cite{Pope:2000,Zagarola:1997}.  As we see below, this functional behavior has consequences for high Re flows.
-\begin{figure}
-   \begin{center}
-      \scalebox{0.8}{\includegraphics{FIGURES/lawofthewall.pdf}}
-      \caption{\label{fig_lawofthewall} \small The law of the wall.  We have omitted the buffer layer since it is not considered in the WW model.  For $z^+\le 11.81$ we have the viscous sublayer.  For $z^+>11.81$ we show a comparison of the log law (\ref{eqn_loglaw}) (red dashed line) and the WW power law (\ref{eqn_wwturb}) (blue solid line) with $A=8.3$ and $B=1/7$.}
-   \end{center}
-\end{figure}
-
-For the purposes of adapting the WW model to FDS we suppose that the first off-wall velocity component $\tilde{u}$ represents the WW profile averaged in the wall-normal direction (refer to Figure \ref{fig_nearwall_grid}).  The density is taken as the average of the neighboring cell values and uniform along the face.  The WW model as implemented in FDS is then given by
-\begin{equationarray}{rcll}
-\label{eqn_tauwlam} |\tau_w| &=& \frac{2 \bar{\mu} |\tilde{u}|}{\Delta z} & \mbox{for} \quad z^+ \le 11.81 \vspace{0.2cm}\\
-\label{eqn_tauwturb}|\tau_w| &=& \bar{\rho}\left[\alpha\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^\beta + \eta\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^B |\tilde{u}|\right]^\gamma                           & \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
-\end{equationarray}
-where
-\begin{equationarray}{rcl}
-\alpha &=& \frac{1-B}{2} A^{\frac{1+B}{1-B}} \vspace{0.2cm}\\
-\beta  &=& 1+B \vspace{0.2cm}\\
-\eta   &=& \frac{1+B}{A} \vspace{0.2cm}\\
-\gamma &=& \frac{2}{1+B}
-\end{equationarray}
-Note that $\bar{\mu}$ is the average of the \emph{molecular} viscosity from the neighboring cells.  A detailed derivation of (\ref{eqn_tauwturb}) is given in Appendix \ref{app_WWderivation}.
-
-In order to decide which formula to use for the wall stress, (\ref{eqn_tauwlam}) or (\ref{eqn_tauwturb}), we must know $z^+$, which of course depends on $\tau_w$.  As a practical matter of implementation, given that most boundary layers in FDS are under-resolved, we first calculate $\tau_w$ from (\ref{eqn_tauwturb}); we then obtain $z^+ = \sqrt{\tau_w/\bar{\rho}}$ ; if $z^+>11.81$, then the computed value of $\tau_w$ is retained, else $\tau_w$ is taken from (\ref{eqn_tauwlam}), which actually involves no additional computation since the ghost cell value for the velocity is prescribed for a no-slip wall by default.
-
-\begin{figure}
-   \begin{center}
-      \scalebox{0.12}{\includegraphics{FIGURES/nearwall_grid.pdf}}
-      \caption{\label{fig_nearwall_grid} \small Near-wall grid.}
-   \end{center}
-\end{figure}
 
 
 
@@ -2580,7 +2585,7 @@ $\bu_d$ is the velocity of the droplet, $\bu$ is the
 velocity of the gas, $\rho$ is the density of the gas,
 and $\dx \, \dy \, \dz$ is the volume of the grid cell.
 The acceleration of an individual droplet is governed by the equation
-\be 
+\be
     \frac{d}{dt} (m_d \bu_d) = m_d\, \bg - \ha \rho\,C_D \, \pi  r_d^2 \,
     (\bu_d-\bu) |\bu_d-\bu|
 \ee
@@ -3073,7 +3078,7 @@ for the species.
 \subsubsection{Discretizing the Divergence}
 \label{div_discret}
 
-The divergence (see Eq.~(\ref{phi})) in the $m$th pressure zone in both the predictor and corrector step
+The divergence (see Eq.~(\ref{eqn_divfromeos})) in the $m$th pressure zone in both the predictor and corrector step
 is discretized
 \be (\nabla \cdot \bu)_{ijk} = \frac{\R}{\bW c_p \bp_m} \left( \dq_{ijk}''' + (\nabla \cdot k \nabla T)_{ijk}
     + \ldots \right) + \frac{1}{\bp_n} \left( \frac{\R}{\bW c_p} -1 \right)
@@ -3106,6 +3111,49 @@ can be extracted from the average molecular weight
    \frac{W_0\,p_m}{T_\infty {\cal R }} + \sum_{\alpha=1}^{N_s} \left( 1-\frac{W_0}{W_\alpha} \right)
    (\rho Y_\alpha)_{ijk} \ee
 
+\subsubsection{Enthalpy and Specific Heat}
+\label{HandCp}
+
+Enthalpy, $h$, and specific heat, $c_p$ are computed by doing a mass weighted average of the values for $h$ or $c_p$ for the individual species present.
+The species values are obtained by table lookup using the nearest integer to the local temperature.  Values for $h$ and $c_p$ were obtained from the NIST-JANAF tables~\cite{NIST_JANAF}.
+
+\subsubsection{Background Pressure Changes}
+
+The divergence of the flow, as defined by the equation of state, is written in compact notation as follows:
+\begin{equation}
+\label{eqn_divfromeos2}
+\nabla \cdot \bu = {\cal D} - {\cal P}\; \dod{\bp_m}{t}
+\end{equation}
+The terms $\mathcal{D}$ and $\mathcal{P}$ are defined by Eqs.~(\ref{eqn_fdsD1}) and (\ref{eqn_fdsP1}), respectively. The subscript $m$ refers to the 
+number of the {\em pressure zone}; that is, a volume within the computational domain that is allowed to have its own background pressure rise. A closed room
+within a building, for example, is a pressure zone. 
+The time derivative of the background pressure of the $m$th
+pressure zone is found by integrating Eq.~(\ref{eqn_divfromeos2}) over the zone volume (denoted by $\Omega_m$):
+\begin{equation}
+\dod{\bp_m}{t} = \left( \int_{\Omega_m} {\cal D} \, dV - \int_{\partial \Omega_m} \bu \cdot d\bS \right) \Big/ \int_{\Omega_m} {\cal P} \, dV  \label{concon2}
+\end{equation}
+Equation~(\ref{concon2}) is essentially a consistency condition, ensuring that blowing air or starting a fire within a sealed
+compartment leads to an appropriate decrease in the divergence within the volume.
+
+In the event that the barrier separating two pressure zones should rupture, Eq.~(\ref{concon2}) is modified so that the pressure in the 
+newly connected zones is driven towards an equilibrium pressure:
+\be
+   \bp_{eq} = \frac{ \sum_m V_m }{ \sum_m V_m/\bp_m } 
+\ee
+Note that 
+\be 
+  \int_{\Omega_m} {\cal P} \, dV \approx  \frac{ V_m}{\gamma \bp_m }
+\ee
+which allows us to write an expression for the equilibrium pressure using quantities that have already been calculated:
+\be 
+  \bp_{eq} = \sum_m \bp_m \int_{\Omega_m} {\cal P} \, dV  \Big/  \sum_m \int_{\Omega_m} {\cal P} \, dV
+\ee
+The pressure in connected zones is driven towards the equilibrium at each time step according to
+\be
+   \dod{\bp_m}{t} = r \, \frac{ \bp_{eq} - \bp_m}{\dt}
+\ee
+where $r$ is a relaxation factor of 0.2, a somewhat arbitrary value designed to slow down the fairly rapid pressure equilibration.  
+   
 
 
 \clearpage
@@ -3370,7 +3418,7 @@ for solving elliptic PDEs called CRAYFISHPAK\footnote{CRAYFISHPAK, a vectorized 
 elliptic equation solver FISHPAK, was originally developed at the National Center for Atmospheric
 Research (NCAR) in Boulder, Colorado.}.
 To ensure that the divergence of the fluid is consistent with the definition
-given in Eq.~(\ref{phi}), the time derivative of the divergence is defined
+given in Eq.~(\ref{eqn_divfromeos}), the time derivative of the divergence is defined
 \be \dod{ }{t}(\nabla \cdot \bu)_{ijk} =
           \frac{(\nabla \cdot \bu)_{ijk}^{(n+1)_e}
               - (\nabla \cdot \bu)_{ijk}^n}{\dt} \ee
@@ -3506,7 +3554,7 @@ corrected thermodynamic quantities.
 
 \item The pressure fluctuation is recomputed using estimated quantities
 \be
-\label{eqn_corrector_poisson}
+\label{eqn_corrector_poisson2}
 \nabla^2{\cal H'}^{n+1} = - \left[ \frac{ 2(\nabla\cdot\bu)^{n+1} - (\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n }{\dt} \right] - \nabla \cdot \bar{\mathbf{F}}^{(n+1)_e}
 \ee
 Again, note that only $(\nabla\cdot\bu)^{n+1}$ is taken from the equation of state.  The divergences of the patch-averaged fields are computed explicitly.
@@ -4289,9 +4337,8 @@ $\bo=(\omx,\omy,\omz)$    \> vorticity vector \\
 \chapter{Derivation of the Velocity Divergence}
 \label{app_divergence}
 
-\subsubsection{Randall McDermott, NIST Postdoctoral Fellow}
 
-In this appendix we derive the divergence of the velocity field as presented in Eq.~(\ref{phi}).
+In this appendix we derive the divergence of the velocity field as presented in Eq.~(\ref{eqn_divfromeos}).
 Note that the constitutive relationships presented here for the mass diffusion and thermal heat fluxes are valid for direct numerical simulations (i.e., well-resolved calculations).
 The minor modifications required of the transport coefficients for large-eddy simulation are presented in Section~\ref{LES}.  We start the derivation by rearranging the continuity equation.
 Next, we differentiate the equation of state to reveal the relationship between transport equations for mass and energy.
@@ -4512,7 +4559,8 @@ The heat release rate per unit volume is defined by
 \label{eqn_heatrelease}
 \dot{q}^\tripleprime \equiv -\sum_\alpha \dot{m}_{\alpha}^\tripleprime \Delta h^0_\alpha \,\mbox{.}
 \end{equation}
-Taking the $z$ direction to be aligned with the gravity vector we have $\partial \overline{p}_i/\partial z = -\rho_i g$, where $g = 9.8$ m/s$^2$ and $\rho_i$ is a specified background density for the $i$th zone.
+Taking the $z$ direction to be aligned with the gravity vector we have $\partial \overline{p}_i/\partial z = -\rho_i g$, 
+where $g = 9.8$ m/s$^2$ and $\rho_i$ is a specified background density for the $i$th zone.
 Thus, the material derivative of the background pressure may be written as
 \begin{eqnarray}
 \label{eqn_expandp0}
@@ -4522,27 +4570,38 @@ Hence, utilizing (\ref{eqn_fickslaw}), (\ref{eqn_heatrelease}), and (\ref{eqn_ex
 for the $i$th zone we may write the divergence (\ref{eqn_divconstraint_final}) as
 \begin{equation}
 \label{eqn_fds_divcontraint}
-\Div \mathbf{u} = \mathcal{D} + \mathcal{P} \frac{\partial \overline{p}_i}{\partial t}
+\Div \mathbf{u} = \mathcal{D} - \mathcal{P} \frac{\partial \overline{p}_i}{\partial t}
 \end{equation}
 where
 \begin{equation}
 \label{eqn_fdsP}
-\mathcal{P} = \frac{1}{\overline{p}_i}\left( \frac{\overline{p}_i}{\rho \,c_p T} - 1 \right) = \frac{1}{\overline{p}_i}\left( \frac{\mathcal{R}}{\overline{W} c_p} - 1 \right)
+\mathcal{P} = \frac{1}{\overline{p}_i}\left( 1 - \frac{\overline{p}_i}{\rho \,c_p T} \right) = \frac{1}{\overline{p}_i}\left( 1 - \frac{\mathcal{R}}{\overline{W} c_p}  \right)
 \end{equation}
 and
 \begin{eqnarray}
 \label{eqn_fdsD}
-\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  - \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
-&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
+\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + 
+                \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + 
+                \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  + 
+                \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
+&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} - 
+                \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + 
+                \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
 \end{eqnarray}
 Equations (\ref{eqn_fdsP}) and (\ref{eqn_fdsD}) correspond to (\ref{eqn_fdsP1}) and (\ref{eqn_fdsD1}) in the FDS Tech Guide.  Though, note that at present the bulk kinetic energy term is not included in the code.
 
-A brief remark on the of the sensible enthalpy $h_{s,\alpha}$ vs. the [chemical + sensible] enthalpy $h_\alpha = \Delta h_\alpha^0 + h_{s,\alpha}$: The definition of the heat flux vector $\dot{\mathbf{q}}^{\prime\prime}$ can be a key source of confusion.  When transporting the sensible enthalpy only, as we are doing here, the heat flux vector does not account for the molecular transport of the chemical enthalpy (the enthalpy of formation).  If we were working in terms of the [chemical + sensible] enthalpy we would not have a ``heat of reaction'' $\dot{q}^{\tripleprime}$, the heat flux vector would account for the transport of both the chemical and the sensible enthalpies, and the sensible enthalpies in (\ref{eqn_fdsD}) would be replaced by the [chemical + sensible] enthalpy $h_{\alpha}$.
+A brief remark on the of the sensible enthalpy $h_{s,\alpha}$ vs. the [chemical + sensible] enthalpy $h_\alpha = \Delta h_\alpha^0 + h_{s,\alpha}$: 
+The definition of the heat flux vector $\dot{\mathbf{q}}^{\prime\prime}$ can be a key source of confusion.  
+When transporting the sensible enthalpy only, as we are doing here, the heat flux vector does not account for the molecular transport of the 
+chemical enthalpy (the enthalpy of formation).  If we were working in terms of the [chemical + sensible] enthalpy we would not have 
+a ``heat of reaction'' $\dot{q}^{\tripleprime}$, the heat flux vector would account for the transport of both the chemical and the sensible enthalpies, 
+and the sensible enthalpies in (\ref{eqn_fdsD}) would be replaced by the [chemical + sensible] enthalpy $h_{\alpha}$.
+
+
+
 
 \chapter{Domain Decomposition Strategy}
 \label{app_pressure_correction}
-
-\subsubsection{Randall McDermott, NIST Postdoctoral Fellow}
 
 The time advancement scheme for multiple meshes involves averaging of the velocity components at a patch boundary in order to maintain stability. It is extremely important to note that -- because of the staggered grid storage arrangement -- two values of the numerical solution for the velocity exist at a given point on a mesh interface.  Consider meshes $m$ (left) and $om$ (right) which are joined side by side in the $x$ direction.  The staggered $u$ velocity components are indexed from $\{0\!:\!nx\}$ (in the $x$ direction) on a given mesh. The values $u^{(m)}_{nx,jk}$ and $u^{(om)}_{0,jk}$ therefore live at the same physical location, but are advanced separately (and by different processors) during the course of the algorithm.  In the ideal circumstance these velocities are identical, as is the case if the PDEs (\ref{eqn_poisson}) and (\ref{eqn_laplace}) are enforced at the mesh interface.  To improve the speed of our parallel algorithm, our strategy is instead to keep the difference between these values small while still enforcing global volume conservation.  Our strategy recovers the ideal case in the limit $\delta t \rightarrow 0$. In fact, for reasonable time steps (CFL $\approx$ 0.5) we observe that the difference in the coincident velocities is negligible.  While the primitive velocity components are indeed unique to a given mesh, for each mesh we may define the discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which includes ghost cell data and is identical at all overlapping mesh points.  To do this we simply average the coincident values of the velocity components at the mesh interfaces and inject the ghost cell values from the neighboring mesh.  For instance, considering the same side-by-side meshes $m$ and $om$ as before,
 \begin{equation}
@@ -4558,12 +4617,18 @@ To see how the new patch-averaged fields are used, consider the predictor step i
 \label{eqn_RK1}
 \mathbf{u}^{(n+1)_e} = \bar{\mathbf{u}}^n - \delta t \left[ \mathbf{F}(\rho^n,\bar{\mathbf{u}}^n) + {\nabla\cH'}^{(n+1)_e} + {\nabla\cH''}^{(n+1)_e} \right] \,\mbox{.}
 \end{equation}
-Note that (\ref{eqn_RK1}) updates a $\bar{\mathbf{u}}$ field to a $\mathbf{u}$ field.  Though this is perfectly legitimate, we should be aware of the following issues.  First, the patch-averaging procedure is slightly dissipative.  But as long as we are accurate, this numerical dissipation is minimal and acceptable (much smaller than physical [molecular, viscous] dissipation).  Second, we must now think of the time update in terms of a projection scheme in order to repair the damage made to the divergence by the averaging procedure (after the averaging procedure, the divergence for mesh boundary cells no longer exactly matches the divergence obtained from the equation of state). In practical terms, this means that the Poisson equation for the pressure fluctuation (in the predictor step) is given by
+Note that (\ref{eqn_RK1}) updates a $\bar{\mathbf{u}}$ field to a $\mathbf{u}$ field.  Though this is perfectly legitimate, we should be aware of the following issues.
+First, the patch-averaging procedure is slightly dissipative.  But as long as we are accurate, this numerical dissipation is minimal and acceptable (much smaller than
+physical [molecular, viscous] dissipation).  Second, we must now think of the time update in terms of a projection scheme in order to repair the damage made to the
+divergence by the averaging procedure (after the averaging procedure, the divergence for mesh boundary cells no longer exactly matches the divergence obtained from the equation of state).
+In practical terms, this means that the Poisson equation for the pressure fluctuation (in the predictor step) is given by
 \begin{equation}
 \label{eqn_poisson_stg1}
 \nabla^2 {\cH'}^{(n+1)_e} = -\left[\frac{ (\nabla\cdot\mathbf{u})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n}{\delta t}\right] -  \mathbf{F}(\rho^n,\bar{\mathbf{u}}^n) \,\mbox{.}
 \end{equation}
-In (\ref{eqn_poisson_stg1}), note that $\mathbf{F}$ is computed using the patch-averaged velocity field. Further, only the $(\nabla\cdot\mathbf{u})^{(n+1)_e}$ term is obtained from the equation of state (\ref{eqn_divfromeos}).  The divergence of the patch-averaged field, $(\nabla\cdot\bar{\mathbf{u}})^n$, is obtained by explicitly applying the discrete divergence operator to $\bar{\mathbf{u}}^n$.  Similarly, in the corrector Poisson equation analogous to (\ref{eqn_corrector_poisson}), only the $(\nabla\cdot\mathbf{u})^{n+1}$ term is obtained from the equation of state; $(\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e}$ and $(\nabla\cdot\bar{\mathbf{u}})^n$ are obtained explicitly:
+In (\ref{eqn_poisson_stg1}), note that $\mathbf{F}$ is computed using the patch-averaged velocity field. Further, only the $(\nabla\cdot\mathbf{u})^{(n+1)_e}$ term is obtained from the equation of state (\ref{eqn_divfromeos}).  The divergence of the patch-averaged field, $(\nabla\cdot\bar{\mathbf{u}})^n$, is obtained by explicitly applying the discrete divergence operator to $\bar{\mathbf{u}}^n$.
+Similarly, in the corrector Poisson equation analogous to (\ref{eqn_corrector_poisson}), only the $(\nabla\cdot\mathbf{u})^{n+1}$ term is obtained from the equation of state;
+$(\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e}$ and $(\nabla\cdot\bar{\mathbf{u}})^n$ are obtained explicitly:
 \begin{equation}
 \label{eqn_poisson_stg2}
 \nabla^2 {\cH'}^{\,n+1} = -\left[\frac{ 2(\nabla\cdot\mathbf{u})^{n+1} - (\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n}{\delta t}\right] -  \mathbf{F}(\rho^{(n+1)_e},\bar{\mathbf{u}}^{(n+1)_e}) \,\mbox{.}
