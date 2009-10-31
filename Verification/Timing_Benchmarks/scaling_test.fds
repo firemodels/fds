@@ -1,6 +1,6 @@
 &HEAD CHID='scaling_test', TITLE='General purpose input file to test FDS timings, SVN $Revision$' /
 
-&MULT ID='mesh multiplier', DX=1.0, DY=1.0, DZ=1.0, I_LOWER=-2, I_UPPER=1, J_LOWER=-2, J_UPPER=1, K_LOWER=0, K_UPPER=3 /
+&MULT ID='mesh multiplier', DX=1.0, DY=1.0, DZ=1.0, I_LOWER=-1, I_UPPER=0, J_LOWER=-1, J_UPPER=0, K_LOWER=0, K_UPPER=1 /
 
 &MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0, MULT_ID='mesh multiplier' /
 
