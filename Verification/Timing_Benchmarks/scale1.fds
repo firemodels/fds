@@ -1,0 +1,19 @@
+&HEAD CHID='scale1', TITLE='General purpose input file to test FDS timings, SVN $Revision: 5015 $' /
+
+&MULT ID='mesh multiplier', DX=1.0, DY=1.0, DZ=1.0, I_LOWER=-1, I_UPPER=0, J_LOWER=-1, J_UPPER=0, K_LOWER=0, K_UPPER=1 /
+
+&MESH IJK=64,64,64, XB=0.0,1.0,0.0,1.0,0.0,1.0, MULT_ID='mesh multiplier' /
+
+&TIME T_END=10.0 /
+
+&SURF ID='HOT', VEL=-0.1, TMP_FRONT=100., COLOR='RED' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT PBZ=0.0,   SURF_ID='HOT' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+
+&TAIL /
