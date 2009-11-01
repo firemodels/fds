@@ -168,6 +168,7 @@ for i=drange
         end
         
         set(gca,'FontName',Font_Name)
+        set(gca,'FontSize',Label_Font_Size)
      
         if strcmp(Flip_Axis,'no')
             xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)

@@ -1182,8 +1182,8 @@ the initial and boundary condition for the governing equations.
 
 The purpose of decomposing the pressure is that for low-Mach number flows, it can be assumed that the temperature and density are inversely
 proportional, and thus the equation of state (in the $m$th pressure zone) can be approximated
-\be \bp_m  =  \rho T \R \sumyw = \rho T \R / \bW  \label{state} \ee
-The pressure $p$ in the state and energy equations is replaced by the background pressure $\bp_m$ to filter out sound waves
+\be \bp_m  =  \rho T \R \sum_\alpha \frac{Y_\alpha}{W_\alpha} = \frac{\rho T \R}{ \bW }  \label{state} \ee
+The pressure, $p$, in the state and energy equations is replaced by the background pressure $\bp_m$ to filter out sound waves
 that travel at speeds that are much faster
 than typical flow speeds expected in fire applications. The low Mach number assumption serves two purposes. First, the filtering of acoustic waves
 means that the time step in the numerical algorithm is bound only by the flow speed as opposed to the speed of sound, and second, the modified state
@@ -1193,14 +1193,14 @@ explicitly solved, but its source terms are included in the expression for the f
 The stratification of the atmosphere is derived from the relation
 \be \frac{d \bp_0}{dz} = - \rho_0(z) \, g  \ee
 where $\rho_0$ is the background density and $g=9.8$ m/s$^2$. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$,
-\be \bp_0(z) = p_\infty \; \exp \; \left( -\int^z_{z_\infty} \frac{\bW \, g}{\R \, T_0[z]} dz \right)  \label{pstrat} \ee
+\be \bp_0(z) = p_\infty \; \exp \, \left( -\int^z_{z_\infty} \frac{\bW \, g}{\R \, T_0(z')} dz' \right)  \label{pstrat} \ee
 where the subscript infinity generally refers to the ground. A linear temperature stratification of the atmosphere may be
 specified by the user such that $T_0(z) = T_\infty + \Gamma z$ where $T_\infty$ is the temperature at the ground and
 $\Gamma$ is the lapse rate (e.g., $\Gamma = -0.0098$~K/m is the {\em adiabatic lapse rate}).
 In this case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref{state}), respectively.
 It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 \be
-   \bp_0(z) = p_\infty  \left( \frac{T_0(z)}{T_\infty} \right)^{\frac{\overline{W}g}{\R \Gamma}}
+   \bp_0(z) = p_\infty  \left( \frac{T_0(z)}{T_\infty} \right)^{\overline{W}g/\R \Gamma}
    \label{pstrat2}
 \ee
 
@@ -1223,11 +1223,12 @@ and
 \begin{align}
 \label{eqn_fdsD1}
 \mathcal{D} &= \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} +
-\frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} -
-\frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  + \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
-&+ \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' -
+\frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) +
+\frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} -
+\frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  + \mathcal{P} w \rho g \nonumber  \\
+&+ \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_m} \left[ \dot{q}^\tripleprime - \dq_b''' -
 \Div \dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha +
-\dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
+\dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T)  \right] 
 \end{align}
 Contributions to the divergence of the flow include the heat release rate of the fire, $\dq'''$, heat losses to evaporating droplets,
 $\dq_b'''$, the net heat flux from thermal conduction and radiation, $\nabla \cdot \dbq''$, updrafts of air over considerable heights of
@@ -3124,9 +3125,9 @@ The divergence of the flow, as defined by the equation of state, is written in c
 \label{eqn_divfromeos2}
 \nabla \cdot \bu = {\cal D} - {\cal P}\; \dod{\bp_m}{t}
 \end{equation}
-The terms $\mathcal{D}$ and $\mathcal{P}$ are defined by Eqs.~(\ref{eqn_fdsD1}) and (\ref{eqn_fdsP1}), respectively. The subscript $m$ refers to the 
+The terms $\mathcal{D}$ and $\mathcal{P}$ are defined by Eqs.~(\ref{eqn_fdsD1}) and (\ref{eqn_fdsP1}), respectively. The subscript $m$ refers to the
 number of the {\em pressure zone}; that is, a volume within the computational domain that is allowed to have its own background pressure rise. A closed room
-within a building, for example, is a pressure zone. 
+within a building, for example, is a pressure zone.
 The time derivative of the background pressure of the $m$th
 pressure zone is found by integrating Eq.~(\ref{eqn_divfromeos2}) over the zone volume (denoted by $\Omega_m$):
 \begin{equation}
@@ -3135,25 +3136,25 @@ pressure zone is found by integrating Eq.~(\ref{eqn_divfromeos2}) over the zone 
 Equation~(\ref{concon2}) is essentially a consistency condition, ensuring that blowing air or starting a fire within a sealed
 compartment leads to an appropriate decrease in the divergence within the volume.
 
-In the event that the barrier separating two pressure zones should rupture, Eq.~(\ref{concon2}) is modified so that the pressure in the 
+In the event that the barrier separating two pressure zones should rupture, Eq.~(\ref{concon2}) is modified so that the pressure in the
 newly connected zones is driven towards an equilibrium pressure:
 \be
-   \bp_{eq} = \frac{ \sum_m V_m }{ \sum_m V_m/\bp_m } 
+   \bp_{eq} = \frac{ \sum_m V_m }{ \sum_m V_m/\bp_m }
 \ee
-Note that 
-\be 
+Note that
+\be
   \int_{\Omega_m} {\cal P} \, dV \approx  \frac{ V_m}{\gamma \bp_m }
 \ee
 which allows us to write an expression for the equilibrium pressure using quantities that have already been calculated:
-\be 
+\be
   \bp_{eq} = \sum_m \bp_m \int_{\Omega_m} {\cal P} \, dV  \Big/  \sum_m \int_{\Omega_m} {\cal P} \, dV
 \ee
 The pressure in connected zones is driven towards the equilibrium at each time step according to
 \be
    \dod{\bp_m}{t} = r \, \frac{ \bp_{eq} - \bp_m}{\dt}
 \ee
-where $r$ is a relaxation factor of 0.2, a somewhat arbitrary value designed to slow down the fairly rapid pressure equilibration.  
-   
+where $r$ is a relaxation factor of 0.2, a somewhat arbitrary value designed to slow down the fairly rapid pressure equilibration.
+
 
 
 \clearpage
@@ -4559,7 +4560,7 @@ The heat release rate per unit volume is defined by
 \label{eqn_heatrelease}
 \dot{q}^\tripleprime \equiv -\sum_\alpha \dot{m}_{\alpha}^\tripleprime \Delta h^0_\alpha \,\mbox{.}
 \end{equation}
-Taking the $z$ direction to be aligned with the gravity vector we have $\partial \overline{p}_i/\partial z = -\rho_i g$, 
+Taking the $z$ direction to be aligned with the gravity vector we have $\partial \overline{p}_i/\partial z = -\rho_i g$,
 where $g = 9.8$ m/s$^2$ and $\rho_i$ is a specified background density for the $i$th zone.
 Thus, the material derivative of the background pressure may be written as
 \begin{eqnarray}
@@ -4580,21 +4581,21 @@ where
 and
 \begin{eqnarray}
 \label{eqn_fdsD}
-\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + 
-                \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) + 
-                \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  + 
+\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} +
+                \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) +
+                \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  +
                 \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
-&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} - 
-                \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + 
+&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} -
+                \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) +
                 \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
 \end{eqnarray}
 Equations (\ref{eqn_fdsP}) and (\ref{eqn_fdsD}) correspond to (\ref{eqn_fdsP1}) and (\ref{eqn_fdsD1}) in the FDS Tech Guide.  Though, note that at present the bulk kinetic energy term is not included in the code.
 
-A brief remark on the of the sensible enthalpy $h_{s,\alpha}$ vs. the [chemical + sensible] enthalpy $h_\alpha = \Delta h_\alpha^0 + h_{s,\alpha}$: 
-The definition of the heat flux vector $\dot{\mathbf{q}}^{\prime\prime}$ can be a key source of confusion.  
-When transporting the sensible enthalpy only, as we are doing here, the heat flux vector does not account for the molecular transport of the 
-chemical enthalpy (the enthalpy of formation).  If we were working in terms of the [chemical + sensible] enthalpy we would not have 
-a ``heat of reaction'' $\dot{q}^{\tripleprime}$, the heat flux vector would account for the transport of both the chemical and the sensible enthalpies, 
+A brief remark on the of the sensible enthalpy $h_{s,\alpha}$ vs. the [chemical + sensible] enthalpy $h_\alpha = \Delta h_\alpha^0 + h_{s,\alpha}$:
+The definition of the heat flux vector $\dot{\mathbf{q}}^{\prime\prime}$ can be a key source of confusion.
+When transporting the sensible enthalpy only, as we are doing here, the heat flux vector does not account for the molecular transport of the
+chemical enthalpy (the enthalpy of formation).  If we were working in terms of the [chemical + sensible] enthalpy we would not have
+a ``heat of reaction'' $\dot{q}^{\tripleprime}$, the heat flux vector would account for the transport of both the chemical and the sensible enthalpies,
 and the sensible enthalpies in (\ref{eqn_fdsD}) would be replaced by the [chemical + sensible] enthalpy $h_{\alpha}$.
 
 
