@@ -1220,7 +1220,7 @@ USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN,DROP_RAD,DROP_TMP,MVAP_TOT
 REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS
 REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
-            RVC,WGT,OMWGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
+            RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
             T,PR_AIR,M_VAP,M_VAP_MAX,XI,YJ,ZK,RDT,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD, &
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
@@ -1275,6 +1275,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
    FILM_THICKNESS =  0._EB
 
    ! Loop over all particle/droplet classes that have the given evaporative index
+   ! First loop is for evaporation and energy transfer
 
    PART_CLASS_LOOP: DO N_PC = 1,N_PART
 
@@ -1298,9 +1299,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
       ! Initialize quantities common to the PARTICLE_CLASS 
 
-      DROP_DEN = 0._EB
-      DROP_TMP = 0._EB
-      DROP_RAD = 0._EB
       FTPR     = PC%FTPR
       TMP_MELT = PC%TMP_MELT
       TMP_BOIL = PC%TMP_V
@@ -1308,19 +1306,19 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
       MW_DROP  = SPECIES(IGAS)%MW
       H_V_REF  = PC%H_V(NINT(PC%H_V_REFERENCE_TEMPERATURE))
       H_L_REF  = PC%C_P_BAR(NINT(TMP_MELT))*TMP_MELT
+
       ! Loop through all droplets in the class and determine the depth of the liquid film on each surface cell
 
-      MASS_SUMMING_LOOP: DO I=1,NLP
+      FILM_SUMMING_LOOP: DO I=1,NLP
          DR => DROPLET(I)
-         IF (DR%IOR==0)        CYCLE MASS_SUMMING_LOOP
-         IF (DR%WALL_INDEX==0) CYCLE MASS_SUMMING_LOOP
-         IF (DR%CLASS /= N_PC) CYCLE MASS_SUMMING_LOOP
-         IF (DR%R<=0._EB)      CYCLE MASS_SUMMING_LOOP
+         IF (DR%IOR==0)        CYCLE FILM_SUMMING_LOOP
+         IF (DR%WALL_INDEX==0) CYCLE FILM_SUMMING_LOOP
+         IF (DR%CLASS /= N_PC) CYCLE FILM_SUMMING_LOOP
+         IF (DR%R<=0._EB)      CYCLE FILM_SUMMING_LOOP
          IW = DR%WALL_INDEX
          FILM_THICKNESS(IW) = FILM_THICKNESS(IW) + DR%PWT*DR%R**3/AW(IW)
-      ENDDO MASS_SUMMING_LOOP
+      ENDDO FILM_SUMMING_LOOP
       FILM_THICKNESS = FILM_THICKNESS*FTPR/PC%DENSITY
-
       FILM_THICKNESS = MAX(MINIMUM_FILM_THICKNESS,FILM_THICKNESS) 
 
       ! Loop through all droplets within the class and determine mass/energy transfer
@@ -1374,6 +1372,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             H_L      = PC%C_P_BAR(ITMP)*TMP_DROP-H_L_REF
             WGT      = DR%PWT
             DHOR     = H_V*MW_DROP/R0     
+
             ! Gas conditions
 
             TMP_G  = TMP(II,JJ,KK)
@@ -1506,7 +1505,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             ! Compute surface cooling and density
             IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
                WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*(Q_RAD+Q_CON_WALL)*RAW(IW)/DT_SUBSTEP
-               WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*WGT*M_DROP*RAW(IW)/REAL(N_SUBSTEPS,EB) 
             ENDIF
 
             !Update gas temperature and determine new subtimestep
@@ -1578,20 +1576,58 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
          ENDDO TIME_ITERATION_LOOP
          
+      ENDDO DROPLET_LOOP
+      
+   ENDDO PART_CLASS_LOOP
+
+   ! Second loop is for summing the part quantities
+
+   PART_CLASS_SUM_LOOP: DO N_PC = 1,N_PART
+
+      PC => PARTICLE_CLASS(N_PC)
+      IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_SUM_LOOP
+
+      DROP_DEN = 0._EB
+      DROP_TMP = 0._EB
+      DROP_RAD = 0._EB
+
+      DROPLET_LOOP_2: DO I=1,NLP
+
+         DR => DROPLET(I)
+         IF (DR%CLASS /= N_PC) CYCLE DROPLET_LOOP_2
+         IF (DR%R<=0._EB)      CYCLE DROPLET_LOOP_2
+
+         ! Determine the current coordinates of the particle
+
+         XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
+         YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
+         ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
+         II  = FLOOR(XI+1._EB)
+         JJ  = FLOOR(YJ+1._EB)
+         KK  = FLOOR(ZK+1._EB)
+         RVC = RDX(II)*RDY(JJ)*RDZ(KK)
+
+         M_DROP   = PC%FTPR*DR%R**3
+
          ! Assign liquid mass to the cell for airborne drops
+
          IF (DR%IOR==0) THEN
-            DEN_ADD = WGT*M_DROP*RVC
+            DEN_ADD = DR%PWT*M_DROP*RVC
             DROP_DEN(II,JJ,KK) = DROP_DEN(II,JJ,KK) + DEN_ADD
             DROP_TMP(II,JJ,KK) = DROP_TMP(II,JJ,KK) + DEN_ADD*DR%TMP
             DROP_RAD(II,JJ,KK) = DROP_RAD(II,JJ,KK) + DEN_ADD*DR%R
          ENDIF
-         
-      ENDDO DROPLET_LOOP
-      
-      ! Calculate cumulative quantities for droplet "clouds"
 
-      WGT   = .5_EB
-      OMWGT = 1._EB-WGT
+         ! Compute surface density
+
+         IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
+            IW = DR%WALL_INDEX
+            WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*DR%PWT*M_DROP*RAW(IW)
+         ENDIF
+
+      ENDDO DROPLET_LOOP_2
+
+      ! Compute cumulative quantities for droplet "clouds"
     
       DROP_RAD = DROP_RAD/(DROP_DEN+1.E-10_EB)
       DROP_TMP = DROP_TMP/(DROP_DEN+1.E-10_EB)
@@ -1601,10 +1637,10 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
       AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_TMP(:,:,:,EVAP_INDEX )+DROP_DEN*DROP_TMP) &
                                           /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
       AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,EVAP_INDEX ))
-      AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = WGT*AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + OMWGT*DROP_DEN
+      AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = RUN_AVG_FAC*AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + OMRAF*DROP_DEN
       WHERE (AVG_DROP_DEN(:,:,:,EVAP_INDEX )<0.0001_EB .AND. DROP_DEN==0._EB) AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = 0.0_EB
 
-   ENDDO PART_CLASS_LOOP
+   ENDDO PART_CLASS_SUM_LOOP
 
 ENDDO EVAP_INDEX_LOOP
 
