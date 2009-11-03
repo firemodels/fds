@@ -20,6 +20,7 @@ int readsmv(char *smvfile){
   FILE *streamsmv;
   int iiso,igrid,ipdim, iiso_seq;
   int ipatch,ipatch_seq;
+  int iplot3d, iplot3d_seq;
   int ismoke3d, ismoke3d_seq;
   int islice, islice_seq;
 #ifdef pp_PART
@@ -39,21 +40,49 @@ int readsmv(char *smvfile){
     if(fgets(buffer,255,streamsmv)==NULL)break;
     CheckMemory;
     if(strncmp(buffer," ",1)==0)continue;
-
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SMOKE3D ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"SMOKE3D",7) == 1){
       nsmoke3d_files++;
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"BNDF",4) == 1){
       npatch_files++;
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"PL3D",4) == 1){
+      nplot3d_files++;
+      continue;
+    }
 #ifdef pp_PART
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ PART ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"PART",4) == 1){
       npart_files++;
       continue;
     }
 #endif
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SLCF ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(
       match(buffer,"SLCF",4) == 1||
       match(buffer,"SLCC",4) == 1||
@@ -63,14 +92,29 @@ int readsmv(char *smvfile){
       nslice_files++;
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ ISOF ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"ISOF",4) == 1){
       niso_files++;
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ GRID ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"GRID",4) == 1){
       nmeshes++;
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ PDIM ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"PDIM",4) == 1){
       ipdim++;
       continue;
@@ -112,8 +156,30 @@ int readsmv(char *smvfile){
       patchi->filebase=NULL;
       patchi->setvalmin=0;
       patchi->setvalmax=0;
-      patchi->valmax=1.0;
       patchi->valmin=0.0;
+      patchi->valmax=1.0;
+    }
+  }
+
+  // allocate memory for plot3d file info
+
+  if(nplot3d_files>0){
+    int i;
+
+    NewMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d));
+    for(i=0;i<nplot3d_files;i++){
+      int j;
+      plot3d *plot3di;
+
+      plot3di = plot3dinfo + i;
+      plot3di->file=NULL;
+      plot3di->filebase=NULL;
+      for(j=0;j<5;j++){
+        plot3di->bounds[j].setvalmin=0;
+        plot3di->bounds[j].setvalmax=0;
+        plot3di->bounds[j].valmin=0.0;
+        plot3di->bounds[j].valmax=1.0;
+      }
     }
   }
 
@@ -150,9 +216,7 @@ int readsmv(char *smvfile){
     }
   }
 
-
-  
-  // allocate memory for slice file info
+  // allocate memory for isosurface file info
 
   if(niso_files>0){
     iso *isoi;
@@ -195,6 +259,8 @@ int readsmv(char *smvfile){
   ipart=0;
   ipart_seq=0;
 #endif
+  iplot3d=0;
+  iplot3d_seq=0;
   islice=0;
   islice_seq=0;
   iiso=0;
@@ -215,7 +281,11 @@ int readsmv(char *smvfile){
     if(fgets(buffer,255,streamsmv)==NULL)break;
     CheckMemory;
     if(strncmp(buffer," ",1)==0)continue;
-
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ ENDF ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"ENDF",4) == 1){
       FILE *endianstream;
       int one;
@@ -258,6 +328,11 @@ int readsmv(char *smvfile){
       sscanf(buffer,"%i %i %i",&meshi->ibar,&meshi->jbar,&meshi->kbar);
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ PDIM ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(doiso==1&&match(buffer,"PDIM",4) == 1){
       mesh *meshi;
 
@@ -267,7 +342,11 @@ int readsmv(char *smvfile){
       sscanf(buffer,"%f %f %f %f %f %f",&meshi->xbar0,&meshi->xbar,&meshi->ybar0,&meshi->ybar,&meshi->zbar0,&meshi->zbar);
       continue;
     }
-
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SYST ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"SYST",4) == 1){
       if(fgets(buffer,255,streamsmv)==NULL)break;
       syst=1;
@@ -290,7 +369,11 @@ int readsmv(char *smvfile){
       }
       continue;
     }
-
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SMOKE3D ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"SMOKE3D",7) == 1){
       smoke3d *smoke3di;
       int filesize;
@@ -363,9 +446,12 @@ int readsmv(char *smvfile){
 #endif
       continue;
     }
-
-
 #ifdef pp_PART
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ PART ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"PART",4) == 1){
       int version=0,dummy;
       char *buffer2;
@@ -413,7 +499,11 @@ int readsmv(char *smvfile){
       continue;
     }
 #endif
-
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"BNDF",4) == 1){
       int version=0,dummy;
       char *buffer2;
@@ -460,6 +550,11 @@ int readsmv(char *smvfile){
       }
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SLCF ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(
       match(buffer,"SLCF",4) == 1||
       match(buffer,"SLCC",4) == 1||
@@ -537,6 +632,85 @@ int readsmv(char *smvfile){
       }
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"PL3D",4) == 1){
+      int version=0;
+      char *buffer2;
+      int filesize;
+      plot3d *plot3di;
+      int blocknumber;
+      float time;
+      int blocktemp;
+
+      if(nmeshes>1){
+        blocknumber=igrid-1;
+      }
+      else{
+        blocknumber=0;
+      }
+      if(strlen(buffer)>5){
+        buffer2 = buffer+5;
+        blocktemp=1;
+        sscanf(buffer2,"%s %f %i",buffer2,&time,&blocktemp);
+        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
+      }
+      else{
+        time=-1.0;
+      }
+
+      plot3di = plot3dinfo + iplot3d;
+      iplot3d_seq++;
+      plot3di->seq_id = iplot3d;
+      plot3di->autozip = 0;
+      plot3di->version=version;
+      plot3di->plot3d_mesh=meshinfo + blocknumber;
+      plot3di->time=time;
+
+      if(fgets(buffer,255,streamsmv)==NULL)break;
+      trim(buffer);
+      if(strlen(buffer)<=0)break;
+      if(getfileinfo(buffer,sourcedir,&filesize)==0){
+        NewMemory((void **)&plot3di->file,(unsigned int)(strlen(buffer)+lensourcedir+1));
+        NewMemory((void **)&plot3di->filebase,(unsigned int)(strlen(buffer)+1));
+        STRCPY(plot3di->filebase,buffer);
+        if(sourcedir!=NULL){
+          STRCPY(plot3di->file,sourcedir);
+          STRCAT(plot3di->file,buffer);
+        }
+        else{
+          STRCPY(plot3di->file,buffer);
+        }
+        if(readlabels(&plot3di->labels[0],streamsmv)==2||
+           readlabels(&plot3di->labels[1],streamsmv)==2||
+           readlabels(&plot3di->labels[2],streamsmv)==2||
+           readlabels(&plot3di->labels[3],streamsmv)==2||
+           readlabels(&plot3di->labels[4],streamsmv)==2){
+          printf("*** Warning: problem reading PL3D entry\n");
+          break;
+        }
+        plot3di->filesize=filesize;
+        iplot3d++;
+      }
+      else{
+        printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        if(readlabels(&plot3dinfo[iplot3d].labels[0],streamsmv)==2)break;
+        if(readlabels(&plot3dinfo[iplot3d].labels[1],streamsmv)==2)break;
+        if(readlabels(&plot3dinfo[iplot3d].labels[2],streamsmv)==2)break;
+        if(readlabels(&plot3dinfo[iplot3d].labels[3],streamsmv)==2)break;
+        if(readlabels(&plot3dinfo[iplot3d].labels[4],streamsmv)==2)break;
+        nplot3d_files--;
+      }
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ ISOF ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
     if(match(buffer,"ISOF",4) == 1){
 
       int version=0;
@@ -914,6 +1088,36 @@ void readini2(char *inifile){
         slicei->setvalmin=setslicemin;
         slicei->valmax=slicemax;
         slicei->valmin=slicemin;
+      }
+      continue;
+    }
+    if(match(buffer,"V_PLOT3D",8)==1){
+      int nplot3d_vars;
+      plot3d *plot3di;
+      int i;
+
+      plot3di = plot3dinfo;
+
+      fgets(buffer,255,stream);
+      nplot3d_vars=5;
+      sscanf(buffer,"%i",&nplot3d_vars);
+      if(nplot3d_vars<0)nplot3d_vars=0;
+      if(nplot3d_vars>5)nplot3d_vars=5;
+
+      for(i=0;i<nplot3d_vars;i++){  
+        int iplot3d;
+        int setvalmin, setvalmax;
+        float valmin, valmax;
+
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %f %i %f",&iplot3d,&setvalmin,&valmin,&setvalmax,&valmax);
+        iplot3d--;
+        if(iplot3d>=0&&iplot3d<5){
+          plot3di->bounds[iplot3d].setvalmin=setvalmin;
+          plot3di->bounds[iplot3d].setvalmax=setvalmax;
+          plot3di->bounds[iplot3d].valmin=valmin;
+          plot3di->bounds[iplot3d].valmax=valmax;
+        }
       }
       continue;
     }

@@ -70,7 +70,7 @@ int convert_slice(slice *slicei){
   char units[256];
   int ijkbar[6];
   uLong framesize;
-  float *sliceframe_raw=NULL;
+  float *sliceframe_data=NULL;
 #ifdef pp_RLETEST
   unsigned char *sliceframe_rle=NULL;
   float *sliceframe_float_rle=NULL;
@@ -368,7 +368,7 @@ int convert_slice(slice *slicei){
 #ifdef pp_RLETEST
   if(NewMemory((void **)&sliceframe_float_rle,ncompressed_save*sizeof(float))==0)goto wrapup;
 #endif
-  if(NewMemory((void **)&sliceframe_raw,ncompressed_save*sizeof(float))==0)goto wrapup;
+  if(NewMemory((void **)&sliceframe_data,ncompressed_save*sizeof(float))==0)goto wrapup;
   if(NewMemory((void **)&sliceframe_compressed,ncompressed_save*sizeof(unsigned char))==0)goto wrapup;
   if(slicei->rle==1){
     if(NewMemory((void **)&sliceframe_compressed_rle,ncompressed_save*sizeof(unsigned char))==0)goto wrapup;
@@ -427,7 +427,7 @@ int convert_slice(slice *slicei){
       sizebefore+=12;
       if(returncode==0)break;
       if(slicei->rle==0){
-        FORTSLICEREAD(sliceframe_raw,framesize);    //---------------
+        FORTSLICEREAD(sliceframe_data,framesize);    //---------------
         if(returncode==0)break;
 
         sizebefore+=(8+framesize*4);
@@ -487,7 +487,7 @@ int convert_slice(slice *slicei){
         }
 
         if(slicei->rle==0){
-          ival = 255*(sliceframe_raw[i]-valmin)/denom;
+          ival = 255*(sliceframe_data[i]-valmin)/denom;
           if(ival<chop_min)ival=0;
           if(ival>chop_max)ival=255;
           sliceframe_uncompressed[index2] = ival;
@@ -496,7 +496,7 @@ int convert_slice(slice *slicei){
           sliceframe_uncompressed[i] = sliceframe_uncompressed_rle[i];
         }
 #ifdef pp_RLETEST
-        sliceframe_float_rle[index2] = sliceframe_raw[i];
+        sliceframe_float_rle[index2] = sliceframe_data[i];
 #endif
       }
       itime++;
@@ -535,7 +535,7 @@ int convert_slice(slice *slicei){
 
 wrapup:
     printf(" 100%s completed\n",pp);
-    FREEMEMORY(sliceframe_raw);
+    FREEMEMORY(sliceframe_data);
     FREEMEMORY(sliceframe_compressed);
     FREEMEMORY(sliceframe_uncompressed);
     FREEMEMORY(sliceframe_compressed_rle);
@@ -553,6 +553,7 @@ wrapup:
 
   {
     char before_label[256],after_label[256];
+
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
     printf("    records=%i, ",count);

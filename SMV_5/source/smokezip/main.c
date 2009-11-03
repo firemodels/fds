@@ -75,6 +75,7 @@ int main(int argc, char **argv){
   light_max=5.0;
 #endif
   overwrite_slice=0;
+  overwrite_plot3d=0;
   endian_info=0;
   cleanfiles=0;
   smoke3dzipstep=1;
@@ -150,11 +151,15 @@ int main(int argc, char **argv){
       case '3':
         overwrite_s=1;
         break;
+      case 'p':
+        overwrite_plot3d=1;
+        break;
       case 'f':
         overwrite_b=1;
         overwrite_s=1;
         overwrite_slice=1;
         overwrite_iso=1;
+        overwrite_plot3d=1;
         break;
       case 'i':
         overwrite_iso=1;
@@ -292,6 +297,17 @@ int main(int argc, char **argv){
       }
     }
   }
+  if(nplot3d_files>0){
+    plot3dinfo[0].dup=0;
+    for(i=1;i<nplot3d_files;i++){
+      plot3d *plot3di; 
+
+      plot3di = plot3dinfo + i;
+
+      plot3di->dup=0;
+      plot3ddup(plot3di,i);
+    }
+  }
   if(npatch_files>0){
     patchinfo[0].dup=0;
     for(i=1;i<npatch_files;i++){
@@ -365,6 +381,7 @@ int main(int argc, char **argv){
   compress_patches();
   compress_smoke3ds();
   compress_slices();
+  compress_plot3ds();
 #ifdef pp_PART
   compress_parts();
 #endif
@@ -501,6 +518,7 @@ void usage(char *prog){
   printf("  -3  - overwrites 3d smoke files\n");
   printf("  -b  - overwrites boundary compressed files\n");
   printf("  -i  - overwrites iso-surface compressed files\n");
+  printf("  -p  - overwrites PLOT3D files\n");
   printf("  -f  - overwrites all compressed files\n");
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 

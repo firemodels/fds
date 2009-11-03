@@ -46,6 +46,20 @@
 #endif
 
 
+typedef struct {
+  int ibar, jbar, kbar;
+  float *xplt, *yplt, *zplt;
+  float xbar0, xbar, ybar0, ybar, zbar0, zbar;
+  float dx, dy, dz;
+  float dxx, dyy, dzz;
+#ifdef pp_LIGHT
+  float cell_volume, cell_surface_area, cell_cross_sectional_area;
+  float *photon_cell;
+  float *light_cell_radiance;
+  float dxyzmax;
+#endif
+} mesh;
+
 /* --------------------------  flowlabels ------------------------------------ */
 
 typedef struct {
@@ -97,18 +111,23 @@ typedef struct {
 } slice;
 
 typedef struct {
-  int ibar, jbar, kbar;
-  float *xplt, *yplt, *zplt;
-  float xbar0, xbar, ybar0, ybar, zbar0, zbar;
-  float dx, dy, dz;
-  float dxx, dyy, dzz;
-#ifdef pp_LIGHT
-  float cell_volume, cell_surface_area, cell_cross_sectional_area;
-  float *photon_cell;
-  float *light_cell_radiance;
-  float dxyzmax;
-#endif
-} mesh;
+  int setvalmin, setvalmax;
+  float valmin, valmax;
+} bound;
+
+typedef struct {
+  char *file,*filebase;
+  float time;
+  int blocknumber;
+  mesh *plot3d_mesh;
+  int filesize;
+  int seq_id,autozip;
+  int doit, done, count;
+  bound bounds[5];
+  int version;
+  flowlabels labels[5];
+  int dup;
+} plot3d;
 
 typedef struct {
   float normal[3];
@@ -187,8 +206,9 @@ int convert_slice(slice *slicei);
 slice *getslice(char *string);
 void compress_slices(void);
 void compress_isos(void);
+int plot3ddup(plot3d *plot3dj, int iplot3d);
 int slicedup(slice *slicej, int islice);
-void compress_slices(void);
+void compress_plot3ds(void);
 void getfilesizelabel(int size, char *sizelabel);
 void initpdf(pdfdata *pdf);
 int getfileinfo(char *filename, char *sourcedir, int *filesize);
@@ -244,12 +264,16 @@ EXTERN lightdata *lightinfo;
 EXTERN float light_delta;
 EXTERN float *light_cdf;
 #endif
+
+EXTERN int nslice_files, niso_files, nplot3d_files;
+
 EXTERN slice *sliceinfo;
-EXTERN int nslice_files;
-EXTERN int niso_files;
 EXTERN iso *isoinfo;
+EXTERN plot3d *plot3dinfo;
+
 EXTERN int nmeshes;
 EXTERN int overwrite_slice;
+EXTERN int overwrite_plot3d;
 #ifdef pp_PART
 EXTERN part *partinfo;
 EXTERN int npart_files;

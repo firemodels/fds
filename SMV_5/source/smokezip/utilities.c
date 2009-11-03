@@ -327,6 +327,7 @@ int getmaxrevision(void){
   MAXREV(CNViso_revision);
   MAXREV(CNVpart_revision);
   MAXREV(CNVslice_revision);
+  MAXREV(CNVplot3d_revision);
   MAXREV(csphere_revision);
   MAXREV(dmalloc_revision);
   MAXREV(egz_stdio_revision);
