@@ -61,3 +61,19 @@
 #ifdef pp_release
 #define SMZVERSION "1.2.5"
 #endif
+
+#ifdef X64
+#undef BIT64
+#define BIT64
+#endif
+
+#ifdef pp_LINUX64
+#undef BIT64
+#define BIT64
+#endif
+
+#ifdef BIT64
+#define FILE_SIZE unsigned long long
+#else
+#define FILE_SIZE unsigned int
+#endif
