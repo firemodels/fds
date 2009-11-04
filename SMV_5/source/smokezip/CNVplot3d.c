@@ -44,7 +44,7 @@ int convert_plot3d(plot3d *plot3di){
   unsigned char *plot3dframe_compressed=NULL, *plot3dframe_uncompressed=NULL;
   uLongf ncompressed_zlib;
   float minmax[10];
-
+  int ijkbar[3];
 
   plot3d_file=plot3di->file;
   version=plot3di->version;
@@ -138,6 +138,9 @@ int convert_plot3d(plot3d *plot3di){
     nx = plot3di->plot3d_mesh->ibar+1;
     ny = plot3di->plot3d_mesh->jbar+1;
     nz = plot3di->plot3d_mesh->kbar+1;
+    ijkbar[0]=nx;
+    ijkbar[1]=ny;
+    ijkbar[2]=nz;
     isotest=0;
     framesize=nx*ny*nz;
     NewMemory((void **)&plot3dframe_data,5*framesize*sizeof(float));
@@ -177,7 +180,8 @@ int convert_plot3d(plot3d *plot3di){
   fwrite(&fileversion,4,1,plot3dstream);   // write out compressed fileversion in case file format changes later
   fwrite(&version,4,1,plot3dstream);       // fds plot3d file version
   fwrite(minmax,4,10,plot3dstream);        // write out min/max bounds for each plot3d file component
-  fwrite(plot3dframe_uncompressed,1,ncompressed_zlib,plot3dstream);
+  fwrite(ijkbar,4,3,plot3dstream);         // write out ibar, jbar, kbar
+  fwrite(plot3dframe_uncompressed,1,ncompressed_zlib,plot3dstream);  // write out compressed plot3d data
 
   //*** PLOT3D FILE FORMAT
 
