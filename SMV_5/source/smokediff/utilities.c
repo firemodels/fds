@@ -382,4 +382,48 @@ void update_buckets(float *vals, int nvals, bucketdata *bucket){
   bucket->ntotal+=nvals;
 }
 
+/* ------------------ similar_grid ------------------------ */
 
+int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
+  float eps;
+
+  factor[0]=1;
+  factor[1]=1;
+  factor[2]=1;
+  eps = mesh1->dx/1000.0;
+  if(fabs(mesh1->dx-mesh2->dx)>eps&&
+     fabs(mesh1->dx-2.0*mesh2->dx)>eps){
+       return 0;
+  }
+  eps = mesh1->dy/1000.0;
+  if(fabs(mesh1->dy-mesh2->dy)>eps&&
+     fabs(mesh1->dy-2.0*mesh2->dy)>eps){
+       return 0;
+  }
+  eps = mesh1->dz/1000.0;
+  if(fabs(mesh1->dz-mesh2->dz)>eps&&
+     fabs(mesh1->dz-2.0*mesh2->dz)>eps){
+       return 0;
+  }
+  if(fabs(mesh1->dx-2*mesh2->dx)<=eps)factor[0]=2;
+  if(fabs(mesh1->dy-2*mesh2->dy)<=eps)factor[1]=2;
+  if(fabs(mesh1->dz-2*mesh2->dz)<=eps)factor[2]=2;
+  return 1;
+}
+
+/* ------------------ exact_grid ------------------------ */
+
+int exact_grid(mesh *mesh1, mesh *mesh2, int *factor){
+  float eps;
+
+  factor[0]=1;
+  factor[1]=1;
+  factor[2]=1;
+  eps = mesh1->dx/1000.0;
+  if(fabs(mesh1->dx-mesh2->dx)>eps)return 0;
+  eps = mesh1->dy/1000.0;
+  if(fabs(mesh1->dy-mesh2->dy)>eps)return 0;
+  eps = mesh1->dz/1000.0;
+  if(fabs(mesh1->dz-mesh2->dz)>eps)return 0;
+  return 1;
+}

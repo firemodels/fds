@@ -86,6 +86,7 @@ typedef struct _slice {
   int is1, is2, js1, js2, ks1, ks2;
   float xmin, xmax, ymin, ymax, zmin, zmax;
   FILE_SIZE filesize;
+  int factor[3];
   int version;
   int volslice;
   struct _slice *slice2;
@@ -149,6 +150,8 @@ void diff_slices(FILE *stream_out);
 void diff_plot3ds(FILE *stream_out);
 void fullfile(char *fileout, char *dir, char *file);
 void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
+int similar_grid(mesh *mesh1, mesh *mesh2, int *factor);
+int exact_grid(mesh *mesh1, mesh *mesh2, int *factor);
 
 #ifdef pp_noappend
 #define FORTgetsliceparms getsliceparms
