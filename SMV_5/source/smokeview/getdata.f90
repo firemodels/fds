@@ -825,7 +825,7 @@ write(lu11,iostat=error)ip1, ip2, jp1, jp2, kp1, kp2
 
 end subroutine outsliceheader
 
-!  ------------------ getsliceframe ------------------------ 
+!  ------------------ outsliceframe ------------------------ 
 
 subroutine outsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,error)
 #ifdef pp_cvf
