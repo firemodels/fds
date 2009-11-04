@@ -221,11 +221,12 @@ void usage(void){
   printf("\n");
   printf("  smokediff [-smv] [-h] [-v] [-s1 dir1] [-s2 dir2] [-d dir] [-nb] [-np] [-ns] smv_case1 smv_case2\n");
   printf("    version: %s (revision %i) - %s\n\n",smv_version,svn_num,__DATE__);
-  printf("  smokediff compares two FDS cases by differencing corresponding boundary, slice, and\n");
-  printf("  Plot3d files referenced in smv_case1.smv and smv_case2.smv.  Results may be viewd by\n");
-  printf("  opening smv_case1_diff.smv in Smokeview or by using the -smv option with smokeiff.\n");
-  printf("  Dimensions and number of grid cells must be identical for any mesh common to smv_case1\n");
-  printf("  and smv_case2.\n\n");
+  printf("  smokediff compares two FDS cases by subtracting data referenced in smv_case2 from corresponding\n");
+  printf("  data referenced in smv_case1 (smv_case1 - smv_case2).  Slice, PLOT3D and boundary files are\n");
+  printf("  supported.  Differenced results may be viewd by opening smv_case1_diff.smv in Smokeview or by\n");
+  printf("  using the -smv option when running smokediff.  Physical grid dimensions must be identical for\n");
+  printf("  corresponsing meshes.  Grid resolution must be the same when differencing boundary and PLOT3D\n");
+  printf("  files.  Grids may be twice as refined when differencing slice files\n\n");
   printf("  -h  - display this message\n");
   printf("  -v  - display version information\n");
   printf("  -s1 dir1 - directory containing case smv_case1.smv\n");

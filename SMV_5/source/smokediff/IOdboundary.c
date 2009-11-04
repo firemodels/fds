@@ -196,7 +196,7 @@ void diff_boundaryes(FILE *stream_out){
     fclose(stream);
     make_outfile(outfile2,NULL,boundary1->file,".bf");
 
-    printf("Subtracting %s from %s\n",fullfile1,fullfile2);
+    printf("Subtracting %s from %s\n",fullfile2,fullfile1);
 
     unit1=11;
     len1=strlen(fullfile1);
@@ -290,7 +290,7 @@ void diff_boundaryes(FILE *stream_out){
           pq1 = pqq1 + boundary1->qoffset[i];
           pq2 = pqq2out + boundary2->qoffset[jj];
           for(kk=0;kk<boundary1->patchsize[i];kk++){
-            pqq3[iq++]=pq2[kk]-pq1[kk];
+            pqq3[iq++]=pq1[kk]-pq2[kk];
             if(pq1[kk]<valmin)valmin=pq1[kk];
             if(pq1[kk]>valmax)valmax=pq1[kk];
           }

@@ -172,7 +172,7 @@ void diff_slices(FILE *stream_out){
       printf("*** problem writing out header for %s\n",fullfile1);
       continue;
     }
-    printf("Subtracting %s from %s\n",fullfile1,fullfile2);
+    printf("Subtracting %s from %s\n",fullfile2,fullfile1);
     error1=1;
     error2a=1;
     error2b=1;
@@ -245,7 +245,7 @@ void diff_slices(FILE *stream_out){
         i2=slice1->factor[0]*i1;
         ijk2=k2*nx2*ny2+j2*nx2+i2;
 
-        qframeout[i]=f1*qframe2a[ijk2]+f2*qframe2b[ijk2]-qframe1[i];
+        qframeout[i]=qframe1[i] - (f1*qframe2a[ijk2]+f2*qframe2b[ijk2]);
         if(qframe1[i]<valmin)valmin=qframe1[i];
         if(qframe1[i]>valmax)valmax=qframe1[i];
       }
