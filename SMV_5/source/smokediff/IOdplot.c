@@ -143,7 +143,7 @@ void diff_plot3ds(FILE *stream_out){
     len2=strlen(fullfile2);
     lenout=strlen(outfile);
     isotest=0;
-    printf("Subtracting %s from %s\n",fullfile1,fullfile2);
+    printf("Subtracting %s from %s\n",fullfile2,fullfile1);
     fflush(stdout);
 
     if(test_mode==1)isotest=1;
@@ -162,7 +162,7 @@ void diff_plot3ds(FILE *stream_out){
     valmin=1000000000.0;
     valmax=-valmin;
     for(i=0;i<nq;i++){
-      qout[i]=qframe2[i]-qframe1[i];
+      qout[i]=qframe1[i]-qframe2[i];
     }
     nn=0;
     fprintf(stream_out,"MINMAXPL3D\n");
