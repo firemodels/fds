@@ -62,6 +62,7 @@ slice *getslice(slice *slicein, casedata *case2){
     if(fabs(slicein->ymax-sliceout->ymax)>dy)continue;
     if(fabs(slicein->zmin-sliceout->zmin)>dz)continue;
     if(fabs(slicein->zmax-sliceout->zmax)>dz)continue;
+    if(similar_grid(slicein->slicemesh,sliceout->slicemesh,slicein->factor)==0)continue;
     return sliceout;
   }
   return NULL;
@@ -98,6 +99,8 @@ void diff_slices(FILE *stream_out){
     int percent_complete;
     int nvals;
     float valmin_percentile, valmax_percentile, cdf01, cdf99;
+    int nx1, ny1, nz1;
+    int nx2, ny2, nz2;
 
     slicei = caseinfo->sliceinfo+j;
     slice1 = slicei;
@@ -136,30 +139,27 @@ void diff_slices(FILE *stream_out){
     unit2=12;
     len2=strlen(fullfile2);
     FORTopenslice(fullfile2,&unit2,&caseinfo->endian,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&error2a,len2);
-    if(is1a!=is1b||js1a!=js1b||ks1a!=ks1b||
-       is2a!=is2b||js2a!=js2b||ks2a!=ks2b||
-       error1!=0||error2a!=0){
+    if(error1!=0||error2a!=0){
       FORTclosefortranfile(&unit1);
       FORTclosefortranfile(&unit2);
       if(error1!=0||error2a!=0){
         if(error1==0)printf("*** problem opening %s\n",fullfile1);
         if(error2a==0)printf("*** problem opening %s\n",fullfile2);
       }
-      if(is1a!=is1b||js1a!=js1b||ks1a!=ks1b||
-         is2a!=is2b||js2a!=js2b||ks2a!=ks2b){
-        printf("*** integer slice bounds do not match for %s\n",fullfile1);
-        printf("    %i %i %i %i %i %i\n",is1a, is2a, js1a, js2a, ks1a, ks2a);
-        printf("    %i %i %i %i %i %i\n",is1b, is2b, js1b, js2b, ks1b, ks2b);
-        printf(" %f %f %f %f %f %f\n",slice1->xmin,slice1->xmax,slice1->ymin,slice1->ymax,slice1->zmin,slice1->zmax);
-        printf(" %f %f %f %f %f %f\n",slice2->xmin,slice2->xmax,slice2->ymin,slice2->ymax,slice2->zmin,slice2->zmax);
-      }
       continue;
     }
 
-    nqframe1 = (is2a+1-is1a)*(js2a+1-js1a)*(ks2a+1-ks1a);
+    nx1 = is2a + 1 - is1a;
+    ny1 = js2a + 1 - js1a;
+    nz1 = ks2a + 1 - ks1a;
+    nqframe1 = nx1*ny1*nz1;
     NewMemory((void **)&qframe1,nqframe1*sizeof(float));
     NewMemory((void **)&qframeout,nqframe1*sizeof(float));
-    nqframe2 = (is2b+1-is1b)*(js2b+1-js1b)*(ks2b+1-ks1b);
+
+    nx2 = is2b + 1 - is1b;
+    ny2 = js2b + 1 - js1b;
+    nz2 = ks2b + 1 - ks1b;
+    nqframe2 = nx2*ny2*nz2;
     NewMemory((void **)&qframe2a,nqframe2*sizeof(float));
     NewMemory((void **)&qframe2b,nqframe2*sizeof(float));
 
@@ -179,7 +179,7 @@ void diff_slices(FILE *stream_out){
     nvals=0;
     init_buckets(slice1->bucket);
     FORTgetsliceframe(&unit1,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframe1,&slicetest1,&error1);
-    if(error1==0)FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2a,qframe2a,&slicetest2,&error2a);
+    if(error1==0 )FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2a,qframe2a,&slicetest2,&error2a);
     if(error2a==0)FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2b,qframe2b,&slicetest2,&error2b);
     if(error1!=0||error2a!=0||error2b!=0){
       FORTclosefortranfile(&unit1);
@@ -209,7 +209,7 @@ void diff_slices(FILE *stream_out){
         fflush(stdout);
       }
       while(time1>time2b){
-        for(i=0;i<nqframe1;i++){
+        for(i=0;i<nqframe2;i++){
           qframe2a[i]=qframe2b[i];
         }
         time2a=time2b;
@@ -224,8 +224,28 @@ void diff_slices(FILE *stream_out){
         f1 = (time2b - time1)/dt;
         f2 = (time1-time2a)/dt;
       }
+      // ijk1 = k*nx1*ny1 + j*nx1 + i
+      // k = ijk1/(nx1*ny1)
+      // j = (ijk1 - k*nx1*ny1)/nx1
+      // i = ijk1 - k*nx1*ny1 - j*nx1
+
+      // ijk2 = k*nx2*ny2 + j*nx2 + i
+
       for(i=0;i<nqframe1;i++){
-        qframeout[i]=f1*qframe2a[i]+f2*qframe2b[i]-qframe1[i];
+        int i1, j1, k1;
+        int i2, j2, k2;
+        int ijk2;
+
+        k1 = i/(nx1*ny1);
+        j1 = (i-k1*nx1*ny1)/nx1;
+        i1 = i-k1*nx1*ny1-j1*nx1;
+
+        k2=slice1->factor[2]*k1;
+        j2=slice1->factor[1]*j1;
+        i2=slice1->factor[0]*i1;
+        ijk2=k2*nx2*ny2+j2*nx2+i2;
+
+        qframeout[i]=f1*qframe2a[ijk2]+f2*qframe2b[ijk2]-qframe1[i];
         if(qframe1[i]<valmin)valmin=qframe1[i];
         if(qframe1[i]>valmax)valmax=qframe1[i];
       }
