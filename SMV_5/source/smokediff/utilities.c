@@ -385,29 +385,27 @@ void update_buckets(float *vals, int nvals, bucketdata *bucket){
 /* ------------------ similar_grid ------------------------ */
 
 int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
-  float eps;
 
   factor[0]=1;
   factor[1]=1;
   factor[2]=1;
-  eps = mesh1->dx/1000.0;
-  if(fabs(mesh1->dx-mesh2->dx)>eps&&
-     fabs(mesh1->dx-2.0*mesh2->dx)>eps){
-       return 0;
-  }
-  eps = mesh1->dy/1000.0;
-  if(fabs(mesh1->dy-mesh2->dy)>eps&&
-     fabs(mesh1->dy-2.0*mesh2->dy)>eps){
-       return 0;
-  }
-  eps = mesh1->dz/1000.0;
-  if(fabs(mesh1->dz-mesh2->dz)>eps&&
-     fabs(mesh1->dz-2.0*mesh2->dz)>eps){
-       return 0;
-  }
-  if(fabs(mesh1->dx-2*mesh2->dx)<=eps)factor[0]=2;
-  if(fabs(mesh1->dy-2*mesh2->dy)<=eps)factor[1]=2;
-  if(fabs(mesh1->dz-2*mesh2->dz)<=eps)factor[2]=2;
+  
+  if(fabs(mesh1->xbar0-mesh2->xbar0)>mesh1->dx/2.0)return 0;
+  if(fabs( mesh1->xbar- mesh2->xbar)>mesh1->dx/2.0)return 0;
+  if(fabs(mesh1->ybar0-mesh2->ybar0)>mesh1->dy/2.0)return 0;
+  if(fabs( mesh1->ybar- mesh2->ybar)>mesh1->dy/2.0)return 0;
+  if(fabs(mesh1->zbar0-mesh2->zbar0)>mesh1->dz/2.0)return 0;
+  if(fabs( mesh1->zbar- mesh2->zbar)>mesh1->dz/2.0)return 0;
+
+  factor[0] = mesh2->ibar/mesh1->ibar;
+  if(mesh1->ibar*factor[0]!=mesh2->ibar)return 0;
+
+  factor[1] = mesh2->jbar/mesh1->jbar;
+  if(mesh1->jbar*factor[1]!=mesh2->jbar)return 0;
+
+  factor[2] = mesh2->kbar/mesh1->kbar;
+  if(mesh1->kbar*factor[2]!=mesh2->kbar)return 0;
+
   return 1;
 }
 
