@@ -312,8 +312,9 @@ SVEXTERN int ReadVolSlice;
 SVEXTERN int Read3DSmoke3DFile;
 SVEXTERN int ReadZoneFile, ReadPartFile, ReadEvacFile;
 
+SVEXTERN int unload_qdata;
+
 SVEXTERN int editwindow_status;
-//SVEXTERN int first;
 SVEXTERN int startup_pass;
 SVEXTERN int ntargtimes;
 SVEXTERN int showtitle1, showtitle2;

@@ -394,9 +394,9 @@ typedef struct mesh_ {
   ventdata *ventinfo;
   int nvents,ndummyvents;
   int nbptrs;
-  int *iqdata;
+  unsigned char *iqdata;
   float *qdata, *udata, *vdata, *wdata;
-  int *yzcolorbase, *xzcolorbase, *xycolorbase; 
+  unsigned char *yzcolorbase, *xzcolorbase, *xycolorbase; 
   float *yzcolorfbase, *xzcolorfbase, *xycolorfbase;
   float *yzcolortbase, *xzcolortbase, *xycolortbase;
   float *dx_xy, *dy_xy, *dz_xy;
@@ -969,7 +969,8 @@ typedef struct {
 
 typedef struct {
   int seq_id, autoload;
-  char *file;
+  char *file,*reg_file,*comp_file;
+  int compression_type;
   float time;
   int num_memblocks;
   int u, v, w, nvars;

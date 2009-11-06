@@ -619,7 +619,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   float tminorig, tmaxorig, dtorig;
   int itt;
   float *q;
-  int *iq;
+  unsigned char *iq;
   plot3d *p;
   mesh *meshi;
   char *iblank;
@@ -638,13 +638,28 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
     meshi = meshinfo+p->blocknumber;
     ntotal=(meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
     iblank=meshi->c_iblank;
-    q=meshi->qdata+plot3dvar*ntotal;
-    for(n=0;n<ntotal;n++){
-      if(*iblank++==1){
-        if(*q<tmin2)tmin2=*q;
-        if(*q>tmax2)tmax2=*q;
+    if(unload_qdata==0||meshi->qdata!=NULL){
+      q=meshi->qdata+plot3dvar*ntotal;
+      for(n=0;n<ntotal;n++){
+        if(*iblank++==1){
+          if(*q<tmin2)tmin2=*q;
+          if(*q>tmax2)tmax2=*q;
+        }
+        q++;
       }
-      q++;
+    }
+    else{
+      float qval, *qvals;
+
+      qvals=p3levels256[plot3dvar];
+      iq=meshi->iqdata+plot3dvar*ntotal;
+      for(n=0;n<ntotal;n++){
+        qval=qvals[*iq++];
+        if(*iblank++==1){
+          if(qval<tmin2)tmin2=qval;
+          if(qval>tmax2)tmax2=qval;
+        }
+      }
     }
   }
   if(settmin==PERCENTILE_MIN||settmin==GLOBAL_MIN){
@@ -678,13 +693,16 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
     if(p->loaded==0||p->display==0)continue;
     meshi = meshinfo+p->blocknumber;
     ntotal=(meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
-    q=meshi->qdata+plot3dvar*ntotal;
-    iq=meshi->iqdata+plot3dvar*ntotal;
-    for(n=0;n<ntotal;n++){
-      itt=(int)(factor*(*q++-local_tmin));
-      if(itt<0)itt=0;
-      if(itt>ndatalevel-1)itt=ndatalevel-1;
-      *iq++=itt;
+
+    if(unload_qdata==0||meshi->qdata!=NULL){
+      q=meshi->qdata+plot3dvar*ntotal;
+      iq=meshi->iqdata+plot3dvar*ntotal;
+      for(n=0;n<ntotal;n++){
+        itt=(int)(factor*(*q++-local_tmin));
+        if(itt<0)itt=0;
+        if(itt>ndatalevel-1)itt=ndatalevel-1;
+        *iq++=itt;
+      }
     }
   }
 
@@ -720,7 +738,30 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   tval = local_tmax;
   num2string(&labels[nlevel-1][0],tval,range);
 
-  for(n=0;n<nlevel+1;n++){tlevels[n]=tminorig+(float)(n-1)*dtorig;}
+  for(n=0;n<nlevel+1;n++){
+    tlevels[n]=tminorig+(float)(n-1)*dtorig;
+  }
+
+  for(i=0;i<nplot3d_files;i++){
+    p = plot3dinfo+i;
+    if(p->loaded==0||p->display==0)continue;
+    meshi = meshinfo+p->blocknumber;
+    ntotal=(meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
+
+    if(unload_qdata==1&&meshi->qdata==NULL){
+      float qval, *qvals;
+
+      qvals=p3levels256[plot3dvar];
+      iq=meshi->iqdata+plot3dvar*ntotal;
+      for(n=0;n<ntotal;n++){
+        qval=qvals[*iq];
+        itt=(int)(factor*(qval-local_tmin));
+        if(itt<0)itt=0;
+        if(itt>ndatalevel-1)itt=ndatalevel-1;
+        *iq++=itt;
+      }
+    }
+  }
 }
 
 /* ------------------ getSliceColors ------------------------ */

@@ -1055,11 +1055,11 @@ void keyboard(unsigned char key, int x, int y){
     printf("antialiasflag=%i\n",antialiasflag);
     return;
   }
-  if(strncmp((const char *)&key2,"i",1)==0){
+  if(strncmp((const char *)&key2,"i",1)==0&&unload_qdata==0){
     handleiso();
     return;
   }
-  if(strncmp((const char *)&key2,"b",1)==0&&visiso==1){
+  if(strncmp((const char *)&key2,"b",1)==0&&visiso==1&&unload_qdata==0){
     isooffset+=FlowDir;
     if(isooffset<1)isooffset=offsetmax;
     if(isooffset>offsetmax)isooffset=1;
@@ -1136,7 +1136,7 @@ void keyboard(unsigned char key, int x, int y){
       plotn=1;
     }
     updateallplotslices();
-    if(visiso==1)updatesurface();
+    if(visiso==1&&unload_qdata==0)updatesurface();
     updateplot3dlistindex();
     return;
   }

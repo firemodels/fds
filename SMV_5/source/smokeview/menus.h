@@ -2103,7 +2103,7 @@ void LoadUnloadMenu(int value){
       readslice("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nplot3d_files;i++){
-      readplot("",i,UNLOAD,&errorcode);
+      readplot3d("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<npatch_files;i++){
       readpatch(i,UNLOAD,&errorcode);
@@ -2153,7 +2153,7 @@ void LoadUnloadMenu(int value){
     islicetype=islicetype_save;
     for(i=0;i<nplot3d_files;i++){
       if(plot3dinfo[i].loaded==1){
-        readplot(plot3dinfo[i].file,i,LOAD,&errorcode);
+        readplot3d(plot3dinfo[i].file,i,LOAD,&errorcode);
       }
     }
     for(ii=0;ii<npatch_loaded;ii++){
@@ -2795,11 +2795,11 @@ void UnloadPlot3dMenu(int value){
   updatemenu=1;  
   GLUTPOSTREDISPLAY
   if(value>=0){
-    readplot("",value,UNLOAD,&errorcode);
+    readplot3d("",value,UNLOAD,&errorcode);
   }
   else{
     for(i=0;i<nplot3d_files;i++){
-      readplot("",i,UNLOAD,&errorcode);
+      readplot3d("",i,UNLOAD,&errorcode);
     }
   }
 }
@@ -3280,11 +3280,11 @@ void LoadPlot3dMenu(int value){
       fprintf(scriptoutstream," %i %f\n",
         plot3dinfo[value].blocknumber+1,plot3dinfo[value].time);
     }
-    readplot(plot3dfile,value,LOAD,&errorcode);
+    readplot3d(plot3dfile,value,LOAD,&errorcode);
   }
   else if(value==-1){
     for(i=0;i<nplot3d_files;i++){
-      readplot("",i,UNLOAD,&errorcode);
+      readplot3d("",i,UNLOAD,&errorcode);
     }
   }
   else{
@@ -4452,7 +4452,9 @@ static int in_menu=0;
       glutAddMenuEntry("-",997);
     }
     glutAddSubMenu("2D Contours",staticslicemenu);
-    glutAddSubMenu("3D Contours",isosurfacemenu);
+    if(unload_qdata==0){
+      glutAddSubMenu("3D Contours",isosurfacemenu);
+    }
 
   }
 
