@@ -2181,11 +2181,9 @@ typedef struct {
         nplot3d_files--;
         break;
       }
-      len=strlen(buffer);
-      buffer[len-1]='\0';
       trim(buffer);
       len=strlen(buffer);
-      if(NewMemory((void **)&plot3dinfo[iplot3d].file,(unsigned int)(len+1))==0)return 2;
+
       p=plot3dinfo+iplot3d;
       p->blocknumber=blocknumber;
       p->seq_id=nn_plot3d;
@@ -2194,47 +2192,65 @@ typedef struct {
       p->loaded=0;
       p->display=0;
 
-      STRCPY(plot3dinfo[iplot3d].file,buffer);
-      if(STAT(buffer,&statbuffer)!=0){
+      NewMemory((void **)&p->reg_file,(unsigned int)(len+1));
+      STRCPY(p->reg_file,buffer);
+
+      NewMemory((void **)&p->comp_file,(unsigned int)(len+4+1));
+      STRCPY(p->comp_file,buffer);
+      STRCAT(p->comp_file,".svz");
+
+      if(STAT(p->comp_file,&statbuffer)==0){
+        p->compression_type=1;
+        p->file=p->comp_file;
+      }
+      else{
+        p->compression_type=0;
+        p->file=p->reg_file;
+      }
+      //disable compression for now
+      p->compression_type=0;
+      p->file=p->reg_file;
+
+      if(STAT(p->file,&statbuffer)!=0){
         for(n=0;n<5;n++){
-          if(readlabels(&plot3dinfo[iplot3d].label[n],stream)==2)return 2;
+          if(readlabels(&p->label[n],stream)==2)return 2;
         }
         nplot3d_files--;
       }
       else{
-        plot3dinfo[iplot3d].u = -1;
-        plot3dinfo[iplot3d].v = -1;
-        plot3dinfo[iplot3d].w = -1;
+        p->u = -1;
+        p->v = -1;
+        p->w = -1;
         for(n=0;n<5;n++){
-          if(readlabels(&plot3dinfo[iplot3d].label[n],stream)==2)return 2;
-          if(match(plot3dinfo[iplot3d].label[n].shortlabel,UVEL,5) == 1){
-            plot3dinfo[iplot3d].u = n;
+          if(readlabels(&p->label[n],stream)==2)return 2;
+          if(match(p->label[n].shortlabel,UVEL,5) == 1){
+            p->u = n;
           }
-          if(match(plot3dinfo[iplot3d].label[n].shortlabel,VVEL,5) == 1){
-            plot3dinfo[iplot3d].v = n;
+          if(match(p->label[n].shortlabel,VVEL,5) == 1){
+            p->v = n;
           }
-          if(match(plot3dinfo[iplot3d].label[n].shortlabel,WVEL,5) == 1){
-            plot3dinfo[iplot3d].w = n;
+          if(match(p->label[n].shortlabel,WVEL,5) == 1){
+            p->w = n;
           }
         }
-        if(plot3dinfo[iplot3d].u>-1||plot3dinfo[iplot3d].v>-1||plot3dinfo[iplot3d].w>-1){
-          plot3dinfo[iplot3d].nvars=mxplot3dvars;
+        if(p->u>-1||p->v>-1||p->w>-1){
+          p->nvars=mxplot3dvars;
         }
         else{
-          plot3dinfo[iplot3d].nvars=5;
+          p->nvars=5;
         }
-        if(NewMemory((void **)&plot3dinfo[iplot3d].label[5].longlabel,6)==0)return 2;
-        if(NewMemory((void **)&plot3dinfo[iplot3d].label[5].shortlabel,6)==0)return 2;
-        if(NewMemory((void **)&plot3dinfo[iplot3d].label[5].unit,4)==0)return 2;
+        if(NewMemory((void **)&p->label[5].longlabel,6)==0)return 2;
+        if(NewMemory((void **)&p->label[5].shortlabel,6)==0)return 2;
+        if(NewMemory((void **)&p->label[5].unit,4)==0)return 2;
 
-        STRCPY(plot3dinfo[iplot3d].label[5].longlabel,"Speed");
-        STRCPY(plot3dinfo[iplot3d].label[5].shortlabel,"Speed");
-        STRCPY(plot3dinfo[iplot3d].label[5].unit,"m/s");
+        STRCPY(p->label[5].longlabel,"Speed");
+        STRCPY(p->label[5].shortlabel,"Speed");
+        STRCPY(p->label[5].unit,"m/s");
 
-        STRCPY(plot3dinfo[iplot3d].longlabel,"");
+        STRCPY(p->longlabel,"");
         for(n=0;n<5;n++){
-          STRCAT(plot3dinfo[iplot3d].longlabel,plot3dinfo[iplot3d].label[n].shortlabel);
-          if(n!=4)STRCAT(plot3dinfo[iplot3d].longlabel,", ");
+          STRCAT(p->longlabel,p->label[n].shortlabel);
+          if(n!=4)STRCAT(p->longlabel,", ");
         }
 
         iplot3d++;
@@ -6644,6 +6660,12 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
+    if(match(buffer,"UNLOAD_QDATA",12)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&unload_qdata);
+      if(unload_qdata!=1)unload_qdata=0;
+      continue;
+    }
     if(match(buffer,"TREECOLORS",10)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",trunccolor,trunccolor+1,trunccolor+2);
@@ -9011,6 +9033,8 @@ void writeini(int flag){
     fprintf(fileout," %i %i %f %i %f\n",i+1,setp3chopmin[i],p3chopmin[i],setp3chopmax[i],p3chopmax[i]);
   }
 
+  fprintf(fileout,"UNLOAD_QDATA\n");
+  fprintf(fileout," %i\n",unload_qdata);
 
   fprintf(fileout,"V_TARGET\n");
   fprintf(fileout," %i %f %i %f\n",settargetmin,targetmin,settargetmax,targetmax);

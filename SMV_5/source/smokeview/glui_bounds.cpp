@@ -80,6 +80,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #endif
 #define AVERAGE_DATA 201
 #define TURB_DATA 202
+#define UNLOAD_QDATA 203
 
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
@@ -174,6 +175,7 @@ GLUI_Checkbox *CHECKBOX_cellcenter_slice_interp=NULL;
 GLUI_Checkbox *CHECKBOX_skip_subslice=NULL;
 GLUI_Checkbox *CHECKBOX_turb_slice=NULL;
 GLUI_Checkbox *CHECKBOX_average_slice=NULL;
+GLUI_Checkbox *CHECKBOX_unload_qdata=NULL;
 
 GLUI_Spinner *SPINNER_plot3d_vectorpointsize=NULL,*SPINNER_plot3d_vectorlinewidth=NULL;
 GLUI_Spinner *SPINNER_sliceaverage=NULL;
@@ -212,6 +214,13 @@ GLUI_EditText *con_p3_min=NULL, *con_p3_max=NULL;
 GLUI_EditText *con_p3_chopmin=NULL, *con_p3_chopmax=NULL;
 GLUI_RadioGroup *con_p3_setmin=NULL, *con_p3_setmax=NULL;
 
+/* ------------------ update_glui_plot3d ------------------------ */
+
+extern "C" void update_glui_plot3d(void){
+  PLOT3D_CB(UNLOAD_QDATA);
+}
+
+/* ------------------ PART_CB_INIT ------------------------ */
 
 extern "C" void PART_CB_INIT(void){
   PART_CB(FILETYPEINDEX);
@@ -414,6 +423,9 @@ extern "C" void glui_bounds_setup(int main_window){
     for(i=0;i<mxplot3dvars;i++){
       glui_bounds->add_radiobutton_to_group(p3rlist,plot3dinfo[0].label[i].shortlabel);
     }
+    CHECKBOX_unload_qdata=glui_bounds->add_checkbox_to_panel(panel_plot3d,"Free memory after coloring data",
+      &unload_qdata,UNLOAD_QDATA,PLOT3D_CB);
+
     panel_pan3 = glui_bounds->add_panel_to_panel(panel_plot3d,"",GLUI_PANEL_NONE);
     panel_contours = glui_bounds->add_panel_to_panel(panel_pan3,"Contours");
     plot3d_display=glui_bounds->add_radiogroup_to_panel(panel_contours,&p3cont2d,UPDATEPLOT,PLOT3D_CB);
@@ -463,6 +475,7 @@ extern "C" void glui_bounds_setup(int main_window){
       &setp3chopmin_temp, &setp3chopmax_temp,&p3chopmin_temp,&p3chopmax_temp,
       DONT_UPDATEBOUNDS,TRUNCATEBOUNDS,
       PLOT3D_CB);
+    PLOT3D_CB(UNLOAD_QDATA);
   }
 
   /*  Slice File Bounds   */
@@ -759,6 +772,31 @@ void PLOT3D_CB(int var){
   int i;
 
   switch (var){
+  case UNLOAD_QDATA:
+    if(unload_qdata==1){
+     panel_isosurface->disable();
+    }
+    else{
+      int enable_isosurface;
+   
+      enable_isosurface=1;
+      for(i=0;i<nmeshes;i++){
+        mesh *meshi;
+        plot3d *plot3di;
+
+        meshi = meshinfo + i;
+        if(meshi->plot3dfilenum==-1)continue;
+        plot3di = plot3dinfo + meshi->plot3dfilenum;
+        if(plot3di->loaded==0||plot3di->display==0)continue;
+        if(meshi->qdata==NULL){
+          enable_isosurface=0;
+          break;
+        }
+      }
+      if(enable_isosurface==1)panel_isosurface->enable();
+      if(enable_isosurface==0)panel_isosurface->disable();
+    }
+    break;
   case UPDATE_VECTOR:
     if(SPINNER_vectorpointsize!=NULL&&SPINNER_vectorlinewidth!=NULL){
       SPINNER_vectorpointsize->set_float_val(vectorpointsize);

@@ -665,7 +665,7 @@ EXTERNCPP void drawcad2geom_opaque(const cadgeom *cd,int trans_flag);
 
 EXTERNCPP char *newtextptr(char ***texture_list,int *n_texture_list,char *texturebuffer,char *lastbuffer);
 
-EXTERNCPP void readplot(char *file, int ifile, int flag,int *errorcode);
+EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
 EXTERNCPP void readpatch(int ifile, int flag, int *errorcode);
 EXTERNCPP void readpart(char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void readzone(char *file, int ifile, int flag, int *errorcode);

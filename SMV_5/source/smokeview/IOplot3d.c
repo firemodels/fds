@@ -23,6 +23,8 @@
 // svn revision character string
 char IOplot3d_revision[]="$Revision$";
 
+void update_glui_plot3d(void);
+
 /* ------------------ plot3dcompare  ------------------------ */
 
 int plot3dcompare( const void *arg1, const void *arg2 ){
@@ -43,9 +45,20 @@ int plot3dcompare( const void *arg1, const void *arg2 ){
 #define ijknode(i,j,k) ((i)+(j)*nx+(k)*nxy)
 #define ijkn(i,j,k,n) ((i)+(j)*nx+(k)*nxy+(n)*nxyz)
 
+#define GET_QVAL(i,j,k,n) \
+  if(unload_qdata==0){\
+    qval=qdata[(i)+(j)*nx+(k)*nxy+(n)*nxyz];\
+  }\
+  else{\
+    float *qvals;\
+    qvals=p3levels256[n];\
+    qval=qvals[iqdata[(i)+(j)*nx+(k)*nxy+(n)*nxyz]];\
+  }
+  
+
 /* ------------------ readplot  ------------------------ */
 
-void readplot(char *file, int ifile, int flag, int *errorcode){
+void readplot3d(char *file, int ifile, int flag, int *errorcode){
   int n, nn, ntotal, i, nnn;
   float *udata, *vdata, *wdata, *sdata;
   float sum;
@@ -151,6 +164,7 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
 #endif
     updatetimes();
     update_unit_defs();
+    update_glui_plot3d();
     return;
   }
   if(ReadPlot3dFile==0){
@@ -170,32 +184,34 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   windex = plot3dinfo[ifile].w;
   if(uindex!=-1||vindex!=-1||windex!=-1)numplot3dvars=plot3dinfo[ifile].nvars;
 
-  if(NewMemory((void **)&meshi->qdata,numplot3dvars*ntotal*sizeof(float))==0){
-    *errorcode=1;
-    readplot("",ifile,UNLOAD,&error);
-    return;
+  if(p->compression_type==0){
+    if(NewMemory((void **)&meshi->qdata,numplot3dvars*ntotal*sizeof(float))==0){
+      *errorcode=1;
+      readplot3d("",ifile,UNLOAD,&error);
+      return;
+    }
   }
 
-  if(NewMemory((void **)&meshi->yzcolorbase ,ny*nz*sizeof(int))==0||
-     NewMemory((void **)&meshi->xzcolorbase ,nx*nz*sizeof(int))==0||
-     NewMemory((void **)&meshi->xycolorbase ,nx*ny*sizeof(int))==0||
-     NewMemory((void **)&meshi->yzcolorfbase,ny*nz*sizeof(int))==0||
-     NewMemory((void **)&meshi->xzcolorfbase,nx*nz*sizeof(int))==0||
-     NewMemory((void **)&meshi->xycolorfbase,nx*ny*sizeof(int))==0||
+  if(NewMemory((void **)&meshi->yzcolorbase ,ny*nz*sizeof(unsigned char))==0||
+     NewMemory((void **)&meshi->xzcolorbase ,nx*nz*sizeof(unsigned char))==0||
+     NewMemory((void **)&meshi->xycolorbase ,nx*ny*sizeof(unsigned char))==0||
+     NewMemory((void **)&meshi->yzcolorfbase,ny*nz*sizeof(float))==0||
+     NewMemory((void **)&meshi->xzcolorfbase,nx*nz*sizeof(float))==0||
+     NewMemory((void **)&meshi->xycolorfbase,nx*ny*sizeof(float))==0||
      NewMemory((void **)&meshi->yzcolortbase,ny*nz*sizeof(float))==0||
      NewMemory((void **)&meshi->xzcolortbase,nx*nz*sizeof(float))==0||
      NewMemory((void **)&meshi->xycolortbase,nx*ny*sizeof(float))==0||
-     NewMemory((void **)&meshi->dx_xy       ,nx*ny*sizeof(int))==0||
-     NewMemory((void **)&meshi->dy_xy       ,nx*ny*sizeof(int))==0||
-     NewMemory((void **)&meshi->dz_xy       ,nx*ny*sizeof(int))==0||
-     NewMemory((void **)&meshi->dx_xz       ,nx*nz*sizeof(int))==0||
-     NewMemory((void **)&meshi->dy_xz       ,nx*nz*sizeof(int))==0||
-     NewMemory((void **)&meshi->dz_xz       ,nx*nz*sizeof(int))==0||
-     NewMemory((void **)&meshi->dx_yz       ,ny*nz*sizeof(int))==0||
-     NewMemory((void **)&meshi->dy_yz       ,ny*nz*sizeof(int))==0||
-     NewMemory((void **)&meshi->dz_yz       ,ny*nz*sizeof(int))==0){
+     NewMemory((void **)&meshi->dx_xy       ,nx*ny*sizeof(float))==0||
+     NewMemory((void **)&meshi->dy_xy       ,nx*ny*sizeof(float))==0||
+     NewMemory((void **)&meshi->dz_xy       ,nx*ny*sizeof(float))==0||
+     NewMemory((void **)&meshi->dx_xz       ,nx*nz*sizeof(float))==0||
+     NewMemory((void **)&meshi->dy_xz       ,nx*nz*sizeof(float))==0||
+     NewMemory((void **)&meshi->dz_xz       ,nx*nz*sizeof(float))==0||
+     NewMemory((void **)&meshi->dx_yz       ,ny*nz*sizeof(float))==0||
+     NewMemory((void **)&meshi->dy_yz       ,ny*nz*sizeof(float))==0||
+     NewMemory((void **)&meshi->dz_yz       ,ny*nz*sizeof(float))==0){
      *errorcode=1;
-     readplot("",ifile,UNLOAD,&error);
+     readplot3d("",ifile,UNLOAD,&error);
      return;
   }
 
@@ -203,11 +219,15 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   plot3dfilelen = strlen(file);
   printf("Loading plot3d data: %s\n",file);
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
-  FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&endian,&isotest,plot3dfilelen);
-  if(NewMemory((void **)&meshi->iqdata,numplot3dvars*ntotal*sizeof(int))==0){
+  if(p->compression_type==0){
+    FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&endian,&isotest,plot3dfilelen);
+  }
+  if(NewMemory((void **)&meshi->iqdata,numplot3dvars*ntotal*sizeof(unsigned char))==0){
     *errorcode=1;
-    readplot("",ifile,UNLOAD,&error);
+    readplot3d("",ifile,UNLOAD,&error);
     return;
+  }
+  if(p->compression_type==1){
   }
   local_stoptime = glutGet(GLUT_ELAPSED_TIME);
   delta_time = (local_stoptime-local_starttime)/1000.0;
@@ -219,33 +239,34 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
   meshi->vdata=NULL;
   meshi->wdata=NULL;
 #endif
-  if(uindex!=-1||vindex!=-1||windex!=-1){
-    vectorspresent=1;
-    p->nvars=mxplot3dvars;
-    udata = meshi->qdata + ntotal*uindex;
-    vdata = meshi->qdata + ntotal*vindex;
-    wdata = meshi->qdata + ntotal*windex;
-    sdata = meshi->qdata + ntotal*5;
-    for(i=0;i<ntotal;i++){
-      sum=0.0f;
-      if(uindex!=-1){sum += *udata*(*udata);udata++;}
-      if(vindex!=-1){sum += *vdata*(*vdata);vdata++;}
-      if(windex!=-1){sum += *wdata*(*wdata);wdata++;}
-      *sdata=sqrt((double)sum);
-      sdata++; 
+  if(p->compression_type==0){
+    if(uindex!=-1||vindex!=-1||windex!=-1){
+      vectorspresent=1;
+      p->nvars=mxplot3dvars;
+      udata = meshi->qdata + ntotal*uindex;
+      vdata = meshi->qdata + ntotal*vindex;
+      wdata = meshi->qdata + ntotal*windex;
+      sdata = meshi->qdata + ntotal*5;
+      for(i=0;i<ntotal;i++){
+        sum=0.0f;
+        if(uindex!=-1){sum += *udata*(*udata);udata++;}
+        if(vindex!=-1){sum += *vdata*(*vdata);vdata++;}
+        if(windex!=-1){sum += *wdata*(*wdata);wdata++;}
+        *sdata=sqrt((double)sum);
+        sdata++; 
+      }
     }
-  }
 #ifdef pp_SHOOTER
-  if(uindex!=-1)meshi->udata=meshi->qdata + ntotal*uindex;
-  if(vindex!=-1)meshi->vdata=meshi->qdata + ntotal*vindex;
-  if(windex!=-1)meshi->wdata=meshi->qdata + ntotal*windex;
+    if(uindex!=-1)meshi->udata=meshi->qdata + ntotal*uindex;
+    if(vindex!=-1)meshi->vdata=meshi->qdata + ntotal*vindex;
+    if(windex!=-1)meshi->wdata=meshi->qdata + ntotal*windex;
 #endif
-
+  }
 
   if(NewMemory((void **)&colorlabelp3,mxplot3dvars*sizeof(char **))==0||
      NewMemory((void **)&scalep3     ,mxplot3dvars*sizeof(char *))==0){
     *errorcode=1;
-    readplot("",ifile,UNLOAD,&error);
+    readplot3d("",ifile,UNLOAD,&error);
     return;
   }
   for(nn=0;nn<mxplot3dvars;nn++){
@@ -256,17 +277,16 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
     if(NewMemory((void **)&colorlabelp3[nn],MAXRGB*sizeof(char *))==0||
        NewMemory((void **)&scalep3[nn],30*sizeof(char))==0){
       *errorcode=1;
-      readplot("",ifile,UNLOAD,&error);
+      readplot3d("",ifile,UNLOAD,&error);
       return;
     }
   }
-
 
   scalep3copy = scalep3;
   if(NewMemory((void **)&p3levels,mxplot3dvars*sizeof(float *))==0||
      NewMemory((void **)&p3levels256,mxplot3dvars*sizeof(float *))==0){
     *errorcode=1;
-    readplot("",ifile,UNLOAD,&error);
+    readplot3d("",ifile,UNLOAD,&error);
     return;
   }
   for(nn=0;nn<mxplot3dvars;nn++){
@@ -282,7 +302,7 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
         setp3max[nn]=SET_MAX;
       }
     }
-  updateglui();
+    updateglui();
   }
   for (nn=0;nn<numplot3dvars;nn++){
     if(nplot3d_files>0){
@@ -297,18 +317,20 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
       unitp3label[nn] = blank;
     }
 
-    for(n=0;n<MAXRGB;n++){(*(colorlabelp3+nn))[n]=NULL;}
+    for(n=0;n<MAXRGB;n++){
+      (*(colorlabelp3+nn))[n]=NULL;
+}
 
     if(NewMemory((void **)&p3levels[nn],(nrgb+1)*sizeof(float))==0||
        NewMemory((void **)&p3levels256[nn],256*sizeof(float))==0){
-      readplot("",ifile,UNLOAD,&error);
+      readplot3d("",ifile,UNLOAD,&error);
       *errorcode=1;
       return;
     }
     for(n=0;n<nrgb;n++){
       if(NewMemory((void **)&(*(colorlabelp3+nn))[n],11)==0){
         *errorcode=1;
-        readplot("",ifile,UNLOAD,&error);
+        readplot3d("",ifile,UNLOAD,&error);
         return;
       }
     }
@@ -369,7 +391,11 @@ void readplot(char *file, int ifile, int flag, int *errorcode){
     printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
-
+  if(p->compression_type==1||unload_qdata==1){
+    unload_qdata=1;
+    FREEMEMORY(meshi->qdata);
+  }
+  update_glui_plot3d();
   GLUTPOSTREDISPLAY
 }
 
@@ -403,7 +429,7 @@ void drawplot3d_texture(mesh *meshi){
   int ibar, jbar, kbar;
   isosurface *currentsurfptr,*currentsurf2ptr;
   contour *plot3dcontour1ptr, *plot3dcontour2ptr, *plot3dcontour3ptr;
-  int *yzcolorbase, *xzcolorbase, *xycolorbase; 
+  unsigned char *yzcolorbase, *xzcolorbase, *xycolorbase; 
   float *yzcolortbase, *xzcolortbase, *xycolortbase; 
 
   float *dx_xy, *dy_xy, *dz_xy;
@@ -526,7 +552,7 @@ void drawplot3d_texture(mesh *meshi){
     /* draw yz vectors */
 
     if(visVector==1){
-      int *yzcolor;
+      unsigned char *yzcolor;
 
       yzcolor=yzcolorbase;
       dx_yzcopy=dx_yz; dy_yzcopy=dy_yz; dz_yzcopy=dz_yz;
@@ -640,7 +666,7 @@ void drawplot3d_texture(mesh *meshi){
     /* draw xz vectors */
 
     if(visVector==1){
-      int *xzcolor;
+      unsigned char*xzcolor;
 
       xzcolor=xzcolorbase;
       antialias(1);
@@ -742,7 +768,7 @@ void drawplot3d_texture(mesh *meshi){
     /* draw xy vectors */
 
     if(visVector==1){
-      int *xycolor;
+      unsigned char *xycolor;
 
       xycolor=xycolorbase;
       antialias(1);
@@ -814,7 +840,7 @@ void drawplot3d_texture(mesh *meshi){
 void drawplot3d(mesh *meshi){
   int i,j,k;
   int colorindex;
-  int *color1, *color2;
+  unsigned char *color1, *color2;
   float dx, dy, dz;
   int plotx, ploty, plotz;
   int visx, visy, visz;
@@ -822,7 +848,7 @@ void drawplot3d(mesh *meshi){
   int ibar, jbar, kbar;
   isosurface *currentsurfptr,*currentsurf2ptr;
   contour *plot3dcontour1ptr, *plot3dcontour2ptr, *plot3dcontour3ptr;
-  int *yzcolorbase, *xzcolorbase, *xycolorbase; 
+  unsigned char *yzcolorbase, *xzcolorbase, *xycolorbase; 
   float *dx_xy, *dy_xy, *dz_xy;
   float *dx_xz, *dy_xz, *dz_xz;
   float *dx_yz, *dy_yz, *dz_yz;
@@ -932,7 +958,7 @@ void drawplot3d(mesh *meshi){
     /* draw yz vectors */
 
     if(visVector==1){
-      int *yzcolor;
+      unsigned char *yzcolor;
 
       yzcolor=yzcolorbase;
       dx_yzcopy=dx_yz; dy_yzcopy=dy_yz; dz_yzcopy=dz_yz;
@@ -1046,7 +1072,7 @@ void drawplot3d(mesh *meshi){
     /* draw xz vectors */
 
     if(visVector==1){
-      int *xzcolor;
+      unsigned char *xzcolor;
 
       xzcolor=xzcolorbase;
       antialias(1);
@@ -1148,7 +1174,7 @@ void drawplot3d(mesh *meshi){
     /* draw xy vectors */
 
     if(visVector==1){
-      int *xycolor;
+      unsigned char *xycolor;
 
       xycolor=xycolorbase;
       antialias(1);
@@ -1226,6 +1252,7 @@ void updatesurface(void){
   int plot3dsize;
   int i;
 
+  if(unload_qdata==1)return;
   for(i=0;i<nmeshes;i++){
     meshi = meshinfo+i;
     if(meshi->plot3dfilenum==-1)continue;
@@ -1458,7 +1485,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   float *xplt, *yplt, *zplt;
   mesh *meshi;
   contour *plot3dcontour1ptr, *plot3dcontour2ptr, *plot3dcontour3ptr;
-  int *yzcolorbase, *xzcolorbase, *xycolorbase; 
+  unsigned char *yzcolorbase, *xzcolorbase, *xycolorbase; 
   float *yzcolorfbase, *xzcolorfbase, *xycolorfbase; 
   float *yzcolortbase, *xzcolortbase, *xycolortbase; 
   float *dx_xy, *dy_xy, *dz_xy;
@@ -1468,10 +1495,11 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   float *dx_xzcopy, *dy_xzcopy, *dz_xzcopy;
   float *dx_xycopy, *dy_xycopy, *dz_xycopy;
   float *qdata;
-  int *iqdata;
+  unsigned char *iqdata;
   char *iblank_xy=NULL, *iblank_xz=NULL, *iblank_yz=NULL;
   int nx, ny, nz, nxy, nxyz;
   char *iblank_x, *iblank_y, *iblank_z;
+  float qval;
 
   meshi = mesh_in;
   plotx = meshi->plotx;
@@ -1555,7 +1583,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   if(slicedir==1){
     float *yzcolorf;
     float *yzcolort;
-    int *yzcolor;
+    unsigned char *yzcolor;
 
     yzcolor=yzcolorbase;
     yzcolorf=yzcolorfbase;
@@ -1567,17 +1595,29 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     for(j=0;j<jbar;j++){for(k=0;k<kbar;k++){
       iblank_yz[k+j*kbar]=iblank_x[ijknode(plotx,j,k)];
     }}
-    for(j=0;j<=jbar;j++){for(k=0;k<=kbar;k++){
-      *yzcolor++=iqdata[ijkn(plotx,j,k,plotn-1)];
-      *yzcolort++=(float)iqdata[ijkn(plotx,j,k,plotn-1)]/255.0;
-      *yzcolorf++=qdata[ijkn(plotx,j,k,plotn-1)];
-      *dx_yzcopy = 0.0;
-      *dy_yzcopy = 0.0;
-      *dz_yzcopy = 0.0;
-      if(uindex!=-1)*dx_yzcopy++=vecfactor*veclength*qdata[ijkn(plotx,j,k,uindex)]/speedmax;
-      if(vindex!=-1)*dy_yzcopy++=vecfactor*veclength*qdata[ijkn(plotx,j,k,vindex)]/speedmax;
-      if(windex!=-1)*dz_yzcopy++=vecfactor*veclength*qdata[ijkn(plotx,j,k,windex)]/speedmax;
-    }}
+    for(j=0;j<=jbar;j++){
+      for(k=0;k<=kbar;k++){
+        *yzcolor++=iqdata[ijkn(plotx,j,k,plotn-1)];
+        *yzcolort++=(float)iqdata[ijkn(plotx,j,k,plotn-1)]/255.0;
+        GET_QVAL(plotx,j,k,plotn-1)
+        *yzcolorf++=qval;
+        *dx_yzcopy = 0.0;
+        *dy_yzcopy = 0.0;
+        *dz_yzcopy = 0.0;
+        if(uindex!=-1){
+          GET_QVAL(plotx,j,k,uindex)
+          *dx_yzcopy++=vecfactor*veclength*qval/speedmax;
+        }
+        if(vindex!=-1){
+          GET_QVAL(plotx,j,k,vindex)
+          *dy_yzcopy++=vecfactor*veclength*qval/speedmax;
+        }
+        if(windex!=-1){
+          GET_QVAL(plotx,j,k,windex)
+          *dz_yzcopy++=vecfactor*veclength*qval/speedmax;
+        }
+      }
+    }
     freecontour(plot3dcontour1ptr);
     initcontour(plot3dcontour1ptr,rgbptr,nrgb+1);
     setcontourslice(plot3dcontour1ptr,1,xplt[plotx]);
@@ -1590,7 +1630,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   else if(slicedir==2){
     float *xzcolorf;
     float *xzcolort;
-    int *xzcolor;
+    unsigned char *xzcolor;
 
     xzcolor=xzcolorbase;
     xzcolorf=xzcolorfbase;
@@ -1605,13 +1645,23 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     for(i=0;i<=ibar;i++){for(k=0;k<=kbar;k++){
       *xzcolor++=iqdata[ijkn(i,ploty,k,plotn-1)];
       *xzcolort++=(float)iqdata[ijkn(i,ploty,k,plotn-1)]/255.0;
-      *xzcolorf++=qdata[ijkn(i,ploty,k,plotn-1)];
+      GET_QVAL(i,ploty,k,plotn-1)
+      *xzcolorf++=qval;
       *dx_xzcopy = 0.0;
       *dy_xzcopy = 0.0;
       *dz_xzcopy = 0.0;
-      if(uindex!=-1)*dx_xzcopy++=vecfactor*veclength*qdata[ijkn(i,ploty,k,uindex)]/speedmax;
-      if(vindex!=-1)*dy_xzcopy++=vecfactor*veclength*qdata[ijkn(i,ploty,k,vindex)]/speedmax;
-      if(windex!=-1)*dz_xzcopy++=vecfactor*veclength*qdata[ijkn(i,ploty,k,windex)]/speedmax;
+      if(uindex!=-1){
+        GET_QVAL(i,ploty,k,uindex)
+        *dx_xzcopy++=vecfactor*veclength*qval/speedmax;
+      }
+      if(vindex!=-1){
+        GET_QVAL(i,ploty,k,vindex)
+        *dy_xzcopy++=vecfactor*veclength*qval/speedmax;
+      }
+      if(windex!=-1){
+        GET_QVAL(i,ploty,k,windex)
+        *dz_xzcopy++=vecfactor*veclength*qval/speedmax;
+      }
     }}
     freecontour(plot3dcontour2ptr);
     initcontour(plot3dcontour2ptr,rgbptr,nrgb+1);
@@ -1625,7 +1675,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   else if(slicedir==3){
     float *xycolorf;
     float *xycolort;
-    int *xycolor;
+    unsigned char *xycolor;
 
     xycolor=xycolorbase;
     xycolorf=xycolorfbase;
@@ -1640,13 +1690,23 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     for(i=0;i<=ibar;i++){for(j=0;j<=jbar;j++){
       *xycolor++=iqdata[ijkn(i,j,plotz,plotn-1)];
       *xycolort++=(float)iqdata[ijkn(i,j,plotz,plotn-1)]/255.0;
-      *xycolorf++=qdata[ijkn(i,j,plotz,plotn-1)];
+      GET_QVAL(i,j,plotz,plotn-1)
+      *xycolorf++=qval;
       *dx_xycopy = 0.0;
       *dy_xycopy = 0.0;
       *dz_xycopy = 0.0;
-      if(uindex!=-1)*dx_xycopy++=vecfactor*veclength*qdata[ijkn(i,j,plotz,uindex)]/speedmax;
-      if(vindex!=-1)*dy_xycopy++=vecfactor*veclength*qdata[ijkn(i,j,plotz,vindex)]/speedmax;
-      if(windex!=-1)*dz_xycopy++=vecfactor*veclength*qdata[ijkn(i,j,plotz,windex)]/speedmax;
+      if(uindex!=-1){
+        GET_QVAL(i,j,plotz,uindex)
+        *dx_xycopy++=vecfactor*veclength*qval/speedmax;
+      }
+      if(vindex!=-1){
+        GET_QVAL(i,j,plotz,vindex)
+        *dy_xycopy++=vecfactor*veclength*qval/speedmax;
+      }
+      if(windex!=-1){
+        GET_QVAL(i,j,plotz,windex)
+        *dz_xycopy++=vecfactor*veclength*qval/speedmax;
+      }
     }}
     freecontour(plot3dcontour3ptr);
     initcontour(plot3dcontour3ptr,rgbptr,nrgb+1);
