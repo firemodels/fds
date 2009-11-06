@@ -831,11 +831,11 @@ void InitOpenGL(void){
 
       plot3di = plot3dinfo + i;
       if(plot3di->autoload==0&&plot3di->loaded==1){
-        readplot(plot3di->file,i,UNLOAD,&errorcode);
+        readplot3d(plot3di->file,i,UNLOAD,&errorcode);
       }
       if(plot3di->autoload==1){
         ReadPlot3dFile=1;
-        readplot(plot3di->file,i,LOAD,&errorcode);
+        readplot3d(plot3di->file,i,LOAD,&errorcode);
       }
     }
     for(i=0;i<npart_files;i++){
@@ -930,6 +930,7 @@ void initvars1(void){
   shooter_uvw[1]=0.0;
   shooter_uvw[2]=0.0;
 #endif
+  unload_qdata=0;
   update_makeiblank_smoke3d=0;
   update_initcull=0;
   sb_atstart=1;

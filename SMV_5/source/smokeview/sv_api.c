@@ -195,7 +195,7 @@ void svWINAPI sv_unload(void){
       readslice("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nplot3d_files;i++){
-      readplot("",i,UNLOAD,&errorcode);
+      readplot3d("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<npatch_files;i++){
       readpatch(i,UNLOAD,&errorcode);

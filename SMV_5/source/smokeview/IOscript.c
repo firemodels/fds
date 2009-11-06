@@ -1248,7 +1248,7 @@ void script_loadfile(scriptdata *scripti){
     plot3di = plot3dinfo + i;
     if(strcmp(plot3di->file,scripti->cval)==0){
       ReadPlot3dFile=1;
-      readplot(plot3di->file,i,LOAD,&errorcode);
+      readplot3d(plot3di->file,i,LOAD,&errorcode);
       update_menu();
       return;
     }
