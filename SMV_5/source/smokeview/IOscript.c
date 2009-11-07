@@ -339,8 +339,6 @@ int compile_script(char *scriptfile){
   free_script();
 
   while(!feof(stream)){
-    scriptdata *scripti;
-
     if(fgets(buffer2,255,stream)==NULL)break;
     cleanbuffer(buffer,buffer2);
 

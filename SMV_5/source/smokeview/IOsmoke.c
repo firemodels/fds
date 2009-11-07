@@ -4424,7 +4424,7 @@ void drawsmoke3dCULL(void){
 #endif
   unsigned char fvalue[4];
 
-  mesh *meshi, *mesh_old;
+  mesh *mesh_old;
   float fire_alpha;
 
   CheckMemory;
@@ -4495,14 +4495,14 @@ void drawsmoke3dCULL(void){
       }
       {
         float fire_color[4];
-        float *firecolor;
+        float *ffirecolor;
 
         fire_color[0]=(float)fire_red/256.0;
         fire_color[1]=(float)fire_green/256.0;
         fire_color[2]=(float)fire_blue/256.0;
         fire_color[3]=(float)fire_alpha/256.0;
-        firecolor=fire_color;
-        glUniform4fv(GPU_firecolor,1,firecolor);
+        ffirecolor=fire_color;
+        glUniform4fv(GPU_firecolor,1,ffirecolor);
       }
 
       xplt=meshi->xplt;
@@ -5860,7 +5860,7 @@ void initcullplane(int cullflag){
         jend = jbeg + jskip;
         if(jend>meshi->jbar)jend=meshi->jbar;
         for(i=0;i<nx;i++){
-          int ii, jj, kk;
+          int jj, kk;
 
           ibeg = i*iskip;
           iend = ibeg + iskip;

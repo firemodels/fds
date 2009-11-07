@@ -215,8 +215,8 @@ void COLORBAR_CB(int var){
   colorbardata *cbi;
   float *rgb_nodes;
   int i;
-  float *rgb1, *rgb1a;
-  float *rgb2, *rgb2a;
+  float *rgb1, *rgb2;
+  float *rgb1a, *rgb2a;
   float *rgb0, *rgb0a;
 
   switch (var){
@@ -341,9 +341,6 @@ void COLORBAR_CB(int var){
 
     if(cbi->nlegs<=2)return;
     for(i=colorbarpoint+1;i<cbi->nlegs;i++){
-      float *rgb1, *rgb1a;
-      float *rgb2, *rgb2a;
-
       cbi->legvals[i-1]=cbi->legvals[i];
       cbi->splitflag[i-1]=cbi->splitflag[i];
       cbi->colorbar_index[i-1]=cbi->colorbar_index[i];
@@ -424,7 +421,7 @@ void COLORBAR_CB(int var){
     break;
   case COLORBAR_DELETE:
     if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
-      colorbardata *cb_from, *cb_to, *cbi;
+      colorbardata *cb_from, *cb_to;
 
       for(i=colorbartype;i<ncolorbars-1;i++){
         cb_to = colorbarinfo + i;

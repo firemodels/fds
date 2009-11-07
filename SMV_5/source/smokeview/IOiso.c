@@ -274,7 +274,6 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   float out[3];
   isosurface *asurface;
   int nisopoints, nisotriangles;
-  int nbuffer;
   int maxfullbuffer,maxcompbuffer;
   unsigned char *comp_buffer;
   unsigned char *full_buffer;
@@ -351,6 +350,8 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   update_highlight_mesh();
    
   if(ib->compression_type==1){
+    int nbuffer;
+
     getisoheader(ib->comp_file,&isostream,ib->size_file,&nisopoints, &nisotriangles,&nbuffer,&maxfullbuffer, &maxcompbuffer,
       &meshi->isolevels, &meshi->nisolevels, &meshi->nisosteps, isoframestep, &ib->normaltable, &ib->nnormaltable);
     getfile_size(ib->comp_file,&file_size);
@@ -731,11 +732,9 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   iisotype=getisotype(ib);
 
   if(ib->dataflag==1){
-    int errorcode;
-
     iisottype = getisottype(ib);
     sync_isobounds(iisottype);
-    setisolabels(ib->tmin, ib->tmax, ib, &errorcode);
+    setisolabels(ib->tmin, ib->tmax, ib, errorcode);
     CheckMemory;
   }
 
