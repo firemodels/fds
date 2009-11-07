@@ -196,7 +196,6 @@ extern "C" void update_view_gluilist(void){
 extern "C" void glui_motion_setup(int main_window){
   int i;
 #define TRANSLATE_SPEED 0.005
-  mesh *meshi;
   int *rotation_index;
 
   float *eye_xyz;
@@ -253,6 +252,8 @@ extern "C" void glui_motion_setup(int main_window){
   if(nmeshes>1){
     meshlist1 = glui_motion->add_listbox_to_panel(panel_motion,"Rotate about:",rotation_index,MESH_LIST,TRANSLATE_CB);
     for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
       meshi = meshinfo + i;
       meshlist1->add_item(i,meshi->label);
     }
@@ -269,8 +270,6 @@ extern "C" void glui_motion_setup(int main_window){
   //glui_motion->add_column(false);
 
   if(nmeshes>1){
-    int i;
-    
     panel_blockageview = glui_motion->add_rollout("Blockage View",false);
     for(i=0;i<nmeshes;i++){
       mesh *meshi;

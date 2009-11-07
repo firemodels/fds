@@ -2212,7 +2212,6 @@ void update_framenumber(int changetime){
 //  int redisplay;
   particle *parti;
   slice *sd;
-  mesh *meshi;
 
   if(force_redisplay==1||(itimeold!=itime&&changetime==1)){
     force_redisplay=0;
@@ -2257,6 +2256,7 @@ void update_framenumber(int changetime){
     if(showpatch==1){
       for(i=0;i<nmeshes;i++){
         patch *patchi;
+        mesh *meshi;
 
         meshi = meshinfo+i;
         patchi=patchinfo + meshi->patchfilenum;
@@ -2301,6 +2301,7 @@ void update_framenumber(int changetime){
     if(ntotal_smooth_blockages>0){
       for(i=0;i<nmeshes;i++){
         smoothblockage *sb;
+        mesh *meshi;
 
         meshi = meshinfo+i;
         if(meshi->showsmoothtimelist!=NULL){

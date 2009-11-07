@@ -1033,8 +1033,6 @@ void setClipPlanes(int mode){
 /* ------------------ ShowScene ------------------------ */
 
 void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
-  int i;
-
   CheckMemory;
 
   show_mode=mode;
@@ -1172,6 +1170,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       particle *parti;
 
       if(staticframe0==0||iframe!=0){
+        int i;
+
         for(i=0;i<npart_files;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->display==0)continue;
@@ -1186,6 +1186,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         }
       }
       if(visStaticSmoke==1&&staticframe0==1){
+        int i;
+
         for(i=0;i<npart_files;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->display==0)continue;
@@ -1198,6 +1200,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw evacuation +++++++++++++++++++++++++ */
 
     if(showevac==1){
+      int i;
+
       for(i=0;i<npart_files;i++){
         particle *parti;
 
@@ -1407,6 +1411,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(showpatch==1){
     patch *patchi;
     mesh *meshi;
+    int i;
 
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
@@ -1463,6 +1468,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(showiso==1){
     iso *isoi;
     mesh *meshi;
+    int i;
 
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
@@ -1518,6 +1524,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         drawsmoke3dCULL();
     }
     else{
+      int i;
+
       for(i=0;i<nsmoke3d_files;i++){
         smoke3d *smoke3di;
 
@@ -1595,6 +1603,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
     for(ii=0;ii<nslice_loaded;ii++){
       slice *sd;
+      int i;
 
       i=slice_loaded_list[ii];
       sd = sliceinfo + i;
@@ -1662,6 +1671,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw vector slice files +++++++++++++++++++++++++ */
 
   if(showvslice==1){
+    int i;
+
     for(i=0;i<nvslice;i++){
       vslice *vd;
       slice *u, *v, *w, *val;
@@ -1757,6 +1768,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   if(showplot3d==1){
     mesh *meshi;
+    int i;
 
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
@@ -2373,8 +2385,7 @@ void updateclip(int slicedir){
 void updatetimes(void){
   int n,n2,ntimes2;
   float *timescopy;
-  int i,j,k;
-  int listindex;
+  int i,k;
   slice *sd;
   iso *ib;
   mesh *meshi;
@@ -2762,6 +2773,8 @@ void updatetimes(void){
   /* determine visibility of each blockage at each time step */
 
   for(i=0;i<nmeshes;i++){
+    int j;
+
     meshi=meshinfo+i;
     for(j=0;j<meshi->nbptrs;j++){
       bc = meshi->blockageinfoptrs[j];
@@ -2770,6 +2783,8 @@ void updatetimes(void){
       if(ntimes>0){
         NewMemory((void **)&bc->showtimelist,ntimes*sizeof(int));
         for(k=0;k<ntimes;k++){
+          int listindex;
+
           bc->showtimelist[k]=1;
           listindex=getindex(times[k],bc->showtime,bc->nshowtime);
           bc->showtimelist[k]=bc->showhide[listindex];
@@ -2801,6 +2816,8 @@ void updatetimes(void){
   /* determine visibility of each vent at each time step */
 
   for(i=0;i<nmeshes;i++){
+    int j;
+
     meshi=meshinfo+i;
     if(meshi->ventinfo==NULL)continue;
     for(j=0;j<meshi->nvents;j++){
@@ -2810,6 +2827,8 @@ void updatetimes(void){
       if(ntimes>0){
         NewMemory((void **)&vi->showtimelist,ntimes*sizeof(int));
         for(k=0;k<ntimes;k++){
+          int listindex;
+
           vi->showtimelist[k]=1;
           listindex=getindex(times[k],vi->showtime,vi->nshowtime);
           vi->showtimelist[k]=vi->showhide[listindex];
@@ -3372,7 +3391,6 @@ void Args(int argc, char **argv){
   char *temp;
   char buffer[255];
   int iarg;
-  STRUCTSTAT statbuffer;
   size_t len_memory;
   char *argi;
   char SMVFILENAME[1024];
@@ -3499,6 +3517,8 @@ void Args(int argc, char **argv){
     }
   }
   if(smvfilename!=NULL){
+    STRUCTSTAT statbuffer;
+
     FREEMEMORY(fds_filein);
     NewMemory((void **)&fds_filein,strlen(fdsprefix)+6);
     STRCPY(fds_filein,fdsprefix);

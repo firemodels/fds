@@ -1243,7 +1243,6 @@ void getsliceparams(void){
         sd->idir=1;
         position = meshi->xplt_orig[is1];
         if(sd->cellcenter==1){
-          int is2;
           float *xp;
 
           is2=is1-1;
@@ -1268,7 +1267,6 @@ void getsliceparams(void){
         sd->idir=2;
         position = meshi->yplt_orig[js1];
         if(sd->cellcenter==1){
-          int js2;
           float *yp;
 
           js2=js1-1;
@@ -1290,7 +1288,6 @@ void getsliceparams(void){
         sd->idir=3;
         position = meshi->zplt_orig[ks1];
         if(sd->cellcenter==1){
-          int ks2;
           float *zp;
 
           ks2=ks1-1;
@@ -2014,8 +2011,8 @@ void drawslice_cellcenter(const slice *sd){
   int maxj;
 
   float *xplt, *yplt, *zplt;
-  int ibar,jbar,kbar;
-  int nx,ny,nz,nxy;
+  int ibar,jbar;
+  int nx,ny,nxy;
   char *iblank_x, *iblank_y, *iblank_z;
   char *iblank_embed;
 
@@ -2032,14 +2029,12 @@ void drawslice_cellcenter(const slice *sd){
   zplt=meshi->zplt;
   ibar=meshi->ibar;
   jbar=meshi->jbar;
-  kbar=meshi->kbar;
   iblank_x=meshi->c_iblank_x;
   iblank_y=meshi->c_iblank_y;
   iblank_z=meshi->c_iblank_z;
   iblank_embed = meshi->c_iblank_embed;
   nx = ibar + 1;
   ny = jbar + 1;
-  nz = kbar + 1;
   nxy = nx*ny;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
@@ -2206,7 +2201,6 @@ void drawslice_cellcenter_interp(const slice *sd){
      y3 = (yplt[j+1]+yplt[j])/2.0;
      ymid = (yy1+y3)/2.0;
      for(k=sd->ks1 + 1; k<sd->ks2; k++){
-       float r11, r31, r13, r33;
        float zmid;
        float rmid;
 
@@ -2398,7 +2392,6 @@ void drawslice_texture(const slice *sd){
      y3 = yplt[j+1];
      ymid = (yy1+y3)/2.0;
      for(k=sd->ks1; k<sd->ks2; k++){
-       float r11, r31, r13, r33;
        float zmid;
        float rmid;
 

@@ -1139,8 +1139,6 @@ void drawColorBars(float ybump){
         if(showplot3d==1&&(i==0&&minfill==0||i==nrgb-1&&maxfill==0)){
         }
         else{
-          float yy, yy2;
-
           yy = (barbot*(nrgb-i)+i*(nrgb+DYFONT+barbot))/nrgb;
           yy2 = (barbot*(nrgb-1-i)+(i+1)*(nrgb+DYFONT+barbot))/nrgb;
 
@@ -1505,8 +1503,6 @@ void drawColorBars(float ybump){
         position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
       }
       else{
-        float yy, yy2;
-
         yy = (barbot*(nrgb-i)+i*(nrgb+DYFONT+barbot))/nrgb;
         yy2 = (barbot*(nrgb-1-i)+(i+1)*(nrgb+DYFONT+barbot))/nrgb;
         position = (yy+yy2)/2.0;
@@ -1522,7 +1518,6 @@ void drawColorBars(float ybump){
           vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
         }
         else{
-          float yy, yy2;
           int ii;
 
           ii = i + 1;
