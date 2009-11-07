@@ -120,7 +120,7 @@ void drawtours(void){
   pathdata *pj;
   keyframe *framej;
   int iframe;
-  float *eye,*oview;
+  float *eye;
 
   float *tmp_tourcol_text,*tmp_tourcol_pathline,*tmp_tourcol_pathknots;
 
@@ -293,6 +293,8 @@ void drawtours(void){
         antialias(1);
         glBegin(GL_LINES);
         for(i=0;i<ntours;i++){
+          float *oview;
+
           touri = tourinfo + i;
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;

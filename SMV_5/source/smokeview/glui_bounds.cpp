@@ -1176,7 +1176,6 @@ extern "C" void add_scriptlist(char *file, int id){
       break;
     case SCRIPT_LOADINI:
       {
-        int id;
         char *inifilename;
 
         id = LIST_ini_list->get_int_val();

@@ -2449,7 +2449,7 @@ void TargetMenu(int value){
 /* ------------------ EvacMenu ------------------------ */
 
 void EvacMenu(int value){
-  int errorcode,i;
+  int errorcode;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value==-11){
     int i;
@@ -2471,6 +2471,8 @@ void EvacMenu(int value){
   }
   else{
     if(value==-1){
+      int i;
+
       for(i=0;i<npart_files;i++){
         if(partinfo[i].evac==0)continue;
         readpart("",i,UNLOAD,&errorcode);
@@ -2606,8 +2608,6 @@ void ParticlePropShowMenu(int value){
     int i;
 
     for(i=0;i<npart5prop;i++){
-      part5prop *propi;
-
       propi = part5propinfo + i;
       if(propi->particle_property==1){
         propi->display=0;
@@ -2620,8 +2620,6 @@ void ParticlePropShowMenu(int value){
     int i;
 
     for(i=0;i<npart5prop;i++){
-      part5prop *propi;
-
       propi = part5propinfo + i;
       if(propi->human_property==1){
         propi->display=0;
@@ -3845,8 +3843,6 @@ void InitMenus(int unload){
   int nvsliceloaded0;
   int nvsliceloaded1;
   char check[]="*";
-  slice *sd;
-  iso *iso2;
   multislice *mslicei;
   multivslice *mvslicei;
   mesh *cmesh;
@@ -3912,6 +3908,8 @@ static int in_menu=0;
   nsliceloaded=0;
   nvsliceloaded=0;
   for(i=0;i<nslice_files;i++){
+    slice *sd;
+
     sd = sliceinfo + i;
     if(sd->loaded==1)nsliceloaded++;
   }
@@ -3933,6 +3931,8 @@ static int in_menu=0;
     mslicei->loaded=0;
     mslicei->display=0;
     for(j=0;j<mslicei->nslices;j++){
+      slice *sd;
+
       sd = sliceinfo + mslicei->islices[j];
       if(sd->loaded==1)mslicei->loaded++;
       if(sd->display==1)mslicei->display++;
@@ -4686,7 +4686,6 @@ static int in_menu=0;
   }
 
   if(ndevice_defs>0){
-    int i;
     sv_object *dv_typei;
 
 
@@ -4806,7 +4805,6 @@ static int in_menu=0;
 
     CREATEMENU(particlepropshowmenu,ParticlePropShowMenu);
     if(npart5prop>=0){
-      char menulabel[256];
       int ntypes;
 
       glutAddMenuEntry("Color:",-1);
@@ -4904,7 +4902,6 @@ static int in_menu=0;
 
     CREATEMENU(humanpropshowmenu,ParticlePropShowMenu);
     if(npart5prop>=0){
-      char menulabel[256];
       int ntypes;
 
       glutAddMenuEntry("Color:",-1);
@@ -5140,6 +5137,7 @@ static int in_menu=0;
 
     if(niso_files>0&&ReadIsoFile==1){
       mesh *hmesh;
+      iso *iso2;
 
       CREATEMENU(isoshowmenu,IsoShowMenu);
       iso2=NULL;
@@ -5338,6 +5336,8 @@ static int in_menu=0;
   if(nslice_files>0&&nsliceloaded>0){
     CREATEMENU(showhideslicemenu,ShowHideSliceMenu);
     for(ii=0;ii<nslice_loaded;ii++){
+      slice *sd;
+
       i = slice_loaded_list[ii];
       sd = sliceinfo + i;
       if(sd_shown==NULL&&sd->type==islicetype){
@@ -5379,9 +5379,6 @@ static int in_menu=0;
 
   CREATEMENU(avatarevacmenu,AvatarEvacMenu);
   if(navatar_types>0){
-    int i;
-    char menulabel[256];
-
     if(iavatar_evac==-1){
       glutAddMenuEntry("*Defined in Evac File",-1);
     }
@@ -5400,8 +5397,6 @@ static int in_menu=0;
   }
   CREATEMENU(avatartourmenu,TourMenu);
   if(navatar_types>0){
-    int i;
-    char menulabel[256];
     if(selectedtour_index>=0&&selectedtour_index<ntours){
       tourdata *touri;
 
@@ -5495,7 +5490,6 @@ static int in_menu=0;
   {
     int human_present=0;
     int particle_present=0;
-    int ii;
 
     if(npart5loaded>0){
       for(ii=0;ii<npart_files;ii++){
@@ -5612,7 +5606,6 @@ static int in_menu=0;
     if(showtarget==0)glutAddMenuEntry("Targets",2);
   }
   if(ndevice_defs>0){
-    int i;
     int num_activedevices=0;
     sv_object *dv_typei;
 
@@ -5985,7 +5978,6 @@ static int in_menu=0;
 #ifdef pp_GPU
     char version_label[256];
 #endif
-    char menulabel[256];
 
 #ifdef BIT64
     sprintf(menulabel,"  Smokeview (64 bit) revision:%i",revision_smv);
@@ -6270,14 +6262,14 @@ static int in_menu=0;
 
     CREATEMENU(evacmenu,EvacMenu);
     {
-      int nevacs=0,nevacloaded=0;
+      int nevacs=0,nevacloaded2=0;
 
       for(ii=0;ii<npart_files;ii++){
         particle *parti;
 
         parti = partinfo + ii;
         if(parti->evac==1){
-          if(parti->loaded==1)nevacloaded++;
+          if(parti->loaded==1)nevacloaded2++;
           nevacs++;
         }
       }
@@ -6298,7 +6290,7 @@ static int in_menu=0;
         }
         glutAddMenuEntry(menulabel,i);
       }
-      if(nevacloaded<=1){
+      if(nevacloaded2<=1){
         glutAddMenuEntry("Unload",-1);
       }
        else{
@@ -6628,6 +6620,8 @@ static int in_menu=0;
       }
       CREATEMENU(unloadslicemenu,UnloadSliceMenu);
       for(i=0;i<nslice_files;i++){
+        slice *sd;
+
         sd = sliceinfo + sliceorderindex[i];
         if(sd->loaded==1){
           STRCPY(menulabel,sd->menulabel2);  
@@ -6639,7 +6633,7 @@ static int in_menu=0;
 //*** this is where I would put the "sub-slice" menus ordered by type
       nloadsubslicemenu=1;
       for(i=1;i<nslice_files;i++){
-        slice *sdim1;
+        slice *sd,*sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
         sdim1 = sliceinfo + sliceorderindex[i-1];
@@ -6651,7 +6645,7 @@ static int in_menu=0;
       }
       iloadsubslicemenu=0;
       for(i=0;i<nslice_files;i++){
-        slice *sdim1;
+        slice *sd,*sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
         sdim1 = sliceinfo + sliceorderindex[i-1];
@@ -6671,7 +6665,7 @@ static int in_menu=0;
       CREATEMENU(loadslicemenu,LoadSliceMenu);
       iloadsubslicemenu=0;
       for(i=0;i<nslice_files;i++){
-        slice *sdim1;
+        slice *sd,*sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
         sdim1 = sliceinfo + sliceorderindex[i-1];
@@ -6825,12 +6819,10 @@ static int in_menu=0;
 /* --------------------------------plot3d menu -------------------------- */
 
     if(nplot3d_files>0){
-      plot3d *plot3di,*plot3dim1;
-      int im1;
+      plot3d *plot3dim1, *plot3di;
 
       CREATEMENU(unloadplot3dmenu,UnloadPlot3dMenu);
       for(ii=0;ii<nplot3d_files;ii++){
-
         i=plot3dorderindex[ii];
         plot3di = plot3dinfo + i;
         if(ii==0){
@@ -6850,6 +6842,8 @@ static int in_menu=0;
       
       nloadsubplot3dmenu=1;
       for(ii=1;ii<nplot3d_files;ii++){
+        int im1;
+
         i = plot3dorderindex[ii];
         im1 = plot3dorderindex[ii-1];
         plot3di = plot3dinfo + i;
@@ -6874,6 +6868,8 @@ static int in_menu=0;
       nloadsubplot3dmenu++;
 
       for(ii=1;ii<nplot3d_files;ii++){
+        int im1;
+
         i = plot3dorderindex[ii];
         im1 = plot3dorderindex[ii-1];
         plot3di = plot3dinfo + i;
@@ -6895,7 +6891,6 @@ static int in_menu=0;
       nloadsubplot3dmenu=0;
       CREATEMENU(loadplot3dmenu,LoadPlot3dMenu);
       for(ii=0;ii<nplot3d_files;ii++){
-        plot3d *plot3di,*plot3dim1;
         int im1;
 
         i = plot3dorderindex[ii];
@@ -7081,8 +7076,6 @@ static int in_menu=0;
       glutAddMenuEntry("Unload All",-1);
 
       if(niso_files>0){
-        int i;
-
         if(isosubmenus==NULL){
           NewMemory((void **)&isosubmenus,niso_files*sizeof(int));
         }

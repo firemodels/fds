@@ -194,7 +194,7 @@ void get_world_eyepos(float *mm, float eyepos[3]){
 
 void getsmokesensors(void){
   int doit, i;
-  int index;
+//  int index;
   int width, height;
   unsigned char rgbval[3];
 
@@ -255,7 +255,7 @@ void getsmokesensors(void){
 void getdevice_screencoords(void){
   double mv_setup[16], projection_setup[16];
   GLint viewport_setup[4];
-  double d_ijk[3];
+//  double d_ijk[3];
   int i;
   int doit;
 
@@ -440,8 +440,6 @@ void draw_devices(void){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
     }
     if(devicei->nparams>0){
-      int i;
-
       for(i=0;i<devicei->nparams;i++){
         valstack[i]=devicei->params[i];
       }

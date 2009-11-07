@@ -106,7 +106,6 @@ int readsmv(char *file){
   float dxsbar, dysbar, dzsbar;
   int showobst;
   float time;
-  int ii;
   int blocktemp;
   ventdata *vinfo,*vi;
   int showvent;
@@ -120,7 +119,6 @@ int readsmv(char *file){
   plot3d *p;
   int igrid;
   int ioffset;
-  slice *sd;
   float *xplttemp,*yplttemp,*zplttemp;
   float *xplt_origtemp,*yplt_origtemp,*zplt_origtemp;
 //  char AIX[]="AIX";
@@ -273,8 +271,6 @@ int readsmv(char *file){
 
   freeall_objects();
   if(ndeviceinfo>0){
-    int i;
-
     for(i=0;i<ndeviceinfo;i++){
     }
     FREEMEMORY(deviceinfo);
@@ -525,7 +521,7 @@ int readsmv(char *file){
     if(match(buffer,"AUTOTERRAIN",11) == 1){
       int len_buffer;
       texture *tt;
-      char *buffer2;
+      char *buff2;
 
       NewMemory((void **)&terrain_texture,sizeof(texture));
       tt = terrain_texture;
@@ -535,12 +531,12 @@ int readsmv(char *file){
     //  if(visTerrain!=1)visTerrain=0;
   
       fgets(buffer,255,stream);
-      buffer2 = trim_front(buffer);
-      trim(buffer2);
-      len_buffer = strlen(buffer2);
+      buff2 = trim_front(buffer);
+      trim(buff2);
+      len_buffer = strlen(buff2);
 
       NewMemory((void **)&tt->file,(len_buffer+1)*sizeof(char));
-      strcpy(tt->file,buffer2);
+      strcpy(tt->file,buff2);
 
       continue;
     }
@@ -1029,7 +1025,6 @@ int readsmv(char *file){
     if(match(buffer,"CLASS_OF_PARTICLES",18) == 1||
        match(buffer,"CLASS_OF_HUMANS",15) == 1){
       float rgb_class[4];
-      size_t len;
       part5class *partclassi;
       char *device_ptr;
 
@@ -3390,6 +3385,7 @@ typedef struct {
       ){
       int terrain=0, cellcenter=0, fire_line=0;
       float above_ground_level=0.0;
+      slice *sd;
 
       nn_slice++;
       if(match(buffer,"SLCT",4) == 1){
@@ -4367,16 +4363,15 @@ typedef struct {
     if(strncmp(buffer," ",1)==0)continue;
 
     if(match(buffer,"MINMAXBNDF",10) == 1){
-      int i;
-      char *file_ptr, file[1024];
+      char *file_ptr, file2[1024];
       float valmin, valmax;
       float percentile_min, percentile_max;
 
       fgets(buffer,255,stream);
-      strcpy(file,buffer);
-      file_ptr = file;
-      trim(file);
-      file_ptr = trim_front(file);
+      strcpy(file2,buffer);
+      file_ptr = file2;
+      trim(file2);
+      file_ptr = trim_front(file2);
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f",&valmin,&valmax,&percentile_min,&percentile_max);
@@ -4394,16 +4389,15 @@ typedef struct {
       continue;
     }
     if(match(buffer,"MINMAXPL3D",10) == 1){
-      int i,j;
-      char *file_ptr, file[1024];
+      char *file_ptr, file2[1024];
       float valmin[5], valmax[5];
       float percentile_min[5], percentile_max[5];
 
       fgets(buffer,255,stream);
-      strcpy(file,buffer);
-      file_ptr = file;
-      trim(file);
-      file_ptr = trim_front(file);
+      strcpy(file2,buffer);
+      file_ptr = file2;
+      trim(file2);
+      file_ptr = trim_front(file2);
 
       for(i=0;i<5;i++){
         fgets(buffer,255,stream);
@@ -4425,16 +4419,15 @@ typedef struct {
       continue;
     }
     if(match(buffer,"MINMAXSLCF",10) == 1){
-      int i;
-      char *file_ptr, file[1024];
+      char *file_ptr, file2[1024];
       float valmin, valmax;
       float percentile_min, percentile_max;
 
       fgets(buffer,255,stream);
-      strcpy(file,buffer);
-      file_ptr = file;
-      trim(file);
-      file_ptr = trim_front(file);
+      strcpy(file2,buffer);
+      file_ptr = file2;
+      trim(file2);
+      file_ptr = trim_front(file2);
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f",&valmin,&valmax,&percentile_min,&percentile_max);
@@ -4472,15 +4465,15 @@ typedef struct {
       }
       nxcell = meshi->ibar;
       for(nn=0;nn<nbtemp;nn++){
-        int ijk[5],kmax;
+        int ijk2[5],kmax;
         int ii, jj;
         float zval;
 
         fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i %i %i %i",ijk,ijk+1,ijk+2,ijk+3,ijk+4,&kmax);
+        sscanf(buffer,"%i %i %i %i %i %i",ijk2,ijk2+1,ijk2+2,ijk2+3,ijk2+4,&kmax);
         zval = meshi->zplt[kmax];
-        for(ii=ijk[0];ii<ijk[1];ii++){
-          for(jj=ijk[2];jj<ijk[3];jj++){
+        for(ii=ijk2[0];ii<ijk2[1];ii++){
+          for(jj=ijk2[2];jj<ijk2[3];jj++){
             int ij;
             float zcell;
 
@@ -4746,6 +4739,7 @@ typedef struct {
   /* add in offsets */
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
+    int ii;
 
     meshi=meshinfo+i;
     meshi->xbar += meshi->offset[0];
@@ -5371,11 +5365,8 @@ typedef struct {
   updateisotypes();
   updatepatchtypes();
   if(autoterrain==1){
-    int i;
-
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
-      int j;
       float *zcell;
 
       meshi = meshinfo + i;
@@ -6525,7 +6516,7 @@ int readini2(char *inifile, int localfile){
     if(fgets(buffer,255,stream)==NULL)break;
 
     if(match(buffer,"MESHVIS",7)==1){
-      int nm, i;
+      int nm;
       mesh *meshi;
 
       fgets(buffer,255,stream);
@@ -6598,8 +6589,6 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"TERRAINPARMS",12)==1){
-      int i;
-
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i",terrain_rgba_zmin,terrain_rgba_zmin+1,terrain_rgba_zmin+2);
 
@@ -6823,7 +6812,6 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"PLOT3DAUTO",10)==1){
       int n3dsmokes=0;
-      int i;
       int seq_id;
 
       fgets(buffer,255,stream);
@@ -6838,7 +6826,6 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"VSLICEAUTO",10)==1){
       int n3dsmokes=0;
-      int i;
       int seq_id;
 
       fgets(buffer,255,stream);
@@ -6853,7 +6840,6 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SLICEAUTO",9)==1){
       int n3dsmokes=0;
-      int i;
       int seq_id;
 
       fgets(buffer,255,stream);
@@ -6868,7 +6854,6 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"PARTAUTO",8)==1){
       int n3dsmokes=0;
-      int i;
       int seq_id;
 
       fgets(buffer,255,stream);
@@ -6883,7 +6868,6 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"ISOAUTO",7)==1){
       int n3dsmokes=0;
-      int i;
       int seq_id;
 
       fgets(buffer,255,stream);
@@ -6898,7 +6882,6 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"S3DAUTO",7)==1){
       int n3dsmokes=0;
-      int i;
       int seq_id;
 
       fgets(buffer,255,stream);
@@ -6913,7 +6896,6 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"PATCHAUTO",9)==1){
       int n3dsmokes=0;
-      int i;
       int seq_id;
 
       fgets(buffer,255,stream);
@@ -9698,14 +9680,12 @@ void writeini(int flag){
 
       if(inifile->file==NULL)continue;
       if(first_time==1){
-        char ini_listfile[1024];
-
         first_time=0;
         strcpy(ini_listfile,caseinifilename);
         strcat(ini_listfile,"list");
         fileout_inilist=fopen(ini_listfile,"w");
       }
-      if(ini_listfile!=NULL){
+      if(fileout_inilist!=NULL){
         fprintf(fileout_inilist,"INIFILE\n");
         fprintf(fileout_inilist," %s\n",inifile->file);
       }

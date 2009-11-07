@@ -63,7 +63,7 @@ int unit_type_match(char *unit_type, f_units *unit_class){
 /* ------------------ add_unit_class ------------------------ */
 
 void add_unit_class(flowlabels *label){
-  f_units *ut,*ut2,*ut3,*ut4;
+  f_units *ut;
   f_unit *units;
   int i;
 
@@ -71,9 +71,6 @@ void add_unit_class(flowlabels *label){
   ResizeMemory((void **)&unitclasses,nunitclasses*sizeof(f_units));
 
   ut = unitclasses + nunitclasses - 1;
-  ut2 = ut-1;
-  ut3 = ut2-1;
-  ut4 = ut3 - 1;
 
   ut->submenuid=0;
 
@@ -158,12 +155,10 @@ void update_unit_defs(void){
 
   if(smokediff==0)return;
   for(i=0;i<nunitclasses;i++){
-    char *datatype;
     float valmin, valmax, diff_maxmin;
     int firstslice, firstpatch, firstplot3d, diff_index;
 
     firstpatch=1;
-    datatype=unitclasses[i].unitclass;
     for(j=0;j<npatch_files;j++){
       patch *patchj;
       
@@ -200,7 +195,6 @@ void update_unit_defs(void){
     }
 
     firstplot3d=1;
-    datatype=unitclasses[i].unitclass;
     for(j=0;j<nplot3d_files;j++){
       plot3d *plot3dj;
       int n;

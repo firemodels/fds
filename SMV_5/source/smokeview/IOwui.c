@@ -251,7 +251,7 @@ void initterrain_all(void){
   float *znode, *znode_offset;
   int nycell;
   float znormal3[3];
-  int i,j,k;
+  int k;
   int nz;
   int ibar, jbar;
   int imesh;
@@ -262,6 +262,7 @@ void initterrain_all(void){
   for(imesh=0;imesh<nmeshes;imesh++){
     mesh *meshi;
     terraindata *terri;
+    int j;
     
     meshi = meshinfo + imesh;
 
@@ -276,7 +277,7 @@ void initterrain_all(void){
 
     uc_znormal = terri->uc_znormal;
     for(j=0;j<=terri->ny;j++){
-      int jm1, im1, ii, jj;
+      int i,jm1, im1;
       float zz;
       float ynode;
 
@@ -665,7 +666,7 @@ void drawterrain(terraindata *terri, int only_geom){
 /* ------------------ drawterrain ------------------------ */
 
 void drawterrain_texture(terraindata *terri, int only_geom){
-  float *znode, *znormal, *zn;
+  float *znode, *znormal;
   unsigned char *uc_znormal, *uc_zn;
   int nxcell;
   int i, j;
@@ -789,8 +790,6 @@ float *get_terraincolor(terraincell *ti){
     }
   }
   if(sv_time>=ter_time[ti->nstates-1]){
-    int ileft;
-
     ileft = ti->nstates-1;
     ti->interval=ileft;
     return rgb_terrain[ileft%10];
@@ -1157,9 +1156,8 @@ void init_tnorm(terraindata *terri){
 /* ------------------ update_terrain ------------------------ */
 
 void update_terrain(int allocate_memory, float vertical_factor){
-  int i, j;
-
   if(autoterrain==1){
+    int i;
 
     nterraininfo = nmeshes;
     if(allocate_memory==1){

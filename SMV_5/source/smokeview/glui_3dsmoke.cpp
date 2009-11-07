@@ -257,7 +257,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   CHECKBOX_show_cullports=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Show cull ports",&show_cullports);
   SPINNER_cull_portsize=glui_3dsmoke->add_spinner_to_panel(panel_slices,"Cull port size",GLUI_SPINNER_INT,&cull_portsize,CULL_PORTSIZE,SMOKE_3D_CB);
   {
-    int i, ijk_max=0;
+    int ijk_max=0;
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
 
