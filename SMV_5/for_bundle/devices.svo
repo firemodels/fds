@@ -130,6 +130,15 @@ DEVICEDEF
  push 0.0 0.0 0.015 translate 0.015 drawsphere pop
  pop
 
+// data layout for ellipsoid
+// 0->2  r,g,b color 
+// 3     dx
+// 4     dy
+// 5     dz
+DEVICEDEF // device for general ellipsoid
+ ELLIPSOID
+ 0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
+ 3.0 1.0 6.0 putuservals2stack 4.0 1.0 4.0 putuservals2stack 5.0 1.0 2.0 putuservals2stack 1.0 1.0 1.0 scalexyz 1.0 drawsphere
 // data layout for particle devices
 // 0->2  r,g,b color 
 // 3     diameter
