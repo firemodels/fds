@@ -20,7 +20,7 @@ char main_revision[]="$Revision$";
 
 int main(int argc, char **argv){
 
-  char *smv1=NULL, *smv2=NULL, *prog=NULL, *arg;
+  char *smv1=NULL, *smv2=NULL, *arg;
   char smoke1[1024], smoke2[1024], smv_out[1024];
   FILE *stream_out, *stream_in1, *stream_in2;
   int no_plot3d=0, no_slice=0, no_boundary=0;
@@ -34,13 +34,12 @@ int main(int argc, char **argv){
 #endif
   strcpy(pp,"%");
 
-
+ // check_histogram();  
   test_mode=0;
   sourcedir1=NULL;
   sourcedir2=NULL;
   destdir=NULL;
 
-  prog=argv[0];
   if(argc==1){
     version();
     return 1;

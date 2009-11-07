@@ -13,8 +13,6 @@
 // svn revision character string
 char IOdboundary_revision[]="$Revision$";
 
-int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout);
-
 /* ------------------ setup_slice ------------------------ */
 
 void setup_boundary(FILE *stream_out){
@@ -46,11 +44,6 @@ void setup_boundary(FILE *stream_out){
 
 boundary *getboundary(boundary *boundaryin, casedata *case2){
   int i,j;
-  float dx, dy, dz;
-
-  dx = boundaryin->boundarymesh->dx/2.0;
-  dy = boundaryin->boundarymesh->dy/2.0;
-  dz = boundaryin->boundarymesh->dz/2.0;
 
   for(i=0;i<case2->nboundary_files;i++){
     boundary *boundaryout;
@@ -213,8 +206,6 @@ void diff_boundaryes(FILE *stream_out){
       int percent_complete;
       float valmin, valmax;
       float valmin_percentile, valmax_percentile;
-      int nvals;
-      float cdf01, cdf99;
 
       ii=0;
       for(i=0;i<boundary1->npatches;i++){
@@ -243,8 +234,8 @@ void diff_boundaryes(FILE *stream_out){
       percent_complete=0;
       valmin=1000000000.0;
       valmax=-valmin;
-      nvals=0;
-      init_buckets(boundary1->bucket);
+
+      vals2histogram(NULL,0,boundary1->histogram);
 
       FORTgetpatchdata(&unit1, &boundary1->npatches, 
         p1i1, p1i2, p1j1, p1j2, p1k1, p1k2, &patchtime1, pqq1, &error1);
@@ -295,7 +286,7 @@ void diff_boundaryes(FILE *stream_out){
             if(pq1[kk]>valmax)valmax=pq1[kk];
           }
         }
-        update_buckets(pqq1, nsize1, boundary1->bucket);
+        update_histogram(pqq1, nsize1, boundary1->histogram);
         FORToutpatchframe(&unit3, &boundary1->npatches,
                         p3i1, p3i2, p3j1, p3j2, p3k1, p3k2,
                         &patchtime1, pqq3, &error3);
@@ -312,10 +303,8 @@ void diff_boundaryes(FILE *stream_out){
       }
       printf("\n");
       fflush(stdout);
-      cdf01=0.01;
-      cdf99=0.99;
-      valmin_percentile = get_hist_val(boundary1->bucket, cdf01);
-      valmax_percentile = get_hist_val(boundary1->bucket, cdf99);
+      valmin_percentile = get_histogram_value(boundary1->histogram, 0.01);
+      valmax_percentile = get_histogram_value(boundary1->histogram, 0.99);
 
       fprintf(stream_out,"MINMAXBNDF\n");
       fprintf(stream_out,"  %s\n",outfile2);
