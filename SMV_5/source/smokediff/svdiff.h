@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+#include "pragmas.h"
+#include "histogram.h"
+
 //************************** pre-processing directives ****************************************
 
 #ifdef INMAIN
@@ -45,16 +48,6 @@
 
 /* --------------------------  flowlabels ------------------------------------ */
 
-#define NBUCKETS 100000
-typedef struct {
-  int buckets[NBUCKETS];
-  float valmin, valmax;
-  int minmax_defined;
-  int ntotal;
-} bucketdata;
-
-/* --------------------------  flowlabels ------------------------------------ */
-
 typedef struct {
   char *longlabel, *shortlabel, *unit;
 } flowlabels;
@@ -76,7 +69,7 @@ typedef struct _boundary {
   int *patch2index, *patchsize, *qoffset;
   char keyword[255];
   int boundarytype;
-  bucketdata *bucket;
+  histogramdata *histogram;
   mesh *boundarymesh;
   flowlabels label;
 } boundary;
@@ -93,7 +86,7 @@ typedef struct _slice {
   char keyword[255];
   int slicetype;
   mesh *slicemesh;
-  bucketdata *bucket;
+  histogramdata *histogram;
   flowlabels label;
 } slice;
 
@@ -103,7 +96,7 @@ typedef struct _plot3d {
   float time;
   struct _plot3d *plot3d2;
   float xmin, xmax, ymin, ymax, zmin, zmax;
-  bucketdata *buckets[5];
+  histogramdata *histogram[5];
   mesh *plot3dmesh;
   flowlabels labels[5];
 } plot3d;
@@ -121,9 +114,6 @@ typedef struct {
 
 //************************** headers ****************************************
 
-void init_buckets(bucketdata *bucket);
-void update_buckets(float *vals, int nvals, bucketdata *bucket);
-float get_hist_val(bucketdata *bucket, float cdf);
 int getendian(void);
 void getSMDiffversion(char *SMDiffversion);
 int getmaxrevision(void);
@@ -131,7 +121,7 @@ int imax(int a, int b);
 int getrevision(char *svn);
 void version(void);
 void usage(void);
-int getfileinfo(char *filename, char *source_dir, int *filesize);
+int getfileinfo(char *filename, char *source_dir, FILE_SIZE *filesize);
 int match(const char *buffer, const char *key, unsigned int lenkey);
 int mesh_match(mesh *mesh1, mesh *mesh2);
 void trim(char *line);
@@ -152,6 +142,7 @@ void fullfile(char *fileout, char *dir, char *file);
 void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 int similar_grid(mesh *mesh1, mesh *mesh2, int *factor);
 int exact_grid(mesh *mesh1, mesh *mesh2, int *factor);
+int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout);
 
 #ifdef pp_noappend
 #define FORTgetsliceparms getsliceparms

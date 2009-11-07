@@ -119,7 +119,7 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
 
   /* ------------------ getfileinfo ------------------------ */
 
-int getfileinfo(char *filename, char *source_dir, int *filesize){
+int getfileinfo(char *filename, char *source_dir, FILE_SIZE *filesize){
   STRUCTSTAT statbuffer;
   int statfile;
   char buffer[1024];
@@ -182,6 +182,7 @@ int getmaxrevision(void){
   MAXREV(IOdslice_revision);
   MAXREV(IOdboundary_revision);
   MAXREV(IOdplot_revision);
+  MAXREV(histogram_revision);
   return max_revision;
 }
 
@@ -258,130 +259,6 @@ void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
   strcat(outfile,ext);
 }
 
-/* ------------------ get_hist_val ------------------------ */
-
-float get_hist_val(bucketdata *bucket, float cdf){
-  int cutoff, count;
-  int i;
-  float returnval;
-
-  cutoff = cdf*bucket->ntotal;
-  count=0;
-  for(i=0;i<NBUCKETS;i++){
-    count+=bucket->buckets[i];
-    if(count>cutoff){
-      returnval = bucket->valmin + (float)(i+0.5)*(bucket->valmax-bucket->valmin)/(float)NBUCKETS;
-      return returnval;
-    }
-  }
-  return bucket->valmax;
-}
-
-/* ------------------ init_buckets ------------------------ */
-
-void init_buckets(bucketdata *bucket){
-  int i;
-
-  for(i=0;i<NBUCKETS;i++){
-    bucket->buckets[i]=0;
-  }
-  bucket->ntotal=0;
-  bucket->minmax_defined=0;
-}
-
-/* ------------------ update_buckets ------------------------ */
-
-void update_buckets(float *vals, int nvals, bucketdata *bucket){
-  int i;
-  int bucket_copy[NBUCKETS];
-  float valmin_vals, valmax_vals;
-  float valmin_new, valmax_new;
-  int remap;
-
-  // find min and max of vals array
-
-  valmin_vals = vals[0];
-  valmax_vals = valmin_vals;
-  for(i=1;i<nvals;i++){
-    if(vals[i]<valmin_vals)valmin_vals=vals[i];
-    if(vals[i]>valmax_vals)valmax_vals=vals[i];
-  }
-
-  remap=0;
-  if(bucket->minmax_defined==0){
-    bucket->minmax_defined=1;
-    valmin_new=valmin_vals;
-    valmax_new=valmax_vals;
-  }
-  else{
-
-    // update valmin and valmax
-
-    valmin_new=bucket->valmin;
-    valmax_new=bucket->valmax;
-    if(valmin_vals<valmin_new){
-      valmin_new=valmin_vals;
-      remap=1;
-    }
-    if(valmax_vals>valmax_new){
-      valmax_new=valmax_vals;
-      remap=1;
-    }
-  }
-  if(remap==1){
-
-    // map old bucket array using new min/max bounds
-
-    for(i=0;i<NBUCKETS;i++){
-      bucket_copy[i]=0;
-    }
-    if(valmin_new==valmax_new){
-      for(i=0;i<NBUCKETS;i++){
-        if(bucket->buckets[i]==0)continue;
-        bucket_copy[0]+=bucket->buckets[i];
-      }
-    }
-    else{
-      float dbucket;
-
-      dbucket = (bucket->valmax-bucket->valmin)/(float)NBUCKETS;
-      for(i=0;i<NBUCKETS;i++){
-        float val;
-        int ival;
-
-        if(bucket->buckets[i]==0)continue;
-        val = bucket->valmin + (float)(i+0.5)*dbucket;
-        ival = NBUCKETS*(val-valmin_new)/(valmax_new-valmin_new);
-        if(ival<0)ival=0;
-        if(ival>NBUCKETS-1)ival=NBUCKETS-1;
-        bucket_copy[ival]+=bucket->buckets[i];
-      }
-    }
-    for(i=0;i<NBUCKETS;i++){
-      bucket->buckets[i]=bucket_copy[i];
-    }
-  }
-
-  // update bucket with vals passed in
-
-  if(valmax_new==valmin_new){
-    bucket->buckets[0]+=nvals;
-  }
-  else{
-    for(i=0;i<nvals;i++){
-      int ival;
-
-      ival = NBUCKETS*(vals[i]-valmin_new)/(valmax_new-valmin_new);
-      if(ival<0)ival=0;
-      if(ival>NBUCKETS-1)ival=NBUCKETS-1;
-      bucket->buckets[ival]++;
-    }
-  }
-  bucket->valmin=valmin_new;
-  bucket->valmax=valmax_new;
-  bucket->ntotal+=nvals;
-}
-
 /* ------------------ similar_grid ------------------------ */
 
 int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
@@ -390,12 +267,12 @@ int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
   factor[1]=1;
   factor[2]=1;
   
-  if(fabs(mesh1->xbar0-mesh2->xbar0)>mesh1->dx/2.0)return 0;
-  if(fabs( mesh1->xbar- mesh2->xbar)>mesh1->dx/2.0)return 0;
-  if(fabs(mesh1->ybar0-mesh2->ybar0)>mesh1->dy/2.0)return 0;
-  if(fabs( mesh1->ybar- mesh2->ybar)>mesh1->dy/2.0)return 0;
-  if(fabs(mesh1->zbar0-mesh2->zbar0)>mesh1->dz/2.0)return 0;
-  if(fabs( mesh1->zbar- mesh2->zbar)>mesh1->dz/2.0)return 0;
+  if(fabs( mesh1->xbar0-mesh2->xbar0)>mesh1->dx/2.0)return 0;
+  if(fabs( mesh1->xbar- mesh2->xbar )>mesh1->dx/2.0)return 0;
+  if(fabs( mesh1->ybar0-mesh2->ybar0)>mesh1->dy/2.0)return 0;
+  if(fabs( mesh1->ybar- mesh2->ybar )>mesh1->dy/2.0)return 0;
+  if(fabs( mesh1->zbar0-mesh2->zbar0)>mesh1->dz/2.0)return 0;
+  if(fabs( mesh1->zbar- mesh2->zbar )>mesh1->dz/2.0)return 0;
 
   factor[0] = mesh2->ibar/mesh1->ibar;
   if(mesh1->ibar*factor[0]!=mesh2->ibar)return 0;
