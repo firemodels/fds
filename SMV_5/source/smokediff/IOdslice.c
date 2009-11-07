@@ -77,7 +77,7 @@ void diff_slices(FILE *stream_out){
     float valmin, valmax;
     char *file1, *file2;
     char fullfile1[1024], fullfile2[1024], outfile[1024],  outfile2[1024];
-    slice *slicei, *slice1, *slice2;
+    slice *slicei, *slice1;//, *slice2;
     FILE *stream;
     int unit1, unit2, unit3;
     FILE_SIZE len1,len2;
@@ -97,15 +97,13 @@ void diff_slices(FILE *stream_out){
     float fraction_complete;
     FILE_SIZE size_sofar;
     int percent_complete;
-    int nvals;
-    float valmin_percentile, valmax_percentile, cdf01, cdf99;
+    float valmin_percentile, valmax_percentile;
     int nx1, ny1, nz1;
     int nx2, ny2, nz2;
 
     slicei = caseinfo->sliceinfo+j;
     slice1 = slicei;
     if(slicei->slice2==NULL)continue;
-    slice2 = slicei->slice2;
     file1 = slicei->file;
     file2 = slicei->slice2->file;
     fullfile(fullfile1,sourcedir1,file1);
@@ -176,8 +174,7 @@ void diff_slices(FILE *stream_out){
     error1=1;
     error2a=1;
     error2b=1;
-    nvals=0;
-    init_buckets(slice1->bucket);
+    vals2histogram(NULL,0,slice1->histogram);
     FORTgetsliceframe(&unit1,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframe1,&slicetest1,&error1);
     if(error1==0 )FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2a,qframe2a,&slicetest2,&error2a);
     if(error2a==0)FORTgetsliceframe(&unit2,&is1b,&is2b,&js1b,&js2b,&ks1b,&ks2b,&time2b,qframe2b,&slicetest2,&error2b);
@@ -191,7 +188,7 @@ void diff_slices(FILE *stream_out){
       FREEMEMORY(qframeout);
       continue;
     }
-    update_buckets(qframe1, nqframe1, slice1->bucket);
+    update_histogram(qframe1, nqframe1, slice1->histogram);
     printf("  Progress: ");
     fflush(stdout);
 
@@ -253,15 +250,13 @@ void diff_slices(FILE *stream_out){
       if(error1!=0)break;
       FORTgetsliceframe(&unit1,&is1a,&is2a,&js1a,&js2a,&ks1a,&ks2a,&time1,qframe1,&slicetest1,&error1);
       if(error1!=0)break;
-      update_buckets(qframe1, nqframe1, slice1->bucket);
+      update_histogram(qframe1, nqframe1, slice1->histogram);
     }
     printf("\n");
     fflush(stdout);
 
-    cdf01=0.01;
-    cdf99=0.99;
-    valmin_percentile = get_hist_val(slice1->bucket, cdf01);
-    valmax_percentile = get_hist_val(slice1->bucket, cdf99);
+    valmin_percentile = get_histogram_value(slice1->histogram, 0.01);
+    valmax_percentile = get_histogram_value(slice1->histogram, 0.99);
     fprintf(stream_out,"MINMAXSLCF\n");
     fprintf(stream_out,"  %s\n",outfile2);
     fprintf(stream_out,"  %f %f %f %f\n",valmin,valmax,valmin_percentile,valmax_percentile);
