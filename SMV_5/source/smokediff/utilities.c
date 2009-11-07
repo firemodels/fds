@@ -293,7 +293,7 @@ void init_buckets(bucketdata *bucket){
 
 void update_buckets(float *vals, int nvals, bucketdata *bucket){
   int i;
-  float bucket_copy[NBUCKETS];
+  int bucket_copy[NBUCKETS];
   float valmin_vals, valmax_vals;
   float valmin_new, valmax_new;
   int remap;
@@ -324,7 +324,7 @@ void update_buckets(float *vals, int nvals, bucketdata *bucket){
       remap=1;
     }
     if(valmax_vals>valmax_new){
-      valmax_new=valmin_vals;
+      valmax_new=valmax_vals;
       remap=1;
     }
   }
