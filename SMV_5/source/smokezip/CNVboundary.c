@@ -403,8 +403,8 @@ void compress_patches(void){
 
   // find bounds
 
-  if(get_bounds==1){
-    get_boundary_bounds();
+  if(get_boundary_bounds==1){
+    Get_Boundary_Bounds();
   }
 
   for(i=0;i<npatch_files;i++){
@@ -443,7 +443,7 @@ void compress_patches(void){
 
 /* ------------------ get_boundary_bounds ------------------------ */
 
-void get_boundary_bounds(void){
+void Get_Boundary_Bounds(void){
   int i;
 
   int endiandata;
