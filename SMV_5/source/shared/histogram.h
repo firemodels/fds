@@ -2,6 +2,11 @@
 // $Revision$
 // $Author$
 
+#ifdef pp_WIN_INTEL
+#pragma warning (disable:2259)
+#pragma warning (disable:1572)
+#endif
+
 /* --------------------------  flowlabels ------------------------------------ */
 
 #define NBUCKETS 100000
@@ -13,7 +18,7 @@ typedef struct {
 
 //************************** headers ****************************************
 
-void vals2histogram(float *vals, int nvals, histogramdata *histogram);
+void init_histogram(float *vals, int nvals, histogramdata *histogram);
 void update_histogram(float *vals, int nvals, histogramdata *histogram);
 void merge_histogram(histogramdata *histogram1, histogramdata *histogram2);
 float get_histogram_value(histogramdata *histogram, float cdf);

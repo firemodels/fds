@@ -4,14 +4,11 @@
 
 #define IN_BUCKET 1
 
-#include "options.h"
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "pragmas.h"
-#include "MALLOC.h"
 #include "histogram.h"
 
 // svn revision character string
@@ -41,7 +38,7 @@ float get_histogram_value(histogramdata *histgram, float cdf){
 
 /* ------------------ init_histogram ------------------------ */
 
-void vals2histogram(float *vals, int nvals, histogramdata *histgram){
+void init_histogram(float *vals, int nvals, histogramdata *histgram){
   int i;
   float valmin, valmax;
   float dbucket;
@@ -86,7 +83,7 @@ void vals2histogram(float *vals, int nvals, histogramdata *histgram){
 void update_histogram(float *vals, int nvals, histogramdata *histgram){
   histogramdata histgramval;
 
-  vals2histogram(vals,nvals,&histgramval);
+  init_histogram(vals,nvals,&histgramval);
   merge_histogram(histgram,&histgramval);
 }
 
@@ -142,6 +139,7 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
   histgram1->ntotal+=histgram2->ntotal;
 }
 
+#ifdef pp_CHECK
 /* ------------------ check_histogram ------------------------ */
 
 void check_histogram(void){
@@ -163,3 +161,4 @@ void check_histogram(void){
   free(vals);
 
 }
+#endif
