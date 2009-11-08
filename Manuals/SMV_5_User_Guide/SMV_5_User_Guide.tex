@@ -1293,6 +1293,7 @@ example, {\tt 1.0 2.0 4.0 scale 1.0 drawsphere}\ creates an
 ellipsoid with semi-major axes of length 1, 2 and 4. This is how
 the ball at the bottom of the heat detector in Figure \ref{figsprinkler}a is drawn.
 
+\newpage
 \infigr{drawtrunccone}{0.5 0.2 0.4 drawtrunccone}
 \paragraph{DRAWTRUNCCONE} The command, {\tt d1 d2 h drawtrunccone},
 draws a right circular truncated cone where d1 is the diameter of
@@ -1378,7 +1379,7 @@ the look of a device at run-time. This command is slightly more general than {\t
 to place operands anywhere on the operand stack.
 
 The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt PUTUSERSVALS2STACK}\
-command to modify the shape and color of the tube using parameters obtained from FDS.  Smokeview copies color, diameter and length information from the {tt CLASS\_\_PARTICLES}\ keyword in the {\tt .smv}\ file to an internal memory buffer with offsets 0, 1 and 2 for red, green and blue colors, offset 3 for diameter and offset 4 for length.  These values are then copied as specified by the {\tt putuservals2stack}\ command onto the memory area uses by the smokeview device commands.
+command to modify the shape and color of the tube using parameters obtained from FDS.  Smokeview copies color, diameter and length information from the {\tt CLASS\_\_PARTICLES}\ keyword in the {\tt .smv}\ file to an internal memory buffer with offsets 0, 1 and 2 for red, green and blue colors, offset 3 for diameter and offset 4 for length.  These values are then copied as specified by the {\tt putuservals2stack}\ command onto the memory area uses by the smokeview device commands.
 
 For example, the command {\tt 4 1 6 putuservals2stack}\ is used in the `EGG' Smokeview device definition given in Figure \ref{figeggexample}.  The data flow is illustrated in Figure \ref{figputuservals2stack}.  In particular,  the command {\tt 4 1 6 putuservals2stack}\ takes one value at offset 4 ({\tt length}) and copies it siz positions ``down'' the command argument list which is first parameter of the {\tt scalexyz} command.  The command
 {\tt 3 1 5 putuservals2stack}\ takes one value at offset 3 ({\tt diameter}) and copies it five positions down the command argument list which in the example below would be the third argument of the {\tt scalexyz}\ command.  Finally, the command {\tt 3 1 1 putuservals2stack}\ takes one value at offset 3 (again {\tt diameter}) and copies it one position down the argument command list which is the second argument of {\tt scalexyz}.
