@@ -7,17 +7,10 @@
 #define EXTERN extern
 #endif
 #include "csphere.h"
-#define PERCENTILE_MIN 0
-#define SET_MIN 1
-#define GLOBAL_MIN 2
-
-#define PERCENTILE_MAX 0
-#define SET_MAX 1
-#define GLOBAL_MAX 2
-
-#define NBUCKETS 100000
 
 #define UNLINK unlink
+
+#include "histogram.h"
 
 #ifdef pp_LIGHT
 #define NPHOTONS 100000
@@ -73,9 +66,12 @@ typedef struct {
   int filesize;
   int seq_id, autozip;
   int doit, done;
+  int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2, *patchdir, *patchsize;
+  int npatches;
   int setvalmin, setvalmax;
   float valmin, valmax;
   int version;
+  histogramdata *histogram;
   flowlabels label;
   int dup;
 } patch;
@@ -93,7 +89,6 @@ typedef struct {
   float *isolevels;
   int nisolevels,nisosteps;
 } iso;
-
 
 typedef struct {
   char *file,*filebase;
@@ -234,6 +229,7 @@ int readlabels(flowlabels *flowlabel, FILE *stream);
 void readini(char *file);
 void readini2(char *file2);
 int convert_boundary(patch *patchi, int pass);
+void get_boundary_bounds(void);
 void convert_3dsmoke(smoke3d *smoke3di);
 void compress_smoke3ds(void);
 int match(const char *buffer, const char *key, unsigned int lenkey);
@@ -245,6 +241,33 @@ void light_smoke(smoke3d *smoke3di,unsigned char *full_lightingbuffer, float *va
 void set_lightfield(smoke3d *smoke3di,float xyz[3], float hrr);
 void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuffer);
 #endif
+
+#ifdef pp_noappend
+#define FORTclosefortranfile closefortranfile
+#define FORTgetboundaryheader1 getboundaryheader1
+#define FORTgetboundaryheader2 getboundaryheader2
+#define FORTopenboundary openboundary
+#define FORTgetpatchdata getpatchdata
+#else
+#define FORTclosefortranfile closefortranfile_
+#define FORTgetboundaryheader1 getboundaryheader1_
+#define FORTgetboundaryheader2 getboundaryheader2_
+#define FORTopenboundary openboundary_
+#define FORTgetpatchdata getpatchdata_
+#endif
+#ifdef WIN32
+#define STDCALL extern void _stdcall
+#else
+#define STDCALL extern void
+#endif
+STDCALL FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
+                         float *patchtimes,float *pqq, int *error);
+STDCALL FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
+                         int *endian, int *version, int *error, FILE_SIZE len);
+STDCALL FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
+                               int *endian, int *npatch, int *error, FILE_SIZE lenfile);
+STDCALL FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
+                               int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
 
 EXTERN int frameskip;
 EXTERN int no_chop;
@@ -297,4 +320,5 @@ EXTERN char endianfilebase[1024];
 EXTERN char *endianfile;
 EXTERN spherepoints sphereinfo;
 EXTERN int autozip, make_demo;
+EXTERN int get_bounds;
 

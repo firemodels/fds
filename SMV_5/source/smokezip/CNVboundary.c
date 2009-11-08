@@ -403,6 +403,10 @@ void compress_patches(void){
 
   // find bounds
 
+  if(get_bounds==1){
+    get_boundary_bounds();
+  }
+
   for(i=0;i<npatch_files;i++){
     patchi = patchinfo + i;
     if(autozip==1&&patchi->autozip==0)continue;
@@ -435,6 +439,85 @@ void compress_patches(void){
       printf("  Min and Max for %s not set in .ini file\n",patchi->label.shortlabel);
     }
   }
+}
 
+/* ------------------ get_boundary_bounds ------------------------ */
+
+void get_boundary_bounds(void){
+  int i;
+
+  int endiandata;
+
+  endiandata=getendian();
+  if(endianswitch==1)endiandata=1-endiandata;
+
+  printf("Determining boundary file bounds\n");
+  for(i=0;i<npatch_files;i++){
+    patch *patchi;
+    int unit1=15;
+    int lenfile;
+    int error1;
+    int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2;
+    float patchtime1, *patchframe;
+    int patchframesize;
+    int j;
+
+    patchi = patchinfo + i;
+    printf("  Examining %s\n",patchi->file);
+    lenfile=strlen(patchi->file);
+    pi1 = patchi->pi1;
+    pi2 = patchi->pi2;
+    pj1 = patchi->pj1;
+    pj2 = patchi->pj2;
+    pk1 = patchi->pk1;
+    pk2 = patchi->pk2;
+    FORTopenboundary(patchi->file,&unit1,&endiandata,&patchi->version,&error1,lenfile);
+    patchframesize=0;
+    for(j=0;j<patchi->npatches;j++){
+      patchframesize+=patchi->patchsize[j];
+    }
+    NewMemory((void **)&patchframe,patchframesize*sizeof(float));
+    init_histogram(NULL,0,patchi->histogram);
+    while(error1==0){
+      FORTgetpatchdata(&unit1, &patchi->npatches, 
+        pi1, pi2, pj1, pj2, pk1, pk2, &patchtime1, patchframe, &error1);
+      update_histogram(patchframe,patchframesize,patchi->histogram);
+    }
+    FREEMEMORY(patchframe);
+  }
+  for(i=0;i<npatch_files;i++){
+    patch *patchi;
+    int j;
+
+    patchi = patchinfo + i;
+    if(patchi->dup==1)continue;
+    for(j=i+1;j<npatch_files;j++){
+      patch *patchj;
+
+      patchj = patchinfo + j;
+      if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)!=0)continue;
+      merge_histogram(patchi->histogram,patchj->histogram);
+    }
+    patchi->valmax=get_histogram_value(patchi->histogram,0.99);
+    patchi->valmin=get_histogram_value(patchi->histogram,0.01);
+    patchi->setvalmax=1;
+    patchi->setvalmin=1;
+    for(j=i+1;j<npatch_files;j++){
+      patch *patchj;
+
+      patchj = patchinfo + j;
+      if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)!=0)continue;
+      patchj->valmax=patchi->valmax;
+      patchj->valmin=patchi->valmin;
+      patchj->setvalmax=1;
+      patchj->setvalmin=1;
+    }
+  }
+  for(i=0;i<npatch_files;i++){
+    patch *patchi;
+
+    patchi = patchinfo + i;
+    FREEMEMORY(patchi->histogram);
+  }
 
 }
