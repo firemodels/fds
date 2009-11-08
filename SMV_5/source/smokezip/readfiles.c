@@ -541,6 +541,42 @@ int readsmv(char *smvfile){
           break;
         }
         patchi->filesize=filesize;
+        if(get_bounds==1){
+          int lenfile, endian, npatches, error, boundaryunitnumber;
+
+          NewMemory((void **)&patchi->histogram,sizeof(histogramdata));
+          lenfile=strlen(patchi->file);
+          endian=getendian();
+          boundaryunitnumber=15;
+          FORTgetboundaryheader1(patchi->file,&boundaryunitnumber,&endian, &npatches, &error, lenfile);
+          if(npatches>0){
+            int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2, *patchdir, *patchsize;
+            int i;
+
+            NewMemory((void **)&pi1,npatches*sizeof(int));
+            NewMemory((void **)&pi2,npatches*sizeof(int));
+            NewMemory((void **)&pj1,npatches*sizeof(int));
+            NewMemory((void **)&pj2,npatches*sizeof(int));
+            NewMemory((void **)&pk1,npatches*sizeof(int));
+            NewMemory((void **)&pk2,npatches*sizeof(int));
+            NewMemory((void **)&patchdir,npatches*sizeof(int));
+            NewMemory((void **)&patchsize,npatches*sizeof(int));
+            patchi->pi1=pi1;
+            patchi->pi2=pi2;
+            patchi->pj1=pj1;
+            patchi->pj2=pj2;
+            patchi->pk1=pk1;
+            patchi->pk2=pk2;
+            patchi->patchdir=patchdir;
+            patchi->npatches=npatches;
+            patchi->patchsize=patchsize;
+            FORTgetboundaryheader2(&boundaryunitnumber, &version, &npatches, pi1, pi2, pj1, pj2, pk1, pk2, patchdir);
+            for(i=0;i<npatches;i++){
+              patchi->patchsize[i] = (pi2[i]+1-pi1[i])*(pj2[i]+1-pj1[i])*(pk2[i]+1-pk1[i]);
+            }
+            CheckMemory;
+          }
+        }
         ipatch++;
       }
       else{

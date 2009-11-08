@@ -81,14 +81,11 @@ int convert_plot3d(plot3d *plot3di){
     strcpy(plot3dfile_svz,plot3di->file);
   }
   {
-
-    char *ext;
     int lensvz;
 
     lensvz = strlen(plot3dfile_svz);
 
     if(lensvz>4){
-      ext = plot3dfile_svz + lensvz - 2;
       strcat(plot3dfile_svz,".svz");
     }
   }
@@ -129,7 +126,6 @@ int convert_plot3d(plot3d *plot3di){
     int j;
     int framesize;
     int k,kk;
-    int returncode;
 
     endian=getendian();
 
@@ -170,7 +166,7 @@ int convert_plot3d(plot3d *plot3di){
         plot3dframe_uncompressed[kk++]=ival;
       }
     }
-    returncode=compress(plot3dframe_compressed,&ncompressed_zlib,plot3dframe_uncompressed,framesize);
+    compress(plot3dframe_compressed,&ncompressed_zlib,plot3dframe_uncompressed,framesize);
     sizeafter=16+ncompressed_zlib;
     sizebefore=5*framesize*sizeof(float);
   }
