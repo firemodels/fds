@@ -31,7 +31,7 @@ A deterministic fire model is based on fundamental conservation laws of mass, mo
 volumes that make up the compartments. A CFD model may use millions of control volumes to compute the solution of the Navier-Stokes equations.
 However, it does not actually solve the Navier-Stokes equations, but rather an approximate form of these equations. The approximation involves simplifying
 physical assumptions, like the various techniques for treating subgrid-scale turbulence.
-The most critical approximation is the discretization of the governing equations. For example, the partial derivative of the density, $\rho$,
+One critical approximation is the discretization of the governing equations. For example, the partial derivative of the density, $\rho$,
 with respect to the spatial coordinate, $x$, can be written in approximate form as:
 \be \frac{\partial \rho}{\partial x} = \frac{\rho_{i+1} - \rho_{i-1}}{2 \, \dx} + \mathcal{O}(\dx^2) \ee
 where $\dx$ is the grid spacing chosen by the model user.
@@ -39,13 +39,15 @@ The second term on the right represents all the terms of order $\dx^2$ and highe
 {\em discretization error}. These extra terms are simply dropped from
 the equation set, the argument being that they become smaller and smaller with decreasing grid cell size, $\dx$. The effect of these neglected terms is captured, to
 some extent, by the subgrid-scale turbulence model, but that is yet another approximation of the true physics. What effect do these approximations have on
-the predicted results? It is very difficult to determine based on an analysis of the discretized equations. At best, one can demonstrate convergence towards some
-analytical solution of the non-turbulent Navier-Stokes equations at a rate determined by the spatial and temporal differencing schemes, but this still does not answer a
-question like, ``What is the error of the model prediction of the gas temperature at a particular location in the room at a particular point in time?''
+the predicted results? It is very difficult to determine based on an analysis of the discretized equations. One possibility for estimating
+the magnitude of the discretization error is to perform a detailed
+convergence analysis, but this still does not answer a
+question like, ``What is the error of the model prediction of the gas
+temperature at a particular location in the room at a particular point in time?''
 
 To make matters worse, there are literally dozens of subroutines that make up a CFD fire model, from its radiation solver, solid phase heat transfer routines, pyrolysis model,
 empirical mass, momentum and energy transfer routines at the wall, and so on. A careful, systematic error analysis of the combination of all these routines is
-nearly impossible. Indeed the complexity of the analysis would approach that of the model itself. For this reason, we rely on comparisons of model predictions to as many
+extremely difficult. Indeed the complexity of the analysis would likely exceed that of the model itself. For this reason, we rely on comparisons of model predictions to as many
 experiments as possible as a means of quantifying model error. However, before we can definitively quantify the error, we first must quantify the uncertainty of the
 measurements against which the model predictions are to be compared. This is discussed below.
 
@@ -74,7 +76,7 @@ publishing hundreds of plots like the one shown in Fig.~\ref{temp_history}.
 
 To this end, we first have to decide how to condense all the data represented by these plots into a more tractable form. Specifically, we
 have to decide on a metric with which to compare two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999}
-discuss various possible metrics. A commonly used metric is simply the difference between the peak measured and predicted values.
+discuss various possible metrics. A commonly used metric is simply to compare the peak measured and predicted values.
 If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
 this exercise is a pair of numbers for each plot, $(E_i,M_i)$, that can be depicted graphically as shown in Fig.~\ref{scatterplot}. This plot
 condenses hundreds of plots into just one, but we still have the problem of quantifying the degree of scatter in the results. At this stage in the analysis, the
@@ -104,8 +106,9 @@ analysis, however, we must first discuss in more detail the subject of experimen
 
 \section{Experimental Uncertainty}
 
-For various reasons, documented fire experiments, especially full-scale experiments, contain fairly limited discussion of uncertainty. Some contain none at all.
-However, in order to assess the accuracy of the model whose predictions have been compared to these measurements, there must be some estimate of the
+For various reasons, the documentation of fire experiments, especially full-scale experiments,
+contains fairly limited discussion of uncertainty. Some contain none at all.
+However, in order to assess the accuracy of the model predictions, there must be some estimate of the
 combined effect of the uncertainty in the reported test parameters, like the heat release rate of the fire,
 and the reported measurements of the quantities of interest, like the hot gas layer (HGL)
 temperature, heat flux, and so forth. Otherwise, the difference between model and measurement would simply have to be attributed as model error and there is no point in
@@ -165,8 +168,10 @@ We are now ready to describe a method for calculating the model error using the 
 listed in Table~\ref{Uncertainty}.
 We make two important assumptions:
 \begin{enumerate}
-\item All uncertainties and errors can be expressed in relative terms, and
-\item All uncertainties and errors are assumed to be normally distributed.
+\item The uncertainties of the experiments and the model can be expressed in
+relative terms,\footnote{The relative uncertainty is defined as
+$\widetilde{\sigma}=\sigma/\mu$, where $\sigma$ is the standard deviation and $\mu$ is the mean of the random variable.} and
+\item The uncertainties are assumed to be normally distributed.
 \end{enumerate}
 Given the complexity of the models and the experiments, it would be difficult to justify
 any particular distribution. In fact, the very reason why we have developed this method of quantifying model error based on validation
@@ -180,50 +185,56 @@ We assume that a given experimental measurement, $E_i$, is normally
 distributed\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
 with mean, $\mu$, and standard deviation, $\sigma$.} about the ``true'' value, $\theta_i$, and there is no systematic bias:
 \be E|\theta \sim N(\theta,\sigma_E^2) \label{expunc} \ee
-The notation $E|\theta$ means that $E$ is conditional on a particular value of $\theta$.
+The notation\footnote{Note that the subscript, $i$, has been dropped merely to reduce the notational clutter.}
+$E|\theta$ means that $E$ is conditional on a particular value of $\theta$.
 This is the usual way of defining a likelihood function.
-It is convenient to use the so-called delta method\footnote{Given the random variable $X \sim N(\mu,\sigma^2)$, the delta method
-says that approximately $g(X) \sim N \left( g(\mu) \, , \, (g'(\mu) \, \sigma)^2\right)$~\cite{Oehlert:1992}.} to obtain the approximate distribution
-\be \ln(E)|\theta \sim N \left( \ln(\theta),\widetilde{\sigma}_E^2 \right) \label{eeq} \ee
+It is convenient to use the so-called delta method\footnote{Given the random variable $X \sim N(\mu,\sigma^2)$, the
+delta method~\cite{Oehlert:1992} provides a way to estimate the distribution of a function of $X$:
+$$g(X) \sim N \left( g(\mu) + g''(\mu) \, \sigma^2/2 \, , \, (g'(\mu) \, \sigma)^2\right)$$} to obtain the approximate distribution
+\be \ln(E)|\theta \sim N \left( \ln(\theta)- \frac{\widetilde{\sigma}_E^2}{2} \, , \,\widetilde{\sigma}_E^2 \right) \label{eeq} \ee
 The purpose of applying the natural log to the random variable is so that we can express its variance in terms of the
 relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. This is convenient because we have assumed that the relative
 uncertainty is constant for each quantity of interest. The quantities and uncertainty values are listed in Table~\ref{Uncertainty}.
 Using a Bayesian argument\footnote{The form of Bayes theorem used here states that the posterior distribution is the product of
-the prior distribution and the likelihood function, normalized by their integral: $f(\theta|E)= p(\theta) \, f(E|\theta)/\int p(\theta) \, f(E|\theta) \, d\theta$.
+the prior distribution and the likelihood function, normalized by their integral:
+$f(\theta|E)= p(\theta) \, f(E|\theta)/\int p(\theta) \, f(E|\theta) \, d\theta$.
 A constant prior is also known as a Jeffreys prior.}
 with a non-informative prior on $\ln(\theta)$, we obtain the posterior distribution as
-\be \ln(\theta)|E \sim N \left( \ln(E),\widetilde{\sigma}_E^2 \right) \label{thetaeq} \ee
-The assumption of a non-informative prior implies that we do not have sufficient information about the prior distribution ({\em i.e.} the true value) of
-$\theta$ to assume anything other than unity.
+\be \ln(\theta)|E \sim N \left( \ln(E)+ \frac{\widetilde{\sigma}_E^2}{2} \, , \, \widetilde{\sigma}_E^2 \right) \label{thetaeq} \ee
+The assumption of a non-informative prior implies that we do not have sufficient information about the
+prior distribution ({\em i.e.} the true value) of
+$\theta$ to assume anything other than a uniform distribution.
 
 We cannot assume, as in the case of the experimental measurements, that the model predictions have no systematic bias. Instead, we
 assume that the model predictions are normally distributed about the true values
 multiplied by a bias factor, $\delta$:
-\be M|\theta \sim N \left(\delta \, \theta,\sigma_M^2 \right) \ee
+\be M|\theta \sim N \left(\delta \, \theta \, , \, \sigma_M^2 \right) \ee
 The standard deviation, $\sigma_M$, is the model-intrinsic uncertainty, {\em i.e.} model error.
 This and the bias factor, $\delta$, are the parameters that we seek to quantify.
 Again, using the log transformation we obtain
-\be \ln(M)|\theta \sim N \left(\ln(\delta)+\ln(\theta)-\frac{1}{2} \frac{\widetilde{\sigma}_M^2}{\delta^2} \; , \;
-    \frac{\widetilde{\sigma}_M^2}{\delta^2} \right) \quad ; \quad \widetilde{\sigma}_M=\frac{\sigma_M}{\theta} \ee
+\be \ln(M)|\theta \sim N \left(\ln(\delta)+\ln(\theta)-\frac{\widetilde{\sigma}_M^2}{2} \; , \;
+    \widetilde{\sigma}_M^2 \right) \quad ; \quad \widetilde{\sigma}_M=\frac{\sigma_M}{\delta \, \theta} \ee
 Note that the estimate of the mean includes an extra term in the Taylor series expansion to obtain a more precise estimate of
 $\delta$. Because $\ln(\theta)$ is random, and we have its posterior distribution from Eq.~(\ref{thetaeq}),
 we can obtain the marginal distribution\footnote{$f(M)= \int f(M|\theta) \, f(\theta) \; d\theta$}
-\be \ln(M) \sim N \left( \ln(\delta)+\ln(E)-\frac{1}{2} \frac{\widetilde{\sigma}_M^2}{\delta^2} \; , \; \frac{\widetilde{\sigma}_M^2}{\delta^2} +\widetilde{\sigma}_E^2 \right) \ee
+\be \ln(M) \sim N \left( \ln(\delta)+\ln(E)- \frac{\widetilde{\sigma}_M^2}{2}+\frac{\widetilde{\sigma}_E^2}{2} \; ,
+   \; \widetilde{\sigma}_M^2+\widetilde{\sigma}_E^2 \right) \label{lnMeq} \ee
 Notice that we have expressed the {\em total relative uncertainty} of the model predictions as a
 combination of model error and experimental uncertainty.
 What we need now is a way to estimate this error and the bias factor, $\delta$. First, define:
 \be \overline{M} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(M_i)  \quad ; \quad \overline{E} = \frac{1}{n} \, \sum_{i=1}^n \, \ln(E_i) \ee
 The least squares estimate of the standard deviation of $\ln(M)$ is
-\be u(M) = \sqrt{\frac{\widetilde{\sigma}_M^2}{\delta^2}+\widetilde{\sigma}_E^2} \approx \sqrt{ \frac{1}{n-1} \sum_{i=1}^n \,
+\be u(M) = \sqrt{\widetilde{\sigma}_M^2+\widetilde{\sigma}_E^2} \approx \sqrt{ \frac{1}{n-1} \sum_{i=1}^n \,
      \left[ (\ln(M_i)-\overline{M}) - (\ln(E_i) - \overline{E})  \right]^2 } \ee
 Note that $u(M)$ is the {\em total relative uncertainty} of $M$.
 Next, compute the estimate for the model error:
-\be \frac{\widetilde{\sigma}_M}{\delta} \approx \sqrt{u(M)^2-\widetilde{\sigma}_E^2} \label{model_error} \ee
-An estimate of $\ln(\delta)$ is $\overline{M}-\overline{E}+\widetilde{\sigma}_M^2/2\delta^2$, and, thus, the estimate of $\delta$ is
-\be \hat{\delta} \approx \exp \left( \overline{M}-\overline{E}+\frac{\widetilde{\sigma}_M^2}{2 \delta^2} \right) \ee
+\be \widetilde{\sigma}_M \approx \sqrt{u(M)^2-\widetilde{\sigma}_E^2} \label{model_error} \ee
+From Eq.~(\ref{lnMeq}), an estimate of $\ln(\delta)$ is $\overline{M}-\overline{E}+\widetilde{\sigma}_M^2/2-\widetilde{\sigma}_E^2/2$,
+and, thus, the estimate of $\delta$ is
+\be \hat{\delta} \approx \exp \left( \overline{M}-\overline{E}+\frac{\widetilde{\sigma}_M^2}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right) \ee
 In essence, this procedure gives us a way to estimate the ``true'' value, $\theta$, using only a predicted value, $M$, and the bias factor and relative error
 for that particular quantity that have been obtained using past validation experiments. The ``truth'' is a random variable with the following distribution:
-\be \theta \sim N \left( \frac{M}{\hat{\delta}} \; , \; \left( \frac{M \, \widetilde{\sigma}_M}{\hat{\delta}} \right)^2 \right) \label{truth} \ee
+\be \theta \sim N \left( \frac{M}{\hat{\delta}} \; , \; \left( M \, \widetilde{\sigma}_M \right)^2 \right) \label{truth} \ee
 This is essentially a recipe for estimating the error associated with a model prediction, $M$.
 Below, we describe how one might make use of this formula in practice. First, however, we need to verify the accuracy of the procedure just described.
 
@@ -347,7 +358,7 @@ Now, consider the graph shown in Fig.~\ref{bell_curve}.
 The vertical lines indicate the ``threshold'' temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
 model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
 The bell curve is a normal distribution obtained from Eq.~(\ref{truth}) above. Its mean and standard deviation are
-\be 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} \quad ; \quad  \widetilde{\sigma}_M \, \frac{M}{\delta} = 0.10 \, \frac{330}{1.03} \ee
+\be 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} \quad ; \quad  \widetilde{\sigma}_M \, M = 0.10 \, 330 \ee
 respectively. The shaded area beneath the bell curve is the probability (0.03 in this case) that the ``true'' temperature can exceed 400~$^\circ$C.
 This means that there is an 3~\% chance that the cables could
 become damaged {\em based solely on the fact that the model is not a perfect representation of reality.}
