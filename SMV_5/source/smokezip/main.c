@@ -64,6 +64,7 @@ int main(int argc, char **argv){
   overwrite_b=0;
   overwrite_s=0;
   overwrite_iso=0;
+  get_bounds=0;
 #ifdef pp_LIGHT
   make_lighting_file=0;
   albedo=(float)0.3;
@@ -143,7 +144,12 @@ int main(int argc, char **argv){
         break;
 #endif
       case 'b':
-        overwrite_b=1;
+        if(strcmp(arg,"-bounds")==0){
+          get_bounds=1;
+        }
+        else{
+          overwrite_b=1;
+        }
         break;
       case '2':
         overwrite_slice=1;
@@ -520,6 +526,7 @@ void usage(char *prog){
   printf("  -i  - overwrites iso-surface compressed files\n");
   printf("  -p  - overwrites PLOT3D files\n");
   printf("  -f  - overwrites all compressed files\n");
+  printf("  -bounds - estimate data bounds\n");
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 
   printf("  -demo - Creates the files (compressed and .svd ) needed by the\n");

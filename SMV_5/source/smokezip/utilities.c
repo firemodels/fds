@@ -334,7 +334,6 @@ int getmaxrevision(void){
   MAXREV(endian_revision);
   MAXREV(main_revision);
   MAXREV(readfiles_revision);
-  MAXREV(stats_revision);
   MAXREV(utilities_revision);
 #ifdef pp_LIGHT
   MAXREV(lightsmoke_revision);
