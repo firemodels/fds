@@ -229,7 +229,7 @@ int readlabels(flowlabels *flowlabel, FILE *stream);
 void readini(char *file);
 void readini2(char *file2);
 int convert_boundary(patch *patchi, int pass);
-void get_boundary_bounds(void);
+void Get_Boundary_Bounds(void);
 void convert_3dsmoke(smoke3d *smoke3di);
 void compress_smoke3ds(void);
 int match(const char *buffer, const char *key, unsigned int lenkey);
@@ -320,5 +320,5 @@ EXTERN char endianfilebase[1024];
 EXTERN char *endianfile;
 EXTERN spherepoints sphereinfo;
 EXTERN int autozip, make_demo;
-EXTERN int get_bounds;
+EXTERN int get_bounds, get_slice_bounds, get_plot3d_bounds, get_boundary_bounds;
 

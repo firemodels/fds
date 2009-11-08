@@ -65,6 +65,9 @@ int main(int argc, char **argv){
   overwrite_s=0;
   overwrite_iso=0;
   get_bounds=0;
+  get_slice_bounds=0;
+  get_plot3d_bounds=0;
+  get_boundary_bounds=0;
 #ifdef pp_LIGHT
   make_lighting_file=0;
   albedo=(float)0.3;
@@ -146,6 +149,18 @@ int main(int argc, char **argv){
       case 'b':
         if(strcmp(arg,"-bounds")==0){
           get_bounds=1;
+          get_slice_bounds=1;
+          get_plot3d_bounds=1;
+          get_boundary_bounds=1;
+        }
+        else if(strcmp(arg,"-bb")==0){
+          get_boundary_bounds=1;
+        }
+        else if(strcmp(arg,"-bs")==0){
+          get_slice_bounds=1;
+        }
+        else if(strcmp(arg,"-bp")==0){
+          get_plot3d_bounds=1;
         }
         else{
           overwrite_b=1;
@@ -526,7 +541,10 @@ void usage(char *prog){
   printf("  -i  - overwrites iso-surface compressed files\n");
   printf("  -p  - overwrites PLOT3D files\n");
   printf("  -f  - overwrites all compressed files\n");
-  printf("  -bounds - estimate data bounds\n");
+  printf("  -bounds - estimate data bounds for all file types\n");
+  printf("  -bb - estimate data bounds for boundary files\n");
+  printf("  -bs - estimate data bounds for slice files\n");
+  printf("  -bp - estimate data bounds for plot3d files\n");
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 
   printf("  -demo - Creates the files (compressed and .svd ) needed by the\n");
