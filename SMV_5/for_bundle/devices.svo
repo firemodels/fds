@@ -155,6 +155,10 @@ DEVICEDEF // device for particle tube
  CYLINDER
  0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
  90.0 rotatey 3.0 2.0 getuservals 0.1 0.3 drawcdisk
+DEVICEDEF // device for general cylinder 
+ GCYLINDER
+ 0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
+ 5.0 1.0 getuservals -30.0 rotatez 6.0 1.0 getuservals -10.0 rotatey 90.0 rotatey 3.0 2.0 getuservals 0.1 0.3 drawcdisk
 DEVICEDEF // device for particle "egg"
  EGG
  0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
