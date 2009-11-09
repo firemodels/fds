@@ -231,6 +231,7 @@ void readini(char *file);
 void readini2(char *file2);
 int convert_boundary(patch *patchi, int pass);
 void Get_Boundary_Bounds(void);
+void Get_Slice_Bounds(void);
 void convert_3dsmoke(smoke3d *smoke3di);
 void compress_smoke3ds(void);
 int match(const char *buffer, const char *key, unsigned int lenkey);
