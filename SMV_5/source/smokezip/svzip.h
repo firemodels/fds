@@ -100,6 +100,7 @@ typedef struct {
   int setchopvalmin, setchopvalmax;
   float chopvalmin, chopvalmax;
   int version;
+  histogramdata *histogram;
   flowlabels label;
   int dup;
   int rle;
@@ -248,12 +249,16 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
 #define FORTgetboundaryheader2 getboundaryheader2
 #define FORTopenboundary openboundary
 #define FORTgetpatchdata getpatchdata
+#define FORTopenslice openslice
+#define FORTgetsliceframe getsliceframe
 #else
 #define FORTclosefortranfile closefortranfile_
 #define FORTgetboundaryheader1 getboundaryheader1_
 #define FORTgetboundaryheader2 getboundaryheader2_
 #define FORTopenboundary openboundary_
 #define FORTgetpatchdata getpatchdata_
+#define FORTopenslice openslice_
+#define FORTgetsliceframe getsliceframe_
 #endif
 #ifdef WIN32
 #define STDCALL extern void _stdcall
@@ -268,6 +273,12 @@ STDCALL FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber,
                                int *endian, int *npatch, int *error, FILE_SIZE lenfile);
 STDCALL FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
+STDCALL FORTgetsliceframe(int *lu11,
+                          int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
+                          float *time,float *qframe,int *slicetest, int *error);
+STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian, 
+                      int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
+                      int *error, FILE_SIZE lenfile);
 
 EXTERN int frameskip;
 EXTERN int no_chop;

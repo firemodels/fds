@@ -592,6 +592,9 @@ void compress_slices(void){
     if(autozip==1&&slicei->autozip==0)continue;
     slicei->count=0;
   }
+  if(get_slice_bounds==1){
+    Get_Slice_Bounds();
+  }
   for(i=0;i<nslice_files;i++){
     char *label;
 
@@ -661,4 +664,75 @@ int slicedup(slice *slicej, int islice){
     }
   }
   return 0;
+}
+/* ------------------ Get_Slice_Bounds ------------------------ */
+
+void Get_Slice_Bounds(void){
+  int i;
+
+  int endiandata;
+
+  endiandata=getendian();
+  if(endianswitch==1)endiandata=1-endiandata;
+
+  printf("Determining slice file bounds\n");
+  for(i=0;i<nslice_files;i++){
+    slice *slicei;
+    int unit1=15;
+    int lenfile;
+    int error1;
+    float slicetime1, *sliceframe;
+    int sliceframesize;
+    int is1, is2, js1, js2, ks1, ks2;
+    int testslice;
+
+    slicei = sliceinfo + i;
+    printf("  Examining %s\n",slicei->file);
+    lenfile=strlen(slicei->file);
+    FORTopenslice(slicei->file,&unit1,&endiandata,&is1,&is2,&js1,&js2,&ks1,&ks2,&error1,lenfile);
+    sliceframesize=(is2+1-is1)*(js2+1-js1)*(ks2+1-ks1);
+    NewMemory((void **)&sliceframe,sliceframesize*sizeof(float));
+    init_histogram(NULL,0,slicei->histogram);
+    testslice=0;
+    while(error1==0){
+      FORTgetsliceframe(&unit1, &is1, &is2, &js1, &js2, &ks1, &ks2, &slicetime1, sliceframe, &testslice,&error1);
+      update_histogram(sliceframe,sliceframesize,slicei->histogram);
+    }
+    FREEMEMORY(sliceframe);
+  }
+  for(i=0;i<nslice_files;i++){
+    slice *slicei;
+    int j;
+
+    slicei = sliceinfo + i;
+    if(slicei->dup==1)continue;
+    for(j=i+1;j<nslice_files;j++){
+      slice *slicej;
+
+      slicej = sliceinfo + j;
+      if(strcmp(slicei->label.shortlabel,slicej->label.shortlabel)!=0)continue;
+      merge_histogram(slicei->histogram,slicej->histogram);
+    }
+    slicei->valmax=get_histogram_value(slicei->histogram,0.99);
+    slicei->valmin=get_histogram_value(slicei->histogram,0.01);
+    slicei->setvalmax=1;
+    slicei->setvalmin=1;
+    for(j=i+1;j<nslice_files;j++){
+      slice *slicej;
+
+      slicej = sliceinfo + j;
+      if(strcmp(slicei->label.shortlabel,slicej->label.shortlabel)!=0)continue;
+      slicej->valmax=slicei->valmax;
+      slicej->valmin=slicei->valmin;
+      slicej->setvalmax=1;
+      slicej->setvalmin=1;
+    }
+  }
+  for(i=0;i<nslice_files;i++){
+    slice *slicei;
+
+    slicei = sliceinfo + i;
+    FREEMEMORY(slicei->histogram);
+  }
+
 }
