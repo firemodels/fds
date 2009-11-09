@@ -541,7 +541,7 @@ int readsmv(char *smvfile){
           break;
         }
         patchi->filesize=filesize;
-        if(get_bounds==1){
+        if(get_boundary_bounds==1){
           int lenfile, endian, npatches, error, boundaryunitnumber;
 
           NewMemory((void **)&patchi->histogram,sizeof(histogramdata));
@@ -616,6 +616,10 @@ int readsmv(char *smvfile){
       slicei->version=version;
       slicei->seq_id = islice_seq;
       slicei->autozip = 0;
+        
+      if(get_slice_bounds==1){
+          NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
+      }
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
       trim(buffer);
