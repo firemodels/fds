@@ -5002,6 +5002,9 @@ typedef struct {
     if(strcmp(label,"smokesensor")==0){
       active_smokesensors=1;
     }
+    if(devicei->plane_surface!=NULL){
+      init_device_plane(devicei);
+    }
   }
 
   nsmoothblocks=0;
