@@ -3111,7 +3111,7 @@ USE MESH_POINTERS
 IMPLICIT NONE
 
 PRIVATE
-PUBLIC :: INIT_IBM,VELTAN2D
+PUBLIC :: INIT_IBM,VELTAN2D,TRILINEAR,GETX,GETU
  
 CONTAINS
 
@@ -3120,105 +3120,419 @@ USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-INTEGER :: IZERO,I,J,K,MIN_I,MAX_I,MIN_J,MAX_J,MIN_K,MAX_K
+INTEGER :: IZERO,I,J,K,NG
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (GEOMETRY_TYPE), POINTER :: G
-REAL(EB) :: DELTA_X,DELTA_Y,DELTA_Z,X_MIN,Y_MIN,Z_MIN,X_MAX,Y_MAX,Z_MAX,R2
-INTEGER, POINTER, DIMENSION(:,:,:) :: U_MASK,V_MASK,W_MASK
+REAL(EB) :: DELTA,D2,R2,RP2,XU(3),PP(3),DP,TIME,TOL=1.E-9_EB
+REAL(EB) :: X_MIN,Y_MIN,Z_MIN,X_MAX,Y_MAX,Z_MAX,HXD,HYD,HZD
 
+TIME = T
 M => MESHES(NM)
 
-IF (T==0._EB) THEN
-   ALLOCATE(M%IBM_SAVE1(0:IBAR,0:JBAR,0:KBAR),STAT=IZERO)
-   CALL ChkMemErr('INIT_IBM','IBM_SAVE1',IZERO)
-   ALLOCATE(M%IBM_SAVE2(0:IBAR,0:JBAR,0:KBAR),STAT=IZERO)
-   CALL ChkMemErr('INIT_IBM','IBM_SAVE2',IZERO)
-   ALLOCATE(M%IBM_SAVE3(0:IBAR,0:JBAR,0:KBAR),STAT=IZERO)
-   CALL ChkMemErr('INIT_IBM','IBM_SAVE3',IZERO)
-ENDIF
+! geometry loop
 
-CALL POINT_TO_MESH(NM)
+GEOM_LOOP: DO NG=1,N_GEOM
 
-U_MASK => IBM_SAVE1
-V_MASK => IBM_SAVE2
-W_MASK => IBM_SAVE3
-U_MASK = 1._EB
-V_MASK = 1._EB
-W_MASK = 1._EB
+   G => GEOMETRY(NG)
+   IF (ICYC>0 .AND. G%TRANSLATE==.FALSE. .AND. G%ROTATE==.FALSE.) CYCLE GEOM_LOOP
+   
+   IF (TWO_D) THEN
+      DELTA = SQRT(M%DX(1)*M%DZ(1))
+   ELSE
+      DELTA = (M%DX(1)*M%DY(1)*M%DZ(1))**ONTH
+   ENDIF
+   DELTA = DELTA-TOL
+   D2 = DELTA**2
 
-! assume uniform mesh spacing for now
-DELTA_X = DX(1)
-DELTA_Y = DY(1)
-DELTA_Z = DZ(1)
+   ! find bounding box
+   
+   SELECT_SHAPE: SELECT CASE(G%ISHAPE)
+      CASE(IBOX) SELECT_SHAPE
+         X_MIN = G%X1
+         Y_MIN = G%Y1
+         Z_MIN = G%Z1
+         X_MAX = G%X2
+         Y_MAX = G%Y2
+         Z_MAX = G%Z2
+         G%X   = 0.5_EB*(X_MIN+X_MAX)
+         G%Y   = 0.5_EB*(Y_MIN+Y_MAX)
+         G%Z   = 0.5_EB*(Z_MIN+Z_MAX)
+         G%HL(1) = X_MAX-G%X
+         G%HL(2) = Y_MAX-G%Y
+         G%HL(3) = Z_MAX-G%Z
+         HXD = G%HL(1)+DELTA
+         HYD = G%HL(2)+DELTA
+         HZD = G%HL(3)+DELTA
+      CASE(ISPHERE) SELECT_SHAPE
+         X_MIN = G%X-G%RADIUS
+         Y_MIN = G%Y-G%RADIUS
+         Z_MIN = G%Z-G%RADIUS
+         X_MAX = G%X+G%RADIUS
+         Y_MAX = G%Y+G%RADIUS
+         Z_MAX = G%Z+G%RADIUS
+         R2 = G%RADIUS**2
+      CASE(ICYLINDER) SELECT_SHAPE ! assume aligned with y axis
+         X_MIN = M%XS
+         Y_MIN = M%YS
+         Z_MIN = M%ZS
+         X_MAX = M%XF
+         Y_MAX = M%YF
+         Z_MAX = M%ZF
+         R2  = G%RADIUS**2
+      CASE(IPLANE)
+         X_MIN = M%XS
+         Y_MIN = M%YS
+         Z_MIN = M%ZS
+         X_MAX = M%XF
+         Y_MAX = M%YF
+         Z_MAX = M%ZF
+         PP   = (/G%X,G%Y,G%Z/)
+         G%NN = (/G%XOR,G%YOR,G%ZOR/) - PP          ! normal vector to plane
+         G%NN = G%NN/SQRT(DOT_PRODUCT(G%NN,G%NN))   ! unit normal
+   END SELECT SELECT_SHAPE
 
-G => GEOMETRY(1)
+   G%MIN_I(NM) = M%IBAR
+   G%MIN_J(NM) = M%JBAR
+   G%MIN_K(NM) = M%KBAR
 
-! oscillating sphere
+   IF (X_MIN>=M%XS .AND. X_MIN<=M%XF) G%MIN_I(NM) = MAX(0,FLOOR((X_MIN-M%XS)/M%DX(1))-1)
+   IF (Y_MIN>=M%YS .AND. Y_MIN<=M%YF) G%MIN_J(NM) = MAX(0,FLOOR((Y_MIN-M%YS)/M%DY(1))-1)
+   IF (Z_MIN>=M%ZS .AND. Z_MIN<=M%ZF) G%MIN_K(NM) = MAX(0,FLOOR((Z_MIN-M%ZS)/M%DZ(1))-1)
+   
+   G%MAX_I(NM) = 0
+   G%MAX_J(NM) = 0
+   G%MAX_K(NM) = 0
 
-G%X = G%X0
-G%Y = G%Y0
-G%Z = G%Z0 + 0.2_EB*SIN(T)
+   IF (X_MAX>=M%XS .AND. X_MAX<=M%XF) G%MAX_I(NM) = MIN(M%IBAR,CEILING((X_MAX-M%XS)/M%DX(1))+1)
+   IF (Y_MAX>=M%YS .AND. Y_MAX<=M%YF) G%MAX_J(NM) = MIN(M%JBAR,CEILING((Y_MAX-M%YS)/M%DY(1))+1)
+   IF (Z_MAX>=M%ZS .AND. Z_MAX<=M%ZF) G%MAX_K(NM) = MIN(M%KBAR,CEILING((Z_MAX-M%ZS)/M%DZ(1))+1)
+   
+   IF (TWO_D) THEN
+      G%MIN_J(NM)=1
+      G%MAX_J(NM)=1
+   ENDIF
+   
+   IF (ICYC==0) THEN
+      ALLOCATE(G%U_MASK(G%MIN_I(NM):G%MAX_I(NM),G%MIN_J(NM):G%MAX_J(NM),G%MIN_K(NM):G%MAX_K(NM)),STAT=IZERO)
+      CALL ChkMemErr('INIT_IBM','U_MASK',IZERO)
+      ALLOCATE(G%V_MASK(G%MIN_I(NM):G%MAX_I(NM),G%MIN_J(NM):G%MAX_J(NM),G%MIN_K(NM):G%MAX_K(NM)),STAT=IZERO)
+      CALL ChkMemErr('INIT_IBM','V_MASK',IZERO)
+      ALLOCATE(G%W_MASK(G%MIN_I(NM):G%MAX_I(NM),G%MIN_J(NM):G%MAX_J(NM),G%MIN_K(NM):G%MAX_K(NM)),STAT=IZERO)
+      CALL ChkMemErr('INIT_IBM','W_MASK',IZERO)
+      G%U_MASK = 1 ! default to gas phase
+      G%V_MASK = 1
+      G%W_MASK = 1
+   ENDIF
 
-G%W = 0.2_EB*COS(T)
+   ! mask cells
 
-! find bounding box
-
-X_MIN = MIN(G%X-G%RADIUS,XS)
-Y_MIN = MIN(G%Y-G%RADIUS,YS)
-Z_MIN = MIN(G%Z-G%RADIUS,ZS)
-
-X_MAX = MAX(G%X+G%RADIUS,XF)
-Y_MAX = MAX(G%Y+G%RADIUS,YF)
-Z_MAX = MAX(G%Z+G%RADIUS,ZF)
-
-MIN_I = FLOOR((X_MIN-XS)/DELTA_X)
-MIN_J = FLOOR((Y_MIN-YS)/DELTA_Y)
-MIN_K = FLOOR((Z_MIN-ZS)/DELTA_Z)
-
-MAX_I = CEILING((X_MAX-XS)/DELTA_X)
-MAX_J = CEILING((Y_MAX-YS)/DELTA_Y)
-MAX_K = CEILING((Z_MAX-ZS)/DELTA_Z)
-
-R2 = G%RADIUS**2
-
-DO K=MIN_K,MAX_K
-   DO J=MIN_J,MAX_J
-      DO I=MIN_I,MAX_I
+   DO K=G%MIN_K(NM),G%MAX_K(NM)
+      DO J=G%MIN_J(NM),G%MAX_J(NM)
+         DO I=G%MIN_I(NM),G%MAX_I(NM)
          
-         IF ( (( X(I)-G%X)**2+(YC(J)-G%Y)**2+(ZC(K)-G%Z)**2)<=R2 ) U_MASK(I,J,K) = 0._EB
-         IF ( ((XC(I)-G%X)**2+( Y(J)-G%Y)**2+(ZC(K)-G%Z)**2)<=R2 ) V_MASK(I,J,K) = 0._EB
-         IF ( ((XC(I)-G%X)**2+(YC(J)-G%Y)**2+( Z(K)-G%Z)**2)<=R2 ) W_MASK(I,J,K) = 0._EB
+            MASK_SHAPE: SELECT CASE(G%ISHAPE)
+            
+               CASE(IBOX) MASK_SHAPE
+                  
+                  ! first assume point is masked
+                  G%U_MASK(I,J,K) = -1
+                  G%V_MASK(I,J,K) = -1
+                  G%W_MASK(I,J,K) = -1
+                  
+                  ! then see if the point is outside geometry
+                  IF (ABS( M%X(I)-G%X)>G%HL(1)) G%U_MASK(I,J,K) = 0
+                  IF (ABS(M%YC(J)-G%Y)>G%HL(2)) G%U_MASK(I,J,K) = 0
+                  IF (ABS(M%ZC(K)-G%Z)>G%HL(3)) G%U_MASK(I,J,K) = 0
+                  
+                  IF (ABS(M%XC(I)-G%X)>G%HL(1)) G%V_MASK(I,J,K) = 0
+                  IF (ABS( M%Y(J)-G%Y)>G%HL(2)) G%V_MASK(I,J,K) = 0
+                  IF (ABS(M%ZC(K)-G%Z)>G%HL(3)) G%V_MASK(I,J,K) = 0
+                  
+                  IF (ABS(M%XC(I)-G%X)>G%HL(1)) G%W_MASK(I,J,K) = 0
+                  IF (ABS(M%YC(J)-G%Y)>G%HL(2)) G%W_MASK(I,J,K) = 0
+                  IF (ABS( M%Z(K)-G%Z)>G%HL(3)) G%W_MASK(I,J,K) = 0
+                  
+                  ! then see if the point is in gas phase
+                  IF (ABS( M%X(I)-G%X)>=HXD) G%U_MASK(I,J,K) = 1
+                  IF (ABS(M%YC(J)-G%Y)>=HYD) G%U_MASK(I,J,K) = 1
+                  IF (ABS(M%ZC(K)-G%Z)>=HZD) G%U_MASK(I,J,K) = 1
+                  
+                  IF (ABS(M%XC(I)-G%X)>=HXD) G%V_MASK(I,J,K) = 1
+                  IF (ABS( M%Y(J)-G%Y)>=HYD) G%V_MASK(I,J,K) = 1
+                  IF (ABS(M%ZC(K)-G%Z)>=HZD) G%V_MASK(I,J,K) = 1
+                  
+                  IF (ABS(M%XC(I)-G%X)>=HXD) G%W_MASK(I,J,K) = 1
+                  IF (ABS(M%YC(J)-G%Y)>=HYD) G%W_MASK(I,J,K) = 1
+                  IF (ABS( M%Z(K)-G%Z)>=HZD) G%W_MASK(I,J,K) = 1
+            
+               CASE(ISPHERE) MASK_SHAPE
+               
+                  RP2 = (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2
+                  IF (RP2-R2 < D2 ) G%U_MASK(I,J,K) = 0
+                  IF (RP2-R2 < TOL) G%U_MASK(I,J,K) = -1
+                  
+                  RP2 = (M%XC(I)-G%X)**2+(M%Y(J)-G%Y)**2+(M%ZC(K)-G%Z)**2
+                  IF (RP2-R2 < D2 ) G%V_MASK(I,J,K) = 0
+                  IF (RP2-R2 < TOL) G%V_MASK(I,J,K) = -1
+                  
+                  RP2 = (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%Z(K)-G%Z)**2
+                  IF (RP2-R2 < D2 ) G%W_MASK(I,J,K) = 0
+                  IF (RP2-R2 < TOL) G%W_MASK(I,J,K) = -1
+                  
+               CASE(ICYLINDER) MASK_SHAPE ! align with y axis for now
+               
+                  RP2 = (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2
+                  IF (RP2-R2 < D2 ) G%U_MASK(I,J,K) = 0
+                  IF (RP2-R2 < TOL) G%U_MASK(I,J,K) = -1
+                  
+                  RP2 = (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2
+                  IF (RP2-R2 < D2 ) G%V_MASK(I,J,K) = 0
+                  IF (RP2-R2 < TOL) G%V_MASK(I,J,K) = -1
+                  
+                  RP2 = (M%XC(I)-G%X)**2+(M%Z(K)-G%Z)**2
+                  IF (RP2-R2 < D2 ) G%W_MASK(I,J,K) = 0
+                  IF (RP2-R2 < TOL) G%W_MASK(I,J,K) = -1
+                  
+               CASE(IPLANE) MASK_SHAPE
+               
+                  ! see Section 10.3 Schneider and Eberly
+                  
+                  XU = (/M%X(I),M%YC(J),M%ZC(K)/)        ! point of interest
+                  IF (G%TWO_SIDED) THEN
+                     DP = ABS(DOT_PRODUCT(G%NN,XU-PP))   ! distance to plane
+                  ELSE
+                     DP = DOT_PRODUCT(G%NN,XU-PP)        ! signed distance to plane
+                  ENDIF
+                  IF (DP<DELTA) G%U_MASK(I,J,K) = 0
+                  IF (DP<TOL)   G%U_MASK(I,J,K) = -1
+                  
+                  XU = (/M%XC(I),M%Y(J),M%ZC(K)/)
+                  IF (G%TWO_SIDED) THEN
+                     DP = ABS(DOT_PRODUCT(G%NN,XU-PP))
+                  ELSE
+                     DP = DOT_PRODUCT(G%NN,XU-PP)
+                  ENDIF
+                  IF (DP<DELTA) G%V_MASK(I,J,K) = 0
+                  IF (DP<TOL)   G%V_MASK(I,J,K) = -1
+                  
+                  XU = (/M%XC(I),M%YC(J),M%Z(K)/)
+                  IF (G%TWO_SIDED) THEN
+                     DP = ABS(DOT_PRODUCT(G%NN,XU-PP))
+                  ELSE
+                     DP = DOT_PRODUCT(G%NN,XU-PP)
+                  ENDIF
+                  IF (DP<DELTA) G%W_MASK(I,J,K) = 0
+                  IF (DP<TOL)   G%W_MASK(I,J,K) = -1
+                  
+            END SELECT MASK_SHAPE
       
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
+
+ENDDO GEOM_LOOP
 
 END SUBROUTINE INIT_IBM
 
 
-REAL(EB) FUNCTION VELTAN2D(U_VEC,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL)
+REAL(EB) FUNCTION TRILINEAR(UU,DXI,LL)
 IMPLICIT NONE
 
-REAL(EB), INTENT(IN) :: U_VEC(2),N_VEC(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
-INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(2,2),S_VEC(2),US,UN,US_WALL,UN_WALL,DPDS,DTSNDN,DUSDS,DUSDN,TSN,TSN_WALL
+REAL(EB), INTENT(IN) :: UU(0:1,0:1,0:1),DXI(3),LL(3)
 
-! wall velocity
-US_WALL = 0._EB
-UN_WALL = 0._EB
+! Comments:
+!
+! see http://local.wasp.uwa.edu.au/~pbourke/miscellaneous/interpolation/index.html
+! with appropriate scaling. LL is length of side.
+!
+!                       UU(1,1,1)
+!        z /----------/
+!        ^/          / |
+!        ------------  |    Particle position
+!        |          |  |
+!  LL(3) |   o<-----|------- DXI = [DXI(1),DXI(2),DXI(3)]
+!        |          | /        
+!        |          |/      Particle property at XX = TRILINEAR
+!        ------------> x
+!        ^
+!        |
+!   X0 = [0,0,0]
+!
+!    UU(0,0,0)
+!
+!===========================================================
+
+TRILINEAR = UU(0,0,0)*(LL(1)-DXI(1))*(LL(2)-DXI(2))*(LL(3)-DXI(3)) +	&
+            UU(1,0,0)*DXI(1)*(LL(2)-DXI(2))*(LL(3)-DXI(3)) +		&
+            UU(0,1,0)*(LL(1)-DXI(1))*DXI(2)*(LL(3)-DXI(3)) +		&
+            UU(0,0,1)*(LL(1)-DXI(1))*(LL(2)-DXI(2))*DXI(3) +		&
+            UU(1,0,1)*DXI(1)*(LL(2)-DXI(2))*DXI(3) +			&
+            UU(0,1,1)*(LL(1)-DXI(1))*DXI(2)*DXI(3) +			&
+            UU(1,1,0)*DXI(1)*DXI(2)*(LL(3)-DXI(3)) +			&
+            UU(1,1,1)*DXI(1)*DXI(2)*DXI(3)
+
+TRILINEAR = TRILINEAR/(LL(1)*LL(2)*LL(3))
+
+END FUNCTION TRILINEAR
+
+
+SUBROUTINE GETX(XI,XU,NG)
+IMPLICIT NONE
+
+REAL(EB), INTENT(OUT) :: XI(3)
+REAL(EB), INTENT(IN) :: XU(3)
+INTEGER, INTENT(IN) :: NG
+TYPE(GEOMETRY_TYPE), POINTER :: G
+REAL(EB) :: PP(3),RU(3),RUMAG,DR,DP
+
+G => GEOMETRY(NG)
+SELECT CASE(G%ISHAPE)
+   CASE(IBOX)
+      XI = XU
+      IF (XU(1)<G%X1) XI(1) = XU(1) + (XU(1)-G%X1)
+      IF (XU(1)>G%X2) XI(1) = XU(1) + (XU(1)-G%X2)
+      IF (XU(2)<G%Y1) XI(2) = XU(2) + (XU(2)-G%Y1)
+      IF (XU(2)>G%Y2) XI(2) = XU(2) + (XU(2)-G%Y2)
+      IF (XU(3)<G%Z1) XI(3) = XU(3) + (XU(3)-G%Z1)
+      IF (XU(3)>G%Z2) XI(3) = XU(3) + (XU(3)-G%Z2)
+   CASE(ISPHERE)
+      RU     = XU-(/G%X,G%Y,G%Z/)
+      RUMAG  = SQRT(DOT_PRODUCT(RU,RU))
+      DR     = RUMAG-G%RADIUS
+      XI     = XU + DR*RU/RUMAG
+   CASE(ICYLINDER)
+      RU     = (/XU(1),0._EB,XU(3)/)-(/G%X,0._EB,G%Z/)
+      RUMAG  = SQRT(DOT_PRODUCT(RU,RU))
+      DR     = RUMAG-G%RADIUS
+      XI     = XU + DR*RU/RUMAG
+   CASE(IPLANE)
+      PP = (/G%X,G%Y,G%Z/)           ! point in the plane
+      DP = DOT_PRODUCT(G%NN,XU-PP)   ! signed distance to plane
+      XI = XU + DP*G%NN
+END SELECT
+
+END SUBROUTINE GETX
+
+
+SUBROUTINE GETU(U_DATA,DXI,XI,XU,INDU,I_VEL,NM)
+IMPLICIT NONE
+
+REAL(EB), INTENT(OUT) :: U_DATA(0:1,0:1,0:1),DXI(3)
+REAL(EB), INTENT(IN) :: XI(3),XU(3)
+INTEGER, INTENT(IN) :: INDU(3),I_VEL,NM
+TYPE(MESH_TYPE), POINTER :: M
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
+INTEGER :: II,JJ,KK
+
+M=>MESHES(NM)
+IF (PREDICTOR) THEN
+   UU => M%U
+   VV => M%V
+   WW => M%W
+ELSE
+   UU => M%US
+   VV => M%VS
+   WW => M%WS
+ENDIF
+
+! first assume XI >= XU
+II = INDU(1)
+JJ = INDU(2)
+KK = INDU(3)
+DXI = XI-XU
+
+SELECT CASE(I_VEL)
+   CASE(1)
+      IF (XI(1)<XU(1)) THEN
+         II=MAX(0,II-1)
+         DXI(1)=DXI(1)+M%DX(II)
+      ENDIF
+      IF (XI(2)<XU(2)) THEN
+         JJ=MAX(0,JJ-1)
+         DXI(2)=DXI(2)+M%DYN(JJ)
+      ENDIF
+      IF (XI(3)<XU(3)) THEN
+         KK=MAX(0,KK-1)
+         DXI(3)=DXI(3)+M%DZN(KK)
+      ENDIF
+      U_DATA(0,0,0) = UU(II,JJ,KK)
+      U_DATA(1,0,0) = UU(II+1,JJ,KK)
+      U_DATA(0,1,0) = UU(II,JJ+1,KK)
+      U_DATA(0,0,1) = UU(II,JJ,KK+1)
+      U_DATA(1,0,1) = UU(II+1,JJ,KK+1)
+      U_DATA(0,1,1) = UU(II,JJ+1,KK+1)
+      U_DATA(1,1,0) = UU(II+1,JJ+1,KK)
+      U_DATA(1,1,1) = UU(II+1,JJ+1,KK+1)
+   CASE(2)
+      IF (XI(1)<XU(1)) THEN
+         II=MAX(0,II-1)
+         DXI(1)=DXI(1)+M%DXN(II)
+      ENDIF
+      IF (XI(2)<XU(2)) THEN
+         JJ=MAX(0,JJ-1)
+         DXI(2)=DXI(2)+M%DY(JJ)
+      ENDIF
+      IF (XI(3)<XU(3)) THEN
+         KK=MAX(0,KK-1)
+         DXI(3)=DXI(3)+M%DZN(KK)
+      ENDIF
+      U_DATA(0,0,0) = VV(II,JJ,KK)
+      U_DATA(1,0,0) = VV(II+1,JJ,KK)
+      U_DATA(0,1,0) = VV(II,JJ+1,KK)
+      U_DATA(0,0,1) = VV(II,JJ,KK+1)
+      U_DATA(1,0,1) = VV(II+1,JJ,KK+1)
+      U_DATA(0,1,1) = VV(II,JJ+1,KK+1)
+      U_DATA(1,1,0) = VV(II+1,JJ+1,KK)
+      U_DATA(1,1,1) = VV(II+1,JJ+1,KK+1)
+   CASE(3)
+      IF (XI(1)<XU(1)) THEN
+         II=MAX(0,II-1)
+         DXI(1)=DXI(1)+M%DXN(II)
+      ENDIF
+      IF (XI(2)<XU(2)) THEN
+         JJ=MAX(0,JJ-1)
+         DXI(2)=DXI(2)+M%DYN(JJ)
+      ENDIF
+      IF (XI(3)<XU(3)) THEN
+         KK=MAX(0,KK-1)
+         DXI(3)=DXI(3)+M%DZ(KK)
+      ENDIF
+      U_DATA(0,0,0) = WW(II,JJ,KK)
+      U_DATA(1,0,0) = WW(II+1,JJ,KK)
+      U_DATA(0,1,0) = WW(II,JJ+1,KK)
+      U_DATA(0,0,1) = WW(II,JJ,KK+1)
+      U_DATA(1,0,1) = WW(II+1,JJ,KK+1)
+      U_DATA(0,1,1) = WW(II,JJ+1,KK+1)
+      U_DATA(1,1,0) = WW(II+1,JJ+1,KK)
+      U_DATA(1,1,1) = WW(II+1,JJ+1,KK+1)
+END SELECT
+
+END SUBROUTINE GETU
+
+
+REAL(EB) FUNCTION VELTAN2D(UU,UW,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: UU(2),UW(2),NN(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
+INTEGER, INTENT(IN) :: I_VEL
+REAL(EB) :: C(2,2),SS(2),US,UN,US_WALL,UN_WALL,DPDS,DTSNDN,DUSDS,DUSDN,TSN,TSN_WALL
 
 ! streamwise unit vector
-S_VEC = (/N_VEC(2),-N_VEC(1)/)
+SS = (/NN(2),-NN(1)/)
 
 ! directional cosines
-C(1,1) = S_VEC(1)
-C(1,2) = -S_VEC(2)
-C(2,1) = S_VEC(2)
-C(2,2) = S_VEC(1)
+C(1,1) = SS(1)
+C(1,2) = -SS(2)
+C(2,1) = SS(2)
+C(2,2) = SS(1)
 
 ! transform velocity
-US = C(1,1)*U_VEC(1) + C(2,1)*U_VEC(2)
-UN = C(1,2)*U_VEC(1) + C(2,2)*U_VEC(2)
+US = C(1,1)*UU(1) + C(2,1)*UU(2)
+UN = C(1,2)*UU(1) + C(2,2)*UU(2)
+
+! transform wall velocity
+US_WALL = C(1,1)*UW(1) + C(2,1)*UW(2)
+UN_WALL = C(1,2)*UW(1) + C(2,2)*UW(2)
 
 ! transform pressure gradient
 DPDS = C(1,1)*GRADP(1) + C(2,1)*GRADP(2)
