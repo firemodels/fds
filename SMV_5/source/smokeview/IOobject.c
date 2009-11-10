@@ -388,7 +388,8 @@ void draw_devices(void){
         int j;
 
         for(j=0;j<nmeshes;j++){
-          drawstaticiso(devicei->plane_surface[j],1,0,2,0);
+          drawstaticiso(devicei->plane_surface[j],-1,0,2,0);
+          drawstaticiso(devicei->plane_surface[j],2,0,2,0);
         }
         continue;
       }
