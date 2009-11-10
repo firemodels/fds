@@ -51,6 +51,7 @@ typedef struct {
   unsigned char *comp_bufferframe, *full_bufferframe;
   int ncomp_bufferframe, nfull_bufferframe;
   unsigned char *s_norm;
+  int cullfaces;
   int compression_type;
 } isosurface;
 
