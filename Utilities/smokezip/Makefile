@@ -75,7 +75,7 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokezip_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) ../lib32/libz.a
+	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) ../linux_lib32/libz.a
 
 # ------------- OSX 32 ----------------
 #  32 bit OSX
