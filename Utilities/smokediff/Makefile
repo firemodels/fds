@@ -88,7 +88,7 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokediff_osx_32
 
 intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+	$(CPP) -o $(bin)/$(exe) -m32 $(obj) $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
 #-------------- Clean Target to remove Object and Module files -----------
 
