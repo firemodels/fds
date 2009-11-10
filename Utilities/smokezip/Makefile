@@ -1,7 +1,7 @@
 SOURCE_DIR = ../../../SMV_5/source/
 INC_DIR = -I $(SOURCE_DIR)/shared
-FILTERC = -D pp_noappend
-FILTERF = -D pp_noappend
+FILTERC =
+FILTERF =
 
 VPATH = $(SOURCE_DIR)/smokezip $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview
 bin = .
@@ -89,7 +89,7 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokezip_osx_32
 
 intel_osx_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a ../osx_lib32/libz.a
+	$(CPP) -o $(bin)/$(exe) -m32 $(obj) $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a ../osx_lib32/libz.a
 
 #-------------- Clean Target to remove Object and Module files -----------
 
