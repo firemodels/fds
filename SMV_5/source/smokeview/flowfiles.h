@@ -599,7 +599,7 @@ typedef struct {
   float xyznorm[3];
   float angle_elev, angle_az;
   float act_time;
-  float *color;
+  float *color, line_width;
   float *act_times;
   int *state_values;
   int nparams;

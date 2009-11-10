@@ -388,8 +388,8 @@ void draw_devices(void){
         int j;
 
         for(j=0;j<nmeshes;j++){
-          drawstaticiso(devicei->plane_surface[j],-1,0,2,0);
-          drawstaticiso(devicei->plane_surface[j],2,0,2,0);
+          drawstaticiso(devicei->plane_surface[j],-1,0,2,0,devicei->line_width);
+          drawstaticiso(devicei->plane_surface[j],2,0,2,0,devicei->line_width);
         }
         continue;
       }
@@ -2432,6 +2432,7 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
 
   devicei->labelptr=devicei->label;
   devicei->color=NULL;
+  devicei->line_width=1.0;
   if(labelptr!=NULL){
     strcpy(devicei->label,labelptr);
   }
@@ -2448,6 +2449,9 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
       color[2]=params[2];
       color[3]=1.0;
       devicei->color=getcolorptr(color);
+    }
+    if(nparams>=4){
+      devicei->line_width=params[3];
     }
   }
   else{

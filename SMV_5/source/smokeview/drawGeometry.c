@@ -4234,7 +4234,7 @@ void drawBlockages(int mode, int trans_flag){
         smoothnorms=1;
         if(meshi->blockagesurface!=NULL){
           bsurface=meshi->blockagesurfaces[j];
-          drawstaticiso(bsurface,1,smoothnorms,trans_flag,1);
+          drawstaticiso(bsurface,1,smoothnorms,trans_flag,1,plot3dlinewidth);
         }
       }
     }
