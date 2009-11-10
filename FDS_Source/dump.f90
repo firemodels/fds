@@ -1036,6 +1036,7 @@ CHARACTER(80) PROCESS_FN_SMV
 LOGICAL :: EX
 CHARACTER(100) :: MESSAGE
 REAL(EB) :: CROWN_HEIGHT
+TYPE (GEOMETRY_TYPE), POINTER :: G
 
 ! If this is an MPI job and this is not the master node, open the .smv file only if this is not a RESTART case
 
@@ -1454,6 +1455,32 @@ DO N=1,N_TREES
       CROWN_HEIGHT = TREE_H(N)-CROWN_B_H(N)
       WRITE(LU_SMV,'(3F12.5)') CROWN_B_H(N), CROWN_W(N), CROWN_HEIGHT
    ENDIF
+ENDDO
+
+! Write out GEOMETRY info (experimental)
+
+DO N=1,N_GEOM
+   G => GEOMETRY(N)
+   WRITE(LU_SMV,'(/A)') 'DEVICE'
+   SELECT CASE(G%ISHAPE)
+      CASE(ISPHERE)
+         WRITE(LU_SMV,'(A)') 'SPHERE'
+         WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,(/G%XOR-G%X,G%YOR-G%Y,G%ZOR-G%Z/),0,4
+         WRITE(LU_SMV,'(4F12.5)') REAL(G%RGB,EB)/255._EB,2._EB*G%RADIUS
+      CASE(ICYLINDER)
+         WRITE(LU_SMV,'(A)') 'GCYLINDER'
+         WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,0._EB,0._EB,1._EB,0,7
+         WRITE(LU_SMV,'(5F12.5,I5)') REAL(G%RGB,EB)/255._EB,2._EB*G%RADIUS,2._EB*G%HL(2),-90
+         WRITE(LU_SMV,'(F12.5)') 0._EB
+      CASE(IPLANE)
+         WRITE(LU_SMV,'(A)') 'plane'
+         WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,(/G%XOR-G%X,G%YOR-G%Y,G%ZOR-G%Z/),0,4
+         WRITE(LU_SMV,'(4F12.5)') REAL(G%RGB,EB)/255._EB,G%PIXELS
+      CASE DEFAULT
+         WRITE(LU_SMV,'(A)') G%SHAPE
+         WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,(/G%XOR-G%X,G%YOR-G%Y,G%ZOR-G%Z/),0,4
+         WRITE(LU_SMV,'(4F12.5)') REAL(G%RGB,EB)/255._EB,2._EB*G%RADIUS
+   END SELECT
 ENDDO
 
 ENDIF MASTER_NODE_IF
