@@ -380,6 +380,21 @@ void draw_devices(void){
   int i;
   float *xyz;
 
+  if(select_device==0||show_mode!=SELECT){
+    for(i=0;i<ndeviceinfo;i++){
+      devicei = deviceinfo + i;
+      if(devicei->object->visible==0)continue;
+      if(devicei->plane_surface!=NULL){
+        int j;
+
+        for(j=0;j<nmeshes;j++){
+          drawstaticiso(devicei->plane_surface[j],1,0,2,0);
+        }
+        continue;
+      }
+    }
+  }
+
   glPushMatrix();
   glPushAttrib(GL_POINT_BIT|GL_LINE_BIT);
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
@@ -391,6 +406,9 @@ void draw_devices(void){
     devicei = deviceinfo + i;
 
     if(devicei->object->visible==0)continue;
+    if(devicei->plane_surface!=NULL){
+      continue;
+    }
     if(isZoneFireModel==1&&strcmp(devicei->object->label,"target")==0&&visSensor==0)continue;
 
     save_use_displaylist=devicei->object->use_displaylist;
@@ -2303,21 +2321,153 @@ float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2
   return dist(p1,p2);
 }
 
+/* ----------------------- dist2plane ------------------------ */
+
+float dist2plane(float x, float y, float z, float xyzp[3], float xyzpn[3]){
+  float return_val;
+  float xyz[3];
+  int i;
+
+  xyz[0]=x;
+  xyz[1]=y;
+  xyz[2]=z;
+  return_val=0.0;
+  for(i=0;i<3;i++){
+    return_val+=(xyz[i]-xyzp[i])*xyzpn[i];
+  }
+  return return_val;
+}
+
+/* ----------------------- init_device_plane ------------------------ */
+
+void init_device_plane(device *devicei){
+  int colorindex;
+  int i;
+  float level=0.0;
+  float xx[2], yy[2], zz[2];
+
+/* stuff min and max grid data into a more convenient form 
+  assuming the following grid numbering scheme
+
+       5-------6
+     / |      /| 
+   /   |     / | 
+  4 -------7   |
+  |    |   |   |  
+  Z    1---|---2
+  |  Y     |  /
+  |/       |/
+  0--X-----3     
+
+  */
+  if(devicei->plane_surface==NULL)return;
+  if(devicei->color==NULL){
+    float rgbcolor[4];
+
+    rgbcolor[0]=1.0;
+    rgbcolor[1]=0.0;
+    rgbcolor[2]=0.0;
+    rgbcolor[3]=1.0;
+    devicei->color=getcolorptr(rgbcolor);
+  }
+  colorindex=0;
+  for(i=0;i<nmeshes;i++){
+    int j;
+    mesh *meshi;
+    float xvert[12], yvert[12], zvert[12];
+    int triangles[18];
+    int nvert, ntriangles;
+    int nodeindexes[8], closestnodes[18];
+    float vals[8];
+
+    InitIsosurface(devicei->plane_surface[i],level,devicei->color,colorindex);
+    devicei->plane_surface[i]->cullfaces=1;
+
+    meshi = meshinfo + i;
+
+    xx[0]=meshi->xbar0;
+    xx[1]=xbar0+xyzmaxdiff*meshi->xbar;
+    yy[0]=meshi->ybar0;
+    yy[1]=ybar0+xyzmaxdiff*meshi->ybar;
+    zz[0]=meshi->zbar0;
+    zz[1]=zbar0+xyzmaxdiff*meshi->zbar;
+    for(j=0;j<8;j++){
+      nodeindexes[j]=j;
+    }
+    vals[0]=dist2plane(xx[0],yy[0],zz[0],devicei->xyz,devicei->xyznorm);
+    vals[1]=dist2plane(xx[0],yy[1],zz[0],devicei->xyz,devicei->xyznorm);
+    vals[2]=dist2plane(xx[1],yy[1],zz[0],devicei->xyz,devicei->xyznorm);
+    vals[3]=dist2plane(xx[1],yy[0],zz[0],devicei->xyz,devicei->xyznorm);
+    vals[4]=dist2plane(xx[0],yy[0],zz[1],devicei->xyz,devicei->xyznorm);
+    vals[5]=dist2plane(xx[0],yy[1],zz[1],devicei->xyz,devicei->xyznorm);
+    vals[6]=dist2plane(xx[1],yy[1],zz[1],devicei->xyz,devicei->xyznorm);
+    vals[7]=dist2plane(xx[1],yy[0],zz[1],devicei->xyz,devicei->xyznorm);
+
+    xx[0]=(meshi->xbar0-xbar0)/xyzmaxdiff;
+    xx[1]=meshi->xbar;
+    yy[0]=(meshi->ybar0-ybar0)/xyzmaxdiff;
+    yy[1]=meshi->ybar;
+    zz[0]=(meshi->zbar0-zbar0)/xyzmaxdiff;
+    zz[1]=meshi->zbar;
+
+    GetIsobox(xx, yy, zz, vals, NULL, nodeindexes, level,
+              xvert, yvert, zvert, NULL, closestnodes, &nvert, triangles, &ntriangles);
+
+    UpdateIsosurface(devicei->plane_surface[i], xvert, yvert, zvert, NULL,
+                     closestnodes, nvert, triangles, ntriangles);
+    GetNormalSurface(devicei->plane_surface[i]);
+    CompressIsosurface(devicei->plane_surface[i],1,
+          xbar0,2*xbar,ybar0,2*ybar,zbar0,zbar);
+    SmoothIsoSurface(devicei->plane_surface[i]);
+  }
+
+}
+
 /* ----------------------- init_device ----------------------------- */
 
 void init_device(device *devicei, float *xyz, float *xyzn, int state0, int nparams, float *params, char *labelptr){
+  float norm;
+  int i;
+
   devicei->labelptr=devicei->label;
+  devicei->color=NULL;
   if(labelptr!=NULL){
     strcpy(devicei->label,labelptr);
+  }
+  if(strcmp(devicei->object->label,"plane")==0){
+    float color[4];
+
+    NewMemory( (void **)&devicei->plane_surface,nmeshes*sizeof(isosurface *));
+    for(i=0;i<nmeshes;i++){
+      NewMemory( (void **)&devicei->plane_surface[i],sizeof(isosurface));
+    }
+    if(nparams>=3){
+      color[0]=params[0];
+      color[1]=params[1];
+      color[2]=params[2];
+      color[3]=1.0;
+      devicei->color=getcolorptr(color);
+    }
+  }
+  else{
+    devicei->plane_surface=NULL;
   }
   if(xyz!=NULL){
     devicei->xyz[0]=xyz[0];
     devicei->xyz[1]=xyz[1];
     devicei->xyz[2]=xyz[2];
   }
-  devicei->xyznorm[0]=xyzn[0];
-  devicei->xyznorm[1]=xyzn[1];
-  devicei->xyznorm[2]=xyzn[2];
+  norm = sqrt(xyzn[0]*xyzn[0]+xyzn[1]*xyzn[1]+xyzn[2]*xyzn[2]);
+  if(norm!=0.0){
+    devicei->xyznorm[0]=xyzn[0]/norm;
+    devicei->xyznorm[1]=xyzn[1]/norm;
+    devicei->xyznorm[2]=xyzn[2]/norm;
+  }
+  else{
+    devicei->xyznorm[0]=0.0;
+    devicei->xyznorm[1]=0.0;
+    devicei->xyznorm[2]=1.0;
+  }
   devicei->nstate_changes=0;
   devicei->istate_changes=0;
   devicei->act_times=NULL;
@@ -2329,8 +2479,6 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
   devicei->nparams=nparams;
   devicei->params=params;
   if(nparams>0&&params!=NULL){
-    int i;
-
     for(i=0;i<nparams;i++){
       devicei->params[i]=params[i];
     }

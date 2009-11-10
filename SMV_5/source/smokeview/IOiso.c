@@ -1838,6 +1838,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
         }
     }
     iso_specular[3] = 1.0;
+    if(asurface->cullfaces==1)glDisable(GL_CULL_FACE);
     glPushAttrib(GL_LIGHTING_BIT);
 
     glEnable(GL_LIGHTING);
@@ -1889,6 +1890,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
       }
     }
     glEnd();
+    if(asurface->cullfaces==1)glEnable(GL_CULL_FACE);
     glDisable(GL_COLOR_MATERIAL);
 
 	  glDisable(GL_LIGHTING);
@@ -2004,13 +2006,11 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
         glVertex3fv(vv3n);
         norm += 3;
       }
-
     }
     glEnd();
     antialias(0);
     glPopMatrix();
   }
-
 }
 
 /* ------------------ updateslicetypes ------------------------ */

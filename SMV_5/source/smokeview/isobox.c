@@ -287,11 +287,13 @@ int edgelist2[15][16]={
   { 0}
 };
 
-
-
 /* determine min and max solution values */
-  vmin = vals[0]; vmax = vals[0];
-  for(n=0;n<12;n++){closestnodes[n]=0;}
+
+  vmin = vals[0]; 
+  vmax = vals[0];
+  for(n=0;n<12;n++){
+    closestnodes[n]=0;
+  }
   for(n=1;n<8;n++){
     if(vals[n]<vmin){vmin=vals[n];}
     if(vals[n]>vmax){vmax=vals[n];}
@@ -419,7 +421,9 @@ int edgelist2[15][16]={
 
   *nvert = nedges;
   *ntriangles = npath;
-  for(n=0;n<npath;n++){triangles[n] = path[n];}
+  for(n=0;n<npath;n++){
+    triangles[n] = path[n];
+  }
 }
 
 /* ------------------ calcNormal2 ------------------------ */
@@ -838,7 +842,9 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
   if(NewMemory((void **)&ordered_closestnodes,nvertices*sizeof(int))==0){
     return 1;
   }
-  for(i=0;i<nvertices;i++){ordered_closestnodes[i]=i;}
+  for(i=0;i<nvertices;i++){
+    ordered_closestnodes[i]=i;
+  }
   qsort((int *)ordered_closestnodes,(size_t)nvertices,sizeof(int),order_closestnodes);
   if(NewMemory((void **)&vertexmap,nvertices*sizeof(int))==0||
      NewMemory((void **)&inverse_vertexmap,nvertices*sizeof(int))==0){
@@ -957,7 +963,9 @@ int UpdateIsosurface(isosurface *surface,
   if(ntriangles>0){
     ns = surface->ntriangles;
     is = surface->triangles + ns;
-    for(n=0;n<ntriangles;n++){is[n] = triangles[n]+noldvert;}
+    for(n=0;n<ntriangles;n++){
+      is[n] = triangles[n]+noldvert;
+    }
     surface->ntriangles = ns + ntriangles;
   }
   return 0;
@@ -1109,6 +1117,7 @@ void InitIsosurface(isosurface *surfacedata, float level, float *color,int color
   surfacedata->plottype = 0;
   surfacedata->closestnodes=NULL;
   surfacedata->tvert=NULL;
+  surfacedata->cullfaces=0;
 }
 
 /* ------------------ freesurface ------------------------ */
@@ -1153,7 +1162,9 @@ void SmoothIsoSurface(isosurface *surfacedata){
   NewMemory((void **)&vertexnorm,3*nvertices_i*sizeof(short));
   surfacedata->norm=norm;
   surfacedata->vertexnorm=vertexnorm;
-  for(n=0;n<3*nvertices_i;n++){xyznorm[n]=0.0;}
+  for(n=0;n<3*nvertices_i;n++){
+    xyznorm[n]=0.0;
+  }
   for(n=0;n<ntriangles_i/3;n++){
     i1=3*triangles_i[3*n];
     i2=3*triangles_i[3*n+1];
@@ -1321,17 +1332,25 @@ void DrawIsosurface(const isosurface *surfacedata){
     glBegin(GL_LINES);
     for (n = 0; n < ntriangles/3; n++) {
       index = triangles[nn++];
-      x = xvert[index]; y = yvert[index]; z = zvert[index];
+      x = xvert[index]; 
+      y = yvert[index]; 
+      z = zvert[index];
       glVertex3f(x,y,z);
-      x11 = x; y11 = y; z11 = z;
+      x11 = x; 
+      y11 = y; 
+      z11 = z;
 
       index = triangles[nn++];
-      x = xvert[index]; y = yvert[index]; z = zvert[index];
+      x = xvert[index]; 
+      y = yvert[index]; 
+      z = zvert[index];
       glVertex3f(x,y,z);
       glVertex3f(x,y,z);
 
       index = triangles[nn++];
-      x = xvert[index]; y = yvert[index]; z = zvert[index];
+      x = xvert[index]; 
+      y = yvert[index]; 
+      z = zvert[index];
       glVertex3f(x,y,z);
       glVertex3f(x,y,z);
       glVertex3f(x11,y11,z11);
@@ -1342,7 +1361,9 @@ void DrawIsosurface(const isosurface *surfacedata){
     glColor3fv(color);
     glBegin(GL_POINTS);
     for (n = 0; n < nvert; n++) {
-      x = xvert[n]; y = yvert[n]; z = zvert[n];
+      x = xvert[n]; 
+      y = yvert[n]; 
+      z = zvert[n];
       glVertex3f(x,y,z);
     }
     glEnd();

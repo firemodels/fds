@@ -599,12 +599,14 @@ typedef struct {
   float xyznorm[3];
   float angle_elev, angle_az;
   float act_time;
+  float *color;
   float *act_times;
   int *state_values;
   int nparams;
   float *params;
   int istate_changes, nstate_changes, state0;
   int *showstatelist;
+  isosurface **plane_surface;
   sv_object *object;
   int type;
 } device;
