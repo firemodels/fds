@@ -1769,7 +1769,9 @@ void drawtiso(const mesh *meshi,int tranflag){
 
 /* ------------------ drawstaticiso ------------------------ */
 
-void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, int trans_flag, int data_type){
+void drawstaticiso(const isosurface *asurface,int surfacetype, 
+                   int smoothnorm, int trans_flag, int data_type, 
+                   float line_width){
   int j,k;
   float vv1[3],vv2[3],vv3[3];
   float vv1n[3],vv2n[3],vv3n[3];
@@ -1905,7 +1907,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
   if(surfacetype==2){
     glPushMatrix();
     antialias(1);
-    glLineWidth(plot3dlinewidth);
+    glLineWidth(line_width);
     glBegin(GL_LINES);
     glColor3fv(asurface->color);
     vertices_i=asurface->vertices;
@@ -1961,7 +1963,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
 
     glPushMatrix();
     antialias(1);
-    glLineWidth(plot3dlinewidth);
+    glLineWidth(line_width);
     glBegin(GL_LINES);
     glColor3f((float)1.,(float)1.,(float)1.);
     for(j=0;j<ntriangles;j++){

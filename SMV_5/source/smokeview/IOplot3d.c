@@ -491,8 +491,8 @@ void drawplot3d_texture(mesh *meshi){
   
   if(cullfaces==1)glDisable(GL_CULL_FACE);
   if(visiso==1){
-    drawstaticiso(currentsurfptr,p3dsurfacetype,p3dsurfacesmooth,2,0);
-    if(surfincrement!=0)drawstaticiso(currentsurf2ptr,p3dsurfacetype,p3dsurfacesmooth,2,0);
+    drawstaticiso(currentsurfptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
+    if(surfincrement!=0)drawstaticiso(currentsurf2ptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
     if(visGrid!=0){
       if(transparentflag==1)transparentoff();
       if(cullfaces==1)glEnable(GL_CULL_FACE);
@@ -905,8 +905,8 @@ void drawplot3d(mesh *meshi){
   
   if(cullfaces==1)glDisable(GL_CULL_FACE);
   if(visiso==1){
-    drawstaticiso(currentsurfptr,p3dsurfacetype,p3dsurfacesmooth,2,0);
-    if(surfincrement!=0)drawstaticiso(currentsurf2ptr,p3dsurfacetype,p3dsurfacesmooth,2,0);
+    drawstaticiso(currentsurfptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
+    if(surfincrement!=0)drawstaticiso(currentsurf2ptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
     if(visGrid!=0){
       if(transparentflag==1)transparentoff();
       if(cullfaces==1)glEnable(GL_CULL_FACE);
