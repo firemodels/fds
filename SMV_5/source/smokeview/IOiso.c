@@ -1797,7 +1797,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
   nvertices=asurface->nvertices;
   ntriangles=asurface->ntriangles/3;
   if(ntriangles==0)return;
-  if(surfacetype==1){
+  if(surfacetype==1||surfacetype==-1){
     float rgbtemp[4];
     float *col;
 
@@ -1840,13 +1840,15 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
     iso_specular[3] = 1.0;
     if(asurface->cullfaces==1)glDisable(GL_CULL_FACE);
     glPushAttrib(GL_LIGHTING_BIT);
-
-    glEnable(GL_LIGHTING);
-    glEnable(GL_COLOR_MATERIAL);
+    if(surfacetype==1){
+      glEnable(GL_LIGHTING);
+      glEnable(GL_COLOR_MATERIAL);
+    }
     glBegin(GL_TRIANGLES);
-
-    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,asurface->color);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
+    if(surfacetype==1){
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,asurface->color);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
+    }
 
     if(transparenton_flag==1){
 	    glColor4fv(rgbtemp);
@@ -1891,9 +1893,10 @@ void drawstaticiso(const isosurface *asurface,int surfacetype, int smoothnorm, i
     }
     glEnd();
     if(asurface->cullfaces==1)glEnable(GL_CULL_FACE);
-    glDisable(GL_COLOR_MATERIAL);
-
-	  glDisable(GL_LIGHTING);
+    if(surfacetype==1){
+      glDisable(GL_COLOR_MATERIAL);
+      glDisable(GL_LIGHTING);
+    }
 
     glPopAttrib();
     if(transparenton_flag==1)transparentoff();  
