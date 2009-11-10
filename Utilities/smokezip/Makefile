@@ -1,17 +1,18 @@
 SOURCE_DIR = ../../../SMV_5/source/
 INC_DIR = -I $(SOURCE_DIR)/shared
-FILTERC =
-FILTERF =
+FILTERC = -D pp_noappend
+FILTERF = -D pp_noappend
 
-VPATH = $(SOURCE_DIR)/smokediff $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview
+VPATH = $(SOURCE_DIR)/smokezip $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview
 bin = .
 
-LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
+#LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
+LINUX32FORTLIBDIR = /opt/intel/11/lib/ia32
 OSX32FORTLIBDIR = /opt/intel/fc/10.1.006/lib
 
 # Definition of the object variables
 
-obj = main.o dmalloc.o assert.o utilities.o readsmv.o IOdboundary.o IOdslice.o IOdplot.o getsizes.o getdata.o histogram.o
+obj = assert.o CNV3dsmoke.o CNVboundary.o CNViso.o CNVpart.o CNVplot3d.o CNVslice.o csphere.o dmalloc.o egz_stdio.o endian.o histogram.o main.o readfiles.o utilities.o getdata.o getsizes.o
 objwin = main.obj dmalloc.obj assert.obj utilities.obj readsmv.obj IOdboundary.obj IOdslice.obj IOdplot.obj getdata.obj getsizes.obj histogram.obj
 
 #*** General Purpose Rules ***
@@ -45,7 +46,7 @@ ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5
 ms_win_32 : CC        = cl
 ms_win_32 : CPP       = cl
 ms_win_32 : FC        = ifort
-ms_win_32 : exe       = smokediff.exe
+ms_win_32 : exe       = smokezip.exe
 ms_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin)
 
@@ -57,7 +58,7 @@ intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
-intel_win_32 : exe       = smokediff.exe
+intel_win_32 : exe       = smokezip.exe
 
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin)
@@ -71,10 +72,10 @@ intel_linux_32 : FORTLIBDIR = $(LINUX32FORTLIBDIR)
 intel_linux_32 : CC        = icc
 intel_linux_32 : CPP       = icc
 intel_linux_32 : FC        = ifort
-intel_linux_32 : exe       = smokediff_linux_32
+intel_linux_32 : exe       = smokezip_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR)
+	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) ../lib32/libz.a
 
 # ------------- OSX 32 ----------------
 #  32 bit OSX
@@ -85,7 +86,7 @@ intel_osx_32 : FORTLIBDIR = $(OSX32FORTLIBDIR)
 intel_osx_32 : CC        = icc
 intel_osx_32 : CPP       = icc
 intel_osx_32 : FC        = ifort
-intel_osx_32 : exe       = smokediff_osx_32
+intel_osx_32 : exe       = smokezip_osx_32
 
 intel_osx_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
