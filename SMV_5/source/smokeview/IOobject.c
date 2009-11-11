@@ -31,6 +31,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETY 109
 #define SV_OFFSETZ 110
 #define SV_TRANSLATEMZD2 111
+#define SV_AXPB2STACK 112
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -44,6 +45,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETY_NUMARGS 1
 #define SV_OFFSETZ_NUMARGS 1
 #define SV_TRANSLATEMZD2_NUMARGS 1
+#define SV_AXPB2STACK_NUMARGS 3
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -584,6 +586,29 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     arg = framei->args + iarg;
     op = framei->ops + iop;
     switch (*op){
+    case SV_AXPB2STACK:
+      if(op_skip==0&&iarg+SV_AXPB2STACK_NUMARGS<=framei->nargs){
+        int arg1, arg2, stackskip;
+        float val1, val2, val_result;
+        float time_val=0.0;
+
+        arg1=arg[0]+0.5;
+        val1=valstack[arg1];
+
+        arg2=arg[1]+0.5;
+        val2=valstack[arg2];
+
+        if(ntimes>0){
+          time_val=times[itime];
+        }
+
+        val_result=val1*time_val+val2;
+
+        stackskip=arg[2]+0.5;
+        arg[3+stackskip]=val_result;
+      }
+      iarg+=3;
+      break;
     case SV_PUTUSERVALS2STACK:
       if(op_skip==0&&iarg+SV_PUTUSERVALS2STACK_NUMARGS<=framei->nargs){
         int i, nargs, iargstart, stackskip;
@@ -1770,6 +1795,11 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
         iop=SV_PUTUSERVALS2STACK;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_PUTUSERVALS2STACK_NUMARGS);
+      }
+      else if(strcmp(token,"axpb2stack")==0){
+        iop=SV_AXPB2STACK;
+        *use_displaylist=0;
+        reporterror(buffer_save,token,numargs,SV_AXPB2STACK_NUMARGS);
       }
       else{
         iop=SV_ERR;
