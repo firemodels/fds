@@ -305,19 +305,19 @@ estimates will be exact because they are based on truncated Taylor series approx
 $\widetilde{\sigma}_E$, is often only a gross approximation in its own right, the accuracy of the procedure is more than adequate.
 
 \begin{table}[t]
-\caption{Estimated bias and relative error from six trials used to verify the analysis. }
+\caption{Estimated bias and relative error from random trials used to verify the analysis. }
 \begin{center}
 \begin{tabular}{|c|c|c|}
 \hline
 Trial   & Bias Factor      & Relative Error \\ \hline \hline
 Exact   & 1.030            &    0.100            \\ \hline \hline
-1       & 1.030            &    0.103            \\ \hline
-2       & 1.035            &    0.102            \\ \hline
-3       & 1.033            &    0.105            \\ \hline
-4       & 1.037            &    0.104            \\ \hline
-5       & 1.041            &    0.105            \\ \hline
-6       & 1.034            &    0.101            \\ \hline
-7       & 1.034            &    0.103            \\ \hline
+1       & 1.031            &    0.097            \\ \hline
+2       & 1.028            &    0.101            \\ \hline
+3       & 1.026            &    0.108            \\ \hline
+4       & 1.034            &    0.100            \\ \hline
+5       & 1.027            &    0.105            \\ \hline
+6       & 1.035            &    0.100            \\ \hline
+7       & 1.029            &    0.097            \\ \hline
 \end{tabular}
 \end{center}
 \label{trials}
@@ -357,10 +357,10 @@ Now, consider the graph shown in Fig.~\ref{bell_curve}.
 \end{figure}
 The vertical lines indicate the ``threshold'' temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
 model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
-The bell curve is a normal distribution obtained from Eq.~(\ref{truth}) above. Its mean and standard deviation are
-\be 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} \quad ; \quad  \widetilde{\sigma}_M \, M = 0.10 \, 330 \ee
-respectively. The shaded area beneath the bell curve is the probability (0.03 in this case) that the ``true'' temperature can exceed 400~$^\circ$C.
-This means that there is an 3~\% chance that the cables could
+The bell curve is a normal distribution whose mean and standard deviation are obtained from Eq.~(\ref{truth}) above, and calculated here:
+\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad  \sigma = \widetilde{\sigma}_M \, M = 0.10 \times 330 = 33 \; ^\circ \hbox{C}  \ee
+respectively. The shaded area beneath the bell curve is the probability (0.035 in this case) that the ``true'' temperature can exceed 400~$^\circ$C.
+This means that there is a 3.5~\% chance that the cables could
 become damaged {\em based solely on the fact that the model is not a perfect representation of reality.}
 
 The obvious question to ask at this point is what do we do if we cannot assume that the specified fire, material properties, and other input parameters are
