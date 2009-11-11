@@ -85,32 +85,6 @@ FILEIN='STDIN'
 
 ! Parse command line arguments
       
-NARGS=IARGC()
-ARGLOOP: DO IARG = 1, NARGS
-   CALL GETARG(IARG,BUFFER)
-   LENSTRING=LEN(TRIM(BUFFER))
-   IF (LENSTRING.EQ.1.AND.BUFFER(1:1).EQ.'-') THEN
-      FILEIN='STDIN'
-      EXIT
-   ENDIF
-   IF(BUFFER(1:1).NE.'-')THEN
-      FILEIN=TRIM(BUFFER)
-      BATCHMODE=1
-      CYCLE ARGLOOP
-   ENDIF
-   IF (LENSTRING.GT.1.AND.BUFFER(1:1).EQ.'-') THEN
-      CALL TOUPPER(BUFFER(2:2),BUFFER(2:2))
-      IF (BUFFER(2:2).EQ.'H') THEN
-         CALL USAGE2(f2aversion,revision)
-         STOP
-      ENDIF
-      IF (BUFFER(2:2).EQ.'V') THEN
-         CALL VERSION2(f2aversion,revision)
-         STOP
-      ENDIF
-   ENDIF
-END DO ARGLOOP
- 
 IF (FILEIN.EQ.'STDIN') THEN
    LU_IN=5
 ELSE
@@ -140,13 +114,6 @@ ENDIF
 
 OPEN(11,FILE=GRIDFILE,STATUS='OLD',FORM='FORMATTED')
  
-CALL SEARCH('VERSION',7,11,IERR)
-IF (IERR.EQ.1) THEN
-   WRITE(6,*) ' WARNING: Assuming FDS version 2 or less'
-   VERSION = 2.
-ELSE
-   READ(11,*) VERSION
-ENDIF
  
 ! Determine the number of meshes
 
@@ -269,6 +236,8 @@ IF(LEN(TRIM(ANS)).GT.1)THEN
    ELSE
       AUTO_SLICE_FLAG=0
    ENDIF
+ELSE
+   AUTO_SLICE_FLAG=0
 ENDIF
  
 ! Select which kind of file to work on

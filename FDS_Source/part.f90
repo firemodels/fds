@@ -1214,7 +1214,8 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,NM)
     
 ! Mass and energy transfer between gas and droplets
 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT,GET_SPECIFIC_GAS_CONSTANT
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT,GET_SPECIFIC_GAS_CONSTANT,&
+GET_SPECIFIC_ENTHALPY
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN,DROP_RAD,DROP_TMP,MVAP_TOT
@@ -1276,7 +1277,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
    ! Loop over all particle/droplet classes that have the given evaporative index
    ! First loop is for evaporation and energy transfer
-
+   
    PART_CLASS_LOOP: DO N_PC = 1,N_PART
 
       PC => PARTICLE_CLASS(N_PC)
@@ -1306,7 +1307,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
       MW_DROP  = SPECIES(IGAS)%MW
       H_V_REF  = PC%H_V(NINT(PC%H_V_REFERENCE_TEMPERATURE))
       H_L_REF  = PC%C_P_BAR(NINT(TMP_MELT))*TMP_MELT
-
       ! Loop through all droplets in the class and determine the depth of the liquid film on each surface cell
 
       FILM_SUMMING_LOOP: DO I=1,NLP
@@ -1319,6 +1319,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
          FILM_THICKNESS(IW) = FILM_THICKNESS(IW) + DR%PWT*DR%R**3/AW(IW)
       ENDDO FILM_SUMMING_LOOP
       FILM_THICKNESS = FILM_THICKNESS*FTPR/PC%DENSITY
+
       FILM_THICKNESS = MAX(MINIMUM_FILM_THICKNESS,FILM_THICKNESS) 
 
       ! Loop through all droplets within the class and determine mass/energy transfer
@@ -1371,8 +1372,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             C_DROP   = PC%C_P(ITMP)
             H_L      = PC%C_P_BAR(ITMP)*TMP_DROP-H_L_REF
             WGT      = DR%PWT
-            DHOR     = H_V*MW_DROP/R0     
-
+            DHOR     = H_V*MW_DROP/R0   
             ! Gas conditions
 
             TMP_G  = TMP(II,JJ,KK)
@@ -1460,7 +1460,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             TMP_DROP_NEW = ( TMP_DROP + DT_SUBSTEP*( Q_DOT_RAD + &
                              A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) + H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
                              H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DY_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / DENOM
-
             ! Compute the total amount of heat extracted from the gas, wall and radiative fields
             Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
             Q_CON_GAS  = DT_SUBSTEP*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
@@ -1501,14 +1500,15 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
                ENDIF
             ENDIF
             M_DROP = M_DROP - M_VAP
-            
+        
             ! Compute surface cooling and density
             IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
                WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*(Q_RAD+Q_CON_WALL)*RAW(IW)/DT_SUBSTEP
+               WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*WGT*M_DROP*RAW(IW)/REAL(N_SUBSTEPS,EB) 
             ENDIF
 
             !Update gas temperature and determine new subtimestep
-            DELTA_H_G = (H_L + H_V)
+            DELTA_H_G = (H_L + H_V - PC%H_V_CORRECTOR)
             YY_GET(:) = YY(II,JJ,KK,:)
             ITMP = MIN(5000,NINT(TMP_G))
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP)            
@@ -1565,7 +1565,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
 
             !Track total mass evaporate in cell
             MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
-
             ! Update droplet quantities
             DR%R   = (M_DROP/FTPR)**ONTH
             DR%TMP = TMP_DROP_NEW

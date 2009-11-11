@@ -4298,7 +4298,12 @@ SELECT CASE(IND)
                   VEL = 1.0_EB
             END SELECT
             ! Compute numerator and denumerator
-            DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M * VEL
+            IF (PY%QUANTITY == 'ENTHALPY') THEN
+               DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*DR%R**PY%PDPA_M * VEL             
+               DV%PDPA_DENUM = 1._EB
+            ELSE
+               DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M * VEL
+            ENDIF
             IF ((PY%QUANTITY /= 'NUMBER CONCENTRATION') .AND. &
                 (PY%QUANTITY /= 'MASS CONCENTRATION') .AND. &
                 (PY%QUANTITY /= 'DROPLET FLUX X') .AND. &
