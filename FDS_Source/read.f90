@@ -1794,10 +1794,11 @@ COUNT_REAC_LOOP: DO
    IF (IOS==1) EXIT COUNT_REAC_LOOP
    READ(LU_INPUT,REAC,ERR=434,IOSTAT=IOS)
    N_REACTIONS = N_REACTIONS + 1
-   IF (FUEL=='null') THEN
+   IF (BOF < 0._EB .AND. E < 0._EB) THEN
       MIXTURE_FRACTION = .TRUE.
+      FUEL = 'ETHYLENE'
    ENDIF
-   IF (FUEL/='null' .AND. MIXTURE_FRACTION) THEN
+   IF ((BOF > 0._EB .OR. E > 0._EB) .AND. MIXTURE_FRACTION) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: cannot use both finite rate REAC and mixture fraction REAC'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
@@ -1810,7 +1811,7 @@ COUNT_REAC_LOOP: DO
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 ENDDO COUNT_REAC_LOOP
-
+ 
 IF (FDS6) HRRPUV_AVERAGE = 1.E10_EB ! effectively remove this bound
  
 IF (FUEL_EVAPORATION) MIXTURE_FRACTION = .TRUE.
@@ -2022,10 +2023,10 @@ CONTAINS
 SUBROUTINE SET_REAC_DEFAULTS
 
 AIT                         = 0._EB 
-BOF                         = 0._EB       ! cm**3/mol-s
+BOF                         = -1._EB       ! cm**3/mol-s
 CO_YIELD                    = 0._EB
 CRITICAL_FLAME_TEMPERATURE  = 1427._EB    ! C
-E                           = 0._EB       ! kJ/kmol
+E                           = -1._EB       ! kJ/kmol
 EPUMO2                      = 13100._EB   ! kJ/kg
 FUEL                        = 'null'
 FYI                         = 'null'
@@ -2343,7 +2344,7 @@ CPOPR = CP_GAMMA/PR
 ! Source: Poling, Prausnitz and O'Connell. Properties of Gases and Liquids, 5th ed, 2000.
 
 IF(MIXTURE_FRACTION) THEN
-   STATE_SPECIES(1) = 'ETHYLENE'
+   STATE_SPECIES(1) = REACTION(1)%FUEL
    STATE_SPECIES(2) = 'OXYGEN'
    STATE_SPECIES(3) = 'NITROGEN'
    STATE_SPECIES(4) = 'WATER VAPOR'
@@ -2452,7 +2453,7 @@ T_LOOP_1: DO J=1,5000
          Y2CPBAR_C(J) = (Y2CPBAR_C(J-1)*(REAL(J,EB)-1._EB)+Y2CP_C(J))/REAL(J,EB)
       ELSE
          Y2H_G_C(J)   =  SUM(Y2Y_C(:)* H_TMP(:)) + Y2CP_C(J) 
-         Y2CPBAR_C(J) =   Y2CP_C(J)
+         Y2CPBAR_C(J) =   Y2H_G_C(J)
       ENDIF
       Y2MU_C(J)    = SUM(Y2Y_C(:) * MU_TMP(:))
       Y2K_C(J)     = SUM(Y2Y_C(:) * K_TMP(:))      
@@ -2496,7 +2497,7 @@ T_LOOP_1: DO J=1,5000
          Y2CPBAR_C(J) = (Y2CPBAR_C(J-1)*REAL(J-1,EB)+Y2CP_C(J))/REAL(J,EB)
       ELSE
          Y2H_G_C(J)   =   H_TMP(SPECIES(0)%INDEX) + Y2CP_C(J) 
-         Y2CPBAR_C(J) =   Y2CP_C(J)
+         Y2CPBAR_C(J) =   Y2H_G_C(J)
       ENDIF
       Y2MU_C(J)    = MU_TMP(SPECIES(0)%INDEX)
       Y2K_C(J)     = K_TMP(SPECIES(0)%INDEX)
@@ -2509,7 +2510,7 @@ T_LOOP_1: DO J=1,5000
          Y2CPBAR(J,N) = (Y2CPBAR(J-1,N)*REAL(J-1,EB)+Y2CP(J,N))/REAL(J,EB)   
       ELSE
          Y2H_G(J,N)   = SUM(Y2Y(:,N) * H_TMP(:)) + Y2CP(J,N) 
-         Y2CPBAR(J,N) = Y2CP(J,N)
+         Y2CPBAR(J,N) = Y2H_G(J,N)
       ENDIF
       Y2MU(J,N)    = SUM(Y2Y(:,N) * MU_TMP(:))
       Y2K(J,N)     = SUM(Y2Y(:,N) * K_TMP(:))
@@ -2653,6 +2654,61 @@ SELECT CASE(GAS_NAME)
       EPSOK= 71.4_EB  
       MW=12._EB
       FORMULA='C'
+   CASE('N-HEXANE')
+      SIGMA=4.524_EB
+      EPSOK=199.41_EB
+      MW=86._EB
+      FORMULA='C6H14'
+   CASE('N-HEPTANE')
+      SIGMA=4.701_EB
+      EPSOK=205.78_EB
+      MW=100._EB
+      FORMULA='C7H16'
+   CASE('N-OCTANE')
+      SIGMA=4.892_EB
+      EPSOK=231.16_EB
+      MW=114._EB
+      FORMULA='C8H18'
+   CASE('N-DECANE')
+      SIGMA=5.233_EB
+      EPSOK=226.46_EB
+      MW=142._EB
+      FORMULA='C10H22'  
+   CASE('METHANOL')
+      SIGMA=3.626_EB
+      EPSOK=481.8_EB
+      MW=32._EB
+      FORMULA='CH3OH'  
+   CASE('ETHANOL')
+      SIGMA=4.530_EB
+      EPSOK=362.6_EB
+      MW=46._EB
+      FORMULA='C2H5OH'  
+    CASE('HYDROGEN BROMIDE')   
+      SIGMA=3.353_EB
+      EPSOK=449._EB
+      MW=81._EB
+      FORMULA='HBR'  
+    CASE('HYDROGEN CHLORIDE')   
+      SIGMA=3.339_EB
+      EPSOK=344.7_EB
+      MW=36._EB
+      FORMULA='HCL'  
+    CASE('HYDROGEN FLOURIDE')   
+      SIGMA=3.148_EB
+      EPSOK=330._EB
+      MW=20._EB
+      FORMULA='HF'  
+    CASE('HYDROGEN CYANIDE')   
+      SIGMA=3.63_EB
+      EPSOK=569.1_EB
+      MW=27._EB
+      FORMULA='HCN'  
+    CASE('TOLUENE')   
+      SIGMA=5.698_EB
+      EPSOK=480._EB !Estimated from BENZENE
+      MW=92._EB
+      FORMULA='HCN'  
 END SELECT  
  
 IF (SIGMAIN>0._EB) SIGMA = SIGMAIN
@@ -2667,24 +2723,36 @@ END SUBROUTINE PROC_SPEC
  
 SUBROUTINE PROC_PART
 USE PHYSICAL_FUNCTIONS, ONLY : JANAF_TABLE_LIQUID, GET_SPECIFIC_ENTHALPY
+CHARACTER(30) :: SPEC_ID
 INTEGER :: N, J, REF_TEMP
-REAL(EB) :: H_L,H_V,YY_GET(1:N_SPECIES),H_G_S,H_G_S_REF
+REAL(EB) :: H_L,H_V,YY_GET(1:N_SPECIES),H_G_S,H_G_S_REF,H_L_REF,TMP_REF,TMP_MELT,TMP_V
 TYPE(PARTICLE_CLASS_TYPE), POINTER :: PC
-TYPE(SPECIES_TYPE), POINTER :: SS
 
 IF (N_PART == 0) RETURN
 
 DO N = 1, N_PART
-   PC => PARTICLE_CLASS(N)
-   SS => SPECIES(PC%SPEC_INDEX)
+   PC => PARTICLE_CLASS(N)   
    IF (.NOT.PC%EVAPORATE .OR. PC%MASSLESS) CYCLE
+   SPEC_ID = SPECIES(PC%SPEC_INDEX)%ID
+   IF (PC%WATER) SPEC_ID = 'WATER VAPOR'
+   IF (PC%FUEL .AND. MIXTURE_FRACTION) SPEC_ID = REACTION(1)%FUEL
+   TMP_REF = -1._EB
+   TMP_MELT = -1._EB
+   TMP_V = -1._EB
    DO J = 1, 5000
       IF (PC%C_P(J) > 0._EB) THEN
-         PC%H_L = (REAL(J,EB)-298.15)*PC%C_P(J)
+         PC%H_L(J) = (REAL(J,EB)-PC%TMP_MELT)*PC%C_P(J)
       ELSE
-         CALL JANAF_TABLE_LIQUID (J,PC%C_P(J),H_V,H_L,SS%ID)
+         CALL JANAF_TABLE_LIQUID (J,PC%C_P(J),H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SPEC_ID)
          IF (J==1) THEN
             PC%H_L(J) = H_L + PC%C_P(J)
+            IF (PC%C_P(J) < 0._EB) THEN
+               WRITE(MESSAGE,'(A,A,A)') 'PARTICLE CLASS ',TRIM(PC%ID),' REQUIRES CP, H_V, TMP_MELT, TMP_V, and T_REF'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            IF (PC%H_V_REFERENCE_TEMPERATURE < 0._EB) PC%H_V_REFERENCE_TEMPERATURE=TMP_REF
+            IF (PC%TMP_V < 0._EB) PC%TMP_V = TMP_V
+            IF (PC%TMP_MELT < 0._EB) PC%TMP_MELT = TMP_MELT
          ELSE
             PC%H_L(J) = PC%H_L(J-1) + PC%C_P(J)
          ENDIF
@@ -2695,14 +2763,17 @@ DO N = 1, N_PART
          PC%C_P_BAR(J) = (PC%C_P_BAR(J-1) * REAL(J-1,EB) + PC%C_P(J)) / REAL(J,EB)
       ENDIF
    ENDDO
-   IF (PC%SPEC_INDEX>0 .AND. PC%H_V(1)<0._EB) THEN
+   IF (PC%SPEC_INDEX>0) THEN
+      IF(PC%H_V(1) > 0._EB) H_V = PC%H_V(1)
       REF_TEMP = NINT(PC%H_V_REFERENCE_TEMPERATURE)
+      H_L_REF = PC%H_L(REF_TEMP)
       YY_GET = 0._EB
       YY_GET(PC%SPEC_INDEX) = 1._EB
       CALL GET_SPECIFIC_ENTHALPY(YY_GET,H_G_S_REF,REF_TEMP)
+      PC%H_V_CORRECTOR = H_V - H_G_S_REF + H_L_REF
       DO J=1,5000
          CALL GET_SPECIFIC_ENTHALPY(YY_GET,H_G_S,J)
-         PC%H_V(J) = H_V + (H_G_S-H_G_S_REF) - (PC%H_L(J)-PC%H_L(REF_TEMP))
+         PC%H_V(J) = H_V + PC%H_V_CORRECTOR + (H_G_S-H_G_S_REF) - (PC%H_L(J)-H_L_REF)
       ENDDO
    ENDIF
 ENDDO
@@ -2762,12 +2833,12 @@ READ_PART_LOOP: DO N=1,N_PART
    DENSITY                  = 1000._EB     ! kg/m3
    DT_INSERT                = 0.01_EB      ! s
    MASS_PER_VOLUME          = 1._EB        ! kg/m3
-   VAPORIZATION_TEMPERATURE = 100.0_EB     ! C
+   VAPORIZATION_TEMPERATURE = -300._EB     ! C
    INITIAL_TEMPERATURE      = TMPA - TMPM  ! C
-   MELTING_TEMPERATURE      = TMPM - TMPM  ! C
+   MELTING_TEMPERATURE      = -300.        ! C
    SPECIFIC_HEAT            = -1._EB     ! kJ/kg-K
    HEAT_OF_VAPORIZATION     = -1._EB     ! kJ/kg
-   H_V_REFERENCE_TEMPERATURE = 0._EB
+   H_V_REFERENCE_TEMPERATURE = -300._EB
    HEAT_OF_COMBUSTION       = -1._EB       ! kJ/kg
    DROPLETS_PER_SECOND      = 5000
    GAMMA                    = 1.4          !Specific heat ratio
