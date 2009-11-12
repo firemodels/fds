@@ -1789,15 +1789,14 @@ REWIND(LU_INPUT)
  
 COUNT_REAC_LOOP: DO
    ID   = 'null'
-   FUEL = 'null'      
+   FUEL = 'null'    
+   BOF = -1._EB
+   E = -1._EB
    CALL CHECKREAD('REAC',LU_INPUT,IOS)
    IF (IOS==1) EXIT COUNT_REAC_LOOP
    READ(LU_INPUT,REAC,ERR=434,IOSTAT=IOS)
    N_REACTIONS = N_REACTIONS + 1
-   IF (BOF < 0._EB .AND. E < 0._EB) THEN
-      MIXTURE_FRACTION = .TRUE.
-      FUEL = 'ETHYLENE'
-   ENDIF
+   IF (BOF < 0._EB .AND. E < 0._EB) MIXTURE_FRACTION = .TRUE.
    IF ((BOF > 0._EB .OR. E > 0._EB) .AND. MIXTURE_FRACTION) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: cannot use both finite rate REAC and mixture fraction REAC'
       CALL SHUTDOWN(MESSAGE)
@@ -1841,10 +1840,10 @@ READ_REACTION_LOOP: DO NN=1,N_REAC_READ
    RN%BOF                = BOF
    RN%E                  = E*1000._EB
    RN%EPUMO2             = EPUMO2*1000._EB
-   RN%FUEL               = FUEL        
    RN%FYI                = FYI
    RN%HEAT_OF_COMBUSTION = HEAT_OF_COMBUSTION*1000._EB
-   IF (FUEL=='null') THEN
+   IF (MIXTURE_FRACTION) THEN
+      IF (FUEL=='null') FUEL = 'ETHYLENE'
       RN%MODE = MIXTURE_FRACTION_REACTION
       ALLOCATE(RN%NU(9))
       RN%NU = 0._EB
@@ -1856,6 +1855,7 @@ READ_REACTION_LOOP: DO NN=1,N_REAC_READ
       RN%NU = NU
    ENDIF
    RN%NAME               = ID
+   RN%FUEL               = FUEL        
    RN%OXIDIZER           = OXIDIZER
 ENDDO READ_REACTION_LOOP
 
