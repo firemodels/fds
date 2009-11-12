@@ -3515,18 +3515,24 @@ IMPLICIT NONE
 
 REAL(EB), INTENT(IN) :: UU(2),UW(2),NN(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
 INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(2,2),SS(2),US,UN,US_WALL,UN_WALL,DPDS,DTSNDN,DUSDS,DUSDN,TSN,TSN_WALL
+REAL(EB) :: C(2,2),SS(2),XX(2),YY(2)
+REAL(EB) :: US,UN,US_WALL,UN_WALL,DPDS,DTSNDN,DUSDS,DUSDN,TSN,TSN_WALL,DT_BL
+INTEGER :: SUBIT,NIT
+
+! Cartesian grid coordinate system orthonormal basis vectors
+XX = (/1._EB, 0._EB/)
+YY = (/0._EB, 1._EB/)
 
 ! streamwise unit vector
 SS = (/NN(2),-NN(1)/)
 
-! directional cosines
-C(1,1) = SS(1)
-C(1,2) = -SS(2)
-C(2,1) = SS(2)
-C(2,2) = SS(1)
+! directional cosines (see Pope, Eq. A.11)
+C(1,1) = DOT_PRODUCT(XX,SS)
+C(1,2) = DOT_PRODUCT(XX,NN)
+C(2,1) = DOT_PRODUCT(YY,SS)
+C(2,2) = DOT_PRODUCT(YY,NN)
 
-! transform velocity
+! transform velocity (see Pope, Eq. A.17)
 US = C(1,1)*UU(1) + C(2,1)*UU(2)
 UN = C(1,2)*UU(1) + C(2,2)*UU(2)
 
@@ -3537,21 +3543,32 @@ UN_WALL = C(1,2)*UW(1) + C(2,2)*UW(2)
 ! transform pressure gradient
 DPDS = C(1,1)*GRADP(1) + C(2,1)*GRADP(2)
 
-! transform stress tensor
-TSN = C(1,1)*C(1,2)*TAU_IJ(1,1) + C(1,1)*C(2,2)*TAU_IJ(1,2) &
-    + C(2,1)*C(1,2)*TAU_IJ(2,1) + C(2,1)*C(2,2)*TAU_IJ(2,2)
-TSN_WALL = -MU*(US-US_WALL)/DN !! or WW based on US, MU and DN
-DTSNDN = (TSN - TSN_WALL)/DN
-
-! transform velocity gradient tensor
+! transform velocity gradient tensor (Pope A.23)
 DUSDS = C(1,1)*C(1,1)*GRADU(1,1) + C(1,1)*C(2,1)*GRADU(1,2) &
       + C(2,1)*C(1,1)*GRADU(2,1) + C(2,1)*C(2,1)*GRADU(2,2)
       
 DUSDN = C(1,1)*C(1,2)*GRADU(1,1) + C(1,1)*C(2,2)*GRADU(1,2) &
       + C(2,1)*C(1,2)*GRADU(2,1) + C(2,1)*C(2,2)*GRADU(2,2)
 
+! transform stress tensor
+TSN = C(1,1)*C(1,2)*TAU_IJ(1,1) + C(1,1)*C(2,2)*TAU_IJ(1,2) &
+    + C(2,1)*C(1,2)*TAU_IJ(2,1) + C(2,1)*C(2,2)*TAU_IJ(2,2)
+    
 ! update boundary layer equations
-US = US - DT*( US*DUSDS + UN*DUSDN + RRHO*(DPDS + DTSNDN) )
+
+! find stable time step
+DT_BL = MINVAL((/DT,0.5_EB*DN/(ABS(US)+1.E-10_EB),0.5_EB*DN**2/(MU*RRHO)/))
+NIT   = CEILING(DT/DT_BL)
+DT_BL = DT/REAL(NIT,EB)
+
+! possible subiterations due to stability constraints
+DO SUBIT = 1,NIT
+   TSN_WALL = -MU*(US-US_WALL)/DN !! or WW based on US, MU and DN
+   DTSNDN = (TSN - TSN_WALL)/DN
+   US = US - DT_BL*( US*DUSDS + UN*DUSDN + RRHO*(DPDS + DTSNDN) )
+ENDDO
+
+! update layer wall-normal velocity
 UN = UN_WALL + DN*(DIVU-DUSDS)
 
 ! transform velocity back to Cartesian component I_VEL
