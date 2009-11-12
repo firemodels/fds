@@ -1,6 +1,8 @@
 @echo off
-set SVNROOT="C:\Projects\NIST 2821-000\SVN\FDS"
-set FDS="C:\Projects\NIST 2821-000\5.0source\c2\fds532.exe"
+set svn_drive=d:
+set SVNROOT=d:\MyDocs\FDS_Repository
+set FDS=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
+
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 set BASEDIR=%CD%
 

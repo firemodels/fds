@@ -4832,7 +4832,8 @@ whether the calculation is a DNS or LES.
 The basic FDS equation set assumes pressure
 to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation, $\tp(\bx,t)$. Most
 often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced pressure field that
-FDS calculates at each time step. Originally (FDS v.~1-4), it was possible to create a single, sealed
+FDS calculates at each time step. Originally (FDS v.~1-4), it was assumed that the background pressure was the same throughout the computational domain.
+Because of this, it was only possible to create a single, sealed
 compartment whose walls conformed to the exterior of the computational domain. A fire or fan could
 increase (or decrease) the background pressure in this single compartment, and a leakage area could
 be defined between the compartment and the ambient exterior. Flow through the ``cracks'' was simply
@@ -6115,9 +6116,9 @@ same {\ct DIAMETER}.
 
 \subsection{Drag}
 
-For massive particles the default drag law (i.e., the drag coefficient correlation as a function of Reynolds number [based on particle diameter]) is that of a sphere.  
-To invoke the cylinder drag law set {\ct DRAG\_LAW$=$`CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable, 
-the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.  
+For massive particles the default drag law (i.e., the drag coefficient correlation as a function of Reynolds number [based on particle diameter]) is that of a sphere.
+To invoke the cylinder drag law set {\ct DRAG\_LAW$=$`CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable,
+the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.
 The {\ct USER\_DRAG\_COEFFICIENT} trumps the {\ct DRAG\_LAW}.
 
 
