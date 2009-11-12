@@ -32,6 +32,11 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETZ 110
 #define SV_TRANSLATEMZD2 111
 #define SV_AXPB2STACK 112
+#define SV_CLIP 113
+#define SV_MIRRORCLIP 114
+#define SV_PERIODICCLIP 115
+#define SV_COPYVAL 116
+#define SV_COPYNVALS 117
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -46,6 +51,11 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETZ_NUMARGS 1
 #define SV_TRANSLATEMZD2_NUMARGS 1
 #define SV_AXPB2STACK_NUMARGS 3
+#define SV_CLIP_NUMARGS 4
+#define SV_MIRRORCLIP_NUMARGS 4
+#define SV_PERIODICCLIP_NUMARGS 4
+#define SV_COPYVAL_NUMARGS 2
+#define SV_COPYNVALS_NUMARGS 3
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -606,6 +616,111 @@ void draw_SVOBJECT(sv_object *object, int iframe){
 
         stackskip=arg[2]+0.5;
         arg[3+stackskip]=val_result;
+      }
+      iarg+=3;
+      break;
+    case SV_CLIP:
+      if(op_skip==0&&iarg+SV_CLIP_NUMARGS<=framei->nargs){
+        int argval, argmin, argmax, stackskip;
+        float val, valmin, valmax;
+
+        argval=arg[0]+0.5;
+        val=valstack[argval];
+
+        argmin=arg[1]+0.5;
+        valmin=valstack[argmin];
+
+        argmax=arg[2]+0.5;
+        valmax=valstack[argmax];
+
+        if(val<valmin)val=valmin;
+        if(val>valmax)val=valmax;
+        
+        stackskip=arg[3]+0.5;
+        arg[4+stackskip]=val;
+      }
+      iarg+=4;
+      break;
+    case SV_MIRRORCLIP:
+      if(op_skip==0&&iarg+SV_MIRRORCLIP_NUMARGS<=framei->nargs){
+        int argval, argmin, argmax, stackskip;
+        float val, valmin, valmax;
+        float val2, valmax2;
+        float val_result;
+
+        argval=arg[0]+0.5;
+        val=valstack[argval];
+
+        argmin=arg[1]+0.5;
+        valmin=valstack[argmin];
+
+        argmax=arg[2]+0.5;
+        valmax=valstack[argmax];
+
+        val2=val-valmin;
+        valmax2=valmax-valmin;
+
+        val2=fmod(val2,2.0*valmax2);
+        if(val2>valmax2)val2=2.0*valmax2-val2;
+
+        val_result = val2 + valmin;
+
+        stackskip=arg[3]+0.5;
+        arg[4+stackskip]=val_result;
+      }
+      iarg+=4;
+      break;
+    case SV_PERIODICCLIP:
+      if(op_skip==0&&iarg+SV_PERIODICCLIP_NUMARGS<=framei->nargs){
+        int argval, argmin, argmax, stackskip;
+        float val, valmin, valmax;
+        float val2, valmax2;
+        float val_result;
+
+        argval=arg[0]+0.5;
+        val=valstack[argval];
+
+        argmin=arg[1]+0.5;
+        valmin=valstack[argmin];
+
+        argmax=arg[2]+0.5;
+        valmax=valstack[argmax];
+
+        val2=val-valmin;
+        valmax2=valmax-valmin;
+
+        val2=fmod(val2,valmax2);
+
+        val_result = val2 + valmin;
+
+        stackskip=arg[3]+0.5;
+        arg[4+stackskip]=val_result;
+      }
+      iarg+=4;
+      break;
+    case SV_COPYVAL:
+      if(op_skip==0&&iarg+SV_COPYVAL_NUMARGS<=framei->nargs){
+        int argval, stackskip;
+        float val;
+
+        argval=arg[0]+0.5;
+        val=valstack[argval];
+
+        stackskip=arg[1]+0.5;
+        arg[2+stackskip]=val;
+      }
+      iarg+=2;
+      break;
+    case SV_COPYNVALS:
+      if(op_skip==0&&iarg+SV_COPYNVALS_NUMARGS<=framei->nargs){
+        int iargstart, nargs, stackskip, i;
+
+        iargstart=arg[0]+0.5;
+        nargs=arg[1]+0.5;
+        stackskip=arg[2]+0.5;
+        for(i=0;i<nargs;i++){
+          arg[3+stackskip+i]=valstack[iargstart+i];
+        }
       }
       iarg+=3;
       break;
@@ -1800,6 +1915,31 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
         iop=SV_AXPB2STACK;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_AXPB2STACK_NUMARGS);
+      }
+      else if(strcmp(token,"clip")==0){
+        iop=SV_CLIP;
+        *use_displaylist=0;
+        reporterror(buffer_save,token,numargs,SV_CLIP_NUMARGS);
+      }
+      else if(strcmp(token,"mirrorclip")==0){
+        iop=SV_MIRRORCLIP;
+        *use_displaylist=0;
+        reporterror(buffer_save,token,numargs,SV_MIRRORCLIP_NUMARGS);
+      }
+      else if(strcmp(token,"peridocclip")==0){
+        iop=SV_PERIODICCLIP;
+        *use_displaylist=0;
+        reporterror(buffer_save,token,numargs,SV_PERIODICCLIP_NUMARGS);
+      }
+      else if(strcmp(token,"copyval")==0){
+        iop=SV_COPYVAL;
+        *use_displaylist=0;
+        reporterror(buffer_save,token,numargs,SV_COPYVAL_NUMARGS);
+      }
+      else if(strcmp(token,"copynvals")==0){
+        iop=SV_COPYNVALS;
+        *use_displaylist=0;
+        reporterror(buffer_save,token,numargs,SV_COPYNVALS_NUMARGS);
       }
       else{
         iop=SV_ERR;
