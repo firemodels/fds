@@ -5371,6 +5371,7 @@ Note that the various {\ct YIELD}s are for well-ventilated, post-flame condition
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
 \begin{description}
+\item[{\ct FUEL}] A character string that identifies fuel species for the reaction. When using the mixture fraction, specifying a fuel will cause FDS to use the thermophyscial properties for that fuel when computing quantites such as specific heat or viscosity.  This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N, OTHER}. Table~\ref{tab:gasspecies} provides a listing of the available species.
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
 label the {\ct REAC} line to more easily identify the fuel species.
 \item[{\ct C, H, O, N, OTHER}] The fuel chemical formula. All numbers are positive.
@@ -5685,29 +5686,41 @@ and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEA
 If either {\ct SPECIFIC\_HEAT} or {\ct ENTHALPY} is specified, then both must be specified.
 The {\ct REFERENCE\_TEMPERATURE} is the temperature that corresponds to the specified value
 of {\ct SPECIFIC\_ENTHALPY}.  In the absence of any of these parameters, the appropriate
-values of {\ct 'AIR'} are assumed.
+values of {\ct 'AIR'} are assumed.  If the species listed in Table~\ref{tab:gasspecies}, is indicated as a liquid, that means that liquid thermophysical properties do not need to be given for those species.
 
 \begin{table}[ht]
 \begin{center}
 \caption[Optional Gas Species]{\bf Optional Gas Species~\cite{Reid:1}}
 \label{tab:gasspecies}
 \vspace{0.1in}
-\begin{tabular}{|l|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|}
 \hline
-Species &   Mol.~Wgt.        & $\sigma$  & $k/\epsilon$  \\
-        &   (g/mol)          & (\AA)     & (K)            \\ \hline
+Species &   Mol.~Wgt.        & $\sigma$  & $k/\epsilon$   & Liquid \\
+        &   (g/mol)          & (\AA)     & (K)            &        \\ \hline
 \hline
-{\ct AIR}             & 29   & 3.711     & 78.6           \\ \hline
-{\ct ARGON}           & 40   & 3.42      & 124.0           \\ \hline
-{\ct CARBON DIOXIDE}  & 44   & 3.941     &195.2           \\ \hline
-{\ct CARBON MONOXIDE} & 28   & 3.690     & 91.7           \\ \hline
-{\ct HELIUM}          &  4   & 2.551     & 10.22          \\ \hline
-{\ct HYDROGEN}        &  2   & 2.827     & 59.7           \\ \hline
-{\ct METHANE}         & 16   & 3.758     &148.6           \\ \hline
-{\ct NITROGEN}        & 28   & 3.798     & 71.4           \\ \hline
-{\ct OXYGEN}          & 32   & 3.467     &106.7           \\ \hline
-{\ct PROPANE}         & 44   & 5.118     &237.1           \\ \hline
-{\ct WATER VAPOR}     & 18   & 2.641     &809.1           \\ \hline
+{\ct AIR}              & 29   & 3.711     & 78.6           &        \\ \hline
+{\ct ARGON}            & 40   & 3.42      & 124.0          &        \\ \hline
+{\ct CARBON DIOXIDE}   & 44   & 3.941     &195.2           &        \\ \hline
+{\ct CARBON MONOXIDE}  & 28   & 3.690     & 91.7           &        \\ \hline
+{\ct ETHANOL}          & 46   & 4.530     &362.6           &    Y   \\ \hline
+{\ct ETHYLENE}         & 28   & 4.163     &224.7           &        \\ \hline
+{\ct HELIUM}           &  4   & 2.551     & 10.22          &        \\ \hline
+{\ct HYDROGEN}         &  2   & 2.827     & 59.7           &        \\ \hline
+{\ct HYDROGEN BROMIDE} & 81   & 3.353     &449.0           &        \\ \hline
+{\ct HYDROGEN CHLORIDE}& 36   & 3.339     &344.7           &        \\ \hline
+{\ct HYDROGEN CYANIDE} & 26   & 3.63      &569.1           &        \\ \hline
+{\ct HYDROGEN FLOURIDE}& 20   & 3.148     &330.0           &        \\ \hline
+{\ct METHANE}          & 16   & 3.758     &148.6           &        \\ \hline
+{\ct METHANOL}         & 32   & 3.626     &481.8           &    Y   \\ \hline
+{\ct N-HEXANE}         & 86   & 4.524     &199.41          &    Y   \\ \hline
+{\ct N-HEPTANE}        &100   & 4.701     &205.75          &    Y   \\ \hline
+{\ct N-OCTANE}         &114   & 4.892     &231.16          &        \\ \hline
+{\ct N-DECANE}         &142   & 5.233     &226.46          &        \\ \hline
+{\ct NITROGEN}         & 28   & 3.798     & 71.4           &        \\ \hline
+{\ct OXYGEN}           & 32   & 3.467     &106.7           &        \\ \hline
+{\ct PROPANE}          & 44   & 5.118     &237.1           &        \\ \hline
+{\ct TOLUENE}          & 92   & 5.698     &480.0           &        \\ \hline
+{\ct WATER VAPOR}      & 18   & 2.641     &809.1           &    Y   \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -6076,18 +6089,14 @@ liquid droplets, but you can specify {\ct EVAPORATE=.FALSE.} to change this.
 \item[{\ct DENSITY}] The density of the liquid or solid droplet/particle.
 (Default 1000~kg/m$^3$)
 \item[{\ct SPECIFIC\_HEAT}] Specific heat of liquid or solid droplet/particle.
-(Default 4.184~kJ/kg/K)
 \item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet.
-(Default 100~$^\circ$C)
 \item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet.
-(Default 0~$^\circ$C)
 \item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet.
-(Default {\ct TMPA})
 \item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet.
-(Default 2259~kJ/kg)
+\item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION}.
+
 \end{description}
-Notice that the default thermal properties are that of water, and also notice that there is no specified thermal conductivity because the
-droplets are assumed to be thermally-thin.
+Notice that the default {\ct DENSITY} is that of water.  If the drops are specified as {\ct WATER} or the drops are specified asL {\ct FUEL} and the {\ct FUEL} species is shown as a liquid in Table~\ref{tab:gasspecies}, then only the {\ct DENSITY} needs to be provided.
 
 \subsection{Size Distribution}
 
@@ -9309,7 +9318,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GAMMA\_D}                  & Real            & Size distribution parameter       &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}      & Real            & Heat of Combustion                & kJ/kg     &               \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}    & Real            & Latent Heat of Vaporization       & kJ/kg     &               \\ \hline
-{\ct H\_V\_REFERENCE\_TEMPERATURE} & Real            & Temperature for Heat of Vaporization & $^\circ$C     & 0.         \\ \hline
+{\ct H\_V\_REFERENCE\_TEMPERATURE} & Real            & Temperature for Heat of Vaporization & $^\circ$C     &            \\ \hline
 {\ct HORIZONTAL\_VELOCITY}      & Real            & Droplet speed, horizontal         & m/s       &  0.2          \\ \hline
 {\ct ID}                        & Character       & Identifier                        &           &               \\ \hline
 {\ct INITIAL\_TEMPERATURE}      & Real            & Initial Temperature               & $^\circ$C & {\ct TMPA}    \\ \hline
@@ -9317,7 +9326,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_PER\_VOLUME}         & Real            & Mass per unit volume              & kg/m$^3$  & 1.            \\ \hline
 {\ct MAXIMUM\_DIAMETER}         & Real            & Break-up bound                    & $\mu$m    & $\infty$      \\ \hline
 {\ct MINIMUM\_DIAMETER}         & Real            & Evaporation bound                 & $\mu$m    & 20.           \\ \hline
-{\ct MELTING\_TEMPERATURE}      & Real            & Melting Temperature               & $^\circ$C & 0.            \\ \hline
+{\ct MELTING\_TEMPERATURE}      & Real            & Melting Temperature               & $^\circ$C &               \\ \hline
 {\ct MONODISPERSE}              & Logical         & Uniform droplet size              &           & {\ct .FALSE.} \\ \hline
 {\ct NUMBER\_INITIAL\_DROPLETS} & Integer         & Number of droplets at start       &           & 0             \\ \hline
 {\ct QUANTITIES(10)}            & Character       & Quantities for coloring           &           &               \\ \hline
@@ -9325,7 +9334,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SAMPLING\_FACTOR}          & Integer         & Filter for output file            &           & 1             \\ \hline
 {\ct SIGMA\_D}                  & Real            & Size distribution parameter       &           &               \\ \hline
 {\ct SPEC\_ID}                  & Character       & Name of gas species               &           &               \\ \hline
-{\ct SPECIFIC\_HEAT}            & Real            & Droplet specific heat             & kJ/kg/K   & 4.184         \\ \hline
+{\ct SPECIFIC\_HEAT}            & Real            & Droplet specific heat             & kJ/kg/K   &               \\ \hline
 {\ct STATIC}                    & Logical         & Stationary Particles              &           & {\ct .FALSE.} \\ \hline
 %{\ct TREE}                      & Logical         & Particles are leaves              &           & {\ct .FALSE.} \\ \hline
 {\ct USER\_DRAG\_COEFFICIENT}   & Real            & Constant drag coefficient         &           & -1.           \\ \hline
