@@ -2104,8 +2104,6 @@ typedef struct {
     glGenTextures(1,&texti->name);
     glBindTexture(GL_TEXTURE_2D,texti->name);
     floortex=readpicture(texti->file,&texwid,&texht);
-    texti->texht=texht;
-    texti->texwid=texwid;
     if(floortex==NULL){
       printf(" - failed\n");
       continue;
