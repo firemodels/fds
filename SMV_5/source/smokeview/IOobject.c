@@ -31,7 +31,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETY 109
 #define SV_OFFSETZ 110
 #define SV_TRANSLATEMZD2 111
-#define SV_AXPB2STACK 112
+#define SV_MULTIADDT 112
 #define SV_CLIP 113
 #define SV_MIRRORCLIP 114
 #define SV_PERIODICCLIP 115
@@ -50,7 +50,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETY_NUMARGS 1
 #define SV_OFFSETZ_NUMARGS 1
 #define SV_TRANSLATEMZD2_NUMARGS 1
-#define SV_AXPB2STACK_NUMARGS 3
+#define SV_MULTIADDT_NUMARGS 3
 #define SV_CLIP_NUMARGS 4
 #define SV_MIRRORCLIP_NUMARGS 4
 #define SV_PERIODICCLIP_NUMARGS 4
@@ -71,6 +71,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWPOINT     211
 #define SV_DRAWARC       212
 #define SV_DRAWCDISK     213
+#define SV_DRAWTSPHERE   214
 
 #define SV_DRAWCUBE_NUMARGS      1
 #define SV_DRAWSPHERE_NUMARGS    1
@@ -86,6 +87,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWPOINT_NUMARGS     0
 #define SV_DRAWARC_NUMARGS       2
 #define SV_DRAWCDISK_NUMARGS     2
+#define SV_DRAWTSPHERE_NUMARGS   2
 
 #define SV_PUSH       300
 #define SV_POP        301
@@ -123,6 +125,7 @@ void drawarc(float angle, float diameter, unsigned char *rgbcolor);
 void drawcircle(float diameter, unsigned char *rgbcolor);
 void drawpoint(unsigned char *rgbcolor);
 void drawsphere(float diameter, unsigned char *rgbcolor);
+void drawtsphere(float texture_index, float diameter, unsigned char *rgbcolor);
 void drawcube(float size, unsigned char *rgbcolor);
 void drawcdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawdisk(float diameter, float height, unsigned char *rgbcolor);
@@ -553,9 +556,7 @@ void draw_SVOBJECT(sv_object *object, int iframe){
   iarg = 0;
   iop = 0;
 
-  if(framei->display_list_ID!=-1
-    &&object->use_displaylist==1
-    ){
+  if(framei->display_list_ID!=-1&&object->use_displaylist==1){
     if(framei->use_bw==setbw){
       glCallList(framei->display_list_ID);
       glPopMatrix();
@@ -596,17 +597,14 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     arg = framei->args + iarg;
     op = framei->ops + iop;
     switch (*op){
-    case SV_AXPB2STACK:
-      if(op_skip==0&&iarg+SV_AXPB2STACK_NUMARGS<=framei->nargs){
+    case SV_MULTIADDT:
+      if(op_skip==0&&iarg+SV_MULTIADDT_NUMARGS<=framei->nargs){
         int arg1, arg2, stackskip;
         float val1, val2, val_result;
         float time_val=0.0;
 
-        arg1=arg[0]+0.5;
-        val1=valstack[arg1];
-
-        arg2=arg[1]+0.5;
-        val2=valstack[arg2];
+        val1=arg[0];
+        val2=arg[1];
 
         if(ntimes>0){
           time_val=times[itime];
@@ -879,6 +877,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       rgbptr=NULL;
       iarg+=2;
       break;
+    case SV_DRAWTSPHERE:
+      if(op_skip==0&&iarg+SV_DRAWTSPHERE_NUMARGS<=framei->nargs)drawtsphere(arg[0],arg[1],rgbptr);
+      rgbptr=NULL;
+      iarg++;
+      break;
     case SV_DRAWSPHERE:
       if(op_skip==0&&iarg+SV_DRAWSPHERE_NUMARGS<=framei->nargs)drawsphere(arg[0],rgbptr);
       rgbptr=NULL;
@@ -996,6 +999,96 @@ void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor){
   glEnd();
 }
 
+/* ----------------------- drawsphere ----------------------------- */
+
+void drawtsphere(float texture_index,float diameter, unsigned char *rgbcolor){
+  texture *texti;
+  float latitude, longitude;
+
+  if(texture_index<0.0||texture_index>=ntextures){
+    texti=NULL;
+  }
+  else{
+    int itext;
+
+    itext = texture_index+0.5;
+    texti = textureinfo + itext;
+    if(texti->loaded==0||texti->display==0)texti=NULL;
+  }
+  if(texti==NULL){
+    drawsphere(diameter,rgbcolor);
+  }
+  else{
+    int i,j;
+    float dlat, dlong;
+    float pi;
+
+    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glEnable(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D,texti->name);
+
+    glPushMatrix();
+    glScalef(diameter/2.0,diameter/2.0,diameter/2.0);
+
+    glBegin(GL_QUADS);
+#define NLAT 20
+#define NLONG 40
+    pi=4.0*atan(1.0);
+    dlat = pi/NLAT;
+    dlong = 2.0*pi/NLONG;
+    for(j=0;j<NLAT;j++){
+      float ti,tip1;
+      float tj,tjp1;
+
+      latitude = -pi/2.0 + j*dlat;
+      tj = 1.0-(float)j/NLAT;
+      tjp1 = 1.0-(float)(j+1)/NLAT;
+      for(i=0;i<NLONG;i++){
+        float x, y, z;
+
+        longitude = -2.0*pi+i*dlong;
+
+        ti = 1.0-(float)i/NLONG;
+        tip1 = 1.0-(float)(i+1)/NLONG;
+
+        x = cos(longitude)*cos(latitude);
+        y = sin(longitude)*cos(latitude);
+        z = sin(latitude);
+
+        glNormal3f(x,y,z);
+        glTexCoord2f(ti,tj);
+        glVertex3f(x,y,z);
+
+        x = cos(longitude+dlong)*cos(latitude);
+        y = sin(longitude+dlong)*cos(latitude);
+        z = sin(latitude);
+        glNormal3f(x,y,z);
+        glTexCoord2f(tip1,tj);
+        glVertex3f(x,y,z);
+
+        x = cos(longitude+dlong)*cos(latitude+dlat);
+        y = sin(longitude+dlong)*cos(latitude+dlat);
+        z = sin(latitude+dlat);
+        glNormal3f(x,y,z);
+        glTexCoord2f(tip1,tjp1);
+        glVertex3f(x,y,z);
+
+        x = cos(longitude)*cos(latitude+dlat);
+        y = sin(longitude)*cos(latitude+dlat);
+        z = sin(latitude+dlat);
+
+        glNormal3f(x,y,z);
+        glTexCoord2f(ti,tjp1);
+        glVertex3f(x,y,z);
+      }
+    }
+    glEnd();
+    glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+
+  }
+}
 
 /* ----------------------- drawsphere ----------------------------- */
 
@@ -1857,6 +1950,11 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
         iop=SV_DRAWCONE;
         reporterror(buffer_save,token,numargs,SV_DRAWCONE_NUMARGS);
       }
+      else if(strcmp(token,"drawtsphere")==0){
+        iop=SV_DRAWTSPHERE;
+        *use_displaylist=0;
+        reporterror(buffer_save,token,numargs,SV_DRAWTSPHERE_NUMARGS);
+      }
       else if(strcmp(token,"drawsphere")==0){
         iop=SV_DRAWSPHERE;
         reporterror(buffer_save,token,numargs,SV_DRAWSPHERE_NUMARGS);
@@ -1911,10 +2009,10 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_PUTUSERVALS2STACK_NUMARGS);
       }
-      else if(strcmp(token,"axpb2stack")==0){
-        iop=SV_AXPB2STACK;
+      else if(strcmp(token,"multiaddt")==0){
+        iop=SV_MULTIADDT;
         *use_displaylist=0;
-        reporterror(buffer_save,token,numargs,SV_AXPB2STACK_NUMARGS);
+        reporterror(buffer_save,token,numargs,SV_MULTIADDT_NUMARGS);
       }
       else if(strcmp(token,"clip")==0){
         iop=SV_CLIP;
@@ -1948,7 +2046,38 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
       numargs=0;
     }
     else{
-      sscanf(token,"%f",local_args);
+      if(strlen(token)>3&&token[0]=='$'&&token[1]=='t'){
+        char *texture_file=NULL;
+        char *end_texture_file=NULL;
+
+        *local_args=-2.0;       
+
+        texture_file=strchr(token+2,'"');
+        end_texture_file=strrchr(token+3,'"');
+
+        if(texture_file!=NULL&&end_texture_file!=NULL){
+          texture_file++;
+          *end_texture_file=0;
+          if(strlen(texture_file)>0){
+            int i;
+
+            for(i=0;i<ntextures;i++){
+              unsigned char *floortex;
+              int texwid, texht;
+              texture *texti;
+
+              texti = textureinfo + i;
+              if(strcmp(texture_file,texti->file)==0){
+                *local_args=(float)i;
+                break;
+              }
+            }
+          }
+        }
+      }
+      else{
+        sscanf(token,"%f",local_args);
+      }
       local_args++;
       numargs++;
     }
@@ -2258,6 +2387,24 @@ void remove_comment(char *buffer){
   comment = strstr(buffer,"//");
   if(comment!=NULL)comment[0]=0;
   return;
+}
+
+/* ----------------------- update_device_defs ----------------------------- */
+
+void update_device_objects(void){
+  int i;
+
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+
+    devicei = deviceinfo + i;
+
+    devicei->object = get_SVOBJECT_type(devicei->label);
+    if(devicei->object==NULL){
+      devicei->object = device_defs_backup[0];
+    }
+  }
+
 }
 
 /* ----------------------- init_device_defs ----------------------------- */

@@ -89,6 +89,7 @@ EXTERNCPP void clip2cam(camera *cam);
 EXTERNCPP void cam2clip(camera *cam);
 EXTERNCPP void to_lower(char *string);
 EXTERNCPP void init_device_defs(void);
+EXTERNCPP void update_device_objects(void);
 EXTERNCPP void make_error_frame(void);
 EXTERNCPP char *get_device_label(char *buffer);
 EXTERNCPP void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az);
