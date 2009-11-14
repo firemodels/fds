@@ -496,16 +496,22 @@ unsigned char *readpicture(char *filename, int *width, int *height){
       return NULL;
     }
     else{
+      FILE *stream;
+
       lenbuffer=strlen(filename)+strlen(texturedir)+1;
       NewMemory((void **)&filebuffer,(unsigned int)(lenbuffer+1));
       allocated=1;
       strcpy(filebuffer,texturedir);
       strcat(filebuffer,dirseparator);
       strcat(filebuffer,filename);
-      if(STAT(filebuffer,&statbuffer)!=0){
+      stream=fopen(filebuffer,"rb");
+      if(stream==NULL){
         FREEMEMORY(filebuffer);
         printf("Texture file:%s unavailable\n",filebuffer);
         return NULL;
+      }
+      else{
+        fclose(stream);
       }
     }
   }
