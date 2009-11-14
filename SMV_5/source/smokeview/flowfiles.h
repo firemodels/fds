@@ -583,16 +583,19 @@ typedef struct _sv_object {
   int select_mode;
   int nframes;
   sv_object_frame **obj_frames, first_frame, last_frame;
- struct _sv_object *prev, *next;
+  struct _sv_object *prev, *next;
 } sv_object;
 
 /* --------------------------  device ------------------------------------ */
 
-typedef struct {
+typedef struct _device{
   int active;
   int screenijk[3], visval;
   char label[30], *labelptr;
   mesh *device_mesh;
+  texture  *textureinfo;
+  char *texturefile;
+  int ntextures;
   float xyz[3], eyedist;
   float val;
   float xyzplot[3];

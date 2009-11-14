@@ -1748,7 +1748,11 @@ void TextureShowMenu(int value){
       break;
     }
   }
-  if(texturedisplay==1)BlockageMenu(visBLOCKAsInput);
+  if(texturedisplay==1){
+    if(value!=visBLOCKOutline&&value!=visBLOCKHide){
+      BlockageMenu(visBLOCKAsInput);
+    }
+  }
   updatemenu=1;
   GLUTPOSTREDISPLAY
 
