@@ -85,6 +85,7 @@ int readsmv(char *file){
   int s_num[6];
   int errorcode;
   int noGRIDpresent=1,startpass;
+  int devices_have_textures=0;
 
   int ipart=0, islice=0, ipatch=0, iplot3d=0, iroom=0,izone=0,ifire=0,iiso=0;
   int ismoke3d=0;
@@ -131,7 +132,6 @@ int readsmv(char *file){
   FILE *stream;
   FILE *ENDIANfile;
   char buffer[255],buffer2[255];
-  char texturebuffer[1024];
   char *buffer3;
   int blocknumber;
   float *xsprcopy, *ysprcopy, *zsprcopy;
@@ -935,7 +935,9 @@ int readsmv(char *file){
   FREEMEMORY(surfaceinfo);
   if(nsurfaces>0){
     if(NewMemory((void **)&surfaceinfo,nsurfaces*sizeof(surface))==0)return 2;
-    if(NewMemory((void **)&textureinfo,nsurfaces*sizeof(surface))==0)return 2;
+  }
+  if(nsurfaces>0||ndeviceinfo>0){
+    if(NewMemory((void **)&textureinfo,(nsurfaces+ndeviceinfo)*sizeof(texture))==0)return 2;
   }
 
   if(cadgeominfo!=NULL)freecadinfo();
@@ -987,6 +989,7 @@ int readsmv(char *file){
   iobst=0;
   ncadgeom=0;
   nsurfaces=0;
+  ndeviceinfo=0;
   noutlineinfo=0;
   if(noffset==0)ioffset=1;
   rewind(stream);
@@ -1611,6 +1614,7 @@ typedef struct {
 #ifdef pp_RENDER
       {
         int found_texture;
+        char texturebuffer[1024];
 
         found_texture=0;
         if(smokeviewbindir!=NULL&&STAT(buffer3,&statbuffer)!=0){
@@ -1836,6 +1840,142 @@ typedef struct {
       }
       continue;
     }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ DEVICE +++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+  /*
+    DEVICE
+    type
+    x y z xn yn zn
+
+  devices
+  -------
+  1 - sensor
+  2 - sprinkler
+  3 - heat detector
+  4 - smoke detector
+
+    DEVICE
+    type
+    x y z xn yn zn
+
+  devices
+  -------
+  1 - sensor
+  2 - sprinkler
+  3 - heat detector
+  4 - smoke detector
+
+typedef struct {
+  float xyz[3];
+  float val;
+  float xyzplot[3];
+  float xyznorm[3];
+  sv_object *object;
+} device;
+    */
+    if(
+      (match(buffer,"DEVICE",6) == 1)&&
+      (match(buffer,"DEVICE_ACT",10) != 1)
+      ){
+      device *devicei;
+      float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
+      int state0=0;
+      int nparams=0, nparams_textures=0;
+      char *labelptr;
+
+      devicei = deviceinfo + ndeviceinfo;
+      devicei->type=DEVICE_DEVICE;
+      fgets(buffer,255,stream);
+      trim(buffer);
+      strcpy(devicei->label,trim_front(buffer));
+      devicei->object = get_SVOBJECT_type(buffer);
+      if(devicei->object==NULL){
+        devicei->object = device_defs_backup[0];
+      }
+      devicei->params=NULL;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
+        xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
+      if(nparams_textures<0)nparams_textures=0;
+      if(nparams_textures>1)nparams_textures=1;
+      devicei->ntextures=nparams_textures;
+      if(nparams_textures>0){
+         NewMemory((void **)&devicei->textureinfo,sizeof(texture));
+      }
+      else{
+        devicei->textureinfo=NULL;
+        devicei->texturefile=NULL;
+      }
+
+      labelptr=strchr(buffer,'%');
+      if(labelptr!=NULL){
+        trim(labelptr);
+        if(strlen(labelptr)>1){
+          labelptr++;
+          labelptr=trim_front(labelptr);
+          if(strlen(labelptr)==0)labelptr=NULL;
+        }
+        else{
+          labelptr=NULL;
+        }
+      }
+
+      if(nparams<=0){
+        init_device(devicei,xyz,xyzn,state0,0,NULL,labelptr);
+      }
+      else{
+        float *params,*pc;
+        int nsize;
+
+        nsize = 6*((nparams-1)/6+1);
+        NewMemory((void **)&params,nsize*sizeof(float));
+        pc=params;
+        for(i=0;i<nsize/6;i++){
+          fgets(buffer,255,stream);
+          sscanf(buffer,"%f %f %f %f %f %f",pc,pc+1,pc+2,pc+3,pc+4,pc+5);
+          pc+=6;
+        }
+        init_device(devicei,xyz,xyzn,state0,nparams,params,labelptr);
+      }
+      get_elevaz(devicei->xyznorm,&devicei->angle_elev,&devicei->angle_az);
+      if(nparams_textures>0){
+        fgets(buffer,255,stream);
+        trim(buffer);
+        buffer3=trim_front(buffer);
+        NewMemory((void **)&devicei->texturefile,strlen(buffer3)+1);
+        strcpy(devicei->texturefile,buffer3);
+        devices_have_textures=1;
+      }
+
+      ndeviceinfo++;
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ DEVICE_ACT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"DEVICE_ACT",10) == 1){
+      device *devicei;
+      int idevice;
+      float act_time;
+      int act_state;
+
+      do_pass4=1;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f %i",&idevice,&act_time,&act_state);
+      idevice--;
+      if(idevice>=0&&idevice<ndeviceinfo){
+        devicei = deviceinfo + idevice;
+        devicei->act_time=act_time;
+        devicei->nstate_changes++;
+      }
+
+      continue;
+    }
   }
 /* 
    ************************************************************************
@@ -1901,7 +2041,7 @@ typedef struct {
 
   // define texture data structures by constructing a list of unique file names from surfaceinfo   
 
-  // get texture filename from SURF info
+  // get texture filename from SURF and device info
 
   ntextures = 0;
   for(i=0;i<nsurfaces;i++){
@@ -1916,6 +2056,20 @@ typedef struct {
     texti->display=0;
     ntextures++;
     surfi->textureinfo=textureinfo+ntextures-1;
+  }
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+
+    devicei = deviceinfo + i;
+    if(devicei->texturefile==NULL)continue;
+    texti = textureinfo + ntextures;
+    NewMemory((void **)&texti->file,strlen(devicei->texturefile)+1);
+    strcpy(texti->file,devicei->texturefile);
+    texti->loaded=0;
+    texti->used=0;
+    texti->display=0;
+    ntextures++;
+    devicei->textureinfo=textureinfo+ntextures-1;
   }
 
   // check to see if texture files exist .
@@ -1950,6 +2104,8 @@ typedef struct {
     glGenTextures(1,&texti->name);
     glBindTexture(GL_TEXTURE_2D,texti->name);
     floortex=readpicture(texti->file,&texwid,&texht);
+    texti->texht=texht;
+    texti->texwid=texwid;
     if(floortex==NULL){
       printf(" - failed\n");
       continue;
@@ -2002,6 +2158,12 @@ typedef struct {
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+
+  if(ntextures>0&&devices_have_textures==1){
+    init_device_defs();
+    update_device_objects();
+  }
+
 
   printf(" - completed\n");
 #ifdef pp_GPU
@@ -2077,9 +2239,6 @@ typedef struct {
       break;
     }
   }
-
-
-  ndeviceinfo=0;
 
   nbtemp=0; nvents=0;
   itrnx=0, itrny=0, itrnz=0, igrid=0, ipdim=0, iobst=0, ivent=0;
@@ -3781,118 +3940,6 @@ typedef struct {
           ndeviceinfo++;
         }
       }
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ DEVICE +++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-  /*
-    DEVICE
-    type
-    x y z xn yn zn
-
-  devices
-  -------
-  1 - sensor
-  2 - sprinkler
-  3 - heat detector
-  4 - smoke detector
-
-    DEVICE
-    type
-    x y z xn yn zn
-
-  devices
-  -------
-  1 - sensor
-  2 - sprinkler
-  3 - heat detector
-  4 - smoke detector
-
-typedef struct {
-  float xyz[3];
-  float val;
-  float xyzplot[3];
-  float xyznorm[3];
-  sv_object *object;
-} device;
-    */
-    if(
-      (match(buffer,"DEVICE",6) == 1)&&
-      (match(buffer,"DEVICE_ACT",10) != 1)
-      ){
-      device *devicei;
-      float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
-      int state0=0;
-      int nparams=0;
-      char *labelptr;
-
-      devicei = deviceinfo + ndeviceinfo;
-      devicei->type=DEVICE_DEVICE;
-      fgets(buffer,255,stream);
-      trim(buffer);
-      devicei->object = get_SVOBJECT_type(buffer);
-      if(devicei->object==NULL){
-        devicei->object = device_defs_backup[0];
-      }
-      devicei->params=NULL;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %i %i",
-        xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams);
-
-      labelptr=strchr(buffer,'%');
-      if(labelptr!=NULL){
-        trim(labelptr);
-        if(strlen(labelptr)>1){
-          labelptr++;
-          labelptr=trim_front(labelptr);
-          if(strlen(labelptr)==0)labelptr=NULL;
-        }
-        else{
-          labelptr=NULL;
-        }
-      }
-
-      if(nparams<=0){
-        init_device(devicei,xyz,xyzn,state0,0,NULL,labelptr);
-      }
-      else{
-        float *params,*pc;
-        int nsize;
-
-        nsize = 6*((nparams-1)/6+1);
-        NewMemory((void **)&params,nsize*sizeof(float));
-        pc=params;
-        for(i=0;i<nsize/6;i++){
-          fgets(buffer,255,stream);
-          sscanf(buffer,"%f %f %f %f %f %f",pc,pc+1,pc+2,pc+3,pc+4,pc+5);
-          pc+=6;
-        }
-        init_device(devicei,xyz,xyzn,state0,nparams,params,labelptr);
-      }
-      get_elevaz(devicei->xyznorm,&devicei->angle_elev,&devicei->angle_az);
-
-      ndeviceinfo++;
-      continue;
-    }
-    if(match(buffer,"DEVICE_ACT",10) == 1){
-      device *devicei;
-      int idevice;
-      float act_time;
-      int act_state;
-
-      do_pass4=1;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i",&idevice,&act_time,&act_state);
-      idevice--;
-      if(idevice>=0&&idevice<ndeviceinfo){
-        devicei = deviceinfo + idevice;
-        devicei->act_time=act_time;
-        devicei->nstate_changes++;
-      }
-
       continue;
     }
   /*
@@ -5728,9 +5775,9 @@ void updateusetextures(void){
   }
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo + i;
-    for(j=0;j<meshi->nbptrs;j++){
-      bc=meshi->blockageinfoptrs[j];
-      if(textureinfo!=NULL){
+    if(textureinfo!=NULL){
+      for(j=0;j<meshi->nbptrs;j++){
+        bc=meshi->blockageinfoptrs[j];
         for(k=0;k<6;k++){
           texti = bc->surf[k]->textureinfo;
           if(texti!=NULL&&texti->loaded==1){
@@ -5762,6 +5809,16 @@ void updateusetextures(void){
           }
         }
       }
+    }
+  }
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+
+    devicei = deviceinfo + i;
+    texti=devicei->textureinfo;
+    if(texti!=NULL&&texti->loaded==1){
+      if(usetextures==1)texti->display=1;
+      texti->used=1;
     }
   }
   ntextures_loaded_used=0;
