@@ -244,6 +244,15 @@ void sv_startup_c(int argc, char **argv){
       NewMemory((void **)&texturedir,texture_len+1);
       strcpy(texturedir,texture_buffer);
     }
+    if(texturedir==NULL){
+      texture_len=strlen(smokeviewbindir)+strlen("textures");
+      NewMemory((void **)&texturedir,texture_len+1);
+      strcpy(texturedir,smokeviewbindir);
+      strcat(texturedir,"textures");
+    }
+  }
+  if(texturedir!=NULL){
+    printf("Texture directory: %s\n",texturedir);
   }
 #ifdef pp_BETA
   printf("*** This version of Smokeview is intended for review and testing ONLY. ***\n");

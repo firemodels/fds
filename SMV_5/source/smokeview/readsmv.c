@@ -417,8 +417,6 @@ int readsmv(char *file){
 
   FREEMEMORY(databasefilename);
 
-  FREEMEMORY(texturedir);
-
   FREEMEMORY(targinfo);
 
   FREEMEMORY(vsliceinfo);
@@ -600,13 +598,13 @@ int readsmv(char *file){
     if(match(buffer,"CADTEXTUREPATH",14) == 1||
        match(buffer,"TEXTUREDIR",10) == 1){
       if(fgets(buffer,255,stream)==NULL)break;
-      FREEMEMORY(texturedir);
       trim(buffer);
       {
         size_t texturedirlen;
 
         texturedirlen=strlen(trim_front(buffer));
         if(texturedirlen>0){
+          FREEMEMORY(texturedir);
           NewMemory( (void **)&texturedir,texturedirlen+1);
           strcpy(texturedir,trim_front(buffer));
         }
