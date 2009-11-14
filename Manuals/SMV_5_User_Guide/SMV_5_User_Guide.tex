@@ -1400,13 +1400,13 @@ to move the origin from an object's base to its center.
 
 \subsection{User Settable Transformations}
 User settable commands allow one to alter how objects defined in the devices.svo file are
-drawn using information passed to Smokeview at run time by FDS.  Smokeview places user data from these commands into an internal array, for discussion here named {\tt smv\_array}.  When Smokeview draws an object containing a user settable command (AXPB2STACK, GETUSERVALS or PUTUSERVALS2STACK), data is copied from {\tt smv\_array} overwriting input values of other device commands.  This allows one to customize objects contained in devices.svo using inputs or results of an FDS input file.
+drawn using information passed to Smokeview at run time by FDS.  Smokeview places user data from these commands into an internal array, for discussion here named {\tt smv\_array}.  When Smokeview draws an object containing a user settable command (MULTIADDT, COPYVAL, or COPYNVALS), data is copied from {\tt smv\_array} overwriting input values of other device commands.  This allows one to customize objects contained in devices.svo using inputs or results of an FDS input file.
 
 \blist
-\hitem{AXPB2STACK}
+\hitem{MULTIADDT}
 The command, \\
 \\
-{\tt offset1 offset2 stackskip axpb2stack}, \\
+{\tt offset1 offset2 stackskip multiaddt}, \\
 \\
 retrieves the values smv\_array[offset1] and smv\_array[offset2] from an internal Smokeview array.  Smokeview then uses these values to perform the operation \\
 \\
@@ -1414,17 +1414,16 @@ smv\_array[offset1]*simulation\_time+smv\_array[offset2] \\
  \\
 placing the result {\tt stackskip}\ positions farther down the device argument stack.
 
-\hitem{GETUSERVALS} The command,\\
+\hitem{COPYVAL} The command,\\
 \\
- {\tt offset nvals getuservals}, \\
+ {\tt offset stackskip copyval}, \\
 \\
-copies the {\tt nvals}\ values smv\_array[offset],~...,~smv\_array[offset+nvals-1] (again from an internal Smokeview array)
-to the device operand stack immediately following the arguments to this GETUSERVALS command.
+copies the value smv\_array[offset] (again from an internal Smokeview array)
+to the device operand stack {\tt stackskip}\ positions from the end of this command.
 This allows one to modify
-the look of a device at run-time.  Note that the command
-{\tt offset nvals getuservals}\ is equivalent to {\tt offset nvals 0 putuservals2stack}.
+the look of a device at run-time.
 
-The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt getuservals}\ and {\tt putuservals2stack}\ commands to customize at run-time how the device is drawn.  For example, the command
+The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt copyval}\ and {\tt copynvals}\ commands to customize at run-time how the device is drawn.  For example, the command
 {\tt 0.0 3.0 getuservals}, as illustrated in Figure \ref{figgetuservals}, copies three parameters from an internal Smokeview buffer starting at offset 0 onto the command argument stack for use by the command {\tt setcolor}, immediately after {\tt getuservals}.
 
 
@@ -1432,22 +1431,22 @@ The device definition listed in Figure \ref{figeggexample} and also found in the
 \begin{center}
 \includegraphics[width=5.0in]{figures/getuservals}\\
 \end{center}
-\caption[Schematic of getuservals usage.]{Schematic of getuservals usage. The commands in the command argument list are taken from the first part of the example in Figure \ref{figeggexample}.
-The blue arrow illustrate which data the {\tt getuservals}\ command retrieves from the internal Smokeview memory buffer.  The black arrow illustrate that the {\tt getuservals}\ command copies this data back onto the command argument list just after the arguments of {\tt getuservals}.
+\caption[Schematic of copyval usage.]{Schematic of copyval usage. 
+The blue arrow illustrate which data item the {\tt copyval}\ command retrieves from the internal Smokeview memory buffer.  The black arrow illustrate where this value is placed 
+on the command argument list.
 }
  \label{figgetuservals}
 \end{figure}
 
-\hitem{PUTUSERVALS2STACK} The command,\\
+\hitem{COPYNVALS} The command,\\
  \\
- {\tt offset nvals stackskip putuservals2stack}, \\
+ {\tt offset nvals stackskip copynvals}, \\
  \\
 copies the {\tt nvals}\ values, {\tt smv\_array[offset+0], ..., smv\_array[offset+nvals-1]},
-to {\tt stackskip} positions past the arguments of this PUTUSERVALS2STACK command.  As before, this allows one to modify
-the look of a device at run-time. This command is slightly more general than {\tt GETUSERVALS} allowing one
-to place copied values anywhere on the operand stack.
+to {\tt stackskip} positions past the arguments of this COPYNVALS command.  As before, this allows one to modify
+the look of a device at run-time.
 
-The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt PUTUSERSVALS2STACK}\
+The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt COPYNVALS}\
 command to modify the shape and color of the tube using parameters obtained from FDS.  Smokeview copies color, diameter and length information from the {\tt CLASS\_\_PARTICLES}\ keyword in the {\tt .smv}\ file to an internal memory buffer with offsets 0, 1 and 2 for red, green and blue colors, offset 3 for diameter and offset 4 for length.  These values are then copied as specified by the {\tt putuservals2stack}\ command onto the memory area uses by the smokeview device commands.
 
 \begin{figure}[\figoptions]
@@ -1458,25 +1457,26 @@ command to modify the shape and color of the tube using parameters obtained from
 // 4     length
 DEVICEDEF // device for particle "egg"
  EGG
- 0.0 3.0 getuservals 1.0 0.0 0.0 setcolor
- 4.0 1.0 6.0 putuservals2stack 3.0 1.0 5.0 putuservals2stack
- 3.0 1.0 1.0 putuservals2stack 1.0 1.0 1.0 scalexyz 1.0 drawsphere
+ 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
+ 4.0 4.0 copyval 3.0 3.0 copyval 3.0 2.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
 \end{verbatim}
-\caption{Device definition for `EGG' used to illustrate the use of the Smokeview device commands {\tt getuservals}\ and {\tt putuservals2stack}.}
+\caption{Device definition for `EGG' used to illustrate the use of the Smokeview device commands {\tt copyval}\ and {\tt copynvals}.}
  \label{figeggexample}
 \end{figure}
 
-For example, the command {\tt 4 1 6 putuservals2stack}\ is used in the `EGG' Smokeview device definition given in Figure \ref{figeggexample}.  The data flow is illustrated in Figure \ref{figputuservals2stack}.  In particular,  the command {\tt 4 1 6 putuservals2stack}\ takes one value at offset 4 ({\tt length}) and copies it siz positions ``down'' the command argument list which is first parameter of the {\tt scalexyz} command.  The command
-{\tt 3 1 5 putuservals2stack}\ takes one value at offset 3 ({\tt diameter}) and copies it five positions down the command argument list which in the example below would be the third argument of the {\tt scalexyz}\ command.  Finally, the command {\tt 3 1 1 putuservals2stack}\ takes one value at offset 3 (again {\tt diameter}) and copies it one position down the argument command list which is the second argument of {\tt scalexyz}.
+The data flow is illustrated in Figure \ref{figcopynvals}.
+The command {\tt 4 4 copyval}\ takes a value at offset 4 ({\tt length}) and copies it 4 positions ``down'' the command argument list which is the first parameter of the {\tt scalexyz} command.
+The command
+{\tt 3 3 copyval}\ copies the value at offset 3 ({\tt diameter}) to three positions down the command argument list which in the example below would be the second argument of the {\tt scalexyz}\ command.  Finally, the command {\tt 3 2 copyval}\ copies the value at offset 3 (again {\tt diameter}) and copies it two positions down the argument command list which is the third argument of {\tt scalexyz}.
 
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=5.0in]{figures/putuservals2stack}\\
 \end{center}
-\caption[Schematic of putuservals2stack usage.]{Schematic of putuservals2stack usage. The commands in the command argument list are taken from the example in Figure \ref{figeggexample}.
-The blue arrows illustrate which data the {\tt putuservals2stack}\ command retrieves from the internal Smokeview memory buffer.  The black arrows illustrate where the {\tt putuservals2stack}\ command copies this data value back onto the command argument list. Note that the 6 in the first {\tt putuservals2stack}\ command indicates how many values to skip.
+\caption[Schematic of copynvals usage.]{Schematic of copynvals usage. The commands in the command argument list are taken from the example in Figure \ref{figeggexample}.
+The blue arrows illustrate which data the {\tt copynvals}\ command retrieves from the internal Smokeview memory buffer.  The black arrows illustrate where the {\tt copynvals}\ command copies this data value back onto the command argument list. Note that the 6 in the first {\tt copynvals}\ command indicates how many values to skip.
 }
- \label{figputuservals2stack}
+ \label{figcopynvals}
 \end{figure}
 
 \elist
@@ -1484,7 +1484,7 @@ The blue arrows illustrate which data the {\tt putuservals2stack}\ command retri
 \section{Conditionals}
 Conditional commands ({\tt skipif}\ statements) may be used to exclude portions of a device
 definition  based upon variable values
-obtained using the {\tt getusers}\ or {\tt putuservals2stack} command .  For example, a tree trunk may be drawn black if a temperature exceeds a specified value.  Four forms of the {\tt skipif}\ command are
+obtained using the {\tt copyval}\ or {\tt copynvals} commands.  For example, a tree trunk may be drawn black if a temperature exceeds a specified value.  Four forms of the {\tt skipif}\ command are
 implemented: {\tt skipifle, skipiflt, skipifge} and {\tt skipifgt}.
 The notation {\tt , gt, le} and {\tt lt} has the usual meaning of greater than or equal to, greater than, {\em etc.}.
 
