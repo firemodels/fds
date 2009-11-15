@@ -219,7 +219,7 @@ DEVICEDEF // device for general ellipsoid
 DEVICEDEF // device for dynamic textured sphere
  TSPHERE
  0.0 0.0 1.0 setcolor
- 2.0 9.0 copyval 0.0 2.0 copyval 1.0 1.0 copyval 10.0 10.0 0.0 multiaddt 45.0 rotatez $t"day2.jpg" 5.0 drawtsphere
+ 2.0 9.0 copyval 0.0 2.0 copyval 1.0 1.0 copyval 10.0 10.0 0.0 multiaddt 45.0 rotatez 0.0 0.5 drawtsphere
 
 // tree devices
 
