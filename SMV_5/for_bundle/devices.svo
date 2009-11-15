@@ -215,20 +215,32 @@ DEVICEDEF // device for general ellipsoid
 // data layout for dynamic textured sphere
 // 0  rotation rate (degrees per second)
 // 1  initial rotation angle
+// 2  sphere diameter
 DEVICEDEF // device for dynamic textured sphere
- MSPHERE
+ TSPHERE
  0.0 0.0 1.0 setcolor
-0.0 2.0 copyval 1.0 1.0 copyval 10.0 10.0 0.0 multiaddt 45.0 rotatez $t"day2.jpg" 5.0 drawtsphere
+ 2.0 9.0 copyval 0.0 2.0 copyval 1.0 1.0 copyval 10.0 10.0 0.0 multiaddt 45.0 rotatez $t"day2.jpg" 5.0 drawtsphere
 
 // tree devices
 
+// data layout for trunk
+// 0  height of trunk base
+// 1  diameter of trunk
+// 2  height of trunk
+// 3-5 r,b,g color
 DEVICEDEF // device for tree trunk
  TRUNK
- 0.55 0.27 0.07 setcolor
+ 3.0 3.0 0.0 copynvals 0.55 0.27 0.07 setcolor
  0.0 2.0 copyval 0.0 0.0 1.0 translate 1.0 2.0 0.0 copynvals 1.0 3.0 drawdisk
+ 
+// data layout for canopy
+// 0  height of canopy base
+// 1  diameter of canopy base
+// 2  height of canopy
+// 3-5 r,b,g color
 DEVICEDEF // device for tree canopy
  CANOPY
- 0.14 0.56 0.14 setcolor
+ 3.0 3.0 0.0 copynvals 0.14 0.56 0.14 setcolor
  0.0 2.0 copyval 0.0 0.0 1.0 translate 1.0 2.0 0.0 copynvals 1.0 3.0 drawcone
 
 DEVICEDEF
