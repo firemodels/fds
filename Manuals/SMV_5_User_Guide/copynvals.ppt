@@ -185,7 +185,7 @@ Volume I: User's Guide
 
 
 \flushright{July 2008\\
-$SVN Repository$~$Revision: 5065 $}
+$SVN Repository$~$Revision$}
 %
 \vfill
 
@@ -1313,7 +1313,7 @@ attributes such as point size, line width or object color.
 There are two types of transformations, static and user settable.
 Static transformations
 do not change other commands.  User settable transformations
-change the inputs of subsequent device commands using data obtained while Smokeview is running.
+change the inputs of other device commands using data obtained while Smokeview is running.
 
 
 \subsection{Static Transformations}
@@ -1399,49 +1399,55 @@ to move the origin from an object's base to its center.
 
 
 \subsection{User Settable Transformations}
-User settable commands allow one to change how objects are drawn by using information passed from FDS. This information is passed using the PARAMS keyword on the \&DEVC namelist statement.  The user settable Smokeview device commands use this passed information to dynamically change the inputs of subsequent device commands.  Smokeview places this passed information into an internal array, for discussion here, named {\tt PARAMS}.
-
-When Smokeview draws an object containing a user settable command (MULTIADDT, COPYVAL, or COPYNVALS), data is copied from {\tt PARAMS} overwriting input values of subsequent device commands.  This allows one to customize objects contained in devices.svo using inputs or results obtained from FDS.
+User settable commands allow one to change how objects are drawn by using information passed from FDS.
+These commands use this information to dynamically change the inputs of other device commands.  Smokeview places information passed from FDS into an internal array, for discussion here named {\tt smv\_array}.  When Smokeview draws an object containing a user settable command (MULTIADDT, COPYVAL, or COPYNVALS), data is copied from {\tt smv\_array} overwriting input values of other device commands.  This allows one to customize objects contained in devices.svo using inputs or results of an FDS input file.
 
 \blist
+\hitem{MULTIADDT}
+The command, \\
+\\
+{\tt in1 in2 out multiaddt}, \\
+\\
+retrieves the values smv\_array[in1] and smv\_array[in2] from an internal Smokeview array.  Smokeview then uses these values to perform the operation \\
+\\
+smv\_array[in1]*simulation\_time+smv\_array[in2] \\
+ \\
+placing the result {\tt out}\ positions farther down the device argument stack.
+
 \hitem{COPYVAL} The command,\\
 \\
- {\tt in out copyval}, \\
+ {\tt in1 out copyval}, \\
 \\
-copies the value PARAMS[in] to a location 
-{\tt out + 1}\ positions farther down the command argument list.
+copies the value smv\_array[in1] (again from an internal Smokeview array)
+to the device operand stack {\tt out}\ positions from the end of this command.
 This allows one to modify
-the look of a device at run-time.  The usage of {\tt copyval}\ is illustrated in Figure \ref{figcopyval}.
+the look of a device at run-time.
+
+The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt copyval}\ and {\tt copynvals}\ commands to how the device is drawn.  For example, the command
+{\tt 0.0 3.0 0.0 copynvals}, as illustrated in Figure \ref{figgetuservals}, copies three parameters from an internal Smokeview buffer starting at {\tt smv\_array[0]}\ the command argument stack for use by the command {\tt setcolor}, immediately after {\tt copynvals}.
+
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[width=5.0in]{figures/copyval}\\
+\includegraphics[width=5.0in]{figures/getuservals}\\
 \end{center}
-\caption[Schematic of {\tt copyval}\ usage.]{Schematic of {\tt copyval}\ usage.
-The command {\tt i j copyval}\ copies the data item {\tt PARAMS[i]} and places it `j+1' positions farther down the command argument list.
+\caption[Schematic of copyval usage.]{Schematic of copyval usage.
+The blue arrow illustrate which data item the {\tt copyval}\ command retrieves from the internal Smokeview memory buffer.  The black arrow illustrate where this value is placed
+on the command argument list.
 }
- \label{figcopyval}
+ \label{figgetuservals}
 \end{figure}
 
 \hitem{COPYNVALS} The command,\\
  \\
- {\tt in n out copynvals}, \\
+ {\tt in nvals out copynvals}, \\
  \\
-copies the {\tt n}\ values {\tt PARAMS[in+0], ..., PARAMS[in+n-1]}
-to a location {\tt out+1} positions farther down the command argument list.
-The usage of {\tt copynvals}\ is illustrated in Figure \ref{figcopynvals}.
+copies {\tt nvals}\ values from {\tt smv\_array[in+0], ..., smv\_array[in+nvals-1]} 
+to {\tt out} positions past the arguments of this {\tt COPYNVALS}\ command.  As before, this allows one to modify
+the look of a device at run-time.
 
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=5.0in]{figures/copynvals}\\
-\end{center}
-\caption[Schematic of {\tt copynvals}\ usage.]{Schematic of {\tt copynvals}\ usage. The command sequence {\tt i n j copynvals}\ copies `n' data items starting at {\tt PARAMS[i]} and places these items `j+1' locations farther down the command argument list.
-}
- \label{figcopynvals}
-\end{figure}
-
-The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt copyval}\ and {\tt copynvals}\ commands to customize how the {\em egg}\ device is drawn.  For example, the command
-{\tt 0.0 3.0 0.0 copynvals}, as illustrated in Figure \ref{figcopyval}, copies three parameters from the Smokeview {\tt PARAMS}\ array buffer starting at {\tt PARAMS[0]}.  These values are copied farther down the command argument stack for use by the command {\tt setcolor}, immediately after {\tt copynvals}.
+The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt COPYNVALS}\
+command to modify the shape and color of the tube using parameters obtained from FDS.  Smokeview copies color, diameter and length information from the {\tt CLASS\_\_PARTICLES}\ keyword in the {\tt .smv}\ file to an internal memory buffer with offsets 0, 1 and 2 for red, green and blue colors, offset 3 for diameter and offset 4 for length.  These values are then copied as specified by the {\tt putuservals2stack}\ command onto the memory area uses by the smokeview device commands.
 
 \begin{figure}[\figoptions]
 \begin{verbatim}
@@ -1458,12 +1464,21 @@ DEVICEDEF // device for particle "egg"
  \label{figeggexample}
 \end{figure}
 
-\hitem{MULTIADDT}
-The command, \\
-\\
-{\tt a b out multiaddt}, \\
-\\
-is used to compute the value, $val=at+b$, where $t$ is the simulation time $a$ and $b$ are either defined in the device.svo file or in the FDS input file. The result, $val$ is placed {\tt out+1}\ positions farther down the command argument list.  This allows one to change how a device appears as a function of time (changing its size, rotating it, changing its color {\em etc.}).
+The data flow is illustrated in Figure \ref{figcopynvals}.
+The command {\tt 4 4 copyval}\ takes a value at offset 4 ({\tt length}) and copies it 4 positions ``down'' the command argument list which is the first parameter of the {\tt scalexyz} command.
+The command
+{\tt 3 3 copyval}\ copies {\tt smv\_array[3]}\ to three positions down the command argument list which in the example below would be the second argument of the {\tt scalexyz}\ command.  Finally, the command {\tt 3 2 copyval}\ copies {\tt smv\_array[3]}\ (again {\tt diameter}) and copies it two positions down the argument command list which is the third argument of {\tt scalexyz}.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=5.0in]{figures/putuservals2stack}\\
+\end{center}
+\caption[Schematic of copynvals usage.]{Schematic of copynvals usage. The commands in the command argument list are taken from the example in Figure \ref{figeggexample}.
+The blue arrows illustrate which data the {\tt copynvals}\ command retrieves from the internal Smokeview memory buffer.  The black arrows illustrate where the {\tt copynvals}\ command copies this data value back onto the command argument list. Note that the 6 in the first {\tt copynvals}\ command indicates how many values to skip.
+}
+ \label{figcopynvals}
+\end{figure}
+
 \elist
 
 \section{Conditionals}
