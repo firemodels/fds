@@ -76,6 +76,7 @@ EXTERNCPP int init_shaders(void);
 EXTERNCPP void LoadSmokeShaders(void);
 EXTERNCPP void UnloadSmokeShaders(void);
 #endif
+EXTERNCPP void initspheresegs(int nlat, int nlong);
 EXTERNCPP mesh *getmesh(float *xyz);
 EXTERNCPP void update_glui_wui(void);
 EXTERNCPP int have_terrain_slice(void);

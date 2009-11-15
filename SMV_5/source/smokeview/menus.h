@@ -3659,6 +3659,18 @@ void ShowDevicesMenu(int value){
   else if(value==-3){
     select_device=1-select_device;
   }
+  else if(value==-999){
+  }
+  else{
+    int oldval;
+
+    oldval=device_sphere_segments;
+    value=-value;
+    device_sphere_segments=value;
+    if(oldval!=device_sphere_segments){
+      initspheresegs(device_sphere_segments,2*device_sphere_segments);
+    }
+  }
   updatemenu=1;
   GLUTPOSTREDISPLAY
 }
@@ -3889,7 +3901,7 @@ static int particlestreakshowmenu=0;
 static int tourmenu=0;
 static int showtourmenu=0, avatartourmenu=0,avatarevacmenu=0;
 static int trainerviewmenu=0,mainmenu=0,zoneshowmenu=0,particleshowmenu=0,evacshowmenu=0,targetmenu=0;
-static int showdevicesmenu=0;
+static int showdevicesmenu=0,spheresegmentmenu=0;
 static int unloadplot3dmenu=0, unloadpatchmenu=0, unloadisomenu=0;
 static int showmultislicemenu=0;
 static int textureshowmenu=0;
@@ -4692,6 +4704,26 @@ static int in_menu=0;
   if(ndevice_defs>0){
     sv_object *dv_typei;
 
+    CREATEMENU(spheresegmentmenu,ShowDevicesMenu);
+
+    if(device_sphere_segments==6){
+      glutAddMenuEntry("   *6",-6);
+    }
+    else{
+      glutAddMenuEntry("   6",-6);
+    }
+    if(device_sphere_segments==10){
+      glutAddMenuEntry("   *10",-10);
+    }
+    else{
+      glutAddMenuEntry("   10",-10);
+    }
+    if(device_sphere_segments==20){
+      glutAddMenuEntry("   *20",-20);
+    }
+    else{
+      glutAddMenuEntry("   20",-20);
+    }
 
     CREATEMENU(showdevicesmenu,ShowDevicesMenu);
     for(i=0;i<ndevice_defs;i++){
@@ -4709,15 +4741,18 @@ static int in_menu=0;
     }
     glutAddMenuEntry("-",-999);
     if(ndeviceinfo>0){
-    if(select_device==1){
-      glutAddMenuEntry("*Select",-3);
-    }
-    else{
-      glutAddMenuEntry("Select",-3);
-    }
+      if(select_device==1){
+        glutAddMenuEntry("*Select",-3);
+      }
+      else{
+        glutAddMenuEntry("Select",-3);
+      }
     }
     glutAddMenuEntry("Show All",-1);
     glutAddMenuEntry("Hide All",-2);
+    glutAddMenuEntry("-",-999);
+    glutAddSubMenu("Sphere Segments",spheresegmentmenu);
+
   }
 
 /* --------------------------------zone show menu -------------------------- */
