@@ -478,6 +478,16 @@ void draw_devices(void){
         valstack[i]=devicei->params[i];
       }
     }
+    nvalstack=devicei->nparams;
+    ntexturestack=0;
+    if(devicei->ntextures>0){
+      if(devicei->textureinfo!=NULL){
+        for(i=0;i<devicei->ntextures;i++){
+          valstack[nvalstack+0]=devicei->params[nvalstack+i];
+        }
+      }
+      ntexturestack=devicei->ntextures;
+    }
     if(showtime==1&&itime>=0&&itime<ntimes&&devicei->showstatelist!=NULL){
       int state;
 
@@ -992,18 +1002,22 @@ void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor){
 
 /* ----------------------- drawsphere ----------------------------- */
 
-void drawtsphere(float texture_index,float diameter, unsigned char *rgbcolor){
+void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor){
   texture *texti;
   float latitude, longitude;
+  int texture_index;
 
-  if(texture_index<0.0||texture_index>=ntextures){
+
+  texture_index=valstack[nvalstack+(int)(texture_index_ptr+0.5)]+0.5;
+
+
+  if(texture_index<0||texture_index>ntextures-1){
     texti=NULL;
   }
   else{
     int itext;
 
-    itext = texture_index+0.5;
-    texti = textureinfo + itext;
+    texti = textureinfo + texture_index;
     if(texti->loaded==0||texti->display==0)texti=NULL;
   }
   if(texti==NULL){
@@ -2037,38 +2051,7 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
       numargs=0;
     }
     else{
-      if(strlen(token)>3&&token[0]=='$'&&token[1]=='t'){
-        char *texture_file=NULL;
-        char *end_texture_file=NULL;
-
-        *local_args=-2.0;       
-
-        texture_file=strchr(token+2,'"');
-        end_texture_file=strrchr(token+3,'"');
-
-        if(texture_file!=NULL&&end_texture_file!=NULL){
-          texture_file++;
-          *end_texture_file=0;
-          if(strlen(texture_file)>0){
-            int i;
-
-            for(i=0;i<ntextures;i++){
-              unsigned char *floortex;
-              int texwid, texht;
-              texture *texti;
-
-              texti = textureinfo + i;
-              if(strcmp(texture_file,texti->file)==0){
-                *local_args=(float)i;
-                break;
-              }
-            }
-          }
-        }
-      }
-      else{
-        sscanf(token,"%f",local_args);
-      }
+      sscanf(token,"%f",local_args);
       local_args++;
       numargs++;
     }
@@ -2393,6 +2376,18 @@ void update_device_objects(void){
     devicei->object = get_SVOBJECT_type(devicei->label);
     if(devicei->object==NULL){
       devicei->object = device_defs_backup[0];
+    }
+    if(devicei->ntextures>0){
+      int j;
+      for(j=0;j<devicei->ntextures;j++){
+        texture *texti;
+        int texture_index;
+
+        texti = devicei->textureinfo+j;
+        texture_index = texti - textureinfo;
+        if(texture_index<0||texture_index>ntextures-1)texture_index=-1;
+        devicei->params[devicei->nparams+j]=texture_index;
+      }
     }
   }
 
