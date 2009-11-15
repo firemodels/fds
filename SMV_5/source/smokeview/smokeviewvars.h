@@ -837,6 +837,8 @@ SVEXTERN sv_object *avatar_defs_backup[2];
 #define SIZE_VALSTACK 1000
 SVEXTERN float valstack[SIZE_VALSTACK];
 SVEXTERN int nvalstack;
+SVEXTERN int ntexturestack;
+
 SVEXTERN int topvalstack;
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;
