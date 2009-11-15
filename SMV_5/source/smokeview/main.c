@@ -67,13 +67,40 @@ int main(int argc, char **argv){
       if(temp_smvbindir!=NULL)strcpy(SMVBINDIR,temp_smvbindir);
 #ifdef WIN32
       if(strlen(SMVBINDIR)==0){
-        strcpy(SMVBINDIR,"c:\\program files\\nist\\smokeview\\");
+        strcpy(SMVBINDIR,"c:\\program files\\fds\\fds5\\bin\\");
       }
 #endif
       if(strlen(SMVBINDIR)>0){
-        NewMemory((void **)&smvprogdir,strlen(SMVBINDIR)+1);
+        NewMemory((void **)&smvprogdir,strlen(SMVBINDIR)+2);
         strcpy(smvprogdir,SMVBINDIR);
       }
+    }
+    if(smvprogdir!=NULL){
+      len=strlen(smvprogdir);
+      if(smvprogdir[len-1]!=dirseparator[0]){
+        strcat(smvprogdir,dirseparator);
+      }
+    }
+    if(texturedir==NULL){
+      char *texture_buffer;
+      size_t texture_len;
+
+      texture_buffer=getenv("texturedir");
+      if(texture_buffer!=NULL){
+        texture_len=strlen(texture_buffer);
+        NewMemory((void **)&texturedir,texture_len+1);
+        strcpy(texturedir,texture_buffer);
+      }
+      if(texturedir==NULL){
+        texture_len=strlen(smvprogdir)+strlen("textures");
+        NewMemory((void **)&texturedir,texture_len+2);
+        strcpy(texturedir,smvprogdir);
+        //strcat(texturedir,dirseparator);
+        strcat(texturedir,"textures");
+      }
+    }
+    if(texturedir!=NULL){
+      printf("Texture directory: %s\n",texturedir);
     }
 
     get_smokezippath(smvprogdir,&smokezippath);
