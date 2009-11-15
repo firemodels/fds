@@ -208,7 +208,8 @@ multiplied by a bias factor, $\delta$:
 \ee
 The standard deviation, $\sigma_M$, is the model-intrinsic uncertainty, {\em i.e.} model error.
 This and the bias factor, $\delta$, are the parameters that we seek to quantify.
-Again, using the log transformation we obtain
+Again, using the delta method we obtain a distribution for $\ln M$ whose parameters can be expressed in terms of a
+relative standard deviation:
 \be
    \ln M \; | \; \theta \sim N \left(\ln \delta +\ln \theta - \frac{\widetilde{\sigma}_M^2}{2} \; , \;
    \widetilde{\sigma}_M^2 \right) \quad ; \quad \widetilde{\sigma}_M=\frac{\sigma_M}{\delta \, \theta} \label{meq}
@@ -312,7 +313,8 @@ The solid, off-diagonal lines indicate the relative uncertainty, $2\widetilde{\s
 The statistical procedure outlined above ought to provide estimates of the values of the bias factor, $\delta$, and the model error, $\widetilde{\sigma}_M$, whose
 values we used in creating the hypothetical model predictions. The results of seven random trials are shown in Table~\ref{trials}. It is not expected that the
 estimates will be exact because they are based on truncated Taylor series approximations. However, given the fact that the experimental uncertainty estimate,
-$\widetilde{\sigma}_E$, is often only a gross approximation in its own right, the accuracy of the procedure is more than adequate.
+$\widetilde{\sigma}_E$, is often only a gross approximation in its own right, the accuracy of the procedure is more than adequate, as indicated by the average values
+of the seven trials.
 
 \begin{table}[t]
 \caption{Estimated bias and relative error from random trials used to verify the analysis. }
@@ -327,7 +329,8 @@ Exact   & 1.030            &    0.100            \\ \hline \hline
 4       & 1.034            &    0.100            \\ \hline
 5       & 1.027            &    0.105            \\ \hline
 6       & 1.035            &    0.100            \\ \hline
-7       & 1.029            &    0.097            \\ \hline
+7       & 1.029            &    0.097            \\ \hline \hline
+Average & 1.030            &    0.101            \\ \hline
 \end{tabular}
 \end{center}
 \label{trials}
@@ -368,14 +371,14 @@ Now, consider the graph shown in Fig.~\ref{bell_curve}.
 The vertical lines indicate the ``threshold'' temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
 model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
 The bell curve is a normal distribution whose mean and standard deviation are obtained from Eq.~(\ref{truth}) above, and calculated here:
-\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad  \sigma = \widetilde{\sigma}_M \, M = 0.10 \times 330 = 33 \; ^\circ \hbox{C}  \ee
+\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad  \sigma = \widetilde{\sigma}_M \, \frac{M}{\hat{\delta}} = 0.10 \times \frac{330}{1.03} = 32 \; ^\circ \hbox{C}  \ee
 respectively. The shaded area beneath the bell curve is the probability (0.035 in this case) that the ``true'' temperature can exceed 400~$^\circ$C.
 This means that there is a 3.5~\% chance that the cables could
 become damaged {\em based solely on the fact that the model is not a perfect representation of reality.}
 
 The obvious question to ask at this point is what do we do if we cannot assume that the specified fire, material properties, and other input parameters are
 known exactly? How does that affect our estimate of the likelihood of cable damage? The procedure above has only provided a way of expressing the model
-error. What about the so-called ``user effects''? What if the specified fire in the electrical cabinet is actually chosen from a distribution of heat release rates?
+error. What if the specified fire in the electrical cabinet is actually chosen from a distribution of heat release rates?
 What if the material properties of the cables are not known exactly? Assuming one could quantify the uncertainty of all of the input parameters, and assuming that the model error
 and the input uncertainty are uncorrelated, it is possible to combine the two following the procedure that was described above that is used to determine the combined
 experimental uncertainty. Of
