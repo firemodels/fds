@@ -622,14 +622,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
         int argval, argmin, argmax, stackskip;
         float val, valmin, valmax;
 
-        argval=arg[0]+0.5;
-        val=valstack[argval];
+        val=arg[0];
 
-        argmin=arg[1]+0.5;
-        valmin=valstack[argmin];
+        valmin=arg[1];
 
-        argmax=arg[2]+0.5;
-        valmax=valstack[argmax];
+        valmax=arg[2];
 
         if(val<valmin)val=valmin;
         if(val>valmax)val=valmax;
@@ -646,14 +643,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
         float val2, valmax2;
         float val_result;
 
-        argval=arg[0]+0.5;
-        val=valstack[argval];
+        val=arg[0];
 
-        argmin=arg[1]+0.5;
-        valmin=valstack[argmin];
+        valmin=arg[1];
 
-        argmax=arg[2]+0.5;
-        valmax=valstack[argmax];
+        valmax=arg[2];
 
         val2=val-valmin;
         valmax2=valmax-valmin;
@@ -675,14 +669,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
         float val2, valmax2;
         float val_result;
 
-        argval=arg[0]+0.5;
-        val=valstack[argval];
+        val=arg[0];
 
-        argmin=arg[1]+0.5;
-        valmin=valstack[argmin];
+        valmin=arg[1];
 
-        argmax=arg[2]+0.5;
-        valmax=valstack[argmax];
+        valmax=arg[2];
 
         val2=val-valmin;
         valmax2=valmax-valmin;
