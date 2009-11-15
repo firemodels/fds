@@ -143,6 +143,8 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
 
 static float *xcirc=NULL, *ycirc=NULL;
 static int ncirc;
+static float *cos_long=NULL, *sin_long=NULL, *cos_lat=NULL, *sin_lat=NULL;
+static int nlat, nlong;
 static float specular[4]={0.4,0.4,0.4,1.0};
 unsigned char *rgbimage=NULL;
 int rgbsize=0;
@@ -1007,10 +1009,12 @@ void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor
   float latitude, longitude;
   int texture_index;
 
-
-  texture_index=valstack[nvalstack+(int)(texture_index_ptr+0.5)]+0.5;
-
-
+  if(texture_index_ptr>=0.0&&texture_index_ptr<ntexturestack){
+    texture_index=valstack[nvalstack+(int)(texture_index_ptr+0.5)]+0.5;
+  }
+  else{
+    texture_index=-1.0;
+  }
   if(texture_index<0||texture_index>ntextures-1){
     texti=NULL;
   }
@@ -1038,7 +1042,7 @@ void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor
 
     glBegin(GL_QUADS);
 #define NLAT 20
-#define NLONG 40
+#define NLONG (2*NLAT)
     pi=4.0*atan(1.0);
     dlat = pi/NLAT;
     dlong = 2.0*pi/NLONG;
@@ -1052,7 +1056,7 @@ void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor
       for(i=0;i<NLONG;i++){
         float x, y, z;
 
-        longitude = -2.0*pi+i*dlong;
+        longitude = i*dlong;
 
         ti = 1.0-(float)i/NLONG;
         tip1 = 1.0-(float)(i+1)/NLONG;
@@ -1723,6 +1727,45 @@ void initcircle(unsigned int npoints){
   xcirc[ncirc]=xcirc[0];
   ycirc[ncirc]=ycirc[0];
 
+}
+
+/* ----------------------- initcircle2 ----------------------------- */
+
+void initcircle2(int nlat, int nlong){
+  float dlat, dlong, pi;
+  int i;
+
+  FREEMEMORY(cos_lat);
+  FREEMEMORY(sin_lat);
+  FREEMEMORY(cos_long);
+  FREEMEMORY(sin_long);
+  NewMemory( (void **)&cos_lat,(nlat+1)*sizeof(float));
+  NewMemory( (void **)&sin_lat,(nlat+1)*sizeof(float));
+  NewMemory( (void **)&cos_long,(nlong+1)*sizeof(float));
+  NewMemory( (void **)&sin_long,(nlong+1)*sizeof(float));
+  pi=4.0*atan(1.0);
+
+  dlat=pi/(float)nlat;
+  for(i=0;i<nlat;i++){
+    float angle;
+
+    angle = -pi/2.0 + i*dlat;
+    cos_lat[i] = cos(angle);
+    sin_lat[i] = sin(angle);
+  }
+  cos_lat[nlat]=cos_lat[0];
+  sin_lat[nlat]=sin_lat[0];
+
+  dlong=2.0*pi/(float)nlong;
+  for(i=0;i<nlong;i++){
+    float angle;
+
+    angle = i*dlong;
+    cos_long[i] = cos(angle);
+    sin_long[i] = sin(angle);
+  }
+  cos_long[nlong]=cos_long[0];
+  sin_long[nlong]=sin_long[0];
 }
 
 /* ----------------------- freecircle ----------------------------- */
