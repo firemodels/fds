@@ -6588,6 +6588,13 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
+    if(match(buffer,"SPHERESEGS",10)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&device_sphere_segments);
+      if(device_sphere_segments<3)device_sphere_segments=3;
+      initspheresegs(device_sphere_segments,2*device_sphere_segments);
+      continue;
+    }
     if(match(buffer,"OFFSETSLICE",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&offset_slice);
@@ -8938,6 +8945,8 @@ void writeini(int flag){
   fprintf(fileout," %f\n",sensorrelsize);
   fprintf(fileout,"SPRINKLERABSSIZE\n");
   fprintf(fileout," %f\n",sprinklerabssize);
+  fprintf(fileout,"SPHERESEGS\n");
+  fprintf(fileout," %i\n",device_sphere_segments);
   if(no_graphics==0&&
      (screenWidth == glutGet(GLUT_SCREEN_WIDTH)||screenHeight == glutGet(GLUT_SCREEN_HEIGHT))
     ){

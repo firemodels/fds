@@ -115,6 +115,9 @@ char IOobject_revision[]="$Revision$";
 
 #define SV_ERR -1
 
+#define NLAT device_sphere_segments
+#define NLONG (2*device_sphere_segments)
+
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected);
 float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2[3]);
 
@@ -1029,8 +1032,6 @@ void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor
   }
   else{
     int i,j;
-    float dlat, dlong;
-    float pi;
 
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
     glEnable(GL_TEXTURE_2D);
@@ -1040,52 +1041,45 @@ void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor
     glPushMatrix();
     glScalef(diameter/2.0,diameter/2.0,diameter/2.0);
 
+    if(cos_lat==NULL)initspheresegs(NLAT,NLONG);
     glBegin(GL_QUADS);
-#define NLAT 20
-#define NLONG (2*NLAT)
-    pi=4.0*atan(1.0);
-    dlat = pi/NLAT;
-    dlong = 2.0*pi/NLONG;
     for(j=0;j<NLAT;j++){
       float ti,tip1;
       float tj,tjp1;
 
-      latitude = -pi/2.0 + j*dlat;
       tj = 1.0-(float)j/NLAT;
       tjp1 = 1.0-(float)(j+1)/NLAT;
       for(i=0;i<NLONG;i++){
         float x, y, z;
 
-        longitude = i*dlong;
-
         ti = 1.0-(float)i/NLONG;
         tip1 = 1.0-(float)(i+1)/NLONG;
 
-        x = cos(longitude)*cos(latitude);
-        y = sin(longitude)*cos(latitude);
-        z = sin(latitude);
+        x = cos_long[i]*cos_lat[j];
+        y = sin_long[i]*cos_lat[j];
+        z = sin_lat[j];
 
         glNormal3f(x,y,z);
         glTexCoord2f(ti,tj);
         glVertex3f(x,y,z);
 
-        x = cos(longitude+dlong)*cos(latitude);
-        y = sin(longitude+dlong)*cos(latitude);
-        z = sin(latitude);
+        x = cos_long[i+1]*cos_lat[j];
+        y = sin_long[i+1]*cos_lat[j];
+        z = sin_lat[j];
         glNormal3f(x,y,z);
         glTexCoord2f(tip1,tj);
         glVertex3f(x,y,z);
 
-        x = cos(longitude+dlong)*cos(latitude+dlat);
-        y = sin(longitude+dlong)*cos(latitude+dlat);
-        z = sin(latitude+dlat);
+        x = cos_long[i+1]*cos_lat[j+1];
+        y = sin_long[i+1]*cos_lat[j+1];
+        z = sin_lat[j+1];
         glNormal3f(x,y,z);
         glTexCoord2f(tip1,tjp1);
         glVertex3f(x,y,z);
 
-        x = cos(longitude)*cos(latitude+dlat);
-        y = sin(longitude)*cos(latitude+dlat);
-        z = sin(latitude+dlat);
+        x = cos_long[i]*cos_lat[j+1];
+        y = sin_long[i]*cos_lat[j+1];
+        z = sin_lat[j+1];
 
         glNormal3f(x,y,z);
         glTexCoord2f(ti,tjp1);
@@ -1094,7 +1088,9 @@ void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor
     }
     glEnd();
     glPopMatrix();
-    glDisable(GL_TEXTURE_2D);
+    if(texti!=NULL){
+      glDisable(GL_TEXTURE_2D);
+    }
 
   }
 }
@@ -1103,29 +1099,43 @@ void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor
 
 void drawsphere(float diameter, unsigned char *rgbcolor){
   int i,j;
-  float *radsphere, *zsphere;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
-  radsphere=ycirc;
-  zsphere=xcirc;
+  if(cos_lat==NULL)initspheresegs(NLAT,NLONG);
+
   glPushMatrix();
   glScalef(diameter/2.0,diameter/2.0,diameter/2.0);
 
   glBegin(GL_QUADS);
   if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
-  for(i=0;i<ncirc/2+1;i++){
-    for(j=0;j<ncirc;j++){
-      glNormal3f(radsphere[  i]*xcirc[  j],radsphere[  i]*ycirc[  j],zsphere[  i]);
-      glVertex3f(radsphere[  i]*xcirc[  j],radsphere[  i]*ycirc[  j],zsphere[  i]);
+  for(j=0;j<NLAT;j++){
+    for(i=0;i<NLONG;i++){
+      float x, y, z;
 
-      glNormal3f(radsphere[i+1]*xcirc[  j],radsphere[i+1]*ycirc[  j],zsphere[i+1]);
-      glVertex3f(radsphere[i+1]*xcirc[  j],radsphere[i+1]*ycirc[  j],zsphere[i+1]);
+      x = cos_long[i]*cos_lat[j];
+      y = sin_long[i]*cos_lat[j];
+      z = sin_lat[j];
 
-      glNormal3f(radsphere[i+1]*xcirc[j+1],radsphere[i+1]*ycirc[j+1],zsphere[i+1]);
-      glVertex3f(radsphere[i+1]*xcirc[j+1],radsphere[i+1]*ycirc[j+1],zsphere[i+1]);
+      glNormal3f(x,y,z);
+      glVertex3f(x,y,z);
 
-      glNormal3f(radsphere[  i]*xcirc[j+1],radsphere[  i]*ycirc[j+1],zsphere[  i]);
-      glVertex3f(radsphere[  i]*xcirc[j+1],radsphere[  i]*ycirc[j+1],zsphere[  i]);
+      x = cos_long[i+1]*cos_lat[j];
+      y = sin_long[i+1]*cos_lat[j];
+      z = sin_lat[j];
+      glNormal3f(x,y,z);
+      glVertex3f(x,y,z);
+
+      x = cos_long[i+1]*cos_lat[j+1];
+      y = sin_long[i+1]*cos_lat[j+1];
+      z = sin_lat[j+1];
+      glNormal3f(x,y,z);
+      glVertex3f(x,y,z);
+
+      x = cos_long[i]*cos_lat[j+1];
+      y = sin_long[i]*cos_lat[j+1];
+      z = sin_lat[j+1];
+
+      glNormal3f(x,y,z);
+      glVertex3f(x,y,z);
     }
   }
   glEnd();
@@ -1729,9 +1739,9 @@ void initcircle(unsigned int npoints){
 
 }
 
-/* ----------------------- initcircle2 ----------------------------- */
+/* ----------------------- initspheresegs ----------------------------- */
 
-void initcircle2(int nlat, int nlong){
+void initspheresegs(int nlat, int nlong){
   float dlat, dlong, pi;
   int i;
 
@@ -1746,15 +1756,13 @@ void initcircle2(int nlat, int nlong){
   pi=4.0*atan(1.0);
 
   dlat=pi/(float)nlat;
-  for(i=0;i<nlat;i++){
+  for(i=0;i<=nlat;i++){
     float angle;
 
     angle = -pi/2.0 + i*dlat;
     cos_lat[i] = cos(angle);
     sin_lat[i] = sin(angle);
   }
-  cos_lat[nlat]=cos_lat[0];
-  sin_lat[nlat]=sin_lat[0];
 
   dlong=2.0*pi/(float)nlong;
   for(i=0;i<nlong;i++){
