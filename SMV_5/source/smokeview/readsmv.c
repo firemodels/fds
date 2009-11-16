@@ -995,6 +995,15 @@ int readsmv(char *file){
   printf("   pass 2\n");
   while(!feof(stream)){
 
+    if(noGRIDpresent==1&&startpass==1){
+      strcpy(buffer,"GRID");
+      startpass=0;
+    }
+    else{
+      if(fgets(buffer,255,stream)==NULL)break;
+      if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
+    }
+
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++ TERRAIN +++++++++++++++++++++++
@@ -1159,14 +1168,6 @@ int readsmv(char *file){
       }
       npartclassinfo++;
       continue;
-    }
-    if(noGRIDpresent==1&&startpass==1){
-      strcpy(buffer,"GRID");
-      startpass=0;
-    }
-    else{
-      if(fgets(buffer,255,stream)==NULL)break;
-      if(strncmp(buffer," ",1)==0)continue;
     }
 
   /*
@@ -1908,7 +1909,7 @@ typedef struct {
         int nsize;
 
         nsize = 6*((nparams-1)/6+1);
-        NewMemory((void **)&params,nsize*sizeof(float));
+        NewMemory((void **)&params,(nsize+devicei->ntextures)*sizeof(float));
         pc=params;
         for(i=0;i<nsize/6;i++){
           fgets(buffer,255,stream);
@@ -1927,6 +1928,7 @@ typedef struct {
         devices_have_textures=1;
       }
 
+      CheckMemory;
       ndeviceinfo++;
       continue;
     }
@@ -2078,6 +2080,7 @@ typedef struct {
       printf("%s - duplicate\n",texti->file);
       continue;
     }
+    CheckMemory;
     glGenTextures(1,&texti->name);
     glBindTexture(GL_TEXTURE_2D,texti->name);
     floortex=readpicture(texti->file,&texwid,&texht);
@@ -2099,6 +2102,7 @@ typedef struct {
     texti->loaded=1;
     printf(" - completed\n");
   }
+  CheckMemory;
 #endif
   if(ntextures==0)FREEMEMORY(textureinfo);
 
@@ -2136,9 +2140,11 @@ typedef struct {
 
   if(ntextures>0&&devices_have_textures==1){
     init_device_defs();
+    CheckMemory;
     update_device_objects();
+    CheckMemory;
   }
-
+  CheckMemory;
 
   printf(" - completed\n");
 #ifdef pp_GPU
@@ -2247,6 +2253,7 @@ typedef struct {
         if(strncmp(buffer," ",1)==0)continue;
       }
     }
+    printf("buffer=%s\n",buffer);
     CheckMemory;
 
   /*
