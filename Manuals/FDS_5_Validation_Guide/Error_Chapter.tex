@@ -1,6 +1,6 @@
 
-\chapter{Quantifying Model Error}
-%\section{Introduction}
+%\chapter{Quantifying Model Error}
+\section{Introduction}
 
 There are various definitions of model validation.
 For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capability of
@@ -59,8 +59,7 @@ a fire model validation study typically consists of comparing point measurements
 Figure~\ref{temp_history} is a typical result for a single point measurement, and given that usually dozens of such measurements are made during each experiment,
 and potentially dozens of experiments are conducted as part of a test series, we can expect hundreds of such plots for any given quantity of interest. In many cases, these
 plots in themselves provide sufficient information for a potential model user or authority having jurisdiction (AHJ) to decide if the model is sufficiently accurate for the
-given application. Because there is no consensus ``acceptance criteria'' within the fire protection community to indicate what constitutes sufficient accuracy, the
-judgment is left to end user or AHJ. It can be argued that this is as it should be because each situation is different. For example, some regulatory
+given application. For example, some regulatory
 authorities prefer models that consistently over-predict the severity of the fire, in which case the model serves as a ``screening tool.'' Design engineers, however,
 usually prefer that the model predict the outcome of the fire as accurately as possible, even though they may apply some form of safety factor to the results.
 In any case, there is certainly no reason why we cannot develop a process to quantify the accuracy of the model that goes beyond simply
@@ -128,7 +127,7 @@ Estimates of the uncertainty in large scale calorimeters is on the order of 15~\
 a compartment fire is proportional to the HRR raised to the two-thirds power, thus a 15~\% uncertainty in the HRR would lead to a $2/3 \times 15$~\%=10~\%
 uncertainty in the model prediction. This uncertainty now needs to be combined with the uncertainty in the thermocouple measurement itself. Let us say that
 this is also 10~\%. Because the two forms of uncertainty are uncorrelated, they are combined by quadrature (summing of squares) to yield a combined
-uncertainty of 14~\%. An other way to look at this is to recognize that the combined uncertainty is represented as the diagonal of the rectangle formed
+uncertainty of 14~\%. Another way to look at this is to recognize that the combined uncertainty is represented as the diagonal of the rectangle formed
 from the horizontal and vertical uncertainty/error bars in Fig.~\ref{scatterplot}.
 
 Hamins performed this exercise for ten quantities of interest in the U.S. NRC validation study. The results are summarized in Table~\ref{Uncertainty}, with
@@ -181,7 +180,10 @@ With these assumptions in mind, we proceed with the statistical analysis of the 
 Assume that the set of model predictions and the corresponding set of experimental measurements are denoted
 $M_i$ and $E_i$, respectively, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers
 expressing the increase in the value of a quantity above its ambient.
-We assume that a given experimental measurement, $E_i$, is normally
+As mentioned above, measurements from full-scale fire experiments often lack uncertainty estimates. In cases where the uncertainty is
+reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely
+a reported systematic bias in the measurement.
+For this reason, we assume that a given experimental measurement, $E_i$, is normally
 distributed\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
 with mean, $\mu$, and standard deviation, $\sigma$.} about the ``true'' value, $\theta_i$, and there is no systematic bias:
 \be
@@ -227,7 +229,7 @@ What we need now is a way to estimate the mean and standard deviation of this co
 The least squares estimate of the standard deviation is
 \be
    \widehat{ \widetilde{\sigma}_M^2+\widetilde{\sigma}_E^2 } = \frac{1}{n-1} \sum_{i=1}^n \,
-   \left[ \left(\ln M_i - \ln E_i \right) - \left( \overline{\ln M} - \overline{\ln E} \right)  \right]^2
+   \left[ \left(\ln M_i - \ln E_i \right) - \left( \overline{\ln M} - \overline{\ln E} \right)  \right]^2 \label{stdev}
 \ee
 Recall that $\widetilde{\sigma}_E$ is known and the expression on the right can be evaluated using the pairs of measured and
 predicted values. An estimate of $\delta$ can be found using the mean of the distribution:
@@ -240,12 +242,16 @@ the prior distribution and the likelihood function, normalized by their integral
 $f(\theta|E)= p(\theta) \, f(E|\theta)/\int p(\theta) \, f(E|\theta) \, d\theta$.
 A constant prior is also known as a Jeffreys prior.}
 with a non-informative prior for $\theta$, we obtain the posterior distribution as
-\be \delta \, \theta \; | \; M \sim N \left( M \; , \; \sigma_M^2 \right) \label{thetaeq} \ee
+\be 
+   \delta \, \theta \; | \; M \sim N \left( M \; , \; \sigma_M^2 \right) \label{thetaeq} 
+\ee
 The assumption of a non-informative prior implies that we do not have sufficient information about the
 prior distribution ({\em i.e.} the true value) of
 $\theta$ to assume anything other than a uniform distribution.
 Dividing by the bias factor, $\delta$, yields a distribution for the ``true'' value of the predicted quantity:
-\be \theta \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth} \ee
+\be 
+   \theta \; | \; M \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth} 
+\ee 
 Below, we describe how one might make use of this formula in practice.
 First, however, we need to verify the accuracy of the procedure just described.
 
@@ -292,7 +298,7 @@ the predicted and measured values.}
 
 
 For the second example, we make our hypothetical model predictions and experimental measurements more realistic. Assume now that the
-measured value is the HGL temperature, and that the relative uncertainty of the measured values, $\widetilde{\sigma}_E=0.07$, is obtained from Table~\ref{Uncertainty}.
+measured quantity is surface temperature, and that the relative uncertainty of the measured values, $\widetilde{\sigma}_E=0.07$, is obtained from Table~\ref{Uncertainty}.
 We assume the model has a bias factor of 1.03 and its relative error is 0.10 in order to generate a set of hypothetical model predictions.
 A graphical representation of the data is shown in Fig.~\ref{Case_2_Scatter}. Note that the
 experimental uncertainty bounds are represented by thick, dashed lines, and the model bias and relative error is shown by the lighter, dashed lines.
@@ -372,8 +378,8 @@ The vertical lines indicate the ``threshold'' temperature at which damage is ass
 model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
 The bell curve is a normal distribution whose mean and standard deviation are obtained from Eq.~(\ref{truth}) above, and calculated here:
 \be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad  \sigma = \widetilde{\sigma}_M \, \frac{M}{\hat{\delta}} = 0.10 \times \frac{330}{1.03} = 32 \; ^\circ \hbox{C}  \ee
-respectively. The shaded area beneath the bell curve is the probability (0.035 in this case) that the ``true'' temperature can exceed 400~$^\circ$C.
-This means that there is a 3.5~\% chance that the cables could
+respectively. The shaded area beneath the bell curve is the probability (0.03 in this case) that the ``true'' temperature can exceed 400~$^\circ$C.
+This means that there is a 3~\% chance that the cables could
 become damaged {\em based solely on the fact that the model is not a perfect representation of reality.}
 
 The obvious question to ask at this point is what do we do if we cannot assume that the specified fire, material properties, and other input parameters are
@@ -384,7 +390,7 @@ and the input uncertainty are uncorrelated, it is possible to combine the two fo
 experimental uncertainty. Of
 course, the uncertainty associated with the input parameters would need to be quantified and propagated through the model. The end result would be a widening of
 the distribution shown in Fig.~\ref{bell_curve} and an increase in the likelihood of cable damage, assuming that the parameters used in the ``base case'' were
-all taken as the mean values of their respective distributions. In fact, depending on the scenario, the uncertainty associated with the input parameters far outweighs
+all taken as the mean values of their respective distributions. In fact, depending on the scenario, the uncertainty associated with the input parameters can far outweigh
 the model error.
 
 
@@ -404,7 +410,7 @@ with insufficient means to do so.
 
 Another concern with the above procedure is that an over-estimate of the experimental uncertainty will naturally result in an under-estimate of the model error. Keep
 in mind that the model can never be declared more accurate than the experimental measurements against which it is compared. This rule is demonstrated
-mathematically by Eq.~(\ref{model_error}) where it is observed that an over-estimate of the experimental uncertainty, $\tilde{\sigma}_E$, can result in
+mathematically by Eq.~(\ref{stdev}) where it is observed that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, can result in
 the square root of a negative number, an imaginary number. In the case that the computed model error is less than the estimated experimental uncertainty, then the
 latter must be re-evaluated, or the number of data points needs to be seriously questioned.
 
