@@ -1,3 +1,7 @@
-1.  test double size rendering - addresses issue 808
-2.  test rendering addition to Motion/View/Rendering dialog box - addresses issue 808
-3.  fix problem with RENDERALL script command - addresses issue 814
+1.  test code for displaying smokediff'd files
+2.  test display of user specified zone fire vent colors
+3.  test code for displaying diff'd files of cases with different grid precisions
+4.  test code for freeing plot3d memory after coloring data (for use with very large cases)
+5.  test code for displaying a planar user device
+6.  test code for displaying dynamic devices, textured sphere devices and color settable trees
+
