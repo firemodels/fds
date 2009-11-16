@@ -4265,6 +4265,7 @@ SELECT CASE(IND)
              PY%QUANTITY == 'ENTHALPY'           .OR. &
              PY%QUANTITY == 'DROPLET FLUX X'     .OR. &
              PY%QUANTITY == 'DROPLET FLUX Y'     .OR. &
+             PY%QUANTITY == 'DROPLET FLUX Z' ) THEN
              IF (PY%PDPA_NORMALIZE) THEN
                 DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*(2._EB*PY%PDPA_RADIUS)**3
              ELSE
