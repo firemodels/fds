@@ -4265,8 +4265,12 @@ SELECT CASE(IND)
              PY%QUANTITY == 'ENTHALPY'           .OR. &
              PY%QUANTITY == 'DROPLET FLUX X'     .OR. &
              PY%QUANTITY == 'DROPLET FLUX Y'     .OR. &
-             PY%QUANTITY == 'DROPLET FLUX Z') &
-            DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*(2._EB*PY%PDPA_RADIUS)**3
+             IF (PY%PDPA_NORMALIZE) THEN
+                DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*(2._EB*PY%PDPA_RADIUS)**3
+             ELSE
+                DV%PDPA_DENUM = 8._EB
+             ENDIF
+         ENDIF
          DLOOP: DO I=1,NLP
             DR=>DROPLET(I)
             IPC=DR%CLASS
@@ -4298,12 +4302,7 @@ SELECT CASE(IND)
                   VEL = 1.0_EB
             END SELECT
             ! Compute numerator and denumerator
-            IF (PY%QUANTITY == 'ENTHALPY') THEN
-               DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*DR%R**PY%PDPA_M * VEL             
-               DV%PDPA_DENUM = 1._EB
-            ELSE
-               DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M * VEL
-            ENDIF
+            DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M * VEL
             IF ((PY%QUANTITY /= 'NUMBER CONCENTRATION') .AND. &
                 (PY%QUANTITY /= 'MASS CONCENTRATION') .AND. &
                 (PY%QUANTITY /= 'DROPLET FLUX X') .AND. &
