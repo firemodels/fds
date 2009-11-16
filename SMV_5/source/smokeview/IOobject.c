@@ -228,7 +228,7 @@ void getsmokesensors(void){
 
     devicei = deviceinfo + i;
     label = devicei->object->label;
-    if(strcmp(label,"smokesensor")!=0)continue;
+    if(STRCMP(label,"smokesensor")!=0)continue;
     doit=1;
   }
   if(doit==0)return;
@@ -253,7 +253,7 @@ void getsmokesensors(void){
     label = devicei->object->label;
 
     
-    if(strcmp(label,"smokesensor")!=0)continue;
+    if(STRCMP(label,"smokesensor")!=0)continue;
 
     col = devicei->screenijk[0];
     row = devicei->screenijk[1];
@@ -286,7 +286,7 @@ void getdevice_screencoords(void){
 
     devicei = deviceinfo + i;
     label = devicei->object->label;
-    if(strcmp(label,"smokesensor")!=0)continue;
+    if(STRCMP(label,"smokesensor")!=0)continue;
     doit=1;
   }
   if(doit==0)return;
@@ -305,7 +305,7 @@ void getdevice_screencoords(void){
     devicei = deviceinfo + i;
     label = devicei->object->label;
     
-    if(strcmp(label,"smokesensor")!=0)continue;
+    if(STRCMP(label,"smokesensor")!=0)continue;
     xyz = devicei->xyz;
     device_mesh = devicei->device_mesh;
     devicei->eyedist = get_point2box_dist(device_mesh->boxmin,device_mesh->boxmax,xyz,world_eyepos);
@@ -339,7 +339,7 @@ void draw_devices_val(void){
     if(devicei->object->visible==0)continue;
     xyz = devicei->xyz;
     xyznorm = devicei->xyznorm;
-    if(active_smokesensors==1&&show_smokesensors!=0&&strcmp(devicei->object->label,"smokesensor")==0){
+    if(active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0){
       char label[256];
       float val;
       int ival;
@@ -430,7 +430,7 @@ void draw_devices(void){
     if(devicei->plane_surface!=NULL){
       continue;
     }
-    if(isZoneFireModel==1&&strcmp(devicei->object->label,"target")==0&&visSensor==0)continue;
+    if(isZoneFireModel==1&&STRCMP(devicei->object->label,"target")==0&&visSensor==0)continue;
 
     save_use_displaylist=devicei->object->use_displaylist;
     tagval=i+1;
@@ -459,7 +459,7 @@ void draw_devices(void){
     glPushMatrix();
     glTranslatef(xyz[0],xyz[1],xyz[2]);
 
-    if(active_smokesensors==1&&show_smokesensors!=0&&strcmp(devicei->object->label,"smokesensor")==0){
+    if(active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0){
       float *xyznorm;
 
       xyznorm = devicei->xyznorm;
@@ -530,8 +530,8 @@ void drawTargetNorm(void){
       devicei = deviceinfo + i;
 
       if(devicei->object->visible==0)continue;
-      if(strcmp(devicei->object->label,"sensor")==0&&visSensor==0)continue;
-      if(isZoneFireModel==1&&strcmp(devicei->object->label,"target")==0&&visSensor==0)continue;
+      if(STRCMP(devicei->object->label,"sensor")==0&&visSensor==0)continue;
+      if(isZoneFireModel==1&&STRCMP(devicei->object->label,"target")==0&&visSensor==0)continue;
       xyz = devicei->xyz;
       xyznorm = devicei->xyznorm;
       glVertex3fv(xyz);
@@ -1709,7 +1709,7 @@ sv_object *get_SVOBJECT_type(char *label){
   label = trim_front(label);
   for(i=0;i<ndevice_defs;i++){
     objecti = device_defs[i];
-    if(strcmp(label,objecti->label)==0){
+    if(STRCMP(label,objecti->label)==0){
       objecti->used=1;
       return objecti;
     }
@@ -1914,183 +1914,183 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
 
     c=token[0];
     if(c>='a'&&c<='z'||c>='A'&&c<='Z'){
-      if(strcmp(token,"translate")==0){
+      if(STRCMP(token,"translate")==0){
         iop=SV_TRANSLATE;
         reporterror(buffer_save,token,numargs,SV_TRANSLATE_NUMARGS);
       }
-      else if(strcmp(token,"translatemzd2")==0){
+      else if(STRCMP(token,"translatemzd2")==0){
         iop=SV_TRANSLATEMZD2;
         reporterror(buffer_save,token,numargs,SV_TRANSLATEMZD2_NUMARGS);
       }
-      else if(strcmp(token,"offsetx")==0){
+      else if(STRCMP(token,"offsetx")==0){
         iop=SV_OFFSETX;
         reporterror(buffer_save,token,numargs,SV_OFFSETX_NUMARGS);
       }
-      else if(strcmp(token,"offsety")==0){
+      else if(STRCMP(token,"offsety")==0){
         iop=SV_OFFSETY;
         reporterror(buffer_save,token,numargs,SV_OFFSETY_NUMARGS);
       }
-      else if(strcmp(token,"offsetz")==0){
+      else if(STRCMP(token,"offsetz")==0){
         iop=SV_OFFSETZ;
         reporterror(buffer_save,token,numargs,SV_OFFSETZ_NUMARGS);
       }
-      else if(strcmp(token,"rotatex")==0){
+      else if(STRCMP(token,"rotatex")==0){
         iop=SV_ROTATEX;
         reporterror(buffer_save,token,numargs,SV_ROTATEX_NUMARGS);
       }
-      else if(strcmp(token,"rotatey")==0){
+      else if(STRCMP(token,"rotatey")==0){
         iop=SV_ROTATEY;
         reporterror(buffer_save,token,numargs,SV_ROTATEY_NUMARGS);
       }
-      else if(strcmp(token,"rotatez")==0){
+      else if(STRCMP(token,"rotatez")==0){
         iop=SV_ROTATEZ;
         reporterror(buffer_save,token,numargs,SV_ROTATEZ_NUMARGS);
       }
-      else if(strcmp(token,"scalexyz")==0){
+      else if(STRCMP(token,"scalexyz")==0){
         iop=SV_SCALEXYZ;
         reporterror(buffer_save,token,numargs,SV_SCALEXYZ_NUMARGS);
       }
-      else if(strcmp(token,"scale")==0&&strcmp(token,"scalexyz")!=0){
+      else if(STRCMP(token,"scale")==0&&STRCMP(token,"scalexyz")!=0){
         iop=SV_SCALE;
         reporterror(buffer_save,token,numargs,SV_SCALE_NUMARGS);
       }
-      else if(strcmp(token,"drawcube")==0){
+      else if(STRCMP(token,"drawcube")==0){
         iop=SV_DRAWCUBE;
         reporterror(buffer_save,token,numargs,SV_DRAWCUBE_NUMARGS);
       }
-      else if(strcmp(token,"skipifge")==0){
+      else if(STRCMP(token,"skipifge")==0){
         iop=SV_IF_AGEB;
         reporterror(buffer_save,token,numargs,SV_IF_AGEB_NUMARGS);
       }
-      else if(strcmp(token,"skipifgt")==0){
+      else if(STRCMP(token,"skipifgt")==0){
         iop=SV_IF_AGTB;
         reporterror(buffer_save,token,numargs,SV_IF_AGTB_NUMARGS);
       }
-      else if(strcmp(token,"skipifle")==0){
+      else if(STRCMP(token,"skipifle")==0){
         iop=SV_IF_ALEB;
         reporterror(buffer_save,token,numargs,SV_IF_ALEB_NUMARGS);
       }
-      else if(strcmp(token,"skipiflt")==0){
+      else if(STRCMP(token,"skipiflt")==0){
         iop=SV_IF_ALTB;
         reporterror(buffer_save,token,numargs,SV_IF_ALTB_NUMARGS);
       }
-      else if(strcmp(token,"drawdisk")==0){
+      else if(STRCMP(token,"drawdisk")==0){
         iop=SV_DRAWDISK;
         reporterror(buffer_save,token,numargs,SV_DRAWDISK_NUMARGS);
       }
-      else if(strcmp(token,"drawcdisk")==0){
+      else if(STRCMP(token,"drawcdisk")==0){
         iop=SV_DRAWCDISK;
         reporterror(buffer_save,token,numargs,SV_DRAWCDISK_NUMARGS);
       }
-      else if(strcmp(token,"drawhexdisk")==0){
+      else if(STRCMP(token,"drawhexdisk")==0){
         iop=SV_DRAWHEXDISK;
         reporterror(buffer_save,token,numargs,SV_DRAWHEXDISK_NUMARGS);
       }
-      else if(strcmp(token,"drawpolydisk")==0){
+      else if(STRCMP(token,"drawpolydisk")==0){
         iop=SV_DRAWPOLYDISK;
         reporterror(buffer_save,token,numargs,SV_DRAWPOLYDISK_NUMARGS);
       }
-      else if(strcmp(token,"drawring")==0){
+      else if(STRCMP(token,"drawring")==0){
         iop=SV_DRAWRING;
         reporterror(buffer_save,token,numargs,SV_DRAWRING_NUMARGS);
       }
-      else if(strcmp(token,"drawnotchplate")==0){
+      else if(STRCMP(token,"drawnotchplate")==0){
         iop=SV_DRAWNOTCHPLATE;
         reporterror(buffer_save,token,numargs,SV_DRAWNOTCHPLATE_NUMARGS);
       }
-      else if(strcmp(token,"drawtrunccone")==0){
+      else if(STRCMP(token,"drawtrunccone")==0){
         iop=SV_DRAWTRUNCCONE;
         reporterror(buffer_save,token,numargs,SV_DRAWTRUNCCONE_NUMARGS);
       }
-      else if(strcmp(token,"drawcone")==0){
+      else if(STRCMP(token,"drawcone")==0){
         iop=SV_DRAWCONE;
         reporterror(buffer_save,token,numargs,SV_DRAWCONE_NUMARGS);
       }
-      else if(strcmp(token,"drawtsphere")==0){
+      else if(STRCMP(token,"drawtsphere")==0){
         iop=SV_DRAWTSPHERE;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_DRAWTSPHERE_NUMARGS);
       }
-      else if(strcmp(token,"drawsphere")==0){
+      else if(STRCMP(token,"drawsphere")==0){
         iop=SV_DRAWSPHERE;
         reporterror(buffer_save,token,numargs,SV_DRAWSPHERE_NUMARGS);
       }
-      else if(strcmp(token,"drawline")==0){
+      else if(STRCMP(token,"drawline")==0){
         iop=SV_DRAWLINE;
         reporterror(buffer_save,token,numargs,SV_DRAWLINE_NUMARGS);
       }
-      else if(strcmp(token,"drawpoint")==0){
+      else if(STRCMP(token,"drawpoint")==0){
         iop=SV_DRAWPOINT;
         reporterror(buffer_save,token,numargs,SV_DRAWPOINT_NUMARGS);
       }
-      else if(strcmp(token,"drawcircle")==0){
+      else if(STRCMP(token,"drawcircle")==0){
         iop=SV_DRAWCIRCLE;
         reporterror(buffer_save,token,numargs,SV_DRAWCIRCLE_NUMARGS);
       }
-      else if(strcmp(token,"drawarc")==0){
+      else if(STRCMP(token,"drawarc")==0){
         iop=SV_DRAWARC;
         reporterror(buffer_save,token,numargs,SV_DRAWARC_NUMARGS);
       }
-      else if(strcmp(token,"setcolor")==0){
+      else if(STRCMP(token,"setcolor")==0){
         iop=SV_SETCOLOR;
         reporterror(buffer_save,token,numargs,SV_SETCOLOR_NUMARGS);
       }
-      else if(strcmp(token,"setlinewidth")==0){
+      else if(STRCMP(token,"setlinewidth")==0){
         iop=SV_SETLINEWIDTH;
         reporterror(buffer_save,token,numargs,SV_SETLINEWIDTH_NUMARGS);
       }
-      else if(strcmp(token,"setpointsize")==0){
+      else if(STRCMP(token,"setpointsize")==0){
         iop=SV_SETPOINTSIZE;
         reporterror(buffer_save,token,numargs,SV_SETPOINTSIZE_NUMARGS);
       }
-      else if(strcmp(token,"setbw")==0){
+      else if(STRCMP(token,"setbw")==0){
         iop=SV_SETBW;
         reporterror(buffer_save,token,numargs,SV_SETBW_NUMARGS);
       }
-      else if(strcmp(token,"push")==0){
+      else if(STRCMP(token,"push")==0){
         iop=SV_PUSH;
         reporterror(buffer_save,token,numargs,SV_PUSH_NUMARGS);
       }
-      else if(strcmp(token,"pop")==0){
+      else if(STRCMP(token,"pop")==0){
         iop=SV_POP;
         reporterror(buffer_save,token,numargs,SV_POP_NUMARGS);
       }
-      else if(strcmp(token,"getuservals")==0){
+      else if(STRCMP(token,"getuservals")==0){
         iop=SV_GETUSERVALS;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_GETUSERVALS_NUMARGS);
       }
-      else if(strcmp(token,"putuservals2stack")==0){
+      else if(STRCMP(token,"putuservals2stack")==0){
         iop=SV_PUTUSERVALS2STACK;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_PUTUSERVALS2STACK_NUMARGS);
       }
-      else if(strcmp(token,"multiaddt")==0){
+      else if(STRCMP(token,"multiaddt")==0){
         iop=SV_MULTIADDT;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_MULTIADDT_NUMARGS);
       }
-      else if(strcmp(token,"clip")==0){
+      else if(STRCMP(token,"clip")==0){
         iop=SV_CLIP;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_CLIP_NUMARGS);
       }
-      else if(strcmp(token,"mirrorclip")==0){
+      else if(STRCMP(token,"mirrorclip")==0){
         iop=SV_MIRRORCLIP;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_MIRRORCLIP_NUMARGS);
       }
-      else if(strcmp(token,"peridocclip")==0){
+      else if(STRCMP(token,"peridocclip")==0){
         iop=SV_PERIODICCLIP;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_PERIODICCLIP_NUMARGS);
       }
-      else if(strcmp(token,"copyval")==0){
+      else if(STRCMP(token,"copyval")==0){
         iop=SV_COPYVAL;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_COPYVAL_NUMARGS);
       }
-      else if(strcmp(token,"copynvals")==0){
+      else if(STRCMP(token,"copynvals")==0){
         iop=SV_COPYNVALS;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_COPYNVALS_NUMARGS);
@@ -2362,7 +2362,7 @@ sv_object *get_object(char *label){
   object_start = device_def_first.next;
   objecti = object_start;
   for(;objecti->next!=NULL;objecti=objecti->next){
-    if(strcmp(objecti->label,label)==0)return objecti;
+    if(STRCMP(objecti->label,label)==0)return objecti;
   }
   return NULL;
 }
@@ -2790,7 +2790,7 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
   if(labelptr!=NULL){
     strcpy(devicei->label,labelptr);
   }
-  if(strcmp(devicei->object->label,"plane")==0){
+  if(STRCMP(devicei->object->label,"plane")==0){
     float color[4];
 
     NewMemory( (void **)&devicei->plane_surface,nmeshes*sizeof(isosurface *));
