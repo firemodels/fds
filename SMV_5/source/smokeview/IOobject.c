@@ -1037,14 +1037,14 @@ void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor
   else{
     int i,j;
 
-    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
     glEnable(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D,texti->name);
 
     glPushMatrix();
     glScalef(diameter/2.0,diameter/2.0,diameter/2.0);
-
+    glColor3f(0.75,0.75,0.70);
     if(cos_lat==NULL)initspheresegs(NLAT,NLONG);
     glBegin(GL_QUADS);
     for(j=0;j<NLAT;j++){
@@ -1095,7 +1095,6 @@ void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor
     if(texti!=NULL){
       glDisable(GL_TEXTURE_2D);
     }
-
   }
 }
 
