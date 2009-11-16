@@ -479,16 +479,20 @@ void draw_devices(void){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
     }
     if(devicei->nparams>0){
-      for(i=0;i<devicei->nparams;i++){
-        valstack[i]=devicei->params[i];
+      int j;
+
+      for(j=0;j<devicei->nparams;j++){
+        valstack[j]=devicei->params[j];
       }
     }
     nvalstack=devicei->nparams;
     ntexturestack=0;
     if(devicei->ntextures>0){
       if(devicei->textureinfo!=NULL){
-        for(i=0;i<devicei->ntextures;i++){
-          valstack[nvalstack+0]=devicei->params[nvalstack+i];
+        int j;
+
+        for(j=0;j<devicei->ntextures;j++){
+          valstack[nvalstack+0+j]=devicei->params[nvalstack+j];
         }
       }
       ntexturestack=devicei->ntextures;
