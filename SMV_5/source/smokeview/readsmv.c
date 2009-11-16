@@ -1842,37 +1842,16 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ DEVICE +++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-  /*
-    DEVICE
-    type
-    x y z xn yn zn
-
-  devices
-  -------
-  1 - sensor
-  2 - sprinkler
-  3 - heat detector
-  4 - smoke detector
 
     DEVICE
-    type
-    x y z xn yn zn
+    label
+    x y z xn yn zn state nparams ntextures 
+    p0 p1 ... p5
+    p6 ...    p11
+    texturefile1
+    ...
+    texturefilen
 
-  devices
-  -------
-  1 - sensor
-  2 - sprinkler
-  3 - heat detector
-  4 - smoke detector
-
-typedef struct {
-  float xyz[3];
-  float val;
-  float xyzplot[3];
-  float xyznorm[3];
-  sv_object *object;
-} device;
     */
     if(
       (match(buffer,"DEVICE",6) == 1)&&
