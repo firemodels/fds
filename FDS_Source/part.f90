@@ -1226,7 +1226,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
-            CP,H_NEW,YY_GET(1:N_SPECIES),M_GAS_NEW,MW_GAS,CP1,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_REF,&
+            CP,H_NEW,YY_GET(1:N_SPECIES),M_GAS_NEW,MW_GAS,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_REF,&
             TMP_G_NEW,DT_SUM
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,N_SUBSTEPS,ITMP
 INTEGER, INTENT(IN) :: NM
@@ -1502,14 +1502,12 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             M_DROP = M_DROP - M_VAP
         
             ! Compute surface cooling and density
-
             IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
                WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*(Q_RAD+Q_CON_WALL)*RAW(IW)/DT_SUBSTEP
                WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*WGT*M_DROP*RAW(IW)/REAL(N_SUBSTEPS,EB) 
             ENDIF
 
-            ! Update gas temperature and determine new sub-timestep
-
+            !Update gas temperature and determine new subtimestep
             DELTA_H_G = (H_L + H_V - PC%H_V_CORRECTOR)
             YY_GET(:) = YY(II,JJ,KK,:)
             ITMP = MIN(5000,NINT(TMP_G))
@@ -1551,36 +1549,26 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
             TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
             YY_GET = 0._EB
             YY_GET(IGAS) = 1._EB
-            ITMP = MIN(5000,NINT(TMP_DROP_NEW))
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP1,ITMP)
             ITMP = MIN(5000,NINT(TMP_G))
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,ITMP)
-        !!  DELTA_H_G = (DELTA_H_G - CP2 * TMP_G) 
-            DELTA_H_G = CP1*TMP_DROP_NEW - CP2*TMP_G 
+            DELTA_H_G = (DELTA_H_G - CP2 * TMP_G) 
             
             ! Compute contribution to the divergence
-
             D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
-                               (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP 
+                               (M_VAP*DELTA_H_G- Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP 
 
             ! Add fuel evaporation rate to running counter before adjusting its value
-
             IF (IGAS>0 .AND. IGAS==I_FUEL) FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP
 
             ! Adjust mass of evaporated liquid to account for different Heat of Combustion between fuel droplet and gas
-
             M_VAP = PC%ADJUST_EVAPORATION*M_VAP
 
-            ! Track total mass evaporate in cell
-
+            !Track total mass evaporate in cell
             MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
             ! Update droplet quantities
-
             DR%R   = (M_DROP/FTPR)**ONTH
             DR%TMP = TMP_DROP_NEW
-
             ! Get out of the loop if the droplet has evaporated completely
-
             IF (DR%R<=0._EB) CYCLE DROPLET_LOOP
             DT_SUM = DT_SUM + DT_SUBSTEP
             DT_SUBSTEP = MIN(DT-DT_SUM,DT_SUBSTEP * 1.5_EB)
