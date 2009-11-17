@@ -2253,7 +2253,6 @@ typedef struct {
         if(strncmp(buffer," ",1)==0)continue;
       }
     }
-    printf("buffer=%s\n",buffer);
     CheckMemory;
 
   /*
