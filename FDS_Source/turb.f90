@@ -3107,11 +3107,12 @@ USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_VARIABLES
 USE MESH_POINTERS
+USE TURBULENCE
 
 IMPLICIT NONE
 
 PRIVATE
-PUBLIC :: INIT_IBM,VELTAN2D,TRILINEAR,GETX,GETU
+PUBLIC :: INIT_IBM,VELTAN2D,TRILINEAR,GETX,GETU,GETGRAD
  
 CONTAINS
 
@@ -3172,12 +3173,15 @@ GEOM_LOOP: DO NG=1,N_GEOM
          Z_MAX = G%Z+G%RADIUS
          R2 = G%RADIUS**2
       CASE(ICYLINDER) SELECT_SHAPE ! assume aligned with y axis
-         X_MIN = M%XS
-         Y_MIN = M%YS
-         Z_MIN = M%ZS
-         X_MAX = M%XF
-         Y_MAX = M%YF
-         Z_MAX = M%ZF
+         G%HL(1) = ABS(G%XOR-G%X)
+         G%HL(2) = ABS(G%YOR-G%Y)
+         G%HL(3) = ABS(G%ZOR-G%Z)
+         X_MIN = G%X-G%RADIUS
+         Y_MIN = G%Y-G%HL(2)
+         Z_MIN = G%Z-G%RADIUS
+         X_MAX = G%X+G%RADIUS
+         Y_MAX = G%Y+G%HL(2)
+         Z_MAX = G%Z+G%RADIUS
          R2  = G%RADIUS**2
       CASE(IPLANE)
          X_MIN = M%XS
@@ -3212,6 +3216,10 @@ GEOM_LOOP: DO NG=1,N_GEOM
       G%MAX_J(NM)=1
    ENDIF
    
+   IF ( G%MAX_I(NM)<G%MIN_I(NM) .OR. &
+        G%MAX_J(NM)<G%MIN_J(NM) .OR. &
+        G%MAX_K(NM)<G%MIN_K(NM) ) CYCLE GEOM_LOOP
+   
    IF (ICYC==0) THEN
       ALLOCATE(G%U_MASK(G%MIN_I(NM):G%MAX_I(NM),G%MIN_J(NM):G%MAX_J(NM),G%MIN_K(NM):G%MAX_K(NM)),STAT=IZERO)
       CALL ChkMemErr('INIT_IBM','U_MASK',IZERO)
@@ -3223,7 +3231,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
       G%V_MASK = 1
       G%W_MASK = 1
    ENDIF
-
+   
    ! mask cells
 
    DO K=G%MIN_K(NM),G%MAX_K(NM)
@@ -3510,18 +3518,64 @@ END SELECT
 END SUBROUTINE GETU
 
 
+SUBROUTINE GETGRAD(G_DATA,DXI,XI,XU,INDU,COMP_I,COMP_J,NM)
+IMPLICIT NONE
+
+REAL(EB), INTENT(OUT) :: G_DATA(0:1,0:1,0:1),DXI(3)
+REAL(EB), INTENT(IN) :: XI(3),XU(3)
+INTEGER, INTENT(IN) :: INDU(3),COMP_I,COMP_J,NM
+TYPE(MESH_TYPE), POINTER :: M
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DUDX
+INTEGER :: II,JJ,KK
+
+M=>MESHES(NM)
+
+IF (COMP_I==1 .AND. COMP_J==1) DUDX => M%WORK5
+IF (COMP_I==2 .AND. COMP_J==2) DUDX => M%WORK7
+IF (COMP_I==1 .AND. COMP_J==2) DUDX => M%IBM_SAVE1
+IF (COMP_I==2 .AND. COMP_J==1) DUDX => M%IBM_SAVE2
+
+! first assume XI >= XU
+II = INDU(1)
+JJ = INDU(2)
+KK = INDU(3)
+DXI = XI-XU
+
+IF (XI(1)<XU(1)) THEN
+   II=MAX(0,II-1)
+   DXI(1)=DXI(1)+M%DX(II)
+ENDIF
+IF (XI(2)<XU(2)) THEN
+   JJ=MAX(0,JJ-1)
+   DXI(2)=DXI(2)+M%DY(JJ)
+ENDIF
+IF (XI(3)<XU(3)) THEN
+   KK=MAX(0,KK-1)
+   DXI(3)=DXI(3)+M%DZ(KK)
+ENDIF
+G_DATA(0,0,0) = DUDX(II,JJ,KK)
+G_DATA(1,0,0) = DUDX(II+1,JJ,KK)
+G_DATA(0,1,0) = DUDX(II,JJ+1,KK)
+G_DATA(0,0,1) = DUDX(II,JJ,KK+1)
+G_DATA(1,0,1) = DUDX(II+1,JJ,KK+1)
+G_DATA(0,1,1) = DUDX(II,JJ+1,KK+1)
+G_DATA(1,1,0) = DUDX(II+1,JJ+1,KK)
+G_DATA(1,1,1) = DUDX(II+1,JJ+1,KK+1)
+
+END SUBROUTINE GETGRAD
+
+
 REAL(EB) FUNCTION VELTAN2D(UU,UW,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL)
 IMPLICIT NONE
 
 REAL(EB), INTENT(IN) :: UU(2),UW(2),NN(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
 INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(2,2),SS(2),XX(2),YY(2)
-REAL(EB) :: US,UN,US_WALL,UN_WALL,DPDS,DTSNDN,DUSDS,DUSDN,TSN,TSN_WALL,DT_BL
-INTEGER :: SUBIT,NIT
+REAL(EB) :: C(2,2),SS(2),SLIP_COEF,ETA,AA,BB
+REAL(EB) :: US,UN,US_WALL,UN_WALL,DPDS,DUSDS,DUSDN,TSN
 
 ! Cartesian grid coordinate system orthonormal basis vectors
-XX = (/1._EB, 0._EB/)
-YY = (/0._EB, 1._EB/)
+REAL(EB), DIMENSION(2), PARAMETER :: XX=(/1._EB, 0._EB/),YY=(/0._EB, 1._EB/)
+
 
 ! streamwise unit vector
 SS = (/NN(2),-NN(1)/)
@@ -3556,20 +3610,25 @@ TSN = C(1,1)*C(1,2)*TAU_IJ(1,1) + C(1,1)*C(2,2)*TAU_IJ(1,2) &
     
 ! update boundary layer equations
 
-! find stable time step
-DT_BL = MINVAL((/DT,0.5_EB*DN/(ABS(US)+1.E-10_EB),0.5_EB*DN**2/(MU*RRHO)/))
-NIT   = CEILING(DT/DT_BL)
-DT_BL = DT/REAL(NIT,EB)
+! update wall-normal velocity
+UN = UN_WALL + DN*(DIVU-0.5_EB*DUSDS)
 
-! possible subiterations due to stability constraints
-DO SUBIT = 1,NIT
-   TSN_WALL = -MU*(US-US_WALL)/DN !! or WW based on US, MU and DN
-   DTSNDN = (TSN - TSN_WALL)/DN
-   US = US - DT_BL*( US*DUSDS + UN*DUSDN + RRHO*(DPDS + DTSNDN) )
-ENDDO
+! parameters in ODE solution
+IF (DNS) THEN
+   ETA = UN + RRHO*MU/DN
+   AA  = -(0.5_EB*DUSDS + TWTH*ETA/DN)
+   BB  = (TWTH*US_WALL/DN + ONSI*DUSDN)*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+ELSE
+   CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,US-US_WALL,MU*RRHO,DN,0._EB)
+   ETA = RRHO*(1-SLIP_COEF)*MU/(2._EB*DN**2)
+   AA  = -(0.5_EB*DUSDS + TWTH*UN/DN + ETA)
+   BB  = ETA*US_WALL - (UN*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+ENDIF
 
-! update layer wall-normal velocity
-UN = UN_WALL + DN*(DIVU-DUSDS)
+IF (ABS(AA)>1.E-9_EB) THEN
+   US = ((AA*US + BB)*EXP(AA*DT) - BB)/AA
+   ! note: as AA -> 0, US -> US; so do nothing (US is unchanged)
+ENDIF
 
 ! transform velocity back to Cartesian component I_VEL
 VELTAN2D = C(I_VEL,1)*US + C(I_VEL,2)*UN

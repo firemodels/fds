@@ -329,6 +329,12 @@ DO K=0,KBAR
          TXY(I,J,K) = MUZ*(DVDX + DUDY)
          TXZ(I,J,K) = MUY*(DUDZ + DWDX)
          TYZ(I,J,K) = MUX*(DVDZ + DWDY)
+         
+         IF (IMMERSED_BOUNDARY_METHOD==2) THEN
+            IBM_SAVE1(I,J,K) = DUDZ
+            IBM_SAVE2(I,J,K) = DWDX
+         ENDIF
+         
       ENDDO
    ENDDO
 ENDDO
@@ -538,8 +544,8 @@ ENDDO
 IF (BAROCLINIC .AND. .NOT.EVACUATION_ONLY(NM)) CALL BAROCLINIC_CORRECTION
 
 ! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
- 
-CALL NO_FLUX
+
+CALL NO_FLUX 
 IF (IMMERSED_BOUNDARY_METHOD>=0) THEN
    CALL INIT_IBM(T,NM)
    CALL IBM_VELOCITY_FLUX(NM)
@@ -1848,7 +1854,7 @@ VN     = 0._EB
 MUTRM  = 1.E-9_EB
 R_DX2  = 1.E-9_EB
 
-! Strategie for OpenMP version of CFL/VN number determination
+! Strategy for OpenMP version of CFL/VN number determination
 ! - find max CFL/VN number for each thread (P_UVWMAX/P_MU_MAX)
 ! - save I,J,K of each P_UVWMAX/P_MU_MAX in P_ICFL... for each thread
 ! - compare sequentially all P_UVWMAX/P_MU_MAX and find the global maximum
@@ -2180,17 +2186,17 @@ END SUBROUTINE BAROCLINIC_CORRECTION
 
 SUBROUTINE IBM_VELOCITY_FLUX(NM)
 
-USE COMPLEX_GEOMETRY, ONLY: VELTAN2D,TRILINEAR,GETX,GETU
+USE COMPLEX_GEOMETRY, ONLY: VELTAN2D,TRILINEAR,GETX,GETU,GETGRAD
 
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,PP,UBAR,VBAR,WBAR
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,PP,UBAR,VBAR,WBAR, &
+                                       DUDX,DVDY,DWDZ,DUDZ,DWDX
 REAL(EB) :: U_IBM,V_IBM,W_IBM,VEL2,DN
 REAL(EB) :: U_ROT,V_ROT,W_ROT
 REAL(EB) :: PE,PW,PT,PB
-REAL(EB) :: U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVEL(3),XG(3)
+REAL(EB) :: U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVEL(3),XGEOM(3),XCELL(3),XNODE(3)
 REAL(EB) :: U_VEC(2),U_GEOM(2),N_VEC(2),DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),RRHO,MUA
-INTEGER :: I,J,K,NG,IJK(3)
-INTEGER :: I_VEL,IP1,IM1,JP1,JM1,KP1,KM1
+INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1
 TYPE(GEOMETRY_TYPE), POINTER :: G
 
 ! References:
@@ -2199,9 +2205,9 @@ TYPE(GEOMETRY_TYPE), POINTER :: G
 ! Boundary Finite-Difference Methods for Three-Dimensional Complex Flow
 ! Simulations. J. Comp. Phys. 161:35-60, 2000.
 !
-! R. McDermott, C. Cruz, and K. McGrattan. A second-order immersed boundary
-! method with near-wall physics. APS/DFD Annual Meeting, Minneapolis, MN,
-! Nov. 2009.
+! R. McDermott, G. Forney, C. Cruz, and K. McGrattan. A second-order immersed
+! boundary method with near-wall physics. APS/DFD Annual Meeting, Minneapolis,
+! MN, Nov. 2009.
  
 IF (PREDICTOR) THEN
    UU => U
@@ -2222,36 +2228,61 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
    UBAR => WORK2
    VBAR => WORK3
    WBAR => WORK4
+   DUDX => WORK5
+   DVDY => WORK6
+   DWDZ => WORK7
    PP = 0._EB
    UBAR = 0._EB
    VBAR = 0._EB
    WBAR = 0._EB
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            UBAR(I,J,K) = 0.5_EB*(UU(I,J,K)+UU(I-1,J,K))
-            VBAR(I,J,K) = 0.5_EB*(VV(I,J,K)+VV(I,J-1,K))
-            WBAR(I,J,K) = 0.5_EB*(WW(I,J,K)+WW(I,J,K-1))
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+         
+            IM1 = MAX(I-1,0)   
+            JM1 = MAX(J-1,0)
+            KM1 = MAX(K-1,0)
+
+            UBAR(I,J,K) = 0.5_EB*(UU(I,J,K)+UU(IM1,J,K))
+            VBAR(I,J,K) = 0.5_EB*(VV(I,J,K)+VV(I,JM1,K))
+            WBAR(I,J,K) = 0.5_EB*(WW(I,J,K)+WW(I,J,KM1))
+            
             VEL2 = UBAR(I,J,K)**2+VBAR(I,J,K)**2+WBAR(I,J,K)**2
             PP(I,J,K) = RHO_AVG*(H(I,J,K)-.5_EB*VEL2)
+            
+            DUDX(I,J,K) = (UU(I,J,K)-UU(IM1,J,K))/DX(I)
+            DVDY(I,J,K) = (VV(I,J,K)-VV(I,JM1,K))/DY(J)
+            DWDZ(I,J,K) = (WW(I,J,K)-WW(I,J,KM1))/DZ(K)
          ENDDO
       ENDDO
    ENDDO
+   
+   DUDZ => IBM_SAVE1
+   DWDX => IBM_SAVE2
 ENDIF
 
 GEOM_LOOP: DO NG=1,N_GEOM
 
    G => GEOMETRY(NG)
-   XG = (/G%X,G%Y,G%Z/)
-
+   
+   IF ( G%MAX_I(NM)<G%MIN_I(NM) .OR. &
+        G%MAX_J(NM)<G%MIN_J(NM) .OR. &
+        G%MAX_K(NM)<G%MIN_K(NM) ) CYCLE GEOM_LOOP
+   
+   XGEOM = (/G%X,G%Y,G%Z/)
+   
    DO K=G%MIN_K(NM),G%MAX_K(NM)
       DO J=G%MIN_J(NM),G%MAX_J(NM)
          DO I=G%MIN_I(NM),G%MAX_I(NM)
             IF (G%U_MASK(I,J,K)==1) CYCLE ! point is in gas phase
          
-            IJK  = (/I,J,K/)
-            XVEL = (/X(I),YC(J),ZC(K)/)
-            U_ROT = (XVEL(3)-XG(3))*G%OMEGA_Y - (XVEL(2)-XG(2))*G%OMEGA_Z
+            IJK   = (/I,J,K/)
+            XVEL  = (/X(I),YC(J),ZC(K)/)
+            XCELL = (/XC(I),YC(J),ZC(K)/)
+            XNODE = (/X(I),YC(J),Z(K)/)
+            DXC   = (/DX(I),DYN(J),DZN(K)/)
+            
+            U_ROT = (XVEL(3)-XGEOM(3))*G%OMEGA_Y - (XVEL(2)-XGEOM(2))*G%OMEGA_Z
   
             SELECT CASE(G%U_MASK(I,J,K))
                CASE(-1)
@@ -2263,16 +2294,15 @@ GEOM_LOOP: DO NG=1,N_GEOM
                      CASE(1)
                         CALL GETX(XI,XVEL,NG)
                         CALL GETU(U_DATA,DXI,XI,XVEL,IJK,1,NM)
-                        DXC = (/DX(I),DYN(J),DZN(K)/)
                         U_IBM = TRILINEAR(U_DATA,DXI,DXC)
                         U_IBM = 0.5_EB*(U_IBM+(G%U+U_ROT))
                      CASE(2)
-                        IP1 = MIN(I+1,IBAR)
-                        JP1 = MIN(J+1,JBAR)
-                        KP1 = MIN(K+1,KBAR)
-                        IM1 = MAX(I-1,1)
-                        JM1 = MAX(J-1,1)
-                        KM1 = MAX(K-1,1)
+                        IP1 = MIN(I+1,IBP1)
+                        JP1 = MIN(J+1,JBP1)
+                        KP1 = MIN(K+1,KBP1)
+                        IM1 = MAX(I-1,0)
+                        JM1 = MAX(J-1,0)
+                        KM1 = MAX(K-1,0)
                                                 
                         U_VEC  = (/UU(I,J,K),0.5_EB*(WBAR(I,J,K)+WBAR(IP1,J,K))/)
                         U_GEOM = (/G%U,G%W/)
@@ -2284,11 +2314,13 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         
                         DIVU = 0.5_EB*(DP(I,J,K)+DP(IP1,J,K))
                         
-                        GRADU(1,1) = (UU(IP1,J,K)-UU(IM1,J,K))/(DX(I)+DX(IP1))
-                        GRADU(1,2) = (UU(I,J,KP1)-UU(I,J,KM1))/(DZN(KM1)+DZN(K))
-                        GRADU(2,1) = 0.5_EB*( WW(IP1,J,K)-WW(I,J,K) + WW(IP1,J,KM1)-WW(I,J,KM1) )/DXN(I)
-                        GRADU(2,2) = 0.5_EB*( WW(I,J,K)-WW(I,J,KM1) + WW(IP1,J,K)-WW(IP1,J,KM1) )/DZ(K)
-                  
+                        ! compute GRADU at point XI
+                        CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,1,1,NM); GRADU(1,1) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,2,2,NM); GRADU(2,2) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XNODE,IJK,1,2,NM); GRADU(1,2) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XNODE,IJK,2,1,NM); GRADU(2,1) = TRILINEAR(U_DATA,DXI,DXC)
+                        
+                        ! compute GRADP at point XVEL
                         PE = PP(IP1,J,K)
                         PW = PP(I,J,K)
                         PT = 0.25_EB*(PP(I,J,K)+PP(IP1,J,K)+PP(I,J,KP1)+PP(IP1,J,KP1))
@@ -2308,6 +2340,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         I_VEL = 1
 
                         !U_IBM = UU(I,J,K)
+                        MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(IP1,J,K))
                         U_IBM = VELTAN2D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL)
                   END SELECT SELECT_METHOD1
             END SELECT
@@ -2326,7 +2359,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
          
                IJK  = (/I,J,K/)
                XVEL = (/XC(I),Y(J),ZC(K)/)
-               V_ROT = (XVEL(1)-XG(1))*G%OMEGA_Z - (XVEL(3)-XG(3))*G%OMEGA_Z
+               V_ROT = (XVEL(1)-XGEOM(1))*G%OMEGA_Z - (XVEL(3)-XGEOM(3))*G%OMEGA_Z
          
                SELECT CASE(G%V_MASK(I,J,K))
                   CASE(-1)
@@ -2335,14 +2368,14 @@ GEOM_LOOP: DO NG=1,N_GEOM
                      SELECT_METHOD2: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
                         CASE(0)
                            CYCLE
-                        CASE(1)
+                        CASE(1:2)
                            CALL GETX(XI,XVEL,NG)
                            CALL GETU(U_DATA,DXI,XI,XVEL,IJK,2,NM)
                            DXC = (/DXN(I),DY(J),DZN(K)/)
                            V_IBM = TRILINEAR(U_DATA,DXI,DXC)
                            V_IBM = 0.5_EB*(V_IBM+(G%V+V_ROT))
-                        CASE(2)
-                           V_IBM = VV(I,J,K)
+                        !CASE(2)
+                        !   V_IBM = VV(I,J,K)
                      END SELECT SELECT_METHOD2
                END SELECT
          
@@ -2358,9 +2391,13 @@ GEOM_LOOP: DO NG=1,N_GEOM
          DO I=G%MIN_I(NM),G%MAX_I(NM)
             IF (G%W_MASK(I,J,K)==1) CYCLE
          
-            IJK  = (/I,J,K/)
-            XVEL = (/XC(I),YC(J),Z(K)/)
-            W_ROT = (XVEL(2)-XG(2))*G%OMEGA_X - (XVEL(1)-XG(1))*G%OMEGA_Y
+            IJK   = (/I,J,K/)
+            XVEL  = (/XC(I),YC(J),Z(K)/)
+            XCELL = (/XC(I),YC(J),ZC(K)/)
+            XNODE = (/X(I),YC(J),Z(K)/)
+            DXC   = (/DXN(I),DYN(J),DZ(K)/)
+            
+            W_ROT = (XVEL(2)-XGEOM(2))*G%OMEGA_X - (XVEL(1)-XGEOM(1))*G%OMEGA_Y
             
             SELECT CASE(G%W_MASK(I,J,K))
                CASE(-1)
@@ -2372,16 +2409,15 @@ GEOM_LOOP: DO NG=1,N_GEOM
                      CASE(1)
                         CALL GETX(XI,XVEL,NG)
                         CALL GETU(U_DATA,DXI,XI,XVEL,IJK,3,NM)
-                        DXC = (/DXN(I),DYN(J),DZ(K)/)
                         W_IBM = TRILINEAR(U_DATA,DXI,DXC)
                         W_IBM = 0.5_EB*(W_IBM+(G%W+W_ROT))
                      CASE(2)
-                        IP1 = MIN(I+1,IBAR)
-                        JP1 = MIN(J+1,JBAR)
-                        KP1 = MIN(K+1,KBAR)
-                        IM1 = MAX(I-1,1)
-                        JM1 = MAX(J-1,1)
-                        KM1 = MAX(K-1,1)
+                        IP1 = MIN(I+1,IBP1)
+                        JP1 = MIN(J+1,JBP1)
+                        KP1 = MIN(K+1,KBP1)
+                        IM1 = MAX(I-1,0)
+                        JM1 = MAX(J-1,0)
+                        KM1 = MAX(K-1,0)
                                                 
                         U_VEC  = (/0.5_EB*(UBAR(I,J,K)+UBAR(I,J,KP1)),WW(I,J,K)/)
                         U_GEOM = (/G%U,G%W/)
@@ -2392,12 +2428,14 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         N_VEC = N_VEC/DN                        ! unit normal
                         
                         DIVU = 0.5_EB*(DP(I,J,K)+DP(I,J,KP1))
-                        
-                        GRADU(1,1) = 0.5_EB*( UU(I,J,K)-UU(IM1,J,K) + UU(I,J,KP1)-UU(IM1,J,KP1) )/DX(I)
-                        GRADU(1,2) = 0.5_EB*( UU(I,J,KP1)-UU(I,J,K) + UU(IM1,J,KP1)-UU(IM1,J,K) )/DZN(K)
-                        GRADU(2,1) = (WW(IP1,J,K)-WW(IM1,J,K))/(DXN(IM1)+DXN(I))
-                        GRADU(2,2) = (WW(I,J,KP1)-WW(I,J,KM1))/(DZ(K)+DZ(KP1))
+                       
+                        ! compute GRADU at point XI
+                        CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,1,1,NM); GRADU(1,1) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,2,2,NM); GRADU(2,2) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XNODE,IJK,1,2,NM); GRADU(1,2) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XNODE,IJK,2,1,NM); GRADU(2,1) = TRILINEAR(U_DATA,DXI,DXC)
                   
+                        ! compute GRADP at point XVEL
                         PE = 0.25_EB*(PP(I,J,K)+PP(I,J,KP1)+PP(IP1,J,K)+PP(IP1,J,KP1))
                         PW = 0.25_EB*(PP(I,J,K)+PP(I,J,KP1)+PP(IM1,J,K)+PP(IM1,J,KP1))
                         PT = PP(I,J,KP1)
@@ -2417,6 +2455,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         I_VEL = 2 ! will change when we go to 3D
                   
                         !W_IBM = WW(I,J,K)
+                        MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(I,J,KP1))
                         W_IBM = VELTAN2D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL)
                   END SELECT SELECT_METHOD3
             END SELECT

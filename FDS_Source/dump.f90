@@ -1469,9 +1469,11 @@ DO N=1,N_GEOM
    WRITE(LU_SMV,'(/A)') 'DEVICE'
    SELECT CASE(G%ISHAPE)
       CASE(ISPHERE)
-         WRITE(LU_SMV,'(A)') 'SPHERE'
-         WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,(/G%XOR-G%X,G%YOR-G%Y,G%ZOR-G%Z/),0,4
-         WRITE(LU_SMV,'(4F12.5)') REAL(G%RGB,EB)/255._EB,2._EB*G%RADIUS
+         WRITE(LU_SMV,'(A)') 'TSPHERE'
+         WRITE(LU_SMV,'(6F12.5,3I5)') G%X,G%Y,G%Z,0._EB,0._EB,1._EB,0,8,1
+         WRITE(LU_SMV,'(6F12.5)') 0._EB,1._EB,0._EB,90._EB,0._EB,0._EB
+         WRITE(LU_SMV,'(2F12.5)') -G%OMEGA_Y*180._EB/PI,2._EB*G%RADIUS
+         WRITE(LU_SMV,'(A)') 'bb.jpg'
       CASE(ICYLINDER)
          WRITE(LU_SMV,'(A)') 'GCYLINDER'
          WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,0._EB,0._EB,1._EB,0,7
