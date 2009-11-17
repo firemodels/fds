@@ -2,7 +2,7 @@
 // $Revision$
 // $Author: gforney $
 
-// static devices
+   // ************ static device definitions - single frame/state ********************
 
 DEVICEDEF
  smokesensor
@@ -33,6 +33,9 @@ DEVICEDEF
  target
  0.6 0.6 0.6 setcolor
  0.0 0.0 -0.005 translate 0.2 0.01 drawdisk
+
+   // ************ static device definitions - multiple frames/states ********************
+
 DEVICEDEF
  heat_detector         // label, name of device
  
@@ -175,75 +178,6 @@ DEVICEDEF
  push 0.0 0.0 1.0 setcolor 
    0.0 0.0 0.0414 translate 0.012 drawsphere pop
 
-// data layout for particle devices
-// 0->2  r,g,b color 
-// 3     diameter
-// 4     length
-DEVICEDEF // device for particle sphere
- SPHERE
- 0.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor
- 3.0 0.0 copyval 0.1 drawsphere
-DEVICEDEF // device for particle tube
- TUBE
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
-DEVICEDEF // device for particle tube
- CYLINDER
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
-DEVICEDEF // device for general cylinder 
- GCYLINDER
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 5.0 0.0 copyval -30.0 rotatez 6.0 0.0 copyval -10.0 rotatey 90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
-DEVICEDEF // device for particle "egg"
- EGG
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 4.0 6.0 copyval 3.0 5.0 copyval 3.0 1.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
-
-// data layout for ellipsoid
-// 0->2  r,g,b color 
-// 3     dx
-// 4     dy
-// 5     dz
-DEVICEDEF // device for general ellipsoid
- ELLIPSOID
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 3.0 6.0 copyval 4.0 4.0 copyval 5.0 2.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
-
-// dynamic devices
-
-// data layout for dynamic textured sphere
-// 0-2 r,g,b color
-// 3  rotation rate (degrees per second)
-// 4  initial rotation angle
-// 5  sphere diameter
-DEVICEDEF // device for dynamic textured sphere
- TSPHERE
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 5.0 9.0 copyval 3.0 2.0 copyval 4.0 1.0 copyval 10.0 10.0 0.0 multiaddt 45.0 rotatez 0.0 0.5 drawtsphere
-
-// tree devices
-
-// data layout for trunk
-// 0  height of trunk base
-// 1  diameter of trunk
-// 2  height of trunk
-// 3-5 r,b,g color
-DEVICEDEF // device for tree trunk
- TRUNK
- 3.0 3.0 0.0 copynvals 0.55 0.27 0.07 setcolor
- 0.0 2.0 copyval 0.0 0.0 1.0 translate 1.0 2.0 0.0 copynvals 1.0 3.0 drawdisk
- 
-// data layout for canopy
-// 0  height of canopy base
-// 1  diameter of canopy base
-// 2  height of canopy
-// 3-5 r,b,g color
-DEVICEDEF // device for tree canopy
- CANOPY
- 3.0 3.0 0.0 copynvals 0.14 0.56 0.14 setcolor
- 0.0 2.0 copyval 0.0 0.0 1.0 translate 1.0 2.0 0.0 copynvals 1.0 3.0 drawcone
-
 DEVICEDEF
  testdoor         // label, name of device
  90.0 rotatez 90.0 rotatex
@@ -291,8 +225,80 @@ NEWFRAME
     0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
  push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 1.0 0.0 0.0 setcolor
     0.0 0.5 0.0 translate 1.0 drawcube pop // front half of door (red)
+
+   // ************ dynamic particle device definitions ********************
+   //         (modifable using data obtained from FDS)
+
+// data layout for particle devices
+// 0->2  r,g,b color 
+// 3     diameter
+// 4     length
+DEVICEDEF // device for particle file sphere
+ SPHERE
+ 0.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor
+ 3.0 0.0 copyval 0.1 drawsphere
+DEVICEDEF // device for particle file tube
+ TUBE
+ 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
+ 90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
+DEVICEDEF // device for particle file tube
+ CYLINDER
+ 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
+ 90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
+DEVICEDEF // device for general cylinder 
+ GCYLINDER
+ 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
+ 5.0 0.0 copyval -30.0 rotatez 6.0 0.0 copyval -10.0 rotatey 90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
+DEVICEDEF // device for particle "egg"
+ EGG
+ 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
+ 4.0 6.0 copyval 3.0 5.0 copyval 3.0 1.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
+
+// data layout for ellipsoid
+// 0->2  r,g,b color 
+// 3     dx
+// 4     dy
+// 5     dz
+DEVICEDEF // device for general ellipsoid
+ ELLIPSOID
+ 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
+ 3.0 6.0 copyval 4.0 4.0 copyval 5.0 2.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
+
+// data layout for dynamic textured sphere
+// 0-2 r,g,b color
+// 3  initial azimuth angle
+// 4  initial elevation angle
+// 5  initial rotation angle
+// 6  rotation rate (degrees per second)
+// 7  sphere diameter
+DEVICEDEF // device for dynamic textured sphere
+ TSPHERE
+ 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
+ 7.0 16.0 copyval 90.0 rotatey 3.0 0.0 copyval 0.0 rotatex 4.0 0.0 copyval 0.0 rotatey 6.0 2.0 copyval 5.0 1.0 copyval 10.0 10.0 0.0 multiaddt 45.0 rotatez 0.0 0.5 drawtsphere
+
+   // ************ dynamic tree device definitions ********************
+
+// data layout for trunk
+// 0  height of trunk base
+// 1  diameter of trunk
+// 2  height of trunk
+// 3-5 r,b,g color
+DEVICEDEF // device for tree trunk
+ TRUNK
+ 3.0 3.0 0.0 copynvals 0.55 0.27 0.07 setcolor
+ 0.0 2.0 copyval 0.0 0.0 1.0 translate 1.0 2.0 0.0 copynvals 1.0 3.0 drawdisk
+ 
+// data layout for canopy
+// 0  height of canopy base
+// 1  diameter of canopy base
+// 2  height of canopy
+// 3-5 r,b,g color
+DEVICEDEF // device for tree canopy
+ CANOPY
+ 3.0 3.0 0.0 copynvals 0.14 0.56 0.14 setcolor
+ 0.0 2.0 copyval 0.0 0.0 1.0 translate 1.0 2.0 0.0 copynvals 1.0 3.0 drawcone
    
-   // ************ avatar definitions ********************
+   // ************ avatar device definitions ********************
 
    // stack frame definition
       
@@ -353,3 +359,61 @@ AVATARDEF
  0.0 0.0 1.0 translate 3.0 3.0 0.0 copynvals 1.0 1.0 1.0 scalexyz 
   push 0.0 -0.25 0.05 translate 0.3 2.5 0.3 scalexyz 0.0 1.0 1.0 setcolor 0.2 drawsphere pop 
   9.0 3.0 0.0 copynvals 0.93 0.87 0.51 setcolor 1.0 0.05 drawdisk 
+
+   // ************ Elementary device definitions ********************
+
+   //  These definitions are used to illustrate the basic building blocks
+   //  used to create more complex devices
+
+DEVICEDEF
+ drawaxis
+ 1.0 0.0 0.0 setcolor
+ push 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
+ 0.0 1.0 0.123 setcolor
+ push 90.0 rotatey 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
+DEVICEDEF
+ drawcone
+ 0.69 0.49 0.17 setcolor
+ 0.50 0.30 drawcone
+DEVICEDEF
+ drawcube
+ 0.69 0.49 0.17 setcolor
+ 0.25 drawcube
+DEVICEDEF
+ drawdisk
+ 0.69 0.49 0.17 setcolor
+ 0.25 0.50 drawdisk
+DEVICEDEF
+ drawcdisk
+ 0.69 0.49 0.17 setcolor
+ 0.25 0.50 drawcdisk
+DEVICEDEF
+ drawhexdisk
+ 0.69 0.49 0.17 setcolor
+ 0.50 0.25 drawhexdisk
+DEVICEDEF
+ drawnotchplate
+ 0.69 0.49 0.17 setcolor
+ 0.5 0.1 0.2 1 drawnotchplate
+DEVICEDEF
+ drawnotchplate2
+ 0.69 0.49 0.17 setcolor
+ 0.5 0.1 0.2 -1 drawnotchplate
+DEVICEDEF
+ drawpolydisk
+ 0.69 0.49 0.17 setcolor
+ 5 0.35 0.15 drawpolydisk
+DEVICEDEF
+ drawring
+ 0.69 0.49 0.17 setcolor
+ 0.3 0.5 0.1 drawring
+DEVICEDEF
+ drawsphere
+ 0.69 0.49 0.17 setcolor
+ 0.25 drawsphere
+DEVICEDEF
+ drawtrunccone
+ 0.69 0.49 0.17 setcolor
+ 0.5 0.2 0.4 drawtrunccone
+
+
