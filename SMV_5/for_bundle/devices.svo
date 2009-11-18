@@ -5,13 +5,22 @@
    // ************ static device definitions - single frame/state ********************
 
 DEVICEDEF
+ target
+ 0.6 0.6 0.6 setcolor
+ 0.0 0.0 -0.005 translate 0.2 0.01 drawdisk
+
+DEVICEDEF  // used by smokeview to display smoke thickness
  smokesensor
  1.0 1.0 1.0 setcolor
  0.15 drawsphere
-DEVICEDEF
+
+DEVICEDEF  // draw a plane intersecting through FDS meshes
  plane
  0.0 1.0 0.0  setcolor
  0.038 drawsphere
+
+   // ************ static device definitions - multiple frames/states ********************
+
 DEVICEDEF
  sensor
  0.0 1.0 0.0  setcolor
@@ -25,16 +34,6 @@ DEVICEDEF
  NEWFRAME
  1.0 1.0 0.0  setcolor
  0.038 drawsphere
-DEVICEDEF
- thermoc4
- 1.0 1.0 0.0  setcolor
- 0.038 drawsphere
-DEVICEDEF
- target
- 0.6 0.6 0.6 setcolor
- 0.0 0.0 -0.005 translate 0.2 0.01 drawdisk
-
-   // ************ static device definitions - multiple frames/states ********************
 
 DEVICEDEF
  heat_detector         // label, name of device
@@ -60,6 +59,7 @@ DEVICEDEF
  1.0 0.0 0.0 setcolor
  push 0.0 0.0 -0.03 translate 
    0.04 drawsphere pop
+
 DEVICEDEF
  sprinkler_upright
  0.0 0.0 -0.04 translate
@@ -98,6 +98,7 @@ DEVICEDEF
    0.064 0.002 0.004 -1.0 drawnotchplate pop
  0.0 0.0 1.0 setcolor 
  push 0.0 0.0 0.015 translate  0.015 drawsphere pop
+
 DEVICEDEF
  sprinkler_pendent
  0.69 0.49 0.17 setcolor
@@ -138,6 +139,7 @@ DEVICEDEF
  0.0 0.0 1.0 setcolor
  push 0.0 0.0 0.015 translate 0.015 drawsphere pop
  pop
+
 DEVICEDEF
  smoke_detector
  0.8 0.8 0.8 setcolor
@@ -157,6 +159,7 @@ DEVICEDEF
  push 0.0 0.0 -0.028 translate 0.10 0.11 0.02 drawring pop
  push 0.0 0.0 -0.028 translate 0.07 0.08 0.02 drawring pop
  push 0.0 0.0 -0.028 translate 0.04 0.05 0.02 drawring pop
+
 DEVICEDEF
  nozzle
  180.0 rotatex 0.0 0.0 -0.041402 translate
@@ -185,6 +188,7 @@ push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 3.0 3.0 0.0 copynvals 0.0 0.0 1
 push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 0.0 0.0 1.0 setcolor 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
  NEWFRAME
  0.001 0.001 0.001 scalexyz 1.0 drawcube // state 1, door disappears
+
 DEVICEDEF
  evacdoor         // label, name of device
  // Evacuation input: door namelist
@@ -205,12 +209,14 @@ NEWFRAME
     1.0 drawcube pop // front half of door (user specified color)
  push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 1.0 0.0 0.0 setcolor
     0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (red)
+
 DEVICEDEF
  evacincline         // label, name of device
  // Evacuation input: evss namelist
  90.0 rotatez 90.0 rotatex
  push  0.0 3.0 0.0 copynvals 1.0 0.1 2.3 scalexyz 3.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor
     0.0 0.5 0.0 translate 1.0 drawcube pop // incline (user specified color)
+
 DEVICEDEF
  evacentr         // label, name of device
  // Evacuation input: entr namelist
@@ -237,32 +243,40 @@ DEVICEDEF // device for particle file sphere
  SPHERE
  0.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor
  3.0 0.0 copyval 0.1 drawsphere
+
 DEVICEDEF // device for particle file tube
  TUBE
  0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
  90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
+
 DEVICEDEF // device for particle file tube
  CYLINDER
  0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
  90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
+
 DEVICEDEF // device for general cylinder 
  GCYLINDER
  0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
  5.0 0.0 copyval -30.0 rotatez 6.0 0.0 copyval -10.0 rotatey 90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
+
+// data layout for egg
+// 0->2  r,g,b color 
+// 3     dy,dz (diameter)
+// 4     dx  (length)
 DEVICEDEF // device for particle "egg"
  EGG
  0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 4.0 6.0 copyval 3.0 5.0 copyval 3.0 1.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
+ 4.0 4.0 copyval 3.0 3.0 copyval 3.0 2.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
 
-// data layout for ellipsoid
+// data layout for gball
 // 0->2  r,g,b color 
 // 3     dx
 // 4     dy
 // 5     dz
-DEVICEDEF // device for general ellipsoid
- ELLIPSOID
+DEVICEDEF // device for a general ball
+ gball
  0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 3.0 6.0 copyval 4.0 4.0 copyval 5.0 2.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
+ 3.0 4.0 copyval 4.0 3.0 copyval 5.0 2.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
 
 // data layout for dynamic textured sphere
 // 0-2 r,g,b color
@@ -366,51 +380,69 @@ AVATARDEF
    //  used to create more complex devices
 
 DEVICEDEF
- drawaxis
+ drawaxis2
  1.0 0.0 0.0 setcolor
  push 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
  0.0 1.0 0.123 setcolor
  push 90.0 rotatey 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
+ 
+DEVICEDEF
+ drawaxis
+ 1.0 0.0 0.0 setcolor
+ push 0.00625 0.00625 0.15 scalexyz 1.0 1.0 drawdisk pop
+ 0.0 1.0 0.123 setcolor
+ push 90.0 rotatey 0.00625 0.00625 0.15 scalexyz 1.0 1.0 drawdisk pop
+ 
 DEVICEDEF
  drawcone
  0.69 0.49 0.17 setcolor
  0.50 0.30 drawcone
+ 
 DEVICEDEF
  drawcube
  0.69 0.49 0.17 setcolor
  0.25 drawcube
+ 
 DEVICEDEF
  drawdisk
  0.69 0.49 0.17 setcolor
  0.25 0.50 drawdisk
+ 
 DEVICEDEF
  drawcdisk
  0.69 0.49 0.17 setcolor
  0.25 0.50 drawcdisk
+ 
 DEVICEDEF
  drawhexdisk
  0.69 0.49 0.17 setcolor
  0.50 0.25 drawhexdisk
+ 
 DEVICEDEF
  drawnotchplate
  0.69 0.49 0.17 setcolor
  0.5 0.1 0.2 1 drawnotchplate
+ 
 DEVICEDEF
  drawnotchplate2
  0.69 0.49 0.17 setcolor
  0.5 0.1 0.2 -1 drawnotchplate
+ 
 DEVICEDEF
  drawpolydisk
  0.69 0.49 0.17 setcolor
  5 0.35 0.15 drawpolydisk
+ 
 DEVICEDEF
  drawring
  0.69 0.49 0.17 setcolor
  0.3 0.5 0.1 drawring
+ 
 DEVICEDEF
  drawsphere
  0.69 0.49 0.17 setcolor
  0.25 drawsphere
+ 
 DEVICEDEF
  drawtrunccone
  0.69 0.49 0.17 setcolor
