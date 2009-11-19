@@ -71,7 +71,6 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define CHOPUPDATE 17
 #define FRAMELOADING 18
 #define STREAKLENGTH 19
-#define OUTPUTSLICEDATA 20
 #define TRACERS 21
 #define PLOTISOTYPE 22
 #ifdef pp_TRANSFORM
@@ -549,7 +548,7 @@ extern "C" void glui_bounds_setup(int main_window){
       CHECKBOX_cellcenter_slice_interp = glui_bounds->add_checkbox_to_panel(panel_slice,"Interpolate cell centered slices",
         &cellcenter_interp);
     }
-    glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata,OUTPUTSLICEDATA,Slice_CB);
+    glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata);
     Slice_CB(FILETYPEINDEX);
   }
 #ifdef pp_COMPRESS
@@ -1598,14 +1597,6 @@ extern "C" void Slice_CB(int var){
     if(SPINNER_plot3d_vectorpointsize!=NULL&&SPINNER_plot3d_vectorlinewidth!=NULL){
       SPINNER_plot3d_vectorpointsize->set_float_val(vectorpointsize);
       SPINNER_plot3d_vectorlinewidth->set_float_val(vectorlinewidth);
-    }
-    break;
-  case OUTPUTSLICEDATA:
-    if(output_slicedata==1){
-      init_slicedata=1;
-    }
-    else{
-      init_slicedata=0;
     }
     break;
   case FRAMELOADING:
