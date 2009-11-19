@@ -7198,11 +7198,9 @@ int readini2(char *inifile, int localfile){
   	    fgets(buffer,255,stream);
 	      sscanf(buffer,"%i",&sliceoutflag);
         if(sliceoutflag!=0){
-          init_slicedata=1;
           output_slicedata=1;
         }
         else{
-          init_slicedata=0;
           output_slicedata=0;
         }
       }

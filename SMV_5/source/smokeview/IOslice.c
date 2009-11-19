@@ -4035,10 +4035,7 @@ void output_Slicedata(void){
   char *ext;
   char flabel[256];
 
-  if(init_slicedata==1){
-    init_slicedata=0;
-    init_Slicedata();
-  }
+  init_Slicedata();
 
   for(ii=0;ii<nslice_loaded;ii++){
     i=slice_loaded_list[ii];
