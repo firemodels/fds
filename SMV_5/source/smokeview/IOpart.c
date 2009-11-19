@@ -31,8 +31,8 @@ void draw_SVOBJECT(sv_object *object, int iframe);
 void ParticlePropShowMenu(int val);
 void PART_CB_INIT(void);
 void update_all_partvis(particle *parti);
-void update_partvis(int first_frame,part5data *datacopy, int nclasses);
-int get_tagindex(part5data *data, int tagval);
+void update_partvis(int first_frame,particle *parti, part5data *datacopy, int nclasses);
+int get_tagindex(const particle *parti, part5data **data, int tagval);
 void endian_switch(void *val, int nval);
 #define READPASS 1
 #define READFAIL 0
@@ -531,7 +531,7 @@ void update_all_partvis(particle *parti){
   datacopy = parti->data5;
   for(i=0;i<parti->nframes;i++){
     for(j=0;j<parti->nclasses;j++){
-      update_partvis(firstframe,datacopy,parti->nclasses);
+      update_partvis(firstframe,parti,datacopy,parti->nclasses);
       datacopy++;
     }
     if(firstframe==1)firstframe=0;
@@ -541,7 +541,7 @@ void update_all_partvis(particle *parti){
 
 /* ------------------ update_partvis ------------------------ */
 
-void update_partvis(int first_frame,part5data *datacopy, int nclasses){
+void update_partvis(int first_frame,particle *parti, part5data *datacopy, int nclasses){
   int nparts;
   unsigned char *vis_part;
 
@@ -563,12 +563,12 @@ void update_partvis(int first_frame,part5data *datacopy, int nclasses){
     int ii;
     part5data *datalast;
     int nvis=0,nleft;
-
-    datalast = datacopy-nclasses;
+      
     for(ii=0;ii<nparts;ii++){
       int tag_index;
 
-      tag_index = get_tagindex(datalast,datacopy->tags[ii]);
+      datalast = datacopy-nclasses;
+      tag_index = get_tagindex(parti,&datalast,datacopy->tags[ii]);
       if(partpointstep==1||(tag_index!=-1&&datalast->vis_part[tag_index]==1)){
         datacopy->vis_part[ii]=1;
         nvis++;
@@ -593,14 +593,34 @@ void update_partvis(int first_frame,part5data *datacopy, int nclasses){
 
 /* ------------------ get_tagindex ------------------------ */
 
-int get_tagindex(part5data *data, int tagval){
+int get_tagindex(const particle *partin, part5data **datain, int tagval){
   int *returnval;
+  part5data *data;
+  int i;
 
-  if(data->npoints==0)return -1;
-  ASSERT(data->sort_tags!=NULL);
-  returnval=bsearch(&tagval,data->sort_tags,data->npoints,2*sizeof(int),tagscompare);
-  if(returnval==NULL)return -1;
-  return *(returnval+1);
+  for(i=-1;i<npart_files;i++){
+    const particle *parti;
+
+    if(i==-1){
+      parti=partin;
+      data = *datain;
+    }
+    else{
+      parti=partinfo + i;
+      if(parti==partin)continue;
+      if(parti->loaded==0||parti->display==0)continue;
+      data = parti->data5+(*datain-partin->data5);
+    }
+    if(parti->loaded==0||parti->display==0)continue;
+
+    if(data->npoints==0)continue;
+    ASSERT(data->sort_tags!=NULL);
+    returnval=bsearch(&tagval,data->sort_tags,data->npoints,2*sizeof(int),tagscompare);
+    if(returnval==NULL)continue;
+    *datain=data;
+    return *(returnval+1);
+  }
+  return -1;
 }
 
 /* ------------------ getpart5header ------------------------ */
@@ -1746,7 +1766,7 @@ void drawPart5(const particle *parti){
 
           if(ipframe-k<0)break;
           datapast = parti->data5+nclasses*(ipframe-k)+i;
-          jj = get_tagindex(datapast,tagval);
+          jj = get_tagindex(parti,&datapast,tagval);
           if(jj<0)break;
           sxx = datapast->sx;
           syy = datapast->sy;
@@ -1778,7 +1798,7 @@ void drawPart5(const particle *parti){
 
           if(ipframe-k<0)break;
           datapast = parti->data5+nclasses*(ipframe-k)+i;
-          jj = get_tagindex(datapast,tagval);
+          jj = get_tagindex(parti,&datapast,tagval);
           if(jj<0||datapast->irvals==NULL)break;
           sxx = datapast->sx;
           syy = datapast->sy;
