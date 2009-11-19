@@ -382,67 +382,55 @@ AVATARDEF
 DEVICEDEF
  drawaxis2
  1.0 0.0 0.0 setcolor
- push 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
+ push 0.05 0.05 0.4 scalexyz 1.0 1.0 drawdisk pop
  0.0 1.0 0.123 setcolor
  push 90.0 rotatey 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
- 
 DEVICEDEF
  drawaxis
  1.0 0.0 0.0 setcolor
- push 0.00625 0.00625 0.15 scalexyz 1.0 1.0 drawdisk pop
+ push 0.00625 0.00625 0.075 scalexyz 1.0 1.0 drawdisk pop
  0.0 1.0 0.123 setcolor
- push 90.0 rotatey 0.00625 0.00625 0.15 scalexyz 1.0 1.0 drawdisk pop
- 
+ push 90.0 rotatey 0.00625 0.00625 0.075 scalexyz 1.0 1.0 drawdisk pop
 DEVICEDEF
  drawcone
  0.69 0.49 0.17 setcolor
  0.50 0.30 drawcone
- 
 DEVICEDEF
  drawcube
  0.69 0.49 0.17 setcolor
  0.25 drawcube
- 
 DEVICEDEF
  drawdisk
  0.69 0.49 0.17 setcolor
  0.25 0.50 drawdisk
- 
 DEVICEDEF
  drawcdisk
  0.69 0.49 0.17 setcolor
  0.25 0.50 drawcdisk
- 
 DEVICEDEF
  drawhexdisk
  0.69 0.49 0.17 setcolor
  0.50 0.25 drawhexdisk
- 
 DEVICEDEF
  drawnotchplate
  0.69 0.49 0.17 setcolor
  0.5 0.1 0.2 1 drawnotchplate
- 
 DEVICEDEF
  drawnotchplate2
  0.69 0.49 0.17 setcolor
  0.5 0.1 0.2 -1 drawnotchplate
- 
 DEVICEDEF
  drawpolydisk
  0.69 0.49 0.17 setcolor
  5 0.35 0.15 drawpolydisk
- 
 DEVICEDEF
  drawring
  0.69 0.49 0.17 setcolor
  0.3 0.5 0.1 drawring
- 
 DEVICEDEF
  drawsphere
  0.69 0.49 0.17 setcolor
  0.25 drawsphere
- 
 DEVICEDEF
  drawtrunccone
  0.69 0.49 0.17 setcolor
