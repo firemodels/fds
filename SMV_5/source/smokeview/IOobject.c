@@ -72,6 +72,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWARC       212
 #define SV_DRAWCDISK     213
 #define SV_DRAWTSPHERE   214
+#define SV_DRAWARCDISK   215
 
 #define SV_DRAWCUBE_NUMARGS      1
 #define SV_DRAWSPHERE_NUMARGS    1
@@ -88,6 +89,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWARC_NUMARGS       2
 #define SV_DRAWCDISK_NUMARGS     2
 #define SV_DRAWTSPHERE_NUMARGS   2
+#define SV_DRAWARCDISK_NUMARGS   3
 
 #define SV_PUSH       300
 #define SV_POP        301
@@ -132,6 +134,7 @@ void drawtsphere(float texture_index, float diameter, unsigned char *rgbcolor);
 void drawcube(float size, unsigned char *rgbcolor);
 void drawcdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawdisk(float diameter, float height, unsigned char *rgbcolor);
+void drawarcdisk(float angle, float diameter, float height, unsigned char *rgbcolor);
 void drawhexdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor);
 void drawring(float d_inner, float d_outer, float height, unsigned char *rgbcolor);
@@ -504,7 +507,7 @@ void draw_devices(void){
       draw_SVOBJECT(devicei->object,state);
     }
     else{
-      draw_SVOBJECT(devicei->object,0);
+      draw_SVOBJECT(devicei->object,devicei->state0);
     }
     devicei->object->use_displaylist=save_use_displaylist;
     glPopMatrix();
@@ -846,6 +849,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       if(op_skip==0&&iarg+SV_DRAWDISK_NUMARGS<=framei->nargs)drawdisk(arg[0],arg[1], rgbptr);
       rgbptr=NULL;
       iarg+=2;
+      break;
+    case SV_DRAWARCDISK:
+      if(op_skip==0&&iarg+SV_DRAWARCDISK_NUMARGS<=framei->nargs)drawarcdisk(arg[0],arg[1], arg[2], rgbptr);
+      rgbptr=NULL;
+      iarg+=3;
       break;
     case SV_DRAWCDISK:
       if(op_skip==0&&iarg+SV_DRAWCDISK_NUMARGS<=framei->nargs)drawcdisk(arg[0],arg[1], rgbptr);
@@ -1330,6 +1338,64 @@ void drawdisk(float diameter, float height, unsigned char *rgbcolor){
 
 }
 
+/* ----------------------- drawarcdisk ----------------------------- */
+
+void drawarcdisk(float angle, float diameter, float height, unsigned char *rgbcolor){
+  int i, iarc;
+
+  if(ncirc==0)initcircle(CIRCLE_SEGS);
+
+  iarc = CIRCLE_SEGS*angle/360.0 + 0.5;
+  if(iarc<2)iarc=2;
+  if(iarc>CIRCLE_SEGS)iarc=CIRCLE_SEGS;
+
+  glBegin(GL_QUADS);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+  for(i=0;i<iarc;i++){
+    glNormal3f(xcirc[i],ycirc[i],0.0);
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0); // 1
+
+    glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
+    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0); // 2
+
+    glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
+    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height); // 3
+
+    glNormal3f(xcirc[i],ycirc[i],0.0);
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height); // 4
+  }
+  glNormal3f(0.0,-1.0,0.0);
+  glVertex3f(0.0,0.0,0.0);
+  glVertex3f(diameter*xcirc[  0]/2.0,diameter*ycirc[  0]/2.0,0.0); // 1
+  glVertex3f(diameter*xcirc[  0]/2.0,diameter*ycirc[  0]/2.0,height); // 1
+  glVertex3f(0.0,0.0,height);
+
+  glNormal3f(-ycirc[iarc-1],xcirc[iarc-1],0.0);
+  glVertex3f(0.0,0.0,0.0);
+  glVertex3f(diameter*xcirc[  iarc-1]/2.0,diameter*ycirc[  iarc-1]/2.0,0.0); // 1
+  glVertex3f(diameter*xcirc[  iarc-1]/2.0,diameter*ycirc[  iarc-1]/2.0,height); // 1
+  glVertex3f(0.0,0.0,height);
+  glEnd();
+
+  glBegin(GL_TRIANGLES);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+  glNormal3f(0.0,0.0,-1.0);
+  for(i=0;i<iarc;i++){
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+    glVertex3f(                    0.0,                    0.0,0.0);
+    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0);
+  }
+  glNormal3f(0.0,0.0,1.0);
+  for(i=0;i<iarc;i++){
+    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height);
+    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height);
+    glVertex3f(                    0.0,                    0.0, height);
+  }
+  glEnd();
+
+}
 
 /* ----------------------- drawcdisk ----------------------------- */
 
@@ -1626,31 +1692,36 @@ void drawnotchplate(float diameter, float height, float notchheight, float direc
 
 void drawcone(float d1, float height, unsigned char *rgbcolor){
   int i;
-  float dz;
+  float factor, denom, rad;
+  float hdr;
 
   if(ncirc==0)initcircle(CIRCLE_SEGS);
   if(height<=0.0)height=0.0001;
 
-  dz = d1/height;
+
+  rad = d1/2.0;
+  hdr = height/rad;
+  denom = 1.0/sqrt(1.0+hdr*hdr);
+  factor = hdr*denom;
 
   glBegin(GL_TRIANGLES);
   if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   for(i=0;i<ncirc;i++){
-    glNormal3f(xcirc[i],ycirc[i],dz);
-    glVertex3f(d1*xcirc[  i]/2.0,d1*ycirc[  i]/2.0,0.0); // 1
+    glNormal3f(factor*xcirc[i],factor*ycirc[i],denom);
+    glVertex3f(rad*xcirc[  i],rad*ycirc[  i],0.0); // 1
 
-    glNormal3f(xcirc[i+1],ycirc[i+1],dz);
-    glVertex3f(d1*xcirc[i+1]/2.0,d1*ycirc[i+1]/2.0,0.0); // 2
+    glNormal3f(factor*xcirc[i+1],factor*ycirc[i+1],denom);
+    glVertex3f(rad*xcirc[i+1],rad*ycirc[i+1],0.0); // 2
 
-    glNormal3f(xcirc[i],ycirc[i],dz);
+    glNormal3f(factor*xcirc[i],factor*ycirc[i],denom);
     glVertex3f(0.0,0.0, height); // 3
   }
   glNormal3f(0.0,0.0,-1.0);
   for(i=0;i<ncirc;i++){
-    glVertex3f(d1*xcirc[  i]/2.0,d1*ycirc[  i]/2.0,0.0);
+    glVertex3f(rad*xcirc[  i],rad*ycirc[  i],0.0);
     glVertex3f(                    0.0,                    0.0,0.0);
-    glVertex3f(d1*xcirc[i+1]/2.0,d1*ycirc[i+1]/2.0,0.0);
+    glVertex3f(rad*xcirc[i+1],rad*ycirc[i+1],0.0);
   }
   glEnd();
 }
