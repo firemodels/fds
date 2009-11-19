@@ -898,9 +898,9 @@ MESH_LOOP: DO NM=1,NMESHES
  
    ! Set up arrays that will return coordinate positions
  
-   NIPX   = 100*M%IBAR
-   NIPY   = 100*M%JBAR
-   NIPZ   = 100*M%KBAR
+   NIPX   = 500*M%IBAR
+   NIPY   = 500*M%JBAR
+   NIPZ   = 500*M%KBAR
    NIPXS  = NINT(NIPX*M%DX(0)/(M%XF-M%XS))
    NIPXF  = NINT(NIPX*M%DX(M%IBP1)/(M%XF-M%XS))
    NIPYS  = NINT(NIPY*M%DY(0)/(M%YF-M%YS))
