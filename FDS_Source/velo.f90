@@ -559,7 +559,7 @@ END SUBROUTINE VELOCITY_FLUX
 SUBROUTINE VELOCITY_FLUX_ISOTHERMAL(NM)
  
 ! Compute the velocity flux at cell edges (ISOTHERMAL DNS ONLY)
- 
+
 REAL(EB) :: UP,UM,VP,VM,WP,WM,VTRM,VOMZ,WOMY,UOMY,VOMX,UOMZ,WOMX, &
             DVDZ,DVDX,DWDY,DWDX,DUDZ,DUDY,PMDT,MPDT, &
             EPSUP,EPSUM,EPSVP,EPSVM,EPSWP,EPSWM
@@ -1904,6 +1904,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
             DO I=0,IBAR
                !!UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
                UVW = ABS(UU(I,J,K)*RDXN(I)) + ABS(VV(I,J,K)*RDYN(J)) + ABS(WW(I,J,K)*RDZN(K))
+               UVW = UVW + IBM_UVWMAX
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL=I
@@ -1933,6 +1934,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
             DO I=0,IBAR
                !!UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
                UVW = SQRT( (UU(I,J,K)*RDXN(I))**2 + (VV(I,J,K)*RDYN(J))**2 + (WW(I,J,K)*RDZN(K))**2 )
+               UVW = UVW + IBM_UVWMAX
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL=I
@@ -1978,7 +1980,7 @@ ENDIF
  
 PARABOLIC_IF: IF (DNS .OR. CELL_SIZE<0.005_EB .OR. CHECK_VN) THEN
  
-   INCOMPRESSIBLE_IF: IF (ISOTHERMAL .AND. N_SPECIES==0) THEN
+   INCOMPRESSIBLE_IF: IF (DNS .AND. ISOTHERMAL .AND. N_SPECIES==0) THEN
       IF (TWO_D) THEN
          R_DX2 = 1._EB/DXMIN**2 + 1._EB/DZMIN**2
       ELSE
@@ -2194,7 +2196,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,PP,UBAR,VBAR,WBAR, &
 REAL(EB) :: U_IBM,V_IBM,W_IBM,VEL2,DN
 REAL(EB) :: U_ROT,V_ROT,W_ROT
 REAL(EB) :: PE,PW,PT,PB
-REAL(EB) :: U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVEL(3),XGEOM(3),XCELL(3),XNODE(3)
+REAL(EB) :: U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVEL(3),XGEOM(3),XCELL(3),XNODE(3),XG(3)
 REAL(EB) :: U_VEC(2),U_GEOM(2),N_VEC(2),DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),RRHO,MUA
 INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1
 TYPE(GEOMETRY_TYPE), POINTER :: G
@@ -2225,9 +2227,9 @@ ENDIF
 
 IF (IMMERSED_BOUNDARY_METHOD==2) THEN
    PP => WORK1
-   UBAR => WORK2
-   VBAR => WORK3
-   WBAR => WORK4
+   UBAR => IBM_SAVE3
+   VBAR => IBM_SAVE4
+   WBAR => IBM_SAVE5
    DUDX => WORK5
    DVDY => WORK6
    DWDZ => WORK7
@@ -2281,17 +2283,17 @@ GEOM_LOOP: DO NG=1,N_GEOM
             XCELL = (/XC(I),YC(J),ZC(K)/)
             XNODE = (/X(I),YC(J),Z(K)/)
             DXC   = (/DX(I),DYN(J),DZN(K)/)
-            
-            U_ROT = (XVEL(3)-XGEOM(3))*G%OMEGA_Y - (XVEL(2)-XGEOM(2))*G%OMEGA_Z
   
             SELECT CASE(G%U_MASK(I,J,K))
                CASE(-1)
+                  U_ROT = (XVEL(3)-XGEOM(3))*G%OMEGA_Y - (XVEL(2)-XGEOM(2))*G%OMEGA_Z
                   U_IBM = G%U + U_ROT
                CASE(0)
                   SELECT_METHOD1: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
                      CASE(0)
                         CYCLE ! treat as gas phase cell
                      CASE(1)
+                        U_ROT = (XVEL(3)-XGEOM(3))*G%OMEGA_Y - (XVEL(2)-XGEOM(2))*G%OMEGA_Z
                         CALL GETX(XI,XVEL,NG)
                         CALL GETU(U_DATA,DXI,XI,XVEL,IJK,1,NM)
                         U_IBM = TRILINEAR(U_DATA,DXI,DXC)
@@ -2303,15 +2305,18 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         IM1 = MAX(I-1,0)
                         JM1 = MAX(J-1,0)
                         KM1 = MAX(K-1,0)
-                                                
-                        U_VEC  = (/UU(I,J,K),0.5_EB*(WBAR(I,J,K)+WBAR(IP1,J,K))/)
-                        U_GEOM = (/G%U,G%W/)
-                        
+ 
                         CALL GETX(XI,XVEL,NG)
-                        N_VEC = (/XI(1)-XVEL(1),XI(3)-XVEL(3)/) ! normal from surface to velocity point
+                        XG    = XVEL-(XI-XVEL)                  ! point on the surface of geometry
+                        N_VEC = (/XVEL(1)-XG(1),XVEL(3)-XG(3)/) ! normal from surface to velocity point
                         DN    = SQRT(DOT_PRODUCT(N_VEC,N_VEC))  ! distance
                         N_VEC = N_VEC/DN                        ! unit normal
                         
+                        U_VEC  = (/UU(I,J,K),0.5_EB*(WBAR(I,J,K)+WBAR(IP1,J,K))/)
+                        U_ROT  = (XG(3)-XGEOM(3))*G%OMEGA_Y - (XG(2)-XGEOM(2))*G%OMEGA_Z
+                        W_ROT  = (XG(2)-XGEOM(2))*G%OMEGA_X - (XG(1)-XGEOM(1))*G%OMEGA_Y
+                        U_GEOM = (/G%U+U_ROT,G%W+W_ROT/)
+
                         DIVU = 0.5_EB*(DP(I,J,K)+DP(IP1,J,K))
                         
                         ! compute GRADU at point XI
@@ -2359,23 +2364,24 @@ GEOM_LOOP: DO NG=1,N_GEOM
          
                IJK  = (/I,J,K/)
                XVEL = (/XC(I),Y(J),ZC(K)/)
-               V_ROT = (XVEL(1)-XGEOM(1))*G%OMEGA_Z - (XVEL(3)-XGEOM(3))*G%OMEGA_Z
          
                SELECT CASE(G%V_MASK(I,J,K))
                   CASE(-1)
+                     V_ROT = (XVEL(1)-XGEOM(1))*G%OMEGA_Z - (XVEL(3)-XGEOM(3))*G%OMEGA_X
                      V_IBM = G%V + V_ROT
                   CASE(0)
                      SELECT_METHOD2: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
                         CASE(0)
                            CYCLE
                         CASE(1:2)
+                           V_ROT = (XVEL(1)-XGEOM(1))*G%OMEGA_Z - (XVEL(3)-XGEOM(3))*G%OMEGA_X
                            CALL GETX(XI,XVEL,NG)
                            CALL GETU(U_DATA,DXI,XI,XVEL,IJK,2,NM)
                            DXC = (/DXN(I),DY(J),DZN(K)/)
                            V_IBM = TRILINEAR(U_DATA,DXI,DXC)
                            V_IBM = 0.5_EB*(V_IBM+(G%V+V_ROT))
                         !CASE(2)
-                        !   V_IBM = VV(I,J,K)
+                        !   V_IBM = G%V + V_ROT
                      END SELECT SELECT_METHOD2
                END SELECT
          
@@ -2397,16 +2403,16 @@ GEOM_LOOP: DO NG=1,N_GEOM
             XNODE = (/X(I),YC(J),Z(K)/)
             DXC   = (/DXN(I),DYN(J),DZ(K)/)
             
-            W_ROT = (XVEL(2)-XGEOM(2))*G%OMEGA_X - (XVEL(1)-XGEOM(1))*G%OMEGA_Y
-            
             SELECT CASE(G%W_MASK(I,J,K))
                CASE(-1)
+                  W_ROT = (XVEL(2)-XGEOM(2))*G%OMEGA_X - (XVEL(1)-XGEOM(1))*G%OMEGA_Y
                   W_IBM = G%W + W_ROT
                CASE(0)
                   SELECT_METHOD3: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
                      CASE(0)
                         CYCLE
                      CASE(1)
+                        W_ROT = (XVEL(2)-XGEOM(2))*G%OMEGA_X - (XVEL(1)-XGEOM(1))*G%OMEGA_Y
                         CALL GETX(XI,XVEL,NG)
                         CALL GETU(U_DATA,DXI,XI,XVEL,IJK,3,NM)
                         W_IBM = TRILINEAR(U_DATA,DXI,DXC)
@@ -2419,13 +2425,16 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         JM1 = MAX(J-1,0)
                         KM1 = MAX(K-1,0)
                                                 
-                        U_VEC  = (/0.5_EB*(UBAR(I,J,K)+UBAR(I,J,KP1)),WW(I,J,K)/)
-                        U_GEOM = (/G%U,G%W/)
-                        
                         CALL GETX(XI,XVEL,NG)
-                        N_VEC = (/XI(1)-XVEL(1),XI(3)-XVEL(3)/) ! normal from surface to velocity point
+                        XG    = XVEL-(XI-XVEL)                  ! point on the surface of geometry
+                        N_VEC = (/XVEL(1)-XG(1),XVEL(3)-XG(3)/) ! normal from surface to velocity point
                         DN    = SQRT(DOT_PRODUCT(N_VEC,N_VEC))  ! distance
                         N_VEC = N_VEC/DN                        ! unit normal
+                        
+                        U_VEC  = (/0.5_EB*(UBAR(I,J,K)+UBAR(I,J,KP1)),WW(I,J,K)/)
+                        U_ROT  = (XG(3)-XGEOM(3))*G%OMEGA_Y - (XG(2)-XGEOM(2))*G%OMEGA_Z
+                        W_ROT  = (XG(2)-XGEOM(2))*G%OMEGA_X - (XG(1)-XGEOM(1))*G%OMEGA_Y
+                        U_GEOM = (/G%U+U_ROT,G%W+W_ROT/)
                         
                         DIVU = 0.5_EB*(DP(I,J,K)+DP(I,J,KP1))
                        
