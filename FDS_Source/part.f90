@@ -677,10 +677,21 @@ REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW
 
-IF (MESHES(NM)%NLP==0) RETURN
-IF (EVACUATION_ONLY(NM)) RETURN  ! Don't waste time if an evac mesh
+! Zero out the number of the droplets in the "orphanage"; that is, the place to hold droplets transferring from mesh to mesh
+
+MESHES(NM)%OMESH(1:NMESHES)%N_DROP_ORPHANS = 0
+
+! Return if there are no particles in this mesh, or of the mesh if for evacuation only
+
+IF (MESHES(NM)%NLP==0)   RETURN
+IF (EVACUATION_ONLY(NM)) RETURN  
+
+! Set the CPU timer and point to the current mesh variables
+
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
+
+! Move the droplets/particles, then compute mass and energy transfer, then add droplet momentum to gas
 
 IF (CORRECTOR) CALL MOVE_PARTICLES(T,NM)
 IF (CORRECTOR) CALL PARTICLE_MASS_ENERGY_TRANSFER(T,NM)

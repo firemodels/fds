@@ -1,6 +1,6 @@
 
-%\chapter{Quantifying Model Error}
-\section{Introduction}
+\chapter{Quantifying Model Error}
+%\section{Introduction}
 
 There are various definitions of model validation.
 For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capability of
@@ -216,7 +216,7 @@ relative standard deviation:
    \ln M \; | \; \theta \sim N \left(\ln \delta +\ln \theta - \frac{\widetilde{\sigma}_M^2}{2} \; , \;
    \widetilde{\sigma}_M^2 \right) \quad ; \quad \widetilde{\sigma}_M=\frac{\sigma_M}{\delta \, \theta} \label{meq}
 \ee
-Subtracting the random variable $\ln E$ in Eq.~(\ref{eeq}) from $\ln M$ in Eq.~(\ref{meq}) yields:
+Combining Eq.~(\ref{eeq}) with Eq.~(\ref{meq}) yields:
 \be
    \ln M  - \ln E \sim N \left( \ln \delta - \frac{\widetilde{\sigma}_M^2}{2}+\frac{\widetilde{\sigma}_E^2}{2} \; ,
    \; \widetilde{\sigma}_M^2+\widetilde{\sigma}_E^2 \right) \label{lnMeq}
@@ -242,16 +242,16 @@ the prior distribution and the likelihood function, normalized by their integral
 $f(\theta|E)= p(\theta) \, f(E|\theta)/\int p(\theta) \, f(E|\theta) \, d\theta$.
 A constant prior is also known as a Jeffreys prior.}
 with a non-informative prior for $\theta$, we obtain the posterior distribution as
-\be 
-   \delta \, \theta \; | \; M \sim N \left( M \; , \; \sigma_M^2 \right) \label{thetaeq} 
+\be
+   \delta \, \theta \; | \; M \sim N \left( M \; , \; \sigma_M^2 \right) \label{thetaeq}
 \ee
 The assumption of a non-informative prior implies that we do not have sufficient information about the
 prior distribution ({\em i.e.} the true value) of
 $\theta$ to assume anything other than a uniform distribution.
 Dividing by the bias factor, $\delta$, yields a distribution for the ``true'' value of the predicted quantity:
-\be 
-   \theta \; | \; M \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth} 
-\ee 
+\be
+   \theta \; | \; M \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth}
+\ee
 Below, we describe how one might make use of this formula in practice.
 First, however, we need to verify the accuracy of the procedure just described.
 
