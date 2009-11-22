@@ -21,5 +21,5 @@ goto:eof
 
 call %envfile%
 
-cd %ProgramFiles%\NIST\Smokeview
+cd %ProgramFiles%\FDS\FDS5\bin
 start wordpad devices.svo 
