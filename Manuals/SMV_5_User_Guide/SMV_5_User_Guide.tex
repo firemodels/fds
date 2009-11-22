@@ -1156,7 +1156,7 @@ As with preference ({\tt .ini}) files, Smokeview looks for device
 definitions in three places.  First, in a file named {\tt
 devices.svo}, in the directory containing the Smokeview program.
 On the PC, this is {\tt
-C:$\backslash$Program Filest$\backslash$NIST$\backslash$Smokeview$\backslash$} . Next, in a file
+C:$\backslash$Program Filest$\backslash$FDS$\backslash$FDS5$\backslash$bin$\backslash$} . Next, in a file
 named {\tt devices.svo}, in the directory containing the case
 being viewed and finally in a file named {\tt casename.svo} where
 {\tt casename} is the name of the case.
@@ -1399,16 +1399,16 @@ to move the origin from an object's base to its center.
 
 
 \subsection{User Settable Transformations}
-User settable commands allow one to change how objects are drawn by using information passed from FDS. This information is passed using the PARAMS keyword on the \&DEVC namelist statement.  The user settable Smokeview device commands use this passed information to dynamically change the inputs of subsequent device commands.  Smokeview places this passed information into an internal array, for discussion here, named {\tt PARAMS}.
+User settable transformations or commands allow one to change how objects are drawn by using information passed from FDS. This information is passed using the {\tt PARAMS} keyword on the {\tt \&DEVC}\ namelist statement.  The user settable commands use this information to dynamically change the inputs of subsequent device commands.  Smokeview places this passed information into an internal array, for discussion here, named {\tt PARAMS}.
 
-When Smokeview draws an object containing a user settable command (MULTIADDT, COPYVAL, or COPYNVALS), data is copied from {\tt PARAMS} overwriting input values of subsequent device commands.  This allows one to customize objects contained in devices.svo using inputs or results obtained from FDS.
+The commands, {\tt COPYVAL}\ and {\tt COPYNVALS}, each copy data from the {\tt PARAMS}\ array to memory locations used to store parameters for a subsequent device command.  The command, {\tt MULTIADDT}, doesn't use {\tt PARAMS}\ but does copy the value it computes for use by a subsequent device command.  This allows one to customize objects contained in devices.svo using inputs or results obtained from FDS.
 
 \blist
 \hitem{COPYVAL} The command,\\
 \\
  {\tt in out copyval}, \\
 \\
-copies the value PARAMS[in] to a location 
+copies the value PARAMS[in] to a location
 {\tt out + 1}\ positions farther down the command argument list.
 This allows one to modify
 the look of a device at run-time.  The usage of {\tt copyval}\ is illustrated in Figure \ref{figcopyval}.
@@ -4181,7 +4181,7 @@ three locations in the following order:
 defined by the {\tt SMOKEVIEWINI}\ environment variable. On the PC,
 the directory
 {\tt
-C:$\backslash$Program Files$\backslash$nist$\backslash$Smokeview$\backslash$smokeview.ini} is the
+C:$\backslash$Program Files$\backslash$ FDS$\backslash$FDS5$\backslash$bin$\backslash$smokeview.ini} is the
 default location for this preference file. The {\tt SMOKEVIEWINI}\
 environment variable may be defined on the
 PC to specify the location of the smokeview.ini file. This
