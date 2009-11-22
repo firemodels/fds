@@ -896,7 +896,9 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       iarg+=2;
       break;
     case SV_DRAWTSPHERE:
-      if(op_skip==0&&iarg+SV_DRAWTSPHERE_NUMARGS<=framei->nargs)drawtsphere(arg[0],arg[1],rgbptr);
+      if(op_skip==0&&iarg+SV_DRAWTSPHERE_NUMARGS<=framei->nargs){
+        drawtsphere(arg[0],arg[1],rgbptr);
+      }
       rgbptr=NULL;
       iarg++;
       break;
@@ -1052,9 +1054,9 @@ void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor
 
     glPushMatrix();
     glScalef(diameter/2.0,diameter/2.0,diameter/2.0);
-    glColor3f(0.75,0.75,0.70);
     if(cos_lat==NULL)initspheresegs(NLAT,NLONG);
     glBegin(GL_QUADS);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
     for(j=0;j<NLAT;j++){
       float ti,tip1;
       float tj,tjp1;
@@ -2154,7 +2156,7 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_MIRRORCLIP_NUMARGS);
       }
-      else if(STRCMP(token,"peridocclip")==0){
+      else if(STRCMP(token,"periodicclip")==0){
         iop=SV_PERIODICCLIP;
         *use_displaylist=0;
         reporterror(buffer_save,token,numargs,SV_PERIODICCLIP_NUMARGS);
