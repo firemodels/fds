@@ -278,6 +278,21 @@ DEVICEDEF // device for a general ball
  0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
  3.0 4.0 copyval 4.0 3.0 copyval 5.0 2.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
 
+// data layout for demo device
+//    device is a rotating textured sphere that moves around in a box
+// 0-2 r,g,b color
+// 3-5   initial direction
+// 6  rotation rate (degrees per second)
+// 7  sphere diameter
+// 8-10 xmax,ymax,zmax  (these 3 parameters are not implemented now)
+DEVICEDEF // device for dynamic textured sphere
+ DEMOSPHERE
+ 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
+ 5.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 -1.5 2.0 20.0 mirrorclip
+ 4.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 0.0 3.0 10.0 mirrorclip
+ 3.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 -2.5 2.5 0.0 mirrorclip 
+ 1.0 0.0 0.0 translate 6.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 rotatez 180.0 rotatey 0.0 2.0 drawtsphere
+
 // data layout for dynamic textured sphere
 // 0-2 r,g,b color
 // 3  initial azimuth angle
