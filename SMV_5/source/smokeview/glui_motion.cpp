@@ -54,6 +54,7 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define WINDOW_RESIZE 16
 #define WINDOWSIZE_LIST 17
 #define SNAPVIEW 21
+#define SET_VIEW_XYZ 22
 
 #define RENDER_TYPE 0
 #define RENDER_SIZE_LIST 1
@@ -79,6 +80,7 @@ GLUI_Panel *panel_rotate=NULL;
 GLUI_Panel *panel_speed=NULL;
 GLUI_Panel *panel_height=NULL;
 GLUI_Rollout *panel_motion=NULL;
+GLUI_Rollout *panel_specify=NULL;
 GLUI_Panel *panel_translate2=NULL,*panel_translate3=NULL;
 GLUI_Rollout *panel_projection=NULL;
 GLUI_Panel *panel_anglebuttons=NULL;
@@ -98,6 +100,9 @@ GLUI_Panel *reset_panel2=NULL;
 GLUI_EditText *edit_view_label=NULL;
 GLUI_Listbox *view_lists=NULL;
 GLUI_Listbox *LIST_windowsize=NULL;
+GLUI_Spinner *SPINNER_set_view_x=NULL;
+GLUI_Spinner *SPINNER_set_view_y=NULL;
+GLUI_Spinner *SPINNER_set_view_z=NULL;
 GLUI_Spinner *SPINNER_zoom=NULL,*SPINNER_aperture=NULL;
 GLUI_Spinner *SPINNER_speed_crawl=NULL, *SPINNER_speed_walk=NULL;
 GLUI_Spinner *SPINNER_xx=NULL, *SPINNER_yy=NULL, *SPINNER_zz=NULL;
@@ -113,6 +118,21 @@ GLUI_Spinner *SPINNER_farclip=NULL;
 
 void RENDER_CB(int var);
 void enable_disable_views(void);
+
+/* ------------------ update_glui_set_view_xyz ------------------------ */
+
+extern "C" void update_glui_set_view_xyz(float *xyz){
+  if(xyz==NULL)return;
+  if(SPINNER_set_view_x==NULL||SPINNER_set_view_y==NULL||SPINNER_set_view_z!=NULL)return;
+  
+  set_view_xyz[0] = xbar0 + xyz[0]*xyzmaxdiff;
+  set_view_xyz[1] = ybar0 + xyz[1]*xyzmaxdiff;
+  set_view_xyz[2] = zbar0 + xyz[2]*xyzmaxdiff;
+
+  SPINNER_set_view_x->set_float_val(set_view_xyz[0]);
+  SPINNER_set_view_y->set_float_val(set_view_xyz[1]);
+  SPINNER_set_view_z->set_float_val(set_view_xyz[2]);
+}
 
 /* ------------------ gluiIdle ------------------------ */
 
@@ -197,8 +217,8 @@ extern "C" void glui_motion_setup(int main_window){
   int i;
 #define TRANSLATE_SPEED 0.005
   int *rotation_index;
-
   float *eye_xyz;
+
   if(camera_label!=NULL){
     free(camera_label);
     camera_label=NULL;
@@ -278,6 +298,15 @@ extern "C" void glui_motion_setup(int main_window){
       glui_motion->add_checkbox_to_panel(panel_blockageview,meshi->label,&meshi->blockvis);
     }
   }
+
+#if pp_BETA
+  panel_specify = glui_motion->add_rollout_to_panel(panel_motion,"Specify");
+
+  SPINNER_set_view_x=glui_motion->add_spinner_to_panel(panel_specify,"x:",GLUI_SPINNER_FLOAT,set_view_xyz+0,SET_VIEW_XYZ,TRANSLATE_CB);
+  SPINNER_set_view_y=glui_motion->add_spinner_to_panel(panel_specify,"y:",GLUI_SPINNER_FLOAT,set_view_xyz+1,SET_VIEW_XYZ,TRANSLATE_CB);
+  SPINNER_set_view_z=glui_motion->add_spinner_to_panel(panel_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,TRANSLATE_CB);
+#endif
+
 
   panel_projection = glui_motion->add_rollout("Window Properties",false);
   projection_radio=glui_motion->add_radiogroup_to_panel(panel_projection,&projection_type,PROJECTION,TRANSLATE_CB);
@@ -785,6 +814,16 @@ extern "C" void TRANSLATE_CB(int var){
   }
 
   switch (var){
+    case SET_VIEW_XYZ:
+      reset_glui_view(-1);
+      eye_xyz[0]=(set_view_xyz[0]-xbar0)/xyzmaxdiff;
+      eye_xyz[1]=(set_view_xyz[1]-ybar0)/xyzmaxdiff;
+      eye_xyz[2]=(set_view_xyz[2]-zbar0)/xyzmaxdiff;
+      eye_xyz0[0]=eye_xyz[0];
+      eye_xyz0[1]=eye_xyz[1];
+      eye_xyz0[2]=eye_xyz[2];
+      update_translate();
+      break;
     case EYE_ROTATE:
     case TRANSLATE_XY:
       reset_glui_view(-1);

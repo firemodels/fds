@@ -105,6 +105,7 @@ SVEXTERN float xtemp;
 
 SVEXTERN char TITLEBASE[1024];
 
+SVEXTERN float set_view_xyz[3];
 SVEXTERN char INIfile[1024];
 SVEXTERN char WRITEINIfile[1024];
 

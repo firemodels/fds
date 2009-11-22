@@ -250,6 +250,7 @@ void update_camera(camera *ca){
     ca->clip_Y_val=clip_Y_val;
     ca->clip_Z_val=clip_Z_val;
   }
+  update_glui_set_view_xyz(ca->eye);
   ca->dirty=0;
 }
 
