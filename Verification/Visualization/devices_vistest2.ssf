@@ -1,0 +1,22 @@
+RENDERDIR
+..\..\Manuals\FDS_5_User_Guide\scriptfigures
+SETVIEWPOINT
+ tsphere
+RENDERONCE
+ tsphere 
+SETVIEWPOINT
+ gball
+RENDERONCE
+ gball 
+SETVIEWPOINT
+ egg
+RENDERONCE
+ egg
+SETVIEWPOINT
+ sphere
+RENDERONCE
+ sphere
+SETVIEWPOINT
+ tube
+RENDERONCE
+ tube
