@@ -1,0 +1,19 @@
+&HEAD CHID='devices_vistest4',TITLE='Smokeview device drawing test SVN $Revision: 2722 $' /
+
+&MESH IJK=32,32,64, XB=0.0,3.2,0.0,1.6,0.0,4.2/
+
+&TIME TWFIN=0.0/
+
+&VENT XB=0.0,0.0,0.0,1.6,0.0,4.2,SURF_ID='OPEN'/
+&VENT XB=3.2,3.2,0.0,1.6,0.0,4.2,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,0.0,0.0,0.0,4.2,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,1.6,1.6,0.0,4.2,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,0.0,1.6,4.2,4.2,SURF_ID='OPEN'/
+
+&PROP ID='demosphere' TEXTURE_MAP='day2.jpg' 
+  SMOKEVIEW_PARAMETERS(1:11)=1.0,1.0,1.0,1.0,2.0,1.2,36.0,2.0,2.5,2.5,2.5 SMOKEVIEW_ID='demosphere' /
+&DEVC XYZ=1.6,0.8,2.1, QUANTITY='TEMPERATURE' PROP_ID='demosphere' /
+
+&TAIL /
+
+
