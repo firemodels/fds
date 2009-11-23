@@ -160,6 +160,7 @@ DEVICEDEF
  push 0.0 0.0 -0.028 translate 0.07 0.08 0.02 drawring pop
  push 0.0 0.0 -0.028 translate 0.04 0.05 0.02 drawring pop
 
+
 DEVICEDEF
  nozzle
  180.0 rotatex 0.0 0.0 -0.041402 translate
@@ -284,14 +285,14 @@ DEVICEDEF // device for a general ball
 // 3-5   initial direction
 // 6  rotation rate (degrees per second)
 // 7  sphere diameter
-// 8-10 xmax,ymax,zmax  (these 3 parameters are not implemented now)
+// 8-10 xmax,ymax,zmax
 DEVICEDEF // device for dynamic textured sphere
  DEMOSPHERE
  0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 5.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 -1.5 2.0 20.0 mirrorclip
- 4.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 0.0 3.0 10.0 mirrorclip
- 3.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 -2.5 2.5 0.0 mirrorclip 
- 1.0 0.0 0.0 translate 6.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 rotatez 180.0 rotatey 0.0 2.0 drawtsphere
+ 5.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 -1.5 2.0 23.0 mirrorclip
+ 4.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 0.0 5.0 13.0 mirrorclip
+ 3.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 -2.5 2.5 3.0 mirrorclip 
+ 0.0 180.0 9.0 multiaddt 1.0 0.0 0.0 translate 6.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 rotatez 180.0 rotatey 0.0 2.0 drawtsphere
 
 // data layout for dynamic textured sphere
 // 0-2 r,g,b color
@@ -311,7 +312,7 @@ DEVICEDEF // device for dynamic textured sphere
 // 0  height of trunk base
 // 1  diameter of trunk
 // 2  height of trunk
-// 3-5 r,b,g color
+// 3-5 r,g,b color
 DEVICEDEF // device for tree trunk
  TRUNK
  3.0 3.0 0.0 copynvals 0.55 0.27 0.07 setcolor
@@ -321,7 +322,7 @@ DEVICEDEF // device for tree trunk
 // 0  height of canopy base
 // 1  diameter of canopy base
 // 2  height of canopy
-// 3-5 r,b,g color
+// 3-5 r,g,b color
 DEVICEDEF // device for tree canopy
  CANOPY
  3.0 3.0 0.0 copynvals 0.14 0.56 0.14 setcolor

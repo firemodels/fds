@@ -23,7 +23,7 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\SMV_5\for_bundle
-echo copy devices.svo to %ProgramFiles%\NIST\Smokeview
+echo copy devices.svo to %ProgramFiles%\fds\fds5\bin
 pause
-copy devices.svo "%ProgramFiles%"\NIST\Smokeview
+copy devices.svo "%ProgramFiles%"\fds\fds5\bin
 pause
