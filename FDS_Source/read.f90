@@ -2808,7 +2808,7 @@ READ_PART_LOOP: DO N=1,N_PART
  
    PC=>PARTICLE_CLASS(N)
    DENSITY                  = 1000._EB     ! kg/m3
-   DT_INSERT                = 0.01_EB      ! s
+   DT_INSERT                = -1._EB       ! dummy value
    MASS_PER_TIME            = -1._EB       ! kg/s
    MASS_PER_VOLUME          = 1._EB        ! kg/m3
    VAPORIZATION_TEMPERATURE = -300._EB     ! C
@@ -2871,6 +2871,13 @@ READ_PART_LOOP: DO N=1,N_PART
    CALL CHECKREAD('PART',LU_INPUT,IOS) 
    IF (IOS==1) EXIT READ_PART_LOOP
    READ(LU_INPUT,PART)
+
+   ! If an initial field of droplets desired, set time increment to very large value to only allow initialization
+
+   IF (NUMBER_INITIAL_DROPLETS>0 .AND. DT_INSERT<0._EB) DT_INSERT = 1.E6_EB
+   IF (DT_INSERT<0._EB)                                 DT_INSERT = 0.01_EB
+
+   ! Set default colors for Smokeview
 
    IF (ANY(RGB<0) .AND. COLOR=='null') THEN
       COLOR = 'BLACK'
