@@ -28,6 +28,8 @@ cd %vis%
 smokeview -runscript colorbar
 smokeview -runscript colorconv
 smokeview -runscript devices_elem
+smokeview -runscript devices_vistest
+smokeview -runscript devices_vistest2
 smokeview -runscript plume5a
 smokeview -runscript plume5b
 smokeview -runscript plume5c
