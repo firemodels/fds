@@ -6023,6 +6023,9 @@ droplets created per second than the number that can be simulated.
 
 \subsection{Particles or Droplets Introduced at the Start of the Calculation}
 
+\label{info:initial_droplets}
+
+
 Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, add {\ct NUMBER\_INITIAL\_DROPLETS}
 to the {\ct PART} line to indicate the number of particles/droplets within the computational domain at the start of the simulation.
 Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which
@@ -6041,6 +6044,12 @@ If there is more than one rectangular volume in which you want to introduce init
 &INIT PART_ID='drops', XB=..., NUMBER_INITIAL_DROPLETS=1000, MASS_PER_VOLUME=3.5 /
 &INIT PART_ID='drops', XB=..., NUMBER_INITIAL_DROPLETS=2000, MASS_PER_VOLUME=2.5 /
 \end{verbatim} \normalsize
+
+\noindent
+If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} to a positive value
+indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INITIAL\_DROPLETS} now indicates the number of droplets/particles inserted every
+{\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be
+introduced per second.
 
 
 \subsection{Droplets that Strike Solid Surfaces}
@@ -8987,9 +8996,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct DENSITY}                   & Real              & Initial value of density                          & kg/m$^3$      & Ambient       \\ \hline
 {\ct MASS\_FRACTION(II)}        & Real Array        & Initial value of species {\ct II}                 & kg/kg         & Ambient       \\ \hline
-{\ct MASS\_PER\_VOLUME}         & Real              & Mass per volume of particles or droplets          & kg/m$^3$      & 1             \\ \hline
-{\ct NUMBER\_INITIAL\_DROPLETS} & Integer           & Number of particles or droplets                   &               & 0             \\ \hline
-{\ct PART\_ID}                  & Character         & ID of particle class                              &               &               \\ \hline
+{\ct MASS\_PER\_TIME}           & Real              & See Section~\ref{info:initial_droplets}           & kg/s          &               \\ \hline
+{\ct MASS\_PER\_VOLUME}         & Real              & See Section~\ref{info:initial_droplets}           & kg/m$^3$      & 1             \\ \hline
+{\ct NUMBER\_INITIAL\_DROPLETS} & Integer           & See Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
+{\ct PART\_ID}                  & Character         & See Section~\ref{info:initial_droplets}           &               &               \\ \hline
 {\ct TEMPERATURE}               & Real              & Initial value of temperature                      & $^\circ$C     & {\ct TMPA}    \\ \hline
 {\ct XB(6)}                     & Real Sextuplet    & Coordinates                                       & m             &               \\ \hline
 \end{longtable}
@@ -9312,43 +9322,44 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
 \hline \hline
 \endhead
-{\ct AGE}                       & Real            & Droplet lifetime                  & s         & 100000.       \\ \hline
-{\ct COLOR}                     & Character       & Default color of droplets         &           & {\ct 'BLACK'} \\ \hline
-{\ct DENSITY}                   & Real            & Droplet density                   & kg/m$^3$  & 1000.         \\ \hline
-{\ct DIAMETER}                  & Real            & Median Volumetric Diameter        & $\mu$m    & 500.          \\ \hline
-{\ct DRAG\_LAW}                 & Character       & Geometry for drag correlation     &           & {\ct 'SPHERE'}\\ \hline
-{\ct DROPLETS\_PER\_SECOND}     & Integer         & Drops per second per head         &           & 5000          \\ \hline
-{\ct DT\_INSERT}                & Real            & Time between insertions           & s         & 0.01          \\ \hline
-{\ct EVAPORATE}                 & Logical         & Assume liquid evaporation         &           & {\ct .TRUE.}  \\ \hline
-{\ct FYI}                       & Character       & Comment String                    &           &               \\ \hline
-{\ct FUEL}                      & Logical         & Liquid Fuel                       &           & {\ct .FALSE.} \\ \hline
-%{\ct GAMMA}                     & Real            & Specific heat ratio for vapor     &           & 1.4           \\ \hline
-{\ct GAMMA\_D}                  & Real            & Size distribution parameter       &           & 2.4           \\ \hline
-{\ct HEAT\_OF\_COMBUSTION}      & Real            & Heat of Combustion                & kJ/kg     &               \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION}    & Real            & Latent Heat of Vaporization       & kJ/kg     &               \\ \hline
-{\ct H\_V\_REFERENCE\_TEMPERATURE} & Real            & Temperature for Heat of Vaporization & $^\circ$C     &            \\ \hline
-{\ct HORIZONTAL\_VELOCITY}      & Real            & Droplet speed, horizontal         & m/s       &  0.2          \\ \hline
-{\ct ID}                        & Character       & Identifier                        &           &               \\ \hline
-{\ct INITIAL\_TEMPERATURE}      & Real            & Initial Temperature               & $^\circ$C & {\ct TMPA}    \\ \hline
-{\ct MASSLESS}                  & Logical         & Massless tracers                  &           & {\ct .FALSE.} \\ \hline
-{\ct MASS\_PER\_VOLUME}         & Real            & Mass per unit volume              & kg/m$^3$  & 1.            \\ \hline
-{\ct MAXIMUM\_DIAMETER}         & Real            & Break-up bound                    & $\mu$m    & $\infty$      \\ \hline
-{\ct MINIMUM\_DIAMETER}         & Real            & Evaporation bound                 & $\mu$m    & 20.           \\ \hline
-{\ct MELTING\_TEMPERATURE}      & Real            & Melting Temperature               & $^\circ$C &               \\ \hline
-{\ct MONODISPERSE}              & Logical         & Uniform droplet size              &           & {\ct .FALSE.} \\ \hline
-{\ct NUMBER\_INITIAL\_DROPLETS} & Integer         & Number of droplets at start       &           & 0             \\ \hline
-{\ct QUANTITIES(10)}            & Character       & Quantities for coloring           &           &               \\ \hline
-{\ct RGB(3)}                    & Integers        & Color indices (0-255)             &           &               \\ \hline
-{\ct SAMPLING\_FACTOR}          & Integer         & Filter for output file            &           & 1             \\ \hline
-{\ct SIGMA\_D}                  & Real            & Size distribution parameter       &           &               \\ \hline
-{\ct SPEC\_ID}                  & Character       & Name of gas species               &           &               \\ \hline
-{\ct SPECIFIC\_HEAT}            & Real            & Droplet specific heat             & kJ/kg/K   &               \\ \hline
-{\ct STATIC}                    & Logical         & Stationary Particles              &           & {\ct .FALSE.} \\ \hline
-%{\ct TREE}                      & Logical         & Particles are leaves              &           & {\ct .FALSE.} \\ \hline
-{\ct USER\_DRAG\_COEFFICIENT}   & Real            & Constant drag coefficient         &           & -1.           \\ \hline
-{\ct VERTICAL\_VELOCITY}        & Real            & Droplet speed, vertical           & m/s       &  0.5          \\ \hline
-{\ct XB(6)}                     & Real array      & Initial particle location         & m         &               \\ \hline
-{\ct WATER}                     & Logical         & Water Droplet                     &           & {\ct .FALSE.} \\ \hline
+{\ct AGE}                           & Real            & Droplet lifetime                        & s         & 100000.       \\ \hline
+{\ct COLOR}                         & Character       & Default color of droplets               &           & {\ct 'BLACK'} \\ \hline
+{\ct DENSITY}                       & Real            & Droplet density                         & kg/m$^3$  & 1000.         \\ \hline
+{\ct DIAMETER}                      & Real            & Median Volumetric Diameter              & $\mu$m    & 500.          \\ \hline
+{\ct DRAG\_LAW}                     & Character       & Geometry for drag correlation           &           & {\ct 'SPHERE'}\\ \hline
+{\ct DROPLETS\_PER\_SECOND}         & Integer         & Drops per second per head               &           & 5000          \\ \hline
+{\ct DT\_INSERT}                    & Real            & Time between insertions                 & s         & 0.01          \\ \hline
+{\ct EVAPORATE}                     & Logical         & Assume liquid evaporation               &           & {\ct .TRUE.}  \\ \hline
+{\ct FYI}                           & Character       & Comment String                          &           &               \\ \hline
+{\ct FUEL}                          & Logical         & Liquid Fuel                             &           & {\ct .FALSE.} \\ \hline
+%{\ct GAMMA}                         & Real            & Specific heat ratio for vapor           &           & 1.4           \\ \hline
+{\ct GAMMA\_D}                      & Real            & Size distribution parameter             &           & 2.4           \\ \hline
+{\ct HEAT\_OF\_COMBUSTION}          & Real            & Heat of Combustion                      & kJ/kg     &               \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION}        & Real            & Latent Heat of Vaporization             & kJ/kg     &               \\ \hline
+{\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real            & Temperature for Heat of Vaporization    & $^\circ$C &               \\ \hline
+{\ct HORIZONTAL\_VELOCITY}          & Real            & Droplet speed, horizontal               & m/s       &  0.2          \\ \hline
+{\ct ID}                            & Character       & Identifier                              &           &               \\ \hline
+{\ct INITIAL\_TEMPERATURE}          & Real            & Initial Temperature                     & $^\circ$C & {\ct TMPA}    \\ \hline
+{\ct MASSLESS}                      & Logical         & Massless tracers                        &           & {\ct .FALSE.} \\ \hline
+{\ct MASS\_PER\_TIME}               & Real            & See Section~\ref{info:initial_droplets} & kg/s      &               \\ \hline
+{\ct MASS\_PER\_VOLUME}             & Real            & See Section~\ref{info:initial_droplets} & kg/m$^3$  & 1.            \\ \hline
+{\ct MAXIMUM\_DIAMETER}             & Real            & Break-up bound                          & $\mu$m    & $\infty$      \\ \hline
+{\ct MINIMUM\_DIAMETER}             & Real            & Evaporation bound                       & $\mu$m    & 20.           \\ \hline
+{\ct MELTING\_TEMPERATURE}          & Real            & Melting Temperature                     & $^\circ$C &               \\ \hline
+{\ct MONODISPERSE}                  & Logical         & Uniform droplet size                    &           & {\ct .FALSE.} \\ \hline
+{\ct NUMBER\_INITIAL\_DROPLETS}     & Integer         & See Section~\ref{info:initial_droplets} &           & 0             \\ \hline
+{\ct QUANTITIES(10)}                & Character       & Quantities for coloring                 &           &               \\ \hline
+{\ct RGB(3)}                        & Integers        & Color indices (0-255)                   &           &               \\ \hline
+{\ct SAMPLING\_FACTOR}              & Integer         & Filter for output file                  &           & 1             \\ \hline
+{\ct SIGMA\_D}                      & Real            & Size distribution parameter             &           &               \\ \hline
+{\ct SPEC\_ID}                      & Character       & Name of gas species                     &           &               \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real            & Droplet specific heat                   & kJ/kg/K   &               \\ \hline
+{\ct STATIC}                        & Logical         & Stationary Particles                    &           & {\ct .FALSE.} \\ \hline
+%{\ct TREE}                          & Logical         & Particles are leaves                    &           & {\ct .FALSE.} \\ \hline
+{\ct USER\_DRAG\_COEFFICIENT}       & Real            & Constant drag coefficient               &           & -1.           \\ \hline
+{\ct VERTICAL\_VELOCITY}            & Real            & Droplet speed, vertical                 & m/s       &  0.5          \\ \hline
+{\ct XB(6)}                         & Real array      & Initial particle location               & m         &               \\ \hline
+{\ct WATER}                         & Logical         & Water Droplet                           &           & {\ct .FALSE.} \\ \hline
 \end{longtable}
 
 
