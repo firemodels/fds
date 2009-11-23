@@ -683,14 +683,16 @@ REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW
 
+! Return if this is an evacuation mesh
+IF (EVACUATION_ONLY(NM)) RETURN  
+
 ! Zero out the number of the droplets in the "orphanage"; that is, the place to hold droplets transferring from mesh to mesh
 
 MESHES(NM)%OMESH(1:NMESHES)%N_DROP_ORPHANS = 0
 
-! Return if there are no particles in this mesh, or of the mesh if for evacuation only
+! Return if there are no particles in this mesh
 
 IF (MESHES(NM)%NLP==0)   RETURN
-IF (EVACUATION_ONLY(NM)) RETURN  
 
 ! Set the CPU timer and point to the current mesh variables
 
