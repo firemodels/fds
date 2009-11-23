@@ -1,0 +1,50 @@
+RENDERDIR
+..\..\Manuals\FDS_5_User_Guide\scriptfigures
+SETVIEWPOINT
+ heat_detector_0
+RENDERONCE
+ heat_detector_0
+SETVIEWPOINT
+ heat_detector_1
+RENDERONCE
+ heat_detector_1
+SETVIEWPOINT
+ target
+RENDERONCE
+ target
+SETVIEWPOINT
+ sensor
+RENDERONCE
+ sensor
+SETVIEWPOINT
+ sprinkler_upright_0
+RENDERONCE
+ sprinkler_upright_0
+SETVIEWPOINT
+ sprinkler_upright_1
+RENDERONCE
+ sprinkler_upright_1
+SETVIEWPOINT
+ sprinkler_pendent_0
+RENDERONCE
+ sprinkler_pendent_0
+SETVIEWPOINT
+ sprinkler_pendent_1
+RENDERONCE
+ sprinkler_pendent_1
+SETVIEWPOINT
+ smoke_detector_0
+RENDERONCE
+ smoke_detector_0
+SETVIEWPOINT
+ smoke_detector_1
+RENDERONCE
+ smoke_detector_1
+SETVIEWPOINT
+ nozzle_0
+RENDERONCE
+ nozzle_0
+SETVIEWPOINT
+ nozzle_1
+RENDERONCE
+ nozzle_1
