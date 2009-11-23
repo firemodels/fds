@@ -119,6 +119,9 @@ $RUNFDS Sprinklers_and_Sprays water_fuel_sprays   fire57
 $RUNFDS Visualization colorbar                    fire47
 $RUNFDS Visualization colorconv                   fire43
 $RUNFDS Visualization devices_elem                fire43
+$RUNFDS Visualization devices_vistest             fire43
+$RUNFDS Visualization devices_vistest2            fire43
+$RUNFDS Visualization devices_vistest4            fire43
 $RUNFDS Visualization plume5a                     fire43
 $RUNFDS Visualization plume5b                     fire43
 $RUNFDS Visualization plume5c                     fire43
