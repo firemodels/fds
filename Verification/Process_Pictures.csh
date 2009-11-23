@@ -26,6 +26,8 @@ cd ..
 cd Visualization
 $RUNSMV -runscript colorconv
 $RUNSMV -runscript devices_elem
+$RUNSMV -runscript devices_vistest
+$RUNSMV -runscript devices_vistest2
 $RUNSMV -runscript plume5a
 $RUNSMV -runscript plume5b
 $RUNSMV -runscript plume5c
