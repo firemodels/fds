@@ -7,11 +7,11 @@ For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capabil
 Deterministic Fire Models,''~\cite{ASTM:E1355} defines it as ``the process of determining the degree to which a calculation method
 is an accurate representation of the real world from the perspective of the intended uses of the calculation method.''
 The accuracy of a model is a complicated function of its inputs and its equations.
-For the sake of clarity, we will use the word {\em uncertainty} in regard to the inputs, and the word {\em error} in regards
+For the sake of clarity, we will use the word {\em uncertainty} in regard to the value of the inputs, and the word {\em error} in regards
 to the equations. The reason for this is two-fold. For one,
 it helps to differentiate various terms that are used to quantify model accuracy; but, more importantly, it highlights the subtle distinction between the roles of the model
-and of the modeler. For example, if the modeler chooses to input 10~MW as the heat release rate of a hypothetical fire, we do not say it is wrong, but rather uncertain because there
-is no easy way to know for sure just how big the fire is going to be. The mathematical model, on the other hand, includes assumptions and approximations that make its predictions less
+and the modeler. For example, if the modeler chooses to input 10~MW as the heat release rate of a hypothetical fire, we do not say that it is wrong, but rather uncertain, because there
+is no easy way to know just how big the fire was or is going to be. The mathematical model, on the other hand, includes assumptions and approximations that make its predictions less
 accurate for the sake of practical implementation.
 
 Our focus at present is not the input uncertainty, but rather the quantification of the model error.
@@ -35,7 +35,7 @@ One critical approximation is the discretization of the governing equations. For
 with respect to the spatial coordinate, $x$, can be written in approximate form as:
 \be \frac{\partial \rho}{\partial x} = \frac{\rho_{i+1} - \rho_{i-1}}{2 \, \dx} + \mathcal{O}(\dx^2) \ee
 where $\dx$ is the grid spacing chosen by the model user.
-The second term on the right represents all the terms of order $\dx^2$ and higher in the Taylor series expansion and are known collectively as the
+The second term on the right represents all of the terms of order $\dx^2$ and higher in the Taylor series expansion and are known collectively as the
 {\em discretization error}. These extra terms are simply dropped from
 the equation set, the argument being that they become smaller and smaller with decreasing grid cell size, $\dx$. The effect of these neglected terms is captured, to
 some extent, by the subgrid-scale turbulence model, but that is yet another approximation of the true physics. What effect do these approximations have on
@@ -47,7 +47,7 @@ temperature at a particular location in the room at a particular point in time?'
 
 To make matters worse, there are literally dozens of subroutines that make up a CFD fire model, from its radiation solver, solid phase heat transfer routines, pyrolysis model,
 empirical mass, momentum and energy transfer routines at the wall, and so on. A careful, systematic error analysis of the combination of all these routines is
-extremely difficult. Indeed the complexity of the analysis would likely exceed that of the model itself. For this reason, we rely on comparisons of model predictions to as many
+extremely difficult. Indeed, the complexity of the analysis would likely exceed that of the model itself. For this reason, we rely on comparisons of model predictions to as many
 experiments as possible as a means of quantifying model error. However, before we can definitively quantify the error, we first must quantify the uncertainty of the
 measurements against which the model predictions are to be compared. This is discussed below.
 
@@ -75,7 +75,7 @@ publishing hundreds of plots like the one shown in Fig.~\ref{temp_history}.
 
 To this end, we first have to decide how to condense all the data represented by these plots into a more tractable form. Specifically, we
 have to decide on a metric with which to compare two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999}
-discuss various possible metrics. A commonly used metric is simply to compare the peak measured and predicted values.
+discuss various possible metrics. A commonly used metric is simply to compare the measured and predicted peak values.
 If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
 this exercise is a pair of numbers for each plot, $(E_i,M_i)$, that can be depicted graphically as shown in Fig.~\ref{scatterplot}. This plot
 condenses hundreds of plots into just one, but we still have the problem of quantifying the degree of scatter in the results. At this stage in the analysis, the
@@ -106,7 +106,7 @@ analysis, however, we must first discuss in more detail the subject of experimen
 \section{Experimental Uncertainty}
 
 For various reasons, the documentation of fire experiments, especially full-scale experiments,
-contains fairly limited discussion of uncertainty. Some contain none at all.
+typically contains fairly limited discussion of uncertainty. Some contain none at all.
 However, in order to assess the accuracy of the model predictions, there must be some estimate of the
 combined effect of the uncertainty in the reported test parameters, like the heat release rate of the fire,
 and the reported measurements of the quantities of interest, like the hot gas layer (HGL)
@@ -116,14 +116,15 @@ continuing this exercise.
 Rather than throwing out several decades worth of fire test data, there are ways that we can estimate the uncertainty of the measurements based on work
 that has been done to quantify the accuracy of such devices as heat flux gauges, oxygen-depletion calorimeters, thermocouples and gas sensors.
 In a recent fire model validation study conducted by the U.S.~Nuclear Regulatory Commission~\cite{NUREG_1824}, Hamins estimated the combined
-uncertainty of the quantities of interest for the large scale fire experiments involved in the study. Referring to Fig.~\ref{scatterplot}, there were
+uncertainty of the quantities of interest for the large scale fire experiments involved in the study. There were
 two uncertainty estimates needed for each quantity. The first was an estimate, expressed in the form of a 95~\% confidence interval, of the
-uncertainty in the measured quantity itself. For example, reported gas and surface temperatures were made with thermocouples of various designs (bare-bead,
+uncertainty in the measurement of the quantity itself. For example, reported gas and surface temperatures were made with thermocouples of various designs (bare-bead,
 shielded, aspirated) with different size beads, metals, and so on. For each, one can estimate the uncertainty in the reported measurement. Next, the
-uncertainty of the measurements of the reported conditions was estimated, including the heat release rate, leakage area, ventilation rate, material
+uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate, leakage area, ventilation rate, material
 properties, and so on. The effect of these uncertainties on the reported measured quantity had to be assessed as well. For example, most of the
 experiments used oxygen consumption calorimetry as the means of measuring the heat release rate.
-Estimates of the uncertainty in large scale calorimeters is on the order of 15~\%. It has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise due to
+Estimates of the uncertainty of large scale calorimeters ranges from 10~\% to 30~\%. For the sake of discussion, we assume that it is 15~\%. 
+It has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise due to
 a compartment fire is proportional to the HRR raised to the two-thirds power, thus a 15~\% uncertainty in the HRR would lead to a $2/3 \times 15$~\%=10~\%
 uncertainty in the model prediction. This uncertainty now needs to be combined with the uncertainty in the thermocouple measurement itself. Let us say that
 this is also 10~\%. Because the two forms of uncertainty are uncorrelated, they are combined by quadrature (summing of squares) to yield a combined
@@ -149,7 +150,7 @@ HGL Temperature                 & 0.14    \\ \hline
 HGL Depth                       & 0.13    \\ \hline
 Ceiling Jet Temperature         & 0.16    \\ \hline
 Plume Temperature               & 0.14    \\ \hline
-Gas Concentrations              & 0.09     \\ \hline
+Gas Concentrations              & 0.09    \\ \hline
 Smoke Concentration             & 0.33    \\ \hline
 Pressure with Ventilation       & 0.80    \\ \hline
 Pressure without Ventilation    & 0.40    \\ \hline
@@ -168,13 +169,16 @@ listed in Table~\ref{Uncertainty}.
 We make two important assumptions:
 \begin{enumerate}
 \item The uncertainties of the experiments and the model can be expressed in
-relative terms,\footnote{The relative uncertainty is defined as
+relative terms, and the relative uncertainty is constant for each quantity,\footnote{The relative uncertainty is defined as
 $\widetilde{\sigma}=\sigma/\mu$, where $\sigma$ is the standard deviation and $\mu$ is the mean of the random variable.} and
 \item The uncertainties are assumed to be normally distributed.
 \end{enumerate}
-Given the complexity of the models and the experiments, it would be difficult to justify
+The first assumption is based on the observation that the results of past validation exercises, when plotted as shown in Fig.~\ref{scatterplot}, suggest
+that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value. Furthermore, given the 
+complexity of the models, it would be difficult to postulate a more precise functional relationship. 
+The same is true of the form of the distribution. Given the complexity of the models and the experiments, it would be difficult to justify
 any particular distribution. In fact, the very reason why we have developed this method of quantifying model error based on validation
-experiments is because the model algorithm itself is too complicated to work with directly as a means of estimating the error.
+experiments is because the model algorithm itself is too complicated to work with directly as a means of estimating the error. 
 
 With these assumptions in mind, we proceed with the statistical analysis of the data.
 Assume that the set of model predictions and the corresponding set of experimental measurements are denoted
@@ -182,7 +186,7 @@ $M_i$ and $E_i$, respectively, where $i$ ranges from 1 to $n$ and both $M_i$ and
 expressing the increase in the value of a quantity above its ambient.
 As mentioned above, measurements from full-scale fire experiments often lack uncertainty estimates. In cases where the uncertainty is
 reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely
-a reported systematic bias in the measurement.
+a reported systematic bias in the measurement because if a bias can be quantified, the reported values are adjusted accordingly.
 For this reason, we assume that a given experimental measurement, $E_i$, is normally
 distributed\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
 with mean, $\mu$, and standard deviation, $\sigma$.} about the ``true'' value, $\theta_i$, and there is no systematic bias:
@@ -226,15 +230,15 @@ What we need now is a way to estimate the mean and standard deviation of this co
    \overline{\ln M} = \frac{1}{n} \, \sum_{i=1}^n \, \ln M_i  \quad ; \quad
    \overline{\ln E} = \frac{1}{n} \, \sum_{i=1}^n \, \ln E_i
 \ee
-The least squares estimate of the standard deviation is
+The least squares estimate\footnote{Note that $\hat{\sigma}$ denotes an estimate of $\sigma$.} of the standard deviation of the combined distribution is defined as:
 \be
-   \widehat{ \widetilde{\sigma}_M^2+\widetilde{\sigma}_E^2 } = \frac{1}{n-1} \sum_{i=1}^n \,
+   \widehat{ \widetilde{\sigma}_M^2 } + \widetilde{\sigma}_E^2  = \frac{1}{n-1} \sum_{i=1}^n \,
    \left[ \left(\ln M_i - \ln E_i \right) - \left( \overline{\ln M} - \overline{\ln E} \right)  \right]^2 \label{stdev}
 \ee
 Recall that $\widetilde{\sigma}_E$ is known and the expression on the right can be evaluated using the pairs of measured and
 predicted values. An estimate of $\delta$ can be found using the mean of the distribution:
 \be
-   \hat{\delta} = \exp \left( \overline{\ln M}-\overline{\ln E}+\frac{\widetilde{\sigma}_M^2}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right)
+   \hat{\delta} = \exp \left( \overline{\ln M}-\overline{\ln E}+\frac{ \widehat{\widetilde{\sigma}_M^2}}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right)
 \ee
 Taking the assumed distribution of the model prediction, $M$, in Eq.~(\ref{mdist}) and using
 a Bayesian argument\footnote{The form of Bayes theorem used here states that the posterior distribution is the product of
@@ -250,7 +254,7 @@ prior distribution ({\em i.e.} the true value) of
 $\theta$ to assume anything other than a uniform distribution.
 Dividing by the bias factor, $\delta$, yields a distribution for the ``true'' value of the predicted quantity:
 \be
-   \theta \; | \; M \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth}
+   \theta \; | \; M \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widehat{\widetilde{\sigma}_M^2} \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth}
 \ee
 Below, we describe how one might make use of this formula in practice.
 First, however, we need to verify the accuracy of the procedure just described.
@@ -261,11 +265,11 @@ The statistical analysis described in the previous section is difficult to under
 the calculation itself is no more difficult than determining means and standard deviations of a few columns of numbers and it can be easily done with
 a simple spreadsheet program.
 
-To better illustrate the process, and also to verify this procedure, suppose we generate 1000 uniformly distributed
+To better illustrate the process, and also to verify this procedure, suppose that we generate 1000 uniformly distributed
 random numbers, $\theta_i$, between 0 and 1000. We say that these numbers represent a particular quantity of interest, like a gas temperature at a particular
 point and at a particular time, and we also say that these values
-have no uncertainty -- they are the ``truth.'' Of course, we can never know the true values, but for this hypothetical exercise assume we can. Next, for each
-$\theta_i$, we randomly choose a value that is to represent a hypothetical measurement, $E_i$, from a normal distribution whose mean is $\theta_i$
+have no uncertainty -- they are the ``truth.'' Of course, we can never know the true values, but for this hypothetical exercise assume that we can. Next, for each
+$\theta_i$, we randomly choose a value that is represents a hypothetical measurement, $E_i$, from a normal distribution whose mean is $\theta_i$
 and whose relative uncertainty, $\widetilde{\sigma}_E$, is assumed known. In the same way, we randomly choose a value that is to represent a hypothetical
 model prediction, $M_i$, from a normal distribution whose mean is $\delta \, \theta_i$ and whose relative error, $\widetilde{\sigma}_M$, is
 specified for this hypothetical exercise.
@@ -279,7 +283,8 @@ true values. The dashed lines indicate the 95~\% confidence interval; that is, i
 lines, whose slopes are plus and minus 20~\% ($2\, \widetilde{\sigma}_M$) of the diagonal line. Of course, this plot cannot exist in a real situation, because the true
 values are never known. Instead, the only way to present the data is via the scatter plot on the right side of Fig.~\ref{Case_1_Scatter}. Here, the measured values, $E_i$, are
 compared with the predicted values, $M_i$. The same dashed lines are carried over from the plot on the left. Because the predicted values are being compared
-with measurements that have uncertainty, it appears that the model error is greater than it actually is. In this hypothetical example, the model is
+with measurements that have uncertainty, it appears that the model error is greater than it actually is because the data points are now scattered noticeably beyond the
+original uncertainty bounds. In this hypothetical example, the model is
 assumed to be as accurate as the measurements, yet the comparison makes it seem as if the model is less accurate than the experiments. The procedure outlined
 above, which makes use of only the measured and predicted values, is able to extract from the data the fact that the hypothetical model has a
 relative error of 10~\%, not the roughly 15~\% that one would infer from the plot if the experimental uncertainty were not taken into account.
@@ -301,7 +306,7 @@ For the second example, we make our hypothetical model predictions and experimen
 measured quantity is surface temperature, and that the relative uncertainty of the measured values, $\widetilde{\sigma}_E=0.07$, is obtained from Table~\ref{Uncertainty}.
 We assume the model has a bias factor of 1.03 and its relative error is 0.10 in order to generate a set of hypothetical model predictions.
 A graphical representation of the data is shown in Fig.~\ref{Case_2_Scatter}. Note that the
-experimental uncertainty bounds are represented by thick, dashed lines, and the model bias and relative error is shown by the lighter, dashed lines.
+experimental uncertainty bounds are represented by solid lines, and the model bias and relative error are represented by the dashed lines.
 Each are expressed as 95~\% confidence intervals ($2 \, \widetilde{\sigma}$).
 
 \begin{figure}[t]
@@ -316,9 +321,12 @@ The solid, off-diagonal lines indicate the relative uncertainty, $2\widetilde{\s
 \label{Case_2_Scatter}
 \end{figure}
 
-The statistical procedure outlined above ought to provide estimates of the values of the bias factor, $\delta$, and the model error, $\widetilde{\sigma}_M$, whose
-values we used in creating the hypothetical model predictions. The results of seven random trials are shown in Table~\ref{trials}. It is not expected that the
-estimates will be exact because they are based on truncated Taylor series approximations. However, given the fact that the experimental uncertainty estimate,
+The statistical procedure outlined above ought to provide estimates of the values of the bias factor, $\delta$, and the model error, $\widetilde{\sigma}_M$, for the
+hypothetical model predictions. The results of seven random trials are shown in Table~\ref{trials}. For each trial, values representing the model 
+predictions and experimental measurements were randomly selected based on the assumed distributions. The calculation procedure discussed above was applied to these
+hypothetical values. The resulting estimates of the model bias and relative error were not exactly the same as those used to generate the data 
+because the calculation procedure relies on truncated Taylor series approximations. 
+However, given the fact that the experimental uncertainty estimate,
 $\widetilde{\sigma}_E$, is often only a gross approximation in its own right, the accuracy of the procedure is more than adequate, as indicated by the average values
 of the seven trials.
 
@@ -348,10 +356,10 @@ Average & 1.030            &    0.101            \\ \hline
 
 \section{Making Use of the Model Error}
 
-The previous sections describes a method of quantifying the model error by comparing its predictions with experimental measurements. But how does one make use the computed
+The previous sections describes a method of quantifying the model error by comparing its predictions with experimental measurements. But how does one make use of the computed
 model bias and relative error? This is best answered with an example. Suppose the model is being used to estimate the likelihood that
 electrical control cables could be damaged due to
-a fire in a particular compartment. Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C. It is also assumed that the fire is
+a fire in a compartment. Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C. It is also assumed that the fire is
 ignited within an electrical cabinet and the heat release rate of the fire is a specified function of time, and that all other input
 parameters for the model are known and provided. Finally, it is assumed, for the time being, that there is no uncertainty
 associated with any of these assumptions. What is the likelihood that the cables would be damaged if that fire were to occur? The calculation is performed, and the
@@ -376,8 +384,9 @@ Now, consider the graph shown in Fig.~\ref{bell_curve}.
 \end{figure}
 The vertical lines indicate the ``threshold'' temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
 model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
-The bell curve is a normal distribution whose mean and standard deviation are obtained from Eq.~(\ref{truth}) above, and calculated here:
-\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad  \sigma = \widetilde{\sigma}_M \, \frac{M}{\hat{\delta}} = 0.10 \times \frac{330}{1.03} = 32 \; ^\circ \hbox{C}  \ee
+The bell curve is taken as a normal distribution whose mean and standard deviation are obtained from Eq.~(\ref{truth}) and calculated here:
+\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad  
+   \sigma = \widetilde{\sigma}_M \, \frac{M}{\hat{\delta}} = 0.10 \times \frac{330}{1.03} = 32 \; ^\circ \hbox{C}  \ee
 respectively. The shaded area beneath the bell curve is the probability (0.03 in this case) that the ``true'' temperature can exceed 400~$^\circ$C.
 This means that there is a 3~\% chance that the cables could
 become damaged {\em based solely on the fact that the model is not a perfect representation of reality.}
