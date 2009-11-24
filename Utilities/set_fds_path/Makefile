@@ -7,7 +7,7 @@ bin = .
 
 # Definition of the object variables
 
-obj = main.obj dmalloc.o assert.o utilities.o
+obj = main.obj utilities.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
@@ -36,6 +36,18 @@ exe       = set_path.exe
 
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) 
+
+# ------------- Win 64 ----------------
+#  64 bit windows
+
+CFLAGS    = -O2 /Qvec_report0 /nologo
+CC        = icl
+CPP       = icl
+FC        = ifort
+exe       = set_path.exe
+
+intel_win_64 : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin) Advapi32.lib 
 
 install	:	$(exe)
 	copy $(exe) ..\Scripts\bundle_setup\$(exe)
