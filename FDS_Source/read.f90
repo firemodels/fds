@@ -1145,7 +1145,6 @@ P_STP   = 101325._EB         ! Standard pressure (Pa)
 TMPM    = 273.15_EB          ! Melting temperature of water (K)
 SIGMA   = 5.67E-8_EB         ! Stefan-Boltzmann constant (W/m**2/K**4)
 C_P_W   = 4184._EB           ! Specific Heat of Water (J/kg/K)
-H_V_W   = 2259._EB*1000._EB  ! Heat of Vap of Water (J/kg)
 MW_AIR  = 1._EB/(0.23_EB/32._EB+0.77_EB/28._EB) ! g/mol
 HUMIDITY= -1._EB             ! Relative Humidity
 RHO_SOOT= 1850._EB           ! Density of soot particle (kg/m3)
@@ -1266,11 +1265,13 @@ TMPA4 = TMPA**4
 ! Humidity (40% by default, but limited for high temps)
  
 IF (HUMIDITY < 0._EB) THEN
+   H_V_W = (3023410.8_EB-MAX(MIN(TMPA,373.15_EB),273.15_EB)*2334.894_EB)*MW_H2O/R0 !linear fit of JANAF table
    X_H2O_TMPA = MIN( 1._EB , EXP(-(H_V_W*MW_H2O/R0)*(1._EB/TMPA     -1._EB/373.15_EB)) )
+   H_V_W = (3023410.8_EB-313.15_EB*2334.894_EB)*MW_H2O/R0 !linear fit of JANAF table
    X_H2O_40_C =              EXP(-(H_V_W*MW_H2O/R0)*(1._EB/313.15_EB-1._EB/373.15_EB))
    HUMIDITY = 40._EB*MIN( 1._EB , X_H2O_40_C/X_H2O_TMPA )
 ENDIF
- 
+
 ! Miscellaneous
  
 MW_BACKGROUND = MW
@@ -1510,7 +1511,7 @@ SUBROUTINE READ_SPEC
  
 USE DEVICE_VARIABLES, ONLY : PROPERTY_TYPE,PROPERTY,N_PROP
 REAL(EB) :: MASS_FRACTION_0,MW,SIGMALJ,EPSILONKLJ,XVAP,VISCOSITY,CONDUCTIVITY,DIFFUSIVITY,MASS_EXTINCTION_COEFFICIENT, &
-            SPECIFIC_HEAT,SPECIFIC_ENTHALPY,REFERENCE_TEMPERATURE
+            SPECIFIC_HEAT,SPECIFIC_ENTHALPY,REFERENCE_TEMPERATURE,H_V
 INTEGER  :: N_SPEC_READ,N_MIX,N,I,IPC,MODE
 LOGICAL  :: ABSORBING
 CHARACTER(30) :: FORMULA,SPECIES_ID(0:MAX_SPECIES)
@@ -1679,7 +1680,8 @@ SPEC_LOOP: DO N=0,N_SPECIES
    ! Special case for water to set initial mass fraction
 
    IF (ID=='WATER VAPOR') THEN
-      XVAP  = MIN(1._EB,EXP(2259.E3_EB*MW_H2O/R0*(1._EB/373.15_EB-1._EB/ MIN(TMPA,373.15_EB))))
+      H_V = (3023410.8_EB-MAX(MIN(TMPA,373.15_EB),273.15_EB)*2334.894_EB)*MW_H2O/R0 !linear fit of JANAF table
+      XVAP  = MIN(1._EB,EXP(H_V*MW_H2O/R0*(1._EB/373.15_EB-1._EB/ MIN(TMPA,373.15_EB))))
       MASS_FRACTION_0 = HUMIDITY*0.01_EB*XVAP/(MW_AIR/MW_H2O+(1._EB-MW_AIR/MW_H2O)*XVAP)
    ENDIF
 
@@ -2754,6 +2756,7 @@ DO N = 1, N_PART
       ENDDO
    ENDIF
 ENDDO
+
 RETURN
 
 END SUBROUTINE PROC_PART
