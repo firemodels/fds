@@ -1,6 +1,6 @@
-// $Date: 2008-01-18 14:27:20 -0500 (Fri, 18 Jan 2008) $ 
+// $Date$ 
 // $Revision$
-// $Author: gforney $
+// $Author$
 
    // ************ static device definitions - single frame/state ********************
 
@@ -452,4 +452,80 @@ DEVICEDEF
  0.69 0.49 0.17 setcolor
  0.5 0.2 0.4 drawtrunccone
 
-
+// NEWS device.svo format
+//DEVICEDEF // device for particle file sphere
+// SMOKEVIEW_PARAMETERS
+// R
+// G
+// B
+// D
+// L
+//
+// SPHERE
+// $GETVALS:R:3 0.0 1.0 setcolor
+// $GETVAL:D drawsphere
+// data layout for egg
+// 0->2  r,g,b color 
+// 3     dy,dz (diameter)
+// 4     dx  (length)
+//DEVICEDEF // device for particle "egg"
+// EGG
+// SMOKEVIEW_PARAMETERS
+// R
+// G
+// B
+// D
+// L
+//
+// $GETVALS:R:3 0.0 0.0 setcolor
+// $GETVAL:D $GETVAL:L $GETVAL:L scalexyz 1.0 drawsphere
+// data layout for demo device
+//    device is a rotating textured sphere that moves around in a box
+// 0-2 r,g,b color
+// 3-5   initial direction
+// 6  rotation rate (degrees per second)
+// 7  sphere diameter
+// 8-10 xmax,ymax,zmax
+//DEVICEDEF // device for dynamic textured sphere
+// DEMOSPHERE
+// SMOKEVIEW_PARAMETERS
+// R
+// G
+// B
+// VX
+// VY
+// VZ
+// ROTATE_RATE
+// D
+// XMAX
+// YMAX
+// ZMAX
+ 
+// $GETVALS:R:3 0.0 0.0 setcolor
+// $GETVAL:VX 0.0 0.0 multiaddt 0.0 -2.5 2.5 $COPYTO:CLIPX mirrorclip 
+// $GETVAL:VY 0.0 0.0 multiaddt 0.0  0.0 5.0 $COPYTO:CLIPY mirrorclip
+// $GETVAL:VZ 0.0 0.0 multiaddt 0.0 -1.5 2.0 $COPYTO:CLIPZ mirrorclip
+// $LABEL:CLIPX $LABEL:CLIPY $LABEL:CLIPZ translate $GETVAL:ROTATE_RATE 0.0 0.0 multiaddt 
+//   0.0 rotatez 180.0 rotatey 0.0 2.0 drawtsphere
+// data layout for dynamic textured sphere
+// 0-2 r,g,b color
+// 3  initial azimuth angle
+// 4  initial elevation angle
+// 5  initial rotation angle
+// 6  rotation rate (degrees per second)
+// 7  sphere diameter
+//DEVICEDEF // device for dynamic textured sphere
+// TSPHERE
+//SMOKEVIEW_PARAMETERS
+//  R
+//  G
+//  B
+//  AX0
+//  ELEV0
+//  ROT0
+//  ROTATION_RATE
+//  D
+// 
+// $GETVALS:R:3 0.0 0.0 setcolor
+// 90.0 rotatey $GETVAL:AX0 rotatex $GETVAL:ELEV0 rotatey 
+// $GETVAL:ROTATION_RATE $GETVAL:ROT0 0.0 multiaddt 45.0 rotatez 0.0 $GETVAL:D drawtsphere
