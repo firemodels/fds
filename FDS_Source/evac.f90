@@ -45,7 +45,7 @@ MODULE EVAC
   PUBLIC N_DOORS, N_EXITS, N_ENTRYS, N_SSTANDS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_SSTANDS, & 
        EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE, EVAC_SSTAND_TYPE
   !
-  CHARACTER(255):: EVAC_VERSION = '2.2.0'
+  CHARACTER(255):: EVAC_VERSION = '2.2.1'
   CHARACTER(255) :: EVAC_COMPILE_DATE
   INTEGER :: EVAC_MODULE_REV
   !
@@ -929,7 +929,8 @@ CONTAINS
       ! TAU_CHANGE_V0   = -0.1_EB  !CF: How often direction is updated?
       TAU_CHANGE_V0   = 0.1_EB   !CF: How often direction is updated?
       THETA_SECTOR    = -40.0_EB !CF: The angle of the first sector
-      CONST_DF        = 0.5_EB   !CF: prefer agents going in the same direction
+      ! v2.2.0 CONST_DF        = 0.5_EB   !CF: prefer agents going in the same direction
+      CONST_DF        = 2.0_EB   !CF: prefer agents going in the same direction
       FAC_DF          = 1.0_EB   !CF: prefer agents going in the same direction
       CONST_CF        = 1.0_EB   !CF: dislike agents going in the opposite direction
       FAC_CF          = 2.0_EB   !CF: dislike agents going in the opposite direction
@@ -937,7 +938,8 @@ CONTAINS
       FAC_2_WALL      = 10.0_EB  !CF: direction leads too close to a wall
       FAC_V0_DIR      = 1.0_EB   !CF: Prefer right and straight ahead (if CF)
       FAC_V0_NOCF     = 1.0_EB   !CF: prefer v0, if no counterflow
-      FAC_NOCF        = 0.5_EB   !CF: prefer v0, if no counterflow
+      ! v2.2.0 FAC_NOCF        = 0.5_EB   !CF: prefer v0, if no counterflow
+      FAC_NOCF        = 2.0_EB   !CF: prefer v0, if no counterflow
       CF_MIN_A        = 0.5_EB   !CF: decrease social force
       CF_MIN_B        = 0.3_EB   !CF: decrease social force range
       CF_FAC_A_WALL   = 1.0_EB   !CF: decrease social force
@@ -10236,10 +10238,8 @@ CONTAINS
     IF (.NOT.ANY(EVACUATION_GRID)) RETURN
     IF (.NOT.(EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM))) RETURN
     CALL POINT_TO_MESH(NM)
-    !       Call POINT_TO_EVAC_MESH(NM)
 
-    ! Write the current time to the prt5 file, then start
-    ! looping through the particle classes
+    ! Write the current time to the prt5 file, then start looping through the particle classes
     WRITE(LU_PART(NM)) REAL(T,FB)
 
     HUMAN_CLASS_LOOP: DO N=1,N_EVAC
