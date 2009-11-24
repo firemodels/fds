@@ -41,8 +41,10 @@ Rem Copy FDS, Smokeview and other needed files to the bin  directory
 
 echo.
 echo Copying files to bin directory
-copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\%fds5%
-copy %fdsmpidir%\fds5_win_mpi_%platform%.exe %out_bin%\%fds5mpi%
+if "%platform%"=="32" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\%fds5%
+if "%platform%"=="32" copy %fdsmpidir%\fds5_win_mpi_%platform%.exe  %out_bin%\%fds5mpi%
+if "%platform%"=="64" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\fds5_win64.exe
+if "%platform%"=="64" copy %fdsmpidir%\fds5_win_mpi_%platform%.exe  %out_bin%\fds5_mpi_win64.exe
 copy %in_fds2ascii%\fds2ascii.exe     %out_bin%\.
 copy %in_smv%\smokeview%platform%_release.exe   %out_bin%\%smokeview%
 copy %in_smv%\smokediff32_release.exe   %out_bin%\%smokediff%
