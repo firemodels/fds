@@ -1488,6 +1488,9 @@ END FUNCTION DRAG
 SUBROUTINE DROPLET_SIZE_DISTRIBUTION(DM,RR,CNF,NPT,GAMMA,SIGMA)
  
 ! Compute droplet Cumulative Number Fraction (CNF)
+
+! CNF(d) = (3/(4*pi))*int_0^d(f(d')*(d'/2)^-3)dd', where f(d') is the PDF of size distribution.
+! CNF(di) \approx C * sum_0^i(f(d')*di^-3*ddi)
  
 REAL(EB), INTENT(IN) :: DM,GAMMA,SIGMA
 INTEGER, INTENT(IN) :: NPT
@@ -1498,6 +1501,7 @@ REAL(EB), INTENT(OUT) :: RR(0:NPT),CNF(0:NPT)
 RR(0)  = 0._EB
 CNF(0) = 0._EB
 SUM1   = 0._EB
+! Discretize range of droplet diameters into NPT parts
 DD1    = (-LOG(1._EB-0.99_EB)/0.693_EB)**(1._EB/GAMMA)*DM/REAL(NPT,EB)
 GFAC   = 0.693_EB*GAMMA*DD1/(DM**GAMMA)
 SFAC   = DD1/(SQRT(TWOPI)*SIGMA)
