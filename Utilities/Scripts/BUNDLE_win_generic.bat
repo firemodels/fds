@@ -55,7 +55,7 @@ copy %in_smv%\smokeview.ini           %out_bin%\.
 echo.
 echo Copying Uninstaller to Uninstall directory
 copy "%bundleinfo%\uninstall_fds5.bat"             "%out_uninstall%\Uninstall.bat"
-copy "%bundleinfo%\set_path.exe"                   "%out_uninstall%\set_path.exe"
+copy "%bundleinfo%\set_path%platform%.exe"                   "%out_uninstall%\set_path.exe"
 
 Rem Include documentation in the bundle only if the variable, docs_include_in_bundles,
 Rem is not set to 0.  This variable is defined in the fds_smv_env.bat setup  file

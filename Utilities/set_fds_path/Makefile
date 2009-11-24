@@ -1,4 +1,5 @@
 SOURCE_DIR = ../../SMV_5/source/
+INSTALL_DIR = ../Scripts/bundle_setup 
 FILTERC =
 FILTERF =
 
@@ -32,7 +33,7 @@ CFLAGS    = -O2 /Qvec_report0 /nologo
 CC        = icl
 CPP       = icl
 FC        = ifort
-exe       = set_path.exe
+exe       = set_path32.exe
 
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) 
@@ -44,13 +45,10 @@ CFLAGS    = -O2 /Qvec_report0 /nologo
 CC        = icl
 CPP       = icl
 FC        = ifort
-exe       = set_path.exe
+exe       = set_path64.exe
 
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) Advapi32.lib 
-
-install	:	$(exe)
-	copy $(exe) ..\Scripts\bundle_setup\$(exe)
 
 #-------------- Clean Target to remove Object and Module files -----------
 
