@@ -6,13 +6,15 @@ There are various definitions of model validation.
 For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capability of
 Deterministic Fire Models,''~\cite{ASTM:E1355} defines it as ``the process of determining the degree to which a calculation method
 is an accurate representation of the real world from the perspective of the intended uses of the calculation method.''
-The accuracy of a model is a complicated function of its inputs and its equations.
-For the sake of clarity, we will use the word {\em uncertainty} in regard to the value of the inputs, and the word {\em error} in regards
+The accuracy of a model is a complicated function of its input parameters and its mathematical equations.
+For the sake of clarity, we will use the word {\em uncertainty} in regard to the input parameters, and the word {\em error} in regards
 to the equations. The reason for this is two-fold. For one,
 it helps to differentiate various terms that are used to quantify model accuracy; but, more importantly, it highlights the subtle distinction between the roles of the model
-and the modeler. For example, if the modeler chooses to input 10~MW as the heat release rate of a hypothetical fire, we do not say that it is wrong, but rather uncertain, because there
-is no easy way to know just how big the fire was or is going to be. The mathematical model, on the other hand, includes assumptions and approximations that make its predictions less
-accurate for the sake of practical implementation.
+and the modeler. The model is based on assumptions and approximations that make its predictions less
+accurate for the sake of practical implementation. In short, its calculation includes a certain amount of error. The modeler, on the other hand, chooses input
+parameters that have uncertainty, but not error. For example, if the modeler
+chooses to input 10~MW as the heat release rate of a hypothetical fire, we do not say that it is wrong, but rather uncertain, because there
+is no easy way to know precisely how big the fire is going to be.
 
 Our focus at present is not the input uncertainty, but rather the quantification of the model error.
 Our strategy is {\em not} to decompose the model into its many parts and systematically assess
@@ -123,7 +125,7 @@ shielded, aspirated) with different size beads, metals, and so on. For each, one
 uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate, leakage area, ventilation rate, material
 properties, and so on. The effect of these uncertainties on the reported measured quantity had to be assessed as well. For example, most of the
 experiments used oxygen consumption calorimetry as the means of measuring the heat release rate.
-Estimates of the uncertainty of large scale calorimeters ranges from 10~\% to 30~\%. For the sake of discussion, we assume that it is 15~\%. 
+Estimates of the uncertainty of large scale calorimeters ranges from 10~\% to 30~\%. For the sake of discussion, we assume that it is 15~\%.
 It has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise due to
 a compartment fire is proportional to the HRR raised to the two-thirds power, thus a 15~\% uncertainty in the HRR would lead to a $2/3 \times 15$~\%=10~\%
 uncertainty in the model prediction. This uncertainty now needs to be combined with the uncertainty in the thermocouple measurement itself. Let us say that
@@ -174,13 +176,14 @@ $\widetilde{\sigma}=\sigma/\mu$, where $\sigma$ is the standard deviation and $\
 \item The uncertainties are assumed to be normally distributed.
 \end{enumerate}
 The first assumption is based on the observation that the results of past validation exercises, when plotted as shown in Fig.~\ref{scatterplot}, suggest
-that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value. Furthermore, given the 
-complexity of the models, it would be difficult to postulate a more precise functional relationship. 
+that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value. Furthermore, given the
+complexity of the models, it would be difficult to postulate a more precise functional relationship.
 The same is true of the form of the distribution. Given the complexity of the models and the experiments, it would be difficult to justify
 any particular distribution. In fact, the very reason why we have developed this method of quantifying model error based on validation
-experiments is because the model algorithm itself is too complicated to work with directly as a means of estimating the error. 
+experiments is because the model algorithm itself is too complicated to work with directly as a means of estimating the error.
 
-With these assumptions in mind, we proceed with the statistical analysis of the data.
+With these assumptions in mind, we proceed with the statistical analysis of the data. A general discussion of Bayesian data analysis can be found in
+Ref.~\cite{Gelman:Stats}.
 Assume that the set of model predictions and the corresponding set of experimental measurements are denoted
 $M_i$ and $E_i$, respectively, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers
 expressing the increase in the value of a quantity above its ambient.
@@ -322,10 +325,10 @@ The solid, off-diagonal lines indicate the relative uncertainty, $2\widetilde{\s
 \end{figure}
 
 The statistical procedure outlined above ought to provide estimates of the values of the bias factor, $\delta$, and the model error, $\widetilde{\sigma}_M$, for the
-hypothetical model predictions. The results of seven random trials are shown in Table~\ref{trials}. For each trial, values representing the model 
+hypothetical model predictions. The results of seven random trials are shown in Table~\ref{trials}. For each trial, values representing the model
 predictions and experimental measurements were randomly selected based on the assumed distributions. The calculation procedure discussed above was applied to these
-hypothetical values. The resulting estimates of the model bias and relative error were not exactly the same as those used to generate the data 
-because the calculation procedure relies on truncated Taylor series approximations. 
+hypothetical values. The resulting estimates of the model bias and relative error were not exactly the same as those used to generate the data
+because the calculation procedure relies on truncated Taylor series approximations.
 However, given the fact that the experimental uncertainty estimate,
 $\widetilde{\sigma}_E$, is often only a gross approximation in its own right, the accuracy of the procedure is more than adequate, as indicated by the average values
 of the seven trials.
@@ -385,7 +388,7 @@ Now, consider the graph shown in Fig.~\ref{bell_curve}.
 The vertical lines indicate the ``threshold'' temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
 model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
 The bell curve is taken as a normal distribution whose mean and standard deviation are obtained from Eq.~(\ref{truth}) and calculated here:
-\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad  
+\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad
    \sigma = \widetilde{\sigma}_M \, \frac{M}{\hat{\delta}} = 0.10 \times \frac{330}{1.03} = 32 \; ^\circ \hbox{C}  \ee
 respectively. The shaded area beneath the bell curve is the probability (0.03 in this case) that the ``true'' temperature can exceed 400~$^\circ$C.
 This means that there is a 3~\% chance that the cables could
