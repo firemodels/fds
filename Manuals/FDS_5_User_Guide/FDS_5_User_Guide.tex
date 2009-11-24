@@ -7407,6 +7407,23 @@ control functions, will then flow water.
 
 \input{smv_devices.tex}
 
+\section{Controlling a \texorpdfstring{{\tt RAMP}}{RAMP}}
+\label{info:RAMPDEVC}
+
+For any user defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.  This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.  In the following example a blower is turned on when the temperature exceeds 100~$^\circ$C and is turned off when the temperature exceeds 200~$^\circ$C.  This is similar functionality to the {\ct CUSTOM} control function, but it allows for variable response rather than just on or off.
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='BLOWER',VEL=-2,RAMP_V='BLOWER RAMP'/
+&DEVC XYZ=2,3,3, QUANTITY='TEMPERATURE',ID='TEMP DEVC'/
+&RAMP ID='BLOWER RAMP', T=20,F=0,DEVC_ID='TEMP DEVC'/
+&RAMP ID='BLOWER RAMP', T=100,F=0/
+&RAMP ID='BLOWER RAMP', T=101,F=1/
+&RAMP ID='BLOWER RAMP', T=200,F=1/
+&RAMP ID='BLOWER RAMP', T=201,F=0/
+\end{verbatim}
+\normalsize
+
 \chapter{Output Data}
 \label{info:outputdata}
 
@@ -9506,8 +9523,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 %{\ct CTRL\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &     \\ \hline
-%{\ct DEVC\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &     \\ \hline
-{\ct FYI}                           & Character     & Comment String (has no effect)    &                       &     \\ \hline
+{\ct DEVC\_ID}                      & Character     & See Section~\ref{info:RAMPDEVC}       &                       &     \\ \hline
 {\ct F}                             & Real          & Function value                    &                       &     \\ \hline
 {\ct FYI}                           & Character     & Comment String (has no effect)    &                       &     \\ \hline
 %{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Points in interpolation function  &                       &  5000   \\ \hline
