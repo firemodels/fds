@@ -7846,8 +7846,9 @@ rate, the third contains the radiative heat loss to all the boundaries
 heat loss to the boundaries ({\em i.e.} the energy flowing out of or
 into the domain), and the fifth contains the energy conducted into the
 solid surfaces.  The sixth column contains the total burning rate of
-fuel, in units of kg/s. It is included merely as a check of the total
-heat release rate.
+fuel, in units of kg/s. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual
+material might have a different heat of combustion. For this reason, it is not always the case that the reported total
+burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate. 
 
 Let $\Omega$ denote the unblocked computational domain, {\em i.e.} the
 volume within the bounding rectangle occupied by gas. Let $\partial
@@ -10296,7 +10297,8 @@ FDS_HRR_Time,HRR,RAD_LOSS,CONV_LOSS,COND_LOSS,BURN_RATE,ZONE_01,ZONE_02, ...
 {\ct CONV\_LOSS} is the rate of energy that is flowing out of (positive) or into (negative) the computational domain,
 {\ct COND\_LOSS} is the rate of energy that is being conducted into (positive) or out of (negative) the solid surfaces,
 {\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, {\em etc.}, are the background pressures of the various
-pressure {\ct ZONE}s.
+pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual
+material might have a different heat of combustion. 
 
 Details of the integrated energy quantities can be found in Section~\ref{info:HRR}. The background pressure is discussed in
 Section~\ref{info:ZONE}.
