@@ -194,7 +194,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
       ENDIF
       DR=>DROPLET(NLP)
  
-      ! Set droplet propeties
+      ! Set droplet properties
  
       DR%TMP    = PC%TMP_INITIAL         ! Initial temperature
       DR%T      = T                      ! Time of insertion
