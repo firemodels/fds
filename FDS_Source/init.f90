@@ -420,7 +420,7 @@ M%RHOS    = M%RHO
 
 ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
 
-IF (N_SPECIES>0) THEN
+IF (N_SPECIES>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
