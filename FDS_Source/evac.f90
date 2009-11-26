@@ -1557,8 +1557,8 @@ CONTAINS
          IF ( ABS(XB(1)-PEX%X1)>1.E-4_EB .OR. ABS(XB(2)-PEX%X2)>1.E-4_EB .OR. &
               ABS(XB(3)-PEX%Y1)>1.E-4_EB .OR. ABS(XB(4)-PEX%Y2)>1.E-4_EB ) THEN
             WRITE(LU_ERR,fmt='(a,a,a,a)') ' WARNING: Exit ',TRIM(ID),' XB adjusted to mesh ',TRIM(MESH_NAME(nm))
-            WRITE(LU_ERR,fmt='(a,6f12.4)') 'Old XB:', PEX%X1,PEX%X2,PEX%Y1,PEX%Y2,PEX%Z1,PEX%Z2
-            WRITE(LU_ERR,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+            WRITE(LU_ERR,fmt='(a,6f12.4)') ' Old XB:', PEX%X1,PEX%X2,PEX%Y1,PEX%Y2,PEX%Z1,PEX%Z2
+            WRITE(LU_ERR,fmt='(a,6f12.4)') ' New XB:', XB(1:6)
          END IF
 
          II = (I1+I2)/2
@@ -1937,8 +1937,8 @@ CONTAINS
          IF ( ABS(XB(1)-PDX%X1)>1.E-4_EB .OR. ABS(XB(2)-PDX%X2)>1.E-4_EB .OR. &
               ABS(XB(3)-PDX%Y1)>1.E-4_EB .OR. ABS(XB(4)-PDX%Y2)>1.E-4_EB ) THEN
             WRITE(LU_ERR,fmt='(a,a,a,a)') ' WARNING: Door ',TRIM(ID),' XB adjusted to mesh ',TRIM(MESH_NAME(nm))
-            WRITE(LU_ERR,fmt='(a,6f12.4)') 'Old XB:', PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2
-            WRITE(LU_ERR,fmt='(a,6f12.4)') 'New XB:', XB(1:6)
+            WRITE(LU_ERR,fmt='(a,6f12.4)') ' Old XB:', PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2
+            WRITE(LU_ERR,fmt='(a,6f12.4)') ' New XB:', XB(1:6)
          END IF
 
          II = (I1+I2)/2
