@@ -184,149 +184,123 @@ DEVICEDEF
 
 DEVICEDEF
  testdoor         // label, name of device
+ :dx :dy :dz :R :G :B
  90.0 rotatez 90.0 rotatex
-push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 3.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor 1.0 drawcube pop // front half of door (user specified color)
-push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 0.0 0.0 1.0 setcolor 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
+push  $dx $dy $dz scalexyz $R $G $B setcolor 1.0 drawcube pop // front half of door (user specified color)
+push  $dx $dy $dz scalexyz 0.0 0.0 1.0 setcolor 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
  NEWFRAME
  0.001 0.001 0.001 scalexyz 1.0 drawcube // state 1, door disappears
 
 DEVICEDEF
  evacdoor         // label, name of device
+ :sx :sy :sz :R :G :B :dx :dy :dz
  // Evacuation input: door namelist
- push  6 3 0.0 copynvals 0.0 0.0 0.0 translate
+ push  $dx $dy $dz translate
     0.133 0.545 0.133 setcolor  0.0 0.0 -0.6 translate 0.4 0.6 drawcone pop // draw an arrow
     // after rotatex 0 0 1 tr ==> inside the door
     // after rotatex 0 1 0 tr ==> right
     // after rotatex 1 0 0 tr ==> up
-    // Note: 0.0 copynvals: max 6 on same line, next should be on the next line in smv file
  90.0 rotatez 90.0 rotatex
- push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 3.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor
+ push  $sx $sy $sz scalexyz $R $G $B setcolor
     0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
- push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 0.133 0.545 0.133 setcolor 
+ push  $sx $sy $sz scalexyz 0.133 0.545 0.133 setcolor 
     0.0 0.5 0.0 translate 1.0 drawcube pop // back half of door (forest green)
 NEWFRAME
+ :sx :sy :sz :R :G :B :dx :dy :dz
  90.0 rotatez 90.0 rotatex
- push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 3.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor
+ push  $sx $sy $sz scalexyz $R $G $B setcolor
     1.0 drawcube pop // front half of door (user specified color)
- push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 1.0 0.0 0.0 setcolor
+ push  $sx $sy $sz scalexyz 1.0 0.0 0.0 setcolor
     0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (red)
 
 DEVICEDEF
  evacincline         // label, name of device
+ :sx :sy :sz :R :G :B
  // Evacuation input: evss namelist
  90.0 rotatez 90.0 rotatex
- push  0.0 3.0 0.0 copynvals 1.0 0.1 2.3 scalexyz 3.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor
+ push  $sx $sy $sz scalexyz $R $G $B setcolor
     0.0 0.5 0.0 translate 1.0 drawcube pop // incline (user specified color)
 
 DEVICEDEF
  evacentr         // label, name of device
+ :sx :sy :sz :R :G :B
  // Evacuation input: entr namelist
  90.0 rotatez 90.0 rotatex
- push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 3.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor
+ push  $sx $sy $sz scalexyz $R $G $B setcolor
     1.0 drawcube pop // front half of door (user specified color)
- push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 0.529 0.808 0.922 setcolor
+ push  $sx $sy $sz scalexyz 0.529 0.808 0.922 setcolor
     0.0 1.0 0.0 translate 1.0 drawcube pop // front half of door (sky blue 135 206 235) 
 NEWFRAME
+ :sx :sy :sz :R :G :B
  90.0 rotatez 90.0 rotatex
- push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 3.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor
+ push  $sx $sy $sz scalexyz $R $G $B setcolor
     0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
- push  0.0 3.0 0.0 copynvals 1.0 0.2 2.3 scalexyz 1.0 0.0 0.0 setcolor
+ push  $sx $sy $sz scalexyz 1.0 0.0 0.0 setcolor
     0.0 0.5 0.0 translate 1.0 drawcube pop // front half of door (red)
 
    // ************ dynamic particle device definitions ********************
    //         (modifable using data obtained from FDS)
 
-// data layout for particle devices
-// 0->2  r,g,b color 
-// 3     diameter
-// 4     length
 DEVICEDEF // device for particle file sphere
- SPHERE
- 0.0 3.0 0.0 copynvals 0.0 0.0 1.0 setcolor
- 3.0 0.0 copyval 0.1 drawsphere
+ sphere
+ :R :G :B :D :L
+ $R $G $B setcolor
+ $D drawsphere
 
 DEVICEDEF // device for particle file tube
- TUBE
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
+ tube
+ :R :G :B :D :L
+ $R $G $B setcolor
+ 90.0 rotatey $D $L drawcdisk
 
 DEVICEDEF // device for particle file tube
- CYLINDER
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
+ cylinder
+ :R :G :B :D :L
+ $R $G $B setcolor
+ 90.0 rotatey $D $L drawcdisk
 
-DEVICEDEF // device for general cylinder 
- GCYLINDER
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 5.0 0.0 copyval -30.0 rotatez 6.0 0.0 copyval -10.0 rotatey 90.0 rotatey 3.0 2.0 0.0 copynvals 0.1 0.3 drawcdisk
-
-// data layout for egg
-// 0->2  r,g,b color 
-// 3     dy,dz (diameter)
-// 4     dx  (length)
 DEVICEDEF // device for particle "egg"
- EGG
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 4.0 4.0 copyval 3.0 3.0 copyval 3.0 2.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
+ egg
+ :R :G :B :D :DX
+ $R $G $B setcolor
+ $DX $D $D scalexyz 1.0 drawsphere
 
-// data layout for gball
-// 0->2  r,g,b color 
-// 3     dx
-// 4     dy
-// 5     dz
 DEVICEDEF // device for a general ball
  gball
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 3.0 4.0 copyval 4.0 3.0 copyval 5.0 2.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
+ :R :G :B :DX :DY :DZ
+ $R $G $B setcolor
+ $DX $DY $DZ scalexyz 1.0 drawsphere
 
-// data layout for demo device
-//    device is a rotating textured sphere that moves around in a box
-// 0-2 r,g,b color
-// 3-5   initial direction
-// 6  rotation rate (degrees per second)
-// 7  sphere diameter
-// 8-10 xmax,ymax,zmax
 DEVICEDEF // device for dynamic textured sphere
- DEMOSPHERE
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 5.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 -1.5 2.0 23.0 mirrorclip
- 4.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 0.0 5.0 13.0 mirrorclip
- 3.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 -2.5 2.5 3.0 mirrorclip 
- 0.0 180.0 9.0 multiaddt 1.0 0.0 0.0 translate 6.0 0.0 copyval 0.0 0.0 0.0 multiaddt 0.0 rotatez 180.0 rotatey 0.0 2.0 drawtsphere
+ demosphere
+ :R :G :B :VX :VY :VZ :ROTATE_RATE :D :XMAX :YMAX :ZMAX
+ $R $G $B setcolor
+ $VX 0.0 @vvx multiaddt :vvx -2.5 2.5 @CLIPX mirrorclip 
+ $VY 0.0 @vvy multiaddt :vvy  0.0 5.0 @CLIPY mirrorclip
+ $VZ 0.0 @vvz multiaddt :vvz -1.5 2.0 @CLIPZ mirrorclip
+ :CLIPX :CLIPY :CLIPZ translate $ROTATE_RATE 0.0 @rotz multiaddt 
+   :rotz rotatez 180.0 rotatey 0.0 2.0 drawtsphere
 
-// data layout for dynamic textured sphere
-// 0-2 r,g,b color
-// 3  initial azimuth angle
-// 4  initial elevation angle
-// 5  initial rotation angle
-// 6  rotation rate (degrees per second)
-// 7  sphere diameter
 DEVICEDEF // device for dynamic textured sphere
- TSPHERE
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 7.0 16.0 copyval 90.0 rotatey 3.0 0.0 copyval 0.0 rotatex 4.0 0.0 copyval 0.0 rotatey 6.0 2.0 copyval 5.0 1.0 copyval 10.0 10.0 0.0 multiaddt 45.0 rotatez 0.0 0.5 drawtsphere
+ tsphere
+  :R :G :B :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D
+ $R $G $B setcolor
+ 90.0 rotatey $AX0 rotatex $ELEV0 rotatey 
+ $ROTATION_RATE $ROT0 @rotz multiaddt :rotz rotatez 0 $D drawtsphere
 
    // ************ dynamic tree device definitions ********************
 
-// data layout for trunk
-// 0  height of trunk base
-// 1  diameter of trunk
-// 2  height of trunk
-// 3-5 r,g,b color
 DEVICEDEF // device for tree trunk
  TRUNK
- 3.0 3.0 0.0 copynvals 0.55 0.27 0.07 setcolor
- 0.0 2.0 copyval 0.0 0.0 1.0 translate 1.0 2.0 0.0 copynvals 1.0 3.0 drawdisk
+ :trunk_base_h :trunk_d :trunk_h :R :G :B
+ $R $G $B setcolor
+ 0.0 0.0 $trunk_base_h translate $trunk_d $trunk_h drawdisk
  
-// data layout for canopy
-// 0  height of canopy base
-// 1  diameter of canopy base
-// 2  height of canopy
-// 3-5 r,g,b color
 DEVICEDEF // device for tree canopy
  CANOPY
- 3.0 3.0 0.0 copynvals 0.14 0.56 0.14 setcolor
- 0.0 2.0 copyval 0.0 0.0 1.0 translate 1.0 2.0 0.0 copynvals 1.0 3.0 drawcone
+ :canopy_base_h :canopy_d :canopy_h :R :G :B
+$R $G $B setcolor
+ 0.0 0.0 $canopy_base_h translate $canopy_d $canopy_h drawcone
    
    // ************ avatar device definitions ********************
 
@@ -359,9 +333,10 @@ AVATARDEF
  push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
 AVATARDEF
  human_altered_with_data         // label, name of avatar
+ :dum1 :dum2 :dum3 :W :D :H1 :sx :sy :sz :R :G :B
  90.0 rotatez
  0.82 0.70 0.55 setcolor // head color  TAN 210 180 140
- 6.0 3.0 0.0 copynvals 1.0 1.0 1.0 scalexyz //  scale by data height
+ $sx $sy $sz scalexyz //  scale by data height
  1.0 1.0 0.579 scalexyz 
  0.3 0.3 0.3 scalexyz 
  push  0.0 0.0 5.2 translate 1.1 drawsphere 
@@ -369,8 +344,8 @@ AVATARDEF
    push -0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
    push  0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
    pop // head
- 9.0 3.0 0.0 copynvals 0.93 0.87 0.51 setcolor  // body color 
- push  0.0 0.0 3.55 translate 3.0 3.0 0.0 copynvals 1.0 1.0 1.0 scalexyz 1.334 1.33 1.0 scalexyz 2.5 drawsphere pop // trunk, scale by width and depth
+ $R $G $B setcolor  // body color 
+ push  0.0 0.0 3.55 translate $W $D $H1 scalexyz 1.334 1.33 1.0 scalexyz 2.5 drawsphere pop // trunk, scale by width and depth
  0.82 0.70 0.55 setcolor // arm color TAN 210 180 140
  push -0.9 0.0 3.5 translate  35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
  push  0.9 0.0 3.5 translate -35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
@@ -379,16 +354,18 @@ AVATARDEF
  push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
 AVATARDEF
  ellipsoid         // label, name of device
+ :dum1 :dum2 :dum3 :W :D :H1 :sx :sy :sz :R :G :B :hx :hy :hz
  90.0 rotatez
- 12.0 3.0 0.0 copynvals 0.0 0.0 2.0 translate 6.0 3.0 0.0 copynvals 1.0 1.0 1.0 scalexyz 3.0 3.0 0.0 copynvals 1.0 1.0 1.0 scalexyz 
+ $hx $hy $hz translate $sx $sy $sz scalexyz $W $D $H1 scalexyz 
   push 0.0 -1.0 0.0 translate 1.0 5.0 0.5 scalexyz 0.0 0.0 1.0 setcolor 0.4 drawsphere pop 
-  9.0 3.0 0.0 copynvals 0.93 0.87 0.51 setcolor 1.0 drawsphere 
+  $R $G $B setcolor 1.0 drawsphere 
 AVATARDEF
  disk         // label, name of device
+ :dum1 :dum2 :dum3 :W :D :H1 :sx :sy :sz :R :G :B :hx :hy :hz
  90.0 rotatez
- 0.0 0.0 1.0 translate 3.0 3.0 0.0 copynvals 1.0 1.0 1.0 scalexyz 
+ 0.0 0.0 1.0 translate $W $D $H1 scalexyz 
   push 0.0 -0.25 0.05 translate 0.3 2.5 0.3 scalexyz 0.0 1.0 1.0 setcolor 0.2 drawsphere pop 
-  9.0 3.0 0.0 copynvals 0.93 0.87 0.51 setcolor 1.0 0.05 drawdisk 
+  $R $G $B setcolor 1.0 0.05 drawdisk 
 
    // ************ Elementary device definitions ********************
 
@@ -452,58 +429,10 @@ DEVICEDEF
  0.69 0.49 0.17 setcolor
  0.5 0.2 0.4 drawtrunccone
 
-// Examples using proposed new device.svo format
 
-//DEVICEDEF // device for particle file sphere
-// sphere
-// :R :G :B :D :L
-// $R:3 0.0 1.0 setcolor
-// $D drawsphere
 
-//DEVICEDEF // device for particle "egg"
-// egg
-// :R :G :B :D :L
-// $R:3 0.0 0.0 setcolor
-// $D $L $L scalexyz 1.0 drawsphere
 
-//DEVICEDEF // device for dynamic textured sphere
-// demosphere
-// :R :G :B :VX :VY :VZ :ROTATE_RATE :D :XMAX :YMAX :ZMAX
-// $R:3 0.0 0.0 setcolor
-// $VX 0.0 0.0 multiaddt 0.0 -2.5 2.5 $COPYTO:CLIPX mirrorclip 
-// $VY 0.0 0.0 multiaddt 0.0  0.0 5.0 $COPYTO:CLIPY mirrorclip
-// $VZ 0.0 0.0 multiaddt 0.0 -1.5 2.0 $COPYTO:CLIPZ mirrorclip
-// #CLIPX #CLIPY #CLIPZ translate $ROTATE_RATE 0.0 0.0 multiaddt 
-//   0.0 rotatez 180.0 rotatey 0.0 2.0 drawtsphere
 
-//DEVICEDEF // device for dynamic textured sphere
-// tsphere
-//  :R :G :B :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D
-// $R:3 0.0 0.0 setcolor
-// 90.0 rotatey $AX0 rotatex $ELEV0 rotatey 
-// $ROTATION_RATE $ROT0 0.0 multiaddt 45.0 rotatez 0 $D drawtsphere
 
-// DEVICEDEF // device for particle "egg"
-// egg
-// :R :G :B :D :DX
-// $R:3 0.0 0.0 setcolor
-// $DX $D $D scalexyz 1.0 drawsphere
 
-//DEVICEDEF // device for a general ball
-// gball
-// :R :G :B :DX :DY :DZ
-// $R:3 0.0 0.0 setcolor
-// $DX $DY $DZ scalexyz 1.0 drawsphere
-
-DEVICEDEF // device for particle file tube
- tube
- :R :G :B :D :L
- $R:3 0.0 0.0 setcolor
- 90.0 rotatey $D $L drawcdisk
-
-DEVICEDEF // device for particle file tube
- CYLINDER
- :R :G :B :D :L
- $R:3 0.0 0.0 setcolor
- 90.0 rotatey $D $L drawcdisk
 
