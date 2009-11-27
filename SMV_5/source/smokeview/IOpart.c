@@ -27,7 +27,7 @@ char IOpart_revision[]="$Revision$";
 
 int tagscompare( const void *arg1, const void *arg2 );
 
-void draw_SVOBJECT(sv_object *object, int iframe);
+void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack);
 void ParticlePropShowMenu(int val);
 void PART_CB_INIT(void);
 void update_all_partvis(particle *parti);
@@ -1515,7 +1515,7 @@ void drawPart5(const particle *parti){
                   avatar_types[avatar_type]->select_mode=0;
                 }
               }
-              draw_SVOBJECT(avatar_types[avatar_type],0);
+              draw_SVOBJECT(avatar_types[avatar_type],0,valstack,nvalstack);
               select_device_color_ptr=NULL;
               avatar_types[avatar_type]->use_displaylist=save_use_displaylist;
               glPopMatrix();
@@ -1556,6 +1556,7 @@ void drawPart5(const particle *parti){
             if(datacopy->partclassbase->vis_type==PART_SPHERES){
               for(j=0;j<datacopy->npoints;j++){
                 float *colorptr;
+                int nvalstack;
 
                 if(vis[j]!=1)continue;
                   
@@ -1582,7 +1583,8 @@ void drawPart5(const particle *parti){
                 valstack[2]=colorptr[2];
                 valstack[3]=datacopy->partclassbase->diameter;
                 valstack[4]=datacopy->partclassbase->length;
-                draw_SVOBJECT(datacopy->partclassbase->sphere,0);
+                nvalstack=5;
+                draw_SVOBJECT(datacopy->partclassbase->sphere,0,valstack,nvalstack);
                 glPopMatrix();
               }
             }
@@ -1592,6 +1594,7 @@ void drawPart5(const particle *parti){
             if(datacopy->partclassbase->vis_type==PART_SMV_DEVICE){
               for(j=0;j<datacopy->npoints;j++){
                 float *colorptr;
+                int nvalstack;
 
                 if(vis[j]!=1)continue;
                   
@@ -1618,7 +1621,8 @@ void drawPart5(const particle *parti){
                 valstack[2]=colorptr[2];
                 valstack[3]=datacopy->partclassbase->diameter;
                 valstack[4]=datacopy->partclassbase->length;
-                draw_SVOBJECT(datacopy->partclassbase->smv_device,0);
+                nvalstack=5;
+                draw_SVOBJECT(datacopy->partclassbase->smv_device,0,valstack,nvalstack);
                 glPopMatrix();
               }
             }

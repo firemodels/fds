@@ -25,8 +25,6 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEZ    103
 #define SV_SCALEXYZ   104
 #define SV_SCALE      105
-#define SV_GETUSERVALS    106
-#define SV_PUTUSERVALS2STACK 107
 #define SV_OFFSETX 108
 #define SV_OFFSETY 109
 #define SV_OFFSETZ 110
@@ -35,8 +33,6 @@ char IOobject_revision[]="$Revision$";
 #define SV_CLIP 113
 #define SV_MIRRORCLIP 114
 #define SV_PERIODICCLIP 115
-#define SV_COPYVAL 116
-#define SV_COPYNVALS 117
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -44,8 +40,6 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEZ_NUMARGS    1
 #define SV_SCALEXYZ_NUMARGS   3
 #define SV_SCALE_NUMARGS      1
-#define SV_GETUSERVALS_NUMARGS   2
-#define SV_PUTUSERVALS2STACK_NUMARGS   3
 #define SV_OFFSETX_NUMARGS 1
 #define SV_OFFSETY_NUMARGS 1
 #define SV_OFFSETZ_NUMARGS 1
@@ -54,8 +48,6 @@ char IOobject_revision[]="$Revision$";
 #define SV_CLIP_NUMARGS 4
 #define SV_MIRRORCLIP_NUMARGS 4
 #define SV_PERIODICCLIP_NUMARGS 4
-#define SV_COPYVAL_NUMARGS 2
-#define SV_COPYNVALS_NUMARGS 3
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -120,6 +112,12 @@ char IOobject_revision[]="$Revision$";
 #define NLAT device_sphere_segments
 #define NLONG (2*device_sphere_segments)
 
+#define TOKEN_FLOAT 0
+#define TOKEN_PUTVAL 1
+#define TOKEN_COMMAND 2
+#define TOKEN_GETVAL 3
+
+char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *frame);
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected);
 float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2[3]);
 
@@ -139,13 +137,12 @@ void drawhexdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor);
 void drawring(float d_inner, float d_outer, float height, unsigned char *rgbcolor);
 void drawnotchplate(float diameter, float height, float notchheight, float direction, unsigned char *rgbcolor);
-void draw_SVOBJECT(sv_object *object, int iframe);
+void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack);
 sv_object *get_object(char *label);
 void free_object(sv_object *object);
 void remove_comment(char *buffer);
 void freecircle(void);
 void initcircle(unsigned int npoints);
-void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int *use_displaylist);
 
 static float *xcirc=NULL, *ycirc=NULL;
 static int ncirc;
@@ -504,10 +501,10 @@ void draw_devices(void){
       int state;
 
       state=devicei->showstatelist[itime];
-      draw_SVOBJECT(devicei->object,state);
+      draw_SVOBJECT(devicei->object,state,valstack,nvalstack);
     }
     else{
-      draw_SVOBJECT(devicei->object,devicei->state0);
+      draw_SVOBJECT(devicei->object,devicei->state0,valstack,nvalstack);
     }
     devicei->object->use_displaylist=save_use_displaylist;
     glPopMatrix();
@@ -554,15 +551,13 @@ void drawTargetNorm(void){
 
 /* ----------------------- draw_SMVOBJECT ----------------------------- */
 
-void draw_SVOBJECT(sv_object *object, int iframe){
+void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack){
   sv_object_frame *framei;
   int *op;
-  float *arg;
-  int iarg,iop;
   unsigned char *rgbptr;
   unsigned char rgbcolor[4];
   int displaylist_id=0;
-  int op_skip=0;
+  int ii;
 
   if(iframe>object->nframes-1||iframe<0)iframe=0;
   framei=object->obj_frames[iframe];
@@ -575,8 +570,18 @@ void draw_SVOBJECT(sv_object *object, int iframe){
   rgbcolor[3]=255;
   rgbptr=rgbcolor;
   glPushMatrix();
-  iarg = 0;
-  iop = 0;
+
+  if(valstack!=NULL&&nvalstack>0){
+    int i;
+
+    for(i=0;i<nvalstack;i++){
+      tokendata *toki;
+
+      toki = framei->tokens + i;
+      if(i>framei->ntokens-1)break;
+      toki->var=valstack[i];
+    }
+  }
 
   if(framei->display_list_ID!=-1&&object->use_displaylist==1){
     if(framei->use_bw==setbw){
@@ -609,19 +614,32 @@ void draw_SVOBJECT(sv_object *object, int iframe){
     glEnable(GL_COLOR_MATERIAL);
   }
 
-  while(iop<framei->nops){
+  for(ii=0;ii<framei->ncommands;ii++){
+    tokendata *toki,*tok1,*tok2,*tok3,*tok4;
+#define NARGVAL 6
+    float arg[NARGVAL], *argptr;
+    int j;
+
     if(select_device_color_ptr==NULL){
       rgbptr=rgbcolor;
     }
     else{
       rgbptr=select_device_color_ptr;
     }
-    arg = framei->args + iarg;
-    op = framei->ops + iop;
-    switch (*op){
+    toki = framei->command_list[ii];
+    for(j=0;j<toki->nvars;j++){
+      tokendata *tokj;
+      
+      tokj = toki - toki->nvars + j;
+      arg[j] = *(tokj->varptr);
+    }
+    if(toki->nvars>0){
+      argptr=(toki-1)->varptr;
+    }
+
+    switch (toki->command){
     case SV_MULTIADDT:
-      if(op_skip==0&&iarg+SV_MULTIADDT_NUMARGS<=framei->nargs){
-        int arg1, arg2, stackskip;
+      {
         float val1, val2, val_result;
         float time_val=0.0;
 
@@ -634,13 +652,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
 
         val_result=val1*time_val+val2;
 
-        stackskip=arg[2]+0.5;
-        arg[3+stackskip]=val_result;
+        *argptr=val_result;
       }
-      iarg+=3;
       break;
     case SV_CLIP:
-      if(op_skip==0&&iarg+SV_CLIP_NUMARGS<=framei->nargs){
+      {
         int argval, argmin, argmax, stackskip;
         float val, valmin, valmax;
 
@@ -653,14 +669,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
         if(val<valmin)val=valmin;
         if(val>valmax)val=valmax;
         
-        stackskip=arg[3]+0.5;
-        arg[4+stackskip]=val;
+        *argptr=val;
       }
-      iarg+=4;
       break;
     case SV_MIRRORCLIP:
-      if(op_skip==0&&iarg+SV_MIRRORCLIP_NUMARGS<=framei->nargs){
-        int argval, argmin, argmax, stackskip;
+      {
         float val, valmin, valmax;
         float val2, valmax2;
         float val_result;
@@ -679,14 +692,11 @@ void draw_SVOBJECT(sv_object *object, int iframe){
 
         val_result = val2 + valmin;
 
-        stackskip=arg[3]+0.5;
-        arg[4+stackskip]=val_result;
+        *argptr=val_result;
       }
-      iarg+=4;
       break;
     case SV_PERIODICCLIP:
-      if(op_skip==0&&iarg+SV_PERIODICCLIP_NUMARGS<=framei->nargs){
-        int argval, argmin, argmax, stackskip;
+      {
         float val, valmin, valmax;
         float val2, valmax2;
         float val_result;
@@ -704,225 +714,108 @@ void draw_SVOBJECT(sv_object *object, int iframe){
 
         val_result = val2 + valmin;
 
-        stackskip=arg[3]+0.5;
-        arg[4+stackskip]=val_result;
+        *argptr=val_result;
       }
-      iarg+=4;
-      break;
-    case SV_COPYVAL:
-      if(op_skip==0&&iarg+SV_COPYVAL_NUMARGS<=framei->nargs){
-        int argval, stackskip;
-        float val;
-
-        argval=arg[0]+0.5;
-        val=valstack[argval];
-
-        stackskip=arg[1]+0.5;
-        arg[2+stackskip]=val;
-      }
-      iarg+=2;
-      break;
-    case SV_COPYNVALS:
-      if(op_skip==0&&iarg+SV_COPYNVALS_NUMARGS<=framei->nargs){
-        int iargstart, nargs, stackskip, i;
-
-        iargstart=arg[0]+0.5;
-        nargs=arg[1]+0.5;
-        stackskip=arg[2]+0.5;
-        for(i=0;i<nargs;i++){
-          arg[3+stackskip+i]=valstack[iargstart+i];
-        }
-      }
-      iarg+=3;
-      break;
-    case SV_PUTUSERVALS2STACK:
-      if(op_skip==0&&iarg+SV_PUTUSERVALS2STACK_NUMARGS<=framei->nargs){
-        int i, nargs, iargstart, stackskip;
-
-        iargstart=arg[0]+0.5;
-        nargs=arg[1]+0.5;
-        stackskip=arg[2]+0.5;
-        if(iarg+2+nargs<=framei->nargs&&iargstart+nargs<SIZE_VALSTACK){
-          for(i=0;i<nargs;i++){
-            arg[3+i+stackskip]=valstack[iargstart+i];
-          }
-        }
-      }
-      iarg+=3;
-      break;
-    case SV_GETUSERVALS:
-      if(op_skip==0&&iarg+SV_GETUSERVALS_NUMARGS<=framei->nargs){
-        int i, nargs, iargstart;
-
-        iargstart=arg[0]+0.5;
-        nargs=arg[1]+0.5;
-        if(iarg+2+nargs<=framei->nargs&&iargstart+nargs<SIZE_VALSTACK){
-          for(i=0;i<nargs;i++){
-            arg[2+i]=valstack[iargstart+i];
-          }
-        }
-      }
-      iarg+=2;
-      break;
-    case SV_IF_AGEB:
-      if(op_skip==0&&iarg+SV_IF_AGEB_NUMARGS<=framei->nargs){
-        if(arg[0]>=arg[1]){
-          op_skip=arg[3]+1.5;
-          if(op_skip<1)op_skip=1;
-        }
-      }
-      iarg+=3;
-      break;
-    case SV_IF_AGTB:
-      if(op_skip==0&&iarg+SV_IF_AGEB_NUMARGS<=framei->nargs){
-        if(arg[0]>arg[1]){
-          op_skip=arg[3]+1.5;
-          if(op_skip<1)op_skip=1;
-        }
-      }
-      iarg+=3;
-      break;
-    case SV_IF_ALEB:
-      if(op_skip==0&&iarg+SV_IF_AGEB_NUMARGS<=framei->nargs){
-        if(arg[0]<=arg[1]){
-          op_skip=arg[3]+1.5;
-          if(op_skip<1)op_skip=1;
-        }
-      }
-      iarg+=3;
-      break;
-    case SV_IF_ALTB:
-      if(op_skip==0&&iarg+SV_IF_AGEB_NUMARGS<=framei->nargs){
-        if(arg[0]>arg[1]){
-          op_skip=arg[3]+1.5;
-          if(op_skip<1)op_skip=1;
-        }
-      }
-      iarg+=3;
       break;
     case SV_TRANSLATE:
-      if(op_skip==0&&iarg+SV_TRANSLATE_NUMARGS<=framei->nargs)glTranslatef(arg[0],arg[1],arg[2]);
-      iarg+=3;
+      glTranslatef(arg[0],arg[1],arg[2]);
       break;
     case SV_TRANSLATEMZD2:
-      if(op_skip==0&&iarg+SV_TRANSLATEMZD2_NUMARGS<=framei->nargs)glTranslatef(0.0,0.0,-arg[0]/2.0);
-      iarg++;
+      glTranslatef(0.0,0.0,-arg[0]/2.0);
       break;
     case SV_OFFSETX:
-      if(op_skip==0&&iarg+SV_OFFSETX_NUMARGS<=framei->nargs)glTranslatef(arg[0],0.0,0.0);
-      iarg++;
+      glTranslatef(arg[0],0.0,0.0);
       break;
     case SV_OFFSETY:
-      if(op_skip==0&&iarg+SV_OFFSETY_NUMARGS<=framei->nargs)glTranslatef(0.0,arg[0],0.0);
-      iarg++;
+      glTranslatef(0.0,arg[0],0.0);
       break;
     case SV_OFFSETZ:
-      if(op_skip==0&&iarg+SV_OFFSETZ_NUMARGS<=framei->nargs)glTranslatef(0.0,0.0,arg[0]);
-      iarg++;
+      glTranslatef(0.0,0.0,arg[0]);
       break;
     case SV_ROTATEX:
-      if(op_skip==0&&iarg+SV_ROTATEX_NUMARGS<=framei->nargs)glRotatef(arg[0],1.0,0.0,0.0);
-      iarg++;
+      glRotatef(arg[0],1.0,0.0,0.0);
       break;
     case SV_ROTATEY:
-      if(op_skip==0&&iarg+SV_ROTATEY_NUMARGS<=framei->nargs)glRotatef(arg[0],0.0,1.0,0.0);
-      iarg++;
+      glRotatef(arg[0],0.0,1.0,0.0);
       break;
     case SV_ROTATEZ:
-      if(op_skip==0&&iarg+SV_ROTATEZ_NUMARGS<=framei->nargs)glRotatef(arg[0],0.0,0.0,1.0);
-      iarg++;
+      glRotatef(arg[0],0.0,0.0,1.0);
       break;
     case SV_SCALEXYZ:
-      if(iarg+SV_SCALEXYZ_NUMARGS<=framei->nargs)glScalef(arg[0],arg[1],arg[2]);
-      iarg+=3;
+      glScalef(arg[0],arg[1],arg[2]);
       break;
     case SV_SCALE:
-      if(op_skip==0&&iarg+SV_SCALE_NUMARGS<=framei->nargs)glScalef(arg[0],arg[1],arg[2]);
-      iarg++;
+      glScalef(arg[0],arg[1],arg[2]);
       break;
     case SV_DRAWCUBE:
-      if(op_skip==0&&iarg+SV_DRAWCUBE_NUMARGS<=framei->nargs)drawcube(arg[0],rgbptr);
+      drawcube(arg[0],rgbptr);
       rgbptr=NULL;
-      iarg++;
       break;
     case SV_DRAWDISK:
-      if(op_skip==0&&iarg+SV_DRAWDISK_NUMARGS<=framei->nargs)drawdisk(arg[0],arg[1], rgbptr);
+      drawdisk(arg[0],arg[1], rgbptr);
       rgbptr=NULL;
-      iarg+=2;
       break;
     case SV_DRAWARCDISK:
-      if(op_skip==0&&iarg+SV_DRAWARCDISK_NUMARGS<=framei->nargs)drawarcdisk(arg[0],arg[1], arg[2], rgbptr);
+      drawarcdisk(arg[0],arg[1], arg[2], rgbptr);
       rgbptr=NULL;
-      iarg+=3;
       break;
     case SV_DRAWCDISK:
-      if(op_skip==0&&iarg+SV_DRAWCDISK_NUMARGS<=framei->nargs)drawcdisk(arg[0],arg[1], rgbptr);
+      drawcdisk(arg[0],arg[1], rgbptr);
       rgbptr=NULL;
-      iarg+=2;
       break;
     case SV_DRAWHEXDISK:
-      if(op_skip==0&&iarg+SV_DRAWHEXDISK_NUMARGS<=framei->nargs)drawhexdisk(arg[0],arg[1], rgbptr);
+      drawhexdisk(arg[0],arg[1], rgbptr);
       rgbptr=NULL;
-      iarg+=2;
       break;
     case SV_DRAWPOLYDISK:
-      if(op_skip==0&&iarg+SV_DRAWPOLYDISK_NUMARGS<=framei->nargs){
+      {
         int nsides;
   
         nsides = arg[0]+0.5;
         drawpolydisk(nsides, arg[1],arg[2], rgbptr);
         rgbptr=NULL;
       }
-      iarg+=3;
       break;
     case SV_DRAWRING:
-      if(op_skip==0&&iarg+SV_DRAWRING_NUMARGS<=framei->nargs)drawring(arg[0],arg[1], arg[2], rgbptr);
+      drawring(arg[0],arg[1], arg[2], rgbptr);
       rgbptr=NULL;
-      iarg+=3;
       break;
     case SV_DRAWNOTCHPLATE:
-      if(op_skip==0&&iarg+SV_DRAWNOTCHPLATE_NUMARGS<=framei->nargs)drawnotchplate(arg[0],arg[1], arg[2], arg[3], rgbptr);
+      drawnotchplate(arg[0],arg[1], arg[2], arg[3], rgbptr);
       rgbptr=NULL;
-      iarg+=4;
       break;
     case SV_DRAWTRUNCCONE:
-      if(op_skip==0&&iarg+SV_DRAWTRUNCCONE_NUMARGS<=framei->nargs)drawtrunccone(arg[0],arg[1],arg[2], rgbptr);
+      drawtrunccone(arg[0],arg[1],arg[2], rgbptr);
       rgbptr=NULL;
-      iarg+=3;
       break;
     case SV_DRAWCONE:
-      if(op_skip==0&&iarg+SV_DRAWCONE_NUMARGS<=framei->nargs)drawcone(arg[0],arg[1], rgbptr);
+      drawcone(arg[0],arg[1], rgbptr);
       rgbptr=NULL;
-      iarg+=2;
       break;
     case SV_DRAWTSPHERE:
-      if(op_skip==0&&iarg+SV_DRAWTSPHERE_NUMARGS<=framei->nargs){
+      {
         drawtsphere(arg[0],arg[1],rgbptr);
       }
       rgbptr=NULL;
-      iarg++;
       break;
     case SV_DRAWSPHERE:
-      if(op_skip==0&&iarg+SV_DRAWSPHERE_NUMARGS<=framei->nargs)drawsphere(arg[0],rgbptr);
+      drawsphere(arg[0],rgbptr);
       rgbptr=NULL;
-      iarg++;
       break;
     case SV_DRAWCIRCLE:
-      if(op_skip==0&&iarg+SV_DRAWCIRCLE_NUMARGS<=framei->nargs)drawcircle(arg[0],rgbptr);
+      drawcircle(arg[0],rgbptr);
       rgbptr=NULL;
-      iarg++;
       break;
     case SV_DRAWARC:
-      if(op_skip==0&&iarg+SV_DRAWARC_NUMARGS<=framei->nargs)drawarc(arg[0],arg[1],rgbptr);
+      drawarc(arg[0],arg[1],rgbptr);
       rgbptr=NULL;
-      iarg+=2;
       break;
     case SV_DRAWPOINT:
-      if(op_skip==0&&iarg+SV_DRAWPOINT_NUMARGS<=framei->nargs)drawpoint(rgbptr);
+      drawpoint(rgbptr);
       rgbptr=NULL;
       break;
     case SV_SETCOLOR:
-      if(op_skip==0&&iarg+SV_SETCOLOR_NUMARGS<=framei->nargs){
+      {
         if(setbw==1){
           float grey;
 
@@ -945,22 +838,19 @@ void draw_SVOBJECT(sv_object *object, int iframe){
           rgbptr=select_device_color_ptr;
         }
       }
-      iarg+=3;
       break;
     case SV_SETLINEWIDTH:
-      if(op_skip==0&&iarg+SV_SETLINEWIDTH_NUMARGS<=framei->nargs){
+      {
         glLineWidth(arg[0]);
-        iarg++;
       }
       break;
     case SV_SETPOINTSIZE:
-      if(op_skip==0&&iarg+SV_SETPOINTSIZE_NUMARGS<=framei->nargs){
+      {
         glPointSize(arg[0]);
-        iarg++;
       }
       break;
     case SV_SETBW:
-      if(op_skip==0&&iarg+SV_SETBW_NUMARGS<=framei->nargs){
+      {
         rgbcolor[0]=255*arg[0];
         rgbcolor[1]=255*arg[0];
         rgbcolor[2]=255*arg[0];
@@ -972,18 +862,16 @@ void draw_SVOBJECT(sv_object *object, int iframe){
           rgbptr=select_device_color_ptr;
         }
       }
-      iarg+=1;
       break;
     case SV_DRAWLINE:
-      if(op_skip==0&&iarg+SV_DRAWLINE_NUMARGS<=framei->nargs)drawline(arg,arg+3,rgbptr);
+      drawline(arg,arg+3,rgbptr);
       rgbptr=NULL;
-      iarg+=6;
       break;
     case SV_PUSH:
-      if(op_skip==0)glPushMatrix();
+      glPushMatrix();
       break;
     case SV_POP:
-      if(op_skip==0)glPopMatrix();
+      glPopMatrix();
       break;
     case SV_NO_OP:
       break;
@@ -993,8 +881,6 @@ void draw_SVOBJECT(sv_object *object, int iframe){
       ASSERT(FFALSE);
       break;
     }
-    iop++;
-    if(op_skip>0)op_skip--;
   }
   if(select_device_color==NULL){
     glDisable(GL_COLOR_MATERIAL);
@@ -1865,6 +1751,7 @@ void freecircle(void){
 sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
   sv_object *object;
   sv_object_frame *framei;
+  int eof;
 
   NewMemory( (void **)&object,sizeof(sv_object));
   object->use_displaylist=1;
@@ -1878,7 +1765,8 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
   NewMemory((void **)&object->obj_frames,object->nframes*sizeof(sv_object_frame *));
 
   object->obj_frames[0]=framei;
-  getargsops(commands,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
+  framei->device=object;
+  parse_device_frame(commands, NULL, &eof, framei);
   framei->display_list_ID=-1;
   framei->error=0;
   framei->use_bw=setbw;
@@ -1890,11 +1778,13 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
 
 void make_error_frame(void){
   char buffer[256];
+  int eof;
 
   error_frame=NULL;
   NewMemory((void **)&error_frame,sizeof(sv_object_frame));
   strcpy(buffer,"1.0 0.0 0.0 setcolor 0.1 drawsphere");
-  getargsops(buffer,&error_frame->args,&error_frame->nargs,&error_frame->ops,&error_frame->nops,NULL);
+  error_frame->device=NULL;
+  parse_device_frame(buffer, NULL, &eof, error_frame);
   error_frame->display_list_ID=-1;
 }
 
@@ -1916,19 +1806,22 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
 
   for(i=0;i<object->nframes;i++){
     sv_object_frame *framei;
+    int eof;
 
     if(i==0){
       NewMemory((void **)&framei,sizeof(sv_object_frame));
       object->obj_frames[0]=framei;
       framei->error=0;
-      getargsops(commandsoff,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
+      framei->device=object;
+      parse_device_frame(commandsoff, NULL, &eof, framei);
       framei->display_list_ID=-1;
       framei->use_bw=setbw;
     }
     else{
       NewMemory((void **)&framei,sizeof(sv_object_frame));
       object->obj_frames[1]=framei;
-      getargsops(commandson,&framei->args,&framei->nargs,&framei->ops,&framei->nops,&object->use_displaylist);
+      framei->device=object;
+      parse_device_frame(commandson, NULL, &eof, framei);
       framei->error=0;
       framei->display_list_ID=-1;
       framei->use_bw=setbw;
@@ -1937,253 +1830,347 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
   return object;
 }
 
-/* ----------------------- getargsops ----------------------------- */
+/* ----------------------- gettoken ----------------------------- */
 
-void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int *use_displaylist){
+void get_token_id(char *token, int *iopptr, int *num_iopptr, int *use_displaylist){
+
+  int iop, num_iop;
+  
+  *use_displaylist=0;
+  
+  if(STRCMP(token,"translate")==0){
+    iop=SV_TRANSLATE;
+    num_iop=SV_TRANSLATE_NUMARGS;
+  }
+  else if(STRCMP(token,"translatemzd2")==0){
+    iop=SV_TRANSLATEMZD2;
+    num_iop=SV_TRANSLATEMZD2_NUMARGS;
+  }
+  else if(STRCMP(token,"offsetx")==0){
+    iop=SV_OFFSETX;
+    num_iop=SV_OFFSETX_NUMARGS;
+  }
+  else if(STRCMP(token,"offsety")==0){
+    iop=SV_OFFSETY;
+    num_iop=SV_OFFSETY_NUMARGS;
+  }
+  else if(STRCMP(token,"offsetz")==0){
+    iop=SV_OFFSETZ;
+    num_iop=SV_OFFSETZ_NUMARGS;
+  }
+  else if(STRCMP(token,"rotatex")==0){
+    iop=SV_ROTATEX;
+    num_iop=SV_ROTATEX_NUMARGS;
+  }
+  else if(STRCMP(token,"rotatey")==0){
+    iop=SV_ROTATEY;
+    num_iop=SV_ROTATEY_NUMARGS;
+  }
+  else if(STRCMP(token,"rotatez")==0){
+    iop=SV_ROTATEZ;
+    num_iop=SV_ROTATEZ_NUMARGS;
+  }
+  else if(STRCMP(token,"scalexyz")==0){
+    iop=SV_SCALEXYZ;
+    num_iop=SV_SCALEXYZ_NUMARGS;
+  }
+  else if(STRCMP(token,"scale")==0&&STRCMP(token,"scalexyz")!=0){
+    iop=SV_SCALE;
+    num_iop=SV_SCALE_NUMARGS;
+  }
+  else if(STRCMP(token,"drawcube")==0){
+    iop=SV_DRAWCUBE;
+    num_iop=SV_DRAWCUBE_NUMARGS;
+  }
+  else if(STRCMP(token,"skipifge")==0){
+    iop=SV_IF_AGEB;
+    num_iop=SV_IF_AGEB_NUMARGS;
+  }
+  else if(STRCMP(token,"skipifgt")==0){
+    iop=SV_IF_AGTB;
+    num_iop=SV_IF_AGTB_NUMARGS;
+  }
+  else if(STRCMP(token,"skipifle")==0){
+    iop=SV_IF_ALEB;
+    num_iop=SV_IF_ALEB_NUMARGS;
+  }
+  else if(STRCMP(token,"skipiflt")==0){
+    iop=SV_IF_ALTB;
+    num_iop=SV_IF_ALTB_NUMARGS;
+  }
+  else if(STRCMP(token,"drawdisk")==0){
+    iop=SV_DRAWDISK;
+    num_iop=SV_DRAWDISK_NUMARGS;
+  }
+  else if(STRCMP(token,"drawcdisk")==0){
+    iop=SV_DRAWCDISK;
+    num_iop=SV_DRAWCDISK_NUMARGS;
+  }
+  else if(STRCMP(token,"drawhexdisk")==0){
+    iop=SV_DRAWHEXDISK;
+    num_iop=SV_DRAWHEXDISK_NUMARGS;
+  }
+  else if(STRCMP(token,"drawpolydisk")==0){
+    iop=SV_DRAWPOLYDISK;
+    num_iop=SV_DRAWPOLYDISK_NUMARGS;
+  }
+  else if(STRCMP(token,"drawring")==0){
+    iop=SV_DRAWRING;
+    num_iop=SV_DRAWRING_NUMARGS;
+  }
+  else if(STRCMP(token,"drawnotchplate")==0){
+    iop=SV_DRAWNOTCHPLATE;
+    num_iop=SV_DRAWNOTCHPLATE_NUMARGS;
+  }
+  else if(STRCMP(token,"drawtrunccone")==0){
+    iop=SV_DRAWTRUNCCONE;
+    num_iop=SV_DRAWTRUNCCONE_NUMARGS;
+  }
+  else if(STRCMP(token,"drawcone")==0){
+    iop=SV_DRAWCONE;
+    num_iop=SV_DRAWCONE_NUMARGS;
+  }
+  else if(STRCMP(token,"drawtsphere")==0){
+    iop=SV_DRAWTSPHERE;
+    *use_displaylist=0;
+    num_iop=SV_DRAWTSPHERE_NUMARGS;
+  }
+  else if(STRCMP(token,"drawsphere")==0){
+    iop=SV_DRAWSPHERE;
+    num_iop=SV_DRAWSPHERE_NUMARGS;
+  }
+  else if(STRCMP(token,"drawline")==0){
+    iop=SV_DRAWLINE;
+    num_iop=SV_DRAWLINE_NUMARGS;
+  }
+  else if(STRCMP(token,"drawpoint")==0){
+    iop=SV_DRAWPOINT;
+    num_iop=SV_DRAWPOINT_NUMARGS;
+  }
+  else if(STRCMP(token,"drawcircle")==0){
+    iop=SV_DRAWCIRCLE;
+    num_iop=SV_DRAWCIRCLE_NUMARGS;
+  }
+  else if(STRCMP(token,"drawarc")==0){
+    iop=SV_DRAWARC;
+    num_iop=SV_DRAWARC_NUMARGS;
+  }
+  else if(STRCMP(token,"setcolor")==0){
+    iop=SV_SETCOLOR;
+    num_iop=SV_SETCOLOR_NUMARGS;
+  }
+  else if(STRCMP(token,"setlinewidth")==0){
+    iop=SV_SETLINEWIDTH;
+    num_iop=SV_SETLINEWIDTH_NUMARGS;
+  }
+  else if(STRCMP(token,"setpointsize")==0){
+    iop=SV_SETPOINTSIZE;
+    num_iop=SV_SETPOINTSIZE_NUMARGS;
+  }
+  else if(STRCMP(token,"setbw")==0){
+    iop=SV_SETBW;
+    num_iop=SV_SETBW_NUMARGS;
+  }
+  else if(STRCMP(token,"push")==0){
+    iop=SV_PUSH;
+    num_iop=SV_PUSH_NUMARGS;
+  }
+  else if(STRCMP(token,"pop")==0){
+    iop=SV_POP;
+    num_iop=SV_POP_NUMARGS;
+  }
+  else if(STRCMP(token,"multiaddt")==0){
+    iop=SV_MULTIADDT;
+    *use_displaylist=0;
+    num_iop=SV_MULTIADDT_NUMARGS;
+  }
+  else if(STRCMP(token,"clip")==0){
+    iop=SV_CLIP;
+    *use_displaylist=0;
+    num_iop=SV_CLIP_NUMARGS;
+  }
+  else if(STRCMP(token,"mirrorclip")==0){
+    iop=SV_MIRRORCLIP;
+    *use_displaylist=0;
+    num_iop=SV_MIRRORCLIP_NUMARGS;
+  }
+  else if(STRCMP(token,"periodicclip")==0){
+    iop=SV_PERIODICCLIP;
+    *use_displaylist=0;
+    num_iop=SV_PERIODICCLIP_NUMARGS;
+  }
+  else{
+    iop=SV_ERR;
+    num_iop=0;
+ }
+ *iopptr=iop;
+ *num_iopptr=num_iop;
+}
+
+/* ----------------------- get_token_loc ----------------------------- */
+
+int get_token_loc(char *var,sv_object_frame *frame){
+  int i;
+  int return_val;
+
+  for(i=0;i<frame->nsymbols;i++){
+    int ii;
+    tokendata *toki;
+    char *token_var;
+
+    ii = frame->symbols[i];
+    toki = frame->tokens+ii;
+    token_var = toki->token+1;
+    if(strcmp(var,token_var)==0)return ii;
+  }
+  return -1;
+}
+
+/* ----------------------- parse_frame ----------------------------- */
+
+char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *frame){
+  char  object_buffer[100000];
+  char object_buffer2[100000];
+  int ntokens;
   char *token;
-  char buffer2[256];
-  char buffer_save[256];
-  char *bufptr;
-  float *local_args;
-  int *local_ops;
-  int iop;
-  int local_nops, local_nargs;
-  int numargs;
-//  int error_code;
+  char *buffer_ptr=NULL,*buffer2;
+  int i;
+  int nsymbols,ncommands;
 
-  strcpy(buffer_save,buffer);
+  *eof = 0;
 
-  strcpy(buffer2,buffer);
-  bufptr=buffer2;
+  // concatentate frame
 
-  local_nargs=0;
-  local_nops=0;
-  token=strtok(buffer," ");
+  trim(buffer);
+  strcpy(object_buffer,buffer);
+  while(stream!=NULL&&!feof(stream)){
+    if(fgets(buffer,255,stream)==NULL){
+      *eof=1;
+      break;
+    }
+    remove_comment(buffer);
+    trim(buffer);
+    buffer2=trim_front(buffer);
+    if(match(buffer2,"DEVICEDEF",9) == 1||
+       match(buffer2,"AVATARDEF",9) == 1||
+       match(buffer2,"NEWFRAME",8) == 1){
+         buffer_ptr=buffer2;
+         break;
+    }
+    strcat(object_buffer," ");
+    strcat(object_buffer,buffer2);
+  }
+  strcpy(object_buffer2,object_buffer);
+
+// count tokens
+
+  ntokens=0;
+  strcpy(object_buffer2,object_buffer);
+  token=strtok(object_buffer2," ");
   while(token!=NULL){
-    char c;
-
-    c=token[0];
-    if(c>='a'&&c<='z'||c>='A'&&c<='Z'){
-      local_nops++;
-    }
-    else{
-      local_nargs++;
-    }
+    ntokens++;
     token=strtok(NULL," ");
   }
-  local_args=NULL;
-  if(local_nargs>0)NewMemory((void  **)&local_args,local_nargs*sizeof(float));
-  *args=local_args;
-  *nargs=local_nargs;
+  frame->ntokens=ntokens;
+  NewMemory((void **)&frame->tokens,ntokens*sizeof(tokendata));
+  if(ntokens>0)NewMemory((void **)&frame->symbols,ntokens*sizeof(int));
 
-  local_ops=NULL;
-  if(local_nops>0)NewMemory((void **)&local_ops,local_nops*sizeof(int));
-  *ops=local_ops;
-  *nops=local_nops;
-  if(local_nops==0)return;
+  // count symbols and commands
 
-  token=strtok(bufptr," ");
-  numargs = 0;
-
-  while(token!=NULL){
+  strcpy(object_buffer2,object_buffer);
+  token=strtok(object_buffer2," ");
+  nsymbols=0;
+  ncommands=0;
+  for(i=0;i<ntokens;i++){
+    tokendata *toki;
     char c;
 
-    c=token[0];
+    toki = frame->tokens + i;
+    toki->token=token;
+
+    c = token[0];
+
+    if(c==':'){
+      frame->symbols[nsymbols++]=i;
+    }
+    if(c>='a'&&c<='z'||c>='A'&&c<='Z')ncommands++;
+
+    token=strtok(NULL," ");
+  }
+  frame->nsymbols=nsymbols;
+  if(ntokens>0)NewMemory((void **)&frame->command_list,ntokens*sizeof(tokendata *));
+  frame->ncommands=ncommands;
+
+  // fill in token data structure
+
+  nsymbols=0;
+  ncommands=0;
+  for(i=0;i<ntokens;i++){
+    tokendata *toki, *first_token=NULL;
+    char c;
+
+    toki = frame->tokens + i;
+
+    c = toki->token[0];
+    if(first_token==NULL&&c!=':')first_token=toki;
     if(c>='a'&&c<='z'||c>='A'&&c<='Z'){
-      if(STRCMP(token,"translate")==0){
-        iop=SV_TRANSLATE;
-        reporterror(buffer_save,token,numargs,SV_TRANSLATE_NUMARGS);
-      }
-      else if(STRCMP(token,"translatemzd2")==0){
-        iop=SV_TRANSLATEMZD2;
-        reporterror(buffer_save,token,numargs,SV_TRANSLATEMZD2_NUMARGS);
-      }
-      else if(STRCMP(token,"offsetx")==0){
-        iop=SV_OFFSETX;
-        reporterror(buffer_save,token,numargs,SV_OFFSETX_NUMARGS);
-      }
-      else if(STRCMP(token,"offsety")==0){
-        iop=SV_OFFSETY;
-        reporterror(buffer_save,token,numargs,SV_OFFSETY_NUMARGS);
-      }
-      else if(STRCMP(token,"offsetz")==0){
-        iop=SV_OFFSETZ;
-        reporterror(buffer_save,token,numargs,SV_OFFSETZ_NUMARGS);
-      }
-      else if(STRCMP(token,"rotatex")==0){
-        iop=SV_ROTATEX;
-        reporterror(buffer_save,token,numargs,SV_ROTATEX_NUMARGS);
-      }
-      else if(STRCMP(token,"rotatey")==0){
-        iop=SV_ROTATEY;
-        reporterror(buffer_save,token,numargs,SV_ROTATEY_NUMARGS);
-      }
-      else if(STRCMP(token,"rotatez")==0){
-        iop=SV_ROTATEZ;
-        reporterror(buffer_save,token,numargs,SV_ROTATEZ_NUMARGS);
-      }
-      else if(STRCMP(token,"scalexyz")==0){
-        iop=SV_SCALEXYZ;
-        reporterror(buffer_save,token,numargs,SV_SCALEXYZ_NUMARGS);
-      }
-      else if(STRCMP(token,"scale")==0&&STRCMP(token,"scalexyz")!=0){
-        iop=SV_SCALE;
-        reporterror(buffer_save,token,numargs,SV_SCALE_NUMARGS);
-      }
-      else if(STRCMP(token,"drawcube")==0){
-        iop=SV_DRAWCUBE;
-        reporterror(buffer_save,token,numargs,SV_DRAWCUBE_NUMARGS);
-      }
-      else if(STRCMP(token,"skipifge")==0){
-        iop=SV_IF_AGEB;
-        reporterror(buffer_save,token,numargs,SV_IF_AGEB_NUMARGS);
-      }
-      else if(STRCMP(token,"skipifgt")==0){
-        iop=SV_IF_AGTB;
-        reporterror(buffer_save,token,numargs,SV_IF_AGTB_NUMARGS);
-      }
-      else if(STRCMP(token,"skipifle")==0){
-        iop=SV_IF_ALEB;
-        reporterror(buffer_save,token,numargs,SV_IF_ALEB_NUMARGS);
-      }
-      else if(STRCMP(token,"skipiflt")==0){
-        iop=SV_IF_ALTB;
-        reporterror(buffer_save,token,numargs,SV_IF_ALTB_NUMARGS);
-      }
-      else if(STRCMP(token,"drawdisk")==0){
-        iop=SV_DRAWDISK;
-        reporterror(buffer_save,token,numargs,SV_DRAWDISK_NUMARGS);
-      }
-      else if(STRCMP(token,"drawcdisk")==0){
-        iop=SV_DRAWCDISK;
-        reporterror(buffer_save,token,numargs,SV_DRAWCDISK_NUMARGS);
-      }
-      else if(STRCMP(token,"drawhexdisk")==0){
-        iop=SV_DRAWHEXDISK;
-        reporterror(buffer_save,token,numargs,SV_DRAWHEXDISK_NUMARGS);
-      }
-      else if(STRCMP(token,"drawpolydisk")==0){
-        iop=SV_DRAWPOLYDISK;
-        reporterror(buffer_save,token,numargs,SV_DRAWPOLYDISK_NUMARGS);
-      }
-      else if(STRCMP(token,"drawring")==0){
-        iop=SV_DRAWRING;
-        reporterror(buffer_save,token,numargs,SV_DRAWRING_NUMARGS);
-      }
-      else if(STRCMP(token,"drawnotchplate")==0){
-        iop=SV_DRAWNOTCHPLATE;
-        reporterror(buffer_save,token,numargs,SV_DRAWNOTCHPLATE_NUMARGS);
-      }
-      else if(STRCMP(token,"drawtrunccone")==0){
-        iop=SV_DRAWTRUNCCONE;
-        reporterror(buffer_save,token,numargs,SV_DRAWTRUNCCONE_NUMARGS);
-      }
-      else if(STRCMP(token,"drawcone")==0){
-        iop=SV_DRAWCONE;
-        reporterror(buffer_save,token,numargs,SV_DRAWCONE_NUMARGS);
-      }
-      else if(STRCMP(token,"drawtsphere")==0){
-        iop=SV_DRAWTSPHERE;
-        *use_displaylist=0;
-        reporterror(buffer_save,token,numargs,SV_DRAWTSPHERE_NUMARGS);
-      }
-      else if(STRCMP(token,"drawsphere")==0){
-        iop=SV_DRAWSPHERE;
-        reporterror(buffer_save,token,numargs,SV_DRAWSPHERE_NUMARGS);
-      }
-      else if(STRCMP(token,"drawline")==0){
-        iop=SV_DRAWLINE;
-        reporterror(buffer_save,token,numargs,SV_DRAWLINE_NUMARGS);
-      }
-      else if(STRCMP(token,"drawpoint")==0){
-        iop=SV_DRAWPOINT;
-        reporterror(buffer_save,token,numargs,SV_DRAWPOINT_NUMARGS);
-      }
-      else if(STRCMP(token,"drawcircle")==0){
-        iop=SV_DRAWCIRCLE;
-        reporterror(buffer_save,token,numargs,SV_DRAWCIRCLE_NUMARGS);
-      }
-      else if(STRCMP(token,"drawarc")==0){
-        iop=SV_DRAWARC;
-        reporterror(buffer_save,token,numargs,SV_DRAWARC_NUMARGS);
-      }
-      else if(STRCMP(token,"setcolor")==0){
-        iop=SV_SETCOLOR;
-        reporterror(buffer_save,token,numargs,SV_SETCOLOR_NUMARGS);
-      }
-      else if(STRCMP(token,"setlinewidth")==0){
-        iop=SV_SETLINEWIDTH;
-        reporterror(buffer_save,token,numargs,SV_SETLINEWIDTH_NUMARGS);
-      }
-      else if(STRCMP(token,"setpointsize")==0){
-        iop=SV_SETPOINTSIZE;
-        reporterror(buffer_save,token,numargs,SV_SETPOINTSIZE_NUMARGS);
-      }
-      else if(STRCMP(token,"setbw")==0){
-        iop=SV_SETBW;
-        reporterror(buffer_save,token,numargs,SV_SETBW_NUMARGS);
-      }
-      else if(STRCMP(token,"push")==0){
-        iop=SV_PUSH;
-        reporterror(buffer_save,token,numargs,SV_PUSH_NUMARGS);
-      }
-      else if(STRCMP(token,"pop")==0){
-        iop=SV_POP;
-        reporterror(buffer_save,token,numargs,SV_POP_NUMARGS);
-      }
-      else if(STRCMP(token,"getuservals")==0){
-        iop=SV_GETUSERVALS;
-        *use_displaylist=0;
-        reporterror(buffer_save,token,numargs,SV_GETUSERVALS_NUMARGS);
-      }
-      else if(STRCMP(token,"putuservals2stack")==0){
-        iop=SV_PUTUSERVALS2STACK;
-        *use_displaylist=0;
-        reporterror(buffer_save,token,numargs,SV_PUTUSERVALS2STACK_NUMARGS);
-      }
-      else if(STRCMP(token,"multiaddt")==0){
-        iop=SV_MULTIADDT;
-        *use_displaylist=0;
-        reporterror(buffer_save,token,numargs,SV_MULTIADDT_NUMARGS);
-      }
-      else if(STRCMP(token,"clip")==0){
-        iop=SV_CLIP;
-        *use_displaylist=0;
-        reporterror(buffer_save,token,numargs,SV_CLIP_NUMARGS);
-      }
-      else if(STRCMP(token,"mirrorclip")==0){
-        iop=SV_MIRRORCLIP;
-        *use_displaylist=0;
-        reporterror(buffer_save,token,numargs,SV_MIRRORCLIP_NUMARGS);
-      }
-      else if(STRCMP(token,"periodicclip")==0){
-        iop=SV_PERIODICCLIP;
-        *use_displaylist=0;
-        reporterror(buffer_save,token,numargs,SV_PERIODICCLIP_NUMARGS);
-      }
-      else if(STRCMP(token,"copyval")==0){
-        iop=SV_COPYVAL;
-        *use_displaylist=0;
-        reporterror(buffer_save,token,numargs,SV_COPYVAL_NUMARGS);
-      }
-      else if(STRCMP(token,"copynvals")==0){
-        iop=SV_COPYNVALS;
-        *use_displaylist=0;
-        reporterror(buffer_save,token,numargs,SV_COPYNVALS_NUMARGS);
+      int use_displaylist;
+      int nargs_actual;
+      tokendata *this_token, *last_token;
+
+      toki->type=TOKEN_COMMAND;
+      get_token_id(toki->token, &toki->command, &toki->nvars, &use_displaylist);
+      frame->command_list[ncommands]=toki;
+      if(frame->device!=NULL)frame->device->use_displaylist=use_displaylist;
+      if(ncommands>0){
+        this_token=toki;
+        last_token=frame->command_list[ncommands-1];
+        nargs_actual = this_token-last_token - 1;
       }
       else{
-        iop=SV_ERR;
+        nargs_actual = toki-first_token;
+        nargs_actual = toki->nvars;
       }
-      *local_ops++=iop;
-      numargs=0;
+      if(nargs_actual!=toki->nvars){
+        printf("*** error: In device: %s, the token: %s has %i arguments, %i were expected\n",
+          frame->device->label,toki->token,nargs_actual,toki->nvars);
+      }
+      ncommands++;
+    }
+    else if(c=='$'||c=='@'){
+      char vartoken[255];
+      char *vartokenptr;
+      tokendata *tokdest;
+
+      toki->loc=get_token_loc(toki->token+1,frame);
+      if(toki->loc>=0){
+        tokdest = frame->tokens+toki->loc;
+        toki->varptr=&tokdest->var;
+      }
+      else{
+        toki->varptr=NULL;
+        printf("*** error: In device: %s, the label: %s is not defined\n",frame->device->label,toki->token);
+      }
+
+      if(c=='$'){
+        toki->type=TOKEN_GETVAL;
+      }
+      if(c=='@'){
+        toki->type=TOKEN_PUTVAL;
+      }
+    }
+    else if(c==':'){
+      toki->type=TOKEN_FLOAT;
+      toki->varptr=&toki->var;
+      nsymbols++;
     }
     else{
-      sscanf(token,"%f",local_args);
-      local_args++;
-      numargs++;
+      toki->type=TOKEN_FLOAT;
+      sscanf(toki->token,"%f%",&toki->var);
+      toki->varptr=&toki->var;
     }
-    token=strtok(NULL," ");
   }
+  return buffer_ptr;
 }
 
 /* ----------------------- read_device_defs ----------------------------- */
@@ -2191,6 +2178,7 @@ void getargsops(char *buffer,float **args,int *nargs, int **ops, int *nops, int 
 int read_device_defs(char *file){
   FILE *stream;
   char buffer[256], *trim_buffer;
+  char *buffer_ptr;
   sv_object *temp_object, *prev_object, *next_object, *current_object;
   sv_object_frame *current_frame;
   int firstdef;
@@ -2199,31 +2187,39 @@ int read_device_defs(char *file){
   sv_object *object_start, *objecti;
   size_t lenbuffer;
   int ndevices=0;
+  int eof=0;
 
   stream=fopen(file,"r");
   if(stream==NULL)return 0;
   printf("      Reading device definitions from: %s\n",file);
 
   firstdef=-1;
+  buffer_ptr=NULL;
   while(!feof(stream)){
     CheckMemory;
-    if(fgets(buffer,255,stream)==NULL)break;
-    remove_comment(buffer);
-    trim(buffer);
-    trim_buffer=trim_front(buffer);
-    lenbuffer=strlen(buffer);
-    if(lenbuffer<1)continue;
+    if(buffer_ptr==NULL){
+      if(eof==1||fgets(buffer,255,stream)==NULL)break;
+      buffer_ptr=buffer;
+    }
+    remove_comment(buffer_ptr);
+    trim(buffer_ptr);
+    trim_buffer=trim_front(buffer_ptr);
+    lenbuffer=strlen(buffer_ptr);
+    if(lenbuffer<1){
+      buffer_ptr=NULL;
+      continue;
+    }
 
 
-    if(match(buffer,"DEVICEDEF",9) == 1||
-       match(buffer,"AVATARDEF",9) == 1
+    if(match(buffer_ptr,"DEVICEDEF",9) == 1||
+       match(buffer_ptr,"AVATARDEF",9) == 1
       ){
         int is_avatar=0;
       char *label;
 
       sv_object_frame *first_frame, *last_frame;
 
-      if(match(buffer,"AVATARDEF",9) == 1){
+      if(match(buffer_ptr,"AVATARDEF",9) == 1){
         is_avatar=1;
       }  
       ndevices++;
@@ -2262,6 +2258,7 @@ int read_device_defs(char *file){
       last_frame->next=NULL;
 
       firstdef=1;
+      buffer_ptr=NULL;
       continue;
     }
     if(match(trim_buffer,"NEWFRAME",8) == 1||firstdef==1){
@@ -2279,56 +2276,20 @@ int read_device_defs(char *file){
       current_frame->next=next_frame;
       current_frame->prev=prev_frame;
 
-      current_frame->args=NULL;
-      current_frame->ops=NULL;
-      current_frame->nargs=0;
-      current_frame->nops=0;
       current_frame->display_list_ID=-1;
       current_frame->use_bw=setbw;
+      current_frame->device=current_object;
 
       current_object->nframes++;
 
       firstdef=0;
-      if(match(trim_buffer,"NEWFRAME",8)==1)continue;
-    }
-    getargsops(buffer,&arglist, &nargs, &oplist, &nops, &current_object->use_displaylist);
-    if(nargs>0){
-      if(current_frame->nargs==0){
-        current_frame->args=arglist;
-        current_frame->nargs=nargs;
-      }
-      else{
-        int i, ncurrent;
-
-        ncurrent = current_frame->nargs;
-        ResizeMemory((void **)&current_frame->args,(ncurrent+nargs)*sizeof(float));
-        for(i=0;i<nargs;i++){
-          current_frame->args[ncurrent+i] = arglist[i];
-        }
-        current_frame->nargs=ncurrent+nargs;
-        FREEMEMORY(arglist);
+      if(match(trim_buffer,"NEWFRAME",8)==1){
+        buffer_ptr=NULL;
+        continue;
       }
     }
-    if(nops>0){
-      if(current_frame->nops==0){
-        current_frame->ops=oplist;
-        current_frame->nops=nops;
-      }
-      else{
-        int i, ncurrent;
-
-        ncurrent = current_frame->nops;
-        ResizeMemory((void **)&current_frame->ops,(ncurrent+nops)*sizeof(int));
-        for(i=0;i<nops;i++){
-          current_frame->ops[ncurrent+i] = oplist[i];
-        }
-        current_frame->nops=ncurrent+nops;
-        FREEMEMORY(oplist);
-      }
-    }
-
+    buffer_ptr=parse_device_frame(buffer,stream,&eof,current_frame);
   }
-
   fclose(stream);
 
   object_start = device_def_first.next;
@@ -2362,15 +2323,20 @@ int read_device_defs(char *file){
       framei = frame_start;
       j=0;
       for(;framei->next!=NULL;){
-        int iop, npushpop=0;
+        int iop, npushpop=0, ii;
 
         CheckMemory;
         objecti->obj_frames[j]=framei;
         framei->error=0;
-        for(iop=0;iop<framei->nops;iop++){
+        for(ii=0;ii<framei->ncommands;ii++){
+          tokendata *command;
+          char *c;
           int op;
 
-          op = framei->ops[iop];
+
+          command = framei->command_list[ii];
+
+          op = command->command;
           if(op==SV_PUSH){
             npushpop++;
           }
@@ -2378,7 +2344,7 @@ int read_device_defs(char *file){
             npushpop--;
             if(npushpop<0){
               npushpop=0;
-              framei->ops[iop]=SV_NO_OP;
+              command->command=SV_NO_OP;
             }
           }
         }
@@ -2473,8 +2439,8 @@ void free_object(sv_object *object){
     sv_object_frame *next_frame;
 
     next_frame=framei->next;
-    if(framei->nargs>0)FREEMEMORY(framei->args);
-    if(framei->nops>0)FREEMEMORY(framei->ops);
+    if(framei->nsymbols>0)FREEMEMORY(framei->symbols);
+    if(framei->ntokens>0)FREEMEMORY(framei->tokens);
     FREEMEMORY(framei);
     framei=next_frame;
   }
@@ -2536,6 +2502,8 @@ void init_device_defs(void){
         strcpy(objectfile,smvprogdir);
         strcat(objectfile,"devices.svo");
         read_device_defs(objectfile);
+       // strcat(objectfile,"test.svo");
+       // read_device_defs2(objectfile);
       }
 
       strcpy(objectfile,"devices.svo");
