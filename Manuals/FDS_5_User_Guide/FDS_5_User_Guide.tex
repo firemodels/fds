@@ -28,10 +28,8 @@
 \usepackage{graphpap}
 \usepackage{rotating}
 \usepackage{epsfig,psfrag}
-%\usepackage{wrapfig}
-%\usepackage{picins}
 \usepackage{geometry}
-\usepackage{tabularx}
+%\usepackage{tabularx}
 \usepackage{longtable}
 \usepackage{lscape}
 \usepackage{amssymb}
@@ -7400,17 +7398,15 @@ control functions, will then flow water.
 \end{verbatim}
 \normalsize
 
-%
-% ---------- section documenting device visualization --------------------------
-%
-% Section on Smokeview devices
 
-\input{smv_devices.tex}
 
 \section{Controlling a \texorpdfstring{{\tt RAMP}}{RAMP}}
 \label{info:RAMPDEVC}
 
-For any user defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.  This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.  In the following example a blower is turned on when the temperature exceeds 100~$^\circ$C and is turned off when the temperature exceeds 200~$^\circ$C.  This is similar functionality to the {\ct CUSTOM} control function, but it allows for variable response rather than just on or off.
+For any user defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.  
+This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.  
+In the following example a blower is turned on when the temperature exceeds 100~$^\circ$C and is turned off when the temperature exceeds 200~$^\circ$C.  
+This is similar functionality to the {\ct CUSTOM} control function, but it allows for variable response rather than just on or off.
 
 \footnotesize
 \begin{verbatim}
@@ -7423,6 +7419,18 @@ For any user defined {\ct RAMP}, the normal independent variable, for example ti
 &RAMP ID='BLOWER RAMP', T=201,F=0/
 \end{verbatim}
 \normalsize
+
+
+
+%
+% Section on Smokeview devices
+\newpage
+
+\input{smv_devices.tex}
+
+
+
+
 
 \chapter{Output Data}
 \label{info:outputdata}
@@ -7848,7 +7856,7 @@ into the domain), and the fifth contains the energy conducted into the
 solid surfaces.  The sixth column contains the total burning rate of
 fuel, in units of kg/s. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual
 material might have a different heat of combustion. For this reason, it is not always the case that the reported total
-burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate. 
+burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate.
 
 Let $\Omega$ denote the unblocked computational domain, {\em i.e.} the
 volume within the bounding rectangle occupied by gas. Let $\partial
@@ -10298,7 +10306,7 @@ FDS_HRR_Time,HRR,RAD_LOSS,CONV_LOSS,COND_LOSS,BURN_RATE,ZONE_01,ZONE_02, ...
 {\ct COND\_LOSS} is the rate of energy that is being conducted into (positive) or out of (negative) the solid surfaces,
 {\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, {\em etc.}, are the background pressures of the various
 pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual
-material might have a different heat of combustion. 
+material might have a different heat of combustion.
 
 Details of the integrated energy quantities can be found in Section~\ref{info:HRR}. The background pressure is discussed in
 Section~\ref{info:ZONE}.

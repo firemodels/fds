@@ -13,7 +13,7 @@
 
 
 \section{Visualizing Devices}
-\subsection{Overview}
+
 Smokeview allows one to visualize FDS devices such as heat and smoke detectors,
 sprinklers, sensors {\em etc.} using instructions contained in a
 data file named {\tt devices.svo}.
@@ -27,36 +27,38 @@ devices may be designed and drawn without requiring modifications to Smokeview.
 
 %With respect to visualization there are two types devices: static and dynamic. This %terminology refers simply to whether the look and/or behavior of the device can be %modified at run time.  For example, the {\tt sensor}\ device is drawn as a small %green sphere with a fixed diameter.  It is a static device.  The {\tt tsphere}\ %device on the other hand is more flexible.  It can be drawn using parameters %specified in the FDS input file, a texture map or image applied to the surface and %a diameter.  It is a dynamic device.
 
-This section gives an overview of what devices are pre-defined and in general what types of devices can be defined.  Further documentation on the underlying technical details may be found in the Smokeview User's guide\cite{Smokeview_Users_Guide_5}.
+This section gives an overview of what devices are pre-defined and in general what types of devices can be defined.  Further documentation on the underlying technical details may be found in the Smokeview User's Guide~\cite{Smokeview_Users_Guide_5}.
 
 \subsection{Static Devices}
+
 A Smokeview device consists of one or more frames or views.  This characteristic is used by Smokeview to display a device in either a normal or activated state.  A smoke detector, for example, is drawn differently depending on whether it has activated or not.  When FDS determines that a device has activated it places a message in the {\tt .smv}\ file indicating the device number, the activation time and the state (0 for inactive or 1 for active).  Smokeview then draws the corresponding frame of the device.
-Tables \ref{tab:devices_sstatic}\ and \ref{tab:devices_mstatic}\
+Tables \ref{tab:devices_static}\ and \ref{tab:devices_mstatic}\
 give a list of devices that have drawings defined.  Each entry shows pictures of the device in its normal state and in its active state if it has one.  The intersection of the red and green tubes indicate the origin of the device, the part of the device displayed at the $(x,y,z)$ coordinate specified on the {\tt \&DEVC}\ input line.
 
 To associate a Smokeview drawing with an FDS device, use the {\tt SMOKEVIEW\_ID}\ keyword  (found on the {\tt \&PROP}\ namelist statement).  The value entered refers to an entry in the {\tt devices.svo}\ file.
 The following lines
 were used to display the target device in Table \ref{tab:devices_static}.
 
+\footnotesize
 \begin{verbatim}
 &PROP ID='target' SMOKEVIEW_ID='target' /
 &DEVC XYZ=0.5,0.8,0.6, QUANTITY='TEMPERATURE' PROP_ID='target' /
-\end{verbatim}
+\end{verbatim} \normalsize
 
-\begin{longtable}[ht]{|l|c|}
+\newpage
+
+\begin{longtable}[t!]{|l|c|}
 \caption{Single Frame Static Devices}
 \label{tab:devices_static}
 \\ \hline
 {\tt SMOKEVIEW\_ID} & Image  \\ \hline \hline
 \endfirsthead
-\caption{Single Frame Static Devices (continued)}
-\\ \hline 
-Smokeview Device Name  & Image  \\ \hline \hline
+\caption{Single Frame Static Devices (continued)} \\ \hline
+{\tt SMOKEVIEW\_ID} & Image  \\ \hline \hline
 \endhead
 
-sensor&\incgraphics{"scriptfigures/sensor"} \\ \hline
-target&\incgraphics{"scriptfigures/target"} \\ \hline
-
+sensor & \incgraphics{"scriptfigures/sensor"} \\ \hline
+target & \incgraphics{"scriptfigures/target"} \\ \hline
 
 \end{longtable}
 
@@ -73,25 +75,11 @@ target&\incgraphics{"scriptfigures/target"} \\ \hline
 & inactive & active  \\ \hline \hline
 \endhead
 
-heat\_detector &
-\incgraphics{"scriptfigures/heat_detector_0"}&
-\incgraphics{"scriptfigures/heat_detector_1"} \\ \hline
-
-nozzle&
-\incgraphics{"scriptfigures/nozzle_0"} &
-\incgraphics{"scriptfigures/nozzle_1"} \\ \hline
-
-smoke\_detector&
-\incgraphics{"scriptfigures/smoke_detector_0"} &
-\incgraphics{"scriptfigures/smoke_detector_1"} \\ \hline
-
-sprinkler\_upright&
-\incgraphics{"scriptfigures/sprinkler_upright_0"} &
-\incgraphics{"scriptfigures/sprinkler_upright_1"} \\ \hline
-
-sprinkler\_pendent&
-\incgraphics{"scriptfigures/sprinkler_pendent_0"} &
-\incgraphics{"scriptfigures/sprinkler_pendent_1"} \\ \hline
+heat\_detector      & \incgraphics{"scriptfigures/heat_detector_0"}     & \incgraphics{"scriptfigures/heat_detector_1"} \\ \hline
+nozzle              & \incgraphics{"scriptfigures/nozzle_0"}            & \incgraphics{"scriptfigures/nozzle_1"} \\ \hline
+smoke\_detector     & \incgraphics{"scriptfigures/smoke_detector_0"}    & \incgraphics{"scriptfigures/smoke_detector_1"} \\ \hline
+sprinkler\_upright  & \incgraphics{"scriptfigures/sprinkler_upright_0"} & \incgraphics{"scriptfigures/sprinkler_upright_1"} \\ \hline
+sprinkler\_pendent  & \incgraphics{"scriptfigures/sprinkler_pendent_0"} & \incgraphics{"scriptfigures/sprinkler_pendent_1"} \\ \hline
 
 \end{longtable}
 
