@@ -556,19 +556,25 @@ typedef struct _tourdata {
   float global_tension;
 } tourdata;
 
-/* --------------------------  sv_object_parts ------------------------------------ */
+/* --------------------------  tokendata ------------------------------------ */
 
-  // part/op types
-  // 0 translatexyz/3, 1 rotatex/1, 2 rotatey/1, 3 rotatez/1, 4 scalexyz/3, 5 scale/1 6 drawcube/1, 7 drawdisk/2, 8 drawsphere/1, 9 drawline  10 drawelliposid/3
+typedef struct {
+  float var,*varptr;
+  int command,loc,type;
+  int nvars;
+  char *token;
+} tokendata;
 
 /* --------------------------  sv_object_frame ------------------------------------ */
 
 typedef struct _sv_object_frame {
-  int *ops, nops, nargs;
   int use_bw;
   int error;
   int display_list_ID;
-  float *args;
+  int *symbols, nsymbols;
+  tokendata *tokens, **command_list;
+  int ntokens,ncommands;
+  struct _sv_object *device;
   struct _sv_object_frame *prev, *next;
 } sv_object_frame;
 
