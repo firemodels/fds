@@ -1402,12 +1402,12 @@ YYMIN  = 0._EB
 YYMAX  = 1._EB
 
 IF (.NOT. SUPPRESSION .AND. CO_PRODUCTION) THEN
-   WRITE(MESSAGE,'(A)')  'Cannot set SUPPRESSION=.FALSE. when CO_PRODUCTION=.TRUE.'
+   WRITE(MESSAGE,'(A)')  'ERROR: Cannot set SUPPRESSION=.FALSE. when CO_PRODUCTION=.TRUE.'
    CALL SHUTDOWN(MESSAGE)
 ENDIF 
 
 IF (SOOT_DEPOSITION .AND. CO_PRODUCTION) THEN
-   WRITE(MESSAGE,'(A)')  'Cannot set CO_PRODUCTION=.TRUE. when SOOT_DEPOSITION=.TRUE.'
+   WRITE(MESSAGE,'(A)')  'ERROR: Cannot set CO_PRODUCTION=.TRUE. when SOOT_DEPOSITION=.TRUE.'
    CALL SHUTDOWN(MESSAGE)
 ENDIF 
 
@@ -1880,12 +1880,12 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
       RN%NU(CO_INDEX)      = CO_YIELD * RN%MW_FUEL / MW_CO
       RN%NU(CO2_INDEX)     = C - RN%NU(CO_INDEX) - RN%NU(SOOT_INDEX) * (1._EB - SOOT_H_FRACTION)
       IF (RN%NU(CO2_INDEX) < 0._EB) THEN
-         WRITE(MESSAGE,'(A)') 'Values for SOOT_YIELD, CO_YIELD, and SOOT_H_FRACTION result in negative CO2 yield'
+         WRITE(MESSAGE,'(A)') 'ERROR: Values for SOOT_YIELD, CO_YIELD, and SOOT_H_FRACTION result in negative CO2 yield'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       RN%NU(H2O_INDEX)     = 0.5_EB * H - RN%NU(H2_INDEX) - 0.5_EB * RN%NU(SOOT_INDEX) * SOOT_H_FRACTION
       IF (RN%NU(H2O_INDEX) < 0._EB) THEN
-         WRITE(MESSAGE,'(A)') 'Values for SOOT_YIELD, H2_YIELD, and SOOT_H_FRACTION result in negative H2O yield'
+         WRITE(MESSAGE,'(A)') 'ERROR: Values for SOOT_YIELD, H2_YIELD, and SOOT_H_FRACTION result in negative H2O yield'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       RN%NU(O2_INDEX)      = RN%NU(CO2_INDEX) + 0.5_EB * (RN%NU(CO_INDEX) + RN%NU(H2O_INDEX) - O)
@@ -1916,12 +1916,12 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
       RN%NU(CO_INDEX)              = C - RN%NU(SOOT_INDEX) * (1._EB - SOOT_H_FRACTION)
       RN%NU(CO2_INDEX)             = 0._EB
       IF (RN%NU(CO2_INDEX) < 0._EB) THEN
-         WRITE(MESSAGE,'(A)') 'Values for SOOT_YIELD, CO_YIELD, and SOOT_H_FRACTION result in negative CO2 yield'
+         WRITE(MESSAGE,'(A)') 'ERROR: Values for SOOT_YIELD, CO_YIELD, and SOOT_H_FRACTION result in negative CO2 yield'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       RN%NU(H2O_INDEX)             = 0.5_EB * H - RN%NU(H2_INDEX) - 0.5_EB * RN%NU(SOOT_INDEX) * SOOT_H_FRACTION
       IF (RN%NU(H2O_INDEX) < 0._EB) THEN
-         WRITE(MESSAGE,'(A)') 'Values for SOOT_YIELD, H2_YIELD, and SOOT_H_FRACTION result in negative H2O yield'
+         WRITE(MESSAGE,'(A)') 'ERROR: Values for SOOT_YIELD, H2_YIELD, and SOOT_H_FRACTION result in negative H2O yield'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       RN%NU(O2_INDEX)              = RN%NU(CO2_INDEX) + 0.5_EB * (RN%NU(CO_INDEX) + RN%NU(H2O_INDEX) - O)
@@ -2572,8 +2572,8 @@ DO N = 1, N_PART
          CALL JANAF_TABLE_LIQUID (J,PC%C_P(J),H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SPEC_ID)
          IF (J==1) THEN
             PC%H_L(J) = H_L + PC%C_P(J)
-            IF (PC%C_P(J) < 0._EB) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'PARTICLE CLASS ',TRIM(PC%ID),' REQUIRES CP, H_V, TMP_MELT, TMP_V, and T_REF'
+            IF (PC%C_P(J) < 0._EB .AND. .NOT.PC%TREE) THEN
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(PC%ID),' requires CP, H_V, TMP_MELT, TMP_V, and T_REF'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             IF (PC%H_V_REFERENCE_TEMPERATURE < 0._EB) PC%H_V_REFERENCE_TEMPERATURE=TMP_REF
@@ -3367,7 +3367,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
       IF ((FLOW_RATE>0._EB .AND. K_FACTOR<=0._EB .AND. OPERATING_PRESSURE<=0._EB) .OR. &
           (FLOW_RATE<0._EB .AND. K_FACTOR>=0._EB .AND. OPERATING_PRESSURE<=0._EB) .OR. &
           (FLOW_RATE<0._EB .AND. K_FACTOR<=0._EB .AND. OPERATING_PRESSURE>0._EB)) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'Problem with PROP ',TRIM(PY%ID),', too few flow parameters'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with PROP ',TRIM(PY%ID),', too few flow parameters'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       IF (K_FACTOR < 0._EB .AND. OPERATING_PRESSURE > 0._EB)  K_FACTOR           = FLOW_RATE/SQRT(OPERATING_PRESSURE)
@@ -3378,7 +3378,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
       PY%OPERATING_PRESSURE = OPERATING_PRESSURE
 
       IF ((DROPLET_VELOCITY == 0._EB) .AND. (ORIFICE_DIAMETER == 0.) .AND. (PRESSURE_RAMP == 'null')) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'Warning: PROP ',TRIM(PY%ID),': droplet velocity is not defined.'
+         WRITE(MESSAGE,'(A,A,A)') 'WARNING: PROP ',TRIM(PY%ID),': droplet velocity is not defined.'
          IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
       ENDIF
       
@@ -3482,7 +3482,7 @@ PROP_LOOP: DO N=0,N_PROP
       SUBTOTAL_FLOWRATE=0._EB
       DO NN=1,TA%NUMBER_ROWS
          IF (TA%TABLE_DATA(NN,6) <=0._EB) THEN
-            WRITE(MESSAGE,'(A,A,A,I5)') 'Spray Pattern Table, ',TRIM(PY%TABLE_ID),', massflux <= 0 for line ',NN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: Spray Pattern Table, ',TRIM(PY%TABLE_ID),', massflux <= 0 for line ',NN
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          TOTAL_FLOWRATE = TOTAL_FLOWRATE + TA%TABLE_DATA(NN,6)
@@ -3761,8 +3761,7 @@ DO N=1,N_MATL
          IF (MATL_NAME(NNN)==ML%RESIDUE_MATL_NAME(NN)) ML%RESIDUE_MATL_INDEX(NN) = NNN
       ENDDO
       IF (ML%RESIDUE_MATL_INDEX(NN)==0 .AND. ML%NU_RESIDUE(NN)>0._EB) THEN
-         WRITE(MESSAGE,'(5A)') 'ERROR: Residue material ', TRIM(ML%RESIDUE_MATL_NAME(NN)),' of ', &
-            TRIM(MATL_NAME(N)), ' is not defined.'
+         WRITE(MESSAGE,'(5A)') 'ERROR: Residue ', TRIM(ML%RESIDUE_MATL_NAME(NN)),' of ',TRIM(MATL_NAME(N)),' is not defined.'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    ENDDO
@@ -3773,7 +3772,7 @@ IF (N_MATL>1) THEN
    DO N=1,N_MATL-1
       DO NN=N+1,N_MATL
          IF(MATL_NAME(N)==MATL_NAME(NN)) THEN
-            WRITE(MESSAGE,'(A,A)') 'Duplicate material name: ',TRIM(MATL_NAME(N))
+            WRITE(MESSAGE,'(A,A)') 'ERROR: Duplicate material name: ',TRIM(MATL_NAME(N))
             CALL SHUTDOWN(MESSAGE)
          ENDIF
       ENDDO
@@ -4181,7 +4180,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
             ENDIF
          ENDDO
          IF (INDEX_LIST(N_LIST)<0) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'MATL: ',TRIM(NAME_LIST(N_LIST)),', on SURF: ',TRIM(SF%ID),', does not exist'
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: MATL_ID ',TRIM(NAME_LIST(N_LIST)),', on SURF: ',TRIM(SF%ID),', does not exist'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
       ENDDO COUNT_LAYER_MATL
@@ -5012,27 +5011,27 @@ COUNT_TABLE_POINTS: DO N=1,N_TABLE
          CASE (SPRAY_PATTERN)
             MESSAGE='null'
             IF (TABLE_DATA(1)<0. .OR.           TABLE_DATA(1)>180) THEN
-               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st lattitude'
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st lattitude'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             IF (TABLE_DATA(2)<TABLE_DATA(1).OR. TABLE_DATA(2)>180) THEN
-               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd lattitude'
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd lattitude'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             IF (TABLE_DATA(3)<-180. .OR.        TABLE_DATA(3)>360) THEN
-               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st longitude'
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st longitude'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             IF (TABLE_DATA(4)<TABLE_DATA(3).OR. TABLE_DATA(4)>360) THEN
-               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd longitude'
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd longitude'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             IF (TABLE_DATA(5)<0) THEN
-               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad velocity'
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad velocity'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             IF (TABLE_DATA(6)<0) THEN
-               WRITE(MESSAGE,'(A,I5,A,A,A)') 'Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad mass flow'
+               WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad mass flow'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
       END SELECT
@@ -7001,7 +7000,7 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
    ! Make sure there is either a FUNCTION_TYPE type for the CTRL
 
    IF (FUNCTION_TYPE=='null') THEN
-      WRITE(MESSAGE,'(A,I5,A)')  ' ERROR: CTRL ',NC,' must have a FUNCTION_TYPE'
+      WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' must have a FUNCTION_TYPE'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 
@@ -7050,7 +7049,7 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
       CASE('RESTART')
          CF%CONTROL_INDEX = CORE_DUMP
       CASE DEFAULT
-         WRITE(MESSAGE,'(A,I5,A)')  ' ERROR: CTRL ',NC,' FUNCTION_TYPE not recognized'
+         WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' FUNCTION_TYPE not recognized'
          CALL SHUTDOWN(MESSAGE)
    END SELECT
    
@@ -7099,7 +7098,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
       CF%N_INPUTS = CF%N_INPUTS + 1
    END DO INPUT_COUNT
    IF (CF%N_INPUTS==0) THEN
-      WRITE(MESSAGE,'(A,I5,A)')  ' ERROR: CTRL ',NC,' must have at least one input'
+      WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' must have at least one input'
       CALL SHUTDOWN(MESSAGE)
    ENDIF   
    
@@ -7114,7 +7113,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             CF%INPUT(NN) = NNN
             CF%INPUT_TYPE(NN) = CONTROL_INPUT
             IF (CF%CONTROL_INDEX == CUSTOM) THEN
-               WRITE(MESSAGE,'(A,I5,A)')  ' ERROR: CUSTOM CTRL ',NC,' cannot have another CTRL as input'
+               WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CUSTOM CTRL ',NC,' cannot have another CTRL as input'
                CALL SHUTDOWN(MESSAGE)
             ENDIF   
             CYCLE BUILD_INPUT
@@ -7127,7 +7126,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             CYCLE BUILD_INPUT
          ENDIF
       END DO DEVC_LOOP
-   WRITE(MESSAGE,'(A,I5,A,A)')  ' ERROR: CTRL ',NC,' cannot locate item for input ', TRIM(CF%INPUT_ID(NN))
+   WRITE(MESSAGE,'(A,I5,A,A)')  'ERROR: CTRL ',NC,' cannot locate item for input ', TRIM(CF%INPUT_ID(NN))
    CALL SHUTDOWN(MESSAGE)
    END DO BUILD_INPUT
 
@@ -7174,7 +7173,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    IF (DV%PROP_ID /='null') THEN
       CALL GET_PROPERTY_INDEX(DV%PROP_INDEX,'DEVC',DV%PROP_ID)
       IF (DV%QUANTITY=='null' .AND. PROPERTY(DV%PROP_INDEX)%QUANTITY=='null') THEN
-         WRITE(MESSAGE,'(5A)')  ' ERROR: DEVC ',TRIM(DV%ID),' or DEVC PROPerty ',TRIM(DV%PROP_ID),' must have a QUANTITY' 
+         WRITE(MESSAGE,'(5A)')  'ERROR: DEVC ',TRIM(DV%ID),' or DEVC PROPerty ',TRIM(DV%PROP_ID),' must have a QUANTITY' 
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       IF (DV%QUANTITY=='null' .AND. PROPERTY(DV%PROP_INDEX)%QUANTITY/='null') DV%QUANTITY = PROPERTY(DV%PROP_INDEX)%QUANTITY
@@ -7188,12 +7187,12 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                               'DEVC',DV%QUANTITY,DV%SPEC_ID,DV%PART_ID)
 
       IF (OUTPUT_QUANTITY(QUANTITY_INDEX)%INTEGRATED .AND. DV%X1<=-1.E6_EB) THEN
-         WRITE(MESSAGE,'(3A)')  ' ERROR: DEVC QUANTITY ',TRIM(DV%QUANTITY),' requires coordinates using XB'
+         WRITE(MESSAGE,'(3A)')  'ERROR: DEVC QUANTITY ',TRIM(DV%QUANTITY),' requires coordinates using XB'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
       IF (.NOT.OUTPUT_QUANTITY(QUANTITY_INDEX)%INTEGRATED .AND. DV%STATISTICS=='null' .AND. DV%X1>-1.E6_EB) THEN
-         WRITE(MESSAGE,'(3A)')  ' ERROR: DEVC QUANTITY ',TRIM(DV%QUANTITY),' requires coordinates using XYZ, not XB'
+         WRITE(MESSAGE,'(3A)')  'ERROR: DEVC QUANTITY ',TRIM(DV%QUANTITY),' requires coordinates using XYZ, not XB'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
@@ -7439,8 +7438,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                DV%TOTAL_FLOWRATE  = DV%TOTAL_FLOWRATE + DEVICE(NN)%FLOWRATE
                DV%DT = MAX(DV%DT,DEVICE(NN)%DELAY)
                IF (NN > N) THEN
-                  WRITE(MESSAGE,'(A,A,A)')  &
-                     'ERROR: ASPIRATION DEVICE ',TRIM(DV%ID),' is not listed after all its inputs'
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: ASPIRATION DEVICE ',TRIM(DV%ID),' is not listed after all its inputs'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
                DV%DEVC_INDEX(NNN)     = NN
@@ -8881,12 +8879,12 @@ DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
         CASE ('SLCF')
               ! Throw out bad slices
            IF (.NOT. OUTPUT_QUANTITY(ND)%SLCF_APPROPRIATE) THEN
-              WRITE(MESSAGE,'(3A)')  ' ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for SLCF'
+              WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for SLCF'
               CALL SHUTDOWN(MESSAGE)
            ENDIF
         CASE ('DEVC')
             IF (.NOT.OUTPUT_QUANTITY(ND)%DEVC_APPROPRIATE) THEN
-               WRITE(MESSAGE,'(3A)')  ' ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for DEVC'
+               WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for DEVC'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             IF (QUANTITY=='AMPUA') ACCUMULATE_WATER = .TRUE.
@@ -8897,7 +8895,7 @@ DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
            ENDIF
         CASE ('BNDF')
            IF (.NOT. OUTPUT_QUANTITY(ND)%BNDF_APPROPRIATE) THEN
-              WRITE(MESSAGE,'(3A)')  ' ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for BNDF'
+              WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for BNDF'
               CALL SHUTDOWN(MESSAGE)
            ENDIF
            IF (QUANTITY=='AMPUA') ACCUMULATE_WATER = .TRUE.
@@ -8988,7 +8986,7 @@ DO NN=1,N_PROP
   ENDIF
 ENDDO
 
-WRITE(MESSAGE,'(5A)')  ' ERROR: ',TRIM(OUTTYPE),' PROP_ID ',TRIM(PROP_ID),' not found'
+WRITE(MESSAGE,'(5A)')  'ERROR: ',TRIM(OUTTYPE),' PROP_ID ',TRIM(PROP_ID),' not found'
 CALL SHUTDOWN(MESSAGE)
 
 END SUBROUTINE GET_PROPERTY_INDEX
