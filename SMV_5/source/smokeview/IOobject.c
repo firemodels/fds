@@ -49,6 +49,21 @@ char IOobject_revision[]="$Revision$";
 #define SV_MIRRORCLIP_NUMARGS 4
 #define SV_PERIODICCLIP_NUMARGS 4
 
+#define SV_TRANSLATE_NUMOUTARGS  0
+#define SV_ROTATEX_NUMOUTARGS    0
+#define SV_ROTATEY_NUMOUTARGS    0
+#define SV_ROTATEZ_NUMOUTARGS    0
+#define SV_SCALEXYZ_NUMOUTARGS   0
+#define SV_SCALE_NUMOUTARGS      0
+#define SV_OFFSETX_NUMOUTARGS 0
+#define SV_OFFSETY_NUMOUTARGS 0
+#define SV_OFFSETZ_NUMOUTARGS 0
+#define SV_TRANSLATEMZD2_NUMOUTARGS 0
+#define SV_MULTIADDT_NUMOUTARGS 1
+#define SV_CLIP_NUMOUTARGS 1
+#define SV_MIRRORCLIP_NUMOUTARGS 1
+#define SV_PERIODICCLIP_NUMOUTARGS 1
+
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
 #define SV_DRAWDISK      202
@@ -83,16 +98,29 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWTSPHERE_NUMARGS   2
 #define SV_DRAWARCDISK_NUMARGS   3
 
+#define SV_DRAWCUBE_NUMOUTARGS      0
+#define SV_DRAWSPHERE_NUMOUTARGS    0
+#define SV_DRAWDISK_NUMOUTARGS      0
+#define SV_DRAWLINE_NUMOUTARGS      0
+#define SV_DRAWCIRCLE_NUMOUTARGS    0
+#define SV_DRAWTRUNCCONE_NUMOUTARGS 0
+#define SV_DRAWNOTCHPLATE_NUMOUTARGS 0
+#define SV_DRAWRING_NUMOUTARGS      0
+#define SV_DRAWCONE_NUMOUTARGS      0
+#define SV_DRAWHEXDISK_NUMOUTARGS   0
+#define SV_DRAWPOLYDISK_NUMOUTARGS   0
+#define SV_DRAWPOINT_NUMOUTARGS     0
+#define SV_DRAWARC_NUMOUTARGS       0
+#define SV_DRAWCDISK_NUMOUTARGS     0
+#define SV_DRAWTSPHERE_NUMOUTARGS   0
+#define SV_DRAWARCDISK_NUMOUTARGS   0
+
 #define SV_PUSH       300
 #define SV_POP        301
 #define SV_SETCOLOR   302
 #define SV_SETBW      303
 #define SV_SETLINEWIDTH 304
 #define SV_SETPOINTSIZE 305
-#define SV_IF_AGEB     306
-#define SV_IF_AGTB     307
-#define SV_IF_ALEB     308
-#define SV_IF_ALTB     309
 
 #define SV_NO_OP      999
 
@@ -102,10 +130,13 @@ char IOobject_revision[]="$Revision$";
 #define SV_SETBW_NUMARGS      1
 #define SV_SETLINEWIDTH_NUMARGS 1
 #define SV_SETPOINTSIZE_NUMARGS 1
-#define SV_IF_AGEB_NUMARGS     3
-#define SV_IF_AGTB_NUMARGS     3
-#define SV_IF_ALEB_NUMARGS     3
-#define SV_IF_ALTB_NUMARGS     3
+
+#define SV_PUSH_NUMOUTARGS       0
+#define SV_POP_NUMOUTARGS        0
+#define SV_SETCOLOR_NUMOUTARGS   0
+#define SV_SETBW_NUMOUTARGS      0
+#define SV_SETLINEWIDTH_NUMOUTARGS 0
+#define SV_SETPOINTSIZE_NUMOUTARGS 0
 
 #define SV_ERR -1
 
@@ -113,9 +144,8 @@ char IOobject_revision[]="$Revision$";
 #define NLONG (2*device_sphere_segments)
 
 #define TOKEN_FLOAT 0
-#define TOKEN_PUTVAL 1
-#define TOKEN_COMMAND 2
-#define TOKEN_GETVAL 3
+#define TOKEN_COMMAND 1
+#define TOKEN_GETVAL 2
 
 char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *frame);
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected);
@@ -1832,179 +1862,199 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
 
 /* ----------------------- gettoken ----------------------------- */
 
-void get_token_id(char *token, int *iopptr, int *num_iopptr, int *use_displaylist){
+void get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int *use_displaylist){
 
-  int iop, num_iop;
+  int op, num_op, num_outop;
   
   *use_displaylist=0;
   
   if(STRCMP(token,"translate")==0){
-    iop=SV_TRANSLATE;
-    num_iop=SV_TRANSLATE_NUMARGS;
+    op=SV_TRANSLATE;
+    num_op=SV_TRANSLATE_NUMARGS;
+    num_outop=SV_TRANSLATE_NUMOUTARGS;
   }
   else if(STRCMP(token,"translatemzd2")==0){
-    iop=SV_TRANSLATEMZD2;
-    num_iop=SV_TRANSLATEMZD2_NUMARGS;
+    op=SV_TRANSLATEMZD2;
+    num_op=SV_TRANSLATEMZD2_NUMARGS;
+    num_outop=SV_TRANSLATEMZD2_NUMOUTARGS;
   }
   else if(STRCMP(token,"offsetx")==0){
-    iop=SV_OFFSETX;
-    num_iop=SV_OFFSETX_NUMARGS;
+    op=SV_OFFSETX;
+    num_op=SV_OFFSETX_NUMARGS;
+    num_outop=SV_OFFSETX_NUMOUTARGS;
   }
   else if(STRCMP(token,"offsety")==0){
-    iop=SV_OFFSETY;
-    num_iop=SV_OFFSETY_NUMARGS;
+    op=SV_OFFSETY;
+    num_op=SV_OFFSETY_NUMARGS;
+    num_outop=SV_OFFSETY_NUMOUTARGS;
   }
   else if(STRCMP(token,"offsetz")==0){
-    iop=SV_OFFSETZ;
-    num_iop=SV_OFFSETZ_NUMARGS;
+    op=SV_OFFSETZ;
+    num_op=SV_OFFSETZ_NUMARGS;
+    num_outop=SV_OFFSETZ_NUMOUTARGS;
   }
   else if(STRCMP(token,"rotatex")==0){
-    iop=SV_ROTATEX;
-    num_iop=SV_ROTATEX_NUMARGS;
+    op=SV_ROTATEX;
+    num_op=SV_ROTATEX_NUMARGS;
+    num_outop=SV_ROTATEX_NUMOUTARGS;
   }
   else if(STRCMP(token,"rotatey")==0){
-    iop=SV_ROTATEY;
-    num_iop=SV_ROTATEY_NUMARGS;
+    op=SV_ROTATEY;
+    num_op=SV_ROTATEY_NUMARGS;
+    num_outop=SV_ROTATEY_NUMOUTARGS;
   }
   else if(STRCMP(token,"rotatez")==0){
-    iop=SV_ROTATEZ;
-    num_iop=SV_ROTATEZ_NUMARGS;
+    op=SV_ROTATEZ;
+    num_op=SV_ROTATEZ_NUMARGS;
+    num_outop=SV_ROTATEZ_NUMOUTARGS;
   }
   else if(STRCMP(token,"scalexyz")==0){
-    iop=SV_SCALEXYZ;
-    num_iop=SV_SCALEXYZ_NUMARGS;
+    op=SV_SCALEXYZ;
+    num_op=SV_SCALEXYZ_NUMARGS;
+    num_outop=SV_SCALEXYZ_NUMOUTARGS;
   }
   else if(STRCMP(token,"scale")==0&&STRCMP(token,"scalexyz")!=0){
-    iop=SV_SCALE;
-    num_iop=SV_SCALE_NUMARGS;
+    op=SV_SCALE;
+    num_op=SV_SCALE_NUMARGS;
+    num_outop=SV_SCALE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawcube")==0){
-    iop=SV_DRAWCUBE;
-    num_iop=SV_DRAWCUBE_NUMARGS;
-  }
-  else if(STRCMP(token,"skipifge")==0){
-    iop=SV_IF_AGEB;
-    num_iop=SV_IF_AGEB_NUMARGS;
-  }
-  else if(STRCMP(token,"skipifgt")==0){
-    iop=SV_IF_AGTB;
-    num_iop=SV_IF_AGTB_NUMARGS;
-  }
-  else if(STRCMP(token,"skipifle")==0){
-    iop=SV_IF_ALEB;
-    num_iop=SV_IF_ALEB_NUMARGS;
-  }
-  else if(STRCMP(token,"skipiflt")==0){
-    iop=SV_IF_ALTB;
-    num_iop=SV_IF_ALTB_NUMARGS;
+    op=SV_DRAWCUBE;
+    num_op=SV_DRAWCUBE_NUMARGS;
+    num_outop=SV_DRAWCUBE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawdisk")==0){
-    iop=SV_DRAWDISK;
-    num_iop=SV_DRAWDISK_NUMARGS;
+    op=SV_DRAWDISK;
+    num_op=SV_DRAWDISK_NUMARGS;
+    num_outop=SV_DRAWDISK_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawcdisk")==0){
-    iop=SV_DRAWCDISK;
-    num_iop=SV_DRAWCDISK_NUMARGS;
+    op=SV_DRAWCDISK;
+    num_op=SV_DRAWCDISK_NUMARGS;
+    num_outop=SV_DRAWCDISK_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawhexdisk")==0){
-    iop=SV_DRAWHEXDISK;
-    num_iop=SV_DRAWHEXDISK_NUMARGS;
+    op=SV_DRAWHEXDISK;
+    num_op=SV_DRAWHEXDISK_NUMARGS;
+    num_outop=SV_DRAWHEXDISK_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawpolydisk")==0){
-    iop=SV_DRAWPOLYDISK;
-    num_iop=SV_DRAWPOLYDISK_NUMARGS;
+    op=SV_DRAWPOLYDISK;
+    num_op=SV_DRAWPOLYDISK_NUMARGS;
+    num_outop=SV_DRAWPOLYDISK_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawring")==0){
-    iop=SV_DRAWRING;
-    num_iop=SV_DRAWRING_NUMARGS;
+    op=SV_DRAWRING;
+    num_op=SV_DRAWRING_NUMARGS;
+    num_outop=SV_DRAWRING_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawnotchplate")==0){
-    iop=SV_DRAWNOTCHPLATE;
-    num_iop=SV_DRAWNOTCHPLATE_NUMARGS;
+    op=SV_DRAWNOTCHPLATE;
+    num_op=SV_DRAWNOTCHPLATE_NUMARGS;
+    num_outop=SV_DRAWNOTCHPLATE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawtrunccone")==0){
-    iop=SV_DRAWTRUNCCONE;
-    num_iop=SV_DRAWTRUNCCONE_NUMARGS;
+    op=SV_DRAWTRUNCCONE;
+    num_op=SV_DRAWTRUNCCONE_NUMARGS;
+    num_outop=SV_DRAWTRUNCCONE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawcone")==0){
-    iop=SV_DRAWCONE;
-    num_iop=SV_DRAWCONE_NUMARGS;
+    op=SV_DRAWCONE;
+    num_op=SV_DRAWCONE_NUMARGS;
+    num_outop=SV_DRAWCONE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawtsphere")==0){
-    iop=SV_DRAWTSPHERE;
+    op=SV_DRAWTSPHERE;
     *use_displaylist=0;
-    num_iop=SV_DRAWTSPHERE_NUMARGS;
+    num_op=SV_DRAWTSPHERE_NUMARGS;
+    num_outop=SV_DRAWTSPHERE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawsphere")==0){
-    iop=SV_DRAWSPHERE;
-    num_iop=SV_DRAWSPHERE_NUMARGS;
+    op=SV_DRAWSPHERE;
+    num_op=SV_DRAWSPHERE_NUMARGS;
+    num_outop=SV_DRAWSPHERE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawline")==0){
-    iop=SV_DRAWLINE;
-    num_iop=SV_DRAWLINE_NUMARGS;
+    op=SV_DRAWLINE;
+    num_op=SV_DRAWLINE_NUMARGS;
+    num_outop=SV_DRAWLINE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawpoint")==0){
-    iop=SV_DRAWPOINT;
-    num_iop=SV_DRAWPOINT_NUMARGS;
+    op=SV_DRAWPOINT;
+    num_op=SV_DRAWPOINT_NUMARGS;
+    num_outop=SV_DRAWPOINT_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawcircle")==0){
-    iop=SV_DRAWCIRCLE;
-    num_iop=SV_DRAWCIRCLE_NUMARGS;
+    op=SV_DRAWCIRCLE;
+    num_op=SV_DRAWCIRCLE_NUMARGS;
+    num_outop=SV_DRAWCIRCLE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawarc")==0){
-    iop=SV_DRAWARC;
-    num_iop=SV_DRAWARC_NUMARGS;
+    op=SV_DRAWARC;
+    num_op=SV_DRAWARC_NUMARGS;
+    num_outop=SV_DRAWARC_NUMOUTARGS;
   }
   else if(STRCMP(token,"setcolor")==0){
-    iop=SV_SETCOLOR;
-    num_iop=SV_SETCOLOR_NUMARGS;
+    op=SV_SETCOLOR;
+    num_op=SV_SETCOLOR_NUMARGS;
+    num_outop=SV_SETCOLOR_NUMOUTARGS;
   }
   else if(STRCMP(token,"setlinewidth")==0){
-    iop=SV_SETLINEWIDTH;
-    num_iop=SV_SETLINEWIDTH_NUMARGS;
+    op=SV_SETLINEWIDTH;
+    num_op=SV_SETLINEWIDTH_NUMARGS;
+    num_outop=SV_SETLINEWIDTH_NUMOUTARGS;
   }
   else if(STRCMP(token,"setpointsize")==0){
-    iop=SV_SETPOINTSIZE;
-    num_iop=SV_SETPOINTSIZE_NUMARGS;
+    op=SV_SETPOINTSIZE;
+    num_op=SV_SETPOINTSIZE_NUMARGS;
+    num_outop=SV_SETPOINTSIZE_NUMOUTARGS;
   }
   else if(STRCMP(token,"setbw")==0){
-    iop=SV_SETBW;
-    num_iop=SV_SETBW_NUMARGS;
+    op=SV_SETBW;
+    num_op=SV_SETBW_NUMARGS;
+    num_outop=SV_SETBW_NUMOUTARGS;
   }
   else if(STRCMP(token,"push")==0){
-    iop=SV_PUSH;
-    num_iop=SV_PUSH_NUMARGS;
+    op=SV_PUSH;
+    num_op=SV_PUSH_NUMARGS;
+    num_outop=SV_PUSH_NUMOUTARGS;
   }
   else if(STRCMP(token,"pop")==0){
-    iop=SV_POP;
-    num_iop=SV_POP_NUMARGS;
+    op=SV_POP;
+    num_op=SV_POP_NUMARGS;
+    num_outop=SV_POP_NUMOUTARGS;
   }
   else if(STRCMP(token,"multiaddt")==0){
-    iop=SV_MULTIADDT;
+    op=SV_MULTIADDT;
     *use_displaylist=0;
-    num_iop=SV_MULTIADDT_NUMARGS;
+    num_op=SV_MULTIADDT_NUMARGS;
+    num_outop=SV_MULTIADDT_NUMOUTARGS;
   }
   else if(STRCMP(token,"clip")==0){
-    iop=SV_CLIP;
+    op=SV_CLIP;
     *use_displaylist=0;
-    num_iop=SV_CLIP_NUMARGS;
+    num_op=SV_CLIP_NUMARGS;
+    num_outop=SV_CLIP_NUMOUTARGS;
   }
   else if(STRCMP(token,"mirrorclip")==0){
-    iop=SV_MIRRORCLIP;
+    op=SV_MIRRORCLIP;
     *use_displaylist=0;
-    num_iop=SV_MIRRORCLIP_NUMARGS;
+    num_op=SV_MIRRORCLIP_NUMARGS;
+    num_outop=SV_MIRRORCLIP_NUMOUTARGS;
   }
   else if(STRCMP(token,"periodicclip")==0){
-    iop=SV_PERIODICCLIP;
+    op=SV_PERIODICCLIP;
     *use_displaylist=0;
-    num_iop=SV_PERIODICCLIP_NUMARGS;
+    num_op=SV_PERIODICCLIP_NUMARGS;
+    num_outop=SV_PERIODICCLIP_NUMOUTARGS;
   }
   else{
-    iop=SV_ERR;
-    num_iop=0;
+    op=SV_ERR;
+    num_op=0;
  }
- *iopptr=iop;
- *num_iopptr=num_iop;
+ *opptr=op;
+ *num_opptr=num_op;
+ *num_outopptr=num_outop;
 }
 
 /* ----------------------- get_token_loc ----------------------------- */
@@ -2116,11 +2166,11 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     if(first_token==NULL&&c!=':')first_token=toki;
     if(c>='a'&&c<='z'||c>='A'&&c<='Z'){
       int use_displaylist;
-      int nargs_actual;
+      int nargs_actual, noutargs_actual;
       tokendata *this_token, *last_token;
 
       toki->type=TOKEN_COMMAND;
-      get_token_id(toki->token, &toki->command, &toki->nvars, &use_displaylist);
+      get_token_id(toki->token, &toki->command, &toki->nvars, &toki->noutvars, &use_displaylist);
       frame->command_list[ncommands]=toki;
       if(frame->device!=NULL)frame->device->use_displaylist=use_displaylist;
       if(ncommands>0){
@@ -2133,12 +2183,30 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
         nargs_actual = toki->nvars;
       }
       if(nargs_actual!=toki->nvars){
-        printf("*** error: In device: %s, the token: %s has %i arguments, %i were expected\n",
-          frame->device->label,toki->token,nargs_actual,toki->nvars);
+        printf("*** error: The command %s in device %s has %i arguments, %i were expected\n",
+          toki->token,frame->device->label,nargs_actual,toki->nvars);
+      }
+      if(nargs_actual==toki->nvars){
+        int ii;
+
+        noutargs_actual=0;
+        for(ii=0;ii<nargs_actual;ii++){
+          tokendata *tokii;
+
+          tokii=toki-1-ii;
+          if(tokii<frame->tokens)break;
+          c=tokii->token[0];
+          if(c!=':')continue;
+          noutargs_actual++;
+        }
+        if(noutargs_actual!=toki->noutvars){
+          printf("*** error: The command %s in device %s has %i output arguments, %i were expected\n",
+            toki->token,frame->device->label,noutargs_actual,toki->noutvars);
+        }
       }
       ncommands++;
     }
-    else if(c=='$'||c=='@'){
+    else if(c=='$'){
       char vartoken[255];
       char *vartokenptr;
       tokendata *tokdest;
@@ -2151,15 +2219,10 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       }
       else{
         toki->varptr=NULL;
-        printf("*** error: In device: %s, the label: %s is not defined\n",frame->device->label,toki->token);
+        printf("*** error: The label %s in device %s is not defined\n",toki->token,frame->device->label);
       }
 
-      if(c=='$'){
-        toki->type=TOKEN_GETVAL;
-      }
-      if(c=='@'){
-        toki->type=TOKEN_PUTVAL;
-      }
+      toki->type=TOKEN_GETVAL;
     }
     else if(c==':'){
       toki->type=TOKEN_FLOAT;
