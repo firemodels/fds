@@ -400,63 +400,60 @@ mpi_gnu_linux_64 : setup $(obj_mpi)
 
 # *** Object Dependencies ***
 
-isob.o : isob.c
-smvv.o : smvv.f90 isob.c
-prec.o : prec.f90
-cons.o : cons.f90 prec.f90
-type.o : type.f90 prec.f90 cons.f90
-devc.o : devc.f90 prec.f90
-pois.o : pois.f90 prec.f90
-mesh.o : mesh.f90 prec.f90 type.f90
-func.o : func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-turb.o : turb.f90 func.f90 prec.f90 cons.f90 mesh.f90
-ctrl.o : ctrl.f90 prec.f90 cons.f90 type.f90 mesh.f90 func.f90
-irad.o : irad.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-ieva.o : ieva.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-fire.o : fire.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-wall.o : wall.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-velo.o : velo.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
-divg.o : divg.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-mass.o : mass.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
-radi.o : radi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 irad.f90
-evac.o : evac.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 ieva.f90
-pres.o : pres.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 pois.f90
-part.o : part.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
-vege.o : vege.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
-read.o : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 evac.f90
-init.o : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 pois.f90
-dump.o : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 evac.f90 smvv.f90 isob.c turb.f90
-main.o : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
-main_mpi.o : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
+smvv.o : isob.o
+cons.o : prec.o
+type.o : prec.o cons.o
+devc.o : prec.o
+pois.o : prec.o
+mesh.o : prec.o type.o
+func.o : prec.o cons.o type.o mesh.o
+turb.o : func.o prec.o cons.o mesh.o
+ctrl.o : prec.o cons.o type.o mesh.o func.o
+irad.o : func.o prec.o cons.o type.o mesh.o
+ieva.o : func.o prec.o cons.o type.o mesh.o
+fire.o : func.o prec.o cons.o type.o mesh.o
+wall.o : func.o prec.o cons.o type.o mesh.o
+velo.o : func.o prec.o cons.o type.o mesh.o turb.o
+divg.o : func.o prec.o cons.o type.o mesh.o
+mass.o : func.o prec.o cons.o type.o mesh.o turb.o
+radi.o : func.o prec.o cons.o type.o mesh.o irad.o
+evac.o : func.o prec.o cons.o type.o mesh.o ieva.o
+pres.o : func.o prec.o cons.o type.o mesh.o pois.o
+part.o : func.o prec.o cons.o type.o mesh.o devc.o
+vege.o : func.o prec.o cons.o type.o mesh.o devc.o
+read.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o evac.o
+init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o
+dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o isob.c turb.o
+main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o
+main_mpi.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o
 
-isob.obj : isob.c
-smvv.obj : smvv.f90 isob.c
-prec.obj : prec.f90
-cons.obj : cons.f90 prec.f90
-type.obj : type.f90 prec.f90 cons.f90
-devc.obj : devc.f90 prec.f90
-pois.obj : pois.f90 prec.f90
-mesh.obj : mesh.f90 prec.f90 type.f90
-func.obj : func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-turb.obj : turb.f90 func.f90 prec.f90 cons.f90 mesh.f90
-ctrl.obj : ctrl.f90 prec.f90 cons.f90 type.f90 mesh.f90 func.f90
-irad.obj : irad.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-ieva.obj : ieva.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-fire.obj : fire.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-wall.obj : wall.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-velo.obj : velo.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
-divg.obj : divg.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-mass.obj : mass.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
-radi.obj : radi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 irad.f90
-evac.obj : evac.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 ieva.f90
-pres.obj : pres.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 pois.f90
-part.obj : part.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
-vege.obj : vege.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
-read.obj : read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 evac.f90
-init.obj : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 pois.f90
-dump.obj : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 evac.f90 smvv.f90 isob.c turb.f90
-main.obj : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
-main_mpi.obj : main_mpi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90
+smvv.obj : isob.obj
+cons.obj : prec.obj
+type.obj : prec.obj cons.obj
+devc.obj : prec.obj
+pois.obj : prec.obj
+mesh.obj : prec.obj type.obj
+func.obj : prec.obj cons.obj type.obj mesh.obj
+turb.obj : func.obj prec.obj cons.obj mesh.obj
+ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
+irad.obj : func.obj prec.obj cons.obj type.obj mesh.obj
+ieva.obj : func.obj prec.obj cons.obj type.obj mesh.obj
+fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj
+wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj
+velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj
+divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj
+mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj
+radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj irad.obj
+evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj
+pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj
+part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj
+vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj
+read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj evac.obj
+init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj
+dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj isob.c turb.obj
+main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj isob.c mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj
+main_mpi.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj isob.c mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj
+
 
 #*** Clean Target to remove Object and Module files ***
 
