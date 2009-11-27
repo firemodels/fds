@@ -205,7 +205,7 @@ radi.o : func.o prec.o cons.o type.o mesh.o irad.o
 evac.o : func.o prec.o cons.o type.o mesh.o ieva.o
 pres.o : func.o prec.o cons.o type.o mesh.o pois.o
 part.o : func.o prec.o cons.o type.o mesh.o devc.o
-vege.o : func.o prec.o cons.o type.o mesh.o devc.o
+vege.o : func.o prec.o cons.o type.o mesh.o devc.o part.o
 read.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o evac.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o isob.c turb.o
@@ -232,7 +232,7 @@ radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj irad.obj
 evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj
 pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj
 part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj
-vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj
+vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj part.obj
 read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj evac.obj
 init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj
 dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj isob.c turb.obj
