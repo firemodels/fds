@@ -560,8 +560,7 @@ typedef struct _tourdata {
 
 typedef struct {
   float var,*varptr;
-  int command,loc,type;
-  int nvars;
+  int command,loc,type,reads,nvars;
   char *token;
 } tokendata;
 
