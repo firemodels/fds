@@ -2075,7 +2075,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
   NewMemory((void **)&frame->tokens,ntokens*sizeof(tokendata));
   if(ntokens>0)NewMemory((void **)&frame->symbols,ntokens*sizeof(int));
 
-  // count symbols and commands
+  // count symbols and commands, zero out access counter
 
   strcpy(object_buffer2,object_buffer);
   token=strtok(object_buffer2," ");
@@ -2087,6 +2087,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
     toki = frame->tokens + i;
     toki->token=token;
+    toki->reads=0;
 
     c = token[0];
 
@@ -2146,6 +2147,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       if(toki->loc>=0){
         tokdest = frame->tokens+toki->loc;
         toki->varptr=&tokdest->var;
+        tokdest->reads++;
       }
       else{
         toki->varptr=NULL;
@@ -2170,6 +2172,19 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       toki->varptr=&toki->var;
     }
   }
+  for(i=0;i<ntokens;i++){
+    tokendata *toki;
+    char c;
+
+    toki = frame->tokens + i;
+    c=toki->token[0];
+    if(c!=':')continue;
+    if(toki->reads==0){
+   //   printf("*** warning: token %s in device %s was not used\n",
+   //     toki->token,frame->device->label);
+    }
+  }
+
   return buffer_ptr;
 }
 
