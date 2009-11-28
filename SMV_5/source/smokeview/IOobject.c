@@ -28,7 +28,6 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETX 108
 #define SV_OFFSETY 109
 #define SV_OFFSETZ 110
-#define SV_TRANSLATEMZD2 111
 #define SV_MULTIADDT 112
 #define SV_CLIP 113
 #define SV_MIRRORCLIP 114
@@ -43,7 +42,6 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETX_NUMARGS 1
 #define SV_OFFSETY_NUMARGS 1
 #define SV_OFFSETZ_NUMARGS 1
-#define SV_TRANSLATEMZD2_NUMARGS 1
 #define SV_MULTIADDT_NUMARGS 3
 #define SV_CLIP_NUMARGS 4
 #define SV_MIRRORCLIP_NUMARGS 4
@@ -58,7 +56,6 @@ char IOobject_revision[]="$Revision$";
 #define SV_OFFSETX_NUMOUTARGS 0
 #define SV_OFFSETY_NUMOUTARGS 0
 #define SV_OFFSETZ_NUMOUTARGS 0
-#define SV_TRANSLATEMZD2_NUMOUTARGS 0
 #define SV_MULTIADDT_NUMOUTARGS 1
 #define SV_CLIP_NUMOUTARGS 1
 #define SV_MIRRORCLIP_NUMOUTARGS 1
@@ -749,9 +746,6 @@ void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack
       break;
     case SV_TRANSLATE:
       glTranslatef(arg[0],arg[1],arg[2]);
-      break;
-    case SV_TRANSLATEMZD2:
-      glTranslatef(0.0,0.0,-arg[0]/2.0);
       break;
     case SV_OFFSETX:
       glTranslatef(arg[0],0.0,0.0);
@@ -1872,11 +1866,6 @@ void get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, in
     op=SV_TRANSLATE;
     num_op=SV_TRANSLATE_NUMARGS;
     num_outop=SV_TRANSLATE_NUMOUTARGS;
-  }
-  else if(STRCMP(token,"translatemzd2")==0){
-    op=SV_TRANSLATEMZD2;
-    num_op=SV_TRANSLATEMZD2_NUMARGS;
-    num_outop=SV_TRANSLATEMZD2_NUMOUTARGS;
   }
   else if(STRCMP(token,"offsetx")==0){
     op=SV_OFFSETX;
