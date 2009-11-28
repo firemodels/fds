@@ -991,45 +991,79 @@ results in a  4x speedup of these actions. } \\ \hline
 \end{table}
 
 %---------------------------------------------------------------------------------
-%--------------- Creating Custom Devices and Avatars -------------------------
+%--------------- Creating Custom Devices -------------------------
 %---------------------------------------------------------------------------------
 
-\chapter{Creating Custom Devices and Avatars}
-Smokeview draws devices such as heat and smoke detectors,
-sprinklers, sensors {\em etc.} using instructions contained in a
-data file.  Smokeview also uses these instructions to define avatars, objects drawn
-at a tour locus or to represent people in an FDS-EVAC simulation.
+\chapter{Creating Custom Devices}
+Smokeview visualizes FDS devices such as heat and smoke detectors,
+sprinklers, sensors using instructions contained in a
+data file named {\tt devices.svo}.
+Smokeview also uses these instructions to represent people (avatars)
+in FDS-EVAC simulations and to represent trees and shrubs in an FDS WUI simulations.
 
-Devices and avatars are defined with the same set of instructions with the following exception.
-An avatar's definition begins using {\tt AVATARDEF}\ while a device definition
-begins using {\tt DEVICEDEF}.
-
-The instructions in a device file correspond to OpenGL library calls,
+The device instruction file is located in the directory where FDS and Smokeview are installed.
+The instructions correspond to OpenGL library calls,
 the same type of calls Smokeview uses to visualize FDS cases.
-Smokeview then acts as an OpenGL interpreter executing OpenGL
+Smokeview then acts as an interpreter executing OpenGL
 commands as specified in the device definition file. Efficiency is
 obtained by compiling these instructions into display lists,
 terminology for an OpenGL construct for storing and efficiently
-drawing collections of OpenGL {\em commands}.
+drawing collections of OpenGL commands.
+New
+devices may be designed and drawn without requiring modifications to Smokeview and more importantly may be created by someone other than the Smokeview developer.
+
+Devices may be designated as static or dynamic.
+This terminology refers to whether the look and behavior of a device can be
+modified using data provided in an FDS input file.  For example, the {\tt sensor}\ device is drawn as a small green sphere with a fixed diameter.  It is a static device.  The {\em look}\ of this device is the same regardless of how an FDS input file is set up.  The {\tt tsphere}\ device on the other hand is dynamic.  The diameter and an image used to cover the sphere (known as a texture map) can be specified in an FDS input file.  It is a dynamic device.
+The look of this device changes from one FDS case to the next depending on the input specified.
+
+As with preference or {\tt .ini}\ files, Smokeview looks for device definition files in three locations:
+in a file named {\tt devices.svo}\ in the FDS/Smokeview installation directory,
+in a file named {\tt devices.svo}\ in the case directory
+and in a file named {\tt casename.svo} also located in the case directory where {\tt casename}\ is the name of the case being visualized.
 
 This section describes how to create new devices. Though all of
 the examples are given for devices, the intent of this procedure
 is to be more general allowing Smokeview to draw other types of
 objects such as people walking.
 
-There are two types of instructions: instructions for drawing
-simple geometric objects such as cubes, disks, spheres {\em etc.}
-and instructions for manipulating these objects through scaling,
+\section{Device File Format}
+The first statement in a device definition is
+the keyword {\tt DEVICEDEF} (or {\tt AVATARDEF}\ when defining a {\em person}).
+The next statement is the name or label for the device.
+Following this are the instructions used for creating the device.
+These instructions consist of zero or more data values followed by a command.
+Data from FDS may be optionally communicated to the device definition
+by placing a series of labels, written as {\tt :var1 ... :varn}, at the beginning of the definition.  These data values may then be accessed later in the definition using \$var1 for label :var1, \$var2 for label :var2 {\em etc.}.
+The data is specified in the FDS input  file using the
+{\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\ input line.
+
+There are two types of instructions, instructions for drawing
+basic geometric objects such as cubes, disks, spheres
+and instructions for manipulating these objects through transformations
+such as scaling,
 rotation and translation. Collectively these instructions specify
 the type, location and orientation of objects used to represent
 devices.  The important feature of this process is that new
 devices may be designed and drawn without the need to modify
 Smokeview.
 
-\section{Device File Format}
-The format for an object definition file is given in Figure
-\ref{figobjectdef}.  Each device definition consists of one or two
-frames.  Devices such as thermocouples which do not activate use
+Some examples of argument/instruction pairs are {\tt d drawsphere} for
+drawing a sphere of diameter {\tt d} or {\tt x y z translate} for
+translating an object by $(x,y,z)$.
+The symbols {\tt d, x, y, z}\ may be
+specified in the device file using a numerical constant such as 1.23 or as a reference to data located elsewhere such as \$var1.
+
+Transformation commands are
+cumulative, each command builds on the effects of the previous
+command.  The commands {\tt push}\ and {\tt pop}\ then may be used to
+isolate these effects by saving and restoring the geometric state.
+More details may be found in the next two sections.
+
+The format for an object definition file in more detail is given in Figure
+\ref{figobjectdef}.  Each device definition consists of one or more
+frames.  A frame is used to represent various states of the device.
+Devices such as thermocouples which do not activate use
 just one frame. Other devices such as sprinklers or smoke
 detectors which do activate use two frames, the first for normal
 conditions and the second for when the device has activated.
@@ -1038,42 +1072,39 @@ conditions and the second for when the device has activated.
 {\small
 \begin{Verbatim}[frame=single,rulecolor=\color{blue},
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-DEVICEDEF
-   //  comments follow the double slash
+// comments are placed after a double slash
 
-   //  blank lines ^^^^^^ are permitted
-   //  any line not begging with a double "slash"
-   //   is part of the devices definition.
-  device_name // name or type of device
-  // comments and blank lines
+DEVICEDEF // DEVICEDEF begins the device definition
 
-  // are permitted anywhere
-  args command1 args command2 ...  // arguments followed by command name
-  args command1 args command2 ...  // arguments and commands may be split
-                                   // across lines
+   //  1. comments and blank lines are permitted anywhere
+   //  2. any line not beginning with a double "slash" is part
+   //     of the devices definition.
+
+  device_name // name or label for device
+  .var1 ... .varn  // a series of variables may be specified for use by
+                   // the device definition.  Smokeview copies data into
+                   // these variables from the SMOKEVIEW_PARAMETERS
+                   // keyword in the FDS input file.  The data in .varn
+                   // is referenced  elsewhere in the definition
+                   // using $varn
+
+  // A series of argument/command pairs are specified on one or
+  // more lines.
+
+  arg1 ... argn command1 arg1 ... argn command2 ...
+
+  // An argument may be a numerical constant (e.g. 2.37),
+  // a label (e.g. .var1) or a reference to a label located
+  // elsewhere (e.g. $var1)
+
  NEWFRAME    // beginning of next frame
-  args command args command  ...
+  more argument/command pairs for next device frame
   ....
 \end{Verbatim}
-} \caption{Device Object file format.}
+}
+\caption{Device Object file format.}
 \label{figobjectdef}%
 \end{figure}
-
-Each definition begins with the {\tt DEVICEDEF}\ keyword.  The
-next non-comment line contains a label naming the device.
-Succeeding lines contain one or more commands, each pre-pended by
-zero or more numerical arguments.   New frames begin with the {\tt
-NEWFRAME}\ keyword.  Blank lines may occur anywhere.  Definitions
-may be documented by adding comments following the {\tt `//'}\
-characters.
-
-Some examples of command/argument pairs are {\tt d drawsphere} for
-drawing a sphere of diameter {\tt d} or {\tt x y z translate} for
-translating an object by $(x,y,z)$. Transformation commands are
-cumulative, each command builds on the effects of the previous
-command.  The {\tt push}\ and {\tt pop}\ then may be used to
-isolate these effects by saving and restoring the geometric state.
-More details may be found in the next two sections.
 
 A simple example of a definition used to draw a sensor along with
 the corresponding Smokeview view is given in Figure
@@ -1081,6 +1112,22 @@ the corresponding Smokeview view is given in Figure
 drawn with color yellow and diameter 0.038 m. Push and pop commands
 are not necessary because there is only one object and no
 transformations are used.
+\begin{figure}[\figoptions]
+{\small
+\begin{Verbatim}[frame=single,rulecolor=\color{blue},
+framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
+DEVICEDEF
+ sensor
+ 1.0 1.0 0.0  setcolor
+ 0.038 drawsphere
+\end{Verbatim}
+}
+\begin{center}
+\includegraphics[height=\figheightA]{figures/sensorplain}\\
+\end{center}
+\caption{Instructions for drawing a sensor along with the corresponding Smokeview view.}
+\label{figsensor}%
+\end{figure}
 
 Figure \ref{figsprinkler} is more complicated. It shows a
 definition for a heat detector along with a corresponding
@@ -1091,21 +1138,6 @@ keyword). This definition uses disks, a truncated cone and spheres.
 The scale and translate commands are used to draw these objects at the proper size.
 The translate command then positions them properly.  Two frames are defined for both the inactive and active (after the heat
 detector has activated.) states.
-
-\begin{figure}[\figoptions]
-\begin{Verbatim}[frame=single,rulecolor=\color{blue},
-framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-DEVICEDEF
- sensor
- 1.0 1.0 0.0  setcolor
- 0.038 drawsphere
-\end{Verbatim}
-\begin{center}
-\includegraphics[height=\figheightA]{figures/sensorplain}\\
-\end{center}
-\caption{Instructions for drawing a sensor along with the corresponding Smokeview view.}
-\label{figsensor}%
-\end{figure}
 
 \begin{figure}[\figoptions]
 {\bf Heat detector Instructions}\\
@@ -1147,25 +1179,54 @@ along with the corresponding Smokeview view.}
 \label{figsprinkler}%
 \end{figure}
 
+Figure \ref{figegg} shows an example of a definition used to draw a scaled sphere using scalings obtained from an FDS input file along with
+the corresponding Smokeview view. The definition uses just one frame. The scaled sphere is
+drawn using data specified on the {\tt SMOKEVIEW\_PARAMETERS}\ keyword
+in the FDS input file.
+
+\begin{figure}[\figoptions]
+{\small
+\begin{Verbatim}[frame=single,rulecolor=\color{blue},
+framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
+DEVICEDEF // device definition for "egg"
+ egg
+ :R :G :B :D :DX     // data obtained from an FDS input file
+ $R $G $B setcolor   // $var values obtained from
+                     //      corresponding :var labels
+ $DX $D $D scalexyz 1.0 drawsphere
+\end{Verbatim}
+}
+{\small
+\begin{Verbatim}[frame=single,rulecolor=\color{blue},
+framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
+FDS input lines to create egg
+
+The data label order (:R :G :B :D :DX) in the device file
+correspond exactly to the SMOKEVIEW_PARAMETERS input order
+in the FDS input file
+
+                                          :R  :G  :B  :D  :DX
+&PROP ID='egg' SMOKEVIEW_PARAMETERS(1:5)=1.0,0.0,0.0,0.25,.75
+                      SMOKEVIEW_ID='egg' /
+&DEVC XYZ=0.5,0.8,2.0, QUANTITY='TEMPERATURE' PROP_ID='egg' /
+
+\end{Verbatim}
+}
+\begin{center}
+\includegraphics[height=\figheightA]{../FDS_5_USER_GUIDE/scriptfigures/egg}\\
+\end{center}
+\caption{Instructions for drawing the dynamic device, egg, along with the corresponding FDS input lines and the Smokeview view.}
+\label{figegg}%
+\end{figure}
 
 \newcommand{\devfig}[1]{
 \includegraphics[height=1.7in]{figures/#1}
 }
 
-As with preference ({\tt .ini}) files, Smokeview looks for device
-definitions in three places.  First, in a file named {\tt
-devices.svo}, in the directory containing the Smokeview program.
-On the PC, this is {\tt
-C:$\backslash$Program Filest$\backslash$FDS$\backslash$FDS5$\backslash$bin$\backslash$} . Next, in a file
-named {\tt devices.svo}, in the directory containing the case
-being viewed and finally in a file named {\tt casename.svo} where
-{\tt casename} is the name of the case.
-
-The global file, {\tt devices.svo}, contains definitions for a
-sprinkler (upright and pendent), heat detector, smoke detector,
-sensor, nozzle and target.  Figure \ref{figdevicesr} gives Smokeview views
-for theses devices.  Active views are shown when they are defined.
-The object's origin is identified by the three intersecting lines.
+Figure \ref{figdevices} gives Smokeview views for several devices
+in the global {\tt devices.svo}\ file (devices.svo file located in the FDS/Smokeview
+installatio directory).  Active views are shown when they are defined.
+The object's origin is identified by two intersecting tubes.
 The origin is placed where FDS records data for these devices.
 
 \begin{figure}[\figoptions]
@@ -1293,7 +1354,6 @@ example, {\tt 1.0 2.0 4.0 scale 1.0 drawsphere}\ creates an
 ellipsoid with semi-major axes of length 1, 2 and 4. This is how
 the ball at the bottom of the heat detector in Figure \ref{figsprinkler}a is drawn.
 
-\newpage
 \infigr{drawtrunccone}{0.5 0.2 0.4 drawtrunccone}
 \paragraph{DRAWTRUNCCONE} The command, {\tt d1 d2 h drawtrunccone},
 draws a right circular truncated cone where d1 is the diameter of
@@ -1389,103 +1449,116 @@ objects drawn afterwards by x, y and z along the x, y and z axes
 respectively.  Equivalently, one can think of think of {\tt x y z
 translate}\ as translating the origin by (-x,-y,-z).
 
-\hitem{TRANSLATEMZD2} The command, {\tt z translatemzd2}, translates
-objects drawn afterwards by -z/2 along the z axis.
-Equivalently, one can think of think of {\tt z
-translatemzd2}\ as translating the origin by (0.0,0.0,z/2).
-This command may be used
-to move the origin from an object's base to its center.
 \elist
 
 
+\newcommand{\valclipped}{{\tt \mbox{val\_clipped}}}
+\newcommand{\valin}{{\tt \mbox{val\_in}}}
+\newcommand{\valmin}{{\tt \mbox{val\_min}}}
+\newcommand{\valmax}{{\tt \mbox{val\_max}}}
+\newcommand{\valone}{{\tt \mbox{val\_1}}}
 \subsection{User Settable Transformations}
-User settable transformations or commands allow one to change how objects are drawn by using information passed from FDS. This information is passed using the {\tt PARAMS} keyword on the {\tt \&DEVC}\ namelist statement.  The user settable commands use this information to dynamically change the inputs of subsequent device commands.  Smokeview places this passed information into an internal array, for discussion here, named {\tt PARAMS}.
-
-The commands, {\tt COPYVAL}\ and {\tt COPYNVALS}, each copy data from the {\tt PARAMS}\ array to memory locations used to store parameters for a subsequent device command.  The command, {\tt MULTIADDT}, doesn't use {\tt PARAMS}\ but does copy the value it computes for use by a subsequent device command.  This allows one to customize objects contained in devices.svo using inputs or results obtained from FDS.
+User settable transformations or commands allow one to change how objects are drawn using information passed from FDS. This information is passed using the {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\ namelist statement.  The user settable commands use this information to dynamically change the inputs of subsequent device commands.  Smokeview places this passed information into an internal array, for discussion here, named {\tt PARAMS}.
 
 \blist
-\hitem{COPYVAL} The command,\\
+\hitem{ADD}
+The command, \\
 \\
- {\tt in out copyval}, \\
+{\tt a b :val add}, \\
 \\
-copies the value PARAMS[in] to a location
-{\tt out + 1}\ positions farther down the command argument list.
-This allows one to modify
-the look of a device at run-time.  The usage of {\tt copyval}\ is illustrated in Figure \ref{figcopyval}.
+is used to compute the value, $val=a+b$, where $a$ and $b$ are either numerical constants or references to previously defined data.  The result, $val$ is placed
+in the label {\tt :val}\ accessible later in the definition file using \$val.
 
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=5.0in]{figures/copyval}\\
-\end{center}
-\caption[Schematic of {\tt copyval}\ usage.]{Schematic of {\tt copyval}\ usage.
-The command {\tt i j copyval}\ copies the data item {\tt PARAMS[i]} and places it `j+1' positions farther down the command argument list.
-}
- \label{figcopyval}
-\end{figure}
+\hitem{CLIP}
+The command, \\
+\\
+\valin\ \valmin\ \valmax\ :\valclipped\ {\tt clip}, \\
+\\
+is used to clip a value \valin\ between \valmin and 
+\valmax\ using
+\begin{eqnarray*}
+\valclipped=\max(\valmin,\min(\valin,\valmax))
+\end{eqnarray*}
 
-\hitem{COPYNVALS} The command,\\
- \\
- {\tt in n out copynvals}, \\
- \\
-copies the {\tt n}\ values {\tt PARAMS[in+0], ..., PARAMS[in+n-1]}
-to a location {\tt out+1} positions farther down the command argument list.
-The usage of {\tt copynvals}\ is illustrated in Figure \ref{figcopynvals}.
+\noindent The inputs, \valin, \valmin\ and \valmax\ are either numerical constants or references to previously defined data.  The clipped result is placed
+in the label :\valclipped\ accessible later in the definition file using \$\valclipped.
 
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=5.0in]{figures/copynvals}\\
-\end{center}
-\caption[Schematic of {\tt copynvals}\ usage.]{Schematic of {\tt copynvals}\ usage. The command sequence {\tt i n j copynvals}\ copies `n' data items starting at {\tt PARAMS[i]} and places these items `j+1' locations farther down the command argument list.
-}
- \label{figcopynvals}
-\end{figure}
+\hitem{DIV}
+The command, \\
+\\
+{\tt a b :val div}, \\
+\\
+is used to compute the value, $val=a/b$, where $a$ and $b$ are either numerical constants or references to previously defined data.  If the denominator, {\tt b}, is zero the the result, $val$, returned is zero.
+and is placed
+in the label {\tt :val}\ accessible later in the definition file using \$val.
 
-The device definition listed in Figure \ref{figeggexample} and also found in the {\tt devices.svo}\ file uses the {\tt copyval}\ and {\tt copynvals}\ commands to customize how the {\em egg}\ device is drawn.  For example, the command
-{\tt 0.0 3.0 0.0 copynvals}, as illustrated in Figure \ref{figcopyval}, copies three parameters from the Smokeview {\tt PARAMS}\ array buffer starting at {\tt PARAMS[0]}.  These values are copied farther down the command argument stack for use by the command {\tt setcolor}, immediately after {\tt copynvals}.
+\hitem{GETT}
+The command, \\
+\\
+{\tt :time gett}, \\
+\\
+is used to obtain the current simulation time.  The simulation time
+is placed
+in the label {\tt :time}\ accessible later in the definition file using \$time.
 
-\begin{figure}[\figoptions]
-\begin{verbatim}
-// data layout for particle devices
-// 0->2  r,g,b color
-// 3     diameter
-// 4     length
-DEVICEDEF // device for particle "egg"
- EGG
- 0.0 3.0 0.0 copynvals 1.0 0.0 0.0 setcolor
- 4.0 4.0 copyval 3.0 3.0 copyval 3.0 2.0 copyval 1.0 1.0 1.0 scalexyz 1.0 drawsphere
-\end{verbatim}
-\caption{Device definition for `EGG' used to illustrate the use of the Smokeview device commands {\tt copyval}\ and {\tt copynvals}.}
- \label{figeggexample}
-\end{figure}
+\hitem{MIRRORCLIP}
+The command, \\
+\\
+\valin\ \valmin\ \valmax\ :\valclipped\ mirrorclip, \\
+\\
+is used to clip a value \valin\ between \valmin\
+and \valmax\ using
+\begin{eqnarray*}
+\valone&=&\mbox{mod}( \valin-\valmin,2(\valmax-\valmin) )\\
+\valclipped&=&\left\{
+\begin{array}{cc}
+  \valmin+\valone & \valone\le \valmax-\valmin \\
+  \valmax-\valone & \valone> \valmax-\valmin
+\end{array}
+\right.
+\end{eqnarray*}
+
+\hitem{MULT}
+The command, \\
+\\
+{\tt a b :val mult}, \\
+\\
+is used to compute the value, $val=ab$, where $a$ and $b$ are either numerical constants or references to previously defined data.  The result, $val$ is placed
+in the label {\tt :val}\ accessible later in the definition file using \$val.
+
+\noindent The inputs, \valin, \valmin\ and \valmax\ are either numerical constants or references to previously defined data.  The clipped result is placed
+in the label :\valclipped\ accessible later in the definition file using \$\valclipped.
 
 \hitem{MULTIADDT}
 The command, \\
 \\
-{\tt a b out multiaddt}, \\
+{\tt a b :val multiaddt}, \\
 \\
-is used to compute the value, $val=at+b$, where $t$ is the simulation time $a$ and $b$ are either defined in the device.svo file or in the FDS input file. The result, $val$ is placed {\tt out+1}\ positions farther down the command argument list.  This allows one to change how a device appears as a function of time (changing its size, rotating it, changing its color {\em etc.}).
-\elist
+is used to compute the value, $val=at+b$, where $t$ is the simulation time and 
+$a$ and $b$ are either numerical constants or references to previously defined data. The result, $val$ is placed
+in the label {\tt :val}\ accessible later in the definition file using \$val.  This allows one to change how a device appears as a function of time (changing its size, rotating it, changing its color {\em etc.}).
 
-\section{Conditionals}
-Conditional commands ({\tt skipif}\ statements) may be used to exclude portions of a device
-definition  based upon variable values
-obtained using the {\tt copyval}\ or {\tt copynvals} commands.  For example, a tree trunk may be drawn black if a temperature exceeds a specified value.  Four forms of the {\tt skipif}\ command are
-implemented: {\tt skipifle, skipiflt, skipifge} and {\tt skipifgt}.
-The notation {\tt , gt, le} and {\tt lt} has the usual meaning of greater than or equal to, greater than, {\em etc.}.
+\hitem{PERIODICCLIP}
+The command, \\
+\\
+\valin\ \valmin\ \valmax\ :\valclipped\ {\tt periodicclip}, \\
+\\
+is used to clip a value \valin\ between \valmin 
+and \valmax\ using
+\begin{eqnarray*}
+\valclipped&=&\valmin+\mbox{mod}( \valin-\valmin,\valmax-\valmin )\\
+\end{eqnarray*}
 
+\noindent The inputs, \valin, \valmin\ and \valmax\ are either numerical constants or references to previously defined data.  The clipped result is placed
+in the label :\valclipped\ accessible later in the definition file using \$\valclipped.
 
-\blist
-\hitem{skip if $a<=b$} The command, {\tt a b n skipifle}\ skips the {\tt n} commands following the
-{\tt skipifle}\ if the floating point values {\em a} and {\em b} satisfy $a\le b$.
-
-\hitem{skip if $a<b$} The command, {\tt a b n skipiflt} skips the {\tt n} commands following
-{\tt skipiflt}\ if the floating point values {\em a} and {\em b} satisfy $a<b$.
-
-\hitem{skip if $a>=b$} The command, {\tt a b n skipifge} skips the {\tt n} commands following
-{\tt skipifge}\ if the floating point values {\em a} and {\em b} satisfy $a\ge b$.
-
-\hitem{skip if $a>b$} The command, {\tt a b n skipifgt} skips the {\tt n} commands following
-{\tt skipifgt}\ if the floating point values {\em a} and {\em b} satisfy $a> b$.
+\hitem{SUB}
+The command, \\
+\\
+{\tt a b :val sub}, \\
+\\
+is used to compute the value, $val=a-b$, where $a$ and $b$ are either numerical constants or references to previously defined data.  The result, $val$ is placed
+in the label {\tt :val}\ accessible later in the definition file using \$val.
 \elist
 
 %---------------------------------------------------------------------------------
