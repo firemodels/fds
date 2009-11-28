@@ -184,58 +184,58 @@ DEVICEDEF
 
 DEVICEDEF
  testdoor         // label, name of device
- :dx :dy :dz :R :G :B
+ :DX :DY :DZ :R :G :B
  90.0 rotatez 90.0 rotatex
-push  $dx $dy $dz scalexyz $R $G $B setcolor 1.0 drawcube pop // front half of door (user specified color)
-push  $dx $dy $dz scalexyz 0.0 0.0 1.0 setcolor 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
+push  $DX $DY $DZ scalexyz $R $G $B setcolor 1.0 drawcube pop // front half of door (user specified color)
+push  $DX $DY $DZ scalexyz 0.0 0.0 1.0 setcolor 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
  NEWFRAME
  0.001 0.001 0.001 scalexyz 1.0 drawcube // state 1, door disappears
 
 DEVICEDEF
  evacdoor         // label, name of device
- :sx :sy :sz :R :G :B :dx :dy :dz
+ :SX :SY :SZ :R :G :B :DX :DY :DZ
  // Evacuation input: door namelist
- push  $dx $dy $dz translate
+ push  $DX $DY $DZ translate
     0.133 0.545 0.133 setcolor  0.0 0.0 -0.6 translate 0.4 0.6 drawcone pop // draw an arrow
     // after rotatex 0 0 1 tr ==> inside the door
     // after rotatex 0 1 0 tr ==> right
     // after rotatex 1 0 0 tr ==> up
  90.0 rotatez 90.0 rotatex
- push  $sx $sy $sz scalexyz $R $G $B setcolor
+ push  $SX $SY $SZ scalexyz $R $G $B setcolor
     0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
- push  $sx $sy $sz scalexyz 0.133 0.545 0.133 setcolor 
+ push  $SX $SY $SZ scalexyz 0.133 0.545 0.133 setcolor 
     0.0 0.5 0.0 translate 1.0 drawcube pop // back half of door (forest green)
 NEWFRAME
- :sx :sy :sz :R :G :B :dx :dy :dz
+ :SX :SY :SZ :R :G :B :DX :DY :DZ
  90.0 rotatez 90.0 rotatex
- push  $sx $sy $sz scalexyz $R $G $B setcolor
+ push  $SX $SY $SZ scalexyz $R $G $B setcolor
     1.0 drawcube pop // front half of door (user specified color)
- push  $sx $sy $sz scalexyz 1.0 0.0 0.0 setcolor
+ push  $SX $SY $SZ scalexyz 1.0 0.0 0.0 setcolor
     0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (red)
 
 DEVICEDEF
  evacincline         // label, name of device
- :sx :sy :sz :R :G :B
+ :SX :SY :SZ :R :G :B
  // Evacuation input: evss namelist
  90.0 rotatez 90.0 rotatex
- push  $sx $sy $sz scalexyz $R $G $B setcolor
+ push  $SX $SY $SZ scalexyz $R $G $B setcolor
     0.0 0.5 0.0 translate 1.0 drawcube pop // incline (user specified color)
 
 DEVICEDEF
  evacentr         // label, name of device
- :sx :sy :sz :R :G :B
+ :SX :SY :SZ :R :G :B
  // Evacuation input: entr namelist
  90.0 rotatez 90.0 rotatex
- push  $sx $sy $sz scalexyz $R $G $B setcolor
+ push  $SX $SY $SZ scalexyz $R $G $B setcolor
     1.0 drawcube pop // front half of door (user specified color)
- push  $sx $sy $sz scalexyz 0.529 0.808 0.922 setcolor
+ push  $SX $SY $SZ scalexyz 0.529 0.808 0.922 setcolor
     0.0 1.0 0.0 translate 1.0 drawcube pop // front half of door (sky blue 135 206 235) 
 NEWFRAME
- :sx :sy :sz :R :G :B
+ :SX :SY :SZ :R :G :B
  90.0 rotatez 90.0 rotatex
- push  $sx $sy $sz scalexyz $R $G $B setcolor
+ push  $SX $SY $SZ scalexyz $R $G $B setcolor
     0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
- push  $sx $sy $sz scalexyz 1.0 0.0 0.0 setcolor
+ push  $SX $SY $SZ scalexyz 1.0 0.0 0.0 setcolor
     0.0 0.5 0.0 translate 1.0 drawcube pop // front half of door (red)
 
    // ************ dynamic particle device definitions ********************
@@ -261,7 +261,7 @@ DEVICEDEF // device for particle file tube
 
 DEVICEDEF // device for particle "egg"
  egg
- :R :G :B :D :DX
+ :R :G :B :D :DX     // data obtained from an FDS input file
  $R $G $B setcolor
  $DX $D $D scalexyz 1.0 drawsphere
 
@@ -275,32 +275,32 @@ DEVICEDEF // device for dynamic textured sphere
  demosphere
  :R :G :B :VX :VY :VZ :ROTATE_RATE :D :XMAX :YMAX :ZMAX
  $R $G $B setcolor
- $VX 0.0 @vvx multiaddt :vvx -2.5 2.5 @CLIPX mirrorclip 
- $VY 0.0 @vvy multiaddt :vvy  0.0 5.0 @CLIPY mirrorclip
- $VZ 0.0 @vvz multiaddt :vvz -1.5 2.0 @CLIPZ mirrorclip
- :CLIPX :CLIPY :CLIPZ translate $ROTATE_RATE 0.0 @rotz multiaddt 
-   :rotz rotatez 180.0 rotatey 0.0 2.0 drawtsphere
+ $VX 0.0 :vvx multiaddt $vvx -2.5 2.5 :CLIPX mirrorclip 
+ $VY 0.0 :vvy multiaddt $vvy  0.0 5.0 :CLIPY mirrorclip
+ $VZ 0.0 :vvz multiaddt $vvz -1.5 2.0 :CLIPZ mirrorclip
+ $CLIPX $CLIPY $CLIPZ translate $ROTATE_RATE 0.0 :rotz multiaddt 
+   $rotz rotatez 180.0 rotatey 0.0 2.0 drawtsphere
 
 DEVICEDEF // device for dynamic textured sphere
  tsphere
   :R :G :B :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D
  $R $G $B setcolor
  90.0 rotatey $AX0 rotatex $ELEV0 rotatey 
- $ROTATION_RATE $ROT0 @rotz multiaddt :rotz rotatez 0 $D drawtsphere
+ $ROTATION_RATE $ROT0 :rotz multiaddt $rotz rotatez 0 $D drawtsphere
 
    // ************ dynamic tree device definitions ********************
 
 DEVICEDEF // device for tree trunk
  TRUNK
- :trunk_base_h :trunk_d :trunk_h :R :G :B
+ :TRUNK_BASE_H :TRUNK_D :TRUNK_H :R :G :B
  $R $G $B setcolor
- 0.0 0.0 $trunk_base_h translate $trunk_d $trunk_h drawdisk
+ 0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk
  
 DEVICEDEF // device for tree canopy
  CANOPY
- :canopy_base_h :canopy_d :canopy_h :R :G :B
+ :CANOPY_BASE_H :CANOPY_D :CANOPY_H :R :G :B
 $R $G $B setcolor
- 0.0 0.0 $canopy_base_h translate $canopy_d $canopy_h drawcone
+ 0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
    
    // ************ avatar device definitions ********************
 
@@ -333,10 +333,10 @@ AVATARDEF
  push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
 AVATARDEF
  human_altered_with_data         // label, name of avatar
- :dum1 :dum2 :dum3 :W :D :H1 :sx :sy :sz :R :G :B
+ :DUM1 :DUM2 :DUM3 :W :D :H1 :SX :SY :SZ :R :G :B
  90.0 rotatez
  0.82 0.70 0.55 setcolor // head color  TAN 210 180 140
- $sx $sy $sz scalexyz //  scale by data height
+ $SX $SY $SZ scalexyz //  scale by data height
  1.0 1.0 0.579 scalexyz 
  0.3 0.3 0.3 scalexyz 
  push  0.0 0.0 5.2 translate 1.1 drawsphere 
@@ -354,14 +354,14 @@ AVATARDEF
  push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
 AVATARDEF
  ellipsoid         // label, name of device
- :dum1 :dum2 :dum3 :W :D :H1 :sx :sy :sz :R :G :B :hx :hy :hz
+ :DUM1 :DUM2 :DUM3 :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
  90.0 rotatez
- $hx $hy $hz translate $sx $sy $sz scalexyz $W $D $H1 scalexyz 
+ $HX $HY $HZ translate $SX $SY $SZ scalexyz $W $D $H1 scalexyz 
   push 0.0 -1.0 0.0 translate 1.0 5.0 0.5 scalexyz 0.0 0.0 1.0 setcolor 0.4 drawsphere pop 
   $R $G $B setcolor 1.0 drawsphere 
 AVATARDEF
  disk         // label, name of device
- :dum1 :dum2 :dum3 :W :D :H1 :sx :sy :sz :R :G :B :hx :hy :hz
+ :DUM1 :DUM2 :DUM3 :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
  90.0 rotatez
  0.0 0.0 1.0 translate $W $D $H1 scalexyz 
   push 0.0 -0.25 0.05 translate 0.3 2.5 0.3 scalexyz 0.0 1.0 1.0 setcolor 0.2 drawsphere pop 
