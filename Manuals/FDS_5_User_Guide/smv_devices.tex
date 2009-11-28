@@ -14,18 +14,20 @@
 
 \section{Visualizing Devices}
 
-Smokeview allows one to visualize FDS devices such as heat and smoke detectors,
+Smokeview visualizes FDS devices such as heat and smoke detectors,
 sprinklers, sensors {\em etc.} using instructions contained in a
 data file named {\tt devices.svo}.
-This file is located in the directory where FDS and Smokeview is installed.
-The instructions contained in this file correspond to OpenGL library calls,
+This file is located in the directory where FDS and Smokeview are installed.
+The instructions correspond to OpenGL library calls,
 the same type of calls Smokeview uses to visualize FDS cases.
-By using a data file rather than program code to represent devices, new
-devices may be designed and drawn without requiring modifications to Smokeview.
+New
+devices therefore may be designed and drawn without requiring modifications to Smokeview and more importantly may be created by someone other than the Smokeview developer.
 
-% add following paragraph back in after we incorporate the section on dynamic devices
+% uncomment following paragraph after we start documenting dynamic devices
 
-%With respect to visualization there are two types devices: static and dynamic. This %terminology refers simply to whether the look and/or behavior of the device can be %modified at run time.  For example, the {\tt sensor}\ device is drawn as a small %green sphere with a fixed diameter.  It is a static device.  The {\tt tsphere}\ %device on the other hand is more flexible.  It can be drawn using parameters %specified in the FDS input file, a texture map or image applied to the surface and %a diameter.  It is a dynamic device.
+%With respect to visualization in Smokeview, 
+%there are two types devices: static and dynamic. 
+%This terminology refers to whether the look and behavior of a device can be %modified based upon data provided in an FDS input file.  For example, the {\tt %sensor}\ device is drawn as a small green sphere with a fixed diameter.  It is a %static device.  The {\em look}\ of this device is the same regardless of how an FDS %input file is set up.  The {\tt tsphere}\ device on the other hand is dynamic.  The %diameter and an image used to cover the sphere (known as a texture map) can be %specified in an FDS input file.  It is a dynamic device.
 
 This section gives an overview of what devices are pre-defined and in general what types of devices can be defined.  Further documentation on the underlying technical details may be found in the Smokeview User's Guide~\cite{Smokeview_Users_Guide_5}.
 
