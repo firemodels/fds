@@ -1810,52 +1810,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 }
 
-/* ------------------ Render ------------------------ */
-
-void Render(int view_mode){
-  if(RenderOnceNow==0&&RenderGif !=0
-    &&render_double==0
-    ){
-    if(plotstate==DYNAMIC_PLOTS && ntimes > 0){
-     if(itime>=0&&itime<ntimes&&
-       ((render_frame[itime] == 0&&showstereo==0)||(render_frame[itime]<2&&showstereo!=0))
-       ){
-       render_frame[itime]++;
-       RenderFrame(view_mode);
-     }
-     else{
-       ASSERT(RenderSkip>0);
-       RenderState(0);
-       RenderSkip=1;
-     }
-    }
-    if(touring == 1 && ntimes == 0){
-      if(rendertourcount % RenderSkip == 0)RenderFrame(view_mode);
-      rendertourcount++;
-      if(ntimes>0)tourangle += (float)(2.0*PI/((float)ntimes/(float)RenderSkip));
-      if(ntimes==0)tourangle += (float)(2.0*PI/((float)maxtourframes/(float)RenderSkip));
-      if(tourangle>2.0*PI){
-        RenderState(0);
-        RenderSkip=1;
-        tourangle=0.0;
-      }
-    }
-  }
-
-  if(render_double==0)sniffErrors("after render");
-
-  if(RenderOnceNow==1||RenderOnceNowL==1||RenderOnceNowR==1){
-    if(render_double==0)RenderFrame(view_mode); 
-    RenderOnceNow=0;
-    if(view_mode==VIEW_LEFT)RenderOnceNowL=0;
-    if(view_mode==VIEW_RIGHT)RenderOnceNowR=0;
-    if(RenderOnceNowR==0&&RenderOnceNowL==0){
-      RenderState(0);
-      RenderSkip=1;
-    }
-  }
-}
-
 /* ------------------ update_rotation_index ------------------------ */
 
 void update_rotation_index(int val){
