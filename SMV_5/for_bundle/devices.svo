@@ -2,6 +2,35 @@
 // $Revision$
 // $Author$
 
+// ************ device file format ********************
+
+// DEVICEDEF   // DEVICEDEF begins the device definition
+
+//    //  1. comments and blank lines are permitted anywhere
+//    //  2. any line not beginning with a double "slash" is part
+//    //     of the device definition.
+
+//   device_name      // name or label for device
+//   .var1 ... .varn  // a series of variables may be specified for use by
+//                    // the device definition.  Smokeview copies data into
+//                    // these variables from the SMOKEVIEW_PARAMETERS
+//                    // keyword in the FDS input file.  The data in .varn
+//                    // is referenced  elsewhere in the definition
+//                    // using $varn
+
+//   // A series of argument/command pairs are specified on one or
+//   // more lines.
+
+//   arg1 ... argn command1 arg1 ... argn command2 ...
+
+//   // An argument may be a numerical constant (e.g. 2.37),
+//   // a label (e.g. .var1) or a reference to a label located
+//   // elsewhere (e.g. $var1)
+
+// NEWFRAME    // beginning of next frame
+//  more argument/command pairs for next device frame
+//  ....
+
    // ************ static device definitions - single frame/state ********************
 
 DEVICEDEF
