@@ -299,7 +299,7 @@ extern "C" void glui_motion_setup(int main_window){
     }
   }
 
-#if pp_BETA
+#ifdef pp_BETA
   panel_specify = glui_motion->add_rollout_to_panel(panel_motion,"Specify");
 
   SPINNER_set_view_x=glui_motion->add_spinner_to_panel(panel_specify,"x:",GLUI_SPINNER_FLOAT,set_view_xyz+0,SET_VIEW_XYZ,TRANSLATE_CB);
