@@ -1084,7 +1084,7 @@ DEVICEDEF // DEVICEDEF begins the device definition
 
    //  1. comments and blank lines are permitted anywhere
    //  2. any line not beginning with a double "slash" is part
-   //     of the devices definition.
+   //     of the device definition.
 
   device_name // name or label for device
   .var1 ... .varn  // a series of variables may be specified for use by
@@ -1310,7 +1310,8 @@ located at the center of the disk's base.\vspace{0.25in}
 \infigl{drawcdisk}{0.25 0.50 drawcdisk}
 \paragraph{DRAWCDISK} The command, {\tt d h drawcdisk},
 draws a circular disk with diameter d and height h. The origin is
-located at the center of the disk.\vspace{0.25in}
+located at the center of the disk. This command is a shortcut 
+for {\tt h 2.0 :hd2 div \$hd2 offsetz d h drawdisk}.
 
 \infigr{drawhexdisk}{0.5 0.25 drawhexdisk}
 \paragraph{DRAWHEXDISK} The command, {\tt d h drawhexdisk},
