@@ -1006,21 +1006,25 @@ The instructions correspond to OpenGL library calls,
 the same type of calls Smokeview uses to visualize FDS cases.
 Smokeview then acts as an interpreter executing OpenGL
 commands as specified in the device definition file. Efficiency is
-obtained by compiling these instructions into display lists,
+attained by compiling these instructions into display lists,
 terminology for an OpenGL construct for storing and efficiently
-drawing collections of OpenGL commands.
-New
-devices may be designed and drawn without requiring modifications to Smokeview and more importantly may be created by someone other than the Smokeview developer.
+drawing collections of OpenGL commands.  New devices may be designed 
+and drawn without requiring modifications to Smokeview and more 
+importantly may be created by someone other than the Smokeview developer.
 
-Devices may be designated as static or dynamic.
-This terminology refers to whether the look and behavior of a device can be
-modified using data provided in an FDS input file.  For example, the {\tt sensor}\ device is drawn as a small green sphere with a fixed diameter.  It is a static device.  The {\em look}\ of this device is the same regardless of how an FDS input file is set up.  The {\tt tsphere}\ device on the other hand is dynamic.  The diameter and an image used to cover the sphere (known as a texture map) can be specified in an FDS input file.  It is a dynamic device.
-The look of this device changes from one FDS case to the next depending on the input specified.
+The appearance of a device may be fixed or it may be altered based upon
+data specified in the FDS input file.  The {\tt sensor}\ device
+is drawn as a small green sphere with a fixed diameter.  Its appearance 
+is the same regardless of how an FDS input file is set up.
+The appearance of the {\tt tsphere}\ device (t for texture) depends on
+data specified in the FDS input file.  One may specify the diameter of the 
+sphere and an
+image to cover it with ( the image is known as a texture map).
 
 As with preference or {\tt .ini}\ files, Smokeview looks for device definition files in three locations:
 in a file named {\tt devices.svo}\ in the FDS/Smokeview installation directory,
-in a file named {\tt devices.svo}\ in the case directory
-and in a file named {\tt casename.svo} also located in the case directory where {\tt casename}\ is the name of the case being visualized.
+in a file named {\tt devices.svo}\ in the casename directory
+and in a file named {\tt casename.svo} also located in the casename directory where {\tt casename}\ is the name of the case being visualized.
 
 This section describes how to create new devices. Though all of
 the examples are given for devices, the intent of this procedure
@@ -1032,10 +1036,13 @@ The first statement in a device definition is
 the keyword {\tt DEVICEDEF} (or {\tt AVATARDEF}\ when defining a {\em person}).
 The next statement is the name or label for the device.
 Following this are the instructions used for creating the device.
-These instructions consist of zero or more data values followed by a command.
+Each instruction consist of zero or more data values followed by a command.
+Comments may be placed anywhere in the device definition file by adding text
+after a double slash `//`.
+
 Data from FDS may be optionally communicated to the device definition
-by placing a series of labels, written as {\tt :var1 ... :varn}, at the beginning of the definition.  These data values may then be accessed later in the definition using \$var1 for label :var1, \$var2 for label :var2 {\em etc.}.
-The data is specified in the FDS input  file using the
+by placing a series of labels, written as {\tt :var1 ... :varn}, at the beginning of the definition.  These data values may then be accessed later in the definition using {\tt \$var1}\ to access data in {\tt :var1}, {\tt \$var2}\ to access data in {\tt :var2}\ {\em etc.}.
+The data place in these {\tt :vari}\ labels is specified in the FDS input  file using the
 {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\ input line.
 
 There are two types of instructions, instructions for drawing
@@ -1051,16 +1058,15 @@ Smokeview.
 Some examples of argument/instruction pairs are {\tt d drawsphere} for
 drawing a sphere of diameter {\tt d} or {\tt x y z translate} for
 translating an object by $(x,y,z)$.
-The symbols {\tt d, x, y, z}\ may be
-specified in the device file using a numerical constant such as 1.23 or as a reference to data located elsewhere such as \$var1.
+The symbols {\tt d}, {\tt x}, {\tt y} and {\tt z}\ are
+specified in the device file using a numerical constant such as 1.23 or using a reference such as \$var to data located elsewhere.
 
 Transformation commands are
 cumulative, each command builds on the effects of the previous
-command.  The commands {\tt push}\ and {\tt pop}\ then may be used to
+one.  The commands {\tt push}\ and {\tt pop}\ 
 isolate these effects by saving and restoring the geometric state.
-More details may be found in the next two sections.
 
-The format for an object definition file in more detail is given in Figure
+The format for an object definition file is given in more detail in Figure
 \ref{figobjectdef}.  Each device definition consists of one or more
 frames.  A frame is used to represent various states of the device.
 Devices such as thermocouples which do not activate use
@@ -1106,9 +1112,9 @@ DEVICEDEF // DEVICEDEF begins the device definition
 \label{figobjectdef}%
 \end{figure}
 
-A simple example of a definition used to draw a sensor along with
-the corresponding Smokeview view is given in Figure
-\ref{figsensor}. The definition uses just one frame. A sphere is
+Figure \ref{figsensor} illustrates a simple example of a device 
+definition used to draw a sensor along with the corresponding 
+Smokeview view.. The definition uses just one frame. A sphere is
 drawn with color yellow and diameter 0.038 m. Push and pop commands
 are not necessary because there is only one object and no
 transformations are used.
@@ -1129,8 +1135,9 @@ DEVICEDEF
 \label{figsensor}%
 \end{figure}
 
-Figure \ref{figsprinkler} is more complicated. It shows a
-definition for a heat detector along with a corresponding
+The example illustrated in Figure \ref{figsprinkler} is more complicated. 
+It shows a
+definition of a heat detector along with a corresponding
 Smokeview view. The definition uses two frames. The first frame
 represents the heat detector's inactive state, the second frame
 represents the active state (commands after the {\tt NEWFRAME}\
@@ -1224,34 +1231,36 @@ in the FDS input file
 }
 
 Figure \ref{figdevices} gives Smokeview views for several devices
-in the global {\tt devices.svo}\ file (devices.svo file located in the FDS/Smokeview
-installatio directory).  Active views are shown when they are defined.
+defined in the {\tt devices.svo}\ file.
+A more complete list is found in the FDS User's Guide~\cite{FDS_Users_Guide_5}.
 The object's origin is identified by two intersecting tubes.
 The origin is placed where FDS records data for these devices.
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{ccc}
- \devfig{sprinkler_inact}&\devfig{pendent_inact}&\devfig{nozzle_inact}\\
- inactive up-right sprinkler&inactive pendent sprinkler&inactive nozzle\\
- \devfig{sprinkler_act}  &\devfig{pendent_act}  &\devfig{nozzle_act}\\
- active up-right sprinkler&active pendent sprinkler&active nozzle\\
- \devfig{smokedetector_inact}&\devfig{heatdetector_inact}&\devfig{target}\\
- inactive smoke detector&inactive heat detector&target\\
- \devfig{smokedetector_act}  &\devfig{heatdetector_act}  &\devfig{sensor}\\
- active smoke detector&active heat detector&sensor
+\begin{tabular}{cc}
+ \devfig{sprinkler_inact}&\devfig{sprinkler_act}\\
+ inactive up-right sprinkler&active up-right sprinkler\\
+ 
+ \devfig{smokedetector_inact}& \devfig{smokedetector_act}\\
+ inactive smoke detector&active smoke detector\\
+ 
+ \devfig{sensor}&\devfig{target}\\
+ sensor&target
  \end{tabular}
  \end{center}
-\caption[Smokeview view of devices defined in the global
-devices.svo file.] {Smokeview view of devices defined in the global
-devices.svo file.  The device origin occurs at the intersection of
-the thin (green) lines, where data is recorded in FDS.}
-\label{figdevicesr}%
+\caption[Smokeview view of several devices defined the devices.svo file.] 
+{Smokeview view of several devices defined in the devices.svo file.
+The device origin occurs at the intersection of
+the thin (green) lines.  This where FDS records data values for this device.}
+\label{figdevices}%
 \end{figure}
 
-\section{Geometric Objects}
-\label{svocommands} Each command used to draw elementary geometric
-objects consists of one or more arguments followed by the command, for example,
+\section{Elementary Geometric Objects}
+\label{svocommands} The objects described in this section
+are the building blocks used to construct more complex devices.
+Each command used to draw an elementary geometric
+object consists of one or more arguments followed by the command, for example,
 the command sequence {\tt 0.3 drawsphere} draws a sphere with diameter 0.3 (all units as with FDS are in meters).
 
 Some portion of the object is
@@ -1364,20 +1373,23 @@ center of the truncated cone's base.
 
 \vspace{0.75in}
 \section{Transformations}
-As with geometric commands, transformation commands consist of one
-or more arguments followed by the command (except for {\tt push}
-and {\tt pop}\ which do not require any arguments). Transformation
-commands are used to change the location and orientation of drawn
-objects, to save and restore the geometric state and to set
-attributes such as point size, line width or object color.
-There are two types of transformations, static and user settable.
-Static transformations
-do not change other commands.  User settable transformations
-change the inputs of subsequent device commands using data obtained while Smokeview is running.
+As with geometric commands, transformation commands consist of zero
+or more arguments followed by the command. Transformation
+commands are used to directly or indirectly change how drawn objects
+appear.  Visual transformations make changes directly, 
+changing the location and orientation of drawn
+objects,  setting drawing
+attributes such as point size, line width or object color
+or saving and restoring the geometric state.  
+Arithmetic transformations make changes indirectly by operating on
+data which in turn is used as inputs to various drawing commands.
 
 
-\subsection{Static Transformations}
-The
+\subsection{Visual Transformations}
+Visual transformation commands are used
+to change the visual appearance of drawn objects.
+These commands map directly to counterparts
+in OpenGL.  The
 rotate and translate commands change the origin (translate) or
 orientation of the x,y,z axes (rotate). The offsetx, offsety and offsetz commands translate
 objects along just one axis.  The PUSH command is then
@@ -1457,8 +1469,13 @@ translate}\ as translating the origin by (-x,-y,-z).
 \newcommand{\valmin}{{\tt \mbox{val\_min}}}
 \newcommand{\valmax}{{\tt \mbox{val\_max}}}
 \newcommand{\valone}{{\tt \mbox{val\_1}}}
-\subsection{User Settable Transformations}
-User settable transformations or commands allow one to change how objects are drawn using information passed from FDS. This information is passed using the {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\ namelist statement.  The user settable commands use this information to dynamically change the inputs of subsequent device commands.  Smokeview places this passed information into an internal array, for discussion here, named {\tt PARAMS}.
+\subsection{Arithmetic Transformations}
+Arithmetic transformation commands
+allow one to indirectly change how objects are drawn using 
+information passed from FDS. This information is passed using the 
+{\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\ namelist statement.
+These commands transform data to change the inputs of 
+subsequent device commands.  
 
 \blist
 \hitem{ADD}
@@ -1474,7 +1491,7 @@ The command, \\
 \\
 \valin\ \valmin\ \valmax\ :\valclipped\ {\tt clip}, \\
 \\
-is used to clip a value \valin\ between \valmin and 
+is used to clip a value \valin\ between \valmin\ and
 \valmax\ using
 \begin{eqnarray*}
 \valclipped=\max(\valmin,\min(\valin,\valmax))
@@ -1488,7 +1505,7 @@ The command, \\
 \\
 {\tt a b :val div}, \\
 \\
-is used to compute the value, $val=a/b$, where $a$ and $b$ are either numerical constants or references to previously defined data.  If the denominator, {\tt b}, is zero the the result, $val$, returned is zero.
+is used to compute the value, $val=a/b$, where $a$ and $b$ are either numerical constants or references to previously defined data.  If the denominator, {\tt b}, is zero then the result, $val$, returned is zero.
 and is placed
 in the label {\tt :val}\ accessible later in the definition file using \$val.
 
@@ -1534,16 +1551,22 @@ The command, \\
 \\
 {\tt a b :val multiaddt}, \\
 \\
-is used to compute the value, $val=at+b$, where $t$ is the simulation time and 
+is used to compute the value, $val=at+b$, where $t$ is the simulation time and
 $a$ and $b$ are either numerical constants or references to previously defined data. The result, $val$ is placed
 in the label {\tt :val}\ accessible later in the definition file using \$val.  This allows one to change how a device appears as a function of time (changing its size, rotating it, changing its color {\em etc.}).
+
+The command, {\tt a b :val multiaddt}, is a shortcut for\\
+\\
+{\tt :time gett a \$time :at mult \$at b :val add}\\
+\\
+
 
 \hitem{PERIODICCLIP}
 The command, \\
 \\
 \valin\ \valmin\ \valmax\ :\valclipped\ {\tt periodicclip}, \\
 \\
-is used to clip a value \valin\ between \valmin 
+is used to clip a value \valin\ between \valmin
 and \valmax\ using
 \begin{eqnarray*}
 \valclipped&=&\valmin+\mbox{mod}( \valin-\valmin,\valmax-\valmin )\\
