@@ -105,6 +105,13 @@ echo.
 echo Getting the Verification cases from the repository
 svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
 
+Rem echo.
+Rem echo Make a generic copy of the installation directory
+Rem if exist "%out_bundle%\..\..\FDS_SMOKEVIEW\" rmdir /s /q "%out_bundle%\..\..\FDS_SMOKEVIEW\"
+Rem mkdir "%out_bundle%\..\..\FDS_SMOKEVIEW\"
+Rem xcopy /E "%out_bundle%\..\FDS\*" "%out_bundle%\..\..\FDS_SMOKEVIEW\"
+Rem if exist "%out_bundle%\..\..\FDS_SMOKEVIEW\FDS5\Uninstall" rmdir /s /q "%out_bundle%\..\..\FDS_SMOKEVIEW\FDS5\Uninstall"
+
 echo.
 echo Copying wrapup scripts for use in final installation
 copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\FDS5\wrapup_fds_install.bat"
