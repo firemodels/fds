@@ -32,6 +32,11 @@ char IOobject_revision[]="$Revision$";
 #define SV_CLIP 113
 #define SV_MIRRORCLIP 114
 #define SV_PERIODICCLIP 115
+#define SV_ADD 116
+#define SV_SUB 117
+#define SV_MULT 118
+#define SV_DIV 119
+#define SV_GETT 120
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -46,6 +51,12 @@ char IOobject_revision[]="$Revision$";
 #define SV_CLIP_NUMARGS 4
 #define SV_MIRRORCLIP_NUMARGS 4
 #define SV_PERIODICCLIP_NUMARGS 4
+#define SV_ADD_NUMARGS 3
+#define SV_SUB_NUMARGS 3
+#define SV_MULT_NUMARGS 3
+#define SV_DIV_NUMARGS 3
+#define SV_GETT_NUMARGS 1
+
 
 #define SV_TRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEX_NUMOUTARGS    0
@@ -60,6 +71,12 @@ char IOobject_revision[]="$Revision$";
 #define SV_CLIP_NUMOUTARGS 1
 #define SV_MIRRORCLIP_NUMOUTARGS 1
 #define SV_PERIODICCLIP_NUMOUTARGS 1
+#define SV_ADD_NUMOUTARGS 1
+#define SV_SUB_NUMOUTARGS 1
+#define SV_MULT_NUMOUTARGS 1
+#define SV_DIV_NUMOUTARGS 1
+#define SV_GETT_NUMOUTARGS 1
+
 
 #define SV_DRAWCUBE      200
 #define SV_DRAWSPHERE    201
@@ -665,6 +682,77 @@ void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack
     }
 
     switch (toki->command){
+    case SV_ADD:
+      {
+        float val1, val2, val_result;
+
+        val1=arg[0];
+        val2=arg[1];
+
+
+        val_result=val1+val2;
+
+        *argptr=val_result;
+      }
+      break;
+    case SV_SUB:
+      {
+        float val1, val2, val_result;
+
+        val1=arg[0];
+        val2=arg[1];
+
+
+        val_result=val1-val2;
+
+        *argptr=val_result;
+      }
+      break;
+    case SV_MULT:
+      {
+        float val1, val2, val_result;
+
+        val1=arg[0];
+        val2=arg[1];
+
+
+        val_result=val1*val2;
+
+        *argptr=val_result;
+      }
+      break;
+    case SV_DIV:
+      {
+        float val1, val2, val_result;
+
+        val1=arg[0];
+        val2=arg[1];
+
+
+        if(val2==0.0){
+          val_result=0.0;
+        }
+        else{
+          val_result=val1/val2;
+        }
+
+        *argptr=val_result;
+      }
+      break;
+    case SV_GETT:
+      {
+        float val_result;
+        float time_val=0.0;
+
+        if(ntimes>0){
+          time_val=times[itime];
+        }
+
+        val_result=time_val;
+
+        *argptr=val_result;
+      }
+      break;
     case SV_MULTIADDT:
       {
         float val1, val2, val_result;
@@ -2012,6 +2100,31 @@ void get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, in
     op=SV_POP;
     num_op=SV_POP_NUMARGS;
     num_outop=SV_POP_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"add")==0){
+    op=SV_ADD;
+    num_op=SV_ADD_NUMARGS;
+    num_outop=SV_ADD_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"sub")==0){
+    op=SV_SUB;
+    num_op=SV_SUB_NUMARGS;
+    num_outop=SV_SUB_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"mult")==0){
+    op=SV_MULT;
+    num_op=SV_MULT_NUMARGS;
+    num_outop=SV_MULT_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"div")==0){
+    op=SV_DIV;
+    num_op=SV_DIV_NUMARGS;
+    num_outop=SV_DIV_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"gett")==0){
+    op=SV_GETT;
+    num_op=SV_GETT_NUMARGS;
+    num_outop=SV_GETT_NUMOUTARGS;
   }
   else if(STRCMP(token,"multiaddt")==0){
     op=SV_MULTIADDT;
