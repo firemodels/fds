@@ -1265,9 +1265,9 @@ TMPA4 = TMPA**4
 ! Humidity (40% by default, but limited for high temps)
  
 IF (HUMIDITY < 0._EB) THEN
-   H_V_W = (3023410.8_EB-MAX(MIN(TMPA,373.15_EB),273.15_EB)*2334.894_EB)*MW_H2O/R0 !linear fit of JANAF table
+   H_V_W = 3023410.8_EB - MAX(MIN(TMPA,373.15_EB),273.15_EB)*2334.894_EB ! J/kg, linear fit of JANAF table
    X_H2O_TMPA = MIN( 1._EB , EXP(-(H_V_W*MW_H2O/R0)*(1._EB/TMPA     -1._EB/373.15_EB)) )
-   H_V_W = (3023410.8_EB-313.15_EB*2334.894_EB)*MW_H2O/R0 !linear fit of JANAF table
+   H_V_W = 3023410.8_EB - 313.15_EB*2334.894_EB ! J/kg, linear fit of JANAF table
    X_H2O_40_C =              EXP(-(H_V_W*MW_H2O/R0)*(1._EB/313.15_EB-1._EB/373.15_EB))
    HUMIDITY = 40._EB*MIN( 1._EB , X_H2O_40_C/X_H2O_TMPA )
 ENDIF
@@ -1635,7 +1635,7 @@ SPEC_LOOP: DO N=0,N_SPECIES
    EPSILONKLJ                  =  0._EB
    ID                          = SPECIES_ID(N)
    MASS_EXTINCTION_COEFFICIENT = 8700._EB  ! m2/kg
-   MASS_FRACTION_0             =  0._EB
+   MASS_FRACTION_0             = -1._EB
    MODE                        = GAS_SPECIES
    MW                          =  0._EB
    REFERENCE_TEMPERATURE       = 25._EB
@@ -1677,12 +1677,16 @@ SPEC_LOOP: DO N=0,N_SPECIES
       END SELECT
    ENDIF
 
-   ! Special case for water to set initial mass fraction
+   ! If the user has not specified an initial mass fraction, do it here
 
-   IF (ID=='WATER VAPOR') THEN
-      H_V = (3023410.8_EB-MAX(MIN(TMPA,373.15_EB),273.15_EB)*2334.894_EB)*MW_H2O/R0 !linear fit of JANAF table
-      XVAP  = MIN(1._EB,EXP(H_V*MW_H2O/R0*(1._EB/373.15_EB-1._EB/ MIN(TMPA,373.15_EB))))
-      MASS_FRACTION_0 = HUMIDITY*0.01_EB*XVAP/(MW_AIR/MW_H2O+(1._EB-MW_AIR/MW_H2O)*XVAP)
+   IF (MASS_FRACTION_0<0._EB) THEN
+      IF (ID=='WATER VAPOR') THEN
+         H_V = 3023410.8_EB - MAX(MIN(TMPA,373.15_EB),273.15_EB)*2334.894_EB ! J/kg, linear fit of JANAF table
+         XVAP  = MIN(1._EB,EXP(H_V*MW_H2O/R0*(1._EB/373.15_EB-1._EB/ MIN(TMPA,373.15_EB))))
+         MASS_FRACTION_0 = HUMIDITY*0.01_EB*XVAP/(MW_AIR/MW_H2O+(1._EB-MW_AIR/MW_H2O)*XVAP)
+      ELSE
+         MASS_FRACTION_0 = 0._EB
+      ENDIF
    ENDIF
 
    ! Special case for soot
