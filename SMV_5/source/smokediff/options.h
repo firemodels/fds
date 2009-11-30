@@ -2,6 +2,7 @@
 // $Revision$
 // $Author$
 
+#define _CRT_SECURE_NO_WARNINGS
 
  /* ------------------ options ------------------------ */
 #ifdef WIN32
