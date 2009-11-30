@@ -1543,6 +1543,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       }
     }
 #else
+    {
+    int i;
     for(i=0;i<nsmoke3d_files;i++){
       smoke3d *smoke3di;
 
@@ -1561,6 +1563,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 #else
       drawsmoke3d(smoke3di);
 #endif
+    }
     }
 #endif
 #ifdef pp_GPU
