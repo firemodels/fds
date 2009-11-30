@@ -11,21 +11,22 @@ set LINUXDIR64=smv_$version\_linux_64
 
 cd $FORBUNDLE
 
+rm -rf $OSXDIR
 mkdir -p $OSXDIR
-mkdir -p $OSXDIR/Documentation
-cp readme.html $OSXDIR/Documentation/.
 
-scp $OSXHOST\:FDS-SMV/SMV_5/bin/smv5_osx_32 $OSXDIR/.
+cp readme.html $OSXDIR/release_notes.html
+scp $OSXHOST\:FDS-SMV/SMV_5/bin/smv5_osx_32 $OSXDIR/smv5_osx
 scp $OSXHOST\:FDS-SMV/SMV_5/bin/smokezip_osx $OSXDIR/.
 scp $OSXHOST\:FDS-SMV/Utilities/smokediff/INTEL_OSX_32/smokediff_osx_32 $OSXDIR/smokediff_osx
 rm -f $OSXDIR.tar $OSXDIR.tar.gz
 tar cvf $OSXDIR.tar $OSXDIR/.
 gzip $OSXDIR.tar
 
+rm -rf $LINUXDIR
 mkdir -p $LINUXDIR
-mkdir -p $LINUXDIR/Documentation
-cp readme.html $LINUXDIR/Documentation/.
-cp $BINDIR/smv5_linux_32 $LINUXDIR/.
+
+cp readme.html $LINUXDIR/release_notes.html
+cp $BINDIR/smv5_linux_32 $LINUXDIR/smv5_linux
 cp $BINDIR/smokezip_linux $LINUXDIR/.
 cp $SVNROOT/Utilities/smokediff/INTEL_LINUX_32/smokediff_linux_32 $LINUXDIR/smokediff_linux
 rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
@@ -34,9 +35,8 @@ gzip $LINUXDIR.tar
 
 rm -rf $LINUXDIR64
 mkdir -p $LINUXDIR64
-mkdir -p $LINUXDIR64/Documentation
-cp readme.html $LINUXDIR64/Documentation/.
 
+cp readme.html $LINUXDIR64/release_notes.html
 cp $BINDIR/smv5_linux_64 $LINUXDIR64/.
 cp $BINDIR/smokezip_linux_64 $LINUXDIR64/.
 cp $SVNROOT/Utilities/smokediff/INTEL_LINUX_64/smokediff_linux_64 $LINUXDIR64/smokediff_linux_64
