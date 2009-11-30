@@ -9,6 +9,8 @@ setenv fdshost devi1.nist.gov
 
 setenv smokeview smv5_osx_32
 setenv smokezip smokezip_osx
+setenv smokediff smokediff_osx_64
+setenv smokediffdir smokediff_osx_64
 setenv fds5 fds5_intel_osx_64
 setenv fds5dir intel_osx_64
 setenv fds5mpi fds5_mpi_intel_osx_64
