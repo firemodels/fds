@@ -9,7 +9,8 @@ else
 set scp_fds_smvroot=~/$fds_smvroot
 endif
 set fds_smvroot=~/$fds_smvroot
-set makedir=$scp_fds_smvroot/FDS_Compilation
+set fdsroot=$scp_fds_smvroot/FDS_Compilation
+set smokediffroot=$scp_fds_smvroot/Utilities/smokediff
 set googledir=$fds_smvroot/Utilities/to_google
 set bundledir=$bundlebase/FDS/FDS5
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
@@ -49,13 +50,15 @@ endif
 # FDS 
 
 if $?fdshost then
-scp $fdshost\:$makedir/$fds5dir/$fds5 $bundledir/bin/.
-scp $fdshost\:$makedir/$fds5mpidir/$fds5mpi $bundledir/bin/.
+scp $fdshost\:$smokediffroot/$smokediffdir/$smokediff $bundledir/bin/.
+scp $fdshost\:$fdsroot/$fds5dir/$fds5 $bundledir/bin/.
+scp $fdshost\:$fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/.
 cp $bundle_setup/FDS-SMV_5_OSX_Launcher.app.zip $bundledir/bin/.
 cp $bundle_setup/README_OSX.html $bundledir/bin/.
 else
-cp $makedir/$fds5dir/$fds5 $bundledir/bin/.
-cp $makedir/$fds5mpidir/$fds5mpi $bundledir/bin/.
+cp $smokediffroot/$smokediffdir/$smokediff $bundledir/bin/.
+cp $fdsroot/$fds5dir/$fds5 $bundledir/bin/.
+cp $fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/.
 endif
 cp $forbundle/smokeview.ini $bundledir/bin/.
 cp $fds2asciidir/$fds2ascii $bundledir/bin/.
