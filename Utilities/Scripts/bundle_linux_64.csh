@@ -8,6 +8,8 @@ setenv bundlebase $2
 setenv INTELLIB lib64
 setenv smokeview smv5_linux_64
 setenv smokezip smokezip_linux
+setenv smokediff smokediff_linux_64
+setenv smokediffdir INTEL_LINUX_64
 setenv fds5 fds5_intel_linux_64
 setenv fds5dir intel_linux_64
 setenv fds5mpi fds5_mpi_intel_linux_64
