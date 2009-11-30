@@ -8,12 +8,18 @@ echo   (will take several hours depending on computer speed)
 set wui="%CD%\Wui"
 set vis="%CD%\Visualization"
 set smvug="%CD%\..\Manuals\SMV_5_User_Guide\"
+set logfile="%CD%\fds_run_tests.log"
 
 echo Press CTRL c to abort
 echo Press any other key to start FDS cases
 pause>NUL
 
-echo | fds5 2> %smvug%\scriptfigures\fds5.version
+echo Starting Visualization verification cases > %logfile%
+date /T >> %logfile%
+time /T >> %logfile%
+echo. >> %logfile%
+
+echo | fds5 2> "%smvug%\figures\fds5.version"
 
 cd %wui%
 fds5 fire_line.fds
@@ -36,4 +42,10 @@ fds5 smoke_test2.fds
 fds5 sprinkler_many.fds
 fds5 thouse5.fds
 fds5 transparency.fds
+
+echo Cases complete >> %logfile%
+date /T >> %logfile%
+time /T >> %logfile%
+
+
 
