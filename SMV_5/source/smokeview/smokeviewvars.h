@@ -493,7 +493,7 @@ SVEXTERN int partpointstep;
 SVEXTERN int partpointstep_old;
 SVEXTERN int partpointskip;
 SVEXTERN int viewoption;
-SVEXTERN int xyz_clipplane;
+SVEXTERN int xyz_clipplane,xyz_clipplane_last;
 SVEXTERN int clip_x,clip_y,clip_z,clip_i,clip_j,clip_k;
 SVEXTERN int clip_X,clip_Y,clip_Z,clip_I,clip_J,clip_K;
 SVEXTERN float clip_x_val, clip_y_val, clip_z_val;
