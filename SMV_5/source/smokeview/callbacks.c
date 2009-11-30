@@ -1368,9 +1368,12 @@ void handle_eyeview(int flag){
 
 void update_clipplanes(void){
   if(trainer_mode==0){
-    if(xyz_clipplane==0)printf("clipping off\n");
-    if(xyz_clipplane==1)printf("clipping blockages + data\n");
-    if(xyz_clipplane==2)printf("clipping blockages\n");
+    if(xyz_clipplane!=xyz_clipplane_last){
+      if(xyz_clipplane==0)printf("clipping off\n");
+      if(xyz_clipplane==1)printf("clipping blockages + data\n");
+      if(xyz_clipplane==2)printf("clipping blockages\n");
+      xyz_clipplane_last=xyz_clipplane;
+    }
   }
   if(xyz_clipplane==0){
     glDisable(GL_CLIP_PLANE0);

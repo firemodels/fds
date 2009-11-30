@@ -228,7 +228,9 @@ int init_shaders(void){
 
   if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader){
     if(setSmokeShaders()==1){
+#ifdef _DEBUG
   		printf("   GPU smoke shader successfully compiled, linked and loaded.\n");
+#endif
       gpuactive=1;
       err=0;
     }
