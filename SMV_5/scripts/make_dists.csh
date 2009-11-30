@@ -17,6 +17,7 @@ cp readme.html $OSXDIR/Documentation/.
 
 scp $OSXHOST\:FDS-SMV/SMV_5/bin/smv5_osx_32 $OSXDIR/.
 scp $OSXHOST\:FDS-SMV/SMV_5/bin/smokezip_osx $OSXDIR/.
+scp $OSXHOST\:FDS-SMV/Utilities/smokediff/INTEL_OSX_32/smokediff_osx_32 $OSXDIR/smokediff_osx
 rm -f $OSXDIR.tar $OSXDIR.tar.gz
 tar cvf $OSXDIR.tar $OSXDIR/.
 gzip $OSXDIR.tar
@@ -26,6 +27,7 @@ mkdir -p $LINUXDIR/Documentation
 cp readme.html $LINUXDIR/Documentation/.
 cp $BINDIR/smv5_linux_32 $LINUXDIR/.
 cp $BINDIR/smokezip_linux $LINUXDIR/.
+cp $SVNROOT/Utilities/smokediff/INTEL_LINUX_32/smokediff_linux_32 $OSXDIR/smokediff_linux
 rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
 tar cvf $LINUXDIR.tar $LINUXDIR/.
 gzip $LINUXDIR.tar
@@ -37,6 +39,7 @@ cp readme.html $LINUXDIR64/Documentation/.
 
 cp $BINDIR/smv5_linux_64 $LINUXDIR64/.
 cp $BINDIR/smokezip_linux_64 $LINUXDIR64/.
+cp $SVNROOT/Utilities/smokediff/INTEL_LINUX_64/smokediff_linux_64 $OSXDIR/smokediff_linux_64
 rm -f $LINUXDIR64.tar $LINUXDIR64.tar.gz
 tar cvf $LINUXDIR64.tar $LINUXDIR64/.
 gzip $LINUXDIR64.tar
