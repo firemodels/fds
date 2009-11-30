@@ -31,6 +31,8 @@ no_target:
 	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 .F90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
+.F90.obj:
+	$(FC) -c $(FFLAGS) $(FILTERF) $<
 .f90.obj:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 .f90.o:
@@ -63,6 +65,19 @@ intel_win_32 : FC        = ifort
 intel_win_32 : exe       = smokediff.exe
 
 intel_win_32 : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin)
+
+# ------------- Win 64 ----------------
+#  64 bit windows
+
+intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D X64 -D WIN32
+intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
+intel_win_64 : CC        = icl
+intel_win_64 : CPP       = icl
+intel_win_64 : FC        = ifort
+intel_win_64 : exe       = smokediff_64.exe
+
+intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin)
 
 # ------------- Linux 32 ----------------
