@@ -1,3 +1,6 @@
+cd Controls
+smokeview -runscript activate_vents
+cd ..
 cd Detectors
 smokeview -runscript beam_detector
 cd ..
