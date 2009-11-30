@@ -241,18 +241,23 @@ void sv_startup_c(int argc, char **argv){
 #ifdef pp_OSX
   getcwd(workingdir,1000);
 #endif
-  printf("Initializing Glut\n");
+  printf("\nInitializing Glut - ");
   glutInit(&argc, argv);
-  printf("Glut initialized\n");
+  printf("initialized\n");
 #ifdef pp_OSX
   chdir(workingdir);
 #endif
 
   mxpoints=mxpoints_orig;
   mxframes=mxframes_orig;
-  printf("Initializing Smokeview graphics window\n");
+#ifdef _DEBUG
+  printf("Initializing Smokeview graphics window - ");
+#endif
   glutInitWindowSize(screenWidth, screenHeight);
-  printf("Smokeview graphics window initialized\n");
+#ifdef _DEBUG
+  printf("initialized\n");
+#endif
+
   max_screenWidth = glutGet(GLUT_SCREEN_WIDTH);
   max_screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
   if(trainer_mode==1){
@@ -277,7 +282,7 @@ void InitOpenGL(void){
   int type;
   int err;
 
-  printf("Initializing OpenGL\n");
+  printf("Initializing OpenGL - ");
   
   type = GLUT_RGB|GLUT_DEPTH;
   if(buffertype==GLUT_DOUBLE){
@@ -299,19 +304,29 @@ void InitOpenGL(void){
     }
   }
 
-  printf("   Initializing Glut display mode\n");
+#ifdef _DEBUG
+  printf("   Initializing Glut display mode - ");
+#endif
   glutInitDisplayMode(type);
-  printf("   Glut display mode initialized\n");
+#ifdef _DEBUG
+  printf("initialized\n");
+#endif
 
   CheckMemory;
+#ifdef _DEBUG
   printf("   creating window\n");
+#endif
   mainwindow_id=glutCreateWindow("");
+#ifdef _DEBUG
   printf("   window created\n");
+#endif
 
 #ifdef pp_MESSAGE
   glui_message_setup(mainwindow_id);
 #endif
-  printf("   defining callbacks\n");
+#ifdef _DEBUG
+  printf("   Initializing callbacks - ");
+#endif
   glutSpecialUpFunc(specialkeyboard_up);
   glutKeyboardUpFunc(keyboard_up);
   glutKeyboardFunc(keyboard);
@@ -322,23 +337,33 @@ void InitOpenGL(void){
   glutDisplayFunc(Display);
   glutVisibilityFunc(NULL);
   glutMenuStatusFunc(MenuStatus);
-  printf("   callbacks initialized\n");
+#ifdef _DEBUG
+  printf("initialized\n");
+#endif
 //  glutWindowStatusFunc(WindowStatus);
   err=0;
 
 #ifdef pp_GPU
+#ifdef _DEBUG
   printf("   Initializing GPU shaders\n");
+#endif
   err=init_shaders();
   if(err==0){
+#ifdef _DEBUG
     printf("   GPU shaders initialization successfully completed\n");
+#endif
   }
 #endif
 #ifdef pp_CULL
   if(err==0){
-    printf("   Initializing OpenGL culling extensions\n");
+#ifdef _DEBUG
+    printf("   Initializing OpenGL culling extensions - ");
+#endif
     err=init_cull_exts();
     if(err==0){
-      printf("   OpenGL culling extension initialization successfully completed\n");
+#ifdef _DEBUG
+      printf("initialized\n");
+#endif
     }
   }
   else{
@@ -376,7 +401,7 @@ void InitOpenGL(void){
     if(nblueshift<0)nblueshift=0;
   }
   opengldefined=1;
-  printf("OpenGL initialized\n");
+  printf("initialized\n");
 }
 
 /* ------------------ set_3dsmoke_startup ------------------------ */
@@ -1314,6 +1339,7 @@ void initvars1(void){
   RenderMenu(render_option);
   viewoption=0;
   xyz_clipplane=0;
+  xyz_clipplane=-1;
   clip_x=0,clip_y=0,clip_z=0,clip_i=0,clip_j=0,clip_k=0;
   clip_X=0,clip_Y=0,clip_Z=0,clip_I=0,clip_J=0,clip_K=0;
   clip_x_val=0.0, clip_y_val=0.0, clip_z_val=0.0;

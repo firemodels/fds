@@ -108,6 +108,7 @@ int main(int argc, char **argv){
     CheckMemory;
     Args(argc, argv_sv);
     version();
+    printf("\n");
     if(smokezippath!=NULL)printf("Smokezip file: %s found\n",smokezippath);
     sv_startup_c(argc,argv_sv);
     CheckMemory;
