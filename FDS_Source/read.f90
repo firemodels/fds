@@ -3378,7 +3378,7 @@ READ_PROP_LOOP: DO N=0,N_PROP
       PY%OPERATING_PRESSURE = OPERATING_PRESSURE
 
       IF ((DROPLET_VELOCITY == 0._EB) .AND. (ORIFICE_DIAMETER == 0.) .AND. (PRESSURE_RAMP == 'null')) THEN
-         WRITE(MESSAGE,'(A,A,A)') 'WARNING: PROP ',TRIM(PY%ID),': droplet velocity is not defined.'
+         WRITE(MESSAGE,'(A,A,A)') 'WARNING: PROP ',TRIM(PY%ID),' droplet velocity is not defined.'
          IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
       ENDIF
       
@@ -3642,23 +3642,23 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
       IF ( ( ANY(THRESHOLD_TEMPERATURE>-TMPM) .OR. ANY(REFERENCE_TEMPERATURE>-TMPM) .OR. ANY(A>=0._EB) .OR. ANY(E>=0._EB) .OR. &
              ANY(HEAT_OF_REACTION/=0._EB) ) .AND. N_REACTIONS==0) THEN
-         WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,'. A reaction parameter is used, but N_REACTIONS=0'  
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL number ',TRIM(ID),'. A reaction parameter is used, but N_REACTIONS=0'  
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
       DO NN=1,N_REACTIONS
          IF (REFERENCE_TEMPERATURE(NN)<-TMPM  .AND. (E(NN)< 0._EB .OR. A(NN)<0._EB)) THEN
-            WRITE(MESSAGE,'(A,I2,A,I2,A)') 'ERROR: Problem with MATL ',N,', REACTION ',NN,'. Set REFERENCE_TEMPERATURE or E and A'  
+            WRITE(MESSAGE,'(A,A,A,I2,A)') 'ERROR: Problem with MATL ',TRIM(ID),', REAC ',NN,'. Set REFERENCE_TEMPERATURE or E and A'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (NU_FUEL(NN)==0._EB .AND. NU_WATER(NN)==0._EB .AND. NU_RESIDUE(NN)==0._EB .AND. SUM(NU_GAS(NN,:))==0._EB) THEN
-            WRITE(MESSAGE,'(A,I2,A,I2,A)') 'WARNING: MATL ',N,', REACTION ',NN,'. No product yields (NUs) set'  
+            WRITE(MESSAGE,'(A,A,A,I2,A)') 'WARNING: MATL ',TRIM(ID),', REAC ',NN,'. No product yields (NUs) set'  
             IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          ENDIF
       ENDDO
    ELSE NOT_BOILING ! Is liquid
       IF (HEAT_OF_REACTION(1) == 0._EB) THEN
-         WRITE(MESSAGE,'(A,I2,A)') 'ERROR: HEAT_OF_REACTION should be greater than zero for liquid MATL ',N,'.'  
+         WRITE(MESSAGE,'(A,A)') 'ERROR: HEAT_OF_REACTION should be greater than zero for liquid MATL ',TRIM(ID)  
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    ENDIF NOT_BOILING
@@ -3666,20 +3666,20 @@ READ_MATL_LOOP: DO N=1,N_MATL
    ! Error checking for thermal properties
 
    IF (DENSITY == 0._EB ) THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,': DENSITY=0' 
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': DENSITY=0' 
       CALL SHUTDOWN(MESSAGE)
    ENDIF
    IF (CONDUCTIVITY == 0._EB .AND. CONDUCTIVITY_RAMP == 'null' ) THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,': CONDUCTIVITY = 0' 
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': CONDUCTIVITY = 0' 
       CALL SHUTDOWN(MESSAGE)
    ENDIF
    IF (SPECIFIC_HEAT == 0._EB .AND. SPECIFIC_HEAT_RAMP == 'null' ) THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,': SPECIFIC_HEAT = 0' 
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': SPECIFIC_HEAT = 0' 
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-   IF (SPECIFIC_HEAT > 10._EB) WRITE(LU_ERR,'(A,I2)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL number ',N
+   IF (SPECIFIC_HEAT > 10._EB) WRITE(LU_ERR,'(A,A)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL ',TRIM(ID)
    IF (ANY(REFERENCE_RATE>0._EB)) THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Problem with MATL number ',N,': REFERENCE_RATE is no longer used starting with FDS 5.4' 
+      WRITE(MESSAGE,'(A,A,A)') 'ERROR: Problem with MATL ',TRIM(ID),': REFERENCE_RATE is no longer used' 
       CALL SHUTDOWN(MESSAGE)
    ENDIF
  
@@ -3767,7 +3767,8 @@ DO N=1,N_MATL
    ENDDO
 ENDDO
 
-!Check for duplicate names
+! Check for duplicate names
+
 IF (N_MATL>1) THEN
    DO N=1,N_MATL-1
       DO NN=N+1,N_MATL
@@ -3778,6 +3779,7 @@ IF (N_MATL>1) THEN
       ENDDO
    ENDDO
 ENDIF
+
 CONTAINS
  
 SUBROUTINE SET_MATL_DEFAULTS
@@ -3866,7 +3868,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
    
    IF (ML%RAMP_C_S/='null') THEN
          IF (RAMPS(-INT(ML%C_S))%DEPENDENT_DATA(1) > 10._EB) &
-            WRITE(LU_ERR,'(A,I2)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL number ',N
+            WRITE(LU_ERR,'(A,A)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL ',TRIM(ID)
    ENDIF   
 
 
@@ -4543,7 +4545,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    IF ((SF%SURFACE_DENSITY == 0._EB) .AND. SF%BURN_AWAY) THEN
-      WRITE(MESSAGE,'(A)') 'WARNING: SURF '//TRIM(SF%ID)//' has BURN_AWAY set but zero combustible density'
+      WRITE(MESSAGE,'(A,A,A)') 'WARNING: SURF ',TRIM(SF%ID),' has BURN_AWAY set but zero combustible density'
       IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
    ENDIF   
 
@@ -5072,12 +5074,12 @@ TYPE(OBSTRUCTION_TYPE), POINTER :: OB2,OBT
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
 TYPE(OBSTRUCTION_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: TEMP_OBSTRUCTION
 INTEGER :: NM,NOM,N_OBST_O,NNN,IC,N,NN,NNNN,N_NEW_OBST,RGB(3),N_OBST_NEW,II,JJ,KK
-CHARACTER(30) :: DEVC_ID,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID
+CHARACTER(30) :: ID,DEVC_ID,SURF_ID,SURF_IDS(3),SURF_ID6(6),CTRL_ID,MULT_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
 REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_SPECIFIED
 LOGICAL :: SAWTOOTH,EMBEDDED,THICKEN,PERMIT_HOLE,ALLOW_VENT,EVACUATION, REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE
-NAMELIST /OBST/ XB,SURF_ID,SURF_IDS,SURF_ID6,FYI,BNDF_FACE,BNDF_OBST, &
+NAMELIST /OBST/ XB,ID,SURF_ID,SURF_IDS,SURF_ID6,FYI,BNDF_FACE,BNDF_OBST, &
                 SAWTOOTH,RGB,TRANSPARENCY,TEXTURE_ORIGIN,THICKEN, OUTLINE,DEVC_ID,CTRL_ID,COLOR, &
                 PERMIT_HOLE,ALLOW_VENT,EVACUATION,MESH_ID,REMOVABLE,MULT_ID,BULK_DENSITY
  
@@ -5123,6 +5125,7 @@ MESH_LOOP: DO NM=1,NMESHES
  
    READ_OBST_LOOP: DO NN=1,N_OBST_O
 
+      ID       = 'null'
       MULT_ID  = 'null'
       SURF_ID  = 'null'
       SURF_IDS = 'null'
@@ -5378,12 +5381,14 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (SURFACE(OB%IBC(NNN))%BURN_AWAY) THEN
                      OB%CONSUMABLE = .TRUE.
                      IF (.NOT.SAWTOOTH) THEN
-                        WRITE(MESSAGE,'(A,I5,A)')  'ERROR: OBST number',N,' cannot have a BURN_AWAY SURF_ID and SAWTOOTH=.FALSE.' 
+                        IF (ID=='null') WRITE(MESSAGE,'(A,I5,A)')'ERROR: OBST ',N,       ' cannot be BURN_AWAY and SAWTOOTH=.FALSE.'
+                        IF (ID/='null') WRITE(MESSAGE,'(A,A,A)') 'ERROR: OBST ',TRIM(ID),' cannot be BURN_AWAY and SAWTOOTH=.FALSE.' 
                         CALL SHUTDOWN(MESSAGE)
                      ENDIF
                   ENDIF
                   IF (SURFACE(OB%IBC(NNN))%POROUS .AND. .NOT.OB%THIN) THEN
-                     WRITE(MESSAGE,'(A,I5,A)')  'ERROR: OBST number',N,' must be zero cells thick if it is to be POROUS'
+                     IF (ID=='null') WRITE(MESSAGE,'(A,I5,A)') 'ERROR: OBST ',N,       ' must be zero cells thick to be POROUS'
+                     IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: OBST ',TRIM(ID),' must be zero cells thick to be POROUS'
                      CALL SHUTDOWN(MESSAGE)
                   ENDIF
                ENDDO FACE_LOOP
@@ -5450,7 +5455,8 @@ MESH_LOOP: DO NM=1,NMESHES
                IF (EVACUATION_ONLY(NM)) BULK_DENSITY = -1._EB
                OB%BULK_DENSITY = BULK_DENSITY
                IF (OB%VOLUME_ADJUST==0._EB .AND. BULK_DENSITY>0._EB) THEN
-                  WRITE(MESSAGE,'(A,I4,A)') 'ERROR: OBSTruction ',NN,' has no volume and thus cannot have a BULK_DENSITY'
+                  IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: OBST ',NN,      ' has no volume and cannot have a BULK_DENSITY'
+                  IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: OBST ',TRIM(ID),' has no volume and cannot have a BULK_DENSITY'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
  
@@ -6042,11 +6048,11 @@ USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
 
 INTEGER :: N,NN,NM,NNN,NVO,IOR,I1,I2,J1,J2,K1,K2,RGB(3)
 REAL(EB) :: SPREAD_RATE,TRANSPARENCY,XYZ(3),TMP_EXTERIOR,MASS_FRACTION(MAX_SPECIES),DYNAMIC_PRESSURE
-CHARACTER(30) :: DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP
+CHARACTER(30) :: ID,DEVC_ID,CTRL_ID,SURF_ID,PRESSURE_RAMP
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
 LOGICAL :: REJECT_VENT,EVACUATION,OUTLINE
-NAMELIST /VENT/ XB,IOR,MB,PBX,PBY,PBZ,SURF_ID,FYI,RGB,TRANSPARENCY,COLOR, &
+NAMELIST /VENT/ XB,ID,IOR,MB,PBX,PBY,PBZ,SURF_ID,FYI,RGB,TRANSPARENCY,COLOR, &
                 TEXTURE_ORIGIN,OUTLINE,DEVC_ID,CTRL_ID, &
                 XYZ,EVACUATION,MESH_ID,SPREAD_RATE,TMP_EXTERIOR,MASS_FRACTION,DYNAMIC_PRESSURE,PRESSURE_RAMP
  
@@ -6094,6 +6100,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
       SURF_ID = 'null'
       COLOR   = 'null'
       MESH_ID = 'null'
+      ID      = 'null'
       RGB     =-1
       TRANSPARENCY = 1._EB
       DYNAMIC_PRESSURE = 0._EB
@@ -6166,12 +6173,14 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF (MESH_ID/='null' .AND. MESH_ID/=MESH_NAME(NM))  REJECT_VENT = .TRUE.
  
       IF (XB(3)==XB(4) .AND. TWO_D .AND. NN<NVO-1) THEN
-         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT',NN,' cannot be specified on a y boundary in a 2-D calculation'
+         IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)')'ERROR: VENT ',NN,      ' cannot be specified on a y boundary in a 2D calculation'
+         IF (ID/='null') WRITE(MESSAGE,'(A,A,A)') 'ERROR: VENT ',TRIM(ID),' cannot be specified on a y boundary in a 2D calculation'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
  
       IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4) .AND. XB(5)/=XB(6)) THEN
-         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT',NN,' must be a plane'
+         IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,      ' must be a plane'
+         IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' must be a plane'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
  
@@ -6207,7 +6216,8 @@ MESH_LOOP_1: DO NM=1,NMESHES
          XB(5) = ZS
          XB(6) = ZF
          IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Evacuation VENT',NN,' must be a vertical plane'
+            IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Evacuation VENT ',NN,      ' must be a vertical plane'
+            IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: Evacuation VENT ',TRIM(ID),' must be a vertical plane'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
       ENDIF
@@ -6290,7 +6300,8 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
       IF ( (VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) .AND. &
            (VT%DEVC_ID /= 'null' .OR. VT%CTRL_ID /= 'null') ) THEN
-         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: OPEN, MIRROR, OR PERIODIC VENT',NN,' cannot be controlled by a device'
+         IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,      ' cannot be controlled by a device'
+         IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' cannot be controlled by a device'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
@@ -6522,7 +6533,7 @@ COUNT_LOOP: DO
    READ(LU_INPUT,NML=INIT,END=11,ERR=12,IOSTAT=IOS)
    N_INIT = N_INIT + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with INIT no.',N_INIT+1
+      WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with INIT number ',N_INIT+1
       CALL SHUTDOWN(MESSAGE)
       ENDIF
 ENDDO COUNT_LOOP
@@ -6631,7 +6642,7 @@ COUNT_ZONE_LOOP: DO
    READ(LU_INPUT,NML=ZONE,END=11,ERR=12,IOSTAT=IOS)
    N_ZONE = N_ZONE + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with ZONE no.',N_ZONE+1
+      WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with ZONE number ',N_ZONE+1
       CALL SHUTDOWN(MESSAGE)
       ENDIF
 ENDDO COUNT_ZONE_LOOP
@@ -6746,7 +6757,7 @@ COUNT_DEVC_LOOP: DO
    READ(LU_INPUT,NML=DEVC,END=11,ERR=12,IOSTAT=IOS)
    N_DEVC = N_DEVC + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I4)') 'ERROR: Problem with DEVC no.',N_DEVC+1
+      WRITE(MESSAGE,'(A,I4)') 'ERROR: Problem with DEVC number ',N_DEVC+1
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 ENDDO COUNT_DEVC_LOOP
@@ -6779,7 +6790,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
       XYZ(3) = 0.5_EB*(XB(5)+XB(6))
    ELSE
       IF (XYZ(1) < -1.E5_EB) THEN
-         WRITE(MESSAGE,'(A,I5,A)')  ' ERROR: DEVC ',NN,' must have coordinates, even if it is not a point quantity'
+         WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates, even if it is not a point quantity'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    ENDIF
@@ -6801,7 +6812,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    ! Make sure there is either a QUANTITY or PROP_ID for the DEVICE
 
    IF (QUANTITY=='null' .AND. PROP_ID=='null') THEN
-      WRITE(MESSAGE,'(A,I5,A)')  ' ERROR: DEVC ',NN,' must have either an output QUANTITY or PROP_ID'
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have either an output QUANTITY or PROP_ID'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 
@@ -6814,7 +6825,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
       ELSE
          N      = N-1
          N_DEVC = N_DEVC-1
-         WRITE(MESSAGE,'(A,I3,A)') 'WARNING: DEVC ',NN,', is not within any mesh.'  
+         WRITE(MESSAGE,'(A,A,A)') 'WARNING: DEVC ',TRIM(ID),' is not within any mesh.'  
          IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
          CYCLE READ_DEVC_LOOP
       ENDIF
@@ -6975,7 +6986,7 @@ COUNT_CTRL_LOOP: DO
    READ(LU_INPUT,NML=CTRL,END=11,ERR=12,IOSTAT=IOS)
    N_CTRL = N_CTRL + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I4)') 'ERROR: Problem with CTRL no.',N_CTRL+1
+      WRITE(MESSAGE,'(A,I4)') 'ERROR: Problem with CTRL number ',N_CTRL+1
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 ENDDO COUNT_CTRL_LOOP
@@ -7197,23 +7208,23 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       ENDIF
 
       IF (QUANTITY_INDEX<0 .AND. DV%IOR==0 .AND. DV%STATISTICS=='null') THEN
-         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Specify orientation of DEVC ' ,N,' using the parameter IOR'
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR: Specify orientation of DEVC ',TRIM(DV%ID),' using the parameter IOR'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
       IF (QUANTITY_INDEX < 0 .AND. (DV%STATISTICS=='MASS MEAN' .OR. DV%STATISTICS=='VOLUME MEAN' .OR. &
                                     DV%STATISTICS=='VOLUME INTEGRAL' .OR. DV%STATISTICS=='MASS INTEGRAL') ) THEN
-         WRITE(MESSAGE,'(A,I4)') 'ERROR: Invalid STATISTICS specified for wall DEVC ',N
+         WRITE(MESSAGE,'(A,A)') 'ERROR: Invalid STATISTICS specified for wall DEVC ',TRIM(DV%ID)
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
       IF (QUANTITY_INDEX > 0 .AND. DV%STATISTICS=='SURFACE INTEGRAL') THEN
-         WRITE(MESSAGE,'(A,I4)') 'ERROR: Invalid STATISTICS specified for gas DEVC ',N
+         WRITE(MESSAGE,'(A,A)') 'ERROR: Invalid STATISTICS specified for gas DEVC ',TRIM(DV%ID)
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
       IF (QUANTITY_INDEX > 0 .AND. DV%STATISTICS/='null' .AND. DV%STATISTICS/='TIME INTEGRAL' .AND. DV%I1<0) THEN
-         WRITE(MESSAGE,'(A,I4)') 'ERROR: XB required when geometrical STATISTICS specified for gas DEVC ',N
+         WRITE(MESSAGE,'(A,A)') 'ERROR: XB required when geometrical STATISTICS specified for gas DEVC ',TRIM(DV%ID)
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       
@@ -7243,11 +7254,11 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       CASE ('spot obscuration','CHAMBER OBSCURATION') 
 
          IF (DV%PROP_INDEX<1) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DEVC ' ,N,' is a smoke detector and must have a PROP_ID'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and must have a PROP_ID'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (PROPERTY(DV%PROP_INDEX)%SPEC_INDEX==0 .AND. .NOT.MIXTURE_FRACTION) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DEVC ' ,N,' is a smoke detector and requires a fire or smoke source'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a fire or smoke source'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          ALLOCATE(DV%T_E(-1:1000))
@@ -7261,7 +7272,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       CASE ('LINK TEMPERATURE','SPRINKLER LINK TEMPERATURE') 
 
          IF (DV%PROP_INDEX<1) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DEVC ' ,N,' must have a PROP_ID'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' must have a PROP_ID'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (PROPERTY(DV%PROP_INDEX)%ACTIVATION_TEMPERATURE <= -273.15_EB) THEN
@@ -7295,14 +7306,14 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       CASE ('SOLID DENSITY')
 
          IF (DV%MATL_ID=='null') THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DEVC ' ,N,' must have a MATL_ID'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' must have a MATL_ID'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
 
       CASE ('CABLE TEMPERATURE')
 
          IF (DV%PROP_INDEX<1) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DEVC ' ,N,' must have a PROP_ID'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' must have a PROP_ID'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          PY => PROPERTY(DV%PROP_INDEX)
@@ -7331,12 +7342,12 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
          IF (DV%PROP_INDEX>0) THEN
             IF (PROPERTY(DV%PROP_INDEX)%SPEC_INDEX==0 .AND. .NOT.MIXTURE_FRACTION) THEN
-               WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DEVC ' ,N,' is a smoke detector and requires a fire or smoke source'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a fire or smoke source'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
          ELSE
             IF (.NOT.MIXTURE_FRACTION) THEN
-               WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DEVC ' ,N,' is a smoke detector and requires a fire or smoke source'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a fire or smoke source'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
          ENDIF
@@ -7404,7 +7415,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          ! Check either for a specified SMOKE SPECies, or if mixture fraction model is being used
          IF (DV%PROP_INDEX>0) THEN
             IF (PROPERTY(DV%PROP_INDEX)%SPEC_INDEX==0 .AND. .NOT.MIXTURE_FRACTION) THEN
-               WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DEVC ' ,N,' is a smoke detector and requires a fire or smoke source'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a fire or smoke source'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
          ENDIF
@@ -7490,7 +7501,7 @@ COUNT_PROF_LOOP: DO
    READ(LU_INPUT,NML=PROF,END=11,ERR=12,IOSTAT=IOS)
    N_PROF = N_PROF + 1
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I4)') 'ERROR: Problem with PROF no.',N_PROF+1
+      WRITE(MESSAGE,'(A,I4)') 'ERROR: Problem with PROF number ',N_PROF+1
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 ENDDO COUNT_PROF_LOOP
@@ -7585,7 +7596,7 @@ COUNT_ISOF_LOOP: DO
    READ(LU_INPUT,NML=ISOF,END=9,ERR=10,IOSTAT=IOS)
    N_ISOF = N_ISOF + 1
    10 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I2)') 'ERROR: Problem with ISOF no.',N_ISOF
+      WRITE(MESSAGE,'(A,I2)') 'ERROR: Problem with ISOF number ',N_ISOF
       CALL SHUTDOWN(MESSAGE)
       ENDIF
 ENDDO COUNT_ISOF_LOOP
@@ -7662,8 +7673,7 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (VECTOR .AND. TWO_D) N_SLCF = N_SLCF + 2
       IF (VECTOR .AND. .NOT. TWO_D) N_SLCF = N_SLCF + 3
       10 IF (IOS>0) THEN
-         ! WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with SLCF no.',N_SLCF+1
-         WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with SLCF no.',N_SLCF_O+1
+         WRITE(MESSAGE,'(A,I3)') 'ERROR: Problem with SLCF number ',N_SLCF_O+1
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    ENDDO COUNT_SLCF_LOOP
