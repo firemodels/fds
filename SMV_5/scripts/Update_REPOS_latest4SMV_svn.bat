@@ -37,5 +37,5 @@ plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% tig
 
 echo.
 echo Updating the devi1 OSX repository, %linux_svn_root%, to the latest revision
-plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% devi1.nist.cfr.nist.gov
+plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% devi1.nist.nist.gov
 pause
