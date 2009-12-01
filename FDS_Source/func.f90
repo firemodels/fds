@@ -1604,130 +1604,137 @@ If ( tmp_1 < 0.20_EB ) FED = FED + 1.0_EB  / (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_
 END FUNCTION FED
 
 SUBROUTINE JANAF_TABLE (I_TMP,CP,H,SPEC_ID,RCON)
-CHARACTER(30) ::SPEC_ID
-INTEGER :: I_TMP
-REAL(EB) CP,CP2,H,RCON,TE
+!CP data in this subroutine is taken from 4th Edition of the NIST-JANAF Thermochemical Tables
+!The tabulated data in the tables have been curve fit
+!For gas species that result from liquid evaporation, H is set at the 0 K reference temperature to obtain the correct H_V
+!at the H_V reference temperature for that liquid.
+!For each species CP is first computed in kJ/mol-K and then converted to kJ/kg-K
+CHARACTER(30),INTENT(IN) ::SPEC_ID
+INTEGER,INTENT(IN) :: I_TMP
+REAL(EB),INTENT(IN) :: RCON
+REAL(EB),INTENT(OUT) :: CP,H
+REAL(EB) :: CP2,TE
 
 TE = REAL(I_TMP,EB)
 
 SELECT CASE (SPEC_ID)
    CASE DEFAULT
-      CP = RCON*GAMMA/(GAMMA-1._EB)
-      H = -298.15_EB * CP
+      CP = RCON*GAMMA/(GAMMA-1._EB) !kJ/kg-K
+      H = 0._EB !kJ/kg
       
    CASE('AIR')
       IF (TE<100._EB) THEN
-         CP = 1032.714_EB + TE * 0.064983_EB
-         CP2 = 904.8438_EB + TE * 0.060737_EB
+         CP = 1032.714_EB + TE * 0.064983_EB !kJ/kg-K
+         CP2 = 904.8438_EB + TE * 0.060737_EB  !kJ/kg-K
       ELSE
          CP = 87.05047_EB-18075.59_EB/TE**2 - 669.4452/TE + 0.03857225_EB*TE - 0.00001590889_EB*TE**2 + 0.000000003770398_EB*TE**3 &
-              - 0.000000000000459012_EB*TE**4 + 2.232133E-17_EB*TE**5 - 11.54189_EB*LOG(TE)
-         CP = CP / MW_N2 * 1000._EB
+              - 0.000000000000459012_EB*TE**4 + 2.232133E-17_EB*TE**5 - 11.54189_EB*LOG(TE) !kJ/mol-K
+         CP = CP / MW_N2 * 1000._EB !kJ/kg-K
          CP2 = 72.69494_EB - 566.7158_EB/TE + 0.03684584_EB*TE - 0.0000168704_EB*TE**2 + 0.000000004308058_EB*TE**3 &
-              - 0.0000000000005561213_EB*TE**4 + 2.857776E-17_EB*TE**5 - 8.989582_EB*LOG(TE)
-         CP2 = CP2 / MW_O2 * 1000._EB
+              - 0.0000000000005561213_EB*TE**4 + 2.857776E-17_EB*TE**5 - 8.989582_EB*LOG(TE) !kJ/mol-K
+         CP2 = CP2 / MW_O2 * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
-      CP = 0.77_EB*CP+0.23*CP2
+      H = 0._EB !kJ/kg
+      CP = 0.77_EB*CP+0.23*CP2 !kJ/kg-K
 
    CASE('NITROGEN')
       IF (TE<100._EB) THEN
-         CP = 1032.714_EB + TE * 0.064983_EB
+         CP = 1032.714_EB + TE * 0.064983_EB !kJ/kg-K
       ELSE
          CP = 87.05047_EB-18075.59_EB/TE**2 - 669.4452/TE + 0.03857225_EB*TE - 0.00001590889_EB*TE**2 + 0.000000003770398_EB*TE**3 &
-              - 0.000000000000459012_EB*TE**4 + 2.232133E-17_EB*TE**5 - 11.54189_EB*LOG(TE)
-         CP = CP / MW_N2 * 1000._EB
+              - 0.000000000000459012_EB*TE**4 + 2.232133E-17_EB*TE**5 - 11.54189_EB*LOG(TE) !kJ/mol-K
+         CP = CP / MW_N2 * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
       
    CASE('OXYGEN')
       IF (TE<100._EB) THEN
-         CP = 904.8438_EB + TE * 0.060737_EB
+         CP = 904.8438_EB + TE * 0.060737_EB !kJ/kg-K
       ELSE
          CP = 72.69494_EB - 566.7158_EB/TE + 0.03684584_EB*TE - 0.0000168704_EB*TE**2 + 0.000000004308058_EB*TE**3 &
-              - 0.0000000000005561213_EB*TE**4 + 2.857776E-17_EB*TE**5 - 8.989582_EB*LOG(TE)
-         CP = CP / MW_O2 * 1000._EB
+              - 0.0000000000005561213_EB*TE**4 + 2.857776E-17_EB*TE**5 - 8.989582_EB*LOG(TE) !kJ/mol-K
+         CP = CP / MW_O2 * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
       
    CASE('METHANE')
       IF (TE<100._EB) THEN
-         CP = 2078.875_EB - TE * 0.0101122_EB
+         CP = 2078.875_EB - TE * 0.0101122_EB !kJ/kg-K
       ELSE
          CP = -420.3769_EB - 993834.8_EB/TE**2 + 24488.36_EB/TE + 0.03226962_EB*TE - 0.00002813934_EB*TE**2 &
-              + 0.000000007651289_EB*TE**3 - 0.0000000000009707785*TE**4+4.772684E-17_EB*TE**5 + 66.26671_EB*LOG(TE)
-         CP = CP / 16._EB * 1000._EB
+              + 0.000000007651289_EB*TE**3 - 0.0000000000009707785*TE**4+4.772684E-17_EB*TE**5 + 66.26671_EB*LOG(TE) !kJ/mol-K
+         CP = CP / 16._EB * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB  !kJ/kg
       
    CASE('ETHYLENE')
       IF (TE<100._EB) THEN
-         CP = 1187.5_EB + TE * 0.010002_EB
+         CP = 1187.5_EB + TE * 0.010002_EB !kJ/kg-K
       ELSE
          CP = -765.804_EB - 964594_EB/TE**2 + 30643.63_EB/TE - 0.07157813_EB*TE + 0.000007792221_EB*TE**2 &
-              - 0.0000000003326001_EB*TE**3 - 2.706439E-14_EB*TE**4 + 2.510661E-18_EB*TE**5 + 129.46_EB*LOG(TE)
-         CP = CP / 28._EB * 1000._EB
+              - 0.0000000003326001_EB*TE**3 - 2.706439E-14_EB*TE**4 + 2.510661E-18_EB*TE**5 + 129.46_EB*LOG(TE) !kJ/mol-K
+         CP = CP / 28._EB * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
       
    CASE('CARBON DIOXIDE')
       IF (TE<100._EB) THEN
-         CP = 658._EB + TE * 0.06981_EB
+         CP = 658._EB + TE * 0.06981_EB !kJ/kg-K
       ELSE
          CP = -137.8814_EB + 3162.309_EB/TE - 0.01967907_EB*TE + 0.000002677873_EB*TE**2 - 0.0000000002017261_EB*TE**3 &
-              + 6.084876E-15_EB*TE**4 + 29.8488_EB*LOG(TE)
-         CP = CP / MW_CO2 * 1000._EB
+              + 6.084876E-15_EB*TE**4 + 29.8488_EB*LOG(TE) !kJ/mol-K
+         CP = CP / MW_CO2 * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
       
    CASE('WATER VAPOR')
       IF (TE<100._EB) THEN
-         CP = 1804.5_EB + TE * 0.452714_EB
+         CP = 1804.5_EB + TE * 0.452714_EB !kJ/kg-K
       ELSE
          CP = 102.2585_EB - 1084.688_EB/TE + 0.04410701_EB*TE - 0.00001181179_EB*TE**2 + 0.000000001601012_EB*TE**3 &
-              - 8.408214E-14_EB*TE**4 - 13.55214_EB*LOG(TE)
-         CP = CP / MW_H2O * 1000._EB
+              - 8.408214E-14_EB*TE**4 - 13.55214_EB*LOG(TE) !kJ/mol-K
+         CP = CP / MW_H2O * 1000._EB !kJ/kg-K
       ENDIF
-      H = 1881295.804_EB
+      H = 1881295.804_EB !kJ/kg
 
    CASE('CARBON MONOXIDE')
       IF (TE<100._EB) THEN
-         CP = 1033.429_EB + TE * 0.090798_EB
+         CP = 1033.429_EB + TE * 0.090798_EB !kJ/kg-K
       ELSE
          CP = 43.9033_EB - 69.46386_EB/TE + 0.01806059_EB*TE - 0.000006173999_EB*TE**2 + 0.000000001003309_EB*TE**3 &
-              - 6.3073984E-14_EB*TE**4 - 3.423053*LOG(TE)
-         CP = CP / MW_CO * 1000._EB
+              - 6.3073984E-14_EB*TE**4 - 3.423053*LOG(TE) !kJ/mol-K
+         CP = CP / MW_CO * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
       
    CASE('HYDROGEN')
       IF (TE<100._EB) THEN
-         CP = 14685._EB - TE * 9.084204_EB
+         CP = 14685._EB - TE * 9.084204_EB !kJ/kg-K
       ELSE
          CP = 138.9978_EB - 2112.074_EB/TE + 0.06201484_EB*TE - 0.00002746675_EB*TE**2 + 0.00000000767361_EB*TE**3 &
-              - 0.000000000001112505_EB*TE**4 + 6.209465E-17_EB*TE**5 -20.90222_EB*LOG(TE)
-         CP = CP / MW_H2 * 1000._EB
+              - 0.000000000001112505_EB*TE**4 + 6.209465E-17_EB*TE**5 -20.90222_EB*LOG(TE) !kJ/mol-K
+         CP = CP / MW_H2 * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
       
    CASE('ARGON')
-         CP = 20.786_EB / 0.040_EB
-         H = 0._EB
+         CP = 20.786_EB / 0.040_EB !kJ/kg-K
+         H = 0._EB !kJ/kg
                
    CASE('HELIUM')
-         CP = 20.786_EB / 0.004_EB
-         H = 0._EB
+         CP = 20.786_EB / 0.004_EB !kJ/kg-K
+         H = 0._EB !kJ/kg
       
    CASE('SOOT')
 !      IF (.NOTE.AL203) TEHEN
          IF (TE<100._EB) THEN
-            CP = -39.5_EB + TE * 1.790405_EB
+            CP = -39.5_EB + TE * 1.790405_EB !kJ/kg-K
          ELSE
             CP = 138.9978_EB - 2112.074_EB/TE + 0.06201484_EB*TE - 0.00002746675_EB*TE**2 + 0.00000000767361_EB*TE**3 &
-               - 0.000000000001112505_EB*TE**4 + 6.209465E-17_EB*TE**5 -20.90222_EB*LOG(TE)
-            CP = CP / 12._EB * 1000._EB
+               - 0.000000000001112505_EB*TE**4 + 6.209465E-17_EB*TE**5 -20.90222_EB*LOG(TE) !kJ/mol-K
+            CP = CP / 12._EB * 1000._EB !kJ/kg-K
          ENDIF
-         H = 0._EB
+         H = 0._EB !kJ/kg-K
 !      ELSE
 !         IF (TE<100._EB) THEN
 !            CP = -39.5_EB + TE * 0.0214849_EB
@@ -1740,94 +1747,97 @@ SELECT CASE (SPEC_ID)
 !      ENDIF
    CASE('HYDROGEN BROMIDE')
       IF (TE<100._EB) THEN
-         CP = 350.925_EB + TE * 0.084659_EB
+         CP = 350.925_EB + TE * 0.084659_EB !kJ/kg-K
       ELSE
          CP = 150.5185+83821.41_EB/TE**2-3380.966_EB/TE+0.05210022_EB*TE-0.00001942684_EB*TE**2+0.000000004370106_EB*TE**3&
-              -0.0000000000005138871_EB*TE**4+2.433508E-17_EB*TE**5-21.93194_EB*LOG(TE)
-         CP = CP / 81._EB * 1000._EB
+              -0.0000000000005138871_EB*TE**4+2.433508E-17_EB*TE**5-21.93194_EB*LOG(TE) !kJ/mol-K
+         CP = CP / 81._EB * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
       
    CASE('HYDROGEN CYANIDE')
       IF (TE<100._EB) THEN
-         CP = 1070.852_EB + TE * 0.156409_EB
+         CP = 1070.852_EB + TE * 0.156409_EB !kJ/kg-K
       ELSE
          CP = -57.025353_EB+1556.193_EB/TE+0.001382767_EB*TE-0.000001495245_EB*TE**2+0.0000000001314654_EB*TE**3&
-               +1.758821E-14_EB*TE**4-2.419441E-18_EB*TE**5+15.34694_EB*LOG(TE)
-         CP = CP / 27._EB * 1000._EB
+               +1.758821E-14_EB*TE**4-2.419441E-18_EB*TE**5+15.34694_EB*LOG(TE) !kJ/mol-K
+         CP = CP / 27._EB * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
 
    CASE('HYDROGEN CHLORIDE')
       IF (TE<100._EB) THEN
-         CP = 785.111_EB + TE * 0.236287_EB
+         CP = 785.111_EB + TE * 0.236287_EB !kJ/kg-K
       ELSE
          CP = 204.4656_EB+183314_EB/TE**2-5890.058_EB/TE+0.06083794_EB*TE-0.00002098845_EB*TE**2+0.000000004486574_EB*TE**3&
-              -0.0000000000005086074_EB*TE**4+2.342705E-17_EB*TE**5-30.54396_EB*LOG(TE)
-         CP = CP / 36._EB * 1000._EB
+              -0.0000000000005086074_EB*TE**4+2.342705E-17_EB*TE**5-30.54396_EB*LOG(TE) !kJ/mol-K
+         CP = CP / 36._EB * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
 
    CASE('HYDROGEN FLOURIDE')
       IF (TE<100._EB) THEN
-         CP = 1370.6_EB + TE * 0.858_EB
+         CP = 1370.6_EB + TE * 0.858_EB !kJ/kg-K
       ELSEIF (TE>=100_EB .AND. TE<=200._EB) THEN
-         CP = 1456.4_EB
+         CP = 1456.4_EB !kJ/kg-K
       ELSE
          CP = 204.4656_EB+183314_EB/TE**2-5890.058_EB/TE+0.06083794_EB*TE-0.00002098845_EB*TE**2+0.000000004486574_EB*TE**3&
-              -0.0000000000005086074_EB*TE**4+2.342705E-17_EB*TE**5-30.54396_EB*LOG(TE)
-         CP = CP / 20._EB * 1000._EB
+              -0.0000000000005086074_EB*TE**4+2.342705E-17_EB*TE**5-30.54396_EB*LOG(TE) !kJ/mol-K
+         CP = CP / 20._EB * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
 
    CASE('NITROGEN OXIDE')
       IF (TE<100._EB) THEN
-         CP = 722.2609_EB + TE * 0.010559_EB
+         CP = 722.2609_EB + TE * 0.010559_EB !kJ/kg-K
       ELSE
          CP = -445.5618_EB-614794.8_EB/TE**2+18374.97_EB/TE-0.08599735_EB*TE+0.00002205842_EB*TE**2-0.0000000039020422_EB*TE**3&
-              +0.0000000000003916969_EB*TE**4-1.644367E-17_EB*TE**5+79.24727_EB*LOG(TE)
-         CP = CP / 46._EB * 1000._EB
+              +0.0000000000003916969_EB*TE**4-1.644367E-17_EB*TE**5+79.24727_EB*LOG(TE) !kJ/mol-K
+         CP = CP / 46._EB * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
 
    CASE('ACROLEIN')
       IF (TE<50._EB) THEN
-         CP = 682.3929_EB + TE * 0.00066_EB
+         CP = 682.3929_EB + TE * 0.00066_EB !kJ/kg-K
       ELSE
          CP = 332.3828_EB-2602.398_EB/TE+0.6547594_EB*TE-0.0005857_EB*TE**2+0.0000002863821_EB*TE**3 &
-              -0.00000000005696995_EB*TE**4-70.66684_EB*LOG(TE)
-         CP = CP / 56._EB * 1000._EB
+              -0.00000000005696995_EB*TE**4-70.66684_EB*LOG(TE) !kJ/mol-K
+         CP = CP / 56._EB * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB
+      H = 0._EB !kJ/kg
    CASE('N-HEPTANE')
       TE = MAX(TE,200._EB)
       CP = -3887.019_EB-2849358._EB/TE**2+130708.2_EB/TE-0.6320126_EB*TE+0.0001695335_EB*TE**2-0.00000003154411_EB*TE**3+&
-           0.00000000000323268_EB*TE**4-1.374039E-16_EB*TE**5+670.4689_EB*LOG(TE)
-      CP = CP / 100._EB * 1000._EB
-      H = 201131._EB      
+           0.00000000000323268_EB*TE**4-1.374039E-16_EB*TE**5+670.4689_EB*LOG(TE) !kJ/mol-K
+      CP = CP / 100._EB * 1000._EB !kJ/kg-K
+      H = 201131._EB  !kJ/kg     
    CASE('METHANOL')
       TE = MAX(TE,200._EB)
       CP = -841.6793_EB-1508086_EB/TE**2+39536.25_EB/TE-0.07191862_EB*TE+0.000006024494_EB*TE**2+0.0000000002922874_EB*TE**3-&
-           0.0000000000001171797_EB*TE**4+7.4231E-18_EB*TE**5+138.8215_EB*LOG(TE)
-      CP = CP / 32._EB * 1000._EB
-      H = 1055464._EB   
+           0.0000000000001171797_EB*TE**4+7.4231E-18_EB*TE**5+138.8215_EB*LOG(TE) !kJ/mol-K
+      CP = CP / 32._EB * 1000._EB !kJ/kg-K
+      H = 1055464._EB !kJ/kg   
    CASE('ETHANOL')
       TE = MAX(TE,50._EB)
       CP = -445.7989_EB-335159.4_EB/TE**2+15246.42_EB/TE+0.0657487_EB*TE-0.00004985012_EB*TE**2+0.00000001383887_EB*TE**3-&
-           0.000000000001815222_EB*TE**4+9.222421E-17_EB*TE**5+78.93689_EB*LOG(TE)
-      CP = CP / 46._EB * 1000._EB
-      H = 857495.9_EB        
+           0.000000000001815222_EB*TE**4+9.222421E-17_EB*TE**5+78.93689_EB*LOG(TE) !kJ/mol-K
+      CP = CP / 46._EB * 1000._EB !kJ/kg-K
+      H = 857495.9_EB !kJ/kg       
    CASE('TOLUENE')
       TE = MAX(TE,200._EB)
       CP = -1764.869_EB+730089.6_EB/TE**2+37622.14_EB/TE-0.223475_EB*TE+0.00003599891_EB*TE**2-0.00000000395711_EB*TE**3+&
-            0.0000000000002350988_EB*TE**4-5.2885E-18_EB*TE**5+315.3972_EB*LOG(TE)
-      CP = CP / 92._EB * 1000._EB
-      H = 356078.2_EB        
+            0.0000000000002350988_EB*TE**4-5.2885E-18_EB*TE**5+315.3972_EB*LOG(TE) !kJ/mol-K
+      CP = CP / 92._EB * 1000._EB !kJ/kg-K
+      H = 356078.2_EB !kJ/kg      
 END SELECT    
 
 END SUBROUTINE JANAF_TABLE
 
 SUBROUTINE JANAF_TABLE_LIQUID (I_TMP,CP,H_V,H_L,T_REF,T_MELT,T_BOIL,SPEC_ID)
+!CP data in this subroutine is taken from 4th Edition of the NIST-JANAF Thermochemical Tables
+!The tabulated data in the tables have been curve fit
+!For each species CP is first computed in kJ/mol-K and then converted to kJ/kg-K
 CHARACTER(30), INTENT(IN) ::SPEC_ID
 INTEGER, INTENT(IN) :: I_TMP
 REAL(EB), INTENT(INOUT) :: CP,H_V,H_L,T_REF,T_MELT,T_BOIL
@@ -1836,49 +1846,49 @@ REAL(EB) :: T
 SELECT CASE (SPEC_ID)
    CASE('WATER VAPOR')
       T = MAX(273._EB,REAL(I_TMP,EB))
-      CP = 194.74308_EB - 1.2338708_EB*T + 0.0047935684_EB*T**2 - 0.0000084183512_EB*T**3 + 0.0000000057563403_EB*T**4
-      CP = CP / MW_H2O * 1000._EB
-      H_L = -1150345._EB
-      H_V = 2385253.83_EB
-      T_REF = 273.15_EB
-      T_MELT = 273.15_EB
-      T_BOIL = 373.15_EB
+      CP = 194.74308_EB - 1.2338708_EB*T + 0.0047935684_EB*T**2 - 0.0000084183512_EB*T**3 + 0.0000000057563403_EB*T**4 !kJ/mol-K
+      CP = CP / MW_H2O * 1000._EB !kJ/kg-K
+      H_L = -1150345._EB !kJ/kg
+      H_V = 2385253.83_EB !kJ/kg
+      T_REF = 273.15_EB !K
+      T_MELT = 273.15_EB !K
+      T_BOIL = 373.15_EB !K
    CASE('N-HEPTANE')
       T = MAX(183._EB,REAL(I_TMP,EB))
-      CP =  0.001061074_EB*T**2 - 0.267961_EB*T + 209.8049_EB
-      CP = CP / 100._EB * 1000._EB
-      H_L = -358349.9_EB
-      H_V = 434962.3_EB
-      T_REF = 182.55_EB
-      T_MELT = 182.55_EB
-      T_BOIL = 371.53_EB
+      CP =  0.001061074_EB*T**2 - 0.267961_EB*T + 209.8049_EB !kJ/mol-K
+      CP = CP / 100._EB * 1000._EB !kJ/kg-K
+      H_L = -358349.9_EB !kJ/kg
+      H_V = 434962.3_EB !kJ/kg
+      T_REF = 182.55_EB !K
+      T_MELT = 182.55_EB !K
+      T_BOIL = 371.53_EB !K
    CASE('METHANOL')
       T = MAX(177._EB,REAL(I_TMP,EB))
-      CP =   0.0008750616_EB*T**2 - 0.3274918_EB*T + 101.2359_EB
-      CP = CP / 32._EB * 1000._EB
-      H_L = -390974.5_EB
-      H_V = 1274941.64_EB
-      T_REF = 176.6_EB
-      T_MELT = 176.6_EB
-      T_BOIL = 337.7_EB
+      CP =   0.0008750616_EB*T**2 - 0.3274918_EB*T + 101.2359_EB !kJ/mol-K
+      CP = CP / 32._EB * 1000._EB !kJ/kg-K
+      H_L = -390974.5_EB !kJ/kg-K
+      H_V = 1274941.64_EB !kJ/kg
+      T_REF = 176.6_EB !K
+      T_MELT = 176.6_EB !K
+      T_BOIL = 337.7_EB !K
    CASE('ETHANOL')
       T = MAX(159._EB,REAL(I_TMP,EB))
       CP =   0.3229_EB*T+16.272_EB
-      CP = CP / 46._EB * 1000._EB
-      H_L = -233706.2_EB
-      H_V = 1000197._EB
-      T_REF = 158.8_EB
-      T_MELT = 158.8_EB
-      T_BOIL = 358.8_EB
+      CP = CP / 46._EB * 1000._EB !kJ/kg-K
+      H_L = -233706.2_EB !kJ/kg-K
+      H_V = 1000197._EB !kJ/kg
+      T_REF = 158.8_EB !K
+      T_MELT = 158.8_EB !K
+      T_BOIL = 358.8_EB !K
    CASE('TOLUENE')
       T = MAX(178._EB,REAL(I_TMP,EB))
-      CP = 0.0007691129_EB*T**2- 0.1856684_EB*T + 143.1817_EB
-      CP = CP / 92._EB * 1000._EB
-      H_L = -260230.8_EB
-      H_V = 490124._EB
-      T_REF = 178.1_EB
-      T_MELT = 178.1_EB
-      T_BOIL = 383.8_EB      
+      CP = 0.0007691129_EB*T**2- 0.1856684_EB*T + 143.1817_EB !kJ/mol-K
+      CP = CP / 92._EB * 1000._EB !kJ/kg-K
+      H_L = -260230.8_EB !kJ/kg-K
+      H_V = 490124._EB !kJ/kg
+      T_REF = 178.1_EB !K
+      T_MELT = 178.1_EB !K
+      T_BOIL = 383.8_EB !K      
    CASE DEFAULT
       CP = -1._EB
       H_L = -1._EB
