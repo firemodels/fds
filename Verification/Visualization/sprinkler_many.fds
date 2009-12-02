@@ -20,6 +20,7 @@ test of video cards ability to display many (15*15*31=6975 to be exact) sprinkle
 &PROP ID='Acme Sprinkler'
       QUANTITY='SPRINKLER LINK TEMPERATURE'
       FLOW_RATE=5.
+      DROPLET_VELOCITY=5.
       RTI=50.
       ACTIVATION_TEMPERATURE= 74.
       OFFSET= 0.05
