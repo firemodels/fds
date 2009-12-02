@@ -810,8 +810,17 @@ int readsmv(char *file){
   }
   else{
   if(nmeshes>1){
-      if(nmeshes!=ntrnx||ntrnx!=ntrny||ntrny!=ntrnz||ntrnz!=npdim||npdim!=nobst||nobst!=nvent||nvent!=noffset){
-        printf("*** fatal error: number of TRNX, TRNY, TRNZ, GRID, PDIM and/or OFFSET are inconsistent");
+      if(nmeshes!=ntrnx||nmeshes!=ntrny||nmeshes!=ntrnz||
+         nmeshes!=npdim||nmeshes!=nobst||nmeshes!=nvent||
+         nmeshes!=noffset){
+        printf("*** fatal error:\n");
+        if(nmeshes!=ntrnx)printf("  found %i TRNX keywords, was expecting %i\n",ntrnx,nmeshes);
+        if(nmeshes!=ntrny)printf("  found %i TRNY keywords, was expecting %i\n",ntrny,nmeshes);
+        if(nmeshes!=ntrnz)printf("  found %i TRNZ keywords, was expecting %i\n",ntrnz,nmeshes);
+        if(nmeshes!=npdim)printf("  found %i PDIM keywords, was expecting %i\n",npdim,nmeshes);
+        if(nmeshes!=nobst)printf("  found %i OBST keywords, was expecting %i\n",nobst,nmeshes);
+        if(nmeshes!=nvent)printf("  found %i VENT keywords, was expecting %i\n",nvent,nmeshes);
+        if(nmeshes!=noffset)printf("  found %i OFFSET keywords, was expecting %i\n",noffset,nmeshes);
         return 2;
       }
      }
@@ -6050,6 +6059,7 @@ void initobst(blockagedata *bc, surface *surf,int index,int meshindex){
 
 void initmesh(mesh *meshi){
 
+  meshi->mesh_offset_ptr=NULL;
 #ifdef pp_CULL
   meshi->cullinfo=NULL;
   meshi->culldefined=0;
@@ -6556,6 +6566,18 @@ int readini2(char *inifile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
+    if(match(buffer,"MESHOFFSET",10)==1){
+      int meshnum;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&meshnum);
+      if(meshnum>=0&&meshnum<nmeshes){
+        mesh *meshi;
+
+        meshi = meshinfo + meshnum;
+        meshi->mesh_offset_ptr=meshi->mesh_offset;
+      }
+    }
     if(match(buffer,"MESHVIS",7)==1){
       int nm;
       mesh *meshi;
@@ -9166,6 +9188,15 @@ void writeini(int flag){
 
     meshi = meshinfo + i;
     fprintf(fileout," %i %i %i %i %i %i \n",meshi->visx,meshi->plotx,meshi->visy,meshi->ploty,meshi->visz,meshi->plotz);
+  }
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    if(meshi->mesh_offset_ptr!=NULL){
+      fprintf(fileout,"MESHOFFSET\n");
+      fprintf(fileout," %i\n",i);
+    }
   }
   fprintf(fileout,"TRANSPARENT\n");
   fprintf(fileout," %i\n",transparentflag);
