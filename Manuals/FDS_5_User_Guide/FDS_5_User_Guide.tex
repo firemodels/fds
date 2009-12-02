@@ -2380,7 +2380,7 @@ in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10
 In default mode, FDS uses the Smagorinsky form of Large Eddy Simulation (LES) to model subgrid-scale turbulence.
 The viscosity $\mu$ is modeled
 \be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
-   \left(2 \; \overline{\bS}_{ij} \cdot \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
+   \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
 where $C_s$ is an empirical constant and $\Delta$ is a length on the
 order of the size of a grid cell.
 The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning
@@ -6004,7 +6004,7 @@ if it is not.
 
 Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the
 activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either
-a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more 
+a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more
 information on devices and controls, see Sections~\ref{info:basic_control}~and~\ref{info:CTRL}.
 
 
@@ -7407,7 +7407,7 @@ control functions, will then flow water.
 \subsection{Example Case: activate\_vents}
 
 The simple test case called {\bf activate\_vents} demonstrates the several of the control functions. Figure~\ref{activate_vents} shows seven
-multiply-colored vents that activate at different times, depending on the particular timing or control function. 
+multiply-colored vents that activate at different times, depending on the particular timing or control function.
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lll}
 \includegraphics[width=2.05in]{FIGURES/activate_vents_5} &
