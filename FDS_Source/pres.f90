@@ -181,7 +181,8 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                TSI = T - T_BEGIN
             ENDIF
             TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,DUMMY,VT%PRESSURE_RAMP_INDEX)
-            H_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE/RHOA
+            !!H_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE/RHOA
+            H_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE/RHO_AVG !! test
          ENDIF
 
          SELECT CASE(IOR)
@@ -193,7 +194,8 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                IF (UU(0,J,K)<0._EB) THEN
                   BXS(J,K) = H_EXTERNAL + HQ2
                ELSE
-                  BXS(J,K) = H_EXTERNAL + H0RR(1) + HQ2*HFAC
+                  !BXS(J,K) = H_EXTERNAL + H0RR(1) + HQ2*HFAC
+                  BXS(J,K) = H_EXTERNAL + H0RR(1) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
                ENDIF
             CASE(-1)
                U2  = UU(IBAR,J,K)**2
@@ -203,7 +205,8 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                IF (UU(IBAR,J,K)>0._EB) THEN
                   BXF(J,K) = H_EXTERNAL + HQ2
                ELSE
-                  BXF(J,K) = H_EXTERNAL + H0RR(2) + HQ2*HFAC
+                  !BXF(J,K) = H_EXTERNAL + H0RR(2) + HQ2*HFAC
+                  BXF(J,K) = H_EXTERNAL + H0RR(2) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
                ENDIF
             CASE( 2)
                U2  = .25_EB*(UU(I,1,K)+UU(I-1,1,K))**2
@@ -213,7 +216,8 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                IF (VV(I,0,K)<0._EB) THEN
                   BYS(I,K) = H_EXTERNAL + HQ2
                ELSE
-                  BYS(I,K) = H_EXTERNAL + H0RR(3) + HQ2*HFAC
+                  !BYS(I,K) = H_EXTERNAL + H0RR(3) + HQ2*HFAC
+                  BYS(I,K) = H_EXTERNAL + H0RR(3) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
                ENDIF
             CASE(-2)
                U2  = .25_EB*(UU(I,JBAR,K)+UU(I-1,JBAR,K))**2
@@ -223,7 +227,8 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                IF (VV(I,JBAR,K)>0._EB) THEN
                   BYF(I,K) = H_EXTERNAL + HQ2
                ELSE
-                  BYF(I,K) = H_EXTERNAL + H0RR(4) + HQ2*HFAC
+                  !BYF(I,K) = H_EXTERNAL + H0RR(4) + HQ2*HFAC
+                  BYF(I,K) = H_EXTERNAL + H0RR(4) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
                ENDIF
             CASE( 3)
                U2  = .25_EB*(UU(I,J,1)+UU(I-1,J,1))**2
@@ -233,7 +238,8 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                IF (WW(I,J,0)<0._EB) THEN
                   BZS(I,J) = H_EXTERNAL + HQ2
                ELSE
-                  BZS(I,J) = H_EXTERNAL + H0RR(5) + HQ2*HFAC
+                  !BZS(I,J) = H_EXTERNAL + H0RR(5) + HQ2*HFAC
+                  BZS(I,J) = H_EXTERNAL + H0RR(5) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
                ENDIF
             CASE(-3)
                U2  = .25_EB*(UU(I,J,KBAR)+UU(I-1,J,KBAR))**2
@@ -243,7 +249,8 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                IF (WW(I,J,KBAR)>0._EB) THEN
                   BZF(I,J) = H_EXTERNAL + HQ2
                ELSE
-                  BZF(I,J) = H_EXTERNAL + H0RR(6) + HQ2*HFAC
+                  !BZF(I,J) = H_EXTERNAL + H0RR(6) + HQ2*HFAC
+                  BZF(I,J) = H_EXTERNAL + H0RR(6) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
                ENDIF
          END SELECT
     
