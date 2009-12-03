@@ -50,7 +50,7 @@ copy %in_smv%\smokeview%platform%_release.exe   %out_bin%\%smokeview%
 copy %in_smv%\smokediff32_release.exe   %out_bin%\%smokediff%
 copy %in_smv%\devices.svo             %out_bin%\.
 copy %in_smv%\pthreadVC.dll           %out_bin%\.
-copy %in_smv%\smokezip_release.exe    %out_bin%\%smokezip%
+copy %in_smv%\smokezip32_release.exe    %out_bin%\%smokezip%
 copy %in_smv%\glew32.dll              %out_bin%\.
 copy %in_smv%\smokeview.ini           %out_bin%\.
 
