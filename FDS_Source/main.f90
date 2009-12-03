@@ -57,7 +57,7 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date, version number, revision number
 
-WRITE(VERSION_STRING,'(A)') '5.4.2'
+WRITE(VERSION_STRING,'(A)') '5.4.3'
 
 !!FDS6=.TRUE.
 !!WRITE(VERSION_STRING,'(A)') '6 Beta'
