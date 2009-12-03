@@ -1244,6 +1244,7 @@ Equation~(\ref{concon}) is essentially a consistency condition, ensuring that bl
 compartment leads to an appropriate decrease in the divergence within the volume.
 
 \subsection{The Momentum Equation}
+\label{sec_momeqn}
 
 The momentum equation is simplified to make it easier to solve
 numerically. First, we start with the non-conservative form of the momentum equation introduced above
@@ -3475,15 +3476,17 @@ several orders of magnitude smaller than the characteristic flow velocity.
 When implemented as part of a predictor-corrector updating scheme,
 the no-flux condition at solid surfaces is maintained remarkably well.
 
-At open boundaries (say $i=nx$),
-$\cal H$ is prescribed depending on whether the flow is incoming or outgoing
+At open boundaries (say $i=nx$), $\cal H$ is prescribed depending on whether the flow is incoming or outgoing.  Define $q \equiv u_{nx,jk}^2 + \bar{v}_{nx,jk}^2 + \bar{w}_{nx,jk}^2$ where $nx$ is the index of the last gas phase cell in the $x$ direction and $u_{nx,jk}$ is the $x$ component of velocity at the boundary. The density at the boundary is denoted $\rho_w$ (for ``wall'').  The background density used in defining ${\cal H}$ is $\rho_\infty$ (see Sec. \ref{sec_momeqn}). The overbars on $v$ and $w$ indicate an interpolation of these components to the boundary location.  The boundary condition on ${\cal H}$ is
 \be
-\begin{array}{ll}
-     {\cal H}_{nx+\ha,jk} = (u_{nx,jk}^2 + \bar{v}_{nx,jk}^2 + \bar{w}_{nx,jk}^2)/2  & u_{nx,jk} > 0    \\
-     {\cal H}_{nx+\ha,jk} = 0      & u_{nx,jk} < 0
-     \end{array} \ee
-where $nx$ is the index of the last gas phase cell in the $x$ direction and
-$u_{nx,jk}$ is the $x$ component of velocity at the boundary.  The overbars on $v$ and $w$ indicate an interpolation of these components to the boundary location. The value of $\cal H$ in the ghost cell is
+\label{eqn_pressbc}
+\begin{array}{lll}
+     {\cal H}_{nx+\ha,jk} = {\cal H}_{ext} + \frac{1}{2}q  & \mbox{for} & u_{nx,jk} > 0    \\
+     {\cal H}_{nx+\ha,jk} = {\cal H}_{ext} + {\cal H}_0 + \frac{1}{2}q(1-\frac{\rho_w}{\rho_\infty})  & \mbox{for} & u_{nx,jk} \le 0
+     \end{array}
+\ee
+The external dynamic pressure, ${\cal H}_{ext} = \tilde{p}_{ext}/\rho_\infty$, as well as the initial dynamic pressure, ${\cal H}_0 = \frac{1}{2}(u_0^2 + v_0^2 + w_0^2)\rho_0/\rho_\infty$, are specified by the user ($\tilde{p}_{ext}$ is set with {\tt DYNAMIC\_PRESSURE} for a specific {\tt VENT}). The condition (\ref{eqn_pressbc}) follows from prescribing the fluctuating hydrodynamic pressure $\tilde{p}_{ext}$ at an outflow vent (zero by default) and assuming the Bernoulli equation applies for an inflow vent where the fluid accelerates from the state \{$\tilde{p}_{ext},\rho_0,u_0,v_0,w_0$\} along a streamline. Note that the background density $\rho_\infty$ is usually equal to the initial ambient density $\rho_0$ at the start of a calculation, but may change in time if the baroclinic correction term is included (again, see Sec. \ref{sec_momeqn}).
+
+The value of $\cal H$ in the ghost cell is
 \be {\cal H}_{nx+1,jk} = 2 {\cal H}_{nx+\ha,jk} - {\cal H}_{nx,jk} \ee
 
 
@@ -4335,7 +4338,7 @@ $\bo=(\omx,\omy,\omz)$    \> vorticity vector \\
 
 
 
-\chapter{Derivation of the Velocity Divergence}
+\chapter{Derivation of the Velocity Divergence Constraint}
 \label{app_divergence}
 
 
@@ -4873,11 +4876,26 @@ Rearranging for $\tau_w$ we find
 which corresponds to Eq. (9.46) in \cite{Sagaut:2001}.
 
 
+\chapter{The Inflow/Outflow Pressure Boundary Condition}
+\subsubsection{R. McDermott, BFRL}
+\label{app_pressbc}
 
-
-
-
-
+Outflow: The outflow condition is quite simple.  Let $q \equiv |\mathbf{u}|$. By definition, ${\cal H} = \frac{1}{2}q^2 + \frac{\tilde{p}}{\rho_\infty}$.  The pressure $\tilde{p}$ is set to $\tilde{p}_{ext}$ by the user ({\tt DYNAMIC\_PRESSURE}, 0 by default).
+\\
+\\
+Inflow: When fluid is entering the domain at an {\tt OPEN} vent we make the assumption that Bernoulli holds (i.e. inviscid, steady, incompressible) and that the fluid element on the boundary has accelerated from the state \{$\tilde{p}_1,\rho_1,q_1$\} along a streamline:
+\begin{equation}
+\tilde{p}_1 + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \tilde{p}_2 + \mbox{$\frac{1}{2}$}\rho_2 q_2^2
+\end{equation}
+Let's say the fluid has kinetic energy $\frac{1}{2}\rho_1 q_1$ at point 1 with ambient pressure $\tilde{p}_1 = \tilde{p}_{ext}$ and accelerates to $q_2$ at point 2 which is on an inflow boundary.  Substituting the definition of ${\cal H}$ for point 2 we obtain
+\begin{equation}
+\tilde{p}_{ext} + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \rho_\infty({\cal H}_2 - \mbox{$\frac{1}{2}$} q_2^2) + \mbox{$\frac{1}{2}$} \rho_2 q_2^2
+\end{equation}
+which rearranges to
+\begin{equation}
+{\cal H}_2 = \underbrace{\frac{\tilde{p}_{ext}}{\rho_\infty}}_{{\cal H}_{ext}} + \underbrace{\frac{1}{2}q_1 \frac{\rho_1}{\rho_\infty}}_{{\cal H}_0} +   \frac{1}{2} q_2 \left(1-\frac{\rho_2}{\rho_\infty}\right)
+\end{equation}
+The density $\rho_2$ (denoted $\rho_w$ in Eq. (\ref{eqn_pressbc})) is taken as the average density between the gas-phase and ghost cells adjacent to the boundary.
 
 
 
