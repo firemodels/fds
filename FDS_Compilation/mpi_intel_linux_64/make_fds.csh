@@ -15,5 +15,5 @@ exit 0
 endif
 
 echo Building $mssg
-make VPATH="../../FDS_Source" -f ../makefile $target
+make  -j4 VPATH="../../FDS_Source" -f ../makefile $target
 echo Complete
