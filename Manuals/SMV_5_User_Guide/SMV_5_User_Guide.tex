@@ -1008,16 +1008,16 @@ Smokeview then acts as an interpreter executing OpenGL
 commands as specified in the device definition file. Efficiency is
 attained by compiling these instructions into display lists,
 terminology for an OpenGL construct for storing and efficiently
-drawing collections of OpenGL commands.  New devices may be designed 
-and drawn without requiring modifications to Smokeview and more 
+drawing collections of OpenGL commands.  New devices may be designed
+and drawn without requiring modifications to Smokeview and more
 importantly may be created by someone other than the Smokeview developer.
 
 The appearance of a device may be fixed or it may be altered based upon
 data specified in the FDS input file.  The {\tt sensor}\ device
-is drawn as a small green sphere with a fixed diameter.  Its appearance 
+is drawn as a small green sphere with a fixed diameter.  Its appearance
 is the same regardless of how an FDS input file is set up.
 The appearance of the {\tt tsphere}\ device (t for texture) depends on
-data specified in the FDS input file.  One may specify the diameter of the 
+data specified in the FDS input file.  One may specify the diameter of the
 sphere and an
 image to cover it with ( the image is known as a texture map).
 
@@ -1063,7 +1063,7 @@ specified in the device file using a numerical constant such as 1.23 or using a 
 
 Transformation commands are
 cumulative, each command builds on the effects of the previous
-one.  The commands {\tt push}\ and {\tt pop}\ 
+one.  The commands {\tt push}\ and {\tt pop}\
 isolate these effects by saving and restoring the geometric state.
 
 The format for an object definition file is given in more detail in Figure
@@ -1112,8 +1112,8 @@ DEVICEDEF // DEVICEDEF begins the device definition
 \label{figobjectdef}%
 \end{figure}
 
-Figure \ref{figsensor} illustrates a simple example of a device 
-definition used to draw a sensor along with the corresponding 
+Figure \ref{figsensor} illustrates a simple example of a device
+definition used to draw a sensor along with the corresponding
 Smokeview view.. The definition uses just one frame. A sphere is
 drawn with color yellow and diameter 0.038 m. Push and pop commands
 are not necessary because there is only one object and no
@@ -1135,7 +1135,7 @@ DEVICEDEF
 \label{figsensor}%
 \end{figure}
 
-The example illustrated in Figure \ref{figsprinkler} is more complicated. 
+The example illustrated in Figure \ref{figsprinkler} is more complicated.
 It shows a
 definition of a heat detector along with a corresponding
 Smokeview view. The definition uses two frames. The first frame
@@ -1241,15 +1241,15 @@ The origin is placed where FDS records data for these devices.
 \begin{tabular}{cc}
  \devfig{sprinkler_inact}&\devfig{sprinkler_act}\\
  inactive up-right sprinkler&active up-right sprinkler\\
- 
+
  \devfig{smokedetector_inact}& \devfig{smokedetector_act}\\
  inactive smoke detector&active smoke detector\\
- 
+
  \devfig{sensor}&\devfig{target}\\
  sensor&target
  \end{tabular}
  \end{center}
-\caption[Smokeview view of several devices defined the devices.svo file.] 
+\caption[Smokeview view of several devices defined the devices.svo file.]
 {Smokeview view of several devices defined in the devices.svo file.
 The device origin occurs at the intersection of
 the thin (green) lines.  This where FDS records data values for this device.}
@@ -1310,7 +1310,7 @@ located at the center of the disk's base.\vspace{0.25in}
 \infigl{drawcdisk}{0.25 0.50 drawcdisk}
 \paragraph{DRAWCDISK} The command, {\tt d h drawcdisk},
 draws a circular disk with diameter d and height h. The origin is
-located at the center of the disk. This command is a shortcut 
+located at the center of the disk. This command is a shortcut
 for {\tt h 2.0 :hd2 div \$hd2 offsetz d h drawdisk}.
 
 \infigr{drawhexdisk}{0.5 0.25 drawhexdisk}
@@ -1372,27 +1372,25 @@ and h is the height or distance between the lower and upper
 portions of the truncated cone.  The origin is located at the
 center of the truncated cone's base.
 
-\vspace{0.75in}
-\section{Transformations}
+\vspace{0.25in}
+\section{Visual Transformations}
 As with geometric commands, transformation commands consist of zero
 or more arguments followed by the command. Transformation
 commands are used to directly or indirectly change how drawn objects
-appear.  Visual transformations make changes directly, 
+appear.  Visual transformations make changes directly,
 changing the location and orientation of drawn
 objects,  setting drawing
 attributes such as point size, line width or object color
-or saving and restoring the geometric state.  
-Arithmetic transformations make changes indirectly by operating on
+or saving and restoring the geometric state.
+Arithmetic transformations, described in the next section,
+make changes indirectly by operating on
 data which in turn is used as inputs to various drawing commands.
 
-
-\subsection{Visual Transformations}
-Visual transformation commands are used
-to change the visual appearance of drawn objects.
-These commands map directly to counterparts
+Visual transformation commands map directly to counterparts
 in OpenGL.  The
 rotate and translate commands change the origin (translate) or
-orientation of the x,y,z axes (rotate). The offsetx, offsety and offsetz commands translate
+orientation of the x,y,z axes (rotate). 
+The offsetx, offsety and offsetz commands translate
 objects along just one axis.  The PUSH command is then
 used to save the origin or axis orientation while the POP command
 is used to restore the origin and axis orientation.
@@ -1470,13 +1468,13 @@ translate}\ as translating the origin by (-x,-y,-z).
 \newcommand{\valmin}{{\tt \mbox{val\_min}}}
 \newcommand{\valmax}{{\tt \mbox{val\_max}}}
 \newcommand{\valone}{{\tt \mbox{val\_1}}}
-\subsection{Arithmetic Transformations}
+\section{Arithmetic Transformations}
 Arithmetic transformation commands
-allow one to indirectly change how objects are drawn using 
-information passed from FDS. This information is passed using the 
+allow one to indirectly change how objects are drawn using
+information passed from FDS. This information is passed using the
 {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\ namelist statement.
-These commands transform data to change the inputs of 
-subsequent device commands.  
+These commands transform data to change the inputs of
+subsequent device commands.
 
 \blist
 \hitem{ADD}
@@ -1583,6 +1581,56 @@ The command, \\
 \\
 is used to compute the value, $val=a-b$, where $a$ and $b$ are either numerical constants or references to previously defined data.  The result, $val$ is placed
 in the label {\tt :val}\ accessible later in the definition file using \$val.
+\elist
+
+\section{Logical and Conditional Operators}
+Logical and conditional operators are used in conjunction to test values and
+execute portion of a device definition depending on the results of the 
+test.  Logical operators return 1 if the test is true and 0 if the test
+is false.
+
+\blist
+\hitem{GT}  The command\\
+\\
+{\tt a b :val GT}\\
+\\
+returns 1 in :val if a is
+greater than b, otherwise it returns 0.
+
+\hitem{GE}  The command\\
+\\
+{\tt a b :val GE}\\
+\\
+returns 1 in :val if a is
+greater than or equal to b, otherwise it returns 0.
+
+\hitem{LT}  The command\\
+\\
+{\tt a b :val LT}\\
+\\
+returns 1 in :val if a is less 
+than b, otherwise it returns 0.
+
+\hitem{LE}  The command\\
+\\
+{\tt a b :val LE}\\
+\\
+in :val if a is less
+than or equal to b, otherwise it returns 0.
+
+
+\hitem{IF,ELSE,ENDIF} Consider the device command sequence
+ \begin{verbatim}
+ $val IF
+  arg1 arg2 command1 arg1 arg2 command2 ....
+ ELSE
+  arg1 arg2 command3 arg1 arg2 command4 ....
+ ENDIF
+ \end{verbatim}
+The value {\tt \$val}\ is typically generated from a previous logical
+operation ({\em ie} with {\tt GE, LT} {\em etc.}).  The commands between the {\tt IF}\ and {\tt ELSE}\ operators are executed
+ if {\tt \$val}\ is not 0 otherwise the commands between {\tt ELSE}\ and
+ {\tt ENDIF}\ are executed.  The {\tt ELSE}\ operator is optional.
 \elist
 
 %---------------------------------------------------------------------------------
