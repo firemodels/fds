@@ -2426,6 +2426,10 @@ void drawslice_texture(const slice *sd){
    glEnd();
   }
   else if(sd->idir==2){
+   if(meshi->mesh_offset_ptr!=NULL){
+     glPushMatrix();
+     glTranslatef(times[itime]/10.0,0.0,0.0);
+   }
    constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
@@ -2468,6 +2472,9 @@ void drawslice_texture(const slice *sd){
      }
    }
    glEnd();
+   if(meshi->mesh_offset_ptr!=NULL){
+     glPopMatrix();
+   }
   }
   else if(sd->idir==3){
    constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset;
