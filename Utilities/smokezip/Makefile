@@ -8,6 +8,7 @@ bin = .
 
 #LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
 LINUX32FORTLIBDIR = /opt/intel/11/lib/ia32
+LINUX64FORTLIBDIR = /opt/intel/11/lib/intel64
 OSX32FORTLIBDIR = /opt/intel/fc/10.1.006/lib
 
 # Definition of the object variables
@@ -76,6 +77,20 @@ intel_linux_32 : exe       = smokezip_linux_32
 
 intel_linux_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) ../linux_lib32/libz.a
+
+# ------------- Linux 64 ----------------
+#  64 bit linux
+
+intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend
+intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX
+intel_linux_64 : FORTLIBDIR = $(LINUX64FORTLIBDIR)
+intel_linux_64 : CC        = icc
+intel_linux_64 : CPP       = icc
+intel_linux_64 : FC        = ifort
+intel_linux_64 : exe       = smokezip_linux_64
+
+intel_linux_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) ../linux_lib64/libz.a
 
 # ------------- OSX 32 ----------------
 #  32 bit OSX
