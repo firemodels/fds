@@ -37,6 +37,13 @@ char IOobject_revision[]="$Revision$";
 #define SV_MULT 118
 #define SV_DIV 119
 #define SV_GETT 120
+#define SV_IF 121
+#define SV_ELSE 122
+#define SV_ENDIF 123
+#define SV_GT 124
+#define SV_GE 125
+#define SV_LT 126
+#define SV_LE 127
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -56,6 +63,13 @@ char IOobject_revision[]="$Revision$";
 #define SV_MULT_NUMARGS 3
 #define SV_DIV_NUMARGS 3
 #define SV_GETT_NUMARGS 1
+#define SV_IF_NUMARGS 1
+#define SV_ELSE_NUMARGS 0
+#define SV_ENDIF_NUMARGS 0
+#define SV_GT_NUMARGS 3
+#define SV_GE_NUMARGS 3
+#define SV_LT_NUMARGS 3
+#define SV_LE_NUMARGS 3
 
 
 #define SV_TRANSLATE_NUMOUTARGS  0
@@ -76,6 +90,13 @@ char IOobject_revision[]="$Revision$";
 #define SV_MULT_NUMOUTARGS 1
 #define SV_DIV_NUMOUTARGS 1
 #define SV_GETT_NUMOUTARGS 1
+#define SV_IF_NUMOUTARGS 0
+#define SV_ELSE_NUMOUTARGS 0
+#define SV_ENDIF_NUMOUTARGS 0
+#define SV_GT_NUMOUTARGS 1
+#define SV_GE_NUMOUTARGS 1
+#define SV_LT_NUMOUTARGS 1
+#define SV_LE_NUMOUTARGS 1
 
 
 #define SV_DRAWCUBE      200
@@ -597,6 +618,7 @@ void drawTargetNorm(void){
 
 void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack){
   sv_object_frame *framei;
+  tokendata *toknext;
   int *op;
   unsigned char *rgbptr;
   unsigned char rgbcolor[4];
@@ -657,12 +679,21 @@ void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack
 
     glEnable(GL_COLOR_MATERIAL);
   }
-
-  for(ii=0;ii<framei->ncommands;ii++){
+  toknext=NULL;
+  for(ii=0;;ii++){
     tokendata *toki,*tok1,*tok2,*tok3,*tok4;
 #define NARGVAL 6
     float arg[NARGVAL], *argptr;
     int j;
+
+    if(ii==0){
+      toki=framei->command_list[0];
+    }
+    else{
+      toki=toknext;
+    }
+    if(toki==NULL)break;
+    toknext=toki->next;
 
     if(select_device_color_ptr==NULL){
       rgbptr=rgbcolor;
@@ -670,7 +701,6 @@ void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack
     else{
       rgbptr=select_device_color_ptr;
     }
-    toki = framei->command_list[ii];
     for(j=0;j<toki->nvars;j++){
       tokendata *tokj;
       
@@ -843,6 +873,46 @@ void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack
       break;
     case SV_OFFSETZ:
       glTranslatef(0.0,0.0,arg[0]);
+      break;
+    case SV_IF:
+      if(arg[0]<-0.001||arg[0]>0.001){
+        toknext=toki->elsenext;
+      }
+      break;
+    case SV_ELSE:
+    case SV_ENDIF:
+      break;
+    case SV_GT:
+      if(arg[0]>arg[1]){
+        *argptr=1.0;
+      }
+      else{
+        *argptr=0.0;
+      }
+      break;
+    case SV_GE:
+      if(arg[0]>=arg[1]){
+        *argptr=1.0;
+      }
+      else{
+        *argptr=0.0;
+      }
+      break;
+    case SV_LT:
+      if(arg[0]<arg[1]){
+        *argptr=1.0;
+      }
+      else{
+        *argptr=0.0;
+      }
+      break;
+    case SV_LE:
+      if(arg[0]<=arg[1]){
+        *argptr=1.0;
+      }
+      else{
+        *argptr=0.0;
+      }
       break;
     case SV_ROTATEX:
       glRotatef(arg[0],1.0,0.0,0.0);
@@ -1985,6 +2055,41 @@ void get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, in
     num_op=SV_ROTATEZ_NUMARGS;
     num_outop=SV_ROTATEZ_NUMOUTARGS;
   }
+  else if(STRCMP(token,"if")==0){
+    op=SV_IF;
+    num_op=SV_IF_NUMARGS;
+    num_outop=SV_IF_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"else")==0){
+    op=SV_ELSE;
+    num_op=SV_ELSE_NUMARGS;
+    num_outop=SV_ELSE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"endif")==0){
+    op=SV_ENDIF;
+    num_op=SV_ENDIF_NUMARGS;
+    num_outop=SV_ENDIF_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"LT")==0){
+    op=SV_LT;
+    num_op=SV_LT_NUMARGS;
+    num_outop=SV_LT_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"LE")==0){
+    op=SV_LE;
+    num_op=SV_LE_NUMARGS;
+    num_outop=SV_LE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"GT")==0){
+    op=SV_GT;
+    num_op=SV_GT_NUMARGS;
+    num_outop=SV_GT_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"GE")==0){
+    op=SV_GE;
+    num_op=SV_GE_NUMARGS;
+    num_outop=SV_GE_NUMOUTARGS;
+  }
   else if(STRCMP(token,"scalexyz")==0){
     op=SV_SCALEXYZ;
     num_op=SV_SCALEXYZ_NUMARGS;
@@ -2278,6 +2383,8 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       if(ncommands>0){
         this_token=toki;
         last_token=frame->command_list[ncommands-1];
+        last_token->next=this_token;
+        this_token->next=NULL;
         nargs_actual = this_token-last_token - 1;
       }
       else{
@@ -2347,6 +2454,59 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     if(toki->reads==0){
    //   printf("*** warning: token %s in device %s was not used\n",
    //     toki->token,frame->device->label);
+    }
+  }
+
+  // define data structures for conditional tokens
+
+  for(i=0;i<ncommands;i++){
+    tokendata *toki;
+    char c;
+
+    toki = frame->command_list[i];
+    switch (toki->command){
+      int j,if_level;
+
+      case SV_IF:
+        if_level=0;
+        for(j=i+1;j<ncommands;j++){
+          tokendata *tokj;
+
+          tokj = frame->command_list[j];
+          if(tokj->command==SV_IF){
+            if_level++;
+            continue;
+          }
+          if(if_level>0&&tokj->command==SV_ENDIF){
+            if_level--;
+            continue;
+          }
+          if(if_level==0&&(tokj->command==SV_ELSE||tokj->command==SV_ENDIF)){
+            toki->elsenext=frame->command_list[j+1];
+            break;
+          }
+        }
+        break;
+      case SV_ELSE:
+        if_level=0;
+        for(j=i+1;j<ncommands;j++){
+          tokendata *tokj;
+
+          tokj = frame->command_list[j];
+          if(tokj->command==SV_IF){
+            if_level++;
+            continue;
+          }
+          if(if_level>0&&tokj->command==SV_ENDIF){
+            if_level--;
+            continue;
+          }
+          if(if_level==0&&tokj->command==SV_ENDIF){
+            toki->next=frame->command_list[j+1];
+            break;
+          }
+        }
+        break;
     }
   }
 

@@ -364,6 +364,7 @@ typedef struct mesh_ {
   terraindata *terrain;
   int mesh_type;
   float meshrgb[3], *meshrgb_ptr;
+  float mesh_offset[3], *mesh_offset_ptr;
   int blockvis;
   float cellsize;
   float *xplt, *yplt, *zplt;
@@ -558,9 +559,10 @@ typedef struct _tourdata {
 
 /* --------------------------  tokendata ------------------------------------ */
 
-typedef struct {
+typedef struct _tokendata {
   float var,*varptr;
   int command,loc,type,reads,nvars,noutvars;
+  struct _tokendata *next,*elsenext;
   char *token;
 } tokendata;
 
