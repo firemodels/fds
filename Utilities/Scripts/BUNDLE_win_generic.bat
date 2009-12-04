@@ -44,7 +44,7 @@ echo Copying files to bin directory
 if "%platform%"=="32" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\%fds5%
 if "%platform%"=="32" copy %fdsmpidir%\fds5_win_mpi_%platform%.exe  %out_bin%\%fds5mpi%
 if "%platform%"=="64" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\.
-if "%platform%"=="64" copy %fdsmpidir%\fds5_win_mpi_%platform%.exe  %out_bin%\.
+if "%platform%"=="64" copy %fdsmpidir%\fds5_win_mpi_%platform%.exe  %out_bin%\fds5_mpi_win_%platform%.exe
 
 copy %in_smv%\smokeview%platform%_release.exe   %out_bin%\%smokeview%
 
