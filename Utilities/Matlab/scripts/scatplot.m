@@ -61,46 +61,36 @@ for j=qrange
         if i>length(Save_Quantity); break; end
         if strcmp(Save_Quantity(i),Scatter_Plot_Title)
             k = k+1;
-            Measured_Metric(k)  = Save_Measured_Metric(i);
-            Predicted_Metric(k) = Save_Predicted_Metric(i);
+            Measured_Metric(k,:)  = Save_Measured_Metric(i,:);
+            Predicted_Metric(k,:) = Save_Predicted_Metric(i,:);
             Group_Key_Label(k)  = Save_Group_Key_Label(i);
-            K(k) = plot(Measured_Metric(k),Predicted_Metric(k),...
+            K(k) = plot(nonzeros(Measured_Metric(k,:)),nonzeros(Predicted_Metric(k,:)),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
         end
-    end
-    
-    if strcmp(Scatter_Plot_Title,'Verification')
-        k = 1000;
-        %Measured_Metric = normrnd(1:1000,(Sigma_2_E/200)*(1:1000),[1 1000]);
-        %Predicted_Metric = normrnd(0.5*(1:1000),0.02*(1:1000),[1 1000]);
-        Measured_Metric = [1:k].*(1 + (Sigma_2_E/200)*randn(1,k));
-        Predicted_Metric = 0.5*[1:k].*(1 + 0.02*randn(1,k));
-        K = plot(Measured_Metric,Predicted_Metric,'ko'); hold on    
     end
     
     if k>0
         
         % statistics
         
-        E_bar = mean(log(Measured_Metric));
-        M_bar = mean(log(Predicted_Metric));
-        M_hat = M_bar - E_bar + log(Measured_Metric);
-        u  = sqrt( sum((log(Predicted_Metric)-M_hat).*(log(Predicted_Metric)-M_hat))/(k-1) );
+        n_pts = length(nonzeros(Measured_Metric));
+        E_bar = mean(log(nonzeros(Measured_Metric)));
+        M_bar = mean(log(nonzeros(Predicted_Metric)));
+        u  = sqrt( sum( ( (log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric))) - (M_bar-E_bar) ).^2 )/(n_pts-1) );
         Sigma_E = Sigma_2_E/200;
         Sigma_E = min(u/sqrt(2),Sigma_E);
-        omega_M = sqrt( max(0,u*u - Sigma_E.^2) );
-        delta = exp(M_bar-E_bar+0.5*omega_M.^2);
-        Sigma_M = delta*omega_M;
+        Sigma_M = sqrt( max(0,u*u - Sigma_E.^2) );
+        delta = exp(M_bar-E_bar+0.5*Sigma_M.^2-0.5*Sigma_E.^2);
         
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')                    
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--') 
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--') 
-        
-        if strcmp(Model_Error,'yes')
-            plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')
-            plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--')
-        end
+       
+         if strcmp(Model_Error,'yes')
+             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')
+             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--')
+             plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--')
+         end
         
         % format the legend and axis labels
         xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
@@ -116,11 +106,11 @@ for j=qrange
         text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
             Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
   
-        if Sigma_E > 0.0
-            text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
-                ['$2 \, \sigma_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
-        end
-        
+         if Sigma_E > 0.0
+             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
+                 ['$2 \, \sigma_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+         end
+         
         if strcmp(Model_Error,'yes')
             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
                 ['$2 \, \sigma_M$=',num2str(2*Sigma_M,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
@@ -129,12 +119,10 @@ for j=qrange
                 ['Bias =',num2str(delta,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
         end
         
-        if strcmp(Scatter_Plot_Title,'Verification')==0
-            C = stripcell(Group_Key_Label);
-            [B I] = unique(C);
-            legend(K(I),C(I),'Location',Key_Position,'FontSize',12)
-            legend boxon
-        end
+        C = stripcell(Group_Key_Label);
+        [B I] = unique(C);
+        legend(K(I),C(I),'Location',Key_Position,'FontSize',12)
+        legend boxon
         
         hold off
         
