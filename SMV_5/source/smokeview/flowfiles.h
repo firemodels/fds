@@ -564,6 +564,7 @@ typedef struct _tokendata {
   int command,loc,type,reads,nvars,noutvars;
   struct _tokendata *next,*elsenext;
   char *token;
+  char tokenlabel[20];
 } tokendata;
 
 /* --------------------------  sv_object_frame ------------------------------------ */

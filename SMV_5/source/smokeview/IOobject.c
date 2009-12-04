@@ -44,6 +44,8 @@ char IOobject_revision[]="$Revision$";
 #define SV_GE 125
 #define SV_LT 126
 #define SV_LE 127
+#define SV_AND 128
+#define SV_OR 129
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -70,6 +72,8 @@ char IOobject_revision[]="$Revision$";
 #define SV_GE_NUMARGS 3
 #define SV_LT_NUMARGS 3
 #define SV_LE_NUMARGS 3
+#define SV_AND_NUMARGS 3
+#define SV_OR_NUMARGS 3
 
 
 #define SV_TRANSLATE_NUMOUTARGS  0
@@ -97,6 +101,8 @@ char IOobject_revision[]="$Revision$";
 #define SV_GE_NUMOUTARGS 1
 #define SV_LT_NUMOUTARGS 1
 #define SV_LE_NUMOUTARGS 1
+#define SV_AND_NUMOUTARGS 1
+#define SV_OR_NUMOUTARGS 1
 
 
 #define SV_DRAWCUBE      200
@@ -875,12 +881,28 @@ void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack
       glTranslatef(0.0,0.0,arg[0]);
       break;
     case SV_IF:
-      if(arg[0]<-0.001||arg[0]>0.001){
+      if(fabs(arg[0])<=0.001){
         toknext=toki->elsenext;
       }
       break;
     case SV_ELSE:
     case SV_ENDIF:
+      break;
+    case SV_AND:
+      if(fabs(arg[0])>=0.001&&fabs(arg[1])>=0.001){
+        *argptr=1.0;
+      }
+      else{
+        *argptr=0.0;
+      }
+      break;
+    case SV_OR:
+      if(fabs(arg[0])>=0.001||fabs(arg[1])>=0.001){
+        *argptr=1.0;
+      }
+      else{
+        *argptr=0.0;
+      }
       break;
     case SV_GT:
       if(arg[0]>arg[1]){
@@ -2090,6 +2112,16 @@ void get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, in
     num_op=SV_GE_NUMARGS;
     num_outop=SV_GE_NUMOUTARGS;
   }
+  else if(STRCMP(token,"AND")==0){
+    op=SV_AND;
+    num_op=SV_AND_NUMARGS;
+    num_outop=SV_AND_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"OR")==0){
+    op=SV_OR;
+    num_op=SV_OR_NUMARGS;
+    num_outop=SV_OR_NUMOUTARGS;
+  }
   else if(STRCMP(token,"scalexyz")==0){
     op=SV_SCALEXYZ;
     num_op=SV_SCALEXYZ_NUMARGS;
@@ -2344,6 +2376,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
     toki = frame->tokens + i;
     toki->token=token;
+    strcpy(toki->tokenlabel,token);
     toki->reads=0;
 
     c = token[0];
