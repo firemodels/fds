@@ -313,6 +313,12 @@ context and while keeping the HRR constant, simulations of fire growth were sign
 location of the heat release rate, fire area, flame radiative fraction, and material thermal and ignition
 properties.
 
+Students at Stord/Haugesund University College in Norway simulated full-scale experiments of temperature and smoke spread in a
+realistic multi-room setting using both CFAST and FDS~\cite{Storm:thesis}. Data from the top 0.5~m of the compartments was compared with measurements.  
+The simulations were found to provide satisfying results in CFAST, as an alternative to FDS.  
+
+
+
 
 
 \subsection{Sprinklers, Mist System, and Suppression by Water}
@@ -416,7 +422,7 @@ ventilation and smoke exhaust system.
 The ability of  version 1 of FDS to  accurately predict smoke detector activation was studied by D'Souza~\cite{DSouza:1}. The smoke transport model
 within FDS  was tested and compared with UL~217 test data.  The second step  in this research was  to further validate  the model with full-scale
 multi-compartment fire tests.  The results  indicated that FDS is capable of predicting  smoke detector activation when used with smoke  detector
-lag correlations  that  correct  for  the time  delay associated with smoke having to penetrate the detector housing. A follow-up report by 
+lag correlations  that  correct  for  the time  delay associated with smoke having to penetrate the detector housing. A follow-up report by
 Roby~{\em et al.}~\cite{CSE_GCR} and paper by
 Zhang~{\em et al.}~\cite{Zhang:FSJ2008} describes the implementation and validation of the smoke detector algorithm currently incorporated in FDS.
 
@@ -518,8 +524,14 @@ Dan Madrzykowski and Doug Walton investigated the fire in the Cook County (Chica
 in a stairwell~\cite{Cook_County}. Issues addressed by the model were the movement of the fire from its room of origin and the movement of smoke up the stairwell.
 
 Outside of NIST, FDS has been used to investigate many actual fires, but very few of these studies are documented in the literature. Exceptions
-include a study by Rein~{\em et al.}~\cite{Rein:Interflam2004} looking at several fire events using an analytical fire growth model, the NIST zone
-model CFAST, and FDS. A similar study was performed several years earlier by Spearpoint {\em et al.}~\cite{Spearpoint:ICFRE3} as a class exercise at
-the University of Maryland. During the SFPE Professional Development Week in the fall of 2001, a workshop was held in which several engineers related
-their experiences using FDS as a forensic tool~\cite{Carpenter:SFPE2001}. The role of carbon monoxide in the deaths of three fire fighters was
-studied by Christensen and Icove~\cite{Christensen:JFS}.
+include 
+\begin{itemize}
+\item A large fire in a ``cash \& carry'' warehouse in the UK was studied by Camp and Townsend using both hand calculations and FDS (version 1)~\cite{Camp:Interflam2001}.
+\item A study by Rein~{\em et al.}~\cite{Rein:Interflam2004} looked at several fire events using an analytical fire growth model, the NIST zone
+model CFAST, and FDS. 
+\item A similar study was performed several years earlier by Spearpoint {\em et al.}~\cite{Spearpoint:ICFRE3} as a class exercise at
+the University of Maryland. 
+\item During the SFPE Professional Development Week in the fall of 2001, a workshop was held in which several engineers related
+their experiences using FDS as a forensic tool~\cite{Carpenter:SFPE2001}. 
+\item The role of carbon monoxide in the deaths of three fire fighters was studied by Christensen and Icove~\cite{Christensen:JFS}.
+\end{itemize}
