@@ -304,11 +304,30 @@ DEVICEDEF // device for dynamic textured sphere
  demosphere
  :R :G :B :VX :VY :VZ :ROTATE_RATE :D :XMAX :YMAX :ZMAX
  $R $G $B setcolor
- $VX 0.0 :vvx multiaddt $vvx -2.5 2.5 :CLIPX mirrorclip 
- $VY 0.0 :vvy multiaddt $vvy  0.0 5.0 :CLIPY mirrorclip
- $VZ 0.0 :vvz multiaddt $vvz -1.5 2.0 :CLIPZ mirrorclip
+ $VX 0.0 :vvx multiaddt $vvx  0.0 $XMAX :CLIPX mirrorclip 
+ $VY 0.0 :vvy multiaddt $vvy  0.0 $YMAX :CLIPY mirrorclip
+ $VZ 0.0 :vvz multiaddt $vvz  0.0 $ZMAX :CLIPZ mirrorclip
  $CLIPX $CLIPY $CLIPZ translate $ROTATE_RATE 0.0 :rotz multiaddt 
-   $rotz rotatez 180.0 rotatey 0.0 2.0 drawtsphere
+   $rotz rotatez 180.0 rotatey 0.0 $D drawtsphere
+
+DEVICEDEF // device to test IF, LE, GT and AND operators
+ gifball
+ :DX :DY :DZ         // parameters passed from FDS in SMOKEVIEW_PARAMETERS array
+ :time gett          // get the current time
+ $time 3.0 :LE_L LE  // is time .le. 3
+ $time 3.0 :GT_L GT  // is time .gt. 3
+ $time 6.0 :LE_H LE  // is time .le. 6
+ $time 6.0 :GT_H GT  // is time .gt  6
+ $LE_L IF
+   1.0 0.0 0.0 setcolor   // set the color to red if t .le. 3.0
+ ENDIF
+ $GT_L $LE_H :ANDTEST AND $ANDTEST IF
+   0.0 1.0 0.0 setcolor   // set the color to green if t .gt. 3.0 and t .le.6
+ ENDIF
+ $GT_H IF            
+    0.0 0.0 1.0 setcolor  // set the color to blue if t > 6.0
+ ENDIF
+ $DX $DY $DZ scalexyz 1.0 drawsphere
 
 DEVICEDEF // device for dynamic textured sphere
  tsphere
