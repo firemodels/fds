@@ -1590,6 +1590,13 @@ test.  Logical operators return 1 if the test is true and 0 if the test
 is false.
 
 \blist
+\hitem{AND}  The command\\
+\\
+{\tt a b :val AND}\\
+\\
+returns 1 in :val if both a
+and b are true (any value other than 0), otherwise it returns 0.
+
 \hitem{GT}  The command\\
 \\
 {\tt a b :val GT}\\
@@ -1604,21 +1611,6 @@ greater than b, otherwise it returns 0.
 returns 1 in :val if a is
 greater than or equal to b, otherwise it returns 0.
 
-\hitem{LT}  The command\\
-\\
-{\tt a b :val LT}\\
-\\
-returns 1 in :val if a is less 
-than b, otherwise it returns 0.
-
-\hitem{LE}  The command\\
-\\
-{\tt a b :val LE}\\
-\\
-in :val if a is less
-than or equal to b, otherwise it returns 0.
-
-
 \hitem{IF,ELSE,ENDIF} Consider the device command sequence
  \begin{verbatim}
  $val IF
@@ -1631,6 +1623,27 @@ The value {\tt \$val}\ is typically generated from a previous logical
 operation ({\em ie} with {\tt GE, LT} {\em etc.}).  The commands between the {\tt IF}\ and {\tt ELSE}\ operators are executed
  if {\tt \$val}\ is not 0 otherwise the commands between {\tt ELSE}\ and
  {\tt ENDIF}\ are executed.  The {\tt ELSE}\ operator is optional.
+
+\hitem{LT}  The command\\
+\\
+{\tt a b :val LT}\\
+\\
+returns 1 in :val if a is less
+than b, otherwise it returns 0.
+
+\hitem{LE}  The command\\
+\\
+{\tt a b :val LE}\\
+\\
+in :val if a is less
+than or equal to b, otherwise it returns 0.
+
+\hitem{OR}  The command\\
+\\
+{\tt a b :val OR}\\
+\\
+returns 1 in :val if either a
+or b are true (any value other than 0), otherwise it returns 0.
 \elist
 
 %---------------------------------------------------------------------------------
