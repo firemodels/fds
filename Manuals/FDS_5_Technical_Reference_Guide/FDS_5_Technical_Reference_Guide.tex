@@ -4906,6 +4906,8 @@ Second-order central differencing of the advection term in the scalar transport 
 
 Optionally, the user may invoke TVD transport schemes by setting {\tt FLUX\_LIMITER}=\{1-4\} on {\tt MISC} (1=first-order upwinding (Godunov), 2=Superbee \cite{Roe:1986} (recommended for LES), 3=MINMOD, 4=CHARM \cite{Zhou:1995} (recommended for DNS)). These TVD schemes are applied during the transport step and each can be shown to be TVD in 1D under certain CFL constraints.  However, except for Godunov's scheme, the TVD proofs do not extend to 3D \cite{Toro}.  Still, these schemes do a much better job than pure central differencing at mitigating dispersion error.  If the TVD schemes are applied, FDS still runs through the boundedness check in case any small violations are not prevented by the flux limiter.
 
+\subsubsection{A simple case}
+
 For simplicity we start by considering a minimum boundedness violation for density in 1D.  That is, somewhere we have $\rho < \rho_{min}$.  Let $\rho_i^*$ denote the resulting density from the explicit transport step for cell $i$ with volume $V_i$.  Our goal is to find a correction $\delta \rho_i$ which:
 \begin{enumerate}[{(}a{)}]
 \item satisfies boundedness, $\rho_i = \rho_i^* + \delta \rho_i \ge \rho_{min}$ for all $i$
@@ -4918,7 +4920,6 @@ As mentioned, the basic idea is to apply a linear smoothing operator $\cal L$ to
 \rho = \rho^* + c {\cal L} \rho^*
 \end{equation}
 To make matters simple, let us envision for the moment that the density in cell $i$ is negative but that the densities in cells $i-1$ and $i+1$ are both safely in bounds (this actually is what happens most of the time with dispersion error).  We therefore want a correction that takes mass away from $i-1$ and $i+1$ and moves it to $i$ to make up the deficit.  We know that for cell $i$ the minimum change in mass and therefore the minimum correction that will satisfy boundedness is $\delta \rho_i = \rho_{min} - \rho_i^*$.  The operator $\cal L$ takes the form of the standard discrete Laplacian.  The correction for cell $i$ is simply
-
 \begin{eqnarray}
 \label{eqn_rhocor}
 \rho_i &=& \rho_i^* + \delta \rho_i \nonumber\\
@@ -4928,7 +4929,7 @@ To make matters simple, let us envision for the moment that the density in cell 
 Comparing the second and third lines, we find that the diffusion coefficient is given by
 \begin{equation}
 \label{eqn_diffcoef}
-c_i = \frac{\rho_{min} - \rho_i^*}{\rho_{i-1}^* - 2 \rho_i^* + \rho_{i+1}^*} 
+c_i = \frac{\rho_{min} - \rho_i^*}{\rho_{i-1}^* - 2 \rho_i^* + \rho_{i+1}^*}
 \end{equation}
 Based on the third line of (\ref{eqn_rhocor}), the correction for cell $i$ may be thought of as the sum to two mass fluxes from its neighboring cells.  The change in mass of cell $i$ is $\delta m_i = \delta \rho_i V_i$ and is balanced by changes in mass for cells $i-1$ and $i+1$:
 \begin{eqnarray}
@@ -4937,31 +4938,32 @@ Based on the third line of (\ref{eqn_rhocor}), the correction for cell $i$ may b
 \end{eqnarray}
 In this case the sum of the mass corrections is zero, as desired:
 \begin{eqnarray}
-\sum_{j=i-1}^{i+1} \delta m_j &=& - c_i (\rho_{i-1}^* - \rho_i^*) V_i + c_i (\rho_{i-1}^* - 2 \rho_i^* + \rho_{i+1}^*) V_i - c_i (\rho_{i+1}^* - \rho_i^*) V_i \nonumber\\
-&=& \delta \rho_{i-1} V_{i-1} + \delta \rho_i V_i + \delta \rho_{i+1}V_{i+1} \nonumber\\
+\sum_{j=i-1}^{i+1} \delta m_j &=& \delta \rho_{i-1} V_{i-1} + \delta \rho_i V_i + \delta \rho_{i+1}V_{i+1} \nonumber\\
+&=& - c_i (\rho_{i-1}^* - \rho_i^*) V_i + c_i (\rho_{i-1}^* - 2 \rho_i^* + \rho_{i+1}^*) V_i - c_i (\rho_{i+1}^* - \rho_i^*) V_i \nonumber\\
 &=& 0 \nonumber
 \end{eqnarray}
 
 \subsubsection{Realistic cases}
 
-The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for the possibility that neighboring cells may both be out of bounds and, of course, multi-dimensional aspects of the problem.  Here again we examine the case of a minimum density boundedness violation. Consider the cell $n = \{i,j,k\}$ in a 3D flow with volume $V_n$ and density $\rho_n^*$ obtained from the transport scheme.  Let $\cal N$ denote the set of cells containing $n$ and its neighbors, excluding diagonal neighbors (in other words, only include cells which share a face with $n$).  We want to correct any boundedness violations for the $m$th cell via
+The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for multi-dimensional aspects of the problem and for the possibility that neighboring cells may both be out of bounds.  Here again we examine the case of a minimum density boundedness violation. Consider the cell $n = \{i,j,k\}$ in a 3D flow with volume $V_n$ and density $\rho_n^*$ obtained from the transport scheme.  Let ${\sf N}$ denote the set of cells containing $n$ and its neighbors excluding diagonal neighbors (in other words, only include cells which share a face with $n$).  We want to correct any boundedness violations for the $n$th cell via
 \begin{equation}
 \label{eqn_rhocor2}
-\rho_m = \rho_m^* + \delta \rho_m
+\rho_n = \rho_n^* + \delta \rho_n
 \end{equation}
-We obtain the corrections by
+Let $\delta \rho_{mn}$ denote the density change for cell $m$ in ${\sf N}$ (the neighborhood of $n$) due to a boundedness violation in $n$. We obtain the final correction for cell $n$ by
 \begin{equation}
 \label{eqn_sumdrho}
-\delta \rho_m = \sum_{n\in {\cal N}} \delta \rho_{mn}
+\delta \rho_n = \sum_{m\in{\sf N}} \delta \rho_{nm}
 \end{equation}
 where
 \begin{equation}
-\delta \rho_{mn} = \left\{ \begin{array}{ll}  \displaystyle -c_n( \max[\rho_{min},\rho_m^*] - \rho_n^*)\frac{V_n}{V_m} & \mbox{if} \quad m\ne n \\ \displaystyle \rho_{min} - \rho_n^* & \mbox{if} \quad m=n \end{array} \right.
+\label{eqn_rhomn}
+\delta \rho_{mn} = \left\{ \begin{array}{ll}  \displaystyle -c_n( \max[\rho_{min},\rho_m^*] - \rho_n^*)\frac{V_n}{V_m} & \mbox{if} \quad m\ne n \\ \displaystyle \max(0,\rho_{min} - \rho_n^*) & \mbox{if} \quad m=n \end{array} \right.
 \end{equation}
-and the smoothing parameter is obtained from
+Note that the correction on the right hand side of (\ref{eqn_sumdrho}) is the transpose of (\ref{eqn_rhomn}).  The smoothing parameter in (\ref{eqn_rhomn}) is obtained from
 \begin{equation}
 \label{eqn_realc}
-c_n = \frac{\rho_{min} - \rho_n^*}{ \sum_{m\in {\cal N},m\ne n} \max[\rho_{min},\rho_m^*] - 6 \rho_n^*}
+c_n = \frac{\max(0,\rho_{min} - \rho_n^*)}{ \sum_{m\in {\sf N},m\ne n} \max[\rho_{min},\rho_m^*] - 6 \rho_n^*}
 \end{equation}
 
 
