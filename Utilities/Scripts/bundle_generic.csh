@@ -65,13 +65,13 @@ endif
 # FDS 
 
 if $?fdshost then
-scp $fdshost\:$fdsroot/$fds5dir/$fds5 $bundledir/bin/.
-scp $fdshost\:$fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/.
+scp $fdshost\:$fdsroot/$fds5dir/$fds5 $bundledir/bin/$fds5out
+scp $fdshost\:$fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/$fds5mpiout
 cp $bundle_setup/FDS-SMV_5_OSX_Launcher.app.zip $bundledir/bin/.
 cp $bundle_setup/README_OSX.html $bundledir/bin/.
 else
-cp $fdsroot/$fds5dir/$fds5 $bundledir/bin/.
-cp $fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/.
+cp $fdsroot/$fds5dir/$fds5 $bundledir/bin/$fds5out
+cp $fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/$fds5mpiout
 endif
 
 cp $forbundle/smokeview.ini $bundledir/bin/.
