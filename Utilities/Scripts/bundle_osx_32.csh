@@ -15,8 +15,12 @@ setenv fds5mpidir mpi_intel_osx_32
 setenv smokeview smv5_osx_32
 setenv smokezip smokezip_osx_32
 setenv smokediff smokediff_osx_32
+
 setenv fds5 fds5_intel_osx_32
 setenv fds5mpi fds5_mpi_intel_osx_32
+
+setenv fds5out fds5_osx_32
+setenv fds5mpiout fds5_mpi_osx_32
 
 setenv fds2ascii fds2ascii_osx
 

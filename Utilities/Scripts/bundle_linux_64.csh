@@ -14,8 +14,12 @@ setenv fds5mpidir mpi_intel_linux_64
 setenv smokeview smv5_linux_64
 setenv smokezip smokezip_linux_64
 setenv smokediff smokediff_linux_64
+
 setenv fds5 fds5_intel_linux_64
 setenv fds5mpi fds5_mpi_intel_linux_64
+
+setenv fds5out fds5_linux_64
+setenv fds5mpiout fds5_mpi_linux_64
 
 setenv fds2ascii fds2ascii_linux
 
