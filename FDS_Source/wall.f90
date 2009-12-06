@@ -75,7 +75,7 @@ ENDIF
  
 ! Loop through all boundary cells and apply heat transfer method, except for thermally-thick cells
  
-HEAT_FLUX_LOOP: DO IW=1,NWC
+HEAT_FLUX_LOOP: DO IW=1,NWC+NVWC
 
    IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE HEAT_FLUX_LOOP
 
@@ -625,9 +625,9 @@ IF (VIRTUAL_PARTICLES .AND. CORRECTOR .AND. N_SPECIES>0) THEN
       ENDIF
       SELECT CASE(SF%GEOMETRY)
          CASE(SURF_CARTESIAN)
-            AREA = 2._EB*PC%LENGTH*PC%WIDTH
+            AREA = 2._EB*SF%LENGTH*SF%WIDTH
          CASE(SURF_CYLINDRICAL)
-            AREA = TWOPI*RADIUS*PC%LENGTH
+            AREA = TWOPI*RADIUS*SF%LENGTH
          CASE(SURF_SPHERICAL)
             AREA = 4._EB*PI*RADIUS**2
       END SELECT
