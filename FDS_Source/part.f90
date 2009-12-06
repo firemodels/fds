@@ -627,7 +627,13 @@ VOLUME_INSERT_LOOP: DO IB=0,N_INIT
          ! Process special particles that are associated with a particular SURFace type
    
          IF (PC%SURF_INDEX>0) THEN
+            SF => SURFACE(PC%SURF_INDEX)
             DR%WALL_INDEX = PC%WALL_INDEX_START + I - 1
+            IF (SF%THICKNESS>0._EB) THEN
+               DR%R = SF%THICKNESS
+            ELSEIF (SF%RADIUS>0._EB) THEN
+               DR%R = SF%RADIUS
+            ENDIF
             XW(DR%WALL_INDEX) = DR%X
             YW(DR%WALL_INDEX) = DR%Y
             ZW(DR%WALL_INDEX) = DR%Z
@@ -1267,6 +1273,7 @@ REAL(EB), PARAMETER :: RUN_AVG_FAC=0.5_EB
 LOGICAL :: TEMPITER
 TYPE (DROPLET_TYPE), POINTER :: DR
 TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC
+TYPE (SURFACE_TYPE), POINTER :: SF
 
 ! Initializations
 RDT    = 1._EB/DT
@@ -1290,7 +1297,7 @@ NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH
 
 ! Working arrays
 
-IF (N_EVAP_INDICIES>0) THEN
+IF (N_EVAP_INDICES>0) THEN
    D_VAP  = 0._EB
    WCPUA  = RUN_AVG_FAC*WCPUA
    WMPUA  = RUN_AVG_FAC*WMPUA
@@ -1303,7 +1310,7 @@ ENDIF
 
 ! Loop over all types of evaporative species
 
-EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
+EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
    FILM_THICKNESS => WALL_WORK2
    FILM_THICKNESS =  0._EB
@@ -1314,23 +1321,36 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICIES
    PART_CLASS_LOOP: DO N_PC = 1,N_PART
 
       PC => PARTICLE_CLASS(N_PC)
-      IF (.NOT.PC%EVAPORATE) CYCLE PART_CLASS_LOOP
-      IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
-      IF (PC%TREE) CYCLE PART_CLASS_LOOP
-
+      
       ! If the particle class is associated with a particular SURF, just get its temperature and cycle
       
       IF (PC%SURF_INDEX>0) THEN
+         SF => SURFACE(PC%SURF_INDEX)
          DO I=1,NLP
             DR=>DROPLET(I)
             IF (DR%CLASS==N_PC) THEN
                IW = DR%WALL_INDEX
                DR%TMP = TMP_F(IW)
+               IF (SF%SHRINK) THEN
+                  DR%R = SUM(WALL(IW)%LAYER_THICKNESS)
+               ELSE
+                  IF (SF%THERMALLY_THICK) THEN
+                     DR%R = MAXVAL(SF%X_S)
+                  ELSE
+                     DR%R = SF%RADIUS
+                  ENDIF
+               ENDIF
             ENDIF
          ENDDO
          CYCLE PART_CLASS_LOOP
       ENDIF
-
+      
+      ! Check to see of the particles/droplets evaporate
+      
+      IF (.NOT.PC%EVAPORATE) CYCLE PART_CLASS_LOOP
+      IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
+      IF (PC%TREE) CYCLE PART_CLASS_LOOP
+      
       ! Initialize quantities common to the PARTICLE_CLASS 
 
       FTPR     = PC%FTPR
