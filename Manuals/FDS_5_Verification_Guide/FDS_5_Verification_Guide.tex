@@ -1116,6 +1116,37 @@ integral function (order 3) of optical depth, $\tau$. The exact solutions and FD
 
 
 
+\clearpage
+
+\section{Radiation Emitted by Hot Spheres (\texorpdfstring{{\bf hot\_spheres}}{hot\_spheres}) }
+\label{hot_spheres}
+
+This case tests the calculation of the radiation heat flux from a collection of hot objects. Within a
+completely open volume that is 1~m on a side, hot spheres with a diameter of 1~cm and temperature of 500~$^\circ$C are
+introduced within a smaller volume that is 0.5~m on a side at a rate of 100 per second. The simulation lasts for
+600~s, in which time the volume becomes nearly filled with 60,000 spheres. Initially, the heat loss is just the sum
+of the areas of the spheres multiplied by $\sigma T^4$ (emissivity is specified as unity in this case). Since the spheres
+are being introduced at a steady rate, this initial heat loss is linear and is indicated by the straight line in the plot
+of the energy loss in Fig.~\ref{hot_spheres_plot}. Over time, however, the volume fills and eventually the radiative
+heat loss approaches that of a solid cube, 0.5~m on a side, whose temperature is 500~$^\circ$C. This is just under 30~kW, as
+shown in the figure. The plot on the right of Fig.~\ref{hot_spheres_plot} shows the incident heat flux to a gauge
+positioned at the center of the volume. Eventually, it is expected that this gauge would register a heat flux of
+$\sigma T^4=20.26$~kW/m$^2$.
+
+
+\noindent
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/hot_spheres_rad_loss} &
+\includegraphics[width=3.2in]{FIGURES/hot_spheres_heat_flux}
+\end{tabular*}
+\caption[Radiation from hot spheres]{The total heat loss (left) and radiative heat flux (right) from a collection of
+hot spheres within a rectangular volume.}
+\label{hot_spheres_plot}
+\end{figure}
+
+
+
 \chapter{Species and Combustion}
 
 This chapter contains examples that test the computations related to species concentrations, gas properties and combustion.
@@ -1389,7 +1420,7 @@ Fig.~\ref{fig_birch_tga} near the temperature of 100~$^\circ$C.
    \begin{center}
       \includegraphics[width=3.5in]{FIGURES/birch_tga}
       \caption[An example of TGA data.]{\label{fig_birch_tga}
-	Comparison of a solid phase model of birch wood with TGA data.}
+    Comparison of a solid phase model of birch wood with TGA data.}
    \end{center}
    \end{figure}
 
