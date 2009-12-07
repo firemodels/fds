@@ -1321,7 +1321,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
    PART_CLASS_LOOP: DO N_PC = 1,N_PART
 
       PC => PARTICLE_CLASS(N_PC)
-      
+
       ! If the particle class is associated with a particular SURF, just get its temperature and cycle
       
       IF (PC%SURF_INDEX>0) THEN
@@ -1344,13 +1344,13 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
          ENDDO
          CYCLE PART_CLASS_LOOP
       ENDIF
-      
+
       ! Check to see of the particles/droplets evaporate
       
       IF (.NOT.PC%EVAPORATE) CYCLE PART_CLASS_LOOP
       IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
       IF (PC%TREE) CYCLE PART_CLASS_LOOP
-      
+
       ! Initialize quantities common to the PARTICLE_CLASS 
 
       FTPR     = PC%FTPR
