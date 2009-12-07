@@ -80,9 +80,304 @@ float integrate_alpha(mesh *smoke_mesh,float *xyz_light,float *xyz2){
   return returnval;
 }
 
+/* ------------------ remove_trial ------------------------ */
+
+void remove_trial(nodedata *node){
+  nodedata *prev, *next;
+
+  next=node->next;
+  prev=node->prev;
+
+  prev->next=next;
+  next->prev=prev;
+}
+
+/* ------------------ insert_trial ------------------------ */
+
+void insert_trial(nodedata *node,nodedata *before){
+  nodedata *prev, *next;
+
+  next=before;
+  prev=before->prev;
+
+  prev->next=node;
+  node->prev=prev;
+
+  node->next=next;
+  next->prev=node;
+}
+
 /* ------------------ update_lightfield ------------------------ */
 
 void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuffer){
+    int i, j, k, ijk, ii;
+    mesh *smoke_mesh;
+    int nxcell, nycell, nzcell;
+    int nx, ny, nxy, nz;
+    nodedata *nodeinfo;
+    nodedata *first_trial, *last_trial, first_t, last_t;
+    int naccepted;
+    
+
+    printf("time=%f\n",time);
+    CheckMemory;
+    smoke_mesh=smoke3di->smoke_mesh;
+
+    nxcell = smoke_mesh->ibar;
+    nycell = smoke_mesh->jbar;
+    nzcell = smoke_mesh->kbar;
+    nx=nxcell+1;
+    ny=nycell+1;
+    nz=nzcell+1;
+    nxy=nx*ny;
+
+    nodeinfo=smoke3di->nodeinfo;
+    if(nodeinfo==NULL){
+    NewMemory((void **)&nodeinfo, nx*ny*nz*sizeof(nodedata));
+    smoke3di->nodeinfo=nodeinfo;
+
+    // define node data structures
+
+    for(k=0;k<nz;k++){
+      for(j=0;j<ny;j++){
+        for(i=0;i<nx;i++){
+          nodedata *nodei;
+
+          ijk = IJKNODE(i,j,k);
+          nodei = nodeinfo + ijk;
+
+          nodei->state=UNKNOWN;
+          nodei->next=NULL;
+          nodei->prev=NULL;
+
+          nodei->nabors[0]=nodeinfo+ijk-1;
+          nodei->nabors[1]=nodeinfo+ijk+1;
+          nodei->nabors[2]=nodeinfo+ijk-nx;
+          nodei->nabors[3]=nodeinfo+ijk+nx;
+          nodei->nabors[4]=nodeinfo+ijk-nxy;
+          nodei->nabors[5]=nodeinfo+ijk+nxy;
+
+          for(ii=0;ii<6;ii++){
+            if(nodei->nabors[ii]-nodeinfo<0||nodei->nabors[ii]-nodeinfo>nx*ny*nz-1){
+              nodei->nabors[ii]=NULL;
+            }
+          }
+        }
+      }
+    }
+    }
+    naccepted=0;
+
+
+    for(i=0;i<nx*ny*nz;i++){
+      nodedata *nodei;
+
+      nodei = nodeinfo + i;
+      nodei->totaldist=255.0;
+      nodei->nodedist=(float)(255-full_alphabuffer[i])/255.0;
+      nodei->state=UNKNOWN;
+    }
+    
+    // assume boundaries light comes in through open boundaries
+
+    for(ii=0;ii<smoke3di->smoke_mesh->nvents;ii++){
+      ventdata *venti;
+      int *ib;
+      int jjj,kkk;
+
+      venti = smoke3di->smoke_mesh->ventinfo + ii;
+      if(venti->is_open==0)continue;
+
+      ib = venti->ib;
+      kkk=(ib[4]-1)*nxy;
+      for(k=ib[4];k<=ib[5];k++){
+        kkk+=nxy;
+        jjj=(ib[2]-1)*nx;
+      for(j=ib[2];j<=ib[3];j++){
+        jjj+=nx;
+      for(i=ib[0];i<=ib[1];i++){
+        nodedata *nodei;
+
+        ijk=kkk+jjj+i;
+        nodei = nodeinfo + ijk;
+        nodei->state=ACCEPTED;
+        naccepted++;
+      }
+      }
+      }
+    }
+
+    // define trial list
+
+    first_trial=&first_t;
+    last_trial=&last_t;
+
+    first_trial->prev=NULL;
+    first_trial->next=last_trial;
+
+    last_trial->prev=first_trial;
+    last_trial->next=NULL;
+    for(i=0;i<nx*ny*nz;i++){
+      nodedata *nodei;
+
+      nodei = nodeinfo+i;
+      if(nodei->state!=UNKNOWN)continue;
+
+      for(j=0;j<6;j++){
+        nodedata *nodej;
+
+        nodej=nodei->nabors[j];
+        if(nodej==NULL||nodej->state!=ACCEPTED)continue;
+        nodei->state=TRIAL;
+        insert_trial(nodei,last_trial);
+        nodei->totaldist=nodej->totaldist*(nodej->nodedist+nodei->nodedist)/2.0;
+        break;
+      }
+    }
+
+    // define trial linked list
+    // also define initial distance for trial nodes
+
+
+    // now it begins
+    // 1.  find the trial node with the minimum distance from adjacent accepted nodes
+    // 2.     remove it from the trial list
+    // 3.     add all unknown neighbors of trial_x, to the trial list
+    // 4.     recompute distance to all neighbors of trial list
+    //        repeat 1-4 until there are no more trial  nodes
+
+    while(first_trial!=last_trial->prev){
+      nodedata *ti,*maxti;
+      float maxdist;
+
+      maxti=first_trial->next;
+      maxdist=maxti->totaldist;
+      /*
+      if(maxdist!=255.0){
+        for(ti=maxti->next;ti!=last_trial;ti=ti->next){
+          if(ti->totaldist>maxdist){
+            maxdist=ti->totaldist;
+            maxti=ti;
+          }
+        }
+      }
+      */
+      remove_trial(maxti);
+      maxti->state=ACCEPTED;
+      for(j=0;j<6;j++){
+        nodedata *tj;
+
+        tj=maxti->nabors[j];
+        if(tj!=NULL&&tj->state!=ACCEPTED){
+          if(tj->state==UNKNOWN){
+            tj->state=TRIAL;
+            insert_trial(tj,last_trial);
+          }
+          tj->totaldist=maxti->totaldist*(tj->nodedist+maxti->nodedist)/2.0;
+        }
+      }
+    }
+    for(i=0;i<nx*ny*nz;i++){
+      nodedata *ti;
+
+      ti = nodeinfo + i;
+      lightingbuffer[i]=albedo*(unsigned char)ti->totaldist;
+    }
+}
+
+/* ------------------ update_lightfield ------------------------ */
+
+void update_lightfield_simple(float time, smoke3d *smoke3di, unsigned char *lightingbuffer){
+ // accumulate hrr for each light
+
+    int i, j, k;
+    mesh *smoke_mesh;
+    int nxcell, nycell, nzcell;
+    float *tau, *f_light;
+    int nx, ny, nxy, nz;
+
+    tau = full_logalphabuffer;
+
+    CheckMemory;
+    smoke_mesh=smoke3di->smoke_mesh;
+    f_light=smoke_mesh->light_cell_radiance;
+
+    nxcell = smoke_mesh->ibar;
+    nycell = smoke_mesh->jbar;
+    nzcell = smoke_mesh->kbar;
+    nx=nxcell+1;
+    ny=nycell+1;
+    nz=nzcell+1;
+    nxy=nx*ny;
+
+    for(i=0;i<nx*ny*nz;i++){
+      f_light[i]=255.0;
+      tau[i] = (float)(255-full_alphabuffer[i])/255.0;
+    }
+
+    for(k=0;k<nz;k++){
+      for(j=0;j<ny;j++){
+        for(i=1;i<nx;i++){
+          int ijk, ijk2;
+
+          ijk=IJKNODE(i,j,k);
+          ijk2=ijk-1;
+          f_light[ijk]=f_light[ijk2]*tau[ijk2];
+        }
+      }
+    }
+    for(k=0;k<nz;k++){
+      for(j=0;j<ny;j++){
+        for(i=nx-2;i>=0;i--){
+          int ijk, ijk2;
+          float val;
+
+          ijk=IJKNODE(i,j,k);
+
+          ijk2=ijk+1;
+          val=f_light[ijk2]*tau[ijk2];
+          if(val<f_light[ijk])break;
+          f_light[ijk]=val;
+        }
+      }
+    }
+    for(k=0;k<nz;k++){
+      for(i=0;i<nx;i++){
+        for(j=1;j<ny;j++){
+          int ijk, ijk2;
+          float val;
+
+          ijk=IJKNODE(i,j,k);
+          ijk2=ijk-nx;
+          val=f_light[ijk2]*tau[ijk2];
+          if(val<f_light[ijk])break;
+          f_light[ijk]=val;
+        }
+      }
+    }
+    for(k=0;k<nz;k++){
+      for(i=0;i<nx;i++){
+        for(j=ny-2;j>=0;j--){
+          int ijk, ijk2;
+          float val;
+
+          ijk=IJKNODE(i,j,k);
+          ijk2=ijk+nx;
+          val=f_light[ijk2]*tau[ijk2];
+          if(val<f_light[ijk])break;
+          f_light[ijk]=val;
+        }
+      }
+    }
+    for(i=0;i<nx*ny*nz;i++){
+      lightingbuffer[i]=albedo*(unsigned char)f_light[i];
+    }
+    CheckMemory;
+}
+
+/* ------------------ update_lightfield ------------------------ */
+
+void update_lightfield_lights(float time, smoke3d *smoke3di, unsigned char *lightingbuffer){
  // accumulate hrr for each light
 
     lightdata *lighti;
@@ -98,7 +393,6 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     float *light_cell_radiance;
     float four_pi;
     float radiance_min, radiance_max;
-    float factor;
     float radiance_mean, radiance_dev;
     int ijk_node, ijk_cell;
 
@@ -141,11 +435,11 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
         for(i=0;i<nxcell;i++){
           float val2;
 
-          xyz_cell_pos[0]=(xplt[i]+zplt[i+1])/2.0;
+          xyz_cell_pos[0]=(xplt[i]+xplt[i+1])/2.0;
           val2 = getlog_1_m_alpha(smoke_mesh, xyz_cell_pos);
           if(val2<0.0){
             for(ilight=0;ilight<nlightinfo;ilight++){
-              float radiance, qgas, dx, dy, dz;
+              float radiance, dx, dy, dz;
               float *xyz_e1, *xyz_e2;
               float *xyz_light;
               int ilight2;
@@ -207,7 +501,7 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     radiance_min=light_cell_radiance[0];
     radiance_max=radiance_min;
     radiance_mean=0.0;
-    factor = 1.0/log(light_max/light_min);
+  //  factor = 1.0/log(light_max/light_min);
     for(i=0;i<nxcell*nycell*nzcell;i++){
       radiance_mean += light_cell_radiance[i];
       if(light_cell_radiance[i]<radiance_min)radiance_min=light_cell_radiance[i];
@@ -315,6 +609,7 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
   //  printf("fluxmin=%f fluxmax=%f\n",fluxmin,fluxmax);
     CheckMemory;
 }
+
 /* ------------------ update_lightfield ------------------------ */
 
 void update_lightfield2(float time, smoke3d *smoke3di, unsigned char *lightingbuffer){
@@ -447,7 +742,7 @@ void update_lightfield2(float time, smoke3d *smoke3di, unsigned char *lightingbu
         i1 = GET_INTERVAL(xyzpos[0],smoke_mesh->xplt[0],smoke_mesh->dx);
         i1 = BOUND(i1,0,nxcell-1);
         j1 = GET_INTERVAL(xyzpos[1],smoke_mesh->yplt[0],smoke_mesh->dy);
-        j1 = BOUND(j1,0,nzcell-1);
+        j1 = BOUND(j1,0,nycell-1);
         k1 = GET_INTERVAL(xyzpos[2],smoke_mesh->zplt[0],smoke_mesh->dz);
         k1 = BOUND(k1,0,nzcell-1);
 

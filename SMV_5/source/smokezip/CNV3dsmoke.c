@@ -29,6 +29,8 @@ void convert_3dsmoke(smoke3d *smoke3di){
   unsigned char *full_lightingbuffer,*compressed_lightingbuffer;
   float *val_buffer;
   char smoke3dfile_lvz[1024];
+  unsigned int lightbefore, lightafter;
+  int light_info[2]={1,0};
   FILE *light3dstream=NULL;
 #endif
   int nxyz[9];
@@ -36,9 +38,6 @@ void convert_3dsmoke(smoke3d *smoke3di){
   int version;
   int buffersize;
   unsigned int sizebefore, sizeafter;
-#ifdef pp_LIGHT
-  unsigned int lightbefore, lightafter;
-#endif
   int count;
   float time;
   int nchars[2];
@@ -52,9 +51,6 @@ void convert_3dsmoke(smoke3d *smoke3di){
   int percent_next=10;
   long data_loc;
   char *smoke3dfile;
-#ifdef pp_LIGHT
-  int light_info[2]={1,0};
-#endif
   float time_max;
  
   smoke3dfile=smoke3di->file;
@@ -159,18 +155,14 @@ void convert_3dsmoke(smoke3d *smoke3di){
       printf("     Use the -f option to overwrite boundary or 3d smoke files\n");
       return;
     }
-//  smoke3dsizestream=fopen(smoke3dsizefile_svz,"r");
-//    if(smoke3dsizestream!=NULL){
-//      fclose(smoke3dsizestream);
-//      printf("  %s exists.\n  Use the -f option if you wish to overwrite it.\n",smoke3dsizefile_svz);
-//      return;
-//    }
   }
 
   smoke3dsizestream=fopen(smoke3dsizefile_svz,"w");
   smoke3dstream=fopen(smoke3dfile_svz,"wb");
 #ifdef pp_LIGHT
-  if(smoke3di->type==1&&make_lighting_file==1)light3dstream=fopen(smoke3dfile_lvz,"wb");
+  if(smoke3di->type==1&&make_lighting_file==1){
+    light3dstream=fopen(smoke3dfile_lvz,"wb");
+  }
 #endif
   if(smoke3dstream==NULL||smoke3dsizestream==NULL
 #ifdef pp_LIGHT
@@ -183,14 +175,12 @@ void convert_3dsmoke(smoke3d *smoke3di){
     if(smoke3dsizestream==NULL){
       printf("  3dsmoke size file, %s, could not be opened for output\n",smoke3dsizefile_svz);
     }
+    if(smoke3dsizestream!=NULL)fclose(smoke3dsizestream);
+    if(smoke3dstream!=NULL)fclose(smoke3dstream);
 #ifdef pp_LIGHT
     if(make_lighting_file==1&&smoke3di->type==1&&light3dstream==NULL){
       printf("  3dsmoke lighting file, %s, could not be opened for output\n",smoke3dfile_lvz);
     }
-#endif
-    if(smoke3dsizestream!=NULL)fclose(smoke3dsizestream);
-    if(smoke3dstream!=NULL)fclose(smoke3dstream);
-#ifdef pp_LIGHT
     if(make_lighting_file==1&&light3dstream!=NULL)fclose(light3dstream);
 #endif
     EGZ_FCLOSE(SMOKE3DFILE);
@@ -250,15 +240,14 @@ void convert_3dsmoke(smoke3d *smoke3di){
     smoke3di->compressed_lightingbuffer=compressed_lightingbuffer;
     CheckMemory;
   }
+
+  lightbefore=0;
+  lightafter=0;
 #endif
 
   count=-1;
   sizebefore=8;
   sizeafter=8;
-#ifdef pp_LIGHT
-  lightbefore=0;
-  lightafter=0;
-#endif
   printf("  Compressing: ");
   time_max=-1000000.0;
   for(;;){
@@ -300,9 +289,10 @@ void convert_3dsmoke(smoke3d *smoke3di){
     if(returncode!=0){
       printf("  ***warning zlib compressor failed - frame %f\n",time);
     }
-
 #ifdef pp_LIGHT
+
     // compress frame of lighting data (into ZLIB format)
+
     if(make_lighting_file==1){
       int return_code;
 
@@ -311,13 +301,13 @@ void convert_3dsmoke(smoke3d *smoke3di){
 
       buffersize=1.01*nx*ny*nz+600;
       smoke3di->ncompressed_lighting_zlib=buffersize;
-      return_code=compress(smoke3di->compressed_lightingbuffer, &smoke3di->ncompressed_lighting_zlib, full_lightingbuffer, nx*ny*nz);
+      return_code=compress(smoke3di->compressed_lightingbuffer, 
+        &smoke3di->ncompressed_lighting_zlib, full_lightingbuffer, nx*ny*nz);
       if(return_code!=0){
         printf("  ***warning zlib compressor failed - frame %f\n",time);
       }
       lightafter+=smoke3di->ncompressed_lighting_zlib;
     }
-
 #endif
 
     data_loc=EGZ_FTELL(SMOKE3DFILE);
@@ -327,7 +317,6 @@ void convert_3dsmoke(smoke3d *smoke3di){
       fflush(stdout);
       percent_next+=10;
     }
-
 
     // write out new entries in the size (sz) file
 

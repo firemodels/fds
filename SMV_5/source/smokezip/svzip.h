@@ -17,6 +17,17 @@
 #define NRAD 10
 #define NTHETA 10
 #define NPSI 10
+
+#define ACCEPTED 0
+#define TRIAL 1
+#define UNKNOWN 2
+typedef struct _nodedata {
+  float totaldist, nodedist;
+  struct _nodedata *nabors[6];
+  struct _nodedata *next, *prev;
+  int state; // 0=accepted 1=trial 2=unknown
+} nodedata;
+
 #endif
 
 #ifdef pp_PART
@@ -39,6 +50,20 @@
 #endif
 
 
+#ifdef pp_LIGHT
+/* --------------------------  ventdata ------------------------------------ */
+
+typedef struct {
+  int ib[6],surf_index,is_open;
+} ventdata;
+
+/* --------------------------  obstdata ------------------------------------ */
+
+typedef struct {
+  int ib[6];
+} obstdata;
+#endif
+
 typedef struct {
   int ibar, jbar, kbar;
   float *xplt, *yplt, *zplt;
@@ -50,6 +75,9 @@ typedef struct {
   float *photon_cell;
   float *light_cell_radiance;
   float dxyzmax;
+  int nvents, nobsts;
+  obstdata *obstinfo;
+  ventdata *ventinfo;
 #endif
 } mesh;
 
@@ -137,6 +165,7 @@ typedef struct {
   int nx, ny, nz, filesize;
 #ifdef pp_LIGHT
   mesh *smoke_mesh;
+  nodedata *nodeinfo;
   float *light_q_rect;
   int type;
   flowlabels label;
