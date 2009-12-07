@@ -27,7 +27,17 @@ int readsmv(char *smvfile){
   int ipart,ipart_seq;
 #endif
   char buffer[255];
+#ifdef pp_LIGHT
+  int nobsts, nvents;
+  int open_index,isurf;
+#endif
 
+#ifdef pp_LIGHT
+  nobsts=0;
+  nvents=0;
+  open_index=-1;
+  isurf=0;
+#endif
   igrid=0;
   ipdim=0;
   streamsmv=fopen(smvfile,"r");
@@ -40,6 +50,26 @@ int readsmv(char *smvfile){
     if(fgets(buffer,255,streamsmv)==NULL)break;
     CheckMemory;
     if(strncmp(buffer," ",1)==0)continue;
+
+#ifdef pp_LIGHT
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SURF ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"SURFACE",7) == 1){
+      char *surf_label;
+
+      if(fgets(buffer,255,streamsmv)==NULL)break;
+      trim(buffer);
+      surf_label=trim_front(buffer);
+      if(strcmp(surf_label,"OPEN")==0){
+        open_index=isurf;
+      }
+      isurf++;
+      continue;
+    }
+#endif
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ SMOKE3D ++++++++++++++++++++++++++++++
@@ -119,11 +149,7 @@ int readsmv(char *smvfile){
       ipdim++;
       continue;
     }
-
-
-
   }
-
 
   // allocate memory for smoke3d file info
 
@@ -382,6 +408,8 @@ int readsmv(char *smvfile){
       smoke3di = smoke3dinfo + ismoke3d;
 #ifdef pp_LIGHT
       if(strlen(buffer)>8){
+        int blocknumber;
+
         blocknumber=1;
         sscanf(buffer+8,"%i",&blocknumber);
         blocknumber--;
@@ -411,6 +439,7 @@ int readsmv(char *smvfile){
         }
         smoke3di->filesize=filesize;
 #ifdef pp_LIGHT
+        smoke3di->nodeinfo=NULL;
         if(readlabels(&smoke3di->label,streamsmv)!=2){
           ismoke3d++;
         }
@@ -446,6 +475,78 @@ int readsmv(char *smvfile){
 #endif
       continue;
     }
+#ifdef pp_LIGHT
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ OBST ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"OBST",4) == 1){
+      mesh *meshi;
+      int i;
+
+      meshi = meshinfo + nobsts++;
+      fgets(buffer,255,streamsmv);
+      sscanf(buffer,"%i",&meshi->nobsts);
+      if(meshi->nobsts<0)meshi->nobsts=0;
+      if(meshi->nobsts==0)continue;
+
+      NewMemory((void **)&meshi->obstinfo,meshi->nobsts*sizeof(obstdata));
+      for(i=0;i<meshi->nobsts;i++){
+        fgets(buffer,255,streamsmv);
+      }
+      for(i=0;i<meshi->nobsts;i++){
+        int *ib;
+        obstdata *obsti;
+
+        obsti = meshi->obstinfo + i;
+        ib=obsti->ib;
+        fgets(buffer,255,streamsmv);
+        sscanf(buffer,"%i %i %i %i %i %i",ib,ib+1,ib+2,ib+3,ib+4,ib+5);
+      }
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ VENT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"VENT",4) == 1){
+      mesh *meshi;
+      int i;
+
+      meshi = meshinfo + nvents++;
+      fgets(buffer,255,streamsmv);
+      sscanf(buffer,"%i",&meshi->nvents);
+      if(meshi->nvents<0)meshi->nvents=0;
+      if(meshi->nvents==0)continue;
+
+      NewMemory((void **)&meshi->ventinfo,meshi->nvents*sizeof(ventdata));
+      for(i=0;i<meshi->nvents;i++){
+        ventdata *venti;
+        float dum;
+        int idum;
+
+        venti = meshi->ventinfo + i;
+        fgets(buffer,255,streamsmv);
+        sscanf(buffer,"%f %f %f %f %f %f %i %i",&dum,&dum,&dum,&dum,&dum,&dum,&idum,&venti->surf_index);
+        if(venti->surf_index==open_index){
+          venti->is_open=1;
+        }
+        else{
+          venti->is_open=0;
+        }
+      }
+      for(i=0;i<meshi->nvents;i++){
+        int *ib;
+        ventdata *venti;
+
+        venti = meshi->ventinfo + i;
+        ib=venti->ib;
+        fgets(buffer,255,streamsmv);
+        sscanf(buffer,"%i %i %i %i %i %i",ib,ib+1,ib+2,ib+3,ib+4,ib+5);
+      }
+    }
+#endif
 #ifdef pp_PART
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -878,9 +979,9 @@ int readsmv(char *smvfile){
       if(make_lighting_file==1){
         int nni, nnj, nnk;
 
-        nni = meshi->ibar;
-        nnj = meshi->jbar;
-        nnk = meshi->kbar;
+        nni = meshi->ibar+1;
+        nnj = meshi->jbar+1;
+        nnk = meshi->kbar+1;
 
         NewMemory((void **)&meshi->photon_cell,nni*nnj*nnk*sizeof(float));
         NewMemory((void **)&meshi->light_cell_radiance,nni*nnj*nnk*sizeof(float));
