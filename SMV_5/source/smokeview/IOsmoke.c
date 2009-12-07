@@ -191,7 +191,7 @@ else{\
   }                                                      \
   else{                                                  \
     xyzindex=xyzindex2;                                  \
-}                                                        \
+  }                                                      \
   if(firecolor==NULL){\
     if(smoke3di->use_lighting_file==1&&show_smokelighting==1){\
       for(node=0;node<6;node++){                             \
@@ -267,6 +267,7 @@ else{\
       glVertex3f(XX,YY,ZZ);                                \
     }\
 }
+#endif
 #define DRAWVERTEXGPUTERRAIN(XX,YY,ZZ) \
   z_offset[0]=znode_offset[m11];\
   z_offset[1]=znode_offset[m12];\
@@ -311,7 +312,6 @@ else{\
       glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
     }\
 }
-#endif
 
 /* ------------------ readsmoke3d ------------------------ */
 
