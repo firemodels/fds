@@ -63,6 +63,7 @@ $RUNFDS Pyrolysis specified_hrr                   fire52
 $RUNFDS Pyrolysis thermoplastic                   fire53
 $RUNFDS Pyrolysis two_step_solid_reaction         fire54
 $RUNFDS Radiation emissivity                      fire55
+$RUNFDS Radiation hot_spheres                     fire55
 $RUNFDS Radiation radiation_box_100_1000          fire56
 $RUNFDS Radiation radiation_box_100__100          fire57
 $RUNFDS Radiation radiation_box_100_2000          fire58
