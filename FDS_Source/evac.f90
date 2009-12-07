@@ -6440,7 +6440,7 @@ CONTAINS
 
              ! Collision avoidance, counterflow, etc.
              CHANGE_V0_RNCF1: IF ( RNCF > EXP(-DTSP/TAU_CHANGE_V0) ) THEN
-                EVEL = SQRT(UBAR**2 + VBAR**2)
+                EVEL = MAX(0.001_EB,SQRT(UBAR**2 + VBAR**2))
                 IF (VBAR >= 0.0_EB) THEN
                    ANGLE_HR = ACOS(UBAR/EVEL)
                 ELSE
@@ -6737,14 +6737,16 @@ CONTAINS
                    ! SUM_SUUNTA(III) = SUM_SUUNTA(III) + SIGN(1.0_EB,THETAS(III))* &
                    !     FAC_V0_DIR*V_HR
                 ELSE
+                   ! If there is at least one counterflow agent in the front sector
                    ! Counterflow: prefer right (and straight ahead)
                    SUM_SUUNTA(III) = SUM_SUUNTA(III) - SIGN(1.0_EB,THETAS(III))*FAC_V0_DIR
                 END IF
              END DO
 
+             ! If there is no agents in the front sector, do not use counterflow algorithm
              IF (N_SUUNTA(N_SECTORS+1) < 1) SUM_SUUNTA(N_SECTORS+1) = SUM_SUUNTA(N_SECTORS+1) + 50.0_EB  ! Empty space ahead
              IF ((N_SUUNTACF(N_SECTORS+1)) < 1) THEN
-                ! no counterflow, prefer v0 direction, i.e., "stay on line"
+                ! No counterflow in the front sector, prefer v0 direction, i.e., "stay on line"
                 SUM_SUUNTA(N_SECTORS+1) = SUM_SUUNTA(N_SECTORS+1) + &
                      (FAC_NOCF + FAC_V0_NOCF*V_HR)*(N_SUUNTA(N_SECTORS+1))
              END IF
