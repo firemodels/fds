@@ -49,6 +49,7 @@
 #endif
 
 #ifdef pp_BETA
+#define pp_LIGHT
 #undef pp_release
 #define SMZVERSION "test"
 #endif
