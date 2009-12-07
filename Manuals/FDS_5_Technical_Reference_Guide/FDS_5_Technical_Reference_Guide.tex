@@ -4958,12 +4958,12 @@ Let $\delta \rho_{mn}$ denote the density change for cell $m$ in ${\sf N}$ (the 
 where
 \begin{equation}
 \label{eqn_rhomn}
-\delta \rho_{mn} = \left\{ \begin{array}{ll}  \displaystyle -c_n( \max[\rho_{min},\rho_m^*] - \rho_n^*)\frac{V_n}{V_m} & \mbox{if} \quad m\ne n \\ \displaystyle \max(0,\rho_{min} - \rho_n^*) & \mbox{if} \quad m=n \end{array} \right.
+\delta \rho_{mn} = \left\{ \begin{array}{ll}  \displaystyle \max(0,\rho_{min} - \rho_n^*) & \mbox{if} \quad m=n  \\ \displaystyle -c_n( \max[\rho_{min},\rho_m^*] - \max[\rho_{min},\rho_n^*])\frac{V_n}{V_m} & \mbox{if} \quad m\ne n \end{array} \right.
 \end{equation}
-Note that the correction on the right hand side of (\ref{eqn_sumdrho}) is the transpose of (\ref{eqn_rhomn}).  The smoothing parameter in (\ref{eqn_rhomn}) is obtained from
+The smoothing parameter in (\ref{eqn_rhomn}) is obtained from
 \begin{equation}
 \label{eqn_realc}
-c_n = \frac{\max(0,\rho_{min} - \rho_n^*)}{ \sum_{m\in {\sf N},m\ne n} \max[\rho_{min},\rho_m^*] - 6 \rho_n^*}
+c_n = \frac{\max(0,\rho_{min} - \rho_n^*)}{ \sum_{s\in {\sf N},s\ne n} ( \max[\rho_{min},\rho_s^*] - \max[\rho_{min},\rho_n^*] )}
 \end{equation}
 
 
