@@ -3461,67 +3461,73 @@ DEVICE_LOOP: DO N=1,N_DEVC
    ! Select either gas or solid phase output quantity
 
    GAS_OR_SOLID_PHASE: IF (DV%OUTPUT_INDEX>0) THEN 
+      GAS_OR_HVAC: IF (DV%OUTPUT_INDEX >= 300) THEN
+      
+         VALUE = HVAC_OUTPUT(DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX,T)
+      
+      ELSE GAS_OR_HVAC
 
-      GAS_STATS: IF (DV%STATISTICS=='null') THEN
+         GAS_STATS: IF (DV%STATISTICS=='null') THEN
 
-         VALUE = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
+            VALUE = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
 
-      ELSEIF (DV%STATISTICS=='TIME INTEGRAL') THEN GAS_STATS
-         VALUE = DV%TI_VALUE + (T-DV%TI_T)* &
-                               GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
-         DV%TI_VALUE = VALUE
-         DV%TI_T = T
+         ELSEIF (DV%STATISTICS=='TIME INTEGRAL') THEN GAS_STATS
+            VALUE = DV%TI_VALUE + (T-DV%TI_T)* &
+                                 GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
+            DV%TI_VALUE = VALUE
+            DV%TI_T = T
 
-      ELSE GAS_STATS
+         ELSE GAS_STATS
 
-         DO K=DV%K1,DV%K2
-            DO J=DV%J1,DV%J2
-               DO I=DV%I1,DV%I2
-                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  NOT_FOUND = .FALSE.
-                  SELECT CASE(DV%STATISTICS)
-                     CASE('MAX')
-                        STAT_VALUE = MAX(STAT_VALUE, &
-                                     GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM))
-                     CASE('MIN')
-                        STAT_VALUE = MIN(STAT_VALUE, &
-                                     GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM))
-                     CASE('MEAN')
-                        STAT_VALUE = STAT_VALUE + &
-                                     GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
-                        STAT_COUNT = STAT_COUNT + 1
-                     CASE('VOLUME INTEGRAL')
-                        VOL = DX(I)*DY(J)*DZ(K)
-                        STAT_VALUE = STAT_VALUE + &
-                                     GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)*VOL
-                     CASE('MASS INTEGRAL')
-                        VOL = DX(I)*DY(J)*DZ(K)
-                        STAT_VALUE = STAT_VALUE + &
-                                     GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)* &
-                                     VOL*RHO(I,J,K)
-                     CASE('AREA INTEGRAL')
-                        IF (DV%IOR==1) STAT_VALUE = STAT_VALUE + DY(J)*DZ(K)* &
+            DO K=DV%K1,DV%K2
+               DO J=DV%J1,DV%J2
+                  DO I=DV%I1,DV%I2
+                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                     NOT_FOUND = .FALSE.
+                     SELECT CASE(DV%STATISTICS)
+                        CASE('MAX')
+                           STAT_VALUE = MAX(STAT_VALUE, &
+                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM))
+                        CASE('MIN')
+                           STAT_VALUE = MIN(STAT_VALUE, &
+                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM))
+                        CASE('MEAN')
+                           STAT_VALUE = STAT_VALUE + &
                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
-                        IF (DV%IOR==2) STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)* &
+                           STAT_COUNT = STAT_COUNT + 1
+                        CASE('VOLUME INTEGRAL')
+                           VOL = DX(I)*DY(J)*DZ(K)
+                           STAT_VALUE = STAT_VALUE + &
+                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)*VOL
+                        CASE('MASS INTEGRAL')
+                           VOL = DX(I)*DY(J)*DZ(K)
+                           STAT_VALUE = STAT_VALUE + &
+                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)* &
+                                       VOL*RHO(I,J,K)
+                        CASE('AREA INTEGRAL')
+                           IF (DV%IOR==1) STAT_VALUE = STAT_VALUE + DY(J)*DZ(K)* &
+                                          GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
+                           IF (DV%IOR==2) STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)* &
+                                          GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
+                           IF (DV%IOR==3) STAT_VALUE = STAT_VALUE + DX(I)*DY(J)* &
+                                          GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
+                        CASE('VOLUME MEAN')
+                           VOL = DX(I)*DY(J)*DZ(K)
+                           STAT_VALUE = STAT_VALUE + &
+                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)*VOL
+                           SUM_VALUE = SUM_VALUE + DX(I)*DY(J)*DZ(K)
+                        CASE('MASS MEAN')
+                           VOL = DX(I)*DY(J)*DZ(K)
+                           STAT_VALUE = STAT_VALUE + VOL*RHO(I,J,K)* &
                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
-                        IF (DV%IOR==3) STAT_VALUE = STAT_VALUE + DX(I)*DY(J)* &
-                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
-                     CASE('VOLUME MEAN')
-                        VOL = DX(I)*DY(J)*DZ(K)
-                        STAT_VALUE = STAT_VALUE + &
-                                     GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)*VOL
-                        SUM_VALUE = SUM_VALUE + DX(I)*DY(J)*DZ(K)
-                     CASE('MASS MEAN')
-                        VOL = DX(I)*DY(J)*DZ(K)
-                        STAT_VALUE = STAT_VALUE + VOL*RHO(I,J,K)* &
-                                     GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
-                        SUM_VALUE = SUM_VALUE + VOL*RHO(I,J,K)
-                  END SELECT
+                           SUM_VALUE = SUM_VALUE + VOL*RHO(I,J,K)
+                     END SELECT
+                  ENDDO
                ENDDO
             ENDDO
-         ENDDO
 
-      ENDIF GAS_STATS
+         ENDIF GAS_STATS
+      ENDIF GAS_OR_HVAC
 
    ELSE GAS_OR_SOLID_PHASE            
 
@@ -4529,6 +4535,59 @@ SELECT CASE(INDX)
 END SELECT
 
 END FUNCTION SOLID_PHASE_OUTPUT
+
+REAL(EB) FUNCTION HVAC_OUTPUT(IND,SPEC_INDEX,DUCT_INDEX,NODE_INDEX,T)
+
+! Compute HVAC Output Quantities
+
+USE MEMORY_FUNCTIONS, ONLY: REALLOCATE
+USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D,EVALUATE_RAMP
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_MOLECULAR_WEIGHT
+USE CONTROL_VARIABLES, ONLY: CONTROL
+REAL(EB), INTENT(IN) :: T
+INTEGER, INTENT(IN) :: SPEC_INDEX,IND,DUCT_INDEX,NODE_INDEX
+REAL(EB) :: Y_H2O,YY_G(1:N_SPECIES),MW,Y_SPECIES
+
+SELECT CASE(IND)
+   CASE DEFAULT
+      HVAC_OUTPUT = 0._EB
+   CASE(300)  ! Duct Velocity
+      HVAC_OUTPUT = DUCT(DUCT_INDEX)%VEL(OLD)
+   CASE(301)  ! Duct Temperature
+      HVAC_OUTPUT = DUCT(DUCT_INDEX)%TMP_D
+   CASE(302)  ! Duct Mass Flow
+      HVAC_OUTPUT = DUCT(DUCT_INDEX)%VEL(OLD)*DUCT(DUCT_INDEX)%RHO_D*DUCT(DUCT_INDEX)%AREA
+   CASE(303)  ! Duct Volume Flow
+      HVAC_OUTPUT = DUCT(DUCT_INDEX)%VEL(OLD)*DUCT(DUCT_INDEX)%AREA
+   CASE(304:305)
+      Y_H2O = 0._EB
+      IF (SPEC_INDEX<0) THEN
+         YY_G(:) = DUCT(DUCT_INDEX)%YY(:)
+         CALL GET_MASS_FRACTION(YY_G,-SPEC_INDEX,Y_SPECIES)
+         IF (DRY) THEN
+            CALL GET_MASS_FRACTION(YY_G,H2O_INDEX,Y_H2O)
+            IF (-SPEC_INDEX==H2O_INDEX) Y_SPECIES=0._EB
+         ENDIF
+      ELSEIF (SPEC_INDEX>0) THEN
+         Y_SPECIES=DUCT(DUCT_INDEX)%YY(SPEC_INDEX)
+      ELSE
+         Y_SPECIES=1.0_EB
+      ENDIF
+      IF (IND==304) THEN
+         HVAC_OUTPUT = Y_SPECIES/(1._EB-Y_H2O)
+      ELSE
+         CALL GET_MOLECULAR_WEIGHT(YY_G,MW)
+         IF (SPEC_INDEX<0) THEN
+            HVAC_OUTPUT = RCON_MF(-SPEC_INDEX)/R0*MW*Y_SPECIES/(1._EB-Y_H2O*MW/MW_H2O)
+         ELSEIF (SPEC_INDEX>0) THEN
+            HVAC_OUTPUT = Y_SPECIES*MW/SPECIES(SPEC_INDEX)%MW
+         ENDIF
+      ENDIF
+   CASE(306)  ! Duct Density
+      HVAC_OUTPUT = DUCT(DUCT_INDEX)%RHO_D
+END SELECT   
+   
+END FUNCTION HVAC_OUTPUT
 
   
 SUBROUTINE DUMP_DEVICES(T)
