@@ -4502,16 +4502,25 @@ CONTAINS
                 x_tmp(2) = HR%X
                 y_tmp(3) = HR%Y + COS(HR%angle)*HR%d_shoulder ! left
                 x_tmp(3) = HR%X - SIN(HR%angle)*HR%d_shoulder
-                II = FLOOR( CELLSI(FLOOR((x_tmp(1)-XS)*RDXINT)) + 1.0_EB )
-                JJ = FLOOR( CELLSJ(FLOOR((y_tmp(1)-YS)*RDYINT)) + 1.0_EB )
-                I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
-                Is_Solid = (Is_Solid .OR. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
-                II = FLOOR( CELLSI(FLOOR((x_tmp(3)-XS)*RDXINT)) + 1.0_EB )
-                JJ = FLOOR( CELLSJ(FLOOR((y_tmp(3)-YS)*RDYINT)) + 1.0_EB )
-                Is_Solid = (Is_Solid .OR. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
-                II = FLOOR( CELLSI(FLOOR((x_tmp(2)-XS)*RDXINT)) + 1.0_EB )
-                JJ = FLOOR( CELLSJ(FLOOR((y_tmp(2)-YS)*RDYINT)) + 1.0_EB )
-                Is_Solid = (Is_Solid .OR. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
+
+                ! Issue 944 bug fix
+                IF (Min(x_tmp(1),x_tmp(2),x_tmp(3)) <= XS) Is_Solid = .TRUE.
+                IF (Min(y_tmp(1),y_tmp(2),y_tmp(3)) <= YS) Is_Solid = .TRUE.
+                IF (Max(x_tmp(1),x_tmp(2),x_tmp(3)) >= XF) Is_Solid = .TRUE.
+                IF (Max(y_tmp(1),y_tmp(2),y_tmp(3)) >= YF) Is_Solid = .TRUE.
+
+                IF (.NOT.Is_Solid) THEN
+                   II = FLOOR( CELLSI(FLOOR((x_tmp(1)-XS)*RDXINT)) + 1.0_EB )
+                   JJ = FLOOR( CELLSJ(FLOOR((y_tmp(1)-YS)*RDYINT)) + 1.0_EB )
+                   I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
+                   Is_Solid = (Is_Solid .OR. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
+                   II = FLOOR( CELLSI(FLOOR((x_tmp(3)-XS)*RDXINT)) + 1.0_EB )
+                   JJ = FLOOR( CELLSJ(FLOOR((y_tmp(3)-YS)*RDYINT)) + 1.0_EB )
+                   Is_Solid = (Is_Solid .OR. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
+                   II = FLOOR( CELLSI(FLOOR((x_tmp(2)-XS)*RDXINT)) + 1.0_EB )
+                   JJ = FLOOR( CELLSJ(FLOOR((y_tmp(2)-YS)*RDYINT)) + 1.0_EB )
+                   Is_Solid = (Is_Solid .OR. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
+                END IF
 
                 IF (.NOT.Is_Solid) THEN
                    ! Check the distances to walls (not to wall corners)
