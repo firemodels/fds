@@ -596,11 +596,11 @@ SUBROUTINE CHECK_DENSITY
  
 ! Redistribute mass from cells below or above the density cut-off limits
 
-USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,RHOMIN,RHOMAX,DEBUG_OPENMP
+USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_SPECIES,RHOMIN,RHOMAX,DEBUG_OPENMP,TWO_D
 REAL(EB) :: SUM,CONST,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,RHO00,RMIN,RMAX
 INTEGER  :: IC,ISUM,I,J,K
 LOGICAL :: LC(-3:3)
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RHODELTA
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHODELTA,V_CELL
 
 RHODELTA => WORK2
 
@@ -609,6 +609,27 @@ IF (PREDICTOR) THEN
 ELSE
    RHOP=>RHO
 ENDIF
+
+V_CELL => WORK3
+
+IF (TWO_D) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            V_CELL(I,J,K) = DX(I)*DZ(K)
+         ENDDO
+      ENDDO
+   ENDDO
+ELSE
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            V_CELL(I,J,K) = DX(I)*DY(K)*DZ(K)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
  
 ! Correct undershoots
 
@@ -626,7 +647,7 @@ DO K=1,KBAR
          IF (SOLID(IC)) CYCLE CHECK_LOOP
          RMIN = RHOMIN
          IF (RHOP(I,J,K)>=RMIN) CYCLE CHECK_LOOP
-         SUM   = 0.
+         SUM   = 0._EB
          ISUM  = 0
          LC    = .FALSE.
          RHO00 = RHOP(I,J,K)
@@ -672,12 +693,30 @@ DO K=1,KBAR
          ELSE
             IF(SUM-ISUM*RHO00 /= 0._EB) THEN
                CONST = (RHOMIN-RHO00)/(SUM-ISUM*RHO00)
-               IF (LC(-1)) RHODELTA(I-1,J,K) = RHODELTA(I-1,J,K) + MAX(RMIN,RHOMI+CONST*(RHO00-RHOMI)) - RHOP(I-1,J,K)
-               IF (LC( 1)) RHODELTA(I+1,J,K) = RHODELTA(I+1,J,K) + MAX(RMIN,RHOPI+CONST*(RHO00-RHOPI)) - RHOP(I+1,J,K)
-               IF (LC(-2)) RHODELTA(I,J-1,K) = RHODELTA(I,J-1,K) + MAX(RMIN,RHOMJ+CONST*(RHO00-RHOMJ)) - RHOP(I,J-1,K)
-               IF (LC( 2)) RHODELTA(I,J+1,K) = RHODELTA(I,J+1,K) + MAX(RMIN,RHOPJ+CONST*(RHO00-RHOPJ)) - RHOP(I,J+1,K)
-               IF (LC(-3)) RHODELTA(I,J,K-1) = RHODELTA(I,J,K-1) + MAX(RMIN,RHOMK+CONST*(RHO00-RHOMK)) - RHOP(I,J,K-1)
-               IF (LC( 3)) RHODELTA(I,J,K+1) = RHODELTA(I,J,K+1) + MAX(RMIN,RHOPK+CONST*(RHO00-RHOPK)) - RHOP(I,J,K+1)
+               IF (LC(-1)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I-1,J,K)
+                  RHODELTA(I-1,J,K) = RHODELTA(I-1,J,K) + MAX(RMIN,RHOMI+CONST*(RHO00-RHOMI)) - RHOP(I-1,J,K)
+               ENDIF
+               IF (LC( 1)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I+1,J,K)
+                  RHODELTA(I+1,J,K) = RHODELTA(I+1,J,K) + MAX(RMIN,RHOPI+CONST*(RHO00-RHOPI)) - RHOP(I+1,J,K)
+               ENDIF
+               IF (LC(-2)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I,J-1,K)
+                  RHODELTA(I,J-1,K) = RHODELTA(I,J-1,K) + MAX(RMIN,RHOMJ+CONST*(RHO00-RHOMJ)) - RHOP(I,J-1,K)
+               ENDIF
+               IF (LC( 2)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I,J+1,K)
+                  RHODELTA(I,J+1,K) = RHODELTA(I,J+1,K) + MAX(RMIN,RHOPJ+CONST*(RHO00-RHOPJ)) - RHOP(I,J+1,K)
+               ENDIF
+               IF (LC(-3)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I,J,K-1)
+                  RHODELTA(I,J,K-1) = RHODELTA(I,J,K-1) + MAX(RMIN,RHOMK+CONST*(RHO00-RHOMK)) - RHOP(I,J,K-1)
+               ENDIF
+               IF (LC( 3)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I,J,K+1)
+                  RHODELTA(I,J,K+1) = RHODELTA(I,J,K+1) + MAX(RMIN,RHOPK+CONST*(RHO00-RHOPK)) - RHOP(I,J,K+1)
+               ENDIF
                RHODELTA(I,J,K) = RHODELTA(I,J,K) + RMIN - RHOP(I,J,K)
             ENDIF
          ENDIF
@@ -703,7 +742,7 @@ DO K=1,KBAR
          IF (SOLID(IC)) CYCLE CHECK_LOOP2
          RMAX = RHOMAX
          IF (RHOP(I,J,K)<=RMAX) CYCLE CHECK_LOOP2
-         SUM   = 0.
+         SUM   = 0._EB
          ISUM  = 0
          LC    = .FALSE.
          RHO00 = RHOP(I,J,K)
@@ -749,12 +788,30 @@ DO K=1,KBAR
          ELSE
             IF(SUM-ISUM*RHO00 /= 0._EB) THEN         
                CONST = (RMAX-RHO00)/(SUM-ISUM*RHO00)
-               IF (LC(-1)) RHODELTA(I-1,J,K) = RHODELTA(I-1,J,K) + MIN(RMAX,RHOMI+CONST*(RHO00-RHOMI)) - RHOP(I-1,J,K)
-               IF (LC( 1)) RHODELTA(I+1,J,K) = RHODELTA(I+1,J,K) + MIN(RMAX,RHOPI+CONST*(RHO00-RHOPI)) - RHOP(I+1,J,K)
-               IF (LC(-2)) RHODELTA(I,J-1,K) = RHODELTA(I,J-1,K) + MIN(RMAX,RHOMJ+CONST*(RHO00-RHOMJ)) - RHOP(I,J-1,K)
-               IF (LC( 2)) RHODELTA(I,J+1,K) = RHODELTA(I,J+1,K) + MIN(RMAX,RHOPJ+CONST*(RHO00-RHOPJ)) - RHOP(I,J+1,K)
-               IF (LC(-3)) RHODELTA(I,J,K-1) = RHODELTA(I,J,K-1) + MIN(RMAX,RHOMK+CONST*(RHO00-RHOMK)) - RHOP(I,J,K-1)
-               IF (LC( 3)) RHODELTA(I,J,K+1) = RHODELTA(I,J,K+1) + MIN(RMAX,RHOPK+CONST*(RHO00-RHOPK)) - RHOP(I,J,K+1)
+               IF (LC(-1)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I-1,J,K)
+                  RHODELTA(I-1,J,K) = RHODELTA(I-1,J,K) + MIN(RMAX,RHOMI+CONST*(RHO00-RHOMI)) - RHOP(I-1,J,K)
+               ENDIF
+               IF (LC( 1)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I+1,J,K)
+                  RHODELTA(I+1,J,K) = RHODELTA(I+1,J,K) + MIN(RMAX,RHOPI+CONST*(RHO00-RHOPI)) - RHOP(I+1,J,K)
+               ENDIF
+               IF (LC(-2)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I,J-1,K)
+                  RHODELTA(I,J-1,K) = RHODELTA(I,J-1,K) + MIN(RMAX,RHOMJ+CONST*(RHO00-RHOMJ)) - RHOP(I,J-1,K)
+               ENDIF
+               IF (LC( 2)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I,J+1,K)
+                  RHODELTA(I,J+1,K) = RHODELTA(I,J+1,K) + MIN(RMAX,RHOPJ+CONST*(RHO00-RHOPJ)) - RHOP(I,J+1,K)
+               ENDIF
+               IF (LC(-3)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I,J,K-1)
+                  RHODELTA(I,J,K-1) = RHODELTA(I,J,K-1) + MIN(RMAX,RHOMK+CONST*(RHO00-RHOMK)) - RHOP(I,J,K-1)
+               ENDIF
+               IF (LC( 3)) THEN
+                  CONST = CONST*V_CELL(I,J,K)/V_CELL(I,J,K+1)
+                  RHODELTA(I,J,K+1) = RHODELTA(I,J,K+1) + MIN(RMAX,RHOPK+CONST*(RHO00-RHOPK)) - RHOP(I,J,K+1)
+               ENDIF
                RHODELTA(I,J,K) = RHODELTA(I,J,K) + RMAX - RHOP(I,J,K)
             ENDIF
          ENDIF
