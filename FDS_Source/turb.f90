@@ -1775,14 +1775,12 @@ REAL(EB), PARAMETER :: ALPHA=7.202125273562269_EB !! ALPHA=(1._EB-B)/2._EB*A**((
 REAL(EB), PARAMETER :: BETA=1._EB+B
 REAL(EB), PARAMETER :: ETA=(1._EB+B)/A
 REAL(EB), PARAMETER :: GAMMA=2._EB/(1._EB+B)
-REAL(EB), PARAMETER :: ERROR_TOLERANCE=1.E-3_EB
+REAL(EB), PARAMETER :: KAPPA=0.41_EB ! von Karman constant
 
-REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS,U_TAU,U_TAU_OLD,RMS_ROUGHNESS_HEIGHT
+REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS,U_TAU
 INTEGER :: I,MAX_ITERATIONS
 
-! Werner and Wengle wall model
-!
-! References:
+! References (for smooth walls):
 !
 ! Werner, H., Wengle, H. (1991) Large-eddy simulation of turbulent flow over
 ! and around a cube in a plate channel. 8th Symposium on Turbulent Shear
@@ -1803,34 +1801,35 @@ INTEGER :: I,MAX_ITERATIONS
 !
 ! McDermott, R. (2009) FDS Wall Flows, Part I: Straight Channels, NIST Technical Note.
 !
+! References (for rough surfaces):
+!
+! Moeng, C.-H. (1984) A Large-Eddy Simulation Model for the Study of Planetary
+! Boundary-Layer Turbulence. Journal of the Atmospheric Sciences, Vol. 41, No. 13,
+! pp. 2052-2062.
+!
+! Stoll, R., Porte-Agel, F. (2008) Large-Eddy Simulation of the Stable Atmospheric
+! Boundary Layer using Dynamic Models with Different Averaging Schemes. Boundary-Layer
+! Meteorology, 126:1-28.
+!
+! Comments:
+!
 ! The slip factor (SF) is based on the following approximation to the wall stress
 ! (note that u0 is the ghost cell value of the streamwise velocity component and
 ! z is the wall-normal direction):
 ! tau_w = mu*(u1-u0)/dz = mu*(u1-SF*u1)/dz = mu*u1/dz*(1-SF)
 ! note that tau_w/rho = nu*u1/dz*(1-SF)
 
-! apply empirical coefficient from numerical experiments comparing FDS with Moody Chart
-RMS_ROUGHNESS_HEIGHT = 0.08_EB*ROUGHNESS 
-
-IF (RMS_ROUGHNESS_HEIGHT>0._EB) THEN
-   TAU_W = NU*2._EB*ABS(U1)/DZ ! guess tau_w/rho
-   U_TAU = SQRT(TAU_W)
-   MAX_ITERATIONS = 10 ! usually converges in 1 or 2 iterations
+IF (ROUGHNESS>0._EB) THEN
+   ! Monin-Obukhov
+   ! at the moment, no stability correction
+   TAU_W = ((U1*KAPPA)/LOG(0.5_EB*DZ/ROUGHNESS))**2 ! actually tau_w/rho
 ELSE
-   U_TAU = 1._EB
-   MAX_ITERATIONS = 1
-ENDIF
-
-DO I=1,MAX_ITERATIONS
-   NU_OVER_DZ = (NU + RMS_ROUGHNESS_HEIGHT*U_TAU)/DZ
+   ! Werner-Wengle
+   NU_OVER_DZ = NU/DZ
    TAU_W = (ALPHA*(NU_OVER_DZ)**BETA + ETA*(NU_OVER_DZ)**B*ABS(U1))**GAMMA ! actually tau_w/rho
-   U_TAU_OLD = U_TAU
-   U_TAU = SQRT(TAU_W)
-   IF ( ABS((U_TAU-U_TAU_OLD)/U_TAU) < ERROR_TOLERANCE ) EXIT
-ENDDO
-
-Z_PLUS = DZ/(NU/U_TAU+RMS_ROUGHNESS_HEIGHT)
-
+ENDIF   
+U_TAU = SQRT(TAU_W)
+Z_PLUS = DZ/(NU/U_TAU)
 IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
    SF = 1._EB-TAU_W/(NU/DZ*ABS(U1)) ! log layer
 ELSE
@@ -3664,6 +3663,8 @@ IF (DNS) THEN
    ETA = UN + RRHO*MU/DN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA/DN)
    BB  = (TWTH*US_WALL/DN + ONSI*DUSDN)*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+   !AA  = -0.5_EB*(DUSDS + ETA/DN)
+   !BB  = 0.5_EB*US_WALL/DN*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
    US = ((AA*US + BB)*EXP(AA*DT) - BB)/AA
 ELSE
    US0 = US
