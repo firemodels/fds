@@ -1778,7 +1778,6 @@ REAL(EB), PARAMETER :: GAMMA=2._EB/(1._EB+B)
 REAL(EB), PARAMETER :: KAPPA=0.41_EB ! von Karman constant
 
 REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS,U_TAU
-INTEGER :: I,MAX_ITERATIONS
 
 ! References (for smooth walls):
 !
@@ -1828,7 +1827,7 @@ ELSE
    NU_OVER_DZ = NU/DZ
    TAU_W = (ALPHA*(NU_OVER_DZ)**BETA + ETA*(NU_OVER_DZ)**B*ABS(U1))**GAMMA ! actually tau_w/rho
 ENDIF   
-U_TAU = SQRT(TAU_W)
+U_TAU = MAX(1.E-9_EB,SQRT(TAU_W))
 Z_PLUS = DZ/(NU/U_TAU)
 IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
    SF = 1._EB-TAU_W/(NU/DZ*ABS(U1)) ! log layer
