@@ -84,12 +84,12 @@ condenses hundreds of plots into just one, but we still have the problem of quan
 diagonal line on the plot shown in Fig.~\ref{scatterplot} only indicates where a prediction and measurement agree. But because the model has error, and
 the measurement has uncertainty, it cannot be said that the model is perfect if its predictions agree exactly with measurements. There needs to be a way of quantifying
 both the error and uncertainty before any conclusions can be drawn.
-Such an exercise would result in the error/uncertainty bars shown in the figure. At first glance, it would appear that the
-horizontal bar associated with each point represents the uncertainty in the measurement, and the vertical bar represents the error in the model. Unfortunately, it
-is not a simple task to quantify these values, nor can it be said that the vertical bar is the result solely of model error. As will be discussed below, any
-experiment involves measurements of elevated temperatures, heat flux, {\em etc.}, resulting from the fire, but also measurements of parameters, like the
-heat release rate and material properties, that are then fed into the model as input. Uncertainty in these input parameters combines with the error in the model
-to form the vertical uncertainty/error bar associated with each point in Fig.~\ref{scatterplot}. Decoupling the error from the uncertainty
+Such an exercise would result in the error/uncertainty bars\footnote{The data in Fig.~\ref{scatterplot} was extracted from Ref.~\cite{NUREG_1824}. 
+The uncertainty bars are for demonstration only.}  
+shown in the figure. The
+horizontal error bar associated with each point represents the uncertainty in the measurement itself. For example, a thermocouple used to measure a gas
+temperature has uncertainty. The vertical error bar, however, results from the combination of the error in the model itself and the uncertainty in the
+measured values of the input parameters, like the heat release rate and material properties. Decoupling the model error from the experimental uncertainty
 is the subject of analysis below. Before presenting this
 analysis, however, we must first discuss in more detail the subject of experimental uncertainty.
 
@@ -112,7 +112,8 @@ typically contains fairly limited discussion of uncertainty. Some contain none a
 However, in order to assess the accuracy of the model predictions, there must be some estimate of the
 combined effect of the uncertainty in the reported test parameters, like the heat release rate of the fire,
 and the reported measurements of the quantities of interest, like the hot gas layer (HGL)
-temperature, heat flux, and so forth. Otherwise, the difference between model and measurement would simply have to be attributed as model error and there is no point in
+temperature, heat flux, and so forth. Unless there is an estimate of the experimental uncertainty, the difference between model and measurement 
+would simply have to be attributed as model error and there is no point in
 continuing this exercise.
 
 Rather than throwing out several decades worth of fire test data, there are ways that we can estimate the uncertainty of the measurements based on work
@@ -125,7 +126,7 @@ shielded, aspirated) with different size beads, metals, and so on. For each, one
 uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate, leakage area, ventilation rate, material
 properties, and so on. The effect of these uncertainties on the reported measured quantity had to be assessed as well. For example, most of the
 experiments used oxygen consumption calorimetry as the means of measuring the heat release rate.
-Estimates of the uncertainty of large scale calorimeters ranges from 10~\% to 30~\%. For the sake of discussion, we assume that it is 15~\%.
+Estimates of the uncertainty of large scale calorimeters range from 10~\% to 30~\%. For the sake of discussion, we assume that it is 15~\%.
 It has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise due to
 a compartment fire is proportional to the HRR raised to the two-thirds power, thus a 15~\% uncertainty in the HRR would lead to a $2/3 \times 15$~\%=10~\%
 uncertainty in the model prediction. This uncertainty now needs to be combined with the uncertainty in the thermocouple measurement itself. Let us say that
@@ -180,7 +181,8 @@ that the difference between predicted and measured values is roughly proportiona
 complexity of the models, it would be difficult to postulate a more precise functional relationship.
 The same is true of the form of the distribution. Given the complexity of the models and the experiments, it would be difficult to justify
 any particular distribution. In fact, the very reason why we have developed this method of quantifying model error based on validation
-experiments is because the model algorithm itself is too complicated to work with directly as a means of estimating the error.
+experiments is because the model algorithm itself is too complicated to work with directly as a means of estimating the error. However, if
+the distributions were better characterized, the methodology presented here could be generalized appropriately.
 
 With these assumptions in mind, we proceed with the statistical analysis of the data. A general discussion of Bayesian data analysis can be found in
 Ref.~\cite{Gelman:Stats}.
@@ -243,22 +245,31 @@ predicted values. An estimate of $\delta$ can be found using the mean of the dis
 \be
    \hat{\delta} = \exp \left( \overline{\ln M}-\overline{\ln E}+\frac{ \widehat{\widetilde{\sigma}_M^2}}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right)
 \ee
-Taking the assumed distribution of the model prediction, $M$, in Eq.~(\ref{mdist}) and using
+Taking the assumed normal distribution of the model prediction, $M$, in Eq.~(\ref{mdist}) and using
 a Bayesian argument\footnote{The form of Bayes theorem used here states that the posterior distribution is the product of
 the prior distribution and the likelihood function, normalized by their integral:
-$f(\theta|E)= p(\theta) \, f(E|\theta)/\int p(\theta) \, f(E|\theta) \, d\theta$.
-A constant prior is also known as a Jeffreys prior.}
+$f(\theta|M)= p(\theta) \, f(M|\theta)/\int p(\theta) \, f(M|\theta) \, d\theta$.
+A constant prior is also known as a Jeffreys prior~\cite{Gelman:Stats}.}
 with a non-informative prior for $\theta$, we obtain the posterior distribution as
 \be
    \delta \, \theta \; | \; M \sim N \left( M \; , \; \sigma_M^2 \right) \label{thetaeq}
 \ee
 The assumption of a non-informative prior implies that we do not have sufficient information about the
 prior distribution ({\em i.e.} the true value) of
-$\theta$ to assume anything other than a uniform distribution.
-Dividing by the bias factor, $\delta$, yields a distribution for the ``true'' value of the predicted quantity:
+$\theta$ to assume anything other than a uniform\footnote{A uniform distribution means that there is an equal likelihood that the random variable takes on any value
+within the range of possibilities.} distribution. This is equivalent to saying that the modeler has not biased the model input parameters to compensate for a known
+bias in the model output. For example, if a model has been shown to over-predict the compartment temperature, and the modeler has reduced the specified heat release
+rate as a result, then it can no longer be assumed that the prior distribution of the true temperature is uniform, and the
+methodology for estimating the true value is no longer valid. Still another way to understand this is by analogy to target shooting. If a given rifle 
+has a defect such that, on average, it shoots 10~cm to the left of a given target, then it must be assumed that a marksman without this knowledge was aiming 
+10~cm to the right of the bullet hole. 
+
+In summary, assuming that the modeler has not modified the input parameters to compensate for a known bias in the model,
+the true value of the model output quantity, $\theta$, given the model prediction, $M$, is assumed to be normally distributed with the following mean and standard deviation:
 \be
    \theta \; | \; M \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widehat{\widetilde{\sigma}_M^2} \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth}
 \ee
+This formula has been obtained by dividing by the bias factor, $\delta$, in Eq.~(\ref{thetaeq}).
 Below, we describe how one might make use of this formula in practice.
 First, however, we need to verify the accuracy of the procedure just described.
 
