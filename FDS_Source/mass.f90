@@ -628,7 +628,7 @@ ELSE
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            V_CELL(I,J,K) = DX(I)*DY(K)*DZ(K)
+            V_CELL(I,J,K) = DX(I)*DY(J)*DZ(K)
          ENDDO
       ENDDO
    ENDDO
