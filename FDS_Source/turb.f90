@@ -1775,9 +1775,10 @@ REAL(EB), PARAMETER :: ALPHA=7.202125273562269_EB !! ALPHA=(1._EB-B)/2._EB*A**((
 REAL(EB), PARAMETER :: BETA=1._EB+B
 REAL(EB), PARAMETER :: ETA=(1._EB+B)/A
 REAL(EB), PARAMETER :: GAMMA=2._EB/(1._EB+B)
-REAL(EB), PARAMETER :: KAPPA=0.41_EB ! von Karman constant
+REAL(EB), PARAMETER :: RKAPPA=2.44_EB ! 1./von Karman constant
+REAL(EB), PARAMETER :: BTILDE=7.44_EB ! see Pope p. 297 (constant has been modified)
 
-REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS,U_TAU
+REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS,U_TAU,TAU_ROUGH
 
 ! References (for smooth walls):
 !
@@ -1818,17 +1819,17 @@ REAL(EB) :: TAU_W,NU_OVER_DZ,Z_PLUS,U_TAU
 ! tau_w = mu*(u1-u0)/dz = mu*(u1-SF*u1)/dz = mu*u1/dz*(1-SF)
 ! note that tau_w/rho = nu*u1/dz*(1-SF)
 
+TAU_ROUGH = 0._EB
 IF (ROUGHNESS>0._EB) THEN
-   ! Monin-Obukhov
-   ! at the moment, no stability correction
-   TAU_W = ((U1*KAPPA)/LOG(0.5_EB*DZ/ROUGHNESS))**2 ! actually tau_w/rho
-ELSE
-   ! Werner-Wengle
-   NU_OVER_DZ = NU/DZ
-   TAU_W = (ALPHA*(NU_OVER_DZ)**BETA + ETA*(NU_OVER_DZ)**B*ABS(U1))**GAMMA ! actually tau_w/rho
-ENDIF   
-U_TAU = MAX(1.E-9_EB,SQRT(TAU_W))
-Z_PLUS = DZ/(NU/U_TAU)
+   ! Pope (2000)
+   TAU_ROUGH = ( U1/(RKAPPA*LOG(0.5_EB*DZ/MIN(ROUGHNESS,DZ))+BTILDE) )**2 ! actually tau_w/rho
+ENDIF
+! Werner-Wengle
+NU_OVER_DZ = NU/DZ
+TAU_W = (ALPHA*(NU_OVER_DZ)**BETA + ETA*(NU_OVER_DZ)**B*ABS(U1))**GAMMA ! actually tau_w/rho
+TAU_W = MAX(TAU_W,TAU_ROUGH)
+U_TAU = SQRT(TAU_W)
+Z_PLUS = DZ/(NU/(U_TAU+1.E-10_EB))
 IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
    SF = 1._EB-TAU_W/(NU/DZ*ABS(U1)) ! log layer
 ELSE
