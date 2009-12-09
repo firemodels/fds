@@ -1058,12 +1058,12 @@ The case numbers in the first row are 0, 40, 1, 2 and 3.  The case numbers in th
 \section{3D Contours - Isosurfaces}
 An isosurface is a surface in 3-D space that defines constant values of a dependent variable.
 For example, FDS uses a mixture fraction model to simulate
-combustion. In this model, there is a critical or stoichimetric
+combustion. In FDS versions 2 through 4 this model considered a critical or stoichimetric
 mixture fraction value, such that regions greater than the
 critical value are fuel rich and regions less than the critical
-value are fuel lean. Burning then occurs, according to the model,
+value are fuel lean. Burning then occurs, according to the model in versions 2 through 4,
 on the level surface where the mixture fraction equals this
-stoichimetric value. Therefore, it is of interest to visualize
+stoichimetric value. Therefore, for those versions of FDS it is of interest to visualize
 these locations. This is done using animated isosurfaces.
 
 The isosurfaces are generated at each desired time step using a
