@@ -1630,7 +1630,6 @@ void initvars1(void){
   view_ntimes=1000;
   ntours=0,selectedtour_index=-1,selectedtour_index_old=-1,selectedtour_index_ini=-1;
   glui_avatar_index=0;
-  topvalstack=0;
   iavatar_evac=0;
   update_selectedtour_index=0;
   viewtourfrompath=0,viewalltours=0,viewanytours=0,edittour=0;

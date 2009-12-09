@@ -37,6 +37,8 @@ char readsmv_revision[]="$Revision$";
 
 #define ijcell2(i,j) nxcell*(j) + (i)
 int GeometryMenu(int var);
+propdata *get_prop_id(char *prop_id);
+
 
 /* ------------------ update_inilist ------------------------ */
 
@@ -155,6 +157,7 @@ int readsmv(char *file){
   int nn_plot3d=0;
   int nn_slice=0;
 
+  npropinfo=0;
   navatar_colors=0;
   FREEMEMORY(avatar_colors);
 
@@ -473,6 +476,12 @@ int readsmv(char *file){
       The keywords TRNX, TRNY, TRNZ, GRID, PDIM, OBST and VENT are not required 
       BUT if any one these keywords are present then the number of each MUST be equal 
     */
+
+
+    if(match(buffer,"PROP",4) == 1){
+      npropinfo++;
+      continue;
+    }
     if(match(buffer,"SMOKEDIFF",9) == 1){
       smokediff=1;
       continue;
@@ -752,6 +761,10 @@ int readsmv(char *file){
    ************************************************************************
  */
 
+ if(npropinfo>0){
+   NewMemory((void **)&propinfo,npropinfo*sizeof(propdata));
+   npropinfo=0;
+ }
  if(nterraininfo>0){
    NewMemory((void **)&terraininfo,nterraininfo*sizeof(terraindata));
    nterraininfo=0;
@@ -1013,14 +1026,117 @@ int readsmv(char *file){
       if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
     }
 
-  /*
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ PROP ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+
+    if(match(buffer,"PROP",4) == 1){
+      propdata *propi;
+      char *fbuffer;
+      int lenbuf;
+
+      propi = propinfo + npropinfo;
+
+      if(fgets(buffer,255,stream)==NULL)break; // prop label
+      trim(buffer);
+      fbuffer=trim_front(buffer);
+      lenbuf=strlen(fbuffer);
+      NewMemory((void **)&propi->label,lenbuf+1);
+      strcpy(propi->label,fbuffer);
+      
+      if(fgets(buffer,255,stream)==NULL)break; // smokeview_id
+      trim(buffer);
+      fbuffer=trim_front(buffer);
+      lenbuf=strlen(fbuffer);
+      NewMemory((void **)&propi->smokeview_id,lenbuf+1);
+      strcpy(propi->smokeview_id,fbuffer);
+      propi->smv_object=get_SVOBJECT_type(propi->smokeview_id);
+
+      if(fgets(buffer,255,stream)==NULL)break; // keyword_values
+      sscanf(buffer,"%i",&propi->nvars_indep);
+      propi->vars_indep=NULL;
+      propi->svals=NULL;
+      if(propi->nvars_indep>0){
+        NewMemory((void **)&propi->vars_indep,propi->nvars_indep*sizeof(char *));
+        NewMemory((void **)&propi->svals,propi->nvars_indep*sizeof(char *));
+        NewMemory((void **)&propi->fvals,propi->nvars_indep*sizeof(float));
+        NewMemory((void **)&propi->vars_indep_index,propi->nvars_indep*sizeof(int));
+        for(i=0;i<propi->nvars_indep;i++){
+          char *equal;
+
+          propi->svals[i]=NULL;
+          propi->vars_indep[i]=NULL;
+          propi->fvals[i]=0.0;
+          fgets(buffer,255,stream);
+          equal=strchr(buffer,'=');
+          if(equal!=NULL){
+            char *buf1, *buf2, *keyword, *val;
+            int lenkey, lenval;
+
+            buf1=buffer;
+            buf2=equal+1;
+            *equal=0;
+
+            trim(buf1);
+            keyword=trim_front(buf1);
+            lenkey=strlen(keyword);
+
+            trim(buf2);
+            val=trim_front(buf2);
+            lenval=strlen(val);
+
+            if(lenkey==0||lenval==0)continue;
+
+            NewMemory((void **)&propi->svals[i],lenval+1);
+            strcpy(propi->svals[i],val);
+
+            NewMemory((void **)&propi->vars_indep[i],lenkey+1);
+            strcpy(propi->vars_indep[i],keyword);
+
+            sscanf(val,"%f",propi->fvals+i);
+          }
+        }
+        get_indep_var_indices(propi->smv_object,
+          propi->vars_indep,propi->nvars_indep,
+          propi->vars_indep_index);
+
+        get_evac_indices(propi->smv_object,
+          propi->vars_evac_index,&propi->nvars_evac);
+
+      }
+      
+      if(fgets(buffer,255,stream)==NULL)break;  // texture files
+      sscanf(buffer,"%i",&propi->ntextures);
+      propi->texturefiles=NULL;
+      if(propi->ntextures>0){
+        NewMemory((void **)&propi->texturefiles,propi->ntextures*sizeof(char *));
+        for(i=0;i<propi->ntextures;i++){
+          char *buf2;
+          int lenbuf;
+
+          fgets(buffer,255,stream);
+          trim(buffer);
+          buf2 = trim_front(buffer);
+          lenbuf=strlen(buf2);
+          propi->texturefiles[i]=NULL;
+          if(lenbuf==0)continue;
+          NewMemory((void **)&propi->texturefiles[i],lenbuf+1);
+          strcpy(propi->texturefiles[i],buf2);
+        }
+      }
+      npropinfo++;
+      continue;
+    }
+
+    /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++ TERRAIN +++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
 
- 
-     if(match(buffer,"TERRAIN",7) == 1){
+    if(match(buffer,"TERRAIN",7) == 1){
 //      terraindata *terri;
       float xmin, xmax, ymin, ymax;
       int nx, ny;
@@ -1046,13 +1162,19 @@ int readsmv(char *file){
       float rgb_class[4];
       part5class *partclassi;
       char *device_ptr;
+      char *smokeview_id, *prop_id;
 
       partclassi = partclassinfo + npartclassinfo;
       partclassi->kind=PARTICLES;
       if(match(buffer,"CLASS_OF_HUMANS",15) == 1)partclassi->kind=HUMANS;
       fgets(buffer,255,stream);
 
-      device_ptr = get_label(buffer);
+      get_labels(buffer,&device_ptr,&prop_id);
+      if(prop_id!=NULL){
+        device_ptr=NULL;
+      }
+      partclassi->prop=NULL;
+
       partclassi->sphere=NULL;
       partclassi->smv_device=NULL;
       partclassi->device_name=NULL;
@@ -1097,14 +1219,21 @@ int readsmv(char *file){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&partclassi->ntypes);
       partclassi->ntypes+=2;
+      partclassi->nvars_dep=partclassi->ntypes-2+3; // subtract off two "dummies" at beginning and add 3 at end for r,g,b
+      partclassi->vars_dep=NULL;
       if(partclassi->ntypes>0){
         flowlabels *labelj;
         char shortdefaultlabel[]="Uniform";
         char longdefaultlabel[]="Uniform color";
 
-
         NewMemory((void **)&partclassi->labels,partclassi->ntypes*sizeof(flowlabels));
-        
+        partclassi->vars_dep=NULL;
+        if(partclassi->nvars_dep>0){
+          NewMemory((void **)&partclassi->vars_dep,partclassi->nvars_dep*sizeof(char *));
+          NewMemory((void **)&partclassi->vars_dep_index,partclassi->nvars_dep*sizeof(int));
+          NewMemory((void **)&partclassi->fvars_dep,partclassi->nvars_dep*sizeof(float));
+        }
+       
         labelj = partclassi->labels+0; // placeholder for hidden
 
         labelj->longlabel=NULL;
@@ -1135,6 +1264,7 @@ int readsmv(char *file){
           labelj->shortlabel=NULL;
           labelj->unit=NULL;
           readlabels(labelj,stream);
+          partclassi->vars_dep[j-2]=labelj->shortlabel;
           if(strcmp(labelj->shortlabel,"DIAMETER")==0){
             partclassi->col_diameter=j-2;
           }
@@ -1871,7 +2001,7 @@ typedef struct {
       float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
       int state0=0;
       int nparams=0, nparams_textures=0;
-      char *labelptr;
+      char *labelptr, *prop_id;
 
       devicei = deviceinfo + ndeviceinfo;
       devicei->type=DEVICE_DEVICE;
@@ -1886,6 +2016,8 @@ typedef struct {
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
         xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
+      get_labels(buffer,&prop_id,NULL);
+      devicei->prop=get_prop_id(prop_id);
       if(nparams_textures<0)nparams_textures=0;
       if(nparams_textures>1)nparams_textures=1;
       devicei->ntextures=nparams_textures;
@@ -2233,6 +2365,7 @@ typedef struct {
   nbtemp=0; nvents=0;
   itrnx=0, itrny=0, itrnz=0, igrid=0, ipdim=0, iobst=0, ivent=0;
   ioffset=0;
+  npartclassinfo=0;
   if(noffset==0)ioffset=1;
 
 /* 
@@ -2266,10 +2399,56 @@ typedef struct {
 
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++ CLASS_OF_PARTICLES +++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"CLASS_OF_PARTICLES",18) == 1||
+       match(buffer,"CLASS_OF_HUMANS",15) == 1){
+      float rgb_class[4];
+      part5class *partclassi;
+      char *device_ptr;
+      char buffer_copy[1024];
+      char *smokeview_id, *prop_id;
+      int nvar;
+
+      partclassi = partclassinfo + npartclassinfo;
+      partclassi->kind=PARTICLES;
+      if(match(buffer,"CLASS_OF_HUMANS",15) == 1)partclassi->kind=HUMANS;
+      fgets(buffer,255,stream);
+
+      get_labels(buffer,&device_ptr,&prop_id);
+      partclassi->prop=get_prop_id(prop_id);
+      if(partclassi->prop!=NULL){
+        sv_object_frame *obj_frame;
+
+        if(partclassi->kind==HUMANS){
+          partclassi->prop->draw_evac=1;
+        }
+        else{
+          partclassi->prop->draw_evac=0;
+        }
+        obj_frame=partclassi->prop->smv_object->obj_frames[0];
+        for(i=0;i<partclassi->nvars_dep-3;i++){
+          char *var;
+
+          var=partclassi->vars_dep[i];
+          partclassi->vars_dep_index[i]=get_token_loc(var,obj_frame);
+        }
+        nvar = partclassi->nvars_dep;
+        partclassi->vars_dep_index[nvar-3]=get_token_loc("R",obj_frame);
+        partclassi->vars_dep_index[nvar-2]=get_token_loc("G",obj_frame);
+        partclassi->vars_dep_index[nvar-1]=get_token_loc("B",obj_frame);
+      }
+
+      npartclassinfo++;
+      continue;
+    }
+    
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ HRRPUVCUT ++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-
     if(match(buffer,"HRRPUVCUT",9) == 1){
       int nhrrpuvcut;
       float hrrpuvcut;
@@ -9937,33 +10116,42 @@ int file_exist(char *file){
   return 1;
 }
 
-/* ------------------ get_label ------------------------ */
+/* ------------------ get_labels ------------------------ */
 
-char *get_label(char *buffer){
-  // find a label between two '%' characters or between % and the EOL 
+void get_labels(char *buffer, char **label1, char **label2){
+  char *tok0, *tok1, *tok2;
 
-  char *labelbeg, *labelend;
-  int len;
-
-  labelbeg=strchr(buffer,'%');
-  if(labelbeg==NULL)return NULL;
-
-  len=strlen(labelbeg);
-  *labelbeg=0;
-  if(len<=1)return NULL;
-  labelbeg++;
-
-  labelend=strchr(labelbeg,'%');
-  if(labelend!=NULL)*labelend=0;
-
-  trim(labelbeg);
-  if(strlen(labelbeg)>0){
-    labelbeg=trim_front(labelbeg);
-    if(strlen(labelbeg)==0)labelbeg=NULL;
+  tok0=NULL;
+  tok1=NULL;
+  tok2=NULL;
+  tok0 = strtok(buffer,"%");
+  if(tok0!=NULL)tok1=strtok(NULL,"%");
+  if(tok1!=NULL)tok2=strtok(NULL,"%");
+  if(tok1!=NULL){
+    trim(tok1);
+    tok1=trim_front(tok1);
+    if(strlen(tok1)==0)tok1=NULL;
   }
-  else{
-    labelbeg=NULL;
+  if(tok2!=NULL){
+    trim(tok2);
+    tok2=trim_front(tok2);
+    if(strlen(tok2)==0)tok2=NULL;
   }
-  return labelbeg;
+  if(label1!=NULL)*label1=tok1;
+  if(label2!=NULL)*label2=tok2;
 }
 
+/* ------------------ get_prop_id ------------------------ */
+
+propdata *get_prop_id(char *prop_id){
+  int i;
+
+  for(i=0;i<npropinfo;i++){
+    propdata *propi;
+
+    propi = propinfo + i;
+
+    if(strcmp(propi->label,prop_id)==0)return propi;
+  }
+  return NULL;
+}
