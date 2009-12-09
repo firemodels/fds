@@ -7,6 +7,20 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 
+/* --------------------------  point ------------------------------------ */
+#define PROPVARMAX 100
+typedef struct {
+  char *label;
+  char *smokeview_id;
+  int ntextures;
+  char **texturefiles, **vars_indep, **svals;
+  int *vars_indep_index, vars_dep_index[PROPVARMAX], vars_evac_index[PROPVARMAX];
+  int nvars_indep,      nvars_dep,                   nvars_evac;
+  float fvals[PROPVARMAX], fvars_evac[PROPVARMAX], fvars_dep[PROPVARMAX];
+  struct _sv_object *smv_object;
+  int draw_evac;
+} propdata;
+
 #ifdef pp_SHOOTER
 
 /* --------------------------  point ------------------------------------ */
@@ -560,8 +574,8 @@ typedef struct _tourdata {
 /* --------------------------  tokendata ------------------------------------ */
 
 typedef struct _tokendata {
-  float var,*varptr;
-  int command,loc,type,reads,nvars,noutvars;
+  float var,*varptr,default_val;
+  int command,loc,type,reads,nvars,noutvars,is_label;
   struct _tokendata *next,*elsenext;
   char *token;
   char tokenlabel[20];
@@ -618,6 +632,7 @@ typedef struct _device{
   int istate_changes, nstate_changes, state0;
   int *showstatelist;
   isosurface **plane_surface;
+  propdata *prop;
   sv_object *object;
   int type;
 } device;
@@ -681,10 +696,15 @@ typedef struct {
   float dx, dy, dz;
   float diameter, length, azimuth, elevation;
   char *device_name;
+  propdata *prop;
   sv_object *sphere, *smv_device;
   int vis_type;
   int maxpoints, ntypes;
   float *xyz, *rgb;
+  int nvars_dep;
+  int *vars_dep_index;
+  float *fvars_dep;
+  char **vars_dep;
   flowlabels *labels;
 } part5class;
 

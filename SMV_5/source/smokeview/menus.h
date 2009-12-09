@@ -4888,6 +4888,7 @@ static int in_menu=0;
           }
           strcat(menulabel,partclassj->name);
           if(partclassj->col_diameter>=0||partclassj->col_length>=0||partclassj->device_name!=NULL||
+             (partclassj->prop!=NULL&&partclassj->prop->smokeview_id!=NULL)||
              (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)
             ){
               strcat(menulabel," drawn using:");
@@ -4915,12 +4916,19 @@ static int in_menu=0;
                 glutAddMenuEntry("      lines",-10-5*j-PART_LINES);
               }
             }
-            if(partclassj->smv_device!=NULL&&partclassj->device_name!=NULL){
+            if(partclassj->smv_device!=NULL&&partclassj->device_name!=NULL||
+              (partclassj->prop!=NULL&&partclassj->prop->smokeview_id!=NULL)
+              ){
               strcpy(menulabel,"      "); 
               if(partclassj->vis_type==PART_SMV_DEVICE){
                 strcat(menulabel,"*");
               }
-              strcat(menulabel,partclassj->device_name);
+              if(partclassj->device_name!=NULL){
+                strcat(menulabel,partclassj->device_name);
+              }
+              else if(partclassj->prop!=NULL&&partclassj->prop->smokeview_id!=NULL){
+                strcat(menulabel,partclassj->prop->smokeview_id);
+              }
               glutAddMenuEntry(menulabel,-10-5*j-PART_SMV_DEVICE);
             }
           }

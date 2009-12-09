@@ -32,6 +32,9 @@
 #include "smokeheaders.h"
 #endif
 
+SVEXTERN int npropinfo;
+SVEXTERN propdata *propinfo;
+
 SVEXTERN int show_mode;
 SVEXTERN int cellcenter_interp, cellcenter_slice_active, cellcenter_bound_active;
 SVEXTERN int part5colorindex, show_tracers_always;
@@ -841,7 +844,6 @@ SVEXTERN int nvalstack;
 SVEXTERN int device_sphere_segments;
 SVEXTERN int ntexturestack;
 
-SVEXTERN int topvalstack;
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;
 SVEXTERN float *tour_t, *tour_t2, *tour_dist, *tour_dist2, *tour_dist3;

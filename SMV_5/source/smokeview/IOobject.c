@@ -208,7 +208,7 @@ void drawhexdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor);
 void drawring(float d_inner, float d_outer, float height, unsigned char *rgbcolor);
 void drawnotchplate(float diameter, float height, float notchheight, float direction, unsigned char *rgbcolor);
-void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack);
+void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop);
 sv_object *get_object(char *label);
 void free_object(sv_object *object);
 void remove_comment(char *buffer);
@@ -494,10 +494,12 @@ void draw_devices(void){
   for(i=0;i<ndeviceinfo;i++){
     int tagval;
     int save_use_displaylist;
+    propdata *prop;
 
     devicei = deviceinfo + i;
+    prop=devicei->prop;
 
-    if(devicei->object->visible==0)continue;
+    if(devicei->object->visible==0||(devicei->prop!=NULL&&devicei->prop->smv_object->visible==0))continue;
     if(devicei->plane_surface!=NULL){
       continue;
     }
@@ -549,6 +551,7 @@ void draw_devices(void){
     if(sensorrelsize!=1.0){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
     }
+    /*
     if(devicei->nparams>0){
       int j;
 
@@ -568,14 +571,16 @@ void draw_devices(void){
       }
       ntexturestack=devicei->ntextures;
     }
+    */
+    prop=devicei->prop;
     if(showtime==1&&itime>=0&&itime<ntimes&&devicei->showstatelist!=NULL){
       int state;
 
       state=devicei->showstatelist[itime];
-      draw_SVOBJECT(devicei->object,state,valstack,nvalstack);
+      draw_SVOBJECT(devicei->object,state,prop);
     }
     else{
-      draw_SVOBJECT(devicei->object,devicei->state0,valstack,nvalstack);
+      draw_SVOBJECT(devicei->object,devicei->state0,prop);
     }
     devicei->object->use_displaylist=save_use_displaylist;
     glPopMatrix();
@@ -622,7 +627,7 @@ void drawTargetNorm(void){
 
 /* ----------------------- draw_SMVOBJECT ----------------------------- */
 
-void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack){
+void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
   sv_object_frame *framei;
   tokendata *toknext;
   int *op;
@@ -630,7 +635,15 @@ void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack
   unsigned char rgbcolor[4];
   int displaylist_id=0;
   int ii;
+  sv_object *object;
 
+  if(prop!=NULL){
+    object=prop->smv_object;
+  }
+  else{
+    object=object_dev;
+  }
+  if(object->visible==0)return;
   if(iframe>object->nframes-1||iframe<0)iframe=0;
   framei=object->obj_frames[iframe];
   ASSERT(framei->error==0||framei->error==1);
@@ -643,15 +656,60 @@ void draw_SVOBJECT(sv_object *object, int iframe, float *valstack, int nvalstack
   rgbptr=rgbcolor;
   glPushMatrix();
 
-  if(valstack!=NULL&&nvalstack>0){
+// copy in default values ( :var=value in devices.svo file )
+
+  for(ii=0;ii<framei->ntokens;ii++){
+    tokendata *toki;
+
+    toki = framei->tokens+ii;
+    if(toki->is_label==1){
+      toki->var=toki->default_val;
+    }
+  }
+
+  // copy values 
+
+  if(prop!=NULL){
     int i;
 
-    for(i=0;i<nvalstack;i++){
-      tokendata *toki;
+    // copy static data from PROP line
 
-      toki = framei->tokens + i;
-      if(i>framei->ntokens-1)break;
-      toki->var=valstack[i];
+    for(i=0;i<prop->nvars_indep;i++){
+      tokendata *toki;
+      int index;
+
+      index = prop->vars_indep_index[i];
+      if(index<0||index>framei->ntokens-1)continue;
+      toki = framei->tokens + index;
+      toki->var=prop->fvals[i];
+    }
+
+    // copy time dependent evac data
+
+    if(prop->nvars_evac>0&&prop->draw_evac==1){
+      for(i=0;i<prop->nvars_evac;i++){
+        tokendata *toki;
+        int index;
+
+        index = prop->vars_evac_index[i];
+        if(index<0||index>framei->ntokens-1)continue;
+        toki = framei->tokens + index;
+        toki->var=prop->fvars_evac[i];
+      }
+    }
+
+    // copy time dependent data using variables from the class_of_... lines
+
+    if(prop->nvars_dep>0){
+      for(i=0;i<prop->nvars_dep;i++){
+        tokendata *toki;
+        int index;
+
+        index = prop->vars_dep_index[i];
+        if(index<0||index>framei->ntokens-1)continue;
+        toki = framei->tokens + index;
+        toki->var=prop->fvars_dep[i];
+      }
     }
   }
 
@@ -2309,8 +2367,8 @@ int get_token_loc(char *var,sv_object_frame *frame){
 
     ii = frame->symbols[i];
     toki = frame->tokens+ii;
-    token_var = toki->token+1;
-    if(strcmp(var,token_var)==0)return ii;
+    token_var = toki->tokenlabel+1;
+    if(STRCMP(var,token_var)==0)return ii;
   }
   return -1;
 }
@@ -2403,6 +2461,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     toki = frame->tokens + i;
 
     c = toki->token[0];
+    toki->is_label=0;
     if(first_token==NULL&&c!=':')first_token=toki;
     if(c>='a'&&c<='z'||c>='A'&&c<='Z'){
       int use_displaylist;
@@ -2467,8 +2526,24 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       toki->type=TOKEN_GETVAL;
     }
     else if(c==':'){
+      char *var, *val, *tok, *equal;
+      char bufcopy[1024];
+
+      strcpy(bufcopy,toki->token);
+      var=strtok(bufcopy,"=");
+      toki->default_val=0.0;
+      if(var!=NULL){
+        val=strtok(NULL,"=");
+        if(val!=NULL){
+          strcpy(toki->tokenlabel,var);
+          sscanf(val,"%f",&toki->default_val);
+        }
+      }
+      equal=strchr(toki->token,'=');
+      if(equal!=NULL)*equal=0;
       toki->type=TOKEN_FLOAT;
       toki->varptr=&toki->var;
+      toki->is_label=1;
       nsymbols++;
     }
     else{
@@ -3259,4 +3334,52 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
       devicei->params[i]=params[i];
     }
   }
+}
+
+/* ----------------------- get_indep_var_indices ----------------------------- */
+
+void get_indep_var_indices(sv_object *smv_object, 
+        char **var_indep_strings, int nvars_indep, int *index){
+
+  int i,j;
+  sv_object_frame *obj_frame;
+
+  obj_frame=smv_object->obj_frames[0];
+
+  for(i=0;i<nvars_indep;i++){
+    char *var;
+
+    var = var_indep_strings[i];
+    index[i]=get_token_loc(var,obj_frame);
+  }
+}
+
+/* ----------------------- get_evac_indices ----------------------------- */
+
+void get_evac_indices(sv_object *smv_object, 
+        int *evac_index,int *nevac_index){
+
+  int n;
+
+  int i,j;
+  sv_object_frame *obj_frame;
+
+  obj_frame=smv_object->obj_frames[0];
+
+  n=0;
+
+  evac_index[n++]=get_token_loc("W",obj_frame);
+  evac_index[n++]=get_token_loc("D",obj_frame);
+  evac_index[n++]=get_token_loc("H1",obj_frame);
+  evac_index[n++]=get_token_loc("SX",obj_frame);
+  evac_index[n++]=get_token_loc("SY",obj_frame);
+  evac_index[n++]=get_token_loc("SZ",obj_frame);
+  evac_index[n++]=get_token_loc("R",obj_frame);
+  evac_index[n++]=get_token_loc("G",obj_frame);
+  evac_index[n++]=get_token_loc("B",obj_frame);
+  evac_index[n++]=get_token_loc("HX",obj_frame);
+  evac_index[n++]=get_token_loc("HY",obj_frame);
+  evac_index[n++]=get_token_loc("HZ",obj_frame);
+
+  *nevac_index=n;
 }

@@ -28,6 +28,9 @@ int SUB_portfrustum(int quad,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
 
+EXTERNCPP int get_token_loc(char *var,sv_object_frame *frame);
+EXTERNCPP void get_indep_var_indices(sv_object *smv_object,char **var_indep_strings, int nvars_indep,int *index);
+EXTERNCPP void get_evac_indices(sv_object *smv_object, int *evac_index,int *nevac_index);
 EXTERNCPP void update_glui_set_view_xyz(float *xyz);
 EXTERNCPP void update_glui_plot3dtype(void);
 EXTERNCPP void update_glui_isotype(void);
@@ -166,6 +169,7 @@ EXTERNCPP void IsoShowMenu(int value);
 EXTERNCPP void ShowPatchMenu(int value);
 EXTERNCPP void Smoke3DShowMenu(int value);
 EXTERNCPP void ShowVSliceMenu(int value);
+EXTERNCPP part5prop *get_part5prop_s(char *label);
 EXTERNCPP int get_part5prop_index_s(char *shortlabel);
 EXTERNCPP int get_part5prop_index(char *label);
 EXTERNCPP void print_part5prop(void);
@@ -198,7 +202,7 @@ EXTERNCPP void error_message(char *message);
 EXTERNCPP void abort_message(char *message);
 #endif
 EXTERNCPP sv_object *get_object(char *label);
-EXTERNCPP char *get_label(char *buffer2);
+EXTERNCPP void get_labels(char *buffer, char **label1, char **label2);
 EXTERNCPP void snap_view_angles(void);
 #ifdef pp_SHOOTER
 EXTERNCPP mesh *inmesh(float xyz[3]);
@@ -630,6 +634,7 @@ EXTERNCPP void allocate_faces(void);
 EXTERNCPP void update_facelists(void);
 EXTERNCPP void update_faces(void);
 EXTERNCPP char *trim_front(char *line);
+EXTERNCPP char *trim_front_back(char *line);
 EXTERNCPP void trim(char *line);
 EXTERNCPP void drawticks(void);
 EXTERNCPP void set_startup_view(void);
