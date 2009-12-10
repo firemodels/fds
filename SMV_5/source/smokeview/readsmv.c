@@ -7490,7 +7490,22 @@ int readini2(char *inifile, int localfile){
       if(show_tracers_always!=1)show_tracers_always=0;
       continue;
     }
+    if(localfile==1&&match(buffer,"PART5CLASSVIS",13)==1){
+      int ntemp;
 
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&ntemp);
+
+      for(j=0;j<ntemp;j++){
+        part5class *partclassj;
+
+        if(j>npartclassinfo)break;
+
+        partclassj = partclassinfo + j;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i",&partclassj->vis_type);
+      }
+    }
     if(match(buffer,"PART5COLOR",10)==1){
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
@@ -9357,6 +9372,17 @@ void writeini(int flag){
 
     }
   }
+  if(flag==LOCAL_INI&&npartclassinfo>0){
+    fprintf(fileout,"PART5CLASSVIS\n");
+    fprintf(fileout," %i\n",npartclassinfo);
+    for(j=0;j<npartclassinfo;j++){
+      part5class *partclassj;
+
+      partclassj = partclassinfo + j;
+      fprintf(fileout," %i",partclassj->vis_type);
+    }
+  }
+
   fprintf(fileout,"\nCONTOURS\n");
   fprintf(fileout,"--------\n\n");
   fprintf(fileout,"P3CONT2D\n");
