@@ -4,7 +4,6 @@ USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 USE TRAN
-USE TYPES, ONLY: DROPLET_TYPE, PARTICLE_CLASS_TYPE, PARTICLE_CLASS, WALL_TYPE
 IMPLICIT NONE
 PRIVATE
 PUBLIC INSERT_DROPLETS_AND_PARTICLES,UPDATE_PARTICLES,REMOVE_DROPLETS,INITIALIZE_DROPLETS,GET_REV_part
@@ -97,7 +96,7 @@ REAL(EB) :: PHI_RN,RN,FLOW_RATE,THETA_RN,SPHI,CPHI,MASS_SUM,D_PRES_FACTOR, &
             TRIGT1,TRIGT2,TNOW,TSI,PIPE_PRESSURE,MASS_PER_TIME,MASS_PER_VOLUME,X1,X2,Y1,Y2,Z1,Z2,BLOCK_VOLUME
 REAL(EB), PARAMETER :: VENT_OFFSET=0.1
 INTEGER :: I,KS,II,JJ,KK,IC,IL,IU,IPC,DROP_SUM,IIG,JJG,KKG,IW,IBC,IOR,STRATUM,IB
-INTEGER :: N_OPEN_NOZZLES,N_INITIAL
+INTEGER :: N_OPEN_NOZZLES,N_INITIAL,N
 LOGICAL :: INSERT_ANOTHER_BATCH
 TYPE (PROPERTY_TYPE), POINTER :: PY
 TYPE (TABLES_TYPE), POINTER :: TA
@@ -126,444 +125,433 @@ COUNT_OPEN_NOZZLES_LOOP: DO KS=1,N_DEVC ! Loop over all devices, but look for sp
    IF (PY%QUANTITY=='SPRINKLER LINK TEMPERATURE') N_ACTUATED_SPRINKLERS = N_ACTUATED_SPRINKLERS + 1
 ENDDO COUNT_OPEN_NOZZLES_LOOP
 
-! Add more than one batch of particles/droplets if FDS time step is large enough
+! Count the number of droplets/particles inserted
 
-OVERALL_INSERT_LOOP: DO  
-
-INSERT_ANOTHER_BATCH = .FALSE.
 INSERT_RATE = 0._EB
 INSERT_COUNT = 0
 
-! Loop over all devices, but look for sprinklers or nozzles
+! Add more than one batch of particles/droplets if FDS time step is large enough
+
+OVERALL_INSERT_LOOP: DO  
    
-SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  
-   DV => DEVICE(KS)
-   PY => PROPERTY(DV%PROP_INDEX)
-   IF (PY%PART_ID == 'null')   CYCLE SPRINKLER_INSERT_LOOP
-   IF (DV%MESH/=NM)            CYCLE SPRINKLER_INSERT_LOOP
-   IF (.NOT. DV%CURRENT_STATE) CYCLE SPRINKLER_INSERT_LOOP
-   IPC = PY%PART_INDEX
-   PC=>PARTICLE_CLASS(IPC)
-   INSERT_RATE = INSERT_RATE + PC%N_INSERT/PC%DT_INSERT
-   INSERT_COUNT = INSERT_COUNT + PC%N_INSERT
-   IF (DV%T_CHANGE == T) THEN 
-      DV%T = T
-      CYCLE SPRINKLER_INSERT_LOOP
-   ENDIF
-   IF (T < PC%INSERT_CLOCK(NM)) CYCLE SPRINKLER_INSERT_LOOP
-   IF (T_BEGIN == DV%T_CHANGE .AND. PY%FLOW_RAMP_INDEX>=1) THEN
-      TSI = T
-   ELSE
-      TSI = T - DV%T_CHANGE
-   ENDIF
+   INSERT_ANOTHER_BATCH = .FALSE.
 
-   IF (PY%PRESSURE_RAMP_INDEX>0) THEN
-      PIPE_PRESSURE = EVALUATE_RAMP(REAL(N_OPEN_NOZZLES,EB),0._EB,PY%PRESSURE_RAMP_INDEX)
-      D_PRES_FACTOR = (PY%OPERATING_PRESSURE/PIPE_PRESSURE)**(1._EB/3._EB)
-      FLOW_RATE = PY%K_FACTOR*SQRT(PIPE_PRESSURE)
-   ELSE
-      PIPE_PRESSURE = PY%OPERATING_PRESSURE
-      D_PRES_FACTOR = 1.0_EB
-      FLOW_RATE = PY%FLOW_RATE
-   ENDIF      
-   FLOW_RATE = EVALUATE_RAMP(TSI,PY%FLOW_TAU,PY%FLOW_RAMP_INDEX)*FLOW_RATE*(PC%DENSITY/1000._EB)/60._EB  ! kg/s
-   IF (FLOW_RATE <= 0._EB) THEN
-      DV%T = T
-      CYCLE SPRINKLER_INSERT_LOOP
-   ENDIF
-
-   ! Direction initialization stuff
-
-   TRIGT1 = ACOS(-DV%ORIENTATION(3))
-   IF (DV%ORIENTATION(2)==0._EB) THEN
-      TRIGT2 = ACOS(1._EB)
-   ELSE
-      TRIGT2 = ACOS(ABS(DV%ORIENTATION(1))/SQRT(DV%ORIENTATION(1)**2+DV%ORIENTATION(2)**2))
-   ENDIF
- 
-   ! Droplet insertion loop
- 
-   MASS_SUM = 0._EB
-   DROP_SUM = 0
-
-   DROPLET_INSERT_LOOP: DO I=1,PC%N_INSERT
-      IF (NLP+1>MAXIMUM_DROPLETS) EXIT DROPLET_INSERT_LOOP
-      NLP = NLP+1
-      PARTICLE_TAG = PARTICLE_TAG + NMESHES
-      IF (NLP>NLPDIM) THEN
-         CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
-         DROPLET=>MESHES(NM)%DROPLET
-      ENDIF
-      DR=>DROPLET(NLP)
- 
-      ! Set droplet properties
- 
-      DR%TMP    = PC%TMP_INITIAL         ! Initial temperature
-      DR%T      = T                      ! Time of insertion
-      DR%IOR    = 0                      ! Orientation index (0 means it is not attached to a solid)
-      DR%A_X    = 0._EB                  ! x component of drag on the gas in units of m/s2
-      DR%A_Y    = 0._EB                  ! y component of drag on the gas in units of m/s2
-      DR%A_Z    = 0._EB                  ! z component of drag on the gas in units of m/s2
-      DR%CLASS = IPC                     ! The class of particles
-      DR%TAG    = PARTICLE_TAG           ! A unique identifying integer
-      IF (MOD(NLP,PC%SAMPLING)==0) THEN  ! Decide whether to show the droplet in Smokeview
-         DR%SHOW = .TRUE.    
-      ELSE
-         DR%SHOW = .FALSE.
-      ENDIF
-      DR%SPLAT   = .FALSE.
-      DR%WALL_INDEX = 0
-
-      ! Randomly choose theta and phi
- 
-      CHOOSE_COORDS: DO
-         PICK_PATTERN: IF(PY%SPRAY_PATTERN_INDEX>0) THEN !Use spray pattern table
-            TA => TABLES(PY%SPRAY_PATTERN_INDEX)
-            CALL RANDOM_NUMBER(RN)
-            FIND_ROW: DO II=1,TA%NUMBER_ROWS
-               IF (RN>PY%TABLE_ROW(II)) CYCLE FIND_ROW
-               EXIT FIND_ROW
-            END DO FIND_ROW
-            CALL RANDOM_NUMBER(RN)
-            THETA_RN = TA%TABLE_DATA(II,1) + RN*(TA%TABLE_DATA(II,2)-TA%TABLE_DATA(II,1))
-            CALL RANDOM_NUMBER(RN)
-            PHI_RN = TA%TABLE_DATA(II,3) + RN*(TA%TABLE_DATA(II,4)-TA%TABLE_DATA(II,3))
-            IF (PY%PRESSURE_RAMP_INDEX>0) THEN
-               DROPLET_SPEED = PY%V_FACTOR(II)*SQRT(PIPE_PRESSURE)
-            ELSE 
-               DROPLET_SPEED = TA%TABLE_DATA(II,5)
-            ENDIF
-         ELSE PICK_PATTERN !Use conical spray
-            CALL RANDOM_NUMBER(RN)
-            THETA_RN = PY%SPRAY_ANGLE(1) + RN*(PY%SPRAY_ANGLE(2)-PY%SPRAY_ANGLE(1))
-            CALL RANDOM_NUMBER(RN)
-            PHI_RN = RN*TWOPI
-            IF (PY%PRESSURE_RAMP_INDEX>0) THEN
-               DROPLET_SPEED = PY%V_FACTOR(1)*SQRT(PIPE_PRESSURE)
-            ELSE
-               DROPLET_SPEED = PY%DROPLET_VELOCITY
-            ENDIF
-         ENDIF PICK_PATTERN
-         PHI_RN = PHI_RN + DV%ROTATION  ! Adjust for rotation of head by rotating about z-axis
-
-         !  Adjust for tilt of sprinkler pipe
-
-         SPHI   = SIN(PHI_RN)
-         CPHI   = COS(PHI_RN)
-         STHETA = SIN(THETA_RN)
-         CTHETA = COS(THETA_RN)
-         XTMP   = STHETA*CPHI
-         YTMP   = STHETA*SPHI
-         ZTMP   = -CTHETA
- 
-         ! First rotate about y-axis away from x-axis
- 
-         VLEN   = SQRT(XTMP**2+ZTMP**2)
-         SHIFT1 = ACOS(ABS(XTMP)/VLEN)
-            SELECT CASE(INT(SIGN(1._EB,ZTMP)))
-            CASE (-1)
-               IF (XTMP<0) SHIFT1 = PI-SHIFT1
-            CASE ( 1)
-            SELECT CASE(INT(SIGN(1._EB,XTMP)))
-               CASE (-1)
-                  SHIFT1 = SHIFT1+PI
-               CASE ( 1)
-                  SHIFT1 = TWOPI - SHIFT1
-            END SELECT
-         END SELECT
-    
-         SHIFT1 = SHIFT1 + TRIGT1
-         XTMP = VLEN * COS(SHIFT1)
-         ZTMP = -VLEN * SIN(SHIFT1)
- 
-         ! Second rotate about z-axis away from x-axis
- 
-         VLEN   = SQRT(XTMP**2+YTMP**2)
-         SHIFT1 = ACOS(ABS(XTMP)/VLEN)
-         SELECT CASE(INT(SIGN(1._EB,YTMP)))
-            CASE ( 1)
-               IF (XTMP<0) SHIFT1 = PI-SHIFT1
-            CASE (-1)
-            SELECT CASE(INT(SIGN(1._EB,XTMP)))
-               CASE (-1)
-                  SHIFT1 = SHIFT1+PI
-               CASE ( 1) 
-                  SHIFT1 = TWOPI - SHIFT1
-            END SELECT
-         END SELECT
- 
-         SHIFT2 = TRIGT2
-         SELECT CASE(INT(SIGN(1._EB,DV%ORIENTATION(1))))
-            CASE (-1)
-               IF (DV%ORIENTATION(2)>0) SHIFT2 = TWOPI - SHIFT2
-            CASE ( 1)
-            SELECT CASE(INT(SIGN(1._EB,DV%ORIENTATION(2))))
-               CASE (-1) 
-                  SHIFT2 = PI-SHIFT2
-               CASE ( 1)
-                  SHIFT2 = SHIFT2+ PI
-            END SELECT
-         END SELECT
-         SHIFT1=SHIFT1+SHIFT2
-         XTMP = VLEN * COS(SHIFT1)
-         YTMP = VLEN * SIN(SHIFT1)
- 
-         ! Compute initial position and velocity of droplets
- 
-         DR%U = DROPLET_SPEED*XTMP
-         DR%V = DROPLET_SPEED*YTMP
-         DR%W = DROPLET_SPEED*ZTMP
-         DR%X = DV%X + PY%OFFSET*XTMP
-         DR%Y = DV%Y + PY%OFFSET*YTMP
-         DR%Z = DV%Z + PY%OFFSET*ZTMP
-         IF (TWO_D) THEN
-            DR%V = 0._EB
-            DR%Y = DV%Y
-         ENDIF
-         IF (DR%X<=XS .OR. DR%X>=XF) CYCLE CHOOSE_COORDS
-         IF (DR%Y<=YS .OR. DR%Y>=YF) CYCLE CHOOSE_COORDS
-         IF (DR%Z<=ZS .OR. DR%Z>=ZF) CYCLE CHOOSE_COORDS
-         XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
-         YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
-         ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
-         II = FLOOR(XI+1._EB)
-         JJ = FLOOR(YJ+1._EB)
-         KK = FLOOR(ZK+1._EB)
-         IC = CELL_INDEX(II,JJ,KK)
-         IF (.NOT.SOLID(IC)) EXIT CHOOSE_COORDS
- 
-      ENDDO CHOOSE_COORDS
-
-      ! Randomly choose droplet size according to Cumulative Distribution Function (CDF)
- 
-      IF (PC%MONODISPERSE) THEN
-         DR%R   = 0.5_EB*PC%DIAMETER*D_PRES_FACTOR
-         DR%PWT = 1._EB
-      ELSE
-         CALL RANDOM_NUMBER(RN)            
-         STRATUM = NINT(REAL(NSTRATA,EB)*RN+0.5_EB)
-         IL = PC%IL_CDF(STRATUM)
-         IU = PC%IU_CDF(STRATUM)
-         CALL RANDOM_CHOICE(PC%CDF(IL:IU), PC%R_CDF(IL:IU), IU-IL,DR%R)
-         DR%PWT = PC%W_CDF(STRATUM)
-         DR%R = D_PRES_FACTOR*DR%R
-         IF (2._EB*DR%R > PC%MAXIMUM_DIAMETER) THEN
-            DR%PWT = DR%PWT*DR%R**3/(0.5_EB*PC%MAXIMUM_DIAMETER)**3
-            DR%R = 0.5_EB*PC%MAXIMUM_DIAMETER
-         ENDIF
-      ENDIF
- 
-      ! Sum up mass of liquid being introduced
-
-      MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
-      DROP_SUM = DROP_SUM + 1
+   ! Loop over all devices, but look for sprinklers or nozzles
       
-   ENDDO DROPLET_INSERT_LOOP
- 
-   ! Compute weighting factor for the droplets just inserted
+   SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC  
    
-   IF (DROP_SUM > 0) THEN
-      PWT0 = FLOW_RATE*PC%DT_INSERT/MASS_SUM
-      DROPLET(NLP-DROP_SUM+1:NLP)%PWT = DROPLET(NLP-DROP_SUM+1:NLP)%PWT*PWT0
-   ENDIF
+      DV => DEVICE(KS)
+      PY => PROPERTY(DV%PROP_INDEX)
+      IF (PY%PART_ID == 'null')   CYCLE SPRINKLER_INSERT_LOOP
+      IF (DV%MESH/=NM)            CYCLE SPRINKLER_INSERT_LOOP
+      IF (.NOT. DV%CURRENT_STATE) CYCLE SPRINKLER_INSERT_LOOP
+      IPC = PY%PART_INDEX
+      PC=>PARTICLE_CLASS(IPC)
+      INSERT_RATE = INSERT_RATE + PY%N_INSERT/PY%DT_INSERT
+      INSERT_COUNT = INSERT_COUNT + PY%N_INSERT
+      IF (DV%T_CHANGE == T) THEN 
+         DV%T = T
+         CYCLE SPRINKLER_INSERT_LOOP
+      ENDIF
+      IF (T < PY%PARTICLE_INSERT_CLOCK(NM)) CYCLE SPRINKLER_INSERT_LOOP
    
-   ! Indicate that droplets from this device have been inserted at this time T
-
-   DV%T = T 
-
-ENDDO SPRINKLER_INSERT_LOOP
- 
-! Loop through all boundary cells and insert particles if appropriate
- 
-WALL_INSERT_LOOP: DO IW=1,NWC
- 
-   IF (T < TW(IW))                        CYCLE WALL_INSERT_LOOP
-   IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE WALL_INSERT_LOOP
-   IBC =  IJKW(5,IW)
-   SF  => SURFACE(IBC)
-   IPC =  SF%PART_INDEX
-   IF (IPC < 1)    CYCLE WALL_INSERT_LOOP
-   PC  => PARTICLE_CLASS(IPC)
-   IF (PC%DEVC_INDEX>0) THEN
-      IF (.NOT.DEVICE(PC%DEVC_INDEX)%CURRENT_STATE) CYCLE WALL_INSERT_LOOP
-   ENDIF
-   IF (PC%CTRL_INDEX>0) THEN
-      IF (.NOT.CONTROL(PC%CTRL_INDEX)%CURRENT_STATE) CYCLE WALL_INSERT_LOOP
-   ENDIF
-   IF (T < PC%INSERT_CLOCK(NM)) CYCLE WALL_INSERT_LOOP
-   INSERT_RATE = INSERT_RATE + NPPCW(IW)/PC%DT_INSERT
-   INSERT_COUNT = INSERT_COUNT + NPPCW(IW)
-   IF (UW(IW) >= -0.0001_EB) CYCLE WALL_INSERT_LOOP
- 
-   II = IJKW(1,IW)
-   JJ = IJKW(2,IW)
-   KK = IJKW(3,IW)
-   IC = CELL_INDEX(II,JJ,KK)
-   IF (.NOT.SOLID(IC)) CYCLE WALL_INSERT_LOOP
- 
-   IF (NM > 1) THEN
-      IIG = IJKW(6,IW)
-      JJG = IJKW(7,IW)
-      KKG = IJKW(8,IW)
-      IF (INTERPOLATED_MESH(IIG,JJG,KKG) > 0) CYCLE WALL_INSERT_LOOP
-   ENDIF
- 
-   IOR = IJKW(4,IW)
-   MASS_SUM = 0._EB
-   PARTICLE_INSERT_LOOP: DO I=1,NPPCW(IW)  ! Loop over all particles for the IW'th cell
- 
-      IF (NLP+1 > MAXIMUM_DROPLETS) EXIT PARTICLE_INSERT_LOOP
- 
-      NLP = NLP+1
-      PARTICLE_TAG = PARTICLE_TAG + NMESHES
-      IF (NLP > NLPDIM) THEN
-         CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
-         DROPLET => MESHES(NM)%DROPLET
-      ENDIF
-      DR=>DROPLET(NLP)
- 
-      IF (ABS(IOR)==1) THEN
-         IF (IOR== 1) DR%X = X(II)   + VENT_OFFSET*DX(II+1)
-         IF (IOR==-1) DR%X = X(II-1) - VENT_OFFSET*DX(II-1)
-         CALL RANDOM_NUMBER(RN)
-         DR%Y = Y(JJ-1) + DY(JJ)*RN
-         CALL RANDOM_NUMBER(RN)
-         DR%Z = Z(KK-1) + DZ(KK)*RN
-      ENDIF
-      IF (ABS(IOR)==2) THEN
-         IF (IOR== 2) DR%Y = Y(JJ)   + VENT_OFFSET*DY(JJ+1)
-         IF (IOR==-2) DR%Y = Y(JJ-1) - VENT_OFFSET*DY(JJ-1)
-         CALL RANDOM_NUMBER(RN)
-         DR%X = X(II-1) + DX(II)*RN
-         CALL RANDOM_NUMBER(RN)
-         DR%Z = Z(KK-1) + DZ(KK)*RN
-      ENDIF
-      IF (ABS(IOR)==3) THEN
-         IF (IOR== 3) DR%Z = Z(KK)   + VENT_OFFSET*DZ(KK+1)
-         IF (IOR==-3) DR%Z = Z(KK-1) - VENT_OFFSET*DZ(KK-1)
-         CALL RANDOM_NUMBER(RN)
-         DR%X = X(II-1) + DX(II)*RN
-         CALL RANDOM_NUMBER(RN)
-         DR%Y = Y(JJ-1) + DY(JJ)*RN
-      ENDIF
- 
-      SELECT CASE(IOR)  ! Give particles an initial velocity (if desired)
-         CASE( 1) 
-            DR%U = -UW(IW)
-         CASE(-1) 
-            DR%U =  UW(IW)
-         CASE( 2) 
-            DR%V = -UW(IW)
-         CASE(-2) 
-            DR%V =  UW(IW)
-         CASE( 3)
-            DR%W = -UW(IW)
-         CASE(-3) 
-            DR%W =  UW(IW)
-      END SELECT
- 
-      ! Save the insertion time (TP) and scalar property (SP) for the particle
- 
-      DR%A_X    = 0._EB
-      DR%A_Y    = 0._EB
-      DR%A_Z    = 0._EB
-      DR%CLASS  = IPC
-      DR%TAG    = PARTICLE_TAG
-      IF (MOD(NLP,PC%SAMPLING)==0) THEN
-         DR%SHOW = .TRUE.
+      ! Determine sprinkler/nozzle flow rate
+   
+      IF (T_BEGIN == DV%T_CHANGE .AND. PY%FLOW_RAMP_INDEX>=1) THEN
+         TSI = T
       ELSE
-         DR%SHOW = .FALSE.
+         TSI = T - DV%T_CHANGE
       ENDIF
-      DR%SPLAT   = .FALSE.
-      DR%WALL_INDEX = 0
-      DR%R   = 0.0_EB
-      DR%TMP = PC%TMP_INITIAL
-      DR%T   = T
-      DR%PWT = 1._EB
-      DR%IOR = 0
-      IF (PC%DIAMETER > 0._EB) THEN
+   
+      IF (PY%PRESSURE_RAMP_INDEX>0) THEN
+         PIPE_PRESSURE = EVALUATE_RAMP(REAL(N_OPEN_NOZZLES,EB),0._EB,PY%PRESSURE_RAMP_INDEX)
+         D_PRES_FACTOR = (PY%OPERATING_PRESSURE/PIPE_PRESSURE)**(1._EB/3._EB)
+         FLOW_RATE = PY%K_FACTOR*SQRT(PIPE_PRESSURE)
+      ELSE
+         PIPE_PRESSURE = PY%OPERATING_PRESSURE
+         D_PRES_FACTOR = 1.0_EB
+         FLOW_RATE = PY%FLOW_RATE
+      ENDIF      
+   
+      FLOW_RATE = EVALUATE_RAMP(TSI,PY%FLOW_TAU,PY%FLOW_RAMP_INDEX)*FLOW_RATE*(PC%DENSITY/1000._EB)/60._EB  ! kg/s
+   
+      IF (FLOW_RATE <= 0._EB) THEN
+         DV%T = T
+         CYCLE SPRINKLER_INSERT_LOOP
+      ENDIF
+   
+      ! Direction initialization stuff
+   
+      TRIGT1 = ACOS(-DV%ORIENTATION(3))
+      IF (DV%ORIENTATION(2)==0._EB) THEN
+         TRIGT2 = ACOS(1._EB)
+      ELSE
+         TRIGT2 = ACOS(ABS(DV%ORIENTATION(1))/SQRT(DV%ORIENTATION(1)**2+DV%ORIENTATION(2)**2))
+      ENDIF
+    
+      ! Droplet insertion loop
+    
+      MASS_SUM = 0._EB
+      DROP_SUM = 0
+   
+      DROPLET_INSERT_LOOP: DO I=1,PY%N_INSERT
+         IF (NLP+1>MAXIMUM_DROPLETS) EXIT DROPLET_INSERT_LOOP
+         NLP = NLP+1
+         PARTICLE_TAG = PARTICLE_TAG + NMESHES
+         IF (NLP>NLPDIM) THEN
+            CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
+            DROPLET=>MESHES(NM)%DROPLET
+         ENDIF
+         DR=>DROPLET(NLP)
+    
+         ! Set droplet properties
+    
+         DR%TMP    = PC%TMP_INITIAL         ! Initial temperature
+         DR%T      = T                      ! Time of insertion
+         DR%IOR    = 0                      ! Orientation index (0 means it is not attached to a solid)
+         DR%A_X    = 0._EB                  ! x component of drag on the gas in units of m/s2
+         DR%A_Y    = 0._EB                  ! y component of drag on the gas in units of m/s2
+         DR%A_Z    = 0._EB                  ! z component of drag on the gas in units of m/s2
+         DR%CLASS = IPC                     ! The class of particles
+         DR%TAG    = PARTICLE_TAG           ! A unique identifying integer
+         IF (MOD(NLP,PC%SAMPLING)==0) THEN  ! Decide whether to show the droplet in Smokeview
+            DR%SHOW = .TRUE.    
+         ELSE
+            DR%SHOW = .FALSE.
+         ENDIF
+         DR%SPLAT   = .FALSE.
+         DR%WALL_INDEX = 0
+   
+         ! Randomly choose theta and phi
+    
+         CHOOSE_COORDS: DO
+            PICK_PATTERN: IF(PY%SPRAY_PATTERN_INDEX>0) THEN !Use spray pattern table
+               TA => TABLES(PY%SPRAY_PATTERN_INDEX)
+               CALL RANDOM_NUMBER(RN)
+               FIND_ROW: DO II=1,TA%NUMBER_ROWS
+                  IF (RN>PY%TABLE_ROW(II)) CYCLE FIND_ROW
+                  EXIT FIND_ROW
+               END DO FIND_ROW
+               CALL RANDOM_NUMBER(RN)
+               THETA_RN = TA%TABLE_DATA(II,1) + RN*(TA%TABLE_DATA(II,2)-TA%TABLE_DATA(II,1))
+               CALL RANDOM_NUMBER(RN)
+               PHI_RN = TA%TABLE_DATA(II,3) + RN*(TA%TABLE_DATA(II,4)-TA%TABLE_DATA(II,3))
+               IF (PY%PRESSURE_RAMP_INDEX>0) THEN
+                  DROPLET_SPEED = PY%V_FACTOR(II)*SQRT(PIPE_PRESSURE)
+               ELSE 
+                  DROPLET_SPEED = TA%TABLE_DATA(II,5)
+               ENDIF
+            ELSE PICK_PATTERN !Use conical spray
+               CALL RANDOM_NUMBER(RN)
+               THETA_RN = PY%SPRAY_ANGLE(1) + RN*(PY%SPRAY_ANGLE(2)-PY%SPRAY_ANGLE(1))
+               CALL RANDOM_NUMBER(RN)
+               PHI_RN = RN*TWOPI
+               IF (PY%PRESSURE_RAMP_INDEX>0) THEN
+                  DROPLET_SPEED = PY%V_FACTOR(1)*SQRT(PIPE_PRESSURE)
+               ELSE
+                  DROPLET_SPEED = PY%DROPLET_VELOCITY
+               ENDIF
+            ENDIF PICK_PATTERN
+            PHI_RN = PHI_RN + DV%ROTATION  ! Adjust for rotation of head by rotating about z-axis
+   
+            !  Adjust for tilt of sprinkler pipe
+   
+            SPHI   = SIN(PHI_RN)
+            CPHI   = COS(PHI_RN)
+            STHETA = SIN(THETA_RN)
+            CTHETA = COS(THETA_RN)
+            XTMP   = STHETA*CPHI
+            YTMP   = STHETA*SPHI
+            ZTMP   = -CTHETA
+    
+            ! First rotate about y-axis away from x-axis
+    
+            VLEN   = SQRT(XTMP**2+ZTMP**2)
+            SHIFT1 = ACOS(ABS(XTMP)/VLEN)
+               SELECT CASE(INT(SIGN(1._EB,ZTMP)))
+               CASE (-1)
+                  IF (XTMP<0) SHIFT1 = PI-SHIFT1
+               CASE ( 1)
+               SELECT CASE(INT(SIGN(1._EB,XTMP)))
+                  CASE (-1)
+                     SHIFT1 = SHIFT1+PI
+                  CASE ( 1)
+                     SHIFT1 = TWOPI - SHIFT1
+               END SELECT
+            END SELECT
+       
+            SHIFT1 = SHIFT1 + TRIGT1
+            XTMP = VLEN * COS(SHIFT1)
+            ZTMP = -VLEN * SIN(SHIFT1)
+    
+            ! Second rotate about z-axis away from x-axis
+    
+            VLEN   = SQRT(XTMP**2+YTMP**2)
+            SHIFT1 = ACOS(ABS(XTMP)/VLEN)
+            SELECT CASE(INT(SIGN(1._EB,YTMP)))
+               CASE ( 1)
+                  IF (XTMP<0) SHIFT1 = PI-SHIFT1
+               CASE (-1)
+               SELECT CASE(INT(SIGN(1._EB,XTMP)))
+                  CASE (-1)
+                     SHIFT1 = SHIFT1+PI
+                  CASE ( 1) 
+                     SHIFT1 = TWOPI - SHIFT1
+               END SELECT
+            END SELECT
+    
+            SHIFT2 = TRIGT2
+            SELECT CASE(INT(SIGN(1._EB,DV%ORIENTATION(1))))
+               CASE (-1)
+                  IF (DV%ORIENTATION(2)>0) SHIFT2 = TWOPI - SHIFT2
+               CASE ( 1)
+               SELECT CASE(INT(SIGN(1._EB,DV%ORIENTATION(2))))
+                  CASE (-1) 
+                     SHIFT2 = PI-SHIFT2
+                  CASE ( 1)
+                     SHIFT2 = SHIFT2+ PI
+               END SELECT
+            END SELECT
+            SHIFT1=SHIFT1+SHIFT2
+            XTMP = VLEN * COS(SHIFT1)
+            YTMP = VLEN * SIN(SHIFT1)
+    
+            ! Compute initial position and velocity of droplets
+    
+            DR%U = DROPLET_SPEED*XTMP
+            DR%V = DROPLET_SPEED*YTMP
+            DR%W = DROPLET_SPEED*ZTMP
+            DR%X = DV%X + PY%OFFSET*XTMP
+            DR%Y = DV%Y + PY%OFFSET*YTMP
+            DR%Z = DV%Z + PY%OFFSET*ZTMP
+            IF (TWO_D) THEN
+               DR%V = 0._EB
+               DR%Y = DV%Y
+            ENDIF
+            IF (DR%X<=XS .OR. DR%X>=XF) CYCLE CHOOSE_COORDS
+            IF (DR%Y<=YS .OR. DR%Y>=YF) CYCLE CHOOSE_COORDS
+            IF (DR%Z<=ZS .OR. DR%Z>=ZF) CYCLE CHOOSE_COORDS
+            XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
+            YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
+            ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
+            II = FLOOR(XI+1._EB)
+            JJ = FLOOR(YJ+1._EB)
+            KK = FLOOR(ZK+1._EB)
+            IC = CELL_INDEX(II,JJ,KK)
+            IF (.NOT.SOLID(IC)) EXIT CHOOSE_COORDS
+    
+         ENDDO CHOOSE_COORDS
+   
+         ! Randomly choose droplet size according to Cumulative Distribution Function (CDF)
+    
          IF (PC%MONODISPERSE) THEN
-            DR%R   = 0.5_EB*PC%DIAMETER
+            DR%R   = 0.5_EB*PC%DIAMETER*D_PRES_FACTOR
             DR%PWT = 1._EB
          ELSE
             CALL RANDOM_NUMBER(RN)            
             STRATUM = NINT(REAL(NSTRATA,EB)*RN+0.5_EB)
             IL = PC%IL_CDF(STRATUM)
             IU = PC%IU_CDF(STRATUM)
-            CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
+            CALL RANDOM_CHOICE(PC%CDF(IL:IU), PC%R_CDF(IL:IU), IU-IL,DR%R)
             DR%PWT = PC%W_CDF(STRATUM)
+            DR%R = D_PRES_FACTOR*DR%R
             IF (2._EB*DR%R > PC%MAXIMUM_DIAMETER) THEN
                DR%PWT = DR%PWT*DR%R**3/(0.5_EB*PC%MAXIMUM_DIAMETER)**3
                DR%R = 0.5_EB*PC%MAXIMUM_DIAMETER
             ENDIF
          ENDIF
+    
+         ! Sum up mass of liquid being introduced
+   
          MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
+         DROP_SUM = DROP_SUM + 1
+         
+      ENDDO DROPLET_INSERT_LOOP
+    
+      ! Compute weighting factor for the droplets just inserted
+      
+      IF (DROP_SUM > 0) THEN
+         PWT0 = FLOW_RATE*PY%DT_INSERT/MASS_SUM
+         DROPLET(NLP-DROP_SUM+1:NLP)%PWT = DROPLET(NLP-DROP_SUM+1:NLP)%PWT*PWT0
       ENDIF
-
-   ENDDO PARTICLE_INSERT_LOOP
-
-   IF (MASS_SUM > 0._EB) THEN
-      IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
-         DROPLET(NLP-NPPCW(IW)+1:NLP)%PWT = &
-         DROPLET(NLP-NPPCW(IW)+1:NLP)%PWT*SF%PARTICLE_MASS_FLUX*AREA_ADJUST(IW)*AW(IW)*PC%DT_INSERT/MASS_SUM
-      ENDIF
-   ENDIF
-
-ENDDO WALL_INSERT_LOOP
-
-! Loop over all INIT and PART lines and look for particles inserted within a specified volume
-
-VOLUME_INSERT_LOOP: DO IB=0,N_INIT
-
-   PARTICLE_LOOP: DO IPC=1,N_PART
+      
+      ! Indicate that droplets from this device have been inserted at this time T
    
+      DV%T = T 
+   
+   ENDDO SPRINKLER_INSERT_LOOP
+    
+   
+   ! Loop through all boundary cells and insert particles if appropriate
+    
+   WALL_INSERT_LOOP: DO IW=1,NWC
+    
+      IF (T < TW(IW))                        CYCLE WALL_INSERT_LOOP
+      IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE WALL_INSERT_LOOP
+      IBC =  IJKW(5,IW)
+      SF  => SURFACE(IBC)
+      IPC =  SF%PART_INDEX
+      IF (IPC < 1)    CYCLE WALL_INSERT_LOOP
+      PC  => PARTICLE_CLASS(IPC)
+      IF (PC%DEVC_INDEX>0) THEN
+         IF (.NOT.DEVICE(PC%DEVC_INDEX)%CURRENT_STATE) CYCLE WALL_INSERT_LOOP
+      ENDIF
+      IF (PC%CTRL_INDEX>0) THEN
+         IF (.NOT.CONTROL(PC%CTRL_INDEX)%CURRENT_STATE) CYCLE WALL_INSERT_LOOP
+      ENDIF
+      IF (T < SF%PARTICLE_INSERT_CLOCK(NM)) CYCLE WALL_INSERT_LOOP
+      INSERT_RATE = INSERT_RATE + NPPCW(IW)/SF%DT_INSERT
+      INSERT_COUNT = INSERT_COUNT + NPPCW(IW)
+      IF (UW(IW) >= -0.0001_EB) CYCLE WALL_INSERT_LOOP
+    
+      II = IJKW(1,IW)
+      JJ = IJKW(2,IW)
+      KK = IJKW(3,IW)
+      IC = CELL_INDEX(II,JJ,KK)
+      IF (.NOT.SOLID(IC)) CYCLE WALL_INSERT_LOOP
+    
+      IF (NM > 1) THEN
+         IIG = IJKW(6,IW)
+         JJG = IJKW(7,IW)
+         KKG = IJKW(8,IW)
+         IF (INTERPOLATED_MESH(IIG,JJG,KKG) > 0) CYCLE WALL_INSERT_LOOP
+      ENDIF
+    
+      ! Loop over all particles for the IW-th cell
+   
+      IOR = IJKW(4,IW)
+      MASS_SUM = 0._EB
+      PARTICLE_INSERT_LOOP: DO I=1,NPPCW(IW) 
+    
+         IF (NLP+1 > MAXIMUM_DROPLETS) EXIT PARTICLE_INSERT_LOOP
+    
+         NLP = NLP+1
+         PARTICLE_TAG = PARTICLE_TAG + NMESHES
+         IF (NLP > NLPDIM) THEN
+            CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
+            DROPLET => MESHES(NM)%DROPLET
+         ENDIF
+         DR=>DROPLET(NLP)
+    
+         IF (ABS(IOR)==1) THEN
+            IF (IOR== 1) DR%X = X(II)   + VENT_OFFSET*DX(II+1)
+            IF (IOR==-1) DR%X = X(II-1) - VENT_OFFSET*DX(II-1)
+            CALL RANDOM_NUMBER(RN)
+            DR%Y = Y(JJ-1) + DY(JJ)*RN
+            CALL RANDOM_NUMBER(RN)
+            DR%Z = Z(KK-1) + DZ(KK)*RN
+         ENDIF
+         IF (ABS(IOR)==2) THEN
+            IF (IOR== 2) DR%Y = Y(JJ)   + VENT_OFFSET*DY(JJ+1)
+            IF (IOR==-2) DR%Y = Y(JJ-1) - VENT_OFFSET*DY(JJ-1)
+            CALL RANDOM_NUMBER(RN)
+            DR%X = X(II-1) + DX(II)*RN
+            CALL RANDOM_NUMBER(RN)
+            DR%Z = Z(KK-1) + DZ(KK)*RN
+         ENDIF
+         IF (ABS(IOR)==3) THEN
+            IF (IOR== 3) DR%Z = Z(KK)   + VENT_OFFSET*DZ(KK+1)
+            IF (IOR==-3) DR%Z = Z(KK-1) - VENT_OFFSET*DZ(KK-1)
+            CALL RANDOM_NUMBER(RN)
+            DR%X = X(II-1) + DX(II)*RN
+            CALL RANDOM_NUMBER(RN)
+            DR%Y = Y(JJ-1) + DY(JJ)*RN
+         ENDIF
+    
+         SELECT CASE(IOR)  ! Give particles an initial velocity (if desired)
+            CASE( 1) 
+               DR%U = -UW(IW)
+            CASE(-1) 
+               DR%U =  UW(IW)
+            CASE( 2) 
+               DR%V = -UW(IW)
+            CASE(-2) 
+               DR%V =  UW(IW)
+            CASE( 3)
+               DR%W = -UW(IW)
+            CASE(-3) 
+               DR%W =  UW(IW)
+         END SELECT
+    
+         ! Save the insertion time (TP) and scalar property (SP) for the particle
+    
+         DR%A_X    = 0._EB
+         DR%A_Y    = 0._EB
+         DR%A_Z    = 0._EB
+         DR%CLASS  = IPC
+         DR%TAG    = PARTICLE_TAG
+         IF (MOD(NLP,PC%SAMPLING)==0) THEN
+            DR%SHOW = .TRUE.
+         ELSE
+            DR%SHOW = .FALSE.
+         ENDIF
+         DR%SPLAT   = .FALSE.
+         DR%WALL_INDEX = 0
+         DR%R   = 0.0_EB
+         DR%TMP = PC%TMP_INITIAL
+         DR%T   = T
+         DR%PWT = 1._EB
+         DR%IOR = 0
+         IF (PC%DIAMETER > 0._EB) THEN
+            IF (PC%MONODISPERSE) THEN
+               DR%R   = 0.5_EB*PC%DIAMETER
+               DR%PWT = 1._EB
+            ELSE
+               CALL RANDOM_NUMBER(RN)            
+               STRATUM = NINT(REAL(NSTRATA,EB)*RN+0.5_EB)
+               IL = PC%IL_CDF(STRATUM)
+               IU = PC%IU_CDF(STRATUM)
+               CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
+               DR%PWT = PC%W_CDF(STRATUM)
+               IF (2._EB*DR%R > PC%MAXIMUM_DIAMETER) THEN
+                  DR%PWT = DR%PWT*DR%R**3/(0.5_EB*PC%MAXIMUM_DIAMETER)**3
+                  DR%R = 0.5_EB*PC%MAXIMUM_DIAMETER
+               ENDIF
+            ENDIF
+            MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
+         ENDIF
+   
+      ENDDO PARTICLE_INSERT_LOOP
+
+      IF (MASS_SUM > 0._EB) THEN
+         IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
+            DROPLET(NLP-NPPCW(IW)+1:NLP)%PWT = &
+            DROPLET(NLP-NPPCW(IW)+1:NLP)%PWT*SF%PARTICLE_MASS_FLUX*AREA_ADJUST(IW)*AW(IW)*SF%DT_INSERT/MASS_SUM
+         ENDIF
+      ENDIF
+   
+   ENDDO WALL_INSERT_LOOP
+   
+
+   ! Loop over all INIT lines and look for particles inserted within a specified volume
+
+   VOLUME_INSERT_LOOP: DO IB=1,N_INIT
+
+      IN => INITIALIZATION(IB)
+
+      IPC = IN%PART_INDEX
+      IF (IPC<1) CYCLE VOLUME_INSERT_LOOP
       PC => PARTICLE_CLASS(IPC)
-      IF (T < PC%INSERT_CLOCK(NM)) CYCLE PARTICLE_LOOP
+      IF (T < IN%PARTICLE_INSERT_CLOCK(NM)) CYCLE VOLUME_INSERT_LOOP
  
-      IF (IB==0) THEN
-         N_INITIAL = PC%NUMBER_INITIAL_DROPLETS
-         MASS_PER_VOLUME = PC%MASS_PER_VOLUME
-         MASS_PER_TIME   = PC%MASS_PER_TIME
-         X1 = PC%X1
-         X2 = PC%X2
-         Y1 = PC%Y1
-         Y2 = PC%Y2
-         Z1 = PC%Z1
-         Z2 = PC%Z2
-      ELSE
-         IN => INITIALIZATION(IB)
-         IF (IPC/=IN%PART_INDEX) CYCLE PARTICLE_LOOP
-         N_INITIAL = IN%NUMBER_INITIAL_DROPLETS
-         MASS_PER_VOLUME = IN%MASS_PER_VOLUME
-         MASS_PER_TIME   = IN%MASS_PER_TIME
-         X1 = IN%X1
-         X2 = IN%X2
-         Y1 = IN%Y1
-         Y2 = IN%Y2
-         Z1 = IN%Z1
-         Z2 = IN%Z2
-      ENDIF
+      N_INITIAL = IN%NUMBER_INITIAL_DROPLETS
+      IF (N_INITIAL==0) CYCLE VOLUME_INSERT_LOOP
 
-      IF (N_INITIAL==0) CYCLE PARTICLE_LOOP
- 
-      IF (X1==0._EB .AND. X2==0._EB .AND. Y1==0._EB .AND. Y2==0._EB .AND. Z1==0._EB .AND. Z2==0._EB) THEN
-         X1 = XS 
-         X2 = XF
-         Y1 = YS 
-         Y2 = YF
-         Z1 = ZS 
-         Z2 = ZF
-      ELSE
-         IF (X1>XF .OR. X2<XS .OR. Y1>YF .OR. Y2<YS .OR. Z1>ZF .OR. Z2<ZS) CYCLE PARTICLE_LOOP
-         X1 = MAX(X1,XS) 
-         X2 = MIN(X2,XF)
-         Y1 = MAX(Y1,YS) 
-         Y2 = MIN(Y2,YF)
-         Z1 = MAX(Z1,ZS) 
-         Z2 = MIN(Z2,ZF)
-      ENDIF
-   
-      BLOCK_VOLUME = (X2-X1)*(Y2-Y1)*(Z2-Z1)
+      MASS_PER_VOLUME = IN%MASS_PER_VOLUME
+      MASS_PER_TIME   = IN%MASS_PER_TIME
+
+      SELECT CASE(IN%SHAPE)
+         CASE('BLOCK')
+            IF (IN%X1>XF .OR. IN%X2<XS .OR. IN%Y1>YF .OR. IN%Y2<YS .OR. IN%Z1>ZF .OR. IN%Z2<ZS) CYCLE VOLUME_INSERT_LOOP
+            X1 = MAX(IN%X1,XS) 
+            X2 = MIN(IN%X2,XF)
+            Y1 = MAX(IN%Y1,YS) 
+            Y2 = MIN(IN%Y2,YF)
+            Z1 = MAX(IN%Z1,ZS) 
+            Z2 = MIN(IN%Z2,ZF)
+            BLOCK_VOLUME = (X2-X1)*(Y2-Y1)*(Z2-Z1)
+         CASE ('CONE')
+      END SELECT
    
       ! Assign properties to the initial droplets/particles
    
@@ -625,7 +613,7 @@ VOLUME_INSERT_LOOP: DO IB=0,N_INIT
    
          IF (PC%SURF_INDEX>0) THEN
             SF => SURFACE(PC%SURF_INDEX)
-            DR%WALL_INDEX = PC%WALL_INDEX_START + I - 1
+            DR%WALL_INDEX = IN%WALL_INDEX_START + I - 1
             IF (SF%THICKNESS>0._EB) THEN
                DR%R = SF%THICKNESS
             ELSEIF (SF%RADIUS>0._EB) THEN
@@ -643,24 +631,36 @@ VOLUME_INSERT_LOOP: DO IB=0,N_INIT
     
       ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
       
-      IF (MASS_PER_TIME>0._EB) MASS_PER_VOLUME = MASS_PER_TIME*PC%DT_INSERT/BLOCK_VOLUME
+      IF (MASS_PER_TIME>0._EB) MASS_PER_VOLUME = MASS_PER_TIME*IN%DT_INSERT/BLOCK_VOLUME
 
       IF (PC%DIAMETER>0._EB) DROPLET(NLP-N_INITIAL+1:NLP)%PWT = &
          DROPLET(NLP-N_INITIAL+1:NLP)%PWT*MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
 
-   ENDDO PARTICLE_LOOP
-   
-ENDDO VOLUME_INSERT_LOOP
+   ENDDO VOLUME_INSERT_LOOP
 
-! Reset particle/droplet insertion clock
+
+   ! Reset particle/droplet insertion clocks
  
-DO IPC=1,N_PART
-   PC => PARTICLE_CLASS(IPC)
-   IF (T >= PC%INSERT_CLOCK(NM)) PC%INSERT_CLOCK(NM) = PC%INSERT_CLOCK(NM) + PC%DT_INSERT
-   IF (T >= PC%INSERT_CLOCK(NM)) INSERT_ANOTHER_BATCH = .TRUE.
-ENDDO
+   DO N=1,N_INIT
+      IN => INITIALIZATION(N)
+      IF (T >= IN%PARTICLE_INSERT_CLOCK(NM)) IN%PARTICLE_INSERT_CLOCK(NM) = IN%PARTICLE_INSERT_CLOCK(NM) + IN%DT_INSERT
+      IF (T >= IN%PARTICLE_INSERT_CLOCK(NM)) INSERT_ANOTHER_BATCH = .TRUE.
+   ENDDO
 
-IF (.NOT.INSERT_ANOTHER_BATCH) EXIT OVERALL_INSERT_LOOP
+   DO N=1,N_SURF
+      SF => SURFACE(N)
+      IF (T >= SF%PARTICLE_INSERT_CLOCK(NM)) SF%PARTICLE_INSERT_CLOCK(NM) = SF%PARTICLE_INSERT_CLOCK(NM) + SF%DT_INSERT
+      IF (T >= SF%PARTICLE_INSERT_CLOCK(NM)) INSERT_ANOTHER_BATCH = .TRUE.
+   ENDDO
+   
+   DO N=1,N_PROP
+      PY => PROPERTY(N)
+      IF (T >= PY%PARTICLE_INSERT_CLOCK(NM)) PY%PARTICLE_INSERT_CLOCK(NM) = PY%PARTICLE_INSERT_CLOCK(NM) + PY%DT_INSERT
+      IF (T >= PY%PARTICLE_INSERT_CLOCK(NM)) INSERT_ANOTHER_BATCH = .TRUE.
+   ENDDO
+
+   IF (.NOT.INSERT_ANOTHER_BATCH) EXIT OVERALL_INSERT_LOOP
+
 ENDDO OVERALL_INSERT_LOOP
  
 TUSED(8,NM)=TUSED(8,NM)+SECOND()-TNOW
