@@ -11,9 +11,16 @@
 &VENT MB='ZMIN', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&PROP ID='ball shape', SMOKEVIEW_ID='tegg', SMOKEVIEW_PARAMETERS(1)='d=0.1' /
-&PROP ID='tegg', SMOKEVIEW_ID='tegg', SMOKEVIEW_PARAMETERS(1:5)='R=0.4','G=.6','B=.8','D=0.2','L=0.5' /
+ The variable names used to customize a device are found in two places. 
+  1) for static, time independed data: entries beginning with ':' in the devices.svo file
+  2) for time dependent data: the short name of any 'QUANTITY' variables.
 
+ The 'tempegg' device changes color, changes size and rotates about the z axis
+ using the variables rot_rate and temp .  rot_rate is passed on PROP line.
+ temp is the short label for 'DROPLET TEMPERATURE' passed on the PART line.  
+ Tbe 'temp' data is obtained from the particle file.
+
+&PROP ID='ball shape', SMOKEVIEW_ID='tempegg', SMOKEVIEW_PARAMETERS(1)='rot_rate=60.0' /
 &PART ID='spheres', SURF_ID='HOT', XB=0.25,0.75,0.25,0.75,0.25,0.75, NUMBER_INITIAL_DROPLETS=100,
       QUANTITIES='DROPLET TEMPERATURE', SAMPLING_FACTOR=1, DT_INSERT=1., PROP_ID='ball shape' /
 
@@ -23,6 +30,9 @@
 &SLCF PBY=0.5, QUANTITY='WATER RADIATION LOSS' /
 &SLCF PBY=0.5, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 
-&DEVC XYZ=0.3,0.3,0.3, QUANTITY='TEMPERATURE',  ID='temp_device', PROP_ID='tegg' /
+  The 'egg' device uses data passed on the PROP line.  
+
+&PROP ID='egg', SMOKEVIEW_ID='egg', SMOKEVIEW_PARAMETERS(1:5)='R=0.2','G=.6','B=.8','D=0.2','DX=0.4' /
+&DEVC XYZ=0.3,0.3,0.3, QUANTITY='TEMPERATURE',  ID='temp_device', PROP_ID='egg' /
 
 &TAIL /

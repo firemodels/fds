@@ -294,6 +294,12 @@ DEVICEDEF // device for particle "egg"
  $R $G $B setcolor
  $DX $D $D scalexyz 1.0 drawsphere
 
+DEVICEDEF // device for particle "egg"
+ tempegg
+ :R :G :B :D :DX :temp :rot_rate    // data obtained from an FDS input file
+ $temp 700.0 :tempd28 div $tempd28 $G $B setcolor 
+ $rot_rate 0.0 :rotz multiaddt $rotz rotatez 0.2 $tempd28 0.2 scalexyz 1.0 drawsphere
+
 DEVICEDEF // device for a general ball
  gball
  :R :G :B :DX :DY :DZ
