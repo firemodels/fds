@@ -996,6 +996,7 @@ results in a  4x speedup of these actions. } \\ \hline
 %---------------------------------------------------------------------------------
 
 \chapter{Creating Custom Devices}
+\label{chap:devices}
 Smokeview visualizes FDS devices such as heat and smoke detectors,
 sprinklers, sensors using instructions contained in a
 data file named {\tt devices.svo}.
@@ -5653,7 +5654,7 @@ cutoff and smoke is displayed below.
 \hitem{ISOF}The {\tt ISOF} keyword defines the {\tt .iso} file name along with
 character labels used to describe the data contents of the isosurface file.
 
-\hitem{PART}The {\tt PART} keyword defines the {\tt .part} file name along with character
+\hitem{PART,PRT5}The {\tt PART} and {\tt PRT5} keywords define the {\tt .part} file name along with character
 labels used to describe the data contents of the particle file.
 
 \hitem{PL3D}The {\tt PL3D} keyword defines the {\tt .q}
@@ -5677,22 +5678,28 @@ device location and name.  This name is used to access the set of
 instructions for drawing the device.  These instructions are
 contained in a file named {\tt devices.svo}. The default location
 of this file on the PC is
-C:$\backslash$nist$\backslash$fds$\backslash$devices.svo . This
+C:$\backslash$Program Files$\backslash$FDS$\backslash$FDS5$\backslash$bin$\backslash$devices.svo . This
 file may be customized by the user by adding instructions for
 devices of their own design ({\em i.e.} custom devices may be
 added to a Smokeview visualization without re-programming
-Smokeview). See ?.? for more information on how to do this. The
+Smokeview). See Chapter \ref{chap:devices} for more information on how to do this. The
 format for the {\tt DEVICE}\ keyword is
 
 \begin{verbatim}
 DEVICE
 device_name
-x y z xn yn zn
+x y z xn yn zn 0 0 % PROP_ID
 \end{verbatim}
 
-where device\_name is name of the entry in the object file
-Smokeview uses to draw the device and $(x,y,z)$ and $(xn,yn,zn)$
-are the location and direction vector of the device.
+\noindent where device\_name is the entry in the {\tt devices.svo} file used 
+to draw the device and $(x,y,z)$ and $(xn,yn,zn)$
+are the location and direction vector of the device.  
+The label 
+{\tt PROP\_ID}\ (pre-pended by a {\tt \%}) is the {\tt PROP} entry used to 
+list of other properties used
+for drawing the device 
+(see the {\tt PROP}\ entry in this section for more details).
+Note, the two {\tt 0 0}\ numbers are used for backwards compatibility.
 
 \hitem{DEVICE\_ACT}The {\tt DEVICE\_ACT} keyword defines the
 activation time for a particular device. The format for the {\tt
@@ -5719,12 +5726,34 @@ where {\tt nheat}\ is the number of heat detectors and
 coordinates of the heat detectors.
 
 \hitem{HEAT\_ACT}The {\tt HEAT\_ACT} keyword defines heat detector activation data.
-A FORTRAN 90 code segment describing the format of {\tt HEAT\_ACT} data is given by:
+A FORTRAN 90 code segment describing the format of {\tt HEAT\_ACT}\ data is given by:
 \begin{verbatim}
    read(5,*)iheat, heat_time
 \end{verbatim}
 where {\tt heat\_time}\ is the activation time of the {\tt iheat}'th heat
 detector.
+
+\hitem{PROP}The {\tt PROP}\ keyword specifies 
+a list of general properties used
+by Smokeview to customize the drawing of devices defined in 
+the devices.svo file.
+The format of the {\tt PROP}\ keyword is
+
+\begin{verbatim}
+PROP
+ prop_id           (character string)
+ smokeview_id      (character string)
+ number of keyword/value pairs  (integer)
+ keyword1=value1   (character string)
+ ..
+ ..
+ keywordn=valuen   (character string)
+ number of texture files (integer) (0 or 1 for now)
+ texture file 1
+ ...
+ ...
+ texture file n
+\end{verbatim}
 
 \hitem{SPRK}The {\tt SPRK} keyword defines sprinkler location data.
 A FORTRAN 90 code segment describing the format of {\tt SPRK} data is given by:
