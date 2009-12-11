@@ -1052,7 +1052,7 @@ int readsmv(char *file){
       lenbuf=strlen(fbuffer);
       NewMemory((void **)&propi->smokeview_id,lenbuf+1);
       strcpy(propi->smokeview_id,fbuffer);
-      propi->smv_object=get_SVOBJECT_type(propi->smokeview_id);
+      propi->smv_object=get_SVOBJECT_type(propi->smokeview_id,missing_device);
 
       if(fgets(buffer,255,stream)==NULL)break; // keyword_values
       sscanf(buffer,"%i",&propi->nvars_indep);
@@ -1114,15 +1114,15 @@ int readsmv(char *file){
         NewMemory((void **)&propi->texturefiles,propi->ntextures*sizeof(char *));
         for(i=0;i<propi->ntextures;i++){
           char *buf2;
-          int lenbuf;
+          int lenbuf2;
 
           fgets(buffer,255,stream);
           trim(buffer);
           buf2 = trim_front(buffer);
-          lenbuf=strlen(buf2);
+          lenbuf2=strlen(buf2);
           propi->texturefiles[i]=NULL;
-          if(lenbuf==0)continue;
-          NewMemory((void **)&propi->texturefiles[i],lenbuf+1);
+          if(lenbuf2==0)continue;
+          NewMemory((void **)&propi->texturefiles[i],lenbuf2+1);
           strcpy(propi->texturefiles[i],buf2);
         }
       }
@@ -1179,9 +1179,9 @@ int readsmv(char *file){
       partclassi->smv_device=NULL;
       partclassi->device_name=NULL;
       if(device_ptr!=NULL){
-        partclassi->sphere=get_SVOBJECT_type("SPHERE");
+        partclassi->sphere=get_SVOBJECT_type("SPHERE",missing_device);
 
-        partclassi->smv_device=get_SVOBJECT_type(device_ptr);
+        partclassi->smv_device=get_SVOBJECT_type(device_ptr,missing_device);
         if(partclassi->smv_device!=NULL){
           len = strlen(device_ptr);
           NewMemory((void **)&partclassi->device_name,len+1);
@@ -1194,7 +1194,7 @@ int readsmv(char *file){
           len = strlen(tube);
           NewMemory((void **)&partclassi->device_name,len+1);
           STRCPY(partclassi->device_name,tube);
-          partclassi->smv_device=get_SVOBJECT_type(tube);
+          partclassi->smv_device=get_SVOBJECT_type(tube,missing_device);
         }
       }
 
@@ -2008,10 +2008,7 @@ typedef struct {
       fgets(buffer,255,stream);
       trim(buffer);
       strcpy(devicei->label,trim_front(buffer));
-      devicei->object = get_SVOBJECT_type(buffer);
-      if(devicei->object==NULL){
-        devicei->object = device_defs_backup[0];
-      }
+      devicei->object = get_SVOBJECT_type(buffer,missing_device);
       devicei->params=NULL;
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
@@ -4089,17 +4086,14 @@ typedef struct {
           }
           if(device_label==NULL){
             if(isZoneFireModel==1){
-              devicecopy->object = get_SVOBJECT_type("target");
+              devicecopy->object = get_SVOBJECT_type("target",thcp_device_backup);
             }
             else{
-              devicecopy->object = get_SVOBJECT_type("thermoc4");
+              devicecopy->object = get_SVOBJECT_type("thermoc4",thcp_device_backup);
             }
           }
           else{
-            devicecopy->object = get_SVOBJECT_type(device_label);
-          }
-          if(devicecopy->object==NULL){
-            devicecopy->object = device_defs_backup[2];
+            devicecopy->object = get_SVOBJECT_type(device_label,thcp_device_backup);
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
@@ -4165,13 +4159,10 @@ typedef struct {
             xyznorm[2]/=normdenom;
           }
           if(device_label==NULL){
-            devicecopy->object = get_SVOBJECT_type("sprinkler_upright");
+            devicecopy->object = get_SVOBJECT_type("sprinkler_upright",sprinkler_upright_device_backup);
           }
           else{
-            devicecopy->object = get_SVOBJECT_type(device_label);
-          }
-          if(devicecopy->object==NULL){
-            devicecopy->object = device_defs_backup[2];
+            devicecopy->object = get_SVOBJECT_type(device_label,sprinkler_upright_device_backup);
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
@@ -4285,13 +4276,10 @@ typedef struct {
             xyznorm[2]/=normdenom;
           }
           if(device_label==NULL){
-            devicecopy->object = get_SVOBJECT_type("heat_detector");
+            devicecopy->object = get_SVOBJECT_type("heat_detector",heat_detector_device_backup);
           }
           else{
-            devicecopy->object = get_SVOBJECT_type(device_label);
-          }
-          if(devicecopy->object==NULL){
-            devicecopy->object = device_defs_backup[1];
+            devicecopy->object = get_SVOBJECT_type(device_label,heat_detector_device_backup);
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
 
@@ -4388,13 +4376,10 @@ typedef struct {
           xyznorm[2]/=normdenom;
         }
         if(device_label==NULL){
-          devicecopy->object = get_SVOBJECT_type("smoke_detector");
+          devicecopy->object = get_SVOBJECT_type("smoke_detector",smoke_detector_device_backup);
         }
         else{
-          devicecopy->object = get_SVOBJECT_type(device_label);
-        }
-        if(devicecopy->object==NULL){
-          devicecopy->object = device_defs_backup[3];
+          devicecopy->object = get_SVOBJECT_type(device_label,smoke_detector_device_backup);
         }
         get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
@@ -10172,6 +10157,7 @@ void get_labels(char *buffer, char **label1, char **label2){
 propdata *get_prop_id(char *prop_id){
   int i;
 
+  if(prop_id==NULL||strlen(prop_id)==0)return NULL;
   for(i=0;i<npropinfo;i++){
     propdata *propi;
 
