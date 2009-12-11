@@ -919,6 +919,31 @@ OBST_LOOP_2: DO N=1,M%N_OBST
  
 ENDDO OBST_LOOP_2
 
+!Initialize PSUM for zone cases
+IF (N_ZONE > 0) THEN
+   DO IPZ = 1,N_ZONE
+      PSUM(IPZ,NM) = 0._EB
+      DO K=1,M%KBAR
+         DO J=1,M%JBAR
+            DO I=1,M%IBAR
+               IF (M%PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE
+               IF (SOLID(CELL_INDEX(I,J,K)))    CYCLE
+               VC   = M%DX(I)*M%RC(I)*M%DY(J)*M%DZ(K)
+               ITMP = MIN(5000,NINT(M%TMP(I,J,K)))
+               IF (N_SPECIES==0) THEN
+                  RTRM = RSUM0/(Y2CP_C(ITMP)*M%PBAR(K,IPZ))
+               ELSE
+                  YY_GET(:) = M%YY(I,J,K,:)
+                  CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,ITMP)
+                  RTRM = M%RSUM(I,J,K)/(CP_MF*M%PBAR(K,IPZ))
+               ENDIF
+               PSUM(IPZ,NM) = PSUM(IPZ,NM) + VC*(1._EB/M%PBAR(K,IPZ)-RTRM)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
 ! Set up wall cell arrays for VIRTUAL boundaries
 
 IW = M%NWC
