@@ -56,6 +56,7 @@ TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (MESH_TYPE), POINTER :: MM
 TYPE (DUCTNODE_TYPE), POINTER :: DN
+TYPE (DUCT_TYPE), POINTER :: DU
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 
 IF (PREDICTOR) THEN
@@ -292,24 +293,30 @@ HEAT_FLUX_LOOP: DO IW=1,NWC+NVWC
          TMP(II,JJ,KK) = TMP_W(IW)
  
        CASE (HVAC_BOUNDARY)
-         IF (T==T_BEGIN .AND. PREDICTOR) CYCLE HEAT_FLUX_LOOP
          TMP_G = TMP(IIG,JJG,KKG)
          DN=>DUCTNODE(VENTS(VENT_INDEX(IW))%NODE_INDEX)
-         TMP_F(IW) = DN%TMP
-         DTMP = TMP_G - TMP_F(IW)
-         HEAT_TRANS_COEF(IW) = HEAT_TRANSFER_COEFFICIENT(IW,IIG,JJG,KKG,IOR,TMP_G,DTMP)
-         QCONF(IW) = HEAT_TRANS_COEF(IW)*DTMP
-         RHOWAL    = 0.5_EB*(RHOP(IIG,JJG,KKG)+RHO_W(IW))
-         IF (N_SPECIES > 0) THEN
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,CP_F,MIN(5000,NINT(TMP_F(IW))))
+         DU=>DUCT(DN%DUCT_INDEX(1))
+         IF (DN%DIR(1)*DU%VEL(NEW) < 0._EB) THEN
+            TMP_F(IW) = DN%TMP
+            DTMP = TMP_G - TMP_F(IW)
+            HEAT_TRANS_COEF(IW) = HEAT_TRANSFER_COEFFICIENT(IW,IIG,JJG,KKG,IOR,TMP_G,DTMP)
+            QCONF(IW) = HEAT_TRANS_COEF(IW)*DTMP
+            RHOWAL    = 0.5_EB*(RHOP(IIG,JJG,KKG)+RHO_W(IW))
+            IF (N_SPECIES > 0) THEN
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,CP_F,MIN(5000,NINT(TMP_F(IW))))
+            ELSE
+               CP_F   = Y2CP_C(MIN(5000,NINT(TMP_F(IW))))
+            ENDIF
+            CP_TERM   = MAX(0._EB,-UW(IW))*RHOWAL*CP
+            CP_TERM_F = MAX(0._EB,-UW(IW))*RHOWAL*CP_F
+            TMP_W(IW) = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G + CP_TERM*TMP_F(IW) - QCONF(IW) )/(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
+            TMP_W(IW) = MAX(TMPMIN,TMP_W(IW))             
          ELSE
-            CP_F   = Y2CP_C(MIN(5000,NINT(TMP_F(IW))))
+            TMP_F(IW) = TMP(IIG,JJG,KKG)
+            TMP_W(IW) = TMP_F(IW)
+            HEAT_TRANS_COEF(IW) = 0._EB
+            QCONF(IW) = 0._EB
          ENDIF
-         CP_TERM   = MAX(0._EB,-UW(IW))*RHOWAL*CP
-         CP_TERM_F = MAX(0._EB,-UW(IW))*RHOWAL*CP_F
-         TMP_W(IW) = ( (RDN(IW)*KW(IW)-0.5_EB*CP_TERM)*TMP_G + CP_TERM*TMP_F(IW) - QCONF(IW) )/(0.5_EB*CP_TERM+RDN(IW)*KW(IW))
-         TMP_W(IW) = MAX(TMPMIN,TMP_W(IW))        
-
    END SELECT METHOD_OF_HEAT_TRANSFER
  
    ! Record wall temperature in the ghost cell
@@ -368,7 +375,6 @@ ENDIF
 ! Loop through the wall cells, apply mass boundary conditions
 
 WALL_CELL_LOOP: DO IW=1,NWC
-
    IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE WALL_CELL_LOOP
 
    IBC = IJKW(5,IW)
@@ -490,14 +496,15 @@ WALL_CELL_LOOP: DO IW=1,NWC
          ENDDO
  
       CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
-
          ! If the current time is before the "activation" time, TW, apply simple BCs and get out
-
-         IF (T < TW(IW) .AND. N_SPECIES > 0) THEN
-            IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) YY_W(IW,1:N_SPECIES)      = YYP(IIG,JJG,KKG,1:N_SPECIES)
-            IF (PREDICTOR) UWS(IW)   = 0._EB 
-            MASSFLUX(IW,1:N_SPECIES) = 0._EB
-            MASSFLUX_ACTUAL(IW,1:N_SPECIES) = 0._EB
+         IF (T < TW(IW)) THEN
+            MASSFLUX(IW,0) = 0._EB
+            IF (N_SPECIES > 0)  THEN
+               IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) YY_W(IW,1:N_SPECIES)      = YYP(IIG,JJG,KKG,1:N_SPECIES)
+               IF (PREDICTOR) UWS(IW)   = 0._EB 
+               MASSFLUX(IW,1:N_SPECIES) = 0._EB
+               MASSFLUX_ACTUAL(IW,1:N_SPECIES) = 0._EB
+               ENDIF
             CYCLE WALL_CELL_LOOP
          ENDIF
 
@@ -521,7 +528,6 @@ WALL_CELL_LOOP: DO IW=1,NWC
             MASSFLUX(IW,N) = MASSFLUX(IW,N)*AREA_ADJUST(IW)
             MFT = MFT + MASSFLUX(IW,N)
          ENDDO SUM_MASSFLUX_LOOP
- 
          ! Add total consumed mass to various summing arrays
 
          CONSUME_MASS: IF (CORRECTOR .AND. SF%THERMALLY_THICK) THEN  
@@ -592,24 +598,29 @@ WALL_CELL_LOOP: DO IW=1,NWC
          YYP(II,JJ,KK,1:N_SPECIES) = YY_W(IW,1:N_SPECIES)
 
       CASE (HVAC_BOUNDARY)
-         IF (T==T_BEGIN .AND. PREDICTOR) CYCLE WALL_CELL_LOOP
          VT => VENTS(VENT_INDEX(IW))
          DN => DUCTNODE(VT%NODE_INDEX)
          DU => DUCT(DN%DUCT_INDEX(1))
-         MFT = DN%DIR(1)*DU%VEL(OLD)*DU%RHO_D/VT%FDS_AREA*DU%AREA
+         MFT = DN%DIR(1)*DU%VEL(NEW)*DU%RHO_D/VT%FDS_AREA*DU%AREA
          RHO_G = RHOP(IIG,JJG,KKG)
          UN    = 2._EB*MFT/(DU%RHO_D+RHO_G)
-         IF (PREDICTOR) UWS(IW) = UN
-         DO N=1,N_SPECIES
-            YY_G  = YYP(IIG,JJG,KKG,N)
-            IF (UWS(IW)>0._EB) THEN
-               YY_WALL = YY_G
-            ELSE  ! This is usually where air is blown into a compartment and we don't want gain or loss of species N
-               YY_WALL = DN%YY(N)
-            ENDIF
-            IF (DNS) YY_W(IW,N) = 2._EB*YY_WALL - YY_G
-            IF (LES) YY_W(IW,N) =       YY_WALL
-         ENDDO
+         UWS(IW) = UN
+         IF (N_SPECIES==0) THEN
+            MASSFLUX(IW,0) = MFT
+         ELSE
+            DO N=1,N_SPECIES
+               YY_G  = YYP(IIG,JJG,KKG,N)
+               IF (UWS(IW)>0._EB) THEN
+                  YY_WALL = YY_G
+               ELSE  ! This is usually where air is blown into a compartment and we don't want gain or loss of species N
+                  YY_WALL = DN%YY(N)
+               ENDIF
+               IF (DNS) YY_W(IW,N) = 2._EB*YY_WALL - YY_G
+               IF (LES) YY_W(IW,N) =       YY_WALL
+            ENDDO
+            MASSFLUX(IW,1:N_SPECIES) = YY_W(IW,1:N_SPECIES)*MFT
+            MASSFLUX(IW,0) = MFT - SUM(MASSFLUX(IW,1:N_SPECIES))
+         ENDIF
 
    END SELECT METHOD_OF_MASS_TRANSFER
    
