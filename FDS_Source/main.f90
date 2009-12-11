@@ -213,8 +213,6 @@ CALL INIT_EVAC_GROUPS
  
 CALL WRITE_STRINGS
 
-IF (HVAC_SOLVE) CALL FIND_NETWORKS(CHANGE)
-
 ! Initialize output files 
 
 IF (.NOT.RESTART) THEN
@@ -295,7 +293,6 @@ MAIN_LOOP: DO
    !=============================================================================================================================
    !                                                     PREDICTOR Step
    !=============================================================================================================================
-
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
 
@@ -320,7 +317,6 @@ MAIN_LOOP: DO
    FIRST_PASS = .TRUE.
 
    CHANGE_TIME_STEP_LOOP: DO
-      
       COMPUTE_DENSITY_LOOP: DO NM=1,NMESHES
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DENSITY_LOOP
          IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
@@ -332,17 +328,24 @@ MAIN_LOOP: DO
             ENDIF
          ENDIF
       ENDDO COMPUTE_DENSITY_LOOP
-      
+
       IF (FIRST_PASS .OR. SYNCHRONIZE) CALL MESH_EXCHANGE(1)
  
       COMPUTE_DIVERGENCE_LOOP: DO NM=1,NMESHES
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DIVERGENCE_LOOP
          IF (FIRST_PASS) CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,2)
          IF (FIRST_PASS) CALL UPDATE_PARTICLES(T(NM),NM)
-         IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0)  CALL WALL_BC(T(NM),NM)
+         IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0)  THEN
+            IF (HVAC_SOLVE) THEN
+               CALL HVAC_BC_IN(NM)
+               IF (NM==1) CALL HVAC_CALC(T(NM))
+            ENDIF
+            CALL WALL_BC(T(NM),NM)
+         ENDIF
          CALL DIVERGENCE_PART_1(T(NM),NM)
+
       ENDDO COMPUTE_DIVERGENCE_LOOP
-      
+
       CALL EXCHANGE_DIVERGENCE_INFO
       
       COMPUTE_PRESSURE_LOOP: DO NM=1,NMESHES
@@ -362,7 +365,7 @@ MAIN_LOOP: DO
          CALL VELOCITY_PREDICTOR(NM,MESH_STOP_STATUS(NM))
          IF (MESH_STOP_STATUS(NM)==INSTABILITY_STOP) PROCESS_STOP_STATUS = INSTABILITY_STOP
       ENDDO PREDICT_VELOCITY_LOOP
-      
+
       ! Time step logic
 
       IF (PROCESS_STOP_STATUS/=NO_STOP) THEN
@@ -420,7 +423,6 @@ MAIN_LOOP: DO
    PREDICTOR = .FALSE.
 
    ! Compute finite differences of predicted quantities
-      
    COMPUTE_FINITE_DIFFERENCES_2: DO NM=1,NMESHES
       CALL OPEN_AND_CLOSE(T(NM),NM)
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_FINITE_DIFFERENCES_2
@@ -453,7 +455,7 @@ MAIN_LOOP: DO
          CALL WALL_BC(T(NM),NM)
       ENDIF
    ENDDO COMPUTE_REACTION
-   
+
    COMPUTE_DIVERGENCE_2: DO NM=1,NMESHES
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DIVERGENCE_2
       IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
@@ -481,7 +483,7 @@ MAIN_LOOP: DO
       CALL VELOCITY_CORRECTOR(NM)
       IF (DIAGNOSTICS) CALL CHECK_DIVERGENCE(NM)
    ENDDO CORRECT_VELOCITY_LOOP
-   
+
    IF (CHECK_VOLUME_FLOW) CALL COMPUTE_VOLUME_FLOW
 
    ! Exchange velocity and pressure at interpolated boundaries
