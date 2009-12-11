@@ -646,8 +646,12 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
   if(object->visible==0)return;
   if(iframe>object->nframes-1||iframe<0)iframe=0;
   framei=object->obj_frames[iframe];
+
   ASSERT(framei->error==0||framei->error==1);
-  if(framei->error!=0)framei=error_frame;
+
+  if(framei->error==1){
+    framei=error_device->obj_frames[0];
+  }
 
   rgbcolor[0]=255;
   rgbcolor[1]=0;
@@ -1926,11 +1930,14 @@ void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor){
 
 /* ----------------------- get_SMVOBJECT_type ----------------------------- */
 
-sv_object *get_SVOBJECT_type(char *label){
+sv_object *get_SVOBJECT_type(char *label,sv_object *default_object){
   int i;
   sv_object *objecti;
 
+  if(label==NULL)return default_object;
+  trim(label);
   label = trim_front(label);
+  if(strlen(label)==0)return default_object;
   for(i=0;i<ndevice_defs;i++){
     objecti = device_defs[i];
     if(STRCMP(label,objecti->label)==0){
@@ -1938,7 +1945,7 @@ sv_object *get_SVOBJECT_type(char *label){
       return objecti;
     }
   }
-  return NULL;
+  return default_object;
 }
 
 /* ----------------------- initcircle ----------------------------- */
@@ -2036,20 +2043,6 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
   return object;
 }
 
-/* ----------------------- make_error_frame ----------------------------- */
-
-void make_error_frame(void){
-  char buffer[256];
-  int eof;
-
-  error_frame=NULL;
-  NewMemory((void **)&error_frame,sizeof(sv_object_frame));
-  strcpy(buffer,"1.0 0.0 0.0 setcolor 0.1 drawsphere");
-  error_frame->device=NULL;
-  parse_device_frame(buffer, NULL, &eof, error_frame);
-  error_frame->display_list_ID=-1;
-}
-
 /* ----------------------- init_SMVOBJECT2 ----------------------------- */
 
 sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int visible){
@@ -2094,12 +2087,14 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
 
 /* ----------------------- gettoken ----------------------------- */
 
-void get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int *use_displaylist){
+int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int *use_displaylist){
 
   int op, num_op, num_outop;
+  int return_val;
   
   *use_displaylist=0;
   
+  return_val=0;
   if(STRCMP(token,"translate")==0){
     op=SV_TRANSLATE;
     num_op=SV_TRANSLATE_NUMARGS;
@@ -2348,10 +2343,13 @@ void get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, in
   else{
     op=SV_ERR;
     num_op=0;
+    num_outop=0;
+    return_val=1;
  }
  *opptr=op;
  *num_opptr=num_op;
  *num_outopptr=num_outop;
+ return return_val;
 }
 
 /* ----------------------- get_token_loc ----------------------------- */
@@ -2388,6 +2386,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
   // concatentate frame
 
+  frame->error=0;
   trim(buffer);
   strcpy(object_buffer,buffer);
   while(stream!=NULL&&!feof(stream)){
@@ -2467,9 +2466,15 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       int use_displaylist;
       int nargs_actual, noutargs_actual;
       tokendata *this_token, *last_token;
+      int error_code;
 
       toki->type=TOKEN_COMMAND;
-      get_token_id(toki->token, &toki->command, &toki->nvars, &toki->noutvars, &use_displaylist);
+      error_code=get_token_id(toki->token, &toki->command, &toki->nvars, &toki->noutvars, &use_displaylist);
+      if(error_code==1){
+        frame->error=1;
+        printf("*** error: unable to identify the command, %s, while parsing:\n\n",toki->token);
+        printf("      %s\n\n",object_buffer);
+      }
       frame->command_list[ncommands]=toki;
       if(frame->device!=NULL)frame->device->use_displaylist=use_displaylist;
       if(ncommands>0){
@@ -2484,6 +2489,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
         nargs_actual = toki->nvars;
       }
       if(nargs_actual!=toki->nvars){
+        frame->error=1;
         printf("*** error: The command %s in device %s has %i arguments, %i were expected\n",
           toki->token,frame->device->label,nargs_actual,toki->nvars);
       }
@@ -2519,6 +2525,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
         tokdest->reads++;
       }
       else{
+        frame->error=1;
         toki->varptr=NULL;
         printf("*** error: The label %s in device %s is not defined\n",toki->token,frame->device->label);
       }
@@ -2797,6 +2804,7 @@ int read_device_defs(char *file){
           }
         }
         if(npushpop>0){
+          printf("*** error: The number of push and pop commands are not equal\n");
           framei->error=1;
         }
         framei=framei->next;
@@ -2914,10 +2922,7 @@ void update_device_objects(void){
 
     devicei = deviceinfo + i;
 
-    devicei->object = get_SVOBJECT_type(devicei->label);
-    if(devicei->object==NULL){
-      devicei->object = device_defs_backup[0];
-    }
+    devicei->object = get_SVOBJECT_type(devicei->label,missing_device);
     if(devicei->ntextures>0){
       int j;
       for(j=0;j<devicei->ntextures;j++){
@@ -2966,35 +2971,43 @@ void init_device_defs(void){
 
     if(isZoneFireModel==1){
       strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.02 0.05 drawdisk");
-      device_defs_backup[0] = init_SVOBJECT1("target", com_buffer,1);
+      target_device_backup = init_SVOBJECT1("target", com_buffer,1);
     }
     else{
       strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.038 drawcube");
-      device_defs_backup[0] = init_SVOBJECT1("sensor", com_buffer,1);
+      target_device_backup = init_SVOBJECT1("sensor", com_buffer,1);
     }
-    strcpy(com_buffer, "0.0 1.0 0.0 setcolor 0.038 drawcube");
-    strcpy(com_buffer2,"1.0 0.0 0.0 setcolor 0.038 drawcube");
-    device_defs_backup[1] = init_SVOBJECT2("heat_detector", com_buffer, com_buffer2,1);
+
+    strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.038 drawcube");
+    thcp_device_backup = init_SVOBJECT1("thcp", com_buffer,1);
 
     strcpy(com_buffer, "0.0 1.0 0.0 setcolor 0.038 drawcube");
     strcpy(com_buffer2,"1.0 0.0 0.0 setcolor 0.038 drawcube");
-    device_defs_backup[2] = init_SVOBJECT2("sprinkler_upright", com_buffer, com_buffer2,1);
+    heat_detector_device_backup = init_SVOBJECT2("heat_detector", com_buffer, com_buffer2,1);
+
+    strcpy(com_buffer, "0.0 1.0 0.0 setcolor 0.038 drawcube");
+    strcpy(com_buffer2,"1.0 0.0 0.0 setcolor 0.038 drawcube");
+    sprinkler_upright_device_backup = init_SVOBJECT2("sprinkler_upright", com_buffer, com_buffer2,1);
 
     strcpy(com_buffer, "0.5 0.5 0.5 setcolor 0.2 0.05 drawdisk");
     strcpy(com_buffer2,"1.0 0.0 0.0 setcolor 0.2 0.05 drawdisk");
-    device_defs_backup[3] = init_SVOBJECT2("smoke_detector", com_buffer, com_buffer2,1);
+    smoke_detector_device_backup = init_SVOBJECT2("smoke_detector", com_buffer, com_buffer2,1);
 
-    make_error_frame();
-    
+    strcpy(com_buffer, "1.0 0.0 0.0 setcolor push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk");
+    error_device = init_SVOBJECT1("error_device", com_buffer,1);
+
+    strcpy(com_buffer, "0.0 0.0 1.0 setcolor push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk");
+    missing_device = init_SVOBJECT1("missing_device", com_buffer,1);
+
     if(ndevice_defs==0){
 
       ndevice_defs=4;
       FREEMEMORY(device_defs);
       NewMemory((void **)&device_defs,4*sizeof(sv_object *));
-      device_defs[0] = device_defs_backup[0];
-      device_defs[1] = device_defs_backup[1];
-      device_defs[2] = device_defs_backup[2];
-      device_defs[3] = device_defs_backup[3];
+      device_defs[0] = target_device_backup;
+      device_defs[1] = heat_detector_device_backup;
+      device_defs[2] = sprinkler_upright_device_backup;
+      device_defs[3] = smoke_detector_device_backup;
     }
 }
 
