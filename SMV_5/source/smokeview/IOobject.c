@@ -650,7 +650,9 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
   ASSERT(framei->error==0||framei->error==1);
 
   if(framei->error==1){
+    object=error_device;
     framei=error_device->obj_frames[0];
+    prop=NULL;
   }
 
   rgbcolor[0]=255;
@@ -2782,7 +2784,6 @@ int read_device_defs(char *file){
 
         CheckMemory;
         objecti->obj_frames[j]=framei;
-        framei->error=0;
         for(ii=0;ii<framei->ncommands;ii++){
           tokendata *command;
           char *c;
@@ -2993,10 +2994,10 @@ void init_device_defs(void){
     strcpy(com_buffer2,"1.0 0.0 0.0 setcolor 0.2 0.05 drawdisk");
     smoke_detector_device_backup = init_SVOBJECT2("smoke_detector", com_buffer, com_buffer2,1);
 
-    strcpy(com_buffer, "1.0 0.0 0.0 setcolor push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk");
+    strcpy(com_buffer, "1.0 0.0 0.0 setcolor push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
     error_device = init_SVOBJECT1("error_device", com_buffer,1);
 
-    strcpy(com_buffer, "0.0 0.0 1.0 setcolor push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk");
+    strcpy(com_buffer, "0.0 0.0 1.0 setcolor push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
     missing_device = init_SVOBJECT1("missing_device", com_buffer,1);
 
     if(ndevice_defs==0){
