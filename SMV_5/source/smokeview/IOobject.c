@@ -163,6 +163,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_SETLINEWIDTH 304
 #define SV_SETPOINTSIZE 305
 #define SV_SETCOLOR   306
+#define SV_GETTEXTUREINDEX 307
 
 #define SV_NO_OP      999
 
@@ -173,6 +174,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_SETLINEWIDTH_NUMARGS 1
 #define SV_SETPOINTSIZE_NUMARGS 1
 #define SV_SETCOLOR_NUMARGS   1
+#define SV_GETTEXTUREINDEX_NUMARGS 2
 
 #define SV_PUSH_NUMOUTARGS       0
 #define SV_POP_NUMOUTARGS        0
@@ -181,6 +183,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_SETLINEWIDTH_NUMOUTARGS 0
 #define SV_SETPOINTSIZE_NUMOUTARGS 0
 #define SV_SETCOLOR_NUMOUTARGS   0
+#define SV_GETTEXTUREINDEX_NUMOUTARGS 1
 
 #define SV_ERR -1
 
@@ -204,7 +207,7 @@ void drawarc(float angle, float diameter, unsigned char *rgbcolor);
 void drawcircle(float diameter, unsigned char *rgbcolor);
 void drawpoint(unsigned char *rgbcolor);
 void drawsphere(float diameter, unsigned char *rgbcolor);
-void drawtsphere(float texture_index, float diameter, unsigned char *rgbcolor);
+void drawtsphere(int texture_index, float diameter, unsigned char *rgbcolor);
 void drawcube(float size, unsigned char *rgbcolor);
 void drawcdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawdisk(float diameter, float height, unsigned char *rgbcolor);
@@ -1067,7 +1070,10 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       break;
     case SV_DRAWTSPHERE:
       {
-        drawtsphere(arg[0],arg[1],rgbptr);
+        int texture_index;
+
+        texture_index = arg[0]+0.5;
+        drawtsphere(texture_index,arg[1],rgbptr);
       }
       rgbptr=NULL;
       break;
@@ -1101,6 +1107,23 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       arg[1]=iarg[1];
       arg[2]=iarg[2];
       }
+    case SV_GETTEXTUREINDEX:
+      {
+        char *texturefile;
+        int i;
+        int textureindex=0;
+
+        texturefile = (toki-2)->string;
+
+        for(i=0;i<ndevice_texture_list;i++){
+          if(strcmp(device_texture_list[i],texturefile)==0){
+            textureindex=i;
+            break;
+          }
+        }
+        *argptr=textureindex;
+      }
+      break;
     case SV_SETRGB:
       {
         if(setbw==1){
@@ -1194,17 +1217,10 @@ void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor){
 
 /* ----------------------- drawsphere ----------------------------- */
 
-void drawtsphere(float texture_index_ptr,float diameter, unsigned char *rgbcolor){
+void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
   texture *texti;
   float latitude, longitude;
-  int texture_index;
 
-  if(texture_index_ptr>=0.0&&texture_index_ptr<ntexturestack){
-    texture_index=valstack[nvalstack+(int)(texture_index_ptr+0.5)]+0.5;
-  }
-  else{
-    texture_index=-1.0;
-  }
   if(texture_index<0||texture_index>ntextures-1){
     texti=NULL;
   }
@@ -2060,6 +2076,7 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
   framei->display_list_ID=-1;
   framei->error=0;
   framei->use_bw=setbw;
+  framei->ntextures=0;
 
   return object;
 }
@@ -2092,6 +2109,7 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
       parse_device_frame(commandsoff, NULL, &eof, framei);
       framei->display_list_ID=-1;
       framei->use_bw=setbw;
+      framei->ntextures=0;
     }
     else{
       NewMemory((void **)&framei,sizeof(sv_object_frame));
@@ -2101,6 +2119,7 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
       framei->error=0;
       framei->display_list_ID=-1;
       framei->use_bw=setbw;
+      framei->ntextures=0;
     }
   }
   return object;
@@ -2286,6 +2305,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_SETCOLOR;
     num_op=SV_SETCOLOR_NUMARGS;
     num_outop=SV_SETCOLOR_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"gettextureindex")==0){
+    op=SV_GETTEXTUREINDEX;
+    num_op=SV_GETTEXTUREINDEX_NUMARGS;
+    num_outop=SV_GETTEXTUREINDEX_NUMOUTARGS;
   }
   else if(STRCMP(token,"setrgb")==0){
     op=SV_SETRGB;
@@ -2584,6 +2608,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     else if(c=='"'){
       char string_copy[256], *sptr;
       int lenstr;
+      char *texturefile;
 
       toki->type=TOKEN_STRING;
       toki->var=0.0;
@@ -2591,8 +2616,9 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       sptr=string_copy;
       strcpy(sptr,toki->token);
       sptr++;
-      if(match(buffer,"t:",2)==1){
-        sptr+=2;
+      texturefile=strstr(sptr,"t:");
+      if(texturefile!=NULL){
+        sptr=texturefile+2;
         toki->type=TOKEN_TEXTURE;
         ntextures++;
       }
@@ -2965,6 +2991,9 @@ void remove_comment(char *buffer){
 /* ----------------------- update_device_textures ----------------------------- */
 
 void update_device_textures(void){
+
+  // create a list of device textures
+
   int i;
 
   for(i=0;i<ndeviceinfo;i++){
@@ -2974,8 +3003,6 @@ void update_device_textures(void){
 
     devicei->object = get_SVOBJECT_type(devicei->label,missing_device);
   }
-
-  // create a list of device textures
 
   device_texture_list=NULL;
   ndevice_texture_list=0;
@@ -2989,13 +3016,23 @@ void update_device_textures(void){
 
     devicei = deviceinfo + i;
     object = devicei->object;
-    for(j=0;i<object->nframes;j++){
+    for(j=0;j<object->nframes;j++){
       sv_object_frame *frame;
 
       frame = object->obj_frames[j];
       ndevice_texture_list+=frame->ntextures;
     }
   }
+  for(i=0;i<npropinfo;i++){
+    propdata *propi;
+
+    propi = propinfo + i;
+
+    ndevice_texture_list += propi->ntextures;
+  }
+
+  // allocate data structures and fill in list
+
   if(ndevice_texture_list>0){
     NewMemory((void **)&device_texture_list,ndevice_texture_list*sizeof(char *));
     NewMemory((void **)&device_texture_list_index,ndevice_texture_list*sizeof(int));
@@ -3007,11 +3044,12 @@ void update_device_textures(void){
 
       devicei = deviceinfo + i;
       object = devicei->object;
-      for(j=0;i<object->nframes;j++){
+      for(j=0;j<object->nframes;j++){
         sv_object_frame *frame;
         int k;
 
         frame = object->obj_frames[j];
+        if(frame->ntextures==0)continue;
         for(k=0;k<frame->ntokens;k++){
           tokendata *toki;
           int kk;
@@ -3030,41 +3068,26 @@ void update_device_textures(void){
         }
       }
     }
-  }
-}
+    for(i=0;i<npropinfo;i++){
+      propdata *propi;
+      int j;
 
-/* ----------------------- update_device_texture_indexes ----------------------------- */
-
-void update_device_texture_indexes(void){
-  int i;
-
-  if(ndevice_texture_list==0)return;
-
-  for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
-    sv_object *object;
-    int j;
-
-    devicei = deviceinfo + i;
-    object = devicei->object;
-    for(j=0;i<object->nframes;j++){
-      sv_object_frame *frame;
-      int k;
-
-      frame = object->obj_frames[j];
-      if(frame->ntextures==0)continue;
-      for(k=0;k<frame->ntokens;k++){
-        tokendata *toki;
-        int kk;
+      propi = propinfo + i;
+      if(propi->ntextures==0)continue;
+      for(j=0;j<propi->ntextures;j++){
         int dup;
+        char *texturefile;
+        int kk;
 
-        toki = frame->tokens + k;
-        if(toki->type!=TOKEN_TEXTURE)continue;
+        texturefile=propi->texturefiles[j];
+        dup=0;
         for(kk=0;kk<ndevice_texture_list;kk++){
-          if(strcmp(device_texture_list[kk],toki->string)==0){
-            toki->texture_index=device_texture_list_index[kk];
+          if(strcmp(device_texture_list[kk],texturefile)==0){
+            dup=1;
+            break;
           }
         }
+        if(dup==0)device_texture_list[ndevice_texture_list++]=texturefile;
       }
     }
   }
