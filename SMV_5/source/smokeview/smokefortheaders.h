@@ -39,6 +39,7 @@
 #define FORTgetplot3dq getplot3dq_
 #define FORTgetplot3dqa getplot3dqa_
 #define FORTgetsliceparms getsliceparms_
+#define FORTcolor2rgb color2rgb_
 #else
 #define FORTfcreate_part5sizefile fcreate_part5sizefile
 #define FORTclosepart  closepart
@@ -64,7 +65,11 @@
 #define FORTgetplot3dq getplot3dq
 #define FORTgetplot3dqa getplot3dqa
 #define FORTgetsliceparms getsliceparms
+#define FORTcolor2rgb color2rgb
 #endif
+
+// SUBROUTINE COLOR2RGB(RGB,COLOR)
+STDCALL FORTcolor2rgb(int *rgb, char *color, FILE_SIZE colorsize);
 
 STDCALL FORTfcreate_part5sizefile(char *part5file, char *part5sizefile, int *angle_flag, int *error,
                                   FILE_SIZE lenpart5file, FILE_SIZE lenpart5sizefile);
