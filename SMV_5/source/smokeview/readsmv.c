@@ -1032,6 +1032,8 @@ int readsmv(char *file){
       propdata *propi;
       char *fbuffer;
       int lenbuf;
+      int ntextures;
+
 
       propi = propinfo + npropinfo;
 
@@ -1054,11 +1056,15 @@ int readsmv(char *file){
       sscanf(buffer,"%i",&propi->nvars_indep);
       propi->vars_indep=NULL;
       propi->svals=NULL;
+      propi->texturefiles=NULL;
+      ntextures=0;
       if(propi->nvars_indep>0){
         NewMemory((void **)&propi->vars_indep,propi->nvars_indep*sizeof(char *));
         NewMemory((void **)&propi->svals,propi->nvars_indep*sizeof(char *));
         NewMemory((void **)&propi->fvals,propi->nvars_indep*sizeof(float));
         NewMemory((void **)&propi->vars_indep_index,propi->nvars_indep*sizeof(int));
+        NewMemory((void **)&propi->texturefiles,propi->nvars_indep*sizeof(char *));
+
         for(i=0;i<propi->nvars_indep;i++){
           char *equal;
 
@@ -1070,6 +1076,7 @@ int readsmv(char *file){
           if(equal!=NULL){
             char *buf1, *buf2, *keyword, *val;
             int lenkey, lenval;
+            char *texturefile;
 
             buf1=buffer;
             buf2=equal+1;
@@ -1087,6 +1094,22 @@ int readsmv(char *file){
 
             NewMemory((void **)&propi->svals[i],lenval+1);
             strcpy(propi->svals[i],val);
+            texturefile=strstr(val,"\"t:");
+            if(texturefile!=NULL){
+              int lentexture;
+
+              texturefile+=3;
+              lentexture=strlen(texturefile);
+              if(texturefile[lentexture-1]=='"'){
+                texturefile[lentexture-1]=' ';
+              }
+              trim(texturefile);
+              texturefile=trim_front(texturefile);
+              propi->texturefiles[ntextures]=texturefile;
+
+              ntextures++;
+            }
+            
 
             NewMemory((void **)&propi->vars_indep[i],lenkey+1);
             strcpy(propi->vars_indep[i],keyword);
@@ -1102,26 +1125,7 @@ int readsmv(char *file){
           propi->vars_evac_index,&propi->nvars_evac);
 
       }
-      
-      if(fgets(buffer,255,stream)==NULL)break;  // texture files
-      sscanf(buffer,"%i",&propi->ntextures);
-      propi->texturefiles=NULL;
-      if(propi->ntextures>0){
-        NewMemory((void **)&propi->texturefiles,propi->ntextures*sizeof(char *));
-        for(i=0;i<propi->ntextures;i++){
-          char *buf2;
-          int lenbuf2;
-
-          fgets(buffer,255,stream);
-          trim(buffer);
-          buf2 = trim_front(buffer);
-          lenbuf2=strlen(buf2);
-          propi->texturefiles[i]=NULL;
-          if(lenbuf2==0)continue;
-          NewMemory((void **)&propi->texturefiles[i],lenbuf2+1);
-          strcpy(propi->texturefiles[i],buf2);
-        }
-      }
+      propi->ntextures=ntextures;
       npropinfo++;
       continue;
     }
@@ -2151,7 +2155,7 @@ typedef struct {
   }
   
 
-  // define texture data structures by constructing a list of unique file names from surfaceinfo   
+  // define texture data structures by constructing a list of unique file names from surfaceinfo and devices   
 
   update_device_textures();
   if(nsurfaces>0||ndevice_texture_list>0){
@@ -2189,7 +2193,6 @@ typedef struct {
     texti->display=0;
     ntextures++;
   }
-  update_device_texture_indexes();
 
   // check to see if texture files exist .
   // If so, then convert to OpenGL format 
@@ -5961,11 +5964,11 @@ void updateusetextures(void){
       }
     }
   }
-  for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+  for(i=0;i<ndevice_texture_list;i++){
+    int texture_index;
 
-    devicei = deviceinfo + i;
-    texti=devicei->textureinfo;
+    texture_index  = device_texture_list_index[i];
+    texti=textureinfo + texture_index;
     if(texti!=NULL&&texti->loaded==1){
       if(usetextures==1)texti->display=1;
       texti->used=1;
