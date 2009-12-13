@@ -624,6 +624,8 @@ SVEXTERN sv_object *thcp_device_backup;
 SVEXTERN sv_object *missing_device;
 SVEXTERN sv_object *error_device;
 SVEXTERN sv_object device_def_first, device_def_last;
+SVEXTERN char **device_texture_list;
+SVEXTERN int ndevice_texture_list, *device_texture_list_index;
 SVEXTERN int ndevice_defs;
 SVEXTERN int svofile_exists;
 SVEXTERN treedata *treeinfo;
