@@ -35,33 +35,33 @@
 
 DEVICEDEF
  target
- 0.6 0.6 0.6 setcolor
+ 153 153 153 setrgb
  0.0 0.0 -0.005 translate 0.2 0.01 drawdisk
 
 DEVICEDEF  // used by smokeview to display smoke thickness
  smokesensor
- 1.0 1.0 1.0 setcolor
+ 255 255 255 setrgb
  0.15 drawsphere
 
 DEVICEDEF  // draw a plane intersecting through FDS meshes
  plane
- 0.0 1.0 0.0  setcolor
+ 0 255 0  setrgb
  0.038 drawsphere
 
    // ************ static device definitions - multiple frames/states ********************
 
 DEVICEDEF
  sensor
- 0.0 1.0 0.0  setcolor
+ 0 255 0  setrgb
  0.038 drawsphere
  NEWFRAME
- 1.0 0.0 0.0  setcolor
+ 255 0 0  setrgb
  0.038 drawsphere
  NEWFRAME
- 0.0 0.0 1.0  setcolor
+ 0 0 255  setrgb
  0.038 drawsphere
  NEWFRAME
- 1.0 1.0 0.0  setcolor
+ 255 255 255  setrgb
  0.038 drawsphere
 
 DEVICEDEF
@@ -71,28 +71,28 @@ DEVICEDEF
  //   a disk, a truncated disk and a sphere.
  //   The sphere changes color when activated.
 
- 0.8 0.8 0.8 setcolor  // set color to off white
+ 204 204 204 setrgb  // set color to off white
  push 0.0 0.0 -0.02 translate 0.127 0.04 drawdisk pop
  push 0.0 0.0 -0.04 translate 
  0.06 0.08 0.02 drawtrunccone pop
- 0.0 1.0 0.0 setcolor
+ 0 255 0 setrgb
  push 0.0 0.0 -0.03 translate  0.04 drawsphere pop
  // push and pop are not necessary in the last line
  //   of a frame.  Its a good idea though to prevent 
  //   problems if parts are added later.
  NEWFRAME  // beginning of activated definition
- 0.8 0.8 0.8 setcolor
+ 204 204 204 setrgb
  push 0.0 0.0 -0.02 translate 0.127 0.04 drawdisk pop
  push 0.0 0.0 -0.04 translate 
    0.06 0.08 0.02 drawtrunccone pop
- 1.0 0.0 0.0 setcolor
+ 255 0 0 setrgb
  push 0.0 0.0 -0.03 translate 
    0.04 drawsphere pop
 
 DEVICEDEF
  sprinkler_upright
  0.0 0.0 -0.04 translate
- 0.69 0.49 0.17 setcolor
+ 176  125 43 setrgb
  push  0.0 0.0 -0.015 translate 0.03 0.03 drawdisk  pop
  push  0.0105 0.0 0.055 translate -22 rotatey 
    0.0085 0.004 0.05 scalexyz 1.0 drawcube pop 
@@ -106,11 +106,11 @@ DEVICEDEF
    0.010 0.017 0.020 drawtrunccone pop
  push 0.0 0.0 0.089 translate 
    0.064 0.002 0.004 -1.0 drawnotchplate pop
- 0.0 1.0 0.0 setcolor
+ 0 255 0  setrgb
  push 0.00 0.0 0.04 translate 
    0.4 0.4 1.0 scalexyz 0.03 drawsphere pop
  NEWFRAME
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.0 0.0 -0.04 translate
  push  0.0 0.0 -0.015 translate 0.03 0.03 drawdisk  pop
  push 0.0105 0.0 0.055 translate -22 rotatey 
@@ -125,12 +125,12 @@ DEVICEDEF
    0.01 0.017 0.02 drawtrunccone pop
  push 0.0 0.0 0.089 translate 
    0.064 0.002 0.004 -1.0 drawnotchplate pop
- 0.0 0.0 1.0 setcolor 
+ 0 0 255 setrgb 
  push 0.0 0.0 0.015 translate  0.015 drawsphere pop
 
 DEVICEDEF
  sprinkler_pendent
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  180.0 rotatey 0.0 0.0 -0.04 translate
  push 0.0 0.0 -0.015 translate 0.03 0.03 drawdisk pop
  push 0.0105 0.0 0.055 translate -22 rotatey 
@@ -145,11 +145,11 @@ DEVICEDEF
    0.01 0.017 0.02 drawtrunccone pop
  push 0.0 0.0 0.089 translate 
    0.064 0.002 0.008 1.0 drawnotchplate pop
- 0.0 1.0 0.0 setcolor
+ 0 255 0 setrgb
  push 0.00 0.0 0.04 translate 
    0.4 0.4 1.0 scalexyz 0.03 drawsphere pop
  NEWFRAME
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  push 
  180.0 rotatey 0.0 0.0 -0.04 translate
  push 0.0 0.0 -0.015 translate 0.03 0.03 drawdisk pop
@@ -165,26 +165,26 @@ DEVICEDEF
    0.01 0.017 0.02 drawtrunccone pop
  push 0.0 0.0 0.089 translate 
    0.064 0.002 0.008 1.0 drawnotchplate pop
- 0.0 0.0 1.0 setcolor
+ 0 255 0 setrgb
  push 0.0 0.0 0.015 translate 0.015 drawsphere pop
  pop
 
 DEVICEDEF
  smoke_detector
- 0.8 0.8 0.8 setcolor
+ 204 204 204 setrgb
  push 0.0 0.0 -0.025 translate 0.127 0.05 drawdisk pop
- 0.0 1.0 0.0 setcolor
+ 0 255 0 setrgb
  push 0.0 0.0 -0.02 translate 0.04 drawsphere pop
- 0.1 0.1 0.1 setcolor
+ 25 25 25 setrgb
  push 0.0 0.0 -0.028 translate 0.10 0.11 0.02 drawring pop
  push 0.0 0.0 -0.028 translate 0.07 0.08 0.02 drawring pop
  push 0.0 0.0 -0.028 translate 0.04 0.05 0.02 drawring pop
  NEWFRAME
- 0.8 0.8 0.8 setcolor
+ 204 204 204 setrgb
  push 0.0 0.0 -0.025 translate 0.127 0.05 drawdisk pop
- 1.0 0.0 0.0 setcolor
+ 255 0 0 setrgb
  push 0.0 0.0 -0.02 translate 0.04 drawsphere pop
- 0.1 0.1 0.1 setcolor 
+ 25 25 25 setrgb 
  push 0.0 0.0 -0.028 translate 0.10 0.11 0.02 drawring pop
  push 0.0 0.0 -0.028 translate 0.07 0.08 0.02 drawring pop
  push 0.0 0.0 -0.028 translate 0.04 0.05 0.02 drawring pop
@@ -193,30 +193,30 @@ DEVICEDEF
 DEVICEDEF
  nozzle
  180.0 rotatex 0.0 0.0 -0.041402 translate
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.022225 0.0127 drawhexdisk
  push 0.0 0.0 0.0127 translate 0.01905 0.01905 drawdisk pop
  push 0.0 0.0 0.031751 translate 0.01905 0.009525 drawhexdisk pop
- 0.8 0.8 0.8 setcolor
+ 204 204 204 setrgb
  push 0.0 0.0 0.035052 translate 0.00635 0.00635 drawdisk pop
  NEWFRAME
  180.0 rotatex 0.0 0.0 -0.041402 translate
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.022225 0.0127 drawhexdisk
  push 0.0 0.0 0.0127 translate 0.01905 0.01905 drawdisk pop
  push 0.0 0.0 0.031751 translate 0.01905 0.009525 drawhexdisk pop
- 0.0 0.0 1.0 setcolor
+ 0 0 255 setrgb
  push 0.0 0.0 0.035052 translate 0.00635 0.00635 drawdisk pop
  push 0.0 0.0 0.035052 translate 0.00635 drawsphere pop
- push 0.0 0.0 1.0 setcolor 
+ push 0 0 255 setrgb 
    0.0 0.0 0.0414 translate 0.012 drawsphere pop
 
 DEVICEDEF
  testdoor         // label, name of device
  :DX :DY :DZ :R :G :B
  90.0 rotatez 90.0 rotatex
-push  $DX $DY $DZ scalexyz $R $G $B setcolor 1.0 drawcube pop // front half of door (user specified color)
-push  $DX $DY $DZ scalexyz 0.0 0.0 1.0 setcolor 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
+push  $DX $DY $DZ scalexyz $R $G $B setrgb 1.0 drawcube pop // front half of door (user specified color)
+push  $DX $DY $DZ scalexyz 0 0 255 setrgb 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
  NEWFRAME
  0.001 0.001 0.001 scalexyz 1.0 drawcube // state 1, door disappears
 
@@ -225,21 +225,21 @@ DEVICEDEF
  :SX :SY :SZ :R :G :B :DX :DY :DZ
  // Evacuation input: door namelist
  push  $DX $DY $DZ translate
-    0.133 0.545 0.133 setcolor  0.0 0.0 -0.6 translate 0.4 0.6 drawcone pop // draw an arrow
+    34 139 34 setrgb  0.0 0.0 -0.6 translate 0.4 0.6 drawcone pop // draw an arrow
     // after rotatex 0 0 1 tr ==> inside the door
     // after rotatex 0 1 0 tr ==> right
     // after rotatex 1 0 0 tr ==> up
  90.0 rotatez 90.0 rotatex
- push  $SX $SY $SZ scalexyz $R $G $B setcolor
+ push  $SX $SY $SZ scalexyz $R $G $B setrgb
     0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
- push  $SX $SY $SZ scalexyz 0.133 0.545 0.133 setcolor 
+ push  $SX $SY $SZ scalexyz 34 139 34 setrgb 
     0.0 0.5 0.0 translate 1.0 drawcube pop // back half of door (forest green)
 NEWFRAME
  :SX :SY :SZ :R :G :B :DX :DY :DZ
  90.0 rotatez 90.0 rotatex
- push  $SX $SY $SZ scalexyz $R $G $B setcolor
+ push  $SX $SY $SZ scalexyz $R $G $B setrgb
     1.0 drawcube pop // front half of door (user specified color)
- push  $SX $SY $SZ scalexyz 1.0 0.0 0.0 setcolor
+ push  $SX $SY $SZ scalexyz 255 0 0 setrgb
     0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (red)
 
 DEVICEDEF
@@ -247,7 +247,7 @@ DEVICEDEF
  :SX :SY :SZ :R :G :B
  // Evacuation input: evss namelist
  90.0 rotatez 90.0 rotatex
- push  $SX $SY $SZ scalexyz $R $G $B setcolor
+ push  $SX $SY $SZ scalexyz $R $G $B setrgb
     0.0 0.5 0.0 translate 1.0 drawcube pop // incline (user specified color)
 
 DEVICEDEF
@@ -255,16 +255,16 @@ DEVICEDEF
  :SX :SY :SZ :R :G :B
  // Evacuation input: entr namelist
  90.0 rotatez 90.0 rotatex
- push  $SX $SY $SZ scalexyz $R $G $B setcolor
+ push  $SX $SY $SZ scalexyz $R $G $B setrgb
     1.0 drawcube pop // front half of door (user specified color)
- push  $SX $SY $SZ scalexyz 0.529 0.808 0.922 setcolor
+ push  $SX $SY $SZ scalexyz 135 206 235 setrgb
     0.0 1.0 0.0 translate 1.0 drawcube pop // front half of door (sky blue 135 206 235) 
 NEWFRAME
  :SX :SY :SZ :R :G :B
  90.0 rotatez 90.0 rotatex
- push  $SX $SY $SZ scalexyz $R $G $B setcolor
+ push  $SX $SY $SZ scalexyz $R $G $B setrgb
     0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
- push  $SX $SY $SZ scalexyz 1.0 0.0 0.0 setcolor
+ push  $SX $SY $SZ scalexyz 255 0 0 setrgb
     0.0 0.5 0.0 translate 1.0 drawcube pop // front half of door (red)
 
    // ************ dynamic particle device definitions ********************
@@ -273,43 +273,43 @@ NEWFRAME
 DEVICEDEF // device for particle file sphere
  sphere
  :R :G :B :D :L
- $R $G $B setcolor
+ $R $G $B setrgb
  $D drawsphere
 
 DEVICEDEF // device for particle file tube
  tube
  :R :G :B :D :L
- $R $G $B setcolor
+ $R $G $B setrgb
  90.0 rotatey $D $L drawcdisk
 
 DEVICEDEF // device for particle file tube
  cylinder
  :R :G :B :D :L
- $R $G $B setcolor
+ $R $G $B setrgb
  90.0 rotatey $D $L drawcdisk
 
 DEVICEDEF // device for particle "egg"
  egg
  :R :G :B :D :DX     // data obtained from an FDS input file
- $R $G $B setcolor
+ $R $G $B setrgb "TAN" setcolor
  $DX $D $D scalexyz 1.0 drawsphere
 
 DEVICEDEF // device for particle "egg"
  tempegg
  :R :G :B :D :DX :temp :rot_rate    // data obtained from an FDS input file
- $temp 700.0 :tempd28 div $tempd28 $G $B setcolor 
+ $temp 700.0 :tempd28 div $tempd28 $G $B setrgb 
  $rot_rate 0.0 :rotz multiaddt $rotz rotatez 0.2 $tempd28 0.2 scalexyz 1.0 drawsphere
 
 DEVICEDEF // device for a general ball
  gball
  :R :G :B :DX :DY :DZ
- $R $G $B setcolor
+ $R $G $B setrgb
  $DX $DY $DZ scalexyz 1.0 drawsphere
 
 DEVICEDEF // device for dynamic textured sphere
  demosphere
  :R :G :B :VX :VY :VZ :ROTATE_RATE :D :XMAX :YMAX :ZMAX
- $R $G $B setcolor
+ $R $G $B setrgb
  $VX 0.0 :vvx multiaddt $vvx  0.0 $XMAX :CLIPX mirrorclip 
  $VY 0.0 :vvy multiaddt $vvy  0.0 $YMAX :CLIPY mirrorclip
  $VZ 0.0 :vvz multiaddt $vvz  0.0 $ZMAX :CLIPZ mirrorclip
@@ -325,20 +325,20 @@ DEVICEDEF // device to test IF, LE, GT and AND operators
  $time 6.0 :LE_H LE  // is time .le. 6
  $time 6.0 :GT_H GT  // is time .gt  6
  $LE_L IF
-   1.0 0.0 0.0 setcolor   // set the color to red if t .le. 3.0
+   255 0 0 setrgb   // set the color to red if t .le. 3.0
  ENDIF
  $GT_L $LE_H :ANDTEST AND $ANDTEST IF
-   0.0 1.0 0.0 setcolor   // set the color to green if t .gt. 3.0 and t .le.6
+   0 255 0 setrgb   // set the color to green if t .gt. 3.0 and t .le.6
  ENDIF
  $GT_H IF            
-    0.0 0.0 1.0 setcolor  // set the color to blue if t > 6.0
+    0 0 255 setrgb  // set the color to blue if t > 6.0
  ENDIF
  $DX $DY $DZ scalexyz 1.0 drawsphere
 
 DEVICEDEF // device for dynamic textured sphere
  tsphere
   :R :G :B :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D
- $R $G $B setcolor
+ $R $G $B setrgb
  90.0 rotatey $AX0 rotatex $ELEV0 rotatey 
  $ROTATION_RATE $ROT0 :rotz multiaddt $rotz rotatez 0 $D drawtsphere
 
@@ -347,13 +347,13 @@ DEVICEDEF // device for dynamic textured sphere
 DEVICEDEF // device for tree trunk
  TRUNK
  :TRUNK_BASE_H :TRUNK_D :TRUNK_H :R :G :B
- $R $G $B setcolor
+ $R $G $B setrgb
  0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk
  
 DEVICEDEF // device for tree canopy
  CANOPY
  :CANOPY_BASE_H :CANOPY_D :CANOPY_H :R :G :B
-$R $G $B setcolor
+$R $G $B setrgb
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
    
    // ************ avatar device definitions ********************
@@ -370,41 +370,41 @@ AVATARDEF
  human_fixed          // label, name of avatar
  :DUM1 :DUM2 :DUM3 :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
  90.0 rotatez
- 0.82 0.70 0.55 setcolor // head color  TAN 210 180 140
+ 210 180 140 setrgb // head color  TAN 210 180 140
  0.3 0.3 0.3 scalexyz 
  0.0 0.0 0.0 translate
  push  0.0 0.0 5.2 translate 1.1 drawsphere 
-   0.0 0.0 1.0 setcolor // eye color BLUE
+   0 0 255 setrgb // eye color BLUE
    push -0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
    push  0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
    pop // head
- 0.15 0.25 0.55 setcolor  // body color 
+ 28 64 140 setrgb  // body color 
  push  0.0 0.0 3.55 translate 0.5 0.3 1.0 scalexyz 2.5 drawsphere pop // trunk
- 0.82 0.70 0.55 setcolor // arm color TAN 210 180 140
+ 210 180 140 setrgb // arm color TAN 210 180 140
  push -0.9 0.0 3.5 translate  35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
  push  0.9 0.0 3.5 translate -35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
- 0.15 0.25 0.55 setcolor // leg color ROYAL BLUE4: 39 64 139
+ 39 64 139 setrgb // leg color ROYAL BLUE4: 39 64 139
  push -0.5 0.0 1.3 translate  30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
  push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
 AVATARDEF
  human_altered_with_data         // label, name of avatar
  :DUM1 :DUM2 :DUM3 :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
  90.0 rotatez
- 0.82 0.70 0.55 setcolor // head color  TAN 210 180 140
+ 210 180 140 setrgb // head color  TAN 210 180 140
  $SX $SY $SZ scalexyz //  scale by data height
  1.0 1.0 0.579 scalexyz 
  0.3 0.3 0.3 scalexyz 
  push  0.0 0.0 5.2 translate 1.1 drawsphere 
-   0.0 0.0 1.0 setcolor // eye color BLUE
+   0 0 255 setrgb // eye color BLUE
    push -0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
    push  0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
    pop // head
- $R $G $B setcolor  // body color 
+ $R $G $B setrgb  // body color 
  push  0.0 0.0 3.55 translate $W $D $H1 scalexyz 1.334 1.33 1.0 scalexyz 2.5 drawsphere pop // trunk, scale by width and depth
- 0.82 0.70 0.55 setcolor // arm color TAN 210 180 140
+ 210 180 140 setrgb // arm color TAN 210 180 140
  push -0.9 0.0 3.5 translate  35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
  push  0.9 0.0 3.5 translate -35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
- 0.15 0.25 0.55 setcolor // leg color ROYAL BLUE4: 39 64 139
+ 39 64 139 setrgb // leg color ROYAL BLUE4: 39 64 139
  push -0.5 0.0 1.3 translate  30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
  push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
 AVATARDEF
@@ -412,15 +412,15 @@ AVATARDEF
  :DUM1 :DUM2 :DUM3 :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
  90.0 rotatez
  $HX $HY $HZ translate $SX $SY $SZ scalexyz $W $D $H1 scalexyz 
-  push 0.0 -1.0 0.0 translate 1.0 5.0 0.5 scalexyz 0.0 0.0 1.0 setcolor 0.4 drawsphere pop 
-  $R $G $B setcolor 1.0 drawsphere 
+  push 0.0 -1.0 0.0 translate 1.0 5.0 0.5 scalexyz 0 0 255 setrgb 0.4 drawsphere pop 
+  $R $G $B setrgb 1.0 drawsphere 
 AVATARDEF
  disk         // label, name of device
  :DUM1 :DUM2 :DUM3 :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
  90.0 rotatez
  0.0 0.0 1.0 translate $W $D $H1 scalexyz 
-  push 0.0 -0.25 0.05 translate 0.3 2.5 0.3 scalexyz 0.0 1.0 1.0 setcolor 0.2 drawsphere pop 
-  $R $G $B setcolor 1.0 0.05 drawdisk 
+  push 0.0 -0.25 0.05 translate 0.3 2.5 0.3 scalexyz 0 255 255 setrgb 0.2 drawsphere pop 
+  $R $G $B setrgb 1.0 0.05 drawdisk 
 
    // ************ Elementary device definitions ********************
 
@@ -429,59 +429,59 @@ AVATARDEF
 
 DEVICEDEF
  drawaxis2
- 1.0 0.0 0.0 setcolor
+ 255 0 0 setrgb
  push 0.05 0.05 0.4 scalexyz 1.0 1.0 drawdisk pop
- 0.0 1.0 0.123 setcolor
+ 0 255 43 setrgb
  push 90.0 rotatey 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
 DEVICEDEF
  drawaxis
- 1.0 0.0 0.0 setcolor
+ 255 0 0 setrgb
  push 0.00625 0.00625 0.075 scalexyz 1.0 1.0 drawdisk pop
- 0.0 1.0 0.123 setcolor
+ 0 255 43 setrgb
  push 90.0 rotatey 0.00625 0.00625 0.075 scalexyz 1.0 1.0 drawdisk pop
 DEVICEDEF
  drawcone
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.50 0.30 drawcone
 DEVICEDEF
  drawcube
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.25 drawcube
 DEVICEDEF
  drawdisk
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.25 0.50 drawdisk
 DEVICEDEF
  drawcdisk
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.25 0.50 drawcdisk
 DEVICEDEF
  drawhexdisk
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.50 0.25 drawhexdisk
 DEVICEDEF
  drawnotchplate
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.5 0.1 0.2 1 drawnotchplate
 DEVICEDEF
  drawnotchplate2
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.5 0.1 0.2 -1 drawnotchplate
 DEVICEDEF
  drawpolydisk
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  5 0.35 0.15 drawpolydisk
 DEVICEDEF
  drawring
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.3 0.5 0.1 drawring
 DEVICEDEF
  drawsphere
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.25 drawsphere
 DEVICEDEF
  drawtrunccone
- 0.69 0.49 0.17 setcolor
+ 176 125 43 setrgb
  0.5 0.2 0.4 drawtrunccone
 
 
