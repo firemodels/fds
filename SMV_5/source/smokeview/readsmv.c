@@ -87,7 +87,6 @@ int readsmv(char *file){
   int s_num[6];
   int errorcode;
   int noGRIDpresent=1,startpass;
-  int devices_have_textures=0;
 
   int ipart=0, islice=0, ipatch=0, iplot3d=0, iroom=0,izone=0,ifire=0,iiso=0;
   int ismoke3d=0;
@@ -955,9 +954,6 @@ int readsmv(char *file){
   FREEMEMORY(surfaceinfo);
   if(nsurfaces>0){
     if(NewMemory((void **)&surfaceinfo,nsurfaces*sizeof(surface))==0)return 2;
-  }
-  if(nsurfaces>0||ndeviceinfo>0){
-    if(NewMemory((void **)&textureinfo,(nsurfaces+ndeviceinfo)*sizeof(texture))==0)return 2;
   }
 
   if(cadgeominfo!=NULL)freecadinfo();
@@ -2063,7 +2059,6 @@ typedef struct {
         buffer3=trim_front(buffer);
         NewMemory((void **)&devicei->texturefile,strlen(buffer3)+1);
         strcpy(devicei->texturefile,buffer3);
-        devices_have_textures=1;
       }
 
       CheckMemory;
@@ -2158,6 +2153,11 @@ typedef struct {
 
   // define texture data structures by constructing a list of unique file names from surfaceinfo   
 
+  update_device_textures();
+  if(nsurfaces>0||ndevice_texture_list>0){
+    if(NewMemory((void **)&textureinfo,(nsurfaces+ndevice_texture_list)*sizeof(texture))==0)return 2;
+  }
+
   // get texture filename from SURF and device info
 
   ntextures = 0;
@@ -2174,20 +2174,22 @@ typedef struct {
     ntextures++;
     surfi->textureinfo=textureinfo+ntextures-1;
   }
-  for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
 
-    devicei = deviceinfo + i;
-    if(devicei->texturefile==NULL)continue;
+  for(i=0;i<ndevice_texture_list;i++){
+    char *texturefile;
+
+    texturefile = device_texture_list[i];
     texti = textureinfo + ntextures;
-    NewMemory((void **)&texti->file,strlen(devicei->texturefile)+1);
-    strcpy(texti->file,devicei->texturefile);
+    len = strlen(texturefile);
+    NewMemory((void **)&texti->file,(len+1)*sizeof(char));
+    device_texture_list_index[i]=ntextures;
+    strcpy(texti->file,texturefile);
     texti->loaded=0;
     texti->used=0;
     texti->display=0;
     ntextures++;
-    devicei->textureinfo=textureinfo+ntextures-1;
   }
+  update_device_texture_indexes();
 
   // check to see if texture files exist .
   // If so, then convert to OpenGL format 
@@ -2276,12 +2278,6 @@ typedef struct {
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 
-  if(ntextures>0&&devices_have_textures==1){
-    init_device_defs();
-    CheckMemory;
-    update_device_objects();
-    CheckMemory;
-  }
   CheckMemory;
 
   printf(" - completed\n");

@@ -576,9 +576,11 @@ typedef struct _tourdata {
 typedef struct _tokendata {
   float var,*varptr,default_val;
   int command,loc,type,reads,nvars,noutvars,is_label;
+  int texture_index;
   struct _tokendata *next,*elsenext;
   char *token;
   char tokenlabel[20];
+  char string[256];
 } tokendata;
 
 /* --------------------------  sv_object_frame ------------------------------------ */
@@ -589,7 +591,7 @@ typedef struct _sv_object_frame {
   int display_list_ID;
   int *symbols, nsymbols;
   tokendata *tokens, **command_list;
-  int ntokens,ncommands;
+  int ntokens,ncommands,ntextures;
   struct _sv_object *device;
   struct _sv_object_frame *prev, *next;
 } sv_object_frame;

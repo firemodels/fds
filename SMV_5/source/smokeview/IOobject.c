@@ -158,26 +158,29 @@ char IOobject_revision[]="$Revision$";
 
 #define SV_PUSH       300
 #define SV_POP        301
-#define SV_SETCOLOR   302
+#define SV_SETRGB   302
 #define SV_SETBW      303
 #define SV_SETLINEWIDTH 304
 #define SV_SETPOINTSIZE 305
+#define SV_SETCOLOR   306
 
 #define SV_NO_OP      999
 
 #define SV_PUSH_NUMARGS       0
 #define SV_POP_NUMARGS        0
-#define SV_SETCOLOR_NUMARGS   3
+#define SV_SETRGB_NUMARGS   3
 #define SV_SETBW_NUMARGS      1
 #define SV_SETLINEWIDTH_NUMARGS 1
 #define SV_SETPOINTSIZE_NUMARGS 1
+#define SV_SETCOLOR_NUMARGS   1
 
 #define SV_PUSH_NUMOUTARGS       0
 #define SV_POP_NUMOUTARGS        0
-#define SV_SETCOLOR_NUMOUTARGS   0
+#define SV_SETRGB_NUMOUTARGS   0
 #define SV_SETBW_NUMOUTARGS      0
 #define SV_SETLINEWIDTH_NUMOUTARGS 0
 #define SV_SETPOINTSIZE_NUMOUTARGS 0
+#define SV_SETCOLOR_NUMOUTARGS   0
 
 #define SV_ERR -1
 
@@ -187,6 +190,8 @@ char IOobject_revision[]="$Revision$";
 #define TOKEN_FLOAT 0
 #define TOKEN_COMMAND 1
 #define TOKEN_GETVAL 2
+#define TOKEN_STRING 3
+#define TOKEN_TEXTURE 4
 
 char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *frame);
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected);
@@ -1084,19 +1089,33 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       break;
     case SV_SETCOLOR:
       {
+      int lenstring;
+      int iarg[3];
+      char *stringptr;
+
+      stringptr = (toki-1)->string;
+
+      lenstring=strlen(stringptr);
+      FORTcolor2rgb(iarg,stringptr,lenstring);
+      arg[0]=iarg[0];
+      arg[1]=iarg[1];
+      arg[2]=iarg[2];
+      }
+    case SV_SETRGB:
+      {
         if(setbw==1){
           float grey;
 
           grey = color2bw(arg);
-          rgbcolor[0]=255*grey;
-          rgbcolor[1]=255*grey;
-          rgbcolor[2]=255*grey;
+          rgbcolor[0]=grey;
+          rgbcolor[1]=grey;
+          rgbcolor[2]=grey;
           rgbcolor[3]=255;
         }
         else{
-          rgbcolor[0]=255*arg[0];
-          rgbcolor[1]=255*arg[1];
-          rgbcolor[2]=255*arg[2];
+          rgbcolor[0]=arg[0];
+          rgbcolor[1]=arg[1];
+          rgbcolor[2]=arg[2];
           rgbcolor[3]=255;
         }
         if(select_device_color_ptr==NULL){
@@ -2268,6 +2287,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     num_op=SV_SETCOLOR_NUMARGS;
     num_outop=SV_SETCOLOR_NUMOUTARGS;
   }
+  else if(STRCMP(token,"setrgb")==0){
+    op=SV_SETRGB;
+    num_op=SV_SETRGB_NUMARGS;
+    num_outop=SV_SETRGB_NUMOUTARGS;
+  }
   else if(STRCMP(token,"setlinewidth")==0){
     op=SV_SETLINEWIDTH;
     num_op=SV_SETLINEWIDTH_NUMARGS;
@@ -2383,6 +2407,8 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
   char *buffer_ptr=NULL,*buffer2;
   int i;
   int nsymbols,ncommands;
+  int ntext=0;
+  int ntextures=0;
 
   *eof = 0;
 
@@ -2555,12 +2581,34 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       toki->is_label=1;
       nsymbols++;
     }
+    else if(c=='"'){
+      char string_copy[256], *sptr;
+      int lenstr;
+
+      toki->type=TOKEN_STRING;
+      toki->var=0.0;
+      toki->varptr=&toki->var;
+      sptr=string_copy;
+      strcpy(sptr,toki->token);
+      sptr++;
+      if(match(buffer,"t:",2)==1){
+        sptr+=2;
+        toki->type=TOKEN_TEXTURE;
+        ntextures++;
+      }
+      lenstr=strlen(sptr);
+      if(sptr[lenstr-1]=='"')sptr[lenstr-1]=' ';
+      trim(sptr);
+      sptr=trim_front(sptr);
+      strcpy(toki->string,sptr);
+    }
     else{
       toki->type=TOKEN_FLOAT;
       sscanf(toki->token,"%f%",&toki->var);
       toki->varptr=&toki->var;
     }
   }
+  frame->ntextures=ntextures;
   for(i=0;i<ntokens;i++){
     tokendata *toki;
     char c;
@@ -2690,6 +2738,7 @@ int read_device_defs(char *file){
       }
   
       NewMemory((void **)&current_object,sizeof(sv_object));
+      current_object->used=0;
       current_object->use_displaylist=1;
       current_object->select_mode=0;
       strcpy(current_object->label,label);
@@ -2913,9 +2962,9 @@ void remove_comment(char *buffer){
   return;
 }
 
-/* ----------------------- update_device_defs ----------------------------- */
+/* ----------------------- update_device_textures ----------------------------- */
 
-void update_device_objects(void){
+void update_device_textures(void){
   int i;
 
   for(i=0;i<ndeviceinfo;i++){
@@ -2924,20 +2973,101 @@ void update_device_objects(void){
     devicei = deviceinfo + i;
 
     devicei->object = get_SVOBJECT_type(devicei->label,missing_device);
-    if(devicei->ntextures>0){
-      int j;
-      for(j=0;j<devicei->ntextures;j++){
-        texture *texti;
-        int texture_index;
+  }
 
-        texti = devicei->textureinfo+j;
-        texture_index = texti - textureinfo;
-        if(texture_index<0||texture_index>ntextures-1)texture_index=-1;
-        devicei->params[devicei->nparams+j]=texture_index;
+  // create a list of device textures
+
+  device_texture_list=NULL;
+  ndevice_texture_list=0;
+
+  // count device textures
+
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+    sv_object *object;
+    int j;
+
+    devicei = deviceinfo + i;
+    object = devicei->object;
+    for(j=0;i<object->nframes;j++){
+      sv_object_frame *frame;
+
+      frame = object->obj_frames[j];
+      ndevice_texture_list+=frame->ntextures;
+    }
+  }
+  if(ndevice_texture_list>0){
+    NewMemory((void **)&device_texture_list,ndevice_texture_list*sizeof(char *));
+    NewMemory((void **)&device_texture_list_index,ndevice_texture_list*sizeof(int));
+    ndevice_texture_list=0;
+    for(i=0;i<ndeviceinfo;i++){
+      device *devicei;
+      sv_object *object;
+      int j;
+
+      devicei = deviceinfo + i;
+      object = devicei->object;
+      for(j=0;i<object->nframes;j++){
+        sv_object_frame *frame;
+        int k;
+
+        frame = object->obj_frames[j];
+        for(k=0;k<frame->ntokens;k++){
+          tokendata *toki;
+          int kk;
+          int dup;
+
+          toki = frame->tokens + k;
+          if(toki->type!=TOKEN_TEXTURE)continue;
+          dup=0;
+          for(kk=0;kk<ndevice_texture_list;kk++){
+            if(strcmp(device_texture_list[kk],toki->string)==0){
+              dup=1;
+              break;
+            }
+          }
+          if(dup==0)device_texture_list[ndevice_texture_list++]=toki->string;
+        }
       }
     }
   }
+}
 
+/* ----------------------- update_device_texture_indexes ----------------------------- */
+
+void update_device_texture_indexes(void){
+  int i;
+
+  if(ndevice_texture_list==0)return;
+
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+    sv_object *object;
+    int j;
+
+    devicei = deviceinfo + i;
+    object = devicei->object;
+    for(j=0;i<object->nframes;j++){
+      sv_object_frame *frame;
+      int k;
+
+      frame = object->obj_frames[j];
+      if(frame->ntextures==0)continue;
+      for(k=0;k<frame->ntokens;k++){
+        tokendata *toki;
+        int kk;
+        int dup;
+
+        toki = frame->tokens + k;
+        if(toki->type!=TOKEN_TEXTURE)continue;
+        for(kk=0;kk<ndevice_texture_list;kk++){
+          if(strcmp(device_texture_list[kk],toki->string)==0){
+            toki->texture_index=device_texture_list_index[kk];
+          }
+        }
+      }
+    }
+  }
 }
 
 /* ----------------------- init_device_defs ----------------------------- */
@@ -2971,33 +3101,33 @@ void init_device_defs(void){
     }
 
     if(isZoneFireModel==1){
-      strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.02 0.05 drawdisk");
+      strcpy(com_buffer,"255 255 0 setrgb 0.02 0.05 drawdisk");
       target_device_backup = init_SVOBJECT1("target", com_buffer,1);
     }
     else{
-      strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.038 drawcube");
+      strcpy(com_buffer,"255 255 0 setrgb 0.038 drawcube");
       target_device_backup = init_SVOBJECT1("sensor", com_buffer,1);
     }
 
-    strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.038 drawcube");
+    strcpy(com_buffer,"255 255 0 setrgb 0.038 drawcube");
     thcp_device_backup = init_SVOBJECT1("thcp", com_buffer,1);
 
-    strcpy(com_buffer, "0.0 1.0 0.0 setcolor 0.038 drawcube");
-    strcpy(com_buffer2,"1.0 0.0 0.0 setcolor 0.038 drawcube");
+    strcpy(com_buffer, "0 255 0 setrgb 0.038 drawcube");
+    strcpy(com_buffer2,"255 0 0 setrgb 0.038 drawcube");
     heat_detector_device_backup = init_SVOBJECT2("heat_detector", com_buffer, com_buffer2,1);
 
-    strcpy(com_buffer, "0.0 1.0 0.0 setcolor 0.038 drawcube");
-    strcpy(com_buffer2,"1.0 0.0 0.0 setcolor 0.038 drawcube");
+    strcpy(com_buffer, "0 255 0 setrgb 0.038 drawcube");
+    strcpy(com_buffer2,"255 0 0 setrgb 0.038 drawcube");
     sprinkler_upright_device_backup = init_SVOBJECT2("sprinkler_upright", com_buffer, com_buffer2,1);
 
-    strcpy(com_buffer, "0.5 0.5 0.5 setcolor 0.2 0.05 drawdisk");
-    strcpy(com_buffer2,"1.0 0.0 0.0 setcolor 0.2 0.05 drawdisk");
+    strcpy(com_buffer, "127 127 127 setrgb 0.2 0.05 drawdisk");
+    strcpy(com_buffer2,"255 0 0 setrgb 0.2 0.05 drawdisk");
     smoke_detector_device_backup = init_SVOBJECT2("smoke_detector", com_buffer, com_buffer2,1);
 
-    strcpy(com_buffer, "1.0 0.0 0.0 setcolor push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
+    strcpy(com_buffer, "255 0 0 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
     error_device = init_SVOBJECT1("error_device", com_buffer,1);
 
-    strcpy(com_buffer, "0.0 0.0 1.0 setcolor push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
+    strcpy(com_buffer, "0 0 255 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
     missing_device = init_SVOBJECT1("missing_device", com_buffer,1);
 
     if(ndevice_defs==0){
@@ -3026,11 +3156,11 @@ void init_avatar(void){
   }
   NewMemory((void **)&avatar_types,navatar_types*sizeof(sv_object *));
 
-  strcpy(com_buffer,"0.0 0.0 1.0 translate 1.0 0.0 0.0 setcolor 0.03 0.1 drawdisk 0.0 0.0 1.0 setcolor 90.0 rotatey 0.03 0.2 drawdisk");
+  strcpy(com_buffer,"0.0 0.0 1.0 translate 255 0 0 setrgb 0.03 0.1 drawdisk 0 0 255 setrgb 90.0 rotatey 0.03 0.2 drawdisk");
   avatar_defs_backup[0] = init_SVOBJECT1("Avatar_1", com_buffer,1);
   avatar_defs_backup[0]->type=1;
 
-  strcpy(com_buffer,"1.0 1.0 0.0 setcolor 0.02 0.05 drawdisk");
+  strcpy(com_buffer,"255 255 0 setrgb 0.02 0.05 drawdisk");
   avatar_defs_backup[1] = init_SVOBJECT1("Avatar_2", com_buffer,1);
   avatar_defs_backup[1]->type=1;
 
