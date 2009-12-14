@@ -8917,6 +8917,12 @@ IF (SPEC_ID =='null') THEN
       ENDIF
    ENDDO
 ENDIF
+
+! Check for use of volume fraction for a mixture fraction species.
+IF (QUANTITY=='VOLUME FRACTION' .AND. (SPEC_ID=='MIXTURE FRACTION' .OR. SPEC_ID(1:17)=='MIXTURE_FRACTION_')) THEN
+      WRITE(MESSAGE,'(A,A)')  'ERROR: QUANTITY VOLUME FRACTION cannot be used for SPEC_ID=',TRIM(SPEC_ID)
+      CALL SHUTDOWN(MESSAGE)
+ENDIF 
       
 DO NS=1,N_PART
    IF (QUANTITY==TRIM(PARTICLE_CLASS(NS)%ID)//'_MPUV') THEN
