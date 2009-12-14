@@ -5694,7 +5694,7 @@ values of {\ct 'AIR'} are assumed.  If the species listed in Table~\ref{tab:gass
 \vspace{0.1in}
 \begin{tabular}{|l|c|c|c|c|}
 \hline
-Species &   Mol.~Wgt.        & $\sigma$  & $k/\epsilon$   & Liquid \\
+Species &   Mol.~Wgt.        & $\sigma$  & $\epsilon/k$   & Liquid \\
         &   (g/mol)          & (\AA)     & (K)            &        \\ \hline
 \hline
 {\ct AIR}              & 29   & 3.711     & 78.6           &        \\ \hline
@@ -8685,7 +8685,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct VISCOSITY}                                 & $\mu$                                         & kg/m/s         & D,I,P,S      \\ \hline
 {\ct VISIBILITY}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
 {\ct VOLUME FLOW}                               & See Section~\ref{info:flows}                  & m$^3$/s        & D            \\ \hline
-{\ct VOLUME FRACTION}$^*$                       & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
+{\ct VOLUME FRACTION}$^{****}$                  & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
 {\ct WALL CLOCK TIME}                           & Elapsed wall clock time                       & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
 {\ct WALL THICKNESS}                            & See Section~\ref{info:material_components}    & m              & B,D          \\ \hline
@@ -8697,8 +8697,10 @@ $^*$    \hspace{0.2in} \= Quantity requires the specification of a gas species u
 $^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
 $^{***}$               \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
                        \> Use the indices 2 and 3 for $v$ and $w$, respectively.
+$^{****}$              \> Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+                       \> Do not use for {\ct MIXTURE FRACTION}.
 \end{tabbing}
-
+ 
 
 \clearpage
 \section{Summary of Infrequently-Used Output Quantities}
