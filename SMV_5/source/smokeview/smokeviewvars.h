@@ -846,9 +846,6 @@ SVEXTERN int iavatar_evac;
 SVEXTERN sv_object **avatar_types;
 SVEXTERN int glui_avatar_index;
 SVEXTERN sv_object *avatar_defs_backup[2];
-#define SIZE_VALSTACK 1000
-SVEXTERN float valstack[SIZE_VALSTACK];
-SVEXTERN int nvalstack;
 SVEXTERN int device_sphere_segments;
 SVEXTERN int ntexturestack;
 

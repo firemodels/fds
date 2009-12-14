@@ -1442,10 +1442,11 @@ void drawPart5(const particle *parti){
 
           avatar_type=0;
           prop=datacopy->partclassbase->prop;
+          if(prop==NULL)prop=propinfo;
           if(iavatar_evac!=-1)avatar_type=iavatar_evac;
           for(j=0;j<datacopy->npoints;j++){
             float az_angle;
-          //  float *rgbobject;
+            float *rgbobject;
             float *colorptr;
             int is_human_color;
 
@@ -1465,7 +1466,7 @@ void drawPart5(const particle *parti){
               az_angle=angle[j];
               glRotatef(az_angle,0.0,0.0,1.0);
 
-              //rgbobject = datacopy->partclassbase->rgb;
+              rgbobject = datacopy->partclassbase->rgb;
 
               //  0->2   class color
               //  3->5   width, depth, 1.0 
@@ -1505,6 +1506,15 @@ void drawPart5(const particle *parti){
                 }
               }
               /*
+              valstack[0]=rgbobject[0];
+              valstack[1]=rgbobject[1];
+              valstack[2]=rgbobject[2];
+              valstack[3]=width[j];
+              valstack[4]=depth[j];
+              valstack[5]=1.0;
+              valstack[6]=1.0;
+              valstack[7]=1.0;
+              valstack[8]=height[j];
               valstack[9] =colorptr[0];
               valstack[10]=colorptr[1];
               valstack[11]=colorptr[2];
@@ -1515,14 +1525,32 @@ void drawPart5(const particle *parti){
               nvalstack=15;
               */
               
+              //  0->2   class color
+              //  3->5   width, depth, 1.0 
+              //  6->8   width, depth, height
+              //  9->11  data file color
+              //  12->14 0.0 0.0 height
 //  :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
-              prop->fvars_evac[0]=width[j];
-              prop->fvars_evac[1]=depth[j];
-              prop->fvars_evac[2]=height[j];
-              prop->fvars_evac[6]=colorptr[0];
-              prop->fvars_evac[7]=colorptr[1];
-              prop->fvars_evac[8]=colorptr[2];
-              prop->fvars_evac[14]=height[j]/2.0;
+              if(prop!=NULL){
+                prop->fvars_evac[0]=rgbobject[0];
+                prop->fvars_evac[1]=rgbobject[1];
+                prop->fvars_evac[2]=rgbobject[2];
+                prop->fvars_evac[3]=width[j];
+                prop->fvars_evac[4]=depth[j];
+                prop->fvars_evac[5]=1.0;
+                prop->fvars_evac[6]=1.0;
+                prop->fvars_evac[7]=1.0;
+                prop->fvars_evac[8]=height[j];
+                prop->fvars_evac[9]=255*colorptr[0];
+                prop->fvars_evac[10]=255*colorptr[1];
+                prop->fvars_evac[11]=255*colorptr[2];
+                prop->fvars_evac[12]=0.0;
+                prop->fvars_evac[13]=0.0;
+                prop->fvars_evac[14]=height[j]/2.0;
+                prop->smv_object=avatar_types[avatar_type];
+                prop->nvars_evac=15;
+                prop->draw_evac=1;
+              }
 
               save_use_displaylist=avatar_types[avatar_type]->use_displaylist;
               if(select_avatar==1&&show_mode==SELECT){
@@ -1549,7 +1577,6 @@ void drawPart5(const particle *parti){
                   avatar_types[avatar_type]->select_mode=0;
                 }
               }
-              prop=datacopy->partclassbase->prop;
               copy_dep_vals(partclassi,datacopy,colorptr,prop,j);
               draw_SVOBJECT(avatar_types[avatar_type],0,prop);
               select_device_color_ptr=NULL;
@@ -1875,6 +1902,7 @@ void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr,
   int ndep_vals;
   float *dep_vals;
 
+  if(prop==NULL)return;
   dep_vals=partclassi->fvars_dep;
   ndep_vals=partclassi->nvars_dep;
   for(ii=0;ii<partclassi->nvars_dep-3;ii++){
