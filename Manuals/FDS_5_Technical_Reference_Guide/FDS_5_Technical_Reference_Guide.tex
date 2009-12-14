@@ -3257,7 +3257,7 @@ F_{\z,ijk} &=  \left(
 \noindent The variables $\epsilon_u$, $\epsilon_v$ and $\epsilon_w$ are local
 Courant numbers evaluated at the same locations as the velocity component
 immediately following them, and serve to bias the differencing of
-the convective terms in the upwind direction.
+the convective terms, upwind biasing for the predictor step and downwind biasing for the corrector step, resulting in a second-order scheme which is consistent with the scheme used for the continuity equation.
 \be
 \epsilon_u = \frac{u \, \dt}{\dx} \quad ; \quad \epsilon_v = \frac{v \, \dt}{\dy} \quad ; \quad \epsilon_w = \frac{w \, \dt}{\dz}
 \ee
