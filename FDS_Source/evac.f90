@@ -1524,7 +1524,7 @@ CONTAINS
          M => MESHES(PEX%IMESH)
  
          IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: EXIT ',TRIM(ID),' must be a plane'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID),' must be a plane'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
 
@@ -1904,7 +1904,7 @@ CONTAINS
          M => MESHES(PDX%IMESH)
  
          IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',TRIM(ID),' must be a plane'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR',TRIM(ID),' must be a plane'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
 
@@ -2899,7 +2899,7 @@ CONTAINS
          M => MESHES(PNX%IMESH)
  
          IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: ENTR',N,' must be a plane'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR',TRIM(ID),' must be a plane'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
 
@@ -8245,8 +8245,9 @@ CONTAINS
                   PDX%ICOUNT = PDX%ICOUNT + 1
                   IF (PDX%T_FIRST <= T_BEGIN) PDX%T_FIRST = T
 
-                  WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4)') ' EVAC: Agent n:o', HR%ILABEL, ' out at ', T, &
-                       ' s, door ', TRIM(PDX%ID), ' FED ', HR%INTDOSE
+                  WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4,A,I4)') &
+                       ' Agent n:o', HR%ILABEL, ' out at ', T, ' s, door ', TRIM(PDX%ID), &
+                       ' FED ', HR%INTDOSE, ', Color_i=', HR%COLOR_INDEX
 
                ELSE    ! ISTAT = 1 ==> DO NOT MOVE TO NODE
                   ! Can not move to the next node, so do not allow to move inside
@@ -8394,17 +8395,17 @@ CONTAINS
                      END IF
                      MESHES(IMESH2)%N_HUMANS = MESHES(IMESH2)%N_HUMANS + 1
                      MESHES(IMESH2)%HUMAN(MESHES(IMESH2)%N_HUMANS) = HR
-                     WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4)') ' EVAC: Agent n:o', &
+                     WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4)') ' Agent n:o', &
                           HR%ILABEL, ' out at ', T, ' s, corr ', TRIM(PCX%ID), ' FED ', HR%INTDOSE
                   END IF            ! Target is door or entry
 
                   IF (IOR_NEW == 3) THEN ! CORR
-                     WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,F8.4)') ' EVAC: Agent n:o', &
+                     WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,F8.4)') ' Agent n:o', &
                           HR%ILABEL, ' change corr ', T, ' s, corr ', TRIM(PCX%ID), HR%INTDOSE
                   END IF
 
                   IF (IOR_NEW == 5) THEN ! EXIT
-                     WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,F8.4)') ' EVAC: Agent n:o', &
+                     WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,F8.4)') ' Agent n:o', &
                           HR%ILABEL, ' exits ', T, ' s, corr ', TRIM(PCX%ID), HR%INTDOSE
                   END IF
                ELSE
