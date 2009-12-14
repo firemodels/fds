@@ -14,7 +14,7 @@ typedef struct {
   char *smokeview_id;
   int ntextures;
   char **texturefiles, **vars_indep, **svals;
-  int *vars_indep_index, vars_dep_index[PROPVARMAX], vars_evac_index[PROPVARMAX];
+  int vars_indep_index[PROPVARMAX], vars_dep_index[PROPVARMAX], vars_evac_index[PROPVARMAX];
   int nvars_indep,      nvars_dep,                   nvars_evac;
   float fvals[PROPVARMAX], fvars_evac[PROPVARMAX], fvars_dep[PROPVARMAX];
   struct _sv_object *smv_object;
@@ -575,12 +575,12 @@ typedef struct _tourdata {
 
 typedef struct _tokendata {
   float var,*varptr,default_val;
-  int command,loc,type,reads,nvars,noutvars,is_label;
+  int command,loc,type,reads,nvars,noutvars,is_label,is_string,is_texturefile;
   int texture_index;
   struct _tokendata *next,*elsenext;
   char *token;
   char tokenlabel[20];
-  char string[256];
+  char string[256],default_string[256];
 } tokendata;
 
 /* --------------------------  sv_object_frame ------------------------------------ */
