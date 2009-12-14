@@ -503,6 +503,7 @@ void draw_devices(void){
     int tagval;
     int save_use_displaylist;
     propdata *prop;
+    int j;
 
     devicei = deviceinfo + i;
     prop=devicei->prop;
@@ -559,28 +560,14 @@ void draw_devices(void){
     if(sensorrelsize!=1.0){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
     }
-    /*
-    if(devicei->nparams>0){
-      int j;
-
-      for(j=0;j<devicei->nparams;j++){
-        valstack[j]=devicei->params[j];
-      }
-    }
-    nvalstack=devicei->nparams;
-    ntexturestack=0;
-    if(devicei->ntextures>0){
-      if(devicei->textureinfo!=NULL){
-        int j;
-
-        for(j=0;j<devicei->ntextures;j++){
-          valstack[nvalstack+0+j]=devicei->params[nvalstack+j];
-        }
-      }
-      ntexturestack=devicei->ntextures;
-    }
-    */
     prop=devicei->prop;
+    if(devicei->nparams>0){
+      prop->nvars_indep=devicei->nparams;
+      for(j=0;j<devicei->nparams;j++){
+        prop->fvals[j]=devicei->params[j];
+        prop->vars_indep_index[j]=j;
+      }
+    }
     if(showtime==1&&itime>=0&&itime<ntimes&&devicei->showstatelist!=NULL){
       int state;
 
@@ -589,6 +576,9 @@ void draw_devices(void){
     }
     else{
       draw_SVOBJECT(devicei->object,devicei->state0,prop);
+    }
+    if(devicei->nparams>0){
+      prop->nvars_indep=0;
     }
     devicei->object->use_displaylist=save_use_displaylist;
     glPopMatrix();
@@ -679,6 +669,9 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
     if(toki->is_label==1){
       toki->var=toki->default_val;
     }
+    if(toki->is_texturefile==1){
+      strcpy(toki->string,toki->default_string);
+    }
   }
 
   // copy values 
@@ -696,6 +689,9 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       if(index<0||index>framei->ntokens-1)continue;
       toki = framei->tokens + index;
       toki->var=prop->fvals[i];
+      if(prop->svals!=NULL&&prop->svals[i]!=NULL&&strlen(prop->svals[i])>0){
+        strcpy(toki->string,prop->svals[i]);
+      }
     }
 
     // copy time dependent evac data
@@ -705,7 +701,8 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
         tokendata *toki;
         int index;
 
-        index = prop->vars_evac_index[i];
+       // index = prop->vars_evac_index[i];
+        index=i;
         if(index<0||index>framei->ntokens-1)continue;
         toki = framei->tokens + index;
         toki->var=prop->fvars_evac[i];
@@ -1093,20 +1090,6 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       drawpoint(rgbptr);
       rgbptr=NULL;
       break;
-    case SV_SETCOLOR:
-      {
-      int lenstring;
-      int iarg[3];
-      char *stringptr;
-
-      stringptr = (toki-1)->string;
-
-      lenstring=strlen(stringptr);
-      FORTcolor2rgb(iarg,stringptr,lenstring);
-      arg[0]=iarg[0];
-      arg[1]=iarg[1];
-      arg[2]=iarg[2];
-      }
     case SV_GETTEXTUREINDEX:
       {
         char *texturefile;
@@ -1124,6 +1107,20 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
         *argptr=textureindex;
       }
       break;
+    case SV_SETCOLOR:
+      {
+      int lenstring;
+      int iarg[3];
+      char *stringptr;
+
+      stringptr = (toki-1)->string;
+
+      lenstring=strlen(stringptr);
+      FORTcolor2rgb(iarg,stringptr,lenstring);
+      arg[0]=iarg[0];
+      arg[1]=iarg[1];
+      arg[2]=iarg[2];
+      }
     case SV_SETRGB:
       {
         if(setbw==1){
@@ -2421,6 +2418,41 @@ int get_token_loc(char *var,sv_object_frame *frame){
   return -1;
 }
 
+/* ----------------------- blank2star ----------------------------- */
+
+void blank2star(char *buffer){
+  int i;
+  int quoteon;
+  char c;
+
+  quoteon=0;
+  for(i=0;i<strlen(buffer);i++){
+    if(buffer[i]=='"'){
+      quoteon=1-quoteon;
+      continue;
+    }
+    if(quoteon==1&&buffer[i]==' '){
+      buffer[i]='*';
+    }
+  }
+}
+
+/* ----------------------- star2blank ----------------------------- */
+
+void star2blank(char *buffer){
+  int i;
+  int quoteon;
+
+  quoteon=0;
+  for(i=0;i<strlen(buffer);i++){
+    if(buffer[i]=='"'){
+      quoteon=1-quoteon;
+      continue;
+    }
+    if(quoteon==1&&buffer[i]=='*')buffer[i]=' ';
+  }
+}
+
 /* ----------------------- parse_frame ----------------------------- */
 
 char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *frame){
@@ -2464,6 +2496,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
   ntokens=0;
   strcpy(object_buffer2,object_buffer);
+  blank2star(object_buffer2);
   token=strtok(object_buffer2," ");
   while(token!=NULL){
     ntokens++;
@@ -2476,6 +2509,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
   // count symbols and commands, zero out access counter
 
   strcpy(object_buffer2,object_buffer);
+  blank2star(object_buffer2);
   token=strtok(object_buffer2," ");
   nsymbols=0;
   ncommands=0;
@@ -2486,6 +2520,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     toki = frame->tokens + i;
     toki->token=token;
     strcpy(toki->tokenlabel,token);
+    if(toki->tokenlabel[0]=='"')star2blank(toki->tokenlabel);
     toki->reads=0;
 
     c = token[0];
@@ -2513,6 +2548,8 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
     c = toki->token[0];
     toki->is_label=0;
+    toki->is_string=0;
+    toki->is_texturefile=0;
     if(first_token==NULL&&c!=':')first_token=toki;
     if(c>='a'&&c<='z'||c>='A'&&c<='Z'){
       int use_displaylist;
@@ -2591,11 +2628,37 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       strcpy(bufcopy,toki->token);
       var=strtok(bufcopy,"=");
       toki->default_val=0.0;
+      strcpy(toki->default_string,"");
       if(var!=NULL){
         val=strtok(NULL,"=");
         if(val!=NULL){
-          strcpy(toki->tokenlabel,var);
-          sscanf(val,"%f",&toki->default_val);
+          char *quoted_string;
+
+
+          quoted_string=strstr(val,"\"");
+          if(quoted_string!=NULL){
+            int len;
+
+            toki->is_string=1;
+            quoted_string++;
+            len=strlen(quoted_string);
+            if(quoted_string[len-1]=='"')quoted_string[len-1]=' ';
+            trim(quoted_string);
+            quoted_string=trim_front(quoted_string);
+            strcpy(toki->default_string,quoted_string);
+            quoted_string=strstr(quoted_string,"t:");
+            if(quoted_string!=NULL){
+              quoted_string+=2;
+              quoted_string=trim_front(quoted_string);
+              strcpy(toki->default_string,quoted_string);
+              toki->is_texturefile=1;
+            }
+            toki->default_val=0.0;
+          }
+          else{
+            strcpy(toki->tokenlabel,var);
+            sscanf(val,"%f",&toki->default_val);
+          }
         }
       }
       equal=strchr(toki->token,'=');
@@ -3171,6 +3234,9 @@ void init_avatar(void){
   int iavatar_types;
   sv_object *objecti,*object_start;
   char com_buffer[1024];
+  char labels[1024];
+
+  strcpy(labels,":DUM1 :DUM2 :DUM3 :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ ");
   
   object_start = device_def_first.next;
   navatar_types=2;
@@ -3179,11 +3245,13 @@ void init_avatar(void){
   }
   NewMemory((void **)&avatar_types,navatar_types*sizeof(sv_object *));
 
-  strcpy(com_buffer,"0.0 0.0 1.0 translate 255 0 0 setrgb 0.03 0.1 drawdisk 0 0 255 setrgb 90.0 rotatey 0.03 0.2 drawdisk");
+  strcpy(com_buffer,labels);
+  strcat(com_buffer,"0.0 0.0 1.0 translate 255 0 0 setrgb 0.03 0.1 drawdisk 0 0 255 setrgb 90.0 rotatey 0.03 0.2 drawdisk");
   avatar_defs_backup[0] = init_SVOBJECT1("Avatar_1", com_buffer,1);
   avatar_defs_backup[0]->type=1;
 
-  strcpy(com_buffer,"255 255 0 setrgb 0.02 0.05 drawdisk");
+  strcpy(com_buffer,labels);
+  strcat(com_buffer,"255 255 0 setrgb 0.02 0.05 drawdisk");
   avatar_defs_backup[1] = init_SVOBJECT1("Avatar_2", com_buffer,1);
   avatar_defs_backup[1]->type=1;
 

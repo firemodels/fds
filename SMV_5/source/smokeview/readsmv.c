@@ -68,6 +68,19 @@ void update_inilist(void){
   }
 }
 
+/* ------------------ propi ------------------------ */
+
+void init_prop(propdata *propi){
+  propi->ntextures=0;
+  propi->nvars_dep=0;
+  propi->nvars_evac=0;
+  propi->nvars_indep=0;
+  propi->vars_indep=NULL;
+  propi->svals=NULL;
+  propi->texturefiles=NULL;
+
+}
+
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(char *file){
@@ -1036,6 +1049,7 @@ int readsmv(char *file){
 
 
       propi = propinfo + npropinfo;
+      init_prop(propi);
 
       if(fgets(buffer,255,stream)==NULL)break; // prop label
       trim(buffer);
@@ -1092,24 +1106,25 @@ int readsmv(char *file){
 
             if(lenkey==0||lenval==0)continue;
 
-            NewMemory((void **)&propi->svals[i],lenval+1);
-            strcpy(propi->svals[i],val);
-            texturefile=strstr(val,"\"t:");
-            if(texturefile!=NULL){
-              int lentexture;
+            if(val[0]=='"'){
+              val[0]=' ';
+              if(val[lenval-1]=='"')val[lenval-1]=' ';
+              trim(val);
+              val=trim_front(val);
+              NewMemory((void **)&propi->svals[i],lenval+1);
+              strcpy(propi->svals[i],val);
+              texturefile=strstr(val,"t:");
+              if(texturefile!=NULL){
+                int lentexture;
 
-              texturefile+=3;
-              lentexture=strlen(texturefile);
-              if(texturefile[lentexture-1]=='"'){
-                texturefile[lentexture-1]=' ';
+                texturefile+=2;
+                texturefile=trim_front(texturefile);
+                propi->texturefiles[ntextures]=propi->svals[i];
+                strcpy(propi->svals[i],texturefile);
+
+                ntextures++;
               }
-              trim(texturefile);
-              texturefile=trim_front(texturefile);
-              propi->texturefiles[ntextures]=texturefile;
-
-              ntextures++;
             }
-            
 
             NewMemory((void **)&propi->vars_indep[i],lenkey+1);
             strcpy(propi->vars_indep[i],keyword);
@@ -2014,7 +2029,14 @@ typedef struct {
       sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
         xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
       get_labels(buffer,&prop_id,NULL);
-      devicei->prop=get_prop_id(prop_id);
+      if(prop_id!=NULL){
+        devicei->prop=get_prop_id(prop_id);
+      }
+      else{
+        NewMemory((void **)&devicei->prop,sizeof(propdata));
+        init_prop(devicei->prop);
+        devicei->prop->smv_object=devicei->object;
+      }
       if(nparams_textures<0)nparams_textures=0;
       if(nparams_textures>1)nparams_textures=1;
       devicei->ntextures=nparams_textures;
