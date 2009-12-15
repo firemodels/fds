@@ -206,11 +206,12 @@ evac.o : func.o prec.o cons.o type.o mesh.o ieva.o
 pres.o : func.o prec.o cons.o type.o mesh.o pois.o
 part.o : func.o prec.o cons.o type.o mesh.o devc.o
 vege.o : func.o prec.o cons.o type.o mesh.o devc.o part.o
-read.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o evac.o
+hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
+read.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o evac.o hvac.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o isob.c turb.o
-main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o
-main_mpi.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o
+main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o
+main_mpi.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o
 
 smvv.obj : isob.obj
 cons.obj : prec.obj
