@@ -1,4 +1,6 @@
-&HEAD CHID='devices_vistest3',TITLE='Smokeview device drawing test SVN $Revision$' /
+&HEAD CHID='devices_wui',TITLE='Smokeview device drawing test SVN $Revision$' /
+
+  Test devices for drawing tree parts (canopy and trunk).
 
 &MESH IJK=32,32,64, XB=0.0,12.8,0.0,1.6,0.0,4.2/
 
