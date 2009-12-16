@@ -10,8 +10,12 @@
 &VENT XB=0.0,3.2,1.6,1.6,0.0,4.2,SURF_ID='OPEN'/
 &VENT XB=0.0,3.2,0.0,1.6,4.2,4.2,SURF_ID='OPEN'/
 
-&PROP ID='demosphere' TEXTURE_MAP='day2.jpg' 
-  SMOKEVIEW_PARAMETERS(1:11)=1.0,1.0,1.0,1.0,2.0,1.2,36.0,2.0,2.5,2.5,2.5 SMOKEVIEW_ID='demosphere' /
+&PROP ID='demosphere' 
+   SMOKEVIEW_PARAMETERS(1:12)='R=255','G=255','B=255',
+                              'VX=1','VY=2','VZ=1.2',
+                              'ROTATE_RATE=36','D=2',
+                              'XMAX=2.5','YMAX=2.5','ZMAX=2.5',
+                              'tfile="t:day2.jpg"' SMOKEVIEW_ID='demosphere' /
 &DEVC XYZ=1.6,0.8,2.1, QUANTITY='TEMPERATURE' PROP_ID='demosphere' /
 
 &TAIL /
