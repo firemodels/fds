@@ -2418,48 +2418,13 @@ int get_token_loc(char *var,sv_object_frame *frame){
   return -1;
 }
 
-/* ----------------------- blank2star ----------------------------- */
-
-void blank2star(char *buffer){
-  int i;
-  int quoteon;
-  char c;
-
-  quoteon=0;
-  for(i=0;i<strlen(buffer);i++){
-    if(buffer[i]=='"'){
-      quoteon=1-quoteon;
-      continue;
-    }
-    if(quoteon==1&&buffer[i]==' '){
-      buffer[i]='*';
-    }
-  }
-}
-
-/* ----------------------- star2blank ----------------------------- */
-
-void star2blank(char *buffer){
-  int i;
-  int quoteon;
-
-  quoteon=0;
-  for(i=0;i<strlen(buffer);i++){
-    if(buffer[i]=='"'){
-      quoteon=1-quoteon;
-      continue;
-    }
-    if(quoteon==1&&buffer[i]=='*')buffer[i]=' ';
-  }
-}
-
 /* ----------------------- parse_frame ----------------------------- */
 
 char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *frame){
   char  object_buffer[100000];
   char object_buffer2[100000];
   int ntokens;
-  char *token;
+  char *token,*tokens[100000];
   char *buffer_ptr=NULL,*buffer2;
   int i;
   int nsymbols,ncommands;
@@ -2494,33 +2459,26 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
 // count tokens
 
-  ntokens=0;
-  strcpy(object_buffer2,object_buffer);
-  blank2star(object_buffer2);
-  token=strtok(object_buffer2," ");
-  while(token!=NULL){
-    ntokens++;
-    token=strtok(NULL," ");
-  }
+  parse_string(object_buffer2,tokens,&ntokens);
   frame->ntokens=ntokens;
-  NewMemory((void **)&frame->tokens,ntokens*sizeof(tokendata));
-  if(ntokens>0)NewMemory((void **)&frame->symbols,ntokens*sizeof(int));
+  if(ntokens>0){
+    NewMemory((void **)&frame->tokens,ntokens*sizeof(tokendata));
+    NewMemory((void **)&frame->symbols,ntokens*sizeof(int));
+    NewMemory((void **)&frame->command_list,ntokens*sizeof(tokendata *));
+  }
 
   // count symbols and commands, zero out access counter
 
-  strcpy(object_buffer2,object_buffer);
-  blank2star(object_buffer2);
-  token=strtok(object_buffer2," ");
   nsymbols=0;
   ncommands=0;
   for(i=0;i<ntokens;i++){
     tokendata *toki;
     char c;
 
+    token=tokens[i];
     toki = frame->tokens + i;
     toki->token=token;
     strcpy(toki->tokenlabel,token);
-    if(toki->tokenlabel[0]=='"')star2blank(toki->tokenlabel);
     toki->reads=0;
 
     c = token[0];
@@ -2529,11 +2487,8 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       frame->symbols[nsymbols++]=i;
     }
     if(c>='a'&&c<='z'||c>='A'&&c<='Z')ncommands++;
-
-    token=strtok(NULL," ");
   }
   frame->nsymbols=nsymbols;
-  if(ntokens>0)NewMemory((void **)&frame->command_list,ntokens*sizeof(tokendata *));
   frame->ncommands=ncommands;
 
   // fill in token data structure
@@ -2705,10 +2660,12 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     toki = frame->tokens + i;
     c=toki->token[0];
     if(c!=':')continue;
+#ifdef _DEBUG
     if(toki->reads==0){
-   //   printf("*** warning: token %s in device %s was not used\n",
-   //     toki->token,frame->device->label);
+      printf("*** warning: token %s in device %s was not used\n",
+        toki->token,frame->device->label);
     }
+#endif
   }
 
   // define data structures for conditional tokens
