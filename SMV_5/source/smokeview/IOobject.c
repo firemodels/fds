@@ -2601,7 +2601,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
             trim(quoted_string);
             quoted_string=trim_front(quoted_string);
             strcpy(toki->default_string,quoted_string);
-            quoted_string=strstr(quoted_string,"t:");
+            quoted_string=strstr(quoted_string,"t%");
             if(quoted_string!=NULL){
               quoted_string+=2;
               quoted_string=trim_front(quoted_string);
@@ -2634,7 +2634,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       sptr=string_copy;
       strcpy(sptr,toki->token);
       sptr++;
-      texturefile=strstr(sptr,"t:");
+      texturefile=strstr(sptr,"t%");
       if(texturefile!=NULL){
         sptr=texturefile+2;
         toki->type=TOKEN_TEXTURE;
