@@ -1,4 +1,7 @@
-&HEAD CHID='devices_vistest4',TITLE='Smokeview device drawing test SVN $Revision: 2722 $' /
+&HEAD CHID='devices_dynamic3',TITLE='Smokeview device drawing test SVN $Revision$' /
+
+ Test the demosphere device.  This device draws a textured sphere that moves
+ around in a user defined box.  
 
 &MESH IJK=32,32,64, XB=0.0,3.2,0.0,1.6,0.0,4.2/
 
@@ -15,7 +18,7 @@
                               'VX=1','VY=2','VZ=1.2',
                               'ROTATE_RATE=36','D=2',
                               'XMAX=2.5','YMAX=2.5','ZMAX=2.5',
-                              'tfile="t:day2.jpg"' SMOKEVIEW_ID='demosphere' /
+                              'tfile="t%day2.jpg"' SMOKEVIEW_ID='demosphere' /
 &DEVC XYZ=1.6,0.8,2.1, QUANTITY='TEMPERATURE' PROP_ID='demosphere' /
 
 &TAIL /
