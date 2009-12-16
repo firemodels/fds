@@ -1080,30 +1080,35 @@ conditions and the second for when the device has activated.
 {\small
 \begin{Verbatim}[frame=single,rulecolor=\color{blue},
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-// comments are placed after a double slash
-
+//  1. comments and blank lines are permitted anywhere
+//  2. any line not beginning with a "//" is part of the definition.
+//  3. the first line non-comment line after DEVICEDEF is the device name
+//  4. a device definition may contain, labels, numerical constants
+//     a number), string constants (enclosed in " ") and/or
+//     commands (beginning with a-z)
+//  5. a label begins with ':' as in :dx
+//  6. the label :dx may be accessed elsewhere using $dx
+//  7. A device may contain multiple frames or states.  A new frame within
+//     a device is defined using NEWFRAME
+   
 DEVICEDEF // DEVICEDEF begins the device definition
 
-   //  1. comments and blank lines are permitted anywhere
-   //  2. any line not beginning with a double "slash" is part
-   //     of the device definition.
-
   device_name // name or label for device
-  .var1 ... .varn  // a series of variables may be specified for use by
-                   // the device definition.  Smokeview copies data into
-                   // these variables from the SMOKEVIEW_PARAMETERS
-                   // keyword in the FDS input file.  The data in .varn
-                   // is referenced  elsewhere in the definition
-                   // using $varn
+  :var1 ... :varn  // a series of labels may be specified for use by
+                   // the device definition.  Data is copied to these
+                   // label locations using the SMOKEVIEW_PARAMETERS
+                   // &PROP keyword or from a particle file. The data
+                   // in :varn may be referenced  elsewhere in the 
+                   // definition using $varn
 
   // A series of argument/command pairs are specified on one or
   // more lines.
 
   arg1 ... argn command1 arg1 ... argn command2 ...
 
-  // An argument may be a numerical constant (e.g. 2.37),
-  // a label (e.g. .var1) or a reference to a label located
-  // elsewhere (e.g. $var1)
+  // An argument may be a numerical constant (e.g. 2.37), a string 
+  // (e.g. "SKYBLUE"), a label (e.g. :var1),  or a reference to a 
+  // label located elsewhere (e.g. $var1)
 
  NEWFRAME    // beginning of next frame
   more argument/command pairs for next device frame
@@ -1398,6 +1403,15 @@ used to save the origin or axis orientation while the POP command
 is used to restore the origin and axis orientation.
 
 \blist
+\hitem{GETTEXTUREINDEX} The command 
+\begin{verbatim}
+"texture_file" :texture_index GETTEXTUREINDEX
+\end{verbatim}
+finds the index in an internal Smokeview table containing the
+entry texture\_file (a file containing a texture map image).  
+This index is used by other device drawing routines
+that support texture mapping (presently drawtsphere).
+
 \hitem{OFFSETX} The command, {\tt x offsetx}, translates
 objects drawn afterwards by x along the x axis.
 
@@ -1445,10 +1459,9 @@ setcolor ).  As with the {\tt setcolor}\ command, {\tt setbw}\ is
 only required when the grey level changes, not for each object
 drawn.
 
-\hitem{SETCOLOR} The command, {\tt r g b setcolor}, sets the red,
-green and blue components of the current color.  Any objects
-drawn afterwards will be drawn with this color.  That is, a {\tt
-setcolor}\ command is not required for each object part drawn.
+\hitem{SETCOLOR} The command, {\tt "color name" setcolor}, 
+obtains sets the color to the red,
+green and blue components of the FDS standard color {\tt color~name}.
 
 \hitem{SETLINEWIDTH} The command, {\tt w setlinewidth}\, sets the
 width of lines drawn with the {\tt drawline}\ and {\tt
@@ -1456,6 +1469,13 @@ drawcircle}\ commands.
 
 \hitem{SETPOINTSIZE} The command, {\tt s setpointsize}, sets the
 size of points drawn with the {\tt drawpoint}\ command.
+
+\hitem{SETRGB} The command, {\tt r g b setrgb},
+sets the red,
+green and blue components of the current color.  Any objects
+drawn afterwards will be drawn with this color.  
+This command is not required for each object part drawn.
+The color component values range from 0 to 255.  
 
 \hitem{TRANSLATE} The command, {\tt x y z translate}, translates
 objects drawn afterwards by x, y and z along the x, y and z axes
@@ -5691,13 +5711,13 @@ device_name
 x y z xn yn zn 0 0 % PROP_ID
 \end{verbatim}
 
-\noindent where device\_name is the entry in the {\tt devices.svo} file used 
+\noindent where device\_name is the entry in the {\tt devices.svo} file used
 to draw the device and $(x,y,z)$ and $(xn,yn,zn)$
-are the location and direction vector of the device.  
-The label 
-{\tt PROP\_ID}\ (pre-pended by a {\tt \%}) is the {\tt PROP} entry used to 
+are the location and direction vector of the device.
+The label
+{\tt PROP\_ID}\ (pre-pended by a {\tt \%}) is the {\tt PROP} entry used to
 list of other properties used
-for drawing the device 
+for drawing the device
 (see the {\tt PROP}\ entry in this section for more details).
 Note, the two {\tt 0 0}\ numbers are used for backwards compatibility.
 
@@ -5733,9 +5753,9 @@ A FORTRAN 90 code segment describing the format of {\tt HEAT\_ACT}\ data is give
 where {\tt heat\_time}\ is the activation time of the {\tt iheat}'th heat
 detector.
 
-\hitem{PROP}The {\tt PROP}\ keyword specifies 
+\hitem{PROP}The {\tt PROP}\ keyword specifies
 a list of general properties used
-by Smokeview to customize the drawing of devices defined in 
+by Smokeview to customize the drawing of devices defined in
 the devices.svo file.
 The format of the {\tt PROP}\ keyword is
 
