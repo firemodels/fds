@@ -4,32 +4,39 @@
 
 // ************ device file format ********************
 
-// DEVICEDEF   // DEVICEDEF begins the device definition
+//  1. comments and blank lines are permitted anywhere
+//  2. any line not beginning with a "//" is part of the definition.
+//  3. the first line non-comment line after DEVICEDEF is the device name
+//  4. a device definition may contain, labels, numerical constants
+//     a number), string constants (enclosed in " ") and/or
+//     commands (beginning with a-z)
+//  5. a label begins with ':' as in :dx
+//  6. the label :dx may be accessed elsewhere using $dx
+//  7. A device may contain multiple frames or states.  A new frame within
+//     a device is defined using NEWFRAME
 
-//    //  1. comments and blank lines are permitted anywhere
-//    //  2. any line not beginning with a double "slash" is part
-//    //     of the device definition.
+// DEVICEDEF // DEVICEDEF begins the device definition
 
-//   device_name      // name or label for device
-//   .var1 ... .varn  // a series of variables may be specified for use by
-//                    // the device definition.  Smokeview copies data into
-//                    // these variables from the SMOKEVIEW_PARAMETERS
-//                    // keyword in the FDS input file.  The data in .varn
-//                    // is referenced  elsewhere in the definition
-//                    // using $varn
+//   device_name // name or label for device
+//   :var1 ... :varn  // a series of labels may be specified for use by
+//                    // the device definition.  Data is copied to these
+//                    // label locations using the SMOKEVIEW_PARAMETERS
+//                    // &PROP keyword or from a particle file. The data
+//                    // in :varn may be referenced  elsewhere in the
+//                    // definition using $varn
 
 //   // A series of argument/command pairs are specified on one or
 //   // more lines.
 
 //   arg1 ... argn command1 arg1 ... argn command2 ...
 
-//   // An argument may be a numerical constant (e.g. 2.37),
-//   // a label (e.g. .var1) or a reference to a label located
-//   // elsewhere (e.g. $var1)
+//   // An argument may be a numerical constant (e.g. 2.37), a string
+//   // (e.g. "SKYBLUE"), a label (e.g. :var1),  or a reference to a
+//   // label located elsewhere (e.g. $var1)
 
-// NEWFRAME    // beginning of next frame
-//  more argument/command pairs for next device frame
-//  ....
+//  NEWFRAME    // beginning of next frame
+//   more argument/command pairs for next device frame
+//   ....
 
    // ************ static device definitions - single frame/state ********************
 
@@ -291,7 +298,7 @@ DEVICEDEF // device for particle file tube
 DEVICEDEF // device for particle "egg"
  egg
  :R :G :B :D :DX     // data obtained from an FDS input file
- $R $G $B setrgb "TAN" setcolor
+ $R $G $B setrgb
  $DX $D $D scalexyz 1.0 drawsphere
 
 DEVICEDEF // device for particle "egg"
@@ -308,13 +315,13 @@ DEVICEDEF // device for a general ball
 
 DEVICEDEF // device for dynamic textured sphere
  demosphere
- :R :G :B :VX :VY :VZ :ROTATE_RATE :D :XMAX :YMAX :ZMAX
+ :R :G :B :VX :VY :VZ :ROTATE_RATE :D :XMAX :YMAX :ZMAX :tfile
  $R $G $B setrgb
  $VX 0.0 :vvx multiaddt $vvx  0.0 $XMAX :CLIPX mirrorclip 
  $VY 0.0 :vvy multiaddt $vvy  0.0 $YMAX :CLIPY mirrorclip
  $VZ 0.0 :vvz multiaddt $vvz  0.0 $ZMAX :CLIPZ mirrorclip
  $CLIPX $CLIPY $CLIPZ translate $ROTATE_RATE 0.0 :rotz multiaddt 
-   $rotz rotatez 180.0 rotatey "t:day2.jpg" :textureindex gettextureindex $textureindex $D drawtsphere
+   $rotz rotatez 180.0 rotatey $tfile :textureindex gettextureindex $textureindex $D drawtsphere
 
 DEVICEDEF // device for dynamic textured sphere
  ttest
@@ -322,17 +329,17 @@ DEVICEDEF // device for dynamic textured sphere
  $texture_file :textureindex gettextureindex $textureindex 1.0 drawtsphere
 
 DEVICEDEF // device to test IF, LE, GT and AND operators
- gifball
+ conditional_ball
  :DX :DY :DZ         // parameters passed from FDS in SMOKEVIEW_PARAMETERS array
  :time gett          // get the current time
  $time 3.0 :LE_L LE  // is time .le. 3
- $time 3.0 :GT_L GT  // is time .gt. 3
+ $time 3.0 :GE_L GT  // is time .gt. 3
  $time 6.0 :LE_H LE  // is time .le. 6
  $time 6.0 :GT_H GT  // is time .gt  6
  $LE_L IF
    "RED" setcolor   // set the color to red if t .le. 3.0
  ENDIF
- $GT_L $LE_H :ANDTEST AND $ANDTEST IF
+ $GE_L $LE_H :ANDTEST AND $ANDTEST IF
    "GREEN" setcolor   // set the color to green if t .gt. 3.0 and t .le.6
  ENDIF
  $GT_H IF            
@@ -342,10 +349,11 @@ DEVICEDEF // device to test IF, LE, GT and AND operators
 
 DEVICEDEF // device for dynamic textured sphere
  tsphere
-  :R :G :B :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D
+  :R :G :B :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D :tfile
  $R $G $B setrgb
  90.0 rotatey $AX0 rotatex $ELEV0 rotatey 
- $ROTATION_RATE $ROT0 :rotz multiaddt $rotz rotatez 0 $D drawtsphere
+ $ROTATION_RATE $ROT0 :rotz multiaddt $rotz rotatez 
+   $tfile :textureindex gettextureindex $textureindex $D drawtsphere
 
    // ************ dynamic tree device definitions ********************
 
@@ -454,7 +462,7 @@ DEVICEDEF
  0.25 drawcube
 DEVICEDEF
  drawdisk
- "BRICK" setcolor
+ "FOREST GREEN" setcolor
  0.25 0.50 drawdisk
 DEVICEDEF
  drawcdisk
