@@ -14,6 +14,7 @@ INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
 INTEGER, PARAMETER :: EB = SELECTED_REAL_KIND(12)
 
 ! Single- and double-precision complex
+
 INTEGER, PARAMETER :: SPC = KIND((1._FB,1._FB))
 INTEGER, PARAMETER :: DPC = KIND((1._EB,1._EB))
 
@@ -29,9 +30,14 @@ INTEGER, PARAMETER :: MAX_LAYERS=20, MAX_MATERIALS=20, MAX_MATERIALS_TOTAL=400, 
 
 INTEGER, PARAMETER :: N_STATE_SPECIES=9
 
+! Hardwired number of parameters that can be passed to Smokeview to describe a drawn object or device
+
+INTEGER, PARAMETER :: SMOKEVIEW_OBJECTS_DIMENSION=20
+
 ! Special numbers
 
 REAL(EB), PARAMETER :: ALMOST_ONE=1._EB-EPSILON(1._EB),ZERO_P=TINY(1._FB)
+
 ! Often used numbers
 
 REAL(EB) :: PI,SQRTPI,RPI,TWOPI,PIO2,RFPI
