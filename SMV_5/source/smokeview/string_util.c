@@ -357,46 +357,10 @@ void array2string(float *vals, int nvals, char *string){
 
 /* ------------------ array2string ------------------------ */
 
-void parse_string(char *string, char ***tokens_ptr, int *ntokens){
+void parse_string(char *string, char **tokens, int *ntokens){
   int i, len, in_quote, ntok, in_token, last_in_token;
   char *c;
-  char **tokens;
 
-  ntok=0;
-  in_quote=0;
-  in_token=0;
-  last_in_token=0;
-  len=strlen(string);
-  c=string;
-  for(i=0;i<=len;i++){
-    switch (*c) {
-      case '"':
-        in_quote=1-in_quote;
-        in_token=1;
-        break;
-      case ' ':
-        if(in_quote==0){
-          in_token=0;
-        }
-        break;
-      case 0:
-        in_token=0;
-        break;
-      default:
-        in_token=1;
-        break;
-    }
-    if(in_token>last_in_token)ntok++;
-    last_in_token=in_token;
-    c++;
-  }
-  if(ntok==0){
-    *ntokens=0;
-    *tokens_ptr=NULL;
-    return;
-  }
-  NewMemory((void **)&tokens,ntok*sizeof(char *));
-  *tokens_ptr=tokens;
   c=string;
   ntok=0;
   in_quote=0;
