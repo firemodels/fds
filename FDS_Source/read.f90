@@ -7882,7 +7882,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    ALLOCATE(M%K_AGL_SLICE(0:IBP1,0:JBP1,N_TERRAIN_SLCF),STAT=IZERO)
    CALL ChkMemErr('READ','K_AGL_SLICE',IZERO)
-   M%K_AGL_SLICE = 0.0_EB
+   M%K_AGL_SLICE = 0
    N = 0
    DO NN = 1, N_SLCF
       SL=>SLICE(NN)
@@ -7891,7 +7891,7 @@ MESH_LOOP: DO NM=1,NMESHES
         N = N + 1 
         M%K_AGL_SLICE(0:IBP1,0:JBP1,N) =  SL%SLICE_AGL*M%RDZ(1)
         ! Subtract one because bottom of domain will be accounted for when cycling through walls cells
-        M%K_AGL_SLICE(0:IBP1,0:JBP1,N) =  M%K_AGL_SLICE(0:IBP1,0:JBP1,N) - 1  
+        M%K_AGL_SLICE(0:IBP1,0:JBP1,N) =  MAX(0,M%K_AGL_SLICE(0:IBP1,0:JBP1,N)-1)
       ENDIF
    ENDDO
 
