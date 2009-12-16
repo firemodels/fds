@@ -14,8 +14,7 @@ test device that uses IF, GE and AND operators
 &VENT XB=0.0,6.4,1.6,1.6,0.0,1.6,SURF_ID='OPEN'/
 &VENT XB=0.0,6.4,0.0,1.6,1.6,1.6,SURF_ID='OPEN'/
 
-&PROP ID='gifball' 
- SMOKEVIEW_PARAMETERS(1:11)=4.0,1.6,1.0 SMOKEVIEW_ID='gifball' /
+&PROP ID='gifball' SMOKEVIEW_PARAMETERS(1:3)='DX=4.0','DY=1.6','DZ=1.0' SMOKEVIEW_ID='gifball' /
 &DEVC XYZ=3.2,0.8,0.8, QUANTITY='TEMPERATURE' PROP_ID='gifball' /
 
 &TAIL /
