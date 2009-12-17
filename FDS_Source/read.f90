@@ -6878,7 +6878,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    ENDIF
 
    IF (BAD) THEN
-      IF (QUANTITY=='TIME' .OR. DUCT_ID/='null' .OR. NODE_ID/='null') THEN
+      IF (DUCT_ID/='null' .OR. NODE_ID/='null') THEN
          XYZ(1) = MESHES(1)%XS
          XYZ(2) = MESHES(1)%YS
          XYZ(3) = MESHES(1)%ZS
