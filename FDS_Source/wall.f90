@@ -1349,75 +1349,86 @@ END SUBROUTINE PYROLYSIS
  
  
 REAL(EB) FUNCTION HEAT_TRANSFER_COEFFICIENT(IW,IIG,JJG,KKG,IOR,TMP_G,DELTA_TMP)
-
+USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT
 INTEGER  :: IW,IIG,JJG,KKG,IOR,ITMP
-REAL(EB) :: TMP_G,DELTA_TMP,U2,V2,W2,VELCON,H_NATURAL,H_FORCED,H_DNS
+REAL(EB) :: TMP_G,DELTA_TMP,U2,V2,W2,VELCON,H_NATURAL,H_FORCED,H_DNS,CP,YY_GET(1:N_SPECIES)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
  
 IF (H_FIXED >= 0._EB) THEN
    HEAT_TRANSFER_COEFFICIENT = H_FIXED
    RETURN
 ENDIF
 
-IF (H_EDDY) THEN
-   ITMP = MIN(5000,NINT(TMP_G))
-   HEAT_TRANSFER_COEFFICIENT = MU(IIG,JJG,KKG)*Y2CP_C(ITMP)*2._EB*RDN(IW)
-   RETURN
-ENDIF
-
-IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
-   RHOP => RHOS
-ELSE
-   UU => US
-   VV => VS
-   WW => WS
-   RHOP => RHO
-ENDIF 
-
-IF (DNS) THEN
+DNS_IF: IF (DNS) THEN
    HEAT_TRANSFER_COEFFICIENT = 2._EB*KW(IW)*RDN(IW)
-ELSE
-   IF (IIG<0) THEN   ! No gas cell information available
-      SELECT CASE(ABS(IOR))
-         CASE(0:2)
-            H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
-         CASE(3)
-            H_NATURAL = HCH*ABS(DELTA_TMP)**ONTH
-      END SELECT
-      H_FORCED = 0._EB
-   ELSE
-      SELECT CASE(ABS(IOR))
-         CASE(0)
-            U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
-            V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
-            W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
-            VELCON = (U2+V2+W2)**0.4_EB
-            H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
-         CASE(1)
-            V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
-            W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
-            VELCON = (V2+W2)**0.4_EB
-            H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
-         CASE(2)
-            U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
-            W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
-            VELCON = (U2+W2)**0.4_EB
-            H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
-         CASE(3)
-            U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
-            V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
-            VELCON = (U2+V2)**0.4_EB
-            H_NATURAL = HCH*ABS(DELTA_TMP)**ONTH
-      END SELECT
-      H_FORCED  = C_FORCED*VELCON*RHOP(IIG,JJG,KKG)**0.8_EB
-   ENDIF
-   ITMP = MIN(5000,NINT(TMP_G))
-   H_DNS = Y2MU_C(ITMP)*CP_GAMMA*RPR*2._EB*RDN(IW)
-   HEAT_TRANSFER_COEFFICIENT = MAX(H_DNS,H_FORCED,H_NATURAL)
-ENDIF
+ELSE DNS_IF
+   H_EDDY_IF: IF (H_EDDY) THEN
+      ITMP = MIN(5000,NINT(TMP_G))
+      IF (N_SPECIES > 0) THEN
+         SELECT CASE(PREDICTOR)
+            CASE(.TRUE.)  
+               YYP => YYS 
+            CASE(.FALSE.) 
+               YYP => YY  
+         END SELECT
+         YY_GET = YYP(IIG,JJG,KKG,:)
+         CALL GET_SPECIFIC_HEAT(YY_GET,CP,ITMP)
+      ELSE
+         CP = Y2CP_C(ITMP)
+      ENDIF
+      HEAT_TRANSFER_COEFFICIENT = MU(IIG,JJG,KKG)*CP*2._EB*RDN(IW)
+   ELSE H_EDDY_IF
+      IF (PREDICTOR) THEN
+         UU => U
+         VV => V
+         WW => W
+         RHOP => RHOS
+      ELSE
+         UU => US
+         VV => VS
+         WW => WS
+         RHOP => RHO
+      ENDIF 
+      IF (IIG<0) THEN   ! No gas cell information available
+         SELECT CASE(ABS(IOR))
+            CASE(0:2)
+               H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
+            CASE(3)
+               H_NATURAL = HCH*ABS(DELTA_TMP)**ONTH
+         END SELECT
+         H_FORCED = 0._EB
+      ELSE
+         SELECT CASE(ABS(IOR))
+            CASE(0)
+               U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
+               V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
+               W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
+               VELCON = (U2+V2+W2)**0.4_EB
+               H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
+            CASE(1)
+               V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
+               W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
+               VELCON = (V2+W2)**0.4_EB
+               H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
+            CASE(2)
+               U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
+               W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
+               VELCON = (U2+W2)**0.4_EB
+               H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
+            CASE(3)
+               U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
+               V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
+               VELCON = (U2+V2)**0.4_EB
+               H_NATURAL = HCH*ABS(DELTA_TMP)**ONTH
+         END SELECT
+         H_FORCED  = C_FORCED*VELCON*RHOP(IIG,JJG,KKG)**0.8_EB
+      ENDIF
+      ITMP = MIN(5000,NINT(TMP_G))
+      H_DNS = Y2MU_C(ITMP)*CP_GAMMA*RPR*2._EB*RDN(IW)
+      HEAT_TRANSFER_COEFFICIENT = MAX(H_DNS,H_FORCED,H_NATURAL)
+   ENDIF H_EDDY_IF
+ENDIF DNS_IF
 
 END FUNCTION HEAT_TRANSFER_COEFFICIENT
 
