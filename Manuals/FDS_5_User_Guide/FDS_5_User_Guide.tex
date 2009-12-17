@@ -8700,7 +8700,7 @@ $^{***}$               \> Add {\ct VELO\_INDEX=1} to the input line if you want 
 $^{****}$              \> Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
                        \> Do not use for {\ct MIXTURE FRACTION}.
 \end{tabbing}
- 
+
 
 \clearpage
 \section{Summary of Infrequently-Used Output Quantities}
@@ -9230,6 +9230,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct GAMMA}                     & Real          & Ratio of specific heats                       &               & 1.4               \\ \hline
 {\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}         & m             & 0.                  \\ \hline
 {\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
+{\ct H\_EDDY}                   & Logical       & Moinuddin and Li heat transfer coefficient    &               & {\ct .FALSE.}     \\ \hline
 {\ct H\_FIXED}                  & Real          & See Section~\ref{solid_phase_verification}    & W/m$^2$/K     &                   \\ \hline
 {\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
 {\ct ISOTHERMAL}                & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
