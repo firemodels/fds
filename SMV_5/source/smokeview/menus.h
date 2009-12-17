@@ -14,6 +14,7 @@ char menu_revision[]="$Revision$";
 void ScriptMenu(int var);
 void add_scriptlist(char *file, int id);
 void update_glui_render();
+void PropMenu(int value);
 
 #ifdef WIN32
 
@@ -2555,6 +2556,11 @@ void Particle5ShowMenu(int value){
 void ParticlePropShowMenu(int value){
   part5prop *propi;
 
+  int propvalue, showvalue;
+
+  propvalue = (-value)/10000-1;
+  value = -((-value)%10000);
+
   if(value==-1)return;
 
   if(value>=0){
@@ -2659,6 +2665,7 @@ void ParticlePropShowMenu(int value){
 
       partclassj = partclassinfo + iclass;
       partclassj->vis_type=vistype;
+      PropMenu(propvalue);
     }
 
   }
@@ -4595,10 +4602,156 @@ static int in_menu=0;
   if(visTerrainType==4)glutAddMenuEntry("*Hidden",21);
   if(visTerrainType!=4)glutAddMenuEntry("Hidden",21);
     
+  if(nobject_defs>0){
+    multiprop=0;
+    for(i=0;i<npropinfo;i++){
+      propdata *propi;
+
+      propi = propinfo + i;
+      if(propi->nsmokeview_ids>1)multiprop=1;
+    }
+    if(multiprop==1){
+      for(i=0;i<npropinfo;i++){
+        propdata *propi;
+
+        propi = propinfo + i;
+        CREATEMENU(propi->menu_id,PropMenu);
+        if(propi->nsmokeview_ids>1){
+          int jj;
+
+          for(jj=0;jj<propi->nsmokeview_ids;jj++){
+            strcpy(menulabel,"");
+            if(propi->smokeview_ids[jj]==propi->smokeview_id){
+              strcat(menulabel,"*");
+            }
+            strcat(menulabel,propi->smokeview_ids[jj]);
+            glutAddMenuEntry(menulabel,jj*npropinfo+i);
+          }
+        }
+      }
+      CREATEMENU(propmenu,PropMenu);
+      for(i=0;i<npropinfo;i++){
+        propdata *propi;
+
+        propi = propinfo + i;
+        if(propi->nsmokeview_ids>1){
+          glutAddSubMenu(propi->label,propi->menu_id);
+        }
+      }
+    }
+
+    CREATEMENU(spheresegmentmenu,ShowObjectsMenu);
+    if(device_sphere_segments==6){
+      glutAddMenuEntry("   *6",-6);
+    }
+    else{
+      glutAddMenuEntry("   6",-6);
+    }
+    if(device_sphere_segments==10){
+      glutAddMenuEntry("   *10",-10);
+    }
+    else{
+      glutAddMenuEntry("   10",-10);
+    }
+    if(device_sphere_segments==20){
+      glutAddMenuEntry("   *20",-20);
+    }
+    else{
+      glutAddMenuEntry("   20",-20);
+    }
+  }
+
+  if(nobject_defs>0){
+    CREATEMENU(showobjectsmenu,ShowObjectsMenu);
+    for(i=0;i<nobject_defs;i++){
+      sv_object *obj_typei;
+
+      obj_typei = object_defs[i];
+      obj_typei->used_by_device=0;
+    }
+    for(i=0;i<ndeviceinfo;i++){
+      device *devicei;
+      propdata *propi;
+      int jj;
+
+      devicei = deviceinfo + i;
+      propi = devicei->prop;
+      for(jj=0;jj<propi->nsmokeview_ids;jj++){
+        sv_object *objectj;
+
+        objectj = propi->smv_objects[jj];
+        objectj->used_by_device=1;
+      }
+    }
+    for(i=0;i<npart5prop;i++){
+      part5prop *partpropi;
+
+      partpropi = part5propinfo + i;
+      for(j=0;j<npartclassinfo;j++){
+        part5class *partclassj;
+        propdata *propi;
+        int jj;
+
+        if(partpropi->class_present[j]==0)continue;
+        partclassj = partclassinfo + j;
+        propi = partclassj->prop;
+        for(jj=0;jj<propi->nsmokeview_ids;jj++){
+          sv_object *objectj;
+
+          objectj = propi->smv_objects[jj];
+          objectj->used_by_device=1;
+        }
+      }
+    }
+
+    for(i=0;i<nobject_defs;i++){
+      sv_object *obj_typei;
+
+      obj_typei = object_defs[i];
+      if(obj_typei->used_by_device==1){
+        char obj_menu[256];
+
+        strcpy(obj_menu,"");
+        if(obj_typei->visible==1){
+          strcat(obj_menu,"*");
+        }
+        strcat(obj_menu,obj_typei->label);
+        glutAddMenuEntry(obj_menu,i);
+      }
+    }
+    glutAddMenuEntry("-",-999);
+    if(ndeviceinfo>0){
+      if(select_device==1){
+        glutAddMenuEntry("*Select",-3);
+      }
+      else{
+        glutAddMenuEntry("Select",-3);
+      }
+    }
+    glutAddMenuEntry("Show All",-1);
+    glutAddMenuEntry("Hide All",-2);
+    glutAddMenuEntry("-",-999);
+    glutAddSubMenu("Segments",spheresegmentmenu);
+
+  }
+
 /* --------------------------------geometry menu -------------------------- */
 
   CREATEMENU(geometrymenu,GeometryMenu);
   if(showedit==0&&ntotal_blockages>0)glutAddSubMenu("Blockages",blockagemenu);
+  if(nobject_defs>0){
+    int num_activedevices=0;
+
+    for(i=0;i<nobject_defs;i++){
+      sv_object *obj_typei;
+
+      obj_typei = object_defs[i];
+      if(obj_typei->used==1)num_activedevices++;
+    }
+    if(isZoneFireModel==0||(isZoneFireModel==1&&num_activedevices>1)){
+      glutAddSubMenu("Objects",showobjectsmenu);
+    }
+  }
     //shaded 17 0
     //stepped 18 1
     //line    19 2
@@ -4725,114 +4878,6 @@ static int in_menu=0;
     break;
   }
 
-  if(nobject_defs>0){
-    multiprop=0;
-    for(i=0;i<npropinfo;i++){
-      propdata *propi;
-
-      propi = propinfo + i;
-      if(propi->nsmokeview_ids>1)multiprop=1;
-    }
-    if(multiprop==1){
-      for(i=0;i<npropinfo;i++){
-        propdata *propi;
-
-        propi = propinfo + i;
-        CREATEMENU(propi->menu_id,PropMenu);
-        if(propi->nsmokeview_ids>1){
-          int jj;
-
-          for(jj=0;jj<propi->nsmokeview_ids;jj++){
-            strcpy(menulabel,"");
-            if(propi->smokeview_ids[jj]==propi->smokeview_id){
-              strcat(menulabel,"*");
-            }
-            strcat(menulabel,propi->smokeview_ids[jj]);
-            glutAddMenuEntry(menulabel,jj*npropinfo+i);
-          }
-        }
-      }
-      CREATEMENU(propmenu,PropMenu);
-      for(i=0;i<npropinfo;i++){
-        propdata *propi;
-
-        propi = propinfo + i;
-        if(propi->nsmokeview_ids>1){
-          glutAddSubMenu(propi->label,propi->menu_id);
-        }
-      }
-    }
-
-    CREATEMENU(spheresegmentmenu,ShowObjectsMenu);
-    if(device_sphere_segments==6){
-      glutAddMenuEntry("   *6",-6);
-    }
-    else{
-      glutAddMenuEntry("   6",-6);
-    }
-    if(device_sphere_segments==10){
-      glutAddMenuEntry("   *10",-10);
-    }
-    else{
-      glutAddMenuEntry("   10",-10);
-    }
-    if(device_sphere_segments==20){
-      glutAddMenuEntry("   *20",-20);
-    }
-    else{
-      glutAddMenuEntry("   20",-20);
-    }
-
-    CREATEMENU(showobjectsmenu,ShowObjectsMenu);
-    for(i=0;i<nobject_defs;i++){
-      sv_object *obj_typei;
-
-      obj_typei = object_defs[i];
-      obj_typei->used_by_device=0;
-    }
-    for(i=0;i<ndeviceinfo;i++){
-      device *devicei;
-      int jj;
-
-      devicei = deviceinfo + i;
-      for(jj=0;jj<devicei->prop->nsmokeview_ids;jj++){
-        sv_object *objectj;
-
-        objectj = devicei->prop->smv_objects[jj];
-        objectj->used_by_device=1;
-      }
-    }
-    for(i=0;i<nobject_defs;i++){
-      sv_object *obj_typei;
-
-      obj_typei = object_defs[i];
-      if(obj_typei->used_by_device==1){
-        char obj_menu[256];
-
-        strcpy(obj_menu,"");
-        if(obj_typei->visible==1){
-          strcat(obj_menu,"*");
-        }
-        strcat(obj_menu,obj_typei->label);
-        glutAddMenuEntry(obj_menu,i);
-      }
-    }
-    glutAddMenuEntry("-",-999);
-    if(ndeviceinfo>0){
-      if(select_device==1){
-        glutAddMenuEntry("*Select",-3);
-      }
-      else{
-        glutAddMenuEntry("Select",-3);
-      }
-    }
-    glutAddMenuEntry("Show All",-1);
-    glutAddMenuEntry("Hide All",-2);
-    glutAddMenuEntry("-",-999);
-    glutAddSubMenu("Segments",spheresegmentmenu);
-
-  }
-
 /* --------------------------------zone show menu -------------------------- */
 
   if(nzone>0){
@@ -4924,7 +4969,7 @@ static int in_menu=0;
     if(npart5prop>=0){
       int ntypes;
 
-      glutAddMenuEntry("Color:",-1);
+      glutAddMenuEntry("Color data using:",-1);
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
 
@@ -4944,7 +4989,6 @@ static int in_menu=0;
       if(part5show==1)glutAddMenuEntry("  Hide",-4);
       glutAddMenuEntry("-",-1);
 
-      glutAddMenuEntry("Type:",-1);
       ntypes=0;
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
@@ -4969,45 +5013,77 @@ static int in_menu=0;
              (partclassj->prop!=NULL&&partclassj->prop->smokeview_id!=NULL)||
              (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)
             ){
-              strcat(menulabel," drawn using:");
-            glutAddMenuEntry(menulabel,-10-5*j);
-            if(partclassj->vis_type==PART_POINTS){
-              glutAddMenuEntry("      *points",-10-5*j-PART_POINTS);
+            if(propi->class_vis[j]==1){
+              strcpy(menulabel,"*Draw ");
             }
             else{
-              glutAddMenuEntry("      points",-10-5*j-PART_POINTS);
+              strcpy(menulabel,"Draw ");
+            }
+            strcat(menulabel,partclassj->name);
+              strcat(menulabel," using:");
+            glutAddMenuEntry(menulabel,-10-5*j);
+            if(partclassj->vis_type==PART_POINTS){
+              glutAddMenuEntry("    *points",-10-5*j-PART_POINTS);
+            }
+            else{
+              glutAddMenuEntry("    points",-10-5*j-PART_POINTS);
             }
             if(partclassj->col_diameter>=0||partclassj->device_name!=NULL){
               if(partclassj->vis_type==PART_SPHERES){
-                glutAddMenuEntry("      *spheres",-10-5*j-PART_SPHERES);
+                glutAddMenuEntry("    *spheres",-10-5*j-PART_SPHERES);
               }
               else{
-                glutAddMenuEntry("      spheres",-10-5*j-PART_SPHERES);
+                glutAddMenuEntry("    spheres",-10-5*j-PART_SPHERES);
               }
             }
             if(partclassj->col_length>=0||partclassj->device_name!=NULL||
               (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)){
               if(partclassj->vis_type==PART_LINES){
-                glutAddMenuEntry("      *lines",-10-5*j-PART_LINES);
+                glutAddMenuEntry("    *lines",-10-5*j-PART_LINES);
               }
               else{
-                glutAddMenuEntry("      lines",-10-5*j-PART_LINES);
+                glutAddMenuEntry("    lines",-10-5*j-PART_LINES);
               }
+            }
+            if(streak5show==1){
+              glutAddSubMenu("    *Streaks",particlestreakshowmenu);
+            }
+            else{
+              glutAddSubMenu("    Streaks",particlestreakshowmenu);
             }
             if(partclassj->smv_device!=NULL&&partclassj->device_name!=NULL||
               (partclassj->prop!=NULL&&partclassj->prop->smokeview_id!=NULL)
               ){
-              strcpy(menulabel,"      "); 
-              if(partclassj->vis_type==PART_SMV_DEVICE){
-                strcat(menulabel,"*");
-              }
               if(partclassj->device_name!=NULL){
+                strcpy(menulabel,"    "); 
+                if(partclassj->vis_type==PART_SMV_DEVICE){
+                  strcat(menulabel,"*");
+                }
                 strcat(menulabel,partclassj->device_name);
+                glutAddMenuEntry(menulabel,-10-5*j-PART_SMV_DEVICE);
               }
               else if(partclassj->prop!=NULL&&partclassj->prop->smokeview_id!=NULL){
-                strcat(menulabel,partclassj->prop->smokeview_id);
+                int iii;
+                propdata *propclass;
+
+              // value = iobject*npropinfo + iprop
+                propclass=partclassj->prop;
+                for(iii=0;iii<propclass->nsmokeview_ids;iii++){
+                  int propvalue, showvalue, menuvalue;
+
+                  propvalue = iii*npropinfo + (propclass-propinfo);
+                  showvalue = -10-5*j-PART_SMV_DEVICE;
+                  menuvalue = (-1-propvalue)*10000 + showvalue;
+                  // propvalue = (-menuvalue)/10000-1;
+                  // showvalue = -((-menuvalue)%10000)
+                  strcpy(menulabel,"    "); 
+                  if(partclassj->vis_type==PART_SMV_DEVICE&&propclass->smokeview_ids[iii]==propclass->smokeview_id){
+                    strcat(menulabel,"*");
+                  }
+                  strcat(menulabel,propclass->smokeview_ids[iii]);
+                  glutAddMenuEntry(menulabel,menuvalue);
+                }
               }
-              glutAddMenuEntry(menulabel,-10-5*j-PART_SMV_DEVICE);
             }
           }
           else{
@@ -5048,7 +5124,6 @@ static int in_menu=0;
       if(part5show==0)glutAddMenuEntry("  *Hide",-5);
       if(part5show==1)glutAddMenuEntry("  Hide",-5);
       glutAddMenuEntry("-",-1);
-
       glutAddMenuEntry("Type:",-1);
       ntypes=0;
       for(i=0;i<npart5prop;i++){
@@ -5073,6 +5148,12 @@ static int in_menu=0;
           glutAddMenuEntry(menulabel,-10-5*j);
         }
         break;
+      }
+      if(streak5show==1){
+        glutAddSubMenu("  *Streaks",particlestreakshowmenu);
+      }
+      else{
+        glutAddSubMenu("  Streaks",particlestreakshowmenu);
       }
       if(ntypes>1){
         glutAddMenuEntry("  Show All Types",-2);
@@ -5631,12 +5712,6 @@ static int in_menu=0;
       if(human_present==1){
         glutAddSubMenu("Humans",humanpropshowmenu);
       }
-      if(streak5show==1){
-        glutAddSubMenu("*Streaks",particlestreakshowmenu);
-      }
-      else{
-        glutAddSubMenu("Streaks",particlestreakshowmenu);
-      }
     }
   }
   if(nevac>0&&navatar_types>0){
@@ -5734,7 +5809,7 @@ static int in_menu=0;
     int num_activedevices=0;
 
     if(multiprop==1){
-      glutAddSubMenu("Properties",propmenu);
+     // glutAddSubMenu("Properties",propmenu);
     }
 
     for(i=0;i<nobject_defs;i++){
@@ -5745,9 +5820,11 @@ static int in_menu=0;
     }
 
     if(num_activedevices>0){
+      /*
       if(isZoneFireModel==0||(isZoneFireModel==1&&num_activedevices>1)){
         glutAddSubMenu("Objects",showobjectsmenu);
       }
+      */
     }
     else{
       for(i=0;i<nobject_defs;i++){

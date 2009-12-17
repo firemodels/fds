@@ -1505,25 +1505,6 @@ void drawPart5(const particle *parti){
                   colorptr=rgb_full[color[j]];
                 }
               }
-              /*
-              valstack[0]=rgbobject[0];
-              valstack[1]=rgbobject[1];
-              valstack[2]=rgbobject[2];
-              valstack[3]=width[j];
-              valstack[4]=depth[j];
-              valstack[5]=1.0;
-              valstack[6]=1.0;
-              valstack[7]=1.0;
-              valstack[8]=height[j];
-              valstack[9] =colorptr[0];
-              valstack[10]=colorptr[1];
-              valstack[11]=colorptr[2];
-              
-              valstack[12]=0.0;
-              valstack[13]=0.0;
-              valstack[14]=height[j]/2.0;
-              nvalstack=15;
-              */
               
               //  0->2   class color
               //  3->5   width, depth, 1.0 
@@ -1614,49 +1595,7 @@ void drawPart5(const particle *parti){
               glEnd();
             }
 
-            // *** draw particles as spheres
-
-            if(datacopy->partclassbase->vis_type==PART_SPHERES){
-              for(j=0;j<datacopy->npoints;j++){
-                float *colorptr;
- //               int nvalstack;
-
-                if(vis[j]!=1)continue;
-                  
-                glPushMatrix();
-                glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
-
-                glRotatef(datacopy->partclassbase->elevation,0.0,1.0,0.0);
-                glRotatef(datacopy->partclassbase->azimuth,0.0,0.0,1.0);
-
-              //  0->2   color
-              //  3      diameter
-              //  4      length
-
-                if(show_default==1){
-                  colorptr=datacopy->partclassbase->rgb;
-                }
-                else{
-                  color = datacopy->irvals+itype*datacopy->npoints;
-                  colorptr=rgb_full[color[j]];
-                }
-
-                /*
-                valstack[0]=colorptr[0];
-                valstack[1]=colorptr[1];
-                valstack[2]=colorptr[2];
-                valstack[3]=datacopy->partclassbase->diameter;
-                valstack[4]=datacopy->partclassbase->length;
-                nvalstack=5;
-                */
-                prop=datacopy->partclassbase->prop;
-                copy_dep_vals(partclassi,datacopy,colorptr,prop,j);
-                draw_SVOBJECT(datacopy->partclassbase->sphere,0,prop);
-                glPopMatrix();
-              }
-            }
-
-            // *** draw particles as tubes
+            // *** draw particles using smokeview object
 
             if(datacopy->partclassbase->vis_type==PART_SMV_DEVICE){
               for(j=0;j<datacopy->npoints;j++){
@@ -1932,9 +1871,9 @@ void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr,
     }
   }
   
-  dep_vals[ndep_vals-3]=colorptr[1];
-  dep_vals[ndep_vals-2]=colorptr[2];
-  dep_vals[ndep_vals-1]=colorptr[3];
+  dep_vals[ndep_vals-3]=colorptr[0]*255;
+  dep_vals[ndep_vals-2]=colorptr[1]*255;
+  dep_vals[ndep_vals-1]=colorptr[2]*255;
   prop->nvars_dep=partclassi->nvars_dep;
   prop->smv_object->visible=1;
   for(ii=0;ii<prop->nvars_dep;ii++){
