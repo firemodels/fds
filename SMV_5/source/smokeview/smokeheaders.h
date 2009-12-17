@@ -93,7 +93,7 @@ EXTERNCPP char *get_camera_label(int index);
 EXTERNCPP void clip2cam(camera *cam);
 EXTERNCPP void cam2clip(camera *cam);
 EXTERNCPP void to_lower(char *string);
-EXTERNCPP void init_device_defs(void);
+EXTERNCPP void init_object_defs(void);
 EXTERNCPP void update_device_textures(void);
 EXTERNCPP char *get_device_label(char *buffer);
 EXTERNCPP void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az);
@@ -104,7 +104,7 @@ EXTERNCPP sv_object *parse_SVOBJECT(FILE *stream);
 EXTERNCPP sv_object *init_SVOBJECT1(char *label, char *commands,int visible);
 EXTERNCPP sv_object *init_SVOBJECT2(char *label, char *commandson, char *commandsoff,int visible);
 EXTERNCPP sv_object *get_SVOBJECT_type(char *label, sv_object *default_object);
-EXTERNCPP int read_device_defs(char *file);
+EXTERNCPP int read_object_defs(char *file);
 EXTERNCPP void freeall_objects(void);
 EXTERNCPP void parse_string(char *string, char **tokens, int *ntokens);
 
