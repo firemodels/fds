@@ -1004,7 +1004,7 @@ int readsmv(char *file){
 
   // read in device (.svo) definitions
 
-    init_device_defs();
+    init_object_defs();
 
 
 /* 
@@ -1046,6 +1046,8 @@ int readsmv(char *file){
       char *fbuffer;
       int lenbuf;
       int ntextures;
+      int nsmokeview_ids;
+      char *smokeview_id;
 
 
       propi = propinfo + npropinfo;
@@ -1057,14 +1059,25 @@ int readsmv(char *file){
       lenbuf=strlen(fbuffer);
       NewMemory((void **)&propi->label,lenbuf+1);
       strcpy(propi->label,fbuffer);
-      
-      if(fgets(buffer,255,stream)==NULL)break; // smokeview_id
-      trim(buffer);
-      fbuffer=trim_front(buffer);
-      lenbuf=strlen(fbuffer);
-      NewMemory((void **)&propi->smokeview_id,lenbuf+1);
-      strcpy(propi->smokeview_id,fbuffer);
-      propi->smv_object=get_SVOBJECT_type(propi->smokeview_id,missing_device);
+
+      if(fgets(buffer,255,stream)==NULL)break; // number of smokeview_id's
+      sscanf(buffer,"%i",&nsmokeview_ids);
+
+      propi->nsmokeview_ids=nsmokeview_ids;
+      NewMemory((void **)&propi->smokeview_ids,nsmokeview_ids*sizeof(char *));
+      NewMemory((void **)&propi->smv_objects,nsmokeview_ids*sizeof(sv_object *));
+      for(i=0;i<nsmokeview_ids;i++){
+        if(fgets(buffer,255,stream)==NULL)break; // smokeview_id
+        trim(buffer);
+        fbuffer=trim_front(buffer);
+        lenbuf=strlen(fbuffer);
+        NewMemory((void **)&smokeview_id,lenbuf+1);
+        strcpy(smokeview_id,fbuffer);
+        propi->smokeview_ids[i]=smokeview_id;
+        propi->smv_objects[i]=get_SVOBJECT_type(propi->smokeview_ids[i],missing_device);
+      }
+      propi->smv_object=propi->smv_objects[0];
+      propi->smokeview_id=propi->smokeview_ids[0];
 
       if(fgets(buffer,255,stream)==NULL)break; // keyword_values
       sscanf(buffer,"%i",&propi->nvars_indep);
@@ -4107,14 +4120,14 @@ typedef struct {
           }
           if(device_label==NULL){
             if(isZoneFireModel==1){
-              devicecopy->object = get_SVOBJECT_type("target",thcp_device_backup);
+              devicecopy->object = get_SVOBJECT_type("target",thcp_object_backup);
             }
             else{
-              devicecopy->object = get_SVOBJECT_type("thermoc4",thcp_device_backup);
+              devicecopy->object = get_SVOBJECT_type("thermoc4",thcp_object_backup);
             }
           }
           else{
-            devicecopy->object = get_SVOBJECT_type(device_label,thcp_device_backup);
+            devicecopy->object = get_SVOBJECT_type(device_label,thcp_object_backup);
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
@@ -4180,10 +4193,10 @@ typedef struct {
             xyznorm[2]/=normdenom;
           }
           if(device_label==NULL){
-            devicecopy->object = get_SVOBJECT_type("sprinkler_upright",sprinkler_upright_device_backup);
+            devicecopy->object = get_SVOBJECT_type("sprinkler_upright",sprinkler_upright_object_backup);
           }
           else{
-            devicecopy->object = get_SVOBJECT_type(device_label,sprinkler_upright_device_backup);
+            devicecopy->object = get_SVOBJECT_type(device_label,sprinkler_upright_object_backup);
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
@@ -4297,10 +4310,10 @@ typedef struct {
             xyznorm[2]/=normdenom;
           }
           if(device_label==NULL){
-            devicecopy->object = get_SVOBJECT_type("heat_detector",heat_detector_device_backup);
+            devicecopy->object = get_SVOBJECT_type("heat_detector",heat_detector_object_backup);
           }
           else{
-            devicecopy->object = get_SVOBJECT_type(device_label,heat_detector_device_backup);
+            devicecopy->object = get_SVOBJECT_type(device_label,heat_detector_object_backup);
           }
           get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
 
@@ -4397,10 +4410,10 @@ typedef struct {
           xyznorm[2]/=normdenom;
         }
         if(device_label==NULL){
-          devicecopy->object = get_SVOBJECT_type("smoke_detector",smoke_detector_device_backup);
+          devicecopy->object = get_SVOBJECT_type("smoke_detector",smoke_detector_object_backup);
         }
         else{
-          devicecopy->object = get_SVOBJECT_type(device_label,smoke_detector_device_backup);
+          devicecopy->object = get_SVOBJECT_type(device_label,smoke_detector_object_backup);
         }
         get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
     
@@ -8159,24 +8172,24 @@ int readini2(char *inifile, int localfile){
       continue;
       }
     if(localfile==1&&match(buffer,"SHOWDEVICES",11)==1){
-      sv_object *dv_typei;
+      sv_object *obj_typei;
       char *dev_label;
       int ndevices_ini;
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&ndevices_ini);
 
-      for(i=0;i<ndevice_defs;i++){
-        dv_typei = device_defs[i];
-        dv_typei->visible=0;
+      for(i=0;i<nobject_defs;i++){
+        obj_typei = object_defs[i];
+        obj_typei->visible=0;
       }
       for(i=0;i<ndevices_ini;i++){
         fgets(buffer,255,stream);
         trim(buffer);
         dev_label=trim_front(buffer);
-        dv_typei=get_object(dev_label);
-        if(dv_typei!=NULL){
-          dv_typei->visible=1;
+        obj_typei=get_object(dev_label);
+        if(obj_typei!=NULL){
+          obj_typei->visible=1;
         }
       }
     }
@@ -9332,20 +9345,20 @@ void writeini(int flag){
   if(flag==LOCAL_INI){
     {
       int ndevice_vis=0;
-      sv_object *dv_typei;
+      sv_object *obj_typei;
 
-      for(i=0;i<ndevice_defs;i++){
-        dv_typei = device_defs[i];
-        if(dv_typei->used==1&&dv_typei->visible==1){
+      for(i=0;i<nobject_defs;i++){
+        obj_typei = object_defs[i];
+        if(obj_typei->used==1&&obj_typei->visible==1){
           ndevice_vis++;
         }
       }
       fprintf(fileout,"SHOWDEVICES\n");
       fprintf(fileout," %i\n",ndevice_vis);
-      for(i=0;i<ndevice_defs;i++){
-        dv_typei = device_defs[i];
-        if(dv_typei->used==1&&dv_typei->visible==1){
-          fprintf(fileout," %s\n",dv_typei->label);
+      for(i=0;i<nobject_defs;i++){
+        obj_typei = object_defs[i];
+        if(obj_typei->used==1&&obj_typei->visible==1){
+          fprintf(fileout," %s\n",obj_typei->label);
         }
       }
     }

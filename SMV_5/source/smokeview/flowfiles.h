@@ -11,13 +11,15 @@
 #define PROPVARMAX 100
 typedef struct {
   char *label;
-  char *smokeview_id;
+  int menu_id;
+  int nsmokeview_ids,ismokeview_ids;
+  char *smokeview_id,**smokeview_ids;
+  struct _sv_object *smv_object, **smv_objects;
   int ntextures;
   char **texturefiles, **vars_indep, **svals;
   int vars_indep_index[PROPVARMAX], vars_dep_index[PROPVARMAX], vars_evac_index[PROPVARMAX];
   int nvars_indep,      nvars_dep,                   nvars_evac;
   float fvals[PROPVARMAX], fvars_evac[PROPVARMAX], fvars_dep[PROPVARMAX];
-  struct _sv_object *smv_object;
   int draw_evac;
 } propdata;
 
@@ -602,7 +604,7 @@ typedef struct _sv_object {
   char label[256];
   int type;
   int visible;
-  int used;
+  int used, used_by_device;
   int use_displaylist;
   int select_mode;
   int nframes;
