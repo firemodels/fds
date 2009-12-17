@@ -1248,19 +1248,12 @@ int readsmv(char *file){
       sscanf(buffer,"%i",&partclassi->ntypes);
       partclassi->ntypes+=2;
       partclassi->nvars_dep=partclassi->ntypes-2+3; // subtract off two "dummies" at beginning and add 3 at end for r,g,b
-      partclassi->vars_dep=NULL;
       if(partclassi->ntypes>0){
         flowlabels *labelj;
         char shortdefaultlabel[]="Uniform";
         char longdefaultlabel[]="Uniform color";
 
         NewMemory((void **)&partclassi->labels,partclassi->ntypes*sizeof(flowlabels));
-        partclassi->vars_dep=NULL;
-        if(partclassi->nvars_dep>0){
-          NewMemory((void **)&partclassi->vars_dep,partclassi->nvars_dep*sizeof(char *));
-          NewMemory((void **)&partclassi->vars_dep_index,partclassi->nvars_dep*sizeof(int));
-          NewMemory((void **)&partclassi->fvars_dep,partclassi->nvars_dep*sizeof(float));
-        }
        
         labelj = partclassi->labels+0; // placeholder for hidden
 
@@ -2449,27 +2442,7 @@ typedef struct {
 
       get_labels(buffer,&device_ptr,&prop_id);
       partclassi->prop=get_prop_id(prop_id);
-      if(partclassi->prop!=NULL){
-        sv_object_frame *obj_frame;
-
-        if(partclassi->kind==HUMANS){
-          partclassi->prop->draw_evac=1;
-        }
-        else{
-          partclassi->prop->draw_evac=0;
-        }
-        obj_frame=partclassi->prop->smv_object->obj_frames[0];
-        for(i=0;i<partclassi->nvars_dep-3;i++){
-          char *var;
-
-          var=partclassi->vars_dep[i];
-          partclassi->vars_dep_index[i]=get_token_loc(var,obj_frame);
-        }
-        nvar = partclassi->nvars_dep;
-        partclassi->vars_dep_index[nvar-3]=get_token_loc("R",obj_frame);
-        partclassi->vars_dep_index[nvar-2]=get_token_loc("G",obj_frame);
-        partclassi->vars_dep_index[nvar-1]=get_token_loc("B",obj_frame);
-      }
+      update_partclass_depend(partclassi);
 
       npartclassinfo++;
       continue;
@@ -7509,6 +7482,31 @@ int readini2(char *inifile, int localfile){
       if(show_tracers_always!=1)show_tracers_always=0;
       continue;
     }
+    if(localfile==1&&match(buffer,"PROPINDEX",9)==1){
+      int nvals;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&nvals);
+      for(i=0;i<nvals;i++){
+        propdata *propi;
+        int ind, val;
+
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i",&ind,&val);
+        if(ind<0||ind>npropinfo-1)continue;
+        propi = propinfo + ind;
+        if(val<0||val>propi->nsmokeview_ids-1)continue;
+        propi->smokeview_id=propi->smokeview_ids[val];
+        propi->smv_object=propi->smv_objects[val];
+      }
+      for(i=0;i<npartclassinfo;i++){
+        part5class *partclassi;
+
+        partclassi = partclassinfo + i;
+        update_partclass_depend(partclassi);
+
+      }
+    }
     if(localfile==1&&match(buffer,"PART5CLASSVIS",13)==1){
       int ntemp;
 
@@ -9398,7 +9396,26 @@ void writeini(int flag){
       part5class *partclassj;
 
       partclassj = partclassinfo + j;
-      fprintf(fileout," %i",partclassj->vis_type);
+      fprintf(fileout," %i\n",partclassj->vis_type);
+    }
+  }
+  if(flag==LOCAL_INI&&npropinfo>0){
+    fprintf(fileout,"PROPINDEX\n");
+    fprintf(fileout," %i\n",npropinfo);
+    for(i=0;i<npropinfo;i++){
+      propdata *propi;
+      int offset;
+      int jj;
+
+      propi = propinfo + i;
+      offset=-1;
+      for(jj=0;jj<propi->nsmokeview_ids;jj++){
+        if(strcmp(propi->smokeview_id,propi->smokeview_ids[jj])==0){
+          offset=jj;
+          break;
+        }
+      }
+      fprintf(fileout," %i %i\n",i,offset);
     }
   }
 

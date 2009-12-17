@@ -3656,9 +3656,19 @@ void PropMenu(int value){
 
     propi = propinfo + iprop;
     if(iobject>=0&&iobject<propi->nsmokeview_ids){
+      int i;
+
       propi->smokeview_id=propi->smokeview_ids[iobject];
       propi->smv_object=propi->smv_objects[iobject];
       updatemenu=1;
+      for(i=0;i<npartclassinfo;i++){
+        part5class *partclassi;
+
+        partclassi = partclassinfo + i;
+        update_partclass_depend(partclassi);
+
+      }
+
       GLUTPOSTREDISPLAY
     }
   }
