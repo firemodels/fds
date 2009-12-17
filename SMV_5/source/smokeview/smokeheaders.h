@@ -107,6 +107,7 @@ EXTERNCPP sv_object *get_SVOBJECT_type(char *label, sv_object *default_object);
 EXTERNCPP int read_object_defs(char *file);
 EXTERNCPP void freeall_objects(void);
 EXTERNCPP void parse_string(char *string, char **tokens, int *ntokens);
+EXTERNCPP void update_partclass_depend(part5class *partclassi);
 
 EXTERNCPP int get_plot3d_index(mesh *meshi, int dir, float val);
 EXTERNCPP int plot3dlistcompare( const void *arg1, const void *arg2 );

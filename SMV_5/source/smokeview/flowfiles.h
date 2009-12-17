@@ -706,9 +706,9 @@ typedef struct {
   int maxpoints, ntypes;
   float *xyz, *rgb;
   int nvars_dep;
-  int *vars_dep_index;
-  float *fvars_dep;
-  char **vars_dep;
+  int vars_dep_index[PROPVARMAX];
+  float fvars_dep[PROPVARMAX];
+  char *vars_dep[PROPVARMAX];
   flowlabels *labels;
 } part5class;
 
