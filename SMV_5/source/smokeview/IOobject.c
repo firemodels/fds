@@ -46,6 +46,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_LE 127
 #define SV_AND 128
 #define SV_OR 129
+#define SV_ABS 130
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -74,6 +75,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_LE_NUMARGS 3
 #define SV_AND_NUMARGS 3
 #define SV_OR_NUMARGS 3
+#define SV_ABS_NUMARGS 2
 
 
 #define SV_TRANSLATE_NUMOUTARGS  0
@@ -103,6 +105,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_LE_NUMOUTARGS 1
 #define SV_AND_NUMOUTARGS 1
 #define SV_OR_NUMOUTARGS 1
+#define SV_ABS_NUMOUTARGS 1
 
 
 #define SV_DRAWCUBE      200
@@ -798,6 +801,14 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
         val_result=val1+val2;
 
         *argptr=val_result;
+      }
+      break;
+    case SV_ABS:
+      if(arg[0]<0.0){
+        *argptr=-arg[0];
+      }
+      else{
+        *argptr=arg[0];
       }
       break;
     case SV_SUB:
@@ -2338,6 +2349,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     num_op=SV_POP_NUMARGS;
     num_outop=SV_POP_NUMOUTARGS;
   }
+  else if(STRCMP(token,"abs")==0){
+    op=SV_ABS;
+    num_op=SV_ABS_NUMARGS;
+    num_outop=SV_ABS_NUMOUTARGS;
+  }
   else if(STRCMP(token,"add")==0){
     op=SV_ADD;
     num_op=SV_ADD_NUMARGS;
@@ -3572,4 +3588,33 @@ void get_evac_indices(sv_object *smv_object,
   evac_index[n++]=get_token_loc("HZ",obj_frame);
 
   *nevac_index=n;
+}
+
+/* ----------------------- update_partclass_depend ----------------------------- */
+
+void update_partclass_depend(part5class *partclassi){
+  int i;
+
+  if(partclassi->prop!=NULL){
+    sv_object_frame *obj_frame;
+    int nvar;
+
+    if(partclassi->kind==HUMANS){
+      partclassi->prop->draw_evac=1;
+    }
+    else{
+      partclassi->prop->draw_evac=0;
+    }
+    obj_frame=partclassi->prop->smv_object->obj_frames[0];
+    for(i=0;i<partclassi->nvars_dep-3;i++){
+      char *var;
+
+      var=partclassi->vars_dep[i];
+      partclassi->vars_dep_index[i]=get_token_loc(var,obj_frame);
+    }
+    nvar = partclassi->nvars_dep;
+    partclassi->vars_dep_index[nvar-3]=get_token_loc("R",obj_frame);
+    partclassi->vars_dep_index[nvar-2]=get_token_loc("G",obj_frame);
+    partclassi->vars_dep_index[nvar-1]=get_token_loc("B",obj_frame);
+  }
 }
