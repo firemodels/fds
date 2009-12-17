@@ -1972,8 +1972,8 @@ sv_object *get_SVOBJECT_type(char *label,sv_object *default_object){
   trim(label);
   label = trim_front(label);
   if(strlen(label)==0)return default_object;
-  for(i=0;i<ndevice_defs;i++){
-    objecti = device_defs[i];
+  for(i=0;i<nobject_defs;i++){
+    objecti = object_defs[i];
     if(STRCMP(label,objecti->label)==0){
       objecti->used=1;
       return objecti;
@@ -2724,9 +2724,9 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
   return buffer_ptr;
 }
 
-/* ----------------------- read_device_defs ----------------------------- */
+/* ----------------------- read_object_defs ----------------------------- */
 
-int read_device_defs(char *file){
+int read_object_defs(char *file){
   FILE *stream;
   char buffer[256], *trim_buffer;
   char *buffer_ptr;
@@ -2788,8 +2788,8 @@ int read_device_defs(char *file){
       current_object->use_displaylist=1;
       current_object->select_mode=0;
       strcpy(current_object->label,label);
-      prev_object = device_def_last.prev;
-      next_object = &device_def_last;
+      prev_object = object_def_last.prev;
+      next_object = &object_def_last;
 
       prev_object->next=current_object;
       next_object->prev=current_object;
@@ -2844,32 +2844,32 @@ int read_device_defs(char *file){
   }
   fclose(stream);
 
-  object_start = device_def_first.next;
+  object_start = object_def_first.next;
   objecti = object_start;
-  ndevice_defs=0;
+  nobject_defs=0;
   for(;objecti->next!=NULL;){
     CheckMemory;
-    ndevice_defs++;
+    nobject_defs++;
     objecti->obj_frames=NULL;
     if(objecti->nframes>0){
       NewMemory((void **)&objecti->obj_frames,objecti->nframes*sizeof(sv_object_frame *));
     }
     objecti=objecti->next;
   }
-  FREEMEMORY(device_defs);
-  if(ndevice_defs>0){
+  FREEMEMORY(object_defs);
+  if(nobject_defs>0){
     int i,j;
 
-    NewMemory((void **)&device_defs,ndevice_defs*sizeof(sv_object *));
+    NewMemory((void **)&object_defs,nobject_defs*sizeof(sv_object *));
 
-    object_start = device_def_first.next;
+    object_start = object_def_first.next;
     objecti = object_start;
     i=0;
     for(;objecti->next!=NULL;){
       sv_object_frame *frame_start, *framei;
 
       CheckMemory;
-      device_defs[i]=objecti;
+      object_defs[i]=objecti;
       i++;
       frame_start = objecti->first_frame.next;
       framei = frame_start;
@@ -2953,7 +2953,7 @@ char *get_device_label(char *buffer){
 sv_object *get_object(char *label){
   sv_object *objecti,*object_start;
 
-  object_start = device_def_first.next;
+  object_start = object_def_first.next;
   objecti = object_start;
   for(;objecti->next!=NULL;objecti=objecti->next){
     if(STRCMP(objecti->label,label)==0)return objecti;
@@ -2967,7 +2967,7 @@ void freeall_objects(void){
   sv_object *object;
 
   for(;;){
-    object = device_def_last.prev;
+    object = object_def_last.prev;
     if(object->prev==NULL)break;
     free_object(object);
   }
@@ -3113,9 +3113,9 @@ void update_device_textures(void){
   }
 }
 
-/* ----------------------- init_device_defs ----------------------------- */
+/* ----------------------- init_object_defs ----------------------------- */
 
-void init_device_defs(void){
+void init_object_defs(void){
     char com_buffer[1024];
     char com_buffer2[1024];
 
@@ -3128,44 +3128,42 @@ void init_device_defs(void){
       if(smvprogdir!=NULL){
         strcpy(objectfile,smvprogdir);
         strcat(objectfile,"devices.svo");
-        read_device_defs(objectfile);
-       // strcat(objectfile,"test.svo");
-       // read_device_defs2(objectfile);
+        read_object_defs(objectfile);
       }
 
       strcpy(objectfile,"devices.svo");
-      read_device_defs(objectfile);
+      read_object_defs(objectfile);
 
       strcpy(objectfile,fdsprefix);
       strcat(objectfile,".svo");
-      read_device_defs(objectfile);
+      read_object_defs(objectfile);
 
       init_avatar();
     }
 
     if(isZoneFireModel==1){
       strcpy(com_buffer,"255 255 0 setrgb 0.02 0.05 drawdisk");
-      target_device_backup = init_SVOBJECT1("target", com_buffer,1);
+      target_object_backup = init_SVOBJECT1("target", com_buffer,1);
     }
     else{
       strcpy(com_buffer,"255 255 0 setrgb 0.038 drawcube");
-      target_device_backup = init_SVOBJECT1("sensor", com_buffer,1);
+      target_object_backup = init_SVOBJECT1("sensor", com_buffer,1);
     }
 
     strcpy(com_buffer,"255 255 0 setrgb 0.038 drawcube");
-    thcp_device_backup = init_SVOBJECT1("thcp", com_buffer,1);
+    thcp_object_backup = init_SVOBJECT1("thcp", com_buffer,1);
 
     strcpy(com_buffer, "0 255 0 setrgb 0.038 drawcube");
     strcpy(com_buffer2,"255 0 0 setrgb 0.038 drawcube");
-    heat_detector_device_backup = init_SVOBJECT2("heat_detector", com_buffer, com_buffer2,1);
+    heat_detector_object_backup = init_SVOBJECT2("heat_detector", com_buffer, com_buffer2,1);
 
     strcpy(com_buffer, "0 255 0 setrgb 0.038 drawcube");
     strcpy(com_buffer2,"255 0 0 setrgb 0.038 drawcube");
-    sprinkler_upright_device_backup = init_SVOBJECT2("sprinkler_upright", com_buffer, com_buffer2,1);
+    sprinkler_upright_object_backup = init_SVOBJECT2("sprinkler_upright", com_buffer, com_buffer2,1);
 
     strcpy(com_buffer, "127 127 127 setrgb 0.2 0.05 drawdisk");
     strcpy(com_buffer2,"255 0 0 setrgb 0.2 0.05 drawdisk");
-    smoke_detector_device_backup = init_SVOBJECT2("smoke_detector", com_buffer, com_buffer2,1);
+    smoke_detector_object_backup = init_SVOBJECT2("smoke_detector", com_buffer, com_buffer2,1);
 
     strcpy(com_buffer, "255 0 0 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
     error_device = init_SVOBJECT1("error_device", com_buffer,1);
@@ -3173,15 +3171,15 @@ void init_device_defs(void){
     strcpy(com_buffer, "0 0 255 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
     missing_device = init_SVOBJECT1("missing_device", com_buffer,1);
 
-    if(ndevice_defs==0){
+    if(nobject_defs==0){
 
-      ndevice_defs=4;
-      FREEMEMORY(device_defs);
-      NewMemory((void **)&device_defs,4*sizeof(sv_object *));
-      device_defs[0] = target_device_backup;
-      device_defs[1] = heat_detector_device_backup;
-      device_defs[2] = sprinkler_upright_device_backup;
-      device_defs[3] = smoke_detector_device_backup;
+      nobject_defs=4;
+      FREEMEMORY(object_defs);
+      NewMemory((void **)&object_defs,4*sizeof(sv_object *));
+      object_defs[0] = target_object_backup;
+      object_defs[1] = heat_detector_object_backup;
+      object_defs[2] = sprinkler_upright_object_backup;
+      object_defs[3] = smoke_detector_object_backup;
     }
 }
 
@@ -3195,7 +3193,7 @@ void init_avatar(void){
 
   strcpy(labels,":DUM1 :DUM2 :DUM3 :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ ");
   
-  object_start = device_def_first.next;
+  object_start = object_def_first.next;
   navatar_types=2;
   for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
     if(objecti->type==1)navatar_types++;

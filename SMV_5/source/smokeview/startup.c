@@ -1695,15 +1695,15 @@ void initvars1(void){
   svofile_exists=0;
   devicenorm_length = 0.1;
   ndeviceinfo=0;
-  ndevice_defs=0;
-  strcpy(device_def_first.label,"first");
-  device_def_first.next=&device_def_last;
-  device_def_first.prev=NULL;
+  nobject_defs=0;
+  strcpy(object_def_first.label,"first");
+  object_def_first.next=&object_def_last;
+  object_def_first.prev=NULL;
 
-  strcpy(device_def_last.label,"last");
-  device_def_last.next=NULL;
-  device_def_last.prev=&device_def_first;
-  device_defs=NULL;
+  strcpy(object_def_last.label,"last");
+  object_def_last.next=NULL;
+  object_def_last.prev=&object_def_first;
+  object_defs=NULL;
  
   showfiles=0;
   smoke3d_external=0;
