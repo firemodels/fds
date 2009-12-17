@@ -6858,17 +6858,17 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
 
    ! Determine which mesh the device is in
 
-   BAD = .FALSE.
+   BAD = .TRUE.
    MESH_LOOP: DO NM=1,NMESHES
-      IF (.NOT.EVACUATION_ONLY(NM)) THEN      
-         M=>MESHES(NM)
-         IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
-            MESH_NUMBER = NM
-            EXIT MESH_LOOP
-         ENDIF
+      IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
+      M=>MESHES(NM)
+      IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
+         MESH_NUMBER = NM
+         BAD = .FALSE.
+         EXIT MESH_LOOP
       ENDIF
-      IF (NM==NMESHES) BAD = .TRUE.
    ENDDO MESH_LOOP
+
    ! Make sure there is either a QUANTITY or PROP_ID for the DEVICE
 
    IF (QUANTITY=='null' .AND. PROP_ID=='null') THEN
