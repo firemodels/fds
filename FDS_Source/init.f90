@@ -927,7 +927,7 @@ IF (N_ZONE > 0) THEN
          DO J=1,M%JBAR
             DO I=1,M%IBAR
                IF (M%PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE
-               IF (SOLID(CELL_INDEX(I,J,K)))    CYCLE
+               IF (M%SOLID(M%CELL_INDEX(I,J,K)))    CYCLE
                VC   = M%DX(I)*M%RC(I)*M%DY(J)*M%DZ(K)
                ITMP = MIN(5000,NINT(M%TMP(I,J,K)))
                IF (N_SPECIES==0) THEN
