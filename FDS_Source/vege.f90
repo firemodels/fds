@@ -437,7 +437,6 @@ H_VAP_H2O    = 2259._EB*1000._EB !J/kg/K heat of vaporization of water
 !PR_AIR = 0.7_EB     
 
 ! Working arrays
-D_VAP            = 0._EB
 TREE_OUTPUT_DATA(:,:,NM) = 0._EB !for output of veg data
 !DMPVDT_FM_VEG  = 0.0_EB
 
@@ -663,7 +662,7 @@ DROPLET_LOOP: DO I=1,NLP
  MW_TERM    = MW_VEG_MOIST_TERM + MW_VEG_VOLIT_TERM
  MW_AVERAGE = R0/RSUM(II,JJ,KK)/RHO_GAS*(MW_VEG_MOIST_TERM + MW_VEG_VOLIT_TERM)
  Q_ENTHALPY = Q_VEG_MOIST + Q_VEG_VOLIT
- D_VAP(II,JJ,KK) = D_VAP(II,JJ,KK)            & 
+ D_LAGRANGIAN(II,JJ,KK) = D_LAGRANGIAN(II,JJ,KK)            & 
                    + (-QCON_VEG*RCP_TEMPORARY + RDT*Q_ENTHALPY*RCP_TEMPORARY)/(RHO_GAS*TMP_GAS)  &
                    + RDT*MW_AVERAGE
 
