@@ -626,6 +626,11 @@ OVERALL_INSERT_LOOP: DO
             IJKW(1,DR%WALL_INDEX) = II
             IJKW(2,DR%WALL_INDEX) = JJ
             IJKW(3,DR%WALL_INDEX) = KK
+            IJKW(4,DR%WALL_INDEX) = 0
+            IJKW(5,DR%WALL_INDEX) = PC%SURF_INDEX
+            IJKW(6,DR%WALL_INDEX) = II
+            IJKW(7,DR%WALL_INDEX) = JJ
+            IJKW(8,DR%WALL_INDEX) = KK
          ENDIF
    
       ENDDO INSERT_PARTICLE_LOOP
@@ -716,6 +721,10 @@ IF (MESHES(NM)%NLP==0)   RETURN
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
+
+! Zero out the contribution by lagrangian particles to divergence
+
+IF (N_EVAP_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. CORRECTOR) D_LAGRANGIAN = 0._EB
 
 ! Move the droplets/particles, then compute mass and energy transfer, then add droplet momentum to gas
 
@@ -1296,7 +1305,6 @@ NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH
 ! Working arrays
 
 IF (N_EVAP_INDICES>0) THEN
-   D_VAP  = 0._EB
    WCPUA  = RUN_AVG_FAC*WCPUA
    WMPUA  = RUN_AVG_FAC*WMPUA
    DROP_DEN => WORK4
@@ -1605,8 +1613,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             DELTA_H_G = (DELTA_H_G - CP2 * TMP_G) 
             
             ! Compute contribution to the divergence
-            D_VAP(II,JJ,KK) =  D_VAP(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
-                               (M_VAP*DELTA_H_G- Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP 
+            D_LAGRANGIAN(II,JJ,KK) =  D_LAGRANGIAN(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
+                                      (M_VAP*DELTA_H_G- Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP 
 
             ! Add fuel evaporation rate to running counter before adjusting its value
             IF (IGAS>0 .AND. IGAS==I_FUEL) FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP

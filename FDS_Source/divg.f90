@@ -637,7 +637,7 @@ IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_20'
-            DP(I,J,K) = DP(I,J,K) + D_VAP(I,J,K)
+            DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
          ENDDO
       ENDDO
    ENDDO
