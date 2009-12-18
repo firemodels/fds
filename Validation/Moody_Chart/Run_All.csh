@@ -19,4 +19,29 @@ $RUNFDS Current_Results poiseuille_N64_mu0125 fire66 &
 $RUNFDS Current_Results poiseuille_N64_mu025  fire67 &
 $RUNFDS Current_Results poiseuille_N8_mu025   fire67 &
 
+$RUNFDS Current_Results z0=p0001_dpdx=-1_N8     fire68 &
+$RUNFDS Current_Results z0=p001_dpdx=-1_N8      fire68 &
+$RUNFDS Current_Results z0=p01_dpdx=-1_N8       fire69 &
+$RUNFDS Current_Results z0=p1_dpdx=-1_N8        fire69 &
+$RUNFDS Current_Results z0=p0001_dpdx=-1_N16    fire70 &
+$RUNFDS Current_Results z0=p001_dpdx=-1_N16     fire70 &
+$RUNFDS Current_Results z0=p01_dpdx=-1_N16      fire70 &
+$RUNFDS Current_Results z0=p0001_dpdx=-100_N8   fire71 &
+$RUNFDS Current_Results z0=p001_dpdx=-100_N8    fire71 &
+$RUNFDS Current_Results z0=p01_dpdx=-100_N8     fire71 &
+$RUNFDS Current_Results z0=p1_dpdx=-100_N8      fire71 &
+$RUNFDS Current_Results z0=p0001_dpdx=-100_N16  fire72 &
+$RUNFDS Current_Results z0=p001_dpdx=-100_N16   fire72 &
+$RUNFDS Current_Results z0=p01_dpdx=-100_N16    fire72 &
+$RUNFDS Current_Results z0=p0001_dpdx=-p0001_N8 fire73 &
+$RUNFDS Current_Results z0=p0001_dpdx=-p01_N8   fire73 &
+$RUNFDS Current_Results z0=p001_dpdx=-p0001_N8  fire73 &
+$RUNFDS Current_Results z0=p001_dpdx=-p01_N8    fire73 &
+$RUNFDS Current_Results z0=p01_dpdx=-p0001_N8   fire74 &
+$RUNFDS Current_Results z0=p01_dpdx=-p01_N8     fire74 &
+$RUNFDS Current_Results z0=p1_dpdx=-p0001_N8    fire74 &
+$RUNFDS Current_Results z0=p1_dpdx=-p01_N8      fire74 &
+$RUNFDS Current_Results z0=p02_dpdx=-1_N16      fire75 &
+$RUNFDS Current_Results z0=p02_dpdx=-100_N16    fire75 &
+
 echo FDS cases submitted
