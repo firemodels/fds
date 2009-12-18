@@ -1126,7 +1126,7 @@ int readsmv(char *file){
               val=trim_front(val);
               NewMemory((void **)&propi->svals[i],lenval+1);
               strcpy(propi->svals[i],val);
-              texturefile=strstr(val,"t:");
+              texturefile=strstr(val,"t%");
               if(texturefile!=NULL){
                 int lentexture;
 
