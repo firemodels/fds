@@ -4713,6 +4713,7 @@ static int in_menu=0;
         if(partpropi->class_present[j]==0)continue;
         partclassj = partclassinfo + j;
         propi = partclassj->prop;
+        if(propi==NULL)continue;
         for(jj=0;jj<propi->nsmokeview_ids;jj++){
           sv_object *objectj;
 
