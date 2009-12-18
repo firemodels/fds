@@ -21,7 +21,7 @@
 &SLCF XB=0.0,1.6,0.8,0.8,0.0,1.6,QUANTITY='TEMPERATURE' /
 
 demosphere labels from devices.svo:  :R :G :B :VX :VY :VZ :ROTATE_RATE :D :XMAX :YMAX :ZMAX :tfile
-&PROP ID='demosphere' TEXTURE_MAP='day2.jpg' SMOKEVIEW_PARAMETERS(1:12)='R=255','G=255','B=255',
+&PROP ID='demosphere' SMOKEVIEW_PARAMETERS(1:12)='R=255','G=255','B=255',
              'VX=0.64','VY=0.0','VZ=0.0','ROTATE_RATE=0.0','D=0.5',
              'XMAX=10.0','YMAX=2.0','ZMAX=2.0','tfile="t%day2.jpg"' SMOKEVIEW_ID='demosphere' /
 &DEVC XYZ=0.0,0.8,0.8, QUANTITY='TEMPERATURE' PROP_ID='demosphere' /
