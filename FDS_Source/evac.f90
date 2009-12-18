@@ -55,10 +55,13 @@ MODULE EVAC
   ! (&EVAC lines)
   TYPE EVACUATION_TYPE
      REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB,T_START=0._EB, Angle=0._EB
+     REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
+     REAL(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
      CHARACTER(60) :: CLASS_NAME='null', ID='null'
      CHARACTER(30) :: GRID_NAME='null'
      LOGICAL :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE.
      INTEGER :: N_INITIAL=0,SAMPLING=0, IPC=0, IMESH=0
+     INTEGER :: I_PRE_DIST=0, I_DET_DIST=0
      INTEGER :: GN_MIN=0, GN_MAX=0
      INTEGER :: N_VENT_FFIELDS=0, Avatar_Color_Index=0
      INTEGER, DIMENSION(3) :: RGB=-1, AVATAR_RGB=-1
@@ -439,7 +442,9 @@ CONTAINS
          AFTER_REACTION_TIME, GN_MIN, GN_MAX, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, MESH_ID, &
          COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
-         AVATAR_COLOR, AVATAR_RGB, SHOW
+         AVATAR_COLOR, AVATAR_RGB, SHOW, PRE_EVAC_DIST, DET_EVAC_DIST, &
+         PRE_MEAN,PRE_PARA,PRE_PARA2,PRE_LOW,PRE_HIGH, &
+         DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH
     NAMELIST /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR, SHOW
 
     NAMELIST /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
@@ -1156,6 +1161,7 @@ CONTAINS
                END IF
             CASE ('null')
                ! Do nothing, use the defaults
+               WRITE (LU_ERR,'(A,A)') ' WARNING: PERS ',TRIM(ID),' no DEFAULT_PROPERTIES given'
             CASE Default
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: PERS ',TRIM(ID),' problem with DEFAULT_PROPERTIES'
                CALL SHUTDOWN(MESSAGE)
@@ -1421,6 +1427,7 @@ CONTAINS
       !
       ! Local variables
       INTEGER nm, i1, i2, j1, j2, i, ii, iii
+      LOGICAL L_TMP
       TYPE (EVAC_EXIT_TYPE), POINTER :: PEX=>NULL()
       TYPE (EVAC_STRS_TYPE),  POINTER :: STRP=>NULL()
       TYPE (MESH_TYPE), POINTER :: M=>NULL()
@@ -1428,8 +1435,8 @@ CONTAINS
       READ_EXIT_LOOP: DO N = 1, N_EXITS
          !
          ID            = 'null'
-         RGB   = -1
-         COLOR = 'null'
+         RGB           = -1
+         COLOR         = 'null'
          XB            = 0.0_EB
          IOR           = 0
          FLOW_FIELD_ID = 'null'
@@ -1627,19 +1634,44 @@ CONTAINS
             PEX%ORIENTATION(2)=REAL(SIGN(1,IOR),EB)
          CASE (-3)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
-               WRITE(MESSAGE,'(A,I4,A)') 'ERROR: EXIT',N,' IOR=-3 but not 3-dim object'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT',TRIM(ID),' IOR=-3 but not 3-dim object'
                CALL SHUTDOWN(MESSAGE)
             END IF
             PEX%ORIENTATION(3)=REAL(SIGN(1,IOR),EB)
          CASE (0)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
-               WRITE(MESSAGE,'(A,I4,A)') 'ERROR: EXIT',N,' no IOR but not 3-dim object'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT',TRIM(ID),' no IOR but not 3-dim object'
                CALL SHUTDOWN(MESSAGE)
             END IF
          CASE Default
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: EXIT',N,' problem with IOR'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT',TRIM(ID),' problem with IOR'
             CALL SHUTDOWN(MESSAGE)
          END SELECT
+
+         L_TMP=.FALSE.
+         DO i = 1, NMESHES
+            IF (.NOT. EVACUATION_ONLY(i)) CYCLE
+            IF (TRIM(FLOW_FIELD_ID)==TRIM(MESH_NAME(i))) THEN
+               L_TMP=.TRUE.
+               EXIT
+            END IF
+         END DO
+         IF (.NOT.(TRIM(FLOW_FIELD_ID)=='null' .OR. L_TMP)) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID),' problem with FLOW_FIELD_ID'
+            CALL SHUTDOWN(MESSAGE)
+         END IF
+         L_TMP=.FALSE.
+         DO i = 1, NMESHES
+            IF (.NOT. EVACUATION_ONLY(i)) CYCLE
+            IF (TRIM(VENT_FFIELD)==TRIM(MESH_NAME(i))) THEN
+               L_TMP=.TRUE.
+               EXIT
+            END IF
+         END DO
+         IF (.NOT.(TRIM(VENT_FFIELD)=='null' .OR. L_TMP)) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID),' problem with VENT_FFIELD'
+            CALL SHUTDOWN(MESSAGE)
+         END IF
          ! 
          ! Check which vent field. If VENT_FFIELD is not found, use
          ! the main evac grid.
@@ -1712,7 +1744,6 @@ CONTAINS
          IF (M%SOLID(M%CELL_INDEX(II,JJ,KK)) .AND. .NOT.COUNT_ONLY .AND. SHOW) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT line ',TRIM(PEX%ID), ' problem with XYZ, inside solid'
             CALL SHUTDOWN(MESSAGE)
-  
          END IF
 
          ! PEX%Z is used to plot the door on the correct height in Smokeview.
@@ -1793,9 +1824,10 @@ CONTAINS
       ! Read the DOOR lines
       !
       ! Local variables
+      INTEGER nm, i1, i2, j1, j2, i, ii, iii
+      LOGICAL L_TMP
       TYPE (EVAC_DOOR_TYPE), POINTER :: PDX=>NULL()
       TYPE (MESH_TYPE), POINTER :: M=>NULL()
-      INTEGER nm, i1, i2, j1, j2, i, ii, iii
       !
       READ_DOOR_LOOP: DO N = 1, N_DOORS
          !
@@ -1904,7 +1936,7 @@ CONTAINS
          M => MESHES(PDX%IMESH)
  
          IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR',TRIM(ID),' must be a plane'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' must be a plane'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
 
@@ -2006,20 +2038,46 @@ CONTAINS
             PDX%ORIENTATION(2)=REAL(SIGN(1,IOR),EB)
          CASE (-3)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
-               WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' IOR=-3 but not 3-dim object'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' IOR=-3 but not 3-dim object'
                CALL SHUTDOWN(MESSAGE)
             END IF
             PDX%ORIENTATION(3)=REAL(SIGN(1,IOR),EB)
          CASE (0)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
-               WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' no IOR but not 3-dim object'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' no IOR but not 3-dim object'
                CALL SHUTDOWN(MESSAGE)
             END IF
          CASE Default
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' problem with IOR'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' problem with IOR'
             CALL SHUTDOWN(MESSAGE)
          END SELECT
          ! 
+
+         L_TMP=.FALSE.
+         DO i = 1, NMESHES
+            IF (.NOT. EVACUATION_ONLY(i)) CYCLE
+            IF (TRIM(FLOW_FIELD_ID)==TRIM(MESH_NAME(i))) THEN
+               L_TMP=.TRUE.
+               EXIT
+            END IF
+         END DO
+         IF (.NOT.(TRIM(FLOW_FIELD_ID)=='null' .OR. L_TMP)) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' problem with FLOW_FIELD_ID'
+            CALL SHUTDOWN(MESSAGE)
+         END IF
+         L_TMP=.FALSE.
+         DO i = 1, NMESHES
+            IF (.NOT. EVACUATION_ONLY(i)) CYCLE
+            IF (TRIM(VENT_FFIELD)==TRIM(MESH_NAME(i))) THEN
+               L_TMP=.TRUE.
+               EXIT
+            END IF
+         END DO
+         IF (.NOT.(TRIM(VENT_FFIELD)=='null' .OR. L_TMP)) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID),' problem with VENT_FFIELD'
+            CALL SHUTDOWN(MESSAGE)
+         END IF
+
          ! Check which vent field. If VENT_FFIELD is not found, use
          ! the main evac grid.
          PDX%I_VENT_FFIELD = 0
@@ -2055,17 +2113,7 @@ CONTAINS
                PDX%Y = PDX%Y - IOR*0.10_EB
             END SELECT
          END IF
-
-         IF (XYZ_SMOKE(1) < HUGE(XYZ_SMOKE)) THEN
-            PDX%Xsmoke = XYZ_SMOKE(1)
-            PDX%Ysmoke = XYZ_SMOKE(2)
-            PDX%Zsmoke = XYZ_SMOKE(3)
-         ELSE
-            PDX%Xsmoke = PDX%X
-            PDX%Ysmoke = PDX%Y
-            PDX%Zsmoke = 0.5_EB*(XB(5)+XB(6)) - EVACUATION_Z_OFFSET(PDX%IMESH) + HUMAN_SMOKE_HEIGHT
-         END IF
-
+         !
          ! Check which evacuation floor
          ii = 0
          iii = 0
@@ -2101,8 +2149,19 @@ CONTAINS
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR line ',TRIM(PDX%ID), ' problem with XYZ, inside solid'
             CALL SHUTDOWN(MESSAGE)
          END IF
+
          ! PDX%Z is used to plot the door on the correct height in Smokeview.
          PDX%Z = PDX%Z + 0.5_EB*PDX%Height - EVACUATION_Z_OFFSET(PDX%IMESH)
+
+         IF (XYZ_SMOKE(1) < HUGE(XYZ_SMOKE)) THEN
+            PDX%Xsmoke = XYZ_SMOKE(1)
+            PDX%Ysmoke = XYZ_SMOKE(2)
+            PDX%Zsmoke = XYZ_SMOKE(3)
+         ELSE
+            PDX%Xsmoke = PDX%X
+            PDX%Ysmoke = PDX%Y
+            PDX%Zsmoke = 0.5_EB*(XB(5)+XB(6)) - EVACUATION_Z_OFFSET(PDX%IMESH) + HUMAN_SMOKE_HEIGHT
+         END IF
 
          ! Check, which fire grid and i,j,k (xyz)
          PDX_SmokeLoop: DO i = 1, NMESHES
@@ -2259,12 +2318,12 @@ CONTAINS
          IF (MAX_HUMANS_INSIDE > 0 ) THEN
             PCX%MAX_HUMANS_INSIDE = MAX_HUMANS_INSIDE
          ELSE
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: CORR',N,' MAX_HUMANS_INSIDE <= 0'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',TRIM(ID),' MAX_HUMANS_INSIDE <= 0'
             CALL SHUTDOWN(MESSAGE)
          END IF
 
          IF (FAC_SPEED < 0 ) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: CORR',N,' FAC_SPEED < 0'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',TRIM(ID),' FAC_SPEED < 0'
             CALL SHUTDOWN(MESSAGE)
          ELSE
             IF (FAC_SPEED == 0.0_EB) FAC_SPEED = 0.6_EB
@@ -2287,7 +2346,7 @@ CONTAINS
          IF (EFF_LENGTH > 0.0_EB ) THEN
             PCX%Eff_Length = EFF_LENGTH
          ELSE
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: CORR',N,' EFF_LENGTH <= 0'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',TRIM(PCX%ID),' EFF_LENGTH <= 0'
             CALL SHUTDOWN(MESSAGE)
          END IF
          PCX%Eff_Area = PCX%Eff_Length*PCX%Eff_Width
@@ -2452,7 +2511,7 @@ CONTAINS
          STRP%FAC_V0_HORI = FAC_V0_HORI
 
          IF (N_LANDINGS>500) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: STRS',N,' N_LANDINGS > 500'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: STRS ',TRIM(STRP%ID),' N_LANDINGS > 500'
             CALL SHUTDOWN(MESSAGE)
          END IF
          STRP%N_LANDINGS = N_LANDINGS
@@ -2745,6 +2804,7 @@ CONTAINS
       !
       ! Local variables
       INTEGER nm, i1, i2, j1, j2, NR
+      LOGICAL L_TMP
       TYPE (EVAC_ENTR_TYPE), POINTER :: PNX=>NULL()
       TYPE (EVAC_PERS_TYPE), POINTER :: PCP=>NULL()
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
@@ -2868,6 +2928,19 @@ CONTAINS
                XB(I+1) = DUMMY
             END IF
          END DO
+
+         L_TMP=.FALSE.
+         DO i = 1, NMESHES
+            IF (.NOT. EVACUATION_ONLY(i)) CYCLE
+            IF (TRIM(FLOW_FIELD_ID)==TRIM(MESH_NAME(i))) THEN
+               L_TMP=.TRUE.
+               EXIT
+            END IF
+         END DO
+         IF (.NOT.(TRIM(FLOW_FIELD_ID)=='null' .OR. L_TMP)) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR ',TRIM(ID),' problem with FLOW_FIELD_ID'
+            CALL SHUTDOWN(MESSAGE)
+         END IF
          ! 
          ! Check which evacuation floor
          ii = 0
@@ -2899,7 +2972,7 @@ CONTAINS
          M => MESHES(PNX%IMESH)
  
          IF (XB(1)/=XB(2) .AND. XB(3)/=XB(4)) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR',TRIM(ID),' must be a plane'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR ',TRIM(ID),' must be a plane'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
 
@@ -2986,17 +3059,17 @@ CONTAINS
             PNX%ORIENTATION(2)=-REAL(SIGN(1,IOR),EB)
          CASE (3)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
-               WRITE(MESSAGE,'(A,I4,A)') 'ERROR: ENTR',N,' IOR=3 but not 3-dim object'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR',TRIM(ID),' IOR=3 but not 3-dim object'
                CALL SHUTDOWN(MESSAGE)
             END IF
             PNX%ORIENTATION(3)=-REAL(SIGN(1,IOR),EB)
          CASE (0)
             IF ( (XB(4)-XB(3)) <= 0.0_EB .OR. (XB(2)-XB(1)) <= 0.0_EB) THEN
-               WRITE(MESSAGE,'(A,I4,A)') 'ERROR: ENTR',N,' no IOR but not 3-dim object'
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR',TRIM(ID),' no IOR but not 3-dim object'
                CALL SHUTDOWN(MESSAGE)
             END IF
          CASE Default
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: ENTR',N,' problem with IOR'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: ENTR',TRIM(ID),' problem with IOR'
             CALL SHUTDOWN(MESSAGE)
          END SELECT
 
@@ -3086,6 +3159,7 @@ CONTAINS
       ! Read the EVAC lines
       ! 
       ! Local variables
+      LOGICAL L_TMP
       TYPE (EVACUATION_TYPE), POINTER :: HPT=>NULL()
       TYPE (EVAC_PERS_TYPE),  POINTER :: PCP=>NULL()
 
@@ -3112,6 +3186,18 @@ CONTAINS
          TIME_STOP                = -99.0_EB
          GN_MIN                   = 1
          GN_MAX                   = 1      
+         PRE_EVAC_DIST = -1  ! If Tpre given on EVAC namelist, override PERS
+         DET_EVAC_DIST = -1  ! If Tdet given on EVAC namelist, override PERS
+         PRE_PARA      = 0.0_EB
+         DET_PARA      = 0.0_EB
+         PRE_PARA2     = 0.0_EB
+         DET_PARA2     = 0.0_EB
+         PRE_LOW       = 0.0_EB
+         DET_LOW       = T_BEGIN
+         PRE_HIGH      = HUGE(PRE_HIGH)
+         DET_HIGH      = HUGE(PRE_HIGH)
+         PRE_MEAN      = 10.0_EB
+         DET_MEAN      = T_BEGIN
 
          KNOWN_DOOR_NAMES         = 'null'
          KNOWN_DOOR_PROBS         = 1.0_EB
@@ -3242,6 +3328,31 @@ CONTAINS
          HPT%IMESH = 0
          HPT%ID = TRIM(ID)
          HPT%SHOW   = SHOW
+         HPT%I_PRE_DIST  = PRE_EVAC_DIST
+         HPT%Tpre_mean   = PRE_MEAN
+         HPT%Tpre_low    = PRE_LOW
+         HPT%Tpre_high   = PRE_HIGH
+         HPT%Tpre_para   = PRE_PARA
+         HPT%Tpre_para2  = PRE_PARA2
+         HPT%I_DET_DIST  = DET_EVAC_DIST
+         HPT%Tdet_mean   = DET_MEAN
+         HPT%Tdet_low    = DET_LOW
+         HPT%Tdet_high   = DET_HIGH
+         HPT%Tdet_para   = DET_PARA
+         HPT%Tdet_para2  = DET_PARA2
+ 
+         L_TMP=.FALSE.
+         DO i = 1, NMESHES
+            IF (.NOT. EVACUATION_ONLY(i)) CYCLE
+            IF (TRIM(FLOW_FIELD_ID)==TRIM(MESH_NAME(i))) THEN
+               L_TMP=.TRUE.
+               EXIT
+            END IF
+         END DO
+         IF (.NOT.(TRIM(FLOW_FIELD_ID)=='null' .OR. L_TMP)) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVAC ',TRIM(ID),' problem with FLOW_FIELD_ID'
+            CALL SHUTDOWN(MESSAGE)
+         END IF
 
          ! Check which evacuation floor
          ii = 0
@@ -3541,7 +3652,7 @@ CONTAINS
             ESS%ORIENTATION(2) = 0.5_EB*IOR*(ESS%H-ESS%H0)/ SQRT((ESS%Y2-ESS%Y1)**2 + (ESS%H-ESS%H0)**2)
             ESS%ORIENTATION(3) = ESS%COS_Y
          CASE Default
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: EVSS',N,' problem with IOR'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: EVSS ',TRIM(ESS%ID),' problem with IOR'
             CALL SHUTDOWN(MESSAGE)
          END SELECT
 
@@ -3622,6 +3733,7 @@ CONTAINS
       IMPLICIT NONE
       !
       ! Local variables
+      LOGICAL :: L_TMP
       TYPE (EVAC_ENTR_TYPE), POINTER :: PNX=>NULL()
       TYPE (EVAC_DOOR_TYPE), POINTER :: PDX=>NULL()
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
@@ -3645,7 +3757,7 @@ CONTAINS
             END IF
          END DO Nodeloop2
          IF (EVAC_CORRS(n)%INODE2 == 0 .OR. EVAC_CORRS(n)%IMESH2 == 0) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: CORR',n,' problem with TO_NODE, loop2'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',Trim(ID),' problem with TO_NODE'
             CALL SHUTDOWN(MESSAGE)
          END IF
       END DO
@@ -3660,7 +3772,7 @@ CONTAINS
             END IF
          END DO NodeLoop
          IF (EVAC_DOORS(n)%INODE2 == 0 .OR. EVAC_DOORS(n)%IMESH2 == 0) THEN
-            WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',n,' problem with TO_NODE'
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(EVAC_DOORS(n)%ID),' problem with TO_NODE'
             CALL SHUTDOWN(MESSAGE)
          END IF
       END DO
@@ -3672,14 +3784,14 @@ CONTAINS
             IF (TRIM(EVAC_Node_List(i)%Node_Type) == 'Door') THEN
                PDX => EVAC_DOORS(EVAC_Node_List(i)%Node_Index)
                IF ((EVAC_DOORS(n)%IOR /= -PDX%IOR) .OR. ABS(EVAC_DOORS(n)%Width-PDX%Width) > 0.1_EB ) THEN
-                  WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' KEEP_XY Problem'
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(EVAC_DOORS(n)%ID),' KEEP_XY Problem'
                   CALL SHUTDOWN(MESSAGE)
                END IF
             END IF
             IF (TRIM(EVAC_Node_List(i)%Node_Type) == 'Entry') THEN
                PNX => EVAC_ENTRYS(EVAC_Node_List(i)%Node_Index)
                IF ((EVAC_DOORS(n)%IOR /= PNX%IOR) .OR. ABS(EVAC_DOORS(n)%Width-PNX%Width) > 0.1_EB ) THEN
-                  WRITE(MESSAGE,'(A,I4,A)') 'ERROR: DOOR',N,' KEEP_XY Problem'
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(EVAC_DOORS(n)%ID),' KEEP_XY Problem'
                   CALL SHUTDOWN(MESSAGE)
                END IF
             END IF
@@ -3749,6 +3861,25 @@ CONTAINS
          ALLOCATE(STRP%NODES_OUT(1:STRP%N_NODES_OUT),STAT=IZERO)
          CALL ChkMemErr('Read_Evac','STRP%NODES_OUT',IZERO) 
          STRP%NODES_OUT = NODES_TMP(1:STRP%N_NODES_OUT)
+      END DO
+
+      DO N = 1,N_EXITS
+         L_TMP = .TRUE.
+         DO i = 1, NPC_PERS
+            IF (TRIM(EVAC_PERSON_CLASSES(i)%ID) == TRIM(EVAC_EXITS(N)%PERS_ID)) L_TMP=.FALSE.
+         END DO
+         IF (L_TMP .AND. .NOT.(TRIM(EVAC_EXITS(N)%PERS_ID))=='null') THEN
+            WRITE(MESSAGE,'(4A)') 'ERROR: EXIT ',TRIM(EVAC_EXITS(N)%ID),' problem with PERS_ID ',TRIM(EVAC_EXITS(N)%PERS_ID)
+            CALL SHUTDOWN(MESSAGE)
+         END IF
+         L_TMP = .TRUE.
+         DO i = 1, NPC_EVAC
+            IF (TRIM(EVACUATION(i)%ID) == TRIM(EVAC_EXITS(N)%EVAC_ID)) L_TMP=.FALSE.
+         END DO
+         IF (L_TMP .AND. .NOT.(TRIM(EVAC_EXITS(N)%EVAC_ID))=='null') THEN
+            WRITE(MESSAGE,'(4A)') 'ERROR: EXIT ',TRIM(EVAC_EXITS(N)%ID),' problem with EVAC_ID ',TRIM(EVAC_EXITS(n)%EVAC_ID)
+            CALL SHUTDOWN(MESSAGE)
+         END IF
       END DO
 
     END SUBROUTINE CHECK_EVAC_NODES
@@ -4354,7 +4485,7 @@ CONTAINS
           END IF
        END DO HP_MeshLoop
        IF (n_tmp < 1 .OR. n_tmp > n_egrids) THEN
-          WRITE(MESSAGE,'(A,A,A,I4)') 'ERROR: INIT_EVAC ',TRIM(HPT%ID),' problem evac node, INODE= ',n_tmp
+          WRITE(MESSAGE,'(A,A,A,I4)') 'ERROR: INIT_EVAC: EVAC ',TRIM(HPT%ID),' problem evac node, INODE= ',n_tmp
           CALL SHUTDOWN(MESSAGE)
        END IF
        !
@@ -4403,9 +4534,9 @@ CONTAINS
              END IF
              !
              HR => HUMAN(N_HUMANS)
-             CALL CLASS_PROPERTIES(HR,PCP)
              HR%IPC = HPT%IPC  ! PERS-line index
              HR%IEL = IPC      ! EVAC-line index
+             CALL CLASS_PROPERTIES(HR,PCP,HR%IEL)
              HR%I_Target = 0
 
              !
@@ -4477,8 +4608,8 @@ CONTAINS
 
                 IF (i_endless_loop >= 10*INT(dens_fac*(16.0_EB*MAX(1.0_EB,LOG10(2.5_EB*VOL2))) / &
                      MAX(1.0_EB,LOG10((2.5_EB*VOL2)/(2.5_EB*VOL2-1)))) ) THEN
-                   WRITE (LU_EVACOUT,fmt='(A,I4,A,I4,A,I6)') ' ERROR: Initialize_Humans, EVAC line ', &
-                        IPC, ', Mesh ', NM, ', i_human ', n_humans
+                   WRITE (LU_EVACOUT,fmt='(A,A,A,I4,A,I6)') ' ERROR: Initialize_Humans, EVAC line ', &
+                        TRIM(EVACUATION(IPC)%ID), ', Mesh ', NM, ', i_human ', n_humans
                    WRITE (LU_EVACOUT,fmt='(a)') '      x       y       z     Rd      Rt      Rs      ds  '
                    WRITE (LU_EVACOUT,fmt='(3f8.2,4f8.4)') HR%X, HR%Y, HR%Z, &
                         2.0_EB*HR%Radius, HR%r_torso, HR%r_shoulder, HR%d_shoulder
@@ -8972,7 +9103,7 @@ CONTAINS
       !
       PCP => EVAC_PERSON_CLASSES(PNX%IPC)
       HR  => MESHES(NM)%HUMAN(N_HUMANS+1)
-      CALL CLASS_PROPERTIES(HR,PCP)
+      CALL CLASS_PROPERTIES(HR,PCP,-I_entry)
       HR%Tpre = 0.0_EB
       HR%Tdet = T_BEGIN
       HR%IPC  = PNX%IPC
@@ -9698,17 +9829,20 @@ CONTAINS
 ! NEXT ARE EVAC MODULE SUBPROGRMAS
 ! ============================================================
 !
-  SUBROUTINE CLASS_PROPERTIES(HR,PCP)
+  SUBROUTINE CLASS_PROPERTIES(HR,PCP,IEL)
     IMPLICIT NONE
     !
     ! Passed variables
+    INTEGER :: IEL  ! >0: EVAC line index, <0: ENTR line index=Abs(iel)
     TYPE (HUMAN_TYPE), POINTER:: HR
     TYPE (EVAC_PERS_TYPE), POINTER:: PCP
     !
     ! Local variables
     ! How many rnd numbers per one call to the rnd routine
     INTEGER, PARAMETER  :: n_rnd=1, n_max_par=4
-    INTEGER  :: n_par, RandomType
+    INTEGER  :: n_par, RandomType, I_det_dist, I_pre_dist
+    REAL(EB) :: Tdet_low, Tdet_high, Tdet_mean, Tdet_para, Tdet_para2
+    REAL(EB) :: Tpre_low, Tpre_high, Tpre_mean, Tpre_para, Tpre_para2
     ! No more than 4 numbers needed to specify the distributions
     REAL(EB) :: RandomPara(n_max_par)
     REAL(EB) :: rnd_vec(n_rnd)
@@ -9721,6 +9855,37 @@ CONTAINS
     ! 7: Triangular (TESTED: OK)
     ! 8: Weibull (TESTED: OK) (alpha=1: Exponential)
     ! 9: Gumbel (TESTED: OK)
+
+    I_det_dist = PCP%I_DET_DIST
+    Tdet_low   = PCP%Tdet_low
+    Tdet_high  = PCP%Tdet_high
+    Tdet_mean  = PCP%Tdet_mean
+    Tdet_para  = PCP%Tdet_para
+    Tdet_para2 = PCP%Tdet_para2
+    I_pre_dist = PCP%I_PRE_DIST
+    Tpre_low   = PCP%Tpre_low
+    Tpre_high  = PCP%Tpre_high
+    Tpre_mean  = PCP%Tpre_mean
+    Tpre_para  = PCP%Tpre_para
+    Tpre_para2 = PCP%Tpre_para2
+    IF (IEL>0) THEN
+       IF (EVACUATION(IEL)%I_DET_DIST>-1) THEN
+          I_det_dist = EVACUATION(IEL)%I_DET_DIST
+          Tdet_low   = EVACUATION(IEL)%Tdet_low
+          Tdet_high  = EVACUATION(IEL)%Tdet_high
+          Tdet_mean  = EVACUATION(IEL)%Tdet_mean
+          Tdet_para  = EVACUATION(IEL)%Tdet_para
+          Tdet_para2 = EVACUATION(IEL)%Tdet_para2
+       END IF
+       IF (EVACUATION(IEL)%I_PRE_DIST>-1) THEN
+          I_pre_dist = EVACUATION(IEL)%I_PRE_DIST
+          Tpre_low   = EVACUATION(IEL)%Tpre_low
+          Tpre_high  = EVACUATION(IEL)%Tpre_high
+          Tpre_mean  = EVACUATION(IEL)%Tpre_mean
+          Tpre_para  = EVACUATION(IEL)%Tpre_para
+          Tpre_para2 = EVACUATION(IEL)%Tpre_para2
+       END IF
+    END IF
 
     SELECT CASE(PCP%I_VEL_DIST)
     CASE(-1)
@@ -9996,45 +10161,45 @@ CONTAINS
        CALL SHUTDOWN('ERROR: Class_Properties I_TAU_DIST')
     END SELECT
 
-    SELECT CASE(PCP%I_DET_DIST)
+    SELECT CASE(I_DET_DIST)
     CASE(-1)
        CALL SHUTDOWN('ERROR: Class_Properties: -1')
     CASE(0)
-       HR%Tdet  = PCP%Tdet_mean
+       HR%Tdet  = Tdet_mean
     CASE(1)   ! Uniform
        ! Parameters: (ave,min,max) ave not used
        n_par = 3
        Randomtype = 1
-       RandomPara(1) = 0.5_EB*(PCP%Tdet_high+PCP%Tdet_low)
-       RandomPara(2) = PCP%Tdet_low
-       RandomPara(3) = PCP%Tdet_high
+       RandomPara(1) = 0.5_EB*(Tdet_high+Tdet_low)
+       RandomPara(2) = Tdet_low
+       RandomPara(3) = Tdet_high
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE(2)   ! Truncated Normal
        ! Parameters: (ave,sigma,min,max)
        n_par = 4
        Randomtype = 2
-       RandomPara(1) = PCP%Tdet_mean
-       RandomPara(2) = PCP%Tdet_para
-       RandomPara(3) = PCP%Tdet_low
-       RandomPara(4) = PCP%Tdet_high
+       RandomPara(1) = Tdet_mean
+       RandomPara(2) = Tdet_para
+       RandomPara(3) = Tdet_low
+       RandomPara(4) = Tdet_high
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE(3)   ! Gamma
        ! Parameters: (ave,alpha,beta) ave not used
        n_par = 3
        Randomtype = 3
-       RandomPara(1) = PCP%Tdet_mean
-       RandomPara(2) = PCP%Tdet_para
-       RandomPara(3) = PCP%Tdet_para2
+       RandomPara(1) = Tdet_mean
+       RandomPara(2) = Tdet_para
+       RandomPara(3) = Tdet_para2
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE(4)   ! Normal
        ! Parameters: (ave,sigma)
        n_par = 2
        Randomtype = 4
-       RandomPara(1) = PCP%Tdet_mean
-       RandomPara(2) = PCP%Tdet_para
+       RandomPara(1) = Tdet_mean
+       RandomPara(2) = Tdet_para
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE(5)   ! LogNormal
@@ -10042,90 +10207,90 @@ CONTAINS
        ! Parameters: (ave,sigma) of ln(x)
        n_par = 4
        Randomtype = 5
-       RandomPara(1) = PCP%Tdet_mean
-       RandomPara(2) = PCP%Tdet_para
-       RandomPara(3) = PCP%Tdet_high  ! high end cutoff
-       RandomPara(4) = PCP%Tdet_para2 ! shift
+       RandomPara(1) = Tdet_mean
+       RandomPara(2) = Tdet_para
+       RandomPara(3) = Tdet_high  ! high end cutoff
+       RandomPara(4) = Tdet_para2 ! shift
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE(6)   ! Beta
        ! Parameters: (ave,a,b) ave not used
        n_par = 3
        Randomtype = 6
-       RandomPara(1) = PCP%Tdet_mean
-       RandomPara(2) = PCP%Tdet_para
-       RandomPara(3) = PCP%Tdet_para2
+       RandomPara(1) = Tdet_mean
+       RandomPara(2) = Tdet_para
+       RandomPara(3) = Tdet_para2
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE(7)   ! Triangular
        ! Parameters: (peak,min,max)
        n_par = 3
        Randomtype = 7
-       RandomPara(1) = PCP%Tdet_mean
-       RandomPara(2) = PCP%Tdet_low
-       RandomPara(3) = PCP%Tdet_high
+       RandomPara(1) = Tdet_mean
+       RandomPara(2) = Tdet_low
+       RandomPara(3) = Tdet_high
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE(8)   ! Weibull  (alpha=1: Exponential)
        ! Parameters: (ave,alpha,lambda)
        n_par = 3
        Randomtype = 8
-       RandomPara(1) = PCP%Tdet_mean
-       RandomPara(2) = PCP%Tdet_para
-       RandomPara(3) = PCP%Tdet_para2
+       RandomPara(1) = Tdet_mean
+       RandomPara(2) = Tdet_para
+       RandomPara(3) = Tdet_para2
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE(9)   ! Gumbel
        ! Parameters: (ave,alpha)
        n_par = 2
        Randomtype = 9
-       RandomPara(1) = PCP%Tdet_mean
-       RandomPara(2) = PCP%Tdet_para
+       RandomPara(1) = Tdet_mean
+       RandomPara(2) = Tdet_para
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tdet = rnd_vec(1)
     CASE Default
        CALL SHUTDOWN('ERROR: Class_Properties I_DET_DIST')
     END SELECT
 
-    SELECT CASE(PCP%I_PRE_DIST)
+    SELECT CASE(I_PRE_DIST)
     CASE(-1)
        CALL SHUTDOWN('ERROR: Class_Properties: -1')
     CASE(0)
-       HR%Tpre  = MAX(0._EB,PCP%Tpre_mean)
+       HR%Tpre  = MAX(0._EB,Tpre_mean)
     CASE(1)   ! Uniform
        ! Parameters: (ave,min,max) ave not used
        n_par = 3
        Randomtype = 1
-       RandomPara(1) = 0.5_EB*(PCP%Tpre_high+PCP%Tpre_low)
-       RandomPara(2) = PCP%Tpre_low
-       RandomPara(3) = PCP%Tpre_high
+       RandomPara(1) = 0.5_EB*(Tpre_high+Tpre_low)
+       RandomPara(2) = Tpre_low
+       RandomPara(3) = Tpre_high
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE(2)   ! Truncated Normal
        ! Parameters: (ave,sigma,min,max)
        n_par = 4
        Randomtype = 2
-       RandomPara(1) = PCP%Tpre_mean
-       RandomPara(2) = PCP%Tpre_para
-       RandomPara(3) = PCP%Tpre_low
-       RandomPara(4) = PCP%Tpre_high
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       RandomPara(3) = Tpre_low
+       RandomPara(4) = Tpre_high
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE(3)   ! Gamma
        ! Parameters: (ave,alpha,beta) ave not used
        n_par = 3
        Randomtype = 3
-       RandomPara(1) = PCP%Tpre_mean
-       RandomPara(2) = PCP%Tpre_para
-       RandomPara(3) = PCP%Tpre_para2
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       RandomPara(3) = Tpre_para2
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE(4)   ! Normal
        ! Parameters: (ave,sigma)
        n_par = 2
        Randomtype = 4
-       RandomPara(1) = PCP%Tpre_mean
-       RandomPara(2) = PCP%Tpre_para
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE(5)   ! LogNormal
@@ -10133,45 +10298,45 @@ CONTAINS
        ! Parameters: (ave,sigma) of ln(x)
        n_par = 4
        Randomtype = 5
-       RandomPara(1) = PCP%Tpre_mean
-       RandomPara(2) = PCP%Tpre_para
-       RandomPara(3) = PCP%Tpre_high  ! high end cutoff
-       RandomPara(4) = PCP%Tpre_para2 ! shift
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       RandomPara(3) = Tpre_high  ! high end cutoff
+       RandomPara(4) = Tpre_para2 ! shift
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE(6)   ! Beta
        ! Parameters: (ave,a,b) ave not used
        n_par = 3
        Randomtype = 6
-       RandomPara(1) = PCP%Tpre_mean
-       RandomPara(2) = PCP%Tpre_para
-       RandomPara(3) = PCP%Tpre_para2
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       RandomPara(3) = Tpre_para2
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE(7)   ! Triangular
        ! Parameters: (peak,min,max)
        n_par = 3
        Randomtype = 7
-       RandomPara(1) = PCP%Tpre_mean
-       RandomPara(2) = PCP%Tpre_low
-       RandomPara(3) = PCP%Tpre_high
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_low
+       RandomPara(3) = Tpre_high
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE(8)   ! Weibull  (alpha=1: Exponential)
        ! Parameters: (ave,alpha,lambda)
        n_par = 3
        Randomtype = 8
-       RandomPara(1) = PCP%Tpre_mean
-       RandomPara(2) = PCP%Tpre_para
-       RandomPara(3) = PCP%Tpre_para2
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       RandomPara(3) = Tpre_para2
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE(9)   ! Gumbel
        ! Parameters: (ave,alpha)
        n_par = 2
        Randomtype = 9
-       RandomPara(1) = PCP%Tpre_mean
-       RandomPara(2) = PCP%Tpre_para
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
        CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
        HR%Tpre = MAX(0._EB,rnd_vec(1))
     CASE Default
