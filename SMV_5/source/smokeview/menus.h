@@ -3944,6 +3944,7 @@ static int unloadmultislicemenu=0, vslicemenu=0, staticslicemenu=0;
 static int evacmenu=0, particlemenu=0, particlesubmenu=0, showpatchmenu=0, zonemenu=0, isoshowmenu=0, isolevelmenu=0, smoke3dshowmenu=0;
 static int particle5showmenu=0;
 static int particlepropshowmenu=0,humanpropshowmenu=0;
+static int *particlepropshowsubmenu=NULL;
 static int particlestreakshowmenu=0;
 static int tourmenu=0;
 static int showtourmenu=0, avatartourmenu=0,avatarevacmenu=0;
@@ -4110,6 +4111,7 @@ static int in_menu=0;
   if(nloadsubvslicemenu>0){
     FREEMEMORY(loadsubvslicemenu);
   }
+  FREEMEMORY(particlepropshowsubmenu);
   if(nloadsubmvslicemenu>0){
     FREEMEMORY(loadsubmvslicemenu);
   }
@@ -4953,6 +4955,7 @@ static int in_menu=0;
   /* --------------------------------particle class show menu -------------------------- */
 
   if(npartclassinfo>0){
+    int ntypes;
 
     CREATEMENU(particlestreakshowmenu,ParticleStreakShowMenu);
     {
@@ -4980,30 +4983,11 @@ static int in_menu=0;
     }
     glutAddMenuEntry("Hide",-2);
 
+// allocate memory for particle property sub-menus
 
-    CREATEMENU(particlepropshowmenu,ParticlePropShowMenu);
-    if(npart5prop>=0){
-      int ntypes;
-
-      glutAddMenuEntry("Color with:",-1);
-      for(i=0;i<npart5prop;i++){
-        part5prop *propi;
-
-        propi = part5propinfo + i;
-        if(propi->particle_property==0)continue;
-        if(propi->display==1){
-          strcpy(menulabel,"  *");
-        }
-        else{
-          strcpy(menulabel,"  ");
-        }
-        strcat(menulabel,propi->label->longlabel);
-        glutAddMenuEntry(menulabel,i);
-      }
-    
-      if(part5show==0)glutAddMenuEntry("  *Hide",-4);
-      if(part5show==1)glutAddMenuEntry("  Hide",-4);
-      glutAddMenuEntry("-",-1);
+    if(npart5prop*npartclassinfo>0){
+      NewMemory((void **)&particlepropshowsubmenu,npart5prop*npartclassinfo*sizeof(int));
+    }
 
       ntypes=0;
       for(i=0;i<npart5prop;i++){
@@ -5017,6 +5001,7 @@ static int in_menu=0;
           if(propi->class_present[j]==0)continue;
           partclassj = partclassinfo + j;
           if(partclassj->kind==HUMANS)continue;
+          CREATEMENU(particlepropshowsubmenu[ntypes],ParticlePropShowMenu);
           ntypes++;
           if(propi->class_vis[j]==1){
             strcpy(menulabel,"  *");
@@ -5030,13 +5015,11 @@ static int in_menu=0;
              (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)
             ){
             if(propi->class_vis[j]==1){
-              strcpy(menulabel,"*Draw ");
+              strcpy(menulabel,"using:");
             }
             else{
-              strcpy(menulabel,"Draw ");
+              strcpy(menulabel,"using:");
             }
-            strcat(menulabel,partclassj->name);
-              strcat(menulabel," using:");
             glutAddMenuEntry(menulabel,-10-5*j);
             if(partclassj->vis_type==PART_POINTS){
               glutAddMenuEntry("    *points",-10-5*j-PART_POINTS);
@@ -5060,12 +5043,6 @@ static int in_menu=0;
               else{
                 glutAddMenuEntry("    lines",-10-5*j-PART_LINES);
               }
-            }
-            if(streak5show==1){
-              glutAddSubMenu("    *Streaks",particlestreakshowmenu);
-            }
-            else{
-              glutAddSubMenu("    Streaks",particlestreakshowmenu);
             }
             if(partclassj->smv_device!=NULL&&partclassj->device_name!=NULL||
               (partclassj->prop!=NULL&&partclassj->prop->smokeview_id!=NULL)
@@ -5106,11 +5083,65 @@ static int in_menu=0;
             glutAddMenuEntry(menulabel,-10-5*j);
           }
         }
-        break;
       }
+
+    CREATEMENU(particlepropshowmenu,ParticlePropShowMenu);
+    if(npart5prop>=0){
+      glutAddMenuEntry("Color with:",-1);
+      for(i=0;i<npart5prop;i++){
+        part5prop *propi;
+
+        propi = part5propinfo + i;
+        if(propi->particle_property==0)continue;
+        if(propi->display==1){
+          strcpy(menulabel,"  *");
+        }
+        else{
+          strcpy(menulabel,"  ");
+        }
+        strcat(menulabel,propi->label->longlabel);
+        glutAddMenuEntry(menulabel,i);
+      }
+    
+      if(part5show==0)glutAddMenuEntry("  *Hide",-4);
+      if(part5show==1)glutAddMenuEntry("  Hide",-4);
+      glutAddMenuEntry("-",-1);
+
+      glutAddMenuEntry("Draw",-1);
+      ntypes=0;
+      for(i=0;i<npart5prop;i++){
+        part5prop *propi;
+
+        propi = part5propinfo + i;
+        if(propi->display==0)continue;
+        for(j=0;j<npartclassinfo;j++){
+          part5class *partclassj;
+
+          if(propi->class_present[j]==0)continue;
+          partclassj = partclassinfo + j;
+          if(partclassj->kind==HUMANS)continue;
+          ntypes++;
+          if(propi->class_vis[j]==1){
+            strcpy(menulabel,"  *");
+          }
+          else{
+            strcpy(menulabel,"  ");
+          }
+          strcat(menulabel,partclassj->name);
+          glutAddSubMenu(menulabel,particlepropshowsubmenu[ntypes-1]);
+        }
+      }
+
       if(ntypes>1){
-        glutAddMenuEntry("  Show All Types",-2);
-        glutAddMenuEntry("  Hide All Types",-3);
+        glutAddMenuEntry("  Show All",-2);
+        glutAddMenuEntry("  Hide All",-3);
+      }
+      glutAddMenuEntry("-",-1);
+      if(streak5show==1){
+        glutAddSubMenu("*Streaks",particlestreakshowmenu);
+      }
+      else{
+        glutAddSubMenu("Streaks",particlestreakshowmenu);
       }
       glutAddMenuEntry("-",-1);
       if(show_tracers_always==0)glutAddMenuEntry("Show tracers always",-6);
@@ -5119,8 +5150,6 @@ static int in_menu=0;
 
     CREATEMENU(humanpropshowmenu,ParticlePropShowMenu);
     if(npart5prop>=0){
-      int ntypes;
-
       glutAddMenuEntry("Color:",-1);
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
@@ -5172,8 +5201,8 @@ static int in_menu=0;
         glutAddSubMenu("  Streaks",particlestreakshowmenu);
       }
       if(ntypes>1){
-        glutAddMenuEntry("  Show All Types",-2);
-        glutAddMenuEntry("  Hide All Types",-3);
+        glutAddMenuEntry("  Show All",-2);
+        glutAddMenuEntry("  Hide All",-3);
       }
     }
   }
