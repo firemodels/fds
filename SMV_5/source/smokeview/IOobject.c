@@ -2434,7 +2434,7 @@ int get_token_loc(char *var,sv_object_frame *frame){
   return -1;
 }
 
-/* ----------------------- parse_frame ----------------------------- */
+/* ----------------------- parse_device_frame ----------------------------- */
 
 char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *frame){
   char  object_buffer[100000];
