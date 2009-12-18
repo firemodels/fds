@@ -84,8 +84,8 @@ condenses hundreds of plots into just one, but we still have the problem of quan
 diagonal line on the plot shown in Fig.~\ref{scatterplot} only indicates where a prediction and measurement agree. But because the model has error, and
 the measurement has uncertainty, it cannot be said that the model is perfect if its predictions agree exactly with measurements. There needs to be a way of quantifying
 both the error and uncertainty before any conclusions can be drawn.
-Such an exercise would result in the error/uncertainty bars\footnote{The data in Fig.~\ref{scatterplot} was extracted from Ref.~\cite{NUREG_1824}. 
-The uncertainty bars are for demonstration only.}  
+Such an exercise would result in the error/uncertainty bars\footnote{The data in Fig.~\ref{scatterplot} was extracted from Ref.~\cite{NUREG_1824}.
+The uncertainty bars are for demonstration only.}
 shown in the figure. The
 horizontal error bar associated with each point represents the uncertainty in the measurement itself. For example, a thermocouple used to measure a gas
 temperature has uncertainty. The vertical error bar, however, results from the combination of the error in the model itself and the uncertainty in the
@@ -112,7 +112,7 @@ typically contains fairly limited discussion of uncertainty. Some contain none a
 However, in order to assess the accuracy of the model predictions, there must be some estimate of the
 combined effect of the uncertainty in the reported test parameters, like the heat release rate of the fire,
 and the reported measurements of the quantities of interest, like the hot gas layer (HGL)
-temperature, heat flux, and so forth. Unless there is an estimate of the experimental uncertainty, the difference between model and measurement 
+temperature, heat flux, and so forth. Unless there is an estimate of the experimental uncertainty, the difference between model and measurement
 would simply have to be attributed as model error and there is no point in
 continuing this exercise.
 
@@ -256,13 +256,15 @@ with a non-informative prior for $\theta$, we obtain the posterior distribution 
 \ee
 The assumption of a non-informative prior implies that we do not have sufficient information about the
 prior distribution ({\em i.e.} the true value) of
-$\theta$ to assume anything other than a uniform\footnote{A uniform distribution means that there is an equal likelihood that the random variable takes on any value
-within the range of possibilities.} distribution. This is equivalent to saying that the modeler has not biased the model input parameters to compensate for a known
-bias in the model output. For example, if a model has been shown to over-predict the compartment temperature, and the modeler has reduced the specified heat release
-rate as a result, then it can no longer be assumed that the prior distribution of the true temperature is uniform, and the
-methodology for estimating the true value is no longer valid. Still another way to understand this is by analogy to target shooting. If a given rifle 
-has a defect such that, on average, it shoots 10~cm to the left of a given target, then it must be assumed that a marksman without this knowledge was aiming 
-10~cm to the right of the bullet hole. 
+$\theta$ to assume anything other than a uniform\footnote{A uniform distribution means that for any two equally sized intervals of the real line, 
+there is an equal likelihood that the random variable takes a value in one of them.} distribution. 
+This is equivalent to saying that the modeler has not biased the model input parameters to compensate for a known
+bias in the model output. For example, if a particular model has been shown to over-predict compartment temperature, and the modeler has reduced the specified heat release
+rate to better estimate the true temperature, then it can no longer be assumed that the prior distribution of the true temperature is uniform. 
+Still another way to look at this is by analogy to target shooting. Suppose a particular rifle
+has a manufacturers defect such that, on average, it shoots 10~cm to the left of the target. It must be assumed that any given shot by a marksman without this knowledge is
+going to strike 10~cm to the left of the intended target. However, if the marksman knows of the defect, he or she will probably aim 10~cm to the right of the 
+intended target to compensate for the defect. If that is the case, it can no longer be assumed that the intended target was 10~cm to the right of the bullet hole. 
 
 In summary, assuming that the modeler has not modified the input parameters to compensate for a known bias in the model,
 the true value of the model output quantity, $\theta$, given the model prediction, $M$, is assumed to be normally distributed with the following mean and standard deviation:
