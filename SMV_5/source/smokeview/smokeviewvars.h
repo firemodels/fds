@@ -612,6 +612,7 @@ SVEXTERN int nunitclasses,nunitclasses_default,nunitclasses_ini;
 SVEXTERN mesh *meshinfo,*current_mesh, *mesh_save, *mesh_last, *loaded_isomesh;
 SVEXTERN float devicenorm_length;
 SVEXTERN int ndeviceinfo;
+SVEXTERN int last_prop_display;
 SVEXTERN device *deviceinfo;
 SVEXTERN int show_smokesensors,active_smokesensors,test_smokesensors;
 SVEXTERN float smoke3d_cvis;
