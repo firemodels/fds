@@ -2576,6 +2576,7 @@ void ParticlePropShowMenu(int value){
     }
     
     propi = part5propinfo + iprop;
+    last_prop_display=iprop;
     propi->display=1;
 
     if(scriptoutstream!=NULL){
@@ -2616,15 +2617,20 @@ void ParticlePropShowMenu(int value){
   }
   else if(value==-4){
     int i;
+    int unhide=1;
 
     for(i=0;i<npart5prop;i++){
       propi = part5propinfo + i;
       if(propi->particle_property==1){
+        if(propi->display==1)unhide=0;
         propi->display=0;
       }
     }
     part5show=0;
     parttype=0;
+    if(unhide==1&&last_prop_display>=0){
+      ParticlePropShowMenu(last_prop_display);
+    }
   }
   else if(value==-5){
     int i;
@@ -4979,7 +4985,7 @@ static int in_menu=0;
     if(npart5prop>=0){
       int ntypes;
 
-      glutAddMenuEntry("Color data using:",-1);
+      glutAddMenuEntry("Color with:",-1);
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
 
