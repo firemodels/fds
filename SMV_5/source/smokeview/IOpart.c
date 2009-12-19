@@ -1633,6 +1633,7 @@ void drawPart5(const particle *parti){
                 */
                 prop=datacopy->partclassbase->prop;
                 copy_dep_vals(partclassi,datacopy,colorptr,prop,j);
+                glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
                 draw_SVOBJECT(prop->smv_object,0,prop);
                 glPopMatrix();
               }
