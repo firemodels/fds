@@ -5958,22 +5958,16 @@ the properties of the droplets ejected by a sprinkler or nozzle, for example
 \section{Particle and Droplet Insertion}
 \label{info:controlling_droplets}
 
+There are three ways of introducing droplets or particles into a simulation. The first is to define a sprinkler or
+nozzle using a {\ct PROP} line that includes a {\ct PART\_ID} that specifies the droplet parameters. The second way to
+introduce particles or droplets is to
+add a {\ct PART\_ID} to a {\ct SURF} line, in which case particles or droplets will be ejected from that surface. Note that
+this only works if the surface has a normal velocity pointing into the flow domain. The third way to introduce droplets or
+particles is via an {\ct INIT} that defines a volume within the computational domain in which the particles/droplets are
+to be introduced initially and/or periodically in time.
 
-\subsection{Controlling the Number of Particles and Droplets}
 
-Regardless of how the particles or droplets are introduced into the computational domain, the following are important
-parameters for controlling their number:
-\begin{description}
-\item[{\ct DT\_INSERT}] Time increment in seconds between the introduction of a ``batch'' of particles or droplets.
-The number per ``batch'' depends on how they are introduced.
-If more particles are desired, lower the input value of this parameter. The default value is 0.01~s.
-\item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
-file {\bf CHID.prt5}. This parameter can be used to reduce the size
-of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default
-is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{part_type}.
-\item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when
-trying to reduce the number of droplets or particles in a simulation.
-\end{description}
+
 
 
 \subsection{Particles Introduced at a Solid Surface}
@@ -6012,9 +6006,11 @@ information on devices and controls, see Sections~\ref{info:basic_control}~and~\
 \subsection{Droplets Introduced at a Sprinkler or Nozzle}
 
 {\ct DROPLETS\_PER\_SECOND} is the  number of droplets inserted every
-second per active sprinkler or nozzle (Default 5000). Note that this parameter only affects sprinklers and nozzles.
+second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct PROP} line that includes other properties of
+the sprinkler or nozzle. Note that this parameter only affects sprinklers and nozzles.
 Changing this parameter does {\em not} change the flow rate, but rather the number
-of droplets used to represent the flow. Also note that the number of droplets introduced per ``batch'' is {\ct DROPLETS\_PER\_SECOND} times {\ct DT\_INSERT}.
+of droplets used to represent the flow.
+Also note that the number of droplets introduced per ``batch'' is {\ct DROPLETS\_PER\_SECOND} times {\ct DT\_INSERT}.
 
 \begin{warning}
 Note that {\ct DROPLETS\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the
@@ -6024,13 +6020,14 @@ point of causing a numerical instability. If you encounter a numerical instabili
 droplets created per second than the number that can be simulated.
 \end{warning}
 
-\subsection{Particles or Droplets Introduced at the Start of the Calculation}
+\subsection{Particles or Droplets Introduced within a Volume}
 
 \label{info:initial_droplets}
 
 
 Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, add {\ct NUMBER\_INITIAL\_DROPLETS}
-to the {\ct PART} line to indicate the number of particles/droplets within the computational domain at the start of the simulation.
+to the {\ct INIT} line\footnote{Prior to FDS~5.5, it was possible to use the {\ct PART} line to specify {\ct NUMBER\_INITIAL\_DROPLETS}.}
+to indicate the number of particles/droplets within the computational domain at the start of the simulation.
 Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which
 specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do
 not confuse this parameter with {\ct DENSITY}, explained in the next section. For example, water has a
@@ -6039,7 +6036,6 @@ and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also,
 certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format
 for {\ct XB} is the same as that used on the {\ct OBST} line.
 
-If there is more than one rectangular volume in which you want to introduce initial droplets or particles, use {\ct INIT} lines of the form:
 
 \footnotesize
 \begin{verbatim}
@@ -6049,48 +6045,40 @@ If there is more than one rectangular volume in which you want to introduce init
 \end{verbatim} \normalsize
 
 \noindent
-If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} to a positive value
+If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} on the {\ct INIT} line
+to a positive value
 indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INITIAL\_DROPLETS} now indicates the number of droplets/particles inserted every
 {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be
 introduced per second.
 
 
-\subsection{Droplets that Strike Solid Surfaces}
+\subsection{Controlling the Number of Particles and Droplets}
 
-When a droplet strikes a solid surface, it sticks and is reassigned a new speed and direction. If the surface is
-horizontal, the direction is randomly chosen. If vertical, the direction is downwards.
-The rate at which the droplets move over the horizontal and vertical surfaces is difficult to
-quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line
-allow you to control the rate at which droplets move horizontally or vertically (downward). The defaults are
-0.2~m/s and 0.5~m/s, respectively.
+Regardless of how the particles or droplets are introduced into the computational domain, the following are important
+parameters for controlling their number:
+\begin{description}
+\item[{\ct DT\_INSERT}] Time increment in seconds between the introduction of a ``batch'' of particles or droplets.
+The number per ``batch'' depends on how they are introduced.
+If more particles are desired, lower the input value of this parameter. The default value is 0.01~s. Note that this
+parameter should be specified on the {\ct SURF}, {\ct PROP}, or {\ct INIT} line, depending on whether the particles/droplets
+originate at a surface, a sprinkler or nozzle, or a volume. Versions prior to FDS~5.5 had this parameter listed on the
+{\ct PART} line.
+\item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
+file {\bf CHID.prt5}. This parameter can be used to reduce the size
+of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default
+is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{part_type}.
+\item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when
+trying to reduce the number of droplets or particles in a simulation.
+\end{description}
 
-There are some applications, like the suppression of racked storage commodities, where it is useful to allow water droplets to move horizontally
-along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and
-absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_DROPLETS=.TRUE.} on the
-{\ct MISC} line. It is normally false.
 
-\begin{warning}
-Be aware that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
-\end{warning}
-
-\noindent
-A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\bf cascade.fds}. Figure~\ref{cascade} shows a stream
-of water droplets impinging on the top of a box followed by the cascading of water droplets over the top edge.
-
-\begin{figure}[ht]
-\begin{center}
-\begin{tabular}{lcr}
-\includegraphics[height=2.2in]{FIGURES/cascade_1} &
-\includegraphics[height=2.2in]{FIGURES/cascade_2} &
-\includegraphics[height=2.2in]{FIGURES/cascade_3}
-\end{tabular}
-\end{center}
-\caption[Example of water cascading over solid obstructions.]{Smokeview rendering of the {\bf cascade} test case.}
-\label{cascade}
-\end{figure}
 
 
 \section{Particle and Droplet Properties}
+
+Lagrangian particles are used to represent a wide variety of objects that cannot be explicitly resolved on the numerical
+mesh. As a result, there are a considerable number of parameters that define them, many of which may not be applicable to
+a particular type of particle or droplet.
 
 
 \subsection{Thermal Properties}
@@ -6143,17 +6131,52 @@ To invoke the cylinder drag law set {\ct DRAG\_LAW$=$`CYLINDER'} on the {\ct PAR
 the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.
 The {\ct USER\_DRAG\_COEFFICIENT} trumps the {\ct DRAG\_LAW}.
 
+\subsection{Velocity on Solid Surfaces}
+
+When a droplet strikes a solid surface, it sticks and is reassigned a new speed and direction. If the surface is
+horizontal, the direction is randomly chosen. If vertical, the direction is downwards.
+The rate at which the droplets move over the horizontal and vertical surfaces is difficult to
+quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line
+allow you to control the rate at which droplets move horizontally or vertically (downward). The defaults are
+0.2~m/s and 0.5~m/s, respectively.
+
+There are some applications, like the suppression of racked storage commodities, where it is useful to allow water droplets to move horizontally
+along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and
+absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_DROPLETS=.TRUE.} on the
+{\ct MISC} line. It is normally false.
+
+\begin{warning}
+Be aware that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
+\end{warning}
+
+\noindent
+A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\bf cascade.fds}. Figure~\ref{cascade} shows a stream
+of water droplets impinging on the top of a box followed by the cascading of water droplets over the top edge.
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{lcr}
+\includegraphics[height=2.2in]{FIGURES/cascade_1} &
+\includegraphics[height=2.2in]{FIGURES/cascade_2} &
+\includegraphics[height=2.2in]{FIGURES/cascade_3}
+\end{tabular}
+\end{center}
+\caption[Example of water cascading over solid obstructions.]{Smokeview rendering of the {\bf cascade} test case.}
+\label{cascade}
+\end{figure}
+
+
 
 \subsection{Color}
 
 The parameter {\ct QUANTITIES} is an array of character strings indicating which
 scalar quantities should be used to color the particles or droplets when viewed as an
 animation. The choices are \\
-{\ct 'DROPLET\_TEMPERATURE'} ($^\circ$C) \\
-{\ct 'DROPLET\_DIAMETER'} ($\mu$m) \\
-{\ct 'DROPLET\_VELOCITY'} (m/s) \\
-{\ct 'DROPLET\_MASS'} (kg) \\
-{\ct 'DROPLET\_AGE'} (s) \\
+{\ct 'DROPLET TEMPERATURE'} ($^\circ$C) \\
+{\ct 'DROPLET DIAMETER'} ($\mu$m) \\
+{\ct 'DROPLET VELOCITY'} (m/s) \\
+{\ct 'DROPLET MASS'} (kg) \\
+{\ct 'DROPLET AGE'} (s) \\
 As a default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then
 Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or
 {\ct COLOR}. By default, water droplets are colored blue and fuel droplets yellow. All others are colored black.
@@ -6196,7 +6219,7 @@ since {\ct MASSLESS} particles are for visualization only.
 
 {\ct STATIC} is a logical parameter indicating whether particles move or just serve
 as obstructions or clutter. Setting {\ct STATIC=.TRUE.} only makes sense in conjunction with a non-zero value of
-{\ct NUMBER\_INITIAL\_DROPLETS}. The default value of {\ct STATIC} is {\ct .FALSE.}
+{\ct NUMBER\_INITIAL\_DROPLETS} on the {\ct INIT} line. The default value of {\ct STATIC} is {\ct .FALSE.}
 
 
 \subsection{Water Droplets}
@@ -6240,8 +6263,7 @@ parameters are given here:
 &PART ID='heptane droplets', FUEL=.TRUE., VAPORIZATION_TEMPERATURE=98.,
       HEAT_OF_VAPORIZATION=316., SPECIFIC_HEAT=2.25, DENSITY=688.,
       QUANTITIES(1:2)='DIAMETER','DROPLET_TEMPERATURE',
-      DROPLETS_PER_SECOND=2000, DIAMETER=1000., HEAT_OF_COMBUSTION=44500.,
-      DT_INSERT=0.02, SAMPLING_FACTOR=1 /
+      DIAMETER=1000., HEAT_OF_COMBUSTION=44500., SAMPLING_FACTOR=1 /
 
 &PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets',
       FLOW_RATE=1.96, FLOW_RAMP='fuel', DROPLET_VELOCITY=10.,
@@ -9379,8 +9401,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DEVC\_ID}                      & Character       & Name of controlling device              &           &               \\ \hline
 {\ct DIAMETER}                      & Real            & Median Volumetric Diameter              & $\mu$m    & 500.          \\ \hline
 {\ct DRAG\_LAW}                     & Character       & Geometry for drag correlation           &           & {\ct 'SPHERE'}\\ \hline
-{\ct DROPLETS\_PER\_SECOND}         & Integer         & Drops per second per head               &           & 5000          \\ \hline
-{\ct DT\_INSERT}                    & Real            & Time between insertions                 & s         & 0.01          \\ \hline
 {\ct EVAPORATE}                     & Logical         & Assume liquid evaporation               &           & {\ct .TRUE.}  \\ \hline
 {\ct FYI}                           & Character       & Comment String                          &           &               \\ \hline
 {\ct FUEL}                          & Logical         & Liquid Fuel                             &           & {\ct .FALSE.} \\ \hline
@@ -9393,13 +9413,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                            & Character       & Identifier                              &           &               \\ \hline
 {\ct INITIAL\_TEMPERATURE}          & Real            & Initial Temperature                     & $^\circ$C & {\ct TMPA}    \\ \hline
 {\ct MASSLESS}                      & Logical         & Massless tracers                        &           & {\ct .FALSE.} \\ \hline
-{\ct MASS\_PER\_TIME}               & Real            & See Section~\ref{info:initial_droplets} & kg/s      &               \\ \hline
-{\ct MASS\_PER\_VOLUME}             & Real            & See Section~\ref{info:initial_droplets} & kg/m$^3$  & 1.            \\ \hline
 {\ct MAXIMUM\_DIAMETER}             & Real            & Break-up bound                          & $\mu$m    & $\infty$      \\ \hline
 {\ct MINIMUM\_DIAMETER}             & Real            & Evaporation bound                       & $\mu$m    & 20.           \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real            & Melting Temperature                     & $^\circ$C &               \\ \hline
 {\ct MONODISPERSE}                  & Logical         & Uniform droplet size                    &           & {\ct .FALSE.} \\ \hline
-{\ct NUMBER\_INITIAL\_DROPLETS}     & Integer         & See Section~\ref{info:initial_droplets} &           & 0             \\ \hline
+{\ct PROP\_ID}                      & Character       & Name of Property line                   &           &               \\ \hline
 {\ct QUANTITIES(10)}                & Character       & Quantities for coloring                 &           &               \\ \hline
 {\ct RGB(3)}                        & Integers        & Color indices (0-255)                   &           &               \\ \hline
 {\ct SAMPLING\_FACTOR}              & Integer         & Filter for output file                  &           & 1             \\ \hline
@@ -9410,7 +9428,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct TREE}                          & Logical         & Particles are leaves                    &           & {\ct .FALSE.} \\ \hline
 {\ct USER\_DRAG\_COEFFICIENT}       & Real            & Constant drag coefficient               &           & -1.           \\ \hline
 {\ct VERTICAL\_VELOCITY}            & Real            & Droplet speed, vertical                 & m/s       &  0.5          \\ \hline
-{\ct XB(6)}                         & Real array      & Initial particle location               & m         &               \\ \hline
 {\ct WATER}                         & Logical         & Water Droplet                           &           & {\ct .FALSE.} \\ \hline
 \end{longtable}
 
@@ -9476,6 +9493,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_FACTOR}                         & Real          & Sprinkler activation parameter            &                       & 0.        \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}               & m/s                   & 1.0       \\ \hline
 {\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity                  & m/s                   & 0.0       \\ \hline
+{\ct DROPLETS\_PER\_SECOND}             & Integer       & Drops per second per head                 &                       & 5000      \\ \hline
+{\ct DT\_INSERT}                        & Real          & Time between insertions                   & s                     & 0.01      \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Sprinkler or nozzle flow rate             & L/min                 &           \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & Time {\ct RAMP} for flow                  &                       &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & Time constant for flow                    &                       & 0.0       \\ \hline
@@ -9496,13 +9515,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PRESSURE\_RAMP}                    & Character     & Pressure {\ct RAMP} for sprinkler systems &                       &           \\ \hline
 {\ct QUANTITY}                          & Character     & Name of associated output                 &                       &           \\ \hline
 {\ct RTI}                               & Real          & Response Time Index                       & $\sqrt{\hbox{m~s}}$   & 100.      \\ \hline
-{\ct SMOKEVIEW\_ID}                     & Character     & Name of drawn object                      &                       &           \\ \hline
-{\ct SMOKEVIEW\_PARAMETERS}             & Real Array    & Misc.~parameters for drawing              &                       &           \\ \hline
+{\ct SMOKEVIEW\_ID}                     & Char.~Array   & Name(s) of drawn object                   &                       &           \\ \hline
+{\ct SMOKEVIEW\_PARAMETERS}             & Char.~Array   & Misc.~parameters for drawing              &                       &           \\ \hline
 {\ct SPEC\_ID}                          & Character     & See Section~\ref{info:alternative_smoke}  &                       &           \\ \hline
 {\ct SPRAY\_ANGLE(2)}                   & Real          & Cone angles for water spray               & deg                   & 60.,75.   \\ \hline
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & {\ct TABL} for spray pattern              &                       &           \\ \hline
-{\ct STATE\_INDEX}                      & Integer       & State code for Smokeview drawing          &                       & 0         \\ \hline
-{\ct TEXTURE\_MAP}                      & Character     & Name of texture map file                  &                       &           \\ \hline
 \end{longtable}
 
 
