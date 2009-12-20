@@ -1,4 +1,4 @@
-&HEAD CHID='devices_dynamic',TITLE='Smokeview device drawing test SVN $Revision$' /
+&HEAD CHID='objects_dynamic',TITLE='Smokeview device drawing test SVN $Revision$' /
  
  Test dynamic devices.  Data used to customize the look of the device is obtained from a particle file.
  
