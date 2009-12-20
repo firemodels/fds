@@ -27,9 +27,10 @@ fds5 fire_line.fds
 cd %vis%
 fds5 colorbar.fds
 fds5 colorconv.fds
-fds5 devices_elem.fds
-fds5 devices_vistest.fds
-fds5 devcices_vistest2.fds
+fds5 objects_elem.fds
+fds5 objects_static.fds
+fds5 objects_dynamic.fds
+fds5 objects_dynamic3.fds
 fds5 plume5a.fds
 fds5 plume5b.fds
 fds5 plume5c.fds
