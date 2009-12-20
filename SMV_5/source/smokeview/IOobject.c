@@ -1107,7 +1107,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
         int i;
         int textureindex=0;
 
-        texturefile = (toki-2)->string;
+        texturefile = (toki-2)->stringptr;
 
         for(i=0;i<ndevice_texture_list;i++){
           if(strcmp(device_texture_list[i],texturefile)==0){
@@ -2582,11 +2582,13 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       if(toki->loc>=0){
         tokdest = frame->tokens+toki->loc;
         toki->varptr=&tokdest->var;
+        toki->stringptr=tokdest->string;
         tokdest->reads++;
       }
       else{
         frame->error=1;
         toki->varptr=NULL;
+        toki->stringptr=NULL;
         printf("*** error: The label %s in device %s is not defined\n",toki->token,frame->device->label);
       }
 
@@ -2636,6 +2638,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       if(equal!=NULL)*equal=0;
       toki->type=TOKEN_FLOAT;
       toki->varptr=&toki->var;
+      toki->stringptr=toki->string;
       toki->is_label=1;
       nsymbols++;
     }
@@ -2647,6 +2650,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       toki->type=TOKEN_STRING;
       toki->var=0.0;
       toki->varptr=&toki->var;
+      toki->stringptr=toki->string;
       sptr=string_copy;
       strcpy(sptr,toki->token);
       sptr++;
