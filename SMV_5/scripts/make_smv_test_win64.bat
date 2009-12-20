@@ -18,7 +18,7 @@ IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 copy smokeview64_test.exe %smvdir%\smokeview.exe
 copy smokezip64_test.exe %smvdir%\smokezip.exe
-copy devices.svo %smvdir%\.
+copy objects.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
 copy pthreadVC.dll %smvdir%\.
 copy note.txt %smvdir%\.
