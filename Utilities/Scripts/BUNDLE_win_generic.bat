@@ -56,7 +56,7 @@ if "%platform%"=="64" copy %in_smv%\smokezip%platform%_release.exe    %out_bin%\
 
 copy %in_fds2ascii%\fds2ascii.exe     %out_bin%\.
 
-copy %in_smv%\devices.svo             %out_bin%\.
+copy %in_smv%\objects.svo             %out_bin%\.
 copy %in_smv%\pthreadVC.dll           %out_bin%\.
 copy %in_smv%\glew32.dll              %out_bin%\.
 copy %in_smv%\smokeview.ini           %out_bin%\.

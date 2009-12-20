@@ -39,7 +39,7 @@ echo.
 echo Copying files to bin directory
 copy %in_fds%\fds5.exe %out_bin%\.
 copy %in_smv%\smokeview.exe %out_bin%\.
-copy %in_smv%\devices.svo %out_bin%\.
+copy %in_smv%\objects.svo %out_bin%\.
 copy %in_smv%\pthreadVC.dll %out_bin%\.
 copy %in_smv%\smokezip.exe %out_bin%\.
 copy %in_smv%\glew32.dll %out_bin%\.
