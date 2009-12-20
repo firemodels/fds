@@ -27,9 +27,9 @@ smokeview -version > scriptfigures\smokeview.version
 cd %vis%
 smokeview -runscript colorbar
 smokeview -runscript colorconv
-smokeview -runscript devices_elem
-smokeview -runscript devices_static
-smokeview -runscript devices_dynamic
+smokeview -runscript objects_elem
+smokeview -runscript objects_static
+smokeview -runscript objects_dynamic
 smokeview -runscript plume5a
 smokeview -runscript plume5b
 smokeview -runscript plume5c
