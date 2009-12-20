@@ -20,7 +20,7 @@ copy smokeview.ini %smvdir%\smokeview.ini
 copy smokeview64_release.exe %smvdir%\smokeview.exe
 copy smokezip64_release.exe %smvdir%\smokezip64.exe
 copy smokediff64_release.exe %smvdir%\smokediff64.exe
-copy devices.svo %smvdir%\.
+copy objects.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
 copy pthreadVC.dll %smvdir%\.
 copy readme.html %smvdir%\release_notes.html

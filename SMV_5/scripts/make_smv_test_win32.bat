@@ -19,7 +19,7 @@ mkdir %smvdir%
 copy smokeview32_test.exe %smvdir%\smokeview.exe
 copy smokediff32_test.exe %smvdir%\smokediff.exe
 copy smokezip32_test.exe %smvdir%\smokezip.exe
-copy devices.svo %smvdir%\.
+copy objects.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
 copy pthreadVC.dll %smvdir%\.
 copy note.txt %smvdir%\.
