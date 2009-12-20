@@ -22,4 +22,4 @@ goto:eof
 call %envfile%
 
 cd %ProgramFiles%\FDS\FDS5\bin
-start wordpad devices.svo 
+start wordpad objects.svo 

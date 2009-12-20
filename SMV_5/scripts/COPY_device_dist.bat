@@ -22,7 +22,7 @@ goto:eof
 call %envfile%
 
 cd %ProgramFiles%\fds\fds5\bin
-echo copy devices.svo to %svn_root%\SMV_5\for_bundle\devices.svo
+echo copy objects.svo to %svn_root%\SMV_5\for_bundle\objects.svo
 pause
-copy devices.svo %svn_root%\SMV_5\for_bundle\devices.svo
+copy objects.svo %svn_root%\SMV_5\for_bundle\objects.svo
 pause
