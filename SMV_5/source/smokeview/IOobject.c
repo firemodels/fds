@@ -919,6 +919,8 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
         valmax2=valmax-valmin;
 
         val2=fmod(val2,2.0*valmax2);
+        if(val2<0.0)val2+=2.0*valmax2;
+
         if(val2>valmax2)val2=2.0*valmax2-val2;
 
         val_result = val2 + valmin;
@@ -942,6 +944,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
         valmax2=valmax-valmin;
 
         val2=fmod(val2,valmax2);
+        if(val2<0.0)val+=valmax2;
 
         val_result = val2 + valmin;
 
