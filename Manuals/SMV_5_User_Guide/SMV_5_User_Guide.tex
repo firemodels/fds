@@ -992,57 +992,59 @@ results in a  4x speedup of these actions. } \\ \hline
 \end{table}
 
 %---------------------------------------------------------------------------------
-%--------------- Creating Custom Devices -------------------------
+%--------------- Creating Custom Objects -----------------------------------------
 %---------------------------------------------------------------------------------
 
-\chapter{Creating Custom Devices}
+\chapter{Creating Custom Objects}
 \label{chap:devices}
 Smokeview visualizes FDS devices such as heat and smoke detectors,
 sprinklers, sensors using instructions contained in a
-data file named {\tt devices.svo}.
+data file named {\tt objects.svo}.
 Smokeview also uses these instructions to represent people (avatars)
 in FDS-EVAC simulations and to represent trees and shrubs in an FDS WUI simulations.
+The Smokeview implementation
+of FDS devices is referred to as objects in this chapter.
 
-The device instruction file is located in the directory where FDS and Smokeview are installed.
+The object instruction file is located in the directory where FDS and Smokeview are installed.
 The instructions correspond to OpenGL library calls,
 the same type of calls Smokeview uses to visualize FDS cases.
 Smokeview then acts as an interpreter executing OpenGL
-commands as specified in the device definition file. Efficiency is
+commands as specified in the object definition file. Efficiency is
 attained by compiling these instructions into display lists,
 terminology for an OpenGL construct for storing and efficiently
-drawing collections of OpenGL commands.  New devices may be designed
+drawing collections of OpenGL commands.  New objects may be designed
 and drawn without requiring modifications to Smokeview and more
 importantly may be created by someone other than the Smokeview developer.
 
-The appearance of a device may be fixed or it may be altered based upon
-data specified in the FDS input file.  The {\tt sensor}\ device
+The appearance of an object may be fixed or it may be altered based upon
+data specified in an FDS input file.  The {\tt sensor}\ object
 is drawn as a small green sphere with a fixed diameter.  Its appearance
 is the same regardless of how an FDS input file is set up.
-The appearance of the {\tt tsphere}\ device (t for texture) depends on
+The appearance of the {\tt tsphere}\ object (t for texture) depends on
 data specified in the FDS input file.  One may specify the diameter of the
 sphere and an
 image to cover it with ( the image is known as a texture map).
 
-As with preference or {\tt .ini}\ files, Smokeview looks for device definition files in three locations:
-in a file named {\tt devices.svo}\ in the FDS/Smokeview installation directory,
-in a file named {\tt devices.svo}\ in the casename directory
+As with preference or {\tt .ini}\ files, Smokeview looks for object definition files in three locations:
+in a file named {\tt objects.svo}\ in the FDS/Smokeview installation directory,
+in a file named {\tt objects.svo}\ in the casename directory
 and in a file named {\tt casename.svo} also located in the casename directory where {\tt casename}\ is the name of the case being visualized.
 
-This section describes how to create new devices. Though all of
-the examples are given for devices, the intent of this procedure
+This section describes how to create new objects. Though all of
+the examples are given for drawing FDS devices, the intent of this procedure
 is to be more general allowing Smokeview to draw other types of
 objects such as people walking.
 
-\section{Device File Format}
-The first statement in a device definition is
-the keyword {\tt DEVICEDEF} (or {\tt AVATARDEF}\ when defining a {\em person}).
-The next statement is the name or label for the device.
-Following this are the instructions used for creating the device.
+\section{Object File Format}
+The first statement in an object definition is
+the keyword {\tt OBJECTDEF} (or {\tt AVATARDEF}\ when defining a {\em person}).
+The next statement is the name or label for the object.
+Following this are the instructions used for creating the object.
 Each instruction consist of zero or more data values followed by a command.
-Comments may be placed anywhere in the device definition file by adding text
+Comments may be placed anywhere in the object definition file by adding text
 after a double slash `//`.
 
-Data from FDS may be optionally communicated to the device definition
+Data from FDS may be optionally communicated to the object definition
 by placing a series of labels, written as {\tt :var1 ... :varn}, at the beginning of the definition.  These data values may then be accessed later in the definition using {\tt \$var1}\ to access data in {\tt :var1}, {\tt \$var2}\ to access data in {\tt :var2}\ {\em etc.}.
 The data place in these {\tt :vari}\ labels is specified in the FDS input  file using the
 {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\ input line.
@@ -1053,15 +1055,15 @@ and instructions for manipulating these objects through transformations
 such as scaling,
 rotation and translation. Collectively these instructions specify
 the type, location and orientation of objects used to represent
-devices.  The important feature of this process is that new
-devices may be designed and drawn without the need to modify
+objects.  The important feature of this process is that new
+objects may be designed and drawn without the need to modify
 Smokeview.
 
 Some examples of argument/instruction pairs are {\tt d drawsphere} for
 drawing a sphere of diameter {\tt d} or {\tt x y z translate} for
 translating an object by $(x,y,z)$.
 The symbols {\tt d}, {\tt x}, {\tt y} and {\tt z}\ are
-specified in the device file using a numerical constant such as 1.23 or using a reference such as \$var to data located elsewhere.
+specified in the object file using a numerical constant such as 1.23 or using a reference such as \$var to data located elsewhere.
 
 Transformation commands are
 cumulative, each command builds on the effects of the previous
@@ -1069,57 +1071,59 @@ one.  The commands {\tt push}\ and {\tt pop}\
 isolate these effects by saving and restoring the geometric state.
 
 The format for an object definition file is given in more detail in Figure
-\ref{figobjectdef}.  Each device definition consists of one or more
-frames.  A frame is used to represent various states of the device.
-Devices such as thermocouples which do not activate use
-just one frame. Other devices such as sprinklers or smoke
+\ref{figobjectdef}.  Each object definition consists of one or more
+frames.  A frame is used to represent various states of the object.
+Objects such as thermocouples which do not activate use
+just one frame. Other objects such as sprinklers or smoke
 detectors which do activate use two frames, the first for normal
-conditions and the second for when the device has activated.
+conditions and the second for when the object has activated.
 
 \begin{figure}[\figoptions]
 {\small
 \begin{Verbatim}[frame=single,rulecolor=\color{blue},
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-//  1. comments and blank lines are permitted anywhere
-//  2. any line not beginning with a "//" is part of the definition.
-//  3. the first line non-comment line after DEVICEDEF is the device name
-//  4. a device definition may contain, labels, numerical constants
+// ************ object file format ********************
+
+//  1. comments and blank lines may be placed anywhere
+//  2. any line not beginning with "//" is part of the definition.
+//  3. the first non-comment line after OBJECTDEF is the object name
+//  4. an object definition may contain, labels, numerical constants
 //     a number), string constants (enclosed in " ") and/or
 //     commands (beginning with a-z)
 //  5. a label begins with ':' as in :dx
-//  6. the label :dx may be accessed elsewhere using $dx
-//  7. A device may contain multiple frames or states.  A new frame within
-//     a device is defined using NEWFRAME
-   
-DEVICEDEF // DEVICEDEF begins the device definition
+//  6. the label :dx may be accessed afterward using $dx
+//  7. An object may contain multiple frames or states.  A new frame within
+//     an object is defined using NEWFRAME
 
-  device_name // name or label for device
-  :var1 ... :varn  // a series of labels may be specified for use by
-                   // the device definition.  Data is copied to these
-                   // label locations using the SMOKEVIEW_PARAMETERS
-                   // &PROP keyword or from a particle file. The data
-                   // in :varn may be referenced  elsewhere in the 
-                   // definition using $varn
+// OBJECTDEF // OBJECTDEF begins the object definition
 
-  // A series of argument/command pairs are specified on one or
-  // more lines.
+//   object_name // name or label for object
+//   :var1 ... :varn  // a series of labels may be specified for use by
+//                    // the object definition.  Data is copied to these
+//                    // label locations using the SMOKEVIEW_PARAMETERS
+//                    // &PROP keyword or from a particle file. The data
+//                    // in :varn may be referenced  elsewhere in the
+//                    // definition using $varn
 
-  arg1 ... argn command1 arg1 ... argn command2 ...
+//   // A series of argument/command pairs are specified on one or
+//   // more lines.
 
-  // An argument may be a numerical constant (e.g. 2.37), a string 
-  // (e.g. "SKYBLUE"), a label (e.g. :var1),  or a reference to a 
-  // label located elsewhere (e.g. $var1)
+//   arg1 ... argn command1 arg1 ... argn command2 ...
 
- NEWFRAME    // beginning of next frame
-  more argument/command pairs for next device frame
-  ....
+//   // An argument may be a numerical constant (e.g. 2.37), a string
+//   // (e.g. "SKYBLUE"), a label (e.g. :var1),  or a reference to a
+//   // label located elsewhere (e.g. $var1)
+
+//  NEWFRAME    // beginning of next frame
+//   more argument/command pairs for the next object frame
+//   ....
 \end{Verbatim}
 }
 \caption{Device Object file format.}
 \label{figobjectdef}%
 \end{figure}
 
-Figure \ref{figsensor} illustrates a simple example of a device
+Figure \ref{figsensor} illustrates a simple example of an object
 definition used to draw a sensor along with the corresponding
 Smokeview view.. The definition uses just one frame. A sphere is
 drawn with color yellow and diameter 0.038 m. Push and pop commands
@@ -1129,7 +1133,7 @@ transformations are used.
 {\small
 \begin{Verbatim}[frame=single,rulecolor=\color{blue},
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-DEVICEDEF
+OBJECTDEF
  sensor
  1.0 1.0 0.0  setcolor
  0.038 drawsphere
@@ -1158,8 +1162,8 @@ detector has activated.) states.
 {\small
 \begin{Verbatim}[frame=single,rulecolor=\color{blue},
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-DEVICEDEF
- heat_detector         // label, name of device
+OBJECTDEF
+ heat_detector         // label, name of object
 
  // The heat detector has three parts
  //   a disk, a truncated disk and a sphere.
@@ -1202,7 +1206,7 @@ in the FDS input file.
 {\small
 \begin{Verbatim}[frame=single,rulecolor=\color{blue},
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-DEVICEDEF // device definition for "egg"
+OBJECTDEF // object definition for "egg"
  egg
  :R :G :B :D :DX     // data obtained from an FDS input file
  $R $G $B setcolor   // $var values obtained from
@@ -1215,7 +1219,7 @@ DEVICEDEF // device definition for "egg"
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 FDS input lines to create egg
 
-The data label order (:R :G :B :D :DX) in the device file
+The data label order (:R :G :B :D :DX) in the object file
 correspond exactly to the SMOKEVIEW_PARAMETERS input order
 in the FDS input file
 
@@ -1229,7 +1233,7 @@ in the FDS input file
 \begin{center}
 \includegraphics[height=\figheightA]{../FDS_5_USER_GUIDE/scriptfigures/egg}\\
 \end{center}
-\caption{Instructions for drawing the dynamic device, egg, along with the corresponding FDS input lines and the Smokeview view.}
+\caption{Instructions for drawing the dynamic object, egg, along with the corresponding FDS input lines and the Smokeview view.}
 \label{figegg}%
 \end{figure}
 
@@ -1237,11 +1241,11 @@ in the FDS input file
 \includegraphics[height=1.7in]{figures/#1}
 }
 
-Figure \ref{figdevices} gives Smokeview views for several devices
-defined in the {\tt devices.svo}\ file.
+Figure \ref{figdevices} gives Smokeview views for several objects
+defined in the {\tt objects.svo}\ file.
 A more complete list is found in the FDS User's Guide~\cite{FDS_Users_Guide_5}.
 The object's origin is identified by two intersecting tubes.
-The origin is placed where FDS records data for these devices.
+The origin is placed where FDS records data for these objects.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1256,16 +1260,16 @@ The origin is placed where FDS records data for these devices.
  sensor&target
  \end{tabular}
  \end{center}
-\caption[Smokeview view of several devices defined the devices.svo file.]
-{Smokeview view of several devices defined in the devices.svo file.
-The device origin occurs at the intersection of
-the thin (green) lines.  This where FDS records data values for this device.}
+\caption[Smokeview view of several objects defined the objects.svo file.]
+{Smokeview view of several objects defined in the objects.svo file.
+The object origin occurs at the intersection of
+the thin (green) lines.  This where FDS records data values for this object.}
 \label{figdevices}%
 \end{figure}
 
 \section{Elementary Geometric Objects}
 \label{svocommands} The objects described in this section
-are the building blocks used to construct more complex devices.
+are the building blocks used to construct more complex objects.
 Each command used to draw an elementary geometric
 object consists of one or more arguments followed by the command, for example,
 the command sequence {\tt 0.3 drawsphere} draws a sphere with diameter 0.3 (all units as with FDS are in meters).
@@ -1403,13 +1407,13 @@ used to save the origin or axis orientation while the POP command
 is used to restore the origin and axis orientation.
 
 \blist
-\hitem{GETTEXTUREINDEX} The command 
+\hitem{GETTEXTUREINDEX} The command
 \begin{verbatim}
 "texture_file" :texture_index GETTEXTUREINDEX
 \end{verbatim}
 finds the index in an internal Smokeview table containing the
-entry texture\_file (a file containing a texture map image).  
-This index is used by other device drawing routines
+entry texture\_file (a file containing a texture map image).
+This index is used by other object drawing routines
 that support texture mapping (presently drawtsphere).
 
 \hitem{OFFSETX} The command, {\tt x offsetx}, translates
@@ -1459,7 +1463,7 @@ setcolor ).  As with the {\tt setcolor}\ command, {\tt setbw}\ is
 only required when the grey level changes, not for each object
 drawn.
 
-\hitem{SETCOLOR} The command, {\tt "color name" setcolor}, 
+\hitem{SETCOLOR} The command, {\tt "color name" setcolor},
 obtains sets the color to the red,
 green and blue components of the FDS standard color {\tt color~name}.
 
@@ -1473,9 +1477,9 @@ size of points drawn with the {\tt drawpoint}\ command.
 \hitem{SETRGB} The command, {\tt r g b setrgb},
 sets the red,
 green and blue components of the current color.  Any objects
-drawn afterwards will be drawn with this color.  
+drawn afterwards will be drawn with this color.
 This command is not required for each object part drawn.
-The color component values range from 0 to 255.  
+The color component values range from 0 to 255.
 
 \hitem{TRANSLATE} The command, {\tt x y z translate}, translates
 objects drawn afterwards by x, y and z along the x, y and z axes
@@ -1496,7 +1500,7 @@ allow one to indirectly change how objects are drawn using
 information passed from FDS. This information is passed using the
 {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\ namelist statement.
 These commands transform data to change the inputs of
-subsequent device commands.
+subsequent object commands.
 
 \blist
 \hitem{ADD}
@@ -1574,7 +1578,8 @@ The command, \\
 \\
 is used to compute the value, $val=at+b$, where $t$ is the simulation time and
 $a$ and $b$ are either numerical constants or references to previously defined data. The result, $val$ is placed
-in the label {\tt :val}\ accessible later in the definition file using \$val.  This allows one to change how a device appears as a function of time (changing its size, rotating it, changing its color {\em etc.}).
+in the label {\tt :val}\ accessible later in the definition file using \$val.  This allows one to change how an object
+appears as a function of time (changing its size, rotating it, changing its color {\em etc.}).
 
 The command, {\tt a b :val multiaddt}, is a shortcut for\\
 \\
@@ -1607,7 +1612,7 @@ in the label {\tt :val}\ accessible later in the definition file using \$val.
 
 \section{Logical and Conditional Operators}
 Logical and conditional operators are used in conjunction to test values and
-execute portion of a device definition depending on the results of the
+execute portion of an object definition depending on the results of the
 test.  Logical operators return 1 if the test is true and 0 if the test
 is false.
 
@@ -1633,7 +1638,7 @@ greater than b, otherwise it returns 0.
 returns 1 in :val if a is
 greater than or equal to b, otherwise it returns 0.
 
-\hitem{IF,ELSE,ENDIF} Consider the device command sequence
+\hitem{IF,ELSE,ENDIF} Consider the object command sequence
  \begin{verbatim}
  $val IF
   arg1 arg2 command1 arg1 arg2 command2 ....
@@ -5696,9 +5701,9 @@ to visualize slice files for these types of simulations that conform to the terr
 sprinkler or heat detector.  The {\tt DEVICE} keyword defines the
 device location and name.  This name is used to access the set of
 instructions for drawing the device.  These instructions are
-contained in a file named {\tt devices.svo}. The default location
+contained in a file named {\tt objects.svo}. The default location
 of this file on the PC is
-C:$\backslash$Program Files$\backslash$FDS$\backslash$FDS5$\backslash$bin$\backslash$devices.svo . This
+C:$\backslash$Program Files$\backslash$FDS$\backslash$FDS5$\backslash$bin$\backslash$objects.svo . This
 file may be customized by the user by adding instructions for
 devices of their own design ({\em i.e.} custom devices may be
 added to a Smokeview visualization without re-programming
@@ -5711,7 +5716,7 @@ device_name
 x y z xn yn zn 0 0 % PROP_ID
 \end{verbatim}
 
-\noindent where device\_name is the entry in the {\tt devices.svo} file used
+\noindent where device\_name is the entry in the {\tt objects.svo} file used
 to draw the device and $(x,y,z)$ and $(xn,yn,zn)$
 are the location and direction vector of the device.
 The label
@@ -5756,7 +5761,7 @@ detector.
 \hitem{PROP}The {\tt PROP}\ keyword specifies
 a list of general properties used
 by Smokeview to customize the drawing of devices defined in
-the devices.svo file.
+the objects.svo file.
 The format of the {\tt PROP}\ keyword is
 
 \begin{verbatim}

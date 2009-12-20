@@ -2,24 +2,24 @@
 // $Revision$
 // $Author$
 
-// ************ device file format ********************
+// ************ object file format ********************
 
-//  1. comments and blank lines are permitted anywhere
-//  2. any line not beginning with a "//" is part of the definition.
-//  3. the first line non-comment line after DEVICEDEF is the device name
-//  4. a device definition may contain, labels, numerical constants
+//  1. comments and blank lines may be placed anywhere
+//  2. any line not beginning with "//" is part of the definition.
+//  3. the first non-comment line after OBJECTDEF is the object name
+//  4. an object definition may contain, labels, numerical constants
 //     a number), string constants (enclosed in " ") and/or
 //     commands (beginning with a-z)
 //  5. a label begins with ':' as in :dx
-//  6. the label :dx may be accessed elsewhere using $dx
-//  7. A device may contain multiple frames or states.  A new frame within
-//     a device is defined using NEWFRAME
+//  6. the label :dx may be accessed afterward using $dx
+//  7. An object may contain multiple frames or states.  A new frame within
+//     an object is defined using NEWFRAME
 
-// DEVICEDEF // DEVICEDEF begins the device definition
+// OBJECTDEF // OBJECTDEF begins the object definition
 
-//   device_name // name or label for device
+//   object_name // name or label for object
 //   :var1 ... :varn  // a series of labels may be specified for use by
-//                    // the device definition.  Data is copied to these
+//                    // the object definition.  Data is copied to these
 //                    // label locations using the SMOKEVIEW_PARAMETERS
 //                    // &PROP keyword or from a particle file. The data
 //                    // in :varn may be referenced  elsewhere in the
@@ -35,29 +35,29 @@
 //   // label located elsewhere (e.g. $var1)
 
 //  NEWFRAME    // beginning of next frame
-//   more argument/command pairs for next device frame
+//   more argument/command pairs for the next object frame
 //   ....
 
-   // ************ static device definitions - single frame/state ********************
+   // ************ static object definitions - single frame/state ********************
 
-DEVICEDEF
+OBJECTDEF
  target
  153 153 153 setrgb
  0.0 0.0 -0.005 translate 0.2 0.01 drawdisk
 
-DEVICEDEF  // used by smokeview to display smoke thickness
+OBJECTDEF  // used by smokeview to display smoke thickness
  smokesensor
  "WHITE" setcolor
  0.15 drawsphere
 
-DEVICEDEF  // draw a plane intersecting through FDS meshes
+OBJECTDEF  // draw a plane intersecting through FDS meshes
  plane
  "GREEN" setcolor
  0.038 drawsphere
 
-   // ************ static device definitions - multiple frames/states ********************
+   // ************ static object definitions - multiple frames/states ********************
 
-DEVICEDEF
+OBJECTDEF
  sensor
  "GREEN" setcolor
  0.038 drawsphere
@@ -71,8 +71,8 @@ DEVICEDEF
  "WHITE" setcolor
  0.038 drawsphere
 
-DEVICEDEF
- heat_detector         // label, name of device
+OBJECTDEF
+ heat_detector         // label, name of object
  
  // The heat detector has three parts
  //   a disk, a truncated disk and a sphere.
@@ -96,7 +96,7 @@ DEVICEDEF
  push 0.0 0.0 -0.03 translate 
    0.04 drawsphere pop
 
-DEVICEDEF
+OBJECTDEF
  sprinkler_upright
  0.0 0.0 -0.04 translate
  "BRICK" setcolor
@@ -135,7 +135,7 @@ DEVICEDEF
  "BLUE" setcolor 
  push 0.0 0.0 0.015 translate  0.015 drawsphere pop
 
-DEVICEDEF
+OBJECTDEF
  sprinkler_pendent
  "BRICK" setcolor
  180.0 rotatey 0.0 0.0 -0.04 translate
@@ -176,7 +176,7 @@ DEVICEDEF
  push 0.0 0.0 0.015 translate 0.015 drawsphere pop
  pop
 
-DEVICEDEF
+OBJECTDEF
  smoke_detector
  204 204 204 setrgb
  push 0.0 0.0 -0.025 translate 0.127 0.05 drawdisk pop
@@ -197,7 +197,7 @@ DEVICEDEF
  push 0.0 0.0 -0.028 translate 0.04 0.05 0.02 drawring pop
 
 
-DEVICEDEF
+OBJECTDEF
  nozzle
  180.0 rotatex 0.0 0.0 -0.041402 translate
  "BRICK" setcolor
@@ -218,8 +218,8 @@ DEVICEDEF
  push "BLUE" setcolor 
    0.0 0.0 0.0414 translate 0.012 drawsphere pop
 
-DEVICEDEF
- testdoor         // label, name of device
+OBJECTDEF
+ testdoor         // label, name of object
  :DX :DY :DZ :R=0 :G=0 :B=0
  90.0 rotatez 90.0 rotatex
 push  $DX $DY $DZ scalexyz $R $G $B setrgb 1.0 drawcube pop // front half of door (user specified color)
@@ -227,8 +227,8 @@ push  $DX $DY $DZ scalexyz "BLUE" setcolor 0.0 1.0 0.0 translate 1.0 drawcube po
  NEWFRAME
  0.001 0.001 0.001 scalexyz 1.0 drawcube // state 1, door disappears
 
-DEVICEDEF
- evacdoor         // label, name of device
+OBJECTDEF
+ evacdoor         // label, name of object
  :SX :SY :SZ :R=0 :G=0 :B=0 :DX :DY :DZ
  // Evacuation input: door namelist
  push  $DX $DY $DZ translate
@@ -249,16 +249,16 @@ NEWFRAME
  push  $SX $SY $SZ scalexyz "RED" setcolor
     0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (red)
 
-DEVICEDEF
- evacincline         // label, name of device
+OBJECTDEF
+ evacincline         // label, name of object
  :SX :SY :SZ :R=0 :G=0 :B=0
  // Evacuation input: evss namelist
  90.0 rotatez 90.0 rotatex
  push  $SX $SY $SZ scalexyz $R $G $B setrgb
     0.0 0.5 0.0 translate 1.0 drawcube pop // incline (user specified color)
 
-DEVICEDEF
- evacentr         // label, name of device
+OBJECTDEF
+ evacentr         // label, name of object
  :SX :SY :SZ :R=0 :G=0 :B=0
  // Evacuation input: entr namelist
  90.0 rotatez 90.0 rotatex
@@ -274,34 +274,34 @@ NEWFRAME
  push  $SX $SY $SZ scalexyz "RED" setcolor
     0.0 0.5 0.0 translate 1.0 drawcube pop // front half of door (red)
 
-   // ************ dynamic particle device definitions ********************
+   // ************ dynamic particle object definitions ********************
    //         (modifable using data obtained from FDS)
 
-DEVICEDEF // device for particle file sphere
+OBJECTDEF // object for particle file sphere
  sphere
  :R=0 :G=0 :B=0 :D=0.1 :L=0.1
  $R $G $B setrgb
  $D drawsphere
 
-DEVICEDEF // device for particle file tube
+OBJECTDEF // object for particle file tube
  tube
  :R=0 :G=0 :B=0 :D=0.1 :L=0.1
  $R $G $B setrgb
  90.0 rotatey $D $L drawcdisk
 
-DEVICEDEF // device for particle file tube
+OBJECTDEF // object for particle file tube
  cylinder
  :R=0 :G=0 :B=0 :D=0.1 :L=0.1
  $R $G $B setrgb
  90.0 rotatey $D $L drawcdisk
 
-DEVICEDEF // device for particle "egg"
+OBJECTDEF // object for particle "egg"
  egg
  :R=0 :G=0 :B=0 :D=0.1 :DX     // data obtained from an FDS input file
  $R $G $B setrgb
  $DX $D $D scalexyz 1.0 drawsphere
 
-DEVICEDEF // color with FDS quantity, stretch with velocity
+OBJECTDEF // color with FDS quantity, stretch with velocity
  velegg
  :R=0 :G=0 :B=0 :D :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0  // data obtained from an FDS input file
  $R $G $B setrgb
@@ -310,34 +310,34 @@ DEVICEDEF // color with FDS quantity, stretch with velocity
  $W-VEL :WV abs $WV 25.0 :W div $W 0.01 .2 :CW clip
  $CU $CV $CW scalexyz 1.0 drawsphere
 
-DEVICEDEF // device for particle "egg"
+OBJECTDEF // object for particle "egg"
  tempegg
  :R=0 :G=0 :B=0 :D=0.1 :DX :temp :rot_rate    // data obtained from an FDS input file
  $temp 700.0 :tempd28 div $tempd28 $G $B setrgb 
  $rot_rate 0.0 :rotz multiaddt $rotz rotatez 0.2 $tempd28 0.2 scalexyz 1.0 drawsphere
 
-DEVICEDEF // device for a general ball
+OBJECTDEF // object for a general ball
  gball
  :R=0 :G=0 :B=0 :DX :DY :DZ
  $R $G $B setrgb
  $DX $DY $DZ scalexyz 1.0 drawsphere
 
-DEVICEDEF // device for dynamic textured sphere
+OBJECTDEF // object for dynamic textured sphere
  demosphere
- :R=0 :G=0 :B=0 :VX :VY :VZ :ROTATE_RATE :D=0.1 :XMAX :YMAX :ZMAX :tfile
+ :R=0 :G=0 :B=0 :X0 :Y0 :Z0 :VX :VY :VZ :ROTATE_RATE :D=0.1 :XMAX :YMAX :ZMAX :tfile
  $R $G $B setrgb
- $VX 0.0 :vvx multiaddt $vvx  0.0 $XMAX :CLIPX mirrorclip 
- $VY 0.0 :vvy multiaddt $vvy  0.0 $YMAX :CLIPY mirrorclip
- $VZ 0.0 :vvz multiaddt $vvz  0.0 $ZMAX :CLIPZ mirrorclip
- 0.5 $CLIPY $CLIPZ translate $ROTATE_RATE 0.0 :rotz multiaddt 
+ $VX $X0 :vvx multiaddt $vvx  0.0 $XMAX :CLIPX mirrorclip 
+ $VY $Y0 :vvy multiaddt $vvy  0.0 $YMAX :CLIPY mirrorclip
+ $VZ $Z0 :vvz multiaddt $vvz  0.0 $ZMAX :CLIPZ mirrorclip
+ $CLIPX $CLIPY $CLIPZ translate $ROTATE_RATE 0.0 :rotz multiaddt 
    $rotz rotatez 180.0 rotatey $tfile :textureindex gettextureindex $textureindex $D drawtsphere
 
-DEVICEDEF // device for dynamic textured sphere
+OBJECTDEF // object for dynamic textured sphere
  ttest
  :texture_file
  $texture_file :textureindex gettextureindex $textureindex 1.0 drawtsphere
 
-DEVICEDEF // device to test IF, LE, GT and AND operators
+OBJECTDEF // object to test IF, LE, GT and AND operators
  conditional_ball
  :DX :DY :DZ         // parameters passed from FDS in SMOKEVIEW_PARAMETERS array
  :time gett          // get the current time
@@ -356,7 +356,7 @@ DEVICEDEF // device to test IF, LE, GT and AND operators
  ENDIF
  $DX $DY $DZ scalexyz 1.0 drawsphere
 
-DEVICEDEF // device for dynamic textured sphere
+OBJECTDEF // object for dynamic textured sphere
  tsphere
   :R=0 :G=0 :B=0 :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D=0.1 :tfile
  $R $G $B setrgb
@@ -364,30 +364,22 @@ DEVICEDEF // device for dynamic textured sphere
  $ROTATION_RATE $ROT0 :rotz multiaddt $rotz rotatez 
    $tfile :textureindex gettextureindex $textureindex $D drawtsphere
 
-   // ************ dynamic tree device definitions ********************
+   // ************ dynamic tree object definitions ********************
 
-DEVICEDEF // device for tree trunk
+OBJECTDEF // object for tree trunk
  TRUNK
  :TRUNK_BASE_H :TRUNK_D :TRUNK_H :R=0 :G=0 :B=0
  $R $G $B setrgb
  0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk
  
-DEVICEDEF // device for tree canopy
+OBJECTDEF // object for tree canopy
  CANOPY
  :CANOPY_BASE_H :CANOPY_D :CANOPY_H :R=0 :G=0 :B=0
 $R $G $B setrgb
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
    
-   // ************ avatar device definitions ********************
+   // ************ avatar object definitions ********************
 
-   // stack frame definition
-      
-   //  0->2   class color
-   //  3->5   width, depth, 1.0 
-   //  6->8   1.0 1.0 height
-   //  9->11  data file color
-   //  12->14 0.0 0.0 height/2.0
-   
 AVATARDEF
  human_fixed          // label, name of avatar
  :DUM1 :DUM2 :DUM3 :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0 :HX :HY :HZ
@@ -408,6 +400,7 @@ AVATARDEF
  39 64 139 setrgb // leg color ROYAL BLUE4: 39 64 139
  push -0.5 0.0 1.3 translate  30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
  push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
+ 
 AVATARDEF
  human_altered_with_data         // label, name of avatar
  :DUM1 :DUM2 :DUM3 :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0 :HX :HY :HZ
@@ -429,79 +422,93 @@ AVATARDEF
  39 64 139 setrgb // leg color ROYAL BLUE4: 39 64 139
  push -0.5 0.0 1.3 translate  30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
  push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
+ 
 AVATARDEF
- ellipsoid         // label, name of device
+ ellipsoid         // label, name of object
  :DUM1 :DUM2 :DUM3 :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0 :HX :HY :HZ
  90.0 rotatez
  $HX $HY $HZ translate $SX $SY $SZ scalexyz $W $D $H1 scalexyz 
   push 0.0 -1.0 0.0 translate 1.0 5.0 0.5 scalexyz "BLUE" setcolor 0.4 drawsphere pop 
-  $R $G $B setrgb 1.0 drawsphere 
+  $R $G $B setrgb 1.0 drawsphere
+  
 AVATARDEF
- disk         // label, name of device
+ disk         // label, name of object
  :DUM1 :DUM2 :DUM3 :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0 :HX :HY :HZ
  90.0 rotatez
  0.0 0.0 1.0 translate $W $D $H1 scalexyz 
   push 0.0 -0.25 0.05 translate 0.3 2.5 0.3 scalexyz "CYAN" setcolor 0.2 drawsphere pop 
   $R $G $B setrgb 1.0 0.05 drawdisk 
 
-   // ************ Elementary device definitions ********************
+   // ************ Elementary object definitions ********************
 
    //  These definitions are used to illustrate the basic building blocks
-   //  used to create more complex devices
+   //  used to create more complex objects
 
-DEVICEDEF
+OBJECTDEF
  drawaxis2
  "GREEN" setcolor
  push 0.05 0.05 0.4 scalexyz 1.0 1.0 drawdisk pop
  0 255 43 setrgb
  push 90.0 rotatey 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
-DEVICEDEF
+ 
+OBJECTDEF
  drawaxis
  "GREEN" setcolor
  push 0.00625 0.00625 0.075 scalexyz 1.0 1.0 drawdisk pop
  0 255 43 setrgb
  push 90.0 rotatey 0.00625 0.00625 0.075 scalexyz 1.0 1.0 drawdisk pop
-DEVICEDEF
+ 
+OBJECTDEF
  drawcone
  "BRICK" setcolor
  0.50 0.30 drawcone
-DEVICEDEF
+ 
+OBJECTDEF
  drawcube
  "BRICK" setcolor
  0.25 drawcube
-DEVICEDEF
+ 
+OBJECTDEF
  drawdisk
- "FOREST GREEN" setcolor
+ "BRICK" setcolor
  0.25 0.50 drawdisk
-DEVICEDEF
+ 
+OBJECTDEF
  drawcdisk
  "BRICK" setcolor
  0.25 0.50 drawcdisk
-DEVICEDEF
+ 
+OBJECTDEF
  drawhexdisk
  "BRICK" setcolor
  0.50 0.25 drawhexdisk
-DEVICEDEF
+ 
+OBJECTDEF
  drawnotchplate
  "BRICK" setcolor
  0.5 0.1 0.2 1 drawnotchplate
-DEVICEDEF
+ 
+OBJECTDEF
  drawnotchplate2
  "BRICK" setcolor
  0.5 0.1 0.2 -1 drawnotchplate
-DEVICEDEF
+ 
+OBJECTDEF
  drawpolydisk
  "BRICK" setcolor
  5 0.35 0.15 drawpolydisk
-DEVICEDEF
+ 
+OBJECTDEF
  drawring
  "BRICK" setcolor
  0.3 0.5 0.1 drawring
-DEVICEDEF
+ 
+OBJECTDEF
  drawsphere
  "BRICK" setcolor
  0.25 drawsphere
-DEVICEDEF
+ 
+OBJECTDEF
  drawtrunccone
  "BRICK" setcolor
  0.5 0.2 0.4 drawtrunccone

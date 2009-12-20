@@ -663,7 +663,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
   rgbptr=rgbcolor;
   glPushMatrix();
 
-// copy in default values ( :var=value in devices.svo file )
+// copy in default values ( :var=value in objects.svo file )
 
   for(ii=0;ii<framei->ntokens;ii++){
     tokendata *toki;
@@ -2465,7 +2465,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     remove_comment(buffer);
     trim(buffer);
     buffer2=trim_front(buffer);
-    if(match(buffer2,"DEVICEDEF",9) == 1||
+    if(match(buffer2,"OBJECTDEF",9) == 1||
        match(buffer2,"AVATARDEF",9) == 1||
        match(buffer2,"NEWFRAME",8) == 1){
          buffer_ptr=buffer2;
@@ -2785,7 +2785,7 @@ int read_object_defs(char *file){
     }
 
 
-    if(match(buffer_ptr,"DEVICEDEF",9) == 1||
+    if(match(buffer_ptr,"OBJECTDEF",9) == 1||
        match(buffer_ptr,"AVATARDEF",9) == 1
       ){
         int is_avatar=0;
@@ -3150,11 +3150,11 @@ void init_object_defs(void){
 
       if(smvprogdir!=NULL){
         strcpy(objectfile,smvprogdir);
-        strcat(objectfile,"devices.svo");
+        strcat(objectfile,"objects.svo");
         read_object_defs(objectfile);
       }
 
-      strcpy(objectfile,"devices.svo");
+      strcpy(objectfile,"objects.svo");
       read_object_defs(objectfile);
 
       strcpy(objectfile,fdsprefix);
