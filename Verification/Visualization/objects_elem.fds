@@ -1,4 +1,4 @@
-&HEAD CHID='devices_elem',TITLE='Smokeview device drawing test SVN $Revision: 2722 $' /
+&HEAD CHID='objects_elem',TITLE='Smokeview device drawing test SVN $Revision: 2722 $' /
 
 &MESH IJK=32,32,64, XB=0.0,1.6,0.0,1.6,0.0,12.0/
 

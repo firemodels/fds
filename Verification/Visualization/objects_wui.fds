@@ -1,4 +1,4 @@
-&HEAD CHID='devices_wui',TITLE='Smokeview device drawing test SVN $Revision$' /
+&HEAD CHID='objects_wui',TITLE='Smokeview device drawing test SVN $Revision$' /
 
   Test devices for drawing tree parts (canopy and trunk).
 
