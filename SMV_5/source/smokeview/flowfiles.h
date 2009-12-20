@@ -582,7 +582,7 @@ typedef struct _tokendata {
   struct _tokendata *next,*elsenext;
   char *token;
   char tokenlabel[20];
-  char string[256],default_string[256];
+  char string[256],default_string[256],*stringptr;
 } tokendata;
 
 /* --------------------------  sv_object_frame ------------------------------------ */
