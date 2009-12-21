@@ -8423,6 +8423,21 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
+    if(match(buffer,"UNITCLASSES",11)==1){
+      int nuc;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&nuc);
+      for(i=0;i<nuc;i++){
+        int active;
+
+        fgets(buffer,255,stream);
+        if(i>nunitclasses-1)continue;
+        sscanf(buffer,"%i",&active);
+        unitclasses[i].active=active;
+      }
+      continue;
+    }
     /*
     if(match(buffer,"UNIT",4)==1&&match(buffer,"UNITS",5)!=1){
       nunitclasses_ini++;
@@ -9642,6 +9657,13 @@ void writeini(int flag){
       }
     }
   }
+
+  fprintf(fileout,"UNITCLASSES\n");
+  fprintf(fileout," %i\n",nunitclasses);
+  for(i=0;i<nunitclasses;i++){
+    fprintf(fileout, "%i\n",unitclasses[i].active);
+  }
+
   /*
   for(nn=0;nn<nunitclasses;nn++){
     f_units *uc;
