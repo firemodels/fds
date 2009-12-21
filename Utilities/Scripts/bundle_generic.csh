@@ -82,6 +82,9 @@ cp $bundle_setup/Overview.html $bundledir/Documentation/.
 cp $mandir/FDS_5_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_5_User_Guide.pdf $bundledir/Documentation/.
 
+echo Copy objects.svo
+cp $bundle_setup/objects.svo $bundledir/bin/objects.svo
+
 echo
 echo Getting the FDS release notes from the repository
 svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki $bundle_setup/FDS_Release_Notes.wiki
