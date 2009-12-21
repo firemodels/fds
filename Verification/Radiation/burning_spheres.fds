@@ -1,7 +1,7 @@
 &HEAD CHID='burning_spheres', TITLE='Test radiation from lagrangian particles, SVN $Revision$'/
 
-&MESH XB=0.0,1.0,0.0,1.0,0.0,2.0, IJK=20,20,40 /
-&TIME T_END=30. /
+&MESH XB=0.0,1.0,0.0,1.0,0.0,3.0, IJK=20,20,60 /
+&TIME T_END=60. /
 
 &VENT MB='XMIN', SURF_ID='HOT WALL' /
 &VENT MB='XMAX', SURF_ID='HOT WALL' /
@@ -10,9 +10,9 @@
 &VENT MB='ZMIN', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&SURF ID='HOT WALL', TMP_FRONT=800., COLOR='TAN' /
+&SURF ID='HOT WALL', TMP_FRONT=700., COLOR='TAN' /
 
-&PROP ID='balls', SMOKEVIEW_ID='SPHERE' /
+&PROP ID='balls', SMOKEVIEW_ID='SPHERE', SMOKEVIEW_PARAMETERS='D=0.01' /
 
 &PART ID='spheres', SURF_ID='chips', QUANTITIES='DROPLET TEMPERATURE','DROPLET DIAMETER', SAMPLING_FACTOR=1 /
 
@@ -23,9 +23,16 @@
       SPECIFIC_HEAT=1.
       CONDUCTIVITY=0.1
       N_REACTIONS=1.
-      NU_FUEL=1.
+      NU_FUEL=0.5
+      NU_RESIDUE=0.5
+      RESIDUE='char'
       REFERENCE_TEMPERATURE=300.
       HEAT_OF_REACTION=1000. /
+
+&MATL ID='char'
+      DENSITY=75.
+      SPECIFIC_HEAT=1.
+      CONDUCTIVITY=0.1 /
 
 &SURF ID='chips'
       MATL_ID='stuff'
