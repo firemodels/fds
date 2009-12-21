@@ -1119,7 +1119,7 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 //   ....
 \end{Verbatim}
 }
-\caption{Device Object file format.}
+\caption{Object file format.}
 \label{figobjectdef}%
 \end{figure}
 
@@ -1219,14 +1219,13 @@ OBJECTDEF // object definition for "egg"
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 FDS input lines to create egg
 
-The data label order (:R :G :B :D :DX) in the object file
-correspond exactly to the SMOKEVIEW_PARAMETERS input order
-in the FDS input file
+The data labels (:R :G :B :D :DX) in the object file
+correspond to the SMOKEVIEW_PARAMETERS inputs in
+in the FDS input file though the order does not need to be the same.
 
-                                          :R  :G  :B  :D  :DX
-&PROP ID='egg' SMOKEVIEW_PARAMETERS(1:5)=1.0,0.0,0.0,0.25,.75
-                      SMOKEVIEW_ID='egg' /
-&DEVC XYZ=0.5,0.8,2.0, QUANTITY='TEMPERATURE' PROP_ID='egg' /
+&PROP ID='egg' SMOKEVIEW_PARAMETERS(1:5)='R=0','G=0','B=255',
+                           'D=0.25','DX=.75' SMOKEVIEW_ID='egg' /
+&DEVC XYZ=0.5,0.8,2.5, QUANTITY='TEMPERATURE' PROP_ID='egg' /
 
 \end{Verbatim}
 }
