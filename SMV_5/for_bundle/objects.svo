@@ -218,6 +218,8 @@ OBJECTDEF
  push "BLUE" setcolor 
    0.0 0.0 0.0414 translate 0.012 drawsphere pop
 
+   // ************ object definitions used for FDS-EVAC ********************
+
 OBJECTDEF
  testdoor         // label, name of object
  :DX :DY :DZ :R=0 :G=0 :B=0
@@ -279,7 +281,7 @@ NEWFRAME
 
 OBJECTDEF // object for particle file sphere
  sphere
- :R=0 :G=0 :B=0 :D=0.1 :L=0.1
+ :R=0 :G=0 :B=0 :D=0.1
  $R $G $B setrgb
  $D drawsphere
 
@@ -318,7 +320,13 @@ OBJECTDEF // object for particle "egg"
 
 OBJECTDEF // object for a general ball
  gball
- :R=0 :G=0 :B=0 :DX :DY :DZ
+ :R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1
+ $D 0.0 :DGT0 GT
+ $DGT0 IF
+  $DX $D EQ
+  $DY $D EQ
+  $DZ $D EQ
+ ENDIF
  $R $G $B setrgb
  $DX $DY $DZ scalexyz 1.0 drawsphere
 
