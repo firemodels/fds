@@ -8438,39 +8438,6 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
-    /*
-    if(match(buffer,"UNIT",4)==1&&match(buffer,"UNITS",5)!=1){
-      nunitclasses_ini++;
-      if(nunitclasses_ini==1){
-        NewMemory((void **)&unitclasses_ini,nunitclasses_ini*sizeof(f_units));
-      }
-      if(nunitclasses_ini>1){
-        ResizeMemory((void **)&unitclasses_ini,nunitclasses_ini*sizeof(f_units));
-      }
-      uc = unitclasses_ini+nunitclasses_ini-1;
-      uc->submenuid=0;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%s",uc->unitclass);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&uc->nunittypes);
-      for(j=0;j<uc->nunittypes;j++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%s",uc->unittypes[j]);
-      }
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&uc->nunits,&uc->active);
-      NewMemory((void **)&(uc->units),uc->nunits*sizeof(f_unit));
-      uc->active--;
-      for(j=0;j<uc->nunits;j++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%s",uc->units[j].unit);
-        scale = uc->units[j].scale;
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f",scale,scale+1);
-      }
-      continue;
-    }
-    */
     if(match(buffer,"SMOOTHLINES",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&antialiasflag);
@@ -9663,28 +9630,6 @@ void writeini(int flag){
   for(i=0;i<nunitclasses;i++){
     fprintf(fileout, "%i\n",unitclasses[i].active);
   }
-
-  /*
-  for(nn=0;nn<nunitclasses;nn++){
-    f_units *uc;
-
-    fprintf(fileout,"UNIT\n");
-    uc = unitclasses+nn;
-    fprintf(fileout,"%s\n",uc->unitclass);
-    fprintf(fileout," %i \n",uc->nunittypes);
-    for(j=0;j<uc->nunittypes;j++){
-      fprintf(fileout,"%s\n",uc->unittypes[j]);
-    }
-    fprintf(fileout," %i %i \n",uc->nunits,uc->active+1);
-    for(j=0;j<uc->nunits;j++){
-      float *scale;
-
-      fprintf(fileout,"%s\n",uc->units[j].unit);
-      scale = uc->units[j].scale;
-      fprintf(fileout," %f %f\n",scale[0],scale[1]);
-    }
-  }
-  */
   if(flag==LOCAL_INI){
     fprintf(fileout,"MSCALE\n");
     fprintf(fileout," %f %f %f\n",mscale[0],mscale[1],mscale[2]);

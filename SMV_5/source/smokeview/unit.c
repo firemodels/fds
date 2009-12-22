@@ -34,7 +34,7 @@ char unit_revision[]="$Revision$";
 
 /* ------------------ get_unit_class ------------------------ */
 
-f_units *get_unit_class(char *label){
+f_units *get_unit_class(char *unit){
   int i;
 
   for(i=0;i<nunitclasses;i++){
@@ -42,23 +42,72 @@ f_units *get_unit_class(char *label){
     int j;
 
     unitclass = unitclasses + i;
-    for(j=0;j<unitclass->nunittypes;j++){
-      if(strcmp(label,unitclass->unittypes[j])==0)return unitclass;
-    }
+    if(strlen(unit)!=strlen(unitclass->units->unit))continue;
+    if(STRCMP(unit,unitclass->units->unit)==0)return unitclass;
   }
   return NULL;
 }
 
 /* ------------------ unit_type_match ------------------------ */
 
-int unit_type_match(char *unit_type, f_units *unit_class){
-  int i;
+int unit_type_match(char *unit, f_units *unit_class){
 
-  for(i=0;i<unit_class->nunittypes;i++){
-    if(strcmp(unit_class->unittypes[i],unit_type)==0)return 1;
-  }
+  if(strlen(unit_class->units->unit)!=strlen(unit))return 1;
+  if(strcmp(unit_class->units->unit,unit)!=0)return 1;
   return 0;
 }
+
+/* ------------------ set_unit_vis ------------------------ */
+
+void set_unit_vis(void){
+  int i;
+  int j;
+
+  for(i=0;i<nunitclasses;i++){
+    f_units *uci;
+
+    uci = unitclasses + i;
+    uci->visible=0;
+
+    for(j=0;j<nslice_files;j++){
+      slice *slicej;
+
+      slicej = sliceinfo + j;
+      if(strlen(slicej->label.unit)!=strlen(uci->units->unit))continue;
+      if(STRCMP(slicej->label.unit,uci->units->unit)!=0)continue;
+      uci->visible=1;
+      break;
+    }
+    if(uci->visible==1)continue;
+  
+    for(j=0;j<npatch_files;j++){
+      patch *patchj;
+      
+      patchj = patchinfo + j;
+      if(strlen(patchj->label.unit)!=strlen(uci->units->unit))continue;
+      if(STRCMP(patchj->label.unit,uci->units->unit)!=0)continue;
+      uci->visible=1;
+      break;
+    }
+    if(uci->visible==1)continue;
+
+    for(j=0;j<nplot3d_files;j++){
+      plot3d *plot3dj;
+      char *shortlabel;
+      int n;
+      
+      plot3dj = plot3dinfo + j;
+      for(n=0;n<5;n++){
+        if(strlen(plot3dj->label[n].unit)!=strlen(uci->units->unit))continue;
+        if(STRCMP(plot3dj->label[n].unit,uci->units->unit)!=0)continue;
+        uci->visible=1;
+        break;
+      }
+      if(uci->visible==1)break;
+    }
+  }
+}
+
 
 /* ------------------ add_unit_class ------------------------ */
 
@@ -78,8 +127,6 @@ void add_unit_class(flowlabels *label){
   ut->nunits=2;
   ut->active=0;
   strcpy(ut->unitclass,label->shortlabel);
-  ut->nunittypes=1;
-  strcpy(ut->unittypes[0],label->shortlabel);
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
   units=ut->units;
@@ -111,22 +158,18 @@ void init_unit_defs(void){
   if(smokediff==0)return;
   for(j=0;j<nslice_files;j++){
     slice *slicej;
-    char *shortlabel;
       
     slicej = sliceinfo + j;
-    shortlabel = slicej->label.shortlabel;
-    unitclass = get_unit_class(shortlabel);
+    unitclass = get_unit_class(slicej->label.unit);
     if(unitclass==NULL){
       add_unit_class(&slicej->label);
     }
   }
   for(j=0;j<npatch_files;j++){
     patch *patchj;
-    char *shortlabel;
       
     patchj = patchinfo + j;
-    shortlabel = patchj->label.shortlabel;
-    unitclass = get_unit_class(shortlabel);
+    unitclass = get_unit_class(patchj->label.unit);
     if(unitclass==NULL){
       add_unit_class(&patchj->label);
     }
@@ -138,8 +181,7 @@ void init_unit_defs(void){
       
     plot3dj = plot3dinfo + j;
     for(n=0;n<5;n++){
-      shortlabel = plot3dj->label[n].shortlabel;
-      unitclass = get_unit_class(shortlabel);
+      unitclass = get_unit_class(plot3dj->label[n].unit);
       if(unitclass==NULL){
         add_unit_class(&plot3dj->label[n]);
       }
@@ -164,7 +206,7 @@ void update_unit_defs(void){
       
       patchj = patchinfo + j;
       if(patchj->loaded==0||patchj->display==0)continue;
-      if(unit_type_match(patchj->label.shortlabel,unitclasses+i)==0)continue;
+      if(unit_type_match(patchj->label.unit,unitclasses+i)!=0)continue;
       if(firstpatch==1){
         firstpatch=0;
         valmin=patchj->diff_valmin;
@@ -182,7 +224,7 @@ void update_unit_defs(void){
       
       slicej = sliceinfo + j;
       if(slicej->loaded==0||slicej->display==0)continue;
-      if(unit_type_match(slicej->label.shortlabel,unitclasses+i)==0)continue;
+      if(unit_type_match(slicej->label.unit,unitclasses+i)!=0)continue;
       if(firstslice==1){
         firstslice=0;
         valmin=slicej->diff_valmin;
@@ -202,10 +244,7 @@ void update_unit_defs(void){
       plot3dj = plot3dinfo + j;
       if(plot3dj->loaded==0||plot3dj->display==0)continue;
       for(n=0;n<5;n++){
-        char *shortlabel;
-
-        shortlabel = plot3dj->label[n].shortlabel;
-        if(unit_type_match(shortlabel,unitclasses+i)==0)continue;
+        if(unit_type_match(plot3dj->label[n].unit,unitclasses+i)!=0)continue;
         if(firstplot3d==1){
           firstplot3d=0;
           valmin=plot3dj->diff_valmin[n];
@@ -239,17 +278,16 @@ void update_unit_defs(void){
 
 /* ------------------ getunitinfo ------------------------ */
 
-void getunitinfo(const char *shortlabel, int *unitclass, int *unittype){
+void getunitinfo(const char *unitlabel, int *unitclass, int *unittype){
   int i,j;
   *unitclass=-1;
   *unittype=-1;
   for(i=0;i<nunitclasses;i++){
-    for(j=0;j<unitclasses[i].nunittypes;j++){
-      if(STRCMP(unitclasses[i].unittypes[j],shortlabel)==0){
-        *unitclass=i;
-        *unittype=unitclasses[i].active;
-        return;
-      }
+    if(strlen(unitclasses[i].units->unit)!=strlen(unitlabel))continue;
+    if(STRCMP(unitclasses[i].units->unit,unitlabel)==0){
+      *unitclass=i;
+      *unittype=unitclasses[i].active;
+      return;
     }
   }
 }
@@ -261,7 +299,7 @@ void InitUnits(void){
   f_unit *units;
   f_units *ut;
 
-  nunitclasses_default=3;
+  nunitclasses_default=4;
   NewMemory((void **)&unitclasses_default,nunitclasses_default*sizeof(f_units));
   
   for(i=0;i<nunitclasses_default;i++){
@@ -280,10 +318,7 @@ void InitUnits(void){
     ut->nunits=3;
   }
   ut->active=0;
-  strcpy(ut->unitclass,"temperature");
-  ut->nunittypes=2;
-  strcpy(ut->unittypes[0],"temp");
-  strcpy(ut->unittypes[1],"d_temp");
+  strcpy(ut->unitclass,"Temperature");
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
   units=ut->units;
@@ -326,12 +361,7 @@ void InitUnits(void){
     ut->diff_index=-1;
     ut->nunits=3;
   }
-  strcpy(ut->unitclass,"velocity");
-  ut->nunittypes=4;
-  strcpy(ut->unittypes[0],"U-VEL");
-  strcpy(ut->unittypes[1],"V-VEL");
-  strcpy(ut->unittypes[2],"W-VEL");
-  strcpy(ut->unittypes[3],"Speed");
+  strcpy(ut->unitclass,"Velocity");
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
   units=ut->units;
@@ -364,9 +394,7 @@ void InitUnits(void){
     ut->diff_index=-1;
     ut->nunits=2;
   }
-  strcpy(ut->unitclass,"distance");
-  ut->nunittypes=1;
-  strcpy(ut->unittypes[0],"VIS_Soot");
+  strcpy(ut->unitclass,"Distance");
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
   units=ut->units;
@@ -375,6 +403,36 @@ void InitUnits(void){
   units[0].scale[1]=0.0;
   strcpy(units[1].unit,"f");
   units[1].scale[0]=3.280833333;
+  units[1].scale[1]=0.0;
+  if(smokediff==1){
+    strcpy(units[2].unit,"% diff");
+    units[3].scale[0]=0.16667;
+    units[3].scale[1]=0.0;
+    units[3].rel_defined=0;
+  }
+  CheckMemory;
+
+  // volume flow units
+
+  ut = unitclasses_default + 3;
+  ut->active=0;
+  if(smokediff==1){
+    ut->diff_index=2;
+    ut->nunits=3;
+  }
+  else{
+    ut->diff_index=-1;
+    ut->nunits=2;
+  }
+  strcpy(ut->unitclass,"Volume Flow");
+
+  NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
+  units=ut->units;
+  strcpy(units[0].unit,"m^3/s");
+  units[0].scale[0]=1.0;
+  units[0].scale[1]=0.0;
+  strcpy(units[1].unit,"cfm");
+  units[1].scale[0]=2118.86720;
   units[1].scale[1]=0.0;
   if(smokediff==1){
     strcpy(units[2].unit,"% diff");
