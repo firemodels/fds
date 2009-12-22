@@ -116,8 +116,9 @@
 \newcommand{\ha}{\frac{1}{2}}
 \newcommand{\ft}{\frac{4}{3}}
 \newcommand{\ot}{\frac{1}{3}}
-\newcommand{\of}{\frac{1}{4}}
 \newcommand{\twth}{\frac{2}{3}}
+\newcommand{\fofi}{\frac{4}{5}}
+\newcommand{\of}{\frac{1}{4}}
 \newcommand{\R}{{\cal R}}
 \newcommand{\be}{\begin{equation}}
 \newcommand{\ee}{\end{equation}}
@@ -718,7 +719,7 @@ to temperature differences between inside and outside.
 
 \item[{\bf Adiabatic Surface Temperature}] A new output quantity has been added to
 facilitate using FDS output in thermal and mechanical finite element models.
-See Section~\ref{info:thermalboundary} for more information.
+See Section~\ref{info:adiabatic} for more information.
 
 \item[{\bf Development, Distribution and Formal User Support}] Starting with FDS 5, an online, open-source
 development environment is being used for configuration management
@@ -3199,115 +3200,105 @@ characteristics of the surfaces of the geometry which includes the thickness of 
 materials applied to that surface.
 \end{warning}
 
-\subsection{Simple Thermal Boundary Conditions}
-\label{info:thermalboundary}
+
+
+\section{Surface Temperature and Heat Flux}
+
+This section describes how to specify simple thermal boundary conditions. These are often used when there is little or no
+information about the properties of the solid materials. If the properties of the materials are known, it is better to specify these
+properties and let the model compute the heat flux to, and temperature of, the walls and other solid surfaces.
+
+
+\subsection{Specified Solid Surface Temperature}
+\label{info:specified_temperature}
 
 Usually, the thermal properties of a solid boundary are specified via the
 {\ct MATL} namelist group, which is in turn invoked by the {\ct SURF} entry via
 the character string {\ct MATL\_ID}. However, sometimes it is convenient to
-simply specify a fixed temperature boundary condition, in which case set
-{\ct TMP\_FRONT} to be the surface temperature in units of $^\circ$C.  One may also specify
-a fixed heat flux.  Two methods are available to do this.  The first is to specify a
+specify a fixed temperature boundary condition, in which case set
+{\ct TMP\_FRONT} to be the surface temperature in units of $^\circ$C:
+
+\footnotesize
+\begin{verbatim}
+&SURF ID        = 'HOT WALL'
+      COLOR     = 'RED'
+      TMP_FRONT = 200. /
+\end{verbatim}
+\normalsize
+
+\noindent
+Note that there is no need to specify a {\ct MATL\_ID} or {\ct THICKNESS}. Because the wall is to be maintained at the given temperature,
+there is no need to say anything about its material composition or thickness.  
+
+
+
+\subsection{Special Topic: Convective Heat Transfer Options}
+\label{info:convection}
+
+This section is labeled as a special topic because normally you do not need to modify the convective heat transfer
+model in FDS. However, there are special cases for which the default model may not be adequate, and this section
+describes some options.
+
+\subsubsection{Default Convective Heat Transfer Model}
+
+By default in an LES calculation, the convective heat flux to the surface is
+obtained from a combination of natural and forced
+convection correlations
+\be \dq_c'' = h \; \Delta T
+    \quad \hbox{W/m}^2 \quad ; \quad h =
+    \max \; \left[ \; C_1 \, |\Delta T|^\ot \; , \;
+            \frac{k}{L} \; C_2 \; \RE^\fofi \; \PR^\ot \;
+            \right]  \quad
+    \hbox{W/m$^2$/K} \ee
+where $\Delta T$ is the difference between the wall and the gas temperature,
+$C_1$ is the coefficient for natural convection (1.52 for a horizontal surface
+and 1.31 for a vertical surface, by default) and $C_2$ is the coefficient for forced convection (0.037 by default)~\cite{Holman:1};
+$L$ is a characteristic length related to the size of the physical
+obstruction; $k$ is the thermal conductivity of the
+gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the
+gas flowing
+past the obstruction. Since the Reynolds number is proportional to the
+characteristic length, $L$, the heat transfer coefficient is weakly
+related to $L$. For this reason, $L$ is taken to be 1~m for most
+calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C_1$ and
+{\ct C\_FORCED} for $C_2$, all of which are input on the {\ct MISC} line.
+
+\subsubsection{Changing the Convective Heat Transfer Coefficient}
+
+If you want to change the default convective heat transfer coefficient, you can set to a constant using
+{\ct H\_FIXED} on the {\ct MISC} line in units of W/m$^2$/K. Another option is to use a turbulent
+convective heat transfer model suggested by Moinuddin and Li of Victoria University, Australia, by setting
+{\ct H\_EDDY=.TRUE.} on the {\ct MISC} line.  
+
+\subsubsection{Specifying the Heat Flux at a Solid Surface}
+
+Instead of altering the convective heat transfer coefficient, you may specify
+a fixed heat flux directly.  Two methods are available to do this.  The first is to specify a
 {\ct NET\_HEAT\_FLUX} in units of kW/m$^2$.  When this is specified FDS will compute the surface
 temperature required to
-ensure that the combine radiative and convective heat flux from the surface is equal to the
+ensure that the combined radiative and convective heat flux from the surface is equal to the
 {\ct NET\_HEAT\_FLUX}.  The second method is to specify separately the {\ct CONVECTIVE\_HEAT\_FLUX},
 in units of kW/m$^2$, and the radiative heat flux.  The radiative heat flux is specified  by setting both
-{\ct TMP\_FRONT} and {\ct EMISSIVITY}. Note that if you wish there to be only a convective heat flux from a
+{\ct TMP\_FRONT} and {\ct EMISSIVITY} appropriately. Note that if you wish there to be only a convective heat flux from a
 surface, then the {\ct EMISSIVITY} should be set to zero.  If {\ct NET\_HEAT\_FLUX} or
 {\ct CONVECTIVE\_HEAT\_FLUX} is positive, the wall heats up the surrounding gases. If {\ct NET\_HEAT\_FLUX} or
 {\ct CONVECTIVE\_HEAT\_FLUX} is negative, the wall cools the surrounding gases.
 
+
+
+\subsection{Special Topic: Adiabatic Surfaces}
+\label{info:adiabatic}
+
 For some special applications, it is often desired that a solid
 surface be adiabatic, that is, there is no net heat transfer
 (radiative and convective) from the gas to the solid. For this case,
-all that must be prescribed on the {\ct SURF} line is {\ct
-ADIABATIC=.TRUE.}, nothing else.  FDS will compute a wall temperature
-so that the sum of the convective and radiative fluxes is zero.  Specifying a surface as {\ct ADIABATIC} will
+all that must be prescribed on the {\ct SURF} line is {\ct ADIABATIC=.TRUE.}, and nothing else.  FDS will compute a wall temperature
+so that the sum of the net convective and radiative heat flux is zero.  Specifying a surface as {\ct ADIABATIC} will
 result in FDS defining {\ct NET\_HEAT\_FLUX=0}.
 
-
-
-\subsection{Fire with a Known Heat Release Rate}
-
-Solids and liquid fuels can be modeled by specifying their relevant
-properties via the {\ct MATL} namelist group. However, if you simply
-want to specify a fire of a given heat release rate (HRR),
-you need not specify any material properties. A specified fire is
-basically modeled as the ejection of gaseous fuel
-from a solid surface or vent. This is essentially a burner, with a
-specified Heat Release Rate Per Unit Area, {\ct HRRPUA}, in units of
-kW/m$^2$. For example
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='FIRE',HRRPUA=500. /
-\end{verbatim}
-\normalsize
-
-\noindent
-applies 500~kW/m$^2$ to any surface with the attribute
-{\ct SURF\_ID='FIRE'}. See the discussion of {\bf Time Dependent Conditions}
-in Section~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
-
-An alternative to {\ct HRRPUA} with the exact same functionality is
-{\ct MLRPUA}, except this parameter
-specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
-{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line. With either,
-the stoichiometry of the gas phase reaction is set by the
-parameters on the {\ct REAC} line. All of the
-species associated with the combustion process are accounted for
-by way of the mixture fraction variable and should not be
-explicitly prescribed. The exception to this rule is
-where a non-reacting gas is introduced into the domain that merely serves
-as a diluent, like CO$_2$ from an extinguisher or H$_2$O from evaporated
-sprinkler droplets (see Section~\ref{info:SPEC} for details).
-If a finite rate combustion model is desired instead of the default mixture
-fraction model, see Section~\ref{info:finite}.
-
 \begin{warning}
-Specifying {\ct HRRPUA} or {\ct MLRPUA} automatically invokes the mixture fraction
-combustion model.
+No solid surface is truly adiabatic; thus, the specification of an adiabatic boundary condition should be used for diagnostic purposes only.
 \end{warning}
-
-
-
-\subsection{Special Topic: A Radially-Spreading Fire}
-\label{info:spread}
-
-Sometimes it is desired that a fire spread radially at some specified
-rate. Rather than trying to design material properties
-to achieve this, you can alternatively use a {\ct VENT} in a special way.
-If the {\ct SURF\_ID} associated with a {\ct VENT}
-defines a specified heat release rate, {\ct HRRPUA}, and
-time history, {\ct RAMP\_Q} or {\ct TAU\_Q}, you can also specify {\ct
-XYZ} and {\ct SPREAD\_RATE} on the {\ct VENT} line.
-Then the fire is directed to start at the point {\ct XYZ} and spread
-radially at a rate of {\ct SPREAD\_RATE} (m/s). The ramp-up begins at
-the time when the fire arrives at a given point.
-For example, the lines
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='FIRE', HRRPUA=500.0, RAMP_Q='fireramp' /
-&RAMP ID='fireramp', T= 0.0, F=0.0 /
-&RAMP ID='fireramp', T= 1.0, F=1.0 /
-&RAMP ID='fireramp', T=30.0, F=1.0 /
-&RAMP ID='fireramp', T=31.0, F=0.0 /
-&VENT XB=0.0,5.0,1.5,9.5,0.0,0.0, SURF_ID='FIRE', XYZ=1.5,4.0,0.0, SPREAD_RATE=0.03 /
-\end{verbatim}
-\normalsize
-
-\noindent
-create a rectangular patch at $z=0$ on which the fire starts at the
-point (1.5,4.0,0.0) and spreads outwards at a rate of 0.03~m/s. Each surface cell
-burns for 30~s as the fire spreads outward, creating a widening ring of fire. Note that the {\ct RAMP\_Q} is used in this
-construct to turn the burning on and off to simulate the consumption of fuel as the fire spreads radially. It should not
-be used to mimic the ``$t$-squared'' curve -- the whole point of the exercise is to mimic this curve in a more natural way.
-Eventually, the fire goes out as the ring grows past the boundary of the rectangle.
-Some trial and error is probably required to find the {\ct SPREAD\_RATE} that
-leads to a desired time history of the heat release rate.
-
 
 
 
@@ -3625,6 +3616,89 @@ FDS has several approaches for describing the pyrolysis of solids and liquids. T
 on the availability of material properties and the appropriateness of the underlying pyrolysis model. This
 section provides a description of the parameters that describe a burning solid material when the burning rate is known. In other
 words, you use these parameters to {\em specify} the burning rate.
+
+
+\subsection{A Gas Burner with a Specified Heat Release Rate}
+
+Solids and liquid fuels can be modeled by specifying their relevant
+properties via the {\ct MATL} namelist group. However, if you simply
+want to specify a fire of a given heat release rate (HRR),
+you need not specify any material properties. A specified fire is
+basically modeled as the ejection of gaseous fuel
+from a solid surface or vent. This is essentially a burner, with a
+specified Heat Release Rate Per Unit Area, {\ct HRRPUA}, in units of
+kW/m$^2$. For example
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='FIRE',HRRPUA=500. /
+\end{verbatim}
+\normalsize
+
+\noindent
+applies 500~kW/m$^2$ to any surface with the attribute
+{\ct SURF\_ID='FIRE'}. See the discussion of {\bf Time Dependent Conditions}
+in Section~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
+
+An alternative to {\ct HRRPUA} with the exact same functionality is
+{\ct MLRPUA}, except this parameter
+specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
+{\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line. With either,
+the stoichiometry of the gas phase reaction is set by the
+parameters on the {\ct REAC} line. All of the
+species associated with the combustion process are accounted for
+by way of the mixture fraction variable and should not be
+explicitly prescribed. The exception to this rule is
+where a non-reacting gas is introduced into the domain that merely serves
+as a diluent, like CO$_2$ from an extinguisher or H$_2$O from evaporated
+sprinkler droplets (see Section~\ref{info:SPEC} for details).
+If a finite rate combustion model is desired instead of the default mixture
+fraction model, see Section~\ref{info:finite}.
+
+\begin{warning}
+Specifying {\ct HRRPUA} or {\ct MLRPUA} automatically invokes the mixture fraction
+combustion model.
+\end{warning}
+
+
+
+\subsection{Special Topic: A Radially-Spreading Fire}
+\label{info:spread}
+
+Sometimes it is desired that a fire spread radially at some specified
+rate. Rather than trying to design material properties
+to achieve this, you can alternatively use a {\ct VENT} in a special way.
+If the {\ct SURF\_ID} associated with a {\ct VENT}
+defines a specified heat release rate, {\ct HRRPUA}, and
+time history, {\ct RAMP\_Q} or {\ct TAU\_Q}, you can also specify {\ct
+XYZ} and {\ct SPREAD\_RATE} on the {\ct VENT} line.
+Then the fire is directed to start at the point {\ct XYZ} and spread
+radially at a rate of {\ct SPREAD\_RATE} (m/s). The ramp-up begins at
+the time when the fire arrives at a given point.
+For example, the lines
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='FIRE', HRRPUA=500.0, RAMP_Q='fireramp' /
+&RAMP ID='fireramp', T= 0.0, F=0.0 /
+&RAMP ID='fireramp', T= 1.0, F=1.0 /
+&RAMP ID='fireramp', T=30.0, F=1.0 /
+&RAMP ID='fireramp', T=31.0, F=0.0 /
+&VENT XB=0.0,5.0,1.5,9.5,0.0,0.0, SURF_ID='FIRE', XYZ=1.5,4.0,0.0, SPREAD_RATE=0.03 /
+\end{verbatim}
+\normalsize
+
+\noindent
+create a rectangular patch at $z=0$ on which the fire starts at the
+point (1.5,4.0,0.0) and spreads outwards at a rate of 0.03~m/s. Each surface cell
+burns for 30~s as the fire spreads outward, creating a widening ring of fire. Note that the {\ct RAMP\_Q} is used in this
+construct to turn the burning on and off to simulate the consumption of fuel as the fire spreads radially. It should not
+be used to mimic the ``$t$-squared'' curve -- the whole point of the exercise is to mimic this curve in a more natural way.
+Eventually, the fire goes out as the ring grows past the boundary of the rectangle.
+Some trial and error is probably required to find the {\ct SPREAD\_RATE} that
+leads to a desired time history of the heat release rate.
+
+
 
 
 \subsection{Solid Fuels that Burn at a Specified Rate}
@@ -9225,9 +9299,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct CHECK\_VOLUME\_FLOW}       & Logical       & Multiple mesh diagnostic                      &               & {\ct .FALSE.}     \\ \hline
 %{\ct CHECK\_KINETIC\_ENERGY}    & Logical       & Estimate unresolved (subgrid) kinetic energy  &               & {\ct .FALSE.}     \\ \hline
 %{\ct CHECK\_MU\_DNS}            & Logical       & Store molecular dynamic viscosity             &               & {\ct .FALSE.}     \\ \hline
-%{\ct C\_FORCED}                 & Real          & Convective heat transfer coefficient          &               & 0.037             \\ \hline
-%{\ct C\_HORIZONTAL}             & Real          & Convective heat transfer coefficient          &               & 1.52             \\ \hline
-%{\ct C\_VERTICAL}               & Real          & Convective heat transfer coefficient          &               & 1.31             \\ \hline
+{\ct C\_FORCED}                 & Real          & See Section~\ref{info:convection}             &               & 0.037             \\ \hline
+{\ct C\_HORIZONTAL}             & Real          & See Section~\ref{info:convection}             &               & 1.52             \\ \hline
+{\ct C\_VERTICAL}               & Real          & See Section~\ref{info:convection}             &               & 1.31             \\ \hline
 {\ct CSMAG}                     & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
 %{\ct COMPUTE\_VISCOSITY\_TWICE} & Logical       & Compute twice per time step                   &               & {\ct .TRUE.}     \\ \hline
 {\ct CONDUCTIVITY}              & Real          & See Section~\ref{info:SPEC}                   &  W/m/K        &                   \\ \hline
@@ -9248,8 +9322,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct GAMMA}                     & Real          & Ratio of specific heats                       &               & 1.4               \\ \hline
 {\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}         & m             & 0.                  \\ \hline
 {\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
-{\ct H\_EDDY}                   & Logical       & Moinuddin and Li heat transfer coefficient    &               & {\ct .FALSE.}     \\ \hline
-{\ct H\_FIXED}                  & Real          & See Section~\ref{solid_phase_verification}    & W/m$^2$/K     &                   \\ \hline
+{\ct H\_EDDY}                   & Logical       & See Section~\ref{info:convection}             &               & {\ct .FALSE.}     \\ \hline
+{\ct H\_FIXED}                  & Real          & See Section~\ref{info:convection}             & W/m$^2$/K     &                   \\ \hline
 {\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
 {\ct ISOTHERMAL}                & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}         &  $^\circ$C/m  & 0                 \\ \hline
@@ -9508,7 +9582,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PDPA\_M}                           & Integer       & See Section~\ref{PDPA}                    &                       & 0         \\ \hline
 {\ct PDPA\_RADIUS}                      & Real          & See Section~\ref{PDPA}                    & m                     & 0.        \\ \hline
 {\ct PDPA\_START}                       & Real          & See Section~\ref{PDPA}                    & s                     & 0.        \\ \hline
-{\ct PRESSURE\_RAMP}                    & Character     & Pressure {\ct RAMP} for sprinkler systems &                       &           \\ \hline
+{\ct PRESSURE\_RAMP}                    & Character     & Pressure {\ct RAMP} for sprinklers        &                       &           \\ \hline
 {\ct QUANTITY}                          & Character     & Name of associated output                 &                       &           \\ \hline
 {\ct RTI}                               & Real          & Response Time Index                       & $\sqrt{\hbox{m~s}}$   & 100.      \\ \hline
 {\ct SMOKEVIEW\_ID}                     & Char.~Array   & Name(s) of drawn object                   &                       &           \\ \hline
