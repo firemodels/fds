@@ -47,6 +47,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_AND 128
 #define SV_OR 129
 #define SV_ABS 130
+#define SV_EQ 131
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -76,7 +77,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_AND_NUMARGS 3
 #define SV_OR_NUMARGS 3
 #define SV_ABS_NUMARGS 2
-
+#define SV_EQ_NUMARGS 2
 
 #define SV_TRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEX_NUMOUTARGS    0
@@ -106,6 +107,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_AND_NUMOUTARGS 1
 #define SV_OR_NUMOUTARGS 1
 #define SV_ABS_NUMOUTARGS 1
+#define SV_EQ_NUMOUTARGS 0
 
 
 #define SV_DRAWCUBE      200
@@ -985,6 +987,15 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       }
       else{
         *argptr=0.0;
+      }
+      break;
+    case SV_EQ:
+      {
+        float *to_ptr, *from_ptr;
+
+        to_ptr=(toki-2)->varptr;
+        from_ptr=(toki-1)->varptr;
+        *to_ptr=*from_ptr;
       }
       break;
     case SV_GT:
@@ -2210,6 +2221,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_GT;
     num_op=SV_GT_NUMARGS;
     num_outop=SV_GT_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"EQ")==0){
+    op=SV_EQ;
+    num_op=SV_EQ_NUMARGS;
+    num_outop=SV_EQ_NUMOUTARGS;
   }
   else if(STRCMP(token,"GE")==0){
     op=SV_GE;
