@@ -345,6 +345,7 @@ EXTERNCPP void handle_plot3d_keys(int  key);
 EXTERNCPP void handle_move_keys(int  key);
 EXTERNCPP int get_interval(float val, float *array, int n);
 
+EXTERNCPP void set_unit_vis(void);
 EXTERNCPP int getrevision(char *svn);
 EXTERNCPP void memorystatus(void);
 EXTERNCPP int getnewfilename(void);
@@ -354,7 +355,7 @@ EXTERNCPP void updateallplotslices(void);
 EXTERNCPP int makeiblank(void);
 EXTERNCPP int makeiblank_carve(void);
 EXTERNCPP void makeiblank_smoke3d(void);
-EXTERNCPP void getunitinfo(const char *shortlabel, int *unitclass, int *unittype);
+EXTERNCPP void getunitinfo(const char *unitlabel, int *unitclass, int *unittype);
 EXTERNCPP void update_unit_defs(void);
 
 EXTERNCPP void SmoothIsoSurface(isosurface *surfacedata);

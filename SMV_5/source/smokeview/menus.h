@@ -6151,6 +6151,7 @@ static int in_menu=0;
       f_units *uci;
 
       uci = unitclasses + i;
+      if(uci->visible==0)continue;
       glutAddSubMenu(uci->unitclass,uci->submenuid);
     }
     if(vishmsTimelabel==0)glutAddMenuEntry("time (h:m:s)",-2);
