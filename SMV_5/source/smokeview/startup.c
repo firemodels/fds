@@ -133,6 +133,7 @@ int initcase_c(int argc, char **argv){
 
   InitUnits();
   init_unit_defs();
+  set_unit_vis();
 
   CheckMemory;
 

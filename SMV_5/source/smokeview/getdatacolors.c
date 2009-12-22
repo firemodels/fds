@@ -1213,7 +1213,7 @@ void drawColorBars(float ybump){
       if(partunitlabel!=NULL)strcpy(partunitlabel2,partunitlabel);
     }
     if(parttype!=0){
-      getunitinfo(partshortlabel2,&partunitclass,&partunittype);
+      getunitinfo(partunitlabel2,&partunitclass,&partunittype);
       if(partunitclass>=0&&partunitclass<nunitclasses){
         if(partunittype>=0){
           partflag=1;
@@ -1229,7 +1229,7 @@ void drawColorBars(float ybump){
   if(showslice==1||showvslice==1){
     sb = slicebounds + islicetype;
     strcpy(unitlabel,sb->label->unit);
-    getunitinfo(sb->label->shortlabel,&sliceunitclass,&sliceunittype);
+    getunitinfo(sb->label->unit,&sliceunitclass,&sliceunittype);
     if(sliceunitclass>=0&&sliceunitclass<nunitclasses){
       if(sliceunittype>0){
         sliceflag=1;
@@ -1246,7 +1246,7 @@ void drawColorBars(float ybump){
     sb = isobounds + iisottype;
     strcpy(unitlabel,sb->label->unit);
     /*
-    getunitinfo(sb->label->shortlabel,&isounitclass,&isounittype);
+    getunitinfo(sb->label->unit,&isounitclass,&isounittype);
     if(isounitclass>=0&&isounitclass<nunitclasses){
       if(isounittype>0){
         isoflag=1;
@@ -1263,7 +1263,7 @@ void drawColorBars(float ybump){
   if(showpatch==1){
     patchi = patchinfo + patchtypes[ipatchtype];
     strcpy(unitlabel,patchi->label.unit);
-    getunitinfo(patchi->label.shortlabel,&patchunitclass,&patchunittype);
+    getunitinfo(patchi->label.unit,&patchunitclass,&patchunittype);
     if(patchunitclass>=0&&patchunitclass<nunitclasses){
       if(patchunittype>0){
         patchflag=1;
@@ -1278,7 +1278,7 @@ void drawColorBars(float ybump){
   }
   if(showplot3d==1){
     strcpy(unitlabel,unitp3label[plotn-1]);
-    getunitinfo(shortp3label[plotn-1],&plot3dunitclass,&plot3dunittype);
+    getunitinfo(unitp3label[plotn-1],&plot3dunitclass,&plot3dunittype);
     if(plot3dunitclass>=0&&plot3dunitclass<nunitclasses){
       if(plot3dunittype>0){
         plot3dflag=1;
@@ -1293,7 +1293,7 @@ void drawColorBars(float ybump){
   }
   if(showzone==1&&sethazardcolor==0){
     strcpy(unitlabel,"C");
-    getunitinfo("Temp",&zoneunitclass,&zoneunittype);
+    getunitinfo(unitlabel,&zoneunitclass,&zoneunittype);
     if(zoneunitclass>=0&&zoneunitclass<nunitclasses){
       if(zoneunittype>0){
         zoneflag=1;

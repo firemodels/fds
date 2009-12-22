@@ -1074,10 +1074,8 @@ typedef struct {
 
 typedef struct {
   int nunits;
-  int active,submenuid;
+  int active,submenuid,visible;
   char unitclass[30]; /* ie: velocity, temperature */
-  char unittypes[10][256]; /* list of equivalent units ie: U-VEL, V-VEL, W-VEL */
-  int nunittypes;
   int diff_index;
   f_unit *units;
 } f_units;
