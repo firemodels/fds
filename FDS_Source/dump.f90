@@ -2237,6 +2237,7 @@ SURFLOOP: DO N=0,N_SURF
          WRITE(LU_OUTPUT,'(A,I2)')      '     Layer ',NL
          WRITE(LU_OUTPUT,'(A,F8.5)')    '        Thickness   (m): ',SF%LAYER_THICKNESS(NL)
          WRITE(LU_OUTPUT,'(A,F8.2)')    '        Density (kg/m3): ',SF%LAYER_DENSITY(NL)
+         ! ToDo: cylindrical and spherical surfaces
          SD = SD + SF%LAYER_THICKNESS(NL)*SF%LAYER_DENSITY(NL)
          DO NN=1,SF%N_LAYER_MATL(NL)
             WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SF%LAYER_MATL_NAME(NL,NN)),', Mass fraction: ',SF%LAYER_MATL_FRAC(NL,NN)
