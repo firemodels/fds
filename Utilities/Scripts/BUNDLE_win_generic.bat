@@ -11,6 +11,7 @@ set in_smv=%svn_root%\SMV_5\for_bundle\
 set to_google=%svn_root%\Utilities\to_google
 set out_bundle=%to_google%\%basename%\FDS
 set out_bin=%out_bundle%\FDS5\bin
+set out_textures=%out_bin%\textures
 set out_uninstall=%out_bundle%\FDS5\Uninstall
 set out_doc=%out_bundle%\FDS5\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
@@ -31,6 +32,7 @@ Rem erase the temporary bundle directory if it already exists
 if exist %out_bundle% rmdir /s /q %out_bundle%
 mkdir %out_bundle%
 mkdir %out_bin%
+mkdir %out_textures%
 mkdir %out_doc%
 mkdir %out_guides%
 mkdir %out_web%
@@ -60,6 +62,8 @@ copy %in_smv%\objects.svo             %out_bin%\.
 copy %in_smv%\pthreadVC.dll           %out_bin%\.
 copy %in_smv%\glew32.dll              %out_bin%\.
 copy %in_smv%\smokeview.ini           %out_bin%\.
+copy %in_smv%\textures\*.jpg          %out_textures%\.
+copy %in_smv%\textures\*.png          %out_textures%\.
 
 echo.
 echo Copying Uninstaller to Uninstall directory
