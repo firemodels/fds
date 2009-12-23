@@ -1556,39 +1556,40 @@ void drawdisk(float diameter, float height, unsigned char *rgbcolor){
 void drawarcdisk(float angle, float diameter, float height, unsigned char *rgbcolor){
   int i, iarc;
 
-  if(ncirc==0)initcircle(CIRCLE_SEGS);
+  if(cos_lat==NULL)initspheresegs(NLAT,NLONG);
 
-  iarc = CIRCLE_SEGS*angle/360.0 + 0.5;
+  iarc = NLONG*angle/360.0 + 0.5;
   if(iarc<2)iarc=2;
-  if(iarc>CIRCLE_SEGS)iarc=CIRCLE_SEGS;
+  if(iarc>NLONG)iarc=NLONG;
 
   glBegin(GL_QUADS);
   if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
   for(i=0;i<iarc;i++){
-    glNormal3f(xcirc[i],ycirc[i],0.0);
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0); // 1
+    glNormal3f(cos_long[i],sin_long[i],0.0);
+    glVertex3f(diameter*cos_long[  i]/2.0,diameter*sin_long[  i]/2.0,0.0); // 1
 
-    glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0); // 2
+    glNormal3f(cos_long[i+1],sin_long[i+1],0.0);
+    glVertex3f(diameter*cos_long[i+1]/2.0,diameter*sin_long[i+1]/2.0,0.0); // 2
 
-    glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height); // 3
+    glNormal3f(cos_long[i+1],sin_long[i+1],0.0);
+    glVertex3f(diameter*cos_long[i+1]/2.0,diameter*sin_long[i+1]/2.0, height); // 3
 
-    glNormal3f(xcirc[i],ycirc[i],0.0);
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height); // 4
+    glNormal3f(cos_long[i],sin_long[i],0.0);
+    glVertex3f(diameter*cos_long[  i]/2.0,diameter*sin_long[  i]/2.0, height); // 4
   }
+  
   glNormal3f(0.0,-1.0,0.0);
   glVertex3f(0.0,0.0,0.0);
-  glVertex3f(diameter*xcirc[  0]/2.0,diameter*ycirc[  0]/2.0,0.0); // 1
-  glVertex3f(diameter*xcirc[  0]/2.0,diameter*ycirc[  0]/2.0,height); // 1
+  glVertex3f(diameter*cos_long[  0]/2.0,diameter*sin_long[  0]/2.0,0.0); // 1
+  glVertex3f(diameter*cos_long[  0]/2.0,diameter*sin_long[  0]/2.0,height); // 1
   glVertex3f(0.0,0.0,height);
 
-  glNormal3f(-ycirc[iarc-1],xcirc[iarc-1],0.0);
-  glVertex3f(0.0,0.0,0.0);
-  glVertex3f(diameter*xcirc[  iarc-1]/2.0,diameter*ycirc[  iarc-1]/2.0,0.0); // 1
-  glVertex3f(diameter*xcirc[  iarc-1]/2.0,diameter*ycirc[  iarc-1]/2.0,height); // 1
+  glNormal3f(sin_long[iarc-1],-cos_long[iarc-1],0.0);
   glVertex3f(0.0,0.0,height);
+  glVertex3f(diameter*cos_long[  iarc]/2.0,diameter*sin_long[  iarc]/2.0,height); // 1
+  glVertex3f(diameter*cos_long[  iarc]/2.0,diameter*sin_long[  iarc]/2.0,0.0); // 1
+  glVertex3f(0.0,0.0,0.0);
   glEnd();
 
   glBegin(GL_TRIANGLES);
@@ -1596,14 +1597,14 @@ void drawarcdisk(float angle, float diameter, float height, unsigned char *rgbco
 
   glNormal3f(0.0,0.0,-1.0);
   for(i=0;i<iarc;i++){
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+    glVertex3f(diameter*cos_long[  i]/2.0,diameter*sin_long[  i]/2.0,0.0);
     glVertex3f(                    0.0,                    0.0,0.0);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0);
+    glVertex3f(diameter*cos_long[i+1]/2.0,diameter*sin_long[i+1]/2.0,0.0);
   }
   glNormal3f(0.0,0.0,1.0);
   for(i=0;i<iarc;i++){
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height);
+    glVertex3f(diameter*cos_long[  i]/2.0,diameter*sin_long[  i]/2.0, height);
+    glVertex3f(diameter*cos_long[i+1]/2.0,diameter*sin_long[i+1]/2.0, height);
     glVertex3f(                    0.0,                    0.0, height);
   }
   glEnd();
@@ -2327,6 +2328,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_DRAWARC;
     num_op=SV_DRAWARC_NUMARGS;
     num_outop=SV_DRAWARC_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"drawarcdisk")==0){
+    op=SV_DRAWARCDISK;
+    num_op=SV_DRAWARCDISK_NUMARGS;
+    num_outop=SV_DRAWARCDISK_NUMOUTARGS;
   }
   else if(STRCMP(token,"setcolor")==0){
     op=SV_SETCOLOR;
