@@ -25,6 +25,6 @@ smokeview -runscript cascade
 
 Rem generate Smokeview figures
 cd ..
-call SMV_Generate_test_pictures
+call Make_SMV_Pictures
 
 
