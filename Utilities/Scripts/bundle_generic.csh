@@ -17,8 +17,8 @@ set bundledir=$bundlebase/FDS/FDS5
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
 set mandir=$fds_smvroot/Manuals/All_PDF_Files
 set smvbindir=$scp_fds_smvroot/SMV_5/bin
-set texturedir=$scp_fds_smvroot/SMV_5/bin/textures
 set forbundle=$fds_smvroot/SMV_5/for_bundle
+set texturedir=$forbundle/textures
 set fds2asciidir=$fds_smvroot/Utilities/fds2ascii
 set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
 
@@ -47,6 +47,8 @@ scp $smvhost\:$smvbindir/$smokeview $bundledir/bin/.
 else
 cp $smvbindir/$smokeview $bundledir/bin/.
 endif
+echo copying textures
+
 cp $texturedir/*.png $bundledir/bin/textures/.
 cp $texturedir/*.jpg $bundledir/bin/textures/.
 
