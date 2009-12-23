@@ -4665,17 +4665,17 @@ static int in_menu=0;
     else{
       glutAddMenuEntry("   6",-6);
     }
-    if(device_sphere_segments==10){
-      glutAddMenuEntry("   *10",-10);
+    if(device_sphere_segments==12){
+      glutAddMenuEntry("   *12",-12);
     }
     else{
-      glutAddMenuEntry("   10",-10);
+      glutAddMenuEntry("   12",-12);
     }
-    if(device_sphere_segments==20){
-      glutAddMenuEntry("   *20",-20);
+    if(device_sphere_segments==24){
+      glutAddMenuEntry("   *24",-24);
     }
     else{
-      glutAddMenuEntry("   20",-20);
+      glutAddMenuEntry("   24",-24);
     }
   }
 
