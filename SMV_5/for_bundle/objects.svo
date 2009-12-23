@@ -172,7 +172,7 @@ OBJECTDEF
    0.01 0.017 0.02 drawtrunccone pop
  push 0.0 0.0 0.089 translate 
    0.064 0.002 0.008 1.0 drawnotchplate pop
- "GREEN" setcolor
+ "BLUE" setcolor
  push 0.0 0.0 0.015 translate 0.015 drawsphere pop
  pop
 
@@ -319,16 +319,16 @@ OBJECTDEF // object for particle "egg"
  $rot_rate 0.0 :rotz multiaddt $rotz rotatez 0.2 $tempd28 0.2 scalexyz 1.0 drawsphere
 
 OBJECTDEF // object for a general ball
- gball
+ ball
  :R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1
  $D 0.0 :DGT0 GT
- $DGT0 IF
-  $DX $D EQ
-  $DY $D EQ
-  $DZ $D EQ
- ENDIF
  $R $G $B setrgb
- $DX $DY $DZ scalexyz 1.0 drawsphere
+ $DGT0 IF
+  $D drawsphere
+  ELSE
+  $DX $DY $DZ scalexyz 1.0 drawsphere
+ ENDIF
+ NO_OP
 
 OBJECTDEF // object for dynamic textured sphere
  demosphere
@@ -364,6 +364,41 @@ OBJECTDEF // object to test IF, LE, GT and AND operators
  ENDIF
  $DX $DY $DZ scalexyz 1.0 drawsphere
 
+OBJECTDEF
+ fan
+  :HUB_R=0 :HUB_G=0 :HUB_B=0 :HUB_D=0.1 :HUB_L=0.12
+  :BLADE_R=128 :BLADE_G=64 :BLADE_B=32 :BLADE_ANGLE=30.0 :BLADE_D=0.5 :BLADE_H=0.09 
+  :ROTATION_RATE=360.0
+ $HUB_L -2.0 :HUB_LD2 div
+ $BLADE_H -2.0 :BLADE_HD2 div
+ $HUB_R $HUB_G $HUB_B setrgb
+ $ROTATION_RATE 0.0 :rotz multiaddt $rotz rotatez  // determine rotation angle
+ push      // fan hub
+   0.0 0.0 $HUB_LD2 translate
+   $HUB_D $HUB_L drawdisk
+ pop
+ push      // fan blade 1
+   $BLADE_R $BLADE_G $BLADE_B setrgb
+   0.0 0.0 $BLADE_HD2 translate 
+   $BLADE_ANGLE $BLADE_D $BLADE_H drawarcdisk
+ pop
+ push     // fan blade 2
+  120.0 rotatez
+  0.0 0.0 $BLADE_HD2 translate 
+  $BLADE_ANGLE $BLADE_D $BLADE_H drawarcdisk
+ pop
+ push     // fan blade 3
+  240.0 rotatez
+  0.0 0.0 $BLADE_HD2 translate 
+  $BLADE_ANGLE $BLADE_D $BLADE_H drawarcdisk
+ pop
+
+OBJECTDEF
+ cone
+  :R=0 :G=0 :B=0 :D=0.1 :H=0.2
+ $R $G $B setcolor
+ $D $H drawcone
+
 OBJECTDEF // object for dynamic textured sphere
  tsphere
   :R=0 :G=0 :B=0 :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D=0.1 :tfile
@@ -375,14 +410,26 @@ OBJECTDEF // object for dynamic textured sphere
    // ************ dynamic tree object definitions ********************
 
 OBJECTDEF // object for tree trunk
+ TREE
+ :TRUNK_D :TRUNK_H :TRUNK_BASE_H   // trunk variables
+ :TRUNK_R=138 :TRUNK_G=69 :TRUNK_B=18 
+ :CANOPY_D :CANOPY_H :CANOPY_BASE_H // canopy variables
+ :CANOPY_R=25 :CANOPY_G=128 :CANOPY_B=0
+ $TRUNK_R $TRUNK_G $TRUNK_B setrgb
+ push 0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk pop
+$CANOPY_R $CANOPY_G $CANOPY_B setrgb
+ 0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
+
+
+OBJECTDEF // object for tree trunk
  TRUNK
- :TRUNK_BASE_H :TRUNK_D :TRUNK_H :R=0 :G=0 :B=0
+ :TRUNK_BASE_H :TRUNK_D :TRUNK_H :R=138 :G=69 :B=18
  $R $G $B setrgb
  0.0 0.0 $TRUNK_BASE_H translate $TRUNK_D $TRUNK_H drawdisk
  
 OBJECTDEF // object for tree canopy
  CANOPY
- :CANOPY_BASE_H :CANOPY_D :CANOPY_H :R=0 :G=0 :B=0
+ :CANOPY_BASE_H :CANOPY_D :CANOPY_H :R=25 :G=128 :B=0
 $R $G $B setrgb
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
    
@@ -454,16 +501,16 @@ AVATARDEF
 
 OBJECTDEF
  drawaxis2
- "GREEN" setcolor
+ "BLACK" setcolor
  push 0.05 0.05 0.4 scalexyz 1.0 1.0 drawdisk pop
- 0 255 43 setrgb
+  "BLACK" setcolor
  push 90.0 rotatey 0.05 0.05 0.6 scalexyz 1.0 1.0 drawdisk pop
  
 OBJECTDEF
  drawaxis
- "GREEN" setcolor
+ "BLACK" setcolor
  push 0.00625 0.00625 0.075 scalexyz 1.0 1.0 drawdisk pop
- 0 255 43 setrgb
+ "BLACK" setcolor
  push 90.0 rotatey 0.00625 0.00625 0.075 scalexyz 1.0 1.0 drawdisk pop
  
 OBJECTDEF
