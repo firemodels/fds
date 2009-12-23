@@ -87,7 +87,7 @@ cp $mandir/FDS_5_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_5_User_Guide.pdf $bundledir/Documentation/.
 
 echo Copy objects.svo
-cp $bundle_setup/objects.svo $bundledir/bin/objects.svo
+cp $forbundle/objects.svo $bundledir/bin/objects.svo
 
 echo
 echo Getting the FDS release notes from the repository
