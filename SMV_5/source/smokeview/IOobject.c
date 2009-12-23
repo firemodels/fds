@@ -180,6 +180,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_SETPOINTSIZE_NUMARGS 1
 #define SV_SETCOLOR_NUMARGS   1
 #define SV_GETTEXTUREINDEX_NUMARGS 2
+#define SV_NO_OP_NUMARGS 0
 
 #define SV_PUSH_NUMOUTARGS       0
 #define SV_POP_NUMOUTARGS        0
@@ -189,6 +190,8 @@ char IOobject_revision[]="$Revision$";
 #define SV_SETPOINTSIZE_NUMOUTARGS 0
 #define SV_SETCOLOR_NUMOUTARGS   0
 #define SV_GETTEXTUREINDEX_NUMOUTARGS 1
+#define SV_NO_OP_NUMOUTARGS 0
+
 
 #define SV_ERR -1
 
@@ -2162,6 +2165,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_TRANSLATE;
     num_op=SV_TRANSLATE_NUMARGS;
     num_outop=SV_TRANSLATE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"no_op")==0){
+    op=SV_NO_OP;
+    num_op=SV_NO_OP_NUMARGS;
+    num_outop=SV_NO_OP_NUMOUTARGS;
   }
   else if(STRCMP(token,"offsetx")==0){
     op=SV_OFFSETX;
