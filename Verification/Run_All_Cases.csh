@@ -4,6 +4,11 @@ setenv FDS $SVNROOT/FDS_Compilation/intel_linux_32/fds5_intel_linux_32
 setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds.csh
 setenv BASEDIR `pwd`
 
+echo FDS cases submitted
+
 ./FDS_Cases.csh
 
-echo FDS cases submitted
+cd $BASEDIR
+
+./SMV_Cases.csh
+
