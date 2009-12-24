@@ -2,7 +2,7 @@
 % newcommands needed by this include file
 %
 \newcommand{\devicewidth}{1.5in}
-\newcommand{\boxwidth}{2.75in}
+\newcommand{\boxwidth}{3.0in}
 \newcommand{\incgraphics}[1]{
 \parbox[c]{\devicewidth}{
 \vspace{0.01in}
@@ -21,11 +21,11 @@ giving the underlying technical details may be found in the Smokeview User's Gui
 
 Smokeview objects may be static or dynamic.  A static object is defined entirely in terms of data and instructions
 found in the {\tt objects.svo}\ file.  For example, the {\tt sensor}\ object is static, it is drawn as a small green
-sphere with a fixed diameter.  Its appearance remains 
-the same regardless of how an FDS input file is set up.  A dynamic object is also defined using instructions found in 
-{\tt objects.svo}\ but uses data found in the {\tt objects.svo}\ file, data specified on the {\tt \&PROP}\ namelist statement and/or 
-data contained in the particle file.  As a result, the appearance of dynamic objects may change based upon the particular FDS case that 
-is run.   For example, the {\tt tsphere}\ object is dynamic.  The diameter and an image used to cover the sphere (known 
+sphere with a fixed diameter.  Its appearance remains
+the same regardless of how an FDS input file is set up.  A dynamic object is also defined using instructions found in
+{\tt objects.svo}\ but uses data found in the {\tt objects.svo}\ file, data specified on the {\tt \&PROP}\ namelist statement and/or
+data contained in the particle file.  As a result, the appearance of dynamic objects may change based upon the particular FDS case that
+is run.   For example, the {\tt tsphere}\ object is dynamic.  The diameter and an image used to cover the sphere (known
 as a texture map) is specified in an FDS input file.
 
 
@@ -74,7 +74,7 @@ target & \incgraphics{"scriptfigures/target"} \\ \hline
 \multirow{2}{*}{{\tt SMOKEVIEW\_ID}} &\multicolumn{2}{|c|}{Image}\\ \cline{2-3}
 & inactive & active  \\ \hline \hline
 \endfirsthead
-\caption{Multiple Frame Static Devices (continued)}
+\caption{Multiple Frame Static Objects (continued)}
 \\ \hline
 \multirow{2}{*}{{\tt SMOKEVIEW\_ID}} &\multicolumn{2}{|c|}{Image}\\ \cline{2-3}
 & inactive & active  \\ \hline \hline
@@ -91,9 +91,9 @@ sprinkler\_pendent  & \incgraphics{"scriptfigures/sprinkler_pendent_0"} & \incgr
 %
 %  sub-section on dynamic objects
 \subsection{Dynamic Smokeview Objects}
-The appearance of several Smokeview objects may be modified using data specified in an FDS input 
-file or data generated during an FDS computation and stored in a particle file. The parameters used to make these changes are passed 
-to Smokeview from the FDS input file using the {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\ 
+The appearance of several Smokeview objects may be modified using data specified in an FDS input
+file or data generated during an FDS computation and stored in a particle file. The parameters used to make these changes are passed
+to Smokeview from the FDS input file using the {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\
 namelist statement.  For example, the {\tt \&PROP}\ statement:
 \begin{verbatim}
 &PROP ID='sphere' SMOKEVIEW_PARAMETERS(1:4)='R=0','G=255','B=0',
@@ -121,15 +121,50 @@ Table \ref{tab:devices_dynamic}\ gives a list of dynamic objects and the keyword
 Each entry shows a picture of the device and the parameters used to customize its appearance.
 
 \begin{longtable}[ht]{|l|l|c|}
-\caption{Dynamic Devices}
+\caption{Dynamic Objects}
 \label{tab:devices_dynamic}
 \\ \hline
 {\tt SMOKEVIEW\_ID}  & {\tt SMOKEVIEW\_PARAMETERS} & Image  \\ \hline \hline
 \endfirsthead
-\caption{Dynamic Devices (continued)}
+\caption{Dynamic Objects (continued)}
 \\ \hline
 {\tt SMOKEVIEW\_ID}  & {\tt SMOKEVIEW\_PARAMETERS} & Image  \\ \hline \hline
 \endhead
+
+ball&
+\parbox[c]{\boxwidth}{
+{\tt SMOKEVIEW\_PARAMETERS(1:6)=}\\
+{\tt 'R=128','G=192','B=255',}\\
+{\tt 'DX=0.25','DY=.75','DZ=1.0'}\\  \\
+R, G, B - red, green, blue color components ranging from 0 to 255\\
+DX, DY, DZ - amount ball is stretched along x, y, z axis respectively
+} &
+\incgraphics{scriptfigures/ball} \\ \hline
+
+cone&
+\parbox[c]{\boxwidth}{
+{\tt SMOKEVIEW\_PARAMETERS(1:5)=}\\
+{\tt 'R=128','G=255','B=192',}\\
+{\tt 'D=0.4','H=0.6'}\\ \\
+R, G, B - red, green, blue color components ranging from 0 to 255\\
+D, H - diameter and length of cone respectively
+} &
+\incgraphics{scriptfigures/cone} \\ \hline
+
+fan&
+\parbox[c]{\boxwidth}{
+{\tt SMOKEVIEW\_PARAMETERS(1:11)=}\\
+{\tt 'HUB\_R=0','HUB\_G=0','HUB\_B=0',}\\
+{\tt 'HUB\_D=0.1','HUB\_L=0.12',}\\
+{\tt 'BLADE\_R=128','BLADE\_G=64',}\\
+{\tt 'BLADE\_B=32','BLADE\_ANGLE=60.0',}\\
+{\tt 'BLADE\_D=0.5','BLADE\_H=0.09'}\\  \\
+HUB\_R, HUB\_G, HUB\_B - red, green, blue color components of fan hub ranging from 0 to 255\\
+HUB\_D, HUB\_L - diameter and length of fan hub\\
+BLADE\_R, BLADE\_G, BLADE\_B - red, green, blue color components of fan blades ranging from 0 to 255\\
+BLADE\_ANGLE, BLADE\_D, BLADE\_H - angle, diameter and height of a fan blade
+} &
+\incgraphics{scriptfigures/fan} \\ \hline
 
 tsphere&
 \parbox[c]{\boxwidth}{
@@ -138,33 +173,14 @@ tsphere&
     {\tt 'AX0=0.0','ELEV0=90.0',}\\
     {\tt 'ROT0=0.0','ROTATION\_RATE=10.0',}\\
     {\tt 'D=1.0','tfile="t\%day2.jpg"'}\\ \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\ \\
-AX0, ELEV0, ROT0 - initial azimuth, elevation and rotation angle respectively\\ \\
-ROTATION\_RATE - rotation rate about z axis in degrees per second\\ \\
-D - diameter of sphere
+R, G, B - red, green, blue color components ranging from 0 to 255\\
+AX0, ELEV0, ROT0 - initial azimuth, elevation and rotation angle respectively\\
+ROTATION\_RATE - rotation rate about z axis in degrees per second\\
+D - diameter of sphere \\
 tfile - name of texture map file
 
 } &
 \incgraphics{scriptfigures/tsphere} \\ \hline
-
-gball&
-\parbox[c]{\boxwidth}{
-{\tt SMOKEVIEW\_PARAMETERS(1:6)=}\\
-{\tt 'R=128','G=192','B=255',}\\
-{\tt 'DX=0.25','DY=.75','DZ=1.0'}\\  \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-DX, DY, DZ - amount ball is stretched along x, y, z axis respectively
-} &
-\incgraphics{scriptfigures/gball} \\ \hline
-
-sphere&
-\parbox[c]{\boxwidth}{
-{\tt SMOKEVIEW\_PARAMETERS(1:4)=}\\
-{\tt 'R=0','G=255','B=0','D=0.5'}\\ \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-D - diameter of sphere
-} &
-\incgraphics{scriptfigures/sphere} \\ \hline
 
 tube&
 \parbox[c]{\boxwidth}{
@@ -176,5 +192,15 @@ D, L - diameter and length of tube respectively
 } &
 \incgraphics{scriptfigures/tube} \\ \hline
 
+vent&
+\parbox[c]{\boxwidth}{
+{\tt SMOKEVIEW\_PARAMETERS(1:6)=}\\
+{\tt 'R=192','G=192','B=128',}\\
+{\tt 'W=0.5','H=1.0', 'ROT=90.0'}\\ \\
+R, G, B - red, green, blue color components ranging from 0 to 255\\
+W, H - width and height of vent respectively\\
+ROT - angle that vent is rotated
+} &
+\incgraphics{scriptfigures/vent} \\ \hline
 
 \end{longtable} 
