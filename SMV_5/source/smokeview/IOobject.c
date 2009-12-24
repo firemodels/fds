@@ -126,6 +126,8 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWCDISK     213
 #define SV_DRAWTSPHERE   214
 #define SV_DRAWARCDISK   215
+#define SV_DRAWSQUARE    216
+#define SV_DRAWVENT      217
 
 #define SV_DRAWCUBE_NUMARGS      1
 #define SV_DRAWSPHERE_NUMARGS    1
@@ -143,6 +145,8 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWCDISK_NUMARGS     2
 #define SV_DRAWTSPHERE_NUMARGS   2
 #define SV_DRAWARCDISK_NUMARGS   3
+#define SV_DRAWSQUARE_NUMARGS 1
+#define SV_DRAWVENT_NUMARGS 2
 
 #define SV_DRAWCUBE_NUMOUTARGS      0
 #define SV_DRAWSPHERE_NUMOUTARGS    0
@@ -160,6 +164,8 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWCDISK_NUMOUTARGS     0
 #define SV_DRAWTSPHERE_NUMOUTARGS   0
 #define SV_DRAWARCDISK_NUMOUTARGS   0
+#define SV_DRAWSQUARE_NUMOUTARGS 0
+#define SV_DRAWVENT_NUMOUTARGS 0
 
 #define SV_PUSH       300
 #define SV_POP        301
@@ -217,6 +223,8 @@ void drawpoint(unsigned char *rgbcolor);
 void drawsphere(float diameter, unsigned char *rgbcolor);
 void drawtsphere(int texture_index, float diameter, unsigned char *rgbcolor);
 void drawcube(float size, unsigned char *rgbcolor);
+void drawsquare(float size, unsigned char *rgbcolor);
+void drawvent(float width, float height, unsigned char *rgbcolor);
 void drawcdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawarcdisk(float angle, float diameter, float height, unsigned char *rgbcolor);
@@ -559,11 +567,14 @@ void draw_devices(void){
 
       get_elevaz(xyznorm,&devicei->angle_elev,&devicei->angle_az);
     }
-    if(devicei->angle_az!=0.0){
-      glRotatef(devicei->angle_az,0.0,0.0,1.0);
-    }
-    if(devicei->angle_elev!=0.0){
-      glRotatef(-devicei->angle_elev,0.0,1.0,0.0);
+    {
+      float cos_az, sin_az;
+#define RAD_DEG 0.017453293
+    glRotatef(-90.0,0.0,1.0,0.0);
+    glRotatef(devicei->angle_az,1.0,0.0,0.0);
+    cos_az=cos(RAD_DEG*devicei->angle_az);
+    sin_az=sin(RAD_DEG*devicei->angle_az);
+    glRotatef(devicei->angle_elev,0.0,cos_az,-sin_az);
     }
     if(sensorrelsize!=1.0){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
@@ -1052,6 +1063,14 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       drawcube(arg[0],rgbptr);
       rgbptr=NULL;
       break;
+    case SV_DRAWSQUARE:
+      drawsquare(arg[0],rgbptr);
+      rgbptr=NULL;
+      break;
+    case SV_DRAWVENT:
+      drawvent(arg[0],arg[1],rgbptr);
+      rgbptr=NULL;
+      break;
     case SV_DRAWDISK:
       drawdisk(arg[0],arg[1], rgbptr);
       rgbptr=NULL;
@@ -1455,6 +1474,115 @@ void drawcube(float size, unsigned char *rgbcolor){
   glVertex3f( s2, s2,-s2);  // 3
   glVertex3f( s2, s2, s2);  // 7
   glVertex3f( s2,-s2, s2);  // 6
+  glEnd();
+
+}
+
+/* ----------------------- drawvent ----------------------------- */
+
+void drawvent(float width, float height, unsigned char *rgbcolor){
+  float wd2, hd2, dw, dh;
+  int i;
+  float dslot;
+#define NSLOTS 10
+#define FACTOR 2
+
+  dslot = height/(NSLOTS+NSLOTS-1+FACTOR+FACTOR);
+  wd2 = width/2.0;
+  hd2 = height/2.0;
+  dw = dslot*FACTOR;
+  dh = dw;
+
+  glBegin(GL_QUADS);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+  glNormal3f(0.0,0.0,-1.0);
+
+  glVertex3f(-wd2,   -hd2,0.0);
+  glVertex3f(-wd2+dw,-hd2,0.0);
+  glVertex3f(-wd2+dw, hd2,0.0);
+  glVertex3f(-wd2,    hd2,0.0);
+
+  glVertex3f(wd2-dw,-hd2,0.0);
+  glVertex3f(wd2,   -hd2,0.0);
+  glVertex3f(wd2,    hd2,0.0);
+  glVertex3f(wd2-dw, hd2,0.0);
+
+  glVertex3f(-wd2+dw,-hd2,   0.0);
+  glVertex3f( wd2-dw,-hd2,   0.0);
+  glVertex3f( wd2-dw,-hd2+dh,0.0);
+  glVertex3f(-wd2+dw,-hd2+dh,0.0);
+
+  glVertex3f(-wd2+dw,hd2-dh,   0.0);
+  glVertex3f( wd2-dw,hd2-dh,   0.0);
+  glVertex3f( wd2-dw,hd2   ,0.0);
+  glVertex3f(-wd2+dw,hd2   ,0.0);
+
+
+  glNormal3f(0.0,0.0,1.0);
+  glVertex3f(-wd2,    hd2,0.0);
+  glVertex3f(-wd2+dw, hd2,0.0);
+  glVertex3f(-wd2+dw,-hd2,0.0);
+  glVertex3f(-wd2,   -hd2,0.0);
+
+  glVertex3f(wd2-dw, hd2,0.0);
+  glVertex3f(wd2,    hd2,0.0);
+  glVertex3f(wd2,   -hd2,0.0);
+  glVertex3f(wd2-dw,-hd2,0.0);
+
+  glVertex3f(-wd2+dw,-hd2+dh,0.0);
+  glVertex3f( wd2-dw,-hd2+dh,0.0);
+  glVertex3f( wd2-dw,-hd2,   0.0);
+  glVertex3f(-wd2+dw,-hd2,   0.0);
+
+  glVertex3f(-wd2+dw,hd2   ,0.0);
+  glVertex3f( wd2-dw,hd2   ,0.0);
+  glVertex3f( wd2-dw,hd2-dh,   0.0);
+  glVertex3f(-wd2+dw,hd2-dh,   0.0);
+
+  glNormal3f(0.0,0.0,-1.0);
+  for(i=0;i<NSLOTS;i++){
+    float yy, yy2;
+
+    yy = -hd2+(2*i+FACTOR+1)*dslot;
+    yy2 = yy + dslot;
+    glVertex3f(-wd2,yy,0.0);
+    glVertex3f( wd2,yy,0.0);
+    glVertex3f( wd2,yy2,0.0);
+    glVertex3f(-wd2,yy2,0.0);
+  }
+  glNormal3f(0.0,0.0,1.0);
+  for(i=0;i<NSLOTS;i++){
+    float yy, yy2;
+
+    yy = -hd2+(2*i+FACTOR+1)*dslot;
+    yy2 = yy + dslot;
+    glVertex3f(-wd2,yy2,0.0);
+    glVertex3f( wd2,yy2,0.0);
+    glVertex3f( wd2,yy,0.0);
+    glVertex3f(-wd2,yy,0.0);
+  }
+  glEnd();
+
+}
+
+/* ----------------------- drawcube ----------------------------- */
+
+void drawsquare(float size, unsigned char *rgbcolor){
+  float s2;
+
+  s2 = size/2.0;
+
+  glBegin(GL_QUADS);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+
+  glNormal3f(0.0,0.0,-1.0);
+  glVertex3f(-s2,-s2,0.0);  // 1
+  glVertex3f(-s2, s2,0.0);  // 4
+  glVertex3f( s2, s2,0.0);  // 3
+  glVertex3f( s2,-s2,0.0);  // 2
+
   glEnd();
 
 }
@@ -2265,6 +2393,16 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_DRAWCUBE;
     num_op=SV_DRAWCUBE_NUMARGS;
     num_outop=SV_DRAWCUBE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"drawvent")==0){
+    op=SV_DRAWVENT;
+    num_op=SV_DRAWVENT_NUMARGS;
+    num_outop=SV_DRAWVENT_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"drawsquare")==0){
+    op=SV_DRAWSQUARE;
+    num_op=SV_DRAWSQUARE_NUMARGS;
+    num_outop=SV_DRAWSQUARE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawdisk")==0){
     op=SV_DRAWDISK;

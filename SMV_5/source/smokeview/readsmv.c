@@ -10076,33 +10076,26 @@ void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
   float coselev;
   float norm, norm2;
   float pi;
+  float az, elev;
 
   norm=xyznorm[0]*xyznorm[0];
   norm+=xyznorm[1]*xyznorm[1];
   norm+=xyznorm[2]*xyznorm[2];
   norm=sqrt(norm);
-  pi=4.0*atan(1.0);
-  if(norm<=0.001){
+  if(norm<0.0001){
     xyznorm[0]=0.0;
     xyznorm[1]=0.0;
     xyznorm[2]=-1.0;
     norm=1.0;
   }
-
-  coselev=-1.0*xyznorm[2]/norm;
-  *angle_elev=180.0*acos(coselev)/pi;
-
-  norm2 = sqrt(xyznorm[0]*xyznorm[0]+xyznorm[1]*xyznorm[1]);
-  if(norm2<=0.001){
-    *angle_az=0.0;
-  }
-  else{
-    *angle_az=180.0*atan2(xyznorm[1],xyznorm[0])/pi;
-  }
   xyznorm[0]/=norm;
   xyznorm[1]/=norm;
   xyznorm[2]/=norm;
-
+  pi=4.0*atan(1.0);
+  az=atan2(xyznorm[1],xyznorm[0]);
+  *angle_az=az*180.0/pi;
+  elev=atan2(xyznorm[2],sqrt(xyznorm[0]*xyznorm[0]+xyznorm[1]*xyznorm[1]));
+  *angle_elev=elev*180.0/pi;
 }
 
 /* ------------------ getfile_modtime ------------------------ */
