@@ -1464,7 +1464,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             R_DROP   = DR%R
             M_DROP   = FTPR*R_DROP**3
             TMP_DROP = DR%TMP
-            ITMP      = NINT(TMP_DROP)
+            ITMP     = NINT(TMP_DROP)
             H_V      = PC%H_V(ITMP)
             C_DROP   = PC%C_P(ITMP)
             H_L      = PC%C_P_BAR(ITMP)*TMP_DROP-H_L_REF
@@ -1607,7 +1607,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             !Update gas temperature and determine new subtimestep
             DELTA_H_G = (H_L + H_V - PC%H_V_CORRECTOR)
             YY_GET(:) = YY(II,JJ,KK,:)
-            ITMP = MIN(5000,NINT(TMP_G))
+            ITMP = MAX(1,MIN(5000,NINT(TMP_G)))
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP)            
             H_G_OLD = M_GAS*CP*TMP_G
             M_GAS_NEW = M_GAS + WGT*M_VAP
@@ -1620,7 +1620,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                TEMPITER = .TRUE.
                ITERATE_TEMP: DO WHILE (TEMPITER)
                   TEMPITER=.FALSE.
-                  ITMP = MIN(5000,NINT(TMP_G_I))
+                  ITMP = MAX(1,MIN(5000,NINT(TMP_G)))
                   IF (N_SPECIES == 0 ) THEN
                      CP2 = Y2CPBAR_C(ITMP)
                   ELSE
