@@ -372,31 +372,38 @@ OBJECTDEF
  $HUB_L -2.0 :HUB_LD2 div
  $BLADE_H -2.0 :BLADE_HD2 div
  $HUB_R $HUB_G $HUB_B setrgb
- $ROTATION_RATE 0.0 :rotz multiaddt $rotz rotatez  // determine rotation angle
- push      // fan hub
+ $ROTATION_RATE 0.0 :rotz multiaddt $rotz rotatez
+ push
    0.0 0.0 $HUB_LD2 translate
    $HUB_D $HUB_L drawdisk
  pop
- push      // fan blade 1
+ push
    $BLADE_R $BLADE_G $BLADE_B setrgb
    0.0 0.0 $BLADE_HD2 translate 
    $BLADE_ANGLE $BLADE_D $BLADE_H drawarcdisk
  pop
- push     // fan blade 2
+ push
   120.0 rotatez
   0.0 0.0 $BLADE_HD2 translate 
   $BLADE_ANGLE $BLADE_D $BLADE_H drawarcdisk
  pop
- push     // fan blade 3
+ push
   240.0 rotatez
   0.0 0.0 $BLADE_HD2 translate 
   $BLADE_ANGLE $BLADE_D $BLADE_H drawarcdisk
  pop
 
 OBJECTDEF
+ vent
+  :R=0 :G=0 :B=0 :W :H :ROT=0.0
+ $ROT rotatez $R $G $B setrgb
+
+ $W $H drawvent
+
+OBJECTDEF
  cone
-  :R=0 :G=0 :B=0 :D=0.1 :H=0.2
- $R $G $B setcolor
+  :R=0 :G=0 :B=0 :D=0.4 :H=0.6
+ $R $G $B setrgb
  $D $H drawcone
 
 OBJECTDEF // object for dynamic textured sphere
