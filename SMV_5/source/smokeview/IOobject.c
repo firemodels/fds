@@ -565,16 +565,14 @@ void draw_devices(void){
       xyznorm[1]=world_eyepos[1]-devicei->xyz[1];
       xyznorm[2]=world_eyepos[2]-devicei->xyz[2];
 
-      get_elevaz(xyznorm,&devicei->angle_elev,&devicei->angle_az);
+      get_elevaz(xyznorm,&devicei->dtheta,devicei->rotate_axis);
     }
     {
       float cos_az, sin_az;
-#define RAD_DEG 0.017453293
-    glRotatef(-90.0,0.0,1.0,0.0);
-    glRotatef(devicei->angle_az,1.0,0.0,0.0);
-    cos_az=cos(RAD_DEG*devicei->angle_az);
-    sin_az=sin(RAD_DEG*devicei->angle_az);
-    glRotatef(devicei->angle_elev,0.0,cos_az,-sin_az);
+      float *axis;
+
+      axis = devicei->rotate_axis;
+      glRotatef(devicei->dtheta,axis[0],axis[1],axis[2]);
     }
     if(sensorrelsize!=1.0){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
@@ -3793,3 +3791,29 @@ void update_partclass_depend(part5class *partclassi){
     partclassi->vars_dep_index[nvar-1]=get_token_loc("B",obj_frame);
   }
 }
+
+/* ------------------ normalize ------------------------ */
+
+void normalize(float *xyz, int n){
+  float norm,norm2;
+  int i;
+
+  norm2 = 0.0;
+
+  for(i=0;i<n;i++){
+    norm2 += xyz[i]*xyz[i];
+  }
+  norm = sqrt(norm2);
+  if(norm<0.00001){
+    for(i=0;i<n-1;i++){
+      xyz[i]=0.0;
+    }
+    xyz[n-1]=1.0;
+  }
+  else{
+    for(i=0;i<n;i++){
+      xyz[i]/=norm;
+    }
+  }
+}
+  

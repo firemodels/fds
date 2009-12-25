@@ -626,7 +626,7 @@ typedef struct _device{
   float val;
   float xyzplot[3];
   float xyznorm[3];
-  float angle_elev, angle_az;
+  float dtheta, rotate_axis[3];
   float act_time;
   float *color, line_width;
   float *act_times;

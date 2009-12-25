@@ -96,7 +96,7 @@ EXTERNCPP void to_lower(char *string);
 EXTERNCPP void init_object_defs(void);
 EXTERNCPP void update_device_textures(void);
 EXTERNCPP char *get_device_label(char *buffer);
-EXTERNCPP void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az);
+EXTERNCPP void get_elevaz(float *xyznorm,float *dtheta, float *rotate_axis);
 EXTERNCPP void drawTargetNorm(void);
 EXTERNCPP void draw_devices(void);
 EXTERNCPP void free_SVOBJECT(sv_object *object);
@@ -363,6 +363,7 @@ EXTERNCPP void updateslicefilenum(void);
 EXTERNCPP void drawstaticiso(const isosurface *asurface,int surfacetype, 
                              int smoothnorms, int trans_flag, int data_type, 
                              float line_width);
+EXTERNCPP void normalize(float *xyz, int n);
 #ifndef CPP
 EXTERNCPP void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr,
 				 int *nvertices, int *ntriangles, float **levels, int *nisolevels,

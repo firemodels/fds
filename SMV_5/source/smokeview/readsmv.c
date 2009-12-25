@@ -2084,7 +2084,7 @@ typedef struct {
         }
         init_device(devicei,xyz,xyzn,state0,nparams,params,labelptr);
       }
-      get_elevaz(devicei->xyznorm,&devicei->angle_elev,&devicei->angle_az);
+      get_elevaz(devicei->xyznorm,&devicei->dtheta,devicei->rotate_axis);
       if(nparams_textures>0){
         fgets(buffer,255,stream);
         trim(buffer);
@@ -4102,7 +4102,7 @@ typedef struct {
           else{
             devicecopy->object = get_SVOBJECT_type(device_label,thcp_object_backup);
           }
-          get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
+          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis);
     
           init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
 
@@ -4171,7 +4171,7 @@ typedef struct {
           else{
             devicecopy->object = get_SVOBJECT_type(device_label,sprinkler_upright_object_backup);
           }
-          get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
+          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis);
     
           init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
 
@@ -4288,7 +4288,7 @@ typedef struct {
           else{
             devicecopy->object = get_SVOBJECT_type(device_label,heat_detector_object_backup);
           }
-          get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
+          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis);
 
           init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
 
@@ -4388,7 +4388,7 @@ typedef struct {
         else{
           devicecopy->object = get_SVOBJECT_type(device_label,smoke_detector_object_backup);
         }
-        get_elevaz(xyznorm,&devicecopy->angle_elev,&devicecopy->angle_az);
+        get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis);
     
         init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
 
@@ -10072,30 +10072,21 @@ void update_loaded_lists(void){
 
 /* ------------------ get_elevaz ------------------------ */
 
-void get_elevaz(float *xyznorm,float *angle_elev,float *angle_az){
-  float coselev;
-  float norm, norm2;
+void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis){
+  float norm2;
   float pi;
   float az, elev;
 
-  norm=xyznorm[0]*xyznorm[0];
-  norm+=xyznorm[1]*xyznorm[1];
-  norm+=xyznorm[2]*xyznorm[2];
-  norm=sqrt(norm);
-  if(norm<0.0001){
-    xyznorm[0]=0.0;
-    xyznorm[1]=0.0;
-    xyznorm[2]=-1.0;
-    norm=1.0;
-  }
-  xyznorm[0]/=norm;
-  xyznorm[1]/=norm;
-  xyznorm[2]/=norm;
+  // cos(dtheta) = (xyznorm .dot. vec3(0,0,1))/||xyznorm||
+  // rotate_axis = xyznorm .cross. vec3(0,0,1)
+
   pi=4.0*atan(1.0);
-  az=atan2(xyznorm[1],xyznorm[0]);
-  *angle_az=az*180.0/pi;
-  elev=atan2(xyznorm[2],sqrt(xyznorm[0]*xyznorm[0]+xyznorm[1]*xyznorm[1]));
-  *angle_elev=elev*180.0/pi;
+  normalize(xyznorm,3);
+  *dtheta = 180.0*acos(xyznorm[2])/pi;
+  rotate_axis[0]=-xyznorm[1];
+  rotate_axis[1]=xyznorm[0];
+  rotate_axis[2]=0.0;
+  normalize(rotate_axis,2);
 }
 
 /* ------------------ getfile_modtime ------------------------ */
