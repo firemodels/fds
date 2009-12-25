@@ -397,7 +397,6 @@ OBJECTDEF
  vent
   :R=0 :G=0 :B=0 :W :H :ROT=0.0
  $ROT rotatez $R $G $B setrgb
-
  $W $H drawvent
 
 OBJECTDEF
@@ -505,6 +504,15 @@ AVATARDEF
 
    //  These definitions are used to illustrate the basic building blocks
    //  used to create more complex objects
+
+OBJECTDEF
+ drawaxisxyz
+ "RED" setcolor
+ push  90.0 rotatey 0.05 0.05 0.4 scalexyz 1.0 1.0 drawdisk pop
+ "GREEN" setcolor
+ push -90.0 rotatex 0.05 0.05 0.4 scalexyz 1.0 1.0 drawdisk pop
+ "BLUE" setcolor
+ push 0.05 0.05 0.4 scalexyz 1.0 1.0 drawdisk pop
 
 OBJECTDEF
  drawaxis2
