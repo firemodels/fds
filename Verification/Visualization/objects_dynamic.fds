@@ -49,12 +49,12 @@ tsphere labels from objects.svo: :R :G :B :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D :t
 
 &PROP ID='tsphere' SMOKEVIEW_PARAMETERS(1:9)='R=255','G=255','B=255',
                       'AX0=0.0','ELEV0=90.0','ROT0=0.0','ROTATION_RATE=-10.0',
-                      'D=1.0','tfile="t%day2.jpg"' SMOKEVIEW_ID='tsphere' /
+                      'D=1.0','tfile="t%sphere_cover_04.png"' SMOKEVIEW_ID='tsphere' /
 &DEVC XYZ=2.5,0.8,2.0, QUANTITY='TEMPERATURE' ORIENTATION=0.0,0.0,1.0 PROP_ID='tsphere' /
 
 vent labels from objects.svo: :R :G :B :W :H :ROT
 
-&PROP ID='vent' SMOKEVIEW_PARAMETERS(1:6)='R=255','G=192','B=128','W=0.5','H=1.0','ROT=90.0' SMOKEVIEW_ID='vent' /
+&PROP ID='vent' SMOKEVIEW_PARAMETERS(1:6)='R=255','G=192','B=128','W=0.5','H=1.0','ROT=00.0' SMOKEVIEW_ID='vent' /
 &DEVC XYZ=2.5,0.8,3.5, QUANTITY='TEMPERATURE' ORIENTATION=0.0,1.0,0.0 PROP_ID='vent' /
 
 &TAIL /
