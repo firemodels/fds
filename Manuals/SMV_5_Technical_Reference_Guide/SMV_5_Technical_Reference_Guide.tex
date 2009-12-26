@@ -753,28 +753,19 @@ techniques are required and are discussed next.
 % -------------------  Motion ------------------------
 %
 
-\section{Moving Objects} The previous sections discussed how appearance
-is important in visualization.  Motion may also be used to gain insight
-into fire phenomena.
-Motion may be thought of in two equivalent ways - keeping the
-scene fixed and changing the observer's location and view
-direction or keeping the observer fixed and moving, rotating
+\section{Motion} Previous sections discussed how appearance is important
+in visualization.  This section discusses how motion may be used to gain
+insight into fire phenomena.  Motion may be thought of in two separate but
+equivalent ways - keeping the scene fixed and changing the observer's location
+and view direction or keeping the observer fixed and translating, rotating
 and/or scaling the scene.
 
-\subsection{Movement - OpenGL Model}
-Objects are moved mathematically in OpenGL by multiplying the
-object's vertices (a vector) with the current OpenGL {\bf
-modelview}\ matrix.  This multiplication is usually performed in
-hardware by the video card.  The modelview matrix is initialized
-to the identity matrix then multiplied by matrices representing
-translation, rotation or scaling as the scene is moved using
-the {\tt glTranslate}, {\tt glRotate}\ and {\tt glScale} OpenGL
-calls.
+Objects are moved or translated in OpenGL by applying a transformation to
+the current {\bf modelview}\ matrix.  The transformation is a matrix whose
+particular form depends on whether it is a translation, a rotation or a scaling.
 
-OpenGL uses homogenous coordinates, meaning that
-the $(x,y,z)$ coordinate is represented as $(x,y,z,w)$ where in
-Smokeview $w=1$.  A translation by $(x,y,z)$ is performed using
-{\tt glTranslate3f(x,y,z)} which causes the matrix
+A translation by $(x,y,z)$ is performed by using {\tt glTranslate3f(x,y,z)}.
+This OpenGL call generates the matrix
 \begin{eqnarray*}
 T=\left(%
 \begin{array}{cccc}
@@ -785,12 +776,12 @@ T=\left(%
 \end{array}%
 \right)
 \end{eqnarray*}
-to be applied to the modelview matrix.  A rotation of $\theta$
-degrees about an axis along the unit-vector $(u,v,w)$ is performed
-using {\tt glRotatef($\theta$,u,v,w)}.  A rotation of $\theta$
-degrees about the $x$ axis is performed using {\tt
-glRotate($\theta$,1.0,0.0,0.0)} which causes the matrix
+and applies it to the modelview matrix.
 
+A rotation of $\theta$ degrees about the unit-vector axis, $(x,y,z)$,
+is performed using {\tt glRotatef($\theta$,x,y,z)}.  A rotation of
+$\theta$ degrees about the $x$ axis is performed using {\tt glRotate($\theta$,1.0,0.0,0.0)}.
+This OpenGL call generates the matrix
 \begin{eqnarray*}
 R=\left(%
 \begin{array}{cccc}
@@ -801,23 +792,57 @@ R=\left(%
 \end{array}%
 \right)
 \end{eqnarray*}
-to be applied to the modelview matrix.  A scaling by $u$, $v$ $w$
-along the $x$, $y$ and $z$ axes respectively is performed using
-{\tt glScale3f(u,v,w)} which causes the matrix
+and applies it to the modelview matrix.
+
+It is of interest to rotate a scene between vectors $u$ and $v$ about an axis perpendicular to both vectors
+as illustrated in Figure \ref{figrotateuv}.
+The rotation axis is formed by generating the cross-product of u and v, namely $u\times v$.  The
+rotation amount $\theta$ is found using $cos(\theta)=u\cdot v/(||u||\cdot ||v||)$ .  For the special case that $u$ and $v$ are unit vectors
+and $u=(0,0,1)$, a vector along the z~axis, then $\theta$ and the rotation axis are given by
 \begin{eqnarray*}
-S=\left(%
+\theta&=&\cos^{-1}(v_z)\\
+u\times v&=&(-v_y,v_x,0)
+\end{eqnarray*}
+so that the OpenGL call to perform the desired rotation would be {\tt glRotatef}$(180\cos^{-1}(v_z)/\pi,-v_y,v_x,0)$.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.0in]{figures/rotate_uv}
+\end{tabular}
+\end{center}
+\caption {xxx} \label{figrotateuv}
+\end{figure}
+
+A scaling of $(a,b,c)$ meaning that
+$x$ components are scaled by $a$,
+$y$ components are scaled by $b$,
+and $z$ components are scaled by $c$
+is performed using {\tt glScale3f(a,b,c)}.
+This OpenGL call generates the matrix
+\begin{eqnarray*}
+R=\left(%
 \begin{array}{cccc}
-  u & 0 & 0 & 0 \\
-  0 & v & 0 & 0 \\
-  0 & 0 & w & 0 \\
+  a & 0 & 0 & 0 \\
+  0 & b & 0 & 0 \\
+  0 & 0 & c & 0 \\
   0 & 0 & 0 & 1 \\
 \end{array}%
 \right)
 \end{eqnarray*}
-to be applied to the modelview matrix.  Smokeview uses scaling to
+and applies it to the modelview matrix.
+Smokeview uses scaling to
 view cases with large aspect ratios, tunnel fires for example.
 
-\subsection{Movement - Smokeview Implementation}
+This multiplication is usually performed in
+hardware by the video card.  The modelview matrix is initialized
+to the identity matrix then multiplied by these
+translation, rotation or scaling transformation matrices as the scene is moved using
+the {\tt glTranslate}, {\tt glRotate}\ and {\tt glScale} OpenGL
+calls.
+
+
+\subsection{Smokeview Implementation}
 The desired translation and rotation amounts are communicated
 between the user and Smokeview using keyboard and/or mouse
 callback routines.  Mouse motion is intercepted by the GLUT
