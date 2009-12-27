@@ -28,3 +28,7 @@ SETVIEWPOINT
  vent(active)
 RENDERONCE
  vent2
+SETVIEWPOINT
+ velegg
+RENDERONCE
+ velegg
