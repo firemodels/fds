@@ -33,7 +33,7 @@ cone labels from objects.svo: :R :G :B :D :H
 
 ball labels from objects.svo: :R :G :B :DX :DY :DZ
 
-&PROP ID='ball' SMOKEVIEW_PARAMETERS(1:6)='R=128','G=192','B=255','DX=0.25','DY=.75','DZ=1.0' SMOKEVIEW_ID='ball' /
+&PROP ID='ball' SMOKEVIEW_PARAMETERS(1:6)='R=128','G=192','B=255','DX=0.5','DY=.75','DZ=1.0' SMOKEVIEW_ID='ball' /
 &DEVC XYZ=0.5,0.8,3.5, QUANTITY='TEMPERATURE' PROP_ID='ball' /
 
 fan labels from objects.svo:
@@ -54,8 +54,11 @@ tsphere labels from objects.svo: :R :G :B :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D :t
 
 vent labels from objects.svo: :R :G :B :W :H :ROT
 
-&PROP ID='vent' SMOKEVIEW_PARAMETERS(1:6)='R=255','G=192','B=128','W=0.5','H=1.0','ROT=00.0' SMOKEVIEW_ID='vent' /
-&DEVC XYZ=2.5,0.8,3.5, QUANTITY='TEMPERATURE' ORIENTATION=0.0,1.0,0.0 PROP_ID='vent' /
+&PROP ID='vent1' SMOKEVIEW_PARAMETERS(1:6)='R=128','G=64','B=32','W=0.5','H=1.0','ROT=0.0' SMOKEVIEW_ID='vent' /
+&DEVC XYZ=2.0,0.8,3.5, QUANTITY='TEMPERATURE' ORIENTATION=0.0,1.0,0.0 PROP_ID='vent1' INITIAL_STATE=.FALSE. /
+
+&PROP ID='vent2' SMOKEVIEW_PARAMETERS(1:6)='R=128','G=64','B=32','W=0.5','H=1.0','ROT=0.0' SMOKEVIEW_ID='vent' /
+&DEVC XYZ=3.2,0.8,3.5, QUANTITY='TEMPERATURE' ORIENTATION=0.0,1.0,0.0 PROP_ID='vent2' INITIAL_STATE=.TRUE. /
 
 &TAIL /
 
