@@ -21,6 +21,10 @@ SETVIEWPOINT
 RENDERONCE
  fan
 SETVIEWPOINT
- vent
+ vent(inactive)
 RENDERONCE
- vent
+ vent1
+SETVIEWPOINT
+ vent(active)
+RENDERONCE
+ vent2
