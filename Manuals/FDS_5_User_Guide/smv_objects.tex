@@ -135,7 +135,7 @@ ball&
 \parbox[c]{\boxwidth}{
 {\tt SMOKEVIEW\_PARAMETERS(1:6)=}\\
 {\tt 'R=128','G=192','B=255',}\\
-{\tt 'DX=0.25','DY=.75','DZ=1.0'}\\  \\
+{\tt 'DX=0.5','DY=.75','DZ=1.0'}\\  \\
 R, G, B - red, green, blue color components ranging from 0 to 255\\
 DX, DY, DZ - amount ball is stretched along x, y, z axis respectively
 } &
@@ -172,7 +172,8 @@ tsphere&
     {\tt 'R=255','G=255','B=255',}\\
     {\tt 'AX0=0.0','ELEV0=90.0',}\\
     {\tt 'ROT0=0.0','ROTATION\_RATE=10.0',}\\
-    {\tt 'D=1.0','tfile="t\%day2.jpg"'}\\ \\
+    {\tt 'D=1.0',}\\
+    {\tt 'tfile="t\%sphere\_cover\_04.png"'}\\ \\
 R, G, B - red, green, blue color components ranging from 0 to 255\\
 AX0, ELEV0, ROT0 - initial azimuth, elevation and rotation angle respectively\\
 ROTATION\_RATE - rotation rate about z axis in degrees per second\\
@@ -201,6 +202,14 @@ R, G, B - red, green, blue color components ranging from 0 to 255\\
 W, H - width and height of vent respectively\\
 ROT - angle that vent is rotated
 } &
-\incgraphics{scriptfigures/vent} \\ \hline
-
+\parbox[c]{\devicewidth}{
+\vspace{0.01in}
+\includegraphics[width=\devicewidth]{scriptfigures/vent1}
+inactive vent\\
+\vspace{0.01in}
+\includegraphics[width=\devicewidth]{scriptfigures/vent2}
+active vent\\
+\vspace{0.01in}
+}
+\\ \hline
 \end{longtable} 
