@@ -640,7 +640,7 @@ void drawTargetNorm(void){
   }
 }
 
-/* ----------------------- draw_SMVOBJECT ----------------------------- */
+/* ----------------------- draw_SVOBJECT ----------------------------- */
 
 void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
   sv_object_frame *framei;
@@ -1257,7 +1257,7 @@ void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor){
   glEnd();
 }
 
-/* ----------------------- drawsphere ----------------------------- */
+/* ----------------------- drawtsphere ----------------------------- */
 
 void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
   texture *texti;
@@ -1494,7 +1494,7 @@ void drawvent(float width, float height, unsigned char *rgbcolor){
   glBegin(GL_QUADS);
   if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
-  glNormal3f(0.0,0.0,-1.0);
+  glNormal3f(0.0,0.0,1.0);
 
   glVertex3f(-wd2,   -hd2,0.0);
   glVertex3f(-wd2+dw,-hd2,0.0);
@@ -1516,29 +1516,29 @@ void drawvent(float width, float height, unsigned char *rgbcolor){
   glVertex3f( wd2-dw,hd2   ,0.0);
   glVertex3f(-wd2+dw,hd2   ,0.0);
 
+
+  glNormal3f(0.0,0.0,-1.0);
+  glVertex3f(-wd2,    hd2,0.0);
+  glVertex3f(-wd2+dw, hd2,0.0);
+  glVertex3f(-wd2+dw,-hd2,0.0);
+  glVertex3f(-wd2,   -hd2,0.0);
+
+  glVertex3f(wd2-dw, hd2,0.0);
+  glVertex3f(wd2,    hd2,0.0);
+  glVertex3f(wd2,   -hd2,0.0);
+  glVertex3f(wd2-dw,-hd2,0.0);
+
+  glVertex3f(-wd2+dw,-hd2+dh,0.0);
+  glVertex3f( wd2-dw,-hd2+dh,0.0);
+  glVertex3f( wd2-dw,-hd2,   0.0);
+  glVertex3f(-wd2+dw,-hd2,   0.0);
+
+  glVertex3f(-wd2+dw,hd2   ,0.0);
+  glVertex3f( wd2-dw,hd2   ,0.0);
+  glVertex3f( wd2-dw,hd2-dh,   0.0);
+  glVertex3f(-wd2+dw,hd2-dh,   0.0);
 
   glNormal3f(0.0,0.0,1.0);
-  glVertex3f(-wd2,    hd2,0.0);
-  glVertex3f(-wd2+dw, hd2,0.0);
-  glVertex3f(-wd2+dw,-hd2,0.0);
-  glVertex3f(-wd2,   -hd2,0.0);
-
-  glVertex3f(wd2-dw, hd2,0.0);
-  glVertex3f(wd2,    hd2,0.0);
-  glVertex3f(wd2,   -hd2,0.0);
-  glVertex3f(wd2-dw,-hd2,0.0);
-
-  glVertex3f(-wd2+dw,-hd2+dh,0.0);
-  glVertex3f( wd2-dw,-hd2+dh,0.0);
-  glVertex3f( wd2-dw,-hd2,   0.0);
-  glVertex3f(-wd2+dw,-hd2,   0.0);
-
-  glVertex3f(-wd2+dw,hd2   ,0.0);
-  glVertex3f( wd2-dw,hd2   ,0.0);
-  glVertex3f( wd2-dw,hd2-dh,   0.0);
-  glVertex3f(-wd2+dw,hd2-dh,   0.0);
-
-  glNormal3f(0.0,0.0,-1.0);
   for(i=0;i<NSLOTS;i++){
     float yy, yy2;
 
@@ -1549,7 +1549,7 @@ void drawvent(float width, float height, unsigned char *rgbcolor){
     glVertex3f( wd2,yy2,0.0);
     glVertex3f(-wd2,yy2,0.0);
   }
-  glNormal3f(0.0,0.0,1.0);
+  glNormal3f(0.0,0.0,-1.0);
   for(i=0;i<NSLOTS;i++){
     float yy, yy2;
 
@@ -1581,6 +1581,11 @@ void drawsquare(float size, unsigned char *rgbcolor){
   glVertex3f( s2, s2,0.0);  // 3
   glVertex3f( s2,-s2,0.0);  // 2
 
+  glNormal3f(0.0,0.0,1.0);
+  glVertex3f( s2,-s2,0.0);  // 2
+  glVertex3f( s2, s2,0.0);  // 3
+  glVertex3f(-s2, s2,0.0);  // 4
+  glVertex3f(-s2,-s2,0.0);  // 1
   glEnd();
 
 }
