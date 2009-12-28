@@ -17,31 +17,29 @@ Smokeview generates visual representations of FDS devices using instructions fou
 uses to visualize FDS cases.  New objects may be designed and drawn without modifying Smokeview and more
 importantly may be created by any user not just the FDS/Smokeview developers.  This section gives an overview
 of Smokeview objects detailing what objects are available and how to modify them.  Further documentation
-giving the underlying technical details may be found in the Smokeview User's Guide~\cite{Smokeview_Users_Guide_5}.
+giving underlying technical details may be found in the Smokeview User's Guide~\cite{Smokeview_Users_Guide_5}.
 
 Smokeview objects may be static or dynamic.  A static object is defined entirely in terms of data and instructions
 found in the {\tt objects.svo}\ file.  For example, the {\tt sensor}\ object is static, it is drawn as a small green
-sphere with a fixed diameter.  Its appearance remains
-the same regardless of how an FDS input file is set up.  A dynamic object is also defined using instructions found in
-{\tt objects.svo}\ but uses data found in the {\tt objects.svo}\ file, data specified on the {\tt \&PROP}\ namelist statement and/or
-data contained in the particle file.  As a result, the appearance of dynamic objects may change based upon the particular FDS case that
-is run.   For example, the {\tt tsphere}\ object is dynamic.  The diameter and an image used to cover the sphere (known
-as a texture map) is specified in an FDS input file.
+sphere with a fixed diameter.  Its appearance remains the same regardless of how an FDS input file is set up.  A
+dynamic object is also defined using instructions found in {\tt objects.svo}\ but in addition uses data specified on
+the {\tt \&PROP}\ namelist statement and/or data contained in a particle file.  As a result, the appearance of dynamic
+objects depends on the particular FDS case that is run.   For example, the {\tt tsphere}\ object is dynamic.  The
+diameter and an image used to cover the sphere (known as a texture map) is specified in an FDS input file.
 
 
 \subsection{Static Smokeview Objects}
 
-A Smokeview object consists of one or more frames or views.  Smokeview can then display an FDS device in a
-normal/inactive state or in an active state.  A sprinkler, for example, is drawn differently depending on
-whether it has activated or not.  When FDS determines that a device has activated it places a message in the
-{\tt .smv}\ file indicating the object number, the activation time and the state (0 for inactive or 1 for active).
-Smokeview then draws the corresponding frame.  Tables \ref{tab:devices_static}\ and \ref{tab:devices_mstatic}\
-give a list of various objects.  Each entry shows pictures of the device in its normal state and
-in its active state if it has one.  The intersection of the red and green tubes indicate the origin,
-the part of the device displayed at the $(x,y,z)$ coordinate specified on the {\tt \&DEVC}\ input line.
+Smokeview objects consist of one or more frames or views.  Smokeview then displays FDS devices in a normal/inactive
+state or in an active state.  A sprinkler, for example, is drawn differently depending on whether it has activated
+or not.  When FDS determines that a device has activated it places a message in the {\tt .smv}\ file indicating the
+object number, the activation time and the state (0 for inactive or 1 for active).  Smokeview then draws the corresponding
+frame.  Tables \ref{tab:devices_static}\ and \ref{tab:devices_mstatic}\ give a list of various static objects.  Each entry shows
+an image of the object in its normal/inactive state and in its active state if it has one.  The intersection of black tubes
+indicate the origin, the part of the device displayed at the $(x,y,z)$ coordinate specified on the {\tt \&DEVC}\ input line.
 
 The {\tt SMOKEVIEW\_ID}\ keyword found on the {\tt \&PROP}\ namelist statement is used to associate an FDS device with a Smokeview object.
-The following lines
+The following FDS input file lines
 were used to display the target device in Table \ref{tab:devices_static}.
 
 \footnotesize
@@ -68,13 +66,13 @@ target & \incgraphics{"scriptfigures/target"} \\ \hline
 \end{longtable}
 
 \begin{longtable}[ht]{|l|c|c|}
-\caption{Multiple Frame Static Objects}
+\caption{Dual Frame Static Objects}
 \label{tab:devices_mstatic}
 \\ \hline
 \multirow{2}{*}{{\tt SMOKEVIEW\_ID}} &\multicolumn{2}{|c|}{Image}\\ \cline{2-3}
 & inactive & active  \\ \hline \hline
 \endfirsthead
-\caption{Multiple Frame Static Objects (continued)}
+\caption{Dual Frame Static Objects (continued)}
 \\ \hline
 \multirow{2}{*}{{\tt SMOKEVIEW\_ID}} &\multicolumn{2}{|c|}{Image}\\ \cline{2-3}
 & inactive & active  \\ \hline \hline
@@ -90,17 +88,18 @@ sprinkler\_pendent  & \incgraphics{"scriptfigures/sprinkler_pendent_0"} & \incgr
 
 %
 %  sub-section on dynamic objects
-\subsection{Dynamic Smokeview Objects}
-The appearance of several Smokeview objects may be modified using data specified in an FDS input
-file or data generated during an FDS computation and stored in a particle file. The parameters used to make these changes are passed
-to Smokeview from the FDS input file using the {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\
-namelist statement.  For example, the {\tt \&PROP}\ statement:
+\subsection{Dynamic Smokeview Objects - Customized Using \&PROP Parameters}
+The appearance of several Smokeview objects may be modified using data specified on the {\tt \&PROP}\ namelist statement in an FDS input
+file.  Objects may also be customized using data stored in a particle file.  This is discussed in the next section.
+
+The {\tt SMOKEVIEW\_PARAMETERS}\ keyword on the {\tt \&PROP}\
+namelist statement is used to customize the appearance of Smokeview objects.  For example, the {\tt \&DEVC}\ and {\tt \&PROP}\ statements:
 \begin{verbatim}
 &PROP ID='sphere' SMOKEVIEW_PARAMETERS(1:4)='R=0','G=255','B=0',
                    'D=0.5' SMOKEVIEW_ID='sphere' /
 &DEVC XYZ=0.5,0.8,1.5, QUANTITY='TEMPERATURE' PROP_ID='sphere' /
 \end{verbatim}
-creates an FDS device drawn as a sphere colored green with diameter 0.5. Each parameter specified using the
+create an FDS device drawn as a sphere colored green with diameter 0.5. Each parameter specified using the
 {\tt SMOKEVIEW\_PARAMETERS} keyword
 is a text string enclosed in single quotes.  The text string is of the form {\tt 'keyword=value'} where possible
 keywords are found in the {\tt objects.svo}\ file (labels beginning with `:').  For example, {\tt R}, {\tt G},
@@ -121,7 +120,7 @@ Table \ref{tab:devices_dynamic}\ gives a list of dynamic objects and the keyword
 Each entry shows a picture of the device and the parameters used to customize its appearance.
 
 \begin{longtable}[ht]{|l|l|c|}
-\caption{Dynamic Objects}
+\caption{Dynamic Objects - Customized using SMOKEVIEW\_PARAMETERS on a \&PROP line}
 \label{tab:devices_dynamic}
 \\ \hline
 {\tt SMOKEVIEW\_ID}  & {\tt SMOKEVIEW\_PARAMETERS} & Image  \\ \hline \hline
@@ -183,16 +182,6 @@ tfile - name of texture map file
 } &
 \incgraphics{scriptfigures/tsphere} \\ \hline
 
-tube&
-\parbox[c]{\boxwidth}{
-{\tt SMOKEVIEW\_PARAMETERS(1:5)=}\\
-{\tt 'R=255','G=0','B=0',}\\
-{\tt 'D=0.2','L=0.6'}\\ \\
-R, G, B - red, green, blue color components ranging from 0 to 255\\
-D, L - diameter and length of tube respectively
-} &
-\incgraphics{scriptfigures/tube} \\ \hline
-
 vent&
 \parbox[c]{\boxwidth}{
 {\tt SMOKEVIEW\_PARAMETERS(1:6)=}\\
@@ -212,4 +201,62 @@ active vent\\
 \vspace{0.01in}
 }
 \\ \hline
-\end{longtable} 
+\end{longtable}
+
+\subsection{Dynamic Smokeview Objects - Customized Using \&PROP Parameters and Particle File Data}
+Particle file data may be used to customize the appearance of Smokeview objects.  This data is accessed
+in an object definition using object variable names that match shortened particle file quantity names -
+those names that appear when the colorbar is displayed in Smokeview.  For example, {\tt U-VEL}, {\tt V-VEL},
+{\tt W-VEL} and {\tt temp} are shortened quantity names that correspond to the full names {\tt U-VELOCITY},
+{\tt V-VELOCITY}, {\tt W-VELOCITY} and {\tt TEMPERATURE}.  These full names are documented in Table \ref{tab:output}
+in this guide.  Shortened particle file quantity names also appear in the Smokeview
+File/Bounds dialog box.
+
+The first three lines of the {\tt velegg}\ object definition are:
+\begin{verbatim}
+OBJECTDEF // color with FDS quantity, stretch with velocity
+ velegg
+ :R=0 :G=0 :B=0 :D :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0
+ \end{verbatim}
+The variables {\tt U-VEL}, {\tt V-VEL}, and {\tt W-VEL} are also particle file quantities (shortened version) that may be
+selected in an FDS input file.  If they are selected, then the {\tt velegg} object may be used to display
+particle file information. This  object colors the sphere using the currently selected Smokeview particle
+variable and stretches a sphere in the x, y and z directions using the {\tt U-VEL}, {\tt V-VEL}, and {\tt W-VEL}
+velocity particle data respectively.  Table \ref{tab:devices_dynamic2} documents those objects that can be customized
+using particle file data.  These objects may be customized as before using data specified with the {\tt SMOKEVIEW\_PARAMETERS} 
+keyword or using particle file data.
+
+\begin{longtable}[ht]{|l|l|c|}
+\caption{Dynamic Objects - Customized using SMOKEVIEW\_PARAMETERS on a \&PROP line and Particle File Data}
+\label{tab:devices_dynamic2}
+\\ \hline
+{\tt SMOKEVIEW\_ID}  & {\tt SMOKEVIEW\_PARAMETERS} & Image  \\ \hline \hline
+\endfirsthead
+\caption{Dynamic Objects (continued)}
+\\ \hline
+{\tt SMOKEVIEW\_ID}  & {\tt SMOKEVIEW\_PARAMETERS} & Image  \\ \hline \hline
+\endhead
+
+tube&
+\parbox[c]{\boxwidth}{
+{\tt SMOKEVIEW\_PARAMETERS(1:5)=}\\
+{\tt 'R=255','G=0','B=0',}\\
+{\tt 'D=0.2','L=0.6'}\\ \\
+R, G, B - red, green, blue color components ranging from 0 to 255\\
+D, L - diameter and length of tube respectively
+} &
+\incgraphics{scriptfigures/tube} \\ \hline
+
+velegg&
+\parbox[c]{\boxwidth}{
+{\tt SMOKEVIEW\_PARAMETERS(1:9)=}\\
+:R=0 :G=0 :B=0 \\
+:U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0  \\
+:VELMIN :VELMAX :D \\  \\
+R, G, B - red, green, blue color components ranging from 0 to 255\\
+U-VEL, V-VEL, W-VEL - u, v, w components of velocity\\
+VELMIN, VELMAX - minimum and maximum velocity\\
+D - diameter of egg at maximum velocity
+} &
+\incgraphics{scriptfigures/velegg} \\ \hline
+\end{longtable}
