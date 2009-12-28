@@ -48,6 +48,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_OR 129
 #define SV_ABS 130
 #define SV_EQ 131
+#define SV_ROTATEXYZ 132
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -78,6 +79,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_OR_NUMARGS 3
 #define SV_ABS_NUMARGS 2
 #define SV_EQ_NUMARGS 2
+#define SV_ROTATEXYZ_NUMARGS 3
 
 #define SV_TRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEX_NUMOUTARGS    0
@@ -108,6 +110,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_OR_NUMOUTARGS 1
 #define SV_ABS_NUMOUTARGS 1
 #define SV_EQ_NUMOUTARGS 0
+#define SV_ROTATEXYZ_NUMOUTARGS 0
 
 
 #define SV_DRAWCUBE      200
@@ -214,6 +217,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected);
 float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2[3]);
 
+void rotatexyz(float x, float y, float z);
 void drawcone(float d1, float height, unsigned char *rgbcolor);
 void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);
 void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor);
@@ -1042,6 +1046,9 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
         *argptr=0.0;
       }
       break;
+    case SV_ROTATEXYZ:
+      rotatexyz(arg[0],arg[1],arg[2]);
+      break;
     case SV_ROTATEX:
       glRotatef(arg[0],1.0,0.0,0.0);
       break;
@@ -1640,6 +1647,22 @@ void drawring(float diam_inner, float diam_outer, float height, unsigned char *r
   }
   glEnd();
 
+}
+
+/* ----------------------- rotatexyz ----------------------------- */
+
+void rotatexyz(float x, float y, float z){
+  float angle;
+  float normxy,normxyz;
+
+  normxy=x*x+y*y;
+  normxy=sqrt(normxy);
+  if(normxy<0.00001)return;
+  normxyz=x*x+y*y+z*z;
+  normxyz=sqrt(normxyz);
+  if(normxyz<0.00001)return;
+  angle=180.0*acos(z/normxyz)/PI;
+  glRotatef(angle,-y/normxy,x/normxy,0.0);
 }
 
 /* ----------------------- drawdisk ----------------------------- */
@@ -2316,6 +2339,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_OFFSETZ;
     num_op=SV_OFFSETZ_NUMARGS;
     num_outop=SV_OFFSETZ_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"rotatexyz")==0){
+    op=SV_ROTATEXYZ;
+    num_op=SV_ROTATEXYZ_NUMARGS;
+    num_outop=SV_ROTATEXYZ_NUMOUTARGS;
   }
   else if(STRCMP(token,"rotatex")==0){
     op=SV_ROTATEX;

@@ -3667,6 +3667,10 @@ void PropMenu(int value){
       propi->smokeview_id=propi->smokeview_ids[iobject];
       propi->smv_object=propi->smv_objects[iobject];
       updatemenu=1;
+      get_indep_var_indices(propi->smv_object,
+        propi->vars_indep,propi->nvars_indep,
+        propi->vars_indep_index);
+
       for(i=0;i<npartclassinfo;i++){
         part5class *partclassi;
 
