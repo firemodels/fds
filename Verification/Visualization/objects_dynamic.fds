@@ -66,6 +66,11 @@ vent labels from objects.svo: :R :G :B :W :H :ROT
           'VELMIN=0.1','VELMAX=4.0','D=0.2' SMOKEVIEW_ID='velegg' /
 &DEVC XYZ=3.1,0.8,1.0, QUANTITY='TEMPERATURE' ORIENTATION=0.0,0.0,1.0 PROP_ID='velegg' /
 
+&PROP ID='veltube' SMOKEVIEW_PARAMETERS(1:9)=
+          'R=64','G=192','B=32',
+          'U-VEL=2.0','V-VEL=2.0','W-VEL=4.0', 
+          'VELMIN=0.1','VELMAX=4.0','D=0.2' SMOKEVIEW_ID='veltube' /
+&DEVC XYZ=2.8,0.8,1.0, QUANTITY='TEMPERATURE' ORIENTATION=0.0,0.0,1.0 PROP_ID='veltube' /
 &TAIL /
 
 
