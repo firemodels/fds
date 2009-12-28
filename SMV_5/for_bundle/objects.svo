@@ -303,14 +303,23 @@ OBJECTDEF // object for particle "egg"
  $R $G $B setrgb
  $DX $D $D scalexyz 1.0 drawsphere
 
-OBJECTDEF // color with FDS quantity, stretch with velocity
- velegg
- :R=0 :G=0 :B=0 :D :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0 :VELMIN=0.01 :VELMAX=0.2 :D=1.0 // data obtained from an FDS input file
+OBJECTDEF // object for particle file tube
+ veltube
+ :R=0 :G=0 :B=0 :D=0.1 :L=0.1 :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0 :VELMIN=0.01 :VELMAX=0.2
  $R $G $B setrgb
  $U-VEL :UV abs $UV $VELMAX :U div $U 0.0 1.0 :CU clip
  $V-VEL :VV abs $VV $VELMAX :V div $V 0.0 1.0 :CV clip
  $W-VEL :WV abs $WV $VELMAX :W div $W 0.0 1.0 :CW clip
- $CU $CV $CW scalexyz $D drawsphere
+ $CU $CV $CW rotatexyz $CU $CV $CW scalexyz $D $L drawcdisk
+
+OBJECTDEF // color with FDS quantity, stretch with velocity
+ velegg
+ :R=0 :G=0 :B=0 :D=1.0 :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0 :VELMIN=0.01 :VELMAX=0.2 // data obtained from an FDS input file
+ $R $G $B setrgb
+ $U-VEL :UV abs $UV $VELMAX :U div $U 0.0 1.0 :CU clip
+ $V-VEL :VV abs $VV $VELMAX :V div $V 0.0 1.0 :CV clip
+ $W-VEL :WV abs $WV $VELMAX :W div $W 0.0 1.0 :CW clip
+ $CU $CV $CW rotatexyz $CU $CV $CW scalexyz $D drawsphere
 
 OBJECTDEF // object for particle "egg"
  tempegg
