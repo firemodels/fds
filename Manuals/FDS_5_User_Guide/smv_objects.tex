@@ -117,7 +117,7 @@ The texture map is specified using {\tt SMOKEVIEW\_PARAMETERS} keyword by placin
 before the texture file name ({\em e.g.}\ {\tt t\%texturefile.jpg}).
 
 Table \ref{tab:devices_dynamic}\ gives a list of dynamic objects and the keyword/parameter pairs used to specify them.
-Each entry shows a picture of the device and the parameters used to customize its appearance.
+Each entry shows an image of the object and the parameters used to customize its appearance.
 
 \begin{longtable}[ht]{|l|l|c|}
 \caption{Dynamic Objects - Customized using SMOKEVIEW\_PARAMETERS on a \&PROP line}
@@ -204,13 +204,15 @@ active vent\\
 \end{longtable}
 
 \subsection{Dynamic Smokeview Objects - Customized Using \&PROP Parameters and Particle File Data}
-Particle file data may be used to customize the appearance of Smokeview objects.  This data is accessed
-in an object definition using object variable names that match shortened particle file quantity names -
-those names that appear when the colorbar is displayed in Smokeview.  For example, {\tt U-VEL}, {\tt V-VEL},
-{\tt W-VEL} and {\tt temp} are shortened quantity names that correspond to the full names {\tt U-VELOCITY},
-{\tt V-VELOCITY}, {\tt W-VELOCITY} and {\tt TEMPERATURE}.  These full names are documented in Table \ref{tab:output}
-in this guide.  Shortened particle file quantity names also appear in the Smokeview
-File/Bounds dialog box.
+Particle file data may be used to customize the appearance of Smokeview objects.  Any objects that have color 
+labels named {\tt R}, {\tt G}, {\tt B} (including those objects in Table \ref{tab:devices_dynamic}) may be 
+colored using particle file data.  In addition, objects that use variable names that match shortened 
+particle file quantity names\footnote{Short forms of particle file quantity names appear in the Smokeview colorbar label 
+and in the Smokeview File/Bounds dialog box.}
+may be customized.  This data may be used to alter the geometry or structure of the object 
+using particle file data.  For example, {\tt U-VEL}, {\tt V-VEL}, {\tt W-VEL} and {\tt temp} are shortened 
+quantity names that correspond to the full names {\tt U-VELOCITY}, {\tt V-VELOCITY}, {\tt W-VELOCITY} and 
+{\tt TEMPERATURE}.  These full names are documented in Table~\ref{tab:output} in this guide.
 
 The first three lines of the {\tt velegg}\ object definition are:
 \begin{verbatim}
@@ -218,12 +220,14 @@ OBJECTDEF // color with FDS quantity, stretch with velocity
  velegg
  :R=0 :G=0 :B=0 :D :U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0
  \end{verbatim}
-The variables {\tt U-VEL}, {\tt V-VEL}, and {\tt W-VEL} are also particle file quantities (shortened version) that may be
+The variables {\tt U-VEL}, {\tt V-VEL}, and {\tt W-VEL} in the above line are also particle file quantities (shortened version) that may be
 selected in an FDS input file.  If they are selected, then the {\tt velegg} object may be used to display
 particle file information. This  object colors the sphere using the currently selected Smokeview particle
 variable and stretches a sphere in the x, y and z directions using the {\tt U-VEL}, {\tt V-VEL}, and {\tt W-VEL}
-velocity particle data respectively.  Table \ref{tab:devices_dynamic2} documents those objects that can be customized
-using particle file data.  These objects may be customized as before using data specified with the {\tt SMOKEVIEW\_PARAMETERS} 
+velocity particle data respectively.  
+
+Table \ref{tab:devices_dynamic2} documents those objects that can be customized
+using particle file data.  These objects may be customized as before using data specified with the {\tt SMOKEVIEW\_PARAMETERS}
 keyword or using particle file data.
 
 \begin{longtable}[ht]{|l|l|c|}
@@ -259,4 +263,17 @@ VELMIN, VELMAX - minimum and maximum velocity\\
 D - diameter of egg at maximum velocity
 } &
 \incgraphics{scriptfigures/velegg} \\ \hline
+
+veltube&
+\parbox[c]{\boxwidth}{
+{\tt SMOKEVIEW\_PARAMETERS(1:9)=}\\
+:R=0 :G=0 :B=0 \\
+:U-VEL=1.0 :V-VEL=1.0 :W-VEL=1.0  \\
+:VELMIN :VELMAX :D \\  \\
+R, G, B - red, green, blue color components ranging from 0 to 255\\
+U-VEL, V-VEL, W-VEL - u, v, w components of velocity\\
+VELMIN, VELMAX - minimum and maximum velocity\\
+D - diameter of tube at VELMAX
+} &
+\incgraphics{scriptfigures/veltube} \\ \hline
 \end{longtable}
