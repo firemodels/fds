@@ -2227,6 +2227,19 @@ lines with a {\ct T}.
 \subsection{Special Topic: Improving the Pressure Solver}
 \label{info:pressurecorrection}
 
+This section provides a few suggestions to improve the performance of the pressure solver. Normally, these options are not used, but there are certain
+applications that might require them.
+
+\subsubsection{Solid Boundary Issues}
+
+At solid surfaces that are not part of the boundary of the computational domain, the pressure solver enforces a no-flux boundary condition. However, it is not perfect, and
+it is possible to have a non-zero normal velocity at a solid surface. For most applications, this velocity is so small that it has a negligible effect on the solution. But sometimes, you
+might want to reduce this error. To do so, you can specify {\ct VELOCITY\_TOLERANCE} on the {\ct MISC} line to be the maximum allowable normal velocity component on the solid
+boundary. It is in units of m/s. If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your
+desired tolerance. The number of iterations are written out to the file {\bf CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive. 
+
+\subsubsection{Multiple-Mesh Issues}
+
 FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is
 assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of
 this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same
@@ -3228,7 +3241,7 @@ specify a fixed temperature boundary condition, in which case set
 
 \noindent
 Note that there is no need to specify a {\ct MATL\_ID} or {\ct THICKNESS}. Because the wall is to be maintained at the given temperature,
-there is no need to say anything about its material composition or thickness.  
+there is no need to say anything about its material composition or thickness.
 
 
 
@@ -3268,7 +3281,7 @@ calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL
 If you want to change the default convective heat transfer coefficient, you can set to a constant using
 {\ct H\_FIXED} on the {\ct MISC} line in units of W/m$^2$/K. Another option is to use a turbulent
 convective heat transfer model suggested by Moinuddin and Li of Victoria University, Australia, by setting
-{\ct H\_EDDY=.TRUE.} on the {\ct MISC} line.  
+{\ct H\_EDDY=.TRUE.} on the {\ct MISC} line.
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
@@ -9354,6 +9367,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
 %{\ct TURB\_INIT}                & Logical       & Write `ini\_salsa.dat' for turb_init.exe      &               & {\ct .FALSE.}     \\ \hline
 {\ct U0,V0,W0}                  & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
+{\ct VELOCITY\_TOLERANCE}       & Real          & See Section~\ref{info:pressurecorrection}     &  m/s          &                   \\ \hline
 {\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
 {\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
