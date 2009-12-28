@@ -20,14 +20,15 @@ USE POIS, ONLY: H3CZSS,H2CZSS,H2CYSS,H3CSSS
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE GLOBAL_CONSTANTS
+USE VELO, ONLY: NO_FLUX
  
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:) :: UWP
-INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
+INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO,P_ITER,II,JJ,KK
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,DWWDT,DVVDT,DUUDT,HQ2,RFODT,U2,V2,W2,HFAC,H0RR(6),TNOW,DUMMY=0._EB, &
-            TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER
+            TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER,U_NEW,V_NEW,W_NEW,VEL_ERROR,VEL_ERROR_MAX
 TYPE (VENTS_TYPE), POINTER :: VT
  
 IF (SOLID_PHASE_ONLY) RETURN
@@ -60,7 +61,13 @@ IF (V0<=0._EB) H0RR(4) = H0*RHOA/RHO_AVG
 IF (W0>=0._EB) H0RR(5) = H0*RHOA/RHO_AVG
 IF (W0<=0._EB) H0RR(6) = H0*RHOA/RHO_AVG
 IF (EVACUATION_ONLY(NM)) H0RR(1:6) = 0._EB
- 
+
+P_ITER = 0
+
+PRESSURE_ITERATION_LOOP: DO
+
+P_ITER = P_ITER + 1
+
 ! Apply pressure boundary conditions at external cells.
 ! If Neumann, BXS, BXF, etc., contain dH/dx(x=XS), dH/dx(x=XF), etc.
 ! If Dirichlet, BXS, BXF, etc., contain H(x=XS), H(x=XF), etc.
@@ -108,22 +115,28 @@ WALL_CELL_LOOP: DO IW=1,NEWC
  
          SELECT CASE(IOR)
             CASE( 1)
-               DUUDT = -RFODT*(UU(0,J,K)   +UWP(IW))
+               IF (PREDICTOR) DUUDT =       RFODT*(-UWP(IW)-        U(0,J,K)           )
+               IF (CORRECTOR) DUUDT = 2._EB*RFODT*(-UWP(IW)-0.5_EB*(U(0,J,K)+US(0,J,K)))
                BXS(J,K) = H(1,J,K)     + 0.5_EB*DX(0)   *(DUUDT+FVX(0,J,K))
             CASE(-1) 
-               DUUDT = -RFODT*(UU(IBAR,J,K)-UWP(IW))
+               IF (PREDICTOR) DUUDT =       RFODT*( UWP(IW)-        U(IBAR,J,K)              )
+               IF (CORRECTOR) DUUDT = 2._EB*RFODT*( UWP(IW)-0.5_EB*(U(IBAR,J,K)+US(IBAR,J,K)))
                BXF(J,K) = H(IBAR,J,K) - 0.5_EB*DX(IBP1)*(DUUDT+FVX(IBAR,J,K))
             CASE( 2)
-               DVVDT = -RFODT*(VV(I,0,K)   +UWP(IW)) 
+               IF (PREDICTOR) DVVDT =       RFODT*(-UWP(IW)-        V(I,0,K)           ) 
+               IF (CORRECTOR) DVVDT = 2._EB*RFODT*(-UWP(IW)-0.5_EB*(V(I,0,K)+VS(I,0,K)))
                BYS(I,K) = H(I,1,K)    + 0.5_EB*DY(0)   *(DVVDT+FVY(I,0,K))
             CASE(-2) 
-               DVVDT = -RFODT*(VV(I,JBAR,K)-UWP(IW))
+               IF (PREDICTOR) DVVDT =       RFODT*( UWP(IW)-        V(I,JBAR,K)              )
+               IF (CORRECTOR) DVVDT = 2._EB*RFODT*( UWP(IW)-0.5_EB*(V(I,JBAR,K)+VS(I,JBAR,K)))
                BYF(I,K) = H(I,JBAR,K) - 0.5_EB*DY(JBP1)*(DVVDT+FVY(I,JBAR,K))
             CASE( 3)
-               DWWDT = -RFODT*(WW(I,J,0)   +UWP(IW))
+               IF (PREDICTOR) DWWDT =       RFODT*(-UWP(IW)-        W(I,J,0)           )
+               IF (CORRECTOR) DWWDT = 2._EB*RFODT*(-UWP(IW)-0.5_EB*(W(I,J,0)+WS(I,J,0)))
                BZS(I,J) = H(I,J,1)    + 0.5_EB*DZ(0)   *(DWWDT+FVZ(I,J,0))
             CASE(-3) 
-               DWWDT = -RFODT*(WW(I,J,KBAR)-UWP(IW))
+               IF (PREDICTOR) DWWDT =       RFODT*( UWP(IW)-        W(I,J,KBAR)              )
+               IF (CORRECTOR) DWWDT = 2._EB*RFODT*( UWP(IW)-0.5_EB*(W(I,J,KBAR)+WS(I,J,KBAR)))
                BZF(I,J) = H(I,J,KBAR) - 0.5_EB*DZ(KBP1)*(DWWDT+FVZ(I,J,KBAR))
          END SELECT
 
@@ -477,7 +490,82 @@ ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
-! ************************* Check the Solution *************************
+! Check the maximum velocity error at a solid boundary
+
+VEL_ERROR_MAX = 0._EB
+
+CHECK_WALL_LOOP: DO IW=1,NWC
+
+   IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE CHECK_WALL_LOOP
+
+   II  = IJKW(1,IW)
+   JJ  = IJKW(2,IW)
+   KK  = IJKW(3,IW)
+   IOR = IJKW(4,IW)
+
+   IF (PREDICTOR) THEN
+
+      SELECT CASE(IOR)
+         CASE( 1)
+            U_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)))
+            VEL_ERROR = U_NEW + UWP(IW)
+         CASE(-1)
+            U_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)))
+            VEL_ERROR = U_NEW - UWP(IW)
+         CASE( 2)
+            V_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK)))
+            VEL_ERROR = V_NEW + UWP(IW)
+         CASE(-2)
+            V_NEW = V(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK)))
+            VEL_ERROR = V_NEW - UWP(IW)
+         CASE( 3)
+            W_NEW = W(II,JJ,KK)   - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK)))
+            VEL_ERROR = W_NEW + UWP(IW)
+         CASE(-3)
+            W_NEW = W(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)))
+            VEL_ERROR = W_NEW - UWP(IW)
+      END SELECT
+
+   ELSE
+
+      SELECT CASE(IOR)
+         CASE( 1)
+            U_NEW = 0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)     - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK))))
+            VEL_ERROR = U_NEW + UWP(IW)
+         CASE(-1)
+            U_NEW = 0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK))))
+            VEL_ERROR = U_NEW - UWP(IW)
+         CASE( 2)
+            V_NEW = 0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)     - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK))))
+            VEL_ERROR = V_NEW + UWP(IW)
+         CASE(-2)
+            V_NEW = 0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK))))
+            VEL_ERROR = V_NEW - UWP(IW)
+         CASE( 3)
+            W_NEW = 0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)     - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK))))
+            VEL_ERROR = W_NEW + UWP(IW)
+         CASE(-3)
+            W_NEW = 0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1))))
+            VEL_ERROR = W_NEW - UWP(IW)
+      END SELECT
+
+   ENDIF
+
+   IF (ABS(VEL_ERROR)>ABS(VEL_ERROR_MAX)) VEL_ERROR_MAX = VEL_ERROR
+
+ENDDO CHECK_WALL_LOOP
+
+IF (ABS(VEL_ERROR_MAX)<VELOCITY_TOLERANCE) THEN
+   PRESSURE_ITERATIONS = P_ITER
+   EXIT PRESSURE_ITERATION_LOOP
+ENDIF
+
+CALL NO_FLUX
+
+ENDDO PRESSURE_ITERATION_LOOP
+
+
+! Optional check of the accuracy of the pressure solver
  
 IF (CHECK_POISSON .AND. .NOT.EVACUATION_ONLY(NM)) THEN     
    POIS_ERR = 0.
@@ -497,8 +585,6 @@ IF (CHECK_POISSON .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       ENDDO
    ENDDO
 ENDIF
- 
-! **********************************************************************
  
 TUSED(5,NM)=TUSED(5,NM)+SECOND()-TNOW
 END SUBROUTINE PRESSURE_SOLVER
