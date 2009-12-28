@@ -914,23 +914,12 @@ END SUBROUTINE VELOCITY_FLUX_CYLINDRICAL
  
 SUBROUTINE NO_FLUX
 
-! Set FVX,FVY,FVZ inside internal blockages to maintain no flux
+! Set FVX,FVY,FVZ inside and on the surface of solid obstructions to maintain no flux
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
-REAL(EB) :: RFODT,H_OTHER
+REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT
 INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR,N_INT_CELLS,IIO,JJO,KKO,NOM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB
- 
-IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
-ELSE
-   UU => US
-   VV => VS
-   WW => WS
-ENDIF
  
 RFODT = RELAXATION_FACTOR/DT
  
@@ -958,10 +947,9 @@ DO IW=1,NEWC
 ENDDO
 !$OMP END DO
 
-! Drive velocity components inside solid obstructions towards zero
+! Set FVX, FVY and FVZ to drive velocity components at solid boundaries towards zero
 
-
-!$OMP DO PRIVATE(N,OB,K,J,I,IC1,IC2) 
+!$OMP DO PRIVATE(N,OB,K,J,I,IC1,IC2,DUUDT,DVVDT,DWWDT) 
 OBST_LOOP: DO N=1,N_OBST
    !!$ IF ((N == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_NO_FLUX_02'
    OB=>OBSTRUCTION(N)
@@ -970,7 +958,11 @@ OBST_LOOP: DO N=1,N_OBST
          LOOP1: DO I=OB%I1  ,OB%I2
             IC1 = CELL_INDEX(I,J,K)
             IC2 = CELL_INDEX(I+1,J,K)
-            IF (SOLID(IC1) .AND. SOLID(IC2)) FVX(I,J,K) = -RDXN(I)*(H(I+1,J,K)-H(I,J,K)) + RFODT*UU(I,J,K)
+            IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+               IF (PREDICTOR) DUUDT = -RFODT*U(I,J,K)
+               IF (CORRECTOR) DUUDT = -RFODT*(U(I,J,K)+US(I,J,K))
+               FVX(I,J,K) = -RDXN(I)*(H(I+1,J,K)-H(I,J,K)) - DUUDT
+            ENDIF
          ENDDO LOOP1
       ENDDO 
    ENDDO 
@@ -979,7 +971,11 @@ OBST_LOOP: DO N=1,N_OBST
          LOOP2: DO I=OB%I1+1,OB%I2
             IC1 = CELL_INDEX(I,J,K)
             IC2 = CELL_INDEX(I,J+1,K)
-            IF (SOLID(IC1) .AND. SOLID(IC2)) FVY(I,J,K) = -RDYN(J)*(H(I,J+1,K)-H(I,J,K)) + RFODT*VV(I,J,K)
+            IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+               IF (PREDICTOR) DVVDT = -RFODT*V(I,J,K)
+               IF (CORRECTOR) DVVDT = -RFODT*(V(I,J,K)+VS(I,J,K))
+               FVY(I,J,K) = -RDYN(J)*(H(I,J+1,K)-H(I,J,K)) - DVVDT
+            ENDIF
          ENDDO LOOP2
       ENDDO 
    ENDDO 
@@ -988,7 +984,11 @@ OBST_LOOP: DO N=1,N_OBST
          LOOP3: DO I=OB%I1+1,OB%I2
             IC1 = CELL_INDEX(I,J,K)
             IC2 = CELL_INDEX(I,J,K+1)
-            IF (SOLID(IC1) .AND. SOLID(IC2)) FVZ(I,J,K) = -RDZN(K)*(H(I,J,K+1)-H(I,J,K)) + RFODT*WW(I,J,K)
+            IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
+               IF (PREDICTOR) DWWDT = -RFODT*W(I,J,K)
+               IF (CORRECTOR) DWWDT = -RFODT*(W(I,J,K)+WS(I,J,K))
+               FVZ(I,J,K) = -RDZN(K)*(H(I,J,K+1)-H(I,J,K)) - DWWDT
+            ENDIF
          ENDDO LOOP3
       ENDDO 
    ENDDO 
@@ -997,7 +997,7 @@ ENDDO OBST_LOOP
  
 ! Add normal velocity to FVX, etc. for surface cells
 
-!$OMP DO PRIVATE(IW,NOM,II,JJ,KK,IOR) 
+!$OMP DO PRIVATE(IW,NOM,II,JJ,KK,IOR,DUUDT,DVVDT,DWWDT) 
 WALL_LOOP: DO IW=1,NWC
 !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_NO_FLUX_03' 
    IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)         CYCLE WALL_LOOP
@@ -1013,17 +1013,29 @@ WALL_LOOP: DO IW=1,NWC
    IF (NOM/=0 .OR. BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) THEN
       SELECT CASE(IOR)
          CASE( 1) 
-            FVX(II,JJ,KK)   = -RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)) + RFODT*(UU(II,JJ,KK)   + UWS(IW))
+            IF (PREDICTOR) DUUDT =       RFODT*(-UWS(IW)-U(II,JJ,KK))
+            IF (CORRECTOR) DUUDT = 2._EB*RFODT*(-UW(IW)-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)))
+            FVX(II,JJ,KK) =   -RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)) - DUUDT
          CASE(-1) 
-            FVX(II-1,JJ,KK) = -RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)) + RFODT*(UU(II-1,JJ,KK) - UWS(IW))
+            IF (PREDICTOR) DUUDT =       RFODT*( UWS(IW)-U(II-1,JJ,KK))
+            IF (CORRECTOR) DUUDT = 2._EB*RFODT*( UW(IW)-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)))
+            FVX(II-1,JJ,KK) = -RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)) - DUUDT
          CASE( 2) 
-            FVY(II,JJ,KK)   = -RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK)) + RFODT*(VV(II,JJ,KK)   + UWS(IW))
+            IF (PREDICTOR) DVVDT =       RFODT*(-UWS(IW)-V(II,JJ,KK))
+            IF (CORRECTOR) DVVDT = 2._EB*RFODT*(-UW(IW)-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)))
+            FVY(II,JJ,KK)   = -RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK)) - DVVDT
          CASE(-2)
-            FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK)) + RFODT*(VV(II,JJ-1,KK) - UWS(IW))
+            IF (PREDICTOR) DVVDT =       RFODT*( UWS(IW)-V(II,JJ-1,KK))
+            IF (CORRECTOR) DVVDT = 2._EB*RFODT*( UW(IW)-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)))
+            FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK)) - DVVDT
          CASE( 3) 
-            FVZ(II,JJ,KK)   = -RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK)) + RFODT*(WW(II,JJ,KK)   + UWS(IW))
+            IF (PREDICTOR) DWWDT =       RFODT*(-UWS(IW)-W(II,JJ,KK))
+            IF (CORRECTOR) DWWDT = 2._EB*RFODT*(-UW(IW)-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)))
+            FVZ(II,JJ,KK)   = -RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK)) - DWWDT
          CASE(-3) 
-            FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)) + RFODT*(WW(II,JJ,KK-1) - UWS(IW))
+            IF (PREDICTOR) DWWDT =       RFODT*( UWS(IW)-W(II,JJ,KK-1))
+            IF (CORRECTOR) DWWDT = 2._EB*RFODT*( UW(IW)-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)))
+            FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)) - DWWDT
       END SELECT
    ENDIF
 
