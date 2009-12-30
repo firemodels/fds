@@ -1621,10 +1621,11 @@ REAL(EB) Y_MF_INT, tmp_1
 ! Next is for CO (ppm)
 ! CO:  (3.317E-5*RMV*t)/D
 !      [RMV]=ltr/min, D=30% COHb concentration at incapacitation
-Call GET_MASS_FRACTION(Y_IN,CO_INDEX,Y_MF_INT)
-tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/RSUM
-FED   = 3.317E-5_EB*25.0_EB* tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
-
+IF (CO_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,CO_INDEX,Y_MF_INT)
+   tmp_1 = RCON_MF(CO_INDEX)*Y_MF_INT*1.E6_EB/RSUM
+   FED   = 3.317E-5_EB*25.0_EB* tmp_1**(1.036_EB)/(30.0_EB*60.0_EB)
+ENDIF
 ! Next is for CO2
 ! VCO2: CO2-induced hyperventilation
 !      exp(0.1903*c_CO2(%) + 2.0004)
