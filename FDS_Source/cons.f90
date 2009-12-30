@@ -25,8 +25,6 @@ INTEGER, PARAMETER :: NULL_BOUNDARY=0,SOLID_BOUNDARY=1,OPEN_BOUNDARY=2,MIRROR_BO
 INTEGER, PARAMETER :: HVAC_BOUNDARY=42                      
 INTEGER, PARAMETER :: NULL_EDGE=0,SOLID_EDGE=1,OPEN_EDGE=2,MIRROR_EDGE=3,SMOOTH_EDGE=4, &
                       INTERPOLATED_EDGE=6,PERIODIC_EDGE=7                                   ! Edge Type
-INTEGER, PARAMETER :: FUEL_INDEX=1,O2_INDEX=2,N2_INDEX=3,H2O_INDEX=4,CO2_INDEX=5,CO_INDEX=6,H2_INDEX=7, &
-                      SOOT_INDEX=8,OTHER_INDEX=9                                            ! Mixture Fraction Species
 INTEGER, PARAMETER :: DIRICHLET=1,NEUMANN=2                                                 ! Pressure Boundary Conditions
 INTEGER, PARAMETER :: PYROLYSIS_NONE=0,PYROLYSIS_SOLID=1,PYROLYSIS_LIQUID=2,&
                       PYROLYSIS_MATERIAL=3,PYROLYSIS_SPECIFIED=4                            ! Pyrolysis model
@@ -37,10 +35,11 @@ INTEGER, PARAMETER :: SPHERE_DRAG=1,CYLINDER_DRAG=2,USER_DRAG=3                 
 INTEGER, PARAMETER :: OLD=1,NEW=2,GUESS=3,PREVIOUS=4                                        ! Network solver indices
 
 ! Species components of the mixture fraction
-
-CHARACTER(20), DIMENSION(9) :: MF_SPEC_ID,MF_SPEC_FORMULA
-DATA MF_SPEC_ID /'fuel','oxygen','nitrogen','water vapor','carbon dioxide','carbon monoxide','hydrogen','soot','other' /
-DATA MF_SPEC_FORMULA /'F','O2','N2','H2O','CO2','CO','H2','Soot','other' /
+INTEGER :: N_STATE_SPECIES
+INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0,H2_INDEX=0, &
+           SOOT_INDEX=0,OTHER_INDEX=0                                                       ! Mixture Fraction Species
+CHARACTER(20), DIMENSION(:), ALLOCATABLE :: MF_SPEC_ID,MF_SPEC_FORMULA
+REAL(EB), DIMENSION(:), ALLOCATABLE :: MF_MW
 
 ! Program Status Code
 
@@ -119,10 +118,9 @@ REAL(EB) :: MW_AIR,MW_OTHER,MW_SOOT,HRRPUA_SHEET=200._EB,RHO_SOOT,VISIBILITY_FAC
 INTEGER :: N_SPECIES=0,I_WATER,I_CO2,N_REACTIONS,I_FUEL,I_PROG_CO, I_PROG_F, I_PROG_SOOT, I_CO, I_O2,I_SOOT,I_Z_MIN,I_Z_MAX, &
            I_N2,I_H2,N_Y_ARRAY,N_KAPPA_ARRAY,N_MIX_SPECIES=0,N_REAC_SPECIES=0
 REAL(EB) :: RSUM0
-REAL(EB), DIMENSION(0:10) :: RCON_MF
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: Y2Y,Y2CP,Y2CPBAR,Y2D,Y2K,Y2MU,Y2H_G
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: Y2Y_C,Y2CP_C,Y2CPBAR_C,Y2D_C,Y2K_C,Y2MU_C,Y2H_G_C,MW_AVG_Y,Y_MF_SUM_Y,&
-                                       Y2KAPPA_M4                                     
+                                       Y2KAPPA_M4,RCON_MF
 REAL(EB) :: MW_AVG_C,Y_MF_SUM_C,MW_AVG_Y_C,Y_MF_SUM_Y_C
 INTEGER, ALLOCATABLE, DIMENSION(:) :: KAPPA_INDEX
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: Y2KAPPA
