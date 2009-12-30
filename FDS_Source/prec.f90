@@ -26,10 +26,6 @@ INTEGER, PARAMETER :: MAX_SPECIES=20, MAX_LEAK_PATHS=20
 
 INTEGER, PARAMETER :: MAX_LAYERS=20, MAX_MATERIALS=20, MAX_MATERIALS_TOTAL=400, MAX_REACTIONS=10, MAX_STEPS=20
 
-! Hardwired number of species associated with the mixture fraction
-
-INTEGER, PARAMETER :: N_STATE_SPECIES=9
-
 ! Hardwired number of parameters that can be passed to Smokeview to describe a drawn object or device
 
 INTEGER, PARAMETER :: SMOKEVIEW_OBJECTS_DIMENSION=20

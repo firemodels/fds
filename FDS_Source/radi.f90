@@ -299,7 +299,11 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
 
    N_KAPPA_ARRAY=0
    IF (MIXTURE_FRACTION) THEN
-      N_KAPPA_ARRAY = 5
+      IF (FUEL_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
+      IF (CO2_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
+      IF (CO_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
+      IF (H2O_INDEX /= 0 .OR. I_WATER /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
+      IF (SOOT_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
    ELSE
       IF (I_FUEL /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
       IF (I_CO2 /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
@@ -315,15 +319,29 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
    CALL ChkMemErr('RADI','KAPPA_INDEX',IZERO)
    IF (MIXTURE_FRACTION) THEN
       Y2KAPPA_M4(1) = REAL(Y2KAPPA_M,EB)**4/REACTION(1)%MW_FUEL
-      Y2KAPPA_M4(2) = REAL(Y2KAPPA_M,EB)**4/MW_CO2
-      Y2KAPPA_M4(3) = REAL(Y2KAPPA_M,EB)**4/MW_CO
-      Y2KAPPA_M4(4) = REAL(Y2KAPPA_M,EB)**4/MW_H2O
-      Y2KAPPA_M4(5) = REAL(Y2KAPPA_M,EB)**4*5._EB
       KAPPA_INDEX(1) = FUEL_INDEX
+      Y2KAPPA_M4(2) = REAL(Y2KAPPA_M,EB)**4/MW_CO2
       KAPPA_INDEX(2) = CO2_INDEX
-      KAPPA_INDEX(3) = CO_INDEX      
-      KAPPA_INDEX(4) = H2O_INDEX
-      KAPPA_INDEX(5) = SOOT_INDEX
+      NS = 2
+      IF (CO_INDEX > 0) THEN
+         NS = NS + 1
+         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_CO
+         KAPPA_INDEX(NS) = CO_INDEX
+      ENDIF      
+      IF (H2O_INDEX > 0 .OR. I_WATER > 0) THEN
+         NS = NS + 1
+         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_H2O
+         IF (H2O_INDEX > 0) THEN
+            KAPPA_INDEX(NS) = H2O_INDEX
+         ELSE
+            KAPPA_INDEX(NS) = I_WATER + N_STATE_SPECIES
+         ENDIF
+      ENDIF      
+      IF (SOOT_INDEX > 0) THEN
+         NS = NS + 1
+         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4*5._EB
+         KAPPA_INDEX(NS) = SOOT_INDEX
+      ENDIF
    ELSE
       NS = 0
       IF (I_FUEL /= 0) THEN
@@ -407,7 +425,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         ENDIF
                      ENDIF
                   CASE(3) !CO
-                     IF(MIXTURE_FRACTION .OR. I_CO /=0) THEN
+                     IF((MIXTURE_FRACTION .AND. CO_INDEX > 0) .OR. I_CO /=0) THEN
                         N = N + 1
                         SVF = 0._EB
                         !FUEL
@@ -424,7 +442,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         ENDIF
                      ENDIF
                   CASE(4) !H2O
-                     IF(MIXTURE_FRACTION .OR. I_WATER /=0) THEN
+                     IF((MIXTURE_FRACTION .AND. H2O_INDEX > 0) .OR. I_WATER /=0) THEN
                         N = N + 1
                         SVF = 0._EB
                         !FUEL
@@ -441,7 +459,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         ENDIF
                      ENDIF
                   CASE(5) !Soot
-                     IF(MIXTURE_FRACTION .OR. I_SOOT /=0) THEN
+                     IF((MIXTURE_FRACTION .AND. SOOT_INDEX > 0).OR. I_SOOT /=0) THEN
                         N = N + 1
                         RCRHO = MW_AIR*P_INF/(R0*RCT)
                         YY = YY * 0.2_EB
