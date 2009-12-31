@@ -131,6 +131,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWARCDISK   215
 #define SV_DRAWSQUARE    216
 #define SV_DRAWVENT      217
+#define SV_DRAWCUBEC     218
 
 #define SV_DRAWCUBE_NUMARGS      1
 #define SV_DRAWSPHERE_NUMARGS    1
@@ -150,6 +151,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWARCDISK_NUMARGS   3
 #define SV_DRAWSQUARE_NUMARGS 1
 #define SV_DRAWVENT_NUMARGS 2
+#define SV_DRAWCUBEC_NUMARGS      1
 
 #define SV_DRAWCUBE_NUMOUTARGS      0
 #define SV_DRAWSPHERE_NUMOUTARGS    0
@@ -169,6 +171,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWARCDISK_NUMOUTARGS   0
 #define SV_DRAWSQUARE_NUMOUTARGS 0
 #define SV_DRAWVENT_NUMOUTARGS 0
+#define SV_DRAWCUBEC_NUMOUTARGS      0
 
 #define SV_PUSH       300
 #define SV_POP        301
@@ -227,6 +230,7 @@ void drawpoint(unsigned char *rgbcolor);
 void drawsphere(float diameter, unsigned char *rgbcolor);
 void drawtsphere(int texture_index, float diameter, unsigned char *rgbcolor);
 void drawcube(float size, unsigned char *rgbcolor);
+void drawcubec(float size, unsigned char *rgbcolor);
 void drawsquare(float size, unsigned char *rgbcolor);
 void drawvent(float width, float height, unsigned char *rgbcolor);
 void drawcdisk(float diameter, float height, unsigned char *rgbcolor);
@@ -1068,6 +1072,10 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       drawcube(arg[0],rgbptr);
       rgbptr=NULL;
       break;
+    case SV_DRAWCUBEC:
+      drawcubec(arg[0],rgbptr);
+      rgbptr=NULL;
+      break;
     case SV_DRAWSQUARE:
       drawsquare(arg[0],rgbptr);
       rgbptr=NULL;
@@ -1479,6 +1487,58 @@ void drawcube(float size, unsigned char *rgbcolor){
   glVertex3f( s2, s2,-s2);  // 3
   glVertex3f( s2, s2, s2);  // 7
   glVertex3f( s2,-s2, s2);  // 6
+  glEnd();
+
+}
+
+
+/* ----------------------- drawcube ----------------------------- */
+
+void drawcubec(float size, unsigned char *rgbcolor){
+  float s1,s2;
+
+  s2 = size;
+  s1 = 0.0;
+
+  glBegin(GL_QUADS);
+  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+
+  glNormal3f(0.0,0.0,-1.0);
+  glVertex3f(s1,s1,s1);  // 1
+  glVertex3f(s1, s2,s1);  // 4
+  glVertex3f( s2, s2,s1);  // 3
+  glVertex3f( s2,s1,s1);  // 2
+
+  glNormal3f(0.0,0.0,1.0);
+  glVertex3f(s1,s1, s2);  // 5
+  glVertex3f( s2,s1, s2);  // 6
+  glVertex3f( s2, s2, s2);  // 7
+  glVertex3f(s1, s2, s2);  // 8
+
+  glNormal3f(0.0,-1.0,0.0);
+  glVertex3f(s1,s1,s1);  // 1
+  glVertex3f( s2,s1,s1);  // 2
+  glVertex3f( s2,s1, s2);  // 6
+  glVertex3f(s1,s1, s2);  // 5
+                    
+  glNormal3f(0.0,1.0,0.0);
+  glVertex3f( s2, s2,s1);  // 3
+  glVertex3f(s1, s2,s1);  // 4
+  glVertex3f(s1, s2, s2);  // 8
+  glVertex3f( s2, s2, s2);  // 7
+
+  glNormal3f(-1.0,0.0,0.0);
+  glVertex3f(s1,s1,s1);  // 1
+  glVertex3f(s1,s1, s2);  // 5
+  glVertex3f(s1, s2, s2);  // 8
+  glVertex3f(s1, s2,s1);  // 4
+                     
+  glNormal3f(1.0,0.0,0.0);
+  glVertex3f( s2,s1,s1);  // 2
+  glVertex3f( s2, s2,s1);  // 3
+  glVertex3f( s2, s2, s2);  // 7
+  glVertex3f( s2,s1, s2);  // 6
   glEnd();
 
 }
@@ -2424,6 +2484,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_DRAWCUBE;
     num_op=SV_DRAWCUBE_NUMARGS;
     num_outop=SV_DRAWCUBE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"drawcubec")==0){
+    op=SV_DRAWCUBEC;
+    num_op=SV_DRAWCUBEC_NUMARGS;
+    num_outop=SV_DRAWCUBEC_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawvent")==0){
     op=SV_DRAWVENT;
