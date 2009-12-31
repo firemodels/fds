@@ -1197,43 +1197,50 @@ along with the corresponding Smokeview view.}
 \label{figsprinkler}%
 \end{figure}
 
-Figure \ref{figegg} shows an example of a definition used to draw a scaled sphere using scalings obtained from an FDS input file along with
-the corresponding Smokeview view. The definition uses just one frame. The scaled sphere is
-drawn using data specified on the {\tt SMOKEVIEW\_PARAMETERS}\ keyword
-in the FDS input file.
+Figure \ref{figball} shows an example of a definition used to draw a scaled sphere 
+using scalings obtained from an FDS input file along with the corresponding Smokeview 
+view.  This definition is set up so that if the label value 'D' has a value greater than 0.0 
+then a sphere is drawn with diameter D otherwise an ellipsoid is drawn with dimensions 'DX', 'DY' and 'DZ'.
+This definition uses just one frame. The scaled sphere/ellipsoid is drawn using data 
+specified on the {\tt SMOKEVIEW\_PARAMETERS}\ keyword in the FDS input file.
 
 \begin{figure}[\figoptions]
 {\small
 \begin{Verbatim}[frame=single,rulecolor=\color{blue},
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-OBJECTDEF // object definition for "egg"
- egg
- :R :G :B :D :DX     // data obtained from an FDS input file
- $R $G $B setcolor   // $var values obtained from
-                     //      corresponding :var labels
- $DX $D $D scalexyz 1.0 drawsphere
+OBJECTDEF // object for a general ball
+ ball
+ :R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1
+ $D 0.0 :DGT0 GT
+ $R $G $B setrgb
+ $DGT0 IF
+  $D drawsphere
+  ELSE
+  $DX $DY $DZ scalexyz 1.0 drawsphere
+ ENDIF
+ NO_OP
 \end{Verbatim}
 }
 {\small
 \begin{Verbatim}[frame=single,rulecolor=\color{blue},
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
-FDS input lines to create egg
+FDS input lines to create ball
 
-The data labels (:R :G :B :D :DX) in the object file
-correspond to the SMOKEVIEW_PARAMETERS inputs in
-in the FDS input file though the order does not need to be the same.
+The data labels (:R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1) in the object file 
+correspond to the SMOKEVIEW_PARAMETERS inputs in the FDS input file 
+though the order may be different.
 
-&PROP ID='egg' SMOKEVIEW_PARAMETERS(1:5)='R=0','G=0','B=255',
-                           'D=0.25','DX=.75' SMOKEVIEW_ID='egg' /
-&DEVC XYZ=0.5,0.8,2.5, QUANTITY='TEMPERATURE' PROP_ID='egg' /
+&PROP ID='ball' SMOKEVIEW_PARAMETERS(1:5)='R=0','G=0','B=255',
+                       'DX=0.25','DY=.5','DZ='1.0' SMOKEVIEW_ID='ball' /
+&DEVC XYZ=0.5,0.8,2.5, QUANTITY='TEMPERATURE' PROP_ID='ball' /
 
 \end{Verbatim}
 }
 \begin{center}
-\includegraphics[height=\figheightA]{../FDS_5_USER_GUIDE/scriptfigures/egg}\\
+\includegraphics[height=\figheightA]{../FDS_5_USER_GUIDE/scriptfigures/ball}\\
 \end{center}
-\caption{Instructions for drawing the dynamic object, egg, along with the corresponding FDS input lines and the Smokeview view.}
-\label{figegg}%
+\caption{Instructions for drawing the dynamic object, ball, along with the corresponding FDS input lines and the Smokeview view.}
+\label{figball}%
 \end{figure}
 
 \newcommand{\devfig}[1]{
@@ -1435,6 +1442,9 @@ object.
 orientation. (see above comment about number of {\tt push}\ and
 {\tt pop}\ commands).
 
+\hitem{ROTATEXYZ} The command, {\tt r x y z rotatexyz}, rotates objects
+drawn afterwards {\tt r} degrees about an axis defined by the vector $(x,y,z)$.
+
 \hitem{ROTATEX} The command, {\tt r rotatex}, rotates objects
 drawn afterwards {\tt r} degrees about the x axis.
 
@@ -1532,6 +1542,13 @@ The command, \\
 is used to compute the value, $val=a/b$, where $a$ and $b$ are either numerical constants or references to previously defined data.  If the denominator, {\tt b}, is zero then the result, $val$, returned is zero.
 and is placed
 in the label {\tt :val}\ accessible later in the definition file using \$val.
+
+\hitem{EQ}
+The command, \\
+\\
+{\tt a b eq}, \\
+\\
+is used to copy data from the label b to a, {\em ie}\ performs the operation a=b.
 
 \hitem{GETT}
 The command, \\
