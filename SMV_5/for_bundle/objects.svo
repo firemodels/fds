@@ -327,6 +327,46 @@ OBJECTDEF // object for particle "egg"
  $temp 700.0 :tempd28 div $tempd28 $G $B setrgb 
  $rot_rate 0.0 :rotz multiaddt $rotz rotatez 0.2 $tempd28 0.2 scalexyz 1.0 drawsphere
 
+OBJECTDEF
+ block
+ :R=0 :G=0 :B=0 :DX=1.0 :DY=1.0 :DZ=1.0
+ $R $G $G setrgb
+ $DX $DY $DZ scalexyz 1.0 drawcubec
+
+OBJECTDEF
+ cablerack
+ :R=105 :G=105 :B=105 :D=0.1016 :DX=1.8292 :DY=1.21920 :DZ=0.3048
+ $R $G $B setrgb
+ 0.057 offsetx
+ push 0.0760 1.4478 0.6096 translate 1.8288 0.0762 0.0762 scalexyz 1.0 drawcubec pop
+ push 0.0760 1.4478 2.1844 translate 1.8288 0.0762 0.0762 scalexyz 1.0 drawcubec pop
+ push 0.0760 1.4478 3.4036 translate 1.8288 0.0762 0.0762 scalexyz 1.0 drawcubec pop
+ push 0.0 1.2192 0.0 translate 0.1016 0.3048 3.6576 scalexyz 1.0 drawcubec pop
+ push $DX 1.2192 0.0 translate 0.1016 0.3048 3.6576 scalexyz 1.0 drawcubec pop
+ push -.057 0.0 0.0 translate 0.2286 1.6256 0.3048 scalexyz 1.0 drawcubec pop
+ push 1.771 0.0 0.0 translate 0.2286 1.6256 0.3048 scalexyz 1.0 drawcubec pop
+ 0.4064 offsetz
+ push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
+ push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
+ $DZ offsetz
+ push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
+ push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
+ $DZ offsetz
+ push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
+ push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
+ $DZ offsetz
+ push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
+ push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
+ $DZ offsetz
+ push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
+ push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
+ $DZ offsetz
+ push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
+ push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
+ $DZ offsetz
+ push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
+ push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
+
 OBJECTDEF // object for a general ball
  ball
  :R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1
