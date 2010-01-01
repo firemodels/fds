@@ -36,3 +36,7 @@ SETVIEWPOINT
  veltube
 RENDERONCE
  veltube
+SETVIEWPOINT
+ box
+RENDERONCE
+ box
