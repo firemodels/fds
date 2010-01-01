@@ -1197,11 +1197,11 @@ along with the corresponding Smokeview view.}
 \label{figsprinkler}%
 \end{figure}
 
-Figure \ref{figball} shows an example of a definition used to draw a scaled sphere 
-using scalings obtained from an FDS input file along with the corresponding Smokeview 
-view.  This definition is set up so that if the label value 'D' has a value greater than 0.0 
+Figure \ref{figball} shows an example of a definition used to draw a scaled sphere
+using scalings obtained from an FDS input file along with the corresponding Smokeview
+view.  This definition is set up so that if the label value 'D' has a value greater than 0.0
 then a sphere is drawn with diameter D otherwise an ellipsoid is drawn with dimensions 'DX', 'DY' and 'DZ'.
-This definition uses just one frame. The scaled sphere/ellipsoid is drawn using data 
+This definition uses just one frame. The scaled sphere/ellipsoid is drawn using data
 specified on the {\tt SMOKEVIEW\_PARAMETERS}\ keyword in the FDS input file.
 
 \begin{figure}[\figoptions]
@@ -1226,8 +1226,8 @@ OBJECTDEF // object for a general ball
 framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 FDS input lines to create ball
 
-The data labels (:R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1) in the object file 
-correspond to the SMOKEVIEW_PARAMETERS inputs in the FDS input file 
+The data labels (:R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1) in the object file
+correspond to the SMOKEVIEW_PARAMETERS inputs in the FDS input file
 though the order may be different.
 
 &PROP ID='ball' SMOKEVIEW_PARAMETERS(1:5)='R=0','G=0','B=255',
@@ -1302,21 +1302,33 @@ The origin location is indicated by the intersection two cylinders, a red cylind
 }
 }
 %\infigr{circle}{0.5 drawcircle}
+\infigr{drawarcdisk}{60.0 0.25 0.50 drawarcdisk}
+\paragraph{DRAWARCDISK} The command, {\tt a d h drawarcdisk},
+draws a portion of circular disk with angle a, diameter d and height h. The origin is
+located at the center of the disk's base.\vspace{0.25in}
+
 \paragraph{DRAWCIRCLE} The command, {\tt d drawcircle },
 draws a circle with diameter d.  The origin is located at the center of the circle.
 
-\infigr{drawcone}{0.50 0.30 drawcone}
+\infigl{drawcone}{0.50 0.30 drawcone}
 \paragraph{DRAWCONE}
 The command, {\tt d h drawcone}, draws a right circular cone where
 d is the diameter of the base and h is the height. The origin is
 located at the center of the cone's base.
 
-\infigl{drawcube}{0.25 drawcube}
+\infigr{drawcube}{0.25 drawcube}
 \paragraph{DRAWCUBE} The command, {\tt s drawcube},
 draws a cube where s is the length of the side.  The origin is
 located at the center of the cube.  An oblong box, a box with
 different length sides, may be drawn by using {\tt scale}\ along
 with {\tt drawcube}.  For example, {\tt 1.0 2.0 4.0 scale 1.0
+drawcube}\ creates a box with dimensions $1\times 2\times 4$.
+
+\infigl{drawcube}{0.25 drawcubec}
+\paragraph{DRAWCUBE} The command, {\tt s drawcubec}, is the same as {\tt s drawcube}\
+except that the origin is located at the front, left, bottom corner of the cube rather 
+than at the cube center.  An oblong box, a box with different length sides, may be drawn 
+by using {\tt scale}\ along with {\tt drawcubec}.  For example, {\tt 1.0 2.0 4.0 scale 1.0
 drawcube}\ creates a box with dimensions $1\times 2\times 4$.
 
 \infigr{drawdisk}{0.25 0.50 drawdisk}
@@ -1328,12 +1340,12 @@ located at the center of the disk's base.\vspace{0.25in}
 \paragraph{DRAWCDISK} The command, {\tt d h drawcdisk},
 draws a circular disk with diameter d and height h. The origin is
 located at the center of the disk. This command is a shortcut
-for {\tt h 2.0 :hd2 div \$hd2 offsetz d h drawdisk}.
+for {\tt h 2.0 :hd2 div \$hd2 offsetz d h drawdisk}.\vspace{0.25in}
 
 \infigr{drawhexdisk}{0.5 0.25 drawhexdisk}
 \paragraph{DRAWHEXDISK} The command, {\tt d h drawhexdisk},
 draws a hexagonal disk with diameter d and height h.  The origin
-is located at the center of the hexagon's base.
+is located at the center of the hexagon's base.\vspace{0.25in}
 
 %\infigr{line}{0.0 0.0 -0.5 0.0 0.0 0.5}
 \paragraph{DRAWLINE} The
