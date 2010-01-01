@@ -204,14 +204,14 @@ active vent\\
 \end{longtable}
 
 \subsection{Dynamic Smokeview Objects - Customized Using \&PROP Parameters and Particle File Data}
-Particle file data may be used to customize the appearance of Smokeview objects.  Any objects that have color 
-labels named {\tt R}, {\tt G}, {\tt B} (including those objects in Table \ref{tab:devices_dynamic}) may be 
-colored using particle file data.  In addition, objects that use variable names that match shortened 
-particle file quantity names\footnote{Short forms of particle file quantity names appear in the Smokeview colorbar label 
+Particle file data may be used to customize the appearance of Smokeview objects.  Any objects that have color
+labels named {\tt R}, {\tt G}, {\tt B} (including those objects in Table \ref{tab:devices_dynamic}) may be
+colored using particle file data.  In addition, objects that use variable names that match shortened
+particle file quantity names\footnote{Short forms of particle file quantity names appear in the Smokeview colorbar label
 and in the Smokeview File/Bounds dialog box.}
-may be customized.  This data may be used to alter the geometry or structure of the object 
-using particle file data.  For example, {\tt U-VEL}, {\tt V-VEL}, {\tt W-VEL} and {\tt temp} are shortened 
-quantity names that correspond to the full names {\tt U-VELOCITY}, {\tt V-VELOCITY}, {\tt W-VELOCITY} and 
+may be customized.  This data may be used to alter the geometry or structure of the object
+using particle file data.  For example, {\tt U-VEL}, {\tt V-VEL}, {\tt W-VEL} and {\tt temp} are shortened
+quantity names that correspond to the full names {\tt U-VELOCITY}, {\tt V-VELOCITY}, {\tt W-VELOCITY} and
 {\tt TEMPERATURE}.  These full names are documented in Table~\ref{tab:output} in this guide.
 
 The first three lines of the {\tt velegg}\ object definition are:
@@ -224,7 +224,7 @@ The variables {\tt U-VEL}, {\tt V-VEL}, and {\tt W-VEL} in the above line are al
 selected in an FDS input file.  If they are selected, then the {\tt velegg} object may be used to display
 particle file information. This  object colors the sphere using the currently selected Smokeview particle
 variable and stretches a sphere in the x, y and z directions using the {\tt U-VEL}, {\tt V-VEL}, and {\tt W-VEL}
-velocity particle data respectively.  
+velocity particle data respectively.
 
 Table \ref{tab:devices_dynamic2} documents those objects that can be customized
 using particle file data.  These objects may be customized as before using data specified with the {\tt SMOKEVIEW\_PARAMETERS}
@@ -240,6 +240,16 @@ keyword or using particle file data.
 \\ \hline
 {\tt SMOKEVIEW\_ID}  & {\tt SMOKEVIEW\_PARAMETERS} & Image  \\ \hline \hline
 \endhead
+
+box&
+\parbox[c]{\boxwidth}{
+{\tt SMOKEVIEW\_PARAMETERS(1:6)=}\\
+{\tt 'R=192','G=255','B=128',}\\
+{\tt 'DX=0.25','DY=.5','DZ=0.125'}\\  \\
+R, G, B - red, green, blue color components ranging from 0 to 255\\
+DX, DY, DZ - amount box is stretched along x, y, z axis respectively
+} &
+\incgraphics{scriptfigures/box} \\ \hline
 
 tube&
 \parbox[c]{\boxwidth}{
