@@ -285,6 +285,12 @@ OBJECTDEF // object for particle file sphere
  $R $G $B setrgb
  $D drawsphere
 
+OBJECTDEF
+ box
+ :R=0 :G=0 :B=0 :DX :DY :DZ
+ $R $G $B setrgb
+ $DX $DY $DZ scalexyz 1.0 drawcubec
+
 OBJECTDEF // object for particle file tube
  tube
  :R=0 :G=0 :B=0 :D=0.1 :L=0.1
@@ -330,7 +336,7 @@ OBJECTDEF // object for particle "egg"
 OBJECTDEF
  block
  :R=0 :G=0 :B=0 :DX=1.0 :DY=1.0 :DZ=1.0
- $R $G $G setrgb
+ $R $G $B setrgb
  $DX $DY $DZ scalexyz 1.0 drawcubec
 
 OBJECTDEF
@@ -636,6 +642,10 @@ OBJECTDEF
  "BRICK" setcolor
  0.5 0.2 0.4 drawtrunccone
 
+OBJECTDEF
+ drawarcdisk
+ "BRICK" setcolor
+ 60.0 0.6 0.2 drawarcdisk
 
 
 
