@@ -2236,7 +2236,7 @@ At solid surfaces that are not part of the boundary of the computational domain,
 it is possible to have a non-zero normal velocity at a solid surface. For most applications, this velocity is so small that it has a negligible effect on the solution. But sometimes, you
 might want to reduce this error. To do so, you can specify {\ct VELOCITY\_TOLERANCE} on the {\ct MISC} line to be the maximum allowable normal velocity component on the solid
 boundary. It is in units of m/s. If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your
-desired tolerance. The number of iterations are written out to the file {\bf CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive. 
+desired tolerance. The number of iterations are written out to the file {\bf CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive.
 
 \subsubsection{Multiple-Mesh Issues}
 
@@ -9444,6 +9444,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct MESH\_ID}            & Character           & Only include in given mesh            &    &               \\ \hline
 {\ct OUTLINE}             & Logical             & Draw as Outline                       &    & {\ct .FALSE.} \\ \hline
 {\ct PERMIT\_HOLE}        & Logical             & Allow a Hole                          &    & {\ct .TRUE.}  \\ \hline
+%{\ct PROP\_ID}            & Character           & Name of Property line (if needed)     &    &               \\ \hline
 {\ct REMOVABLE}           & Logical             & Allow obstruction to be removed       &    & {\ct .TRUE.}  \\ \hline
 {\ct RGB(3)}              & Integer Triplet     & Color indices (0 - 255)               &    &               \\ \hline
 {\ct SAWTOOTH}            & Logical             & See Section~\ref{info:SAWTOOTH}       &    & {\ct .TRUE.}  \\ \hline
