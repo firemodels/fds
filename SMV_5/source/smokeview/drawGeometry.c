@@ -1312,8 +1312,10 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     faceptr->thinface=0;
     faceptr->is_interior=0;
     faceptr->show_bothsides=0;
+    faceptr->bc=NULL;
     
     if(bc!=NULL){
+      faceptr->bc=bc;
       faceptr->hidden=0;
       faceptr->patchpresent=0;
       faceptr->blockageindex=-2;
@@ -1715,6 +1717,7 @@ void update_facelists(void){
         blockagedata *bc;
 
         bc=meshi->blockageinfoptrs[j];
+        if(bc->prop!=NULL&&bc->prop->blockvis==0)continue;
         facej = meshi->faceinfo + 6*j;
         for(k=0;k<6;k++){
 //          facej->patchpresent=1-meshi->patchfacevis[7*j+patch_dir[k]];
@@ -1736,6 +1739,7 @@ void update_facelists(void){
       if(showonly_hiddenfaces==0&&facej->hidden==1)continue;
       if(showonly_hiddenfaces==1&&facej->hidden==0)continue;
       if(facej->thinface==1)continue;
+      if(facej->bc!=NULL&&facej->bc->prop!=NULL&&facej->bc->prop->blockvis==0)continue;
 
       vent_offset = 6*meshi->nbptrs;
       outline_offset = vent_offset + meshi->nvents;

@@ -12,6 +12,7 @@
 typedef struct {
   char *label;
   int menu_id;
+  int inblockage,blockvis;
   int nsmokeview_ids,ismokeview_ids;
   char *smokeview_id,**smokeview_ids;
   struct _sv_object *smv_object, **smv_objects;
@@ -221,6 +222,7 @@ typedef struct {
   int **showtimelist_handle;
   int thinface;
   int show_bothsides, is_interior;
+  struct _blockagedata *bc;
   surface *surfaceinfo;
   texture *textureinfo;
 } facedata;
@@ -235,10 +237,11 @@ typedef struct {
 
 /* -------------------------- blockagedata ------------------------------------ */
 
-typedef struct {
+typedef struct _blockagedata {
   int ijk[6],ijkORIG[6];
   float xmin, xmax, ymin, ymax, zmin, zmax, xyzORIG[6];
   surface *surf[6],*surfORIG[6];
+  propdata *prop;
   int walltype,walltypeORIG;
   int surf_index[6],surf_indexORIG[6];
   int patchvis[7];
