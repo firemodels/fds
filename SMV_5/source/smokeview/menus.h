@@ -3588,7 +3588,18 @@ void BlockageMenu(int value){
      sb_atstart=1-sb_atstart;
      break;
    default:
-     ASSERT(FFALSE);
+     if(value<0){
+       value=-value-1;
+       if(value>=0&&value<=npropinfo-1){
+         propdata *propi;
+
+         propi = propinfo + value;
+         propi->blockvis=1-propi->blockvis;
+       }
+     }
+     else{
+       ASSERT(FFALSE);
+     }
      break;
   }
   updatemenu=1;  
@@ -4281,6 +4292,33 @@ static int in_menu=0;
   }
   else{
     glutAddMenuEntry("   Hidden",visBLOCKHide);
+  }
+  {
+    int nblockprop=0;
+
+    for(i=0;i<npropinfo;i++){
+      propdata *propi;
+
+      propi = propinfo + i;
+      if(propi->inblockage==1)nblockprop++;
+    }
+    if(nblockprop>0){
+      char propmenulabel[255];
+
+      glutAddMenuEntry("-",999);
+      glutAddMenuEntry("Show/Hide Blockage Types:",999);
+      for(i=0;i<npropinfo;i++){
+        propdata *propi;
+
+        propi = propinfo + i;
+        if(propi->inblockage==1){
+          strcpy(propmenulabel,"    ");
+          if(propi->blockvis==1)strcat(propmenulabel,"*");
+          strcat(propmenulabel,propi->label);
+          glutAddMenuEntry(propmenulabel,-i-1);
+        }
+      }
+    }
   }
   glutAddMenuEntry("-",999);
   glutAddMenuEntry("Locations:",999);

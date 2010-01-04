@@ -71,6 +71,8 @@ void update_inilist(void){
 /* ------------------ propi ------------------------ */
 
 void init_prop(propdata *propi){
+  propi->blockvis=1;
+  propi->inblockage=0;
   propi->ntextures=0;
   propi->nvars_dep=0;
   propi->nvars_evac=0;
@@ -78,7 +80,6 @@ void init_prop(propdata *propi){
   propi->vars_indep=NULL;
   propi->svals=NULL;
   propi->texturefiles=NULL;
-
 }
 
 /* ------------------ readsmv ------------------------ */
@@ -2932,6 +2933,8 @@ typedef struct {
 
     if(autoterrain==0&&match(buffer,"OBST",4) == 1){
       mesh *meshi;
+      propdata *prop;
+      char *proplabel;
 
       CheckMemoryOff;
       iobst++;
@@ -2962,6 +2965,24 @@ typedef struct {
         for(i=0;i<6;i++){
           s_num[i]=-1;
         }
+        proplabel=strchr(buffer,'%');
+        prop=NULL;
+        if(proplabel!=NULL){
+          proplabel++;
+          trim(proplabel);
+          proplabel = trim_front(proplabel);
+          for(i=0;i<npropinfo;i++){
+            propdata *propi;
+
+            propi = propinfo + i;
+            if(STRCMP(proplabel,propi->label)==0){
+              prop = propi;
+              propi->inblockage=1;
+              break;
+            }
+          }
+        }
+        bc->prop=prop;
         {
           float t_origin[3];
           t_origin[0]=texture_origin[0];
@@ -6159,6 +6180,7 @@ void initobst(blockagedata *bc, surface *surf,int index,int meshindex){
   char blocklabel[255];
   size_t len;
 
+  bc->prop=NULL;
   bc->is_wuiblock=0;
   bc->transparent=0;
   bc->usecolorindex=0;
