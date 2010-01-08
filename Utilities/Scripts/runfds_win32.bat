@@ -3,7 +3,7 @@ set dir=%1
 set infile=%2
 
 set fulldir=%BASEDIR%/%dir%
-ECHO fulldir
+
 set in=%infile%.fds
 set out=%infile%.err
 set stopfile=%infile%.stop
