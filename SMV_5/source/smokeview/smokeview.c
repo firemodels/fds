@@ -1096,7 +1096,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(times!=NULL&&updateUpdateFrameRateMenu==1)sv_FrameRateMenu(frameratevalue);
   if(updatefaces==1)update_faces();
   if(updatefacelists==1)update_facelists();
-  if(showstereo!=2&&showstereo!=3&&showstereo!=4)ClearBuffers(mode);
+  if(showstereo==0||showstereo==1)ClearBuffers(mode);
 
 /* ++++++++++++++++++++++++ draw viewports +++++++++++++++++++++++++ */
 
@@ -3479,7 +3479,7 @@ void Args(int argc, char **argv){
     FREEMEMORY(fds_filein);
     NewMemory((void **)&fds_filein,strlen(fdsprefix)+6);
     STRCPY(fds_filein,fdsprefix);
-    STRCAT(fds_filein,".data");
+    STRCAT(fds_filein,".fds");
     if(STAT(fds_filein,&statbuffer)!=0){
       FREEMEMORY(fds_filein);
     }

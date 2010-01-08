@@ -6723,7 +6723,6 @@ int readini2(char *inifile, int localfile){
   int n3d;
   int iplot3d, isetmin, isetmax;
   float p3mintemp, p3maxtemp;
-  f_units *uc;
   float *scale;
   float valmin, valmax;
   int setvalmin, setvalmax;
@@ -6738,6 +6737,8 @@ int readini2(char *inifile, int localfile){
   if( (stream=fopen(inifile,"r"))==NULL)return 1;
 
   for(i=0;i<nunitclasses_ini;i++){
+    f_units *uc;
+
     uc=unitclasses_ini+i;
     FREEMEMORY(uc->units);
   }
@@ -6846,7 +6847,7 @@ int readini2(char *inifile, int localfile){
       showstereoOLD=showstereo;
       sscanf(buffer,"%i",&showstereo);
       if(showstereo<0)showstereo=0;
-      if(showstereo>4)showstereo=4;
+      if(showstereo>5)showstereo=5;
       if(showstereo==1&&videoSTEREO!=1)showstereo=0;
       update_glui_stereo();
       continue;
