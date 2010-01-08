@@ -124,6 +124,16 @@ SETTIMEVAL
 RENDERONCE
  plume5c_iso_solid_30
 
+LOADINIFILE
+ plume5c_iso2.ini
+LOADFILE
+ plume5c_01.iso
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_iso2_solid_30
+
+
 // render iso files (solid with normals)
 
 LOADINIFILE
