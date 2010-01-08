@@ -448,10 +448,10 @@ The images for this test were created automatically by running the smokeview scr
 
 \section{Iso-surfaces}
 An isosurface is a surface in 3-D space that defines constant values of a dependent variable.
-Figures \ref{figisotest} and \ref{figisotest2} present images verifying the display of isosurfaces.
+Figures \ref{figisotest}, \ref{figisotest2} and \ref{figisotest3} present images verifying the display of isosurfaces.
 A series of temperature isosurfaces are drawn at 0.0~s, 10.0~s and 30.0~s.  A portion of the interior gas temperature is initialized to 600.0~\degC\ hence the rectangular block that appears in the $t=0.0$~s images.
 The first column in Figure \ref{figisotest}\ presents the iso-surface using points.  The second column presents the iso-surface using triangulated outlines.
-The first column in Figure \ref{figisotest2}\ presents the iso-surface using a solid surface.  The second column also presents the iso-surface using a solid surface but also includes normal vectors.
+The first column in Figure \ref{figisotest2}\ presents the iso-surface using a solid surface.  The second column also presents the iso-surface using a solid surface but also includes normal vectors. Figure \ref{figisotest3} demonstrates color customization using the {\tt ISOCOLORS}\ .ini keyword.
 The FDS input file for this test is {\tt plume5c.fds}.
 The images for this test were created automatically by running the smokeview script, {\tt plume5c.ssf}.
 
@@ -491,6 +491,20 @@ The images for this test were created automatically by running the smokeview scr
 \end{center}
  \caption[Isosurface file test 2.]{Isosurface file test 2. A portion of the interior gas temperature is initialized to 600.0~\degC.  The isosurface should surround this region for the $t=0.0$~s images.}
 \label{figisotest2}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rcc}
+ 30.0~s&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso_solid_30}&
+ \includegraphics[height=\figheightD]{scriptfigures/plume5c_iso2_solid_30}\\
+ &solid view - orange&solid view - blue
+  \end{tabular}
+\end{center}
+ \caption[Isosurface file test 3.]{Isosurface file test 3. A portion of the interior gas temperature is initialized to 600.0~\degC.  
+ The two isosurfaces are colored orange and blue using the ISOCOLORS .ini keyword.}
+\label{figisotest3}%
 \end{figure}
 
 \subsection{Sensitivity Analysis}
