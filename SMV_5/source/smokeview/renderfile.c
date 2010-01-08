@@ -187,7 +187,7 @@ void RenderFrame(int view_mode){
       sprintf(suffix,"%04i_L",image_num);
       break;
     case VIEW_RIGHT:
-      if(showstereo==2||showstereo==3||showstereo==4){
+      if(showstereo!=0&&showstereo!=1){
         sprintf(suffix,"%04i",image_num);
       }
       else{
