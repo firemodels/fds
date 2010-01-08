@@ -703,7 +703,7 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"S",1)==0){
     showstereoOLD=showstereo;
     showstereo++;
-    if(showstereo>4)showstereo=0;
+    if(showstereo>5)showstereo=0;
     if(showstereo==1&&videoSTEREO!=1)showstereo=2;
     update_glui_stereo();
     return;
@@ -2004,6 +2004,52 @@ void Display(void){
       glFlush();
     }
     if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+  }
+  else if(showstereo==5){             // custom red/blue stereo
+    glDrawBuffer(GL_BACK);
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    glClearColor(1.0, 1.0, 1.0, 1.0); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if(showstereo_frame==0||showstereo_frame==2){
+      glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
+      ShowScene(RENDER,VIEW_LEFT,0,0,0,screenWidth,screenHeight);
+      glFlush();
+    }
+    if(showstereo_frame==1||showstereo_frame==2){
+      glDrawBuffer(GL_BACK);
+      glColorMask(GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE);
+      glClearColor(0.0, 1.0, 1.0, 1.0); 
+      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+      ShowScene(RENDER,VIEW_RIGHT,0,0,0,screenWidth,screenHeight);
+
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+
+      glEnable(GL_BLEND);
+      glDisable(GL_LIGHTING);
+      glDisable(GL_COLOR_MATERIAL);
+      glDisable(GL_DITHER);
+//      glShadeModel(GL_FLAT);
+
+      glBlendFunc(GL_DST_COLOR,GL_ZERO);
+      glBegin(GL_QUADS);
+      glColor4f(0.0,right_green,right_blue,1.0);
+      glVertex3f(-1.0,-1.0,0.1);
+      glVertex3f(1.0,-1.0,0.1);
+      glVertex3f(1.0,1.0,0.1);
+      glVertex3f(-1.0,1.0,0.1);
+      glEnd();
+
+      glFlush();
+    }
+    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_DITHER);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
   }
   else{
     if(benchmark_flag==1){

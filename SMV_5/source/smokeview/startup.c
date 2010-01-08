@@ -1500,6 +1500,8 @@ void initvars1(void){
   callfrom_tourglui=0;
   showtours_whenediting=0;
 
+  right_green=0.0;
+  right_blue=1.0;
   no_graphics=0;
   showstereo=0;
   showstereoOLD=showstereo;

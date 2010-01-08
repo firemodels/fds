@@ -34,6 +34,7 @@
 
 SVEXTERN int npropinfo;
 SVEXTERN propdata *propinfo;
+SVEXTERN float right_green, right_blue;
 
 SVEXTERN int show_mode;
 SVEXTERN int cellcenter_interp, cellcenter_slice_active, cellcenter_bound_active;
