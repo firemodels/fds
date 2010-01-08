@@ -19,5 +19,6 @@ call %envfile%
 %svn_drive%
 
 cd %svn_root%\Verification\
-call SMV_Run_tests.bat
+call Run_SMV_cases.bat
+pause
 
