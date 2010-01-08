@@ -3279,7 +3279,7 @@ calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL
 \subsubsection{Changing the Convective Heat Transfer Coefficient}
 
 If you want to change the default convective heat transfer coefficient, you can set to a constant using
-{\ct H\_FIXED} on the {\ct MISC} line in units of W/m$^2$/K. Another option is to use a turbulent
+{\ct H\_FIXED} on the {\ct SURF} line in units of W/m$^2$/K. Another option is to use a turbulent
 convective heat transfer model suggested by Moinuddin and Li of Victoria University, Australia, by setting
 {\ct H\_EDDY=.TRUE.} on the {\ct MISC} line.
 
@@ -4280,12 +4280,12 @@ to update the solid phase every time step (normally it does this every
 other time step), and set {\ct DT} to whatever value appropriate for
 the solid phase calculation. Since there is no gas phase calculation
 that will limit the time step, it is best to control this yourself.
-\item Put {\ct H\_FIXED=0.} on the {\ct MISC} line. This turns off the
+\item Put {\ct H\_FIXED=0.} on the {\ct SURF} line. This turns off the
 convective heat flux from gas to surface and vis verse. The heat flux
 to the solid is specified via {\ct EXTERNAL\_FLUX} (kW/m$^2$) on the
 {\ct SURF} line that is assigned to the solid surface. If you want to specify a particular
 convective heat flux to the solid surface, you can set {\ct ASSUMED\_GAS\_TEMPERATURE} on the
-{\ct MISC} line, along with a non-zero value of {\ct H\_FIXED} in units of W/m$^2$/K.
+{\ct MISC} line, along with a non-zero value of {\ct H\_FIXED} on {\ct SURF} in units of W/m$^2$/K.
 \item Turn off all the gas phase computations by setting {\ct SOLID\_PHASE\_ONLY=.TRUE.}
 on the {\ct MISC} line. This will also speed
 up the computations significantly. If the gas phase computations are
@@ -9336,7 +9336,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}         & m             & 0.                  \\ \hline
 {\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
 {\ct H\_EDDY}                   & Logical       & See Section~\ref{info:convection}             &               & {\ct .FALSE.}     \\ \hline
-{\ct H\_FIXED}                  & Real          & See Section~\ref{info:convection}             & W/m$^2$/K     &                   \\ \hline
+%moved to SURF%{\ct H\_FIXED}                  & Real          & See Section~\ref{info:convection}             & W/m$^2$/K     &                   \\ \hline
 {\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
 {\ct ISOTHERMAL}                & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}         &  $^\circ$C/m  & 0                 \\ \hline
@@ -9838,6 +9838,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FREE\_SLIP}                      & Logical         & See Section~\ref{info:WALL_MODEL} &                     & {\ct .FALSE.}           \\ \hline
 {\ct FYI}                             & Character       & Comment String                    &                     &                         \\ \hline
 {\ct GEOMETRY}                        & Character       & Geometry type                     &                     & {\ct 'CARTESIAN'}       \\ \hline
+{\ct H\_FIXED}                        & Real            & See Section~\ref{info:convection} & W/m$^2$/K           &                         \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION }         & Real            & For specified HRR only            & kJ/kg               & 0.                      \\ \hline
 {\ct HRRPUA }                         & Real            & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
 {\ct ID     }                         & Character       & IDentifier                        &                     &                         \\ \hline
