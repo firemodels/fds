@@ -4,9 +4,9 @@ set svn_drive=d:
 set BASEDIR=%CD%
 set SVNROOT=%BASEDIR%\..\
 
-set FDS=..\FDS_Compilation\intel_win_32\fds5_win_32
+set FDS=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
 
-set RUNFDS=call ..\Utilities\Scripts\runfds_win32.bat
+set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 
 echo You are about to run the Verification Test Suite.
 pause > Nul
