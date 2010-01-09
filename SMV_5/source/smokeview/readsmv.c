@@ -2931,7 +2931,7 @@ typedef struct {
     // note - OBST lines for autoterran==1 are processed in pass 4
     //        because Smokeview needs info from pass 3
 
-    if(autoterrain==0&&match(buffer,"OBST",4) == 1){
+    if(match(buffer,"OBST",4) == 1&&autoterrain==0){
       mesh *meshi;
       propdata *prop;
       char *proplabel;
