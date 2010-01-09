@@ -164,12 +164,15 @@ void mouse_edit_blockage(int button, int state, int x, int y){
     highlight_mesh=sd->mesh;
     update_highlight_mesh();
     meshi = meshinfo + highlight_mesh;
+#ifdef pp_BLOCKEDIT
     update_rotation_index(highlight_mesh);
+#endif
     update_current_mesh(meshi);
     bchighlight_old=bchighlight;
     bchighlight = meshi->blockageinfoptrs[highlight_block];
     for(i=0;i<6;i++){
       surface_indices[i]=inv_sorted_surfidlist[bchighlight->surf_index[i]];
+      surface_indices_bak[i]=inv_sorted_surfidlist[bchighlight->surf_index[i]];
     }
 
     glShadeModel(GL_SMOOTH);

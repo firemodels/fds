@@ -1652,9 +1652,12 @@ void initvars1(void){
   showzerosplit=0;
 #endif
   nselectblocks=0;
-  surface_indices[0]=0.0;
-  surface_indices[1]=0.0;
-  surface_indices[2]=0.0;
+  surface_indices[0]=0;
+  surface_indices[1]=0;
+  surface_indices[2]=0;
+  surface_indices[3]=0;
+  surface_indices[4]=0;
+  surface_indices[5]=0;
   wall_case=0;
   strcpy(surfacedefaultlabel,"");
   mscale[0]=1.0;
