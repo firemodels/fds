@@ -232,7 +232,6 @@ void update_camera(camera *ca){
       update_current_mesh(meshinfo);
     }
     highlight_mesh = current_mesh-meshinfo;
-    update_highlight_mesh();
     handle_eyeview(1);
     update_meshlist1(ca->rotation_index);
     update_trainer_moves();

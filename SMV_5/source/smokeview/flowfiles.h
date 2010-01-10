@@ -240,6 +240,7 @@ typedef struct {
 typedef struct _blockagedata {
   int ijk[6],ijkORIG[6];
   float xmin, xmax, ymin, ymax, zmin, zmax, xyzORIG[6];
+  float xyzEXACT[6];
   surface *surf[6],*surfORIG[6];
   propdata *prop;
   int walltype,walltypeORIG;

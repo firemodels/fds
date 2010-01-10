@@ -185,12 +185,25 @@ void get_blockvals(  float *xmin, float *xmax,
     *kmin = 0;
     return;
   }
-  *xmin = current_mesh->xplt_orig[bc->ijk[IMIN]]-current_mesh->offset[0];
-  *xmax = current_mesh->xplt_orig[bc->ijk[IMAX]]-current_mesh->offset[0];
-  *ymin = current_mesh->yplt_orig[bc->ijk[JMIN]]-current_mesh->offset[1];
-  *ymax = current_mesh->yplt_orig[bc->ijk[JMAX]]-current_mesh->offset[1];
-  *zmin = current_mesh->zplt_orig[bc->ijk[KMIN]]-current_mesh->offset[2];
-  *zmax = current_mesh->zplt_orig[bc->ijk[KMAX]]-current_mesh->offset[2];
+  if(blockage_as_input==1){
+    float *xyz;
+
+    xyz = bc->xyzEXACT;
+    *xmin = xyz[0];
+    *xmax = xyz[1];
+    *ymin = xyz[2];
+    *ymax = xyz[3];
+    *zmin = xyz[4];
+    *zmax = xyz[5];
+  }
+  else{
+    *xmin = current_mesh->xplt_orig[bc->ijk[IMIN]]-current_mesh->offset[0];
+    *xmax = current_mesh->xplt_orig[bc->ijk[IMAX]]-current_mesh->offset[0];
+    *ymin = current_mesh->yplt_orig[bc->ijk[JMIN]]-current_mesh->offset[1];
+    *ymax = current_mesh->yplt_orig[bc->ijk[JMAX]]-current_mesh->offset[1];
+    *zmin = current_mesh->zplt_orig[bc->ijk[KMIN]]-current_mesh->offset[2];
+    *zmax = current_mesh->zplt_orig[bc->ijk[KMAX]]-current_mesh->offset[2];
+  }
   *imin = bc->ijk[IMIN];
   *jmin = bc->ijk[JMIN];
   *kmin = bc->ijk[KMIN];
@@ -2776,129 +2789,6 @@ void update_selectfaces(void){
       }
     }
   }
-}
-
-/* ------------------ remove_blocks ------------------------ */
-
-void remove_blocks(void){
-  int i,j;
-  mesh *meshi;
-  blockagedata *blocklist[6], *bc;
-  int ntotal=0, nremove, ncount=0;
-
-  if(highlight_mesh<0||highlight_mesh>=(int)nmeshes||bchighlight==NULL)return;
-  meshi = meshinfo + highlight_mesh;
-  for(i=0;i<meshi->nbptrs;i++){
-    bc = meshi->blockageinfoptrs[i];
-    bc->hole=0;
-    ntotal += remove_block(bc,bchighlight,0,blocklist);
-  }
-  if(ntotal==0)return;
-  for(i=0;i<meshi->ncarveblocks;i++){
-    FREEMEMORY(meshi->carveblockptrs[i]);
-  }
-  FREEMEMORY(meshi->carveblockptrs);
-  NewMemory((void **)&meshi->carveblockptrs,sizeof(blockagedata *)*ntotal);
-  for(i=0;i<meshi->nbptrs;i++){
-    bc = meshi->blockageinfoptrs[i];
-    nremove = remove_block(bc,bchighlight,1,blocklist);
-    for(j=0;j<nremove;j++){
-      meshi->carveblockptrs[ncount++]=blocklist[j];
-    }
-  }
-}
-
-/* ------------------ remove_block ------------------------ */
-
-int remove_block(blockagedata *block, const blockagedata *hole,int flag,blockagedata *blocklist[6]){
-  int i;
-  int nlist=0;                 
-  blockagedata *newblock;
-  
-  for(i=0;i<6;i++){
-    blocklist[i]=NULL;
-  }
-  if(hole->ijk[IMAX]<=block->ijk[IMIN]||
-     hole->ijk[JMAX]<=block->ijk[JMIN]||
-     hole->ijk[KMAX]<=block->ijk[KMIN]||
-     hole->ijk[IMIN]>=block->ijk[IMAX]||
-     hole->ijk[JMIN]>=block->ijk[JMAX]||
-     hole->ijk[KMIN]>=block->ijk[KMAX])return nlist;
-
-  if(block->ijk[KMIN]<hole->ijk[KMIN]){
-    if(flag==1){
-      NewMemory((void **)&blocklist[nlist],sizeof(blockagedata));
-      memcpy(blocklist[nlist],block,sizeof(blockagedata));
-      newblock = blocklist[nlist];
-      newblock->ijk[KMAX]=hole->ijk[KMIN];
-      newblock->hole=0;
-    }
-    nlist++;
-  }
-  if(hole->ijk[KMAX]<block->ijk[KMAX]){
-    if(flag==1){
-      NewMemory((void **)&blocklist[nlist],sizeof(blockagedata));
-      memcpy(blocklist[nlist],block,sizeof(blockagedata));
-      newblock = blocklist[nlist];
-      newblock->ijk[KMIN]=hole->ijk[KMAX];
-      newblock->hole=0;
-    }
-    nlist++;
-  }
-  if(block->ijk[IMIN]<hole->ijk[IMIN]){
-    if(flag==1){
-      NewMemory((void **)&blocklist[nlist],sizeof(blockagedata));
-      memcpy(blocklist[nlist],block,sizeof(blockagedata));
-      newblock = blocklist[nlist];
-      newblock->ijk[IMAX]=hole->ijk[IMIN];
-      newblock->ijk[KMIN]=hole->ijk[KMIN];
-      newblock->ijk[KMAX]=hole->ijk[KMAX];
-      newblock->hole=0;
-    }
-    nlist++;
-  }
-  if(hole->ijk[IMAX]<block->ijk[IMAX]){
-    if(flag==1){
-      NewMemory((void **)&blocklist[nlist],sizeof(blockagedata));
-      memcpy(blocklist[nlist],block,sizeof(blockagedata));
-      newblock = blocklist[nlist];
-      newblock->ijk[IMIN]=hole->ijk[IMAX];
-      newblock->ijk[KMIN]=hole->ijk[KMIN];
-      newblock->ijk[KMAX]=hole->ijk[KMAX];
-      newblock->hole=0;
-    }
-    nlist++;
-  }
-  if(block->ijk[JMIN]<hole->ijk[JMIN]){
-    if(flag==1){
-      NewMemory((void **)&blocklist[nlist],sizeof(blockagedata));
-      memcpy(blocklist[nlist],block,sizeof(blockagedata));
-      newblock = blocklist[nlist];
-      newblock->ijk[IMIN]=hole->ijk[IMIN];
-      newblock->ijk[IMAX]=hole->ijk[IMAX];
-      newblock->ijk[JMAX]=hole->ijk[JMIN];
-      newblock->ijk[KMIN]=hole->ijk[KMIN];
-      newblock->ijk[KMAX]=hole->ijk[KMAX];
-      newblock->hole=0;
-    }
-    nlist++;
-  }
-  if(hole->ijk[JMAX]<block->ijk[JMAX]){
-    if(flag==1){
-      NewMemory((void **)&blocklist[nlist],sizeof(blockagedata));
-      memcpy(blocklist[nlist],block,sizeof(blockagedata));
-      newblock = blocklist[nlist];
-      newblock->ijk[IMIN]=hole->ijk[IMIN];
-      newblock->ijk[IMAX]=hole->ijk[IMAX];
-      newblock->ijk[JMIN]=hole->ijk[JMAX];
-      newblock->ijk[KMIN]=hole->ijk[KMIN];
-      newblock->ijk[KMAX]=hole->ijk[KMAX];
-      newblock->hole=0;
-    }
-    nlist++;
-  }
-  if(nlist>0)block->hole=1;
-  return nlist;
 }
 
 /* ------------------ mt_update_smooth_blockages ------------------------ */

@@ -276,7 +276,6 @@ SVEXTERN int stretch_var_black, stretch_var_white, move_var;
 SVEXTERN int showhide_option;
 SVEXTERN int snifferrornumber;
 SVEXTERN int xyz_dir;
-SVEXTERN int xyz_blockage_dir;
 SVEXTERN int which_face;
 SVEXTERN int showfontmenu;
 SVEXTERN int showlightmenu;
@@ -432,9 +431,7 @@ SVEXTERN int uindex, vindex, windex;
 SVEXTERN int p3cont2d, p3cont3dsmooth;
 SVEXTERN int cullfaces;
 SVEXTERN int showonly_hiddenfaces;
-#ifndef pp_BLOCKEDIT
 SVEXTERN int blockage_index;
-#endif
 
 
 SVEXTERN int windowresized;
@@ -960,7 +957,7 @@ SVEXTERN float smoke3d_rthick;
 SVEXTERN int smokedrawtest_nummin;
 SVEXTERN int smokedrawtest_nummax;
 SVEXTERN int ijkbarmax;
-SVEXTERN int blockage_as_input;
+SVEXTERN int blockage_as_input, blockage_snapped;
 SVEXTERN int show_cad_and_grid;
 SVEXTERN int use_nistlogo;
 SVEXTERN int benchmark_flag;

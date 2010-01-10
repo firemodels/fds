@@ -141,9 +141,6 @@ EXTERNCPP int get_tick_dir(float *mm);
 EXTERNCPP void OpenSMVFile(char *filename,int filenamelength,int *openfile);
 #endif
 EXTERNCPP void get_smokezippath(char *progdir, char **zippath);
-EXTERNCPP void moveiblockage(int ival);
-EXTERNCPP void stretchiblockage(int ival);
-EXTERNCPP void obstlabelcopy(char **dest, const char *source);
 EXTERNCPP int AnySmoke(char *type);
 EXTERNCPP int AnySlices(char *type);
 EXTERNCPP void TrainerViewMenu(int var);
@@ -328,7 +325,6 @@ EXTERNCPP void update_projection_type(void);
 EXTERNCPP void update_eyerotate(void);
 EXTERNCPP void update_cursor_checkbox(void);
 EXTERNCPP void update_clip_all(void);
-EXTERNCPP void update_highlight_mesh(void);
 EXTERNCPP void backup_blockage(blockagedata *bc);
 EXTERNCPP void update_blockpath(void);
 EXTERNCPP void getinverse(float *m, float *mi);
@@ -349,7 +345,6 @@ EXTERNCPP void set_unit_vis(void);
 EXTERNCPP int getrevision(char *svn);
 EXTERNCPP void memorystatus(void);
 EXTERNCPP int getnewfilename(void);
-EXTERNCPP int remove_block(blockagedata *block, const blockagedata *hole,int flag,blockagedata *blocklist[6]);
 EXTERNCPP void showhide_translate(int var);
 EXTERNCPP void updateallplotslices(void);
 EXTERNCPP int makeiblank(void);
@@ -374,7 +369,6 @@ EXTERNCPP void getisolevels(const char *isofile, int dataflag, float **levelsptr
 EXTERNCPP void getcisolevels(const char *isofile, float **levelsptr, int *nisolevels);
 EXTERNCPP void getsmoothblockparms(mesh *gb, smoothblockage *sb);
 EXTERNCPP void MakeIsoBlockages(mesh *gb, smoothblockage *sb);
-EXTERNCPP void convert_fdsfile(const char *filein, const char *fileout, const char *fileout2);
 
 EXTERNCPP int ifsmoothblock(void);
 EXTERNCPP void updatevslices(void);
@@ -398,7 +392,6 @@ EXTERNCPP unsigned char *readpng(const char *filename,int *width, int *height);
 #endif
 
 EXTERNCPP void update_whichface(int which_face);
-EXTERNCPP void update_xyzdir(int dir);
 EXTERNCPP void update_blockvals(int flag);
 EXTERNCPP void show_glui_colorbar(void);
 EXTERNCPP void hide_glui_colorbar(void);
@@ -457,15 +450,6 @@ EXTERNCPP void get_blockvals(float *xmin, float *xmax,
                    int *imin, int *jmin, int *kmin);
 EXTERNCPP void show_glui_edit(void);
 EXTERNCPP void hide_glui_edit(void);
-EXTERNCPP void addnewobject(void);
-EXTERNCPP void deleteobject(void);
-EXTERNCPP void undeleteobject(void);
-EXTERNCPP void movefblockage(float *xmin, float *xmax, 
-                   float *ymin, float *ymax, 
-                   float *zmin, float *zmax);
-EXTERNCPP void outputblockage(void);
-EXTERNCPP void outputchangedblockages(void);
-EXTERNCPP void update_movestretch(blockagedata *bc);
 
 EXTERNCPP void updateslicelistindex(int sfn);
 EXTERNCPP void updatepatchlistindex(int patchfilenum);
@@ -476,7 +460,6 @@ EXTERNCPP void transparenton(void);
 EXTERNCPP void getlabels(const char *filein);
 EXTERNCPP void initobst(blockagedata *bc,surface *surf,int index,int meshindex);
 EXTERNCPP void setsurfaceindex(blockagedata *bc);
-EXTERNCPP char *getkeyparam(char *source, int *n, const char *key);
 EXTERNCPP void updateusetextures(void);
 EXTERNCPP int updatergbhist(int width, int height,int maketable, int *colortable, int nrgb);
 EXTERNCPP void antialias(int flag);
@@ -511,7 +494,6 @@ EXTERNCPP void updateclipbounds(int set_i0, int *i0, int set_i1, int *i1, int ma
 EXTERNCPP void ClearBuffers(int mode);
 EXTERNCPP void updatetimes(void);
 EXTERNCPP void synctimes(void);
-EXTERNCPP int getxyzindex(float x,const float *xplt_orig,int ijkbar);
 EXTERNCPP int compare( const void *arg1, const void *arg2 );
 EXTERNCPP void updateplotslice(int slicedir);
 EXTERNCPP void drawpatch(const mesh *gb);

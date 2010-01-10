@@ -84,7 +84,6 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   if(flag==UNLOAD&&p->loaded==0)return;
 
   highlight_mesh=p->blocknumber;
-  update_highlight_mesh();
   meshi=meshinfo+highlight_mesh;
   update_current_mesh(meshi);
 

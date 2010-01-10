@@ -20,11 +20,6 @@
 // svn revision character string
 extern "C" char glui_blockedit_revision[]="$Revision$";
 
-#define NEW_OBJECT 1
-#define DELETE_OBJECT 4
-#define UNDELETE_OBJECT 5
-#define RADIO_XYZ 6
-#define RADIO_OBJECT_TYPE 7
 #define XMIN_SPIN 20
 #define YMIN_SPIN 21
 #define ZMIN_SPIN 22
@@ -33,35 +28,19 @@ extern "C" char glui_blockedit_revision[]="$Revision$";
 #define ZMAX_SPIN 25
 #define UPDATE_LIST 31
 #define RADIO_WALL 32
-#define SET_LABEL 33
-#define MESH_LIST 34
 
-#ifndef pp_BLOCKEDIT
 GLUI_StaticText *statictext_blockage_index=NULL;
 GLUI_StaticText *statictext_mesh_index=NULL;
 GLUI_StaticText *statictext_label=NULL;
-#endif
 
 GLUI *glui_edit=NULL;
 GLUI_Panel *panel_label=NULL,*panel_obj_select=NULL,*panel_surface=NULL;
 GLUI_Panel *panel_obj_new=NULL;
 GLUI_RadioGroup *group2=NULL;
-#ifdef pp_BLOCKEDIT
-GLUI_RadioGroup *wallgroup=NULL;
-#endif
 GLUI_Panel *panel_obj_stretch=NULL, *panel_obj_stretch2=NULL,*panel_obj_stretch3=NULL, *panel_obj_stretch4=NULL;
 GLUI_EditText *edittext_xmin=NULL, *edittext_ymin=NULL, *edittext_zmin=NULL;
 GLUI_EditText *edittext_xmax=NULL, *edittext_ymax=NULL, *edittext_zmax=NULL;
-#ifdef pp_BLOCKEDIT
-GLUI_EditText *edittextlabel=NULL;
-#endif
 GLUI_Listbox *surfacelists[6]={NULL,NULL,NULL,NULL,NULL,NULL};
-#ifdef pp_BLOCKEDIT
-GLUI_Listbox *meshlist=NULL;
-#endif
-#ifdef pp_BLOCKEDIT
-GLUI_Spinner *SPINNER_move=NULL, *SPINNER_stretch_white=NULL,*SPINNER_stretch_black;
-#endif
 GLUI_Button *Update_Button=NULL;
 GLUI_Button *Cancel_Button=NULL;
 GLUI_Button *Undo_Button=NULL;
@@ -70,18 +49,10 @@ GLUI_Checkbox *blockage_checkbox=NULL;
 
 extern "C" void OBJECT_CB(int var);
 
-void OBJECT_MOVE_STRETCH_CB(int var);
 void BUTTON_hide3_CB(int var);
 
 char a_updatelabel[1000];
 char *updatelabel=NULL;
-
-
-extern "C" void update_highlight_mesh(void){
-#ifdef pp_BLOCKEDIT
-  if(meshlist!=NULL)meshlist->set_int_val(highlight_mesh);
-#endif
-}
 
 /* ------------------ glui_edit_setup ------------------------ */
 
@@ -101,61 +72,17 @@ extern "C" void glui_edit_setup(int main_window){
   zplt_orig=current_mesh->zplt_orig;
 
   if(glui_edit!=NULL)glui_edit->close();
-#ifdef pp_BLOCKEDIT
-  glui_edit = GLUI_Master.create_glui("Edit",0,0,0);
-#else
-  glui_edit = GLUI_Master.create_glui("Blockage",0,0,0);
-#endif
+  glui_edit = GLUI_Master.create_glui("Blockage Info",0,0,0);
   if(showedit==0)glui_edit->hide();
 
-#ifdef pp_BLOCKEDIT
-  panel_obj_select = glui_edit->add_panel("Select");
-#else
   panel_obj_select = glui_edit->add_panel("Surface Properties:");
-#endif
-
-
-#ifdef pp_BLOCKEDIT
-  panel_obj_new=glui_edit->add_panel_to_panel(panel_obj_select,"",GLUI_PANEL_NONE);
-  if(nmeshes>1){
-    meshlist = glui_edit->add_listbox_to_panel(panel_obj_new,"Mesh",&highlight_mesh,MESH_LIST,OBJECT_CB);
-    for(i=0;i<nmeshes;i++){
-      meshi = meshinfo + i;
-      meshlist->add_item(i,meshi->label);
-    }
-  }
-  glui_edit->add_button_to_panel(panel_obj_new,"New",NEW_OBJECT,OBJECT_CB);
-  glui_edit->add_button_to_panel(panel_obj_new,"Delete",DELETE_OBJECT,OBJECT_CB);
-  glui_edit->add_button_to_panel(panel_obj_new,"UnDelete",UNDELETE_OBJECT,OBJECT_CB);
-#endif
-
-#ifdef pp_BLOCKEDIT
-  panel_label=glui_edit->add_panel_to_panel(panel_obj_select,"",GLUI_PANEL_NONE);
-  edittextlabel = glui_edit->add_edittext_to_panel(panel_label,"Label",GLUI_EDITTEXT_TEXT,NULL,SET_LABEL,OBJECT_CB);
-  edittextlabel->set_w(260);
-#endif
 
   panel_surface=glui_edit->add_panel_to_panel(panel_obj_select,"",GLUI_PANEL_NONE);
-
-#ifdef pp_BLOCKEDIT
-  if(nsurfaces>0){
-    wallgroup = glui_edit->add_radiogroup_to_panel(panel_surface,&wall_case,RADIO_WALL,OBJECT_CB);
-    glui_edit->add_radiobutton_to_group(wallgroup,"1 Wall");
-    glui_edit->add_radiobutton_to_group(wallgroup,"3 Wall");
-    glui_edit->add_radiobutton_to_group(wallgroup,"6 Wall");
-  }
-  glui_edit->add_checkbox_to_panel(panel_surface,"Color",&visNormalEditColors);
-#endif
-
 
   glui_edit->add_column_to_panel(panel_surface,false);
 
   if(nsurfaces>0){
-#ifdef pp_BLOCKEDIT
-    glui_edit->add_statictext_to_panel(panel_surface,"Surface Type:");
-#else
     glui_edit->add_statictext_to_panel(panel_surface,"");
-#endif
     surfacelists[DOWN_X] = glui_edit->add_listbox_to_panel(panel_surface,"Left",surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);
     surfacelists[DOWN_X]->set_w(260);
     for(i=0;i<nsurfaces;i++){
@@ -215,27 +142,10 @@ extern "C" void glui_edit_setup(int main_window){
 
   glui_edit->add_column(false);
 
-#ifdef pp_BLOCKEDIT
-  panel_obj_stretch2 = glui_edit->add_panel("Move/Stretch");
-#else
   panel_obj_stretch2 = glui_edit->add_panel("Coordinates");
-#endif
 
-#ifdef pp_BLOCKEDIT
-  panel_obj_stretch = glui_edit->add_panel_to_panel(panel_obj_stretch2,"",GLUI_PANEL_NONE);
-  group2 = glui_edit->add_radiogroup_to_panel(panel_obj_stretch,&xyz_dir,RADIO_XYZ,OBJECT_CB);
-  glui_edit->add_radiobutton_to_group(group2,"X");
-  glui_edit->add_radiobutton_to_group(group2,"Y");
-  glui_edit->add_radiobutton_to_group(group2,"Z");
-  glui_edit->add_column_to_panel(panel_obj_stretch,false);
-  SPINNER_stretch_black=glui_edit->add_spinner_to_panel(panel_obj_stretch,"Stretch black",GLUI_SPINNER_INT,&stretch_var_black,STRETCH_BLACK,OBJECT_MOVE_STRETCH_CB);
-  SPINNER_stretch_black->set_int_limits(0,ibar,GLUI_LIMIT_CLAMP);
-  SPINNER_stretch_white=glui_edit->add_spinner_to_panel(panel_obj_stretch,"Stretch white",GLUI_SPINNER_INT,&stretch_var_white,STRETCH_WHITE,OBJECT_MOVE_STRETCH_CB);
-  SPINNER_stretch_white->set_int_limits(0,ibar,GLUI_LIMIT_CLAMP);
-  SPINNER_move=glui_edit->add_spinner_to_panel(panel_obj_stretch,"Move",GLUI_SPINNER_INT,&move_var,MOVE,OBJECT_MOVE_STRETCH_CB);
-  SPINNER_move->set_int_limits(0,ibar,GLUI_LIMIT_CLAMP);
-#endif
-
+  blockage_checkbox=glui_edit->add_checkbox_to_panel(panel_obj_stretch2,"Dimensions snapped to grid",&blockage_snapped,
+    BLOCKAGE_AS_INPUT,OBJECT_CB);
   panel_obj_stretch3 = glui_edit->add_panel_to_panel(panel_obj_stretch2,"",GLUI_PANEL_NONE);
   edittext_xmin=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"x",GLUI_EDITTEXT_FLOAT,&glui_block_xmin,XMIN_SPIN,OBJECT_CB);
   edittext_ymin=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"y",GLUI_EDITTEXT_FLOAT,&glui_block_ymin,YMIN_SPIN,OBJECT_CB);
@@ -246,12 +156,14 @@ extern "C" void glui_edit_setup(int main_window){
   edittext_ymax=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"",GLUI_EDITTEXT_FLOAT,&glui_block_ymax,YMAX_SPIN,OBJECT_CB);
   edittext_zmax=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"",GLUI_EDITTEXT_FLOAT,&glui_block_zmax,ZMAX_SPIN,OBJECT_CB);
 
-#ifdef pp_BLOCKEDIT
-  blockage_checkbox=glui_edit->add_checkbox_to_panel(panel_obj_stretch3,"Blockages as Input",&blockage_as_input,BLOCKAGE_AS_INPUT,OBJECT_CB);
-#else
-  blockage_as_input=1;
+  edittext_xmin->disable();
+  edittext_ymin->disable();
+  edittext_zmin->disable();
+
+  edittext_xmax->disable();
+  edittext_ymax->disable();
+  edittext_zmax->disable();
   OBJECT_CB(BLOCKAGE_AS_INPUT);
-#endif
 
   edittext_xmin->set_float_limits(xplt_orig[0],xplt_orig[ibar],GLUI_LIMIT_CLAMP);
   edittext_xmax->set_float_limits(xplt_orig[0],xplt_orig[ibar],GLUI_LIMIT_CLAMP);
@@ -261,43 +173,17 @@ extern "C" void glui_edit_setup(int main_window){
   edittext_zmax->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
 
   panel_obj_stretch4=glui_edit->add_panel("",GLUI_PANEL_NONE);
-#ifdef pp_BLOCKEDIT
-  Undo_Button=glui_edit->add_button_to_panel(panel_obj_stretch4,"Undo Selected Blockage",UNDO_BLOCKAGE,BUTTON_hide3_CB);
-  UndoAll_Button=glui_edit->add_button_to_panel(panel_obj_stretch4,"Undo All Blockages",UNDO_ALL_BLOCKAGES,BUTTON_hide3_CB);
 
-  glui_edit->add_separator_to_panel(panel_obj_stretch4);
-  if(fds_fileout!=NULL){
-    updatelabel=a_updatelabel;
-    strcpy(updatelabel,"Update ");
-    strcat(updatelabel,fds_fileout);
-    Update_Button=glui_edit->add_button_to_panel(panel_obj_stretch4,updatelabel,UPDATE_WINDOW,BUTTON_hide3_CB);
-  }
-  if(fds_fileout==NULL){
-    Update_Button=glui_edit->add_button_to_panel(panel_obj_stretch4,"(FDS Data File Unknown)",UPDATE_WINDOW,BUTTON_hide3_CB);
-    Update_Button->disable();
-  }
-#endif
-
-#ifndef pp_BLOCKEDIT
   if(nmeshes>1){
     char meshlabel[255];
 
     strcpy(meshlabel,"Mesh label:");
     strcat(meshlabel,meshinfo->label);
     statictext_mesh_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,meshlabel);
-  /*
-    meshlist = glui_edit->add_listbox_to_panel(panel_obj_stretch4,"Mesh",&highlight_mesh,MESH_LIST,OBJECT_CB);
-    for(i=0;i<nmeshes;i++){
-      meshi = meshinfo + i;
-      meshlist->add_item(i,meshi->label);
-    }
-    meshlist->disable();
-  */
   }
   statictext_blockage_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST number: ");
   statictext_label=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST label:");
   glui_edit->add_separator_to_panel(panel_obj_stretch4);
-#endif
   glui_edit->add_button_to_panel(panel_obj_stretch4,"Close",CLOSE_WINDOW,BUTTON_hide3_CB);
 
   glui_edit->set_main_gfx_window( main_window );
@@ -310,7 +196,6 @@ extern "C" void hide_glui_edit(void){
   if(glui_edit!=NULL)glui_edit->hide();
   showedit=0;
   updatemenu=1;
-  outputchangedblockages();
   editwindow_status=CLOSE_WINDOW;
 }
 
@@ -334,12 +219,10 @@ void BUTTON_hide3_CB(int var){
   mesh *meshi;
   switch (var){
   case CLOSE_WINDOW: 
-    if(blockages_dirty==1)outputchangedblockages();
     DialogMenu(16);
     smooth_blockages();
     break;
   case UPDATE_WINDOW:
-    outputchangedblockages();
     blockages_dirty=0;
     break;
   case CANCEL_WINDOW:
@@ -419,66 +302,6 @@ void BUTTON_hide3_CB(int var){
 
 }
 
-/* ------------------ update_movestretch ------------------------ */
-
-extern "C" void update_movestretch(blockagedata *bc){
-#ifdef pp_BLOCKEDIT
-  int ibar,jbar,kbar;
-  int imin, imax, jmin, jmax, kmin, kmax;
-
-  ibar=current_mesh->ibar;
-  jbar=current_mesh->jbar;
-  kbar=current_mesh->kbar;
-
-  if(bc==NULL){
-    imin=0;
-    imax=1;
-    jmin=0;
-    jmax=1;
-    kmin=0;
-    kmax=1;
-  }
-  else{
-    imin=bc->ijk[IMIN];
-    imax=bc->ijk[IMAX];
-    jmin=bc->ijk[JMIN];
-    jmax=bc->ijk[JMAX];
-    kmin=bc->ijk[KMIN];
-    kmax=bc->ijk[KMAX];
-  }
-
-  switch (xyz_dir){
-  case XDIR:
-    SPINNER_move->set_int_limits(0,ibar,GLUI_LIMIT_CLAMP);
-    SPINNER_move->set_int_val(imin);
-    SPINNER_stretch_black->set_int_limits(0,ibar,GLUI_LIMIT_CLAMP);
-    SPINNER_stretch_black->set_int_val(imin);
-    SPINNER_stretch_white->set_int_limits(0,ibar,GLUI_LIMIT_CLAMP);
-    SPINNER_stretch_white->set_int_val(imax);
-    break;
-  case YDIR:
-    SPINNER_move->set_int_limits(0,jbar,GLUI_LIMIT_CLAMP);
-    SPINNER_move->set_int_val(jmin);
-    SPINNER_stretch_black->set_int_limits(0,jbar,GLUI_LIMIT_CLAMP);
-    SPINNER_stretch_black->set_int_val(jmin);
-    SPINNER_stretch_white->set_int_limits(0,jbar,GLUI_LIMIT_CLAMP);
-    SPINNER_stretch_white->set_int_val(jmax);
-    break;
-  case ZDIR:
-    SPINNER_move->set_int_limits(0,kbar,GLUI_LIMIT_CLAMP);
-    SPINNER_move->set_int_val(kmin);
-    SPINNER_stretch_black->set_int_limits(0,ibar,GLUI_LIMIT_CLAMP);
-    SPINNER_stretch_black->set_int_val(kmin);
-    SPINNER_stretch_white->set_int_limits(0,kbar,GLUI_LIMIT_CLAMP);
-    SPINNER_stretch_white->set_int_val(kmax);
-    break;
-  default:
-    ASSERT(FFALSE);
-    break;
-  }
-#endif
-}
-
 /* ------------------ update_blockvals ------------------------ */
 
 extern "C" void update_blockvals(int flag){
@@ -521,22 +344,10 @@ extern "C" void update_blockvals(int flag){
   }
 
   if(flag==1){
-#ifdef pp_BLOCKEDIT
-    if(bchighlight_old!=NULL){
-      label=edittextlabel->get_text();
-      obstlabelcopy(&bchighlight_old->label,label);
-    }
-#endif
     if(bchighlight!=NULL){
-#ifndef pp_BLOCKEDIT
       char dialog_label[255];
       mesh *blockmesh;
-#endif
 
-#ifdef pp_BLOCKEDIT
-      edittextlabel->set_text(bchighlight->label);
-#endif
-#ifndef pp_BLOCKEDIT
       if(nmeshes>1){
         blockmesh = meshinfo + bchighlight->meshindex;
         sprintf(dialog_label,"Mesh label: %s",blockmesh->label);
@@ -547,7 +358,6 @@ extern "C" void update_blockvals(int flag){
       strcpy(dialog_label,"&OBST label: ");
       strcat(dialog_label,bchighlight->label);
       statictext_label->set_text(dialog_label);
-#endif
 
       switch (wall_case){
       case WALL_1:
@@ -578,9 +388,6 @@ extern "C" void update_blockvals(int flag){
       }
     }
     else{
-#ifdef pp_BLOCKEDIT
-      edittextlabel->set_text("");
-#endif
       if(nsurfaces>0){
         for(i=0;i<6;i++){
           surface_indices[i]=inv_sorted_surfidlist[0];
@@ -590,53 +397,6 @@ extern "C" void update_blockvals(int flag){
       }
     }
   }
-  update_movestretch(bchighlight);
-}
-
-/* ------------------ OBJECT_MOVE_STRETCH_CB ------------------------ */
-
-void OBJECT_MOVE_STRETCH_CB(int var){
-  switch (var){
-  case MOVE:
-    which_face=0;
-    moveiblockage(move_var);
-    break;
-  case STRETCH_BLACK:
-    which_face=-1;
-    stretchiblockage(stretch_var_black);
-    break;
-  case STRETCH_WHITE:
-    which_face=1;
-    stretchiblockage(stretch_var_white);
-    break;
-  default:
-    ASSERT(FFALSE);
-    break;
-  }
-  update_blockvals(0);
-  update_faces();
-}
-
-/* ------------------ update_xyzdir ------------------------ */
-
-extern "C" void update_xyzdir(int dir){
-  xyz_blockage_dir=dir;
-#ifdef pp_BLOCKEDIT
-  switch (dir) {
-  case 0:
-    group2->set_int_val(dir);
-    break;
-  case 1:
-    group2->set_int_val(dir);
-    break;
-  case 2:
-    group2->set_int_val(dir);
-    break;
-  default:
-    ASSERT(FFALSE);
-    break;
-  }
-#endif
 }
 
 /* ------------------ OBJECT_CB ------------------------ */
@@ -644,63 +404,8 @@ extern "C" void update_xyzdir(int dir){
 void OBJECT_CB(int var){
   int i,temp;
   switch (var){
-    case MESH_LIST:
-      update_current_mesh(meshinfo + highlight_mesh);
-      update_rotation_index(highlight_mesh);
-    break;
-    case SET_LABEL:
-#ifdef pp_BLOCKEDIT
-    if(bchighlight!=NULL){
-      obstlabelcopy(&bchighlight->label,edittextlabel->get_text());
-    }
-#endif
-    break;
-    case NEW_OBJECT:
-      addnewobject();
-      break;
-    case DELETE_OBJECT:
-      deleteobject();
-      break;
-    case UNDELETE_OBJECT:
-      undeleteobject();
-      break;
-    case RADIO_XYZ:
-      xyz_blockage_dir=xyz_dir;
-      update_movestretch(bchighlight);
-      update_xyzdir(xyz_dir);
-      break;
-    case RADIO_OBJECT_TYPE:
-      xyz_dir=xyz_blockage_dir;
-      group2->set_int_val(xyz_dir);
-      break;
-    case XMIN_SPIN:
-    case XMAX_SPIN:
-    case YMIN_SPIN:
-    case YMAX_SPIN:
-    case ZMIN_SPIN:
-    case ZMAX_SPIN:
-      movefblockage(
-        &glui_block_xmin, &glui_block_xmax,
-        &glui_block_ymin, &glui_block_ymax,
-        &glui_block_zmin, &glui_block_zmax);
-      update_blockvals(0);
-      break;
-
     case UPDATE_LIST:
       switch (wall_case){
-#ifdef pp_BLOCKEDIT
-      case WALL_1:
-        temp=surface_indices[UP_Z];
-        temp=surface_indices_bak[UP_Z];
-        if(nsurfaces>0){
-          for(i=0;i<6;i++){
-            if(i==UP_Z)continue;
-            surface_indices[i]=temp;
-            surfacelists[i]->set_int_val(temp);
-          }
-        }
-        break;
-#else
       case WALL_1:
         temp=surface_indices_bak[UP_Z];
         if(nsurfaces>0){
@@ -710,19 +415,6 @@ void OBJECT_CB(int var){
           }
         }
         break;
-#endif
-#ifdef pp_BLOCKEDIT
-      case WALL_3:
-        temp=surface_indices_bak[UP_Y];
-        if(nsurfaces>0){
-          for(i=0;i<6;i++){
-            if(i==UP_Z||i==DOWN_Z||i==UP_Y)continue;
-            surface_indices[i]=temp;
-            surfacelists[i]->set_int_val(temp);
-          }
-        }
-        break;
-#else
       case WALL_3:
         if(nsurfaces>0){
           for(i=0;i<6;i++){
@@ -732,11 +424,6 @@ void OBJECT_CB(int var){
           }
         }
         break;
-#endif
-#ifdef pp_BLOCKEDIT
-      case WALL_6:
-        break;
-#else
       case WALL_6:
         if(nsurfaces>0){
           for(i=0;i<6;i++){
@@ -746,7 +433,6 @@ void OBJECT_CB(int var){
           }
         }
         break;
-#endif
       default:
         ASSERT(FFALSE);
         break;
@@ -776,21 +462,12 @@ void OBJECT_CB(int var){
         for(i=0;i<6;i++){
           surfacelists[i]->enable();
         }
-#ifdef pp_BLOCKEDIT
-        surfacelists[DOWN_Z]->set_name("zmin");
-        surfacelists[UP_Z]->set_name("zmax");
-        surfacelists[DOWN_Y]->set_name("ymin");
-        surfacelists[UP_Y]->set_name("ymax");
-        surfacelists[DOWN_X]->set_name("xmin");
-        surfacelists[UP_X]->set_name("xmax");
-#else
-        surfacelists[DOWN_Z]->set_name("bottom");
-        surfacelists[UP_Z]->set_name("top");
-        surfacelists[DOWN_Y]->set_name("front");
-        surfacelists[UP_Y]->set_name("back");
-        surfacelists[DOWN_X]->set_name("left");
-        surfacelists[UP_X]->set_name("right");
-#endif
+        surfacelists[DOWN_Z]->set_name("lower z face");
+        surfacelists[UP_Z]->set_name("upper z face");
+        surfacelists[DOWN_Y]->set_name("lower y face");
+        surfacelists[UP_Y]->set_name("upper y face");
+        surfacelists[DOWN_X]->set_name("lower x face");
+        surfacelists[UP_X]->set_name("upper x face");
         break;
       case WALL_3:
         for(i=0;i<6;i++){
@@ -800,21 +477,12 @@ void OBJECT_CB(int var){
         surfacelists[UP_Z]->enable();
         surfacelists[UP_Y]->enable();
 
-#ifdef pp_BLOCKEDIT
-        surfacelists[DOWN_Z]->set_name("zmin");
-        surfacelists[UP_Z]->set_name("zmax");
-        surfacelists[UP_Y]->set_name("vertical");
+        surfacelists[DOWN_Z]->set_name("lower z face");
+        surfacelists[UP_Z]->set_name("upper z face");
+        surfacelists[UP_Y]->set_name("side faces");
         surfacelists[DOWN_Y]->set_name("");
         surfacelists[DOWN_X]->set_name("");
         surfacelists[UP_X]->set_name("");
-#else
-        surfacelists[DOWN_Z]->set_name("bottom");
-        surfacelists[UP_Z]->set_name("top");
-        surfacelists[UP_Y]->set_name("side");
-        surfacelists[DOWN_Y]->set_name("side");
-        surfacelists[DOWN_X]->set_name("side");
-        surfacelists[UP_X]->set_name("side");
-#endif
 
         break;
       case WALL_1:
@@ -822,7 +490,7 @@ void OBJECT_CB(int var){
           surfacelists[i]->disable();
         }
         surfacelists[UP_Z]->enable();
-        surfacelists[UP_Z]->set_name("All");
+        surfacelists[UP_Z]->set_name("All faces");
 
         surfacelists[DOWN_Z]->set_name("");
         surfacelists[DOWN_Y]->set_name("");
@@ -837,40 +505,17 @@ void OBJECT_CB(int var){
       OBJECT_CB(UPDATE_LIST);
       break;
       case BLOCKAGE_AS_INPUT2:
-        blockage_checkbox->set_int_val(blockage_as_input);
+        blockage_snapped=1-blockage_as_input;
+        blockage_checkbox->set_int_val(blockage_snapped);
       case BLOCKAGE_AS_INPUT:
+        blockage_as_input=1-blockage_snapped;
         if(blockage_as_input==1){
-          edittext_xmin->disable();
-          edittext_ymin->disable();
-          edittext_zmin->disable();
-
-          edittext_xmax->disable();
-          edittext_ymax->disable();
-          edittext_zmax->disable();
-#ifdef pp_BLOCKEDIT
-          SPINNER_stretch_black->disable();
-          SPINNER_stretch_white->disable();
-          SPINNER_move->disable();
-#endif
           blocklocation=BLOCKlocation_exact;
-          update_blockvals(0);
         }
         else{
-          edittext_xmin->enable();
-          edittext_ymin->enable();
-          edittext_zmin->enable();
-
-          edittext_xmax->enable();
-          edittext_ymax->enable();
-          edittext_zmax->enable();
-#ifdef pp_BLOCKEDIT
-          SPINNER_stretch_black->enable();
-          SPINNER_stretch_white->enable();
-          SPINNER_move->enable();
-#endif
           blocklocation=BLOCKlocation_grid;
-          update_blockvals(0);
         }
+        update_blockvals(0);
         break;
     default:
       ASSERT(FFALSE);

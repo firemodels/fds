@@ -2985,13 +2985,22 @@ typedef struct {
         bc->prop=prop;
         {
           float t_origin[3];
+          float *xyzEXACT;
+
           t_origin[0]=texture_origin[0];
           t_origin[1]=texture_origin[1];
           t_origin[2]=texture_origin[2];
+          xyzEXACT = bc->xyzEXACT;
           sscanf(buffer,"%f %f %f %f %f %f %i %i %i %i %i %i %i %f %f %f",
-            &(bc->xmin),&(bc->xmax),&(bc->ymin),&(bc->ymax),&(bc->zmin),&(bc->zmax),
+            xyzEXACT,xyzEXACT+1,xyzEXACT+2,xyzEXACT+3,xyzEXACT+4,xyzEXACT+5,
             &(bc->id),s_num+DOWN_X,s_num+UP_X,s_num+DOWN_Y,s_num+UP_Y,s_num+DOWN_Z,s_num+UP_Z,
             t_origin,t_origin+1,t_origin+2);
+          bc->xmin=xyzEXACT[0];
+          bc->xmax=xyzEXACT[1];
+          bc->ymin=xyzEXACT[2];
+          bc->ymax=xyzEXACT[3];
+          bc->zmin=xyzEXACT[4];
+          bc->zmax=xyzEXACT[5];
           bc->texture_origin[0]=t_origin[0];
           bc->texture_origin[1]=t_origin[1];
           bc->texture_origin[2]=t_origin[2];
