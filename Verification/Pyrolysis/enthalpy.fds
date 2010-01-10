@@ -14,13 +14,12 @@ curve after 80 degC.
 
 &TIME T_END=7, DT=0.005, WALL_INCREMENT=1 /
 
-&MISC H_FIXED=0. /
-
 &DUMP DT_PL3D=10000000. /
 
 &SURF ID='SLAB'
       COLOR='TOMATO 1'
       EXTERNAL_FLUX = 3.0
+      H_FIXED = 0. /
       MATL_ID(1,:) = 'MAT_A'
       THICKNESS=0.001 /
 

@@ -4,12 +4,13 @@
 
 &TIME T_END=50000., WALL_INCREMENT=1, DT=0.5 /
 
-&MISC ASSUMED_GAS_TEMPERATURE=120., H_FIXED=10.  /  Case B
+&MISC ASSUMED_GAS_TEMPERATURE=120.  /  Case B
 
 &SURF ID        = 'SLAB'
       MATL_ID   = 'SLAB_B'
       THICKNESS = 0.1
       STRETCH_FACTOR = 1.
+      H_FIXED   = 10.
       BACKING   = 'INSULATED' /  
 
 &MATL ID            = 'SLAB_B'

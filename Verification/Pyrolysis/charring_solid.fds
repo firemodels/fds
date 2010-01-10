@@ -14,8 +14,6 @@ representative of any particular type of wood.
 
 &TIME T_END=600., WALL_INCREMENT = 1, DT = 0.01 /  Force FDS to do solid phase calc every time step
 
-&MISC H_FIXED=0.0 /  No convective heat transfer
-
 &REAC ID='NO REACTION', Y_O2_INFTY=0.01 /  No gas phase reaction with 1% O2 concentration
 
 &DUMP DT_PL3D=10000000. /  No Plot3D output
@@ -29,6 +27,7 @@ The wood sample, plus its backing of calcium silicate board
       MATL_MASS_FRACTION(1,1:3) = 0.70,0.1,0.20
       MATL_ID(2,1) = 'CASI'
       THICKNESS(1:2)  =  0.01,0.01 
+      H_FIXED = 0.
       EXTERNAL_FLUX = 50. /
 
 Reaction 1: CELLULOSE is converted to "ACTIVE" solid fuel
