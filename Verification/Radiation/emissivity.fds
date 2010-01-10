@@ -11,14 +11,13 @@ The emissivity is measured using EMISSIVITY output quantity.
 
 &TIME T_END=10 DT = 0.01 WALL_INCREMENT = 1/
 
-&MISC H_FIXED = 0. /
-
 &DUMP DT_DEVC = 0.2
       DT_PL3D=10000000./
 
 &SURF ID='TEST'
       COLOR='TEAL'
       MATL_ID(1,:) = 'MAT_A'
+      H_FIXED=0.
       THICKNESS=0.001/
 
 &MATL ID = 'MAT_A'
