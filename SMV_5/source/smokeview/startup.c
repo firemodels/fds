@@ -1095,7 +1095,6 @@ void initvars1(void){
   showhide_option=0;
   snifferrornumber=0;
   xyz_dir=0;
-  xyz_blockage_dir=0;
   which_face=2;
   showfontmenu=1;
 #ifdef pp_SHOWLIGHT
@@ -1731,6 +1730,7 @@ void initvars1(void){
   smokedrawtest_nummax=1;
   ijkbarmax=5;
   blockage_as_input=0;
+  blockage_snapped=1;
   show_cad_and_grid=0;
   use_nistlogo=0;
   benchmark_flag=0;
