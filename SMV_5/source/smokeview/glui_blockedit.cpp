@@ -34,17 +34,11 @@ GLUI_StaticText *statictext_mesh_index=NULL;
 GLUI_StaticText *statictext_label=NULL;
 
 GLUI *glui_edit=NULL;
-GLUI_Panel *panel_label=NULL,*panel_obj_select=NULL,*panel_surface=NULL;
-GLUI_Panel *panel_obj_new=NULL;
-GLUI_RadioGroup *group2=NULL;
-GLUI_Panel *panel_obj_stretch=NULL, *panel_obj_stretch2=NULL,*panel_obj_stretch3=NULL, *panel_obj_stretch4=NULL;
+GLUI_Panel *panel_obj_select=NULL,*panel_surface=NULL;
+GLUI_Panel *panel_obj_stretch2=NULL,*panel_obj_stretch3=NULL, *panel_obj_stretch4=NULL;
 GLUI_EditText *edittext_xmin=NULL, *edittext_ymin=NULL, *edittext_zmin=NULL;
 GLUI_EditText *edittext_xmax=NULL, *edittext_ymax=NULL, *edittext_zmax=NULL;
 GLUI_Listbox *surfacelists[6]={NULL,NULL,NULL,NULL,NULL,NULL};
-GLUI_Button *Update_Button=NULL;
-GLUI_Button *Cancel_Button=NULL;
-GLUI_Button *Undo_Button=NULL;
-GLUI_Button *UndoAll_Button=NULL;
 GLUI_Checkbox *blockage_checkbox=NULL;
 
 extern "C" void OBJECT_CB(int var);
@@ -226,74 +220,6 @@ void BUTTON_hide3_CB(int var){
     blockages_dirty=0;
     break;
   case CANCEL_WINDOW:
-    break;
-  case UNDO_BLOCKAGE:
-    if(bchighlight!=NULL){
-      bchighlight->xmin=bchighlight->xyzORIG[0];
-      bchighlight->xmax=bchighlight->xyzORIG[1];
-      bchighlight->ymin=bchighlight->xyzORIG[2];
-      bchighlight->ymax=bchighlight->xyzORIG[3];
-      bchighlight->zmin=bchighlight->xyzORIG[4];
-      bchighlight->zmax=bchighlight->xyzORIG[5];
-      bchighlight->ijk[0]=bchighlight->ijkORIG[0];
-      bchighlight->ijk[1]=bchighlight->ijkORIG[1];
-      bchighlight->ijk[2]=bchighlight->ijkORIG[2];
-      bchighlight->ijk[3]=bchighlight->ijkORIG[3];
-      bchighlight->ijk[4]=bchighlight->ijkORIG[4];
-      bchighlight->ijk[5]=bchighlight->ijkORIG[5];
-      for(i=0;i<6;i++){
-        bchighlight->surf[i]=bchighlight->surfORIG[i];
-        bchighlight->surf_index[i]=bchighlight->surf_indexORIG[i];
-      }
-      for(i=0;i<6;i++){
-        surface_indices[i]=inv_sorted_surfidlist[bchighlight->surf_index[i]];
-        surface_indices_bak[i]=inv_sorted_surfidlist[bchighlight->surf_index[i]];
-      }
-      bchighlight->walltype=bchighlight->walltypeORIG;
-      updateusetextures();
-      update_blockvals(1);
-     // OBJECT_CB(RADIO_WALL);
-      update_faces();
-    }
-    break;
-  case UNDO_ALL_BLOCKAGES:
-    bchighlight_save=bchighlight;
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo+i;
-      for(j=0;j<meshi->nbptrs;j++){
-        bc=meshi->blockageinfoptrs[j];
-        if(bc==NULL)continue;
-        if(bc->changed==0&&bc->changed_surface==0)continue;
-        bchighlight=bc;
-        bc->xmin=bc->xyzORIG[0];
-        bc->xmax=bc->xyzORIG[1];
-        bc->ymin=bc->xyzORIG[2];
-        bc->ymax=bc->xyzORIG[3];
-        bc->zmin=bc->xyzORIG[4];
-        bc->zmax=bc->xyzORIG[5];
-        bc->ijk[0]=bc->ijkORIG[0];
-        bc->ijk[1]=bc->ijkORIG[1];
-        bc->ijk[2]=bc->ijkORIG[2];
-        bc->ijk[3]=bc->ijkORIG[3];
-        bc->ijk[4]=bc->ijkORIG[4];
-        bc->ijk[5]=bc->ijkORIG[5];
-        for(k=0;k<6;k++){
-          bc->surf[k]=bc->surfORIG[k];
-          bc->surf_index[k]=bc->surf_indexORIG[k];
-        }
-        for(i=0;i<6;i++){
-          surface_indices[i]=inv_sorted_surfidlist[bc->surf_index[i]];
-          surface_indices_bak[i]=inv_sorted_surfidlist[bc->surf_index[i]];
-        }
-        bc->walltype=bc->walltypeORIG;
-        update_blockvals(1);
-        OBJECT_CB(RADIO_WALL);
-      }
-    }
-    bchighlight=bchighlight_save;
-    updateusetextures();
-    update_faces();
-        
     break;
   default:
     ASSERT(FFALSE);
