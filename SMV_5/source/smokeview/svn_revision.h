@@ -51,7 +51,6 @@ extern char IOwui_revision[];
 extern char IOzone_revision[];
 extern char isobox_revision[];
 extern char main_revision[];
-extern char objectedit_revision[];
 extern char output_revision[];
 extern char parseobst_revision[];
 extern char readsmv_revision[];

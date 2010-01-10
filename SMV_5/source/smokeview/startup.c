@@ -2219,7 +2219,6 @@ int getmaxrevision(void){
   MAXREV(IOzone_revision);
   MAXREV(isobox_revision);
   MAXREV(main_revision);
-  MAXREV(objectedit_revision);
   MAXREV(output_revision);
   MAXREV(parseobst_revision);
   MAXREV(readsmv_revision);
