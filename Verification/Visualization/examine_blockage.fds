@@ -1,0 +1,25 @@
+&HEAD CHID='examine_blockage',TITLE='Examine Blockage Test SVN $Revision$' /
+
+&MESH IJK=16,16,16, XB=-1.0,2.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=16,16,16, XB=-1.0,2.0,0.0,1.0,1.0,2.0 /
+
+&TIME TWFIN=0. /
+
+&VENT XB=-1.0,-1.0,0.0,1.0,0.0,2.0,SURF_ID='OPEN'/
+&VENT XB= 2.0, 2.0,0.0,1.0,0.0,2.0,SURF_ID='OPEN'/
+&VENT XB=-1.0, 2.0,0.0,0.0,0.0,2.0,SURF_ID='OPEN'/
+&VENT XB=-1.0, 2.0,1.0,1.0,0.0,2.0,SURF_ID='OPEN'/
+&VENT XB=-1.0, 2.0,0.0,1.0,0.0,0.0,SURF_ID='OPEN'/
+&VENT XB=-1.0, 2.0,0.0,1.0,2.0,2.0,SURF_ID='OPEN'/
+
+&SURF ID='surf1' RGB = 32,   32, 192 /
+&SURF ID='surf2' RGB = 32,  192,  32 /
+&SURF ID='surf3' RGB = 128, 128, 128 /
+&SURF ID='surf4' RGB = 192, 192,  32 /
+&SURF ID='surf5' RGB = 192,  32, 192 /
+&SURF ID='surf6' RGB = 32,  192, 192 /
+
+&OBST XB=-0.6, -0.4, 0.3, 0.7, 0.5, 1.5  SURF_ID='surf1' /  first obst line
+&OBST XB= 0.4,  0.6, 0.3, 0.7, 0.5, 1.5  SURF_IDS='surf1','surf2','surf3' /  second obst line
+&OBST XB= 1.4,  1.6, 0.3, 0.7, 0.5, 1.5  SURF_ID6='surf1','surf2','surf3','surf4','surf5','surf6' /  third obst line
+&TAIL /
