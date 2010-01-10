@@ -162,11 +162,7 @@ void mouse_edit_blockage(int button, int state, int x, int y){
     sd = selectfaceinfo + val;
     highlight_block=sd->blockage;
     highlight_mesh=sd->mesh;
-    update_highlight_mesh();
     meshi = meshinfo + highlight_mesh;
-#ifdef pp_BLOCKEDIT
-    update_rotation_index(highlight_mesh);
-#endif
     update_current_mesh(meshi);
     bchighlight_old=bchighlight;
     bchighlight = meshi->blockageinfoptrs[highlight_block];
@@ -211,7 +207,6 @@ void mouse_edit_blockage(int button, int state, int x, int y){
         ASSERT(FFALSE);
         break;
     }
-    update_xyzdir(xyz_dir);
     update_blockvals(1);
   }
 }
@@ -938,7 +933,6 @@ void keyboard(unsigned char key, int x, int y){
         highlight_mesh++;
         if(highlight_mesh>nmeshes-1)highlight_mesh=0;
         update_current_mesh(meshinfo+highlight_mesh);
-        update_highlight_mesh();
       }
     }
     return;

@@ -347,7 +347,6 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   }
   meshi->isofilenum=ifile;
   highlight_mesh = blocknumber;
-  update_highlight_mesh();
    
   if(ib->compression_type==1){
     int nbuffer;

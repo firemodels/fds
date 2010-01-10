@@ -79,7 +79,6 @@ void readpatch(int ifile, int flag, int *errorcode){
   file = pi->file;
   blocknumber = pi->blocknumber;
   highlight_mesh = blocknumber;
-  update_highlight_mesh();
   meshi = meshinfo+blocknumber;
   update_current_mesh(meshi);
   filenum = meshi->patchfilenum;
