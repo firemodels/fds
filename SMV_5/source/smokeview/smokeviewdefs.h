@@ -88,6 +88,7 @@ void _sniffErrors(char *whereat);
 #define DOWN_X 3 
 #define DOWN_Z 4
 #define UP_Z   5
+#define NOT_USED 6
 
 #define NO_PLOTS 0
 #define STATIC_PLOTS 1

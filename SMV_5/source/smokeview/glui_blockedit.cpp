@@ -38,7 +38,7 @@ GLUI_Panel *panel_obj_select=NULL,*panel_surface=NULL;
 GLUI_Panel *panel_obj_stretch2=NULL,*panel_obj_stretch3=NULL, *panel_obj_stretch4=NULL;
 GLUI_EditText *edittext_xmin=NULL, *edittext_ymin=NULL, *edittext_zmin=NULL;
 GLUI_EditText *edittext_xmax=NULL, *edittext_ymax=NULL, *edittext_zmax=NULL;
-GLUI_Listbox *surfacelists[6]={NULL,NULL,NULL,NULL,NULL,NULL};
+GLUI_Listbox *surfacelists[7]={NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 GLUI_Checkbox *blockage_checkbox=NULL;
 
 extern "C" void OBJECT_CB(int var);
@@ -69,18 +69,51 @@ extern "C" void glui_edit_setup(int main_window){
   glui_edit = GLUI_Master.create_glui("Blockage Info",0,0,0);
   if(showedit==0)glui_edit->hide();
 
-  panel_obj_select = glui_edit->add_panel("Surface Properties:");
+  panel_obj_select = glui_edit->add_panel("SURFs");
 
   panel_surface=glui_edit->add_panel_to_panel(panel_obj_select,"",GLUI_PANEL_NONE);
 
   glui_edit->add_column_to_panel(panel_surface,false);
 
   if(nsurfaces>0){
+    int not_used=0;
+
     glui_edit->add_statictext_to_panel(panel_surface,"");
+
+    surfacelists[NOT_USED] = glui_edit->add_listbox_to_panel(panel_surface,"Unused SURFs",
+      surface_indices+NOT_USED,UPDATE_LIST,OBJECT_CB);
+    surfacelists[NOT_USED]->set_w(260);
+    for(i=0;i<nsurfaces;i++){
+      surfi = surfaceinfo + sorted_surfidlist[i];
+      if(surfi->used_by_obst==1)continue;
+      if(surfi->used_by_vent==1)continue;
+      if(surfi->obst_surface==0)continue;
+      not_used++;
+    }
+    if(not_used>0){
+      for(i=0;i<nsurfaces;i++){
+        surfi = surfaceinfo + sorted_surfidlist[i];
+        if(surfi->used_by_obst==1)continue;
+        if(surfi->used_by_vent==1)continue;
+        if(surfi->obst_surface==0)continue;
+        surfacelabel = surfi->surfacelabel;
+        surfacelists[NOT_USED]->add_item(i,surfacelabel);
+        surface_indices[NOT_USED]=i;
+        surface_indices_bak[NOT_USED]=surface_indices[NOT_USED];
+      }
+    }
+    else{
+      surfacelists[NOT_USED]->add_item(0,"none");
+      surface_indices[NOT_USED]=0;
+      surface_indices_bak[NOT_USED]=surface_indices[NOT_USED];
+    }
+    surfacelists[NOT_USED]->set_int_val(surface_indices[NOT_USED]);
+
     surfacelists[DOWN_X] = glui_edit->add_listbox_to_panel(panel_surface,"Left",surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);
     surfacelists[DOWN_X]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
+      if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
       surfacelists[DOWN_X]->add_item(i,surfacelabel);
@@ -90,6 +123,7 @@ extern "C" void glui_edit_setup(int main_window){
     surfacelists[UP_X]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
+      if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
       surfacelists[UP_X]->add_item(i,surfacelabel);
@@ -99,6 +133,7 @@ extern "C" void glui_edit_setup(int main_window){
     surfacelists[DOWN_Y]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
+      if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
       surfacelists[DOWN_Y]->add_item(i,surfacelabel);
@@ -108,6 +143,7 @@ extern "C" void glui_edit_setup(int main_window){
     surfacelists[UP_Y]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
+      if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
       surfacelists[UP_Y]->add_item(i,surfacelabel);
@@ -117,6 +153,7 @@ extern "C" void glui_edit_setup(int main_window){
     surfacelists[DOWN_Z]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
+      if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
       surfacelists[DOWN_Z]->add_item(i,surfacelabel);
@@ -126,12 +163,16 @@ extern "C" void glui_edit_setup(int main_window){
     surfacelists[UP_Z]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
+      if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
       surfacelists[UP_Z]->add_item(i,surfacelabel);
     }
 
     OBJECT_CB(RADIO_WALL);
+    for(i=0;i<6;i++){
+      surfacelists[i]->disable();
+    }
   }
 
   glui_edit->add_column(false);
@@ -331,6 +372,10 @@ void OBJECT_CB(int var){
   int i,temp;
   switch (var){
     case UPDATE_LIST:
+      if(surface_indices[NOT_USED]!=surface_indices_bak[NOT_USED]){
+        surface_indices[NOT_USED]=surface_indices_bak[NOT_USED];
+        surfacelists[NOT_USED]->set_int_val(surface_indices[NOT_USED]);
+      }
       switch (wall_case){
       case WALL_1:
         temp=surface_indices_bak[UP_Z];
@@ -388,12 +433,12 @@ void OBJECT_CB(int var){
         for(i=0;i<6;i++){
           surfacelists[i]->enable();
         }
-        surfacelists[DOWN_Z]->set_name("lower z face");
-        surfacelists[UP_Z]->set_name("upper z face");
-        surfacelists[DOWN_Y]->set_name("lower y face");
-        surfacelists[UP_Y]->set_name("upper y face");
-        surfacelists[DOWN_X]->set_name("lower x face");
-        surfacelists[UP_X]->set_name("upper x face");
+        surfacelists[DOWN_Z]->set_name("z lower face");
+        surfacelists[UP_Z]->set_name("z upper face");
+        surfacelists[DOWN_Y]->set_name("y lower face");
+        surfacelists[UP_Y]->set_name("y upper face");
+        surfacelists[DOWN_X]->set_name("x lower face");
+        surfacelists[UP_X]->set_name("x upper face");
         break;
       case WALL_3:
         for(i=0;i<6;i++){
@@ -403,8 +448,8 @@ void OBJECT_CB(int var){
         surfacelists[UP_Z]->enable();
         surfacelists[UP_Y]->enable();
 
-        surfacelists[DOWN_Z]->set_name("lower z face");
-        surfacelists[UP_Z]->set_name("upper z face");
+        surfacelists[DOWN_Z]->set_name("z lower face");
+        surfacelists[UP_Z]->set_name("z upper face");
         surfacelists[UP_Y]->set_name("side faces");
         surfacelists[DOWN_Y]->set_name("");
         surfacelists[DOWN_X]->set_name("");

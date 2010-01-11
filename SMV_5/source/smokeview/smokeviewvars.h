@@ -881,7 +881,7 @@ SVEXTERN int showzerosplit;
 SVEXTERN int *sortedblocklist,*changed_idlist,nchanged_idlist;
 SVEXTERN int nselectblocks;
 SVEXTERN surface *surfaceinfo,sdefault,v_surfacedefault,e_surfacedefault;
-SVEXTERN int surface_indices[6],surface_indices_bak[6];
+SVEXTERN int surface_indices[7],surface_indices_bak[7];
 SVEXTERN int wall_case;
 SVEXTERN surface *surfacedefault, *vent_surfacedefault, *exterior_surfacedefault;
 SVEXTERN char surfacedefaultlabel[256];
