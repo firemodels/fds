@@ -98,7 +98,6 @@ int readsmv(char *file){
   float s_color[4];
   int *ijk;
   int s_type;
-  int s_num[6];
   int errorcode;
   int noGRIDpresent=1,startpass;
 
@@ -116,8 +115,6 @@ int readsmv(char *file){
   float *xp=NULL, *yp=NULL, *zp=NULL;
   float *xp2=NULL, *yp2=NULL, *zp2=NULL;
   float *xpltcopy, *ypltcopy, *zpltcopy;
-//  float xmid, ymid, zmid;
-//  float offset,voffset;
   float dxbar, dybar, dzbar;
   float dxsbar, dysbar, dzsbar;
   int showobst;
@@ -127,7 +124,6 @@ int readsmv(char *file){
   int showvent;
   int colorindex, blocktype;
   int ventindex,venttype;
-//  int ventdir;
   int dataflag;
   int roomnumber;
   float width,ventoffset,bottom,top;
@@ -137,8 +133,6 @@ int readsmv(char *file){
   int ioffset;
   float *xplttemp,*yplttemp,*zplttemp;
   float *xplt_origtemp,*yplt_origtemp,*zplt_origtemp;
-//  char AIX[]="AIX";
-//  char SGI[]="SGI";
   particle *parti;
   int itrnx, itrny, itrnz, ipdim, iobst, ivent;
   int ibartemp=2, jbartemp=2, kbartemp=2;
@@ -254,15 +248,6 @@ int readsmv(char *file){
   }
 
   // free memory for particle class
-
-  /*
-  typedef struct {
-  char *name;
-  float *rgb;
-  int ntypes;
-  flowlabels *labels;
-} partclass;
-*/
 
   if(partclassinfo!=NULL){
     for(i=0;i<npartclassinfo+1;i++){
@@ -2955,6 +2940,8 @@ typedef struct {
 
       ntotal_blockages+=nbtemp;
       for(nn=0;nn<nbtemp;nn++){
+        int s_num[6];
+
         meshi->blockageinfoptrs[nn]=NULL;
         meshi->deletelist[nn]=NULL;
         NewMemory((void **)&meshi->blockageinfoptrs[nn],sizeof(blockagedata));
@@ -3021,6 +3008,9 @@ typedef struct {
           if(surfaceinfo==NULL||s_num[i]<0||s_num[i]>=nsurfaces)continue;
           surfi=surfaceinfo+s_num[i];
           bc->surf[i]=surfi;
+        }
+        for(i=0;i<6;i++){
+          bc->surf[i]->used_by_obst=1;
         }
         setsurfaceindex(bc);
       }
@@ -3194,6 +3184,8 @@ typedef struct {
       meshi->ventinfo=vinfo;
 
       for(nn=0;nn<nvents+12;nn++){
+        int s_num[6];
+
         vi=vinfo+nn;
         vi->transparent=0;
         vi->useventcolor=0;
@@ -3275,6 +3267,7 @@ typedef struct {
           if(vi->surf[0]!=NULL&&strncmp(vi->surf[0]->surfacelabel,"OPEN",4)==0){
             vi->isOpenvent=1;
           }
+          vi->surf[0]->used_by_vent=1;
         }
       }
       for(nn=0;nn<nvents+12;nn++){
@@ -4682,7 +4675,7 @@ typedef struct {
       }
       continue;
     }
-    if(autoterrain==1&&match(buffer,"OBST",4) == 1){
+    if(match(buffer,"OBST",4) == 1&&autoterrain==1){
       mesh *meshi;
       int nxcell;
 
@@ -6024,6 +6017,8 @@ void updateusetextures(void){
 /* ------------------ initsurface ------------------------ */
 
 void initsurface(surface *surf){
+  surf->used_by_obst=0;
+  surf->used_by_vent=0;
   surf->emis=1.0;
   surf->temp_ignition=TEMP_IGNITION_MAX;
   surf->surfacelabel=NULL;
@@ -6037,7 +6032,6 @@ void initsurface(surface *surf){
   surf->location=0;
   surf->invisible=0;
   surf->transparent=0;
-
 }
 
 /* ------------------ initventsurface ------------------------ */

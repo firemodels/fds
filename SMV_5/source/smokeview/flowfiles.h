@@ -196,6 +196,7 @@ typedef struct {
   int invisible;
   int location;
   int transparent;
+  int used_by_obst,used_by_vent;
 } surface;
 
 /* --------------------------  facedata ------------------------------------ */
