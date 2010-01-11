@@ -1325,9 +1325,9 @@ with {\tt drawcube}.  For example, {\tt 1.0 2.0 4.0 scale 1.0
 drawcube}\ creates a box with dimensions $1\times 2\times 4$.
 
 \infigl{drawcube}{0.25 drawcubec}
-\paragraph{DRAWCUBE} The command, {\tt s drawcubec}, is the same as {\tt s drawcube}\
-except that the origin is located at the front, left, bottom corner of the cube rather 
-than at the cube center.  An oblong box, a box with different length sides, may be drawn 
+\paragraph{DRAWCUBEC} The command, {\tt s drawcubec}, is the same as {\tt s drawcube}\
+except that the origin is located at the front, left, bottom corner of the cube rather
+than at the cube center.  An oblong box, a box with different length sides, may be drawn
 by using {\tt scale}\ along with {\tt drawcubec}.  For example, {\tt 1.0 2.0 4.0 scale 1.0
 drawcube}\ creates a box with dimensions $1\times 2\times 4$.
 
@@ -3183,8 +3183,9 @@ tasks in setting up an \fds\ input file is defining the geometry
 (blockages, vent locations \etc) properly. \Smokeview\ may be used
 to debug \fds\ input files by making short model runs and observing
 whether blockages, vents and other geometric features of a model run are
-located correctly. Blockages may then be created or changed. This
-is done with the {\em Edit Geometry}\ dialog box called from the
+located correctly. Blockages may then be created or changed using a text editor and 
+location information provided by the
+{\em Examine Blockages}\ dialog box called from the
 \fbox{\tt Dialogs}\ menu.
 
 The following is a general procedure for identifying problems in
@@ -3226,54 +3227,26 @@ keyword back to the desired final simulation time, remove any
 unnecessary \fds\ {\tt COLOR} keywords and run the case.
 \end{enumerate}
 
-\section{Examining and/or Editing Blockages}  Blockages may be examined or changed by selecting
-the menu item \frameit{Dialogs/Edit Geometry} which opens up the dialog box
-illustrated in Figure \ref{figEDIT}. Text edit boxes allow one to
-define comments (any text to the right of the closing ``/'' on an
-\&OBST line and pull down menus for linking surfaces (\&SURF
-lines) to obstructions. The surface choices are obtained from the
-input file or the database file if one is specified in the input
-file for FDS 4 and earlier cases.
-
-Note, the blockage editor does not work when clipping planes are
-active.
-
-The user may associate one, three or six surfaces with an obstruction.
-If the {\em\tt 3 wall} radio button is selected then materials
-for the top (upper surface), sides (vertical surfaces) and
-bottom (lower surface) may be specified. The {\tt\em color}\ check
-box allows the input or default color (manilla) to be displayed
-on blockage surfaces.
-
+\section{Examining Blockages}  Blockages locations and SURF 
+properties may be examined by selecting
+the menu item \frameit{Examine Blockages} which opens up the dialog box
+illustrated in Figure \ref{figEDIT}. Note, clipping planes need to be turned off 
+when using this dialog box.
 Associating unique colors with each surface allows the user to quickly
 determine whether blockages are defined with the proper surfaces.
 One can then verify that these modeling elements have been
 defined and positioned as intended.
+Position coordinates are displayed
+{\em snapped}\ to the nearest grid line or as specified in the input file.
 
 \begin{figure}[\figoptions]
 \centerline{
-\centerline{\includegraphics[width=4.826in]{figures/figEDIT} } }
-\caption[Blockage Edit Dialog Box.] {Blockage Edit Dialog Box.
-Click on `New' to create a new blockage or click on an existing
-blockage in the Smokeview scene to change its size or location.
-Change the size or location by entering blockage bounds directly
-or clicking an `arrow' and/or direction buttons.  Note, the
-blockage editor does not work when clipping planes are active.}
+\centerline{\includegraphics[width=4.402777in]{figures/figEDIT} } }
+\caption{Examine Blockages Dialog Box.}
  \label{figEDITBLOCKS}
 \label{figEDIT}
 \end{figure}
 
-The blockage editor works on one mesh at a time. For multi-mesh
-cases, use the Mesh list-box to select the desired mesh or simply
-click on a blockage in the mesh to switch to that mesh. The
-pull-down menu is necessary for meshes without blockages.
-
-Position coordinates entered into the text boxes are
-{\em snapped}\ to the nearest grid line.  Materials appearing
-under {\em\tt Surface Type}\ come from those materials
-defined in either the input data file or the database file.
-Either one, three or six wall properties can be entered by
-selecting the appropriate radio button.
 
 \chapter{Making Movies} \label{section:movie} A movie can be made
 of a Smokeview animation by converting the visualized scene into a
