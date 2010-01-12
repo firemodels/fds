@@ -1981,9 +1981,11 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Values for SOOT_YIELD, CO_YIELD, and SOOT_H_FRACTION result in negative CO2 yield'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      IF (RN%NU(H2O_INDEX) < 0._EB) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: Values for SOOT_YIELD, H2_YIELD, and SOOT_H_FRACTION result in negative H2O yield'
-         CALL SHUTDOWN(MESSAGE)
+      IF (H > 0._EB) THEN
+         IF (RN%NU(H2O_INDEX) < 0._EB) THEN
+            WRITE(MESSAGE,'(A)') 'ERROR: Values for SOOT_YIELD, H2_YIELD, and SOOT_H_FRACTION result in negative H2O yield'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
       ENDIF
       RN%NU(O2_INDEX)  = RN%NU(CO2_INDEX) + 0.5_EB*(RN%NU(CO_INDEX) - O)
       IF (H>0._EB) RN%NU(O2_INDEX) = RN%NU(O2_INDEX) + 0.5*RN%NU(H2O_INDEX)
@@ -2059,9 +2061,11 @@ SET_MIXTURE_FRACTION: IF (MIXTURE_FRACTION) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Values for SOOT_YIELD, CO_YIELD, and SOOT_H_FRACTION result in negative CO2 yield'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      IF (RN%NU(H2O_INDEX) < 0._EB) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: Values for SOOT_YIELD, H2_YIELD, and SOOT_H_FRACTION result in negative H2O yield'
-         CALL SHUTDOWN(MESSAGE)
+      IF (H > 0._EB) THEN
+         IF (RN%NU(H2O_INDEX) < 0._EB) THEN
+            WRITE(MESSAGE,'(A)') 'ERROR: Values for SOOT_YIELD, H2_YIELD, and SOOT_H_FRACTION result in negative H2O yield'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
       ENDIF
       RN%NU(O2_INDEX)  = RN%NU(CO2_INDEX) - 0.5_EB * O
       IF (CO_YIELD > 0._EB) RN%NU(O2_INDEX) = RN%NU(O2_INDEX) - 0.5_EB * RN%NU(CO_INDEX)
