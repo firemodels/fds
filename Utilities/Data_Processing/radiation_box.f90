@@ -52,7 +52,6 @@ file_loop: do n=1,10
    read(10,*)
    read(10,*)
    read(10,*)
-   read(10,*)
    read(10,*,end=20) t,(flux(k,n),k=1,20)
 20 continue
    close(10)

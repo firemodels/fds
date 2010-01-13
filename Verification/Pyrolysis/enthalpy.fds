@@ -19,7 +19,7 @@ curve after 80 degC.
 &SURF ID='SLAB'
       COLOR='TOMATO 1'
       EXTERNAL_FLUX = 3.0
-      H_FIXED = 0. /
+      H_FIXED = 0. 
       MATL_ID(1,:) = 'MAT_A'
       THICKNESS=0.001 /
 

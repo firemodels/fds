@@ -1974,11 +1974,11 @@ CHARACTER(30) :: QUANTITY
  
 WRITE(LU_ERR,'(/A/)')      ' Fire Dynamics Simulator'
 WRITE(LU_ERR,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
-IF (.NOT.PARALLEL .AND. .NOT.USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRIM(VERSION_STRING),"; MPI Disabled; OpenMP Disabled"
-IF (     PARALLEL .AND. .NOT.USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRIM(VERSION_STRING),"; MPI Enabled; OpenMP Disabled"
-IF (.NOT.PARALLEL .AND.      USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRIM(VERSION_STRING),"; MPI Disabled; OpenMP Enabled"
-IF (     PARALLEL .AND.      USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRIM(VERSION_STRING),"; MPI Enabled; OpenMP Enabled"
-IF (USE_OPENMP .AND. .NOT.PARALLEL) WRITE(LU_ERR,'(A,I3/)')           ' Number of available threads: ',OPENMP_AVAILABLE_THREADS
+IF (.NOT.USE_MPI .AND. .NOT.USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRIM(VERSION_STRING),"; MPI Disabled; OpenMP Disabled"
+IF (     USE_MPI .AND. .NOT.USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRIM(VERSION_STRING),"; MPI Enabled; OpenMP Disabled"
+IF (.NOT.USE_MPI .AND.      USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRIM(VERSION_STRING),"; MPI Disabled; OpenMP Enabled"
+IF (     USE_MPI .AND.      USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRIM(VERSION_STRING),"; MPI Enabled; OpenMP Enabled"
+IF (USE_OPENMP .AND. .NOT.USE_MPI) WRITE(LU_ERR,'(A,I3/)')           ' Number of available threads: ',OPENMP_AVAILABLE_THREADS
 WRITE(LU_ERR,'(A,I4/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
 WRITE(LU_ERR,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
 WRITE(LU_ERR,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
@@ -1987,8 +1987,8 @@ WRITE(LU_ERR,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
  
 WRITE(LU_OUTPUT,'(/A/)')      ' Fire Dynamics Simulator'
 WRITE(LU_OUTPUT,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
-IF (.NOT.PARALLEL)   WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
-IF (PARALLEL)        WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
+IF (.NOT.USE_MPI)   WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Serial'
+IF (USE_MPI)        WRITE(LU_OUTPUT,'(A,A,A)')      ' Version          : ',TRIM(VERSION_STRING),' Parallel'
 
 ! ADD Version and OpenMP Information
 

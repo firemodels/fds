@@ -19,9 +19,9 @@ Using default value of extinction coefficient, percent obscuration of asp1 shoul
 &VENT XB=-0.5,0.5,-0.5,0.5,-1.,-1.,SURF_ID='FLOWIN'/
 &VENT XB=-0.5,0.5,-0.5,0.5,1.,1.,SURF_ID='FLOWOUT'/
 
-&DEVC XYZ = 0.0,0.5,0.5, QUANTITY = 'soot density', FLOWRATE=0.3,DELAY=50,ID='sp1',DEVC_ID='asp1'/
-&DEVC XYZ = 0.0,0.5,0.5, QUANTITY = 'soot density', FLOWRATE=0.3,DELAY=100,ID='sp2',DEVC_ID='asp1'/
-&DEVC XYZ = 0.0,0.5,0.5, QUANTITY = 'soot density', FLOWRATE=0.3,DELAY=150,ID='sp3',DEVC_ID='asp1'/
-&DEVC XYZ = 0.0,0.0,0.0, QUANTITY = 'aspiration', ID='asp1',BYPASS_FLOWRATE=0./
+&DEVC XYZ=0.0,0.5,0.5, QUANTITY='DENSITY', SPEC_ID='soot', FLOWRATE=0.3, DELAY=50,ID='sp1', DEVC_ID='asp1' /
+&DEVC XYZ=0.0,0.5,0.5, QUANTITY='DENSITY', SPEC_ID='soot', FLOWRATE=0.3, DELAY=100,ID='sp2',DEVC_ID='asp1' /
+&DEVC XYZ=0.0,0.5,0.5, QUANTITY='DENSITY', SPEC_ID='soot', FLOWRATE=0.3, DELAY=150,ID='sp3',DEVC_ID='asp1' /
+&DEVC XYZ=0.0,0.0,0.0, QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0./
 
 &TAIL /

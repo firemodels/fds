@@ -10,7 +10,6 @@ open(10,file=infile,form='formatted',status='old')
 read(10,*)
 read(10,*)
 read(10,*)
-read(10,*)
 read(10,*) t,(flux(i),i=1,5)
 close(10)
 
