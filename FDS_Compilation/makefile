@@ -9,16 +9,16 @@
 
 VPATH = ../FDS_Source
 
-# Definition of the Serial or MPI object variables (same, except for main vs main_mpi)
+# Definition of the non-MPI or MPI object variables
 
 obj_serial = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
              ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
-             mass.o wall.o fire.o divg.o init.o velo.o pres.o mpis.o main_mpi.o
+             mass.o wall.o fire.o divg.o init.o velo.o pres.o mpis.o main.o
 objwin_serial = $(obj_serial:.o=.obj)
 
 obj_mpi = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
           ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
-          mass.o wall.o fire.o divg.o init.o velo.o pres.o mpip.o main_mpi.o
+          mass.o wall.o fire.o divg.o init.o velo.o pres.o mpip.o main.o
 objwin_mpi = $(obj_mpi:.o=.obj)
 
 # General Purpose Rules
@@ -425,7 +425,7 @@ hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
 read.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o evac.o hvac.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o isob.c turb.o
-main_mpi.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o 
+main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o 
 
 smvv.obj : isob.obj
 cons.obj : prec.obj
@@ -452,7 +452,7 @@ hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
 read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj irad.obj evac.obj hvac.obj
 init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj
 dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj isob.c turb.obj
-main_mpi.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj isob.c mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj
+main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj isob.c mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj
 
 
 #*** Clean Target to remove Object and Module files ***
