@@ -7,7 +7,7 @@ Test various devices and actions upon activation.
 
 &TIME T_END=60.0 /
 
-&SURF ID='FIRE', HRRPUA=500., PART_ID='smoke' /
+&SURF ID='FIRE', HRRPUA=500., PART_ID='smoke', DT_INSERT=0.05 /
 
 &VENT XB=3.0,4.0,4.0,4.0,0.0,1.0, SURF_ID='OPEN' /
 &VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='FIRE' /
@@ -16,7 +16,7 @@ Test various devices and actions upon activation.
 &OBST XB=2.1,2.2,0.1,0.2,0.2,0.3, COLOR='BLUE',   DEVC_ID='smoke_2' / Block in Mesh 1 tied to SD in Mesh 2
 
 &PART ID='smoke', MASSLESS=.TRUE., SAMPLING_FACTOR=1 /
-&PART ID='water', WATER=.TRUE.,    SAMPLING_FACTOR=1 /
+&PART ID='water', WATER=.TRUE.,    SAMPLING_FACTOR=5 /
 
 &PROP ID='Acme Smoke'
       QUANTITY='CHAMBER OBSCURATION' /
