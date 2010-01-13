@@ -79,6 +79,7 @@ OBJECTDEF
  //   The sphere changes color when activated.
 
  204 204 204 setrgb  // set color to off white
+ 180.0 rotatey 0.0 0.0 0.03 translate
  push 0.0 0.0 -0.02 translate 0.127 0.04 drawdisk pop
  push 0.0 0.0 -0.04 translate 
  0.06 0.08 0.02 drawtrunccone pop
@@ -89,6 +90,7 @@ OBJECTDEF
  //   problems if parts are added later.
  NEWFRAME  // beginning of activated definition
  204 204 204 setrgb
+ 180.0 rotatey 0.0 0.0 0.03 translate
  push 0.0 0.0 -0.02 translate 0.127 0.04 drawdisk pop
  push 0.0 0.0 -0.04 translate 
    0.06 0.08 0.02 drawtrunccone pop
@@ -98,7 +100,7 @@ OBJECTDEF
 
 OBJECTDEF
  sprinkler_upright
- 0.0 0.0 -0.04 translate
+ 180.0 rotatey 0.0 0.0 -0.04 translate
  "BRICK" setcolor
  push  0.0 0.0 -0.015 translate 0.03 0.03 drawdisk  pop
  push  0.0105 0.0 0.055 translate -22 rotatey 
@@ -118,7 +120,7 @@ OBJECTDEF
    0.4 0.4 1.0 scalexyz 0.03 drawsphere pop
  NEWFRAME
  "BRICK" setcolor
- 0.0 0.0 -0.04 translate
+ 180.0 rotatey 0.0 0.0 -0.04 translate
  push  0.0 0.0 -0.015 translate 0.03 0.03 drawdisk  pop
  push 0.0105 0.0 0.055 translate -22 rotatey 
    0.0085 0.004 0.05 scalexyz 1.0 drawcube pop
@@ -138,7 +140,7 @@ OBJECTDEF
 OBJECTDEF
  sprinkler_pendent
  "BRICK" setcolor
- 180.0 rotatey 0.0 0.0 -0.04 translate
+ 0.0 0.0 -0.04 translate
  push 0.0 0.0 -0.015 translate 0.03 0.03 drawdisk pop
  push 0.0105 0.0 0.055 translate -22 rotatey 
    0.0085 0.004 0.05 scalexyz 1.0 drawcube pop
@@ -158,7 +160,7 @@ OBJECTDEF
  NEWFRAME
  "BRICK" setcolor
  push 
- 180.0 rotatey 0.0 0.0 -0.04 translate
+ 0.0 0.0 -0.04 translate
  push 0.0 0.0 -0.015 translate 0.03 0.03 drawdisk pop
  push 0.0105 0.0 0.055 translate -22 rotatey 
    0.0085 0.004 0.05 scalexyz 1.0 drawcube pop
@@ -179,6 +181,7 @@ OBJECTDEF
 OBJECTDEF
  smoke_detector
  204 204 204 setrgb
+ 180.0 rotatey 0.0 0.0 0.02 translate
  push 0.0 0.0 -0.025 translate 0.127 0.05 drawdisk pop
  "GREEN" setcolor
  push 0.0 0.0 -0.02 translate 0.04 drawsphere pop
@@ -188,6 +191,7 @@ OBJECTDEF
  push 0.0 0.0 -0.028 translate 0.04 0.05 0.02 drawring pop
  NEWFRAME
  204 204 204 setrgb
+ 180.0 rotatey 0.0 0.0 0.02 translate
  push 0.0 0.0 -0.025 translate 0.127 0.05 drawdisk pop
  "RED" setcolor
  push 0.0 0.0 -0.02 translate 0.04 drawsphere pop
