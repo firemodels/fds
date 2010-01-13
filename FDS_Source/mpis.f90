@@ -293,12 +293,12 @@ MODULE MPI
 !
 ! attribute functions
 !
-       external MPI_NULL_COPY_FN, MPI_NULL_DELETE_FN
-       external MPI_COMM_NULL_COPY_FN, MPI_COMM_NULL_DELETE_FN
-       external MPI_TYPE_NULL_COPY_FN, MPI_TYPE_NULL_DELETE_FN
-       external MPI_WIN_NULL_COPY_FN, MPI_WIN_NULL_DELETE_FN
-       external MPI_DUP_FN, MPI_COMM_DUP_FN
-       external MPI_TYPE_DUP_FN, MPI_WIN_DUP_FN
+     ! external MPI_NULL_COPY_FN, MPI_NULL_DELETE_FN
+     ! external MPI_COMM_NULL_COPY_FN, MPI_COMM_NULL_DELETE_FN
+     ! external MPI_TYPE_NULL_COPY_FN, MPI_TYPE_NULL_DELETE_FN
+     ! external MPI_WIN_NULL_COPY_FN, MPI_WIN_NULL_DELETE_FN
+     ! external MPI_DUP_FN, MPI_COMM_DUP_FN
+     ! external MPI_TYPE_DUP_FN, MPI_WIN_DUP_FN
 !
 ! double precision functions
 !
@@ -434,11 +434,11 @@ subroutine mpi_allgather ( data1, nsend, sendtype,data2, nrecv, recvtype, &
   ierror = MPI_SUCCESS
 
   if ( sendtype == mpi_double_precision ) then
-    call mpi_copy_double_precision ( data1, data2, nsend, ierror )
+  ! call mpi_copy_double_precision ( data1, data2, nsend, ierror )
   else if ( sendtype == mpi_integer ) then
-    call mpi_copy_integer ( data1, data2, nsend, ierror )
+  ! call mpi_copy_integer ( data1, data2, nsend, ierror )
   else if ( sendtype == mpi_real ) then
-    call mpi_copy_real ( data1, data2, nsend, ierror )
+  ! call mpi_copy_real ( data1, data2, nsend, ierror )
   else
     ierror = MPI_FAILURE
   end if
@@ -506,11 +506,11 @@ subroutine mpi_allgatherv ( data1, nsend, sendtype, data2, nrecv, ndispls, &
   ierror = MPI_SUCCESS
 
   if ( sendtype == mpi_double_precision ) then
-    call mpi_copy_double_precision ( data1, data2, nsend, ierror )
+  ! call mpi_copy_double_precision ( data1, data2, nsend, ierror )
   else if ( sendtype == mpi_integer ) then
-    call mpi_copy_integer ( data1, data2, nsend, ierror )
+  ! call mpi_copy_integer ( data1, data2, nsend, ierror )
   else if ( sendtype == mpi_real ) then
-    call mpi_copy_real ( data1, data2, nsend, ierror )
+  ! call mpi_copy_real ( data1, data2, nsend, ierror )
   else
     ierror = MPI_FAILURE
   end if
@@ -544,11 +544,11 @@ subroutine mpi_gatherv ( data1, nsend, sendtype, data2, nrecv, ndispls, &
   ierror = MPI_SUCCESS
 
   if ( sendtype == mpi_double_precision ) then
-    call mpi_copy_double_precision ( data1, data2, nsend, ierror )
+  ! call mpi_copy_double_precision ( data1, data2, nsend, ierror )
   else if ( sendtype == mpi_integer ) then
-    call mpi_copy_integer ( data1, data2, nsend, ierror )
+  ! call mpi_copy_integer ( data1, data2, nsend, ierror )
   else if ( sendtype == mpi_real ) then
-    call mpi_copy_real ( data1, data2, nsend, ierror )
+  ! call mpi_copy_real ( data1, data2, nsend, ierror )
   else
     ierror = MPI_FAILURE
   end if
@@ -625,15 +625,15 @@ subroutine mpi_allreduce ( data1, data2, n, datatype, operation, comm, ierror )
 
   if ( datatype == mpi_double_precision ) then
 
-    call mpi_reduce_double_precision ( data1, data2, n, operation, ierror )
+  ! call mpi_reduce_double_precision ( data1, data2, n, operation, ierror )
 
   else if ( datatype == mpi_integer ) then
 
-    call mpi_reduce_integer ( data1, data2, n, operation, ierror )
+  ! call mpi_reduce_integer ( data1, data2, n, operation, ierror )
 
   else if ( datatype == mpi_real ) then
 
-    call mpi_reduce_real ( data1, data2, n, operation, ierror )
+  ! call mpi_reduce_real ( data1, data2, n, operation, ierror )
 
   else
 
@@ -1804,15 +1804,15 @@ subroutine mpi_reduce ( data1, data2, n, datatype, operation, receiver, &
 
   if ( datatype == mpi_double_precision ) then
 
-    call mpi_reduce_double_precision ( data1, data2, n, operation, ierror )
+  ! call mpi_reduce_double_precision ( data1, data2, n, operation, ierror )
 
   else if ( datatype == mpi_integer ) then
 
-    call mpi_reduce_integer ( data1, data2, n, operation, ierror )
+  ! call mpi_reduce_integer ( data1, data2, n, operation, ierror )
 
   else if ( datatype == mpi_real ) then
 
-    call mpi_reduce_real ( data1, data2, n, operation, ierror )
+  ! call mpi_reduce_real ( data1, data2, n, operation, ierror )
 
   else
 
@@ -2138,11 +2138,11 @@ subroutine mpi_reduce_scatter ( data1, data2, n, datatype, operation, comm, &
   ierror = MPI_SUCCESS
 
   if ( datatype == mpi_double_precision ) then
-    call mpi_copy_double_precision ( data1, data2, n, ierror )
+  ! call mpi_copy_double_precision ( data1, data2, n, ierror )
   else if ( datatype == mpi_integer ) then
-    call mpi_copy_integer ( data1, data2, n, ierror )
+  ! call mpi_copy_integer ( data1, data2, n, ierror )
   else if ( datatype == mpi_real ) then
-    call mpi_copy_real ( data1, data2, n, ierror )
+  ! call mpi_copy_real ( data1, data2, n, ierror )
   else
     ierror = MPI_FAILURE
   end if
