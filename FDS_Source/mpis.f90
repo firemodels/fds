@@ -302,8 +302,8 @@ MODULE MPI
 !
 ! double precision functions
 !
-      double precision MPI_WTIME, MPI_WTICK , PMPI_WTIME, PMPI_WTICK
-      external MPI_WTIME, MPI_WTICK , PMPI_WTIME, PMPI_WTICK
+      double precision MPI_WTIME, MPI_WTICK !, PMPI_WTIME, PMPI_WTICK
+      external MPI_WTIME, MPI_WTICK !, PMPI_WTIME, PMPI_WTICK
 !
 ! extra items added by McGrattan
 !
