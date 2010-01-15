@@ -10110,7 +10110,7 @@ void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis){
   normalize(xyznorm,3);
   *dtheta = 180.0*acos(xyznorm[2])/pi;
   rotate_axis[0]=-xyznorm[1];
-  rotate_axis[1]=xyznorm[0];
+  rotate_axis[1]= xyznorm[0];
   rotate_axis[2]=0.0;
   normalize(rotate_axis,2);
 }
