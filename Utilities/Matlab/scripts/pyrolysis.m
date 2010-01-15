@@ -63,7 +63,7 @@ for i_plot=1:2
         delta_T(1) = 10.;
         delta_T(2) = 80.;
         delta_T(3) = 20.;
-        residue(1) = 0.0;
+        residue(1) = 0.2;
         residue(2) = 0.2;
         residue(3) = 0.0;
     end
@@ -71,7 +71,7 @@ for i_plot=1:2
     % Calculate A and E
     
     for i=1:n_components
-        Y_p=0.4;
+        Y_p=1./exp(1.);
         r_p(i)=2*dTdt*(1.-residue(i))/delta_T(i);
         E(i)=(r_p(i)/Y_p)*R0*T_p(i)*T_p(i)/dTdt;
         A(i)=(r_p(i)/Y_p)*exp(E(i)./(R0.*T_p(i)));
