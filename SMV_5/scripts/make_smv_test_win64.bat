@@ -22,6 +22,10 @@ copy objects.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
 copy pthreadVC.dll %smvdir%\.
 copy note.txt %smvdir%\.
+mkdir %smvdir%\textures
+copy textures\*.jpg %smvdir%\textures
+copy textures\*.png %smvdir%\textures
+
 
 echo
 echo winzipping distribution directory
