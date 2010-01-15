@@ -333,6 +333,7 @@ void getsmokesensors(void){
     label = devicei->object->label;
     if(STRCMP(label,"smokesensor")!=0)continue;
     doit=1;
+    break;
   }
   if(doit==0)return;
 
@@ -3308,7 +3309,9 @@ void update_device_textures(void){
 
     devicei = deviceinfo + i;
 
-    devicei->object = get_SVOBJECT_type(devicei->label,missing_device);
+    if(devicei->object==NULL){
+      devicei->object = get_SVOBJECT_type(devicei->label,missing_device);
+    }
   }
 
   device_texture_list=NULL;

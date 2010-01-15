@@ -2023,6 +2023,9 @@ typedef struct {
       get_labels(buffer,&prop_id,NULL);
       if(prop_id!=NULL){
         devicei->prop=get_prop_id(prop_id);
+        if(devicei->prop!=NULL&&devicei->prop->smv_object!=NULL){
+          devicei->object=devicei->prop->smv_object;
+        }
       }
       else{
         NewMemory((void **)&devicei->prop,sizeof(propdata));
