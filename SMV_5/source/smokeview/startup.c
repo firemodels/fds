@@ -914,7 +914,6 @@ void InitOpenGL(void){
     TrainerViewMenu(trainerview);
   }
 
-
 /* ------------------ initvars1 ------------------------ */
 
 void initvars1(void){
