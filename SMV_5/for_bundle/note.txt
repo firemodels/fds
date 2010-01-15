@@ -1,7 +1,17 @@
-1.  test code for displaying smokediff'd files
-2.  test display of user specified zone fire vent colors
-3.  test code for displaying diff'd files of cases with different grid precisions
-4.  test code for freeing plot3d memory after coloring data (for use with very large cases)
-5.  test code for displaying a planar user device
-6.  test code for displaying dynamic devices, textured sphere devices and color settable trees
-
+1.  test new devices.svo format
+2.  add some error checking for new format
+3.  test use of character strings in device file
+4.  test texture maps in device file
+5.  test option to display one of several smokeview objects when viewing particle files
+6.  test option to change change distance units from m to f
+7.  simplify unit conversion code by using keying on "unit" rather than "short label" to do the conversion
+8.  test code for drawing new vent and "square" objects
+9.  test object rotation fixes
+10. test active and inactive vent objects
+11. test cable tray object and drawcubec drawing command
+12. test use of PROP_ID with blockages and objects
+13. in blockage editor change output file extension to .fds - addresses issue 986; 
+14. test option to adjust blue/green right stereo buffer - addresses issue 978; 
+15. test option to change Mass Fraction kg/kg units to g/kg - addresses issue 985
+16. remove blockage edit capability, was buggy - replaced with dialog box that displays rather than edits blockage properties
+17. add list of unused SURFs to Examine Blockage dialog box
