@@ -2172,7 +2172,9 @@ r_{\alpha \beta} =
 where $T_{thr,\alpha \beta}$ is a threshold temperature that can be
 used to dictate that the reaction must not occur below a
 user-specified temperature. By default, the term is deactivated
-($T_{thr,\alpha\beta}=0$ K).
+($T_{thr,\alpha\beta}=0$ K). Appendix~\ref{solid_kinetics_appendix} describes a method
+for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using
+bench-scale measurement techniques.
 
 The production term $S_\alpha$ is the sum over all the reactions where the
 solid residue is material $\alpha$
@@ -4965,6 +4967,52 @@ The smoothing parameter in (\ref{eqn_rhomn}) is obtained from
 \label{eqn_realc}
 c_n = \frac{\max(0,\rho_{min} - \rho_n^*)}{ \sum_{s\in {\sf N},s\ne n} ( \max[\rho_{min},\rho_s^*] - \max[\rho_{min},\rho_n^*] )}
 \end{equation}
+
+
+\chapter{Solid Phase Kinetics}
+\label{solid_kinetics_appendix}
+
+This section describes a method of determining the values of the kinetic parameters for the thermal decomposition of a solid,
+following the methodology described by Lyon~\cite{Lyon:FM2000}.
+
+Consider a multi-component solid. The mass fraction of any component, $Y(t)$, changes in time according to the equation:
+\be
+   \frac{dY}{dt} = -A \, Y \, \exp \left( -\frac{E}{RT} \right)    \quad ; \quad Y(0) = Y_0  \label{dYdt}
+\ee
+For bench-scale measurement techniques like TGA (Thermo-Gravimetric Analysis), a small sample of the material is
+heated linearly in time at a specified rate, $dT/dt=\beta$. The results are usually expressed as a function of
+temperature rather than time; thus, it is convenient to rewrite Eq.~(\ref{dYdt}) as:
+\be
+   \frac{dY}{dT} = -\frac{A}{\beta} \, Y \, \exp \left( -\frac{E}{RT} \right)    \quad ; \quad Y(T=T_0) = Y_0  \label{dYdT}
+\ee
+The decomposition rate, $-dY/dt$, peaks at a temperature denoted by $T_p$ with a value denoted by $r_p$.
+At this temperature, the second derivative of $Y$ is zero:
+\be
+   \frac{d^2 Y}{dT^2} = -\frac{A}{\beta} \, \frac{dY}{dT} \, \exp \left( -\frac{E}{RT_p} \right) -
+   \frac{A}{\beta} \, Y \, \exp \left( -\frac{E}{RT_p} \right) \, \frac{E}{R T_p^2}
+   = -\frac{dY}{dT} \left[ \frac{A}{\beta} \, \exp \left( -\frac{E}{RT_p} \right) - \frac{E}{R T_p^2} \right] = 0  \label{d2YdT2}
+\ee
+Next, Eq.~(\ref{dYdT}) can be integrated from $T_0$ to $T_p$:
+\be
+   \int_{Y_0}^{Y_p} \left( \frac{dY'}{Y'} \right) = - \frac{A}{\beta} \int_{T_0}^{T_p} \exp \left( -\frac{E}{RT'} \right) \; dT'
+   \approx - \frac{A R T_p^2}{ \beta \, (E+2 R T_p) } \; \exp \left( -\frac{E}{RT_p} \right)
+\ee
+Using Eq.~(\ref{d2YdT2}) to eliminate $A$ yields:
+\be
+   \ln \left( \frac{Y_p}{Y_0} \right) = - \frac{E}{E+2 R T_p} \approx -1  \quad \quad (E \gg 2 R T_p)
+\ee
+or more simply, $Y_p \approx Y_0/e$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
+\be
+   E = RT_p^2 \, \frac{A}{\beta} \, \exp \left( -\frac{E}{RT_p} \right) = \frac{RT_p^2}{\beta} \frac{r_p}{Y_p}
+   \approx \frac{RT_p^2}{\beta} \frac{e r_p}{Y_0}
+\ee
+Then $A$ can be evaluated directly from Eq.~(\ref{dYdt}):
+\be
+   A = \frac{r_p}{Y_p} \, \exp \left( \frac{E}{RT_p} \right) \approx \frac{e r_p}{Y_0} \, \exp \left( \frac{E}{RT_p} \right)
+\ee
+
+
+
 
 
 \end{document}
