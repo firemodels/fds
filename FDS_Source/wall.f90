@@ -352,6 +352,8 @@ TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (OMESH_TYPE), POINTER :: OM
 TYPE (MESH_TYPE), POINTER :: MM
 TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC
+TYPE (REACTION_TYPE), POINTER :: RN
+TYPE (MATERIAL_TYPE), POINTER :: ML
 TYPE (DROPLET_TYPE), POINTER :: DR
 TYPE (DUCTNODE_TYPE), POINTER :: DN
 TYPE (DUCT_TYPE), POINTER :: DU
@@ -497,7 +499,9 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          ENDDO
  
       CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
+
          ! If the current time is before the "activation" time, TW, apply simple BCs and get out
+
          IF (T < TW(IW)) THEN
             MASSFLUX(IW,0) = 0._EB
             IF (N_SPECIES > 0)  THEN
@@ -508,6 +512,8 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
                ENDIF
             CYCLE WALL_CELL_LOOP
          ENDIF
+
+         ! Zero out the running counter of Mass Flux Total (MFT)
 
          MFT = 0._EB
 
@@ -523,12 +529,19 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
                MASSFLUX(IW,N) = EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*SF%MASS_FLUX(N)
                IF (N==I_FUEL) THEN
                   IF (EW(IW)>0._EB) MASSFLUX(IW,N) = MASSFLUX(IW,N)*EXP(-EW(IW))
-                  MASSFLUX_ACTUAL(IW,N) = MASSFLUX(IW,N)
+                  IF (SF%N_MATL==0) THEN
+                     MASSFLUX_ACTUAL(IW,N) = MASSFLUX(IW,N)/AREA_ADJUST(IW)
+                  ELSE
+                     ML => MATERIAL(SF%MATL_INDEX(1))
+                     RN => REACTION(1)
+                     MASSFLUX_ACTUAL(IW,N) = MASSFLUX(IW,N)*RN%HEAT_OF_COMBUSTION/ML%HEAT_OF_COMBUSTION(1,I_FUEL)/AREA_ADJUST(IW)
+                  ENDIF
                ENDIF
             ENDIF
             MASSFLUX(IW,N) = MASSFLUX(IW,N)*AREA_ADJUST(IW)
             MFT = MFT + MASSFLUX(IW,N)
          ENDDO SUM_MASSFLUX_LOOP
+
          ! Add total consumed mass to various summing arrays
 
          CONSUME_MASS: IF (CORRECTOR .AND. SF%THERMALLY_THICK) THEN  
@@ -745,16 +758,19 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ENDIF
    SF => SURFACE(IBC)
 
-! Determine ghost cell value of RSUM=R0*Sum(Y_i/M_i) 
+   ! Determine ghost cell value of RSUM=R0*Sum(Y_i/M_i) 
+
    IF (N_SPECIES>0) THEN
       YY_GET = YY_W(IW,:)
       CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM_W(IW))
    ENDIF
  
-! Compute ghost cell density
+   ! Compute ghost cell density
+
    IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) RHO_W(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM_W(IW)*TMP_W(IW))
 
-! Actually set the ghost cell value of density in the ghost cell if it is a solid wall
+   ! Actually set the ghost cell value of density in the ghost cell if it is a solid wall
+
    IF ( (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) .OR.  &
          BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
       RHOP(II,JJ,KK) = RHO_W(IW)

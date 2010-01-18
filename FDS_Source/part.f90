@@ -1320,6 +1320,7 @@ TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC
 TYPE (SURFACE_TYPE), POINTER :: SF
 
 ! Initializations
+
 RDT    = 1._EB/DT
 OMRAF  = 1._EB - RUN_AVG_FAC
 FUEL_DROPLET_MLR(NM) = 0._EB
@@ -1403,6 +1404,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
       MW_DROP  = SPECIES(IGAS)%MW
       H_V_REF  = PC%H_V(NINT(PC%H_V_REFERENCE_TEMPERATURE))
       H_L_REF  = PC%C_P_BAR(NINT(TMP_MELT))*TMP_MELT
+
       ! Loop through all droplets in the class and determine the depth of the liquid film on each surface cell
 
       FILM_SUMMING_LOOP: DO I=1,NLP
@@ -1448,6 +1450,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
          N_SUBSTEPS = 1
          DT_SUBSTEP = DT/REAL(N_SUBSTEPS,EB) 
          DT_SUM = 0._EB
+
          TIME_ITERATION_LOOP: DO WHILE (DT_SUM < DT)
 
             IF (N_SPECIES==0) THEN
@@ -1469,13 +1472,14 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             H_L      = PC%C_P_BAR(ITMP)*TMP_DROP-H_L_REF
             WGT      = DR%PWT
             DHOR     = H_V*MW_DROP/R0   
+
             ! Gas conditions
 
             TMP_G  = TMP(II,JJ,KK)
             RHO_G  = RHO(II,JJ,KK)
             MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
             M_GAS  = RHO_G/RVC        
-            M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT!limit to avoid diveregence errors
+            M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT ! limit to avoid diveregence errors
             K_AIR  = CPOPR*MU_AIR
             IF (IGAS>0) THEN
                Y_GAS = YY(II,JJ,KK,IGAS)
@@ -1486,6 +1490,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             V2 = 0.5_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))
             W2 = 0.5_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))
             VEL_REL = SQRT((U2-DR%U)**2+(V2-DR%V)**2+(W2-DR%W)**2)
+
             ! Set variables for heat transfer on solid
 
             SOLID_OR_GAS_PHASE: IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
@@ -1550,22 +1555,28 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                DY_DTMP_DROP = 0._EB
                Y_DROP       = 0._EB
             ENDIF
+
             ! Update the droplet temperature semi_implicitly
     
             DENOM = 1._EB + (H_HEAT + H_WALL + H_MASS*RHO_G*H_V*DY_DTMP_DROP)*DT_SUBSTEP*A_DROP/(2._EB*M_DROP*C_DROP) 
             TMP_DROP_NEW = ( TMP_DROP + DT_SUBSTEP*( Q_DOT_RAD + &
                              A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) + H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
                              H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DY_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / DENOM
+
             ! Compute the total amount of heat extracted from the gas, wall and radiative fields
+
             Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
             Q_CON_GAS  = DT_SUBSTEP*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
             Q_CON_WALL = DT_SUBSTEP*A_DROP*H_WALL*(TMP_WALL-0.5_EB*(TMP_DROP+TMP_DROP_NEW))
             Q_TOT      = Q_RAD+Q_CON_GAS+Q_CON_WALL
+
             ! Compute the total amount of liquid evaporated
+
             M_VAP = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
             M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP,M_VAP_MAX))
             
             ! Evaporate completely small droplets
+
             IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  
                M_VAP  = M_DROP
                IF (Q_TOT>0._EB) THEN
@@ -1598,14 +1609,23 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             M_DROP = M_DROP - M_VAP
         
             ! Compute surface cooling and density
+
             IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
                WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*(Q_RAD+Q_CON_WALL)*RAW(IW)/DT_SUBSTEP
                WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*WGT*M_DROP*RAW(IW)/REAL(N_SUBSTEPS,EB) 
             ENDIF
 
-            !Update gas temperature and determine new subtimestep
+            ! Add fuel evaporation rate to running counter and adjust mass of evaporated fuel to account for different 
+            ! Heat of Combustion between fuel droplet and gas
+
+            IF (IGAS>0 .AND. IGAS==I_FUEL) THEN
+               FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP
+               M_VAP = PC%ADJUST_EVAPORATION*M_VAP
+            ENDIF
+
+            ! Update gas temperature and determine new subtimestep
+
             DELTA_H_G = (H_L + H_V - PC%H_V_CORRECTOR)
-            YY_GET(:) = YY(II,JJ,KK,:)
             ITMP = MAX(1,MIN(5000,NINT(TMP_G)))
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP)            
             H_G_OLD = M_GAS*CP*TMP_G
@@ -1638,11 +1658,16 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                IF (DT_SUBSTEP <= 0.00001_EB*DT) CALL SHUTDOWN('Numerical instability in particle energy transport')
                CYCLE TIME_ITERATION_LOOP
             ENDIF
+
+            ! Update gas cell density, temperature, and mass fractions
+
             RHO(II,JJ,KK) = M_GAS_NEW*RVC
             YY(II,JJ,KK,:) = YY_GET(:)
             CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(II,JJ,KK))
-            TMP(II,JJ,KK) = TMP_G_NEW
-            TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP(II,JJ,KK)))
+            TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP_G_NEW))
+
+            ! Compute change in enthalpy between gas and liquid
+
             YY_GET = 0._EB
             YY_GET(IGAS) = 1._EB
             ITMP = MIN(5000,NINT(TMP_G))
@@ -1650,21 +1675,21 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             DELTA_H_G = (DELTA_H_G - CP2 * TMP_G) 
             
             ! Compute contribution to the divergence
+
             D_LAGRANGIAN(II,JJ,KK) =  D_LAGRANGIAN(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
                                       (M_VAP*DELTA_H_G- Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP 
 
-            ! Add fuel evaporation rate to running counter before adjusting its value
-            IF (IGAS>0 .AND. IGAS==I_FUEL) FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP
+            ! Keep track of total mass evaporated in cell
 
-            ! Adjust mass of evaporated liquid to account for different Heat of Combustion between fuel droplet and gas
-            M_VAP = PC%ADJUST_EVAPORATION*M_VAP
-
-            !Track total mass evaporate in cell
             MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
+
             ! Update droplet quantities
+
             DR%R   = (M_DROP/FTPR)**ONTH
             DR%TMP = TMP_DROP_NEW
+
             ! Get out of the loop if the droplet has evaporated completely
+
             IF (DR%R<=0._EB) CYCLE DROPLET_LOOP
             DT_SUM = DT_SUM + DT_SUBSTEP
             DT_SUBSTEP = MIN(DT-DT_SUM,DT_SUBSTEP * 1.5_EB)
