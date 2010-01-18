@@ -327,7 +327,7 @@ MODULE EVAC
        HUMAN_SMOKE_HEIGHT, TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, &
        CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
        CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, FAC_DOOR_QUEUE, &
-       FAC_DOOR_WAIT, CF_MIN_B
+       FAC_DOOR_WAIT, CF_MIN_B, FAC_DOOR_OLD, FAC_DOOR_OLD2
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -478,7 +478,7 @@ CONTAINS
          FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
          CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, &
          FAC_DOOR_QUEUE, FAC_DOOR_WAIT, CF_MIN_B, &
-         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI
+         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, FAC_DOOR_OLD, FAC_DOOR_OLD2
     !
     IF (.NOT. ANY(EVACUATION_GRID)) THEN
        N_EVAC = 0
@@ -956,7 +956,9 @@ CONTAINS
       ! FAC_DOOR_QUEUE  = 0.0_EB   ! Door selection algorithm: persons/m/s
       FAC_DOOR_QUEUE  = 1.3_EB   ! Door selection algorithm: persons/m/s
       FAC_DOOR_WAIT   = 0.9_EB   ! Door selection algorithm: patience factor
-      
+      FAC_DOOR_OLD    = 0.1_EB      ! The present door is considered "smoke free" longer than others
+      FAC_DOOR_OLD2   = 0.9_EB      ! The present door is considered "not too much smoke" longer than others
+
       OUTPUT_SPEED         = .FALSE.
       OUTPUT_MOTIVE_FORCE  = .FALSE.
       OUTPUT_MOTIVE_ANGLE  = .FALSE.
@@ -5043,7 +5045,7 @@ CONTAINS
     REAL(FB) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4, T_TMP, DT_TMP
     REAL(FB) TMPOUT5, TMPOUT6, TMPOUT7, TMPOUT8
     REAL(EB), ALLOCATABLE, DIMENSION(:) :: YY_GET
-    
+
     EXCHANGE_EVACUATION=.FALSE.
     !
     IF (.NOT. ANY(EVACUATION_GRID)) RETURN
@@ -5074,11 +5076,13 @@ CONTAINS
     !
     ! Update interval (seconds) fire ==> evac information
     DT_SAVE = 2.0_EB
+
     IOS = 0
 
     L_USE_FED  = .FALSE.
     L_FED_READ = BTEST(I_MODE,3)
     L_FED_SAVE = BTEST(I_MODE,1)
+
 
     !
     ! Change information: Fire meshes ==> evac meshes
@@ -11541,7 +11545,8 @@ CONTAINS
              ELSE
                 L2_tmp = K_ave_Door(i)
              END IF
-             IF (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
+             !Issue 989 IF (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
+             IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD*L2_tmp
              IF (FAC_DOOR_QUEUE > 0.001_EB) THEN
                 T_tmp  = SQRT((x_o-x1_old)**2 + (y_o-y1_old)**2)
                 T_tmp1 = MIN(1.5_EB*Pi*T_tmp**2/(FAC_DOOR_QUEUE*Width), REAL(N_queue,EB)/(FAC_DOOR_QUEUE*Width))
@@ -11593,7 +11598,7 @@ CONTAINS
                 ELSE
                    l2_tmp = K_ave_Door(i)
                 END IF
-                IF (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
+                IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD*L2_tmp
                 T_tmp  = SQRT((x_o-x1_old)**2 + (y_o-y1_old)**2)
                 IF (i_o == i_old_ffield) T_tmp = T_tmp*FAC_DOOR_WAIT
                 IF (T_tmp < L2_min .AND. L2_tmp < ABS(FED_DOOR_CRIT)) THEN
@@ -11635,7 +11640,7 @@ CONTAINS
                    ELSE
                       l2_tmp = K_ave_Door(i)
                    END IF
-                   IF (i_o == i_old_ffield) L2_tmp = 0.1_EB*L2_tmp
+                   IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD*L2_tmp
                    T_tmp  = SQRT((x_o-x1_old)**2 + (y_o-y1_old)**2)
                    IF (i_o == i_old_ffield) T_tmp = T_tmp*FAC_DOOR_WAIT
                    IF (T_tmp < L2_min .AND. L2_tmp < ABS(FED_DOOR_CRIT)) THEN
@@ -11680,7 +11685,7 @@ CONTAINS
                       ELSE
                          l2_tmp = (SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)*0.5_EB)/(3.0_EB/K_ave_Door(i))
                       END IF
-                      IF (i_o == i_old_ffield) L2_tmp = 0.9_EB*L2_tmp
+                      IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD2*L2_tmp
                       IF (L2_tmp < L2_min) THEN
                          L2_min = L2_tmp
                          i_tmp = i
