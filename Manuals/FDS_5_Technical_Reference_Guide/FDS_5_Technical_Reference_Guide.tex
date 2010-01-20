@@ -4992,7 +4992,7 @@ At this temperature, the second derivative of $Y$ is zero:
    \frac{A}{\beta} \, Y \, \exp \left( -\frac{E}{RT_p} \right) \, \frac{E}{R T_p^2}
    = -\frac{dY}{dT} \left[ \frac{A}{\beta} \, \exp \left( -\frac{E}{RT_p} \right) - \frac{E}{R T_p^2} \right] = 0  \label{d2YdT2}
 \ee
-Next, Eq.~(\ref{dYdT}) can be integrated from $T_0$ to $T_p$:
+Next, Eq.~(\ref{dYdT}) can be integrated from $Y_0$ to $Y_p$ (the value of $Y$ at the peak), and $T_0$ to $T_p$:
 \be
    \int_{Y_0}^{Y_p} \left( \frac{dY'}{Y'} \right) = - \frac{A}{\beta} \int_{T_0}^{T_p} \exp \left( -\frac{E}{RT'} \right) \; dT'
    \approx - \frac{A R T_p^2}{ \beta \, (E+2 R T_p) } \; \exp \left( -\frac{E}{RT_p} \right)
@@ -5010,6 +5010,16 @@ Then $A$ can be evaluated directly from Eq.~(\ref{dYdt}):
 \be
    A = \frac{r_p}{Y_p} \, \exp \left( \frac{E}{RT_p} \right) \approx \frac{e r_p}{Y_0} \, \exp \left( \frac{E}{RT_p} \right)
 \ee
+Note that the formulae for $A$ and $E$ are appropriate for multiple-step reactions, where the number of peaks in the reaction
+rate curve corresponds to the number of reactions. For TGA data, the values of $r_p$ can be pulled directly from the reaction
+rate curve, assuming the units are s$^{-1}$. For micro-combustion calorimetry, assuming that the results are presented in units of
+W/g, the values of $r_p$ can be found from:
+\be
+   r_p = \frac{q_p}{\Delta H}
+\ee
+where $q_p$ are the peaks of the heat release rate curve and $\Delta H$ is the heat of combustion, which is obtained by integrating
+the heat release rate curve as a function of the temperature. It is important to check the units of all of these quantities because the
+results of these experiments are often presented in different ways depending on the particular application.
 
 
 
