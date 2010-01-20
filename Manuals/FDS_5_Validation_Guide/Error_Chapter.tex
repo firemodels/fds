@@ -26,6 +26,11 @@ uncertainty is easier to quantify than the model error, the error can be estimat
 difference between prediction and measurement. The quotation marks in the previous sentence indicate that model error and input uncertainty do not simply add together,
 and to decouple them requires some statistical analysis that will be described below.
 
+In essence, the methodology presented below will allow a model user to assign error bars to the results of a numerical simulation. This is different than what is
+commonly done now, namely {\em sensitivity analysis}. In a sensitivity analysis, the modeler demonstrates the effect on the results of varying important input parameters.
+This is an important exercise, but it does not address the error due to the model itself. In fact, the methodology discussed below is designed to answer the
+question posed in this way -- suppose that the physical parameters of a given fire scenario are known exactly, what is the accuracy of the model prediction?
+
 
 \section{Model Error}
 
@@ -419,7 +424,22 @@ experimental uncertainty. Of
 course, the uncertainty associated with the input parameters would need to be quantified and propagated through the model. The end result would be a widening of
 the distribution shown in Fig.~\ref{bell_curve} and an increase in the likelihood of cable damage, assuming that the parameters used in the ``base case'' were
 all taken as the mean values of their respective distributions. In fact, depending on the scenario, the uncertainty associated with the input parameters can far outweigh
-the model error.
+the model error. For example, it was discussed above that the upper layer temperature in a compartment is proportional to the heat release rate to the two-thirds power.
+Hamins~\cite{NUREG_1824} demonstrates that the surface temperature of an object also exhibits the same sensitivity to the HRR. Suppose that in a compartment fire
+analysis, the HRR is chosen from a distribution derived from experimental measurements of the burning rate of the potential fuel sources in the room. Suppose a similar
+analysis is done for the other input parameters that have a significant impact on the results. Assuming that the
+input parameters are normally-distributed, and that the
+simulation makes use of the mean values, the combined uncertainty in the result could
+be expressed in terms of the model error, $\widetilde{\sigma}_M$, plus contributions from the uncertainty in the input parameters:
+\be
+   \widetilde{\sigma}^2 = \widetilde{\sigma}_M^2 + \sum_i p_i^2 \widetilde{\sigma}_i^2  \label{comb_unc}
+\ee
+The factors, $p_i$, represent the power dependencies of the individual input parameters. For example, a prediction of the surface temperature of an object has a power dependence of
+$p=0.67$ on the HRR. In essence, Eq.~(\ref{comb_unc}) combines the sensitivity and error analyses to produce a single estimate of the total uncertainty of the
+model result. To the person evaluating the analysis, like the AHJ, this is really all that matters. However, for the model developers and model users, it is useful to
+decompose the total uncertainty into its constituent parts. That encourages the developers to reduce as much as possible the value of $\widetilde{\sigma}_M$ and the users to reduce
+the values of $\widetilde{\sigma}_i$. It also indicates the major sources of uncertainty so that resources can be spent wisely addressing the most important ones.
+
 
 
 \section{Limitations}
