@@ -24,11 +24,11 @@ call %envfile%
 echo.
 cd %svn_root%\FDS_Compilation\Intel_Win_64
 echo Cleaning intel_win_64
-make -f ..\makefile clean
+%intelbin%\make -f ..\makefile clean
 
 echo.
 cd %svn_root%\FDS_Compilation\mpi_intel_win_64
 echo Cleaning mpi_intel_win_64
-make -f ..\makefile clean
+%intelbin%\make -f ..\makefile clean
 
 pause
