@@ -44,43 +44,43 @@
 
 \section{Hydrodynamics}
 
-Notation.  Summation over repeated Roman suffixes is implied.  Superscripts are excluded from the summation convention.  Summation over Greek suffixes is shown explicitly.
+Notation.  Summation over repeated Roman suffixes is implied.  Superscripts are excluded from the summation convention.  Summation over Greek suffixes is shown explicitly.  Gibbs notation is used sparingly where it seems useful.
 
 \subsection{Derived Equations}
 
-Mass:
+\paragraph{Mass}
 
 \begin{equation}
 \label{eqn_mass}
 \frac{\partial \rho}{\partial t} = - \frac{\partial \rho u_i}{\partial x_i} + \dot{m}_b^\ppp
 \end{equation}
 
-Scalar:
+\paragraph{Scalar}
 
 \begin{equation}
 \label{eqn_scalar}
-\frac{\partial \rho Y_\alpha}{\partial t} = - \frac{\partial F_{\alpha,i}}{\partial x_i} + \dot{m}_{\alpha}^\ppp + \dot{m}_{\alpha,b}^\ppp 
+\frac{\partial \rho Y_\alpha}{\partial t} = - \frac{\partial F_{\alpha,i}}{\partial x_i} + \dot{m}_{\alpha}^\ppp + \dot{m}_{\alpha,b}^\ppp
 \end{equation}
 
-Momentum:
+\paragraph{Momentum}
 
 \begin{equation}
 \label{eqn_momentum}
 \frac{\partial u_i}{\partial t} = - \left( F_{u,i} + \frac{\partial \cal H}{\partial x_i} \right)
 \end{equation}
 
-Poisson:
-
-\begin{equation}
-\label{eqn_poisson}
-\frac{\partial^2 \cal H}{\partial x_i \partial x_i} = - \left(\frac{\partial F_{u,i}}{\partial x_i} + \frac{\partial {\cal D}}{\partial t}\right)
-\end{equation}
-
-Divergence constraint:
+\paragraph{Divergence Constraint}
 
 \begin{equation}
 \label{eqn_divergence}
-{\cal D} = \frac{\partial u_i}{\partial x_i} = \frac{1}{\rho}\left(\dot{m}_b^\ppp - \frac{\mbox{D}\rho}{\mbox{D}t}\right)
+\Div \mathbf{u} = \frac{\partial u_i}{\partial x_i} = \frac{1}{\rho}\left(\dot{m}_b^\ppp - \frac{\mbox{D}\rho}{\mbox{D}t}\right)
+\end{equation}
+
+\paragraph{Poisson}
+
+\begin{equation}
+\label{eqn_poisson}
+\frac{\partial^2 \cal H}{\partial x_i \partial x_i} = - \left(\frac{\partial F_{u,i}}{\partial x_i} + \frac{\partial (\Div \mathbf{u}) }{\partial t}\right)
 \end{equation}
 
 \begin{figure}[t]
@@ -170,34 +170,11 @@ Note: {\tt DXN = DX}.
 \begin{equation}
 \overline{\overline{C}^{i^\ssp}}^{j\ssmp} = \left\{ \begin{array}{ll} \overline{\overline{C}^{i^\ssp}}^{j^-} & \mbox{if} \quad i=j \\ \overline{\overline{C}^{i^\ssp}}^{j^+} & \mbox{if} \quad i\ne j \end{array} \right.
 \end{equation}
-Similarly, consider component $i$ of vector $\mathbf{V}$ interpolated in direction $j$.  
+Similarly, consider component $i$ of vector $\mathbf{V}$ interpolated in direction $j$.
 \begin{equation}
 \overline{V}_i^{j\ssmp} = \left\{ \begin{array}{ll} \overline{V}_i^{j^\ssm} & \mbox{if} \quad i=j \\ \overline{V}_i^{j^\ssp} & \mbox{if} \quad i\ne j \end{array} \right.
 \end{equation}
 
-
-\subsection{Ordinary Difference Equations (O$\Delta$Es)}
-
-\paragraph{Mass}
-
-\begin{equation}
-\label{eqn_mass_ode}
-\frac{\dif \rho}{\dif t} = -\frac{\delta (\overline{\rho}^{\tiny FL} u_i)}{\delta x_i^\ssm} + \dot{m}_b^\ppp
-\end{equation}
-
-\paragraph{Scalar}
-
-\begin{equation}
-\label{eqn_scalar_ode}
-\frac{\dif (\rho Y_\alpha)}{\dif t} = -\frac{\delta F_{\alpha,i}}{\delta x_i^\ssm} + \dot{m}_\alpha^\ppp + \dot{m}_{\alpha,b}^\ppp
-\end{equation}
-
-\paragraph{Momentum}
-
-\begin{equation}
-\label{eqn_scalar_ode}
-\frac{\dif u_i}{\dif t} = - \left( F_{u,i} + \frac{\delta \cal H}{\delta x_i^\ssp} \right)
-\end{equation}
 
 \subsection{Scalar Flux}
 
@@ -208,7 +185,9 @@ F_{\alpha,i} = \overline{\rho Y_\alpha}^{\tiny FL} u_i - \overline{\rho D_\alpha
 
 \subsection{Flux Limiter}
 
-A flux limited scalar value premultiplies the staggered, face-centered velocity to form the scalar flux.  Think of the flux limiter as a form of interpolation which is dependent on the velocity direction. Consider face $i$ between cells $i$ and $i+1$.  The local ($loc$) and upstream ($up$) data variations are
+The point being, we want TVD, bounded scalar field.  Boundedness correction discussed in Appendix \ref{app}.
+
+A flux limited scalar value premultiplies the staggered, face-centered velocity to form the scalar advective flux.  Think of the flux limiter as a form of interpolation which is dependent on the velocity direction. Consider face $i$ between cells $i$ and $i+1$.  The local ($loc$) and upstream ($up$) data variations are
 \begin{eqnarray}
 \delta C_{loc} &=& \mbox{\tt C(I+1)-C(I)} \nonumber\\
 \delta C_{up}  &=& \left\{ \begin{array}{ll} \mbox{\tt C(I)-C(I-1)} & \mbox{if} \quad \mbox{\tt U(I)}>0 \\ \mbox{\tt C(I+2)-C(I+1)} & \mbox{if} \quad \mbox{\tt U(I)}<0 \end{array} \right. \nonumber
@@ -272,7 +251,8 @@ f_i = B_i + G_i + D_i + \dot{m}_b^\ppp(u_i - u_{i,b}) + ...
 
 \paragraph{Baroclinic}
 \begin{equation}
-B_i = \left(1-\frac{\overline{\rho}^{i^+}}{\rho_{avg}}\right) \frac{\delta P}{\delta x_i^+}
+%B_i = \left(1-\frac{\overline{\rho}^{i^+}}{\rho_{avg}}\right) \frac{\delta P}{\delta x_i^+}
+B_i = \overline{\rho^2({\cal H} - K)}^{i^\ssp} \frac{\delta (1/\rho)}{\delta x_i^\ssp}
 \end{equation}
 
 \paragraph{Gravity}
@@ -315,37 +295,62 @@ We first describe the time integration scheme in terms of a simple forward (expl
 Y_\alpha^{n+1} = \frac{(\rho Y_\alpha)^{n+1}}{\rho^{n+1}}
 \end{equation}
 
-\subsubsection{Projection}
+\paragraph{Boundedness Check} See Appendix \ref{app}
 
-Here we modify our thinking slightly and learn how to view the velocity update as a predictor/corrector (a.k.a. fractional-step method) buried within a single projection step.
-
-\paragraph{Predictor}
-
-\begin{eqnarray}
-\label{eqn_desired} u_i^{n+1} &=& u_i^n - \delta t \left[ F_{u,i}^n + \frac{\delta {\cal H}^{n+1}}{\delta x_i^\ssp} \right] \\
-\label{eqn_guess} u_i^* &=& u_i^n - \delta t F_{u,i}^n
-\end{eqnarray}
-
-\paragraph{Corrector} Subtracting (\ref{eqn_guess}) from (\ref{eqn_desired}) yields the correction step
+\subsubsection{Divergence Constraint}
 
 \begin{equation}
-u_i^{n+1} = u_i^* - \delta t \frac{\delta {\cal H}^{n+1}}{\delta x_i^\ssp}
+\label{eqn_divcon}
+{\Div \mathbf{u}}^{n+1} = \frac{1}{\rho^{n+1}}\left(\dot{m}_b^\ppp - \frac{\mbox{D}\rho}{\mbox{D}t}\right)^{n+1}
 \end{equation}
+Equation (\ref{eqn_divcon}) is principally responsible for relating the rate of chemical heat release with the volume expansion of the fluid.  Terms on the right hand side involving the velocity, which are few and minor, are computed using $\mathbf{u}^n$.  The expanded form of the divergence constraint and a detailed derivation are given in Appendix \ref{app}.
+
+\subsubsection{Velocity Projection}
+
+Here we show how to view the velocity update as a fractional-step projection method.  To develop a projection scheme, first write down the form of the desired temporal update.  Below in Eq.~(\ref{eqn_desired}) we show a semi-implicit update of the momentum equation.  That is, all terms on the right hand side are evaluated at time level $n$ with the exception of the scalar ${\cal H}^{n\ssp}$ which is supposed to live at some time level $n^\ssp >n$ and is yet unknown\footnote[1]{There are subtle difficulties in claiming a time location for $\cal H$ in this context because ultimately its value depends on arbitrary choices made in the time location for $F_{u,i}$. The end result, which is of little consequence in practice, is that the hydrodynamic pressure is known with less temporal accuracy than the velocity field \cite{Almgren}.}.  Next, write down the update with an initial guess for the pressure gradient (see Eq. (\ref{eqn_guess})); zero will do.  This results in a guess for the velocity field, call it $\mathbf{u}^*$, which does not satisfy the divergence constraint (\ref{eqn_divcon}).
+\begin{eqnarray}
+\label{eqn_desired} u_i^{n+1} &=& u_i^n - \delta t \left[ F_{u,i}^n + \frac{\delta {\cal H}^{n\ssp}}{\delta x_i^\ssp} \right] \\
+\label{eqn_guess} u_i^* &=& u_i^n - \delta t F_{u,i}^n
+\end{eqnarray}
+Subtracting (\ref{eqn_guess}) from (\ref{eqn_desired}) yields the projection
+\begin{equation}
+\label{eqn_projection}
+u_i^{n+1} = u_i^* - \delta t \frac{\delta {\cal H}^{n\ssp}}{\delta x_i^\ssp}
+\end{equation}
+Equation (\ref{eqn_projection}) can be viewed as a Hodge decomposition of the vector field $\mathbf{u}^*$ \cite{Chorin}.  The scalar ${\cal H}^{n\ssp}$ satisfies a Poisson equation, as we show next, but may only be determined to within an arbitrary constant.  Dirichlet boundary conditions on ${\cal H}$ must be known in order to set its absolute value (see Section \ref{sec}).
 
 \paragraph{The Poisson Equation}
 
+The Poisson equation is obtained by taking the divergence of (\ref{eqn_projection}).
 \begin{eqnarray}
 \label{eqn_poisson}
-\frac{\delta^2 {\cal H}^{n+1}}{\delta x_i^\ssm\delta x_i^\ssp} &=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - \frac{\delta u_i^{n+1}}{\delta x_i^\ssm} \right) \nonumber\\
-&=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - {\cal D}^{n+1} \right)
+\frac{\delta^2 {\cal H}^{n\ssp}}{\delta x_i^\ssm\delta x_i^\ssp} &=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - \frac{\delta u_i^{n+1}}{\delta x_i^\ssm} \right) \nonumber\\
+&=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - \Div \mathbf{u}^{n+1} \right)
 \end{eqnarray}
+For a single mesh, the Poisson equation (\ref{eqn_poisson}) is solved with a fast direct method.  For multiple mesh cases, the Poisson equation is solved by an additive Schwarz method with varying levels of global defect correction.  Details are given in Section \ref{sec}.
 
-\paragraph{Divergence Constraint}
-
+\paragraph{The Projection Operator} We now have all the elements in place to define our projection operator, but the equations have been introduced in an order that aids the derivation, not the order in which they are solved in practice.  Thus, the projection operator
 \begin{equation}
-{\cal D}^{n+1} = \frac{1}{\rho^{n+1}}\left(\dot{m}_b^\ppp - \frac{\mbox{D}\rho}{\mbox{D}t}\right)^{n+1}
+\mathbf{u}^{n+1} = {\cal P}(\mathbf{u}^n)
 \end{equation}
+is defined by the following
+\begin{enumerate}
+\item Compute $F_{u,i}^n$ via (\ref{eqn_force}) and ${\Div \mathbf{u}}^{n+1}$ via (\ref{eqn_divcon})
+\item Compute $u_i^*$ via (\ref{eqn_guess})
+\item Build the right hand side of the Poisson equation (\ref{eqn_poisson})
+\item Solve (\ref{eqn_poisson}) for ${\cal H}^{n\ssp}$
+\item Compute $u_i^{n+1}$ via (\ref{eqn_projection})
+\end{enumerate}
+It is important to appreciate that the projection forces equivalence between (\ref{eqn_divcon}) and the discrete divergence of the updated velocity field. 
 
+
+\paragraph{STOP! MPI Exchange 1} $\rho$, $Y_\alpha$
+
+\subsubsection{Intermediate Updates}
+
+Compute $J_{\alpha,i}^{n+1}$, $\dot{m}_\alpha^{\ppp \,\,n+1}$, $\Div \mathbf{q}_{rad}^{n+1}$, etc. and apply boundary conditions.
+
+\paragraph{STOP! MPI Exchange 2} $u_i$, $\cal H$, $\delta t$
 
 %\section{Combustion}
 %
