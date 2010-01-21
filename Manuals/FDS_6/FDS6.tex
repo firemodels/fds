@@ -1,0 +1,489 @@
+\documentclass[11pt]{article}
+
+\input{preamble}
+
+\begin{document}
+
+\title{FDS 6: Architectural Plans}
+\author{Randall McDermott\footnotemark[2], Kevin McGrattan, Glenn Forney, William Mell, Jason Floyd,\\Simo Hostikka, Susanne Kilian, Christian Rogsch}
+\date{\today}
+\footnotetext[2]{\parbox[t]{15cm}{Corresponding author. \\\emph{Email:} \tt randall.mcdermott@nist.gov}}
+\maketitle
+\thispagestyle{empty}
+
+\section{Introduction}
+\label{introduction}
+
+%Cleaning out the garage... The purpose of this document is to layout proposed structural plans for version 6 of the Fire Dynamics Simulator (FDS 6).  The targeted improvements are:
+%
+%\begin{itemize}
+%\item code clean up (reduce redundant code, readability)
+%\item memory utilization
+%\item efficiency (separation of uniform and stretched grid operators)
+%\item scalability
+%\item allow embedded (nested) mesh capabilities
+%\item flexibility in physics sub-models
+%\item sophistication of core turbulence and wall models
+%\item scalar transport scheme
+%\item maintain second-order accuracy at mesh boundaries (requires 2 ghost cells)
+%\item generalization of particle method (combine vege, cable, droplet formulations)
+%\item high order immersed boundary method for curved surfaces
+%\item LES $\rightarrow$ DNS convergence
+%\item LES quality assessment
+%\item removal of artificial, \emph{ad hoc} parameters
+%\item standardize format for velocity field initialization
+%\item velocity field ``nudging'' (data assimilation in atmospheric flows)
+%\item turbulent inflow conditions
+%\item generalize combustion chemistry in terms of the progress variable/mixture fraction approach
+%\item soot deposition and oxidation
+%\item HVAC
+%\item front tracking via level-set method
+%\end{itemize}
+%
+
+
+\section{Hydrodynamics}
+
+Notation.  Summation over repeated Roman suffixes is implied.  Superscripts are excluded from the summation convention.  Summation over Greek suffixes is shown explicitly.
+
+\subsection{Derived Equations}
+
+Mass:
+
+\begin{equation}
+\label{eqn_mass}
+\frac{\partial \rho}{\partial t} = - \frac{\partial \rho u_i}{\partial x_i} + \dot{m}_b^\ppp
+\end{equation}
+
+Scalar:
+
+\begin{equation}
+\label{eqn_scalar}
+\frac{\partial \rho Y_\alpha}{\partial t} = - \frac{\partial F_{\alpha,i}}{\partial x_i} + \dot{m}_{\alpha}^\ppp + \dot{m}_{\alpha,b}^\ppp 
+\end{equation}
+
+Momentum:
+
+\begin{equation}
+\label{eqn_momentum}
+\frac{\partial u_i}{\partial t} = - \left( F_{u,i} + \frac{\partial \cal H}{\partial x_i} \right)
+\end{equation}
+
+Poisson:
+
+\begin{equation}
+\label{eqn_poisson}
+\frac{\partial^2 \cal H}{\partial x_i \partial x_i} = - \left(\frac{\partial F_{u,i}}{\partial x_i} + \frac{\partial {\cal D}}{\partial t}\right)
+\end{equation}
+
+Divergence constraint:
+
+\begin{equation}
+\label{eqn_divergence}
+{\cal D} = \frac{\partial u_i}{\partial x_i} = \frac{1}{\rho}\left(\dot{m}_b^\ppp - \frac{\mbox{D}\rho}{\mbox{D}t}\right)
+\end{equation}
+
+\begin{figure}[t]
+   \begin{center}
+      \includegraphics[scale=1.0]{FIGURES/test.pdf}
+      \caption{\label{fig_grid} \small Grid.}
+   \end{center}
+\end{figure}
+
+\subsection{Spatial Discretization}
+
+Make note where significant differences in cost arise due to stretched grids.  It seems clear to me that this requires some special treatment.  We certainly do not want our code to be 2-3 times slower just for the sake of treating the special case of stretched grids which we hope will not be used much anyway.
+
+Accuracy?
+
+\subsubsection{Differencing}
+
+Notation inspired by Aaron Fogelson (Mathematics, U.~of Utah) lecture notes.
+
+\paragraph {Uniform Grid} 2 FLOPs, 2 memory look-ups (MLUs)...
+
+\begin{equation}
+\label{eqn_difference_operator_uniform_face}
+\frac{\delta F}{\delta x^\ssm} = \frac{\mbox{\tt F(I)-F(I-1)}}{\mbox{\tt DX}}
+\end{equation}
+
+\begin{equation}
+\label{eqn_difference_operator_uniform_cell}
+\frac{\delta C}{\delta x^\ssp} = \frac{\mbox{\tt C(I+1)-C(I)}}{\mbox{\tt DXN}}
+\end{equation}
+Note: {\tt DXN = DX}.
+
+\paragraph{Stretched Grid} 2 FLOPs, 3 MLUs.
+
+\begin{equation}
+\label{eqn_difference_operator_stretched_face}
+\frac{\delta F}{\delta x^\ssm} = \frac{\mbox{\tt F(I)-F(I-1)}}{\mbox{\tt DX(I)}}
+\end{equation}
+
+\begin{equation}
+\label{eqn_difference_operator_stretched_cell}
+\frac{\delta C}{\delta x^\ssp} = \frac{\mbox{\tt C(I+1)-C(I)}}{\mbox{\tt DXN(I)}}
+\end{equation}
+
+\paragraph{Radial} 4 FLOPs. Precompute {\tt RNDX(I) = RN(I)*DX(I)}.
+
+\begin{equation}
+\label{eqn_radial_difference}
+\frac{1}{r} \frac{\delta (rF)}{\delta r^\ssm} = \frac{\mbox{\tt R(I)*F(I)-R(I-1)*F(I-1)}}{\mbox{\tt RNDX(I)}}
+\end{equation}
+
+\paragraph{Vectors and Tensors} Due to the staggered-grid storage arrangement for vectors and tensors, it is useful to define special differencing operators.
+\begin{equation}
+\frac{\delta V_i}{\delta x_j^\ssmp} = \left\{ \begin{array}{ll} \displaystyle \frac{\delta V_i}{\delta x_j^\ssm} & \mbox{if} \quad i=j \vspace{.2cm} \\ \displaystyle \frac{\delta V_i}{\delta x_j^\ssp} & \mbox{if} \quad i\ne j \end{array} \right.
+\end{equation}
+
+\begin{equation}
+\frac{\delta T_{ij}}{\delta x_j^\sspm} = \frac{\delta T_{11}}{\delta x^\ssp} + \frac{\delta T_{12}}{\delta y^\ssm} + \frac{\delta T_{13}}{\delta z^\ssm}
+\end{equation}
+
+
+\subsubsection{Interpolation}
+
+\paragraph{Uniform Grid} 2 FLOPs...
+\begin{equation}
+\label{eqn_linear_interpolation}
+\overline{C}^{i^+} = \mbox{\tt 0.5*(C(I)+C(I+1))}
+\end{equation}
+
+\begin{equation}
+\label{eqn_linear_interpolation}
+\overline{F}^{i^-} = \mbox{\tt 0.5*(F(I-1)+F(I))}
+\end{equation}
+
+\paragraph{Stretched Grid} 5 FLOPs...
+\begin{equation}
+\label{eqn_lever_rule}
+\overline{C}^{i^+} = \frac{\mbox{\tt DX(I+1)*C(I)+DX(I)*C(I+1)}}{\mbox{\tt DX(I)+DX(I+1)}}
+\end{equation}
+
+\begin{equation}
+\label{eqn_lever_rule}
+\overline{F}^{i^-} = \frac{\mbox{\tt DXN(I)*F(I-1)+DXN(I-1)*F(I)}}{\mbox{\tt DXN(I-1)+DXN(I)}}
+\end{equation}
+
+\paragraph{Scalars and Vectors} Similar to the special differencing operators needed for vectors and tensors, here we define special interpolation operators for scalars and vector components. The following is useful for the interpolation of cell centered properties. If $i=j$ then the $^-$ interpolation operator is to be used and if $i\ne j$ the $^+$ interpolation operator is used.
+\begin{equation}
+\overline{\overline{C}^{i^\ssp}}^{j\ssmp} = \left\{ \begin{array}{ll} \overline{\overline{C}^{i^\ssp}}^{j^-} & \mbox{if} \quad i=j \\ \overline{\overline{C}^{i^\ssp}}^{j^+} & \mbox{if} \quad i\ne j \end{array} \right.
+\end{equation}
+Similarly, consider component $i$ of vector $\mathbf{V}$ interpolated in direction $j$.  
+\begin{equation}
+\overline{V}_i^{j\ssmp} = \left\{ \begin{array}{ll} \overline{V}_i^{j^\ssm} & \mbox{if} \quad i=j \\ \overline{V}_i^{j^\ssp} & \mbox{if} \quad i\ne j \end{array} \right.
+\end{equation}
+
+
+\subsection{Ordinary Difference Equations (O$\Delta$Es)}
+
+\paragraph{Mass}
+
+\begin{equation}
+\label{eqn_mass_ode}
+\frac{\dif \rho}{\dif t} = -\frac{\delta (\overline{\rho}^{\tiny FL} u_i)}{\delta x_i^\ssm} + \dot{m}_b^\ppp
+\end{equation}
+
+\paragraph{Scalar}
+
+\begin{equation}
+\label{eqn_scalar_ode}
+\frac{\dif (\rho Y_\alpha)}{\dif t} = -\frac{\delta F_{\alpha,i}}{\delta x_i^\ssm} + \dot{m}_\alpha^\ppp + \dot{m}_{\alpha,b}^\ppp
+\end{equation}
+
+\paragraph{Momentum}
+
+\begin{equation}
+\label{eqn_scalar_ode}
+\frac{\dif u_i}{\dif t} = - \left( F_{u,i} + \frac{\delta \cal H}{\delta x_i^\ssp} \right)
+\end{equation}
+
+\subsection{Scalar Flux}
+
+\begin{equation}
+\label{eqn_flux}
+F_{\alpha,i} = \overline{\rho Y_\alpha}^{\tiny FL} u_i - \overline{\rho D_\alpha}^{i^+} \frac{\delta Y_\alpha}{\delta x_i^\ssp} + J_{\alpha,i}^{sgs}
+\end{equation}
+
+\subsection{Flux Limiter}
+
+A flux limited scalar value premultiplies the staggered, face-centered velocity to form the scalar flux.  Think of the flux limiter as a form of interpolation which is dependent on the velocity direction. Consider face $i$ between cells $i$ and $i+1$.  The local ($loc$) and upstream ($up$) data variations are
+\begin{eqnarray}
+\delta C_{loc} &=& \mbox{\tt C(I+1)-C(I)} \nonumber\\
+\delta C_{up}  &=& \left\{ \begin{array}{ll} \mbox{\tt C(I)-C(I-1)} & \mbox{if} \quad \mbox{\tt U(I)}>0 \\ \mbox{\tt C(I+2)-C(I+1)} & \mbox{if} \quad \mbox{\tt U(I)}<0 \end{array} \right. \nonumber
+\end{eqnarray}
+The limiter function $B(r)$ depends on the upstream-to-local data ratio, $r=\delta C_{up}/\delta C_{loc}$, (see E. F. Toro, p. 454 \cite{Toro}).  Options for this function are:
+\begin{enumerate}
+\item[]{\tt FLUX\_LIMITER=0\,\,\,} Central Differencing  \begin{equation} B(r) = 1 \end{equation}
+\item[]{\tt FLUX\_LIMITER=1\,\,\,} First-order Upwinding (Godunov's Scheme) \begin{equation} B(r) = 0 \end{equation}
+\item[]{\tt FLUX\_LIMITER=2\,\,\,} Superbee (recommended for LES) \begin{equation} B(r) = \max(0,\min(2r,1),\min(r,2)) \end{equation}
+\item[]{\tt FLUX\_LIMITER=3\,\,\,} MINMOD \begin{equation} B(r) = \max(0,\min(1,r)) \end{equation}
+\end{enumerate}
+Once $B(r)$ has been determined, the scalar face value is found from
+\begin{equation}
+\label{eqn_flux_limiter}
+\overline{C}^{\tiny FL} = \left\{ \begin{array}{lcll} \mbox{\tt C(I)} &+& B(r) \,\mbox{\tt 0.5(C(I+1)-C(I))} & \mbox{if} \quad \mbox{\tt U(I)}>0 \\
+\mbox{\tt C(I+1)} &+& B(r) \,\mbox{\tt 0.5(C(I)-C(I+1))} & \mbox{if} \quad \mbox{\tt U(I)}<0 \end{array} \right.
+\end{equation}
+
+\paragraph{Special Case} [{\tt FLUX\_LIMITER=4}] CHARM (recommended for DNS) For this limiter the FDS implementation uses the reciprocal definition of the data ratio, $r = \delta C_{loc}/\delta C_{up}$.  The limiter function is given by \cite{Zhou,Kempf}
+\begin{equation}
+B(r) = \frac{r(3r+1)}{(r+1)^2}
+\end{equation}
+and the scalar face value is then determined from
+\begin{equation}
+\label{eqn_charm_limiter}
+\overline{C}^{\tiny FL} = \left\{ \begin{array}{lcll} \mbox{\tt C(I)} &+& B(r) \,\mbox{\tt 0.5(C(I)-C(I-1))} & \mbox{if} \quad \mbox{\tt U(I)}>0 \\
+\mbox{\tt C(I+1)} &+& B(r) \,\mbox{\tt 0.5(C(I+1)-C(I+2))} & \mbox{if} \quad \mbox{\tt U(I)}<0 \end{array} \right.
+\end{equation}
+
+\paragraph{Remark} In practice, we set $r=0$ initially and only compute $r$ if the denominator is not zero.  Note that for $\delta C_{loc}=0$ it does not matter which limiter (0-3) is used.  For CHARM, we set both $r=0$ and $B=0$ initially and only compute $B$ if $r>0$ (this requires data variations to have the same sign), else CHARM reduces to Godunov's scheme.
+
+\subsection{Forces}
+
+\begin{equation}
+\label{eqn_force}
+F_{u,i} = \overline{\overline{u}_j^{j^-}}^{i^+} \frac{\delta \overline{u}_i^{j\ssmp}}{\delta x_j^\sspm} - \frac{\delta K}{\delta x_i^\ssp} + \frac{1}{\overline{\rho}^{i^+}} \left[ \frac{\delta}{\delta x_j^\sspm} \left( \tau_{ij} + \tau_{ij}^{sgs} \right) + f_i \right]
+\end{equation}
+
+\paragraph{Resolved Kinetic Energy} The resolved kinetic energy per unit mass is
+\begin{equation}
+\label{eqn_ke}
+K = \mhalf ( \overline{u}_i^{i^-}\overline{u}_i^{i^-} )
+\end{equation}
+
+\paragraph{Deviatoric Stress}
+
+\begin{equation}
+\label{eqn_deviatoric_stress}
+\tau_{ij} = -2 \,\,\overline{\overline{\mu}^{i^+}}^{j\ssmp} \left( S_{ij} - \mthird S_{kk} \delta_{ij} \right)
+\end{equation}
+
+\begin{equation}
+\label{eqn_strain_tensor}
+S_{ij} = \frac{1}{2}\left( \frac{\delta u_i}{\delta x_j^\ssmp} + \frac{\delta u_j}{\delta x_i^\ssmp} \right)
+\end{equation}
+
+\paragraph{Volumetric Forces} The volumetric force $f_i$ may contain contributions from the baroclinic, gravitational, subgrid drag, and bulk mass source terms, as well as additional forces discussed in more detail later.
+\begin{equation}
+f_i = B_i + G_i + D_i + \dot{m}_b^\ppp(u_i - u_{i,b}) + ...
+\end{equation}
+
+\paragraph{Baroclinic}
+\begin{equation}
+B_i = \left(1-\frac{\overline{\rho}^{i^+}}{\rho_{avg}}\right) \frac{\delta P}{\delta x_i^+}
+\end{equation}
+
+\paragraph{Gravity}
+\begin{equation}
+G_i = (\overline{\rho}^{i^+}-\rho_0)g_i
+\end{equation}
+
+\paragraph{Drag} Details of the subgrid drag force $D_i$ are discussed in Section \ref{sec}.
+
+\paragraph{Bulk Mass Source} Vapor from droplet evaporation and the off gasses from subgrid pyrolysis have inertial effects which are separate from the drag force; $D_i$ may be present even if $\dot{m}_b^\ppp=0$.
+
+\paragraph{Additional Volumetric Forces} Additional forces may be defined and added to $f_i$ as required.  In particular, the immersed boundary method (IBM) may be viewed in terms of an additional force, though we prefer to use the \emph{direct forcing} approach of Fadlun \cite{Fadlun} which specifies $F_{u,i}$ directly. Treatment of immersed boundaries (a.k.a.~{\tt OBST}acles) is discussed in Section \ref{sec}.  Other examples of useful additional force terms are the nudging force used for data assimilation and mean pressure gradient forces used in periodic channel flows.
+
+
+
+
+%\subsection{Boundary Conditions}
+%\subsubsection{External Boundaries}
+%\subsubsection{Immersed Boundaries}
+
+
+\subsection{Temporal Integration}
+
+We first describe the time integration scheme in terms of a simple forward (explicit) Euler update of the scalar transport equations and the analogous single step projection scheme for the momentum equations.  We then show how this simple update is easily extended to higher-order, multistage Runge-Kutta schemes.
+
+\subsubsection{Density}
+
+\begin{equation}
+\label{eqn_densityupdate}
+\rho^{n+1} = \rho^n + \delta t \left[\dot{m}_b^\ppp - \frac{\delta (\overline{\rho}^{FL} u_i)}{\delta x_i^\ssm} \right]^n
+\end{equation}
+
+\subsubsection{Scalars}
+
+\begin{equation}
+\label{eqn_densityupdate}
+(\rho Y_\alpha)^{n+1} = \rho^n Y_\alpha^n + \delta t \left[\dot{m}_\alpha^\ppp + \dot{m}_{\alpha,b}^\ppp - \frac{\delta F_{\alpha,i}}{\delta x_i^\ssm} \right]^n
+\end{equation}
+\begin{equation}
+Y_\alpha^{n+1} = \frac{(\rho Y_\alpha)^{n+1}}{\rho^{n+1}}
+\end{equation}
+
+\subsubsection{Projection}
+
+Here we modify our thinking slightly and learn how to view the velocity update as a predictor/corrector (a.k.a. fractional-step method) buried within a single projection step.
+
+\paragraph{Predictor}
+
+\begin{eqnarray}
+\label{eqn_desired} u_i^{n+1} &=& u_i^n - \delta t \left[ F_{u,i}^n + \frac{\delta {\cal H}^{n+1}}{\delta x_i^\ssp} \right] \\
+\label{eqn_guess} u_i^* &=& u_i^n - \delta t F_{u,i}^n
+\end{eqnarray}
+
+\paragraph{Corrector} Subtracting (\ref{eqn_guess}) from (\ref{eqn_desired}) yields the correction step
+
+\begin{equation}
+u_i^{n+1} = u_i^* - \delta t \frac{\delta {\cal H}^{n+1}}{\delta x_i^\ssp}
+\end{equation}
+
+\paragraph{The Poisson Equation}
+
+\begin{eqnarray}
+\label{eqn_poisson}
+\frac{\delta^2 {\cal H}^{n+1}}{\delta x_i^\ssm\delta x_i^\ssp} &=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - \frac{\delta u_i^{n+1}}{\delta x_i^\ssm} \right) \nonumber\\
+&=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - {\cal D}^{n+1} \right)
+\end{eqnarray}
+
+\paragraph{Divergence Constraint}
+
+\begin{equation}
+{\cal D}^{n+1} = \frac{1}{\rho^{n+1}}\left(\dot{m}_b^\ppp - \frac{\mbox{D}\rho}{\mbox{D}t}\right)^{n+1}
+\end{equation}
+
+
+%\section{Combustion}
+%
+%\subsection{Chemical Reaction}
+%
+%\subsection{Turbulence-Chemistry Interaction}
+%
+%\subsection{Soot}
+%\subsubsection{Formation and Oxidation}
+%\subsubsection{Deposition}
+%
+%\section{Radiation}
+%
+%\section{Pyrolysis}
+%
+
+%\section{Programming Issues}
+%
+%\subsection{Flow}
+%\subsection{Efficiency}
+%\subsection{Memory Allocation}
+%\subsection{I/O}
+%\subsection{MPI}
+%\subsection{Best Practices Guide}
+
+%\section{Special Topics}
+%
+%\subsection{Quality Assessment}
+%
+%\subsection{Embedded Meshes}
+%
+%\subsection{Pressure Solver}
+%
+%\subsection{Particle Methods}
+%
+%\subsection{Front Tracking}
+%
+%\subsection{Initialization}
+%
+%\subsection{Nudging}
+%
+%\subsection{HVAC}
+%
+%\subsection{Complex Geometry}
+%
+%\section{Memory Allocation, Work and Saved Arrays}
+
+%\section{Theory}
+%\label{theory}
+%
+%\subsection{Governing Equations}
+%
+%Independent Unknowns:\\
+%
+%$\rho$, $Y_\alpha$, $u_i$, $p$, $T$... $= n_s + 5$.\\
+%
+%\noindent Independent Equations:\\
+%
+%Mass (1):
+%
+%\begin{equation}
+%\label{eqn_continuity}
+%\frac{\partial \rho}{\partial t} + \frac{\partial (\rho u_i)}{\partial x_i} = \dot{m}_{b}^\ppp
+%\end{equation}
+%
+%Species ($n_s - 1$):
+%
+%\begin{equation}
+%\label{eqn_scalar}
+%\frac{\partial (\rho Y_\alpha)}{\partial t} + \frac{\partial (\rho Y_\alpha u_i)}{\partial x_i} = - \frac{\partial J_{\alpha,i}}{\partial x_i} + \dot{m}_\alpha^\ppp + \dot{m}_{\alpha,b}^\ppp
+%\end{equation}
+%
+%Momentum (3):
+%
+%\begin{equation}
+%\label{eqn_momentum}
+%\frac{\partial (\rho u_i)}{\partial t} + \frac{\partial (\rho u_i u_j)}{\partial x_j} = - \frac{\partial}{\partial x_j}\left( p\delta_{ij} + \tau_{ij}\right) + \rho g_i + \dot{m}_b^\ppp u_{i,b} + f_i
+%\end{equation}
+%
+%Sensible enthalpy (1):
+%
+%\begin{equation}
+%\label{eqn_enthalpy}
+%\frac{\partial (\rho h_s)}{\partial t} + \frac{\partial (\rho h_s u_i)}{\partial x_i} = -\sum_\alpha \Delta h_\alpha^0\dot{m}_\alpha^\ppp + \frac{\mbox{D} p_0}{\mbox{D}t} - \frac{\partial q_i}{\partial x_i} - \dot{q}_b^\ppp + \dot{m}_b^\ppp h_{s,b} + \dot{m}_b^\ppp\mhalf(u_{i,b}-u_i)^2
+%\end{equation}
+%
+%Equation of state (1):
+%
+%\begin{equation}
+%\label{eqn_eos}
+%\rho = \frac{p_0 \overline{W}}{{\cal R} T}
+%\end{equation}
+%
+%\subsection{Constitutive Relationships}
+%
+%Diffusive flux...
+%\begin{equation}
+%\label{eqn_diffusive_flux}
+%J_{\alpha,i} = -\rho D_{\alpha} \frac{\partial Y_\alpha}{\partial x_i}
+%\end{equation}
+%
+%The deviatoric stress...
+%\begin{equation}
+%\label{eqn_viscous_stress}
+%\tau_{ij} = -2\mu\left(S_{ij} - \mthird S_{kk}\delta_{ij}\right)
+%\end{equation}
+%where
+%\begin{equation}
+%\label{eqn_strain_tensor}
+%S_{ij} = \frac{1}{2}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right)
+%\end{equation}
+%The heat flux vector...
+%\begin{equation}
+%\label{eqn_heat_flux_vector}
+%q_i = -k \frac{\partial T}{\partial x_i} + \sum_\alpha h_{s,\alpha} J_{\alpha,i} + q_i^{rad}
+%\end{equation}
+%
+%\subsection{Large-Eddy Simulation}
+%\subsubsection{The Filter Formalism}
+%\subsubsection{Subgrid Closures}
+%\subsubsection{The DNS Limit}
+%\subsubsection{Implicit Filtering: A Practical Interpretation}
+
+\bibliographystyle{plain}
+\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
