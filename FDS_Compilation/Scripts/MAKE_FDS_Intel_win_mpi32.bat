@@ -17,16 +17,11 @@ goto:eof
 
 Rem location of batch files used to set up Intel compilation environment
 
-set intelbin=c:\bin
-
-call %intelbin%\clvars x86
-call %intelbin%\ifortvars ia32
-
 call %envfile%
 
 %svn_drive%
 cd %svn_root%\FDS_Compilation\mpi_intel_win_32
 
-make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_32
+.\make_fds
 
 pause
