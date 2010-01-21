@@ -19,10 +19,8 @@ call %envfile%
 
 %svn_drive%
 
-call %svn_root%\FDS_Compilation\Scripts\SET_INTEL_64.bat
-
 cd %svn_root%\FDS_Compilation\mpi_intel_win_64
 
-make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64
+.\make_fds
 
 pause
