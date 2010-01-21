@@ -1,6 +1,6 @@
 set intelbin=c:\bin
 
-call %intelbin%\iclvars intel64
+Rem call %intelbin%\iclvars intel64
 call %intelbin%\ifortvars intel64
 
 Rem erase *.obj
