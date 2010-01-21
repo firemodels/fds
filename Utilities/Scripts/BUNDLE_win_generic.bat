@@ -18,12 +18,6 @@ set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
 set out_examples=%out_bundle%\FDS5\Examples
 
-set fds5=fds5.exe
-set fds5mpi=fds5_mpi.exe
-set smokeview=smokeview.exe
-set smokediff=smokediff.exe
-set smokezip=smokezip.exe
-
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 set wikify=%svn_root%\Utilities\Scripts\wikify.py
 
@@ -43,18 +37,18 @@ Rem Copy FDS, Smokeview and other needed files to the bin  directory
 
 echo.
 echo Copying files to bin directory
-if "%platform%"=="32" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\%fds5%
-if "%platform%"=="32" copy %fdsmpidir%\fds5_win_mpi_%platform%.exe  %out_bin%\%fds5mpi%
+if "%platform%"=="32" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\fds5.exe
+if "%platform%"=="32" copy %fdsmpidir%\fds5_mpi_win_%platform%.exe  %out_bin%\fds5_mpi.exe
 if "%platform%"=="64" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\.
-if "%platform%"=="64" copy %fdsmpidir%\fds5_win_mpi_%platform%.exe  %out_bin%\fds5_mpi_win_%platform%.exe
+if "%platform%"=="64" copy %fdsmpidir%\fds5_mpi_win_%platform%.exe  %out_bin%\.
 
-copy %in_smv%\smokeview%platform%_release.exe   %out_bin%\%smokeview%
+copy %in_smv%\smokeview%platform%_release.exe   %out_bin%\smokeview.exe
 
-if "%platform%"=="32" copy %in_smv%\smokediff%platform%_release.exe   %out_bin%\%smokediff%
+if "%platform%"=="32" copy %in_smv%\smokediff%platform%_release.exe   %out_bin%\smokediff.exe
 if "%platform%"=="64" copy %in_smv%\smokediff%platform%_release.exe   %out_bin%\smokediff_win_64.exe
 
-if "%platform%"=="32" copy %in_smv%\smokezip%platform%_release.exe   %out_bin%\%smokezip%
-if "%platform%"=="64" copy %in_smv%\smokezip%platform%_release.exe    %out_bin%\smokezip_win_64.exe
+if "%platform%"=="32" copy %in_smv%\smokezip%platform%_release.exe   %out_bin%\smokezip.exe
+if "%platform%"=="64" copy %in_smv%\smokezip%platform%_release.exe   %out_bin%\smokezip_win_64.exe
 
 copy %in_fds2ascii%\fds2ascii.exe     %out_bin%\.
 
@@ -68,7 +62,7 @@ copy %in_smv%\textures\*.png          %out_textures%\.
 echo.
 echo Copying Uninstaller to Uninstall directory
 copy "%bundleinfo%\uninstall_fds5.bat"             "%out_uninstall%\Uninstall.bat"
-copy "%bundleinfo%\set_path%platform%.exe"                   "%out_uninstall%\set_path.exe"
+copy "%bundleinfo%\set_path%platform%.exe"         "%out_uninstall%\set_path.exe"
 
 Rem Include documentation in the bundle only if the variable, docs_include_in_bundles,
 Rem is not set to 0.  This variable is defined in the fds_smv_env.bat setup  file
