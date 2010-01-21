@@ -68,7 +68,7 @@ intel_win_32 : setup_win $(objwin_serial)
 
 mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
-mpi_intel_win_32 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE)
+mpi_intel_win_32 : FFLAGS = -O2 /I $(MPIINCLUDE)
 mpi_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 mpi_intel_win_32 : FCOMPL = ifort
 mpi_intel_win_32 : CCOMPL = cl
@@ -81,9 +81,9 @@ mpi_intel_win_32 : setup_win $(objwin_mpi)
  #    ..\Scripts\ifortvars intel64
 
 intel_win_64 : FFLAGS = -O2 /Qvec_report0
-intel_win_64 : CFLAGS = -O2 -Dpp_noappend /Qvec_report0
+intel_win_64 : CFLAGS = -O2 -Dpp_noappend
 intel_win_64 : FCOMPL = ifort
-intel_win_64 : CCOMPL = icl
+intel_win_64 : CCOMPL = cl
 intel_win_64 : obj = fds5_win_64
 intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F100000000 $(objwin_serial)
@@ -91,9 +91,9 @@ intel_win_64 : setup_win $(objwin_serial)
 mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_64 : MPIINCLUDE = "c:\program files\mpich2\include"
 mpi_intel_win_64 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE)
-mpi_intel_win_64 : CFLAGS = -O2 -Dpp_noappend /Qvec_report0
+mpi_intel_win_64 : CFLAGS = -O2 -Dpp_noappend 
 mpi_intel_win_64 : FCOMPL = ifort
-mpi_intel_win_64 : CCOMPL = icl
+mpi_intel_win_64 : CCOMPL = cl
 mpi_intel_win_64 : obj = fds5_win_mpi_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
