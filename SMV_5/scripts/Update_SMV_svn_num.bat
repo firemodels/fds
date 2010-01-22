@@ -23,18 +23,21 @@ set win_dir=%svn_root%\SMV_5\source\smokeview
 cd %win_dir%
 
 echo.
-echo Updating the directory %win_dir% on the Windows repository to the SVN revision: %smv_revision%
-svn -r %smv_revision% update
+echo *** Use Smartsvn to update the directory %win_dir% in the Windows repository to revision: %smv_revision%
 
 set scriptdir=%linux_svn_root%/SMV_5/scripts/
 set linux_smvdir=%linux_svn_root%/SMV_5/source/smokeview
 
 echo.
-echo Updating the directory %linux_smvdir% on the Linux repository to the SVN revision: %smv_revision%
+echo Updating the directory %linux_smvdir% in the Linux repository to the SVN revision: %smv_revision%
 plink %svn_logon% %scriptdir%/UPDATE_smv_onhost.csh  %linux_smvdir% %smv_revision% acrux.cfr.nist.gov
 
 echo.
-echo Updating the directory %linux_smvdir% on the the OSX repository to the SVN revision: %smv_revision%
+echo Updating the directory %linux_smvdir% in the the OSX repository on tiger to the SVN revision: %smv_revision%
 plink %svn_logon% %scriptdir%/UPDATE_smv_onhost.csh  %linux_smvdir% %smv_revision% tiger.cfr.nist.gov
+
+echo.
+echo Updating the directory %linux_smvdir% in the the OSX repository on devi1 to the SVN revision: %smv_revision%
+plink %svn_logon% %scriptdir%/UPDATE_smv_onhost.csh  %linux_smvdir% %smv_revision% devi1.cfr.nist.gov
 
 pause
