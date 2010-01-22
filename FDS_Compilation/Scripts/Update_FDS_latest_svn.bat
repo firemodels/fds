@@ -21,19 +21,18 @@ call %envfile%
 %svn_drive%
 set win_fdsdir=%svn_root%\FDS_Source
 echo.
-echo Updating %win_fdsdir% on the Windows repository to latest revision
-cd %win_fdsdir%
-svn update
+echo *** Use Smartsvn to update %win_fdsdir% in the Windows repository to latest revision
+
 
 set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts/
 set linux_fdsdir=%linux_svn_root%/FDS_Source
 
 echo.
-echo Updating %linux_fdsdir% on the Linux repository to the latest revision
+echo Updating %linux_fdsdir% in the Linux repository on acrux to the latest revision
 plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_fdsdir% acrux.cfr.nist.gov
 
 echo.
-echo Updating %linux_fdsdir% on the OSX repository to the latest revision
+echo Updating %linux_fdsdir% in the OSX repository on devi1 to the latest revision
 plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_fdsdir% devi1.nist.gov
 
 pause

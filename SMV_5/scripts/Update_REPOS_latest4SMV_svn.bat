@@ -18,17 +18,14 @@ Rem location of batch files used to set up Intel compilation environment
 
 call %envfile%
 
-%svn_drive%
 echo.
-echo Updating the Windows repository, %svn_root%, to the latest revision
-cd %svn_root%
-svn update
+echo *** Use Smartsvn to update the Windows repository, %svn_root%, to the latest revision
 
 set scriptdir=%linux_svn_root%/Utilities/Scripts/
 set linux_fdsdir=%linux_svn_root%
 
 echo.
-echo Updating the acrux Linux repository, %linux_svn_root%, to the latest revision
+echo Updating the Linux repository, %linux_svn_root%, to the latest revision
 plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% acrux.cfr.nist.gov
 
 echo.

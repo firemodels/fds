@@ -18,11 +18,8 @@ Rem location of batch files used to set up Intel compilation environment
 
 call %envfile%
 
-%svn_drive%
 echo.
-echo Updating the Windows repository, %svn_root%, to the latest revision
-cd %svn_root%
-svn update
+echo *** Use Smartsvn to update the Windows repository, %svn_root%, to the latest revision
 
 set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts/
 set linux_fdsdir=%linux_svn_root%

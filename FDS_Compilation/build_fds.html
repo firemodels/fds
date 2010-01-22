@@ -4,16 +4,16 @@
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Build FDS</h2>
-Build FDS <a href="Scripts/EDIT_build_fds.bat">(edit)</a> -
+Build FDS -
 <a href="../SMV_5/build_smokeview.html">Build Smokeview</a> -
-<a href="../Utilities/build_other.html">Build Bundle/Other</a>
+<a href="../Utilities/build_other.html">Build Bundle</a>
 
 <hr size="1">
 
 <h3>Build, Package and Upload FDS</h3>
 
 <ul>
-<li><a href="Scripts/Update_REPOS_latest_svn.bat">Update repositories</a> (Windows, Linux and Mac) to the latest revision.</a>.
+<li><a href="Scripts/Update_REPOS_latest_svn.bat">Update Linux and OSX repositories to the latest version.</a> (Use Smartsvn to update the Windows repository)
 <li><a href="Scripts/GET_fds_svn_num.bat">Get the SVN revision number of the FDS source</a>  (make sure it is what you expect)
 <li><a href="Scripts/EDIT_setup.bat">Update FDS version string</a> in fds_smv_set.bat
 </ul>
@@ -66,9 +66,9 @@ Build: <a href="Scripts/MAKE_FDS_Intel_OSX_64.bat">Serial</a>,
 </table>
 <h3>Other</h3>
 <ul>
-<li><a href="Scripts/Update_FDS_svn_num.bat">Update the FDS source to the revision specified </a> 
-in the <a href="Scripts/EDIT_setup.bat"><tt>fds_smv_env.bat</tt> configuration file.</a>
-<li><a href="Scripts/Update_FDS_latest_svn.bat">Update the FDS source to the latest revision</a>.
+<li> <a href="Scripts/EDIT_build_fds.bat">Edit this page</a>
+<li><a href="Scripts/Update_FDS_svn_num.bat">Update FDS source (Linux and OSX) to the revision specified </a> 
+in the <a href="Scripts/EDIT_setup.bat"><tt>fds_smv_env.bat</tt> configuration file.</a> <br> Use Smartsvn to update the FDS source on Windows
 <li><a href="../FDS_Compilation/getting_started.html">Getting Started - setting up build scripts</a>
 
 </ul>
