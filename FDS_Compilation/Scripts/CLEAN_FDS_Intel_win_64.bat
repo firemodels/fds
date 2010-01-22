@@ -1,7 +1,7 @@
 @echo off
 Title Cleaning FDS for 64 bit Windows 
 
-Rem Batch file used to clean 32 and 64 bit FDS build directories
+Rem Batch file used to clean Windows 64 bit FDS build directories
 
 set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -15,20 +15,21 @@ goto:eof
 
 :endif_envexist
 
-Rem location of batch files used to set up Intel compilation environment
-set intelbin=c:\bin
-
 call %envfile%
 
 %svn_drive%
 echo.
 cd %svn_root%\FDS_Compilation\Intel_Win_64
 echo Cleaning intel_win_64
-%intelbin%\make -f ..\makefile clean
+
+erase *.obj 
+erase *.mod
 
 echo.
 cd %svn_root%\FDS_Compilation\mpi_intel_win_64
 echo Cleaning mpi_intel_win_64
-%intelbin%\make -f ..\makefile clean
+
+erase *.obj 
+erase *.mod
 
 pause

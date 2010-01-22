@@ -17,21 +17,21 @@ goto:eof
 
 call %envfile%
 
-set intelbin=c:\bin
-
 %svn_drive%
 echo.
 echo cleaning intel_win_32
 cd %svn_root%\FDS_Compilation\intel_win_32
 echo Cleaning intel_win_32
 
-%intelbin%\make -f ..\makefile winclean
+erase *.obj 
+erase *.mod
 
 echo.
 echo cleaning mpi_intel_win_32
 cd %svn_root%\FDS_Compilation\mpi_intel_win_32
 echo Cleaning mpi_intel_win_32
 
-%intelbin%\make -f ..\makefile winclean
+erase *.obj 
+erase *.mod
 
 pause
