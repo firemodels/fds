@@ -28,7 +28,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:) :: UWP
 INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO,P_ITER,II,JJ,KK
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,DWWDT,DVVDT,DUUDT,HQ2,RFODT,U2,V2,W2,HFAC,H0RR(6),TNOW,DUMMY=0._EB, &
-            TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER,U_NEW,V_NEW,W_NEW,VEL_ERROR,VEL_ERROR_MAX
+            TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER,U_NEW,V_NEW,W_NEW,VEL_ERROR,VEL_ERROR_MAX, &
+            P_EXTERNAL
 TYPE (VENTS_TYPE), POINTER :: VT
  
 IF (SOLID_PHASE_ONLY) RETURN
@@ -195,7 +196,8 @@ WALL_CELL_LOOP: DO IW=1,NEWC
             ENDIF
             TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,DUMMY,VT%PRESSURE_RAMP_INDEX)
             !!H_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE/RHOA
-            H_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE/RHO_AVG !! test
+            IF (.NOT.BAROCLINIC2) H_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE/RHO_AVG !! test
+            IF (BAROCLINIC2)      P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE         !! also test
          ENDIF
 
          SELECT CASE(IOR)
@@ -205,10 +207,12 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                W2  = .25_EB*(WW(1,J,K)+WW(1,J,K-1))**2
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (UU(0,J,K)<0._EB) THEN
-                  BXS(J,K) = H_EXTERNAL + HQ2
+                  IF (.NOT.BAROCLINIC2) BXS(J,K) = H_EXTERNAL + HQ2
+                  IF (BAROCLINIC2)      BXS(J,K) = P_EXTERNAL/RHO_W(IW) + HQ2
                ELSE
                   !BXS(J,K) = H_EXTERNAL + H0RR(1) + HQ2*HFAC
-                  BXS(J,K) = H_EXTERNAL + H0RR(1) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (.NOT.BAROCLINIC2) BXS(J,K) = H_EXTERNAL + H0RR(1) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (BAROCLINIC2)      BXS(J,K) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
             CASE(-1)
                U2  = UU(IBAR,J,K)**2
@@ -216,10 +220,12 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                W2  = .25_EB*(WW(IBAR,J,K)+WW(IBAR,J,K-1))**2
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (UU(IBAR,J,K)>0._EB) THEN
-                  BXF(J,K) = H_EXTERNAL + HQ2
+                  IF (.NOT.BAROCLINIC2) BXF(J,K) = H_EXTERNAL + HQ2
+                  IF (BAROCLINIC2)      BXF(J,K) = P_EXTERNAL/RHO_W(IW) + HQ2
                ELSE
                   !BXF(J,K) = H_EXTERNAL + H0RR(2) + HQ2*HFAC
-                  BXF(J,K) = H_EXTERNAL + H0RR(2) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (.NOT.BAROCLINIC2) BXF(J,K) = H_EXTERNAL + H0RR(2) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (BAROCLINIC2)      BXF(J,K) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
             CASE( 2)
                U2  = .25_EB*(UU(I,1,K)+UU(I-1,1,K))**2
@@ -227,10 +233,12 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                W2  = .25_EB*(WW(I,1,K)+WW(I,1,K-1))**2
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (VV(I,0,K)<0._EB) THEN
-                  BYS(I,K) = H_EXTERNAL + HQ2
+                  IF (.NOT.BAROCLINIC2) BYS(I,K) = H_EXTERNAL + HQ2
+                  IF (BAROCLINIC2)      BYS(I,K) = P_EXTERNAL/RHO_W(IW) + HQ2
                ELSE
                   !BYS(I,K) = H_EXTERNAL + H0RR(3) + HQ2*HFAC
-                  BYS(I,K) = H_EXTERNAL + H0RR(3) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (.NOT.BAROCLINIC2) BYS(I,K) = H_EXTERNAL + H0RR(3) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (BAROCLINIC2)      BYS(I,K) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
             CASE(-2)
                U2  = .25_EB*(UU(I,JBAR,K)+UU(I-1,JBAR,K))**2
@@ -238,10 +246,12 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                W2  = .25_EB*(WW(I,JBAR,K)+WW(I,JBAR,K-1))**2
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (VV(I,JBAR,K)>0._EB) THEN
-                  BYF(I,K) = H_EXTERNAL + HQ2
+                  IF (.NOT.BAROCLINIC2) BYF(I,K) = H_EXTERNAL + HQ2
+                  IF (BAROCLINIC2)      BYF(I,K) = P_EXTERNAL/RHO_W(IW) + HQ2
                ELSE
                   !BYF(I,K) = H_EXTERNAL + H0RR(4) + HQ2*HFAC
-                  BYF(I,K) = H_EXTERNAL + H0RR(4) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (.NOT.BAROCLINIC2) BYF(I,K) = H_EXTERNAL + H0RR(4) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (BAROCLINIC2)      BYF(I,K) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
             CASE( 3)
                U2  = .25_EB*(UU(I,J,1)+UU(I-1,J,1))**2
@@ -249,10 +259,12 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                W2  = WW(I,J,0)**2
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (WW(I,J,0)<0._EB) THEN
-                  BZS(I,J) = H_EXTERNAL + HQ2
+                  IF (.NOT.BAROCLINIC2) BZS(I,J) = H_EXTERNAL + HQ2
+                  IF (BAROCLINIC2)      BZS(I,J) = P_EXTERNAL/RHO_W(IW) + HQ2
                ELSE
                   !BZS(I,J) = H_EXTERNAL + H0RR(5) + HQ2*HFAC
-                  BZS(I,J) = H_EXTERNAL + H0RR(5) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (.NOT.BAROCLINIC2) BZS(I,J) = H_EXTERNAL + H0RR(5) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (BAROCLINIC2)      BZS(I,J) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
             CASE(-3)
                U2  = .25_EB*(UU(I,J,KBAR)+UU(I-1,J,KBAR))**2
@@ -260,10 +272,12 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                W2  = WW(I,J,KBAR)**2
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (WW(I,J,KBAR)>0._EB) THEN
-                  BZF(I,J) = H_EXTERNAL + HQ2
+                  IF (.NOT.BAROCLINIC2) BZF(I,J) = H_EXTERNAL + HQ2
+                  IF (BAROCLINIC2)      BZF(I,J) = P_EXTERNAL/RHO_W(IW) + HQ2
                ELSE
                   !BZF(I,J) = H_EXTERNAL + H0RR(6) + HQ2*HFAC
-                  BZF(I,J) = H_EXTERNAL + H0RR(6) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (.NOT.BAROCLINIC2) BZF(I,J) = H_EXTERNAL + H0RR(6) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
+                  IF (BAROCLINIC2)      BZF(I,J) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
          END SELECT
     
