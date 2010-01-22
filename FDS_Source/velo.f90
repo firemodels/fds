@@ -422,6 +422,11 @@ ELSE
    MPDT =  0.5_EB*DT
 ENDIF
 !$OMP END SINGLE
+
+IF (NOBIAS) THEN
+   PMDT = 0._EB
+   MPDT = 0._EB
+ENDIF
  
 ! Compute x-direction flux term FVX
 
@@ -598,7 +603,8 @@ ENDDO
  
 ! Baroclinic torque correction
  
-IF (BAROCLINIC .AND. .NOT.EVACUATION_ONLY(NM)) CALL BAROCLINIC_CORRECTION
+IF (BAROCLINIC .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.BAROCLINIC2) CALL BAROCLINIC_CORRECTION
+IF (BAROCLINIC2) CALL BAROCLINIC_CORRECTION2
 
 ! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
 
@@ -673,6 +679,11 @@ ELSE
    MPDT =  0.5_EB*DT
 ENDIF
 !$OMP END SINGLE
+
+IF (NOBIAS) THEN
+   PMDT = 0._EB
+   MPDT = 0._EB
+ENDIF
  
 ! Compute x-direction flux term FVX
 
@@ -814,6 +825,11 @@ ELSE
    PMDT = -0.5_EB*DT
    MPDT =  0.5_EB*DT
 ENDIF
+
+IF (NOBIAS) THEN
+   PMDT = 0._EB
+   MPDT = 0._EB
+ENDIF
  
 ! Compute r-direction flux term FVX
  
@@ -903,7 +919,8 @@ ENDDO
  
 ! Baroclinic torque correction terms
  
-IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION
+IF (BAROCLINIC .AND. .NOT.BAROCLINIC2) CALL BAROCLINIC_CORRECTION
+IF (BAROCLINIC2) CALL BAROCLINIC_CORRECTION2
  
 ! Adjust FVX and FVZ at solid, internal obstructions for no flux
  
@@ -2146,7 +2163,7 @@ ELSE
    WW => WS
    RHOP=>RHOS
 ENDIF
- 
+
 RHO_AVG_OLD = RHO_AVG
 RHO_AVG = 2._EB*RHO_LOWER_GLOBAL*RHO_UPPER_GLOBAL/(RHO_LOWER_GLOBAL+RHO_UPPER_GLOBAL)
 IF (RHO_AVG<=0._EB) THEN
@@ -2256,6 +2273,70 @@ ENDDO
 END SUBROUTINE BAROCLINIC_CORRECTION
 
 
+SUBROUTINE BAROCLINIC_CORRECTION2
+ 
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,RHMK,RRHO
+REAL(EB) :: U2,V2,W2
+INTEGER  :: I,J,K
+ 
+RHMK => WORK1 ! rho*(H-K)
+RRHO => WORK2 ! reciprocal of rho
+ 
+IF (PREDICTOR) THEN
+   UU => U
+   VV => V
+   WW => W
+   RHOP=>RHO
+ELSE
+   UU => US
+   VV => VS
+   WW => WS
+   RHOP=>RHOS
+ENDIF
+ 
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         U2 = 0.25_EB*(UU(I,J,K)+UU(I-1,J,K))**2
+         V2 = 0.25_EB*(VV(I,J,K)+VV(I,J-1,K))**2
+         W2 = 0.25_EB*(WW(I,J,K)+WW(I,J,K-1))**2
+         RHMK(I,J,K) = RHOP(I,J,K)*(H(I,J,K)-0.5_EB*(U2+V2+W2))
+         RRHO(I,J,K) = 1._EB/RHOP(I,J,K)
+      ENDDO
+   ENDDO
+ENDDO
+
+! For the moment, I do not apply baro2 at boundaries
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBM1
+         FVX(I,J,K) = FVX(I,J,K) - 0.5_EB*(RHMK(I,J,K)+RHMK(I+1,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)
+      ENDDO
+   ENDDO
+ENDDO
+ 
+IF (.NOT.TWO_D) THEN
+   DO K=1,KBAR
+      DO J=1,JBM1
+         DO I=1,IBAR
+            FVY(I,J,K) = FVY(I,J,K) - 0.5_EB*(RHMK(I,J,K)+RHMK(I,J+1,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
+DO K=1,KBM1
+   DO J=1,JBAR
+      DO I=1,IBAR
+         FVZ(I,J,K) = FVZ(I,J,K) - 0.5_EB*(RHMK(I,J,K)+RHMK(I,J,K+1))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)
+      ENDDO
+   ENDDO
+ENDDO
+ 
+END SUBROUTINE BAROCLINIC_CORRECTION2
+
+
 !===========================================================================
 ! The following are experimental routines for implementation of a second-
 ! order immersed boundary method (IBM). ~RJM
@@ -2325,7 +2406,8 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
             WBAR(I,J,K) = 0.5_EB*(WW(I,J,K)+WW(I,J,KM1))
             
             VEL2 = UBAR(I,J,K)**2+VBAR(I,J,K)**2+WBAR(I,J,K)**2
-            PP(I,J,K) = RHO_AVG*(H(I,J,K)-.5_EB*VEL2)
+            !!PP(I,J,K) = RHO_AVG*(H(I,J,K)-.5_EB*VEL2)
+            PP(I,J,K) = RHOP(I,J,K)*(H(I,J,K)-.5_EB*VEL2)
             
             DUDX(I,J,K) = (UU(I,J,K)-UU(IM1,J,K))/DX(I)
             DVDY(I,J,K) = (VV(I,J,K)-VV(I,JM1,K))/DY(J)
