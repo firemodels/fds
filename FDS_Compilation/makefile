@@ -5,6 +5,8 @@
 #
 # make intel_linux_mpi_64
 
+# A make utility for windows may be downloaded from http://gnuwin32.sourceforge.net/packages/make.htm
+
 # The variable VPATH defines where the source code is relative to the current directory
 
 VPATH = ../FDS_Source
