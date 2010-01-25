@@ -1576,23 +1576,23 @@ WALL_LOOP: DO IW=1,NWC
       
    ! Apply the different species boundary conditions
    METHOD_OF_MASS_TRANSFER: SELECT CASE(METHOD_ID)
-      
-      CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER
 
-         SELECT CASE(IOR)
-            CASE( 1)
-               FX(II,JJ,KK,0)   = 0._EB
-            CASE(-1)
-               FX(II-1,JJ,KK,0) = 0._EB
-            CASE( 2)   
-               FY(II,JJ,KK,0)   = 0._EB
-            CASE(-2)
-               FY(II,JJ-1,KK,0) = 0._EB
-            CASE( 3)
-               FZ(II,JJ,KK,0)   = 0._EB
-            CASE(-3)
-               FZ(II,JJ,KK-1,0) = 0._EB
-         END SELECT
+!      CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER
+!
+!         SELECT CASE(IOR)
+!            CASE( 1)
+!               FX(II,JJ,KK,0)   = 0._EB
+!            CASE(-1)
+!               FX(II-1,JJ,KK,0) = 0._EB
+!            CASE( 2)   
+!               FY(II,JJ,KK,0)   = 0._EB
+!            CASE(-2)
+!               FY(II,JJ-1,KK,0) = 0._EB
+!            CASE( 3)
+!               FZ(II,JJ,KK,0)   = 0._EB
+!            CASE(-3)
+!               FZ(II,JJ,KK-1,0) = 0._EB
+!         END SELECT
             
       CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
          
