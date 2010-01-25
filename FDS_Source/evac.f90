@@ -2868,6 +2868,12 @@ CONTAINS
          END IF
          IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_ENTR_LOOP
 
+         IF (RESTART) THEN
+            MAX_HUMANS = 0
+            MAX_FLOW   = 0.0_EB
+            MAX_HUMANS_RAMP = 'null'
+         END IF
+
          IF (MAX_HUMANS < 0) MAX_HUMANS = HUGE(MAX_HUMANS)
          IF (MAX_FLOW <= 0.0_EB) MAX_HUMANS = 0
          IF (Trim(MAX_HUMANS_RAMP)/='null') THEN
@@ -3232,6 +3238,11 @@ CONTAINS
          END IF
 
          IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_EVAC_LOOP
+
+         IF (RESTART) THEN
+            NUMBER_INITIAL_PERSONS = 0
+            MAX_FLOW = 0.0_EB
+         END IF
 
          HPT=>EVACUATION(N)
 
@@ -3888,9 +3899,12 @@ CONTAINS
 
   END SUBROUTINE READ_EVAC
 
-  SUBROUTINE INITIALIZE_EVAC_DUMPS
+  SUBROUTINE INITIALIZE_EVAC_DUMPS(Tin,T_SAVE)
     IMPLICIT NONE
     !
+    ! Passed variables
+    REAL(EB), INTENT(IN) :: Tin
+    REAL(EB), INTENT(INOUT) :: T_SAVE
     ! Local variables
     CHARACTER(50) tcform
     INTEGER n_cols, i, j, nm, izero
@@ -3898,6 +3912,9 @@ CONTAINS
     INTEGER(4) n_egrids_tmp, ibar_tmp, jbar_tmp, kbar_tmp, &
          ntmp1, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6, ios, N
     REAL(FB) u_tmp, v_tmp
+    INTEGER(4) N_TMP
+    REAL(FB) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4, T_TMP, DT_TMP
+    REAL(FB) TMPOUT5, TMPOUT6, TMPOUT7, TMPOUT8
     CHARACTER(60), ALLOCATABLE, DIMENSION(:) :: CTEMP
     !
     TYPE (MESH_TYPE), POINTER :: MFF =>NULL()
@@ -3976,7 +3993,115 @@ CONTAINS
        OPEN (LU_EVACCSV,file=FN_EVACCSV,form='formatted',status='old', position='append')
        !
        IF (L_fed_save) THEN
-          OPEN (LU_EVACFED,file=FN_EVACFED,form='unformatted', status='old',position='append')
+          OPEN (LU_EVACFED,file=FN_EVACFED,form='unformatted', status='old',position='rewind')
+          READ (LU_EVACFED) ntmp1
+          IF (ios.NE.0) THEN
+             WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR'
+             CLOSE (LU_EVACFED)
+             CALL SHUTDOWN(MESSAGE)
+          END IF
+          READ (LU_EVACFED) n_egrids_tmp, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6
+          IF (ios.NE.0) THEN
+             WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED READ ERROR, Restart failed'
+             CLOSE (LU_EVACFED)
+             CALL SHUTDOWN(MESSAGE)
+          END IF
+          ! Do not read old format. Do not read new format, if there the numbers
+          ! are not: n_egrids, 4, n_corrs, 8 
+          IF ( ntmp2 /= 4 .OR. ntmp3 /= n_corrs .OR. ntmp1 >= 0 .OR. ntmp4 /= 8  .OR. &
+               ntmp5 /= N_DOORS+N_EXITS .OR. ntmp6 /= 4) THEN
+             WRITE (MESSAGE,FMT='(a,a,a)') ' FDS+Evac Error in FED File: ', TRIM(FN_EVACFED), ', Restart failed'
+             CLOSE (LU_EVACFED)
+             CALL SHUTDOWN(MESSAGE)
+          END IF
+          IF (n_egrids_tmp /= n_egrids) THEN
+             WRITE(MESSAGE,'(A,2I4,A)') 'ERROR: Init Evac Dumps: FED ',n_egrids_tmp, n_egrids, ', Restart failed'
+             CLOSE (LU_EVACFED)
+             CALL SHUTDOWN(MESSAGE)
+          END IF
+
+          ! Position the FED file at the correct position, i.e., at the restart point.
+          ! The FED file might have some time points after the restart time, because
+          ! FED file is written every 2 seconds.
+          ! LU_EVACFED: CHID_EVAC.FED, FED AND SOOT, TIME DEPENDENT, BINARY
+          ! FILE FORMAT: 1A. ROW: N < 0 (NEW FORMAT)
+          !              1B. ROW: N_EGRIDS,4,N_CORRS,8 (NEW FORMAT)
+          !                 2. ROW: T AND DT
+          !                    3. ROW: IBAR,JBAR,KBAR, N_QUANTITIES
+          !                       4. ROW: ONWARDS DATA
+          !                    GOTO 3. (MESHES)
+          !                       N. ROW: CORR DATA (8 REAL NUMBERS)
+          !                       N+1. ROW: NEXT CORR DATA...
+          !                 GOTO 2. (TIME POINTS)
+          T_TMP  = REAL(T_BEGIN,FB)
+          DT_TMP = 0.0_FB
+          T_SAVE = 0.0_FB
+          TIME_LOOP: DO WHILE (REAL(T_SAVE,EB) < Tin)
+             !write(lu_err,*)'*** restart fed time if ',T_TMP, DT_TMP,Tin
+             IOS = 0
+             READ (LU_EVACFED,END=324,IOSTAT=IOS) T_TMP, DT_TMP
+             T_SAVE = T_TMP + DT_TMP ! Next time point in the file
+             write(lu_err,*)'*** restart fed time read in ',T_TMP, Tin
+             IF (IOS.NE.0) THEN
+                WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED read error'
+                CLOSE (LU_EVACFED)
+                CALL SHUTDOWN(MESSAGE)
+             END IF
+             MESH_LOOP: DO NM=1,NMESHES
+                IF ( .NOT.(EVACUATION_GRID(NM) .AND. EVACUATION_ONLY(NM)) ) CYCLE
+                CALL POINT_TO_MESH(NM)
+                READ (LU_EVACFED,IOSTAT=IOS) IBAR_TMP, JBAR_TMP, KBAR_TMP, N_TMP
+                IF (IOS.NE.0) THEN
+                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED read error'
+                   CLOSE (LU_EVACFED)
+                   CALL SHUTDOWN(MESSAGE)
+                END IF
+                IF (IBAR_TMP /= IBAR .OR. JBAR_TMP /= JBAR .OR. N_TMP < 4 ) THEN
+                   CLOSE (LU_EVACFED)
+                   CALL SHUTDOWN('ERROR: Init Evac Dumps: Problems to read the FED file')
+                END IF
+                DO I = 1, IBAR
+                   DO J= 1, JBAR
+                      READ (LU_EVACFED,IOSTAT=IOS) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4
+                      IF (IOS.NE.0) THEN
+                         WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED read error'
+                         CLOSE (LU_EVACFED)
+                         CALL SHUTDOWN(MESSAGE)
+                      END IF
+                   END DO     ! J=1,JBAR
+                END DO       ! I=1,IBAR
+             END DO MESH_LOOP
+             CORR_LOOP: DO I = 1, N_CORRS
+                READ (LU_EVACFED,IOSTAT=IOS) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4, TMPOUT5, TMPOUT6, TMPOUT7, TMPOUT8
+                IF (IOS.NE.0) THEN
+                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED read error'
+                   CLOSE (LU_EVACEFF)
+                   CALL SHUTDOWN(MESSAGE)
+                END IF
+             END DO CORR_LOOP
+             DOOR_LOOP: DO I = 1, N_DOORS
+                READ (LU_EVACFED,IOSTAT=IOS) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4
+                write(lu_err,*)'*** restart fed door t_tmp ',i,T_TMP, TMPOUT1
+                IF (IOS.NE.0) THEN
+                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED read error'
+                   CLOSE (LU_EVACFED)
+                   CALL SHUTDOWN(MESSAGE)
+                END IF
+             END DO DOOR_LOOP
+             EXIT_LOOP: DO I = 1, N_EXITS
+                IF (EVAC_EXITS(I)%COUNT_ONLY) CYCLE EXIT_LOOP
+                READ (LU_EVACFED,IOSTAT=IOS) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4
+                IF (IOS.NE.0) THEN
+                   WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps: FED read error'
+                   CLOSE (LU_EVACFED)
+                   CALL SHUTDOWN(MESSAGE)
+                END IF
+             END DO EXIT_LOOP
+
+          END DO TIME_LOOP
+324       CONTINUE
+
+          WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', TRIM(FN_EVACFED), ' is calculated and used'
        END IF
        ! 
        IF (L_fed_read) THEN
@@ -4028,6 +4153,33 @@ CONTAINS
        !
        IF ( l_fed_read .OR. l_fed_save ) n_dead = 0
        !
+       ! Restart: read always from the hard drive
+       ios = 3
+       INQUIRE (file=FN_EVACEFF,exist=L_status)
+       IF (L_status) THEN
+          l_eff_save = .FALSE.
+          l_eff_read = .TRUE.
+          I_EVAC = IBCLR(I_EVAC,0) ! do not save EFF
+          I_EVAC = IBSET(I_EVAC,2) ! read EFF
+          OPEN (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', status='old')
+          READ (LU_EVACEFF,Iostat=ios) n_egrids_tmp
+          IF (ios.NE.0) THEN
+             ios = 1
+             WRITE(LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
+             WRITE(LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
+             CLOSE (LU_EVACEFF)
+          END IF
+          IF (n_egrids_tmp /= COUNT(EVACUATION_ONLY) .AND. ios < 1) THEN
+             ios = 2
+             WRITE(LU_EVACOUT,'(A,2I4)') ' WARNING: Init Evac Dumps: EFF READ ERROR ',n_egrids_tmp, COUNT(EVACUATION_ONLY)
+             WRITE(LU_EVACOUT,'(A)')     ' WARNING: EFF file is not read in'
+             CLOSE (LU_EVACEFF)
+          END IF
+       END IF
+       IF (ios .NE. 0) THEN
+         WRITE(MESSAGE,'(A)') 'ERROR: Restart problem: EFF READ ERROR'
+         CALL SHUTDOWN(MESSAGE)
+       END IF
 
     ELSE                      ! replace files
        !
@@ -4146,7 +4298,7 @@ CONTAINS
              CTEMP(j) = TRIM(EVAC_EXITS(i)%ID)
           END IF
        END DO
-    
+
        IF ( l_fed_read .OR. l_fed_save ) THEN
           ! Write the 'fed' columns
           n_dead = 0
@@ -4216,7 +4368,7 @@ CONTAINS
     END IF                  ! if-append-else
     ! 
     ! Read the evac flow fields from the disk, if they exist.
-    IF ( L_eff_read ) THEN
+    IF ( L_eff_read .OR. APPEND) THEN
        ios = 0
        ReadEffLoop: DO nm = 1, NMESHES
           IF (EVACUATION_ONLY(NM)) THEN
@@ -4265,7 +4417,7 @@ CONTAINS
     IF (L_eff_read) THEN
        WRITE (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', TRIM(FN_EVACEFF), ' is read in and used'
     END IF
-    IF (L_eff_save .AND. .NOT. append) THEN
+    IF (L_eff_save .AND. .NOT. APPEND) THEN
        l_eff_read = .FALSE.
        I_EVAC = IBCLR(I_EVAC,2)  ! do not read EFF
        OPEN (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', status='replace')
@@ -4304,7 +4456,7 @@ CONTAINS
              WRITE (LU_EVACOUT,'(I5,A,A)')          NM, ' ', EVAC_NODE_List(EVAC_STRS(N)%NODES_OUT(NM))%ID
           ENDDO
        ENDDO
-   END IF
+    END IF
 
   END SUBROUTINE INITIALIZE_EVAC_DUMPS
       
