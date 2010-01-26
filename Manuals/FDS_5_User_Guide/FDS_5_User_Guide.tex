@@ -1493,6 +1493,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 {\ct MULT}  & Multiplier Parameters        & \ref{info:MULT} & \ref{tbl:MULT}  \\ \hline
 {\ct OBST}  & Obstruction                  & \ref{info:OBST} & \ref{tbl:OBST}  \\ \hline
 {\ct PART}  & Lagrangian Particle          & \ref{info:PART} & \ref{tbl:PART}  \\ \hline
+{\ct PRES}  & Pressure Solver Parameters   & \ref{info:PRES} & \ref{tbl:PRES}  \\ \hline
 {\ct PROF}  & Profile Output               & \ref{info:PROF} & \ref{tbl:PROF}  \\ \hline
 {\ct PROP}  & Device Property              & \ref{info:PROP} & \ref{tbl:PROP}  \\ \hline
 {\ct RADI}  & Radiation                    & \ref{info:RADI} & \ref{tbl:RADI}  \\ \hline
@@ -2224,47 +2225,9 @@ lines with a {\ct T}.
 
 
 
-\subsection{Special Topic: Improving the Pressure Solver}
-\label{info:pressurecorrection}
 
-This section provides a few suggestions to improve the performance of the pressure solver. Normally, these options are not used, but there are certain
-applications that might require them.
 
-\subsubsection{Solid Boundary Issues}
 
-At solid surfaces that are not part of the boundary of the computational domain, the pressure solver enforces a no-flux boundary condition. However, it is not perfect, and
-it is possible to have a non-zero normal velocity at a solid surface. For most applications, this velocity is so small that it has a negligible effect on the solution. But sometimes, you
-might want to reduce this error. To do so, you can specify {\ct VELOCITY\_TOLERANCE} on the {\ct MISC} line to be the maximum allowable normal velocity component on the solid
-boundary. It is in units of m/s. If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your
-desired tolerance. The number of iterations are written out to the file {\bf CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive.
-
-\subsubsection{Multiple-Mesh Issues}
-
-FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is
-assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of
-this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same
-as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel
-instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for
-the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because the Poisson
-equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerics can be found in the
-FDS Technical Reference Guide.
-
-A new feature has been added in FDS 5 to improve the accuracy of the multi-mesh pressure solver. Briefly, a correction is made to the local solutions of the Poisson
-equation by way of a global solution for an ``average'' pressure in each mesh. This can be thought of as the pressure that one would obtain from a zone or lumped parameter
-model where each compartment in a building has its own bulk pressure obtained via mass balance estimates at compartment boundaries. Currently, this
-pressure correction is still an option because it requires additional testing and it requires additional CPU time. To invoke it, add \\
-{\ct PRESSURE\_CORRECTION=.TRUE.} \\
-to the {\ct MISC} line. Run your case with and without the option to determine how much additional CPU time is required, and also how much of an improvement in
-accuracy it yields. This can be done in two ways. First, examine vector slice files of various quantities at the mesh boundaries to see if there are noticeable changes
-in the flow field due to the boundary. Second, add \\
-{\ct CHECK\_VOLUME\_FLOW=.TRUE.} \\
-to the {\ct DUMP} line, just for debugging purposes. This will prompt FDS to compute the volume flow at each mesh boundary to determine if the pressure correction
-scheme is working properly. If error messages appear on the screen or in the standard error file, post the case to the Issue Tracker.
-
-\begin{warning}
-\noindent If {\ct PRESSURE\_CORRECTION=.TRUE.}, the meshes cannot overlap. Also, if two adjacent meshes are of different resolution, any obstruction crossing the
-mesh interface must conform to the more coarse of the two. Otherwise, volume cannot be conserved.
-\end{warning}
 
 
 
@@ -2482,6 +2445,34 @@ is different inside and out.
 Note that a solid obstruction can be given an initial temperature via the
 parameter {\ct TMP\_INNER} on the {\ct SURF} line. An initial velocity
 can be prescribed via {\ct U0}, {\ct V0}, and {\ct W0} on the {\ct MISC} line.
+
+
+\section{Special Topic: Improving the Pressure Solver: The \texorpdfstring{{\tt PRES}}{PRES} Namelist Group (Table \ref{tbl:PRES})}
+\label{info:PRES}
+
+FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is
+assumed infinite, and that the pressure throughout the computational domain is affected, instantaneously, by local changes in the flow field. A simple example of
+this is when air is pushed through a tunnel. If the tunnel has forced flow at one end and an opening at the other, the volume flow at the opening is the same
+as that which is forced at the other end. Without any heat addition, the air is assumed incompressible. Information is passed through the tunnel
+instantaneously in the model via a solution of a linear system of equations for the pressure. For a single mesh, the solution of this Poisson equation for
+the pressure is very accurate. However, for multiple meshes, there is potentially a delay in information passing throughout the domain because the Poisson
+equation is solved on each individual mesh, without any influence from the larger computational domain. The details of the numerics can be found in the
+FDS Technical Reference Guide.
+
+
+Another limitation of the pressure solver is that at solid surfaces that are not part of the boundary of the computational domain,
+the pressure solver enforces a no-flux boundary condition. However, it is not perfect, and
+it is possible to have a non-zero normal velocity at a solid surface. For most applications, this velocity is so small that it has a negligible effect on the solution.
+
+If either the error in the normal component of the velocity at a mesh interface or at a solid boundary is large, you
+can reduce it by making more than the default number of calls to the pressure solver at each time step.
+To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the maximum allowable normal velocity component on the solid
+boundary or the largest error at a mesh interface. It is in units of m/s.
+If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your
+desired tolerance. The number of iterations are written out to the file {\bf CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive.
+The maximum number of iterations per time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10000.
+
+
 
 
 
@@ -8841,8 +8832,10 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, d\bs$                                & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
 %{\ct LEAKAGE}                                   & Volume flow due to leaks                          & m$^3$/s        & D            \\ \hline
+{\ct MAXIMUM VELOCITY ERROR}                    & See Section \ref{info:PRES}                       &                & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
+{\ct PRESSURE ITERATIONS}                       & No. pressure iterations                           &                & D            \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -9348,7 +9341,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct P\_INF}                    & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
 %{\ct PERIODIC\_TEST}           & Integer       & Initial condition for verification test       &               & 0                 \\ \hline
 {\ct POROUS\_FLOOR}             & Logical       & See Section~\ref{info:sprinklers}             &               & {\ct .TRUE.}      \\ \hline
-{\ct PRESSURE\_CORRECTION}      & Logical       & See Section~\ref{info:pressurecorrection}                    &               & {\ct .FALSE.}     \\ \hline
+%{\ct PRESSURE\_CORRECTION}      & Logical       & See Section~\ref{info:pressurecorrection}                    &               & {\ct .FALSE.}     \\ \hline
 %{\ct PROJECTION}                & Logical       & Use formal projection method (eliminates initial divergence errors) &               & {\ct .FALSE.}     \\ \hline
 {\ct RADIATION}                 & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
 {\ct RAMP\_GX}                  & Character     & Time function, $x$ comp. of gravity           &               &                   \\ \hline
@@ -9367,7 +9360,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
 %{\ct TURB\_INIT}                & Logical       & Write `ini\_salsa.dat' for turb_init.exe      &               & {\ct .FALSE.}     \\ \hline
 {\ct U0,V0,W0}                  & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
-{\ct VELOCITY\_TOLERANCE}       & Real          & See Section~\ref{info:pressurecorrection}     &  m/s          &                   \\ \hline
 {\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
 {\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
@@ -9518,6 +9510,30 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 
 \vspace{\baselineskip}
+
+
+\section{\texorpdfstring{{\tt PRES}}{PRES} (Pressure Solver Parameters)}
+
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Pressure Solver Parameters]{For more information see Section~\ref{info:PRES}.}
+\label{tbl:PRES} \\
+\hline
+\multicolumn{5}{|c|}{{\ct PRES} (Pressure Solver Parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct PRES} (Pressure Solver Parameters)} \\
+\hline \hline
+\endhead
+{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & See Section~\ref{info:PRES}           &               &   10000                \\ \hline
+{\ct VELOCITY\_TOLERANCE}           & Real          & See Section~\ref{info:PRES}           &  m/s          &                        \\ \hline
+\end{longtable}
+
+\vspace{\baselineskip}
+
 
 
 \section{\texorpdfstring{{\tt PROF}}{PROF} (Wall Profile Parameters)}
@@ -10297,9 +10313,9 @@ The only compiler option necessary, in addition to any needed to
 address the above issues, is for full optimization (usually -O or some variant). Some
 compilers have a standard optimization level, plus various degrees of
 ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
-\item For the single processor version of FDS, compile with {\bf main.f90}
-\item The parallel version of FDS uses {\bf main\_mpi.f90} instead of
-{\bf main.f90}, plus additional MPI libraries need to be installed. More
+\item For the single processor version of FDS, compile with {\bf mpis.f90}
+\item The parallel version of FDS uses {\bf mpip.f90} instead of
+{\bf mpis.f90}, plus additional MPI libraries need to be installed. More
 details on MPI can be found at the web site, along with links to the
 necessary organizations who have developed free MPI libraries.
 \end{itemize}
@@ -10338,7 +10354,9 @@ init.f90   & Initialize variables and Poisson solver \\ \hline
 turb.f90   & Experimental routines, mostly involving the turbulence model \\ \hline
 velo.f90   & Momentum equations \\ \hline
 vege.f90   & Experimental vegetation model \\ \hline
-main.f90 {\bf or} main\_mpi.f90   & Main programs, serial and parallel versions \\ \hline
+mpis.f90   & "Dummy" Fortran/MPI bindings for non-MPI compilation \\ \hline
+mpip.f90   & MPI "include" statement for MPI compilation \\ \hline
+main.f90   & Main program for both serial and parallel versions \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
