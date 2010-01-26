@@ -223,13 +223,19 @@ and the scalar face value is then determined from
 
 \begin{equation}
 \label{eqn_force}
-F_{u,i} = \overline{\overline{u}_j^{j^-}}^{i^+} \frac{\delta \overline{u}_i^{j\ssmp}}{\delta x_j^\sspm} - \frac{\delta K}{\delta x_i^\ssp} + \frac{1}{\overline{\rho}^{i^+}} \left[ \frac{\delta}{\delta x_j^\sspm} \left( \tau_{ij} + \tau_{ij}^{sgs} \right) + f_i \right]
+F_{u,i} = \overline{\overline{u}_j^{j^-}}^{i^+} \frac{\delta \overline{u}_i^{j\ssmp}}{\delta x_j^\sspm} - \frac{\delta K}{\delta x_i^\ssp} - B_i + \frac{1}{\overline{\rho}^{i^+}} \left[ \frac{\delta}{\delta x_j^\sspm} \left( \tau_{ij} + \tau_{ij}^{sgs} \right) + f_i \right]
 \end{equation}
 
 \paragraph{Resolved Kinetic Energy} The resolved kinetic energy per unit mass is
 \begin{equation}
 \label{eqn_ke}
 K = \mhalf ( \overline{u}_i^{i^-}\overline{u}_i^{i^-} )
+\end{equation}
+
+\paragraph{Baroclinic Correction}
+\begin{equation}
+%B_i = \left(1-\frac{\overline{\rho}^{i^+}}{\rho_{avg}}\right) \frac{\delta P}{\delta x_i^+}
+B_i = \overline{\rho({\cal H} - K)}^{i^\ssp} \frac{\delta (1/\rho)}{\delta x_i^\ssp}
 \end{equation}
 
 \paragraph{Deviatoric Stress}
@@ -244,25 +250,12 @@ K = \mhalf ( \overline{u}_i^{i^-}\overline{u}_i^{i^-} )
 S_{ij} = \frac{1}{2}\left( \frac{\delta u_i}{\delta x_j^\ssmp} + \frac{\delta u_j}{\delta x_i^\ssmp} \right)
 \end{equation}
 
-\paragraph{Volumetric Forces} The volumetric force $f_i$ may contain contributions from the baroclinic, gravitational, subgrid drag, and bulk mass source terms, as well as additional forces discussed in more detail later.
+\paragraph{Volumetric Forces} The volumetric force $f_i$ may contain contributions from gravity and bulk mass source terms, as well as additional forces discussed in more detail later.
 \begin{equation}
-f_i = B_i + G_i + D_i + \dot{m}_b^\ppp(u_i - u_{i,b}) + ...
+f_i = (\overline{\rho}^{i^+}-\rho_0)g_i + \dot{m}_b^\ppp(u_i-u_{i,b}) + ...
 \end{equation}
 
-\paragraph{Baroclinic}
-\begin{equation}
-%B_i = \left(1-\frac{\overline{\rho}^{i^+}}{\rho_{avg}}\right) \frac{\delta P}{\delta x_i^+}
-B_i = \overline{\rho^2({\cal H} - K)}^{i^\ssp} \frac{\delta (1/\rho)}{\delta x_i^\ssp}
-\end{equation}
-
-\paragraph{Gravity}
-\begin{equation}
-G_i = (\overline{\rho}^{i^+}-\rho_0)g_i
-\end{equation}
-
-\paragraph{Drag} Details of the subgrid drag force $D_i$ are discussed in Section \ref{sec}.
-
-\paragraph{Bulk Mass Source} Vapor from droplet evaporation and the off gasses from subgrid pyrolysis have inertial effects which are separate from the drag force; $D_i$ may be present even if $\dot{m}_b^\ppp=0$.
+\paragraph{Bulk Mass Source} Vapor from droplet evaporation and the off gasses from subgrid pyrolysis have inertial effects which are separate from the drag force; subgrid drag (see Section \ref{sec}) may be present even if $\dot{m}_b^\ppp=0$.
 
 \paragraph{Additional Volumetric Forces} Additional forces may be defined and added to $f_i$ as required.  In particular, the immersed boundary method (IBM) may be viewed in terms of an additional force, though we prefer to use the \emph{direct forcing} approach of Fadlun \cite{Fadlun} which specifies $F_{u,i}$ directly. Treatment of immersed boundaries (a.k.a.~{\tt OBST}acles) is discussed in Section \ref{sec}.  Other examples of useful additional force terms are the nudging force used for data assimilation and mean pressure gradient forces used in periodic channel flows.
 
@@ -307,7 +300,7 @@ Equation (\ref{eqn_divcon}) is principally responsible for relating the rate of 
 
 \subsubsection{Velocity Projection}
 
-Here we show how to view the velocity update as a fractional-step projection method.  To develop a projection scheme, first write down the form of the desired temporal update.  Below in Eq.~(\ref{eqn_desired}) we show a semi-implicit update of the momentum equation.  That is, all terms on the right hand side are evaluated at time level $n$ with the exception of the scalar ${\cal H}^{n\ssp}$ which is supposed to live at some time level $n^\ssp >n$ and is yet unknown\footnote[1]{There are subtle difficulties in claiming a time location for $\cal H$ in this context because ultimately its value depends on arbitrary choices made in the time location for $F_{u,i}$. The end result, which is of little consequence in practice, is that the hydrodynamic pressure is known with less temporal accuracy than the velocity field \cite{Almgren}.}.  Next, write down the update with an initial guess for the pressure gradient (see Eq. (\ref{eqn_guess})); zero will do.  This results in a guess for the velocity field, call it $\mathbf{u}^*$, which does not satisfy the divergence constraint (\ref{eqn_divcon}).
+Here we show how to view the velocity update as a fractional-step projection method.  To develop a projection scheme, we first write down the form of the desired temporal update.  In Eq.~(\ref{eqn_desired}) below we show a semi-implicit update of the momentum equation.  That is, all terms on the right hand side are evaluated at time level $n$ with the exception of the scalar ${\cal H}^{n\ssp}$ which is supposed to live at some time level $n^\ssp >n$ and is yet unknown\footnote[1]{There are subtle difficulties in claiming a time location for $\cal H$ in this context because ultimately its value depends on arbitrary choices made in the time location for $F_{u,i}$. The end result, which is of little consequence in practice, is that the hydrodynamic pressure is known with less temporal accuracy than the velocity field \cite{Almgren}.}.  Next, write down the update with an initial guess for the pressure gradient (see Eq. (\ref{eqn_guess})); zero will do.  This results in a guess for the velocity field, call it $\mathbf{u}^*$, which does not satisfy the divergence constraint (\ref{eqn_divcon}).
 \begin{eqnarray}
 \label{eqn_desired} u_i^{n+1} &=& u_i^n - \delta t \left[ F_{u,i}^n + \frac{\delta {\cal H}^{n\ssp}}{\delta x_i^\ssp} \right] \\
 \label{eqn_guess} u_i^* &=& u_i^n - \delta t F_{u,i}^n
@@ -327,30 +320,103 @@ The Poisson equation is obtained by taking the divergence of (\ref{eqn_projectio
 \frac{\delta^2 {\cal H}^{n\ssp}}{\delta x_i^\ssm\delta x_i^\ssp} &=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - \frac{\delta u_i^{n+1}}{\delta x_i^\ssm} \right) \nonumber\\
 &=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - \Div \mathbf{u}^{n+1} \right)
 \end{eqnarray}
-For a single mesh, the Poisson equation (\ref{eqn_poisson}) is solved with a fast direct method.  For multiple mesh cases, the Poisson equation is solved by an additive Schwarz method with varying levels of global defect correction.  Details are given in Section \ref{sec}.
+For a single mesh, the Poisson equation (\ref{eqn_poisson}) is solved with a fast direct method (see FishPak).  For multiple mesh cases, the Poisson equation is solved by an additive Schwarz method with varying levels of global defect correction.  Details are given in Section \ref{sec}.
 
-\paragraph{The Projection Operator} We now have all the elements in place to define our projection operator, but the equations have been introduced in an order that aids the derivation, not the order in which they are solved in practice.  Thus, the projection operator
+\paragraph{The Projection Operator} We now have all the elements in place to define our projection operator, but so far the equations have been introduced in an order that aids the derivation, not the order in which they are solved in practice.  Thus, the projection operator
 \begin{equation}
-\mathbf{u}^{n+1} = {\cal P}(\mathbf{u}^n)
+\mathbf{u}^{n+1} = {\cal P}(\mathbf{u}^*)
 \end{equation}
-is defined by the following
+is defined by the following:
 \begin{enumerate}
-\item Compute $F_{u,i}^n$ via (\ref{eqn_force}) and ${\Div \mathbf{u}}^{n+1}$ via (\ref{eqn_divcon})
-\item Compute $u_i^*$ via (\ref{eqn_guess})
+\item Compute ${\Div \mathbf{u}}^{n+1}$ via (\ref{eqn_divcon})
 \item Build the right hand side of the Poisson equation (\ref{eqn_poisson})
 \item Solve (\ref{eqn_poisson}) for ${\cal H}^{n\ssp}$
 \item Compute $u_i^{n+1}$ via (\ref{eqn_projection})
 \end{enumerate}
-It is important to appreciate that the projection forces equivalence between (\ref{eqn_divcon}) and the discrete divergence of the updated velocity field. 
+It is important to appreciate that the projection forces equivalence between (\ref{eqn_divcon}) and the discrete divergence of the updated velocity field.
 
 
-\paragraph{STOP! MPI Exchange 1} $\rho$, $Y_\alpha$
+\subsubsection{The Basic (Forward Euler) Algorithm}
 
-\subsubsection{Intermediate Updates}
+Define the FDS state vector as $\mathbf{Q} = [\mathbf{u},{\cal H},\rho,\mathbf{Y},T]$. In this section we list the steps in a single forward Euler (FE) update of this state.  The description below assumes we have chosen a stable time increment $\delta t$.
 
-Compute $J_{\alpha,i}^{n+1}$, $\dot{m}_\alpha^{\ppp \,\,n+1}$, $\Div \mathbf{q}_{rad}^{n+1}$, etc. and apply boundary conditions.
+\begin{enumerate}
+\item[] Given: $\mathbf{Q}^n$, $J_{\alpha,i}^n$, $\dot{m}_\alpha^{\ppp \,\,n}$, $\Div \mathbf{q}_{rad}^n$
+\item Update density and scalars: $\rho^{n+1}$, $Y_\alpha^{n+1}$
+    \begin{enumerate}
+    \item Build advective fluxes (see Flux Limiter)
+    \item Check for boundedness violations
+    \end{enumerate}
+\item Update temperature: $T^{n+1} = \mbox{EOS}(\rho,\mathbf{Y})$
+\item Update velocity field: $\mathbf{u}^*$ (should not require exchange, build in check for this)
+\item MPI exchange: $\rho^{n+1}$, $Y_\alpha^{n+1}$, $T^{n+1}$
+\item[] Steps 1-4 define the operator $\mathbf{Q}^{*} = \mathcal{E}(\mathbf{Q}^n)$
+\item Compute particle (bulk) mass source terms: $\dot{m}_{\alpha,b}^{\ppp\,\,n+1}$
+\item Compute reaction mass source terms: $\dot{m}_\alpha^{\ppp\,\,n+1}$
+\item Update radiation field: $\Div \mathbf{q}_{rad}^{n+1}$
+\item Update diffusive flux (mass and heat): $J_{\alpha,i}^{n+1}$
+\item Projection: $\mathbf{Q}^{n+1} = \mathcal{P}(\mathbf{Q}^*)$
+\item MPI exchange: $\mathbf{u}^{n+1}$, ${\cal H}^{n\ssp}$
+\end{enumerate}
 
-\paragraph{STOP! MPI Exchange 2} $u_i$, $\cal H$, $\delta t$
+
+\subsubsection{Higher-Order Methods}
+
+\paragraph{SSP-RK2}
+
+The strong-stability preserving (SSP), second-order Runge-Kutta (RK2) scheme (hereafter simply RK2) may now be constructed from a linear combination of the FE procedure just outlined.  This scheme is also known as ``Modified Euler'' and is virtually identical to MacCormack's predictor/corrector method.  Bracketed superscripts will be used to denote intermediate stages of the scheme.  The RK2 procedure is
+
+\begin{enumerate}
+\item RK Stage 1
+    \begin{enumerate}
+    \item $\mathbf{Q}^{*} = \mathcal{E}(\mathbf{Q}^n)$
+    \item $\mathbf{Q}^{(1)} = \mathcal{P}(\mathbf{Q}^*)$
+    \end{enumerate}
+\item RK Stage 2
+    \begin{enumerate}
+    \item $\mathbf{Q}^{**} = \mhalf (\mathbf{Q}^n + \mathcal{E}(\mathbf{Q}^{(1)}))$
+    \item $\mathbf{Q}^{n+1} = \mathcal{P}(\mathbf{Q}^{**})$
+    \end{enumerate}
+\end{enumerate}
+
+\paragraph{SSP-RK3} The benefits of a third-order scheme are improved accuracy and stability with a larger time step.  A third-order SSP Runge-Kutta scheme (RK3) is may be constructed as follows (see \cite{Shu}):
+
+\begin{enumerate}
+\item RK Stage 1
+    \begin{enumerate}
+    \item $\mathbf{Q}^{*} = \mathcal{E}(\mathbf{Q}^n)$
+    \item $\mathbf{Q}^{(1)} = \mathcal{P}(\mathbf{Q}^*)$
+    \end{enumerate}
+\item RK Stage 2
+    \begin{enumerate}
+    \item $\mathbf{Q}^{**} = \mbox{$\frac{3}{4}$} \mathbf{Q}^n + \mbox{$\frac{1}{4}$}\mathcal{E}(\mathbf{Q}^{(1)}))$
+    \item $\mathbf{Q}^{(2)} = \mathcal{P}(\mathbf{Q}^{**})$
+    \end{enumerate}
+\item RK Stage 3
+    \begin{enumerate}
+    \item $\mathbf{Q}^{***} = \mbox{$\frac{1}{3}$} \mathbf{Q}^n + \mbox{$\frac{2}{3}$}\mathcal{E}(\mathbf{Q}^{(2)})$
+    \item $\mathbf{Q}^{n+1} = \mathcal{P}(\mathbf{Q}^{***})$
+    \end{enumerate}
+\end{enumerate}
+
+\paragraph{SSP-RK4} A fourth-order scheme is also possible with the same simple procedure.  For details, refer to \ref{Gottlieb}.
+
+\paragraph{Order of Averaging and Projection} A somewhat subtle issue that can have important consequences for stability is the order of averaging and projection that is chosen when developing a multistage scheme (this issue was recognized by Stanislav Borodai [currently at REI]). Reconsider the SSP-RK2 scheme. Notice that it would have been plausible for us to choose the following:
+
+\begin{enumerate}
+\item RK Stage 1
+    \begin{enumerate}
+    \item $\mathbf{Q}^{*} = \mathcal{E}(\mathbf{Q}^n)$
+    \item $\mathbf{Q}^{(1)} = \mathcal{P}(\mathbf{Q}^*)$
+    \end{enumerate}
+\item RK Stage 2 (what NOT to do)
+    \begin{enumerate}
+    \item $\mathbf{Q}^{**} = \mathcal{E}(\mathbf{Q}^{(1)})$
+    \item $\mathbf{Q}^{n+1} = \mhalf (\mathbf{Q}^n + \mathcal{P}(\mathbf{Q}^{**}))$
+    \end{enumerate}
+\end{enumerate}
+
+Notice that here we first projected then averaged in order to obtain our final update (in 2b).  Such a scheme allows any divergence errors in $\mathbf{Q}^n$ to propagate from time step to time step and any numerical round off errors to accumulate.  It is therefore important to always \emph{average then project} in multistep projection methods.
 
 %\section{Combustion}
 %
