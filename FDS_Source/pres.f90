@@ -11,25 +11,24 @@ PRIVATE
 CHARACTER(255), PARAMETER :: presid='$Id$'
 CHARACTER(255), PARAMETER :: presrev='$Revision$'
 CHARACTER(255), PARAMETER :: presdate='$Date$'
-PUBLIC PRESSURE_SOLVER,COMPUTE_A_B,COMPUTE_CORRECTION_PRESSURE,GET_REV_PRES
+PUBLIC PRESSURE_SOLVER,COMPUTE_VELOCITY_ERROR,COMPUTE_A_B,COMPUTE_CORRECTION_PRESSURE,GET_REV_PRES
  
 CONTAINS
  
 SUBROUTINE PRESSURE_SOLVER(T,NM)
+
 USE POIS, ONLY: H3CZSS,H2CZSS,H2CYSS,H3CSSS
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE GLOBAL_CONSTANTS
-USE VELO, ONLY: NO_FLUX
  
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:) :: UWP
-INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO,P_ITER,II,JJ,KK
+INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,DWWDT,DVVDT,DUUDT,HQ2,RFODT,U2,V2,W2,HFAC,H0RR(6),TNOW,DUMMY=0._EB, &
-            TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER,U_NEW,V_NEW,W_NEW,VEL_ERROR,VEL_ERROR_MAX, &
-            P_EXTERNAL
+            TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL
 TYPE (VENTS_TYPE), POINTER :: VT
  
 IF (SOLID_PHASE_ONLY) RETURN
@@ -62,12 +61,6 @@ IF (V0<=0._EB) H0RR(4) = H0*RHOA/RHO_AVG
 IF (W0>=0._EB) H0RR(5) = H0*RHOA/RHO_AVG
 IF (W0<=0._EB) H0RR(6) = H0*RHOA/RHO_AVG
 IF (EVACUATION_ONLY(NM)) H0RR(1:6) = 0._EB
-
-P_ITER = 0
-
-PRESSURE_ITERATION_LOOP: DO
-
-P_ITER = P_ITER + 1
 
 ! Apply pressure boundary conditions at external cells.
 ! If Neumann, BXS, BXF, etc., contain dH/dx(x=XS), dH/dx(x=XF), etc.
@@ -162,7 +155,7 @@ WALL_CELL_LOOP: DO IW=1,NEWC
          SELECT CASE(IOR)
             CASE( 1)
                DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
-               BXS(J,K) = (DX_OTHER*H(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER)
+               BXS(J,K) = (DX_OTHER*H(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER) 
             CASE(-1)
                DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
                BXF(J,K) = (DX_OTHER*H(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)
@@ -504,84 +497,9 @@ ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
-! Check the maximum velocity error at a solid boundary
-
-VEL_ERROR_MAX = 0._EB
-
-CHECK_WALL_LOOP: DO IW=1,NWC
-
-   IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE CHECK_WALL_LOOP
-
-   II  = IJKW(1,IW)
-   JJ  = IJKW(2,IW)
-   KK  = IJKW(3,IW)
-   IOR = IJKW(4,IW)
-
-   IF (PREDICTOR) THEN
-
-      SELECT CASE(IOR)
-         CASE( 1)
-            U_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)))
-            VEL_ERROR = U_NEW + UWP(IW)
-         CASE(-1)
-            U_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)))
-            VEL_ERROR = U_NEW - UWP(IW)
-         CASE( 2)
-            V_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK)))
-            VEL_ERROR = V_NEW + UWP(IW)
-         CASE(-2)
-            V_NEW = V(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK)))
-            VEL_ERROR = V_NEW - UWP(IW)
-         CASE( 3)
-            W_NEW = W(II,JJ,KK)   - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK)))
-            VEL_ERROR = W_NEW + UWP(IW)
-         CASE(-3)
-            W_NEW = W(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)))
-            VEL_ERROR = W_NEW - UWP(IW)
-      END SELECT
-
-   ELSE
-
-      SELECT CASE(IOR)
-         CASE( 1)
-            U_NEW = 0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)     - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK))))
-            VEL_ERROR = U_NEW + UWP(IW)
-         CASE(-1)
-            U_NEW = 0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK))))
-            VEL_ERROR = U_NEW - UWP(IW)
-         CASE( 2)
-            V_NEW = 0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)     - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK))))
-            VEL_ERROR = V_NEW + UWP(IW)
-         CASE(-2)
-            V_NEW = 0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK))))
-            VEL_ERROR = V_NEW - UWP(IW)
-         CASE( 3)
-            W_NEW = 0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)     - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK))))
-            VEL_ERROR = W_NEW + UWP(IW)
-         CASE(-3)
-            W_NEW = 0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1))))
-            VEL_ERROR = W_NEW - UWP(IW)
-      END SELECT
-
-   ENDIF
-
-   IF (ABS(VEL_ERROR)>ABS(VEL_ERROR_MAX)) VEL_ERROR_MAX = VEL_ERROR
-
-ENDDO CHECK_WALL_LOOP
-
-IF (ABS(VEL_ERROR_MAX)<VELOCITY_TOLERANCE) THEN
-   PRESSURE_ITERATIONS = P_ITER
-   EXIT PRESSURE_ITERATION_LOOP
-ENDIF
-
-CALL NO_FLUX
-
-ENDDO PRESSURE_ITERATION_LOOP
-
-
 ! Optional check of the accuracy of the pressure solver
- 
-IF (CHECK_POISSON .AND. .NOT.EVACUATION_ONLY(NM)) THEN     
+
+IF (CHECK_POISSON .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    POIS_ERR = 0.
    DO K=1,KBAR
       DO J=1,JBAR
@@ -599,12 +517,167 @@ IF (CHECK_POISSON .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       ENDDO
    ENDDO
 ENDIF
- 
+
 TUSED(5,NM)=TUSED(5,NM)+SECOND()-TNOW
 END SUBROUTINE PRESSURE_SOLVER
 
 
-! Everything below this point is experimental and not currently implemented
+
+SUBROUTINE COMPUTE_VELOCITY_ERROR(NM)
+
+! Check the maximum velocity error at a solid boundary
+
+USE COMP_FUNCTIONS, ONLY: SECOND
+USE GLOBAL_CONSTANTS
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB), POINTER, DIMENSION(:) :: UWP
+INTEGER :: IW,IOR,II,JJ,KK,IIO,JJO,KKO
+REAL(EB) :: TNOW,U_NEW,V_NEW,W_NEW,U_NEW_OTHER,V_NEW_OTHER,W_NEW_OTHER,VELOCITY_ERROR
+TYPE(OMESH_TYPE), POINTER :: OM
+
+TNOW=SECOND()
+CALL POINT_TO_MESH(NM)
+
+IF (PREDICTOR) THEN
+   UWP=> UWS
+ELSE
+   UWP=> UW
+ENDIF
+
+VELOCITY_ERROR_MAX(NM) = 0._EB
+!!WALL_WORK1 = 0._EB
+
+CHECK_WALL_LOOP: DO IW=1,NWC
+
+   IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE CHECK_WALL_LOOP
+
+   II  = IJKW(1,IW)
+   JJ  = IJKW(2,IW)
+   KK  = IJKW(3,IW)
+   IOR = IJKW(4,IW)
+
+   ! Update normal component of velocity at the mesh boundary
+
+   IF (PREDICTOR) THEN
+      SELECT CASE(IOR)
+         CASE( 1)
+            U_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)))
+         CASE(-1)
+            U_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)))
+         CASE( 2)
+            V_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK)))
+         CASE(-2)
+            V_NEW = V(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK)))
+         CASE( 3)
+            W_NEW = W(II,JJ,KK)   - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK)))
+         CASE(-3)
+            W_NEW = W(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)))
+      END SELECT
+   ELSE
+      SELECT CASE(IOR)
+         CASE( 1)
+            U_NEW = 0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)     - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK))))
+         CASE(-1)
+            U_NEW = 0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK))))
+         CASE( 2)
+            V_NEW = 0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)     - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK))))
+         CASE(-2)
+            V_NEW = 0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK))))
+         CASE( 3)
+            W_NEW = 0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)     - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK))))
+         CASE(-3)
+            W_NEW = 0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1))))
+      END SELECT
+   ENDIF
+
+   ! At interpolated boundaries, compare updated normal component of velocity with that of the other mesh
+
+   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+      OM  => OMESH(IJKW(9,IW))
+      IIO = IJKW(10,IW)
+      JJO = IJKW(11,IW)
+      KKO = IJKW(12,IW)
+      IF (PREDICTOR) THEN
+         SELECT CASE(IOR)
+            CASE( 1)
+               U_NEW_OTHER = OM%U(IIO,JJO,KKO)   + DT*OM%DUDT(IIO,JJO,KKO)
+            CASE(-1)
+               U_NEW_OTHER = OM%U(IIO-1,JJO,KKO) + DT*OM%DUDT(IIO-1,JJO,KKO)
+            CASE( 2)
+               V_NEW_OTHER = OM%V(IIO,JJO,KKO)   + DT*OM%DVDT(IIO,JJO,KKO)
+            CASE(-2)
+               V_NEW_OTHER = OM%V(IIO,JJO-1,KKO) + DT*OM%DVDT(IIO,JJO-1,KKO)
+            CASE( 3)
+               W_NEW_OTHER = OM%W(IIO,JJO,KKO)   + DT*OM%DWDT(IIO,JJO,KKO)
+            CASE(-3)
+               W_NEW_OTHER = OM%W(IIO,JJO,KKO-1) + DT*OM%DWDT(IIO,JJO,KKO-1)
+         END SELECT
+      ELSE
+         SELECT CASE(IOR)
+            CASE( 1)
+               U_NEW_OTHER = 0.5_EB*(OM%U(IIO,JJO,KKO)+OM%US(IIO,JJO,KKO)     + DT*OM%DUDT(IIO,JJO,KKO))
+            CASE(-1)
+               U_NEW_OTHER = 0.5_EB*(OM%U(IIO-1,JJO,KKO)+OM%US(IIO-1,JJO,KKO) + DT*OM%DUDT(IIO-1,JJO,KKO))
+            CASE( 2)
+               V_NEW_OTHER = 0.5_EB*(OM%V(IIO,JJO,KKO)+OM%VS(IIO,JJO,KKO)     + DT*OM%DVDT(IIO,JJO,KKO))
+            CASE(-2)
+               V_NEW_OTHER = 0.5_EB*(OM%V(IIO,JJO-1,KKO)+OM%VS(IIO,JJO-1,KKO) + DT*OM%DVDT(IIO,JJO-1,KKO))
+            CASE( 3)
+               W_NEW_OTHER = 0.5_EB*(OM%W(IIO,JJO,KKO)+OM%WS(IIO,JJO,KKO)     + DT*OM%DWDT(IIO,JJO,KKO))
+            CASE(-3)
+               W_NEW_OTHER = 0.5_EB*(OM%W(IIO,JJO,KKO-1)+OM%WS(IIO,JJO,KKO-1) + DT*OM%DWDT(IIO,JJO,KKO-1))
+         END SELECT
+      ENDIF
+   ENDIF
+
+   ! At solid boundaries, compare updated normal velocity with specified normal velocity (UWP)
+
+   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
+      SELECT CASE(IOR)
+         CASE( 1)
+            U_NEW_OTHER = -UWP(IW)
+         CASE(-1)
+            U_NEW_OTHER =  UWP(IW)
+         CASE( 2)
+            V_NEW_OTHER = -UWP(IW)
+         CASE(-2)
+            V_NEW_OTHER =  UWP(IW)
+         CASE( 3)
+            W_NEW_OTHER = -UWP(IW)
+         CASE(-3)
+            W_NEW_OTHER =  UWP(IW)
+      END SELECT
+   ENDIF
+
+   ! Compute velocity difference
+
+   SELECT CASE(ABS(IOR))
+      CASE(1)
+         VELOCITY_ERROR = U_NEW - U_NEW_OTHER
+  !!     IF (IOR>0) WALL_WORK1(IW) = -1.0*VELOCITY_ERROR*DX(II)/(4.*DT)
+  !!     IF (IOR<0) WALL_WORK1(IW) =  1.0*VELOCITY_ERROR*DX(II)/(4.*DT)
+      CASE(2)
+         VELOCITY_ERROR = V_NEW - V_NEW_OTHER
+      CASE(3)
+         VELOCITY_ERROR = W_NEW - W_NEW_OTHER
+   END SELECT
+
+   IF (ABS(VELOCITY_ERROR)>VELOCITY_ERROR_MAX(NM)) then
+      VELOCITY_ERROR_MAX_I(NM) = II
+      VELOCITY_ERROR_MAX_J(NM) = JJ
+      VELOCITY_ERROR_MAX_K(NM) = KK
+      VELOCITY_ERROR_MAX(NM)   = ABS(VELOCITY_ERROR)
+   endif
+
+ENDDO CHECK_WALL_LOOP
+
+TUSED(5,NM)=TUSED(5,NM)+SECOND()-TNOW
+END SUBROUTINE COMPUTE_VELOCITY_ERROR
+
+
+
+! Everything below this point is related to PRESSURE_CORRECTION
  
 SUBROUTINE COMPUTE_A_B(A,B,NM)
 
