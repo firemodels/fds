@@ -44,7 +44,7 @@
 
 \section{Hydrodynamics}
 
-Notation.  Summation over repeated Roman suffixes is implied.  Superscripts are excluded from the summation convention.  Summation over Greek suffixes is shown explicitly.  Gibbs notation is used sparingly where it seems useful.
+Notation.  Summation over repeated Roman suffixes is implied.  Superscripts are excluded from the summation convention.  Summation over Greek suffixes is shown explicitly.  Gibbs notation is used sparingly where it seems useful. Where appropriate, default values for model parameters are shown in square brackets.
 
 \subsection{Derived Equations}
 
@@ -322,47 +322,42 @@ The Poisson equation is obtained by taking the divergence of (\ref{eqn_projectio
 \end{eqnarray}
 For a single mesh, the Poisson equation (\ref{eqn_poisson}) is solved with a fast direct method (see FishPak).  For multiple mesh cases, the Poisson equation is solved by an additive Schwarz method with varying levels of global defect correction.  Details are given in Section \ref{sec}.
 
-\paragraph{The Projection Operator} We now have all the elements in place to define our projection operator, but so far the equations have been introduced in an order that aids the derivation, not the order in which they are solved in practice.  Thus, the projection operator
-\begin{equation}
-\mathbf{u}^{n+1} = {\cal P}(\mathbf{u}^*)
-\end{equation}
-is defined by the following:
-\begin{enumerate}
-\item Compute ${\Div \mathbf{u}}^{n+1}$ via (\ref{eqn_divcon})
-\item Build the right hand side of the Poisson equation (\ref{eqn_poisson})
-\item Solve (\ref{eqn_poisson}) for ${\cal H}^{n\ssp}$
-\item Compute $u_i^{n+1}$ via (\ref{eqn_projection})
-\end{enumerate}
-It is important to appreciate that the projection forces equivalence between (\ref{eqn_divcon}) and the discrete divergence of the updated velocity field.
+\paragraph{The Projection Operator} We now have all the elements in place to define our projection operator, but so far the equations have been introduced in an order that aids the derivation, not the order in which they are solved in practice.  The sequential steps in the velocity projection are listed in the next section combined with requisite scalar operations.  It is important to appreciate that the projection forces equivalence between (\ref{eqn_divcon}) and the discrete divergence of the updated velocity field.
 
 
 \subsubsection{The Basic (Forward Euler) Algorithm}
 
-Define the FDS state vector as $\mathbf{Q} = [\mathbf{u},{\cal H},\rho,\mathbf{Y},T]$. In this section we list the steps in a single forward Euler (FE) update of this state.  The description below assumes we have chosen a stable time increment $\delta t$.
+Define the FDS state vector as $\mathbf{Q} = [\mathbf{u},{\cal H},\rho,\mathbf{Y},T]$. In this section we list the steps in a single forward Euler (FE) update of this state.
 
 \begin{enumerate}
-\item[] Given: $\mathbf{Q}^n$, $J_{\alpha,i}^n$, $\dot{m}_\alpha^{\ppp \,\,n}$, $\Div \mathbf{q}_{rad}^n$
-\item Update density and scalars: $\rho^{n+1}$, $Y_\alpha^{n+1}$
-    \begin{enumerate}
-    \item Build advective fluxes (see Flux Limiter)
-    \item Check for boundedness violations
-    \end{enumerate}
-\item Update temperature: $T^{n+1} = \mbox{EOS}(\rho,\mathbf{Y})$
+\item[] Given: $\mathbf{Q}^n$, $J_{\alpha,i}^n$, $\dot{m}_\alpha^{\ppp \,\,n}$, $\Div \mathbf{q}_{rad}^n$, ${\Div \mathbf{u}}^n$, $\delta t$
+\item\label{item_euler_first} {\tt IF (RK\_STAGE==1)} Check stability: $\delta t$
 \item Update velocity field: $\mathbf{u}^*$ (should not require exchange, build in check for this)
-\item MPI exchange: $\rho^{n+1}$, $Y_\alpha^{n+1}$, $T^{n+1}$
-\item[] Steps 1-4 define the operator $\mathbf{Q}^{*} = \mathcal{E}(\mathbf{Q}^n)$
+\item\label{item_euler_last} Update density and scalars: $\rho^{n+1}$, $(\rho Y_\alpha)^*$
+\item[] Steps \ref{item_euler_first}-\ref{item_euler_last} define the \emph{${\cal E}$uler operator}: $\mathbf{Q}^{*} = \mathcal{E}(\mathbf{Q}^n)$
+\item\label{item_mpi} \textbf{MPI exchange}: $\rho^{n+1}$, $(\rho Y_\alpha)^*$
+\item\label{item_proj_first} Complete scalar update: $Y_\alpha^{n+1} = (\rho Y_\alpha)^*/\rho^{n+1}$
+\item Update temperature: $T^{n+1} = \mbox{EOS}(\rho^{n+1},\mathbf{Y}^{n+1},p_0^{n+1})$
 \item Compute particle (bulk) mass source terms: $\dot{m}_{\alpha,b}^{\ppp\,\,n+1}$
 \item Compute reaction mass source terms: $\dot{m}_\alpha^{\ppp\,\,n+1}$
 \item Update radiation field: $\Div \mathbf{q}_{rad}^{n+1}$
 \item Update diffusive flux (mass and heat): $J_{\alpha,i}^{n+1}$
-\item Projection: $\mathbf{Q}^{n+1} = \mathcal{P}(\mathbf{Q}^*)$
-\item MPI exchange: $\mathbf{u}^{n+1}$, ${\cal H}^{n\ssp}$
+\item Compute ${\Div \mathbf{u}}^{n+1}$ via (\ref{eqn_divcon})
+\item Build the right hand side of the Poisson equation (\ref{eqn_poisson})
+\item Solve (\ref{eqn_poisson}) for ${\cal H}^{n\ssp}$
+\item\label{item_proj_last} Compute $\mathbf{u}^{n+1}$ via (\ref{eqn_projection})
+\item[] Steps \ref{item_proj_first}-\ref{item_proj_last} define the \emph{projection operator}: $\mathbf{Q}^{n+1} = \mathcal{P}(\mathbf{Q}^*)$
+\item \textbf{MPI exchange}: $\mathbf{u}^{n+1}$, ${\cal H}^{n\ssp}$
 \end{enumerate}
+
+\paragraph{Remark: ``Six of One, Half Dozen of the Other''} Some elements of the basic algorithm are arbitrary but some elements, e.g. the order of certain steps, are not.  There may be some method to the madness.
+
+We will see in the next section that separating the basic scheme into and an explicit Euler step and a subsequent projection step makes the extension to arbitrarily high-order time integration extremely simple.  Also, the ordering is intended to be optimal in terms of mesh to mesh data exchange which is a bottleneck in distributed memory parallel processing (MPI).  For example, it makes more sense to exchange only $\rho$ and $Y_\alpha$ (or $[\rho Y_\alpha]$) and then to \emph{compute} the value of the ghost cell temperature rather than exchanging temperature as well (or does it??).  Referring to Steps \ref{item_mpi} and \ref{item_proj_first}, whether to exchange $(\rho Y_\alpha)$ and then compute $Y_\alpha$ or to compute then exchange is arbitrary, but this ordering has the advantage of keeping MPI exchanges outside the definition of the projection operator (the computation of $Y_\alpha$ must fall within this definition for reasons we will see shortly) and may therefore be helpful with code organization.
 
 
 \subsubsection{Higher-Order Methods}
 
-\paragraph{SSP-RK2}
+\paragraph{SSP-RK2 [default]}
 
 The strong-stability preserving (SSP), second-order Runge-Kutta (RK2) scheme (hereafter simply RK2) may now be constructed from a linear combination of the FE procedure just outlined.  This scheme is also known as ``Modified Euler'' and is virtually identical to MacCormack's predictor/corrector method.  Bracketed superscripts will be used to denote intermediate stages of the scheme.  The RK2 procedure is
 
@@ -379,7 +374,7 @@ The strong-stability preserving (SSP), second-order Runge-Kutta (RK2) scheme (he
     \end{enumerate}
 \end{enumerate}
 
-\paragraph{SSP-RK3} The benefits of a third-order scheme are improved accuracy and stability with a larger time step.  A third-order SSP Runge-Kutta scheme (RK3) is may be constructed as follows (see \cite{Shu}):
+\paragraph{SSP-RK3} The benefits of a third-order scheme are improved accuracy and stability with a larger time step.  The drawbacks are storage and cost for a given time step.  A third-order SSP Runge-Kutta scheme (RK3) is may be constructed as follows (see \cite{Shu}):
 
 \begin{enumerate}
 \item RK Stage 1
@@ -399,24 +394,77 @@ The strong-stability preserving (SSP), second-order Runge-Kutta (RK2) scheme (he
     \end{enumerate}
 \end{enumerate}
 
-\paragraph{SSP-RK4} A fourth-order scheme is also possible with the same simple procedure.  For details, refer to \ref{Gottlieb}.
+\paragraph{SSP-RK4} A fourth-order scheme following the same general outline is also possible.  For details, refer to \ref{Gottlieb}.
 
-\paragraph{Order of Averaging and Projection} A somewhat subtle issue that can have important consequences for stability is the order of averaging and projection that is chosen when developing a multistage scheme (this issue was recognized by Stanislav Borodai [currently at REI]). Reconsider the SSP-RK2 scheme. Notice that it would have been plausible for us to choose the following:
-
+\paragraph{Order of Averaging and Projection} A somewhat subtle issue that can have important consequences for accuracy and stability is the order of averaging and projection that is chosen when developing a multistage scheme (this issue was recognized by Stanislav Borodai [currently at REI]). Reconsider the SSP-RK2 scheme. It would have been plausible for us to choose the following for the second stage of the scheme:
 \begin{enumerate}
-\item RK Stage 1
-    \begin{enumerate}
-    \item $\mathbf{Q}^{*} = \mathcal{E}(\mathbf{Q}^n)$
-    \item $\mathbf{Q}^{(1)} = \mathcal{P}(\mathbf{Q}^*)$
-    \end{enumerate}
-\item RK Stage 2 (what NOT to do)
+\item[2.] RK Stage 2 (what NOT to do)
     \begin{enumerate}
     \item $\mathbf{Q}^{**} = \mathcal{E}(\mathbf{Q}^{(1)})$
     \item $\mathbf{Q}^{n+1} = \mhalf (\mathbf{Q}^n + \mathcal{P}(\mathbf{Q}^{**}))$
     \end{enumerate}
 \end{enumerate}
-
 Notice that here we first projected then averaged in order to obtain our final update (in 2b).  Such a scheme allows any divergence errors in $\mathbf{Q}^n$ to propagate from time step to time step and any numerical round off errors to accumulate.  It is therefore important to always \emph{average then project} in multistep projection methods.
+
+\subsubsection{Stability}
+
+In explicit schemes, stability criteria may often be understood in terms of maintaining physically realizable conditions.  Below we examine the necessary conditions for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields.
+
+\paragraph{The Courant-Friedrichs-Lewy (CFL) Constraint}
+
+The well-known CFL constraint given by
+\begin{equation}
+\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} \approx 1
+\end{equation}
+places a restriction on the time step due to the advection velocity. Physically, the constraint says that a fluid element should not transverse more than one cell within a time step. The exact value needed for the CFL number depends on the order of the RK scheme and the choice of velocity norm. Three choices are available in FDS:
+\begin{enumerate}
+\item[]{\tt CFL\_VELOCITY\_NORM=0} (least restrictive, corresponds to $L_\infty$ norm of components) 
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
+    \end{equation}
+\item[]{\tt CFL\_VELOCITY\_NORM=[1]} (most restrictive, corresponds to $L_1$ (Manhattan) norm of components)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z}
+    \end{equation}
+\item[]{\tt CFL\_VELOCITY\_NORM=2} ($L_2$ norm of components)
+    \begin{equation}
+    \frac{\|\mathbf{u}\|}{\delta x} = \sqrt{ (u/\delta x)^2+(v/\delta y)^2+(w/\delta z)^2 }
+    \end{equation}
+\end{enumerate}
+
+
+\paragraph{The Von Neumann Constraint}
+
+The Von Neumann constraint is given by
+\begin{equation}
+\mbox{VN} = \delta t \sum_i \frac{[(\mu/\rho),D_\alpha]}{\delta x_i^2} < \frac{1}{2}
+\end{equation}
+We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity, $V_{\alpha,i} = D_\alpha \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+
+We can also think of VN in terms of a TVD constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious wiggles that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
+\begin{equation}
+u_i^{n+1} = u_i^n + \frac{\delta t \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
+\end{equation}
+Very simply, notice that if $\delta t \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth''.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
+
+\paragraph{Realizable Mass Density}
+
+In an explicit Euler update of the continuity equation, if the time increment is too large the computational cell may be totally drained of mass, which of course is not physical. The constraint $\rho^{n+1}>0$ therefore leads to the following restriction on the time step:
+\begin{equation}
+\label{eqn_dtmassrestrict}
+\delta t < \frac{\rho^n}{\overline{\mathbf{u}}^n\cdot\nabla\rho^n + \rho^n \Div\mathbf{u}^n}
+\end{equation}
+We can argue that the case we are most concerned with is when $\rho^n$ is near zero.  A reasonable approximation to (\ref{eqn_dtmassrestrict}) then becomes (time location suppressed)
+\begin{eqnarray}
+\label{eqn_divstability}
+\delta t &<& \frac{\rho}{\overline{u}_i^{i^\ssm} \left(\frac{\rho-0}{\delta x_i^\ssm}\right) + \rho \Div\mathbf{u}} \nonumber\\
+&<& \left[ \frac{\overline{u}_i^{i^\ssm}}{\delta x_i^\ssm} + \Div\mathbf{u} \right]^{-1}
+\end{eqnarray}
+Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\tt CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
+
+\paragraph{Adjusting the Time Step} In the call to {\tt CHECK\_STABILITY} (Step 1 in the basic algorithm) both the CFL and VN numbers are compared with {\tt CFL\_MAX[1.0]/CFL\_MIN[0.8]} and {\tt VN\_MAX[0.5]/VN\_MIN[0.4]}, respectively (default values shown in brackets).
+
+
 
 %\section{Combustion}
 %
