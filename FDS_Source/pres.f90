@@ -155,22 +155,22 @@ WALL_CELL_LOOP: DO IW=1,NEWC
          SELECT CASE(IOR)
             CASE( 1)
                DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
-               BXS(J,K) = (DX_OTHER*H(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER) 
+               BXS(J,K) = (DX_OTHER*H(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER) + WALL_WORK1(IW)
             CASE(-1)
                DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
-               BXF(J,K) = (DX_OTHER*H(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)
+               BXF(J,K) = (DX_OTHER*H(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)+ WALL_WORK1(IW)
             CASE( 2)
                DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
-               BYS(I,K) = (DY_OTHER*H(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER)
+               BYS(I,K) = (DY_OTHER*H(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER)+ WALL_WORK1(IW)
             CASE(-2)
                DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
-               BYF(I,K) = (DY_OTHER*H(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)
+               BYF(I,K) = (DY_OTHER*H(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)+ WALL_WORK1(IW)
             CASE( 3)
                DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
-               BZS(I,J) = (DZ_OTHER*H(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)
+               BZS(I,J) = (DZ_OTHER*H(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)+ WALL_WORK1(IW)
             CASE(-3)
                DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
-               BZF(I,J) = (DZ_OTHER*H(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)
+               BZF(I,J) = (DZ_OTHER*H(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)+ WALL_WORK1(IW)
          END SELECT
  
       ENDIF INTERPOLATED_ONLY
@@ -546,7 +546,7 @@ ELSE
 ENDIF
 
 VELOCITY_ERROR_MAX(NM) = 0._EB
-!!WALL_WORK1 = 0._EB
+WALL_WORK1 = 0._EB
 
 CHECK_WALL_LOOP: DO IW=1,NWC
 
@@ -655,12 +655,17 @@ CHECK_WALL_LOOP: DO IW=1,NWC
    SELECT CASE(ABS(IOR))
       CASE(1)
          VELOCITY_ERROR = U_NEW - U_NEW_OTHER
-  !!     IF (IOR>0) WALL_WORK1(IW) = -1.0*VELOCITY_ERROR*DX(II)/(4.*DT)
-  !!     IF (IOR<0) WALL_WORK1(IW) =  1.0*VELOCITY_ERROR*DX(II)/(4.*DT)
+         IF (IOR>0) WALL_WORK1(IW) = -1.0*VELOCITY_ERROR*DX(II)/(4.*DT)
+         IF (IOR<0) WALL_WORK1(IW) =  1.0*VELOCITY_ERROR*DX(II)/(4.*DT)
+!!if (nm==2 .and. ii==26 .and. kk==6 .and. ior==-1) write(0,*) VELOCITY_ERROR,RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK))
       CASE(2)
          VELOCITY_ERROR = V_NEW - V_NEW_OTHER
+         IF (IOR>0) WALL_WORK1(IW) = -1.0*VELOCITY_ERROR*DY(JJ)/(4.*DT)
+         IF (IOR<0) WALL_WORK1(IW) =  1.0*VELOCITY_ERROR*DY(JJ)/(4.*DT)
       CASE(3)
          VELOCITY_ERROR = W_NEW - W_NEW_OTHER
+         IF (IOR>0) WALL_WORK1(IW) = -1.0*VELOCITY_ERROR*DZ(KK)/(4.*DT)
+         IF (IOR<0) WALL_WORK1(IW) =  1.0*VELOCITY_ERROR*DZ(KK)/(4.*DT)
    END SELECT
 
    IF (ABS(VELOCITY_ERROR)>VELOCITY_ERROR_MAX(NM)) then
