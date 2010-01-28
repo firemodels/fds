@@ -225,41 +225,29 @@ OBJECTDEF
    // ************ object definitions used for FDS-EVAC ********************
 
 OBJECTDEF
- testdoor         // label, name of object
- :DX :DY :DZ :R=0 :G=0 :B=0
- 90.0 rotatez 90.0 rotatex
-push  $DX $DY $DZ scalexyz $R $G $B setrgb 1.0 drawcube pop // front half of door (user specified color)
-push  $DX $DY $DZ scalexyz "BLUE" setcolor 0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (blue)
- NEWFRAME
- 0.001 0.001 0.001 scalexyz 1.0 drawcube // state 1, door disappears
-
-OBJECTDEF
  evacdoor         // label, name of object
  :SX :SY :SZ :R=0 :G=0 :B=0 :DX :DY :DZ
- // Evacuation input: door namelist
- push  $DX $DY $DZ translate
+ // Evacuation input: door or exit namelist
+ push  $DX $DY $DZ translate -180.0 rotatex
     34 139 3 setrgb 0.0 0.0 -0.6 translate 0.4 0.6 drawcone pop // draw an arrow
-    // after rotatex 0 0 1 tr ==> inside the door
-    // after rotatex 0 1 0 tr ==> right
-    // after rotatex 1 0 0 tr ==> up
- 90.0 rotatez 90.0 rotatex
+ -90.0 rotatez -90.0 rotatex
  push  $SX $SY $SZ scalexyz $R $G $B setrgb
     0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
  push  $SX $SY $SZ scalexyz 34 139 3 setrgb 
     0.0 0.5 0.0 translate 1.0 drawcube pop // back half of door (forest green)
 NEWFRAME
  :SX :SY :SZ :R=0 :G=0 :B=0 :DX :DY :DZ
- 90.0 rotatez 90.0 rotatex
+ -90.0 rotatez -90.0 rotatex
  push  $SX $SY $SZ scalexyz $R $G $B setrgb
-    1.0 drawcube pop // front half of door (user specified color)
+    0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
  push  $SX $SY $SZ scalexyz "RED" setcolor
-    0.0 1.0 0.0 translate 1.0 drawcube pop // back half of door (red)
+    0.0 0.5 0.0 translate 1.0 drawcube pop // back half of door (red)
 
 OBJECTDEF
  evacincline         // label, name of object
  :SX :SY :SZ :R=0 :G=0 :B=0
  // Evacuation input: evss namelist
- 90.0 rotatez 90.0 rotatex
+ -90.0 rotatez -90.0 rotatex
  push  $SX $SY $SZ scalexyz $R $G $B setrgb
     0.0 0.5 0.0 translate 1.0 drawcube pop // incline (user specified color)
 
@@ -267,18 +255,18 @@ OBJECTDEF
  evacentr         // label, name of object
  :SX :SY :SZ :R=0 :G=0 :B=0
  // Evacuation input: entr namelist
- 90.0 rotatez 90.0 rotatex
+ -90.0 rotatez -90.0 rotatex
  push  $SX $SY $SZ scalexyz $R $G $B setrgb
-    1.0 drawcube pop // front half of door (user specified color)
+    0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
  push  $SX $SY $SZ scalexyz 135 206 235 setrgb
-    0.0 1.0 0.0 translate 1.0 drawcube pop // front half of door (sky blue 135 206 235) 
+    0.0 0.5 0.0 translate 1.0 drawcube pop // back half of door (sky blue 135 206 235) 
 NEWFRAME
  :SX :SY :SZ :R=0 :G=0 :B=0
- 90.0 rotatez 90.0 rotatex
+ -90.0 rotatez -90.0 rotatex
  push  $SX $SY $SZ scalexyz $R $G $B setrgb
     0.0 -0.5 0.0 translate 1.0 drawcube pop // front half of door (user specified color)
  push  $SX $SY $SZ scalexyz "RED" setcolor
-    0.0 0.5 0.0 translate 1.0 drawcube pop // front half of door (red)
+    0.0 0.5 0.0 translate 1.0 drawcube pop // back half of door (red)
 
    // ************ dynamic particle object definitions ********************
    //         (modifable using data obtained from FDS)
@@ -650,10 +638,4 @@ OBJECTDEF
  drawarcdisk
  "BRICK" setcolor
  60.0 0.6 0.2 drawarcdisk
-
-
-
-
-
-
 
