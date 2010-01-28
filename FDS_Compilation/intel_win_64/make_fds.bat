@@ -1,4 +1,4 @@
-set intelbin=c:\bin
+set intelbin="%IFORT_COMPILER11%\bin"
 
 call %intelbin%\ifortvars intel64
 
