@@ -11370,9 +11370,13 @@ CONTAINS
 
     ! Mass fraction array ==> soot density (mg/m3)
     ! Next is for soot (mg/m3)
-    YY_GET(:) = MESHES(nom)%YY(I,J,K,:)
-    CALL GET_MASS_FRACTION(YY_GET,SOOT_INDEX,Y_MF_INT)
-    soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
+    IF (SOOT_INDEX > 0) THEN
+       YY_GET(:) = MESHES(nom)%YY(I,J,K,:)
+       CALL GET_MASS_FRACTION(YY_GET,SOOT_INDEX,Y_MF_INT)
+       soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
+    ELSE
+       soot_dens = 0._EB
+    ENDIF
     ! Calculate Purser's fractional effective dose (FED)
     fed_indx = FED(YY_GET,MESHES(nom)%RSUM(I,J,K))
     ! Gas temperature, ind=5, C
