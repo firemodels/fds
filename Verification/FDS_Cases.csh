@@ -23,6 +23,7 @@ $RUNFDS Fires couch                               fire47
 $RUNFDS Fires room_fire                           fire51
 $RUNFDS Fires spray_burner                        fire52
 $RUNFDS Flowfields dancing_eddies                 fire53
+$RUNFDS Flowfields duct_flow                      fire53
 $RUNFDS Flowfields gas_filling                    fire54
 $RUNFDS Flowfields hallways                       fire55
 $RUNFDS Flowfields helium_2d                      fire56
