@@ -935,6 +935,7 @@ SUBROUTINE NO_FLUX(NM)
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP 
 INTEGER, INTENT(IN) :: NM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
 REAL(EB) :: RFODT,H_OTHER,DUUDT,DVVDT,DWWDT
 INTEGER  :: IC2,IC1,N,I,J,K,IW,II,JJ,KK,IOR,N_INT_CELLS,IIO,JJO,KKO,NOM
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB
@@ -942,6 +943,9 @@ TYPE (OBSTRUCTION_TYPE), POINTER :: OB
 CALL POINT_TO_MESH(NM)
  
 RFODT = RELAXATION_FACTOR/DT
+
+IF (PREDICTOR) HP => H
+IF (CORRECTOR) HP => HS
  
 ! Exchange H at interpolated boundaries
 
@@ -958,12 +962,14 @@ DO IW=1,NEWC
    DO KKO=IJKW(12,IW),IJKW(15,IW)
       DO JJO=IJKW(11,IW),IJKW(14,IW)
          DO IIO=IJKW(10,IW),IJKW(13,IW)
-            H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
+            IF (PREDICTOR) H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
+            IF (CORRECTOR) H_OTHER = H_OTHER + OMESH(NOM)%HS(IIO,JJO,KKO)
          ENDDO
       ENDDO
    ENDDO
    N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
-   H(II,JJ,KK) = H_OTHER/REAL(N_INT_CELLS,EB)
+   IF (PREDICTOR) H(II,JJ,KK)  = H_OTHER/REAL(N_INT_CELLS,EB)
+   IF (CORRECTOR) HS(II,JJ,KK) = H_OTHER/REAL(N_INT_CELLS,EB)
 ENDDO
 !$OMP END DO
 
@@ -981,7 +987,7 @@ OBST_LOOP: DO N=1,N_OBST
             IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
                IF (PREDICTOR) DUUDT = -RFODT*U(I,J,K)
                IF (CORRECTOR) DUUDT = -RFODT*(U(I,J,K)+US(I,J,K))
-               FVX(I,J,K) = -RDXN(I)*(H(I+1,J,K)-H(I,J,K)) - DUUDT
+               FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
             ENDIF
          ENDDO LOOP1
       ENDDO 
@@ -994,7 +1000,7 @@ OBST_LOOP: DO N=1,N_OBST
             IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
                IF (PREDICTOR) DVVDT = -RFODT*V(I,J,K)
                IF (CORRECTOR) DVVDT = -RFODT*(V(I,J,K)+VS(I,J,K))
-               FVY(I,J,K) = -RDYN(J)*(H(I,J+1,K)-H(I,J,K)) - DVVDT
+               FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
             ENDIF
          ENDDO LOOP2
       ENDDO 
@@ -1007,7 +1013,7 @@ OBST_LOOP: DO N=1,N_OBST
             IF (SOLID(IC1) .AND. SOLID(IC2)) THEN
                IF (PREDICTOR) DWWDT = -RFODT*W(I,J,K)
                IF (CORRECTOR) DWWDT = -RFODT*(W(I,J,K)+WS(I,J,K))
-               FVZ(I,J,K) = -RDZN(K)*(H(I,J,K+1)-H(I,J,K)) - DWWDT
+               FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
             ENDIF
          ENDDO LOOP3
       ENDDO 
@@ -1035,27 +1041,27 @@ WALL_LOOP: DO IW=1,NWC
          CASE( 1) 
             IF (PREDICTOR) DUUDT =       RFODT*(-UWS(IW)-U(II,JJ,KK))
             IF (CORRECTOR) DUUDT = 2._EB*RFODT*(-UW(IW)-0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)))
-            FVX(II,JJ,KK) =   -RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)) - DUUDT
+            FVX(II,JJ,KK) =   -RDXN(II)  *(HP(II+1,JJ,KK)-HP(II,JJ,KK)) - DUUDT
          CASE(-1) 
             IF (PREDICTOR) DUUDT =       RFODT*( UWS(IW)-U(II-1,JJ,KK))
             IF (CORRECTOR) DUUDT = 2._EB*RFODT*( UW(IW)-0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK)))
-            FVX(II-1,JJ,KK) = -RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)) - DUUDT
+            FVX(II-1,JJ,KK) = -RDXN(II-1)*(HP(II,JJ,KK)-HP(II-1,JJ,KK)) - DUUDT
          CASE( 2) 
             IF (PREDICTOR) DVVDT =       RFODT*(-UWS(IW)-V(II,JJ,KK))
             IF (CORRECTOR) DVVDT = 2._EB*RFODT*(-UW(IW)-0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)))
-            FVY(II,JJ,KK)   = -RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK)) - DVVDT
+            FVY(II,JJ,KK)   = -RDYN(JJ)  *(HP(II,JJ+1,KK)-HP(II,JJ,KK)) - DVVDT
          CASE(-2)
             IF (PREDICTOR) DVVDT =       RFODT*( UWS(IW)-V(II,JJ-1,KK))
             IF (CORRECTOR) DVVDT = 2._EB*RFODT*( UW(IW)-0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK)))
-            FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK)) - DVVDT
+            FVY(II,JJ-1,KK) = -RDYN(JJ-1)*(HP(II,JJ,KK)-HP(II,JJ-1,KK)) - DVVDT
          CASE( 3) 
             IF (PREDICTOR) DWWDT =       RFODT*(-UWS(IW)-W(II,JJ,KK))
             IF (CORRECTOR) DWWDT = 2._EB*RFODT*(-UW(IW)-0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)))
-            FVZ(II,JJ,KK)   = -RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK)) - DWWDT
+            FVZ(II,JJ,KK)   = -RDZN(KK)  *(HP(II,JJ,KK+1)-HP(II,JJ,KK)) - DWWDT
          CASE(-3) 
             IF (PREDICTOR) DWWDT =       RFODT*( UWS(IW)-W(II,JJ,KK-1))
             IF (CORRECTOR) DWWDT = 2._EB*RFODT*( UW(IW)-0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1)))
-            FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)) - DWWDT
+            FVZ(II,JJ,KK-1) = -RDZN(KK-1)*(HP(II,JJ,KK)-HP(II,JJ,KK-1)) - DWWDT
       END SELECT
    ENDIF
 
@@ -1091,7 +1097,6 @@ SUBROUTINE VELOCITY_PREDICTOR(NM,STOP_STATUS)
 REAL(EB) :: TNOW
 INTEGER  :: STOP_STATUS,I,J,K
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: HT
 
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY) THEN
@@ -1102,20 +1107,13 @@ ENDIF
 TNOW=SECOND() 
 CALL POINT_TO_MESH(NM)
 
-IF (PRESSURE_CORRECTION) THEN
-   HT => WORK1
-   HT = H + HP
-ELSE
-   HT => H
-ENDIF
-
 !$OMP PARALLEL
 !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
          !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_PREDICTOR'
-         US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(HT(I+1,J,K)-HT(I,J,K)) )
+         US(I,J,K) = U(I,J,K) - DT*( FVX(I,J,K) + RDXN(I)*(H(I+1,J,K)-H(I,J,K)) )
       ENDDO
    ENDDO
 ENDDO
@@ -1125,7 +1123,7 @@ ENDDO
 DO K=1,KBAR
    DO J=0,JBAR
       DO I=1,IBAR
-         VS(I,J,K) = V(I,J,K) - DT*( FVY(I,J,K) + RDYN(J)*(HT(I,J+1,K)-HT(I,J,K)) )
+         VS(I,J,K) = V(I,J,K) - DT*( FVY(I,J,K) + RDYN(J)*(H(I,J+1,K)-H(I,J,K)) )
       ENDDO
    ENDDO
 ENDDO
@@ -1135,12 +1133,13 @@ ENDDO
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         WS(I,J,K) = W(I,J,K) - DT*( FVZ(I,J,K) + RDZN(K)*(HT(I,J,K+1)-HT(I,J,K)) )
+         WS(I,J,K) = W(I,J,K) - DT*( FVZ(I,J,K) + RDZN(K)*(H(I,J,K+1)-H(I,J,K)) )
       ENDDO
    ENDDO
 ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
+
 IF (EVACUATION_ONLY(NM)) WS = 0._EB
 
 ! Check the stability criteria, and if the time step is too small, send back a signal to kill the job
@@ -1164,7 +1163,6 @@ USE TURBULENCE, ONLY: TURBULENT_KINETIC_ENERGY
 REAL(EB) :: TNOW
 INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: HT
  
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY) RETURN
@@ -1172,20 +1170,13 @@ IF (FREEZE_VELOCITY) RETURN
 TNOW=SECOND() 
 CALL POINT_TO_MESH(NM)
 
-IF (PRESSURE_CORRECTION) THEN
-   HT => WORK1
-   HT = H + HP
-ELSE
-   HT => H
-ENDIF
-
 !$OMP PARALLEL
 !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
          !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_VELOCITY_CORRECTOR'
-         U(I,J,K) = .5_EB*( U(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + RDXN(I)*(HT(I+1,J,K)-HT(I,J,K))) )
+         U(I,J,K) = 0.5_EB*( U(I,J,K) + US(I,J,K) - DT*(FVX(I,J,K) + RDXN(I)*(HS(I+1,J,K)-HS(I,J,K))) )
       ENDDO
    ENDDO
 ENDDO
@@ -1195,7 +1186,7 @@ ENDDO
 DO K=1,KBAR
    DO J=0,JBAR
       DO I=1,IBAR
-         V(I,J,K) = .5_EB*( V(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + RDYN(J)*(HT(I,J+1,K)-HT(I,J,K))) )
+         V(I,J,K) = 0.5_EB*( V(I,J,K) + VS(I,J,K) - DT*(FVY(I,J,K) + RDYN(J)*(HS(I,J+1,K)-HS(I,J,K))) )
       ENDDO
    ENDDO
 ENDDO
@@ -1205,12 +1196,13 @@ ENDDO
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         W(I,J,K) = .5_EB*( W(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + RDZN(K)*(HT(I,J,K+1)-HT(I,J,K))) )
+         W(I,J,K) = 0.5_EB*( W(I,J,K) + WS(I,J,K) - DT*(FVZ(I,J,K) + RDZN(K)*(HS(I,J,K+1)-HS(I,J,K))) )
       ENDDO
    ENDDO
 ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
+
 IF (EVACUATION_ONLY(NM)) W = 0._EB
 
 IF (CHECK_KINETIC_ENERGY .AND. .NOT.EVACUATION_ONLY(NM)) CALL TURBULENT_KINETIC_ENERGY

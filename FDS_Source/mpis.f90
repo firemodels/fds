@@ -1524,6 +1524,21 @@ subroutine mpi_init ( ierror )
 
   return
 end subroutine
+
+
+subroutine mpi_recv_init ( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer n
+  integer comm
+  integer data(n)
+  integer datatype
+  integer ierror
+  integer iproc
+  integer irequest
+  integer itag
+end subroutine mpi_recv_init
+
+
 subroutine mpi_irecv ( data, n, datatype, iproc, itag, comm, irequest, ierror )
 
 !*****************************************************************************80
@@ -1587,6 +1602,21 @@ subroutine mpi_irecv ( data, n, datatype, iproc, itag, comm, irequest, ierror )
 
   return
 end subroutine
+
+
+subroutine mpi_send_init( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer n
+  integer comm
+  integer data(n)
+  integer datatype
+  integer ierror
+  integer iproc
+  integer itag
+  integer request
+end subroutine mpi_send_init
+
+
 subroutine mpi_isend ( data, n, datatype, iproc, itag, comm, request, ierror )
 
 !*****************************************************************************80
@@ -2335,6 +2365,17 @@ subroutine mpi_wait ( irequest, istatus, ierror )
 
   return
  end subroutine
+
+
+subroutine mpi_startall ( icount, irequest, ierror )
+  implicit none
+  integer icount
+  integer ierror
+  integer irequest
+end subroutine mpi_startall
+
+
+
 subroutine mpi_waitall ( icount, irequest, istatus, ierror )
 
 !*****************************************************************************80

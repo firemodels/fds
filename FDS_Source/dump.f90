@@ -3903,8 +3903,6 @@ SELECT CASE(IND)
       MW_RATIO = SPECIES(0)%MW/MW_H2O
       Y_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
       GAS_PHASE_OUTPUT = Y_MF_INT/Y_EQUIL * 100._EB      
-   CASE(22)  ! HP
-      IF (PRESSURE_CORRECTION) GAS_PHASE_OUTPUT = HP(II,JJ,KK)
       
    CASE(23)  ! KINETIC ENERGY (per unit mass) -- do not average because this operation is dissipative
       UU   = U(MIN(IBAR,II),JJ,KK)
