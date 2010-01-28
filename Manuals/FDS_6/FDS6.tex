@@ -180,7 +180,7 @@ Similarly, consider component $i$ of vector $\mathbf{V}$ interpolated in directi
 
 \begin{equation}
 \label{eqn_flux}
-F_{\alpha,i} = \overline{\rho Y_\alpha}^{\tiny FL} u_i - \overline{\rho D_\alpha}^{i^+} \frac{\delta Y_\alpha}{\delta x_i^\ssp} + J_{\alpha,i}^{sgs}
+F_{\alpha,i} = \overline{\rho Y_\alpha}^{\tiny FL} u_i + J_{\alpha,i} + J_{\alpha,i}^{sgs}
 \end{equation}
 
 \subsection{Flux Limiter}
@@ -278,17 +278,28 @@ We first describe the time integration scheme in terms of a simple forward (expl
 \rho^{n+1} = \rho^n + \delta t \left[\dot{m}_b^\ppp - \frac{\delta (\overline{\rho}^{FL} u_i)}{\delta x_i^\ssm} \right]^n
 \end{equation}
 
-\subsubsection{Scalars}
+\subsubsection{Time Splitting for Scalars}
+
+\paragraph{Transport}
 
 \begin{equation}
 \label{eqn_densityupdate}
-(\rho Y_\alpha)^{n+1} = \rho^n Y_\alpha^n + \delta t \left[\dot{m}_\alpha^\ppp + \dot{m}_{\alpha,b}^\ppp - \frac{\delta F_{\alpha,i}}{\delta x_i^\ssm} \right]^n
+(\rho Y_\alpha)^* = \rho^n Y_\alpha^n + \delta t \left[\dot{m}_{\alpha,b}^\ppp - \frac{\delta F_{\alpha,i}}{\delta x_i^\ssm} \right]^n
 \end{equation}
+
+\paragraph{Chemical Reaction}
+
+\begin{equation}
+(\rho Y_\alpha)^{n+1} = (\rho Y_\alpha)^* + \dot{m}_{\alpha}^\ppp(\rho \mathbf{Y}^*,\tau)\delta t 
+\end{equation}
+
+\paragraph{Recovering Mass Fractions}
+
 \begin{equation}
 Y_\alpha^{n+1} = \frac{(\rho Y_\alpha)^{n+1}}{\rho^{n+1}}
 \end{equation}
 
-\paragraph{Boundedness Check} See Appendix \ref{app}
+\subsubsection{Boundedness} See Appendix \ref{app}
 
 \subsubsection{Divergence Constraint}
 
@@ -296,33 +307,33 @@ Y_\alpha^{n+1} = \frac{(\rho Y_\alpha)^{n+1}}{\rho^{n+1}}
 \label{eqn_divcon}
 {\Div \mathbf{u}}^{n+1} = \frac{1}{\rho^{n+1}}\left(\dot{m}_b^\ppp - \frac{\mbox{D}\rho}{\mbox{D}t}\right)^{n+1}
 \end{equation}
-Equation (\ref{eqn_divcon}) is principally responsible for relating the rate of chemical heat release with the volume expansion of the fluid.  Terms on the right hand side involving the velocity, which are few and minor, are computed using $\mathbf{u}^n$.  The expanded form of the divergence constraint and a detailed derivation are given in Appendix \ref{app}.
+Equation (\ref{eqn_divcon}) is principally responsible for relating the rate of chemical heat release with the volume expansion of the fluid. The heat release is computed using $\dot{m}_{\alpha}^\ppp(\rho \mathbf{Y}^*,\tau)$. Details are given in Section \ref{sec}. Terms on the right hand side involving the velocity (e.g. the rate of convective heat transfer) are computed using $\mathbf{u}^n$. The expanded form of the divergence constraint and a detailed derivation are provided in Appendix \ref{app}.
 
 \subsubsection{Velocity Projection}
 
-Here we show how to view the velocity update as a fractional-step projection method.  To develop a projection scheme, we first write down the form of the desired temporal update.  In Eq.~(\ref{eqn_desired}) below we show a semi-implicit update of the momentum equation.  That is, all terms on the right hand side are evaluated at time level $n$ with the exception of the scalar ${\cal H}^{n\ssp}$ which is supposed to live at some time level $n^\ssp >n$ and is yet unknown\footnote[1]{There are subtle difficulties in claiming a time location for $\cal H$ in this context because ultimately its value depends on arbitrary choices made in the time location for $F_{u,i}$. The end result, which is of little consequence in practice, is that the hydrodynamic pressure is known with less temporal accuracy than the velocity field \cite{Almgren}.}.  Next, write down the update with an initial guess for the pressure gradient (see Eq. (\ref{eqn_guess})); zero will do.  This results in a guess for the velocity field, call it $\mathbf{u}^*$, which does not satisfy the divergence constraint (\ref{eqn_divcon}).
+Here we show how to view the velocity update as a fractional-step projection method.  To develop a projection scheme, we first write down the form of the desired temporal update.  In Eq.~(\ref{eqn_desired}) below we show a semi-implicit update of the momentum equation.  That is, all terms on the right hand side are evaluated at time level $n$ with the exception of the scalar ${\cal H}^{*}$ which is supposed to live at some time level $n^* >n$ and is yet unknown\footnote[3]{There are subtle difficulties in claiming a time location for $\cal H$ in this context because ultimately its value depends on arbitrary choices made in the time location for $F_{u,i}$. The end result, which is of little consequence in practice, is that the hydrodynamic pressure is known with less temporal accuracy than the velocity field \cite{Almgren}.}.  Next, we write down the update with an initial guess (zero) for the pressure gradient (see Eq. (\ref{eqn_guess})).  This results in a guess for the velocity field, call it $\mathbf{u}^*$, which does not satisfy the divergence constraint (\ref{eqn_divcon}).
 \begin{eqnarray}
-\label{eqn_desired} u_i^{n+1} &=& u_i^n - \delta t \left[ F_{u,i}^n + \frac{\delta {\cal H}^{n\ssp}}{\delta x_i^\ssp} \right] \\
+\label{eqn_desired} u_i^{n+1} &=& u_i^n - \delta t \left[ F_{u,i}^n + \frac{\delta {\cal H}^{*}}{\delta x_i^\ssp} \right] \\
 \label{eqn_guess} u_i^* &=& u_i^n - \delta t F_{u,i}^n
 \end{eqnarray}
 Subtracting (\ref{eqn_guess}) from (\ref{eqn_desired}) yields the projection
 \begin{equation}
 \label{eqn_projection}
-u_i^{n+1} = u_i^* - \delta t \frac{\delta {\cal H}^{n\ssp}}{\delta x_i^\ssp}
+u_i^{n+1} = u_i^* - \delta t \frac{\delta {\cal H}^{*}}{\delta x_i^\ssp}
 \end{equation}
-Equation (\ref{eqn_projection}) can be viewed as a Hodge decomposition of the vector field $\mathbf{u}^*$ \cite{Chorin}.  The scalar ${\cal H}^{n\ssp}$ satisfies a Poisson equation, as we show next, but may only be determined to within an arbitrary constant.  Dirichlet boundary conditions on ${\cal H}$ must be known in order to set its absolute value (see Section \ref{sec}).
+Equation (\ref{eqn_projection}) can be viewed as a Hodge decomposition of the vector field $\mathbf{u}^*$ \cite{Chorin}.  The scalar ${\cal H}^{*}$ satisfies a Poisson equation, as we show next, but may only be determined to within an arbitrary constant.  Dirichlet boundary conditions on ${\cal H}$ must be known in order to set its absolute value (see Section \ref{sec}).
 
 \paragraph{The Poisson Equation}
 
 The Poisson equation is obtained by taking the divergence of (\ref{eqn_projection}).
 \begin{eqnarray}
 \label{eqn_poisson}
-\frac{\delta^2 {\cal H}^{n\ssp}}{\delta x_i^\ssm\delta x_i^\ssp} &=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - \frac{\delta u_i^{n+1}}{\delta x_i^\ssm} \right) \nonumber\\
+\frac{\delta^2 {\cal H}^{*}}{\delta x_i^\ssm\delta x_i^\ssp} &=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - \frac{\delta u_i^{n+1}}{\delta x_i^\ssm} \right) \nonumber\\
 &=& \frac{1}{\delta t}\left( \frac{\delta u_i^*}{\delta x_i^\ssm} - \Div \mathbf{u}^{n+1} \right)
 \end{eqnarray}
 For a single mesh, the Poisson equation (\ref{eqn_poisson}) is solved with a fast direct method (see FishPak).  For multiple mesh cases, the Poisson equation is solved by an additive Schwarz method with varying levels of global defect correction.  Details are given in Section \ref{sec}.
 
-\paragraph{The Projection Operator} We now have all the elements in place to define our projection operator, but so far the equations have been introduced in an order that aids the derivation, not the order in which they are solved in practice.  The sequential steps in the velocity projection are listed in the next section combined with requisite scalar operations.  It is important to appreciate that the projection forces equivalence between (\ref{eqn_divcon}) and the discrete divergence of the updated velocity field.
+\paragraph{The Projection Operator} We now have all the elements in place to define our projection operator, but so far the equations have been introduced in an order that aids the derivation, not the order in which they are solved in practice.  The sequential steps in the velocity projection are listed in the next section combined with requisite scalar operations.  It is important to appreciate that the projection forces equivalence between (\ref{eqn_divcon}) and the discrete divergence of the updated velocity field, as indicated by (\ref{eqn_poisson}).
 
 
 \subsubsection{The Basic (Forward Euler) Algorithm}
@@ -330,24 +341,26 @@ For a single mesh, the Poisson equation (\ref{eqn_poisson}) is solved with a fas
 Define the FDS state vector as $\mathbf{Q} = [\mathbf{u},{\cal H},\rho,\mathbf{Y},T]$. In this section we list the steps in a single forward Euler (FE) update of this state.
 
 \begin{enumerate}
-\item[] Given: $\mathbf{Q}^n$, $J_{\alpha,i}^n$, $\dot{m}_\alpha^{\ppp \,\,n}$, $\Div \mathbf{q}_{rad}^n$, ${\Div \mathbf{u}}^n$, $\delta t$
-\item\label{item_euler_first} {\tt IF (RK\_STAGE==1)} Check stability: $\delta t$
+\item[] Given: $\mathbf{Q}^n$, $J_{\alpha,i}^n$, $\dot{m}_{\alpha,b}^{\ppp \,\,n}$, ${\Div \mathbf{u}}^n$, $\delta t$
+\item\label{item_euler_first} If RK Stage 1, check stability: $\delta t$
 \item Update velocity field: $\mathbf{u}^*$ (should not require exchange, build in check for this)
-\item\label{item_euler_last} Update density and scalars: $\rho^{n+1}$, $(\rho Y_\alpha)^*$
+\item Update density and scalars: $\rho^{n+1}$, $(\rho Y_\alpha)^*$
+\item\label{item_euler_last} Check boundedness
 \item[] Steps \ref{item_euler_first}-\ref{item_euler_last} define the \emph{${\cal E}$uler operator}: $\mathbf{Q}^{*} = \mathcal{E}(\mathbf{Q}^n)$
 \item\label{item_mpi} \textbf{MPI exchange}: $\rho^{n+1}$, $(\rho Y_\alpha)^*$
-\item\label{item_proj_first} Complete scalar update: $Y_\alpha^{n+1} = (\rho Y_\alpha)^*/\rho^{n+1}$
+\item\label{item_proj_first} Compute reaction mass source terms: $\dot{m}_\alpha^{\ppp\,\,*}$
+\item Complete scalar update:  $(\rho Y_\alpha)^{n+1} = (\dot{m}_\alpha^{\ppp\,\,*})\,\delta t$
+\item Recover mass fractions: $Y_\alpha^{n+1} = (\rho Y_\alpha)^{n+1}/\rho^{n+1}$
 \item Update temperature: $T^{n+1} = \mbox{EOS}(\rho^{n+1},\mathbf{Y}^{n+1},p_0^{n+1})$
 \item Compute particle (bulk) mass source terms: $\dot{m}_{\alpha,b}^{\ppp\,\,n+1}$
-\item Compute reaction mass source terms: $\dot{m}_\alpha^{\ppp\,\,n+1}$
 \item Update radiation field: $\Div \mathbf{q}_{rad}^{n+1}$
 \item Update diffusive flux (mass and heat): $J_{\alpha,i}^{n+1}$
 \item Compute ${\Div \mathbf{u}}^{n+1}$ via (\ref{eqn_divcon})
 \item Build the right hand side of the Poisson equation (\ref{eqn_poisson})
-\item Solve (\ref{eqn_poisson}) for ${\cal H}^{n\ssp}$
+\item Solve (\ref{eqn_poisson}) for ${\cal H}^{*}$
 \item\label{item_proj_last} Compute $\mathbf{u}^{n+1}$ via (\ref{eqn_projection})
 \item[] Steps \ref{item_proj_first}-\ref{item_proj_last} define the \emph{projection operator}: $\mathbf{Q}^{n+1} = \mathcal{P}(\mathbf{Q}^*)$
-\item \textbf{MPI exchange}: $\mathbf{u}^{n+1}$, ${\cal H}^{n\ssp}$
+\item \textbf{MPI exchange}: $\mathbf{u}^{n+1}$, ${\cal H}^{*}$
 \end{enumerate}
 
 \paragraph{Remark: ``Six of One, Half Dozen of the Other''} Some elements of the basic algorithm are arbitrary but some elements, e.g. the order of certain steps, are not.  There may be some method to the madness.
@@ -408,7 +421,7 @@ Notice that here we first projected then averaged in order to obtain our final u
 
 \subsubsection{Stability}
 
-In explicit schemes, stability criteria may often be understood in terms of maintaining physically realizable conditions.  Below we examine the necessary conditions for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields.
+In explicit schemes, stability criteria may often be understood in terms of using the time step to maintain physically realizable conditions.  Below we examine the necessary conditions for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields.
 
 \paragraph{The Courant-Friedrichs-Lewy (CFL) Constraint}
 
@@ -416,13 +429,15 @@ The well-known CFL constraint given by
 \begin{equation}
 \mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} \approx 1
 \end{equation}
-places a restriction on the time step due to the advection velocity. Physically, the constraint says that a fluid element should not transverse more than one cell within a time step. The exact value needed for the CFL number depends on the order of the RK scheme and the choice of velocity norm. Three choices are available in FDS:
+places a restriction on the time step due to the advection velocity. Physically, the constraint says that a fluid element should not transverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters commensurate with each other.  In other words, in order to resolve an eddy the size of the mesh spacing, the time step needs to be in concert with the CFL.  If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would be roughly 10 times the grid spacing, which would severely limit the benefit of the LES.  In most cases, if one wishes the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
+
+The exact CFL needed to maintain stability depends on the order of the RK scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS:
 \begin{enumerate}
-\item[]{\tt CFL\_VELOCITY\_NORM=0} (least restrictive, corresponds to $L_\infty$ norm of components) 
+\item[]{\tt CFL\_VELOCITY\_NORM=0} (FDS 5 default, least restrictive, corresponds to $L_\infty$ norm of components) 
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \max \left(\frac{|u|}{\delta x}, \frac{|v|}{\delta y}, \frac{|w|}{\delta z}\right)
     \end{equation}
-\item[]{\tt CFL\_VELOCITY\_NORM=[1]} (most restrictive, corresponds to $L_1$ (Manhattan) norm of components)
+\item[]{\tt CFL\_VELOCITY\_NORM=[1]} (FDS 6 default, most restrictive, corresponds to $L_1$ norm of components)
     \begin{equation}
     \frac{\|\mathbf{u}\|}{\delta x} = \frac{|u|}{\delta x}+\frac{|v|}{\delta y}+\frac{|w|}{\delta z}
     \end{equation}
@@ -437,15 +452,15 @@ places a restriction on the time step due to the advection velocity. Physically,
 
 The Von Neumann constraint is given by
 \begin{equation}
-\mbox{VN} = \delta t \sum_i \frac{[(\mu/\rho),D_\alpha]}{\delta x_i^2} < \frac{1}{2}
+\mbox{VN} = \delta t \max[(\mu/\rho),D_\alpha] \sum_i \frac{1}{\delta x_i^2} < \frac{1}{2}
 \end{equation}
-We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity, $V_{\alpha,i} = D_\alpha \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
+We can understand this constraint in a couple of different ways.  First, we could consider the model for the diffusion velocity of species $\alpha$ in direction $i$, $V_{\alpha,i} = D_\alpha \partial Y_\alpha/\partial x_i$, and we would then see that VN is simply a CFL constraint due to diffusive transport.
 
 We can also think of VN in terms of a TVD constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious wiggles that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
 \begin{equation}
 u_i^{n+1} = u_i^n + \frac{\delta t \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
 \end{equation}
-Very simply, notice that if $\delta t \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth''.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
+Very simply, notice that if $\delta t \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth'', else the neighboring cell values may be shifting in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
 
 \paragraph{Realizable Mass Density}
 
@@ -462,7 +477,11 @@ We can argue that the case we are most concerned with is when $\rho^n$ is near z
 \end{eqnarray}
 Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\tt CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
 
-\paragraph{Adjusting the Time Step} In the call to {\tt CHECK\_STABILITY} (Step 1 in the basic algorithm) both the CFL and VN numbers are compared with {\tt CFL\_MAX[1.0]/CFL\_MIN[0.8]} and {\tt VN\_MAX[0.5]/VN\_MIN[0.4]}, respectively (default values shown in brackets).
+\paragraph{Adjusting the Time Step} In the call to {\tt CHECK\_STABILITY} (Step 1 in the basic algorithm) both the CFL and VN numbers are compared with {\tt CFL\_MAX[1.0]/CFL\_MIN[0.8]} and {\tt VN\_MAX[0.5]/VN\_MIN[0.4]}, respectively (default values shown in brackets).  To be clear, the CFL constraint is now given by
+\begin{equation}
+\mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + \max{[\Div\mathbf{u},0]} \right)
+\end{equation}
+If either the current CFL or VN is too large then the new time step is set to 90\% of the allowable value.  If both CFL and VN are below their minimum values then the current time step is increased by 10\%.  The initial time step may be set and locked on the {\tt TIME} line of the FDS input file.  See the User's Guide for details.
 
 
 
