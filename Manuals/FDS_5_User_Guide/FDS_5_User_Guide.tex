@@ -1264,7 +1264,6 @@ Feature & Description & Symptom of Problem & Recommendation \\
 {\ct BAROCLINIC}     & Restores the baroclinic torque term to the momentum equation   & Erratic fluid motion, numerical instability in multiple mesh simulations    & Reconfigure meshes    \\ \hline
 {\ct CO\_PRODUCTION} & Algorithm to predict CO production    & Inaccuracies found in comparison to experiments       & Research usage only    \\ \hline
 Liquid Fuels         & Pyrolysis model of evaporating liquid fuel  & Inaccuracies found in comparison to experiments; physical and numerical sensitivity  & Research usage only    \\ \hline
-{\ct PRESSURE\_CORRECTION} & Improve accuracy of pressure solver over multiple meshes  & Erratic fluid motion  & Do not use if results are unphysical    \\ \hline
 Solid Fuels     & Pyrolysis model of solid fuel  & Results in FDS 5.4 and beyond different than previous versions  & Read Section \ref{info:solid_pyrolysis}   \\ \hline
 \end{tabular}
 \end{sidewaystable}
@@ -2471,6 +2470,23 @@ boundary or the largest error at a mesh interface. It is in units of m/s.
 If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your
 desired tolerance. The number of iterations are written out to the file {\bf CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive.
 The maximum number of iterations per time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10000.
+
+\subsubsection{Example Case: {\bf duct\_flow}}
+
+To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the 
+case called {\bf duct\_flow}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the
+duct. Figure~\ref{duct_flow} displays the computed inflow and outflow as a function of time, and the number of pressure iterations required. The outflow does not match
+the inflow exactly because of inaccuracies at the solid and mesh boundaries. The {\ct VELOCITY\_TOLERANCE} has been set to 0.01~m/s.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3in]{FIGURES/duct_flow}
+\includegraphics[width=3in]{FIGURES/duct_flow_iterations}
+\end{center}
+\caption[Simple example of flow through a duct.]{(Left) Volume flow into and out of a square duct. (Right) The number of pressure iterations as a function of time.}
+\label{duct_flow}
+\end{figure}
+
 
 
 
@@ -9341,7 +9357,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct P\_INF}                    & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
 %{\ct PERIODIC\_TEST}           & Integer       & Initial condition for verification test       &               & 0                 \\ \hline
 {\ct POROUS\_FLOOR}             & Logical       & See Section~\ref{info:sprinklers}             &               & {\ct .TRUE.}      \\ \hline
-%{\ct PRESSURE\_CORRECTION}      & Logical       & See Section~\ref{info:pressurecorrection}                    &               & {\ct .FALSE.}     \\ \hline
 %{\ct PROJECTION}                & Logical       & Use formal projection method (eliminates initial divergence errors) &               & {\ct .FALSE.}     \\ \hline
 {\ct RADIATION}                 & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
 {\ct RAMP\_GX}                  & Character     & Time function, $x$ comp. of gravity           &               &                   \\ \hline
