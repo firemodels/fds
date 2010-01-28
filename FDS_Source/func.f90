@@ -1629,18 +1629,20 @@ ENDIF
 ! Next is for CO2
 ! VCO2: CO2-induced hyperventilation
 !      exp(0.1903*c_CO2(%) + 2.0004)
-Call GET_MASS_FRACTION(Y_IN,CO2_INDEX,Y_MF_INT)
-tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/RSUM
-FED = FED * Exp( 0.1903_EB*tmp_1*100.0_EB + 2.0004_EB )/7.1_EB
-
+IF (CO2_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,CO2_INDEX,Y_MF_INT)
+   tmp_1 = RCON_MF(CO2_INDEX)*Y_MF_INT/RSUM
+   FED = FED * Exp( 0.1903_EB*tmp_1*100.0_EB + 2.0004_EB )/7.1_EB
+ENDIF
 ! Next is for O2
 ! LO: low oxygen
 ! t_Io = exp(8.13-0.54(20.9-%O2)), time in minutes
 ! F_Io = dt/t_Io
-Call GET_MASS_FRACTION(Y_IN,O2_INDEX,Y_MF_INT)
-tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/RSUM
-If ( tmp_1 < 0.20_EB ) FED = FED + 1.0_EB  / (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*tmp_1)) )
-
+IF (O2_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,O2_INDEX,Y_MF_INT)
+   tmp_1 = RCON_MF(O2_INDEX)*Y_MF_INT/RSUM
+   If ( tmp_1 < 0.20_EB ) FED = FED + 1.0_EB  / (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*tmp_1)) )
+ENDIF
 END FUNCTION FED
 
 SUBROUTINE JANAF_TABLE (I_TMP,CP,H,SPEC_ID,RCON)

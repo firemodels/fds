@@ -2221,21 +2221,70 @@ DO N=1,N_SPECIES
       IF (.NOT. MIXTURE_FRACTION) THEN
          N_Y_ARRAY = N_Y_ARRAY + 1         
          SPECIES(N)%INDEX = N_Y_ARRAY
+         IF (N==I_SOOT) SOOT_INDEX = N_Y_ARRAY
+         IF (N==I_N2) N2_INDEX = N_Y_ARRAY 
+         IF (N==I_O2) O2_INDEX = N_Y_ARRAY 
+         IF (N==I_WATER) H2O_INDEX = N_Y_ARRAY 
+         IF (N==I_H2) H2_INDEX = N_Y_ARRAY 
+         IF (N==I_CO)  CO_INDEX = N_Y_ARRAY 
+         IF (N==I_CO2) CO2_INDEX = N_Y_ARRAY 
       ELSE
-         IF (N==I_SOOT .AND. SOOT_INDEX > 0) THEN
-            SPECIES(N)%INDEX = SOOT_INDEX
+         IF (N==I_SOOT) THEN
+            IF (SOOT_INDEX > 0) THEN
+               SPECIES(N)%INDEX = SOOT_INDEX
+            ELSE
+               N_Y_ARRAY = N_Y_ARRAY + 1         
+               SOOT_INDEX = N_Y_ARRAY
+               SPECIES(N)%INDEX = N_Y_ARRAY
+            ENDIF               
          ELSEIF (N==I_N2) THEN
-            SPECIES(N)%INDEX = N2_INDEX
+            IF (N2_INDEX > 0) THEN
+               SPECIES(N)%INDEX = N2_INDEX
+            ELSE
+               N_Y_ARRAY = N_Y_ARRAY + 1         
+               N2_INDEX = N_Y_ARRAY
+               SPECIES(N)%INDEX = N_Y_ARRAY
+            ENDIF               
          ELSEIF (N==I_O2) THEN
-            SPECIES(N)%INDEX = O2_INDEX
-         ELSEIF (N==I_WATER .AND. H2O_INDEX > 0) THEN
-            SPECIES(N)%INDEX = H2O_INDEX
-         ELSEIF (N==I_H2 .AND. H2_INDEX > 0) THEN
-            SPECIES(N)%INDEX = H2_INDEX
-         ELSEIF (N==I_CO .AND. CO_INDEX > 0) THEN
-            SPECIES(N)%INDEX = CO_INDEX
+            IF (O2_INDEX > 0) THEN
+               SPECIES(N)%INDEX = O2_INDEX
+            ELSE
+               N_Y_ARRAY = N_Y_ARRAY + 1         
+               O2_INDEX = N_Y_ARRAY
+               SPECIES(N)%INDEX = N_Y_ARRAY
+            ENDIF               
+         ELSEIF (N==I_WATER) THEN
+            IF (H2O_INDEX > 0) THEN
+               SPECIES(N)%INDEX = H2O_INDEX
+            ELSE
+               N_Y_ARRAY = N_Y_ARRAY + 1         
+               H2O_INDEX = N_Y_ARRAY
+               SPECIES(N)%INDEX = N_Y_ARRAY
+            ENDIF               
+         ELSEIF (N==I_H2) THEN
+            IF (H2_INDEX > 0) THEN
+               SPECIES(N)%INDEX = H2_INDEX
+            ELSE
+               N_Y_ARRAY = N_Y_ARRAY + 1         
+               H2_INDEX = N_Y_ARRAY
+               SPECIES(N)%INDEX = N_Y_ARRAY
+            ENDIF               
+         ELSEIF (N==I_CO) THEN
+            IF (CO_INDEX > 0) THEN
+               SPECIES(N)%INDEX = CO_INDEX
+            ELSE
+               N_Y_ARRAY = N_Y_ARRAY + 1         
+               CO_INDEX = N_Y_ARRAY
+               SPECIES(N)%INDEX = N_Y_ARRAY
+            ENDIF               
          ELSEIF (N==I_CO2) THEN
-            SPECIES(N)%INDEX = CO2_INDEX
+            IF (CO2_INDEX > 0) THEN
+               SPECIES(N)%INDEX = CO2_INDEX
+            ELSE
+               N_Y_ARRAY = N_Y_ARRAY + 1         
+               CO2_INDEX = N_Y_ARRAY
+               SPECIES(N)%INDEX = N_Y_ARRAY
+            ENDIF               
          ELSE
              N_Y_ARRAY = N_Y_ARRAY + 1         
              SPECIES(N)%INDEX = N_Y_ARRAY
@@ -2243,7 +2292,7 @@ DO N=1,N_SPECIES
       ENDIF 
    ELSE
       SPECIES(N)%INDEX = N_STATE_SPECIES + 1     
-   ENDIF
+   ENDIF   
 ENDDO
 
 ! If this is not a mixture fraction calculation, add an index to the species array for background gas species
@@ -2359,12 +2408,23 @@ DO N=1,N_SPECIES
    IF (SS%MODE==GAS_SPECIES) SS0%YY0 = SS0%YY0 - SS%YY0
 ENDDO
 
-IF (MIXTURE_FRACTION) THEN
-   ALLOCATE (RCON_MF(1:N_STATE_SPECIES),STAT=IZERO)
-   CALL ChkMemErr('READ','RCON_MF',IZERO)
+ALLOCATE (RCON_MF(1:N_Y_ARRAY),STAT=IZERO)
+CALL ChkMemErr('READ','RCON_MF',IZERO)
+IF (N_STATE_SPECIES > 0) THEN
    RCON_MF(1:N_STATE_SPECIES) = R0/MF_MW(1:N_STATE_SPECIES)
-   SS0%MW = 1._EB/(REACTION(1)%Y_O2_INFTY/MW_O2+REACTION(1)%Y_N2_INFTY/MW_N2)
+   IF (N_Y_ARRAY > N_STATE_SPECIES) THEN
+      NN = N_STATE_SPECIES
+      DO N = 1, N_SPECIES
+         IF (SPECIES(N)%INDEX > N_STATE_SPECIES) THEN
+            NN = NN + 1
+            RCON_MF(NN) = R0/SPECIES(N)%MW
+         ENDIF
+      ENDDO
+   ENDIF
+ELSE
+   RCON_MF(1:N_SPECIES) = R0/SPECIES(1:N_SPECIES)%MW
 ENDIF
+IF (MIXTURE_FRACTION) SS0%MW = 1._EB/(REACTION(1)%Y_O2_INFTY/MW_O2+REACTION(1)%Y_N2_INFTY/MW_N2)
 
 MW_MIN = SS0%MW
 MW_MAX = SS0%MW
