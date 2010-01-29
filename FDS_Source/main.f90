@@ -117,13 +117,6 @@ CALL SET_OFTEN_USED
  
 CALL READ_DATA
  
-! Make sure that the appropriate number of processes (NUMPROCS) have been assigned
-
-IF (RESTRICT_MESH_ASSIGNMENT .AND. NMESHES/=NUMPROCS .AND. .NOT.ANY(EVACUATION_GRID)) THEN
-   IF (MYID==0) WRITE(LU_ERR,'(A)') 'ERROR: The number of meshes is not equal to the number of MPI processes'
-   STOP
-ENDIF
-
 ! Determine if radiation exchanges should be done by default
 
 IF (RADIATION) THEN
@@ -476,8 +469,6 @@ MAIN_LOOP: DO
 
    ! Figure out fastest and slowest meshes
  
-   ! T_MAX = MAXVAL(T)
-   ! T_MIN = MINVAL(T)
    T_MAX = MAXVAL(T,MASK=.NOT.EVACUATION_ONLY)
    T_MIN = MINVAL(T,MASK=.NOT.EVACUATION_ONLY)
    IF (ALL(EVACUATION_ONLY)) T_MAX = T_EVAC
@@ -741,8 +732,6 @@ MAIN_LOOP: DO
 
    IF (USE_MPI) &
    CALL MPI_ALLGATHERV(T(DISPLS(MYID)+1),COUNTS(MYID),MPI_DOUBLE_PRECISION,T,COUNTS,DISPLS,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IERR)
-   ! T_MIN = MINVAL(T)
-   ! T_MAX = MAXVAL(T)
    T_MAX = MAXVAL(T,MASK=.NOT.EVACUATION_ONLY)
    T_MIN = MINVAL(T,MASK=.NOT.EVACUATION_ONLY)
    IF (ALL(EVACUATION_ONLY)) T_MAX = T_EVAC
