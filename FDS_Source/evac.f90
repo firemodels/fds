@@ -11370,8 +11370,8 @@ CONTAINS
 
     ! Mass fraction array ==> soot density (mg/m3)
     ! Next is for soot (mg/m3)
+    YY_GET(:) = MESHES(nom)%YY(I,J,K,:)
     IF (SOOT_INDEX > 0) THEN
-       YY_GET(:) = MESHES(nom)%YY(I,J,K,:)
        CALL GET_MASS_FRACTION(YY_GET,SOOT_INDEX,Y_MF_INT)
        soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
     ELSE
