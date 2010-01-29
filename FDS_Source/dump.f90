@@ -2143,11 +2143,15 @@ REACTION_LOOP: DO N=1,N_REACTIONS
       CASE (MIXTURE_FRACTION_REACTION)
          WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., O_2           ',RN%NU(O2_INDEX)
          WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., CO_2          ',RN%NU(CO2_INDEX)
-         IF (H2O_INDEX > 0) WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., H2O           ',RN%NU(H2O_INDEX)
-         IF (SOOT_INDEX > 0) WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., Soot          ',RN%NU(SOOT_INDEX)
-         IF (CO_INDEX > 0) WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., CO            ',RN%NU(CO_INDEX)  
+         IF (H2O_INDEX > 0 .AND. H2O_INDEX <=N_STATE_SPECIES) &
+            WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., H2O           ',RN%NU(H2O_INDEX)
+         IF (SOOT_INDEX > 0 .AND. SOOT_INDEX <=N_STATE_SPECIES) &
+            WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., Soot          ',RN%NU(SOOT_INDEX)
+         IF (CO_INDEX > 0 .AND. CO_INDEX <=N_STATE_SPECIES)  &
+            WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., CO            ',RN%NU(CO_INDEX)  
          WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., N_2           ',RN%NU(N2_INDEX)           
-         IF (OTHER_INDEX > 0) WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., Other         ',RN%NU(OTHER_INDEX)
+         IF (OTHER_INDEX > 0 .AND. OTHER_INDEX <=N_STATE_SPECIES) &
+            WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., Other         ',RN%NU(OTHER_INDEX)
          WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoichiometric Value of Z     ',RN%Z_F
       CASE (FINITE_RATE_REACTION)
          DO NN=1,N_SPECIES
