@@ -358,7 +358,6 @@ MESH_LOOP: DO N=1,NMESHES_READ
                   WRITE(MESSAGE,'(A)') 'ERROR: MPI_PROCESS greater than total number of processes'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-               RESTRICT_MESH_ASSIGNMENT = .FALSE.
             ELSE
                IF (     USE_MPI) CURRENT_MPI_PROCESS = MIN(NM-1,NUMPROCS-1)
                IF (.NOT.USE_MPI) CURRENT_MPI_PROCESS = 0
