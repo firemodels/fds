@@ -919,7 +919,8 @@ ENDDO OBST_LOOP_2
 
 !Initialize PSUM for zone cases
 IF (N_ZONE > 0) THEN
-   DO IPZ = 1,N_ZONE
+   N_ZONE_LOOP: DO IPZ = 1,N_ZONE
+      IF (EVACUATION_ONLY(NM)) EXIT N_ZONE_LOOP
       PSUM(IPZ,NM) = 0._EB
       DO K=1,M%KBAR
          DO J=1,M%JBAR
@@ -939,7 +940,7 @@ IF (N_ZONE > 0) THEN
             ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ENDDO N_ZONE_LOOP
 ENDIF
 
 ! Set up wall cell arrays for VIRTUAL boundaries
