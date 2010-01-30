@@ -57,6 +57,7 @@
 \usepackage{array,eqnarray}
 \usepackage{enumerate}
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
+\newcommand{\ct}{\tt\small}
 
 
 \setlength{\textwidth}{6.5in}
@@ -1094,14 +1095,13 @@ is not possible to resolve the combustion and transport processes directly.
 However, for small-scale combustion experiments,
 it is possible to compute the transport and combustion processes directly.
 
-\leftline{\underline{Conservation of Momentum}}
-\be \dod{\bu}{t} + \bu \times \bo + \nabla {\cal H} =
-  \frac{1}{\rho} \left((\rho-\rho_0)\bg + {\bof_b}
-  + \nabla \cdot \btau_{ij} \right) \label{momentum2} \ee
-
-\leftline{\underline{Pressure Equation}}
-\be \nabla^2 {\cal H} = -\dod{ (\nabla \cdot \bu) }{t} - \nabla \cdot \bF  \quad ; \quad
-\bF = \bu \times \bo - \frac{1}{\rho} \left((\rho-\rho_m)\bg - {\bof_b} - \nabla \cdot \btau_{ij} \right)   \label{simplephi2} \ee
+Chapter~\ref{momentum_chapter} contains a detailed description of the numerical solution of the momentum and
+pressure equations. For the purpose of outlining the solution procedure below, it is sufficient to
+consider the momentum equation written as:
+\be \dod{\bu}{t} + \bF + \nabla {\cal H} = 0  \label{momentum2} \ee
+and the pressure equation as
+\be \nabla^2 {\cal H} = -\dod{ }{t} (\nabla \cdot \bu) - \nabla \cdot \bF    \label{simplephi2} \ee
+which is obtained by taking the divergence of the momentum equation.
 
 
 \subsection{Energy Transport}
@@ -1121,7 +1121,7 @@ where $k$ is the thermal conductivity.
 
 
 
-        
+
 \subsection{Equation of State}
 
 \be p = \frac{\rho \R T}{\bW}  \label{basicstate} \ee
@@ -1132,13 +1132,13 @@ allowing for large variations in temperature and density~\cite{Rehm:1}.
 This gives the equations an elliptic character, consistent with low speed,
 thermal convective processes. In practice, this means that the spatially resolved pressure, $p(x,y,z)$, is
 replaced by an ``average'' or ``background'' pressure, $\bp_m(z,t)$, that is only a function of time
-and height above the ground. 
+and height above the ground.
 \be \bp_m(z,t) = \rho T {\cal R} \sum_\alpha  Y_\alpha/W_\alpha \ee
 Taking the material derivative of the background pressure and substituting the result into the
 energy conservation equation yields an expression for the velocity divergence, $\nabla \dot \bu$, that is an important
 term in the numerical algorithm because it effectively eliminates the need to solve a transport equation for the
 specific enthalpy.
-The source terms from the energy conservation equation are incorporated into the divergence, which appears in the 
+The source terms from the energy conservation equation are incorporated into the divergence, which appears in the
 mass transport equations. The temperature is found from the
 density and background pressure via the equation of state.
 
@@ -1147,25 +1147,25 @@ density and background pressure via the equation of state.
 
 \section{Solution Procedure}
 
-FDS uses a second-order accurate finite-difference approximation to the governing equations on a series of connected recti-linear meshes. 
+FDS uses a second-order accurate finite-difference approximation to the governing equations on a series of connected recti-linear meshes.
 The flow variables are updated in time using an explicit second-order Runge-Kutta scheme.
-This section describes how this algorithm is used to advance in time the density, species mass fractions, velocity components, and 
+This section describes how this algorithm is used to advance in time the density, species mass fractions, velocity components, and
 background and perturbation pressure. Let $\rho^n$, $Y_\alpha^n$, $\bu^n$, $\bp_m^n$ and $\cH^n$ denote these variables at the $n$th time step.
 
 \begin{enumerate}
-\item Compute the ``patch-average'' velocity field $\bar{\mathbf{u}}^n$ (see Appendix \ref{app_pressure_correction}).
+\item Compute the ``patch-average'' velocity field $\bar{\mathbf{u}}^n$ (see Section \ref{app_pressure_correction}).
 
 \item Estimate $\rho$, $Y_\alpha$, and $\bp_m$ at the next time step with an explicit Euler step. For
 example, the density is estimated by
 \be \frac{\rho^*-\rho^n}{\dt} + \nabla \cdot \rho^n \bar{\bu}^n = 0 \ee
 
-\item Exchange\footnote{In this context, the word ``exchange'' implies that information is to be passed from one mesh to another via MPI (Message Passing Interface) routines.} 
+\item Exchange\footnote{In this context, the word ``exchange'' implies that information is to be passed from one mesh to another via MPI (Message Passing Interface) routines.}
 values of $\rho^*$ and $Y_\alpha^*$ at mesh boundaries.
 
 \item Apply boundary conditions for $\rho^*$ and $Y_\alpha^*$.
 
 \item Compute the divergence, $\nabla \cdot \bar{\bu}^*$, using the estimated thermodynamic quantities. Note that at this stage, the velocity field has
-not been estimated at the next time step, only its divergence. 
+not been estimated at the next time step, only its divergence.
 
 \item Solve the Poisson equation for the pressure fluctuation with a direct solver on each individual mesh:
 \be \nabla^2 \cH^n = - \left[ \frac{ \nabla \cdot \bu^* -
@@ -1189,15 +1189,15 @@ If the time step satisfies the stability criteria, the procedure continues to th
 See Section~\ref{stability} for more details on stability.
 \end{enumerate}
 
-\noindent 
+\noindent
 This concludes the ``Predictor'' stage of the time step.  At this point, values of $\cH^n$ and the components of $\bu^*$ are exchanged at mesh boundaries via MPI calls.
 
 \begin{enumerate}
-\item Compute the ``patch-average'' velocity field $\bar{\bu}^*$ (see Appendix \ref{app_pressure_correction}).
+\item Compute the ``patch-average'' velocity field $\bar{\bu}^*$ (see Section \ref{app_pressure_correction}).
 
 \item Apply the second part of the Runge-Kutta update to the mass variables. For example, the density is corrected
 \be
-\frac{\rho^{n+1} - \ha \left(\rho^n + \rho^* \right)}{\dt/2} +  \nabla \cdot \rho^* \bar{\bu}^* = 0 
+\frac{\rho^{n+1} - \ha \left(\rho^n + \rho^* \right)}{\dt/2} +  \nabla \cdot \rho^* \bar{\bu}^* = 0
 \ee
 
 \item Exchange values of $\rho^n$ and $Y_\alpha^n$ at mesh boundaries.
@@ -1209,7 +1209,7 @@ This concludes the ``Predictor'' stage of the time step.  At this point, values 
 \item Compute the pressure fluctuation using estimated quantities
 \be
 \label{eqn_corrector_poisson2}
-\nabla^2{\cal H}^* = - \left[ \frac{ \nabla\cdot\bu^{n+1} - \ha \left( \nabla\cdot\bar{\bu}^* + \nabla\cdot\bar{\bu}^n \right) }{\dt/2} \right] 
+\nabla^2{\cal H}^* = - \left[ \frac{ \nabla\cdot\bu^{n+1} - \ha \left( \nabla\cdot\bar{\bu}^* + \nabla\cdot\bar{\bu}^n \right) }{\dt/2} \right]
    - \nabla \cdot \bar{\mathbf{F}}^*
 \ee
 
@@ -1478,15 +1478,9 @@ can be extracted from the average molecular weight
    \frac{W_0\,p_m}{T_\infty {\cal R }} + \sum_{\alpha=1}^{N_s} \left( 1-\frac{W_0}{W_\alpha} \right)
    (\rho Y_\alpha)_{ijk} \ee
 
-\subsection{Enthalpy and Specific Heat}
-\label{HandCp}
 
-Enthalpy, $h$, and specific heat, $c_p$ are computed by doing a mass weighted average of the values for $h$ or $c_p$ for the individual species present.
-The species values are obtained by table lookup using the nearest integer to the local temperature.  Values for $h$ and $c_p$ were obtained from the NIST-JANAF tables~\cite{NIST_JANAF}.
-
-\subsection{Background Pressure Changes}
-
-The divergence of the flow, as defined by the equation of state, is written in compact notation as follows:
+To descibe how the background pressure of the $m$th pressure zone, $\bp_m$, is updated in time, consider the expression for the
+divergence written in compact notation:
 \begin{equation}
 \label{eqn_divfromeos2}
 \nabla \cdot \bu = {\cal D} - {\cal P}\; \dod{\bp_m}{t}
@@ -1522,14 +1516,129 @@ The pressure in connected zones is driven towards the equilibrium at each time s
 where $r$ is a relaxation factor of 0.2, a somewhat arbitrary value designed to slow down the fairly rapid pressure equilibration.
 
 
+\subsection{Enthalpy and Specific Heat}
+\label{HandCp}
+
+Enthalpy, $h$, and specific heat, $c_p$ are computed by doing a mass weighted average of the values for $h$ or $c_p$ for the individual species present.
+The species values are obtained by table lookup using the nearest integer to the local temperature.  Values for $h$ and $c_p$ were obtained from the NIST-JANAF tables~\cite{NIST_JANAF}.
+
+
+\subsection{Coupling the Gas and Solid Phase}
+
+Gas phase temperatures are defined at cell centers; solid surfaces lie at the
+interface of the bordering gas phase cell and a ``ghost'' cell inside the
+solid. As far as the gas phase calculation is concerned,
+the normal temperature gradient at the surface is expressed in terms of
+the temperature difference between the ``gas'' cell and the ``ghost'' cell.
+The solid surface temperature is not used directly in the gas phase calculation.
+Rather, the ghost cell temperature is used to couple the gas and solid phases.
+The ghost cell temperature
+has no physical meaning on its own. It is purely a numerical construct. It does
+not represent the temperature within the wall, but rather establishes
+a temperature gradient at the solid surface consistent with the empirical
+correlation. Only the difference between ghost and
+gas cell temperatures matters, for this defines the heat transfer to the
+wall.
+
+In a DNS calculation, the solid surface temperature is assumed to be an average of the
+ghost cell temperature and the temperature of the first cell in the gas,
+thus the ghost cell temperature is defined
+\be T_{ghost} =  2 T_s - T_{gas}  \ee
+For an LES calculation, the numerical expression for the heat lost to the boundary is
+equated with the empirical convective heat transfer
+\be k_{\hbox{\tiny LES}} \frac{T_{gas} - T_{ghost}}{\dn} - \bar{\rho} \, u_n \bar{c}_p (\bar{T}) \, \bar{T}
+   = h \; (T_{gas}-T_s) - \bar{\rho} \, u_n  \, \bar{c}_p(T_s) \, T_s  \label{ebal} \ee
+where $\dn$ is the distance between the center of the ghost cell
+and the center of the gas cell, and the bar over the $T$ and $\rho$ indicate the average of the gas and ghost values:
+\be \overline{T} = \frac{T_{gas}+T_{ghost}}{2}  \quad ; \quad \overline{\rho} = \frac{\rho_{gas} + \rho_{ghost}^*}{2} \ee
+The specific heat is defined:
+\be \bar{c}_p (T) = \frac{1}{T} \int_0^T c_p(T') \, dT' \ee
+Equation~(\ref{ebal}) is solved for $T_{ghost}$,
+so that when the conservation equations are updated, the amount of heat
+lost to the wall is equivalent to the empirical expression on the right
+hand side. Note that the asterisk in the equations above denotes that the value is taken from the previous
+time step.
+
+At solid walls there is no transfer of mass, thus the boundary condition
+for the $l$th species at a wall is simply
+\be Y_{l,ghost} = Y_{l,gas} \ee
+where the subscripts ``ghost'' and ``gas'' are the same as above since
+the mass fraction, like temperature, is defined at cell centers.
+At forced flow boundaries either the mass fraction $Y_{l,w}$ or
+the mass flux $\dot{m}_l''$ of species $l$ may be prescribed.
+Then the ghost cell mass fraction can be derived because, as with
+temperature, the normal gradient of mass fraction is needed in the gas phase
+calculation.
+For cases where the mass fraction is prescribed
+\be Y_{l,ghost} = 2 Y_{l,w} - Y_{l,gas}  \ee
+For cases where the mass flux is prescribed,
+the following equation must be solved iteratively
+\be \dot{m}_l'' = u_n \frac{\rho_{ghost} Y_{l,ghost} + \rho_{gas} Y_{l,gas}}{2}
+  - \rho D \frac{Y_{l,gas}-Y_{l,ghost}}{\dn}
+  \mp \frac{\dt \, u_n^2}{2} \frac{\rho_{gas} Y_{l,gas}
+   -\rho_{ghost} Y_{l,ghost}}{\dn} \ee
+where $\dot{m}_l''$ is the mass flux of species $l$ per unit area,
+$u_n$ is the normal component of velocity at the wall pointing into
+the flow domain, and $\dn$ is the distance between the center of the ghost
+cell and the center of the gas cell. Notice that the last term on the
+right hand side is subtracted at the predictor step and added at the
+corrector step, consistent with the biased upwinding introduced earlier.
+
+Once the temperature and species mass fractions have been defined in the
+ghost cell, the density in the ghost cell is computed from the equation of
+state
+\be  \rho_{ghost} = \frac{p_0}{ {\cal R} \, T_{ghost} \, \sum_l (Y_{l,ghost}/W_l) }  \ee
 
 
 
-\chapter{The Momentum Equation}
-\label{sec_momeqn}
+\subsection{Mass and Energy Transfer at Interpolated Mesh Boundaries}
 
-The momentum equation is simplified to make it easier to solve
-numerically. First, we start with the non-conservative form of the momentum equation introduced above
+In simulations involving more than one numerical mesh, information has to be passed between meshes, even when
+the meshes are being processed by separate computers. If two meshes abut each other, and the mesh cells are aligned and the same size, then
+one mesh simply uses the density and species mass fractions of the adjacent mesh as the ``ghost'' cell values. However, in cases where the
+mesh cells are not the same size, the exchange of information must be done more carefully. Consider a case where two meshes meet:
+
+\begin{picture}(200,110)(0,-10)
+\setlength{\unitlength}{0.02in}
+\put(120,10){\framebox(20,20){ }}
+\put(120,30){\framebox(20,20){ }}
+\put(140,10){\framebox(40,40){ }}
+\put(100,30){\makebox(0,0){Mesh 1}}
+\put(200,30){\makebox(0,0){Mesh 2}}
+\thicklines
+\put(140,0){\line(0,1){60}}
+\end{picture}
+
+\noindent
+We want the total and species mass fluxes between meshes to be the same, or as close as possible.
+Let the density in cell $(1,j',k')$ of Mesh 2 be denoted $\rho_{1,j'k'}^{(2)}$. Assume that this cell abuts four cells in Mesh 1. The densities in the four abutting cells
+of Mesh 1 are denoted $\rho_{I,jk}^{(1)}$. Note that $j$ and $k$ are not the same as $j'$ and $k'$. $I$ is the number of cells in the $x$ direction of Mesh 1. The
+ghost cell quantities in Mesh 1 have an $i$ index of $I+1$. The ghost cell quantities in Mesh 2 have an $i$ index of 0.
+We want to assert mass conservation at the mesh interface:
+\be
+   \sum_{j,k} u_{I,jk}^{(1)} \; \frac{\rho_{I+1,jk}^{(1)}+\rho_{I,jk}^{(1)}}{2} \; \dy^{(1)} \, \dz^{(1)}  =
+              u_{0,j'k'}^{(2)} \; \frac{\rho_{1,j'k'}^{(2)}+\rho_{0,j'k'}^{(2)}}{2} \; \dy^{(2)} \, \dz^{(2)}  \label{rhou}
+\ee
+When solving for $\rho_{0,j'k'}^{(2)}$, the ghost cell value for Mesh 2, we have to assume that the ghost cells values for Mesh 1 are simply linearly interpolated
+from the gas phase values of Mesh 1 and Mesh 2:
+\be \rho_{I+1,jk}^{(1)} = \rho_{I,jk}^{(1)} + \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}} \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \label{ghostrho} \ee
+Rearranging terms in Eq.~(\ref{rhou}) and using the expression for the ghost cells from Eq.~(\ref{ghostrho}), we get:
+\be \rho_{0,j'k'}^{(2)} = -\rho_{1,j'k'}^{(2)} + \frac{1}{u_{0,j'k'}^{(2)} \dy^{(2)} \, \dz^{(2)} } \sum_{j,k}  u_{1,jk}^{(1)} \dy^{(1)} \, \dz^{(1)}
+    \left[ 2 \, \rho_{I,jk}^{(1)} +  \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}}  \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \right]  \ee
+
+
+
+
+\chapter{Momentum Transport and Pressure}
+\label{momentum_chapter}
+
+This chapter describes the solution of the momentum equation. This consists of two major parts -- the
+discretization of the flux terms and then the solution of an elliptic partial differential equation for the
+pressure.
+
+\section{Simplifying the Momentum Equation}
+
+First, we start with the non-conservative form of the momentum equation introduced above
 \be \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla \cdot \btau_{ij}  \ee
 Next, we make the following substitutions:
 \begin{enumerate}
@@ -1537,279 +1646,17 @@ Next, we make the following substitutions:
 $\nabla p=\rho_n \bg + \nabla \tp$.
 \item Apply the vector identity: $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $
 \item Divide all terms by the density, $\rho$
-\item Decompose the pressure term, noting that $\rho_\infty$ is the constant density at the ground:
-   $$ \frac{\nabla \tp}{\rho} = \frac{\nabla \tp}{\rho_\infty} + \left( \frac{1}{\rho} -
-   \frac{1}{\rho_\infty} \right) \nabla \tp  $$
-\item Define ${\cal H} \equiv |\bu|^2/2 + \tp/\rho_\infty $
+\item Decompose the pressure term:
+   $$ \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \nabla \left(\frac{1}{\rho} \right)  $$
+\item Define ${\cal H} \equiv |\bu|^2/2 + \tp/\rho $
 \end{enumerate}
 Now the momentum equation can be written
-\be \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} + \left( \frac{1}{\rho} -
-   \frac{1}{\rho_\infty} \right) \nabla \tp = \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg
+\be \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg
 + \bof_b + \nabla \cdot \btau_{ij} \Big]  \label{momeq} \ee
-The numerical solution of the pressure equation obtained by taking the divergence of Eq.~(\ref{momeq})
-is greatly simplified by either neglecting the last term on the left hand side, or
-in cases where it cannot be neglected, treating it with some care.
-The decision to either neglect the extra pressure term or to approximate it depends on its
-relative contribution to the creation of vorticity. An evolution equation for the circulation, $\Gamma=\oint \bu \cdot d\bx$, reveals the
-sources of vorticity in the absence of any external forces, $\bof_b$:
-\be \frac{d\Gamma}{dt} =
-    \oint \left(\frac{1}{\rho_\infty} - \frac{1}{\rho} \right) \nabla \tp \cdot d\bx
-  + \oint \frac{\rho-\rho_n}{\rho} \bg \cdot d\bx
-  + \oint \frac{ \nabla \cdot \btau_{ij}}{\rho}  \cdot d\bx \ee
-The first term on the right hand side represents the baroclinic torque.
-The second term is buoyancy-induced vorticity.
-The third term represents the vorticity generated by molecular and subgrid-scale stresses, as in boundary and shear layers.
-In most practical large scale fire simulations, the fire itself occupies a small part of
-the computational domain. Hence, the fire is often not well resolved by
-the numerical grid, in which case the vorticity generated in regions where there are
-large deviations in density is not captured
-directly. The mixing of air and combustion products occurs in the plume above the fire where
-buoyancy is the dominant source of vorticity. In these calculations, the baroclinic torque
-can be neglected to simplify the numerical solution. In simulations where detailed flame dynamics are
-resolvable, the pressure term responsible for the baroclinic torque cannot be neglected, but for reasons
-to be made clear below, must be treated differently than the other pressure term.
-In neither of these cases is the Boussinesq approximation
-invoked -- the fluid is still considered thermally-expandable; the divergence is non-zero; and the mass and
-energy equations are not modified.
-
-\section{Velocity Boundary Conditions}
-\label{WW_model}
-
-When the momentum equation is integrated over a cell adjacent to the wall in an LES it turns out that the most difficult term to
-handle is the viscous stress at the wall, e.g. $\bar{\tau}_{xz}|_{z=0}$, because the wall-normal gradient of the streamwise velocity component cannot be resolved.
-Note that the sgs stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number
-where the viscous terms are negligible and the sgs stress is of critical importance.  The fidelity of the sgs model still influences the wall stress, however,
-since other components of the sgs tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model.
-The model used for $\tau_w = \bar{\tau}_{xz}|_{z=0}$ in FDS is the Werner and Wengle model \cite{Werner:1991} which we now describe.
-
-An important scaling quantity in the near-wall region is the friction velocity, defined as $u^* \equiv \sqrt{\tau_w/\rho}$.
-From the friction velocity we define the nondimensional streamwise velocity $u^+ \equiv u/u^*$ and nondimensional wall-normal distance $z^+ \equiv z/\ell$,
-where $\ell = \mu/(\rho u^*)$. The law of the wall is then given by \cite{Pope:2000,TennekesLumley}
-\begin{equationarray}{rcll}
-\label{eqn_visclayer} u^+ &=& z^+               & \mbox{for} \quad z^+ < 5 \\
-\label{eqn_loglaw}    u^+ &=& 2.4 \ln z^+ + 5.2 & \mbox{for} \quad z^+ > 30 \,\mbox{,}
-\end{equationarray}
-The region $5 < z^+ < 30$, where both viscous and inertial stresses are important, is referred to as the buffer layer.  The upper range of the log law depends on the Reynolds number \cite{Pope:2000,Zagarola:1997}.
-
-Werner and Wengle \cite{Werner:1991} propose a simplification to the law of the wall to eliminate the mathematical difficulties of handling the buffer and log layers.  Furthermore, WW suppose that their simplified formula for the streamwise velocity holds \emph{instantaneously} within the LES.  The WW wall law is given by \cite{Sagaut:2001}
-\begin{equationarray}{rcll}
-\label{eqn_wwlam}  u^+ &=& z^+       & \mbox{for} \quad z^+ \le 11.81 \\
-\label{eqn_wwturb} u^+ &=& A (z^+)^B & \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
-\end{equationarray}
-where $A=8.3$ and $B=1/7$. Note that a power law has been substituted for the log law and the viscous sublayer and the power law region are matched within the buffer region.  A comparison of the log law and the power law is shown in Figure \ref{fig_lawofthewall}.  In the region $11.81 < z^+ < 10^3$ the power law is a good approximation to the log law and for $z^+>10^3$ the power law loosely exhibits wake region behavior for a flow with $\mbox{Re} \approx 5e5$ \cite{Pope:2000,Zagarola:1997}.  As we see below, this functional behavior has consequences for high Re flows.
-\begin{figure}
-   \begin{center}
-      \scalebox{0.8}{\includegraphics{FIGURES/lawofthewall.pdf}}
-      \caption{\label{fig_lawofthewall} \small The law of the wall.  We have omitted the buffer layer since it is not considered in the WW model.  For $z^+\le 11.81$ we have the viscous sublayer.  For $z^+>11.81$ we show a comparison of the log law (\ref{eqn_loglaw}) (red dashed line) and the WW power law (\ref{eqn_wwturb}) (blue solid line) with $A=8.3$ and $B=1/7$.}
-   \end{center}
-\end{figure}
-
-For the purposes of adapting the WW model to FDS we suppose that the first off-wall velocity component $\tilde{u}$ represents the WW profile averaged in the wall-normal direction (refer to Figure \ref{fig_nearwall_grid}).  The density is taken as the average of the neighboring cell values and uniform along the face.  The WW model as implemented in FDS is then given by
-\begin{equationarray}{rcll}
-\label{eqn_tauwlam} |\tau_w| &=& \frac{2 \bar{\mu} |\tilde{u}|}{\Delta z} & \mbox{for} \quad z^+ \le 11.81 \vspace{0.2cm}\\
-\label{eqn_tauwturb}|\tau_w| &=& \bar{\rho}\left[\alpha\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^\beta + \eta\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^B |\tilde{u}|\right]^\gamma                           & \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
-\end{equationarray}
-where
-\begin{equationarray}{rcl}
-\alpha &=& \frac{1-B}{2} A^{\frac{1+B}{1-B}} \vspace{0.2cm}\\
-\beta  &=& 1+B \vspace{0.2cm}\\
-\eta   &=& \frac{1+B}{A} \vspace{0.2cm}\\
-\gamma &=& \frac{2}{1+B}
-\end{equationarray}
-Note that $\bar{\mu}$ is the average of the \emph{molecular} viscosity from the neighboring cells.  A detailed derivation of (\ref{eqn_tauwturb}) is given in Appendix \ref{app_WWderivation}.
-
-In order to decide which formula to use for the wall stress, (\ref{eqn_tauwlam}) or (\ref{eqn_tauwturb}), we must know $z^+$, which of course depends on $\tau_w$.  As a practical matter of implementation, given that most boundary layers in FDS are under-resolved, we first calculate $\tau_w$ from (\ref{eqn_tauwturb}); we then obtain $z^+ = \sqrt{\tau_w/\bar{\rho}}$ ; if $z^+>11.81$, then the computed value of $\tau_w$ is retained, else $\tau_w$ is taken from (\ref{eqn_tauwlam}), which actually involves no additional computation since the ghost cell value for the velocity is prescribed for a no-slip wall by default.
-
-\begin{figure}
-   \begin{center}
-      \scalebox{0.12}{\includegraphics{FIGURES/nearwall_grid.pdf}}
-      \caption{\label{fig_nearwall_grid} \small Near-wall grid.}
-   \end{center}
-\end{figure}
-
-
-
-\section{The Equation for Pressure (Poisson's Equation)}
-
-The reason for either neglecting the baroclinic torque or decomposing the pressure term in the
-momentum equation is to simplify the
-elliptic partial differential equation obtained by
-taking the divergence of the momentum equation
-\be \nabla^2 {\cal H} =
-     -\dod{(\nabla \cdot \bu)}{t} - \nabla \cdot \bF
-    \quad ; \quad \bF = - \bu\times\bo + \left( \frac{1}{\rho} -
-   \frac{1}{\rho_\infty} \right) \nabla \tp - \frac{1}{\rho}
-    \Big( (\rho-\rho_0) \bg + \bof_b + \nabla \cdot \btau_{ij} \Big)
-   \label{pe}\ee
-Note that the pressure $\tp$ appears on both sides of Eq.~(\ref{pe}). The
-pressure on the right hand side is taken from the previous time step of the
-overall explicit time-marching scheme. It can be neglected if the baroclinic torque is
-not considered important in a given simulation. The pressure on the left hand side (incorporated
-in the variable $\cal H$) is solved for directly.
-The reason for the decomposition of the pressure term is so that the linear algebraic system
-arising from the discretization of Eq.~(\ref{pe})
-has constant coefficients ({\em i.e.} it is {\em separable}) and can be solved to machine accuracy
-by a fast, direct ({\em i.e.} non-iterative) method that utilizes
-Fast Fourier Transforms (FFT).
-No-flux or forced-flow boundary conditions are specified by asserting that
-\be \dod{{\cal H}}{n} = -F_n - \dod{u_n}{t} \label{bc} \ee
-where $F_n$ is the normal component of $\bF$ at the vent or solid wall,
-and $\partial u_n/\partial t$ is the specified rate of change
-in the normal component of
-velocity at a forced vent. Initially, the velocity is zero everywhere.
-
-At open external boundaries the pressure term $\cal H$ is specified
-depending on whether the flow is outgoing or incoming
-\be \begin{array}{ll}
-     {\cal H} = |\bu|^2/2  & \hbox{outgoing}    \\
-     {\cal H} = 0          & \hbox{incoming}
-     \end{array} \ee
-The outgoing boundary condition assumes that the pressure perturbation
-$\tp$ is zero at an outgoing boundary and that $\cal H$ is
-constant along streamlines. The incoming boundary condition assumes that
-$\cal H$ is zero infinitely far away. At the boundary between two meshes, the
-pressure boundary condition is similar to that at an external open
-boundary, except that where the flow is incoming, $\cal H$ is taken from the adjacent mesh.
-
-
-\section{Large Eddy Simulation (LES)}
-\label{LES}
-
-The most distinguishing feature of any CFD model is its treatment of turbulence.
-Chapter 1 contains a brief history of turbulence modeling as it has been applied to the fire
-problem. Of the three main techniques of simulating turbulence, FDS contains only Large Eddy
-Simulation (LES) and Direct Numerical Simulation (DNS). There is no Reynolds-Averaged Navier-Stokes (RANS)
-capability in FDS.
-
-LES is a technique used to model the dissipative processes (viscosity,
-thermal conductivity, material diffusivity) that occur at length scales smaller than those that
-are explicitly resolved on the numerical grid. This means that the parameters $\mu$, $k$ and $D$ in the equations
-above cannot be used directly in most practical simulations. They must be replaced by surrogate expressions
-that ``model'' their impact on the approximate form of the governing equations.
-This section contains a simple explanation of how these terms are modeled
-in FDS. Note that this discussion is quite different than what it typically found in the
-literature, thus the reader is encouraged to consider other explanations of the technique in the references that are
-listed in a review article by Pope~\cite{Pope:LES}.
-
-There is a small term in the energy equation
-known as the {\em dissipation rate}, $\epsilon$,
-the rate at which kinetic energy is converted to thermal energy by viscosity:
-\begin{align}
-\epsilon &\equiv \btau_{ij} \cdot \nabla \bu \quad =  \quad
-   \mu \left( 2 \; \bS_{ij} \cdot \bS_{ij}
-                  - \frac{2}{3} (\nabla \cdot \bu)^2 \right)  \nonumber \\
-  &= \mu \left[ 2 \left(\dod{u}{x}\right)^2
- + 2 \left(\dod{v}{y}\right)^2 + 2 \left(\dod{w}{z}\right)^2 + \right. \nonumber \\
-&  \left.
-  \left(\dod{v}{x}+\dod{u}{y}\right)^2 + \left(\dod{w}{y}+\dod{v}{z}\right)^2
- + \left(\dod{u}{z}+\dod{w}{x}\right)^2 - \frac{2}{3}
-   \left(\dod{u}{x}+\dod{v}{y} + \dod{w}{z} \right)^2  \right]  \label{dissipation} \end{align}
-This term is usually neglected in the energy conservation equation because it is very small relative to the heat release rate of
-the fire. To understand where this term originates, form an evolution equation for the kinetic energy of the fluid by
-taking the dot product of the momentum equation (\ref{momentum}) with the velocity vector\footnote{In this section
-it is convenient to work with the Lagrangian form of the conservation equations. }:
-\be \rho \, \frac{\mbox{D}\bu}{\mbox{D}t} \cdot \bu = \rho  \, \frac{\mbox{D}\left(|\bu|^2/2\right)}{\mbox{D}t} = 
-    \rho \bof_b \cdot \bu - \nabla p \cdot \bu + \nabla \cdot (\btau_{ij} \cdot \bu) - \epsilon \ee
-As mentioned above $\epsilon$ is a negligible quantity in the energy equation. However, its functional form
-is useful in representing the dissipation of kinetic energy from the resolved flow field.
-Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the viscosity $\mu$ is modeled
-\be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
-   \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
-where $C_s$ is an empirical constant and $\Delta$ is a length on the
-order of the size of a grid cell.
-The bar above the various quantities denotes that these are the resolved values, meaning
-that they are computed from the numerical solution sampled on a coarse grid (relative to DNS).
-The other diffusive parameters,
-the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
-\be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
-\quad ; \quad
- (\rho D)_{l,\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be
-constant for a given scenario.
-
-The model for the viscosity, $\mu_{\hbox{\tiny LES}}$, serves two roles: first, it provides a stabilizing
-effect in the numerical
-algorithm, damping out numerical instabilities as they arise in the flow field, especially where vorticity is
-generated. Second, it has the appropriate mathematical form to describe the dissipation of kinetic energy from the flow.
-Note the similar mathematical form of $\mu_{\hbox{\tiny LES}}$ and
-the dissipation rate, $\epsilon$, defined in Eq.~(\ref{dissipation}).
-In the parlance of the turbulence community, the dissipation
-rate is related to the turbulent kinetic energy (most often denoted by $k$) by the
-relation $\epsilon \approx k^{3/2}/L$, where $L$ is a length scale.
-
-There have been numerous refinements of the original Smagorinsky
-model~\cite{Deardorff:1,Germano:1,Lilly:1},
-but it is difficult to assess the improvements offered by these newer
-schemes for fires. There are two reasons for this. First, the structure of the
-fire plume is so dominated by the large-scale resolvable eddies that
-even a constant eddy viscosity gives results comparable to
-those obtained using the Smagorinsky model~\cite{Baum:4}. Second, the lack
-of precision in most large-scale fire test data makes it difficult to
-assess the relative accuracy of each model.
-The Smagorinsky model with constant $C_s$ produces satisfactory results
-for most large-scale applications where boundary layers are not
-well-resolved (see Volume 3, {\em Experimental Validation}). In fact, experience to date using the simple form of LES described above
-has shown that the best results are obtained when the Smagorinsky constant $C_s$ is set
-as low as possible to maintain numerical stability. In other words, the most realistic
-flow simulations are obtained when resolvable eddies are not ``damped'' by excessive
-amounts of artificial viscosity.
-
-
-
-\section{Direct Numerical Simulation (DNS)}
-\label{DNS}
-
-There are some flow scenarios where it is possible to use the molecular properties
-$\mu$, $k$ and $D$ directly. Usually, this means that the numerical grid cells are on the
-order of 1~mm or less, and the simulation is regarded as a
-Direct Numerical Simulation (DNS).
-For a DNS, the viscosity, thermal conductivity
-and material diffusivity are approximated from kinetic theory because the temperature
-dependence of each is important in combustion scenarios.
-The viscosity of the species $\alpha$ is given by
-\be \mu_\alpha = \frac{26.69\times 10^{-7} (W_\alpha \, T)^\ha}{\sigma_\alpha^2 \, \Omega_v}
-\quad \quad \frac{\hbox{kg}}{\hbox{m s}} \ee
-where $\sigma_\alpha$ is the Lennard-Jones
-hard-sphere diameter ($\AA$) and $\Omega_v$ is the
-collision integral, an empirical function of the
-temperature $T$. The thermal conductivity of species $\alpha$ is given by
-\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR}  \quad \quad \frac{\hbox{W}}{\hbox{m K}}  \ee
-where the Prandtl number $\PR$ is 0.7.
-The viscosity and thermal conductivity of a gas mixture are given by
-\be \mu_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; \mu_\alpha  \quad ; \quad
-k_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; k_\alpha  \ee
-The binary diffusion coefficient of species $\alpha$
-diffusing into species $\beta$ is given by
-\be D_{\alpha \beta} = \frac{2.66\times 10^{-7} \, T^{3/2} }{W_{\alpha \beta}^\ha \, \sigma_{\alpha \beta}^2 \, \Omega_D }
-\quad \quad \frac{\hbox{m$^2$}}{s} \ee
-where $W_{\alpha \beta}=2(1/W_\alpha+1/W_\beta)^{-1}$, $\sigma_{\alpha \beta}=(\sigma_\alpha+\sigma_\beta)/2$, and
-$\Omega_D$ is the diffusion collision integral, an empirical
-function of the temperature, $T$~\cite{Poling:1}.
-It is assumed that nitrogen is the dominant species in any combustion
-scenario considered here, thus the diffusion coefficient in the
-species mass conservation equations is that of the given species diffusing
-into nitrogen
-\be (\rho D)_{\alpha,\hbox{\tiny DNS}} = \rho \;  D_{\alpha 0} \ee
-where species 0 is nitrogen.
-
-\clearpage
-\subsection{The Momentum Equation}
-
-\label{themom}
-
-The three components of the momentum equation are
-\begin{eqnarray}
-\dod{\hu}{t} + F_x + \dod{\hp}{x} = 0 \quad &;& \quad
-F_x = \hw \, \omy - \hv \, \omz - \frac{1}{\rho} \left( f_x
-  +  \dod{\tau_{xx}}{x} + \dod{\tau_{xy}}{y} + \dod{\tau_{xz}}{z} \right) \\
-\dod{\hv}{t} + F_y + \dod{\hp}{y} = 0 \quad &;& \quad
-F_y = \hu \, \omz - \hw \, \omx - \frac{1}{\rho} \left( f_y
-  +  \dod{\tau_{yx}}{x} + \dod{\tau_{yy}}{y} + \dod{\tau_{yz}}{z} \right) \\
-\dod{\hw}{t} + F_z + \dod{\hp}{z} = 0 \quad &;& \quad
-F_z = \hv \, \omx - \hu \, \omy - \frac{1}{\rho} \left( f_z
-  +  \dod{\tau_{zx}}{x} + \dod{\tau_{zy}}{y} + \dod{\tau_{zz}}{z} \right)
-\end{eqnarray}
-The spatial discretization of the momentum equations takes the form
+It is convenient to write this equation in the form:
+\be \dod{\bu}{t} + \bF + \nabla \cH = 0 \label{simple_momentum_equation} \ee
+The vector $\bF$ is referred to collectively as the momentum flux terms, and the term $\nabla \cH$ is referred to as the
+pressure gradient. The spatial discretization of the momentum equations takes the form
 \begin{eqnarray}
 \dod{\hu}{t} + F_{\x,ijk} + \frac{\hp_{i+1,jk} -\hp_{ijk}}{\dx} = 0  \label{umom} \\
 \dod{\hv}{t} + F_{\y,ijk} + \frac{\hp_{i,j+1,k}-\hp_{ijk}}{\dy} = 0  \label{vmom} \\
@@ -1819,7 +1666,17 @@ where $\hp_{ijk}$ is taken at center of cell $ijk$,
 $\hu_{ijk}$ and $F_{\x,ijk}$ are taken at the side of the cell facing
 in the forward $x$ direction, $\hv_{ijk}$ and $F_{\y,ijk}$ at the side
 facing in the forward $y$ direction, and $\hw_{ijk}$ and $F_{\z,ijk}$
-at the side facing in the forward $z$ (vertical) direction. In the
+at the side facing in the forward $z$ (vertical) direction.
+The flux terms are discretized:
+\begin{eqnarray}
+F_x &=& \hw \, \omy - \hv \, \omz - \frac{1}{\rho} \left( f_x
+  +  \dod{\tau_{xx}}{x} + \dod{\tau_{xy}}{y} + \dod{\tau_{xz}}{z} \right) \\
+F_y &=& \hu \, \omz - \hw \, \omx - \frac{1}{\rho} \left( f_y
+  +  \dod{\tau_{yx}}{x} + \dod{\tau_{yy}}{y} + \dod{\tau_{yz}}{z} \right) \\
+F_z &=& \hv \, \omx - \hu \, \omy - \frac{1}{\rho} \left( f_z
+  +  \dod{\tau_{zx}}{x} + \dod{\tau_{zy}}{y} + \dod{\tau_{zz}}{z} \right)
+\end{eqnarray}
+In the
 definitions to follow, the components of the vorticity $(\om_x,\om_y,\om_z)$
 are located at cell edges pointing in the $x$, $y$ and $z$ directions,
 respectively. The same is true for the off-diagonal terms of the viscous
@@ -1907,11 +1764,90 @@ of the form of the discretized equations, the time-stepping scheme, and
 the direct solution of the Poisson equation for the pressure.
 
 
-\subsubsection{Viscous Terms (LES)}
 
-The major difference between an LES and a DNS calculation is the form of
-the viscosity, and the thermal and material diffusivities.
-For a Large Eddy Simulation, the dynamic viscosity
+\section{Large Eddy Simulation (LES)}
+\label{LES}
+
+The most distinguishing feature of any CFD model is its treatment of turbulence.
+Chapter 1 contains a brief history of turbulence modeling as it has been applied to the fire
+problem. Of the three main techniques of simulating turbulence, FDS contains only Large Eddy
+Simulation (LES) and Direct Numerical Simulation (DNS). There is no Reynolds-Averaged Navier-Stokes (RANS)
+capability in FDS.
+
+LES is a technique used to model the dissipative processes (viscosity,
+thermal conductivity, material diffusivity) that occur at length scales smaller than those that
+are explicitly resolved on the numerical grid. This means that the parameters $\mu$, $k$ and $D$ in the equations
+above cannot be used directly in most practical simulations. They must be replaced by surrogate expressions
+that ``model'' their impact on the approximate form of the governing equations.
+This section contains a simple explanation of how these terms are modeled
+in FDS. Note that this discussion is quite different than what it typically found in the
+literature, thus the reader is encouraged to consider other explanations of the technique in the references that are
+listed in a review article by Pope~\cite{Pope:LES}.
+
+There is a small term in the energy equation
+known as the {\em dissipation rate}, $\epsilon$,
+the rate at which kinetic energy is converted to thermal energy by viscosity:
+\begin{align}
+\epsilon &\equiv \btau_{ij} \cdot \nabla \bu \quad =  \quad
+   \mu \left( 2 \; \bS_{ij} \cdot \bS_{ij}
+                  - \frac{2}{3} (\nabla \cdot \bu)^2 \right)  \nonumber \\
+  &= \mu \left[ 2 \left(\dod{u}{x}\right)^2
+ + 2 \left(\dod{v}{y}\right)^2 + 2 \left(\dod{w}{z}\right)^2 + \right. \nonumber \\
+&  \left.
+  \left(\dod{v}{x}+\dod{u}{y}\right)^2 + \left(\dod{w}{y}+\dod{v}{z}\right)^2
+ + \left(\dod{u}{z}+\dod{w}{x}\right)^2 - \frac{2}{3}
+   \left(\dod{u}{x}+\dod{v}{y} + \dod{w}{z} \right)^2  \right]  \label{dissipation} \end{align}
+This term is usually neglected in the energy conservation equation because it is very small relative to the heat release rate of
+the fire. To understand where this term originates, form an evolution equation for the kinetic energy of the fluid by
+taking the dot product of the momentum equation (\ref{momentum}) with the velocity vector\footnote{In this section
+it is convenient to work with the Lagrangian form of the conservation equations. }:
+\be \rho \, \frac{\mbox{D}\bu}{\mbox{D}t} \cdot \bu = \rho  \, \frac{\mbox{D}\left(|\bu|^2/2\right)}{\mbox{D}t} =
+    \rho \bof_b \cdot \bu - \nabla p \cdot \bu + \nabla \cdot (\btau_{ij} \cdot \bu) - \epsilon \ee
+As mentioned above $\epsilon$ is a negligible quantity in the energy equation. However, its functional form
+is useful in representing the dissipation of kinetic energy from the resolved flow field.
+Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the viscosity $\mu$ is modeled
+\be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
+   \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
+where $C_s$ is an empirical constant and $\Delta$ is a length on the
+order of the size of a grid cell.
+The bar above the various quantities denotes that these are the resolved values, meaning
+that they are computed from the numerical solution sampled on a coarse grid (relative to DNS).
+The other diffusive parameters,
+the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
+\be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
+\quad ; \quad
+ (\rho D)_{l,\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be
+constant for a given scenario.
+
+The model for the viscosity, $\mu_{\hbox{\tiny LES}}$, serves two roles: first, it provides a stabilizing
+effect in the numerical
+algorithm, damping out numerical instabilities as they arise in the flow field, especially where vorticity is
+generated. Second, it has the appropriate mathematical form to describe the dissipation of kinetic energy from the flow.
+Note the similar mathematical form of $\mu_{\hbox{\tiny LES}}$ and
+the dissipation rate, $\epsilon$, defined in Eq.~(\ref{dissipation}).
+In the parlance of the turbulence community, the dissipation
+rate is related to the turbulent kinetic energy (most often denoted by $k$) by the
+relation $\epsilon \approx k^{3/2}/L$, where $L$ is a length scale.
+
+There have been numerous refinements of the original Smagorinsky
+model~\cite{Deardorff:1,Germano:1,Lilly:1},
+but it is difficult to assess the improvements offered by these newer
+schemes for fires. There are two reasons for this. First, the structure of the
+fire plume is so dominated by the large-scale resolvable eddies that
+even a constant eddy viscosity gives results comparable to
+those obtained using the Smagorinsky model~\cite{Baum:4}. Second, the lack
+of precision in most large-scale fire test data makes it difficult to
+assess the relative accuracy of each model.
+The Smagorinsky model with constant $C_s$ produces satisfactory results
+for most large-scale applications where boundary layers are not
+well-resolved (see Volume 3, {\em Experimental Validation}). In fact, experience to date using the simple form of LES described above
+has shown that the best results are obtained when the Smagorinsky constant $C_s$ is set
+as low as possible to maintain numerical stability. In other words, the most realistic
+flow simulations are obtained when resolvable eddies are not ``damped'' by excessive
+amounts of artificial viscosity.
+
+In the discretized form of the momentum equation, the LES form of the dynamic viscosity
 is defined at cell centers
 \be \mu_{ijk} = \rho_{ijk} \, (C_s\, \Delta)^2 \, |S|   \ee
 where $C_s$ is an empirical constant, $\Delta=(\dx\,\dy\,\dz)^\ot$, and
@@ -1939,73 +1875,106 @@ $C_s$ is 0.20, $\PR_t$ and $\SC_t$ are 0.5. There are no rigorous justifications
 for these choices other than through comparison with
 experimental data~\cite{Zhang:1}.
 
-\subsubsection{Viscous Terms (DNS)}
 
-The dynamic viscosity, thermal conductivity and diffusion coefficients
-for a DNS calculation are defined at cell centers
-\begin{eqnarray}
-\mu_{ijk} &=& \sum_l Y_{l,ijk} \; \mu_l(T_{ijk})  \\
-k_{ijk}   &=& \sum_l Y_{l,ijk} \; k_l(T_{ijk})   \\
-D_{l,ijk} &=& D_{l0}(T_{ijk})  \end{eqnarray}
-where the values for each individual species are approximated from
-kinetic theory~\cite{Poling:1}. The term $D_{l0}$ is the binary diffusion
-coefficient for species $l$ diffusing into the predominant species $0$,
-usually nitrogen. It is often the case that the
-numerical grid is too coarse to resolve steep gradients in flow
-quantities when the temperature is near ambient.
-However, as the temperature increases and
-the diffusion coefficients increase in value, the situation improves.
-As a consequence, there is a provision in the numerical algorithm to place
-a lower bound on the viscous coefficients to avoid numerical instabilities
-at temperatures close to ambient.
+\section{Direct Numerical Simulation (DNS)}
+\label{DNS}
 
-
-\subsubsection{Velocity Boundary Conditions at a Solid Surface}
-
-At solid boundaries, the tangential components of velocity need to be set inside the solid in order to establish a velocity gradient for the
-numerical velocity field. As an example, consider
-a solid surface forming the lower boundary of the computational domain ($z=0$). The horizontal velocity components $u_{ij,1}$ and
-$v_{ij,1}$ are computed at the vertical faces of the first layer of gas phase grid cells above the solid surface. What should the
-values of $u_{ij,0}$ and $v_{ij,0}$ be set to such that the flow near the wall is impeded by the same amount as a
-real turbulent flow? Assuming that the numerical grid is too coarse to resolve the boundary layer (of nominal thickness $d$), and assuming
-a turbulent velocity profile
-\be U(z) = \left\{ \begin{array}{ll}  U_0  (z/d)^{1/7} &   z<d  \\
-                                      U_0              &   z>d \end{array} \right. \ee
-a simple slip boundary condition can be worked out such that
-\be u_{ij,0} = u_{ij,1} \; \left( 1- \frac{d}{\dz} \right)  \quad ; \quad  v_{ij,0} = v_{ij,1} \; \left( 1- \frac{d}{\dz} \right) \ee
-where $\dz$ is the height of the grid cell. For coarse grids,
-the boundary condition is very similar to a ``free-slip'' condition because $d << \dz$.
-
-Past and present versions of FDS have employed a default boundary condition for LES calculations
-where $u_{ij,0}$ and $v_{ij,0}$ are set to one-half the values of
-$u_{ij,1}$ and $v_{ij,1}$, respectively. Although from the discussion above this implies that the thickness of the
-boundary layer $d$ is assumed to
-be half that of the grid cell $\dz$, in practice, it really implies that real walls
-are covered with small obstructions that are half a cell thick or
-less in size, in which case they do not appear explicitly in the simulation.
-The ``half-slip'' condition is an attempt to account for this wall clutter.
-
-In a DNS calculation, this discussion is moot. The inner-wall ``ghost'' cell velocities are
-set so that the velocity at the wall surface is zero.
+There are some flow scenarios where it is possible to use the molecular properties
+$\mu$, $k$ and $D$ directly. Usually, this means that the numerical grid cells are on the
+order of 1~mm or less, and the simulation is regarded as a
+Direct Numerical Simulation (DNS).
+For a DNS, the viscosity, thermal conductivity
+and material diffusivity are approximated from kinetic theory because the temperature
+dependence of each is important in combustion scenarios.
+The viscosity of the species $\alpha$ is given by
+\be \mu_\alpha = \frac{26.69\times 10^{-7} (W_\alpha \, T)^\ha}{\sigma_\alpha^2 \, \Omega_v}
+\quad \quad \frac{\hbox{kg}}{\hbox{m s}} \ee
+where $\sigma_\alpha$ is the Lennard-Jones
+hard-sphere diameter ($\AA$) and $\Omega_v$ is the
+collision integral, an empirical function of the
+temperature $T$. The thermal conductivity of species $\alpha$ is given by
+\be k_\alpha = \frac{\mu_\alpha \, c_{p,\alpha}}{\PR}  \quad \quad \frac{\hbox{W}}{\hbox{m K}}  \ee
+where the Prandtl number $\PR$ is 0.7.
+The viscosity and thermal conductivity of a gas mixture are given by
+\be \mu_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; \mu_\alpha  \quad ; \quad
+k_{\hbox{\tiny DNS}} = \sum_\alpha \; Y_\alpha \; k_\alpha  \ee
+The binary diffusion coefficient of species $\alpha$
+diffusing into species $\beta$ is given by
+\be D_{\alpha \beta} = \frac{2.66\times 10^{-7} \, T^{3/2} }{W_{\alpha \beta}^\ha \, \sigma_{\alpha \beta}^2 \, \Omega_D }
+\quad \quad \frac{\hbox{m$^2$}}{s} \ee
+where $W_{\alpha \beta}=2(1/W_\alpha+1/W_\beta)^{-1}$, $\sigma_{\alpha \beta}=(\sigma_\alpha+\sigma_\beta)/2$, and
+$\Omega_D$ is the diffusion collision integral, an empirical
+function of the temperature, $T$~\cite{Poling:1}.
+It is assumed that nitrogen is the dominant species in any combustion
+scenario considered here, thus the diffusion coefficient in the
+species mass conservation equations is that of the given species diffusing
+into nitrogen
+\be (\rho D)_{\alpha,\hbox{\tiny DNS}} = \rho \;  D_{\alpha 0} \ee
+where species 0 is nitrogen.
 
 
 
-\subsubsection{Force Terms}
 
-The external force term components are defined at cell faces, just like the velocity components. For example, the drag force components
-from sprinkler droplets are:
-\begin{eqnarray}
-f_{x,ijk} &=&\frac{1}{2}\frac{\sum \rho C_D\pi r_d^2 (u_d-u_{ijk}) |\bu_d-\bu|}{\dx\, \dy\, \dz}  \\
-f_{y,ijk} &=&\frac{1}{2}\frac{\sum \rho C_D\pi r_d^2 (v_d-v_{ijk}) |\bu_d-\bu|}{\dx\, \dy\, \dz}  \\
-f_{z,ijk} &=&\frac{1}{2}\frac{\sum \rho C_D\pi r_d^2 (w_d-w_{ijk}) |\bu_d-\bu|}{\dx\, \dy \,\dz}
-\end{eqnarray}
-where $r_d$ is the radius of a droplet, $\bu=(u_d,v_d,w_d)$ the velocity of a droplet, $C_D$ the drag
-coefficient, and $\dx \, \dy \,\dz$ the volume of the $ijk$th cell.
-The summations represent all droplets within a grid cell centered about
-the $x$, $y$ and $z$ faces of a grid cell respectively.
+\section{Velocity Boundary Conditions}
+\label{WW_model}
+
+When the momentum equation is integrated over a cell adjacent to the wall in an LES it turns out that the most difficult term to
+handle is the viscous stress at the wall, e.g. $\bar{\tau}_{xz}|_{z=0}$, because the wall-normal gradient of the streamwise velocity component cannot be resolved.
+Note that the sgs stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number
+where the viscous terms are negligible and the sgs stress is of critical importance.  The fidelity of the sgs model still influences the wall stress, however,
+since other components of the sgs tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model.
+The model used for $\tau_w = \bar{\tau}_{xz}|_{z=0}$ in FDS is the Werner and Wengle model \cite{Werner:1991} which we now describe.
+
+An important scaling quantity in the near-wall region is the friction velocity, defined as $u^* \equiv \sqrt{\tau_w/\rho}$.
+From the friction velocity we define the nondimensional streamwise velocity $u^+ \equiv u/u^*$ and nondimensional wall-normal distance $z^+ \equiv z/\ell$,
+where $\ell = \mu/(\rho u^*)$. The law of the wall is then given by \cite{Pope:2000,TennekesLumley}
+\begin{equationarray}{rcll}
+\label{eqn_visclayer} u^+ &=& z^+               & \mbox{for} \quad z^+ < 5 \\
+\label{eqn_loglaw}    u^+ &=& 2.4 \ln z^+ + 5.2 & \mbox{for} \quad z^+ > 30 \,\mbox{,}
+\end{equationarray}
+The region $5 < z^+ < 30$, where both viscous and inertial stresses are important, is referred to as the buffer layer.  The upper range of the log law depends on the Reynolds number \cite{Pope:2000,Zagarola:1997}.
+
+Werner and Wengle \cite{Werner:1991} propose a simplification to the law of the wall to eliminate the mathematical difficulties of handling the buffer and log layers.  Furthermore, WW suppose that their simplified formula for the streamwise velocity holds \emph{instantaneously} within the LES.  The WW wall law is given by \cite{Sagaut:2001}
+\begin{equationarray}{rcll}
+\label{eqn_wwlam}  u^+ &=& z^+       & \mbox{for} \quad z^+ \le 11.81 \\
+\label{eqn_wwturb} u^+ &=& A (z^+)^B & \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
+\end{equationarray}
+where $A=8.3$ and $B=1/7$. Note that a power law has been substituted for the log law and the viscous sublayer and the power law region are matched within the buffer region.  A comparison of the log law and the power law is shown in Figure \ref{fig_lawofthewall}.  In the region $11.81 < z^+ < 10^3$ the power law is a good approximation to the log law and for $z^+>10^3$ the power law loosely exhibits wake region behavior for a flow with $\mbox{Re} \approx 5e5$ \cite{Pope:2000,Zagarola:1997}.  As we see below, this functional behavior has consequences for high Re flows.
+\begin{figure}
+   \begin{center}
+      \scalebox{0.8}{\includegraphics{FIGURES/lawofthewall.pdf}}
+      \caption{\label{fig_lawofthewall} \small The law of the wall.  We have omitted the buffer layer since it is not considered in the WW model.  For $z^+\le 11.81$ we have the viscous sublayer.  For $z^+>11.81$ we show a comparison of the log law (\ref{eqn_loglaw}) (red dashed line) and the WW power law (\ref{eqn_wwturb}) (blue solid line) with $A=8.3$ and $B=1/7$.}
+   \end{center}
+\end{figure}
+
+For the purposes of adapting the WW model to FDS we suppose that the first off-wall velocity component $\tilde{u}$ represents the WW profile averaged in the wall-normal direction (refer to Figure \ref{fig_nearwall_grid}).  The density is taken as the average of the neighboring cell values and uniform along the face.  The WW model as implemented in FDS is then given by
+\begin{equationarray}{rcll}
+\label{eqn_tauwlam} |\tau_w| &=& \frac{2 \bar{\mu} |\tilde{u}|}{\Delta z} & \mbox{for} \quad z^+ \le 11.81 \vspace{0.2cm}\\
+\label{eqn_tauwturb}|\tau_w| &=& \bar{\rho}\left[\alpha\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^\beta + \eta\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^B |\tilde{u}|\right]^\gamma                           & \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
+\end{equationarray}
+where
+\begin{equationarray}{rcl}
+\alpha &=& \frac{1-B}{2} A^{\frac{1+B}{1-B}} \vspace{0.2cm}\\
+\beta  &=& 1+B \vspace{0.2cm}\\
+\eta   &=& \frac{1+B}{A} \vspace{0.2cm}\\
+\gamma &=& \frac{2}{1+B}
+\end{equationarray}
+Note that $\bar{\mu}$ is the average of the \emph{molecular} viscosity from the neighboring cells.  A detailed derivation of (\ref{eqn_tauwturb}) is given in Appendix \ref{app_WWderivation}.
+
+In order to decide which formula to use for the wall stress, (\ref{eqn_tauwlam}) or (\ref{eqn_tauwturb}), we must know $z^+$, which of course depends on $\tau_w$.  As a practical matter of implementation, given that most boundary layers in FDS are under-resolved, we first calculate $\tau_w$ from (\ref{eqn_tauwturb}); we then obtain $z^+ = \sqrt{\tau_w/\bar{\rho}}$ ; if $z^+>11.81$, then the computed value of $\tau_w$ is retained, else $\tau_w$ is taken from (\ref{eqn_tauwlam}), which actually involves no additional computation since the ghost cell value for the velocity is prescribed for a no-slip wall by default.
+
+\begin{figure}
+   \begin{center}
+      \scalebox{0.12}{\includegraphics{FIGURES/nearwall_grid.pdf}}
+      \caption{\label{fig_nearwall_grid} \small Near-wall grid.}
+   \end{center}
+\end{figure}
 
 
-\subsubsection{Time Step}
+
+
+
+\section{Time Step and Stability Constraints}
 
 \label{stability}
 
@@ -2032,14 +2001,29 @@ of any explicit, second-order numerical scheme for solving a parabolic partial d
 equation. To save CPU time, the Von Neumann criterion is only invoked for DNS calculations or for LES
 calculations with grid cells smaller than 5~mm.
 
-
 \clearpage
-\subsection{The Pressure Equation}
+\section{The Equation for Pressure (Poisson Equation)}
 
-The momentum equation is
-\be \dod{\bu}{t} + \bF + \nabla \cH = 0 \ee
-The divergence operator applied to the three components of the
-discretized momentum equation (\ref{umom}--\ref{wmom}) yields the following discrete Poisson equation for the modified pressure, $\hp$:
+An elliptic partial differential equation (known as a Poisson equation) is obtained by
+taking the divergence of the momentum equation
+\be \nabla^2 {\cal H} =
+     -\dod{(\nabla \cdot \bu)}{t} - \nabla \cdot \bF
+    \quad ; \quad \bF = - \bu\times\bo - \tp \nabla \left( \frac{1}{\rho} \right) - \frac{1}{\rho}
+    \Big( (\rho-\rho_0) \bg + \bof_b + \nabla \cdot \btau_{ij} \Big)
+   \label{pe}\ee
+Note that the pressure $\tp$ appears on both sides of Eq.~(\ref{pe}). The
+pressure on the right hand side is taken from the previous time step of the
+overall explicit time-marching scheme. It can be neglected if the baroclinic torque is
+not considered important in a given simulation. The pressure on the left hand side (incorporated
+in the variable $\cal H$) is solved for directly.
+The reason for the decomposition of the pressure term is so that the linear algebraic system
+arising from the discretization of Eq.~(\ref{pe})
+has constant coefficients ({\em i.e.} it is {\em separable}) and can be solved to machine accuracy
+by a fast, direct ({\em i.e.} non-iterative) method that utilizes
+Fast Fourier Transforms (FFT).
+
+The discretized form of the
+Poisson equation for the modified pressure, $\hp$, is:
 \begin{eqnarray}
 \frac{\hp_{i+1,jk}-2\hp_{ijk}+\hp_{i-1,jk}}{\dx^2} +
 \frac{\hp_{i,j+1,k}-2\hp_{ijk}+\hp_{i,j-1,k}}{\dy^2} +
@@ -2057,25 +2041,88 @@ elliptic equation solver FISHPAK, was originally developed at the National Cente
 Research (NCAR) in Boulder, Colorado.}.
 To ensure that the divergence of the fluid is consistent with the definition
 given in Eq.~(\ref{eqn_divfromeos}), the time derivative of the divergence is defined
-\be \dod{ }{t}(\nabla \cdot \bu)_{ijk} =
-          \frac{(\nabla \cdot \bu)_{ijk}^{(n+1)_e}
+\be \dod{ }{t}(\nabla \cdot \bu)_{ijk} \equiv
+          \frac{(\nabla \cdot \bu)_{ijk}^*
               - (\nabla \cdot \bu)_{ijk}^n}{\dt} \ee
 at the predictor step, and then
-\be \dod{ }{t}(\nabla \cdot \bu)_{ijk} =
-         \frac{2(\nabla \cdot \bu)_{ijk}^{n+1} -
-         (\nabla \cdot \bu)_{ijk}^{(n+1)_e}
-       - (\nabla \cdot \bu)_{ijk}^n}{\dt} \ee
-at the corrector step. The discretization of the divergence was
+\be \dod{ }{t}(\nabla \cdot \bu)_{ijk} \equiv
+         \frac{(\nabla \cdot \bu)_{ijk}^{n+1} -
+         \ha \left[ (\nabla \cdot \bu)_{ijk}^*
+       + (\nabla \cdot \bu)_{ijk}^n \right]}{\dt/2} \ee
+at the corrector step. The discretization of the divergence is
 given in Eq.~(\ref{divdis}).
+
+
+\subsection{Open Boundary Conditions}
+
+Outflow: The outflow condition is quite simple.
+Let $q \equiv |\mathbf{u}|$. By definition, ${\cal H} = \frac{1}{2}q^2 + \frac{\tilde{p}}{\rho_\infty}$.
+The pressure $\tilde{p}$ is set to $\tilde{p}_{ext}$ by the user ({\ct DYNAMIC\_PRESSURE}, 0 by default).
+\\
+\\
+Inflow: When fluid is entering the domain at an {\tt OPEN} vent we make the assumption that
+Bernoulli holds (i.e. inviscid, steady, incompressible) and that the fluid element on the boundary has
+accelerated from the state \{$\tilde{p}_1,\rho_1,q_1$\} along a streamline:
+\begin{equation}
+\tilde{p}_1 + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \tilde{p}_2 + \mbox{$\frac{1}{2}$}\rho_2 q_2^2
+\end{equation}
+Let's say the fluid has kinetic energy $\frac{1}{2}\rho_1 q_1^2$ at point 1 with
+ambient pressure $\tilde{p}_1 = \tilde{p}_{ext}$ and accelerates to $q_2$ at point 2 which is on an inflow boundary.
+Substituting the definition of ${\cal H}$ for point 2 we obtain
+\begin{equation}
+\tilde{p}_{ext} + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \rho_\infty({\cal H}_2 - \mbox{$\frac{1}{2}$} q_2^2) +
+\mbox{$\frac{1}{2}$} \rho_2 q_2^2
+\end{equation}
+which rearranges to
+\begin{equation}
+{\cal H}_2 = \underbrace{\frac{\tilde{p}_{ext}}{\rho_\infty}}_{{\cal H}_{ext}} +
+\underbrace{\frac{1}{2}q_1^2 \frac{\rho_1}{\rho_\infty}}_{{\cal H}_0} +   \frac{1}{2} q_2^2 \left(1-\frac{\rho_2}{\rho_\infty}\right)
+\end{equation}
+The density $\rho_2$ (denoted $\rho_w$ in Eq. (\ref{eqn_pressbc})) is taken as the average density
+between the gas-phase and ghost cells adjacent to the boundary.
+
+At open boundaries (say $i=I$), $\cal H$ is prescribed depending on whether the flow is incoming or outgoing.
+Define $q^2 \equiv u_{I,jk}^2 + \bar{v}_{I,jk}^2 + \bar{w}_{I,jk}^2$ where $I$ is the index of the last gas phase cell in the $x$
+direction and $u_{I,jk}$ is the $x$ component of velocity at the boundary.
+The density at the boundary is denoted $\rho_w$ (for ``wall'').
+The background density used in defining ${\cal H}$ is $\rho_\infty$.
+The overbars on $v$ and $w$ indicate an interpolation of
+these components to the boundary location.  The boundary condition on ${\cal H}$ is
+\be
+\label{eqn_pressbc}
+\begin{array}{lll}
+     {\cal H}_{I+\ha,jk} = {\cal H}_{ext} + \frac{1}{2}q^2  & \mbox{for} & u_{I,jk} > 0    \\
+     {\cal H}_{I+\ha,jk} = {\cal H}_{ext} + {\cal H}_0 + \frac{1}{2}q^2(1-\frac{\rho_w}{\rho_\infty})  & \mbox{for} & u_{I,jk} \le 0
+     \end{array}
+\ee
+The external dynamic pressure, ${\cal H}_{ext} = \tilde{p}_{ext}/\rho_\infty$, as well as the initial
+dynamic pressure, ${\cal H}_0 = \frac{1}{2}(u_0^2 + v_0^2 + w_0^2)\rho_0/\rho_\infty$,
+are specified by the user ($\tilde{p}_{ext}$ is set with {\ct DYNAMIC\_PRESSURE} for
+a specific {\ct VENT}). The condition (\ref{eqn_pressbc}) follows from prescribing the
+fluctuating hydrodynamic pressure $\tilde{p}_{ext}$ at an outflow vent (zero by default)
+and assuming the Bernoulli equation applies for an inflow vent where the fluid accelerates from the
+state \{$\tilde{p}_{ext},\rho_0,u_0,v_0,w_0$\} along a streamline.
+Note that the background density $\rho_\infty$ is usually equal to the initial ambient density $\rho_0$ at
+the start of a calculation, but may change in time if
+the baroclinic correction term is included.
+
+
+
+\subsection{Solid Boundary Conditions}
 
 Direct Poisson solvers are most efficient if the domain is a
 rectangular region, although other geometries such as cylinders
 and spheres can be handled almost as easily. For these solvers,
-a no-flux condition
-is simple to prescribe at external boundaries.
-For example, at the floor, $z=0$, the Poisson solver is
+a no-flux condition is simple to prescribe at external boundaries.
+Using the $x=x_{\hbox{\tiny max}}$ boundary as an example:
+\be \dod{{\cal H}}{x} = -F_x - \dod{u}{t} \label{bc} \ee
+where $F_x$ is the $x$-component of $\bF$ at the vent or solid wall,
+and $\partial u/\partial t$ is the user-specified rate of change
+in the $x$-component of velocity.
+In discretized form, the Poisson solver is
 supplied with the Neumann boundary condition
-\be \frac{\hp_{ij,1}-\hp_{ij,0}}{\dz} = -F_{z,ij,0} \label{dbc} \ee
+\be \frac{\hp_{I+1,jk}-\hp_{I,jk}}{\dx} = -F_{x,I,jk} \label{dbc} \ee
+because the normal component of velocity is zero at this boundary from the start of the calculation.
 However, many practical problems involve more
 complicated geometries. For building fires,
 doors and windows within multi-room enclosures are very important features
@@ -2089,20 +2136,26 @@ step to the next to enforce the no-flux condition.
 At the start of a time step,
 the components of the convection/diffusion term $\bF$ are computed
 at all cell faces that do not correspond to walls.
-At those cell faces that do correspond to solid walls, we prescribe
+At those cell faces that do correspond to solid walls but are not located at the exterior of the
+computational grid, we prescribe (using the same example as above, but now with $i \ne I$):
 \be
-F_n = -\dod{{\cal H}}{n}^* + \frac{u_n}{\dt} \label{sbc}
+F_{x,ijk}^n = - \frac{\hp_{i+1,jk}^{n-1}-\hp_{ijk}^{n-1}}{\dx} - \frac{u_{ijk}^*-u_{ijk}^n}{\dt} \label{sbc}
 \ee
-where $F_n$ is the normal component of $\bF$ at the wall.
-
-The asterisk indicates the most recent value of the pressure. The pressure at this
-particular time step is not known until the Poisson equation is solved.
-Equation~(\ref{sbc}) asserts that following the solution of the Poisson
-equation for the pressure, the normal component of velocity $u_n$ will
-be driven nearly (but not exactly) to zero.
+at the predictor step, and
+\be
+F_{x,ijk}^* = - \frac{\hp_{i+1,jk}^{*-1}-\hp_{ijk}^{*-1}}{\dx} - \frac{u_{ijk}^{n+1}-\ha
+   \left( u_{ijk}^*+u_{ijk}^n \right)}{\dt/2} \label{sbcc}
+\ee
+at the corrector step. Note that $*-1$ denotes the pressure term used in the corrector part of the
+previous time step.
+In both of these cases, the value of $\hp^n$ or $\hp^*$ is not known. That is what we are solving for.
+Instead, the value of $\hp$ from the previous time step is used to estimate the pressure gradient.
+Equations~(\ref{sbc}) or (\ref{sbcc}) assert that following the solution of the Poisson
+equation for the pressure, the desired normal component of velocity at the next time step, $u^*$ or $u^{n+1}$, will
+be driven towards zero.
 This is approximate because the true value of the velocity time
 derivative depends on the solution of the pressure equation, but since
-the most recent estimate of pressure is used, the approximation is very
+the most recent estimate of pressure is used, the approximation is fairly
 good. Also, even though there are small errors in normal velocity at solid
 surfaces, the divergence of each blocked cell
 remains exactly zero for the duration of the calculation.
@@ -2110,37 +2163,84 @@ In other words, the total flux into a given obstruction is always identically
 zero, and the error in normal velocity is usually at least
 several orders of magnitude smaller than the characteristic flow velocity.
 When implemented as part of a predictor-corrector updating scheme,
-the no-flux condition at solid surfaces is maintained remarkably well.
+the no-flux condition at solid surfaces is maintained fairly well. If greater accuracy is
+required, the Poisson equation can be solved iteratively as the boundary condition (\ref{sbc}) or (\ref{sbcc}) is updated with
+each successive approximation of the pressure gradient at the solid wall.
 
-At open boundaries (say $i=nx$), $\cal H$ is prescribed depending on whether the flow is incoming or outgoing.
-Define $q \equiv u_{nx,jk}^2 + \bar{v}_{nx,jk}^2 + \bar{w}_{nx,jk}^2$ where $nx$ is the index of the last gas phase cell in the $x$
-direction and $u_{nx,jk}$ is the $x$ component of velocity at the boundary. The density at the boundary is denoted $\rho_w$ (for ``wall'').
-The background density used in defining ${\cal H}$ is $\rho_\infty$ (see Sec. \ref{sec_momeqn}). The overbars on $v$ and $w$ indicate an interpolation of
-these components to the boundary location.  The boundary condition on ${\cal H}$ is
+
+
+\subsection{Interpolated Boundary Conditions}
+\label{app_pressure_correction}
+
+The time advancement scheme for multiple meshes involves averaging of the velocity components at a patch boundary in
+order to maintain stability. It is extremely important to note that -- because of the staggered grid storage
+arrangement -- two values of the numerical solution for the velocity exist at a given point on a mesh interface.
+Consider meshes $m$ (left) and $om$ (right) which are joined side by side in the $x$ direction. The values $u^{(m)}_{I,jk}$
+and $u^{(om)}_{0,jk}$ therefore live at the same physical location, but are advanced separately (and by different processes)
+during the course of the algorithm.
+In the ideal circumstance these velocities are identical, as is the case if the PDEs
+are enforced at the mesh interface.  To improve the speed of our parallel algorithm, our strategy is instead to keep
+the difference between these values small while still enforcing global volume conservation.
+Our strategy recovers the ideal case in the limit $\delta t \rightarrow 0$.
+While the primitive velocity components are indeed unique to a given mesh, for each mesh we may define the
+discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which includes ghost cell data and is identical at all overlapping mesh points.
+To do this we simply average the coincident values of the velocity components at the mesh interfaces and inject the
+ghost cell values from the neighboring mesh.  For instance, considering the same side-by-side meshes $m$ and $om$ as before,
 \be
-\label{eqn_pressbc}
-\begin{array}{lll}
-     {\cal H}_{nx+\ha,jk} = {\cal H}_{ext} + \frac{1}{2}q  & \mbox{for} & u_{nx,jk} > 0    \\
-     {\cal H}_{nx+\ha,jk} = {\cal H}_{ext} + {\cal H}_0 + \frac{1}{2}q(1-\frac{\rho_w}{\rho_\infty})  & \mbox{for} & u_{nx,jk} \le 0
-     \end{array}
+\label{eqn_patchave_ufield}
+\bar{u}^{(m)}_{I,jk} = \bar{u}^{(om)}_{0,jk} \equiv \frac{1}{2} \left( u^{(m)}_{I,jk} + u^{(om)}_{0,jk} \right)
 \ee
-The external dynamic pressure, ${\cal H}_{ext} = \tilde{p}_{ext}/\rho_\infty$, as well as the initial
-dynamic pressure, ${\cal H}_0 = \frac{1}{2}(u_0^2 + v_0^2 + w_0^2)\rho_0/\rho_\infty$, are specified by the user ($\tilde{p}_{ext}$ is set with {\tt DYNAMIC\_PRESSURE} for
-a specific {\tt VENT}). The condition (\ref{eqn_pressbc}) follows from prescribing the fluctuating hydrodynamic pressure $\tilde{p}_{ext}$ at an outflow vent (zero by default)
-and assuming the Bernoulli equation applies for an inflow vent where the fluid accelerates from the state \{$\tilde{p}_{ext},\rho_0,u_0,v_0,w_0$\} along a streamline.
-Note that the background density $\rho_\infty$ is usually equal to the initial ambient density $\rho_0$ at the start of a calculation, but may change in time if
-the baroclinic correction term is included (again, see Sec. \ref{sec_momeqn}).
+for all patch boundary cells $j$ and $k$. Here, for simplicity, we are only considering the case in which the
+cell sizes are equivalent for the adjoining meshes (coarse-fine mesh interfaces are currently handled by the code,
+but details will be documented at a later date).
 
-The value of $\cal H$ in the ghost cell is
-\be {\cal H}_{nx+1,jk} = 2 {\cal H}_{nx+\ha,jk} - {\cal H}_{nx,jk} \ee
+To see how the new patch-averaged fields are used, consider the predictor step in the time advancement,
+which may now be written as
+\begin{equation}
+\label{eqn_RK1}
+\mathbf{u}^* = \bar{\mathbf{u}}^n - \dt \left( \mathbf{F}(\bar{\mathbf{u}}^n) + {\nabla\cH}^n \right)
+\end{equation}
+Note that (\ref{eqn_RK1}) updates a $\bar{\mathbf{u}}$ field to a $\mathbf{u}$ field.
+Though this is perfectly legitimate, we should be aware of the following issues.
+First, the patch-averaging procedure is slightly dissipative.  But as long as we are accurate, this numerical
+dissipation is minimal and acceptable (much smaller than
+physical [molecular, viscous] dissipation).  Second, we must now think of the time update in terms of a
+projection scheme in order to repair the damage made to the
+divergence by the averaging procedure (after the averaging procedure, the divergence for mesh boundary cells
+no longer exactly matches the divergence obtained from the equation of state).
+In practical terms, this means that the Poisson equation for the pressure fluctuation (in the predictor step) is given by
+\be
+\label{eqn_poisson_stg1}
+\nabla^2 {\cH}^n = -\left(\frac{ \nabla\cdot\mathbf{u}^* - \nabla\cdot\bar{\mathbf{u}}^n}{\delta t}\right) -
+  \mathbf{F}(\bar{\mathbf{u}}^n)
+\ee
+In Eq.~(\ref{eqn_poisson_stg1}), note that $\mathbf{F}$ is computed using the patch-averaged velocity field.
+Further, only the $\nabla\cdot\mathbf{u}^*$ term is obtained from the equation of state (\ref{eqn_divfromeos}).
+The divergence of the patch-averaged field, $\nabla\cdot\bar{\mathbf{u}}^n$, is obtained by explicitly
+applying the discrete divergence operator to $\bar{\mathbf{u}}^n$.
+Similarly, in the corrector Poisson equation,
+only the $\nabla\cdot\mathbf{u}^{n+1}$ term is obtained from the equation of state;
+$\nabla\cdot\bar{\mathbf{u}}^*$ and $\nabla\cdot\bar{\mathbf{u}}^n$ are obtained explicitly:
+\begin{equation}
+\label{eqn_poisson_stg2}
+\nabla^2 {\cH}^* = -\left(\frac{ \nabla\cdot\mathbf{u}^{n+1} -
+    \ha \left( \nabla\cdot\bar{\mathbf{u}}^* + \nabla\cdot\bar{\mathbf{u}}^n \right)}{\dt/2}\right) -
+    \mathbf{F}(\bar{\mathbf{u}}^*)
+\end{equation}
+Finally, the velocity corrector step is
+\be
+\label{eqn_RK2}
+\bu^{n+1} = \ha \left[ \bar{\bu}^n + \bar{\bu}^* - \dt \left( \mathbf{F}(\bar{\mathbf{u}}^*) + \nabla{\cH}^* \right)  \right]
+\ee
+The benefit of the averaging procedure is that $\mathbf{F}$ is now the same on each mesh
+for a given location along a mesh interface, since all force terms are determined using the patch-averaged field.
+This also means that stress tensors computed at a mesh interface (which are buried in $\mathbf{F}$) are symmetric;
+this symmetry is a requirement for angular momentum conservation.  Thus, the patch-averaging procedure prevents the
+production of spurious vorticity at mesh interfaces.
 
 
 
-
-
-
-
-\chapter{Combustion Model}
+\chapter{Combustion}
 
 \label{combustionsection}
 
@@ -2425,7 +2525,6 @@ If combustion is allowed to occur in a grid
 cell, the single step combustion is assumed to be
 infinitely fast.  Combustion will consume all of either the fuel or the oxygen in the grid cell.
 
-
 In the case of the two-step, three parameter mixture fraction model, the first step converts the
 fuel to CO and other combustion products, and the second step oxidizes the CO into CO$_2$.  The first step is
 determined as it is for the single step reaction.  The second step, however, is assumed to be rate dependent.
@@ -2434,61 +2533,6 @@ simulations, flame temperatures will not be resolved on the grid because the hea
 the flame sheet thickness.  Since a grid cell with heat released from the first step has a flame, CO conversion is
 always allowed in these grid cells.  In all other grid cells, the local temperature is used to perform a finite-rate
 computation that determines the rate of CO conversion.
-
-
-
-\subsubsection{On-Going Research}
-
-One can envision extending the three parameter mixture fraction model to a fourth parameter for soot production:
-\be Z_4 = \frac {W_F}{x W_S} Y_S \ee
-This extension would allow for combustion models that predict soot formation along with extinction and CO production.
-
-Additional partitionings of the mixture fraction could be added as well; however, there is a point of diminishing
-returns.  The present advantage of using a mixture fraction approach is to track the movement of a number of gas
-species using a smaller number of scalar variables at the expense of having to use state relationships to obtain
-species mass fractions.  As more mixture fraction variables are added, the net savings in fewer species transport
-equations vs. the expense of state relationships will diminish.
-
-
-
-
-\newpage
-\section{Finite-Rate Reaction (DNS)}
-
-In a DNS calculation, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
-oxygen, and combustion products).  Since the flame is being resolved in a DNS calculation, the local gas
-temperatures can be used to determine the reaction kinetics.  Thus, it is possible to implement a relatively simple
-set of one or more chemical reactions to model the combustion. Consider the reaction of oxygen and a hydrocarbon
-fuel
-
-\be  \mathrm{ C_xH_y + \nu_{O_2}  \, O_2 \longrightarrow
-     \nu_{CO_2}  \,  CO_2 +
-     \nu_{H_2 O}  \, H_2O }   \ee
-If this were modeled as a single-step reaction, the reaction rate would be given by the expression
-\be \frac{d[\mathrm{C_xH_y}]}{dt} = -B \, [\mathrm{C_xH_y}]^a \, [\mathrm{O_2}]^b \, e^{-E/RT}
-   \label{reaction} \ee
-Suggested values of $B$, $E$, $a$ and $b$ for various hydrocarbon
-fuels are given
-in Refs.~\cite{Puri:1,Westbrook:1}. It should be understood that the
-implementation of any of these one-step reaction schemes is still very
-much a research exercise because it is not universally accepted that
-combustion phenomena can be represented by such a simple mechanism.
-Improved predictions of the heat release rate may be possible by considering a multi-step set of reactions.
-However, each additional gas species defined in the computation incurs a roughly 5~\% increase in the CPU time.
-
-
-\clearpage
-\section{Combustion}
-
-\subsection{Heat Release Rate (Mixture Fraction)}
-
-
-When using the mixture fraction-based combustion model, we must extract the local heat release rate per unit
-volume from the computed mixture
-fraction field. The mixture fraction, $Z$, is partitioned into at least 2 components, $Z_\alpha$, such that the
-sum of the components equals the mixture
-fraction. Each component is tracked via a transport equation, and the conversion of mass from one
-component to another represents a reaction step and an associated release of energy.
 
 
 \subsubsection{Two-Parameter Mixture Fraction}
@@ -2542,16 +2586,30 @@ reaction is still limited by $\dq_{\max}'''$.  Once $\dq'''_{\CO}$ is computed t
 
 
 
+\newpage
+\section{Finite-Rate Combustion Model}
 
-\subsection{Heat Release Rate (Finite-Rate Reaction)}
+In a DNS calculation, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
+oxygen, and combustion products).  Since the flame is being resolved in a DNS calculation, the local gas
+temperatures can be used to determine the reaction kinetics.  Thus, it is possible to implement a relatively simple
+set of one or more chemical reactions to model the combustion. Consider the reaction of oxygen and a hydrocarbon
+fuel
+\be  \mathrm{ C_xH_y + \nu_{O_2}  \, O_2 \longrightarrow
+     \nu_{CO_2}  \,  CO_2 +
+     \nu_{H_2 O}  \, H_2O }   \ee
+If this were modeled as a single-step reaction, the reaction rate would be given by the expression
+\be \frac{d[\mathrm{C_xH_y}]}{dt} = -B \, [\mathrm{C_xH_y}]^a \, [\mathrm{O_2}]^b \, e^{-E/RT}
+   \label{reaction} \ee
+Suggested values of $B$, $E$, $a$ and $b$ for various hydrocarbon
+fuels are given
+in Refs.~\cite{Puri:1,Westbrook:1}. It should be understood that the
+implementation of any of these one-step reaction schemes is still very
+much a research exercise because it is not universally accepted that
+combustion phenomena can be represented by such a simple mechanism.
+Improved predictions of the heat release rate may be possible by considering a multi-step set of reactions.
+However, each additional gas species defined in the computation incurs a roughly 5~\% increase in the CPU time.
 
-For simulations that do not employ a mixture fraction-based combustion model,
-multi-step, finite-rate reactions are assumed, taking the form:
-\be  \mathrm{ \nu_{C_x H_y} \, C_x H_y
-   + \nu_{O_2} \, O_2 \longrightarrow
-     \nu_{CO_2}\,  CO_2 +
-     \nu_{H_2 O} \, H_2O }  \ee
-It is assumed that the chemical reaction
+For finite-rate chemistry, it is assumed that the chemical reaction
 time scale is much shorter than any convective or diffusive
 transport time scale. Thus, it makes sense to calculate the
 consequences of the reaction assuming all other processes are
@@ -2584,10 +2642,6 @@ that they are entered in the input file.
 
 
 
-
-
-
-
 \chapter{Thermal Radiation}
 
 Energy transport consists of convection, conduction and
@@ -2597,6 +2651,7 @@ and radiation are represented by the divergence of the heat flux
 vector in the energy equation, $\nabla \cdot \dbq''$. This section
 describes the equations associated with the radiative part, $\dbq''_r$.
 
+\section{Radiation Transport Equation}
 
 The Radiative Transport Equation (RTE) for an absorbing/emitting
 and scattering medium is
@@ -2734,32 +2789,11 @@ radiation loss term which is designed to partition the fire's heat
 release rate in accordance with measured values.
 
 
-The boundary condition for the radiation intensity leaving
-a gray diffuse wall is given as
-\be I_w(\bs) = \frac{\epsilon\,\sigma\,T_w^4}{\pi} + \frac{1-\epsilon}{\pi}
- \int_{\bs'\cdot \bn_w < 0} I_w(\bs')\; |\bs'\cdot \bn_w | \; d\bs'
- \label{RTEbc} \ee
-where $I_w(\bs)$ is the intensity at the wall, $\epsilon$ is the
-emissivity, and $T_{w}$ is the wall surface temperature.
-The radiant heat flux vector $\dbq_r''$ is defined
-\be \dbq_r''(\bx) = \int_{4\pi} \; \bs' \, I(\bx,\bs') \; d\bs'   \ee
-The gas phase contribution to the radiative loss term in the energy
-equation is
-\be -\nabla \cdot \dbq_r''(\bx)(\mbox{gas}) =
-    \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_b(\bx) \right]  \quad ; \quad
-    U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'
-\ee
-In words, the net radiant energy gained by a grid cell is the
-difference between that which is absorbed and that which is emitted.
-
-
 \section{Numerical Method}
 \label{radnumericalmethodsection}
 
 This section describes how $\nabla \cdot \dbq_r''$ (the radiative loss term) is computed at all gas-phase cells. Plus, it describes how
 the radiative and convective heat fluxes, $\dq_r''$ and $\dq_c''$, are computed at solid boundaries.
-
-\subsection{Discretization of the Radiative Heat Transfer Equation}
 
 The radiative transport equation~(\ref{bandRTE}) is solved using
 techniques similar to those for convective transport in finite volume
@@ -2953,9 +2987,27 @@ be solved directly. Iterations may be needed only with the reflective
 walls and optically thick situations.  Currently, no iterations are
 made.
 
-\subsection{Radiation Heat Transfer to Solid Objects}
+\section{Radiation Heat Transfer to Solid Objects}
 
-The boundary condition on a solid wall is given as
+The boundary condition for the radiation intensity leaving
+a gray diffuse wall is given as
+\be I_w(\bs) = \frac{\epsilon\,\sigma\,T_w^4}{\pi} + \frac{1-\epsilon}{\pi}
+ \int_{\bs'\cdot \bn_w < 0} I_w(\bs')\; |\bs'\cdot \bn_w | \; d\bs'
+ \label{RTEbc} \ee
+where $I_w(\bs)$ is the intensity at the wall, $\epsilon$ is the
+emissivity, and $T_{w}$ is the wall surface temperature.
+The radiant heat flux vector $\dbq_r''$ is defined
+\be \dbq_r''(\bx) = \int_{4\pi} \; \bs' \, I(\bx,\bs') \; d\bs'   \ee
+The gas phase contribution to the radiative loss term in the energy
+equation is
+\be -\nabla \cdot \dbq_r''(\bx)(\mbox{gas}) =
+    \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_b(\bx) \right]  \quad ; \quad
+    U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'
+\ee
+In words, the net radiant energy gained by a grid cell is the
+difference between that which is absorbed and that which is emitted.
+
+In discretized form, the boundary condition on a solid wall is given as
 \be I_w^l = \epsilon \; \frac{\sigma T_w^4}{\pi} + \frac{1-\epsilon}{\pi} \sum_{D_w^{l'}<0} I_w^{l'}\; |D_w^{l'} |  \ee
 where $D_w^{l'}= \int_{\Omega^{l'}}(\bs\cdot \bn_w)d\Omega$.
 The constraint $D_w^{l'}<0$ means that only the ``incoming'' directions
@@ -2986,7 +3038,7 @@ The local incident radiation intensity is
 
 
 
-\chapter{The Solid Phase Model}
+\chapter{Solid Phase}
 
 FDS assumes that solid obstructions consist of multiple layers, with each
 layer composed of multiple material components that can undergo multiple thermal degradation reactions.
@@ -3031,14 +3083,169 @@ models for different types of solid and liquid fuels.
 Section~\ref{inradsection} describes the term
 $\dq_{s,r}'''$, the radiative absorption and emission in depth.
 Section~\ref{conflux} describes the convective heat transfer to the
-solid surface. Finally, Section~\ref{matbc} describes how the
-radiative and convective heat fluxes are applied as boundary
-conditions for Eq.~(\ref{1dheat}).
+solid surface.
+
+\subsection{Numerical Model}
+
+A one dimensional heat transfer calculation is performed at each solid
+boundary cell for which the user has prescribed thermal
+properties. The solid can consist of multiple layers of materials.
+Each layer is partitioned into non-uniform cells, clustered near the
+front and back faces.  The smallest cells are chosen based on the
+criteria
+\be \dx < S_s\sqrt{\frac{k_s}{\rho_s c_s}} \ee
+where $S_s$ is a cell size factor defined by the user. By default,
+$S_s$ is 1.0.  Interior cells increase in size by a user-defined
+stretch factor when moving inwards from the surfaces. By default, the
+stretch factor is 2.0. The cell boundaries are located at points
+$x_i$. The temperature at the center of the $i$th cell is denoted $T_{s,i}$.
+The (temperature-dependent) thermal conductivity of the solid
+at the center of the $i$th cell is denoted $k_{s,i}$.
+The temperatures are updated in time using an implicit
+Crank-Nicolson scheme
+\begin{eqnarray}
+    \frac{T_{s,i}^{n+1}-T_{s,i}^n}{\dt} = \frac{1}{2 (\rho_s c_s)_i \dx_{i} }
+& & \left(
+    k_{s,i+\ha}\frac{T_{s,i+1}^n-T_{s,i}^n}{\dx_{s,i+\ha}} - \right.
+    k_{s,i-\ha}\frac{T_{s,i}^n-T_{s,i-1}^n}{\dx_{s,i-\ha}} +  \nonumber \\
+& & k_{s,i+\ha}\frac{T_{s,i+1}^{n+1}-T_{s,i}^{n+1}}{\dx_{i+\ha}} -
+    \left.
+    k_{s,i-\ha}\frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\dx_{i-\ha}}
+     \right)
+    + \frac{\dq_s'''}{\rho_s c_s}
+\end{eqnarray}
+for $1 \le i \le N$. The width of each cell is $\dx_i$. The distance
+from the center of cell $i$ to the center of cell $i+1$ is
+$\dx_{i+\ha}$. However, the material properties $k_s$, $c_s$, $\rho_s$
+and source terms $\dq_s'''$ are updated in an explicit manner, using
+the temperature information from time step $n$.
+
+
+The boundary condition on the front surface is
+\be  -k_s \dod{T_s}{x}(0,t) =  \dq''_c + \dq''_r \ee
+If the internal radiation is solved for a solid, the radiation
+boundary condition $\dq''_r$ is not used.
+
+On the back surface, two possible boundary condition types may be
+specified by the user. (1) If the back surface is assumed to be open
+either to an ambient
+void or to another part of the computational domain,
+the back side boundary condition is similar to that of
+the front side. (2) If the back side is assumed to be perfectly insulated,
+an adiabatic boundary condition is used
+\be  k_s \dod{T_s}{x} =  0 \ee
+
+The boundary condition is discretized
+\be -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\dx_{\ha}} = \dq''_c{}^{(n+1)} + \dq''_r{}^{(n+1)} \ee
+The convective and radiative fluxes at the next time step are approximated
+\begin{eqnarray}
+\dq''_c{}^{(n+1)} &\approx& \dq''_c{}^n - h\left( T_{s,\ha}^{n+1} - T_{s,\ha}^n \right) \\
+\dq''_r{}^{(n+1)} &\approx& \dq''_r{}^n - 4 \; \epsilon \; \sigma \; T_{s,\ha}^{n^3} \left(
+  T_{s,\ha}^{n+1} - T_{s,\ha}^n \right)  \end{eqnarray}
+The wall temperature is defined $T_w \equiv T_{s,\ha}=(T_{s,0}+T_{s,1})/2$.
+
+The size and number of solid phase cells
+can change during the course of a calculation as solid material is converted to gas. The size of each cell is reduced such that the cell density remains
+equal to the density of the virgin material.
+If the cell size gets below a pre-defined threshold (1~$\mu$m), the cell is completely removed.
+Following cell shrinking or cell removal, the solid phase mesh is re-gridded and the mass and enthalpy values are interpolated from the old mesh to the new mesh.
 
 
 
+\subsection{Radiation Heat Transfer to Solids}
+\label{inradsection}
 
-\section{Component-Averaged Thermal Properties}
+If it is assumed that the thermal radiation from the surrounding gases is
+absorbed within an infinitely thin layer at the surface of the solid
+obstruction, then the net radiative heat flux is the sum of incoming and outgoing
+components, $\dq_r'' = \dq_{r,in}'' - \dq_{r,out}''$, where:
+\begin{eqnarray}
+ \dq_{r,in}'' &=& \epsilon\,
+ \int_{\bs'\cdot \bn_w < 0} I_w(\bs')\; |\bs'\cdot \bn_w | \; d\bO
+ \label{RFluxIn1} \\
+ \dq_{r,out}'' &=& \epsilon\,\sigma\,T_w^4
+ \label{RFluxOut1}
+\end{eqnarray}
+However, many common materials do not have infinite optical
+thickness. Rather, the radiation penetrates the material
+to some finite depth. The radiative transport within the solid (or
+liquid) can be described as a source term in Eq.~(\ref{1dheat}).
+A ``two-flux'' model based on the Schuster-Schwarzschild
+approximation~\cite{Siegel:1} assumes the radiative
+intensity is constant inside the ``forward'' and ``backward''
+hemispheres. The transport equation for the intensity in the ``forward''
+direction is
+\be
+ \frac{1}{2}\frac{dI^+(x)}{dx}=\kappa_s\,\left(I_b-I^+(x)\right)
+ \label{RInForward}
+\ee
+where $x$ is the distance from the material surface and $\kappa_s$ is
+the absorption coefficient
+\be
+   \kappa_s = \sum_{\alpha=1}^{N_m} X_\alpha \; \kappa_{s,\alpha}
+\ee
+A corresponding formula can be given for
+the ``backward'' direction. Multiplying Eq.~\ref{RInForward} by $\pi$
+gives us the ``forward'' radiative heat flux into the solid
+\be
+ \frac{1}{2}\frac{{d\dq^+_r(x)} }{dx}=\kappa_s\,
+       \left(\sigma\,T_s^4-\dq_r^+(x)\right)
+ \label{RFluxForward}
+\ee
+The radiative source term in the heat conduction equation is a sum of the
+``forward'' and ``backward'' flux gradients
+\be
+  \dq_{s,r}'''(x) = \frac{d\dq_r^+(x)}{dx}+\frac{d\dq_r^-(x)}{dx}
+\ee
+The boundary condition for Eq.~\ref{RFluxForward} at the solid (or liquid)
+surface is given by
+\be
+ \dq_r^+(0) = \dq_{r,in}'' + (1-\epsilon)\,\dq_r^-(0)
+ \label{RFluxInBC}
+\ee
+where $\dq_r^-(0)$ is the ``backward'' radiative heat flux at the
+surface. In this formulation, the surface emissivity and the internal
+absorption are assumed to be independent properties of the
+material.
+
+
+\subsection{Convective Heat Transfer to Solids}
+\label{conflux}
+
+The calculation of the convective heat flux depends on whether one is
+performing a Direct Numerical Simulation (DNS) or a
+Large Eddy Simulation (LES).
+In a DNS calculation, the convective heat flux to a solid surface $\dq''_c$
+is obtained directly from the gas temperature gradient at the boundary
+\be \dq_c'' = - k \; \dod{T}{n} = -k \frac{T_w-T_g}{\dn/2}\ee
+where $k$ is the thermal conductivity of the gas,
+$n$ is the spatial coordinate pointing into the solid, $\dn$ is the normal
+grid spacing, $T_g$ is the gas temperature in the center of the first gas phase cell, and
+$T_w$ is the wall surface temperature.
+
+In an LES calculation, the convective heat flux to the surface is
+obtained from a combination of natural and forced
+convection correlations
+\be \dq_c'' = h (T_g - T_w)
+    \quad \hbox{W/m}^2 \quad ; \quad h =
+    \max \; \left[ \; C\, |T_g-T_w|^\ot \; , \;
+            \frac{k}{L} \; 0.037 \; \RE^\fofi \; \PR^\ot \;
+            \right]  \quad
+    \hbox{W/m$^2$/K} \ee
+where $C$ is the coefficient for natural convection (1.52 for a horizontal surface
+and 1.31 for a vertical surface)~\cite{Holman:1},
+$L$ is a characteristic length related to the size of the physical
+obstruction, $k$ is the thermal conductivity of the
+gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the
+gas flowing
+past the obstruction. Since the Reynolds number is proportional to the
+characteristic length, $L$, the heat transfer coefficient is weakly
+related to $L$. For this reason, $L$ is taken to be 1~m for most
+calculations.
+
+
+
+\subsection{Component-Averaged Thermal Properties}
 \label{matcoefs}
 
 The conductivity and volumetric heat capacity of the solid are defined
@@ -3211,292 +3418,6 @@ computation of the convection of the liquid within the pool.
 
 
 
-\section{Radiation Heat Transfer to Solids}
-\label{inradsection}
-
-If it is assumed that the thermal radiation from the surrounding gases is
-absorbed within an infinitely thin layer at the surface of the solid
-obstruction, then the net radiative heat flux is the sum of incoming and outgoing
-components, $\dq_r'' = \dq_{r,in}'' - \dq_{r,out}''$, where:
-\begin{eqnarray}
- \dq_{r,in}'' &=& \epsilon\,
- \int_{\bs'\cdot \bn_w < 0} I_w(\bs')\; |\bs'\cdot \bn_w | \; d\bO
- \label{RFluxIn1} \\
- \dq_{r,out}'' &=& \epsilon\,\sigma\,T_w^4
- \label{RFluxOut1}
-\end{eqnarray}
-However, many common materials do not have infinite optical
-thickness. Rather, the radiation penetrates the material
-to some finite depth. The radiative transport within the solid (or
-liquid) can be described as a source term in Eq.~(\ref{1dheat}).
-A ``two-flux'' model based on the Schuster-Schwarzschild
-approximation~\cite{Siegel:1} assumes the radiative
-intensity is constant inside the ``forward'' and ``backward''
-hemispheres. The transport equation for the intensity in the ``forward''
-direction is
-\be
- \frac{1}{2}\frac{dI^+(x)}{dx}=\kappa_s\,\left(I_b-I^+(x)\right)
- \label{RInForward}
-\ee
-where $x$ is the distance from the material surface and $\kappa_s$ is
-the absorption coefficient
-\be
-   \kappa_s = \sum_{\alpha=1}^{N_m} X_\alpha \; \kappa_{s,\alpha}
-\ee
-A corresponding formula can be given for
-the ``backward'' direction. Multiplying Eq.~\ref{RInForward} by $\pi$
-gives us the ``forward'' radiative heat flux into the solid
-\be
- \frac{1}{2}\frac{{d\dq^+_r(x)} }{dx}=\kappa_s\,
-       \left(\sigma\,T_s^4-\dq_r^+(x)\right)
- \label{RFluxForward}
-\ee
-The radiative source term in the heat conduction equation is a sum of the
-``forward'' and ``backward'' flux gradients
-\be
-  \dq_{s,r}'''(x) = \frac{d\dq_r^+(x)}{dx}+\frac{d\dq_r^-(x)}{dx}
-\ee
-The boundary condition for Eq.~\ref{RFluxForward} at the solid (or liquid)
-surface is given by
-\be
- \dq_r^+(0) = \dq_{r,in}'' + (1-\epsilon)\,\dq_r^-(0)
- \label{RFluxInBC}
-\ee
-where $\dq_r^-(0)$ is the ``backward'' radiative heat flux at the
-surface. In this formulation, the surface emissivity and the internal
-absorption are assumed to be independent properties of the
-material.
-
-
-\section{Convective Heat Transfer to Solids}
-\label{conflux}
-
-The calculation of the convective heat flux depends on whether one is
-performing a Direct Numerical Simulation (DNS) or a
-Large Eddy Simulation (LES).
-In a DNS calculation, the convective heat flux to a solid surface $\dq''_c$
-is obtained directly from the gas temperature gradient at the boundary
-\be \dq_c'' = - k \; \dod{T}{n} \ee
-where $n$ is the spatial coordinate pointing into the solid.
-In an LES calculation, the convective heat flux to the surface is
-obtained from a combination of natural and forced
-convection correlations
-\be \dq_c'' = h \; \Delta T
-    \quad \hbox{W/m}^2 \quad ; \quad h =
-    \max \; \left[ \; C\, |\Delta T|^\ot \; , \;
-            \frac{k}{L} \; 0.037 \; \RE^\fofi \; \PR^\ot \;
-            \right]  \quad
-    \hbox{W/m$^2$/K} \ee
-where $\Delta T$ is the difference between the wall and the gas temperature
-(taken at the center of the grid cell abutting the wall),
-$C$ is the coefficient for natural convection (1.52 for a horizontal surface
-and 1.31 for a vertical surface)~\cite{Holman:1},
-$L$ is a characteristic length related to the size of the physical
-obstruction, $k$ is the thermal conductivity of the
-gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the
-gas flowing
-past the obstruction. Since the Reynolds number is proportional to the
-characteristic length, $L$, the heat transfer coefficient is weakly
-related to $L$. For this reason, $L$ is taken to be 1~m for most
-calculations.
-
-
-\section{Boundary Conditions}
-\label{matbc}
-
-The boundary condition on the front surface is
-\be  -k_s \dod{T_s}{x}(0,t) =  \dq''_c + \dq''_r \ee
-If the internal radiation is solved for a solid, the radiation
-boundary condition $\dq''_r$ is not used.
-
-On the back surface, two possible boundary condition types may be
-specified by the user. (1) If the back surface is assumed to be open
-either to an ambient
-void or to another part of the computational domain,
-the back side boundary condition is similar to that of
-the front side. (2) If the back side is assumed to be perfectly insulated,
-an adiabatic boundary condition is used
-\be  k_s \dod{T_s}{x} =  0 \ee
-
-
-\clearpage
-\section{Solid Phase Model}
-
-\subsection{Solid Surface and Interior Temperatures}
-
-A one dimensional heat transfer calculation is performed at each solid
-boundary cell for which the user has prescribed thermal
-properties. The solid can consist of multiple layers of materials.
-Each layer is partitioned into non-uniform cells, clustered near the
-front and back faces.  The smallest cells are chosen based on the
-criteria
-\be \dx < S_s\sqrt{\frac{k_s}{\rho_s c_s}} \ee
-where $S_s$ is a cell size factor defined by the user. By default,
-$S_s$ is 1.0.  Interior cells increase in size by a user-defined
-stretch factor when moving inwards from the surfaces. By default, the
-stretch factor is 2.0. The cell boundaries are located at points
-$x_i$. The temperature at the center of the $i$th cell is denoted $T_{s,i}$.
-The (temperature-dependent) thermal conductivity of the solid
-at the center of the $i$th cell is denoted $k_{s,i}$.
-The temperatures are updated in time using an implicit
-Crank-Nicolson scheme
-\begin{eqnarray}
-    \frac{T_{s,i}^{n+1}-T_{s,i}^n}{\dt} = \frac{1}{2 (\rho_s c_s)_i \dx_{i} }
-& & \left(
-    k_{s,i+\ha}\frac{T_{s,i+1}^n-T_{s,i}^n}{\dx_{s,i+\ha}} - \right.
-    k_{s,i-\ha}\frac{T_{s,i}^n-T_{s,i-1}^n}{\dx_{s,i-\ha}} +  \nonumber \\
-& & k_{s,i+\ha}\frac{T_{s,i+1}^{n+1}-T_{s,i}^{n+1}}{\dx_{i+\ha}} -
-    \left.
-    k_{s,i-\ha}\frac{T_{s,i}^{n+1}-T_{s,i-1}^{n+1}}{\dx_{i-\ha}}
-     \right)
-    + \frac{\dq_s'''}{\rho_s c_s}
-\end{eqnarray}
-for $1 \le i \le N$. The width of each cell is $\dx_i$. The distance
-from the center of cell $i$ to the center of cell $i+1$ is
-$\dx_{i+\ha}$. However, the material properties $k_s$, $c_s$, $\rho_s$
-and source terms $\dq_s'''$ are updated in an explicit manner, using
-the temperature information from time step $n$.
-
-The boundary condition is discretized
-\be -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\dx_{\ha}} = \dq''_c{}^{(n+1)} + \dq''_r{}^{(n+1)} \ee
-The convective and radiative fluxes at the next time step are approximated
-\begin{eqnarray}
-\dq''_c{}^{(n+1)} &\approx& \dq''_c{}^n - h\left( T_{s,\ha}^{n+1} - T_{s,\ha}^n \right) \\
-\dq''_r{}^{(n+1)} &\approx& \dq''_r{}^n - 4 \; \epsilon \; \sigma \; T_{s,\ha}^{n^3} \left(
-  T_{s,\ha}^{n+1} - T_{s,\ha}^n \right)  \end{eqnarray}
-The wall temperature is defined $T_w \equiv T_{s,\ha}=(T_{s,0}+T_{s,1})/2$.
-
-The size and number of solid phase cells
-can change during the course of a calculation as solid material is converted to gas. The size of each cell is reduced such that the cell density remains
-equal to the density of the virgin material.
-If the cell size gets below a pre-defined threshold (1~$\mu$m), the cell is completely removed.
-Following cell shrinking or cell removal, the solid phase mesh is re-gridded and the mass and enthalpy values are interpolated from the old mesh to the new mesh.
-
-
-
-\subsection{Convective Heat Transfer to Solid Objects}
-
-In a DNS calculation where the boundary layer is resolved, the convective flux to the wall
-is given by
-\be
-\dq''_c = -k \frac{T_{gas}-T_w}{\dn/2}
-\ee
-where $T_{gas}$ is the gas temperature in the center of the first gas-phase grid cell,
-$T_w$ is the surface or ``wall'' temperature, $\dn$ is the
-size of a grid cell in the normal direction to the wall, and $k$ is
-the temperature-dependent thermal conductivity of the gas mixture.
-
-In an LES calculation, where the boundary layer is not resolved, an empirical heat transfer coefficient, $h$, is used: \be \dq''_c = h \,
-(T_{gas}-T_w)\quad \hbox{W/m}^2 \ee The heat transfer coefficient, $h$, is the maximum of its natural and forced empirical values:
- \be h = \max \left( C |T_{gas} -T_w|^\ot \, , \, \frac{k_{air}}{L} 0.037 \, \RE_L^{4/5} \PR^{1/3} \right)  \quad \hbox{W/m}^2\hbox{/K}  \ee
-$C$ is an empirical coefficient (1.31 for vertical surface; 1.52 for horizontal), $k_{air}$ is
-the thermal conductivity of air (not the ``turbulent''
-value used in the LES solver), $L$ is a length scale (assumed to be 1 m), the Reynolds number
-is based on the density and velocity of the gases in
-the middle of the first grid cell and the length scale $L$, and the Prandtl number is assumed to be 0.7.
-
-
-\subsection{Coupling the Gas and Solid Phase}
-
-Gas phase temperatures are defined at cell centers; solid surfaces lie at the
-interface of the bordering gas phase cell and a ``ghost'' cell inside the
-solid. As far as the gas phase calculation is concerned,
-the normal temperature gradient at the surface is expressed in terms of
-the temperature difference between the ``gas'' cell and the ``ghost'' cell.
-The solid surface temperature is not used directly in the gas phase calculation.
-Rather, the ghost cell temperature is used to couple the gas and solid phases.
-The ghost cell temperature
-has no physical meaning on its own. It is purely a numerical construct. It does
-not represent the temperature within the wall, but rather establishes
-a temperature gradient at the solid surface consistent with the empirical
-correlation. Only the difference between ghost and
-gas cell temperatures matters, for this defines the heat transfer to the
-wall.
-
-In a DNS calculation, the solid surface temperature is assumed to be an average of the
-ghost cell temperature and the temperature of the first cell in the gas,
-thus the ghost cell temperature is defined
-\be T_{ghost} =  2 T_s - T_{gas}  \ee
-For an LES calculation, the numerical expression for the heat lost to the boundary is
-equated with the empirical convective heat transfer
-\be k_{\hbox{\tiny LES}} \frac{T_{gas} - T_{ghost}}{\dn} - \bar{\rho} \, u_n \bar{c}_p (\bar{T}) \, \bar{T}
-   = h \; (T_{gas}-T_s) - \bar{\rho} \, u_n  \, \bar{c}_p(T_s) \, T_s  \label{ebal} \ee
-where $\dn$ is the distance between the center of the ghost cell
-and the center of the gas cell, and the bar over the $T$ and $\rho$ indicate the average of the gas and ghost values:
-\be \overline{T} = \frac{T_{gas}+T_{ghost}}{2}  \quad ; \quad \overline{\rho} = \frac{\rho_{gas} + \rho_{ghost}^*}{2} \ee
-The specific heat is defined:
-\be \bar{c}_p (T) = \frac{1}{T} \int_0^T c_p(T') \, dT' \ee
-Equation~(\ref{ebal}) is solved for $T_{ghost}$,
-so that when the conservation equations are updated, the amount of heat
-lost to the wall is equivalent to the empirical expression on the right
-hand side. Note that the asterisk in the equations above denotes that the value is taken from the previous
-time step.
-
-At solid walls there is no transfer of mass, thus the boundary condition
-for the $l$th species at a wall is simply
-\be Y_{l,ghost} = Y_{l,gas} \ee
-where the subscripts ``ghost'' and ``gas'' are the same as above since
-the mass fraction, like temperature, is defined at cell centers.
-At forced flow boundaries either the mass fraction $Y_{l,w}$ or
-the mass flux $\dot{m}_l''$ of species $l$ may be prescribed.
-Then the ghost cell mass fraction can be derived because, as with
-temperature, the normal gradient of mass fraction is needed in the gas phase
-calculation.
-For cases where the mass fraction is prescribed
-\be Y_{l,ghost} = 2 Y_{l,w} - Y_{l,gas}  \ee
-For cases where the mass flux is prescribed,
-the following equation must be solved iteratively
-\be \dot{m}_l'' = u_n \frac{\rho_{ghost} Y_{l,ghost} + \rho_{gas} Y_{l,gas}}{2}
-  - \rho D \frac{Y_{l,gas}-Y_{l,ghost}}{\dn}
-  \mp \frac{\dt \, u_n^2}{2} \frac{\rho_{gas} Y_{l,gas}
-   -\rho_{ghost} Y_{l,ghost}}{\dn} \ee
-where $\dot{m}_l''$ is the mass flux of species $l$ per unit area,
-$u_n$ is the normal component of velocity at the wall pointing into
-the flow domain, and $\dn$ is the distance between the center of the ghost
-cell and the center of the gas cell. Notice that the last term on the
-right hand side is subtracted at the predictor step and added at the
-corrector step, consistent with the biased upwinding introduced earlier.
-
-Once the temperature and species mass fractions have been defined in the
-ghost cell, the density in the ghost cell is computed from the equation of
-state
-\be  \rho_{ghost} = \frac{p_0}{ {\cal R} \, T_{ghost} \, \sum_l (Y_{l,ghost}/W_l) }  \ee
-
-
-\subsection{Mass and Energy Transfer at Interpolated Mesh Boundaries}
-
-In simulations involving more than one numerical mesh, information has to be passed between meshes, even when
-the meshes are being processed by separate computers. If two meshes abut each other, and the mesh cells are aligned and the same size, then
-one mesh simply uses the density and species mass fractions of the adjacent mesh as the ``ghost'' cell values. However, in cases where the
-mesh cells are not the same size, the exchange of information must be done more carefully. Consider a case where two meshes meet:
-
-\begin{picture}(200,110)(0,-10)
-\setlength{\unitlength}{0.02in}
-\put(120,10){\framebox(20,20){ }}
-\put(120,30){\framebox(20,20){ }}
-\put(140,10){\framebox(40,40){ }}
-\put(100,30){\makebox(0,0){Mesh 1}}
-\put(200,30){\makebox(0,0){Mesh 2}}
-\thicklines
-\put(140,0){\line(0,1){60}}
-\end{picture}
-
-\noindent
-We want the total and species mass fluxes between meshes to be the same, or as close as possible.
-Let the density in cell $(1,j',k')$ of Mesh 2 be denoted $\rho_{1,j'k'}^{(2)}$. Assume that this cell abuts four cells in Mesh 1. The densities in the four abutting cells
-of Mesh 1 are denoted $\rho_{I,jk}^{(1)}$. Note that $j$ and $k$ are not the same as $j'$ and $k'$. $I$ is the number of cells in the $x$ direction of Mesh 1. The
-ghost cell quantities in Mesh 1 have an $i$ index of $I+1$. The ghost cell quantities in Mesh 2 have an $i$ index of 0.
-We want to assert mass conservation at the mesh interface:
-\be
-   \sum_{j,k} u_{I,jk}^{(1)} \; \frac{\rho_{I+1,jk}^{(1)}+\rho_{I,jk}^{(1)}}{2} \; \dy^{(1)} \, \dz^{(1)}  =
-              u_{0,j'k'}^{(2)} \; \frac{\rho_{1,j'k'}^{(2)}+\rho_{0,j'k'}^{(2)}}{2} \; \dy^{(2)} \, \dz^{(2)}  \label{rhou}
-\ee
-When solving for $\rho_{0,j'k'}^{(2)}$, the ghost cell value for Mesh 2, we have to assume that the ghost cells values for Mesh 1 are simply linearly interpolated
-from the gas phase values of Mesh 1 and Mesh 2:
-\be \rho_{I+1,jk}^{(1)} = \rho_{I,jk}^{(1)} + \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}} \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \label{ghostrho} \ee
-Rearranging terms in Eq.~(\ref{rhou}) and using the expression for the ghost cells from Eq.~(\ref{ghostrho}), we get:
-\be \rho_{0,j'k'}^{(2)} = -\rho_{1,j'k'}^{(2)} + \frac{1}{u_{0,j'k'}^{(2)} \dy^{(2)} \, \dz^{(2)} } \sum_{j,k}  u_{1,jk}^{(1)} \dy^{(1)} \, \dz^{(1)}
-    \left[ 2 \, \rho_{I,jk}^{(1)} +  \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}}  \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \right]  \ee
 
 
 
@@ -3504,130 +3425,6 @@ Rearranging terms in Eq.~(\ref{rhou}) and using the expression for the ghost cel
 
 
 
-
-
-
-
-
-\chapter{Fire Detection Devices}
-
-FDS predicts the thermal environment resulting from a fire, but it relies on various empirical models that describe the
-activation of various fire detection devices. These models are described in this section.
-
-
-\section{Sprinkler Activation}
-
-The temperature of the sensing element (or ``link'') of an automatic fire sprinkler is estimated from
-the differential equation put forth by Heskestad and Bill~\cite{Heskestad:3},
-with the addition of a term to account for the cooling of the link
-by water droplets in the gas stream from previously activated
-sprinklers
-\be \frac{dT_l}{dt} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l) -
-   \frac{C}{\hbox{RTI}} (T_l - T_m) - \frac{C_2}{\hbox{RTI}} \beta |\bu|
-   \label{actode} \ee
-Here $T_l$ is the link temperature, $T_g$ is the gas temperature in the
-neighborhood of the link, $T_m$ is the temperature of the sprinkler
-mount (assumed ambient),
-and $\beta$ is the volume fraction of (liquid) water in the
-gas stream. The sensitivity of the detector is characterized by
-the value of RTI. The amount of heat conducted away from the
-link by the mount is indicated by the ``C-Factor'', $C$. The RTI and
-C-Factor are determined experimentally. The constant
-$C_2$ has been empirically determined by DiMarzo and
-co-workers~\cite{Ruffino:1,Ruffino:2,Gavelli:1} to
-be $6\times 10^6$~K/(m/s)$^\ha$, and its value is relatively constant
-for different types of sprinklers.
-
-The algorithm for heat detector activation is exactly the same as for
-sprinkler activation, except there is no accounting for conductive losses or
-droplet cooling. Note that neither the sprinkler nor heat detector models account for
-thermal radiation.
-
-\section{Heat Detectors}
-
-As far as FDS is concerned, a heat detector is just a sprinkler with no water spray. In other words, the activation of a heat
-detector is governed by Eq.~(\ref{actode}), but with just the first term on the right hand side:
-\be \frac{dT_l}{dt} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l)  \label{heatactode} \ee
-Both the RTI and activation temperature are determined empirically.
-
-
-\section{Smoke Detectors}
-
-An informative discussion of the issues associated with smoke detection can be found in the
-SFPE Handbook chapter ``Design of Detection Systems,'' by Schifiliti, Meacham and Custer~\cite{SFPE}.
-The authors point out that the difficulty in modeling smoke detector activation stems from a number of issues:
-(1) the production and transport of smoke in the early stage of a fire are not well-understood, (2) detectors often use
-complex response algorithms rather than simple threshold or rate-of-change criteria, (3) detectors can be sensitive
-to smoke particle number density, size distribution, refractive index, composition, {\em etc.}, and (4) most
-computer models, including FDS, do not provide detailed descriptions of the smoke besides its bulk transport. This
-last point is the most important. At best, in its present form, FDS can only provide to an activation algorithm the
-velocity and smoke concentration of the ceiling jet flowing past the detector. Regardless of the
-detailed mechanism within
-the device, any activation model included within FDS can only account for the entry resistance of the smoke due to the
-geometry of the detector. Issues related to the effectiveness of ionization or photoelectric detectors cannot be
-addressed by FDS.
-
-Consider the simple idealization of a ``spot-type'' smoke detector. A disk-shaped cover lined with a fine mesh screen
-forms the external housing of the device, which is usually mounted to the ceiling.
-Somewhere within the device is a relatively small sensing chamber where the smoke is actually detected in some way.
-A simple model of this device has been proposed by Heskestad~\cite{SFPE}. He suggested that the mass fraction of smoke in the
-sensing chamber of the detector $Y_c$ lags behind the mass fraction in the
-external free stream $Y_e$ by a time period $\delta t = L/u$,
-where $u$ is the free stream velocity and $L$ is a length characteristic of the detector geometry.
-The change in the mass fraction of smoke in the sensing chamber can be found by solving the following equation:
-\be \frac{d Y_c }{dt} = \frac{ Y_e(t) - Y_c(t)}{L/\bu} \label{HYoeq} \ee
-The detector activates when $Y_c$ rises above a detector-specific threshold.
-
-A more detailed model of smoke detection involving two filling times rather than one has also been proposed.
-Smoke passing into the sensing chamber must first pass through the exterior housing, then it must pass through a series
-of baffles before arriving at the sensing chamber. There is a time lag
-associated with the passing of the smoke through the housing and also the entry of the smoke into the sensing chamber.
-Let $\delta t_e$ be the characteristic filling time of the entire volume enclosed by the external housing. Let
-$\delta t_c$ be the characteristic filling time of the sensing chamber.
-Cleary~{\em et al.}~\cite{Cleary:IAFSS6} suggested that each characteristic filling time is a function of the
-free-stream velocity $u$ outside the detector
-\be
-\delta t_e = \alpha_e u^{\beta_e} \quad ; \quad \delta t_c = \alpha_c u^{\beta_c}
-\ee
-The $\alpha$'s and $\beta$'s are empirical constants related to the specific detector geometry
-The change in the mass fraction of smoke in the sensing chamber $Y_c$ can be found by solving the following equation:
-\be
-\frac{d Y_c}{dt} = \frac{ Y_e(t-\delta t_e) - Y_c(t)}{\delta t_c} \label{Yoeq}
-\ee
-where $Y_e$ is the mass fraction of smoke outside of the detector in the free-stream.
-A simple interpretation of the equation is that the concentration of the smoke that enters the sensing chamber at time $t$
-is that of the free-stream at time $t-\delta t_e$.
-
-An analytical solution for Eq.~(\ref{Yoeq}) can be found, but it is more convenient to simply integrate it numerically
-as is done for sprinklers and heat detectors. Then, the predicted mass fraction of smoke in the sensing chamber,
-$Y_c(t)$, can be converted into an expression for the percent obscuration per unit length by computing:
-\be
-\left( 1 - e^{-\kappa \rho Y_c l} \right) \times 100
-\ee
-where $\kappa$ is the specific extinction coefficient, $\rho$ is the density of the external gases in the ceiling jet,
-and $l$ is the preferred unit of length (typically 1~m or 1~ft).
-For most flaming fuels, a suggested value for $\kappa$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
-wavelength of 633~nm~\cite{Mulholland:F+M}.
-
-The SFPE Handbook has references to various works on smoke detection and suggested values for the
-characteristic length $L$. FDS includes the one parameter Heskestad model as a special case of the four parameter
-Cleary model. For the Cleary model, one must set
-$\alpha_e$, $\beta_e$, $\alpha_c$, and $\beta_c$, whereas for the Heskestad model only $L=\alpha_c$ needs to be
-specified. Eq.~(\ref{Yoeq})
-is still used, with $\alpha_e=0$ and $\beta_e=\beta_c=-1$.
-Proponents of the four-parameter model claim that the two filling times are needed to
-better capture the behavior of detectors in a very
-slow free-stream ($u<0.5$~m/s). Rather than declaring one model better than another,
-the algorithm included in FDS allows the
-user to pick these various parameters, and in so doing, pick whichever model the user feels is appropriate~\cite{CSE_GCR}.
-
-Additionally, FDS can model the behavior of beam and aspiration smoke detectors.  For a beam detector the user
-specifies the emitter and receiver positions and the total obscuration at which the detector will alarm.  FDS will then
-integrate the obscuration over the path length using the predicted soot concentration in each grid cell along
-the path.  For an aspiration detector the user specifies the sampling locations, the flow rate at each location, the
-transport time from each sampling point to the detector, the flow rate of any bypass flow, and the total obscuration at which the
-detector will alarm.  FDS will compute that soot concentration at the detector by weighting the predicted soot concentrations
-at the sampling locations with their flow rates after applying the appropriate time delay.
 
 
 
@@ -3635,12 +3432,40 @@ at the sampling locations with their flow rates after applying the appropriate t
 
 \chapter{Lagrangian Particles}
 
-There are several uses for liquid sprays within FDS, most notably for sprinklers, but also for liquid fuel sprays. The basic physics is the
-same in each case, but the liquid properties are different.
-Also, simulating the effects of a sprinkler spray involves a number of
-elements beyond just activation: computing the droplet trajectories and
-tracking the water as it drips onto the burning surface.
+Lagrangian particles are used to represent a wide variety of objects that cannot be resolved on
+the numerical grid. Some are solid; some are liquid. This chapter outlines the treatment of the transport, size
+distribution, and mass, momentum and energy transfer of the droplets or particles.
 
+\section{Droplet/Particle Transport in the Gas Phase}
+
+For a spray, the force term $\bof_b$ in Eq.~(\ref{momentum})
+represents the momentum transferred from the droplets to the gas.
+It is obtained by summing the force transferred from each droplet
+in a grid cell and dividing by the cell volume
+\be {\bof_b} = \ha \frac{\sum \rho C_D \pi  r_d^2 (\bu_d-\bu) |\bu_d-\bu|}
+    {\dx \, \dy \, \dz} \ee
+where $C_D$ is the drag coefficient, $r_d$ is the droplet radius,
+$\bu_d$ is the velocity of the droplet, $\bu$ is the
+velocity of the gas, $\rho$ is the density of the gas,
+and $\dx \, \dy \, \dz$ is the volume of the grid cell.
+The acceleration of an individual droplet is governed by the equation
+\be
+    \frac{d}{dt} (m_d \bu_d) = m_d\, \bg - \ha \rho\,C_D \, \pi  r_d^2 \,
+    (\bu_d-\bu) |\bu_d-\bu|
+\ee
+where $m_d$ is the mass of the droplet.  The trajectory of the droplet is governed by the equation
+\be
+    \frac{d \bx_d}{dt} = \bu_d
+\ee
+The drag coefficient (default based on a sphere) is a function of the local Reynolds number (based on droplet diameter)
+\begin{eqnarray}
+ C_D &=& \left\{ \begin{array}{ll}
+     24/\RE_d                                       & \RE_d < 1    \\
+     24\left(0.85+0.15 \, \RE_d^{0.687} \right)/\RE_d  & 1 < \RE_d < 1000 \\
+     0.44                                           & 1000 < \RE_d
+     \end{array} \right.  \\
+\RE_d &=& \frac{\rho \, |\bu_d-\bu| \, 2 r_d}{\mu(T)} \end{eqnarray}
+where $\mu(T)$ is the dynamic viscosity of air at temperature $T$.
 
 
 \section{Droplet Size Distribution}
@@ -3717,12 +3542,7 @@ a typical industrial-scale sprinkler. The median diameter $d_m$ is
 \label{rosin}
 \end{figure}
 
-
-
-\section{Droplet Transport in the Gas Phase}
-
-Every droplet from a given sprinkler or nozzle is not tracked. Instead,
-a sampled set of the droplets is tracked.
+In most cases, a sampled set of the droplets or particles is explicitly tracked in the model.
 The procedure for selecting droplet sizes is as follows:
 Suppose the mass flow rate of the liquid is $\dm$.
 Suppose also that the time interval for droplet insertion
@@ -3737,46 +3557,91 @@ a weighting constant C from the mass balance
 The mass and heat transferred from each droplet will be multiplied by
 the weighting factor $C$.
 
-For a spray, the force term $\bof_b$ in Eq.~(\ref{momentum})
-represents the momentum transferred from the droplets to the gas.
-It is obtained by summing the force transferred from each droplet
-in a grid cell and dividing by the cell volume
-\be {\bof_b} = \ha \frac{\sum \rho C_D \pi  r_d^2 (\bu_d-\bu) |\bu_d-\bu|}
-    {\dx \, \dy \, \dz} \ee
-where $C_D$ is the drag coefficient, $r_d$ is the droplet radius,
-$\bu_d$ is the velocity of the droplet, $\bu$ is the
-velocity of the gas, $\rho$ is the density of the gas,
-and $\dx \, \dy \, \dz$ is the volume of the grid cell.
-The acceleration of an individual droplet is governed by the equation
+
+
+
+
+\section{Heating and Evaporation of Liquid Droplets}
+
+Liquid ``droplets'' are represented either as discrete airborne spheres propelled through the gas,
+or as rectangular blocks that collectively form a thin liquid film on solid objects.
+These ``droplets'' are still individually tracked as
+lagrangian particles, but the heat and mass transfer coefficients are different.
+In the discussion to follow, the term ``droplets'' will be used to describe either form.
+
+Over the course of a time step of the gas phase solver, the droplets in a
+given grid cell evaporate as a function of
+the liquid equilibrium vapor mass fraction, $Y_l$,
+the local gas phase vapor mass fraction, $Y_g$, the (assumed uniform) liquid temperature, $T_l$,
+and the local gas temperature, $T_g$. If the droplet is attached to a surface, $T_s$ is the solid temperature.
+The mass and energy transfer between the gas and the liquid can be described by the
+following set of equations~\cite{Cheremisinoff:1}
+\begin{align}
+\frac{dm_l}{dt}               & =  - A \; h_m \, \rho \, (Y_l - Y_g) \\
+m_l \; c_l \; \frac{dT_l}{dt} & =    A \, h  \, (T_g-T_l) + A \, h_s \, (T_s-T_l) + \dq_r + \frac{dm_l}{dt} \; h_v  \label{droplet_temp}   \end{align}
+Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the
+film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
+$\rho$ is the gas density, $c_l$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_s$ is the heat transfer coefficient between the liquid and the
+solid surface, $\dq_r$ is the rate of radiative heating of the droplet, and $h_v$ is the latent heat of vaporization of the
+liquid. The vapor mass fraction of the gas, $Y_g$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction
+is obtained from the Clausius-Clapeyron equation
+\be X_l = \exp \left[ \frac{h_v \, W_l}{\cal R}
+      \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]  \quad ; \quad
+      Y_l = \frac{X_l}{X_l \, (1-W_a/W_l) + W_a/W_l}  \label{clausius_clapeyron} \ee
+where $X_d$ is the equilibrium vapor {\em volume} fraction, $W_l$ is the molecular weight
+of the evaporated liquid, $W_a$ is the molecular weight of air,
+$\cal R$ is the universal gas constant, and $T_b$ is the boiling temperature
+of the liquid.
+
+Mass and heat transfer between liquid and gas are described with analogous empirical correlations.
+The mass transfer coefficient, $h_m$, is described by the empirical relationships~\cite{Incropera:1}:
 \be
-    \frac{d}{dt} (m_d \bu_d) = m_d\, \bg - \ha \rho\,C_D \, \pi  r_d^2 \,
-    (\bu_d-\bu) |\bu_d-\bu|
+   h_m = \frac{\SH \; D_{lg}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
+                                                                                 0.037 \;   \RE_L^{\frac{4}{5}} \; \SC^\ot & \hbox{film}     \end{array} \right.
 \ee
-where $m_d$ is the mass of the droplet.  The trajectory of the droplet is governed by the equation
+$\SH$ is the Sherwood number, $D_{lg}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or
+1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity),
+$\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number
+($\nu/D_{lg}$, assumed 0.6 for all cases).
+
+An analogous relationship exists for the heat transfer coefficient:
 \be
-    \frac{d \bx_d}{dt} = \bu_d
+   h  = \frac{\NU \; k}{L} \quad ; \quad \NU = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \; \PR^\ot           & \hbox{droplet} \\ [0.1in]
+                                                                         0.037 \;   \RE_L^{\frac{4}{5}} \; \PR^\ot & \hbox{film}     \end{array} \right.
 \ee
-The drag coefficient (default based on a sphere) is a function of the local Reynolds number (based on droplet diameter)
-\begin{eqnarray}
- C_D &=& \left\{ \begin{array}{ll}
-     24/\RE_d                                       & \RE_d < 1    \\
-     24\left(0.85+0.15 \, \RE_d^{0.687} \right)/\RE_d  & 1 < \RE_d < 1000 \\
-     0.44                                           & 1000 < \RE_d
-     \end{array} \right.  \\
-\RE_d &=& \frac{\rho \, |\bu_d-\bu| \, 2 r_d}{\mu(T)} \end{eqnarray}
-where $\mu(T)$ is the dynamic viscosity of air at temperature $T$.
+$\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\PR$ is the Prandtl number (assumed 0.7 for all cases).
 
 
+The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet.
+After the temperature of each droplet is computed, the
+appropriate amount of vaporized liquid is added to the given mesh cell, and the cell
+gas temperature is reduced slightly based on the energy lost to the droplet.
 
-\section{Droplet Transport on a Surface}
-
-When a liquid droplet hits a solid horizontal surface, it is assigned a
-random horizontal direction and moves at a fixed velocity until it
-reaches the edge, at which point it drops straight down at the same
-fixed velocity. This ``dripping'' velocity has been measured for water to be on
-the order of 0.5~m/s~\cite{Hamins:1,Hamins:IAFSS2002}. While attached to a surface, the ``droplet'' is assumed to form a thin film of liquid that transfers heat to the solid, and heat and mass to
-the gas. Details are included in the next section.
-
+Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows.
+Note that a few terms have been left out to make the algorithm more clear.
+\be
+   \frac{T_l^{n+1}-T_l^n}{\dt} = \frac{1}{m_l \, c_l} \left[ A \, h \, \left( T_g-\frac{T_l^{n+1}+T_l^n}{2} \right) -
+   A \, h_m \, \rho \left( \frac{Y_l^{n+1}+Y_l^n}{2} - Y_g \right) h_v  \right]
+\ee
+The equilibrium vapor mass fraction, $Y_l^n$, is a function of $T_l^n$ via
+Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
+\be
+   Y_l^{n+1} \approx Y_l^n + \left( \frac{dY_l}{dT_l} \right)^n \; \Big( T_l^{n+1}-T_l^n \Big)
+\ee
+where the derivative of $Y_l$ with respect to temperature is obtained via the chain rule:
+\be
+   \frac{dY_l}{dT_l} = \frac{dY_l}{dX_l} \, \frac{dX_l}{dT_l}  = \frac{W_a/W_l}{ (X_l (1-W_a/W_l) + W_a/W_l)^2 } \;
+     \frac{h_v W_l}{{\cal R} \, T_l^2} \, \exp \left[ \frac{h_v \, W_l}{\cal R} \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]
+\ee
+The amount of evaporated liquid is given by
+\be
+   \delta m_l = \dt \, A \, h_m \, \rho  \left[  Y_l^n + \ha \left( \frac{dY_l}{dT_l} \right)^n \;
+   \Big( T_l^{n+1}-T_l^n \Big)  \right]
+\ee
+The amount of heat extracted from the gas is
+\be
+   \delta q = \dt \, A \, h \, \left( T_g - \frac{T_l^n+T_l^{n+1}}{2} \right)
+\ee
 
 
 \section{Absorption and Scattering of Thermal Radiation by Droplets}
@@ -3902,64 +3767,54 @@ represent a typical radiating flame temperature. A value of 1173~K is
 used by default.  The averaged quantities, now functions of the
 droplet mean diameter only, are stored in one-dimensional arrays.
 During the simulation, the local properties are found by table
-look-up using the local mean droplet diameter.  More details of the
-computation are given in Section~\ref{dropnumericalmethod}.
+look-up using the local mean droplet diameter.
 
-
-
-\section{Heating and Evaporation of Liquid Droplets}
-
-Liquid ``droplets'' are represented either as discrete airborne spheres propelled through the gas, or as rectangular blocks that collectively form a thin liquid film on solid objects.
-These ``droplets'' are still individually tracked as
-lagrangian particles, but the heat and mass transfer coefficients are different. In the discussion to follow, the term ``droplets'' will be used to describe either form.
-
-Over the course of a time step of the gas phase solver, the droplets in a
-given grid cell evaporate as a function of
-the liquid equilibrium vapor mass fraction, $Y_l$,
-the local gas phase vapor mass fraction, $Y_g$, the (assumed uniform) liquid temperature, $T_l$,
-and the local gas temperature, $T_g$. If the droplet is attached to a surface, $T_s$ is the solid temperature.
-The mass and energy transfer between the gas and the liquid can be described by the
-following set of equations~\cite{Cheremisinoff:1}
-\begin{align}
-\frac{dm_l}{dt}               & =  - A \; h_m \, \rho \, (Y_l - Y_g) \\
-m_l \; c_l \; \frac{dT_l}{dt} & =    A \, h  \, (T_g-T_l) + A \, h_s \, (T_s-T_l) + \dq_r + \frac{dm_l}{dt} \; h_v  \label{droplet_temp}   \end{align}
-Here, $m_l$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A$ is the surface area of the liquid droplet (or that fraction of the
-film exposed to the gas and to the wall), $h_m$ is the mass transfer coefficient to be discussed below,
-$\rho$ is the gas density, $c_l$ is the liquid specific heat, $h$ is the heat transfer coefficient between the liquid and the gas, $h_s$ is the heat transfer coefficient between the liquid and the
-solid surface, $\dq_r$ is the rate of radiative heating of the droplet, and $h_v$ is the latent heat of vaporization of the
-liquid. The vapor mass fraction of the gas, $Y_g$, is obtained from the gas phase mass conservation equations, and the liquid equilibrium vapor mass fraction
-is obtained from the Clausius-Clapeyron equation
-\be X_l = \exp \left[ \frac{h_v \, W_l}{\cal R}
-      \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]  \quad ; \quad
-      Y_l = \frac{X_l}{X_l \, (1-W_a/W_l) + W_a/W_l}  \label{clausius_clapeyron} \ee
-where $X_d$ is the equilibrium vapor {\em volume} fraction, $W_l$ is the molecular weight
-of the evaporated liquid, $W_a$ is the molecular weight of air,
-$\cal R$ is the universal gas constant, and $T_b$ is the boiling temperature
-of the liquid.
-
-Mass and heat transfer between liquid and gas are described with analogous empirical correlations.
-The mass transfer coefficient, $h_m$, is described by the empirical relationships~\cite{Incropera:1}:
+The computation of $\chi_f$ for a similar but simpler situation has
+been derived in Ref.~\cite{Yang:3}. It can be shown that here
+$\chi_f$ becomes
 \be
-   h_m = \frac{\SH \; D_{lg}}{L} \quad ; \quad \SH = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \;           \SC^\ot & \hbox{droplet} \\ [0.1in]
-                                                                                 0.037 \;   \RE_L^{\frac{4}{5}} \; \SC^\ot & \hbox{film}     \end{array} \right.
+\chi_f = \frac{1}{\delta\Omega^l}
+\int_0^{\mu^l}\int_0^{\mu^l}\int_{\mu_{d,0}}^{\mu_{d,\pi}}
+\frac{P_0(\theta_d)}
+{\left[(1-\mu^2)(1-\mu'^2)-(\mu_d-\mu\mu')^2\right]^{1/2}}
+\; d\mu_d \, d\mu \, d\mu'
 \ee
-$\SH$ is the Sherwood number, $D_{lg}$ is the binary diffusion coefficient between the liquid vapor and the surrounding gas (usually assumed air), $L$ is a length scale equal to either the droplet diameter or
-1~m for a surface film, $\RE_D$ is the Reynolds number of the droplet (based on the diameter, $D$, and the relative air-droplet velocity),
-$\RE_L$ is the Reynolds number based on the length scale $L$, and $\SC$ is the Schmidt number
-($\nu/D_{lg}$, assumed 0.6 for all cases).
-
-An analogous relationship exists for the heat transfer coefficient:
+where $\mu_d$ is a cosine of the scattering angle $\theta_d$ and
+$P_0(\theta_d)$ is a single droplet scattering phase function
 \be
-   h  = \frac{\NU \; k}{L} \quad ; \quad \NU = \left\{ \begin{array}{ll} 2 + 0.6 \; \RE_D^\ha \; \PR^\ot           & \hbox{droplet} \\ [0.1in]
-                                                                         0.037 \;   \RE_L^{\frac{4}{5}} \; \PR^\ot & \hbox{film}     \end{array} \right.
+P_0(\theta_d) =
+\frac{\la^2\left(|S_1(\theta_d)|^2+|S_2(\theta_d)|^2\right)}{2 \, C_s(r,\la)}
 \ee
-$\NU$ is the Nusselt number, $k$ is the thermal conductivity of the gas, and $\PR$ is the Prandtl number (assumed 0.7 for all cases).
+$S_1(\theta_d)$ and $S_2(\theta_d)$ are the scattering amplitudes,
+given by
+Mie-theory. The integration limit $\mu^l$ is a cosine of the polar angle
+defining the boundary of the symmetric control angle $\delta\Omega^l$
+\be
+\mu^l = \cos(\theta^l) = 1 - \frac{2}{N_\Omega}
+\ee
+The limits of the innermost integral are
+\be
+\mu_{d,0}   = \mu\mu' + \sqrt{1-\mu^2}\sqrt{1-\mu'^2}  \quad ; \quad
+\mu_{d,\pi} = \mu\mu' - \sqrt{1-\mu^2}\sqrt{1-\mu'^2}
+\ee
+When $\chi_f$ is integrated over the droplet size distribution to get
+an averaged value, it is multiplied by $C_s(r,\la)$. It is therefore
+$|S_1|^2+|S_2|^2$, not $P_0(\theta_d)$, that is integrated. Physically,
+this means that intensities are added, not
+probabilities~\cite{Wiscombe}.
 
 
 
+\section{Droplet Transport on a Surface}
 
-
-
+When a liquid droplet hits a solid horizontal surface, it is assigned a
+random horizontal direction and moves at a fixed velocity until it
+reaches the edge, at which point it drops straight down at the same
+fixed velocity. This ``dripping'' velocity has been measured for water to be on
+the order of 0.5~m/s~\cite{Hamins:1,Hamins:IAFSS2002}.
+While attached to a surface, the ``droplet'' is assumed to form a thin film of liquid that
+transfers heat to the solid, and heat and mass to
+the gas. Details are included in the next section.
 
 
 \section{Fire Suppression by Water}
@@ -4016,100 +3871,138 @@ mass per unit area, $m_w''$, expressed in units of kg/m$^2$,
 Note that $a$ is an empirical constant.
 
 
-\clearpage
-
-\section{Liquid Sprays}
-
-\subsection{Particle movement}
-
-Lagrangian particles are can be introduced into the flow field as a means of
-visualization or simulation of droplets, aerosols, {\em etc.}. The
-position $\bx_p$ of each particle is governed by the equations
-\be \frac{d\bx_p}{dt} = \bu  \ee
-The particle positions are updated according to the same predictor-corrector
-scheme that is applied to the other flow quantities. Briefly, the
-position $\bx_p$ of a given particle is updated according to the two
-step scheme
-\begin{eqnarray}
-\bx_p^{(n+1)_e} &=& \bx_p^n + \dt \, \overline{\bu}^n \\
-\bx_p^{n+1} &=& \ha \left(\bx_p^n + \bx_p^{(n+1)_e} + \dt \,
-\overline{\bu}^{(n+1)_e}  \right)
-\end{eqnarray}
-where the bar over the velocity vector indicates that the velocity of
-the fluid is linearly interpolated at the particle's position.
 
 
-\subsection{Interaction of Droplets and Radiation}
 
-\label{dropnumericalmethod}
 
-The computation of $\chi_f$ for a similar but simpler situation has
-been derived in Ref.~\cite{Yang:3}. It can be shown that here
-$\chi_f$ becomes
+
+
+
+
+
+
+
+
+
+\chapter{Fire Detection Devices}
+
+FDS predicts the thermal environment resulting from a fire, but it relies on various empirical models that describe the
+activation of various fire detection devices. These models are described in this section.
+
+
+\section{Sprinklers}
+
+The temperature of the sensing element (or ``link'') of an automatic fire sprinkler is estimated from
+the differential equation put forth by Heskestad and Bill~\cite{Heskestad:3},
+with the addition of a term to account for the cooling of the link
+by water droplets in the gas stream from previously activated
+sprinklers
+\be \frac{dT_l}{dt} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l) -
+   \frac{C}{\hbox{RTI}} (T_l - T_m) - \frac{C_2}{\hbox{RTI}} \beta |\bu|
+   \label{actode} \ee
+Here $T_l$ is the link temperature, $T_g$ is the gas temperature in the
+neighborhood of the link, $T_m$ is the temperature of the sprinkler
+mount (assumed ambient),
+and $\beta$ is the volume fraction of (liquid) water in the
+gas stream. The sensitivity of the detector is characterized by
+the value of RTI. The amount of heat conducted away from the
+link by the mount is indicated by the ``C-Factor'', $C$. The RTI and
+C-Factor are determined experimentally. The constant
+$C_2$ has been empirically determined by DiMarzo and
+co-workers~\cite{Ruffino:1,Ruffino:2,Gavelli:1} to
+be $6\times 10^6$~K/(m/s)$^\ha$, and its value is relatively constant
+for different types of sprinklers.
+
+The algorithm for heat detector activation is exactly the same as for
+sprinkler activation, except there is no accounting for conductive losses or
+droplet cooling. Note that neither the sprinkler nor heat detector models account for
+thermal radiation.
+
+\section{Heat Detectors}
+
+As far as FDS is concerned, a heat detector is just a sprinkler with no water spray. In other words, the activation of a heat
+detector is governed by Eq.~(\ref{actode}), but with just the first term on the right hand side:
+\be \frac{dT_l}{dt} = \frac{\sqrt{|\bu|}}{\hbox{RTI}} (T_g - T_l)  \label{heatactode} \ee
+Both the RTI and activation temperature are determined empirically.
+
+
+\section{Smoke Detectors}
+
+An informative discussion of the issues associated with smoke detection can be found in the
+SFPE Handbook chapter ``Design of Detection Systems,'' by Schifiliti, Meacham and Custer~\cite{SFPE}.
+The authors point out that the difficulty in modeling smoke detector activation stems from a number of issues:
+(1) the production and transport of smoke in the early stage of a fire are not well-understood, (2) detectors often use
+complex response algorithms rather than simple threshold or rate-of-change criteria, (3) detectors can be sensitive
+to smoke particle number density, size distribution, refractive index, composition, {\em etc.}, and (4) most
+computer models, including FDS, do not provide detailed descriptions of the smoke besides its bulk transport. This
+last point is the most important. At best, in its present form, FDS can only provide to an activation algorithm the
+velocity and smoke concentration of the ceiling jet flowing past the detector. Regardless of the
+detailed mechanism within
+the device, any activation model included within FDS can only account for the entry resistance of the smoke due to the
+geometry of the detector. Issues related to the effectiveness of ionization or photoelectric detectors cannot be
+addressed by FDS.
+
+Consider the simple idealization of a ``spot-type'' smoke detector. A disk-shaped cover lined with a fine mesh screen
+forms the external housing of the device, which is usually mounted to the ceiling.
+Somewhere within the device is a relatively small sensing chamber where the smoke is actually detected in some way.
+A simple model of this device has been proposed by Heskestad~\cite{SFPE}. He suggested that the mass fraction of smoke in the
+sensing chamber of the detector $Y_c$ lags behind the mass fraction in the
+external free stream $Y_e$ by a time period $\delta t = L/u$,
+where $u$ is the free stream velocity and $L$ is a length characteristic of the detector geometry.
+The change in the mass fraction of smoke in the sensing chamber can be found by solving the following equation:
+\be \frac{d Y_c }{dt} = \frac{ Y_e(t) - Y_c(t)}{L/\bu} \label{HYoeq} \ee
+The detector activates when $Y_c$ rises above a detector-specific threshold.
+
+A more detailed model of smoke detection involving two filling times rather than one has also been proposed.
+Smoke passing into the sensing chamber must first pass through the exterior housing, then it must pass through a series
+of baffles before arriving at the sensing chamber. There is a time lag
+associated with the passing of the smoke through the housing and also the entry of the smoke into the sensing chamber.
+Let $\delta t_e$ be the characteristic filling time of the entire volume enclosed by the external housing. Let
+$\delta t_c$ be the characteristic filling time of the sensing chamber.
+Cleary~{\em et al.}~\cite{Cleary:IAFSS6} suggested that each characteristic filling time is a function of the
+free-stream velocity $u$ outside the detector
 \be
-\chi_f = \frac{1}{\delta\Omega^l}
-\int_0^{\mu^l}\int_0^{\mu^l}\int_{\mu_{d,0}}^{\mu_{d,\pi}}
-\frac{P_0(\theta_d)}
-{\left[(1-\mu^2)(1-\mu'^2)-(\mu_d-\mu\mu')^2\right]^{1/2}}
-\; d\mu_d \, d\mu \, d\mu'
+\delta t_e = \alpha_e u^{\beta_e} \quad ; \quad \delta t_c = \alpha_c u^{\beta_c}
 \ee
-where $\mu_d$ is a cosine of the scattering angle $\theta_d$ and
-$P_0(\theta_d)$ is a single droplet scattering phase function
+The $\alpha$'s and $\beta$'s are empirical constants related to the specific detector geometry
+The change in the mass fraction of smoke in the sensing chamber $Y_c$ can be found by solving the following equation:
 \be
-P_0(\theta_d) =
-\frac{\la^2\left(|S_1(\theta_d)|^2+|S_2(\theta_d)|^2\right)}{2 \, C_s(r,\la)}
+\frac{d Y_c}{dt} = \frac{ Y_e(t-\delta t_e) - Y_c(t)}{\delta t_c} \label{Yoeq}
 \ee
-$S_1(\theta_d)$ and $S_2(\theta_d)$ are the scattering amplitudes,
-given by
-Mie-theory. The integration limit $\mu^l$ is a cosine of the polar angle
-defining the boundary of the symmetric control angle $\delta\Omega^l$
+where $Y_e$ is the mass fraction of smoke outside of the detector in the free-stream.
+A simple interpretation of the equation is that the concentration of the smoke that enters the sensing chamber at time $t$
+is that of the free-stream at time $t-\delta t_e$.
+
+An analytical solution for Eq.~(\ref{Yoeq}) can be found, but it is more convenient to simply integrate it numerically
+as is done for sprinklers and heat detectors. Then, the predicted mass fraction of smoke in the sensing chamber,
+$Y_c(t)$, can be converted into an expression for the percent obscuration per unit length by computing:
 \be
-\mu^l = \cos(\theta^l) = 1 - \frac{2}{N_\Omega}
+\left( 1 - e^{-\kappa \rho Y_c l} \right) \times 100
 \ee
-The limits of the innermost integral are
-\be
-\mu_{d,0}   = \mu\mu' + \sqrt{1-\mu^2}\sqrt{1-\mu'^2}  \quad ; \quad
-\mu_{d,\pi} = \mu\mu' - \sqrt{1-\mu^2}\sqrt{1-\mu'^2}
-\ee
-When $\chi_f$ is integrated over the droplet size distribution to get
-an averaged value, it is multiplied by $C_s(r,\la)$. It is therefore
-$|S_1|^2+|S_2|^2$, not $P_0(\theta_d)$, that is integrated. Physically,
-this means that intensities are added, not
-probabilities~\cite{Wiscombe}.
+where $\kappa$ is the specific extinction coefficient, $\rho$ is the density of the external gases in the ceiling jet,
+and $l$ is the preferred unit of length (typically 1~m or 1~ft).
+For most flaming fuels, a suggested value for $\kappa$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
+wavelength of 633~nm~\cite{Mulholland:F+M}.
 
+The SFPE Handbook has references to various works on smoke detection and suggested values for the
+characteristic length $L$. FDS includes the one parameter Heskestad model as a special case of the four parameter
+Cleary model. For the Cleary model, one must set
+$\alpha_e$, $\beta_e$, $\alpha_c$, and $\beta_c$, whereas for the Heskestad model only $L=\alpha_c$ needs to be
+specified. Eq.~(\ref{Yoeq})
+is still used, with $\alpha_e=0$ and $\beta_e=\beta_c=-1$.
+Proponents of the four-parameter model claim that the two filling times are needed to
+better capture the behavior of detectors in a very
+slow free-stream ($u<0.5$~m/s). Rather than declaring one model better than another,
+the algorithm included in FDS allows the
+user to pick these various parameters, and in so doing, pick whichever model the user feels is appropriate~\cite{CSE_GCR}.
 
-\subsection{Heating and Evaporation of Liquid Droplets}
-
-The exchange of mass and energy between liquid droplets and the surrounding gases (or solid surfaces) is computed droplet by droplet. After the temperature of each droplet is computed, the
-appropriate amount of vaporized liquid is added to the given mesh cell, and the cell gas temperature is reduced slightly based on the energy lost to the droplet.
-
-Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows. Note that a few terms have been left out to make the algorithm more clear.
-\be
-   \frac{T_l^{n+1}-T_l^n}{\dt} = \frac{1}{m_l \, c_l} \left[ A \, h \, \left( T_g-\frac{T_l^{n+1}+T_l^n}{2} \right) - A \, h_m \, \rho \left( \frac{Y_l^{n+1}+Y_l^n}{2} - Y_g \right) h_v  \right]
-\ee
-The equilibrium vapor mass fraction, $Y_l^n$, is a function of $T_l^n$ via Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
-\be
-   Y_l^{n+1} \approx Y_l^n + \left( \frac{dY_l}{dT_l} \right)^n \; \Big( T_l^{n+1}-T_l^n \Big)
-\ee
-where the derivative of $Y_l$ with respect to temperature is obtained via the chain rule:
-\be
-   \frac{dY_l}{dT_l} = \frac{dY_l}{dX_l} \, \frac{dX_l}{dT_l}  = \frac{W_a/W_l}{ (X_l (1-W_a/W_l) + W_a/W_l)^2 } \;
-     \frac{h_v W_l}{{\cal R} \, T_l^2} \, \exp \left[ \frac{h_v \, W_l}{\cal R} \left( \frac{1}{T_b}-\frac{1}{T_l} \right) \right]
-\ee
-The amount of evaporated liquid is given by
-\be
-   \delta m_l = \dt \, A \, h_m \, \rho  \left[  Y_l^n + \ha \left( \frac{dY_l}{dT_l} \right)^n \; \Big( T_l^{n+1}-T_l^n \Big)  \right]
-\ee
-The amount of heat extracted from the gas is
-\be
-   \delta q = \dt \, A \, h \, \left( T_g - \frac{T_l^n+T_l^{n+1}}{2} \right)
-\ee
-
-
-
-
-
-
+Additionally, FDS can model the behavior of beam and aspiration smoke detectors.  For a beam detector the user
+specifies the emitter and receiver positions and the total obscuration at which the detector will alarm.  FDS will then
+integrate the obscuration over the path length using the predicted soot concentration in each grid cell along
+the path.  For an aspiration detector the user specifies the sampling locations, the flow rate at each location, the
+transport time from each sampling point to the detector, the flow rate of any bypass flow, and the total obscuration at which the
+detector will alarm.  FDS will compute that soot concentration at the detector by weighting the predicted soot concentrations
+at the sampling locations with their flow rates after applying the appropriate time delay.
 
 
 
@@ -4527,50 +4420,6 @@ and the sensible enthalpies in (\ref{eqn_fdsD}) would be replaced by the [chemic
 
 
 
-\chapter{Domain Decomposition Strategy}
-\label{app_pressure_correction}
-
-The time advancement scheme for multiple meshes involves averaging of the velocity components at a patch boundary in order to maintain stability. It is extremely important to note that -- because of the staggered grid storage arrangement -- two values of the numerical solution for the velocity exist at a given point on a mesh interface.  Consider meshes $m$ (left) and $om$ (right) which are joined side by side in the $x$ direction.  The staggered $u$ velocity components are indexed from $\{0\!:\!nx\}$ (in the $x$ direction) on a given mesh. The values $u^{(m)}_{nx,jk}$ and $u^{(om)}_{0,jk}$ therefore live at the same physical location, but are advanced separately (and by different processors) during the course of the algorithm.  In the ideal circumstance these velocities are identical, as is the case if the PDEs (\ref{eqn_poisson}) and (\ref{eqn_laplace}) are enforced at the mesh interface.  To improve the speed of our parallel algorithm, our strategy is instead to keep the difference between these values small while still enforcing global volume conservation.  Our strategy recovers the ideal case in the limit $\delta t \rightarrow 0$. In fact, for reasonable time steps (CFL $\approx$ 0.5) we observe that the difference in the coincident velocities is negligible.  While the primitive velocity components are indeed unique to a given mesh, for each mesh we may define the discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which includes ghost cell data and is identical at all overlapping mesh points.  To do this we simply average the coincident values of the velocity components at the mesh interfaces and inject the ghost cell values from the neighboring mesh.  For instance, considering the same side-by-side meshes $m$ and $om$ as before,
-\begin{equation}
-\label{eqn_patchave_ufield}
-\bar{u}^{(m)}_{ijk} \equiv \left\{ \begin{array}{ll} u^{(m)}_{ijk} & \mbox{for}\quad 0<i<nx \vspace{0.2cm}\\
-\frac{1}{2} \left[ u^{(m)}_{nx,jk} + u^{(om)}_{0,jk} \right] & \mbox{for}\quad i=nx \vspace{0.2cm}\\
-u^{(om)}_{1,jk} & \mbox{for}\quad i=nx+1 \end{array} \right.
-\end{equation}
-for all patch boundary cells $j$ and $k$; $nx$ identifies the right-most boundary cells for mesh $m$. Here, for simplicity, we are only considering the case in which the cell sizes are equivalent for the adjoining meshes (coarse-fine mesh interfaces are currently handled by the code, but details will be documented at a later date).  The values of $\bar{u}^{(m)}$ for the index ranges not considered in (\ref{eqn_patchave_ufield}) depend on the specific boundary conditions for the other faces of mesh $m$.  The same ideas are used to define the patch-averaged fields for $\bar{v}$ and $\bar{w}$.
-
-To see how the new patch-averaged fields are used, consider the predictor step in the time advancement, which may now be written as
-\begin{equation}
-\label{eqn_RK1}
-\mathbf{u}^{(n+1)_e} = \bar{\mathbf{u}}^n - \delta t \left[ \mathbf{F}(\rho^n,\bar{\mathbf{u}}^n) + {\nabla\cH'}^{(n+1)_e} + {\nabla\cH''}^{(n+1)_e} \right] \,\mbox{.}
-\end{equation}
-Note that (\ref{eqn_RK1}) updates a $\bar{\mathbf{u}}$ field to a $\mathbf{u}$ field.  Though this is perfectly legitimate, we should be aware of the following issues.
-First, the patch-averaging procedure is slightly dissipative.  But as long as we are accurate, this numerical dissipation is minimal and acceptable (much smaller than
-physical [molecular, viscous] dissipation).  Second, we must now think of the time update in terms of a projection scheme in order to repair the damage made to the
-divergence by the averaging procedure (after the averaging procedure, the divergence for mesh boundary cells no longer exactly matches the divergence obtained from the equation of state).
-In practical terms, this means that the Poisson equation for the pressure fluctuation (in the predictor step) is given by
-\begin{equation}
-\label{eqn_poisson_stg1}
-\nabla^2 {\cH'}^{(n+1)_e} = -\left[\frac{ (\nabla\cdot\mathbf{u})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n}{\delta t}\right] -  \mathbf{F}(\rho^n,\bar{\mathbf{u}}^n) \,\mbox{.}
-\end{equation}
-In (\ref{eqn_poisson_stg1}), note that $\mathbf{F}$ is computed using the patch-averaged velocity field. Further, only the $(\nabla\cdot\mathbf{u})^{(n+1)_e}$ term is obtained from the equation of state (\ref{eqn_divfromeos}).  The divergence of the patch-averaged field, $(\nabla\cdot\bar{\mathbf{u}})^n$, is obtained by explicitly applying the discrete divergence operator to $\bar{\mathbf{u}}^n$.
-Similarly, in the corrector Poisson equation analogous to (\ref{eqn_corrector_poisson}), only the $(\nabla\cdot\mathbf{u})^{n+1}$ term is obtained from the equation of state;
-$(\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e}$ and $(\nabla\cdot\bar{\mathbf{u}})^n$ are obtained explicitly:
-\begin{equation}
-\label{eqn_poisson_stg2}
-\nabla^2 {\cH'}^{\,n+1} = -\left[\frac{ 2(\nabla\cdot\mathbf{u})^{n+1} - (\nabla\cdot\bar{\mathbf{u}})^{(n+1)_e} - (\nabla\cdot\bar{\mathbf{u}})^n}{\delta t}\right] -  \mathbf{F}(\rho^{(n+1)_e},\bar{\mathbf{u}}^{(n+1)_e}) \,\mbox{.}
-\end{equation}
-Finally, the velocity corrector step is
-\be
-\label{eqn_RK2}
-\bu^{n+1} = \ha \left[ \bar{\bu}^n + \bar{\bu}^{(n+1)_e} - \dt \left( \mathbf{F}[\rho^{(n+1)_e},\bar{\mathbf{u}}^{(n+1)_e}] + \nabla{\cH'}^{\,n+1} + \nabla{\cH''}^{\,n+1}\right) \right] \,\mbox{.}
-\ee
-The benefit of the averaging procedure is that $\mathbf{F}$ is now the same on each mesh for a given location along a mesh interface, since all force terms are determined using the patch-averaged field.  This also means that stress tensors computed at a mesh interface (which are buried in $\mathbf{F}$) are symmetric; this symmetry is a requirement for angular momentum conservation.  Thus, the patch-averaging procedure prevents the production of spurious vorticity at mesh interfaces.
-
-It remains that we specify the boundary conditions for the Poisson and Laplace equations.  At the interface of two adjoining meshes we apply the following Dirichlet boundary condition for the pressure fluctuation (again, mesh $m$ is to the left of mesh $om$ in this example):
-\be {\cH'}_{nx+\ha,jk}^{(m)} = {\cH'}_{1-\ha,jk}^{(om)} = \frac{1}{2}\left[ {\cH'}_{nx,jk}^{(m),*} + {\cH'}_{1,jk}^{(om),*} \right] \,\mbox{.} \ee
-Again, the asterisk denotes the most recent value.  Note that the pressure boundary values are identical for each mesh at the interface.  To a good approximation, this boundary condition maintains continuity of the pressure field from mesh to mesh without invoking an iterative procedure.
-
 
 
 \chapter{A Simple Model of Flame Extinction}
@@ -4706,26 +4555,6 @@ Rearranging for $\tau_w$ we find
 which corresponds to Eq. (9.46) in \cite{Sagaut:2001}.
 
 
-\chapter{The Inflow/Outflow Pressure Boundary Condition}
-\subsubsection{R. McDermott, BFRL}
-\label{app_pressbc}
-
-Outflow: The outflow condition is quite simple.  Let $q \equiv |\mathbf{u}|$. By definition, ${\cal H} = \frac{1}{2}q^2 + \frac{\tilde{p}}{\rho_\infty}$.  The pressure $\tilde{p}$ is set to $\tilde{p}_{ext}$ by the user ({\tt DYNAMIC\_PRESSURE}, 0 by default).
-\\
-\\
-Inflow: When fluid is entering the domain at an {\tt OPEN} vent we make the assumption that Bernoulli holds (i.e. inviscid, steady, incompressible) and that the fluid element on the boundary has accelerated from the state \{$\tilde{p}_1,\rho_1,q_1$\} along a streamline:
-\begin{equation}
-\tilde{p}_1 + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \tilde{p}_2 + \mbox{$\frac{1}{2}$}\rho_2 q_2^2
-\end{equation}
-Let's say the fluid has kinetic energy $\frac{1}{2}\rho_1 q_1^2$ at point 1 with ambient pressure $\tilde{p}_1 = \tilde{p}_{ext}$ and accelerates to $q_2$ at point 2 which is on an inflow boundary.  Substituting the definition of ${\cal H}$ for point 2 we obtain
-\begin{equation}
-\tilde{p}_{ext} + \mbox{$\frac{1}{2}$}\rho_1 q_1^2 = \rho_\infty({\cal H}_2 - \mbox{$\frac{1}{2}$} q_2^2) + \mbox{$\frac{1}{2}$} \rho_2 q_2^2
-\end{equation}
-which rearranges to
-\begin{equation}
-{\cal H}_2 = \underbrace{\frac{\tilde{p}_{ext}}{\rho_\infty}}_{{\cal H}_{ext}} + \underbrace{\frac{1}{2}q_1 \frac{\rho_1}{\rho_\infty}}_{{\cal H}_0} +   \frac{1}{2} q_2 \left(1-\frac{\rho_2}{\rho_\infty}\right)
-\end{equation}
-The density $\rho_2$ (denoted $\rho_w$ in Eq. (\ref{eqn_pressbc})) is taken as the average density between the gas-phase and ghost cells adjacent to the boundary.
 
 \chapter{Scalar Boundedness Correction}
 \subsubsection{R. McDermott, BFRL}
