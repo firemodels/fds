@@ -1441,11 +1441,12 @@ USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER,NULL_BOUN
 
 ! Computes the scalar advective and diffusive flux
 INTEGER, INTENT(IN) :: NM
-INTEGER :: I,J,K,N,II,JJ,KK,IOR,IW,IIG,JJG,KKG,ICM,ICP,IBC,METHOD_ID
+INTEGER :: I,J,K,N,II,JJ,KK,IOR,IW,IIG,JJG,KKG,ICM,ICP,IBC,METHOD_ID,NOM,IIO,JJO,KKO
 REAL(EB) :: ZZ(4),TNOW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,YYP,FX,FY,FZ
 TYPE (SURFACE_TYPE), POINTER :: SF
+TYPE (MESH_TYPE), POINTER :: M2
 
 ! Notes:
 !
@@ -1612,10 +1613,15 @@ WALL_LOOP: DO IW=1,NWC
          END SELECT
          
       CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER
+         NOM = IJKW(9,IW)
+         IIO = IJKW(10,IW)
+         JJO = IJKW(11,IW)
+         KKO = IJKW(12,IW)
+         M2  => MESHES(NOM)
       
          SELECT CASE(IOR)
             CASE( 1)
-               ZZ(1) = RHO_W(IW)
+               ZZ(1) = M2%RHO(IIO-1,JJO,KKO)
                ZZ(2) = RHO_W(IW)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                ZZ(4) = RHOP(IIG+1,JJG,KKG)
@@ -1624,10 +1630,10 @@ WALL_LOOP: DO IW=1,NWC
                ZZ(1) = RHOP(IIG-1,JJG,KKG)
                ZZ(2) = RHOP(IIG,JJG,KKG)
                ZZ(3) = RHO_W(IW)
-               ZZ(4) = RHO_W(IW)
+               ZZ(4) = M2%RHO(IIO+1,JJO,KKO)
                FX(II-1,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)*R(II-1)
             CASE( 2)
-               ZZ(1) = RHO_W(IW)
+               ZZ(1) = M2%RHO(IIO,JJO-1,KKO)
                ZZ(2) = RHO_W(IW)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                ZZ(4) = RHOP(IIG,JJG+1,KKG)
@@ -1636,10 +1642,10 @@ WALL_LOOP: DO IW=1,NWC
                ZZ(1) = RHOP(IIG,JJG-1,KKG)
                ZZ(2) = RHOP(IIG,JJG,KKG)
                ZZ(3) = RHO_W(IW)
-               ZZ(4) = RHO_W(IW)
+               ZZ(4) = M2%RHO(IIO,JJO+1,KKO)
                FY(II,JJ-1,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
             CASE( 3)
-               ZZ(1) = RHO_W(IW)
+               ZZ(1) = M2%RHO(IIO,JJO,KKO-1)
                ZZ(2) = RHO_W(IW)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                ZZ(4) = RHOP(IIG,JJG,KKG+1)
@@ -1648,7 +1654,7 @@ WALL_LOOP: DO IW=1,NWC
                ZZ(1) = RHOP(IIG,JJG,KKG-1)
                ZZ(2) = RHOP(IIG,JJG,KKG)
                ZZ(3) = RHO_W(IW)
-               ZZ(4) = RHO_W(IW)
+               ZZ(4) = M2%RHO(IIO,JJO,KKO+1)
                FZ(II,JJ,KK-1,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
          END SELECT
             
@@ -1804,10 +1810,15 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             END SELECT
             
          CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER2
+            NOM = IJKW(9,IW)
+            IIO = IJKW(10,IW)
+            JJO = IJKW(11,IW)
+            KKO = IJKW(12,IW)
+            M2  => MESHES(NOM)
                
             SELECT CASE(IOR)
                CASE( 1)
-                  ZZ(1) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(1) = M2%RHO(IIO-1,JJO,KKO)*M2%YY(IIO-1,JJO,KKO,N)
                   ZZ(2) = RHO_W(IW)*YY_W(IW,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(4) = RHOYYP(IIG+1,JJG,KKG,N)
@@ -1816,10 +1827,10 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   ZZ(1) = RHOYYP(IIG-1,JJG,KKG,N)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(3) = RHO_W(IW)*YY_W(IW,N)
-                  ZZ(4) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(4) = M2%RHO(IIO+1,JJO,KKO)*M2%YY(IIO+1,JJO,KKO,N)
                   FX(II-1,JJ,KK,N) = (FX(II-1,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER))*R(II-1)
                CASE( 2)
-                  ZZ(1) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(1) = M2%RHO(IIO,JJO-1,KKO)*M2%YY(IIO,JJO-1,KKO,N)
                   ZZ(2) = RHO_W(IW)*YY_W(IW,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(4) = RHOYYP(IIG,JJG+1,KKG,N)
@@ -1828,10 +1839,10 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   ZZ(1) = RHOYYP(IIG,JJG-1,KKG,N)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(3) = RHO_W(IW)*YY_W(IW,N)
-                  ZZ(4) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(4) = M2%RHO(IIO,JJO+1,KKO)*M2%YY(IIO,JJO+1,KKO,N)
                   FY(II,JJ-1,KK,N) = FY(II,JJ-1,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
                CASE( 3)
-                  ZZ(1) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(1) = M2%RHO(IIO,JJO,KKO-1)*M2%YY(IIO,JJO,KKO-1,N)
                   ZZ(2) = RHO_W(IW)*YY_W(IW,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(4) = RHOYYP(IIG,JJG,KKG+1,N)
@@ -1840,7 +1851,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   ZZ(1) = RHOYYP(IIG,JJG,KKG-1,N)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(3) = RHO_W(IW)*YY_W(IW,N)
-                  ZZ(4) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(4) = M2%RHO(IIO,JJO,KKO+1)*M2%YY(IIO,JJO,KKO+1,N)
                   FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
             END SELECT
             
