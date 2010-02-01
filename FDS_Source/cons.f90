@@ -35,7 +35,7 @@ INTEGER, PARAMETER :: SPHERE_DRAG=1,CYLINDER_DRAG=2,USER_DRAG=3                 
 INTEGER, PARAMETER :: OLD=1,NEW=2,GUESS=3,PREVIOUS=4                                        ! Network solver indices
 
 ! Species components of the mixture fraction
-INTEGER :: N_STATE_SPECIES
+INTEGER :: N_STATE_SPECIES=0
 INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0,H2_INDEX=0, &
            SOOT_INDEX=0,OTHER_INDEX=0                                                       ! Mixture Fraction Species
 CHARACTER(20), DIMENSION(:), ALLOCATABLE :: MF_SPEC_ID,MF_SPEC_FORMULA
