@@ -608,13 +608,13 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
                   END SELECT
                   RHO_YY_OTHER(1:N_SPECIES) = RHO_YY_OTHER(1:N_SPECIES) + &
                                  ARO*(OM_RHOP(IIO,JJO,KKO)*OM_YYP(IIO,JJO,KKO,1:N_SPECIES)-RHO_G*YY_G_ALL(1:N_SPECIES))
+                  KRES(II,JJ,KK) = OM%KRES(IIO,JJO,KKO)
                ENDDO
             ENDDO
          ENDDO
          YY_OTHER(1:N_SPECIES) = RHO_YY_OTHER(1:N_SPECIES)/RHO_W(IW)
          YY_W(IW,1:N_SPECIES)  = YY_OTHER(1:N_SPECIES)
          YYP(II,JJ,KK,1:N_SPECIES) = YY_W(IW,1:N_SPECIES)
-         KRES(II,JJ,KK) = MESHES(NOM)%KRES(IIO,JJO,KKO)
 
       CASE (HVAC_BOUNDARY)
          VT => VENTS(VENT_INDEX(IW))
