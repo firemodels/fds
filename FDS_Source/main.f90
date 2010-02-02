@@ -1163,15 +1163,15 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
             CASE( 1) 
                IMIN=MAX(IMIN,M%IJKW(10,IW)-1)
             CASE(-1) 
-               IMAX=MIN(IMAX,M%IJKW(13,IW))
+               IMAX=MIN(IMAX,M%IJKW(13,IW)+1)
             CASE( 2) 
                JMIN=MAX(JMIN,M%IJKW(11,IW)-1)
             CASE(-2) 
-               JMAX=MIN(JMAX,M%IJKW(14,IW))
+               JMAX=MIN(JMAX,M%IJKW(14,IW)+1)
             CASE( 3) 
                KMIN=MAX(KMIN,M%IJKW(12,IW)-1)
             CASE(-3) 
-               KMAX=MIN(KMAX,M%IJKW(15,IW))
+               KMAX=MIN(KMAX,M%IJKW(15,IW)+1)
          END SELECT
       ENDIF NOT_PERIODIC
    ENDDO SEARCH_LOOP
@@ -1213,12 +1213,12 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    ALLOCATE(M%OMESH(NOM)%  WS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    M%OMESH(NOM)%W  = W0
    M%OMESH(NOM)%WS = W0
-   ALLOCATE(M%OMESH(NOM)% DUDT(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
-   ALLOCATE(M%OMESH(NOM)% DVDT(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
-   ALLOCATE(M%OMESH(NOM)% DWDT(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
-   M%OMESH(NOM)%DUDT = 0._EB
-   M%OMESH(NOM)%DVDT = 0._EB
-   M%OMESH(NOM)%DWDT = 0._EB
+   ALLOCATE(M%OMESH(NOM)% FVX(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
+   ALLOCATE(M%OMESH(NOM)% FVY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
+   ALLOCATE(M%OMESH(NOM)% FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
+   M%OMESH(NOM)%FVX = 0._EB
+   M%OMESH(NOM)%FVY = 0._EB
+   M%OMESH(NOM)%FVZ = 0._EB
  
    IF (N_SPECIES>0) THEN
       ALLOCATE(M%OMESH(NOM)%  YY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,N_SPECIES))
@@ -1282,7 +1282,7 @@ END SUBROUTINE DOUBLE_CHECK
 SUBROUTINE POST_RECEIVES(CODE)
 
 INTEGER, INTENT(IN) :: CODE
-INTEGER :: SNODE,NRA,NSB
+INTEGER :: SNODE,NRA,NSB,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE
 REAL(EB) :: TNOW
 
 TNOW = SECOND()
@@ -1310,17 +1310,26 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
    TAG   = TAGS(NM,NOM,CODE)
  
+   IMIN = I_MIN(NM,NOM)
+   IMAX = I_MAX(NM,NOM)
+   JMIN = J_MIN(NM,NOM)
+   JMAX = J_MAX(NM,NOM)
+   KMIN = K_MIN(NM,NOM)
+   KMAX = K_MAX(NM,NOM)
+
+   IJK_SIZE = (IMAX-IMIN+1)*(JMAX-JMIN+1)*(KMAX-KMIN+1)
+
    INITIALIZATION_IF: IF (CODE==0) THEN
  
       IF (NIC(NM,NOM)>0) THEN
          NRA = NUMBER_RADIATION_ANGLES
          NSB = NUMBER_SPECTRAL_BANDS
-         ALLOCATE(M3%REAL_RECV_PKG1(MAX(NIC(NM,NOM),NIC(NOM,NM))*(4+N_SPECIES)+1))
-         ALLOCATE(M3%REAL_RECV_PKG2(MAX(NIC(NM,NOM),NIC(NOM,NM))*(8          )+1))
-         ALLOCATE(M3%REAL_RECV_PKG3(MAX(NIC(NM,NOM),NIC(NOM,NM))*(4+N_SPECIES)+1))
-         ALLOCATE(M3%REAL_RECV_PKG4(MAX(NIC(NM,NOM),NIC(NOM,NM))*(8          )+1))
+         ALLOCATE(M3%REAL_RECV_PKG1(IJK_SIZE*(3+N_SPECIES)))
+         ALLOCATE(M3%REAL_RECV_PKG2(IJK_SIZE*(4          )))
+         ALLOCATE(M3%REAL_RECV_PKG3(IJK_SIZE*(3+N_SPECIES)))
+         ALLOCATE(M3%REAL_RECV_PKG4(IJK_SIZE*(4          )))
          ALLOCATE(M3%REAL_RECV_PKG5((NRA*NSB+1)*NIC(NM,NOM)+1))
-         ALLOCATE(M3%REAL_RECV_PKG7(MAX(NIC(NM,NOM),NIC(NOM,NM))*(3          )+1))
+         ALLOCATE(M3%REAL_RECV_PKG7(IJK_SIZE*(4          )))
       ENDIF
  
       N_REQ = MIN(N_REQ+1,SIZE(REQ))
@@ -1446,7 +1455,7 @@ SUBROUTINE MESH_EXCHANGE(CODE)
  
 REAL(EB) :: TNOW
 INTEGER, INTENT(IN) :: CODE
-INTEGER :: NM,II,JJ,KK,LL,NC,N,NN,RNODE,SNODE,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
+INTEGER :: NM,II,JJ,KK,LL,NC,N,NN,RNODE,SNODE,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE
 INTEGER :: NN1,NN2,NRA,NSB
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP,HP2
  
@@ -1492,6 +1501,8 @@ RECEIVING_MESH_LOOP: DO NOM=1,NMESHES
    KMIN = K_MIN(NOM,NM)
    KMAX = K_MAX(NOM,NM)
 
+   IJK_SIZE = (IMAX-IMIN+1)*(JMAX-JMIN+1)*(KMAX-KMIN+1)
+
    ! Initial information exchange
  
    INITIALIZE_SEND_IF: IF (CODE==0) THEN
@@ -1499,12 +1510,12 @@ RECEIVING_MESH_LOOP: DO NOM=1,NMESHES
       IF (NIC(NOM,NM)>0 .AND. RNODE/=SNODE) THEN
          NRA = NUMBER_RADIATION_ANGLES
          NSB = NUMBER_SPECTRAL_BANDS
-         ALLOCATE(M3%REAL_SEND_PKG1(MAX(NIC(NOM,NM),NIC(NM,NOM))*(4+N_SPECIES)+1))
-         ALLOCATE(M3%REAL_SEND_PKG2(MAX(NIC(NOM,NM),NIC(NM,NOM))*(8          )+1))
-         ALLOCATE(M3%REAL_SEND_PKG3(MAX(NIC(NOM,NM),NIC(NM,NOM))*(4+N_SPECIES)+1))
-         ALLOCATE(M3%REAL_SEND_PKG4(MAX(NIC(NOM,NM),NIC(NM,NOM))*(8          )+1))
+         ALLOCATE(M3%REAL_SEND_PKG1(IJK_SIZE*(3+N_SPECIES)))
+         ALLOCATE(M3%REAL_SEND_PKG2(IJK_SIZE*(4          )))
+         ALLOCATE(M3%REAL_SEND_PKG3(IJK_SIZE*(3+N_SPECIES)))
+         ALLOCATE(M3%REAL_SEND_PKG4(IJK_SIZE*(4          )))
          ALLOCATE(M3%REAL_SEND_PKG5((NRA*NSB+1)*NIC(NOM,NM)+1))
-         ALLOCATE(M3%REAL_SEND_PKG7(MAX(NIC(NOM,NM),NIC(NM,NOM))*(3          )+1))
+         ALLOCATE(M3%REAL_SEND_PKG7(IJK_SIZE*(4          )))
       ENDIF
  
       IF (RNODE/=SNODE) THEN
@@ -1527,26 +1538,19 @@ RECEIVING_MESH_LOOP: DO NOM=1,NMESHES
    IF (CODE==1 .AND. NIC(NOM,NM)>0) THEN
       IF (RNODE/=SNODE) THEN
          LL = 0
-         IWW = 0
-         PACK_REAL_SEND_PKG1: DO IW=1,M4%NEWC
-            IF (M3%IJKW(9,IW)/=NM) CYCLE PACK_REAL_SEND_PKG1
-            DO KK=M3%IJKW(12,IW),M3%IJKW(15,IW)
-               DO JJ=M3%IJKW(11,IW),M3%IJKW(14,IW)
-                  DO II=M3%IJKW(10,IW),M3%IJKW(13,IW)
-                     IWW = IWW + 1
-                     M3%REAL_SEND_PKG1(LL+1) = REAL(IW,EB)
-                     M3%REAL_SEND_PKG1(LL+2) = M%RHOS(II,JJ,KK)
-                     M3%REAL_SEND_PKG1(LL+3) = M%MU(II,JJ,KK)
-                     M3%REAL_SEND_PKG1(LL+4) = M%D(II,JJ,KK)
-                     IF (N_SPECIES>0) M3%REAL_SEND_PKG1(LL+5:LL+4+N_SPECIES) = M%YYS(II,JJ,KK,1:N_SPECIES)
-                     LL = LL+4+N_SPECIES
-                  ENDDO
+         DO KK=KMIN,KMAX
+            DO JJ=JMIN,JMAX
+               DO II=IMIN,IMAX
+                  M3%REAL_SEND_PKG1(LL+1) = M%RHOS(II,JJ,KK)
+                  M3%REAL_SEND_PKG1(LL+2) = M%MU(II,JJ,KK)
+                  M3%REAL_SEND_PKG1(LL+3) = M%D(II,JJ,KK)
+                  IF (N_SPECIES>0) M3%REAL_SEND_PKG1(LL+4:LL+3+N_SPECIES) = M%YYS(II,JJ,KK,1:N_SPECIES)
+                  LL = LL+3+N_SPECIES
                ENDDO
             ENDDO
-         ENDDO PACK_REAL_SEND_PKG1
-         M3%REAL_SEND_PKG1(IWW*(4+N_SPECIES)+1) = -999.0_EB
+         ENDDO
          N_REQ=MIN(N_REQ+1,SIZE(REQ))
-         CALL MPI_ISEND(M3%REAL_SEND_PKG1(1),IWW*(4+N_SPECIES)+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+         CALL MPI_ISEND(M3%REAL_SEND_PKG1(1),IJK_SIZE*(3+N_SPECIES),MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
       ELSE
          M2=>MESHES(NOM)%OMESH(NM)
          M2%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= M%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
@@ -1563,67 +1567,29 @@ RECEIVING_MESH_LOOP: DO NOM=1,NMESHES
       IF (CORRECTOR) HP => M%HS
       IF (RNODE/=SNODE) THEN
          LL = 0
-         IWW = 0
-         PACK_REAL_SEND_PKG7: DO IW=1,M4%NEWC
-            IF (M3%IJKW(9,IW)/=NM) CYCLE PACK_REAL_SEND_PKG7
-            DO KK=M3%IJKW(12,IW),M3%IJKW(15,IW)
-               DO JJ=M3%IJKW(11,IW),M3%IJKW(14,IW)
-                  DO II=M3%IJKW(10,IW),M3%IJKW(13,IW)
-                     IWW = IWW + 1
-                     M3%REAL_SEND_PKG7(LL+1) = REAL(IW,EB)
-                     SELECT CASE(M3%IJKW(4,IW))
-                        CASE( 1)
-                           M3%REAL_SEND_PKG7(LL+2) = -M%FVX(II,JJ,KK)-(HP(II+1,JJ,KK)-HP(II,JJ,KK))*M%RDXN(II)
-                        CASE(-1)
-                           M3%REAL_SEND_PKG7(LL+2) = -M%FVX(II-1,JJ,KK)-(HP(II,JJ,KK)-HP(II-1,JJ,KK))*M%RDXN(II-1)
-                        CASE( 2)
-                           M3%REAL_SEND_PKG7(LL+2) = -M%FVY(II,JJ,KK)-(HP(II,JJ+1,KK)-HP(II,JJ,KK))*M%RDYN(JJ)
-                        CASE(-2)
-                           M3%REAL_SEND_PKG7(LL+2) = -M%FVY(II,JJ-1,KK)-(HP(II,JJ,KK)-HP(II,JJ-1,KK))*M%RDYN(JJ-1)
-                        CASE( 3)
-                           M3%REAL_SEND_PKG7(LL+2) = -M%FVZ(II,JJ,KK)-(HP(II,JJ,KK+1)-HP(II,JJ,KK))*M%RDZN(KK)
-                        CASE(-3)
-                           M3%REAL_SEND_PKG7(LL+2) = -M%FVZ(II,JJ,KK-1)-(HP(II,JJ,KK)-HP(II,JJ,KK-1))*M%RDZN(KK-1)
-                     END SELECT
-                     M3%REAL_SEND_PKG7(LL+3) = HP(II,JJ,KK)
-                     LL = LL+3
-                  ENDDO
+         DO KK=KMIN,KMAX
+            DO JJ=JMIN,JMAX
+               DO II=IMIN,IMAX
+                  M3%REAL_SEND_PKG7(LL+1) = M%FVX(II,JJ,KK)
+                  M3%REAL_SEND_PKG7(LL+2) = M%FVY(II,JJ,KK)
+                  M3%REAL_SEND_PKG7(LL+3) = M%FVZ(II,JJ,KK)
+                  M3%REAL_SEND_PKG7(LL+4) = HP(II,JJ,KK)
+                  LL = LL+4
                ENDDO
             ENDDO
-         ENDDO PACK_REAL_SEND_PKG7
-         M3%REAL_SEND_PKG7(IWW*3+1) = -999.0_EB
+         ENDDO
          IF (CODE==2) THEN
             N_PREQ=N_PREQ+1
-            CALL MPI_SEND_INIT(M3%REAL_SEND_PKG7(1),IWW*3+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,PREQ(N_PREQ),IERR)
+            CALL MPI_SEND_INIT(M3%REAL_SEND_PKG7(1),IJK_SIZE*4,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,PREQ(N_PREQ),IERR)
          ENDIF
       ELSE
          M2=>MESHES(NOM)%OMESH(NM)
          IF (PREDICTOR) HP2 => M2%H
          IF (CORRECTOR) HP2 => M2%HS
-         DO IW=1,M4%NEWC
-            IF (M3%IJKW(9,IW)/=NM) CYCLE
-            DO KK=M3%IJKW(12,IW),M3%IJKW(15,IW)
-               DO JJ=M3%IJKW(11,IW),M3%IJKW(14,IW)
-                  DO II=M3%IJKW(10,IW),M3%IJKW(13,IW)
-                     SELECT CASE(M3%IJKW(4,IW))
-                        CASE( 1)
-                           M2%DUDT(II,JJ,KK)   = -M%FVX(II,JJ,KK)-(HP(II+1,JJ,KK)-HP(II,JJ,KK))*M%RDXN(II)
-                        CASE(-1)
-                           M2%DUDT(II-1,JJ,KK) = -M%FVX(II-1,JJ,KK)-(HP(II,JJ,KK)-HP(II-1,JJ,KK))*M%RDXN(II-1)
-                        CASE( 2)
-                           M2%DVDT(II,JJ,KK)   = -M%FVY(II,JJ,KK)-(HP(II,JJ+1,KK)-HP(II,JJ,KK))*M%RDYN(JJ)
-                        CASE(-2)
-                           M2%DVDT(II,JJ-1,KK) = -M%FVY(II,JJ-1,KK)-(HP(II,JJ,KK)-HP(II,JJ-1,KK))*M%RDYN(JJ-1)
-                        CASE( 3)
-                           M2%DWDT(II,JJ,KK)   = -M%FVZ(II,JJ,KK)-(HP(II,JJ,KK+1)-HP(II,JJ,KK))*M%RDZN(KK)
-                        CASE(-3)
-                           M2%DWDT(II,JJ,KK-1) = -M%FVZ(II,JJ,KK-1)-(HP(II,JJ,KK)-HP(II,JJ,KK-1))*M%RDZN(KK-1)
-                     END SELECT
-                  ENDDO
-               ENDDO
-            ENDDO
-         ENDDO
-         HP2(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)  = HP(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+         M2%FVX(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVX(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+         M2%FVY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+         M2%FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+         HP2(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)    = HP(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
       ENDIF
    ENDIF
 
@@ -1632,29 +1598,19 @@ RECEIVING_MESH_LOOP: DO NOM=1,NMESHES
    IF (CODE==3 .AND. NIC(NOM,NM)>0) THEN
       IF (RNODE/=SNODE) THEN
          LL = 0
-         IWW = 0
-         PACK_REAL_SEND_PKG2: DO IW=1,M4%NEWC
-            IF (M3%IJKW(9,IW)/=NM) CYCLE PACK_REAL_SEND_PKG2
-            DO KK=M3%IJKW(12,IW),M3%IJKW(15,IW)
-               DO JJ=M3%IJKW(11,IW),M3%IJKW(14,IW)
-                  DO II=M3%IJKW(10,IW),M3%IJKW(13,IW)
-                     IWW = IWW + 1
-                     M3%REAL_SEND_PKG2(LL+1) = REAL(IW,EB)
-                     M3%REAL_SEND_PKG2(LL+2) = M%HS(II,JJ,KK)
-                     M3%REAL_SEND_PKG2(LL+3) = M%US(II,JJ,KK)
-                     M3%REAL_SEND_PKG2(LL+4) = M%VS(II,JJ,KK)
-                     M3%REAL_SEND_PKG2(LL+5) = M%WS(II,JJ,KK)
-                     M3%REAL_SEND_PKG2(LL+6) = M%US(II-1,JJ,KK)
-                     M3%REAL_SEND_PKG2(LL+7) = M%VS(II,JJ-1,KK)
-                     M3%REAL_SEND_PKG2(LL+8) = M%WS(II,JJ,KK-1)
-                     LL = LL+8
-                  ENDDO
+         DO KK=KMIN,KMAX
+            DO JJ=JMIN,JMAX
+               DO II=IMIN,IMAX
+                  M3%REAL_SEND_PKG2(LL+1) = M%HS(II,JJ,KK)
+                  M3%REAL_SEND_PKG2(LL+2) = M%US(II,JJ,KK)
+                  M3%REAL_SEND_PKG2(LL+3) = M%VS(II,JJ,KK)
+                  M3%REAL_SEND_PKG2(LL+4) = M%WS(II,JJ,KK)
+                  LL = LL+4
                ENDDO
             ENDDO
-         ENDDO PACK_REAL_SEND_PKG2
-         M3%REAL_SEND_PKG2(IWW*8+1) = -999.0_EB
+         ENDDO
          N_REQ=MIN(N_REQ+1,SIZE(REQ))
-         CALL MPI_ISEND(M3%REAL_SEND_PKG2(1),IWW*8+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+         CALL MPI_ISEND(M3%REAL_SEND_PKG2(1),IJK_SIZE*4,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
       ELSE
          M2=>MESHES(NOM)%OMESH(NM)
          M2%HS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%HS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
@@ -1669,26 +1625,19 @@ RECEIVING_MESH_LOOP: DO NOM=1,NMESHES
    IF (CODE==4 .AND. NIC(NOM,NM)>0) THEN
       IF (RNODE/=SNODE) THEN
          LL = 0
-         IWW = 0
-         PACK_REAL_SEND_PKG3: DO IW=1,M4%NEWC
-            IF (M3%IJKW(9,IW)/=NM) CYCLE PACK_REAL_SEND_PKG3
-            DO KK=M3%IJKW(12,IW),M3%IJKW(15,IW)
-               DO JJ=M3%IJKW(11,IW),M3%IJKW(14,IW)
-                  DO II=M3%IJKW(10,IW),M3%IJKW(13,IW)
-                     IWW = IWW + 1
-                     M3%REAL_SEND_PKG3(LL+1) = REAL(IW,EB)
-                     M3%REAL_SEND_PKG3(LL+2) = M%RHO(II,JJ,KK)
-                     M3%REAL_SEND_PKG3(LL+3) = M%MU(II,JJ,KK)
-                     M3%REAL_SEND_PKG3(LL+4) = M%DS(II,JJ,KK)
-                     IF (N_SPECIES>0) M3%REAL_SEND_PKG3(LL+5:LL+4+N_SPECIES) = M%YY(II,JJ,KK,1:N_SPECIES)
-                     LL = LL+4+N_SPECIES
-                  ENDDO
-                ENDDO
-             ENDDO
-         ENDDO PACK_REAL_SEND_PKG3
-         M3%REAL_SEND_PKG3(IWW*(4+N_SPECIES)+1) = -999.0_EB
+         DO KK=KMIN,KMAX
+            DO JJ=JMIN,JMAX
+               DO II=IMIN,IMAX
+                  M3%REAL_SEND_PKG3(LL+1) = M%RHO(II,JJ,KK)
+                  M3%REAL_SEND_PKG3(LL+2) = M%MU(II,JJ,KK)
+                  M3%REAL_SEND_PKG3(LL+3) = M%DS(II,JJ,KK)
+                  IF (N_SPECIES>0) M3%REAL_SEND_PKG3(LL+4:LL+3+N_SPECIES) = M%YY(II,JJ,KK,1:N_SPECIES)
+                  LL = LL+3+N_SPECIES
+               ENDDO
+            ENDDO
+         ENDDO
          N_REQ=MIN(N_REQ+1,SIZE(REQ))
-         CALL MPI_ISEND(M3%REAL_SEND_PKG3(1),IWW*(4+N_SPECIES)+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+         CALL MPI_ISEND(M3%REAL_SEND_PKG3(1),IJK_SIZE*(3+N_SPECIES),MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
       ELSE
          M2=>MESHES(NOM)%OMESH(NM)
          M2%RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
@@ -1715,29 +1664,19 @@ RECEIVING_MESH_LOOP: DO NOM=1,NMESHES
    IF (CODE==6 .AND. NIC(NOM,NM)>0) THEN
       IF (RNODE/=SNODE) THEN
          LL = 0
-         IWW = 0
-         PACK_REAL_SEND_PKG4: DO IW=1,M4%NEWC
-            IF (M3%IJKW(9,IW)/=NM) CYCLE PACK_REAL_SEND_PKG4
-            DO KK=M3%IJKW(12,IW),M3%IJKW(15,IW)
-               DO JJ=M3%IJKW(11,IW),M3%IJKW(14,IW)
-                  DO II=M3%IJKW(10,IW),M3%IJKW(13,IW)
-                     IWW = IWW + 1
-                     M3%REAL_SEND_PKG4(LL+1) = REAL(IW,EB)
-                     M3%REAL_SEND_PKG4(LL+2) = M%H(II,JJ,KK)
-                     M3%REAL_SEND_PKG4(LL+3) = M%U(II,JJ,KK)
-                     M3%REAL_SEND_PKG4(LL+4) = M%V(II,JJ,KK)
-                     M3%REAL_SEND_PKG4(LL+5) = M%W(II,JJ,KK)
-                     M3%REAL_SEND_PKG4(LL+6) = M%U(II-1,JJ,KK)
-                     M3%REAL_SEND_PKG4(LL+7) = M%V(II,JJ-1,KK)
-                     M3%REAL_SEND_PKG4(LL+8) = M%W(II,JJ,KK-1)
-                     LL = LL+8
-                  ENDDO
-                ENDDO
-             ENDDO
-         ENDDO PACK_REAL_SEND_PKG4
-         M3%REAL_SEND_PKG4(IWW*8+1) = -999.0_EB
+         DO KK=KMIN,KMAX
+            DO JJ=JMIN,JMAX
+               DO II=IMIN,IMAX
+                  M3%REAL_SEND_PKG4(LL+1) = M%H(II,JJ,KK)
+                  M3%REAL_SEND_PKG4(LL+2) = M%U(II,JJ,KK)
+                  M3%REAL_SEND_PKG4(LL+3) = M%V(II,JJ,KK)
+                  M3%REAL_SEND_PKG4(LL+4) = M%W(II,JJ,KK)
+                  LL = LL+4
+               ENDDO
+            ENDDO
+         ENDDO
          N_REQ=MIN(N_REQ+1,SIZE(REQ))
-         CALL MPI_ISEND(M3%REAL_SEND_PKG4(1),IWW*8+1,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
+         CALL MPI_ISEND(M3%REAL_SEND_PKG4(1),IJK_SIZE*4,MPI_DOUBLE_PRECISION,SNODE,TAG,MPI_COMM_WORLD,REQ(N_REQ),IERR)
       ELSE
          M2=>MESHES(NOM)%OMESH(NM)
          M2%H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%H(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
@@ -1921,6 +1860,13 @@ RECV_MESH_LOOP: DO NM=1,NMESHES
  
    TAG = TAGS(NM,NOM,CODE)
 
+   IMIN = I_MIN(NOM,NM)
+   IMAX = I_MAX(NOM,NM)
+   JMIN = J_MIN(NOM,NM)
+   JMAX = J_MAX(NOM,NM)
+   KMIN = K_MIN(NOM,NM)
+   KMAX = K_MAX(NOM,NM)
+     
    ! Receive information before the time stepping starts needed for radiation exchange
  
    IF (CODE==0 .AND. RADIATION) THEN
@@ -1938,21 +1884,17 @@ RECV_MESH_LOOP: DO NM=1,NMESHES
 
    IF (CODE==1 .AND. NIC(NOM,NM)>0 .AND. RNODE/=SNODE) THEN
       LL = 0
-      UNPACK_REAL_RECV_PKG1: DO 
-         IW = NINT(M2%REAL_RECV_PKG1(LL+1))
-         IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG1
-         DO KK=M4%IJKW(12,IW),M4%IJKW(15,IW)
-            DO JJ=M4%IJKW(11,IW),M4%IJKW(14,IW)
-               DO II=M4%IJKW(10,IW),M4%IJKW(13,IW)
-                  M2%RHOS(II,JJ,KK)  = M2%REAL_RECV_PKG1(LL+2)
-                  M2%MU(II,JJ,KK)    = M2%REAL_RECV_PKG1(LL+3)
-                  M2%D(II,JJ,KK)     = M2%REAL_RECV_PKG1(LL+4)
-                  IF (N_SPECIES>0) M2%YYS(II,JJ,KK,1:N_SPECIES)= M2%REAL_RECV_PKG1(LL+5:LL+4+N_SPECIES)
-                  LL = LL+4+N_SPECIES
-               ENDDO
+      DO KK=KMIN,KMAX
+         DO JJ=JMIN,JMAX
+            DO II=IMIN,IMAX
+               M2%RHOS(II,JJ,KK)  = M2%REAL_RECV_PKG1(LL+1)
+               M2%MU(II,JJ,KK)    = M2%REAL_RECV_PKG1(LL+2)
+               M2%D(II,JJ,KK)     = M2%REAL_RECV_PKG1(LL+3)
+               IF (N_SPECIES>0) M2%YYS(II,JJ,KK,1:N_SPECIES)= M2%REAL_RECV_PKG1(LL+4:LL+3+N_SPECIES)
+               LL = LL+3+N_SPECIES
             ENDDO
          ENDDO
-      ENDDO UNPACK_REAL_RECV_PKG1
+      ENDDO
    ENDIF 
 
    ! Unpack densities and species mass fractions following PREDICTOR exchange
@@ -1961,101 +1903,68 @@ RECV_MESH_LOOP: DO NM=1,NMESHES
       LL = 0
       IF (PREDICTOR) HP => M2%H
       IF (CORRECTOR) HP => M2%HS
-      UNPACK_REAL_RECV_PKG7: DO
-         IW = NINT(M2%REAL_RECV_PKG7(LL+1))
-         IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG7
-         DO KK=M4%IJKW(12,IW),M4%IJKW(15,IW)
-            DO JJ=M4%IJKW(11,IW),M4%IJKW(14,IW)
-               DO II=M4%IJKW(10,IW),M4%IJKW(13,IW)
-                  SELECT CASE(M4%IJKW(4,IW))
-                     CASE( 1)
-                        M2%DUDT(II,JJ,KK)   = M2%REAL_RECV_PKG7(LL+2)
-                     CASE(-1)
-                        M2%DUDT(II-1,JJ,KK) = M2%REAL_RECV_PKG7(LL+2)
-                     CASE( 2)
-                        M2%DVDT(II,JJ,KK)   = M2%REAL_RECV_PKG7(LL+2)
-                     CASE(-2)
-                        M2%DVDT(II,JJ-1,KK) = M2%REAL_RECV_PKG7(LL+2)
-                     CASE( 3)
-                        M2%DWDT(II,JJ,KK)   = M2%REAL_RECV_PKG7(LL+2)
-                     CASE(-3)
-                        M2%DWDT(II,JJ,KK-1) = M2%REAL_RECV_PKG7(LL+2)
-                  END SELECT
-                  HP(II,JJ,KK) = M2%REAL_RECV_PKG7(LL+3)
-                  LL = LL+3
-               ENDDO
+      DO KK=KMIN,KMAX
+         DO JJ=JMIN,JMAX
+            DO II=IMIN,IMAX
+               M2%FVX(II,JJ,KK) = M2%REAL_RECV_PKG7(LL+1)
+               M2%FVY(II,JJ,KK) = M2%REAL_RECV_PKG7(LL+2)
+               M2%FVZ(II,JJ,KK) = M2%REAL_RECV_PKG7(LL+3)
+               HP(II,JJ,KK)     = M2%REAL_RECV_PKG7(LL+4)
+               LL = LL+4
             ENDDO
          ENDDO
-      ENDDO UNPACK_REAL_RECV_PKG7
+      ENDDO
    ENDIF
 
    ! Unpack pressure following PREDICTOR stage of time step
  
    IF (CODE==3 .AND. NIC(NOM,NM)>0 .AND. RNODE/=SNODE) THEN
       LL = 0
-      UNPACK_REAL_RECV_PKG2: DO
-         IW = NINT(M2%REAL_RECV_PKG2(LL+1))
-         IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG2
-         DO KK=M4%IJKW(12,IW),M4%IJKW(15,IW)
-            DO JJ=M4%IJKW(11,IW),M4%IJKW(14,IW)
-               DO II=M4%IJKW(10,IW),M4%IJKW(13,IW)
-                  M2%HS(II,JJ,KK)   = M2%REAL_RECV_PKG2(LL+2)
-                  M2%US(II,JJ,KK)   = M2%REAL_RECV_PKG2(LL+3)
-                  M2%VS(II,JJ,KK)   = M2%REAL_RECV_PKG2(LL+4)
-                  M2%WS(II,JJ,KK)   = M2%REAL_RECV_PKG2(LL+5)
-                  M2%US(II-1,JJ,KK) = M2%REAL_RECV_PKG2(LL+6)
-                  M2%VS(II,JJ-1,KK) = M2%REAL_RECV_PKG2(LL+7)
-                  M2%WS(II,JJ,KK-1) = M2%REAL_RECV_PKG2(LL+8)
-                  LL = LL+8
-               ENDDO
+      DO KK=KMIN,KMAX
+         DO JJ=JMIN,JMAX
+            DO II=IMIN,IMAX
+               M2%HS(II,JJ,KK)   = M2%REAL_RECV_PKG2(LL+1)
+               M2%US(II,JJ,KK)   = M2%REAL_RECV_PKG2(LL+2)
+               M2%VS(II,JJ,KK)   = M2%REAL_RECV_PKG2(LL+3)
+               M2%WS(II,JJ,KK)   = M2%REAL_RECV_PKG2(LL+4)
+               LL = LL+4
             ENDDO
          ENDDO
-      ENDDO UNPACK_REAL_RECV_PKG2
+      ENDDO
    ENDIF 
 
    ! Unpack density and species mass fractions following CORRECTOR update
 
    IF (CODE==4 .AND. NIC(NOM,NM)>0 .AND. RNODE/=SNODE) THEN
       LL = 0
-      UNPACK_REAL_RECV_PKG3: DO 
-         IW = NINT(M2%REAL_RECV_PKG3(LL+1))
-         IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG3
-         DO KK=M4%IJKW(12,IW),M4%IJKW(15,IW)
-            DO JJ=M4%IJKW(11,IW),M4%IJKW(14,IW)
-               DO II=M4%IJKW(10,IW),M4%IJKW(13,IW)
-                  M2%RHO(II,JJ,KK) = M2%REAL_RECV_PKG3(LL+2)
-                  M2%MU(II,JJ,KK)  = M2%REAL_RECV_PKG3(LL+3)
-                  M2%DS(II,JJ,KK)  = M2%REAL_RECV_PKG3(LL+4)
-                  IF (N_SPECIES>0) M2%YY(II,JJ,KK,1:N_SPECIES)= M2%REAL_RECV_PKG3(LL+5:LL+4+N_SPECIES)
-                  LL = LL+4+N_SPECIES
-               ENDDO
+      DO KK=KMIN,KMAX
+         DO JJ=JMIN,JMAX
+            DO II=IMIN,IMAX
+               M2%RHO(II,JJ,KK) = M2%REAL_RECV_PKG3(LL+1)
+               M2%MU(II,JJ,KK)  = M2%REAL_RECV_PKG3(LL+2)
+               M2%DS(II,JJ,KK)  = M2%REAL_RECV_PKG3(LL+3)
+               IF (N_SPECIES>0) M2%YY(II,JJ,KK,1:N_SPECIES)= M2%REAL_RECV_PKG3(LL+4:LL+3+N_SPECIES)
+               LL = LL+3+N_SPECIES
             ENDDO
          ENDDO
-      ENDDO UNPACK_REAL_RECV_PKG3
+      ENDDO
    ENDIF
 
    ! Unpack pressure and velocities at the end of the CORRECTOR stage of the time step
  
    IF (CODE==6 .AND. NIC(NOM,NM)>0 .AND. RNODE/=SNODE) THEN
       LL = 0
-      UNPACK_REAL_RECV_PKG4: DO
-         IW = NINT(M2%REAL_RECV_PKG4(LL+1))
-         IF (IW==-999) EXIT UNPACK_REAL_RECV_PKG4
-         DO KK=M4%IJKW(12,IW),M4%IJKW(15,IW)
-            DO JJ=M4%IJKW(11,IW),M4%IJKW(14,IW)
-               DO II=M4%IJKW(10,IW),M4%IJKW(13,IW)
-                  M2%H(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+2)
-                  M2%U(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+3)
-                  M2%V(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+4)
-                  M2%W(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+5)
-                  M2%U(II-1,JJ,KK) = M2%REAL_RECV_PKG4(LL+6)
-                  M2%V(II,JJ-1,KK) = M2%REAL_RECV_PKG4(LL+7)
-                  M2%W(II,JJ,KK-1) = M2%REAL_RECV_PKG4(LL+8)
-                  LL = LL+8
-               ENDDO
+      DO KK=KMIN,KMAX
+         DO JJ=JMIN,JMAX
+            DO II=IMIN,IMAX
+               M2%H(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+1)
+               M2%U(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+2)
+               M2%V(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+3)
+               M2%W(II,JJ,KK)   = M2%REAL_RECV_PKG4(LL+4)
+               LL = LL+4
             ENDDO
          ENDDO
-      ENDDO UNPACK_REAL_RECV_PKG4
+      ENDDO
    ENDIF
 
    ! Unpack radiation information at the end of the CORRECTOR stage of the time step
