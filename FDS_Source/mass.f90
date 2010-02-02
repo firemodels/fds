@@ -1446,7 +1446,7 @@ REAL(EB) :: ZZ(4),TNOW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,YYP,FX,FY,FZ
 TYPE (SURFACE_TYPE), POINTER :: SF
-TYPE (MESH_TYPE), POINTER :: M2
+TYPE (OMESH_TYPE), POINTER :: M2
 
 ! Notes:
 !
@@ -1617,7 +1617,7 @@ WALL_LOOP: DO IW=1,NWC
          IIO = IJKW(10,IW)
          JJO = IJKW(11,IW)
          KKO = IJKW(12,IW)
-         M2  => MESHES(NOM)
+         M2  => OMESH(NOM)
       
          SELECT CASE(IOR)
             CASE( 1)
@@ -1826,7 +1826,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             IIO = IJKW(10,IW)
             JJO = IJKW(11,IW)
             KKO = IJKW(12,IW)
-            M2  => MESHES(NOM)
+            M2  => OMESH(NOM)
                
             SELECT CASE(IOR)
                CASE( 1)
