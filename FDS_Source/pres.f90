@@ -204,7 +204,7 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (UU(0,J,K)<0._EB) THEN
                   IF (.NOT.BAROCLINIC2) BXS(J,K) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BXS(J,K) = P_EXTERNAL/RHO_W(IW) + HQ2
+                  IF (BAROCLINIC2)      BXS(J,K) = P_EXTERNAL/RHO_W(IW) + KRES(0,J,K)
                ELSE
                   !BXS(J,K) = H_EXTERNAL + H0RR(1) + HQ2*HFAC
                   IF (.NOT.BAROCLINIC2) BXS(J,K) = H_EXTERNAL + H0RR(1) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
@@ -217,7 +217,7 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (UU(IBAR,J,K)>0._EB) THEN
                   IF (.NOT.BAROCLINIC2) BXF(J,K) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BXF(J,K) = P_EXTERNAL/RHO_W(IW) + HQ2
+                  IF (BAROCLINIC2)      BXF(J,K) = P_EXTERNAL/RHO_W(IW) + KRES(IBP1,J,K)
                ELSE
                   !BXF(J,K) = H_EXTERNAL + H0RR(2) + HQ2*HFAC
                   IF (.NOT.BAROCLINIC2) BXF(J,K) = H_EXTERNAL + H0RR(2) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
@@ -230,7 +230,7 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (VV(I,0,K)<0._EB) THEN
                   IF (.NOT.BAROCLINIC2) BYS(I,K) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BYS(I,K) = P_EXTERNAL/RHO_W(IW) + HQ2
+                  IF (BAROCLINIC2)      BYS(I,K) = P_EXTERNAL/RHO_W(IW) + KRES(I,0,K)
                ELSE
                   !BYS(I,K) = H_EXTERNAL + H0RR(3) + HQ2*HFAC
                   IF (.NOT.BAROCLINIC2) BYS(I,K) = H_EXTERNAL + H0RR(3) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
@@ -243,7 +243,7 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (VV(I,JBAR,K)>0._EB) THEN
                   IF (.NOT.BAROCLINIC2) BYF(I,K) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BYF(I,K) = P_EXTERNAL/RHO_W(IW) + HQ2
+                  IF (BAROCLINIC2)      BYF(I,K) = P_EXTERNAL/RHO_W(IW) + KRES(I,JBP1,K)
                ELSE
                   !BYF(I,K) = H_EXTERNAL + H0RR(4) + HQ2*HFAC
                   IF (.NOT.BAROCLINIC2) BYF(I,K) = H_EXTERNAL + H0RR(4) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
@@ -256,7 +256,7 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (WW(I,J,0)<0._EB) THEN
                   IF (.NOT.BAROCLINIC2) BZS(I,J) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BZS(I,J) = P_EXTERNAL/RHO_W(IW) + HQ2
+                  IF (BAROCLINIC2)      BZS(I,J) = P_EXTERNAL/RHO_W(IW) + KRES(I,J,0)
                ELSE
                   !BZS(I,J) = H_EXTERNAL + H0RR(5) + HQ2*HFAC
                   IF (.NOT.BAROCLINIC2) BZS(I,J) = H_EXTERNAL + H0RR(5) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
@@ -269,7 +269,7 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (WW(I,J,KBAR)>0._EB) THEN
                   IF (.NOT.BAROCLINIC2) BZF(I,J) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BZF(I,J) = P_EXTERNAL/RHO_W(IW) + HQ2
+                  IF (BAROCLINIC2)      BZF(I,J) = P_EXTERNAL/RHO_W(IW) + KRES(I,J,KBP1)
                ELSE
                   !BZF(I,J) = H_EXTERNAL + H0RR(6) + HQ2*HFAC
                   IF (.NOT.BAROCLINIC2) BZF(I,J) = H_EXTERNAL + H0RR(6) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)

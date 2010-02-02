@@ -1094,7 +1094,7 @@ SUBROUTINE VELOCITY_PREDICTOR(NM,STOP_STATUS)
 
 ! Estimates the velocity components at the next time step
 
-REAL(EB) :: TNOW
+REAL(EB) :: TNOW,U2,V2,W2
 INTEGER  :: STOP_STATUS,I,J,K
 INTEGER, INTENT(IN) :: NM
 
@@ -1140,6 +1140,20 @@ ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
+IF (BAROCLINIC2) THEN
+   ! compute resolved kinetic energy per unit mass
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            U2 = 0.25_EB*(US(I-1,J,K)+US(I,J,K))**2
+            V2 = 0.25_EB*(VS(I,J-1,K)+VS(I,J,K))**2
+            W2 = 0.25_EB*(WS(I,J,K-1)+WS(I,J,K))**2
+            KRES(I,J,K) = 0.5_EB*(U2+V2+W2)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
 IF (EVACUATION_ONLY(NM)) WS = 0._EB
 
 ! Check the stability criteria, and if the time step is too small, send back a signal to kill the job
@@ -1160,7 +1174,7 @@ USE TURBULENCE, ONLY: TURBULENT_KINETIC_ENERGY
 
 ! Correct the velocity components
 
-REAL(EB) :: TNOW
+REAL(EB) :: TNOW,U2,V2,W2
 INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
  
@@ -1202,6 +1216,20 @@ DO K=0,KBAR
 ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
+
+IF (BAROCLINIC2) THEN
+   ! compute resolved kinetic energy per unit mass
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            U2 = 0.25_EB*(U(I-1,J,K)+U(I,J,K))**2
+            V2 = 0.25_EB*(V(I,J-1,K)+V(I,J,K))**2
+            W2 = 0.25_EB*(W(I,J,K-1)+W(I,J,K))**2
+            KRES(I,J,K) = 0.5_EB*(U2+V2+W2)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
 
 IF (EVACUATION_ONLY(NM)) W = 0._EB
 
@@ -2270,10 +2298,9 @@ END SUBROUTINE BAROCLINIC_CORRECTION
 
 SUBROUTINE BAROCLINIC_CORRECTION2
  
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,RHMK,RRHO
-REAL(EB) :: U2,V2,W2
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,HP,RHMK,RRHO
 INTEGER  :: I,J,K
- 
+
 RHMK => WORK1 ! rho*(H-K)
 RRHO => WORK2 ! reciprocal of rho
  
@@ -2282,30 +2309,27 @@ IF (PREDICTOR) THEN
    VV => V
    WW => W
    RHOP=>RHO
+   HP => H
 ELSE
    UU => US
    VV => VS
    WW => WS
    RHOP=>RHOS
+   HP => HS
 ENDIF
  
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         U2 = 0.25_EB*(UU(I,J,K)+UU(I-1,J,K))**2
-         V2 = 0.25_EB*(VV(I,J,K)+VV(I,J-1,K))**2
-         W2 = 0.25_EB*(WW(I,J,K)+WW(I,J,K-1))**2
-         RHMK(I,J,K) = RHOP(I,J,K)*(H(I,J,K)-0.5_EB*(U2+V2+W2))
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1         
+         RHMK(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRES(I,J,K))
          RRHO(I,J,K) = 1._EB/RHOP(I,J,K)
       ENDDO
    ENDDO
 ENDDO
 
-! For the moment, I do not apply baro2 at boundaries
-
 DO K=1,KBAR
    DO J=1,JBAR
-      DO I=1,IBM1
+      DO I=0,IBAR
          FVX(I,J,K) = FVX(I,J,K) - 0.5_EB*(RHMK(I,J,K)+RHMK(I+1,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)
       ENDDO
    ENDDO
@@ -2313,7 +2337,7 @@ ENDDO
  
 IF (.NOT.TWO_D) THEN
    DO K=1,KBAR
-      DO J=1,JBM1
+      DO J=0,JBAR
          DO I=1,IBAR
             FVY(I,J,K) = FVY(I,J,K) - 0.5_EB*(RHMK(I,J,K)+RHMK(I,J+1,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)
          ENDDO
@@ -2321,7 +2345,7 @@ IF (.NOT.TWO_D) THEN
    ENDDO
 ENDIF
 
-DO K=1,KBM1
+DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          FVZ(I,J,K) = FVZ(I,J,K) - 0.5_EB*(RHMK(I,J,K)+RHMK(I,J,K+1))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)
