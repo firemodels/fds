@@ -576,7 +576,7 @@ MAIN_LOOP: DO
       
       IF (FLUX_LIMITER>=0) THEN
          DO NM=1,NMESHES
-            CALL SCALARF(NM) ! keep within time step loop
+            IF (PROCESS(NM)==MYID .AND. ACTIVE_MESH(NM)) CALL SCALARF(NM) ! keep within time step loop
          ENDDO
       ENDIF
  
@@ -756,7 +756,7 @@ MAIN_LOOP: DO
    
    IF (FLUX_LIMITER>=0) THEN
       DO NM=1,NMESHES
-         CALL SCALARF(NM)
+         IF (PROCESS(NM)==MYID .AND. ACTIVE_MESH(NM)) CALL SCALARF(NM)
       ENDDO
    ENDIF
 
