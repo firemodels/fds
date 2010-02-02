@@ -1513,13 +1513,13 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBM1
          ZZ(1:4) = RHOP(I-1:I+2,J,K)
-         ICM = CELL_INDEX(I,J,K)
-         ICP = CELL_INDEX(I+1,J,K)
-         IF (WALL_INDEX(ICM,-1)==0 .AND. WALL_INDEX(ICP,1)==0) THEN
+         !ICM = CELL_INDEX(I,J,K)
+         !ICP = CELL_INDEX(I+1,J,K)
+         !IF (WALL_INDEX(ICM,-1)==0 .AND. WALL_INDEX(ICP,1)==0) THEN
             FX(I,J,K,0) = R(I)*UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)
-         ELSE
-            FX(I,J,K,0) = R(I)*UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,1)
-         ENDIF
+         !ELSE
+         !   FX(I,J,K,0) = R(I)*UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,1)
+         !ENDIF
       ENDDO
    ENDDO
 ENDDO
@@ -1528,13 +1528,13 @@ DO K=1,KBAR
    DO J=1,JBM1
       DO I=1,IBAR
          ZZ(1:4) = RHOP(I,J-1:J+2,K)
-         ICM = CELL_INDEX(I,J,K)
-         ICP = CELL_INDEX(I,J+1,K)
-         IF (WALL_INDEX(ICM,-2)==0 .AND. WALL_INDEX(ICP,2)==0) THEN
+         !ICM = CELL_INDEX(I,J,K)
+         !ICP = CELL_INDEX(I,J+1,K)
+         !IF (WALL_INDEX(ICM,-2)==0 .AND. WALL_INDEX(ICP,2)==0) THEN
             FY(I,J,K,0) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
-         ELSE
-            FY(I,J,K,0) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,1)
-         ENDIF
+         !ELSE
+         !   FY(I,J,K,0) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,1)
+         !ENDIF
       ENDDO
    ENDDO
 ENDDO
@@ -1543,13 +1543,13 @@ DO K=1,KBM1
    DO J=1,JBAR
       DO I=1,IBAR
          ZZ(1:4) = RHOP(I,J,K-1:K+2)
-         ICM = CELL_INDEX(I,J,K)
-         ICP = CELL_INDEX(I,J,K+1)
-         IF (WALL_INDEX(ICM,-3)==0 .AND. WALL_INDEX(ICP,3)==0) THEN
-            FZ(I,J,K,0) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
-         ELSE
-            FZ(I,J,K,0) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,1)
-         ENDIF
+         !ICM = CELL_INDEX(I,J,K)
+         !ICP = CELL_INDEX(I,J,K+1)
+         !IF (WALL_INDEX(ICM,-3)==0 .AND. WALL_INDEX(ICP,3)==0) THEN
+           FZ(I,J,K,0) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
+         !ELSE
+         !   FZ(I,J,K,0) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,1)
+         !ENDIF
       ENDDO
    ENDDO
 ENDDO
@@ -1621,40 +1621,52 @@ WALL_LOOP: DO IW=1,NWC
       
          SELECT CASE(IOR)
             CASE( 1)
-               ZZ(1) = M2%RHO(IIO-1,JJO,KKO)
-               ZZ(2) = RHO_W(IW)
+               IF (PREDICTOR) ZZ(1) = M2%RHO(IIO-1,JJO,KKO)
+               IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO-1,JJO,KKO)
+               IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)
+               IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                ZZ(4) = RHOP(IIG+1,JJG,KKG)
                FX(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)*R(II)
             CASE(-1)
                ZZ(1) = RHOP(IIG-1,JJG,KKG)
                ZZ(2) = RHOP(IIG,JJG,KKG)
-               ZZ(3) = RHO_W(IW)
-               ZZ(4) = M2%RHO(IIO+1,JJO,KKO)
+               IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)
+               IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)
+               IF (PREDICTOR) ZZ(4) = M2%RHO(IIO+1,JJO,KKO)
+               IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO+1,JJO,KKO)
                FX(II-1,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)*R(II-1)
             CASE( 2)
-               ZZ(1) = M2%RHO(IIO,JJO-1,KKO)
-               ZZ(2) = RHO_W(IW)
+               IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO-1,KKO)
+               IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO,JJO-1,KKO)
+               IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)
+               IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                ZZ(4) = RHOP(IIG,JJG+1,KKG)
                FY(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
             CASE(-2)
                ZZ(1) = RHOP(IIG,JJG-1,KKG)
                ZZ(2) = RHOP(IIG,JJG,KKG)
-               ZZ(3) = RHO_W(IW)
-               ZZ(4) = M2%RHO(IIO,JJO+1,KKO)
+               IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)
+               IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)
+               IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO+1,KKO)
+               IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO+1,KKO)
                FY(II,JJ-1,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
             CASE( 3)
-               ZZ(1) = M2%RHO(IIO,JJO,KKO-1)
-               ZZ(2) = RHO_W(IW)
+               IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO,KKO-1)
+               IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO,JJO,KKO-1)
+               IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)
+               IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                ZZ(4) = RHOP(IIG,JJG,KKG+1)
                FZ(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
             CASE(-3)
                ZZ(1) = RHOP(IIG,JJG,KKG-1)
                ZZ(2) = RHOP(IIG,JJG,KKG)
-               ZZ(3) = RHO_W(IW)
-               ZZ(4) = M2%RHO(IIO,JJO,KKO+1)
+               IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)
+               IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)
+               IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO,KKO+1)
+               IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO,KKO+1)
                FZ(II,JJ,KK-1,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
          END SELECT
             
@@ -1710,13 +1722,13 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO J=1,JBAR
          DO I=1,IBM1
             ZZ(1:4) = RHOYYP(I-1:I+2,J,K,N)
-            ICM = CELL_INDEX(I,J,K)
-            ICP = CELL_INDEX(I+1,J,K)
-            IF (WALL_INDEX(ICM,-1)==0 .AND. WALL_INDEX(ICP,1)==0) THEN
+            !ICM = CELL_INDEX(I,J,K)
+            !ICP = CELL_INDEX(I+1,J,K)
+            !IF (WALL_INDEX(ICM,-1)==0 .AND. WALL_INDEX(ICP,1)==0) THEN
                FX(I,J,K,N) = R(I)*(FX(I,J,K,N) + UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER))
-            ELSE
-               FX(I,J,K,N) = R(I)*(FX(I,J,K,N) + UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,1))
-            ENDIF
+            !ELSE
+            !   FX(I,J,K,N) = R(I)*(FX(I,J,K,N) + UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,1))
+            !ENDIF
          ENDDO
       ENDDO
    ENDDO
@@ -1725,13 +1737,13 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO J=1,JBM1
          DO I=1,IBAR
             ZZ(1:4) = RHOYYP(I,J-1:J+2,K,N)
-            ICM = CELL_INDEX(I,J,K)
-            ICP = CELL_INDEX(I,J+1,K)
-            IF (WALL_INDEX(ICM,-2)==0 .AND. WALL_INDEX(ICP,2)==0) THEN
+            !ICM = CELL_INDEX(I,J,K)
+            !ICP = CELL_INDEX(I,J+1,K)
+            !IF (WALL_INDEX(ICM,-2)==0 .AND. WALL_INDEX(ICP,2)==0) THEN
                FY(I,J,K,N) = FY(I,J,K,N) + VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
-            ELSE
-               FY(I,J,K,N) = FY(I,J,K,N) + VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,1)
-            ENDIF
+            !ELSE
+            !   FY(I,J,K,N) = FY(I,J,K,N) + VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,1)
+            !ENDIF
          ENDDO
       ENDDO
    ENDDO
@@ -1740,13 +1752,13 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO J=1,JBAR
          DO I=1,IBAR
             ZZ(1:4) = RHOYYP(I,J,K-1:K+2,N)
-            ICM = CELL_INDEX(I,J,K)
-            ICP = CELL_INDEX(I,J,K+1)
-            IF (WALL_INDEX(ICM,-3)==0 .AND. WALL_INDEX(ICP,3)==0) THEN
+            !ICM = CELL_INDEX(I,J,K)
+            !ICP = CELL_INDEX(I,J,K+1)
+            !IF (WALL_INDEX(ICM,-3)==0 .AND. WALL_INDEX(ICP,3)==0) THEN
                FZ(I,J,K,N) = FZ(I,J,K,N) + WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
-            ELSE
-               FZ(I,J,K,N) = FZ(I,J,K,N) + WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,1)
-            ENDIF
+            !ELSE
+            !   FZ(I,J,K,N) = FZ(I,J,K,N) + WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,1)
+            !ENDIF
          ENDDO
       ENDDO
    ENDDO
@@ -1818,40 +1830,52 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                
             SELECT CASE(IOR)
                CASE( 1)
-                  ZZ(1) = M2%RHO(IIO-1,JJO,KKO)*M2%YY(IIO-1,JJO,KKO,N)
-                  ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+                  IF (PREDICTOR) ZZ(1) = M2%RHO(IIO-1,JJO,KKO)*M2%YY(IIO-1,JJO,KKO,N)
+                  IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO-1,JJO,KKO)*M2%YYS(IIO-1,JJO,KKO,N)
+                  IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
+                  IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)                  
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(4) = RHOYYP(IIG+1,JJG,KKG,N)
                   FX(II,JJ,KK,N) = (FX(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER))*R(II)
                CASE(-1)
                   ZZ(1) = RHOYYP(IIG-1,JJG,KKG,N)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(3) = RHO_W(IW)*YY_W(IW,N)
-                  ZZ(4) = M2%RHO(IIO+1,JJO,KKO)*M2%YY(IIO+1,JJO,KKO,N)
+                  IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
+                  IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
+                  IF (PREDICTOR) ZZ(4) = M2%RHO(IIO+1,JJO,KKO)*M2%YY(IIO+1,JJO,KKO,N)
+                  IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO+1,JJO,KKO)*M2%YYS(IIO+1,JJO,KKO,N)
                   FX(II-1,JJ,KK,N) = (FX(II-1,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER))*R(II-1)
                CASE( 2)
-                  ZZ(1) = M2%RHO(IIO,JJO-1,KKO)*M2%YY(IIO,JJO-1,KKO,N)
-                  ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+                  IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO-1,KKO)*M2%YY(IIO,JJO-1,KKO,N)
+                  IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO,JJO-1,KKO)*M2%YYS(IIO,JJO-1,KKO,N)
+                  IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
+                  IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(4) = RHOYYP(IIG,JJG+1,KKG,N)
                   FY(II,JJ,KK,N) = FY(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
                CASE(-2)
                   ZZ(1) = RHOYYP(IIG,JJG-1,KKG,N)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(3) = RHO_W(IW)*YY_W(IW,N)
-                  ZZ(4) = M2%RHO(IIO,JJO+1,KKO)*M2%YY(IIO,JJO+1,KKO,N)
+                  IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
+                  IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
+                  IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO+1,KKO)*M2%YY(IIO,JJO+1,KKO,N)
+                  IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO+1,KKO)*M2%YYS(IIO,JJO+1,KKO,N)
                   FY(II,JJ-1,KK,N) = FY(II,JJ-1,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
                CASE( 3)
-                  ZZ(1) = M2%RHO(IIO,JJO,KKO-1)*M2%YY(IIO,JJO,KKO-1,N)
-                  ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+                  IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO,KKO-1)*M2%YY(IIO,JJO,KKO-1,N)
+                  IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO,JJO,KKO-1)*M2%YYS(IIO,JJO,KKO-1,N)
+                  IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
+                  IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(4) = RHOYYP(IIG,JJG,KKG+1,N)
                   FZ(II,JJ,KK,N) = FZ(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
                CASE(-3)
                   ZZ(1) = RHOYYP(IIG,JJG,KKG-1,N)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(3) = RHO_W(IW)*YY_W(IW,N)
-                  ZZ(4) = M2%RHO(IIO,JJO,KKO+1)*M2%YY(IIO,JJO,KKO+1,N)
+                  IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
+                  IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
+                  IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO,KKO+1)*M2%YY(IIO,JJO,KKO+1,N)
+                  IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO,KKO+1)*M2%YYS(IIO,JJO,KKO+1,N)
                   FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
             END SELECT
             

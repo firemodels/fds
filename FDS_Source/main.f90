@@ -573,13 +573,19 @@ MAIN_LOOP: DO
       IF (FIRST_PASS .OR. SYNCHRONIZE) CALL POST_RECEIVES(1)  
 
       ! Predict density and mass fractions at next time step, and then start the divergence calculation
+      
+      IF (FLUX_LIMITER>=0) THEN
+         DO NM=1,NMESHES
+            CALL SCALARF(NM) ! keep within time step loop
+         ENDDO
+      ENDIF
  
       COMPUTE_DENSITY_LOOP: DO NM=1,NMESHES
          IF (PROCESS(NM)/=MYID)    CYCLE COMPUTE_DENSITY_LOOP
          IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DENSITY_LOOP
          IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
             IF (FLUX_LIMITER>=0) THEN
-               CALL SCALARF(NM) ! leave this here
+               !CALL SCALARF(NM)
                CALL DENSITY_TVD(NM)
             ELSE
                CALL DENSITY(NM)
@@ -747,6 +753,12 @@ MAIN_LOOP: DO
    CALL POST_RECEIVES(4)
 
    ! Finite differences for mass and momentum equations for the second half of the time step
+   
+   IF (FLUX_LIMITER>=0) THEN
+      DO NM=1,NMESHES
+         CALL SCALARF(NM)
+      ENDDO
+   ENDIF
 
    COMPUTE_FINITE_DIFFERENCES_2: DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID)    CYCLE COMPUTE_FINITE_DIFFERENCES_2
@@ -755,7 +767,7 @@ MAIN_LOOP: DO
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,1)
       IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
          IF (FLUX_LIMITER>=0) THEN
-            CALL SCALARF(NM) ! leave this here
+            !CALL SCALARF(NM)
             CALL DENSITY_TVD(NM)
          ELSE
             CALL MASS_FINITE_DIFFERENCES(NM)
