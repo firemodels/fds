@@ -416,6 +416,10 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
    IIG = IJKW(6,IW)
    JJG = IJKW(7,IW)
    KKG = IJKW(8,IW)
+   
+   ! Resolved kinetic energy
+   
+   KRES(II,JJ,KK) = KRES(IIG,JJG,KKG) ! this is overwritten at INTERPOLATED_BC
 
    ! Check if suppression by water is to be applied
 
@@ -610,6 +614,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          YY_OTHER(1:N_SPECIES) = RHO_YY_OTHER(1:N_SPECIES)/RHO_W(IW)
          YY_W(IW,1:N_SPECIES)  = YY_OTHER(1:N_SPECIES)
          YYP(II,JJ,KK,1:N_SPECIES) = YY_W(IW,1:N_SPECIES)
+         KRES(II,JJ,KK) = MESHES(NOM)%KRES(IIO,JJO,KKO)
 
       CASE (HVAC_BOUNDARY)
          VT => VENTS(VENT_INDEX(IW))
