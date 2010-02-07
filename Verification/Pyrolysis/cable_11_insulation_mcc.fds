@@ -1,0 +1,80 @@
+&HEAD CHID='cable_11_insulation_mcc', TITLE='Micro-Calorimetry Test of Cable Insulation Material' / 
+
+&MESH IJK=3,1,4, XB=-2,2,-0.5,0.5,0,1 /  
+
+&TIME TWFIN=800., WALL_INCREMENT=1, DT=0.01 /  
+
+&MISC SOLID_PHASE_ONLY=.TRUE. /
+
+&RADI NUMBER_RADIATION_ANGLES=20 /
+&REAC ID='NO REACTION', Y_O2_INFTY=0.01, HEAT_OF_COMBUSTION=26026. /  No gas phase reaction
+&DUMP DT_PL3D = 10000000. /
+
+&VENT MB='XMIN', SURF_ID='HOT' /
+&VENT MB='XMAX', SURF_ID='HOT' /
+&VENT MB='ZMAX', SURF_ID='HOT' /
+&VENT XB=-2,-1,-0.5,0.5,0.0,0.0, SURF_ID='HOT' /
+&VENT XB= 1, 2,-0.5,0.5,0.0,0.0, SURF_ID='HOT' /
+&VENT XB=-1, 1,-0.5,0.5,0.0,0.0, SURF_ID='SAMPLE' /
+
+&SURF ID = 'SAMPLE'
+      RGB =200,100,0
+      BACKING = 'INSULATED' 
+      THICKNESS = 0.00001
+      H_FIXED = 0.
+      MATL_ID(1,1) = 'COMP A',
+      MATL_ID(1,2) = 'COMP B'
+      MATL_MASS_FRACTION(1,:) = 0.05,0.95 /  
+
+&MATL ID                    = 'COMP A'
+      EMISSIVITY            = 1.0
+      DENSITY               = 1000.
+      CONDUCTIVITY          = 0.2
+      SPECIFIC_HEAT         = 1.5
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 355.
+      REFERENCE_RATE        = 0.00192
+      REFERENCE_FRACTION    = 0.05
+      HEATING_RATE          = 60.
+      NU_RESIDUE            = 0.06
+      RESIDUE               = 'char'
+      NU_FUEL               = 0.94
+      HEAT_OF_REACTION      = 1000. /
+
+&MATL ID                    = 'COMP B'
+      EMISSIVITY            = 1.0
+      DENSITY               = 1000.
+      CONDUCTIVITY          = 0.2
+      SPECIFIC_HEAT         = 1.5
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 485.
+      REFERENCE_RATE        = 0.02305
+      REFERENCE_FRACTION    = 0.95
+      HEATING_RATE          = 60.
+      NU_RESIDUE            = 0.06
+      RESIDUE               = 'char'
+      NU_FUEL               = 0.94
+      HEAT_OF_REACTION      = 1000. /
+
+&MATL ID                    = 'char'
+      EMISSIVITY            = 1.0
+      DENSITY               = 150.
+      CONDUCTIVITY          = 0.1
+      SPECIFIC_HEAT         = 1.0 /
+
+&SURF ID = 'HOT'
+	EMISSIVITY = 1.0
+	RGB        = 250,0,0
+	TMP_FRONT  = 820.
+        H_FIXED    = 0.
+	RAMP_T 	   = 'T_RAMP' /
+
+&RAMP ID='T_RAMP', T=  0., F = 0.0 /
+&RAMP ID='T_RAMP', T=800., F = 1.0 /
+
+&DEVC XYZ=0.0,0.0,1.0, IOR=-3, QUANTITY='WALL TEMPERATURE', ID='heater temp' /
+&DEVC XYZ=0.0,0.0,0.0, IOR= 3, QUANTITY='WALL TEMPERATURE', ID='sample temp' /
+&DEVC XYZ=0.0,0.0,0.0, IOR= 3, QUANTITY='HRRPUM', ID='hrrpum' /
+&DEVC XYZ=0.0,0.0,0.0, IOR= 3, QUANTITY='SURFACE DENSITY', ID='mpua' /
+
+&TAIL /
