@@ -3351,7 +3351,7 @@ r_{\alpha \beta} =
 where $T_{thr,\alpha \beta}$ is a threshold temperature that can be
 used to dictate that the reaction must not occur below a
 user-specified temperature. By default, the term is deactivated
-($T_{thr,\alpha\beta}=0$ K). Appendix~\ref{solid_kinetics_appendix} describes a method
+($T_{thr,\alpha\beta}=0$ K). The chapter on pyrolysis in the FDS Verification Guide describes methods
 for determining the kinetic parameters $A_{\alpha \beta}$ and $E_{\alpha\beta}$ using
 bench-scale measurement techniques.
 
@@ -4623,92 +4623,6 @@ The smoothing parameter in (\ref{eqn_rhomn}) is obtained from
 \label{eqn_realc}
 c_n = \frac{\max(0,\rho_{min} - \rho_n^*)}{ \sum_{s\in {\sf N},s\ne n} ( \max[\rho_{min},\rho_s^*] - \max[\rho_{min},\rho_n^*] )}
 \end{equation}
-
-
-\chapter{Solid Phase Kinetics}
-\label{solid_kinetics_appendix}
-
-This section describes a method of determining the values of the kinetic parameters for the thermal decomposition of a solid,
-following the methodology described by Lyon~\cite{Lyon:FM2000}.
-
-Consider a multi-component solid. The mass fraction of any component, $Y(t)$, changes in time according to the equation:
-\be
-   \frac{dY}{dt} = -A \, Y \, \exp \left( -\frac{E}{RT} \right)    \quad ; \quad Y(0) = Y_0  \label{dYdt}
-\ee
-For bench-scale measurement techniques like TGA (Thermo-Gravimetric Analysis), a small sample of the material is
-heated linearly in time at a specified rate, $dT/dt=\beta$. The results are usually expressed as a function of
-temperature rather than time; thus, it is convenient to rewrite Eq.~(\ref{dYdt}) as:
-\be
-   \frac{dY}{dT} = -\frac{A}{\beta} \, Y \, \exp \left( -\frac{E}{RT} \right)    \quad ; \quad Y(T=T_0) = Y_0  \label{dYdT}
-\ee
-The decomposition rate, $-dY/dt$, peaks at a temperature denoted by $T_p$ with a value denoted by $r_p$.
-At this temperature, the second derivative of $Y$ is zero:
-\be
-   \frac{d^2 Y}{dT^2} = -\frac{A}{\beta} \, \frac{dY}{dT} \, \exp \left( -\frac{E}{RT_p} \right) -
-   \frac{A}{\beta} \, Y \, \exp \left( -\frac{E}{RT_p} \right) \, \frac{E}{R T_p^2}
-   = -\frac{dY}{dT} \left[ \frac{A}{\beta} \, \exp \left( -\frac{E}{RT_p} \right) - \frac{E}{R T_p^2} \right] = 0  \label{d2YdT2}
-\ee
-Next, Eq.~(\ref{dYdT}) can be integrated from $Y_0$ to $Y_p$ (the value of $Y$ at the peak), and $T_0$ to $T_p$:
-\be
-   \int_{Y_0}^{Y_p} \left( \frac{dY'}{Y'} \right) = - \frac{A}{\beta} \int_{T_0}^{T_p} \exp \left( -\frac{E}{RT'} \right) \; dT'
-   \approx - \frac{A R T_p^2}{ \beta \, (E+2 R T_p) } \; \exp \left( -\frac{E}{RT_p} \right)
-\ee
-Using Eq.~(\ref{d2YdT2}) to eliminate $A$ yields:
-\be
-   \ln \left( \frac{Y_p}{Y_0} \right) = - \frac{E}{E+2 R T_p} \approx -1  \quad \quad (E \gg 2 R T_p)
-\ee
-or more simply, $Y_p \approx Y_0/e$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
-\be
-   E = RT_p^2 \, \frac{A}{\beta} \, \exp \left( -\frac{E}{RT_p} \right) = \frac{RT_p^2}{\beta} \frac{r_p}{Y_p}
-   \approx \frac{RT_p^2}{\beta} \frac{e r_p}{Y_0}  \label{E_formula}
-\ee
-Then $A$ can be evaluated directly from Eq.~(\ref{dYdt}):
-\be
-   A = \frac{r_p}{Y_p} \, \exp \left( \frac{E}{RT_p} \right) \approx \frac{e r_p}{Y_0} \, \exp \left( \frac{E}{RT_p} \right) \label{A_formula}
-\ee
-Note that the formulae for $A$ and $E$ are appropriate for multiple-step reactions, where the number of peaks in the reaction
-rate curve corresponds to the number of reactions. For TGA data, the values of $r_p$ can be obtained directly from inspection of
-the reaction
-rate curve, assuming the units are s$^{-1}$. For micro-combustion calorimetry, assuming that the results are presented in units of
-W/g, the values of $r_p$ can be found from:
-\be
-   r_p = \frac{q_p}{\Delta H} \label{r_formula}
-\ee
-where $q_p$ are the peaks of the heat release rate curve and $\Delta H$ is the heat of combustion, which is obtained by integrating
-the heat release rate curve over the temperature and then multiplying by the heating rate.
-It is important to check the units of all of these quantities because the
-results of these experiments are often presented in different ways depending on the particular application.
-
-As an example of how to apply this procedure, consider the two plots shown in Fig.~\ref{mcc_plots}. The dashed curves in the figures
-display the results of micro-calorimetry measurements for the insulation and jacket material of a multi-conductor control
-cable.
-\begin{figure}[ht]
-\includegraphics[width=3in]{FIGURES/I11_2}
-\includegraphics[width=3in]{FIGURES/J11_2}
-\caption{Results of a micro-calorimetry analysis of a sample of cable insulation (left) and jacket material (right).}
-\label{mcc_plots}
-\end{figure}
-The insulation material exhibits two fairly well-defined peaks, whereas the jacket material exhibits three. For each reaction,
-the kinetic parameters were calculated using the formulae (\ref{E_formula}) and (\ref{A_formula}). The choices of
-$T_p$, $r_p$, and $Y_0$ for each reaction are shown on the plots\footnote{Note that $r_p$ has been calculated using
-Eq.~(\ref{r_formula}), where the heat of combustion, $\Delta H$, is the area beneath the curve multiplied by the
-heating rate, $\beta$, which in this case is 1~K/s. Note also that the ``peak'' temperatures, $T_p$, are expressed
-in units of Kelvin in the formulae. They are presented here in degrees Celsius because this is the unit typically used for
-FDS input data and the unit of which MCC data is typically presented.}. These were all chosen by inspection from the original
-micro-calorimetry data. Nothing has been assumed about the materials themselves. It has to be assumed that each reaction
-liberates fuel gases that burn at the computed heat of combustion. It must also be assumed that each reaction yields the
-same fraction of residue.
-
-The black curves in the plots of Fig.~\ref{mcc_plots} are the results of numerically integrating Eq.~(\ref{dYdt}) for each
-material component. It is assumed that the insulation and jacket materials are composed of multiple components, with each
-having a single reaction that produces fuel gas and residue. In this example, the residue yield for the insulation material is
-6~\%; for the jacket 49~\%, obtained simply by weighing the sample before and after the micro-calorimetry measurement.
-Although the residue yields do not play a role in the kinetic constants, they are necessary
-inputs to FDS. The residue is also important when interpreting the original data. Sometimes the heat release rate is
-expressed in units of W/g of the {\em total} sample, and sometimes in units of W/g of pyrolyzed gases. The latter
-is preferable because the heat of combustion obtained by integrating under the plot of the HRR is interpreted in the
-conventional manner. In fact, the HRR data shown here was originally reported in units of W/g {\em total}. It was then
-divided by the factor $(1-\nu_r)$ to modify its interpretation.
 
 
 

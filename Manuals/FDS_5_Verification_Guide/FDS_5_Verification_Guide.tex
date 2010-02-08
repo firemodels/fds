@@ -1308,61 +1308,18 @@ lines are FDS results and the dark lines are the HEATING results. An example inp
 
 \chapter{Pyrolysis}
 
-Solids can undergo simultaneous reactions under the following assumptions:
-\begin{itemize}
-\setlength{\itemsep}{0.0in}
-\item instantaneous release of volatiles from solid to the gas phase,
-\item local thermal equilibrium between the solid and the volatiles,
-\item no condensation of gaseous products, and
-\item no porosity effects
-\end{itemize}
+This chapter tests the routines in FDS that calculate the thermal decomposition of materials. Solid
+surfaces can be made up of multiple layers, with each layer consisting of multiple material components.
 Each material component may undergo several competing reactions, and
 each of these reactions may produce some other solid component
-(residue), gaseous fuel, and/or water vapor according to
-the yield coefficients $\nu_s$, $\nu_f$ and $\nu_w$, respectively.
-These coefficients should usually satisfy $\nu_s + \nu_f + \nu_w = 1$,
-but smaller yields may also be used to take into account the gaseous
-products that are not explicitly included in the simulation.
+(residue), gaseous fuel, and/or water vapor.
 
-
-\clearpage
-
-\section{A Simple Two-Step Pyrolysis Example (\texorpdfstring{{\bf two\_step\_solid\_reaction}}{two\_step\_solid\_reaction})}
-
-Consider  the set  of ordinary  differential equations  describing the mass  fraction of  three  components of  a  solid material  undergoing thermal
-degradation:
-\begin{eqnarray}
-    \frac{dY_a}{dt} &=&  -K_{ab} Y_a \nonumber  \\
-    \frac{dY_b}{dt} &=&   K_{ab} Y_a  -  K_{bc}  Y_b  \\
-    \frac{dY_c}{dt} &=&   K_{bc} Y_a
-    \nonumber
-\end{eqnarray}
-where  the  mass  fraction  of  component  $a$  is  1  initially.  The
-analytical solution is:
-\begin{eqnarray}
-    Y_a(t)    &=&    \exp(-K_{ab}t)    \nonumber   \\
-    Y_b(t)    &=&    \frac{K_{ab}}{K_{bc}-K_{ab}} \exp(-K_{ab} t)  - \exp(-K_{bc} t) \\
-    Y_c(t)    &=&    \left[   K_{ab}    (1-\exp(-K_{bc} t) )    +  K_{bc}*(\exp(-K_{ab} t) -1) \right] / (K_{ab}-K_{bc})
-\end{eqnarray}
-The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $K_{bc} = 0.262$ are shown here:
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3.5in]{FIGURES/two_step_solid_reaction}
-\end{center}
-\caption[The {\bf two\_step\_solid\_reaction} test case.]{Comparison of a two-step solid pyrolysis calculation with an analytical solution.}
-\label{two_step_solid_reaction}
-\end{figure}
-
-
-
-\clearpage
 
 \section{Development of surface emissivity (\texorpdfstring{{\bf emissivity}}{emissivity})}
 
-For thermally thick surfaces, the surface emissivity is computed as a
-mass-weighted sum of the individual material emissivities
-in the first condensed phase grid cell. In the verification test, the
+For thermally thick materials, the surface emissivity is computed as a
+mass-weighted sum of the individual values of the emissivity
+in the first condensed phase grid cell. In this verification test, the
 initial material, having emissivity of 1.0, is converted to another
 material, having emissivity of 0.0, at a constant rate of 0.1~s$^{-1}$. As a
 result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s.
@@ -1376,7 +1333,6 @@ result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s.
 \end{figure}
 
 
-\clearpage
 
 \section{Enthalpy of solid materials (\texorpdfstring{{\bf enthalpy}}{enthalpy})}
 
@@ -1410,9 +1366,184 @@ This example tests a number of features, including the reaction rate, mass weigh
 convective heat transfer has been turned off, and the correct steady-state temperature is calculated by FDS.
 
 
+\section{A Simple Two-Step Pyrolysis Example (\texorpdfstring{{\bf two\_step\_solid\_reaction}}{two\_step\_solid\_reaction})}
+
+Before considering actual experimental measurements, it is necessary to check the accuracy of the ordinary differential
+equation solver within FDS.
+Consider  the simplified set  of ordinary  differential equations  describing the mass
+fraction of  three  components of  a  solid material  undergoing thermal
+degradation:
+\begin{eqnarray}
+    \frac{dY_a}{dt} &=&  -K_{ab} Y_a \nonumber  \\
+    \frac{dY_b}{dt} &=&   K_{ab} Y_a  -  K_{bc}  Y_b  \\
+    \frac{dY_c}{dt} &=&   K_{bc} Y_a
+    \nonumber
+\end{eqnarray}
+where  the  mass  fraction  of  component  $a$  is  1  initially.  The
+analytical solution is:
+\begin{eqnarray}
+    Y_a(t)    &=&    \exp(-K_{ab}t)    \nonumber   \\
+    Y_b(t)    &=&    \frac{K_{ab}}{K_{bc}-K_{ab}} \exp(-K_{ab} t)  - \exp(-K_{bc} t) \\
+    Y_c(t)    &=&    \left[   K_{ab}    (1-\exp(-K_{bc} t) )    +  K_{bc}*(\exp(-K_{ab} t) -1) \right] / (K_{ab}-K_{bc})
+\end{eqnarray}
+The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $K_{bc} = 0.262$ are shown here:
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.5in]{FIGURES/two_step_solid_reaction}
+\end{center}
+\caption[The {\bf two\_step\_solid\_reaction} test case.]{Comparison of a two-step solid pyrolysis calculation with an analytical solution.}
+\label{two_step_solid_reaction}
+\end{figure}
+
+
+
+
 \clearpage
 
-\section{Using TGA Data (\texorpdfstring{{\bf birch\_tga}}{birch\_tga})}
+\section{Interpreting Bench-Scale Measurements}
+\label{solid_kinetics}
+
+This section describes a method of determining and applying the values of the kinetic parameters for the thermal
+decomposition of a solid, following the methodology described by Lyon~\cite{Lyon:FM2000}.
+
+
+\subsection{General Theory}
+
+Consider a solid material that is made up of multiple components.
+The mass fraction of any component, $Y(t)$, changes in time according to the equation:
+\be
+   \frac{dY}{dt} = -A \, Y \, \exp \left( -\frac{E}{RT} \right)    \quad ; \quad Y(0) = Y_0  \label{dYdt}
+\ee
+For bench-scale measurement techniques like TGA (Thermo-Gravimetric Analysis), a small sample of the material is
+heated linearly in time at a specified rate, $dT/dt=\beta$. The results are usually expressed as a function of
+temperature rather than time; thus, it is convenient to rewrite Eq.~(\ref{dYdt}) as:
+\be
+   \frac{dY}{dT} = -\frac{A}{\beta} \, Y \, \exp \left( -\frac{E}{RT} \right)    \quad ; \quad Y(T=T_0) = Y_0  \label{dYdT}
+\ee
+The decomposition rate, $-dY/dt$, peaks at a temperature denoted by $T_p$ with a value denoted by $r_p$.
+At this temperature, the second derivative of $Y$ is zero:
+\be
+   \frac{d^2 Y}{dT^2} = -\frac{A}{\beta} \, \frac{dY}{dT} \, \exp \left( -\frac{E}{RT_p} \right) -
+   \frac{A}{\beta} \, Y \, \exp \left( -\frac{E}{RT_p} \right) \, \frac{E}{R T_p^2}
+   = -\frac{dY}{dT} \left[ \frac{A}{\beta} \, \exp \left( -\frac{E}{RT_p} \right) - \frac{E}{R T_p^2} \right] = 0  \label{d2YdT2}
+\ee
+Next, Eq.~(\ref{dYdT}) can be integrated from $Y_0$ to $Y_p$ (the value of $Y$ at the peak), and $T_0$ to $T_p$:
+\be
+   \int_{Y_0}^{Y_p} \left( \frac{dY'}{Y'} \right) = - \frac{A}{\beta} \int_{T_0}^{T_p} \exp \left( -\frac{E}{RT'} \right) \; dT'
+   \approx - \frac{A R T_p^2}{ \beta \, (E+2 R T_p) } \; \exp \left( -\frac{E}{RT_p} \right)
+\ee
+Using Eq.~(\ref{d2YdT2}) to eliminate $A$ yields:
+\be
+   \ln \left( \frac{Y_p}{Y_0} \right) = - \frac{E}{E+2 R T_p} \approx -1  \quad \quad (E \gg 2 R T_p)
+\ee
+or more simply, $Y_p \approx Y_0/e$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
+\be
+   E = RT_p^2 \, \frac{A}{\beta} \, \exp \left( -\frac{E}{RT_p} \right) = \frac{RT_p^2}{\beta} \frac{r_p}{Y_p}
+   \approx \frac{RT_p^2}{\beta} \frac{e r_p}{Y_0}  \label{E_formula}
+\ee
+Then $A$ can be evaluated directly from Eq.~(\ref{dYdt}):
+\be
+   A = \frac{r_p}{Y_p} \, \exp \left( \frac{E}{RT_p} \right) \approx \frac{e r_p}{Y_0} \, \exp \left( \frac{E}{RT_p} \right) \label{A_formula}
+\ee
+Note that the formulae for $A$ and $E$ are appropriate for multiple-step reactions, where the number of peaks in the reaction
+rate curve corresponds to the number of material components, and each component undergoes a single-step reaction that forms
+fuel gas and residue.
+For each peak, the value of $T_p$ is readily obtained from the plot.
+For TGA data, the values of $r_p$ can be obtained directly from inspection of the reaction
+rate curve, assuming the units are s$^{-1}$. The values of $Y_0$ can be estimated based on the relative area underneath
+the peak.
+
+
+
+\subsection{Using Micro-Calorimetry Data (\texorpdfstring{{\bf cable\_11\_mcc}}{cable\_11\_mcc})}
+\label{cable_11_mcc}
+
+Add discussion of the micro-calorimeter.
+
+As an example of how to work with MCC data, consider the two plots shown in Fig.~\ref{mcc_plots}. The solid curves in the figures
+display the results of micro-calorimetry measurements for the insulation and jacket material of a multi-conductor control
+cable (the number 11 has no particular meaning other than to distinguish it from other cables being studied).
+\begin{figure}[ht]
+\includegraphics[width=3.2in]{FIGURES/cable_11_insulation_mcc}
+\includegraphics[width=3.2in]{FIGURES/cable_11_jacket_mcc}
+\caption{Results of a micro-calorimetry analysis of a sample of cable insulation (left) and jacket material (right).}
+\label{mcc_plots}
+\end{figure}
+The insulation material exhibits two fairly well-defined peaks, whereas the jacket material exhibits three. Thus, the insulation
+material is modeled using two solid components, each undergoing a single-step reaction, plus a solid residue. The jacket
+material is modeled using three solid components, plus a residue. The residue yield for the insulation material is
+6~\%; for the jacket 49~\%, obtained simply by weighing the sample before and after the micro-calorimetry measurement. It is
+not known which reaction produces what fraction of the residue. Rather, it is assumed that each reaction yields the same
+residue in the same amount.
+The residue yield, denoted $\nu_r$, is very important because the results of the measurement are reported in terms of
+the heat release rate {\em per unit mass of the original sample}, {\em i.e.} W/g. The area under the curves in
+Fig.~\ref{mcc_plots}, when divided by the heating rate, $\beta$, in units of K/s, represents the total energy released
+per unit mass of the original sample. However, if this value is divided by the factor $(1-\nu_r)$, the more conventional
+form of the heat of combustion is obtained.
+
+The dashed curves in Fig.~\ref{mcc_plots} are the results of FDS simulations of the MCC measurements. To mimic the
+apparatus, a very thin sheet comprised of a mixture of the solid components with an insulated backing is heated at the
+rate specified in the experiment (1~K/s or 60~K/min, the units needed in FDS).
+For each reaction,
+the kinetic parameters are calculated using the formulae (\ref{E_formula}) and (\ref{A_formula}). The values of
+$T_p$ are obtained directly from the figures. The value of $r_p/Y_0$ for the $j$th reaction can be found from:
+\be
+   \left( \frac{r_p}{Y_0} \right)_j = \beta \, \dot{q}(T_{p,j}) \Big/ \int_{T_{j-1}}^{T_j} \dot{q}(T') \, dT'  \label{r_formula}
+\ee
+where $\dot{q}_{p,j}$ is the value of the $j$th heat release rate peak and the temperature values, $T_j$, are estimates
+of the temperature range over which that particular reaction takes place. Note that the temperature ranges ought to be
+continuous.
+It is important to check the units of all of these quantities because the
+results of these experiments are often presented in different ways depending on the particular application. A mistake
+in units can result in values of $A$ and/or $E$ that will invariably cause spurious results.
+
+The dashed curves in Fig.~\ref{mcc_plots} are the results of numerically integrating Eq.~(\ref{dYdt}) within FDS for each
+material component. A typical input line for FDS that describes a single material component undergoing a single
+reaction is given by:
+
+\footnotesize
+\begin{verbatim}
+&MATL ID                    = 'COMP A'
+      EMISSIVITY            = ...
+      DENSITY               = ...
+      CONDUCTIVITY          = ...
+      SPECIFIC_HEAT         = ...
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 300.
+      REFERENCE_RATE        = 0.0064
+      HEATING_RATE          = 60.
+      NU_RESIDUE            = 0.49
+      RESIDUE               = 'char'
+      NU_FUEL               = 0.51
+      HEAT_OF_REACTION      = ... /
+\end{verbatim} \normalsize
+
+\noindent Note that only the relevant parameters are shown. The other parameters are not relevant in this
+exercise. Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket
+materials. The peak temperatures are easy to estimate, and the values of $r_p/Y_0$ can be fine-tuned to closely match
+the data. Note that it is possible to compute values of $A$ and $E$ and input them directly into FDS, rather
+than inputting those listed in the table. However, the values of $A$ and $E$ are fairly large numbers and have little
+meaning in their own.
+
+
+\begin{table}[ht]
+\begin{center}
+\caption{Parameters used to derive the kinetic constants for cable materials. The heating rate for both is
+60~$^\circ$C/min.}
+\label{cable_parameters}
+\begin{tabular}{|l||c|c||c|c|c|}
+\hline
+Parameter               & \multicolumn{2}{|c|}{Insulation, $\nu_r$=0.06 }  &  \multicolumn{3}{|c|}{Jacket, $\nu_r$=0.49} \\ \cline{2-6}
+                        & 1             & 2                 &  1        & 2         & 3              \\ \hline \hline
+$T_p$ ($^\circ$C)       & 355           & 485               &  300      & 345       & 450            \\ \hline
+$r_p/Y_0$ (s$^{-1}$)    & 0.0384        & 0.2426            &  0.0064   & 0.3500    & 0.0156         \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\subsection{Using TGA Data (\texorpdfstring{{\bf birch\_tga}}{birch\_tga})}
 \label{birch_tga}
 
 This is an example of a comparison of a candidate solid phase model with TGA (Thermo-gravimetric Analysis) data. The sample cases
@@ -1432,9 +1563,8 @@ Fig.~\ref{fig_birch_tga} near the temperature of 100~$^\circ$C.
 
 
 
+
 \chapter{Droplets}
-
-
 
 
 \section{Water Droplet Evaporation (\texorpdfstring{{\bf water\_evaporation}}{water\_evaporation}) }
