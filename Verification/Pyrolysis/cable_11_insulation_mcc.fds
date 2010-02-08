@@ -33,8 +33,7 @@
       SPECIFIC_HEAT         = 1.5
       N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 355.
-      REFERENCE_RATE        = 0.00192
-      REFERENCE_FRACTION    = 0.05
+      REFERENCE_RATE        = 0.0384
       HEATING_RATE          = 60.
       NU_RESIDUE            = 0.06
       RESIDUE               = 'char'
@@ -48,8 +47,7 @@
       SPECIFIC_HEAT         = 1.5
       N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 485.
-      REFERENCE_RATE        = 0.02305
-      REFERENCE_FRACTION    = 0.95
+      REFERENCE_RATE        = 0.0243
       HEATING_RATE          = 60.
       NU_RESIDUE            = 0.06
       RESIDUE               = 'char'
