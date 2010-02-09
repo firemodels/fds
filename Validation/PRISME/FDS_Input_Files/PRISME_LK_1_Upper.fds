@@ -1,0 +1,41 @@
+&HEAD CHID='PRISME_LK_1_Upper', TITLE='PRISME Test' / 
+
+&MESH IJK=12,9,9, XB=-.30,0.30,-.225,0.225,-.225,0.225 / 
+
+&TIME DT=0.2, TWFIN=2000.0 / 
+
+&MISC TMPA=30., SURF_DEFAULT='HOT' /
+
+&SURF ID='HOT', TMP_FRONT=600., COLOR='GRAY', RAMP_T='shroud' / 
+&RAMP ID='shroud',T=   0.,F=0. /
+&RAMP ID='shroud',T= 100.,F=0.35 /
+&RAMP ID='shroud',T= 200.,F=0.44 /
+&RAMP ID='shroud',T= 300.,F=0.65 /
+&RAMP ID='shroud',T= 400.,F=0.72 /
+&RAMP ID='shroud',T= 500.,F=0.76 /
+&RAMP ID='shroud',T= 600.,F=0.82 /
+&RAMP ID='shroud',T= 700.,F=0.88 /
+&RAMP ID='shroud',T= 800.,F=0.97 /
+&RAMP ID='shroud',T= 900.,F=0.98 /
+&RAMP ID='shroud',T=1000.,F=0.90 /
+&RAMP ID='shroud',T=1100.,F=0.70 /
+&RAMP ID='shroud',T=1200.,F=0.45 /
+&RAMP ID='shroud',T=1300.,F=0.35 /
+&RAMP ID='shroud',T=1400.,F=0.29 /
+&RAMP ID='shroud',T=1500.,F=0.25 /
+&RAMP ID='shroud',T=1600.,F=0.21 /
+&RAMP ID='shroud',T=1800.,F=0.16 /
+&RAMP ID='shroud',T=2000.,F=0.13 /
+ 
+&VENT XB=-.30,-.30,-.075,0.075,-.075,0.075,SURF_ID='OPEN' /  
+&VENT XB=0.30,0.30,-.075,0.075,-.075,0.075,SURF_ID='OPEN' / 
+
+&DUMP DT_DEVC=10., DT_PL3D=10000. /
+
+&PROP ID='NRC_1', QUANTITY='CABLE TEMPERATURE', CABLE_MASS_PER_LENGTH=0.41, 
+      CABLE_FAILURE_TEMPERATURE=400., CABLE_DIAMETER=0.015, CABLE_JACKET_THICKNESS=0.0015 /
+
+&DEVC XYZ=0.00,0.00,0.225, IOR=-3, ID='Air Temp', QUANTITY='WALL TEMPERATURE' /
+&DEVC XYZ=0.01,0.00,0.000, ID='NRC_1', PROP_ID='NRC_1', ORIENTATION=0,0,1 /
+
+&TAIL /
