@@ -57,13 +57,13 @@ for i_plot=1:2
         T_p(1) = 100.+273.;
         T_p(2) = 300.+273.;
         T_p(3) = 300.+273.;
-        Y_0(1)=0.10;
-        Y_0(2)=0.90;
-        Y_0(3)=0.00;
+        Y_0(1)=0.1;
+        Y_0(2)=0.9;
+        Y_0(3)=0.0;
         delta_T(1) = 10.;
         delta_T(2) = 80.;
         delta_T(3) = 20.;
-        residue(1) = 0.2;
+        residue(1) = 0.0;
         residue(2) = 0.2;
         residue(3) = 0.0;
     end
@@ -71,10 +71,9 @@ for i_plot=1:2
     % Calculate A and E
     
     for i=1:n_components
-        Y_p=1./exp(1.);
         r_p(i)=2*dTdt*(1.-residue(i))/delta_T(i);
-        E(i)=(r_p(i)/Y_p)*R0*T_p(i)*T_p(i)/dTdt;
-        A(i)=(r_p(i)/Y_p)*exp(E(i)./(R0.*T_p(i)));
+        E(i)=exp(1.)*r_p(i)*R0*T_p(i)*T_p(i)/dTdt;
+        A(i)=exp(1.)*r_p(i)*exp(E(i)./(R0.*T_p(i)));
     end
 
     % Solve the ODE dY/dT=f(T,Y)
@@ -128,7 +127,7 @@ for i_plot=1:2
     
     for i=1:n_components
         axes(AX(2));
-        line([T_p(i)-273 T_p(i)-273],[0.00 Y_0(i)*r_p(i)*1000],'LineStyle','--','Color','black','LineWidth',1)
+        line([T_p(i)-273 T_p(i)-273],[0.00 Y_0(i)*r_p(i)*(1-residue(i))*1000],'LineStyle','-','Color','black','LineWidth',1)
     end
     
     % Create the PDF files
