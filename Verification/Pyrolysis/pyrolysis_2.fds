@@ -27,11 +27,11 @@
       MATL_MASS_FRACTION(1,1:2) = 0.9,0.1 /
 
 &MATL ID                    = 'water'
-      EMISSIVITY 	    = 1.0
-      DENSITY 	            = 1000.
+      EMISSIVITY 	          = 1.0
+      DENSITY 	          = 1000.
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 4.184 
-      N_REACTIONS	    = 1
+      N_REACTIONS	          = 1
       REFERENCE_TEMPERATURE = 100.
       PYROLYSIS_RANGE       = 10.
       NU_WATER              = 1.
@@ -39,13 +39,13 @@
 
 &MATL ID                    = 'stuff'
       EMISSIVITY            = 1.0
-      DENSITY 	            = 500.
+      DENSITY 	          = 500.
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 1.0 
       N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 300.
       PYROLYSIS_RANGE       = 80.
-      NU_FUEL 	            = 0.8
+      NU_FUEL 	          = 0.8
       NU_RESIDUE            = 0.2
       RESIDUE               = 'ash'
       HEAT_OF_REACTION      = 1000. /
