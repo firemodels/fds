@@ -42,36 +42,33 @@ for i_plot=1:2
         n_components = 3;
         T_p(1) = 100.+273.;
         T_p(2) = 300.+273.;
-        T_p(3) = 300.+273.;
         Y_0(1)=0.00;
         Y_0(2)=1.00;
         Y_0(3)=0.00;
         delta_T(1) = 10.;
-        delta_T(2) = 80.;
-        delta_T(3) = 20.;
+        delta_T(2) = -80.;
+        r_p(2)     = 0.002;
         residue(1) = 0.0;
-        residue(2) = 0.0;
-        residue(3) = 0.0;
+        residue(2) = 0.0; 
     else
         n_components = 3;
         T_p(1) = 100.+273.;
         T_p(2) = 300.+273.;
-        T_p(3) = 300.+273.;
         Y_0(1)=0.1;
         Y_0(2)=0.9;
         Y_0(3)=0.0;
         delta_T(1) = 10.;
         delta_T(2) = 80.;
-        delta_T(3) = 20.;
         residue(1) = 0.0;
         residue(2) = 0.2;
-        residue(3) = 0.0;
     end
 
     % Calculate A and E
     
-    for i=1:n_components
-        r_p(i)=2*dTdt*(1.-residue(i))/delta_T(i);
+    for i=1:n_components-1
+        if delta_T(i)>0 
+            r_p(i)=2*dTdt*(1.-residue(i))/delta_T(i);
+        end
         E(i)=exp(1.)*r_p(i)*R0*T_p(i)*T_p(i)/dTdt;
         A(i)=exp(1.)*r_p(i)*exp(E(i)./(R0.*T_p(i)));
     end
@@ -125,7 +122,7 @@ for i_plot=1:2
 
     % Add vertical lines to indicate the temperature peaks
     
-    for i=1:n_components
+    for i=1:n_components-1
         axes(AX(2));
         line([T_p(i)-273 T_p(i)-273],[0.00 Y_0(i)*r_p(i)*(1-residue(i))*1000],'LineStyle','-','Color','black','LineWidth',1)
     end
