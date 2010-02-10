@@ -660,6 +660,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
   int displaylist_id=0;
   int ii;
   sv_object *object;
+  int use_material;
 
   if(prop!=NULL){
     object=prop->smv_object;
@@ -771,6 +772,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
     }
   }
 
+  use_material=0;
   if(select_device_color_ptr==NULL){
     glEnable(GL_LIGHTING);
 
@@ -779,6 +781,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
     glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
 
     glEnable(GL_COLOR_MATERIAL);
+    use_material=1;
   }
   toknext=NULL;
   for(ii=0;;ii++){
@@ -1250,7 +1253,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       break;
     }
   }
-  if(select_device_color==NULL){
+  if(use_material==1){
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
