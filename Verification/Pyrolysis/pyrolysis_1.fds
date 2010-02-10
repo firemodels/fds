@@ -2,7 +2,7 @@
 
 &MESH IJK = 3,1,4, XB = -2,2,-0.5,0.5,0,1 / 
 
-&TIME TWFIN=9600., WALL_INCREMENT=1, DT=0.2 /
+&TIME TWFIN=9600., WALL_INCREMENT=1, DT=0.05 /
 
 &MISC SOLID_PHASE_ONLY=.TRUE. /
 
@@ -26,13 +26,15 @@
       MATL_ID   = 'stuff' /  
 
 &MATL ID                    = 'stuff'
-      EMISSIVITY 	    = 1.0
-      DENSITY 	            = 500.
+      EMISSIVITY 	          = 1.0
+      DENSITY 	          = 500.
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 1.0 
-      N_REACTIONS	    = 1
+      N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 300.
-      NU_FUEL 	            = 1.
+      REFERENCE_RATE        = 0.002
+      HEATING_RATE          = 5.
+      NU_FUEL               = 1.
       HEAT_OF_REACTION      = 1000. /
 
 &SURF ID         = 'HOT'
