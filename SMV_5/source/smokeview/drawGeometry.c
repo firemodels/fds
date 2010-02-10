@@ -972,8 +972,9 @@ void drawcadgeom(const cadgeom *cd){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   glEnable(GL_LIGHTING); 
-  glBegin(GL_QUADS);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+  glEnable(GL_COLOR_MATERIAL);
+  glBegin(GL_QUADS);
   for(i=0;i<cd->nquads;i++){
     quadi = cd->quad+i;
     colorindex=quadi->colorindex;
@@ -990,7 +991,7 @@ void drawcadgeom(const cadgeom *cd){
         colorindex2 = 15 + (15*colorindex % 230);
         thiscolor=rgb_cad[colorindex2];
       }
-      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,thiscolor);
+      glColor4fv(thiscolor);
     }
     last_colorindex=colorindex;
     lastcolor=thiscolor;
@@ -1004,7 +1005,9 @@ void drawcadgeom(const cadgeom *cd){
     glVertex3fv(xyzpoint+9);
   }
   glEnd();
+  glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_LIGHTING);
+  sniffErrors("drawcadgeom");
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }

@@ -1608,8 +1608,25 @@ void drawPart5(const particle *parti){
                 glPushMatrix();
                 glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
 
+#ifdef pp_BETA
+                if(1==0){
+                  glRotatef(-datacopy->partclassbase->elevation,0.0,1.0,0.0);
+                  glRotatef( datacopy->partclassbase->azimuth,  0.0,0.0,1.0);
+                }
+                else{
+                  float xyznorm[3], axis[3], dtheta;
+
+                  xyznorm[0]=world_eyepos[0]-xplts[sx[j]];
+                  xyznorm[1]=world_eyepos[1]-yplts[sy[j]];
+                  xyznorm[2]=world_eyepos[2]-zplts[sz[j]];
+
+                  get_elevaz(xyznorm,&dtheta,axis);
+                  glRotatef( dtheta,axis[0],axis[1],axis[2]);
+                }
+#else
                 glRotatef(-datacopy->partclassbase->elevation,0.0,1.0,0.0);
-                glRotatef(datacopy->partclassbase->azimuth,0.0,0.0,1.0);
+                glRotatef( datacopy->partclassbase->azimuth,  0.0,0.0,1.0);
+#endif                
 
               //  0->2   color
               //  3      diameter

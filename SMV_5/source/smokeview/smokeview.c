@@ -897,9 +897,13 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_scratch);
     matmatmult(inverse_modelview_setup,modelview_scratch,modelview_current);
 
+#ifdef pp_BETA
+    get_world_eyepos(modelview_scratch, world_eyepos);
+#else
     if(active_smokesensors==1){
       get_world_eyepos(modelview_scratch, world_eyepos);
     }
+#endif
     if(nsmoke3d_files>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
       sniffErrors("after getsmokedir");
