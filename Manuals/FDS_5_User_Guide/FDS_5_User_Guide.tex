@@ -3878,29 +3878,28 @@ It is very important to keep in mind that $A$ and $E$ are not available for most
 there are several parameters that can be used by FDS to derive effective values. The most important parameter to
 specify in place of $A$ and $E$ is
 the  {\ct REFERENCE\_TEMPERATURE} ($^\circ$C). To understand this parameter, consider the plot shown in Fig.~\ref{pyrolysis}.
-These curves represent
-the results of a hypothetical TGA experiment.
-The Mass Fraction (blue curve) is the normalized density of the material which decreases as the sample is slowly heated,
+These curves represent the results of a hypothetical TGA experiment.
+The Mass Fraction (blue curve) is the normalized density of the material ($Y$) which decreases as the sample is slowly heated,
 in this case at a rate
-of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time.
+of 5~K/min. The Reaction Rate (green curve) is the rate of change of the mass fraction as a function of time ($-dY/dt$).
 Where this curve peaks is referred to in FDS
 as the {\ct REFERENCE\_TEMPERATURE}.\footnote{The term ``reference temperature'' is used simply to maintain
 backward compatibility with earlier versions of
 FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily
 the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material
-decreases at its maximum rate within the context of a TGA or similar experimental apparatus. Next, the
-{\ct REFERENCE\_RATE} is the reaction rate, in units of s$^{-1)$, corresponding to the {\ct REFERENCE\_TEMPERATURE}. The
-kinetic constants for the reaction are then found from the formulae\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method,
+decreases at its maximum rate within the context of a TGA or similar experimental apparatus. The
+kinetic constants for the reaction are found from the formulae\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method,
 do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MATL} line.}:
-\begin{align}
-   E &= \frac{e \, r_p}{Y_0} \, \frac{R \, T_p^2}{\dot{T}} \label{E} \\
-   A &= \frac{e \, r_p}{Y_0} \, e^{E/R \, T_p} \label{A}
-\end{align}
-where $T_p$ and $r_p$ are the reference temperature and rate, respectively. The parameter $Y_0$ represents the
-mass fraction corresponding to the particular material component undergoing reaction. For a single component, single
-reaction material, it is 1. Further discussion of $Y_0$ is found in the next example. The {\ct HEATING\_RATE} ($\dot{T}$) is
+\be
+   E = \frac{e \, r_p}{Y_0} \, \frac{R \, T_p^2}{\dot{T}} \quad ; \quad
+   A = \frac{e \, r_p}{Y_0} \, e^{E/R \, T_p} \label{AandE}
+\ee
+where $T_p$ and $r_p/Y_0$ are the reference temperature and rate, respectively. The
+{\ct REFERENCE\_RATE} is the reaction rate, in units of s$^{-1}$, at the given {\ct REFERENCE\_TEMPERATURE} divided by
+the mass fraction, $Y_0$, of material in the original sample undergoing the reaction. For a single component, single
+reaction material, $Y_0=1$. The {\ct HEATING\_RATE} ($\dot{T}$) is
 the rate at which the temperature of the TGA (or equivalent) test
-apparatus was increased, in units of K/min (in the formula, it is expressed in K/s).
+apparatus was increased. It is input into FDS in units of K/min (in the formula, it is expressed in K/s).
 Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green curve
 (Reaction Rate) is equal to the heating rate (in units of K/s).
 
@@ -3911,13 +3910,13 @@ Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green 
 \end{minipage}
 \hfill
 \begin{minipage}{3.0in}
+\begin{equation*}
+   \frac{dY}{dt} = -A \, Y \, \exp(-E/RT)   \quad \; \quad    Y(0) =1
+\end{equation*}
 \begin{align*}
-   \frac{dY}{dt} &= -A \, Y \, \exp(-E/RT)                             & Y(0) &=1 \\
-   \frac{dT}{dt} &= \frac{5}{60} \; \frac{\mathrm{K}}{\mathrm{s}}      & T(0) &= 20+273 \; \mathrm{K} \\
-\end{align*}
-\begin{align*}
-   T_p &= 300+273 \; \mathrm{K}  \\
+   T_p &= 300 \; ^\circ\mathrm{C}  \\
    r_p &= 0.002   \; \mathrm{s}^{-1}  \\
+   \dot{T} &= 5 \; \mathrm{K/min} \\
    \nu_s &= 0 \\
 \end{align*}
 \end{minipage}
@@ -3925,7 +3924,7 @@ Its default value is 5~K/min. In Fig.~\ref{pyrolysis}, the area under the green 
 undergoing heating at a rate of 5~K/min. The green curve represents the reaction rate, $-dY/dt$. The system of ordinary differential equations that
 describe the transformation is shown at right. Note that the parameters $T_p$, $r_p$, and $\nu_s$ represent the ``reference'' temperature,
 reaction rate, and residue yield of the single reaction. From these parameters, values of $A$ and $E$ can be estimated using
-the formulae in Eqs.~(\ref{E}) and (\ref{A}).}
+the formulae in (\ref{AandE}).}
 \label{pyrolysis}
 \end{figure} \normalsize
 
@@ -3939,14 +3938,15 @@ approximate width (in degrees Celsius or Kelvin) of the green curve, assuming it
 80~$^\circ$C. Using these input parameters, an estimate is made of the peak reaction rate, $r_p$, with which $E$, then $A$,
 are calculated.
 \be
-   r_p = \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_s) \label{r_p}
+   \frac{r_p}{Y_0} = \frac{2 \, \dot{T}} {\Delta T} \, (1-\nu_s) \label{r_p}
 \ee
-The parameter, $\nu_r$, is the yield of solid residue. When in doubt about the values of
+The parameter, $\nu_r$, is the yield of solid residue.
+
+When in doubt about the values of
 these parameters, just specify the {\ct REFERENCE\_TEMPERATURE}.
 Note that FDS will automatically calculate $A$ and $E$ using the above formulae.
 Do not specify $A$ and $E$ if you specify {\ct REFERENCE\_TEMPERATURE}, and do not specify {\ct PYROLYSIS\_RANGE} if you
 specify {\ct REFERENCE\_RATE}.
-
 For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} would have the form:
 
 \footnotesize
@@ -3959,6 +3959,7 @@ For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} wou
       NU_RESIDUE(1)            = 0.
       REFERENCE_TEMPERATURE(1) = 300.
       REFERENCE_RATE(1)        = 0.002
+      HEATING_RATE(1)          = 5.
       HEAT_OF_REACTION(1)      = ... /
 \end{verbatim}
 \normalsize
@@ -3994,6 +3995,8 @@ each gaseous species using the notation {\ct HEAT\_OF\_COMBUSTION(j,s)}, as expl
 different versions of the model.
 \end{warning}
 
+\subsubsection{Multiple Solid Phase Reactions}
+
 The solid phase reaction represented by Fig.~\ref{pyrolysis} is very simple -- a single, homogenous material is
 heated and gasified completely.
 In general, real materials are not so simple. First, they consist of more than one material component, each of which can
@@ -4018,13 +4021,13 @@ neighborhood of 300~$^\circ$C, leaving 20~\% of its mass behind in the form of a
 \begin{align*}
    \frac{dY_1}{dt} &= -A_{1,1} \, Y_1 \, \exp(-E_{1,1}/RT)                  & Y_1(0) &=0.1 \\
    \frac{dY_2}{dt} &= -A_{2,1} \, Y_2 \, \exp(-E_{2,1}/RT)                  & Y_2(0) &=0.9 \\
-   \frac{dY_3}{dt} &= -\nu_{s,2,1} \frac{dY_2}{dt}                          & Y_3(0) &=0.0 \\
-   \frac{dT}{dt}   &= \frac{5}{60} \; \frac{\mathrm{K}}{\mathrm{s}} & T(0)  &= 20+273 \; \mathrm{K} \\
+   \frac{dY_3}{dt} &= -\nu_{s,2,1} \frac{dY_2}{dt}                          & Y_3(0) &=0.0
 \end{align*}
 \begin{align*}
    T_{p,1,1} &= 100+273 \; \mathrm{K}        & T_{p,2,1}   &= 300+273 \; \mathrm{K} \\
    r_{p,1,1} &= 0.0016 \; \mathrm{s}^{-1}    & r_{p,2,1}   &= 0.0012 \; \mathrm{s}^{-1} \\
    \nu_{s,1,1} &= 0                          & \nu_{s,2,1} &= 0.2 \\
+   \dot{T} &= 5 \; \mathrm{K/min} & &
 \end{align*}
 \end{minipage} \normalsize
 \caption[A more complicated demonstration of the pyrolysis model.]{The blue curve represents the combined mass fraction,
@@ -4043,52 +4046,63 @@ the transformation of the materials is shown at right.}
 The key input lines for this reaction are shown in Fig.~\ref{pyrolysis_2_inputs}.
 Note that the only parameters shown are those that describe the reaction mechanism, and that each of these parameters
 can be found either from visual inspection of the the mass loss (blue) curve or the reaction rate (green) curve.
-The thermal properties of each material would also be needed for an actual FDS simulation, but are not relevant in the context of a
-TGA or similar experiment that involves a slow heating of a small sample of material.
+Even if TGA or similar data were unavailable in this case, you can still model the solid as a combination of water
+that evaporates at 100~$^\circ$C and some other material that pyrolyzes in the vicinity of 300~$^\circ$C, leaving
+20~\% of its mass as a residue.
 The full set of parameters for these cases are listed in {\bf pyrolysis\_1.fds}
 and {\bf pyrolysis\_2.fds}.
 Those interested in testing potential solid phase reaction mechanisms ought to use these test cases as templates.
 
 \begin{figure}[ht]
-\begin{minipage}{\textwidth}
+\begin{center}
+\begin{minipage}{4in}
 \footnotesize
 \begin{verbatim}
-&SURF ID                      = 'SAMPLE'
-    ...
-    MATL_ID(1,1:2)            = 'stuff', 'water'
-    MATL_MASS_FRACTION(1,1:2) = 0.9,0.1 /
+&SURF ID                        = 'SAMPLE'
+      ...
+      MATL_ID(1,1:2)            = 'stuff','water'
+      MATL_MASS_FRACTION(1,1:2) = 0.9,0.1 /
 
-&MATL ID                  = 'water'
-    ...
-    N_REACTIONS           = 1
-    REFERENCE_TEMPERATURE = 100.
-    REFERENCE_RATE        = 0.0016
-    NU_WATER              = 1.
-    HEAT_OF_REACTION      = ... /
+&MATL ID                    = 'water'
+      EMISSIVITY            = 1.0
+      DENSITY               = 1000.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 4.184
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 100.
+      PYROLYSIS_RANGE       = 10.
+      HEATING_RATE          = 5.
+      NU_WATER              = 1.
+      HEAT_OF_REACTION      = 2500. /
 
-&MATL ID                  = 'stuff'
-    ...
-    N_REACTIONS           = 1
-    REFERENCE_TEMPERATURE = 300.
-    REFERENCE_RATE        = 0.0012
-    NU_FUEL               = 0.8
-    NU_RESIDUE            = 0.2
-    RESIDUE               = 'ash'
-    HEAT_OF_REACTION      = ... /
+&MATL ID                    = 'stuff'
+      EMISSIVITY            = 1.0
+      DENSITY               = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 300.
+      PYROLYSIS_RANGE       = 80.
+      HEATING_RATE          = 5.
+      NU_FUEL               = 0.8
+      NU_RESIDUE            = 0.2
+      RESIDUE               = 'ash'
+      HEAT_OF_REACTION      = 1000. /
 
-&MATL ID                  = 'ash'
-      ... /
+&MATL ID                    = 'ash'
+      EMISSIVITY            = 1.0
+      DENSITY               = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
 \end{verbatim} \normalsize
 \end{minipage}
+\end{center}
 \caption[Input parameters for sample case {\bf pyrolysis\_2}.]{Input parameters for sample case {\bf pyrolysis\_2}.}
 \label{pyrolysis_2_inputs}
+
 \end{figure}
 
 
-
-
-
-\newpage
 
 
 \subsubsection{The Heat of Reaction}
@@ -4130,7 +4144,7 @@ $n_{t,j}$ is prescribed under the name {\ct N\_T(j)}.
 
 
 
-
+\clearpage
 
 
 \subsection{Liquid Fuels}
