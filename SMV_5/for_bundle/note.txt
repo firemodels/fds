@@ -15,3 +15,4 @@
 15. test option to change Mass Fraction kg/kg units to g/kg - addresses issue 985
 16. remove blockage edit capability, was buggy - replaced with dialog box that displays rather than edits blockage properties
 17. add list of unused SURFs to Examine Blockage dialog box
+18. test cad drawing fix
