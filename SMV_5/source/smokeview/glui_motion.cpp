@@ -342,7 +342,9 @@ extern "C" void glui_motion_setup(int main_window){
   render_panel = glui_motion->add_rollout("Render",false);
   render_type_radio=glui_motion->add_radiogroup_to_panel(render_panel,&renderfiletype,RENDER_TYPE,RENDER_CB);
   glui_motion->add_radiobutton_to_group(render_type_radio,"PNG");
+#ifdef pp_JPEG
   glui_motion->add_radiobutton_to_group(render_type_radio,"JPEG");
+#endif
 
   render_size_index=RenderWindow; 
   render_size_list = glui_motion->add_listbox_to_panel(render_panel,"Size:",&render_size_index,RENDER_SIZE_LIST,RENDER_CB);

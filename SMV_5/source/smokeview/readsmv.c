@@ -7773,6 +7773,12 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"RENDERFILETYPE",14)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&renderfiletype);
+#ifndef pp_JPEG
+      if(renderfiletype==1){
+        printf("*** warning: JPEG not supported, render filetype changed to PNG\n");
+        renderfiletype=0;
+      }
+#endif
       continue;
     }
     if(match(buffer,"SHOWGRIDLOC",11)==1){

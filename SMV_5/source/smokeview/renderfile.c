@@ -20,7 +20,9 @@
 #include "gd.h"
 
 #define PNG 0
+#ifdef pp_JPEG
 #define JPEG 1
+#endif
 #ifdef pp_GDGIF
 #define GIF 2
 #endif
@@ -208,9 +210,11 @@ void RenderFrame(int view_mode){
   case 0:
     renderfile_ext=ext_png;
     break;
+#ifdef pp_JPEG
   case 1:
     renderfile_ext=ext_jpg;
     break;
+#endif
 #ifdef pp_GDGIF
   case 2:
     renderfile_ext=ext_gif;
@@ -281,9 +285,11 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   case PNG:
     ext=ext_png;
     break;
+#ifdef pp_JPEG
   case JPEG:
     ext=ext_jpg;
     break;
+#endif
 #ifdef pp_GDGIF
   case GIF:
     ext=ext_gif;
@@ -384,9 +390,11 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   case PNG:
     gdImagePng(RENDERimage,RENDERfile);
     break;
+#ifdef pp_JPEG
   case JPEG:
     gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
+#endif
 #ifdef pp_GDGIF
   case GIF:
     gdImageGif(RENDERimage,RENDERfile);
@@ -498,9 +506,11 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   case PNG:
     gdImagePng(RENDERimage,RENDERfile);
     break;
+#ifdef pp_JPEG
   case JPEG:
     gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
+#endif
 #ifdef pp_GDGIF
   case GIF:
     gdImageGif(RENDERimage,RENDERfile);
@@ -566,12 +576,18 @@ unsigned char *readpicture(char *filename, int *width, int *height){
   
   printf("Loading texture:%s ",filebuffer);
   ext = filebuffer + strlen(filebuffer) - 4;
+#ifdef pp_JPEG
   if(strncmp(ext,".jpg",4)==0||strncmp(ext,".JPG",4)==0){
     returncode = readjpeg(filebuffer,width,height,pixel_skip);
   }
   else if(strncmp(ext,".png",4)==0||strncmp(ext,".PNG",4)==0){
     returncode = readpng(filebuffer,width,height);
   }
+#else
+  if(strncmp(ext,".png",4)==0||strncmp(ext,".PNG",4)==0){
+    returncode = readpng(filebuffer,width,height);
+  }
+#endif
   else if(strncmp(ext,".rgb",4)==0||strncmp(ext,".RGB",4)==0){
     returncode = readrgb(filebuffer,width,height);
   }
@@ -594,6 +610,7 @@ unsigned char *readpicture(char *filename, int *width, int *height){
 
 }
 
+#ifdef pp_JPEG
 /* ------------------ readjpeg ------------------------ */
 
 unsigned char *readjpeg(const char *filename,int *width, int *height, int skip){
@@ -640,6 +657,7 @@ unsigned char *readjpeg(const char *filename,int *width, int *height, int skip){
   return dataptr;
 
 }
+#endif
 
 /* ------------------ readpng ------------------------ */
 
