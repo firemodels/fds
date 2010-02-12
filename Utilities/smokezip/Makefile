@@ -9,7 +9,8 @@ bin = .
 #LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
 LINUX32FORTLIBDIR = /opt/intel/11/lib/ia32
 LINUX64FORTLIBDIR = /opt/intel/11/lib/intel64
-OSX32FORTLIBDIR = /opt/intel/fc/10.1.006/lib
+OSX32FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
+OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 
 # Definition of the object variables
 
@@ -106,6 +107,21 @@ intel_osx_32 : exe       = smokezip_osx_32
 intel_osx_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) -m32 $(obj) $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a ../osx_lib32/libz.a
 
+# ------------- OSX 64 ----------------
+#  64 bit OSX
+
+intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX
+intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX
+intel_osx_64 : FORTLIBDIR = $(OSX32FORTLIBDIR)
+intel_osx_64 : CC        = icc
+intel_osx_64 : CPP       = icc
+intel_osx_64 : FC        = ifort
+intel_osx_64 : exe       = smokezip_osx_64
+
+intel_osx_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) -m64 $(obj) $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a ../osx_lib64/libz.a
+
+#-------------- Clean Target to remove Object and Module files -----------
 #-------------- Clean Target to remove Object and Module files -----------
 
 .PHONY : clean
