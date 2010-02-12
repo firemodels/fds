@@ -167,11 +167,11 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 # OS X
-osx32_libdir = /opt/intel/Compiler/11.0/056/lib
-osx64_libdir = /opt/intel/Compiler/11.0/056/lib
+osx32_libdir = /opt/intel/Compiler/11.1/080/lib
+osx64_libdir = /opt/intel/Compiler/11.1/080/lib
 
 # 32 bit
-intel_osx_32 : FFLAGS = -O3  -m32 -axSSSE3 -heap-arrays -static-intel -L$(osx32_libdir) -vec_report0
+intel_osx_32 : FFLAGS = -O3  -m32 -axSSSE3 -heap-arrays -static-intel -vec_report0
 intel_osx_32 : CFLAGS = -O3 -m32 -Dpp_noappend -Dpp_OSX -vec_report0
 intel_osx_32 : FCOMPL = ifort
 intel_osx_32 : CCOMPL = icc
@@ -204,7 +204,7 @@ intel_osx_mpi_32_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 # 64 bit
-intel_osx_64 : FFLAGS = -O3 -m64 -heap-arrays -axSSSE3 -static-intel -L$(osx64_libdir) -vec_report0
+intel_osx_64 : FFLAGS = -O3 -m64 -heap-arrays -axSSSE3 -static-intel
 intel_osx_64 : CFLAGS = -O3 -m64 -Dpp_noappend -Dpp_OSX -vec_report0
 intel_osx_64 : FCOMPL = ifort
 intel_osx_64 : CCOMPL = icc

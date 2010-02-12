@@ -1,4 +1,6 @@
 #!/bin/csh -f
+#iccvars.csh ia32
+#ifortvars.csh ia32
 set mssg="32 bit OSX FDS"
 set target=intel_osx_32
 set objdir=.
