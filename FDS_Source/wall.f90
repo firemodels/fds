@@ -969,7 +969,9 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
             REACTION_RATE = RHO_S0 * REACTION_RATE
             ! Limit reaction rate
             REACTION_RATE = MIN(REACTION_RATE , WC%RHO_S(I,N)/DT_BC)
+            ! Compute mdot''_norm = mdot''' * r^(I_GRAD) * \Delta x / R^(I_GRAD)
             MFLUX_S = MF_FRAC(I)*REACTION_RATE/RDX_S(I)/SF%THICKNESS**I_GRAD
+            ! Sum up local mass fluxes
             DO NS = 1,N_SPECIES
                MASSFLUX(IW,NS)        = MASSFLUX(IW,NS)        + ML%ADJUST_BURN_RATE(J,NS)*ML%NU_GAS(J,NS)*MFLUX_S
                MASSFLUX_ACTUAL(IW,NS) = MASSFLUX_ACTUAL(IW,NS) +                           ML%NU_GAS(J,NS)*MFLUX_S
@@ -1021,10 +1023,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
    ! If the fuel or water massflux is non-zero, set the ignition time
 
    IF (TW(IW)>T) THEN
-      IF (MASSFLUX(IW,I_FUEL) > 0._EB) TW(IW) = T
-      IF (I_WATER > 0) THEN
-         IF (MASSFLUX(IW,I_WATER) > 0._EB) TW(IW) = T
-      ENDIF
+      IF (SUM(MASSFLUX(IW,:)) > 0._EB) TW(IW) = T
    ENDIF
 
    ! Special reactions: LIQUID
