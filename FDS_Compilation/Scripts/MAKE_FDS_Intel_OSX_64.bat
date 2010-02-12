@@ -23,6 +23,7 @@ set target=intel_osx_64
 set fdsdir=%linux_svn_root%/FDS_Compilation/intel_osx_64
 set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts
 
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% devi1.nist.gov
+#plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% devi1.nist.gov
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% bluesky.cfr.nist.gov
 
 pause
