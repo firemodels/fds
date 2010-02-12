@@ -223,7 +223,9 @@ void _sniffErrors(char *whereat);
 #define StepOn 10000
 #define RenderCancel 999
 #define RenderOnce 998
+#ifdef pp_JPEG
 #define RenderJPEG 997
+#endif
 #ifdef pp_GDGIF
 #define RenderGIF 988
 #endif
