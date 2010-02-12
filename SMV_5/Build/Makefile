@@ -115,23 +115,23 @@ intel_win_32 : exe       = smv5_win_32
 intel_win_32 : $(objwin)
 	$(CPP) -m32 -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\smokeview_fort.lib $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\glew32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
 
-# ------------- OSX TEST 32 ----------------
-#  OSX TEST running tiger (tiger)
+# ------------- OSX test 32 ----------------
+#  OSX running snow leopard (bluesky)
 
 intel_osx_test_32 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_32
 intel_osx_test_32 : FORTLIBDIR  = $(OSX32FORTLIBDIR)
-intel_osx_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
-intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_OSX
+intel_osx_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX -D pp_BETA
+intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -D pp_BETA
 intel_osx_test_32 : CC        = icc 
 intel_osx_test_32 : CPP       = icpc
 intel_osx_test_32 : FC        = ifort
 intel_osx_test_32 : exe       = smv5_osx_test_32
 
 intel_osx_test_32 : $(obj)
-	g++ -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT -L$(IMAGELIBDIR) -lz -ljpeg -lpng -lgd -lglui $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+	icpc -m32 -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
 # ------------- OSX 32 ----------------
-#  OSX running leopard (bluesky)
+#  OSX running snow leopard (bluesky)
 
 intel_osx_32 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_32
 intel_osx_32 : FORTLIBDIR  = $(OSX32FORTLIBDIR)
@@ -144,6 +144,22 @@ intel_osx_32 : exe       = smv5_osx_32
 
 intel_osx_32 : $(obj)
 	icpc -m32 -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+
+
+# ------------- OSX 64 ----------------
+#  OSX running test leopard (bluesky)
+
+intel_osx_test_64 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_64
+intel_osx_test_64 : FORTLIBDIR  = $(OSX64FORTLIBDIR)
+intel_osx_test_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX -D pp_BETA
+intel_osx_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX -D pp_BETA
+intel_osx_test_64 : CC        = icc 
+intel_osx_test_64 : CPP       = icpc
+intel_osx_test_64 : FC        = ifort
+intel_osx_test_64 : exe       = smv5_osx_64
+
+intel_osx_test_64 : $(obj)
+	icpc -m64 -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
 # ------------- OSX 64 ----------------
 #  OSX running leopard (bluesky)
