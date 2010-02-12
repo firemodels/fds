@@ -106,6 +106,10 @@
 #define pp_GPU
 #endif
 
+#ifndef pp_OSX
+#define pp_JPEG
+#endif
+
 #undef pp_OPEN
 #ifdef WIN32
 #ifdef pp_BETA

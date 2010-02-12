@@ -1291,10 +1291,12 @@ void RenderMenu(int value){
      renderfiletype=0;
      updatemenu=1;  
      break;
+#ifdef pp_JPEG
   case RenderJPEG:
      renderfiletype=1;
      updatemenu=1;  
      break;
+#endif
 #ifdef pp_GDGIF
   case RenderGIF:
      renderfiletype=2;
@@ -6030,21 +6032,27 @@ static int in_menu=0;
   glutAddMenuEntry("TYPE",10000);
   if(renderfiletype==0){
     glutAddMenuEntry("*PNG",RenderPNG);
+#ifdef pp_JPEG
     glutAddMenuEntry("JPEG",RenderJPEG);
+#endif
 #ifdef pp_GDGIF
     glutAddMenuEntry("GIF",RenderGIF);
 #endif
   }
   if(renderfiletype==1){
     glutAddMenuEntry("PNG",RenderPNG);
+#ifdef pp_JPEG
     glutAddMenuEntry("*JPEG",RenderJPEG);
+#endif
 #ifdef pp_GDGIF
     glutAddMenuEntry("GIF",RenderGIF);
 #endif
   }
   if(renderfiletype==2){
     glutAddMenuEntry("PNG",RenderPNG);
+#ifdef pp_JPEG
     glutAddMenuEntry("JPEG",RenderJPEG);
+#endif
 #ifdef pp_GDGIF
     glutAddMenuEntry("*GIF",RenderGIF);
 #endif
@@ -6392,7 +6400,7 @@ static int in_menu=0;
   }
   if(displayblank==1)glutAddMenuEntry("",1);
   glutAddMenuEntry("Misc keyboard commands",1);
-  glutAddMenuEntry("  r: render the current scene as a jpeg or png image",7);
+  glutAddMenuEntry("  r: render the current scene to an image file",7);
   glutAddMenuEntry("  R:   (same as r but at twice the resolution)",7);
   if(ntotal_blockages>0||isZoneFireModel==0){
     glutAddMenuEntry("  g: toggle grid visibility",2);

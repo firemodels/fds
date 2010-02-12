@@ -3690,6 +3690,9 @@ void usage(char **argv){
 #ifdef ISO_DEBUG
     printf(", ISO_DEBUG");
 #endif
+#ifdef pp_JPEG
+    printf(", pp_JPEG");
+#endif
 #ifdef pp_LIGHT
     printf(", pp_LIGHT");
 #endif
