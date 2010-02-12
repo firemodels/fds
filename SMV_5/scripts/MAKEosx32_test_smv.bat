@@ -30,7 +30,6 @@ set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
 set bindir=FDS-SMV/SMV_5/bin
 
-#plink %svn_logon% %scriptdir%/ssh_command.csh tiger.cfr.nist.gov %scriptdir% make_smv_osx32test.csh %smv_revision%
 plink %svn_logon% %scriptdir%/ssh_command.csh blueskyk.cfr.nist.gov %scriptdir% make_smv_osx32test.csh %smv_revision%
 
 echo.
