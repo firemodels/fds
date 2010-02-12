@@ -69,7 +69,6 @@ GLUI_StaticText *STATICTEXT_left=NULL, *STATICTEXT_right=NULL;
 int selectedcolorbar_index;
 int cb_rgb[6];
 int cb_jump;
-int cb_hidesv;
 
 #define COLORBAR_LIST 0
 #define COLORBAR_CLOSE 1
