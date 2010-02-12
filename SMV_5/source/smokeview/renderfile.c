@@ -392,7 +392,7 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
     break;
 #ifdef pp_JPEG
   case JPEG:
-//    gdImageJpeg(RENDERimage,RENDERfile,-1);
+    gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
 #endif
 #ifdef pp_GDGIF
@@ -508,7 +508,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
     break;
 #ifdef pp_JPEG
   case JPEG:
-//    gdImageJpeg(RENDERimage,RENDERfile,-1);
+    gdImageJpeg(RENDERimage,RENDERfile,-1);
     break;
 #endif
 #ifdef pp_GDGIF
@@ -626,7 +626,7 @@ unsigned char *readjpeg(const char *filename,int *width, int *height, int skip){
 
   file = fopen(filename, "rb");
   if (file == NULL)return NULL;
-//  image = gdImageCreateFromJpeg(file);
+  image = gdImageCreateFromJpeg(file);
   fclose(file);
   if(image==NULL)return NULL;
   WIDTH=gdImageSX(image);
