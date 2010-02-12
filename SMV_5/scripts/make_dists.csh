@@ -1,8 +1,10 @@
 #!/bin/csh -f
 set version=$1
 set SVNROOT=~/FDS-SMV
-set OSXHOST=tiger.cfr.nist.gov
-set OSXHOST2=devi1.nist.gov
+#set OSXHOST=tiger.cfr.nist.gov
+#set OSXHOST2=devi1.nist.gov
+set OSXHOST=bluesky.cfr.nist.gov
+set OSXHOST2=bluesky.cfr.nist.gov
 
 set BINDIR=$SVNROOT/SMV_5/bin
 set FORBUNDLE=$SVNROOT/SMV_5/for_bundle

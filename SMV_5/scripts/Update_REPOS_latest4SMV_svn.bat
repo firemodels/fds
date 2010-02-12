@@ -29,10 +29,12 @@ echo Updating the Linux repository, %linux_svn_root%, to the latest revision
 plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% acrux.cfr.nist.gov
 
 echo.
-echo Updating the tiger OSX repository, %linux_svn_root%, to the latest revision
-plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% tiger.cfr.nist.gov
+#echo Updating the tiger OSX repository, %linux_svn_root%, to the latest revision
+#plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% tiger.cfr.nist.gov
+echo Updating the bluesky OSX repository, %linux_svn_root%, to the latest revision
+plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% bluesky.cfr.nist.gov
 
 echo.
-echo Updating the devi1 OSX repository, %linux_svn_root%, to the latest revision
-plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% devi1.nist.gov
+#echo Updating the devi1 OSX repository, %linux_svn_root%, to the latest revision
+#plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% devi1.nist.gov
 pause
