@@ -4442,9 +4442,11 @@ CONTAINS
           WRITE (LU_EVACOUT,'(A)')          '   Node coordinates'
           DO NM = 1,EVAC_STRS(N)%N_NODES
              IF (EVAC_STRS(N)%NODE_TYPE(NM) == STRS_LANDING_TYPE) THEN
-                WRITE (LU_EVACOUT,'(A,I3,8F8.3)') '   Landing ',NM,EVAC_STRS(N)%XB_NODE(NM,1:8)
+                !WRITE (LU_EVACOUT,'(A,I3,8F8.3)') '   Landing ',NM,EVAC_STRS(N)%XB_NODE(NM,1:8)
+                WRITE (LU_EVACOUT,'(A,I3,8F8.3)') '   Landing ',NM,(EVAC_STRS(N)%XB_NODE(NM,I),I=1,8)
              ELSE
-                WRITE (LU_EVACOUT,'(A,I3,8F8.3)') '   Stair   ',NM,EVAC_STRS(N)%XB_NODE(NM,1:8)
+                !WRITE (LU_EVACOUT,'(A,I3,8F8.3)') '   Stair   ',NM,EVAC_STRS(N)%XB_NODE(NM,1:8)
+                WRITE (LU_EVACOUT,'(A,I3,8F8.3)') '   Stair   ',NM,(EVAC_STRS(N)%XB_NODE(NM,I),I=1,8)
              ENDIF
           ENDDO
           WRITE (LU_EVACOUT,'(A)')          '   Nodes in '
@@ -4978,10 +4980,13 @@ CONTAINS
   END SUBROUTINE INITIALIZE_EVACUATION
 
   !
-  SUBROUTINE INIT_EVAC_GROUPS
+  SUBROUTINE INIT_EVAC_GROUPS(MESH_STOP_STATUS)
     IMPLICIT NONE
     !
     ! Initialize group lists, known doors, etc
+    !
+    ! Passed variables
+    INTEGER, DIMENSION(:) :: MESH_STOP_STATUS
     !
     ! Local variables
     INTEGER I,J, IZERO, nom, j1, ii, i_target_old, i_change_old, i_tmp, i_tmp2
@@ -5033,6 +5038,7 @@ CONTAINS
        N_CHANGE_TRIALS = 0 ! Count the initialization Nash equilibrium iterations
        I_CHANGE_OLD    = -1
        IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EVACUATION_GRID(NOM)) ) CYCLE
+       IF (MESH_STOP_STATUS(NOM)/=NO_STOP) CYCLE
        M => MESHES(NOM)
        GROUP_LIST(:)%GROUP_SIZE  = 0
        GROUP_LIST(:)%GROUP_X = 0.0_EB
@@ -8049,7 +8055,7 @@ CONTAINS
                ISKNOWNDOOR = .TRUE.
             ELSE
                DO ID = 1, PNX%N_VENT_FFIELDS
-                  IF (I == EVAC_NODE_LIST(PNX%I_DOOR_NODES(ID))%NODE_INDEX) THEN
+                  IF (I == PNX%I_DOOR_NODES(ID)) THEN
                      ISKNOWNDOOR = .TRUE.
                      EXIT
                   END IF
@@ -11598,6 +11604,7 @@ CONTAINS
           END IF
        END DO
        DO i = 1, PNX%N_VENT_FFIELDS 
+          ! P = 0 or 1 for entrys.
           ! Check that the door/exit is in the correct main evac grid.
           i_tmp = 1
           IF (TRIM(EVAC_Node_List(PNX%I_DOOR_NODES(i))%Node_Type) == 'Door') THEN
