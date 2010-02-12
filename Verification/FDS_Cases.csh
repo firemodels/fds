@@ -18,6 +18,7 @@ $RUNFDS Controls device_test                      fire41
 $RUNFDS Detectors aspiration_detector             fire53
 $RUNFDS Detectors beam_detector                   fire54
 $RUNFDS Fires box_burn_away                       fire45
+$RUNFDS Fires box_burn_away2                      fire45
 $RUNFDS Fires cable_tray                          fire46
 $RUNFDS Fires couch                               fire47
 $RUNFDS Fires room_fire                           fire51
