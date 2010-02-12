@@ -8,6 +8,7 @@
 %RUNFDS% Detectors aspiration_detector             fire43
 %RUNFDS% Detectors beam_detector                   fire44
 %RUNFDS% Fires box_burn_away                       fire45
+%RUNFDS% Fires box_burn_away2                      fire45
 %RUNFDS% Fires cable_tray                          fire46
 %RUNFDS% Fires couch                               fire47
 %RUNFDS% Fires room_fire                           fire51
