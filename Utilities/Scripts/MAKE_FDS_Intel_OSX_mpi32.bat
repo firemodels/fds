@@ -23,6 +23,7 @@ set target=mpi_intel_osx_32
 set fdsdir=%linux_svn_root%/Utilities/Makefile/Mpi_Intel_OSX_32
 set scriptdir=%linux_svn_root%/Utilities/Scripts
 
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% devi1.nist.gov
+#plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% devi1.nist.gov
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% bluesky.cfr.nist.gov
 
 pause
