@@ -4,19 +4,18 @@
 #
 setenv fds_smvroot $1
 setenv bundlebase $2
-#setenv smvhost tiger.cfr.nist.gov
-#setenv fdshost devi1.nist.gov
 setenv smvhost bluesky.cfr.nist.gov
 setenv fdshost bluesky.cfr.nist.gov
+setenv platform OSX
 
-setenv smokezipdir INTEL_OSX_32
-setenv smokediffdir INTEL_OSX_32
+setenv smokezipdir INTEL_OSX_64
+setenv smokediffdir INTEL_OSX_64
 setenv fds5dir intel_osx_64
 setenv fds5mpidir mpi_intel_osx_64
 
-setenv smokeview smv5_osx_32
-setenv smokezip smokezip_osx_32
-setenv smokediff smokediff_osx_32
+setenv smokeview smv5_osx_64
+setenv smokezip smokezip_osx_64
+setenv smokediff smokediff_osx_64
 
 setenv fds5 fds5_intel_osx_64
 setenv fds5mpi fds5_mpi_intel_osx_64
