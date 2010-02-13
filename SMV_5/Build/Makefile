@@ -156,7 +156,7 @@ intel_osx_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX -D pp_BETA
 intel_osx_test_64 : CC        = icc 
 intel_osx_test_64 : CPP       = icpc
 intel_osx_test_64 : FC        = ifort
-intel_osx_test_64 : exe       = smv5_osx_64
+intel_osx_test_64 : exe       = smv5_osx_test_64
 
 intel_osx_test_64 : $(obj)
 	icpc -m64 -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
@@ -175,21 +175,6 @@ intel_osx_64 : exe       = smv5_osx_64
 
 intel_osx_64 : $(obj)
 	icpc -m64 -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
-
-# ------------- OSX 32 ----------------
-#  OSX running tiger (tiger)
-
-intel_osx_32a : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_32
-intel_osx_32a : FORTLIBDIR  = $(OSX32FORTLIBDIR)
-intel_osx_32a : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
-intel_osx_32a : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
-intel_osx_32a : CC        = icc 
-intel_osx_32a : CPP       = icpc
-intel_osx_32a : FC        = ifort
-intel_osx_32a : exe       = smv5_osx_32
-
-intel_osx_32a : $(obj)
-	g++ -o $(bin)/$(exe) $(obj) -framework OpenGL -framework GLUT -L$(IMAGELIBDIR) -lz -ljpeg -lpng -lgd -lglui $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
 # ------------- Linux 32 ----------------
 #  32 bit linux (acrux) using gnu compilers 
