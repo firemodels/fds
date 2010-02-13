@@ -34,7 +34,7 @@ Rem --------------- 64 bit OSX ----------------
 
   set glabels=Type-Archive,Opsys-OSX,%level%
   set dplatform=64 bit OSX
-  set platform=osx64
+  set platform=osx_64
   set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
   set exe=smv_%version%_%smv_revision%_%platform%.tar.gz
   echo.

@@ -1,6 +1,6 @@
 @echo off
-
-Rem  Windows batch file to build a release Smokeview for Linux 64.
+vi m
+Rem  Windows batch file to package a Linux Smokeview
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -17,20 +17,18 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Using the environment variables:
-echo.
-echo Using SVN revision %smv_revision% to build a 64 bit test Linux Smokeview
 
 %svn_drive%
 cd %svn_root%\smv_5\scripts
-set version=%smv_version%_%smv_revision%
+set version=%smv_version%
 
 set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
-set bindir=FDS-SMV/SMV_5/bin
 
-plink %svn_logon% %scriptdir%/ssh_command.csh fire79 %scriptdir% make_smv_linux64.csh %smv_revision%
+echo making Linux archives
+plink %svn_logon% %scriptdir%/make_linux_dist.csh %version% %smv_revision%
 
-echo.
-echo compilation complete
+echo downloading Linux Smokeview files
+pscp %svn_logon%:%bundledir%/smv_%version%_%smv_revision%_linux.tar.gz ..\for_bundle\to_google\.
+
 pause
