@@ -10045,8 +10045,13 @@ void writeini(int flag){
     fprintf(fileout,"# Platform: WIN32\n");
 #endif
 #endif
+#ifndef pp_OSX64
 #ifdef pp_OSX
-    fprintf(fileout,"# Platform: OS X\n");
+    printf("Platform: OSX\n");
+#endif
+#endif
+#ifdef pp_OSX64
+    printf("Platform: OSX64\n");
 #endif
 #ifndef pp_LINUX64
 #ifdef pp_LINUX

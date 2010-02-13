@@ -60,6 +60,13 @@
 #define BIT64
 #endif
 
+#ifdef pp_OSX64
+#undef pp_OSX
+#define pp_OSX
+#undef BIT64
+#define BIT64
+#endif
+
 #ifdef BIT64
 #define FILE_SIZE unsigned long long
 #else

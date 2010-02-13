@@ -3623,8 +3623,13 @@ void version(void){
     printf(" (MSVS C/C++)\n");
 #endif
 #endif
+#ifndef pp_OSX64
 #ifdef pp_OSX
-    printf("Platform: OS X\n");
+    printf("Platform: OSX\n");
+#endif
+#endif
+#ifdef pp_OSX64
+    printf("Platform: OSX64\n");
 #endif
 #ifndef pp_LINUX64
 #ifdef pp_LINUX
