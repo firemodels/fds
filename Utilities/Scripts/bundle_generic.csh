@@ -3,11 +3,7 @@
 # this script is called by bundle_platform_size.csh
 # where platform may be linux or osx and size may be 32 or 64
 
-if $?fdshost then
 set scp_fds_smvroot=$fds_smvroot
-else
-set scp_fds_smvroot=~/$fds_smvroot
-endif
 set fds_smvroot=~/$fds_smvroot
 set fdsroot=$scp_fds_smvroot/FDS_Compilation
 set smokediffroot=$scp_fds_smvroot/Utilities/smokediff
@@ -42,11 +38,7 @@ endif
 
 # smokeview
 
-if $?smvhost then
 scp $smvhost\:$smvbindir/$smokeview $bundledir/bin/.
-else
-cp $smvbindir/$smokeview $bundledir/bin/.
-endif
 echo copying textures
 
 cp $texturedir/*.png $bundledir/bin/textures/.
@@ -54,31 +46,18 @@ cp $texturedir/*.jpg $bundledir/bin/textures/.
 
 # smokediff
 
-if $?fdshost then
 scp $fdshost\:$smokediffroot/$smokediffdir/$smokediff $bundledir/bin/.
-else
-cp $smokediffroot/$smokediffdir/$smokediff $bundledir/bin/.
-endif
 
 # smokezip
 
-if $?fdshost then
 scp $fdshost\:$smokeziproot/$smokezipdir/$smokezip $bundledir/bin/.
-else
-cp $smokeziproot/$smokezipdir/$smokezip $bundledir/bin/.
-endif
 
 # FDS 
 
-if $?fdshost then
 scp $fdshost\:$fdsroot/$fds5dir/$fds5 $bundledir/bin/$fds5out
 scp $fdshost\:$fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/$fds5mpiout
 cp $bundle_setup/FDS-SMV_5_OSX_Launcher.app.zip $bundledir/bin/.
 cp $bundle_setup/README_OSX.html $bundledir/bin/.
-else
-cp $fdsroot/$fds5dir/$fds5 $bundledir/bin/$fds5out
-cp $fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/$fds5mpiout
-endif
 
 cp $forbundle/smokeview.ini $bundledir/bin/.
 cp $fds2asciidir/$fds2ascii $bundledir/bin/.
