@@ -19,6 +19,7 @@ $VDIR/NIST_FSE_2008/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_NRC/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_RSE_1994/FDS_Output_Files/Process_Output.csh
 $VDIR/NRL_HAI/FDS_Output_Files/Process_Output.csh
+$VDIR/PRISME/FDS_Output_Files/Process_Output.csh
 $VDIR/Restivo_Experiment/FDS_Output_Files/Process_Output.csh
 $VDIR/Smyth_Slot_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/SP2009_AST/FDS_Output_Files/Process_Output.csh
