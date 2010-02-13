@@ -1,6 +1,6 @@
 @echo off
 
-Rem  Windows batch file to create an achive for a 64 bit Linux smokeview
+Rem  Windows batch file to create an OSX achive for an OSX smokeview
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -25,9 +25,11 @@ set version=%smv_version%
 set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
 
-echo making 64 bit Linux distribution archive
-plink %svn_logon% %scriptdir%/make_linux64_dist.csh %version% %smv_revision%
+echo making 32 bit Smokeview OSX distribution archive
+plink %svn_logon% %scriptdir%/make_osx_dists.csh %version% %smv_revision%
 
-echo downloading Linux Smokeview files
-pscp %svn_logon%:%bundledir%/smv_%version%_%smv_revision%_linux64.tar.gz ..\for_bundle\to_google\.
+echo downloading 32 bit Smokeview OSX distribution archive
+pscp %svn_logon%:%bundledir%/smv_%version%_%smv_revision%_osx.tar.gz ..\for_bundle\to_google\.
+
+
 pause
