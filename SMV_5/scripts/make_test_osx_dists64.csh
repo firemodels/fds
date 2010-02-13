@@ -6,7 +6,7 @@ set OSXHOST=bluesky.cfr.nist.gov
 
 set BINDIR=$SVNROOT/SMV_5/bin
 set FORBUNDLE=$SVNROOT/SMV_5/for_bundle
-set OSXDIR=smv_$version\_$revision\_osx
+set OSXDIR=smv_$version\_$revision\_osx_64
 
 cd $FORBUNDLE
 
