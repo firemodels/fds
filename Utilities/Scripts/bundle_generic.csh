@@ -38,6 +38,7 @@ endif
 
 # smokeview
 
+echo copying $smokeview from $smvbindir on $smvhost
 scp $smvhost\:$smvbindir/$smokeview $bundledir/bin/.
 echo copying textures
 
@@ -46,18 +47,27 @@ cp $texturedir/*.jpg $bundledir/bin/textures/.
 
 # smokediff
 
+echo copying $smokediff from $smokediffdir on $fdshost
 scp $fdshost\:$smokediffroot/$smokediffdir/$smokediff $bundledir/bin/.
 
 # smokezip
 
+echo copying $smokezip from $smokezipdir on $fdshost
 scp $fdshost\:$smokeziproot/$smokezipdir/$smokezip $bundledir/bin/.
 
 # FDS 
 
+echo copying $fds5 from $fds5dir on $fdshost
 scp $fdshost\:$fdsroot/$fds5dir/$fds5 $bundledir/bin/$fds5out
+
+echo copying $fds5mpi from $fds5dir on $fdshost
 scp $fdshost\:$fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/$fds5mpiout
+
+if ($?OSXBUNDLE) then
+echo copying OSX launcher script
 cp $bundle_setup/FDS-SMV_5_OSX_Launcher.app.zip $bundledir/bin/.
 cp $bundle_setup/README_OSX.html $bundledir/bin/.
+endif
 
 cp $forbundle/smokeview.ini $bundledir/bin/.
 cp $fds2asciidir/$fds2ascii $bundledir/bin/.

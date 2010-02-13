@@ -6,7 +6,6 @@ setenv fds_smvroot $1
 setenv bundlebase $2
 setenv fdshost acrux.cfr.nist.gov
 setenv smvhost acrux.cfr.nist.gov
-setenv platform LINUX
 
 setenv INTELLIB lib32
 setenv smokezipdir INTEL_LINUX_32
