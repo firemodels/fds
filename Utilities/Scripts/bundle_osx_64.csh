@@ -6,7 +6,7 @@ setenv fds_smvroot $1
 setenv bundlebase $2
 setenv smvhost bluesky.cfr.nist.gov
 setenv fdshost bluesky.cfr.nist.gov
-setenv platform OSX
+setenv OSXBUNDLE
 
 setenv smokezipdir INTEL_OSX_64
 setenv smokediffdir INTEL_OSX_64
