@@ -8828,15 +8828,15 @@ IF (QUANTITY=='EXTINCTION COEFFICIENT' .AND. SPEC_ID=='null' .AND. MIXTURE_FRACT
 IF (QUANTITY=='SOOT VOLUME FRACTION'   .AND. SPEC_ID=='null' .AND. MIXTURE_FRACTION) SPEC_ID='SOOT'
 IF (QUANTITY=='VISIBILITY'             .AND. SPEC_ID=='null' .AND. MIXTURE_FRACTION) SPEC_ID='SOOT'
 
-IF (SPEC_ID=='fuel') SPEC_ID='FUEL'
-IF (SPEC_ID=='nitrogen') SPEC_ID='NITROGEN'
-IF (SPEC_ID=='oxygen') SPEC_ID='OXYGEN'
-IF (SPEC_ID=='water vapor') SPEC_ID='WATER VAPOR'
-IF (SPEC_ID=='carbon dioxide') SPEC_ID='CARBON DIOXIDE'
+IF (SPEC_ID=='fuel')            SPEC_ID='FUEL'
+IF (SPEC_ID=='nitrogen')        SPEC_ID='NITROGEN'
+IF (SPEC_ID=='oxygen')          SPEC_ID='OXYGEN'
+IF (SPEC_ID=='water vapor')     SPEC_ID='WATER VAPOR'
+IF (SPEC_ID=='carbon dioxide')  SPEC_ID='CARBON DIOXIDE'
 IF (SPEC_ID=='carbon monoxide') SPEC_ID='CARBON MONOXIDE'
-IF (SPEC_ID=='hydrogen') SPEC_ID='HYDROGEN'
-IF (SPEC_ID=='other') SPEC_ID='OTHER'
-IF (SPEC_ID=='soot') SPEC_ID='SOOT'
+IF (SPEC_ID=='hydrogen')        SPEC_ID='HYDROGEN'
+IF (SPEC_ID=='other')           SPEC_ID='OTHER'
+IF (SPEC_ID=='soot')            SPEC_ID='SOOT'
 
 SPEC_INDEX = 0
 PART_INDEX = 0
@@ -8845,54 +8845,54 @@ NODE_INDEX = 0
 
 ! Convert old mixture fraction based quantities
 
-IF (SPEC_INDEX==0 .AND. (QUANTITY=='fuel'.OR.QUANTITY=='fuel mass fraction')) THEN
+IF (QUANTITY=='fuel'.OR.QUANTITY=='fuel mass fraction') THEN
    SPEC_ID = 'FUEL'
    IF (QUANTITY=='fuel')               QUANTITY   = 'VOLUME FRACTION'
    IF (QUANTITY=='fuel mass fraction') QUANTITY   = 'MASS FRACTION'
 ENDIF
-IF (SPEC_INDEX==0 .AND. (QUANTITY=='oxygen'.OR.QUANTITY=='oxygen mass fraction')) THEN
+IF (QUANTITY=='oxygen'.OR.QUANTITY=='oxygen mass fraction') THEN
    SPEC_ID = 'OXYGEN'
    IF (QUANTITY=='oxygen')               QUANTITY   = 'VOLUME FRACTION'
    IF (QUANTITY=='oxygen mass fraction') QUANTITY   = 'MASS FRACTION'
 ENDIF
-IF (SPEC_INDEX==0 .AND. (QUANTITY=='nitrogen'.OR.QUANTITY=='nitrogen mass fraction')) THEN
+IF (QUANTITY=='nitrogen'.OR.QUANTITY=='nitrogen mass fraction') THEN
    SPEC_ID = 'NITROGEN'
    IF (QUANTITY=='nitrogen')               QUANTITY   = 'VOLUME FRACTION'
    IF (QUANTITY=='nitrogen mass fraction') QUANTITY   = 'MASS FRACTION'
 ENDIF
-IF (SPEC_INDEX==0 .AND. (QUANTITY=='water vapor'.OR.QUANTITY=='water vapor mass fraction')) THEN
+IF (QUANTITY=='water vapor'.OR.QUANTITY=='water vapor mass fraction') THEN
    SPEC_ID = 'WATER VAPOR'
    IF (QUANTITY=='water vapor')               QUANTITY   = 'VOLUME FRACTION'
    IF (QUANTITY=='water vapor mass fraction') QUANTITY   = 'MASS FRACTION'
 ENDIF
-IF (SPEC_INDEX==0 .AND. (QUANTITY=='carbon dioxide'.OR.QUANTITY=='carbon dioxide mass fraction')) THEN
+IF (QUANTITY=='carbon dioxide'.OR.QUANTITY=='carbon dioxide mass fraction') THEN
    SPEC_ID = 'CARBON DIOXIDE'
    IF (QUANTITY=='carbon dioxide')               QUANTITY   = 'VOLUME FRACTION'
    IF (QUANTITY=='carbon dioxide mass fraction') QUANTITY   = 'MASS FRACTION'
 ENDIF
-IF (SPEC_INDEX==0 .AND. (QUANTITY=='carbon monoxide'.OR.QUANTITY=='carbon monoxide mass fraction')) THEN
+IF (QUANTITY=='carbon monoxide'.OR.QUANTITY=='carbon monoxide mass fraction') THEN
    SPEC_ID = 'CARBON MONOXIDE'
    IF (QUANTITY=='carbon monoxide')               QUANTITY   = 'VOLUME FRACTION'
    IF (QUANTITY=='carbon monoxide mass fraction') QUANTITY   = 'MASS FRACTION'
 ENDIF
-IF (SPEC_INDEX==0 .AND. (QUANTITY=='hydrogen'.OR.QUANTITY=='hydrogen mass fraction')) THEN
+IF (QUANTITY=='hydrogen'.OR.QUANTITY=='hydrogen mass fraction') THEN
    SPEC_ID = 'HYDROGEN'
    IF (QUANTITY=='hydrogen')               QUANTITY   = 'VOLUME FRACTION'
    IF (QUANTITY=='hydrogen mass fraction') QUANTITY   = 'MASS FRACTION'
 ENDIF
-IF (SPEC_INDEX==0 .AND. (QUANTITY=='soot'.OR.QUANTITY=='soot mass fraction')) THEN
+IF (QUANTITY=='soot'.OR.QUANTITY=='soot mass fraction') THEN
    SPEC_ID = 'SOOT'
    IF (QUANTITY=='soot')               QUANTITY   = 'VOLUME FRACTION'
    IF (QUANTITY=='soot mass fraction') QUANTITY   = 'MASS FRACTION'
 ENDIF
-IF (SPEC_INDEX==0 .AND. (QUANTITY=='other'.OR.QUANTITY=='other mass fraction')) THEN
+IF (QUANTITY=='other'.OR.QUANTITY=='other mass fraction') THEN
    SPEC_ID = 'OTHER'
    IF (QUANTITY=='other')               QUANTITY   = 'VOLUME FRACTION'
    IF (QUANTITY=='other mass fraction') QUANTITY   = 'MASS FRACTION'
 ENDIF
 
-
 ! Assign SPEC_INDEX when SPEC_ID is specified
+
 IF (SPEC_ID/='null') THEN
    DO NS=1,N_SPECIES
       IF (SPEC_ID==SPECIES(NS)%ID) THEN
@@ -8918,6 +8918,11 @@ IF (SPEC_ID/='null' .AND. SPEC_INDEX==0) THEN
       ENDIF
    ENDDO
 ENDIF
+
+IF (SPEC_ID/='null' .AND. SPEC_INDEX==0) THEN
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR: ',TRIM(SPEC_ID),' is neither explicitly specified nor part of the mixture fraction model'
+      CALL SHUTDOWN(MESSAGE)
+ENDIF 
 
 ! Assign HVAC indexes
 
@@ -9053,11 +9058,14 @@ IF (SPEC_ID =='null') THEN
 ENDIF
 
 ! Check for use of volume fraction for a mixture fraction species.
+
 IF (QUANTITY=='VOLUME FRACTION' .AND. (SPEC_ID=='MIXTURE FRACTION' .OR. SPEC_ID(1:17)=='MIXTURE_FRACTION_')) THEN
       WRITE(MESSAGE,'(A,A)')  'ERROR: QUANTITY VOLUME FRACTION cannot be used for SPEC_ID=',TRIM(SPEC_ID)
       CALL SHUTDOWN(MESSAGE)
 ENDIF 
       
+! Convert old particle quantity names
+
 DO NS=1,N_PART
    IF (QUANTITY==TRIM(PARTICLE_CLASS(NS)%ID)//'_MPUV') THEN
       QUANTITY   = 'MPUV'
@@ -9096,6 +9104,7 @@ DO NS=1,N_PART
       PART_INDEX = NS
    ENDIF
 ENDDO
+
 ! Convert various old mixture fraction based names
 
 IF (QUANTITY=='visibility') THEN
