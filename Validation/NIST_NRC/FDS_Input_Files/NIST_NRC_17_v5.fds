@@ -18,6 +18,7 @@
       FYI        = 'Toluene, C_7 H_8'
       C          = 7.
       H          = 8.
+      CO_YIELD   = 0.07
       SOOT_YIELD = 0.195 /
 
 &OBST XB= 9.8,11.8, 3.1, 4.1, 0.0, 0.0, SURF_ID='STEEL SHEET' /  Fire Pan
