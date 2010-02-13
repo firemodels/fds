@@ -1,5 +1,4 @@
 @echo off
-vi m
 Rem  Windows batch file to package a Linux Smokeview
 
 Rem setup environment variables (defining where repository resides etc) 
