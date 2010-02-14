@@ -85,18 +85,18 @@ no_target:
 #  64 bit windows
 
 intel_win_64 : INC = -I ../../source/include
-intel_win_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
+intel_win_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
 intel_win_64 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
 intel_win_64 : FORTLIBDIR  = $(WIN64FORTLIBDIR)
 intel_win_64 : FFLAGS    = -O2 -fpp /Qvec_report0
-intel_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D pp_WIN_INTEL /Qvec_report0
+intel_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D pp_WIN_INTEL -D X64 /Qvec_report0
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smv5_win_64
 
 intel_win_64 : $(objwin)
-	$(CPP) -m64 -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\smokeview_fort.lib $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\glew32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
+	$(CPP) -m64 -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\smokeview_fort_64.lib $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
 
 # ------------- Win 32 ----------------
 #  32 bit windows
