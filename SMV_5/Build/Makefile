@@ -223,7 +223,7 @@ intel_linux_test_32 : $(obj)
 
 
 # ------------- Linux 32 ----------------
-#  32 bit linux (acrux)
+#  32 bit linux (fire78)
 
 intel_linux_32 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_32
 intel_linux_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
@@ -235,6 +235,21 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smv5_linux_32
 
 intel_linux_32 : $(obj)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
+
+# ------------- Linux 32 ----------------
+#  32 bit linux (acrux)
+
+intel_linux_32a : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_32
+intel_linux_32a : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
+intel_linux_32a : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
+intel_linux_32a : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
+intel_linux_32a : CC        = icc 
+intel_linux_32a : CPP       = icpc
+intel_linux_32a : FC        = ifort
+intel_linux_32a : exe       = smv5_linux_32
+
+intel_linux_32a : $(obj)
 	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore $(SYSTEMLIBS)
 
 # ------------- Linux 64 DEBUG ----------------
