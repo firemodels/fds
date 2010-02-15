@@ -47,7 +47,7 @@ LINUX64FORTLIBDIR  = /opt/intel/11/lib/intel64
 
 # Definition of the object variables
 
-obj = main.o IOscript.o IOshooter.o glui_message.o glui_shooter.o glui_wui.o csphere.o colorbar.o endian.o camera.o IOhrr.o IOwui.o IOobject.o IOtour.o glui_labels.o glui_tour.o smoothlabel.o getdatacolors.o smokeview.o output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o sv_api.o glui_3dsmoke.o glui_clip.o glui_stereo.o glui_blockedit.o glui_motion.o glui_bounds.o egz_stdio.o parseobst.o dmalloc.o assert.o compress3dc.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o glui_colorbar.o skybox.o blockage_test.o segtri.o string_util.o startup.o glui_trainer.o shaders.o unit.o getsizes.o getdata.o
+obj = main.o IOscript.o IOshooter.o glui_message.o glui_shooter.o glui_wui.o csphere.o colorbar.o endian.o camera.o IOhrr.o IOwui.o IOobject.o IOtour.o glui_labels.o glui_tour.o smoothlabel.o getdatacolors.o smokeview.o output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o sv_api.o glui_3dsmoke.o glui_clip.o glui_stereo.o glui_blockedit.o glui_motion.o glui_bounds.o egz_stdio.o parseobst.o dmalloc.o assert.o compress3dc.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o glui_colorbar.o skybox.o blockage_test.o segtri.o string_util.o startup.o glui_trainer.o shaders.o unit.o getdata.o getsizes.o
 objwin = $(obj:.o=.obj)
 
 # include file directory locations (should be the same for all builds)
@@ -87,8 +87,7 @@ no_target:
 intel_win_64 : INC = -I ../../source/include
 intel_win_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
 intel_win_64 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-intel_win_64 : FORTLIBDIR  = $(WIN64FORTLIBDIR)
-intel_win_64 : FFLAGS    = -O2 -fpp /Qvec_report0
+intel_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5 /Qvec_report0
 intel_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D pp_WIN_INTEL -D X64 /Qvec_report0
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
@@ -96,7 +95,7 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smv5_win_64
 
 intel_win_64 : $(objwin)
-	$(CPP) -m64 -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\smokeview_fort_64.lib $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
+	$(CPP) -m64 -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
 
 # ------------- Win 32 ----------------
 #  32 bit windows
@@ -104,8 +103,7 @@ intel_win_64 : $(objwin)
 intel_win_32 : INC = -I ../../source/include
 intel_win_32 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
 intel_win_32 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-intel_win_32 : FORTLIBDIR  = $(WIN32FORTLIBDIR)
-intel_win_32 : FFLAGS    = -O2 -fpp /Qvec_report0
+intel_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5 /Qvec_report0
 intel_win_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D pp_WIN_INTEL /Qvec_report0
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
@@ -113,7 +111,7 @@ intel_win_32 : FC        = ifort
 intel_win_32 : exe       = smv5_win_32
 
 intel_win_32 : $(objwin)
-	$(CPP) -m32 -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\smokeview_fort.lib $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\glew32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
+	$(CPP) -m32 -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\glew32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
 
 # ------------- OSX test 32 ----------------
 #  OSX running snow leopard (bluesky)
@@ -236,21 +234,6 @@ intel_linux_32 : exe       = smv5_linux_32
 
 intel_linux_32 : $(obj)
 	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
-
-# ------------- Linux 32 ----------------
-#  32 bit linux (acrux)
-
-intel_linux_32a : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_32
-intel_linux_32a : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
-intel_linux_32a : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
-intel_linux_32a : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
-intel_linux_32a : CC        = icc 
-intel_linux_32a : CPP       = icpc
-intel_linux_32a : FC        = ifort
-intel_linux_32a : exe       = smv5_linux_32
-
-intel_linux_32a : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore $(SYSTEMLIBS)
 
 # ------------- Linux 64 DEBUG ----------------
 # 64 bit debug linux (fire79)
