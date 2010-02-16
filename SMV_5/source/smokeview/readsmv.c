@@ -71,6 +71,7 @@ void update_inilist(void){
 /* ------------------ propi ------------------------ */
 
 void init_prop(propdata *propi){
+  propi->nsmokeview_ids=0;
   propi->blockvis=1;
   propi->inblockage=0;
   propi->ntextures=0;
