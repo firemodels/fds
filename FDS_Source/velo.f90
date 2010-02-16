@@ -156,7 +156,7 @@ ENDIF
 
 ! Mirror viscosity into solids and exterior boundary cells
  
-IF (LES .AND. H_EDDY .AND. .NOT.DYNSMAG) DAMPING_FACTOR = 0.0625_EB ! = (0.05/.2)**2
+!!IF (LES .AND. H_EDDY .AND. .NOT.DYNSMAG) DAMPING_FACTOR = 0.0625_EB ! = (0.05/.2)**2
 
 !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
 WALL_LOOP: DO IW=1,NWC
