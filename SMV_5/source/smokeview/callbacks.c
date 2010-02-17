@@ -707,7 +707,12 @@ void keyboard(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"T",1)==0){
+#ifdef pp_FRACTILE  
+    usetexturebar++;
+    if(usetexturebar==4)usetexturebar=0;
+#else
     usetexturebar=1-usetexturebar;
+#endif
     printf("usetexturebar=%i\n",usetexturebar);
     return;
   }

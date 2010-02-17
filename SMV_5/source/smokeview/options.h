@@ -104,6 +104,7 @@
 #endif
 
 #ifdef pp_BETA
+#define pp_FRACTILE
 #define pp_LIGHT
 #define pp_SHOOTER
 #define pp_TRANSFORMxxx
