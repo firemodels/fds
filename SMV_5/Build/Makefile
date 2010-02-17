@@ -37,8 +37,6 @@ SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
 
 # FORTRAN Library directories for various platforms
 
-WIN64FORTLIBDIR  = "C:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia64"
-WIN32FORTLIBDIR  = "C:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia32"
 #OSX32FORTLIBDIR  = /opt/intel/fc/10.1.006/lib
 OSX32FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
 OSX64FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
@@ -87,8 +85,8 @@ no_target:
 intel_win_64 : INC = -I ../../source/include
 intel_win_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
 intel_win_64 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-intel_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5 /Qvec_report0
-intel_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D pp_WIN_INTEL -D X64 /Qvec_report0
+intel_win_64 : FFLAGS    = -m64 -O2 -fpp -D pp_PART5 -D pp_cvf /Qvec_report0
+intel_win_64 : CFLAGS    = -m64 -O2 -D WIN32 -D _CONSOLE -D pp_WIN_INTEL -D X64 /Qvec_report0
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
