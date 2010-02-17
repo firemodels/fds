@@ -1196,11 +1196,9 @@ IF (FDS6) THEN
    ENDIF
    NOBIAS=.TRUE.
    BAROCLINIC2=.TRUE.
-   PROJECTION=.TRUE.
    STORE_MU_DNS=.TRUE.
    CHECK_VN=.TRUE.
    CLIP_MASS_FRACTION=.TRUE.
-   H_EDDY=.TRUE.
    ! reread the line to pick up any user-specified options
    REWIND(LU_INPUT)
    CALL CHECKREAD('MISC',LU_INPUT,IOS)
