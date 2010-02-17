@@ -156,7 +156,7 @@ ENDIF
 
 ! Mirror viscosity into solids and exterior boundary cells
  
-!!IF (LES .AND. H_EDDY .AND. .NOT.DYNSMAG) DAMPING_FACTOR = 0.0625_EB ! = (0.05/.2)**2
+IF (LES .AND. H_EDDY .AND. .NOT.DYNSMAG) DAMPING_FACTOR = 0.0625_EB ! = (0.05/.2)**2
 
 !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
 WALL_LOOP: DO IW=1,NWC
@@ -1939,7 +1939,7 @@ SUBROUTINE CHECK_STABILITY(NM,CODE)
 ! Checks the Courant and Von Neumann stability criteria, and if necessary, reduces the time step accordingly
  
 INTEGER, INTENT(IN) :: NM,CODE
-REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM,DMAX,RDMAX
+REAL(EB) :: UODX,VODY,WODZ,UVW,UVWMAX,R_DX2,MU_MAX,MUTRM
 INTEGER  :: I,J,K
 REAL(EB) :: P_UVWMAX,P_MU_MAX,P_MU_TMP !private variables for OpenMP-Code
 INTEGER  :: P_ICFL,P_JCFL,P_KCFL,P_I_VN,P_J_VN,P_K_VN !private variables for OpenMP-Code
@@ -1986,7 +1986,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
                UODX = ABS(UU(I,J,K))*RDXN(I)
                VODY = ABS(VV(I,J,K))*RDYN(J)
                WODZ = ABS(WW(I,J,K))*RDZN(K)
-               UVW  = MAX(UODX,VODY,WODZ)
+               UVW  = MAX(UODX,VODY,WODZ) + DP(I,J,K)
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL = I
@@ -2016,7 +2016,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
             DO I=0,IBAR
                !!UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
                UVW = ABS(UU(I,J,K)*RDXN(I)) + ABS(VV(I,J,K)*RDYN(J)) + ABS(WW(I,J,K)*RDZN(K))
-               UVW = UVW + IBM_UVWMAX
+               UVW = UVW + IBM_UVWMAX + DP(I,J,K)
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL=I
@@ -2046,7 +2046,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
             DO I=0,IBAR
                !!UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
                UVW = SQRT( (UU(I,J,K)*RDXN(I))**2 + (VV(I,J,K)*RDYN(J))**2 + (WW(I,J,K)*RDZN(K))**2 )
-               UVW = UVW + IBM_UVWMAX
+               UVW = UVW + IBM_UVWMAX + DP(I,J,K)
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL=I
@@ -2069,24 +2069,6 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
 END SELECT SELECT_VELOCITY_NORM
 
 CFL = DT*UVWMAX
-
-! Find minimum time step allowed by divergence constraint
-
-RDMAX = HUGE(1._EB)
-DMAX = 0._EB
-IF (CFL_VELOCITY_NORM>0) THEN
-   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I) REDUCTION(MAX:DMAX)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DMAX = MAX(DMAX,DP(I,J,K))
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END PARALLEL DO
-   !!DMAX = MAXVAL(D)
-   IF (DMAX>0._EB) RDMAX = CFL_MAX/DMAX
-ENDIF
  
 ! Determine max Von Neumann Number for fine grid calcs
  
@@ -2148,7 +2130,7 @@ ENDIF PARABOLIC_IF
  
 ! Adjust time step size if necessary
  
-IF ((CFL<CFL_MAX.AND.VN<VN_MAX.AND.DT<RDMAX) .OR. LOCK_TIME_STEP) THEN
+IF ((CFL<CFL_MAX.AND.VN<VN_MAX) .OR. LOCK_TIME_STEP) THEN
    DT_NEXT = DT
    IF (CFL<=CFL_MIN .AND. VN<VN_MIN .AND. .NOT.LOCK_TIME_STEP) THEN
       IF (     RESTRICT_TIME_STEP) DT_NEXT = MIN(1.1_EB*DT,DT_INIT)
@@ -2156,7 +2138,7 @@ IF ((CFL<CFL_MAX.AND.VN<VN_MAX.AND.DT<RDMAX) .OR. LOCK_TIME_STEP) THEN
    ENDIF
 ELSE
    IF (UVWMAX==0._EB) UVWMAX = 1._EB
-   DT = 0.9_EB*MIN( CFL_MAX/UVWMAX , VN_MAX/(2._EB*R_DX2*MUTRM), RDMAX )
+   DT = 0.9_EB*MIN( CFL_MAX/UVWMAX , VN_MAX/(2._EB*R_DX2*MUTRM) )
    CHANGE_TIME_STEP(NM) = .TRUE.
 ENDIF
 
