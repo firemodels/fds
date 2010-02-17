@@ -1855,6 +1855,35 @@ ENDIF
 END SUBROUTINE WERNER_WENGLE_WALL_MODEL
 
 
+SUBROUTINE SURFACE_HEAT_FLUX_MODEL(H,U_TAU,DZ,ROUGHNESS,IOR,RHO,CP)
+
+REAL(EB), INTENT(OUT) :: H ! heat transfer coefficient
+REAL(EB), INTENT(IN) :: U_TAU,DZ,ROUGHNESS,RHO,CP
+INTEGER, INTENT(IN) :: IOR
+REAL(EB), PARAMETER :: KAPPA=0.41_EB ! von Karman constant
+REAL(EB) :: PSI,MOL,Z0
+
+! References:
+!
+! Stoll, R., Porte-Agel, F. (2008) Large-Eddy Simulation of the Stable Atmospheric
+! Boundary Layer using Dynamic Models with Different Averaging Schemes. Boundary-Layer
+! Meteorology, 126:1-28.
+
+PSI = 0._EB
+MOL = 0._EB
+Z0 = MAX(ROUGHNESS,1.E-6_EB)
+
+! atmospheric stability correction (use later)
+IF (IOR==3) THEN
+   MOL = 0._EB !! -U_TAU**3*THETA/(KAPPA*GVEC(3)*HEAT_FLUX)
+   PSI = 0._EB !! -7.8_EB*0.5*DZ/MOL
+ENDIF
+
+H = RHO*CP*U_TAU*KAPPA/(LOG(0.5_EB*DZ/Z0)-PSI)
+
+END SUBROUTINE SURFACE_HEAT_FLUX_MODEL
+
+
 SUBROUTINE PERM3D(UP,VP,WP,Q,R,S,NC,UBAR,D1,D2,DIV)
 	IMPLICIT NONE
 	
