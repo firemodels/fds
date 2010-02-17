@@ -545,6 +545,9 @@ EXTERNCPP void setisocolors(float isomin, float isomax, iso *sd, int *errorcode)
 EXTERNCPP void drawslice(const slice *sd);
 EXTERNCPP void drawslice_cellcenter(const slice *sd);
 EXTERNCPP void drawslice_texture(const slice *sd);
+#ifdef pp_FRACTILE
+EXTERNCPP void drawslice_texture_fractile(const slice *sd);
+#endif
 EXTERNCPP void drawslice_terrain(const slice *sd);
 EXTERNCPP void drawvolslice_terrain(const slice *sd);
 EXTERNCPP void drawvolslice_texture(const slice *sd);

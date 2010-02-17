@@ -1426,7 +1426,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         if(filenum!=-1){
           patchi = patchinfo + filenum;
           if(patchi->loaded==0||patchi->display==0||patchi->type!=ipatchtype)continue;
-          if(usetexturebar==1){
+          if(usetexturebar!=0){
             if(vis_threshold==1&&do_threshold==1){
               if(patchi->cellcenter==1){
                 drawpatch_threshold_cellcenter(meshi);
@@ -1631,7 +1631,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       }
 
       if(sd->qslicedata!=NULL)sd->slicedata = sd->qslicedata + sd->islice*sd->nsliceii;
-      if(usetexturebar==1){
+      if(usetexturebar!=0){
         if(sd->volslice==1){
           if(sd->terrain==1){
             drawvolslice_terrain(sd);
@@ -1645,7 +1645,16 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
             drawslice_terrain(sd);
           }
           else{
+#ifdef pp_FRACTILE          
+            if(usetexturebar==1){
+              drawslice_texture(sd);
+            }
+            else{
+              drawslice_texture_fractile(sd);
+            }
+#else
             drawslice_texture(sd);
+#endif
           }
         }
       }
@@ -1781,7 +1790,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       meshi=meshinfo+i;
       if(meshi->plot3dfilenum==-1)continue;
       if(plot3dinfo[meshi->plot3dfilenum].display==0)continue;
-      if(usetexturebar==1){
+      if(usetexturebar!=0){
         drawplot3d_texture(meshi);
       }
       else{
@@ -3688,6 +3697,9 @@ void usage(char **argv){
 #endif
 #ifdef EGZ
     printf(", EGZ");
+#endif
+#ifdef pp_FRACTILE
+    printf(", pp_FRACTILE");
 #endif
 #ifdef pp_GPU
     printf(", pp_GPU");
