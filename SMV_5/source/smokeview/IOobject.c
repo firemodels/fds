@@ -1173,13 +1173,13 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       break;
     case SV_SETCOLOR:
       {
-      int lenstring;
+      FILE_SIZE lenstring;
       int iarg[3];
       char *stringptr;
 
       stringptr = (toki-1)->string;
 
-      lenstring=strlen(stringptr);
+      lenstring=(FILE_SIZE)strlen(stringptr);
       FORTcolor2rgb(iarg,stringptr,lenstring);
       arg[0]=iarg[0];
       arg[1]=iarg[1];
