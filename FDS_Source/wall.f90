@@ -1380,11 +1380,14 @@ END SUBROUTINE PYROLYSIS
  
 REAL(EB) FUNCTION HEAT_TRANSFER_COEFFICIENT(IW,IIG,JJG,KKG,IOR,TMP_G,DELTA_TMP,H_FIXED)
 USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_HEAT
+USE TURBULENCE, ONLY: WERNER_WENGLE_WALL_MODEL
 INTEGER  :: IW,IIG,JJG,KKG,IOR,ITMP
 REAL(EB) :: TMP_G,DELTA_TMP,U2,V2,W2,VELCON,H_NATURAL,H_FORCED,H_DNS,H_FIXED,CP,YY_GET(1:N_SPECIES)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP=>NULL()
- 
+TYPE(SURFACE_TYPE), POINTER :: SF
+REAL(EB) :: DUMMY,NU,DN
+
 IF (H_FIXED >= 0._EB) THEN
    HEAT_TRANSFER_COEFFICIENT = H_FIXED
    RETURN
@@ -1398,71 +1401,73 @@ ENDIF
 DNS_IF: IF (DNS) THEN
    HEAT_TRANSFER_COEFFICIENT = 2._EB*KW(IW)*RDN(IW)
 ELSE DNS_IF
-   H_EDDY_IF: IF (H_EDDY .AND. IIG>=0) THEN
-      ITMP = MIN(5000,NINT(TMP_G))
-      IF (N_SPECIES > 0) THEN
-         SELECT CASE(PREDICTOR)
-            CASE(.TRUE.)  
-               YYP => YYS 
-            CASE(.FALSE.) 
-               YYP => YY  
-         END SELECT
-         YY_GET = YYP(IIG,JJG,KKG,:)
-         CALL GET_SPECIFIC_HEAT(YY_GET,CP,ITMP)
-      ELSE
-         CP = Y2CP_C(ITMP)
-      ENDIF
-      HEAT_TRANSFER_COEFFICIENT = MU(IIG,JJG,KKG)*RPR*CP*2._EB*RDN(IW)
-   ELSE H_EDDY_IF
+   NO_GAS_CELL_IF: IF (IIG<0) THEN   ! No gas cell information available
+      SELECT CASE(ABS(IOR))
+         CASE(0:2)
+            H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
+         CASE(3)
+            H_NATURAL = HCH*ABS(DELTA_TMP)**ONTH
+      END SELECT
+      H_FORCED = 0._EB
+   ELSE NO_GAS_CELL_IF
       IF (PREDICTOR) THEN
          UU => U
          VV => V
          WW => W
          RHOP => RHOS
+         YYP => YYS
       ELSE
          UU => US
          VV => VS
          WW => WS
          RHOP => RHO
-      ENDIF 
-      IF (IIG<0) THEN   ! No gas cell information available
-         SELECT CASE(ABS(IOR))
-            CASE(0:2)
-               H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
-            CASE(3)
-               H_NATURAL = HCH*ABS(DELTA_TMP)**ONTH
-         END SELECT
-         H_FORCED = 0._EB
-      ELSE
-         SELECT CASE(ABS(IOR))
-            CASE(0)
-               U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
-               V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
-               W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
-               VELCON = (U2+V2+W2)**0.4_EB
-               H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
-            CASE(1)
-               V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
-               W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
-               VELCON = (V2+W2)**0.4_EB
-               H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
-            CASE(2)
-               U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
-               W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
-               VELCON = (U2+W2)**0.4_EB
-               H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
-            CASE(3)
-               U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
-               V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
-               VELCON = (U2+V2)**0.4_EB
-               H_NATURAL = HCH*ABS(DELTA_TMP)**ONTH
-         END SELECT
-         H_FORCED  = C_FORCED*VELCON*RHOP(IIG,JJG,KKG)**0.8_EB
+         YYP => YY  
       ENDIF
+      SF => SURFACE(IJKW(5,IW))
       ITMP = MIN(5000,NINT(TMP_G))
-      H_DNS = Y2MU_C(ITMP)*CP_GAMMA*RPR*2._EB*RDN(IW)
-      HEAT_TRANSFER_COEFFICIENT = MAX(H_DNS,H_FORCED,H_NATURAL)
-   ENDIF H_EDDY_IF
+      NU = Y2MU_C(ITMP)*SPECIES(0)%MW/RHOP(IIG,JJG,KKG)
+      DN = 1._EB/RDN(IW)
+      H_NATURAL = 0._EB
+      SELECT CASE(ABS(IOR))
+         CASE(0)
+            U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
+            V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
+            W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
+            VELCON = (U2+V2+W2)**0.4_EB
+            IF (.NOT.H_EDDY) H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
+         CASE(1)
+            V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
+            W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
+            VELCON = (V2+W2)**0.4_EB
+            IF (.NOT.H_EDDY) H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
+            CALL WERNER_WENGLE_WALL_MODEL(DUMMY,U_TAU(IW),SQRT(V2+W2),NU,DN,SF%ROUGHNESS)
+         CASE(2)
+            U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
+            W2 = 0.25_EB*(WW(IIG,JJG,KKG)+WW(IIG,JJG,KKG-1))**2
+            VELCON = (U2+W2)**0.4_EB
+            IF (.NOT.H_EDDY) H_NATURAL = HCV*ABS(DELTA_TMP)**ONTH
+            CALL WERNER_WENGLE_WALL_MODEL(DUMMY,U_TAU(IW),SQRT(U2+W2),NU,DN,SF%ROUGHNESS)
+         CASE(3)
+            U2 = 0.25_EB*(UU(IIG,JJG,KKG)+UU(IIG-1,JJG,KKG))**2
+            V2 = 0.25_EB*(VV(IIG,JJG,KKG)+VV(IIG,JJG-1,KKG))**2
+            VELCON = (U2+V2)**0.4_EB
+            IF (.NOT.H_EDDY) H_NATURAL = HCH*ABS(DELTA_TMP)**ONTH
+            CALL WERNER_WENGLE_WALL_MODEL(DUMMY,U_TAU(IW),SQRT(U2+V2),NU,DN,SF%ROUGHNESS)
+      END SELECT 
+      H_EDDY_IF: IF (H_EDDY) THEN
+         IF (N_SPECIES > 0) THEN
+            YY_GET = YYP(IIG,JJG,KKG,:)
+            CALL GET_SPECIFIC_HEAT(YY_GET,CP,ITMP)
+         ELSE
+            CP = Y2CP_C(ITMP)
+         ENDIF
+         H_FORCED = MU(IIG,JJG,KKG)*RPR*CP*2._EB*RDN(IW)
+      ELSE  H_EDDY_IF
+         H_FORCED  = C_FORCED*VELCON*RHOP(IIG,JJG,KKG)**0.8_EB
+      ENDIF H_EDDY_IF
+   ENDIF NO_GAS_CELL_IF
+   H_DNS = Y2MU_C(ITMP)*CP_GAMMA*RPR*2._EB*RDN(IW)
+   HEAT_TRANSFER_COEFFICIENT = MAX(H_DNS,H_FORCED,H_NATURAL)
 ENDIF DNS_IF
 
 END FUNCTION HEAT_TRANSFER_COEFFICIENT
