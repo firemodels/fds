@@ -1401,6 +1401,7 @@ ENDIF
 DNS_IF: IF (DNS) THEN
    HEAT_TRANSFER_COEFFICIENT = 2._EB*KW(IW)*RDN(IW)
 ELSE DNS_IF
+   ITMP = MIN(5000,NINT(TMP_G))
    NO_GAS_CELL_IF: IF (IIG<0) THEN   ! No gas cell information available
       SELECT CASE(ABS(IOR))
          CASE(0:2)
@@ -1424,7 +1425,6 @@ ELSE DNS_IF
          YYP => YY  
       ENDIF
       SF => SURFACE(IJKW(5,IW))
-      ITMP = MIN(5000,NINT(TMP_G))
       NU = Y2MU_C(ITMP)*SPECIES(0)%MW/RHOP(IIG,JJG,KKG)
       DN = 1._EB/RDN(IW)
       H_NATURAL = 0._EB
