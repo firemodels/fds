@@ -1994,7 +1994,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
                UODX = ABS(UU(I,J,K))*RDXN(I)
                VODY = ABS(VV(I,J,K))*RDYN(J)
                WODZ = ABS(WW(I,J,K))*RDZN(K)
-               UVW  = MAX(UODX,VODY,WODZ) + DP(I,J,K)
+               UVW  = MAX(UODX,VODY,WODZ) + MAX(0._EB,DP(I,J,K))
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL = I
@@ -2024,7 +2024,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
             DO I=0,IBAR
                !!UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
                UVW = ABS(UU(I,J,K)*RDXN(I)) + ABS(VV(I,J,K)*RDYN(J)) + ABS(WW(I,J,K)*RDZN(K))
-               UVW = UVW + IBM_UVWMAX + DP(I,J,K)
+               UVW = UVW + IBM_UVWMAX + MAX(0._EB,DP(I,J,K))
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL=I
@@ -2054,7 +2054,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
             DO I=0,IBAR
                !!UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
                UVW = SQRT( (UU(I,J,K)*RDXN(I))**2 + (VV(I,J,K)*RDYN(J))**2 + (WW(I,J,K)*RDZN(K))**2 )
-               UVW = UVW + IBM_UVWMAX + DP(I,J,K)
+               UVW = UVW + IBM_UVWMAX + MAX(0._EB,DP(I,J,K))
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL=I
