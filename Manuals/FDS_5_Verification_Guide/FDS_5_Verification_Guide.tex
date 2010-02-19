@@ -1315,6 +1315,87 @@ each of these reactions may produce some other solid component
 (residue), gaseous fuel, and/or water vapor.
 
 
+\section{Mass conservation of pyrolyzed mass 
+	(\texorpdfstring{{\bf surf\_mass\_conservation}}
+			     {surf\_mass\_concervation})}
+
+The following tests are used to check the conservation of pyrolyzed
+mass produced by the pyrolysis routine embedded in the 1D heat
+transfer routine. This solver is envoked when a {\ct SURF} is used
+with reacting materials {\ct MATL}. In the tests, four independent
+parameters or modelling options are varied:
+\begin{enumerate}
+\item The {\ct SURF} can be associated with either {\ct VENT} or {\ct
+PART}.
+\item The {\ct SURF} geometry can be either {\ct CARTESIAN}, {\ct CYLINDRICAL}
+or {\ct SPHERICAL}.
+\item The {\ct MATL} may be either charring (non-zero {\ct
+NU\_RESIDUE} or non-charring.
+\item The pyrolysis product may be either fuel associated with the
+mixture fraction model, or an additional gas species, defined using
+{\ct SPEC}.
+\end{enumerate}
+
+\subsection{SURF associated with VENT}
+
+\begin{figure}[ht!]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r} 
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_char_cart_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_char_cart_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_char_cyl_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_char_cyl_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_char_spher_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_char_spher_gas} 
+\end{tabular*}
+\caption[The {\bf surf\_mass\_vent\_X\_char\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for charring surfaces associated with vents.} 
+\label{surf_mass_vent_char}
+\end{figure}
+
+\begin{figure}[ht!]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r} 
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_nonchar_cart_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_nonchar_cart_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_nonchar_cyl_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_nonchar_cyl_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_nonchar_spher_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_vent_nonchar_spher_gas} 
+\end{tabular*}
+\caption[The {\bf surf\_mass\_vent\_X\_nonchar\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for non-charring surfaces associated with vents.}
+\label{surf_mass_vent_nonchar}
+\end{figure}
+
+\subsection{SURF associated with PART}
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r} 
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cart_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cart_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cyl_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cyl_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_spher_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_spher_gas} 
+\end{tabular*}
+\caption[The {\bf surf\_mass\_part\_X\_char\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for charring surfaces associated with particles.} 
+\label{surf_mass_part_char}
+\end{figure}
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r} 
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cart_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cart_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cyl_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cyl_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_spher_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_spher_gas} 
+\end{tabular*}
+\caption[The {\bf surf\_mass\_part\_X\_nonchar\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for non-charring surfaces associated with particles.}
+\label{surf_mass_part_nonchar}
+\end{figure}
+
 \section{Development of surface emissivity (\texorpdfstring{{\bf emissivity}}{emissivity})}
 
 For thermally thick materials, the surface emissivity is computed as a
