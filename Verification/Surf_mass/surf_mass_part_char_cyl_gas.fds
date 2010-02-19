@@ -1,0 +1,63 @@
+&HEAD CHID='Surf_mass_part_char_cyl_gas',TITLE='Surface mass, particles, char, cylinder, gas' /
+
+
+&MESH 	IJK= 6,6,8,
+	XB = -1.5,1.5,-1.5,1.5,0.0,4.0 /
+
+&TIME TWFIN=100., DT = 0.01, WALL_INCREMENT = 1 / 
+
+&DUMP DT_HRR = 0.01, DT_DEVC = 0.01 DT_PL3D = 10000 DT_SLCF = 10000 /
+
+&REAC ID = 'WOOD'
+	SOOT_YIELD 	= 0.0
+	CO_YIELD	= 0.0
+	C 		= 3.4
+	H		=6.2
+	O 		=2.5
+	HEAT_OF_COMBUSTION = 12000.
+	Y_O2_INFTY	=0.01
+	IDEAL 		=.TRUE. /
+
+&SURF ID                        = 'Wood'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.01
+	LENGTH			= 0.1
+	GEOMETRY                = 'CYLINDRICAL'
+      EXTERNAL_FLUX 		= 50. /
+      
+&MATL ID = 'PINE'
+      EMISSIVITY 	= 1.0
+	DENSITY 	= 360.
+	CONDUCTIVITY	= 0.05
+	SPECIFIC_HEAT	= 1.0
+	N_REACTIONS	= 1
+	A		= 1E20
+	E 		= 1.6E5
+	N_S		= 1
+	NU_GAS(1,1)	= 0.5
+	NU_RESIDUE	= 0.5
+	RESIDUE 	= 'CHAR'
+	HEAT_OF_REACTION= 1000
+	HEAT_OF_COMBUSTION(1,1) = 12000/
+	
+&SPEC ID = 'fuel_gas', MW = 50. /
+	
+&MATL ID = 'CHAR'
+	EMISSIVITY 	= 1.0
+	DENSITY 	= 180.
+	CONDUCTIVITY	= 1.0
+	SPECIFIC_HEAT	= 1.6 /
+
+&PART ID='Wood_part', SAMPLING_FACTOR=1,SURF_ID='Wood', PROP_ID='wood image'
+	QUANTITIES='DROPLET_TEMPERATURE','DROPLET MASS','DROPLET DIAMETER' /
+
+&INIT PART_ID='Wood_part', XB=-0.5,0.5,-0.5,0.5,0,0.02,NUMBER_INITIAL_DROPLETS = 1  /
+
+&PROP ID='wood image', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.02' /
+
+&DEVC XB = -1.5,1.5,-1.5,1.5,0.0,4.0, QUANTITY = 'DENSITY', 
+	ID = 'density', STATISTICS = 'VOLUME INTEGRAL', SPEC_ID = 'fuel_gas'/
+&DEVC XB = -1.5,1.5,-1.5,1.5,0.0,4.0 , QUANTITY = 'MPUV', PART_ID = 'Wood_part', 
+	ID = 'mpuv',IOR = 3, STATISTICS = 'VOLUME INTEGRAL'  /
+&TAIL /
