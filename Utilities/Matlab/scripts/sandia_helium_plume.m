@@ -7,8 +7,8 @@
 close all
 clear all
 
-addpath '..\..\..\Validation\Sandia_He_1m\Experimental_Data'
-addpath '..\..\..\Validation\Sandia_He_1m\FDS_Input_Files'
+addpath '..\..\Validation\Sandia_He_1m\Experimental_Data'
+addpath '..\..\Validation\Sandia_He_1m\FDS_Input_Files'
 
 radial_profile('W2.csv','Sandia_He_1m_devc.csv','Sandia_He_1m\Sandia_He_1m_W2',[2:22],0.2,'bo','b-','vertical velocity (m/s)',-.5,.5,.1,0,5,1)
 radial_profile('W4.csv','Sandia_He_1m_devc.csv','Sandia_He_1m\Sandia_He_1m_W4',[23:43],0.2,'bo','b-','vertical velocity (m/s)',-.5,.5,.1,0,5,1)
