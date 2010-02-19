@@ -499,6 +499,7 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
                DO J=1,JBAR
                   DO I=1,IBAR
                      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                     ITMP = MIN(5000,NINT(TMP(I,J,K)))
                      CP = Y2CP_C(ITMP)
                      KP(I,J,K) = CP*MU(I,J,K)/PR
                   ENDDO
