@@ -611,6 +611,7 @@ EXTERNCPP int nodeinvent(const mesh *gb, int i,int j,int k, int dir);
 EXTERNCPP void MenuStatus(int status, int x, int y);
 EXTERNCPP int readini2(char *inifile, int localfile);
 EXTERNCPP int match(char *buffer, const char *key, unsigned int lenkey);
+EXTERNCPP int matchonly(char *buffer, const char *key, unsigned int lenkey);
 EXTERNCPP int match_upper(char *buffer, const char *key, unsigned int lenkey);
 EXTERNCPP void obst_or_vent2faces(const mesh *gb,blockagedata *bc, ventdata *vi, facedata *faceptr,int facetype);
 EXTERNCPP void initsurface(surface *surf);
