@@ -556,10 +556,10 @@ int readsmv(char *file){
       continue;
     }
     if(
-       (match(buffer,"SPRK",4) == 1 && match(buffer,"SPRK_ACT",8) != 1)||
-       (match(buffer,"HEAT",4) == 1 && match(buffer,"HEAT_ACT",8) != 1)||
-       (match(buffer,"SMOD",4) == 1 && match(buffer,"SMOD_ACT",8) != 1)||
-       (match(buffer,"THCP",4) == 1)
+       matchonly(buffer,"SPRK",4) == 1||
+       matchonly(buffer,"HEAT",4) == 1||
+       matchonly(buffer,"SMOD",4) == 1||
+       matchonly(buffer,"THCP",4) == 1
     ){
       int local_ntc;
 
@@ -4258,7 +4258,7 @@ typedef struct {
     ++++++++++++++++++++++ HEAT ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"HEAT",4) == 1 && match(buffer,"HEAT_ACT",8) != 1){
+    if(matchonly(buffer,"HEAT",4) == 1){
       mesh *meshi;
       char *device_label;
 
@@ -6621,6 +6621,23 @@ int match(char *buffer, const char *key, unsigned int lenkey){
     return 0;
 }
 
+/* ------------------ matchonly ------------------------ */
+
+int matchonly(char *buffer, const char *key, unsigned int lenkey){
+  size_t lenbuffer;
+
+  ASSERT(strlen(key)==lenkey);
+  
+  if(strncmp(buffer,key,lenkey) != 0)return 0;
+  trim(buffer);
+  lenbuffer=strlen(buffer);
+  if(lenbuffer==lenkey){
+    return 1;
+  }
+  else{
+    return 0;
+  }
+}
 /* ------------------ readini ------------------------ */
 
 int readini(int scriptconfigfile){
