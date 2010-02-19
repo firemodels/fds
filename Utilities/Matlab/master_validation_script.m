@@ -15,5 +15,6 @@ addpath 'scripts'
 [saved_data,drange] = dataplot('validation');
 scatplot(saved_data,drange)
 beyler_hood
+sandia_helium_plume
 
 display('validation scripts completed successfully!')
