@@ -625,6 +625,7 @@ EXTERNCPP void allocate_faces(void);
 EXTERNCPP void update_facelists(void);
 EXTERNCPP void update_faces(void);
 EXTERNCPP char *trim_front(char *line);
+EXTERNCPP char *trim_string(char *buffer);
 EXTERNCPP char *trim_front_back(char *line);
 EXTERNCPP void trim(char *line);
 EXTERNCPP void drawticks(void);

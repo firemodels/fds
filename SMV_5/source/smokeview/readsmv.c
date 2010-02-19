@@ -141,7 +141,7 @@ int readsmv(char *file){
   int  n;
   FILE *stream;
   FILE *ENDIANfile;
-  char buffer[255],buffer2[255];
+  char buffer[255],buffer2[255],*bufptr;
   char *buffer3;
   int blocknumber;
   float *xsprcopy, *ysprcopy, *zsprcopy;
@@ -1582,10 +1582,7 @@ typedef struct {
         nsmoke3d_files--;
         break;
       }
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim(buffer);
-
+      bufptr=trim_string(buffer);
       len=strlen(buffer);
       lenbuffer=len;
       {
@@ -1594,7 +1591,7 @@ typedef struct {
         smoke3di = smoke3dinfo + ismoke3d;
 
         if(NewMemory((void **)&smoke3di->reg_file,(unsigned int)(len+1))==0)return 2;
-        STRCPY(smoke3di->reg_file,buffer);
+        STRCPY(smoke3di->reg_file,bufptr);
 
 #ifdef pp_LIGHT
         smoke3di->use_lighting_file=0;
@@ -1635,7 +1632,7 @@ typedef struct {
         smoke3di->water_index=-1;
         smoke3di->hrrpuv_index=-1;
 
-        STRCPY(buffer2,buffer);
+        STRCPY(buffer2,bufptr);
         STRCAT(buffer2,".svz");
 
         len=lenbuffer+4;
@@ -1883,14 +1880,12 @@ typedef struct {
         nzone--;
         break;
       }
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim(buffer);
-      len=strlen(buffer);
+      bufptr=trim_string(buffer);
+      len=strlen(bufptr);
       zonei->loaded=0;
       zonei->display=0;
 
-      full_name=buffer;
+      full_name=bufptr;
       if(STAT(full_name,&statbuffer)!=0)full_name=NULL;
 
       last_name=lastname(buffer);
@@ -2406,7 +2401,7 @@ typedef struct {
       }
       else{
         if(fgets(buffer,255,stream)==NULL)break;
-        if(strncmp(buffer," ",1)==0)continue;
+        if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
       }
     }
     CheckMemory;
@@ -2498,8 +2493,8 @@ typedef struct {
         nplot3d_files--;
         break;
       }
-      trim(buffer);
-      len=strlen(buffer);
+      bufptr=trim_string(buffer);
+      len=strlen(bufptr);
 
       p=plot3dinfo+iplot3d;
       p->blocknumber=blocknumber;
@@ -2510,10 +2505,10 @@ typedef struct {
       p->display=0;
 
       NewMemory((void **)&p->reg_file,(unsigned int)(len+1));
-      STRCPY(p->reg_file,buffer);
+      STRCPY(p->reg_file,bufptr);
 
       NewMemory((void **)&p->comp_file,(unsigned int)(len+4+1));
-      STRCPY(p->comp_file,buffer);
+      STRCPY(p->comp_file,bufptr);
       STRCAT(p->comp_file,".svz");
 
       if(STAT(p->comp_file,&statbuffer)==0){
@@ -2711,7 +2706,9 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"TITLE1",6)==1){
-      if(fgets(TITLE1,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL)break;
+      bufptr=trim_string(buffer);
+      strcpy(TITLE1,bufptr);
       continue;
     }
   /*
@@ -2720,7 +2717,9 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"TITLE2",6)==1){
-      if(fgets(TITLE2,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL)break;
+      bufptr=trim_string(buffer);
+      strcpy(TITLE2,bufptr);
       continue;
     }
   /*
@@ -3457,22 +3456,21 @@ typedef struct {
         npart_files--;
         break;
       }
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim(buffer);
-      len=strlen(buffer);
+
+      bufptr=trim_string(buffer);
+      len=strlen(bufptr);
       parti->reg_file=NULL;
       if(NewMemory((void **)&parti->reg_file,(unsigned int)(len+1))==0)return 2;
-      STRCPY(parti->reg_file,buffer);
+      STRCPY(parti->reg_file,bufptr);
 
       parti->size_file=NULL;
       if(NewMemory((void **)&parti->size_file,(unsigned int)(len+1+3))==0)return 2;
-      STRCPY(parti->size_file,buffer);
+      STRCPY(parti->size_file,bufptr);
       STRCAT(parti->size_file,".sz");
 
       parti->comp_file=NULL;
       if(NewMemory((void **)&parti->comp_file,(unsigned int)(len+1+4))==0)return 2;
-      STRCPY(parti->comp_file,buffer);
+      STRCPY(parti->comp_file,bufptr);
       STRCAT(parti->comp_file,".svz");
 
       if(STAT(parti->comp_file,&statbuffer)==0){
@@ -3641,12 +3639,10 @@ typedef struct {
     /* ENDF superscedes ENDIAN */
     if(match(buffer,"ENDF",4) == 1){
       if(fgets(buffer,255,stream)==NULL)break;
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim(buffer);
-      len=strlen(buffer);
+      bufptr=trim_string(buffer);
+      len=strlen(bufptr);
       NewMemory((void **)&endianfilename,(unsigned int)(len+1));
-      strcpy(endianfilename,buffer);
+      strcpy(endianfilename,bufptr);
       ENDIANfile = fopen(endianfilename,"rb");
       if(ENDIANfile!=NULL){
         endian_native = getendian();
@@ -3667,14 +3663,12 @@ typedef struct {
   */
     if(match(buffer,"INPF",4) == 1){
       if(fgets(buffer,255,stream)==NULL)break;
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim(buffer);
+      bufptr=trim_string(buffer);
 
-      len=strlen(buffer);
+      len=strlen(bufptr);
       FREEMEMORY(fds_filein);
       if(NewMemory((void **)&fds_filein,(unsigned int)(len+1))==0)return 2;
-      STRCPY(fds_filein,buffer);
+      STRCPY(fds_filein,bufptr);
       if(STAT(fds_filein,&statbuffer)!=0){
         FreeMemory(fds_filein);
         fds_filein=NULL;
@@ -3715,20 +3709,20 @@ typedef struct {
       if(fgets(buffer,255,stream)==NULL){
         break;
       }
-      trim(buffer);
-      len=strlen(buffer);
+      bufptr=trim_string(buffer);
+      len=strlen(bufptr);
       FREEMEMORY(chidfilebase);
       NewMemory((void **)&chidfilebase,(unsigned int)(len+1));
-      STRCPY(chidfilebase,buffer);
+      STRCPY(chidfilebase,bufptr);
 
-  if(chidfilebase!=NULL){
-    NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
-    STRCPY(hrrfilename,chidfilebase);
-    STRCAT(hrrfilename,"_hrr.csv");
-    if(STAT(hrrfilename,&statbuffer)!=0){
-      FREEMEMORY(hrrfilename);
-    }
-  }
+      if(chidfilebase!=NULL){
+        NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
+        STRCPY(hrrfilename,chidfilebase);
+        STRCAT(hrrfilename,"_hrr.csv");
+        if(STAT(hrrfilename,&statbuffer)!=0){
+          FREEMEMORY(hrrfilename);
+        }
+      }
       continue;
     }
 
@@ -3776,22 +3770,22 @@ typedef struct {
         break;
       }
 
-      trim(buffer);
-      len=strlen(buffer);
+      bufptr=trim_string(buffer);
+      len=strlen(bufptr);
       sd = sliceinfo+islice;
       NewMemory((void **)&sd->reg_file,(unsigned int)(len+1));
-      STRCPY(sd->reg_file,buffer);
+      STRCPY(sd->reg_file,bufptr);
 
       NewMemory((void **)&sd->comp_file,(unsigned int)(len+4+1));
-      STRCPY(sd->comp_file,buffer);
+      STRCPY(sd->comp_file,bufptr);
       STRCAT(sd->comp_file,".svz");
 
       NewMemory((void **)&sd->rle_file,(unsigned int)(len+4+1));
-      STRCPY(sd->rle_file,buffer);
+      STRCPY(sd->rle_file,bufptr);
       STRCAT(sd->rle_file,".rle");
 
       NewMemory((void **)&sd->size_file,(unsigned int)(len+3+1));
-      STRCPY(sd->size_file,buffer);
+      STRCPY(sd->size_file,bufptr);
       STRCAT(sd->size_file,".sz");
 
       sd->compression_type=0;
@@ -3893,20 +3887,18 @@ typedef struct {
         npatch_files--;
         break;
       }
-      len=strlen(buffer);
-      buffer[len-1]='\0';
 
-      trim(buffer);
-      len=strlen(buffer);
+      bufptr=trim_string(buffer);
+      len=strlen(bufptr);
       NewMemory((void **)&patchi->reg_file,(unsigned int)(len+1));
-      STRCPY(patchi->reg_file,buffer);
+      STRCPY(patchi->reg_file,bufptr);
 
       NewMemory((void **)&patchi->comp_file,(unsigned int)(len+4+1));
-      STRCPY(patchi->comp_file,buffer);
+      STRCPY(patchi->comp_file,bufptr);
       STRCAT(patchi->comp_file,".svz");
 
       NewMemory((void **)&patchi->size_file,(unsigned int)(len+4+1));
-      STRCPY(patchi->size_file,buffer);
+      STRCPY(patchi->size_file,bufptr);
 //      STRCAT(patchi->size_file,".szz"); when we actully use file check both .sz and .szz extensions
 
       if(STAT(patchi->comp_file,&statbuffer)==0){
@@ -3995,21 +3987,19 @@ typedef struct {
       isoi->color_label.shortlabel=NULL;
       isoi->color_label.unit=NULL;
 
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim(buffer);
+      bufptr=trim_string(buffer);
 
-      len=strlen(buffer);
+      len=strlen(bufptr);
 
       NewMemory((void **)&isoi->reg_file,(unsigned int)(len+1));
-      STRCPY(isoi->reg_file,buffer);
+      STRCPY(isoi->reg_file,bufptr);
 
       NewMemory((void **)&isoi->comp_file,(unsigned int)(len+4+1));
-      STRCPY(isoi->comp_file,buffer);
+      STRCPY(isoi->comp_file,bufptr);
       STRCAT(isoi->comp_file,".svz");
 
       NewMemory((void **)&isoi->size_file,(unsigned int)(len+3+1));
-      STRCPY(isoi->size_file,buffer);
+      STRCPY(isoi->size_file,bufptr);
       STRCAT(isoi->size_file,".sz");
 
       if(STAT(isoi->comp_file,&statbuffer)==0){
@@ -4595,7 +4585,7 @@ typedef struct {
 
   while((autoterrain==1||do_pass4==1)&&!feof(stream)){
     if(fgets(buffer,255,stream)==NULL)break;
-    if(strncmp(buffer," ",1)==0)continue;
+    if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
 
     if(match(buffer,"MINMAXBNDF",10) == 1){
       char *file_ptr, file2[1024];
