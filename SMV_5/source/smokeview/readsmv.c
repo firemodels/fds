@@ -1516,23 +1516,21 @@ typedef struct {
   */
     if(match(buffer,"CADGEOM",7) == 1){
       if(fgets(buffer,255,stream)==NULL)break;
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim(buffer);
-      len=strlen(buffer);
+      bufptr=trim_string(buffer);
+      len=strlen(bufptr);
       cadgeominfo[ncadgeom].order=NULL;
       cadgeominfo[ncadgeom].quad=NULL;
       cadgeominfo[ncadgeom].file=NULL;
       if(STAT(buffer,&statbuffer)==0){
         if(NewMemory((void **)&cadgeominfo[ncadgeom].file,(unsigned int)(len+1))==0)return 2;
-        STRCPY(cadgeominfo[ncadgeom].file,buffer);
-        printf("   reading cad file: %s\n",buffer);
+        STRCPY(cadgeominfo[ncadgeom].file,bufptr);
+        printf("   reading cad file: %s\n",bufptr);
         readcadgeom(cadgeominfo+ncadgeom);
         printf("   completed\n");
         ncadgeom++;
       }
       else{
-        printf("   CAD geometry file: %s could not be opened\n",buffer);
+        printf("   CAD geometry file: %s could not be opened\n",bufptr);
       }
       continue;
     }
@@ -1552,8 +1550,8 @@ typedef struct {
   */
     if(match(buffer,"SURFDEF",7) == 1){
       fgets(buffer,255,stream);
-      trim(buffer);
-      strcpy(surfacedefaultlabel,trim_front(buffer));
+      bufptr=trim_string(buffer);
+      strcpy(surfacedefaultlabel,trim_front(bufptr));
       continue;
     }
   /*
