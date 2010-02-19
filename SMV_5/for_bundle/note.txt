@@ -16,3 +16,5 @@
 16. remove blockage edit capability, was buggy - replaced with dialog box that displays rather than edits blockage properties
 17. add list of unused SURFs to Examine Blockage dialog box
 18. test cad drawing fix
+19. test initialization of value in prop data structure 
+20. test improved .smv parsing algorithm (add leading blanks to any .smv line that is not a keyword)
