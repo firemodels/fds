@@ -6461,38 +6461,41 @@ int createnulllabel(flowlabels *flowlabel){
 /* ------------------ readlabels ------------------------ */
 
 int readlabels(flowlabels *flowlabel, FILE *stream){
-  char buffer[255];
+  char buffer2[255], *buffer;
   size_t len;
 
-  if(fgets(buffer,255,stream)==NULL){
-    strcpy(buffer,"*");
+  if(fgets(buffer2,255,stream)==NULL){
+    strcpy(buffer2,"*");
   }
 
-  len=strlen(buffer);
-  buffer[len-1]='\0';
+  len=strlen(buffer2);
+  buffer2[len-1]='\0';
+  buffer=trim_front(buffer2);
   trim(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
 
 
-  if(fgets(buffer,255,stream)==NULL){
-    strcpy(buffer,"**");
+  if(fgets(buffer2,255,stream)==NULL){
+    strcpy(buffer2,"**");
   }
 
-  len=strlen(buffer);
-  buffer[len-1]='\0';
+  len=strlen(buffer2);
+  buffer2[len-1]='\0';
+  buffer=trim_front(buffer2);
   trim(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
 
-  if(fgets(buffer,255,stream)==NULL){
-    strcpy(buffer,"***");
+  if(fgets(buffer2,255,stream)==NULL){
+    strcpy(buffer2,"***");
   }
 
-  len=strlen(buffer);
-  buffer[len-1]='\0';
+  len=strlen(buffer2);
+  buffer2[len-1]='\0';
+  buffer=trim_front(buffer2);
   trim(buffer);
   len=strlen(buffer);
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
@@ -6503,38 +6506,41 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
 /* ------------------ readlabels_cellcenter ------------------------ */
 
 int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
-  char buffer[255];
+  char buffer2[255], *buffer;
   size_t len;
 
-  if(fgets(buffer,255,stream)==NULL){
-    strcpy(buffer,"*");
+  if(fgets(buffer2,255,stream)==NULL){
+    strcpy(buffer2,"*");
   }
 
-  len=strlen(buffer);
-  buffer[len-1]='\0';
+  len=strlen(buffer2);
+  buffer2[len-1]='\0';
+  buffer=trim_front(buffer2);
   trim(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1+15))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
   STRCAT(flowlabel->longlabel,"(cell centered)");
 
-  if(fgets(buffer,255,stream)==NULL){
-    strcpy(buffer,"**");
+  if(fgets(buffer2,255,stream)==NULL){
+    strcpy(buffer2,"**");
   }
 
-  len=strlen(buffer);
-  buffer[len-1]='\0';
+  len=strlen(buffer2);
+  buffer2[len-1]='\0';
+  buffer=trim_front(buffer2);
   trim(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
 
-  if(fgets(buffer,255,stream)==NULL){
-    strcpy(buffer,"***");
+  if(fgets(buffer2,255,stream)==NULL){
+    strcpy(buffer2,"***");
   }
 
-  len=strlen(buffer);
-  buffer[len-1]='\0';
+  len=strlen(buffer2);
+  buffer2[len-1]='\0';
+  buffer=trim_front(buffer2);
   trim(buffer);
   len=strlen(buffer);
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
@@ -6545,38 +6551,41 @@ int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
 /* ------------------ readlabels_terrain ------------------------ */
 
 int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
-  char buffer[255];
+  char buffer2[255],*buffer;
   size_t len;
 
-  if(fgets(buffer,255,stream)==NULL){
-    strcpy(buffer,"*");
+  if(fgets(buffer2,255,stream)==NULL){
+    strcpy(buffer2,"*");
   }
 
-  len=strlen(buffer);
-  buffer[len-1]='\0';
+  len=strlen(buffer2);
+  buffer2[len-1]='\0';
+  buffer=trim_front(buffer2);
   trim(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1+9))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
   STRCAT(flowlabel->longlabel,"(terrain)");
 
-  if(fgets(buffer,255,stream)==NULL){
-    strcpy(buffer,"**");
+  if(fgets(buffer2,255,stream)==NULL){
+    strcpy(buffer2,"**");
   }
 
-  len=strlen(buffer);
-  buffer[len-1]='\0';
+  len=strlen(buffer2);
+  buffer2[len-1]='\0';
+  buffer=trim_front(buffer2);
   trim(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
 
-  if(fgets(buffer,255,stream)==NULL){
-    strcpy(buffer,"***");
+  if(fgets(buffer2,255,stream)==NULL){
+    strcpy(buffer2,"***");
   }
 
-  len=strlen(buffer);
-  buffer[len-1]='\0';
+  len=strlen(buffer2);
+  buffer2[len-1]='\0';
+  buffer=trim_front(buffer2);
   trim(buffer);
   len=strlen(buffer);
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
