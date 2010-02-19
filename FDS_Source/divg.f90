@@ -28,7 +28,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP,FX,FY,FZ
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW, YSUM,YY_GET(1:N_SPECIES),ZZ_GET(1:N_MIX_SPECIES), &
             HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,VDOT_LEAK,TIME_RAMP_FACTOR,ZONE_VOLUME,CP_MF,DELTA_P,PRES_RAMP_FACTOR,&
-            H_G,H_G_A,TMP_G
+            H_G,H_G_A,TMP_G,CP
 TYPE(SURFACE_TYPE), POINTER :: SF
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,I,J,K,IPZ,IOPZ
  
@@ -480,10 +480,36 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       !$OMP END DO
 
    ELSE K_DNS_OR_LES
-    
-      !$OMP WORKSHARE
-      KP = MU*CPOPR
-      !$OMP END WORKSHARE
+      
+      CP_FTMP_IF: IF (CP_FTMP) THEN
+         IF (N_SPECIES > 0) THEN
+            DO K=1,KBAR
+               DO J=1,JBAR
+                  DO I=1,IBAR
+                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                     ITMP = MIN(5000,NINT(TMP(I,J,K)))
+                     YY_GET = YYP(I,J,K,:)
+                     CALL GET_SPECIFIC_HEAT(YY_GET,CP,ITMP)
+                     KP(I,J,K) = CP*MU(I,J,K)/PR
+                  ENDDO
+               ENDDO
+            ENDDO
+         ELSE
+            DO K=1,KBAR
+               DO J=1,JBAR
+                  DO I=1,IBAR
+                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                     CP = Y2CP_C(ITMP)
+                     KP(I,J,K) = CP*MU(I,J,K)/PR
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
+      ELSE CP_FTMP_IF
+         !$OMP WORKSHARE
+         KP = MU*CPOPR
+         !$OMP END WORKSHARE
+      ENDIF CP_FTMP_IF
       
    ENDIF K_DNS_OR_LES
 
