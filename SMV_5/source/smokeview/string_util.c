@@ -266,6 +266,20 @@ void num2string(char *string, float tval,float range){
 
 }
 
+/* ------------------ get_string ------------------------ */
+
+char *trim_string(char *buffer){
+  int len;
+  char *bufptr;
+
+  len=strlen(buffer);
+  buffer[len-1]='\0';
+  bufptr=trim_front(buffer);
+  trim(bufptr);
+  return bufptr;
+}
+
+
 /* ------------------ STRCMP ------------------------ */
 
 int STRCMP(const char *s1, const char *s2){
