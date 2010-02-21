@@ -80,8 +80,10 @@ F        & 19       & 1.0  & 162         &  206           & 0.14    \\ \hline
 
 \section{NRL/HAI Wall Heat Flux Measurements}
 
-Predicted and measured vertical heat flux profiles from 9 propane sand burner fires are shown on the following pages. The parameters for each
-experiment are listed in Table~\ref{NRL/HAI_Parameters} below. Note that all the FDS simulations were performed with a grid resolution such that
+Predicted and measured vertical heat flux profiles from 9 propane sand burner fires are shown on the following pages.
+The parameters for each
+experiment are listed in Table~\ref{NRL/HAI_Parameters} below. Note that all the FDS simulations were performed with
+a grid resolution such that
 $D^*/\dx=10$.
 
 \begin{table}[ht]
@@ -149,7 +151,7 @@ Note that all the FDS simulations were performed with a grid resolution of 2~cm,
 the parameter {\ct RADIATIVE\_FRACTION} has been set to zero, meaning that FDS is basing the source term
 of the radiation transport equation on the temperature rather than the heat release rate. In addition, the
 soot yield has been set to 0.05 as a crude way to represent the excess soot that is present in the flames but is
-eventually oxidized. The version of FDS used was 5.2.1, and this version does not have a soot model to
+eventually oxidized. The version of FDS used does not have a soot model to
 account for higher levels of soot in the flame region.
 
 \begin{warning}
@@ -174,6 +176,40 @@ ordinarily not use it.}
 {Comparison of predicted and measured heat fluxes to adjacent panels forming a corner in the single
 burning item (SBI) apparatus at the University of Ulster.}
 \end{figure}
+
+\clearpage
+
+\section{FM Parallel Panel Heat Flux Measurements}
+
+Predicted and measured vertical heat flux profiles for three propane and three propylene fires (30~kW, 60~kW, and
+100~kW) sandwiched between two 2.4~m high, 0.6~m wide panels are presented on the following page.
+Note that all the FDS simulations were performed with a grid resolution of 2~cm, and note also that
+the parameter {\ct RADIATIVE\_FRACTION} has been set to 0.37 for propylene and 0.29 for propane.  In addition, the
+soot yield has been set to 0.095 for propylene and 0.024 for propane. There is no soot growth or extinction model
+used.
+
+\begin{warning}
+\noindent
+{\bf These results should be regarded as preliminary because features of the next major release (FDS 6) are used.}
+\end{warning}
+
+\newpage
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_1_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_4_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_2_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_5_Heat_Flux} \\
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_3_Heat_Flux} &
+\includegraphics[height=2.2in]{FIGURES/FM_Parallel_Panel/FM_Parallel_Panel_6_Heat_Flux}
+\end{tabular*}
+\label{FM_Parallel_Panel}
+\caption[Side wall heat flux predictions, FM Parallel Panel experiments.]
+{Comparison of predicted and measured heat fluxes to parallel panels.}
+\end{figure}
+
+
 
 \clearpage
 
