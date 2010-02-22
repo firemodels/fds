@@ -27,41 +27,42 @@ if nargin>=1
     error_frac  = varargin{3};
     xaxis_label = varargin{4};
     yaxis_label = varargin{5};
-    legend_pos  = varargin{6};
-    rmin        = varargin{7};
-    rmax        = varargin{8};
-    dr          = varargin{9};
-    xmin        = varargin{10};
-    xmax        = varargin{11};
-    dx          = varargin{12};
-    ymin        = varargin{13};
-    ymax        = varargin{14};
-    dy          = varargin{15};
-    exp_file    = varargin{16};
-    exp_format  = varargin{17};
-    exp_label   = varargin{18};
-    if nargin>18
-        fds_file1   = varargin{19};
-        fds_format1 = varargin{20};
-        fds_label1  = varargin{21};
+    text_label  = varargin{6};
+    legend_pos  = varargin{7};
+    rmin        = varargin{8};
+    rmax        = varargin{9};
+    dr          = varargin{10};
+    xmin        = varargin{11};
+    xmax        = varargin{12};
+    dx          = varargin{13};
+    ymin        = varargin{14};
+    ymax        = varargin{15};
+    dy          = varargin{16};
+    exp_file    = varargin{17};
+    exp_format  = varargin{18};
+    exp_label   = varargin{19};
+    if nargin>19
+        fds_file1   = varargin{20};
+        fds_format1 = varargin{21};
+        fds_label1  = varargin{22};
         nfds        = 1;
     end
-    if nargin>21
-        fds_file2   = varargin{22};
-        fds_format2 = varargin{23};
-        fds_label2  = varargin{24};
+    if nargin>22
+        fds_file2   = varargin{23};
+        fds_format2 = varargin{24};
+        fds_label2  = varargin{25};
         nfds        = 2;
     end
-    if nargin>24
-        fds_file3   = varargin{25};
-        fds_format3 = varargin{26};
-        fds_label3  = varargin{27};
+    if nargin>25
+        fds_file3   = varargin{26};
+        fds_format3 = varargin{27};
+        fds_label3  = varargin{28};
         nfds        = 3;
     end
-    if nargin>27
-        fds_file4   = varargin{28};
-        fds_format4 = varargin{29};
-        fds_label4  = varargin{30};
+    if nargin>28
+        fds_file4   = varargin{29};
+        fds_format4 = varargin{30};
+        fds_label4  = varargin{31};
         nfds        = 4;
     end
 end
@@ -106,6 +107,10 @@ if nfds>=4
     H(5)=plot(R,W,fds_format4,'LineWidth',2);
     hold off
 end
+
+xt = xmin + .05*(xmax-xmin);
+yt = ymin + .9*(ymax-ymin);
+text(xt,yt,text_label,'FontSize',14,'Interpreter','LaTeX')
 
 plot_style
 set(gca,'Units',Plot_Units)
