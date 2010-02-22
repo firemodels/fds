@@ -1,4 +1,4 @@
-&HEAD CHID='Sandia_He_1m_dx1p5mm', TITLE='Sandia 1m helium plume' /
+&HEAD CHID='Sandia_He_1m_dx1p5cm', TITLE='Sandia 1m helium plume, 1.5 cm resolution' /
 
 &MULT ID='mesh array', DX=1.0,DY=1.0,DZ=1.0, I_UPPER=1,J_UPPER=1,K_UPPER=3 /
 &MESH IJK=64,64,64, XB=-1.0,0.0,-1.0,0.0,-.0625,0.9375, MULT_ID='mesh array' /
