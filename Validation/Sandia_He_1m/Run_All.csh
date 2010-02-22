@@ -4,6 +4,7 @@ setenv FDS $SVNROOT/FDS_Compilation/intel_linux_32/fds5_intel_linux_32
 set RUNFDS=$SVNROOT/Utilities/Scripts/runfds.csh
 setenv BASEDIR `pwd`
 
-$RUNFDS Current_Results Sandia_He_1m fire61 &
+$RUNFDS Current_Results Sandia_He_1m_dx3mm   fire61 &
+$RUNFDS Current_Results Sandia_He_1m_dx1p5mm fire62 &
 
 echo FDS cases submitted
