@@ -1,9 +1,9 @@
 #!/bin/csh -f
 setenv SVNROOT ~/FDS-SMV
-setenv FDS $SVNROOT/FDS_Compilation/intel_linux_32/fds5_intel_linux_32
-set RUNFDS=$SVNROOT/Utilities/Scripts/runfds.csh
-setenv BASEDIR `pwd`
-
-$RUNFDS Current_Results Sandia_He_1m fire61 &
-
+setenv FDS $SVNROOT/FDS_Compilation/mpi_intel_linux_32/fds5_mpi_intel_linux_32
+set WDIR=$SVNROOT/Validation/Sandia_Plumes
+cd $WDIR/Current_Results
+mpirun -np 16 $FDS Sandia_He_1m_dx3cm.fds >& Sandia_He_1m_dx3cm.err &
+mpirun -np 16 $FDS Sandia_He_1m_dx1p5cm.fds >& Sandia_He_1m_dx1p5cm.err &
+cd $WDIR
 echo FDS cases submitted
