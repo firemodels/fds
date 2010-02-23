@@ -276,7 +276,7 @@ ENDIF INIT_WIDE_BAND
 !                  4        CO
 !                  5        O2
 !                  6        N2
-!          SVF(J)=SOOT VOLUME FRACTION OF J TH ELEMENT
+!          SVF=SOOT VOLUME FRACTION OF J TH ELEMENT
 !          OMMIN=MINIMUM WAVE NUMBER IN SPECTRUM, CM-1.
 !          OMMAX=MAXIMUM WAVE NUMBER IN SPECTRUM, CM-1.
 !
@@ -390,16 +390,15 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
             N = 0
             KAPPA_SPECIES: DO NS = 1, 5
                SELECT CASE(NS)
-                  CASE(1) !FUEL
+                  CASE(1) ! FUEL
                      IF(MIXTURE_FRACTION .OR. I_FUEL /=0) THEN
                         N = N + 1
-                        SVF = 0._EB
-                        !FUEL
+                        SVF    = 0._EB
                         SPECIE = 0._EB
-                        P = 0._EB
+                        P      = 0._EB
                         SPECIE(3) = YY
-                        P(3) = YY
-                        P(6) = (1._EB-YY)
+                        P(3)      = YY
+                        P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
                            Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
@@ -407,16 +406,15 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                            Y2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
                      ENDIF
-                  CASE(2) !CO2
+                  CASE(2) ! CO2
                      IF(MIXTURE_FRACTION .OR. I_CO2 /=0) THEN
                         N = N + 1
-                        SVF = 0._EB
-                        !FUEL
+                        SVF    = 0._EB
                         SPECIE = 0._EB
-                        P = 0._EB
+                        P      = 0._EB
                         SPECIE(1) = YY
-                        P(1) = YY
-                        P(6) = (1._EB-YY)
+                        P(1)      = YY
+                        P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
                            Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
@@ -424,16 +422,15 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                            Y2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
                      ENDIF
-                  CASE(3) !CO
+                  CASE(3) ! CO
                      IF((MIXTURE_FRACTION .AND. CO_INDEX > 0) .OR. I_CO /=0) THEN
                         N = N + 1
-                        SVF = 0._EB
-                        !FUEL
+                        SVF    = 0._EB
                         SPECIE = 0._EB
-                        P = 0._EB
+                        P      = 0._EB
                         SPECIE(4) = YY
-                        P(4) = YY
-                        P(6) = (1._EB-YY)
+                        P(4)      = YY
+                        P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
                            Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
@@ -441,16 +438,15 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                            Y2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
                      ENDIF
-                  CASE(4) !H2O
+                  CASE(4) ! H2O
                      IF((MIXTURE_FRACTION .AND. H2O_INDEX > 0) .OR. I_WATER /=0) THEN
                         N = N + 1
-                        SVF = 0._EB
-                        !FUEL
+                        SVF    = 0._EB
                         SPECIE = 0._EB
-                        P = 0._EB
+                        P      = 0._EB
                         SPECIE(2) = YY
-                        P(2) = YY
-                        P(6) = (1._EB-YY)
+                        P(2)      = YY
+                        P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
                            Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
@@ -464,7 +460,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         RCRHO = MW_AIR*P_INF/(R0*RCT)
                         YY = YY * 0.2_EB
                         SPECIE = 0._EB
-                        P = 0._EB
+                        P      = 0._EB
                         SPECIE(5) = YY*RCRHO/RHO_SOOT
                         P(6) = 1._EB
                         SVF = YY*RCRHO/RHO_SOOT
@@ -480,6 +476,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
          ENDDO Y_LOOP_z
       ENDDO T_LOOP_Z
    ENDDO BAND_LOOP_Z
+
    CALL RCDEALLOC  ! Deallocate RadCal arrays
 
 ENDIF MAKE_KAPPA_ARRAYS
