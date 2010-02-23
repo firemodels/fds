@@ -13,14 +13,22 @@ VPATH = ../FDS_Source
 
 # Definition of the non-MPI or MPI object variables
 
-obj_serial = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
+# note: objf_serial and objf_mpi contain only Fortran routines ie not isob.c
+
+objf_serial = prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
              ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
              mass.o wall.o fire.o divg.o init.o velo.o pres.o mpis.o main.o
+obj_serial = isob.o $(objf_serial)
+
+objwinf_serial = $(objf_serial:.o=.obj)
 objwin_serial = $(obj_serial:.o=.obj)
 
-obj_mpi = isob.o prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
+objf_mpi = prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
           ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
           mass.o wall.o fire.o divg.o init.o velo.o pres.o mpip.o main.o
+obj_mpi = isob.o $(objf_mpi)
+
+objwinf_mpi = $(objf_mpi:.o=.obj)
 objwin_mpi = $(obj_mpi:.o=.obj)
 
 # General Purpose Rules
@@ -57,17 +65,25 @@ intel_win_32_db : CFLAGS = -Dpp_noappend
 intel_win_32_db : FCOMPL = ifort
 intel_win_32_db : CCOMPL = cl
 intel_win_32_db : obj = fds5_win_32_db
-intel_win_32_db : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
+intel_win_32_db : setup_win $(objwinf_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwinf_serial) ../win32lib/isob.obj
 
 intel_win_32 : FFLAGS = -O2 /Qvec_report0
 intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 intel_win_32 : FCOMPL = ifort
 intel_win_32 : CCOMPL = cl
 intel_win_32 : obj = fds5_win_32
-intel_win_32 : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
+intel_win_32 : setup_win $(objwinf_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwinf_serial) ../win32lib/isob.obj
 
+intel_win_32all : FFLAGS = -O2 /Qvec_report0
+intel_win_32all : CFLAGS = -O2 -Dpp_noappend
+intel_win_32all : FCOMPL = ifort
+intel_win_32all : CCOMPL = cl
+intel_win_32all : obj = fds5_win_32
+intel_win_32all : setup_win $(objwin_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
+	
 mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
 mpi_intel_win_32 : FFLAGS = -O2 /I $(MPIINCLUDE)
@@ -75,8 +91,8 @@ mpi_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 mpi_intel_win_32 : FCOMPL = ifort
 mpi_intel_win_32 : CCOMPL = cl
 mpi_intel_win_32 : obj = fds5_mpi_win_32
-mpi_intel_win_32 : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
+mpi_intel_win_32 : setup_win $(objwinf_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwinf_mpi) ../win32lib/isob.obj $(MPILIB)
 
  #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
  #    ..\Scripts\iclvars intel64
@@ -87,8 +103,8 @@ intel_win_64 : CFLAGS = -O2 -Dpp_noappend
 intel_win_64 : FCOMPL = ifort
 intel_win_64 : CCOMPL = cl
 intel_win_64 : obj = fds5_win_64
-intel_win_64 : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F100000000 $(objwin_serial)
+intel_win_64 : setup_win $(objwinf_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F100000000 $(objwinf_serial) ../win64lib/isob.obj
 
 mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_64 : MPIINCLUDE = "c:\program files\mpich2\include"
@@ -97,8 +113,8 @@ mpi_intel_win_64 : CFLAGS = -O2 -Dpp_noappend
 mpi_intel_win_64 : FCOMPL = ifort
 mpi_intel_win_64 : CCOMPL = cl
 mpi_intel_win_64 : obj = fds5_mpi_win_64
-mpi_intel_win_64 : setup_win $(objwin_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
+mpi_intel_win_64 : setup_win $(objwinf_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwinf_mpi) ../win64lib/isob.obj $(MPILIB)
 
 # Intel Compiler for Linux, version 11
 
@@ -429,7 +445,6 @@ init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o
 dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o isob.c turb.o
 main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o 
 
-smvv.obj : isob.obj
 cons.obj : prec.obj
 type.obj : prec.obj cons.obj
 devc.obj : prec.obj
