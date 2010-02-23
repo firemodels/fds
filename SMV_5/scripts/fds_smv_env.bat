@@ -1,53 +1,44 @@
 @echo off
-
 Rem Configuration file for FDS-SMV scripts
 Rem This file contains user customizable settings for the FDS and Smokeview build scripts
 
-
-Rem VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 Rem VVVVVVVV SETTINGS BELOW CHANGED ONLY ONCE VVVVVVVVVVVVVVVVVVVVVVVVVVVV
-Rem VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 Rem ---------- SVN repository locations ------------
 
 set svn_root=d:\fds-smv
 set svn_drive=d:
-
 set linux_svn_root=FDS-SMV
 
 Rem ---------- User/Host names -----------------
 
 set linux_username=gforney
-
 set google_username=gforney
-
 set linux_hostname=acrux.cfr.nist.gov
 
-Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Rem ^^^^^^^^ SETTINGS ABOVE CHANGED ONLY ONCE ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Rem **********************************************************************
-
-Rem ----------------------------------------------------------------------
 Rem --- SETTINGS BELOW UPDATED MORE THAN ONCE - as repository changes ----
-Rem ----------------------------------------------------------------------
 
 Rem ----------- version and revision numbers -------------
 
 Rem ------ Smokeview version and revision numbers ---------
 
-set smv_version=5.4.3
-set smv_revision=4599
+set smv_version=xyz
+set smv_revision=5621
 
 Rem ------ FDS version and revision numbers ---------
 
-set fds_version=5.4.0
-set fds_revision=4629
+set fds_version=test
+set fds_revision=5545
 
 Rem ------ Verification case revision number ---------
 
 set verification_revision=4584
+
+Rem ------ including other documentation ---------
+
+set docs_include_in_bundle=0
 
 Rem ----------- for uploading to Google Code -----------------
 
@@ -78,11 +69,11 @@ Rem --------------------------------------
 
 set svn_logon=%linux_username%@%linux_hostname%
 
-set homedir="%homedrive%%homepath%"
+set homedir=%homedrive%%homepath%\
 
 Rem put your google password into a file named gc.passwd located in
 Rem   the directory below (your windows home directory found by simply
 Rem   opening a winows command shell)
 
-set google_password_dir=%homedir%
+set google_password_dir=d:\gpf_home\
 
