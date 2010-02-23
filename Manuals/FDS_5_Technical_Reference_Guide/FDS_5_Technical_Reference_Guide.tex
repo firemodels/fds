@@ -4,8 +4,6 @@
 \usepackage{pdfsync}
 %\usepackage{hyperref}
 
-%\usepackage{array,eqnarray}
-
 %\usepackage{eso-pic}
 %\usepackage{graphicx}
 %\usepackage{color}
@@ -54,7 +52,7 @@
 \usepackage{lastpage} % Automatic last page number reference.
 \usepackage[T1]{fontenc}
 \usepackage{upquote}
-\usepackage{array,eqnarray}
+%\usepackage{array,eqnarray}
 \usepackage{enumerate}
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}{\tt\small}
@@ -1916,11 +1914,11 @@ where species 0 is nitrogen.
 
 
 \section{Velocity Boundary Conditions}
+
+\subsection{Smooth Walls}
 \label{WW_model}
 
-When the momentum equation is integrated over a cell adjacent to the wall in an LES it turns out that the most difficult term to
-handle is the viscous stress at the wall, e.g. $\bar{\tau}_{xz}|_{z=0}$, because the wall-normal gradient of the streamwise velocity component cannot be resolved.
-Note that the sgs stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number
+When the momentum equation is integrated over a cell adjacent to the wall in an LES it turns out that the most difficult term to handle is the viscous stress at the wall, e.g. $\bar{\tau}_{xz}|_{z=0}$, because the wall-normal gradient of the streamwise velocity component cannot be resolved. Note that the sgs stress at the wall is identically zero.  We have, therefore, an entirely different situation than exists in the bulk flow at high Reynolds number
 where the viscous terms are negligible and the sgs stress is of critical importance.  The fidelity of the sgs model still influences the wall stress, however,
 since other components of the sgs tensor affect the value of the near-wall velocity and hence the resulting viscous stress determined by the wall model.
 The model used for $\tau_w = \bar{\tau}_{xz}|_{z=0}$ in FDS is the Werner and Wengle model \cite{Werner:1991} which we now describe.
@@ -1928,17 +1926,17 @@ The model used for $\tau_w = \bar{\tau}_{xz}|_{z=0}$ in FDS is the Werner and We
 An important scaling quantity in the near-wall region is the friction velocity, defined as $u^* \equiv \sqrt{\tau_w/\rho}$.
 From the friction velocity we define the nondimensional streamwise velocity $u^+ \equiv u/u^*$ and nondimensional wall-normal distance $z^+ \equiv z/\ell$,
 where $\ell = \mu/(\rho u^*)$. The law of the wall is then given by \cite{Pope:2000,TennekesLumley}
-\begin{equationarray}{rcll}
-\label{eqn_visclayer} u^+ &=& z^+               & \mbox{for} \quad z^+ < 5 \\
-\label{eqn_loglaw}    u^+ &=& 2.4 \ln z^+ + 5.2 & \mbox{for} \quad z^+ > 30 \,\mbox{,}
-\end{equationarray}
+\begin{eqnarray}
+\label{eqn_visclayer} u^+ &=& z^+                \hspace{2.27cm}\mbox{for} \quad z^+ < 5 \\
+\label{eqn_loglaw}    u^+ &=& 2.4 \ln z^+ + 5.2  \hspace{0.50cm}\mbox{for} \quad z^+ > 30
+\end{eqnarray}
 The region $5 < z^+ < 30$, where both viscous and inertial stresses are important, is referred to as the buffer layer.  The upper range of the log law depends on the Reynolds number \cite{Pope:2000,Zagarola:1997}.
 
 Werner and Wengle \cite{Werner:1991} propose a simplification to the law of the wall to eliminate the mathematical difficulties of handling the buffer and log layers.  Furthermore, WW suppose that their simplified formula for the streamwise velocity holds \emph{instantaneously} within the LES.  The WW wall law is given by \cite{Sagaut:2001}
-\begin{equationarray}{rcll}
-\label{eqn_wwlam}  u^+ &=& z^+       & \mbox{for} \quad z^+ \le 11.81 \\
-\label{eqn_wwturb} u^+ &=& A (z^+)^B & \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
-\end{equationarray}
+\begin{eqnarray}
+\label{eqn_wwlam}  u^+ &=& z^+        \hspace{1.22cm}\mbox{for} \quad z^+ \le 11.81 \\
+\label{eqn_wwturb} u^+ &=& A (z^+)^B  \hspace{0.50cm}\mbox{for} \quad z^+ > 11.81 \,\mbox{,}
+\end{eqnarray}
 where $A=8.3$ and $B=1/7$. Note that a power law has been substituted for the log law and the viscous sublayer and the power law region are matched within the buffer region.  A comparison of the log law and the power law is shown in Figure \ref{fig_lawofthewall}.  In the region $11.81 < z^+ < 10^3$ the power law is a good approximation to the log law and for $z^+>10^3$ the power law loosely exhibits wake region behavior for a flow with $\mbox{Re} \approx 5e5$ \cite{Pope:2000,Zagarola:1997}.  As we see below, this functional behavior has consequences for high Re flows.
 \begin{figure}
    \begin{center}
@@ -1948,17 +1946,17 @@ where $A=8.3$ and $B=1/7$. Note that a power law has been substituted for the lo
 \end{figure}
 
 For the purposes of adapting the WW model to FDS we suppose that the first off-wall velocity component $\tilde{u}$ represents the WW profile averaged in the wall-normal direction (refer to Figure \ref{fig_nearwall_grid}).  The density is taken as the average of the neighboring cell values and uniform along the face.  The WW model as implemented in FDS is then given by
-\begin{equationarray}{rcll}
-\label{eqn_tauwlam} |\tau_w| &=& \frac{2 \bar{\mu} |\tilde{u}|}{\Delta z} & \mbox{for} \quad z^+ \le 11.81 \vspace{0.2cm}\\
-\label{eqn_tauwturb}|\tau_w| &=& \bar{\rho}\left[\alpha\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^\beta + \eta\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^B |\tilde{u}|\right]^\gamma                           & \mbox{for} \quad z^+ > 11.81 \,\mbox{,}
-\end{equationarray}
+\begin{eqnarray}
+\label{eqn_tauwlam} |\tau_w| &=& \frac{2 \bar{\mu} |u|}{\delta z}  \hspace{4.70cm}\mbox{for} \quad z^+ \le 11.81 \vspace{0.2cm}\\
+\label{eqn_tauwturb}|\tau_w| &=& \bar{\rho}\left[\alpha\left(\frac{\bar{\mu}}{\bar{\rho}\delta z}\right)^\beta + \eta\left(\frac{\bar{\mu}}{\bar{\rho}\delta z}\right)^B |u|\right]^\gamma  \hspace{0.50cm}\mbox{for} \quad z^+ > 11.81 \,\mbox{,}
+\end{eqnarray}
 where
-\begin{equationarray}{rcl}
+\begin{eqnarray}
 \alpha &=& \frac{1-B}{2} A^{\frac{1+B}{1-B}} \vspace{0.2cm}\\
 \beta  &=& 1+B \vspace{0.2cm}\\
 \eta   &=& \frac{1+B}{A} \vspace{0.2cm}\\
 \gamma &=& \frac{2}{1+B}
-\end{equationarray}
+\end{eqnarray}
 Note that $\bar{\mu}$ is the average of the \emph{molecular} viscosity from the neighboring cells.  A detailed derivation of (\ref{eqn_tauwturb}) is given in Appendix \ref{app_WWderivation}.
 
 In order to decide which formula to use for the wall stress, (\ref{eqn_tauwlam}) or (\ref{eqn_tauwturb}), we must know $z^+$, which of course depends on $\tau_w$.  As a practical matter of implementation, given that most boundary layers in FDS are under-resolved, we first calculate $\tau_w$ from (\ref{eqn_tauwturb}); we then obtain $z^+ = \sqrt{\tau_w/\bar{\rho}}$ ; if $z^+>11.81$, then the computed value of $\tau_w$ is retained, else $\tau_w$ is taken from (\ref{eqn_tauwlam}), which actually involves no additional computation since the ghost cell value for the velocity is prescribed for a no-slip wall by default.
@@ -1970,9 +1968,26 @@ In order to decide which formula to use for the wall stress, (\ref{eqn_tauwlam})
    \end{center}
 \end{figure}
 
+\subsection{Rough Walls}
+\label{rough_wall_model}
 
+For rough walls we employ the log law presented in Pope \cite{Pope:2000},
+\begin{equation}
+\label{eqn_roughwallloglaw}
+u^+ = \frac{1}{\kappa} \ln \left(\frac{z}{z_0}\right) + \tilde{B}
+\end{equation}
+The von K\'{a}rm\'{a}n constant is $\kappa=0.41$.  The dimensional roughness height is denoted $z_0$ (prescribed by setting {\tt ROUGHNESS} [in meters] on the {\tt SURF} line). The distance to the wall $z$ is taken as $\delta z/2$ for the first off-wall grid cell (in the wall-normal direction).  Pope notes that the parameter $\tilde{B}$ varies with $z_0/\ell$ but attains a constant value in the fully rough limit.  Experiments suggest this limiting value is 8.5.  However, in order for FDS to reproduce the friction law over a broad range of Reynolds numbers, roughness heights, and grid resolutions, this parameter is adjusted to $\tilde{B} = 7.44$ (see the FDS Verification Guide).
 
+With these parameters set, the stress for the rough wall case may be obtained from
+\begin{equation}
+\label{eqn_roughwall_stress}
+\tau_w = \bar{\rho} \left( \frac{u}{2.44 \ln (0.5\,\delta z/z_0) + 7.44} \right)^2
+\end{equation}
+where $u$ is the streamwise velocity stored at $\delta z/2$.
 
+\subsection{The Transition Region}
+
+As can be seen by studying the Moody diagram for the friction law in rough wall pipes (see e.g. \cite{Pope:2000,MYO}), the transition region where neither the smooth wall limit nor the rough wall limit is accurate spans but a small range of Reynolds numbers.  Therefore, instead of trying to approximate the variation in $\tilde{B}$, the maximum between the smooth wall (\ref{eqn_tauwturb}) and rough wall (\ref{eqn_roughwall_stress}) stress is used.
 
 \section{Time Step and Stability Constraints}
 
