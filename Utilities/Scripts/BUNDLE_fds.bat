@@ -77,6 +77,6 @@ cd ..
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
-Rem c:\bin\winzip\wzipse32 %basename%.zip -d "c:\program files\nist\"
-c:\bin\winzip\wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -m %bundleinfo%\message.txt %basename%.zip -c FDS5\setup.bat
+Rem wzipse32 %basename%.zip -d "c:\program files\nist\"
+wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -m %bundleinfo%\message.txt %basename%.zip -c FDS5\setup.bat
 pause
