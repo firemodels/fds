@@ -42,6 +42,7 @@ if nargin>=1
     exp_file    = varargin{18};
     exp_format  = varargin{19};
     exp_label   = varargin{20};
+    nfds        = 0;
     if nargin>20
         fds_file1   = varargin{21};
         fds_format1 = varargin{22};
@@ -72,9 +73,13 @@ end
 M = csvread(exp_file,1,0);
 r = M(:,1);
 w = M(:,2);
-e = error_frac*abs(w); % percent error matches DesJardin paper
-e(2:2:length(e)) = 0;  % remove every other error bar for clarity
-H(1)=errorbar(r,w,e,exp_format);
+if (error_frac>0)
+    e = error_frac*abs(w); % percent error matches DesJardin paper
+    e(2:2:length(e)) = 0;  % remove every other error bar for clarity
+    H(1)=errorbar(r,w,e,exp_format);
+else
+    H(1)=plot(r,w,exp_format);
+end
 
 % FDS data
 if nfds>=1
@@ -132,6 +137,7 @@ set(gca,'XTick',xmin:dx:xmax)
 set(gca,'XMinorTick','on')
 %set(gca,'YMinorGrid','on')
 
+if nfds==0; h = legend(H,exp_label,'Location',legend_pos); end
 if nfds==1; h = legend(H,exp_label,fds_label1,'Location',legend_pos); end
 if nfds==2; h = legend(H,exp_label,fds_label1,fds_label2,'Location',legend_pos); end
 if nfds==3; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,'Location',legend_pos); end
