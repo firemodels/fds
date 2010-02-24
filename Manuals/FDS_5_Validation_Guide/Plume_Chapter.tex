@@ -180,7 +180,6 @@ summary plot at the end of the chapter.
 
 
 \section{Sandia 1 m Helium Plume}
-
 \label{Sandia plume}
 
 Calculations of the Sandia 1 m helium plume are run at two grid resolutions: 3 cm and 1.5 cm.  To provide the reader with a qualitative feel for the results, Fig.~\ref{Sandia_He_1m_image} is a snapshot from the simulation showing shadow contours of vertical velocity. The calculations are run in parallel on 16 processors.  The outlined blocks indicate the domain decomposition.  Data for vertical velocity, radial velocity, and helium mass fraction are recorded at three levels downstream from the base of the plume, $z = [0.2, 0.4, 0.6]$ m, corresponding to the experimental measurements of O'Hern et al.~\cite{OHern:2005}.  Results for the mean profiles are given in Figs.~\ref{Sandia_He_1m_velocity} and \ref{Sandia_He_1m_massfraction}.  The means are taken between $t=10$ and $t=20$ seconds in the simulation.
@@ -223,6 +222,25 @@ The domain is 2 m $\times$ 2 m $\times$ 4 m. The boundary conditions are open on
 \caption[Sandia 1~m helium plume mean mass fraction profiles.]
 {FDS predictions of mean helium mass fraction profiles for the Sandia 1~m helium plume experiment. Results are shown for 3 cm and 1.5 cm grid resolutions. With $z$ being the streamwise coordinate, the bottom row shows data at $z=0.2$ m, the middle row shows data at $z=0.4$ m, and the top row shows data at $z=0.6$ m.}
 \label{Sandia_He_1m_massfraction}
+\end{figure}
+
+\clearpage
+
+\section{Sandia 1 m Methane Pool Fire}
+\label{Sandia_methane}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_W_zp9} &
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_U_zp9} \\
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_W_zp5} &
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_U_zp5} \\
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_W_zp3} &
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_U_zp3}
+\end{tabular*}
+\caption[Sandia 1~m methane pool fire mean velocity profiles.]
+{FDS predictions of mean velocity profiles for the Sandia 1~m methane pool fire experiment. Results are shown for 3 cm and 1.5 cm grid resolutions. The $z$ coordinate represents height above the methane pool; bottom row: $z=0.3$ m, middle row: $z=0.5$ m, and top row: $z=0.9$ m.}
+\label{Sandia_CH4_1m_velocity}
 \end{figure}
 
 \clearpage
