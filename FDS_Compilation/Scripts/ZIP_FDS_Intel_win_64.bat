@@ -19,8 +19,6 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\FDS_Compilation
 
-set bin=c:\bin
-
 set fdsroot=fds_%fds_version%_win64
 set togoogle=%svn_root%\FDS_Compilation\to_google\%fdsroot%
 
@@ -39,7 +37,7 @@ cd ..
 echo.
 echo creating self-extracting archive
 if exist %fdsroot%.exe erase %fdsroot%.exe
-%bin%\winzip\wzipse32 %fdsroot%.zip -d "C:\Program Files (x86)\nist\FDS"
+wzipse32 %fdsroot%.zip -d "C:\Program Files (x86)\nist\FDS"
 
 echo %fdsroot%.exe located in %cd%
 pause

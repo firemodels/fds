@@ -42,7 +42,7 @@ echo creating self-extracting archive
 
 cd %togoogle%
 if exist %zipbase%.exe erase %zipbase%.exe
-c:\bin\winzip\wzipse32 %zipbase%.zip -d "C:\Program Files\nist\Documentation"
+wzipse32 %zipbase%.zip -d "C:\Program Files\nist\Documentation"
 
 echo Documentation self-extractor, %zipbase%.exe, 
 echo located in %togoogle%
