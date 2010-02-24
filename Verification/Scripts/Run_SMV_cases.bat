@@ -1,7 +1,7 @@
 @echo off
 set svn_drive=d:
 
-set BASEDIR=%CD%
+set BASEDIR=%CD%\..
 set SVNROOT=%BASEDIR%\..\
 
 set FDS=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
