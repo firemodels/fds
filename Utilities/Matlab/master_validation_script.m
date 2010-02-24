@@ -16,5 +16,6 @@ addpath 'scripts'
 scatplot(saved_data,drange)
 beyler_hood
 sandia_helium_plume
+sandia_methane_fire
 
 display('validation scripts completed successfully!')
