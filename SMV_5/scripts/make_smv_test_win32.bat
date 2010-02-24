@@ -34,7 +34,7 @@ wzzip -a -r -p %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-c:\bin\winzip\wzipse32 %zipbase%.zip -runasadmin -d "c:\program files\fds\fds5\bin"
+wzipse32 %zipbase%.zip -runasadmin -d "c:\program files\fds\fds5\bin"
 copy %zipbase%.exe ..\.
 
 cd ..\..\..\scripts
