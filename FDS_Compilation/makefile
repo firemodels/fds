@@ -182,10 +182,6 @@ mpi_intel_linux_64_db : obj = fds5_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-# OS X
-osx32_libdir = /opt/intel/11/lib
-osx64_libdir = /opt/intel/11/lib
-
 # 32 bit
 intel_osx_32 : FFLAGS = -O3  -m32 -axSSSE3 -heap-arrays -static-intel -vec_report0
 intel_osx_32 : CFLAGS = -O3 -m32 -Dpp_noappend -Dpp_OSX -vec_report0
@@ -195,7 +191,7 @@ intel_osx_32 : obj = fds5_intel_osx_32
 intel_osx_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_32 : FFLAGS  = -O3 -m32 -axSSSE3 -heap-arrays -static-intel -L$(osx32_libdir) -L/opt/openmpi32/lib -vec_report0
+mpi_intel_osx_32 : FFLAGS  = -O3 -m32 -axSSSE3 -heap-arrays -static-intel -L/opt/openmpi32/lib -vec_report0
 mpi_intel_osx_32 : CFLAGS  = -O3 -m32 -Dpp_noappend -Dpp_OSX -vec_report0
 mpi_intel_osx_32 : FCOMPL  = /opt/openmpi32/bin/mpif77
 mpi_intel_osx_32 : CCOMPL  = icc
@@ -228,7 +224,7 @@ intel_osx_64 : obj = fds5_intel_osx_64
 intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64 : FFLAGS  = -O3 -m64 -heap-arrays -axSSSE3 -static-intel -L$(osx64_libdir) -L/opt/openmpi64/lib -vec_report0
+mpi_intel_osx_64 : FFLAGS  = -O3 -m64 -heap-arrays -axSSSE3 -static-intel -L/opt/openmpi64/lib -vec_report0
 mpi_intel_osx_64 : CFLAGS  = -O3 -m64 -Dpp_noappend -Dpp_OSX -vec_report0
 mpi_intel_osx_64 : FCOMPL  = /opt/openmpi64/bin/mpif77
 mpi_intel_osx_64 : CCOMPL  = icc
