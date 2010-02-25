@@ -24,12 +24,10 @@ endif
 
 source $IFORT_COMPILER11/bin/ifortvars.csh $platform
 if ("$platform" == "ia32") then
-echo defining 32 bit mpi environment
-source ../Scripts/set_mpi32.csh
+set path = (/usr/local/lam7i/bin $path)
 endif
 if ("$platform" == "intel64") then
-echo defining 64 bit mpi environment
-source ../Scripts/set_mpi64.csh
+set path = (/usr/local/lam7i_64/bin $path)
 endif
 
 exit 0
