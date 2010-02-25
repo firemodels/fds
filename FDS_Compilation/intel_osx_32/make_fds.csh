@@ -1,19 +1,9 @@
 #!/bin/csh -f
-#iccvars.csh ia32
-#ifortvars.csh ia32
-set mssg="32 bit OSX FDS"
-set target=intel_osx_32
-set objdir=.
-if($#argv>0)then
-  set objdir=$1
-endif
-cd $objdir
+set platform=ia32
+set dir=`pwd`
+set target=$dir:t
 
-if ($#argv > 1) then
-echo Cleaning $mssg
-make  -f ../makefile clean
-exit 0
-endif
-echo Building $mssg
+source /opt/intel/11/bin/ifortvars.csh $platform
+
+echo Building $target
 make VPATH="../../FDS_Source" -f ../makefile $target
-echo Complete

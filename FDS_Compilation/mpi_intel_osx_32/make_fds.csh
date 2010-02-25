@@ -1,18 +1,9 @@
 #!/bin/csh -f
-set mssg="32 bit MPI OSX FDS"
-set target=mpi_intel_osx_32
+set platform=ia32
+set dir=`pwd`
+set target=$dir:t
 
-set objdir=.
-if($#argv>0)then
-  set objdir=$1
-endif
-cd $objdir
+source /opt/intel/11/bin/ifortvars.csh $platform
 
-if ($#argv > 1) then
-echo Cleaning $mssg 
-make  -f ../makefile clean 
-exit 0
-endif
-echo Building $mssg 
-make VPATH="../../FDS_Source" -f ../makefile $target 
-echo Complete 
+echo Building $target
+make VPATH="../../FDS_Source" -f ../makefile $target
