@@ -22,8 +22,8 @@ call %envfile%
 set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts
 set fdsdir=%linux_svn_root%/FDS_Compilation/
 
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh intel_osx_32  %fdsdir%/intel_osx_32 bluesky clean
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh intel_linux_32  %fdsdir%/intel_linux_32 fire41 clean
 
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh mpi_intel_osx_32  %fdsdir%/mpi_intel_osx_32 bluesky clean
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh mpi_intel_linux_32  %fdsdir%/mpi_intel_linux_32 fire41 clean
 
 pause
