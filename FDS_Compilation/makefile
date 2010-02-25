@@ -183,8 +183,8 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 # OS X
-osx32_libdir = /opt/intel/Compiler/11.1/080/lib
-osx64_libdir = /opt/intel/Compiler/11.1/080/lib
+osx32_libdir = /opt/intel/11/lib
+osx64_libdir = /opt/intel/11/lib
 
 # 32 bit
 intel_osx_32 : FFLAGS = -O3  -m32 -axSSSE3 -heap-arrays -static-intel -vec_report0
@@ -213,7 +213,7 @@ intel_osx_32_db : setup $(obj_serial)
 
 intel_osx_mpi_32_db : FFLAGS  = -check -warn unused -O0 -m32 -g -traceback -fpe:0 -vec_report0
 intel_osx_mpi_32_db : CFLAGS  = -O0 -m32 -g -traceback -Dpp_noappend -Dpp_OSX
-intel_osx_mpi_32_db : FCOMPL  = /usr/local/bin/mpif77
+intel_osx_mpi_32_db : FCOMPL  = /opt/openmpi32/bin/mpif77
 intel_osx_mpi_32_db : CCOMPL  = icc
 intel_osx_mpi_32_db : obj = fds5_mpi_intel_osx_32_db
 intel_osx_mpi_32_db : setup $(obj_mpi)
@@ -246,7 +246,7 @@ intel_osx_64_db : setup $(obj_serial)
 
 intel_osx_mpi_64_db : FFLAGS  = -check -warn unused -O0 -g -traceback -m64 -fpe:0 -fp-stack-check -save-temps -vec_report0
 intel_osx_mpi_64_db : CFLAGS  = -O0 -g -traceback -m64 -Dpp_noappend -Dpp_OSX -vec_report0
-intel_osx_mpi_64_db : FCOMPL  = /usr/local/bin/mpif77
+intel_osx_mpi_64_db : FCOMPL  = /opt/openmpi64/bin/mpif77
 intel_osx_mpi_64_db : CCOMPL  = icc
 intel_osx_mpi_64_db : obj = fds5_mpi_intel_osx_64_db
 intel_osx_mpi_64_db : setup $(obj_mpi)
