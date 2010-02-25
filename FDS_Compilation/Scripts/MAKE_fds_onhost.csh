@@ -9,5 +9,5 @@ if ($#argv>3) then
   exit 0
 endif
 echo Building FDS in $fdsdir on $host using the target $target
-ssh $host \( cd \~/$fdsdir \; make VPATH="../../FDS_Source" -f ../makefile $target \)
+ssh $host \( cd \~/$fdsdir \; ./make_fds.csh \)
 echo Completed
