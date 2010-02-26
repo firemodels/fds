@@ -1803,6 +1803,8 @@ REAL(EB) :: U_TAU,TAU_W,NU_OVER_DZ,Z_PLUS,TAU_ROUGH
 !
 ! References (for rough surfaces):
 !
+! S. B. Pope (2000) Turbulent Flows, Cambridge.
+!
 ! Moeng, C.-H. (1984) A Large-Eddy Simulation Model for the Study of Planetary
 ! Boundary-Layer Turbulence. Journal of the Atmospheric Sciences, Vol. 41, No. 13,
 ! pp. 2052-2062.
