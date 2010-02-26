@@ -22,6 +22,7 @@ echo "           $IFORT_COMPILER11 "
 exit 1
 endif
 
+echo Using Fortran located at: $IFORT_COMPILER11
 source $IFORT_COMPILER11/bin/ifortvars.csh $platform
 if ("$platform" == "ia32") then
 set path = (/usr/local/lam7i/bin $path)
