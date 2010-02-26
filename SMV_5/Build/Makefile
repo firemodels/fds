@@ -40,7 +40,8 @@ SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
 #OSX32FORTLIBDIR  = /opt/intel/fc/10.1.006/lib
 OSX32FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
 OSX64FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
-LINUX32FORTLIBDIR  = /opt/intel/fc/10.1.021/lib
+#LINUX32FORTLIBDIR  = /opt/intel/fc/10.1.021/lib
+LINUX32FORTLIBDIR  = /opt/intel/11/lib/ia32
 LINUX64FORTLIBDIR  = /opt/intel/11/lib/intel64
 
 # Definition of the object variables
@@ -246,7 +247,7 @@ intel_linux_64_dbg : FC        = ifort
 intel_linux_64_dbg : exe       = smv5_linux_64_dbg
 
 intel_linux_64_dbg : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -l$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
 # ------------- Linux 64 Test ----------------
 # 64 bit test linux (fire79)
