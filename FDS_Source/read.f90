@@ -2469,7 +2469,8 @@ T_LOOP_1: DO J=1,5000
          Y2CPBAR_C(J) = (Y2CPBAR_C(J-1)*(REAL(J,EB)-1._EB)+Y2CP_C(J))/REAL(J,EB)
       ELSE
          Y2H_G_C(J)   =  SUM(Y2Y_C(:)* H_TMP(:)) + Y2CP_C(J) 
-         Y2CPBAR_C(J) =   Y2H_G_C(J)
+  !!!    Y2CPBAR_C(J) =   Y2H_G_C(J)
+         Y2CPBAR_C(J) =   Y2CP_C(J)
       ENDIF
       Y2MU_C(J)    = SUM(Y2Y_C(1:N_STATE_SPECIES) * MU_TMP(:N_STATE_SPECIES))
       Y2K_C(J)     = SUM(Y2Y_C(1:N_STATE_SPECIES) * K_TMP(1:N_STATE_SPECIES))      
@@ -2515,7 +2516,8 @@ T_LOOP_1: DO J=1,5000
          Y2CPBAR_C(J) = (Y2CPBAR_C(J-1)*REAL(J-1,EB)+Y2CP_C(J))/REAL(J,EB)
       ELSE
          Y2H_G_C(J)   =   H_TMP(SPECIES(0)%INDEX) + Y2CP_C(J) 
-         Y2CPBAR_C(J) =   Y2H_G_C(J)
+  !!!    Y2CPBAR_C(J) =   Y2H_G_C(J)
+         Y2CPBAR_C(J) =   Y2CP_C(J)
       ENDIF
       Y2MU_C(J)    = MU_TMP(SPECIES(0)%INDEX)
       Y2K_C(J)     = K_TMP(SPECIES(0)%INDEX)
@@ -2528,7 +2530,8 @@ T_LOOP_1: DO J=1,5000
          Y2CPBAR(J,N) = (Y2CPBAR(J-1,N)*REAL(J-1,EB)+Y2CP(J,N))/REAL(J,EB)   
       ELSE
          Y2H_G(J,N)   = SUM(Y2Y(:,N) * H_TMP(:)) + Y2CP(J,N) 
-         Y2CPBAR(J,N) = Y2H_G(J,N)
+  !!!    Y2CPBAR(J,N) = Y2H_G(J,N)
+         Y2CPBAR(J,N) = Y2CP(J,N)
       ENDIF
       Y2MU(J,N)    = SUM(Y2Y(:,N) * MU_TMP(:))
       Y2K(J,N)     = SUM(Y2Y(:,N) * K_TMP(:))
