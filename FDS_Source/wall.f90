@@ -118,7 +118,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC+NVWC
          YY_N = 0.5*(YYP(IIG,JJG,KKG,:)+YY_W(IW,:))
          CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,CP,ITMP)
       ELSE
-         CP   = Y2CP_C(ITMP)
+         CP   = Y2CPBAR_C(ITMP)
       ENDIF
    ENDIF
    METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
@@ -183,7 +183,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC+NVWC
          IF (N_SPECIES > 0) THEN
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,CP_F,MIN(5000,NINT(TMP_F(IW))))
          ELSE
-            CP_F   = Y2CP_C(MIN(5000,NINT(TMP_F(IW))))
+            CP_F   = Y2CPBAR_C(MIN(5000,NINT(TMP_F(IW))))
          ENDIF
          CP_TERM   = MAX(0._EB,-UW(IW))*RHOWAL*CP
          CP_TERM_F = MAX(0._EB,-UW(IW))*RHOWAL*CP_F
@@ -305,7 +305,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC+NVWC
             IF (N_SPECIES > 0) THEN
                CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,CP_F,MIN(5000,NINT(TMP_F(IW))))
             ELSE
-               CP_F   = Y2CP_C(MIN(5000,NINT(TMP_F(IW))))
+               CP_F   = Y2CPBAR_C(MIN(5000,NINT(TMP_F(IW))))
             ENDIF
             CP_TERM   = MAX(0._EB,-UW(IW))*RHOWAL*CP
             CP_TERM_F = MAX(0._EB,-UW(IW))*RHOWAL*CP_F
