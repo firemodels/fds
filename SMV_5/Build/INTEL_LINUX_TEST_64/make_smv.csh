@@ -1,2 +1,3 @@
 #!/bin/csh -f
-make -f ../Makefile intel_linux_test_64
+source ../../scripts/set_cfort.csh intel64
+make -j4 -f ../Makefile intel_linux_test_64
