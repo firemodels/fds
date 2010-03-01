@@ -377,12 +377,12 @@ aix_mpi : $(obj_mpi)
 #*** GNU Compilers ***
 
 #GCC and gfortran Version
-gnu_32 : FFLAGS  = -O1
-gnu_32 : CFLAGS  = -O1
-gnu_32 : FCOMPL  = gfortran
-gnu_32 : CCOMPL  = gcc
-gnu_32 : obj     = fds5_gnu_32
-gnu_32 : $(obj_serial)
+gnu_linux_32 : FFLAGS  = -O1 -ffree-line-length-none -ffree-form
+gnu_linux_32 : CFLAGS  = -O1
+gnu_linux_32 : FCOMPL  = gfortran
+gnu_linux_32 : CCOMPL  = gcc
+gnu_linux_32 : obj     = fds5_gnu_linux_32
+gnu_linux_32 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 gnu_mpi_32 : FFLAGS  = -O1
