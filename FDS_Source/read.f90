@@ -1693,7 +1693,7 @@ ENDDO COUNT_REAC_LOOP
 IF (FDS6) THEN
    HRRPUV_AVERAGE = 1.E10_EB ! effectively remove this bound
    HRRPUA_SHEET   = 1.E10_EB
-   C_EDC          = 0.9_EB
+   C_EDC          = 1._EB
 ENDIF
  
 IF (FUEL_EVAPORATION) MIXTURE_FRACTION = .TRUE.
