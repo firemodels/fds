@@ -1,6 +1,6 @@
 set intelbin=c:\bin
 
-call %intelbin%\ifortvars ia32
+call "%IFORT_COMPILER11%"\bin\ifortvars ia32
 
 Rem erase *.obj
 Rem erase *.mod
