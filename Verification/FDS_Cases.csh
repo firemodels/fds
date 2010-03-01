@@ -58,6 +58,8 @@ $RUNFDS Pressure_Effects pressure_boundary        fire64
 $RUNFDS Pressure_Effects pressure_rise            fire65
 $RUNFDS Pressure_Effects zone_break               fire66
 $RUNFDS Pressure_Effects zone_shape               fire67
+$RUNFDS Pyrolysis cable_11_insulation_mcc         fire68
+$RUNFDS Pyrolysis cable_11_jacket_mcc             fire68
 $RUNFDS Pyrolysis birch_tga_1step_2               fire68
 $RUNFDS Pyrolysis birch_tga_1step_20              fire68
 $RUNFDS Pyrolysis charring_solid                  fire68
