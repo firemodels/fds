@@ -2563,7 +2563,9 @@ CONTAINS
             Z_TMP = 0.5_EB * (XB_STAIRS(I,6)+XB_STAIRS(I,5))
             ! Choose core
             DO J = 1,STRP%N_CORES
-               IF ((Z_TMP >= STRP%XB_CORE(J,5)) .AND. (Z_TMP <= STRP%XB_CORE(J,6))) EXIT
+               IF ((Z_TMP >= STRP%XB_CORE(J,5)) .AND. (Z_TMP <= STRP%XB_CORE(J,6))) THEN
+                  EXIT
+               ENDIF
             ENDDO
             J = MIN(J,STRP%N_CORES)
             IF (XB_LANDINGS(I+1,1)>XB_LANDINGS(I,2)) THEN ! From -x to +x
@@ -2634,7 +2636,9 @@ CONTAINS
             ! Choose core
             Z_TMP = 0.5_EB * (STRP%XB_NODE(J,5)+STRP%XB_NODE(J,6))
             DO K = 1,STRP%N_CORES
-               IF ((Z_TMP >= STRP%XB_CORE(K,5)) .AND. (Z_TMP <= STRP%XB_CORE(K,6))) EXIT
+               IF ((Z_TMP >= STRP%XB_CORE(K,5)) .AND. (Z_TMP <= STRP%XB_CORE(K,6))) THEN
+                  EXIT
+               ENDIF
             ENDDO
             K = MIN(K,STRP%N_CORES)
             STRP%I_CORE(J) = K
@@ -2644,7 +2648,9 @@ CONTAINS
                ! Choose core
                Z_TMP = 0.5_EB * (STRP%XB_NODE(J+1,5)+STRP%XB_NODE(J+1,6))
                DO K = 1,STRP%N_CORES
-                  IF ((Z_TMP >= STRP%XB_CORE(K,5)) .AND. (Z_TMP <= STRP%XB_CORE(K,6))) EXIT
+                  IF ((Z_TMP >= STRP%XB_CORE(K,5)) .AND. (Z_TMP <= STRP%XB_CORE(K,6))) THEN
+                     EXIT
+                  ENDIF
                ENDDO
                K = MIN(K,STRP%N_CORES)
                STRP%I_CORE(J+1) = K
