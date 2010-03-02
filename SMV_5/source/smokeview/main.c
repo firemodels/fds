@@ -91,7 +91,7 @@ int main(int argc, char **argv){
         NewMemory((void **)&texturedir,texture_len+1);
         strcpy(texturedir,texture_buffer);
       }
-      if(texturedir==NULL){
+      if(texturedir==NULL&&smvprogdir!=NULL){
         texture_len=strlen(smvprogdir)+strlen("textures");
         NewMemory((void **)&texturedir,texture_len+2);
         strcpy(texturedir,smvprogdir);
