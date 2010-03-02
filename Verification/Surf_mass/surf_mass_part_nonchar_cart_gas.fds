@@ -7,6 +7,7 @@
 &DUMP DT_HRR = 0.01, DT_DEVC = 0.01 DT_PL3D = 10000 DT_SLCF = 10000 /
 
 &SURF ID                        = 'Wood'
+      BACKING                   = 'INSULATED'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
 	LENGTH 			= 0.05
