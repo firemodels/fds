@@ -3,13 +3,14 @@
 &MESH 	IJK= 6,6,6,
 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 /
 
-&TIME TWFIN=350., DT = 0.01, WALL_INCREMENT = 1 / 
+&TIME TWFIN=200., DT = 0.01, WALL_INCREMENT = 1 / 
 &DUMP DT_HRR = 0.01, DT_DEVC = 0.01 DT_PL3D = 10000 DT_SLCF = 10000 /
 
 &SURF ID                        = 'Wood'
+      BACKING                   = 'INSULATED'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
-      THICKNESS                 = 0.02
+      THICKNESS                 = 0.01
       EXTERNAL_FLUX 		= 50. /
       
 &MATL ID = 'PINE'
