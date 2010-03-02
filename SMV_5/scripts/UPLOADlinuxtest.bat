@@ -1,7 +1,8 @@
 @echo off
 
-Rem Windows batch file to upload Smokeview osx test files to
-Rem the google download site.
+Rem Windows batch file to upload Smokeview test files to
+Rem the google download site.  This script assume that the Windows
+Rem batch file, MAKEtest.bat, has already been run.
 
 set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -28,17 +29,18 @@ set level=Release-4_Test
 echo Uploading Smokeview %level% version=test revision=%smv_revision%
 pause
 
-Rem --------------- 32 bit OSX ----------------
+Rem --------------- 32 bit Linux ----------------
 
-  set glabels=Type-Archive,Opsys-OSX,%level%
-  set dplatform=32 bit OSX
-  set platform=osx
+  set glabels=Type-Archive,Opsys-Linux,%level%
+  set dplatform=32 bit Linux
+  set platform=linux
   set summary=Smokeview test for %dplatform% (SVN r%smv_revision%)
   set exe=smv_test_%smv_revision%_%platform%.tar.gz
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
        googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+
 
 echo.
 echo Uploads complete

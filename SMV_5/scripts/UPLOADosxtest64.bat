@@ -25,9 +25,7 @@ Rem should not need to edit any lines below
 
 set level=Release-4_Test
 
-set version=%smv_version%
-
-echo Uploading Smokeview %level% version=%smv_version% revision=%smv_revision%
+echo Uploading Smokeview %level% version=test revision=%smv_revision%
 pause
 
 Rem --------------- 64 bit OSX ----------------
@@ -35,8 +33,8 @@ Rem --------------- 64 bit OSX ----------------
   set glabels=Type-Archive,Opsys-OSX,%level%
   set dplatform=64 bit OSX
   set platform=osx_64
-  set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
-  set exe=smv_%version%_%smv_revision%_%platform%.tar.gz
+  set summary=Smokeview test for %dplatform% (SVN r%smv_revision%)
+  set exe=smv_test_%smv_revision%_%platform%.tar.gz
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
