@@ -22,11 +22,9 @@ call %envfile%
 echo Using the environment variables:
 echo.
 echo Using SVN revision %smv_revision% to build a 32 bit test Linux Smokeview
-pause
 
 %svn_drive%
 cd %svn_root%\smv_5\scripts
-set version=%smv_version%_%smv_revision%
 
 set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
