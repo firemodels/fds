@@ -40,6 +40,7 @@ INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0
            SOOT_INDEX=0,OTHER_INDEX=0                                                       ! Mixture Fraction Species
 CHARACTER(20), DIMENSION(:), ALLOCATABLE :: MF_SPEC_ID,MF_SPEC_FORMULA
 REAL(EB), DIMENSION(:), ALLOCATABLE :: MF_MW
+REAL(EB) :: H_G_H2O_FAC=0._EB
 
 ! Program Status Code
 
