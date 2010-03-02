@@ -1,13 +1,16 @@
- FDS+Evac version: FDS 5.4.1, Evac 2.2.0
+ FDS+Evac version: FDS 5.4.3, Evac 2.2.1
 
- SVN Revision No. : 4746
- Peak Memory Usage: 217 928 K (win32 XP, single thread)
+ A simple test case for memory usage of FDS+Evac.  Evacuation
+ part is k=1 mesh ==> surface to volume ratio is large so the
+ surface cells/arrays take some memory, but the surface +-u_z
+ are not needed in reality, because two dimensional calculation.
 
- This is a sample input (and help) file for FDS5+Evac
- VTT Technical Research Centre of Finland, 2009
- Author: Timo Korhonen, timo.korhonen(at)vtt.fi
- 
-&HEAD CHID='evac_memory_test1',TITLE='test for RAM: fire+evac mesh' /
+ evac_memory_test1: Fire + evacuation meshes
+
+ SVN Revision No. : 5716
+ Peak Memory Usage: 239 548 K (win32 XP, single thread)
+
+&HEAD CHID='evac_memory_test1',TITLE='test for RAM: fire+evac mesh, SVN $Revision: 4582 $' /
 
  Fire mesh
 &MESH IJK=100, 80, 4 XB=0.0,50.0, 0.0,40.0, 0.0,2.0 /
@@ -68,18 +71,18 @@
  material is defined below, which has only color:
 &SURF ID='EVAC_WALL', RGB = 200,0,200 / or COLOR
 
-/=======================================================
-/============= FIRE FDS GEOMETRY STARTS ================
-/=======================================================
-/
-&VENT MB='XMIN' SURF_ID='OPEN',    /
-&VENT MB='XMAX' SURF_ID='OPEN',     /
-&VENT MB='YMIN' SURF_ID='OPEN',    /
-&VENT MB='YMAX' SURF_ID='OPEN',     /
-&VENT MB='ZMIN' SURF_ID='INERT',    /
-&VENT MB='ZMAX' SURF_ID='INERT',    /
+=======================================================
+============= FIRE FDS GEOMETRY STARTS ================
+=======================================================
 
-/ The 1st floor, z=0.0m-2.0m
+&VENT MB='XMIN' SURF_ID='OPEN',   /
+&VENT MB='XMAX' SURF_ID='OPEN',   /
+&VENT MB='YMIN' SURF_ID='OPEN',   /
+&VENT MB='YMAX' SURF_ID='OPEN',   /
+&VENT MB='ZMIN' SURF_ID='INERT',  /
+&VENT MB='ZMAX' SURF_ID='INERT',  /
+
+ The 1st floor, z=0.0m-2.0m
 
 &OBST XB =  0.0, 0.25, 0.0,5.25, 0.0,2.0, 
       RGB = 0.3,0.8,0.2, SURF_ID='INERT'   / xbar0 wall with door
@@ -247,7 +250,7 @@
 =============== OUTPUT FILES STARTS ===================
 =======================================================
 
- SLCF PBZ= 1.5, QUANTITY='VELOCITY', VECTOR=.TRUE., EVACUATION=.TRUE. / 
+&SLCF PBZ= 1.5, QUANTITY='VELOCITY', VECTOR=.TRUE., EVACUATION=.TRUE. / 
 
  Next lines are ordianry Fds fire output
 &SLCF PBZ= 1.500, QUANTITY='visibility' / 

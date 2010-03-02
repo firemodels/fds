@@ -1,4 +1,4 @@
-File started by T.K., May 4, 2009
+Latest changes: T.K., March 2, 2010, SVN $Revision: 4582 $
 
 ==============================
 Evacuation test cases for FDS5
@@ -10,13 +10,7 @@ TEST CASES FOR MEMORY USAGE
 
 These test cases consume quite much RAM.  If one needs more memory
 usage to test something, then the MESH IJK could be doubled (and so
-on).  Note that the memory (fds5.4.0, svn3895) is mainly used for the
-evacuation meshes.
-
-   fds5.4.1, svn 4746:
-   fire + no evac:  65 340 K RAM (Peak Memory usage, winXP32, testcase0)
-   fire + evac:    217 928 K RAM (Peak Memory usage, winXP32, testcase1)
-   no fire + evac: 156 972 K RAM (Peak Memory usage, winXP32, testcase2)
+on).
 
 evac_memory_test0.fds
 
@@ -35,6 +29,16 @@ evac_memory_test2.fds
    No fire mesh, one main evacuation mesh, four additional evacuation
    meshes (for each door)
 
+   fds5.4.0, svn3895:
+   fire + evac:    616 472 K RAM (Peak Memory usage, winXP32, test1)
+   no fire + evac: 556 404 K RAM (Peak Memory usage, winXP32, test2)
+   fire + no evac:  63 596 K RAM (Peak Memory usage, winXP32, test0)
+
+   fds5.4.2, svn5104:
+   fire + evac:    224 324 K RAM (Peak Memory usage, winXP32, test1)
+   no fire + evac: 162 808 K RAM (Peak Memory usage, winXP32, test2)
+   fire + no evac:  65 952 K RAM (Peak Memory usage, winXP32, test0)
+
 ========================
 TEST CASES FOR SMOKEVIEW
 ========================
@@ -43,6 +47,10 @@ Next cases have two floors, which are connected, i.e., the agents are
 going from the second floor to the first floor.  These test cases
 use all the main features of the evacuation module, e.g., they move
 agents from one mesh to some other mesh.
+
+evac_smv_testcase0.fds
+
+   Just fire mesh
 
 evac_smv_testcase1.fds
 
