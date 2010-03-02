@@ -1624,8 +1624,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             ENDIF
 
             ! Update gas temperature and determine new subtimestep
-
-            DELTA_H_G = (H_L + H_V - PC%H_V_CORRECTOR - PC%H_FG_CORRECTOR)
+            DELTA_H_G = (H_L + H_V - PC%H_V_CORRECTOR)
             ITMP = MAX(1,MIN(5000,NINT(TMP_G)))
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP)            
             H_G_OLD = M_GAS*CP*TMP_G

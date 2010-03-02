@@ -1738,7 +1738,7 @@ SELECT CASE (SPEC_ID)
               - 8.408214E-14_EB*TE**4 - 13.55214_EB*LOG(TE) !kJ/mol-K
          CP = CP / MW_H2O * 1000._EB !kJ/kg-K
       ENDIF
-      H = 0._EB!1881295.804_EB !kJ/kg
+      H = 1881295.804_EB !kJ/kg
 
    CASE('CARBON MONOXIDE')
       IF (TE<100._EB) THEN
@@ -1854,38 +1854,38 @@ SELECT CASE (SPEC_ID)
       CP = -3887.019_EB-2849358._EB/TE**2+130708.2_EB/TE-0.6320126_EB*TE+0.0001695335_EB*TE**2-0.00000003154411_EB*TE**3+&
            0.00000000000323268_EB*TE**4-1.374039E-16_EB*TE**5+670.4689_EB*LOG(TE) !kJ/mol-K
       CP = CP / 100._EB * 1000._EB !kJ/kg-K
-      H = 0._EB!201131._EB  !kJ/kg     
+      H = 201131._EB  !kJ/kg     
    CASE('METHANOL')
       TE = MAX(TE,200._EB)
       CP = -841.6793_EB-1508086_EB/TE**2+39536.25_EB/TE-0.07191862_EB*TE+0.000006024494_EB*TE**2+0.0000000002922874_EB*TE**3-&
            0.0000000000001171797_EB*TE**4+7.4231E-18_EB*TE**5+138.8215_EB*LOG(TE) !kJ/mol-K
       CP = CP / 32._EB * 1000._EB !kJ/kg-K
-      H = 0._EB!1055464._EB !kJ/kg   
+      H = 1055464._EB !kJ/kg   
    CASE('ETHANOL')
       TE = MAX(TE,50._EB)
       CP = -445.7989_EB-335159.4_EB/TE**2+15246.42_EB/TE+0.0657487_EB*TE-0.00004985012_EB*TE**2+0.00000001383887_EB*TE**3-&
            0.000000000001815222_EB*TE**4+9.222421E-17_EB*TE**5+78.93689_EB*LOG(TE) !kJ/mol-K
       CP = CP / 46._EB * 1000._EB !kJ/kg-K
-      H = 0._EB!857495.9_EB !kJ/kg       
+      H = 857495.9_EB !kJ/kg       
    CASE('TOLUENE')
       TE = MAX(TE,200._EB)
       CP = -1764.869_EB+730089.6_EB/TE**2+37622.14_EB/TE-0.223475_EB*TE+0.00003599891_EB*TE**2-0.00000000395711_EB*TE**3+&
             0.0000000000002350988_EB*TE**4-5.2885E-18_EB*TE**5+315.3972_EB*LOG(TE) !kJ/mol-K
       CP = CP / 92._EB * 1000._EB !kJ/kg-K
-      H = 0._EB!356078.2_EB !kJ/kg      
+      H = 356078.2_EB !kJ/kg      
 END SELECT    
 
 END SUBROUTINE JANAF_TABLE
 
-SUBROUTINE JANAF_TABLE_LIQUID (I_TMP,CP,H_V,H_L,T_REF,T_MELT,T_BOIL,SPEC_ID,H_CORR)
+SUBROUTINE JANAF_TABLE_LIQUID (I_TMP,CP,H_V,H_L,T_REF,T_MELT,T_BOIL,SPEC_ID)
 !CP data in this subroutine is taken from 4th Edition of the NIST-JANAF Thermochemical Tables
 !The tabulated data in the tables have been curve fit
 !For each species CP is first computed in kJ/mol-K and then converted to kJ/kg-K
 CHARACTER(30), INTENT(IN) ::SPEC_ID
 INTEGER, INTENT(IN) :: I_TMP
-REAL(EB), INTENT(INOUT) :: CP,H_V,H_L,T_REF,T_MELT,T_BOIL,H_CORR
+REAL(EB), INTENT(INOUT) :: CP,H_V,H_L,T_REF,T_MELT,T_BOIL
 REAL(EB) :: T
-H_CORR = 0._EB
+
 SELECT CASE (SPEC_ID)
    CASE('WATER VAPOR')
       T = MAX(273._EB,REAL(I_TMP,EB))
@@ -1893,7 +1893,6 @@ SELECT CASE (SPEC_ID)
       CP = CP / MW_H2O * 1000._EB !kJ/kg-K
       H_L = -1150345._EB!kJ/kg
       H_V = 2385253.83_EB !kJ/kg
-      H_CORR = -1881295.804_EB !kJ/kg
       T_REF = 273.15_EB !K
       T_MELT = 273.15_EB !K
       T_BOIL = 373.15_EB !K
@@ -1903,7 +1902,6 @@ SELECT CASE (SPEC_ID)
       CP = CP / 100._EB * 1000._EB !kJ/kg-K
       H_L = -358349.9_EB !kJ/kg
       H_V = 434962.3_EB !kJ/kg
-      H_CORR = -201131._EB  !kJ/kg     
       T_REF = 182.55_EB !K
       T_MELT = 182.55_EB !K
       T_BOIL = 371.53_EB !K
@@ -1913,7 +1911,6 @@ SELECT CASE (SPEC_ID)
       CP = CP / 32._EB * 1000._EB !kJ/kg-K
       H_L = -390974.5_EB !kJ/kg-K
       H_V = 1274941.64_EB !kJ/kg
-      H_CORR = -1055464._EB !kJ/kg   
       T_REF = 176.6_EB !K
       T_MELT = 176.6_EB !K
       T_BOIL = 337.7_EB !K
@@ -1923,7 +1920,6 @@ SELECT CASE (SPEC_ID)
       CP = CP / 46._EB * 1000._EB !kJ/kg-K
       H_L = -233706.2_EB !kJ/kg-K
       H_V = 1000197._EB !kJ/kg
-      H_CORR = -857495.9_EB !kJ/kg       
       T_REF = 158.8_EB !K
       T_MELT = 158.8_EB !K
       T_BOIL = 358.8_EB !K
@@ -1933,7 +1929,6 @@ SELECT CASE (SPEC_ID)
       CP = CP / 92._EB * 1000._EB !kJ/kg-K
       H_L = -260230.8_EB !kJ/kg-K
       H_V = 490124._EB !kJ/kg
-      H_CORR = -356078.2_EB !kJ/kg      
       T_REF = 178.1_EB !K
       T_MELT = 178.1_EB !K
       T_BOIL = 383.8_EB !K      
