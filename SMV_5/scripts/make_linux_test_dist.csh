@@ -1,11 +1,10 @@
 #!/bin/csh -f
-set version=$1
-set revision=$2
+set revision=$1
 set SVNROOT=~/FDS-SMV
 
 set BINDIR=$SVNROOT/SMV_5/bin
 set FORBUNDLE=$SVNROOT/SMV_5/for_bundle
-set LINUXDIR=smv_$version\_$revision\_linux
+set LINUXDIR=smv_test\_$revision\_linux
 
 cd $FORBUNDLE
 

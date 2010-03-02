@@ -1,12 +1,11 @@
 #!/bin/csh -f
-set version=$1
-set revision=$2
+set revision=$1
 set SVNROOT=~/FDS-SMV
 set OSXHOST=bluesky.cfr.nist.gov
 
 set BINDIR=$SVNROOT/SMV_5/bin
 set FORBUNDLE=$SVNROOT/SMV_5/for_bundle
-set OSXDIR=smv_$version\_$revision\_osx
+set OSXDIR=smv_test\_$revision\_osx
 
 cd $FORBUNDLE
 
