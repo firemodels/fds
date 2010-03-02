@@ -18,9 +18,10 @@
 
 
 &SURF ID                     	= 'Wood'
+      BACKING                   = 'INSULATED'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
-      THICKNESS                 = 0.02
+      THICKNESS                 = 0.01
       EXTERNAL_FLUX 		= 50. /
       
 &MATL ID = 'PINE'

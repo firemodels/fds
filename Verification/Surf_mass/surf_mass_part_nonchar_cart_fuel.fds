@@ -17,6 +17,7 @@
 	IDEAL 		=.TRUE. /
 
 &SURF ID                        = 'Wood'
+      BACKING                   = 'INSULATED'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
 	LENGTH 			= 0.05
