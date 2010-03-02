@@ -20,16 +20,15 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\smv_5\scripts
-set version=%smv_version%
 
 set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
 
 echo making OSX test distribution archive
-plink %svn_logon% %scriptdir%/make_test_osx_dists64.csh %version% %smv_revision%
+plink %svn_logon% %scriptdir%/make_test_osx_dists64.csh %smv_revision%
 
 echo downloading OSX test distribution archive
-pscp %svn_logon%:%bundledir%/smv_%version%_%smv_revision%_osx_64.tar.gz ..\for_bundle\to_google\.
+pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_osx_64.tar.gz ..\for_bundle\to_google\.
 
 
 pause
