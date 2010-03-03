@@ -6,4 +6,4 @@ cd $SVNROOT/SMV_5/source/smokeview
 svn -r $rev update
 cd $SVNROOT/SMV_5/Build/INTEL_LINUX_32
 make -f ../Makefile clean >& /dev/null
-make -f ../Makefile intel_linux_test_32
+./make_smv.csh
