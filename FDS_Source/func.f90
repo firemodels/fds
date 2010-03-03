@@ -1678,7 +1678,7 @@ SELECT CASE (SPEC_ID)
          CP2 = CP2 / MW_O2 * 1000._EB !kJ/kg-K
       ENDIF
       H = 0._EB !kJ/kg
-      CP = 0.77_EB*CP+0.23*CP2 !kJ/kg-K
+      CP = (1._EB-Y_O2_INFTY)*CP+Y_O2_INFTY*CP2 !kJ/kg-K
 
    CASE('NITROGEN')
       IF (TE<100._EB) THEN

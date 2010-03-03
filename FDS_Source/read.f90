@@ -1095,7 +1095,7 @@ P_STP   = 101325._EB         ! Standard pressure (Pa)
 TMPM    = 273.15_EB          ! Melting temperature of water (K)
 SIGMA   = 5.67E-8_EB         ! Stefan-Boltzmann constant (W/m**2/K**4)
 C_P_W   = 4184._EB           ! Specific Heat of Water (J/kg/K)
-MW_AIR  = 1._EB/(0.23_EB/32._EB+0.77_EB/28._EB) ! g/mol
+MW_AIR  = 1._EB/(Y_O2_INFTY/32._EB+(1._EB-Y_O2_INFTY)/28._EB) ! g/mol
 HUMIDITY= -1._EB             ! Relative Humidity
 RHO_SOOT= 1850._EB           ! Density of soot particle (kg/m3)
 SMOKE_ALBEDO= 0.3            ! Albedo of smoke
@@ -1653,7 +1653,7 @@ SUBROUTINE READ_REAC
 CHARACTER(30) :: FUEL,OXIDIZER
 LOGICAL :: IDEAL
 INTEGER :: NN,N_REAC_READ
-REAL(EB) :: Y_O2_INFTY,Y_F_INLET, &
+REAL(EB) :: Y_F_INLET, &
             H2_YIELD,SOOT_YIELD,CO_YIELD, Y_F_LFL,X_O2_LL,EPUMO2,BOF,&
             CRITICAL_FLAME_TEMPERATURE,HEAT_OF_COMBUSTION,NU(MAX_SPECIES),E,N_S(MAX_SPECIES),C,H,N,O,OTHER, &
             FUEL_HEAT_OF_FORMATION,MAXIMUM_VISIBILITY,AIT, MW_FUEL
@@ -2024,7 +2024,6 @@ SOOT_H_FRACTION             = 0.1_EB
 X_O2_LL                     = 0.15_EB    ! %
 Y_F_LFL                     = 0.0_EB 
 Y_F_INLET                   = 1._EB
-Y_O2_INFTY                  = 0.23_EB
 IDEAL                       = .FALSE.
 C                           = 3._EB
 H                           = 8._EB
