@@ -1511,11 +1511,25 @@ void drawColorBars(float ybump){
       outputBarText(right[0],position,color2,plot3dcolorlabel_ptr);
     }
     if(visiso==0){
-      for (i=0; i<nrgb-1; i++){
+      int nlabels;
+
+      nlabels=nrgb-1;
+      if(p3cont2d==STEPPED_CONTOURS){
+        nlabels=nrgb;
+      }
+      for (i=0; i<nlabels; i++){
         float vert_position;
 
         if(p3cont2d==SHADED_CONTOURS){
           vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
+        }
+        else if(p3cont2d==STEPPED_CONTOURS){
+          int ii;
+
+          ii = i + 1;
+          yy = (barbot*(nrgb-ii)+ii*(nrgb+DYFONT+barbot))/nrgb;
+          yy2 = (barbot*(nrgb-1-ii)+(ii+1)*(nrgb+DYFONT+barbot))/nrgb;
+          vert_position = yy-dyfont/2.0;
         }
         else{
           int ii;
@@ -1532,7 +1546,7 @@ void drawColorBars(float ybump){
           scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
         }
-        if(p3cont2d==SHADED_CONTOURS||i!=nrgb-2){
+        if(p3cont2d==SHADED_CONTOURS||i!=nrgb-2||p3cont2d==STEPPED_CONTOURS){
           outputBarText(right[0],vert_position,color1,plot3dcolorlabel_ptr);
         }
       }
