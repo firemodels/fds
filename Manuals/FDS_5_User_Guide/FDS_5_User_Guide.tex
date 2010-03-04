@@ -3272,14 +3272,14 @@ convection correlations
     \hbox{W/m$^2$/K} \ee
 where $\Delta T$ is the difference between the wall and the gas temperature,
 $C_1$ is the coefficient for natural convection (1.52 for a horizontal surface
-and 1.31 for a vertical surface, by default) and $C_2$ is the coefficient for forced convection (0.037 by default)~\cite{Holman:1};
+and 1.31 for a vertical surface, by default) and $C_2$ is the coefficient for forced convection (0.037 by default, see \cite{Holman:1} Eq.~(5-85));
 $L$ is a characteristic length related to the size of the physical
 obstruction; $k$ is the thermal conductivity of the
 gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the
 gas flowing
 past the obstruction. Since the Reynolds number is proportional to the
 characteristic length, $L$, the heat transfer coefficient is weakly
-related to $L$. For this reason, $L$ is taken to be 1~m for most
+related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, $L$ is taken to be 1~m for most
 calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C_1$ and
 {\ct C\_FORCED} for $C_2$, all of which are input on the {\ct MISC} line.
 
@@ -4303,17 +4303,17 @@ consistent with the material properties of the block. The block is
 densities of the pyrolysis product gases (written to
 box\_burn\_away\_devc.csv and box\_burn\_away2\_devc.csv), as well as
 the integrated burning rate (written to box\_burn\_away\_hrr.csv) in
-the end of the 30 s calculation ought to be: 
+the end of the 30 s calculation ought to be:
 \be
 (0.4)^3 \; \hbox{m}^3 \times 20 \; \hbox{kg/m}^3 = 1.28 \; \hbox{kg}
 \ee
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{FIGURES/box_burn_away} &
-\includegraphics[width=3.2in]{FIGURES/box_burn_away2} 
+\includegraphics[width=3.2in]{FIGURES/box_burn_away2}
 \end{tabular*}
 \caption[Output of {\bf box\_burn\_away} and {\br box\_burn\_away2}
-test cases.]{Output of {\bf box\_burn\_away} test cases.} 
+test cases.]{Output of {\bf box\_burn\_away} test cases.}
 \label{box_burn_away}
 \end{figure}
 
