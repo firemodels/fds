@@ -1304,7 +1304,8 @@ transfer routine. This solver is evoked when boundary conditions on a {\ct SURF}
 with reacting materials described  on respective {\ct MATL} lines. In the tests, four independent
 parameters or modeling options are varied:
 \begin{enumerate}
-\item The {\ct SURF} can be associated with either {\ct VENT} or {\ct PART}.
+\item The {\ct SURF} can be associated with either {\ct VENT} or {\ct
+PART}. (The {\ct PART} case will be added later.)
 \item The {\ct SURF} geometry can be either {\ct CARTESIAN}, {\ct CYLINDRICAL}
 or {\ct SPHERICAL}.
 \item The {\ct MATL} may be either charring (non-zero {\ct
@@ -1314,8 +1315,45 @@ mixture fraction model, or an additional gas species, defined using a
 {\ct SPEC} line.
 \end{enumerate}
 
+In all cases, the material thickness (or radius for cylindrical and spherical) is 0.01 m. The material density is 360 kg/m$^3$ and the yield of gaseous
+products for the charring cases is 0.5, i.e. half of the original mass. For cartesian surfaces the mass losses per unit area of reacting surface are
+$m''_{char}$ = 1.8 kg/m$^2$ and $m''_{nchar}$ = 3.6 kg/m$^2$, for charring and non-charring surfaces, respectively. 
+
+For cylindrical surfaces, the volume per unit 
+area is
+\be
+V_{cyl}'' = \frac{\pi r^2}{2\pi r} 
+\ee
+and the mass losses are $m''_{char}$ = 0.9 kg/m$^2$ and $m''_{nchar}$ = 1.8 kg/m$^2$. 
+
+For spherical surfaces, the volume per unit area is 
+\be
+V_{spher}'' = \frac{4\pi r^3/3}{4\pi r^2}
+\ee
+and the mass losses are $m''_{char}$ = 0.6 kg/m$^2$ and $m''_{nchar}$ = 1.2 kg/m$^2$. 
+
+The computed results are
+\begin{description}
+\item[Gas Phase Mass] is the instantaneous value of the gas phase concentration of the pyrolysis product gas, integrated over the volume of the
+computational domain. It should gradually increase from zero to the analytical value.
+\item[Integrated Surface Density] is the instantaneous value of the surface density of the reacting surface, integrated over the {\ct VENT} area. 
+For charring materials it should decrease from the initial value (twice the final value) to the analytical mass. For non-charring materials, it should 
+decrease from the analytical value to zero.
+\item[Integrated Burning Rate] is total burning rate, i.e. mixture fraction fuel production rate integrated over all the surfaces, and integrated over time
+from zero to the instanteneous time value. It should increase from zero to the analytical value.
+%\item[Integrated MPUV] is the particle mass per unit volume integrated over the volume of the computational domain.
+%For charring materials it should decrease from the initial value (twice the final value) to the analytical mass. For non-charring materials, it should 
+%decrease from the analytical value to zero.
+\end{description}
+
+
 \subsection{SURF associated with VENT}
 
+
+The analytical mass losses are calculated by multiplying the corresponding value of $m''$ by the {\ct VENT} area, 
+which in all cases is 1.0 m$^2$. 
+The analytical and computed results for charring material are compared in~\ref{surf_mass_vent_char}. 
+The analytical and computed results for non-charring material are compared in~\ref{surf_mass_vent_nonchar}. 
 \begin{figure}[ht!]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -1346,38 +1384,52 @@ mixture fraction model, or an additional gas species, defined using a
 
 \clearpage
 
-\subsection{SURF associated with PART}
-
-\begin{figure}[ht]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cart_fuel} &
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cart_gas} \\
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cyl_fuel} &
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cyl_gas} \\
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_spher_fuel} &
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_spher_gas}
-\end{tabular*}
-\caption[The {\bf surf\_mass\_part\_X\_char\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for charring surfaces associated with particles.}
-\label{surf_mass_part_char}
-\end{figure}
-
-\begin{figure}[ht]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cart_fuel} &
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cart_gas} \\
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cyl_fuel} &
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cyl_gas} \\
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_spher_fuel} &
-\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_spher_gas}
-\end{tabular*}
-\caption[The {\bf surf\_mass\_part\_X\_nonchar\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for non-charring surfaces associated with particles.}
-\label{surf_mass_part_nonchar}
-\end{figure}
-
-
-\clearpage
+%\subsection{SURF associated with PART}
+%
+%The analytical masses are obtained by multiplying the corresponding values of $m''$ by the particle area. 
+%For the cartesian surfaces, the particle area is two times the product of parameters {\ct LENGHT} and {\ct WIDTH} of the {\ct SURF} line, both of
+%which were given a value 0.05 m. As a result, the analytical masses for particles with associated cartesian surfaces are 
+%$m_{char}$ = 1.8 $\cdot 2\cdot 0.05^2$ kg = 0.0090 kg, and $m''_{nchar}$ = 0.018 kg.
+%
+%With associated cylindrical surfaces, the particle area is determined by the {\ct LENGTH} parameter, which was given a value 0.1 m, and the surface 
+%{\ct THICKNESS} = 0.01 m. The analytical masses are thus
+%$m_{char}$ = 0.9 $\cdot 2\pi\cdot 0.01\cdot 0.1$ kg = 0.00565 kg, and $m''_{nchar}$ = 0.0113 kg.
+%
+%With associated spherical surfaces, the particle area is $4\pi\cdot$ {\ct THICKNESS}$^2$.
+%The analytical masses are thus
+%$m_{char}$ = 0.6 $\cdot 4\pi\cdot 0.01^2$ kg = 7.54$\cdot10^{-4}$ kg, and $m''_{nchar}$ = 1.51$\cdot10^{-3}$ kg.
+%
+%The analytical and computed results for charring material are compared in~\ref{surf_mass_part_char}. 
+%The analytical and computed results for non-charring material are compared in~\ref{surf_mass_part_nonchar}. 
+%\begin{figure}[ht]
+%\noindent
+%\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cart_fuel} &
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cart_gas} \\
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cyl_fuel} &
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cyl_gas} \\
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_spher_fuel} &
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_spher_gas}
+%\end{tabular*}
+%\caption[The {\bf surf\_mass\_part\_X\_char\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for charring surfaces associated with particles.}
+%\label{surf_mass_part_char}
+%\end{figure}
+%
+%\begin{figure}[ht]
+%\noindent
+%\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cart_fuel} &
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cart_gas} \\
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cyl_fuel} &
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cyl_gas} \\
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_spher_fuel} &
+%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_spher_gas}
+%\end{tabular*}
+%\caption[The {\bf surf\_mass\_part\_X\_nonchar\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for non-charring surfaces associated with particles.}
+%\label{surf_mass_part_nonchar}
+%\end{figure}
+%
+%\clearpage
 
 \section{Development of surface emissivity (\texorpdfstring{{\bf emissivity}}{emissivity})}
 
