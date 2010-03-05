@@ -229,18 +229,38 @@ The domain is 2 m $\times$ 2 m $\times$ 4 m. The boundary conditions are open on
 \section{Sandia 1 m Methane Pool Fire}
 \label{Sandia_methane}
 
+\begin{figure}[h]
+\begin{center}
+\includegraphics[height=4in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_image}
+\caption[Sandia 1~m methane pool fire instantaneous temperature contours.]{A snapshot of FDS results for the Sandia 1 m methane pool fire showing instantaneous contours of temperature.  The rows of measurement devices are visible near the base.}
+\label{Sandia_CH4_1m_image}
+\end{center}
+\end{figure}
+
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_W_zp9} &
-\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_U_zp9} \\
-\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_W_zp5} &
-\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_U_zp5} \\
-\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_W_zp3} &
-\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_U_zp3}
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_W_zp9} &
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_U_zp9} \\
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_W_zp5} &
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_U_zp5} \\
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_W_zp3} &
+\includegraphics[height=2.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_U_zp3}
 \end{tabular*}
 \caption[Sandia 1~m methane pool fire mean velocity profiles.]
 {FDS predictions of mean velocity profiles for the Sandia 1~m methane pool fire experiment. Results are shown for 3 cm and 1.5 cm grid resolutions. The $z$ coordinate represents height above the methane pool; bottom row: $z=0.3$ m, middle row: $z=0.5$ m, and top row: $z=0.9$ m.}
 \label{Sandia_CH4_1m_velocity}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=3.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_dx1p5cm_velsignal} \\
+\includegraphics[height=3.2in]{FIGURES/Sandia_Plumes/Sandia_CH4_1m_Test17_dx1p5cm_powerspectrum}
+\end{tabular}
+\end{center}
+\caption[Sandia 1~m methane pool fire velocity signal and power spectrum.]
+{Velocity signal and power spectrum for the Sandia 1~m methane pool fire experiment, Test 17.  The vertical velocity signal (top plot) is output from FDS on the centerline at $z=0.5$ m downstream of the fuel source.  The power spectrum of vertical velocity is measured at four locations and averaged.  Two of the measurement locations are along the centerline, at $z=[0.5, 2.0]$ m, and two are along the edge of the plume, $x = 0.5$ m and $z=[0.5, 2.0]$ m.  The measured puffing frequency of the plume is 0.61 Hz \cite{Tieszen:2002}.  The temporal Nyquist limit is $1/(2\delta t)$ where roughly $\delta t = \delta x/\max(W) = 0.015/7.0 = 0.002$ s.}
+\label{Sandia_CH4_1m_Test17_spectrum}
 \end{figure}
 
 \clearpage
