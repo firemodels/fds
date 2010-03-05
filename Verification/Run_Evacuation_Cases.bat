@@ -24,7 +24,7 @@ REM set smvug="%CD%\..\Manuals\SMV_5_User_Guide\"
 REM echo | fds5 2> "%smvug%\figures\fds5.version"
 
 cd %BASEDIR%\Evacuation
-call Evacuation\Make_SMV_Evac_pictures.bat
+call Make_SMV_Evac_pictures.bat
 
 echo Evacuation Verification cases done
 pause Press any key...
