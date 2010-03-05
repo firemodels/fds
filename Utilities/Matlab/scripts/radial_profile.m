@@ -6,7 +6,7 @@
 %
 % Example:
 %
-% function []=radial_profile(plot_file,devc_col,error_frac, ...
+% function []=radial_profile(plot_file,data_format,devc_col,error,error_type,tmin, ...
 %                            xaxis_label,yaxis_label,title_label,text_label,legend_pos, ...
 %                            rmin,rmax,dr,xmin,xmax,dx,ymin,ymax,dy, ...
 %                            exp_file,exp_format,exp_label, ...
@@ -17,66 +17,77 @@
 
 function []=radial_profile(varargin)
 
-if nargin<1|nargin>32; 
+if nargin<1|nargin>100; 
     display('Error in argument list')
 end
 if nargin>=1
     plotdir = ['../../Manuals/FDS_5_Validation_Guide/FIGURES/'];
-    plot_file   = varargin{1};
-    devc_col    = varargin{2};
-    error_frac  = varargin{3};
-    xaxis_label = varargin{4};
-    yaxis_label = varargin{5};
-    title_label = varargin{6};
-    text_label  = varargin{7};
-    legend_pos  = varargin{8};
-    rmin        = varargin{9};
-    rmax        = varargin{10};
-    dr          = varargin{11};
-    xmin        = varargin{12};
-    xmax        = varargin{13};
-    dx          = varargin{14};
-    ymin        = varargin{15};
-    ymax        = varargin{16};
-    dy          = varargin{17};
-    exp_file    = varargin{18};
-    exp_format  = varargin{19};
-    exp_label   = varargin{20};
+    iarg = 1;
+    plot_file   = varargin{iarg}; iarg=iarg+1;
+    data_format = varargin{iarg}; iarg=iarg+1;
+    devc_col    = varargin{iarg}; iarg=iarg+1;
+    error       = varargin{iarg}; iarg=iarg+1;
+    error_type  = varargin{iarg}; iarg=iarg+1;
+    tmin        = varargin{iarg}; iarg=iarg+1;
+    xaxis_label = varargin{iarg}; iarg=iarg+1;
+    yaxis_label = varargin{iarg}; iarg=iarg+1;
+    title_label = varargin{iarg}; iarg=iarg+1;
+    text_label  = varargin{iarg}; iarg=iarg+1;
+    legend_pos  = varargin{iarg}; iarg=iarg+1;
+    rmin        = varargin{iarg}; iarg=iarg+1;
+    rmax        = varargin{iarg}; iarg=iarg+1;
+    dr          = varargin{iarg}; iarg=iarg+1;
+    xmin        = varargin{iarg}; iarg=iarg+1;
+    xmax        = varargin{iarg}; iarg=iarg+1;
+    dx          = varargin{iarg}; iarg=iarg+1;
+    ymin        = varargin{iarg}; iarg=iarg+1;
+    ymax        = varargin{iarg}; iarg=iarg+1;
+    dy          = varargin{iarg}; iarg=iarg+1;
+    exp_file    = varargin{iarg}; iarg=iarg+1;
+    exp_format  = varargin{iarg}; iarg=iarg+1;
+    exp_label   = varargin{iarg}; iarg=iarg+1;
     nfds        = 0;
-    if nargin>20
-        fds_file1   = varargin{21};
-        fds_format1 = varargin{22};
-        fds_label1  = varargin{23};
+    if nargin>iarg
+        fds_file1   = varargin{iarg}; iarg=iarg+1;
+        fds_format1 = varargin{iarg}; iarg=iarg+1;
+        fds_label1  = varargin{iarg}; iarg=iarg+1;
         nfds        = 1;
     end
-    if nargin>23
-        fds_file2   = varargin{24};
-        fds_format2 = varargin{25};
-        fds_label2  = varargin{26};
+    if nargin>iarg
+        fds_file2   = varargin{iarg}; iarg=iarg+1;
+        fds_format2 = varargin{iarg}; iarg=iarg+1;
+        fds_label2  = varargin{iarg}; iarg=iarg+1;
         nfds        = 2;
     end
-    if nargin>26
-        fds_file3   = varargin{27};
-        fds_format3 = varargin{28};
-        fds_label3  = varargin{29};
+    if nargin>iarg
+        fds_file3   = varargin{iarg}; iarg=iarg+1;
+        fds_format3 = varargin{iarg}; iarg=iarg+1;
+        fds_label3  = varargin{iarg}; iarg=iarg+1;
         nfds        = 3;
     end
-    if nargin>29
-        fds_file4   = varargin{30};
-        fds_format4 = varargin{31};
-        fds_label4  = varargin{32};
+    if nargin>iarg
+        fds_file4   = varargin{iarg}; iarg=iarg+1;
+        fds_format4 = varargin{iarg}; iarg=iarg+1;
+        fds_label4  = varargin{iarg}; iarg=iarg+1;
         nfds        = 4;
     end
 end
+
+figure
 
 % experimental data
 M = csvread(exp_file,1,0);
 r = M(:,1);
 w = M(:,2);
-if (error_frac>0)
-    e = error_frac*abs(w); % percent error matches DesJardin paper
+if (error>0)
+    if strcmp(error_type,'relative')
+        e = error*abs(w); % percent error matches DesJardin paper
+    else
+        e = error*ones(1,length(w)/length(error));
+    end 
+    
     e(2:2:length(e)) = 0;  % remove every other error bar for clarity
-    H(1)=errorbar(r,w,e,exp_format);
+    H(1)=errorbar(r,w,-e,+e,exp_format);
 else
     H(1)=plot(r,w,exp_format);
 end
@@ -85,32 +96,68 @@ end
 if nfds>=1
     hold on
     M = csvread(fds_file1,2,0);
-    R = rmin:dr:rmax;
-    W = M(3,devc_col);
+    if strcmp(data_format,'row')
+        R = rmin:dr:rmax;
+        W = M(3,devc_col);
+    elseif strcmp(data_format,'mean')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>1);
+        W = mean(M(T,devc_col));
+    elseif strcmp(data_format,'col')
+        R = M(:,1);
+        W = M(:,devc_col);
+    end
     H(2)=plot(R,W,fds_format1,'LineWidth',2);
     hold off
 end
 if nfds>=2
     hold on
     M = csvread(fds_file2,2,0);
-    R = rmin:dr:rmax;
-    W = M(3,devc_col);
+    if strcmp(data_format,'row')
+        R = rmin:dr:rmax;
+        W = M(3,devc_col);
+    elseif strcmp(data_format,'mean')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>10);
+        W = mean(M(T,devc_col));
+    elseif strcmp(data_format,'col')
+        R = M(:,1);
+        W = M(:,devc_col);
+    end
     H(3)=plot(R,W,fds_format2,'LineWidth',2);
     hold off
 end
 if nfds>=3
     hold on
     M = csvread(fds_file3,2,0);
-    R = rmin:dr:rmax;
-    W = M(3,devc_col);
+    if strcmp(data_format,'row')
+        R = rmin:dr:rmax;
+        W = M(3,devc_col);
+    elseif strcmp(data_format,'mean')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>10);
+        W = mean(M(T,devc_col));
+    elseif strcmp(data_format,'col')
+        R = M(:,1);
+        W = M(:,devc_col);
+    end
     H(4)=plot(R,W,fds_format3,'LineWidth',2);
     hold off
 end
 if nfds>=4
     hold on
     M = csvread(fds_file4,2,0);
-    R = rmin:dr:rmax;
-    W = M(3,devc_col);
+    if strcmp(data_format,'row')
+        R = rmin:dr:rmax;
+        W = M(3,devc_col);
+    elseif strcmp(data_format,'mean')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>10);
+        W = mean(M(T,devc_col));
+    elseif strcmp(data_format,'col')
+        R = M(:,1);
+        W = M(:,devc_col);
+    end
     H(5)=plot(R,W,fds_format4,'LineWidth',2);
     hold off
 end
