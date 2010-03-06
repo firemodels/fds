@@ -17,8 +17,8 @@ addpath('../../Validation/Beyler_Hood/Experimental_Data')
 addpath('../../Validation/Beyler_Hood/FDS_Output_Files')
 
 % load experimental data and FDS prediction
-[exp_data,exp_header] = xlsread('Beyler_Hood_Test.csv');
-[fds_data,fds_header] = xlsread('Beyler_Hood_FDS.csv');
+[exp_header,exp_data] = dvcread('Beyler_Hood_Test.csv',1);
+[fds_header,fds_data] = dvcread('Beyler_Hood_FDS.csv',1);
 
 for j = 1:n
 
