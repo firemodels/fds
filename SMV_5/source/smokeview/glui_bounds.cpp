@@ -430,7 +430,9 @@ extern "C" void glui_bounds_setup(int main_window){
     plot3d_display=glui_bounds->add_radiogroup_to_panel(panel_contours,&p3cont2d,UPDATEPLOT,PLOT3D_CB);
     glui_bounds->add_radiobutton_to_group(plot3d_display,"Shaded Contours");
     glui_bounds->add_radiobutton_to_group(plot3d_display,"Stepped Contours");
+#ifdef pp_LINE
     glui_bounds->add_radiobutton_to_group(plot3d_display,"Line Contours");
+#endif
     
     //glui_bounds->add_column_to_panel(panel_pan3);
     panel_vector = glui_bounds->add_panel_to_panel(panel_pan3,"Vector");

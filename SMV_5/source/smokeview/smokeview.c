@@ -2914,9 +2914,9 @@ void Init(void){
 
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;
-    initcontour(&meshi->plot3dcontour1,rgbptr,nrgb+1);
-    initcontour(&meshi->plot3dcontour2,rgbptr,nrgb+1);
-    initcontour(&meshi->plot3dcontour3,rgbptr,nrgb+1);
+    initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb-1);
+    initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb-1);
+    initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb-1);
   }
 
   if(set_no_part!=1&&nopart!=1&&npart_files>0){

@@ -113,9 +113,9 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   freecontour(&meshi->plot3dcontour1);
   freecontour(&meshi->plot3dcontour2);
   freecontour(&meshi->plot3dcontour3);
-  initcontour(&meshi->plot3dcontour1,rgbptr,nrgb);
-  initcontour(&meshi->plot3dcontour2,rgbptr,nrgb);
-  initcontour(&meshi->plot3dcontour3,rgbptr,nrgb);
+  initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb-1);
+  initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb-1);
+  initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb-1);
 
 
   for(i=0;i<nmeshes;i++){
@@ -131,6 +131,15 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
         FREEMEMORY(colorlabelp3[nn]);
       }
       FREEMEMORY(colorlabelp3);
+    }
+    if(colorlabeliso != NULL){
+      for(nn=0;nn<mxplot3dvars;nn++){
+        for(nnn=0;nnn<MAXRGB;nnn++){
+          FREEMEMORY((*(colorlabeliso+nn))[nnn]);
+        }
+        FREEMEMORY(colorlabeliso[nn]);
+      }
+      FREEMEMORY(colorlabeliso);
     }
     if(scalep3 != NULL){
       for(nn=0;nn<mxplot3dvars;nn++){FREEMEMORY(scalep3[nn]);}
@@ -263,6 +272,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   }
 
   if(NewMemory((void **)&colorlabelp3,mxplot3dvars*sizeof(char **))==0||
+     NewMemory((void **)&colorlabeliso,mxplot3dvars*sizeof(char **))==0||
      NewMemory((void **)&scalep3     ,mxplot3dvars*sizeof(char *))==0){
     *errorcode=1;
     readplot3d("",ifile,UNLOAD,&error);
@@ -270,10 +280,12 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   }
   for(nn=0;nn<mxplot3dvars;nn++){
     colorlabelp3[nn]=NULL;
+    colorlabeliso[nn]=NULL;
     scalep3[nn]=NULL;
   }
   for(nn=0;nn<mxplot3dvars;nn++){
     if(NewMemory((void **)&colorlabelp3[nn],MAXRGB*sizeof(char *))==0||
+       NewMemory((void **)&colorlabeliso[nn],MAXRGB*sizeof(char *))==0||
        NewMemory((void **)&scalep3[nn],30*sizeof(char))==0){
       *errorcode=1;
       readplot3d("",ifile,UNLOAD,&error);
@@ -318,6 +330,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
 
     for(n=0;n<MAXRGB;n++){
       (*(colorlabelp3+nn))[n]=NULL;
+      (*(colorlabeliso+nn))[n]=NULL;
 }
 
     if(NewMemory((void **)&p3levels[nn],(nrgb+1)*sizeof(float))==0||
@@ -332,10 +345,15 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
         readplot3d("",ifile,UNLOAD,&error);
         return;
       }
+      if(NewMemory((void **)&(*(colorlabeliso+nn))[n],11)==0){
+        *errorcode=1;
+        readplot3d("",ifile,UNLOAD,&error);
+        return;
+      }
     }
     getPlot3DColors(nn,
                   setp3min[nn],p3min+nn, setp3max[nn],p3max+nn, 
-                  nrgb_full, nrgb, *(colorlabelp3+nn),scalep3copy,p3levels[nn],p3levels256[nn]);
+                  nrgb_full, nrgb-1, *(colorlabelp3+nn),*(colorlabeliso+nn),scalep3copy,p3levels[nn],p3levels256[nn]);
     scalep3copy++;
   }
   if(meshi->plotx==-1)meshi->plotx=ibar/2; 
@@ -1270,14 +1288,18 @@ void updatesurface(void){
     qdata=meshi->qdata;
 
     if(ReadPlot3dFile!=1)return;
-    if(plotiso[plotn-1]<0){plotiso[plotn-1]=nrgb-2;}
-    if(plotiso[plotn-1]>nrgb-2){plotiso[plotn-1]=0;}
+    if(plotiso[plotn-1]<0){
+      plotiso[plotn-1]=nrgb-3;
+    }
+    if(plotiso[plotn-1]>nrgb-3){
+      plotiso[plotn-1]=0;
+    }
     colorindex=plotiso[plotn-1];
-    level = p3min[plotn-1] + colorindex*(p3max[plotn-1]-p3min[plotn-1])/((float)nrgb-2.0f);
+    level = p3min[plotn-1] + (colorindex+0.5)*(p3max[plotn-1]-p3min[plotn-1])/((float)nrgb-2.0f);
     isolevelindex=colorindex;
     isolevelindex2=colorindex;
     freesurface(currentsurfptr);
-    InitIsosurface(currentsurfptr, level, rgb[colorindex],-999);
+    InitIsosurface(currentsurfptr, level, rgb_plot3d_contour[colorindex],-999);
     GetIsosurface(currentsurfptr,qdata+(plotn-1)*plot3dsize,NULL,iblank_cell,level,
       xplt,ibar+1,yplt,jbar+1,zplt,kbar+1,isooffset);
     GetNormalSurface(currentsurfptr);
@@ -1293,7 +1315,7 @@ void updatesurface(void){
       if(colorindex2>nrgb-2)colorindex2=0;
       level2 = p3min[plotn-1] + colorindex2*(p3max[plotn-1]-p3min[plotn-1])/((float)nrgb-2.0f);
       freesurface(currentsurf2ptr);
-      InitIsosurface(currentsurf2ptr, level2, rgb[colorindex2],-999);
+      InitIsosurface(currentsurf2ptr, level2, rgb_plot3d_contour[colorindex2],-999);
       GetIsosurface(currentsurf2ptr,qdata+(plotn-1)*plot3dsize,NULL,iblank_cell,level2,
         xplt,ibar+1,yplt,jbar+1,zplt,kbar+1,isooffset);
       GetNormalSurface(currentsurf2ptr);
@@ -1618,7 +1640,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
       }
     }
     freecontour(plot3dcontour1ptr);
-    initcontour(plot3dcontour1ptr,rgbptr,nrgb+1);
+    initcontour(plot3dcontour1ptr,rgb_plot3d_contour,nrgb-1);
     setcontourslice(plot3dcontour1ptr,1,xplt[plotx]);
     getcontours(yplt,zplt,jbar+1,kbar+1, 
       yzcolorfbase, iblank_yz,p3levels[plotn-1],
@@ -1663,7 +1685,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
       }
     }}
     freecontour(plot3dcontour2ptr);
-    initcontour(plot3dcontour2ptr,rgbptr,nrgb+1);
+    initcontour(plot3dcontour2ptr,rgb_plot3d_contour,nrgb-1);
     setcontourslice(plot3dcontour2ptr,2,yplt[ploty]);
     getcontours(xplt,zplt,ibar+1,kbar+1, 
       xzcolorfbase, iblank_xz,p3levels[plotn-1], 
@@ -1708,7 +1730,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
       }
     }}
     freecontour(plot3dcontour3ptr);
-    initcontour(plot3dcontour3ptr,rgbptr,nrgb+1);
+    initcontour(plot3dcontour3ptr,rgb_plot3d_contour,nrgb-1);
     setcontourslice(plot3dcontour3ptr,3,zplt[plotz]);
     getcontours(xplt,yplt,ibar+1,jbar+1, 
       xycolorfbase, iblank_xy,p3levels[plotn-1], 

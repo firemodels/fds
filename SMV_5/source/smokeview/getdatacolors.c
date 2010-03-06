@@ -610,7 +610,7 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
 
 void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, float *ttmax, 
               int ndatalevel, int nlevel,
-              char **labels,char **scale, float *tlevels, float *tlevels256){
+              char **labels,char **labelsiso,char **scale, float *tlevels, float *tlevels256){
   int n;
   float dt, factor, tval;
   float local_tmin, local_tmax, tmin2, tmax2;
@@ -726,20 +726,22 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   }
 
   range = local_tmax-local_tmin;
-  dt = range/(float)(nlevel-2);
-  dtorig = (tmaxorig-tminorig)/(float)(nlevel-2);
-  for (n=1;n<nlevel-1;n++){
-    tval = local_tmin + (n-1)*dt;
+  dt = range/(float)(nlevel-1);
+  dtorig = (tmaxorig-tminorig)/(float)(nlevel-1);
+  for (n=0;n<nlevel-1;n++){
+    tval = local_tmin + n*dt;
     num2string(&labels[n][0],tval,range);
+    num2string(&labelsiso[n][0],tval+dt/2.0,range);
   }
   for(n=0;n<256;n++){
     tlevels256[n] = (local_tmin*(255-n) + local_tmax*n)/255.;
   }
   tval = local_tmax;
   num2string(&labels[nlevel-1][0],tval,range);
+  num2string(&labelsiso[nlevel-1][0],tval,range);
 
-  for(n=0;n<nlevel+1;n++){
-    tlevels[n]=tminorig+(float)(n-1)*dtorig;
+  for(n=0;n<nlevel;n++){
+    tlevels[n]=tminorig+(float)n*dtorig;
   }
 
   for(i=0;i<nplot3d_files;i++){
@@ -1130,33 +1132,33 @@ void drawColorBars(float ybump){
     glBegin(GL_QUADS);
     if(showplot3d==1&&p3cont2d!=SHADED_CONTOURS){
       int icol;
+      float top, tophat;
 
       // draw plot3d colorbars
-      for (i = 0; i < nrgb; i++){
-        i3 = i+1;
-        icol = i*((nrgb_full-1)/(nrgb-1));
-        if(i3>nrgb_full-1)i3=nrgb_full;
-        if(showplot3d==1&&i==0&&p3cont2d==LINE_CONTOURS)continue;
-        if(showplot3d==1&&(i==0&&minfill==0||i==nrgb-1&&maxfill==0)){
-        }
-        else{
-          yy = (barbot*(nrgb-i)+i*(nrgb+DYFONT+barbot))/nrgb;
-          yy2 = (barbot*(nrgb-1-i)+(i+1)*(nrgb+DYFONT+barbot))/nrgb;
 
-          glColor4fv(rgb_full[icol]);
-          glVertex2f(barleft, yy); 
-          glVertex2f(barright,yy);
+      top = barbot+nrgb+DYFONT;
+      tophat = top - (top-barbot)/(nrgb-2);
+      for (i = 0; i < nrgb-2; i++){
+        yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
+        yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
+
+        glColor4fv(rgb_plot3d_contour[i]);
+        glVertex2f(barleft, yy); 
+        glVertex2f(barright,yy);
        
-          glVertex2f(barright,yy2);
-          glVertex2f(barleft, yy2);
-        }
+        glVertex2f(barright,yy2);
+        glVertex2f(barleft, yy2);
       }
     }
     else{
+      float top, tophat;
+
       // draw all other colorbars
+      top = barbot+nrgb+DYFONT;
+      tophat = top - (top-barbot)/255.0;
       for (i = 0; i < nrgb_full; i++){
-        yy = (barbot*(255-i)+i*(nrgb+DYFONT+barbot))/255.;
-        yy2 = (barbot*(254-i)+(i+1)*(nrgb+DYFONT+barbot))/255.;
+         yy = (barbot*(255-i)+    i*tophat)/255.;
+        yy2 = (barbot*(254-i)+(i+1)*tophat)/255.;
         i3=i+1;
         if(i==nrgb_full-1)i3=i;
 
@@ -1508,65 +1510,52 @@ void drawColorBars(float ybump){
         yy2 = (barbot*(nrgb-1-i)+(i+1)*(nrgb+DYFONT+barbot))/nrgb;
         position = (yy+yy2)/2.0;
       }
+      position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
       iposition = get_label_position(position,dyfont,barbot);
       outputBarText(right[0],position,color2,plot3dcolorlabel_ptr);
     }
     if(visiso==0){
       int nlabels;
+      float ddbar,bar0,vert_position;
 
-      nlabels=nrgb-1;
-      if(p3cont2d==STEPPED_CONTOURS||p3cont2d==LINE_CONTOURS){
-        nlabels=nrgb;
-      }
-      for (i=0; i<nlabels; i++){
-        float vert_position;
+      ddbar = (float)(nrgb+DYFONT)/(float)(nrgb-2);
+      bar0 = barbot-dyfont/2.0;
 
-        if(p3cont2d==SHADED_CONTOURS){
-          vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
-        }
-        else if(p3cont2d==STEPPED_CONTOURS){
-          int ii;
-
-          ii = i + 1;
-          yy = (barbot*(nrgb-ii)+ii*(nrgb+DYFONT+barbot))/nrgb;
-          yy2 = (barbot*(nrgb-1-ii)+(ii+1)*(nrgb+DYFONT+barbot))/nrgb;
-          vert_position = yy-dyfont/2.0;
-        }
-        else{
-          int ii;
-
-          ii = i + 1;
-          yy = (barbot*(nrgb-ii)+ii*(nrgb+DYFONT+barbot))/nrgb;
-          yy2 = (barbot*(nrgb-1-ii)+(ii+1)*(nrgb+DYFONT+barbot))/nrgb;
-          vert_position = (yy+yy2)/2.0-dyfont/2.0;
-        }
+      for (i=0; i<nrgb-1; i++){
+        vert_position = (float)(i)*ddbar+bar0;
         if(iposition==i)continue;
-        plot3dcolorlabel_ptr=&colorlabelp3[plotn-1][i+1][0];
+        plot3dcolorlabel_ptr=&colorlabelp3[plotn-1][i][0];
         if(plot3dflag==1){
           val = tttmin + i*plot3drange/(nrgb-2);
           scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
         }
-        if(p3cont2d==SHADED_CONTOURS||i!=nrgb-2||p3cont2d==STEPPED_CONTOURS||p3cont2d==LINE_CONTOURS){
-          outputBarText(right[0],vert_position,color1,plot3dcolorlabel_ptr);
-        }
+        outputBarText(right[0],vert_position,color1,plot3dcolorlabel_ptr);
       }
     }
     else
     {
-      for (i=1; i<nrgb; i++){
+      float ddbar,bar0,vert_position;
+
+      ddbar = (float)(nrgb+DYFONT)/(float)(nrgb-2);
+      bar0 = barbot-dyfont/2.0;
+
+      for (i=0; i<nrgb-2; i++){
+
+        vert_position = (float)(i+0.5)*ddbar + bar0;
+
         if(iposition==i)continue;
-        plot3dcolorlabel_ptr=&colorlabelp3[plotn-1][i][0];
+        plot3dcolorlabel_ptr=&colorlabeliso[plotn-1][i][0];
         if(plot3dflag==1){
           val = tttmin + (i-1)*plot3drange/(nrgb-2);
           scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
         }
-        if(isolevelindex+1==i||isolevelindex2+1==i){
-          outputBarText(right[0],(float)i+barbot,color2,plot3dcolorlabel_ptr);
+        if(isolevelindex==i||isolevelindex2==i){
+          outputBarText(right[0],vert_position,color2,plot3dcolorlabel_ptr);
         }
         else{
-          outputBarText(right[0],(float)i+barbot,color1,plot3dcolorlabel_ptr);
+          outputBarText(right[0],vert_position,color1,plot3dcolorlabel_ptr);
         }
       }
     }
