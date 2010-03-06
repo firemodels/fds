@@ -954,8 +954,11 @@ void keyboard(unsigned char key, int x, int y){
     case GLUT_ACTIVE_SHIFT:
     default:
       p3cont2d++;
-   // if(p3cont2d==2)p3cont2d++;
+#ifdef pp_LINE
       if(p3cont2d>2)p3cont2d=0;
+#else
+      if(p3cont2d>1)p3cont2d=0;
+#endif
       update_plot3d_display();
     }
     return;

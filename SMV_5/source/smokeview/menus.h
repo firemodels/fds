@@ -1638,7 +1638,7 @@ void IsoSurfaceMenu(int value){
 
 void LevelMenu(int value){
   if(ReadPlot3dFile==1){
-    plotiso[plotn-1]=value-1;
+    plotiso[plotn-1]=value;
     updateshowstep(1,ISO);
     updatesurface();
     updatemenu=1;  
@@ -4376,18 +4376,27 @@ static int in_menu=0;
 
   if(nplot3d_files>0){
     CREATEMENU(levelmenu,LevelMenu);
-    for(i=1;i<nrgb;i++){
-      if(colorlabelp3!=NULL){
-        glutAddMenuEntry(&colorlabelp3[plotn-1][nrgb-i][0],nrgb-i);
+    for(i=1;i<nrgb-1;i++){
+      if(colorlabeliso!=NULL){
+        char *colorlabel;
+        char levellabel[256];
+
+        colorlabel=&colorlabeliso[plotn-1][nrgb-2-i][0];
+        strcpy(levellabel,"");
+        if(plotiso[plotn-1]==nrgb-2-i&&visiso==1){
+          strcat(levellabel,"*");
+        }
+        strcat(levellabel,colorlabel);
+        glutAddMenuEntry(levellabel,nrgb-2-i);
       }
       else{
-        if(plotiso[plotn]==i-1&&visiso==1){
-          sprintf(chari,"*%i",i);
+        if(plotiso[plotn]==i&&visiso==1){
+          sprintf(chari,"*%i",i+1);
         }
         else{
-          sprintf(chari,"%i",i);
+          sprintf(chari,"%i",i+1);
         }
-        glutAddMenuEntry(chari,i);
+        glutAddMenuEntry(chari,i+1);
       }
     }
   }

@@ -199,7 +199,7 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
   for(n=0;n<nlevels;n++){
     ci->levels[n]=levels[n];
   }
-  for(n=0;n<nlevels-1;n++){
+  for(n=0;n<nlevels;n++){
     if(levels[0]==levels[nlevels-1]&&n==0){
       blankit=1;
     }
@@ -208,7 +208,12 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
     }
 
     contlow=(double)levels[n];
-    conthigh=(double)levels[n+1];
+    if(n==nlevels-1){
+      conthigh=contlow+levels[n]-levels[n-1];
+    }
+    else{
+      conthigh=(double)levels[n+1];
+    }
 
     mxpolys=(nx+1)*(ny+1)+1;
     mxnodes=8*mxpolys;
@@ -316,46 +321,22 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
   double xcopy[5],ycopy[5],valcopy[5],vallownet[5],valhighnet[5];
   int nn,edgenum;
   double factor;
-  double dist;
-
-  dist = conthigh - contlow;
-  if(ilev==0)conthigh-=dist/10000;
-  if(ilev==1)contlow-=dist/10000;
 
   *nnode=0;
   *nnode2=0;
-  if(conthigh<=contlow&&blankit==0)return;
+  if(conthigh<=contlow&&blankit==0&&ilev<nlevels-1)return;
   if(blankit==0){
     for(n=0;n<4;n++){
-      if(minfill==0){
-        if(ilev!=0&&val[n]<=contlow){
-          state[n]=0;
-        }
+      state[n]=1;
+      if(ilev!=0&&val[n]<=contlow){
+        state[n]=0;
       }
-      else{
-        if(ilev!=0&&val[n]<=contlow){
-          state[n]=0;
-        }
-        if(ilev==0&&val[n]<=conthigh){
-          state[n]=1;
-        }
-      }
-      if(maxfill==0){
-        if(ilev!=nlevels-2&&val[n]>=conthigh){
-          state[n]=2;
-        }
-      }
-      else{
-        if(ilev!=nlevels-2&&val[n]>=conthigh){
-          state[n]=2;
-        }
-        if(ilev==nlevels-2&&val[n]>=contlow){
-          state[n]=1;
-        }
+      if(ilev!=nlevels-2&&val[n]>=conthigh){
+        state[n]=2;
       }
     }
     casenum=state[3]+3*state[2]+9*state[1]+27*state[0];
-    if(maxfill==1&&casenum==80&&ilev==nlevels-2){
+    if(maxfill==1&&casenum==80&&ilev==nlevels-1){
       casenum=40;
     }
     if(minfill==1&&casenum==0&&ilev==0){
@@ -403,8 +384,14 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
   }
   for(n=0;n<*nnode;n++){
     edgenum=contourfill_list[casenum][n+1];
-    if(edgenum>=0){xnode[n]=x[edgenum]; ynode[n]=y[edgenum];}
-    else{xnode[n]=xzero[-edgenum];ynode[n]=yzero[-edgenum];}
+    if(edgenum>=0){
+      xnode[n]=x[edgenum]; 
+      ynode[n]=y[edgenum];
+    }
+    else{
+      xnode[n]=xzero[-edgenum];
+      ynode[n]=yzero[-edgenum];
+    }
 /*
     xnodecopy[n]=xnode[n];
     ynodecopy[n]=ynode[n];
@@ -412,7 +399,8 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
   }
   for(n=0;n<*nnode2;n++){
     edgenum=contourline_list[casenum][n+1];
-    xline[n]=xzero[edgenum];yline[n]=yzero[edgenum];
+    xline[n]=xzero[edgenum];
+    yline[n]=yzero[edgenum];
   }
 }
 
@@ -435,7 +423,8 @@ void DrawContours(const contour *ci,int drawoption, float linewidth){
   if(drawoption==0)return;
   nlevels=ci->nlevels;
   xyzval=ci->xyzval;
-  for(n=0;n<nlevels-1;n++){
+  for(n=0;n<nlevels;n++){
+    if(drawoption==1&&n==nlevels-1)continue;
     xnode=ci->xnode[n];
     ynode=ci->ynode[n];
     xline=ci->xlines[n];
@@ -449,7 +438,9 @@ void DrawContours(const contour *ci,int drawoption, float linewidth){
         glColor4fv(rgb[n]);
         for(ipoly=0;ipoly<npolys;ipoly++){
           glBegin(GL_POLYGON);
-          for(j=0;j<polysize[ipoly];j++){glVertex3f(xyzval,*xnode++,*ynode++);}
+          for(j=0;j<polysize[ipoly];j++){
+            glVertex3f(xyzval,*xnode++,*ynode++);
+          }
           glEnd();
         }
       }
@@ -457,7 +448,9 @@ void DrawContours(const contour *ci,int drawoption, float linewidth){
         glColor4fv(rgb[n]);
         glLineWidth(linewidth);
         glBegin(GL_LINES);
-        for(iline=0;iline<nlinepts;iline++){glVertex3f(xyzval,*xline++,*yline++);}
+        for(iline=0;iline<nlinepts;iline++){
+          glVertex3f(xyzval,*xline++,*yline++);
+        }
         glEnd();
       }
     }
@@ -467,7 +460,9 @@ void DrawContours(const contour *ci,int drawoption, float linewidth){
         for(ipoly=0;ipoly<npolys;ipoly++){
           nnodes=polysize[ipoly];
           glBegin(GL_POLYGON);
-          for(j=0;j<nnodes;j++){glVertex3f(*xnode++,xyzval,*ynode++);}
+          for(j=0;j<nnodes;j++){
+            glVertex3f(*xnode++,xyzval,*ynode++);
+          }
           glEnd();
         }
       }
@@ -475,7 +470,9 @@ void DrawContours(const contour *ci,int drawoption, float linewidth){
         glColor4fv(rgb[n]);
         glLineWidth(linewidth);
         glBegin(GL_LINES);
-        for(iline=0;iline<nlinepts;iline++){glVertex3f(*xline++,xyzval,*yline++);}
+        for(iline=0;iline<nlinepts;iline++){
+          glVertex3f(*xline++,xyzval,*yline++);
+        }
         glEnd();
       }
     }
@@ -484,7 +481,9 @@ void DrawContours(const contour *ci,int drawoption, float linewidth){
         glColor4fv(rgb[n]);
         for(ipoly=0;ipoly<npolys;ipoly++){
           glBegin(GL_POLYGON);
-          for(j=0;j<polysize[ipoly];j++){glVertex3f(*xnode++,*ynode++,xyzval);}
+          for(j=0;j<polysize[ipoly];j++){
+            glVertex3f(*xnode++,*ynode++,xyzval);
+          }
           glEnd();
         }
       }
@@ -492,7 +491,9 @@ void DrawContours(const contour *ci,int drawoption, float linewidth){
         glColor4fv(rgb[n]);
         glLineWidth(linewidth);
         glBegin(GL_LINES);
-        for(iline=0;iline<nlinepts;iline++){glVertex3f(*xline++,*yline++,xyzval);}
+        for(iline=0;iline<nlinepts;iline++){
+          glVertex3f(*xline++,*yline++,xyzval);
+        }
         glEnd();
       }
     }

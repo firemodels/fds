@@ -275,6 +275,17 @@ void sv_startup_c(int argc, char **argv){
   for(i=0;i<MAXRGB;i++){
     rgbptr[i]=&rgb[i][0];
   }
+  NewMemory((void **)&rgb_plot3d_contour,MAXRGB*sizeof(float *));
+  for(i=0;i<nrgb-1;i++){
+    int ii;
+    float factor;
+
+    factor=256/(nrgb-2);
+
+    ii = factor*((float)i+0.5);
+    if(ii>255)ii=255;
+    rgb_plot3d_contour[i]=&rgb_full[ii][0];
+  }
 }
 
 /* ------------------ InitOpenGL ------------------------ */
@@ -2141,6 +2152,7 @@ void initvars0(void){
   p3levels=NULL, zonelevels=NULL;
   p3levels256=NULL;
   colorlabelp3=NULL;
+  colorlabeliso=NULL;
   partscale=NULL;
   zonescale=NULL;
   plotiso=NULL;
