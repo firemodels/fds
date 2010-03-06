@@ -7,8 +7,8 @@
 close all
 clear all
 
-addpath '..\..\Validation\Sandia_Plumes\Experimental_Data'
-addpath '..\..\Validation\Sandia_Plumes\FDS_Output_Files'
+addpath '../../Validation/Sandia_Plumes/Experimental_Data'
+addpath '../../Validation/Sandia_Plumes/FDS_Output_Files'
 
 % plot velocity signal and power spectrum
 
