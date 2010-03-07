@@ -705,7 +705,7 @@ EXTERNCPP void readiso(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void InitMenus(int unload);
 EXTERNCPP void smoothlabel(float *min, float *max, int n);
 EXTERNCPP int readsmv(char *file);
-
+EXTERNCPP char *which(char *prog, char *pathlist);
 EXTERNCPP int STRCMP(const char *s1, const char *s2);
 EXTERNCPP int gettargetposition(int itarget, float time, float *x, float *y, float *z);
 EXTERNCPP void outputAxisLabels(void);

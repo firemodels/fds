@@ -5,6 +5,7 @@
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
+#include <sys/stat.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <math.h>
@@ -411,3 +412,52 @@ void parse_string(char *string, char **tokens, int *ntokens){
   }
   *ntokens=ntok;
 }
+
+  /* ------------------ getfileinfo ------------------------ */
+
+int fileexist(char *filename){
+  STRUCTSTAT statbuffer;
+  int statfile;
+  char buffer[1024];
+
+  statfile=STAT(filename,&statbuffer);
+  return statfile;
+}
+/* ------------------ array2string ------------------------ */
+
+char *which(char *prog, char *pathlist){
+  char *pathlistptr;
+  char fullpath[4096];
+  char *dir;
+  int lenpath;
+  char pathsep[2];
+  char dirsep[2];
+
+#ifdef WIN32
+  strcpy(pathsep,";");
+  strcpy(dirsep,"\\");
+#else
+  strcpy(pathsep,":");
+  strcpy(dirsep,"/";
+#endif
+
+  if(prog==NULL)return NULL;
+  pathlistptr=getenv("PATH");
+  if(pathlistptr==NULL)return NULL;
+  lenpath=strlen(pathlistptr);
+  strcpy(pathlist,pathlistptr);
+        
+  dir=strtok(pathlist,pathsep);
+  while(dir!=NULL){
+    printf("dir=%s\n",dir);
+    strcpy(fullpath,dir);
+    strcat(fullpath,dirsep);
+    strcat(fullpath,prog);
+    if(fileexist(fullpath)==0){
+      return dir;
+    }
+    dir=strtok(NULL,pathsep);
+  }
+  return NULL;
+}
+
