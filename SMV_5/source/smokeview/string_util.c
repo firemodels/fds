@@ -456,7 +456,7 @@ char *which(char *progname){
 #ifdef WIN32
   lenprog=strlen(prog);
   ext=progname+lenprog-4;
-  if(lenprog<=||STRCMP(ext,".exe")!=0){
+  if(lenprog<=4||STRCMP(ext,".exe")!=0){
     strcat(progname,".exe");
  }
 #endif
