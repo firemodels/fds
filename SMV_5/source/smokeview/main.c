@@ -50,9 +50,7 @@ int main(int argc, char **argv){
     progname=argv_sv[0];
     len=strlen(progname);
     if(len>2){
-      NewMemory((void **)&smvprogdir,len+1);
-      strcpy(smvprogdir,progname);
-      getdir(smvprogdir);
+      smvprogdir=getdir(progname);
     }
     else{
       smvprogdir=NULL;
@@ -104,9 +102,9 @@ int main(int argc, char **argv){
 
     CheckMemory;
     Args(argc, argv_sv);
-    if(texturedir!=NULL){
-      printf("Texture directory: %s\n",texturedir);
-    }
+//    if(texturedir!=NULL){
+//      printf("Texture directory: %s\n",texturedir);
+//    }
     version();
     printf("\n");
     if(smokezippath!=NULL)printf("Smokezip file: %s found\n",smokezippath);

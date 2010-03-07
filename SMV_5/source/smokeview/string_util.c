@@ -21,21 +21,26 @@ char string_util_revision[]="$Revision$";
 
 /* ------------------ rootdir ------------------------ */
 
-void getdir(char *argstart){
-  size_t i,nargi;
-  char *argi;
+char *getdir(char *progname){
+  size_t i,nprogname;
+  char *c;
+  char *progpath;
+  int lenprogpath;
 
-  nargi=strlen(argstart);
-  argi = argstart+nargi-1;
-  for(i=0;i<nargi;i++){
-    if(strncmp(argi,dirseparator,1)==0){
-      *(argi+1)='\0';
-      return;
+  nprogname=strlen(progname);
+  c = progname+nprogname-1;
+  progpath=progname;
+  for(i=0;i<nprogname;i++){
+    if(strncmp(c,dirseparator,1)==0){
+      *(c+1)='\0';
+      NewMemory((void **)&progpath,(unsigned int)(strlen(c)+2));
+      strcpy(progpath,c);
+      return progpath;
     }
-    argi--;
+    c--;
   }
-  *argstart='\0';
-  return;
+  progpath=which(progname);
+  return progpath;
 }
 
 
@@ -425,13 +430,12 @@ int fileexist(char *filename){
 }
 /* ------------------ array2string ------------------------ */
 
-char *which(char *prog, char *pathlist){
-  char *pathlistptr;
-  char fullpath[4096];
-  char *dir;
-  int lenpath;
-  char pathsep[2];
-  char dirsep[2];
+char *which(char *progname){
+  char *pathlistptr, fullpath[4096], pathlist[4096], prog[4096];
+  char *dir,*returndir;
+  const char *ext;
+  char pathsep[2], dirsep[2];
+  int lendir,lenprog;
 
 #ifdef WIN32
   strcpy(pathsep,";");
@@ -441,23 +445,43 @@ char *which(char *prog, char *pathlist){
   strcpy(dirsep,"/";
 #endif
 
-  if(prog==NULL)return NULL;
+  if(progname==NULL)return NULL;
+  strcpy(prog,progname);
+  progname=prog;
+
   pathlistptr=getenv("PATH");
   if(pathlistptr==NULL)return NULL;
-  lenpath=strlen(pathlistptr);
   strcpy(pathlist,pathlistptr);
+  
+#ifdef WIN32
+  lenprog=strlen(prog);
+  ext=progname+lenprog-4;
+  if(lenprog<=||STRCMP(ext,".exe")!=0){
+    strcat(progname,".exe");
+ }
+#endif
         
   dir=strtok(pathlist,pathsep);
   while(dir!=NULL){
-    printf("dir=%s\n",dir);
     strcpy(fullpath,dir);
     strcat(fullpath,dirsep);
     strcat(fullpath,prog);
     if(fileexist(fullpath)==0){
-      return dir;
+      lendir=strlen(dir);
+      if(lendir<=0)continue;
+      NewMemory((void **)&returndir,(unsigned int)(lendir+2));
+      strcpy(returndir,dir);
+      strcat(returndir,dirsep);
+#ifdef pp_BETA
+      printf("%s found in directory %s\n",prog,dir);
+#endif
+      return returndir;
     }
     dir=strtok(NULL,pathsep);
   }
+#ifdef pp_BETA
+  printf("%s not found in any path directory\n",prog);
+#endif
   return NULL;
 }
 
