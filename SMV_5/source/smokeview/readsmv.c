@@ -7754,6 +7754,11 @@ int readini2(char *inifile, int localfile){
       if(visSensorNorm!=0)visSensorNorm=1;
       continue;
     }
+    if(match(buffer,"AVATAREVAC",10)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i ",&iavatar_evac);
+      continue;
+    }
     if(match(buffer,"SHOWVENTS",9)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i ",&visVents,&visVentLines,&visVentSolid);
@@ -9376,7 +9381,12 @@ void writeini(int flag){
   fprintf(fileout," %i\n",isoframestep);
   fprintf(fileout,"SHOWTRACERSALWAYS\n");
   fprintf(fileout," %i\n",show_tracers_always);
-
+ 
+  if(flag==LOCAL_INI){
+    fprintf(fileout,"AVATAREVAC\n");
+    fprintf(fileout," %i\n",iavatar_evac);
+  }
+ 
   if(flag==LOCAL_INI){
     {
       int ndevice_vis=0;
