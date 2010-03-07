@@ -2468,6 +2468,10 @@ void EvacMenu(int value){
       if(parti->evac==0)continue;
       ReadEvacFile=1;
       readpart(parti->file,i,LOAD,&errorcode);
+      if(scriptoutstream!=NULL){
+        fprintf(scriptoutstream,"LOADFILE\n");
+        fprintf(scriptoutstream," %s\n",parti->file);
+      }
     }
     force_redisplay=1;
     update_framenumber(0);
@@ -2475,6 +2479,10 @@ void EvacMenu(int value){
   if(value>=0){
     ReadEvacFile=1;
     readpart(partinfo[value].file,value,LOAD,&errorcode);
+    if(scriptoutstream!=NULL){
+      fprintf(scriptoutstream,"LOADFILE\n");
+      fprintf(scriptoutstream," %s\n",partinfo[value].file);
+    }
   }
   else{
     if(value==-1){
