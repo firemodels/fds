@@ -1719,7 +1719,7 @@ READ_REACTION_LOOP: DO NN=1,N_REAC_READ
    CALL CHECKREAD('REAC',LU_INPUT,IOS) 
    CALL SET_REAC_DEFAULTS
    IF (IOS==0) READ(LU_INPUT,REAC)
-   RN%AIT                = AIT
+   RN%AIT                = AIT + TMPM
    RN%BOF                = BOF
    RN%E                  = E*1000._EB
    RN%EPUMO2             = EPUMO2*1000._EB
@@ -2003,7 +2003,7 @@ CONTAINS
 
 SUBROUTINE SET_REAC_DEFAULTS
 
-AIT                         = 0._EB 
+AIT                         = -TMPM        ! C
 BOF                         = -1._EB       ! cm**3/mol-s
 CO_YIELD                    = 0._EB
 CRITICAL_FLAME_TEMPERATURE  = 1427._EB    ! C
