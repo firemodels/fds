@@ -442,7 +442,7 @@ char *which(char *progname){
   strcpy(dirsep,"\\");
 #else
   strcpy(pathsep,":");
-  strcpy(dirsep,"/";
+  strcpy(dirsep,"/");
 #endif
 
   if(progname==NULL)return NULL;
