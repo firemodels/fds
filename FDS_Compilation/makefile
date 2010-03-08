@@ -104,7 +104,7 @@ intel_win_64 : FCOMPL = ifort
 intel_win_64 : CCOMPL = cl
 intel_win_64 : obj = fds5_win_64
 intel_win_64 : setup_win $(objwinf_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS) /F100000000 $(objwinf_serial) ../win64lib/isob.obj
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwinf_serial) ../win64lib/isob.obj
 
 mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_64 : MPIINCLUDE = "c:\program files\mpich2\include"
@@ -114,7 +114,7 @@ mpi_intel_win_64 : FCOMPL = ifort
 mpi_intel_win_64 : CCOMPL = cl
 mpi_intel_win_64 : obj = fds5_mpi_win_64
 mpi_intel_win_64 : setup_win $(objwinf_mpi)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwinf_mpi) ../win64lib/isob.obj $(MPILIB)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F1000000000 $(objwinf_mpi) ../win64lib/isob.obj $(MPILIB)
 
 # Intel Compiler for Linux, version 11
 
