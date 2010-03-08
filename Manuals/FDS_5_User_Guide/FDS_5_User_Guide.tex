@@ -5521,14 +5521,14 @@ Note that the various {\ct YIELD}s are for well-ventilated, post-flame condition
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
 \begin{description}
-\item[{\ct FUEL}] A character string that identifies fuel species for the reaction. When using the mixture fraction, specifying a fuel will cause FDS to use the thermophyscial properties for that fuel when computing quantites such as specific heat or viscosity.  This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N, OTHER}. Table~\ref{tab:gasspecies} provides a listing of the available species.
+\item[{\ct FUEL}] A character string that identifies fuel species for the reaction. When using the mixture fraction, specifying a fuel will cause FDS to use the thermophyscial properties for that fuel when computing quantites such as specific heat or viscosity.  This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N, OTHER}. Table~\ref{tab:gasspecies} provides a listing of the available species.  By default, FDS uses the gas thermophysical properties of {\ct ETHYLENE} for the fuel.
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
 label the {\ct REAC} line to more easily identify the fuel species.
 \item[{\ct C, H, O, N, OTHER}] The fuel chemical formula. All numbers are positive.
 (Mixture Fraction only, default values are those of propane)
 \item[{\ct MW\_OTHER}] Average molecular weight for {\ct OTHER} (g/mol).
 (Mixture Fraction only, default is the molecular weight of N$_2$, 28 g/mol)
-\item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Mixture Fraction only, default 0.23)
+\item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Mixture Fraction only, default 0.232428)
 \item[{\ct Y\_F\_INLET}] Mass fraction of fuel in fuel stream (Mixture Fraction only, default 1.0)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_s$.
 Note that this parameter does not apply to the processes of soot growth and oxidation,
@@ -9786,7 +9786,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct E}                                   & Real        & Activation Energy (Finite Rate)               &   kJ/kmol         &     \\ \hline
 {\ct EDDY\_DISSIPATION}                   & Logical     & See Section~\ref{info:turbulent_combustion}   &                   & {\ct .TRUE.}    \\ \hline
 {\ct EPUMO2}                              & Real        & Energy per Unit Mass Oxygen                   &   kJ/kg           & 13100    \\ \hline
-{\ct FUEL}                                & Character   & Name of Fuel (Finite Rate)                    &                   &     \\ \hline
+{\ct FUEL}                                & Character   & Name of Fuel (Finite Rate)                    &                   & {\ct ETHYLENE}\\ \hline
 {\ct FYI}                                 & Character   & Comment String (has no effect)                &                   &     \\ \hline
 {\ct H}                                   & Real        & Hydrogen atoms in fuel                        &                   & 8    \\ \hline
 {\ct H2\_YIELD}                           & Real        & Fraction of H$_2$ from the fuel               & kg/kg             & 0        \\ \hline
@@ -9811,7 +9811,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct X\_O2\_LL}                           & Real        & Lower Oxygen Limit                            &  mol/mol          & 0.15    \\ \hline
 {\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner                  &  kg/kg            & 1.0     \\ \hline
 {\ct Y\_F\_LFL}                           & Real        & Lower Fuel limit (mass fraction)              &  kg/kg            & 0.0     \\ \hline
-{\ct Y\_O2\_INFTY}                        & Real        & Ambient oxygen mass fraction                  &  kg/kg            & 0.23    \\ \hline
+{\ct Y\_O2\_INFTY}                        & Real        & Ambient oxygen mass fraction                  &  kg/kg            & 0.232428\\ \hline
 %\end{tabular*}
 \end{longtable}
 
