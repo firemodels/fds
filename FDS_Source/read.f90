@@ -1198,9 +1198,9 @@ IF (FDS6) THEN
    BAROCLINIC2=.TRUE.
    CHECK_VN=.TRUE.
    CLIP_MASS_FRACTION=.TRUE.
-   CP_FTMP=.TRUE.
+   !CP_FTMP=.TRUE.
    RESTRICT_TIME_STEP=.FALSE.
-   H_LOGLAW=.TRUE.
+   !H_LOGLAW=.TRUE.
    ! reread the line to pick up any user-specified options
    REWIND(LU_INPUT)
    CALL CHECKREAD('MISC',LU_INPUT,IOS)
@@ -1693,7 +1693,7 @@ ENDDO COUNT_REAC_LOOP
 IF (FDS6) THEN
    HRRPUV_AVERAGE = 1.E10_EB ! effectively remove this bound
    HRRPUA_SHEET   = 1.E10_EB
-   C_EDC          = 1._EB
+   C_EDC          = 0.4_EB
 ENDIF
  
 IF (FUEL_EVAPORATION) MIXTURE_FRACTION = .TRUE.
