@@ -4,6 +4,9 @@
 
 #include "options.h"
 #include <stdlib.h>
+#ifdef _DEBUG
+#include <stdio.h>
+#endif
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
@@ -172,7 +175,6 @@ void setcontourslice(contour *ci,int idir,float xyz){
 
 void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,  
                  const float *vals, const char *iblank, const float *levels,
-                 int minfill, int maxfill,
                  const contour *ci){
   int n,i,j;
   double x[4],y[4],v[4];
@@ -190,28 +192,32 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
   int nlinepts;
   int nlevels;
   int blankit=0;
+  int minfill, maxfill;
 
 #define ij(i,j) ((i)*ny+(j))
 #define ijblank(i,j) ((i)*(ny-1)+(j))
 
 
   nlevels=ci->nlevels;
-  for(n=0;n<nlevels;n++){
+  for(n=0;n<nlevels-2;n++){
     ci->levels[n]=levels[n];
   }
   for(n=0;n<nlevels;n++){
-    if(levels[0]==levels[nlevels-1]&&n==0){
-      blankit=1;
-    }
-    else{
-      blankit=0;
-    }
+    minfill=0;
+    maxfill=0;
+    if(n==nlevels-2){
+      contlow=(double)levels[0]-(levels[1]-levels[0]);
+      conthigh=(double)levels[0];
+      minfill=1;
 
-    contlow=(double)levels[n];
-    if(n==nlevels-1){
-      conthigh=contlow+levels[n]-levels[n-1];
+    }
+    else if(n==nlevels-1){
+      contlow=levels[nlevels-2];
+      conthigh=levels[nlevels-2]+(levels[nlevels-3]-levels[nlevels-4]);
+      maxfill=1;
     }
     else{
+      contlow=(double)levels[n];
       conthigh=(double)levels[n+1];
     }
 
@@ -324,30 +330,28 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
 
   *nnode=0;
   *nnode2=0;
-  if(conthigh<=contlow&&blankit==0&&ilev<nlevels-1)return;
+  if(conthigh<=contlow)return;
   if(blankit==0){
     for(n=0;n<4;n++){
       state[n]=1;
-      if(ilev!=0&&val[n]<=contlow){
+      if(minfill==0&&val[n]<=contlow){
         state[n]=0;
       }
-      if(ilev!=nlevels-2&&val[n]>=conthigh){
+      if(maxfill==0&&val[n]>=conthigh){
         state[n]=2;
       }
     }
     casenum=state[3]+3*state[2]+9*state[1]+27*state[0];
-    if(maxfill==1&&casenum==80&&ilev==nlevels-1){
+    if(maxfill==1&&casenum==80){
       casenum=40;
     }
-    if(minfill==1&&casenum==0&&ilev==0){
+    if(minfill==1&&casenum==0){
       casenum=40;
     }
   }
   else{
     casenum=40;
   }
-  if(minfill==0&&ilev==0)casenum=0;
-  if(maxfill==0&&ilev==nlevels-2)casenum=0;
   *casen=casenum;
   *nnode=contourfill_list[casenum][0];
   *nnode2=contourline_list[casenum][0];
@@ -406,93 +410,49 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
 
 /*  ------------------ drawcontours ------------------------ */
 
-void DrawContours(const contour *ci,int drawoption, float linewidth){
-/*
-  drawoption = 1 ==> draw shaded contours
-  drawoption = 2 ==> draw "line" contours
-*/
+void DrawContours(const contour *ci){
   int nlevels, n, npolys, *polysize, ipoly,j,nnodes;
   float *xnode, *ynode,xyzval;
-  float *xline, *yline;
   float **rgb;
 
-  int nlinepts,iline;
   int *npolysv;
 
   rgb=ci->rgbptr;
-  if(drawoption==0)return;
   nlevels=ci->nlevels;
   xyzval=ci->xyzval;
   for(n=0;n<nlevels;n++){
-    if(drawoption==1&&n==nlevels-1)continue;
     xnode=ci->xnode[n];
     ynode=ci->ynode[n];
-    xline=ci->xlines[n];
-    yline=ci->ylines[n];
     polysize=ci->polysize[n];
     npolysv=ci->npolys;
     npolys=npolysv[n];
-    nlinepts=ci->nlines[n];
     if(ci->idir==1){
-      if(drawoption==1){
-        glColor4fv(rgb[n]);
-        for(ipoly=0;ipoly<npolys;ipoly++){
-          glBegin(GL_POLYGON);
-          for(j=0;j<polysize[ipoly];j++){
-            glVertex3f(xyzval,*xnode++,*ynode++);
-          }
-          glEnd();
-        }
-      }
-      if(drawoption==2){
-        glColor4fv(rgb[n]);
-        glLineWidth(linewidth);
-        glBegin(GL_LINES);
-        for(iline=0;iline<nlinepts;iline++){
-          glVertex3f(xyzval,*xline++,*yline++);
+      glColor4fv(rgb[n]);
+      for(ipoly=0;ipoly<npolys;ipoly++){
+        glBegin(GL_POLYGON);
+        for(j=0;j<polysize[ipoly];j++){
+          glVertex3f(xyzval,*xnode++,*ynode++);
         }
         glEnd();
       }
     }
     else if(ci->idir==2){
-      if(drawoption==1){
-        glColor4fv(rgb[n]);
-        for(ipoly=0;ipoly<npolys;ipoly++){
-          nnodes=polysize[ipoly];
-          glBegin(GL_POLYGON);
-          for(j=0;j<nnodes;j++){
-            glVertex3f(*xnode++,xyzval,*ynode++);
-          }
-          glEnd();
-        }
-      }
-      if(drawoption==2){
-        glColor4fv(rgb[n]);
-        glLineWidth(linewidth);
-        glBegin(GL_LINES);
-        for(iline=0;iline<nlinepts;iline++){
-          glVertex3f(*xline++,xyzval,*yline++);
+      glColor4fv(rgb[n]);
+      for(ipoly=0;ipoly<npolys;ipoly++){
+        nnodes=polysize[ipoly];
+        glBegin(GL_POLYGON);
+        for(j=0;j<nnodes;j++){
+          glVertex3f(*xnode++,xyzval,*ynode++);
         }
         glEnd();
       }
     }
     else if(ci->idir==3){
-      if(drawoption==1){
-        glColor4fv(rgb[n]);
-        for(ipoly=0;ipoly<npolys;ipoly++){
-          glBegin(GL_POLYGON);
-          for(j=0;j<polysize[ipoly];j++){
-            glVertex3f(*xnode++,*ynode++,xyzval);
-          }
-          glEnd();
-        }
-      }
-      if(drawoption==2){
-        glColor4fv(rgb[n]);
-        glLineWidth(linewidth);
-        glBegin(GL_LINES);
-        for(iline=0;iline<nlinepts;iline++){
-          glVertex3f(*xline++,*yline++,xyzval);
+      glColor4fv(rgb[n]);
+      for(ipoly=0;ipoly<npolys;ipoly++){
+        glBegin(GL_POLYGON);
+        for(j=0;j<polysize[ipoly];j++){
+          glVertex3f(*xnode++,*ynode++,xyzval);
         }
         glEnd();
       }

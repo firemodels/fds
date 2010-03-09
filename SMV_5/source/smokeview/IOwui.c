@@ -457,7 +457,6 @@ void initterrain_all(void){
 
     getcontours(terri->x_scaled,terri->y_scaled,terri->nx+1,terri->ny+1,
       terri->znode, NULL, terri->levels,
-      minfill, maxfill,
       &meshi->terrain_contour);
 
   }
@@ -1181,7 +1180,7 @@ void update_terrain(int allocate_memory, float vertical_factor){
       ymax = meshi->yplt_orig[ny];
 
       initterrain_znode(meshi, terri, xmin, xmax, nx, ymin, ymax, ny, allocate_memory);
-      initcontour(&meshi->terrain_contour,rgbptr,nrgb+1);
+      initcontour(&meshi->terrain_contour,rgbptr,nrgb);
     }
     initterrain_all();
   }
