@@ -612,8 +612,7 @@ ENDDO
  
 ! Baroclinic torque correction
  
-IF (BAROCLINIC .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.BAROCLINIC2) CALL BAROCLINIC_CORRECTION
-IF (BAROCLINIC2) CALL BAROCLINIC_CORRECTION2
+IF (BAROCLINIC .AND. .NOT.EVACUATION_ONLY(NM)) CALL BAROCLINIC_CORRECTION
 
 ! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
 
@@ -928,8 +927,7 @@ ENDDO
  
 ! Baroclinic torque correction terms
  
-IF (BAROCLINIC .AND. .NOT.BAROCLINIC2) CALL BAROCLINIC_CORRECTION
-IF (BAROCLINIC2) CALL BAROCLINIC_CORRECTION2
+IF (BAROCLINIC) CALL BAROCLINIC_CORRECTION
  
 ! Adjust FVX and FVZ at solid, internal obstructions for no flux
  
@@ -1149,19 +1147,20 @@ ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
-IF (BAROCLINIC2) THEN
-   ! compute resolved kinetic energy per unit mass
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            U2 = 0.25_EB*(US(I-1,J,K)+US(I,J,K))**2
-            V2 = 0.25_EB*(VS(I,J-1,K)+VS(I,J,K))**2
-            W2 = 0.25_EB*(WS(I,J,K-1)+WS(I,J,K))**2
-            KRES(I,J,K) = 0.5_EB*(U2+V2+W2)
-         ENDDO
+! Compute resolved kinetic energy per unit mass
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         U2 = 0.25_EB*(US(I-1,J,K)+US(I,J,K))**2
+         V2 = 0.25_EB*(VS(I,J-1,K)+VS(I,J,K))**2
+         W2 = 0.25_EB*(WS(I,J,K-1)+WS(I,J,K))**2
+         KRES(I,J,K) = 0.5_EB*(U2+V2+W2)
       ENDDO
    ENDDO
-ENDIF
+ENDDO
+
+! No vertical velocity in Evacuation meshes
 
 IF (EVACUATION_ONLY(NM)) WS = 0._EB
 
@@ -1226,19 +1225,20 @@ ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
-IF (BAROCLINIC2) THEN
-   ! compute resolved kinetic energy per unit mass
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            U2 = 0.25_EB*(U(I-1,J,K)+U(I,J,K))**2
-            V2 = 0.25_EB*(V(I,J-1,K)+V(I,J,K))**2
-            W2 = 0.25_EB*(W(I,J,K-1)+W(I,J,K))**2
-            KRES(I,J,K) = 0.5_EB*(U2+V2+W2)
-         ENDDO
+! Compute resolved kinetic energy per unit mass
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         U2 = 0.25_EB*(U(I-1,J,K)+U(I,J,K))**2
+         V2 = 0.25_EB*(V(I,J-1,K)+V(I,J,K))**2
+         W2 = 0.25_EB*(W(I,J,K-1)+W(I,J,K))**2
+         KRES(I,J,K) = 0.5_EB*(U2+V2+W2)
       ENDDO
    ENDDO
-ENDIF
+ENDDO
+
+! No vertical velocity in Evacuation meshes
 
 IF (EVACUATION_ONLY(NM)) W = 0._EB
 
@@ -2184,137 +2184,8 @@ ENDIF
 END SUBROUTINE CHECK_STABILITY
  
  
+
 SUBROUTINE BAROCLINIC_CORRECTION
- 
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),HQS=>NULL(),RTRM=>NULL(),RHOP=>NULL()
-REAL(EB) :: RHO_AVG_OLD,RRAT,U2,V2,W2
-INTEGER  :: I,J,K
- 
-HQS  => WORK1
-RTRM => WORK2
- 
-IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
-   RHOP=>RHO
-ELSE
-   UU => US
-   VV => VS
-   WW => WS
-   RHOP=>RHOS
-ENDIF
-
-RHO_AVG_OLD = RHO_AVG
-RHO_AVG = 2._EB*RHO_LOWER_GLOBAL*RHO_UPPER_GLOBAL/(RHO_LOWER_GLOBAL+RHO_UPPER_GLOBAL)
-IF (RHO_AVG<=0._EB) THEN
-   WRITE(LU_ERR,*) 'WARNING! RHO_AVG <= 0 in BAROCLINIC_CORRECTION'
-   RRAT = 1._EB
-   RTRM = 0._EB
-ELSE
-   RRAT = RHO_AVG_OLD/RHO_AVG
-   RTRM = (1._EB-RHO_AVG/RHOP)*RRAT
-ENDIF
-
-!$OMP PARALLEL
-!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,U2,V2,W2) 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_BAROCLINIC'
-         U2 = 0.25_EB*(UU(I,J,K)+UU(I-1,J,K))**2
-         V2 = 0.25_EB*(VV(I,J,K)+VV(I,J-1,K))**2
-         W2 = 0.25_EB*(WW(I,J,K)+WW(I,J,K-1))**2
-         HQS(I,J,K) = 0.5_EB*(U2+V2+W2)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO COLLAPSE(2) PRIVATE(K,J,U2,V2,W2) 
-DO K=1,KBAR
-   DO J=1,JBAR
-      U2 = (1.5_EB*UU(0,J,K)-0.5_EB*UU(1,J,K))**2
-      V2 = 0.25_EB*(VV(1,J,K)+VV(1,J-1,K))**2
-      W2 = 0.25_EB*(WW(1,J,K)+WW(1,J,K-1))**2
-      HQS(0,J,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DX(1)+HQS(1,J,K))
-      U2 = (1.5_EB*UU(IBAR,J,K)-0.5_EB*UU(IBM1,J,K))**2
-      V2 = 0.25_EB*(VV(IBAR,J,K)+VV(IBAR,J-1,K))**2
-      W2 = 0.25_EB*(WW(IBAR,J,K)+WW(IBAR,J,K-1))**2
-      HQS(IBP1,J,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DX(IBAR)+HQS(IBAR,J,K))
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
- 
-IF (.NOT.TWO_D) THEN
-   !$OMP DO COLLAPSE(2) PRIVATE(K,I,U2,V2,W2)
-   DO K=1,KBAR
-      DO I=1,IBAR
-         U2 = 0.25_EB*(UU(I,1,K)+UU(I-1,1,K))**2
-         V2 = (1.5_EB*VV(I,0,K)-0.5_EB*VV(I,1,K))**2
-         W2 = 0.25_EB*(WW(I,1,K)+WW(I,1,K-1))**2
-         HQS(I,0,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DY(1)+HQS(I,1,K))
-         U2 = 0.25_EB*(UU(I,JBAR,K)+UU(I-1,JBAR,K))**2
-         V2 = (1.5_EB*VV(I,JBAR,K)-0.5_EB*VV(I,JBM1,K))**2
-         W2 = 0.25_EB*(WW(I,JBAR,K)+WW(I,JBAR,K-1))**2
-         HQS(I,JBP1,K) = MIN(0.5_EB*(U2+V2+W2),10._EB*DY(JBAR)+HQS(I,JBAR,K))
-      ENDDO
-   ENDDO
-   !$OMP END DO NOWAIT
-ENDIF
-
-!$OMP DO COLLAPSE(2) PRIVATE(J,I,U2,V2,W2)
-DO J=1,JBAR
-   DO I=1,IBAR
-      U2 = 0.25_EB*(UU(I,J,1)+UU(I-1,J,1))**2
-      V2 = 0.25_EB*(VV(I,J,1)+VV(I,J-1,1))**2
-      W2 = (1.5_EB*WW(I,J,0)-0.5_EB*WW(I,J,1))**2
-      HQS(I,J,0) = MIN(0.5_EB*(U2+V2+W2),10._EB*DZ(1)+HQS(I,J,1))
-      U2 = 0.25_EB*(UU(I,J,KBAR)+UU(I-1,J,KBAR))**2
-      V2 = 0.25_EB*(VV(I,J,KBAR)+VV(I,J-1,KBAR))**2
-      W2 = (1.5_EB*WW(I,J,KBAR)-0.5_EB*WW(I,J,KBM1))**2
-      HQS(I,J,KBP1) = MIN(0.5_EB*(U2+V2+W2),10._EB*DZ(KBAR)+HQS(I,J,KBAR))
-   ENDDO
-ENDDO
-!$OMP END DO
-
-!$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         FVX(I,J,K) = FVX(I,J,K) - 0.5_EB*(RTRM(I+1,J,K)+RTRM(I,J,K))*(H(I+1,J,K)-H(I,J,K)-HQS(I+1,J,K)+HQS(I,J,K))*RDXN(I)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
- 
-IF (.NOT.TWO_D) THEN
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-   DO K=1,KBAR
-      DO J=0,JBAR
-         DO I=1,IBAR
-            FVY(I,J,K) = FVY(I,J,K) - 0.5_EB*(RTRM(I,J+1,K)+RTRM(I,J,K))*(H(I,J+1,K)-H(I,J,K)-HQS(I,J+1,K)+HQS(I,J,K))*RDYN(J)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO NOWAIT
-ENDIF
-
-!$OMP DO COLLAPSE(3) PRIVATE(K,J,I) 
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         FVZ(I,J,K) = FVZ(I,J,K) - 0.5_EB*(RTRM(I,J,K+1)+RTRM(I,J,K))*(H(I,J,K+1)-H(I,J,K)-HQS(I,J,K+1)+HQS(I,J,K))*RDZN(K)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-!$OMP END PARALLEL
- 
-END SUBROUTINE BAROCLINIC_CORRECTION
-
-
-SUBROUTINE BAROCLINIC_CORRECTION2
  
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),HP=>NULL(),RHMK=>NULL(),RRHO=>NULL()
 INTEGER  :: I,J,K
@@ -2371,7 +2242,7 @@ DO K=0,KBAR
    ENDDO
 ENDDO
  
-END SUBROUTINE BAROCLINIC_CORRECTION2
+END SUBROUTINE BAROCLINIC_CORRECTION
 
 
 !===========================================================================
@@ -2444,7 +2315,6 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
             WBAR(I,J,K) = 0.5_EB*(WW(I,J,K)+WW(I,J,KM1))
             
             VEL2 = UBAR(I,J,K)**2+VBAR(I,J,K)**2+WBAR(I,J,K)**2
-            !!PP(I,J,K) = RHO_AVG*(H(I,J,K)-.5_EB*VEL2)
             PP(I,J,K) = RHOP(I,J,K)*(H(I,J,K)-.5_EB*VEL2)
             
             DUDX(I,J,K) = (UU(I,J,K)-UU(IM1,J,K))/DX(I)

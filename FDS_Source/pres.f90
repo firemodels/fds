@@ -27,8 +27,8 @@ REAL(EB), INTENT(IN) :: T
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),HP=>NULL()
 REAL(EB), POINTER, DIMENSION(:) :: UWP=>NULL()
 INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
-REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,DWWDT,DVVDT,DUUDT,HQ2,RFODT,U2,V2,W2,HFAC,H0RR(6),TNOW,DUMMY=0._EB, &
-            TSI,TIME_RAMP_FACTOR,H_EXTERNAL,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL
+REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,DWWDT,DVVDT,DUUDT,RFODT,TNOW,DUMMY=0._EB, &
+            TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL
 TYPE (VENTS_TYPE), POINTER :: VT=>NULL()
  
 IF (SOLID_PHASE_ONLY) RETURN
@@ -54,15 +54,6 @@ ENDIF
 ! Miscellaneous settings for wind and baroclinic cases
  
 RFODT = RELAXATION_FACTOR/DT
-HFAC  = 1._EB-RHOA/RHO_AVG
-H0RR  = 0._EB
-IF (U0>=0._EB) H0RR(1) = H0*RHOA/RHO_AVG
-IF (U0<=0._EB) H0RR(2) = H0*RHOA/RHO_AVG
-IF (V0>=0._EB) H0RR(3) = H0*RHOA/RHO_AVG
-IF (V0<=0._EB) H0RR(4) = H0*RHOA/RHO_AVG
-IF (W0>=0._EB) H0RR(5) = H0*RHOA/RHO_AVG
-IF (W0<=0._EB) H0RR(6) = H0*RHOA/RHO_AVG
-IF (EVACUATION_ONLY(NM)) H0RR(1:6) = 0._EB
 
 ! Apply pressure boundary conditions at external cells.
 ! If Neumann, BXS, BXF, etc., contain dH/dx(x=XS), dH/dx(x=XF), etc.
@@ -73,8 +64,7 @@ IF (EVACUATION_ONLY(NM)) H0RR(1:6) = 0._EB
 
 !$OMP PARALLEL
 !$OMP DO PRIVATE(IW,I,J,K,IOR,DUUDT,DVVDT,DWWDT,NOM,H_OTHER,KKO,JJO,IIO) &
-!$OMP PRIVATE(N_INT_CELLS,DX_OTHER,DY_OTHER,DZ_OTHER,H_EXTERNAL,VT,TSI,TIME_RAMP_FACTOR) &
-!$OMP PRIVATE(U2,V2,W2,HQ2)
+!$OMP PRIVATE(N_INT_CELLS,DX_OTHER,DY_OTHER,DZ_OTHER,VT,TSI,TIME_RAMP_FACTOR) 
 WALL_CELL_LOOP: DO IW=1,NEWC
  
    I   = IJKW(1,IW)
@@ -182,7 +172,6 @@ WALL_CELL_LOOP: DO IW=1,NEWC
 
       OPEN: IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
  
-         H_EXTERNAL = 0._EB
          IF (VENT_INDEX(IW)>0) THEN
             VT => VENTS(VENT_INDEX(IW))
             IF (TW(IW) == T_BEGIN .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
@@ -191,89 +180,45 @@ WALL_CELL_LOOP: DO IW=1,NEWC
                TSI = T - T_BEGIN
             ENDIF
             TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,DUMMY,VT%PRESSURE_RAMP_INDEX)
-            !!H_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE/RHOA
-            IF (.NOT.BAROCLINIC2) H_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE/RHO_AVG !! test
-            IF (BAROCLINIC2)      P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE         !! also test
+            P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE      
          ENDIF
 
          SELECT CASE(IOR)
             CASE( 1)
-               U2  = UU(0,J,K)**2
-               V2  = .25_EB*(VV(1,J,K)+VV(1,J-1,K))**2
-               W2  = .25_EB*(WW(1,J,K)+WW(1,J,K-1))**2
-               HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (UU(0,J,K)<0._EB) THEN
-                  IF (.NOT.BAROCLINIC2) BXS(J,K) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BXS(J,K) = P_EXTERNAL/RHO_W(IW) + KRES(0,J,K)
+                  BXS(J,K) = P_EXTERNAL/RHO_W(IW) + KRES(0,J,K)
                ELSE
-                  !BXS(J,K) = H_EXTERNAL + H0RR(1) + HQ2*HFAC
-                  IF (.NOT.BAROCLINIC2) BXS(J,K) = H_EXTERNAL + H0RR(1) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
-                  IF (BAROCLINIC2)      BXS(J,K) = P_EXTERNAL/RHO_W(IW) + H0
+                  BXS(J,K) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
             CASE(-1)
-               U2  = UU(IBAR,J,K)**2
-               V2  = .25_EB*(VV(IBAR,J,K)+VV(IBAR,J-1,K))**2
-               W2  = .25_EB*(WW(IBAR,J,K)+WW(IBAR,J,K-1))**2
-               HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (UU(IBAR,J,K)>0._EB) THEN
-                  IF (.NOT.BAROCLINIC2) BXF(J,K) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BXF(J,K) = P_EXTERNAL/RHO_W(IW) + KRES(IBP1,J,K)
+                  BXF(J,K) = P_EXTERNAL/RHO_W(IW) + KRES(IBP1,J,K)
                ELSE
-                  !BXF(J,K) = H_EXTERNAL + H0RR(2) + HQ2*HFAC
-                  IF (.NOT.BAROCLINIC2) BXF(J,K) = H_EXTERNAL + H0RR(2) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
-                  IF (BAROCLINIC2)      BXF(J,K) = P_EXTERNAL/RHO_W(IW) + H0
+                  BXF(J,K) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
             CASE( 2)
-               U2  = .25_EB*(UU(I,1,K)+UU(I-1,1,K))**2
-               V2  = VV(I,0,K)**2
-               W2  = .25_EB*(WW(I,1,K)+WW(I,1,K-1))**2
-               HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (VV(I,0,K)<0._EB) THEN
-                  IF (.NOT.BAROCLINIC2) BYS(I,K) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BYS(I,K) = P_EXTERNAL/RHO_W(IW) + KRES(I,0,K)
+                  BYS(I,K) = P_EXTERNAL/RHO_W(IW) + KRES(I,0,K)
                ELSE
-                  !BYS(I,K) = H_EXTERNAL + H0RR(3) + HQ2*HFAC
-                  IF (.NOT.BAROCLINIC2) BYS(I,K) = H_EXTERNAL + H0RR(3) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
-                  IF (BAROCLINIC2)      BYS(I,K) = P_EXTERNAL/RHO_W(IW) + H0
+                  BYS(I,K) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
             CASE(-2)
-               U2  = .25_EB*(UU(I,JBAR,K)+UU(I-1,JBAR,K))**2
-               V2  = VV(I,JBAR,K)**2
-               W2  = .25_EB*(WW(I,JBAR,K)+WW(I,JBAR,K-1))**2
-               HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (VV(I,JBAR,K)>0._EB) THEN
-                  IF (.NOT.BAROCLINIC2) BYF(I,K) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BYF(I,K) = P_EXTERNAL/RHO_W(IW) + KRES(I,JBP1,K)
+                  BYF(I,K) = P_EXTERNAL/RHO_W(IW) + KRES(I,JBP1,K)
                ELSE
-                  !BYF(I,K) = H_EXTERNAL + H0RR(4) + HQ2*HFAC
-                  IF (.NOT.BAROCLINIC2) BYF(I,K) = H_EXTERNAL + H0RR(4) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
-                  IF (BAROCLINIC2)      BYF(I,K) = P_EXTERNAL/RHO_W(IW) + H0
+                  BYF(I,K) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
             CASE( 3)
-               U2  = .25_EB*(UU(I,J,1)+UU(I-1,J,1))**2
-               V2  = .25_EB*(VV(I,J,1)+VV(I,J-1,1))**2
-               W2  = WW(I,J,0)**2
-               HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (WW(I,J,0)<0._EB) THEN
-                  IF (.NOT.BAROCLINIC2) BZS(I,J) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BZS(I,J) = P_EXTERNAL/RHO_W(IW) + KRES(I,J,0)
+                  BZS(I,J) = P_EXTERNAL/RHO_W(IW) + KRES(I,J,0)
                ELSE
-                  !BZS(I,J) = H_EXTERNAL + H0RR(5) + HQ2*HFAC
-                  IF (.NOT.BAROCLINIC2) BZS(I,J) = H_EXTERNAL + H0RR(5) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
-                  IF (BAROCLINIC2)      BZS(I,J) = P_EXTERNAL/RHO_W(IW) + H0
+                  BZS(I,J) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
             CASE(-3)
-               U2  = .25_EB*(UU(I,J,KBAR)+UU(I-1,J,KBAR))**2
-               V2  = .25_EB*(VV(I,J,KBAR)+VV(I,J-1,KBAR))**2
-               W2  = WW(I,J,KBAR)**2
-               HQ2 = MIN(5000._EB,0.5_EB*(U2+V2+W2))
                IF (WW(I,J,KBAR)>0._EB) THEN
-                  IF (.NOT.BAROCLINIC2) BZF(I,J) = H_EXTERNAL + HQ2
-                  IF (BAROCLINIC2)      BZF(I,J) = P_EXTERNAL/RHO_W(IW) + KRES(I,J,KBP1)
+                  BZF(I,J) = P_EXTERNAL/RHO_W(IW) + KRES(I,J,KBP1)
                ELSE
-                  !BZF(I,J) = H_EXTERNAL + H0RR(6) + HQ2*HFAC
-                  IF (.NOT.BAROCLINIC2) BZF(I,J) = H_EXTERNAL + H0RR(6) + HQ2*(1._EB-RHO_W(IW)/RHO_AVG)
-                  IF (BAROCLINIC2)      BZF(I,J) = P_EXTERNAL/RHO_W(IW) + H0
+                  BZF(I,J) = P_EXTERNAL/RHO_W(IW) + H0
                ENDIF
          END SELECT
     
