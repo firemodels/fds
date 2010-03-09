@@ -32,11 +32,10 @@ void getcontournodes(int n, int levels, const double x[4], const double y[4], co
                      int *nnode2,float *xline, float *yline,
                      int *casen,int blankit);
 
-void DrawContours(const contour *ci,int drawoption, float linewidth);
+void DrawContours(const contour *ci);
 void setcontourslice(contour *ci,int idir,float xyz);
 void getcontours(const float *xgrid, const float *ygrid, int nx, int ny,  
                  const float *vals, const char *iblank, const float *levels,  
-                 int minfill, int maxfill,
                  const contour *ci);
 void initcontour(contour *ci, float **rgbptr, int nlevels);
 void freecontour(contour *ci);

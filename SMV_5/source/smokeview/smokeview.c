@@ -1388,14 +1388,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       switch (visTerrainType){
         case 1:
         case 2:
-          if(visTerrainType==1){
-            if(cullfaces==1)glDisable(GL_CULL_FACE);
-            DrawContours(&meshinfo[i].terrain_contour,1,plot3dlinewidth);
-            if(cullfaces==1)glEnable(GL_CULL_FACE);
-          }
-          else{
-            DrawContours(&meshinfo[i].terrain_contour,2,plot3dlinewidth);
-          }
+          if(cullfaces==1)glDisable(GL_CULL_FACE);
+          DrawContours(&meshinfo[i].terrain_contour);
+          if(cullfaces==1)glEnable(GL_CULL_FACE);
           break;
         case 0:
         case 3:
@@ -2914,9 +2909,9 @@ void Init(void){
 
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;
-    initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb-1);
-    initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb-1);
-    initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb-1);
+    initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
+    initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb);
+    initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb);
   }
 
   if(set_no_part!=1&&nopart!=1&&npart_files>0){

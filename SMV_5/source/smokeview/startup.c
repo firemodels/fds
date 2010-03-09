@@ -276,16 +276,18 @@ void sv_startup_c(int argc, char **argv){
     rgbptr[i]=&rgb[i][0];
   }
   NewMemory((void **)&rgb_plot3d_contour,MAXRGB*sizeof(float *));
-  for(i=0;i<nrgb-1;i++){
+  for(i=0;i<nrgb-2;i++){
     int ii;
     float factor;
 
-    factor=256/(nrgb-2);
+    factor=256.0/(float)(nrgb-2);
 
     ii = factor*((float)i+0.5);
     if(ii>255)ii=255;
     rgb_plot3d_contour[i]=&rgb_full[ii][0];
   }
+  rgb_plot3d_contour[nrgb-2]=&rgb_full[0][0];
+  rgb_plot3d_contour[nrgb-1]=&rgb_full[255][0];
 }
 
 /* ------------------ InitOpenGL ------------------------ */
