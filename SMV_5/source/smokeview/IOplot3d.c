@@ -113,9 +113,9 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   freecontour(&meshi->plot3dcontour1);
   freecontour(&meshi->plot3dcontour2);
   freecontour(&meshi->plot3dcontour3);
-  initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb-1);
-  initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb-1);
-  initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb-1);
+  initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
+  initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb);
+  initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb);
 
 
   for(i=0;i<nmeshes;i++){
@@ -142,15 +142,21 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
       FREEMEMORY(colorlabeliso);
     }
     if(scalep3 != NULL){
-      for(nn=0;nn<mxplot3dvars;nn++){FREEMEMORY(scalep3[nn]);}
+      for(nn=0;nn<mxplot3dvars;nn++){
+        FREEMEMORY(scalep3[nn]);
+      }
       FREEMEMORY(scalep3);
     }
     if(p3levels!=NULL){
-      for(nn=0;nn<mxplot3dvars;nn++){FREEMEMORY(p3levels[nn]);}
+      for(nn=0;nn<mxplot3dvars;nn++){
+        FREEMEMORY(p3levels[nn]);
+      }
       FREEMEMORY(p3levels);
     }
     if(p3levels256!=NULL){
-      for(nn=0;nn<mxplot3dvars;nn++){FREEMEMORY(p3levels256[nn]);}
+      for(nn=0;nn<mxplot3dvars;nn++){
+        FREEMEMORY(p3levels256[nn]);
+      }
       FREEMEMORY(p3levels256);
     }
   }
@@ -517,7 +523,9 @@ void drawplot3d_texture(mesh *meshi){
     }
   }
 
-  if(transparentflag==1)transparenton();
+  if(transparentflag==1){
+    transparenton();
+  }
   if(visVector==0&&p3cont2d==SHADED_CONTOURS){
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
     glEnable(GL_TEXTURE_1D);
@@ -527,7 +535,9 @@ void drawplot3d_texture(mesh *meshi){
   /* +++++++++++++++++++++++++++   draw yz contours +++++++++++++++++++++++++++++++++++++ */
 
   if(visx!=0){
-    if(visVector==0)DrawContours(plot3dcontour1ptr,p3cont2d,plot3dlinewidth);
+    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+      DrawContours(plot3dcontour1ptr);
+    }
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       if(plotx<0){
         plotx=ibar;
@@ -636,8 +646,8 @@ void drawplot3d_texture(mesh *meshi){
   /* +++++++++++++++++++++++++++++++++  draw xz contours  ++++++++++++++++++++++++++++++++++++++++ */
 
   if(visy!=0){
-    if(visVector==0){
-      DrawContours(plot3dcontour2ptr,p3cont2d,plot3dlinewidth);
+    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+      DrawContours(plot3dcontour2ptr);
     }
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       /*
@@ -746,8 +756,8 @@ void drawplot3d_texture(mesh *meshi){
   /* ++++++++++++++++++++++++++++ draw xy contours ++++++++++++++++++++++++++++++++ */
 
   if(visz!=0){
-    if(visVector==0){
-      DrawContours(plot3dcontour3ptr,p3cont2d,plot3dlinewidth);
+    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+      DrawContours(plot3dcontour3ptr);
     }
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       if(plotz<0){plotz=kbar;updateplotslice(3);}
@@ -847,7 +857,9 @@ void drawplot3d_texture(mesh *meshi){
   if(visVector==0&&p3cont2d==SHADED_CONTOURS){
     glDisable(GL_TEXTURE_1D);
   }
-  if(transparentflag==1)transparentoff();
+  if(transparentflag==1){
+    transparentoff();
+  }
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -936,7 +948,9 @@ void drawplot3d(mesh *meshi){
   /* +++++++++++++++++++++++++++   draw yz contours +++++++++++++++++++++++++++++++++++++ */
 
   if(visx!=0){
-    if(visVector==0)DrawContours(plot3dcontour1ptr,p3cont2d,plot3dlinewidth);
+    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+      DrawContours(plot3dcontour1ptr);
+    }
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       if(plotx<0){
         plotx=ibar;
@@ -1042,8 +1056,8 @@ void drawplot3d(mesh *meshi){
   /* +++++++++++++++++++++++++++++++++  draw xz contours  ++++++++++++++++++++++++++++++++++++++++ */
 
   if(visy!=0){
-    if(visVector==0){
-      DrawContours(plot3dcontour2ptr,p3cont2d,plot3dlinewidth);
+    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+      DrawContours(plot3dcontour2ptr);
     }
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       /*
@@ -1152,8 +1166,8 @@ void drawplot3d(mesh *meshi){
   /* ++++++++++++++++++++++++++++ draw xy contours ++++++++++++++++++++++++++++++++ */
 
   if(visz!=0){
-    if(visVector==0){
-      DrawContours(plot3dcontour3ptr,p3cont2d,plot3dlinewidth);
+    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+      DrawContours(plot3dcontour3ptr);
     }
     if(visVector==0&&p3cont2d==SHADED_CONTOURS){
       if(plotz<0){plotz=kbar;updateplotslice(3);}
@@ -1640,11 +1654,10 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
       }
     }
     freecontour(plot3dcontour1ptr);
-    initcontour(plot3dcontour1ptr,rgb_plot3d_contour,nrgb-1);
+    initcontour(plot3dcontour1ptr,rgb_plot3d_contour,nrgb);
     setcontourslice(plot3dcontour1ptr,1,xplt[plotx]);
     getcontours(yplt,zplt,jbar+1,kbar+1, 
       yzcolorfbase, iblank_yz,p3levels[plotn-1],
-      minfill, maxfill,
       plot3dcontour1ptr);
     FREEMEMORY(iblank_yz);
   }
@@ -1685,11 +1698,10 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
       }
     }}
     freecontour(plot3dcontour2ptr);
-    initcontour(plot3dcontour2ptr,rgb_plot3d_contour,nrgb-1);
+    initcontour(plot3dcontour2ptr,rgb_plot3d_contour,nrgb);
     setcontourslice(plot3dcontour2ptr,2,yplt[ploty]);
     getcontours(xplt,zplt,ibar+1,kbar+1, 
       xzcolorfbase, iblank_xz,p3levels[plotn-1], 
-      minfill, maxfill,
       plot3dcontour2ptr);
     FREEMEMORY(iblank_xz);
   }
@@ -1730,11 +1742,10 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
       }
     }}
     freecontour(plot3dcontour3ptr);
-    initcontour(plot3dcontour3ptr,rgb_plot3d_contour,nrgb-1);
+    initcontour(plot3dcontour3ptr,rgb_plot3d_contour,nrgb);
     setcontourslice(plot3dcontour3ptr,3,zplt[plotz]);
     getcontours(xplt,yplt,ibar+1,jbar+1, 
       xycolorfbase, iblank_xy,p3levels[plotn-1], 
-      minfill, maxfill,
       plot3dcontour3ptr);
     FREEMEMORY(iblank_xy);
   }
