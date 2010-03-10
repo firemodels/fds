@@ -120,6 +120,10 @@ Rem if exist "%out_bundle%\..\..\FDS_SMOKEVIEW\FDS5\Uninstall" rmdir /s /q "%out
 echo.
 echo Copying wrapup scripts for use in final installation
 copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\FDS5\wrapup_fds_install.bat"
+if %docs_include_in_bundle% EQU 0 goto end_docs2
+copy "%bundleinfo%\wrapup_fds_full_install.bat" "%out_bundle%\FDS5\wrapup_fds_install.bat"
+:end_docs2
+
 copy "%bundleinfo%\shortcut.exe" "%out_bundle%\FDS5\shortcut.exe"
 copy "%bundleinfo%\set_path.exe" "%out_bundle%\FDS5\set_path.exe"
 
