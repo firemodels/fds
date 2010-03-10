@@ -1,6 +1,7 @@
 @echo off
 set svn_drive=d:
 
+set SCRIPT_DIR=%CD%
 set BASEDIR=%CD%\..
 set SVNROOT=%BASEDIR%\..\
 
@@ -19,7 +20,7 @@ Rem This file is included in the smokeview user's guide
 set smvug="%CD%\..\Manuals\SMV_5_User_Guide\"
 echo | fds5 2> "%smvug%\figures\fds5.version"
 
-call SMV_Cases.bat
+call %SCRIPT_DIR%\SMV_Cases.bat
 
 cd %BASEDIR%
 
