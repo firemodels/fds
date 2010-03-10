@@ -1149,8 +1149,7 @@ void drawColorBars(float ybump){
         glVertex2f(barright,yy2);
         glVertex2f(barleft, yy2);
       }
-      // really should be if(visiso==0) but am turning feature off for now
-      if(visiso==3){
+      {
         i=-1;
         yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
@@ -1164,7 +1163,7 @@ void drawColorBars(float ybump){
 
         i=nrgb-2;
         yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
-        yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
+        yy2 = (barbot*(nrgb-3.5-i)+  (i+0.5)*tophat)/(nrgb-3);
 
         glColor4fv(rgb_plot3d_contour[nrgb-1]);
         glVertex2f(barleft, yy); 
@@ -1195,6 +1194,33 @@ void drawColorBars(float ybump){
         glVertex2f(barleft,yy2);
       }
     }
+      {
+        float top, tophat;
+
+        top = barbot+nrgb+DYFONT;
+        tophat = top - (top-barbot)/(nrgb-2);
+        i=-1;
+        yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
+        yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
+
+        glColor4fv(rgb_full[0]);
+        glVertex2f(barleft, yy); 
+        glVertex2f(barright,yy);
+       
+        glVertex2f(barright,yy2);
+        glVertex2f(barleft, yy2);
+
+        i=nrgb-2;
+        yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
+        yy2 = (barbot*(nrgb-3.5-i)+  (i+0.5)*tophat)/(nrgb-3);
+
+        glColor4fv(rgb_full[nrgb_full-1]);
+        glVertex2f(barleft, yy); 
+        glVertex2f(barright,yy);
+       
+        glVertex2f(barright,yy2);
+        glVertex2f(barleft, yy2);
+      }
     glEnd();
   }
   leftsmoke=0;
