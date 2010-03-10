@@ -1150,16 +1150,19 @@ void drawColorBars(float ybump){
         glVertex2f(barleft, yy2);
       }
       {
+        float barmid;
+
+        barmid = (barleft+barright)/2.0;
         i=-1;
-        yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
+        yy =  (barbot*(nrgb-3-(i+0.5))  +(i+0.5)   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
 
         glColor4fv(rgb_plot3d_contour[nrgb-2]);
-        glVertex2f(barleft, yy); 
-        glVertex2f(barright,yy);
-       
-        glVertex2f(barright,yy2);
+
         glVertex2f(barleft, yy2);
+        glVertex2f(barmid, yy); 
+        glVertex2f(barmid,yy);
+        glVertex2f(barright,yy2);
 
         i=nrgb-2;
         yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
@@ -1169,8 +1172,8 @@ void drawColorBars(float ybump){
         glVertex2f(barleft, yy); 
         glVertex2f(barright,yy);
        
-        glVertex2f(barright,yy2);
-        glVertex2f(barleft, yy2);
+        glVertex2f(barmid,yy2);
+        glVertex2f(barmid, yy2);
       }
     }
     else{
@@ -1195,20 +1198,22 @@ void drawColorBars(float ybump){
       }
     }
       {
-        float top, tophat;
+        float top, tophat, barmid;
+
+        barmid=(barleft+barright)/2.0;
 
         top = barbot+nrgb+DYFONT;
         tophat = top - (top-barbot)/(nrgb-2);
         i=-1;
-        yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
-        yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
+        yy =  (barbot*(nrgb-3-(i+0.5))  +(i+0.5)   *tophat)/(nrgb-3);
+        yy2 = (barbot*(nrgb-4.0-i)+  (i+1.0)*tophat)/(nrgb-3);
 
         glColor4fv(rgb_full[0]);
-        glVertex2f(barleft, yy); 
-        glVertex2f(barright,yy);
-       
-        glVertex2f(barright,yy2);
+
         glVertex2f(barleft, yy2);
+        glVertex2f(barmid, yy); 
+        glVertex2f(barmid,yy);
+        glVertex2f(barright,yy2);
 
         i=nrgb-2;
         yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
@@ -1218,8 +1223,8 @@ void drawColorBars(float ybump){
         glVertex2f(barleft, yy); 
         glVertex2f(barright,yy);
        
-        glVertex2f(barright,yy2);
-        glVertex2f(barleft, yy2);
+        glVertex2f(barmid,yy2);
+        glVertex2f(barmid, yy2);
       }
     glEnd();
   }
