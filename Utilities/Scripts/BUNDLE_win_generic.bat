@@ -85,8 +85,8 @@ copy "%in_smv%\readme.html"                      "%out_guides%\Smokeview_release
 
 copy "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
 copy "%bundleinfo%\FDS_Web_Site.url"          "%out_web%\Official_Web_Site.url"
-copy "%bundleinfo%\Updates.url"               "%out_web%\Software Updates.url"
-copy "%bundleinfo%\Docs.url"               "%out_web%\Documentation Updates.url"
+copy "%bundleinfo%\Updates.url"               "%out_web%\Software_Updates.url"
+copy "%bundleinfo%\Docs.url"               "%out_web%\Documentation_Updates.url"
 copy "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
 copy "%bundleinfo%\discussion_group.url"          "%out_web%\Discussion_Group.url"
 copy "%bundleinfo%\issue_tracker.url"          "%out_web%\Issue_Tracker.url"
