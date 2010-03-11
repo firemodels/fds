@@ -4372,7 +4372,7 @@ SELECT CASE(IND)
             DR=>DROPLET(I)
             IPC=DR%CLASS
             PC=>PARTICLE_CLASS(IPC)
-            IF (PY%PART_ID/=PC%ID .AND. PY%PART_ID/='ALL') CYCLE DLOOP
+            IF (PY%PART_INDEX/=IPC .AND. PY%PART_INDEX/=0) CYCLE DLOOP
             IF ((DR%X-DV%X)**2+(DR%Y-DV%Y)**2+(DR%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP
             SELECT CASE(PY%QUANTITY)
                CASE('U-VELOCITY') 
