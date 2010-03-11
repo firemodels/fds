@@ -363,36 +363,9 @@ void initdefaultcolorbars(void){
     cbi->nlegs=0;
     cbi->legindex=0;
   }
-
-      // original colorbar
-
-  cbi=colorbarinfo;
-  strcpy(cbi->label,"Original");
-  cbi->label_ptr=cbi->label;
-  cbi->nlegs=nrgb;
-  cbi->valmin=0.0;
-  cbi->valmax=100.0;
-  dval = (cb_valmax-cb_valmin)/(float)(cbi->nlegs-1);
-  for(i=0;i<cbi->nlegs;i++){
-    ii = 6*i;
-    cbi->leg_rgb[ii]  =rgb[i][0];
-    cbi->leg_rgb[ii+1]=rgb[i][1];
-    cbi->leg_rgb[ii+2]=rgb[i][2];
-    if(i!=cbi->nlegs-1){
-      cbi->leg_rgb[ii+3]=rgb[i+1][0];
-      cbi->leg_rgb[ii+4]=rgb[i+1][1];
-      cbi->leg_rgb[ii+5]=rgb[i+1][2];
-      cbi->legvals[i]=cb_valmin + i*dval;
-      cbi->colorbar_index[i]=255*(float)i/(cbi->nlegs-1);
-    }
-  }
-  cbi->colorbar_index[cbi->nlegs-1]=255;
-  cbi->legvals[cbi->nlegs-1]=cb_valmax;
-  cbi->splitflag[cbi->nlegs-1]=0;
-
       // rainbow colorbar
 
-  cbi=colorbarinfo+1;
+  cbi=colorbarinfo;
   strcpy(cbi->label,"Rainbow");
   cbi->label_ptr=cbi->label;
   cbi->nlegs=5;
@@ -460,7 +433,7 @@ void initdefaultcolorbars(void){
 
       // b&w colorbar
 
-  cbi=colorbarinfo+2;
+  cbi=colorbarinfo+1;
   strcpy(cbi->label,"Black and White");
   cbi->label_ptr=cbi->label;
   cbi->valmin=0.0;
@@ -505,8 +478,6 @@ void initdefaultcolorbars(void){
 
   remapcolorbar(colorbarinfo);
   remapcolorbar(colorbarinfo+1);
-  remapcolorbar(colorbarinfo+2);
-
 }
 
 
