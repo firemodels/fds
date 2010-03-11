@@ -82,11 +82,11 @@ echo to the Documentation directory
 copy %in_pdf%\FDS_5_User_Guide.pdf               %out_guides%\.
 copy %in_pdf%\SMV_5_User_Guide.pdf               %out_guides%\.
 copy "%in_smv%\readme.html"                      "%out_guides%\Smokeview_release_notes.html"
-copy "%bundleinfo%\Latest_Documentation.url"     "%out_guides%\Latest_Documentation.url"
 
 copy "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
 copy "%bundleinfo%\FDS_Web_Site.url"          "%out_web%\Official_Web_Site.url"
-copy "%bundleinfo%\Updates.url"               "%out_web%\Updates.url"
+copy "%bundleinfo%\Updates.url"               "%out_web%\Software Updates.url"
+copy "%bundleinfo%\Docs.url"               "%out_web%\Documentation Updates.url"
 copy "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
 copy "%bundleinfo%\discussion_group.url"          "%out_web%\Discussion_Group.url"
 copy "%bundleinfo%\issue_tracker.url"          "%out_web%\Issue_Tracker.url"
