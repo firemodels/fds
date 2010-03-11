@@ -8321,7 +8321,7 @@ f(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} \left( \frac{\sum_i n_
 where $x$ is the quantity to be measured. The summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} and centered at
 the location given by the device {\ct XYZ}. The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
-\item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Use {\ct 'ALL'} to account for all particles.
+\item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Do not specify to account for all particles.
 \item[{\ct PDPA\_START}] $t_s$, starting time of time integration in seconds. PDPA output is always a running average over time.
 As the spray simulation may contain some initial transient phase, it may be useful to specify the starting time of data collection.
 \item[{\ct PDPA\_END}] $t_e$, ending time of time integration in seconds.
