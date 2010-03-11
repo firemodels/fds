@@ -5558,7 +5558,6 @@ static int in_menu=0;
 /* --------------------------------shade menu -------------------------- */
 
   CREATEMENU(shademenu,ShadeMenu);
-    glutAddSubMenu("Colorbars",colorbarmenu);
 
   if(background_flip==1){
     glutAddMenuEntry("*Flip background",1);
@@ -5566,12 +5565,14 @@ static int in_menu=0;
   else{
     glutAddMenuEntry("Flip background",1);
   }
+  /*
   if(setbw==0){
     glutAddMenuEntry("*Color/BW",2);
   }
   else{
     glutAddMenuEntry("Color/*BW",2);
   }
+  */
   if(transparentflag==1){
     glutAddMenuEntry("*Transparent (data)",3);
   }
@@ -6229,6 +6230,7 @@ static int in_menu=0;
 /* --------------------------------option menu -------------------------- */
 
   CREATEMENU(optionmenu,OptionMenu);
+  glutAddSubMenu("Colorbars",colorbarmenu);
   glutAddSubMenu("Shades",shademenu);
   if(nunitclasses>0)glutAddSubMenu("Units",unitsmenu);
 #ifdef pp_SHOWLIGHT
