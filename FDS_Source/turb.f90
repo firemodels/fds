@@ -1473,6 +1473,10 @@ DO K = N_LO(3),N_HI(3)
             ENDIF
             C_DYNSMAG(I,J,K) = SQRT(MLHAT(I,J,K)/MMHAT(I,J,K))/DELTA
          ENDIF
+         
+         ! clip max value of CS, note that CS*DELTA is the "mixing length", so DELTA
+         ! is a reasonable upper bound
+         C_DYNSMAG(I,J,K) = MIN(C_DYNSMAG(I,J,K),1._EB)
 				
       END DO
    END DO
