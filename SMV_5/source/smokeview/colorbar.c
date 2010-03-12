@@ -363,7 +363,8 @@ void initdefaultcolorbars(void){
     cbi->nlegs=0;
     cbi->legindex=0;
   }
-      // rainbow colorbar
+  
+  // rainbow colorbar
 
   cbi=colorbarinfo;
   strcpy(cbi->label,"Rainbow");
@@ -431,9 +432,200 @@ void initdefaultcolorbars(void){
   cbi->legvals[3]=cb_valmin+3*dval;
   cbi->legvals[4]=cb_valmax;
 
-      // b&w colorbar
+  // jet colorbar
 
   cbi=colorbarinfo+1;
+  strcpy(cbi->label,"jet");
+  cbi->label_ptr=cbi->label;
+  cbi->nlegs=8;
+  cbi->valmin=0.0;
+  cbi->valmax=100.0;
+
+  cbi->leg_rgb[0]=0.0;
+  cbi->leg_rgb[1]=0.0;
+  cbi->leg_rgb[2]=0.560784;
+
+  cbi->leg_rgb[3]=0.0;
+  cbi->leg_rgb[4]=0.0;
+  cbi->leg_rgb[5]=1.0;
+
+
+  cbi->leg_rgb[6]=0.0;
+  cbi->leg_rgb[7]=0.0;
+  cbi->leg_rgb[8]=1.0;
+
+  cbi->leg_rgb[9]=0.0;
+  cbi->leg_rgb[10]=0.51961;
+  cbi->leg_rgb[11]=1.0;
+
+
+  cbi->leg_rgb[12]=0.0;
+  cbi->leg_rgb[13]=0.51961;
+  cbi->leg_rgb[14]=1.0;
+
+  cbi->leg_rgb[15]=0.0;
+  cbi->leg_rgb[16]=1.0;
+  cbi->leg_rgb[17]=1.0;
+
+
+  cbi->leg_rgb[18]=0.0;
+  cbi->leg_rgb[19]=1.0;
+  cbi->leg_rgb[20]=1.0;
+
+  cbi->leg_rgb[21]=0.501961;
+  cbi->leg_rgb[22]=1.0;
+  cbi->leg_rgb[23]=0.501961;
+
+
+  cbi->leg_rgb[24]=0.501961;
+  cbi->leg_rgb[25]=1.0;
+  cbi->leg_rgb[26]=0.501961;
+
+  cbi->leg_rgb[27]=1.0;
+  cbi->leg_rgb[28]=1.0;
+  cbi->leg_rgb[29]=0.0;
+
+
+  cbi->leg_rgb[30]=1.0;
+  cbi->leg_rgb[31]=1.0;
+  cbi->leg_rgb[32]=0.0;
+
+  cbi->leg_rgb[33]=1.0;
+  cbi->leg_rgb[34]=0.501961;
+  cbi->leg_rgb[35]=0.0;
+
+
+  cbi->leg_rgb[36]=1.0;
+  cbi->leg_rgb[37]=0.501961;
+  cbi->leg_rgb[38]=0.0;
+
+  cbi->leg_rgb[39]=1.0;
+  cbi->leg_rgb[40]=0.0;
+  cbi->leg_rgb[41]=0.0;
+
+
+  cbi->leg_rgb[42]=1.0;
+  cbi->leg_rgb[43]=0.0;
+  cbi->leg_rgb[44]=0.0;
+
+  cbi->leg_rgb[45]=0.501961;
+  cbi->leg_rgb[46]=0.0;
+  cbi->leg_rgb[47]=0.0;
+  
+  cbi->splitflag[0]=0;
+  cbi->splitflag[1]=0;
+  cbi->splitflag[2]=0;
+  cbi->splitflag[3]=0;
+  cbi->splitflag[4]=0;
+  cbi->splitflag[5]=0;
+  cbi->splitflag[6]=0;
+  cbi->splitflag[7]=0;
+
+  nlegs = cbi->nlegs-1;
+  cbi->colorbar_index[0]=0;
+  cbi->colorbar_index[1]=32;
+  cbi->colorbar_index[2]=64;
+  cbi->colorbar_index[3]=96;
+  cbi->colorbar_index[4]=128;
+  cbi->colorbar_index[5]=160;
+  cbi->colorbar_index[6]=192;
+  cbi->colorbar_index[7]=224;
+
+  dval = (cb_valmax-cb_valmin)/(float)nlegs;
+  cbi->legvals[0]=cb_valmin;
+  cbi->legvals[1]=cb_valmin+dval;
+  cbi->legvals[2]=cb_valmin+2*dval;
+  cbi->legvals[3]=cb_valmin+3*dval;
+  cbi->legvals[4]=cb_valmin+4*dval;
+  cbi->legvals[5]=cb_valmin+5*dval;
+  cbi->legvals[6]=cb_valmin+6*dval;
+  cbi->legvals[7]=cb_valmax;
+
+  // autumn
+
+  cbi=colorbarinfo+2;
+  strcpy(cbi->label,"autumn");
+  cbi->label_ptr=cbi->label;
+  cbi->nlegs=2;
+  cbi->valmin=0.0;
+  cbi->valmax=100.0;
+
+  cbi->leg_rgb[0]=1.0;
+  cbi->leg_rgb[1]=0.0;
+  cbi->leg_rgb[2]=0.0;
+
+  cbi->leg_rgb[3]=1.0;
+  cbi->leg_rgb[4]=1.0;
+  cbi->leg_rgb[5]=0.0;
+  
+  cbi->leg_rgb[6]=1.0;
+  cbi->leg_rgb[7]=1.0;
+  cbi->leg_rgb[8]=0.0;
+
+  cbi->leg_rgb[9]=1.0;
+  cbi->leg_rgb[10]=1.0;
+  cbi->leg_rgb[11]=0.0;
+
+  cbi->splitflag[0]=0;
+  cbi->splitflag[1]=0;
+
+  nlegs = cbi->nlegs-1;
+  cbi->colorbar_index[0]=0;
+  cbi->colorbar_index[1]=255;
+
+  dval = (cb_valmax-cb_valmin)/(float)nlegs;
+  cbi->legvals[0]=cb_valmin;
+  cbi->legvals[1]=cb_valmax;
+
+  // test colorbar
+
+  cbi=colorbarinfo+3;
+  strcpy(cbi->label,"test");
+  cbi->label_ptr=cbi->label;
+  cbi->valmin=0.0;
+  cbi->valmax=100.0;
+
+  cbi->nlegs=3;
+
+  cbi->leg_rgb[0]=0.0;
+  cbi->leg_rgb[1]=0.623529;
+  cbi->leg_rgb[2]=0.0;
+
+  cbi->leg_rgb[3]=0.705882;
+  cbi->leg_rgb[4]=0.862745;
+  cbi->leg_rgb[5]=0.0;
+
+  cbi->leg_rgb[6]=0.705882;
+  cbi->leg_rgb[7]=0.862745;
+  cbi->leg_rgb[8]=0.0;
+
+  cbi->leg_rgb[9] =0.843137;
+  cbi->leg_rgb[10]=0.862745;
+  cbi->leg_rgb[11]=0.33333;
+
+  cbi->leg_rgb[12] =0.843137;
+  cbi->leg_rgb[13]=0.862745;
+  cbi->leg_rgb[14]=0.33333;
+
+  cbi->leg_rgb[15] =0.976471;
+  cbi->leg_rgb[16]=0.862745;
+  cbi->leg_rgb[17]=0.662745;
+
+  cbi->splitflag[0]=0;
+  cbi->splitflag[1]=0;
+  cbi->splitflag[2]=0;
+
+  nlegs = cbi->nlegs-1;
+  cbi->colorbar_index[0]=0;
+  cbi->colorbar_index[1]=128;
+  cbi->colorbar_index[2]=255;
+  cbi->legvals[0]=cb_valmin;
+  cbi->legvals[1]=cb_valmax;
+
+
+  // b&w colorbar
+
+  cbi=colorbarinfo+4;
   strcpy(cbi->label,"Black and White");
   cbi->label_ptr=cbi->label;
   cbi->valmin=0.0;
@@ -478,6 +670,9 @@ void initdefaultcolorbars(void){
 
   remapcolorbar(colorbarinfo);
   remapcolorbar(colorbarinfo+1);
+  remapcolorbar(colorbarinfo+2);
+  remapcolorbar(colorbarinfo+3);
+
 }
 
 
