@@ -978,7 +978,9 @@ void DialogMenu(int value){
     showgluistereo=0;
     hide_glui_stereo();
     showcolorbar=0;
+#ifdef pp_COLOR
     hide_glui_colorbar();
+#endif
     if(showedit==1)DialogMenu(16);
     showtrainer=0;
     hide_trainer();
@@ -5565,14 +5567,12 @@ static int in_menu=0;
   else{
     glutAddMenuEntry("Flip background",1);
   }
-  /*
   if(setbw==0){
     glutAddMenuEntry("*Color/BW",2);
   }
   else{
     glutAddMenuEntry("Color/*BW",2);
   }
-  */
   if(transparentflag==1){
     glutAddMenuEntry("*Transparent (data)",3);
   }
