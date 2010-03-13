@@ -277,6 +277,14 @@ void remapcolorbar(colorbardata *cbi){
     colorbar[1+3*i]=rgb_node[1+3*(cbi->nnodes-1)]/255.0;
     colorbar[2+3*i]=rgb_node[2+3*(cbi->nnodes-1)]/255.0;
   }
+  if(cbi->use_colorbar_extremes==0){
+    colorbar[0]=cbi->rgb_below_min[0];
+    colorbar[1]=cbi->rgb_below_min[1];
+    colorbar[2]=cbi->rgb_below_min[2];
+    colorbar[0+3*255]=cbi->rgb_above_max[0];
+    colorbar[1+3*255]=cbi->rgb_above_max[1];
+    colorbar[2+3*255]=cbi->rgb_above_max[2];
+  }
   CheckMemory;
 }
 
@@ -289,6 +297,8 @@ void initdefaultcolorbars(void){
   colorbardata *cbi;
   int ii;
 
+  ndefaultcolorbars=6;
+  
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
   NewMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
@@ -302,6 +312,7 @@ void initdefaultcolorbars(void){
   cbi->label_ptr=cbi->label;
   cbi->nnodes=5;
   cbi->nodehilight=0;
+  cbi->use_colorbar_extremes=1;
 
   cbi->index_node[0]=0;
   cbi->rgb_node[0]=0;
@@ -335,6 +346,7 @@ void initdefaultcolorbars(void){
   cbi->label_ptr=cbi->label;
   cbi->nnodes=6;
   cbi->nodehilight=0;
+  cbi->use_colorbar_extremes=1;
 
   cbi->index_node[0]=0;
   cbi->rgb_node[0]=0;
@@ -373,6 +385,7 @@ void initdefaultcolorbars(void){
   cbi->label_ptr=cbi->label;
   cbi->nnodes=2;
   cbi->nodehilight=0;
+  cbi->use_colorbar_extremes=1;
 
   cbi->index_node[0]=0;
   cbi->rgb_node[0]=255;
@@ -384,12 +397,36 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[4]=0;
   cbi->rgb_node[5]=0;
   cbi++;
+  
+  // blue/green/red
 
+  strcpy(cbi->label,"blue->green->red");
+  cbi->label_ptr=cbi->label;
+  cbi->nnodes=3;
+  cbi->nodehilight=0;
+  cbi->use_colorbar_extremes=1;
+
+  cbi->index_node[0]=0;
+  cbi->rgb_node[0]=0;
+  cbi->rgb_node[1]=0;
+  cbi->rgb_node[2]=255;
+
+  cbi->index_node[1]=128;
+  cbi->rgb_node[3]=0;
+  cbi->rgb_node[4]=255;
+  cbi->rgb_node[5]=0;
+
+  cbi->index_node[2]=255;
+  cbi->rgb_node[6]=255;
+  cbi->rgb_node[7]=0;
+  cbi->rgb_node[8]=0;
+  cbi++;
 
   // b&w colorbar
 
   strcpy(cbi->label,"blue->red split");
   cbi->label_ptr=cbi->label;
+  cbi->use_colorbar_extremes=1;
 
   cbi->nnodes=4;
   cbi->nodehilight=0;
@@ -422,6 +459,7 @@ void initdefaultcolorbars(void){
 
   cbi->nnodes=2;
   cbi->nodehilight=0;
+  cbi->use_colorbar_extremes=1;
 
   cbi->index_node[0]=0;
   cbi->rgb_node[0]=255;
@@ -438,6 +476,18 @@ void initdefaultcolorbars(void){
 
   for(i=0;i<ndefaultcolorbars;i++){
     cbi = colorbarinfo + i;
+    if(cbi->use_colorbar_extremes==1){
+      unsigned char *rgb_min, *rgb_max;
+
+      rgb_min=cbi->rgb_node;
+      rgb_max=cbi->rgb_node+(cbi->nnodes-1)*3;
+      cbi->rgb_below_min[0]=rgb_min[0];
+      cbi->rgb_below_min[1]=rgb_min[1];
+      cbi->rgb_below_min[2]=rgb_min[2];
+      cbi->rgb_above_max[0]=rgb_max[0];
+      cbi->rgb_above_max[1]=rgb_max[1];
+      cbi->rgb_above_max[2]=rgb_max[2];
+    }
     remapcolorbar(cbi);
   }
 

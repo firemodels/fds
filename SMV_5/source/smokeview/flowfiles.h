@@ -90,6 +90,8 @@ typedef struct {
   unsigned char rgb_node[3*256];
   unsigned char index_node[256];  // colorbar index
   float colorbar[3*256];
+  int use_colorbar_extremes; 
+  unsigned char rgb_below_min[3], rgb_above_max[3];
 } colorbardata;
 
 /* --------------------------  surfid ------------------------------------ */

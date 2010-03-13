@@ -8662,6 +8662,8 @@ int readini2(char *inifile, int localfile){
         if(ncolorbarini>0)ResizeMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
 
         for(n=ndefaultcolorbars;n<ncolorbars;n++){
+          int extreme, rgbmin[3],rgbmax[3];
+
           cbi = colorbarinfo + n;
 
           fgets(buffer,255,stream);
@@ -8688,6 +8690,21 @@ int readini2(char *inifile, int localfile){
             cbi->rgb_node[nn+1]=g1;
             cbi->rgb_node[nn+2]=b1;
           }
+          fgets(buffer,255,stream);
+          sscanf(buffer,"%i %i %i %i %i %i %i",
+            &cbi->use_colorbar_extremes,
+            rgbmin,rgbmin+1,rgbmin+2,
+            rgbmax,rgbmax+1,rgbmax+2);
+          if(cbi->use_colorbar_extremes!=0)cbi->use_colorbar_extremes=1;
+          for(i=0;i<3;i++){
+            if(rgbmin[i]<0)rgbmin[i]=0;
+            if(rgbmin[i]>255)rgbmin[i]=255;
+            if(rgbmax[i]<0)rgbmax[i]=0;
+            if(rgbmax[i]>255)rgbmax[i]=255;
+            cbi->rgb_above_max[i]=rgbmax[i];
+            cbi->rgb_below_min[i]=rgbmin[i];
+          }
+
           remapcolorbar(cbi);
         }
     }
@@ -9859,6 +9876,9 @@ void writeini(int flag){
         rrgb = cbi->rgb_node+3*i;
         fprintf(fileout," %i %i %i %i\n",cbi->index_node[i],(int)rrgb[0],(int)rrgb[1],(int)rrgb[2]);
       }
+      fprintf(fileout," %i %i %i %i %i %i %i\n",cbi->use_colorbar_extremes,
+        cbi->rgb_below_min[0],cbi->rgb_below_min[1],cbi->rgb_below_min[2],
+        cbi->rgb_above_max[0],cbi->rgb_above_max[1],cbi->rgb_above_max[2]);
     }
   }
   fprintf(fileout,"\nTOUR INFO\n");
