@@ -1631,7 +1631,6 @@ void initvars1(void){
   showall_textures=0;
 
   ncolorbars=0;
-  ndefaultcolorbars=5;
   update_load_startup=0;
   do_threshold=0;
   mt_compress=1;

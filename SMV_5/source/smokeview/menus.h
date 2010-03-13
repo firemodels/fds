@@ -6109,12 +6109,12 @@ static int in_menu=0;
     if(showbounds==0)glutAddMenuEntry("Compression/Smokezip...  ALT+z",24);
   }
 #endif
+#ifdef pp_COLOR
+  if(showcolorbar==1)glutAddMenuEntry("*Customize Colorbar...  ALT+c",23);
+  if(showcolorbar==0)glutAddMenuEntry("Customize Colorbar...  ALT+c",23);
+#endif
   if(showlabels==1)glutAddMenuEntry("*Display...  ALT+d",22);
   if(showlabels==0)glutAddMenuEntry("Display...  ALT+d",22);
-#ifdef pp_COLOR
-  if(showcolorbar==1)glutAddMenuEntry("*Edit Colorbar...  ALT+c",23);
-  if(showcolorbar==0)glutAddMenuEntry("Edit Colorbar...  ALT+c",23);
-#endif
   if(isZoneFireModel==0){
     if(showedit==1)glutAddMenuEntry("*Examine Blockages...  ALT+e",16);
     if(showedit==0)glutAddMenuEntry("Examine Blockages...  ALT+e",16);
