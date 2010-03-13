@@ -127,40 +127,19 @@ void trimzeros(char *line){
 /* ------------------ trimmzeros ------------------------ */
 
 void trimmzeros(char *line){
-  size_t i,j,lenline;
-  char *linecopy, c;
-  char buffer[1024];
-  size_t ibeg;
-  size_t start=1;
-  size_t bufstart=0;
-  size_t lenbuf;
+  char linecopy[1024];
+  char *token;
 
-  lenline=strlen(line);
-  linecopy=line;
-  for(i=0;i<lenline;i++){
-    c=*linecopy++;
-    if(start==1){
-      if(c==' ')continue;
-      ibeg=i;
-      start=0;
-      buffer[0]=c;
-      continue;
-    }
-    buffer[i-ibeg]=c;
-    if(c==' '){
-      buffer[i-ibeg]='\0';
-      trimzeros(buffer);
-      lenbuf = strlen(buffer);
-      for(j=bufstart;j<bufstart+lenbuf;j++){
-        line[j]=buffer[j-bufstart];
-      }
-      bufstart+=strlen(buffer);
-      line[bufstart]=' ';
-      bufstart++;
-      start=1;
-    }
+  trim(line);
+  strcpy(linecopy,line);
+  token=strtok(linecopy," ");
+  strcpy(line,"");
+  while(token!=NULL){
+    trimzeros(token);
+    strcat(line,token);
+    strcat(line," ");
+    token=strtok(NULL," ");
   }
-  line[bufstart]='\0';
 }
 
 /* ------------------ STRSTR ------------------------ */
