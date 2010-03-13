@@ -33,15 +33,23 @@ GLUI_Panel *panel_cb4=NULL;
 GLUI_Panel *panel_cb4L=NULL;
 GLUI_Panel *panel_cb4R=NULL;
 GLUI_Panel *panel_point=NULL;
+GLUI_Panel *panel_extreme=NULL;
 GLUI_Panel *panel_cb5=NULL;
 GLUI_Panel *panel_cb5a=NULL;
 GLUI_Panel *panel_cb5b=NULL;
 GLUI_Panel *panel_cb6=NULL;
 GLUI_Panel *panel_cb7=NULL;
 GLUI_Panel *panel_cb8=NULL;
+GLUI_Panel *panel_cb9=NULL;
 
 GLUI_Listbox *LISTBOX_colorbar=NULL;
 GLUI *glui_colorbar=NULL;
+GLUI_Spinner *SPINNER_down_red=NULL;
+GLUI_Spinner *SPINNER_down_green=NULL;
+GLUI_Spinner *SPINNER_down_blue=NULL;
+GLUI_Spinner *SPINNER_up_red=NULL;
+GLUI_Spinner *SPINNER_up_green=NULL;
+GLUI_Spinner *SPINNER_up_blue=NULL;
 GLUI_Spinner *SPINNER_left_red=NULL;
 GLUI_Spinner *SPINNER_left_green=NULL;
 GLUI_Spinner *SPINNER_left_blue=NULL;
@@ -55,7 +63,7 @@ GLUI_Button *BUTTON_addpoint=NULL;
 GLUI_Button *BUTTON_deletepoint=NULL;
 GLUI_Button *BUTTON_savesettings=NULL;
 GLUI_Button *BUTTON_update=NULL;
-GLUI_Checkbox *CHECKBOX_jump=NULL;
+GLUI_Checkbox *CHECKBOX_usebounds=NULL;
 GLUI_Spinner *SPINNER_valmin=NULL;
 GLUI_Spinner *SPINNER_valmax=NULL;
 GLUI_Spinner *SPINNER_val=NULL;
@@ -66,8 +74,8 @@ GLUI_StaticText *STATICTEXT_left=NULL, *STATICTEXT_right=NULL;
 
 
 int selectedcolorbar_index;
-int cb_rgb[6];
-int cb_jump;
+int cb_rgb[3],cb_up_rgb[3],cb_down_rgb[3];
+int cb_usecolorbar_extreme;
 
 #define COLORBAR_LIST 0
 #define COLORBAR_CLOSE 1
@@ -82,6 +90,8 @@ int cb_jump;
 #define COLORBAR_UPDATE 11
 #define COLORBAR_COLORINDEX 12
 #define COLORBAR_DELETE 14
+#define COLORBAR_EXTREME_RGB 15
+#define COLORBAR_EXTREME 16
 
 extern "C" void colorbar_global2local(void);
 
@@ -153,7 +163,7 @@ extern "C" void glui_colorbar_setup(int main_window){
   BUTTON_update=glui_colorbar->add_button_to_panel(panel_cb1,"Update label",COLORBAR_UPDATE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(panel_cb1,false);
 
-  panel_point = glui_colorbar->add_panel("Colorbar Node");
+  panel_point = glui_colorbar->add_panel("Node");
   
   panel_cb5 = glui_colorbar->add_panel_to_panel(panel_point,"",GLUI_PANEL_NONE);
 
@@ -175,6 +185,23 @@ extern "C" void glui_colorbar_setup(int main_window){
   SPINNER_right_red->set_int_limits(0,255);
   SPINNER_right_green->set_int_limits(0,255);
   SPINNER_right_blue->set_int_limits(0,255);
+
+  panel_extreme = glui_colorbar->add_panel("Colors For Data Extremes");
+
+  CHECKBOX_usebounds=glui_colorbar->add_checkbox_to_panel(panel_extreme,"Use colors from colorbar",&cb_usecolorbar_extreme,
+    COLORBAR_EXTREME,COLORBAR_CB);
+  panel_cb9 = glui_colorbar->add_panel_to_panel(panel_extreme,"",GLUI_PANEL_NONE);
+  panel_cb8 = glui_colorbar->add_panel_to_panel(panel_cb9,"Below data min");
+  SPINNER_down_red=  glui_colorbar->add_spinner_to_panel(panel_cb8,"red",  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+  SPINNER_down_green=glui_colorbar->add_spinner_to_panel(panel_cb8,"green",GLUI_SPINNER_INT,cb_down_rgb+1,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+  SPINNER_down_blue= glui_colorbar->add_spinner_to_panel(panel_cb8,"blue", GLUI_SPINNER_INT,cb_down_rgb+2,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+
+  glui_colorbar->add_column_to_panel(panel_cb9);
+
+  panel_cb7 = glui_colorbar->add_panel_to_panel(panel_cb9,"Above data max");
+  SPINNER_up_red=  glui_colorbar->add_spinner_to_panel(panel_cb7,"red",  GLUI_SPINNER_INT,cb_up_rgb,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+  SPINNER_up_green=glui_colorbar->add_spinner_to_panel(panel_cb7,"green",GLUI_SPINNER_INT,cb_up_rgb+1,COLORBAR_EXTREME_RGB,COLORBAR_CB);
+  SPINNER_up_blue= glui_colorbar->add_spinner_to_panel(panel_cb7,"blue", GLUI_SPINNER_INT,cb_up_rgb+2,COLORBAR_EXTREME_RGB,COLORBAR_CB);
 
   colorbar_global2local();
 
@@ -288,6 +315,45 @@ void COLORBAR_CB(int var){
     updatecolors(-1);
     if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
     break;
+  case COLORBAR_EXTREME:
+    if(colorbartype>=0&&colorbartype<ncolorbars){
+      cbi = colorbarinfo + colorbartype;
+      cbi->use_colorbar_extremes=cb_usecolorbar_extreme;
+    }
+    if(cb_usecolorbar_extreme==0){
+      SPINNER_down_red->enable();
+      SPINNER_down_green->enable();
+      SPINNER_down_blue->enable();
+      SPINNER_up_red->enable();
+      SPINNER_up_green->enable();
+      SPINNER_up_blue->enable();
+    }
+    else{
+      SPINNER_down_red->disable();
+      SPINNER_down_green->disable();
+      SPINNER_down_blue->disable();
+      SPINNER_up_red->disable();
+      SPINNER_up_green->disable();
+      SPINNER_up_blue->disable();
+    }
+    remapcolorbar(cbi);
+    updatecolors(-1);
+    break;
+  case COLORBAR_EXTREME_RGB:
+    if(colorbartype<0||colorbartype>=ncolorbars)return;
+    cbi = colorbarinfo + colorbartype;
+
+    rgb_nodes=cbi->rgb_above_max;
+    for(i=0;i<3;i++){
+      rgb_nodes[i]=cb_up_rgb[i];
+    }
+    rgb_nodes=cbi->rgb_below_min;
+    for(i=0;i<3;i++){
+      rgb_nodes[i]=cb_down_rgb[i];
+    }
+    remapcolorbar(cbi);
+    updatecolors(-1);
+    break;
   case COLORBAR_RGB:
     if(colorbartype<0||colorbartype>=ncolorbars)return;
     cbi = colorbarinfo + colorbartype;
@@ -378,8 +444,6 @@ extern "C" void colorbar_global2local(void){
     
   SPINNER_colorindex->set_int_val(cbi->index_node[colorbarpoint]);
 
-  rgb = cbi->rgb_node+3*colorbarpoint;
-
   BUTTON_next->enable();
   BUTTON_prev->enable();
 
@@ -406,7 +470,24 @@ extern "C" void colorbar_global2local(void){
     BUTTON_deletepoint->disable();
     SPINNER_colorindex->disable();
   }
-  SPINNER_right_red->set_float_val(  (int)(rgb[0]));
-  SPINNER_right_green->set_float_val((int)(rgb[1]));
-  SPINNER_right_blue->set_float_val( (int)(rgb[2]));
+  rgb = cbi->rgb_node+3*colorbarpoint;
+  SPINNER_right_red->set_int_val(  (int)(rgb[0]));
+  SPINNER_right_green->set_int_val((int)(rgb[1]));
+  SPINNER_right_blue->set_int_val( (int)(rgb[2]));
+
+  rgb = cbi->rgb_below_min;
+  SPINNER_down_red->set_int_val(  (int)(rgb[0]));
+  SPINNER_down_green->set_int_val(  (int)(rgb[1]));
+  SPINNER_down_blue->set_int_val(  (int)(rgb[2]));
+
+  rgb = cbi->rgb_above_max;
+  SPINNER_up_red->set_int_val(  (int)(rgb[0]));
+  SPINNER_up_green->set_int_val(  (int)(rgb[1]));
+  SPINNER_up_blue->set_int_val(  (int)(rgb[2]));
+
+  CHECKBOX_usebounds->set_int_val(cbi->use_colorbar_extremes);
+
+  COLORBAR_CB(COLORBAR_EXTREME);
+
+
 }
