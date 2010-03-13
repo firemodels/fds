@@ -25,7 +25,9 @@ char startup_revision[]="$Revision$";
 
 //void get_smokezippath(char *progdir, char **zippath);
 int getmaxrevision(void);
+#ifdef pp_COLOR
 void glui_colorbar_setup(int main_window);
+#endif
 void glui_motion_setup(int main_window);
 #ifdef pp_SHOOTER
 void glui_shooter_setup(int main_window);
@@ -144,7 +146,9 @@ int initcase_c(int argc, char **argv){
   }
 
   if(ntours==0)setup_tour();
+#ifdef pp_COLOR
   glui_colorbar_setup(mainwindow_id);
+#endif
   glui_motion_setup(mainwindow_id);
   glui_bounds_setup(mainwindow_id);
 #ifdef pp_SHOOTER
@@ -2208,7 +2212,9 @@ int getmaxrevision(void){
   MAXREV(glui_bounds_revision);
   MAXREV(glui_clip_revision);
   MAXREV(glui_wui_revision);
+#ifdef pp_COLOR
   MAXREV(glui_colorbar_revision);
+#endif
   MAXREV(glui_labels_revision);
   MAXREV(glui_motion_revision);
   MAXREV(glui_stereo_revision);
