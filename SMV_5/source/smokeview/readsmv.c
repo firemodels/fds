@@ -8645,26 +8645,15 @@ int readini2(char *inifile, int localfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
 
-/*
-      GENCOLORBAR
-	  ncolorbars
-      label
-      nlegs
-      fraction r1 g1 b1 r2 g2 b2
-      ...
-      fraction r1 g1 b1 r2 g2 b2
-      */
-
 #ifdef pp_COLOR
-      if(match(buffer,"GENCOLORBARS",12) == 1){
-      {
+      if(match(buffer,"GCOLORBAR",9) == 1){
         colorbardata *cbi;
-        float r1, g1, b1, r2, g2, b2;
+        int r1, g1, b1;
         int n;
         int ncolorbarini;
 
         fgets(buffer,255,stream);
-		    ncolorbarini=0;
+        ncolorbarini=0;
         sscanf(buffer,"%i",&ncolorbarini);
 
         initdefaultcolorbars();
@@ -8680,37 +8669,27 @@ int readini2(char *inifile, int localfile){
           strcpy(cbi->label,buffer);
 
           fgets(buffer,255,stream);
-          sscanf(buffer,"%f %f",&cbi->valmin,&cbi->valmax);
-
-          fgets(buffer,255,stream);
-          sscanf(buffer,"%i",&cbi->nlegs);
-
-          cbi->legindex=0;
+          sscanf(buffer,"%i %i",&cbi->nnodes,&cbi->nodehilight);
+          if(cbi->nnodes<0)cbi->nnodes=0;
+          if(cbi->nodehilight<0||cbi->nodehilight>=cbi->nnodes){
+            cbi->nodehilight=0;
+          }
 
           cbi->label_ptr=cbi->label;
-          for(i=0;i<cbi->nlegs;i++){
-            int icbar, isflag;
+          for(i=0;i<cbi->nnodes;i++){
+            int icbar;
 
             fgets(buffer,255,stream);
-            r1=-1.0; g1=-1.0; b1=-1.0; 
-            r2=-1.0; g2=-1.0; b2=-1.0;
-            sscanf(buffer,"%i %i %f %f %f %f %f %f",&icbar,&isflag,
-              &r1,&g1,&b1,&r2,&g2,&b2);
-            cbi->colorbar_index[i]=icbar;
-            cbi->splitflag[i]=isflag;
-            nn = 6*i;
-            cbi->leg_rgb[nn  ]=r1;
-            cbi->leg_rgb[nn+1]=g1;
-            cbi->leg_rgb[nn+2]=b1;
-            cbi->leg_rgb[nn+3]=r2;
-            cbi->leg_rgb[nn+4]=g2;
-            cbi->leg_rgb[nn+5]=b2;
+            r1=-1; g1=-1; b1=-1; 
+            sscanf(buffer,"%i %i %i %i",&icbar,&r1,&g1,&b1);
+            cbi->index_node[i]=icbar;
+            nn = 3*i;
+            cbi->rgb_node[nn  ]=r1;
+            cbi->rgb_node[nn+1]=g1;
+            cbi->rgb_node[nn+2]=b1;
           }
-          cbi->splitflag[0]=0;
-          cbi->splitflag[cbi->nlegs-1]=0;
           remapcolorbar(cbi);
         }
-      }
     }
 #endif
 
@@ -9865,47 +9844,20 @@ void writeini(int flag){
   fprintf(fileout," %i\n",show_smokelighting);
 #endif
 
-  /*
-  GENCOLORBAR
-	  ncolorbars
-      label
-      nlegs
-      fraction r1 g1 b1 r2 g2 b2
-      ...
-      fraction r1 g1 b1 r2 g2 b2
-	  */
   if(ncolorbars>ndefaultcolorbars){
 	  colorbardata *cbi;
-	  float *rrgb;
+	  unsigned char *rrgb;
 	  int n;
 
-    fprintf(fileout,"GENCOLORBARS\n");
-	  fprintf(fileout," %i\n",ncolorbars-ndefaultcolorbars);
+    fprintf(fileout,"GCOLORBAR\n");
+    fprintf(fileout," %i\n",ncolorbars-ndefaultcolorbars);
     for(n=ndefaultcolorbars;n<ncolorbars;n++){
       cbi = colorbarinfo + n;
-	    fprintf(fileout,"%s\n",cbi->label);
-      fprintf(fileout," %f %f\n",cbi->valmin,cbi->valmax);
-	    fprintf(fileout," %i\n",cbi->nlegs);
-      for(i=0;i<cbi->nlegs-1;i++){
-		    rrgb = cbi->leg_rgb+6*i;
-        
-        fprintf(fileout," %i %i ",cbi->colorbar_index[i],cbi->splitflag[i]);
-		    if(cbi->splitflag[i]==0){
-          sprintf(buffer,"%f %f %f ",rrgb[0],rrgb[1],rrgb[2]);
-        }
-		    else{
-          sprintf(buffer,"%f %f %f %f %f %f ",rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
-        }
-        trimmzeros(buffer);
-        fprintf(fileout,"%s\n",buffer);
-      }
-	    if(cbi->nlegs>0){
-        i=cbi->nlegs-1;
-		    rrgb = cbi->leg_rgb+6*i;
-        fprintf(fileout," %i %i ",cbi->colorbar_index[i],cbi->splitflag[i]);
-        sprintf(buffer," %f %f %f %f %f %f ",rrgb[0],rrgb[1],rrgb[2],rrgb[3],rrgb[4],rrgb[5]);
-        trimmzeros(buffer);
-        fprintf(fileout,"%s\n",buffer);
+      fprintf(fileout,"%s\n",cbi->label);
+      fprintf(fileout," %i %i\n",cbi->nnodes,cbi->nodehilight);
+      for(i=0;i<cbi->nnodes;i++){
+        rrgb = cbi->rgb_node+3*i;
+        fprintf(fileout," %i %i %i %i\n",cbi->index_node[i],(int)rrgb[0],(int)rrgb[1],(int)rrgb[2]);
       }
     }
   }

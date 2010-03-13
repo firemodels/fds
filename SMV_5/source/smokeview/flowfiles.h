@@ -85,13 +85,11 @@ typedef struct {
 /* --------------------------  colorbardata ------------------------------------ */
 
 typedef struct {
-  char label[1024];        // menu label
-  char *label_ptr;
-  int legindex, nlegs; // selected leg, number of legs
-  int splitflag[256], splits[256], nsplits;
-  unsigned char colorbar_index[256];  // colorbar index
-  float leg_rgb[6*256], colorbar[3*256];   // colorbar nodes, colorbar
-  float valmin, valmax, legvals[256];
+  char label[1024], *label_ptr ;        // menu label
+  int nnodes,nodehilight;
+  unsigned char rgb_node[3*256];
+  unsigned char index_node[256];  // colorbar index
+  float colorbar[3*256];
 } colorbardata;
 
 /* --------------------------  surfid ------------------------------------ */

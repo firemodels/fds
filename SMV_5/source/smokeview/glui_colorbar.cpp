@@ -1,7 +1,6 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
 #include "options.h"
 #include <string.h>
 #ifdef pp_OSX
@@ -76,14 +75,12 @@ int cb_jump;
 #define COLORBAR_NEXT 3
 #define COLORBAR_PREV 4
 #define COLORBAR_NEW 5
-#define COLORBAR_VAL 6
 #define COLORBAR_ADDPOINT 7
 #define COLORBAR_DELETEPOINT 8
 #define COLORBAR_SAVE 9
 #define COLORBAR_LABEL 10
 #define COLORBAR_UPDATE 11
 #define COLORBAR_COLORINDEX 12
-#define COLORBAR_MINMAX 13
 #define COLORBAR_DELETE 14
 
 extern "C" void colorbar_global2local(void);
@@ -156,9 +153,6 @@ extern "C" void glui_colorbar_setup(int main_window){
   BUTTON_update=glui_colorbar->add_button_to_panel(panel_cb1,"Update label",COLORBAR_UPDATE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(panel_cb1,false);
 
-  SPINNER_valmin=  glui_colorbar->add_spinner_to_panel(panel_cb1,"Min value",  GLUI_SPINNER_FLOAT,&cb_valmin,  COLORBAR_MINMAX,COLORBAR_CB);
-  SPINNER_valmax=  glui_colorbar->add_spinner_to_panel(panel_cb1,"Max value",  GLUI_SPINNER_FLOAT,&cb_valmax,  COLORBAR_MINMAX,COLORBAR_CB);
-
   panel_point = glui_colorbar->add_panel("Colorbar Node");
   
   panel_cb5 = glui_colorbar->add_panel_to_panel(panel_point,"",GLUI_PANEL_NONE);
@@ -172,28 +166,12 @@ extern "C" void glui_colorbar_setup(int main_window){
   BUTTON_addpoint=glui_colorbar->add_button_to_panel(panel_cb5,"Insert",COLORBAR_ADDPOINT,COLORBAR_CB);
 
   panel_cb4 = glui_colorbar->add_panel_to_panel(panel_point,"",GLUI_PANEL_NONE);
-  STATICTEXT_left=glui_colorbar->add_statictext_to_panel(panel_cb4,"");
+  SPINNER_colorindex=  glui_colorbar->add_spinner_to_panel(panel_cb4,"node index",  GLUI_SPINNER_INT,&cb_colorindex,  COLORBAR_COLORINDEX,COLORBAR_CB);
+  SPINNER_colorindex->set_int_limits(0,255);
   SPINNER_right_red=  glui_colorbar->add_spinner_to_panel(panel_cb4,"red",  GLUI_SPINNER_INT,cb_rgb,COLORBAR_RGB,COLORBAR_CB);
   SPINNER_right_green=glui_colorbar->add_spinner_to_panel(panel_cb4,"green",GLUI_SPINNER_INT,cb_rgb+1,COLORBAR_RGB,COLORBAR_CB);
   SPINNER_right_blue= glui_colorbar->add_spinner_to_panel(panel_cb4,"blue", GLUI_SPINNER_INT,cb_rgb+2,COLORBAR_RGB,COLORBAR_CB);
 
-  glui_colorbar->add_column_to_panel(panel_cb4,false);
-  STATICTEXT_right=glui_colorbar->add_statictext_to_panel(panel_cb4,"Color");
-  SPINNER_left_red=  glui_colorbar->add_spinner_to_panel(panel_cb4,"",  GLUI_SPINNER_INT,cb_rgb+3,  COLORBAR_RGB,COLORBAR_CB);
-  SPINNER_left_green=glui_colorbar->add_spinner_to_panel(panel_cb4,"",GLUI_SPINNER_INT,cb_rgb+4,COLORBAR_RGB,COLORBAR_CB);
-  SPINNER_left_blue= glui_colorbar->add_spinner_to_panel(panel_cb4,"", GLUI_SPINNER_INT,cb_rgb+5,COLORBAR_RGB,COLORBAR_CB);
-
-
-  panel_cb7 = glui_colorbar->add_panel_to_panel(panel_point,"",GLUI_PANEL_NONE);
-  CHECKBOX_jump = glui_colorbar->add_checkbox_to_panel(panel_cb7,"Split Colorbar",&cb_jump,COLORBAR_RGB,COLORBAR_CB);
-  glui_colorbar->add_column_to_panel(panel_cb7,false);
-  SPINNER_val=  glui_colorbar->add_spinner_to_panel(panel_cb7,"Value",  GLUI_SPINNER_FLOAT,&cb_val,  COLORBAR_VAL,COLORBAR_CB);
-  SPINNER_colorindex=  glui_colorbar->add_spinner_to_panel(panel_cb7,"Colorbar index",  GLUI_SPINNER_INT,&cb_colorindex,  COLORBAR_COLORINDEX,COLORBAR_CB);
-  SPINNER_colorindex->set_int_limits(0,255);
-
-  SPINNER_left_red->set_int_limits(0,255);
-  SPINNER_left_green->set_int_limits(0,255);
-  SPINNER_left_blue->set_int_limits(0,255);
   SPINNER_right_red->set_int_limits(0,255);
   SPINNER_right_green->set_int_limits(0,255);
   SPINNER_right_blue->set_int_limits(0,255);
@@ -212,54 +190,16 @@ extern "C" void glui_colorbar_setup(int main_window){
 
 void COLORBAR_CB(int var){
   colorbardata *cbi;
-  float *rgb_nodes;
+  unsigned char *rgb_nodes;
   int i;
-  float *rgb1, *rgb2;
-  float *rgb1a, *rgb2a;
-  float *rgb0, *rgb0a;
 
   switch (var){
   case COLORBAR_COLORINDEX:
     if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
       cbi = colorbarinfo + colorbartype;
       
-//    SPINNER_val->set_float_val(cbi->legvals[colorbarpoint]);
-//    SPINNER_colorindex->set_int_val(cbi->colorbar_index[colorbarpoint]);
-      cb_val=cb_valmin + (cb_valmax-cb_valmin)*((float)cb_colorindex/255.0);
-      cbi->legvals[colorbarpoint]=cb_val;
-      cbi->colorbar_index[colorbarpoint]=cb_colorindex;
+      cbi->index_node[colorbarpoint]=cb_colorindex;
 
-      colorbar_global2local();
-      remapcolorbar(cbi);
-      updatecolors(-1);
-    }
-    break;
-  case COLORBAR_MINMAX:
-    if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
-      cbi = colorbarinfo + colorbartype;
-      for(i=0;i<cbi->nlegs-1;i++){
-        cbi->legvals[i]=cb_valmin + (float)i*(cb_valmax-cb_valmin)/(cbi->nlegs-1);
-        cbi->colorbar_index[i]=255*(cbi->legvals[i]-cb_valmin)/(cb_valmax-cb_valmin);
-      }
-      cbi->legvals[cbi->nlegs-1]=cb_valmax;
-      cbi->colorbar_index[cbi->nlegs-1]=255;
-      cbi->valmin=cb_valmin;
-      cbi->valmax=cb_valmax;
-
-      SPINNER_val->set_float_limits(cb_valmin,cb_valmax);
-      colorbar_global2local();
-      remapcolorbar(cbi);
-      updatecolors(-1);
-    }
-    break;
-  case COLORBAR_VAL:
-    if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
-      cbi = colorbarinfo + colorbartype;
-      cb_colorindex=255*(cb_val-cb_valmin)/(cb_valmax-cb_valmin);
-      if(cb_colorindex<0)cb_colorindex=0;
-      if(cb_colorindex>255)cb_colorindex=255;
-      cbi->legvals[colorbarpoint]=cb_val;
-      cbi->colorbar_index[colorbarpoint]=cb_colorindex;
       colorbar_global2local();
       remapcolorbar(cbi);
       updatecolors(-1);
@@ -270,8 +210,11 @@ void COLORBAR_CB(int var){
     break;
   case COLORBAR_LABEL:
     if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
+      char *clabel;
+
       cbi = colorbarinfo + colorbartype;
-      strcpy(cbi->label,colorbar_label);
+      clabel=EDITTEXT_colorbar_label->get_text();
+      strcpy(cbi->label,clabel);
       LISTBOX_colorbar->delete_item(colorbartype);
       LISTBOX_colorbar->add_item(colorbartype,colorbar_label);
       LISTBOX_colorbar->set_int_val(0);
@@ -286,96 +229,73 @@ void COLORBAR_CB(int var){
   case COLORBAR_ADDPOINT:
     if(colorbartype<ndefaultcolorbars||colorbartype>=ncolorbars)return;
     cbi = colorbarinfo + colorbartype;
-    if(colorbarpoint<=0||colorbarpoint>cbi->nlegs-1)return;
+    if(colorbarpoint<=0||colorbarpoint>cbi->nnodes-1)return;
 
-    cbi->nlegs++;
-    for(i=cbi->nlegs-1;i>=colorbarpoint+1;i--){
-      cbi->legvals[i]=cbi->legvals[i-1];
-      cbi->colorbar_index[i]=cbi->colorbar_index[i-1];
-      cbi->splitflag[i]=cbi->splitflag[i-1];
-      rgb2 = cbi->leg_rgb+6*i;
-      rgb1 = rgb2-6;
-      rgb2a = rgb2+3;
-      rgb1a = rgb1+3;
+    cbi->nnodes++;
+    if(colorbarpoint<1)colorbarpoint=1;
+    cbi->nodehilight=colorbarpoint;
+    for(i=cbi->nnodes-1;i>=colorbarpoint+1;i--){
+      unsigned char *rgb1, *rgb2;
+
+      rgb2 = cbi->rgb_node+3*i;
+      rgb1 = rgb2-3;
       rgb2[0] =rgb1[0];
       rgb2[1] =rgb1[1];
       rgb2[2] =rgb1[2];
-      rgb2a[0]=rgb1a[0];
-      rgb2a[1]=rgb1a[1];
-      rgb2a[2]=rgb1a[2];
+      cbi->index_node[i]=cbi->index_node[i-1];
     }
-    cbi->colorbar_index[colorbarpoint]=(cbi->colorbar_index[colorbarpoint]+cbi->colorbar_index[colorbarpoint-1])/2;
-    cbi->legvals[colorbarpoint]=(cbi->legvals[colorbarpoint]+cbi->legvals[colorbarpoint-1])/2.0;
+    {
+      unsigned char *rnew, *rbef, *raft;
+      unsigned char *inew, *ibef, *iaft;
 
-    cbi->splitflag[colorbarpoint]=0;
-    rgb1 = cbi->leg_rgb+6*colorbarpoint;
-    rgb2 = rgb1 + 6;
-    rgb1a = rgb1 + 3;
-    rgb2a = rgb2 + 3;
-    rgb0 = rgb1 - 6;
-    rgb0a = rgb0 + 3;
+      rnew = cbi->rgb_node+3*colorbarpoint;
+      rbef = rnew-3;
+      raft = rnew+3;
+      rnew[0]=((float)rbef[0]+(float)raft[0])/2.0;
+      rnew[1]=((float)rbef[1]+(float)raft[1])/2.0;
+      rnew[2]=((float)rbef[2]+(float)raft[2])/2.0;
 
-    rgb1[0] = (rgb1[0] + rgb0[0])/2.0;
-    rgb1[1] = (rgb1[1] + rgb0[1])/2.0;
-    rgb1[2] = (rgb1[2] + rgb0[2])/2.0;
-
-    rgb0a[0] = rgb1[0];
-    rgb0a[1] = rgb1[1];
-    rgb0a[2] = rgb1[2];
-
-    rgb1a[0] = rgb2[0];
-    rgb1a[1] = rgb2[1];
-    rgb1a[2] = rgb2[2];
+      inew = cbi->index_node+colorbarpoint;
+      ibef = inew-1;
+      iaft = inew+1;
+      *inew = (*ibef+*iaft)/2;
+    }
 
     colorbar_global2local();
     remapcolorbar(cbi);
     updatecolors(-1);
 
-    if(colorbarpoint==cbi->nlegs)colorbarpoint=cbi->nlegs-1;
+    if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
     break;
   case COLORBAR_DELETEPOINT:
     if(colorbartype<ndefaultcolorbars||colorbartype>=ncolorbars)return;
     cbi = colorbarinfo + colorbartype;
-    if(colorbarpoint<0||colorbarpoint>cbi->nlegs-1)return;
+    if(colorbarpoint<0||colorbarpoint>cbi->nnodes-1)return;
 
-    if(cbi->nlegs<=2)return;
-    for(i=colorbarpoint+1;i<cbi->nlegs;i++){
-      cbi->legvals[i-1]=cbi->legvals[i];
-      cbi->splitflag[i-1]=cbi->splitflag[i];
-      cbi->colorbar_index[i-1]=cbi->colorbar_index[i];
-      rgb2 = cbi->leg_rgb+6*i;
-      rgb1 = rgb2-6;
-      rgb2a = rgb2+3;
-      rgb1a = rgb1+3;
+    if(cbi->nnodes<2)return;
+    for(i=colorbarpoint+1;i<cbi->nnodes;i++){
+      unsigned char *rgb1, *rgb2;
+
+      cbi->index_node[i-1]=cbi->index_node[i];
+      rgb2 = cbi->rgb_node+3*i;
+      rgb1 = rgb2-3;
       rgb1[0]=rgb2[0];
       rgb1[1]=rgb2[1];
       rgb1[2]=rgb2[2];
-      rgb1a[0]=rgb2a[0];
-      rgb1a[1]=rgb2a[1];
-      rgb1a[2]=rgb2a[2];
     }
-    cbi->nlegs--;
+    cbi->nnodes--;
     remapcolorbar(cbi);
     updatecolors(-1);
-    if(colorbarpoint==cbi->nlegs)colorbarpoint=cbi->nlegs-1;
+    if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
     break;
   case COLORBAR_RGB:
     if(colorbartype<0||colorbartype>=ncolorbars)return;
     cbi = colorbarinfo + colorbartype;
-    if(colorbarpoint<0||colorbarpoint>cbi->nlegs-1)return;
-    if(cbi->splitflag[colorbarpoint]!=cb_jump){
-      cbi->splitflag[colorbarpoint]=cb_jump;
-      colorbar_global2local();
-    }
-    rgb_nodes=cbi->leg_rgb+6*colorbarpoint;
+    if(colorbarpoint<0||colorbarpoint>cbi->nnodes-1)return;
+    rgb_nodes=cbi->rgb_node+3*colorbarpoint;
 
     for(i=0;i<3;i++){
-      rgb_nodes[i]=(float)cb_rgb[i+3]/255.0;
-    }
-    if(cbi->splitflag[colorbarpoint]==1){
-      for(i=3;i<6;i++){
-        rgb_nodes[i-6]=(float)cb_rgb[i-3]/255.0;
-      }
+      rgb_nodes[i]=cb_rgb[i];
     }
     remapcolorbar(cbi);
     updatecolors(-1);
@@ -400,13 +320,13 @@ void COLORBAR_CB(int var){
     cbi = colorbarinfo + colorbartype;
     if(var==COLORBAR_NEXT){
       colorbarpoint++;
-      if(colorbarpoint>cbi->nlegs-1)colorbarpoint=0;
+      if(colorbarpoint>cbi->nnodes-1)colorbarpoint=0;
     }
     else if(var==COLORBAR_PREV){
       colorbarpoint--;
-      if(colorbarpoint<0)colorbarpoint=cbi->nlegs-1;
+      if(colorbarpoint<0)colorbarpoint=cbi->nnodes-1;
     }
-    cbi->legindex=colorbarpoint;
+    cbi->nodehilight=colorbarpoint;
     colorbar_global2local();
     break;
   case COLORBAR_NEW:
@@ -448,95 +368,45 @@ void COLORBAR_CB(int var){
 
 extern "C" void colorbar_global2local(void){
   colorbardata *cbi;
-  int ii;
-  float *rgb;
+  unsigned char *rgb;
   int icolorbar;
 
-  if(colorbartype>=0&&colorbartype<ncolorbars){
-    cbi = colorbarinfo + colorbartype;
-    colorbarpoint=cbi->legindex;
+  if(colorbartype<0||colorbartype>=ncolorbars)return;
+
+  cbi = colorbarinfo + colorbartype;
+  colorbarpoint=cbi->nodehilight;
     
-    cb_jump = cbi->splitflag[colorbarpoint];
-    CHECKBOX_jump->set_int_val(cb_jump);
-    
-    SPINNER_val->set_float_val(cbi->legvals[colorbarpoint]);
-    SPINNER_colorindex->set_int_val(cbi->colorbar_index[colorbarpoint]);
-    SPINNER_valmin->set_float_val(  cbi->valmin);
-    SPINNER_valmax->set_float_val(  cbi->valmax);
+  SPINNER_colorindex->set_int_val(cbi->index_node[colorbarpoint]);
 
-    ii = 6*colorbarpoint;
-    rgb = cbi->leg_rgb+ii;
+  rgb = cbi->rgb_node+3*colorbarpoint;
 
-    BUTTON_next->enable();
-    BUTTON_prev->enable();
+  BUTTON_next->enable();
+  BUTTON_prev->enable();
 
-    strcpy(colorbar_label,cbi->label);
-    EDITTEXT_colorbar_label->set_text(colorbar_label);
-    SPINNER_left_red->set_int_val(   (int)(255*rgb[0]));
-    SPINNER_left_green->set_int_val( (int)(255*rgb[1]));
-    SPINNER_left_blue->set_int_val(  (int)(255*rgb[2]));
-    icolorbar=LISTBOX_colorbar->get_int_val();
-    if(icolorbar>=ndefaultcolorbars){
-      BUTTON_delete->enable();
-      SPINNER_valmin->enable();
-      SPINNER_valmax->enable();
-      EDITTEXT_colorbar_label->enable();
-      SPINNER_left_red->enable();
-      SPINNER_left_green->enable();
-      SPINNER_left_blue->enable();
-      if(cbi->splitflag[colorbarpoint]==1){
-        SPINNER_right_red->enable();
-        SPINNER_right_green->enable();
-        SPINNER_right_blue->enable();
-      }
-      else{
-        SPINNER_right_red->disable();
-        SPINNER_right_green->disable();
-        SPINNER_right_blue->disable();
-      }
-      BUTTON_addpoint->enable();
-      BUTTON_deletepoint->enable();
-      if(colorbarpoint==0||colorbarpoint==cbi->nlegs-1){
-        CHECKBOX_jump->disable();
-        SPINNER_val->disable();
-        SPINNER_colorindex->disable();
-      }
-      else{
-        CHECKBOX_jump->enable();
-        SPINNER_val->enable();
-        SPINNER_colorindex->enable();
-      }
-    }
-    else{
-      BUTTON_delete->disable();
-      SPINNER_valmin->disable();
-      SPINNER_valmax->disable();
-      EDITTEXT_colorbar_label->disable();
-      BUTTON_addpoint->disable();
-      BUTTON_deletepoint->disable();
-      CHECKBOX_jump->disable();
-      SPINNER_val->disable();
-      SPINNER_colorindex->disable();
-
-      SPINNER_left_red->disable();
-      SPINNER_left_green->disable();
-      SPINNER_left_blue->disable();
-      SPINNER_right_red->disable();
-      SPINNER_right_green->disable();
-      SPINNER_right_blue->disable();
-    }
-    if(colorbarpoint>0){
-      SPINNER_right_red->set_float_val(  (int)(255*rgb[3-6]));
-      SPINNER_right_green->set_float_val((int)(255*rgb[4-6]));
-      SPINNER_right_blue->set_float_val( (int)(255*rgb[5-6]));
-    }
-  }
-  if(CHECKBOX_jump->get_int_val()==1){
-    STATICTEXT_left->set_text("Color left of split");
-    STATICTEXT_right->set_text("Color right of split");
+  strcpy(colorbar_label,cbi->label);
+  EDITTEXT_colorbar_label->set_text(colorbar_label);
+  icolorbar=LISTBOX_colorbar->get_int_val();
+  if(icolorbar>=ndefaultcolorbars){
+    BUTTON_delete->enable();
+    EDITTEXT_colorbar_label->enable();
+    SPINNER_right_red->enable();
+    SPINNER_right_green->enable();
+    SPINNER_right_blue->enable();
+    BUTTON_addpoint->enable();
+    BUTTON_deletepoint->enable();
+    SPINNER_colorindex->enable();
   }
   else{
-    STATICTEXT_left->set_text("");
-    STATICTEXT_right->set_text("Color");
+    BUTTON_delete->disable();
+    EDITTEXT_colorbar_label->disable();
+    SPINNER_right_red->disable();
+    SPINNER_right_green->disable();
+    SPINNER_right_blue->disable();
+    BUTTON_addpoint->disable();
+    BUTTON_deletepoint->disable();
+    SPINNER_colorindex->disable();
   }
+  SPINNER_right_red->set_float_val(  (int)(rgb[0]));
+  SPINNER_right_green->set_float_val((int)(rgb[1]));
+  SPINNER_right_blue->set_float_val( (int)(rgb[2]));
 }
