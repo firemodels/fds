@@ -653,7 +653,7 @@ int readsmv(char *file){
       ntrnz++;
       continue;
     }
-    if(match(buffer,"SURFACE",7) ==1){
+    if(match(buffer,"SURFACE",7) ==1&&match(buffer,"SURFACE DENSITY",15)!=1){
       nsurfaces++;
       continue;
     }
@@ -1695,7 +1695,7 @@ typedef struct {
     ++++++++++++++++++++++ SURFACE ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"SURFACE",7) ==1){
+    if(match(buffer,"SURFACE",7) ==1&&match(buffer,"SURFACE DENSITY",15)!=1){
       surfi = surfaceinfo + nsurfaces;
       initsurface(surfi);
       fgets(buffer,255,stream);
