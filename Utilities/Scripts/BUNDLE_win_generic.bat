@@ -81,6 +81,8 @@ echo to the Documentation directory
 
 copy %in_pdf%\FDS_5_User_Guide.pdf               %out_guides%\.
 copy %in_pdf%\SMV_5_User_Guide.pdf               %out_guides%\.
+copy %in_pdf%\SMV_5_Technical_Reference_Guide.pdf %out_guides%\.
+copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_guides%\.
 copy "%in_smv%\readme.html"                      "%out_guides%\Smokeview_release_notes.html"
 
 copy "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
@@ -94,11 +96,11 @@ copy "%bundleinfo%\issue_tracker.url"          "%out_web%\Issue_Tracker.url"
 if %docs_include_in_bundle% EQU 0 goto end_docs
 echo.
 echo Copying all other documentation to the Documentation directory
-copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_guides%\.
 copy %in_pdf%\FDS_5_Validation_Guide.pdf          %out_guides%\.
 copy %in_pdf%\FDS_5_Verification_Guide.pdf        %out_guides%\.
 copy %in_pdf%\SMV_5_Verification_Guide.pdf        %out_guides%\.
-copy %in_pdf%\SMV_5_Technical_Reference_Guide.pdf %out_guides%\.
+Rem copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_guides%\.
+Rem copy %in_pdf%\SMV_5_Technical_Reference_Guide.pdf %out_guides%\.
 :end_docs
 
 Rem Copy readme_examples file to Examples directory to let user download all examples
