@@ -3,7 +3,7 @@
 RENDERDIR
  ..\..\Manuals\SMV_5_User_Guide\scriptfigures
 LOADINIFILE
- script_test_left.ini
+ script_test.ini
 SETVIEWPOINT
  left
 LOADFILE
@@ -12,16 +12,12 @@ SETTIMEVAL
  5.012974
 RENDERONCE
  script_test_left_05
-LOADINIFILE
- script_test.ini
 SETVIEWPOINT
- external
+ center
 SETTIMEVAL
  10.006555
 RENDERONCE
  script_test_center_10
-LOADINIFILE
- script_test_right.ini
 SETVIEWPOINT
  right
 SETTIMEVAL
