@@ -18,3 +18,5 @@
 18. test cad drawing fix
 19. test initialization of value in prop data structure 
 20. test improved .smv parsing algorithm (add leading blanks to any .smv line that is not a keyword)
+21. test plot3d 2d and 3d contouring code to make sure colors are consistent
+22. test new colorbar editor
