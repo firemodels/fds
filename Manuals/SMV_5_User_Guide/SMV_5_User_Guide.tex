@@ -3081,6 +3081,16 @@ Figure \ref{figCLIPPED}a is drawn with no clipping.
 Figure \ref{figCLIPPED}b is drawn clipping just the geometry (blockages).
 Figure \ref{figCLIPPED}c is drawn clipping both the geometry and the data.
 
+\chapter{Customizing the Colorbar}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=2.722222in]{figures/figCOLORBAR_EDITOR}
+\end{center}
+\caption[Colorbar Editor dialog box.]{
+Colorbar Editor dialog box.} \label{figCOLORBAR}
+\end{figure}
+
 \chapter{Smokeview - Demonstrator Mode}
 A simplified version of Smokeview may be invoked in order to present a fire scenario for training or demonstration
 purposes.  All actions are performed using one unified dialog box, illustrated in Figure \ref{figDEMO}.  This dialog box is opened for the user at startup and allows the user to select data to be viewed, tours to travel along, viewpoints to observe and scene manipulation to perform.  Smokeview loads data when it starts up.
@@ -3183,7 +3193,7 @@ tasks in setting up an \fds\ input file is defining the geometry
 (blockages, vent locations \etc) properly. \Smokeview\ may be used
 to debug \fds\ input files by making short model runs and observing
 whether blockages, vents and other geometric features of a model run are
-located correctly. Blockages may then be created or changed using a text editor and 
+located correctly. Blockages may then be created or changed using a text editor and
 location information provided by the
 {\em Examine Blockages}\ dialog box called from the
 \fbox{\tt Dialogs}\ menu.
@@ -3227,10 +3237,10 @@ keyword back to the desired final simulation time, remove any
 unnecessary \fds\ {\tt COLOR} keywords and run the case.
 \end{enumerate}
 
-\section{Examining Blockages}  Blockages locations and SURF 
+\section{Examining Blockages}  Blockages locations and SURF
 properties may be examined by selecting
 the menu item \frameit{Examine Blockages} which opens up the dialog box
-illustrated in Figure \ref{figEDIT}. Note, clipping planes need to be turned off 
+illustrated in Figure \ref{figEDIT}. Note, clipping planes need to be turned off
 when using this dialog box.
 Associating unique colors with each surface allows the user to quickly
 determine whether blockages are defined with the proper surfaces.
