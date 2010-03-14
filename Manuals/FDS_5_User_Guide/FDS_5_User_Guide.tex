@@ -333,7 +333,7 @@ $SVN Repository$~$Revision$}
 {\em Gary Locke, Secretary} \\
 \hspace{1in} \\
 National Institute of Standards and Technology \\
-{\em Patrick Gallagher, Acting Director} }
+{\em Patrick Gallagher, Director} }
 
 
 \end{minipage}
@@ -2236,13 +2236,13 @@ The pressure term in the momentum transport equation solved by FDS is decomposed
 \be \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)  \ee
 The pressure term is written like this so that a separable elliptic partial differential equation can be solved for the
 ``total'' pressure, ${\cal H} \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on
-the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable. 
+the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable.
 This term is sometimes referred to as the baroclinic torque, and it is responsible for
-generating vorticity due to the non-alignment of pressure and density gradients. 
-In versions of FDS prior to 5.5, the second term was included only as an option. 
+generating vorticity due to the non-alignment of pressure and density gradients.
+In versions of FDS prior to 5.5, the second term was included only as an option.
 Starting with FDS~5.5, however, the baroclinic torque is included by default. It can be excluded by setting
-{\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line, but this is only recommended for diagnostic purposes. For example, in the simple helium plume test case below, 
-neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant. 
+{\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line, but this is only recommended for diagnostic purposes. For example, in the simple helium plume test case below,
+neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant.
 For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
 
 
@@ -8318,7 +8318,7 @@ The PDPA device output at time $t$ is computed as
 \be
 f(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} \left( \frac{\sum_i n_i d_i^m x}{\sum_i n_i d_i^n}\right)^{1/(m-n)}  dt
 \ee
-where $x$ is the quantity to be measured, or just one in case of mean diameters. 
+where $x$ is the quantity to be measured, or just one in case of mean diameters.
 The summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} and centered at
 the location given by the device {\ct XYZ}. The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
