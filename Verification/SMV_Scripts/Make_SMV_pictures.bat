@@ -46,3 +46,4 @@ smokeview -runscript sprinkler_many
 cd %wui%
 smokeview -runscript fire_line
 
+cd ..\SMV_scripts
