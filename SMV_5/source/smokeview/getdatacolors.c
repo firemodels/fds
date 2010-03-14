@@ -58,13 +58,26 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
 
   range = local_tmax - local_tmin;
   factor = 0.0f;
-  if(range!=0.0f)factor = ndatalevel/range;
+  if(range!=0.0f)factor = (ndatalevel-2)/range;
   for(n=0;n<nt;n++){
-    itt=(int)(factor*(*t++-local_tmin));
+    float val;
+
+    val = *t;
+
+    if(val<local_tmin){
+      itt=0;
+    }
+    else if(val>local_tmax){
+      itt=ndatalevel-1;
+    }
+    else{
+      itt=1+(int)(factor*(val-local_tmin));
+    }
     if(itt<0)itt=0;
     if(itt>ndatalevel-1)itt=ndatalevel-1;
     *it=itt;
     it++;
+    t++;
   }
   frexp10(local_tmax, &expmax);
   frexp10(local_tmin, &expmin);
@@ -135,10 +148,21 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
   range = local_tmax - local_tmin;
   factor = 0.0f;
   if(range!=0.0f){
-    factor = (ndatalevel-1)/range;
+    factor = (ndatalevel-2)/range;
   }
   for(n=0;n<nt;n++){
-    itt=(int)(0.5+(factor*(*t-local_tmin)));
+    float val;
+
+    val=*t;
+    if(val<local_tmin){
+      itt=0;
+    }
+    else if(val>local_tmax){
+      itt=ndatalevel-1;
+    }
+    else{
+      itt=1+(int)(0.5+(factor*(*t-local_tmin)));
+    }
     if(itt<0)itt=0;
     if(itt>ndatalevel-1)itt=ndatalevel-1;
     *it=itt;
@@ -240,7 +264,15 @@ void getPart5Colors(particle *parti, int nlevel){
             int irval;
 
             val=*rvals++;
-            irval = 255*(val-valmin)/dval;
+            if(val<valmin){
+              irval=0;
+            }
+            else if(val>valmax){
+              irval=255;
+            }
+            else{
+              irval = 1+253*(val-valmin)/dval;
+            }
             if(irval<0)irval=0;
             if(irval>255)irval=255;
             *irvals++=irval;
@@ -474,11 +506,22 @@ void getPartColors(const float *t, int local_skip, int nt,
   range = local_tmax - local_tmin;
   factor=0.0f;
   if(range!=0.0f){
-    factor = 255./range;
+    factor = 253./range;
   }
   for(n=local_skip;n<nt;n++){
     if((particle_type==1&&*isprink==0)||(*isprink==1&&droplet_type==1)){
-      itt=(int)(factor*(*t-local_tmin));
+      float val;
+
+      val = *t;
+      if(val<local_tmin){
+        itt=0;
+      }
+      else if(val>local_tmax){
+        itt=255;
+      }
+      else{
+        itt=1+(int)(factor*(*t-local_tmin));
+      }
       if(itt<0)itt=0;
       if(itt>255){
         itt=255;
@@ -560,15 +603,25 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
 
   dt = local_tmax - local_tmin;
   factor=0.0f;
-  if(dt!=0.0f)factor = nlevel_full/dt;
+  if(dt!=0.0f)factor = (nlevel_full-2)/dt;
   for(n=0;n<nt;n++){
-    itt=(int)(factor*(*t-local_tmin));
+    float val;
+
+    val=*t;
+    if(val<local_tmin){
+      itt=0;
+    }
+    else if(val>local_tmax){
+      itt=nlevel_full-1;
+    }
+    else{
+      itt=1+(int)(factor*(val-local_tmin));
+    }
     if(itt<0)itt=0;
     if(itt>nlevel_full-1)itt=nlevel_full-1;
     *it=itt;
-    it++;t++;
-	/* iblank++;*/
-
+    it++;
+    t++;
   }
 
   STRCPY(scale,"");
@@ -682,7 +735,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   tminorig=local_tmin;
   tmaxorig=local_tmax;
   if(range!=0.0f){
-    factor = (float)ndatalevel/range;
+    factor = (float)(ndatalevel-2)/range;
   }
   else{
     factor = 0.0f;
@@ -698,10 +751,22 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
       q=meshi->qdata+plot3dvar*ntotal;
       iq=meshi->iqdata+plot3dvar*ntotal;
       for(n=0;n<ntotal;n++){
-        itt=(int)(factor*(*q++-local_tmin));
+        float val;
+
+        val=*q;
+        if(val<local_tmin){
+          itt=0;
+        }
+        else if(val>local_tmax){
+          itt=ndatalevel-1;
+        }
+        else{
+          itt=1+(int)(factor*(val-local_tmin));
+        }
         if(itt<0)itt=0;
         if(itt>ndatalevel-1)itt=ndatalevel-1;
         *iq++=itt;
+        q++;
       }
     }
   }
@@ -780,17 +845,30 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
 
   range = local_tmax-local_tmin;
   if(range!=0.0f){
-    factor = (float)ndatalevel/range;
+    factor = (float)(ndatalevel-2)/range;
   }
    else{
      factor = 0.0f;
    }
   for(n=0;n<nt;n++){
-    itt=(int)(factor*(*t++-local_tmin));
+    float val;
+
+    val = *t;
+
+    if(val<local_tmin){
+      itt=0;
+    }
+    else if(val>local_tmax){
+      itt=ndatalevel-1;
+    }
+    else{
+      itt=1+(int)(factor*(val-local_tmin));
+    }
     if(itt<0)itt=0;
     if(itt>ndatalevel-1)itt=ndatalevel-1;
     *it=itt;
     it++;
+    t++;
   }
 
   STRCPY(*scale,"");
@@ -927,17 +1005,29 @@ void getIsoColors(const float *t, int nt, unsigned char *it,
 
   range = local_tmax-local_tmin;
   if(range!=0.0f){
-    factor = (float)ndatalevel/range;
+    factor = (float)(ndatalevel-2)/range;
   }
    else{
      factor = 0.0f;
    }
   for(n=0;n<nt;n++){
-    itt=(int)(factor*(*t++-local_tmin));
+    float val;
+
+    val=*t;
+    if(val<local_tmin){
+      itt=0;
+    }
+    else if(val>local_tmax){
+      itt=ndatalevel-1;
+    }
+    else{
+      itt=1+(int)(factor*(val-local_tmin));
+    }
     if(itt<0)itt=0;
     if(itt>ndatalevel-1)itt=ndatalevel-1;
     *it=itt;
     it++;
+    t++;
   }
 
   STRCPY(*scale,"");

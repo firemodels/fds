@@ -1241,8 +1241,8 @@ void initvars1(void){
   showterrain=0;
   showgluitrainer=0;
   colorbarcycle=0;
-  colorbartype=1;
-  colorbartype_save=1;
+  colorbartype=0;
+  colorbartype_save=colorbartype;
   colorbarpoint=0;
   vectorspresent=0;
 
