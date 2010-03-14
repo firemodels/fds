@@ -3082,6 +3082,25 @@ Figure \ref{figCLIPPED}b is drawn clipping just the geometry (blockages).
 Figure \ref{figCLIPPED}c is drawn clipping both the geometry and the data.
 
 \chapter{Customizing the Colorbar}
+A colorbar is used to associate data with color.  It maps floating point data to a set of 256 colors.  In Smokeview, a colorbar is a table with 256 entries, each entry having a red, green and blue coordinate ranging from 0.0 to 1.0.  A colorbar obviously may be visualized by displaying its color components in a linear band.  It may also be visualized by thinking of its  red, green and blue coordinates spatially associating the red, green and blue color components with and x, y and z spatial coordinate.  A colorbar may then be thought of as a path within a unit cube.  Figure \ref{figCOLORBAR_EXAMPLES} gives several examples of colorbars used by Smokeview displayed using the colorbar editor illustrated in Figure \ref{figCOLORBAR}.
+
+A colorbar path need not be continuous.  Figure \ref{figCOLORBAR_EXAMPLES}c gives an example of a colorbar with a break.  This colorbar jumps in the middle from a shade of cyan to a shade of yellow.  Discontinuous colorbars are useful for highlighting regions in a simulation with a particular property, for example where the temperature exceeds the boiling point of water or in a topographic map where a shoreline (zero elevation) occurs.
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[width=3.25in]{figures/colorbar_rainbow}&
+\includegraphics[width=3.25in]{figures/colorbar_bluered}\\
+a) rainbow&b) blue-/>red\\
+\includegraphics[width=3.25in]{figures/colorbar_split}&
+\includegraphics[width=3.25in]{figures/colorbar_whiteblack}\\
+c) blue-/>red split&d) white-/>black
+\end{tabular}
+\end{center}
+\caption[Colorbar Examples]{
+Colorbar Examples} \label{figCOLORBAR_EXAMPLES}
+\end{figure}
 
 \begin{figure}[\figoptions]
 \begin{center}
