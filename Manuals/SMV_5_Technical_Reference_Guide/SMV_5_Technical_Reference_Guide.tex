@@ -901,20 +901,22 @@ The basic procedure is to
 \end{enumerate}
 These steps are detailed in the following sections.   It is important to point out that the use of 1D texture maps in step 4 enables more detail to be obtained from the visualization due to the way that color interpolations between grid points are performed.
 
-\subsection{Determining Data Bounds}Smokeview uses three methods or criteria for setting data bounds.  First, the bounds may be set by the user.  This would be useful to ensure consistent coloring when several file types are displayed simultaneously (say slice and boundary files).  A second method is to use {\em percentile}\ bounds (1st and 99th by default) which are useful when data outliers are present.  To find percentile bounds, Smokeview scans the data computing a histogram.  It then picks data bounds at a specified percentile levels, 1st and 99th by default.  The third method for setting data bounds is to simply pick the global bounds for the data.
+\subsection{Determining Data Bounds}Smokeview uses three methods for setting data bounds.  First, the bounds may be set by the user.  This would be useful to ensure consistent coloring when several file types are displayed simultaneously (say slice and boundary files).  A second method is to use {\em percentile}\ bounds (1st and 99th by default) which are useful when data outliers are present.  To find percentile bounds, Smokeview scans the data computing a histogram.  It then picks data bounds at a specified percentile levels, 1st and 99th by default.  The third method for setting data bounds is to simply pick the global bounds for the data.
 
 \subsection{Converting data to a color}
-Once the data bounds are determined, an integer index array is computed from the data using an algorithm of the form
-\begin{verbatim}
-int i, *dataindex;
-float *data, datamin, datamax;
+An index into a color table of size 256 is computed using
 
-for(i=0;i<ndata;i++){
-  dataindex[i]=255*(data[i]-datamin)/(datamax-datamin);
-}
-\end{verbatim}
+\begin{eqnarray*}
+\mbox{color index}=\left\{
+\begin{array}{ll}
+  0 & v < v_{min}\\
+  1+253(v-v_{min})/(v_{max}-v_{min}) & v_{min}\le v \le v_{max} \\
+  255 & v > v_{max}
+\end{array}
+\right.
+\end{eqnarray*}
 
-The data indices in {\tt dataindex}\ then point into a colorbar data structure containing 256 entries.  Each entry contains 4 components (red, green, blue and opacity).  Each component is scaled from 0.0 to 1.0.  The data in the colorbar data structure then defines colors (by default) as illustrated by the {\bf bold path}\ in Figure \ref{colorbarinfo}.  Other colorbars may be used, for example a color bar containing shades of grey from white to black.
+Each table entry contains 4 components (red, green, blue and opacity).  Each component is scaled from 0.0 to 1.0.  The data in the colorbar data structure then defines colors (by default) as illustrated by the {\bf bold path}\ in Figure \ref{colorbarinfo}.  Other colorbars may be used, for example a color bar containing shades of grey from white to black.
 
 
 \begin{figure}[\figoptions]
