@@ -1,6 +1,6 @@
 @echo off
 
-Rem  Windows batch file to build a test Smokeview for OSX.
+Rem  Windows batch file to build a test Smokeview for 64 bit Linux
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -23,7 +23,6 @@ echo Using SVN revision %smv_revision% to build a 64 bit test Linux Smokeview
 
 %svn_drive%
 cd %svn_root%\smv_5\scripts
-set version=%smv_version%_%smv_revision%
 
 set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
