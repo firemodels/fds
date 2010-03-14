@@ -168,7 +168,7 @@ void RenderFrame(int view_mode){
 
   // filename suffix
 
-  if(use_scriptfile==0){
+  if(use_scriptfile==0||(current_script_command!=NULL&&current_script_command->command==SCRIPT_RENDERALL)){
     int image_num;
     char suffix[20];
 
