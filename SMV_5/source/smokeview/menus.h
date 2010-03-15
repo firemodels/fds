@@ -931,7 +931,6 @@ void DialogMenu(int value){
     if(showwui==1)show_glui_wui();
     if(showwui==0)hide_glui_wui();
     break;
-#ifdef pp_COLOR
   case 23:
     showcolorbar=1-showcolorbar;
     if(showcolorbar==1){
@@ -943,7 +942,6 @@ void DialogMenu(int value){
       hide_glui_colorbar();
     }
     break;
-#endif
   case 16:
     showedit=1-showedit;
     if(showedit==1){
@@ -981,9 +979,7 @@ void DialogMenu(int value){
     showgluistereo=0;
     hide_glui_stereo();
     showcolorbar=0;
-#ifdef pp_COLOR
     hide_glui_colorbar();
-#endif
     if(showedit==1)DialogMenu(16);
     showtrainer=0;
     hide_trainer();
@@ -5578,10 +5574,6 @@ static int in_menu=0;
   else{
     glutAddMenuEntry("  Transparent (data)",-13);
   }
-//#ifdef pp_COLOR
-//  if(viscolorbarpath==1)glutAddMenuEntry("*Show colorbar path",-5);
-//  if(viscolorbarpath==0)glutAddMenuEntry("Show colorbar path",-5);
-//#endif
 
 /* --------------------------------showVslice menu -------------------------- */
   if(nvsliceloaded==0){
@@ -6112,10 +6104,8 @@ static int in_menu=0;
     if(showbounds==0)glutAddMenuEntry("Compression/Smokezip...  ALT+z",24);
   }
 #endif
-#ifdef pp_COLOR
   if(showcolorbar==1)glutAddMenuEntry("*Customize Colorbar...  ALT+c",23);
   if(showcolorbar==0)glutAddMenuEntry("Customize Colorbar...  ALT+c",23);
-#endif
   if(showlabels==1)glutAddMenuEntry("*Display...  ALT+d",22);
   if(showlabels==0)glutAddMenuEntry("Display...  ALT+d",22);
   if(isZoneFireModel==0){
