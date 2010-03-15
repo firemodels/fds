@@ -202,7 +202,7 @@ extern "C" void glui_colorbar_setup(int main_window){
 
   panel_extreme = glui_colorbar->add_panel("");
 
-  CHECKBOX_usebounds=glui_colorbar->add_checkbox_to_panel(panel_extreme,"Hilight extreme data",&show_extremedata,
+  CHECKBOX_usebounds=glui_colorbar->add_checkbox_to_panel(panel_extreme,"Highlight extreme data",&show_extremedata,
     COLORBAR_EXTREME,COLORBAR_CB);
   panel_cb9 = glui_colorbar->add_panel_to_panel(panel_extreme,"",GLUI_PANEL_NONE);
   panel_cb8 = glui_colorbar->add_panel_to_panel(panel_cb9,"Below specified min");
