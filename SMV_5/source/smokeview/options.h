@@ -100,7 +100,6 @@
 #undef pp_THREAD
 //#define pp_LIGHT
 //#define pp_SHOWLIGHT
-//#define pp_COLOR
 #endif
 
 #ifdef pp_BETA
@@ -108,7 +107,6 @@
 #define pp_LIGHT
 #define pp_SHOOTER
 #define pp_TRANSFORMxxx
-#define pp_COLOR
 #endif
 
 #ifdef pp_CULL
