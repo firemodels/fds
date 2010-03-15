@@ -870,14 +870,8 @@ SVEXTERN float user_tick_origin[3], user_tick_max[3], user_tick_min[3], user_tic
 SVEXTERN int user_tick_nxyz[3], user_tick_sub, user_tick_option, vis_user_ticks, auto_user_tick_placement;
 SVEXTERN int user_tick_show_x, user_tick_show_y, user_tick_show_z;
 SVEXTERN int visCadTextures, visTerrainTexture;
-#ifdef pp_COLOR
 SVEXTERN int bw_colorbar_index;
 SVEXTERN int viscolorbarpath;
-SVEXTERN int showzerosplit;
-#else
-SVEXTERN int viscolorbarpath;
-SVEXTERN int showzerosplit;
-#endif
 SVEXTERN int *sortedblocklist,*changed_idlist,nchanged_idlist;
 SVEXTERN int nselectblocks;
 SVEXTERN surface *surfaceinfo,sdefault,v_surfacedefault,e_surfacedefault;

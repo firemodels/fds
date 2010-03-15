@@ -8664,7 +8664,6 @@ int readini2(char *inifile, int localfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
 
-#ifdef pp_COLOR
       if(match(buffer,"GCOLORBAR",9) == 1){
         colorbardata *cbi;
         int r1, g1, b1;
@@ -8713,7 +8712,6 @@ int readini2(char *inifile, int localfile){
           remapcolorbar(cbi);
         }
     }
-#endif
 
       if(match(buffer,"TOURCOLORS",10)==1){
         col=tourcol_selectedpathline;

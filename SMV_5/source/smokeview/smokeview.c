@@ -1128,7 +1128,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
-#ifdef pp_COLOR
   if(viscolorbarpath==1){
     if(cb_hidesv==1){
       setColorbarClipPlanes(0);
@@ -1140,7 +1139,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     sniffErrors("after setColorbarClipPlanes 1");
 }
 
-#endif
   if(eyeview==1&&nskyboxinfo>0)draw_skybox();
 
   if(UpdateLIGHTS==1)updateLights(0);
@@ -1809,13 +1807,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
  /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
-#ifdef pp_COLOR
   if(viscolorbarpath==1){
     if(cb_hidesv==1){
       setColorbarClipPlanes(0);
     }
   }
-#endif
 
   sniffErrors("end of loop");
 
@@ -3674,9 +3670,6 @@ void usage(char **argv){
     printf("  Smokeview was built with the following pre-processing directives set:\n");
 #ifdef pp_ALPHA
     printf(" pp_ALPHA");
-#endif
-#ifdef pp_COLOR
-    printf(", pp_COLOR");
 #endif
 #ifdef pp_COMPRESS
     printf(", pp_COMPRESS");
