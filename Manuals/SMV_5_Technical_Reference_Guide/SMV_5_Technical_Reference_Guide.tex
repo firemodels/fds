@@ -145,7 +145,8 @@ Volume II: Technical Reference Guide
 
 \vspace{.25in}
 
-\flushright{August 2009\\
+\flushright{\today \\
+Smokeview Version 5.5 \\
 SVN Repository~$Revision$}
 
 \vfill
@@ -916,7 +917,7 @@ An index into a color table of size 256 is computed using
 \right.
 \end{eqnarray*}
 
-Each table entry contains 4 components (red, green, blue and opacity).  Each component is scaled from 0.0 to 1.0.  The data in the colorbar data structure then defines colors (by default) as illustrated by the {\bf bold path}\ in Figure \ref{colorbarinfo}.  Other colorbars may be used, for example a color bar containing shades of grey from white to black.
+\noindent where $v_{min}$ and $v_{max}$ are specified data bounds.  Each table entry contains 4 components (red, green, blue and opacity).  Each component is scaled from 0.0 to 1.0.  The data in the colorbar data structure then defines colors (by default) as illustrated by the {\bf bold path}\ in Figure \ref{colorbarinfo}.  Other colorbars may be used, for example a color bar containing shades of grey from white to black.
 
 
 \begin{figure}[\figoptions]
