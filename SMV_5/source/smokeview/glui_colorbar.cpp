@@ -104,6 +104,13 @@ extern "C" void update_extreme(void){
   CHECKBOX_usebounds->set_int_val(show_extremedata);
 }
 
+
+/* ------------------ update_camera_label ------------------------ */
+
+extern "C" void update_colorbar_type(void){
+  LISTBOX_colorbar->set_int_val(colorbartype);
+}
+
 /* ------------------ update_camera_label ------------------------ */
 
 extern "C" void update_colorbar_label(void){
