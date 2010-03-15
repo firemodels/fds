@@ -97,6 +97,13 @@ extern "C" void colorbar_global2local(void);
 
 void COLORBAR_CB(int var);
 
+
+/* ------------------ update_camera_label ------------------------ */
+
+extern "C" void update_extreme(void){
+  CHECKBOX_usebounds->set_int_val(show_extremedata);
+}
+
 /* ------------------ update_camera_label ------------------------ */
 
 extern "C" void update_colorbar_label(void){
@@ -186,19 +193,19 @@ extern "C" void glui_colorbar_setup(int main_window){
   SPINNER_right_green->set_int_limits(0,255);
   SPINNER_right_blue->set_int_limits(0,255);
 
-  panel_extreme = glui_colorbar->add_panel("Colors For Data Extremes");
+  panel_extreme = glui_colorbar->add_panel("");
 
-  CHECKBOX_usebounds=glui_colorbar->add_checkbox_to_panel(panel_extreme,"Use colors from colorbar",&cb_usecolorbar_extreme,
+  CHECKBOX_usebounds=glui_colorbar->add_checkbox_to_panel(panel_extreme,"Hilight extreme data",&show_extremedata,
     COLORBAR_EXTREME,COLORBAR_CB);
   panel_cb9 = glui_colorbar->add_panel_to_panel(panel_extreme,"",GLUI_PANEL_NONE);
-  panel_cb8 = glui_colorbar->add_panel_to_panel(panel_cb9,"Below data min");
+  panel_cb8 = glui_colorbar->add_panel_to_panel(panel_cb9,"Below specified min");
   SPINNER_down_red=  glui_colorbar->add_spinner_to_panel(panel_cb8,"red",  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,COLORBAR_CB);
   SPINNER_down_green=glui_colorbar->add_spinner_to_panel(panel_cb8,"green",GLUI_SPINNER_INT,cb_down_rgb+1,COLORBAR_EXTREME_RGB,COLORBAR_CB);
   SPINNER_down_blue= glui_colorbar->add_spinner_to_panel(panel_cb8,"blue", GLUI_SPINNER_INT,cb_down_rgb+2,COLORBAR_EXTREME_RGB,COLORBAR_CB);
 
   glui_colorbar->add_column_to_panel(panel_cb9);
 
-  panel_cb7 = glui_colorbar->add_panel_to_panel(panel_cb9,"Above data max");
+  panel_cb7 = glui_colorbar->add_panel_to_panel(panel_cb9,"Above specified max");
   SPINNER_up_red=  glui_colorbar->add_spinner_to_panel(panel_cb7,"red",  GLUI_SPINNER_INT,cb_up_rgb,COLORBAR_EXTREME_RGB,COLORBAR_CB);
   SPINNER_up_green=glui_colorbar->add_spinner_to_panel(panel_cb7,"green",GLUI_SPINNER_INT,cb_up_rgb+1,COLORBAR_EXTREME_RGB,COLORBAR_CB);
   SPINNER_up_blue= glui_colorbar->add_spinner_to_panel(panel_cb7,"blue", GLUI_SPINNER_INT,cb_up_rgb+2,COLORBAR_EXTREME_RGB,COLORBAR_CB);
@@ -316,11 +323,7 @@ void COLORBAR_CB(int var){
     if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
     break;
   case COLORBAR_EXTREME:
-    if(colorbartype>=0&&colorbartype<ncolorbars){
-      cbi = colorbarinfo + colorbartype;
-      cbi->use_colorbar_extremes=cb_usecolorbar_extreme;
-    }
-    if(cb_usecolorbar_extreme==0){
+    if(show_extremedata==1){
       SPINNER_down_red->enable();
       SPINNER_down_green->enable();
       SPINNER_down_blue->enable();
@@ -336,18 +339,21 @@ void COLORBAR_CB(int var){
       SPINNER_up_green->disable();
       SPINNER_up_blue->disable();
     }
+    if(colorbartype<0||colorbartype>=ncolorbars)return;
+    cbi = colorbarinfo + colorbartype;
     remapcolorbar(cbi);
     updatecolors(-1);
+    updatemenu=1;
     break;
   case COLORBAR_EXTREME_RGB:
     if(colorbartype<0||colorbartype>=ncolorbars)return;
     cbi = colorbarinfo + colorbartype;
 
-    rgb_nodes=cbi->rgb_above_max;
+    rgb_nodes=rgb_above_max;
     for(i=0;i<3;i++){
       rgb_nodes[i]=cb_up_rgb[i];
     }
-    rgb_nodes=cbi->rgb_below_min;
+    rgb_nodes=rgb_below_min;
     for(i=0;i<3;i++){
       rgb_nodes[i]=cb_down_rgb[i];
     }
@@ -475,17 +481,15 @@ extern "C" void colorbar_global2local(void){
   SPINNER_right_green->set_int_val((int)(rgb[1]));
   SPINNER_right_blue->set_int_val( (int)(rgb[2]));
 
-  rgb = cbi->rgb_below_min;
+  rgb = rgb_below_min;
   SPINNER_down_red->set_int_val(  (int)(rgb[0]));
   SPINNER_down_green->set_int_val(  (int)(rgb[1]));
   SPINNER_down_blue->set_int_val(  (int)(rgb[2]));
 
-  rgb = cbi->rgb_above_max;
+  rgb = rgb_above_max;
   SPINNER_up_red->set_int_val(  (int)(rgb[0]));
   SPINNER_up_green->set_int_val(  (int)(rgb[1]));
   SPINNER_up_blue->set_int_val(  (int)(rgb[2]));
-
-  CHECKBOX_usebounds->set_int_val(cbi->use_colorbar_extremes);
 
   COLORBAR_CB(COLORBAR_EXTREME);
 

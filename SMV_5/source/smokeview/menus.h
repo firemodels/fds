@@ -405,67 +405,64 @@ void ColorBarMenu(int value){
       break;
     case -7:
       show_extremedata=1-show_extremedata;
+      update_extreme();
       updatecolors(-1);
       break;
-    default:
-      ASSERT(FFALSE);
-      break;
-    }
+    case -11:
+     background_flip = 1-background_flip;
+     updatecolors(-1);
+     set_labels_controls();
+     break;
+    case -12:
+     setbw=1-setbw;
+     if(setbw==1){
+       colorbartype_save=colorbartype;
+       ColorBarMenu(bw_colorbar_index);
+     }
+     else{
+       colorbartype=colorbartype_save;
+       ColorBarMenu(colorbartype);
+     }
+     updatecolors(-1);
+     set_labels_controls();
+     break;
+   case -13:
+     transparentflag=1-transparentflag;
+     updatecolors(-1);
+     set_labels_controls();
+     break;
+   case -14:
+     colorbarflip=1-colorbarflip;updatecolors(-1);
+     break;
+   case -15:
+     colorbarcycle++;
+     if(colorbarcycle>=nrgb)colorbarcycle=0;
+     updatecolors(-1);
+     break;
+   case -16:
+     colorbarcycle=0;
+     background_flip=0;
+     setbw=0;
+     updatecolors(-1);
+     break;
+   default:
+     ASSERT(FFALSE);
+     break;
+   }
   }
   if(value>=0){
     colorbartype=value;
-    if(value==2)setbw=1;
+    if(value==bw_colorbar_index)setbw=1;
   }
-  updatecolors(-1);
+  if(value>-10){
+    updatecolors(-1);
+  }
 }
 
 /* ------------------ ShadeMenu ------------------------ */
 
 void ShadeMenu(int value){
-  updatemenu=1;  
-  GLUTPOSTREDISPLAY
-  switch (value){
-   case 1:
-    background_flip = 1-background_flip;
-    updatecolors(-1);
-    set_labels_controls();
-    break;
-   case 2:
-    setbw=1-setbw;
-    if(setbw==1){
-      colorbartype_save=colorbartype;
-      ColorBarMenu(2);
-    }
-    else{
-      colorbartype=colorbartype_save;
-      ColorBarMenu(colorbartype);
-    }
-    updatecolors(-1);
-    set_labels_controls();
-  break;
-  case 3:
-    transparentflag=1-transparentflag;
-    updatecolors(-1);
-    set_labels_controls();
-    break;
-  case 4:
-    colorbarflip=1-colorbarflip;updatecolors(-1);
-    break;
-  case 5:
-    colorbarcycle++;
-    if(colorbarcycle>=nrgb)colorbarcycle=0;
-    updatecolors(-1);
-    break;
-  case 6:
-    colorbarcycle=0;
-    background_flip=0;
-    setbw=0;
-    updatecolors(-1);
-    break;
-  default:
-    ASSERT(FFALSE);
-    break;
-  }
+  ColorBarMenu(-10-value);
 }
 /* ------------------ Smoke3DShowMenu ------------------------ */
 
@@ -3941,7 +3938,7 @@ void InitMenus(int unload){
   int ntextures_used;
   int multiprop;
 
-static int titlemenu=0, labelmenu=0, shademenu=0, colorbarmenu=0, lightingmenu=0, showhidemenu=0;
+static int titlemenu=0, labelmenu=0, colorbarmenu=0, lightingmenu=0, showhidemenu=0;
 static int optionmenu=0, rotatetypemenu=0;
 static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0;
 #ifdef pp_COMPRESS
@@ -5515,15 +5512,17 @@ static int in_menu=0;
     colorbardata *cbi;
     char ccolorbarmenu[256];
 
+    glutAddMenuEntry("Colorbars:",-999);
     for(i=0;i<ncolorbars;i++){
       cbi = colorbarinfo + i;
 
+      strcpy(ccolorbarmenu,"  ");
       if(colorbartype==i){
-        strcpy(ccolorbarmenu,"*");
+        strcat(ccolorbarmenu,"*");
         strcat(ccolorbarmenu,cbi->label);
       }
       else{
-        strcpy(ccolorbarmenu,cbi->label);
+        strcat(ccolorbarmenu,cbi->label);
       }
 	    if(i==ndefaultcolorbars){
         glutAddMenuEntry("-",-999);
@@ -5532,53 +5531,51 @@ static int in_menu=0;
     }
   }
   glutAddMenuEntry("-",-999);
-  if(colorband==1){
-    glutAddMenuEntry("*Narrow colorband",-6);
+  glutAddMenuEntry("Modify colorbar:",-999);
+  if(show_extremedata==1){
+    glutAddMenuEntry("  *Highlight extreme data",-7);
   }
   else{
-    glutAddMenuEntry("Narrow colorband",-6);
+    glutAddMenuEntry("  Highlight extreme data",-7);
+  }
+  if(colorband==1){
+    glutAddMenuEntry("  *Narrow colorband",-6);
+  }
+  else{
+    glutAddMenuEntry("  Narrow colorband",-6);
   }
   if(colorbarflip==1){
-    glutAddMenuEntry("*Flip",-2);
+    glutAddMenuEntry("  *Flip",-2);
   }
   else{
-    glutAddMenuEntry("Flip",-2);
+    glutAddMenuEntry("  Flip",-2);
   }
-  glutAddMenuEntry("Cycle",-3);
-  glutAddMenuEntry("Reset",-4);
-  if(show_extremedata==1){
-    glutAddMenuEntry("*Highlight out of range data",-7);
-  }
-  else{
-    glutAddMenuEntry("Highlight out of range data",-7);
-  }
-#ifdef pp_COLOR
-  if(viscolorbarpath==1)glutAddMenuEntry("*Show colorbar path",-5);
-  if(viscolorbarpath==0)glutAddMenuEntry("Show colorbar path",-5);
-#endif
-
-/* --------------------------------shade menu -------------------------- */
-
-  CREATEMENU(shademenu,ShadeMenu);
-
+  glutAddMenuEntry("  Cycle",-3);
+  glutAddMenuEntry("  Reset",-4);
+  glutAddMenuEntry("-",-999);
+  glutAddMenuEntry("Shades:",-999);
   if(background_flip==1){
-    glutAddMenuEntry("*Flip background",1);
+    glutAddMenuEntry("  *Flip background",-11);
   }
   else{
-    glutAddMenuEntry("Flip background",1);
+    glutAddMenuEntry("  Flip background",-11);
   }
   if(setbw==0){
-    glutAddMenuEntry("*Color/BW",2);
+    glutAddMenuEntry("  *Color/BW",-12);
   }
   else{
-    glutAddMenuEntry("Color/*BW",2);
+    glutAddMenuEntry("  Color/*BW",-12);
   }
   if(transparentflag==1){
-    glutAddMenuEntry("*Transparent (data)",3);
+    glutAddMenuEntry("  *Transparent (data)",-13);
   }
   else{
-    glutAddMenuEntry("Transparent (data)",3);
+    glutAddMenuEntry("  Transparent (data)",-13);
   }
+//#ifdef pp_COLOR
+//  if(viscolorbarpath==1)glutAddMenuEntry("*Show colorbar path",-5);
+//  if(viscolorbarpath==0)glutAddMenuEntry("Show colorbar path",-5);
+//#endif
 
 /* --------------------------------showVslice menu -------------------------- */
   if(nvsliceloaded==0){
@@ -6230,8 +6227,7 @@ static int in_menu=0;
 /* --------------------------------option menu -------------------------- */
 
   CREATEMENU(optionmenu,OptionMenu);
-  glutAddSubMenu("Colorbars",colorbarmenu);
-  glutAddSubMenu("Shades",shademenu);
+  glutAddSubMenu("Colorbars/Shades",colorbarmenu);
   if(nunitclasses>0)glutAddSubMenu("Units",unitsmenu);
 #ifdef pp_SHOWLIGHT
   if(showlightmenu==1)glutAddSubMenu("Lighting",lightingmenu);

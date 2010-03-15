@@ -306,6 +306,7 @@ EXTERNCPP void bench_out(float frame_rate);
 EXTERNCPP void output_Slicedata(void);
 EXTERNCPP void init_Slicedata(void);
 EXTERNCPP void update_camera_label(void);
+EXTERNCPP void update_extreme(void);
 EXTERNCPP void update_colorbar_label(void);
 EXTERNCPP void init_camera_list(void);
 EXTERNCPP camera *insert_camera(camera *cb,camera *source, char *name);

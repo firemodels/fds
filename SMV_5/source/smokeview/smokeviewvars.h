@@ -600,6 +600,7 @@ SVEXTERN pthread_t compress_thread_id;
 
 SVEXTERN int lock_allsmoke;
 
+SVEXTERN unsigned char rgb_below_min[3], rgb_above_max[3];
 SVEXTERN int colorbar_select_index,update_colorbar_select_index;
 SVEXTERN float world_eyepos[3];
 SVEXTERN int tour_usecurrent;
@@ -870,6 +871,7 @@ SVEXTERN int user_tick_nxyz[3], user_tick_sub, user_tick_option, vis_user_ticks,
 SVEXTERN int user_tick_show_x, user_tick_show_y, user_tick_show_z;
 SVEXTERN int visCadTextures, visTerrainTexture;
 #ifdef pp_COLOR
+SVEXTERN int bw_colorbar_index;
 SVEXTERN int viscolorbarpath;
 SVEXTERN int showzerosplit;
 #else
