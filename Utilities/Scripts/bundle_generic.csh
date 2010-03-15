@@ -76,6 +76,8 @@ echo Copying documentation
 cp $bundle_setup/Overview.html $bundledir/Documentation/.
 cp $mandir/FDS_5_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_5_User_Guide.pdf $bundledir/Documentation/.
+cp $mandir/SMV_5_Technical_Reference_Guide.pdf $bundledir/Documentation/.
+cp $mandir/FDS_5_Technical_Reference_Guide.pdf $bundledir/Documentation/.
 
 echo Copy objects.svo
 cp $forbundle/objects.svo $bundledir/bin/objects.svo
