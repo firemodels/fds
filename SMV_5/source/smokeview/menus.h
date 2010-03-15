@@ -452,7 +452,13 @@ void ColorBarMenu(int value){
   }
   if(value>=0){
     colorbartype=value;
-    if(value==bw_colorbar_index)setbw=1;
+    update_colorbar_type();
+    if(value==bw_colorbar_index){
+      setbw=1;
+    }
+    else{
+      setbw=0;
+    }
   }
   if(value>-10){
     updatecolors(-1);
@@ -5512,7 +5518,7 @@ static int in_menu=0;
     colorbardata *cbi;
     char ccolorbarmenu[256];
 
-    glutAddMenuEntry("Colorbars:",-999);
+    glutAddMenuEntry("Colorbar:",-999);
     for(i=0;i<ncolorbars;i++){
       cbi = colorbarinfo + i;
 
