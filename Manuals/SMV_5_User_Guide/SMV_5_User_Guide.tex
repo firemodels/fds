@@ -3083,10 +3083,32 @@ Figure \ref{figCLIPPED}c is drawn clipping both the geometry and the data.
 
 \chapter{Customizing the Colorbar}
 \section{Overview}
-A colorbar is used to associate data with color.  It maps floating point data values to a set of 256 colors.  In Smokeview, a colorbar is a table with 256 entries, each entry having a red, green and blue coordinate ranging from 0.0 to 1.0.  A colorbar obviously may be visualized by displaying its color components in a linear band.  It may also be visualized by thinking of color spatially associating the red, green and blue color components with an x, y and z spatial coordinate.  A colorbar may then be thought of as a path within a unit cube.  Figure \ref{figCOLORBAR_EXAMPLES} gives several examples of colorbars used by Smokeview.  Each image was generated using the colorbar editor illustrated in Figure \ref{figCOLORBAR}.
+A colorbar is used to map 
+data with color.  A colorbar may be visualized by
+displaying its color components in a linear band.  It may also be
+visualized by thinking of color spatially associating red, green and
+blue color components with x, y and z spatial coordinates.  A colorbar
+may then be thought of as a path within a cube, the lower left bottom
+cube corner with color black and the upper right top corner with color
+white.
+Figure \ref{figCOLORBAR_EXAMPLES} gives several examples of colorbars pre-defined
+by Smokeview.  Each image was generated using the colorbar editor
+illustrated in Figure \ref{figCOLORBAR}.
 
-A colorbar path need not be continuous.  Figure \ref{figCOLORBAR_EXAMPLES}c gives an example of a colorbar with a break.  This colorbar jumps in the middle from a shade of cyan to a shade of yellow.  Discontinuous colorbars are useful for highlighting regions in a simulation with a particular property, for example where the temperature exceeds the boiling point of water or in a topographic map where a shoreline (zero elevation) occurs.
+A colorbar in Smokeview consists of a set of color nodes forming a path
+within a unit cube.  Though most colorbars paths are continuous, a colorbar
+path need not be.  Discontinuous colorbars
+are useful for highlighting regions in a simulation with a particular
+property, for example where the temperature exceeds the boiling point of
+water or in a topographic map where a shoreline (zero elevation) occurs.
+Figure \ref{figCOLORBAR_EXAMPLES}c
+gives an example of a colorbar with a break.  This colorbar jumps in the
+middle from a shade of cyan to a shade of yellow.  
 
+%In Smokeview, a colorbar is represented internally
+%as a table
+%with 256 rows, each row having a red, green and blue entry
+%ranging from 0.0 to 1.0.  
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -3112,11 +3134,30 @@ Colorbar Editor dialog box.} \label{figCOLORBAR}
 \end{figure}
 
 \section{Using the Colorbar Editor}
+The Colorbar Editor dialog box is opened from the {\em Dialogs$>$Customize
+Colorbar}\ menu entry.  The dialog box contains a list of colorbars 
+pre-defined by Smokeview and others others if defined by the user.  
+A new colorbar is
+created by selecting the
+{\em New}\ button . It is created initially by making a copy of the currently selected colorbar. Once created, it may be altered by
+adding/deleting color nodes with the {\em ADD/DELETE}\ buttons and 
+altering their color.  Colorbars are saved in the Smokeview
+configuration (.ini) file.  
+
+Data greater than the specified maximum and less than the specified minimum
+may be highlighted by selecting the {\em Highlight Extreme Data}\ checkbox.
+The color used to highlight this data may also be specified.  The colors defined are shown in the triangular regions at the top and bottom of the colorbar.
 
 \chapter{Smokeview - Demonstrator Mode}
-A simplified version of Smokeview may be invoked in order to present a fire scenario for training or demonstration
-purposes.  All actions are performed using one unified dialog box, illustrated in Figure \ref{figDEMO}.  This dialog box is opened for the user at startup and allows the user to select data to be viewed, tours to travel along, viewpoints to observe and scene manipulation to perform.  Smokeview loads data when it starts up.
-The intent is to allow one not using Smokeview daily to more easily make use of Smokeview's capabilities.
+A simplified version of Smokeview may be invoked in order to present a fire
+scenario for training or demonstration
+purposes.  All actions are performed using one unified dialog box,
+illustrated in Figure \ref{figDEMO}.  This dialog box is opened for the
+user at startup and allows the user to select data to be viewed, tours to
+travel along, viewpoints to observe and scene manipulation to perform.
+Smokeview loads data when it starts up.
+The intent is to allow one not using Smokeview daily to more easily
+make use of Smokeview's capabilities.
 
 
 \begin{figure}[\figoptions]
