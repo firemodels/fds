@@ -299,7 +299,7 @@ void InitUnits(void){
   f_unit *units;
   f_units *ut;
 
-  nunitclasses_default=5;
+  nunitclasses_default=6;
   NewMemory((void **)&unitclasses_default,nunitclasses_default*sizeof(f_units));
   
   for(i=0;i<nunitclasses_default;i++){
@@ -463,6 +463,37 @@ void InitUnits(void){
   units[0].scale[1]=0.0;
   strcpy(units[1].unit,"g/kg");
   units[1].scale[0]=1000.0;
+  units[1].scale[1]=0.0;
+  if(smokediff==1){
+    strcpy(units[2].unit,"% diff");
+    units[3].scale[0]=0.16667;
+    units[3].scale[1]=0.0;
+    units[3].rel_defined=0;
+  }
+  CheckMemory;
+
+
+  // Concentration
+
+  ut = unitclasses_default + 5;
+  ut->active=0;
+  if(smokediff==1){
+    ut->diff_index=2;
+    ut->nunits=3;
+  }
+  else{
+    ut->diff_index=-1;
+    ut->nunits=2;
+  }
+  strcpy(ut->unitclass,"Concentration");
+
+  NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
+  units=ut->units;
+  strcpy(units[0].unit,"mol/mol");
+  units[0].scale[0]=1.0;
+  units[0].scale[1]=0.0;
+  strcpy(units[1].unit,"ppm");
+  units[1].scale[0]=1000000.0;
   units[1].scale[1]=0.0;
   if(smokediff==1){
     strcpy(units[2].unit,"% diff");
