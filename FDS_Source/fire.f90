@@ -34,7 +34,7 @@ CALL POINT_TO_MESH(NM)
 
 ! Upper bounds on local HRR per unit volume
 
-Q_UPPER = HRRPUA_SHEET/CELL_SIZE
+Q_UPPER = HRRPUA_SHEET/CELL_SIZE**HRRPUA_SHEET_EXPONENT
 
 ! Choose between mixture fraction formulation or finite-rate chemistry
 
