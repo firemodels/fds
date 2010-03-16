@@ -359,7 +359,8 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     }
     getPlot3DColors(nn,
                   setp3min[nn],p3min+nn, setp3max[nn],p3max+nn, 
-                  nrgb_full, nrgb-1, *(colorlabelp3+nn),*(colorlabeliso+nn),scalep3copy,p3levels[nn],p3levels256[nn]);
+                  nrgb_full, nrgb-1, *(colorlabelp3+nn),*(colorlabeliso+nn),scalep3copy,p3levels[nn],p3levels256[nn],
+                  plot3dinfo[ifile].extreme_min+nn,plot3dinfo[ifile].extreme_max+nn);
     scalep3copy++;
   }
   if(meshi->plotx==-1)meshi->plotx=ibar/2; 

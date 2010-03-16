@@ -727,11 +727,14 @@ EXTERNCPP void getBoundaryColors(float *t, int nt, unsigned char *it,
               int settmin, float *tmin, int settmax, float *tmax, 
               float *tmin_global, float *tmax_global,
               int ndatalevel, int nlevel,
-              char **labels, char *scale, float *tvals256);
+              char **labels, char *scale, float *tvals256,
+              int *extreme_min, int *extreme_max);
 EXTERNCPP void getBoundaryColors2(float *t, int nt, unsigned char *it, 
               int settmin, float *ttmin, int settmax, float *ttmax,
               float *tmin_global, float *tmax_global,
-              int ndatalevel);
+              int ndatalevel,
+              int *extreme_min, int *extreme_max
+              );
 EXTERNCPP void getBoundaryLabels(
               float tmin, float tmax,
               char **labels, char *scale, float *tvals256, int nlevel);
@@ -741,7 +744,9 @@ EXTERNCPP void getZoneColors(const float *t, int nt, unsigned char *it,
                );
 EXTERNCPP void getPlot3DColors(int iplot, int settmin, float *ttmin, int settmax, float *ttmax, 
               int ndatalevel, int nlevel,
-              char **labels,char **labelsiso, char **scale, float *tlevels, float *tlevels256);
+              char **labels,char **labelsiso, char **scale, float *tlevels, float *tlevels256,
+              int *extreme_min, int *extreme_max
+              );
 EXTERNCPP float getsliceval(slice *sd, unsigned char ival);
 EXTERNCPP void updateallslicelabels(int slicetype, int *errorcode);
 EXTERNCPP void updateallisolabels(int slicetype, int *errorcode);
@@ -752,7 +757,9 @@ EXTERNCPP void getSliceLabels(float tmin, float tmax, int nlevel,
 EXTERNCPP void getSliceColors(const float *t, int nt, unsigned char *it,
               float tmin, float tmax, 
               int ndatalevel, int nlevel,
-              char labels[12][11],char **scale, float *tlevels2);
+              char labels[12][11],char **scale, float *tlevels2,
+              int *extreme_min, int *extreme_max
+              );
 EXTERNCPP void setisolabels(float smin, float smax, 
                     iso *sd, int *errorcode);
 EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,

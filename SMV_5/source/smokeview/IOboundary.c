@@ -168,6 +168,8 @@ void readpatch(int ifile, int flag, int *errorcode){
     }
     FREEMEMORY(colorlabelpatch);
   }
+  patchinfo[ifile].extreme_max=0;
+  patchinfo[ifile].extreme_min=0;
   ibartemp=meshi->ibar;
   jbartemp=meshi->jbar;
   kbartemp=meshi->kbar;
@@ -786,7 +788,8 @@ void readpatch(int ifile, int flag, int *errorcode){
         meshi->pqqi, meshi->npatchsize, meshi->ipqqi, 
                  setpatchmin,&patchmin, setpatchmax,&patchmax, 
                  &patchmin_global, &patchmax_global,
-                 nrgb_full);
+                 nrgb_full,
+                 &patchinfo[ifile].extreme_min,&patchinfo[ifile].extreme_max);
     }
     CheckMemory;
     if(error!=0)break;
@@ -865,12 +868,15 @@ void readpatch(int ifile, int flag, int *errorcode){
     setpatchmax=SET_MAX;
     local2globalpatchbounds(patchi->label.shortlabel);
   }
+  patchinfo[ifile].extreme_min=0;
+  patchinfo[ifile].extreme_max=0;
   switch(loadpatchbysteps){
   case 0:
     getBoundaryColors(meshi->pqq, npqq, meshi->ipqq, 
       setpatchmin,&patchmin, setpatchmax,&patchmax, 
       &patchmin_global, &patchmax_global,
-      nrgb_full,nrgb, colorlabelpatch,patchscale,boundarylevels256);
+      nrgb_full,nrgb, colorlabelpatch,patchscale,boundarylevels256,
+      &patchinfo[ifile].extreme_min,&patchinfo[ifile].extreme_max);
     break;
   case 1:
     getBoundaryLabels(

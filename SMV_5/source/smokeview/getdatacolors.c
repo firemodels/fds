@@ -25,7 +25,9 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
               int settmin, float *ttmin, int settmax, float *ttmax,
               float *tmin_global, float *tmax_global,
               int ndatalevel, int nlevel,
-              char **labels, char *scale, float *tvals256){
+              char **labels, char *scale, float *tvals256,
+              int *extreme_min, int *extreme_max
+              ){
   int n;
   float *tcopy, factor, tval, range;
   int expmin, expmax;
@@ -45,6 +47,8 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
   }
   *tmin_global = tmin2;
   *tmax_global = tmax2;
+  *extreme_min=0;
+  *extreme_max=0;
   local_skip=0;
   adjustdatabounds(t,local_skip,nt,settmin,&tmin2,settmax,&tmax2);
   if(settmin!=SET_MIN){
@@ -66,9 +70,11 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
 
     if(val<local_tmin){
       itt=0;
+      *extreme_min=1;
     }
     else if(val>local_tmax){
       itt=ndatalevel-1;
+      *extreme_max=1;
     }
     else{
       itt=1+(int)(factor*(val-local_tmin));
@@ -116,7 +122,9 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
 void getBoundaryColors2(float *t, int nt, unsigned char *it, 
               int settmin, float *ttmin, int settmax, float *ttmax,
               float *tmin_global, float *tmax_global,
-              int ndatalevel){
+              int ndatalevel,
+              int *extreme_min, int *extreme_max
+              ){
   int n;
   float *tcopy, factor, range;
   int itt;
@@ -138,9 +146,11 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
   adjustdatabounds(t,local_skip,nt,settmin,&tmin2,settmax,&tmax2);
   if(settmin!=SET_MIN){
     *ttmin=tmin2;
+    *extreme_min=1;
   }
   if(settmax!=SET_MAX){
     *ttmax=tmax2;
+    *extreme_max=1;
   }
   local_tmin = *ttmin;
   local_tmax = *ttmax;
@@ -663,7 +673,9 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
 
 void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, float *ttmax, 
               int ndatalevel, int nlevel,
-              char **labels,char **labelsiso,char **scale, float *tlevels, float *tlevels256){
+              char **labels,char **labelsiso,char **scale, float *tlevels, float *tlevels256,
+              int *extreme_min, int *extreme_max
+              ){
   int n;
   float dt, factor, tval;
   float local_tmin, local_tmax, tmin2, tmax2;
@@ -684,7 +696,8 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
 
   tmin2= 1000000000.;
   tmax2=-1000000000.;
-
+  *extreme_min=0;
+  *extreme_max=0;
   for(i=0;i<nplot3d_files;i++){
     p = plot3dinfo+i;
     if(p->loaded==0||p->display==0)continue;
@@ -756,9 +769,11 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
         val=*q;
         if(val<local_tmin){
           itt=0;
+          *extreme_min=1;
         }
         else if(val>local_tmax){
           itt=ndatalevel-1;
+          *extreme_max=1;
         }
         else{
           itt=1+(int)(factor*(val-local_tmin));
@@ -836,7 +851,9 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
 void getSliceColors(const float *t, int nt, unsigned char *it,
               float local_tmin, float local_tmax, 
               int ndatalevel, int nlevel,
-              char labels[12][11],char **scale, float *tlevels256){
+              char labels[12][11],char **scale, float *tlevels256,
+              int *extreme_min, int *extreme_max
+              ){
   int n;
   float dt, factor, tval;
   float range;
@@ -844,6 +861,8 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
   int itt;
 
   range = local_tmax-local_tmin;
+  *extreme_min=0;
+  *extreme_max=0;
   if(range!=0.0f){
     factor = (float)(ndatalevel-2)/range;
   }
@@ -857,9 +876,11 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
 
     if(val<local_tmin){
       itt=0;
+      *extreme_min=1;
     }
     else if(val>local_tmax){
       itt=ndatalevel-1;
+      *extreme_max=1;
     }
     else{
       itt=1+(int)(factor*(val-local_tmin));
@@ -1247,23 +1268,27 @@ void drawColorBars(float ybump){
         yy =  (barbot*(nrgb-3-(i+0.5))  +(i+0.5)   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
 
-        glColor4fv(rgb_plot3d_contour[nrgb-2]);
+        if(show_extreme_below==1){     
+          glColor4fv(rgb_plot3d_contour[nrgb-2]);
 
-        glVertex2f(barleft, yy2);
-        glVertex2f(barmid, yy); 
-        glVertex2f(barmid,yy);
-        glVertex2f(barright,yy2);
+          glVertex2f(barleft, yy2);
+          glVertex2f(barmid, yy); 
+          glVertex2f(barmid,yy);
+          glVertex2f(barright,yy2);
+        }
 
         i=nrgb-2;
         yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-3.5-i)+  (i+0.5)*tophat)/(nrgb-3);
 
-        glColor4fv(rgb_plot3d_contour[nrgb-1]);
-        glVertex2f(barleft, yy); 
-        glVertex2f(barright,yy);
+        if(show_extreme_above==1){
+          glColor4fv(rgb_plot3d_contour[nrgb-1]);
+          glVertex2f(barleft, yy); 
+          glVertex2f(barright,yy);
        
-        glVertex2f(barmid,yy2);
-        glVertex2f(barmid, yy2);
+          glVertex2f(barmid,yy2);
+          glVertex2f(barmid, yy2);
+        }
       }
     }
     else{
@@ -1298,23 +1323,27 @@ void drawColorBars(float ybump){
         yy =  (barbot*(nrgb-3-(i+0.5))  +(i+0.5)   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-4.0-i)+  (i+1.0)*tophat)/(nrgb-3);
 
-        glColor4fv(rgb_full[0]);
+        if(show_extreme_below==1){
+          glColor4fv(rgb_full[0]);
 
-        glVertex2f(barleft, yy2);
-        glVertex2f(barmid, yy); 
-        glVertex2f(barmid,yy);
-        glVertex2f(barright,yy2);
+          glVertex2f(barleft, yy2);
+          glVertex2f(barmid, yy); 
+          glVertex2f(barmid,yy);
+          glVertex2f(barright,yy2);
+        }
 
         i=nrgb-2;
         yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-3.5-i)+  (i+0.5)*tophat)/(nrgb-3);
 
-        glColor4fv(rgb_full[nrgb_full-1]);
-        glVertex2f(barleft, yy); 
-        glVertex2f(barright,yy);
+        if(show_extreme_above==1){
+          glColor4fv(rgb_full[nrgb_full-1]);
+          glVertex2f(barleft, yy); 
+          glVertex2f(barright,yy);
        
-        glVertex2f(barmid,yy2);
-        glVertex2f(barmid, yy2);
+          glVertex2f(barmid,yy2);
+          glVertex2f(barmid, yy2);
+        }
       }
     glEnd();
   }

@@ -1659,7 +1659,9 @@ void setslicecolors(float smin, float smax,
   getSliceColors(sd->qslicedata,sd->nslicetotal,sd->slicelevel,
                 smin,smax,
                 nrgb_full,nrgb,
-                sb->colorlabels,&scale,sb->levels256);
+                sb->colorlabels,&scale,sb->levels256,
+                &sd->extreme_min,&sd->extreme_max
+                );
 }
 
 /* ------------------ setslicelabels ------------------------ */
