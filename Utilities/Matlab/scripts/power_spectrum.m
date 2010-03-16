@@ -3,7 +3,8 @@
 % power_spectrum.m
 
 function []=power_spectrum(spectrum_file,dt_puff,slope_scale,xaxis_title,yaxis_title,xmin,xmax,ymin,ymax, ...
-                           devc_file,devc_col,tmin,tmax,dt,spectrum_style,nyquist_style)
+                           devc_file,devc_col,tmin,tmax,dt,spectrum_style,nyquist_style, ...
+                           title1,title2)
 
 plotdir = ['../../Manuals/FDS_5_Validation_Guide/FIGURES/'];
 
@@ -53,10 +54,10 @@ axis([xmin xmax ymin ymax])
 
 xt = 1.5e-1;
 yt = 3.5e0;
-text(xt,yt,'Sandia 1 m Methane Pool Fire, Test 17','FontSize',Label_Font_Size,'Interpreter','LaTeX')
+text(xt,yt,title1,'FontSize',Label_Font_Size,'Interpreter','LaTeX')
 xt = 1.5e-1;
 yt = .9e0;
-text(xt,yt,'FDS W-Velocity, 1.5 cm Resolution','FontSize',Label_Font_Size,'Interpreter','LaTeX')
+text(xt,yt,title2,'FontSize',Label_Font_Size,'Interpreter','LaTeX')
 
 text(1.5e-1,3.5e-4,'measured','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX');
 text(1.5e-1,1.2e-4,'puffing','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX');
