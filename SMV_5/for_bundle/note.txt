@@ -22,3 +22,4 @@
 22. test new colorbar editor
 23. test ppm unit change option
 24. test option to not draw triangular portions of color bar when data is totall with data bounds
+25. test placement of colorbar dialog box and routine that get smokeview bin directory
