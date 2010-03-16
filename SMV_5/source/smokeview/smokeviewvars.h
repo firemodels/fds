@@ -224,7 +224,7 @@ SVEXTERN float modelview_current[16];
 SVEXTERN float modelview_scratch[16];
 
 SVEXTERN camera *camera_current, *camera_save, *camera_last;
-SVEXTERN camera *camera_external, *camera_internal, *camera_ini;
+SVEXTERN camera *camera_external, *camera_internal, *camera_ini, *camera_external_save;
 SVEXTERN camera camera_list_first, camera_list_last, **camera_list;
 SVEXTERN int ncamera_list,i_view_list,init_camera_list_flag;
 SVEXTERN int camera_max_id;

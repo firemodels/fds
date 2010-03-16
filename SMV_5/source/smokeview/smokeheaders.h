@@ -754,6 +754,7 @@ EXTERNCPP void setslicelabels(float smin, float smax,
                     slice *sd, int *errorcode);
 EXTERNCPP void getSliceLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
+EXTERNCPP void updatePart5extremes(void);
 EXTERNCPP void getSliceColors(const float *t, int nt, unsigned char *it,
               float tmin, float tmax, 
               int ndatalevel, int nlevel,
@@ -764,10 +765,6 @@ EXTERNCPP void setisolabels(float smin, float smax,
                     iso *sd, int *errorcode);
 EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
-EXTERNCPP void getIsoColors(const float *t, int nt, unsigned char *it,
-              float tmin, float tmax, 
-              int ndatalevel, int nlevel,
-              char labels[12][11],char **scale, float *tlevels2);
 EXTERNCPP int SVimage2file(char *GIFfilename, int rendertype, int width, int height);
 EXTERNCPP void update_showhidebuttons(void);
 EXTERNCPP void update_fileload(void);
