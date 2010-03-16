@@ -2,9 +2,12 @@
 set scratchdir=$SVNROOT/Utilities/Scripts/tmp
 set dir=$1
 set infile=$2
-set tasks=$3
 
-set fulldir=$BASEDIR/$dir
+setenv fulldir $BASEDIR/$dir
+set in=$infile.fds
+set out=$infile.err
+
+set scriptfile=$scratchdir/script.$$
 
 if(! -e $FDS) then
   echo "The file $FDS does not exit. Run aborted"
@@ -14,6 +17,21 @@ if(! -d $fulldir) then
   echo "The directory $fulldir does not exit. Run aborted."
   exit
 endif
+if(! -e $fulldir/$in) then
+  echo "The fds input  files, $fulldir/$in, does not exit. Run aborted."
+  exit
+endif
 
+#cd $fulldir
+#qsub sge-fds.sh
+
+cat << EOF > $scriptfile
+#!/bin/bash
+#\$ -S /bin/bash
+#\$ -cwd -N $infile -V -e /dev/null -o /dev/null
 cd $fulldir
-qsub -t $tasks sge-fds-array.sh
+$FDS $in >& $out
+EOF
+chmod +x $scriptfile
+qsub $scriptfile
+
