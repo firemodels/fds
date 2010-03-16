@@ -88,6 +88,11 @@ void update_camera_ypos(camera *camera_data){
   }
   eyeyfactor = -1.10*width/2.0/tan(local_aperture_default*PI/360.0);
   camera_data->eye[1]=eyeyfactor*xyzbox;
+  if(viscolorbarpath==1){
+    camera_data->eye[0]=0.7;
+    camera_data->eye[1]=-2.25;
+    camera_data->eye[2]=0.5;
+  }
   camera_data->isometric_y=(eyeyfactor-1.0)*xyzbox;
 }
 

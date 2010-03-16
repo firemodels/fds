@@ -120,15 +120,24 @@ extern "C" void update_colorbar_label(void){
 /* ------------------ hide_glui_colorbar ------------------------ */
 
 void hide_glui_colorbar(void){
-  if(glui_colorbar!=NULL)glui_colorbar->hide();
   showcolorbar=0;
+  if(glui_colorbar!=NULL){
+    Reshape(screenWidth,screenHeight);
+    ResetView(RESTORE_EXTERIOR_VIEW);
+    glui_colorbar->hide();
+  }
   updatemenu=1;
 }
 
 /* ------------------ show_glui_colorbar ------------------------ */
 
 void show_glui_colorbar(void){
-  if(glui_colorbar!=NULL)glui_colorbar->show();
+// show colorbar dialog box and redefine initial view point
+  if(glui_colorbar!=NULL){
+    Reshape(screenWidth,screenHeight);
+    ResetView(RESTORE_EXTERIOR_VIEW);
+    glui_colorbar->show();
+  }
 }
 
 /* ------------------ glui_colorbar_setup ------------------------ */
