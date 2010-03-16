@@ -1981,7 +1981,7 @@ void initvars0(void){
   demo_option=0;
   current_mesh=NULL;
   camera_current=NULL, camera_save=NULL, camera_last=NULL;
-  camera_external=NULL, camera_internal=NULL, camera_ini=NULL;
+  camera_external=NULL, camera_internal=NULL, camera_ini=NULL, camera_external_save=NULL;
   camera_list=NULL;
 
   camera_label=NULL;

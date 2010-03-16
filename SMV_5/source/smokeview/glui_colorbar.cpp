@@ -122,6 +122,7 @@ extern "C" void update_colorbar_label(void){
 void hide_glui_colorbar(void){
   showcolorbar=0;
   if(glui_colorbar!=NULL){
+    copy_camera(camera_external,camera_external_save);
     Reshape(screenWidth,screenHeight);
     ResetView(RESTORE_EXTERIOR_VIEW);
     glui_colorbar->hide();
@@ -400,7 +401,7 @@ void COLORBAR_CB(int var){
     break;
   case COLORBAR_CLOSE:
     viscolorbarpath=0;
-    glui_colorbar->hide();
+    hide_glui_colorbar();
     break;
   case COLORBAR_NEXT:
   case COLORBAR_PREV:

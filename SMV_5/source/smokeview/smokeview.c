@@ -2176,6 +2176,10 @@ void updateShow(void){
       if(current_particle_type!=last_particle_type)updatechopcolors();
       break;
     }
+    if(current_property!=NULL){
+      if(current_property->extreme_max==1)show_extreme_above=1;
+      if(current_property->extreme_min==1)show_extreme_below=1;
+    }
   }
   evacflag=0;
   if(visEvac==1&&visTimeEvac==1){
@@ -2990,6 +2994,8 @@ void Init(void){
     strcpy(name_external,"external");
     init_camera(camera_external,name_external);
     camera_external->view_id=1;
+
+    copy_camera(camera_external_save,camera_external);
   }
   if(camera_ini->defined==1){
     copy_camera(camera_current,camera_ini);

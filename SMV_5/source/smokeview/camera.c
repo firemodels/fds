@@ -110,6 +110,10 @@ void init_camera(camera *camera_data,char *name){
   camera_data->eye[0]=eyexfactor*xbar;
   update_camera_ypos(camera_data);
   camera_data->eye[2]=eyezfactor*zbar;
+  camera_data->eye_save[0]=camera_data->eye[0];
+  camera_data->eye_save[1]=camera_data->eye[1];
+  camera_data->eye_save[2]=camera_data->eye[2];
+
   x=camera_data->modelview;
   for(i=0;i<16;i++){
     x[i]=0.0;

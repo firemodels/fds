@@ -224,6 +224,62 @@ void getBoundaryLabels(
   num2string(&labels[nlevel-1][0],tval,range);
 }
 
+/* ------------------ updatePart5extremes ------------------------ */
+
+void updatePart5extremes(void){
+  int i,j,k,m;
+  part5data *datacopy;
+  float *diameter_data, *length_data, *azimuth_data, *elevation_data;
+  float *u_vel_data, *v_vel_data, *w_vel_data;
+
+  for(i=0;i<npart5prop;i++){
+    int n;
+
+    part5prop *propi;
+
+    propi = part5propinfo + i;
+    propi->extreme_max=0;
+    propi->extreme_min=0;
+  }
+
+
+  for(i=0;i<npart_files;i++){
+    particle *parti;
+
+    parti = partinfo + i;
+    if(parti->loaded==0||parti->display==0)continue;
+    datacopy = parti->data5;
+    for(i=0;i<parti->nframes;i++){
+      for(j=0;j<parti->nclasses;j++){
+        part5class *partclassi;
+        unsigned char *irvals;
+
+        partclassi = parti->partclassptr[j];
+        irvals = datacopy->irvals;
+        for(k=2;k<partclassi->ntypes;k++){
+          part5prop *prop_id;
+
+          prop_id = get_part5prop(partclassi->labels[k].longlabel);
+          if(prop_id==NULL)continue;
+
+          if(strcmp(partclassi->labels[k].longlabel,"HUMAN_COLOR")==0){
+          }
+          else{
+            for(m=0;m<datacopy->npoints;m++){
+              int irval;
+
+              irval=*irvals++;
+              if(irval==0)prop_id->extreme_min=1;
+              if(irval==255)prop_id->extreme_max=1;
+            }
+          }
+        }
+        datacopy++;
+      }
+    }
+  }
+}
+
 /* ------------------ getPart5Colors ------------------------ */
 
 void getPart5Colors(particle *parti, int nlevel){
@@ -978,78 +1034,6 @@ void getIsoLabels(float local_tmin, float local_tmax, int nlevel,
   int expmax,expmin;
 
   range = local_tmax-local_tmin;
-
-  STRCPY(*scale,"");
-  frexp10(local_tmax, &expmax);
-  frexp10(local_tmin, &expmin);
-  if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<EXPMIN||expmin>EXPMAX)){
-    local_tmin *= pow((double)10.0,(double)-expmin);
-    local_tmax *= pow((double)10.0,(double)-expmin);
-    sprintf(*scale,"*10^%i",expmin);
-  }
-  if(expmin==0&&(expmax<EXPMIN||expmax>EXPMAX)){
-    local_tmin *= pow((double)10.0,(double)-expmax);
-    local_tmax *= pow((double)10.0,(double)-expmax);
-    sprintf(*scale,"*10^%i",expmax);
-  }
-  if(expmax==0&&(expmin<EXPMIN||expmin>EXPMAX)){
-    local_tmin *= pow((double)10.0,(double)-expmin);
-    local_tmax *= pow((double)10.0,(double)-expmin);
-    sprintf(*scale,"*10^%i",expmin);
-  }
-
-  range = local_tmax-local_tmin;
-  dt = range/(float)(nlevel-2);
-  for (n=1;n<nlevel-1;n++){
-    tval = local_tmin + (n-1)*dt;
-    num2string(&labels[n][0],tval,range);
-  }
-  for(n=0;n<256;n++){
-    tlevels256[n] = (local_tmin*(255-n) + local_tmax*n)/255.;
-  }
-  tval = local_tmax;
-  num2string(&labels[nlevel-1][0],tval,range);
-}
-
-
-/* ------------------ getSliceColors ------------------------ */
-
-void getIsoColors(const float *t, int nt, unsigned char *it,
-              float local_tmin, float local_tmax, 
-              int ndatalevel, int nlevel,
-              char labels[12][11],char **scale, float *tlevels256){
-  int n;
-  float dt, factor, tval;
-  float range;
-  int expmax,expmin;
-  int itt;
-
-  range = local_tmax-local_tmin;
-  if(range!=0.0f){
-    factor = (float)(ndatalevel-2)/range;
-  }
-   else{
-     factor = 0.0f;
-   }
-  for(n=0;n<nt;n++){
-    float val;
-
-    val=*t;
-    if(val<local_tmin){
-      itt=0;
-    }
-    else if(val>local_tmax){
-      itt=ndatalevel-1;
-    }
-    else{
-      itt=1+(int)(factor*(val-local_tmin));
-    }
-    if(itt<0)itt=0;
-    if(itt>ndatalevel-1)itt=ndatalevel-1;
-    *it=itt;
-    it++;
-    t++;
-  }
 
   STRCPY(*scale,"");
   frexp10(local_tmax, &expmax);
