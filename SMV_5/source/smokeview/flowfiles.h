@@ -876,6 +876,7 @@ typedef struct {
   int vloaded;
   int reload;
   float delta;
+  int extreme_min, extreme_max;
 
 } slice;
 
@@ -1002,6 +1003,7 @@ typedef struct {
   flowlabels label;
   char scale[31];
   char menulabel[128];
+  int extreme_min, extreme_max;
 
 } patch;
 
@@ -1015,6 +1017,7 @@ typedef struct {
   int num_memblocks;
   int u, v, w, nvars;
   float diff_valmin[5], diff_valmax[5];
+  int extreme_min[6], extreme_max[6];
   int blocknumber,loaded,display;
   flowlabels label[6];
   char menulabel[256],longlabel[256];

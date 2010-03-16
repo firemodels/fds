@@ -1656,6 +1656,8 @@ void initvars1(void){
   cb_hidesv=0;
   viscolorbarpath=0;
   nselectblocks=0;
+  show_extreme_above=0;
+  show_extreme_below=0;
   surface_indices[0]=0;
   surface_indices[1]=0;
   surface_indices[2]=0;

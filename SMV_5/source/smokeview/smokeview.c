@@ -2003,6 +2003,8 @@ void updateShow(void){
   particle *parti;
   showtime=0; showtime2=0; showplot3d=0; showpatch=0; 
   showslice=0; showvslice=0; showsmoke=0; showzone=0; showiso=0;
+  show_extreme_below=0;
+  show_extreme_above=0;
 #ifdef pp_SHOOTER
   showshooter=0;
 #endif
@@ -2087,6 +2089,28 @@ void updateShow(void){
         break;
       }
     }
+    if(show_extreme_above==0){
+      for(ii=0;ii<nslice_loaded;ii++){
+        i=slice_loaded_list[ii];
+        sd = sliceinfo+i;
+        if(sd->display==0||sd->type!=islicetype)continue;
+        if(sd->extreme_max==1){
+          show_extreme_above=1;
+          break;
+        }
+      }
+    }
+    if(show_extreme_below==0){
+      for(ii=0;ii<nslice_loaded;ii++){
+        i=slice_loaded_list[ii];
+        sd = sliceinfo+i;
+        if(sd->display==0||sd->type!=islicetype)continue;
+        if(sd->extreme_min==1){
+          show_extreme_below=1;
+          break;
+        }
+      }
+    }
   }
   isoflag=0;
   tisoflag=0;
@@ -2121,6 +2145,24 @@ void updateShow(void){
       if(patchi->display==0||patchi->type!=ipatchtype)continue;
       patchflag=1;
       break;
+    }
+    for(ii=0;ii<npatch_loaded;ii++){
+      i = patch_loaded_list[ii];
+      patchi=patchinfo+i;
+      if(patchi->display==0||patchi->type!=ipatchtype)continue;
+      if(patchi->extreme_max==1){
+        show_extreme_above=1;
+        break;
+      }
+    }
+    for(ii=0;ii<npatch_loaded;ii++){
+      i = patch_loaded_list[ii];
+      patchi=patchinfo+i;
+      if(patchi->display==0||patchi->type!=ipatchtype)continue;
+      if(patchi->extreme_min==1){
+        show_extreme_below=1;
+        break;
+      }
     }
   }
   partflag=0;
@@ -2206,6 +2248,24 @@ void updateShow(void){
   if(showshooter==1)RenderTime=1;
 #endif
   if(plotstate==STATIC_PLOTS&&ReadPlot3dFile==1&&plotn>0&&plotn<=numplot3dvars)showplot3d=1;
+  if(showplot3d==1){
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
+      ii=meshi->plot3dfilenum;
+      if(ii==-1)continue;
+      if(plot3dinfo[ii].loaded==0)continue;
+      if(plot3dinfo[ii].display==0)continue;
+      if(plot3dinfo[ii].extreme_min[plotn-1]==1)show_extreme_below=1;
+    }
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
+      ii=meshi->plot3dfilenum;
+      if(ii==-1)continue;
+      if(plot3dinfo[ii].loaded==0)continue;
+      if(plot3dinfo[ii].display==0)continue;
+      if(plot3dinfo[ii].extreme_max[plotn-1]==1)show_extreme_above=1;
+    }
+  }
 
   numColorbars=0;
   if(ReadEvacFile==1)numColorbars++;

@@ -233,7 +233,7 @@ SVEXTERN char label_startup_view[256];
 SVEXTERN char *camera_label, *colorbar_label;
 
 SVEXTERN int visPatchType[7];
-SVEXTERN int setp3min[MAXPLOT3DVARS];
+SVEXTERN int setp3min[MAXPLOT3DVARS],p3_extreme_min[MAXPLOT3DVARS],p3_extreme_max[MAXPLOT3DVARS];
 SVEXTERN float p3min[MAXPLOT3DVARS];
 SVEXTERN float p3chopmin[MAXPLOT3DVARS];
 SVEXTERN int setp3max[MAXPLOT3DVARS];
@@ -806,6 +806,7 @@ SVEXTERN float direction_angleINI0;
 SVEXTERN float xyzeyeorig[3],xeyedir[3], yeyedir[3], zeyedir[3];
 SVEXTERN int adjustalphaflag;
 SVEXTERN int colorband, show_extremedata;
+SVEXTERN int show_extreme_above, show_extreme_below;
 
 SVEXTERN int script_index, ini_index;
 SVEXTERN char script_inifile_suffix[1024];
