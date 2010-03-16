@@ -209,6 +209,9 @@ int readsmv(char *file){
   FREEMEMORY(camera_external);
   if(file!=NULL)NewMemory((void **)&camera_external,sizeof(camera));
 
+  FREEMEMORY(camera_external_save);
+  if(file!=NULL)NewMemory((void **)&camera_external_save,sizeof(camera));
+
   FREEMEMORY(camera_ini);
   if(file!=NULL){
     NewMemory((void **)&camera_ini,sizeof(camera));

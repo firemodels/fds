@@ -362,6 +362,7 @@ typedef struct {
   int blocknumber,display,loaded;
   float tmin,tmax;
   float valmin_data, valmax_data;
+  int extreme_min, extreme_max;
   float *levels;
   int nlevels;
   char menulabel[128];
@@ -669,7 +670,7 @@ typedef struct _camera {
   int defined,dirty;
   int projection_type;
   int eyeview, rotation_index;
-  float eye[3], view[3], up[3];
+  float eye[3], view[3], up[3], eye_save[3];
   float isometric_y;
   float angle_zx[2];
   float view_angle, direction_angle, elevation_angle;
@@ -734,6 +735,7 @@ typedef struct {
   int setvalmin, setvalmax;
   float chopmin, chopmax;
   int setchopmin, setchopmax;
+  int extreme_min, extreme_max;
   int *buckets;
 } part5prop;
 
