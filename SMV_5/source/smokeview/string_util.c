@@ -33,13 +33,16 @@ char *getdir(char *progname){
   for(i=0;i<nprogname;i++){
     if(strncmp(c,dirseparator,1)==0){
       *(c+1)='\0';
-      NewMemory((void **)&progpath,(unsigned int)(strlen(c)+2));
-      strcpy(progpath,c);
+      NewMemory((void **)&progpath,(unsigned int)(strlen(progname)+2));
+      strcpy(progpath,progname);
       return progpath;
     }
     c--;
   }
   progpath=which(progname);
+  if(progpath==NULL)return NULL;
+
+  CheckMemory;
   return progpath;
 }
 
