@@ -124,6 +124,7 @@ EXTERNCPP void ReloadMenu(int value);
 EXTERNCPP void ColorBarMenu(int val);
 EXTERNCPP void initdefaultcolorbars(void);
 EXTERNCPP void drawcolorbarpath(void);
+EXTERNCPP void update_colorbar_splits(colorbardata *cbi);
 EXTERNCPP void remapcolorbar(colorbardata *cbi);
 EXTERNCPP void adjust_colorbar_splits(colorbardata *cbi);
 EXTERNCPP void interpcolor(float *col1, float *col2,float *rgb,int npoints_seg, int jumpflag);

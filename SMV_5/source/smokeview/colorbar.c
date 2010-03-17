@@ -418,7 +418,7 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[8]=0;
   cbi++;
 
-  // b&w colorbar
+  // blue->red split
 
   strcpy(cbi->label,"blue->red split");
   cbi->label_ptr=cbi->label;
@@ -482,6 +482,21 @@ void initdefaultcolorbars(void){
     cbi = colorbarinfo + i;
 
     remapcolorbar(cbi);
+    update_colorbar_splits(cbi);
+  }
+}
+
+/* ------------------ update_colorbar_splits ------------------------ */
+
+void update_colorbar_splits(colorbardata *cbi){
+  int i;
+
+  cbi->nsplits=0;
+  for(i=1;i<cbi->nnodes;i++){
+    if(cbi->index_node[i]==cbi->index_node[i-1]){
+      cbi->splits[cbi->nsplits]=i;
+      cbi->nsplits++;
+    }
   }
 }
 
