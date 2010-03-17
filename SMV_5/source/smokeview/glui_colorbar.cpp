@@ -252,6 +252,7 @@ void COLORBAR_CB(int var){
       cbi->index_node[colorbarpoint]=cb_colorindex;
 
       colorbar_global2local();
+      update_colorbar_splits(current_colorbar);
       remapcolorbar(cbi);
       updatecolors(-1);
     }
@@ -313,6 +314,7 @@ void COLORBAR_CB(int var){
     }
 
     colorbar_global2local();
+    update_colorbar_splits(current_colorbar);
     remapcolorbar(cbi);
     updatecolors(-1);
 
@@ -335,6 +337,7 @@ void COLORBAR_CB(int var){
       rgb1[2]=rgb2[2];
     }
     cbi->nnodes--;
+    update_colorbar_splits(current_colorbar);
     remapcolorbar(cbi);
     updatecolors(-1);
     if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
@@ -422,6 +425,8 @@ void COLORBAR_CB(int var){
     if(colorbartype<0||colorbartype>=ncolorbars)return;
     addcolorbar(colorbartype);
     colorbartype=ncolorbars-1;
+    current_colorbar=colorbarinfo + colorbartype;
+    update_colorbar_splits(current_colorbar);
     cbi = colorbarinfo + colorbartype;  //addcolorbar resizes (and possibly moves) colorbarinfo
     LISTBOX_colorbar->add_item(colorbartype,cbi->label);
     LISTBOX_colorbar->set_int_val(colorbartype);

@@ -86,9 +86,10 @@ typedef struct {
 
 typedef struct {
   char label[1024], *label_ptr ;        // menu label
-  int nnodes,nodehilight;
+  int nnodes,nodehilight,nsplits;
   unsigned char rgb_node[3*256];
   unsigned char index_node[256];  // colorbar index
+  unsigned char splits[256];
   float colorbar[3*256];
 } colorbardata;
 
