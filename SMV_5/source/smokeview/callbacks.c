@@ -375,7 +375,7 @@ void mouse(int button, int state, int x, int y){
         }
         colorbar_select_index=ifactor;
         state=glutGetModifiers();
-        if(state==GLUT_ACTIVE_CTRL&&(showtime==1 || showplot3d==1)&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
+        if(state==GLUT_ACTIVE_CTRL&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
           colorsplitdrag=1;
         }
         else{
