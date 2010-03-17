@@ -1148,7 +1148,7 @@ void initvars1(void){
   mxpoints=MAXPOINTS,mxframes=MAXFRAMES,mxframepoints;
   mxpoints_orig=MAXPOINTS,mxframes_orig=MAXFRAMES;
   mxpoints_comm=0, mxframes_comm=0;
-  timedrag=0,colordrag=0;
+  timedrag=0,colordrag=0,colorsplitdrag=0;
   isonormtype=1,showisonormals=0;
   global_changecolorindex=-1;
   fontindex=0,fontWoffset=0,fontHoffset=0;
@@ -1238,6 +1238,7 @@ void initvars1(void){
   showgluitrainer=0;
   colorbarcycle=0;
   colorbartype=0;
+  current_colorbar=colorbarinfo;
   colorbartype_save=colorbartype;
   colorbarpoint=0;
   vectorspresent=0;

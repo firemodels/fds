@@ -299,7 +299,7 @@ SVEXTERN int sethazardcolor;
 SVEXTERN int mxpoints,mxframes,mxframepoints;
 SVEXTERN int mxpoints_orig,mxframes_orig;
 SVEXTERN int mxpoints_comm, mxframes_comm;
-SVEXTERN int timedrag,colordrag;
+SVEXTERN int timedrag,colordrag,colorsplitdrag;
 SVEXTERN int isonormtype,showisonormals;
 SVEXTERN int global_changecolorindex;
 SVEXTERN int fontindex,fontWoffset,fontHoffset;
@@ -831,7 +831,7 @@ SVEXTERN int showall_textures;
 
 SVEXTERN int ncolorbars;
 SVEXTERN int ndefaultcolorbars;
-SVEXTERN colorbardata *colorbarinfo;
+SVEXTERN colorbardata *colorbarinfo,*current_colorbar;
 
 SVEXTERN int update_load_startup;
 SVEXTERN int do_threshold;

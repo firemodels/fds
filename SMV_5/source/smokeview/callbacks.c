@@ -323,6 +323,7 @@ void mouse(int button, int state, int x, int y){
     update_translate();
     timedrag=0;
     colordrag=0;
+    colorsplitdrag=0;
     glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
     update_trainer_moves();
     return;
@@ -373,8 +374,14 @@ void mouse(int button, int state, int x, int y){
           ifactor=-1;
         }
         colorbar_select_index=ifactor;
-        updatecolors(ifactor);
-        colordrag=1;
+        state=glutGetModifiers();
+        if(state==GLUT_ACTIVE_CTRL&&(showtime==1 || showplot3d==1)&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
+          colorsplitdrag=1;
+        }
+        else{
+          colordrag=1;
+          updatecolors(ifactor);
+        }
         return;
       }
     }
@@ -470,6 +477,37 @@ void motion(int xm, int ym){
       }
       colorbar_select_index=ifactor;
       updatecolors(ifactor);
+    }
+    return;
+  }
+  if(colorsplitdrag==1&&(showtime==1 || showplot3d==1)&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
+    int temp;
+    int ifactor;
+    float factor;
+    int valmax=255;
+    int valmin=0;
+
+    temp = (int)(1.2*dwinH);
+    if(xm>screenWidth-dwinWW){
+      int ii;
+      unsigned char *cc;
+
+      yy = screenHeight - ym;
+      factor=(yy-temp)/(screenHeight-temp);
+      factor *= (nrgb+1.0)/(nrgb-0.5);
+      if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
+      ifactor=(int)(255*factor);
+
+      cc=current_colorbar->index_node;
+
+      if(ifactor>250)ifactor=250;
+      if(ifactor<5)ifactor=5;
+      ii=current_colorbar->splits[0];
+      current_colorbar->index_node[ii]=ifactor;
+      current_colorbar->index_node[ii-1]=ifactor;
+      remapcolorbar(current_colorbar);
+      updatecolors(-1);
+      update_colorbar_splits(current_colorbar);
     }
     return;
   }
