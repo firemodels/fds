@@ -9,9 +9,9 @@
 
 /* --------------------------  flowlabels ------------------------------------ */
 
-#define NBUCKETS 100000
+#define NHIST_BUCKETS 100000
 typedef struct {
-  int buckets[NBUCKETS];
+  int buckets[NHIST_BUCKETS];
   float valmin, valmax;
   int ntotal;
 } histogramdata;
