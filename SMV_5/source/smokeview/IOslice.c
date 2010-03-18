@@ -1732,6 +1732,8 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
     *pmin=0.0;
     *pmax=1.0;
   }
+  //printf(" global min (slice file): %f\n",*pmin);
+  //printf(" global max (slice file): %f\n",*pmax);
 }
 
 /* ------------------ adjustslicebounds ------------------------ */
