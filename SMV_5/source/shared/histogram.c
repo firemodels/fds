@@ -26,10 +26,10 @@ float get_histogram_value(histogramdata *histgram, float cdf){
 
   cutoff = cdf*histgram->ntotal;
   count=0;
-  for(i=0;i<NBUCKETS;i++){
+  for(i=0;i<NHIST_BUCKETS;i++){
     count+=histgram->buckets[i];
     if(count>cutoff){
-      returnval = histgram->valmin + (float)(i+0.5)*(histgram->valmax-histgram->valmin)/(float)NBUCKETS;
+      returnval = histgram->valmin + (float)(i+0.5)*(histgram->valmax-histgram->valmin)/(float)NHIST_BUCKETS;
       return returnval;
     }
   }
@@ -41,7 +41,7 @@ float get_histogram_value(histogramdata *histgram, float cdf){
 void init_histogram(histogramdata *histgram){
   int i;
 
-  for(i=0;i<NBUCKETS;i++){
+  for(i=0;i<NHIST_BUCKETS;i++){
     histgram->buckets[i]=0;
   }
   histgram->ntotal=0;
@@ -56,7 +56,7 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
   float valmin, valmax;
   float dbucket;
 
-  for(i=0;i<NBUCKETS;i++){
+  for(i=0;i<NHIST_BUCKETS;i++){
     histgram->buckets[i]=0;
   }
   if(nvals==0){
@@ -70,7 +70,7 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
       valmin=HMIN(vals[i],valmin);
       valmax=HMAX(vals[i],valmax);
     }
-    dbucket=(valmax-valmin)/NBUCKETS;
+    dbucket=(valmax-valmin)/NHIST_BUCKETS;
     if(dbucket==0.0){
       histgram->buckets[0]=nvals;
     }
@@ -80,7 +80,7 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
 
         ival = (vals[i]-valmin)/dbucket;
         ival=HMAX(0,ival);
-        ival=HMIN(NBUCKETS-1,ival);
+        ival=HMIN(NHIST_BUCKETS-1,ival);
         histgram->buckets[ival]++;
       }
     }
@@ -107,26 +107,26 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
 
   int i;
   float dbucket1, dbucket2, dbucket_new;
-  int bucket1copy[NBUCKETS];
+  int bucket1copy[NHIST_BUCKETS];
   float valmin_new, valmax_new;
 
   valmin_new=HMIN(histgram1->valmin,histgram2->valmin);
   valmax_new=HMAX(histgram1->valmax,histgram2->valmax);
 
-  for(i=0;i<NBUCKETS;i++){
+  for(i=0;i<NHIST_BUCKETS;i++){
     bucket1copy[i]=histgram1->buckets[i];
     histgram1->buckets[i]=0;
   }
-  dbucket1 = (histgram1->valmax-histgram1->valmin)/NBUCKETS;
-  dbucket2 = (histgram2->valmax-histgram2->valmin)/NBUCKETS;
-  dbucket_new=(valmax_new-valmin_new)/NBUCKETS;
+  dbucket1 = (histgram1->valmax-histgram1->valmin)/NHIST_BUCKETS;
+  dbucket2 = (histgram2->valmax-histgram2->valmin)/NHIST_BUCKETS;
+  dbucket_new=(valmax_new-valmin_new)/NHIST_BUCKETS;
 
   if(dbucket_new==0.0){
     histgram1->buckets[0]=histgram1->ntotal+histgram2->ntotal;
     histgram1->ntotal=histgram1->buckets[0];
   }
   else{
-    for(i=0;i<NBUCKETS;i++){
+    for(i=0;i<NHIST_BUCKETS;i++){
       float val;
       int ival;
 
@@ -134,14 +134,14 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
         val = histgram1->valmin + (i+0.5)*dbucket1;
         ival = (val-valmin_new)/dbucket_new;
         if(ival<0)ival=0;
-        if(ival>NBUCKETS-1)ival=NBUCKETS-1;
+        if(ival>NHIST_BUCKETS-1)ival=NHIST_BUCKETS-1;
         histgram1->buckets[ival]+=bucket1copy[i];
       }
       if(histgram2->buckets[i]!=0){
         val = histgram2->valmin + (i+0.5)*dbucket2;
         ival = (val-valmin_new)/dbucket_new;
         if(ival<0)ival=0;
-        if(ival>NBUCKETS-1)ival=NBUCKETS-1;
+        if(ival>NHIST_BUCKETS-1)ival=NHIST_BUCKETS-1;
         histgram1->buckets[ival]+=histgram2->buckets[i];
       }
     }
