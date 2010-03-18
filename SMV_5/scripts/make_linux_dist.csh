@@ -5,14 +5,14 @@ set SVNROOT=~/FDS-SMV
 
 set BINDIR=$SVNROOT/SMV_5/bin
 set FORBUNDLE=$SVNROOT/SMV_5/for_bundle
-set LINUXDIR=smv_$version\_$revision\_linux
+set LINUXDIR=smv_$version\_linux32
 
 cd $FORBUNDLE
 
 rm -rf $LINUXDIR
 mkdir -p $LINUXDIR
 mkdir -p $LINUXDIR/Documentation
-cp note.txt $LINUXDIR/Documentation/.
+cp readme.html $LINUXDIR/Documentation/release_notes.html
 cp $BINDIR/smv5_linux_32 $LINUXDIR/.
 cp $BINDIR/smokezip_linux_32 $LINUXDIR/.
 rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
