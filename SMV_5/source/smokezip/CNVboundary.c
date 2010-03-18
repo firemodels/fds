@@ -290,10 +290,19 @@ int convert_boundary(patch *patchi,int pass){
 
       for(i=0;i<npatchfull;i++){
         unsigned char ival;
+        float val;
+
+        val = patchvals[i];
     
-        if(patchvals[i]<patchi->valmin)patchvals[i]=patchi->valmin;
-        if(patchvals[i]>patchi->valmax)patchvals[i]=patchi->valmax;
-        ival=255*(patchvals[i]-patchi->valmin)/(patchi->valmax-patchi->valmin);
+        if(val<patchi->valmin){
+          ival=0;
+        }
+        else if(val>patchi->valmax){
+          ival=255;
+        }
+        else{
+          ival=1+253*(val-patchi->valmin)/(patchi->valmax-patchi->valmin);
+        }
         full_boundarybuffer[i]=ival;
       }
 
