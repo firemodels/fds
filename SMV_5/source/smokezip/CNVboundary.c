@@ -486,7 +486,7 @@ void Get_Boundary_Bounds(void){
       patchframesize+=patchi->patchsize[j];
     }
     NewMemory((void **)&patchframe,patchframesize*sizeof(float));
-    init_histogram(NULL,0,patchi->histogram);
+    init_histogram(patchi->histogram);
     while(error1==0){
       FORTgetpatchdata(&unit1, &patchi->npatches, 
         pi1, pi2, pj1, pj2, pk1, pk2, &patchtime1, patchframe, &error1);
