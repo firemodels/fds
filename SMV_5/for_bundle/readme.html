@@ -21,6 +21,64 @@
 
 <ul>
 
+<li>5.5 (build 5868) - March 18, 2010
+
+<ol>
+<li>enhancement: add option to customize colorbars for visualizing data
+<li>enhancement: add option to convert between molar concentration and ppm in Units menu 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1035&can=1&sort=-id">Issue 1035</a>),
+<li>enhancement: implement procedures for modifying smokeview objects using data specified on a &PROP line in an FDS input file
+and data found in a particle file.  More details may be found in both the FDS and Smokeview User's guides.
+<li>enhancement: implement new version of PROP line (allowing multiple Smokeview objects) for particle files, clarify/simplify menus
+<li>enhancemnt: allow objects to input character strings.  This allows the <em>setcolor</em> to input a symbolic color name
+just as with FDS and texture file names may be input directly in the objects.svo file .  
+<li>enhancement: Add <em>VOLUME FLOW RATE</em> and <em>DISTANCE</em> as quantities that can have their units changed.
+<li>enhancemet: add EQ, ABS, drawsquare, drawvent and noop object commands
+
+<p>
+<li>usability: ignore leading blanks when parsing file names (keywords affected: PART, SLCF, BNDF, ISOF, SMOKE3D, PL3D, ZONE, INPF, CHID, ENDF)
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1013&can=1&sort=-id">Issue 1013</a>),
+<li>usability: save avatar type in .ini file and output evac file when recording a script - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1030&can=1&sort=-id">Issue 1030</a>),
+<li>usability: implement a C version of the which command, a routine used to determine which directory in the PATH variable Smokeview is located in -
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1023&can=1&sort=-id">Issue 1023</a>),
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1030&can=1&sort=-id">Issue 1030</a>),
+<li>usability: make PLOT3D continuous and blocked colobar consistent -
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1026&can=1&sort=-id">Issue 1026</a>),
+<li>usability: add capability to show or hide blockages that are associated with a Smokeview object.
+This association is made in an FDS input file by adding a PROP_ID keyword to an &OBST line.
+<li>usability: add drawcubec object command that sets origin at the front left corner rather than center of the cube.
+<li>usability: add rotatexyz object command.  This command rotates rotates an object about an arbitrary (x,y,z) vector
+<li>usability: use the .smv <em>UNIT</em> character strings rather than <em>SHORT LABEL</em> 
+character strings to generate the Smokeview Units menus.  
+<li>usability: add the unit classes state to the .ini file so that unit choices are saved across Smokeview calls
+<li>usability: add sub-menus for particle properties, fix a bug in parsing object textures on PROP line
+<li>usability: fix hide menu item in particle show/hide menu
+<li>usability: add PROPINDEX to .ini file, stores which smokeview objects are displayed
+<li>usability: added setrgb routine to input r,g,b color coordinates.  
+The r, g, b values range from 0 to 255 rather than 0.0 to 1.0 to be consistent with FDS input.
+<li>usability: adapted a FDS routine for use in Smokeview to return the r,g,b colors (ranging from 0 to 255)
+given a symbolic color name.
+
+
+<p>
+<li>fix: fix drawing of cad view of geometry
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1006&can=1&sort=-id">Issue 1006</a>),
+<li>fix:   Convert the "Blockage Edit" dialog box to a dialog box for examining blockages.
+The original Blockage Edit dialog box was buggy and there are now better alternatives for editing blockages.
+<li>fix: corrections to object rotation routines
+<li>fix: fix some bugs in the object command, drawarcdisk
+<li>fix: fix bug in use of fmod function
+<li>fix: fix problem specifying textures on &PROP line
+
+<p><li>internal: change internal notation of Smokeview objects from devices to objects.  This 
+is to avoid confusion with FDS devices.  Change the file name where Smokeview objects are stored 
+to objects.svo
+<li>internal: implement a simpler more robust procedure for parsing the smokeview object file
+<li>internal: add missing scaling call when drawing particle objects
+<li>internal: fix problem with null pointer in object menus
+</ol>
+
 <li>5.4.8 (build 5220) - December 3, 2009
 
 <ol>
