@@ -76,6 +76,9 @@ void readpatch(int ifile, int flag, int *errorcode){
   CheckMemory;
   patchfilenum=ifile;
   pi = patchinfo + ifile;
+#ifdef pp_HIST
+  init_histogram(pi->histogram);
+#endif
   file = pi->file;
   blocknumber = pi->blocknumber;
   highlight_mesh = blocknumber;
@@ -234,6 +237,11 @@ void readpatch(int ifile, int flag, int *errorcode){
       &meshi->npatches,&meshi->npatchsize,
       meshi->pi1,meshi->pi2,meshi->pj1,meshi->pj2,meshi->pk1,meshi->pk2,meshi->patchdir,
       &headersize,&framesize);
+
+    // loadpatchbysteps
+    //  0 - load entire uncompressed data set
+    //  1 - load uncompressed data set one frame at a time
+    //  2 - load compressed data set
 
     loadpatchbysteps=0;
     if(flag==LOAD){
