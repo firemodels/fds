@@ -703,7 +703,7 @@ void Get_Slice_Bounds(void){
     FORTopenslice(slicei->file,&unit1,&endiandata,&is1,&is2,&js1,&js2,&ks1,&ks2,&error1,lenfile);
     sliceframesize=(is2+1-is1)*(js2+1-js1)*(ks2+1-ks1);
     NewMemory((void **)&sliceframe,sliceframesize*sizeof(float));
-    init_histogram(NULL,0,slicei->histogram);
+    init_histogram(slicei->histogram);
     testslice=0;
     while(error1==0){
       FORTgetsliceframe(&unit1, &is1, &is2, &js1, &js2, &ks1, &ks2, &slicetime1, sliceframe, &testslice,&error1);

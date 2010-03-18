@@ -38,7 +38,20 @@ float get_histogram_value(histogramdata *histgram, float cdf){
 
 /* ------------------ init_histogram ------------------------ */
 
-void init_histogram(float *vals, int nvals, histogramdata *histgram){
+void init_histogram(histogramdata *histgram){
+  int i;
+
+  for(i=0;i<NBUCKETS;i++){
+    histgram->buckets[i]=0;
+  }
+  histgram->ntotal=0;
+  histgram->valmin=pow(10.0,20.0);
+  histgram->valmax=-histgram->valmin;
+}
+
+/* ------------------ copy_data2histogram ------------------------ */
+
+void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
   int i;
   float valmin, valmax;
   float dbucket;
@@ -46,10 +59,9 @@ void init_histogram(float *vals, int nvals, histogramdata *histgram){
   for(i=0;i<NBUCKETS;i++){
     histgram->buckets[i]=0;
   }
-  if(vals==NULL||nvals==0){
-    histgram->ntotal=0;
-    histgram->valmin=pow(10.0,20.0);
-    histgram->valmax=-histgram->valmin;
+  if(nvals==0){
+    valmin=pow(10.0,20.0);
+    valmax=-valmin;
   }
   else{
     valmin=vals[0];
@@ -72,10 +84,10 @@ void init_histogram(float *vals, int nvals, histogramdata *histgram){
         histgram->buckets[ival]++;
       }
     }
-    histgram->ntotal=nvals;
-    histgram->valmax=valmax;
-    histgram->valmin=valmin;
   }
+  histgram->ntotal=nvals;
+  histgram->valmax=valmax;
+  histgram->valmin=valmin;
 }
 
 /* ------------------ update_histogram ------------------------ */
@@ -83,7 +95,7 @@ void init_histogram(float *vals, int nvals, histogramdata *histgram){
 void update_histogram(float *vals, int nvals, histogramdata *histgram){
   histogramdata histgramval;
 
-  init_histogram(vals,nvals,&histgramval);
+  copy_data2histogram(vals,nvals,&histgramval);
   merge_histogram(histgram,&histgramval);
 }
 
