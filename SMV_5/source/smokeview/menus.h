@@ -5527,9 +5527,6 @@ static int in_menu=0;
       else{
         strcat(ccolorbarmenu,cbi->label);
       }
-	    if(i==ndefaultcolorbars){
-        glutAddMenuEntry("-",-999);
-	    }
       glutAddMenuEntry(ccolorbarmenu,i);
     }
   }
@@ -5545,15 +5542,15 @@ static int in_menu=0;
     glutAddMenuEntry("  *Narrow colorband",-6);
   }
   else{
-    glutAddMenuEntry("  Narrow colorband",-6);
+    glutAddMenuEntry("  *Wide colorband",-6);
   }
   if(colorbarflip==1){
-    glutAddMenuEntry("  *Flip",-2);
+    glutAddMenuEntry("  *Flip colorbar",-2);
   }
   else{
-    glutAddMenuEntry("  Flip",-2);
+    glutAddMenuEntry("  Flip colorbar",-2);
   }
-  glutAddMenuEntry("  Cycle",-3);
+  glutAddMenuEntry("  Cycle colorbar",-3);
   glutAddMenuEntry("  Reset",-4);
   glutAddMenuEntry("-",-999);
   glutAddMenuEntry("Shades:",-999);
