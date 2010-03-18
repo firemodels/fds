@@ -449,7 +449,7 @@ computed gas variables and surface data. \Smokeview\ also presents
 contours and vector plots of static data anywhere within a
 simulation scene at a fixed time. Several examples using these
 techniques to investigate fire incidents are documented in
-Revs.~\cite{CHERRYROAD,IOWA,HOUSTON,WTC}.
+Refs.~\cite{CHERRYROAD,IOWA,HOUSTON,WTC}.
 
 Smokeview is used before, during and after model runs.
 \smokeview\ is used in a post-processing step to
@@ -3086,19 +3086,23 @@ Figure \ref{figCLIPPED}c is drawn clipping both the geometry and the data.
 \chapter{Customizing the Colorbar}
 \section{Overview}
 A colorbar is used to map
-data with color.  A colorbar may be visualized by
-displaying its color components in a linear band.  It may also be
-visualized by thinking of color spatially associating red, green and
+data with color.  A colorbar is normally visualized by
+displaying its color in sequence forming a bar or rectangle.
+When designing a colorbar, it is convenient to also visualize it
+by thinking of color spatially associating red, green and
 blue color components with x, y and z spatial coordinates.  A colorbar
 may then be thought of as a path within a cube where the lower left bottom
 cube corner is colored black and the upper right top corner is colored
-white.  Other corners are colored red, green, blue, cyan, magenta and yellow depending on their color components present.
+white.  Other corners are colored red, green, blue, cyan, magenta and
+yellow depending on their color components present.
 Figure \ref{figCOLORBAR_EXAMPLES} gives several examples of colorbars pre-defined
 by Smokeview.  Each image was generated using the colorbar editor
 illustrated in Figure \ref{figCOLORBAR}.
 
 A colorbar in Smokeview consists of a set of color nodes forming a path
-within a cube.  Though most colorbars paths are continuous, a colorbar
+within a cube.  This way of visualizing it is helpful in defining new
+colorbars by allowing one to more easily judge changes in color within the
+colorbar.  Though most colorbars paths are continuous, a colorbar
 path need not be.  Discontinuous colorbars
 are useful for highlighting regions in a simulation with a particular
 property, for example where the temperature exceeds the boiling point of
@@ -3138,20 +3142,45 @@ Colorbar Editor dialog box.} \label{figCOLORBAR}
 \end{figure}
 
 \section{Using the Colorbar Editor}
-The Colorbar Editor dialog box is opened from the {\em Dialogs$>$Customize
-Colorbar}\ menu entry.  The dialog box contains a list of colorbars
-pre-defined by Smokeview and others if defined by the user.
-A new colorbar is
-created by selecting the
-{\em New}\ button . It is created initially by making a copy of the currently selected colorbar. Once created, it may be altered by
-adding/deleting nodes with the {\em ADD/DELETE}\ buttons and
-altering their color with the red, green, blue spinners.  
-Colorbar definitions (only colorbars created by the user) are saved in the Smokeview
-configuration (.ini) file.
+The Colorbar Editor dialog box is opened from the
+\frameit{Dialogs}$>$\frameit{Customize Colorbar}\ menu entry.
+When this menu item is selected, a spatial representation of the currently
+selected colorbar is displayed within the Smokeview scene along the
+Colorbar Editor dialog box.  The FDS simulation scene is hidden by default
+but may be shown along with the colorbar display by unchecking the
+{\em Hide scene}\ checkbox.
 
-Data greater than the specified maximum and less than the specified minimum
+The colorbar is represented visually in two ways.  First, as a series
+of colored nodes and lines.
+The nodes and lines are a spatial representation of the colorbar where as
+stated earlier the r, g, b color components are mapped to x, y, z spatial
+coordinates.
+Second, as a rectangle with a series of colored squares and numbered
+indices
+displayed along side. (This rectangle is equivalent to the colorbar
+displayed beside a regular Smokeview scene).  The numbered indices indicate
+the position in the colorbar where the node color occurs.
+Once the node indices and colors are defined, Smokeview interpolates to
+form a table of colors (256 rows, 3 columns).
+
+The Colorbar Editor dialog box contains a list of colorbars
+pre-defined by Smokeview and others if defined by the user.
+A new colorbar is created by selecting the
+{\em New}\ button . The new colorbar is created initially by making
+a copy of the
+currently selected colorbar. Once created, it may be altered by
+adding/deleting nodes with the {\em Add/Delete}\ buttons and
+altering color with the red, green, blue spinners.
+Note that only colorbars created by a user may be changed.
+The {\em Add/Delete}\ and other buttons for modifying colorbar characteristics are only enabled for user defined colorbars.  They are disabled for Smokeview predefined colorbars.
+Colorbar definitions (only colorbars created by the user) are saved
+in the Smokeview configuration (.ini) file.
+
+The bottom portion of the Colorbar Editor dialog box is used to define colors for extreme data.  That is, data occurring below the specified minimum or above the specified maximum.  This data
 may be highlighted by selecting the {\em Highlight Extreme Data}\ checkbox.
-The color used to highlight this data may also be specified.  The colors defined are shown in the triangular regions at the top and bottom of the colorbar.
+The color used to highlight this data may also be specified.  The colors
+defined using this dialog box are shown in the triangular regions at the top and bottom of the
+colorbar.
 
 \chapter{Smokeview - Demonstrator Mode}
 A simplified version of Smokeview may be invoked in order to present a fire
