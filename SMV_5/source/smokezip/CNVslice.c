@@ -487,7 +487,18 @@ int convert_slice(slice *slicei){
         }
 
         if(slicei->rle==0){
-          ival = 255*(sliceframe_data[i]-valmin)/denom;
+          float val;
+
+          val = sliceframe_data[i];
+          if(val<valmin){
+            ival=0;
+          }
+          else if(val>valmax){
+            ival=255;
+          }
+          else{
+            ival = 1 + 253*(val-valmin)/denom;
+          }
           if(ival<chop_min)ival=0;
           if(ival>chop_max)ival=255;
           sliceframe_uncompressed[index2] = ival;

@@ -160,9 +160,15 @@ int convert_plot3d(plot3d *plot3di){
         int ival;
 
         val = plot3dframe_data[kk];
-        ival = 255*(val-valmin)/dv;
-        if(ival<0)ival=0;
-        if(ival>255)ival=255;
+        if(val<valmin){
+          ival=0;
+        }
+        else if(val>valmax){
+          ival=255;
+        }
+        else{
+          ival = 1 + 253*(val-valmin)/dv;
+        }
         plot3dframe_uncompressed[kk++]=ival;
       }
     }
