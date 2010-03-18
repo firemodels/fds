@@ -29,7 +29,7 @@ echo making 32 bit Smokeview OSX distribution archive
 plink %svn_logon% %scriptdir%/make_osx_dists.csh %version% %smv_revision%
 
 echo downloading 32 bit Smokeview OSX distribution archive
-pscp %svn_logon%:%bundledir%/smv_%version%_%smv_revision%_osx.tar.gz ..\for_bundle\to_google\.
+pscp %svn_logon%:%bundledir%/smv_%version%_osx32.tar.gz ..\for_bundle\to_google\.
 
 
 pause
