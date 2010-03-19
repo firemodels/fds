@@ -3701,11 +3701,9 @@ implementation, the above equations are written in the form
 \sigma_d(\bx,\la) &= A_d(\bx)\int_0^\infty \frac{f(r,d_m(\bx)) \; C_s(r,\la)} {\pi(d_m(\bx)/2)^2} \; dr
 \end{align}
 where $A_d$ is the total cross sectional area per unit volume of the
-droplets. $A_d$ is approximated as
-\be
-A_d \approx \frac{\rho_d(\bx)}{2\rho_w d_m(\bx)/3}
-\ee
-% WHY? We could write N(\bx)=\rho_d/((4/3)*pi*rho_w*r_m^3) -- Simo
+droplets. $A_d$ is computed simply by summing the cross sectional areas of all the droplets within a cell 
+and divided by the cell volume. For practical reasons, a relaxation factor of 0.5 is used to smooth slightly
+the temporal variation of $A_d$.
 
 An accurate computation of the in-scattering integral on the right
 hand side of Eq.~(\ref{RTEspray}) would be extremely time
