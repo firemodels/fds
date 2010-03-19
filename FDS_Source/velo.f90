@@ -1492,6 +1492,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             MUA = 0.5_EB*(MU(IIGM,JJGM,KKGM) + MU(IIGP,JJGP,KKGP))
 
             ! Determine if there is a tangential velocity component
+
             IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY) THEN
                VEL_T = 0._EB
             ELSE
@@ -1509,21 +1510,25 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ENDIF
  
             ! Choose the appropriate boundary condition to apply
+
             BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
 
                CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
+
                   VEL_GHOST = VEL_GAS
                   DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                   MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                   ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+
                CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
                   VEL_GHOST = 2._EB*VEL_T - VEL_GAS
                   DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                   MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                   ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+
                CASE (WALL_MODEL) BOUNDARY_CONDITION
-               
+
                   IF ( SOLID(CELL_INDEX(IIGM,JJGM,KKGM)) .OR. SOLID(CELL_INDEX(IIGP,JJGP,KKGP)) ) THEN
                      MU_WALL = MUA
                      SLIP_COEF=-1._EB
@@ -1537,11 +1542,11 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                   MU_DUIDXJ(ICD_SGN) = MU_WALL*(VEL_GAS-VEL_T)*I_SGN*(1._EB-SLIP_COEF)/DXX(ICD)
                   ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-
                   IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .NEQV. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
                      DUIDXJ(ICD_SGN) = 0.5_EB*DUIDXJ(ICD_SGN)
                      MU_DUIDXJ(ICD_SGN) = 0.5_EB*MU_DUIDXJ(ICD_SGN)
                   ENDIF
+
             END SELECT BOUNDARY_CONDITION
 
          ELSE INTERPOLATION_IF  ! Use data from another mesh
