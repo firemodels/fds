@@ -70,8 +70,23 @@ void update_inilist(void){
 
 /* ------------------ propi ------------------------ */
 
-void init_prop(propdata *propi){
-  propi->nsmokeview_ids=0;
+void init_prop(propdata *propi, int nsmokeview_ids, char *label){
+  int nlabel;
+
+  nlabel = strlen(label);
+  if(nlabel==0){
+    NewMemory((void **)&propi->label,5);
+    strcpy(propi->label,"null");
+  }
+  else{
+    NewMemory((void **)&propi->label,nlabel+1);
+    strcpy(propi->label,label);
+  }
+  
+  NewMemory((void **)&propi->smokeview_ids,nsmokeview_ids*sizeof(char *));
+  NewMemory((void **)&propi->smv_objects,nsmokeview_ids*sizeof(sv_object *));
+
+  propi->nsmokeview_ids=nsmokeview_ids;
   propi->blockvis=1;
   propi->inblockage=0;
   propi->ntextures=0;
@@ -1034,28 +1049,22 @@ int readsmv(char *file){
     if(match(buffer,"PROP",4) == 1){
       propdata *propi;
       char *fbuffer;
+      char proplabel[255];
       int lenbuf;
       int ntextures;
       int nsmokeview_ids;
       char *smokeview_id;
 
-
       propi = propinfo + npropinfo;
-      init_prop(propi);
 
-      if(fgets(buffer,255,stream)==NULL)break; // prop label
-      trim(buffer);
-      fbuffer=trim_front(buffer);
-      lenbuf=strlen(fbuffer);
-      NewMemory((void **)&propi->label,lenbuf+1);
-      strcpy(propi->label,fbuffer);
+      if(fgets(proplabel,255,stream)==NULL)break; // prop label
+      trim(proplabel);
+      fbuffer=trim_front(proplabel);
 
       if(fgets(buffer,255,stream)==NULL)break; // number of smokeview_id's
       sscanf(buffer,"%i",&nsmokeview_ids);
 
-      propi->nsmokeview_ids=nsmokeview_ids;
-      NewMemory((void **)&propi->smokeview_ids,nsmokeview_ids*sizeof(char *));
-      NewMemory((void **)&propi->smv_objects,nsmokeview_ids*sizeof(sv_object *));
+      init_prop(propi,nsmokeview_ids,fbuffer);
       for(i=0;i<nsmokeview_ids;i++){
         if(fgets(buffer,255,stream)==NULL)break; // smokeview_id
         trim(buffer);
@@ -2018,16 +2027,15 @@ typedef struct {
       sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
         xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
       get_labels(buffer,&prop_id,NULL);
-      if(prop_id!=NULL){
-        devicei->prop=get_prop_id(prop_id);
-        if(devicei->prop!=NULL&&devicei->prop->smv_object!=NULL){
-          devicei->object=devicei->prop->smv_object;
-        }
+      devicei->prop=get_prop_id(prop_id);
+      if(prop_id!=NULL&&devicei->prop!=NULL&&devicei->prop->smv_object!=NULL){
+        devicei->object=devicei->prop->smv_object;
       }
       else{
         NewMemory((void **)&devicei->prop,sizeof(propdata));
-        init_prop(devicei->prop);
+        init_prop(devicei->prop,1,devicei->label);
         devicei->prop->smv_object=devicei->object;
+        devicei->prop->smv_objects[0]=devicei->prop->smv_object;
       }
       if(nparams_textures<0)nparams_textures=0;
       if(nparams_textures>1)nparams_textures=1;

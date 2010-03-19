@@ -4757,6 +4757,7 @@ static int in_menu=0;
 
       devicei = deviceinfo + i;
       propi = devicei->prop;
+      if(propi==NULL)continue;
       for(jj=0;jj<propi->nsmokeview_ids;jj++){
         sv_object *objectj;
 
