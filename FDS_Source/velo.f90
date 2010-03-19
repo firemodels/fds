@@ -2188,7 +2188,7 @@ END SUBROUTINE CHECK_STABILITY
 SUBROUTINE BAROCLINIC_CORRECTION
  
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),HP=>NULL(),RHMK=>NULL(),RRHO=>NULL()
-INTEGER  :: I,J,K
+INTEGER  :: I,J,K,IC1,IC2
 
 RHMK => WORK1 ! rho*(H-K)
 RRHO => WORK2 ! reciprocal of rho
@@ -2219,6 +2219,9 @@ ENDDO
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
+         IC1 = CELL_INDEX(I,J,K)
+         IC2 = CELL_INDEX(I+1,J,K)
+         IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
          FVX(I,J,K) = FVX(I,J,K) - 0.5_EB*(RHMK(I,J,K)+RHMK(I+1,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)
       ENDDO
    ENDDO
@@ -2228,6 +2231,9 @@ IF (.NOT.TWO_D) THEN
    DO K=1,KBAR
       DO J=0,JBAR
          DO I=1,IBAR
+            IC1 = CELL_INDEX(I,J,K)
+            IC2 = CELL_INDEX(I,J+1,K)
+            IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
             FVY(I,J,K) = FVY(I,J,K) - 0.5_EB*(RHMK(I,J,K)+RHMK(I,J+1,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)
          ENDDO
       ENDDO
@@ -2237,6 +2243,9 @@ ENDIF
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
+         IC1 = CELL_INDEX(I,J,K)
+         IC2 = CELL_INDEX(I,J,K+1)
+         IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
          FVZ(I,J,K) = FVZ(I,J,K) - 0.5_EB*(RHMK(I,J,K)+RHMK(I,J,K+1))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)
       ENDDO
    ENDDO
