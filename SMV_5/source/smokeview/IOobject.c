@@ -587,7 +587,7 @@ void draw_devices(void){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
     }
     prop=devicei->prop;
-    if(devicei->nparams>0){
+    if(devicei->nparams>0&&prop!=NULL){
       prop->nvars_indep=devicei->nparams;
       for(j=0;j<devicei->nparams;j++){
         prop->fvals[j]=devicei->params[j];
@@ -603,7 +603,7 @@ void draw_devices(void){
     else{
       draw_SVOBJECT(devicei->object,devicei->state0,prop);
     }
-    if(devicei->nparams>0){
+    if(devicei->nparams>0&&prop!=NULL){
       prop->nvars_indep=0;
     }
     devicei->object->use_displaylist=save_use_displaylist;
