@@ -631,7 +631,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      EVAP_INDEX = PC%EVAP_INDEX
                      IF (EVAP_INDEX==0) CYCLE PC_LOOP
                      IF (AVG_DROP_DEN(I,J,K,EVAP_INDEX)==0._EB) CYCLE PC_LOOP
-                     NCSDROP = THFO*AVG_DROP_DEN(I,J,K,EVAP_INDEX)/ (PC%DENSITY*AVG_DROP_RAD(I,J,K,EVAP_INDEX))
+!                     NCSDROP = THFO*AVG_DROP_DEN(I,J,K,EVAP_INDEX)/ (PC%DENSITY*AVG_DROP_RAD(I,J,K,EVAP_INDEX))
+                     NCSDROP = AVG_DROP_AREA(I,J,K,EVAP_INDEX)
                      ! Absorption and scattering efficiency
                      CALL INTERPOLATE1D(PC%KWR,PC%WQABS(:,IBND), 0.95_EB*AVG_DROP_RAD(I,J,K,EVAP_INDEX),QVAL) 
                      KAPPAW(I,J,K) = KAPPAW(I,J,K) + NCSDROP*QVAL
