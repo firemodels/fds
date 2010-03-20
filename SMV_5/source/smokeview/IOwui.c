@@ -667,7 +667,7 @@ void drawterrain(terraindata *terri, int only_geom){
 void drawterrain_texture(terraindata *terri, int only_geom){
   float *znode, *znormal;
   unsigned char *uc_znormal, *uc_zn;
-  int nxcell;
+  int nxcell,nycell;
   int i, j;
   float *x, *y;
   terraincell *ti;
@@ -696,6 +696,7 @@ void drawterrain_texture(terraindata *terri, int only_geom){
   uc_znormal = terri->uc_znormal;
   znode = terri->znode;
   nxcell = terri->nx;
+  nycell = terri->ny;
   x = terri->x;
   y = terri->y;
   ti = terri->tcell;
@@ -721,28 +722,28 @@ void drawterrain_texture(terraindata *terri, int only_geom){
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
       glNormal3fv(zn);
       glTexCoord2f(tx,ty);
-      glVertex3f(x[i],y[j],znode[ijnode2(i,j)]);
+      glVertex3f(x[i],y[j],znode[ijnode3(i,j)]);
 
 //      zn = znormal+3*ijnode2(ip1,j);
       uc_zn = uc_znormal+ijnode2(ip1,j);
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
       glNormal3fv(zn);
       glTexCoord2f(txp1,ty);
-      glVertex3f(x[i+1],y[j],znode[ijnode2(ip1,j)]);
+      glVertex3f(x[i+1],y[j],znode[ijnode3(ip1,j)]);
 
 //      zn = znormal+3*ijnode2(ip1,jp1);
       uc_zn = uc_znormal+ijnode2(ip1,jp1);
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
       glNormal3fv(zn);
       glTexCoord2f(txp1,typ1);
-      glVertex3f(x[i+1],y[j+1],znode[ijnode2(ip1,jp1)]);
+      glVertex3f(x[i+1],y[j+1],znode[ijnode3(ip1,jp1)]);
 
 //      zn = znormal+3*ijnode2(i,jp1);
       uc_zn = uc_znormal+ijnode2(i,jp1);
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
       glNormal3fv(zn);
       glTexCoord2f(tx,typ1);
-      glVertex3f(x[i],y[j+1],znode[ijnode2(i,jp1)]);
+      glVertex3f(x[i],y[j+1],znode[ijnode3(i,jp1)]);
 
       ti++;
     }
