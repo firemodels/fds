@@ -31,6 +31,9 @@ void getcontournodes(int n, int levels, const double x[4], const double y[4], co
                      int *nnode, float *xnode, float *ynode,
                      int *nnode2,float *xline, float *yline,
                      int *casen,int blankit);
+void getlinecontournodes(double linelevel, const double x[4], const double y[4], const double val[4],
+                     int *nline_nodes,float *xline, float *yline,
+                     int blankit);
 
 void DrawContours(const contour *ci);
 void setcontourslice(contour *ci,int idir,float xyz);
