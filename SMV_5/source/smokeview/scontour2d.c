@@ -313,6 +313,81 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
 
 }
 
+/*  ------------------ getlinecontours ------------------------ */
+
+void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,  
+                 const float *vals, const char *iblank, const float *levels,
+                 const contour *ci){
+  int n,i,j;
+  double x[4],y[4],v[4];
+  double linelevel;
+  float *xline=NULL, *yline=NULL;
+  float *xlinecopy, *ylinecopy;
+  int mxpolys,mxlines;
+  int nnode2,casen,doit;
+  int ij0,ij2,i2j,i2j2;
+  int nlinepts;
+  int nlevels;
+  int blankit=0;
+  int minfill, maxfill;
+
+  nlevels=ci->nlevels;
+  for(n=0;n<nlevels-2;n++){
+    ci->levels[n]=levels[n];
+  }
+  for(n=0;n<nlevels;n++){
+    linelevel=(double)levels[n];
+
+    mxpolys=(nx+1)*(ny+1)+1;
+    mxlines=4*mxpolys;
+    NewMemory((void **)&xline,mxlines*sizeof(float));
+    xlinecopy=xline;
+    NewMemory((void **)&yline,mxlines*sizeof(float));
+    ylinecopy=yline;
+
+    nlinepts=0;
+    for(j=0;j<ny-1;j++){
+      y[0]=(double)ygrid[j];
+      y[1]=(double)ygrid[j+1];
+      y[2]=(double)ygrid[j+1];
+      y[3]=(double)ygrid[j];
+      for(i=0;i<nx-1;i++){
+        x[0]=(double)xgrid[i];
+        x[1]=(double)xgrid[i];
+        x[2]=(double)xgrid[i+1];
+        x[3]=(double)xgrid[i+1];
+        doit=1;
+        ij0=ij(i,j);
+        ij2=ij(i,j+1);
+        i2j2=ij(i+1,j+1);
+        i2j=ij(i+1,j);
+        if(iblank!=NULL&&iblank[ijblank(i,j)]!=2)doit=0;
+        if(doit==1){
+          v[0]=(double)vals[ij0];
+          v[1]=(double)vals[ij2];
+          v[2]=(double)vals[i2j2];
+          v[3]=(double)vals[i2j];
+          getlinecontournodes(linelevel,x,y,v,
+            &nnode2,xlinecopy,ylinecopy,
+            blankit);
+          if(nnode2!=0){
+            xlinecopy += nnode2;
+            ylinecopy += nnode2;
+            nlinepts += nnode2;
+          }
+        }
+      }
+    }
+    if(nlinepts>0){
+      ResizeMemory((void **)&xline,nlinepts*sizeof(float));
+      ResizeMemory((void **)&yline,nlinepts*sizeof(float));
+    }
+    ci->xlines[n]=xline;
+    ci->ylines[n]=yline;
+    ci->nlines[n]=nlinepts;
+  }
+}
+
 /*  ------------------ getcontournodes ------------------------ */
 
 void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4], const double val[4],
@@ -323,7 +398,6 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
   int state[4]={1,1,1,1}, n,casenum;
   float xzero[9]={2.,2.,2.,2.,2.,2.,2.,2.,2.};
   float yzero[9]={2.,2.,2.,2.,2.,2.,2.,2.,2.};
-/*  float xnodecopy[9], ynodecopy[9]; */
   double xcopy[5],ycopy[5],valcopy[5],vallownet[5],valhighnet[5];
   int nn,edgenum;
   double factor;
@@ -396,12 +470,67 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
       xnode[n]=xzero[-edgenum];
       ynode[n]=yzero[-edgenum];
     }
-/*
-    xnodecopy[n]=xnode[n];
-    ynodecopy[n]=ynode[n];
-*/
   }
   for(n=0;n<*nnode2;n++){
+    edgenum=contourline_list[casenum][n+1];
+    xline[n]=xzero[edgenum];
+    yline[n]=yzero[edgenum];
+  }
+}
+
+/*  ------------------ getlinecontournodes ------------------------ */
+
+void getlinecontournodes(double linelevel, const double x[4], const double y[4], const double val[4],
+                     int *nline_nodes,float *xline, float *yline,
+                     int blankit){
+  int state[4]={1,1,1,1}, n,casenum;
+  float xzero[9]={2.,2.,2.,2.,2.,2.,2.,2.,2.};
+  float yzero[9]={2.,2.,2.,2.,2.,2.,2.,2.,2.};
+  double xcopy[5],ycopy[5],valcopy[5],valnet[5];
+  int nn,edgenum;
+  double factor;
+
+  *nline_nodes=0;
+  if(blankit==0){
+    for(n=0;n<4;n++){
+      state[n]=1;
+      if(val[n]<linelevel){
+        state[n]=0;
+      }
+      if(val[n]>=linelevel){
+        state[n]=2;
+      }
+    }
+    casenum=state[3]+3*state[2]+9*state[1]+27*state[0];
+  }
+  else{
+    casenum=40;
+  }
+  *nline_nodes=contourline_list[casenum][0];
+  if(casenum==0)return;
+
+  for(n=0;n<4;n++){
+    xcopy[n]=x[n];
+    ycopy[n]=y[n];
+    valcopy[n]=val[n];
+    valnet[n]=val[n]-linelevel;
+  }
+  xcopy[4]=x[0]; 
+  ycopy[4]=y[0];
+  valnet[4]=valnet[0];
+  valcopy[4]=val[0];
+
+  if(casenum!=40){
+    for(n=0;n<4;n++){
+      if(valnet[n]*valnet[n+1]<=0.0f){
+        nn=2*n+1;
+        factor = valnet[n+1]/(valcopy[n+1]-valcopy[n]);
+        xzero[nn] = xcopy[n]*factor + xcopy[n+1]*(1.0f-factor);
+        yzero[nn] = ycopy[n]*factor + ycopy[n+1]*(1.0f-factor);
+      }
+    }
+  }
+  for(n=0;n<*nline_nodes;n++){
     edgenum=contourline_list[casenum][n+1];
     xline[n]=xzero[edgenum];
     yline[n]=yzero[edgenum];
@@ -456,6 +585,54 @@ void DrawContours(const contour *ci){
         }
         glEnd();
       }
+    }
+  }
+}
+
+/*  ------------------ DrawLineContours ------------------------ */
+
+void DrawLineContours(const contour *ci, float linewidth){
+
+  int nlevels, n, npolys, *polysize, ipoly,j,nnodes;
+  float xyzval;
+  float *xline, *yline;
+  float **rgb;
+
+  int nlinepts,iline;
+
+  rgb=ci->rgbptr;
+  nlevels=ci->nlevels;
+  xyzval=ci->xyzval;
+  for(n=0;n<nlevels-1;n++){
+    xline=ci->xlines[n];
+    yline=ci->ylines[n];
+    nlinepts=ci->nlines[n];
+    if(ci->idir==1){
+      glColor4fv(rgb[n]);
+      glLineWidth(linewidth);
+      glBegin(GL_LINES);
+      for(iline=0;iline<nlinepts;iline++){
+        glVertex3f(xyzval,*xline++,*yline++);
+      }
+      glEnd();
+    }
+    else if(ci->idir==2){
+      glColor4fv(rgb[n]);
+      glLineWidth(linewidth);
+      glBegin(GL_LINES);
+      for(iline=0;iline<nlinepts;iline++){
+        glVertex3f(*xline++,xyzval,*yline++);
+      }
+      glEnd();
+    }
+    else if(ci->idir==3){
+      glColor4fv(rgb[n]);
+      glLineWidth(linewidth);
+      glBegin(GL_LINES);
+      for(iline=0;iline<nlinepts;iline++){
+        glVertex3f(*xline++,*yline++,xyzval);
+      }
+      glEnd();
     }
   }
 }
