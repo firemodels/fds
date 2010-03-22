@@ -136,7 +136,6 @@ int initcase_c(int argc, char **argv){
   set_unit_vis();
 
   CheckMemory;
-
   readini(0);
 
   if(sb_atstart==1){
@@ -956,6 +955,13 @@ void initvars1(void){
   shooter_uvw[0]=0.0;
   shooter_uvw[1]=0.0;
   shooter_uvw[2]=0.0;
+#endif
+#ifdef pp_SLICECONTOURS
+  vis_slice_contours=0;
+  update_slicecontours=0;
+#else
+  vis_slice_contours=0;
+  update_slicecontours=0;
 #endif
   unload_qdata=0;
   update_makeiblank_smoke3d=0;

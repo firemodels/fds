@@ -22,6 +22,7 @@
 #ifdef pp_SPHERE
 #include "csphere.h"
 #endif
+
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
@@ -3831,6 +3832,8 @@ typedef struct {
       sd->blocknumber=blocknumber;
       sd->vloaded=0;
       sd->reload=0;
+      sd->nline_contours=0;
+      sd->line_contours=NULL;
       {
         mesh *meshi;
 
@@ -5534,6 +5537,11 @@ typedef struct {
       slicebounds[nslice2].chopmin=1.0;
       slicebounds[nslice2].setchopmax=0;
       slicebounds[nslice2].setchopmin=0;
+#ifdef pp_SLICECONTOURS
+      slicebounds[nslice2].line_contour_min=0.0;
+      slicebounds[nslice2].line_contour_max=1.0;
+      slicebounds[nslice2].line_contour_num=1;
+#endif
       nslice2++;
       for(n=0;n<i;n++){
         slice *slicen;
@@ -5838,8 +5846,18 @@ void parsedatabase(char *file){
       NewMemory((void **)&textureinfo,nsurfids_shown*sizeof(surface));
     }
     if(nsurfaces>0){
-      ResizeMemory((void **)&surfaceinfo,(nsurfids_shown+nsurfaces)*sizeof(surface));
-      ResizeMemory((void **)&textureinfo,(nsurfids_shown+nsurfaces)*sizeof(surface));
+      if(surfaceinfo==NULL){
+        NewMemory((void **)&surfaceinfo,(nsurfids_shown+nsurfaces)*sizeof(surface));
+      }
+      else{
+        ResizeMemory((void **)&surfaceinfo,(nsurfids_shown+nsurfaces)*sizeof(surface));
+      }
+      if(textureinfo==NULL){
+        NewMemory((void **)&textureinfo,(nsurfids_shown+nsurfaces)*sizeof(surface));
+      }
+      else{
+        ResizeMemory((void **)&textureinfo,(nsurfids_shown+nsurfaces)*sizeof(surface));
+      }
     }
     surfj = surfaceinfo + nsurfaces - 1;
     for(j=0;j<nsurfids;j++){
@@ -7326,9 +7344,32 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"V_SLICE",7)==1){
+#ifdef pp_SLICECONTOURS
+      char *level_val;
+#endif
+
       fgets(buffer,255,stream);
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
+#ifdef pp_SLICECONTOURS
+      {
+        char *colen;
+
+        colen=strstr(buffer,":");
+        level_val=NULL;
+        if(colen!=NULL){
+          level_val=colen+1;
+          trim(level_val);
+          *colen=0;
+          if(strlen(level_val)>1){
+            sscanf(level_val,"%f %f %i",&slice_line_contour_min,&slice_line_contour_max,&slice_line_contour_num);
+          }
+          {
+            level_val=NULL;
+          }
+        }
+      }
+#endif
       if(strcmp(buffer2,"")!=0){
         for(i=0;i<nslice2;i++){
           if(strcmp(slicebounds[i].datalabel,buffer2)!=0)continue;
@@ -7336,6 +7377,13 @@ int readini2(char *inifile, int localfile){
           slicebounds[i].setvalmax=setvalmax;
           slicebounds[i].valmin=valmin;
           slicebounds[i].valmax=valmax;
+#ifdef pp_SLICECONTOURS
+          if(level_val!=NULL){
+            slicebounds[i].line_contour_min=slice_line_contour_min;  
+            slicebounds[i].line_contour_max=slice_line_contour_max;  
+            slicebounds[i].line_contour_num=slice_line_contour_num;  
+          }
+#endif
           break;
         }
       }
@@ -7345,6 +7393,11 @@ int readini2(char *inifile, int localfile){
           slicebounds[i].setvalmax=setvalmax;
           slicebounds[i].valmin=valmin;
           slicebounds[i].valmax=valmax;
+#ifdef pp_SLICECONTOURS
+          slicebounds[i].line_contour_min=slice_line_contour_min;  
+          slicebounds[i].line_contour_max=slice_line_contour_max;  
+          slicebounds[i].line_contour_num=slice_line_contour_num;  
+#endif
         }
       }
       continue;
@@ -9286,10 +9339,17 @@ void writeini(int flag){
   if(nslice2>0){
     for(i=0;i<nslice2;i++){
       fprintf(fileout,"V_SLICE\n");
+#ifdef pp_SLICECONTOURS
+      fprintf(fileout," %i %f %i %f %s : %f %f %i\n",
+#else
       fprintf(fileout," %i %f %i %f %s\n",
+#endif
         slicebounds[i].setvalmin,slicebounds[i].valmin,
         slicebounds[i].setvalmax,slicebounds[i].valmax,
         slicebounds[i].label->shortlabel
+#ifdef pp_SLICECONTOURS
+        ,slicebounds[i].line_contour_min,slicebounds[i].line_contour_max,slicebounds[i].line_contour_num
+#endif
         );
     }
     for(i=0;i<nslice2;i++){

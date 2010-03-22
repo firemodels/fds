@@ -18,12 +18,14 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+#include "contourdefs.h"
+
 
 // svn revision character string
 char IOslice_revision[]="$Revision$";
 
 int endianswitch;
-
+void update_slice_contours(int slice_type_index, float line_min, float line_max,int nline_values);
 int int_switch(int val);
 float float_switch(float val);
 void endian_switch(void *val, int nval);
@@ -244,9 +246,6 @@ void readvslice(int ivslice, int flag, int *errorcode){
   PrintMemoryInfo;
 #endif
   IDLE();
-
-
-
 }
 
 /* ------------------ readslice ------------------------ */
@@ -1542,7 +1541,118 @@ void updatevslicetypes(void){
   }
 }
 
+/* ------------------ update_slice_contours ------------------------ */
+
+void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values){
+  int i,j;
+  int nx, ny, nz;
+  mesh *meshi;
+  int ibar, jbar, kbar;
+  float *xplt, *yplt, *zplt;
+  float constval;
+  databounds *sb;
+  int slice_type_j;
+  int contours_gen=0;
+  float dval;
+
+  dval=0.0;
+  if(nline_values>1&&line_max!=line_min){
+    dval=(line_max-line_min)/(float)(nline_values-1);
+  }
+
+  sb = slicebounds + slice_type_index;
+  for(j=0;j<nslice_files;j++){
+    slice *sd;
+
+    sd = sliceinfo + j;
+    if(sd->loaded==0)continue;
+
+    slice_type_j = getslicetype(sd);
+    if(slice_type_j!=slice_type_index)continue;
+    if(sd->qslicedata==NULL){
+      printf("*** warning: data not available from %s to generate contours\n",sd->reg_file);
+      continue;
+    }
+    printf("generating contours for %s\n",sd->file);
+    contours_gen=1;
+
+    for(i=0;i<nline_values;i++){
+      int val_index;
+      float val;
+      int ii;
+      float valmin, valmax;
+      
+      valmin = sb->levels256[0];
+      valmax = sb->levels256[255];
+
+      val=line_min + i*dval;
+      val_index=255;
+      if(val<valmin){
+        val_index=0;
+      }
+      else if(valmax>valmin&&val>=valmin&&val<=valmax){
+        val_index=255*(val-valmin)/(valmax-valmin);
+      }
+      else if(val>valmax){
+        val_index=255;
+      }
+      if(val_index<0)val_index=0;
+      if(val_index>255)val_index=255;
+      sd->rgb_slice_ptr[i]=&rgb_full[val_index][0];
+    }
+    meshi = meshinfo + sd->blocknumber;
+
+    xplt=meshi->xplt;
+    yplt=meshi->yplt;
+    zplt=meshi->zplt;
+    ibar=meshi->ibar;
+    jbar=meshi->jbar;
+    kbar=meshi->kbar;
+    nx = ibar + 1;
+    ny = jbar + 1;
+    nz = kbar + 1;
+
+    switch (sd->idir){
+      case 1:
+      constval = xplt[sd->is1]+offset_slice*sd->sliceoffset;
+      break;
+      case 2:
+      constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
+      break;
+      case 3:
+      constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset;
+      break;
+    }
+
+    freecontours(sd->line_contours,sd->nline_contours);
+    sd->nline_contours=sd->nsteps;
+    initcontours(&sd->line_contours,sd->rgb_slice_ptr,sd->nline_contours,constval,sd->idir,line_min,line_max,nline_values);
+    for(i=0;i<sd->nline_contours;i++){
+      float *vals;
+      contour *ci;
+
+      vals = sd->qslicedata + i*sd->nsliceii;
+      ci = sd->line_contours+i;
+      switch (sd->idir){
+        case 1:
+        getlinecontours(yplt,zplt,ny,nz,vals,NULL,line_min, line_max,ci);
+        break;
+        case 2:
+        getlinecontours(xplt,zplt,nx,nz,vals,NULL,line_min,line_max,ci);
+        break;
+        case 3:
+        getlinecontours(xplt,yplt,nx,ny,vals,NULL,line_min,line_max,ci);
+        break;
+      }
+    }
+  }
+  if(contours_gen==0){
+    printf("*** warning: no slice files of type %s are currently loaded\n",sb->datalabel);
+  }
+}
+
 /* ------------------ updateslicetypes ------------------------ */
+
 void updateslicetypes(void){
   int i;
   slice *sd;
@@ -1688,6 +1798,11 @@ void setslicelabels(float smin, float smax,
 
 void setslicebounds(int slicetype){
   if(slicetype>=0&&slicetype<nslice2){
+#ifdef pp_SLICECONTOURS
+    slice_line_contour_min=slicebounds[slicetype].line_contour_min;
+    slice_line_contour_max=slicebounds[slicetype].line_contour_max;
+    slice_line_contour_num=slicebounds[slicetype].line_contour_num;
+#endif
     slicemin=slicebounds[slicetype].valmin;
     slicemax=slicebounds[slicetype].valmax;
     setslicemin=slicebounds[slicetype].setvalmin;
