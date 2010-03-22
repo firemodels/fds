@@ -16,7 +16,7 @@ CHARACTER(255), PARAMETER :: velodate='$Date$'
 
 PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,GET_REV_velo, &
        MATCH_VELOCITY,VELOCITY_BC,CHECK_STABILITY
-PRIVATE VELOCITY_FLUX,VELOCITY_FLUX_ISOTHERMAL,VELOCITY_FLUX_CYLINDRICAL
+PRIVATE VELOCITY_FLUX,VELOCITY_FLUX_CYLINDRICAL
  
 CONTAINS
  
@@ -32,11 +32,7 @@ TNOW = SECOND()
 
 SELECT CASE(FUNCTION_CODE)
    CASE(1)
-      IF (DNS .AND. ISOTHERMAL .AND. N_SPECIES==0) THEN
-         CALL VELOCITY_FLUX_ISOTHERMAL(NM)
-      ELSE
-         IF (PREDICTOR .OR. COMPUTE_VISCOSITY_TWICE) CALL COMPUTE_VISCOSITY(NM)
-      ENDIF
+      IF (PREDICTOR .OR. COMPUTE_VISCOSITY_TWICE) CALL COMPUTE_VISCOSITY(NM)
    CASE(2)
       IF (PREDICTOR .OR. COMPUTE_VISCOSITY_TWICE) CALL VISCOSITY_BC(NM)
       IF (.NOT.CYLINDRICAL) CALL VELOCITY_FLUX(T,NM)
@@ -627,149 +623,6 @@ END SUBROUTINE VELOCITY_FLUX
 
 
 
-SUBROUTINE VELOCITY_FLUX_ISOTHERMAL(NM)
- 
-! Compute the velocity flux at cell edges (ISOTHERMAL DNS ONLY)
-
-REAL(EB) :: UP,UM,VP,VM,WP,WM,VTRM,VOMZ,WOMY,UOMY,VOMX,UOMZ,WOMX, &
-            DVDZ,DVDX,DWDY,DWDX,DUDZ,DUDY,PMDT,MPDT, &
-            EPSUP,EPSUM,EPSVP,EPSVM,EPSWP,EPSWM
-INTEGER :: I,J,K
-REAL(EB), POINTER, DIMENSION(:,:,:) :: OMX=>NULL(),OMY=>NULL(),OMZ=>NULL(),UU=>NULL(),VV=>NULL(),WW=>NULL()
-INTEGER, INTENT(IN) :: NM
- 
-CALL POINT_TO_MESH(NM)
- 
-IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
-ELSE
-   UU => US
-   VV => VS
-   WW => WS
-ENDIF
- 
-OMX => WORK4
-OMY => WORK5
-OMZ => WORK6
-
-
-! Compute vorticity and stress tensor components
-!$OMP PARALLEL
-!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DUDY,DVDX,DUDZ,DWDX,DVDZ,DWDY)  
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_FLUX_ISOTHERMAL_01'
-         DUDY = RDYN(J)*(UU(I,J+1,K)-UU(I,J,K))
-         DVDX = RDXN(I)*(VV(I+1,J,K)-VV(I,J,K))
-         DUDZ = RDZN(K)*(UU(I,J,K+1)-UU(I,J,K))
-         DWDX = RDXN(I)*(WW(I+1,J,K)-WW(I,J,K))
-         DVDZ = RDZN(K)*(VV(I,J,K+1)-VV(I,J,K))
-         DWDY = RDYN(J)*(WW(I,J+1,K)-WW(I,J,K))
-         OMX(I,J,K) = DWDY - DVDZ
-         OMY(I,J,K) = DUDZ - DWDX
-         OMZ(I,J,K) = DVDX - DUDY
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
- 
-! Upwind/Downwind bias factors
-
-!$OMP SINGLE
-IF (PREDICTOR) THEN
-   PMDT =  0.5_EB*DT
-   MPDT = -0.5_EB*DT
-ELSE
-   PMDT = -0.5_EB*DT
-   MPDT =  0.5_EB*DT
-ENDIF
-!$OMP END SINGLE
-
-IF (NOBIAS) THEN
-   PMDT = 0._EB
-   MPDT = 0._EB
-ENDIF
- 
-! Compute x-direction flux term FVX
-
-!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,WP,WM,VP,VM,EPSWP,EPSWM,EPSVP,EPSVM,WOMY,VOMZ,VTRM)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_FLUX_ISOTHERMAL_03'
-         WP    = WW(I,J,K)   + WW(I+1,J,K)
-         WM    = WW(I,J,K-1) + WW(I+1,J,K-1)
-         VP    = VV(I,J,K)   + VV(I+1,J,K)
-         VM    = VV(I,J-1,K) + VV(I+1,J-1,K)
-         EPSWP = 1._EB + WP*MPDT*RDZN(K)
-         EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
-         EPSVP = 1._EB + VP*MPDT*RDYN(J)
-         EPSVM = 1._EB + VM*PMDT*RDYN(J-1)
-         WOMY  = EPSWP*WP*OMY(I,J,K) + EPSWM*WM*OMY(I,J,K-1)
-         VOMZ  = EPSVP*VP*OMZ(I,J,K) + EPSVM*VM*OMZ(I,J-1,K)
-         VTRM  = RREDZ(K)*(OMY(I,J,K)-OMY(I,J,K-1)) - RREDY(J)*(OMZ(I,J,K)-OMZ(I,J-1,K))
-         FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) - VTRM
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-! Compute y-direction flux term FVY
-
-!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,UP,UM,WP,WM,EPSUP,EPSUM,EPSWP,EPSWM,WOMX,UOMZ,VTRM) 
-DO K=1,KBAR
-   DO J=0,JBAR
-      DO I=1,IBAR
-         UP    = UU(I,J,K)   + UU(I,J+1,K)
-         UM    = UU(I-1,J,K) + UU(I-1,J+1,K)
-         WP    = WW(I,J,K)   + WW(I,J+1,K)
-         WM    = WW(I,J,K-1) + WW(I,J+1,K-1)
-         EPSUP = 1._EB + UP*MPDT*RDXN(I)
-         EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
-         EPSWP = 1._EB + WP*MPDT*RDZN(K)
-         EPSWM = 1._EB + WM*PMDT*RDZN(K-1)
-         WOMX  = EPSWP*WP*OMX(I,J,K) + EPSWM*WM*OMX(I,J,K-1)
-         UOMZ  = EPSUP*UP*OMZ(I,J,K) + EPSUM*UM*OMZ(I-1,J,K)
-         VTRM  = RREDX(I)*(OMZ(I,J,K)-OMZ(I-1,J,K)) - RREDZ(K)*(OMX(I,J,K)-OMX(I,J,K-1))
-         FVY(I,J,K) = 0.25_EB*(UOMZ - WOMX) - VTRM
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-! Compute z-direction flux term FVZ
-
-!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,UP,UM,VP,VM,EPSUP,EPSUM,EPSVP,EPSVM,UOMY,VOMX,VTRM) 
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         UP    = UU(I,J,K)   + UU(I,J,K+1)
-         UM    = UU(I-1,J,K) + UU(I-1,J,K+1)
-         VP    = VV(I,J,K)   + VV(I,J,K+1)
-         VM    = VV(I,J-1,K) + VV(I,J-1,K+1)
-         EPSUP = 1._EB + UP*MPDT*RDXN(I)
-         EPSUM = 1._EB + UM*PMDT*RDXN(I-1)
-         EPSVP = 1._EB + VP*MPDT*RDYN(J)
-         EPSVM = 1._EB + VM*PMDT*RDYN(J-1)
-         UOMY  = EPSUP*UP*OMY(I,J,K) + EPSUM*UM*OMY(I-1,J,K)
-         VOMX  = EPSVP*VP*OMX(I,J,K) + EPSVM*VM*OMX(I,J-1,K)
-         VTRM  = RREDY(J)*(OMX(I,J,K)-OMX(I,J-1,K)) - RREDX(I)*(OMY(I,J,K)-OMY(I-1,J,K))
-         FVZ(I,J,K) = 0.25_EB*(VOMX - UOMY) - VTRM
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO
-!$OMP END PARALLEL
- 
-! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
- 
-CALL NO_FLUX(NM)
- 
-END SUBROUTINE VELOCITY_FLUX_ISOTHERMAL
- 
- 
 SUBROUTINE VELOCITY_FLUX_CYLINDRICAL(T,NM)
 
 ! Compute convective and diffusive terms for 2D axisymmetric
