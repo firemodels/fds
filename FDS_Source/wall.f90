@@ -417,10 +417,6 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
    JJG = IJKW(7,IW)
    KKG = IJKW(8,IW)
    
-   ! Resolved kinetic energy
-   
-   KRES(II,JJ,KK) = KRES(IIG,JJG,KKG) ! this is overwritten at INTERPOLATED_BC
-
    ! Check if suppression by water is to be applied
 
    IF (CORRECTOR .AND. SF%E_COEFFICIENT>0._EB) THEN
@@ -608,7 +604,6 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
                   END SELECT
                   RHO_YY_OTHER(1:N_SPECIES) = RHO_YY_OTHER(1:N_SPECIES) + &
                                  ARO*(OM_RHOP(IIO,JJO,KKO)*OM_YYP(IIO,JJO,KKO,1:N_SPECIES)-RHO_G*YY_G_ALL(1:N_SPECIES))
-                  KRES(II,JJ,KK) = OM%KRES(IIO,JJO,KKO)
                ENDDO
             ENDDO
          ENDDO
