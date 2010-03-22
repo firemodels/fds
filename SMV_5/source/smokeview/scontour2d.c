@@ -110,6 +110,37 @@ int contourline_list[81][5]={
   {2,5,7},{0},{0}
 };
 
+/*  ------------------ initcontours ------------------------ */
+
+void initcontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval, int idir, float level_min, float level_max, int nlevels){
+  int i;
+
+  contour *cont;
+  float dval;
+
+  dval = 0.0;
+
+  if(nlevels>1&&level_min!=level_max){
+    dval = (level_max-level_min)/(int)(nlevels-1);
+  }
+
+  NewMemory((void **)&cont,ncontours*sizeof(contour));
+  *ci_ptr=cont;
+  for(i=0;i<ncontours;i++){
+    contour *ci;
+    int j;
+
+    ci = cont+i;
+    initcontour(ci,rgbptr,nlevels);
+    ci->xyzval=constval;
+    ci->idir=idir;
+    for(j=0;j<nlevels;j++){
+      ci->levels[j]=level_min+i*dval;
+    }
+  }
+
+}
+
 /*  ------------------ initcontour ------------------------ */
 
 void initcontour(contour *ci, float **rgbptr, int nlevels){
@@ -134,6 +165,18 @@ void initcontour(contour *ci, float **rgbptr, int nlevels){
     ci->ynode[n]=NULL;
     ci->xlines[n]=NULL;
     ci->ylines[n]=NULL;
+  }
+}
+
+/*  ------------------ freecontour ------------------------ */
+
+void freecontours(contour *contours,int ncontours){
+  int i;
+  contour *ci;
+
+  for(i=0;i<ncontours;i++){
+    ci = contours + i;
+    freecontour(ci);
   }
 }
 
@@ -316,7 +359,7 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
 /*  ------------------ getlinecontours ------------------------ */
 
 void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,  
-                 const float *vals, const char *iblank, const float *levels,
+                 const float *vals, const char *iblank, const float line_min, const float line_max,
                  const contour *ci){
   int n,i,j;
   double x[4],y[4],v[4];
@@ -330,13 +373,18 @@ void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,
   int nlevels;
   int blankit=0;
   int minfill, maxfill;
+  float dval;
+
+  
 
   nlevels=ci->nlevels;
-  for(n=0;n<nlevels-2;n++){
-    ci->levels[n]=levels[n];
+  dval=0.0;
+  if(nlevels>1&&line_min!=line_max){
+    dval=(line_max-line_min)/(float)(nlevels-1);
   }
   for(n=0;n<nlevels;n++){
-    linelevel=(double)levels[n];
+    linelevel=(double)line_min+n*dval;
+    ci->levels[n]=linelevel;
 
     mxpolys=(nx+1)*(ny+1)+1;
     mxlines=4*mxpolys;
@@ -600,10 +648,11 @@ void DrawLineContours(const contour *ci, float linewidth){
 
   int nlinepts,iline;
 
+  if(ci==NULL)return;
   rgb=ci->rgbptr;
   nlevels=ci->nlevels;
   xyzval=ci->xyzval;
-  for(n=0;n<nlevels-1;n++){
+  for(n=0;n<nlevels;n++){
     xline=ci->xlines[n];
     yline=ci->ylines[n];
     nlinepts=ci->nlines[n];

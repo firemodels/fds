@@ -861,10 +861,13 @@ typedef struct {
   float *qslicedata, *slicetimes, *qslice;
   unsigned char *qslicedata_compressed;
   unsigned char *slicecomplevel;
+  contour *line_contours;
+  int nline_contours;
   compinfo *compindex;
   unsigned char *slicelevel;
   char menulabel[128];
   char menulabel2[128];
+  float *rgb_slice_ptr[256];
   int nsteps,islice;
   float *slicedata;
   unsigned char *slicepoint;
@@ -883,7 +886,6 @@ typedef struct {
   int reload;
   float delta;
   int extreme_min, extreme_max;
-
 } slice;
 
 /* --------------------------  multislice ------------------------------------ */
@@ -916,6 +918,11 @@ typedef struct {
   char *datalabel;
   int setvalmin, setvalmax;
   int setchopmin, setchopmax;
+#ifdef pp_SLICECONTOURS
+  float line_contour_min;
+  float line_contour_max;
+  int line_contour_num;
+#endif
   float valmin, valmax;
   float chopmin, chopmax;
   float valmin_data,valmax_data;

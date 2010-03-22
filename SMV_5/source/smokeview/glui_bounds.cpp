@@ -22,6 +22,7 @@
 extern "C" char glui_bounds_revision[]="$Revision$";
 // $Date$ $Author$
 
+extern "C" void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values);
 extern "C" int file_exist(char *file);
 extern "C" void keyboard(unsigned char key, int x, int y);
 extern "C" void glui_script_disable(void);
@@ -112,6 +113,11 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define UPDATEBOUNDS 1
 #define DONT_UPDATEBOUNDS 0
 
+#ifdef pp_SLICECONTOURS
+#define LINE_CONTOUR_VALUE 301
+#define UPDATE_LINE_CONTOUR_VALUE 302
+#endif
+
 GLUI_Button *BUTTON_compress=NULL;
 #ifdef pp_TRANSFORM
 GLUI_Panel *panel_slice_transform=NULL;
@@ -122,6 +128,14 @@ GLUI_Panel *panel_pan3=NULL;
 GLUI_Panel *panel_contours=NULL;
 GLUI_Panel *panel_isosurface=NULL;
 GLUI_Panel *panel_vector=NULL;
+GLUI_Panel *panel_slice_vector=NULL;
+#ifdef pp_SLICECONTOURS
+GLUI_Panel *panel_line_contour=NULL;
+GLUI_Spinner *SPINNER_line_contour_num=NULL;
+GLUI_Spinner *SPINNER_line_contour_min=NULL;
+GLUI_Spinner *SPINNER_line_contour_max=NULL;
+GLUI_Button *BUTTON_update_line_contour=NULL;
+#endif
 GLUI_Panel *panel_script1=NULL;
 GLUI_Panel *panel_script1a=NULL;
 GLUI_Panel *panel_script1b=NULL;
@@ -531,17 +545,33 @@ extern "C" void glui_bounds_setup(int main_window){
       if(view_tstop>tttmax)tttmax=view_tstop;
       SPINNER_sliceaverage->set_float_limits(0.0,tttmax);
     }
-    {
-    GLUI_Panel *panel_vector=NULL;
 
-    panel_vector=glui_bounds->add_panel_to_panel(panel_slice,"Vector");
-    SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_vector,"Point size",GLUI_SPINNER_FLOAT,
+    panel_slice_vector=glui_bounds->add_panel_to_panel(panel_slice,"Vector");
+    SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_slice_vector,"Point size",GLUI_SPINNER_FLOAT,
       &vectorpointsize,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorpointsize->set_float_limits(1.0,10.0);
-    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_vector,"Line width",GLUI_SPINNER_FLOAT,
+    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_slice_vector,"Line width",GLUI_SPINNER_FLOAT,
       &vectorlinewidth,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
-    }
+
+#ifdef pp_SLICECONTOURS
+      slicebounds[nslice2].line_contour_min=0.0;
+      slicebounds[nslice2].line_contour_max=1.0;
+      slicebounds[nslice2].line_contour_num=1;
+
+    panel_line_contour = glui_bounds->add_panel_to_panel(panel_slice,"Line Contours");
+    slice_line_contour_min=0.0;
+    slice_line_contour_max=1.0;
+    SPINNER_line_contour_min=glui_bounds->add_spinner_to_panel(panel_line_contour,"Min",GLUI_SPINNER_FLOAT,
+      &slice_line_contour_min,LINE_CONTOUR_VALUE,Slice_CB);
+    SPINNER_line_contour_max=glui_bounds->add_spinner_to_panel(panel_line_contour,"Max",GLUI_SPINNER_FLOAT,
+      &slice_line_contour_max,LINE_CONTOUR_VALUE,Slice_CB);
+    slice_line_contour_num=1;
+    SPINNER_line_contour_num=glui_bounds->add_spinner_to_panel(panel_line_contour,"Number of contours",GLUI_SPINNER_INT,
+      &slice_line_contour_num,LINE_CONTOUR_VALUE,Slice_CB);
+    BUTTON_update_line_contour=glui_bounds->add_button_to_panel(panel_line_contour,"Update Contours",UPDATE_LINE_CONTOUR_VALUE,Slice_CB);
+    glui_bounds->add_checkbox_to_panel(panel_line_contour,"Show contours",&vis_slice_contours);
+#endif
 
     if(n_embedded_meshes>0){
       CHECKBOX_skip_subslice=glui_bounds->add_checkbox_to_panel(panel_slice,"Skip coarse sub-slice",&skip_slice_in_embedded_mesh);
@@ -1583,6 +1613,24 @@ extern "C" void Slice_CB(int var){
   ASSERT(con_slice_min!=NULL);
   ASSERT(con_slice_max!=NULL);
   switch (var){
+#ifdef pp_SLICECONTOURS
+    case LINE_CONTOUR_VALUE:
+      if(slice_line_contour_num<1){
+        slice_line_contour_num=1;
+        SPINNER_line_contour_num->set_int_val(slice_line_contour_num);
+      }
+      if(slice_line_contour_num==1&&slice_line_contour_min!=slice_line_contour_max){
+        slice_line_contour_max=slice_line_contour_min;
+        SPINNER_line_contour_max->set_float_val(slice_line_contour_max);
+      }
+      slicebounds[list_slice_index].line_contour_min=slice_line_contour_min;
+      slicebounds[list_slice_index].line_contour_max=slice_line_contour_max;
+      slicebounds[list_slice_index].line_contour_num=slice_line_contour_num;
+      break;
+    case UPDATE_LINE_CONTOUR_VALUE:
+      update_slice_contours(list_slice_index,slice_line_contour_min, slice_line_contour_max,slice_line_contour_num);
+      break;
+#endif
   case AVERAGE_DATA:
     if(slice_average_flag==1&&slice_turbprop_flag==1){
       slice_turbprop_flag=0;
@@ -1739,6 +1787,11 @@ extern "C" void Slice_CB(int var){
     else{
       con_slice_chopmax->disable();
     }
+#ifdef pp_SLICECONTOURS
+    SPINNER_line_contour_min->set_float_val(slice_line_contour_min);
+    SPINNER_line_contour_max->set_float_val(slice_line_contour_max);
+    SPINNER_line_contour_num->set_int_val(slice_line_contour_num);
+#endif
     break;
   case FILEUPDATE:
     for(ii=0;ii<nslice_loaded;ii++){
