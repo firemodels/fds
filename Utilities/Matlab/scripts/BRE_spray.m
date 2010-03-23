@@ -6,7 +6,8 @@ close all
 clear all
 
 addpath('../../Validation/BRE_Spray/Experimental_Data')
-addpath('../../Validation/BRE_Spray/FDS_Output_Files')
+addpath('../../Validation/BRE_Spray/FDS_Input_Files')
+%addpath('../../Validation/BRE_Spray/FDS_Output_Files')
 
 % load experimental data and FDS prediction
 [exp_data] = csvread('BRE_Spray_Test.csv',2);
@@ -14,6 +15,8 @@ exp_col_d = 6;
 exp_col_w = 7;
 exp_col_att = 4;
 
+dmax = max(exp_data(:,exp_col_d));
+wmax = max(exp_data(:,exp_col_w));
 amax = max(exp_data(:,exp_col_att));
 
 Nozzle{1} = 'A';
@@ -27,13 +30,6 @@ exp_color{1} = 'b';
 exp_color{2} = 'g';
 exp_color{3} = 'r';
 
-w_leg_pos{1} = 'NorthWest';
-w_leg_pos{2} = 'SouthWest';
-w_leg_pos{3} = 'NorthWest';
-d_leg_pos{1} = 'NorthWest';
-d_leg_pos{2} = 'NorthWest';
-d_leg_pos{3} = 'SouthWest';
-
 exp_rows(1,:) = [1:8];
 exp_rows(2,:) = [9:16];
 exp_rows(3,:) = [17:24];
@@ -45,10 +41,10 @@ fds_color{1} = 'w';
 fds_color{2} = 'w';
 fds_color{3} = 'w';
 
-wmin = 0;
-wmax = 6;
-dmin = 0;
-dmax = 800;
+wmin = [0.5 1 0];
+wmax = [3 6 6];
+dmin = [50 100 100];
+dmax = [350 400 1000];
 
 for n = 1:3
 for p = 1:8
@@ -102,11 +98,11 @@ hf(3)=figure(3);
 ha(n,1) = plot(exp_data(exp_rows(n,:),4),FDS_Attenuation(n,:),exp_marker{n});
 set(ha(n,1),'MarkerFaceColor',exp_color{n});
 hold on
-
 xmin = 0;
 ymin = 0;
 xmax = amax;
-ymax = amax;
+ymax = xmax;
+
 plot([xmin xmax],[ymin ymax],'k-.')
 axis([xmin xmax ymin ymax])
   
@@ -120,57 +116,45 @@ figure(hf(1))
 plot_style
 set(d_ax(1:3),'Units',Plot_Units)
 set(d_ax(1:3),'FontName',Font_Name)
-Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
-Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
+  %  Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
+  %  Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
+  %  set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(gcf,'DefaultLineLineWidth',Line_Width)
 for n = 1:3
-   set(d_ax(n),'Position',[Plot_X+(n-1)*Plot_Height/3,Plot_Y,Plot_Height/3,Plot_Height])
-   axis(d_ax(n),[0 9 dmin dmax]);
+   axis(d_ax(n),[0 8 dmin(n) dmax(n)]);
    xlabel(d_ax(n),'P (bar)','Interpreter','LaTeX','FontSize',Label_Font_Size)
    title(d_ax(n),['Nozzle ' Nozzle{n}],'Interpreter','LaTeX','FontSize',Label_Font_Size)
-   hl(n) = legend(hd(n,:),'Exp.','FDS','Location',d_leg_pos{n});
+   hl(n) = legend(hd(n,:),'Exp.','FDS','Location','NorthEast');
 end
-set(d_ax(2:3),'YTickLabel',[])
-set(d_ax(1),'XTick',[0 2 4 6 8])
-set(d_ax(2:3),'XTick',[2 4 6 8])
 ylabel(d_ax(1),'Mean diameter ($\mu$m)','Interpreter','LaTeX','FontSize',Label_Font_Size)
 
-% print to pdf
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Height Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_5_Validation_Guide/FIGURES/BRE_Spray/BRE_Spray_Diameter');
 
+
+% print to pdf
+  %  set(gcf,'Visible',Figure_Visibility);
+  %  set(gcf,'PaperUnits',Paper_Units);
+  %  set(gcf,'PaperSize',[Paper_Height Paper_Height]);
+  %  set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
+  %  print(gcf,'-dpdf',['../../Manuals/FDS_5_Validation_Guide/FIGURES/Beyler_Hood/Beyler_',print_name{j}])
+    
+%    close
 
 % w-plot
-
 figure(hf(2))
 plot_style
 set(w_ax(1:3),'Units',Plot_Units)
 set(w_ax(1:3),'FontName',Font_Name)
-Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
-Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
+  %  Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
+  %  Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
+  %  set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(gcf,'DefaultLineLineWidth',Line_Width)
 for n = 1:3
-   set(w_ax(n),'Position',[Plot_X+(n-1)*Plot_Height/3,Plot_Y,Plot_Height/3,Plot_Height])
-   axis(w_ax(n),[0 9 wmin wmax]);
+   axis(w_ax(n),[0 8 wmin(n) wmax(n)]);
    xlabel(w_ax(n),'P (bar)','Interpreter','LaTeX','FontSize',Label_Font_Size)
    title(w_ax(n),['Nozzle ' Nozzle{n}],'Interpreter','LaTeX','FontSize',Label_Font_Size)
-   hl(n) = legend(hw(n,:),'Exp.','FDS','Location',w_leg_pos{n});
+   hl(n) = legend(hw(n,:),'Exp.','FDS','Location','NorthWest');
 end
-set(w_ax(2:3),'YTickLabel',[])
-set(w_ax(1),'XTick',[0 2 4 6 8])
-set(w_ax(2:3),'XTick',[2 4 6 8])
 ylabel(w_ax(1),'Mean W-velocity (m/s)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-
-% print to pdf
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Height Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_5_Validation_Guide/FIGURES/BRE_Spray/BRE_Spray_W');
-
 
 % Attenuation plot
 
@@ -186,11 +170,3 @@ xlabel('Exp. Attenuation (\%)','Interpreter','LaTeX','FontSize',Label_Font_Size)
 ylabel('FDS Attenuation (\%)','Interpreter','LaTeX','FontSize',Label_Font_Size)
 hl(n) = legend(ha,'Nozzle A','Nozzle B','Nozzle D','Location','SouthEast');
 
-% print to pdf
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Height Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_5_Validation_Guide/FIGURES/BRE_Spray/BRE_Spray_Attenuation');
-
-close all
