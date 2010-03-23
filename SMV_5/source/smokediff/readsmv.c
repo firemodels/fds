@@ -538,9 +538,9 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       if(getfileinfo(full_file,NULL,&filesize)==0){
         int lenfile, endian, npatches, error, boundaryunitnumber;
 
-        NewMemory((void **)&boundaryi->file,(unsigned int)(strlen(buffer)+1));
+        NewMemory((void **)&boundaryi->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&boundaryi->histogram,sizeof(histogramdata));
-        STRCPY(boundaryi->file,buffer);
+        STRCPY(boundaryi->file,full_file);
         if(readlabels(&boundaryi->label,streamsmv)==2){
           printf("*** Warning: problem reading BNDF entry\n");
           break;
