@@ -555,9 +555,6 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
 
 #ifdef pp_SLICECONTOURS
-      slicebounds[nslice2].line_contour_min=0.0;
-      slicebounds[nslice2].line_contour_max=1.0;
-      slicebounds[nslice2].line_contour_num=1;
 
     panel_line_contour = glui_bounds->add_panel_to_panel(panel_slice,"Line Contours");
     slice_line_contour_min=0.0;
