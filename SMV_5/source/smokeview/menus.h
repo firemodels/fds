@@ -395,14 +395,6 @@ void ColorBarMenu(int value){
     case -5:
       viscolorbarpath=1-viscolorbarpath;
       break;
-    case -6:
-      if(colorband==1){
-        colorband=5;
-      }
-      else{
-        colorband=1;
-      }
-      break;
     case -7:
       show_extremedata=1-show_extremedata;
       update_extreme();
@@ -5538,12 +5530,6 @@ static int in_menu=0;
   }
   else{
     glutAddMenuEntry("  Highlight extreme data",-7);
-  }
-  if(colorband==1){
-    glutAddMenuEntry("  *Narrow colorband",-6);
-  }
-  else{
-    glutAddMenuEntry("  *Wide colorband",-6);
   }
   if(colorbarflip==1){
     glutAddMenuEntry("  *Flip colorbar",-2);
