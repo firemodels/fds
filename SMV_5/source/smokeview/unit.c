@@ -116,6 +116,11 @@ void add_unit_class(flowlabels *label){
   f_unit *units;
   int i;
 
+ #ifdef pp_SMOKEDIFF
+ #else
+  return; // disable this functino for now
+#endif
+
   nunitclasses++;
   ResizeMemory((void **)&unitclasses,nunitclasses*sizeof(f_units));
 
@@ -309,6 +314,7 @@ void InitUnits(void){
 
   // temperature units
 
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     ut->diff_index=3;
     ut->nunits=4;
@@ -317,6 +323,10 @@ void InitUnits(void){
     ut->diff_index=-1;
     ut->nunits=3;
   }
+#else
+  ut->diff_index=-1;
+  ut->nunits=3;
+#endif
   ut->active=0;
   strcpy(ut->unitclass,"Temperature");
 
@@ -327,6 +337,7 @@ void InitUnits(void){
   units[0].scale[1]=0.0;
   strcpy(units[1].unit,"F");
   units[1].scale[0]=1.8;
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     units[1].scale[1]=0.0;
     units[1].rel_defined=0;
@@ -334,8 +345,12 @@ void InitUnits(void){
   else{
     units[1].scale[1]=32.0;
   }
+#else
+  units[1].scale[1]=32.0;
+#endif
   strcpy(units[2].unit,"K");
   units[2].scale[0]=1.0;
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     units[2].scale[1]=273.15;
   }
@@ -348,11 +363,15 @@ void InitUnits(void){
     units[3].scale[1]=0.0;
     units[3].rel_defined=0;
   }
+#else
+  units[2].scale[1]=0.0;
+#endif
 
   // velocity units
 
   ut = unitclasses_default+1;
   ut->active=0;
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     ut->diff_index=3;
     ut->nunits=4;
@@ -361,6 +380,10 @@ void InitUnits(void){
     ut->diff_index=-1;
     ut->nunits=3;
   }
+#else
+  ut->diff_index=-1;
+  ut->nunits=3;
+#endif
   strcpy(ut->unitclass,"Velocity");
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
@@ -374,18 +397,21 @@ void InitUnits(void){
   strcpy(units[2].unit,"f/s");
   units[2].scale[0]=3.2808333333;
   units[2].scale[1]=0.0;
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     strcpy(units[3].unit,"% diff");
     units[3].scale[0]=0.16667;
     units[3].scale[1]=0.0;
     units[3].rel_defined=0;
   }
+#endif
   CheckMemory;
 
   // distance units
 
   ut = unitclasses_default + 2;
   ut->active=0;
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     ut->diff_index=2;
     ut->nunits=3;
@@ -394,6 +420,10 @@ void InitUnits(void){
     ut->diff_index=-1;
     ut->nunits=2;
   }
+#else
+  ut->diff_index=-1;
+  ut->nunits=2;
+#endif
   strcpy(ut->unitclass,"Distance");
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
@@ -404,18 +434,21 @@ void InitUnits(void){
   strcpy(units[1].unit,"f");
   units[1].scale[0]=3.280833333;
   units[1].scale[1]=0.0;
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     strcpy(units[2].unit,"% diff");
     units[3].scale[0]=0.16667;
     units[3].scale[1]=0.0;
     units[3].rel_defined=0;
   }
+#endif
   CheckMemory;
 
   // volume flow units
 
   ut = unitclasses_default + 3;
   ut->active=0;
+#ifdef pp_SMOKDIFF
   if(smokediff==1){
     ut->diff_index=2;
     ut->nunits=3;
@@ -424,6 +457,10 @@ void InitUnits(void){
     ut->diff_index=-1;
     ut->nunits=2;
   }
+#else
+  ut->diff_index=-1;
+  ut->nunits=2;
+#endif
   strcpy(ut->unitclass,"Volume Flow");
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
@@ -434,18 +471,21 @@ void InitUnits(void){
   strcpy(units[1].unit,"cfm");
   units[1].scale[0]=2118.86720;
   units[1].scale[1]=0.0;
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     strcpy(units[2].unit,"% diff");
     units[3].scale[0]=0.16667;
     units[3].scale[1]=0.0;
     units[3].rel_defined=0;
   }
+#endif
   CheckMemory;
 
   // Mass fraction units
 
   ut = unitclasses_default + 4;
   ut->active=0;
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     ut->diff_index=2;
     ut->nunits=3;
@@ -454,6 +494,10 @@ void InitUnits(void){
     ut->diff_index=-1;
     ut->nunits=2;
   }
+#else
+  ut->diff_index=-1;
+  ut->nunits=2;
+#endif
   strcpy(ut->unitclass,"Mass Fraction");
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
@@ -464,12 +508,14 @@ void InitUnits(void){
   strcpy(units[1].unit,"g/kg");
   units[1].scale[0]=1000.0;
   units[1].scale[1]=0.0;
+#ifdef pp_SMOKEDIFF
   if(smokediff==1){
     strcpy(units[2].unit,"% diff");
     units[3].scale[0]=0.16667;
     units[3].scale[1]=0.0;
     units[3].rel_defined=0;
   }
+#endif
   CheckMemory;
 
 
@@ -477,6 +523,7 @@ void InitUnits(void){
 
   ut = unitclasses_default + 5;
   ut->active=0;
+#ifdef pp_SMOKDIFF
   if(smokediff==1){
     ut->diff_index=2;
     ut->nunits=3;
@@ -485,6 +532,10 @@ void InitUnits(void){
     ut->diff_index=-1;
     ut->nunits=2;
   }
+#else
+  ut->diff_index=-1;
+  ut->nunits=2;
+#endif
   strcpy(ut->unitclass,"Concentration");
 
   NewMemory((void **)&(ut->units),ut->nunits*sizeof(f_unit));
@@ -495,11 +546,13 @@ void InitUnits(void){
   strcpy(units[1].unit,"ppm");
   units[1].scale[0]=1000000.0;
   units[1].scale[1]=0.0;
+#ifdef pp_SMOKDIFF
   if(smokediff==1){
     strcpy(units[2].unit,"% diff");
     units[3].scale[0]=0.16667;
     units[3].scale[1]=0.0;
     units[3].rel_defined=0;
   }
+#endif
   CheckMemory;
 }
