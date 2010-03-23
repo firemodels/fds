@@ -1607,7 +1607,7 @@ void initvars1(void){
   direction_angleINI0=0.0;
 
   adjustalphaflag=2;
-  colorband=5;
+  colorband=1;
   show_extremedata=0;
 
   highlight_block=-1, highlight_mesh=0, highlight_flag=2;

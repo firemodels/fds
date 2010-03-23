@@ -7010,13 +7010,6 @@ int readini2(char *inifile, int localfile){
       if(smooth_block_solid!=1)smooth_block_solid=0;
       continue;
     }
-    if(match(buffer,"COLORBAND",9)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&colorband);
-      if(colorband<1)colorband=1;
-      if(colorband>255)colorband=255;
-      continue;
-    }
     if(match(buffer,"SHOWTRANSPARENTVENTS",20)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&show_transparent_vents);
@@ -9223,8 +9216,6 @@ void writeini(int flag){
   fprintf(fileout," %i\n",setbw);
   fprintf(fileout,"COLORBARFLIP\n");
   fprintf(fileout," %i\n",colorbarflip);
-  fprintf(fileout,"COLORBAND\n");
-  fprintf(fileout," %i\n",colorband);
 
   fprintf(fileout,"\n LIGHTING\n");
   fprintf(fileout,"--------\n\n");
