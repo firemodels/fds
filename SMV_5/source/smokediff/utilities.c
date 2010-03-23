@@ -226,9 +226,13 @@ int getrevision(char *svn){
 /* ------------------ fullfile ------------------------ */
 
 void fullfile(char *fileout, char *dir, char *file){
+  char *file2;
+
+  trim(file);
+  file2=trim_front(file);
   strcpy(fileout,"");
   if(dir!=NULL)strcat(fileout,dir);
-  strcat(fileout,file);
+  strcat(fileout,file2);
 }
 
 /* ------------------ getendian ------------------------ */
