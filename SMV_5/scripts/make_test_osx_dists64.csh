@@ -16,6 +16,7 @@ cp note.txt $OSXDIR/Documentation/.
 
 scp $OSXHOST\:FDS-SMV/SMV_5/bin/smv5_osx_test_64 $OSXDIR/.
 scp $OSXHOST\:FDS-SMV/SMV_5/bin/smokezip_osx_64 $OSXDIR/.
+scp $OSXHOST\:FDS-SMV/SMV_5/bin/smokediff_osx_64 $OSXDIR/.
 rm -f $OSXDIR.tar $OSXDIR.tar.gz
 tar cvf $OSXDIR.tar $OSXDIR/.
 gzip $OSXDIR.tar

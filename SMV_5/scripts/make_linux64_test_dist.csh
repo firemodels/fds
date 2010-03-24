@@ -14,6 +14,7 @@ mkdir -p $LINUXDIR/Documentation
 cp note.txt $LINUXDIR/Documentation/.
 cp $BINDIR/smv5_linux_test_64 $LINUXDIR/.
 cp $BINDIR/smokezip_linux_64 $LINUXDIR/.
+cp $BINDIR/smokediff_linux_64 $LINUXDIR/.
 rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
 tar cvf $LINUXDIR.tar $LINUXDIR/.
 gzip $LINUXDIR.tar
