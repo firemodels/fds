@@ -1359,7 +1359,7 @@ void initvars1(void){
   RenderMenu(render_option);
   viewoption=0;
   xyz_clipplane=0;
-  xyz_clipplane=-1;
+  xyz_clipplane_last=-1;
   clip_x=0,clip_y=0,clip_z=0,clip_i=0,clip_j=0,clip_k=0;
   clip_X=0,clip_Y=0,clip_Z=0,clip_I=0,clip_J=0,clip_K=0;
   clip_x_val=0.0, clip_y_val=0.0, clip_z_val=0.0;

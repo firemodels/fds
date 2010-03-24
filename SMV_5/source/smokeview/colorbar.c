@@ -252,30 +252,55 @@ void remapcolorbar(colorbardata *cbi){
   int i,j,i1,i2;
   float factor,*colorbar;
   unsigned char *rgb_node;
-  
+  unsigned char *alpha;
+
   CheckMemory;
   colorbar=cbi->colorbar;
   rgb_node=cbi->rgb_node;
+  alpha=cbi->alpha;
   for(i=0;i<cbi->index_node[0];i++){
     colorbar[0+3*i]=rgb_node[0]/255.0;
     colorbar[1+3*i]=rgb_node[1]/255.0;
     colorbar[2+3*i]=rgb_node[2]/255.0;
+    if(rgb_node[0]==0&&rgb_node[1]==1&&rgb_node[2]==2){
+      alpha[i]=0;
+    }
+    else{
+      alpha[i]=255;
+    }
   }
   for(i=0;i<cbi->nnodes-1;i++){
     i1 = cbi->index_node[i];
     i2 = cbi->index_node[i+1];
     if(i2==i1)continue;
+    rgb_node = cbi->rgb_node+3*i;
     for(j=i1;j<i2;j++){
       factor = (float)(j-i1)/(float)(i2-i1);
-      colorbar[0+3*j]=((1.0-factor)*rgb_node[0+3*i]+factor*rgb_node[0+3*(i+1)])/255.0;
-      colorbar[1+3*j]=((1.0-factor)*rgb_node[1+3*i]+factor*rgb_node[1+3*(i+1)])/255.0;
-      colorbar[2+3*j]=((1.0-factor)*rgb_node[2+3*i]+factor*rgb_node[2+3*(i+1)])/255.0;
+      colorbar[0+3*j]=((1.0-factor)*rgb_node[0]+factor*rgb_node[3])/255.0;
+      colorbar[1+3*j]=((1.0-factor)*rgb_node[1]+factor*rgb_node[4])/255.0;
+      colorbar[2+3*j]=((1.0-factor)*rgb_node[2]+factor*rgb_node[5])/255.0;
+      if(
+        rgb_node[0]==0&&rgb_node[1]==1&&rgb_node[2]==2&&
+        rgb_node[3]==0&&rgb_node[4]==1&&rgb_node[5]==2
+        ){
+        alpha[j]=0;
+      }
+      else{
+        alpha[j]=255;
+      }
     }
   }
+  rgb_node = cbi->rgb_node+3*(cbi->nnodes-1);
   for(i=cbi->index_node[cbi->nnodes-1];i<256;i++){
-    colorbar[0+3*i]=rgb_node[0+3*(cbi->nnodes-1)]/255.0;
-    colorbar[1+3*i]=rgb_node[1+3*(cbi->nnodes-1)]/255.0;
-    colorbar[2+3*i]=rgb_node[2+3*(cbi->nnodes-1)]/255.0;
+    colorbar[0+3*i]=rgb_node[0]/255.0;
+    colorbar[1+3*i]=rgb_node[1]/255.0;
+    colorbar[2+3*i]=rgb_node[2]/255.0;
+    if(rgb_node[0]==0&&rgb_node[1]==1&&rgb_node[2]==2){
+      alpha[i]=0;
+    }
+    else{
+      alpha[i]=255;
+    }
   }
   if(show_extremedata==1){
     colorbar[0]=rgb_below_min[0];
