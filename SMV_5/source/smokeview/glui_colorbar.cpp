@@ -248,6 +248,7 @@ void COLORBAR_CB(int var){
   case COLORBAR_COLORINDEX:
     if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
       cbi = colorbarinfo + colorbartype;
+      current_colorbar=cbi;
       
       cbi->index_node[colorbarpoint]=cb_colorindex;
 

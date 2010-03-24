@@ -1234,26 +1234,35 @@ void drawColorBars(float ybump){
       top = barbot+nrgb+DYFONT;
       tophat = top - (top-barbot)/(nrgb-2);
       for (i = 0; i < nrgb-2; i++){
+        float *rgb_plot3d;
+
+        rgb_plot3d = rgb_plot3d_contour[i];
+
         yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
 
-        glColor4fv(rgb_plot3d_contour[i]);
-        glVertex2f(barleft, yy); 
-        glVertex2f(barright,yy);
+        if(rgb_plot3d[3]!=0.0){
+          glColor4fv(rgb_plot3d);
+          glVertex2f(barleft, yy); 
+          glVertex2f(barright,yy);
        
-        glVertex2f(barright,yy2);
-        glVertex2f(barleft, yy2);
+          glVertex2f(barright,yy2);
+          glVertex2f(barleft, yy2);
+        }
       }
       {
         float barmid;
+        float *rgb_plot3d;
+
+        rgb_plot3d = rgb_plot3d_contour[nrgb-2];
 
         barmid = (barleft+barright)/2.0;
         i=-1;
         yy =  (barbot*(nrgb-3-(i+0.5))  +(i+0.5)   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
 
-        if(show_extreme_below==1){     
-          glColor4fv(rgb_plot3d_contour[nrgb-2]);
+        if(show_extreme_below==1&&rgb_plot3d[3]!=0.0){     
+          glColor4fv(rgb_plot3d);
 
           glVertex2f(barleft, yy2);
           glVertex2f(barmid, yy); 
@@ -1265,8 +1274,9 @@ void drawColorBars(float ybump){
         yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-3.5-i)+  (i+0.5)*tophat)/(nrgb-3);
 
-        if(show_extreme_above==1){
-          glColor4fv(rgb_plot3d_contour[nrgb-1]);
+        rgb_plot3d = rgb_plot3d_contour[nrgb-1];
+        if(show_extreme_above==1&&rgb_plot3d[3]!=0.0){
+          glColor4fv(rgb_plot3d);
           glVertex2f(barleft, yy); 
           glVertex2f(barright,yy);
        
@@ -1282,18 +1292,25 @@ void drawColorBars(float ybump){
       top = barbot+nrgb+DYFONT;
       tophat = top - (top-barbot)/255.0;
       for (i = 0; i < nrgb_full; i++){
+        float *rgb_cb,*rgb_cb2;
+
+        rgb_cb=rgb_full[i];
+
          yy = (barbot*(255-i)+    i*tophat)/255.;
         yy2 = (barbot*(254-i)+(i+1)*tophat)/255.;
         i3=i+1;
         if(i==nrgb_full-1)i3=i;
+        rgb_cb2=rgb_full[i3];
 
-        glColor4fv(rgb_full[i]); 
-        glVertex2f(barleft, yy);
-        glVertex2f(barright,yy);
+        if(rgb_cb[3]!=0.0&&rgb_cb2[3]!=0.0){
+          glColor4fv(rgb_cb); 
+          glVertex2f(barleft, yy);
+          glVertex2f(barright,yy);
 
-        glColor4fv(rgb_full[i3]);
-        glVertex2f(barright,yy2);
-        glVertex2f(barleft,yy2);
+          glColor4fv(rgb_cb2);
+          glVertex2f(barright,yy2);
+          glVertex2f(barleft,yy2);
+        }
       }
     }
       {
@@ -1868,11 +1885,26 @@ void updatecolors(int changecolorindex){
     rgb_trans[4*n+3]=(float)n/(float)(nrgb_full-1);
   }
   if(colorbarinfo!=NULL){
+    int tflag=0;
+    
     for(n=0;n<nrgb_full;n++){
+      if(colorbarinfo[colorbartype].alpha[n]==0){
+        tflag=1;
+        break;
+      }
+    }
+    for(n=0;n<nrgb_full;n++){
+      float rgb_cb[3],graylevel;
+
       rgb_full[n][0]=colorbarinfo[colorbartype].colorbar[3*n];
       rgb_full[n][1]=colorbarinfo[colorbartype].colorbar[3*n+1];
       rgb_full[n][2]=colorbarinfo[colorbartype].colorbar[3*n+2];
-      rgb_full[n][3]=transparentlevel;
+      if(tflag==1){
+        rgb_full[n][3]=colorbarinfo[colorbartype].alpha[n]/255.0;
+      }
+      else{
+        rgb_full[n][3]=transparentlevel;
+      }
     } 
   }
   else{
