@@ -56,5 +56,5 @@
 #endif
 
 #ifdef pp_release
-#define SMDiffVERSION "1.0.0"
+#define SMDiffVERSION "1.0.1"
 #endif
