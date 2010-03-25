@@ -1504,6 +1504,8 @@ DNS_IF: IF (DNS) THEN
    HEAT_TRANSFER_COEFFICIENT = 2._EB*KW(IW)*RDN(IW)
 ELSE DNS_IF
    ITMP = MIN(5000,NINT(TMP_G))
+   CP = 0._EB
+   MU_G = 0._EB
    NO_GAS_CELL_IF: IF (IIG<0) THEN   ! No gas cell information available
       SELECT CASE(ABS(IOR))
          CASE(0:2)
