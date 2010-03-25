@@ -14,6 +14,7 @@ mkdir -p $OSXDIR
 mkdir -p $OSXDIR/Documentation
 cp note.txt $OSXDIR/Documentation/.
 
+cp $FORBUNDLE/objects.svo $OSXDIR/.
 scp $OSXHOST\:FDS-SMV/SMV_5/bin/smv5_osx_test_32 $OSXDIR/.
 scp $OSXHOST\:FDS-SMV/SMV_5/bin/smokezip_osx_32 $OSXDIR/.
 scp $OSXHOST\:FDS-SMV/SMV_5/bin/smokediff_osx_32 $OSXDIR/.
