@@ -9,7 +9,7 @@ Using default value of extinction coefficient, percent obscuration of asp1 shoul
 &MESH IJK = 10,10,10, XB=-1.,1.,-1.,1.,-1.,1. /
 
 &TIME T_END=200. /
-&DUMP NFRAMES=200/
+&DUMP NFRAMES=200 DT_PL3D = 10000. /
 
 &REAC SOOT_YIELD=0.001/
 
