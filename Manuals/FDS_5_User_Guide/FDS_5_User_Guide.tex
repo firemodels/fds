@@ -3604,10 +3604,7 @@ mesh cells half the size. Setting {\ct WALL\_INCREMENT=1} on the
 time step.
 
 If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
-the surface is going to shrink when the surface reacts. The shrinking behavior can be prevented in the numerical model
-by setting {\ct SHRINK=.FALSE.}
-on the {\ct SURF} line.  However, setting {\ct SHRINK=.FALSE.} may introduce numerical problems in the wall solver.
-When all the material of
+the surface is going to shrink when the surface reacts. When all the material of
 a shrinking surface is consumed but {\ct BURN\_AWAY} is not prescribed, the surface temperature is
 set to {\ct TMP\_BACK}, convective heat flux
 to zero and burning rate to zero.
@@ -9942,7 +9939,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
 {\ct RGB(3)}                          & Int.~Triplet    & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
 %{\ct Roughness}                       & Real            & Wall roughness height             & m                   & 0. (DNS), 4.5E-5 (LES)  \\ \hline
-{\ct SHRINK}                          & Logical         & Shrinking material                &                     & {\ct .TRUE.}            \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
 {\ct SURFACE\_DENSITY}                & Real            & See Section~\ref{info:BURN_AWAY}  & kg/m$^2$            & 0.0                     \\ \hline
 {\ct TAU\_MF(I)}                      & Real Array      & Ramp time for species {\ct I}     & s                   & 1.     \\ \hline
