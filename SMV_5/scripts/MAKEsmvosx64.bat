@@ -19,23 +19,20 @@ goto:eof
 :endif_envexist
 
 call %envfile%
+echo Using the environment variables:
+echo.
+echo Using SVN revision %smv_revision% to build Smokeview
 
 %svn_drive%
 cd %svn_root%\smv_5\scripts
-set version=%smv_version%
+set version=%smv_version%_%smv_revision%
 
 set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
+set bindir=FDS-SMV/SMV_5/bin
 
-echo making Linux and OSX distribution archives
-plink %svn_logon% %scriptdir%/make_dists.csh %version%
+plink %svn_logon% %scriptdir%/ssh_command.csh bluesky.cfr.nist.gov %scriptdir% make_smv_osx64.csh %smv_revision%
 
-echo downloading Linux Smokeview archive
-pscp %svn_logon%:%bundledir%/smv_%version%_linux.tar.gz ..\for_bundle\to_google\.
-echo downloading Linux 64 Smokeview files
-pscp %svn_logon%:%bundledir%/smv_%version%_linux_64.tar.gz ..\for_bundle\to_google\.
-
-echo downloading MAC OSX Smokeview archive
-pscp %svn_logon%:%bundledir%/smv_%version%_osx.tar.gz ..\for_bundle\to_google\.
-
+echo.
+echo compilation complete
 pause
