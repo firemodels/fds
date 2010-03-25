@@ -25,7 +25,7 @@ set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
 
 echo making Linux archives
-plink %svn_logon% %scriptdir%/make_linux_test_dist.csh %smv_revision%
+plink %svn_logon% %scriptdir%/MAKEtestdistlinux32.csh %smv_revision%
 
 echo downloading Linux Smokeview files
 pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux.tar.gz ..\for_bundle\to_google\.
