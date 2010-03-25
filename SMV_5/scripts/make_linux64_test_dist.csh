@@ -12,6 +12,7 @@ rm -rf $LINUXDIR
 mkdir -p $LINUXDIR
 mkdir -p $LINUXDIR/Documentation
 cp note.txt $LINUXDIR/Documentation/.
+cp $FORBUNDLE/objects.svo $LINUXDIR/.
 cp $BINDIR/smv5_linux_test_64 $LINUXDIR/.
 cp $BINDIR/smokezip_linux_64 $LINUXDIR/.
 cp $BINDIR/smokediff_linux_64 $LINUXDIR/.
