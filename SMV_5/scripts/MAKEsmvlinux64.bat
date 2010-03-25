@@ -29,7 +29,7 @@ set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
 set bindir=FDS-SMV/SMV_5/bin
 
-plink %svn_logon% %scriptdir%/ssh_command.csh fire79 %scriptdir% make_smv_linux64.csh %smv_revision%
+plink %svn_logon% %scriptdir%/ssh_command.csh fire79 %scriptdir% MAKEsmvlinux64.csh %smv_revision%
 
 echo.
 echo compilation complete

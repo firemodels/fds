@@ -26,7 +26,7 @@ set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
 
 echo making 32 bit Smokeview OSX distribution archive
-plink %svn_logon% %scriptdir%/make_osx_dists.csh %version% %smv_revision%
+plink %svn_logon% %scriptdir%/MAKEdistosx32.csh %version% %smv_revision%
 
 echo downloading 32 bit Smokeview OSX distribution archive
 pscp %svn_logon%:%bundledir%/smv_%version%_osx32.tar.gz ..\for_bundle\to_google\.
