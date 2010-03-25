@@ -938,10 +938,24 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
    HEAT_TRANS_COEF(IW) = HEAT_TRANSFER_COEFFICIENT(IW,IIG,JJG,KKG,IOR,TMP_G,DTMP,SF%H_FIXED)
    QCONF(IW) = HEAT_TRANS_COEF(IW)*DTMP
  
+   ! Compute back side emissivity
+  
+   E_WALLB = SF%EMISSIVITY_BACK
+   IF (E_WALLB < 0._EB .AND. SF%BACKING /= INSULATED) THEN
+      E_WALLB = 0._EB
+      VOLSUM = 0._EB
+      NWP = SUM(WC%N_LAYER_CELLS)
+      DO N=1,SF%N_MATL
+         IF (WC%RHO_S(NWP,N)==0._EB) CYCLE
+         ML  => MATERIAL(SF%MATL_INDEX(N))
+         VOLSUM = VOLSUM + WC%RHO_S(NWP,N)/ML%RHO_S
+         E_WALLB = E_WALLB + WC%RHO_S(NWP,N)*ML%EMISSIVITY/ML%RHO_S
+      ENDDO
+      IF (VOLSUM > 0._EB) E_WALLB = E_WALLB/VOLSUM
+   ENDIF
+
    ! Get heat losses from convection and radiation out of back of surface
   
-   E_WALLB = MATERIAL(SF%LAYER_MATL_INDEX(SF%N_LAYERS,1))%EMISSIVITY
-         
    SELECT CASE(SF%BACKING)
       CASE(VOID)  ! Non-insulated backing to an ambient void
          DTMP = SF%TMP_BACK - TMP_B(IW)
