@@ -1,2 +1,2 @@
 #!/bin/csh -f
-make -f ../Makefile intel_osx_64
+make -j4 -f ../Makefile intel_osx_64
