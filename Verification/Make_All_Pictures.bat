@@ -24,7 +24,7 @@ cd Sprinklers_and_Sprays
 smokeview -runscript cascade
 
 Rem generate Smokeview figures
-cd ..
+cd ..\SMV_Scripts
 call Make_SMV_Pictures
 
 
