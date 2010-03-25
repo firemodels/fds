@@ -13,6 +13,7 @@ rm -rf $LINUXDIR
 mkdir -p $LINUXDIR
 mkdir -p $LINUXDIR/Documentation
 cp readme.html $LINUXDIR/Documentation/release_notes.html
+cp $FORBUNDLE/objects.svo $LINUXDIR/.
 cp $BINDIR/smv5_linux_64 $LINUXDIR/.
 cp $BINDIR/smokezip_linux_64 $LINUXDIR/.
 rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
