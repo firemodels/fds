@@ -34,4 +34,5 @@ $FDS $in >& $out
 EOF
 chmod +x $scriptfile
 qsub $scriptfile
+rm $scriptfile
 
