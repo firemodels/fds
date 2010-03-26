@@ -11,7 +11,7 @@
 #include "svdiff.h"
 #include "MALLOC.h"
 
-//dummy change to bump version number to 1.0.1
+//dummy change to bump version number to 1.0.2
 
 // svn revision character string
 char main_revision[]="$Revision$";
