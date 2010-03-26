@@ -32,10 +32,10 @@ void setup_boundary(FILE *stream_out){
 
       fprintf(stream_out,"%s\n",boundaryi->keyword);
       make_outfile(outfile,NULL,boundaryi->file,".bf");
-      fprintf(stream_out,"%s\n",outfile);
-      fprintf(stream_out,"%s\n",boundaryi->label.longlabel);
-      fprintf(stream_out,"%s\n",boundaryi->label.shortlabel);
-      fprintf(stream_out,"%s\n",boundaryi->label.unit);
+      fprintf(stream_out," %s\n",outfile);
+      fprintf(stream_out," %s\n",boundaryi->label.longlabel);
+      fprintf(stream_out," %s\n",boundaryi->label.shortlabel);
+      fprintf(stream_out," %s\n",boundaryi->label.unit);
     }
   }
 }

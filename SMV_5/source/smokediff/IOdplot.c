@@ -33,14 +33,14 @@ void setup_plot3d(FILE *stream_out){
 
       fprintf(stream_out,"%s\n",plot3di->keyword);
       make_outfile(outfile,NULL,plot3di->file,".q");
-      fprintf(stream_out,"%s\n",outfile);
+      fprintf(stream_out," %s\n",outfile);
       for(j=0;j<5;j++){
         flowlabels *label;
 
         label = plot3di->labels + j;
-        fprintf(stream_out,"%s\n",label->longlabel);
-        fprintf(stream_out,"%s\n",label->shortlabel);
-        fprintf(stream_out,"%s\n",label->unit);
+        fprintf(stream_out," %s\n",label->longlabel);
+        fprintf(stream_out," %s\n",label->shortlabel);
+        fprintf(stream_out," %s\n",label->unit);
       }
     }
   }
