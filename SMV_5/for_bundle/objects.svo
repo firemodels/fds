@@ -382,7 +382,7 @@ OBJECTDEF // object for dynamic textured sphere
  $VX $X0 :vvx multiaddt
  $VY $Y0 :vvy multiaddt
  $VZ $Z0 :vvz multiaddt
- $vvx $vvy $vvz translate $DX $DY $DZ scalexyz 0.0 0.0 0.5 translate 1.0 drawcube
+ $vvx $vvy $vvz gtranslate $DX $DY $DZ scalexyz 0.0 0.0 0.5 gtranslate 1.0 drawcube
 
 OBJECTDEF // object for a general ball
  ball
