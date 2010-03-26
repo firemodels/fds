@@ -32,10 +32,10 @@ void setup_slice(FILE *stream_out){
 
       fprintf(stream_out,"%s\n",slicei->keyword);
       make_outfile(outfile,NULL,slicei->file,".sf");
-      fprintf(stream_out,"%s\n",outfile);
-      fprintf(stream_out,"%s\n",slicei->label.longlabel);
-      fprintf(stream_out,"%s\n",slicei->label.shortlabel);
-      fprintf(stream_out,"%s\n",slicei->label.unit);
+      fprintf(stream_out," %s\n",outfile);
+      fprintf(stream_out," %s\n",slicei->label.longlabel);
+      fprintf(stream_out," %s\n",slicei->label.shortlabel);
+      fprintf(stream_out," %s\n",slicei->label.unit);
     }
   }
 }
