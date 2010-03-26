@@ -49,6 +49,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ABS 130
 #define SV_EQ 131
 #define SV_ROTATEXYZ 132
+#define SV_GTRANSLATE  133
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -80,6 +81,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ABS_NUMARGS 2
 #define SV_EQ_NUMARGS 2
 #define SV_ROTATEXYZ_NUMARGS 3
+#define SV_GTRANSLATE_NUMARGS  3
 
 #define SV_TRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEX_NUMOUTARGS    0
@@ -111,6 +113,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ABS_NUMOUTARGS 1
 #define SV_EQ_NUMOUTARGS 0
 #define SV_ROTATEXYZ_NUMOUTARGS 0
+#define SV_GTRANSLATE_NUMOUTARGS  0
 
 
 #define SV_DRAWCUBE      200
@@ -587,6 +590,10 @@ void draw_devices(void){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);
     }
     prop=devicei->prop;
+    if(prop!=NULL){
+      prop->rotate_axis=devicei->rotate_axis;
+      prop->rotate_angle=devicei->dtheta;
+    }
     if(devicei->nparams>0&&prop!=NULL){
       prop->nvars_indep=devicei->nparams;
       for(j=0;j<devicei->nparams;j++){
@@ -975,6 +982,19 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
         val_result = val2 + valmin;
 
         *argptr=val_result;
+      }
+      break;
+    case SV_GTRANSLATE:
+      if(prop!=NULL){
+        float *axis;
+
+        axis = prop->rotate_axis;
+        glRotatef(-prop->rotate_angle,axis[0],axis[1],axis[2]);
+        glTranslatef(arg[0],arg[1],arg[2]);
+        glRotatef(prop->rotate_angle,axis[0],axis[1],axis[2]);
+      }
+      else{
+        glTranslatef(arg[0],arg[1],arg[2]);
       }
       break;
     case SV_TRANSLATE:
@@ -2383,6 +2403,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_TRANSLATE;
     num_op=SV_TRANSLATE_NUMARGS;
     num_outop=SV_TRANSLATE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"gtranslate")==0){
+    op=SV_GTRANSLATE;
+    num_op=SV_GTRANSLATE_NUMARGS;
+    num_outop=SV_GTRANSLATE_NUMOUTARGS;
   }
   else if(STRCMP(token,"no_op")==0){
     op=SV_NO_OP;
