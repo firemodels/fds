@@ -365,6 +365,25 @@ OBJECTDEF
  push -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec pop
  push $DX offsetx -1.19348 rotatex $D $DY $D scalexyz 1.0 drawcubec  pop
 
+OBJECTDEF // object for dynamic textured sphere
+ movingsphere
+ :R=0 :G=0 :B=0 :X0 :Y0 :Z0 :VX :VY :VZ :ROTATE_RATE :D=0.1 :tfile
+ $R $G $B setrgb
+ $VX $X0 :vvx multiaddt
+ $VY $Y0 :vvy multiaddt
+ $VZ $Z0 :vvz multiaddt
+ $vvx $vvy $vvz translate $ROTATE_RATE 0.0 :rotz multiaddt 
+   $rotz rotatez 180.0 rotatey $tfile :textureindex gettextureindex $textureindex $D drawtsphere
+
+OBJECTDEF // object for dynamic textured sphere
+ movingbox
+ :R=0 :G=0 :B=0 :X0 :Y0 :Z0 :VX :VY :VZ :DX :DY :DZ
+ $R $G $B setrgb
+ $VX $X0 :vvx multiaddt
+ $VY $Y0 :vvy multiaddt
+ $VZ $Z0 :vvz multiaddt
+ $vvx $vvy $vvz translate $DX $DY $DZ scalexyz 0.0 0.0 0.5 translate 1.0 drawcube
+
 OBJECTDEF // object for a general ball
  ball
  :R=0 :G=0 :B=0 :DX :DY :DZ :D=-.1
