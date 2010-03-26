@@ -2,7 +2,8 @@
 set SVNROOT=~/FDS-SMV
 
 cd $SVNROOT/Utilities/smokediff/INTEL_OSX_32
-make -f ../Makefile clean >& /dev/null
+#make -f ../Makefile clean >& /dev/null
+make -f ../Makefile clean 
 ./make_diff.csh
 cd $SVNROOT/Utilities/smokediff/INTEL_OSX_64
 make -f ../Makefile clean >& /dev/null
