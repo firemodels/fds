@@ -126,4 +126,4 @@ intel_osx_64 : $(obj)
 
 .PHONY : clean
 clean:
-	erase *.obj
+	rm *.o
