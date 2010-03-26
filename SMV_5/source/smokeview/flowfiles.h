@@ -15,6 +15,7 @@
 typedef struct {
   char *label;
   int menu_id;
+  float *rotate_axis, rotate_angle;
   int inblockage,blockvis;
   int nsmokeview_ids,ismokeview_ids;
   char *smokeview_id,**smokeview_ids;
