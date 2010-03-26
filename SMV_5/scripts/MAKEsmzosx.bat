@@ -1,6 +1,6 @@
 @echo off
 
-Rem  Windows batch file to build a release Smokeview for Linux 32.
+Rem  Windows batch file to build 32 and 64 bit OSX versions of smokezip
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -17,19 +17,14 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Using the environment variables:
-echo.
-echo Using SVN revision %smv_revision% to build a 32 bit test Linux Smokeview
+echo Building 32 and 64 bit OSX versions of smokezip
 
 %svn_drive%
 cd %svn_root%\smv_5\scripts
-set version=%smv_version%_%smv_revision%
 
 set scriptdir=FDS-SMV/SMV_5/scripts
-set bundledir=FDS-SMV/SMV_5/for_bundle
-set bindir=FDS-SMV/SMV_5/bin
 
-plink %svn_logon% %scriptdir%/ssh_command.csh fire79 %scriptdir% MAKEsmvlinux32.csh %smv_revision%
+plink %svn_logon% %scriptdir%/ssh_command.csh bluesky.cfr.nist.gov %scriptdir% MAKEsmzosx.csh %smv_revision%
 
 echo.
 echo compilation complete

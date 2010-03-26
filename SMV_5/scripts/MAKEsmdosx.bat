@@ -1,6 +1,6 @@
 @echo off
 
-Rem  Windows batch file to build smokediff
+Rem  Windows batch file to build 32 and 64 bit OSX versions of smokediff
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -17,14 +17,12 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Using the environment variables:
-echo.
-echo Using SVN revision %smv_revision% to build 32 and 64 bit LINUX Smokediff
 
 %svn_drive%
 cd %svn_root%\smv_5\scripts
 
 set scriptdir=FDS-SMV/SMV_5/scripts
+echo Building 32 and 64 bit OSX versions of smokediff
 
 plink %svn_logon% %scriptdir%/ssh_command.csh bluesky.cfr.nist.gov %scriptdir% MAKEsmdosx.csh
 
