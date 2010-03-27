@@ -250,7 +250,8 @@ int getendian(void){
 void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
   char filecopy[1024], *file1_noext;
 
-  strcpy(filecopy,file1);
+  trim(file1);
+  strcpy(filecopy,trim_front(file1));
   file1_noext=strstr(filecopy,ext);
   strcpy(outfile,"");
   if(file1_noext==NULL)return;
