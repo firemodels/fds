@@ -362,6 +362,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       plot3d *plot3di;
       float time;
       int meshnumber=1;
+      char full_file[1024];
+      FILE_SIZE filesize;
 
       if(strlen(buffer)>4){
         sscanf(buffer+4,"%f %i",&time,&meshnumber);
@@ -376,26 +378,39 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       strcpy(plot3di->keyword,buffer);
 
       fgets(buffer,255,streamsmv);
-      trim(buffer);
-      NewMemory((void **)&plot3di->file,(unsigned int)(strlen(buffer)+1));
-      NewMemory((void **)&plot3di->histogram[0],sizeof(histogramdata));
-      NewMemory((void **)&plot3di->histogram[1],sizeof(histogramdata));
-      NewMemory((void **)&plot3di->histogram[2],sizeof(histogramdata));
-      NewMemory((void **)&plot3di->histogram[3],sizeof(histogramdata));
-      NewMemory((void **)&plot3di->histogram[4],sizeof(histogramdata));
+      fullfile(full_file,smvcase->dir,buffer);
+      if(getfileinfo(full_file,NULL,&filesize)==0){
+        NewMemory((void **)&plot3di->file,(unsigned int)(strlen(full_file)+1));
+        NewMemory((void **)&plot3di->histogram[0],sizeof(histogramdata));
+        NewMemory((void **)&plot3di->histogram[1],sizeof(histogramdata));
+        NewMemory((void **)&plot3di->histogram[2],sizeof(histogramdata));
+        NewMemory((void **)&plot3di->histogram[3],sizeof(histogramdata));
+        NewMemory((void **)&plot3di->histogram[4],sizeof(histogramdata));
       
-      CheckMemory;
-      strcpy(plot3di->file,buffer);
-      CheckMemory;
-      if(readlabels(plot3di->labels+0,streamsmv)==2)break;
-      if(readlabels(plot3di->labels+1,streamsmv)==2)break;
-      if(readlabels(plot3di->labels+2,streamsmv)==2)break;
-      if(readlabels(plot3di->labels+3,streamsmv)==2)break;
-      if(readlabels(plot3di->labels+4,streamsmv)==2)break;
+        CheckMemory;
+        strcpy(plot3di->file,full_file);
+        CheckMemory;
+        if(readlabels(plot3di->labels+0,streamsmv)==2)break;
+        if(readlabels(plot3di->labels+1,streamsmv)==2)break;
+        if(readlabels(plot3di->labels+2,streamsmv)==2)break;
+        if(readlabels(plot3di->labels+3,streamsmv)==2)break;
+        if(readlabels(plot3di->labels+4,streamsmv)==2)break;
 
-      CheckMemory;
+        CheckMemory;
       
-      iplot3d++;
+        iplot3d++;
+      }
+      else{
+        printf("*** Warning: the file, %s, does not exist.\n",full_file);
+        CheckMemory;
+        if(readlabels(plot3di->labels+0,streamsmv)==2)break;
+        if(readlabels(plot3di->labels+1,streamsmv)==2)break;
+        if(readlabels(plot3di->labels+2,streamsmv)==2)break;
+        if(readlabels(plot3di->labels+3,streamsmv)==2)break;
+        if(readlabels(plot3di->labels+4,streamsmv)==2)break;
+        nplot3d_files--;
+        smvcase->nplot3d_files=nplot3d_files;
+      }
       continue;
     }
 
@@ -459,9 +474,9 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         int error, lenfile;
         int endian;
 
-        NewMemory((void **)&slicei->file,(unsigned int)(strlen(buffer)+1));
+        NewMemory((void **)&slicei->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
-        STRCPY(slicei->file,buffer);
+        STRCPY(slicei->file,full_file);
         if(readlabels(&slicei->label,streamsmv)==2){
           printf("*** Warning: problem reading SLCF entry\n");
           break;
