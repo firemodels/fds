@@ -64,7 +64,7 @@ plot3d *getplot3d(plot3d *plot3din, casedata *case2){
 
     plot3dout = case2->plot3dinfo + i;
     meshout = plot3dout->plot3dmesh;
-    if(fabs(plot3din->time-plot3dout->time)>0.01)continue;
+    if(fabs(plot3din->time-plot3dout->time)>0.05)continue;
     if(strcmp(plot3din->labels[0].longlabel,plot3dout->labels[0].longlabel)!=0)continue;
     if(strcmp(plot3din->labels[1].longlabel,plot3dout->labels[1].longlabel)!=0)continue;
     if(strcmp(plot3din->labels[2].longlabel,plot3dout->labels[2].longlabel)!=0)continue;
