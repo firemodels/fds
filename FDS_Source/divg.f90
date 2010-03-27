@@ -483,6 +483,7 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       
       CP_FTMP_IF: IF (CP_FTMP) THEN
          IF (N_SPECIES > 0) THEN
+            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YY_GET,CP)
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
@@ -494,7 +495,9 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
                   ENDDO
                ENDDO
             ENDDO
+            !$OMP END DO
          ELSE
+            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,CP)
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
@@ -505,6 +508,7 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
                   ENDDO
                ENDDO
             ENDDO
+            !$OMP END DO
          ENDIF
       ELSE CP_FTMP_IF
          !$OMP WORKSHARE
