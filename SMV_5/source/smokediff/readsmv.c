@@ -340,7 +340,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       }
       if(stream_out!=NULL){
         make_outfile(endianfilename, NULL, buffer, ".end");
-        fprintf(stream_out,"ENDF\n %s\n",buffer);
+        fprintf(stream_out,"ENDF\n %s\n",endianfilename);
         make_outfile(endianfilename, destdir, buffer, ".end");
         ENDIANfile=fopen(endianfilename,"wb");
         if(ENDIANfile!=NULL){
