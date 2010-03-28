@@ -186,7 +186,7 @@ Volume I: User's Guide
 
 
 \flushright{\today \\
-Smokeview Version 5.5 \\
+Smokeview Version 5.5.2 \\
 $SVN Repository$~$Revision$}
 %
 \vfill
@@ -1003,11 +1003,15 @@ Smokeview visualizes FDS devices such as heat and smoke detectors,
 sprinklers, sensors using instructions contained in a
 data file named {\tt objects.svo}.
 Smokeview also uses these instructions to represent people (avatars)
-in FDS-EVAC simulations and to represent trees and shrubs in an FDS WUI simulations.
+in FDS-EVAC simulations and to represent trees and shrubs in an FDS WUI
+simulations.
 The Smokeview implementation
 of FDS devices is referred to as objects in this chapter.
 
-The object instruction file is located in the directory where FDS and Smokeview are installed.
+The object instruction file is located in the directory where FDS and
+Smokeview are installed.\footnote{The current objects.svo file 
+containing documentation and a listing of object definitions is listed in
+Appendix \ref{section:objects}}.
 The instructions correspond to OpenGL library calls,
 the same type of calls Smokeview uses to visualize FDS cases.
 Smokeview then acts as an interpreter executing OpenGL
@@ -1436,6 +1440,13 @@ entry texture\_file (a file containing a texture map image).
 This index is used by other object drawing routines
 that support texture mapping (presently drawtsphere).
 
+\hitem{GTRANSLATE} The command, {\tt x y z gtranslate}, translates
+objects in a global reference frame, the same reference frame used
+to define FDS geometry.  Objects drawn after the gtranslate command
+are moved by x, y and z along the x, y and z cartesian axes
+respectively.  Equivalently, one can think of think of {\tt x y z
+gtranslate}\ as translating the origin by (-x,-y,-z).
+
 \hitem{OFFSETX} The command, {\tt x offsetx}, translates
 objects drawn afterwards by x along the x axis.
 
@@ -1456,8 +1467,13 @@ object.
 orientation. (see above comment about number of {\tt push}\ and
 {\tt pop}\ commands).
 
-\hitem{ROTATEXYZ} The command, {\tt r x y z rotatexyz}, rotates objects
-drawn afterwards {\tt r} degrees about an axis defined by the vector $(x,y,z)$.
+\hitem{ROTATEAXIS} The command, {\tt angle x y z rotateaxis}, rotates objects
+drawn afterwards by {\tt angle} degrees about an axis defined by the vector $(x,y,z)$.
+
+\hitem{ROTATEXYZ} The command, {\tt x y z rotatexyz}, rotates objects
+from the vector $(0,0,1)$ to the vector $(x,y,z)$ .  The axis of rotation computed internally by Smokeview is
+$(0,0,1)\times (x,y,z)=(-y,x,0)$ (a vector perpendicular to the plane formed by vectors $(0,0,1)$ and $(x,y,z)$) . The cosine of the angle of rotation is
+$z/\sqrt{x^2+y^2+z^2}$
 
 \hitem{ROTATEX} The command, {\tt r rotatex}, rotates objects
 drawn afterwards {\tt r} degrees about the x axis.
@@ -1505,9 +1521,8 @@ This command is not required for each object part drawn.
 The color component values range from 0 to 255.
 
 \hitem{TRANSLATE} The command, {\tt x y z translate}, translates
-objects drawn afterwards by x, y and z along the x, y and z axes
-respectively.  Equivalently, one can think of think of {\tt x y z
-translate}\ as translating the origin by (-x,-y,-z).
+objects drawn afterwards by x, y and z along x, y and z axes
+respectively relative to the current (local) reference frame.
 
 \elist
 
@@ -6011,9 +6026,12 @@ of OpenGL).  The four points should be in counter-clockwise order.
 \hitem{index} Points to a material in the [APPEARANCE] section.
 \elist
 
-
-
-
+\section{Objects.svo}
+\label{section:objects}
+{
+\scriptsize
+\verbatiminput{../../SMV_5/for_bundle/objects.svo}
+}
 
 %---------------------------------------------------------------------------------
 %------------------------ Frequently Asked Questions -----------------------------
