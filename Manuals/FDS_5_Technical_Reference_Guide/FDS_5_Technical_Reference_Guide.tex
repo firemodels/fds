@@ -2528,29 +2528,21 @@ expected of the modeler are the fuel composition, the soot and CO yields, and th
 The discussion of the various multi-step reactions above is essentially book-keeping, the accounting of the gas
 molecules formed in the combustion process. But what of the heat released?
 
-When tracking species with two mixture fraction parameters, there is a single step reaction, the conversion of fuel into a
-fixed, predefined set of combustion products.  Fuel and oxygen react within a grid cell and release energy according to
-the rate of fuel consumption:
-\be \dq''' = \dm_\F''' \Delta H_{\F} \ee
-The amount of fuel in the grid cell is obtained directly from the definition of $Z_1$ whereas the amount of O$_2$ is
-obtained using the state relationships discussed in the prior section.  Combustion is either allowed or
+When the gas constituents are characterized by two mixture fraction variables, there is a single step reaction that
+converts fuel and oxygen into a
+fixed, predefined set of combustion products. Combustion is either allowed or
 disallowed\footnote{Note that the user has control over the parameters associated with local gas phase extinction.}
 using the relation shown in Fig.~\ref{plotsupp}.
 If combustion is allowed to occur in a grid
-cell, the single step combustion is assumed to be
-infinitely fast.  Combustion will consume all of either the fuel or the oxygen in the grid cell.
+cell, the single-step reaction is assumed to be infinitely fast, and the rate of fuel consumption is controlled
+only by the mixing rate of fuel and oxygen. This rate is modeled as described below.
 
 In the case of the two-step, three parameter mixture fraction model, the first step converts the
 fuel to CO and other combustion products, and the second step oxidizes the CO into CO$_2$.  The first step is
-determined as it is for the single step reaction.  The second step, however, is assumed to be rate dependent.
-Determining if the second step can take place in a grid cell is done in one of two ways.  For most LES
-simulations, flame temperatures will not be resolved on the grid because the heat released is smeared out over a grid cell much larger than
-the flame sheet thickness.  Since a grid cell with heat released from the first step has a flame, CO conversion is
-always allowed in these grid cells.  In all other grid cells, the local temperature is used to perform a finite-rate
-computation that determines the rate of CO conversion.
+determined as it is in the single step reaction case.  The second step, however, is assumed to be rate-dependent.
 
 
-\subsubsection{Two-Parameter Mixture Fraction}
+\subsubsection{One-Step, Fast Reaction}
 
 When the mixture fraction is divided into two components, $Z_1$ and $Z_2$, there is one chemical
 reaction that converts $Z_1$ to $Z_2$.  Recall from Section~\ref{extinction}
@@ -2563,17 +2555,18 @@ Instead, if any grid cell surrounding one containing both fuel and oxygen satisf
 combustion is assumed to occur.  The heat release rate is computed as
 \be \dq''' = \frac{ \min \left( \rho Y_\F , s \rho Y_\OTWO \right) }{\tau} \, \Delta H  \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }   \ee
 Here, $\tau$ is a mixing time scale~\cite{Raman:CF} given by
-\be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \ee
+\be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \label{mixtime} \ee
 The coefficient, $C$, is taken as 0.1 in FDS by default, based on comparisons to various flame height correlations.
 
-There are two additional bounds on the local heat release rate per unit volume. One is based on an empirically determined maximum heat release rate
-per unit area of flame sheet:
-\be \dq_{\max,1}''' = \frac{ \dq_{\max}''}{(\dx \, \dy \, \dz)^\ot }  \quad ; \quad  \dq_{\max}'' = 200 \; \; \hbox{kW/m}^2  \ee
-The second bound is based on an empirical estimate of the average volumetric heat release rate
-of a fire. Orloff and De Ris~\cite{Orloff:19th_Symposium} suggest a value of 1200~kW/m$^3$, and FDS uses by default a value of 3000~kW/m$^3$ as an upper bound.
-\be \dq_{\max,2}''' = \frac{ \overline{\dq_{\max}'''} - (1-\dt/\tau') \; \overline{\dq'''} }{\dt/\tau'} \quad ; \quad  \overline{\dq_{\max}'''}=3000 \; \; \hbox{kW/m}^3   \ee
-Here, $\tau'$ is an averaging time that should be larger than the pulsation period of the fire.\footnote{
-All of these parameters are accessible to the model user. See the FDS User's Guide~\cite{FDS_Users_Guide_5} for more details.}
+While the mixing time scale given in Eq.~(\ref{mixtime}) is an easily computed and robust subgrid-scale model of
+turbulent combustion, there is still a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
+this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
+is sometimes too coarse to expect the simple mixing time model to work effectively.
+A scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
+heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses by default a value of 2000~kW/m$^3$ as an upper bound
+on the local value of the heat release rate per unit volume. Typically, this bound only affects fires whose value of $Q^*$
+is less than one\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the
+area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
 
 Once the heat release rate is computed, the mixture fraction variables are updated:
 \be {Z_1}^{n+1} = {Z_1}^n - \frac {\dq''' {\Delta t}}{\rho  \Delta H}  \quad ; \quad  {Z_2}^{n+1} =
@@ -2581,7 +2574,7 @@ Once the heat release rate is computed, the mixture fraction variables are updat
 Note that the total fuel mass is conserved in this process; $Z=Z_1+Z_2$ is still a conserved quantity.
 
 
-\subsubsection{Three-Parameter Mixture Fraction}
+\subsubsection{Two-Step, Fast-Slow Reaction}
 
 When the mixture fraction is divided into three components, $Z_1$, $Z_2$, and $Z_3$, there are two chemical
 reactions that convert $Z_1$ to $Z_2$ and $Z_2$ to $Z_3$.  Recall from Section~\ref{co_production}
@@ -2602,7 +2595,7 @@ reaction is still limited by $\dq_{\max}'''$.  Once $\dq'''_{\CO}$ is computed t
 
 
 \newpage
-\section{Finite-Rate Combustion Model}
+\section{Finite-Rate, Multiple-Step Combustion Model}
 
 In a DNS calculation, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
 oxygen, and combustion products).  Since the flame is being resolved in a DNS calculation, the local gas
@@ -3701,7 +3694,7 @@ implementation, the above equations are written in the form
 \sigma_d(\bx,\la) &= A_d(\bx)\int_0^\infty \frac{f(r,d_m(\bx)) \; C_s(r,\la)} {\pi(d_m(\bx)/2)^2} \; dr
 \end{align}
 where $A_d$ is the total cross sectional area per unit volume of the
-droplets. $A_d$ is computed simply by summing the cross sectional areas of all the droplets within a cell 
+droplets. $A_d$ is computed simply by summing the cross sectional areas of all the droplets within a cell
 and divided by the cell volume. For practical reasons, a relaxation factor of 0.5 is used to smooth slightly
 the temporal variation of $A_d$.
 
