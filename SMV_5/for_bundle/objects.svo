@@ -378,6 +378,50 @@ OBJECTDEF // object for a general ball
  NO_OP
 
 OBJECTDEF // object for dynamic textured sphere
+ movingsphere2
+ :R=0 :G=0 :B=0  // sphere color
+ :X0 :Y0 :Z0     // origin
+ :VX :VY :VZ     // velocity
+ :axis_x=0.0 :axis_y=0.0 :axis_z=1.0 // axis of rotation
+ :ROTATE_RATE    // rotation rate
+ :D=0.1          // sphere diameter
+ :tfile          // texture file
+ $R $G $B setrgb
+ $VX $X0 :vvx multiaddt
+ $VY $Y0 :vvy multiaddt
+ $VZ $Z0 :vvz multiaddt
+ $vvx $vvy $vvz gtranslate $ROTATE_RATE 0.0 :rotz multiaddt 
+   $rotz $axis_x $axis_y $axis_z rotateaxis 180.0 rotatey $tfile :textureindex gettextureindex $textureindex $D drawtsphere
+   push 255 0 0 setrgb 0.0 0.0 -1.0 translate 0.1 2.0 drawdisk pop
+   
+OBJECTDEF // object for dynamic textured sphere
+ movingsphere
+ :R=0 :G=0 :B=0  // sphere color
+ :X0 :Y0 :Z0     // origin
+ :VX :VY :VZ     // velocity
+ :ROTATE_RATE    // rotation rate
+ :D=0.1          // sphere diameter
+ :tfile          // texture file
+ $R $G $B setrgb
+ $VX $X0 :vvx multiaddt
+ $VY $Y0 :vvy multiaddt
+ $VZ $Z0 :vvz multiaddt
+ $vvx $vvy $vvz translate $ROTATE_RATE 0.0 :rotz multiaddt 
+   $rotz rotatez 180.0 rotatey $tfile :textureindex gettextureindex $textureindex $D drawtsphere
+
+OBJECTDEF // object for a moving box
+ movingbox
+ :R=0 :G=0 :B=0 // box color
+ :X0 :Y0 :Z0    // lower left front box corner
+ :VX :VY :VZ    // box velocity
+ :DX :DY :DZ    // box size
+ $R $G $B setrgb
+ $VX $X0 :vvx multiaddt
+ $VY $Y0 :vvy multiaddt
+ $VZ $Z0 :vvz multiaddt
+ $vvx $vvy $vvz gtranslate $DX $DY $DZ scalexyz 0.0 0.0 0.5 gtranslate 1.0 drawcube
+
+OBJECTDEF // object for dynamic textured sphere
  demosphere
  :R=0 :G=0 :B=0 :X0 :Y0 :Z0 :VX :VY :VZ :ROTATE_RATE :D=0.1 :XMAX :YMAX :ZMAX :tfile
  $R $G $B setrgb
