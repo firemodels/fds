@@ -1584,7 +1584,7 @@ NO_GAS_CELL_IF: IF (IIG>=0) THEN
       IF (N_SPECIES > 0) THEN
          CALL GET_SPECIFIC_HEAT(YY_GET,CP,ITMP)
       ELSE
-         CP = Y2CP_C(ITMP)s
+         CP = Y2CP_C(ITMP)
       ENDIF
    ENDIF
 
