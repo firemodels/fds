@@ -36,7 +36,7 @@ mkdir %out_uninstall%
 Rem Copy FDS, Smokeview and other needed files to the bin  directory
 
 echo.
-echo Copying files to bin directory
+echo Copying application files to bin directory
 if "%platform%"=="32" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\fds5.exe
 if "%platform%"=="32" copy %fdsmpidir%\fds5_mpi_win_%platform%.exe  %out_bin%\fds5_mpi.exe
 if "%platform%"=="64" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\.
@@ -52,10 +52,14 @@ if "%platform%"=="64" copy %in_smv%\smokezip%platform%_release.exe   %out_bin%\s
 
 copy %in_fds2ascii%\fds2ascii.exe     %out_bin%\.
 
+echo.
+echo Copying auxillary files to the bin directory
 copy %in_smv%\objects.svo             %out_bin%\.
 copy %in_smv%\pthreadVC.dll           %out_bin%\.
 copy %in_smv%\glew32.dll              %out_bin%\.
 copy %in_smv%\smokeview.ini           %out_bin%\.
+echo.
+echo Copying textures to the bin\textures directory
 copy %in_smv%\textures\*.jpg          %out_textures%\.
 copy %in_smv%\textures\*.png          %out_textures%\.
 
@@ -76,8 +80,7 @@ echo Converting the FDS release notes from wiki to html format
 "%wikify%" -r "%bundleinfo%\FDS_Release_Notes.wiki" > "%out_guides%\FDS_Release_Notes.htm"
 
 echo.
-echo Copying FDS and Smokeview users guide and other documentation 
-echo to the Documentation directory
+echo Copying Documentation to the Documentation directory
 
 copy %in_pdf%\FDS_5_User_Guide.pdf               %out_guides%\.
 copy %in_pdf%\SMV_5_User_Guide.pdf               %out_guides%\.
@@ -85,6 +88,8 @@ copy %in_pdf%\SMV_5_Technical_Reference_Guide.pdf %out_guides%\.
 copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_guides%\.
 copy "%in_smv%\readme.html"                      "%out_guides%\Smokeview_release_notes.html"
 
+echo.
+echo Copying web page shortcuts
 copy "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
 copy "%bundleinfo%\FDS_Web_Site.url"          "%out_web%\Official_Web_Site.url"
 copy "%bundleinfo%\Updates.url"               "%out_web%\Software_Updates.url"
@@ -92,16 +97,6 @@ copy "%bundleinfo%\Docs.url"               "%out_web%\Documentation_Updates.url"
 copy "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
 copy "%bundleinfo%\discussion_group.url"          "%out_web%\Discussion_Group.url"
 copy "%bundleinfo%\issue_tracker.url"          "%out_web%\Issue_Tracker.url"
-
-if %docs_include_in_bundle% EQU 0 goto end_docs
-echo.
-echo Copying all other documentation to the Documentation directory
-copy %in_pdf%\FDS_5_Validation_Guide.pdf          %out_guides%\.
-copy %in_pdf%\FDS_5_Verification_Guide.pdf        %out_guides%\.
-copy %in_pdf%\SMV_5_Verification_Guide.pdf        %out_guides%\.
-Rem copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_guides%\.
-Rem copy %in_pdf%\SMV_5_Technical_Reference_Guide.pdf %out_guides%\.
-:end_docs
 
 Rem Copy readme_examples file to Examples directory to let user download all examples
 
@@ -122,14 +117,12 @@ Rem if exist "%out_bundle%\..\..\FDS_SMOKEVIEW\FDS5\Uninstall" rmdir /s /q "%out
 echo.
 echo Copying wrapup scripts for use in final installation
 copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\FDS5\wrapup_fds_install.bat"
-if %docs_include_in_bundle% EQU 0 goto end_docs2
-copy "%bundleinfo%\wrapup_fds_full_install.bat" "%out_bundle%\FDS5\wrapup_fds_install.bat"
-:end_docs2
 
 copy "%bundleinfo%\shortcut.exe" "%out_bundle%\FDS5\shortcut.exe"
 copy "%bundleinfo%\set_path.exe" "%out_bundle%\FDS5\set_path.exe"
 
-Rem compress bundle directory
+echo.
+echo Compressing FDS/Smokeview distribution
 
 cd %to_google%
 if exist %basename%.zip erase %basename%.zip
