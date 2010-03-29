@@ -1,8 +1,5 @@
-set intelbin=c:\bin
-
-call %intelbin%\iclvars ia32
-call %intelbin%\ifortvars ia32
-
+call "%IFORT_COMPILER11%\bin\ifortvars" ia32
+call "%IFORT_COMPILER11%\bin\iclvars" ia32
 Rem erase *.obj
 Rem erase *.mod
 make -f ..\Makefile intel_win_32
