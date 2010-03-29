@@ -17,20 +17,10 @@ goto:eof
 
 Rem location of batch files used to set up Intel compilation environment
 
-set intelbin=c:\bin
-
-call %intelbin%\iclvars ia32
-call %intelbin%\ifortvars ia32
-
 call %envfile%
 
 %svn_drive%
 cd %svn_root%\Utilities\Makefile\Intel_Win_32
-set out=intel_win_32.out
-echo. | tee -a %out%
-date /t | tee -a  %out%
-time /t | tee -a  %out%
-make VPATH="../../../FDS_Source" -f ..\makefile intel_win_32 | tee -a %out%
+.\make_fds2
 
-cd ..\..\Scripts
 pause
