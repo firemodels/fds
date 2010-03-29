@@ -19,14 +19,7 @@ call %envfile%
 
 %svn_drive%
 
-call %svn_root%\Utilities\Scripts\SET_INTEL_64.bat
-
 cd %svn_root%\Utilities\Makefile\Intel_Win_64
-set out=intel_win_64.out
-echo. | tee -a  %out%
-date /t | tee -a  %out%
-time /t | tee -a  %out%
-make VPATH="../../../FDS_Source" -f ..\makefile intel_win_64 | tee -a %out%
-pscp %out% %svn_logon%:%linux_svn_root%/Utilities/Makefile/Intel_Win_64/intel_win_64.out
+.\make_fds2
 
 pause
