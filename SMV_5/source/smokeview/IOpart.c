@@ -178,16 +178,17 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
 
     CheckMemory;
     if(count>=nf_all)break;
-    if(count%partframestep==0){
+    FORTPART5READ(&time,1);
+    
+    if(count%partframestep!=0||(settmin_p==1&&time<tmin_p-TEPS)||(settmax_p==1&&time>tmax_p+TEPS)){
+      doit=0;
+    }
+    else{
       count2++;
       doit=1;
     }
-    else{
-      doit=0;
-    }
     count++;
 
-    FORTPART5READ(&time,1);
     if(returncode==0)break;
     if(doit==1){
       printf("particle time=%.2f",time);
@@ -706,7 +707,11 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
     }
     if(exitloop==1)break;
     nframes_all++;
-    if((nframes_all-1)%partframestep!=0)continue;
+    if((nframes_all-1)%partframestep!=0||
+       (settmin_p!=0&&time<tmin_p-TEPS)||
+       (settmax_p!=0&&time>tmax_p+TEPS)){
+       continue;
+    }
     (parti->nframes)++;
   }
   rewind(stream);
@@ -742,11 +747,14 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
 
       count++;
       fail=0;
-      if(count%partframestep!=0){
-        if(fgets(buffer,255,stream)==NULL){
-          fail=1;
-          break;
-        }
+      if(fgets(buffer,255,stream)==NULL){
+        fail=1;
+        break;
+      }
+      sscanf(buffer,"%f",&time);
+      if(count%partframestep!=0||
+         (settmin_p!=0&&time<tmin_p-TEPS)||
+         (settmax_p!=0&&time>tmax_p+TEPS)){
         for(j=0;j<parti->nclasses;j++){
           if(fgets(buffer,255,stream)==NULL){
             fail=1;
@@ -756,11 +764,6 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
         if(fail==1)break;
         continue;
       }
-      if(fgets(buffer,255,stream)==NULL){
-        fail=1;
-        break;
-      }
-      sscanf(buffer,"%f",&time);
       for(j=0;j<parti->nclasses;j++){
         int npoints ,ntypes;
 
