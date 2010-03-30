@@ -6,9 +6,11 @@ close all
 clear all
 
 addpath('../../Validation/BRE_Spray/Experimental_Data')
+addpath('../../Validation/BRE_Spray/FDS_Input_Files')
 addpath('../../Validation/BRE_Spray/FDS_Output_Files')
 
 % load experimental data and FDS prediction
+
 [exp_data] = csvread('BRE_Spray_Test.csv',2);
 exp_col_d = 6;
 exp_col_w = 7;
