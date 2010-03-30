@@ -121,7 +121,7 @@ do
       if(error.ne.0)go to 999    
     endif    
   end do
-  write(lu21,"(e11.4)")time
+  write(lu21,"(e15.8)")time
   do i = 1, nclasses
     write(lu21,"(1x,i9)")numpoints(i)
   end do

@@ -2800,6 +2800,10 @@ void updatetimes(void){
     if(meshi->isotimes==NULL)continue;
     meshi->iiso=0;
   }
+  for(i=0;i<npart_files;i++){
+    parti = partinfo + i;
+    parti->iframe=0;
+  }
 
   /* determine visibility of each blockage at each time step */
 
