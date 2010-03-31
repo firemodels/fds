@@ -1613,37 +1613,14 @@ void drawPart5(const particle *parti){
                 glPushMatrix();
                 glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
 
-#ifdef pp_BETA
-                if(1==1){
-                  glRotatef(-datacopy->partclassbase->elevation,0.0,1.0,0.0);
-                  glRotatef( datacopy->partclassbase->azimuth,  0.0,0.0,1.0);
-                }
-                else{
-                  float xyznorm[3], axis[3], dtheta;
+// A vector pointing from the eye position to the particle positino
+//    (for future use)
+//                 xyznorm[0]=world_eyepos[0]-xplts[sx[j]];
+//                 xyznorm[1]=world_eyepos[1]-yplts[sy[j]];
+//                 xyznorm[2]=world_eyepos[2]-zplts[sz[j]];
 
-                  xyznorm[0]=world_eyepos[0]-xplts[sx[j]];
-                  xyznorm[1]=world_eyepos[1]-yplts[sy[j]];
-                  xyznorm[2]=world_eyepos[2]-zplts[sz[j]];
-
-                  get_elevaz(xyznorm,&dtheta,axis);
-                  glRotatef( dtheta,axis[0],axis[1],axis[2]);
-                }
-#else
-                if(1==1){
-                  glRotatef(-datacopy->partclassbase->elevation,0.0,1.0,0.0);
-                  glRotatef( datacopy->partclassbase->azimuth,  0.0,0.0,1.0);
-                }
-                else{
-                  float xyznorm[3], axis[3], dtheta;
-
-                  xyznorm[0]=world_eyepos[0]-xplts[sx[j]];
-                  xyznorm[1]=world_eyepos[1]-yplts[sy[j]];
-                  xyznorm[2]=world_eyepos[2]-zplts[sz[j]];
-
-                  get_elevaz(xyznorm,&dtheta,axis);
-                  glRotatef( dtheta,axis[0],axis[1],axis[2]);
-                }
-#endif                
+                glRotatef(-datacopy->partclassbase->elevation,0.0,1.0,0.0);
+                glRotatef( datacopy->partclassbase->azimuth,  0.0,0.0,1.0);
 
               //  0->2   color
               //  3      diameter
@@ -1657,14 +1634,6 @@ void drawPart5(const particle *parti){
                   colorptr=rgb_full[color[j]];
                 }
 
-                /*
-                valstack[0]=colorptr[0];
-                valstack[1]=colorptr[1];
-                valstack[2]=colorptr[2];
-                valstack[3]=datacopy->partclassbase->diameter;
-                valstack[4]=datacopy->partclassbase->length;
-                nvalstack=5;
-                */
                 prop=datacopy->partclassbase->prop;
                 copy_dep_vals(partclassi,datacopy,colorptr,prop,j);
                 glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
