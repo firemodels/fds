@@ -39,6 +39,7 @@ int main(int argc, char **argv){
   sourcedir1=NULL;
   sourcedir2=NULL;
   destdir=NULL;
+  strcpy(type_label,"");
 
   if(argc==1){
     version();
@@ -51,9 +52,26 @@ int main(int argc, char **argv){
     arg=argv[i];
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
+      char *key;
+
+      key = arg+1;
       switch(arg[1]){
       case 't':
-        test_mode=1;
+        if(strcmp(key,"type")==0){
+          char *label;
+
+          i++;
+          strcpy(type_label,"");
+          if(i<argc){
+            label=argv[i];
+            if(label!=NULL&&strlen(label)>0){
+              strcpy(type_label,label);
+            }
+          }
+        }
+        else{
+          test_mode=1;
+        }
         break;
       case 'h':
         usage();
@@ -218,14 +236,19 @@ void usage(void){
 
   strcpy(pp,"%");
   printf("\n");
-  printf("  smokediff [-smv] [-h] [-v] [-s1 dir1] [-s2 dir2] [-d dir] [-nb] [-np] [-ns] smv_case1 smv_case2\n");
+  printf("  smokediff [options] smv_case1 smv_case2\n");
   printf("    version: %s (revision %i) - %s\n\n",smv_version,svn_num,__DATE__);
-  printf("  smokediff compares two FDS cases by subtracting data referenced in smv_case2 from corresponding\n");
-  printf("  data referenced in smv_case1 (smv_case1 - smv_case2).  Slice, PLOT3D and boundary files are\n");
-  printf("  supported.  Differenced results may be viewd by opening smv_case1_diff.smv in Smokeview or by\n");
-  printf("  using the -smv option when running smokediff.  Physical grid dimensions must be identical for\n");
-  printf("  corresponsing meshes.  Grid resolution must be the same when differencing boundary and PLOT3D\n");
-  printf("  files.  Grids may be twice as refined when differencing slice files\n\n");
+
+  printf("  smokediff compares two FDS cases by subtracting data referenced in smv_case2 from\n");
+  printf("  corresponding data referenced in smv_case1 (smv_case1 - smv_case2).  Slice, PLOT3d\n");
+  printf("  and boundary files are supported.  Differenced results may be viewed by opening\n"); 
+  printf("  smv_case1_diff.smv in Smokeview or by using the -smv option when running smokediff.\n\n");
+
+  printf("  Mesh bounds must be identical for corresponsing meshes.  Mesh resolutions must be\n");
+  printf("  identical when differencing boundary or PLOT3D files.  The x, y, and/or z mesh\n");
+  printf("  resolution in smv_case1 must be an integer multiple of the corresponding x, y, z mesh\n");
+  printf("  resolution in smv_case2 when differencing slice files.\n\n");
+
   printf("  -h  - display this message\n");
   printf("  -v  - display version information\n");
   printf("  -s1 dir1 - directory containing case smv_case1.smv\n");
@@ -235,6 +258,7 @@ void usage(void){
   printf("  -np      - do not difference Plot3d files\n");
   printf("  -ns      - do not difference slice files\n");
   printf("  -smv     - view case in smokeview when differencing is complete\n");
+  printf("  -type label - difference only data of type label (in boundary and slice files)\n");
   printf("  smv_case1,smv_case2 - Two smokeview cases to compare.\n");
 }
 
