@@ -1983,52 +1983,43 @@ CFL = DT*UVWMAX
  
 PARABOLIC_IF: IF (DNS .OR. CHECK_VN) THEN
  
-   INCOMPRESSIBLE_IF: IF (DNS .AND. ISOTHERMAL .AND. N_SPECIES==0) THEN
-      IF (TWO_D) THEN
-         R_DX2 = 1._EB/DXMIN**2 + 1._EB/DZMIN**2
-      ELSE
-         R_DX2 = 1._EB/DXMIN**2 + 1._EB/DYMIN**2 + 1._EB/DZMIN**2
-      ENDIF
-      MUTRM = MAX(RPR,RSC)*Y2MU_C(NINT(TMPA))*SPECIES(0)%MW
-   ELSE INCOMPRESSIBLE_IF
-      MU_MAX = 0._EB
-      P_MU_MAX = MU_MAX
-      MUP => MU
-      !$OMP PARALLEL PRIVATE(P_I_VN,P_J_VN,P_K_VN,P_MU_TMP) FIRSTPRIVATE(P_MU_MAX)
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            IILOOP_OpenMP: DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IILOOP_OpenMP
-               P_MU_TMP = MUP(I,J,K)/RHOP(I,J,K)
-               IF (P_MU_TMP>=P_MU_MAX) THEN
-                  P_MU_MAX = P_MU_TMP
-                  P_I_VN=I
-                  P_J_VN=J
-                  P_K_VN=K
-               ENDIF
-            ENDDO IILOOP_OpenMP
-         ENDDO
+   MU_MAX = 0._EB
+   P_MU_MAX = MU_MAX
+   MUP => MU
+   !$OMP PARALLEL PRIVATE(P_I_VN,P_J_VN,P_K_VN,P_MU_TMP) FIRSTPRIVATE(P_MU_MAX)
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         IILOOP_OpenMP: DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE IILOOP_OpenMP
+            P_MU_TMP = MUP(I,J,K)/RHOP(I,J,K)
+            IF (P_MU_TMP>=P_MU_MAX) THEN
+               P_MU_MAX = P_MU_TMP
+               P_I_VN=I
+               P_J_VN=J
+               P_K_VN=K
+            ENDIF
+         ENDDO IILOOP_OpenMP
       ENDDO
-      !$OMP END DO NOWAIT
-      !$OMP CRITICAL
-      IF (P_MU_MAX>=MU_MAX) THEN
-         MU_MAX = P_MU_MAX
-         I_VN=P_I_VN
-         J_VN=P_J_VN
-         K_VN=P_K_VN
-      ENDIF
-      !$OMP END CRITICAL
-      !$OMP END PARALLEL
-      
-      IF (TWO_D) THEN
-         R_DX2 = RDX(I_VN)**2 + RDZ(K_VN)**2
-      ELSE
-         R_DX2 = RDX(I_VN)**2 + RDY(J_VN)**2 + RDZ(K_VN)**2
-      ENDIF
-      MUTRM = MAX(RPR,RSC)*MU_MAX
-   ENDIF INCOMPRESSIBLE_IF
- 
+   ENDDO
+   !$OMP END DO NOWAIT
+   !$OMP CRITICAL
+   IF (P_MU_MAX>=MU_MAX) THEN
+      MU_MAX = P_MU_MAX
+      I_VN=P_I_VN
+      J_VN=P_J_VN
+      K_VN=P_K_VN
+   ENDIF
+   !$OMP END CRITICAL
+   !$OMP END PARALLEL
+   
+   IF (TWO_D) THEN
+      R_DX2 = RDX(I_VN)**2 + RDZ(K_VN)**2
+   ELSE
+      R_DX2 = RDX(I_VN)**2 + RDY(J_VN)**2 + RDZ(K_VN)**2
+   ENDIF
+
+   MUTRM = MAX(RPR,RSC)*MU_MAX
    VN = DT*2._EB*R_DX2*MUTRM
  
 ENDIF PARABOLIC_IF
