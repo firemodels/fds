@@ -1614,7 +1614,7 @@ void drawPart5(const particle *parti){
                 glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
 
 #ifdef pp_BETA
-                if(1==0){
+                if(1==1){
                   glRotatef(-datacopy->partclassbase->elevation,0.0,1.0,0.0);
                   glRotatef( datacopy->partclassbase->azimuth,  0.0,0.0,1.0);
                 }
@@ -1629,7 +1629,7 @@ void drawPart5(const particle *parti){
                   glRotatef( dtheta,axis[0],axis[1],axis[2]);
                 }
 #else
-                if(1==0){
+                if(1==1){
                   glRotatef(-datacopy->partclassbase->elevation,0.0,1.0,0.0);
                   glRotatef( datacopy->partclassbase->azimuth,  0.0,0.0,1.0);
                 }
