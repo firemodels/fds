@@ -3814,16 +3814,8 @@ probabilities~\cite{Wiscombe}.
 
 
 
-\section{Droplet Transport on a Surface}
 
-When a liquid droplet hits a solid horizontal surface, it is assigned a
-random horizontal direction and moves at a fixed velocity until it
-reaches the edge, at which point it drops straight down at the same
-fixed velocity. This ``dripping'' velocity has been measured for water to be on
-the order of 0.5~m/s~\cite{Hamins:1,Hamins:IAFSS2002}.
-While attached to a surface, the ``droplet'' is assumed to form a thin film of liquid that
-transfers heat to the solid, and heat and mass to
-the gas. Details are included in the next section.
+
 
 
 \section{Fire Suppression by Water}
@@ -3841,6 +3833,19 @@ to characterize the decrease in the pyrolysis rate as a function of
 the decrease in the total heat feedback to the surface. Unfortunately,
 most fuels of interest in fire applications are multi-component solids
 with complex geometry at scales unresolvable by the computational grid.
+
+\subsection{Droplet Transport on a Surface}
+
+When a liquid droplet hits a solid horizontal surface, it is assigned a
+random horizontal direction and moves at a fixed velocity until it
+reaches the edge, at which point it drops straight down at the same
+fixed velocity. This ``dripping'' velocity has been measured for water to be on
+the order of 0.5~m/s~\cite{Hamins:1,Hamins:IAFSS2002}.
+While attached to a surface, the ``droplet'' is assumed to form a thin film of liquid that
+transfers heat to the solid, and heat and mass to
+the gas.
+
+\subsection{Reduction of Pyrolysis Rate due to Water}
 
 To date, most of the work in this area has been
 performed at Factory Mutual. An important paper on the subject is
@@ -3880,11 +3885,25 @@ mass per unit area, $m_w''$, expressed in units of kg/m$^2$,
 Note that $a$ is an empirical constant.
 
 
+\section{Beyond Droplets -- Using Lagrangian Particles to Model Complex Objects}
 
+There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform
+to the rectilinear mesh. For example, electrical cables, dry brush, tree branches and so on, are potential fuels that cannot
+be well-represented as solid cubes, not only because the geometry is wrong, but also because the solid restricts the
+movement of hot gases through the complex collection of objects. As a potential remedy for the problem, these objects can
+be modeled as discrete particles that are either spheres, cylinders or small sheets. Each particle can be assigned a surface
+type in much the same way as is done for solid obstructions that conform to the numerical grid. The particle is assumed to be
+thermally-thick, but for simplicity the heat conduction within the particle is assumed to be one-dimensional in either
+a cylindrical, spherical or cartesian coordinate system.
 
-
-
-
+It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation
+equation. For a grid cell with indices $ijk$, the source term is: 
+\be (-\nabla \cdot \dot{\bq}_r'')_{ijk} = \sum \left[ \kappa_p \left( U_{ijk} - 4 \sigma \, T_p^4 \right) \right] \ee
+where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
+\be \kappa_p = \frac{A}{4 \, \dx \dy \dz} \ee
+where $A$ is the surface area of the particle and $\dx \dy \dz$ is the volume of the cell.
+The net radiative heat flux onto the surface of the particle is
+\be \dq_{r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_p^4 \right) \ee
 
 
 
