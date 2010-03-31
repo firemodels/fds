@@ -19,11 +19,10 @@ clear all
 addpath 'scripts'
 
 [saved_data,drange] = dataplot('verification');
-%[saved_data,drange] = dataplot('verification',[62:85]);
-%[saved_data,drange] = dataplot('verification',[67]);
-%run scripts/turb_model
-%run scripts/wall_model
-%run scripts/pyrolysis
-%run scripts/birch_tga
+
+run scripts/turb_model
+run scripts/wall_model
+run scripts/pyrolysis
+run scripts/birch_tga
 
 display('verification scripts completed successfully!')
