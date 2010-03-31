@@ -45,6 +45,9 @@ void setup_boundary(FILE *stream_out){
 boundary *getboundary(boundary *boundaryin, casedata *case2){
   int i,j;
 
+  if(strlen(type_label)>0&&strcmp(type_label,boundaryin->label.shortlabel)!=0){
+    return NULL;
+  }
   for(i=0;i<case2->nboundary_files;i++){
     boundary *boundaryout;
     int *patch2index;

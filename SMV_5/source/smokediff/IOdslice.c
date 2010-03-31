@@ -49,7 +49,9 @@ slice *getslice(slice *slicein, casedata *case2){
   dx = slicein->slicemesh->dx/2.0;
   dy = slicein->slicemesh->dy/2.0;
   dz = slicein->slicemesh->dz/2.0;
-
+  if(strlen(type_label)>0&&strcmp(type_label,slicein->label.shortlabel)!=0){
+    return NULL;
+  }
   for(i=0;i<case2->nslice_files;i++){
     slice *sliceout;
 
