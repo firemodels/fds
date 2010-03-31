@@ -431,7 +431,6 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       slice *slicei;
       int meshnumber=0;
       mesh *slicemesh;
-      float *xplt, *yplt, *zplt;
       char full_file[1024];
 
       len=strlen(buffer);
@@ -459,9 +458,6 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       if(match(buffer,"SLCT",4) == 1){
         slicei->slicetype=4;
       }
-      xplt = slicemesh->xplt;
-      yplt = slicemesh->yplt;
-      zplt = slicemesh->zplt;
 
       slicei->version=version;
 
@@ -473,7 +469,9 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         int is1, is2, js1, js2, ks1, ks2;
         int error, lenfile;
         int endian;
+        float *xplt, *yplt, *zplt;
 
+        endian=getendian();
         NewMemory((void **)&slicei->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
         STRCPY(slicei->file,full_file);
@@ -490,6 +488,9 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         slicei->js2=js2;
         slicei->ks1=ks1;
         slicei->ks2=ks2;
+        xplt = slicemesh->xplt;
+        yplt = slicemesh->yplt;
+        zplt = slicemesh->zplt;
         slicei->xmin = xplt[is1];
         slicei->xmax = xplt[is2];
         slicei->ymin = yplt[js1];
