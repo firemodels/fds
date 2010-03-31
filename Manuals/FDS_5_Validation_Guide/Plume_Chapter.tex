@@ -59,12 +59,14 @@ A widely used experimental correlation for flame height is given by the expressi
 \be \frac{L_f}{D} = 3.7 \; (Q^*)^{2/5} - 1.02 \ee
 where
 \be Q^* = \frac{\dQ}{\rho_\infty \, c_p \, T_\infty \, \sqrt{g} \; D^{5/2} }  \ee
-is a non-dimensional quantity that relates the fire's heat release rate, $\dQ$, with the diameter of its base, $D$. The greater the value of $Q*$, the
-higher the flame height relative to its width. Table~\ref{Flame_Height_Parameters} lists the parameters for 16 FDS calculations of a fire in a 1~m by 1~m
+is a non-dimensional quantity that relates the fire's heat release rate, $\dQ$, with the diameter of its base, $D$. The greater the value of $Q^*$, the
+higher the flame height relative to its base diameter. Table~\ref{Flame_Height_Parameters} lists the parameters for 16 FDS calculations of a fire in a 1~m by 1~m
 square pan\footnote{The effective diameter, $D$, of a 1~m square pan is 1.13~m, obtained by equating the area of a square and circle.},
-and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's experimental correlation. Note that the flame height for the FDS
-simulations is defined as the distance above the pan, on average, at which 95~\% of the fuel has been consumed. Note also that all the simulations used
-a cell size such that $D^*/\dx=10$.
+and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note that the flame height for the FDS
+simulations is defined as the distance above the pan, on average, at which 99~\% of the fuel has been consumed. Note also that the simulations were
+run at three different grid resolutions. A convenient length scale is given by
+\be D^* = (Q^*)^{2/5} \, D \ee
+Given a grid cell size, $\dx$, the three resolutions can be characterized by the non-dimensional quantity, $D^*/\dx$, whose values in this case are 5, 10 and 20.
 
 
 \begin{table}[h!]
