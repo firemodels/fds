@@ -8062,14 +8062,16 @@ energy generated within the space heats up the gases and solid
 surfaces, and then a balance between heat input and output is
 achieved.
 
-Note that, in axially symmetric simulations, the volume $\Omega$ is
+Note that, in axially symmetric simulations, the coordinates {\ct
+XB(3)} and {\ct XB(4)} refer to the width of the cylindrical sector 
+at 1 m distance from the cylinder axis, and the volume $\Omega$ is
 the volume of the cylindrical sector
 \be
-\Omega = \frac{1}{2}\left({\ct XB(2)-XB(1)}\right)^2
+\Omega = \frac{1}{2 R_1}\left({\ct XB(2)^2-XB(1)^2}\right)
             \left({\ct XB(4)-XB(3)}\right)
             \left({\ct XB(6)-XB(5)}\right)
 \ee
-
+where $R_1 = $~1~m.
 
 
 \subsection{Visibility and Obscuration}
