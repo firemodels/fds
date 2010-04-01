@@ -790,6 +790,23 @@ endif
 return
 end subroutine getsliceframe
 
+
+!  ------------------ endian_out ------------------------ 
+
+subroutine endianout(endianfilename)
+implicit none
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_endianout@8' :: endianout
+#endif
+character(len=*) :: endianfilename
+integer :: one
+
+open(unit=31,file=trim(endianfilename),form="unformatted")
+one=1
+write(31)one
+return
+end subroutine endianout
+
 !  ------------------ outsliceheader ------------------------ 
 
 subroutine outsliceheader(slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
@@ -814,9 +831,9 @@ if(connected)close(lu11)
 
 open(unit=lu11,file=trim(slicefilename),form="unformatted")
 
-longlbl= "                              "
-shortlbl="                              "
-unitlbl= "                              "
+longlbl= "long                          "
+shortlbl="short                         "
+unitlbl= "unit                          "
 write(lu11,iostat=error)longlbl
 write(lu11,iostat=error)shortlbl
 write(lu11,iostat=error)unitlbl
