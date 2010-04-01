@@ -726,7 +726,8 @@ SELECT CASE (STATISTICS)
 END SELECT
 
 IF (I==0) THEN
-   WRITE(MESSAGE,'(A,A,A,A)')  'WARNING: Problem with units compatibility using STATISTICS of ',TRIM(STATISTICS),' with the QUANTITY ',TRIM(QUANTITY)
+   WRITE(MESSAGE,'(A,A,A,A)')  'WARNING: Problem with units compatibility using STATISTICS of ',TRIM(STATISTICS), &
+                               ' with the QUANTITY ',TRIM(QUANTITY)
    IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
 ENDIF
 
