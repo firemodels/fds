@@ -339,16 +339,13 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         smvcase->endian=endian;
       }
       if(stream_out!=NULL){
+        int lenout;
+
         make_outfile(endianfilename, NULL, buffer, ".end");
         fprintf(stream_out,"ENDF\n %s\n",endianfilename);
         make_outfile(endianfilename, destdir, buffer, ".end");
-        ENDIANfile=fopen(endianfilename,"wb");
-        if(ENDIANfile!=NULL){
-          int one=1;
-
-          fwrite(&one,4,1,ENDIANfile);
-          fclose(ENDIANfile);
-        }
+        lenout=strlen(endianfilename);
+        FORTendianout(endianfilename,lenout);
       }
       continue;
     }

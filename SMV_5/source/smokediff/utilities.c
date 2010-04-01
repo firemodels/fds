@@ -82,35 +82,31 @@ void trim(char *line){
 /* ------------------ readlabels ------------------------ */
 
 int readlabels(flowlabels *flowlabel, FILE *stream){
-  char buffer[255];
+  char buffer2[255],*buffer;
   unsigned int len;
 
   flowlabel->longlabel=NULL;
   flowlabel->shortlabel=NULL;
   flowlabel->unit=NULL;
 
-  if(fgets(buffer,255,stream)==NULL)return 2;
-
-  len=strlen(buffer);
-  buffer[len-1]='\0';
-  trim(buffer);
+  if(fgets(buffer2,255,stream)==NULL)return 2;
+  trim(buffer2);
+  buffer=trim_front(buffer2);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
 
 
-  if(fgets(buffer,255,stream)==NULL)return 2;
-  len=strlen(buffer);
-  buffer[len-1]='\0';
-  trim(buffer);
+  if(fgets(buffer2,255,stream)==NULL)return 2;
+  trim(buffer2);
+  buffer=trim_front(buffer2);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
 
-  if(fgets(buffer,255,stream)==NULL)return 2;
-  len=strlen(buffer);
-  buffer[len-1]='\0';
-  trim(buffer);
+  if(fgets(buffer2,255,stream)==NULL)return 2;
+  trim(buffer2);
+  buffer=trim_front(buffer2);
   len=strlen(buffer);
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->unit,buffer);
