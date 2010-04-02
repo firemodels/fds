@@ -111,6 +111,7 @@ IF (N_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
 ENDIF
 
 ! Zero out divergence to start
+
 !$OMP PARALLEL
 !$OMP WORKSHARE 
 DP  = 0._EB
@@ -209,7 +210,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       JJG = IJKW(7,IW) 
       KKG = IJKW(8,IW) 
       RHODW(IW,N) = RHO_D(IIG,JJG,KKG)
-      RHO_D_DYDN  = RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_W(IW,N))*RDN(IW)
+      RHO_D_DYDN  = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
       DEL_RHO_D_DEL_Y(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Y(IIG,JJG,KKG,N) - RHO_D_DYDN*RDN(IW)
       IOR = IJKW(4,IW)
       SELECT CASE(IOR) 
@@ -230,13 +231,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       IF (FLUX_LIMITER>=0) THEN
          IBC = IJKW(5,IW)
          SF => SURFACE(IBC)
-         IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FRACTION) THEN
-            ! This modification is required because, in the case of SPECIFIED_MASS_FRACTION,
-            ! YY_W refers to the mass fraction on the boundary, not the ghost cell; so DN is
-            ! half of its value at an interpolated boundary, for instance, and the scalar
-            ! gradient is doubled.
-            RHO_D_DYDN = 2._EB*RHO_D_DYDN
-         ENDIF
          SELECT CASE(IOR) 
             CASE( 1)
                FX(IIG-1,JJG,KKG,N) = -RHO_D_DYDN
@@ -256,7 +250,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    ENDDO WALL_LOOP
    !$OMP END DO
 
-   
 
    ! Compute del dot h_n*rho*D del Y_n only for non-mixture fraction cases
  
@@ -318,7 +311,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          YY_GET(N) = 1._EB
          CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
          HDIFF = (H_G-H_G_A)*TMP_G
-         RHO_D_DYDN = RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_W(IW,N))*RDN(IW)
+         RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
          SELECT CASE(IOR)
             CASE( 1) 
                H_RHO_D_DYDX(IIG-1,JJG,KKG) = 0._EB
@@ -760,7 +753,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                IIG = IJKW(6,IW) 
                JJG = IJKW(7,IW) 
                KKG = IJKW(8,IW) 
-               UWS(IW) = UWS(IW)*2._EB*RHOA / (RHO_W(IW)+RHOP(IIG,JJG,KKG))
+               UWS(IW) = UWS(IW)*RHOA/RHO_F(IW)
             ENDIF
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
             II = IJKW(1,IW)

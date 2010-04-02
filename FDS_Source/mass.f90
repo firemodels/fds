@@ -109,7 +109,7 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
       KK  = IJKW(3,IW) 
       KKG = IJKW(8,IW)
       IOR = IJKW(4,IW)
-      UDRHODN = UWP(IW)*(RHO_W(IW)-RHOP(IIG,JJG,KKG))*RDN(IW)
+      UDRHODN = 2._EB*UWP(IW)*(RHO_F(IW)-RHOP(IIG,JJG,KKG))*RDN(IW)
       SELECT CASE(IOR)
          CASE( 1)
             UDRHODX(II,JJ,KK)   = UDRHODN
@@ -190,7 +190,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       KK  = IJKW(3,IW) 
       KKG = IJKW(8,IW)
       IOR = IJKW(4,IW)
-      UDRHODN = UWP(IW)*( RHO_W(IW)*YY_W(IW,N) - RHOP(IIG,JJG,KKG)*YYP(IIG,JJG,KKG,N) )*RDN(IW)
+      UDRHODN = 2._EB*UWP(IW)*( RHO_F(IW)*YY_F(IW,N) - RHOP(IIG,JJG,KKG)*YYP(IIG,JJG,KKG,N) )*RDN(IW)
       SELECT CASE(IOR)
          CASE( 1)
             UDRHODX(II,JJ,KK)   = UDRHODN
@@ -873,7 +873,7 @@ SPECIESLOOP: DO N=1,N_SPECIES
                  YMI = YYP(I-1,J,K,N)
                  LC(-1) = .TRUE.
                ELSE
-                 YMI = YY_W(IW_A(-1),N)  
+                 YMI = YY_F(IW_A(-1),N)  
                ENDIF
             ENDIF          
             IF (IW_A( 1) == 0) THEN
@@ -884,7 +884,7 @@ SPECIESLOOP: DO N=1,N_SPECIES
                  YPI = YYP(I+1,J,K,N)
                  LC( 1) = .TRUE.
                ELSE
-                 YPI = YY_W(IW_A(1),N)  
+                 YPI = YY_F(IW_A(1),N)  
                ENDIF
             ENDIF           
             IF (IW_A(-2) == 0) THEN
@@ -895,7 +895,7 @@ SPECIESLOOP: DO N=1,N_SPECIES
                  YMJ = YYP(I,J-1,K,N)
                  LC(-2) = .TRUE.
                ELSE
-                 YMJ = YY_W(IW_A(-2),N)  
+                 YMJ = YY_F(IW_A(-2),N)  
                ENDIF
             ENDIF         
             IF (IW_A( 2) == 0) THEN
@@ -906,7 +906,7 @@ SPECIESLOOP: DO N=1,N_SPECIES
                  YPJ = YYP(I,J+1,K,N)
                  LC( 2) = .TRUE.
                ELSE
-                 YPJ = YY_W(IW_A( 2),N)  
+                 YPJ = YY_F(IW_A( 2),N)  
                ENDIF
             ENDIF         
             IF (IW_A(-3) == 0) THEN
@@ -917,7 +917,7 @@ SPECIESLOOP: DO N=1,N_SPECIES
                  YMK = YYP(I,J,K-1,N)
                  LC(-3) = .TRUE.
                ELSE
-                 YMK = YY_W(IW_A(-3),N)  
+                 YMK = YY_F(IW_A(-3),N)  
                ENDIF
             ENDIF         
             IF (IW_A( 3) == 0) THEN
@@ -928,7 +928,7 @@ SPECIESLOOP: DO N=1,N_SPECIES
                  YPK = YYP(I,J,K+1,N)
                  LC( 3) = .TRUE.
                ELSE
-                 YPK = YY_W(IW_A( 3),N)  
+                 YPK = YY_F(IW_A( 3),N)  
                ENDIF
             ENDIF           
             YMIN  = MIN(YMI,YPI,YMJ,YPJ,YMK,YPK)
@@ -1023,37 +1023,37 @@ SPECIESLOOP: DO N=1,N_SPECIES
                YMI = YYP(I-1,J,K,N)
                LC(-1) = .TRUE.
             ELSE
-               YMI = YY_W(IW_A(-1),N)  
+               YMI = YY_F(IW_A(-1),N)  
             ENDIF          
             IF (IW_A( 1) == 0) THEN
                YPI = YYP(I+1,J,K,N)
                LC( 1) = .TRUE.
             ELSE
-               YPI = YY_W(IW_A( 1),N)  
+               YPI = YY_F(IW_A( 1),N)  
             ENDIF           
             IF (IW_A(-2) == 0) THEN
                YMJ = YYP(I,J-1,K,N)
                LC(-2) = .TRUE.
             ELSE
-               YMJ = YY_W(IW_A(-2),N)  
+               YMJ = YY_F(IW_A(-2),N)  
             ENDIF         
             IF (IW_A( 2) == 0) THEN
                YPJ = YYP(I,J+1,K,N)
                LC( 2) = .TRUE.
             ELSE
-               YPJ = YY_W(IW_A( 2),N)  
+               YPJ = YY_F(IW_A( 2),N)  
             ENDIF         
             IF (IW_A(-3) == 0) THEN
                YMK = YYP(I,J,K-1,N)
                LC(-3) = .TRUE.
             ELSE
-               YMK = YY_W(IW_A(-3),N)  
+               YMK = YY_F(IW_A(-3),N)  
             ENDIF         
             IF (IW_A( 3) == 0) THEN
                YPK = YYP(I,J,K+1,N)
                LC( 3) = .TRUE.
             ELSE
-               YPK = YY_W(IW_A( 3),N)  
+               YPK = YY_F(IW_A( 3),N)  
             ENDIF           
             YMAX  = MAX(YMI,YPI,YMJ,YPJ,YMK,YPK)
             YMAX = MIN(YMAX,YYMAX(N))            
@@ -1649,28 +1649,28 @@ WALL_LOOP: DO IW=1,NWC
              
          SELECT CASE(IOR)
             CASE( 1)
-               ZZ(2) = RHO_W(IW)
+               ZZ(2) = RHO_F(IW)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                FX(II,JJ,KK,0) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)*R(II)
             CASE(-1)
                ZZ(2) = RHOP(IIG,JJG,KKG)
-               ZZ(3) = RHO_W(IW)
+               ZZ(3) = RHO_F(IW)
                FX(II-1,JJ,KK,0) = UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1)*R(II-1)
             CASE( 2)   
-               ZZ(2) = RHO_W(IW)
+               ZZ(2) = RHO_F(IW)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                FY(II,JJ,KK,0) = VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
             CASE(-2)
                ZZ(2) = RHOP(IIG,JJG,KKG)
-               ZZ(3) = RHO_W(IW)
+               ZZ(3) = RHO_F(IW)
                FY(II,JJ-1,KK,0) = VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
             CASE( 3)
-               ZZ(2) = RHO_W(IW)
+               ZZ(2) = RHO_F(IW)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                FZ(II,JJ,KK,0) = WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
             CASE(-3)
                ZZ(2) = RHOP(IIG,JJG,KKG)
-               ZZ(3) = RHO_W(IW)
+               ZZ(3) = RHO_F(IW)
                FZ(II,JJ,KK-1,0) = WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
          END SELECT
       
@@ -1864,28 +1864,28 @@ SPECIES_LOOP: DO N=1,N_SPECIES
 
             SELECT CASE(IOR)
                CASE( 1)
-                  ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(2) = RHO_F(IW)*YY_F(IW,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   FX(II,JJ,KK,N) = (FX(II,JJ,KK,N) + UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1))*R(II)
                CASE(-1)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(3) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(3) = RHO_F(IW)*YY_F(IW,N)
                   FX(II-1,JJ,KK,N) = (FX(II-1,JJ,KK,N) + UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1))*R(II-1)
                CASE( 2)   
-                  ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(2) = RHO_F(IW)*YY_F(IW,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   FY(II,JJ,KK,N) = FY(II,JJ,KK,N) + VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
                CASE(-2)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(3) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(3) = RHO_F(IW)*YY_F(IW,N)
                   FY(II,JJ-1,KK,N) = FY(II,JJ-1,KK,N) + VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
                CASE( 3)
-                  ZZ(2) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(2) = RHO_F(IW)*YY_F(IW,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   FZ(II,JJ,KK,N) = FZ(II,JJ,KK,N) + WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
                CASE(-3)
                   ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(3) = RHO_W(IW)*YY_W(IW,N)
+                  ZZ(3) = RHO_F(IW)*YY_F(IW,N)
                   FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
             END SELECT
       

@@ -186,39 +186,39 @@ WALL_CELL_LOOP: DO IW=1,NEWC
          SELECT CASE(IOR)
             CASE( 1)
                IF (UU(0,J,K)<0._EB) THEN
-                  BXS(J,K) = P_EXTERNAL/RHO_W(IW) + KRES(1,J,K)
+                  BXS(J,K) = P_EXTERNAL/RHO_F(IW) + KRES(1,J,K)
                ELSE
-                  BXS(J,K) = P_EXTERNAL/RHO_W(IW) + H0
+                  BXS(J,K) = P_EXTERNAL/RHO_F(IW) + H0
                ENDIF
             CASE(-1)
                IF (UU(IBAR,J,K)>0._EB) THEN
-                  BXF(J,K) = P_EXTERNAL/RHO_W(IW) + KRES(IBAR,J,K)
+                  BXF(J,K) = P_EXTERNAL/RHO_F(IW) + KRES(IBAR,J,K)
                ELSE
-                  BXF(J,K) = P_EXTERNAL/RHO_W(IW) + H0
+                  BXF(J,K) = P_EXTERNAL/RHO_F(IW) + H0
                ENDIF
             CASE( 2)
                IF (VV(I,0,K)<0._EB) THEN
-                  BYS(I,K) = P_EXTERNAL/RHO_W(IW) + KRES(I,1,K)
+                  BYS(I,K) = P_EXTERNAL/RHO_F(IW) + KRES(I,1,K)
                ELSE
-                  BYS(I,K) = P_EXTERNAL/RHO_W(IW) + H0
+                  BYS(I,K) = P_EXTERNAL/RHO_F(IW) + H0
                ENDIF
             CASE(-2)
                IF (VV(I,JBAR,K)>0._EB) THEN
-                  BYF(I,K) = P_EXTERNAL/RHO_W(IW) + KRES(I,JBAR,K)
+                  BYF(I,K) = P_EXTERNAL/RHO_F(IW) + KRES(I,JBAR,K)
                ELSE
-                  BYF(I,K) = P_EXTERNAL/RHO_W(IW) + H0
+                  BYF(I,K) = P_EXTERNAL/RHO_F(IW) + H0
                ENDIF
             CASE( 3)
                IF (WW(I,J,0)<0._EB) THEN
-                  BZS(I,J) = P_EXTERNAL/RHO_W(IW) + KRES(I,J,1)
+                  BZS(I,J) = P_EXTERNAL/RHO_F(IW) + KRES(I,J,1)
                ELSE
-                  BZS(I,J) = P_EXTERNAL/RHO_W(IW) + H0
+                  BZS(I,J) = P_EXTERNAL/RHO_F(IW) + H0
                ENDIF
             CASE(-3)
                IF (WW(I,J,KBAR)>0._EB) THEN
-                  BZF(I,J) = P_EXTERNAL/RHO_W(IW) + KRES(I,J,KBAR)
+                  BZF(I,J) = P_EXTERNAL/RHO_F(IW) + KRES(I,J,KBAR)
                ELSE
-                  BZF(I,J) = P_EXTERNAL/RHO_W(IW) + H0
+                  BZF(I,J) = P_EXTERNAL/RHO_F(IW) + H0
                ENDIF
          END SELECT
     
