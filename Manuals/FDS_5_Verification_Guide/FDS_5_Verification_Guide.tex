@@ -951,7 +951,7 @@ In this work the FDS wall model has been verified for both laminar and turbulent
 
 \section{Energy Conservation (\texorpdfstring{{\bf energy\_budget}}{energy\_budget})}
 
-The examples in this section check that mass and energy are conserved for relatively simple configurations. 
+The examples in this section check that mass and energy are conserved for relatively simple configurations.
 
 \subsection{The Heat from a Fire (\texorpdfstring{{\bf energy\_budget}}{energy\_budget})}
 
@@ -982,7 +982,7 @@ wall (both radiative and convective) are approximately 730~kW. The plot is shown
 \end{figure}
 
 
-\subsection{Gas Injection as an Isentropic Process (\texorpdfstring{{\bf isentropic}}{isentropic})}
+\subsection{Gas Injection via an Isentropic Process (\texorpdfstring{{\bf isentropic}}{isentropic})}
 
 This example checks that if nitrogen is added to a sealed compartment with adiabatic ({\em i.e.} no heat loss) walls, that the
 density, pressure and temperature ought to rise according to the ideal gas law for an isentropic process:
@@ -990,18 +990,50 @@ density, pressure and temperature ought to rise according to the ideal gas law f
 The subscripts 2 and 1 refer to the final and initial state, respectively. Nitrogen is a diatomic gas for which $\gamma=1.4$. As an additional
 check, the nitrogen is injected at two different rates such that in case A the injection occurs in 10~s and in case B the injection occurs in
 50~s. The nitrogen is introduced into the domain via small spheres that do not generate or absorb heat. They do not occupy volume either. They just
-inject the nitrogen at a specified rate into the particular grid cell that each occupies. 
+inject the nitrogen at a specified rate into the particular grid cell that each occupies.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{FIGURES/isentropic_density} &
 \includegraphics[width=3.2in]{FIGURES/isentropic_pressure} \\
-\multicolumn{2}{c}{\includegraphics[width=3.2in]{FIGURES/isentropic_temperature} } 
+\includegraphics[width=3.2in]{FIGURES/isentropic_temperature} &
+\includegraphics[width=3.2in]{FIGURES/isentropic_enthalpy}
 \end{tabular*}
-\caption[The isentropic case.]{Density, pressure and temperature rise due to the injection of nitrogen into a sealed compartment.}
+\caption[The isentropic case.]{Density, pressure, temperature, and enthalpy rise due to the injection of nitrogen into a sealed compartment.}
 \label{isentropic}
 \end{figure}
 
+
+\subsection{Gas Injection via a Non-Isentropic Process (\texorpdfstring{{\bf isentropic2}}{isentropic2})}
+
+This example checks that if nitrogen is added via an external vent to a sealed compartment with adiabatic ({\em i.e.} no heat loss) walls, that the
+density, pressure and temperature ought to rise to rise to the same values regardless of the time of injection.
+In the two cases, 0.2~kg of N$_2$ are added to a compartment that is 1~m$^3$ in volume. In the first case, the injection occurs in 10~s, in the
+second case in 50~s. The temperature of the gas in both cases is 500~$^\circ$C. It is expected that the pressure, $p$, should rise at the rate:
+\be \frac{dp}{dt} = \frac{\gamma \, p \, u \, A}{V} \ee
+where $u$ is the injection velocity and $A$ is the area of the vent. The vent area is 0.04~m$^2$. The density of the incoming N$_2$ is found from the
+Equation of State: 
+\be \rho = \frac{ \overline{W} \, p }{ {\cal R} T} \ee
+The injection velocity is the mass flux divided by the density, $u=\dot{m}''/\rho$, in which case, the pressure rise can be written
+\be \frac{dp}{dt} = \frac{\gamma \, \dot{m}'' \, {\cal R} T \, A}{\overline{W} \, V} \ee
+Note that the pressure rise is constant. In both the fast and slow injection cases, the pressure is expected to rise 64282~Pa above ambient. The density
+and temperature rise are also linear. The density increases from 1.164~kg/m$^3$ to 1.364~kg/m$^3$. The temperature increases from 20~$^\circ$C to 135.7~$^\circ$C.
+The change in the internal energy of the system, based on the mass and temperature of the added N$_2$, is:
+\be \Delta E = (0.2 \; \hbox{kg}) \times (1.039 \; \hbox{kJ/kg/K}) \times (773.15 \; \hbox{K} ) = 160.7 \; \hbox{kJ} \ee
+Adding in the work due to the pressure yields the change in total enthalpy:
+\be \Delta H = \Delta E + V \, \Delta P = 160.7 \; \hbox{kJ} + (1 \; \hbox{m}^3) \times ( \; 64.3 \; \hbox{kJ/m}^3) = 225 \; \hbox{kJ} \ee 
+
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/isentropic2_density} &
+\includegraphics[width=3.2in]{FIGURES/isentropic2_pressure} \\
+\includegraphics[width=3.2in]{FIGURES/isentropic2_temperature} &
+\includegraphics[width=3.2in]{FIGURES/isentropic2_enthalpy} 
+\end{tabular*}
+\caption[The isentropic2 case.]{Density, pressure, temperature, and enthalpy rise due to the injection of nitrogen into a sealed compartment.}
+\label{isentropic2}
+\end{figure}
 
 
 
