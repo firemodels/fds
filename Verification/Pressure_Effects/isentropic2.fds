@@ -1,4 +1,4 @@
-&HEAD CHID='isentropic', TITLE='Test isentropic pressure rise, SVN $Revision: 5435 $'/
+&HEAD CHID='isentropic2', TITLE='Test isentropic pressure rise, SVN $Revision: 5435 $'/
 
 &MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK=20,20,20 /
 &MESH XB=1.1,2.1,0.0,1.0,0.0,1.0, IJK=20,20,20 /
@@ -11,21 +11,16 @@
 
 &SURF ID='Adiabatic Wall', ADIABATIC=.TRUE. /
 
-&PROP ID='ball shape', SMOKEVIEW_ID='SPHERE', SMOKEVIEW_PARAMETERS(1)='D=0.01' /
-
-&PART ID='fast_spheres', SURF_ID='FAST', QUANTITIES='DROPLET TEMPERATURE', SAMPLING_FACTOR=1, PROP_ID='ball shape' /
-&PART ID='slow_spheres', SURF_ID='SLOW', QUANTITIES='DROPLET TEMPERATURE', SAMPLING_FACTOR=1, PROP_ID='ball shape' /
-
-&INIT PART_ID='fast_spheres', XB=0.25,0.75,0.25,0.75,0.25,0.75, NUMBER_INITIAL_DROPLETS=100 /
-&INIT PART_ID='slow_spheres', XB=1.35,1.85,0.25,0.75,0.25,0.75, NUMBER_INITIAL_DROPLETS=100 /
+&VENT XB=0.4,0.6,0.4,0.6,0.0,0.0, SURF_ID='FAST', COLOR='RED' /
+&VENT XB=1.5,1.7,0.4,0.6,0.0,0.0, SURF_ID='SLOW', COLOR='GREEN' /
 
 &SPEC ID='NITROGEN', MASS_FRACTION_0=1. /
-&SURF ID='FAST', MASS_FLUX(1)=0.5, RAMP_MF(1)='blow_fast', H_FIXED=0., RADIUS=0.005, GEOMETRY='SPHERICAL' /
+&SURF ID='FAST', MASS_FLUX(1)=0.5, RAMP_MF(1)='blow_fast', H_FIXED=0., TMP_FRONT=500. /
 &RAMP ID='blow_fast', T= 0., F=0. /
 &RAMP ID='blow_fast', T= 1., F=1. /
 &RAMP ID='blow_fast', T=10., F=1. /
 &RAMP ID='blow_fast', T=11., F=0. /
-&SURF ID='SLOW', MASS_FLUX(1)=0.1, RAMP_MF(1)='blow_slow', H_FIXED=0., RADIUS=0.005, GEOMETRY='SPHERICAL' /
+&SURF ID='SLOW', MASS_FLUX(1)=0.1, RAMP_MF(1)='blow_slow', H_FIXED=0., TMP_FRONT=500. /
 &RAMP ID='blow_slow', T= 0., F=0. /
 &RAMP ID='blow_slow', T= 1., F=1. /
 &RAMP ID='blow_slow', T=50., F=1. /

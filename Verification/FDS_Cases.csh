@@ -52,6 +52,8 @@ $RUNFDS NS_Analytical_Solution ns2d_8             fire66
 $RUNFDS NS_Analytical_Solution ns2d_8_nupt1       fire67
 $RUNFDS Pressure_Effects door_crack               fire68
 $RUNFDS Pressure_Effects fan_test                 fire61
+$RUNFDS Pressure_Effects isentropic               fire61
+$RUNFDS Pressure_Effects isentropic2              fire61
 $RUNFDS Pressure_Effects leak_test_2              fire62
 $RUNFDS Pressure_Effects leak_test                fire63
 $RUNFDS Pressure_Effects pressure_boundary        fire64
