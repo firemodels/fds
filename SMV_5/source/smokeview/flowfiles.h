@@ -876,6 +876,7 @@ typedef struct {
   float above_ground_level;
   int volslice;
   int is1, is2, js1, js2, ks1, ks2;
+  float xmin,xmax,ymin,ymax,zmin,zmax;
   int nsliceii;
   int *slicetimeslist;
   int idir;
