@@ -552,10 +552,13 @@ EXTERNCPP void drawslice_texture(const slice *sd);
 #ifdef pp_FRACTILE
 EXTERNCPP void drawslice_texture_fractile(const slice *sd);
 #endif
+EXTERNCPP float MIN(float x, float y);
+EXTERNCPP float MAX(float x, float y);
 EXTERNCPP void drawslice_terrain(const slice *sd);
 EXTERNCPP void drawvolslice_terrain(const slice *sd);
 EXTERNCPP void drawvolslice_texture(const slice *sd);
 EXTERNCPP int new_multi(slice *sdold,slice *sd);
+EXTERNCPP int hide_slice2(slice *sdi,slice *sdj);
 EXTERNCPP void drawvolslice(const slice *sd);
 EXTERNCPP void drawvvolslice(const vslice *vd);
 EXTERNCPP void drawvvolslice_terrain(const vslice *vd);

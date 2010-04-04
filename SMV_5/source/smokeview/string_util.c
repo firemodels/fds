@@ -410,6 +410,7 @@ int fileexist(char *filename){
   statfile=STAT(filename,&statbuffer);
   return statfile;
 }
+
 /* ------------------ array2string ------------------------ */
 
 char *which(char *progname){
@@ -466,4 +467,27 @@ char *which(char *progname){
 #endif
   return NULL;
 }
+
+/* ------------------ MIN ------------------------ */
+
+float MIN(float x,float y){
+  if(x<y){
+    return x;
+  }
+  else{
+    return y;
+  }
+}
+
+/* ------------------ MAX ------------------------ */
+
+float MAX(float x,float y){
+  if(x>y){
+    return x;
+  }
+  else{
+    return y;
+  }
+}
+
 
