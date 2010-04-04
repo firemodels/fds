@@ -1164,6 +1164,33 @@ void updatevslicemenulabels(void){
   }
 }
 
+/* ------------------ hide_slice ------------------------ */
+
+int hide_slice2(slice *sdi,slice *sdj){
+  float delta;
+  float dx, dy, dz;
+
+  if(sdi->volslice==1||sdj->volslice==1)return 0;
+  delta = sdi->delta;
+  if(sdj->delta>delta)delta=sdj->delta;
+  if(strcmp(sdj->label.shortlabel,sdi->label.shortlabel)!=0
+      ||sdj->idir!=sdi->idir
+      ||sdj->position+delta<sdi->position
+      ||sdj->position-delta>sdi->position
+      ||sdj->mesh_type!=sdi->mesh_type
+        ){
+      return 0;
+  }
+  dx = MIN(sdi->xmax,sdi->xmax) - MAX(sdi->xmin,sdi->xmin);
+  dy = MIN(sdi->ymax,sdi->ymax) - MAX(sdi->ymin,sdi->ymin);
+  dz = MIN(sdi->zmax,sdi->zmax) - MAX(sdi->zmin,sdi->zmin);
+  if(sdi->idir==1)dx=1.0;
+  if(sdi->idir==2)dy=1.0;
+  if(sdi->idir==3)dz=1.0;
+  if(dx<0.0||dy<0.0||dz<0.0||sdj->blocknumber<=sdi->blocknumber)return 0;
+  return 1;
+}
+
 /* ------------------ new_multi ------------------------ */
 
 int new_multi(slice *sdold,slice *sd){
@@ -1196,7 +1223,7 @@ int new_multi(slice *sdold,slice *sd){
 /* ------------------ getsliceparams ------------------------ */
 
 void getsliceparams(void){
-  int i;
+  int i,iii;
   char *file;
   slice *sd,*sdold;
   int error;
@@ -1311,8 +1338,25 @@ void getsliceparams(void){
       sd->position=position;
       trimzeros(sd->slicedir);
     }
+    {
+      float *xplt, *yplt, *zplt;
+
+      meshi = meshinfo + sd->blocknumber;
+      sd->mesh_type=meshi->mesh_type;
+      xplt = meshi->xplt;
+      yplt = meshi->yplt;
+      zplt = meshi->zplt;
+      sd->xmin = xplt[sd->is1];
+      sd->xmax = xplt[sd->is2];
+      sd->ymin = yplt[sd->js1];
+      sd->ymax = yplt[sd->js2];
+      sd->zmin = zplt[sd->ks1];
+      sd->zmax = zplt[sd->ks2];
+    }
   }
   if(nslice_files>0){
+    int ii;
+
     FREEMEMORY(sliceorderindex);
     NewMemory((void **)&sliceorderindex,sizeof(int)*nslice_files);
     for(i=0;i<nslice_files;i++){
@@ -1351,8 +1395,36 @@ void getsliceparams(void){
       }
       mslicei->nslices++;
       mslicei->islices[mslicei->nslices-1]=sliceorderindex[i];
-    } 
+    }
   }
+#ifdef pp_HIDEMULTI
+  for(iii=0;iii<nmultislices;iii++){
+    int ii;
+
+    mslicei = multisliceinfo + iii;
+    for(i=0;i<mslicei->nslices;i++){
+      slice *sdi, *sdj;
+      int j;
+
+      if(mslicei->islices[i]==-1)continue;
+      sdi = sliceinfo + mslicei->islices[i];
+      for(j=0;j<mslicei->nslices;j++){
+        if(i==j||mslicei->islices[j]==-1)continue;
+        sdj = sliceinfo + mslicei->islices[j];
+        if(hide_slice2(sdi,sdj)==1){
+          mslicei->islices[j]=-1;
+        }
+      }
+    }
+    ii=0;
+    for(i=0;i<mslicei->nslices;i++){
+      if(mslicei->islices[i]==-1)continue;
+      mslicei->islices[ii]=mslicei->islices[i];
+      ii++;
+    }
+    mslicei->nslices=ii;
+  }
+#endif
   updateslicemenulabels();
 }
 

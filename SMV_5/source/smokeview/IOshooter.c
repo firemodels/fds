@@ -23,25 +23,6 @@
 
 // svn revision character string
 char IOshooter_revision[]="$Revision$";
-// $Date$ $Author$
-
-float MIN(float x,float y){
-  if(x<y){
-    return x;
-  }
-  else{
-    return y;
-  }
-}
-
-float MAX(float x,float y){
-  if(x>y){
-    return x;
-  }
-  else{
-    return y;
-  }
-}
 
 /* ------------------ allocate_shooter ------------------------ */
 
