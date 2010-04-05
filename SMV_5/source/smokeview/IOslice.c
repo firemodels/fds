@@ -1168,7 +1168,7 @@ void updatevslicemenulabels(void){
 
 int hide_slice2(slice *sdi,slice *sdj){
   float delta;
-  float dx, dy, dz;
+  float dx, dy, dz, aslice, aintersect;
 
   if(sdi->volslice==1||sdj->volslice==1)return 0;
   delta = sdi->delta;
@@ -1181,13 +1181,24 @@ int hide_slice2(slice *sdi,slice *sdj){
         ){
       return 0;
   }
-  dx = MIN(sdi->xmax,sdi->xmax) - MAX(sdi->xmin,sdi->xmin);
-  dy = MIN(sdi->ymax,sdi->ymax) - MAX(sdi->ymin,sdi->ymin);
-  dz = MIN(sdi->zmax,sdi->zmax) - MAX(sdi->zmin,sdi->zmin);
-  if(sdi->idir==1)dx=1.0;
-  if(sdi->idir==2)dy=1.0;
-  if(sdi->idir==3)dz=1.0;
-  if(dx<0.0||dy<0.0||dz<0.0||sdj->blocknumber<=sdi->blocknumber)return 0;
+  dx = MIN(sdi->xmax,sdj->xmax) - MAX(sdi->xmin,sdj->xmin);
+  dy = MIN(sdi->ymax,sdj->ymax) - MAX(sdi->ymin,sdj->ymin);
+  dz = MIN(sdi->zmax,sdj->zmax) - MAX(sdi->zmin,sdj->zmin);
+  if(sdi->idir==1){
+    dx=1.0;
+    aslice=(sdi->ymax-sdi->ymin)*(sdi->zmax-sdi->zmin);
+  }
+  if(sdi->idir==2){
+    dy=1.0;
+    aslice=(sdi->xmax-sdi->xmin)*(sdi->zmax-sdi->zmin);
+  }
+  if(sdi->idir==3){
+    dz=1.0;
+    aslice=(sdi->xmax-sdi->xmin)*(sdi->ymax-sdi->ymin);
+  }
+  aintersect=dx*dy*dz;
+  if(dx<=0.0||dy<=0.0||dz<=0.0||sdj->blocknumber<=sdi->blocknumber)return 0;
+  if(aintersect<0.1*aslice)return 0;
   return 1;
 }
 
