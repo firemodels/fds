@@ -17,7 +17,6 @@
 #undef pp_release
 #define pp_HIST
 #define pp_SLICECONTOURS
-#define pp_HIDEMULTI
 #endif
 
 #ifdef pp_ALPHA
@@ -82,6 +81,7 @@
 #define pp_THREAD
 #endif
 
+#define pp_HIDEMULTI
 #define pp_MESSAGE
 #define pp_SPHERE
 #define pp_ISOOUT
