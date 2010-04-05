@@ -162,7 +162,11 @@ HEAT_FLUX_LOOP: DO IW=1,NWC+NVWC
          ELSE
             TSI = T - TW(IW)
          ENDIF
-         TMP_F(IW) = TMP_0(KK) + EVALUATE_RAMP(TSI,SF%TAU(TIME_TEMP),SF%RAMP_INDEX(TIME_TEMP))*(SF%TMP_FRONT-TMP_0(KK))
+         IF (UW(IW)<=0._EB) THEN
+            TMP_F(IW) = TMP_0(KK) + EVALUATE_RAMP(TSI,SF%TAU(TIME_TEMP),SF%RAMP_INDEX(TIME_TEMP))*(SF%TMP_FRONT-TMP_0(KK))
+         ELSE
+            TMP_F(IW) = TMP_G  ! If gas is being drawn from the domain, set the boundary temperature to the gas temperature
+         ENDIF
          DTMP = TMP_G - TMP_F(IW)
          HEAT_TRANS_COEF(IW) = HEAT_TRANSFER_COEFFICIENT(IW,IIG,JJG,KKG,IOR,TMP_G,DTMP,SF%H_FIXED)
          QCONF(IW) = HEAT_TRANS_COEF(IW)*DTMP
