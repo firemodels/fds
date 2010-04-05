@@ -21,10 +21,16 @@
 
 <ul>
 
-<li>5.5.3 (build 5969) - March 30, 2010
+<li>5.5.3 (build 5998) - April 5, 2010
 <ol>
+<li>usability: hide overlapping slices.
+If two slices overlap, the slice located in the mesh with higher
+index (defined further down in the FDS input file) will not be drawn.
+<li>fix: fix problem with dynamic particle display
 <li>fix: fix particle display when specifying min and max time bounds in .ini file -
-(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1047&can=1&sort=-id">Issue 1047</a>),
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1047&can=1&sort=-id">Issue 1047</a>)
+<li>fix: add Fortran subroutine to create an endian (.end) file - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1044&can=1&sort=-id">Issue 1044</a>)
 </ol>
 
 <li>5.5.2 (build 5958) - March 29, 2010
