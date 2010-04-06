@@ -236,7 +236,7 @@ Jason Floyd \\
 \vspace{.25in}
 
 \flushright{\today \\
-FDS Version 5.4 \\
+FDS Version 5.5 \\
 $SVN Repository$~$Revision$}
 
 \vfill
@@ -3897,7 +3897,7 @@ thermally-thick, but for simplicity the heat conduction within the particle is a
 a cylindrical, spherical or cartesian coordinate system.
 
 It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation
-equation. For a grid cell with indices $ijk$, the source term is: 
+equation. For a grid cell with indices $ijk$, the source term is:
 \be (-\nabla \cdot \dot{\bq}_r'')_{ijk} = \sum \left[ \kappa_p \left( U_{ijk} - 4 \sigma \, T_p^4 \right) \right] \ee
 where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
 \be \kappa_p = \frac{A}{4 \, \dx \dy \dz} \ee
