@@ -77,9 +77,9 @@ end subroutine getxyzdata
 
 !  ------------------ getpatchdata ------------------------ 
 
-subroutine getpatchdata(lunit,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,error)
+subroutine getpatchdata(lunit,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,npqq,error)
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_getpatchdata@44' :: getpatchdata
+!DEC$ ATTRIBUTES ALIAS:'_getpatchdata@48' :: getpatchdata
 #endif
 implicit none
 
@@ -87,7 +87,7 @@ implicit none
 integer, intent(in) :: npatch,lunit
 integer, intent(in), dimension(*) :: pi1, pi2, pj1, pj2, pk1, pk2
 real, intent(out), dimension(*) :: pqq
-integer, intent(out) :: error
+integer, intent(out) :: error,npqq
 real, intent(out) :: patchtime
 
 integer :: i, i1, i2, j1, j2, k1, k2, size, ibeg, iend, lu15, ii
@@ -99,6 +99,7 @@ if(error.ne.0)then
   return
 endif
 ibeg = 1
+npqq=0
 do i = 1, npatch
   i1 = pi1(i)
   i2 = pi2(i)
@@ -107,6 +108,7 @@ do i = 1, npatch
   k1 = pk1(i)
   k2 = pk2(i)
   size = (i2+1-i1)*(j2+1-j1)*(k2+1-k1)
+  npqq=npqq+size
   iend = ibeg + size - 1
   read(lu15,iostat=error)(pqq(ii),ii=ibeg,iend)
   if(error.ne.0)then
