@@ -18,7 +18,6 @@ char getdatacolors_revision[]="$Revision$";
 #define EXPMIN -2
 #define EXPMAX 3
 
-
 /* ------------------ getBoundaryColors ------------------------ */
 
 void getBoundaryColors(float *t, int nt, unsigned char *it, 
@@ -179,6 +178,104 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
     it++;
     t++;
   }
+}
+
+/* ------------------ getBoundaryColors3 ------------------------ */
+
+void getBoundaryColors3(float *t, int nt, unsigned char *it, 
+              int settmin, float *ttmin, int settmax, float *ttmax,
+              float *tmin_global, float *tmax_global,
+              int ndatalevel, int nlevel,
+              char **labels, char *scale, float *tvals256,
+              int *extreme_min, int *extreme_max
+              ){
+  int n;
+  float *tcopy, factor, tval, range;
+  int expmin, expmax;
+  int itt;
+  float local_tmin, local_tmax, tmin2, tmax2;
+  int local_skip;
+
+  tmin2 = *t;
+  tmax2 = *t;
+    
+  STRCPY(scale,"");
+  tcopy = t+1;
+  for(n=1;n<nt;n++){
+    if(*tcopy<tmin2)tmin2=*tcopy;
+    if(*tcopy>tmax2)tmax2=*tcopy;
+    tcopy++;
+  }
+  *tmin_global = tmin2;
+  *tmax_global = tmax2;
+  *extreme_min=0;
+  *extreme_max=0;
+  local_skip=0;
+  adjustdatabounds(t,local_skip,nt,settmin,&tmin2,settmax,&tmax2);
+  if(settmin!=SET_MIN){
+    *ttmin=tmin2;
+  }
+  if(settmax!=SET_MAX){
+    *ttmax=tmax2;
+  }
+  local_tmin = *ttmin;
+  local_tmax = *ttmax;
+
+  range = local_tmax - local_tmin;
+  factor = 0.0f;
+  if(range!=0.0f)factor = (ndatalevel-2)/range;
+  for(n=0;n<nt;n++){
+    float val;
+
+    val = *t;
+
+    if(val<local_tmin){
+      itt=0;
+      *extreme_min=1;
+    }
+    else if(val>local_tmax){
+      itt=ndatalevel-1;
+      *extreme_max=1;
+    }
+    else{
+      itt=1+(int)(factor*(val-local_tmin));
+    }
+    if(itt<0)itt=0;
+    if(itt>ndatalevel-1)itt=ndatalevel-1;
+    *it=itt;
+    it++;
+    t++;
+  }
+  frexp10(local_tmax, &expmax);
+  frexp10(local_tmin, &expmin);
+  if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<-2||expmin>2)){
+    local_tmin *= pow((double)10.0,(double)-expmin);
+    local_tmax *= pow((double)10.0,(double)-expmin);
+    sprintf(scale,"*10^%i",expmin);
+  }
+  if(expmin==0&&(expmax<EXPMIN||expmax>EXPMAX)){
+    local_tmin *= pow((double)10.0,(double)-expmax);
+    local_tmax *= pow((double)10.0,(double)-expmax);
+    sprintf(scale,"*10^%i",expmax);
+  }
+  if(expmax==0&&(expmin<EXPMIN||expmin>EXPMAX)){
+    local_tmin *= pow((double)10.0,(double)-expmin);
+    local_tmax *= pow((double)10.0,(double)-expmin);
+    sprintf(scale,"*10^%i",expmin);
+  }
+  range = local_tmax - local_tmin;
+  factor = range/(nlevel-2);
+  for (n=1;n<nlevel-2;n++){
+    tval = local_tmin + (n-1)*factor;
+    num2string(&labels[n][0],tval,range);
+  }
+  tval = local_tmin + (nlevel-3)*factor;
+  for(n=0;n<256;n++){
+    tvals256[n] = (local_tmin*(255-n) + n*local_tmax)/255.;
+  }
+  num2string(&labels[nlevel-2][0],tval,range);
+  tval = local_tmax;
+  num2string(&labels[nlevel-1][0],tval,range);
 }
 
 /* ------------------ getBoundaryLabels ------------------------ */
