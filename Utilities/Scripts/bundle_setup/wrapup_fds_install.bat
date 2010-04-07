@@ -7,11 +7,12 @@ exit
 :dircheck
 
 echo.
-echo FDS and Smokeview installation.
+echo Wrapping up FDS and Smokeview installation.
+echo.
+Rem echo Press any key to proceed or CTRL C to abort
+Rem pause>NUL
 echo.
 echo Removing pre 5.4 FDS/Smokeview entries (if present) from the System Path.
-echo Press any key to proceed or CTRL C to abort
-pause>NUL
 
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 
@@ -32,7 +33,6 @@ mkdir "%FDS5START%"
 mkdir "%FDS5START%\FDS on the Web"
 copy "%CD%\Documentation\FDS_on_the_Web\Software_Updates.url"            "%FDS5START%\FDS on the Web\Software Updates.url"  
 copy "%CD%\Documentation\FDS_on_the_Web\Documentation_Updates.url"       "%FDS5START%\FDS on the Web\Documentation Updates.url"  
-copy "%CD%\Documentation\FDS_on_the_Web\Developer_Web_Site.url" "%FDS5START%\FDS on the Web\Developer Web Site.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"   "%FDS5START%\FDS on the Web\Discussion Group.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"  "%FDS5START%\FDS on the Web\Official Web Site.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"   "%FDS5START%\FDS on the Web\Discussion Group.url"
