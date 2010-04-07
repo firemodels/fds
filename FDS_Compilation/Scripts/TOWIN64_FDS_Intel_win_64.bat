@@ -21,4 +21,6 @@ pause
 %svn_drive%
 cd %svn_root%\FDS_Compilation\intel_win_64
 copy fds5_win_64.exe "c:\program files\fds\fds5\bin\fds5_win_64.exe"
+cd %svn_root%\FDS_Compilation\mpi_intel_win_64
+copy fds5_mpi_win_64.exe "c:\program files\fds\fds5\bin\fds5_mpi_win_64.exe"
 pause

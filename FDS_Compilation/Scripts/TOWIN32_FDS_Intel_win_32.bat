@@ -20,4 +20,6 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\FDS_Compilation\intel_win_32
 copy fds5_win_32.exe "%PROGRAMFILES%\fds\fds5\bin\fds5.exe"
+cd %svn_root%\FDS_Compilation\mpi_intel_win_32
+copy fds5_mpi_win_32.exe "%PROGRAMFILES%\fds\fds5\bin\fds5_mpi.exe"
 pause
