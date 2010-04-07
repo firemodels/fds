@@ -739,6 +739,12 @@ EXTERNCPP void getBoundaryColors2(float *t, int nt, unsigned char *it,
               int ndatalevel,
               int *extreme_min, int *extreme_max
               );
+EXTERNCPP void getBoundaryColors3(float *t, int nt, unsigned char *it, 
+              int settmin, float *tmin, int settmax, float *tmax, 
+              float *tmin_global, float *tmax_global,
+              int ndatalevel, int nlevel,
+              char **labels, char *scale, float *tvals256,
+              int *extreme_min, int *extreme_max);
 EXTERNCPP void getBoundaryLabels(
               float tmin, float tmax,
               char **labels, char *scale, float *tvals256, int nlevel);

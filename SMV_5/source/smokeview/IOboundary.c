@@ -721,13 +721,17 @@ void readpatch(int ifile, int flag, int *errorcode){
       for (n=0;n<boundframestep;n++){
         if(error==0){
           int lunit=15;
+          int npqqi;
 
           FORTgetpatchdata(&lunit,&meshi->npatches,
           meshi->pi1,meshi->pi2,
           meshi->pj1,meshi->pj2,
           meshi->pk1,meshi->pk2,
-          meshi->patchtimesi,meshi->pqqi,
+          meshi->patchtimesi,meshi->pqqi,&npqqi,
           &error);
+#ifdef pp_HIST
+          update_histogram(meshi->pqqi, npqqi, pi->histogram);
+#endif
         }
       }
     }
@@ -880,11 +884,19 @@ void readpatch(int ifile, int flag, int *errorcode){
   patchinfo[ifile].extreme_max=0;
   switch(loadpatchbysteps){
   case 0:
+#ifdef pp_HIST
+    getBoundaryColors3(meshi->pqq, npqq, meshi->ipqq, 
+      setpatchmin,&patchmin, setpatchmax,&patchmax, 
+      &patchmin_global, &patchmax_global,
+      nrgb_full,nrgb, colorlabelpatch,patchscale,boundarylevels256,
+      &patchinfo[ifile].extreme_min,&patchinfo[ifile].extreme_max);
+#else
     getBoundaryColors(meshi->pqq, npqq, meshi->ipqq, 
       setpatchmin,&patchmin, setpatchmax,&patchmax, 
       &patchmin_global, &patchmax_global,
       nrgb_full,nrgb, colorlabelpatch,patchscale,boundarylevels256,
       &patchinfo[ifile].extreme_min,&patchinfo[ifile].extreme_max);
+#endif
     break;
   case 1:
     getBoundaryLabels(

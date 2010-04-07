@@ -91,7 +91,7 @@ STDCALL FORTgetpatchsizes2(int *version, int *npatch,int *npatchsize,
                            int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2, int *patchdir,
                            int *headersize, int *framesize);
 STDCALL FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
-                         float *patchtimes,float *pqq, int *error);
+                         float *patchtimes,float *pqq, int *npqq, int *error);
 STDCALL FORTgetdata2a(int *nmax,int *nspr,float *x,float *y,float *z,float *t,
                       float *stime,int *np,int *ns,int *error);
 STDCALL FORTgetdata1(int *ipart, int *error);
