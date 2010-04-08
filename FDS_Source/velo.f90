@@ -398,8 +398,12 @@ DO K=0,KBAR
          TYZ(I,J,K) = MUX*(DVDZ + DWDY)
          
          IF (IMMERSED_BOUNDARY_METHOD==2) THEN
-            IBM_SAVE1(I,J,K) = DUDZ
-            IBM_SAVE2(I,J,K) = DWDX
+            IBM_SAVE1(I,J,K) = DUDY
+            IBM_SAVE2(I,J,K) = DUDZ
+            IBM_SAVE3(I,J,K) = DVDX
+            IBM_SAVE4(I,J,K) = DVDZ
+            IBM_SAVE5(I,J,K) = DWDX
+            IBM_SAVE6(I,J,K) = DWDY
          ENDIF
          
       ENDDO
@@ -620,7 +624,7 @@ IF (BAROCLINIC .AND. .NOT.EVACUATION_ONLY(NM)) CALL BAROCLINIC_CORRECTION
 
 CALL NO_FLUX(NM)
 IF (IMMERSED_BOUNDARY_METHOD>=0) THEN
-   CALL INIT_IBM(T,NM)
+   IF (PREDICTOR) CALL INIT_IBM(T,NM)
    CALL IBM_VELOCITY_FLUX(NM)
 ENDIF
 IF (EVACUATION_ONLY(NM)) FVZ = 0._EB
@@ -1040,7 +1044,7 @@ END SUBROUTINE VELOCITY_PREDICTOR
 
 SUBROUTINE VELOCITY_CORRECTOR(NM)
 
-USE TURBULENCE, ONLY: TURBULENT_KINETIC_ENERGY
+USE TURBULENCE, ONLY: TURBULENT_KINETIC_ENERGY,SUBGRID_SCALAR_VARIANCE,WAVELET_ERROR_ESTIMATOR
 
 ! Correct the velocity components
 
@@ -1108,7 +1112,11 @@ ENDDO
 
 IF (EVACUATION_ONLY(NM)) W = 0._EB
 
-IF (CHECK_KINETIC_ENERGY .AND. .NOT.EVACUATION_ONLY(NM)) CALL TURBULENT_KINETIC_ENERGY(NM)
+IF (CHECK_KINETIC_ENERGY .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+   CALL TURBULENT_KINETIC_ENERGY(NM)
+   !CALL SUBGRID_SCALAR_VARIANCE(NM)
+   !CALL WAVELET_ERROR_ESTIMATOR(NM)
+ENDIF
 
 TUSED(4,NM)=TUSED(4,NM)+SECOND()-TNOW
 END SUBROUTINE VELOCITY_CORRECTOR
@@ -1492,7 +1500,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
             MU_DUIDXJ(ICD_SGN) = MUA*I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
             ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-   
+            
          ENDIF INTERPOLATION_IF
 
          ! Set ghost cell values at edge of computational domain
@@ -1656,14 +1664,14 @@ EXTERNAL_WALL_LOOP: DO IW=1,NEWC
    
    IF (IJKW(9,IW)==0) CYCLE EXTERNAL_WALL_LOOP
 
-   II  = IJKW( 1,IW)
-   JJ  = IJKW( 2,IW)
-   KK  = IJKW( 3,IW)
-   IOR = IJKW( 4,IW)
+   II  = IJKW(1,IW)
+   JJ  = IJKW(2,IW)
+   KK  = IJKW(3,IW)
+   IOR = IJKW(4,IW)
    IIG = IJKW(6,IW)
    JJG = IJKW(7,IW)
    KKG = IJKW(8,IW)
-   NOM = IJKW( 9,IW)
+   NOM = IJKW(9,IW)
    OM => OMESH(NOM)
    M2 => MESHES(NOM)
    
@@ -1904,7 +1912,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
             DO I=0,IBAR
                !!UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
                UVW = ABS(UU(I,J,K)*RDXN(I)) + ABS(VV(I,J,K)*RDYN(J)) + ABS(WW(I,J,K)*RDZN(K))
-               UVW = UVW + IBM_UVWMAX + ABS(DP(I,J,K))
+               UVW = UVW + ABS(DP(I,J,K))
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL=I
@@ -1934,7 +1942,7 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
             DO I=0,IBAR
                !!UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
                UVW = SQRT( (UU(I,J,K)*RDXN(I))**2 + (VV(I,J,K)*RDYN(J))**2 + (WW(I,J,K)*RDZN(K))**2 )
-               UVW = UVW + IBM_UVWMAX + ABS(DP(I,J,K))
+               UVW = UVW + ABS(DP(I,J,K))
                IF (UVW>=P_UVWMAX) THEN
                   P_UVWMAX = UVW
                   P_ICFL=I
@@ -1976,6 +1984,8 @@ WALL_LOOP: DO IW=1,NWC
       KCFL=KKG
    ENDIF
 ENDDO WALL_LOOP
+
+UVWMAX = MAX(UVWMAX,IBM_UVWMAX) ! for moving immersed boundary method
 
 CFL = DT*UVWMAX
  
@@ -2138,19 +2148,21 @@ END SUBROUTINE BAROCLINIC_CORRECTION
 
 SUBROUTINE IBM_VELOCITY_FLUX(NM)
 
-USE COMPLEX_GEOMETRY, ONLY: VELTAN2D,TRILINEAR,GETX,GETU,GETGRAD
+USE COMPLEX_GEOMETRY, ONLY: VELTAN2D,VELTAN3D,TRILINEAR,GETX,GETU,GETGRAD
 
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),DP=>NULL(),RHOP=>NULL(),PP=>NULL(), &
-                                       UBAR=>NULL(),VBAR=>NULL(),WBAR=>NULL(),DUDX=>NULL(),DVDY=>NULL(),&
-                                       DWDZ=>NULL(),DUDZ=>NULL(),DWDX=>NULL()
-REAL(EB) :: U_IBM,V_IBM,W_IBM,VEL2,DN
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP,RHOP,PP,HP, &
+                                       UBAR,VBAR,WBAR, &
+                                       DUDX,DUDY,DUDZ, &
+                                       DVDX,DVDY,DVDZ, &
+                                       DWDX,DWDY,DWDZ
+REAL(EB) :: U_IBM,V_IBM,W_IBM,DN
 REAL(EB) :: U_ROT,V_ROT,W_ROT
-REAL(EB) :: PE,PW,PT,PB
-REAL(EB) :: U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVEL(3),XGEOM(3),XCELL(3),XNODE(3),XG(3)
-REAL(EB) :: U_VEC(2),U_GEOM(2),N_VEC(2),DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),RRHO,MUA
+REAL(EB) :: PE,PW,PN,PS,PT,PB
+REAL(EB) :: U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVELO(3),XGEOM(3),XCELL(3),XEDGX(3),XEDGY(3),XEDGZ(3),XSURF(3)
+REAL(EB) :: U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),RRHO,MUA
 INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1
-TYPE(GEOMETRY_TYPE), POINTER :: G=>NULL()
+TYPE(GEOMETRY_TYPE), POINTER :: G
 
 ! References:
 !
@@ -2168,19 +2180,21 @@ IF (PREDICTOR) THEN
    WW => W
    DP => D
    RHOP => RHO
+   HP => H
 ELSE
    UU => US
    VV => VS
    WW => WS
    DP => DS
    RHOP => RHOS
+   HP => HS
 ENDIF
 
 IF (IMMERSED_BOUNDARY_METHOD==2) THEN
    PP => WORK1
-   UBAR => IBM_SAVE3
-   VBAR => IBM_SAVE4
-   WBAR => IBM_SAVE5
+   UBAR => WORK2
+   VBAR => WORK3
+   WBAR => WORK4
    DUDX => WORK5
    DVDY => WORK6
    DWDZ => WORK7
@@ -2199,9 +2213,8 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
             UBAR(I,J,K) = 0.5_EB*(UU(I,J,K)+UU(IM1,J,K))
             VBAR(I,J,K) = 0.5_EB*(VV(I,J,K)+VV(I,JM1,K))
             WBAR(I,J,K) = 0.5_EB*(WW(I,J,K)+WW(I,J,KM1))
-            
-            VEL2 = UBAR(I,J,K)**2+VBAR(I,J,K)**2+WBAR(I,J,K)**2
-            PP(I,J,K) = RHOP(I,J,K)*(H(I,J,K)-.5_EB*VEL2)
+
+            PP(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRES(I,J,K))
             
             DUDX(I,J,K) = (UU(I,J,K)-UU(IM1,J,K))/DX(I)
             DVDY(I,J,K) = (VV(I,J,K)-VV(I,JM1,K))/DY(J)
@@ -2210,8 +2223,12 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
       ENDDO
    ENDDO
    
-   DUDZ => IBM_SAVE1
-   DWDX => IBM_SAVE2
+   DUDY => IBM_SAVE1
+   DUDZ => IBM_SAVE2
+   DVDX => IBM_SAVE3
+   DVDZ => IBM_SAVE4
+   DWDX => IBM_SAVE5
+   DWDY => IBM_SAVE6
 ENDIF
 
 GEOM_LOOP: DO NG=1,N_GEOM
@@ -2230,23 +2247,25 @@ GEOM_LOOP: DO NG=1,N_GEOM
             IF (G%U_MASK(I,J,K)==1) CYCLE ! point is in gas phase
          
             IJK   = (/I,J,K/)
-            XVEL  = (/X(I),YC(J),ZC(K)/)
+            XVELO = (/X(I),YC(J),ZC(K)/)
             XCELL = (/XC(I),YC(J),ZC(K)/)
-            XNODE = (/X(I),YC(J),Z(K)/)
-            DXC   = (/DX(I),DYN(J),DZN(K)/)
+            XEDGX = (/XC(I),Y(J),Z(K)/)
+            XEDGY = (/X(I),YC(J),Z(K)/)
+            XEDGZ = (/X(I),Y(J),ZC(K)/)
+            DXC   = (/DX(I),DY(J),DZ(K)/)
   
             SELECT CASE(G%U_MASK(I,J,K))
                CASE(-1)
-                  U_ROT = (XVEL(3)-XGEOM(3))*G%OMEGA_Y - (XVEL(2)-XGEOM(2))*G%OMEGA_Z
+                  U_ROT = (XVELO(3)-XGEOM(3))*G%OMEGA_Y - (XVELO(2)-XGEOM(2))*G%OMEGA_Z
                   U_IBM = G%U + U_ROT
                CASE(0)
                   SELECT_METHOD1: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
                      CASE(0)
                         CYCLE ! treat as gas phase cell
                      CASE(1)
-                        U_ROT = (XVEL(3)-XGEOM(3))*G%OMEGA_Y - (XVEL(2)-XGEOM(2))*G%OMEGA_Z
-                        CALL GETX(XI,XVEL,NG)
-                        CALL GETU(U_DATA,DXI,XI,XVEL,IJK,1,NM)
+                        U_ROT = (XVELO(3)-XGEOM(3))*G%OMEGA_Y - (XVELO(2)-XGEOM(2))*G%OMEGA_Z
+                        CALL GETX(XI,XVELO,NG)
+                        CALL GETU(U_DATA,DXI,XI,XVELO,IJK,1,NM)
                         U_IBM = TRILINEAR(U_DATA,DXI,DXC)
                         U_IBM = 0.5_EB*(U_IBM+(G%U+U_ROT))
                      CASE(2)
@@ -2257,91 +2276,174 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         JM1 = MAX(J-1,0)
                         KM1 = MAX(K-1,0)
  
-                        CALL GETX(XI,XVEL,NG)
-                        XG    = XVEL-(XI-XVEL)                  ! point on the surface of geometry
-                        N_VEC = (/XVEL(1)-XG(1),XVEL(3)-XG(3)/) ! normal from surface to velocity point
-                        DN    = SQRT(DOT_PRODUCT(N_VEC,N_VEC))  ! distance
+                        CALL GETX(XI,XVELO,NG)                  ! find interpolation point XI for tensors
+                        XSURF = XVELO-(XI-XVELO)                ! point on the surface of geometry
+                        N_VEC = XVELO-XSURF                     ! normal from surface to velocity point
+                        DN    = SQRT(DOT_PRODUCT(N_VEC,N_VEC))  ! distance from surface to velocity point
                         N_VEC = N_VEC/DN                        ! unit normal
                         
-                        U_VEC  = (/UU(I,J,K),0.5_EB*(WBAR(I,J,K)+WBAR(IP1,J,K))/)
-                        U_ROT  = (XG(3)-XGEOM(3))*G%OMEGA_Y - (XG(2)-XGEOM(2))*G%OMEGA_Z
-                        W_ROT  = (XG(2)-XGEOM(2))*G%OMEGA_X - (XG(1)-XGEOM(1))*G%OMEGA_Y
-                        U_GEOM = (/G%U+U_ROT,G%W+W_ROT/)
+                        U_VEC  = (/UU(I,J,K),0.5_EB*(VBAR(I,J,K)+VBAR(IP1,J,K)),0.5_EB*(WBAR(I,J,K)+WBAR(IP1,J,K))/)
+                        U_ROT  = (XSURF(3)-XGEOM(3))*G%OMEGA_Y - (XSURF(2)-XGEOM(2))*G%OMEGA_Z
+                        V_ROT  = (XSURF(1)-XGEOM(1))*G%OMEGA_Z - (XSURF(3)-XGEOM(3))*G%OMEGA_X
+                        W_ROT  = (XSURF(2)-XGEOM(2))*G%OMEGA_X - (XSURF(1)-XGEOM(1))*G%OMEGA_Y
+                        U_GEOM = (/G%U+U_ROT,G%V+V_ROT,G%W+W_ROT/)
 
                         DIVU = 0.5_EB*(DP(I,J,K)+DP(IP1,J,K))
                         
                         ! compute GRADU at point XI
                         CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,1,1,NM); GRADU(1,1) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGZ,IJK,1,2,NM); GRADU(1,2) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGY,IJK,1,3,NM); GRADU(1,3) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGZ,IJK,2,1,NM); GRADU(2,1) = TRILINEAR(U_DATA,DXI,DXC)
                         CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,2,2,NM); GRADU(2,2) = TRILINEAR(U_DATA,DXI,DXC)
-                        CALL GETGRAD(U_DATA,DXI,XI,XNODE,IJK,1,2,NM); GRADU(1,2) = TRILINEAR(U_DATA,DXI,DXC)
-                        CALL GETGRAD(U_DATA,DXI,XI,XNODE,IJK,2,1,NM); GRADU(2,1) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGX,IJK,2,3,NM); GRADU(2,3) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGY,IJK,3,1,NM); GRADU(3,1) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGX,IJK,3,2,NM); GRADU(3,2) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,3,3,NM); GRADU(3,3) = TRILINEAR(U_DATA,DXI,DXC)
                         
-                        ! compute GRADP at point XVEL
+                        ! compute GRADP at point XVELO
                         PE = PP(IP1,J,K)
                         PW = PP(I,J,K)
+                        PN = 0.25_EB*(PP(I,J,K)+PP(IP1,J,K)+PP(I,JP1,K)+PP(IP1,JP1,K))
+                        PS = 0.25_EB*(PP(I,J,K)+PP(IP1,J,K)+PP(I,JM1,K)+PP(IP1,JM1,K))
                         PT = 0.25_EB*(PP(I,J,K)+PP(IP1,J,K)+PP(I,J,KP1)+PP(IP1,J,KP1))
                         PB = 0.25_EB*(PP(I,J,K)+PP(IP1,J,K)+PP(I,J,KM1)+PP(IP1,J,KM1))
                   
                         GRADP(1) = (PE-PW)/DXN(I)
-                        GRADP(2) = (PT-PB)/DZ(K)
+                        GRADP(2) = (PN-PS)/DY(J)
+                        GRADP(3) = (PT-PB)/DZ(K)
  
                         RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(IP1,J,K))
-                        MUA = 0.5_EB*(MU(I,J,K)+MU(IP1,J,K))
+                        !!MUA = 0.5_EB*(MU(I,J,K)+MU(IP1,J,K)) ! strictly speaking, should be interpolated to XI
+                        CALL GETU(U_DATA,DXI,XI,XCELL,IJK,4,NM); MUA = TRILINEAR(U_DATA,DXI,DXC)
                   
                         TAU_IJ(1,1) = -MUA*(GRADU(1,1)-TWTH*DIVU)
                         TAU_IJ(2,2) = -MUA*(GRADU(2,2)-TWTH*DIVU)
+                        TAU_IJ(3,3) = -MUA*(GRADU(3,3)-TWTH*DIVU)
                         TAU_IJ(1,2) = -MUA*(GRADU(1,2)+GRADU(2,1))
+                        TAU_IJ(1,3) = -MUA*(GRADU(1,3)+GRADU(3,1))
+                        TAU_IJ(2,3) = -MUA*(GRADU(2,3)+GRADU(3,2))
                         TAU_IJ(2,1) = TAU_IJ(1,2)
+                        TAU_IJ(3,1) = TAU_IJ(1,3)
+                        TAU_IJ(3,2) = TAU_IJ(2,3)
                   
                         I_VEL = 1
 
                         !U_IBM = UU(I,J,K)
                         MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(IP1,J,K))
-                        U_IBM = VELTAN2D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL)
+                        !!U_IBM = VELTAN2D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL)
+                        U_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
                   END SELECT SELECT_METHOD1
             END SELECT
       
-            FVX(I,J,K) = -RDXN(I)*(H(I+1,J,K)-H(I,J,K)) - (U_IBM-UU(I,J,K))/DT
+            FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - (U_IBM-UU(I,J,K))/DT
         
          ENDDO
       ENDDO
    ENDDO
    
-   IF (.NOT.TWO_D) THEN
+   TWO_D_IF: IF (.NOT.TWO_D) THEN
       DO K=G%MIN_K(NM),G%MAX_K(NM)
          DO J=G%MIN_J(NM),G%MAX_J(NM)
             DO I=G%MIN_I(NM),G%MAX_I(NM)
                IF (G%V_MASK(I,J,K)==1) CYCLE ! point is in gas phase
          
-               IJK  = (/I,J,K/)
-               XVEL = (/XC(I),Y(J),ZC(K)/)
+               IJK   = (/I,J,K/)
+               XVELO = (/XC(I),Y(J),ZC(K)/)
+               XCELL = (/XC(I),YC(J),ZC(K)/)
+               XEDGX = (/XC(I),Y(J),Z(K)/)
+               XEDGY = (/X(I),YC(J),Z(K)/)
+               XEDGZ = (/X(I),Y(J),ZC(K)/)
+               DXC   = (/DX(I),DY(J),DZ(K)/)
          
                SELECT CASE(G%V_MASK(I,J,K))
                   CASE(-1)
-                     V_ROT = (XVEL(1)-XGEOM(1))*G%OMEGA_Z - (XVEL(3)-XGEOM(3))*G%OMEGA_X
+                     V_ROT = (XVELO(1)-XGEOM(1))*G%OMEGA_Z - (XVELO(3)-XGEOM(3))*G%OMEGA_X
                      V_IBM = G%V + V_ROT
                   CASE(0)
                      SELECT_METHOD2: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
                         CASE(0)
                            CYCLE
-                        CASE(1:2)
-                           V_ROT = (XVEL(1)-XGEOM(1))*G%OMEGA_Z - (XVEL(3)-XGEOM(3))*G%OMEGA_X
-                           CALL GETX(XI,XVEL,NG)
-                           CALL GETU(U_DATA,DXI,XI,XVEL,IJK,2,NM)
-                           DXC = (/DXN(I),DY(J),DZN(K)/)
+                        CASE(1)
+                           V_ROT = (XVELO(1)-XGEOM(1))*G%OMEGA_Z - (XVELO(3)-XGEOM(3))*G%OMEGA_X
+                           CALL GETX(XI,XVELO,NG)
+                           CALL GETU(U_DATA,DXI,XI,XVELO,IJK,2,NM)
                            V_IBM = TRILINEAR(U_DATA,DXI,DXC)
                            V_IBM = 0.5_EB*(V_IBM+(G%V+V_ROT))
-                        !CASE(2)
-                        !   V_IBM = G%V + V_ROT
+                        CASE(2)
+                           IP1 = MIN(I+1,IBP1)
+                           JP1 = MIN(J+1,JBP1)
+                           KP1 = MIN(K+1,KBP1)
+                           IM1 = MAX(I-1,0)
+                           JM1 = MAX(J-1,0)
+                           KM1 = MAX(K-1,0)
+ 
+                           CALL GETX(XI,XVELO,NG)                  ! find interpolation point XI for tensors
+                           XSURF = XVELO-(XI-XVELO)                ! point on the surface of geometry
+                           N_VEC = XVELO-XSURF                     ! normal from surface to velocity point
+                           DN    = SQRT(DOT_PRODUCT(N_VEC,N_VEC))  ! distance from surface to velocity point
+                           N_VEC = N_VEC/DN                        ! unit normal
+                        
+                           U_VEC  = (/0.5_EB*(UBAR(I,J,K)+UBAR(I,JP1,K)),VV(I,J,K),0.5_EB*(WBAR(I,J,K)+WBAR(I,JP1,K))/)
+                           U_ROT  = (XSURF(3)-XGEOM(3))*G%OMEGA_Y - (XSURF(2)-XGEOM(2))*G%OMEGA_Z
+                           V_ROT  = (XSURF(1)-XGEOM(1))*G%OMEGA_Z - (XSURF(3)-XGEOM(3))*G%OMEGA_X
+                           W_ROT  = (XSURF(2)-XGEOM(2))*G%OMEGA_X - (XSURF(1)-XGEOM(1))*G%OMEGA_Y
+                           U_GEOM = (/G%U+U_ROT,G%V+V_ROT,G%W+W_ROT/)
+
+                           DIVU = 0.5_EB*(DP(I,J,K)+DP(I,JP1,K))
+                        
+                           ! compute GRADU at point XI
+                           CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,1,1,NM); GRADU(1,1) = TRILINEAR(U_DATA,DXI,DXC)
+                           CALL GETGRAD(U_DATA,DXI,XI,XEDGZ,IJK,1,2,NM); GRADU(1,2) = TRILINEAR(U_DATA,DXI,DXC)
+                           CALL GETGRAD(U_DATA,DXI,XI,XEDGY,IJK,1,3,NM); GRADU(1,3) = TRILINEAR(U_DATA,DXI,DXC)
+                           CALL GETGRAD(U_DATA,DXI,XI,XEDGZ,IJK,2,1,NM); GRADU(2,1) = TRILINEAR(U_DATA,DXI,DXC)
+                           CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,2,2,NM); GRADU(2,2) = TRILINEAR(U_DATA,DXI,DXC)
+                           CALL GETGRAD(U_DATA,DXI,XI,XEDGX,IJK,2,3,NM); GRADU(2,3) = TRILINEAR(U_DATA,DXI,DXC)
+                           CALL GETGRAD(U_DATA,DXI,XI,XEDGY,IJK,3,1,NM); GRADU(3,1) = TRILINEAR(U_DATA,DXI,DXC)
+                           CALL GETGRAD(U_DATA,DXI,XI,XEDGX,IJK,3,2,NM); GRADU(3,2) = TRILINEAR(U_DATA,DXI,DXC)
+                           CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,3,3,NM); GRADU(3,3) = TRILINEAR(U_DATA,DXI,DXC)
+                        
+                           ! compute GRADP at point XVELO
+                           PE = 0.25_EB*(PP(I,J,K)+PP(IP1,J,K)+PP(I,JP1,K)+PP(IP1,JP1,K))
+                           PW = 0.25_EB*(PP(I,J,K)+PP(IM1,J,K)+PP(I,JP1,K)+PP(IM1,JP1,K))
+                           PN = PP(I,JP1,K)
+                           PS = PP(I,J,K)
+                           PT = 0.25_EB*(PP(I,J,K)+PP(I,J,KP1)+PP(I,JP1,K)+PP(I,JP1,KP1))
+                           PB = 0.25_EB*(PP(I,J,K)+PP(I,J,KM1)+PP(I,JP1,K)+PP(I,JP1,KM1))
+                  
+                           GRADP(1) = (PE-PW)/DX(I)
+                           GRADP(2) = (PN-PS)/DYN(J)
+                           GRADP(3) = (PT-PB)/DZ(K)
+ 
+                           RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,JP1,K))
+                           !!MUA = 0.5_EB*(MU(I,J,K)+MU(I,JP1,K)) ! strictly speaking, should be interpolated to XI
+                           CALL GETU(U_DATA,DXI,XI,XCELL,IJK,4,NM); MUA = TRILINEAR(U_DATA,DXI,DXC)
+                  
+                           TAU_IJ(1,1) = -MUA*(GRADU(1,1)-TWTH*DIVU)
+                           TAU_IJ(2,2) = -MUA*(GRADU(2,2)-TWTH*DIVU)
+                           TAU_IJ(3,3) = -MUA*(GRADU(3,3)-TWTH*DIVU)
+                           TAU_IJ(1,2) = -MUA*(GRADU(1,2)+GRADU(2,1))
+                           TAU_IJ(1,3) = -MUA*(GRADU(1,3)+GRADU(3,1))
+                           TAU_IJ(2,3) = -MUA*(GRADU(2,3)+GRADU(3,2))
+                           TAU_IJ(2,1) = TAU_IJ(1,2)
+                           TAU_IJ(3,1) = TAU_IJ(1,3)
+                           TAU_IJ(3,2) = TAU_IJ(2,3)
+                  
+                           I_VEL = 2
+
+                           !V_IBM = VV(I,J,K)
+                           MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(I,JP1,K))
+                           !!V_IBM = VELTAN2D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL)
+                           V_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
                      END SELECT SELECT_METHOD2
                END SELECT
          
-               FVY(I,J,K) = -RDYN(J)*(H(I,J+1,K)-H(I,J,K)) - (V_IBM-VV(I,J,K))/DT
+               FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - (V_IBM-VV(I,J,K))/DT
          
             ENDDO
          ENDDO 
       ENDDO
-   ENDIF
+   ENDIF TWO_D_IF
    
    DO K=G%MIN_K(NM),G%MAX_K(NM)
       DO J=G%MIN_J(NM),G%MAX_J(NM)
@@ -2349,23 +2451,25 @@ GEOM_LOOP: DO NG=1,N_GEOM
             IF (G%W_MASK(I,J,K)==1) CYCLE
          
             IJK   = (/I,J,K/)
-            XVEL  = (/XC(I),YC(J),Z(K)/)
+            XVELO = (/XC(I),YC(J),Z(K)/)
             XCELL = (/XC(I),YC(J),ZC(K)/)
-            XNODE = (/X(I),YC(J),Z(K)/)
-            DXC   = (/DXN(I),DYN(J),DZ(K)/)
+            XEDGX = (/XC(I),Y(J),Z(K)/)
+            XEDGY = (/X(I),YC(J),Z(K)/)
+            XEDGZ = (/X(I),Y(J),ZC(K)/)
+            DXC   = (/DX(I),DY(J),DZ(K)/) ! assume uniform grids for now
             
             SELECT CASE(G%W_MASK(I,J,K))
                CASE(-1)
-                  W_ROT = (XVEL(2)-XGEOM(2))*G%OMEGA_X - (XVEL(1)-XGEOM(1))*G%OMEGA_Y
+                  W_ROT = (XVELO(2)-XGEOM(2))*G%OMEGA_X - (XVELO(1)-XGEOM(1))*G%OMEGA_Y
                   W_IBM = G%W + W_ROT
                CASE(0)
                   SELECT_METHOD3: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
                      CASE(0)
                         CYCLE
                      CASE(1)
-                        W_ROT = (XVEL(2)-XGEOM(2))*G%OMEGA_X - (XVEL(1)-XGEOM(1))*G%OMEGA_Y
-                        CALL GETX(XI,XVEL,NG)
-                        CALL GETU(U_DATA,DXI,XI,XVEL,IJK,3,NM)
+                        W_ROT = (XVELO(2)-XGEOM(2))*G%OMEGA_X - (XVELO(1)-XGEOM(1))*G%OMEGA_Y
+                        CALL GETX(XI,XVELO,NG)
+                        CALL GETU(U_DATA,DXI,XI,XVELO,IJK,3,NM)
                         W_IBM = TRILINEAR(U_DATA,DXI,DXC)
                         W_IBM = 0.5_EB*(W_IBM+(G%W+W_ROT))
                      CASE(2)
@@ -2376,51 +2480,67 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         JM1 = MAX(J-1,0)
                         KM1 = MAX(K-1,0)
                                                 
-                        CALL GETX(XI,XVEL,NG)
-                        XG    = XVEL-(XI-XVEL)                  ! point on the surface of geometry
-                        N_VEC = (/XVEL(1)-XG(1),XVEL(3)-XG(3)/) ! normal from surface to velocity point
-                        DN    = SQRT(DOT_PRODUCT(N_VEC,N_VEC))  ! distance
+                        CALL GETX(XI,XVELO,NG)                  ! find interpolation point XI for tensors
+                        XSURF = XVELO-(XI-XVELO)                ! point on the surface of geometry
+                        N_VEC = XVELO-XSURF                     ! normal from surface to velocity point
+                        DN    = SQRT(DOT_PRODUCT(N_VEC,N_VEC))  ! distance from surface to velocity point
                         N_VEC = N_VEC/DN                        ! unit normal
                         
-                        U_VEC  = (/0.5_EB*(UBAR(I,J,K)+UBAR(I,J,KP1)),WW(I,J,K)/)
-                        U_ROT  = (XG(3)-XGEOM(3))*G%OMEGA_Y - (XG(2)-XGEOM(2))*G%OMEGA_Z
-                        W_ROT  = (XG(2)-XGEOM(2))*G%OMEGA_X - (XG(1)-XGEOM(1))*G%OMEGA_Y
-                        U_GEOM = (/G%U+U_ROT,G%W+W_ROT/)
+                        U_VEC  = (/0.5_EB*(UBAR(I,J,K)+UBAR(I,J,KP1)),0.5_EB*(VBAR(I,J,K)+VBAR(I,J,KP1)),WW(I,J,K)/)
+                        U_ROT  = (XSURF(3)-XGEOM(3))*G%OMEGA_Y - (XSURF(2)-XGEOM(2))*G%OMEGA_Z
+                        V_ROT  = (XSURF(1)-XGEOM(1))*G%OMEGA_Z - (XSURF(3)-XGEOM(3))*G%OMEGA_X
+                        W_ROT  = (XSURF(2)-XGEOM(2))*G%OMEGA_X - (XSURF(1)-XGEOM(1))*G%OMEGA_Y
+                        U_GEOM = (/G%U+U_ROT,G%V+V_ROT,G%W+W_ROT/)
                         
                         DIVU = 0.5_EB*(DP(I,J,K)+DP(I,J,KP1))
                        
                         ! compute GRADU at point XI
                         CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,1,1,NM); GRADU(1,1) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGZ,IJK,1,2,NM); GRADU(1,2) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGY,IJK,1,3,NM); GRADU(1,3) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGZ,IJK,2,1,NM); GRADU(2,1) = TRILINEAR(U_DATA,DXI,DXC)
                         CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,2,2,NM); GRADU(2,2) = TRILINEAR(U_DATA,DXI,DXC)
-                        CALL GETGRAD(U_DATA,DXI,XI,XNODE,IJK,1,2,NM); GRADU(1,2) = TRILINEAR(U_DATA,DXI,DXC)
-                        CALL GETGRAD(U_DATA,DXI,XI,XNODE,IJK,2,1,NM); GRADU(2,1) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGX,IJK,2,3,NM); GRADU(2,3) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGY,IJK,3,1,NM); GRADU(3,1) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XEDGX,IJK,3,2,NM); GRADU(3,2) = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETGRAD(U_DATA,DXI,XI,XCELL,IJK,3,3,NM); GRADU(3,3) = TRILINEAR(U_DATA,DXI,DXC)
                   
-                        ! compute GRADP at point XVEL
+                        ! compute GRADP at point XVELO
                         PE = 0.25_EB*(PP(I,J,K)+PP(I,J,KP1)+PP(IP1,J,K)+PP(IP1,J,KP1))
                         PW = 0.25_EB*(PP(I,J,K)+PP(I,J,KP1)+PP(IM1,J,K)+PP(IM1,J,KP1))
+                        PN = 0.25_EB*(PP(I,J,K)+PP(I,J,KP1)+PP(I,JP1,K)+PP(I,JP1,KP1))
+                        PS = 0.25_EB*(PP(I,J,K)+PP(I,J,KP1)+PP(I,JM1,K)+PP(I,JM1,KP1))
                         PT = PP(I,J,KP1)
                         PB = PP(I,J,K)
                   
                         GRADP(1) = (PE-PW)/DX(I)
-                        GRADP(2) = (PT-PB)/DZN(K)
+                        GRADP(2) = (PN-PS)/DY(J)
+                        GRADP(3) = (PT-PB)/DZN(K)
  
                         RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,KP1))
-                        MUA = 0.5_EB*(MU(I,J,K)+MU(I,J,KP1))
+                        !!MUA = 0.5_EB*(MU(I,J,K)+MU(I,J,KP1)) ! strictly speaking, should be interpolated to XI
+                        CALL GETU(U_DATA,DXI,XI,XCELL,IJK,4,NM); MUA = TRILINEAR(U_DATA,DXI,DXC)
                   
                         TAU_IJ(1,1) = -MUA*(GRADU(1,1)-TWTH*DIVU)
                         TAU_IJ(2,2) = -MUA*(GRADU(2,2)-TWTH*DIVU)
+                        TAU_IJ(3,3) = -MUA*(GRADU(3,3)-TWTH*DIVU)
                         TAU_IJ(1,2) = -MUA*(GRADU(1,2)+GRADU(2,1))
+                        TAU_IJ(1,3) = -MUA*(GRADU(1,3)+GRADU(3,1))
+                        TAU_IJ(2,3) = -MUA*(GRADU(2,3)+GRADU(3,2))
                         TAU_IJ(2,1) = TAU_IJ(1,2)
+                        TAU_IJ(3,1) = TAU_IJ(1,3)
+                        TAU_IJ(3,2) = TAU_IJ(2,3)
                   
-                        I_VEL = 2 ! will change when we go to 3D
+                        I_VEL = 3 ! will change when we go to 3D
                   
                         !W_IBM = WW(I,J,K)
                         MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(I,J,KP1))
-                        W_IBM = VELTAN2D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL)
+                        !!W_IBM = VELTAN2D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL)
+                        W_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
                   END SELECT SELECT_METHOD3
             END SELECT
          
-            FVZ(I,J,K) = -RDZN(K)*(H(I,J,K+1)-H(I,J,K)) - (W_IBM-WW(I,J,K))/DT
+            FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - (W_IBM-WW(I,J,K))/DT
          
          ENDDO
       ENDDO
