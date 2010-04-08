@@ -18,7 +18,7 @@ CHARACTER(255), PARAMETER :: turbdate='$Date: 2008-12-18 13:26:05 -0500 (Thu, 18
 PRIVATE
 PUBLIC :: ANALYTICAL_SOLUTION, sandia_dat, INIT_TURB_ARRAYS, spectral_output, VARDEN_DYNSMAG, &
           GET_REV_turb, TURBULENT_KINETIC_ENERGY, WERNER_WENGLE_WALL_MODEL, COMPRESSION_WAVE, &
-          DUMP_RAW_DATA, SURFACE_HEAT_FLUX_MODEL
+          DUMP_RAW_DATA, SURFACE_HEAT_FLUX_MODEL, SUBGRID_SCALAR_VARIANCE, WAVELET_ERROR_ESTIMATOR
  
 CONTAINS
 
@@ -1122,33 +1122,51 @@ ENDDO
 END SUBROUTINE ANALYTICAL_SOLUTION
 
 
-SUBROUTINE COMPRESSION_WAVE(NM,T)
+SUBROUTINE COMPRESSION_WAVE(NM,T,ITEST)
 IMPLICIT NONE
 
-INTEGER, INTENT(IN) :: NM
+INTEGER, INTENT(IN) :: NM,ITEST
 REAL(EB), INTENT(IN) :: T
 INTEGER :: I,J,K
 
 CALL POINT_TO_MESH(NM)
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=0,IBAR
-         !U(I,J,K) = 2._EB + SIN(X(I))
-         U(I,J,K) = 0.5_EB*SIN(X(I))*COS(T)
-         US(I,J,K) = U(I,J,K)
+SELECT CASE(ITEST)
+   CASE(3)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               U(I,J,K) = 2._EB + SIN(X(I))
+               US(I,J,K) = U(I,J,K)
+            ENDDO
+         ENDDO
       ENDDO
-   ENDDO
-ENDDO
-DO K=0,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         !W(I,J,K) = 2._EB + SIN(Z(K))
-         W(I,J,K) = 0.5_EB*SIN(Z(K))*COS(T)
-         WS(I,J,K) = W(I,J,K)
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               W(I,J,K) = 2._EB + SIN(Z(K))
+               WS(I,J,K) = W(I,J,K)
+            ENDDO
+         ENDDO
       ENDDO
-   ENDDO
-ENDDO
+   CASE(4)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=0,IBAR
+               U(I,J,K) = 0.5_EB*SIN(X(I))*COS(T)
+               US(I,J,K) = U(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               W(I,J,K) = 0.5_EB*SIN(Z(K))*COS(T)
+               WS(I,J,K) = W(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+END SELECT
 
 DO K=1,KBAR
    DO J=1,JBAR
@@ -1769,117 +1787,166 @@ ENDDO
 END SUBROUTINE TURBULENT_KINETIC_ENERGY
 
 
-!SUBROUTINE TURBULENT_SCALAR_DISSIPATION(NM)
-!IMPLICIT NONE
+SUBROUTINE SUBGRID_SCALAR_VARIANCE(NM)
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: NM
+INTEGER :: I,J,K,N_LO(3),N_HI(3),ARRAY_LO(3),ARRAY_HI(3)
+REAL(EB) :: T_TOT,T_LES,T_SGS
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: ZP,ZP_HAT
+
+CALL POINT_TO_MESH(NM)
+
+N_LO = 1
+N_HI = (/IBAR,JBAR,KBAR/)
+
+ARRAY_LO = 0
+ARRAY_HI = (/IBP1,JBP1,KBP1/)
+
+IF (PREDICTOR) THEN
+   YYP=>YYS
+ELSE
+   YYP=>YY
+ENDIF
+ZP => WORK1
+ZP_HAT => WORK2
+
+DO K = ARRAY_LO(3),ARRAY_HI(3)
+   DO J = ARRAY_LO(2),ARRAY_HI(2)
+      DO I = ARRAY_LO(1),ARRAY_HI(1)
+         ZP(I,J,K) = YYP(I,J,K,1) ! this is a hack for now because mixture fraction is not general
+      ENDDO
+   ENDDO
+ENDDO
+CALL TEST_FILTER(ZP_HAT,ZP,N_LO,N_HI,ARRAY_LO,ARRAY_HI)
+   
+DO K = N_LO(3),N_HI(3)
+   DO J = N_LO(2),N_HI(2)
+      DO I = N_LO(1),N_HI(1)
+      
+         T_LES = ZP(I,J,K)**2 - ZP_HAT(I,J,K)**2
+         T_SGS = (ZP(I,J,K)-ZP_HAT(I,J,K))**2
+         T_TOT = T_LES + T_SGS
+         
+         IF (T_TOT>0._EB) THEN
+            MSR(I,J,K) = T_SGS/T_TOT
+         ELSE
+            MSR(I,J,K) = 0._EB
+         ENDIF
+         
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE SUBGRID_SCALAR_VARIANCE
+
+
+SUBROUTINE WAVELET_ERROR_ESTIMATOR(NM)
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: NM
+INTEGER :: I,J,K
+REAL(EB) :: SS(4)
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: ZP
+
+CALL POINT_TO_MESH(NM)
+
+IF (PREDICTOR) THEN
+   YYP=>YYS
+ELSE
+   YYP=>YY
+ENDIF
+ZP => WORK1
+
+IF (.NOT.MIXTURE_FRACTION) THEN
+   DO K = 0,KBP1
+      DO J = 0,JBP1
+         DO I = 0,IBP1
+            ZP(I,J,K) = YYP(I,J,K,1) ! hack
+         ENDDO
+      ENDDO
+   ENDDO
+ELSE
+   DO K = 0,KBP1
+      DO J = 0,JBP1
+         DO I = 0,IBP1
+            ZP(I,J,K) = SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
+WEM = 0._EB
+DO K = 1,KBAR
+   DO J = 1,JBAR
+      DO I = 2,IBAR
+          SS = ZP(I-2:I+1,J,K)
+          WEM(I,J,K) = WAVELET_ERROR(SS)
+      ENDDO
+   ENDDO
+ENDDO
+IF (.NOT.TWO_D) THEN
+   DO K = 1,KBAR
+      DO J = 2,JBAR
+         DO I = 1,IBAR
+            SS = ZP(I,J-2:J+1,K)
+            WEM(I,J,K) = MAX(WEM(I,J,K),WAVELET_ERROR(SS))
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+DO K = 2,KBAR
+   DO J = 1,JBAR
+      DO I = 1,IBAR
+         SS = ZP(I,J,K-2:K+1)
+         WEM(I,J,K) = MAX(WEM(I,J,K),WAVELET_ERROR(SS))
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE WAVELET_ERROR_ESTIMATOR
+
+
+REAL(EB) FUNCTION WAVELET_ERROR(S)
+IMPLICIT NONE
+
+INTEGER, PARAMETER :: M=2 ! only need two level transform, but could be generalized
+REAL(EB), INTENT(IN) :: S(2*M)
+REAL(EB) :: A(M,M)=0._EB,C(M,M)=0._EB,C1,C2
+INTEGER :: I,J,K,N
+
+! Comments: This function generates a normalized error measure WAVELET_ERROR based on coefficients
+! from a simple Haar wavelet transform.  The function requires the input of 5 scalar values.  The
+! error is estimated at the point of the median value S(3) based on the 4 segment averages...
 !
-!INTEGER, INTENT(IN) :: NM
-!INTEGER :: I,J,K,N_LO(3),N_HI(3),ARRAY_LO(3),ARRAY_HI(3)
-!REAL(EB) :: DZZPDX,DZZPDY,DZZPDZ
-!REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
-!REAL(EB), POINTER, DIMENSION(:,:,:) :: ZZP,ZZP_HAT,ZZP_PRIME
-!
-!CALL POINT_TO_MESH(NM)
-!
-!N_LO = 1
-!N_HI = (/IBAR,JBAR,KBAR/)
-!
-!ARRAY_LO = 0
-!ARRAY_HI = (/IBP1,JBP1,KBP1/)
-!
-!IF (PREDICTOR) THEN
-!   YYP=>YYS
-!ELSE
-!   YYP=>YY
-!ENDIF
-!ZZP       => WORK1
-!ZZP_HAT   => WORK2
-!ZZP_PRIME => WORK3
-!
-!DO K = ARRAY_LO(3),ARRAY_HI(3)
-!   DO J = ARRAY_LO(2),ARRAY_HI(2)
-!      DO I = ARRAY_LO(1),ARRAY_HI(1)
-!         ZZP(I,J,K) = SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
-!      ENDDO
-!   ENDDO
-!ENDDO
-!CALL TEST_FILTER(ZZP_HAT,ZZP,N_LO,N_HI,ARRAY_LO,ARRAY_HI)
-!DO K = ARRAY_LO(3),ARRAY_HI(3)
-!   DO J = ARRAY_LO(2),ARRAY_HI(2)
-!      DO I = ARRAY_LO(1),ARRAY_HI(1)
-!         ZZP_PRIME(I,J,K) = ZZP(I,J,K) - ZZP_HAT(I,J,K)
-!      ENDDO
-!   ENDDO
-!ENDDO
-!   
-!DO K = N_LO(3),N_HI(3)
-!   DO J = N_LO(2),N_HI(2)
-!      DO I = N_LO(1),N_HI(1)
-!      
-!         DZZPDX = (ZZP_PRIME(I+1,J,K)-ZZP_PRIME(I-1,J,K))/(DXN(I-1)+DXN(I))
-!         DZZPDY = (ZZP_PRIME(I,J+1,K)-ZZP_PRIME(I,J-1,K))/(DYN(J-1)+DYN(J))
-!         DZZPDZ = (ZZP_PRIME(I,J,K+1)-ZZP_PRIME(I,J,K-1))/(DZN(K-1)+DZN(K))
-!                   
-!         ! Scalar Dissipation Rate (1/s)
-!         SDR(I,J,K) = 2*MU(I,J,K)/(SC*RHO(I,J,K))*(DZZPDX**2+DZZPDY**2+DZZPDZ**2)
-!         
-!      ENDDO
-!   ENDDO
-!ENDDO
-!
-!END SUBROUTINE TURBULENT_SCALAR_DISSIPATION
-!
-!
-!SUBROUTINE SUBGRID_SCALAR_VARIANCE(NM)
-!IMPLICIT NONE
-!
-!INTEGER, INTENT(IN) :: NM
-!INTEGER :: I,J,K,N_LO(3),N_HI(3),ARRAY_LO(3),ARRAY_HI(3)
-!REAL(EB) :: DZZPDX,DZZPDY,DZZPDZ,DELTA2
-!REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
-!REAL(EB), POINTER, DIMENSION(:,:,:) :: ZZP
-!REAL(EB), PARAMETER :: C_SGSVAR=0.09 ! Branley and Jones (1999)
-!
-!CALL POINT_TO_MESH(NM)
-!
-!N_LO = 1
-!N_HI = (/IBAR,JBAR,KBAR/)
-!
-!ARRAY_LO = 0
-!ARRAY_HI = (/IBP1,JBP1,KBP1/)
-!
-!IF (PREDICTOR) THEN
-!   YYP=>YYS
-!ELSE
-!   YYP=>YY
-!ENDIF
-!ZZP => WORK1
-!
-!DO K = ARRAY_LO(3),ARRAY_HI(3)
-!   DO J = ARRAY_LO(2),ARRAY_HI(2)
-!      DO I = ARRAY_LO(1),ARRAY_HI(1)
-!         ZZP(I,J,K) = SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
-!      ENDDO
-!   ENDDO
-!ENDDO
-!   
-!DO K = N_LO(3),N_HI(3)
-!   DO J = N_LO(2),N_HI(2)
-!      DO I = N_LO(1),N_HI(1)
-!      
-!         DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
-!      
-!         DZZPDX = (ZZP(I+1,J,K)-ZZP(I-1,J,K))/(DXN(I-1)+DXN(I))
-!         DZZPDY = (ZZP(I,J+1,K)-ZZP(I,J-1,K))/(DYN(J-1)+DYN(J))
-!         DZZPDZ = (ZZP(I,J,K+1)-ZZP(I,J,K-1))/(DZN(K-1)+DZN(K))
-!                   
-!         ! sgs scalar variance
-!         SGS_VAR(I,J,K) = C_SGSVAR*DELTA2*(DZZPDX**2+DZZPDY**2+DZZPDZ**2)
-!         
-!      ENDDO
-!   ENDDO
-!ENDDO
-!
-!END SUBROUTINE SUBGRID_SCALAR_VARIANCE
+!    S(1)    S(2)    S(3)    S(4)
+! |   o   |   o   |   o   |   o   |
+!                     E
+
+! discrete Haar wavelet transform
+N=M
+DO I=1,M
+   DO J=1,N
+      K=2*J-1
+      IF (I==1) THEN
+         A(I,J) = 0.5_EB*(S(K)+S(K+1))
+         C(I,J) = 0.5_EB*(S(K)-S(K+1))
+      ELSE
+         A(I,J) = 0.5_EB*(A(I-1,K)+A(I-1,K+1))
+         C(I,J) = 0.5_EB*(A(I-1,K)-A(I-1,K+1))
+      ENDIF
+   ENDDO
+   N=N/2;
+ENDDO
+
+C1 = SUM(C(1,:))
+C2 = SUM(C(2,:))
+
+WAVELET_ERROR = ABS(C1-C2)/(ABS(A(2,1))+1.E-6_EB)
+
+END FUNCTION WAVELET_ERROR
 
 
 SUBROUTINE WERNER_WENGLE_WALL_MODEL(SF,U_TAU,U1,NU,DZ,ROUGHNESS)
@@ -2225,6 +2292,7 @@ LU_RAW_DATA  = GET_FILE_NUMBER()
 FN_RAW_DATA  = TRIM(CHID)//'_rawu.csv'
 
 OPEN (UNIT=LU_RAW_DATA,FILE=FN_RAW_DATA,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
+WRITE (LU_RAW_DATA,*) '      X (m),       Y (m),       Z (m),       U (m/s)'
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
@@ -2235,9 +2303,24 @@ ENDDO
 CLOSE (LU_RAW_DATA)
 
 LU_RAW_DATA  = GET_FILE_NUMBER()
+FN_RAW_DATA  = TRIM(CHID)//'_rawv.csv'
+
+OPEN (UNIT=LU_RAW_DATA,FILE=FN_RAW_DATA,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
+WRITE (LU_RAW_DATA,*) '      X (m),       Y (m),       Z (m),       V (m/s)'
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         WRITE (LU_RAW_DATA,'(3(F12.6,A),1F14.8)') XC(I),',',Y(J),',',ZC(K),',',V(I,J,K)
+      ENDDO
+   ENDDO
+ENDDO
+CLOSE (LU_RAW_DATA)
+
+LU_RAW_DATA  = GET_FILE_NUMBER()
 FN_RAW_DATA  = TRIM(CHID)//'_raww.csv'
 
 OPEN (UNIT=LU_RAW_DATA,FILE=FN_RAW_DATA,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
+WRITE (LU_RAW_DATA,*) '      X (m),       Y (m),       Z (m),       W (m/s)'
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -2353,7 +2436,7 @@ FZ2=>M2%SCALAR_SAVE3
 
 ! Restrict fine mesh to coarse mesh for embedded cells
 
-SPECIES_LOOP: DO N = 0,N_SPECIES
+SPECIES_LOOP: DO N=0,N_SPECIES
 
    ! x-direction fluxes
 
@@ -2361,7 +2444,7 @@ SPECIES_LOOP: DO N = 0,N_SPECIES
       KK_0 = KK_LO + (K-K_LO)*NRZ
       DO J = J_LO,J_HI
          JJ_0 = JJ_LO + (J-J_LO)*NRY
-         DO I = I_LO-1,I_HI !!
+         DO I = I_LO-1,I_HI !! note: this includes fine mesh boundary
             II_0 = II_LO + (I-I_LO+1)*NRX !!
                   
             FX1(I,J,K,N) = 0._EB
@@ -2723,7 +2806,7 @@ END SUBROUTINE RESTRICT_DIV_EMB
 
 
 SUBROUTINE PROJECT_VELOCITY(NM)
-USE POIS, ONLY: H3CZSS
+USE POIS, ONLY: H3CZSS,H2CZSS
 IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: NM
@@ -2734,14 +2817,15 @@ REAL(EB) :: DIV,LHSS,RES,POIS_ERR
 CALL POINT_TO_MESH(NM)
 
 IF (PREDICTOR) THEN
-   UU=>U
-   VV=>V
-   WW=>W
-   DP=>D
-ELSEIF (CORRECTOR) THEN
+   ! note: PROJECT_VELOCITY is called AFTER the predictor update of velocity
    UU=>US
    VV=>VS
    WW=>WS
+   DP=>D
+ELSEIF (CORRECTOR) THEN
+   UU=>U
+   VV=>V
+   WW=>W
    DP=>DS
 ENDIF
 PP=>WORK1
@@ -2768,35 +2852,37 @@ BZS = 0._EB
 BZF = 0._EB
 
 PRHS_SAVE(1:IBAR,1:JBAR,1:KBAR) = PRHS
-!CALL H3CZSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,POIS_PTB,SAVE2,WORK,HX)
+IF (.NOT.TWO_D) CALL H3CZSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,POIS_PTB,SAVE2,WORK,HX)
+IF (TWO_D .AND. .NOT. CYLINDRICAL) CALL H2CZSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PTB,SAVE2,WORK,HX)
 PP(1:IBAR,1:JBAR,1:KBAR) = PRHS
 
-!! Apply boundary conditions to PP
-! 
-!DO K=1,KBAR
-!   DO J=1,JBAR
-!      PP(0,J,K)    = PP(1,J,K)
-!      PP(IBP1,J,K) = PP(IBAR,J,K)
-!   ENDDO
-!ENDDO
-! 
-!DO K=1,KBAR
-!   DO I=1,IBAR
-!      PP(I,0,K)    = PP(I,1,K)
-!      PP(I,JBP1,K) = PP(I,JBAR,K)
-!   ENDDO
-!ENDDO
-! 
-!DO J=1,JBAR
-!   DO I=1,IBAR
-!      PP(I,J,0)    = PP(I,J,1)
-!      PP(I,J,KBP1) = PP(I,J,KBAR)
-!   ENDDO
-!ENDDO
+! Apply boundary conditions to PP
+ 
+DO K=1,KBAR
+   DO J=1,JBAR
+      PP(0,J,K)    = -PP(1,J,K) ! use minus if Dirichlet, plus if Neumann, see init of SAVE2
+      PP(IBP1,J,K) = -PP(IBAR,J,K)
+   ENDDO
+ENDDO
+ 
+DO K=1,KBAR
+   DO I=1,IBAR
+      PP(I,0,K)    = -PP(I,1,K)
+      PP(I,JBP1,K) = -PP(I,JBAR,K)
+   ENDDO
+ENDDO
+
+DO J=1,JBAR
+   DO I=1,IBAR
+      PP(I,J,0)    = -PP(I,J,1)
+      PP(I,J,KBP1) = -PP(I,J,KBAR)
+   ENDDO
+ENDDO
 
 ! ************************* Check the Solution *************************
  
-IF (.FALSE.) THEN !! need to apply bcs to PP if TRUE    
+IF (.FALSE.) THEN
+
    POIS_ERR = 0._EB
    DO K=1,KBAR
       DO J=1,JBAR
@@ -2813,25 +2899,25 @@ IF (.FALSE.) THEN !! need to apply bcs to PP if TRUE
 
 ENDIF
 
-! correct interior velocities
+! correct velocities
 
 DO K=1,KBAR
    DO J=1,JBAR
-      DO I=1,IBAR-1
+      DO I=0,IBAR
          UU(I,J,K) = UU(I,J,K) - RDXN(I)*(PP(I+1,J,K)-PP(I,J,K))
       ENDDO
    ENDDO
 ENDDO
 
 DO K=1,KBAR
-   DO J=1,JBAR-1
+   DO J=0,JBAR
       DO I=1,IBAR
          VV(I,J,K) = VV(I,J,K) - RDYN(J)*(PP(I,J+1,K)-PP(I,J,K))
       ENDDO
    ENDDO
 ENDDO
 
-DO K=1,KBAR-1
+DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          WW(I,J,K) = WW(I,J,K) - RDZN(K)*(PP(I,J,K+1)-PP(I,J,K))
@@ -2898,9 +2984,10 @@ INTEGER, INTENT(IN) :: NM1,NM2
 
 TYPE(MESH_TYPE), POINTER :: M1,M2
 INTEGER :: I,J,K,I_LO,I_HI,J_LO,J_HI,K_LO,K_HI,II_0,JJ_0,KK_0,II,JJ,KK, &
-           NRX,NRY,NRZ,II_LO,JJ_LO,KK_LO,INDEX_LIST(12),IERROR
+           NRX,NRY,NRZ,II_LO,JJ_LO,KK_LO,INDEX_LIST(12),IERROR,IW,IOR
 REAL(EB) :: VOLUME_LIST(3)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU1,VV1,WW1,UU2,VV2,WW2
+REAL(EB), PARAMETER :: RF=0.5_EB,OMRF=0.5_EB
 
 CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
 SELECT CASE (IERROR)
@@ -2925,19 +3012,19 @@ M1=>MESHES(NM1) ! coarse mesh
 M2=>MESHES(NM2) ! fine mesh
 
 IF (PREDICTOR) THEN
-   UU1=>M1%U
-   VV1=>M1%V
-   WW1=>M1%W
-   UU2=>M2%U
-   VV2=>M2%V
-   WW2=>M2%W
-ELSEIF (CORRECTOR) THEN
    UU1=>M1%US
    VV1=>M1%VS
    WW1=>M1%WS
    UU2=>M2%US
    VV2=>M2%VS
    WW2=>M2%WS
+ELSEIF (CORRECTOR) THEN
+   UU1=>M1%U
+   VV1=>M1%V
+   WW1=>M1%W
+   UU2=>M2%U
+   VV2=>M2%V
+   WW2=>M2%W
 ENDIF
 
 ! Set fine mesh boundary value to corresponding coarse mesh value
@@ -3038,6 +3125,29 @@ DO J = J_LO,J_HI
    ENDDO
 ENDDO
 
+! fine mesh boundary loop
+
+FINE_MESH_WALL_LOOP: DO IW=1,M2%NEWC
+   II  = M2%IJKW(1,IW)
+   JJ  = M2%IJKW(2,IW)
+   KK  = M2%IJKW(3,IW)
+   IOR = M2%IJKW(4,IW)
+   SELECT CASE (IOR)
+      CASE(1)
+         M2%UVW_SAVE(IW)=UU2(0,JJ,KK)
+      CASE(-1)
+         M2%UVW_SAVE(IW)=UU2(M2%IBAR,JJ,KK)
+      CASE(2)
+         M2%UVW_SAVE(IW)=UU2(II,0,KK)
+      CASE(-2)
+         M2%UVW_SAVE(IW)=UU2(II,M2%JBAR,KK)
+      CASE(3)
+         M2%UVW_SAVE(IW)=UU2(II,JJ,0)
+      CASE(-3)
+         M2%UVW_SAVE(IW)=UU2(II,JJ,M2%KBAR)
+   END SELECT
+ENDDO FINE_MESH_WALL_LOOP
+
 END SUBROUTINE MATCH_VELOCITY_EMB
 
 
@@ -3078,143 +3188,146 @@ M2=>MESHES(NM2) ! fine mesh
 IF (PREDICTOR) THEN
    RHOP1 => M1%RHOS
    YYP1  => M1%YYS
+   HH1   => M1%H
    
    RHOP2 => M2%RHOS
    YYP2  => M2%YYS
+   HH2   => M2%H
 ELSEIF (CORRECTOR) THEN
    RHOP1 => M1%RHO
    YYP1  => M1%YY
+   HH1   => M1%HS
    
    RHOP2 => M2%RHO
    YYP2  => M2%YY
+   HH2   => M2%HS
 ENDIF
 TMP1 => M1%TMP
 TMP2 => M2%TMP
-HH1 => M1%H
-HH2 => M2%H
+
 
 ! Set fine mesh boundary value to corresponding coarse mesh value
 
 SPECIES_LOOP: DO N=1,N_SPECIES
 
-DO K = K_LO,K_HI
-   KK_0 = KK_LO + (K-K_LO)*NRZ
+   DO K = K_LO,K_HI
+      KK_0 = KK_LO + (K-K_LO)*NRZ
+      DO J = J_LO,J_HI
+         JJ_0 = JJ_LO + (J-J_LO)*NRY
+
+         ! east face
+         I = I_HI+1
+         II_0 = II_LO + (I-I_LO)*NRX + 1
+         IF (II_0==M2%IBP1 .AND. I_HI/=M1%IBAR) THEN
+         ! if I_HI==M1%IBAR then this might be an external boundary and the ghost cell value
+         ! is handled in WALL_BC; similar conditions apply below
+            DO KK = KK_0+1,KK_0+NRZ
+               DO JJ = JJ_0+1,JJ_0+NRY
+                  RHOP2(II_0,JJ,KK) = RHOP1(I,J,K)
+                  TMP2(II_0,JJ,KK) = TMP1(I,J,K)
+                  HH2(II_0,JJ,KK) = HH1(I,J,K)
+                  IF (N_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
+               ENDDO
+            ENDDO
+         ENDIF
+         
+         ! west face
+         I = I_LO-1
+         II_0 = II_LO + (I-I_LO+1)*NRX
+         IF (II_0==0 .AND. I_LO/=1) THEN
+            DO KK = KK_0+1,KK_0+NRZ
+               DO JJ = JJ_0+1,JJ_0+NRY
+                  RHOP2(II_0,JJ,KK) = RHOP1(I,J,K)
+                  TMP2(II_0,JJ,KK) = TMP1(I,J,K)
+                  HH2(II_0,JJ,KK) = HH1(I,J,K)
+                  IF (N_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
+               ENDDO
+            ENDDO
+         ENDIF
+         
+      ENDDO
+   ENDDO
+
+   DO K = K_LO,K_HI
+      KK_0 = KK_LO + (K-K_LO)*NRZ
+      DO I = I_LO,I_HI
+         II_0 = II_LO + (I-I_LO)*NRX
+
+         ! north face
+         J = J_HI+1
+         JJ_0 = JJ_LO + (J-J_LO)*NRY + 1
+         IF (JJ_0==M2%JBP1 .AND. J_HI/=M1%JBAR) THEN
+            DO KK = KK_0+1,KK_0+NRZ
+               DO II = II_0+1,II_0+NRX
+                  RHOP2(II,JJ_0,KK) = RHOP1(I,J,K)
+                  TMP2(II,JJ_0,KK) = TMP1(I,J,K)
+                  HH2(II,JJ_0,KK) = HH1(I,J,K)
+                  IF (N_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
+               ENDDO
+            ENDDO
+         ENDIF
+         
+         ! south face
+         J = J_LO-1
+         JJ_0 = JJ_LO + (J-J_LO+1)*NRY
+         IF (JJ_0==0 .AND. J_LO/=1) THEN
+            DO KK = KK_0+1,KK_0+NRZ
+               DO II = II_0+1,II_0+NRX
+                  RHOP2(II,JJ_0,KK) = RHOP1(I,J,K)
+                  TMP2(II,JJ_0,KK) = TMP1(I,J,K)
+                  HH2(II,JJ_0,KK) = HH1(I,J,K)
+                  IF (N_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
+               ENDDO
+            ENDDO
+         ENDIF
+         
+      ENDDO
+   ENDDO
+
    DO J = J_LO,J_HI
       JJ_0 = JJ_LO + (J-J_LO)*NRY
+      DO I = I_LO,I_HI
+         II_0 = II_LO + (I-I_LO)*NRX
 
-      ! east face
-      I = I_HI+1
-      II_0 = II_LO + (I-I_LO)*NRX + 1
-      IF (II_0==M2%IBP1 .AND. I_HI/=M1%IBAR) THEN
-      ! if I_HI==M1%IBAR then this might be an external boundary and the ghost cell value
-      ! is handled in WALL_BC; similar conditions apply below
-         DO KK = KK_0+1,KK_0+NRZ
+         ! top face
+         K = K_HI+1
+         KK_0 = KK_LO + (K-K_LO)*NRZ + 1
+         IF (KK_0==M2%KBP1  .AND. K_HI/=M1%KBAR) THEN
             DO JJ = JJ_0+1,JJ_0+NRY
-               RHOP2(II_0,JJ,KK) = RHOP1(I,J,K)
-               TMP2(II_0,JJ,KK) = TMP1(I,J,K)
-               HH2(II_0,JJ,KK) = HH1(I,J,K)
-               IF (N_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
+               DO II = II_0+1,II_0+NRX
+                  RHOP2(II,JJ,KK_0) = RHOP1(I,J,K)
+                  TMP2(II,JJ,KK_0) = TMP1(I,J,K)
+                  HH2(II,JJ,KK_0) = HH1(I,J,K)
+                  IF (N_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
+               ENDDO
             ENDDO
-         ENDDO
-      ENDIF
+         ENDIF
          
-      ! west face
-      I = I_LO-1
-      II_0 = II_LO + (I-I_LO+1)*NRX
-      IF (II_0==0 .AND. I_LO/=1) THEN
-         DO KK = KK_0+1,KK_0+NRZ
+         ! bottom face
+         K = K_LO-1
+         KK_0 = KK_LO + (K-K_LO+1)*NRZ
+         IF (KK_0==0 .AND. K_LO/=1) THEN
             DO JJ = JJ_0+1,JJ_0+NRY
-               RHOP2(II_0,JJ,KK) = RHOP1(I,J,K)
-               TMP2(II_0,JJ,KK) = TMP1(I,J,K)
-               HH2(II_0,JJ,KK) = HH1(I,J,K)
-               IF (N_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
+               DO II = II_0+1,II_0+NRX
+                  RHOP2(II,JJ,KK_0) = RHOP1(I,J,K)
+                  TMP2(II,JJ,KK_0) = TMP1(I,J,K)
+                  HH2(II,JJ,KK_0) = HH1(I,J,K)
+                  IF (N_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
+               ENDDO
             ENDDO
-         ENDDO
-      ENDIF
+         ENDIF
          
+      ENDDO
    ENDDO
-ENDDO
 
-DO K = K_LO,K_HI
-   KK_0 = KK_LO + (K-K_LO)*NRZ
-   DO I = I_LO,I_HI
-      II_0 = II_LO + (I-I_LO)*NRX
-
-      ! north face
-      J = J_HI+1
-      JJ_0 = JJ_LO + (J-J_LO)*NRY + 1
-      IF (JJ_0==M2%JBP1 .AND. J_HI/=M1%JBAR) THEN
-         DO KK = KK_0+1,KK_0+NRZ
-            DO II = II_0+1,II_0+NRX
-               RHOP2(II,JJ_0,KK) = RHOP1(I,J,K)
-               TMP2(II,JJ_0,KK) = TMP1(I,J,K)
-               HH2(II,JJ_0,KK) = HH1(I,J,K)
-               IF (N_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
-            ENDDO
-         ENDDO
-      ENDIF
-         
-      ! south face
-      J = J_LO-1
-      JJ_0 = JJ_LO + (J-J_LO+1)*NRY
-      IF (JJ_0==0 .AND. J_LO/=1) THEN
-         DO KK = KK_0+1,KK_0+NRZ
-            DO II = II_0+1,II_0+NRX
-               RHOP2(II,JJ_0,KK) = RHOP1(I,J,K)
-               TMP2(II,JJ_0,KK) = TMP1(I,J,K)
-               HH2(II,JJ_0,KK) = HH1(I,J,K)
-               IF (N_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
-            ENDDO
-         ENDDO
-      ENDIF
-         
-   ENDDO
-ENDDO
-
-DO J = J_LO,J_HI
-   JJ_0 = JJ_LO + (J-J_LO)*NRY
-   DO I = I_LO,I_HI
-      II_0 = II_LO + (I-I_LO)*NRX
-
-      ! top face
-      K = K_HI+1
-      KK_0 = KK_LO + (K-K_LO)*NRZ + 1
-      IF (KK_0==M2%KBP1  .AND. K_HI/=M1%KBAR) THEN
-         DO JJ = JJ_0+1,JJ_0+NRY
-            DO II = II_0+1,II_0+NRX
-               RHOP2(II,JJ,KK_0) = RHOP1(I,J,K)
-               TMP2(II,JJ,KK_0) = TMP1(I,J,K)
-               HH2(II,JJ,KK_0) = HH1(I,J,K)
-               IF (N_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
-            ENDDO
-         ENDDO
-      ENDIF
-         
-      ! bottom face
-      K = K_LO-1
-      KK_0 = KK_LO + (K-K_LO+1)*NRZ
-      IF (KK_0==0 .AND. K_LO/=1) THEN
-         DO JJ = JJ_0+1,JJ_0+NRY
-            DO II = II_0+1,II_0+NRX
-               RHOP2(II,JJ,KK_0) = RHOP1(I,J,K)
-               TMP2(II,JJ,KK_0) = TMP1(I,J,K)
-               HH2(II,JJ,KK_0) = HH1(I,J,K)
-               IF (N_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
-            ENDDO
-         ENDDO
-      ENDIF
-         
-   ENDDO
-ENDDO
-
-WALL_LOOP: DO IW=1,M2%NWC
+   WALL_LOOP: DO IW=1,M2%NWC
       IF (M2%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
-      II  = M2%IJKW(1,IW)
-      JJ  = M2%IJKW(2,IW)
-      KK  = M2%IJKW(3,IW)
+      II = M2%IJKW(1,IW)
+      JJ = M2%IJKW(2,IW)
+      KK = M2%IJKW(3,IW)
       M2%RHO_F(IW)  = RHOP2(II,JJ,KK) 
       M2%YY_F(IW,N) = YYP2(II,JJ,KK,N)
-ENDDO WALL_LOOP
+   ENDDO WALL_LOOP
 
 ENDDO SPECIES_LOOP
 
@@ -3300,7 +3413,7 @@ USE TURBULENCE
 IMPLICIT NONE
 
 PRIVATE
-PUBLIC :: INIT_IBM,VELTAN2D,TRILINEAR,GETX,GETU,GETGRAD
+PUBLIC :: INIT_IBM,VELTAN2D,VELTAN3D,TRILINEAR,GETX,GETU,GETGRAD
  
 CONTAINS
 
@@ -3313,7 +3426,7 @@ INTEGER :: IZERO,I,J,K,NG
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (GEOMETRY_TYPE), POINTER :: G
 REAL(EB) :: DELTA,D2,R2,RP2,XU(3),PP(3),DP,TIME,TOL=1.E-9_EB
-REAL(EB) :: X_MIN,Y_MIN,Z_MIN,X_MAX,Y_MAX,Z_MAX,HXD,HYD,HZD
+REAL(EB) :: X_MIN,Y_MIN,Z_MIN,X_MAX,Y_MAX,Z_MAX
 
 TIME = T
 M => MESHES(NM)
@@ -3323,8 +3436,23 @@ M => MESHES(NM)
 GEOM_LOOP: DO NG=1,N_GEOM
 
    G => GEOMETRY(NG)
-   IF (ICYC>0 .AND. (.NOT. G%TRANSLATE) .AND. (.NOT. G%ROTATE)) CYCLE GEOM_LOOP
+
+   IF (ICYC>1 .AND. (.NOT. G%TRANSLATE) .AND. (.NOT. G%ROTATE)) CYCLE GEOM_LOOP
    
+   ! acceleration (not implemented yet)
+   
+   G%U = G%U0
+   G%V = G%V0
+   G%W = G%W0
+   
+   ! translation (linear for now)
+   
+   G%X = G%X0 + G%U*TIME
+   G%Y = G%Y0 + G%V*TIME
+   G%Z = G%Z0 + G%W*TIME
+   
+   IBM_UVWMAX = MAXVAL((/ABS(G%U),ABS(G%V),ABS(G%W)/))*RDX(1)
+      
    IF (TWO_D) THEN
       !DELTA = SQRT(M%DX(1)*M%DZ(1))
       DELTA = MIN(M%DX(1),M%DZ(1))
@@ -3332,28 +3460,27 @@ GEOM_LOOP: DO NG=1,N_GEOM
       !DELTA = (M%DX(1)*M%DY(1)*M%DZ(1))**ONTH
       DELTA = MIN(M%DX(1),M%DY(1),M%DZ(1))
    ENDIF
-   DELTA = DELTA-TOL
    D2 = DELTA**2
 
    ! find bounding box
-   
+
    SELECT_SHAPE: SELECT CASE(G%ISHAPE)
       CASE(IBOX) SELECT_SHAPE
+         G%X1 = G%X1 + G%U*DT
+         G%X2 = G%X2 + G%U*DT
+         G%Y1 = G%Y1 + G%V*DT
+         G%Y2 = G%Y2 + G%V*DT
+         G%Z1 = G%Z1 + G%W*DT
+         G%Z2 = G%Z2 + G%W*DT
          X_MIN = G%X1
-         Y_MIN = G%Y1
-         Z_MIN = G%Z1
          X_MAX = G%X2
+         Y_MIN = G%Y1
          Y_MAX = G%Y2
+         Z_MIN = G%Z1
          Z_MAX = G%Z2
-         G%X   = 0.5_EB*(X_MIN+X_MAX)
-         G%Y   = 0.5_EB*(Y_MIN+Y_MAX)
-         G%Z   = 0.5_EB*(Z_MIN+Z_MAX)
-         G%HL(1) = X_MAX-G%X
-         G%HL(2) = Y_MAX-G%Y
-         G%HL(3) = Z_MAX-G%Z
-         HXD = G%HL(1)+DELTA
-         HYD = G%HL(2)+DELTA
-         HZD = G%HL(3)+DELTA
+         G%HL(1) = 0.5_EB*(X_MAX-X_MIN) + TOL
+         G%HL(2) = 0.5_EB*(X_MAX-X_MIN) + TOL
+         G%HL(3) = 0.5_EB*(X_MAX-X_MIN) + TOL
       CASE(ISPHERE) SELECT_SHAPE
          X_MIN = G%X-G%RADIUS
          Y_MIN = G%Y-G%RADIUS
@@ -3362,9 +3489,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
          Y_MAX = G%Y+G%RADIUS
          Z_MAX = G%Z+G%RADIUS
          R2 = G%RADIUS**2
-         IBM_UVWMAX = MAXVAL((/ABS(G%U),ABS(G%V),ABS(G%W)/)) + &
-                      G%RADIUS*MAXVAL((/ABS(G%OMEGA_X),ABS(G%OMEGA_Y),ABS(G%OMEGA_Z)/))
-         IBM_UVWMAX = IBM_UVWMAX*RDX(1)
+         IBM_UVWMAX = IBM_UVWMAX + G%RADIUS*MAXVAL((/ABS(G%OMEGA_X),ABS(G%OMEGA_Y),ABS(G%OMEGA_Z)/))*RDX(1)
       CASE(ICYLINDER) SELECT_SHAPE ! assume aligned with y axis
          G%HL(1) = ABS(G%XOR-G%X)
          G%HL(2) = ABS(G%YOR-G%Y)
@@ -3413,17 +3538,20 @@ GEOM_LOOP: DO NG=1,N_GEOM
         G%MAX_J(NM)<G%MIN_J(NM) .OR. &
         G%MAX_K(NM)<G%MIN_K(NM) ) CYCLE GEOM_LOOP
    
-   IF (ICYC==0) THEN
-      ALLOCATE(G%U_MASK(G%MIN_I(NM):G%MAX_I(NM),G%MIN_J(NM):G%MAX_J(NM),G%MIN_K(NM):G%MAX_K(NM)),STAT=IZERO)
-      CALL ChkMemErr('INIT_IBM','U_MASK',IZERO)
-      ALLOCATE(G%V_MASK(G%MIN_I(NM):G%MAX_I(NM),G%MIN_J(NM):G%MAX_J(NM),G%MIN_K(NM):G%MAX_K(NM)),STAT=IZERO)
-      CALL ChkMemErr('INIT_IBM','V_MASK',IZERO)
-      ALLOCATE(G%W_MASK(G%MIN_I(NM):G%MAX_I(NM),G%MIN_J(NM):G%MAX_J(NM),G%MIN_K(NM):G%MAX_K(NM)),STAT=IZERO)
-      CALL ChkMemErr('INIT_IBM','W_MASK',IZERO)
-      G%U_MASK = 1 ! default to gas phase
-      G%V_MASK = 1
-      G%W_MASK = 1
-   ENDIF
+   IF (G%IBM_ALLOCATED) DEALLOCATE(G%U_MASK,G%V_MASK,G%W_MASK)
+   G%IBM_ALLOCATED=.FALSE.
+   
+   ALLOCATE(G%U_MASK(G%MIN_I(NM):G%MAX_I(NM),G%MIN_J(NM):G%MAX_J(NM),G%MIN_K(NM):G%MAX_K(NM)),STAT=IZERO)
+   CALL ChkMemErr('INIT_IBM','U_MASK',IZERO)
+   ALLOCATE(G%V_MASK(G%MIN_I(NM):G%MAX_I(NM),G%MIN_J(NM):G%MAX_J(NM),G%MIN_K(NM):G%MAX_K(NM)),STAT=IZERO)
+   CALL ChkMemErr('INIT_IBM','V_MASK',IZERO)
+   ALLOCATE(G%W_MASK(G%MIN_I(NM):G%MAX_I(NM),G%MIN_J(NM):G%MAX_J(NM),G%MIN_K(NM):G%MAX_K(NM)),STAT=IZERO)
+   CALL ChkMemErr('INIT_IBM','W_MASK',IZERO)
+   IF (IZERO==0) G%IBM_ALLOCATED=.TRUE.
+   
+   G%U_MASK = 1 ! default to gas phase
+   G%V_MASK = 1
+   G%W_MASK = 1
    
    ! mask cells
 
@@ -3435,37 +3563,28 @@ GEOM_LOOP: DO NG=1,N_GEOM
             
                CASE(IBOX) MASK_SHAPE
                   
-                  ! first assume point is masked
-                  G%U_MASK(I,J,K) = -1
-                  G%V_MASK(I,J,K) = -1
-                  G%W_MASK(I,J,K) = -1
+                  ! see if the point is inside geometry
+                  IF (ABS( M%X(I)-G%X)<G%HL(1) .AND. &
+                      ABS(M%YC(J)-G%Y)<G%HL(2) .AND. &
+                      ABS(M%ZC(K)-G%Z)<G%HL(3)) G%U_MASK(I,J,K) = -1
                   
-                  ! then see if the point is outside geometry
-                  IF (ABS( M%X(I)-G%X)>G%HL(1)) G%U_MASK(I,J,K) = 0
-                  IF (ABS(M%YC(J)-G%Y)>G%HL(2)) G%U_MASK(I,J,K) = 0
-                  IF (ABS(M%ZC(K)-G%Z)>G%HL(3)) G%U_MASK(I,J,K) = 0
+                  IF (ABS(M%XC(I)-G%X)<G%HL(1) .AND. &
+                      ABS( M%Y(J)-G%Y)<G%HL(2) .AND. &
+                      ABS(M%ZC(K)-G%Z)<G%HL(3)) G%V_MASK(I,J,K) = -1
                   
-                  IF (ABS(M%XC(I)-G%X)>G%HL(1)) G%V_MASK(I,J,K) = 0
-                  IF (ABS( M%Y(J)-G%Y)>G%HL(2)) G%V_MASK(I,J,K) = 0
-                  IF (ABS(M%ZC(K)-G%Z)>G%HL(3)) G%V_MASK(I,J,K) = 0
+                  IF (ABS(M%XC(I)-G%X)<G%HL(1) .AND. &
+                      ABS(M%YC(J)-G%Y)<G%HL(2) .AND. &
+                      ABS( M%Z(K)-G%Z)<G%HL(3)) G%W_MASK(I,J,K) = -1
                   
-                  IF (ABS(M%XC(I)-G%X)>G%HL(1)) G%W_MASK(I,J,K) = 0
-                  IF (ABS(M%YC(J)-G%Y)>G%HL(2)) G%W_MASK(I,J,K) = 0
-                  IF (ABS( M%Z(K)-G%Z)>G%HL(3)) G%W_MASK(I,J,K) = 0
+                  ! see if the point is in surface layer
+                  IF (X_MAX<M%X(I) .AND. M%X(I)<X_MAX+DELTA) G%U_MASK(I,J,K) = 0
+                  IF (Y_MAX<M%Y(J) .AND. M%Y(J)<Y_MAX+DELTA) G%V_MASK(I,J,K) = 0
+                  IF (Z_MAX<M%Z(K) .AND. M%Z(K)<Z_MAX+DELTA) G%W_MASK(I,J,K) = 0
                   
-                  ! then see if the point is in gas phase
-                  IF (ABS( M%X(I)-G%X)>=HXD) G%U_MASK(I,J,K) = 1
-                  IF (ABS(M%YC(J)-G%Y)>=HYD) G%U_MASK(I,J,K) = 1
-                  IF (ABS(M%ZC(K)-G%Z)>=HZD) G%U_MASK(I,J,K) = 1
+                  IF (X_MIN-DELTA<M%X(I) .AND. M%X(I)<X_MIN) G%U_MASK(I,J,K) = 0
+                  IF (Y_MIN-DELTA<M%Y(J) .AND. M%Y(J)<Y_MIN) G%V_MASK(I,J,K) = 0
+                  IF (Z_MIN-DELTA<M%Z(K) .AND. M%Z(K)<Z_MIN) G%W_MASK(I,J,K) = 0
                   
-                  IF (ABS(M%XC(I)-G%X)>=HXD) G%V_MASK(I,J,K) = 1
-                  IF (ABS( M%Y(J)-G%Y)>=HYD) G%V_MASK(I,J,K) = 1
-                  IF (ABS(M%ZC(K)-G%Z)>=HZD) G%V_MASK(I,J,K) = 1
-                  
-                  IF (ABS(M%XC(I)-G%X)>=HXD) G%W_MASK(I,J,K) = 1
-                  IF (ABS(M%YC(J)-G%Y)>=HYD) G%W_MASK(I,J,K) = 1
-                  IF (ABS( M%Z(K)-G%Z)>=HZD) G%W_MASK(I,J,K) = 1
-            
                CASE(ISPHERE) MASK_SHAPE
                
                   RP2 = (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2
@@ -3706,6 +3825,27 @@ SELECT CASE(I_VEL)
       U_DATA(0,1,1) = WW(II,JJ+1,KK+1)
       U_DATA(1,1,0) = WW(II+1,JJ+1,KK)
       U_DATA(1,1,1) = WW(II+1,JJ+1,KK+1)
+   CASE(4) ! viscosity
+      IF (XI(1)<XU(1)) THEN
+         II=MAX(0,II-1)
+         DXI(1)=DXI(1)+M%DXN(II)
+      ENDIF
+      IF (XI(2)<XU(2)) THEN
+         JJ=MAX(0,JJ-1)
+         DXI(2)=DXI(2)+M%DYN(JJ)
+      ENDIF
+      IF (XI(3)<XU(3)) THEN
+         KK=MAX(0,KK-1)
+         DXI(3)=DXI(3)+M%DZN(KK)
+      ENDIF
+      U_DATA(0,0,0) = M%MU(II,JJ,KK)
+      U_DATA(1,0,0) = M%MU(II+1,JJ,KK)
+      U_DATA(0,1,0) = M%MU(II,JJ+1,KK)
+      U_DATA(0,0,1) = M%MU(II,JJ,KK+1)
+      U_DATA(1,0,1) = M%MU(II+1,JJ,KK+1)
+      U_DATA(0,1,1) = M%MU(II,JJ+1,KK+1)
+      U_DATA(1,1,0) = M%MU(II+1,JJ+1,KK)
+      U_DATA(1,1,1) = M%MU(II+1,JJ+1,KK+1)
 END SELECT
 
 END SUBROUTINE GETU
@@ -3724,9 +3864,14 @@ INTEGER :: II,JJ,KK
 M=>MESHES(NM)
 
 IF (COMP_I==1 .AND. COMP_J==1) DUDX => M%WORK5
-IF (COMP_I==2 .AND. COMP_J==2) DUDX => M%WORK7
 IF (COMP_I==1 .AND. COMP_J==2) DUDX => M%IBM_SAVE1
-IF (COMP_I==2 .AND. COMP_J==1) DUDX => M%IBM_SAVE2
+IF (COMP_I==1 .AND. COMP_J==3) DUDX => M%IBM_SAVE2
+IF (COMP_I==2 .AND. COMP_J==1) DUDX => M%IBM_SAVE3
+IF (COMP_I==2 .AND. COMP_J==2) DUDX => M%WORK6
+IF (COMP_I==2 .AND. COMP_J==3) DUDX => M%IBM_SAVE4
+IF (COMP_I==3 .AND. COMP_J==1) DUDX => M%IBM_SAVE5
+IF (COMP_I==3 .AND. COMP_J==2) DUDX => M%IBM_SAVE6
+IF (COMP_I==3 .AND. COMP_J==3) DUDX => M%WORK7
 
 ! first assume XI >= XU
 II = INDU(1)
@@ -3829,12 +3974,104 @@ ELSE
    ENDDO
 ENDIF
 
-
-
 ! transform velocity back to Cartesian component I_VEL
 VELTAN2D = C(I_VEL,1)*US + C(I_VEL,2)*UN
 
 END FUNCTION VELTAN2D
+
+
+REAL(EB) FUNCTION VELTAN3D(UU,UW,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL,ROUGHNESS)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT, NORM2
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: UU(3),UW(3),NN(3),DN,DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),DT,RRHO,MU,ROUGHNESS
+INTEGER, INTENT(IN) :: I_VEL
+REAL(EB) :: C(3,3),SS(3),PP(3),SLIP_COEF,ETA,AA,BB,US0,DUMMY,UU_REL(3)
+REAL(EB) :: US,UP,UN,DPDS,DUSDS,DUSDN,TSN
+INTEGER :: SUBIT,I,J
+
+! Cartesian grid coordinate system orthonormal basis vectors
+REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0._EB/),E3=(/0._EB,0._EB,1._EB/)
+
+UU_REL = UU-UW
+IF (DOT_PRODUCT(NN,UU_REL)<1.E-6_EB) THEN
+   VELTAN3D = UU(I_VEL)
+   RETURN
+ENDIF
+
+! find a vector PP in the tangent plane of the surface and orthogonal to UU-UW
+CALL CROSS_PRODUCT(PP,NN,UU_REL)
+PP = PP/NORM2(PP) ! normalize to unit vector
+
+! define the streamwise unit vector SS
+CALL CROSS_PRODUCT(SS,PP,NN)
+
+! directional cosines (see Pope, Eq. A.11)
+C(1,1) = DOT_PRODUCT(E1,SS)
+C(1,2) = DOT_PRODUCT(E1,PP)
+C(1,3) = DOT_PRODUCT(E1,NN)
+C(2,1) = DOT_PRODUCT(E2,SS)
+C(2,2) = DOT_PRODUCT(E2,PP)
+C(2,3) = DOT_PRODUCT(E2,NN)
+C(3,1) = DOT_PRODUCT(E3,SS)
+C(3,2) = DOT_PRODUCT(E3,PP)
+C(3,3) = DOT_PRODUCT(E3,NN)
+
+! transform velocity (see Pope, Eq. A.17)
+US = C(1,1)*(UU(1)-UW(1)) + C(2,1)*(UU(2)-UW(2)) + C(3,1)*(UU(3)-UW(3))
+UP = C(1,2)*(UU(1)-UW(1)) + C(2,2)*(UU(2)-UW(2)) + C(3,2)*(UU(3)-UW(3))
+UN = C(1,3)*(UU(1)-UW(1)) + C(2,3)*(UU(2)-UW(2)) + C(3,3)*(UU(3)-UW(3))
+
+!! check UP, should be zero
+!print *, UP
+
+! transform pressure gradient
+DPDS = C(1,1)*GRADP(1) + C(2,1)*GRADP(2) + C(3,1)*GRADP(3)
+
+! transform tensors (Pope A.23)
+DUSDS = 0._EB
+DUSDN = 0._EB
+TSN = 0._EB
+DO I=1,3
+   DO J=1,3
+      DUSDS = DUSDS + C(I,1)*C(J,1)*GRADU(I,J)
+      DUSDN = DUSDN + C(I,1)*C(J,3)*GRADU(I,J)
+      TSN = TSN + C(I,1)*C(J,3)*TAU_IJ(I,J)
+   ENDDO
+ENDDO
+    
+! update boundary layer equations
+
+! update wall-normal velocity
+UN = DN*(DIVU-0.5_EB*DUSDS)
+
+! ODE solution
+IF (DNS) THEN
+   ETA = UN + RRHO*MU/DN
+   AA  = -(0.5_EB*DUSDS + TWTH*ETA/DN)
+   BB  = ONSI*DUSDN*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+   !AA  = -0.5_EB*(DUSDS + ETA/DN)
+   !BB  = 0.5_EB*US_WALL/DN*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+   US = ((AA*US + BB)*EXP(AA*DT) - BB)/AA
+ELSE
+   US0 = US
+   DO SUBIT=1,1
+      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,DUMMY,US,MU*RRHO,DN,ROUGHNESS)
+      !IF (SLIP_COEF< -1._EB .OR. SLIP_COEF>-1._EB) THEN
+      !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
+      !ENDIF
+      ETA = RRHO*(1-SLIP_COEF)*MU/(2._EB*DN**2)
+      AA  = -(0.5_EB*DUSDS + TWTH*UN/DN + ETA)
+      BB  = -(UN*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+      US = ((AA*US0 + BB)*EXP(AA*DT) - BB)/AA
+   ENDDO
+ENDIF
+
+! transform velocity back to Cartesian component I_VEL
+VELTAN3D = C(I_VEL,1)*US + C(I_VEL,3)*UN + UW(I_VEL)
+
+END FUNCTION VELTAN3D
+
 
 
 END MODULE COMPLEX_GEOMETRY
