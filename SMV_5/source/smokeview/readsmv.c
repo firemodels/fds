@@ -7819,11 +7819,6 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i ",&axissmooth);
       continue;
     }
-    if(match(buffer,"AXISNUM",7)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&axisnum);
-      continue;
-    }
     if(match(buffer,"SHOWBLOCKS",10)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&visBlocks);
@@ -9710,8 +9705,6 @@ void writeini(int flag){
   fprintf(fileout," %i\n",vectorskip);
   fprintf(fileout,"AXISSMOOTH\n");
   fprintf(fileout," %i\n",axissmooth);
-  fprintf(fileout,"AXISNUM\n");
-  fprintf(fileout," %i\n",axisnum);
   fprintf(fileout,"BLOCKLOCATION\n");
   fprintf(fileout," %i\n",blocklocation);
   fprintf(fileout,"SHOWCADANDGRID\n");

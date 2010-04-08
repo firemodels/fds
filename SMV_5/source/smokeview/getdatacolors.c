@@ -248,13 +248,11 @@ void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it,
   *tmax_global = tmax2;
   *extreme_min=0;
   *extreme_max=0;
-  if(axisnum==1){
-    if(settmin==PERCENTILE_MIN){
-      tmin2=get_histogram_value(&full_histogram, percentile_level); 
-    }
-    if(settmax==PERCENTILE_MAX){
-      tmax2=get_histogram_value(&full_histogram, 1.0-percentile_level); 
-    }
+  if(settmin==PERCENTILE_MIN){
+    tmin2=get_histogram_value(&full_histogram, percentile_level); 
+  }
+  if(settmax==PERCENTILE_MAX){
+    tmax2=get_histogram_value(&full_histogram, 1.0-percentile_level); 
   }
   if(axissmooth==1){
     smoothlabel(&tmin2,&tmax2,nrgb);
