@@ -1,25 +1,2 @@
-1.  test new devices.svo format
-2.  add some error checking for new format
-3.  test use of character strings in device file
-4.  test texture maps in device file
-5.  test option to display one of several smokeview objects when viewing particle files
-6.  test option to change change distance units from m to f
-7.  simplify unit conversion code by using keying on "unit" rather than "short label" to do the conversion
-8.  test code for drawing new vent and "square" objects
-9.  test object rotation fixes
-10. test active and inactive vent objects
-11. test cable tray object and drawcubec drawing command
-12. test use of PROP_ID with blockages and objects
-13. in blockage editor change output file extension to .fds - addresses issue 986; 
-14. test option to adjust blue/green right stereo buffer - addresses issue 978; 
-15. test option to change Mass Fraction kg/kg units to g/kg - addresses issue 985
-16. remove blockage edit capability, was buggy - replaced with dialog box that displays rather than edits blockage properties
-17. add list of unused SURFs to Examine Blockage dialog box
-18. test cad drawing fix
-19. test initialization of value in prop data structure 
-20. test improved .smv parsing algorithm (add leading blanks to any .smv line that is not a keyword)
-21. test plot3d 2d and 3d contouring code to make sure colors are consistent
-22. test new colorbar editor
-23. test ppm unit change option
-24. test option to not draw triangular portions of color bar when data is totall with data bounds
-25. test placement of colorbar dialog box and routine that get smokeview bin directory
+1. test fix of particle display when specifying time min and max bounds in .ini file
+2. test logic to hide slice files that occupy the same location as other slice files in meshes with a lower index

@@ -1947,7 +1947,7 @@ void adjustslicebounds(const slice *sd, float *pmin, float *pmax){
     pdata = sd->qslicedata;
     ndata = sd->nslicetotal;
 
-    if(axisnum==1&&(setslicemin==PERCENTILE_MIN||setslicemax==PERCENTILE_MAX)){
+    if(setslicemin==PERCENTILE_MIN||setslicemax==PERCENTILE_MAX){
       dp = (*pmax - *pmin)/NBUCKETS;
       nsmall=0;
       nbig=NBUCKETS;
