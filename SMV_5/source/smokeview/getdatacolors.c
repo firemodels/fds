@@ -179,10 +179,44 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
     t++;
   }
 }
+#ifdef pp_HIST
+
+/* ------------------ remap_patchdata ------------------------ */
+
+void remap_patchdata(patch *patchi,float valmin, float valmax, int *extreme_min, int *extreme_max){
+  int i;
+  mesh *meshi;
+  unsigned char *ipqq;
+  int npqq;
+
+  meshi = meshinfo + patchi->blocknumber;
+  ipqq = meshi->ipqq;
+  npqq = meshi->npatch_frames*meshi->npatchsize;
+  for(i=0;i<npqq;i++){
+    float val;
+    int ival;
+
+    ival = ipqq[i];
+    val = (patchi->local_valmin*(254-ival)+patchi->local_valmax*(ival-1))/253.0;
+
+    if(val<valmin){
+      ival=0;
+      *extreme_min=1;
+    }
+    else if(val>valmax){
+      ival=255;
+      *extreme_max=1;
+    }
+    else{
+      ival=1+253*(val-valmin)/(valmax-valmin);
+    }
+    ipqq[i]=ival;
+  }
+}
 
 /* ------------------ getBoundaryColors3 ------------------------ */
 
-void getBoundaryColors3(float *t, int nt, unsigned char *it, 
+void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it, 
               int settmin, float *ttmin, int settmax, float *ttmax,
               float *tmin_global, float *tmax_global,
               int ndatalevel, int nlevel,
@@ -194,24 +228,37 @@ void getBoundaryColors3(float *t, int nt, unsigned char *it,
   int expmin, expmax;
   int itt;
   float local_tmin, local_tmax, tmin2, tmax2;
-  int local_skip;
+  histogramdata full_histogram;
+  int i,j;
+  patch *patchj;
 
-  tmin2 = *t;
-  tmax2 = *t;
-    
-  STRCPY(scale,"");
-  tcopy = t+1;
-  for(n=1;n<nt;n++){
-    if(*tcopy<tmin2)tmin2=*tcopy;
-    if(*tcopy>tmax2)tmax2=*tcopy;
-    tcopy++;
+  init_histogram(&full_histogram);
+
+  for(j=0;j<npatch_files;j++){
+    patchj=patchinfo+j;
+    if(patchj->loaded==0||patchj->type!=ipatchtype)continue;
+    merge_histogram(&full_histogram,patchj->histogram);
   }
+
+  CheckMemory;
+  tmin2=get_histogram_value(&full_histogram, 0.0);
+  tmax2=get_histogram_value(&full_histogram, 1.0);
+
   *tmin_global = tmin2;
   *tmax_global = tmax2;
   *extreme_min=0;
   *extreme_max=0;
-  local_skip=0;
-  adjustdatabounds(t,local_skip,nt,settmin,&tmin2,settmax,&tmax2);
+  if(axisnum==1){
+    if(settmin==PERCENTILE_MIN){
+      tmin2=get_histogram_value(&full_histogram, percentile_level); 
+    }
+    if(settmax==PERCENTILE_MAX){
+      tmax2=get_histogram_value(&full_histogram, 1.0-percentile_level); 
+    }
+  }
+  if(axissmooth==1){
+    smoothlabel(&tmin2,&tmax2,nrgb);
+  }
   if(settmin!=SET_MIN){
     *ttmin=tmin2;
   }
@@ -221,6 +268,16 @@ void getBoundaryColors3(float *t, int nt, unsigned char *it,
   local_tmin = *ttmin;
   local_tmax = *ttmax;
 
+  patchi->local_valmin=local_tmin;
+  patchi->local_valmax=local_tmax;
+
+  CheckMemory;
+  for(j=0;j<npatch_files;j++){
+    patchj=patchinfo+j;
+    if(patchj->loaded==0||patchj->type!=ipatchtype||patchi==patchj)continue;
+    remap_patchdata(patchj,local_tmin,local_tmax,extreme_min,extreme_max);
+  }
+  CheckMemory;
   range = local_tmax - local_tmin;
   factor = 0.0f;
   if(range!=0.0f)factor = (ndatalevel-2)/range;
@@ -246,6 +303,8 @@ void getBoundaryColors3(float *t, int nt, unsigned char *it,
     it++;
     t++;
   }
+  CheckMemory;
+  STRCPY(scale,"");
   frexp10(local_tmax, &expmax);
   frexp10(local_tmin, &expmin);
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<-2||expmin>2)){
@@ -277,7 +336,7 @@ void getBoundaryColors3(float *t, int nt, unsigned char *it,
   tval = local_tmax;
   num2string(&labels[nlevel-1][0],tval,range);
 }
-
+#endif
 /* ------------------ getBoundaryLabels ------------------------ */
 
 void getBoundaryLabels(

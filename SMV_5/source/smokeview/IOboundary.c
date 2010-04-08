@@ -875,17 +875,19 @@ void readpatch(int ifile, int flag, int *errorcode){
   for(i=0;i<npatch_files;i++){
     if(patchinfo[i].loaded==1&&patchinfo[i].type==ipatchtype)npatchloaded++;
   }
+#ifndef pp_HIST
   if(npatchloaded>1){
     setpatchmin=SET_MIN;
     setpatchmax=SET_MAX;
     local2globalpatchbounds(patchi->label.shortlabel);
   }
+#endif
   patchinfo[ifile].extreme_min=0;
   patchinfo[ifile].extreme_max=0;
   switch(loadpatchbysteps){
   case 0:
 #ifdef pp_HIST
-    getBoundaryColors3(meshi->pqq, npqq, meshi->ipqq, 
+    getBoundaryColors3(patchinfo + ifile,meshi->pqq, npqq, meshi->ipqq, 
       setpatchmin,&patchmin, setpatchmax,&patchmax, 
       &patchmin_global, &patchmax_global,
       nrgb_full,nrgb, colorlabelpatch,patchscale,boundarylevels256,
