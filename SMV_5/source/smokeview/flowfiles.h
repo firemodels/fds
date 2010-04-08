@@ -1014,6 +1014,7 @@ typedef struct {
   int num_memblocks;
   int setvalmin, setvalmax;
   float valmin, valmax;
+  float local_valmin, local_valmax;
   float diff_valmin, diff_valmax;
   int blocknumber,loaded,display;
   flowlabels label;
