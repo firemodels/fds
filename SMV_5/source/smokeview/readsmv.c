@@ -2465,6 +2465,7 @@ typedef struct {
           meshi=meshinfo+i;
           meshi->hrrpuv_cutoff=hrrpuvcut;
         }
+        global_hrrpuv_cutoff=meshinfo->hrrpuv_cutoff;
         for(i=1;i<nhrrpuvcut;i++){
           mesh *meshi;
 
