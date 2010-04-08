@@ -945,7 +945,7 @@ SVEXTERN smoke3d *smoke3dinfo;
 SVEXTERN int smoke_shade, fire_red, fire_green, fire_blue;
 SVEXTERN float smoke_shade4[4];
 SVEXTERN float fire_halfdepth;
-SVEXTERN float hrrpuv_cutoff;
+SVEXTERN float hrrpuv_cutoff, global_hrrpuv_cutoff;
 
 SVEXTERN int smokecullflag;
 SVEXTERN int smokedrawtest,smokedrawtest2;

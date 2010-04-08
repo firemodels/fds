@@ -1731,6 +1731,7 @@ void initvars1(void){
   smoke_shade=0, fire_red=255, fire_green=128, fire_blue=0;
   fire_halfdepth=2.0;
   hrrpuv_cutoff=600.0;
+  global_hrrpuv_cutoff=hrrpuv_cutoff;
 
   smokecullflag=1;
   smokedrawtest=0,smokedrawtest2=0;
