@@ -28,11 +28,13 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP,FX,FY,FZ
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW, YSUM,YY_GET(1:N_SPECIES),ZZ_GET(1:N_MIX_SPECIES), &
             HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,VDOT_LEAK,TIME_RAMP_FACTOR,ZONE_VOLUME,CP_MF,DELTA_P,PRES_RAMP_FACTOR,&
-            H_G,H_G_A,TMP_G,CP
+            H_G,H_G_A,TMP_G
 TYPE(SURFACE_TYPE), POINTER :: SF
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,I,J,K,IPZ,IOPZ
  
 IF (SOLID_PHASE_ONLY) RETURN
+IF (PERIODIC_TEST==3) RETURN
+IF (PERIODIC_TEST==4) RETURN
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
@@ -228,24 +230,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             RHO_D_DYDZ(IIG,JJG,KKG)   = 0._EB
       END SELECT
       
-      IF (FLUX_LIMITER>=0) THEN
-         IBC = IJKW(5,IW)
-         SF => SURFACE(IBC)
-         SELECT CASE(IOR) 
-            CASE( 1)
-               FX(IIG-1,JJG,KKG,N) = -RHO_D_DYDN
-            CASE(-1)
-               FX(IIG,JJG,KKG,N) = RHO_D_DYDN
-            CASE( 2)
-               FY(IIG,JJG-1,KKG,N) = -RHO_D_DYDN
-            CASE(-2)
-               FY(IIG,JJG,KKG,N) = RHO_D_DYDN
-            CASE( 3)
-               FZ(IIG,JJG,KKG-1,N) = -RHO_D_DYDN
-            CASE(-3)
-               FZ(IIG,JJG,KKG,N) = RHO_D_DYDN
-          END SELECT
-      ENDIF
+      IF (FLUX_LIMITER>=0) FW(IW,N) = -SIGN(1._EB,REAL(IOR,EB))*RHO_D_DYDN
       
    ENDDO WALL_LOOP
    !$OMP END DO
@@ -476,41 +461,10 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       !$OMP END DO
 
    ELSE K_DNS_OR_LES
-      
-      CP_FTMP_IF: IF (CP_FTMP) THEN
-         IF (N_SPECIES > 0) THEN
-            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YY_GET,CP)
-            DO K=1,KBAR
-               DO J=1,JBAR
-                  DO I=1,IBAR
-                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                     ITMP = MIN(5000,NINT(TMP(I,J,K)))
-                     YY_GET = YYP(I,J,K,:)
-                     CALL GET_SPECIFIC_HEAT(YY_GET,CP,ITMP)
-                     KP(I,J,K) = CP*MU(I,J,K)/PR
-                  ENDDO
-               ENDDO
-            ENDDO
-            !$OMP END DO
-         ELSE
-            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,CP)
-            DO K=1,KBAR
-               DO J=1,JBAR
-                  DO I=1,IBAR
-                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                     ITMP = MIN(5000,NINT(TMP(I,J,K)))
-                     CP = Y2CP_C(ITMP)
-                     KP(I,J,K) = CP*MU(I,J,K)/PR
-                  ENDDO
-               ENDDO
-            ENDDO
-            !$OMP END DO
-         ENDIF
-      ELSE CP_FTMP_IF
-         !$OMP WORKSHARE
-         KP = MU*CPOPR
-         !$OMP END WORKSHARE
-      ENDIF CP_FTMP_IF
+   
+      !$OMP WORKSHARE
+      KP = MU*CPOPR
+      !$OMP END WORKSHARE
       
    ENDIF K_DNS_OR_LES
 
@@ -869,6 +823,8 @@ INTEGER :: IW,IOR,II,JJ,KK,IIG,JJG,KKG,IC,I,J,K,IPZ,IOPZ,IOPZ2
 REAL(EB), DIMENSION(N_ZONE) :: USUM_ADD
 
 IF (SOLID_PHASE_ONLY) RETURN
+IF (PERIODIC_TEST==3) RETURN
+IF (PERIODIC_TEST==4) RETURN
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
