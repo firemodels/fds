@@ -38,6 +38,7 @@ void update_alpha(void);
 #define FIRE_HALFDEPTH 4
 #define FIRE_ALPHA 5
 #define FIRE_CUTOFF 6
+#define GLOBAL_FIRE_CUTOFF 15
 #define SMOKE_SHADE 7
 #ifdef pp_GPU
 #define SMOKE_RTHICK 8
@@ -130,7 +131,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   
   if(nsmoke3d_files<=0)return;
-  SPINNER_smoke3d_hrrpuv_cutoffptr=(GLUI_Spinner **)malloc(nmeshes*sizeof(GLUI_Spinner *));
+  SPINNER_smoke3d_hrrpuv_cutoffptr=(GLUI_Spinner **)malloc((nmeshes+1)*sizeof(GLUI_Spinner *));
   
   glui_3dsmoke=glui_bounds;
   panel_absorption = glui_3dsmoke->add_panel_to_panel(panel_smoke3d,"Absorption Adjustments");
@@ -193,6 +194,10 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #define HRRPUV_CUTOFF_MAX 1199.99
 
     glui_3dsmoke->add_statictext_to_panel(panel_fire,"HRRPUV cutoff (kW/m3):");
+
+    SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]=glui_3dsmoke->add_spinner_to_panel
+      (panel_fire,"All meshes",GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
+    SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
     for(i=0;i<nmeshes;i++){
       meshi = meshinfo + i;
       if(meshi->hrrpuv_cutoff>HRRPUV_CUTOFF_MAX)meshi->hrrpuv_cutoff=HRRPUV_CUTOFF_MAX;
@@ -360,6 +365,8 @@ void update_alpha(void){
 
 
 void SMOKE_3D_CB(int var){
+  int i;
+
   switch (var){
   case SMOKETEST:
     update_alpha();
@@ -374,6 +381,14 @@ void SMOKE_3D_CB(int var){
     break;
   case SMOKE_3D_CLOSE:
     hide_glui_3dsmoke();
+    break;
+  case GLOBAL_FIRE_CUTOFF:
+    for(i=0;i<nmeshes;i++){
+      SPINNER_smoke3d_hrrpuv_cutoffptr[i]->set_float_val(global_hrrpuv_cutoff);
+    }
+    GLUTPOSTREDISPLAY
+    force_redisplay=1;
+    IDLE();
     break;
   case FIRE_RED:
   case FIRE_GREEN:
