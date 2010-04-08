@@ -21,7 +21,7 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
     int nsmall, nbig, *buckets=NULL, n, level, total, alpha05;
     float dp, pmin2, pmax2;
 
-    if(axisnum==1&&(setpmin==PERCENTILE_MIN||setpmax==PERCENTILE_MAX)){
+    if(setpmin==PERCENTILE_MIN||setpmax==PERCENTILE_MAX){
       dp = (*pmax - *pmin)/NBUCKETS;
       nsmall=0;
       nbig=NBUCKETS;
@@ -265,7 +265,7 @@ void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, c
     float dp, pmin2, pmax2;
     int ndata;
 
-    if(axisnum==1&&(setpmin==PERCENTILE_MIN||setpmax==PERCENTILE_MAX)){
+    if(setpmin==PERCENTILE_MIN||setpmax==PERCENTILE_MAX){
       dp = (*pmax - *pmin)/NBUCKETS;
       nsmall=0;
       nbig=NBUCKETS;
@@ -338,7 +338,7 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
     int ndata=0;
     int ntotal;
 
-    if(axisnum==1&&(setpmin==PERCENTILE_MIN||setpmax==PERCENTILE_MAX)){
+    if(setpmin==PERCENTILE_MIN||setpmax==PERCENTILE_MAX){
       dp = (*pmax - *pmin)/NBUCKETS;
       nsmall=0;
       nbig=NBUCKETS;

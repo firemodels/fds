@@ -367,7 +367,7 @@ SVEXTERN float targetmin, targetmax;
 SVEXTERN float partmin, partmax, slicemin, slicemax;
 SVEXTERN float zonemin, zonemax;
 SVEXTERN float speedmax;
-SVEXTERN int axissmooth,axisnum;
+SVEXTERN int axissmooth;
 SVEXTERN int FlowDir,ClipDir;
 SVEXTERN int plotn;
 SVEXTERN int stept;
