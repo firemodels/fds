@@ -50,8 +50,8 @@ if "%platform%"=="64" copy %in_smv%\smokediff%platform%_release.exe   %out_bin%\
 if "%platform%"=="32" copy %in_smv%\smokezip%platform%_release.exe   %out_bin%\smokezip.exe
 if "%platform%"=="64" copy %in_smv%\smokezip%platform%_release.exe   %out_bin%\smokezip_win_64.exe
 
-if "%platform%"=="32" copy %in_fds2ascii%\fds2ascii_win32\fds2ascii_win_32.exe     %out_bin%\fds2ascii.exe
-if "%platform%"=="64" copy %in_fds2ascii%\fds2ascii_win64\fds2ascii_win_64.exe     %out_bin%\fds2ascii_win_64.exe
+if "%platform%"=="32" copy %in_fds2ascii%\intel_win_32\fds2ascii_win_32.exe     %out_bin%\fds2ascii.exe
+if "%platform%"=="64" copy %in_fds2ascii%\intel_win_64\fds2ascii_win_64.exe     %out_bin%\fds2ascii_win_64.exe
 
 echo.
 echo Copying auxillary files to the bin directory
