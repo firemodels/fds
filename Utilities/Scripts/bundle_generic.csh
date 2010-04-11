@@ -15,7 +15,7 @@ set mandir=$fds_smvroot/Manuals/All_PDF_Files
 set smvbindir=$scp_fds_smvroot/SMV_5/bin
 set forbundle=$fds_smvroot/SMV_5/for_bundle
 set texturedir=$forbundle/textures
-set fds2asciiroot=$fds_smvroot/Utilities/fds2ascii
+set fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
 set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
 
 cd $googledir
