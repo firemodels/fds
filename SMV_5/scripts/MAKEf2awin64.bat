@@ -1,6 +1,6 @@
 @echo off
 
-Rem  Windows batch file to build linux 32 and 64 bit versions of smokezip
+Rem  Windows batch file to build 64 bit windows version of fds2ascii
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -19,8 +19,9 @@ goto:eof
 call %envfile%
 
 echo Building 64 bit Windows versions of fds2ascii
+%svn_drive%
 cd %svn_root%\Utilities\fds2ascii\intel_win_64
-make_fds2ascii
+call make_fds2ascii
 
 echo.
 echo compilation complete
