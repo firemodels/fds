@@ -171,6 +171,8 @@ extern "C" void glui_colorbar_setup(int main_window){
   cb_hidesv=1;
   CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(panel_cb2R2,"Hide Scene",&cb_hidesv);
 
+  glui_colorbar->add_checkbox("Smooth colorbar labels",&axissmooth);
+
   panel_cb1 = glui_colorbar->add_panel("Colorbar");
   if(ncolorbars>0){
     selectedcolorbar_index=-1;
