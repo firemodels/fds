@@ -23,7 +23,8 @@ setenv fds5mpi fds5_mpi_intel_linux_32
 setenv fds5out fds5_linux_32
 setenv fds5mpiout fds5_mpi_linux_32
 
-setenv fds2ascii fds2ascii_linux
+setenv fds2ascii fds2ascii_linux_32
+setenv fds2asciidir intel_linux_32
 
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh
 

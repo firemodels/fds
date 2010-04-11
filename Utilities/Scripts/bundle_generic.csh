@@ -15,7 +15,7 @@ set mandir=$fds_smvroot/Manuals/All_PDF_Files
 set smvbindir=$scp_fds_smvroot/SMV_5/bin
 set forbundle=$fds_smvroot/SMV_5/for_bundle
 set texturedir=$forbundle/textures
-set fds2asciidir=$fds_smvroot/Utilities/fds2ascii
+set fds2asciiroot=$fds_smvroot/Utilities/fds2ascii
 set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
 
 cd $googledir
@@ -70,7 +70,7 @@ cp $bundle_setup/README_OSX.html $bundledir/bin/.
 endif
 
 cp $forbundle/smokeview.ini $bundledir/bin/.
-cp $fds2asciidir/$fds2ascii $bundledir/bin/.
+scp $fdshost\:$fds2asciiroot/$fds2asciidir/$fds2ascii $bundledir/bin/.
 
 echo Copying documentation
 cp $bundle_setup/Overview.html $bundledir/Documentation/.
