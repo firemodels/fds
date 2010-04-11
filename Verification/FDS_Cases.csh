@@ -151,3 +151,19 @@ $RUNFDS Surf_mass surf_mass_vent_nonchar_cyl_gas    fire66
 $RUNFDS Surf_mass surf_mass_vent_nonchar_spher_fuel fire66
 $RUNFDS Surf_mass surf_mass_vent_nonchar_spher_gas  fire66
 
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL0_16  fire70
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL0_32  fire70
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL0_64  fire70
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL0_128 fire70
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL2_16  fire71
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL2_32  fire71
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL2_64  fire71
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL2_128 fire71
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL4_16  fire72
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL4_32  fire72
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL4_64  fire72
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL4_128 fire72
+
+
+
+
