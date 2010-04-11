@@ -39,7 +39,7 @@ char readsmv_revision[]="$Revision$";
 #define ijcell2(i,j) nxcell*(j) + (i)
 int GeometryMenu(int var);
 propdata *get_prop_id(char *prop_id);
-
+void init_evac_prop(void);
 
 /* ------------------ update_inilist ------------------------ */
 
@@ -4916,6 +4916,8 @@ typedef struct {
  */
 
   CheckMemory;
+
+  init_evac_prop();
 
   update_inilist();
 
@@ -10288,4 +10290,31 @@ propdata *get_prop_id(char *prop_id){
     if(strcmp(propi->label,prop_id)==0)return propi;
   }
   return NULL;
+}
+
+/* ------------------ init_evac_prop ------------------------ */
+
+void init_evac_prop(void){
+  char label[256];
+  char *smokeview_id;
+  int lenbuf;
+  int nsmokeview_ids;
+
+  strcpy(label,"evac default");
+
+  NewMemory( (void **)&prop_evacdefault,sizeof(propdata));
+  nsmokeview_ids=1;
+
+  init_prop(prop_evacdefault,nsmokeview_ids,label);
+
+
+  NewMemory((void **)&smokeview_id,6+1);
+  strcpy(smokeview_id,"sensor");
+  prop_evacdefault->smokeview_ids[0]=smokeview_id;
+  prop_evacdefault->smv_objects[0]=get_SVOBJECT_type(prop_evacdefault->smokeview_ids[0],missing_device);
+
+  prop_evacdefault->smv_object=prop_evacdefault->smv_objects[0];
+  prop_evacdefault->smokeview_id=prop_evacdefault->smokeview_ids[0];
+
+  prop_evacdefault->ntextures=0;
 }
