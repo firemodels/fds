@@ -1447,7 +1447,7 @@ void drawPart5(const particle *parti){
 
           avatar_type=0;
           prop=datacopy->partclassbase->prop;
-          if(prop==NULL)prop=propinfo;
+          if(prop==NULL)prop=prop_evacdefault;
           if(iavatar_evac!=-1)avatar_type=iavatar_evac;
           for(j=0;j<datacopy->npoints;j++){
             float az_angle;
