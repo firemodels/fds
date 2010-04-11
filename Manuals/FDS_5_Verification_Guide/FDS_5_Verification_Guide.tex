@@ -946,6 +946,187 @@ With the same grid set up as described above the smooth walls, a series of cases
 
 In this work the FDS wall model has been verified for both laminar and turbulent flow through straight channels with smooth or rough walls.  It is shown that for the laminar (DNS) case FDS is second-order accurate.  It is suggested elsewhere that, as a rule of thumb, 10 \% accuracy is the best that can be expected from friction factor calculations of turbulent flow \cite{MYO}.  The Werner and Wengle wall model is adapted to variable density flows (though only constant density flows are tested here) for smooth walls and it is shown that FDS is capable of reproducing friction factors for a broad range of Reynolds numbers to within 6.0 \% relative accuracy.  A log law for rough walls is adopted to FDS with similar results.
 
+\clearpage
+
+\section{Analytical Solutions to the Continuity Equation}
+
+Analytical solutions for primitive flow variables (density, velocity, pressure, etc.) are useful in the development and testing of numerical schemes for computational fluid dynamics (CFD).  For example, an analytical solution to the 2D incompressible Navier-Stokes (NS) equations is presented in Section \ref{ns2d} and is used to verify the spatial and temporal accuracy of momentum equation.  However, to our knowledge, there are no similar (i.e., time dependent and periodic in space) analytical solutions for the compressible NS equations, which could be used for verification of both compressible and variable-density low-Mach flow solvers.
+
+The aim of the present work is to take a small step toward developing such analytical solutions.  The main idea is that, given a specified velocity field, the continuity equation can be rearranged into a linear hyperbolic PDE for the logarithm of the density.  Let $\rho$ denote the density and let $\mathbf{u} = [u,v]^T$ denote the velocity. The continuity equation (conservation of mass) can then be written as
+\begin{equation}
+\label{eqn_continuity}
+\frac{\partial \ln \rho}{\partial t} + \mathbf{u} \cdot \nabla \ln \rho + \nabla\cdot \mathbf{u} = 0 \,\mbox{.}
+\end{equation}
+Further, for certain, simple specifications of the velocity, this PDE can be solved using the method of characteristics.
+
+In what follows we present 1D and 2D solutions to (\ref{eqn_continuity}) for two basic irrotational flow fields.  All the solutions are periodic in space.  The first configuration is a pulsating flow that cycles between compressing the fluid toward the center and then the corners of the domain.  In the second configuration, time periodicity is achieved by using a constant and uniform advection velocity in combination with the compression waves.  This results in a solution with a qualitatively different character than the first.
+
+\subsection{Pulsating 1D solution}
+\label{soln_1d}
+
+We specify the velocity as
+\begin{equation}
+\label{eqn_velocity1d}
+u(x,t)  = B \sin(x) \cos(\omega t) \,\mbox{,}
+\end{equation}
+where $B$ is a constant amplitude and $\omega$ is the frequency of the compression cycle. The velocity divergence in 1D is then
+\begin{equation}
+\label{eqn_pdesource1d}
+\frac{\partial u}{\partial x} = B \cos(x) \cos(\omega t) \,\mbox{.}
+\end{equation}
+
+Let $q \equiv \ln \rho$ (this notation is used through out this work).  The 1D continuity equation can then be written as the following linear hyperbolic PDE:
+\begin{equation}
+\label{eqn_cont1d}
+\frac{\partial q}{\partial t} + B \sin(x) \cos(\omega t) \frac{\partial q}{\partial x} + B \cos(x) \cos(\omega t) = 0 \,\mbox{,}
+\end{equation}
+which can be solved using the method of characteristics to obtain the solution
+\begin{equation}
+\label{eqn_1dsoln}
+q(x,t) = q(x_0[x,t],0) + \ln \left\{ \frac{ 1 + \tan^2\left(\frac{x_0[x,t]}{2}\right) \exp\left(\frac{2B}{\omega}\sin[\omega t]\right) }{ 1 + \tan^2\left(\frac{x_0[x,t]}{2}\right) } \right\} - \frac{B}{\omega} \sin(\omega t) \,\mbox{,}
+\end{equation}
+where the initial position is given by
+\begin{equation}
+\label{eqn_initialposition1d}
+x_0(x,t) = 2 \arctan\left( \tan\left[\frac{x}{2}\right] \exp\left[-\frac{B}{\omega}\sin(\omega t)\right] \right) \,\mbox{.}
+\end{equation}
+Note that we have taken the initial time to be zero, as is done throughout this work.
+
+The qualitative form of the solution (\ref{eqn_1dsoln}) is illustrated by Figure \ref{fig_soln1d}, where we show the solution at specific points in time corresponding to the initial condition, the peak of the first compression cycle, and the trough of the first compression cycle.  The initial condition for the density is specified as $\rho(x,0) = 1$ and the amplitude and frequency are set to unity, $B=1$ and $\omega=1$.
+
+
+\subsection{Pulsating 2D solution}
+\label{soln_2d}
+
+The velocity $\mathbf{u}=[u,v]^T$ and the velocity divergence are given by
+\begin{eqnarray}
+\label{eqn_u2d}
+u(x,t) &=& B \sin(x) \cos(\omega t) \,\mbox{,} \vspace{0.2cm}\\
+v(y,t) &=& B \sin(y) \cos(\omega t) \,\mbox{,}
+\end{eqnarray}
+\begin{equation}
+\label{eqn_div2d}
+\nabla\cdot\mathbf{u} = B(\cos[x] + \cos[y]) \cos(\omega t) \,\mbox{,}
+\end{equation}
+where, again, $B$ is a constant amplitude and $\omega$ is the compression frequency.  The 2D continuity equation may then be written as
+\begin{equation}
+\label{eqn_cont2d}
+\frac{\partial q}{\partial t} + B \sin(x) \cos(\omega t) \frac{\partial q}{\partial x} + B \sin(y) \cos(\omega t) \frac{\partial q}{\partial y} + B( \cos[x] + \cos[y]) \cos(\omega t) = 0 \,\mbox{,}
+\end{equation}
+where, again, $q \equiv \ln \rho(\mathbf{x},t)$.
+
+The solution to (\ref{eqn_cont2d}) can be obtained by adding the solutions of the following two PDEs:
+\begin{eqnarray}
+\label{eqn_linearpdes}
+\frac{\partial q_1}{\partial t} + B \sin(x) \cos(\omega t) \frac{\partial q_1}{\partial x} + B \cos(x) \cos(\omega t) &=& 0 \,\mbox{,} \vspace{0.3cm} \\
+\frac{\partial q_2}{\partial t} + B \sin(y) \cos(\omega t) \frac{\partial q_2}{\partial y} + B \cos(y) \cos(\omega t) &=& 0 \,\mbox{.}
+\end{eqnarray}
+Thus, utilizing (\ref{eqn_1dsoln}) and (\ref{eqn_initialposition1d}), and replacing $q_1(x_0[x,t],0) + q_2(y_0[y,t],0)$ with $q_0(x,y,t)$, we find that the solution to (\ref{eqn_cont2d}) is
+\begin{eqnarray}
+\label{eqn_2dsoln}
+q(x,y,t) &=& q_0(x,y,t) \nonumber\vspace{0.3cm}\\
+&+& \ln \left\{ \frac{1 + a(x_0[x,t]) \exp \left( \frac{2B}{\omega} \sin[\omega t] \right)}{1 + a(x_0[x,t])} \right\} \nonumber\vspace{0.3cm}\\
+&+& \ln \left\{ \frac{1 + a(y_0[y,t]) \exp \left( \frac{2B}{\omega} \sin[\omega t] \right)}{1 + a(y_0[y,t])} \right\} \nonumber\vspace{0.3cm}\\
+&-& \frac{2B}{\omega} \sin(\omega t) \,\mbox{,}
+\end{eqnarray}
+where
+\begin{equation}
+\label{eqn_a}
+a(z) \equiv \tan^2\left(\frac{z}{2}\right) \,\mbox{,}
+\end{equation}
+and the initial positions are given by
+\begin{eqnarray}
+\label{eqn_initpos2d}
+x_0(x,t) &=& 2 \arctan\left( \tan\left[\frac{x}{2}\right] \exp\left[-\frac{B}{\omega}\sin(\omega t)\right] \right) \,\mbox{,} \vspace{0.3cm}\\
+y_0(y,t) &=& 2 \arctan\left( \tan\left[\frac{y}{2}\right] \exp\left[-\frac{B}{\omega}\sin(\omega t)\right] \right) \,\mbox{.}
+\end{eqnarray}
+Note that the initial condition $q_0(x,y,t)$ is restricted to cases where $\frac{\partial q_0}{\partial x}$ is independent of $y$ and $\frac{\partial q_0}{\partial y}$ is independent of $x$.  That is, the function $q_0$ must be \emph{additively separable}.
+
+\subsection{Stationary compression wave in 1D}
+\label{stationary_1d}
+
+Another problem which can be solved analytically is that of a stationary compression wave.  In this section we consider a stationary compression wave combined with a constant and uniform advection velocity in 1D.  The velocity is specified to be
+\begin{equation}
+\label{eqn_statu1d}
+u(x) = c + \sin(x) \,\mbox{,}
+\end{equation}
+where $|c|>1$ is a constant.  The 1D continuity equation becomes
+\begin{equation}
+\label{eqn_stat1dcont}
+\frac{\partial q}{\partial t} + [c + \sin(x)] \frac{\partial q}{\partial x} + \cos(x) = 0 \,\mbox{.}
+\end{equation}
+A solution to (\ref{eqn_stat1dcont}) is
+\begin{eqnarray}
+\label{eqn_stat1dsoln}
+q(x,t) &=& q(x_0[x,t],0) \nonumber \vspace{0.3cm}\\
+&+& \ln\left\{ -c^2 - \cos\big(bt + 2\arctan[\gamma(x,t)] \big) + b\sin\big(bt + 2\arctan[\gamma(x,t)] \big) \right\} \nonumber \vspace{0.3cm}\\
+&-& \ln\left\{ -c^2 - \cos\big( 2\arctan[\gamma(x,t)] \big) + b\sin\big( 2\arctan[\gamma(x,t)] \big) \right\} \,\mbox{,}
+\end{eqnarray}
+where
+\begin{equation}
+\label{eqn_b}
+b \equiv \sqrt{-1 + c^2} > 0 \,\mbox{,}
+\end{equation}
+\begin{equation}
+\label{eqn_gamma}
+\gamma(x,t) = \frac{ 1 + c\tan\left( \frac{x_0[x,t]}{2} \right) }{b} \,\mbox{,}
+\end{equation}
+and
+\begin{equation}
+\label{eqn_stat1dx0}
+x_0(x,t) = 2\arctan\left( \frac{b}{c} \tan \left[ \arctan\left\{ \frac{1+c\tan[x/2]}{b} \right\} - \frac{bt}{2} \right] - \frac{1}{c} \right) \,\mbox{.}
+\end{equation}
+
+\subsection{Stationary compression wave in 2D}
+\label{stationary_2d}
+
+As with the pulsating flow, there is a simple extension of the 1D stationary wave solution to 2D.  In this section we consider the velocity field with components
+\begin{eqnarray}
+u(x) &=& c_1 + \sin(x) \,\mbox{,} \\
+v(y) &=& c_2 + \sin(y) \,\mbox{.}
+\end{eqnarray}
+The continuity equation can be written as
+\begin{equation}
+\label{eqn_stat2d_cont}
+\frac{\partial q}{\partial t} + [c_1 + \sin(x)] \frac{\partial q}{\partial x} + [c_2 + \sin(y)] \frac{\partial q}{\partial y} + \cos(x) + \cos(y) = 0 \,\mbox{.}
+\end{equation}
+A solution to (\ref{eqn_stat2d_cont}) is
+\begin{eqnarray}
+\label{eqn_stat2d_soln}
+q(x,y,t) &=& q_0(x,y,t) \nonumber\\
+&+& \mathcal{I}_1(x,t) - \mathcal{I}_1^0(x,t) \nonumber\\
+&+& \mathcal{I}_2(y,t) - \mathcal{I}_2^0(y,t) \,\mbox{,}
+\end{eqnarray}
+where
+\begin{eqnarray}
+\label{eqn_Ii}
+\mathcal{I}_i(z,t) &=& \ln\left\{ -c_i^2 - \cos\big(b_i t + 2\arctan[\gamma_i(z,t)] \big) + b_i \sin\big(b_i t + 2\arctan[\gamma_i(z,t)] \big) \right\}\,\mbox{,} \quad\quad  \vspace{0.3cm}\\
+\label{eqn_Ii0}
+\mathcal{I}_i^0(z,t) &=& \ln\left\{ -c_i^2 - \cos\big(2\arctan[\gamma_i(z,t)] \big) + b_i \sin\big(2\arctan[\gamma_i(z,t)] \big) \right\} \,\mbox{,}
+\end{eqnarray}
+and
+\begin{equation}
+b_i \equiv \sqrt{-1 + c_i^2} >0 \,\mbox{,}
+\end{equation}
+\begin{equation}
+\gamma_i(z,t) = \frac{ 1 + c_i \tan\left( \frac{z_0[z,t]}{2} \right) }{b_i} \,\mbox{,}
+\end{equation}
+\begin{equation}
+z_0(z,t) = 2\arctan\left( \frac{b_i}{c_i} \tan \left[ \arctan\left\{ \frac{1+c_i\tan[z/2]}{b_i} \right\} - \frac{b_it}{2} \right] - \frac{1}{c_i} \right) \,\mbox{.}
+\end{equation}
+Note that $z_0 \Rightarrow x_0$ for $i=1$ and $z_0 \Rightarrow y_0$ for $i=2$.  To be clear, no summation is implied over repeated indices. Also, note that the same restrictions apply to the initial condition as did in Section \ref{soln_2d}. Namely, that $\frac{\partial q_0}{\partial x}$ is independent of $y$ and $\frac{\partial q_0}{\partial y}$ is independent of $x$.
+
+An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Figure \ref{fig_compression_wave}.  In this case we set $c_1 = 2$ and $c_2 = 3$ to create an asymmetry in the flow.  The periodicity in time depends on the choices of $c_1$ and $c_2$; it is possible that no periodicity exists. We have not found a case that generates a singularity. The analytical time series of the density at the position $(x,y) = (3\pi/2, 3\pi/2)$ is shown as the solid black line. FDS is run with the CHARM flux limiter scheme (as this is a DNS flow field).  The solution at successively finer grid resolutions is plotted and compared with the analytical solution, demonstrating convergence of the scheme.  On the right side of the figure we demonstrate second-order convergence of the central, Superbee, and CHARM limiter schemes in FDS.
+
+\begin{figure}[t]
+   \begin{tabular}{rl}
+      \includegraphics[width=3.2in]{FIGURES/compression_wave_time_series.pdf} &
+      \includegraphics[width=3.2in]{FIGURES/compression_wave_convergence.pdf}
+   \end{tabular}
+   \caption{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for LES and CHARM is the default for DNS.}
+   \label{fig_compression_wave}
+\end{figure}
+
 
 \clearpage
 
@@ -1012,7 +1193,7 @@ In the two cases, 0.2~kg of N$_2$ are added to a compartment that is 1~m$^3$ in 
 second case in 50~s. The temperature of the gas in both cases is 500~$^\circ$C. It is expected that the pressure, $p$, should rise at the rate:
 \be \frac{dp}{dt} = \frac{\gamma \, p \, u \, A}{V} \ee
 where $u$ is the injection velocity and $A$ is the area of the vent. The vent area is 0.04~m$^2$. The density of the incoming N$_2$ is found from the
-Equation of State: 
+Equation of State:
 \be \rho = \frac{ \overline{W} \, p }{ {\cal R} T} \ee
 The injection velocity is the mass flux divided by the density, $u=\dot{m}''/\rho$, in which case, the pressure rise can be written
 \be \frac{dp}{dt} = \frac{\gamma \, \dot{m}'' \, {\cal R} T \, A}{\overline{W} \, V} \ee
@@ -1021,7 +1202,7 @@ and temperature rise are also linear. The density increases from 1.164~kg/m$^3$ 
 The change in the internal energy of the system, based on the mass and temperature of the added N$_2$, is:
 \be \Delta E = (0.2 \; \hbox{kg}) \times (1.039 \; \hbox{kJ/kg/K}) \times (773.15 \; \hbox{K} ) = 160.7 \; \hbox{kJ} \ee
 Adding in the work due to the pressure yields the change in total enthalpy:
-\be \Delta H = \Delta E + V \, \Delta P = 160.7 \; \hbox{kJ} + (1 \; \hbox{m}^3) \times ( \; 64.3 \; \hbox{kJ/m}^3) = 225 \; \hbox{kJ} \ee 
+\be \Delta H = \Delta E + V \, \Delta P = 160.7 \; \hbox{kJ} + (1 \; \hbox{m}^3) \times ( \; 64.3 \; \hbox{kJ/m}^3) = 225 \; \hbox{kJ} \ee
 
 
 \begin{figure}[ht]
@@ -1029,7 +1210,7 @@ Adding in the work due to the pressure yields the change in total enthalpy:
 \includegraphics[width=3.2in]{FIGURES/isentropic2_density} &
 \includegraphics[width=3.2in]{FIGURES/isentropic2_pressure} \\
 \includegraphics[width=3.2in]{FIGURES/isentropic2_temperature} &
-\includegraphics[width=3.2in]{FIGURES/isentropic2_enthalpy} 
+\includegraphics[width=3.2in]{FIGURES/isentropic2_enthalpy}
 \end{tabular*}
 \caption[The isentropic2 case.]{Density, pressure, temperature, and enthalpy rise due to the injection of nitrogen into a sealed compartment.}
 \label{isentropic2}
