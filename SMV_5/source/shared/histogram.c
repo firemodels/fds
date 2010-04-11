@@ -132,6 +132,8 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
 
       if(bucket1copy[i]!=0){
         val = histgram1->valmin + (i+0.5)*dbucket1;
+        valmin_new=HMIN(valmin_new,val);
+        valmax_new=HMAX(valmax_new,val);
         ival = (val-valmin_new)/dbucket_new;
         if(ival<0)ival=0;
         if(ival>NHIST_BUCKETS-1)ival=NHIST_BUCKETS-1;
@@ -139,6 +141,8 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
       }
       if(histgram2->buckets[i]!=0){
         val = histgram2->valmin + (i+0.5)*dbucket2;
+        valmin_new=HMIN(valmin_new,val);
+        valmax_new=HMAX(valmax_new,val);
         ival = (val-valmin_new)/dbucket_new;
         if(ival<0)ival=0;
         if(ival>NHIST_BUCKETS-1)ival=NHIST_BUCKETS-1;
