@@ -1567,6 +1567,11 @@ WALL_LOOP: DO IW=1,NWC
                IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                ZZ(4) = RHOP(IIG+1,JJG,KKG)
+               !debug...
+               !ZZ(1) = RHOP(IBM1,JJG,KKG)
+               !ZZ(2) = RHOP(IBAR,JJG,KKG)
+               !ZZ(3) = RHOP(1,JJG,KKG)
+               !ZZ(4) = RHOP(2,JJG,KKG)
                FX(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)*R(II)
             CASE(-1)
                ZZ(1) = RHOP(IIG-1,JJG,KKG)
@@ -1575,6 +1580,11 @@ WALL_LOOP: DO IW=1,NWC
                IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)
                IF (PREDICTOR) ZZ(4) = M2%RHO(IIO+1,JJO,KKO)
                IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO+1,JJO,KKO)
+               !debug...
+               !ZZ(1) = RHOP(IBM1,JJG,KKG)
+               !ZZ(2) = RHOP(IBAR,JJG,KKG)
+               !ZZ(3) = RHOP(1,JJG,KKG)
+               !ZZ(4) = RHOP(2,JJG,KKG)
                FX(II-1,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)*R(II-1)
             CASE( 2)
                IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO-1,KKO)
@@ -1599,6 +1609,11 @@ WALL_LOOP: DO IW=1,NWC
                IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)
                ZZ(3) = RHOP(IIG,JJG,KKG)
                ZZ(4) = RHOP(IIG,JJG,KKG+1)
+               !degug...
+               !ZZ(1) = RHOP(IIG,JJG,KBM1)
+               !ZZ(2) = RHOP(IIG,JJG,KBAR)
+               !ZZ(3) = RHOP(IIG,JJG,1)
+               !ZZ(4) = RHOP(IIG,JJG,2)
                FZ(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
             CASE(-3)
                ZZ(1) = RHOP(IIG,JJG,KKG-1)
@@ -1607,6 +1622,11 @@ WALL_LOOP: DO IW=1,NWC
                IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)
                IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO,KKO+1)
                IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO,KKO+1)
+               !debug...
+               !ZZ(1) = RHOP(IIG,JJG,KBM1)
+               !ZZ(2) = RHOP(IIG,JJG,KBAR)
+               !ZZ(3) = RHOP(IIG,JJG,1)
+               !ZZ(4) = RHOP(IIG,JJG,2)
                FZ(II,JJ,KK-1,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
          END SELECT
             

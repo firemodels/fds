@@ -1132,36 +1132,52 @@ INTEGER :: I,J,K
 CALL POINT_TO_MESH(NM)
 
 SELECT CASE(ITEST)
-   CASE(3)
+   CASE(3) ! stationary compression wave
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=0,IBAR
-               U(I,J,K) = 2._EB + SIN(X(I))
+               U(I,J,K)  = 2._EB + SIN(X(I))
                US(I,J,K) = U(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               V(I,J,K)  = 0._EB
+               VS(I,J,K) = 0._EB
             ENDDO
          ENDDO
       ENDDO
       DO K=0,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               W(I,J,K) = 2._EB + SIN(Z(K))
+               W(I,J,K)  = 3._EB + SIN(Z(K))
                WS(I,J,K) = W(I,J,K)
             ENDDO
          ENDDO
       ENDDO
-   CASE(4)
+   CASE(4) ! pulsating dilation
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=0,IBAR
-               U(I,J,K) = 0.5_EB*SIN(X(I))*COS(T)
+               U(I,J,K)  = 0.5_EB*SIN(X(I))*COS(T)
                US(I,J,K) = U(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               V(I,J,K)  = 0._EB
+               VS(I,J,K) = 0._EB
             ENDDO
          ENDDO
       ENDDO
       DO K=0,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               W(I,J,K) = 0.5_EB*SIN(Z(K))*COS(T)
+               W(I,J,K)  = 0.5_EB*SIN(Z(K))*COS(T)
                WS(I,J,K) = W(I,J,K)
             ENDDO
          ENDDO
@@ -1860,23 +1876,13 @@ ELSE
 ENDIF
 ZP => WORK1
 
-IF (.NOT.MIXTURE_FRACTION) THEN
-   DO K = 0,KBP1
-      DO J = 0,JBP1
-         DO I = 0,IBP1
-            ZP(I,J,K) = YYP(I,J,K,1) ! hack
-         ENDDO
+DO K = 0,KBP1
+   DO J = 0,JBP1
+      DO I = 0,IBP1
+         ZP(I,J,K) = YYP(I,J,K,1)
       ENDDO
    ENDDO
-ELSE
-   DO K = 0,KBP1
-      DO J = 0,JBP1
-         DO I = 0,IBP1
-            ZP(I,J,K) = SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
+ENDDO
 
 WEM = 0._EB
 DO K = 1,KBAR
