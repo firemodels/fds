@@ -4669,6 +4669,8 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
 
    ! Species Arrays and Method of Mass Transfer (SPECIES_BC_INDEX)
 
+   SF%SPECIES_BC_INDEX = NO_MASS_FLUX
+
    IF (ANY(SF%MASS_FRACTION>=0._EB) .AND. (ANY(SF%MASS_FLUX/=0._EB).OR.BURNING)) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot specify mass fraction with mass flux and/or burning'
       CALL SHUTDOWN(MESSAGE)
