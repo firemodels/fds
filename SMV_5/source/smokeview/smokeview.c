@@ -3635,7 +3635,10 @@ void Args(int argc, char **argv){
       usage(argv);
       exit(0);
     }
-    else if(strncmp(argv[i],"-version",8)==0){
+    else if(
+      strncmp(argv[i],"-version",8)==0||
+      strncmp(argv[i],"-v",2)==0
+      ){
       version();
       exit(0);
     }
