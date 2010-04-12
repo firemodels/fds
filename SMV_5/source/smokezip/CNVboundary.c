@@ -488,8 +488,10 @@ void Get_Boundary_Bounds(void){
     NewMemory((void **)&patchframe,patchframesize*sizeof(float));
     init_histogram(patchi->histogram);
     while(error1==0){
+      int ndummy;
+
       FORTgetpatchdata(&unit1, &patchi->npatches, 
-        pi1, pi2, pj1, pj2, pk1, pk2, &patchtime1, patchframe, &error1);
+        pi1, pi2, pj1, pj2, pk1, pk2, &patchtime1, patchframe, &ndummy,&error1);
       update_histogram(patchframe,patchframesize,patchi->histogram);
     }
     FREEMEMORY(patchframe);

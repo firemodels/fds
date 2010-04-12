@@ -253,6 +253,10 @@ int main(int argc, char **argv){
         usage(prog);
         return 1;
         break;
+      case 'v':
+        version();
+        return 1;
+        break;
       default:
         usage(prog);
         return 1;
