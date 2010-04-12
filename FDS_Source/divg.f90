@@ -134,9 +134,12 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    ! Compute rho*D
  
    RHO_D => WORK4
-   
+
    !$OMP PARALLEL SHARED(RHO_D) 
    IF (DNS .AND. SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) THEN
+      !$OMP WORKSHARE
+      RHO_D = 0._EB
+      !$OMP END WORKSHARE
       !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP)
       DO K=1,KBAR
          DO J=1,JBAR
@@ -201,7 +204,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       FZ(:,:,:,N) = -RHO_D_DYDZ
       !$OMP END WORKSHARE
    ENDIF
-   
+
    ! Correct rho*D del Y at boundaries and store rho*D at boundaries
 
    !$OMP DO PRIVATE(IW,IIG,JJG,KKG,RHO_D_DYDN,IOR,IBC,SF)
@@ -234,7 +237,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       
    ENDDO WALL_LOOP
    !$OMP END DO
-
 
    ! Compute del dot h_n*rho*D del Y_n only for non-mixture fraction cases
  
