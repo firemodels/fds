@@ -24,6 +24,12 @@ float get_histogram_value(histogramdata *histgram, float cdf){
   int i;
   float returnval;
 
+  if(cdf<=0.0){
+    return histgram->valmin;
+  }
+  if(cdf>=1.0){
+    return histgram->valmax;
+  }
   cutoff = cdf*histgram->ntotal;
   count=0;
   for(i=0;i<NHIST_BUCKETS;i++){

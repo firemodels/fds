@@ -76,9 +76,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   CheckMemory;
   patchfilenum=ifile;
   pi = patchinfo + ifile;
-#ifdef pp_HIST
   init_histogram(pi->histogram);
-#endif
   file = pi->file;
   blocknumber = pi->blocknumber;
   highlight_mesh = blocknumber;
@@ -729,9 +727,7 @@ void readpatch(int ifile, int flag, int *errorcode){
           meshi->pk1,meshi->pk2,
           meshi->patchtimesi,meshi->pqqi,&npqqi,
           &error);
-#ifdef pp_HIST
           update_histogram(meshi->pqqi, npqqi, pi->histogram);
-#endif
         }
       }
     }
@@ -875,30 +871,13 @@ void readpatch(int ifile, int flag, int *errorcode){
   for(i=0;i<npatch_files;i++){
     if(patchinfo[i].loaded==1&&patchinfo[i].type==ipatchtype)npatchloaded++;
   }
-#ifndef pp_HIST
-  if(npatchloaded>1){
-    setpatchmin=SET_MIN;
-    setpatchmax=SET_MAX;
-    local2globalpatchbounds(patchi->label.shortlabel);
-  }
-#endif
-  patchinfo[ifile].extreme_min=0;
-  patchinfo[ifile].extreme_max=0;
   switch(loadpatchbysteps){
   case 0:
-#ifdef pp_HIST
     getBoundaryColors3(patchinfo + ifile,meshi->pqq, npqq, meshi->ipqq, 
       setpatchmin,&patchmin, setpatchmax,&patchmax, 
       &patchmin_global, &patchmax_global,
       nrgb_full,nrgb, colorlabelpatch,patchscale,boundarylevels256,
       &patchinfo[ifile].extreme_min,&patchinfo[ifile].extreme_max);
-#else
-    getBoundaryColors(meshi->pqq, npqq, meshi->ipqq, 
-      setpatchmin,&patchmin, setpatchmax,&patchmax, 
-      &patchmin_global, &patchmax_global,
-      nrgb_full,nrgb, colorlabelpatch,patchscale,boundarylevels256,
-      &patchinfo[ifile].extreme_min,&patchinfo[ifile].extreme_max);
-#endif
     break;
   case 1:
     getBoundaryLabels(

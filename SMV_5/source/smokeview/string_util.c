@@ -207,7 +207,7 @@ void num2string(char *string, float tval,float range){
   float tval2,mant10;
   int exp10;
 
-  if(fabs((double)tval)<fabs((double)range)/100.0f)tval=0.0f;
+  //if(fabs((double)tval)<fabs((double)range)/100.0f)tval=0.0f;
   tval2=tval; 
   if(tval2<0.0)tval2=-tval2;
   if(0.01<=tval2&&tval2<0.1){

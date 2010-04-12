@@ -580,6 +580,8 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata);
     Slice_CB(FILETYPEINDEX);
   }
+  glui_bounds->add_checkbox("Smooth colorbar labels",&axissmooth);
+
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
     glui_bounds->add_separator();
