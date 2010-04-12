@@ -6,9 +6,7 @@
 #define DEF_FLOWFILES
 #include "contourdefs.h"
 #include "isodefs.h"
-#ifdef pp_HIST
 #include "histogram.h"
-#endif
 
 /* --------------------------  point ------------------------------------ */
 #define PROPVARMAX 100
@@ -1021,9 +1019,7 @@ typedef struct {
   char scale[31];
   char menulabel[128];
   int extreme_min, extreme_max;
-#ifdef pp_HIST
   histogramdata *histogram;
-#endif
 
 } patch;
 

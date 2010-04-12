@@ -145,11 +145,9 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
   adjustdatabounds(t,local_skip,nt,settmin,&tmin2,settmax,&tmax2);
   if(settmin!=SET_MIN){
     *ttmin=tmin2;
-    *extreme_min=1;
   }
   if(settmax!=SET_MAX){
     *ttmax=tmax2;
-    *extreme_max=1;
   }
   local_tmin = *ttmin;
   local_tmax = *ttmax;
@@ -164,9 +162,11 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
 
     val=*t;
     if(val<local_tmin){
+      *extreme_min=1;
       itt=0;
     }
     else if(val>local_tmax){
+      *extreme_max=1;
       itt=ndatalevel-1;
     }
     else{
@@ -179,7 +179,6 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
     t++;
   }
 }
-#ifdef pp_HIST
 
 /* ------------------ remap_patchdata ------------------------ */
 
@@ -334,7 +333,7 @@ void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it,
   tval = local_tmax;
   num2string(&labels[nlevel-1][0],tval,range);
 }
-#endif
+
 /* ------------------ getBoundaryLabels ------------------------ */
 
 void getBoundaryLabels(

@@ -3937,9 +3937,7 @@ typedef struct {
         else{
           if(readlabels(&patchi->label,stream)==2)return 2;
         }
-#ifdef pp_HIST
         NewMemory((void **)&patchi->histogram,sizeof(histogramdata));
-#endif
         ipatch++;
       }
       else{
