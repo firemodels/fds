@@ -1,4 +1,4 @@
-&HEAD CHID='Surf_mass_part_char_cyl_gas',TITLE='Surface mass, particles, char, cylinder, gas' /
+&HEAD CHID='surf_mass_part_char_cyl_gas',TITLE='Surface mass, particles, char, cylinder, gas' /
 
 
 &MESH 	IJK= 6,6,6,

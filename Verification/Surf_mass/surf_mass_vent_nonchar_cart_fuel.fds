@@ -1,4 +1,4 @@
-&HEAD CHID='Surf_mass_vent_nonchar_cart_fuel',TITLE='Surface mass, vent, nonchar, cartesian, fuel' /
+&HEAD CHID='surf_mass_vent_nonchar_cart_fuel',TITLE='Surface mass, vent, nonchar, cartesian, fuel' /
 
 &MESH 	IJK= 6,6,6,
 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 /
