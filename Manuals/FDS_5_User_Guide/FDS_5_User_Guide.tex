@@ -6783,7 +6783,6 @@ table. The median diameter of the particle size distribution is scaled as
 $d_m(p) = d_m(p_o)(p_o/p)^{1/3}$, where $p_o$ is the {\ct OPERATING\_PRESSURE}
 and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} on the corresponding {\ct PART} line.
 
-
 \subsection{Nozzles}
 \label{info:nozzles}
 
@@ -6806,6 +6805,54 @@ The following lines:
 \noindent
 designate two nozzles of the same type, one which activates at time zero, the other at 5~s. Note that nozzles must have a designated
 {\ct PROP\_ID}, and the {\ct PROP} line must have a designated {\ct PART\_ID} to describe the liquid droplets.
+
+\subsubsection{Example Case: {\bf flow\_rate}}
+
+This example demonstrates the use of pressure ramps and control logic for opening and closing nozzles. It also serves as a verification test for
+the water flow rate. There are four nozzles that open at designated times: 0 s, 15 s, 30 s and 45 s. At time 60 s, all the nozzles are closed. 
+The number of open nozzles is measured using a device with quantity {\ct 'OPEN NOZZLES'}. A comparison of the FDS result and the exact, intended values
+is shown in left part of Figure~\ref{flow_rate}.
+
+The pressure ramp has been designed to deliver a total flow rate of 10 l/min at all values of open nozzles. Mathematically this means that 
+\be
+N_n K \sqrt{p} = 10 \;\hbox{l/min} \Rightarrow 
+p = \left( \frac{10 \;\hbox{l/min}}{N_n K}\right)^2
+\ee
+
+\noindent
+where $N_n$ is the number of open nozzles. The corresponding nozzle and pressure ramp definitions are
+\footnotesize
+\begin{verbatim}
+&PROP ID='Head', 
+      OFFSET=0.10, 
+      PART_ID='water drops', 
+      K_FACTOR = 2.5
+      OPERATING_PRESSURE = 1
+      PRESSURE_RAMP = 'PR'
+      DROPLET_VELOCITY=2., 
+      SPRAY_ANGLE= 0.,60., 
+      SMOKEVIEW_ID='sprinkler_upright' /
+
+&RAMP ID='PR',   T= 1., F=16. /    
+&RAMP ID='PR',   T= 2., F=4. /     
+&RAMP ID='PR',   T= 3., F=1.778 /  
+&RAMP ID='PR',   T= 4., F=1. /     
+\end{verbatim}
+\normalsize
+
+The accumulated water is tracked using a device measuring the accumulated mass per unit area, integrated over the total floor area. 
+The total mass of accumulated water should increase from zero to 10 kg in 60 s. A comparison of the FDS prediction and this analytical result is 
+shown in the right side of Figure~\ref{flow_rate}. The small delay of the FDS result is caused by the time it takes from the droplets to fall down on the 
+floor.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/flow_rate_open_nozzles} &
+\includegraphics[width=3.2in]{FIGURES/flow_rate_water_mass}
+\end{tabular*}
+\caption[Output of the flow rate test case.]{Output of the {\bf flow\_rate} test case.}
+\label{flow_rate}
+\end{figure}
 
 
 \subsection{Heat Detectors}

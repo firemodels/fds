@@ -87,8 +87,6 @@ Accumulated Mass Per Unit Area, integrated over 10 m2.
       ID = 'Water mass'
       STATISTICS = 'SURFACE INTEGRAL'
       XB = -5,+5,-5,+5,0,0 /  
-      CONVERSION_FACTOR = 1.
-      UNITS = 'kg'
 
 Number of open nozzles
 
