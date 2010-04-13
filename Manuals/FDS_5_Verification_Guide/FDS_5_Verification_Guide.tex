@@ -1585,7 +1585,7 @@ from zero to the instanteneous time value. It should increase from zero to the a
 \end{description}
 
 
-\subsection{SURF associated with VENT}
+\subsection{Pyrolysis at a Solid Surface}
 
 
 The analytical mass losses are calculated by multiplying the corresponding value of $m''$ by the {\ct VENT} area,
@@ -1622,52 +1622,52 @@ The analytical and computed results for non-charring material are compared in~\r
 
 \clearpage
 
-%\subsection{SURF associated with PART}
-%
-%The analytical masses are obtained by multiplying the corresponding values of $m''$ by the particle area.
-%For the cartesian surfaces, the particle area is two times the product of parameters {\ct LENGHT} and {\ct WIDTH} of the {\ct SURF} line, both of
-%which were given a value 0.05 m. As a result, the analytical masses for particles with associated cartesian surfaces are
-%$m_{char}$ = 1.8 $\cdot 2\cdot 0.05^2$ kg = 0.0090 kg, and $m''_{nchar}$ = 0.018 kg.
-%
-%With associated cylindrical surfaces, the particle area is determined by the {\ct LENGTH} parameter, which was given a value 0.1 m, and the surface
-%{\ct THICKNESS} = 0.01 m. The analytical masses are thus
-%$m_{char}$ = 0.9 $\cdot 2\pi\cdot 0.01\cdot 0.1$ kg = 0.00565 kg, and $m''_{nchar}$ = 0.0113 kg.
-%
-%With associated spherical surfaces, the particle area is $4\pi\cdot$ {\ct THICKNESS}$^2$.
-%The analytical masses are thus
-%$m_{char}$ = 0.6 $\cdot 4\pi\cdot 0.01^2$ kg = 7.54$\cdot10^{-4}$ kg, and $m''_{nchar}$ = 1.51$\cdot10^{-3}$ kg.
-%
-%The analytical and computed results for charring material are compared in~\ref{surf_mass_part_char}.
-%The analytical and computed results for non-charring material are compared in~\ref{surf_mass_part_nonchar}.
-%\begin{figure}[ht]
-%\noindent
-%\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cart_fuel} &
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cart_gas} \\
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cyl_fuel} &
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cyl_gas} \\
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_spher_fuel} &
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_spher_gas}
-%\end{tabular*}
-%\caption[The {\bf surf\_mass\_part\_X\_char\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for charring surfaces associated with particles.}
-%\label{surf_mass_part_char}
-%\end{figure}
-%
-%\begin{figure}[ht]
-%\noindent
-%\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cart_fuel} &
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cart_gas} \\
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cyl_fuel} &
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cyl_gas} \\
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_spher_fuel} &
-%\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_spher_gas}
-%\end{tabular*}
-%\caption[The {\bf surf\_mass\_part\_X\_nonchar\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for non-charring surfaces associated with particles.}
-%\label{surf_mass_part_nonchar}
-%\end{figure}
-%
-%\clearpage
+\subsection{Pyrolysis of Discrete Particles}
+
+The analytical masses are obtained by multiplying the corresponding values of $m''$ by the particle area.
+For the cartesian surfaces, the particle area is two times the product of parameters {\ct LENGTH} and {\ct WIDTH} of the {\ct SURF} line, both of
+which were given a value 0.05 m. As a result, the analytical masses for particles with associated cartesian surfaces are
+$m_{char}$ = 1.8 $\cdot 2\cdot 0.05^2$ kg = 0.0090 kg, and $m''_{nchar}$ = 0.018 kg.
+
+With associated cylindrical surfaces, the particle area is determined by the {\ct LENGTH} parameter, which was given a value 0.1 m, and the surface
+{\ct THICKNESS} = 0.01 m. The analytical masses are thus
+$m_{char}$ = 0.9 $\cdot 2\pi\cdot 0.01\cdot 0.1$ kg = 0.00565 kg, and $m''_{nchar}$ = 0.0113 kg.
+
+With associated spherical surfaces, the particle area is $4\pi\cdot$ {\ct THICKNESS}$^2$.
+The analytical masses are thus
+$m_{char}$ = 0.6 $\cdot 4\pi\cdot 0.01^2$ kg = 7.54$\cdot10^{-4}$ kg, and $m''_{nchar}$ = 1.51$\cdot10^{-3}$ kg.
+
+The analytical and computed results for charring material are compared in~\ref{surf_mass_part_char}.
+The analytical and computed results for non-charring material are compared in~\ref{surf_mass_part_nonchar}.
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cart_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cart_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cyl_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_cyl_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_spher_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_char_spher_gas}
+\end{tabular*}
+\caption[The {\bf surf\_mass\_part\_X\_char\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for charring surfaces associated with particles.}
+\label{surf_mass_part_char}
+\end{figure}
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cart_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cart_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cyl_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_cyl_gas} \\
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_spher_fuel} &
+\includegraphics[width=3.2in]{FIGURES/surf_mass_part_nonchar_spher_gas}
+\end{tabular*}
+\caption[The {\bf surf\_mass\_part\_X\_nonchar\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for non-charring surfaces associated with particles.}
+\label{surf_mass_part_nonchar}
+\end{figure}
+
+\clearpage
 
 \section{Development of surface emissivity (\texorpdfstring{{\bf emissivity}}{emissivity})}
 

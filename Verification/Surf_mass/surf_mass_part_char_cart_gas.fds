@@ -1,4 +1,4 @@
-&HEAD CHID='Surf_mass_part_char_cart_gas',TITLE='Surface mass, particles, char, cartesian, gas' /
+&HEAD CHID='surf_mass_part_char_cart_gas',TITLE='Surface mass, particles, char, cartesian, gas' /
 
 &MESH 	IJK= 6,6,6,
 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 /
