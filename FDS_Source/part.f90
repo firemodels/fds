@@ -1304,7 +1304,7 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,NM)
 ! Mass and energy transfer between gas and droplets
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT,GET_SPECIFIC_GAS_CONSTANT,&
-GET_SPECIFIC_ENTHALPY
+                               GET_SPECIFIC_ENTHALPY,SURFACE_DENSITY
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL(),DROP_RAD=>NULL(),DROP_TMP=>NULL(),MVAP_TOT=>NULL(),DROP_AREA=>NULL()
@@ -1317,7 +1317,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
             CP,H_NEW,YY_GET(1:N_SPECIES),M_GAS_NEW,MW_GAS,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_REF,&
             TMP_G_NEW,DT_SUM
-INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,N_SUBSTEPS,ITMP
+INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,N_SUBSTEPS,ITMP,IBC
 INTEGER, INTENT(IN) :: NM
 LOGICAL :: TEMPITER
 TYPE (DROPLET_TYPE), POINTER :: DR=>NULL()
@@ -1733,10 +1733,25 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
          KK  = FLOOR(ZK+1._EB)
          RVC = RDX(II)*RDY(JJ)*RDZ(KK)
 
+         ! Determine the mass of the droplet/particle, depending on whether the particle has a distinct SURFace type.
 
-         M_DROP   = PC%FTPR*DR%R**3
+         IBC = PC%SURF_INDEX
+         IF (IBC<1) THEN
+            M_DROP = PC%FTPR*DR%R**3
+         ELSE
+            SF => SURFACE(IBC)
+            IW = DR%WALL_INDEX
+            SELECT CASE(SF%GEOMETRY)
+               CASE(SURF_CARTESIAN)
+                  M_DROP = 2._EB*SF%LENGTH*SF%WIDTH*DR%R*SURFACE_DENSITY(NM,IW,1)  ! The 1 indicates kg/m3, not kg/m2
+               CASE(SURF_CYLINDRICAL)
+                  M_DROP = PI*DR%R**2*SF%LENGTH*SURFACE_DENSITY(NM,IW,1)
+               CASE(SURF_SPHERICAL)
+                  M_DROP = FOTH*PI*DR%R**3*SURFACE_DENSITY(NM,IW,1)
+            END SELECT
+         ENDIF
 
-         ! Assign liquid mass to the cell for airborne drops
+         ! Assign particle or droplet mass to the grid cell if the particle/droplet not on a surface
 
          IF (DR%IOR==0) THEN
             DEN_ADD = DR%PWT*M_DROP*RVC
