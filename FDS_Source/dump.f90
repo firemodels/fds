@@ -3658,11 +3658,11 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
       SOLID_STATS: IF (DV%STATISTICS=='null') THEN
 
-         VALUE = SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)
+         VALUE = SOLID_PHASE_OUTPUT(NM,DV%IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)
 
       ELSEIF (DV%STATISTICS=='TIME INTEGRAL') THEN SOLID_STATS
 
-         VALUE = DV%TI_VALUE + (T-DV%TI_T)*SOLID_PHASE_OUTPUT(DV%IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)
+         VALUE = DV%TI_VALUE + (T-DV%TI_T)*SOLID_PHASE_OUTPUT(NM,DV%IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)
          DV%TI_VALUE = VALUE
          DV%TI_T = T
 
@@ -3678,14 +3678,14 @@ DEVICE_LOOP: DO N=1,N_DEVC
                NOT_FOUND = .FALSE.
                SELECT CASE(DV%STATISTICS)
                   CASE('MAX')
-                     STAT_VALUE = MAX(STAT_VALUE,SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX))
+                     STAT_VALUE = MAX(STAT_VALUE,SOLID_PHASE_OUTPUT(NM,IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX))
                   CASE('MIN')
-                     STAT_VALUE = MIN(STAT_VALUE,SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX))
+                     STAT_VALUE = MIN(STAT_VALUE,SOLID_PHASE_OUTPUT(NM,IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX))
                   CASE('MEAN')
-                     STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)
+                     STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(NM,IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)
                      STAT_COUNT = STAT_COUNT + 1
                   CASE('SURFACE INTEGRAL')
-                     STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)*AW(IW) 
+                     STAT_VALUE = STAT_VALUE + SOLID_PHASE_OUTPUT(NM,IW,ABS(DV%OUTPUT_INDEX),DV%SPEC_INDEX,DV%PART_INDEX)*AW(IW) 
                END SELECT
             ENDIF
          ENDDO WALL_CELL_LOOP
@@ -4485,13 +4485,14 @@ END FUNCTION GAS_PHASE_OUTPUT
 
 
 
-REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(IWX,INDX,SPEC_INDEX,PART_INDEX)
+REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(NM,IWX,INDX,SPEC_INDEX,PART_INDEX)
 
 ! Compute Solid Phase DEVICE Output Quantities
  
-INTEGER, INTENT(IN) :: IWX,INDX,SPEC_INDEX,PART_INDEX
-REAL(EB) :: CONCORR,U2,V2,W2,HQ2,FLUX,DFLUXDT,SOLID_PHASE_OUTPUT_OLD,WGT,THICKNESS
-INTEGER :: IOR,II1,II2,II,JJ,KK,IIG,JJG,KKG,NWP,I_GRAD,NN
+USE PHYSICAL_FUNCTIONS, ONLY: SURFACE_DENSITY
+INTEGER, INTENT(IN) :: IWX,INDX,SPEC_INDEX,PART_INDEX,NM
+REAL(EB) :: CONCORR,U2,V2,W2,HQ2,FLUX,DFLUXDT,SOLID_PHASE_OUTPUT_OLD
+INTEGER :: IOR,II1,II2,II,JJ,KK,IIG,JJG,KKG,NN
  
 IF (BOUNDARY_TYPE(IWX)==NULL_BOUNDARY) THEN
    SOLID_PHASE_OUTPUT = OUTPUT_QUANTITY(-INDX)%AMBIENT_VALUE
@@ -4608,37 +4609,8 @@ SELECT CASE(INDX)
       ENDIF
 
    CASE(25) ! SURFACE DENSITY
-      IF (.NOT.SURFACE(IJKW(5,IWX))%THERMALLY_THICK) THEN
-         SOLID_PHASE_OUTPUT = 0._EB
-      ELSE
-         SELECT CASE(SURFACE(IJKW(5,IWX))%GEOMETRY)
-         CASE(SURF_CARTESIAN)
-            I_GRAD = 0
-         CASE(SURF_CYLINDRICAL)
-            I_GRAD = 1
-         CASE(SURF_SPHERICAL)
-            I_GRAD = 2
-         END SELECT
-         IF (SURFACE(IJKW(5,IWX))%SHRINK) THEN
-            THICKNESS = SUM(WALL(IWX)%LAYER_THICKNESS)
-            NWP = SUM(WALL(IWX)%N_LAYER_CELLS)
-            X_S_NEW(0:NWP) = THICKNESS-WALL(IWX)%X_S(0:NWP)
-         ELSE
-            THICKNESS = SUM(SURFACE(IJKW(5,IWX))%LAYER_THICKNESS)
-            NWP = SURFACE(IJKW(5,IWX))%N_CELLS
-            IIG = IJKW(6,IWX)
-            JJG = IJKW(7,IWX)
-            KKG = IJKW(8,IWX)
-            IOR = IJKW(4,IWX)
-            X_S_NEW(0:NWP) = THICKNESS-SURFACE(IJKW(5,IWX))%X_S(0:NWP)
-         ENDIF
-         SOLID_PHASE_OUTPUT = 0._EB
-         DO II2=1,NWP
-            WGT = (X_S_NEW(II2-1)**(I_GRAD+1)-X_S_NEW(II2)**(I_GRAD+1))/SURFACE(IJKW(5,IWX))%THICKNESS**I_GRAD
-            WGT = WGT/REAL(I_GRAD+1,EB)
-            SOLID_PHASE_OUTPUT = SOLID_PHASE_OUTPUT + SUM(WALL(IWX)%RHO_S(II2,:))*WGT
-         ENDDO
-      ENDIF
+      SOLID_PHASE_OUTPUT = SURFACE_DENSITY(NM,IWX,0)
+
    CASE(26) ! SOLID DENSITY
       SF => SURFACE(IJKW(5,IWX))
       II1 = DV%I_DEPTH
@@ -4660,6 +4632,7 @@ SELECT CASE(INDX)
          ENDIF
       ENDDO
       SOLID_PHASE_OUTPUT = 0._EB
+
    CASE(27) ! EMISSIVITY
       SOLID_PHASE_OUTPUT = E_WALL(IWX)
 
@@ -4678,6 +4651,8 @@ SELECT CASE(INDX)
 END SELECT
 
 END FUNCTION SOLID_PHASE_OUTPUT
+
+
 
 REAL(EB) FUNCTION HVAC_OUTPUT(IND,SPEC_INDEX,DUCT_INDEX,NODE_INDEX)
 
@@ -5181,7 +5156,7 @@ FLOOP: DO NF=1,N_BNDF
                DO J=J1,J2
                   IC = CELL_INDEX(IG,J,K)
                   IW = WALL_INDEX(IC,-IOR)
-                  PP(J,K) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                  PP(J,K) = SOLID_PHASE_OUTPUT(NM,IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                   IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(IG,J,K))) IBK(J,K)=1
                ENDDO
             ENDDO
@@ -5196,7 +5171,7 @@ FLOOP: DO NF=1,N_BNDF
                      IF (ISUM>0) THEN
                         PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
                      ELSE
-                        PPN(J,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                        PPN(J,K) = SOLID_PHASE_OUTPUT(NM,0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      ENDIF
                   ENDDO
                ENDDO
@@ -5216,7 +5191,7 @@ FLOOP: DO NF=1,N_BNDF
                DO I=I1,I2
                   IC = CELL_INDEX(I,JG,K)
                   IW = WALL_INDEX(IC,-IOR)
-                  PP(I,K) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                  PP(I,K) = SOLID_PHASE_OUTPUT(NM,IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                   IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,JG,K))) IBK(I,K)=1
                ENDDO
             ENDDO
@@ -5231,7 +5206,7 @@ FLOOP: DO NF=1,N_BNDF
                      IF (ISUM>0) THEN
                         PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
                      ELSE
-                        PPN(I,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                        PPN(I,K) = SOLID_PHASE_OUTPUT(NM,0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      ENDIF
                   ENDDO
                ENDDO
@@ -5251,7 +5226,7 @@ FLOOP: DO NF=1,N_BNDF
                DO I=I1,I2
                   IC = CELL_INDEX(I,J,KG)
                   IW = WALL_INDEX(IC,-IOR)
-                  PP(I,J) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                  PP(I,J) = SOLID_PHASE_OUTPUT(NM,IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                   ! Special dump of UL pan test data
                   IF (UL_PAN_DATA .AND. IOR==3 .AND. OUTPUT_QUANTITY(-IND)%NAME=='AMPUA' .AND. MOD(INT(T),100)==0) &
                      WRITE(LU_UL_PAN_DATA,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
@@ -5269,7 +5244,7 @@ FLOOP: DO NF=1,N_BNDF
                      IF (ISUM>0) THEN
                         PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
                      ELSE
-                        PPN(I,J) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                        PPN(I,J) = SOLID_PHASE_OUTPUT(NM,0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      ENDIF
                   ENDDO
                ENDDO
@@ -5309,7 +5284,7 @@ FLOOP: DO NF=1,N_BNDF
                   DO J=J1,J2
                      IC = CELL_INDEX(I,J,K)
                      IW = WALL_INDEX(IC,-IOR)
-                     PP(J,K) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                     PP(J,K) = SOLID_PHASE_OUTPUT(NM,IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY) IBK(J,K)=1
                   ENDDO
                ENDDO
@@ -5324,7 +5299,7 @@ FLOOP: DO NF=1,N_BNDF
                         IF (ISUM>0) THEN
                            PPN(J,K) = PPN(J,K)/REAL(ISUM,EB)
                         ELSE
-                           PPN(J,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                           PPN(J,K) = SOLID_PHASE_OUTPUT(NM,0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                         ENDIF
                      ENDDO
                   ENDDO
@@ -5340,7 +5315,7 @@ FLOOP: DO NF=1,N_BNDF
                   DO I=I1,I2
                      IC = CELL_INDEX(I,J,K)
                      IW = WALL_INDEX(IC,-IOR)
-                     PP(I,K) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                     PP(I,K) = SOLID_PHASE_OUTPUT(NM,IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY) IBK(I,K)=1
                   ENDDO
                ENDDO
@@ -5355,7 +5330,7 @@ FLOOP: DO NF=1,N_BNDF
                         IF (ISUM>0) THEN
                            PPN(I,K) = PPN(I,K)/REAL(ISUM,EB)
                         ELSE
-                           PPN(I,K) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                           PPN(I,K) = SOLID_PHASE_OUTPUT(NM,0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                         ENDIF
                      ENDDO
                   ENDDO
@@ -5371,7 +5346,7 @@ FLOOP: DO NF=1,N_BNDF
                   DO I=I1,I2
                      IC = CELL_INDEX(I,J,K)
                      IW = WALL_INDEX(IC,-IOR)
-                     PP(I,J) = SOLID_PHASE_OUTPUT(IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                     PP(I,J) = SOLID_PHASE_OUTPUT(NM,IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                      ! Special dump of UL pan test data
                      IF (UL_PAN_DATA .AND. IOR==3 .AND. OUTPUT_QUANTITY(-IND)%NAME=='AMPUA' .AND. MOD(INT(T),100)==0) &
                         WRITE(LU_UL_PAN_DATA,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
@@ -5389,7 +5364,7 @@ FLOOP: DO NF=1,N_BNDF
                         IF (ISUM>0) THEN
                            PPN(I,J) = PPN(I,J)/REAL(ISUM,EB)
                         ELSE
-                           PPN(I,J) = SOLID_PHASE_OUTPUT(0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
+                           PPN(I,J) = SOLID_PHASE_OUTPUT(NM,0,IND,BF%SPEC_INDEX,BF%PART_INDEX)
                         ENDIF
                      ENDDO
                   ENDDO
