@@ -676,9 +676,9 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             ENDIF
             ENDIF EVAC_IF_NOT
             IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
-               TSI = T            
+               TSI = T + DT
             ELSE
-               TSI = T+DT-TW(IW)
+               TSI = T + DT - TW(IW)
                IF (TSI<0._EB) THEN
                   UWS(IW) = 0._EB
                   CYCLE WALL_LOOP3
