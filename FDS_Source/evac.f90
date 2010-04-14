@@ -4499,11 +4499,11 @@ CONTAINS
     TYPE (EVAC_HOLE_TYPE),  POINTER :: EHX=>NULL()
     TYPE (HUMAN_TYPE), POINTER :: HR=>NULL(), HRE=>NULL()
     !
-    TNOW = SECOND()
-
     IF ( .NOT.(EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM)) ) RETURN
     ! Next means that only EVAC_PROCESS is doing something
     IF (MYID /= PROCESS(NM)) RETURN
+
+    TNOW = SECOND()
     !
     ! Gaussian random numbers, initialize (only once during
     ! the whole calculation is needed). We are now in the
@@ -4997,7 +4997,7 @@ CONTAINS
     ! Local variables
     INTEGER I,J, IZERO, nom, j1, ii, i_target_old, i_change_old, i_tmp, i_tmp2
     INTEGER :: i_egrid, i_target, color_index, i_new_ffield
-    REAL(EB) :: evel
+    REAL(EB) :: evel, TNOW
     ! 
     TYPE (MESH_TYPE), POINTER :: M=>NULL()
     TYPE (EVAC_SSTAND_TYPE), POINTER :: ESS=>NULL()
@@ -5045,6 +5045,7 @@ CONTAINS
        I_CHANGE_OLD    = -1
        IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EVACUATION_GRID(NOM)) ) CYCLE
        IF (MESH_STOP_STATUS(NOM)/=NO_STOP) CYCLE
+       TNOW=SECOND()
        M => MESHES(NOM)
        GROUP_LIST(:)%GROUP_SIZE  = 0
        GROUP_LIST(:)%GROUP_X = 0.0_EB
@@ -5145,6 +5146,7 @@ CONTAINS
        IF (FAC_DOOR_QUEUE > 0.001_EB) WRITE(LU_EVACOUT,FMT='(A,F14.2,A,I8)') &
             ' INIT: Changes per agent ', REAL(N_CHANGE_DOORS,EB)/REAL(M%N_HUMANS,EB), &
             ', Nash iterations', N_CHANGE_TRIALS/M%N_HUMANS
+       TUSED(12,NOM)=TUSED(12,NOM)+SECOND()-TNOW
     END DO                  ! 1, NMESHES
 
     WRITE (LU_EVACOUT,FMT='(/A)') ' EVAC: Initial positions of the agents'
@@ -5155,6 +5157,7 @@ CONTAINS
     I_EGRID = 0
     DO NOM = 1, NMESHES
        IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EVACUATION_GRID(NOM)) ) CYCLE
+       TNOW=SECOND()
        M => MESHES(NOM)
        I_EGRID = I_EGRID+1
        DO I = 1, M%N_HUMANS
@@ -5186,6 +5189,7 @@ CONTAINS
                HR%X, HR%Y, HR%Z, HR%TPRE, HR%TDET,2.0_EB*HR%RADIUS, &
                HR%SPEED, HR%TAU, HR%GROUP_ID, HR%I_FFIELD, HR%COLOR_INDEX
        END DO
+       TUSED(12,NOM)=TUSED(12,NOM)+SECOND()-TNOW
     END DO
     WRITE (LU_EVACOUT,FMT='(/)')
 
@@ -5204,7 +5208,7 @@ CONTAINS
     INTEGER :: NM, NOM, I, J, I1, J1, K1
     INTEGER :: IOS, IZERO
     LOGICAL L_USE_FED, L_FED_READ, L_FED_SAVE
-    REAL(EB) DT_SAVE
+    REAL(EB) DT_SAVE, TNOW
     INTEGER(4) IBAR_TMP, JBAR_TMP, KBAR_TMP, N_TMP
     REAL(FB) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4, T_TMP, DT_TMP
     REAL(FB) TMPOUT5, TMPOUT6, TMPOUT7, TMPOUT8
@@ -5275,6 +5279,7 @@ CONTAINS
        MESH_LOOP: DO NM=1,NMESHES
           IF ( .NOT.(EVACUATION_GRID(NM) .AND. EVACUATION_ONLY(NM)) ) CYCLE
           !
+          TNOW=SECOND() 
           CALL POINT_TO_MESH(NM)
           IF (L_FED_SAVE) THEN
              IBAR_TMP = IBAR
@@ -5333,6 +5338,7 @@ CONTAINS
              END DO     ! J=1,JBAR
           END DO       ! I=1,IBAR
 
+          TUSED(7,NM) = TUSED(7,NM) + SECOND() - TNOW
        END DO MESH_LOOP
 
        ! Next loop interpolates fire mesh (soot+fed) into human_grids and
@@ -5619,8 +5625,8 @@ CONTAINS
     TYPE (EVAC_SSTAND_TYPE), POINTER :: ESS=>NULL()
     TYPE (HUMAN_TYPE), POINTER :: HR=>NULL(), HRE=>NULL()
     !
-    TNOW=SECOND()
     IF ( .NOT.(EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM)) ) RETURN
+    TNOW=SECOND()
     !
     ! Maximun speed of the agents.  
     VMAX_TIMO      = V_MAX
@@ -10580,10 +10586,10 @@ CONTAINS
     INTEGER, ALLOCATABLE, DIMENSION(:) :: TA
     TYPE (HUMAN_TYPE), POINTER :: HR =>NULL()
     !
-    TNOW=SECOND() 
-    !
     IF (.NOT.ANY(EVACUATION_GRID)) RETURN
     IF (.NOT.(EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM))) RETURN
+    TNOW=SECOND() 
+    !
     CALL POINT_TO_MESH(NM)
 
     ! Write the current time to the prt5 file, then start looping through the particle classes
