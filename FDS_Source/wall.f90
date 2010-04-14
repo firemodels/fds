@@ -1020,8 +1020,8 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
       CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_W)
       ! Weighted average of wall and gas values
       ! Alvernative 1
-      YPRSUM  = 0.2*(Y_MF_W/RSUM_W) + 0.8*(Y_MF_G/RSUM_G)
-!      YPRSUM  = 0.0*(Y_MF_W/RSUM_W) + 1.0*(Y_MF_G/RSUM_G)
+!      YPRSUM  = 0.2*(Y_MF_W/RSUM_W) + 0.8*(Y_MF_G/RSUM_G)
+      YPRSUM  = 0.0*(Y_MF_W/RSUM_W) + 1.0*(Y_MF_G/RSUM_G)
       ! Alternative 2
 !      YY_S    = 0.2*Y_MF_W+0.8*Y_MF_G
 !      RSUM_S  = 0.2*RSUM_W+0.8*RSUM_G
