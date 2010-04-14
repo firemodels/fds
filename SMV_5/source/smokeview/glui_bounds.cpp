@@ -105,6 +105,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define STARTUP 94
 #define SAVE_FILE_LIST 93
 #define LOAD_FILES 92
+#define COLORBAR_EXTREME2 109
 
 #define UPDATE_VECTOR 101
 
@@ -173,6 +174,7 @@ GLUI_EditText *con_slice_chopmin=NULL, *con_slice_chopmax=NULL;
 GLUI_EditText *con_part_chopmin=NULL, *con_part_chopmax=NULL;
 GLUI_RadioGroup *con_slice_setmin=NULL, *con_slice_setmax=NULL;
 GLUI_Checkbox *showchar_checkbox=NULL, *showonlychar_checkbox;
+GLUI_Checkbox *CHECKBOX_extreme2=NULL;
 GLUI_Checkbox *startup_checkbox=NULL;
 GLUI_Checkbox *check_overwrite_all=NULL;
 GLUI_Checkbox *check_compress_autoloaded=NULL;
@@ -226,6 +228,12 @@ GLUI_RadioGroup *con_part_setmin=NULL, *con_part_setmax=NULL;
 GLUI_EditText *con_p3_min=NULL, *con_p3_max=NULL;
 GLUI_EditText *con_p3_chopmin=NULL, *con_p3_chopmax=NULL;
 GLUI_RadioGroup *con_p3_setmin=NULL, *con_p3_setmax=NULL;
+
+/* ------------------ update_update_extreme2 ------------------------ */
+
+extern "C" void update_extreme2(void){
+  if(CHECKBOX_extreme2!=NULL)CHECKBOX_extreme2->set_int_val(show_extremedata);
+}
 
 /* ------------------ update_glui_plot3d ------------------------ */
 
@@ -581,6 +589,8 @@ extern "C" void glui_bounds_setup(int main_window){
     Slice_CB(FILETYPEINDEX);
   }
   glui_bounds->add_checkbox("Smooth colorbar labels",&axissmooth);
+  CHECKBOX_extreme2=glui_bounds->add_checkbox("Highlight extreme data",&show_extremedata,
+    COLORBAR_EXTREME2,Slice_CB);
 
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
@@ -1612,6 +1622,9 @@ extern "C" void Slice_CB(int var){
   ASSERT(con_slice_min!=NULL);
   ASSERT(con_slice_max!=NULL);
   switch (var){
+    case COLORBAR_EXTREME2:
+      update_extreme();
+      break;
 #ifdef pp_SLICECONTOURS
     case LINE_CONTOUR_VALUE:
       if(slice_line_contour_num<1){

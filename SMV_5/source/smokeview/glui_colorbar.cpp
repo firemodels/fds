@@ -102,6 +102,7 @@ void COLORBAR_CB(int var);
 
 extern "C" void update_extreme(void){
   CHECKBOX_usebounds->set_int_val(show_extremedata);
+  COLORBAR_CB(COLORBAR_EXTREME);
 }
 
 
@@ -344,6 +345,7 @@ void COLORBAR_CB(int var){
     if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
     break;
   case COLORBAR_EXTREME:
+    update_extreme2();
     if(show_extremedata==1){
       SPINNER_down_red->enable();
       SPINNER_down_green->enable();

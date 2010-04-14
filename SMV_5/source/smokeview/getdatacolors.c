@@ -1266,7 +1266,7 @@ int get_label_position(float position, float dyfont, float barbot){
 
       /* ------------------ drawColorBars ------------------------ */
 
-void drawColorBars(float ybump){
+void drawColorBars(void){
   float dyfont;
   int dyscreen;
   int temp;
@@ -1274,7 +1274,7 @@ void drawColorBars(float ybump){
   int i,i3;
   float labeltop;
   float barleft;
-  float dbar=.10f, dtext=.3f, dspace=.05f, space;
+  float dbar=.20f, dtext=.15f, dspace=.07f, space;
   float barbot=-0.5f;
   float right[3],left[3],bottom[4];
   int ileft=0;
@@ -1351,8 +1351,8 @@ void drawColorBars(float ybump){
   left[2] = left[1]-space;
   if(left[2]<0.0f)left[2]=0.0;
 
-//  labeltop=nrgb+.7;
-  labeltop=nrgb+1.0+ybump;
+  labeltop=nrgb+1.0;
+
   temp = (int)(1.2f*dwinH);
   dyscreen=screenHeight-temp-fontHoffset-2*titlesafe_offset;
 
@@ -1377,7 +1377,6 @@ void drawColorBars(float ybump){
     (showsmoke==1&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
     sniffErrors("before colorbar");
     CheckMemory;
-    glBegin(GL_QUADS);
     if(showplot3d==1&&p3cont2d!=SHADED_CONTOURS){
       int icol;
       float top, tophat;
@@ -1386,6 +1385,7 @@ void drawColorBars(float ybump){
 
       top = barbot+nrgb+DYFONT;
       tophat = top - (top-barbot)/(nrgb-2);
+      glBegin(GL_QUADS);
       for (i = 0; i < nrgb-2; i++){
         float *rgb_plot3d;
 
@@ -1403,7 +1403,8 @@ void drawColorBars(float ybump){
           glVertex2f(barleft, yy2);
         }
       }
-      {
+      glEnd();
+      if(show_extremedata==1){
         float barmid;
         float *rgb_plot3d;
 
@@ -1414,13 +1415,16 @@ void drawColorBars(float ybump){
         yy =  (barbot*(nrgb-3-(i+0.5))  +(i+0.5)   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
 
+        if(show_extreme_below==1||show_extreme_above==1)glEnable(GL_POLYGON_SMOOTH);
+
         if(show_extreme_below==1&&rgb_plot3d[3]!=0.0){     
+          glBegin(GL_TRIANGLES);
           glColor4fv(rgb_plot3d);
 
-          glVertex2f(barleft, yy2);
-          glVertex2f(barmid, yy); 
+          glVertex2f(barleft,yy2);
           glVertex2f(barmid,yy);
           glVertex2f(barright,yy2);
+          glEnd();
         }
 
         i=nrgb-2;
@@ -1429,13 +1433,15 @@ void drawColorBars(float ybump){
 
         rgb_plot3d = rgb_plot3d_contour[nrgb-1];
         if(show_extreme_above==1&&rgb_plot3d[3]!=0.0){
+          glBegin(GL_TRIANGLES);
           glColor4fv(rgb_plot3d);
           glVertex2f(barleft, yy); 
           glVertex2f(barright,yy);
        
-          glVertex2f(barmid,yy2);
           glVertex2f(barmid, yy2);
+          glEnd();
         }
+        if(show_extreme_below==1||show_extreme_above==1)glDisable(GL_POLYGON_SMOOTH);
       }
     }
     else{
@@ -1444,7 +1450,8 @@ void drawColorBars(float ybump){
       // draw all other colorbars
       top = barbot+nrgb+DYFONT;
       tophat = top - (top-barbot)/255.0;
-      for (i = 0; i < nrgb_full; i++){
+      glBegin(GL_QUADS);
+      for (i = 0; i < nrgb_full-1; i++){
         float *rgb_cb,*rgb_cb2;
 
         rgb_cb=rgb_full[i];
@@ -1452,7 +1459,7 @@ void drawColorBars(float ybump){
          yy = (barbot*(255-i)+    i*tophat)/255.;
         yy2 = (barbot*(254-i)+(i+1)*tophat)/255.;
         i3=i+1;
-        if(i==nrgb_full-1)i3=i;
+        if(i==nrgb_full-2)i3=i;
         rgb_cb2=rgb_full[i3];
 
         if(rgb_cb[3]!=0.0&&rgb_cb2[3]!=0.0){
@@ -1465,8 +1472,9 @@ void drawColorBars(float ybump){
           glVertex2f(barleft,yy2);
         }
       }
+      glEnd();
     }
-      {
+      if(show_extremedata==1){
         float top, tophat, barmid;
 
         barmid=(barleft+barright)/2.0;
@@ -1477,29 +1485,32 @@ void drawColorBars(float ybump){
         yy =  (barbot*(nrgb-3-(i+0.5))  +(i+0.5)   *tophat)/(nrgb-3);
         yy2 = (barbot*(nrgb-4.0-i)+  (i+1.0)*tophat)/(nrgb-3);
 
+        if(show_extreme_below==1||show_extreme_above==1)glEnable(GL_POLYGON_SMOOTH);
+
         if(show_extreme_below==1){
+          glBegin(GL_TRIANGLES);
           glColor4fv(rgb_full[0]);
 
           glVertex2f(barleft, yy2);
           glVertex2f(barmid, yy); 
-          glVertex2f(barmid,yy);
           glVertex2f(barright,yy2);
+          glEnd();
         }
 
         i=nrgb-2;
-        yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
-        yy2 = (barbot*(nrgb-3.5-i)+  (i+0.5)*tophat)/(nrgb-3);
+        yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3)+(barbot-tophat)/255.0;
+        yy2 = (barbot*(nrgb-3.5-i)+  (i+0.5)*tophat)/(nrgb-3)+(barbot-tophat)/255.0;
 
         if(show_extreme_above==1){
+          glBegin(GL_TRIANGLES);
           glColor4fv(rgb_full[nrgb_full-1]);
           glVertex2f(barleft, yy); 
           glVertex2f(barright,yy);
-       
-          glVertex2f(barmid,yy2);
           glVertex2f(barmid, yy2);
+          glEnd();
         }
+        if(show_extreme_below==1||show_extreme_above==1)glDisable(GL_POLYGON_SMOOTH);
       }
-    glEnd();
   }
   leftsmoke=0;
   leftslice=0;
