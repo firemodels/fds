@@ -1,0 +1,40 @@
+&HEAD CHID='linear_ramp_inflow_1mesh', TITLE='linear, 1x1-topology, dv/dt=const' /
+
+&MESH  ID='MESH01', IJK=100,1,10, XB= 0,1, -0.5,0.5, -.05,.05 /
+
+&TIME T_END=4.0 / 
+
+&DUMP DT_PL3D=1.E10 /
+
+&MISC DNS = .TRUE.
+      STRATIFICATION =.FALSE. 
+      NOISE = .FALSE.
+      RADIATION = .FALSE.
+      SURF_DEFAULT = 'WAND' / 
+
+&SURF ID        = 'WAND'
+      ADIABATIC = .TRUE.
+      FREE_SLIP = .TRUE./
+
+&SURF ID='LINKS',VEL=-1.0,RAMP_V='IN'/
+       
+&VENT XB=0,0, -0.5,0.5, -.05,.05, SURF_ID='LINKS' /
+&VENT XB=1,1, -0.5,0.5, -.05,.05, SURF_ID='OPEN'  /
+
+&SLCF PBY=0.0, QUANTITY='PRESSURE' /
+&SLCF PBY=0.0, QUANTITY='H' /
+&SLCF PBY=0.0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBY=0.0, QUANTITY='U-VELOCITY' /
+&SLCF PBY=0.0, QUANTITY='W-VELOCITY' /
+
+&DEVC XYZ= 0,0,0, QUANTITY='PRESSURE'  , ID='P_left'/ 
+&DEVC XYZ= 1,0,0, QUANTITY='PRESSURE'  , ID='P_right'/
+&DEVC XYZ= 0,0,0, QUANTITY='U-VELOCITY', ID='U_left'/ 
+&DEVC XYZ= 1,0,0, QUANTITY='U-VELOCITY', ID='U_right'/
+&DEVC XYZ= 0,0,0, QUANTITY='DENSITY',    ID='rho'/
+
+&RAMP ID='IN',T=0.0 , F=0.0 /
+&RAMP ID='IN',T=4.0 , F=4.0 / 
+	
+&TAIL /
+
