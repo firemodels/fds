@@ -3608,6 +3608,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
                DO J=DV%J1,DV%J2
                   DO I=DV%I1,DV%I2
                      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                     VOL = DX(I)*RC(I)*DY(J)*DZ(K)
                      NOT_FOUND = .FALSE.
                      SELECT CASE(DV%STATISTICS)
                         CASE('MAX')
@@ -3621,28 +3622,24 @@ DEVICE_LOOP: DO N=1,N_DEVC
                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
                            STAT_COUNT = STAT_COUNT + 1
                         CASE('VOLUME INTEGRAL')
-                           VOL = DX(I)*DY(J)*DZ(K)
                            STAT_VALUE = STAT_VALUE + &
                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)*VOL
                         CASE('MASS INTEGRAL')
-                           VOL = DX(I)*DY(J)*DZ(K)
                            STAT_VALUE = STAT_VALUE + &
                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)* &
                                        VOL*RHO(I,J,K)
                         CASE('AREA INTEGRAL')
-                           IF (DV%IOR==1) STAT_VALUE = STAT_VALUE + DY(J)*DZ(K)* &
+                           IF (DV%IOR==1) STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)* &
                                           GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
                            IF (DV%IOR==2) STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)* &
                                           GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
-                           IF (DV%IOR==3) STAT_VALUE = STAT_VALUE + DX(I)*DY(J)* &
+                           IF (DV%IOR==3) STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)* &
                                           GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
                         CASE('VOLUME MEAN')
-                           VOL = DX(I)*DY(J)*DZ(K)
                            STAT_VALUE = STAT_VALUE + &
                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)*VOL
-                           SUM_VALUE = SUM_VALUE + DX(I)*DY(J)*DZ(K)
+                           SUM_VALUE = SUM_VALUE + VOL
                         CASE('MASS MEAN')
-                           VOL = DX(I)*DY(J)*DZ(K)
                            STAT_VALUE = STAT_VALUE + VOL*RHO(I,J,K)* &
                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
                            SUM_VALUE = SUM_VALUE + VOL*RHO(I,J,K)
@@ -4258,7 +4255,7 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = 0._EB
       DO J=1,JBAR
          DO I=1,IBAR
-            GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT + Q(I,J,KK)*DX(I)*DY(J)*0.001
+            GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT + Q(I,J,KK)*DX(I)*RC(I)*DY(J)*0.001
          ENDDO
       ENDDO
       
