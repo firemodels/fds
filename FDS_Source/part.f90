@@ -523,9 +523,8 @@ OVERALL_INSERT_LOOP: DO
             DROPLET(NLP-NPPCW(IW)+1:NLP)%PWT*FLOW_RATE*AREA_ADJUST(IW)*AW(IW)*SF%DT_INSERT/MASS_SUM
          ENDIF
       ENDIF
-   
+
    ENDDO WALL_INSERT_LOOP
-   
 
    ! Loop over all INIT lines and look for particles inserted within a specified volume
 
@@ -862,7 +861,7 @@ DROPLET_LOOP: DO I=1,NLP
 
    ! Calculate the particle velocity components and the amount of momentum to transfer to the gas
 
-   RVC = RDX(II)*RDY(JJ)*RDZ(KK)
+   RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
 
    UREL  = DR%U - UBAR
    VREL  = DR%V - VBAR
@@ -1442,7 +1441,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
          II  = FLOOR(XI+1._EB)
          JJ  = FLOOR(YJ+1._EB)
          KK  = FLOOR(ZK+1._EB)
-         RVC = RDX(II)*RDY(JJ)*RDZ(KK)
+         RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
          
          ! Determine how many sub-time step iterations are needed and then iterate over the time step.
          ! This is not fully functional. Keep as a placeholder for now.
@@ -1731,8 +1730,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
          II  = FLOOR(XI+1._EB)
          JJ  = FLOOR(YJ+1._EB)
          KK  = FLOOR(ZK+1._EB)
-         RVC = RDX(II)*RDY(JJ)*RDZ(KK)
-
+         RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
          ! Determine the mass of the droplet/particle, depending on whether the particle has a distinct SURFace type.
 
          IBC = PC%SURF_INDEX
