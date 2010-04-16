@@ -1,2 +1,4 @@
-1. test fix of particle display when specifying time min and max bounds in .ini file
-2. test logic to hide slice files that occupy the same location as other slice files in meshes with a lower index
+1.  improve algorithm for determining min/max data bounds
+2.  add spinner in 3d smoke dialog box to set all HRRPUV_CUTOFF values at once
+3.  fix problem with device display when also displaying people
+4.  test improved colorbar display
