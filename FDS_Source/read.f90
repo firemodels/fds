@@ -6970,6 +6970,9 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    CALL SET_DEVC_DEFAULTS
    READ(LU_INPUT,DEVC) 
 
+! Reorder XB coordinates if necessary
+
+   CALL CHECK_XB(XB)
 
    IF (XB(1)>-1.E5_EB) THEN
       XYZ(1) = 0.5_EB*(XB(1)+XB(2))
