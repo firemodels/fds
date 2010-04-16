@@ -1619,12 +1619,13 @@ extern "C" void Slice_CB(int var){
   slice *sd;
 
   updatemenu=1;
+  if(var==COLORBAR_EXTREME2){
+    update_extreme();
+    return;
+  }
   ASSERT(con_slice_min!=NULL);
   ASSERT(con_slice_max!=NULL);
   switch (var){
-    case COLORBAR_EXTREME2:
-      update_extreme();
-      break;
 #ifdef pp_SLICECONTOURS
     case LINE_CONTOUR_VALUE:
       if(slice_line_contour_num<1){
