@@ -820,7 +820,6 @@ DROPLET_LOOP: DO I=1,NLP
    IF (UVW/=0._EB) DTMIN = MIN(DTMIN,1._EB/UVW)
    NITER = MAX(1,CEILING(DT/DTMIN))
    DTSP  = DT/REAL(NITER,EB)
-
     
    ! Iterate over a single time step
     
@@ -838,128 +837,139 @@ DROPLET_LOOP: DO I=1,NLP
          IC = CELL_INDEX(II,JJ,KK)
       ENDIF
 
-   ! Interpolate the nearest velocity components of the gas
+      ! Interpolate the nearest velocity components of the gas
 
-   IIX  = FLOOR(XI+.5_EB)
-   JJY  = FLOOR(YJ+.5_EB)
-   KKZ  = FLOOR(ZK+.5_EB)
-   UBAR = AFILL2(U,II-1,JJY,KKZ,(DR%X-X(II-1))*RDX(II),YJ-JJY+.5_EB          ,ZK-KKZ+.5_EB)
-   VBAR = AFILL2(V,IIX,JJ-1,KKZ,XI-IIX+.5_EB          ,(DR%Y-Y(JJ-1))*RDY(JJ),ZK-KKZ+.5_EB)
-   WBAR = AFILL2(W,IIX,JJY,KK-1,XI-IIX+.5_EB          ,YJ-JJY+.5_EB          ,(DR%Z-Z(KK-1))*RDZ(KK))
+      IIX  = FLOOR(XI+.5_EB)
+      JJY  = FLOOR(YJ+.5_EB)
+      KKZ  = FLOOR(ZK+.5_EB)
+      UBAR = AFILL2(U,II-1,JJY,KKZ,(DR%X-X(II-1))*RDX(II),YJ-JJY+.5_EB,ZK-KKZ+.5_EB)
+      VBAR = AFILL2(V,IIX,JJ-1,KKZ,XI-IIX+.5_EB,(DR%Y-Y(JJ-1))*RDY(JJ),ZK-KKZ+.5_EB)
+      WBAR = AFILL2(W,IIX,JJY,KK-1,XI-IIX+.5_EB,YJ-JJY+.5_EB,(DR%Z-Z(KK-1))*RDZ(KK))
     
-   ! If the particle is just a massless tracer, just move it and go on to the next particle
+      ! If the particle is just a massless tracer, just move it and go on to the next particle
 
-   IF (PC%MASSLESS) THEN
-      DR%U = UBAR
-      DR%V = VBAR
-      DR%W = WBAR
-      DR%X = DR%X + DR%U*DTSP
-      DR%Y = DR%Y + DR%V*DTSP
-      DR%Z = DR%Z + DR%W*DTSP
-      CYCLE DROPLET_LOOP
-   ENDIF
-
-   ! Calculate the particle velocity components and the amount of momentum to transfer to the gas
-
-   RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-
-   UREL  = DR%U - UBAR
-   VREL  = DR%V - VBAR
-   WREL  = DR%W - WBAR
-   QREL  = SQRT(UREL*UREL + VREL*VREL + WREL*WREL)
-   TMP_G = MAX(TMPMIN,TMP(II,JJ,KK))
-   RHO_G = RHO(II,JJ,KK)
-   MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
-   DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
-   DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
-      IF (PC%DRAG_LAW==USER_DRAG) THEN
-         C_DRAG = PC%USER_DRAG_COEFFICIENT
-      ELSE
-         C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
+      IF (PC%MASSLESS) THEN
+         DR%U = UBAR
+         DR%V = VBAR
+         DR%W = WBAR
+         DR%X = DR%X + DR%U*DTSP
+         DR%Y = DR%Y + DR%V*DTSP
+         DR%Z = DR%Z + DR%W*DTSP
+         CYCLE DROPLET_LOOP
       ENDIF
 
-      !Secondary break-up
-      BREAKUP: IF (PC%BREAKUP) THEN
-         WE_G=RHO(II,JJ,KK)*QREL**2*2._EB*RD/PC%SURFACE_TENSION
-         T_BU_BAG    = T_END-T_BEGIN
-         T_BU_STRIP  = T_END-T_BEGIN
-         ! Breakup conditions according to WAVE model by Reitz (1987)
-         IF (WE_G >= 12.0_EB)             T_BU_BAG   = 1.72_EB*B_1*SQRT(PC%DENSITY*RDC/(2*PC%SURFACE_TENSION))
-         IF (WE_G/SQRT(DR%RE) >= 1.0_EB)  T_BU_STRIP = B_1*(RD/QREL)*SQRT(PC%DENSITY/RHO_G)
-         ! droplet age is larger than smallest characteristic breakup time
-         IF ((T-DR%T) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
-            IF (PC%MONODISPERSE) THEN
-               RD       = THROHALF*RD
-            ELSE
-               DO WHILE (RD >= DR%R)
-                  CALL RANDOM_CHOICE(PC%CHILD_CDF(:),PC%BREAKUP_CHILD_DIAMETER*DR%R*PC%CHILD_R_CDF(:),NDC,RD)
-               END DO
-               RD = MAX(RD,PC%MINIMUM_DIAMETER/2._EB)
-            ENDIF
-            DR%RE    = RHO_G*QREL*2._EB*RD/MU_AIR
-            IF (PC%DRAG_LAW==USER_DRAG) THEN
-               C_DRAG = PC%USER_DRAG_COEFFICIENT
-            ELSE
-               C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
-            ENDIF
+      ! Calculate the particle velocity components and the amount of momentum to transfer to the gas
 
-            DR%PWT   = DR%PWT*RDC/RD**3
-            DR%T     = T
-            DR%R     = RD
-            RDS      = RD*RD
-            RDC      = RD*RDS
+      RVC    = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
+      UREL   = DR%U - UBAR
+      VREL   = DR%V - VBAR
+      WREL   = DR%W - WBAR
+      QREL   = SQRT(UREL*UREL + VREL*VREL + WREL*WREL)
+      TMP_G  = MAX(TMPMIN,TMP(II,JJ,KK))
+      RHO_G  = RHO(II,JJ,KK)
+      MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
+      DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
+
+      DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
+
+         IF (PC%DRAG_LAW==USER_DRAG) THEN
+            C_DRAG = PC%USER_DRAG_COEFFICIENT
+         ELSE
+            C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
          ENDIF
-      ENDIF BREAKUP
 
-      ! Drag reduction
+         ! Secondary break-up model
 
-      DROP_DEN      = AVG_DROP_DEN(II,JJ,KK,PC%EVAP_INDEX) 
-      DROP_VOL_FRAC = DROP_DEN/PC%DENSITY 
-      IF (DROP_VOL_FRAC > PC%DENSE_VOLUME_FRACTION) C_DRAG = WAKE_REDUCTION(DROP_VOL_FRAC,DR%RE,C_DRAG)
+         BREAKUP: IF (PC%BREAKUP) THEN
+            WE_G=RHO(II,JJ,KK)*QREL**2*2._EB*RD/PC%SURFACE_TENSION
+            T_BU_BAG    = T_END-T_BEGIN
+            T_BU_STRIP  = T_END-T_BEGIN
+            ! Breakup conditions according to WAVE model by Reitz (1987)
+            IF (WE_G >= 12.0_EB)             T_BU_BAG   = 1.72_EB*B_1*SQRT(PC%DENSITY*RDC/(2*PC%SURFACE_TENSION))
+            IF (WE_G/SQRT(DR%RE) >= 1.0_EB)  T_BU_STRIP = B_1*(RD/QREL)*SQRT(PC%DENSITY/RHO_G)
+            ! droplet age is larger than smallest characteristic breakup time
+            AGE_IF: IF ((T-DR%T) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
+               IF (PC%MONODISPERSE) THEN
+                  RD       = THROHALF*RD
+               ELSE
+                  DO WHILE (RD >= DR%R)
+                     CALL RANDOM_CHOICE(PC%CHILD_CDF(:),PC%BREAKUP_CHILD_DIAMETER*DR%R*PC%CHILD_R_CDF(:),NDC,RD)
+                  END DO
+                  RD = MAX(RD,PC%MINIMUM_DIAMETER/2._EB)
+               ENDIF
+               DR%RE    = RHO_G*QREL*2._EB*RD/MU_AIR
+               IF (PC%DRAG_LAW==USER_DRAG) THEN
+                  C_DRAG = PC%USER_DRAG_COEFFICIENT
+               ELSE
+                  C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
+               ENDIF
 
-      IF (.NOT. PC%TREE) THEN
-         SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
-         DR%A_X  = (REAL(N-1,EB)*DR%A_X + SFAC*UREL*RVC)/REAL(N,EB)
-         DR%A_Y  = (REAL(N-1,EB)*DR%A_Y + SFAC*VREL*RVC)/REAL(N,EB)
-         DR%A_Z  = (REAL(N-1,EB)*DR%A_Z + SFAC*WREL*RVC)/REAL(N,EB)
-      ELSE
-         SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
-         DR%A_X  = SFAC*UREL
-         DR%A_Y  = SFAC*VREL
-         DR%A_Z  = SFAC*WREL
-      ENDIF
+               DR%PWT   = DR%PWT*RDC/RD**3
+               DR%T     = T
+               DR%R     = RD
+               RDS      = RD*RD
+               RDC      = RD*RDS
+            ENDIF AGE_IF
+         ENDIF BREAKUP
 
-      IF (.NOT.PC%STATIC) THEN
-         CONST   = 8._EB*PC%DENSITY*RD/(3._EB*RHO_G*C_DRAG*QREL)
-         BFAC    = EXP(-DTSP/CONST)
-         IF (SPATIAL_GRAVITY_VARIATION) THEN
-            GRVT1 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GX)*GVEC(1) 
-            GRVT2 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GY)*GVEC(2) 
-            GRVT3 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GZ)*GVEC(3) 
+         ! Drag reduction, except for particles associated with a SURF line
+
+         IF (PC%SURF_INDEX<1) THEN
+            DROP_DEN      = AVG_DROP_DEN(II,JJ,KK,PC%EVAP_INDEX) 
+            DROP_VOL_FRAC = DROP_DEN/PC%DENSITY 
+            IF (DROP_VOL_FRAC > PC%DENSE_VOLUME_FRACTION) C_DRAG = WAKE_REDUCTION(DROP_VOL_FRAC,DR%RE,C_DRAG)
          ENDIF
-         AUREL   = CONST*GRVT1
-         AVREL   = CONST*GRVT2
-         AWREL   = CONST*GRVT3
-         DR%U    = UBAR + (UREL+AUREL)*BFAC - AUREL
-         DR%V    = VBAR + (VREL+AVREL)*BFAC - AVREL
-         DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
-      ENDIF
-   ELSE DRAG_CALC ! No drag
-      DR%A_X  = 0._EB
-      DR%A_Y  = 0._EB
-      DR%A_Z  = 0._EB
-   ENDIF DRAG_CALC
 
-   ! If the particle does not move, but does drag, go on to the next particle
+         ! Calculate gas phase force transfer terms, A_X, A_Y, and A_Z
 
-   IF (PC%STATIC) CYCLE DROPLET_LOOP
+         IF (.NOT. PC%TREE) THEN
+            SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
+            DR%A_X  = (REAL(N-1,EB)*DR%A_X + SFAC*UREL*RVC)/REAL(N,EB)
+            DR%A_Y  = (REAL(N-1,EB)*DR%A_Y + SFAC*VREL*RVC)/REAL(N,EB)
+            DR%A_Z  = (REAL(N-1,EB)*DR%A_Z + SFAC*WREL*RVC)/REAL(N,EB)
+         ELSE
+            SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
+            DR%A_X  = SFAC*UREL
+            DR%A_Y  = SFAC*VREL
+            DR%A_Z  = SFAC*WREL
+         ENDIF
+
+         ! Update velocity components for moving droplets/particles
+
+         IF (.NOT.PC%STATIC) THEN
+            CONST   = 8._EB*PC%DENSITY*RD/(3._EB*RHO_G*C_DRAG*QREL)
+            BFAC    = EXP(-DTSP/CONST)
+            IF (SPATIAL_GRAVITY_VARIATION) THEN
+               GRVT1 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GX)*GVEC(1) 
+               GRVT2 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GY)*GVEC(2) 
+               GRVT3 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GZ)*GVEC(3) 
+            ENDIF
+            AUREL   = CONST*GRVT1
+            AVREL   = CONST*GRVT2
+            AWREL   = CONST*GRVT3
+            DR%U    = UBAR + (UREL+AUREL)*BFAC - AUREL
+            DR%V    = VBAR + (VREL+AVREL)*BFAC - AVREL
+            DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
+         ENDIF
+
+      ELSE DRAG_CALC ! No drag
+
+         DR%A_X  = 0._EB
+         DR%A_Y  = 0._EB
+         DR%A_Z  = 0._EB
+
+      ENDIF DRAG_CALC
+
+      ! If the particle does not move, but does drag, go on to the next particle
+
+      IF (PC%STATIC) CYCLE DROPLET_LOOP
     
       ! Update droplet position
 
       X_OLD = DR%X
       Y_OLD = DR%Y
       Z_OLD = DR%Z
-      ! pc = predictor corrector update of X
+
       DR%X  = DR%X + DR%U*DTSP
       DR%Y  = DR%Y + DR%V*DTSP
       DR%Z  = DR%Z + DR%W*DTSP
@@ -975,7 +985,7 @@ DROPLET_LOOP: DO I=1,NLP
          ENDIF
          CYCLE DROPLET_LOOP
       ENDIF
-    
+       
       IF (.NOT.POROUS_FLOOR .AND. DR%Z<ZS) THEN
          IC = CELL_INDEX(II,JJ,1)
          IW = WALL_INDEX(IC,-3)
@@ -993,8 +1003,9 @@ DROPLET_LOOP: DO I=1,NLP
             DR%W = 0._EB
          ENDIF
       ENDIF
-    
+ 
       ! Where is the droplet now?
+
       XI  = CELLSI(FLOOR((DR%X-XS)*RDXINT))
       YJ  = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
       ZK  = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
@@ -1151,11 +1162,11 @@ DROPLET_LOOP: DO I=1,NLP
          IF_HIT_SOLID: IF (HIT_SOLID) THEN
  
             IF (DR%WALL_INDEX==0) CYCLE SUB_TIME_STEP_ITERATIONS
-
+   
             ! Add droplet mass to accumulated liquid array
-
+   
             IF (ACCUMULATE_WATER .AND. HIT_SOLID .AND. .NOT.DR%SPLAT) THEN
-               AWMPUA(DR%WALL_INDEX,PC%EVAP_INDEX) = AWMPUA(DR%WALL_INDEX,PC%EVAP_INDEX) + DR%PWT*PC%FTPR*DR%R**3*RAW(DR%WALL_INDEX)
+               AWMPUA(DR%WALL_INDEX,PC%EVAP_INDEX)=AWMPUA(DR%WALL_INDEX,PC%EVAP_INDEX)+DR%PWT*PC%FTPR*DR%R**3*RAW(DR%WALL_INDEX)
                DR%SPLAT = .TRUE.
             ENDIF
 
@@ -1178,7 +1189,7 @@ DROPLET_LOOP: DO I=1,NLP
             ICN = CELL_INDEX(IIN,JJN,KKN)
             IF (IOR_OLD==DR%IOR) CYCLE SUB_TIME_STEP_ITERATIONS
 
-         ! Check if droplet has not found surface. Simply remove for now. Todo: search algorith
+            ! Check if droplet has not found surface. Simply remove for now. Todo: search algorith
 
             IW = WALL_INDEX(ICN, -DR%IOR)
             IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) THEN
@@ -1215,6 +1226,7 @@ DROPLET_LOOP: DO I=1,NLP
             END SELECT DIRECTION
 
          ENDIF IF_HIT_SOLID
+
       ENDIF AIR_TO_SOLID 
 
       ! Check if droplets that were attached to a solid are still attached after the time update
