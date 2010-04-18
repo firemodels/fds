@@ -1,6 +1,6 @@
-// $Date: 2010-03-17 20:34:56 -0400 (Wed, 17 Mar 2010) $ 
-// $Revision: 5857 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 
  /* ------------------ options ------------------------ */
