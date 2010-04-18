@@ -1,6 +1,6 @@
-// $Date: 2009-11-07 22:37:51 -0500 (Sat, 07 Nov 2009) $ 
-// $Revision: 5036 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #include "options.h"
 #include "background.h"
@@ -10,7 +10,7 @@
 #include "svn_revision.h"
 
 // svn revision character string
-char utilities_revision[]="$Revision: 5036 $";
+char utilities_revision[]="$Revision$";
 
 /* ------------------ imax ------------------------ */
 
