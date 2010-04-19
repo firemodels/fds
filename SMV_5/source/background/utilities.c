@@ -72,21 +72,6 @@ void version(void){
     printf("Version: %s\n",smv_version);
     printf("SVN Revision Number: %i\n",svn_num);
     printf("Compile Date: %s\n",__DATE__);
-#ifdef X64
-    printf("Platform: WIN64\n");
-#endif
-#ifdef WIN32
-#ifndef X64
-    printf("Platform: WIN32\n");
-#endif
-#endif
-#ifdef pp_OSX
-    printf("Platform: OS X\n");
-#endif
-#ifdef pp_LINUX
-    printf("Platform: LINUX\n");
-#endif
-
 }
 
 /* ------------------ getmaxrev ------------------------ */

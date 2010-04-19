@@ -119,6 +119,7 @@ int main(int argc, char **argv){
 void usage(char *prog){
   char prog_version[100];
   int svn_num;
+  char pp[]="%";
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
   svn_num=getmaxrevision();    // get svn revision number
@@ -131,12 +132,15 @@ void usage(char *prog){
 
   printf("where\n\n");
 
-  printf("  -d dtime     - wait dtime seconds before running prog in the background\n");
-  printf("  -h           - display this message\n");
-  printf("  -u max_usage - wait to run prog until cpu usage is less than max_usage\n");
-  printf("  -v           - display version information\n");
-  printf("  prog         - program to run in the background\n");
-  printf("  arguments    - command line arguments of prog\n");
+  printf("  -d dtime  - wait dtime seconds before running prog in the background\n");
+  printf("  -h        - display this message\n");
+  printf("  -u max    - wait to run prog until cpu usage is less than max (25-100%s)\n",pp);
+  printf("  -v        - display version information\n");
+  printf("  prog      - program to run in the background\n");
+  printf("  arguments - command line arguments of prog\n\n");
+  printf("Example:\n");
+  printf("  background -d 1.5 -u 50 prog arg1 arg2\n");
+  printf("    runs prog (with arguments arg1 and arg2) after 1.5 seconds\n    and when the CPU usage drops below 50%s\n",pp);
 }
 
 typedef BOOL ( __stdcall * pfnGetSystemTimes)( LPFILETIME lpIdleTime, LPFILETIME lpKernelTime, LPFILETIME lpUserTime );
