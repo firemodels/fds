@@ -1,16 +1,25 @@
-&HEAD CHID='linear_ramp_inflow_1mesh', TITLE='linear, dv/dt=const' /
+&HEAD CHID='linear_ramp_inflow_4mesh', TITLE='linear, dv/dt=const' /
 
-&MESH IJK=100,1,10, XB= 0.00,1.00, -0.5,0.5, -.05,.05 /
+&MESH IJK=25,1,10, XB= 0.00,0.25, -0.5,0.5, -.05,.05 /
+&MESH IJK=25,1,10, XB= 0.25,0.50, -0.5,0.5, -.05,.05 /
+&MESH IJK=25,1,10, XB= 0.50,0.75, -0.5,0.5, -.05,.05 /
+&MESH IJK=25,1,10, XB= 0.75,1.00, -0.5,0.5, -.05,.05 /
 
 &TIME T_END=8.0 / 
 
-&DUMP DT_PL3D=1.E10 /
+&DUMP DT_PL3D=1.E10, VELOCITY_ERROR_FILE=.TRUE. /
 
 &MISC DNS = .TRUE.
       STRATIFICATION =.FALSE. 
       NOISE = .FALSE.
       RADIATION = .FALSE.
       SURF_DEFAULT = 'WAND' /
+
+&PRES VELOCITY_TOLERANCE=1.E-6
+      OLD_PRESSURE_SCHEME=.TRUE.
+      PREDICTOR_RELAX_FACTOR=1.0
+      CORRECTOR_RELAX_FACTOR=0.25
+      PRESSIT_RELAX_FACTOR=1.8 /
 
 &SURF ID        = 'WAND'
       ADIABATIC = .TRUE.
