@@ -39,16 +39,6 @@
 #define pp_release
 
 #ifdef pp_release
-#define PROGVERSION "0.9"
+#define PROGVERSION "1.0"
 #endif
 
-#ifdef X64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef BIT64
-#define FILE_SIZE unsigned long long
-#else
-#define FILE_SIZE unsigned int
-#endif
