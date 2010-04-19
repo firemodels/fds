@@ -164,6 +164,10 @@ $RUNFDS Scalar_Analytical_Solution compression_wave_FL4_32  fire72
 $RUNFDS Scalar_Analytical_Solution compression_wave_FL4_64  fire72
 $RUNFDS Scalar_Analytical_Solution compression_wave_FL4_128 fire72
 
+$RUNFDS Transient_Inflow linear_ramp_inflow_1mesh fire73
+$RUNFDS Transient_Inflow linear_ramp_inflow_2mesh fire73
+$RUNFDS Transient_Inflow linear_ramp_inflow_4mesh fire73
+
 
 
 
