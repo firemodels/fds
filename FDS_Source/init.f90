@@ -735,6 +735,11 @@ ALLOCATE(M%WALL_WORK1(NDWC),STAT=IZERO)
 CALL ChkMemErr('INIT','WALL_WORK1',IZERO) 
 ALLOCATE(M%WALL_WORK2(NDWC),STAT=IZERO)
 CALL ChkMemErr('INIT','WALL_WORK2',IZERO) 
+
+! Vegetation surface drag
+ALLOCATE(M%VEG_DRAG(0:IBP1,0:JBP1),STAT=IZERO)
+CALL ChkMemErr('INIT','VEG_DRAG',IZERO) 
+M%VEG_DRAG = 0._EB
  
 ! Set up boundary arrays for external boundaries of the current mesh
 
@@ -1025,6 +1030,10 @@ ENDDO
 
 M%BC_CLOCK     = T_BEGIN
 M%WALL_COUNTER = 0
+
+! Set clock for boudary fuel vegetation model
+
+M%VEG_CLOCK_BC = T_BEGIN
  
 ! Allocate arrays for storing velocity boundary condition info
  
