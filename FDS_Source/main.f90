@@ -430,6 +430,13 @@ WALL_CLOCK_START_ITERATIONS = WALL_CLOCK_TIME()
 !***********************************************************************************************************************************
 !                                                           MAIN TIMESTEPPING LOOP
 !***********************************************************************************************************************************
+
+! Level Set model for firespread in vegetation (currently uses constant wind: does not need CFD computations).
+
+IF (VEG_LEVEL_SET) THEN
+  CALL LEVEL_SET_FIRESPREAD(1)
+  CALL END_FDS
+ENDIF
  
 MAIN_LOOP: DO  
  
@@ -846,6 +853,7 @@ MAIN_LOOP: DO
       IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_WALL_BC_2A
       IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
          CALL WALL_BC(T(NM),NM)
+         CALL BNDRY_VEG_MASS_ENERGY_TRANSFER(T(NM),NM)
          !!CALL COMPUTE_RADIATION(T(NM),NM) !!
       ENDIF
       !!CALL DIVERGENCE_PART_1(T(NM),NM) !!
