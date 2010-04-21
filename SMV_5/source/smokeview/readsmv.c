@@ -1536,7 +1536,7 @@ typedef struct {
       cadgeominfo[ncadgeom].order=NULL;
       cadgeominfo[ncadgeom].quad=NULL;
       cadgeominfo[ncadgeom].file=NULL;
-      if(STAT(buffer,&statbuffer)==0){
+      if(STAT(bufptr,&statbuffer)==0){
         if(NewMemory((void **)&cadgeominfo[ncadgeom].file,(unsigned int)(len+1))==0)return 2;
         STRCPY(cadgeominfo[ncadgeom].file,bufptr);
         printf("   reading cad file: %s\n",bufptr);
