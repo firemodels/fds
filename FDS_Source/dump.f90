@@ -1474,18 +1474,50 @@ ENDDO
 !   Y_TREE(N) = XYZ(2)
 !   Z_TREE(N) = XYZ(3)
 
+!DO N=1,N_TREES
+!  IF (VEG_FUEL_GEOM(N) == 'CONE' .OR. VEG_FUEL_GEOM(N) == 'CYLINDER') THEN !PROP
+!    WRITE(LU_SMV,'(/A)')'PROP'
+!    WRITE(LU_SMV,'(1X,A)')TRIM(VEG_LABELS(N))
+!    WRITE(LU_SMV,'(2X,I1)') 1
+!    IF (VEG_FUEL_GEOM(N) == 'CONE') VEG_DEVICE = 'canopy'
+!    IF (VEG_FUEL_GEOM(N) == 'CYLINDER') VEG_DEVICE = 'trunk'
+!    WRITE(LU_SMV,'(1X,A)')TRIM(VEG_DEVICE)
+!    WRITE(LU_SMV,'(2X,I1)') 6
+!!   WRITE(TCFORM,'(F8.2)') CROWN_B_H(N) ; WRITE(TCFORM,'(A,A)')'CANOPY_BASE_H=',TRIM(TCFORM)
+!!   WRITE(LU_SMV,'(1X,A)')TRIM(TCFORM)
+!!   WRITE(TCFORM,'(F8.2)') CROWN_W(N) ; WRITE(TCFORM,'(A,A)')'CANOPY_D=',TRIM(TCFORM)
+!!   WRITE(LU_SMV,'(1X,A)')TRIM(TCFORM)
+!!   WRITE(TCFORM,'(F8.2)') TREE_H(N)-CROWN_B_H(N) ; WRITE(TCFORM,'(A,A)')'CANOPY_H=',TRIM(TCFORM)
+!!   WRITE(LU_SMV,'(1X,A)')TRIM(TCFORM)
+!    WRITE(LU_SMV,'(1X,A)') 'CANOPY_BASE_H=0.3'
+!    WRITE(LU_SMV,'(1X,A)') 'CANOPY_D=1.0'
+!    WRITE(LU_SMV,'(1X,A)') 'CANOPY_H=3.7'
+!    WRITE(LU_SMV,'(1X,A)') 'R=25'
+!    WRITE(LU_SMV,'(1X,A)') 'G=108'
+!    WRITE(LU_SMV,'(1X,A)') 'B=0'
+!  ENDIF
+!ENDDO
+
 DO N=1,N_TREES
    IF (VEG_FUEL_GEOM(N) == 'CONE' .OR. VEG_FUEL_GEOM(N) == 'CYLINDER') THEN
       IF (VEG_FUEL_GEOM(N) == 'CONE') VEG_DEVICE = 'CANOPY'
       IF (VEG_FUEL_GEOM(N) == 'CYLINDER') VEG_DEVICE = 'TRUNK'
       WRITE(LU_SMV,'(/A)') 'DEVICE'
       WRITE(LU_SMV,'(1X,A)') TRIM(VEG_DEVICE)
-!     WRITE(LU_SMV,'(1X,A)') TRIM(VEG_FUEL_GEOM(N))
-      WRITE(LU_SMV,'(6F12.5,1X,I3,1X,I5,1X,"%",(A))') X_TREE(N), Y_TREE(N), Z_TREE(N),0.0,0.0,-1.0,0,3,TRIM(VEG_LABELS(N))
+      WRITE(LU_SMV,'(6F12.5,1X,I3,1X,I5,1X,"%",(A))') X_TREE(N), Y_TREE(N), Z_TREE(N),0.0,0.0, 1.0,0,3,TRIM(VEG_LABELS(N))
       CROWN_HEIGHT = TREE_H(N)-CROWN_B_H(N)
       WRITE(LU_SMV,'(3F12.5)') CROWN_B_H(N), CROWN_W(N), CROWN_HEIGHT
    ENDIF
 ENDDO
+
+! Write out level set slice file name (placeholder)
+IF (VEG_LEVEL_SET) THEN
+   WRITE(LU_SMV,'(A)') 'SLCF     1'
+   WRITE(LU_SMV,'(A)') 'lsfs.sf'
+   WRITE(LU_SMV,'(A)') 'phifield'
+   WRITE(LU_SMV,'(A)') 'phifield'
+   WRITE(LU_SMV,'(A)') '-'
+ENDIF 
 
 ! Write out GEOMETRY info (experimental)
 
@@ -4614,6 +4646,10 @@ SELECT CASE(INDX)
          ELSE
             SOLID_PHASE_OUTPUT = 0._EB
          ENDIF
+      ENDIF
+
+      IF (SURFACE(IJKW(5,IWX))%VEGETATION) THEN     !surface vegetation height
+         SOLID_PHASE_OUTPUT = WALL(IWX)%VEG_HEIGHT
       ENDIF
 
    CASE(25) ! SURFACE DENSITY
