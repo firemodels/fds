@@ -927,11 +927,11 @@ DROPLET_LOOP: DO I=1,NLP
             DR%A_X  = (REAL(N-1,EB)*DR%A_X + SFAC*UREL*RVC)/REAL(N,EB)
             DR%A_Y  = (REAL(N-1,EB)*DR%A_Y + SFAC*VREL*RVC)/REAL(N,EB)
             DR%A_Z  = (REAL(N-1,EB)*DR%A_Z + SFAC*WREL*RVC)/REAL(N,EB)
-         ELSE
+         ELSE !raised vegetation drag and vaporization
             SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
-            DR%A_X  = SFAC*UREL
-            DR%A_Y  = SFAC*VREL
-            DR%A_Z  = SFAC*WREL
+            DR%A_X  = SFAC*UREL - DR%VEG_MLR*UBAR/RHO_G
+            DR%A_Y  = SFAC*VREL - DR%VEG_MLR*VBAR/RHO_G
+            DR%A_Z  = SFAC*WREL - DR%VEG_MLR*WBAR/RHO_G
          ENDIF
 
          ! Update velocity components for moving droplets/particles
