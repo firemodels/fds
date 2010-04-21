@@ -6,12 +6,15 @@ USE MESH_POINTERS
 USE TRAN
 USE PART
 USE MEMORY_FUNCTIONS, ONLY:CHKMEMERR
-USE TYPES, ONLY: DROPLET_TYPE, PARTICLE_CLASS_TYPE, PARTICLE_CLASS, WALL_TYPE
+USE TYPES, ONLY: DROPLET_TYPE, PARTICLE_CLASS_TYPE, PARTICLE_CLASS! WALL_TYPE,SURFACE_TYPE 
 IMPLICIT NONE
 PRIVATE
-PUBLIC INITIALIZE_RAISED_VEG, RAISED_VEG_MASS_ENERGY_TRANSFER, GET_REV_vege
+PUBLIC INITIALIZE_RAISED_VEG, RAISED_VEG_MASS_ENERGY_TRANSFER, LEVEL_SET_FIRESPREAD, GET_REV_vege, &
+       BNDRY_VEG_MASS_ENERGY_TRANSFER
 TYPE (DROPLET_TYPE), POINTER :: DR
 TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC
+!TYPE (WALL_TYPE), POINTER :: WC
+!TYPE (SURFACE_TYPE), POINTER :: SF 
 CHARACTER(255), PARAMETER :: vegeid='$Id$'
 CHARACTER(255), PARAMETER :: vegerev='$Revision$'
 CHARACTER(255), PARAMETER :: vegedate='$Date$'
@@ -303,9 +306,11 @@ TREE_LOOP: DO NCT=1,N_TREES
         DR%W = 0.
         DR%R =  2./PC%VEG_SV !cylinder, Porterie
         DR%IOR = 0
-        DR%VEG_FUEL_MASS = PC%VEG_BULK_DENSITY
+        DR%VEG_FUEL_MASS  = PC%VEG_BULK_DENSITY
         DR%VEG_MOIST_MASS = PC%VEG_MOISTURE*DR%VEG_FUEL_MASS
+        DR%VEG_CHAR_MASS  = 0.0_EB
         DR%VEG_PACKING_RATIO = PC%VEG_BULK_DENSITY/PC%VEG_DENSITY 
+        DR%VEG_SV            = PC%VEG_SV 
         DR%VEG_KAPPA = 0.25*PC%VEG_SV*PC%VEG_BULK_DENSITY/PC%VEG_DENSITY
         DR%TMP = PC%VEG_INITIAL_TEMPERATURE
         IF(IGN_ELEM(NCT)) THEN
@@ -394,9 +399,13 @@ REAL(EB) :: H_SENS_VEG_VOLIT,MW_TERM,Q_ENTHALPY,Q_VEG_MOIST,Q_VEG_VOLIT
 REAL(EB) :: MW_AVERAGE,MW_VEG_MOIST_TERM,MW_VEG_VOLIT_TERM
 REAL(EB) :: XI,YJ,ZK
 REAL(EB) :: A_H2O_VEG,E_H2O_VEG,A_PYR_VEG,E_PYR_VEG,L_PYR_VEG
+REAL(EB) :: A_CHAR_VEG,E_CHAR_VEG,BETA_CHAR_VEG,NU_CHAR_VEG,NU_ASH_VEG,NU_O2_CHAR_VEG, &
+            MPV_CHAR,MPV_CHAR_LOSS,MPV_CHAR_MIN,MPV_CHAR_CO2,Y_O2,H_CHAR_OXID,ORIG_PACKING_RATIO, &
+            VEG_FUEL_AND_CHAR_MASS
+REAL(EB) :: YY_GET(1:N_SPECIES)
 INTEGER :: I,II,JJ,KK,IIX,JJY,KKZ,IPC,N_TREE
 INTEGER, INTENT(IN) :: NM
-LOGICAL :: VEG_DEGRADATION_1,VEG_DEGRADATION_2
+LOGICAL :: VEG_DEGRADATION_LINEAR,VEG_DEGRADATION_ARRHENIUS
 
 !place holder
 REAL(EB) :: RCP_TEMPORARY
@@ -463,18 +472,26 @@ DROPLET_LOOP: DO I=1,NLP
  IF (PC%VEG_STEM) CYCLE DROPLET_LOOP   !Skip droplet if veg is a tree stem
 
 ! Intialize quantities
+ DR%VEG_MLR     = 0.0_EB
  Q_VEG_MOIST    = 0.0_EB
  Q_VEG_VOLIT    = 0.0_EB
  Q_UPTO_VOLIT   = 0.0_EB
  Q_VOLIT        = 0.0_EB
  MPV_MOIST_LOSS = 0.0_EB
+ MPV_CHAR_LOSS  = 0.0_EB
+ MPV_CHAR_CO2   = 0.0_EB
+ H_CHAR_OXID    = 0.0_EB
  MPV_VOLIT      = 0.0_EB
+ MPV_CHAR       = DR%VEG_CHAR_MASS !kg/m^3
  MW_VEG_MOIST_TERM = 0.0_EB
  MW_VEG_VOLIT_TERM = 0.0_EB
+ VEG_FUEL_AND_CHAR_MASS    = 0.0_EB
+ VEG_DEGRADATION_LINEAR    = .FALSE.
+ VEG_DEGRADATION_ARRHENIUS = .FALSE.
 
 ! Vegetation variables
  CHAR_FCTR = 1._EB - PC%VEG_CHAR_FRACTION
- SV_VEG  = PC%VEG_SV !surface-to-volume ration 1/m
+ SV_VEG  = DR%VEG_SV !surface-to-volume ration 1/m
  TMP_VEG = DR%TMP
  MPV_VEG = DR%VEG_FUEL_MASS !bulk density of dry veg
  MPV_MOIST     = DR%VEG_MOIST_MASS !bulk density of moisture in veg
@@ -482,6 +499,11 @@ DROPLET_LOOP: DO I=1,NLP
  MPV_MOIST_MIN = PC%VEG_MOIST_MPV_MIN
  MPV_MOIST_LOSS_MAX = PC%VEG_DEHYDRATION_RATE_MAX*DT
  MPV_VOLIT_MAX      = PC%VEG_BURNING_RATE_MAX*DT
+ ORIG_PACKING_RATIO   = PC%VEG_BULK_DENSITY/PC%VEG_DENSITY 
+
+! Thermal degradation approach parameters
+ IF(PC%VEG_DEGRADATION == 'LINEAR') VEG_DEGRADATION_LINEAR = .TRUE.
+ IF(PC%VEG_DEGRADATION == 'ARRHENIUS') VEG_DEGRADATION_ARRHENIUS = .TRUE.
 
 ! Determine grid cell quantities of the vegetation fuel element
  XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
@@ -547,15 +569,12 @@ DROPLET_LOOP: DO I=1,NLP
   ENDIF
  ENDIF
 
- VEG_DEGRADATION_2 = .FALSE. 
- VEG_DEGRADATION_1 = .TRUE. 
-
 !      ************** Non-Arrehnius Degradation model *************************
 ! Drying occurs if qnet > 0 with Tveg held at 100 c
 ! Pyrolysis occurs according to Morvan & Dupuy empirical formula. Linear
 ! temperature dependence with qnet factor
 !
- IF_VEG_DEGRADATION_1: IF(VEG_DEGRADATION_1) THEN
+ IF_VEG_DEGRADATION_LINEAR: IF(VEG_DEGRADATION_LINEAR) THEN
  IF_NET_HEAT_INFLUX: IF (QNET_VEG > 0.0_EB .AND. .NOT. DR%IGNITOR) THEN !dehydrate or pyrolyze 
 
 ! Drying of vegetation 
@@ -602,18 +621,28 @@ DROPLET_LOOP: DO I=1,NLP
    ENDIF IF_VOLITALIZATION
 
  ENDIF IF_NET_HEAT_INFLUX
- ENDIF IF_VEG_DEGRADATION_1
+ ENDIF IF_VEG_DEGRADATION_LINEAR
 
 !      ************** Arrehnius Degradation model *************************
 ! Drying and pyrolysis occur according to Arrehnius expressions obtained 
-! from the literature
+! from the literature (Porterie et al., Num. Heat Transfer, 47:571-591, 2005
+! Predicting wildland fire behavior and emissions using a fine-scale physical
+! model
 !
- IF_VEG_DEGRADATION_2: IF(VEG_DEGRADATION_2) THEN
-  A_H2O_VEG = 600000._EB !1/s sqrt(K)
-  E_H2O_VEG = 5800._EB !K
-  A_PYR_VEG = 36300._EB !1/s
-  E_PYR_VEG = 7250._EB !K
-  L_PYR_VEG = 418 !J/kg
+ IF_VEG_DEGRADATION_ARRHENIUS: IF(VEG_DEGRADATION_ARRHENIUS) THEN
+  A_H2O_VEG      = 600000._EB !1/s sqrt(K)
+  E_H2O_VEG      = 5800._EB !K
+  A_PYR_VEG      = 36300._EB !1/s
+  E_PYR_VEG      = 7250._EB !K
+  L_PYR_VEG      = 418._EB !J/kg
+  A_CHAR_VEG     = 430._EB !m/s
+  E_CHAR_VEG     = 9000._EB !K
+  BETA_CHAR_VEG  = 0.2_EB
+  NU_CHAR_VEG    = 0.3_EB
+  NU_ASH_VEG     = 0.1_EB
+  NU_O2_CHAR_VEG = 1.65_EB
+  H_CHAR_OXID    = -12.0E+6_EB !J/kg
+
   IF_NOT_IGNITOR: IF (.NOT. DR%IGNITOR) THEN !dehydrate or pyrolyze 
 
 ! Drying of vegetation 
@@ -636,8 +665,10 @@ DROPLET_LOOP: DO I=1,NLP
      MPV_VOLIT    = MIN(MPV_VOLIT,(MPV_VEG-MPV_VEG_MIN))
      MPV_VEG      = MPV_VEG - MPV_VOLIT
      DR%VEG_FUEL_MASS = MPV_VEG
+     VEG_FUEL_AND_CHAR_MASS = MPV_VEG
+     DR%VEG_CHAR_MASS = DR%VEG_CHAR_MASS + NU_CHAR_VEG*MPV_VOLIT !kg/m^3
 !Handle veg. fuel elements if element mass <= prescribed char mass
-     IF (MPV_VEG <= MPV_VEG_MIN) THEN
+     IF (MPV_VEG <= MPV_VEG_MIN .AND. .NOT. PC%VEG_CHAR_OXIDATION) THEN
        IF(PC%VEG_REMOVE_CHARRED) DR%R = 0.0001_EB*PC%KILL_RADIUS !fuel element will be removed
      ENDIF
 !Enthalpy of volatiles using Cp,volatiles(T) from Ritchie
@@ -647,13 +678,47 @@ DROPLET_LOOP: DO I=1,NLP
      MW_VEG_VOLIT_TERM= MPV_VOLIT/REACTION(1)%MW_FUEL
   ENDIF IF_VOLITALIZATION_2
 
+
+!Char oxidation (note that this can be handled only approximately with the conserved
+!scalar based gas-phase combustion model - no gas phase oxygen is consumed by
+!the char oxidation reaction since it would be inconsistent with the state
+!relation for oxygen base on the conserved scalar approach for gas phase
+!combustion)
+  IF_CHAR_OXIDATION: IF (PC%VEG_CHAR_OXIDATION) THEN
+   MPV_CHAR_MIN = 0.035_EB
+   MPV_CHAR     = DR%VEG_CHAR_MASS
+   IF_CHAR_OXIDATION_2: IF (MPV_CHAR > MPV_CHAR_MIN) THEN
+     YY_GET(:) = YY(II,JJ,KK,:)
+     CALL GET_MASS_FRACTION(YY_GET,O2_INDEX,Y_O2)
+     MPV_CHAR_LOSS = DT*RHO_GAS*Y_O2*A_CHAR_VEG/NU_O2_CHAR_VEG*SV_VEG*DR%VEG_PACKING_RATIO*  &
+                      EXP(-E_CHAR_VEG/TMP_VEG)*(1+BETA_CHAR_VEG*SQRT(2._EB*RE_D))
+     MPV_CHAR_LOSS = MIN(MPV_CHAR_LOSS,MPV_CHAR-MPV_CHAR_MIN)
+     MPV_CHAR_LOSS = MIN(MPV_CHAR_LOSS,PC%VEG_CHAR_FRACTION*MPV_VOLIT_MAX) !use specified max
+     MPV_CHAR      = MPV_CHAR - MPV_CHAR_LOSS
+     MPV_CHAR_CO2  = (1._EB + NU_O2_CHAR_VEG - NU_ASH_VEG)*MPV_CHAR_LOSS
+     DR%VEG_CHAR_MASS     = MPV_CHAR !kg/m^3
+     VEG_FUEL_AND_CHAR_MASS = VEG_FUEL_AND_CHAR_MASS + MPV_CHAR
+     IF (MPV_VEG < MPV_VEG_MIN) THEN !charring reduce veg elem size
+      DR%VEG_PACKING_RATIO = MPV_CHAR/(PC%VEG_DENSITY*PC%VEG_CHAR_FRACTION)
+      DR%VEG_SV     = PC%VEG_SV*(ORIG_PACKING_RATIO/DR%VEG_PACKING_RATIO)**0.333_EB 
+     ENDIF
+     IF (MPV_CHAR <= MPV_CHAR_MIN) THEN 
+       DR%VEG_CHAR_MASS = 0.0_EB
+       IF(PC%VEG_REMOVE_CHARRED) DR%R = 0.0001_EB*PC%KILL_RADIUS !fuel element will be removed
+     ENDIF
+!    MW_VEG_MOIST_TERM = MPV_MOIST_LOSS/MW_H2O
+!    Q_VEG_MOIST  = MPV_MOIST_LOSS*CP_H2O*(TMP_VEG - TMPA)
+   ENDIF IF_CHAR_OXIDATION_2
+  ENDIF IF_CHAR_OXIDATION
+
 ! print*,'TMP_VEG before',TMP_VEG
-  TMP_VEG_NEW  = TMP_VEG_NEW - (MPV_MOIST_LOSS*H_VAP_H2O + MPV_VOLIT*L_PYR_VEG)/ &
-                                   (DR%VEG_MOIST_MASS*CP_H2O + DR%VEG_FUEL_MASS*CP_VEG)
+  TMP_VEG_NEW  = TMP_VEG_NEW - (MPV_MOIST_LOSS*H_VAP_H2O + MPV_VOLIT*L_PYR_VEG + & 
+                                MPV_CHAR_LOSS*H_CHAR_OXID) / &
+                               (DR%VEG_MOIST_MASS*CP_H2O + VEG_FUEL_AND_CHAR_MASS*CP_VEG)
 ! print*,'TMP_VEG after',TMP_VEG_NEW
 ! print*,'********************************************'
  ENDIF IF_NOT_IGNITOR
- ENDIF IF_VEG_DEGRADATION_2
+ ENDIF IF_VEG_DEGRADATION_ARRHENIUS
 
  DR%TMP = TMP_VEG_NEW
  DR%VEG_EMISS = 4.*SIGMA*DR%VEG_KAPPA*DR%TMP**4 !used in RTE solver
@@ -667,13 +732,16 @@ DROPLET_LOOP: DO I=1,NLP
                    + RDT*MW_AVERAGE
 
 ! Add water vapor and fuel vapor mass to total density
-  MPV_ADDED     = MPV_MOIST_LOSS + MPV_VOLIT
+  MPV_ADDED     = MPV_MOIST_LOSS + MPV_VOLIT + MPV_CHAR_CO2
+  DR%VEG_MLR    = MPV_ADDED*RDT !used in FVX,FVY,FVZ along with drag in part.f90
   RHO(II,JJ,KK) = RHO_GAS + MPV_ADDED
   RRHO_GAS_NEW  = 1._EB/RHO(II,JJ,KK)
 ! print*,'NM =',NM
 ! print*,'** ',rho(ii,jj,kk)
 
-! Add water vapor mass to water vapor mass fraction
+! Add water vapor mass from drying to water vapor mass fraction
+!print*,'vege:N_SPECIES,I_FUEL,I_WATER,I_CO2',n_species,i_fuel,i_water,i_co2
+!print*,'vege:FUEL_INDEX,H2O_INDEX,CO2_INDEX,O2_INDEX,',fuel_index,h2O_index,co2_index,o2_index
  IF (I_WATER /= 0) THEN 
 ! YY(II,JJ,KK,I_WATER) = (MPV_MOIST_LOSS + YY(II,JJ,KK,I_WATER)*RHO_GAS)/(MPV_MOIST_LOSS + RHO_GAS)
 ! YY(II,JJ,KK,I_WATER) = YY(II,JJ,KK,I_WATER) +  MPV_MOIST_LOSS*RRHO_GAS_NEW
@@ -682,13 +750,18 @@ DROPLET_LOOP: DO I=1,NLP
 ! DMPVDT_FM_VEG(II,JJ,KK,I_WATER) = DMPVDT_FM_VEG(II,JJ,KK,I_WATER) + RDT*MPV_MOIST_LOSS
  ENDIF
 
-! Add fuel vapor mass to fuel mass fraction
+! Add fuel vapor mass from pyrolysis to fuel mass fraction
  IF (I_FUEL /= 0) THEN 
 ! YY(II,JJ,KK,I_FUEL) = (MPV_VOLIT + YY(II,JJ,KK,I_FUEL)*RHO_GAS)/(MPV_VOLIT + RHO_GAS)
 ! YY(II,JJ,KK,I_FUEL) = YY(II,JJ,KK,I_FUEL) + MPV_VOLIT*RRHO_GAS_NEW
   YY(II,JJ,KK,I_FUEL) = YY(II,JJ,KK,I_FUEL) + (MPV_VOLIT - MPV_ADDED*YY(II,JJ,KK,I_FUEL))*RRHO_GAS_NEW
 ! YY(II,JJ,KK,I_FUEL) = MIN(1._EB,YY(II,JJ,KK,I_FUEL))
 ! DMPVDT_FM_VEG(II,JJ,KK,I_FUEL) = DMPVDT_FM_VEG(II,JJ,KK,I_FUEL) + RDT*MPV_VOLIT
+ ENDIF
+
+! Add CO2 vapor mass from char oxidation mass to CO2 mass fraction
+ IF (I_CO2 /= 0 .AND. PC%VEG_CHAR_OXIDATION) THEN 
+  YY(II,JJ,KK,I_CO2) = YY(II,JJ,KK,I_CO2) + (MPV_CHAR_CO2 - MPV_ADDED*YY(II,JJ,KK,I_CO2))*RRHO_GAS_NEW
  ENDIF
 
 ! WRITE(9998,'(A)')'T,TMP_VEG,QCON_VEG,QRAD_VEG'
@@ -730,6 +803,1243 @@ CALL REMOVE_DROPLETS(T,NM)
  
 END SUBROUTINE RAISED_VEG_MASS_ENERGY_TRANSFER
 
+! ***********************************************************************************************
+
+SUBROUTINE BNDRY_VEG_MASS_ENERGY_TRANSFER(T,NM)
+!
+! Issues:
+! 1. Are SF%VEG_FUEL_FLUX_L and SF%VEG_MOIST_FLUX_L needed in linear degradation model?
+REAL(EB) :: DT_BC,RDT_BC,T
+INTEGER, INTENT(IN) :: NM
+INTEGER  ::  IBC,IW
+INTEGER  ::  I,IIG,JJG,KKG,KK
+REAL(EB) :: C_P_VEG,C_P_MOIST_AND_VEG,DETAVEG,DZVEG_L,ETAVEG,ETAVEG_H,H_CONV,KAPPA_VEG,LAMBDA_AIR, &
+            VEG_TMPF_EFF,QRAD_INC,QRADM_INC,QRADP_INC,RE_VEG_PART, &
+            TMP_BOIL,TMPG_A,TMP_G,DTMP,U2,V2
+INTEGER  :: N
+REAL(EB) :: RHO_G,UN,MFT,EPSB,DD,YY_G,DENOM
+INTEGER  IIVEG_L,IVEG_L,IBURN,J,LBURN,NVEG_L
+!REAL(EB), ALLOCATABLE, DIMENSION(:) :: VEG_DIV_QRNET_EMISS,VEG_DIV_QRNET_INC,
+!         VEG_QRNET_EMISS,VEG_QRNET_INC,VEG_QRM_EMISS,VEG_QRP_EMISS, VEG_QRM_INC,VEG_QRP_INC
+REAL(EB) :: VEG_DIV_QRNET_EMISS(20),VEG_DIV_QRNET_INC(20),VEG_QRNET_EMISS(0:20),VEG_QRNET_INC(0:20), &
+            VEG_QRM_EMISS(0:20),VEG_QRP_EMISS(0:20), VEG_QRM_INC(0:20),VEG_QRP_INC(0:20)
+REAL(EB) :: A_H2O_VEG,E_H2O_VEG,A_PYR_VEG,E_PYR_VEG,L_PYR_VEG
+REAL(EB) :: A_CHAR_VEG,E_CHAR_VEG,BETA_CHAR_VEG,NU_CHAR_VEG,NU_ASH_VEG,NU_O2_CHAR_VEG,H_CHAR_OXID
+REAL(EB) :: CP_H2O,CP_VEG,DTMP_VEG,H_VAP_H2O,TMP_VEG,TMP_VEG_NEW
+REAL(EB) :: CHAR_FCTR,MPA_MOIST,MPA_MOIST_LOSS,MPA_MOIST_LOSS_MAX,MPA_MOIST_MIN,MPA_VEG,MPA_VEG_MIN, & 
+            MPA_VOLIT,MPA_VOLIT_MAX
+REAL(EB) :: DETA_VEG,ETA_H,ETAFM_VEG,ETAFP_VEG,ETAG_VEG,ETAI_VEG
+REAL(EB) :: A_CELL,V_CELL
+REAL(EB) :: QCONF_L,Q_FOR_DRYING,Q_VEG_MOIST,Q_VEG_VOLIT,QNET_VEG,Q_FOR_VOLIT,Q_VOLIT,Q_UPTO_VOLIT
+LOGICAL  :: VEG_DEGRADATION_ARRHENIUS,VEG_DEGRADATION_LINEAR
+logical  :: fuel_elem_degrad,fds4_degrad
+
+TYPE (WALL_TYPE),    POINTER :: WC =>NULL()
+TYPE (SURFACE_TYPE), POINTER :: SF =>NULL()
+
+CALL POINT_TO_MESH(NM)
+
+
+TMP_BOIL  = 373._EB
+CP_H2O    = 4190._EB !J/kg/K specific heat of water
+H_VAP_H2O = 2259._EB*1000._EB !J/kg/K heat of vaporization of water
+DT_BC     = T - VEG_CLOCK_BC
+RDT_BC    = 1.0_EB/DT_BC
+
+! Thermal degradation approach parameters
+  VEG_DEGRADATION_LINEAR = .TRUE.
+  VEG_DEGRADATION_ARRHENIUS = .FALSE.
+  fuel_elem_degrad = .true.
+  fds4_degrad      = .false.
+!
+! Loop through vegetation wall cells and burn
+!
+VEG_WALL_CELL_LOOP: DO IW=1,NWC
+
+  IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE VEG_WALL_CELL_LOOP
+
+  IBC = IJKW(5,IW)
+  SF  => SURFACE(IBC)
+!
+  IF (.NOT. SF%VEGETATION) CYCLE VEG_WALL_CELL_LOOP
+  WC  => WALL(IW)
+
+  IIG = IJKW(6,IW)
+  JJG = IJKW(7,IW)
+  KKG = IJKW(8,IW)
+  TMP_G = TMP(IIG,JJG,KKG)
+  CHAR_FCTR = 1._EB - SF%VEG_CHARFRAC
+  VEG_DRAG(IIG,JJG) = SF%VEG_DRAG_INI*(SF%VEG_CHARFRAC + CHAR_FCTR*WC%VEG_HEIGHT/SF%VEG_HEIGHT)
+
+  IF(SF%VEG_NO_BURN) CYCLE VEG_WALL_CELL_LOOP
+
+
+! Initialize quantities
+  Q_VEG_MOIST     = 0.0_EB
+  Q_VEG_VOLIT     = 0.0_EB
+  Q_UPTO_VOLIT    = 0.0_EB
+  Q_VOLIT         = 0.0_EB
+  MPA_MOIST_LOSS  = 0.0_EB
+  MPA_VOLIT       = 0.0_EB
+  SF%VEG_DIVQNET_L = 0.0_EB
+  SF%VEG_MOIST_FLUX_L = 0.0_EB
+  SF%VEG_FUEL_FLUX_L  = 0.0_EB
+  MASSFLUX(IW,I_FUEL) = 0.0_EB 
+  QCONF(IW)           = 0.0_EB
+  IF (I_WATER /= 0) MASSFLUX(IW,I_WATER) = 0.0_EB
+
+! Vegetation variables and minimum bounds
+  NVEG_L = SF%NVEG_L
+  LBURN  = 0
+  MPA_VEG_MIN   = SF%VEG_CHARFRAC*SF%VEG_LOAD / REAL(NVEG_L,EB) !kg/m^2
+  MPA_MOIST_MIN = 0.001_EB*SF%VEG_MOISTURE*SF%VEG_LOAD/REAL(NVEG_L,EB) !ks/m^2
+  IF (SF%VEG_MOISTURE == 0.0_EB) MPA_MOIST_MIN = 1._EB
+  DZVEG_L   = SF%VEG_HEIGHT/REAL(NVEG_L,EB)
+  KAPPA_VEG = SF%VEG_KAPPA
+  DETAVEG   = DZVEG_L*KAPPA_VEG
+
+! Find top of vegetation which burns downward from the top
+  DO IVEG_L = 1,NVEG_L 
+    IF(WC%VEG_FUELMASS_L(IVEG_L) <= MPA_VEG_MIN) LBURN = IVEG_L
+  ENDDO
+  WC%VEG_HEIGHT = REAL(NVEG_L-LBURN,EB)*DZVEG_L
+! MPA_MOIST_LOSS_MAX = DT_BC*0.1_EB/REAL(NVEG_L-LBURN,EB) !upper bound based on F19 AU grassland exp U = 5 m/s
+! MPA_MOIST_LOSS_MAX = DT_BC*0.05_EB/REAL(NVEG_L-LBURN,EB)
+! MPA_VOLIT_MAX      = DT_BC*0.05_EB/REAL(NVEG_L-LBURN,EB)
+  MPA_MOIST_LOSS_MAX = 9999999._EB
+  MPA_VOLIT_MAX      = 9999999._EB
+
+! Factors for computing divergence of incident and self emission radiant fluxes
+! in vegetation fuel bed. These need to be recomputed as the height of the
+! vegetation surface layer decreases with burning
+
+  DETA_VEG = SF%VEG_KAPPA*DZVEG_L 
+
+! Factors for computing decay of +/- incident fluxes
+  SF%VEG_FINCM_RADFCT_L(:) =  0.0_EB
+  SF%VEG_FINCP_RADFCT_L(:) =  0.0_EB
+  ETA_H = SF%VEG_KAPPA*WC%VEG_HEIGHT
+  DO IVEG_L = 0,SF%NVEG_L - LBURN
+    ETAFM_VEG = IVEG_L*DETA_VEG
+    ETAFP_VEG = ETA_H - ETAFM_VEG
+    SF%VEG_FINCM_RADFCT_L(IVEG_L) = EXP(-ETAFM_VEG)
+    SF%VEG_FINCP_RADFCT_L(IVEG_L) = EXP(-ETAFP_VEG)
+  ENDDO
+
+!  Integrand for computing +/- self emission fluxes
+  SF%VEG_SEMISSP_RADFCT_L(:,:) = 0.0_EB
+  SF%VEG_SEMISSM_RADFCT_L(:,:) = 0.0_EB
+! q+
+  DO IIVEG_L = 0,SF%NVEG_L-LBURN !veg grid coordinate
+    DO IVEG_L = IIVEG_L,SF%NVEG_L-1-LBURN !integrand index
+!    ETAG_VEG = IIVEG_L*DETA_VEG
+!    ETAI_VEG =  IVEG_L*DETA_VEG
+!    SF%VEG_SEMISSP_RADFCT_L(IVEG_L,IIVEG_L) = EXP(-(ETAI_VEG-ETAG_VEG))
+     ETAFM_VEG = (IVEG_L-IIVEG_L)*DETA_VEG
+     ETAFP_VEG = ETAFM_VEG + DETA_VEG
+     SF%VEG_SEMISSP_RADFCT_L(IVEG_L,IIVEG_L) = EXP(-ETAFM_VEG) - EXP(-ETAFP_VEG)
+    ENDDO
+  ENDDO
+! q-
+  DO IIVEG_L = 0,SF%NVEG_L-LBURN
+    DO IVEG_L = 1,IIVEG_L
+!    ETAG_VEG = IIVEG_L*DETA_VEG
+!    ETAI_VEG =  IVEG_L*DETA_VEG
+!    SF%VEG_SEMISSM_RADFCT_L(IVEG_L,IIVEG_L) = EXP(-(ETAG_VEG-ETAI_VEG))
+     ETAFM_VEG = (IIVEG_L-IVEG_L)*DETA_VEG
+     ETAFP_VEG = ETAFM_VEG + DETA_VEG
+     SF%VEG_SEMISSM_RADFCT_L(IVEG_L,IIVEG_L) = EXP(-ETAFM_VEG) - EXP(-ETAFP_VEG)
+    ENDDO
+  ENDDO
+!
+! compute CONVECTIVE HEAT FLUX on vegetation
+! cylinder heat transfer coefficient, hc, from Albini CST, assumes
+! lambda ~ rho*cp*T^1.5/p where cp (of air) is assumed to be 
+! independent of temperature. Flux is from Morvan and Dupuy assuming
+! constant physical properties and integrating vertically over fuel
+! bed to get a factor of h multiplying their qc'''
+! DTMP*BETA*sigma*h*hc*(T-Ts)
+! hc = 0.350*(sigma/4)*lambda in Albini CST 1985 assumes quiescent air
+! hc = 0.683*(sigma/4)*lambda*Re^0.466 ; Re=|u|r/nu, r=2/sigma
+!      used by Porterie, cylinders in air flow
+! lambda = lambda0*(rho/rho0)(T/T0)^a; a=1.5 below
+  TMPG_A     = (TMP_G*0.0033_EB)**1.5
+  LAMBDA_AIR = 0.026_EB*RHO(IIG,JJG,KKG)*0.861_EB*TMPG_A
+!Albini assumes quiescent air
+! H_CONV = 0.35*LAMBDA_AIR*SF%VEG_SVRATIO*0.25
+!Holman "Heat Transfer",5th Edition, McGraw-Hill, 1981 p.285 
+!assumes vertical cylinder laminar air flow
+! H_CONV = 1.42*(DTMP/VEG_HEIGHT_S(IBC))**0.25 !W/m^2/C
+!Porterie allow for air flow
+! U2 = 0.25*(U(IIG,JJG,KKG)+U(IIG-1,JJG,KKG))**2
+! V2 = 0.25*(V(IIG,JJG,KKG)+V(IIG,JJG-1,KKG))**2
+! RE_VEG_PART = SQRT(U2 + V2)*2./SF%VEG_SVRATIO/TMPG_A/15.11E-6
+! H_CONV = 0.5*LAMBDA_AIR*0.683*RE_VEG_PART**0.466*0.5*SF%VEG_SVRATIO
+!
+  DO I=1,NVEG_L-LBURN
+!   IF(WC%VEG_TMP_L(I+LBURN) >= TMP_BOIL .AND. WC%VEG_MOISTMASS_L(I+LBURN) > MPA_MOIST_MIN) &
+!      WC%VEG_TMP_L(I+LBURN) = TMP_BOIL
+!   IF(WC%VEG_TMP_L(I+LBURN) >= 500._EB .AND. WC%VEG_FUELMASS_L(I+LBURN) > MPA_VEG_MIN) &
+!      WC%VEG_TMP_L(I+LBURN) = 500._EB
+    DTMP = TMP_G - WC%VEG_TMP_L(I+LBURN)
+!   DTMP = 0.5_EB*(TMP_G - WC%VEG_TMP_L(I+LBURN))
+!Holman see ref above (needs DTMP so its computation is done here)
+    H_CONV = 1.42_EB*(ABS(DTMP)/DZVEG_L)**0.25
+!
+    QCONF_L   = H_CONV*DTMP
+    QCONF(IW) = QCONF(IW) + QCONF_L !W/m^2
+    SF%VEG_DIVQNET_L(I) = SF%VEG_PACKING*SF%VEG_SVRATIO*QCONF_L*DZVEG_L !W/m^3
+!   SF%VEG_DIVQNET_L(I) = SF%VEG_PACKING*SF%VEG_SVRATIO*H_CONV*DTMP*DZVEG_L
+!   IF (SF%VEG_DIVQNET_L(I) < 0.0_EB) SF%VEG_DIVQNET_L(I) = 0.0_EB
+  ENDDO
+! QCONF(IW) = SUM(SF%VEG_DIVQNET_L) !*RDN(IW)*WC%VEG_HEIGHT
+!
+! Compute +/- radiation fluxes and their divergence due to self emission within vegetation
+  LAYER_RAD_FLUXES: IF (LBURN .LT. NVEG_L) THEN
+    VEG_QRP_EMISS   = 0.0_EB ; VEG_QRM_EMISS = 0.0_EB 
+    VEG_QRNET_EMISS = 0.0_EB ; VEG_DIV_QRNET_EMISS = 0.0_EB
+! qe+
+    DO J=0,NVEG_L-LBURN !veg grid coordinate loop
+      DO I=J,NVEG_L-LBURN !integrand loop 
+         VEG_QRP_EMISS(J) =  VEG_QRP_EMISS(J) + SF%VEG_SEMISSP_RADFCT_L(I,J)*WC%VEG_TMP_L(I+LBURN)**4
+      ENDDO
+    ENDDO
+! qe-
+    DO J=0,NVEG_L-LBURN  !veg grid coordinate
+      DO I=0,J           !integrand for q-
+         VEG_QRM_EMISS(J) = VEG_QRM_EMISS(J) + SF%VEG_SEMISSM_RADFCT_L(I,J)*WC%VEG_TMP_L(I+LBURN)**4
+      ENDDO
+    ENDDO
+    VEG_QRP_EMISS =  VEG_QRP_EMISS*SIGMA
+    VEG_QRM_EMISS =  VEG_QRM_EMISS*SIGMA
+!
+    DO I=0,NVEG_L-LBURN
+      VEG_QRNET_EMISS(I) = VEG_QRP_EMISS(I)-VEG_QRM_EMISS(I)
+    ENDDO
+!    DO I=1,NVEG_L-LBURN
+!      VEG_QRNET_EMISS(I)  = VEG_QRNET_EMISS(I) - VEG_QRM_EMISS(I)
+!    ENDDO
+!
+    DO I=1,NVEG_L-LBURN
+      VEG_DIV_QRNET_EMISS(I) = VEG_QRNET_EMISS(I-1) - VEG_QRNET_EMISS(I)
+    ENDDO
+!
+! Compute +/- radiation fluxes and their divergence due to incident fluxes on boundaries
+!   QRADM_INC = QRADIN(IW) !sigma*Ta^4 + flame
+    QRADM_INC = QRADIN(IW)/E_WALL(IW) + SIGMA*TMP_F(IW)**4 ! as done in FDS4
+!   print*,'vege: QRADIN(IW)',qradin(iw)
+    ETAVEG_H  = (NVEG_L - LBURN)*DETAVEG
+    !this QRADP_INC ensures zero net radiant fluxes at bottom of vegetation
+!   QRADP_INC = SIGMA*WC%VEG_TMP_L(NVEG_L)**4
+    QRADP_INC = QRADM_INC*SF%VEG_FINCM_RADFCT_L(NVEG_L-LBURN) + VEG_QRM_EMISS(NVEG_L-LBURN)
+!   QRADP_INC = QRADM_INC*SF%VEG_FINCM_RADFCT_L(NVEG_L-LBURN)
+    VEG_QRM_INC   = 0.0_EB ; VEG_QRP_INC = 0.0_EB 
+    VEG_QRNET_INC = 0.0_EB ; VEG_DIV_QRNET_INC = 0.0_EB
+    DO I=0,NVEG_L-LBURN
+      VEG_QRM_INC(I)   = QRADM_INC*SF%VEG_FINCM_RADFCT_L(I)
+      VEG_QRP_INC(I)   = QRADP_INC*SF%VEG_FINCP_RADFCT_L(I)
+      VEG_QRNET_INC(I) = VEG_QRP_INC(I)-VEG_QRM_INC(I)
+    ENDDO
+    DO I=1,NVEG_L-LBURN
+      VEG_DIV_QRNET_INC(I) = VEG_QRNET_INC(I-1) - VEG_QRNET_INC(I)
+    ENDDO
+  ENDIF LAYER_RAD_FLUXES
+!
+! Add divergence of net radiation flux to divergence of convection flux
+  DO I=1,NVEG_L-LBURN
+    SF%VEG_DIVQNET_L(I)= SF%VEG_DIVQNET_L(I) - (VEG_DIV_QRNET_INC(I) + VEG_DIV_QRNET_EMISS(I))
+!   SF%VEG_DIVQNET_L(I)= SF%VEG_DIVQNET_L(I) - VEG_DIV_QRNET_INC(I)
+  ENDDO
+!
+!
+!      ************** Boundary Fuel Non-Arrehnius (Linear in temp) Degradation model *************************
+! Drying occurs if qnet > 0 with Tveg held at 100 c
+! Pyrolysis occurs according to Morvan & Dupuy empirical formula. Linear
+! temperature dependence with qnet factor
+!
+
+  IF_VEG_DEGRADATION_LINEAR: IF (VEG_DEGRADATION_LINEAR) THEN
+
+  if_fds4_degrad: if(fds4_degrad) then
+!
+! compute mass flux of H20 vapor or fuel gas
+!
+!     VEG_MOIST_FLUX_L   = 0.0
+!     VEG_FUEL_FLUX_L    = 0.0
+!     MASSFLUX(IW,IFUEL) = 0.0
+      DO IVEG_L = LBURN+1,NVEG_L
+
+       IF(SF%VEG_DIVQNET_L(IVEG_L-LBURN) .GT. 0._EB) THEN 
+
+!                                 -- boiling 
+        IF(WC%VEG_TMP_L(IVEG_L).GE.TMP_BOIL .AND. WC%VEG_MOISTMASS_L(IVEG_L).GT.MPA_MOIST_MIN) THEN
+          SF%VEG_MOIST_FLUX_L(IVEG_L) = SF%VEG_DIVQNET_L(IVEG_L-LBURN)/H_VAP_H2O
+          WC%VEG_MOISTMASS_L(IVEG_L) = WC%VEG_MOISTMASS_L(IVEG_L) - DT_BC*SF%VEG_MOIST_FLUX_L(IVEG_L)
+!         print*,'&& layer, water mass',
+!     .  iveg_l,veg_water_mass_per_area_l(iw,iveg_l)
+        ENDIF
+!                                 -- pyrolysis multiple layers
+        IF (WC%VEG_MOISTMASS_L(IVEG_L).LE.MPA_MOIST_MIN .AND. WC%VEG_FUELMASS_L(IVEG_L).GT.MPA_VEG_MIN) THEN
+
+        IF(WC%VEG_TMP_L(IVEG_L).GE. 400._EB .AND. WC%VEG_TMP_L(IVEG_L).LE. 500._EB)  &
+         SF%VEG_FUEL_FLUX_L(IVEG_L) = SF%VEG_DIVQNET_L(IVEG_L-LBURN)*0.0000025*(WC%VEG_TMP_L(IVEG_L)-400.)*0.01 
+!
+        WC%VEG_FUELMASS_L(IVEG_L) = WC%VEG_FUELMASS_L(IVEG_L) - DT_BC*SF%VEG_FUEL_FLUX_L(IVEG_L)
+        MASSFLUX(IW,I_FUEL)= SF%VEG_FUEL_FLUX_L(IVEG_L) + MASSFLUX(IW,I_FUEL)
+        ENDIF !pyrolysis models
+        WC%VEG_FUELMASS_L(IVEG_L) = MAX(WC%VEG_FUELMASS_L(IVEG_L),MPA_VEG_MIN)
+       ENDIF !qnetflux_l > 0
+       ENDDO !boil off and pyrolysis
+!
+! Compute temperature of vegetation
+!
+      VEG_TEMP_LOOP: DO IVEG_L = LBURN+1,NVEG_L
+!
+      IF (WC%VEG_MOISTMASS_L(IVEG_L) .LT. MPA_MOIST_MIN) WC%VEG_MOISTMASS_L(IVEG_L) = 0.0
+!
+      C_P_VEG = (0.01 + 0.0037*WC%VEG_TMP_L(IVEG_L))*1000. !W/kg/K
+      C_P_MOIST_AND_VEG = CP_H2O*WC%VEG_MOISTMASS_L(IVEG_L) + C_P_VEG*WC%VEG_FUELMASS_L(IVEG_L)
+      WC%VEG_TMP_L(IVEG_L) = WC%VEG_TMP_L(IVEG_L) + DT_BC*( SF%VEG_DIVQNET_L(IVEG_L-LBURN)  &
+                             - SF%VEG_MOIST_FLUX_L(IVEG_L)*H_VAP_H2O &
+                             - SF%VEG_FUEL_FLUX_L(IVEG_L)*416000. )/C_P_MOIST_AND_VEG
+
+!  Set veg. temp to boiling temp if appropriate
+      IF (WC%VEG_MOISTMASS_L(IVEG_L).GE.MPA_MOIST_MIN .AND. WC%VEG_TMP_L(IVEG_L).GE.TMP_BOIL)  &
+           WC%VEG_TMP_L(IVEG_L) = TMP_BOIL
+
+!  Set veg. temp to pyroysis temp if appropriate
+!     IF (SF%VEG_FUEL_FLUX_L(IVEG_L).GT.0._EB .AND. WC%VEG_TMP_L(IVEG_L).GT.500._EB) WC%VEG_TMP_L(IVEG_L) = 500.
+      IF (WC%VEG_FUELMASS_L(IVEG_L).GT.MPA_VEG_MIN .AND. WC%VEG_TMP_L(IVEG_L).GT.500._EB) WC%VEG_TMP_L(IVEG_L) = 500._EB
+
+      ENDDO VEG_TEMP_LOOP
+
+    WC%VEG_TMP_L(LBURN) = WC%VEG_TMP_L(LBURN+1)
+
+  endif if_fds4_degrad
+
+
+  if_fuel_elem_degrad: if (fuel_elem_degrad) then
+
+    LAYER_LOOP1: DO IVEG_L = LBURN+1,NVEG_L
+!
+! Compute temperature of vegetation
+!
+      MPA_VEG   = WC%VEG_FUELMASS_L(IVEG_L)
+      MPA_MOIST = WC%VEG_MOISTMASS_L(IVEG_L)
+      TMP_VEG   = WC%VEG_TMP_L(IVEG_L)
+      QNET_VEG  = SF%VEG_DIVQNET_L(IVEG_L-LBURN)
+      C_P_VEG = (0.01_EB + 0.0037_EB*TMP_VEG)*1000._EB !J/kg/K
+      C_P_MOIST_AND_VEG = CP_H2O*MPA_MOIST +  C_P_VEG*MPA_VEG
+      DTMP_VEG = DT_BC*QNET_VEG/C_P_MOIST_AND_VEG
+      TMP_VEG_NEW = TMP_VEG + DTMP_VEG 
+!     IF(TMP_VEG_NEW >= 800._EB .AND. MPA_VEG <= MPA_VEG_MIN) TMP_VEG_NEW = 800._EB
+
+      IF_DIVQ_L_GE_0: IF(QNET_VEG > 0._EB) THEN 
+
+! -- drying of veg layer
+      IF(MPA_MOIST > MPA_MOIST_MIN .AND. TMP_VEG_NEW >= TMP_BOIL) THEN
+        Q_FOR_DRYING   = (TMP_VEG_NEW - TMP_BOIL)/DTMP_VEG * QNET_VEG
+        MPA_MOIST_LOSS = MIN(DT_BC*Q_FOR_DRYING/H_VAP_H2O,MPA_MOIST-MPA_MOIST_MIN)
+        MPA_MOIST_LOSS = MIN(MPA_MOIST_LOSS,MPA_MOIST_LOSS_MAX) !use specified max
+        TMP_VEG_NEW    = TMP_BOIL
+        WC%VEG_MOISTMASS_L(IVEG_L) = MPA_MOIST - MPA_MOIST_LOSS !kg/m^2
+        IF( WC%VEG_MOISTMASS_L(IVEG_L) <= MPA_MOIST_MIN ) WC%VEG_MOISTMASS_L(IVEG_L) = 0.0_EB
+        IF (I_WATER /= 0) MASSFLUX(IW,I_WATER) = MASSFLUX(IW,I_WATER) + RDT_BC*MPA_MOIST_LOSS
+!       WC%VEG_TMP_L(IVEG_L) = TMP_VEG_NEW
+      ENDIF
+
+! -- pyrolysis multiple layers
+      IF_VOLITIZATION: IF (MPA_MOIST <= MPA_MOIST_MIN) THEN
+
+        IF(TMP_VEG_NEW >= 400._EB .AND. MPA_VEG > MPA_VEG_MIN) THEN
+          TMP_VEG_NEW  = MIN(TMP_VEG_NEW,500._EB)
+          Q_UPTO_VOLIT = CP_VEG*MPA_VEG*(400._EB-TMP_VEG)
+          Q_FOR_VOLIT  = DT_BC*QNET_VEG - Q_UPTO_VOLIT
+          Q_VOLIT      = Q_FOR_VOLIT*0.01_EB*(TMP_VEG-400._EB)
+          MPA_VOLIT    = CHAR_FCTR*Q_VOLIT*0.00000239_EB
+          MPA_VOLIT    = MAX(MPA_VOLIT,0._EB)
+          MPA_VOLIT    = MIN(MPA_VOLIT,MPA_VOLIT_MAX)
+          MPA_VOLIT    = MIN(MPA_VOLIT,MPA_VEG-MPA_VEG_MIN)
+          MPA_VEG      = MPA_VEG - MPA_VOLIT
+          Q_VOLIT      = MPA_VOLIT*418000._EB
+          TMP_VEG_NEW  = TMP_VEG + (Q_FOR_VOLIT-Q_VOLIT)/(MPA_VEG*CP_VEG)
+          TMP_VEG_NEW  = MIN(TMP_VEG_NEW,500._EB)
+          WC%VEG_FUELMASS_L(IVEG_L) = MPA_VEG
+          MASSFLUX(IW,I_FUEL)= MASSFLUX(IW,I_FUEL) + RDT_BC*MPA_VOLIT
+!         WC%VEG_TMP_L(IVEG_L) = TMP_VEG_NEW
+        ENDIF        
+
+      ENDIF IF_VOLITIZATION
+
+      ENDIF IF_DIVQ_L_GE_0
+      
+      WC%VEG_TMP_L(IVEG_L) = TMP_VEG_NEW
+
+    ENDDO LAYER_LOOP1
+
+    WC%VEG_TMP_L(LBURN) = WC%VEG_TMP_L(LBURN+1)
+
+  endif if_fuel_elem_degrad
+
+  ENDIF  IF_VEG_DEGRADATION_LINEAR
+
+!      ************** Boundary Fuel Arrehnius Degradation model *************************
+! Drying and pyrolysis occur according to Arrehnius expressions obtained 
+! from the literature (Porterie et al., Num. Heat Transfer, 47:571-591, 2005
+! Predicting wildland fire behavior and emissions using a fine-scale physical
+! model
+
+  IF_VEG_DEGRADATION_ARRHENIUS: IF(VEG_DEGRADATION_ARRHENIUS) THEN
+    A_H2O_VEG      = 600000._EB !1/s sqrt(K)
+    E_H2O_VEG      = 5800._EB !K
+    A_PYR_VEG      = 36300._EB !1/s
+    E_PYR_VEG      = 7250._EB !K
+    L_PYR_VEG      = 418._EB !J/kg
+    A_CHAR_VEG     = 430._EB !m/s
+    E_CHAR_VEG     = 9000._EB !K
+    BETA_CHAR_VEG  = 0.2_EB
+    NU_CHAR_VEG    = 0.3_EB
+    NU_ASH_VEG     = 0.1_EB
+    NU_O2_CHAR_VEG = 1.65_EB
+    H_CHAR_OXID    = -12.0E+6_EB !J/kg
+
+    LAYER_LOOP2: DO IVEG_L = LBURN+1,NVEG_L
+
+      MPA_MOIST = WC%VEG_MOISTMASS_L(IVEG_L)
+      MPA_VEG   = WC%VEG_FUELMASS_L(IVEG_L)
+      TMP_VEG   = WC%VEG_TMP_L(IVEG_L)
+
+! Drying of vegetation (Arrhenius)
+      IF_DEHYDRATION_2: IF (MPA_MOIST > MPA_MOIST_MIN) THEN
+        MPA_MOIST_LOSS = MIN(DT_BC*MPA_MOIST*A_H2O_VEG*EXP(-E_H2O_VEG/TMP_VEG)/SQRT(TMP_VEG), &
+                         MPA_MOIST-MPA_MOIST_MIN)
+        MPA_MOIST      = MPA_MOIST - MPA_MOIST_LOSS
+        WC%VEG_MOISTMASS_L(IVEG_L) = MPA_MOIST !kg/m^2
+        IF (MPA_MOIST <= MPA_MOIST_MIN) WC%VEG_MOISTMASS_L(IVEG_L) = 0.0_EB
+      ENDIF IF_DEHYDRATION_2
+
+! Volitalization of vegetation(Arrhenius)
+      IF_VOLITALIZATION_2: IF(MPA_VEG > MPA_VEG_MIN) THEN
+        MPA_VOLIT    = MAX(SF%VEG_CHARFRAC*DT_BC*MPA_VEG*A_PYR_VEG*EXP(-E_PYR_VEG/TMP_VEG),0._EB)
+        MPA_VOLIT    = MIN(MPA_VOLIT,(MPA_VEG-MPA_VEG_MIN))
+        MPA_VEG      = MPA_VEG - MPA_VOLIT
+        WC%VEG_FUELMASS_L(IVEG_L) = MPA_VEG
+      ENDIF IF_VOLITALIZATION_2
+
+      MASSFLUX(IW,I_FUEL)= MASSFLUX(IW,I_FUEL) + MPA_VOLIT/DT_BC
+      IF (I_WATER /= 0) MASSFLUX(IW,I_WATER) = MASSFLUX(IW,I_WATER) + MPA_MOIST/DT_BC
+
+! Vegetation temperature (Arrhenius)
+      C_P_VEG = (0.01_EB + 0.0037_EB*TMP_VEG)*1000._EB !W/kg/K
+      C_P_MOIST_AND_VEG = CP_H2O*WC%VEG_MOISTMASS_L(IVEG_L) +  C_P_VEG*WC%VEG_FUELMASS_L(IVEG_L)
+
+      WC%VEG_TMP_L(IVEG_L) = WC%VEG_TMP_L(IVEG_L) + (DT_BC*SF%VEG_DIVQNET_L(IVEG_L-LBURN) - &
+                             (MPA_MOIST_LOSS*H_VAP_H2O + MPA_VOLIT*L_PYR_VEG) )/C_P_MOIST_AND_VEG
+
+    ENDDO LAYER_LOOP2
+
+  ENDIF IF_VEG_DEGRADATION_ARRHENIUS
+  
+  MASSFLUX_ACTUAL(IW,I_FUEL) = MASSFLUX(IW,I_FUEL)
+  IF (I_WATER /= 0) MASSFLUX_ACTUAL(IW,I_WATER) = MASSFLUX(IW,I_WATER)
+ 
+! Temperature boundary condtions 
+! Mass boundary conditions are determine in subroutine SPECIES_BC in wall.f90 for case SPECIFIED_MASS_FLUX
+! TMP_F(IW) = WC%VEG_TMP_L(NVEG_L)
+! IF (LBURN < NVEG_L)  TMP_F(IW) = WC%VEG_TMP_L(1+LBURN)
+  IF (LBURN < NVEG_L) THEN
+!   TMP_F(IW) = WC%VEG_TMP_L(1+LBURN)
+    TMP_F(IW) = ((VEG_QRP_INC(0)+VEG_QRP_EMISS(1))/SIGMA)**.25 !as done in FDS4
+  ELSE
+    TMP_F(IW) = TMP_G !Tveg=Tgas if veg is completely burned
+  ENDIF
+! TMP_F(IW) = MAX(TMP_F(IW),TMPA)
+
+ENDDO VEG_WALL_CELL_LOOP
+
+VEG_CLOCK_BC = T
+
+END SUBROUTINE BNDRY_VEG_MASS_ENERGY_TRANSFER
+!
+! ***********************************************************************************************
+SUBROUTINE LEVEL_SET_FIRESPREAD(NM)
+!
+! Level set based modeling of fire spread across terrain. Currently, no
+! computation of the wind field is needed. Instead, U0, V0,
+! which are specified on the MISC line of the input file, are used for 
+! the wind field. 
+! Does use the terrain and extent of the vegetation as
+! defined in the fds input file.
+!
+!
+INTEGER, INTENT(IN) :: NM
+INTEGER :: I_FLANK,I,IBC,II,IIG,IW,J,JJ,JJG,LU_SLCF_LS,N_FINAL,N_FIRES,N_STEPS_OUT,N_STEPS_IGN, &
+           N_TIME
+INTEGER :: N_IGNITION
+REAL(EB) :: DT_LS,VEG_MOISTURE_LS
+REAL(EB) :: AMP,DS_LS,LX,LY,SR_X_MAX,SR_Y_MAX,T_FINAL,U_AMBIENT,UMAG,UMAX_LS, &
+            V_AMBIENT,VMAX_LS,XMAX_LS,XMIN_LS,YMIN_LS,YMAX_LS
+REAL(EB) :: DELTAT_IGN,DX_IGN,HEAD_WIDTH,HEAD_WIDTH_FCTR,HEAD_WIDTH_MAX, &
+            IGNITION_WIDTH_X,IGNITION_WIDTH_Y,T_IGN,XIGNL_MIN,XIGNL_MAX, &
+            XIGNR_MIN,XIGNR_MAX,X_MID,X_IGN_MIN,X_IGN_MAX
+REAL(EB) :: R_FLANK,R_HEAD_INF,R_0_INF,R_HEAD_INFW,R_0_INF_AU,R_HEAD_INF_AU
+REAL(EB) :: R_HEAD_U0_INFW,R_HEAD_U_INFW
+REAL(EB) :: BB,MM,LY0
+REAL(EB) :: DT_OUTPUT
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: X0_FIRE,Y0_FIRE,X_LS,Y_LS
+LOGICAL :: HEAD_WIDTH_DEPENDENCE
+!
+REAL(FB) :: TIME_LS
+REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: PHI_OUT
+CHARACTER(30) :: SMOKEVIEW_LABEL,SMOKEVIEW_BAR_LABEL,UNITS
+
+TYPE (WALL_TYPE),    POINTER :: WC =>NULL()
+TYPE (SURFACE_TYPE), POINTER :: SF =>NULL()
+
+CALL POINT_TO_MESH(NM)
+
+!
+!-Initialize variables
+!
+HEAD_WIDTH_DEPENDENCE = .FALSE.
+!-- Domain specification (meters)
+!LX = 100._EB ; NX_LS = 100; DX_LS = LX/REAL(NX_LS,EB)
+!LY = 100._EB ; NY_LS = 100; DY_LS = LY/REAL(NY_LS,EB)
+!YMIN_LS = -10._EB
+!YMAX_LS = YMIN_LS + LY
+!
+!-- Ambient wind (m/s) and Vegetation Moisture
+!U_AMBIENT = 0._EB ; V_AMBIENT = 4._EB
+!VEG_MOISTURE = 6._EB
+!
+! ===================
+! Case specified from input file (assumes there's only one mesh)
+! ===================
+!
+ LX = XF - XS ; NX_LS = IBAR ; DX_LS = LX/REAL(NX_LS,EB)
+ LX = YF - YS ; NY_LS = JBAR ; DY_LS = LX/REAL(NY_LS,EB)
+ T_FINAL = T_END
+ U_AMBIENT = U0 ; V_AMBIENT = V0 ; VEG_MOISTURE_LS = 5.8_EB
+ YMIN_LS = YS
+ YMAX_LS = YF
+! ===================
+! AU grass fires
+! ===================
+! -- C064
+!-----------
+!LX = 100._EB ; NX_LS = 100; DX_LS = LX/REAL(NX_LS,EB)
+!LY = 100._EB ; NY_LS = 100; DY_LS = LY/REAL(NY_LS,EB)
+!T_FINAL = 101._EB !Final time in seconds
+!YMIN_LS = -10._EB
+!YMAX_LS = YMIN_LS + LY
+!U_AMBIENT = 0._EB ; V_AMBIENT = 4.6_EB ; VEG_MOISTURE_LS = 6.3_EB
+!T_IGN = 27._EB
+!HEAD_WIDTH_MAX = 50._EB !meters
+!-----------
+! -- F19
+!-----------
+!LX = 200._EB ; NX_LS = 200; DX_LS = LX/REAL(NX_LS,EB)
+!LY = 200._EB ; NY_LS = 200; DY_LS = LY/REAL(NY_LS,EB)
+!T_FINAL = 139._EB !Final time in seconds
+!YMIN_LS = -10._EB
+!YMAX_LS = YMIN_LS + LY
+!U_AMBIENT = 0._EB ; V_AMBIENT = 4.8_EB ; VEG_MOISTURE_LS = 5.8_EB
+!T_IGN = 56._EB
+!HEAD_WIDTH_MAX =175._EB !meters
+!
+!-----------
+! -- line fire ignition
+!-----------
+ T_IGN = -10._EB !set <0 for instantaneous line fire igntion
+!
+! -- Number of fires and their location
+N_FIRES = 1 ; ALLOCATE(X0_FIRE(N_FIRES)) ; ALLOCATE(Y0_FIRE(N_FIRES))
+X0_FIRE(1) = 0.0_EB ; Y0_FIRE(1) = 10._EB
+!
+! -- Constants in spread rate magnitude formula SR = R_FLANK + R_HEAD_U0_INFW + R_HEAD_U_INFW
+!    R_FLANK = spread rate of flank fire
+!    R_HEAD_U0_INFW = spread rate of head fire when ambient wind is zero
+!    R_HEAD_U_INFW  = head fire spread rate coefficient which is mulitplied by the wind speed
+!
+! Australian grassland fires (infinite head width values)
+R_HEAD_U0_INFW  = 0.165_EB*EXP(-0.108*VEG_MOISTURE_LS)/SQRT(U_AMBIENT**2 + V_AMBIENT**2)
+R_HEAD_U_INFW   = 0.534_EB*EXP(-0.108*VEG_MOISTURE_LS)
+!
+! WFDS boundary fuel run AU F19, 8m (point ignitor), U2=7 m/s (matches U2=5m/s AU case)
+R_HEAD_U0_INFW  = 0.0
+!need to divide by wind speed because this is the spread rate
+R_HEAD_U_INFW   = 1.1/SQRT(U_AMBIENT**2 + V_AMBIENT**2)
+R_FLANK         = 0.4 !flank ROS from wfds
+
+! Spread rates from WFDS boundary fuel run AU F19, 8m (point ignitor), U2=1 m/s
+!R_HEAD_U0_INFW  = 0.0
+!R_HEAD_U_INFW   = 0.25_EB/V_AMBIENT !need to divide by wind speed because this is the spread rate
+!R_FLANK       = 0.195 !flank ROS from wfds
+!
+! Define spread rate across domain (including no burn areas)
+!
+ALLOCATE(ROS_HEAD(NX_LS,NY_LS))    ; CALL ChkMemErr('VEGE:LEVEL SET','ROS_HEAD',IZERO) ; ROS_HEAD=0.0_EB
+ALLOCATE(ROS_HEAD_U0_INFW(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','ROS_HEAD_U0_INFW',IZERO)
+ALLOCATE(ROS_HEAD_U_INFW(NX_LS,NY_LS))  ; CALL ChkMemErr('VEGE:LEVEL SET','ROS_HEAD_U_INFW',IZERO)
+ALLOCATE(ROS_FLANK(NX_LS,NY_LS))   ; CALL ChkMemErr('VEGE:LEVEL SET','ROS_FLANK',IZERO)
+
+ROS_HEAD_U0_INFW = R_HEAD_U0_INFW
+ROS_HEAD_U_INFW  = R_HEAD_U_INFW
+ROS_FLANK        = R_FLANK
+
+!ROS_HEAD_U0_INFW(90:110,90:110) =  0.0_EB
+!ROS_HEAD_U_INFW(90:110,90:110)  =  0.0_EB
+!ROS_FLANK(90:110,90:110)  =  0.0_EB
+
+! Assign spread rates (i.e., vegetation types) to locations on terrain
+
+ROS_WALL_CELL_LOOP: DO IW=1,NWC
+
+  IBC = IJKW(5,IW)
+  SF  => SURFACE(IBC)
+
+  WC  => WALL(IW)
+
+  IIG = IJKW(6,IW)
+  JJG = IJKW(7,IW)
+
+  IF (SF%VEG_NO_BURN) THEN
+   ROS_HEAD_U0_INFW(IIG,JJG) =  0.0_EB
+   ROS_HEAD_U_INFW(IIG,JJG)  =  0.0_EB
+   ROS_FLANK(IIG,JJG)        =  0.0_EB
+  ENDIF
+
+ENDDO ROS_WALL_CELL_LOOP
+
+!
+!C_F = 0.2_EB
+!
+! -- Flux limiter
+!LIMITER_LS = 1 !MINMOD
+LIMITER_LS = 2 !SUPERBEE
+!LIMITER_LS = 3 !First order upwinding
+!
+! -- Output file
+DT_OUTPUT = 1._EB
+TIME_LS = 0._EB
+LU_SLCF_LS = 9999
+SMOKEVIEW_LABEL = 'phifield'
+SMOKEVIEW_BAR_LABEL = 'phifield'
+UNITS  = 'C'
+OPEN(LU_SLCF_LS,FILE='lsfs.sf',FORM='UNFORMATTED',STATUS='REPLACE')
+WRITE(LU_SLCF_LS) SMOKEVIEW_LABEL(1:30)
+WRITE(LU_SLCF_LS) SMOKEVIEW_LABEL(1:30)
+WRITE(LU_SLCF_LS) UNITS(1:30)
+WRITE(LU_SLCF_LS)1,NX_LS,1,NY_LS,1,1
+!
+!
+! =============== end of case specifications ========================
+!
+!-- Allocate arrays
+ALLOCATE(U_LS(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','U_LS',IZERO) ; U_LS = 0._EB
+ALLOCATE(V_LS(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','V_LS',IZERO) ; V_LS = 0._EB
+ALLOCATE(PHI_LS(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_LS',IZERO)
+ALLOCATE(PHI0_LS(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','PHI0_LS',IZERO)
+ALLOCATE(PHI1_LS(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','PHI1_LS',IZERO)
+ALLOCATE(PHI_OUT(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_OUT',IZERO)
+ALLOCATE(SR_X_LS(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','SR_X_LS',IZERO)
+ALLOCATE(SR_Y_LS(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','SR_Y_LS',IZERO)
+ALLOCATE(FLUX0_LS(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','FLUX0_LS',IZERO)
+ALLOCATE(FLUX1_LS(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','FLUX1_LS',IZERO)
+!
+!-- Computational grid
+ALLOCATE(X_LS(NX_LS))   ; CALL ChkMemErr('VEGE:LEVEL SET','X_LS',IZERO)
+ALLOCATE(Y_LS(NY_LS+1)) ; CALL ChkMemErr('VEGE:LEVEL SET','Y_LS',IZERO)
+
+DO I = 0,NX_LS-1
+!X_LS(I+1) = -0.5_EB*LX + 0.5_EB*DX_LS + DX_LS*REAL(I,EB)
+ X_LS(I+1) = XS + 0.5_EB*DX_LS + DX_LS*REAL(I,EB)
+ENDDO
+!
+DO J = 0,NY_LS
+!Y_LS(J+1) = YMIN_LS + DY_LS*REAL(J,EB)
+ Y_LS(J+1) = YS + DY_LS*REAL(J,EB)
+ENDDO
+XMIN_LS = X_LS(1) ; XMAX_LS = X_LS(NX_LS)
+!
+!-- Build wind field ------------------------------------------------------
+U_LS = U(1:NX_LS,1:NY_LS,1)
+V_LS = V(1:NX_LS,1:NY_LS,1)
+
+!U_LS = U_LS + U_AMBIENT
+!V_LS = V_LS + V_AMBIENT
+!
+! Compute time step
+!ROS_HEAD_U0_INFW = R_HEAD_U0_INFW
+!ROS_HEAD_U_INFW  = R_HEAD_U_INFW
+UMAX_LS  = MAXVAL(ABS(U_LS))
+VMAX_LS  = MAXVAL(ABS(V_LS))
+UMAG     = SQRT(UMAX_LS**2 + VMAX_LS**2)
+SR_X_MAX = ( MAXVAL(ROS_HEAD_U0_INFW) + MAXVAL(ROS_HEAD_U_INFW) )*UMAX_LS
+SR_Y_MAX = SR_X_MAX*VMAX_LS/UMAX_LS
+!SR_Y_MAX = ( MAXVAL(R_HEAD_U0_INFW) + MAXVAL(R_HEAD_U_INFW) )*VMAX_LS
+DT_LS = 0.25_EB/MAX(SR_X_MAX/DX_LS,SR_Y_MAX/DY_LS)
+!DT_LS = 0.1603_EB !to make AU F19 ignition sequence work
+N_STEPS_OUT = DT_OUTPUT/DT_LS
+N_STEPS_OUT = MAX(N_STEPS_OUT,1)
+N_FINAL     = T_FINAL/DT_LS
+!
+!
+!-- Initialize level set field. Fireline is at PHI_LS = 0 -------------------
+!
+!--- Gaussian shape
+!PHI_MIN_LS = -1._EB
+!PHI_MAX_LS = -1._EB
+!AMP = 2._EB ; DS_LS = 0.01_EB*LX
+!DO I = 1,NX_LS
+! DO J = 1,NY_LS
+!  PHI_LS(I,J) = AMP*EXP(-(X_LS(I)-X0_FIRE(1))**2/DS_LS**2   &
+!                        -(Y_LS(J)-Y0_FIRE(1))**2/DS_LS**2) - 1
+! ENDDO
+!ENDDO
+!
+!--- Ignition line across entire domain
+!PHI_MIN_LS = -1._EB
+!PHI_MAX_LS = 1._EB
+!LY0 = 0._EB
+!MM = (PHI_MAX_LS-PHI_MIN_LS)/(2*YMIN_LS-LY0);
+!BB = PHI_MAX _LS- YMIN_LS*MM
+!DO I = 1,NX_LS
+! DO J = 1,NY_LS
+!  IF (Y_LS(J) < (LY0-YMIN_LS)) THEN
+!   PHI_LS(I,J) = MM*Y_LS(J)+BB
+! ELSE
+!   PHI_LS(I,J) = PHI_MIN_LS
+!  ENDIF
+! ENDDO
+!ENDDO
+!
+!--- Finite width ignition line
+PHI_MIN_LS = -1._EB
+PHI_MAX_LS = 1._EB
+IGNITION_WIDTH_X = 8._EB
+IGNITION_WIDTH_Y = 8._EB
+X_MID     = XMIN_LS + 0.5*(XMIN_LS + XMAX_LS)
+X_IGN_MIN = X_MID - 0.5*IGNITION_WIDTH_X
+X_IGN_MAX = X_IGN_MIN + IGNITION_WIDTH_X
+PHI_LS = PHI_MIN_LS
+!DO I = 1,NX_LS
+! DO J = 1,NY_LS
+!! IF (Y_LS(J) <  YMIN_LS + 0.02_EB*(YMAX_LS-YMIN_LS) .AND. &
+!!     X_LS(I) >= XMIN_LS + 0.55_EB*(XMAX_LS-XMIN_LS) .AND. &
+!!     X_LS(I) <= XMIN_LS + 0.65_EB*(XMAX_LS-XMIN_LS) ) THEN
+!!  PHI_LS(I,J) = PHI_MAX_LS
+!!ELSE
+!!  PHI_LS(I,J) = PHI_MIN_LS
+!! ENDIF
+!  IF (Y_LS(J) <= IGNITION_WIDTH_Y .AND. X_LS(I) >= X_IGN_MIN .AND. X_LS(I) <= X_IGN_MAX) THEN
+!    PHI_LS(I,J) = PHI_MAX_LS
+!  ELSE
+!    PHI_LS(I,J) = PHI_MIN_LS
+!  ENDIF
+! ENDDO
+!ENDDO
+!
+!--- Time dependent ignition line
+!N_STEPS_IGN = 1._EB/DT_LS !ignitor every 1 s
+!DELTAT_IGN  = N_STEPS_IGN*DT_LS
+!N_STEPS_IGN = 6 !AU C064
+!!N_STEPS_IGN = 4 !AU F19 with dx=1m and DT_LS defined to be 0.1603 s
+!PHI_MIN_LS = -1._EB ; PHI_MAX_LS = 1._EB
+!PHI_LS = PHI_MIN_LS
+!N_IGNITION = 0 !counter for ignitions
+!DX_IGN     = 1._EB !m, length of ignition segments in each direction
+!XIGNL_MIN  = -DX_IGN ; XIGNL_MAX = 0._EB !bounds of left ignitor
+!XIGNR_MIN  =  0._EB  ; XIGNR_MAX = DX_IGN !bounds of right ignitor
+!HEAD_WIDTH = 2._EB*DX_IGN
+!
+!-- Time step solution using second order Runge-Kutta -----------------------
+!
+TIMESTEP: DO N_TIME = 1,N_FINAL
+!
+!--- Put in time dependent ignitor
+!
+! IF (TIME_LS <= T_IGN) THEN 
+!  IF (MOD(N_TIME,N_STEPS_IGN) < 0.0001_EB .AND. HEAD_WIDTH < HEAD_WIDTH_MAX) THEN
+!   DO I = 1,NX_LS
+!    DO J = 1,2
+!     IF ( X_LS(I) >= XIGNL_MIN .AND. X_LS(I) <= XIGNL_MAX ) THEN
+!      PHI_LS(I,J) = PHI_MAX_LS
+!      PHI_MIN_LS = PHI_MIN_LS
+!     ENDIF
+!     IF ( X_LS(I) >= XIGNR_MIN .AND. X_LS(I) <= XIGNR_MAX ) THEN
+!      PHI_LS(I,J) = PHI_MAX_LS
+!      PHI_MIN_LS = PHI_MIN_LS
+!     ENDIF
+!    ENDDO
+!   ENDDO
+!   XIGNL_MIN = XIGNL_MIN - DX_IGN
+!   XIGNL_MAX = XIGNL_MAX - DX_IGN
+!   XIGNR_MIN = XIGNR_MIN + DX_IGN
+!   XIGNR_MAX = XIGNR_MAX + DX_IGN
+!   N_IGNITION = N_IGNITION + 1
+!!  HEAD_WIDTH_FCTR = EXP(-(0.859_EB + 2.036_EB*UMAG)/HEAD_WIDTH)
+!!  IF (.NOT. HEAD_WIDTH_DEPENDENCE) HEAD_WIDTH_FCTR = 1._EB
+!!  ROS_HEAD = (R_HEAD_U0_INFW + R_HEAD_U_INFW)*HEAD_WIDTH_FCTR - ROS_FLAMK/UMAG
+!   HEAD_WIDTH = HEAD_WIDTH + 2._EB*DX_IGN
+!  ENDIF
+! ENDIF
+
+!-- Find flank-to-flank distance at base of fire assume symmetry about xmid and
+!   define spread rate
+
+ IF (HEAD_WIDTH_DEPENDENCE) THEN
+  I_FLANK = 0
+  DO II = NX_LS/2,NX_LS
+   IF(PHI_LS(II,1) <= 0.0_EB .AND. I_FLANK==0) I_FLANK = II
+  ENDDO
+  HEAD_WIDTH = 2._EB*(I_FLANK - NX_LS/2)*DX_LS
+  IF (TIME_LS == 0._EB) HEAD_WIDTH = IGNITION_WIDTH_X
+  HEAD_WIDTH_FCTR = EXP(-(0.859_EB + 2.036_EB*UMAG)/HEAD_WIDTH)
+  ROS_HEAD = (ROS_HEAD_U0_INFW + ROS_HEAD_U_INFW)*HEAD_WIDTH_FCTR - ROS_FLANK/UMAG
+ ELSE
+  ROS_HEAD = (ROS_HEAD_U0_INFW + ROS_HEAD_U_INFW) - ROS_FLANK/UMAG
+ ENDIF
+
+! -- Ignite landscape at user specified location(s) and time(s)
+! ** change to go into the wall cell loop only if time corrensponds to an
+! ** ignition time. Need to create a separate array with sorted ignition times
+
+IGNITOR_WALL_CELL_LOOP: DO IW=1,NWC
+
+  IBC = IJKW(5,IW)
+  SF  => SURFACE(IBC)
+
+  WC  => WALL(IW)
+
+  IIG = IJKW(6,IW)
+  JJG = IJKW(7,IW)
+
+  IF (SF%VEG_LSET_IGNITE_T >= TIME_LS .AND. SF%VEG_LSET_IGNITE_T <= TIME_LS + DT_LS) PHI_LS(IIG,JJG) = PHI_MAX_LS 
+
+ENDDO IGNITOR_WALL_CELL_LOOP
+
+
+!
+!--- RK Stage 1
+ RK2_PREDICTOR_LS = .TRUE.
+ CALL LEVEL_SET_SPREAD_RATE
+ CALL LEVEL_SET_ADVECT_FLUX
+ PHI1_LS = PHI_LS - DT_LS*FLUX0_LS
+ !PHI1_LS = MAX(PHI1_LS,PHI_MIN_LS)
+ !PHI1_LS = MIN(PHI1_LS,PHI_MAX_LS)
+
+!--- RK Stage2
+ RK2_PREDICTOR_LS = .FALSE.
+ CALL LEVEL_SET_SPREAD_RATE
+ CALL LEVEL_SET_ADVECT_FLUX
+ PHI_LS = PHI_LS - 0.5_EB*DT_LS*(FLUX0_LS + FLUX1_LS)
+ !PHI_LS = MAX(PHI_LS,PHI_MIN_LS)
+ !PHI_LS = MIN(PHI_LS,PHI_MAX_LS)
+!
+ TIME_LS = TIME_LS + DT_LS
+
+!--- Output slice file for smokeview
+ IF (MOD(N_TIME,N_STEPS_OUT) < 0.0001_EB) THEN
+  PHI_OUT = PHI_LS
+  WRITE(LU_SLCF_LS) TIME_LS
+  WRITE(LU_SLCF_LS) ((PHI_OUT(I,J),I=1,NX_LS),J=1,NY_LS)
+! WRITE(LU_SLCF_LS) ((1.,I=1,NX_LS),J=1,NY_LS)
+ ENDIF
+!
+ENDDO TIMESTEP
+!
+CLOSE(LU_SLCF_LS)
+!
+END SUBROUTINE LEVEL_SET_FIRESPREAD
+
+
+SUBROUTINE LEVEL_SET_SPREAD_RATE
+!
+! Compute components of spread rate vector
+!
+INTEGER :: I,J,IM1,IM2,IP1,IP2,JM1,JP1
+REAL(EB) :: COS_THETA,DPHIDX,DPHIDY,F_EAST,F_WEST,F_NORTH,F_SOUTH, &
+            MAG_F,MAG_SR,MAG_U,MAG_WIND,WIND_DOT_NORMAL_FIRELINE
+REAL(EB), DIMENSION(:)   :: NORMAL_FIRELINE(2),UNIT_WIND_VEC(2)
+!
+IF (RK2_PREDICTOR_LS) PHI0_LS = PHI_LS
+IF (.NOT. RK2_PREDICTOR_LS) PHI0_LS = PHI1_LS
+SR_X_LS = 0.0_EB ; SR_Y_LS = 0.0_EB
+
+FLUX_ILOOP: DO I = 1,NX_LS
+!
+ IM1=I-1; IF (IM1<1) IM1=IM1+NX_LS
+ IM2=I-2; IF (IM2<1) IM2=IM2+NX_LS
+
+ IP1=I+1; IF (IP1>NX_LS) IP1=IP1-NX_LS
+ IP2=I+2; IF (IP2>NX_LS) IP2=IP2-NX_LS
+
+  DO J = 2,NY_LS-1
+   JM1=J-1
+   JP1=J+1
+
+   F_EAST  = 0.5*( PHI0_LS(I,J) + PHI0_LS(IP1,J) )
+   F_WEST  = 0.5*( PHI0_LS(I,J) + PHI0_LS(IM1,J) )
+   F_NORTH = 0.5*( PHI0_LS(I,J) + PHI0_LS(I,JP1) )
+   F_SOUTH = 0.5*( PHI0_LS(I,J) + PHI0_LS(I,JM1) )
+
+   DPHIDX = (F_EAST-F_WEST)/DX_LS
+   DPHIDY = (F_NORTH-F_SOUTH)/DY_LS
+   MAG_F = SQRT(DPHIDX**2 + DPHIDY**2)
+   IF (MAG_F > 0._EB) THEN   !components of unit vector normal to PHI contours
+    NORMAL_FIRELINE(1) = -DPHIDX/MAG_F
+    NORMAL_FIRELINE(2) = -DPHIDY/MAG_F
+   ELSE
+    NORMAL_FIRELINE = 0._EB
+   ENDIF
+                
+!  MAG_WIND = SQRT(U(I,J)*2 +  V(I,J)**2)
+!  UNIT_WIND_VEC(1) = U(I,J)/MAG_WIND
+!  UNIT_WIND_VEC(2) = V(I,J)/MAG_WIND
+
+   WIND_DOT_NORMAL_FIRELINE = U_LS(I,J)*NORMAL_FIRELINE(1) + &
+                              V_LS(I,J)*NORMAL_FIRELINE(2)
+   MAG_U  = SQRT(U_LS(I,J)*2 + V_LS(I,J)**2)
+   COS_THETA = ABS(WIND_DOT_NORMAL_FIRELINE)/MAG_U
+   MAG_SR = ROS_FLANK(I,J) + ROS_HEAD(I,J)*MAG_U*COS_THETA**1.5 !magnitude of spread rate
+!  MAG_SR = R_FLANK + ROS_HEAD*WIND_DOT_NORMAL_FIRELINE !magnitude of spread rate
+   SR_X_LS(I,J) = MAG_SR*NORMAL_FIRELINE(1) !spread rate components
+   SR_Y_LS(I,J) = MAG_SR*NORMAL_FIRELINE(2) 
+     
+  ENDDO
+
+!-- Inlet boundary
+  DO J = 1,1
+
+   JP1 = J+1
+        
+   F_EAST  = 0.5*( PHI0_LS(I,J) + PHI0_LS(IP1,J) )
+   F_WEST  = 0.5*( PHI0_LS(I,J) + PHI0_LS(IM1,J) )
+   F_NORTH = 0.5*( PHI0_LS(I,J) + PHI0_LS(I,JP1) )
+   F_SOUTH = 0.5*( PHI0_LS(I,J) + PHI_MIN_LS ) !only for finite width ignition line
+!   F_SOUTH = 0.5*( PHI0_LS(I,J) + PHI_MAX_LS )
+        
+   DPHIDX = (F_EAST-F_WEST)/DX_LS
+   DPHIDY = (F_NORTH-F_SOUTH)/DY_LS
+   MAG_F = SQRT(DPHIDX**2 +  DPHIDY**2)
+   If (MAG_F > 0._EB) THEN
+    NORMAL_FIRELINE(1) = -DPHIDX/MAG_F
+    NORMAL_FIRELINE(2) = -DPHIDY/MAG_F
+   ELSE
+    NORMAL_FIRELINE = 0._EB
+   ENDIF
+        
+   WIND_DOT_NORMAL_FIRELINE = U_LS(I,J)*NORMAL_FIRELINE(1) + &
+                              V_LS(I,J)*NORMAL_FIRELINE(2)
+   MAG_U  = SQRT(U_LS(I,J)*2 + V_LS(I,J)**2)
+   COS_THETA = ABS(WIND_DOT_NORMAL_FIRELINE)/MAG_U
+   MAG_SR = ROS_FLANK(I,J) + ROS_HEAD(I,J)*MAG_U*COS_THETA**1.5 !magnitude of spread rate
+!  MAG_SR = R_FLANK + ROS_HEAD*WIND_DOT_NORMAL_FIRELINE !magnitude of spread rate
+   SR_X_LS(I,J) = MAG_SR*NORMAL_FIRELINE(1) 
+   SR_Y_LS(I,J) = MAG_SR*NORMAL_FIRELINE(2) 
+        
+  ENDDO
+
+!-- OUTLET BOUNDARY
+  DO J = NY_LS,NY_LS
+        
+   JM1 = J-1
+
+   F_EAST =  0.5*( PHI0_LS(I,J) + PHI0_LS(IP1,J) )
+   F_WEST =  0.5*( PHI0_LS(I,J) + PHI0_LS(IM1,J) )
+   F_NORTH = 0.5*( PHI0_LS(I,J) + PHI_MIN_LS )
+   F_SOUTH = 0.5*( PHI0_LS(I,J) + PHI0_LS(I,JM1) )
+        
+   DPHIDX = (F_EAST-F_WEST)/DX_LS
+   DPHIDY = (F_NORTH-F_SOUTH)/DY_LS
+   MAG_F = SQRT(DPHIDX**2 + DPHIDY**2)
+   IF (MAG_F > 0._EB) THEN
+    NORMAL_FIRELINE(1) = -DPHIDX/MAG_F
+    NORMAL_FIRELINE(2) = -DPHIDY/MAG_F
+   ELSE
+    NORMAL_FIRELINE = 0._EB
+   ENDIF
+        
+   WIND_DOT_NORMAL_FIRELINE = U_LS(I,J)*NORMAL_FIRELINE(1) + &
+                              V_LS(I,J)*NORMAL_FIRELINE(2)
+   MAG_U  = SQRT(U_LS(I,J)*2 + V_LS(I,J)**2)
+   COS_THETA = ABS(WIND_DOT_NORMAL_FIRELINE)/MAG_U
+   MAG_SR = ROS_FLANK(I,J) + ROS_HEAD(I,J)*MAG_U*COS_THETA**1.5 !magnitude of spread rate
+!  MAG_SR = R_FLANK + ROS_HEAD*WIND_DOT_NORMAL_FIRELINE !magnitude of spread rate
+   SR_X_LS(I,J) = MAG_SR*NORMAL_FIRELINE(1) 
+   SR_Y_LS(I,J) = MAG_SR*NORMAL_FIRELINE(2) 
+        
+ ENDDO
+ENDDO FLUX_ILOOP
+
+END SUBROUTINE LEVEL_SET_SPREAD_RATE 
+
+!--------------------------------------------------------------------
+!
+SUBROUTINE LEVEL_SET_ADVECT_FLUX
+!
+! Use the spread rate [SR_X_LS,SR_Y_LS] to compute the limited scalar gradient
+! and take dot product with spread rate vector to get advective flux
+
+INTEGER :: I,IM1,IM2,IP1,IP2,J,JM1,JM2,JP1,JP2
+REAL(EB), DIMENSION(:) :: Z(4)
+REAL(EB), DIMENSION(:,:) :: FLUX_LS(NX_LS,NY_LS)
+REAL(EB) :: DPHIDX,DPHIDY,F_EAST,F_WEST,F_NORTH,F_SOUTH
+
+IF (RK2_PREDICTOR_LS) PHI0_LS = PHI_LS
+IF (.NOT. RK2_PREDICTOR_LS) PHI0_LS = PHI1_LS
+
+ILOOP: DO I = 1,NX_LS
+
+ IM1=I-1; IF (IM1<1) IM1=IM1+NX_LS
+ IM2=I-2; IF (IM2<1) IM2=IM2+NX_LS
+
+ IP1=I+1; IF (IP1>NX_LS) IP1=IP1-NX_LS
+ IP2=I+2; IF (IP2>NX_LS) IP2=IP2-NX_LS
+
+ DO J = 3,NY_LS-2
+   JM1=J-1
+   JM2=J-2
+   JP1=J+1
+   JP2=J+2
+
+!-- east face
+   Z(1) = PHI0_LS(IM1,J)
+   Z(2) = PHI0_LS(I,J)
+   Z(3) = PHI0_LS(IP1,J)
+   Z(4) = PHI0_LS(IP2,J)
+   F_EAST = SCALAR_FACE_VALUE(SR_X_LS(I,J),Z,LIMITER_LS)
+
+!-- west face
+   Z(1) = PHI0_LS(IM2,J)
+   Z(2) = PHI0_LS(IM1,J)
+   Z(3) = PHI0_LS(I,J)
+   Z(4) = PHI0_LS(IP1,J)
+   F_WEST = SCALAR_FACE_VALUe(SR_X_LS(I,J),Z,LIMITER_LS)
+
+!    north face
+   Z(1) = PHI0_LS(I,JM1)
+   Z(2) = PHI0_LS(I,J)
+   Z(3) = PHI0_LS(I,JP1)
+   Z(4) = PHI0_LS(I,JP2)
+   F_NORTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+
+!    south face
+   Z(1) = PHI0_LS(I,JM2)
+   Z(2) = PHI0_LS(I,JM1)
+   Z(3) = PHI0_LS(I,J)
+   Z(4) = PHI0_LS(I,JP1)
+   F_SOUTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+        
+   DPHIDX = (F_EAST-F_WEST)/DX_LS
+   DPHIDY = (F_NORTH-F_SOUTH)/DY_LS
+   FLUX_LS(I,J) = SR_X_LS(I,J)*DPHIDX + SR_Y_LS(I,J)*DPHIDY
+        
+!  fx = (f_east-f_west)/dx
+!  fy = (f_north-f_south)/dy
+!       phi(i,j) = phi0(i,j) - dt*[Fx(i,j) Fy(i,j)]*[fx fy]
+ ENDDO
+
+! Inlet boundary
+ DO J = 1,2
+   JM1 = J-1
+
+   JP1 = J+1
+   JP2 = J+2
+
+!    east face
+   Z(1) = PHI0_LS(IM1,J)
+   Z(2) = PHI0_LS(I,J)
+   Z(3) = PHI0_LS(IP1,J)
+   Z(4) = PHI0_LS(IP2,J)
+   F_EAST = SCALAR_FACE_VALUE(SR_X_LS(I,J),Z,LIMITER_LS)
+
+!    west face
+   Z(1) = PHI0_LS(IM2,J)
+   Z(2) = PHI0_LS(IM1,J)
+   Z(3) = PHI0_LS(I,J)
+   Z(4) = PHI0_LS(IP1,J)
+   F_WEST = SCALAR_FACE_VALUE(SR_X_LS(I,J),Z,LIMITER_LS)
+
+   IF (J==1) THEN
+!    north face
+    Z(1) = PHI_MAX_LS
+    Z(2) = PHI0_LS(I,J)
+    Z(3) = PHI0_LS(I,JP1)
+    Z(4) = PHI0_LS(I,JP2)
+    F_NORTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+
+!    south face
+    Z(1) = PHI_MAX_LS
+    Z(2) = PHI_MAX_LS
+    Z(3) = PHI0_LS(I,J)
+    Z(4) = PHI0_LS(I,JP1)
+    F_SOUTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+
+   ELSEIF (j==2) THEN
+!    north face
+    Z(1) = PHI0_LS(I,JM1)
+    Z(2) = PHI0_LS(I,J)
+    Z(3) = PHI0_LS(I,JP1)
+    Z(4) = PHI0_LS(I,JP2)
+    F_NORTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+
+!    south face
+    Z(1) = PHI_MAX_LS
+    Z(2) = PHI0_LS(I,JM1)
+    Z(3) = PHI0_LS(I,J)
+    Z(4) = PHI0_LS(I,JP1)
+    F_SOUTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+   ENDIF
+        
+   DPHIDX = (F_EAST-F_WEST)/DX_LS
+   DPHIDY = (F_NORTH-F_SOUTH)/DY_LS
+   FLUX_LS(I,J) = SR_X_LS(I,J)*DPHIDX + SR_Y_LS(I,J)*DPHIDY
+        
+!   phi(i,j) = phi0(i,j) - dt*[Fx(i,j) Fy(i,j)]*[fx fy]
+ ENDDO
+ FLUX_LS(:,1) = FLUX_LS(:,2)
+
+! outlet boundary
+ DO J = NY_LS-1,NY_LS
+   JM1 = J-1
+   JM2 = J-2
+
+   JP1 = J+1
+
+!    east face
+   Z(1) = PHI0_LS(IM1,J)
+   Z(2) = PHI0_LS(I,J)
+   Z(3) = PHI0_LS(IP1,J)
+   Z(4) = PHI0_LS(IP2,J)
+   F_EAST = SCALAR_FACE_VALUE(SR_X_LS(I,J),Z,LIMITER_LS)
+
+!    west face
+   Z(1) = PHI0_LS(IM2,J)
+   Z(2) = PHI0_LS(IM1,J)
+   Z(3) = PHI0_LS(I,J)
+   Z(4) = PHI0_LS(IP1,J)
+   F_WEST = SCALAR_FACE_VALUE(SR_X_LS(I,J),Z,LIMITER_LS)
+
+   IF (J == NY_LS-1) THEN
+!    north face
+    Z(1) = PHI0_LS(I,JM1)
+    Z(2) = PHI0_LS(I,J)
+    Z(3) = PHI0_LS(I,JP1)
+    Z(4) = PHI_MIN_LS
+    F_NORTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+
+!    south face
+    Z(1) = PHI0_LS(I,JM2)
+    Z(2) = PHI0_LS(I,JM1)
+    Z(3) = PHI0_LS(I,J)
+    Z(4) = PHI0_LS(I,JP1)
+    F_SOUTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+
+   ELSEIF (J == NY_LS) THEN
+!    north face
+    Z(1) = PHI0_LS(I,JM1)
+    Z(2) = PHI0_LS(I,J)
+    Z(3) = PHI_MIN_LS
+    Z(4) = PHI_MIN_LS
+    F_NORTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+
+!    south face
+    Z(1) = PHI0_LS(I,JM2)
+    Z(2) = PHI0_LS(I,JM1)
+    Z(3) = PHI0_LS(I,J)
+    Z(4) = PHI_MIN_LS
+    F_SOUTH = SCALAR_FACE_VALUE(SR_Y_LS(I,J),Z,LIMITER_LS)
+    ENDIF
+
+   DPHIDX = (F_EAST-F_WEST)/DX_LS
+   DPHIDY = (F_NORTH-F_SOUTH)/DY_LS
+   FLUX_LS(I,J) = SR_X_LS(I,J)*DPHIDX + SR_Y_LS(I,J)*DPHIDY
+
+!       fx = (f_east-f_west)/dx
+!       fy = (f_north-f_south)/dy
+        
+!       phi(i,j) = phi0(i,j) - dt*[Fx(i,j) Fy(i,j)]*[fx fy]
+ ENDDO
+
+ENDDO ILOOP
+
+IF (RK2_PREDICTOR_LS) FLUX0_LS = FLUX_LS
+IF (.NOT. RK2_PREDICTOR_LS) FLUX1_LS = FLUX_LS
+
+
+END SUBROUTINE LEVEL_SET_ADVECT_FLUX 
+!
+! ----------------------------------------------------
+REAL(EB) FUNCTION SCALAR_FACE_VALUE(SR_XY,Z,LIMITER)
+!
+! From Randy 7-11-08
+! This function computes the scalar value on a face.
+! The scalar is denoted Z, and the velocity is denoted U.
+! The gradient (computed elsewhere) is a central difference across 
+! the face subject to a flux limiter.  The flux limiter choices are:
+! 
+! limiter = 1 implements the MINMOD limiter
+! limiter = 2 implements the SUPERBEE limiter of Roe
+! limiter = 3 implements first-order upwinding (monotone)
+!
+!
+!                    location of face
+!                            
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!                     SRXY        SRXY
+!                 (if f_east)  (if f_west)
+!         Z(1)        Z(2)        Z(3)        Z(4)
+!
+INTEGER :: LIMITER
+REAL(EB) :: SR_XY
+REAL(EB), INTENT(IN), DIMENSION(4) :: Z
+REAL(EB) :: B,DZLOC,DZUP,R,ZUP,ZDWN
+
+IF (SR_XY > 0._EB) THEN
+!     the flow is left to right
+ DZLOC = Z(3)-Z(2)
+ DZUP  = Z(2)-Z(1)
+
+ IF (ABS(DZLOC) > 0._EB) THEN
+  R = DZUP/DZLOC
+ ELSE
+  R = 0._EB
+ ENDIF
+ ZUP  = Z(2)
+ ZDWN = Z(3)
+ELSE
+!     the flow is right to left
+ DZLOC = Z(3)-Z(2)
+ DZUP  = Z(4)-Z(3)
+
+ IF (ABS(DZLOC) > 0._EB) THEN
+  R = DZUP/DZLOC
+ ELSE
+  r = 0._EB
+ ENDIF
+  ZUP  = Z(3)
+  ZDWN = Z(2)
+ENDIF
+
+! flux limiter
+IF (LIMITER==1) THEN
+!     MINMOD
+    B = MAX(0._EB,MIN(1._EB,R))
+ELSEIF (limiter==2) THEN
+!     SUPERBEE
+    B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+ELSEIF (limiter==3) THEN
+!     first-order upwinding
+    B = 0._EB
+ENDIF
+
+SCALAR_FACE_VALUE = ZUP + 0.5*B*( ZDWN - ZUP )
+
+END FUNCTION SCALAR_FACE_VALUE
+!
 
 SUBROUTINE GET_REV_vege(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
