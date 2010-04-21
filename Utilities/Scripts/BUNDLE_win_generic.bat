@@ -36,7 +36,7 @@ mkdir %out_uninstall%
 Rem Copy FDS, Smokeview and other needed files to the bin  directory
 
 echo.
-echo Copying application files to bin directory
+echo Copying application files to the bin directory
 if "%platform%"=="32" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\fds5.exe
 if "%platform%"=="32" copy %fdsmpidir%\fds5_mpi_win_%platform%.exe  %out_bin%\fds5_mpi.exe
 if "%platform%"=="64" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\.
@@ -52,6 +52,8 @@ if "%platform%"=="64" copy %in_smv%\smokezip%platform%_release.exe   %out_bin%\s
 
 if "%platform%"=="32" copy %in_fds2ascii%\intel_win_32\fds2ascii_win_32.exe     %out_bin%\fds2ascii.exe
 if "%platform%"=="64" copy %in_fds2ascii%\intel_win_64\fds2ascii_win_64.exe     %out_bin%\fds2ascii_win_64.exe
+
+copy %in_smv%\backgound.exe %out_bin%\background.exe
 
 echo.
 echo Copying auxillary files to the bin directory

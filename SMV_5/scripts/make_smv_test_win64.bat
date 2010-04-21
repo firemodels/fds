@@ -19,6 +19,7 @@ mkdir %smvdir%
 copy smokeview64_test.exe %smvdir%\smokeview.exe
 copy smokediff64_release.exe %smvdir%\smokediff.exe
 copy smokezip64_test.exe %smvdir%\smokezip.exe
+copy background.exe %smvdir%\background.exe
 copy objects.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
 copy pthreadVC.dll %smvdir%\.
