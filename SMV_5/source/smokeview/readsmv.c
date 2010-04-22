@@ -728,7 +728,8 @@ int readsmv(char *file){
       nslice_files++;
       continue;
     }
-    if(match(buffer,"SMOKE3D",7) == 1){
+    if(match(buffer,"SMOKE3D",7) == 1||
+       match(buffer,"VSMOKE3D",8) == 1){
       nsmoke3d_files++;
       continue;
     }
@@ -1574,7 +1575,8 @@ typedef struct {
     ++++++++++++++++++++++ SMOKE3D ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"SMOKE3D",7) == 1){
+    if(match(buffer,"SMOKE3D",7) == 1||
+       match(buffer,"VSMOKE3D",8) == 1){
       size_t lenbuffer;
 
       nn_smoke3d++;
@@ -1602,6 +1604,9 @@ typedef struct {
         smoke3d *smoke3di;
         
         smoke3di = smoke3dinfo + ismoke3d;
+
+        smoke3di->fileversion=0;
+        if(match(buffer,"VSMOKE3D",8) == 1)smoke3di->fileversion=1;
 
         if(NewMemory((void **)&smoke3di->reg_file,(unsigned int)(len+1))==0)return 2;
         STRCPY(smoke3di->reg_file,bufptr);
