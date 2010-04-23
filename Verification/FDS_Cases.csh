@@ -73,6 +73,15 @@ $RUNFDS Pyrolysis thermoplastic                   fire53
 $RUNFDS Pyrolysis two_step_solid_reaction         fire54
 $RUNFDS Radiation emissivity                      fire55
 $RUNFDS Radiation hot_spheres                     fire55
+$RUNFDS Radiation plate_view_factor_2D_30         fire56
+$RUNFDS Radiation plate_view_factor_2D_60         fire56
+$RUNFDS Radiation plate_view_factor_2D_100        fire56
+$RUNFDS Radiation plate_view_factor_cart_30       fire57
+$RUNFDS Radiation plate_view_factor_cart_60       fire57
+$RUNFDS Radiation plate_view_factor_cart_100      fire57
+$RUNFDS Radiation plate_view_factor_cyl_30        fire58
+$RUNFDS Radiation plate_view_factor_cyl_60        fire58
+$RUNFDS Radiation plate_view_factor_cyl_100       fire58
 $RUNFDS Radiation radiation_box_100_1000          fire56
 $RUNFDS Radiation radiation_box_100__100          fire57
 $RUNFDS Radiation radiation_box_100_2000          fire58
