@@ -1268,21 +1268,21 @@ transport equation.
 
 
 This verification case tests the computation of radiative heat flux from hot surface to a differential, parallel surface at 1 m distance
-in different co-ordinate systems. The radiating surface is at 1000~$^\circ$C temperature and has emissivity of 1.0.  The exact values are 
+in different co-ordinate systems. The radiating surface is at 1000~$^\circ$C temperature and has emissivity of 1.0.  The exact values are
 calculated using the analycal expressions for the view factors.
 \begin{center}
 \begin{tabular}{|l|l|c|}
 \hline Co-ordinates & Radiation source & Heat flux (kW/m$^2$)  \\ \hline \hline
-2D cartesian   & Infinite plate of width 2 m   & 105.3 \\ 
-3D cartesian   & Square plate of width 2 m     & 81.8 \\ 
-2D cylindrical & Circular disk of diameter 2 m & 74.1 \\ \hline 
+2D cartesian   & Infinite plate of width 2 m   & 105.3 \\
+3D cartesian   & Square plate of width 2 m     & 81.8 \\
+2D cylindrical & Circular disk of diameter 2 m & 74.1 \\ \hline
 \end{tabular}
 \end{center}
 
 A comparison of exact values and FDS predictions at three diffferent angular resolutions is shown below.
-\begin{center} 
-\includegraphics[width=4.0in]{FIGURES/plate_view_factor.pdf} 
-\end{center} 
+\begin{center}
+\includegraphics[width=4.0in]{FIGURES/plate_view_factor.pdf}
+\end{center}
 
 
 
@@ -1559,7 +1559,7 @@ This chapter tests the routines in FDS that calculate the thermal decomposition 
 surfaces can consist of multiple layers, and each layer can consist of multiple material components.
 Each material component may undergo several competing reactions, and
 each of these reactions may produce some other solid component
-(residue), gaseous fuel, and/or water vapor. 
+(residue), gaseous fuel, and/or water vapor.
 
 
 \section{Mass conservation of pyrolyzed mass (\texorpdfstring{{\bf surf\_mass\_conservation}}{surf\_mass\_concervation})}
@@ -1820,9 +1820,32 @@ the peak.
 \subsection{Using Micro-Calorimetry Data (\texorpdfstring{{\bf cable\_11\_mcc}}{cable\_11\_mcc})}
 \label{cable_11_mcc}
 
-Add discussion of the micro-calorimeter.
+This section describes a method for interpreting micro-combustion calorimeter (MCC) measurements.
+The pyrolysis combustion flow calorimeter (PCFC), developed 
+by Lyon and Walters~\cite{Lyon:JAAP2004} at the U.S. Federal Aviation Administration (FAA), is a device 
+used to measure the heat generated from the combustion of small (4~mg to 6~mg) material samples by oxygen depletion calorimetry. 
+Samples are pyrolyzed at a specified heating rate in an anerobic atmosphere (typically N$_2$) and the resulting gases are mixed with 
+excess oxygen and combusted in a separate chamber. The heat release rate from the specimen is obtained from measurements of the 
+concentration of oxygen in the effluent exiting the combustor as a function of time. The methodology is the basis for 
+the standard test ASTM~D~7309~\cite{ASTM:D7309}.
 
-As an example of how to work with MCC data, consider the two plots shown in Fig.~\ref{mcc_plots}. The solid curves in the figures
+The results of PCFC measurements for several multi-conductor control cables are shown in Fig.~\ref{mcc_plots}. 
+For each cable, the insulation and jacket material were tested separately, and at least three replicates were performed for each 
+(only one replicate is shown for each sample). The samples, weighing approximately 5~mg, were cut from the cable jackets and conductor 
+insulation material of each of the cables. These samples were pyrolyzed in the PCFC at a rate of 1~K/s
+from 100~$^\circ$C to 600~$^\circ$C in a nitrogen atmosphere and the effluent combusted at 900~$^\circ$C in a mixture consisting of 20~\% O$_2$ 
+and 80~\% N$_2$. The resulting curve shows the heat release rate of the sample as it was heated, normalized by the mass of the original sample. 
+There are usually one, two or three noticeable peaks in the curve, corresponding to temperatures where a significant decomposition reaction occurs. 
+Each peak can be characterized by the maximum value of the heat release rate~($\dot{q}_p$), the temperature ($T_p$), and the relative fraction of the original 
+sample mass that undergoes this particular reaction ($Y_0$). The area under the curve
+\be \int_0^\infty \dot{q}(T) \, dT = \beta \, \Delta H' \ee
+is the sample heating rate ($\beta$) times the energy released per unit mass of the original sample ($\Delta H'$). This latter quantity is
+related to the more conventional heat of combustion via the relation
+\be \Delta H = \frac{\Delta H'}{1-\nu_r} \ee
+where $\nu_r$ is the fraction of the original mass that remains as residue. Sometimes this is referred to as the ``char yield.''
+ 
+The MCC measurement is similar to TGA in that it is possible to derive the kinetic parameters, $A$ and $E$, for the various reactions from
+the heat release rate curve. As an example of how to work with MCC data, consider the two plots shown in Fig.~\ref{mcc_plots}. The solid curves in the figures
 display the results of micro-calorimetry measurements for the insulation and jacket material of a multi-conductor control
 cable (the number 11 has no particular meaning other than to distinguish it from other cables being studied).
 \begin{figure}[ht]
@@ -1832,29 +1855,23 @@ cable (the number 11 has no particular meaning other than to distinguish it from
 \label{mcc_plots}
 \end{figure}
 The insulation material exhibits two fairly well-defined peaks, whereas the jacket material exhibits three. Thus, the insulation
-material is modeled using two solid components, each undergoing a single-step reaction, plus a solid residue. The jacket
-material is modeled using three solid components, plus a residue. The residue yield for the insulation material is
+material is modeled using two solid components, each undergoing a single-step reaction that produces fuel gas and a solid residue. The jacket
+material is modeled using three solid components. The residue yield for the insulation material is
 6~\%; for the jacket 49~\%, obtained simply by weighing the sample before and after the micro-calorimetry measurement. It is
 not known which reaction produces what fraction of the residue. Rather, it is assumed that each reaction yields the same
-residue in the same amount.
-The residue yield, denoted $\nu_r$, is very important because the results of the measurement are reported in terms of
-the heat release rate {\em per unit mass of the original sample}, {\em i.e.} W/g. The area under the curves in
-Fig.~\ref{mcc_plots}, when divided by the heating rate, $\beta$, in units of K/s, represents the total energy released
-per unit mass of the original sample. However, if this value is divided by the factor $(1-\nu_r)$, the more conventional
-form of the heat of combustion is obtained.
-
+residue in the same relative amount.
 The dashed curves in Fig.~\ref{mcc_plots} are the results of FDS simulations of the MCC measurements. To mimic the
-apparatus, a very thin sheet comprised of a mixture of the solid components with an insulated backing is heated at the
+sample heating, a very thin sheet comprised of a mixture of the solid components with an insulated backing is heated at the
 rate specified in the experiment (1~K/s or 60~K/min, the units needed in FDS).
 For each reaction,
 the kinetic parameters are calculated using the formulae (\ref{E_formula}) and (\ref{A_formula}). The values of
 $T_p$ are obtained directly from the figures. The value of $r_p/Y_0$ for the $j$th reaction can be found from:
 \be
-   \left( \frac{r_p}{Y_0} \right)_j = \beta \, \dot{q}(T_{p,j}) \Big/ \int_{T_{j-1}}^{T_j} \dot{q}(T') \, dT'  \label{r_formula}
+   r_{p,j} = \beta \, \frac{\dot{q}_{p,j}}{ \Delta H'}   \quad ; \quad 
+   \Delta H'=\int_0^\infty \dot{q}(T) \, dT   \label{r_formula}
 \ee
-where $\dot{q}_{p,j}$ is the value of the $j$th heat release rate peak and the temperature values, $T_j$, are estimates
-of the temperature range over which that particular reaction takes place. Note that the temperature ranges ought to be
-continuous.
+where $\dot{q}_{p,j}$ is the value of the $j$th heat release rate peak. The values, $Y_{0,j}$, can be estimated from the
+relative area under the curve. Their sum ought to be 1.
 It is important to check the units of all of these quantities because the
 results of these experiments are often presented in different ways depending on the particular application. A mistake
 in units can result in values of $A$ and/or $E$ that will invariably cause spurious results.
@@ -1865,7 +1882,7 @@ reaction is given by:
 
 \footnotesize
 \begin{verbatim}
-&MATL ID                    = 'COMP A'
+&MATL ID                    = 'Cable 11 Jacket Component A'
       EMISSIVITY            = ...
       DENSITY               = ...
       CONDUCTIVITY          = ...
@@ -1880,8 +1897,11 @@ reaction is given by:
       HEAT_OF_REACTION      = ... /
 \end{verbatim} \normalsize
 
-\noindent Note that only the relevant parameters are shown. The other parameters are not relevant in this
-exercise. Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket
+\noindent Only the relevant parameters are shown. The other parameters are not relevant in this
+exercise. Note that {\ct REFERENCE\_TEMPERATURE} is $T_p$, but in units of $^\circ$C. {\ct REFERENCE\_RATE} is actually
+$r_p/Y_0$, in units of s$^{-1}$. {\ct HEATING\_RATE} is $\beta$ in units of K/min.
+{\ct NU\_RESIDUE} is $\nu_r$ and {\ct NU\_FUEL} is ($1-\nu_r$).
+Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket
 materials. The peak temperatures are easy to estimate, and the values of $r_p/Y_0$ can be fine-tuned to closely match
 the data. Note that it is possible to compute values of $A$ and $E$ and input them directly into FDS, rather
 than inputting those listed in the table. However, the values of $A$ and $E$ are fairly large numbers and have little
