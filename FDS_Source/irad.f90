@@ -1682,7 +1682,7 @@ REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC,WL_LOW,WL_HIGH
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS, WQSCA
 INTEGER  :: NRDMIE, NLMBDMIE, NDG=30
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: KWR
-REAL(EB) DGROUP_A, DGROUP_B
+REAL(EB) DGROUP_A, DGROUP_B, WEIGH_CYL
 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RSA, DLX, DLY, DLZ, DLB
@@ -1722,6 +1722,7 @@ INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 !     UII       Integrated intensity
 !     UIID      Parts of UII  if WIDE_BAND_MODEL = TRUE, UIID contains the band specific intensity
 !                             if WIDE_BAND_MODEL/= TRUE, UIID contains the ANGLE_INCREMENTs of intensity
+!     WEIGH_CYL In cylindrical coordinates, all intensities represent two actual control angles
 !     WL_LOW    Lower wavelength limit of the spectral bands
 !     WL_HIGH   Upper wavelength limit of the spectral bands
 !     WQABS     Absorption efficiency factor array 
