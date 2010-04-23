@@ -109,15 +109,16 @@ integer, intent(in) ::is1,is2,js1,js2,ks1,ks2
 
 end subroutine smoke3dheader
 
-subroutine smoke3dtofile(file,time,dx,extcoef,type,xyz,nx,ny,nz)
+subroutine smoke3dtofile(file,time,dx,extcoef,type,xyz,nx,ny,nz,HRRPUV_MAX_SMV)
 
 !DEC$ ATTRIBUTES C :: SMOKE3DTOFILE
-!DEC$ ATTRIBUTES REFERENCE :: FILE,TIME,DX,EXTCOEF,TYPE,XYZ,NX,NY,NZ
+!DEC$ ATTRIBUTES REFERENCE :: FILE,TIME,DX,EXTCOEF,TYPE,XYZ,NX,NY,NZ,HRRPUV_MAX_SMV
 character(len=*), intent(in) :: file
 real, intent(in) :: time, dx, extcoef
 integer, intent(in) :: nx,ny,nz
 real, intent(in), dimension(nx*ny*nz) :: xyz
 integer, intent(in) :: type
+real, intent(in) :: HRRPUV_MAX_SMV
 end subroutine smoke3dtofile
 
 end interface
