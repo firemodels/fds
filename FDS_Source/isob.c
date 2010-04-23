@@ -2136,7 +2136,8 @@ void CCsmoke3dheader(char *file,int *is1, int *is2, int *js1, int *js2, int *ks1
   fclose(textfile);
 }
 
-void CCsmoke3dtofile(char *file, float *time, float *dx, float *extcoef,int *type, float *xyz, int *nx, int *ny, int *nz){
+void CCsmoke3dtofile(char *file, float *time, float *dx, float *extcoef,int *type, float *xyz, int *nx, int *ny, int *nz,
+                     float *hrrpuv_max_smv){
 
   FILE *binfile,*textfile;
   unsigned char *buffer_in, *buffer_out;
@@ -2147,6 +2148,7 @@ void CCsmoke3dtofile(char *file, float *time, float *dx, float *extcoef,int *typ
   char textfilename[1024];
   int nxyz;
   double factor;
+  float cutmax;
 
 #define SOOT 1
 #define FIRE 2
@@ -2183,10 +2185,12 @@ void CCsmoke3dtofile(char *file, float *time, float *dx, float *extcoef,int *typ
 
     break;
   case FIRE:
+    cutmax=*hrrpuv_max_smv;
+    if(cutmax<=0.0)cutmax=1.0;
     for(i=0;i<nxyz;i++){
       if(*xyz<0.0)*xyz=0.0;
-      if(*xyz>1200.0)*xyz=1200.0;
-      buffer_in[i]=254*(*xyz/1200.0);
+      if(*xyz>cutmax)*xyz=cutmax;
+      buffer_in[i]=254*(*xyz/cutmax);
       xyz++;
     }
 
