@@ -1,4 +1,4 @@
-&HEAD CHID='cable_11_insulation_mcc', TITLE='Micro-Calorimetry Test of Cable Insulation Material' / 
+&HEAD CHID='cable_23_insulation_mcc', TITLE='Micro-Calorimetry Test of Cable Insulation Material' / 
 
 &MESH IJK=4,1,4, XB=-2,2,-0.5,0.5,0,1 /  
 
@@ -7,8 +7,8 @@
 &MISC SOLID_PHASE_ONLY=.TRUE. /
 
 &RADI NUMBER_RADIATION_ANGLES=20 /
- REAC ID='NO REACTION', Y_O2_INFTY=0.01, HEAT_OF_COMBUSTION=26026. /  No gas phase reaction
 &REAC ID='NO REACTION', Y_O2_INFTY=0.01 /  No gas phase reaction
+ REAC ID='NO REACTION', Y_O2_INFTY=0.01, HEAT_OF_COMBUSTION=25043. /  No gas phase reaction
 &DUMP DT_PL3D = 10000000. /
 
 &VENT MB='XMIN', SURF_ID='HOT' /
@@ -16,66 +16,50 @@
 &VENT MB='ZMAX', SURF_ID='HOT' /
 &VENT XB=-2,-1,-0.5,0.5,0.0,0.0, SURF_ID='HOT' /
 &VENT XB= 1, 2,-0.5,0.5,0.0,0.0, SURF_ID='HOT' /
-&VENT XB=-1, 1,-0.5,0.5,0.0,0.0, SURF_ID='Cable 11 Insulation' /
+&VENT XB=-1, 1,-0.5,0.5,0.0,0.0, SURF_ID='Cable 23 Insulation' /
 
-&SURF ID = 'Cable 11 Insulation'
+&SURF ID = 'Cable 23 Insulation'
       RGB =200,100,0
       BACKING = 'INSULATED' 
       THICKNESS = 0.00001
       H_FIXED = 0.
-      MATL_ID(1,1) = 'Cable 11 Insulation Comp. A',
-      MATL_ID(1,2) = 'Cable 11 Insulation Comp. B'
-      MATL_ID(1,3) = 'Cable 11 Insulation Comp. C'
-      MATL_MASS_FRACTION(1,:) = 0.06,0.91,0.03 /  
+      MATL_ID(1,1) = 'Cable 23 Insulation Comp. A',
+      MATL_ID(1,2) = 'Cable 23 Insulation Comp. B'
+      MATL_MASS_FRACTION(1,1:2) = 0.08,0.92 /  
 
-&MATL ID                    = 'Cable 11 Insulation Comp. A'
+&MATL ID                    = 'Cable 23 Insulation Comp. A'
       EMISSIVITY            = 1.0
       DENSITY               = 1000.
       CONDUCTIVITY          = 0.2
       SPECIFIC_HEAT         = 1.5
       N_REACTIONS           = 1
-      REFERENCE_TEMPERATURE = 360.
-      REFERENCE_RATE        = 0.0232
+      REFERENCE_TEMPERATURE = 355.
+      REFERENCE_RATE        = 0.0250
       HEATING_RATE          = 60.
       NU_RESIDUE            = 0.06
       RESIDUE               = 'char'
       NU_FUEL               = 0.94
-      HEAT_OF_COMBUSTION    = 26720.
+      HEAT_OF_COMBUSTION    = 25043.
       HEAT_OF_REACTION      = 1000. /
 
-&MATL ID                    = 'Cable 11 Insulation Comp. B'
+&MATL ID                    = 'Cable 23 Insulation Comp. B'
       EMISSIVITY            = 1.0
       DENSITY               = 1000.
       CONDUCTIVITY          = 0.2
       SPECIFIC_HEAT         = 1.5
       N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 485.
-      REFERENCE_RATE        = 0.0247
+      REFERENCE_RATE        = 0.0230
       HEATING_RATE          = 60.
       NU_RESIDUE            = 0.06
       RESIDUE               = 'char'
       NU_FUEL               = 0.94
-      HEAT_OF_COMBUSTION    = 26720.
-      HEAT_OF_REACTION      = 1000. /
-
-&MATL ID                    = 'Cable 11 Insulation Comp. C'
-      EMISSIVITY            = 1.0
-      DENSITY               = 1000.
-      CONDUCTIVITY          = 0.2
-      SPECIFIC_HEAT         = 1.5
-      N_REACTIONS           = 1
-      REFERENCE_TEMPERATURE = 425.
-      REFERENCE_RATE        = 0.0398
-      HEATING_RATE          = 60.
-      NU_RESIDUE            = 0.06
-      RESIDUE               = 'char'
-      NU_FUEL               = 0.94
-      HEAT_OF_COMBUSTION    = 26720.
+      HEAT_OF_COMBUSTION    = 25043.
       HEAT_OF_REACTION      = 1000. /
 
 &MATL ID                    = 'char'
       EMISSIVITY            = 1.0
-      DENSITY               = 150.
+      DENSITY               =  60.
       CONDUCTIVITY          = 0.1
       SPECIFIC_HEAT         = 1.0 /
 
