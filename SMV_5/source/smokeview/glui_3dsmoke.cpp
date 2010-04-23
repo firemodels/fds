@@ -191,13 +191,18 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   {
     mesh *meshi;
     
-#define HRRPUV_CUTOFF_MAX 1199.99
+#define HRRPUV_CUTOFF_MAX (hrrpuv_max_smv-0.01)
 
     glui_3dsmoke->add_statictext_to_panel(panel_fire,"HRRPUV cutoff (kW/m3):");
 
-    SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]=glui_3dsmoke->add_spinner_to_panel
-      (panel_fire,"All meshes",GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
-    SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
+    if(nmeshes>1){
+      SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]=glui_3dsmoke->add_spinner_to_panel
+        (panel_fire,"All meshes",GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
+      SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
+    }
+    else{
+      SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]=NULL;
+    }
     for(i=0;i<nmeshes;i++){
       meshi = meshinfo + i;
       if(meshi->hrrpuv_cutoff>HRRPUV_CUTOFF_MAX)meshi->hrrpuv_cutoff=HRRPUV_CUTOFF_MAX;

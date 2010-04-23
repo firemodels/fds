@@ -369,6 +369,7 @@ SVEXTERN float zonemin, zonemax;
 SVEXTERN float speedmax;
 SVEXTERN int axissmooth;
 SVEXTERN propdata *prop_evacdefault;
+SVEXTERN float hrrpuv_max_smv;
 SVEXTERN int FlowDir,ClipDir;
 SVEXTERN int plotn;
 SVEXTERN int stept;

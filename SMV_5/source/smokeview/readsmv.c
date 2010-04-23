@@ -1578,7 +1578,16 @@ typedef struct {
     if(match(buffer,"SMOKE3D",7) == 1||
        match(buffer,"VSMOKE3D",8) == 1){
       size_t lenbuffer;
+      int is_vsmoke3d=0,idummy;
+      float temp_val=-1.0;
+      char *buffer_temp;
 
+      if(match(buffer,"VSMOKE3D",8) == 1){
+        is_vsmoke3d=1;
+        buffer_temp=buffer+8;
+        sscanf(buffer_temp,"%i %f",&idummy,&temp_val);
+        if(temp_val>0.0)hrrpuv_max_smv=temp_val;
+      }
       nn_smoke3d++;
       trim(buffer);
       len=strlen(buffer);
@@ -1604,9 +1613,6 @@ typedef struct {
         smoke3d *smoke3di;
         
         smoke3di = smoke3dinfo + ismoke3d;
-
-        smoke3di->fileversion=0;
-        if(match(buffer,"VSMOKE3D",8) == 1)smoke3di->fileversion=1;
 
         if(NewMemory((void **)&smoke3di->reg_file,(unsigned int)(len+1))==0)return 2;
         STRCPY(smoke3di->reg_file,bufptr);
