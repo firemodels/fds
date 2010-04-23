@@ -958,7 +958,6 @@ typedef struct {
 typedef struct _smoke3d {
   int seq_id,autoload;
   char *file;
-  int fileversion;
   char *comp_file, *reg_file;
 #ifdef pp_LIGHT
   int use_lighting_file;
