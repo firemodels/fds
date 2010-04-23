@@ -2372,7 +2372,7 @@ RHOA = P_INF/(TMPA*RSUM0)
  
 CP_GAMMA = SS0%RCON*GAMMA/(GAMMA-1._EB)
 CPOPR = CP_GAMMA/PR
- 
+
 ! Compute variable-temperature specific heats for specific species
 ! Compute viscosity, thermal conductivity for species 0 to N_SPECIES. Diffusivity for species 1 to N_SPECIES. 
 ! These terms are used for DNS, and as the lower limits in LES calcs
@@ -5013,7 +5013,7 @@ IF (DNS) RADIATIVE_FRACTION = 0.00_EB
 NUMBER_RADIATION_ANGLES = 100
 TIME_STEP_INCREMENT     = 3
 IF (TWO_D) THEN
-   NUMBER_RADIATION_ANGLES = 50
+   NUMBER_RADIATION_ANGLES = 60
    TIME_STEP_INCREMENT     = 2
 ENDIF
  
