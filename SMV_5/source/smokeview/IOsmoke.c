@@ -1135,7 +1135,7 @@ void mergesmoke3dcolors(void){
   fire[0]=fire_red;
   fire[1]=fire_green;
   fire[2]=fire_blue;
-  i_hrrpuv_cutoff=254*hrrpuv_cutoff/1200.0;
+  i_hrrpuv_cutoff=254*hrrpuv_cutoff/hrrpuv_max_smv;
 
 #ifdef pp_CULL
   for(i=0;i<nmeshes;i++){
@@ -1178,7 +1178,7 @@ void mergesmoke3dcolors(void){
 #ifdef pp_CULL
     meshi->cull_smoke3d=smoke3di;
 #endif
-    i_hrrpuv_cutoff=254*meshi->hrrpuv_cutoff/1200.0;
+    i_hrrpuv_cutoff=254*meshi->hrrpuv_cutoff/hrrpuv_max_smv;
 
     if(fire_halfdepth<=0.0){
       smoke3di->fire_alpha=255;
@@ -3324,7 +3324,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
     i_hrrcutoff=-1;
   }
   else{
-    i_hrrcutoff=254*meshi->hrrpuv_cutoff/1200.0;
+    i_hrrcutoff=254*meshi->hrrpuv_cutoff/hrrpuv_max_smv;
     if(i_hrrcutoff<0)i_hrrcutoff=0;
     if(i_hrrcutoff>254)i_hrrcutoff=254;
   }
@@ -4530,7 +4530,7 @@ void drawsmoke3dCULL(void){
         i_hrrcutoff=-1;
       }
       else{
-        i_hrrcutoff=254*meshi->hrrpuv_cutoff/1200.0;
+        i_hrrcutoff=254*meshi->hrrpuv_cutoff/hrrpuv_max_smv;
         if(i_hrrcutoff<0)i_hrrcutoff=0;
         if(i_hrrcutoff>254)i_hrrcutoff=254;
       }
