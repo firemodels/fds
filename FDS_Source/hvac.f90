@@ -117,14 +117,14 @@ DO NN=1,N_HVAC_READ
          DU%ID   = ID
          IF (AREA < 0._EB) THEN
             IF (DIAMETER < 0._EB) THEN
-              WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct must area or diameter specied, HVAC line number ',NN
+              WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct must have area or diameter specifiied, HVAC line number ',NN
               CALL SHUTDOWN(MESSAGE)
             ENDIF
             AREA = 0.5_EB*PIO2*DIAMETER**2
          ENDIF
          IF (DIAMETER < 0._EB) THEN
             IF (AREA < 0._EB) THEN
-              WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct must area or diameter specied, HVAC line number ',NN
+              WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct must have area or diameter specified, HVAC line number ',NN
               CALL SHUTDOWN(MESSAGE)
             ENDIF
             DIAMETER = SQRT(2._EB*AREA/PIO2)
@@ -142,7 +142,6 @@ DO NN=1,N_HVAC_READ
 !            WRITE(MESSAGE,'(A,I2)') 'ERROR: Duct needs a loss coefficient, HVAC line number ',NN
 !            CALL SHUTDOWN(MESSAGE)
 !         ENDIF
-         IF (LOSS(2,1)<0._EB) LOSS(2,1)=LOSS(1,1)
          DU%LOSS(1:2) = MAX(0._EB,LOSS(1:2,1))
          IF (CTRL_ID /='null' .AND. DEVC_ID /='null') THEN
             WRITE(MESSAGE,'(A,I2)') 'ERROR: Can only specify one of CTRL_ID or DEVC_ID, HVAC line number ',NN
@@ -208,14 +207,15 @@ DO NN=1,N_HVAC_READ
          ALLOCATE(DN%LOSS_ARRAY(MAX(2,DN%N_DUCTS),MAX(2,DN%N_DUCTS)))
          DN%LOSS_ARRAY = 0._EB
          IF (DN%N_DUCTS >=2) THEN
-            DN%LOSS_ARRAY = MAX(0._EB,LOSS(1:DN%N_DUCTS,1:DN%N_DUCTS))
+            DN%LOSS_ARRAY = LOSS(1:DN%N_DUCTS,1:DN%N_DUCTS)
          ELSE
-            DN%LOSS_ARRAY(1,2) = MAX(0._EB,LOSS(1,1))
-            DN%LOSS_ARRAY(2,1) = MAX(0._EB,LOSS(2,1))
+            DN%LOSS_ARRAY(1,2) = LOSS(1,1)
+            DN%LOSS_ARRAY(2,1) = LOSS(2,1)
          ENDIF
       CASE('FAN')
          I_FAN = I_FAN + 1
          FAN(I_FAN)%ID = ID
+         FAN(I_FAN)%OFF_LOSS = LOSS(1,1)
          FAN(I_FAN)%FAN_RAMP = RAMP_ID
          FAN(I_FAN)%VOL_FLOW = VOLUME_FLOW
          FAN(I_FAN)%MAX_PRES = MAX_PRESSURE
@@ -418,7 +418,7 @@ SQUARE = .FALSE.
 LENGTH = 1._EB
 DAMPER = .FALSE.
 REVERSE = .FALSE.
-LOSS = -1._EB
+LOSS = 0._EB
 VOLUME_FLOW  = 1.E7_EB
 MAX_FLOW     = 1.E7_EB
 MAX_PRESSURE = 1.E7_EB
@@ -1008,7 +1008,7 @@ DO NN = 1, N_DUCTNODES
                CASE DEFAULT
                   P_AVE = PBARP(KK,PRESSURE_ZONE(II,JJ,KK))
             END SELECT
-            P_SUM = P_SUM + P_AVE*AREA!(P_AVE+RHOP(II,JJ,KK)*(H(II,JJ,KK)-.5_EB*VEL2))*AREA
+            P_SUM = P_SUM + (P_AVE+RHOP(II,JJ,KK)*(H(II,JJ,KK)-.5_EB*VEL2))*AREA
             AREA_SUM = AREA_SUM + AREA
          ENDDO
       ENDDO

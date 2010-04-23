@@ -463,10 +463,36 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       !$OMP END DO
 
    ELSE K_DNS_OR_LES
-   
-      !$OMP WORKSHARE
-      KP = MU*CPOPR
-      !$OMP END WORKSHARE
+      IF (FDS6) THEN
+         IF (N_SPECIES > 0 ) THEN
+            DO K=1,KBAR
+               DO J=1,JBAR
+                  DO I=1,IBAR
+                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                     ITMP = MIN(5000,NINT(TMP(I,J,K)))
+                     YY_GET(:) = YYP(I,J,K,:)
+                     CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,ITMP)  
+                     KP(I,J,K) = MU(I,J,K)*CP_MF*RPR  
+                  ENDDO
+               ENDDO
+            ENDDO
+            !$OMP END DO
+         ELSE
+            DO K=1,KBAR
+               DO J=1,JBAR
+                  DO I=1,IBAR
+                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                     ITMP = MIN(5000,NINT(TMP(I,J,K)))
+                     KP(I,J,K) = MU(I,J,K)*Y2CP_C(ITMP)*SPECIES(0)%MW*RPR
+                  ENDDO
+               ENDDO
+            ENDDO
+         ENDIF
+      ELSE
+         !$OMP WORKSHARE
+         KP = MU*CPOPR
+         !$OMP END WORKSHARE
+      ENDIF
       
    ENDIF K_DNS_OR_LES
 
