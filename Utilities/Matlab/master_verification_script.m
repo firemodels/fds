@@ -18,12 +18,13 @@ clear all
 
 addpath 'scripts'
 
-[saved_data,drange] = dataplot('verification');
+[saved_data,drange] = dataplot('verification',[72:95]);
 
 run scripts/turb_model
 run scripts/wall_model
 run scripts/pyrolysis
 run scripts/birch_tga
 run scripts/compression_wave
+run scripts/plate_view_factor
 
 display('verification scripts completed successfully!')

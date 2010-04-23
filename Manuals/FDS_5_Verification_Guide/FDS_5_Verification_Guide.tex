@@ -1262,6 +1262,33 @@ transport equation.
 
 \clearpage
 
+\section{Radiation from parallel plate in different co-ordinate systems \\
+(\texorpdfstring{{\bf plate\_view\_factor}}{plate\_view\_factor}) }
+\label{plate_view_factor}
+
+
+This verification case tests the computation of radiative heat flux from hot surface to a differential, parallel surface at 1 m distance
+in different co-ordinate systems. The radiating surface is at 1000~$^\circ$C temperature and has emissivity of 1.0.  The exact values are 
+calculated using the analycal expressions for the view factors.
+\begin{center}
+\begin{tabular}{|l|l|c|}
+\hline Co-ordinates & Radiation source & Heat flux (kW/m$^2$)  \\ \hline \hline
+2D cartesian   & Infinite plate of width 2 m   & 105.3 \\ 
+3D cartesian   & Square plate of width 2 m     & 81.8 \\ 
+2D cylindrical & Circular disk of diameter 2 m & 74.1 \\ \hline 
+\end{tabular}
+\end{center}
+
+A comparison of exact values and FDS predictions at three diffferent angular resolutions is shown below.
+\begin{center} 
+\includegraphics[width=4.0in]{FIGURES/plate_view_factor.pdf} 
+\end{center} 
+
+
+
+\clearpage
+
+
 \section{Radiation inside a box (\texorpdfstring{{\bf radiation\_in\_a\_box}}{radiation\_in\_a\_box}) }
 \label{radiation_in_a_box}
 
