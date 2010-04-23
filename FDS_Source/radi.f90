@@ -121,12 +121,6 @@ DO I=1,NRT
          DLY(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  +COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
          DLB(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  -COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
          DLZ(N)    = 0.5_EB*(PHIUP-PHILOW)   * ((SIN(THETAUP))**2-(SIN(THETALOW))**2)
-         ! In axially symmetric case, each angle represents two symmetric angles. So weight the intensities by two.
-         DLX(N) = 2._EB*DLX(N)
-         DLY(N) = 2._EB*DLY(N)
-         DLB(N) = 2._EB*DLB(N)
-         DLZ(N) = 2._EB*DLZ(N)
-         RSA(N) = 2._EB*RSA(N)
       ELSEIF (TWO_D) THEN
          DLX(N) = (SIN(PHIUP)-SIN(PHILOW))*F_THETA
          DLY(N) = 0._EB
@@ -150,6 +144,15 @@ DO N = 1,NRA
    DLN( 3,N) =  DLZ(N)
 ENDDO
  
+! In axially symmetric case, each angle represents two symmetric angles. So weight the intensities by two.
+
+WEIGH_CYL = 1._EB
+IF (CYLINDRICAL) THEN
+   WEIGH_CYL = 2._EB
+   ! Wall direction cosines are only used for flux integrations, so they can by multiplied in advance.
+   DLN = WEIGH_CYL * DLN
+ENDIF
+
 ! Calculate mirroring matrix
  
 N = 0
@@ -890,20 +893,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         IW = WALL_INDEX(IC,-ISTEP)
                         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
                            ILXU = WALL(IW)%ILW(N,IBND)
-                           AYU = 0.5*AYU
-                           AZ = 0.5*AZ
                         ENDIF
                         IW = WALL_INDEX(IC,-JSTEP*2)
                         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
                            ILYU = WALL(IW)%ILW(N,IBND)
-                           AXU = 0.5*AXU
-                           AZ = 0.5*AZ
                         ENDIF
                         IW = WALL_INDEX(IC,-KSTEP*3)
                         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
                            ILZU = WALL(IW)%ILW(N,IBND)
-                           AXU = 0.5*AXU
-                           AYU = 0.5*AYU
                         ENDIF
                      ENDIF
                      RAP = 1._EB/(AXD+AYD+AZ+EXTCOE(I,J,K)*VC*RSA(N))
@@ -984,23 +981,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
             ENDIF GEOMETRY
  
-            ! Boundary values: Incoming radiation
-            
-            WALL_LOOP2: DO IW=1,NWC
-               IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY)   CYCLE WALL_LOOP2     
-               IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)   CYCLE WALL_LOOP2  
-               IF (BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2  
-               IOR = IJKW(4,IW)
-               IF (TWO_D .AND. .NOT.CYLINDRICAL  .AND. ABS(IOR)==2) CYCLE WALL_LOOP2  ! 2-D non cylindrical
-               IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP2     ! outgoing
-               IIG = IJKW(6,IW)
-               JJG = IJKW(7,IW)
-               KKG = IJKW(8,IW)
-               INRAD_W(IW) = INRAD_W(IW) + DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 1
-               WALL(IW)%ILW(N,IBND) = IL(IIG,JJG,KKG)
-               INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 2
-            ENDDO WALL_LOOP2
- 
             ! Copy the Y-downwind intensities to Y-upwind in cylindrical case
  
             IF (CYLINDRICAL) THEN
@@ -1020,12 +1000,29 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO CKLOOP2
             ENDIF
  
+            ! Boundary values: Incoming radiation
+            
+            WALL_LOOP2: DO IW=1,NWC
+               IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY)   CYCLE WALL_LOOP2     
+               IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)   CYCLE WALL_LOOP2  
+               IF (BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2  
+               IOR = IJKW(4,IW)
+               IF (TWO_D .AND. .NOT.CYLINDRICAL  .AND. ABS(IOR)==2) CYCLE WALL_LOOP2  ! 2-D non cylindrical
+               IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP2     ! outgoing
+               IIG = IJKW(6,IW)
+               JJG = IJKW(7,IW)
+               KKG = IJKW(8,IW)
+               INRAD_W(IW) = INRAD_W(IW) + DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 1
+               WALL(IW)%ILW(N,IBND) = IL(IIG,JJG,KKG)
+               INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 2
+            ENDDO WALL_LOOP2
+ 
             ! Calculate integrated intensity UIID
  
             IF (WIDE_BAND_MODEL) THEN
-               UIID(:,:,:,IBND) = UIID(:,:,:,IBND) + RSA(N)*IL
+               UIID(:,:,:,IBND) = UIID(:,:,:,IBND) + WEIGH_CYL*RSA(N)*IL
             ELSE
-               UIID(:,:,:,ANGLE_INC_COUNTER) = UIID(:,:,:,ANGLE_INC_COUNTER) + RSA(N)*IL
+               UIID(:,:,:,ANGLE_INC_COUNTER) = UIID(:,:,:,ANGLE_INC_COUNTER) + WEIGH_CYL*RSA(N)*IL
             ENDIF
  
             ! Interpolate boundary intensities onto other meshes
@@ -1110,7 +1107,7 @@ IF (GAS_CELL_RAD_FLUX) THEN
       IF (DV%MESH /= NM) CYCLE DEVC_LOOP2
       IW = DV%VIRTUAL_WALL_INDEX
       IF (IW>0) THEN
-         QRADIN(IW) = E_WALL(IW)*SUM(DV%ILW)
+         QRADIN(IW) = E_WALL(IW)*WEIGH_CYL*SUM(DV%ILW)
       ENDIF
    ENDDO DEVC_LOOP2
 ENDIF
