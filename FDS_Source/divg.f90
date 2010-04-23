@@ -463,7 +463,8 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       !$OMP END DO
 
    ELSE K_DNS_OR_LES
-      IF (FDS6) THEN
+    
+      CP_FTMP_IF: IF (CP_FTMP) THEN
          IF (N_SPECIES > 0 ) THEN
             DO K=1,KBAR
                DO J=1,JBAR
@@ -476,7 +477,6 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
                   ENDDO
                ENDDO
             ENDDO
-            !$OMP END DO
          ELSE
             DO K=1,KBAR
                DO J=1,JBAR
@@ -488,8 +488,8 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
                ENDDO
             ENDDO
          ENDIF
-         !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
-         BOUNDARY_LOOP2: DO IW=1,NEWC
+         
+         BOUNDARY_LOOP2: DO IW=1,NWC
             II  = IJKW(1,IW)
             JJ  = IJKW(2,IW)
             KK  = IJKW(3,IW)
@@ -498,12 +498,11 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
             KKG = IJKW(8,IW)
             KP(II,JJ,KK) = KP(IIG,JJG,KKG)
          ENDDO BOUNDARY_LOOP2
-         !$OMP END DO
-      ELSE
+      ELSE CP_FTMP_IF
          !$OMP WORKSHARE
          KP = MU*CPOPR
-         !$OMP END WORKSHARE
-      ENDIF
+         !$OMP END WORKSHARE   
+      ENDIF CP_FTMP_IF
       
    ENDIF K_DNS_OR_LES
 
