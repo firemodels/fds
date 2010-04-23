@@ -190,8 +190,6 @@ DO K=1,KBAR
                CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_0,ITMP)            
                CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_N,ICFT)
                DYAIR = DYF * (1._EB - Y_FU_0) / Y_O2_0 * RN%O2_F_RATIO
-               IF (II==16 .AND. JJ==16 .AND. YY(II,JJ,KK,I_FUEL)>1.E-6_EB) WRITE(*,*) KK, &
-               (DYF*H_F_0 + DYAIR*H_G_0)*TMP(I,J,K) + DYF*DELTAH_F , (DYF*H_F_N + DYAIR*H_G_N)*RN%CRIT_FLAME_TMP
                IF ( (DYF*H_F_0 + DYAIR*H_G_0)*TMP(I,J,K) + DYF*DELTAH_F < (DYF*H_F_N + DYAIR*H_G_N)*RN%CRIT_FLAME_TMP) CYCLE
             ELSE
                Y_O2_CORR = RN%Y_O2_LL*(RN%CRIT_FLAME_TMP-TMP_MIN)/(RN%CRIT_FLAME_TMP-CRIT_FLAME_TMPA)
