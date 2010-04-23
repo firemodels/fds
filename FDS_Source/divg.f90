@@ -483,11 +483,22 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
                   DO I=1,IBAR
                      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                      ITMP = MIN(5000,NINT(TMP(I,J,K)))
-                     KP(I,J,K) = MU(I,J,K)*Y2CP_C(ITMP)*SPECIES(0)%MW*RPR
+                     KP(I,J,K) = MU(I,J,K)*Y2CP_C(ITMP)*RPR
                   ENDDO
                ENDDO
             ENDDO
          ENDIF
+         !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
+         BOUNDARY_LOOP2: DO IW=1,NEWC
+            II  = IJKW(1,IW)
+            JJ  = IJKW(2,IW)
+            KK  = IJKW(3,IW)
+            IIG = IJKW(6,IW)
+            JJG = IJKW(7,IW)
+            KKG = IJKW(8,IW)
+            KP(II,JJ,KK) = KP(IIG,JJG,KKG)
+         ENDDO BOUNDARY_LOOP2
+         !$OMP END DO
       ELSE
          !$OMP WORKSHARE
          KP = MU*CPOPR
