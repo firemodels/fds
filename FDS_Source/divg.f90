@@ -489,7 +489,7 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
             ENDDO
          ENDIF
          
-         BOUNDARY_LOOP2: DO IW=1,NWC
+         BOUNDARY_LOOP2: DO IW=1,NEWC
             II  = IJKW(1,IW)
             JJ  = IJKW(2,IW)
             KK  = IJKW(3,IW)
