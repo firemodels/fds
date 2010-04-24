@@ -1505,7 +1505,6 @@ WALL_LOOP: DO IW=1,NWC
    JJG = IJKW(7,IW)
    KKG = IJKW(8,IW)
    IOR = IJKW(4,IW)
-   ! copied from wall.f90 ---
    IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
       IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) IBC = INTERPOLATED_SURF_INDEX
       IF (BOUNDARY_TYPE(IW)==MIRROR_BOUNDARY)       IBC = MIRROR_SURF_INDEX
@@ -1534,24 +1533,24 @@ WALL_LOOP: DO IW=1,NWC
 !            CASE(-3)
 !               FZ(II,JJ,KK-1,0) = 0._EB
 !         END SELECT
-            
-      CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
-         
-         SELECT CASE(IOR)
-            CASE( 1)
-               FX(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))*R(II)
-            CASE(-1)
-               FX(II-1,JJ,KK,0) = -SUM(MASSFLUX(IW,:))*R(II-1)
-            CASE( 2)   
-               FY(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))
-            CASE(-2)
-               FY(II,JJ-1,KK,0) = -SUM(MASSFLUX(IW,:))
-            CASE( 3)
-               FZ(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))
-            CASE(-3)
-               FZ(II,JJ,KK-1,0) = -SUM(MASSFLUX(IW,:))
-         END SELECT
-         
+!            
+!      CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
+!         
+!         SELECT CASE(IOR)
+!            CASE( 1)
+!               FX(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))*R(II)
+!            CASE(-1)
+!               FX(II-1,JJ,KK,0) = -SUM(MASSFLUX(IW,:))*R(II-1)
+!            CASE( 2)   
+!               FY(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))
+!            CASE(-2)
+!               FY(II,JJ-1,KK,0) = -SUM(MASSFLUX(IW,:))
+!            CASE( 3)
+!               FZ(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))
+!            CASE(-3)
+!               FZ(II,JJ,KK-1,0) = -SUM(MASSFLUX(IW,:))
+!         END SELECT
+!         
       CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER
          NOM = IJKW(9,IW)
          IIO = IJKW(10,IW)
@@ -1717,7 +1716,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       IIG = IJKW(6,IW)
       JJG = IJKW(7,IW)
       KKG = IJKW(8,IW)
-      ! copied from wall.f90 ---
       IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
          IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) IBC = INTERPOLATED_SURF_INDEX
          IF (BOUNDARY_TYPE(IW)==MIRROR_BOUNDARY)       IBC = MIRROR_SURF_INDEX
