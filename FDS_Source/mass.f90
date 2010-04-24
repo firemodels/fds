@@ -1517,40 +1517,6 @@ WALL_LOOP: DO IW=1,NWC
    ! Apply the different species boundary conditions
    METHOD_OF_MASS_TRANSFER: SELECT CASE(METHOD_ID)
 
-!      CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER
-!
-!         SELECT CASE(IOR)
-!            CASE( 1)
-!               FX(II,JJ,KK,0)   = 0._EB
-!            CASE(-1)
-!               FX(II-1,JJ,KK,0) = 0._EB
-!            CASE( 2)   
-!               FY(II,JJ,KK,0)   = 0._EB
-!            CASE(-2)
-!               FY(II,JJ-1,KK,0) = 0._EB
-!            CASE( 3)
-!               FZ(II,JJ,KK,0)   = 0._EB
-!            CASE(-3)
-!               FZ(II,JJ,KK-1,0) = 0._EB
-!         END SELECT
-!            
-!      CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
-!         
-!         SELECT CASE(IOR)
-!            CASE( 1)
-!               FX(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))*R(II)
-!            CASE(-1)
-!               FX(II-1,JJ,KK,0) = -SUM(MASSFLUX(IW,:))*R(II-1)
-!            CASE( 2)   
-!               FY(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))
-!            CASE(-2)
-!               FY(II,JJ-1,KK,0) = -SUM(MASSFLUX(IW,:))
-!            CASE( 3)
-!               FZ(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))
-!            CASE(-3)
-!               FZ(II,JJ,KK-1,0) = -SUM(MASSFLUX(IW,:))
-!         END SELECT
-!         
       CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER
          NOM = IJKW(9,IW)
          IIO = IJKW(10,IW)
@@ -1633,29 +1599,17 @@ WALL_LOOP: DO IW=1,NWC
 
          SELECT CASE(IOR)
             CASE( 1)
-               ZZ(2) = RHO_F(IW)
-               ZZ(3) = RHOP(IIG,JJG,KKG)
-               FX(II,JJ,KK,0) = UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1)*R(II)
+               FX(II,JJ,KK,0) = UU(II,JJ,KK)*RHO_F(IW)*R(II)
             CASE(-1)
-               ZZ(2) = RHOP(IIG,JJG,KKG)
-               ZZ(3) = RHO_F(IW)
-               FX(II-1,JJ,KK,0) = UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1)*R(II-1)
+               FX(II-1,JJ,KK,0) = UU(II-1,JJ,KK)*RHO_F(IW)*R(II-1)
             CASE( 2)   
-               ZZ(2) = RHO_F(IW)
-               ZZ(3) = RHOP(IIG,JJG,KKG)
-               FY(II,JJ,KK,0) = VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
+               FY(II,JJ,KK,0) = VV(II,JJ,KK)*RHO_F(IW)
             CASE(-2)
-               ZZ(2) = RHOP(IIG,JJG,KKG)
-               ZZ(3) = RHO_F(IW)
-               FY(II,JJ-1,KK,0) = VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
+               FY(II,JJ-1,KK,0) = VV(II,JJ-1,KK)*RHO_F(IW)
             CASE( 3)
-               ZZ(2) = RHO_F(IW)
-               ZZ(3) = RHOP(IIG,JJG,KKG)
-               FZ(II,JJ,KK,0) = WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
+               FZ(II,JJ,KK,0) = WW(II,JJ,KK)*RHO_F(IW)
             CASE(-3)
-               ZZ(2) = RHOP(IIG,JJG,KKG)
-               ZZ(3) = RHO_F(IW)
-               FZ(II,JJ,KK-1,0) = WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
+               FZ(II,JJ,KK-1,0) = WW(II,JJ,KK-1)*RHO_F(IW)
          END SELECT
       
    END SELECT METHOD_OF_MASS_TRANSFER
@@ -1728,39 +1682,39 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       ! Apply the different species boundary conditions
       METHOD_OF_MASS_TRANSFER2: SELECT CASE(METHOD_ID)
       
-         CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER2
-
-            SELECT CASE(IOR)
-               CASE( 1)
-                  FX(II,JJ,KK,N)   = 0._EB
-               CASE(-1)
-                  FX(II-1,JJ,KK,N) = 0._EB
-               CASE( 2)   
-                  FY(II,JJ,KK,N)   = 0._EB
-               CASE(-2)
-                  FY(II,JJ-1,KK,N) = 0._EB
-               CASE( 3)
-                  FZ(II,JJ,KK,N)   = 0._EB
-               CASE(-3)
-                  FZ(II,JJ,KK-1,N) = 0._EB
-            END SELECT
-            
-         CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER2
-         
-            SELECT CASE(IOR)
-               CASE( 1)
-                  FX(II,JJ,KK,N)   = MASSFLUX(IW,N)*R(II)
-               CASE(-1)
-                  FX(II-1,JJ,KK,N) = -MASSFLUX(IW,N)*R(II-1)
-               CASE( 2)   
-                  FY(II,JJ,KK,N)   = MASSFLUX(IW,N)
-               CASE(-2)
-                  FY(II,JJ-1,KK,N) = -MASSFLUX(IW,N)
-               CASE( 3)
-                  FZ(II,JJ,KK,N)   = MASSFLUX(IW,N)
-               CASE(-3)
-                  FZ(II,JJ,KK-1,N) = -MASSFLUX(IW,N)
-            END SELECT
+!         CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER2
+!
+!            SELECT CASE(IOR)
+!               CASE( 1)
+!                  FX(II,JJ,KK,N)   = 0._EB
+!               CASE(-1)
+!                  FX(II-1,JJ,KK,N) = 0._EB
+!               CASE( 2)   
+!                  FY(II,JJ,KK,N)   = 0._EB
+!               CASE(-2)
+!                  FY(II,JJ-1,KK,N) = 0._EB
+!               CASE( 3)
+!                  FZ(II,JJ,KK,N)   = 0._EB
+!               CASE(-3)
+!                  FZ(II,JJ,KK-1,N) = 0._EB
+!            END SELECT
+!            
+!         CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER2
+!         
+!            SELECT CASE(IOR)
+!               CASE( 1)
+!                  FX(II,JJ,KK,N)   = MASSFLUX(IW,N)*R(II)
+!               CASE(-1)
+!                  FX(II-1,JJ,KK,N) = -MASSFLUX(IW,N)*R(II-1)
+!               CASE( 2)   
+!                  FY(II,JJ,KK,N)   = MASSFLUX(IW,N)
+!               CASE(-2)
+!                  FY(II,JJ-1,KK,N) = -MASSFLUX(IW,N)
+!               CASE( 3)
+!                  FZ(II,JJ,KK,N)   = MASSFLUX(IW,N)
+!               CASE(-3)
+!                  FZ(II,JJ,KK-1,N) = -MASSFLUX(IW,N)
+!            END SELECT
             
          CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER2
             NOM = IJKW(9,IW)
@@ -1777,7 +1731,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)                  
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(4) = RHOYYP(IIG+1,JJG,KKG,N)
-                  !FX(II,JJ,KK,N) = (FX(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER))*R(II)
                   FX(II,JJ,KK,N) = (FX(II,JJ,KK,N) + UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,FLUX_LIMITER))*R(II)
                CASE(-1)
                   ZZ(1) = RHOYYP(IIG-1,JJG,KKG,N)
@@ -1786,7 +1739,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
                   IF (PREDICTOR) ZZ(4) = M2%RHO(IIO+1,JJO,KKO)*M2%YY(IIO+1,JJO,KKO,N)
                   IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO+1,JJO,KKO)*M2%YYS(IIO+1,JJO,KKO,N)
-                  !FX(II-1,JJ,KK,N) = (FX(II-1,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER))*R(II-1)
                   FX(II-1,JJ,KK,N) = (FX(II-1,JJ,KK,N) + UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,FLUX_LIMITER))*R(II-1)
                CASE( 2)
                   IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO-1,KKO)*M2%YY(IIO,JJO-1,KKO,N)
@@ -1795,7 +1747,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(4) = RHOYYP(IIG,JJG+1,KKG,N)
-                  !FY(II,JJ,KK,N) = FY(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
                   FY(II,JJ,KK,N) = FY(II,JJ,KK,N) + VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,FLUX_LIMITER)
                CASE(-2)
                   ZZ(1) = RHOYYP(IIG,JJG-1,KKG,N)
@@ -1804,7 +1755,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
                   IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO+1,KKO)*M2%YY(IIO,JJO+1,KKO,N)
                   IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO+1,KKO)*M2%YYS(IIO,JJO+1,KKO,N)
-                  !FY(II,JJ-1,KK,N) = FY(II,JJ-1,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
                   FY(II,JJ-1,KK,N) = FY(II,JJ-1,KK,N) + VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,FLUX_LIMITER)
                CASE( 3)
                   IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO,KKO-1)*M2%YY(IIO,JJO,KKO-1,N)
@@ -1813,7 +1763,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
                   ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
                   ZZ(4) = RHOYYP(IIG,JJG,KKG+1,N)
-                  !FZ(II,JJ,KK,N) = FZ(II,JJ,KK,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
                   FZ(II,JJ,KK,N) = FZ(II,JJ,KK,N) + WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,FLUX_LIMITER)
                CASE(-3)
                   ZZ(1) = RHOYYP(IIG,JJG,KKG-1,N)
@@ -1822,37 +1771,24 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
                   IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO,KKO+1)*M2%YY(IIO,JJO,KKO+1,N)
                   IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO,KKO+1)*M2%YYS(IIO,JJO,KKO+1,N)
-                  !FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
                   FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,FLUX_LIMITER)
             END SELECT
             
-         CASE DEFAULT METHOD_OF_MASS_TRANSFER2 ! handles SPECIFIED_MASS_FRACTION also
+         CASE DEFAULT METHOD_OF_MASS_TRANSFER2
 
             SELECT CASE(IOR)
                CASE( 1)
-                  ZZ(2) = RHO_F(IW)*YY_F(IW,N)
-                  ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
-                  FX(II,JJ,KK,N) = (FW(IW,N) + UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,1))*R(II)
+                  FX(II,JJ,KK,N)   =(FW(IW,N) + UU(II,JJ,KK)  *RHO_F(IW)*YY_F(IW,N))*R(II)
                CASE(-1)
-                  ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(3) = RHO_F(IW)*YY_F(IW,N)
-                  FX(II-1,JJ,KK,N) = (FW(IW,N) + UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,1))*R(II-1)
+                  FX(II-1,JJ,KK,N) =(FW(IW,N) + UU(II-1,JJ,KK)*RHO_F(IW)*YY_F(IW,N))*R(II-1)
                CASE( 2)   
-                  ZZ(2) = RHO_F(IW)*YY_F(IW,N)
-                  ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
-                  FY(II,JJ,KK,N) = FW(IW,N) + VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,1)
+                  FY(II,JJ,KK,N)   = FW(IW,N) + VV(II,JJ,KK)  *RHO_F(IW)*YY_F(IW,N)
                CASE(-2)
-                  ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(3) = RHO_F(IW)*YY_F(IW,N)
-                  FY(II,JJ-1,KK,N) = FW(IW,N) + VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,1)
+                  FY(II,JJ-1,KK,N) = FW(IW,N) + VV(II,JJ-1,KK)*RHO_F(IW)*YY_F(IW,N)
                CASE( 3)
-                  ZZ(2) = RHO_F(IW)*YY_F(IW,N)
-                  ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
-                  FZ(II,JJ,KK,N) = FW(IW,N) + WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,1)
+                  FZ(II,JJ,KK,N)   = FW(IW,N) + WW(II,JJ,KK)  *RHO_F(IW)*YY_F(IW,N)
                CASE(-3)
-                  ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(3) = RHO_F(IW)*YY_F(IW,N)
-                  FZ(II,JJ,KK-1,N) = FW(IW,N) + WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,1)
+                  FZ(II,JJ,KK-1,N) = FW(IW,N) + WW(II,JJ,KK-1)*RHO_F(IW)*YY_F(IW,N)
             END SELECT
       
       END SELECT METHOD_OF_MASS_TRANSFER2
