@@ -203,7 +203,7 @@ OBJECTDEF
 
 OBJECTDEF
  nozzle
- 180.0 rotatex 0.0 0.0 -0.041402 translate
+ 0.0 0.0 -0.041402 translate
  "BRICK" setcolor
  0.022225 0.0127 drawhexdisk
  push 0.0 0.0 0.0127 translate 0.01905 0.01905 drawdisk pop
@@ -211,7 +211,7 @@ OBJECTDEF
  204 204 204 setrgb
  push 0.0 0.0 0.035052 translate 0.00635 0.00635 drawdisk pop
  NEWFRAME
- 180.0 rotatex 0.0 0.0 -0.041402 translate
+ 0.0 0.0 -0.041402 translate
  "BRICK" setcolor
  0.022225 0.0127 drawhexdisk
  push 0.0 0.0 0.0127 translate 0.01905 0.01905 drawdisk pop
