@@ -75,7 +75,7 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = fds2ascii_osx_32
 
 intel_osx_32 : $(obj)
-	$(FC) -o $(bin)/$(exe) $(obj)
+	$(FC) -o $(bin)/$(exe)  -mmacosx-version-min=10.4 $(obj)
 
 # ------------- OSX 64 ----------------
 #  64 bit OSX
@@ -85,7 +85,7 @@ intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = fds2ascii_osx_64
 
 intel_osx_64 : $(obj)
-	$(FC) -o $(bin)/$(exe) $(obj)
+	$(FC) -o $(bin)/$(exe)  -mmacosx-version-min=10.4 $(obj)
 
 #-------------- Clean Target to remove Object and Module files -----------
 
