@@ -95,11 +95,11 @@ OPEN(LU_INPUT,FILE=FN_INPUT,ACTION='READ')
 
 CALL READ_DEAD    ! Scan input file looking for old NAMELIST groups, and stop the run if they exist
 CALL READ_HEAD
+CALL READ_MISC
 CALL READ_MULT
 CALL READ_MESH
 CALL READ_TRAN
 CALL READ_TIME
-CALL READ_MISC
 CALL READ_PRES
 CALL READ_RADI
 CALL READ_PROP
@@ -433,12 +433,14 @@ MESH_LOOP: DO N=1,NMESHES_READ
             M%YF    = XB4
             M%ZS    = XB5
             M%ZF    = XB6
-            XS_MIN  = MIN(XS_MIN,M%XS)
-            XF_MAX  = MAX(XF_MAX,M%XF)
-            YS_MIN  = MIN(YS_MIN,M%YS)
-            YF_MAX  = MAX(YF_MAX,M%YF)
-            ZS_MIN  = MIN(ZS_MIN,M%ZS)
-            ZF_MAX  = MAX(ZF_MAX,M%ZF)
+            IF (.NOT.EVACUATION) THEN
+               XS_MIN  = MIN(XS_MIN,M%XS)
+               XF_MAX  = MAX(XF_MAX,M%XF)
+               YS_MIN  = MIN(YS_MIN,M%YS)
+               YF_MAX  = MAX(YF_MAX,M%YF)
+               ZS_MIN  = MIN(ZS_MIN,M%ZS)
+               ZF_MAX  = MAX(ZF_MAX,M%ZF)
+            ENDIF
             M%DXI   = (M%XF-M%XS)/REAL(M%IBAR,EB)
             M%DETA  = (M%YF-M%YS)/REAL(M%JBAR,EB)
             M%DZETA = (M%ZF-M%ZS)/REAL(M%KBAR,EB)
@@ -457,6 +459,13 @@ MESH_LOOP: DO N=1,NMESHES_READ
    ENDDO K_MULT_LOOP
 
 ENDDO MESH_LOOP
+
+! Min and Max values of temperature
+ 
+TMPMIN = TMPM
+IF (LAPSE_RATE < 0._EB) TMPMIN = MIN(TMPMIN,TMPA+LAPSE_RATE*ZF_MAX)
+TMPMAX = 3000._EB
+
 REWIND(LU_INPUT)
  
 ! Start the timing arrays
@@ -1272,11 +1281,8 @@ APPEND = .FALSE.
 IF (RESTART .AND. RESTART_CHID == CHID) APPEND = .TRUE.
 IF (RESTART) NOISE  = .FALSE.
  
-! Min and Max values of species and temperature
+! Min and Max values of species
  
-TMPMIN = TMPM
-IF (LAPSE_RATE < 0._EB) TMPMIN = MIN(TMPMIN,TMPA+LAPSE_RATE*MESHES(1)%ZF)
-TMPMAX = 3000._EB
 YYMIN  = 0._EB
 YYMAX  = 1._EB
 
