@@ -178,7 +178,7 @@ DO K=1,KBAR
             ENDIF
 
             ! Evaluate empirical extinction criteria
-            IF (FDS6) THEN
+            IF (EMPIRICAL_EXTINCTION) THEN
                ITMP = NINT(MIN(5000._EB,TMP(I,J,K)))
                YY_GET = 0._EB
                YY_GET(I_FUEL) = 1._EB
