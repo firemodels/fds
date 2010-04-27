@@ -129,6 +129,38 @@ DO K=1,KBAR
          IF (Y_FU_0<=Y_FU_MIN) CYCLE
          Y_O2_0  = Y_O2(I,J,K)
          IF (Y_O2_0<=Y_O2_MIN) CYCLE
+         
+         
+         LES_IF: IF (LES) THEN
+            IF (.NOT.TWO_D) THEN
+               DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
+            ELSE
+               DELTA2 = DX(I)*DZ(K)
+            ENDIF
+            IF (EDDY_DISSIPATION) TURBULENT_TIME_SCALE=IEDC
+            IF (EDDY_BREAK_UP)    TURBULENT_TIME_SCALE=IEBU
+            SELECT CASE (TURBULENT_TIME_SCALE)
+               CASE (IEDC)
+                  MIX_TIME(I,J,K)=C_EDC*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
+               CASE (IEBU)
+                  KSGS=MTR(I,J,K)*KRES(I,J,K)/(1._EB-MTR(I,J,K))+1.E-10
+                  MIX_TIME(I,J,K)=MIN(SC*RHO(I,J,K)*DELTA2/MU_DNS(I,J,K),C_EBU*SQRT(DELTA2/KSGS))
+            END SELECT
+         ENDIF LES_IF
+         
+         ODE_IF: IF (EDC_ODE) THEN
+            IF (Y_FU_0<=Y_O2_0/RN%O2_F_RATIO) THEN
+               DYF = Y_FU_0*(1._EB - EXP(-MIN(1._EB,DT/MIX_TIME(I,J,K))))
+            ELSE
+               DYF = (Y_O2_0/RN%O2_F_RATIO)*(1._EB - EXP(-MIN(1._EB,DT/MIX_TIME(I,J,K))))
+            ENDIF
+            Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F
+         ELSE ODE_IF
+            DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)
+            Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
+         ENDIF ODE_IF
+         
+         
          IF_SUPPRESSION: IF (SUPPRESSION) THEN  ! Get maximum O2 in the current and neighboring cells to see if flame viable
 
             Y_O2_MAX  = 0._EB
@@ -179,7 +211,7 @@ DO K=1,KBAR
 
             ! Evaluate empirical extinction criteria
             IF (EMPIRICAL_EXTINCTION) THEN
-               DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO) 
+               !!DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO) 
                ITMP = NINT(MIN(5000._EB,TMP(I,J,K)))
                YY_GET = 0._EB
                YY_GET(I_FUEL) = 1._EB
@@ -200,34 +232,7 @@ DO K=1,KBAR
 
          ENDIF IF_SUPPRESSION
          
-         LES_IF: IF (LES) THEN
-            IF (.NOT.TWO_D) THEN
-               DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
-            ELSE
-               DELTA2 = DX(I)*DZ(K)
-            ENDIF
-            IF (EDDY_DISSIPATION) TURBULENT_TIME_SCALE=IEDC
-            IF (EDDY_BREAK_UP)    TURBULENT_TIME_SCALE=IEBU
-            SELECT CASE (TURBULENT_TIME_SCALE)
-               CASE (IEDC)
-                  MIX_TIME(I,J,K)=C_EDC*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
-               CASE (IEBU)
-                  KSGS=MTR(I,J,K)*KRES(I,J,K)/(1._EB-MTR(I,J,K))+1.E-10
-                  MIX_TIME(I,J,K)=MIN(SC*RHO(I,J,K)*DELTA2/MU_DNS(I,J,K),C_EBU*SQRT(DELTA2/KSGS))
-            END SELECT
-         ENDIF LES_IF
-         
-         ODE_IF: IF (EDC_ODE) THEN
-            IF (Y_FU_0<=Y_O2_0/RN%O2_F_RATIO) THEN
-               DYF = Y_FU_0*(1._EB - EXP(-MIN(1._EB,DT/MIX_TIME(I,J,K))))
-            ELSE
-               DYF = (Y_O2_0/RN%O2_F_RATIO)*(1._EB - EXP(-MIN(1._EB,DT/MIX_TIME(I,J,K))))
-            ENDIF
-            Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F
-         ELSE ODE_IF
-            DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)
-            Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
-         ENDIF ODE_IF
+         !! moved Q_BOUND_1 block above IF_SUPPRESSION
          
          Q_BOUND_2 = Q_UPPER
          Q_NEW = MIN(Q_BOUND_1,Q_BOUND_2)
