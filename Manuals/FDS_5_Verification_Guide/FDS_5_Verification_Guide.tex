@@ -1771,48 +1771,49 @@ decomposition of a solid, following the methodology described by Lyon~\cite{Lyon
 
 \subsection{General Theory}
 
-Consider a solid material that is made up of multiple components.
-The mass fraction of any component, $Y(t)$, changes in time according to the equation:
+Consider a solid material that undergoes multiple reactions during its thermal decomposition, as evidenced by, for example,
+thermal gravimetric analysis (TGA). From this measurement alone, it is not possible to determine the chemical make-up of the solid. However,
+if it is assumed that the number of material components making up the solid is equal to the assumed number of reactions, as determined from the TGA
+results, the mass fraction of any component, $Y_i(t)$, changes in time according to the equation:
 \be
-   \frac{dY}{dt} = -A \, Y \, \exp \left( -\frac{E}{RT} \right)    \quad ; \quad Y(0) = Y_0  \label{dYdt}
+   \frac{dY_i}{dt} = -A_i \, Y_i \, \exp \left( -\frac{E_i}{RT} \right)    \quad ; \quad Y_i(0) = Y_{0,i}  \label{dYdt}
 \ee
-For bench-scale measurement techniques like TGA (Thermo-Gravimetric Analysis), a small sample of the material is
-heated linearly in time at a specified rate, $dT/dt=\beta$. The results are usually expressed as a function of
-temperature rather than time; thus, it is convenient to rewrite Eq.~(\ref{dYdt}) as:
+In the TGA apparatus, the temperature of the sample is increased linearly in time, $dT/dt=\beta$. Because TGA results are usually expressed as a function of
+temperature rather than time, it is convenient to rewrite Eq.~(\ref{dYdt}) as:
 \be
-   \frac{dY}{dT} = -\frac{A}{\beta} \, Y \, \exp \left( -\frac{E}{RT} \right)    \quad ; \quad Y(T=T_0) = Y_0  \label{dYdT}
+   \frac{dY_i}{dT} = -\frac{A_i}{\beta} \, Y_i \, \exp \left( -\frac{E_i}{RT} \right)    \quad ; \quad Y(T=T_0) = Y_{0,i}  \label{dYdT}
 \ee
-The decomposition rate, $-dY/dt$, peaks at a temperature denoted by $T_p$ with a value denoted by $r_p$.
-At this temperature, the second derivative of $Y$ is zero:
+The decomposition rate, $-dY_i/dt$, peaks at a temperature denoted by $T_{p,i}$ with a value denoted by $r_{p,i}$.
+At this temperature, the second derivative of $Y_i$ is zero:
 \be
-   \frac{d^2 Y}{dT^2} = -\frac{A}{\beta} \, \frac{dY}{dT} \, \exp \left( -\frac{E}{RT_p} \right) -
-   \frac{A}{\beta} \, Y \, \exp \left( -\frac{E}{RT_p} \right) \, \frac{E}{R T_p^2}
-   = -\frac{dY}{dT} \left[ \frac{A}{\beta} \, \exp \left( -\frac{E}{RT_p} \right) - \frac{E}{R T_p^2} \right] = 0  \label{d2YdT2}
+   \frac{d^2 Y_i}{dT^2} = -\frac{A_i}{\beta} \, \frac{dY_i}{dT} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) -
+   \frac{A_i}{\beta} \, Y_i \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) \, \frac{E_i}{R T_{p,i}^2}
+   = -\frac{dY_i}{dT} \left[ \frac{A_i}{\beta} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) - \frac{E_i}{R T_{p,i}^2} \right] = 0  \label{d2YdT2}
 \ee
-Next, Eq.~(\ref{dYdT}) can be integrated from $Y_0$ to $Y_p$ (the value of $Y$ at the peak), and $T_0$ to $T_p$:
+Next, Eq.~(\ref{dYdT}) can be integrated from $Y_{0,i}$ to $Y_{p,i}$ (the value of $Y_i$ at the peak), and $T_0$ to $T_{p,i}$:
 \be
-   \int_{Y_0}^{Y_p} \left( \frac{dY'}{Y'} \right) = - \frac{A}{\beta} \int_{T_0}^{T_p} \exp \left( -\frac{E}{RT'} \right) \; dT'
-   \approx - \frac{A R T_p^2}{ \beta \, (E+2 R T_p) } \; \exp \left( -\frac{E}{RT_p} \right)
+   \int_{Y_{0,i}}^{Y_{p,i}} \left( \frac{dY_i'}{Y_i'} \right) = - \frac{A_i}{\beta} \int_{T_0}^{T_{p,i}} \exp \left( -\frac{E_i}{RT'} \right) \; dT'
+   \approx - \frac{A_i R T_{p,i}^2}{ \beta \, (E_i+2 R T_{p,i}) } \; \exp \left( -\frac{E_i}{RT_{p,i}} \right)
 \ee
-Using Eq.~(\ref{d2YdT2}) to eliminate $A$ yields:
+Using Eq.~(\ref{d2YdT2}) to eliminate $A_i$ yields:
 \be
-   \ln \left( \frac{Y_p}{Y_0} \right) = - \frac{E}{E+2 R T_p} \approx -1  \quad \quad (E \gg 2 R T_p)
+   \ln \left( \frac{Y_{p,i}}{Y_{0,i}} \right) = - \frac{E_i}{E_i+2 R T_{p,i}} \approx -1  \quad \quad (E_i \gg 2 R T_{p,i})
 \ee
-or more simply, $Y_p \approx Y_0/e$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
+or more simply, $Y_{p,i} \approx Y_{0,i}/e$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
 \be
-   E = RT_p^2 \, \frac{A}{\beta} \, \exp \left( -\frac{E}{RT_p} \right) = \frac{RT_p^2}{\beta} \frac{r_p}{Y_p}
-   \approx \frac{RT_p^2}{\beta} \frac{e r_p}{Y_0}  \label{E_formula}
+   E_i = RT_{p,i}^2 \, \frac{A_i}{\beta} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) = \frac{RT_{p,i}^2}{\beta} \frac{r_{p,i}}{Y_{p,i}}
+   \approx \frac{RT_{p,i}^2}{\beta} \frac{e r_{p,i}}{Y_{0,i}}  \label{E_formula}
 \ee
-Then $A$ can be evaluated directly from Eq.~(\ref{dYdt}):
+Then $A_i$ can be evaluated directly from Eq.~(\ref{dYdt}):
 \be
-   A = \frac{r_p}{Y_p} \, \exp \left( \frac{E}{RT_p} \right) \approx \frac{e r_p}{Y_0} \, \exp \left( \frac{E}{RT_p} \right) \label{A_formula}
+   A_i = \frac{r_{p,i}}{Y_{p,i}} \, \exp \left( \frac{E_i}{RT_{p,i}} \right) \approx \frac{e r_{p,i}}{Y_{0,i}} \, \exp \left( \frac{E_i}{RT_{p,i}} \right) \label{A_formula}
 \ee
-Note that the formulae for $A$ and $E$ are appropriate for multiple-step reactions, where the number of peaks in the reaction
+Note that the formulae for $A_i$ and $E_i$ are appropriate for multiple-step reactions, where the number of peaks in the reaction
 rate curve corresponds to the number of material components, and each component undergoes a single-step reaction that forms
 fuel gas and residue.
-For each peak, the value of $T_p$ is readily obtained from the plot.
-For TGA data, the values of $r_p$ can be obtained directly from inspection of the reaction
-rate curve, assuming the units are s$^{-1}$. The values of $Y_0$ can be estimated based on the relative area underneath
+For each peak, the value of $T_{p,i}$ is readily obtained from the plot.
+For TGA data, the values of $r_{p,i}$ can be obtained directly from inspection of the reaction
+rate curve, assuming the units are s$^{-1}$. The values of $Y_{0,i}$ can be estimated based on the relative area underneath
 the peak.
 
 
@@ -1821,30 +1822,30 @@ the peak.
 \label{cable_11_mcc}
 
 This section describes a method for interpreting micro-combustion calorimeter (MCC) measurements.
-The pyrolysis combustion flow calorimeter (PCFC), developed 
-by Lyon and Walters~\cite{Lyon:JAAP2004} at the U.S. Federal Aviation Administration (FAA), is a device 
-used to measure the heat generated from the combustion of small (4~mg to 6~mg) material samples by oxygen depletion calorimetry. 
-Samples are pyrolyzed at a specified heating rate in an anerobic atmosphere (typically N$_2$) and the resulting gases are mixed with 
-excess oxygen and combusted in a separate chamber. The heat release rate from the specimen is obtained from measurements of the 
-concentration of oxygen in the effluent exiting the combustor as a function of time. The methodology is the basis for 
+The pyrolysis combustion flow calorimeter (PCFC), developed
+by Lyon and Walters~\cite{Lyon:JAAP2004} at the U.S. Federal Aviation Administration (FAA), is a device
+used to measure the heat generated from the combustion of small (4~mg to 6~mg) material samples by oxygen depletion calorimetry.
+Samples are pyrolyzed at a specified heating rate in an anerobic atmosphere (typically N$_2$) and the resulting gases are mixed with
+excess oxygen and combusted in a separate chamber. The heat release rate from the specimen is obtained from measurements of the
+concentration of oxygen in the effluent exiting the combustor as a function of time. The methodology is the basis for
 the standard test ASTM~D~7309~\cite{ASTM:D7309}.
 
-The results of PCFC measurements for several multi-conductor control cables are shown in Fig.~\ref{mcc_plots}. 
-For each cable, the insulation and jacket material were tested separately, and at least three replicates were performed for each 
-(only one replicate is shown for each sample). The samples, weighing approximately 5~mg, were cut from the cable jackets and conductor 
+The results of PCFC measurements for several multi-conductor control cables are shown in Fig.~\ref{mcc_plots}.
+For each cable, the insulation and jacket material were tested separately, and at least three replicates were performed for each
+(only one replicate is shown for each sample). The samples, weighing approximately 5~mg, were cut from the cable jackets and conductor
 insulation material of each of the cables. These samples were pyrolyzed in the PCFC at a rate of 1~K/s
-from 100~$^\circ$C to 600~$^\circ$C in a nitrogen atmosphere and the effluent combusted at 900~$^\circ$C in a mixture consisting of 20~\% O$_2$ 
-and 80~\% N$_2$. The resulting curve shows the heat release rate of the sample as it was heated, normalized by the mass of the original sample. 
-There are usually one, two or three noticeable peaks in the curve, corresponding to temperatures where a significant decomposition reaction occurs. 
-Each peak can be characterized by the maximum value of the heat release rate~($\dot{q}_p$), the temperature ($T_p$), and the relative fraction of the original 
-sample mass that undergoes this particular reaction ($Y_0$). The area under the curve
+from 100~$^\circ$C to 600~$^\circ$C in a nitrogen atmosphere and the effluent combusted at 900~$^\circ$C in a mixture consisting of 20~\% O$_2$
+and 80~\% N$_2$. The resulting curve shows the heat release rate of the sample as it was heated, normalized by the mass of the original sample.
+There are usually one, two or three noticeable peaks in the curve, corresponding to temperatures where a significant decomposition reaction occurs.
+Each peak can be characterized by the maximum value of the heat release rate~($\dot{q}_{p,i}$), the temperature ($T_{p,i}$), and the relative fraction of the original sample mass that undergoes this particular reaction ($Y_{0,i}$). The area under the curve
 \be \int_0^\infty \dot{q}(T) \, dT = \beta \, \Delta H' \ee
 is the sample heating rate ($\beta$) times the energy released per unit mass of the original sample ($\Delta H'$). This latter quantity is
 related to the more conventional heat of combustion via the relation
 \be \Delta H = \frac{\Delta H'}{1-\nu_r} \ee
-where $\nu_r$ is the fraction of the original mass that remains as residue. Sometimes this is referred to as the ``char yield.''
- 
-The MCC measurement is similar to TGA in that it is possible to derive the kinetic parameters, $A$ and $E$, for the various reactions from
+where $\nu_r$ is the fraction of the original mass that remains as residue. Sometimes this is referred to as the ``char yield.'' Note that it is
+assumed to be the same for all reactions.
+
+The MCC measurement is similar to TGA in that it is possible to derive the kinetic parameters, $A_i$ and $E_i$, for the various reactions from
 the heat release rate curve. As an example of how to work with MCC data, consider the two plots shown in Fig.~\ref{mcc_plots}. The solid curves in the figures
 display the results of micro-calorimetry measurements for the insulation and jacket material of a multi-conductor control
 cable (the number 11 has no particular meaning other than to distinguish it from other cables being studied).
@@ -1865,16 +1866,16 @@ sample heating, a very thin sheet comprised of a mixture of the solid components
 rate specified in the experiment (1~K/s or 60~K/min, the units needed in FDS).
 For each reaction,
 the kinetic parameters are calculated using the formulae (\ref{E_formula}) and (\ref{A_formula}). The values of
-$T_p$ are obtained directly from the figures. The value of $r_p/Y_0$ for the $j$th reaction can be found from:
+$T_{p,i}$ are obtained directly from the figures. The value of $r_{p,i}/Y_{0,i}$ for the $i$th reaction can be found from:
 \be
-   r_{p,j} = \beta \, \frac{\dot{q}_{p,j}}{ \Delta H'}   \quad ; \quad 
+   r_{p,i} = \beta \, \frac{\dot{q}_{p,i}}{ \Delta H'}   \quad ; \quad
    \Delta H'=\int_0^\infty \dot{q}(T) \, dT   \label{r_formula}
 \ee
-where $\dot{q}_{p,j}$ is the value of the $j$th heat release rate peak. The values, $Y_{0,j}$, can be estimated from the
+where $\dot{q}_{p,i}$ is the value of the $i$th heat release rate peak. The values, $Y_{0,i}$, can be estimated from the
 relative area under the curve. Their sum ought to be 1.
 It is important to check the units of all of these quantities because the
 results of these experiments are often presented in different ways depending on the particular application. A mistake
-in units can result in values of $A$ and/or $E$ that will invariably cause spurious results.
+in units can result in values of $A_i$ and/or $E_i$ that will invariably cause spurious results.
 
 The dashed curves in Fig.~\ref{mcc_plots} are the results of numerically integrating Eq.~(\ref{dYdt}) within FDS for each
 material component. A typical input line for FDS that describes a single material component undergoing a single
@@ -1898,13 +1899,13 @@ reaction is given by:
 \end{verbatim} \normalsize
 
 \noindent Only the relevant parameters are shown. The other parameters are not relevant in this
-exercise. Note that {\ct REFERENCE\_TEMPERATURE} is $T_p$, but in units of $^\circ$C. {\ct REFERENCE\_RATE} is actually
-$r_p/Y_0$, in units of s$^{-1}$. {\ct HEATING\_RATE} is $\beta$ in units of K/min.
+exercise. Note that {\ct REFERENCE\_TEMPERATURE} is $T_{p,i}$, but in units of $^\circ$C. {\ct REFERENCE\_RATE} is actually
+$r_{p,i}/Y_{0,i}$, in units of s$^{-1}$. {\ct HEATING\_RATE} is $\beta$ in units of K/min.
 {\ct NU\_RESIDUE} is $\nu_r$ and {\ct NU\_FUEL} is ($1-\nu_r$).
 Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket
-materials. The peak temperatures are easy to estimate, and the values of $r_p/Y_0$ can be fine-tuned to closely match
-the data. Note that it is possible to compute values of $A$ and $E$ and input them directly into FDS, rather
-than inputting those listed in the table. However, the values of $A$ and $E$ are fairly large numbers and have little
+materials. The peak temperatures are easy to estimate, and the values of $r_{p,i}/Y_{0,i}$ can be fine-tuned to closely match
+the data. Note that it is possible to compute values of $A_i$ and $E_i$ and input them directly into FDS, rather
+than inputting those listed in the table. However, the values of $A_i$ and $E_i$ are fairly large numbers and have little
 meaning in their own.
 
 
@@ -1915,10 +1916,10 @@ meaning in their own.
 \label{cable_parameters}
 \begin{tabular}{|l||c|c||c|c|c|}
 \hline
-Parameter               & \multicolumn{2}{|c|}{Insulation, $\nu_r$=0.06 }  &  \multicolumn{3}{|c|}{Jacket, $\nu_r$=0.49} \\ \cline{2-6}
-                        & 1             & 2                 &  1        & 2         & 3              \\ \hline \hline
-$T_p$ ($^\circ$C)       & 355           & 485               &  300      & 345       & 450            \\ \hline
-$r_p/Y_0$ (s$^{-1}$)    & 0.0384        & 0.2426            &  0.0064   & 0.3500    & 0.0156         \\ \hline
+Parameter                       & \multicolumn{2}{|c|}{Insulation, $\nu_r$=0.06 }  &  \multicolumn{3}{|c|}{Jacket, $\nu_r$=0.49} \\ \cline{2-6}
+                                & 1             & 2                 &  1        & 2         & 3              \\ \hline \hline
+$T_{p,i}$ ($^\circ$C)           & 355           & 485               &  300      & 345       & 450            \\ \hline
+$r_{p,i}/Y_{0,i}$ (s$^{-1}$)    & 0.0384        & 0.2426            &  0.0064   & 0.3500    & 0.0156         \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
