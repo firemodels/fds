@@ -39,7 +39,7 @@ pause
 
 Rem --------------- 64 bit Windows ----------------
 if not %upload_win64% == 1 goto endif_win64
-  set glabels=Type-Installer,Opsys-Windows_64,%level%
+  set glabels=Type-Installer,OpSys-Windows_64,%level%
   set dplatform=64 bit Windows
   set platform=win64
   set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
