@@ -20,6 +20,7 @@ copy smokeview.ini %smvdir%\smokeview.ini
 copy smokeview32_release.exe %smvdir%\smokeview.exe
 copy smokediff32_release.exe %smvdir%\smokediff.exe
 copy smokezip32_release.exe %smvdir%\smokezip.exe
+copy background.exe %smvdir%\background.exe
 copy objects.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
 copy pthreadVC.dll %smvdir%\.
