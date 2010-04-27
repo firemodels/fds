@@ -29,7 +29,7 @@ cd %svn_root%\smv_5\for_bundle\to_google
 
 Rem --------------- 32 bit Windows ----------------
 if not %upload_win32% == 1 goto endif_win32
-  set glabels=Type-Installer,Opsys-Windows,%level%
+  set glabels=Type-Installer,OpSys-Windows,%level%
   set dplatform=32 bit Windows
   set platform=win32
   set summary=Smokeview %version% for %dplatform% (SVN r%smv_revision%)

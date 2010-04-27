@@ -32,7 +32,7 @@ pause
 
 Rem --------------- 64 bit OSX ----------------
 
-  set glabels=Type-Archive,Opsys-OSX,%level%
+  set glabels=Type-Archive,OpSys-OSX_64,%level%
   set dplatform=64 bit OSX
   set platform=osx64
   set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)

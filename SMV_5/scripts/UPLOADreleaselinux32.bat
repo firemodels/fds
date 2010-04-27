@@ -33,7 +33,7 @@ pause
 
 Rem --------------- 32 bit Linux ----------------
 
-  set glabels=Type-Archive,Opsys-Linux,%level%
+  set glabels=Type-Archive,OpSys-Linux,%level%
   set dplatform=32 bit Linux
   set platform=linux32
   set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
