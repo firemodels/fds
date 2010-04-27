@@ -19,6 +19,7 @@ mkdir %smvdir%
 copy smokeview.ini %smvdir%\smokeview.ini
 copy smokeview64_release.exe %smvdir%\smokeview.exe
 copy smokezip64_release.exe %smvdir%\smokezip64.exe
+copy background.exe %smvdir%\background.exe
 copy smokediff64_release.exe %smvdir%\smokediff64.exe
 copy objects.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
@@ -32,7 +33,7 @@ wzzip -a -r -P %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-c:\bin\winzip\wzipse32 %zipbase%.zip -d "c:\program files\fds\fds5\bin"
+wzipse32 %zipbase%.zip -d "c:\program files\fds\fds5\bin"
 copy %zipbase%.exe ..\.
 
 cd ..\..\..\scripts
