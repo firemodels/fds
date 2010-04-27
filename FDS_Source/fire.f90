@@ -179,6 +179,7 @@ DO K=1,KBAR
 
             ! Evaluate empirical extinction criteria
             IF (EMPIRICAL_EXTINCTION) THEN
+               DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO) 
                ITMP = NINT(MIN(5000._EB,TMP(I,J,K)))
                YY_GET = 0._EB
                YY_GET(I_FUEL) = 1._EB
