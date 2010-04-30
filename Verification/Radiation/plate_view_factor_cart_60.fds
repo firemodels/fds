@@ -1,6 +1,6 @@
 &HEAD CHID='plate_view_factor_cart_60',TITLE='Heat flux from rectangular plate,SVN $Revision: 3499 $' /
 
-The RADIATIVE HEAT FLUXES shouls be 81.8 kW/m2.
+The RADIATIVE HEAT FLUX should be 81.8 kW/m2.
 
 &MESH IJK=20,20,10, XB=0,2,0,2,0,1 /
 
