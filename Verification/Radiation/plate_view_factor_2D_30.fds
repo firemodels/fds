@@ -1,6 +1,6 @@
 &HEAD CHID='plate_view_factor_2D_30',TITLE='View factor from infinite slab, SVN $Revision: 3499 $'/
 
-The RADIATIVE HEAT FLUX shouls be 105.34 kW/m2
+The RADIATIVE HEAT FLUX should be 105.34 kW/m2
 
 &MESH IJK=20,1,10, XB=0,2,-.5,.5,0,1 /
 

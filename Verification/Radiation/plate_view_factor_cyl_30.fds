@@ -1,6 +1,6 @@
 &HEAD CHID='plate_view_factor_cyl_30',TITLE='View factor from circular plate, SVN $Revision: 3499 $'/
 
-The RADIATIVE HEAT FLUX shouls be 74.1 kW/m2
+The RADIATIVE HEAT FLUX should be 74.1 kW/m2
 
 &MESH IJK=10,1,10, XB=0.0,3.0,-.5,.5,0.0,3.0 CYLINDRICAL = .TRUE. /
 
