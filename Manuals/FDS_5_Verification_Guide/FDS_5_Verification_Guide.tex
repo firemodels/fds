@@ -1397,6 +1397,36 @@ of loosely and densely packed radiating spheres.}
 \label{hot_spheres_plot}
 \end{figure}
 
+\clearpage
+
+\section{Radiation Absorbed by Liquid Droplets (\texorpdfstring{{\bf droplet\_absorption}}{droplet\_absorption}) }
+\label{droplet_absorption}
+
+This case tests the conservation of energy that is absorbed by liquid droplets. We want to make sure that the energy that is taken away from 
+the thermal radiation field is accuratelly converted into increased temperature of the droplets. Considering the total mass of 
+absorbing droplets, the average droplet temperature $\bar{T_d}$ is increased by the absorbed radiation $\dot{Q}_r$ according to the following ODE
+\be
+m c_p \frac{d \bar{T_d}}{dt} = \dot{Q}_r
+\ee
+where $m$ and $c_p$ are the total mass and specific heat of the droplets, respectively. Here we have assumed that the convective heat transfer between the
+gas and droplets is small. (This is implemented by increasing the gas phase Prandtl number into a artificially high value.)
+If the absorbed power remains constant during the time step, the average droplet temperature in the end should be
+\be
+\bar{T_d} = T_0 + dt \int\dot{Q}_r dV / (m c_p)
+\ee
+By setting $T_0=$ 0$^\circ$C, $dt =$ 0.01~s, $m =$ 0.01~kg and $c_p =$ 1.0~kJ/kg, the value of $\bar{T_d}$ should be equal to the volumetric integral of
+$\dot{Q}_r$. The following two plots show comparison of the predicted average droplet temperature and the analytical value in cartesian and cylindrical
+co-ordinate systems.
+\noindent
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/droplet_absorption_cart} &
+\includegraphics[width=3.2in]{FIGURES/droplet_absorption_cyl} 
+\end{tabular*}
+\caption[Radiation absorption by liquid droplets]{Conserversion of absorbed thermal radiation energy into increased average droplet temperature.}
+\label{droplet_absorption_figures}
+\end{figure}
+
 
 
 \chapter{Species and Combustion}
