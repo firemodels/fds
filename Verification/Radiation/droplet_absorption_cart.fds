@@ -1,0 +1,67 @@
+
+The droplet tempererature is increased by the absorption of thermal radiation.
+Considering the total mass of absorbing droplets, the ode for average droplet 
+temperature is
+
+m c_p dT/dt = Q_abs
+
+With constant conditions, the average droplet temperature in the end should be
+
+dT = dt Q_abs / (m c_p)
+
+By setting dt = 0.01 s, m = 0.01 kg and c_p = 1.0 kJ/kg, the numerical 
+value of dT should be equal to the time averaged Q_abs.
+
+--------------------FDS Data-----------------------------
+&HEAD CHID='droplet_absorption_cart',TITLE='Cartesian droplet absorption test case, SVN $Revision: 5905 $' /
+
+&MESH IJK=3,3,3, XB=0.0,3.0,0.0,3.0,0.0,3.0 /
+
+&TIME T_END=.01 DT = 0.0001 / 
+
+&MISC 	SURF_DEFAULT = 'HOT' 
+	GVEC = 0,0,0
+        PR = 100.
+	RUN_AVG_FAC = 0. /
+
+&DUMP NFRAMES=100, DT_PL3D=10000. /
+
+&RADI RADTMP=1000.
+      ANGLE_INCREMENT=1
+      TIME_STEP_INCREMENT=1 /
+
+&SURF ID='HOT'
+      TMP_FRONT = 1000.
+      TAU_T = 0.0 /
+
+&PART ID='water drops'
+      STATIC = .TRUE.
+      INITIAL_TEMPERATURE = 0.
+      VAPORIZATION_TEMPERATURE = 1000.
+      SPECIFIC_HEAT = 1.0
+      HEAT_OF_VAPORIZATION = 0.01
+      WATER=.TRUE.
+      DIAMETER=1000.
+      MINIMUM_DIAMETER=10.
+      SAMPLING_FACTOR=1 /
+
+	
+&INIT 	NUMBER_INITIAL_DROPLETS = 100, 
+	MASS_PER_VOLUME = 0.01
+        XB = 1,2,1,2,1,2
+	PART_ID = 'water drops' /
+
+
+&DEVC QUANTITY='WATER RADIATION LOSS', ID = 'Absorption'
+	STATISTICS = 'VOLUME INTEGRAL', XB = 0,3,0,3,0,3 /
+&DEVC QUANTITY='ADT', PART_ID='water drops', ID = 'ADT'
+	STATISTICS = 'VOLUME MEAN', XB = 1,2,1,2,1,2 /
+&DEVC QUANTITY='MPUV', PART_ID='water drops' 
+	STATISTICS = 'VOLUME INTEGRAL', XB = 0,3,0,3,0,3 /
+&DEVC QUANTITY='ADD', PART_ID='water drops' 
+	STATISTICS = 'VOLUME MEAN', XB = 1,2,1,2,1,2 /
+	
+
+&TAIL /
+
+
