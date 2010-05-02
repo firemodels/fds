@@ -377,6 +377,12 @@ OBJECTDEF // object for a general ball
  ENDIF
  NO_OP
 
+OBJECTDEF
+ face_eye
+  :R=0 :G=0 :B=0 :W :H
+ $R $G $B setrgb
+ rotateeye $W $H 1.0 scalexyz 1.0 drawsquare
+
 OBJECTDEF // object for dynamic textured sphere
  movingsphere2
  :R=0 :G=0 :B=0  // sphere color
