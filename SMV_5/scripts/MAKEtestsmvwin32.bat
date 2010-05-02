@@ -27,7 +27,8 @@ svn -r %smv_revision% update
 
 cd %svn_root%\smv_5\Build\INTEL_WIN_TEST_32
 erase *.obj
-make_smv
+call make_smv
+copy %svn_root%\smv_5\bin\smv5_win_test_32.exe %svn_root%\smv_5\for_bundle\smokeview32_test.exe
 
 echo.
 echo compilation complete
