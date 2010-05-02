@@ -81,6 +81,7 @@ SVEXTERN unsigned int GPU_depthtexture;
 SVEXTERN int i_hrrcutoff;
 #endif
 
+SVEXTERN float partfacedir[3];
 SVEXTERN int demo_option;
 SVEXTERN int small_font_height, large_font_height;
 SVEXTERN float cb_valmin, cb_valmax, cb_val;
