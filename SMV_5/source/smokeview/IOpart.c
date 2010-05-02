@@ -1613,12 +1613,6 @@ void drawPart5(const particle *parti){
                 glPushMatrix();
                 glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
 
-// A vector pointing from the eye position to the particle positino
-//    (for future use)
-//                 xyznorm[0]=world_eyepos[0]-xplts[sx[j]];
-//                 xyznorm[1]=world_eyepos[1]-yplts[sy[j]];
-//                 xyznorm[2]=world_eyepos[2]-zplts[sz[j]];
-
                 glRotatef(-datacopy->partclassbase->elevation,0.0,1.0,0.0);
                 glRotatef( datacopy->partclassbase->azimuth,  0.0,0.0,1.0);
 
@@ -1637,6 +1631,11 @@ void drawPart5(const particle *parti){
                 prop=datacopy->partclassbase->prop;
                 copy_dep_vals(partclassi,datacopy,colorptr,prop,j);
                 glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+
+                partfacedir[0]=xbar0+world_eyepos[0]/xyzmaxdiff-xplts[sx[j]];
+                partfacedir[1]=ybar0+world_eyepos[1]/xyzmaxdiff-yplts[sy[j]];
+                partfacedir[2]=zbar0+world_eyepos[2]/xyzmaxdiff-zplts[sz[j]];
+                
                 draw_SVOBJECT(prop->smv_object,0,prop);
                 glPopMatrix();
               }

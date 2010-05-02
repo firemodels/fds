@@ -51,6 +51,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEXYZ 132
 #define SV_GTRANSLATE  133
 #define SV_ROTATEAXIS 134
+#define SV_ROTATEEYE 135
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -84,6 +85,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEXYZ_NUMARGS 3
 #define SV_GTRANSLATE_NUMARGS  3
 #define SV_ROTATEAXIS_NUMARGS 4
+#define SV_ROTATEEYE_NUMARGS 0
 
 #define SV_TRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEX_NUMOUTARGS    0
@@ -117,6 +119,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEXYZ_NUMOUTARGS 0
 #define SV_GTRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEAXIS_NUMOUTARGS 0
+#define SV_ROTATEEYE_NUMOUTARGS 0
 
 
 #define SV_DRAWCUBE      200
@@ -226,6 +229,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected);
 float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2[3]);
 
+void rotateeye(void);
 void rotateaxis(float angle, float ax, float ay, float az);
 void rotatexyz(float x, float y, float z);
 void drawcone(float d1, float height, unsigned char *rgbcolor);
@@ -1084,6 +1088,9 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
     case SV_ROTATEAXIS:
       rotateaxis(arg[0],arg[1],arg[2],arg[3]);
       break;
+    case SV_ROTATEEYE:
+      rotateeye();
+      break;
     case SV_ROTATEX:
       glRotatef(arg[0],1.0,0.0,0.0);
       break;
@@ -1738,6 +1745,13 @@ void drawring(float diam_inner, float diam_outer, float height, unsigned char *r
   }
   glEnd();
 
+}
+
+
+/* ----------------------- rotateeye ----------------------------- */
+
+void rotateeye(void){
+  rotatexyz(partfacedir[0],partfacedir[1],partfacedir[2]);
 }
 
 /* ----------------------- rotateaxis ----------------------------- */
@@ -2451,6 +2465,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_ROTATEAXIS;
     num_op=SV_ROTATEAXIS_NUMARGS;
     num_outop=SV_ROTATEAXIS_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"rotateeye")==0){
+    op=SV_ROTATEEYE;
+    num_op=SV_ROTATEEYE_NUMARGS;
+    num_outop=SV_ROTATEEYE_NUMOUTARGS;
   }
   else if(STRCMP(token,"rotatex")==0){
     op=SV_ROTATEX;

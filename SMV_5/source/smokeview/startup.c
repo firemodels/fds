@@ -963,6 +963,9 @@ void initvars1(void){
   vis_slice_contours=0;
   update_slicecontours=0;
 #endif
+  partfacedir[0]=0.0;
+  partfacedir[1]=0.0;
+  partfacedir[2]=1.0;
   unload_qdata=0;
   update_makeiblank_smoke3d=0;
   update_initcull=0;
