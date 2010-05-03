@@ -27,7 +27,8 @@ svn -r %smv_revision% update
 
 cd %svn_root%\smv_5\Build\INTEL_WIN_64
 erase *.obj
-make_smv
+call make_smv
+copy %svn_root%\smv_5\bin\smv5_win_64.exe %svn_root%\smv_5\for_bundle\smokeview64_release.exe
 
 echo.
 echo compilation complete
