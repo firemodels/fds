@@ -1039,6 +1039,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   M2%WALL(IW)%ILW(N,IBND)=IL(M2%IJKW(10,IW),M2%IJKW(11,IW),M2%IJKW(12,IW))
                ENDDO OTHER_WALL_LOOP
             ENDDO INTERPOLATION_LOOP
+
+            ! Compute projected intensity on gas phase devices measuring radiative flux
+
             IF (GAS_CELL_RAD_FLUX) THEN
                DEVC_LOOP: DO NN = 1, N_GAS_CELL_RAD_DEVC
                   DV => DEVICE(GAS_CELL_RAD_DEVC_INDEX(NN))
@@ -1047,7 +1050,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   IF (COSINE <0._EB) DV%ILW(N,IBND) = -COSINE * IL(DV%I,DV%J,DV%K)
                ENDDO DEVC_LOOP
             ENDIF
+
          ENDDO ANGLE_LOOP
+
       ENDDO UPDATE_LOOP
  
       ! Compute incoming flux on walls 
