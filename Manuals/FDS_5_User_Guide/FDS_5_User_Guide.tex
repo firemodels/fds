@@ -5677,7 +5677,7 @@ fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules ar
 a given mesh cell at a given time step. This section provides a brief explanation of these rules and the parameters that control them.
 
 In an LES simulation, the heat release rate is computed as
-\be \dq''' = \min \, \left( \dq_{\max}''' \; , \; \frac{ \min \left( \rho Y_\F , s \rho Y_\OTWO \right) }{\tau} \, \Delta H  \right) \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \ee
+\be \dq''' = \min \, \left( \dq_{\max}''' \; , \; \frac{ \rho \min \left( \rho Y_\F , \rho Y_\OTWO/s \right) }{\tau} \, \Delta H  \right) \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \ee
 Here, $\tau$ is a mixing time scale~\cite{Raman:CF} given by
 \be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \ee
 The coefficient, $C$, is taken as 0.1 in FDS by default, based on comparisons to various flame height correlations. It is given by
@@ -5687,9 +5687,9 @@ on the {\ct REAC} line, in which case $\tau$ becomes the time step, $\dt$.
 There is an additional bound on the local heat release rate per unit volume,
 based on an empirical estimate of the average volumetric heat release rate of a fire.
 Orloff and De Ris~\cite{Orloff:19th_Symposium} suggest a value of 1200~kW/m$^3$ for the entire fire.
-FDS uses by default a value of 
+FDS uses by default a value of
 \be \dq_{\max}'''=\frac{\dq_{\max}''}{\dx} + \overline{\dq_{\max}'''} \quad \hbox{kW/m}^3 \ee
-as a local upper bound. The term, $\dq_{\max}''$, is the maximum heat release rate per unit area of flame sheet. 
+as a local upper bound. The term, $\dq_{\max}''$, is the maximum heat release rate per unit area of flame sheet.
 It is specified via {\ct HRRPUA\_SHEET} on the {\ct REAC} line. It is 0~kW/m$^2$ by default for LES; 200 for DNS.
 The term, $\overline{\dq_{\max}'''}$, is the maximum heat release rate per unit volume.
 It is specified via {\ct HRRPUV\_AVERAGE} on the {\ct REAC} line. It is 2500~kW/m$^3$ by default for LES; 0 for DNS.
@@ -6809,13 +6809,13 @@ designate two nozzles of the same type, one which activates at time zero, the ot
 \subsubsection{Example Case: {\bf flow\_rate}}
 
 This example demonstrates the use of pressure ramps and control logic for opening and closing nozzles. It also serves as a verification test for
-the water flow rate. There are four nozzles that open at designated times: 0 s, 15 s, 30 s and 45 s. At time 60 s, all the nozzles are closed. 
+the water flow rate. There are four nozzles that open at designated times: 0 s, 15 s, 30 s and 45 s. At time 60 s, all the nozzles are closed.
 The number of open nozzles is measured using a device with quantity {\ct 'OPEN NOZZLES'}. A comparison of the FDS result and the exact, intended values
 is shown in left part of Figure~\ref{flow_rate}.
 
-The pressure ramp has been designed to deliver a total flow rate of 10 l/min at all values of open nozzles. Mathematically this means that 
+The pressure ramp has been designed to deliver a total flow rate of 10 l/min at all values of open nozzles. Mathematically this means that
 \be
-N_n K \sqrt{p} = 10 \;\hbox{l/min} \Rightarrow 
+N_n K \sqrt{p} = 10 \;\hbox{l/min} \Rightarrow
 p = \left( \frac{10 \;\hbox{l/min}}{N_n K}\right)^2
 \ee
 
@@ -6823,26 +6823,26 @@ p = \left( \frac{10 \;\hbox{l/min}}{N_n K}\right)^2
 where $N_n$ is the number of open nozzles. The corresponding nozzle and pressure ramp definitions are
 \footnotesize
 \begin{verbatim}
-&PROP ID='Head', 
-      OFFSET=0.10, 
-      PART_ID='water drops', 
+&PROP ID='Head',
+      OFFSET=0.10,
+      PART_ID='water drops',
       K_FACTOR = 2.5
       OPERATING_PRESSURE = 1
       PRESSURE_RAMP = 'PR'
-      DROPLET_VELOCITY=2., 
-      SPRAY_ANGLE= 0.,60., 
+      DROPLET_VELOCITY=2.,
+      SPRAY_ANGLE= 0.,60.,
       SMOKEVIEW_ID='sprinkler_upright' /
 
-&RAMP ID='PR',   T= 1., F=16. /    
-&RAMP ID='PR',   T= 2., F=4. /     
-&RAMP ID='PR',   T= 3., F=1.778 /  
-&RAMP ID='PR',   T= 4., F=1. /     
+&RAMP ID='PR',   T= 1., F=16. /
+&RAMP ID='PR',   T= 2., F=4. /
+&RAMP ID='PR',   T= 3., F=1.778 /
+&RAMP ID='PR',   T= 4., F=1. /
 \end{verbatim}
 \normalsize
 
-The accumulated water is tracked using a device measuring the accumulated mass per unit area, integrated over the total floor area. 
-The total mass of accumulated water should increase from zero to 10 kg in 60 s. A comparison of the FDS prediction and this analytical result is 
-shown in the right side of Figure~\ref{flow_rate}. The small delay of the FDS result is caused by the time it takes from the droplets to fall down on the 
+The accumulated water is tracked using a device measuring the accumulated mass per unit area, integrated over the total floor area.
+The total mass of accumulated water should increase from zero to 10 kg in 60 s. A comparison of the FDS prediction and this analytical result is
+shown in the right side of Figure~\ref{flow_rate}. The small delay of the FDS result is caused by the time it takes from the droplets to fall down on the
 floor.
 
 \begin{figure}[ht]
