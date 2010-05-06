@@ -2382,6 +2382,7 @@ SURFLOOP: DO N=0,N_SURF
          IF (SF%BACKING==EXPOSED)   WRITE(LU_OUTPUT,'(A)') '     Exposed Backing'
       ENDIF
       IF (SF%GEOMETRY==SURF_CYLINDRICAL) WRITE(LU_OUTPUT,'(A)') '     Assumed cylindrical symmetry'
+      IF (SF%GEOMETRY==SURF_SPHERICAL)   WRITE(LU_OUTPUT,'(A)') '     Assumed spherical symmetry'
    ENDIF THICK
  
    IF (SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE) &
@@ -2407,6 +2408,8 @@ SURFLOOP: DO N=0,N_SURF
                SF%MASS_FLUX(I_FUEL)*REACTION(1)%HEAT_OF_COMBUSTION* REACTION(1)%Y_F_INLET*0.001_EB
       ENDIF
    ENDIF
+
+   IF (SF%CONV_LENGTH /= 1._EB) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Convection length scale (m) ', SF%CONV_LENGTH
  
 ENDDO SURFLOOP
  
