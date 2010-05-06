@@ -2526,7 +2526,7 @@ grid resolution is too coarse to resolve the flame.  Thus, flame temperatures wi
 finite-rate computation will not succeed.
 Instead, if any grid cell surrounding one containing both fuel and oxygen satisfies the ``Burn'' criteria depicted in Fig.~\ref{plotsupp},
 combustion is assumed to occur.  The heat release rate is computed as
-\be \dq''' = \frac{ \min \left( \rho Y_\F , s \rho Y_\OTWO \right) }{\tau} \, \Delta H  \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }   \ee
+\be \dq''' = \frac{ \rho \min \left( Y_\F , Y_\OTWO/s \right) }{\tau} \, \Delta H  \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }   \ee
 Here, $\tau$ is a mixing time scale~\cite{Raman:CF} given by
 \be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \label{mixtime} \ee
 The coefficient, $C$, is taken as 0.1 in FDS by default, based on comparisons to various flame height correlations.
