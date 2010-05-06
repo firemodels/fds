@@ -1,24 +1,27 @@
-&HEAD CHID='Sandia_CH4_1m_Test24_dx1p5cm', TITLE='Sandia 1m med flow rate methane pool fire (Test 24), 1.5 cm resolution' /
+&HEAD CHID='Sandia_H2_1m_Test35_dx3cm', TITLE='Sandia 1m hydrogen pool fire (Test 35), 3 cm resolution' /
 
 &MULT ID='mesh array', DX=1.5,DY=1.5,DZ=1.0, I_UPPER=1,J_UPPER=1,K_UPPER=3 /
-&MESH IJK=96,96,64, XB=-1.5,0.0,-1.5,0.0,-.0625,0.9375, MULT_ID='mesh array' /
+&MESH IJK=48,48,32, XB=-1.5,0.0,-1.5,0.0,-.0625,0.9375, MULT_ID='mesh array' /
 
 &TIME T_END=20. /
 &DUMP DT_PL3D=1.E10, DT_DEVC=10. /
-&MISC TMPA=20.
-      P_INF=81300.
-      HUMIDITY=14.
+&MISC TMPA=26.
+      P_INF=82200.
+      HUMIDITY=8.
       FDS6=.TRUE.
       CHECK_KINETIC_ENERGY=.TRUE.
-      SURF_DEFAULT='PLATE'/
+      SURF_DEFAULT='PLATE'
+      SUPPRESSION=.FALSE./
 
-&REAC ID='METHANE'
-      C=1.
-      H=4.
-      HEAT_OF_COMBUSTION=50056.
-      CRITICAL_FLAME_TEMPERATURE=1207 /
+&RADI RADIATIVE_FRACTION=0. / if 0 use RADCAL
 
-&SURF ID='POOL',HRRPUA=2703.,TMP_FRONT=15. /
+&REAC ID='HYDROGEN'
+      C=0.
+      H=2.
+      SOOT_YIELD=0.
+      HEAT_OF_COMBUSTION=120032./
+
+&SURF ID='POOL',MASS_FLUX(1)=0.022,TMP_FRONT=24. /
 &SURF ID='PLATE',COLOR='GRAY' /
 
 &VENT XB=-0.5,0.5,-0.5,0.5,-.0625,-.0625,COLOR='BLUE',SURF_ID='POOL'/
@@ -43,6 +46,7 @@
 &SLCF PBY=-.0625, QUANTITY='C_DYNSMAG' /
 &SLCF PBY=-.0625, QUANTITY='TURBULENCE RESOLUTION' /
 &SLCF PBY=-.0625, QUANTITY='WAVELET ERROR' /
+
 
 Tieszen et al., Comb. and Flame (2002), Figure 6
 &DEVC XYZ = 0.0,0.0,0.505, QUANTITY = 'W-VELOCITY', ID='W005'/

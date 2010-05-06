@@ -1,7 +1,7 @@
-&HEAD CHID='Sandia_He_1m_dx3cm', TITLE='Sandia 1m helium plume, 3 cm resolution' /
+&HEAD CHID='Sandia_He_1m_dx6cm', TITLE='Sandia 1m helium plume, 6 cm resolution' /
 
 &MULT ID='mesh array', DX=1.5,DY=1.5,DZ=1.0, I_UPPER=1,J_UPPER=1,K_UPPER=3 /
-&MESH IJK=48,48,32, XB=-1.5,0.0,-1.5,0.0,-.0625,0.9375, MULT_ID='mesh array' /
+&MESH IJK=24,24,16, XB=-1.5,0.0,-1.5,0.0,-.0625,0.9375, MULT_ID='mesh array' /
 
 &TIME T_END=20. /
 &DUMP DT_PL3D=1.E10, DT_DEVC=10./
