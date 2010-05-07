@@ -934,6 +934,7 @@ void initvars1(void){
   show_smokelighting=0;
 #endif
 #ifdef pp_SHOOTER
+  glui_time=0.0;
   last_prop_display=-1;
   visShooter=0;
   isosubmenus=NULL;
