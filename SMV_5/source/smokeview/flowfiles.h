@@ -843,6 +843,7 @@ typedef struct {
   int terrain, cellcenter, fire_line;
   int compression_type;
   int ncompressed;
+  int slicetype;
   float qval256[256];
   char slicedir[50];
   int loaded, display, benchvis;

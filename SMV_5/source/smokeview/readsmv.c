@@ -3796,6 +3796,10 @@ typedef struct {
       bufptr=trim_string(buffer);
       len=strlen(bufptr);
       sd = sliceinfo+islice;
+      sd->slicetype=0;
+      if(terrain==1)sd->slicetype=1;
+      if(fire_line==1)sd->slicetype=2;
+      if(cellcenter==1)sd->slicetype=3;
       NewMemory((void **)&sd->reg_file,(unsigned int)(len+1));
       STRCPY(sd->reg_file,bufptr);
 

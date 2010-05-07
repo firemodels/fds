@@ -566,6 +566,8 @@ void drawterrain(terraindata *terri, int only_geom){
   float terrain_specular[4]={0.8,0.8,0.8,1.0};
   float zt_min, zt_max;
 
+#define ZOFFSET 0.001
+
   zt_min = zterrain_min;
   zt_max = zterrain_min + vertical_factor*(zterrain_max-zterrain_min);
 
@@ -618,7 +620,7 @@ void drawterrain(terraindata *terri, int only_geom){
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
 
       glNormal3fv(zn);
-      zval = znode[ijnode3(i,j)];
+      zval = znode[ijnode3(i,j)]+ZOFFSET;
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i],y[j],zval);
@@ -627,7 +629,7 @@ void drawterrain(terraindata *terri, int only_geom){
       uc_zn = uc_znormal+ijnode3(ip1,j);
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
       glNormal3fv(zn);
-      zval = znode[ijnode3(ip1,j)];
+      zval = znode[ijnode3(ip1,j)]+ZOFFSET;
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i+1],y[j],zval);
@@ -636,7 +638,7 @@ void drawterrain(terraindata *terri, int only_geom){
       uc_zn = uc_znormal+ijnode3(ip1,jp1);
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
       glNormal3fv(zn);
-      zval = znode[ijnode3(ip1,jp1)];
+      zval = znode[ijnode3(ip1,jp1)]+ZOFFSET;
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i+1],y[j+1],zval);
@@ -645,7 +647,7 @@ void drawterrain(terraindata *terri, int only_geom){
       uc_zn = uc_znormal+ijnode3(i,jp1);
       zn = getnormalvectorptr(wui_sphereinfo, (unsigned int)(*uc_zn));
       glNormal3fv(zn);
-      zval = znode[ijnode3(i,jp1)];
+      zval = znode[ijnode3(i,jp1)]+ZOFFSET;
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
       glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i],y[j+1],zval);
