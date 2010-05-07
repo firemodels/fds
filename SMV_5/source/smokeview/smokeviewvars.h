@@ -36,6 +36,7 @@ SVEXTERN int npropinfo;
 SVEXTERN propdata *propinfo;
 SVEXTERN float right_green, right_blue;
 
+SVEXTERN float glui_time;
 SVEXTERN int show_mode;
 SVEXTERN int cellcenter_interp, cellcenter_slice_active, cellcenter_bound_active;
 SVEXTERN int part5colorindex, show_tracers_always;

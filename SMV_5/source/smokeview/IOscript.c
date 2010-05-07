@@ -1335,6 +1335,42 @@ void script_settimeval(scriptdata *scripti){
   }
 }
 
+/* ------------------ settimeval ------------------------ */
+
+void settimeval(float timeval){
+  int i;
+
+  if(times!=NULL&&ntimes>0){
+    if(timeval<times[0])timeval=times[0];
+    if(timeval>times[ntimes-1]-0.0001)timeval=times[ntimes-1]-0.0001;
+    for(i=0;i<ntimes;i++){
+      float tlow, thigh;
+
+      if(i==0){
+        tlow = times[i];
+        thigh = (times[i]+times[i+1])/2.0;
+      }
+      else if(i==ntimes-1){
+        tlow = (times[i-1]+times[i])/2.0;
+        thigh = times[i];
+      }
+      else{
+        tlow=(times[i-1]+times[i])/2.0;
+        thigh=(times[i]+times[i+1])/2.0;
+      }
+      if(tlow<=timeval&&timeval<thigh){
+        itime=i;
+        stept=1;
+        force_redisplay=1;
+        update_framenumber(0);
+        UpdateTimeLabels();
+        keyboard('t',0,0);
+        break;
+      }
+    }
+  }
+}
+
 /* ------------------ script_setviewpoint ------------------------ */
 
 void script_setviewpoint(scriptdata *scripti){
