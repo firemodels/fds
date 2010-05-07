@@ -81,6 +81,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define AVERAGE_DATA 201
 #define TURB_DATA 202
 #define UNLOAD_QDATA 203
+#define SET_TIME 204
 
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
@@ -588,6 +589,8 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata);
     Slice_CB(FILETYPEINDEX);
   }
+  glui_bounds->add_spinner("Set time:",GLUI_SPINNER_FLOAT,&glui_time,SET_TIME,Slice_CB);
+
   glui_bounds->add_checkbox("Smooth colorbar labels",&axissmooth);
   CHECKBOX_extreme2=glui_bounds->add_checkbox("Highlight extreme data",&show_extremedata,
     COLORBAR_EXTREME2,Slice_CB);
@@ -1621,6 +1624,10 @@ extern "C" void Slice_CB(int var){
   updatemenu=1;
   if(var==COLORBAR_EXTREME2){
     update_extreme();
+    return;
+  }
+  if(var==SET_TIME){
+    settimeval(glui_time);
     return;
   }
   ASSERT(con_slice_min!=NULL);
