@@ -928,6 +928,9 @@ int slicecompare( const void *arg1, const void *arg2 ){
   slicej = sliceinfo + *(int *)arg2;
   if(slicei->mesh_type<slicej->mesh_type)return -1;
   if(slicei->mesh_type>slicej->mesh_type)return 1;
+  if(slicei->slicetype<slicej->slicetype)return -1;
+  if(slicei->slicetype>slicej->slicetype)return 1;
+
   delta = slicei->delta;
   if(slicej->delta>delta)delta=slicej->delta;
 
