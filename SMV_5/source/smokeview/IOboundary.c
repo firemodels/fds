@@ -533,7 +533,7 @@ void readpatch(int ifile, int flag, int *errorcode){
             *xyzpatchcopy++ = yplttemp[j1];
             *xyzpatchcopy++ = zplttemp[k];
             *xyzpatch_ignitecopy++ = xplttemp[i]+dx_factor;
-            *xyzpatch_ignitecopy++ = yplttemp[j]+dyy;
+            *xyzpatch_ignitecopy++ = yplttemp[j1]+dyy;
             *xyzpatch_ignitecopy++ = zplttemp[k]+dz_factor;
             patchblankcopy[ii++]=0;
           }

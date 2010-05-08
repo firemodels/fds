@@ -28,6 +28,7 @@ int SUB_portfrustum(int quad,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
 
+EXTERNCPP void updateGluiTimeBounds(float time_min, float time_max);
 EXTERNCPP void settimeval(float timeval);
 EXTERNCPP int get_token_loc(char *var,sv_object_frame *frame);
 EXTERNCPP void get_indep_var_indices(sv_object *smv_object,char **var_indep_strings, int nvars_indep,int *index);
