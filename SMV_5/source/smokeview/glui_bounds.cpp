@@ -138,6 +138,7 @@ GLUI_Spinner *SPINNER_line_contour_min=NULL;
 GLUI_Spinner *SPINNER_line_contour_max=NULL;
 GLUI_Button *BUTTON_update_line_contour=NULL;
 #endif
+GLUI_Spinner *SPINNER_timebounds=NULL;
 GLUI_Panel *panel_script1=NULL;
 GLUI_Panel *panel_script1a=NULL;
 GLUI_Panel *panel_script1b=NULL;
@@ -589,7 +590,8 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata);
     Slice_CB(FILETYPEINDEX);
   }
-  glui_bounds->add_spinner("Set time:",GLUI_SPINNER_FLOAT,&glui_time,SET_TIME,Slice_CB);
+  SPINNER_timebounds=glui_bounds->add_spinner("Set time:",GLUI_SPINNER_FLOAT,&glui_time,SET_TIME,Slice_CB);
+  SPINNER_timebounds->set_float_limits(0.0,3600.0*24);
 
   glui_bounds->add_checkbox("Smooth colorbar labels",&axissmooth);
   CHECKBOX_extreme2=glui_bounds->add_checkbox("Highlight extreme data",&show_extremedata,
@@ -1996,3 +1998,12 @@ extern "C" void open_smokezippanel(void){
     rollout_compress->open();
   }
 }
+
+/* ------------------ updateGluiTimeBounds ------------------------ */
+
+extern "C" void updateGluiTimeBounds(float time_min, float time_max){
+  if(SPINNER_timebounds!=NULL){
+    SPINNER_timebounds->set_float_limits(time_min,time_max);
+  }
+}
+
