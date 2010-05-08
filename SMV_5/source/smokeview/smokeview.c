@@ -2872,7 +2872,10 @@ void updatetimes(void){
 
   if(ntimes>0)synctimes();
   updatefaces=1;
-  if(ntimes>0)UpdateTimeLabels();
+  if(ntimes>0){
+    UpdateTimeLabels();
+    updateGluiTimeBounds(times[0],times[ntimes-1]);
+  }
 }
 
 /* ------------------ getindex ------------------------ */
