@@ -672,7 +672,6 @@ void drawterrain_texture(terraindata *terri, int only_geom){
   int nxcell,nycell;
   int i, j;
   float *x, *y;
-  terraincell *ti;
   float terrain_color[4];
 
   terrain_color[0]=1.0;
@@ -701,7 +700,6 @@ void drawterrain_texture(terraindata *terri, int only_geom){
   nycell = terri->ny;
   x = terri->x;
   y = terri->y;
-  ti = terri->tcell;
   for(j=0;j<terri->ny;j++){
     int jp1;
     float ty,typ1;
@@ -746,8 +744,6 @@ void drawterrain_texture(terraindata *terri, int only_geom){
       glNormal3fv(zn);
       glTexCoord2f(tx,typ1);
       glVertex3f(x[i],y[j+1],znode[ijnode3(i,jp1)]);
-
-      ti++;
     }
   }
   glEnd();
