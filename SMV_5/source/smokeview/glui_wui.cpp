@@ -120,7 +120,9 @@ extern "C" void glui_wui_setup(int main_window){
     RADIO_texture=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,"Image");
     glui_wui->add_radiobutton_to_group(RADIO_terrain_type,"Hidden");
 
-    RADIO_texture->disable();
+    if(terrain_texture==NULL||terrain_texture->loaded==0){
+      RADIO_texture->disable();
+    }
 
     glui_wui->add_column_to_panel(panel_terrain_hidden1,false);
 

@@ -580,7 +580,7 @@ void drawterrain(terraindata *terri, int only_geom){
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
-  glColor4f(1.0,0.0,0.0,1.0);
+//  glColor4f(1.0,0.0,0.0,1.0);
   glEnable(GL_LIGHTING);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&terrain_shininess);
   glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,rgbterrain);
@@ -622,7 +622,7 @@ void drawterrain(terraindata *terri, int only_geom){
       glNormal3fv(zn);
       zval = znode[ijnode3(i,j)]+ZOFFSET;
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
-      glColor4fv(rgbterrain+4*izval);
+      //glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i],y[j],zval);
 
 //      zn = znormal+3*ijnode2(ip1,j);
@@ -631,7 +631,7 @@ void drawterrain(terraindata *terri, int only_geom){
       glNormal3fv(zn);
       zval = znode[ijnode3(ip1,j)]+ZOFFSET;
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
-      glColor4fv(rgbterrain+4*izval);
+     // glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i+1],y[j],zval);
 
 //      zn = znormal+3*ijnode2(ip1,jp1);
@@ -640,7 +640,7 @@ void drawterrain(terraindata *terri, int only_geom){
       glNormal3fv(zn);
       zval = znode[ijnode3(ip1,jp1)]+ZOFFSET;
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
-      glColor4fv(rgbterrain+4*izval);
+     // glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i+1],y[j+1],zval);
 
       //zn = znormal+3*ijnode2(i,jp1);
@@ -649,7 +649,7 @@ void drawterrain(terraindata *terri, int only_geom){
       glNormal3fv(zn);
       zval = znode[ijnode3(i,jp1)]+ZOFFSET;
       izval = (MAXRGB-1)*(zval-zt_min)/(zt_max-zt_min);
-      glColor4fv(rgbterrain+4*izval);
+     // glColor4fv(rgbterrain+4*izval);
       glVertex3f(x[i],y[j+1],zval);
 
       ti++;
@@ -684,7 +684,6 @@ void drawterrain_texture(terraindata *terri, int only_geom){
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   glEnable(GL_LIGHTING);
-  glEnable(GL_NORMALIZE);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
   glEnable(GL_TEXTURE_2D);
@@ -751,7 +750,6 @@ void drawterrain_texture(terraindata *terri, int only_geom){
   glDisable(GL_TEXTURE_2D);
    
   glDisable(GL_COLOR_MATERIAL);
-  glDisable(GL_NORMALIZE);
   glDisable(GL_LIGHTING);
 
   glPopMatrix();
