@@ -930,7 +930,7 @@ void InitOpenGL(void){
 
 void initvars1(void){
 
-  mod_terrain=0;
+  show_slice_terrain=0;
 #ifdef pp_LIGHT
   show_smokelighting=0;
 #endif

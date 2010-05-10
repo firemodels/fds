@@ -111,7 +111,7 @@ extern "C" void glui_wui_setup(int main_window){
      SPINNER_blue_max->set_int_limits(0,255,GLUI_LIMIT_CLAMP);
 
     panel_terrain_hidden1=glui_wui->add_panel_to_panel(panel_terrain,"",GLUI_PANEL_NONE);
-    panel_terrain_type=glui_wui->add_panel_to_panel(panel_terrain_hidden1,"View");
+    panel_terrain_type=glui_wui->add_panel_to_panel(panel_terrain_hidden1,"Surface view");
     RADIO_terrain_type=glui_wui->add_radiogroup_to_panel(panel_terrain_type,&visTerrainType,
       TERRAIN_TYPE,WUI_CB);
     glui_wui->add_radiobutton_to_group(RADIO_terrain_type,"3D surface");
