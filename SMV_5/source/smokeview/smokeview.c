@@ -1390,7 +1390,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
           break;
         case 0:
         case 3:
-          if(mod_terrain==0){
+          if(show_slice_terrain==0){
             if(visTerrainType==3&&terrain_texture!=NULL&&terrain_texture->loaded==1){
               drawterrain_texture(terri,only_geom);
             }
@@ -1640,9 +1640,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
           }
         }
         else{
-          if(sd->terrain==1&&planar_terrain_slice==0){
-          //xxx
-          //  drawslice_terrain_map(sd);
+          if(sd->terrain==1){
+            if(visTerrainType==3){
+              drawslice_terrain_map(sd);
+            }
+            else{
+              drawslice_terrain(sd);
+            }
           }
           else{
 #ifdef pp_FRACTILE          
@@ -2879,6 +2883,17 @@ void updatetimes(void){
     UpdateTimeLabels();
     updateGluiTimeBounds(times[0],times[ntimes-1]);
   }
+  show_slice_terrain=0;
+  if(visTerrainType==3){
+    for(i=0;i<nslice_files;i++){
+      sd = sliceinfo + i;
+      if(sd->loaded==0||sd->display==0||sd->terrain==0)continue;
+      show_slice_terrain=1;
+      break;
+    }
+  }
+
+
 }
 
 /* ------------------ getindex ------------------------ */
