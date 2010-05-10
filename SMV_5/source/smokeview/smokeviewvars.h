@@ -32,6 +32,7 @@
 #include "smokeheaders.h"
 #endif
 
+SVEXTERN int mod_terrain;
 SVEXTERN int npropinfo;
 SVEXTERN propdata *propinfo;
 SVEXTERN float right_green, right_blue;

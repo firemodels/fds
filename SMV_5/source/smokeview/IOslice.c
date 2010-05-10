@@ -3025,10 +3025,11 @@ void drawslice_terrain(const slice *sd){
 
 void drawslice_terrain_map(const slice *sd){
   int i,j,k,n,n2;
-  float r11, r13, r31, r33;
   float constval,x1,x3,yy1,y3,z1,z3;
   int maxj;
   float *x, *y;
+  float *rgb_ptr;
+
 
   float *xplt, *yplt;
   terraindata *terri;
@@ -3036,6 +3037,8 @@ void drawslice_terrain_map(const slice *sd){
   int nycell;
 
   mesh *meshi;
+
+  rgb_ptr = rgb_slice;
 
   meshi = meshinfo + sd->blocknumber;
   terri = meshi->terrain;
@@ -3051,6 +3054,7 @@ void drawslice_terrain_map(const slice *sd){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   if(transparentflag==1)transparenton();
+  glEnable(GL_COLOR_MATERIAL);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
   glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D,terrain_texture->name);
@@ -3062,15 +3066,14 @@ void drawslice_terrain_map(const slice *sd){
    for(j=sd->js1; j<sd->js2; j++){
      float xmid;
      float z11, z13, zmid, z31, z33;
-     float ymid, rmid;
+     float r11, r13, rmid, r31, r33;
+     float ymid;
      int jj;
-     int jp1;
      float ty,typ1,tymid;
 
      jj = j - sd->js1;
-     jp1 = jj + 1;
-     ty = (y[jj]-ybar0ORIG)/(ybarORIG-ybar0ORIG);
-     typ1 = (y[jj+1]-ybar0ORIG)/(ybarORIG-ybar0ORIG);
+        ty = (y[jj]-ybar0ORIG)/(ybarORIG-ybar0ORIG);
+      typ1 = (y[jj+1]-ybar0ORIG)/(ybarORIG-ybar0ORIG);
      tymid = (ty+typ1)/2.0;
 
 
@@ -3080,13 +3083,11 @@ void drawslice_terrain_map(const slice *sd){
 
      for(i=sd->is1; i<sd->is2; i++){
        int ii;
-       int ip1;
        float tx,txp1,txmid;
 
        ii = i - sd->is1;
-       ip1 = ii + 1;
-       tx = (x[ii]-xbar0ORIG)/(xbarORIG-xbar0ORIG);
-       txp1 = (x[ii+1]-xbar0ORIG)/(xbarORIG-xbar0ORIG);
+          tx = (x[ii]-xbar0ORIG)/(xbarORIG-xbar0ORIG);
+        txp1 = (x[ii+1]-xbar0ORIG)/(xbarORIG-xbar0ORIG);
        txmid = (tx+txp1)/2.0;
 
 
@@ -3097,41 +3098,42 @@ void drawslice_terrain_map(const slice *sd){
        x3 = xplt[i+1];
        xmid = (x1+x3)/2.0;
 
-       //r11 = (float)sd->slicepoint[n]/255.0;
-       //r31 = (float)sd->slicepoint[n2]/255.0;
-       //r13 = (float)sd->slicepoint[n+1]/255.0;
-       //r33 = (float)sd->slicepoint[n2+1]/255.0;
-
        z11 = constval + znode[ijnode2(i,j)];
        z31 = constval + znode[ijnode2(i+1,j)];
        z13 = constval + znode[ijnode2(i,j+1)];
        z33 = constval + znode[ijnode2(i+1,j+1)];
 
        zmid = (z11 + z31 + z13 + z33)/4.0;
+
+       r11 = 1.0-(float)sd->slicepoint[n]/255.0;
+       r31 = 1.0-(float)sd->slicepoint[n2]/255.0;
+       r13 = 1.0-(float)sd->slicepoint[n+1]/255.0;
+       r33 = 1.0-(float)sd->slicepoint[n2+1]/255.0;
        rmid = (r11+r31+r13+r33)/4.0;
 
        //  (x1,y3,r13,z13)                    (x3,y3,r33,z33)
        //                (xmid,ymid,rmid,zmid)
        //  (x1,yy1,r11,z11)                    (x3,yy1,r31,z31)
-       glTexCoord2f( tx,ty);      glVertex3f(  x1,  yy1, z11);
-       glTexCoord2f( txp1,ty);    glVertex3f(  x3,  yy1, z31);
-       glTexCoord2f(txmid,tymid); glVertex3f(xmid, ymid, zmid);
+       glColor3f(r11,r11,r11); glTexCoord2f( tx,ty);      glVertex3f(  x1,  yy1, z11);
+       glColor3f(r31,r31,r31); glTexCoord2f( txp1,ty);    glVertex3f(  x3,  yy1, z31);
+       glColor3f(rmid,rmid,rmid); glTexCoord2f(txmid,tymid); glVertex3f(xmid, ymid, zmid);
 
-       glTexCoord2f( txp1,ty);    glVertex3f(  x3,  yy1, z31);
-       glTexCoord2f( txp1,typ1);  glVertex3f(  x3,  y3,  z33);
-       glTexCoord2f(txmid,tymid); glVertex3f(xmid, ymid, zmid);
+       glColor3f(r31,r31,r31); glTexCoord2f( txp1,ty);    glVertex3f(  x3,  yy1, z31);
+       glColor3f(r33,r33,r33); glTexCoord2f( txp1,typ1);  glVertex3f(  x3,  y3,  z33);
+       glColor3f(rmid,rmid,rmid);glTexCoord2f(txmid,tymid); glVertex3f(xmid, ymid, zmid);
 
-       glTexCoord2f( txp1,typ1);  glVertex3f(  x3,  y3, z33);
-       glTexCoord2f( tx,typ1);    glVertex3f(  x1,  y3, z13);
-       glTexCoord2f(txmid,tymid); glVertex3f(xmid,ymid, zmid);
+       glColor3f(r33,r33,r33); glTexCoord2f( txp1,typ1);  glVertex3f(  x3,  y3, z33);
+       glColor3f(r13,r13,r13); glTexCoord2f( tx,typ1);    glVertex3f(  x1,  y3, z13);
+       glColor3f(rmid,rmid,rmid); glTexCoord2f(txmid,tymid); glVertex3f(xmid,ymid, zmid);
 
-       glTexCoord2f(tx,typ1);     glVertex3f(  x1,  y3,  z13);
-       glTexCoord2f(tx,ty);       glVertex3f(  x1,  yy1, z11);
-       glTexCoord2f(txmid,tymid); glVertex3f(xmid, ymid, zmid);
+       glColor3f(r13,r13,r13); glTexCoord2f(tx,typ1);     glVertex3f(  x1,  y3,  z13);
+       glColor3f(r11,r11,r11); glTexCoord2f(tx,ty);       glVertex3f(  x1,  yy1, z11);
+       glColor3f(rmid,rmid,rmid); glTexCoord2f(txmid,tymid); glVertex3f(xmid, ymid, zmid);
      }
    }
    glEnd();
   }
+  glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_TEXTURE_2D);
   if(transparentflag==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
