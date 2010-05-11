@@ -245,7 +245,7 @@ IF (STATE_FILE) THEN
    WRITE(FN_STATE(1),'(A,A)') TRIM(CHID),'_state.csv'
 ENDIF
 
-! Vegetation File(s)
+! Vegetation File(s) for Fuel Element model
 
 IF (N_TREES_OUT > 0) THEN
   N_TREE = 0
@@ -485,7 +485,7 @@ ELSE
 ENDIF
 
 
-! Open vegetation ouput files(s)
+! Open vegetation ouput files(s) for Fuel Element model
 
 DO N=1,N_TREES_OUT 
  IF (APPEND) THEN
@@ -1088,7 +1088,7 @@ WRITE(LU_SMV,'(1X,A)')  TRIM(TITLE)
 
 ! Indentify as terrain case
 
-IF (TERRAIN_CASE) THEN
+IF (TERRAIN_CASE .OR. VEG_LEVEL_SET) THEN
   WRITE(LU_SMV,'(/A)') 'AUTOTERRAIN'
   WRITE(LU_SMV,'(I3)') 1
 ENDIF
@@ -1516,7 +1516,7 @@ ENDDO
 
 ! Write out level set slice file name (placeholder)
 IF (VEG_LEVEL_SET) THEN
-   WRITE(LU_SMV,'(A)') 'SLCF     1'
+   WRITE(LU_SMV,'(A 5X,2I)') 'SLCT ',1,1 !terrain slice assumes one mesh and puts level set data on terrain
    WRITE(LU_SMV,'(A)') 'lsfs.sf'
    WRITE(LU_SMV,'(A)') 'phifield'
    WRITE(LU_SMV,'(A)') 'phifield'
@@ -5063,7 +5063,7 @@ END SUBROUTINE DUMP_HRR
 SUBROUTINE DUMP_VEG(T)
 
 ! --- temporary (place holder) ouput routine
-! Write out total dry and moisture mass in vegetation
+! Write out total dry and moisture mass in vegetation (fuel element model)
  
 REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
