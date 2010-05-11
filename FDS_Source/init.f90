@@ -2015,6 +2015,11 @@ DO NSLICE = 1, M%N_TERRAIN_SLCF
    IF (IOR==3) M%K_AGL_SLICE(I,J,NSLICE) = M%K_AGL_SLICE(I,J,NSLICE) + M%IJKW(8,IW) 
 ENDDO
 
+! Fill arrays containing K index and physical height of terrain for use in level set firespread 
+IF (VEG_LEVEL_SET .AND. IOR==3) THEN 
+  M%LS_Z_TERRAIN(M%IJKW(6,IW),M%IJKW(7,IW)) = M%Z(M%IJKW(8,IW)-1)
+ENDIF
+
 ! Do not assign normal velocities at boundaries of evacuation meshes
 
 IF (EVACUATION_ONLY(NM)) M%UW(IW) = 0._EB
