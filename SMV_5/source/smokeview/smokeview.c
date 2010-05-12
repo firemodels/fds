@@ -1390,13 +1390,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
           break;
         case 0:
         case 3:
-          if(show_slice_terrain==0){
-            if(visTerrainType==3&&terrain_texture!=NULL&&terrain_texture->loaded==1){
-              drawterrain_texture(terri,only_geom);
-            }
-            else{
-              drawterrain(terri,only_geom);
-            }
+          if(visTerrainType==3&&terrain_texture!=NULL&&terrain_texture->loaded==1){
+            drawterrain_texture(terri,only_geom);
+          }
+          else{
+            drawterrain(terri,only_geom);
           }
           break;
       }
@@ -1641,12 +1639,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         }
         else{
           if(sd->terrain==1){
-            if(visTerrainType==3){
-              drawslice_terrain_map(sd);
-            }
-            else{
-              drawslice_terrain(sd);
-            }
+            drawslice_terrain(sd);
           }
           else{
 #ifdef pp_FRACTILE          
