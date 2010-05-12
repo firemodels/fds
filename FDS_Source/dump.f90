@@ -1091,6 +1091,7 @@ WRITE(LU_SMV,'(1X,A)')  TRIM(TITLE)
 IF (TERRAIN_CASE .OR. VEG_LEVEL_SET) THEN
   WRITE(LU_SMV,'(/A)') 'AUTOTERRAIN'
   WRITE(LU_SMV,'(I3)') 1
+  WRITE(LU_SMV,'(A)') TRIM(TERRAIN_IMAGE)
 ENDIF
  
 ! Record the version and endian-ness in .smv file
