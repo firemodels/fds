@@ -755,7 +755,7 @@ SUBROUTINE PYROLYSIS(T,DT_BC)
 
 ! Loop through all the boundary cells that require a 1-D heat transfer calc
 
-USE PHYSICAL_FUNCTIONS, ONLY: GET_MOLECULAR_WEIGHT
+USE PHYSICAL_FUNCTIONS, ONLY: GET_MOLECULAR_WEIGHT,GET_MASS_FRACTION
 USE GEOMETRY_FUNCTIONS
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB) :: DTMP,QNETF,QDXKF,QDXKB,RR,TMP_G,T,RFACF,RFACB,RFACF2,RFACB2,PPCLAUS,PPSURF,TMP_G_B,DT_BC, &
@@ -1028,16 +1028,18 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
       IF (ML%NU_FUEL(1)>0._EB) MFLUX = MFLUX/ML%NU_FUEL(1)
       ! gas phase 
       YY_GET = MAX(0._EB,YY(IIG,JJG,KKG,:))
-      Y_MF_G = YY_GET(I_FUEL)
-      CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_G)
+!      Y_MF_G = YY_GET(I_FUEL)                      ! OLD
+      CALL GET_MASS_FRACTION(YY_GET,I_FUEL,Y_MF_G)  ! NEW
+!      CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_G)     ! OLD
+      RSUM_G = RSUM(IIG,JJG,KKG)                    ! NEW
       ! wall values
-      YY_GET = MAX(0._EB,YY_F(IW,:))
-      Y_MF_W = YY_GET(I_FUEL)
-      CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_W)
+!      YY_GET = MAX(0._EB,YY_F(IW,:))
+!      Y_MF_W = YY_GET(I_FUEL)
+!      CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_W)
       ! Weighted average of wall and gas values
       ! Alvernative 1
 !      YPRSUM  = 0.2*(Y_MF_W/RSUM_W) + 0.8*(Y_MF_G/RSUM_G)
-      YPRSUM  = 0.0*(Y_MF_W/RSUM_W) + 1.0*(Y_MF_G/RSUM_G)
+      YPRSUM  = Y_MF_G/RSUM_G
       ! Alternative 2
 !      YY_S    = 0.2*Y_MF_W+0.8*Y_MF_G
 !      RSUM_S  = 0.2*RSUM_W+0.8*RSUM_G
