@@ -135,6 +135,7 @@ $RUNFDS Sprinklers_and_Sprays bucket_test_2       fire53
 $RUNFDS Sprinklers_and_Sprays bucket_test         fire53
 $RUNFDS Sprinklers_and_Sprays cascade             fire54
 $RUNFDS Sprinklers_and_Sprays droplet_flux        fire54
+$RUNFDS Sprinklers_and_Sprays flow_rate           fire55
 $RUNFDS Sprinklers_and_Sprays fuel_evaporation    fire55
 $RUNFDS Sprinklers_and_Sprays particle_colors     fire55
 $RUNFDS Sprinklers_and_Sprays water_cooling       fire56
