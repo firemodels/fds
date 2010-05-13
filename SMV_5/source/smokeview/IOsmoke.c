@@ -101,20 +101,20 @@ if(show_smoketest==0){\
   }
 
 #define DRAWVERTEXTERRAIN(XX,YY,ZZ)        \
-z_offset[0]=znode_offset[m11];\
-z_offset[1]=znode_offset[m12];\
-z_offset[2]=znode_offset[m22];\
-z_offset[3]=znode_offset[m21];\
 if(show_smoketest==0){\
   value[0]=alphaf_ptr[n11]; \
   value[1]=alphaf_ptr[n12]; \
   value[2]=alphaf_ptr[n22]; \
   value[3]=alphaf_ptr[n21]; \
+  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
+  z_offset[0]=znode_offset[m11];\
+  z_offset[1]=znode_offset[m12];\
+  z_offset[2]=znode_offset[m22];\
+  z_offset[3]=znode_offset[m21];\
   ivalue[0]=n11<<2;  \
   ivalue[1]=n12<<2;  \
   ivalue[2]=n22<<2;  \
   ivalue[3]=n21<<2;  \
-  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
   }                                                      \
@@ -148,6 +148,10 @@ if(show_smoketest==0){\
   }\
 }\
 else{\
+  z_offset[0]=znode_offset[m11];\
+  z_offset[1]=znode_offset[m12];\
+  z_offset[2]=znode_offset[m22];\
+  z_offset[3]=znode_offset[m21];\
   for(node=0;node<6;node++){                             \
     mm = xyzindex1[node];                                 \
     glColor4ub(0,0,0,(unsigned char)smoke_alpha);\
