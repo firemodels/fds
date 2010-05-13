@@ -5687,6 +5687,7 @@ typedef struct {
 
   if(cullactive==1)initcull(cullsmoke);
 #endif
+  update_mesh_terrain();
 
 
   printf("wrap up completed\n");
@@ -6304,6 +6305,7 @@ void initmesh(mesh *meshi){
   meshi->cull_smoke3d=NULL;
   meshi->smokedir_old=-100;
 #endif
+  meshi->is_bottom=1;
   meshi->blockvis=1;
   meshi->zcell=NULL;
   meshi->terrain=NULL;
@@ -6744,6 +6746,7 @@ int readini(int scriptconfigfile){
 
   if(statfile1==0&&smokeviewini!=NULL){
     if(readini2(smokeviewini,0)==2)return 2;
+    update_terrain_options();
   }
 
   // smokeview.ini in smokeview directory (could be different than above)
