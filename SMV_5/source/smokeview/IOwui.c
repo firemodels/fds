@@ -568,6 +568,7 @@ void drawterrain(terraindata *terri, int only_geom){
 
 #define ZOFFSET 0.001
 
+  if(terri->terrain_mesh->is_bottom==0)return;
   zt_min = zterrain_min;
   zt_max = zterrain_min + vertical_factor*(zterrain_max-zterrain_min);
 
@@ -673,6 +674,8 @@ void drawterrain_texture(terraindata *terri, int only_geom){
   int i, j;
   float *x, *y;
   float terrain_color[4];
+
+  if(terri->terrain_mesh->is_bottom==0)return;
 
   terrain_color[0]=1.0;
   terrain_color[1]=1.0;
@@ -1192,6 +1195,7 @@ void update_terrain(int allocate_memory, float vertical_factor){
 
       meshi=meshinfo + imesh;
       terri = meshi->terrain;
+      terri->terrain_mesh=meshi;
       if(terri==NULL)continue;
       znode = terri->znode;
       znode_scaled = terri->znode_scaled;
@@ -1220,3 +1224,52 @@ int have_terrain_slice(void){
   }
   return 0;
 }
+
+/* ------------------ if_slice_terrain ------------------------ */
+
+void update_terrain_options(void){
+  if(nterraininfo>0||autoterrain==1){
+    visOpenVents=0;
+    visDummyVents=0;
+    visFrame=0;
+    updatemenu=1;
+  }
+}
+
+/* ------------------ update_mesh_terrain ------------------------ */
+
+void update_mesh_terrain(void){
+  int i;
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    mesh *meshj;
+    int ii, jj;
+    float *x, *y, *z;
+    float xyz[3];
+
+    meshi = meshinfo + i;
+
+    meshi->is_bottom=1;
+
+    x = meshi->xplt_orig;
+    y = meshi->yplt_orig;
+    z = meshi->zplt_orig;
+
+    xyz[2] = z[0] - (z[1]-z[0])/2.0;
+
+    for(ii=0;ii<meshi->ibar;ii++){
+      xyz[0]=x[ii];
+      for(jj=0;jj<meshi->jbar;jj++){
+        xyz[1]=y[jj];
+        meshj = get_mesh(xyz);
+        if(meshj==NULL)continue;
+        meshi->is_bottom=0;
+        break;
+      }
+      if(meshi->is_bottom==0)break;
+    }
+    printf("Mesh %i - isbottom=%i\n",i,meshi->is_bottom);
+  }
+}
+

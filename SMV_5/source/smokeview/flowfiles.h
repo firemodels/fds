@@ -177,6 +177,7 @@ typedef struct {
   unsigned char *uc_znormal;
   float *times;
   terraincell *tcell;
+  struct mesh_ *terrain_mesh;
   int ntimes;
 } terraindata;
 
@@ -387,6 +388,7 @@ typedef struct {
 typedef struct mesh_ {
   terraindata *terrain;
   int mesh_type;
+  int is_bottom;
   float meshrgb[3], *meshrgb_ptr;
   float mesh_offset[3], *mesh_offset_ptr;
   int blockvis;
