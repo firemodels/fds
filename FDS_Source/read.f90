@@ -1335,7 +1335,7 @@ SUBROUTINE READ_DUMP
  
 INTEGER :: N,I_DUM
 NAMELIST /DUMP/ RENDER_FILE,SMOKE3D,SMOKE3D_COMPRESSION,SMOKE3D_QUANTITY,FLUSH_FILE_BUFFERS,MASS_FILE,STATE_FILE, &
-                DT_CTRL,DT_PART,DT_MASS,DT_HRR,DT_DEVC,DT_PROF,DT_SLCF,DT_PL3D,DT_ISOF,DT_BNDF,DT_FLUSH,DT_VEG, &
+                DT_CTRL,DT_PART,DT_MASS,DT_HRR,DT_DEVC,DT_DEVC_LINE,DT_PROF,DT_SLCF,DT_PL3D,DT_ISOF,DT_BNDF,DT_FLUSH,DT_VEG, &
                 NFRAMES,DT_RESTART,DEBUG,TIMING,CHECK_VOLUME_FLOW,COLUMN_DUMP_LIMIT,MAXIMUM_DROPLETS,WRITE_XYZ, &
                 PLOT3D_QUANTITY,UL_PAN_DATA,STATUS_FILES,DEVC_COLUMN_LIMIT,CTRL_COLUMN_LIMIT,PLOT3D_SPEC_ID,SMOKE3D_SPEC_ID, &
                 PLOT3D_PART_ID,CENTERED_HRR_TIME,CENTERED_DEVC_TIME,HEADERS,PLOT3D_VELO_INDEX,RAW_DATA_FILE,VELOCITY_ERROR_FILE
@@ -1361,19 +1361,20 @@ IF (ISOTHERMAL) PLOT3D_QUANTITY(5) = 'PRESSURE'
 MAXIMUM_DROPLETS  = 500000
 COLUMN_DUMP_LIMIT = .TRUE.  ! Limit csv files to 255 columns
  
-DT_BNDF    = -1._EB
-DT_RESTART = 1000000._EB
-DT_FLUSH   = -1._EB
-DT_DEVC    = -1._EB
-DT_HRR     = -1._EB
-DT_ISOF    = -1._EB
-DT_MASS    = -1._EB
-DT_PART    = -1._EB
-DT_PL3D    = -1._EB
-DT_PROF    = -1._EB
-DT_SLCF    = -1._EB
-DT_CTRL    = -1._EB
-DT_VEG    = -1._EB
+DT_BNDF      = -1._EB
+DT_RESTART   = 1000000._EB
+DT_FLUSH     = -1._EB
+DT_DEVC      = -1._EB
+DT_DEVC_LINE = 0.25_EB*(T_END-T_BEGIN)
+DT_HRR       = -1._EB
+DT_ISOF      = -1._EB
+DT_MASS      = -1._EB
+DT_PART      = -1._EB
+DT_PL3D      = -1._EB
+DT_PROF      = -1._EB
+DT_SLCF      = -1._EB
+DT_CTRL      = -1._EB
+DT_VEG       = -1._EB
 CENTERED_HRR_TIME = .FALSE.
 CENTERED_DEVC_TIME = .FALSE.
  
@@ -7099,24 +7100,33 @@ SUBROUTINE READ_DEVC
 
 ! Just read in the DEViCes and the store the info in DEVICE()
 
-USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE, DEVICE, N_DEVC
-INTEGER  :: N,NN,NM,MESH_NUMBER,N_DEVCO,IOR,TRIP_DIRECTION,VELO_INDEX
+USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE, DEVICE, N_DEVC, N_DEVC_TIME, N_DEVC_LINE,MAX_DEVC_LINE_POINTS
+INTEGER  :: NN,NM,MESH_NUMBER,N_DEVC_READ,IOR,TRIP_DIRECTION,VELO_INDEX,POINTS,I_POINT
 REAL(EB) :: DEPTH,ORIENTATION(3),ROTATION,SETPOINT,FLOWRATE,BYPASS_FLOWRATE,DELAY,XYZ(3),CONVERSION_FACTOR
 CHARACTER(30) :: QUANTITY,PROP_ID,CTRL_ID,DEVC_ID,SURF_ID,STATISTICS,PART_ID,MATL_ID,SPEC_ID,UNITS,DUCT_ID,NODE_ID
 LOGICAL :: INITIAL_STATE,LATCH,DRY,TIME_AVERAGED
 TYPE (DEVICE_TYPE), POINTER :: DV
 NAMELIST /DEVC/ DEPTH,FYI,IOR,ID,ORIENTATION,PROP_ID,QUANTITY,ROTATION,XB,XYZ,INITIAL_STATE,LATCH,TRIP_DIRECTION,CTRL_ID,& 
                 SETPOINT,DEVC_ID,FLOWRATE,DELAY,BYPASS_FLOWRATE,SURF_ID,STATISTICS,PART_ID,MATL_ID,SPEC_ID,DRY,CONVERSION_FACTOR,&
-                UNITS,TIME_AVERAGED,VELO_INDEX,DUCT_ID,NODE_ID
+                UNITS,TIME_AVERAGED,VELO_INDEX,DUCT_ID,NODE_ID,POINTS
+
+! Read the input file and count the number of DEVC lines
+
 N_DEVC = 0
+N_DEVC_READ = 0
+MAX_DEVC_LINE_POINTS = 0
+
 REWIND(LU_INPUT)
 COUNT_DEVC_LOOP: DO
    CALL CHECKREAD('DEVC',LU_INPUT,IOS)
    IF (IOS==1) EXIT COUNT_DEVC_LOOP
+   POINTS = 1
    READ(LU_INPUT,NML=DEVC,END=11,ERR=12,IOSTAT=IOS)
-   N_DEVC = N_DEVC + 1
+   N_DEVC      = N_DEVC      + POINTS
+   N_DEVC_READ = N_DEVC_READ + 1
+   MAX_DEVC_LINE_POINTS = MAX(MAX_DEVC_LINE_POINTS,POINTS)
    12 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I4)') 'ERROR: Problem with DEVC number ',N_DEVC+1
+      WRITE(MESSAGE,'(A,I4)') 'ERROR: Problem with DEVC number ',N_DEVC_READ+1
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 ENDDO COUNT_DEVC_LOOP
@@ -7124,121 +7134,149 @@ ENDDO COUNT_DEVC_LOOP
 
 IF (N_DEVC==0) RETURN
 
-! Allocate DEVICE array and set initial values of all to 0
+! Allocate DEVICE array to hold all information for each device
 
 ALLOCATE(DEVICE(N_DEVC),STAT=IZERO)
 CALL ChkMemErr('READ','DEVICE',IZERO)
  
-! Read in the DEVC lines
+! Read in the DEVC lines, keeping track of TIME-history devices, and LINE array devices
 
-N_DEVCO = N_DEVC
-N       = 0
+N_DEVC      = 0
+N_DEVC_TIME = 0
+N_DEVC_LINE = 0
 
-READ_DEVC_LOOP: DO NN=1,N_DEVCO
+READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
-   N          = N+1
    CALL CHECKREAD('DEVC',LU_INPUT,IOS)
    IF (IOS==1) EXIT READ_DEVC_LOOP
    CALL SET_DEVC_DEFAULTS
    READ(LU_INPUT,DEVC) 
 
-! Reorder XB coordinates if necessary
+   ! Error statement of POINTS>1 and XB not specified
 
-   CALL CHECK_XB(XB)
-
-   IF (XB(1)>-1.E5_EB) THEN
-      XYZ(1) = 0.5_EB*(XB(1)+XB(2))
-      XYZ(2) = 0.5_EB*(XB(3)+XB(4))
-      XYZ(3) = 0.5_EB*(XB(5)+XB(6))
-   ELSE
-      IF (XYZ(1) < -1.E5_EB .AND. DUCT_ID=='null' .AND. NODE_ID=='null') THEN
-         WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates, even if it is not a point quantity'
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
+   IF (POINTS>1 .AND. ANY(XB<-1.E5_EB)) THEN
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates given in terms of XB'
+      CALL SHUTDOWN(MESSAGE)
    ENDIF
-
-   ! Determine which mesh the device is in
-
-   BAD = .TRUE.
-   MESH_LOOP: DO NM=1,NMESHES
-      IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
-      M=>MESHES(NM)
-      IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
-         MESH_NUMBER = NM
-         BAD = .FALSE.
-         EXIT MESH_LOOP
-      ENDIF
-   ENDDO MESH_LOOP
-
-   ! Make sure there is either a QUANTITY or PROP_ID for the DEVICE
-
-   IF (QUANTITY=='null' .AND. PROP_ID=='null') THEN
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have either an output QUANTITY or PROP_ID'
+   IF (POINTS>1 .AND. STATISTICS/='null') THEN
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' cannot use POINTS>1 and STATISTICS at the same time'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 
-   IF (BAD) THEN
-      IF (DUCT_ID/='null' .OR. NODE_ID/='null') THEN
-         XYZ(1) = MESHES(1)%XS
-         XYZ(2) = MESHES(1)%YS
-         XYZ(3) = MESHES(1)%ZS
-         MESH_NUMBER = 1
+   ! Reorder XB coordinates if necessary
+
+   IF (POINTS==1) CALL CHECK_XB(XB)
+
+   ! Process the point devices along a line, if necessary
+
+   POINTS_LOOP: DO I_POINT=1,POINTS
+
+      IF (XB(1)>-1.E5_EB) THEN
+         XYZ(1) = XB(1) + (XB(2)-XB(1))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
+         XYZ(2) = XB(3) + (XB(4)-XB(3))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
+         XYZ(3) = XB(5) + (XB(6)-XB(5))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
       ELSE
-         N      = N-1
-         N_DEVC = N_DEVC-1
-         WRITE(MESSAGE,'(A,A,A)') 'WARNING: DEVC ',TRIM(ID),' is not within any mesh.'  
-         IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
-         CYCLE READ_DEVC_LOOP
+         IF (XYZ(1) < -1.E5_EB .AND. DUCT_ID=='null' .AND. NODE_ID=='null') THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates, even if it is not a point quantity'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
       ENDIF
-   ENDIF
+
+      ! Determine which mesh the device is in
    
-   ! Assign properties to the DEVICE array
+      BAD = .TRUE.
+      MESH_LOOP: DO NM=1,NMESHES
+         IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
+         M=>MESHES(NM)
+         IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
+            MESH_NUMBER = NM
+            BAD = .FALSE.
+            EXIT MESH_LOOP
+         ENDIF
+      ENDDO MESH_LOOP
+   
+      ! Make sure there is either a QUANTITY or PROP_ID for the DEVICE
+   
+      IF (QUANTITY=='null' .AND. PROP_ID=='null') THEN
+         WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have either an output QUANTITY or PROP_ID'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+   
+      IF (BAD) THEN
+         IF (DUCT_ID/='null' .OR. NODE_ID/='null') THEN
+            XYZ(1) = MESHES(1)%XS
+            XYZ(2) = MESHES(1)%YS
+            XYZ(3) = MESHES(1)%ZS
+            MESH_NUMBER = 1
+         ELSE
+            WRITE(MESSAGE,'(A,A,A)') 'WARNING: DEVC ',TRIM(ID),' is not within any mesh.'  
+            IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+            CYCLE READ_DEVC_LOOP
+         ENDIF
+      ENDIF
 
-   DV => DEVICE(N)
-   M  => MESHES(MESH_NUMBER)
+      ! Determine if the DEVC is a TIME or LINE device
 
-   DV%CONVERSION_FACTOR= CONVERSION_FACTOR
-   DV%DEPTH            = DEPTH
-   DV%IOR              = IOR
-   DV%ID               = ID
-   DV%MESH             = MESH_NUMBER
-   DV%ORDINAL          = NN
-   DV%ORIENTATION(1:3) = ORIENTATION(1:3)/SQRT(ORIENTATION(1)**2+ORIENTATION(2)**2+ORIENTATION(3)**2)
-   DV%PROP_ID          = PROP_ID
-   DV%CTRL_ID          = CTRL_ID   
-   DV%DEVC_ID          = DEVC_ID   
-   DV%SURF_ID          = SURF_ID            
-   DV%PART_ID          = PART_ID            
-   DV%MATL_ID          = MATL_ID            
-   DV%SPEC_ID          = SPEC_ID            
-   DV%DUCT_ID          = DUCT_ID 
-   DV%NODE_ID          = NODE_ID   
-   DV%QUANTITY         = QUANTITY
-   DV%ROTATION         = ROTATION*TWOPI/360._EB
-   DV%SETPOINT         = SETPOINT
-   DV%LATCH            = LATCH
-   DV%TRIP_DIRECTION   = TRIP_DIRECTION
-   DV%INITIAL_STATE    = INITIAL_STATE
-   DV%CURRENT_STATE    = INITIAL_STATE
-   DV%PRIOR_STATE      = INITIAL_STATE
-   DV%FLOWRATE         = FLOWRATE
-   DV%BYPASS_FLOWRATE  = BYPASS_FLOWRATE
-   DV%STATISTICS       = STATISTICS   
-   DV%TIME_AVERAGED    = TIME_AVERAGED 
-   DV%SURF_INDEX       = 0
-   DV%UNITS            = UNITS
-   DV%DELAY            = DELAY / TIME_SHRINK_FACTOR
-   DV%X1               = XB(1)
-   DV%X2               = XB(2)
-   DV%Y1               = XB(3)
-   DV%Y2               = XB(4)
-   DV%Z1               = XB(5)
-   DV%Z2               = XB(6)
-   DV%X                = XYZ(1)
-   DV%Y                = XYZ(2)
-   DV%Z                = XYZ(3)
-   DV%DRY              = DRY
-   DV%VELO_INDEX       = VELO_INDEX
+      IF (POINTS==1)                   N_DEVC_TIME = N_DEVC_TIME + 1
+      IF (POINTS>1 .AND. I_POINT==1)   N_DEVC_LINE = N_DEVC_LINE + 1
+      
+      ! Assign properties to the DEVICE array
+   
+      N_DEVC = N_DEVC + 1
+
+      DV => DEVICE(N_DEVC)
+      M  => MESHES(MESH_NUMBER)
+   
+      DV%CONVERSION_FACTOR= CONVERSION_FACTOR
+      DV%DEPTH            = DEPTH
+      DV%IOR              = IOR
+      IF (ID=='null') THEN
+         WRITE(ID,'(A7,I4)') 'Device_',N_DEVC
+      ELSE
+         DV%ID               = ID
+      ENDIF
+      IF (POINTS>1)DV%LINE= N_DEVC_LINE
+      DV%POINT            = I_POINT
+      DV%MESH             = MESH_NUMBER
+      DV%ORDINAL          = NN
+      DV%ORIENTATION(1:3) = ORIENTATION(1:3)/SQRT(ORIENTATION(1)**2+ORIENTATION(2)**2+ORIENTATION(3)**2)
+      DV%PROP_ID          = PROP_ID
+      DV%CTRL_ID          = CTRL_ID   
+      DV%DEVC_ID          = DEVC_ID   
+      DV%SURF_ID          = SURF_ID            
+      DV%PART_ID          = PART_ID            
+      DV%MATL_ID          = MATL_ID            
+      DV%SPEC_ID          = SPEC_ID            
+      DV%DUCT_ID          = DUCT_ID 
+      DV%NODE_ID          = NODE_ID   
+      DV%QUANTITY         = QUANTITY
+      DV%ROTATION         = ROTATION*TWOPI/360._EB
+      DV%SETPOINT         = SETPOINT
+      DV%LATCH            = LATCH
+      DV%TRIP_DIRECTION   = TRIP_DIRECTION
+      DV%INITIAL_STATE    = INITIAL_STATE
+      DV%CURRENT_STATE    = INITIAL_STATE
+      DV%PRIOR_STATE      = INITIAL_STATE
+      DV%FLOWRATE         = FLOWRATE
+      DV%BYPASS_FLOWRATE  = BYPASS_FLOWRATE
+      DV%STATISTICS       = STATISTICS   
+      DV%TIME_AVERAGED    = TIME_AVERAGED 
+      DV%SURF_INDEX       = 0
+      DV%UNITS            = UNITS
+      DV%DELAY            = DELAY / TIME_SHRINK_FACTOR
+      DV%X1               = XB(1)
+      DV%X2               = XB(2)
+      DV%Y1               = XB(3)
+      DV%Y2               = XB(4)
+      DV%Z1               = XB(5)
+      DV%Z2               = XB(6)
+      DV%X                = XYZ(1)
+      DV%Y                = XYZ(2)
+      DV%Z                = XYZ(3)
+      DV%DRY              = DRY
+      DV%VELO_INDEX       = VELO_INDEX
+   
+   ENDDO POINTS_LOOP
 
    ! Coordinates for non-point devices
 
@@ -7272,6 +7310,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVCO
    ENDIF
    
 ENDDO READ_DEVC_LOOP
+
 REWIND(LU_INPUT)
 
 CONTAINS
@@ -7281,16 +7320,7 @@ SUBROUTINE SET_DEVC_DEFAULTS
 CONVERSION_FACTOR = 1._EB
 DEPTH            = 0._EB
 IOR              = 0
-SELECT CASE(N)
-   CASE(1:9)
-      WRITE(ID,'(A7,I1)') 'Device_',N
-   CASE(10:99)
-      WRITE(ID,'(A7,I2)') 'Device_',N
-   CASE(100:999)
-      WRITE(ID,'(A7,I3)') 'Device_',N
-   CASE(1000:9999)
-      WRITE(ID,'(A7,I4)') 'Device_',N
-END SELECT
+ID               = 'null'
 ORIENTATION(1:3) = (/0._EB,0._EB,-1._EB/)
 PROP_ID          = 'null'
 CTRL_ID          = 'null'
@@ -7314,6 +7344,7 @@ XB(5)            = -1.E6_EB
 XB(6)            =  1.E6_EB
 INITIAL_STATE    = .FALSE.
 LATCH            = .TRUE.
+POINTS           = 1
 SETPOINT         = 1.E20_EB
 STATISTICS       = 'null'
 TRIP_DIRECTION   = 1
@@ -7590,7 +7621,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
-      IF (.NOT.OUTPUT_QUANTITY(QUANTITY_INDEX)%INTEGRATED .AND. DV%STATISTICS=='null' .AND. DV%X1>-1.E6_EB) THEN
+      IF (.NOT.OUTPUT_QUANTITY(QUANTITY_INDEX)%INTEGRATED .AND. DV%STATISTICS=='null' .AND. DV%X1>-1.E6_EB .AND. DV%LINE==0) THEN
          WRITE(MESSAGE,'(3A)')  'ERROR: DEVC QUANTITY ',TRIM(DV%QUANTITY),' requires coordinates using XYZ, not XB'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
