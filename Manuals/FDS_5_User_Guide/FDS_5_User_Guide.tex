@@ -7750,6 +7750,8 @@ specified a point via the triplet of real numbers, {\ct XYZ}, FDS would calculat
 values defined at the centers of the 8 nearest cells. Starting in FDS 5, this is no longer done. Instead, FDS reports the value of the {\ct QUANTITY} in
 the cell where the point {\ct XYZ} is located.
 
+\subsubsection{Devices on Solid Surfaces}
+
 When prescribing a solid phase quantity, be sure to position the
 probe at a solid surface. It is not always obvious where the
 solid surface is since the mesh does not always align with the input obstruction
@@ -7775,6 +7777,7 @@ Re-position the probe and try again. For example, the line
 designates the surface temperature of a wall facing the negative $y$
 direction.
 
+\subsubsection{Non-Pointwise Devices}
 
 In addition to point measurements, the {\ct DEVC} group can be used
 to report integrated quantities (See Table~\ref{tab:output}).
@@ -7799,6 +7802,25 @@ be done using {\ct XB} -- avoid planes or volumes
 that cross multiple mesh boundaries. FDS has to decide which mesh to
 use in the integration, and it chooses the finest mesh overlapping
 the centroid of the designated plane or volume.
+
+
+\subsubsection{Linear Array of Point Devices}
+\label{info:line_file}
+
+The {\ct DEVC} input construct enables you to specify a linear array of devices. By adding the parameter {\ct POINTS} and using the
+sextuple coordinate array {\ct XB}, you can direct FDS to create a line of devices from $(x_1,y_1,z_1)$ to $(x_2,y_2,z_2)$ as follows:
+
+\footnotesize
+\begin{verbatim}
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='TEMPERATURE', ID='TC Tree', POINTS=20 /
+\end{verbatim}
+\normalsize
+
+\noindent
+In a file called {\bf CHID\_line.csv}, there will be 4 columns of data (3 spatial coordinates and the value) 
+with the 20 temperature points presented as a running average. The
+averaging time is given by {\ct DT\_DEVC\_LINE} on the {\ct DUMP} line. It is 0.25 times the total simulation time by default. This is a convenient
+way to output a time-averaged linear profile of a quantity, like an array of thermocouples.
 
 
 
@@ -9084,6 +9106,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct MATL\_ID}         & Character       & Material identifier (if needed)                                  &       &         \\ \hline
 {\ct ORIENTATION}      & Real Triplet    & Direction vector                                                 &       & 0,0,-1  \\ \hline
 {\ct PART\_ID}         & Character       & Particle identifier (if needed)                                  &       &         \\ \hline
+{\ct POINTS}           & Integer         & See Section~\ref{info:line_file}                                 &       & 1       \\ \hline
 {\ct PROP\_ID}         & Character       & Associated {\ct PROP}erty line                                   &       &         \\ \hline
 {\ct QUANTITY}         & Character       & Name of Quantity to output                                       &       &         \\ \hline
 {\ct ROTATION}         & Real Triplet    & Rotation Angle                                                   & deg   & 0       \\ \hline
@@ -9120,41 +9143,40 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
 \hline \hline
 \endhead
-{\ct CHECK\_VOLUME\_FLOW}       & Logical      & See Section~\ref{info:pressurecorrection}        &           & {\ct .FALSE.}                      \\ \hline
-{\ct COLUMN\_DUMP\_LIMIT}       & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                      \\ \hline
-{\ct CTRL\_COLUMN\_LIMIT}         & Integer      & Number of columns in {\ct CTRL} file &           & 254                      \\ \hline
-{\ct DEVC\_COLUMN\_LIMIT}         & Integer      & Number of columns in {\ct DEVC} file &           & 254                      \\ \hline
-{\ct DT\_BNDF}                  & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES} \\ \hline
-%{\ct DEBUG}                     & Logical      & General purpose diagnostic flag   &           & {\ct .FALSE.}                      \\ \hline
-{\ct DT\_CTRL}                  & Real         & Control status dump interval      &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_DEVC}                  & Real         & Device output dump interval       &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_FLUSH}                 & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_HRR}                   & Real         & Heat release dump interval        &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_ISOF}                  & Real         & Iso-surface dump interval         &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_MASS}                  & Real         & Mass diagnostic dump interval     &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_PART}                  & Real         & Particle dump interval            &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_PL3D}                  & Real         & PLOT3D dump interval              &  s        & $\Delta t${\ct /5}         \\ \hline
-{\ct DT\_PROF}                  & Real         & Profile dump interval             &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_RESTART}               & Real         & Restart core dump interval        &  s        & 1000000.                          \\ \hline
-{\ct DT\_SLCF}                  & Real         & Slice dump interval               &  s        & $\Delta t${\ct /NFRAMES}    \\ \hline
-{\ct FLUSH\_FILE\_BUFFERS}      & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .TRUE.}                      \\ \hline
-%{\ct HEADERS}                   & Logical       & Print headers in *.csv output files &           & {\ct .TRUE.}                     \\ \hline
-{\ct MASS\_FILE}                & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                     \\ \hline
-{\ct MAXIMUM\_DROPLETS}         & Integer      & Max particles per mesh            &           & 500000                            \\ \hline
-{\ct NFRAMES}                   & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
-{\ct PLOT3D\_QUANTITY(5)}       & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
-{\ct PLOT3D\_SPEC\_ID(5)}       & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
-{\ct PLOT3D\_VELO\_INDEX}       & Integer~Quint & See Section~\ref{info:velocity}                                  &       &  0      \\ \hline
-%{\ct RENDER\_FILE}              & Character    & Name of render file from dxf2fds  &           &                                   \\ \hline
-{\ct SMOKE3D}                   & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                      \\ \hline
-{\ct SMOKE3D\_QUANTITY}         & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
-{\ct SMOKE3D\_SPEC\_ID}         & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
-%{\ct SMOKE3D\_COMPRESSION}      & Character    & Type of compression for S3D file  &           & {\ct 'RLE'}                      \\ \hline
-{\ct STATE\_FILE}               & Logical      & Flag for state relation file      &           & {\ct .FALSE.}                     \\ \hline
-%{\ct TIMING}                    & Logical      & General purpose timing flag       &           & {\ct .FALSE.}                      \\ \hline
-{\ct STATUS\_FILES}             & Logical      & Flag for status (notready) file   &           & {\ct .FALSE.}                     \\ \hline
-{\ct WRITE\_XYZ}                & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}                     \\ \hline
-%\end{tabular*}
+%{\ct CHECK\_VOLUME\_FLOW}           & Logical      & See Section~\ref{info:pressurecorrection}     &           & {\ct .FALSE.}                      \\ \hline
+{\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Limit text output to 255 columns              &           & {\ct .TRUE.}                      \\ \hline
+{\ct CTRL\_COLUMN\_LIMIT}           & Integer      & Number of columns in {\ct CTRL} file &        & 254                      \\ \hline
+{\ct DEVC\_COLUMN\_LIMIT}           & Integer      & Number of columns in {\ct DEVC} file &        & 254                      \\ \hline
+{\ct DT\_BNDF}                      & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES} \\ \hline
+%{\ct DEBUG}                         & Logical      & General purpose diagnostic flag   &           & {\ct .FALSE.}                      \\ \hline
+{\ct DT\_CTRL}                      & Real         & Control status dump interval      &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_DEVC}                      & Real         & Device output dump interval       &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_DEVC\_LINE}                & Real         & See Section~\ref{info:line_file}  &           & 1       \\ \hline
+{\ct DT\_FLUSH}                     & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_HRR}                       & Real         & Heat release dump interval        &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_ISOF}                      & Real         & Iso-surface dump interval         &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_MASS}                      & Real         & Mass diagnostic dump interval     &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_PART}                      & Real         & Particle dump interval            &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_PL3D}                      & Real         & PLOT3D dump interval              &  s        & $\Delta t${\ct /5}         \\ \hline
+{\ct DT\_PROF}                      & Real         & Profile dump interval             &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
+{\ct DT\_RESTART}                   & Real         & Restart core dump interval        &  s        & 1000000.                          \\ \hline
+{\ct DT\_SLCF}                      & Real         & Slice dump interval               &  s        & $\Delta t${\ct /NFRAMES}    \\ \hline
+{\ct FLUSH\_FILE\_BUFFERS}          & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .TRUE.}                      \\ \hline
+{\ct MASS\_FILE}                    & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                     \\ \hline
+{\ct MAXIMUM\_DROPLETS}             & Integer      & Max particles per mesh            &           & 500000                            \\ \hline
+{\ct NFRAMES}                       & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
+{\ct PLOT3D\_QUANTITY(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
+{\ct PLOT3D\_SPEC\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
+{\ct PLOT3D\_VELO\_INDEX}           & Integer~Quint & See Section~\ref{info:velocity}                                  &       &  0      \\ \hline
+%{\ct RENDER\_FILE}                  & Character    & Name of render file from dxf2fds  &           &                                   \\ \hline
+{\ct SMOKE3D}                       & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                      \\ \hline
+{\ct SMOKE3D\_QUANTITY}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
+{\ct SMOKE3D\_SPEC\_ID}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
+%{\ct SMOKE3D\_COMPRESSION}          & Character    & Type of compression for S3D file  &           & {\ct 'RLE'}                      \\ \hline
+{\ct STATE\_FILE}                   & Logical      & Flag for state relation file      &           & {\ct .FALSE.}                     \\ \hline
+%{\ct TIMING}                        & Logical      & General purpose timing flag       &           & {\ct .FALSE.}                      \\ \hline
+{\ct STATUS\_FILES}                 & Logical      & Flag for status (notready) file   &           & {\ct .FALSE.}                     \\ \hline
+{\ct WRITE\_XYZ}                    & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}                     \\ \hline
 \end{longtable}
 
 \noindent
