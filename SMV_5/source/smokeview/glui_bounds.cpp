@@ -107,6 +107,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define SAVE_FILE_LIST 93
 #define LOAD_FILES 92
 #define COLORBAR_EXTREME2 109
+#define TRANSPARENTLEVEL 110
 
 #define UPDATE_VECTOR 101
 
@@ -131,6 +132,7 @@ GLUI_Panel *panel_contours=NULL;
 GLUI_Panel *panel_isosurface=NULL;
 GLUI_Panel *panel_vector=NULL;
 GLUI_Panel *panel_slice_vector=NULL;
+GLUI_Spinner *SPINNER_transparentlevel=NULL;
 #ifdef pp_SLICECONTOURS
 GLUI_Panel *panel_line_contour=NULL;
 GLUI_Spinner *SPINNER_line_contour_num=NULL;
@@ -546,6 +548,8 @@ extern "C" void glui_bounds_setup(int main_window){
 #endif
     SPINNER_sliceframestep=glui_bounds->add_spinner_to_panel(panel_slice,"Frame Skip",GLUI_SPINNER_INT,&sliceframeskip,FRAMELOADING,Slice_CB);
     SPINNER_sliceframestep->set_int_limits(0,100);
+    SPINNER_transparentlevel=glui_bounds->add_spinner_to_panel(panel_slice,"Transparent level",GLUI_SPINNER_FLOAT,&transparentlevel,TRANSPARENTLEVEL,Slice_CB);
+    SPINNER_transparentlevel->set_float_limits(0.0,1.0);
     CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Averaged Slice Data",&slice_average_flag,AVERAGE_DATA,Slice_CB);
     //CHECKBOX_turb_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Turbulence Resolution",&slice_turbprop_flag,TURB_DATA,Slice_CB);
     SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(panel_slice,"Time Interval",GLUI_SPINNER_FLOAT,&slice_average_interval);
@@ -1635,6 +1639,9 @@ extern "C" void Slice_CB(int var){
   ASSERT(con_slice_min!=NULL);
   ASSERT(con_slice_max!=NULL);
   switch (var){
+    case TRANSPARENTLEVEL:
+      updatecolors(-1);
+      break;
 #ifdef pp_SLICECONTOURS
     case LINE_CONTOUR_VALUE:
       if(slice_line_contour_num<1){
