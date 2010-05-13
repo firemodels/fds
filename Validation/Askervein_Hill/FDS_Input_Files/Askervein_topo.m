@@ -92,10 +92,10 @@ z2 = num2str(z_max,'%1.2f');
 mesh = ['&MESH IJK=',n1,',',n2,',',n3,', XB=',x1,',',x2,',',y1,',',y2,',',z1,',',z2,'/']; fprintf(fid,'%s\n',mesh);
 fprintf(fid,'%s\n','  '); % blank line
 
-trnz = ['&TRNZ IDERIV=0, CC=250, PC=100, MESH_NUMBER=1/']; fprintf(fid,'%s\n',trnz);
-trnz = ['&TRNZ IDERIV=1, CC=250, PC=.8, MESH_NUMBER=1/']; fprintf(fid,'%s\n',trnz);
-trnz = ['&TRNZ IDERIV=0, CC=250, PC=100, MESH_NUMBER=2/']; fprintf(fid,'%s\n',trnz);
-trnz = ['&TRNZ IDERIV=1, CC=250, PC=.8, MESH_NUMBER=2/']; fprintf(fid,'%s\n',trnz);
+%trnz = ['&TRNZ IDERIV=0, CC=250, PC=100, MESH_NUMBER=1/']; fprintf(fid,'%s\n',trnz);
+%trnz = ['&TRNZ IDERIV=1, CC=250, PC=.8, MESH_NUMBER=1/']; fprintf(fid,'%s\n',trnz);
+%trnz = ['&TRNZ IDERIV=0, CC=250, PC=100, MESH_NUMBER=2/']; fprintf(fid,'%s\n',trnz);
+%trnz = ['&TRNZ IDERIV=1, CC=250, PC=.8, MESH_NUMBER=2/']; fprintf(fid,'%s\n',trnz);
 % fprintf(fid,'%s\n','  '); % blank line
 
 time = ['&TIME T_END=',num2str(T,'%1.1f'),'/'];
@@ -106,8 +106,14 @@ dump = ['&DUMP NFRAMES=3600,DT_PL3D=1.E10/'];
 fprintf(fid,'%s\n',dump);
 fprintf(fid,'%s\n','  '); % blank line
 
-misc = ['&MISC FDS6=.TRUE.,TMPA=15.0,LAPSE_RATE=-0.01,HUMIDITY=95.0,']; fprintf(fid,'%s\n',misc);
-misc = ['      PERIODIC_TEST=100,U0=6.0,V0=16.0,MEAN_FORCING=.TRUE.,RFAC_FORCING=0.5,SURF_DEFAULT=''terrain''/']; fprintf(fid,'%s\n',misc);
+misc = ['&MISC FDS6=.TRUE.'];       fprintf(fid,'%s\n',misc);
+misc = ['      TMPA=15.0'];         fprintf(fid,'%s\n',misc);
+misc = ['      LAPSE_RATE=-0.01'];  fprintf(fid,'%s\n',misc);
+misc = ['      HUMIDITY=95.0'];     fprintf(fid,'%s\n',misc);
+misc = ['      PERIODIC_TEST=100']; fprintf(fid,'%s\n',misc);
+misc = ['      U0=6.0, MEAN_FORCING_U=.TRUE.']; fprintf(fid,'%s\n',misc);
+misc = ['      V0=16.0,MEAN_FORCING_V=.TRUE.']; fprintf(fid,'%s\n',misc);
+misc = ['      SURF_DEFAULT=''terrain''/']; fprintf(fid,'%s\n',misc);
 fprintf(fid,'%s\n','  '); % blank line
 
 surf = ['&SURF ID=''terrain'',ROUGHNESS=0.02/']; fprintf(fid,'%s\n',surf);
