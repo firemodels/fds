@@ -433,32 +433,23 @@ IF (N_DEVC_TIME>0) THEN
          IF (APPEND) THEN
             OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
          ELSE
-            IF (.NOT.HEADERS) THEN
-               OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='REPLACE')
-            ELSE
-               OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='REPLACE')
-               WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(DEVC_COLUMN_LIMIT, N_DEVC_TIME - DEVC_COLUMN_LIMIT * (I - 1)),"(A,','),A)"
-               WRITE(LU_DEVC(I),TCFORM) 's',(TRIM(TIME_DEVC_UNITS(N)),N=DEVC_COLUMN_LIMIT*(I-1)+1,MIN(N_DEVC_TIME, &
-                                        I*DEVC_COLUMN_LIMIT))
-               WRITE(TCFORM,'(A,I4.4,A)') "(A,",MIN(DEVC_COLUMN_LIMIT, N_DEVC_TIME - DEVC_COLUMN_LIMIT * (I - 1)),"(',',3A))"
-               WRITE(LU_DEVC(I),TCFORM) 'FDS Time',('"',TRIM(TIME_DEVC_LABEL(N)),'"', &
+            OPEN(LU_DEVC(I),FILE=FN_DEVC(I),FORM='FORMATTED',STATUS='REPLACE')
+            WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(DEVC_COLUMN_LIMIT, N_DEVC_TIME - DEVC_COLUMN_LIMIT * (I - 1)),"(A,','),A)"
+            WRITE(LU_DEVC(I),TCFORM) 's',(TRIM(TIME_DEVC_UNITS(N)),N=DEVC_COLUMN_LIMIT*(I-1)+1,MIN(N_DEVC_TIME,I*DEVC_COLUMN_LIMIT))
+            WRITE(TCFORM,'(A,I4.4,A)') "(A,",MIN(DEVC_COLUMN_LIMIT, N_DEVC_TIME - DEVC_COLUMN_LIMIT * (I - 1)),"(',',3A))"
+            WRITE(LU_DEVC(I),TCFORM) 'FDS Time',('"',TRIM(TIME_DEVC_LABEL(N)),'"', &
                                              N=DEVC_COLUMN_LIMIT * (I - 1) + 1,MIN(N_DEVC_TIME, I * DEVC_COLUMN_LIMIT))
-            ENDIF
          ENDIF
       ENDDO
    ELSE
       IF (APPEND) THEN
          OPEN(LU_DEVC(1),FILE=FN_DEVC(1),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
       ELSE
-         IF (.NOT.HEADERS) THEN
-            OPEN(LU_DEVC(1),FILE=FN_DEVC(1),FORM='FORMATTED',STATUS='REPLACE')
-         ELSE
-            OPEN(LU_DEVC(1),FILE=FN_DEVC(1),FORM='FORMATTED',STATUS='REPLACE')
-            WRITE(TCFORM,'(A,I4.4,A)') "(",N_DEVC_TIME,"(A,','),A)"
-            WRITE(LU_DEVC(1),TCFORM) 's',(TRIM(TIME_DEVC_UNITS(N)),N=1,N_DEVC_TIME)
-            WRITE(TCFORM,'(A,I4.4,A)') "(A,",N_DEVC_TIME,"(',',3A))"
-            WRITE(LU_DEVC(1),TCFORM) 'FDS Time',('"',TRIM(TIME_DEVC_LABEL(N)),'"',N=1,N_DEVC_TIME)
-         ENDIF
+         OPEN(LU_DEVC(1),FILE=FN_DEVC(1),FORM='FORMATTED',STATUS='REPLACE')
+         WRITE(TCFORM,'(A,I4.4,A)') "(",N_DEVC_TIME,"(A,','),A)"
+         WRITE(LU_DEVC(1),TCFORM) 's',(TRIM(TIME_DEVC_UNITS(N)),N=1,N_DEVC_TIME)
+         WRITE(TCFORM,'(A,I4.4,A)') "(A,",N_DEVC_TIME,"(',',3A))"
+         WRITE(LU_DEVC(1),TCFORM) 'FDS Time',('"',TRIM(TIME_DEVC_LABEL(N)),'"',N=1,N_DEVC_TIME)
       ENDIF
    ENDIF
 
@@ -518,14 +509,10 @@ ENDIF
 IF (APPEND) THEN
    OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
 ELSE
-   IF (.NOT.HEADERS) THEN
-      OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')   
-   ELSE
-      OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')
-      WRITE(TCFORM,'(A,I4.4,A)') "(",5+N_ZONE,"(A,','),A)"
-      WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kg/s',('atm',N=1,N_ZONE) 
-      WRITE(LU_HRR,TCFORM) 'FDS_HRR_Time','HRR','RAD_LOSS','CONV_LOSS','COND_LOSS','BURN_RATE',(TRIM(P_ZONE(N)%ID),N=1,N_ZONE) 
-   ENDIF
+   OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')
+   WRITE(TCFORM,'(A,I4.4,A)') "(",5+N_ZONE,"(A,','),A)"
+   WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kg/s',('atm',N=1,N_ZONE) 
+   WRITE(LU_HRR,TCFORM) 'FDS_HRR_Time','HRR','RAD_LOSS','CONV_LOSS','COND_LOSS','BURN_RATE',(TRIM(P_ZONE(N)%ID),N=1,N_ZONE) 
 ENDIF
 
 
@@ -535,14 +522,10 @@ DO N=1,N_TREES_OUT
  IF (APPEND) THEN
     OPEN(LU_VEG_OUT(N),FILE=FN_VEG_OUT(N),FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
  ELSE
-    IF (.NOT.HEADERS) THEN
-       OPEN(LU_VEG_OUT(N),FILE=FN_VEG_OUT(N),FORM='FORMATTED',STATUS='REPLACE')   
-    ELSE
-       OPEN(LU_VEG_OUT(N),FILE=FN_VEG_OUT(N),FORM='FORMATTED',STATUS='REPLACE')
-       WRITE(LU_VEG_OUT(N),'(A,A,A,A,A)')'s,','kg,','kg, ','kW, ','kW' 
-       WRITE(LU_VEG_OUT(N),'(A,A,A,A,A)')'FDS_Vegout_Time,','Total_Tree_Dry_Mass,','Total_Tree_Moist_Mass, ', &
+    OPEN(LU_VEG_OUT(N),FILE=FN_VEG_OUT(N),FORM='FORMATTED',STATUS='REPLACE')
+    WRITE(LU_VEG_OUT(N),'(A,A,A,A,A)')'s,','kg,','kg, ','kW, ','kW' 
+    WRITE(LU_VEG_OUT(N),'(A,A,A,A,A)')'FDS_Vegout_Time,','Total_Tree_Dry_Mass,','Total_Tree_Moist_Mass, ', &
                                          'total_int_div(qveg_conv)dVe, ','total_int_div(qveg_rad)dVe'
-    ENDIF
  ENDIF
 ENDDO
  
@@ -639,29 +622,25 @@ IF_DUMP_SPECIES_INFO: IF (MASS_FILE) THEN
    IF (APPEND) THEN
       OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
    ELSE
-      IF (.NOT.HEADERS) THEN
-         OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='REPLACE')
+      OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='REPLACE')
+      IF (MIXTURE_FRACTION) THEN
+         LABEL(1) = 'Time'
+         LABEL(2) = 'Total'
+         LABEL(3:3+N_STATE_SPECIES-1) = MF_SPEC_ID(1:N_STATE_SPECIES)
+         NN = 3+N_STATE_SPECIES-1
+         DO N=1,N_SPECIES
+            IF (SPECIES(N)%MODE==GAS_SPECIES .AND. SPECIES(N)%INDEX > N_STATE_SPECIES) THEN
+               NN = NN+1
+               LABEL(NN) = SPECIES(N)%ID
+            ENDIF
+         ENDDO
+         WRITE(TCFORM,'(A,I4.4,A)') "(",NN-1,"(A,','),A)"
+         WRITE(LU_MASS,TCFORM) 's',('kg',N=1,NN-1)
+         WRITE(LU_MASS,TCFORM) (TRIM(LABEL(N)),N=1,NN)
       ELSE
-         OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='REPLACE')
-         IF (MIXTURE_FRACTION) THEN
-            LABEL(1) = 'Time'
-            LABEL(2) = 'Total'
-            LABEL(3:3+N_STATE_SPECIES-1) = MF_SPEC_ID(1:N_STATE_SPECIES)
-            NN = 3+N_STATE_SPECIES-1
-            DO N=1,N_SPECIES
-               IF (SPECIES(N)%MODE==GAS_SPECIES .AND. SPECIES(N)%INDEX > N_STATE_SPECIES) THEN
-                  NN = NN+1
-                  LABEL(NN) = SPECIES(N)%ID
-               ENDIF
-            ENDDO
-            WRITE(TCFORM,'(A,I4.4,A)') "(",NN-1,"(A,','),A)"
-            WRITE(LU_MASS,TCFORM) 's',('kg',N=1,NN-1)
-            WRITE(LU_MASS,TCFORM) (TRIM(LABEL(N)),N=1,NN)
-         ELSE
-            WRITE(TCFORM,'(A,I4.4,A)') "(",N_SPECIES+1,"(A,','),A)"
-            WRITE(LU_MASS,TCFORM) 's',('kg',N=0,N_SPECIES)
-            WRITE(LU_MASS,TCFORM)'FDS Time','Total',(TRIM(SPECIES(N)%ID),N=1,N_SPECIES)
-         ENDIF
+         WRITE(TCFORM,'(A,I4.4,A)') "(",N_SPECIES+1,"(A,','),A)"
+         WRITE(LU_MASS,TCFORM) 's',('kg',N=0,N_SPECIES)
+         WRITE(LU_MASS,TCFORM)'FDS Time','Total',(TRIM(SPECIES(N)%ID),N=1,N_SPECIES)
       ENDIF
    ENDIF
 ENDIF IF_DUMP_SPECIES_INFO
