@@ -761,7 +761,8 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB) :: DTMP,QNETF,QDXKF,QDXKB,RR,TMP_G,T,RFACF,RFACB,RFACF2,RFACB2,PPCLAUS,PPSURF,TMP_G_B,DT_BC, &
             DXKF,DXKB,REACTION_RATE,QRADINB,RFLUX_UP,RFLUX_DOWN,E_WALLB, &
             HVRG,Y_MF_G,Y_MF_W,RSUM_W, RSUM_G, MFLUX, MFLUX_S, VOLSUM,YPRSUM, &
-            DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, DX_GRID, RHO_S0,DT2_BC,TOLERANCE,C_S_ADJUST_UNITS
+            DXF, DXB,HTCB,Q_WATER_F,Q_WATER_B,TMP_F_OLD, DX_GRID, RHO_S0,DT2_BC,TOLERANCE,C_S_ADJUST_UNITS,&
+            MW_G,H_MASS,X_G,X_W,D_AIR,MU_AIR,U2,V2,W2,RE_L,SC_AIR,SH_FAC_WALL,SHERWOOD,VELCON,RHO_G
 !REAL(EB) :: YY_S,RSUM_S
 INTEGER :: IBC,IIG,JJG,KKG,IIB,JJB,KKB,IWB,NWP,I,J,NR,NNN,NL,II,JJ,KK,IW,IOR,N,I_OBST,NS
 REAL(EB) :: SMALLEST_CELL_SIZE(MAX_LAYERS),THICKNESS,YY_GET(1:N_SPECIES)
@@ -1019,68 +1020,130 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
    ENDIF
 
    ! Estimate the previous value of liquid mass fluxes. The possibility of multiple liquids not taken into account.
+   NEW_EVAP_IF: IF (NEW_EVAP) THEN
+      MATERIAL_LOOP2B: DO N=1,SF%N_MATL
+         ML  => MATERIAL(SF%MATL_INDEX(N))
+         IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID) CYCLE MATERIAL_LOOP2B
+         IF (WC%RHO_S(1,N)==0._EB) CYCLE MATERIAL_LOOP2B
+         YY_GET = MAX(0._EB,YY(IIG,JJG,KKG,:))
+         CALL GET_MOLECULAR_WEIGHT(YY_GET,MW_G)
+         X_G = YY_GET(I_FUEL)/REACTION(1)%MW_FUEL*MW_G
+         X_W = MIN(1._EB,EXP(ML%H_R(1)*REACTION(1)%MW_FUEL/R0*(1./ML%TMP_BOIL-1./WC%TMP_S(1))))
+         D_AIR = 1.0E-5_EB  ! diffusion (m2/s)
+         IF (DNS) THEN
+            H_MASS = 2._EB*D_AIR*RDN(IW)
+         ELSE
+            MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
 
-   MFLUX = MAX(0._EB,MFLUX - MASSFLUX_ACTUAL(IW,I_FUEL)) ! Decrease 
-   MATERIAL_LOOP2: DO N=1,SF%N_MATL
-      ML  => MATERIAL(SF%MATL_INDEX(N))
-      IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID) CYCLE MATERIAL_LOOP2
-      IF (WC%RHO_S(1,N)==0._EB) CYCLE MATERIAL_LOOP2
-      IF (ML%NU_FUEL(1)>0._EB) MFLUX = MFLUX/ML%NU_FUEL(1)
-      ! gas phase 
-      YY_GET = MAX(0._EB,YY(IIG,JJG,KKG,:))
-!      Y_MF_G = YY_GET(I_FUEL)                      ! OLD
-      CALL GET_MASS_FRACTION(YY_GET,I_FUEL,Y_MF_G)  ! NEW
-!      CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_G)     ! OLD
-      RSUM_G = RSUM(IIG,JJG,KKG)                    ! NEW
-      ! wall values
-!      YY_GET = MAX(0._EB,YY_F(IW,:))
-!      Y_MF_W = YY_GET(I_FUEL)
-!      CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_W)
-      ! Weighted average of wall and gas values
-      ! Alvernative 1
-!      YPRSUM  = 0.2*(Y_MF_W/RSUM_W) + 0.8*(Y_MF_G/RSUM_G)
-      YPRSUM  = Y_MF_G/RSUM_G
-      ! Alternative 2
-!      YY_S    = 0.2*Y_MF_W+0.8*Y_MF_G
-!      RSUM_S  = 0.2*RSUM_W+0.8*RSUM_G
-!      YPRSUM  = YY_S/RSUM_S
-      HVRG    = REACTION(1)%MW_FUEL*ML%H_R(1)/R0
-      PPSURF  = MIN(1._EB,(R0/REACTION(1)%MW_FUEL)*YPRSUM)
-      PPCLAUS = MIN(1._EB,EXP(HVRG*(1./ML%TMP_BOIL-1./WC%TMP_S(1))))
-      ! Make initial guess
-      IF ((MFLUX==0._EB) .AND. (PPSURF<PPCLAUS)) THEN         
-         MFLUX = (ML%INIT_VAPOR_FLUX/(R0*TMPA/P_INF))*REACTION(1)%MW_FUEL/ML%ADJUST_BURN_RATE(1,I_FUEL)
-      ENDIF
-      ! Adjust MFLUX to reach equilibrium vapor pressure
-      IF (PPSURF/=PPCLAUS .AND. PPSURF>0._EB) THEN
-         MFLUX = MFLUX*MIN(1.02_EB,MAX(0.98_EB,PPCLAUS/PPSURF))
-      ENDIF
-      IF (MFLUX > 0._EB .AND. TW(IW)>T) TW(IW) = T
-      IF (WC%TMP_S(1)>ML%TMP_BOIL) THEN
-         ! Net flux guess for liquid evap
-         QNETF = Q_WATER_F + QRADIN(IW) - QRADOUT(IW) + QCONF(IW)
-         MFLUX = MAX(MFLUX,1.02*(QNETF - 2.*(ML%TMP_BOIL-WC%TMP_S(1))/DXF/K_S(1))/ML%H_R(1))
-      ENDIF
-      MFLUX = MIN(MFLUX,THICKNESS*ML%RHO_S/DT_BC)
-      ! CYLINDRICAL and SPHERICAL scaling not implemented
-      DO NS = 1,N_SPECIES
-         MASSFLUX(IW,NS)        = MASSFLUX(IW,NS)        + ML%ADJUST_BURN_RATE(1,NS)*ML%NU_GAS(1,NS)*MFLUX
-         MASSFLUX_ACTUAL(IW,NS) = MASSFLUX_ACTUAL(IW,NS) +                           ML%NU_GAS(1,NS)*MFLUX
-      ENDDO
-      Q_S(1) = Q_S(1) - MFLUX*ML%H_R(1)/DX_S(1)  ! no improvement (in cone test) if used updated RDX 
+            ! Calculate tangential velocity near the surface
+            IF (PREDICTOR) THEN
+               RHO_G = RHO(IIG,JJG,KKG)
+               U2 = 0.25_EB*(U(IIG,JJG,KKG)+U(IIG-1,JJG,KKG))**2
+               V2 = 0.25_EB*(V(IIG,JJG,KKG)+V(IIG,JJG-1,KKG))**2
+               W2 = 0.25_EB*(W(IIG,JJG,KKG)+W(IIG,JJG,KKG-1))**2
+            ELSE
+               RHO_G = RHOS(IIG,JJG,KKG)
+               U2 = 0.25_EB*(US(IIG,JJG,KKG)+US(IIG-1,JJG,KKG))**2
+               V2 = 0.25_EB*(VS(IIG,JJG,KKG)+VS(IIG,JJG-1,KKG))**2
+               W2 = 0.25_EB*(WS(IIG,JJG,KKG)+WS(IIG,JJG,KKG-1))**2
+            ENDIF
+            SELECT CASE(ABS(IOR))
+               CASE(1)
+                  U2 = 0._EB
+               CASE(2)
+                  V2 = 0._EB
+               CASE(3)
+                  W2 = 0._EB
+            END SELECT 
+            VELCON = (U2+V2+W2)**0.4_EB
+            RE_L     = MAX(5.E5_EB,RHO_G*VELCON/(RDN(IW)*MU_AIR))
+            SC_AIR = 0.6_EB     ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
+            SH_FAC_WALL = 0.037_EB*SC_AIR**ONTH
+            SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
+            H_MASS = SHERWOOD*D_AIR*RDN(IW)*2._EB
+         ENDIF
+         MFLUX = MAX(0._EB,&
+            REACTION(1)%MW_FUEL/R0/WC%TMP_S(1)*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
+         IF (PREDICTOR) THEN
+            MFLUX = MFLUX * PBAR(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
+         ELSE
+            MFLUX = MFLUX * PBAR_S(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
+         ENDIF
+         MFLUX = MIN(MFLUX,THICKNESS*ML%RHO_S/DT_BC)
+         ! CYLINDRICAL and SPHERICAL scaling not implemented
+         DO NS = 1,N_SPECIES
+            MASSFLUX(IW,NS)        = MASSFLUX(IW,NS)        + ML%ADJUST_BURN_RATE(1,NS)*ML%NU_GAS(1,NS)*MFLUX
+            MASSFLUX_ACTUAL(IW,NS) = MASSFLUX_ACTUAL(IW,NS) +                           ML%NU_GAS(1,NS)*MFLUX
+         ENDDO
+         Q_S(1) = Q_S(1) - MFLUX*ML%H_R(1)/DX_S(1)  ! no improvement (in cone test) if used updated RDX 
 
-      DX_GRID = DT_BC*MFLUX/ML%RHO_S
-      IF (POINT_SHRINK) THEN
-         X_S_NEW(1:NWP) = MAX(0._EB,X_S_NEW(1:NWP)-DX_GRID)
-         IF (DX_GRID > 0._EB) WC%SHRINKING = .TRUE.
-      ENDIF
-      
-      EXIT MATERIAL_LOOP2     ! Can handle only one LIQUID fuel at the time
+         DX_GRID = DT_BC*MFLUX/ML%RHO_S
+         IF (POINT_SHRINK) THEN
+            X_S_NEW(1:NWP) = MAX(0._EB,X_S_NEW(1:NWP)-DX_GRID)
+            IF (DX_GRID > 0._EB) WC%SHRINKING = .TRUE.
+         ENDIF
+      ENDDO MATERIAL_LOOP2B
+   ELSE NEW_EVAP_IF !Old routine
+      MFLUX = MAX(0._EB,MFLUX - MASSFLUX_ACTUAL(IW,I_FUEL)) ! Decrease 
+      MATERIAL_LOOP2: DO N=1,SF%N_MATL
+         ML  => MATERIAL(SF%MATL_INDEX(N))
+         IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_LIQUID) CYCLE MATERIAL_LOOP2
+         IF (WC%RHO_S(1,N)==0._EB) CYCLE MATERIAL_LOOP2
+         IF (ML%NU_FUEL(1)>0._EB) MFLUX = MFLUX/ML%NU_FUEL(1)
+         ! gas phase 
+         YY_GET = MAX(0._EB,YY(IIG,JJG,KKG,:))
+   !      Y_MF_G = YY_GET(I_FUEL)                      ! OLD
+         CALL GET_MASS_FRACTION(YY_GET,I_FUEL,Y_MF_G)  ! NEW
+   !      CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_G)     ! OLD
+         RSUM_G = RSUM(IIG,JJG,KKG)                    ! NEW
+         ! wall values
+   !      YY_GET = MAX(0._EB,YY_F(IW,:))
+   !      Y_MF_W = YY_GET(I_FUEL)
+   !      CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_W)
+         ! Weighted average of wall and gas values
+         ! Alvernative 1
+   !      YPRSUM  = 0.2*(Y_MF_W/RSUM_W) + 0.8*(Y_MF_G/RSUM_G)
+         YPRSUM  = Y_MF_G/RSUM_G
+         ! Alternative 2
+   !      YY_S    = 0.2*Y_MF_W+0.8*Y_MF_G
+   !      RSUM_S  = 0.2*RSUM_W+0.8*RSUM_G
+   !      YPRSUM  = YY_S/RSUM_S
+         HVRG    = REACTION(1)%MW_FUEL*ML%H_R(1)/R0
+         PPSURF  = MIN(1._EB,(R0/REACTION(1)%MW_FUEL)*YPRSUM)
+         PPCLAUS = MIN(1._EB,EXP(HVRG*(1./ML%TMP_BOIL-1./WC%TMP_S(1))))
+         ! Make initial guess
+         IF ((MFLUX==0._EB) .AND. (PPSURF<PPCLAUS)) THEN         
+            MFLUX = (ML%INIT_VAPOR_FLUX/(R0*TMPA/P_INF))*REACTION(1)%MW_FUEL/ML%ADJUST_BURN_RATE(1,I_FUEL)
+         ENDIF
+         ! Adjust MFLUX to reach equilibrium vapor pressure
+         IF (PPSURF/=PPCLAUS .AND. PPSURF>0._EB) THEN
+            MFLUX = MFLUX*MIN(1.02_EB,MAX(0.98_EB,PPCLAUS/PPSURF))
+         ENDIF
+         IF (MFLUX > 0._EB .AND. TW(IW)>T) TW(IW) = T
+         IF (WC%TMP_S(1)>ML%TMP_BOIL) THEN
+            ! Net flux guess for liquid evap
+            QNETF = Q_WATER_F + QRADIN(IW) - QRADOUT(IW) + QCONF(IW)
+            MFLUX = MAX(MFLUX,1.02*(QNETF - 2.*(ML%TMP_BOIL-WC%TMP_S(1))/DXF/K_S(1))/ML%H_R(1))
+         ENDIF
+         MFLUX = MIN(MFLUX,THICKNESS*ML%RHO_S/DT_BC)
+         ! CYLINDRICAL and SPHERICAL scaling not implemented
+         DO NS = 1,N_SPECIES
+            MASSFLUX(IW,NS)        = MASSFLUX(IW,NS)        + ML%ADJUST_BURN_RATE(1,NS)*ML%NU_GAS(1,NS)*MFLUX
+            MASSFLUX_ACTUAL(IW,NS) = MASSFLUX_ACTUAL(IW,NS) +                           ML%NU_GAS(1,NS)*MFLUX
+         ENDDO
+         Q_S(1) = Q_S(1) - MFLUX*ML%H_R(1)/DX_S(1)  ! no improvement (in cone test) if used updated RDX 
 
-   ENDDO MATERIAL_LOOP2
+         DX_GRID = DT_BC*MFLUX/ML%RHO_S
+         IF (POINT_SHRINK) THEN
+            X_S_NEW(1:NWP) = MAX(0._EB,X_S_NEW(1:NWP)-DX_GRID)
+            IF (DX_GRID > 0._EB) WC%SHRINKING = .TRUE.
+         ENDIF
+         
+         EXIT MATERIAL_LOOP2     ! Can handle only one LIQUID fuel at the time
 
+      ENDDO MATERIAL_LOOP2
+   ENDIF NEW_EVAP_IF
    ! Re-generate grid for shrinking wall
-
    N_LAYER_CELLS_NEW = 0
    RECOMPUTE_GRID: IF (WC%SHRINKING) THEN
       NWP_NEW = 0
