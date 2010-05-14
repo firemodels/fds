@@ -6,7 +6,7 @@ setenv BASEDIR `pwd`
 
 $RUNFDS Current_Results Steckler_010 fire41 &
 $RUNFDS Current_Results Steckler_011 fire43 &
-$RUNFDS Current_Results Steckler_012 fire44 &
+$RUNFDS Current_Results Steckler_012 fire43 &
 $RUNFDS Current_Results Steckler_013 fire45 &
 $RUNFDS Current_Results Steckler_014 fire46 &
 $RUNFDS Current_Results Steckler_016 fire47 &
