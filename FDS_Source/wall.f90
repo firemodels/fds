@@ -1052,7 +1052,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          IF (DNS) THEN
             ZZ = 0._EB
             ZZ(1) = 1._EB
-            ITMP = MIN(5000._EB,NINT(TMP(IIG,JJG,KKG)))
+            ITMP = MIN(5000,NINT(TMP(IIG,JJG,KKG)))
             CALL GET_DIFFUSIVITY(ZZ,0._EB,D_AIR,ITMP)
             H_MASS = 2._EB*D_AIR*RDN(IW)
          ELSE
@@ -1075,8 +1075,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
             SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
             H_MASS = SHERWOOD*D_AIR*RDN(IW)*2._EB
          ENDIF
-         MFLUX = MAX(0._EB,&
-            REACTION(1)%MW_FUEL/R0/WC%TMP_S(1)*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
+         MFLUX = MAX(0._EB,REACTION(1)%MW_FUEL/R0/WC%TMP_S(1)*H_MASS*LOG((X_G-1._EB)/(X_W-1._EB)))
          MFLUX = MFLUX * PBARP(KKG,PRESSURE_ZONE(IIG,JJG,KKG))
          MFLUX = MIN(MFLUX,THICKNESS*ML%RHO_S/DT_BC)
          IF (MFLUX > 0._EB .AND. TW(IW)>T) TW(IW) = T
