@@ -322,7 +322,7 @@ void initdefaultcolorbars(void){
   colorbardata *cbi;
   int ii;
 
-  ndefaultcolorbars=6;
+  ndefaultcolorbars=7;
   
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
@@ -470,6 +470,45 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[9]=255;
   cbi->rgb_node[10]=0;
   cbi->rgb_node[11]=0;
+  cbi++;
+
+  // blue->red split
+
+  strcpy(cbi->label,"red/black");
+  cbi->label_ptr=cbi->label;
+
+  cbi->nnodes=6;
+  cbi->nodehilight=0;
+
+  cbi->index_node[0]=0;
+  cbi->rgb_node[0]=255;
+  cbi->rgb_node[1]=255;
+  cbi->rgb_node[2]=255;
+
+  cbi->index_node[1]=120;
+  cbi->rgb_node[3]=255;
+  cbi->rgb_node[4]=255;
+  cbi->rgb_node[5]=255;
+
+  cbi->index_node[2]=120;
+  cbi->rgb_node[6]=255;
+  cbi->rgb_node[7]=0;
+  cbi->rgb_node[8]=0;
+
+  cbi->index_node[3]=136;
+  cbi->rgb_node[9]=255;
+  cbi->rgb_node[10]=0;
+  cbi->rgb_node[11]=0;
+
+  cbi->index_node[4]=136;
+  cbi->rgb_node[9]=64;
+  cbi->rgb_node[10]=64;
+  cbi->rgb_node[11]=64;
+
+  cbi->index_node[5]=255;
+  cbi->rgb_node[9]=64;
+  cbi->rgb_node[10]=64;
+  cbi->rgb_node[11]=64;
   cbi++;
 
   // b&w colorbar
