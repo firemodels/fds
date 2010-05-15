@@ -1269,7 +1269,6 @@ void update_mesh_terrain(void){
       }
       if(meshi->is_bottom==0)break;
     }
-    printf("Mesh %i - isbottom=%i\n",i,meshi->is_bottom);
   }
 }
 
