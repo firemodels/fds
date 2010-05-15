@@ -404,6 +404,7 @@ int readsmv(char *smvfile){
       smoke3d *smoke3di;
       int filesize;
       int filelen;
+      char *buffer2;
 
       smoke3di = smoke3dinfo + ismoke3d;
 #ifdef pp_LIGHT
@@ -421,21 +422,22 @@ int readsmv(char *smvfile){
       smoke3di->autozip = 0;
       if(fgets(buffer,255,streamsmv)==NULL)break;
       trim(buffer);
-      filelen=strlen(buffer);
+      buffer2=trim_front(buffer);
+      filelen=strlen(buffer2);
       if(sourcedir!=NULL){
         filelen+=lensourcedir+1;
       }
       if(filelen<=0)break;
-      if(getfileinfo(buffer,sourcedir,&filesize)==0){
+      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
         NewMemory((void **)&smoke3di->file,(unsigned int)(filelen+lensourcedir+1));
         NewMemory((void **)&smoke3di->filebase,(unsigned int)(filelen+1));
-        STRCPY(smoke3di->filebase,buffer);
+        STRCPY(smoke3di->filebase,buffer2);
         if(sourcedir!=NULL){
           STRCPY(smoke3di->file,sourcedir);
-          STRCAT(smoke3di->file,buffer);
+          STRCAT(smoke3di->file,buffer2);
         }
         else{
-          STRCPY(smoke3di->file,buffer);
+          STRCPY(smoke3di->file,buffer2);
         }
         smoke3di->filesize=filesize;
 #ifdef pp_LIGHT
@@ -625,17 +627,18 @@ int readsmv(char *smvfile){
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
       trim(buffer);
-      if(strlen(buffer)<=0)break;
-      if(getfileinfo(buffer,sourcedir,&filesize)==0){
-        NewMemory((void **)&patchi->file,(unsigned int)(strlen(buffer)+lensourcedir+1));
-        NewMemory((void **)&patchi->filebase,(unsigned int)(strlen(buffer)+1));
-        STRCPY(patchi->filebase,buffer);
+      buffer2=trim_front(buffer);
+      if(strlen(buffer2)<=0)break;
+      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
+        NewMemory((void **)&patchi->file,(unsigned int)(strlen(buffer2)+lensourcedir+1));
+        NewMemory((void **)&patchi->filebase,(unsigned int)(strlen(buffer2)+1));
+        STRCPY(patchi->filebase,buffer2);
         if(sourcedir!=NULL){
           STRCPY(patchi->file,sourcedir);
-          STRCAT(patchi->file,buffer);
+          STRCAT(patchi->file,buffer2);
         }
         else{
-          STRCPY(patchi->file,buffer);
+          STRCPY(patchi->file,buffer2);
         }
         if(readlabels(&patchi->label,streamsmv)==2){
           printf("*** Warning: problem reading BNDF entry\n");
@@ -724,8 +727,9 @@ int readsmv(char *smvfile){
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
       trim(buffer);
-      if(strlen(buffer)<=0)break;
-      strcpy(buffer_rle,buffer);
+      buffer2=trim_front(buffer);
+      if(strlen(buffer2)<=0)break;
+      strcpy(buffer_rle,buffer2);
       strcat(buffer_rle,".rle");
       slicei->rle=-1;
       if(getfileinfo(buffer_rle,sourcedir,&filesize)==0){
@@ -747,17 +751,17 @@ int readsmv(char *smvfile){
         slicei->filesize=filesize;
         islice++;
       }
-      if(slicei->rle==-1&&getfileinfo(buffer,sourcedir,&filesize)==0){
-        NewMemory((void **)&slicei->file,(unsigned int)(strlen(buffer)+lensourcedir+1));
-        NewMemory((void **)&slicei->filebase,(unsigned int)(strlen(buffer)+1));
-        STRCPY(slicei->filebase,buffer);
+      if(slicei->rle==-1&&getfileinfo(buffer2,sourcedir,&filesize)==0){
+        NewMemory((void **)&slicei->file,(unsigned int)(strlen(buffer2)+lensourcedir+1));
+        NewMemory((void **)&slicei->filebase,(unsigned int)(strlen(buffer2)+1));
+        STRCPY(slicei->filebase,buffer2);
         slicei->rle=0;
         if(sourcedir!=NULL){
           STRCPY(slicei->file,sourcedir);
-          STRCAT(slicei->file,buffer);
+          STRCAT(slicei->file,buffer2);
         }
         else{
-          STRCPY(slicei->file,buffer);
+          STRCPY(slicei->file,buffer2);
         }
         if(readlabels(&slicei->label,streamsmv)==2){
           printf("*** Warning: problem reading SLCF entry\n");
@@ -883,20 +887,21 @@ int readsmv(char *smvfile){
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
       trim(buffer);
-      if(strlen(buffer)<=0)break;
-      if(getfileinfo(buffer,sourcedir,&filesize)==0){
+      buffer2=trim_front(buffer);
+      if(strlen(buffer2)<=0)break;
+      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
         int filelen;
 
-        filelen = strlen(buffer)+lensourcedir+1;
+        filelen = strlen(buffer2)+lensourcedir+1;
         NewMemory((void **)&isoi->file,filelen);
-        NewMemory((void **)&isoi->filebase,strlen(buffer)+1);
-        STRCPY(isoi->filebase,buffer);
+        NewMemory((void **)&isoi->filebase,strlen(buffer2)+1);
+        STRCPY(isoi->filebase,buffer2);
         if(sourcedir!=NULL){
           STRCPY(isoi->file,sourcedir);
-          STRCAT(isoi->file,buffer);
+          STRCAT(isoi->file,buffer2);
         }
         else{
-          STRCPY(isoi->file,buffer);
+          STRCPY(isoi->file,buffer2);
         }
         if(readlabels(&isoi->label,streamsmv)==2){
           printf("*** Warning: problem reading SLCF entry\n");
