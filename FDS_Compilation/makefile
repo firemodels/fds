@@ -106,6 +106,14 @@ intel_win_64 : obj = fds5_win_64
 intel_win_64 : setup_win $(objwinf_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwinf_serial) ../win64lib/isob.obj
 
+intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all
+intel_win_64_db : CFLAGS = -O2 -Dpp_noappend
+intel_win_64_db : FCOMPL = ifort
+intel_win_64_db : CCOMPL = cl
+intel_win_64_db : obj = fds5_win_64_db
+intel_win_64_db : setup_win $(objwinf_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwinf_serial) ../win64lib/isob.obj
+
 mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_64 : MPIINCLUDE = "c:\program files\mpich2\include"
 mpi_intel_win_64 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE)
