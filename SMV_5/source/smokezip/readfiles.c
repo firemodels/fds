@@ -771,7 +771,7 @@ int readsmv(char *smvfile){
         islice++;
       }
       if(slicei->rle==-1){
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        printf("*** Warning: the file, %s, does not exist.\n",buffer2);
         if(readlabels(&sliceinfo[islice].label,streamsmv)==2)break;
         nslice_files--;
       }
