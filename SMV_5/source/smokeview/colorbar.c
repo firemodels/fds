@@ -322,7 +322,7 @@ void initdefaultcolorbars(void){
   colorbardata *cbi;
   int ii;
 
-  ndefaultcolorbars=7;
+  ndefaultcolorbars=8;
   
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
@@ -472,9 +472,9 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[11]=0;
   cbi++;
 
-  // blue->red split
+  // red/black
 
-  strcpy(cbi->label,"red/black");
+  strcpy(cbi->label,"red/black (level set)");
   cbi->label_ptr=cbi->label;
 
   cbi->nnodes=6;
@@ -501,14 +501,45 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[11]=0;
 
   cbi->index_node[4]=136;
-  cbi->rgb_node[9]=64;
-  cbi->rgb_node[10]=64;
-  cbi->rgb_node[11]=64;
+  cbi->rgb_node[12]=64;
+  cbi->rgb_node[13]=64;
+  cbi->rgb_node[14]=64;
 
   cbi->index_node[5]=255;
-  cbi->rgb_node[9]=64;
-  cbi->rgb_node[10]=64;
-  cbi->rgb_node[11]=64;
+  cbi->rgb_node[15]=64;
+  cbi->rgb_node[16]=64;
+  cbi->rgb_node[17]=64;
+  cbi++;
+
+
+  // black/white
+
+  strcpy(cbi->label,"black/white (wall thickness)");
+  cbi->label_ptr=cbi->label;
+
+  cbi->nnodes=4;
+  cbi->nodehilight=0;
+
+  cbi->index_node[0]=0;
+  cbi->rgb_node[0]=0;
+  cbi->rgb_node[1]=0;
+  cbi->rgb_node[2]=0;
+
+  cbi->index_node[1]=32;
+  cbi->rgb_node[3]=0;
+  cbi->rgb_node[4]=0;
+  cbi->rgb_node[5]=0;
+
+  cbi->index_node[2]=32;
+  cbi->rgb_node[6]=255;
+  cbi->rgb_node[7]=255;
+  cbi->rgb_node[8]=255;
+
+  cbi->index_node[3]=255;
+  cbi->rgb_node[9]=255;
+  cbi->rgb_node[10]=255;
+  cbi->rgb_node[11]=255;
+
   cbi++;
 
   // b&w colorbar
