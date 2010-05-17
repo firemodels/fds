@@ -928,13 +928,16 @@ void drawiso(const mesh *meshi,int tranflag){
       nvertices=asurface->nvertices;
       ntriangles=asurface->ntriangles/3;
       if(ntriangles==0)continue;
-      if(setbw==0){
-        iso_color_ptr = iso_colors+4*icolor;
+      if(i==0&&strcmp(isoi->surface_label.shortlabel,"hrrpuv")==0){
+        iso_color_ptr=hrrpuv_iso_color;
       }
       else{
+        iso_color_ptr=iso_colors+4*icolor;
+      }
+      if(setbw!=0){
         float greylevel;
 
-        greylevel=color2bw(iso_colors+4*icolor);
+        greylevel=color2bw(iso_color_ptr);
         iso_color_tmp[0]=greylevel;
         iso_color_tmp[1]=greylevel;
         iso_color_tmp[2]=greylevel;
