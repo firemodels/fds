@@ -32,6 +32,7 @@
 #include "smokeheaders.h"
 #endif
 
+SVEXTERN float hrrpuv_iso_color[4];
 SVEXTERN int show_slice_terrain;
 SVEXTERN int npropinfo;
 SVEXTERN propdata *propinfo;
