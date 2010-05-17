@@ -1248,6 +1248,10 @@ void initvars1(void){
   show_glui_error=0;
   show_glui_abort=0;
 #endif
+  hrrpuv_iso_color[0]=1.0;
+  hrrpuv_iso_color[1]=0.5;
+  hrrpuv_iso_color[2]=0.0;
+  hrrpuv_iso_color[3]=1.0;
   showterrain=0;
   showgluitrainer=0;
   colorbarcycle=0;

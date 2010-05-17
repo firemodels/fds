@@ -2050,21 +2050,17 @@ void updatecolors(int changecolorindex){
   }
   if(colorbarinfo!=NULL){
     int tflag=0;
-    
-    for(n=0;n<nrgb_full;n++){
-      if(colorbarinfo[colorbartype].alpha[n]==0){
-        tflag=1;
-        break;
-      }
-    }
+    unsigned char *alpha;
+
+    alpha = colorbarinfo[colorbartype].alpha;
     for(n=0;n<nrgb_full;n++){
       float rgb_cb[3],graylevel;
 
       rgb_full[n][0]=colorbarinfo[colorbartype].colorbar[3*n];
       rgb_full[n][1]=colorbarinfo[colorbartype].colorbar[3*n+1];
       rgb_full[n][2]=colorbarinfo[colorbartype].colorbar[3*n+2];
-      if(tflag==1){
-        rgb_full[n][3]=colorbarinfo[colorbartype].alpha[n]/255.0;
+      if(alpha[n]==0){
+        rgb_full[n][3]=0.0;
       }
       else{
         rgb_full[n][3]=transparentlevel;
