@@ -737,6 +737,15 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     update_fire_line=1;
   }
 
+  if(colorbartype_ini==-1){
+    if(strcmp(sd->label.shortlabel,"thick")==0){
+      ColorBarMenu(wallthickness_colorbar);
+    }
+    if(strcmp(sd->label.shortlabel,"phifield")==0){
+      ColorBarMenu(levelset_colorbar);
+    }
+  }
+
   GLUTPOSTREDISPLAY
 }
 /* ------------------ outputslicebounds ------------------------ */
@@ -2961,7 +2970,7 @@ void drawslice_terrain(const slice *sd){
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   if(sd->idir==3){
-   constval = sd->above_ground_level/xyzmaxdiff+offset_slice*sd->sliceoffset;
+   constval = 0.01 + sd->above_ground_level/xyzmaxdiff+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
      float xmid;

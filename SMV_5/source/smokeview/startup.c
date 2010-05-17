@@ -930,6 +930,8 @@ void InitOpenGL(void){
 
 void initvars1(void){
 
+  levelset_colorbar=-1;
+  wallthickness_colorbar=-1;
   show_slice_terrain=0;
 #ifdef pp_LIGHT
   show_smokelighting=0;
@@ -1250,8 +1252,10 @@ void initvars1(void){
   showgluitrainer=0;
   colorbarcycle=0;
   colorbartype=0;
+  colorbartype_ini=-1;
   current_colorbar=colorbarinfo;
   colorbartype_save=colorbartype;
+  colorbartype_default=colorbartype;
   colorbarpoint=0;
   vectorspresent=0;
 
