@@ -262,7 +262,10 @@ void remapcolorbar(colorbardata *cbi){
     colorbar[0+3*i]=rgb_node[0]/255.0;
     colorbar[1+3*i]=rgb_node[1]/255.0;
     colorbar[2+3*i]=rgb_node[2]/255.0;
-    if(rgb_node[0]==0&&rgb_node[1]==1&&rgb_node[2]==2){
+    if(
+      (rgb_node[0]==0&&rgb_node[1]==1&&rgb_node[2]==2)||
+      (rgb_node[0]==253&&rgb_node[1]==254&&rgb_node[2]==255)
+      ){
       alpha[i]=0;
     }
     else{
@@ -280,8 +283,10 @@ void remapcolorbar(colorbardata *cbi){
       colorbar[1+3*j]=((1.0-factor)*rgb_node[1]+factor*rgb_node[4])/255.0;
       colorbar[2+3*j]=((1.0-factor)*rgb_node[2]+factor*rgb_node[5])/255.0;
       if(
-        rgb_node[0]==0&&rgb_node[1]==1&&rgb_node[2]==2&&
-        rgb_node[3]==0&&rgb_node[4]==1&&rgb_node[5]==2
+        (rgb_node[0]==0&&rgb_node[1]==1&&rgb_node[2]==2&&
+        rgb_node[3]==0&&rgb_node[4]==1&&rgb_node[5]==2)||
+        (rgb_node[0]==253&&rgb_node[1]==254&&rgb_node[2]==255&&
+         rgb_node[3]==253&&rgb_node[4]==254&&rgb_node[5]==255)
         ){
         alpha[j]=0;
       }
@@ -295,7 +300,11 @@ void remapcolorbar(colorbardata *cbi){
     colorbar[0+3*i]=rgb_node[0]/255.0;
     colorbar[1+3*i]=rgb_node[1]/255.0;
     colorbar[2+3*i]=rgb_node[2]/255.0;
-    if(rgb_node[0]==0&&rgb_node[1]==1&&rgb_node[2]==2){
+    if(
+      (rgb_node[0]==0&&rgb_node[1]==1&&rgb_node[2]==2)||
+      (rgb_node[0]==253&&rgb_node[1]==254&&rgb_node[2]==255)
+      )
+    {
       alpha[i]=0;
     }
     else{
@@ -474,6 +483,7 @@ void initdefaultcolorbars(void){
 
   // red/black
 
+  levelset_colorbar=cbi-colorbarinfo;
   strcpy(cbi->label,"red/black (level set)");
   cbi->label_ptr=cbi->label;
 
@@ -481,13 +491,13 @@ void initdefaultcolorbars(void){
   cbi->nodehilight=0;
 
   cbi->index_node[0]=0;
-  cbi->rgb_node[0]=255;
-  cbi->rgb_node[1]=255;
+  cbi->rgb_node[0]=253;
+  cbi->rgb_node[1]=254;
   cbi->rgb_node[2]=255;
 
   cbi->index_node[1]=120;
-  cbi->rgb_node[3]=255;
-  cbi->rgb_node[4]=255;
+  cbi->rgb_node[3]=253;
+  cbi->rgb_node[4]=254;
   cbi->rgb_node[5]=255;
 
   cbi->index_node[2]=120;
@@ -514,6 +524,7 @@ void initdefaultcolorbars(void){
 
   // black/white
 
+  wallthickness_colorbar=cbi-colorbarinfo;
   strcpy(cbi->label,"black/white (wall thickness)");
   cbi->label_ptr=cbi->label;
 
@@ -531,13 +542,13 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[5]=0;
 
   cbi->index_node[2]=32;
-  cbi->rgb_node[6]=255;
-  cbi->rgb_node[7]=255;
+  cbi->rgb_node[6]=253;
+  cbi->rgb_node[7]=254;
   cbi->rgb_node[8]=255;
 
   cbi->index_node[3]=255;
-  cbi->rgb_node[9]=255;
-  cbi->rgb_node[10]=255;
+  cbi->rgb_node[9]=253;
+  cbi->rgb_node[10]=254;
   cbi->rgb_node[11]=255;
 
   cbi++;

@@ -37,6 +37,7 @@ SVEXTERN int npropinfo;
 SVEXTERN propdata *propinfo;
 SVEXTERN float right_green, right_blue;
 
+SVEXTERN int levelset_colorbar, wallthickness_colorbar;
 SVEXTERN float glui_time;
 SVEXTERN int show_mode;
 SVEXTERN int cellcenter_interp, cellcenter_slice_active, cellcenter_bound_active;
@@ -404,7 +405,7 @@ SVEXTERN int shooter_itime;
 #endif
 SVEXTERN int showgluitrainer;
 SVEXTERN int colorbarcycle;
-SVEXTERN int colorbartype;
+SVEXTERN int colorbartype,colorbartype_ini,colorbartype_default;
 SVEXTERN int colorbartype_save;
 SVEXTERN int colorbarpoint;
 SVEXTERN int vectorspresent;

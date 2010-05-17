@@ -7041,6 +7041,9 @@ int readini2(char *inifile, int localfile){
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&colorbartype);
+      if(colorbartype!=colorbartype_default){
+        colorbartype_ini=colorbartype;
+      }
       continue;
     }
     if(match(buffer,"SHOWEXTREMEDATA",15)==1){
@@ -9944,8 +9947,10 @@ void writeini(int flag){
   fprintf(fileout," %i\n",show_smokelighting);
 #endif
 
-  fprintf(fileout,"COLORBARTYPE\n");
-  fprintf(fileout," %i\n",colorbartype);
+  if(colorbartype!=colorbartype_default){
+    fprintf(fileout,"COLORBARTYPE\n");
+    fprintf(fileout," %i\n",colorbartype);
+  }
   fprintf(fileout,"SHOWEXTREMEDATA\n");
   fprintf(fileout," %i\n",show_extremedata);
   {
