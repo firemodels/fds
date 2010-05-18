@@ -80,7 +80,7 @@
 #define pp_THREAD
 #endif
 
-#define pp_HIDEMULTI
+//#define pp_HIDEMULTI
 #define pp_MESSAGE
 #define pp_SPHERE
 #define pp_ISOOUT
