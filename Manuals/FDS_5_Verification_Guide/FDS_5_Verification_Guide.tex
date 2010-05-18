@@ -1402,8 +1402,8 @@ of loosely and densely packed radiating spheres.}
 \section{Radiation Absorbed by Liquid Droplets (\texorpdfstring{{\bf droplet\_absorption}}{droplet\_absorption}) }
 \label{droplet_absorption}
 
-This case tests the conservation of energy that is absorbed by liquid droplets. We want to make sure that the energy that is taken away from 
-the thermal radiation field is accuratelly converted into increased temperature of the droplets. Considering the total mass of 
+This case tests the conservation of energy that is absorbed by liquid droplets. We want to make sure that the energy that is taken away from
+the thermal radiation field is accuratelly converted into increased temperature of the droplets. Considering the total mass of
 absorbing droplets, the average droplet temperature $\bar{T_d}$ is increased by the absorbed radiation $\dot{Q}_r$ according to the following ODE
 \be
 m c_p \frac{d \bar{T_d}}{dt} = \dot{Q}_r
@@ -1421,7 +1421,7 @@ co-ordinate systems.
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{FIGURES/droplet_absorption_cart} &
-\includegraphics[width=3.2in]{FIGURES/droplet_absorption_cyl} 
+\includegraphics[width=3.2in]{FIGURES/droplet_absorption_cyl}
 \end{tabular*}
 \caption[Radiation absorption by liquid droplets]{Conserversion of absorbed thermal radiation energy into increased average droplet temperature.}
 \label{droplet_absorption_figures}
@@ -1795,19 +1795,20 @@ The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $
 \section{Interpreting Bench-Scale Measurements}
 \label{solid_kinetics}
 
-This section describes a method of determining and applying the values of the kinetic parameters for the thermal
+This section describes a method of deriving and applying the values of the kinetic parameters for the thermal
 decomposition of a solid, following the methodology described by Lyon~\cite{Lyon:FM2000}.
 
 
 \subsection{General Theory}
 
-Consider a solid material that undergoes multiple reactions during its thermal decomposition, as evidenced by, for example,
-thermal gravimetric analysis (TGA). From this measurement alone, it is not possible to determine the chemical make-up of the solid. However,
-if it is assumed that the number of material components making up the solid is equal to the assumed number of reactions, as determined from the TGA
-results, the mass fraction of any component, $Y_i(t)$, changes in time according to the equation:
-\be
-   \frac{dY_i}{dt} = -A_i \, Y_i \, \exp \left( -\frac{E_i}{RT} \right)    \quad ; \quad Y_i(0) = Y_{0,i}  \label{dYdt}
-\ee
+Consider a small sample of solid material that is heated at a relatively slow, constant rate. An example of this process is
+thermal gravimetric analysis (TGA). Assume that the solid consists of $N$ material components, with each component mass fraction denoted by
+$Y_i(t)$. As the solid is heated, each component undergoes a reaction to form undetermined gases or a single solid residue whose
+mass fraction is denoted $Y_r(t)$ and whose yield is denoted by $\nu_r$. The governing equations for the component mass fractions is then:
+\begin{eqnarray}
+   \frac{dY_i}{dt} &=& -A_i \, Y_i \, \exp \left( -\frac{E_i}{RT} \right)    \quad ; \quad Y_i(0) = Y_{0,i} \quad ; \quad i=1,N  \label{dYdt} \\
+   \frac{dY_r}{dt} &=& -\nu_r  \sum_i \frac{dY_i}{dt}                        \quad ; \quad Y_r(0) = 0  \label{dYrdt}
+\end{eqnarray}
 In the TGA apparatus, the temperature of the sample is increased linearly in time, $dT/dt=\beta$. Because TGA results are usually expressed as a function of
 temperature rather than time, it is convenient to rewrite Eq.~(\ref{dYdt}) as:
 \be
@@ -1832,19 +1833,16 @@ Using Eq.~(\ref{d2YdT2}) to eliminate $A_i$ yields:
 or more simply, $Y_{p,i} \approx Y_{0,i}/e$. Now, the activation energy can be evaluated using Eqs.~(\ref{dYdt}) and (\ref{d2YdT2}):
 \be
    E_i = RT_{p,i}^2 \, \frac{A_i}{\beta} \, \exp \left( -\frac{E_i}{RT_{p,i}} \right) = \frac{RT_{p,i}^2}{\beta} \frac{r_{p,i}}{Y_{p,i}}
-   \approx \frac{RT_{p,i}^2}{\beta} \frac{e r_{p,i}}{Y_{0,i}}  \label{E_formula}
+   \approx \frac{RT_{p,i}^2}{\beta} \frac{e \, r_{p,i}}{Y_{0,i}}  \label{E_formula}
 \ee
 Then $A_i$ can be evaluated directly from Eq.~(\ref{dYdt}):
 \be
-   A_i = \frac{r_{p,i}}{Y_{p,i}} \, \exp \left( \frac{E_i}{RT_{p,i}} \right) \approx \frac{e r_{p,i}}{Y_{0,i}} \, \exp \left( \frac{E_i}{RT_{p,i}} \right) \label{A_formula}
+   A_i = \frac{r_{p,i}}{Y_{p,i}} \, \exp \left( \frac{E_i}{RT_{p,i}} \right) \approx \frac{e \, r_{p,i}}{Y_{0,i}} \, \exp \left( \frac{E_i}{RT_{p,i}} \right) \label{A_formula}
 \ee
-Note that the formulae for $A_i$ and $E_i$ are appropriate for multiple-step reactions, where the number of peaks in the reaction
-rate curve corresponds to the number of material components, and each component undergoes a single-step reaction that forms
-fuel gas and residue.
-For each peak, the value of $T_{p,i}$ is readily obtained from the plot.
-For TGA data, the values of $r_{p,i}$ can be obtained directly from inspection of the reaction
-rate curve, assuming the units are s$^{-1}$. The values of $Y_{0,i}$ can be estimated based on the relative area underneath
-the peak.
+Note that the formulae for $A_i$ and $E_i$ can be evaluated with parameters that are obtained directly by 
+inspection of the plot of mass loss rate versus temperature.
+For each peak, the values of $T_{p,i}$ and $r_{p,i}$ are obvious. 
+The values of $Y_{0,i}$ can be estimated based on the relative area underneath each peak. The values of $Y_{0,i}$ should sum to 1.
 
 
 
