@@ -7246,11 +7246,8 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       DV%CONVERSION_FACTOR= CONVERSION_FACTOR
       DV%DEPTH            = DEPTH
       DV%IOR              = IOR
-      IF (ID=='null') THEN
-         WRITE(ID,'(A7,I4)') 'Device_',N_DEVC
-      ELSE
-         DV%ID               = ID
-      ENDIF
+      IF (ID=='null') WRITE(ID,'(A7,I4)') 'Device_',N_DEVC
+      DV%ID               = ID
       IF (POINTS>1)DV%LINE= N_DEVC_LINE
       DV%POINT            = I_POINT
       DV%MESH             = MESH_NUMBER
