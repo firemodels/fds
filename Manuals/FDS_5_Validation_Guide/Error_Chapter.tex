@@ -1,38 +1,60 @@
 
-\chapter{Quantifying Model Error}
-%\section{Introduction}
+%\newcommand{\paper}{paper }
+%\chapter{Quantifying Model Error}
+
+\section{Introduction}
+\newcommand{\paper}{chapter }
 
 There are various definitions of model validation.
 For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capability of
 Deterministic Fire Models,''~\cite{ASTM:E1355} defines it as ``the process of determining the degree to which a calculation method
 is an accurate representation of the real world from the perspective of the intended uses of the calculation method.''
-The accuracy of a model is a complicated function of its input parameters and its mathematical equations.
-For the sake of clarity in the discussion to follow, the word {\em uncertainty} shall be applied to the input parameters and the
-word {\em error} to the equations. The reason for this is two-fold. For one,
-it helps to differentiate various terms that are used to quantify model accuracy; but, more importantly, it highlights the subtle distinction between the roles of the model
-and the modeler. The model is based on assumptions and approximations that make its predictions less
-accurate for the sake of practical implementation. In short, its calculation includes a certain amount of error. The modeler, on the other hand, chooses input
-parameters that have uncertainty, but not error. For example, if the modeler
-chooses to input 10~MW as the heat release rate of a hypothetical fire, it is not necessarily erroneous, but rather uncertain,
-because there is no easy way to know precisely how big the fire is going to be.
+The accuracy of a model prediction is a complicated function of the uncertainty of its input parameters and its mathematical formulation. 
+The relative contribution of each to
+the uncertainty of the prediction are commonly referred to as the {\em parameter uncertainty} and the
+{\em model uncertainty}, respectively. 
+Perhaps the best way to explain the role each plays is by way of example. 
+Suppose a fire model is being used to estimate the likelihood that electrical control cables could be damaged due to
+a fire in a compartment. Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C. It is also assumed that the fire is
+ignited within an electrical cabinet, and that the heat release rate of the fire is a specified function of time. 
+What is the likelihood that the cables would be damaged if that fire were to occur? 
+The calculation is performed, and the model predicts that the maximum surface temperature of the cables is 350~$^\circ$C. 
+Does this mean that there is no chance of damage? The answer is no, because the input parameters, like the heat release rate of
+the cabinet fire, and the model assumptions, like the description of the cable, have uncertainty. 
+The purpose of this \paper is to suggest a method to estimate the probability that the cables could actually reach temperatures 
+greater than 400~$^\circ$C even though the model prediction is 350~$^\circ$C.
 
-The focus at present is not the input uncertainty, but rather the quantification of the model error.
-The strategy is {\em not} to decompose the model into its many parts and systematically assess
-the error of each. Such an exercise would be extremely difficult, especially for a computational fluid dynamics (CFD) model, and the results would probably be subject to the same
-degree of error as the model itself. Instead, the traditional approach is taken in which model predictions are compared with experimental measurements. However, unlike many
-model validation studies performed to date, a method is proposed in which the model {\em error} can be distinguished from the model input {\em uncertainty}. The difference
-between model prediction and experimental measurement is a combination of the two, and because the input
-uncertainty is easier to quantify than the model error, the error can be estimated by ``subtracting off,'' in the broad sense, the input uncertainty from the reported
-difference between prediction and measurement. The quotation marks in the previous sentence indicate that model error and input uncertainty do not simply add together,
+To do this, both the parameter and model uncertainties need to be quantified. First, consider the parameter uncertainty. 
+For most fire scenarios, the heat release rate has the greatest impact on the outcome, with a few other parameters playing a secondary role. Typically,
+the heat release rate of something like an electrical cabinet fire can be expressed as a probability distribution, and this distribution can be propagated through the
+model using any number of methods~\cite{Notarianni:SFPE}. 
+
+Next, consider the model uncertainty. It has been suggested by some that
+a means to quantify the model uncertainty is to combine the uncertainties of all the model components in a similar way as is done for the input parameters.  
+However, such an exercise is very difficult, especially for a computational fluid dynamics (CFD) model, for a number of reasons. First, fire involves
+a complicated interaction of gas and solid phase phenomena that are closely coupled. Second, grid sensitivity in a CFD model or the error associated with
+a two-layer assumption in a zone model are dependent on the particular fire scenario. Third, fire is an inherently transient phenomenon in which relatively small
+changes in events, like a door opening or sprinkler actuation, can lead to significant changes in outcome. Rather than attempt a detailed uncertainty
+analysis of each sub-model, the approach taken is to exploit the relative abundance of measurements in controlled fire 
+experiments as a means to quantify the model uncertainty. This is the traditional approach to quantify the accuracy of a fire model. 
+However, model simulations of fire experiments are subject to parameter uncertainty; thus, in order to quantify the model uncertainty, 
+the parameter uncertainty must be ``subtracted'' from the difference between the prediction and the reported measurement. 
+The quotation marks indicate that the model and parameter uncertainty do not simply add together,
 and to decouple them requires some statistical analysis that will be described below.
 
-In essence, the methodology presented below will allow a model user to assign error bars to the results of a numerical simulation. This is different than what is
-commonly done now, namely {\em sensitivity analysis}. In a sensitivity analysis, the modeler demonstrates the effect on the results of varying important input parameters.
-This is an important exercise, but it does not address the error due to the model itself. In fact, the methodology discussed below is designed to answer the
-question posed in this way -- suppose that the physical parameters of a given fire scenario are known exactly, what is the accuracy of the model prediction?
+The overall procedure is not a dramatic departure from current
+methods of model validation, but it does add a very tractable method for discerning how much of the uncertainty in the prediction is due
+to the input parameters and how much is due to the model itself. Too often the two are lumped together, in which case there is no way to know 
+if the inaccuracy is due to the model or the model user. For this reason, this methodology is of tremendous value to model developers because, 
+in a sense, it strips away what are often referred to as
+``user effects'' to reveal inadequacies of the model itself.
 
 
-\section{Model Error}
+
+
+
+
+\section{Model Uncertainty}
 
 A deterministic fire model is based on fundamental conservation laws of mass, momentum and energy, applied either to entire compartments or smaller control
 volumes that make up the compartments. A CFD model may use millions of control volumes to compute the solution of the Navier-Stokes equations.
@@ -49,13 +71,13 @@ some extent, by the subgrid-scale turbulence model, but that is yet another appr
 the predicted results? It is very difficult to determine based on an analysis of the discretized equations. One possibility for estimating
 the magnitude of the discretization error is to perform a detailed
 convergence analysis, but this still does not answer a
-question like, ``What is the error of the model prediction of the gas
+question like, ``What is the uncertainty of the model prediction of the gas
 temperature at a particular location in the room at a particular point in time?''
 
 To make matters worse, there are literally dozens of subroutines that make up a CFD fire model, from its radiation solver, solid phase heat transfer routines, pyrolysis model,
 empirical mass, momentum and energy transfer routines at the wall, and so on. A careful, systematic error analysis of the combination of all these routines is
 extremely difficult. Indeed, the complexity of the analysis would likely exceed that of the model itself. For this reason, comparisons of model predictions to as many
-experiments as possible is the primary means of quantifying model error. However, before the error can be quantified, the uncertainty of the
+experiments as possible is the primary means of quantifying model uncertainty. However, before the model uncertainty can be quantified, the uncertainty of the
 measurements against which the model predictions are compared must be quantified. This is discussed below.
 
 
@@ -469,9 +491,5 @@ latter must be re-evaluated, or the number of data points needs to be seriously 
 
 A procedure has been proposed to estimate model error by way of comparisons of model predictions with experimental measurements whose uncertainty has been
 quantified. For clarity of presentation, issues associated with the selection of experiments, metrics of comparison, and presentation of results, have not been
-discussed in detail because these decisions are application-specific and best left to the end user or AHJ. The overall procedure is not a dramatic departure from current
-methods of model validation, but it does present a very tractable method of distinguishing the model {\em error} from the {\em uncertainty} of the model inputs and the measurements
-against which the model is compared. Too often these various forms of uncertainty are lumped together, in which case there is no way to know what part of the model, if
-any, needs improvement. For this reason, this methodology is of tremendous value to model developers because, in a sense, it strips away what are often referred to as
-``user effects'' to reveal inadequacies of the model itself. The goal of the model developers is to reduce the model error as much as possible, even though
-uncertainties in the input parameters may never be eliminated completely.
+discussed in detail because these decisions are application-specific and best left to the end user or AHJ. 
+
