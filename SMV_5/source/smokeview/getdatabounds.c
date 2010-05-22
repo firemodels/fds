@@ -359,7 +359,7 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
         iblank=meshi->c_iblank;
         q=meshi->qdata+plot3dvar*ntotal;
         for(n=0;n<ntotal;n++){
-          if(*iblank++==1){
+          if(iblank==NULL||*iblank++==1){
             level=0;
             if(dp!=0.0f)level = (int)((q[n] - *pmin)/dp);
             if(level<0){

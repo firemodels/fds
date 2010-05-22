@@ -929,7 +929,8 @@ void InitOpenGL(void){
 /* ------------------ initvars1 ------------------------ */
 
 void initvars1(void){
-
+  arg_iblank=0;
+  use_iblank=1;
   levelset_colorbar=-1;
   wallthickness_colorbar=-1;
   show_slice_terrain=0;

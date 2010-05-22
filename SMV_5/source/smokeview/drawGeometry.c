@@ -355,9 +355,16 @@ void setventdirs(void){
               index1=ijkcell(i-1,j,k);
               index2=ijkcell(i,j,k);
               index3=ijkcell(i+1,j,k);
-              state1=iblank_x[index1];
-              state2=iblank_x[index2];
-              state3=iblank_x[index3];
+              if(use_iblank==1){
+                state1=iblank_x[index1];
+                state2=iblank_x[index2];
+                state3=iblank_x[index3];
+              }
+              else{
+                state1=2;
+                state2=2;
+                state3=2;
+              }
               if(state1==2&&state3==2)continue; // air on both sides
               if(state1==0&&state3==0)continue; // solid on both sides
               if(state2==1){
@@ -406,9 +413,16 @@ void setventdirs(void){
               index1=ijkcell(i,j-1,k);
               index2=ijkcell(i,j,k);
               index3=ijkcell(i,j+1,k);
-              state1=iblank_y[index1];
-              state2=iblank_y[index2];
-              state3=iblank_y[index3];
+              if(use_iblank==1){
+                state1=iblank_y[index1];
+                state2=iblank_y[index2];
+                state3=iblank_y[index3];
+              }
+              else{
+                state1=2;
+                state2=2;
+                state3=2;
+              }
               if(state1==2&&state3==2)continue; // air on both sides
               if(state1==0&&state3==0)continue; // solid on both sides
               if(state2==1){
@@ -457,9 +471,16 @@ void setventdirs(void){
               index1=ijkcell(i,j,k-1);
               index2=ijkcell(i,j,k);
               index3=ijkcell(i,j,k+1);
-              state1=iblank_z[index1];
-              state2=iblank_z[index2];
-              state3=iblank_z[index3];
+              if(use_iblank==1){
+                state1=iblank_z[index1];
+                state2=iblank_z[index2];
+                state3=iblank_z[index3];
+              }
+              else{
+                state1=2;
+                state2=2;
+                state3=2;
+              }
               if(state1==2&&state3==2)continue; // air on both sides
               if(state1==0&&state3==0)continue; // solid on both sides
               if(state2==1){

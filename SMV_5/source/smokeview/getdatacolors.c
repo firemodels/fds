@@ -916,7 +916,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
     if(unload_qdata==0||meshi->qdata!=NULL){
       q=meshi->qdata+plot3dvar*ntotal;
       for(n=0;n<ntotal;n++){
-        if(*iblank++==1){
+        if(iblank==NULL||*iblank++==1){
           if(*q<tmin2)tmin2=*q;
           if(*q>tmax2)tmax2=*q;
         }

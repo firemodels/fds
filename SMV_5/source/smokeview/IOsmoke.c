@@ -41,7 +41,7 @@ char *textFileRead(char *fn);
 #define ADJUSTALPHA(ALPHAIN,ASPECTRATIO,NORM,NORMTYPE) \
             alphaf_out[n]=0;\
             if(ALPHAIN==0)continue;\
-            if(adjustalphaflag==2&&iblank_smoke3d[n]==0)continue;\
+            if(adjustalphaflag==2&&iblank_smoke3d!=NULL&&iblank_smoke3d[n]==0)continue;\
             if(adjustalphaflag==3){\
               alphaf_out[n]=ALPHAIN;\
             }\
@@ -177,10 +177,12 @@ else{\
   value[2]=alphaf_in[n22];\
   value[3]=alphaf_in[n21];\
   if(adjustalphaflag==2||adjustalphaflag==3){\
-    if(iblank_smoke3d[n11]==0)value[0]=0;\
-    if(iblank_smoke3d[n12]==0)value[1]=0;\
-    if(iblank_smoke3d[n22]==0)value[2]=0;\
-    if(iblank_smoke3d[n21]==0)value[3]=0;\
+    if(iblank_smoke3d!=NULL){\
+      if(iblank_smoke3d[n11]==0)value[0]=0;\
+      if(iblank_smoke3d[n12]==0)value[1]=0;\
+      if(iblank_smoke3d[n22]==0)value[2]=0;\
+      if(iblank_smoke3d[n21]==0)value[3]=0;\
+    }\
   }\
   if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   SETBVALS\
@@ -237,7 +239,7 @@ else{\
   value[3]=alphaf_in[n21];\
   if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   SETBVALS \
-  if(adjustalphaflag==2||adjustalphaflag==3){\
+  if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL){\
     if(iblank_smoke3d[n11]==0)value[0]=0;\
     if(iblank_smoke3d[n12]==0)value[1]=0;\
     if(iblank_smoke3d[n22]==0)value[2]=0;\
@@ -282,7 +284,7 @@ else{\
   value[2]=alphaf_in[n22];\
   value[3]=alphaf_in[n21];\
   SETBVALS \
-  if(adjustalphaflag==2||adjustalphaflag==3){\
+  if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL){\
     if(iblank_smoke3d[n11]==0)value[0]=0;\
     if(iblank_smoke3d[n12]==0)value[1]=0;\
     if(iblank_smoke3d[n22]==0)value[2]=0;\
@@ -5559,13 +5561,10 @@ void makeiblank_smoke3d(void){
     ny = jbar + 1;
     nxy = nx*ny;
 
-    if(smoke3di->loaded==1&&smokemesh->iblank_smoke3d==NULL){
+    if(use_iblank==1&&smoke3di->loaded==1&&smokemesh->iblank_smoke3d==NULL){
       NewMemory( (void **)&iblank_smoke3d,ijksize*sizeof(unsigned char));
       smokemesh->iblank_smoke3d=iblank_smoke3d;
     }
-    //else if(smoke3di->loaded==0&&smokemesh->iblank_smoke3d!=NULL){
-    //  FREEMEMORY(smokemesh->iblank_smoke3d);
-    //}
   }
 
 #define ALLMESHES 0
@@ -5575,7 +5574,7 @@ void makeiblank_smoke3d(void){
     smokemesh = meshinfo + ic;
     if(smokemesh->smokeloaded==0)continue;
     iblank_smoke3d = smokemesh->iblank_smoke3d;
-
+    if(iblank_smoke3d==NULL)continue;
 
     xplt=smokemesh->xplt;
     yplt=smokemesh->yplt;

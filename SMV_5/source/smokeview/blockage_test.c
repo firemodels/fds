@@ -39,10 +39,6 @@ int seg_in_rect(float *p1, float *p2,
                 float ymin, float ymax, 
                 float zmin, float zmax,
                 int checkbounds);
-float getblockdist0(float x, float y, float z);
-int get_move_status0(float view_height,char *label);
-void get_move_status(float *oldpos,float *newpos,
-                     int *sstatus_now,int *sstatus_new,float *view_height);
 #define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
 #define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
 
@@ -150,333 +146,11 @@ void drawMovedir(void){
 
 /* ------------------ getnewpos ------------------------ */
 
-void reset_move(void){
-  llasttime = glutGet(GLUT_ELAPSED_TIME);
-}
-
 void getnewpos(float *oldpos, float dx, float dy, float dz,float local_speed_factor){
-  float view_height;
-  float delta;
-  float newtest[3],newpos[3],seek_dist;
-  float distnorm;
-  int sstatus_now,sstatus_next;
-  int local_thistime;
-#ifdef _DEBUG
-  float rthistime;
-#endif
-  float deltime,deldist;
-  float speedlimit=2.0*5280.0/3600.0;
-//  int inmotion;
-
-#define MAXSTEP .31
-
-#define GM_OUTSIDE 0
-#define GM_BLOCKAGE 1
-#define GM_LOW 2
-#define GM_INRANGE 3
-#define GM_HIGH 4
-#define SPEEDMAXCOUNT 20
-
-  pass_through=1;
-  if(pass_through==1
-    ||from_glui_trainer==1
-    ){
-    oldpos[0] += dx;
-    oldpos[1] += dy;
-    oldpos[2] += dz;
-    from_glui_trainer=0;
-    return;
-  }
-
-  speedlimit=local_speed_factor*speed_now;
-  speedlimit/=xyzmaxdiff;
-
-  local_thistime = glutGet(GLUT_ELAPSED_TIME);
-  deltime=local_thistime-llasttime;
-  deltime/=1000.0;
-  if(deltime<0.05){
-    if(deltime<0.01)deltime=0.01;
-//    inmotion=1;
-  }
-  else{
-//    inmotion=0;
-    speed_I=0;
-  }
-  if(resetclock==1){
-    deltime=0.01;
-    deldist=0.01;
-    resetclock=0;
-  }
-  else{
-    deldist=speedlimit*deltime;
-  }
-  llasttime=local_thistime;
-
-  
-#ifdef _DEBUG
-  rthistime=(float)local_thistime/1000.0;
-  printf("time=%.2f\n",rthistime);
-#endif
-
-  seek_dist=0.3;
-  seek_dist/=xyzmaxdiff;
-
-  distnorm=sqrt(dx*dx+dy*dy+dz*dz);
-
-  if(distnorm==0.0){
-    dx=seek_dist;
-    dy=seek_dist;
-    dz=0.0;
-    distnorm=sqrt(dx*dx+dy*dy);
-    if(distnorm==0.0)distnorm=1.0;
-  }
-
-  // ||(dx,dy,dz)|| = deldist  (ie the norm of (dx,dy,dz)=deldist )
-
-  dx*=(deldist/distnorm);
-  dy*=(deldist/distnorm);
-  dz*=(deldist/distnorm);
-
-  newpos[0] = oldpos[0]+dx;
-  newpos[1] = oldpos[1]+dy;
-  newpos[2] = oldpos[2]+dz;
-
-  newtest[0] = oldpos[0]+seek_dist*dx/deldist;
-  newtest[1] = oldpos[1]+seek_dist*dy/deldist;
-  newtest[2] = oldpos[2]+seek_dist*dz/deldist;
-
-  movedir[0]=dx/deldist;
-  movedir[1]=dy/deldist;
-  movedir[2]=dz/deldist;
-
-  get_move_status(oldpos,newpos,&sstatus_now,&sstatus_next,&view_height);
-  delta = view_height-desired_view_height;
-
-  if(speed_I>=0){
-    speed_now=speed_desired;
-   // update_glui_speed();
-    speed_I++;
-    if(speed_I>SPEEDMAXCOUNT)speed_I=-1;
-  }
-#ifdef _DEBUG
-  printf("*** view_height=%f speed now=%f speed desired=%f speed_I=%i\n",view_height,speed_now,speed_desired,speed_I);
-#endif
-
-  switch (sstatus_now){
-  case GM_OUTSIDE:
-  case GM_BLOCKAGE:
-    oldpos[0] = newpos[0];
-    oldpos[1] = newpos[1];
-    oldpos[2] = newpos[2];
-    break;
-  case GM_LOW:
-  case GM_INRANGE:
-  case GM_HIGH:
-    if(sstatus_next==GM_OUTSIDE){
-      if(seg_in_vent(oldpos,newtest)==HIT){
-        oldpos[0] = newpos[0];
-        oldpos[1] = newpos[1];
-        oldpos[2] = newpos[2];
-      }
-      else{
-        adjust_new_position(oldpos,newpos);
-      }
-    }
-    else if(sstatus_next==GM_BLOCKAGE||sstatus_next==GM_LOW){
-      if(sstatus_now==GM_LOW&&sstatus_next==GM_LOW){
-        oldpos[0] = newpos[0];
-        oldpos[1] = newpos[1];
-        oldpos[2] += MAXSTEP/xyzmaxdiff;
-
-        return;
-      }
-      if(seg_in_blockage(oldpos,newtest)==HIT){
-        oldpos[0] = newpos[0];
-        oldpos[1] = newpos[1];
-        oldpos[2] = newpos[2];
-        return;
-      }
-      adjust_new_position(oldpos,newpos);
-    }
-    else{
-      oldpos[0] = newpos[0];
-      oldpos[1] = newpos[1];
-      if(sstatus_next==GM_INRANGE){
-        newpos[2]-=delta/xyzmaxdiff;
-      }
-//      else if(status_next==GM_LOW){
-//        newpos[2]+=MAXSTEP/xyzmaxdiff;
-//      }
-      else if(sstatus_next==GM_HIGH){
-        newpos[2]-=MAXSTEP/xyzmaxdiff;
-      }
-      oldpos[2] = newpos[2];
-    }
-    break;
-  default:
-    ASSERT(FFALSE);
-    break;
-  }
-}
-
-/* ------------------ get_move_status ------------------------ */
-
-void get_move_status(float *oldpos,float *newpos,
-                     int *sstatus_now,int *sstatus_next,
-                     float *view_height){
-  float view_height0;
-  char label_now[10], label_next[10];
-  mesh *mesh_point;
-
-  view_height0 = getblockdist0(oldpos[0],oldpos[1],oldpos[2]);
-  *sstatus_now=get_move_status0(view_height0,label_now);
-
-  mesh_point=getmesh(oldpos);
-
-  if(mesh_point==NULL||*sstatus_now==GM_OUTSIDE||*sstatus_now==GM_BLOCKAGE){
-    *view_height = getblockdist0(newpos[0],newpos[1],newpos[2]);
-    *sstatus_next=get_move_status0(*view_height,label_next);
-  }
-  else{
-    float dx, dy, dz, seg_dist;
-    float dx2, dy2, dz2;
-    int npoints,i;
-    float testpos[3];
-    float v_height=0.0;
-    int s_next=0;
-    int break_early=0;
-    
-    dx = newpos[0]-oldpos[0];
-    dy = newpos[1]-oldpos[1];
-    dz = newpos[2]-oldpos[2];
-    seg_dist = sqrt(dx*dx+dy*dy+dz*dz);
-    npoints = seg_dist/mesh_point->cellsize + 1;
-    dx2 = dx/npoints;
-    dy2 = dy/npoints;
-    dz2 = dz/npoints;
-
-    for(i=1;i<=npoints;i++){
-      testpos[0]=oldpos[0]+i*dx2;
-      testpos[1]=oldpos[1]+i*dy2;
-      testpos[2]=oldpos[2]+i*dz2;
-      v_height = getblockdist0(testpos[0],testpos[1],testpos[2]);
-      s_next=get_move_status0(v_height,label_next);
-      if(s_next==GM_BLOCKAGE||s_next==GM_LOW){
-        *view_height=v_height;
-        *sstatus_next=s_next;
-        break_early=1;
-      }
-    }
-    if(break_early==0){
-      *view_height=v_height;
-      *sstatus_next=s_next;
-    }
-#ifdef _DEBUG
-    if(break_early==1){
-      printf("********************************************************\n");
-      printf("********************************************************\n");
-      printf("********************************************************\n");
-      printf("********************************* break_early=%i ***********************\n",break_early);
-      printf("********************************************************\n");
-      printf("********************************************************\n");
-      printf("********************************************************\n");
-    }
-#endif
-
-  }
-
-#ifdef _DEBUG
-  printf("  old status=%s new status=%s\n",label_now,label_next);
-  printf("old distance=%f new distance=%f\n",view_height0,*view_height);
-#endif
-  {
-    int trainee_next=0;
-
-    if(*sstatus_next!=GM_BLOCKAGE&&*sstatus_next!=GM_OUTSIDE)trainee_next=1;
-    trainee_location=trainee_next;
-  }
-
-}
-
-/* ------------------ adjust_new_position ------------------------ */
-
-void adjust_new_position(float oldpos[3], float newpos[3]){
-  float view_height;
-  int status;
-  float dx, dy, dz;
-
-  dx = newpos[0]-oldpos[0];
-  dy = newpos[1]-oldpos[1];
-  dz = newpos[2]-oldpos[2];
-
-
-  view_height = getblockdist0(oldpos[0]+dx,oldpos[1],oldpos[2]);
-  status=get_move_status0(view_height,NULL);
-  if(status!=GM_OUTSIDE&&status!=GM_BLOCKAGE&&status!=GM_LOW){
-    oldpos[0] += dx;
-    return;
-  }
-
-  view_height = getblockdist0(oldpos[0],oldpos[1]+dy,oldpos[2]);
-  status=get_move_status0(view_height,NULL);
-  if(status!=GM_OUTSIDE&&status!=GM_BLOCKAGE&&status!=GM_LOW){
-    oldpos[1] += dy;
-    return;
-  }
-
-  view_height = getblockdist0(oldpos[0],oldpos[1],oldpos[2]+dz);
-  status=get_move_status0(view_height,NULL);
-  if(status!=GM_OUTSIDE&&status!=GM_BLOCKAGE&&status!=GM_LOW){
-    oldpos[2] += dz;
-    return;
-  }
-}
-
-/* ------------------ get_move_status0 ------------------------ */
-
-int get_move_status0(float view_height,char *label){
-  int status;
-
-  if(view_height<0.0){
-    status=GM_OUTSIDE;
-  }
-  else if(view_height==0.0){
-    status=GM_BLOCKAGE;
-  }
-  else{
-    if(fabs(view_height-desired_view_height)<=MAXSTEP){
-      status=GM_INRANGE;
-    }
-    else if(view_height<desired_view_height-MAXSTEP){
-      status=GM_LOW;
-    }
-    else{
-      status=GM_HIGH;
-    }
-  }
-  if(label!=NULL){
-    switch (status){
-    case GM_OUTSIDE:
-      strcpy(label,"OUTSIDE");
-      break;
-    case GM_BLOCKAGE:
-      strcpy(label,"BLOCKAGE");
-      break;
-    case GM_INRANGE:
-      strcpy(label,"OK");
-      break;
-    case GM_LOW:
-      strcpy(label,"LOW");
-      break;
-    case GM_HIGH:
-      strcpy(label,"HIGH");
-      break;
-    default:
-      ASSERT(FFALSE);
-      break;
-    }
-  }
-  return status;
+  oldpos[0] += dx;
+  oldpos[1] += dy;
+  oldpos[2] += dz;
+  from_glui_trainer=0;
 }
 
 /* ------------------ getmesh ------------------------ */
@@ -572,20 +246,6 @@ float getblockdist(float x, float y, float z){
     }
   }
   return -1.0;
-}
-
-
-/* ------------------ getblockdist0 ------------------------ */
-
-float getblockdist0(float x, float y, float z){
-  float xx, yy, zz;
-  float view_height;
-
-  xx = xbar0 + x*xyzmaxdiff;
-  yy = ybar0 + y*xyzmaxdiff;
-  zz = zbar0 + z*xyzmaxdiff;
-  view_height = getblockdist(xx,yy,zz);
-  return view_height;
 }
 
 /* ------------------ init_blockdist  ------------------------ */
@@ -752,8 +412,11 @@ int makeiblank_carve(void){
     if(n_embedded==0)continue;
 
     ib_embed=NULL;
-    if(NewMemory((void **)&ib_embed,ijksize*sizeof(char))==0)return 1;
+    if(use_iblank==1){
+      if(NewMemory((void **)&ib_embed,ijksize*sizeof(char))==0)return 1;
+    }
     meshi->c_iblank_embed=ib_embed;
+    if(ib_embed==NULL)continue;
     for(j=0;j<ijksize;j++){
       ib_embed[j]=1;
     }
@@ -836,7 +499,7 @@ int makeiblank(void){
   int ibar,jbar,kbar;
   int nx, ny, nxy;
   char *iblank,*iblank_cell,*iblank_x,*iblank_y,*iblank_z;
-
+  if(use_iblank==0)return 0;
   for(ig=0;ig<nmeshes;ig++){
     meshi = meshinfo+ig;
     ibar = meshi->ibar;
