@@ -4919,6 +4919,9 @@ typedef struct {
 
   printf("reading input file completed\n");
   printf("beginning wrap up - \n");
+#ifdef _DEBUG
+  PrintMemoryInfo;
+#endif
 
 
 /* 
@@ -4927,6 +4930,14 @@ typedef struct {
    ************************************************************************
  */
 
+  if(arg_iblank==0){
+    if(autoterrain==1){
+      use_iblank=0;
+    }
+    else{
+      use_iblank=1;
+    }
+  }
   CheckMemory;
 
   init_evac_prop();
@@ -5691,6 +5702,9 @@ typedef struct {
 
 
   printf("wrap up completed\n");
+#ifdef _DEBUG
+  PrintMemoryInfo;
+#endif
 
   
   return 0;

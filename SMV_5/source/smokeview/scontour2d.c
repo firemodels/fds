@@ -336,12 +336,23 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
       ResizeMemory((void **)&xnode,nnodes*sizeof(float));
       ResizeMemory((void **)&ynode,nnodes*sizeof(float));
     }
+    else{
+      FREEMEMORY(xnode);
+      FREEMEMORY(ynode);
+    }
     if(nlinepts>0){
       ResizeMemory((void **)&xline,nlinepts*sizeof(float));
       ResizeMemory((void **)&yline,nlinepts*sizeof(float));
     }
+    else{
+      FREEMEMORY(xline);
+      FREEMEMORY(yline);
+    }
     if(npolys>0){
       ResizeMemory((void **)&polysize,npolys*sizeof(int));
+    }
+    else{
+      FREEMEMORY(polysize);
     }
     ci->nnodes[n]=nnodes;
     ci->npolys[n]=npolys;

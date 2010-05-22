@@ -217,7 +217,6 @@ EXTERNCPP void draw_shooter(void);
 EXTERNCPP void show_trainer(void);
 EXTERNCPP void hide_trainer(void);
 EXTERNCPP int get_trainee_location(void);
-EXTERNCPP void reset_move(void);
 EXTERNCPP void set_trainer_controls(void);
 EXTERNCPP void training_move(int  mode);
 EXTERNCPP void load_startup_smoke(void);

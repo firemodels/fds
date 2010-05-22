@@ -590,10 +590,12 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     sd->nsliceii = sd->nslicei*sd->nslicej*sd->nslicek;
     sd->nslicetotal=sd->nsteps*sd->nsliceii;
-    if(NewMemory((void **)&sd->c_iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(char))==0){
-      readslice("",ifile,UNLOAD,&error);
-      *errorcode=1;
-      return;
+    if(use_iblank==1){
+      if(NewMemory((void **)&sd->c_iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(char))==0){
+        readslice("",ifile,UNLOAD,&error);
+        *errorcode=1;
+        return;
+      }
     }
     if(sd->compression_type==1||sd->compression_type==2){
       if(NewMemory((void **)&sd->slicecomplevel,sd->nsliceii*sizeof(unsigned char))==0){
@@ -614,40 +616,42 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     ny = meshi->jbar + 1;
     nxy = nx*ny;
 
-    switch (sd->idir){
-    case 1:
-      ii=0;
-      for(j=sd->js1;j<sd->js2;j++){
-        for(k=sd->ks1;k<sd->ks2;k++){
-          for(i=sd->is1;i<sd->is1+sd->nslicei;i++){
-            sd->c_iblank[ii++]=meshi->c_iblank_x[ijk(i,j,k)];
-          }
-        }
-      }
-      break;
-    case 2:
-      ii=0;
-      for(i=sd->is1;i<sd->is2;i++){
-        for(k=sd->ks1;k<sd->ks2;k++){
-          for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
-            sd->c_iblank[ii++]=meshi->c_iblank_y[ijk(i,j,k)];
-          }
-        }
-      }
-      break;
-    case 3:
-      ii=0;
-      for(i=sd->is1;i<sd->is2;i++){
+    if(use_iblank==1){
+      switch (sd->idir){
+      case 1:
+        ii=0;
         for(j=sd->js1;j<sd->js2;j++){
-          for(k=sd->ks1;k<sd->ks1+sd->nslicek;k++){
-            sd->c_iblank[ii++]=meshi->c_iblank_z[ijk(i,j,k)];
+          for(k=sd->ks1;k<sd->ks2;k++){
+            for(i=sd->is1;i<sd->is1+sd->nslicei;i++){
+              sd->c_iblank[ii++]=meshi->c_iblank_x[ijk(i,j,k)];
+            }
           }
         }
+        break;
+      case 2:
+        ii=0;
+        for(i=sd->is1;i<sd->is2;i++){
+          for(k=sd->ks1;k<sd->ks2;k++){
+            for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
+              sd->c_iblank[ii++]=meshi->c_iblank_y[ijk(i,j,k)];
+            }
+          }
+        }
+        break;
+      case 3:
+        ii=0;
+        for(i=sd->is1;i<sd->is2;i++){
+          for(j=sd->js1;j<sd->js2;j++){
+            for(k=sd->ks1;k<sd->ks1+sd->nslicek;k++){
+              sd->c_iblank[ii++]=meshi->c_iblank_z[ijk(i,j,k)];
+            }
+          }
+        }
+        break;
+      default:
+        ASSERT(FFALSE);
+        break;
       }
-      break;
-    default:
-      ASSERT(FFALSE);
-      break;
     }
     if(sd->compression_type==0){
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
@@ -1925,7 +1929,7 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
   for (n=0;n<ndata;n++){
     frame_number = n/(sd->nsliceii);
     point = n - frame_number*sd->nsliceii;
-    if(sd->c_iblank[point]==0){
+    if(sd->c_iblank!=NULL&&sd->c_iblank[point]==0){
       continue;
     }
     if(first==1){
@@ -2658,7 +2662,7 @@ void drawslice_texture(const slice *sd){
        float zmid,rmid;
 
        n++; n2++; 
-       if(show_slice_in_obst==0&&iblank_y[ijk(i,sd->js1,k)]!=2)continue;
+       if(show_slice_in_obst==0&&iblank_y!=NULL&&iblank_y[ijk(i,sd->js1,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,sd->js1,k)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255;
        r31 = (float)sd->slicepoint[n2]/255;
