@@ -3647,6 +3647,14 @@ void Args(int argc, char **argv){
       usage(argv);
       exit(0);
     }
+    else if(strncmp(argv[i],"-noblank",8)==0){
+      arg_iblank=1;
+      use_iblank=0;
+    }
+    else if(strncmp(argv[i],"-blank",6)==0){
+      arg_iblank=1;
+      use_iblank=1;
+    }
     else if(
       strncmp(argv[i],"-version",8)==0||
       strncmp(argv[i],"-v",2)==0

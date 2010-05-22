@@ -820,6 +820,8 @@ SVEXTERN int adjustalphaflag;
 SVEXTERN int colorband, show_extremedata;
 SVEXTERN int show_extreme_above, show_extreme_below;
 
+SVEXTERN int use_iblank,arg_iblank;
+
 SVEXTERN int script_index, ini_index;
 SVEXTERN char script_inifile_suffix[1024];
 SVEXTERN char script_renderdir[1024], script_renderfilesuffix[1024], script_renderfile[1024];
