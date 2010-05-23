@@ -1,4 +1,7 @@
-1.  improve algorithm for determining min/max data bounds
-2.  add spinner in 3d smoke dialog box to set all HRRPUV_CUTOFF values at once
-3.  fix problem with device display when also displaying people
-4.  test improved colorbar display
+1 test internally defined colorbars used for terrain visualization
+2 test removal of leading blanks in file names
+3 test SPINNER in slice dialog box for setting transparency level
+4 test code for dispalying slice files overlaying terrain maps
+5 test spinner for setting time
+6 test removal of slice file hiding option
+7 test code for reducing memory allocations
