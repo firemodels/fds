@@ -1,51 +1,52 @@
 
+\newcommand{\paper}{chapter }
 %\newcommand{\paper}{paper }
-%\chapter{Quantifying Model Error}
+
+\chapter{Uncertainty}
 
 \section{Introduction}
-\newcommand{\paper}{chapter }
 
 There are various definitions of model validation.
 For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capability of
 Deterministic Fire Models,''~\cite{ASTM:E1355} defines it as ``the process of determining the degree to which a calculation method
 is an accurate representation of the real world from the perspective of the intended uses of the calculation method.''
-The accuracy of a model prediction is a complicated function of the uncertainty of its input parameters and its mathematical formulation. 
+The accuracy of a model prediction is a complicated function of the uncertainty of its input parameters and its mathematical formulation.
 The relative contribution of each to
 the uncertainty of the prediction are commonly referred to as the {\em parameter uncertainty} and the
-{\em model uncertainty}, respectively. 
-Perhaps the best way to explain the role each plays is by way of example. 
+{\em model uncertainty}, respectively.
+Perhaps the best way to explain the role each plays is by way of example.
 Suppose a fire model is being used to estimate the likelihood that electrical control cables could be damaged due to
 a fire in a compartment. Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C. It is also assumed that the fire is
-ignited within an electrical cabinet, and that the heat release rate of the fire is a specified function of time. 
-What is the likelihood that the cables would be damaged if that fire were to occur? 
-The calculation is performed, and the model predicts that the maximum surface temperature of the cables is 350~$^\circ$C. 
+ignited within an electrical cabinet, and that the heat release rate of the fire is a specified function of time.
+What is the likelihood that the cables would be damaged if that fire were to occur?
+The calculation is performed, and the model predicts that the maximum surface temperature of the cables is 350~$^\circ$C.
 Does this mean that there is no chance of damage? The answer is no, because the input parameters, like the heat release rate of
-the cabinet fire, and the model assumptions, like the description of the cable, have uncertainty. 
-The purpose of this \paper is to suggest a method to estimate the probability that the cables could actually reach temperatures 
+the cabinet fire, and the model assumptions, like the description of the cable, have uncertainty.
+The purpose of this \paper is to suggest a method to estimate the probability that the cables could actually reach temperatures
 greater than 400~$^\circ$C even though the model prediction is 350~$^\circ$C.
 
-To do this, both the parameter and model uncertainties need to be quantified. First, consider the parameter uncertainty. 
+To do this, both the parameter and model uncertainties need to be quantified. First, consider the parameter uncertainty.
 For most fire scenarios, the heat release rate has the greatest impact on the outcome, with a few other parameters playing a secondary role. Typically,
 the heat release rate of something like an electrical cabinet fire can be expressed as a probability distribution, and this distribution can be propagated through the
-model using any number of methods~\cite{Notarianni:SFPE}. 
+model using any number of methods~\cite{SFPE:Notarianni}.
 
 Next, consider the model uncertainty. It has been suggested by some that
-a means to quantify the model uncertainty is to combine the uncertainties of all the model components in a similar way as is done for the input parameters.  
+a means to quantify the model uncertainty is to combine the uncertainties of all the model components in a similar way as is done for the input parameters.
 However, such an exercise is very difficult, especially for a computational fluid dynamics (CFD) model, for a number of reasons. First, fire involves
 a complicated interaction of gas and solid phase phenomena that are closely coupled. Second, grid sensitivity in a CFD model or the error associated with
 a two-layer assumption in a zone model are dependent on the particular fire scenario. Third, fire is an inherently transient phenomenon in which relatively small
 changes in events, like a door opening or sprinkler actuation, can lead to significant changes in outcome. Rather than attempt a detailed uncertainty
-analysis of each sub-model, the approach taken is to exploit the relative abundance of measurements in controlled fire 
-experiments as a means to quantify the model uncertainty. This is the traditional approach to quantify the accuracy of a fire model. 
-However, model simulations of fire experiments are subject to parameter uncertainty; thus, in order to quantify the model uncertainty, 
-the parameter uncertainty must be ``subtracted'' from the difference between the prediction and the reported measurement. 
+analysis of each sub-model, the approach taken is to exploit the relative abundance of measurements in controlled fire
+experiments as a means to quantify the model uncertainty. This is the traditional approach to quantify the accuracy of a fire model.
+However, model simulations of fire experiments are subject to parameter uncertainty; thus, in order to quantify the model uncertainty,
+the parameter uncertainty must be ``subtracted'' from the difference between the prediction and the reported measurement.
 The quotation marks indicate that the model and parameter uncertainty do not simply add together,
 and to decouple them requires some statistical analysis that will be described below.
 
 The overall procedure is not a dramatic departure from current
 methods of model validation, but it does add a very tractable method for discerning how much of the uncertainty in the prediction is due
-to the input parameters and how much is due to the model itself. Too often the two are lumped together, in which case there is no way to know 
-if the inaccuracy is due to the model or the model user. For this reason, this methodology is of tremendous value to model developers because, 
+to the input parameters and how much is due to the model itself. Too often the two are lumped together, in which case there is no way to know
+if the inaccuracy is due to the model or the model user. For this reason, this methodology is of tremendous value to model developers because,
 in a sense, it strips away what are often referred to as
 ``user effects'' to reveal inadequacies of the model itself.
 
@@ -194,21 +195,45 @@ Surface Temperature             & 0.14    \\ \hline
 
 \section{Calculating Model Error}
 
-This section describes a method for calculating the model error using the estimated experimental uncertainties
-listed in Table~\ref{Uncertainty}.
-There are two important assumptions to make:
+This section describes a method for calculating the {\em model uncertainty}. In terms of the example given above, this
+is the answer to the question, ``350~$^\circ$C plus or minus what?'' The focus is on the model, not the parameter, uncertainty;
+thus, it is assumed, for the moment, that the input parameters are not subject to any uncertainty.
+In that case, how good is the prediction, assuming the fire scenario is exactly defined? The answer to this question is based solely on
+the model's track record for predicting cable temperatures in controlled validation experiments.
+
+Actually, the ``plus or minus'' uncertainty bounds are expressed as a statistical distribution. In other words, the
+prediction is not expressed merely as 350~$^\circ$C, but rather as a random variable with a given mean, $\mu$, and standard
+deviation, $\sigma$. There are a few very important assumptions to make at the start:
 \begin{enumerate}
-\item The uncertainties of the experiments and the model can be expressed in
-relative terms, and the relative uncertainty is constant for each quantity,\footnote{The relative uncertainty is defined as
-$\widetilde{\sigma}=\sigma/\mu$, where $\sigma$ is the standard deviation and $\mu$ is the mean of the random variable.} and
-\item The uncertainties are assumed to be normally distributed.
+\item The distribution is assumed to be normal.
+\item The degree to which the model under or over-predicts the ``truth'' is expressed as a multiplicative bias factor, $\delta$; thus,
+the mean of the distribution is $M/\delta$, where $M$ is the model prediction.
+\item The standard deviation of the distribution is expressed as a fixed percentage of the mean,
+$\widetilde{\sigma}=\sigma/\mu$.
 \end{enumerate}
-The first assumption is based on the observation that the results of past validation exercises, when plotted as shown in Fig.~\ref{scatterplot}, suggest
-that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value. Furthermore, given the
+Under these assumptions, the ``true'' temperature of the cable, $\theta$, is expressed in the
+following way\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
+with mean, $\mu$, and standard deviation, $\sigma$.}:
+\be
+   \theta \; | \; 350 \sim N \left( \frac{350}{\delta} \; , \; \widetilde{\sigma}_M^2
+   \left( \frac{350}{\delta} \right)^2 \right) \label{truthexample}
+\ee
+In words, given a model prediction of 350~$^\circ$C, the expected value of the true temperature is assumed to be normally distributed
+with the given mean and standard deviation. The values of $\delta$ and $\widetilde{\sigma}_M$ are calculated based on the
+comparison of model predictions with experimental measurements. This calculation is discussed below. First, however, the
+assumptions above require justification.
+
+The first assumption is based on the observation that the results of past validation exercises,
+when plotted as shown in Fig.~\ref{scatterplot}, suggest
+that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value.
+Furthermore, given the
 complexity of the models, it would be difficult to postulate a more precise functional relationship.
-The same is true of the form of the distribution. Given the complexity of the models and the experiments, it would be difficult to justify
-any particular distribution. In fact, the very reason for developing this method of quantifying model error based on validation
-experiments is because the model algorithm itself is too complicated to work with directly as a means of estimating the error. However, if
+The same is true of the form of the distribution. Given the complexity of the models and the experiments,
+it would be difficult to justify
+any particular distribution. In fact, the very reason for developing this method of quantifying model
+error based on validation
+experiments is because the model algorithm itself is too complicated to work with directly
+as a means of estimating the error. However, if
 the distributions were better characterized, the methodology presented here could be generalized appropriately.
 
 With these assumptions in mind, a relatively simple method of analyzing the data can be developed.
@@ -221,8 +246,7 @@ As mentioned above, measurements from full-scale fire experiments often lack unc
 reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely
 a reported systematic bias in the measurement because if a bias can be quantified, the reported values are adjusted accordingly.
 For this reason, assume that a given experimental measurement, $E_i$, is normally
-distributed\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
-with mean, $\mu$, and standard deviation, $\sigma$.} about the ``true'' value, $\theta_i$, and there is no systematic bias:
+distributed about the ``true'' value, $\theta_i$, and there is no systematic bias:
 \be
    E \; | \; \theta \sim N(\theta \; , \; \sigma_E^2) \label{expunc}
 \ee
@@ -491,5 +515,4 @@ latter must be re-evaluated, or the number of data points needs to be seriously 
 
 A procedure has been proposed to estimate model error by way of comparisons of model predictions with experimental measurements whose uncertainty has been
 quantified. For clarity of presentation, issues associated with the selection of experiments, metrics of comparison, and presentation of results, have not been
-discussed in detail because these decisions are application-specific and best left to the end user or AHJ. 
-
+discussed in detail because these decisions are application-specific and best left to the end user or AHJ.
