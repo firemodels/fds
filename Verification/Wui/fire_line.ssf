@@ -1,9 +1,11 @@
 RENDERDIR
  ..\..\Manuals\SMV_5_Verification_Guide\scriptfigures
 SETVIEWPOINT
- view 1
+ overview
 LOADFILE
- fire_line_05.sf
+ fire_line_01_bf.sf
+LOADFILE
+ fire_line_01.iso
 SETTIMEVAL
  10.05
 RENDERONCE
