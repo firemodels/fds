@@ -1586,7 +1586,7 @@ ENDDO
 
 ! Write out level set slice file name (placeholder)
 IF (VEG_LEVEL_SET) THEN
-   WRITE(LU_SMV,'(A 5X,2I)') 'SLCT ',1,1 !terrain slice assumes one mesh and puts level set data on terrain
+   WRITE(LU_SMV,'(A,5X,2I)') 'SLCT ',1,1 !terrain slice assumes one mesh and puts level set data on terrain
    WRITE(LU_SMV,'(A)') 'lsfs.sf'
    WRITE(LU_SMV,'(A)') 'phifield'
    WRITE(LU_SMV,'(A)') 'phifield'
