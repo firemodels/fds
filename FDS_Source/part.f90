@@ -1327,7 +1327,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
             CP,H_NEW,YY_GET(1:N_SPECIES),M_GAS_NEW,MW_GAS,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_REF,&
-            TMP_G_NEW,DT_SUM
+            TMP_G_NEW,DT_SUM,DCPDT
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,N_SUBSTEPS,ITMP,IBC
 INTEGER, INTENT(IN) :: NM
 LOGICAL :: TEMPITER
@@ -1594,8 +1594,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             
             ! Evaporate completely small droplets
 
-            IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN  
-               M_VAP  = M_DROP
+            IF (PC%EVAPORATE .AND. R_DROP<0.5_EB*PC%MINIMUM_DIAMETER) THEN
+               M_VAP  = M_DROP/N_SUBSTEPS
                IF (Q_TOT>0._EB) THEN
                   Q_FRAC = M_VAP*H_V/Q_TOT 
                   Q_CON_GAS  = Q_CON_GAS*Q_FRAC
@@ -1655,23 +1655,32 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                TEMPITER = .TRUE.
                ITERATE_TEMP: DO WHILE (TEMPITER)
                   TEMPITER=.FALSE.
-                  ITMP = MAX(1,MIN(5000,NINT(TMP_G)))
+                  ITMP = MAX(1,MIN(5000,NINT(TMP_G_I)))
                   IF (N_SPECIES == 0 ) THEN
                      CP2 = Y2CPBAR_C(ITMP)
+                     CP = Y2CPBAR_C(ITMP+1)
                   ELSE
                      CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,ITMP)
+                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP+1)
                   ENDIF
-                  TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(CP2*M_GAS_NEW)
-                  IF ((TMP_G_NEW-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
+                  ! Compute approximation of d(cp)/dT
+                  DCPDT = CP-CP2
+                  TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP2+TMP_G_I*DCPDT))
+!                  TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(CP2*M_GAS_NEW)
+                  IF (ABS(TMP_G_NEW-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
                   TMP_G_NEW = TMP_G_I
                ENDDO ITERATE_TEMP
             ELSE
                DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
+               N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                CYCLE TIME_ITERATION_LOOP
             ENDIF
             IF (ABS(TMP_G_NEW/TMP_G - 1._EB) > 0.2_EB) THEN
                DT_SUBSTEP = DT_SUBSTEP * 0.5_EB            
-               IF (DT_SUBSTEP <= 0.00001_EB*DT) CALL SHUTDOWN('Numerical instability in particle energy transport')
+               N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
+               IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
+                  CALL SHUTDOWN('Numerical instability in particle energy transport')
+               ENDIF
                CYCLE TIME_ITERATION_LOOP
             ENDIF
 
