@@ -1,61 +1,89 @@
 
-\newcommand{\paper}{chapter }
-%\newcommand{\paper}{paper }
+%\newcommand{\paper}{chapter }
+\newcommand{\paper}{paper }
 
-\chapter{Uncertainty}
+%\chapter{Uncertainty}
 
-\section{Introduction}
+\section{What is the Problem?}
 
-There are various definitions of model validation.
-For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capability of
-Deterministic Fire Models,''~\cite{ASTM:E1355} defines it as ``the process of determining the degree to which a calculation method
-is an accurate representation of the real world from the perspective of the intended uses of the calculation method.''
-The accuracy of a model prediction is a complicated function of the uncertainty of its input parameters and its mathematical formulation.
-The relative contribution of each to
-the uncertainty of the prediction are commonly referred to as the {\em parameter uncertainty} and the
-{\em model uncertainty}, respectively.
-Perhaps the best way to explain the role each plays is by way of example.
-Suppose a fire model is being used to estimate the likelihood that electrical control cables could be damaged due to
-a fire in a compartment. Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C. It is also assumed that the fire is
-ignited within an electrical cabinet, and that the heat release rate of the fire is a specified function of time.
-What is the likelihood that the cables would be damaged if that fire were to occur?
-The calculation is performed, and the model predicts that the maximum surface temperature of the cables is 350~$^\circ$C.
+The purpose of this \paper can best be described with a simple example.
+Suppose a fire model is used to estimate the likelihood that electrical control cables would be damaged due to
+a fire.  It is assumed that the fire is ignited within an electrical cabinet, and that
+damage to exterior cables is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C.
+The model predicts that the maximum surface temperature of the cables would be 350~$^\circ$C.
 Does this mean that there is no chance of damage? The answer is no, because the input parameters, like the heat release rate of
-the cabinet fire, and the model assumptions, like the description of the cable, have uncertainty.
-The purpose of this \paper is to suggest a method to estimate the probability that the cables could actually reach temperatures
-greater than 400~$^\circ$C even though the model prediction is 350~$^\circ$C.
+the cabinet fire, and the model assumptions, like the way the cable is modeled, are uncertain.
 
-To do this, both the parameter and model uncertainties need to be quantified. First, consider the parameter uncertainty.
-For most fire scenarios, the heat release rate has the greatest impact on the outcome, with a few other parameters playing a secondary role. Typically,
-the heat release rate of something like an electrical cabinet fire can be expressed as a probability distribution, and this distribution can be propagated through the
-model using any number of methods~\cite{SFPE:Notarianni}.
+Uncertainty analysis has long been a part of fire science. Indeed, fire modeling has its origins in risk assessment and uncertainty analysis. The scenario above,
+for example, was considered by Sui and Apostolakis in the early 1980s~\cite{Sui:RE1982} as part of their development of risk models for
+nuclear power plants. The fire models at the
+time were relatively simple, which made the methods for quantifying their uncertainty reasonably tractable for practicing engineers. Over the past
+thirty years, however, both fire modeling and the corresponding methods of uncertainty analysis have become far more complex. While both are still
+areas of active research, it can be argued that while fire modeling has become commonplace among practicing fire protection engineers, uncertainty
+analysis has not. There are a number of reasons for this, including:
+\begin{enumerate}
+\item It is time-consuming,
+\item It is difficult to understand, and
+\item It is typically not demanded by authorities having jurisdiction (AHJ).
+\end{enumerate}
+Whether or not these are valid does not change the fact that detailed uncertainty analyses are rarely performed in practice. At best, model developers
+and users publish validation studies whose conclusions are expressed in ways like this: ``The model generally over-predicts the measured temperatures
+by about 10~\%,'' or ``The model predictions are within about 20~\% of the measured heat fluxes.'' This information helps to inform the decision of
+the AHJ, but only in the most qualitative sense. In particular, if the model has been shown to over-predict the quantity of interest, it is considered
+``conservative,'' and its subsequent predictions are assessed in that light. 
 
-Next, consider the model uncertainty. It has been suggested by some that
-a means to quantify the model uncertainty is to combine the uncertainties of all the model components in a similar way as is done for the input parameters.
-However, such an exercise is very difficult, especially for a computational fluid dynamics (CFD) model, for a number of reasons. First, fire involves
-a complicated interaction of gas and solid phase phenomena that are closely coupled. Second, grid sensitivity in a CFD model or the error associated with
-a two-layer assumption in a zone model are dependent on the particular fire scenario. Third, fire is an inherently transient phenomenon in which relatively small
-changes in events, like a door opening or sprinkler actuation, can lead to significant changes in outcome. Rather than attempt a detailed uncertainty
-analysis of each sub-model, the approach taken is to exploit the relative abundance of measurements in controlled fire
-experiments as a means to quantify the model uncertainty. This is the traditional approach to quantify the accuracy of a fire model.
-However, model simulations of fire experiments are subject to parameter uncertainty; thus, in order to quantify the model uncertainty,
-the parameter uncertainty must be ``subtracted'' from the difference between the prediction and the reported measurement.
-The quotation marks indicate that the model and parameter uncertainty do not simply add together,
-and to decouple them requires some statistical analysis that will be described below.
+As performance based design increases the use of fire modeling, and the results of the model are incorporated within a statistical framework,
+like a probabilistic risk assessment (PRA), there is a need for a more formal approach to uncertainty that is still tractable for the practicing 
+engineer. Using the example above, the answer to the question as to whether or not cables would be damaged in a fire could be expressed in terms of
+the graph shown in Fig.~\ref{bell_curve}. This is the classic Gaussian or normal distribution -- the ``bell curve.'' The area underneath the curve is 1, and
+the area indicated by the shaded region is the probability that even though the model has predicted 350~$^\circ$C, there is still a chance that
+the cables could be damaged because of uncertainty in the model and its input parameters. 
+\begin{figure}[t]
+\begin{center}
+\includegraphics[width=5.in]{FIGURES/bell_curve}
+\end{center}
+\caption[Demonstration of model uncertainty.]{Plot showing a possible way of expressing the uncertainty of the model prediction.}
+\label{bell_curve}
+\end{figure} 
 
+This \paper suggests a methodology for calculating the mean and standard deviation of this distribution using the following information:
+\begin{enumerate}
+\item The predicted value,
+\item Two parameters resulting from a validation study, the model bias and the relative standard deviation,
+\item A few simple empirical relationships between the predicted quantity and the most important input parameters.
+\end{enumerate}  
 The overall procedure is not a dramatic departure from current
-methods of model validation, but it does add a very tractable method for discerning how much of the uncertainty in the prediction is due
-to the input parameters and how much is due to the model itself. Too often the two are lumped together, in which case there is no way to know
-if the inaccuracy is due to the model or the model user. For this reason, this methodology is of tremendous value to model developers because,
-in a sense, it strips away what are often referred to as
-``user effects'' to reveal inadequacies of the model itself.
+practice, but it does better quantify the uncertainty of the prediction and it distinguishes the relative contributions of
+the uncertainty of the mathematical model and the uncertainty of the input parameters. Too often the two are lumped together, in which case there is no way to know
+the source of the uncertainty, ``user effects'' or the model itself. 
 
 
 
+\section{What is Uncertainty?}
+
+Before developing the procedure, a few definitions are needed. 
+The uncertainty of a model prediction is the result of the uncertainty of its input parameters, known as the {\em parameter uncertainty}, and the
+uncertainty of the mathematical model, known as the {\em model uncertainty}. 
+
+\subsection{Parameter Uncertainty}
+
+For most fire scenarios, the heat release rate has the greatest impact on the outcome, with a few other parameters playing a secondary role. Typically,
+the heat release rate of something like an electrical cabinet fire can be expressed as a probability distribution, 
+and this distribution can be propagated through the model using any number of methods~\cite{SFPE:Notarianni}.
+
+For example, most of the
+experiments used oxygen consumption calorimetry as the means of measuring the heat release rate.
+Estimates of the uncertainty of large scale calorimeters range from 10~\% to 30~\%. For the sake of discussion, assume it is 15~\%.
+It has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise due to
+a compartment fire is proportional to the HRR raised to the two-thirds power, thus a 15~\% uncertainty in the HRR would lead to a $2/3 \times 15$~\%=10~\%
+uncertainty in the model prediction. This uncertainty now needs to be combined with the uncertainty in the thermocouple measurement itself. Assume that
+this is also 10~\%. Because the two forms of uncertainty are uncorrelated, they are combined by quadrature (summing of squares) to yield a combined
+uncertainty of 14~\%. Another way to look at this is to recognize that the combined uncertainty is represented as the diagonal of the rectangle formed
+from the horizontal and vertical uncertainty/error bars in Fig.~\ref{scatterplot}.
 
 
 
-\section{Model Uncertainty}
+\subsection{Model Uncertainty}
 
 A deterministic fire model is based on fundamental conservation laws of mass, momentum and energy, applied either to entire compartments or smaller control
 volumes that make up the compartments. A CFD model may use millions of control volumes to compute the solution of the Navier-Stokes equations.
@@ -81,8 +109,26 @@ extremely difficult. Indeed, the complexity of the analysis would likely exceed 
 experiments as possible is the primary means of quantifying model uncertainty. However, before the model uncertainty can be quantified, the uncertainty of the
 measurements against which the model predictions are compared must be quantified. This is discussed below.
 
+Next, consider the model uncertainty. It has been suggested by some that
+a means to quantify the model uncertainty is to combine the uncertainties of all the model components in a similar way as is done for the input parameters.
+However, such an exercise is very difficult, especially for a computational fluid dynamics (CFD) model, for a number of reasons. First, fire involves
+a complicated interaction of gas and solid phase phenomena that are closely coupled. Second, grid sensitivity in a CFD model or the error associated with
+a two-layer assumption in a zone model are dependent on the particular fire scenario. Third, fire is an inherently transient phenomenon in which relatively small
+changes in events, like a door opening or sprinkler actuation, can lead to significant changes in outcome. Rather than attempt a detailed uncertainty
+analysis of each sub-model, the approach taken is to exploit the relative abundance of measurements in controlled fire
+experiments as a means to quantify the model uncertainty. This is the traditional approach to quantify the accuracy of a fire model.
+However, model simulations of fire experiments are subject to parameter uncertainty; thus, in order to quantify the model uncertainty,
+the parameter uncertainty must be ``subtracted'' from the difference between the prediction and the reported measurement.
+The quotation marks indicate that the model and parameter uncertainty do not simply add together,
+and to decouple them requires some statistical analysis that will be described below.
+
 
 \section{The Validation Process}
+
+There are various definitions of model validation.
+For example, ASTM~E~1355, ``Standard Guide for Evaluating the Predictive Capability of
+Deterministic Fire Models,''~\cite{ASTM:E1355} defines it as ``the process of determining the degree to which a calculation method
+is an accurate representation of the real world from the perspective of the intended uses of the calculation method.''
 
 Because it is impractical to dissect a complicated fire model into its many components and assess the accuracy of each individually,
 a fire model validation study typically consists of comparing point measurements from a wide variety of fire experiments with corresponding model predictions.
@@ -129,20 +175,6 @@ is the subject of the analysis below.
 \end{figure}
 
 
-
-
-
-\section{Experimental Uncertainty}
-
-For various reasons, the documentation of fire experiments, especially full-scale experiments,
-typically contains fairly limited discussion of uncertainty. Some contain none at all.
-However, in order to assess the accuracy of the model predictions, there must be some estimate of the
-combined effect of the uncertainty in the reported test parameters, like the heat release rate of the fire,
-and the reported measurements of the quantities of interest, like the hot gas layer (HGL)
-temperature, heat flux, and so forth. Unless there is an estimate of the experimental uncertainty,
-the difference between model and measurement
-would simply have to be attributed as model error and there is no point in
-continuing this exercise.
 
 Rather than throwing out several decades worth of fire test data, there are ways to estimate the uncertainty of the measurements based on work
 that has been done to quantify the accuracy of such devices as heat flux gauges, oxygen-depletion calorimeters, thermocouples and gas sensors.
@@ -193,7 +225,11 @@ Surface Temperature             & 0.14    \\ \hline
 \end{table}
 
 
-\section{Calculating Model Error}
+
+
+
+
+\section{Calculating Model Uncertainty}
 
 This section describes a method for calculating the {\em model uncertainty}. In terms of the example given above, this
 is the answer to the question, ``350~$^\circ$C plus or minus what?'' The focus is on the model, not the parameter, uncertainty;
@@ -445,13 +481,6 @@ predictions of this particular quantity. For the sake of argument, assume a bias
 surface temperatures by 3~\%. Also assume that the relative error has been calculated and it is 0.10~. These are the same values that were assumed in the second example
 of the previous section.
 Now, consider the graph shown in Fig.~\ref{bell_curve}.
-\begin{figure}[t]
-\begin{center}
-\includegraphics[width=5.in]{FIGURES/bell_curve}
-\end{center}
-\caption[Demonstration of model error.]{Plot showing how one might make use of the model error.}
-\label{bell_curve}
-\end{figure}
 The vertical lines indicate the ``threshold'' temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
 model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
 The bell curve is taken as a normal distribution whose mean and standard deviation are obtained from Eq.~(\ref{truth}) and calculated here:
