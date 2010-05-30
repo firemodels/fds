@@ -2695,7 +2695,7 @@ The end result of this input file is to create a pyramid by repeating long, rect
 face in a stair-step pattern. Note in this case the use of {\ct N\_LOWER} and {\ct N\_UPPER} which automatically cause FDS to
 repeat the obstructions in sequence rather than as an array.
 
-Note that the {\ct MULT}iplication functionality works for {\ct MESH}es, as well, but it only applies to the
+Note that the {\ct MULT}iplication functionality works for {\ct MESH} and {\ct INIT} lines. For a {\ct MESH}, it only applies to the
 bounds ({\ct XB}) of the mesh, not the number of cells.
 
 
@@ -5387,6 +5387,8 @@ Gravity             & {\ct MISC}        & {\ct GVEC(3)}                         
 \end{tabular}
 \end{table}
 
+\newpage
+
 \section{Temperature-Dependent Functions}
 
 Thermal properties like conductivity and specific heat can vary significantly with temperature. In such cases, use
@@ -5805,6 +5807,8 @@ the index 1 refers to the first, and only, gas species that is specified in the 
 
 \subsection{Special Topic: Gas Species Properties}
 
+\label{gas_species_props}
+
 Gases whose properties are hardwired in FDS are listed in
 Table~\ref{tab:gasspecies}. The physical properties
 of these gases are known and do not need to be specified. However, if a
@@ -5828,7 +5832,8 @@ and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEA
 If either {\ct SPECIFIC\_HEAT} or {\ct ENTHALPY} is specified, then both must be specified.
 The {\ct REFERENCE\_TEMPERATURE} is the temperature that corresponds to the specified value
 of {\ct SPECIFIC\_ENTHALPY}.  In the absence of any of these parameters, the appropriate
-values of {\ct 'AIR'} are assumed.  If the species listed in Table~\ref{tab:gasspecies}, is indicated as a liquid, that means that liquid thermophysical properties do not need to be given for those species.
+values of {\ct 'AIR'} are assumed.  If the species listed in Table~\ref{tab:gasspecies}, is indicated as a liquid, that means that liquid thermo-physical 
+properties do not need to be given for those species.
 
 \begin{table}[ht]
 \begin{center}
@@ -6225,6 +6230,8 @@ a particular type of particle or droplet.
 
 
 \subsection{Thermal Properties}
+
+\label{thermal_part_props}
 
 For Lagrangian particles that are not {\ct MASSLESS}, the following parameters should be
 included on the {\ct PART} line to indicate how they heat up and possibly evaporate. It is assumed by default that non-massless particles are
@@ -9283,6 +9290,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_FRACTION(II)}        & Real Array        & Initial value of species {\ct II}                 & kg/kg         & Ambient       \\ \hline
 {\ct MASS\_PER\_TIME}           & Real              & See Section~\ref{info:initial_droplets}           & kg/s          &               \\ \hline
 {\ct MASS\_PER\_VOLUME}         & Real              & See Section~\ref{info:initial_droplets}           & kg/m$^3$      & 1             \\ \hline
+{\ct MULT\_ID }                 & Character         & See Section~\ref{info:MULT}                       &               &               \\ \hline
 {\ct NUMBER\_INITIAL\_DROPLETS} & Integer           & See Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
 {\ct PART\_ID}                  & Character         & See Section~\ref{info:initial_droplets}           &               &               \\ \hline
 {\ct TEMPERATURE}               & Real              & Initial value of temperature                      & $^\circ$C     & {\ct TMPA}    \\ \hline
@@ -9400,12 +9408,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct LEVEL}        & Integer                    & Level in EMBedded mesh hierarchy            &    & 0                \\ \hline
 {\ct MPI\_PROCESS} & Integer                    & See Section~\ref{info:multimesh}            &    &    \\ \hline
 {\ct RGB}         & Integer Triplet             & Color indices (0-255)                       &    & 0,0,0            \\ \hline
+{\ct MULT\_ID }   & Character                   & See Section~\ref{info:MULT}                 &    &               \\ \hline
 {\ct SYNCHRONIZE} & Logical                     & Sync. time steps of multiple meshes         &    & {\ct .TRUE.}     \\ \hline
-{\ct XB(6)}          & Real Sextuplet              & Min/Max Coordinates of the MESH             & m  & 0,1,0,1,0,1      \\ \hline
-%{\ct POISSON\_BC} & Integer Sextuplet           & Pressure boundary conditions      &    &    \\ \hline
-%{\ct IBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
-%{\ct JBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
-%{\ct KBAR2}       & Integer                     & No. cells in $z$ direction        &    & 10  \\ \hline
+{\ct XB(6)}       & Real Sextuplet              & Min/Max Coordinates of the MESH             & m  & 0,1,0,1,0,1      \\ \hline
 %{\ct EVAC_Z_OFFSET} & Real                      & Floor level vs evacuation mesh $z$&  m & 1.0  \\ \hline
 \end{longtable}
 
@@ -9571,6 +9576,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct EVACUATION}          & Logical             & Only use for Evac case                &    & {\ct .FALSE.} \\ \hline
 {\ct FYI}                 & Character           & Comment String (has no effect)        &    &               \\ \hline
 %{\ct MESH\_ID}            & Character           & Only include in given mesh            &    &               \\ \hline
+{\ct MULT\_ID }           & Character           & See Section~\ref{info:MULT}           &    &               \\ \hline
 {\ct OUTLINE}             & Logical             & Draw as Outline                       &    & {\ct .FALSE.} \\ \hline
 {\ct PERMIT\_HOLE}        & Logical             & Allow a Hole                          &    & {\ct .TRUE.}  \\ \hline
 %{\ct PROP\_ID}            & Character           & Name of Property line (if needed)     &    &               \\ \hline
@@ -9622,7 +9628,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GAMMA\_D}                      & Real            & Size distribution parameter             &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}          & Real            & Heat of Combustion                      & kJ/kg     &               \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION}        & Real            & Latent Heat of Vaporization             & kJ/kg     &               \\ \hline
-{\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real            & Temperature for Heat of Vaporization    & $^\circ$C &               \\ \hline
+{\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real            & See Section~\ref{thermal_part_props}    & $^\circ$C &               \\ \hline
 {\ct HORIZONTAL\_VELOCITY}          & Real            & Droplet speed, horizontal               & m/s       &  0.2          \\ \hline
 {\ct ID}                            & Character       & Identifier                              &           &               \\ \hline
 {\ct INITIAL\_TEMPERATURE}          & Real            & Initial Temperature                     & $^\circ$C & {\ct TMPA}    \\ \hline
@@ -9940,22 +9946,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ABSORBING}                     & Logical     & Absorbs radiation                           &                   & {\ct .FALSE.} \\ \hline
-{\ct CONDUCTIVITY}                  & Real        & Conductivity $k$                            & W/m/K             &     \\ \hline
-{\ct DIFFUSIVITY}                   & Real        & Diffusivity   $D$                           & m$^2$/s           &     \\ \hline
+{\ct CONDUCTIVITY}                  & Real        & Conductivity, $k$                           & W/m/K             &     \\ \hline
+{\ct DIFFUSIVITY}                   & Real        & Diffusivity,  $D$                           & m$^2$/s           &     \\ \hline
 {\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
-{\ct FORMULA }                      & Character   & Chemical formula for                        &                   & \\
-                                    &             & Smokeview label                             &                   &     \\ \hline
+{\ct FORMULA }                      & Character   & Smokeview label                             &                   &     \\ \hline
 {\ct FYI}                           & Character   & Comment String                              &                   &     \\ \hline
 {\ct ID }                           & Character   & Name of species                             &                   &     \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0   \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & Initial mass fraction                       &                   & 0   \\ \hline
 {\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.  \\ \hline
-{\ct REFERENCE\_TEMPERATURE}        & Real        & Temperature for                          & $^\circ$C         & 25.  \\
-                                    &             & Specific Enthalpy                             &                   &     \\ \hline
-{\ct SPECIFIC\_ENTHALPY}            & Real        & Specific Enthalpy                            & kJ/kg             &      \\ \hline
-{\ct SPECIFIC\_HEAT}                & Real        & Specific Heat                            & kJ/kg/K           &      \\ \hline
+{\ct REFERENCE\_TEMPERATURE}        & Real        & See Section~\ref{gas_species_props}         & $^\circ$C         & 25.  \\ \hline
+{\ct SPECIFIC\_ENTHALPY}            & Real        & Specific Enthalpy                           & kJ/kg             &      \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real        & Specific Heat                               & kJ/kg/K           &      \\ \hline
 {\ct SIGMALJ}                       & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
-{\ct VISCOSITY}                     & Real        & Dynamic Viscosity $mu$                      & kg/m/s            &     \\ \hline
+{\ct VISCOSITY}                     & Real        & Dynamic Viscosity, $\mu$                    & kg/m/s            &     \\ \hline
 \end{longtable}
 
 
@@ -9988,7 +9992,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct E\_COEFFICIENT}                  & Real            & Extinguishing coefficient         & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct EMISSIVITY}                      & Real            & Emissivity                        &                     & 0.9                     \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
-{\ct EXTERNAL\_FLUX\_RAMP}            & Character       & Ramp ID for external flux         &                     &                         \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & See Section~\ref{info:WALL_MODEL} &                     & {\ct .FALSE.}           \\ \hline
 {\ct FYI}                             & Character       & Comment String                    &                     &                         \\ \hline
 {\ct GEOMETRY}                        & Character       & Geometry type                     &                     & {\ct 'CARTESIAN'}       \\ \hline
@@ -10014,7 +10017,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct POROUS}                          & Logical         & See Section~\ref{info:Velocity_BC}&                     & {\ct .FALSE.}           \\ \hline
 {\ct PLE}                             & Real            & Atmospheric profile exp.          &                     & 0.3                     \\ \hline
 {\ct PROFILE}                         & Character       & Name of velocity profile          &                     &                         \\ \hline
-{\ct RAMP\_MF(I)}                     & Character       & Ramp ID for species I             &                     &                         \\ \hline
+{\ct RAMP\_EF}                        & Character       & Ramp {\ct ID} for external flux   &                     &                         \\ \hline
+{\ct RAMP\_MF(I)}                     & Character       & Ramp {\ct ID} for species {\ct I} &                     &                         \\ \hline
 {\ct RAMP\_Q}                         & Character       & Ramp ID for HRR                   &                     &                         \\ \hline
 {\ct RAMP\_T}                         & Character       & Ramp ID for temp.                 &                     &                         \\ \hline
 {\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
@@ -10022,8 +10026,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ROUGHNESS}                       & Real            & Wall roughness height             & m                   & 0.                      \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
 {\ct SURFACE\_DENSITY}                & Real            & See Section~\ref{info:BURN_AWAY}  & kg/m$^2$            & 0.0                     \\ \hline
-{\ct TAU\_EXTERNAL\_FLUX}             & Real            & Ramp time for external flux       & s                   & 1.                      \\ \hline
-{\ct TAU\_MF(I)}                      & Real Array      & Ramp time for species {\ct I}     & s                   & 1.                      \\ \hline
+{\ct TAU\_EF}                         & Real            & Ramp time for external flux       & s                   & 1.                      \\ \hline
+{\ct TAU\_MF(I)}                      & Real            & Ramp time for species {\ct I}     & s                   & 1.                      \\ \hline
 {\ct TAU\_Q}                          & Real            & Ramp time for HRR                 & s                   & 1.                      \\ \hline
 {\ct TAU\_T}                          & Real            & Ramp time for temp.               & s                   & 1.                      \\ \hline
 {\ct TAU\_V}                          & Real            & Ramp time for velocity            & s                   & 1.                      \\ \hline
