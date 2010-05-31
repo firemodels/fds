@@ -1,8 +1,8 @@
-&HEAD CHID='particle_drag_D',TITLE='Spray drag  test' /
+&HEAD CHID='particle_drag_U100_N1600',TITLE='Spray drag  test' /
 
 &MESH IJK=4,4,4,XB=-0.5,0.5,-0.5,0.5,-0.5,0.5 /
 
-&TIME   T_END=4/
+&TIME   T_END=5/
 &MISC   NOISE=.FALSE.,
     DNS=.TRUE.,
     GVEC=0,0,0, 
@@ -11,7 +11,7 @@
     ISOTHERMAL=.TRUE.
     PERIODIC_TEST=100
     FISHPAK_BC(1)=0
-    U0=50
+    U0=100
     VISCOSITY=0.0
     FDS6=.TRUE.
     CONSTANT_PROPERTIES=.TRUE.
