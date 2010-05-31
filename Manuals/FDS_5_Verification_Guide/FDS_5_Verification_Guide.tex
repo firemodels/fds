@@ -1976,6 +1976,70 @@ Fig.~\ref{fig_birch_tga} near the temperature of 100~$^\circ$C.
 
 \chapter{Droplets}
 
+\section{Interphase momentum transfer (\texorpdfstring{{\bf particle\_drag}}{particle\_drag})}
+\label{particle_drag}
+The particle drag test cases consider a $1\times1\times1$ $m^{3}$
+channel with periodic boundary conditions on the X-faces and {\ct{FREE\_SLIP}}
+walls on Y- and Z-faces. Static droplets are placed in the center
+of the channel, one particle in a computational cell, so that they form a surface
+perpendicular to the flow direction. Graviational acceleration and viscosity
+are set to zero. Due to the symmetry of the problem the flow is one
+dimensional. Assuming that the droplets are of uniform diameter  and
+the drag coefficient and gas density are constant, the velocity in
+the channel decays according to
+\be u=\frac{u_{0}}{Bu_{0}t+1},\ee
+\noindent where
+\be B=\frac{1}{2}\frac{\sum_{i=1}^{N}\rho_{g}C_{D}\pi r_{d}^{2}}{MV}.\ee
+In the above $M=\rho_{g}V$ is the mass of the gas within the channel,
+ $\rho_{g}$ is gas density, $r_{d}$ is the droplet radius, $C_{D}$
+is the droplet drag coeffcient, $N$ is the number of droplets in the
+channel and $u$ is the gas velocity in the channel (in the x-direction).
+The common parameters used in all the simulations are
+\[
+    C_D=10, \quad r_d=0.005.
+\]
+The initial veolcity $u_0$ is varies as presented in Table \ref{particle_drag_parameters}.
+Graphical comparison of computed results to the analytical results is shown in Figure \ref{particle_drag_plots}. 
+\begin{table}[ht]
+\begin{center}
+\caption{Parameters used in the {\bf particle\_drag} cases}
+\label{particle_drag_parameters}
+\begin{tabular}{|c|c|c|}
+\hline 
+Case & $u_{0}$ & $N$\tabularnewline
+\hline
+\hline 
+A & 10 & 16 \tabularnewline
+\hline 
+B & 50 & 16\tabularnewline
+\hline 
+C & 100 & 16\tabularnewline
+\hline 
+D & 50  & 1600\tabularnewline
+\hline 
+E & 100 & 1600\tabularnewline
+\hline 
+F & 150 & 1600 \tabularnewline
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{FIGURES/particle_drag_A} &
+\includegraphics[width=3.2in]{FIGURES/particle_drag_D} \\
+\includegraphics[width=3.2in]{FIGURES/particle_drag_B} &
+\includegraphics[width=3.2in]{FIGURES/particle_drag_E} \\
+\includegraphics[width=3.2in]{FIGURES/particle_drag_C} &
+\includegraphics[width=3.2in]{FIGURES/particle_drag_F}
+\end{tabular*}
+\caption[Sample cases {\bf particle\_drag}.]{Outputs of the {\bf particle\_drag} test cases compared with analytical solutions.}
+\label{particle_drag_plots}
+\end{figure}
+
+\clearpage
 
 \section{Water Droplet Evaporation (\texorpdfstring{{\bf water\_evaporation}}{water\_evaporation}) }
 \label{water_evaporation}
