@@ -4024,15 +4024,15 @@ SELECT CASE(IND)
       UU   = 0.5_EB*(U(MIN(IBAR,II),JJ,KK)+U(MAX(0,II-1),JJ,KK))
       VV   = 0.5_EB*(V(II,MIN(JBAR,JJ),KK)+V(II,MAX(0,JJ-1),KK))
       WW   = 0.5_EB*(W(II,JJ,MIN(KBAR,KK))+W(II,JJ,MAX(0,KK-1)))
-      SELECT CASE(VELO_INDEX)
+      SELECT CASE(ABS(VELO_INDEX))
          CASE DEFAULT
             SGN = 1._EB
          CASE(1)
-            SGN = SIGN(1._EB,UU)
+            SGN = SIGN(1._EB,UU)*SIGN(1,VELO_INDEX)
          CASE(2)
-            SGN = SIGN(1._EB,VV)
+            SGN = SIGN(1._EB,VV)*SIGN(1,VELO_INDEX)
          CASE(3)
-            SGN = SIGN(1._EB,WW)
+            SGN = SIGN(1._EB,WW)*SIGN(1,VELO_INDEX)
       END SELECT
       VEL2 = UU**2+VV**2+WW**2
       GAS_PHASE_OUTPUT  = SGN*SQRT(VEL2)
