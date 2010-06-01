@@ -1839,9 +1839,9 @@ Then $A_i$ can be evaluated directly from Eq.~(\ref{dYdt}):
 \be
    A_i = \frac{r_{p,i}}{Y_{p,i}} \, \exp \left( \frac{E_i}{RT_{p,i}} \right) \approx \frac{e \, r_{p,i}}{Y_{0,i}} \, \exp \left( \frac{E_i}{RT_{p,i}} \right) \label{A_formula}
 \ee
-Note that the formulae for $A_i$ and $E_i$ can be evaluated with parameters that are obtained directly by 
+Note that the formulae for $A_i$ and $E_i$ can be evaluated with parameters that are obtained directly by
 inspection of the plot of mass loss rate versus temperature.
-For each peak, the values of $T_{p,i}$ and $r_{p,i}$ are obvious. 
+For each peak, the values of $T_{p,i}$ and $r_{p,i}$ are obvious.
 The values of $Y_{0,i}$ can be estimated based on the relative area underneath each peak. The values of $Y_{0,i}$ should sum to 1.
 
 
@@ -1974,51 +1974,52 @@ Fig.~\ref{fig_birch_tga} near the temperature of 100~$^\circ$C.
 
 
 
-\chapter{Droplets}
+\chapter{Lagrangian Particles}
 
-\section{Interphase momentum transfer (\texorpdfstring{{\bf particle\_drag}}{particle\_drag})}
+This chapter contains verification cases that test all aspects of particles, droplets, sprays, and so on. Note that in FDS, lagrangian particles are used for
+a variety of purposes, not just water droplets.
+
+\section{Momentum Transfer (\texorpdfstring{{\bf particle\_drag}}{particle\_drag})}
 \label{particle_drag}
-The particle drag test cases consider a $1\times1\times1$ $m^{3}$
-channel with periodic boundary conditions on the X-faces and {\ct{FREE\_SLIP}}
-walls on Y- and Z-faces. Static droplets are placed in the center
-of the channel, one particle in a computational cell, so that they form a surface
-perpendicular to the flow direction. Graviational acceleration and viscosity
-are set to zero. Due to the symmetry of the problem the flow is one
+
+The particle drag test cases consider a 1~m by 1~m by 1~m 
+channel with periodic boundary conditions on the $x$-faces and {\ct FREE\_SLIP}
+walls on $y$- and $z$-faces. Static droplets are placed in the center
+of the channel, one particle per computational cell, so that they form a surface
+perpendicular to the flow direction. Gravity is set to zero. Due to the symmetry of the problem the flow is one
 dimensional. Assuming that the droplets are of uniform diameter  and
 the drag coefficient and gas density are constant, the velocity in
 the channel decays according to
-\be u=\frac{u_{0}}{Bu_{0}t+1},\ee
-\noindent where
-\be B=\frac{1}{2}\frac{\sum_{i=1}^{N}\rho_{g}C_{D}\pi r_{d}^{2}}{MV}.\ee
-In the above $M=\rho_{g}V$ is the mass of the gas within the channel,
- $\rho_{g}$ is gas density, $r_{d}$ is the droplet radius, $C_{D}$
-is the droplet drag coeffcient, $N$ is the number of droplets in the
-channel and $u$ is the gas velocity in the channel (in the x-direction).
+\be u=\frac{u_{0}}{1 + B \, u_{0} \, t}  \quad ; \quad B=\frac{1}{2}\frac{\sum \rho_{g} \, C_{D} \, \pi \, r_{d}^{2}}{MV} \ee
+In the above, $M=\rho_{g}V$ is the mass of the gas within the channel,
+$\rho_{g}$ is the gas density, $r_{d}$ is the droplet radius, $C_{D}$
+is the droplet drag coefficient, and $u$ is the gas velocity in the $x$-direction. The summation is
+over all $N$ particles.
 The common parameters used in all the simulations are
 \[
-    C_D=10, \quad r_d=0.005.
+    C_D=10, \quad r_d=0.005
 \]
-The initial veolcity $u_0$ is varies as presented in Table \ref{particle_drag_parameters}.
-Graphical comparison of computed results to the analytical results is shown in Figure \ref{particle_drag_plots}. 
+The initial velocity, $u_0$, for each case is listed in Table~\ref{particle_drag_parameters}.
+Comparisons of computed and analytical results are shown in Figure~\ref{particle_drag_plots}.
 \begin{table}[ht]
 \begin{center}
 \caption{Parameters used in the {\bf particle\_drag} cases}
 \label{particle_drag_parameters}
 \begin{tabular}{|c|c|c|}
-\hline 
+\hline
 Case & $u_{0}$ & $N$\tabularnewline
 \hline
-\hline 
+\hline
 A & 10 & 16 \tabularnewline
-\hline 
+\hline
 B & 50 & 16\tabularnewline
-\hline 
+\hline
 C & 100 & 16\tabularnewline
-\hline 
+\hline
 D & 50  & 1600\tabularnewline
-\hline 
+\hline
 E & 100 & 1600\tabularnewline
-\hline 
+\hline
 F & 150 & 1600 \tabularnewline
 \hline
 \end{tabular}
