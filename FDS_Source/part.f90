@@ -885,7 +885,7 @@ DROPLET_LOOP: DO I=1,NLP
             T_BU_BAG    = T_END-T_BEGIN
             T_BU_STRIP  = T_END-T_BEGIN
             ! Breakup conditions according to WAVE model by Reitz (1987)
-            IF (WE_G >= 12.0_EB)             T_BU_BAG   = 1.72_EB*B_1*SQRT(PC%DENSITY*RDC/(2*PC%SURFACE_TENSION))
+            IF (WE_G >= 12.0_EB)             T_BU_BAG   = 1.72_EB*B_1*SQRT(PC%DENSITY*RDC/(2._EB*PC%SURFACE_TENSION))
             IF (WE_G/SQRT(DR%RE) >= 1.0_EB)  T_BU_STRIP = B_1*(RD/QREL)*SQRT(PC%DENSITY/RHO_G)
             ! droplet age is larger than smallest characteristic breakup time
             AGE_IF: IF ((T-DR%T) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
@@ -895,7 +895,7 @@ DROPLET_LOOP: DO I=1,NLP
                   DO WHILE (RD >= DR%R)
                      CALL RANDOM_CHOICE(PC%CHILD_CDF(:),PC%BREAKUP_CHILD_DIAMETER*DR%R*PC%CHILD_R_CDF(:),NDC,RD)
                   END DO
-                  RD = MAX(RD,PC%MINIMUM_DIAMETER/2._EB)
+                  RD = MAX(RD,1.1_EB*PC%MINIMUM_DIAMETER/2._EB)
                ENDIF
                DR%RE    = RHO_G*QREL*2._EB*RD/MU_AIR
                IF (PC%DRAG_LAW==USER_DRAG) THEN
