@@ -753,6 +753,7 @@ REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,SFAC,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
             DTSP,DTMIN,UBAR,VBAR,WBAR,BFAC,GRVT1,GRVT2,GRVT3,AUREL,AVREL,AWREL,CONST, &
             UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION(-3:3),SURFACE_DROPLET_DIAMETER, &
             T_BU_BAG,T_BU_STRIP,B_1,THROHALF,P_UVWMAX,UVWMAX
+REAL(EB) :: CHILD_RADIUS(0:NDC)
 LOGICAL :: HIT_SOLID
 INTEGER :: ICN,I,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,IW,N,NITER,IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IOR_OLD,IC,IOR_FIRST,IML
 INTEGER, INTENT(IN) :: NM
@@ -828,9 +829,15 @@ DROPLET_LOOP: DO I=1,NLP
       ! Get current particle coordinates
 
       IF (N>1) THEN
-         XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
-         YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
-         ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
+         II = MAX(LBOUND(CELLSI,1),MIN(UBOUND(CELLSI,1),FLOOR((DR%X-XS)*RDXINT)))
+         JJ = MAX(LBOUND(CELLSJ,1),MIN(UBOUND(CELLSJ,1),FLOOR((DR%Y-YS)*RDYINT)))
+         KK = MAX(LBOUND(CELLSK,1),MIN(UBOUND(CELLSK,1),FLOOR((DR%Z-ZS)*RDZINT)))
+         XI  = CELLSI(II)
+         YJ  = CELLSJ(JJ)
+         ZK  = CELLSK(KK)
+!         XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
+!         YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
+!         ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
          II = FLOOR(XI+1._EB)
          JJ = FLOOR(YJ+1._EB)
          KK = FLOOR(ZK+1._EB)
@@ -851,7 +858,7 @@ DROPLET_LOOP: DO I=1,NLP
       IF (PC%MASSLESS) THEN
          DR%U = UBAR
          DR%V = VBAR
-         DR%W = WBAR
+         DR%W = WBAR 
          DR%X = DR%X + DR%U*DTSP
          DR%Y = DR%Y + DR%V*DTSP
          DR%Z = DR%Z + DR%W*DTSP
@@ -893,7 +900,8 @@ DROPLET_LOOP: DO I=1,NLP
                   RD       = THROHALF*RD
                ELSE
                   DO WHILE (RD >= DR%R)
-                     CALL RANDOM_CHOICE(PC%CHILD_CDF(:),PC%BREAKUP_CHILD_DIAMETER*DR%R*PC%CHILD_R_CDF(:),NDC,RD)
+                     CHILD_RADIUS = PC%BREAKUP_CHILD_DIAMETER*DR%R*PC%CHILD_R_CDF(:)
+                     CALL RANDOM_CHOICE(PC%CHILD_CDF(:),CHILD_RADIUS,NDC,RD)
                   END DO
                   RD = MAX(RD,1.1_EB*PC%MINIMUM_DIAMETER/2._EB)
                ENDIF
@@ -1004,11 +1012,18 @@ DROPLET_LOOP: DO I=1,NLP
          ENDIF
       ENDIF
  
-      ! Where is the droplet now?
+      ! Where is the droplet now? Limit the location by UBOUND and LBOUND due to the possible
+      ! super fast droplets
 
-      XI  = CELLSI(FLOOR((DR%X-XS)*RDXINT))
-      YJ  = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
-      ZK  = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
+      IIN = MAX(LBOUND(CELLSI,1),MIN(UBOUND(CELLSI,1),FLOOR((DR%X-XS)*RDXINT)))
+      JJN = MAX(LBOUND(CELLSJ,1),MIN(UBOUND(CELLSJ,1),FLOOR((DR%Y-YS)*RDYINT)))
+      KKN = MAX(LBOUND(CELLSK,1),MIN(UBOUND(CELLSK,1),FLOOR((DR%Z-ZS)*RDZINT)))
+      XI  = CELLSI(IIN)
+      YJ  = CELLSJ(JJN)
+      ZK  = CELLSK(KKN)
+!      XI  = CELLSI(FLOOR((DR%X-XS)*RDXINT))
+!      YJ  = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
+!      ZK  = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
       IIN = FLOOR(XI+1._EB)
       JJN = FLOOR(YJ+1._EB)
       KKN = FLOOR(ZK+1._EB)
@@ -1232,37 +1247,28 @@ DROPLET_LOOP: DO I=1,NLP
       ! Check if droplets that were attached to a solid are still attached after the time update
 
       IW = WALL_INDEX(ICN, -DR%IOR)
-      
-      SELECT CASE(DR%IOR)
-         CASE( 1)
-            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
+
+      IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
+         SELECT CASE(DR%IOR)
+            CASE( 1)
                DR%X = DR%X - 0.2_EB*DX(II)
                DR%W = -DR%W
-            ENDIF
-         CASE(-1)
-            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
+            CASE(-1)
                DR%X = DR%X + 0.2_EB*DX(II)
                DR%W = -DR%W
-            ENDIF
-         CASE( 2)
-            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
+            CASE( 2)
                DR%Y = DR%Y - 0.2_EB*DY(JJ)
                DR%W = -DR%W
-            ENDIF
-         CASE(-2)
-            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
+            CASE(-2)
                DR%Y = DR%Y + 0.2_EB*DY(JJ)
                DR%W = -DR%W
-            ENDIF
-         CASE( 3)
-            IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN  ! Particle has reached the edge of a horizontal surface
+            CASE( 3) ! Particle has reached the edge of a horizontal surface
                DR%U = -DR%U
                DR%V = -DR%V
                DR%Z =  DR%Z - 0.2_EB*DZ(KK)
-            ENDIF
-         CASE(-3)
-
-      END SELECT
+            CASE(-3)
+         END SELECT
+      ENDIF
 
       IF (DR%IOR/=0 .AND. BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
          DR%IOR = 0
