@@ -1,7 +1,7 @@
 &HEAD CHID='UL_SFPE_20', TITLE='20 ft ceiling with 100 mm grid spacing' /
 
-&MESH IJK=100,100,60, XB=10.25,20.25,10.25,20.25,0.0,6.0 /
-&MESH IJK=100,100,60, XB=10.25,20.25,20.25,30.25,0.0,6.0 / 
+&MESH IJK= 50, 50,30, XB=10.25,20.25,10.25,20.25,0.0,6.0 /
+&MESH IJK= 50, 50,30, XB=10.25,20.25,20.25,30.25,0.0,6.0 / 
 
 &TIME TWFIN=600. / 
 
@@ -35,8 +35,28 @@
       QUANTITIES(1:2)='DROPLET_DIAMETER','DROPLET_TEMPERATURE',
       DIAMETER=100.,HEAT_OF_COMBUSTION=45000. /
 
-&PROP ID='nozzle', SMOKEVIEW_ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=3.633, FLOW_TAU=-300.,
+&PROP ID='nozzle', SMOKEVIEW_ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=3.633, FLOW_RAMP='fire_ramp' ,
       DROPLET_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
+
+&RAMP ID='fire_ramp', T=  0., F=0.00 /
+&RAMP ID='fire_ramp', T=  1., F=0.10 /
+&RAMP ID='fire_ramp', T= 30., F=0.13 /
+&RAMP ID='fire_ramp', T= 60., F=0.16 /
+&RAMP ID='fire_ramp', T=120., F=0.24 /
+&RAMP ID='fire_ramp', T=150., F=0.29 /
+&RAMP ID='fire_ramp', T=180., F=0.34 /
+&RAMP ID='fire_ramp', T=210., F=0.40 /
+&RAMP ID='fire_ramp', T=240., F=0.46 /
+&RAMP ID='fire_ramp', T=270., F=0.52 /
+&RAMP ID='fire_ramp', T=300., F=0.59 /
+&RAMP ID='fire_ramp', T=330., F=0.66 /
+&RAMP ID='fire_ramp', T=360., F=0.74 /
+&RAMP ID='fire_ramp', T=390., F=0.82 /
+&RAMP ID='fire_ramp', T=420., F=0.91 /
+&RAMP ID='fire_ramp', T=450., F=1.00 /
+&RAMP ID='fire_ramp', T=600., F=1.00 /
+
+&DUMP DT_DEVC=10. /
 
 &DEVC XYZ=14.75,15.25, 0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME', SETPOINT=0., ID='noz_A' /
 &DEVC XYZ=15.75,15.25, 0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME', SETPOINT=0., ID='noz_B' /  
