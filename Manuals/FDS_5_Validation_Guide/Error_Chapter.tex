@@ -113,10 +113,34 @@ input parameters in the following way:
    \widetilde{\sigma}_P^2 = \sum_i p_i^2 \, \widetilde{\sigma}_i^2  \label{parameter_uncertainty}
 \ee
 The terms $\widetilde{\sigma}_i$ are the relative standard deviations of the various input parameters,
-$p_i$ are the respective power dependencies, and
+$p_i$ are the respective power dependencies (See Table~\ref{Parameter_Uncertainty}), and
 $\widetilde{\sigma_P}$ is the total contribution of the input parameters to the uncertainty of the model prediction.
 Because it is assumed that the uncertainty of the various input parameters are uncorrelated, they are combined by
 quadrature, or the summing of squares.
+
+\begin{table}[t]
+\caption{Sensitivity of model outputs from Volume 2 of NUREG-1824~\cite{NUREG_1824}. }
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+Output Quantity                                 & Input Parameter(s)    & Power Dependence, $p$ \\ \hline \hline
+HGL Temperature                                 & HRR                   & 2/3    \\ \hline
+HGL Depth                                       & Door Height           & 1      \\ \hline
+Ceiling Jet Temperature                         & HRR                   &        \\ \hline
+Plume Temperature                               & HRR                   &        \\ \hline
+Gas Concentration                               & HRR                   & 1/2    \\ \hline
+                                                & HRR                   & 1      \\ \cline{2-3}
+\raisebox{1.5ex}[0pt]{Smoke Concentration}      & Soot Yield            & 1      \\ \hline
+                                                & HRR                   & 2      \\ \cline{2-3}
+Compartment Pressure                            & Leakage Rate          & 2      \\ \cline{2-3}
+                                                & Ventilation Rate      & 2      \\ \hline
+Heat Flux                                       & Heat Flux             & 4/3    \\ \hline
+Surface Temperature                             & HRR                   & 2/3    \\ \hline
+\end{tabular}
+\end{center}
+\label{Parameter_Uncertainty}
+\end{table}
+
 
 
 
