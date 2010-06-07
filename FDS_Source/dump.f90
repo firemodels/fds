@@ -1,6 +1,6 @@
 MODULE DUMP
  
-! Create and write (dump) to various output files
+! Create and write ("dump") to various output files
  
 USE PRECISION_PARAMETERS
 USE COMP_FUNCTIONS
