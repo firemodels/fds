@@ -1,3 +1,19 @@
+%T. Myers
+%6-07-2010
+%TimeAverage.m
+%
+%Input: in = file_name.csv; Intended to be used with a csv format file. The
+%first x rows can be title or heading, which will be reinserted at the top
+%of the output file. Cannot handle text down an entire column or text interspaced with the data. All text must be confined to title/heading rows
+%
+%Averages every f data points and creates a new data point at the end of
+%the time period examined. Assumes time is in seconds.
+%
+%Output: out = file_name.csv; will out put a csv format file. The exact
+%title and heading rows will be inserted into the initial rows, and the
+%adjusted data will be appended to the end.
+
+
 clear, clc;
 %Determine the file from which to draw the data
 in = input('Please enter the name of the file to be time averaged. \n Be sure the file is contained in MATLAB’s current folder. \n :','s');
