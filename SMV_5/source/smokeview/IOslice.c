@@ -2614,7 +2614,7 @@ void drawslice_texture(const slice *sd){
        float rmid;
 
        n++; n2++; 
-       if(show_slice_in_obst==0&&iblank_x[ijk(sd->is1,j,k)]!=2)continue;
+       if(show_slice_in_obst==0&&iblank_x!=NULL&&iblank_x[ijk(sd->is1,j,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(sd->is1,j,k)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
@@ -2710,7 +2710,7 @@ void drawslice_texture(const slice *sd){
        float ymid, rmid;
 
        n++; n2++; 
-       if(show_slice_in_obst==0&&iblank_z[ijk(i,j,sd->ks1)]!=2)continue;
+       if(show_slice_in_obst==0&&iblank_z!=NULL&&iblank_z[ijk(i,j,sd->ks1)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[ijk(i,j,sd->ks1)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
