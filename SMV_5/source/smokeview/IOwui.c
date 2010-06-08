@@ -454,7 +454,7 @@ void initterrain_all(void){
     for(j=0;j<=terri->ny;j++){
       terri->y_scaled[j] = (meshi->yplt_orig[j]-ybar0)/xyzmaxdiff;
     }
-
+//xxx
     getcontours(terri->x_scaled,terri->y_scaled,terri->nx+1,terri->ny+1,
       terri->znode, NULL, terri->levels,
       &meshi->terrain_contour);
