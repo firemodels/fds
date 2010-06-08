@@ -1911,10 +1911,10 @@ MESH_LOOP: DO NM=1,NMESHES
 
    DO K=1,M%KBAR
       J_LOOP1: DO J=1,M%JBAR
-         DO N=1,M%N_OBST
-            OB => M%OBSTRUCTION(N)
-            IF ((OB%I1==0.OR.OB%I2==M%IBAR) .AND. (OB%J1<J.AND.J<=OB%J2) .AND. (OB%K1<K.AND.K<=OB%K2)) CYCLE J_LOOP1
-         ENDDO
+!         DO N=1,M%N_OBST
+!            OB => M%OBSTRUCTION(N)
+!            IF ((OB%I1==0.OR.OB%I2==M%IBAR) .AND. (OB%J1<J.AND.J<=OB%J2) .AND. (OB%K1<K.AND.K<=OB%K2)) CYCLE J_LOOP1
+!         ENDDO
          YY = 0.5_EB*(M%Y(J)+M%Y(J-1))
          ZZ = 0.5_EB*(M%Z(K)+M%Z(K-1))
          XX = M%X(0) - 0.001_EB*M%DX(0)
@@ -1926,10 +1926,10 @@ MESH_LOOP: DO NM=1,NMESHES
 
    DO K=1,M%KBAR
       I_LOOP1: DO I=1,M%IBAR
-         DO N=1,M%N_OBST
-            OB => M%OBSTRUCTION(N)
-            IF ((OB%J1==0.OR.OB%J2==M%JBAR) .AND. (OB%I1<I.AND.I<=OB%I2) .AND. (OB%K1<K.AND.K<=OB%K2)) CYCLE I_LOOP1
-         ENDDO
+!         DO N=1,M%N_OBST
+!            OB => M%OBSTRUCTION(N)
+!            IF ((OB%J1==0) .AND. (OB%I1<I.AND.I<=OB%I2) .AND. (OB%K1<K.AND.K<=OB%K2)) CYCLE I_LOOP1
+!         ENDDO
          XX = 0.5_EB*(M%X(I)+M%X(I-1))
          ZZ = 0.5_EB*(M%Z(K)+M%Z(K-1))
          YY = M%Y(0) - 0.001_EB*M%DY(0)
@@ -1941,10 +1941,10 @@ MESH_LOOP: DO NM=1,NMESHES
 
    DO J=1,M%JBAR
       I_LOOP2: DO I=1,M%IBAR
-         DO N=1,M%N_OBST
-            OB => M%OBSTRUCTION(N)
-            IF ((OB%K1==0.OR.OB%K2==M%KBAR) .AND. (OB%I1<I.AND.I<=OB%I2) .AND. (OB%J1<J.AND.J<=OB%J2)) CYCLE I_LOOP2
-         ENDDO
+!         DO N=1,M%N_OBST
+!            OB => M%OBSTRUCTION(N)
+!            IF ((OB%K1==0.OR.OB%K2==M%KBAR) .AND. (OB%I1<I.AND.I<=OB%I2) .AND. (OB%J1<J.AND.J<=OB%J2)) CYCLE I_LOOP2
+!         ENDDO
          XX = 0.5_EB*(M%X(I)+M%X(I-1))
          YY = 0.5_EB*(M%Y(J)+M%Y(J-1))
          ZZ = M%Z(0) - 0.001_EB*M%DZ(0)
