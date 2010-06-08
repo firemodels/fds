@@ -328,27 +328,29 @@ void mouse(int button, int state, int x, int y){
     update_trainer_moves();
     return;
   }
-  if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+  if ((button == GLUT_LEFT_BUTTON || button == GLUT_MIDDLE_BUTTON )&& state == GLUT_DOWN){
     glutSetCursor(GLUT_CURSOR_INFO);
 
     /* edit blockages */
 
-    if(blockageSelect==1){
-      mouse_edit_blockage(button,state,x,y);
-    }
+    if(button==GLUT_LEFT_BUTTON){
+      if(blockageSelect==1){
+        mouse_edit_blockage(button,state,x,y);
+      }
 
     /* edit tours */
 
-    if(edittour==1&&blockageSelect==0){
-      mouse_edit_tour(button, state, x, y);
-    }
+      if(edittour==1&&blockageSelect==0){
+        mouse_edit_tour(button, state, x, y);
+      }
 
-    if(select_avatar==1){
-      mouse_select_avatar(button, state, x, y);
-    }
+      if(select_avatar==1){
+        mouse_select_avatar(button, state, x, y);
+      }
 
-    if(select_device==1){
-      mouse_select_device(button, state, x, y);
+      if(select_device==1){
+        mouse_select_device(button, state, x, y);
+      }
     }
     GLUTPOSTREDISPLAY
     if( showtime==1 || showplot3d==1){
@@ -409,6 +411,7 @@ void mouse(int button, int state, int x, int y){
       enable_reset_saved_view();
     }
     state=glutGetModifiers();
+    if(button==GLUT_MIDDLE_BUTTON)state=GLUT_ACTIVE_CTRL;
     switch (state){
     case GLUT_ACTIVE_CTRL:
       key_state = KEY_CTRL;
