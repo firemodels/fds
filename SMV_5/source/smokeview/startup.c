@@ -929,6 +929,7 @@ void InitOpenGL(void){
 /* ------------------ initvars1 ------------------------ */
 
 void initvars1(void){
+  usemenu=1;
   arg_iblank=0;
   use_iblank=1;
   levelset_colorbar=-1;
