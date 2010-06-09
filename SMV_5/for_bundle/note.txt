@@ -6,3 +6,4 @@
 6 test spinner for setting time
 7 test removal of slice file hiding option
 8 test code for reducing memory allocations
+9 test code for using middle and right mouse button for translating scene (after turning off menus with M key)
