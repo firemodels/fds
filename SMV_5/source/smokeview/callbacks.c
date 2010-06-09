@@ -328,7 +328,7 @@ void mouse(int button, int state, int x, int y){
     update_trainer_moves();
     return;
   }
-  if ((button == GLUT_LEFT_BUTTON || button == GLUT_MIDDLE_BUTTON )&& state == GLUT_DOWN){
+  if ((button == GLUT_LEFT_BUTTON || button == GLUT_MIDDLE_BUTTON || button == GLUT_RIGHT_BUTTON)&& state == GLUT_DOWN){
     glutSetCursor(GLUT_CURSOR_INFO);
 
     /* edit blockages */
@@ -410,8 +410,15 @@ void mouse(int button, int state, int x, int y){
       canrestorelastview=1;
       enable_reset_saved_view();
     }
-    state=glutGetModifiers();
-    if(button==GLUT_MIDDLE_BUTTON)state=GLUT_ACTIVE_CTRL;
+    if(button==GLUT_MIDDLE_BUTTON){
+      state=GLUT_ACTIVE_CTRL;
+    }
+    else if(button==GLUT_RIGHT_BUTTON){
+      state=GLUT_ACTIVE_ALT;
+    }
+    else{
+      state=glutGetModifiers();
+    }
     switch (state){
     case GLUT_ACTIVE_CTRL:
       key_state = KEY_CTRL;
@@ -922,7 +929,7 @@ void keyboard(unsigned char key, int x, int y){
     int state;
 
     state=glutGetModifiers();
-    if(state==GLUT_ACTIVE_ALT){
+    if(usemenu==1&&state==GLUT_ACTIVE_ALT){
       printf("re-attaching menus to right mouse button\n");
       glutDetachMenu(GLUT_RIGHT_BUTTON);
       InitMenus(LOAD);
@@ -961,6 +968,16 @@ void keyboard(unsigned char key, int x, int y){
   }
   if(strncmp((const char *)&key2,"M",1)==0){
     updatemenu=1;
+    usemenu=1-usemenu;
+    glutDetachMenu(GLUT_RIGHT_BUTTON);
+    if(usemenu==1){
+      InitMenus(LOAD);
+      glutAttachMenu(GLUT_RIGHT_BUTTON);
+      printf(" Menus turned on.  Type M to turn off.\n");
+    }
+    else{
+      printf(" Menus turned off.  Type M to turn on.\n");
+    }
     return;
   }
   if(strncmp((const char *)&key2,"m",1)==0){
@@ -1938,19 +1955,21 @@ void Display(void){
      updatecolors(colorbar_select_index);
    }
   if(updatemenu==1){
-    if(menustatus==GLUT_MENU_NOT_IN_USE){
-      glutDetachMenu(GLUT_RIGHT_BUTTON);
-      InitMenus(LOAD);
-      glutAttachMenu(GLUT_RIGHT_BUTTON);
-    }
-    else{
+    if(usemenu==1){
+      if(menustatus==GLUT_MENU_NOT_IN_USE){
+        glutDetachMenu(GLUT_RIGHT_BUTTON);
+        InitMenus(LOAD);
+        glutAttachMenu(GLUT_RIGHT_BUTTON);
+      }
+      else{
 #ifdef _DEBUG
-      printf("menus in use, will not be updated\n");
+        printf("menus in use, will not be updated\n");
 #endif
       /* 
       menus are being used used so keep re-displaying scene until
       user does something to cause menus to not be used
       */
+      }
     }
   }
 
