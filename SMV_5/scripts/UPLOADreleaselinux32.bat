@@ -24,7 +24,7 @@ cd %svn_root%\SMV_5\for_bundle\to_google
 Rem ----------------------------------------------------------
 Rem should not need to edit any lines below
 
-set level=Release-3-Maintenance
+set level=Release-3_Maintenance
 
 set version=%smv_version%
 
