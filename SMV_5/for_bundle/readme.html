@@ -21,6 +21,32 @@
 
 <ul>
 
+<li>5.5.5 (build 6317) - June 9, 2010
+<ol>
+<li>enhancement: Use the middle mouse button to zoom the scene in and out and the right mouse button
+(after M key is pressed to detach menus) to move the scene up and down.  
+The M key is pressed again to reattach menus to the right mouse button.
+<li> enhancement: Create a Smokeview object command named rotateeye.
+This command causes objects to always rotates so that it faces the viewer
+<li> enhancement: add a widget to the slice dialog box that sets the transparency level
+<li> enhancement: modify terrain maps using slice file data
+<li> enhancement: add a widget to set the simulation time -
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1086&can=1&sort=-id">Issue 1086</a>)
+<li>usability: Reduce memory requirements for visualizing large cases.
+Eliminate unnecessary memory allocations, add runtime options (-blank, -noblank) to use or not use blanking arrays (to save memory)
+<li> usability: turn off slice file hiding -
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1099&can=1&sort=-id">Issue 1099</a>)
+<li> usability: to reduce confusion, set the default hrrpuv isosurface color to orange
+<li> usability: when using wui slice files (levelset or wall thickness) automatically load wui customized colorbars
+<li> usability:  add a colorbar designed to hilight wui levelsets
+<li> usability: improve the algorithms for drawing terrain -
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1096&can=1&sort=-id">Issue 1096</a>)
+<li> usablity: implement changes to speed up 3D HRRPUV display
+<li>fix: add missing test for NULL iblank arrays
+<li> fix: fix terrain overlap with dummy vents and terrain menu labeling -
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1085&can=1&sort=-id">Issue 1085</a>)
+</ol>
+
 <li>5.5.4 (build 6130) - April 26, 2010
 <ol>
 <li>enhancement: add utility named background to bundle.
