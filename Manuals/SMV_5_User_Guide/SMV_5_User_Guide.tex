@@ -846,11 +846,31 @@ The scene may be rotated or translated while in world view, either
 directly with the mouse or by using controls contained in the
 {\em Motion/View/Render}\ dialog box. This dialog box is opened from the
 \fbox{Dialogs$>$Motion/View/Render}\ menu item and is illustrated in
-Figure \ref{figMOTION}. Clicking on the scene and dragging the
+Figure \ref{figMOTION}. 
+
+Clicking on the scene and dragging the
 mouse horizontally, vertically or a combination of both results in
-scene rotation or translation depending upon whether
-\frameit{CTRL} or \frameit{ALT} is depressed or not during mouse
-movement.
+scene rotation or translation depending upon whether the left, 
+middle or right mouse button is depressed.
+
+\blist
+
+\hitem{left mouse button} horizontal and vertical mouse motion results in scene rotation.
+
+\hitem{middle mouse button} Horizontal mouse movement when the middle mouse button is depressed 
+results in
+scene translation from side to side along the X axis. Vertical
+mouse movement results in scene translation into and out of the
+computer screen along the Y axis.  
+Alternatively, one can depress the CTRL key and the left mouse button to achieve the same effect.
+
+\hitem{right mouse button} Vertical mouse movement when the right mouse button is depressed results in vertical scene
+translation along the Z axis.  Horizontal mouse movement has no
+effect.  Alternatively,  one can depress the ALT key and the left mouse button to achieve the same effect.
+Note that the right mouse button is also used to display Smokeview menus.  To switch this behavior to scene movement, press the {\em M}\ key.
+Press the {\em M}\ key again to switch back to menu use.
+
+\elist
 
 %\begin{wrapfigure}[15]{O}[0.5in]{3.5in}
 \begin{figure}[\figoptions]
@@ -864,25 +884,6 @@ Motion/View/Render Dialog Box is invoked by selecting
 \label{figMOTION}
 \end{figure}
 %\end{wrapfigure}
-
-In particular, when modifier keys are not depressed, horizontal or
-vertical mouse movement results in scene rotation parallel to the
-XY or YZ plane, respectively. Pressing the CTRL and ALT modifier
-keys while moving the mouse results in scene movement in the
-following ways:
-
-\blist
-
-\hitem{CTRL key depressed} Horizontal mouse movement results in
-scene translation from side to side along the X axis. Vertical
-mouse movement results in scene translation into and out of the
-computer screen along the Y axis.
-
-\hitem{ALT key depressed} Vertical mouse movement results in scene
-translation along the Z axis.  Horizontal mouse movement has no
-effect on the scene while the \frameit{ALT} key is depressed.
-
-\elist
 
 The {\em Motion/View/Render}\ dialog box, illustrated in Figure \ref{figMOTION}\, may be used to move the scene in a
 more controlled manner. For example, buttons in the {\em Motion}\ region allows one to translate or rotate the scene.
@@ -4353,6 +4354,8 @@ contours).
 
 \hitem{m}Switch between blocks in a case that has more than one
 mesh.
+
+\hitem{M}Switch the behavior of the right mouse button between activating smokeview menus and moving the scene vertically.
 
 \hitem{o}Switch between outline viewing modes. The modes are
 \begin{enumerate}
