@@ -4152,6 +4152,7 @@ typedef struct {
           get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis);
     
           init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
+          devicecopy->prop=NULL;
 
           devicecopy++;
           ndeviceinfo++;
@@ -8253,6 +8254,12 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&visVZone);
       continue;
       }
+    if(match(buffer,"SHOWZONEFIRE",12)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i ",&viszonefire);
+      if(viszonefire!=0)viszonefire=1;
+      continue;
+    }
     if(match(buffer,"SHOWHZONE",9)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visHZone);
@@ -9872,6 +9879,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",cullfaces);
   fprintf(fileout,"\nZone\n");
   fprintf(fileout,"----\n\n");
+  fprintf(fileout,"SHOWZONEFIRE\n");
+  fprintf(fileout," %i\n",viszonefire);
   fprintf(fileout,"SHOWHZONE\n");
   fprintf(fileout," %i\n",visHZone);
   fprintf(fileout,"SHOWVZONE\n");

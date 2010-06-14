@@ -665,16 +665,18 @@ void drawroomdata(void){
   }
 
 
-  glColor3f(0.7f,0.7f,0.7f);
-  for(i=0;i<nfires;i++){
-    qdot = zoneqfirebase[i]/1000.0f;
-    if(qdot>0.0f){
-      height = (0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f))/xyzmaxdiff;
-      radius = height*0.268f;
-      glPushMatrix();
-      glTranslatef(fireinfo[i].absx,fireinfo[i].absy,fireinfo[i].absz);
-      DrawCone(radius,height);
-      glPopMatrix();
+  if(viszonefire==1){
+    glColor3f(0.7f,0.7f,0.7f);
+    for(i=0;i<nfires;i++){
+      qdot = zoneqfirebase[i]/1000.0f;
+      if(qdot>0.0f){
+        height = (0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f))/xyzmaxdiff;
+        radius = height*0.268f;
+        glPushMatrix();
+        glTranslatef(fireinfo[i].absx,fireinfo[i].absy,fireinfo[i].absz);
+        DrawCone(radius,height);
+        glPopMatrix();
+      }
     }
   }
   if(transparentflag==1)transparentoff();
