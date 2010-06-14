@@ -3792,6 +3792,9 @@ void ZoneShowMenu(int value){
       visVentLines=0;
     }
     break;
+  case 15:
+    viszonefire=1-viszonefire;
+    break;
   default:
     ASSERT(FFALSE);
   }
@@ -5006,6 +5009,14 @@ static int in_menu=0;
         }
       }
 
+    }
+    if(nfires>0){
+      if(viszonefire==1){
+        glutAddMenuEntry("*Fires",15);
+      }
+      else{
+        glutAddMenuEntry("Fires",15);
+      }
     }
   }
 

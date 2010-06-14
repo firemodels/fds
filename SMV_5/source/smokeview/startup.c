@@ -1358,7 +1358,7 @@ void initvars1(void){
   visFloor=0, visFrame=1;
   visNormalEditColors=1;
   visWalls=0, visGrid=0, visCeiling=0, cursorPlot3D=0;
-  visVZone=1, visHZone=0;
+  visVZone=1, visHZone=0, viszonefire=1;
   visSensor=1, visSensorNorm=1, hasSensorNorm=0, visSprink=1, visHeat=1;
   visVents=1;
   partframestep=1, sliceframestep=1, boundframestep=1;
