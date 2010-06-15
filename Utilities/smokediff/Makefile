@@ -78,7 +78,7 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokediff_64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin) ../../../SMV_5/Build/LIBS/lib_win_intel_64/smokeview_fort_64.lib
 
 # ------------- Linux 32 ----------------
 #  32 bit linux
