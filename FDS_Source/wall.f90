@@ -440,16 +440,8 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
                   TSI = T - TW(IW)
                ENDIF
                MASSFLUX(IW,N) = EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*SF%MASS_FLUX(N)
-               IF (N==I_FUEL) THEN
-                  IF (EW(IW)>0._EB) MASSFLUX(IW,N) = MASSFLUX(IW,N)*EXP(-EW(IW))
-                  IF (SF%N_MATL==0) THEN
-                     MASSFLUX_ACTUAL(IW,N) = MASSFLUX(IW,N)/AREA_ADJUST(IW)
-                  ELSE
-                     ML => MATERIAL(SF%MATL_INDEX(1))
-                     RN => REACTION(1)
-                     MASSFLUX_ACTUAL(IW,N) = MASSFLUX(IW,N)*RN%HEAT_OF_COMBUSTION/ML%HEAT_OF_COMBUSTION(1,I_FUEL)/AREA_ADJUST(IW)
-                  ENDIF
-               ENDIF
+               IF ((N==I_FUEL).AND.(EW(IW)>0._EB)) MASSFLUX(IW,N) = MASSFLUX(IW,N)*EXP(-EW(IW))
+               MASSFLUX_ACTUAL(IW,N) = MASSFLUX(IW,N)
             ENDIF
             MASSFLUX(IW,N) = MASSFLUX(IW,N)*AREA_ADJUST(IW)
             MFT = MFT + MASSFLUX(IW,N)
