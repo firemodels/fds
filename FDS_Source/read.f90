@@ -7191,9 +7191,15 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
    POINTS_LOOP: DO I_POINT=1,POINTS
 
       IF (XB(1)>-1.E5_EB) THEN
-         XYZ(1) = XB(1) + (XB(2)-XB(1))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
-         XYZ(2) = XB(3) + (XB(4)-XB(3))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
-         XYZ(3) = XB(5) + (XB(6)-XB(5))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
+         IF (POINTS > 1) THEN
+            XYZ(1) = XB(1) + (XB(2)-XB(1))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
+            XYZ(2) = XB(3) + (XB(4)-XB(3))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
+            XYZ(3) = XB(5) + (XB(6)-XB(5))*REAL(I_POINT-1,EB)/REAL(MAX(POINTS-1,1),EB)
+         ELSE
+            XYZ(1) = XB(1) + (XB(2)-XB(1))/2._EB
+            XYZ(2) = XB(3) + (XB(4)-XB(3))/2._EB
+            XYZ(3) = XB(5) + (XB(6)-XB(5))/2._EB
+         ENDIF
       ELSE
          IF (XYZ(1) < -1.E5_EB .AND. DUCT_ID=='null' .AND. NODE_ID=='null') THEN
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates, even if it is not a point quantity'
