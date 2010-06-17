@@ -21,8 +21,9 @@ $RUNFDS Detectors aspiration_detector             fire53
 $RUNFDS Detectors beam_detector                   fire54
 $RUNFDS Energy_Budget energy_budget_adiabatic_walls fire54
 $RUNFDS Energy_Budget energy_budget_cold_walls    fire55
-$RUNFDS Fires box_burn_away                       fire45
+$RUNFDS Fires box_burn_away1                      fire45
 $RUNFDS Fires box_burn_away2                      fire45
+$RUNFDS Fires box_burn_away3                      fire45
 $RUNFDS Fires cable_tray                          fire46
 $RUNFDS Fires couch                               fire47
 $RUNFDS Fires room_fire                           fire51
