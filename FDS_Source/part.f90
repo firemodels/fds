@@ -1758,6 +1758,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
          JJ  = FLOOR(YJ+1._EB)
          KK  = FLOOR(ZK+1._EB)
          RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
+
          ! Determine the mass of the droplet/particle, depending on whether the particle has a distinct SURFace type.
 
          IBC = PC%SURF_INDEX
