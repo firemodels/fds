@@ -23,8 +23,6 @@ mkdir %outdir%\%FDSVG%
 
 copy %indir%\%FDSUG%\*.pdf  %outdir%\%FDSUG%
 copy %indir%\%FDSUG%\*.png  %outdir%\%FDSUG%
-copy %indir%\%FDSTG%\*.pdf  %outdir%\%FDSTG%
-copy %indir%\%FDSTUG%\*.png %outdir%\%FDSTG%
 copy %indir%\%FDSVG%\*.pdf  %outdir%\%FDSVG%
 copy %indir%\%FDSVG%\*.png  %outdir%\%FDSVG%
 
