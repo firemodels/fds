@@ -22,7 +22,7 @@
       DENSITY=100.
       SPECIFIC_HEAT=1.
       CONDUCTIVITY=0.1
-      N_REACTIONS=1.
+      N_REACTIONS=1
       NU_FUEL=0.5
       NU_RESIDUE=0.5
       RESIDUE='char'
