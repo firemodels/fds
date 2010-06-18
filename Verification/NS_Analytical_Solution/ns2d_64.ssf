@@ -1,5 +1,5 @@
 RENDERDIR
- ../../Manuals/FDS_5_Verification_Guide/FIGURES
+ ../../Manuals/FDS_5_Verification_Guide/SCRIPT_FIGURES
 LOADFILE
  ns2d_64_02.sf
 SETTIMEVAL
