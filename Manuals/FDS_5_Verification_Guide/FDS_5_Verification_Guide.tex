@@ -731,8 +731,8 @@ As mentioned, with $\nu=0$ the solution is periodic in time and this figure demo
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/ns2d_64_start} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/ns2d_64_end} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_64_start} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_64_end} }
    \end{tabular*}
    \caption{Initial and final states of the $u$-component of velocity.}
    \label{fig_ns2d_smv}
@@ -805,10 +805,10 @@ To the right of each decay curve plot in Figure \ref{fig_cbc_energy} is the corr
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/csmag_32_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/csmag_32_spectra.pdf} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/csmag_64_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/csmag_64_spectra.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_decay.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_32_spectra.pdf} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_decay.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_spectra.pdf} }
    \end{tabular*}
    \caption{\label{fig_cbc_energy} \small (Left) Time histories of integrated kinetic energy corresponding to the grid resolutions on the right side of the figure.  In the $32^3$ case (top), the CBC data (open circles) are obtained by applying a filter to the CBC energy spectra at the Nyquist limit for an $N=32$ grid.  Similarly, for the $64^3$ case (bottom), the CBC data are obtained from filtered spectra for an $N=64$ grid.  Notice that the integrated FDS results for the $32^3$ case compare better with the filtered CBC data than the $64^3$ results.  This is a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased. (Right) Energy spectra for the $32^3$ case (top) and the $64^3$ case (bottom).  The solid black lines are the spectral data of Comte-Bellot and Corrsin at three different points in time corresponding to downstream positions in the turbulent wind tunnel.  The initial condition for the velocity field (spectra shown as black dots) in the FDS simulation is prescribed such that the energy spectrum matches the initial CBC data.  The FDS energy spectra corresponding to the subsequent CBC data are shown by the red and blue dots. The vertical dashed line represents the wavenumber of the grid Nyquist limit. }
 \end{figure}
@@ -838,10 +838,10 @@ Next, in Figure \ref{fig_dynsmag_cbc}, we show results for the dynamic model ana
 
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/dsmag_32_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/dsmag_32_spectra.pdf} } \\
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/dsmag_64_decay.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/dsmag_64_spectra.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_decay.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_32_spectra.pdf} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_decay.pdf} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_spectra.pdf} }
    \end{tabular*}
    \caption{\label{fig_dynsmag_cbc} \small Dynamic Smagorinsky model results (analogous to Figure \ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
@@ -893,7 +893,7 @@ As verification of the no-slip boundary condition and further verification of th
 is determined from the steady state mean velocity $\bar{u}$ which is output by FDS for the specified pressure drop.  The exact friction factor for this flow is $f_{exact} = 24/\mbox{Re}_H$.  The friction factor error $|f-f_{exact}|$ is plotted for a range of grid spacings $\delta z = H/N_z$ in Figure \ref{fig_poiseuille_convergence} demonstrating second-order convergence of the laminar velocity field.
 \begin{figure}
    \begin{center}
-      \scalebox{.7}{\includegraphics{FIGURES/poiseuille_convergence.pdf}}
+      \scalebox{.7}{\includegraphics{SCRIPT_FIGURES/poiseuille_convergence.pdf}}
       \caption{\label{fig_poiseuille_convergence} \small FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
    \end{center}
 \end{figure}
@@ -937,7 +937,7 @@ $\mbox{d}p/\mbox{d}x$   & \multicolumn{3}{c|}{$z^+$} &  Re$_H$  & $f$ FDS  & $f$
 With the same grid set up as described above the smooth walls, a series of cases labeled as {\tt z0*} in the repository were run at various roughness heights, grid resolutions, and Reynolds numbers.  The results are presented together with the smooth wall cases in Fig.~\ref{fig_fds_moody_chart}.  The laminar cases provide accurate results for two different Reynolds numbers.  As can bee seen, both the smooth wall and rough wall treatments behave well over the range tested.
 \begin{figure}
    \begin{center}
-      \scalebox{0.9}{\includegraphics{FIGURES/fds_moody_chart.pdf}}
+      \scalebox{0.9}{\includegraphics{SCRIPT_FIGURES/fds_moody_chart.pdf}}
       \caption{\label{fig_fds_moody_chart} \small The FDS Moody Chart: friction factor, $f$, versus Reynolds number, Re. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are for turbulent flow at various levels of relative roughness $z_0/H$ shown on the right axis.  Stars are DNS results from FDS at a single grid resolution ($N_z=64$). Symbols are FDS results for 3D LES with dynamic Smagorinsky.  Black symbols show results for the Werner Wengle wall model at three grid resolutions ($N_z=\{8,16,32\}$).  Colored symbols are FDS results for the rough wall cases at different grid resolutions and relative roughnesses as differentiated by the symbol shapes.}
    \end{center}
 \end{figure}
@@ -1121,8 +1121,8 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Figure \ref{fi
 
 \begin{figure}[t]
    \begin{tabular}{rl}
-      \includegraphics[width=3.2in]{FIGURES/compression_wave_time_series.pdf} &
-      \includegraphics[width=3.2in]{FIGURES/compression_wave_convergence.pdf}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_time_series.pdf} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_convergence.pdf}
    \end{tabular}
    \caption{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for LES and CHARM is the default for DNS.}
    \label{fig_compression_wave}
@@ -1281,7 +1281,7 @@ calculated using the analycal expressions for the view factors.
 
 A comparison of exact values and FDS predictions at three diffferent angular resolutions is shown below.
 \begin{center}
-\includegraphics[width=4.0in]{FIGURES/plate_view_factor.pdf}
+\includegraphics[width=4.0in]{SCRIPT_FIGURES/plate_view_factor.pdf}
 \end{center}
 
 
@@ -1964,7 +1964,7 @@ Fig.~\ref{fig_birch_tga} near the temperature of 100~$^\circ$C.
 
 \begin{figure}[ht]
    \begin{center}
-      \includegraphics[width=3.5in]{FIGURES/birch_tga}
+      \includegraphics[width=3.5in]{SCRIPT_FIGURES/birch_tga}
       \caption[An example of TGA data.]{\label{fig_birch_tga}
     Comparison of a solid phase model of birch wood with TGA data.}
    \end{center}
@@ -1982,7 +1982,7 @@ a variety of purposes, not just water droplets.
 \section{Momentum Transfer (\texorpdfstring{{\bf particle\_drag}}{particle\_drag})}
 \label{particle_drag}
 
-The particle drag test cases consider a 1~m by 1~m by 1~m 
+The particle drag test cases consider a 1~m by 1~m by 1~m
 channel with periodic boundary conditions on the $x$-faces and {\ct FREE\_SLIP}
 walls on $y$- and $z$-faces. Static droplets are placed in the center
 of the channel, one particle per computational cell, so that they form a surface

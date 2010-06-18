@@ -11,7 +11,7 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 data_dir = '../../../../FDS-SMV/Verification/Scalar_Analytical_Solution/';
-plot_dir = '../../../../FDS-SMV/Manuals/FDS_5_Verification_Guide/FIGURES/';
+plot_dir = '../../../../FDS-SMV/Manuals/FDS_5_Verification_Guide/SCRIPT_FIGURES/';
 
 % central differencing, FL=0
 M_FL0_16 = csvread([data_dir,'compression_wave_FL0_16_devc.csv'],2,0);
