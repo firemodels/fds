@@ -1,30 +1,45 @@
+@echo off
+
+echo.
+echo erasing User Guide scripted figures generated previously
+erase ..\Manuals\FDS_5_User_Guide\SCRIPT_FIGURES\*.png
+
+echo.
+echo erasing Verification scripted figures generated previously
+erase ..\Manuals\FDS_5_Verification_Guide\SCRIPT_FIGURES\*.png
+
 cd Controls
 smokeview -runscript activate_vents
-cd ..
-cd Detectors
+
+cd ..\Detectors
 smokeview -runscript beam_detector
-cd ..
-cd Fires
+
+cd ..\Fires
 smokeview -runscript room_fire
-cd ..
-cd Flowfields
+
+cd ..\Flowfields
 smokeview -runscript helium_2d
 smokeview -runscript sawtooth
-cd ..
-cd Miscellaneous
+
+cd ..\Miscellaneous
 smokeview -runscript pyramid
-cd ..
-cd NS_Analytical_Solution
+
+cd ..\NS_Analytical_Solution
 smokeview -runscript ns2d_64
-cd ..
-cd Pressure_Effects
+
+cd ..\Pressure_Effects
 smokeview -runscript pressure_boundary
-cd ..
-cd Sprinklers_and_Sprays
+
+cd ..\Sprinklers_and_Sprays
 smokeview -runscript cascade
+
+cd ..\Visualization
+smokeview -runscript objects_static
+smokeview -runscript objects_dynamic
+
 
 Rem generate Smokeview figures
 cd ..\SMV_Scripts
-call Make_SMV_Pictures
+Rem call Make_SMV_Pictures
 
 

@@ -5,7 +5,7 @@ set BASEDIR=%CD%
 set SVNROOT=%BASEDIR%\..\
 
 set FDS=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
-Rem set FDS=background -u 50 -d 10 %SVNROOT%\FDS_Compilation\intel_win_64\fds5_win_64
+Rem set FDS=background -u 75 -d 10 %SVNROOT%\FDS_Compilation\intel_win_64\fds5_win_64
 
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
@@ -13,8 +13,10 @@ set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 echo You are about to run the Verification Test Suite.
 pause > Nul
 
-echo FDS cases submitted
+echo creating FDS case list from FDS_Cases.csh
+..\Utilities\Data_Processing\csh2bat FDS_Cases.csh FDS_Cases.bat
 
+echo running FDS cases
 call FDS_Cases.bat
 
 cd %BASEDIR%
@@ -26,5 +28,6 @@ set smvug="%CD%\..\Manuals\SMV_5_User_Guide\"
 echo | fds5 2> "%smvug%\figures\fds5.version"
 
 call SMV_Cases.bat
+erase FDS_Cases.bat
 
 pause

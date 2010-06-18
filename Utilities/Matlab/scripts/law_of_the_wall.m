@@ -42,7 +42,7 @@ ylabel('$u^+$','FontSize',Title_Font_Size,'Interpreter','LaTeX')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../../Manuals/FDS_5_Technical_Reference_Guide/FIGURES/lawofthewall')
+print(gcf,'-dpdf','../../../Manuals/FDS_5_Technical_Reference_Guide/SCRIPT_FIGURES/lawofthewall')
 
 % % check FDS parameters
 % 
