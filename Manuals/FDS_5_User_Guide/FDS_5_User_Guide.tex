@@ -1484,8 +1484,8 @@ table containing all of the keywords for each group.
 \hline
 Group Name  & Namelist Group Description& Reference Section & Parameter Table  \\ \hline
 {\ct BNDF}  & Boundary File Output         & \ref{info:BNDF} & \ref{tbl:BNDF}  \\ \hline
+{\ct CLIP}  & Min/Max Clipping Parameters  & \ref{info:CLIP} & \ref{tbl:CLIP}  \\ \hline
 {\ct CTRL}  & Control Function Parameters  & \ref{info:CTRL} & \ref{tbl:CTRL}  \\ \hline
-%{\ct CLIP}  & Min/Max Clipping Parameters  & \ref{info:CLIP} & \ref{tbl:CLIP}  \\ \hline
 {\ct DEVC}  & Device Parameters            & \ref{info:DEVC} & \ref{tbl:DEVC}  \\ \hline
 {\ct DUMP}  & Output Parameters            & \ref{info:DUMP} & \ref{tbl:DUMP}  \\ \hline
 {\ct HEAD}  & Input File Header            & \ref{info:HEAD} & \ref{tbl:HEAD}  \\ \hline
@@ -1507,6 +1507,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 {\ct SLCF}  & Slice File Output            & \ref{info:SLCF} & \ref{tbl:SLCF}  \\ \hline
 {\ct SPEC}  & Species Parameters           & \ref{info:SPEC} & \ref{tbl:SPEC}  \\ \hline
 {\ct SURF}  & Surface Properties           & \ref{info:SURF} & \ref{tbl:SURF}  \\ \hline
+{\ct TABL}  & Tabulated Particle Data      & \ref{info:TABL} & \ref{tbl:TABL}  \\ \hline
 {\ct TIME}  & Simulation Time              & \ref{info:TIME} & \ref{tbl:TIME}  \\ \hline
 %{\ct TREE}  & Conical Tree Parameters      & \ref{info:TREE} & \ref{tbl:TREE}  \\ \hline
 {\ct TRNX}  & Mesh Stretching              & \ref{info:TRNX} & \ref{tbl:TRNX}  \\ \hline
@@ -4298,7 +4299,7 @@ the end of the 30 s calculation ought to be:
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{FIGURES/box_burn_away1} &
 \includegraphics[width=3.2in]{FIGURES/box_burn_away2} \\
-\includegraphics[width=3.2in]{FIGURES/box_burn_away3} 
+\includegraphics[width=3.2in]{FIGURES/box_burn_away3}
 \end{tabular*}
 \caption[Output of {\bf box\_burn\_away} test cases.]{Output of {\bf box\_burn\_away} test cases.}
 \label{box_burn_away}
@@ -5834,7 +5835,7 @@ and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEA
 If either {\ct SPECIFIC\_HEAT} or {\ct ENTHALPY} is specified, then both must be specified.
 The {\ct REFERENCE\_TEMPERATURE} is the temperature that corresponds to the specified value
 of {\ct SPECIFIC\_ENTHALPY}.  In the absence of any of these parameters, the appropriate
-values of {\ct 'AIR'} are assumed.  If the species listed in Table~\ref{tab:gasspecies}, is indicated as a liquid, that means that liquid thermo-physical 
+values of {\ct 'AIR'} are assumed.  If the species listed in Table~\ref{tab:gasspecies}, is indicated as a liquid, that means that liquid thermo-physical
 properties do not need to be given for those species.
 
 \begin{table}[ht]
