@@ -60,7 +60,7 @@ do j=1,5
    enddo
 enddo 
 
-open(11,file='radiation_plane_layer.tex',form='formatted',status='replace')
+open(11,file='../../Manuals/FDS_5_Verification_Guide/SCRIPT_FIGURES/radiation_plane_layer.tex',form='formatted',status='replace')
 
 write(11,'(a)') "\begin{center}"
 write(11,'(a)') "\begin{tabular}{|c|c|c|c|c|c|c|} \hline"
