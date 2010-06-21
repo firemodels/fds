@@ -2,7 +2,7 @@
 
 Rem  Windows batch file to build directory tree of FDS figures.
 
-set version_tag=2010_0618
+set version_tag=2010_0618_r6356
 
 cd to_google
 
@@ -23,8 +23,10 @@ mkdir %outdir%\%FDSVG%
 
 copy %indir%\%FDSUG%\*.pdf  %outdir%\%FDSUG%
 copy %indir%\%FDSUG%\*.png  %outdir%\%FDSUG%
+
 copy %indir%\%FDSVG%\*.pdf  %outdir%\%FDSVG%
 copy %indir%\%FDSVG%\*.png  %outdir%\%FDSVG%
+copy %indir%\%FDSVG%\*.tex  %outdir%\%FDSVG%
 
 echo figure bundle build finished
 
