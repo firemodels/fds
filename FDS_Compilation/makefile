@@ -15,17 +15,17 @@ VPATH = ../FDS_Source
 
 # note: objf_serial and objf_mpi contain only Fortran routines ie not isob.c
 
-objf_serial = prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
+objf_serial = prec.o mpis.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
              ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
-             mass.o wall.o fire.o divg.o init.o velo.o pres.o mpis.o main.o
+             mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 obj_serial = isob.o $(objf_serial)
 
 objwinf_serial = $(objf_serial:.o=.obj)
 objwin_serial = $(obj_serial:.o=.obj)
 
-objf_mpi = prec.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
+objf_mpi = prec.o mpip.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
           ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
-          mass.o wall.o fire.o divg.o init.o velo.o pres.o mpip.o main.o
+          mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 obj_mpi = isob.o $(objf_mpi)
 
 objwinf_mpi = $(objf_mpi:.o=.obj)
