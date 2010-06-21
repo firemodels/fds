@@ -967,10 +967,6 @@ MAIN_LOOP: DO
       CALL UPDATE_GLOBAL_OUTPUTS(T(NM),NM)
    ENDDO VELOCITY_BC_LOOP_2
 
-   ! Exchange EVAC information among meshes
-
-   CALL EVAC_EXCHANGE
-
    ! Check for dumping end of timestep outputs
 
    CALL UPDATE_CONTROLS(T)
@@ -979,6 +975,10 @@ MAIN_LOOP: DO
    ENDDO
    CALL DUMP_GLOBAL_OUTPUTS(T_MIN)
  
+   ! Exchange EVAC information among meshes
+
+   CALL EVAC_EXCHANGE
+
    ! Dump out diagnostics
 
    IF (DIAGNOSTICS .OR. T_MIN>=T_END) THEN
