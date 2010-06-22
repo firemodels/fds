@@ -1587,7 +1587,7 @@ ENDDO
 
 ! Write out level set slice file name (placeholder)
 IF (VEG_LEVEL_SET) THEN
-   WRITE(LU_SMV,'(A,5X,2I)') 'SLCT ',1,1 !terrain slice assumes one mesh and puts level set data on terrain
+   WRITE(LU_SMV,'(A,5X,2I3)') 'SLCT ',1,1 !terrain slice assumes one mesh and puts level set data on terrain
    WRITE(LU_SMV,'(A)') 'lsfs.sf'
    WRITE(LU_SMV,'(A)') 'phifield'
    WRITE(LU_SMV,'(A)') 'phifield'
@@ -1599,13 +1599,13 @@ ENDIF
 DO N=1,N_GEOM
    G => GEOMETRY(N)
    WRITE(LU_SMV,'(/A)') 'PROP'
-   WRITE(LU_SMV,'(1X A)') G%ID
-   WRITE(LU_SMV,'(1X I)') 1
-   WRITE(LU_SMV,'(1X A)') G%SMVOBJECT
-   WRITE(LU_SMV,'(1X I)') 12
-   WRITE(LU_SMV,'(1X A,3I)') 'R=',G%RGB(1)
-   WRITE(LU_SMV,'(1X A,3I)') 'G=',G%RGB(2)
-   WRITE(LU_SMV,'(1X A,3I)') 'B=',G%RGB(3)
+   WRITE(LU_SMV,'(1X,A)') G%ID
+   WRITE(LU_SMV,'(1X,I3)') 1
+   WRITE(LU_SMV,'(1X,A)') G%SMVOBJECT
+   WRITE(LU_SMV,'(1X,I3)') 12
+   WRITE(LU_SMV,'(1X,A,I3)') 'R=',G%RGB(1)
+   WRITE(LU_SMV,'(1X,A,I3)') 'G=',G%RGB(2)
+   WRITE(LU_SMV,'(1X,A,I3)') 'B=',G%RGB(3)
    
    ! find rotation matrix
    VOR = (/G%XOR,G%YOR,G%ZOR/)
