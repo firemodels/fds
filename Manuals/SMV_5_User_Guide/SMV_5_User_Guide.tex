@@ -846,22 +846,22 @@ The scene may be rotated or translated while in world view, either
 directly with the mouse or by using controls contained in the
 {\em Motion/View/Render}\ dialog box. This dialog box is opened from the
 \fbox{Dialogs$>$Motion/View/Render}\ menu item and is illustrated in
-Figure \ref{figMOTION}. 
+Figure \ref{figMOTION}.
 
 Clicking on the scene and dragging the
 mouse horizontally, vertically or a combination of both results in
-scene rotation or translation depending upon whether the left, 
+scene rotation or translation depending upon whether the left,
 middle or right mouse button is depressed.
 
 \blist
 
 \hitem{left mouse button} horizontal and vertical mouse motion results in scene rotation.
 
-\hitem{middle mouse button} Horizontal mouse movement when the middle mouse button is depressed 
+\hitem{middle mouse button} Horizontal mouse movement when the middle mouse button is depressed
 results in
 scene translation from side to side along the X axis. Vertical
 mouse movement results in scene translation into and out of the
-computer screen along the Y axis.  
+computer screen along the Y axis.
 Alternatively, one can depress the CTRL key and the left mouse button to achieve the same effect.
 
 \hitem{right mouse button} Vertical mouse movement when the right mouse button is depressed results in vertical scene
@@ -3623,6 +3623,100 @@ smokediff -smv casename1 casename2
 \verbatiminput{scriptfigures/smokediff.help}
 }
 
+\chapter{Background - A utility to run multiple Windows programs simultaneously}
+
+This chapter explains the use of a utility named {\em background.exe}, what it is and 
+how it might be useful to FDS users.  It is included with the Windows FDS/Smokeview 
+bundles.  The Windows {\em start}\ command can be used to run Windows programs in the 
+background.  {\em background.exe}\ has the additional feature of checking the current 
+CPU usage level and only starting new programs when the usage level is below a specified 
+amount.  This enables one to submit a long list of FDS cases without saturating the CPU, 
+since only a small number (depending on the maximum usage level specified) will be 
+running at any one time.
+
+MPI is a message passing software library used to enable implement parallel processing 
+at the program {\em i.e.}\ FORTRAN source code level.  This enables one to make use of 
+multiple CPUs thereby speeding up a calculation. {\em background.exe}\ allows parallel 
+processing to occur at the program level.  It is often the case that one is doing a 
+parameter study or running a long list of cases to verify the use of FDS. Typically you 
+would create a windows batch file (.bat) containing a list of commands like
+
+\begin{verbatim}
+fds5 casename_1.fds
+....
+fds5 casername_n.fds
+\end{verbatim}
+
+On a Windows system, each entry in the above list will not start until the previous entry 
+has completed, even if the computer has multiple cores or CPUs.
+
+Unix/Linux based systems have the capability of putting computer jobs in the background, 
+meaning that when a job is run, control returns immediately allowing the next job in the 
+list to start running.  With computers that have multiple cores or CPUS, one can then run 
+more than one job simultaneously.
+
+Here is how one might use {\em background}\ with FDS
+
+\begin{verbatim}
+background -d 1.0 -u 90 fds5 casename.fds
+\end{verbatim}
+
+This command runs "fds5 casename.fds" after waiting 1~s and ensuring that the CPU usage is 
+less than 90 \%. If the CPU usage happens to be more than 90 \%, the program {\em background}\ 
+waits to submit the fds5 command until the usage drops below 90 \% .  Once this occurs, it runs 
+the command, {\tt fds5 casename.fds}.
+
+The purpose of the delay before submitting a job is to give windows a chance to update the usage level from the
+previous invocations.  This feature is a fail safe to ensure that a large number of jobs are not
+submitted at once.
+
+The background utility is designed to use in a windows batch file. For example, suppose you have
+a list of 5 FDS jobs you want to run in a windows batch file. On a windows computer you would have \
+a batch file with the contents something like
+
+\begin{verbatim}
+fds5 case1.fds
+fds5 case2.fds
+fds5 case3.fds
+fds5 case4.fds
+fds5 case5.fds
+\end{verbatim}
+
+Using background with a 2 second delay and 75 per cent maximum load level, you would change your script to something like
+
+\begin{verbatim}
+background -d 2 -u 75 fds5 case1.fds
+background -d 2 -u 75 fds5 case2.fds
+background -d 2 -u 75 fds5 case3.fds
+background -d 2 -u 75 fds5 case4.fds
+background -d 2 -u 75 fds5 case5.fds
+\end{verbatim}
+
+Help information for background may be obtained at the command line by typing {\tt background -h} which gives:
+
+\begin{verbatim}
+background 1.0(6084) - Apr 27 2010
+  Runs a windows program in the background
+
+Usage:
+
+  background [-d delay time (s) -h -u max_usage -v] prog [arguments]
+
+where
+
+  -d dtime  - wait dtime seconds before running prog in the background
+  -h        - display this message
+  -u max    - wait to run prog until cpu usage is less than max (25-100%)
+  -v        - display version information
+  prog      - program to run in the background
+  arguments - command line arguments of prog
+
+Example:
+  background -d 1.5 -u 50 prog arg1 arg2
+    runs prog (with arguments arg1 and arg2) after 1.5 seconds
+    and when the CPU usage drops below 50%
+\end{verbatim}
+
 %---------------------------------------------------------------------------------
 %------------------------ Summary ------------------------------------------------
 %---------------------------------------------------------------------------------
@@ -3699,7 +3793,7 @@ smokeview -help
 
 {
 \scriptsize
-\verbatiminput{scriptfigures/smokeview.help}
+\verbatiminput{SCRIPT_FIGURES/smokeview.help}
 }
 
 \noindent The {\tt -nopart} option is used to prevent a particle
