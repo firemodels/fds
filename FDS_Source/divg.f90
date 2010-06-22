@@ -207,7 +207,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
 
    ! Correct rho*D del Y at boundaries and store rho*D at boundaries
 
-   !$OMP DO PRIVATE(IW,IIG,JJG,KKG,RHO_D_DYDN,IOR,IBC,SF)
+   !$OMP DO PRIVATE(IW,IIG,JJG,KKG,RHO_D_DYDN,IOR)
    WALL_LOOP: DO IW=1,NWC
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP
       !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_04'
@@ -465,7 +465,8 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    ELSE K_DNS_OR_LES
     
       CP_FTMP_IF: IF (CP_FTMP) THEN
-         IF (N_SPECIES > 0 ) THEN
+         IF (N_SPECIES > 0) THEN
+            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YY_GET,CP_MF)
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
@@ -477,7 +478,9 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
                   ENDDO
                ENDDO
             ENDDO
+            !$OMP END DO
          ELSE
+            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP)
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
@@ -487,6 +490,7 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
                   ENDDO
                ENDDO
             ENDDO
+            !$OMP END DO
          ENDIF
          
          BOUNDARY_LOOP2: DO IW=1,NEWC
