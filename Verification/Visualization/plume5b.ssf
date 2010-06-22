@@ -1,5 +1,5 @@
 RENDERDIR  // define directory where rendered images are placed
- ..\..\Manuals\SMV_5_Verification_Guide\scriptfigures
+ ..\..\Manuals\SMV_5_Verification_Guide\SCRIPT_FIGURES
 LOADINIFILE
  plume5b_slice.ini
 LOADFILE

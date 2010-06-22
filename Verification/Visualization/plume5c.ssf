@@ -1,7 +1,7 @@
 // put rendered files in specified directory
 
 RENDERDIR
- ..\..\Manuals\SMV_5_Verification_Guide\scriptfigures
+ ..\..\Manuals\SMV_5_Verification_Guide\SCRIPT_FIGURES
 
 // render slice files
 
