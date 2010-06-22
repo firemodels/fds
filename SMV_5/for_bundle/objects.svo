@@ -224,6 +224,21 @@ OBJECTDEF
 
    // ************ object definitions used for FDS-EVAC ********************
 
+
+OBJECTDEF
+ evacbox
+// draws a square "railings"
+// smv file: xyz is the (min_x, min_y, z) corner
+//           orientation vector (0,0,1)
+// Red Green Blue  width(x) depth(y) diameter
+ :R=0 :G=0 :B=0 :DX :DY :D
+ $R $G $B setrgb
+ push  0.0 0.0 0.0 translate -90.0 rotatex $D $D $DY scalexyz 1.0 1.0 drawdisk pop
+ push  $DX 0.0 0.0 translate -90.0 rotatex $D $D $DY scalexyz 1.0 1.0 drawdisk pop
+ push  0.0 0.0 0.0 translate  90.0 rotatey $D $D $DX scalexyz 1.0 1.0 drawdisk pop
+ push  0.0 $DY 0.0 translate  90.0 rotatey $D $D $DX scalexyz 1.0 1.0 drawdisk pop
+// push  $DX 0.0 0.0 translate -90.0 rotatex $D $D $DY scalexyz 1.0 drawcubec pop
+
 OBJECTDEF
  evacdoor         // label, name of object
  :SX :SY :SZ :R=0 :G=0 :B=0 :DX :DY :DZ
