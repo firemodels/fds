@@ -9,20 +9,20 @@ set smvvg="%CD%\..\..\Manuals\SMV_5_Verification_Guide"
 
 cd %smvug%
 
-erase scriptfigures\*.png
-erase scriptfigures\*.help
-erase scriptfigures\*.version
+erase SCRIPT_FIGURES\*.png
+erase SCRIPT_FIGURES\*.help
+erase SCRIPT_FIGURES\*.version
 
-smokeview -help > scriptfigures\smokeview.help
-smokeview -version > scriptfigures\smokeview.version
-smokezip -help > scriptfigures\smokezip.help
-smokediff -help > scriptfigures\smokediff.help
-smokediff -v > scriptfigures\smokediff.version
+smokeview -help > SCRIPT_FIGURES\smokeview.help
+smokeview -version > SCRIPT_FIGURES\smokeview.version
+smokezip -help > SCRIPT_FIGURES\smokezip.help
+smokediff -help > SCRIPT_FIGURES\smokediff.help
+smokediff -v > SCRIPT_FIGURES\smokediff.version
 
 cd %smvvg%
-erase scriptfigures\*.version
-erase scriptfigures\*.png
-smokeview -version > scriptfigures\smokeview.version
+erase SCRIPT_FIGURES\*.version
+erase SCRIPT_FIGURES\*.png
+smokeview -version > SCRIPT_FIGURES\smokeview.version
 
 cd %vis%
 smokeview -runscript colorbar
