@@ -53,7 +53,7 @@ if "%platform%"=="64" copy %in_smv%\smokezip%platform%_release.exe   %out_bin%\s
 if "%platform%"=="32" copy %in_fds2ascii%\intel_win_32\fds2ascii_win_32.exe     %out_bin%\fds2ascii.exe
 if "%platform%"=="64" copy %in_fds2ascii%\intel_win_64\fds2ascii_win_64.exe     %out_bin%\fds2ascii_win_64.exe
 
-copy %in_smv%\backgound.exe %out_bin%\background.exe
+copy %in_smv%\background.exe %out_bin%\background.exe
 
 echo.
 echo Copying auxillary files to the bin directory
