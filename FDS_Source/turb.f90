@@ -1157,41 +1157,75 @@ SELECT CASE(ITEST)
             ENDDO
          ENDDO
       ENDDO
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               D(I,J,K) = (U(I,J,K)-U(I-1,J,K))*RDX(I) + (W(I,J,K)-W(I,J,K-1))*RDZ(K)
+               DS(I,J,K) = D(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
    CASE(4) ! pulsating dilation
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=0,IBAR
-               U(I,J,K)  = 0.5_EB*SIN(X(I))*COS(T)
-               US(I,J,K) = U(I,J,K)
+      PREDICTOR_IF: IF (PREDICTOR) THEN
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=0,IBAR
+                  US(I,J,K) = SIN(X(I))*COS(T)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-      DO K=1,KBAR
-         DO J=0,JBAR
-            DO I=1,IBAR
-               V(I,J,K)  = 0._EB
-               VS(I,J,K) = 0._EB
+         DO K=1,KBAR
+            DO J=0,JBAR
+               DO I=1,IBAR
+                  VS(I,J,K) = 0._EB
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-      DO K=0,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               W(I,J,K)  = 0.5_EB*SIN(Z(K))*COS(T)
-               WS(I,J,K) = W(I,J,K)
+         DO K=0,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  WS(I,J,K) = SIN(Z(K))*COS(T)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  DS(I,J,K) = (US(I,J,K)-US(I-1,J,K))*RDX(I) + (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
+               ENDDO
+            ENDDO
+         ENDDO
+      ELSE PREDICTOR_IF
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=0,IBAR
+                  U(I,J,K) = SIN(X(I))*COS(T)
+               ENDDO
+            ENDDO
+         ENDDO
+         DO K=1,KBAR
+            DO J=0,JBAR
+               DO I=1,IBAR
+                  V(I,J,K) = 0._EB
+               ENDDO
+            ENDDO
+         ENDDO
+         DO K=0,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  W(I,J,K) = SIN(Z(K))*COS(T)
+               ENDDO
+            ENDDO
+         ENDDO
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  D(I,J,K) = (U(I,J,K)-U(I-1,J,K))*RDX(I) + (W(I,J,K)-W(I,J,K-1))*RDZ(K)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDIF PREDICTOR_IF
 END SELECT
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         D(I,J,K) = (U(I,J,K)-U(I-1,J,K))*RDX(I) + (W(I,J,K)-W(I,J,K-1))*RDZ(K)
-         DS(I,J,K) = D(I,J,K)
-      ENDDO
-   ENDDO
-ENDDO
 
 END SUBROUTINE COMPRESSION_WAVE
 
