@@ -9319,8 +9319,6 @@ void writeini(int flag){
   }
   fprintf(fileout,"WINDOWOFFSET\n");
   fprintf(fileout," %i\n",titlesafe_offsetBASE);
-  fprintf(fileout,"WINDOWOFFSET\n");
-  fprintf(fileout," %i\n",titlesafe_offsetBASE);
   fprintf(fileout,"RENDEROPTION\n");
   fprintf(fileout," %i\n",render_option);
   fprintf(fileout,"\n LINES\n");
