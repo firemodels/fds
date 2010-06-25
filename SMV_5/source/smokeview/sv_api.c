@@ -164,8 +164,22 @@ void svWINAPI sv_startup(char *file, int showpart){
 /* ------------------ ResizeWindow ------------------------ */
 
 void ResizeWindow(int width, int height){
+  float wscaled, hscaled;
+
   if(render_double!=0)return;
   glutSetWindow(mainwindow_id);
+  wscaled = (float)width/(float)max_screenWidth;
+  hscaled = (float)height/(float)max_screenHeight;
+  if(wscaled>1.0||hscaled>1.0){
+    if(wscaled>hscaled){
+      width/=wscaled;
+      height/=wscaled;
+    }
+    else{
+      width/=hscaled;
+      height/=hscaled;
+    }
+  }
   glutReshapeWindow(width,height);
   GLUTPOSTREDISPLAY
 }
