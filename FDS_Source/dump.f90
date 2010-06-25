@@ -3997,7 +3997,7 @@ REAL(EB) :: FLOW,HMFAC,F1,F2,H_TC,SRAD,TMP_TC,MU_AIR,RE_D,K_AIR,NUSSELT,NU_FAC,P
             VELSR,WATER_VOL_FRAC,RHS,Y_E,DT_C,DT_E,T_RATIO,Y_E_LAG, H_G,H_G_SUM,CP,YY_GET(1:N_SPECIES), &
             DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,R_Y_H2O,YY_G(1:N_SPECIES),R_DN,SGN
 REAL(FB) :: TMPUP,TMPLOW,ZINT
-INTEGER :: ITER,N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW,SPEC_INDEX,PART_INDEX,ITMP,IP,JP,KP
+INTEGER :: ITER,N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW,SPEC_INDEX,PART_INDEX,ITMP,IP,JP,KP,FLOW_INDEX
 CHARACTER(100) :: MESSAGE
 
 ! Get species mass fraction if necessary
@@ -4327,6 +4327,9 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = TMP_TC-TMPM
 
    CASE(111:119)  ! FLOWs
+      IF (IND==111 .OR. IND==114 .OR. IND==117) FLOW_INDEX = 1  ! VOLUME FLOW
+      IF (IND==112 .OR. IND==115 .OR. IND==118) FLOW_INDEX = 2  ! MASS FLOW
+      IF (IND==113 .OR. IND==116 .OR. IND==119) FLOW_INDEX = 3  ! HEAT FLOW
       FLOW = 0._EB
       DO K=DV%K1,DV%K2
          DO J=DV%J1,DV%J2
@@ -4334,6 +4337,10 @@ SELECT CASE(IND)
                IP = I
                JP = J
                KP = K
+               IF ((SOLID(CELL_INDEX(I,J,K)).OR.SOLID(CELL_INDEX(IP,JP,KP))) .AND. FLOW_INDEX/=1) THEN
+                  WRITE(MESSAGE,'(A)') "ERROR: MASS OR HEAT FLOW not appropriate at solid boundary"
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
                SELECT CASE(DV%IOR)
                   CASE(1)
                      IP   = I+1
@@ -4364,23 +4371,26 @@ SELECT CASE(IND)
                ELSE
                   Y_SPECIES2 = 1._EB
                ENDIF
-               IF (IND==111 .OR. IND==114 .OR. IND==117) HMFAC = 1._EB
-               IF (IND==112 .OR. IND==115 .OR. IND==118) HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
-               IF (IND==113 .OR. IND==116 .OR. IND==119) THEN
-                  TMP_TC = 0.5_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
-                  ITMP=MIN(5000,NINT(TMP_TC))
-                  IF (N_SPECIES>0) THEN
-                     YY_G =0.5_EB*(YY(I,J,K,:)+YY(IP,JP,KP,:))
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_G,H_G_SUM,ITMP)
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_G,H_G,NINT(TMPA))
-                  ELSE
-                     H_G_SUM = Y2CPBAR_C(ITMP)
-                     H_G     = Y2CPBAR_C(NINT(TMPA))
-                  ENDIF
-                  H_G_SUM = H_G_SUM*TMP_TC
-                  H_G     = H_G    *TMPA
-                  HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))*(H_G_SUM-H_G)*0.001_EB
-               ENDIF
+               SELECT CASE(FLOW_INDEX)
+                  CASE(1) 
+                     HMFAC = 1._EB
+                  CASE(2)
+                     HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
+                  CASE(3)
+                     TMP_TC = 0.5_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
+                     ITMP=MIN(5000,NINT(TMP_TC))
+                     IF (N_SPECIES>0) THEN
+                        YY_G =0.5_EB*(YY(I,J,K,:)+YY(IP,JP,KP,:))
+                        CALL GET_AVERAGE_SPECIFIC_HEAT(YY_G,H_G_SUM,ITMP)
+                        CALL GET_AVERAGE_SPECIFIC_HEAT(YY_G,H_G,NINT(TMPA))
+                     ELSE
+                        H_G_SUM = Y2CPBAR_C(ITMP)
+                        H_G     = Y2CPBAR_C(NINT(TMPA))
+                     ENDIF
+                     H_G_SUM = H_G_SUM*TMP_TC
+                     H_G     = H_G    *TMPA
+                     HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))*(H_G_SUM-H_G)*0.001_EB
+               END SELECT
                SELECT CASE(IND)
                   CASE(111:113)
                      FLOW = FLOW + VEL*HMFAC*AREA
@@ -4389,7 +4399,7 @@ SELECT CASE(IND)
                   CASE(117:119)
                      FLOW = FLOW - MIN(0._EB,VEL)*HMFAC*AREA
                END SELECT
-               IF (IND==113 .OR. IND==116 .OR. IND==119) FLOW = FLOW - AREA*MU(I,J,K)*CPOPR*(TMP(IP,JP,KP)-TMP(I,J,K))*R_DN*0.001
+               IF (FLOW_INDEX==3) FLOW = FLOW - AREA*MU(I,J,K)*CPOPR*(TMP(IP,JP,KP)-TMP(I,J,K))*R_DN*0.001
             ENDDO
          ENDDO
       ENDDO
