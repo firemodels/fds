@@ -9,6 +9,7 @@ bin = .
 # Definition of the object variables
 
 objwin = main.obj utilities.obj
+obj = main.o utilities.o
 
 #*** General Purpose Rules ***
 
@@ -48,6 +49,18 @@ intel_win_32 : exe       = background.exe
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) 
 
+# ------------- Linux 32 ----------------
+#  32 bit linux
+
+intel_linux_32 : FFLAGS    = 
+intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
+intel_linux_32 : CC        = icc
+intel_linux_32 : CPP       = icc
+intel_linux_32 : FC        = ifort
+intel_linux_32 : exe       = background
+
+intel_linux_32 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) 
 
 #-------------- Clean Target to remove Object and Module files -----------
 
