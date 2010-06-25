@@ -24,7 +24,16 @@ void usage(char *prog);
 #ifdef WIN32
 void GetSystemTimesAddress(void);
 #endif
-CHAR cpuusage(void);
+unsigned char cpuusage(void);
+
+#ifdef pp_LINUX
+void Sleep(int ticks){
+  float time;
+
+  time = ticks/1000.0;
+  sleep(time);
+}
+#endif
 
 /* ------------------ main ------------------------ */
 
@@ -103,7 +112,9 @@ int main(int argc, char **argv){
     Sleep(itime);
   }
 
+#ifdef WIN32
   GetSystemTimesAddress();
+#endif
   cpu_usage=cpuusage();
   Sleep(200);
   cpu_usage=cpuusage();
@@ -114,7 +125,9 @@ int main(int argc, char **argv){
     cpu_usage=cpuusage();
   }
   command=argv[argstart];
+#ifdef WIN32
   _spawnvp(_P_NOWAIT,command, argv+argstart);
+#endif
   return 0;
 }
 
@@ -172,7 +185,7 @@ void GetSystemTimesAddress(){
 
 /* ------------------ cpuusage ------------------------ */
 
-CHAR cpuusage()
+unsigned char cpuusage()
 {
 	FILETIME               ft_sys_idle;
 	FILETIME               ft_sys_kernel;
@@ -186,7 +199,7 @@ CHAR cpuusage()
 	static ULARGE_INTEGER  ul_sys_kernel_old;
 	static ULARGE_INTEGER  ul_sys_user_old;
 
-	CHAR  usage = 0;
+	unsigned char usage = 0;
 
 	// we cannot directly use GetSystemTimes on C language
 	/* add this line :: pfnGetSystemTimes */
@@ -236,7 +249,7 @@ int get_ncores(void){
   if(stream==NULL)return 1;
   while(!feof(stream)){
     if(fgets(buffer,255,stream)==NULL)break;
-    if(strncmp(buffer,"processor",9)ncores++;
+    if(strncmp(buffer,"processor",9)==0)ncores++;
   }
   if(ncores==0)ncores=1;
   fclose(stream);
@@ -250,11 +263,11 @@ float get_load(void){
   stream=fopen("/proc/loadavg","r");
   if(stream==NULL)return 1.0;
   if(fgets(buffer,255,stream)==NULL)return 1.0;
-  sscanf(buffer,"%f%,&load1);
+  sscanf(buffer,"%f",&load1);
   fclose(stream);
   return load1;
 }
-CHAR cpuusage(){
+unsigned char cpuusage(){
   unsigned char usage;
   float load;
   int ncores;
