@@ -7,8 +7,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef WIN32
 #include <process.h>
 #include <windows.h>
+#endif
 #include "svn_revision.h"
 #include "background.h"
 
@@ -19,7 +21,9 @@ char main_revision[]="$Revision$";
 void run_command(void);
 
 void usage(char *prog);
+#ifdef WIN32
 void GetSystemTimesAddress(void);
+#endif
 CHAR cpuusage(void);
 
 /* ------------------ main ------------------------ */
@@ -143,6 +147,7 @@ void usage(char *prog){
   printf("    runs prog (with arguments arg1 and arg2) after 1.5 seconds\n    and when the CPU usage drops below 50%s\n",pp);
 }
 
+#ifdef WIN32
 typedef BOOL ( __stdcall * pfnGetSystemTimes)( LPFILETIME lpIdleTime, LPFILETIME lpKernelTime, LPFILETIME lpUserTime );
 static pfnGetSystemTimes s_pfnGetSystemTimes = NULL;
 
@@ -220,3 +225,44 @@ CHAR cpuusage()
 
 	return usage;
 }
+#endif
+#ifdef pp_LINUX
+int get_ncores(void){
+  FILE *stream;
+  int ncores;
+  char buffer[255];
+
+  stream=fopen("/proc/cpuinfo","r");
+  if(stream==NULL)return 1;
+  while(!feof(stream)){
+    if(fgets(buffer,255,stream)==NULL)break;
+    if(strncmp(buffer,"processor",9)ncores++;
+  }
+  if(ncores==0)ncores=1;
+  fclose(stream);
+  return ncores;
+}
+float get_load(void){
+  FILE *stream;
+  char buffer[255];
+  float load1;
+
+  stream=fopen("/proc/loadavg","r");
+  if(stream==NULL)return 1.0;
+  if(fgets(buffer,255,stream)==NULL)return 1.0;
+  sscanf(buffer,"%f%,&load1);
+  fclose(stream);
+  return load1;
+}
+CHAR cpuusage(){
+  unsigned char usage;
+  float load;
+  int ncores;
+
+  ncores = get_ncores();
+  load = get_load();
+  if(load>ncores)load=ncores;
+  usage = 100*load/(float)ncores;
+  return usage;
+}
+#endif
