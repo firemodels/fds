@@ -9,10 +9,8 @@ PROGRAM FDS2ASCII
 IMPLICIT NONE
 
 INTERFACE
-
 SUBROUTINE PARSE(BUFFER,SB_TOKS,SE_TOKS,N_TOKS)
 IMPLICIT NONE
-
 CHARACTER(*), INTENT(INOUT) :: BUFFER
 INTEGER, DIMENSION(*), INTENT(OUT) :: SB_TOKS, SE_TOKS
 INTEGER, INTENT(OUT) :: N_TOKS
@@ -20,9 +18,9 @@ END SUBROUTINE PARSE
 END INTERFACE
 
 CHARACTER(255), PARAMETER :: revision='$Revision$'
-CHARACTER(255), PARAMETER :: f2aversion='2.0.0'
+CHARACTER(255), PARAMETER :: f2aversion='2.1.0'
 INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
-INTEGER :: IERR, VERSION, NMESHES, NM, NOC, I, J, K, L
+INTEGER :: IERR, NMESHES, NM, NOC, I, J, K, L
 INTEGER :: IDUM, IFILE, NSAM, NV, MV
 INTEGER :: I1, I2, J1, J2, K1, K2, I3, J3, K3
 INTEGER :: I10, I20, J10, J20, K10, K20
@@ -53,13 +51,17 @@ INTEGER, ALLOCATABLE, DIMENSION(:) :: IOR,I1B,I2B,J1B,J2B,K1B,K2B
 INTEGER, ALLOCATABLE, DIMENSION(:) :: AUTO_SLICES
 REAL(FB), ALLOCATABLE, DIMENSION(:,:,:,:) :: Q
 REAL(FB), ALLOCATABLE, DIMENSION(:,:,:) :: F
+LOGICAL, ALLOCATABLE, DIMENSION(:,:,:) :: ALREADY_USED
 LOGICAL :: NEW_PLOT3D=.TRUE.
 INTEGER IOR_SLCF
-CHARACTER(2) ANS
+CHARACTER(2) :: ANS
+CHARACTER(4) :: CHOICE
 CHARACTER(30) :: UNITJUNK
 CHARACTER(256) GRIDFILE,QNAME,CHID,QFILE,JUNK,FRMT,OUTFILE,SLCF_LABEL_DUMMY
 CHARACTER(256), DIMENSION(500) :: PL3D_FILE,SLCF_FILE,BNDF_FILE,SLCF_TEXT,BNDF_TEXT,SLCF_UNIT,BNDF_UNIT,SLCF_LABEL
 CHARACTER(256), DIMENSION(500) :: SLICE_LABELS
+CHARACTER(20), DIMENSION(500) :: BNDF_TYPE
+CHARACTER(20) :: BNDF_TYPE_CHOSEN
 INTEGER :: NSLICE_LABELS, SLICE_EXIST
 REAL(FB), DIMENSION(500) :: X1, X2, Y1, Y2, Z1, Z2
 INTEGER,  DIMENSION(60) :: IB,IS
@@ -78,6 +80,8 @@ INTEGER :: N_TOKS
 INTEGER :: ERROR_STATUS
 CHARACTER(256) :: ARG
 
+! Optional arguments in the call sequence
+
 NARGS = IARGC()
 IF(NARGS.GT.0)THEN
   DO I = 1, NARGS
@@ -93,6 +97,7 @@ IF(NARGS.GT.0)THEN
   END DO
 ENDIF
 
+! Set a few default values
 
 ZOFFSET=0.0
 ZOFFSET_FLAG=0
@@ -272,8 +277,7 @@ EXTRA_PLOT3D_FILES: DO
       CALL SEARCH('PL3D',4,11,IERR)
       IF (IERR.EQ.1) EXIT SEARCH_PL3D
       BACKSPACE(11) 
-      IF (VERSION.LE.2.) READ(11,*) JUNK,PL3D_TIME(I)
-      IF (VERSION.GT.2.) READ(11,*) JUNK,PL3D_TIME(I),PL3D_MESH(I)
+      READ(11,*) JUNK,PL3D_TIME(I),PL3D_MESH(I)
       READ(11,'(A)') PL3D_FILE(I)
       DO II=1,5
       IS(II) = II
@@ -352,11 +356,10 @@ EXTRA_PLOT3D_FILES: DO
          NFILES_EXIST=0
 
          SEARCH_SLCF: DO I=1,500
-            CALL SEARCH2('SLCF',4,'SLCC',4,11,IERR)
+            CALL SEARCH2('SLCF',4,'SLCC',4,11,IERR,CHOICE)
             IF (IERR.EQ.1) EXIT SEARCH_SLCF
             BACKSPACE(11)
-            IF (VERSION.LE.2.) READ(11,*) JUNK
-            IF (VERSION.GT.2.) READ(11,*) JUNK,SLCF_MESH(I)
+            READ(11,*) JUNK,SLCF_MESH(I)
             READ(11,'(A)') SLCF_FILE(I)
             READ(11,'(A)') SLCF_TEXT(I)
    
@@ -619,10 +622,11 @@ EXTRA_PLOT3D_FILES: DO
       IF(BATCHMODE.EQ.0)write(6,'(A,A,A,ES12.4)') ' Integral of ',TRIM(SLCF_TEXT(IS(MV))),' = ',SUM(MV)
  
       ENDDO VARLOOP
-!*** WRITE OUT SLICE DATA IF AUTO_SLICE_FLAG IS SET
-!       (WRITE IT OUT HERE RATHER THAN later SO WE DON'T HAVE TO SAVE EXTRA DATA)
+
+      ! WRITE OUT SLICE DATA IF AUTO_SLICE_FLAG IS SET
+      !(WRITE IT OUT HERE RATHER THAN later SO WE DON'T HAVE TO SAVE EXTRA DATA)
          
-      IF(AUTO_SLICE_FLAG.EQ.1)THEN
+      IF (AUTO_SLICE_FLAG.EQ.1) THEN
         IF(IAUTO.EQ.1)THEN
           IF(BATCHMODE.EQ.0)write(6,*) 'Enter output file name:'
           READ(LU_IN,'(A)') OUTFILE
@@ -668,11 +672,10 @@ EXTRA_PLOT3D_FILES: DO
          NFILES_EXIST=0
 
          SEARCH_BNDF: DO I=1,500
-            CALL SEARCH2('BNDF',4,'BNDC',4,11,IERR)
+            CALL SEARCH2('BNDF',4,'BNDC',4,11,IERR,CHOICE)
             IF (IERR.EQ.1) EXIT SEARCH_BNDF
             BACKSPACE(11)
-            IF (VERSION.LE.2.) READ(11,*) JUNK
-            IF (VERSION.GT.2.) READ(11,*) JUNK,BNDF_MESH(I)
+            READ(11,*) JUNK,BNDF_MESH(I)
             READ(11,'(A)') BNDF_FILE(I)
             READ(11,'(A)') BNDF_TEXT(I)
             READ(11,*)
@@ -681,6 +684,8 @@ EXTRA_PLOT3D_FILES: DO
             CLOSE(12)
             IF (RCODE.NE.0) CYCLE
             NFILES_EXIST=NFILES_EXIST+1
+            IF (CHOICE=='BNDC') BNDF_TYPE(I) = 'CENTERED'
+            IF (CHOICE=='BNDF') BNDF_TYPE(I) = 'STAGGERED'
             IF (BATCHMODE.EQ.0) write(6,'(I3,3X,A,I2,A,A)') I,'MESH ',BNDF_MESH(I), ', ',TRIM(BNDF_TEXT(I))
          ENDDO SEARCH_BNDF
     
@@ -693,19 +698,18 @@ EXTRA_PLOT3D_FILES: DO
          READ(LU_IN,*) TBEG,TEND
          IF (BATCHMODE.EQ.0) write(6,*) ' Enter orientation: (plus or minus 1, 2 or 3)'
          READ(LU_IN,*) IOR_INPUT
-         IF (VERSION.LE.2.0) IOR_INPUT = ABS(IOR_INPUT)
     
          IF(BATCHMODE.EQ.0)write(6,*) ' Enter number of variables'
          READ(LU_IN,*) NV
     
          BVARLOOP: DO MV=1,NV
    
-            IF(BATCHMODE.EQ.0) write(6,'(A,I2)') ' Enter boundary file index for variable',MV
+            IF (BATCHMODE.EQ.0) write(6,'(A,I2)') ' Enter boundary file index for variable',MV
             READ(LU_IN,*) I
             IB(MV) = I
             QFILE = BNDF_FILE(I)
             OPEN(12,FILE=QFILE,FORM='UNFORMATTED',STATUS='OLD', IOSTAT=RCODE)
-            IF(RCODE.NE.0)THEN
+            IF (RCODE.NE.0) THEN
               CLOSE(12)
               CYCLE
             ENDIF
@@ -715,9 +719,16 @@ EXTRA_PLOT3D_FILES: DO
                M=>MESH(NM)
                ALLOCATE(Q(0:M%IBAR,0:M%JBAR,0:M%KBAR,NV))
                Q = 0.
+               ALLOCATE(ALREADY_USED(0:M%IBAR,0:M%JBAR,0:M%KBAR))
+               BNDF_TYPE_CHOSEN = BNDF_TYPE(I)
             ELSE
                IF (BNDF_MESH(I).NE.NM) THEN
                   WRITE(6,*) ' ERROR: All boundary files must have the same mesh'
+                  STOP
+               ENDIF
+               IF (BNDF_TYPE(I).NE.BNDF_TYPE_CHOSEN) THEN
+                  IF (BNDF_TYPE_CHOSEN=='CENTERED') WRITE(6,*) ' ERROR: All boundary files must be CELL_CENTERED'
+                  IF (BNDF_TYPE_CHOSEN/='CENTERED') WRITE(6,*) ' ERROR: No boundary files can be CELL_CENTERED'
                   STOP
                ENDIF
             ENDIF
@@ -738,14 +749,7 @@ EXTRA_PLOT3D_FILES: DO
             ENDIF
     
             DO I=1,NPATCH
-               IF (VERSION.LE.2.0) THEN
-                  READ(12) I1B(I),I2B(I),J1B(I),J2B(I),K1B(I),K2B(I)
-                  IF (I1B(I).EQ.I2B(I)) IOR(I) = 1
-                  IF (J1B(I).EQ.J2B(I)) IOR(I) = 2
-                  IF (K1B(I).EQ.K2B(I)) IOR(I) = 3
-               ELSE
-                  READ(12) I1B(I),I2B(I),J1B(I),J2B(I),K1B(I),K2B(I),IOR(I)
-               ENDIF
+               READ(12) I1B(I),I2B(I),J1B(I),J2B(I),K1B(I),K2B(I),IOR(I)
             ENDDO
     
             IF (MV.EQ.1) THEN
@@ -761,17 +765,21 @@ EXTRA_PLOT3D_FILES: DO
                DO II=1,NPATCH
                   SELECT CASE(ABS(IOR(II)))
                      CASE(1)
-                        READ(12,END=199) ((F(J,K,II),J=J1B(II),J2B(II)),K=K1B(II),K2B(II))
+                        IF (BNDF_TYPE_CHOSEN=='STAGGERED')READ(12,END=199) ((F(J,K,II),J=J1B(II),J2B(II)),K=K1B(II),K2B(II))
+                        IF (BNDF_TYPE_CHOSEN=='CENTERED') READ(12,END=199) ((F(J,K,II),J=J1B(II)+1,J2B(II)+1),K=K1B(II)+1,K2B(II)+1)
                      CASE(2)
-                        READ(12,END=199) ((F(I,K,II),I=I1B(II),I2B(II)),K=K1B(II),K2B(II))
+                        IF (BNDF_TYPE_CHOSEN=='STAGGERED')READ(12,END=199) ((F(I,K,II),I=I1B(II),I2B(II)),K=K1B(II),K2B(II))
+                        IF (BNDF_TYPE_CHOSEN=='CENTERED') READ(12,END=199) ((F(I,K,II),I=I1B(II)+1,I2B(II)+1),K=K1B(II)+1,K2B(II)+1)
                      CASE(3)
-                        READ(12,END=199) ((F(I,J,II),I=I1B(II),I2B(II)),J=J1B(II),J2B(II))
+                        IF (BNDF_TYPE_CHOSEN=='STAGGERED')READ(12,END=199) ((F(I,J,II),I=I1B(II),I2B(II)),J=J1B(II),J2B(II))
+                        IF (BNDF_TYPE_CHOSEN=='CENTERED') READ(12,END=199) ((F(I,J,II),I=I1B(II)+1,I2B(II)+1),J=J1B(II)+1,J2B(II)+1)
                   END SELECT
                ENDDO
                IF (TIME.LT.TBEG) CYCLE READ_BLOOP
                IF (TIME.GT.TEND) EXIT READ_BLOOP
        
                NCOUNT = NCOUNT + 1
+               ALREADY_USED = .FALSE.
     
                REC_PATCH: DO II=1,NPATCH
                   IF (IOR(II).NE.IOR_INPUT) CYCLE REC_PATCH
@@ -779,19 +787,28 @@ EXTRA_PLOT3D_FILES: DO
                      CASE(1)
                         DO K=K1B(II),K2B(II)
                            DO J=J1B(II),J2B(II)
-                              Q(I1B(II),J,K,MV) = Q(I1B(II),J,K,MV) + F(J,K,II)
+                              IF (.NOT.ALREADY_USED(I1B(II),J,K)) THEN
+                                 Q(I1B(II),J,K,MV) = Q(I1B(II),J,K,MV) + F(J,K,II)
+                                 ALREADY_USED(I1B(II),J,K) = .TRUE.
+                              ENDIF
                            ENDDO
                         ENDDO
                      CASE(2)
                         DO K=K1B(II),K2B(II)
                            DO I=I1B(II),I2B(II)
-                              Q(I,J1B(II),K,MV) = Q(I,J1B(II),K,MV) + F(I,K,II)
+                              IF (.NOT.ALREADY_USED(I,J1B(II),K)) THEN
+                                 Q(I,J1B(II),K,MV) = Q(I,J1B(II),K,MV) + F(I,K,II)
+                                 ALREADY_USED(I,J1B(II),K) = .TRUE.
+                              ENDIF
                            ENDDO
                         ENDDO
                      CASE(3)
                         DO J=J1B(II),J2B(II)
                            DO I=I1B(II),I2B(II)
-                              Q(I,J,K1B(II),MV) = Q(I,J,K1B(II),MV) + F(I,J,II)
+                              IF (.NOT.ALREADY_USED(I,J,K1B(II))) THEN
+                                 Q(I,J,K1B(II),MV) = Q(I,J,K1B(II),MV) + F(I,J,II)
+                                 ALREADY_USED(I,J,K1B(II)) = .TRUE.
+                              ENDIF
                            ENDDO
                         ENDDO
                   END SELECT
@@ -932,7 +949,7 @@ EXTRA_PLOT3D_FILES: DO
         enddo
         endif
  
-      CASE(3)
+      CASE(3)  ! Write out boundary file output
  
          PATCHES: DO II=1,NPATCH
             IF (IOR(II).NE.IOR_INPUT) CYCLE PATCHES
@@ -947,16 +964,35 @@ EXTRA_PLOT3D_FILES: DO
             WRITE(44,FRMT) 'X','Y','Z',(TRIM(BNDF_TEXT(IB(L))),L=1,NV)
             WRITE(44,FRMT) 'm','m','m',(TRIM(BNDF_UNIT(IB(L))),L=1,NV)
             WRITE(FRMT,'(A,I2.2,A)') "(",NV+2,"(E12.5,','),E12.5)"
-            DO K=K1B(II),K2B(II),NSAM
-               DO J=J1B(II),J2B(II),NSAM
-                  DO I=I1B(II),I2B(II),NSAM
-                     IF (M%X(I).GT.XF .OR. M%X(I).LT.XS) CYCLE 
-                     IF (M%Y(J).GT.YF .OR. M%Y(J).LT.YS) CYCLE
-                     IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE
-                     WRITE(44,FRMT) M%X(I),M%Y(J),M%Z(K),(Q(I,J,K,L),L=1,NV)
-                  ENDDO 
+            IF (BNDF_TYPE_CHOSEN=='STAGGERED') THEN
+               DO K=K1B(II),K2B(II),NSAM
+                  DO J=J1B(II),J2B(II),NSAM
+                     DO I=I1B(II),I2B(II),NSAM
+                        IF (M%X(I).GT.XF .OR. M%X(I).LT.XS) CYCLE 
+                        IF (M%Y(J).GT.YF .OR. M%Y(J).LT.YS) CYCLE
+                        IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE
+                        WRITE(44,FRMT) M%X(I),M%Y(J),M%Z(K),(Q(I,J,K,L),L=1,NV)
+                     ENDDO 
+                  ENDDO
                ENDDO
-            ENDDO
+            ELSE
+               IF (ABS(IOR_INPUT)==1) I1B(II) = I1B(II)-1
+               IF (ABS(IOR_INPUT)==2) J1B(II) = J1B(II)-1
+               IF (ABS(IOR_INPUT)==3) K1B(II) = K1B(II)-1
+               DO K=K1B(II)+1,K2B(II),NSAM
+                  DO J=J1B(II)+1,J2B(II),NSAM
+                     DO I=I1B(II)+1,I2B(II),NSAM
+                        IF (M%X(I).GT.XF .OR. M%X(I).LT.XS) CYCLE
+                        IF (M%Y(J).GT.YF .OR. M%Y(J).LT.YS) CYCLE
+                        IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE
+                        IF (ABS(IOR_INPUT)==1) WRITE(44,FRMT) M%X(I),0.5*(M%Y(J-1)+M%Y(J)),0.5*(M%Z(K-1)+M%Z(K)),(Q(I,J,K,L),L=1,NV)
+                        IF (ABS(IOR_INPUT)==2) WRITE(44,FRMT) 0.5*(M%X(I-1)+M%X(I)),M%Y(J),0.5*(M%Z(K-1)+M%Z(K)),(Q(I,J,K,L),L=1,NV)
+                        IF (ABS(IOR_INPUT)==3) WRITE(44,FRMT) 0.5*(M%X(I-1)+M%X(I)),0.5*(M%Y(J-1)+M%Y(J)),M%Z(K),(Q(I,J,K,L),L=1,NV)
+                     ENDDO
+                  ENDDO
+               ENDDO
+
+            ENDIF
          ENDDO PATCHES
  
    END SELECT
@@ -995,17 +1031,22 @@ RETURN
 
 END SUBROUTINE SEARCH
 
-SUBROUTINE SEARCH2(STRING,LENGTH,STRING2,LENGTH2,LU,IERR)
+SUBROUTINE SEARCH2(STRING,LENGTH,STRING2,LENGTH2,LU,IERR,CHOICE)
 
 IMPLICIT NONE
 CHARACTER(*), INTENT(IN) :: STRING,STRING2
+CHARACTER(*), INTENT(OUT) :: CHOICE
 INTEGER, INTENT(OUT) :: IERR
 INTEGER, INTENT(IN) :: LU, LENGTH, LENGTH2
 CHARACTER(20) :: JUNK
 
 SEARCH_LOOP: DO 
    READ(LU,'(A)',END=10) JUNK
-   IF (JUNK(1:LENGTH).EQ.STRING(1:LENGTH).OR.JUNK(1:LENGTH2).EQ.STRING2(1:LENGTH2)) EXIT SEARCH_LOOP
+   IF (JUNK(1:LENGTH).EQ.STRING(1:LENGTH).OR.JUNK(1:LENGTH2).EQ.STRING2(1:LENGTH2)) THEN
+      IF (JUNK(1:LENGTH) .EQ.STRING(1:LENGTH))   CHOICE = JUNK(1:LENGTH)
+      IF (JUNK(1:LENGTH2).EQ.STRING2(1:LENGTH2)) CHOICE = JUNK(1:LENGTH2)
+      EXIT SEARCH_LOOP
+   ENDIF
 ENDDO SEARCH_LOOP
 
 IERR = 0
