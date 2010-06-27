@@ -8635,7 +8635,7 @@ Note that this statistic is only appropriate for solid phase quantities, in part
 fluxes are appropriate output quantities.
 
 
-\subsubsection{Mass and Energy Flows}
+\subsubsection{Volume, Mass, and Heat Flow}
 \label{info:flows}
 
 The net flow of mass and energy into or out of compartments can be useful for many applications. There are several outputs that address these. All are prescribed via
@@ -8659,6 +8659,10 @@ yields the integral of the flow in the positive or negative direction
 only. In other words, if you want to know the mass flow out of a
 compartment, use {\ct 'MASS FLOW +'} or {\ct 'MASS FLOW -'}, depending
 on the orientation of the door.
+
+\begin{warning}
+The quantities {\ct 'MASS FLOW'} and {\ct 'HEAT FLOW'} should not be applied at a solid boundary.
+\end{warning}
 
 \subsection{Temporally-Integrated Outputs}
 \label{info:time_integral}
