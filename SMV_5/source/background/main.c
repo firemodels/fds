@@ -27,6 +27,11 @@ void GetSystemTimesAddress(void);
 unsigned char cpuusage(void);
 
 #ifdef pp_LINUX
+int get_ncores(void);
+float get_load(void);
+#endif
+
+#ifdef pp_LINUX
 void Sleep(int ticks){
   float time;
 
@@ -242,14 +247,16 @@ unsigned char cpuusage()
 #ifdef pp_LINUX
 int get_ncores(void){
   FILE *stream;
-  int ncores;
+  int ncores=0;
   char buffer[255];
 
   stream=fopen("/proc/cpuinfo","r");
   if(stream==NULL)return 1;
   while(!feof(stream)){
     if(fgets(buffer,255,stream)==NULL)break;
-    if(strncmp(buffer,"processor",9)==0)ncores++;
+    if(strlen(buffer)<9)continue;
+    buffer[9]=0;
+    if(strcmp(buffer,"processor")==0)ncores++;
   }
   if(ncores==0)ncores=1;
   fclose(stream);
@@ -275,7 +282,7 @@ unsigned char cpuusage(){
   ncores = get_ncores();
   load = get_load();
   if(load>ncores)load=ncores;
-  usage = 100*load/(float)ncores;
+  usage = 100*(load/(float)ncores);
   return usage;
 }
 #endif
