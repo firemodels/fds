@@ -48,6 +48,9 @@ int main(int argc, char **argv){
   int argstart=-1;
   float delay_time=0.0;
   int cpu_usage, cpu_usage_max=25;
+#ifdef pp_LINUX  
+  char command_buffer[1024];
+#endif  
 
   int itime;
   char *arg;
@@ -129,9 +132,18 @@ int main(int argc, char **argv){
     Sleep(200);
     cpu_usage=cpuusage();
   }
-  command=argv[argstart];
 #ifdef WIN32
+  command=argv[argstart];
   _spawnvp(_P_NOWAIT,command, argv+argstart);
+#endif
+#ifdef pp_LINUX
+  strcpy(command_buffer,"");
+  for(i=argstart;i<argc;i++){
+    arg=argv[i];
+    strcat(command_buffer,arg);
+    if(i!=argc-1)strcat(command_buffer," ");    
+  }
+  system(command_buffer);
 #endif
   return 0;
 }
