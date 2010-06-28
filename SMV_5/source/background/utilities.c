@@ -68,7 +68,7 @@ void version(void){
     getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
     svn_num=getmaxrevision();    // get svn revision number
     printf("\n");
-    printf("backbround\n\n");
+    printf("background\n\n");
     printf("Version: %s\n",smv_version);
     printf("SVN Revision Number: %i\n",svn_num);
     printf("Compile Date: %s\n",__DATE__);
