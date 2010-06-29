@@ -1,18 +1,22 @@
 #!/bin/csh -f
 
 #  This script runs all FDS and Smokeview verifciation cases.
-#  If you decide you want to stop all the runs before they would
-#  finish normally then type:
 #
-#  setenv STOPFDS
+#  To abort FDS runs, uncomment the following line and rerun this script.
 #
-#  at a command prompt then re-run this script. After FDS jobs have stopped
-#  then open up a NEW shell and re-run script.
+#setenv STOPFDS
 #
 setenv SVNROOT ~/FDS-SMV
 setenv FDS $SVNROOT/FDS_Compilation/intel_linux_32/fds5_intel_linux_32
-setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds.csh
 setenv BASEDIR `pwd`
+
+setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds.csh
+
+# To run the "background" version of this script, 
+# uncomment the two lines below containing RUNFDS and BACKGROUND
+
+#setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds_bg.csh
+#setenv BACKGROUND "$SVNROOT/Utilities/background/INTEL_LINUX_32/background -u 50 -d 10"
 
 echo FDS cases submitted
 
