@@ -29,6 +29,7 @@ unsigned char cpuusage(void);
 #ifdef pp_LINUX
 int get_ncores(void);
 float get_load(void);
+float get_host_load(char *host);
 #endif
 
 #ifdef pp_LINUX
@@ -279,6 +280,30 @@ int get_ncores(void){
   if(ncores==0)ncores=1;
   fclose(stream);
   return ncores;
+}
+float get_host_load(char *host){
+  FILE *stream;
+  char buffer[1024];
+  char command[1024];
+  char localfile[1024];
+  float load1;
+  
+  strcpy(localfile,"loadavg.");
+  strcat(localfile,host);
+
+  strcpy(command,"scp ");
+  strcat(command,host);
+  strcat(command,":/proc/loadavg ");
+  strcat(command,localfile);
+
+  system(command);
+
+  stream=fopen(localfile,"r");
+  if(stream==NULL)return 1.0;
+  if(fgets(buffer,255,stream)==NULL)return 1.0;
+  sscanf(buffer,"%f",&load1);
+  fclose(stream);
+  return load1;
 }
 float get_load(void){
   FILE *stream;
