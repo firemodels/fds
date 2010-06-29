@@ -1104,7 +1104,7 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,PRESSURE_RELAX_FACTOR,RELAXATION_FACTOR,FYI, &
                 H_EDDY,H_LOGLAW,H_CHILTON_COLBURN,LIMITING_DT_RATIO, &
                 NOBIAS,VAN_DRIEST,HRRPUVCUT_MAX,EMBEDDED_MESH,RUN_AVG_FAC,THERMOPHORETIC_DEPOSITION,TURBULENT_DEPOSITION, &
                 VEG_LEVEL_SET,CP_FTMP,HRRPUV_MAX_SMV,EXTINCTION2,TERRAIN_IMAGE,NEW_EVAP, &
-                SCALAR_ENERGY_TOLERANCE
+                SCALAR_ENERGY_TOLERANCE,TURBULENT_KINETIC_ENERGY_TOLERANCE
  
 ! Physical constants
  
@@ -8244,15 +8244,15 @@ MESH_LOOP: DO NM=1,NMESHES
          IF (ITER==4)                    QUANTITY = 'W-VELOCITY'
          IF (ITER==1 .AND. FIRE_LINE)    QUANTITY = 'TEMPERATURE'
          IF (ITER==1 .AND. LEVEL_SET_FIRE_LINE) QUANTITY = 'TEMPERATURE'
-         IF ( ITER==1) THEN
+         IF (ITER==1) THEN
             SL%FIRE_LINE = FIRE_LINE
             SL%LEVEL_SET_FIRE_LINE = LEVEL_SET_FIRE_LINE
-             IF (LEVEL_SET_FIRE_LINE .AND. .NOT. VEG_LEVEL_SET) THEN
-              WRITE(MESSAGE,'(A,A,A)') "ERROR: In order to have a level fire line slice file, &
-                                        VEG_LEVEL_SET must be TRUE on &MISC to run the LS model"
-              CALL SHUTDOWN(MESSAGE)
-             ENDIF
-           ELSE
+            IF (LEVEL_SET_FIRE_LINE .AND. .NOT. VEG_LEVEL_SET) THEN
+               WRITE(MESSAGE,'(A,A,A)') "ERROR: In order to have a level fire line slice file, &
+                                         VEG_LEVEL_SET must be TRUE on &MISC to run the LS model"
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+         ELSE
             SL%FIRE_LINE = .FALSE.
             SL%LEVEL_SET_FIRE_LINE = .FALSE.
             SPEC_ID      = 'null'
@@ -9255,8 +9255,8 @@ IF (SPEC_ID/='null' .AND. SPEC_INDEX==0) THEN
 ENDIF
 
 IF (SPEC_ID/='null' .AND. SPEC_INDEX==0) THEN
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: ',TRIM(SPEC_ID),' is neither explicitly specified nor part of the mixture fraction model'
-      CALL SHUTDOWN(MESSAGE)
+   WRITE(MESSAGE,'(A,A,A)')  'ERROR: ',TRIM(SPEC_ID),' is neither explicitly specified nor part of the mixture fraction model'
+   CALL SHUTDOWN(MESSAGE)
 ENDIF 
 
 ! Assign HVAC indexes

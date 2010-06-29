@@ -120,14 +120,6 @@ IF (CHECK_KINETIC_ENERGY .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    ALLOCATE(M%MTR(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
    CALL ChkMemErr('INIT','MTR',IZERO)
    M%MTR=0._EB
-   ! measure of scalar resolution
-   ALLOCATE(M%MSR(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','MSR',IZERO)
-   M%MSR=0._EB
-   ! wavelet error measure
-   ALLOCATE(M%WEM(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','WEM',IZERO)
-   M%WEM=0._EB
 ENDIF
 
 ! Background pressure, temperature, density as a function of height (Z coordinate)
