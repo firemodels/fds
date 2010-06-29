@@ -141,8 +141,14 @@ int main(int argc, char **argv){
   for(i=argstart;i<argc;i++){
     arg=argv[i];
     strcat(command_buffer,arg);
-    if(i!=argc-1)strcat(command_buffer," ");    
+    if(i==argc-1){
+      strcat(command_buffer,"  &");    
+    }
+    else{
+      strcat(command_buffer," ");    
+    }
   }
+  printf("now running: %s\n",command_buffer);
   system(command_buffer);
 #endif
   return 0;
