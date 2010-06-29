@@ -47,7 +47,7 @@ MODULE EVAC
        EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE, EVAC_SSTAND_TYPE, NPC_EVAC, N_HOLES, &
        EVACUATION_TYPE, EVAC_HOLE_TYPE, EVACUATION, EVAC_HOLES
   !
-  CHARACTER(255):: EVAC_VERSION = '2.2.2'
+  CHARACTER(255):: EVAC_VERSION = '2.3.0'
   CHARACTER(255) :: EVAC_COMPILE_DATE
   INTEGER :: EVAC_MODULE_REV
   !
@@ -1040,7 +1040,7 @@ CONTAINS
          L_NON_SP = 0.3_EB ! Evac 2.2.0
          C_YOUNG  = 120000.0_EB
          GAMMA    = 16000.0_EB
-         KAPPA    = 40000.0_EB
+         KAPPA    = 240000.0_EB
          ! Rotational freedom constants
          D_TORSO_MEAN = 0.30_EB
          D_SHOULDER_MEAN = 0.19_EB
@@ -2074,7 +2074,8 @@ CONTAINS
          XYZ(:)        = HUGE(XYZ)
          XYZ_SMOKE(:)  = HUGE(XYZ_SMOKE)
          COLOR_INDEX   = -1
-         KEEP_XY       = .FALSE.
+         ! Changed for Evac 2.2.2, old was KEEP_XY = .FALSE.
+         KEEP_XY       = .TRUE.
          !
          CALL CHECKREAD('DOOR',LU_INPUT,IOS)
          IF (IOS == 1) THEN
@@ -4061,6 +4062,7 @@ CONTAINS
       IMPLICIT NONE
       !
       ! Local variables
+      REAL(EB) xtol,ytol
       LOGICAL :: L_TMP
       TYPE (EVAC_ENTR_TYPE), POINTER :: PNX=>NULL()
       TYPE (EVAC_DOOR_TYPE), POINTER :: PDX=>NULL()
@@ -4131,20 +4133,32 @@ CONTAINS
          ! Check if door leads to Stairs
          PDX%STR_INDX = 0
          PDX%STR_SUB_INDX = 0
-         CheckDoorStrLoop: DO i = 1, N_STRS
-            STRP=>EVAC_STRS(i)
+         IF (ABS(PDX%IOR)>1) THEN
+            xtol=0.05_EB
+            ytol=0.2_EB
+         ELSE
+            xtol=0.2_EB
+            ytol=0.05_EB
+         END IF
+         CheckDoorStrLoop: DO I = 1, N_STRS
+            STRP=>EVAC_STRS(I)
             IF (STRP%IMESH==PDX%IMESH .OR. STRP%IMESH==PDX%IMESH2) THEN
-               PDX%STR_INDX = i
-               DO j = 1,STRP%N_NODES
+               PDX%STR_INDX = I
+               DO J = 1,STRP%N_NODES
                   IF ( Is_Within_Bounds(PDX%X1,PDX%X2,PDX%Y1,PDX%Y2,PDX%Z1,PDX%Z2, &
                        STRP%XB_NODE(j,1), STRP%XB_NODE(j,2), STRP%XB_NODE(j,3),STRP%XB_NODE(j,4), &
-                       STRP%XB_NODE(j,5), STRP%XB_NODE(j,6), 0._EB, 0._EB, 0._EB)) THEN
+                       STRP%XB_NODE(j,5), STRP%XB_NODE(j,6), xtol, ytol, 0.1_EB)) THEN
                      PDX%STR_SUB_INDX = j
                      EXIT CheckDoorStrLoop
                   END IF
                END DO
             END IF
          END DO CheckDoorStrLoop
+         IF (MYID==MAX(0,EVAC_PROCESS) .AND. PDX%STR_INDX/=0 .AND. PDX%STR_SUB_INDX==0) THEN
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: DOOR line ', TRIM(PDX%ID), ' is in stairs ', &
+                 TRIM(EVAC_STRS(PDX%STR_INDX)%ID), ', no node found'
+            CALL SHUTDOWN(MESSAGE)
+         END IF
       END DO
 
       ! Create list of incoming nodes for Stairs
@@ -4820,11 +4834,11 @@ CONTAINS
           ENDDO
           WRITE (LU_EVACOUT,'(A)')          '   Nodes in '
           DO NM = 1, EVAC_STRS(N)%N_NODES_IN
-             WRITE (LU_EVACOUT,'(I5,A,A)')          NM, ' ', EVAC_NODE_List(EVAC_STRS(N)%NODES_IN(NM))%ID
+             WRITE (LU_EVACOUT,'(I5,A,A)')          NM, ' ', Trim(EVAC_NODE_List(EVAC_STRS(N)%NODES_IN(NM))%ID)
           ENDDO
           WRITE (LU_EVACOUT,'(A)')          '   Nodes out '
           DO NM = 1, EVAC_STRS(N)%N_NODES_OUT
-             WRITE (LU_EVACOUT,'(I5,A,A)')          NM, ' ', EVAC_NODE_List(EVAC_STRS(N)%NODES_OUT(NM))%ID
+             WRITE (LU_EVACOUT,'(I5,A,A)')          NM, ' ', Trim(EVAC_NODE_List(EVAC_STRS(N)%NODES_OUT(NM))%ID)
           ENDDO
        ENDDO
     END IF
@@ -6547,7 +6561,7 @@ CONTAINS
           END IF
           !
           ! Check if an agent is on a spectator stand.
-          HR%Z = 0.5_EB*(ZS+ZF)  ! The agent is not on any incline
+          IF (.NOT. NM_STRS_MESH) HR%Z = 0.5_EB*(ZS+ZF)  ! The agent is not on any incline
           SS_LOOP1: DO J = 1, N_SSTANDS
              ESS => EVAC_SSTANDS(J)
              IF (ESS%IMESH /= NM) CYCLE SS_LOOP1
@@ -7130,7 +7144,7 @@ CONTAINS
              STRP=>EVAC_STRS(N)     
           END IF
           ! Check if an agent is on a spectator stand.
-          HR%Z = 0.5_EB*(ZS+ZF)  ! The agent is not on any incline
+          IF (.NOT. NM_STRS_MESH) HR%Z = 0.5_EB*(ZS+ZF)  ! The agent is not on any incline
           SS_LOOP2: DO J = 1, N_SSTANDS
              ESS => EVAC_SSTANDS(J)
              IF (ESS%IMESH == NM .AND. (ESS%X1 <= HR%X .AND. ESS%X2 >= HR%X) .AND. (ESS%Y1 <= HR%Y .AND. ESS%Y2 >= HR%Y) ) THEN
@@ -8627,7 +8641,7 @@ CONTAINS
             END IF
          END IF
          IF (EVAC_NODE_LIST(I)%NODE_TYPE=='Exit') THEN
-            Z_FINAL_UNKNOWN = EVAC_EXITS(EVAC_NODE_LIST(I)%NODE_INDEX)%Z1
+            Z_FINAL_UNKNOWN = 0.5_EB*(EVAC_EXITS(EVAC_NODE_LIST(I)%NODE_INDEX)%Z1+EVAC_EXITS(EVAC_NODE_LIST(I)%NODE_INDEX)%Z2)
             IF (ISKNOWNDOOR) THEN
                FINAL_NODE = I
                Z_FINAL = Z_FINAL_UNKNOWN
@@ -8678,7 +8692,7 @@ CONTAINS
             DZ_NODE = -1._EB * SIGN(1.0_EB,DZ_FINAL) ! Initialize dz_node to different direction than final target
             SELECT CASE(EVAC_NODE_LIST(INODE)%NODE_TYPE)
             CASE('Door')
-               Z_NODE = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Z1
+               Z_NODE = 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Z1+EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Z2)
                X_NODE = 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X1+EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X2)
                Y_NODE = 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y1+EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y2)
                STR_SUB_INDX = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%STR_SUB_INDX
@@ -9432,6 +9446,14 @@ CONTAINS
          irnmax = MAX(irnmax,5)
          istat = 1
          MFF=>MESHES(imesh2)
+         DO N = 1, N_STRS
+            IF (EVAC_STRS(N)%IMESH == IMESH2) THEN
+               STRS_Indx = N
+               STRP=>EVAC_STRS(N)
+               NM_STRS_MESH = .TRUE.
+               EXIT
+            END IF
+         END DO
          !
          irn = 0
          angle = 0.0_EB
@@ -9450,7 +9472,7 @@ CONTAINS
                   xx = x1 + ior*(1.0_EB*HR%B + HR%r_torso)
                END IF
             CASE(-2,2)
-               ! 270 or90 degrees, i.e., 3pi/2 or pi/2 radians
+               ! 270 or 90 degrees, i.e., 3pi/2 or pi/2 radians
                angle = (1.0_EB-(ior/4.0_EB))*Pi
                CALL RANDOM_NUMBER(rn)
                IF (keep_xy) THEN
@@ -9510,7 +9532,7 @@ CONTAINS
             x_tmp(3) = xx - SIN(angle)*HR%d_shoulder
             P2PLoop: DO ie = 1, MFF%N_HUMANS
                HRE=>MFF%HUMAN(IE)
-               IF (STR_SUB_INDX /= HRE%STR_SUB_INDX) CYCLE P2PLoop
+               IF (NM_STRS_MESH .AND. STR_SUB_INDX /= HRE%STR_SUB_INDX) CYCLE P2PLoop
                r_tmp(4) = HRE%r_shoulder ! right circle
                r_tmp(5) = HRE%r_torso     ! center circle
                r_tmp(6) = HRE%r_shoulder ! left circle
