@@ -1,7 +1,7 @@
 &HEAD CHID='UL_SFPE_20', TITLE='20 ft ceiling with 100 mm grid spacing' /
 
-&MESH IJK= 50, 50,30, XB=10.25,20.25,10.25,20.25,0.0,6.0 /
-&MESH IJK= 50, 50,30, XB=10.25,20.25,20.25,30.25,0.0,6.0 / 
+&MESH IJK= 100, 100, 60, XB=10.25,20.25,10.25,20.25,0.0,6.0 /
+&MESH IJK= 100, 100, 60, XB=10.25,20.25,20.25,30.25,0.0,6.0 / 
 
 &TIME TWFIN=600. / 
 
@@ -35,26 +35,78 @@
       QUANTITIES(1:2)='DROPLET_DIAMETER','DROPLET_TEMPERATURE',
       DIAMETER=100.,HEAT_OF_COMBUSTION=45000. /
 
-&PROP ID='nozzle', SMOKEVIEW_ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=3.633, FLOW_RAMP='fire_ramp' ,
+&PROP ID='nozzle', SMOKEVIEW_ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=3.633, FLOW_RAMP='fire_ramp',
       DROPLET_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
 
-&RAMP ID='fire_ramp', T=  0., F=0.00 /
-&RAMP ID='fire_ramp', T=  1., F=0.10 /
-&RAMP ID='fire_ramp', T= 30., F=0.13 /
-&RAMP ID='fire_ramp', T= 60., F=0.16 /
-&RAMP ID='fire_ramp', T=120., F=0.24 /
-&RAMP ID='fire_ramp', T=150., F=0.29 /
-&RAMP ID='fire_ramp', T=180., F=0.34 /
-&RAMP ID='fire_ramp', T=210., F=0.40 /
-&RAMP ID='fire_ramp', T=240., F=0.46 /
-&RAMP ID='fire_ramp', T=270., F=0.52 /
-&RAMP ID='fire_ramp', T=300., F=0.59 /
-&RAMP ID='fire_ramp', T=330., F=0.66 /
-&RAMP ID='fire_ramp', T=360., F=0.74 /
-&RAMP ID='fire_ramp', T=390., F=0.82 /
-&RAMP ID='fire_ramp', T=420., F=0.91 /
-&RAMP ID='fire_ramp', T=450., F=1.00 /
-&RAMP ID='fire_ramp', T=600., F=1.00 /
+&RAMP ID='fire_ramp', T=  0., F=0.0025 /
+&RAMP ID='fire_ramp', T=  5., F=0.0056 /
+&RAMP ID='fire_ramp', T= 10., F=0.0100 /
+&RAMP ID='fire_ramp', T= 20., F=0.0225 /
+&RAMP ID='fire_ramp', T= 30., F=0.0400 /
+&RAMP ID='fire_ramp', T= 40., F=0.0624 /
+&RAMP ID='fire_ramp', T= 50., F=0.0688 /
+&RAMP ID='fire_ramp', T= 60., F=0.0755 /
+&RAMP ID='fire_ramp', T= 70., F=0.0825 /
+&RAMP ID='fire_ramp', T= 80., F=0.0899 /
+&RAMP ID='fire_ramp', T= 90., F=0.0975 /
+&RAMP ID='fire_ramp', T=100., F=0.1055 /
+&RAMP ID='fire_ramp', T=110., F=0.1137 /
+&RAMP ID='fire_ramp', T=120., F=0.1223 /
+&RAMP ID='fire_ramp', T=130., F=0.1312 /
+&RAMP ID='fire_ramp', T=140., F=0.1404 /
+&RAMP ID='fire_ramp', T=150., F=0.1499 /
+&RAMP ID='fire_ramp', T=160., F=0.1597 /
+&RAMP ID='fire_ramp', T=170., F=0.1699 /
+&RAMP ID='fire_ramp', T=180., F=0.1803 /
+&RAMP ID='fire_ramp', T=190., F=0.1911 /
+&RAMP ID='fire_ramp', T=200., F=0.2022 /
+&RAMP ID='fire_ramp', T=210., F=0.2136 /
+&RAMP ID='fire_ramp', T=220., F=0.2253 /
+&RAMP ID='fire_ramp', T=230., F=0.2372 /
+&RAMP ID='fire_ramp', T=240., F=0.2496 /
+&RAMP ID='fire_ramp', T=250., F=0.2622 /
+&RAMP ID='fire_ramp', T=260., F=0.2752 /
+&RAMP ID='fire_ramp', T=270., F=0.2884 /
+&RAMP ID='fire_ramp', T=280., F=0.3020 /
+&RAMP ID='fire_ramp', T=290., F=0.3159 /
+&RAMP ID='fire_ramp', T=300., F=0.3301 /
+&RAMP ID='fire_ramp', T=310., F=0.3446 /
+&RAMP ID='fire_ramp', T=320., F=0.3594 /
+&RAMP ID='fire_ramp', T=330., F=0.3746 /
+&RAMP ID='fire_ramp', T=340., F=0.3900 /
+&RAMP ID='fire_ramp', T=350., F=0.4058 /
+&RAMP ID='fire_ramp', T=360., F=0.4218 /
+&RAMP ID='fire_ramp', T=370., F=0.4382 /
+&RAMP ID='fire_ramp', T=380., F=0.4549 /
+&RAMP ID='fire_ramp', T=390., F=0.4719 /
+&RAMP ID='fire_ramp', T=400., F=0.4892 /
+&RAMP ID='fire_ramp', T=410., F=0.5068 /
+&RAMP ID='fire_ramp', T=420., F=0.5248 /
+&RAMP ID='fire_ramp', T=430., F=0.5430 /
+&RAMP ID='fire_ramp', T=440., F=0.5616 /
+&RAMP ID='fire_ramp', T=450., F=0.5805 /
+&RAMP ID='fire_ramp', T=460., F=0.5997 /
+&RAMP ID='fire_ramp', T=470., F=0.6192 /
+&RAMP ID='fire_ramp', T=480., F=0.6390 /
+&RAMP ID='fire_ramp', T=490., F=0.6591 /
+&RAMP ID='fire_ramp', T=500., F=0.6795 /
+&RAMP ID='fire_ramp', T=510., F=0.7003 /
+&RAMP ID='fire_ramp', T=520., F=0.7213 /
+&RAMP ID='fire_ramp', T=530., F=0.7427 /
+&RAMP ID='fire_ramp', T=540., F=0.7644 /
+&RAMP ID='fire_ramp', T=550., F=0.7864 /
+&RAMP ID='fire_ramp', T=560., F=0.8087 /
+&RAMP ID='fire_ramp', T=570., F=0.8313 /
+&RAMP ID='fire_ramp', T=580., F=0.8543 /
+&RAMP ID='fire_ramp', T=590., F=0.8775 /
+&RAMP ID='fire_ramp', T=600., F=0.9011 /
+
+
+
+
+
+
+
 
 &DUMP DT_DEVC=10. /
 
