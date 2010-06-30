@@ -2065,7 +2065,7 @@ sizable fire, but may not be appropriate to study a very small, smoldering sourc
 U.S. Nuclear Regulatory Commission~\cite{NUREG_1824}, the $D^*/\dx$ values ranged from 4 to 16.}.
 
 \subsection{\emph{A Posteriori} Mesh Quality Metrics}
-
+\label{info:meshquality}
 The quality of a particular simulation is most directly tied to grid resolution.  Three output quantities are suggested for measuring errors in the velocity and scalar fields:
 \begin{enumerate}
 \item A model for the fraction of unresolved kinetic energy called the \emph{measure of turbulence resolution} (similar to what is often called the `Pope criterion' \cite{Pope:2004}), MTR
@@ -2083,7 +2083,7 @@ Examples:
 Note that {\tt SPEC\_ID} is required for MSR and WEM.  Also, {\tt CELL\_CENTERED} is optional for any of the three metrics.
 
 \subsubsection{Measure of Turbulence Resolution}
-\label{mtr}
+
 In FDS, the user may output a scalar quantity which we refer to as the \emph{measure of turbulence resolution}, defined locally as
 \begin{eqnarray}
 \mbox{MTR}(\mathbf{x},t) = \frac{k_{sgs}}{k_{res} + k_{sgs}}
@@ -9025,8 +9025,9 @@ remember that all output quantity names ought to be in single quotes.
 {\ct RADIATIVE HEAT FLUX GAS}                   & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D            \\ \hline
 {\ct RADIOMETER}                                & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Relative humidity                             & \%             & D,I,P,S      \\ \hline
+{\ct SCALAR RESOLUTION}$^{****}$                &  See Section~\ref{info:meshquality}           &                & D,S          \\ \hline
 {\ct SOOT VOLUME FRACTION}                      & $\rho Y_s(Z)/\rho_s$                          & mol/mol        & D,I,P,S      \\ \hline
-{\ct SPECIFIC ENTHALPY}                         & $\sum Y_\alpha \int_0^T c_{p,\alpha}(T') \, dT'$  & kJ/kg    & D,I,P,S      \\ \hline
+{\ct SPECIFIC ENTHALPY}                         & $\sum Y_\alpha \int_0^T c_{p,\alpha}(T') \, dT'$  & kJ/kg    & D,I,P,S        \\ \hline
 {\ct SPECIFIC HEAT}                             & $c_p$                                         & kJ/kg/K        & D,I,P,S      \\ \hline
 {\ct SPRINKLER LINK TEMPERATURE}                & See Section~\ref{info:sprinklers}             & $^\circ$C      & D            \\ \hline
 {\ct SOLID DENSITY}                             & See Section~\ref{info:material_components}    & kg/m$^3$       & D            \\ \hline
@@ -9035,6 +9036,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct THERMOCOUPLE}                              & $T_{TC}$ (Section~\ref{info:THERMOCOUPLE})    & $^\circ$C      & D            \\ \hline
 {\ct TIME}                                      & $t$ (Section~\ref{info:DEVC})                 & s              & D            \\ \hline
 {\ct TIME STEP}                                 & $\delta t$, Numerical time step               & s              & D            \\ \hline
+{\ct TURBULENCE RESOLUTION}                     & See Section~\ref{info:meshquality}            &                & D,S          \\ \hline
 {\ct U-VELOCITY}                                & $u$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct V-VELOCITY}                                & $v$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct W-VELOCITY}                                & $w$                                           & m/s            & D,I,P,S      \\ \hline
@@ -9047,6 +9049,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct WALL CLOCK TIME}                           & Elapsed wall clock time                       & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
 {\ct WALL THICKNESS}                            & See Section~\ref{info:material_components}    & m              & B,D          \\ \hline
+{\ct WAVELET ERROR}$^{****}$                    & See Section~\ref{info:meshquality}            &                & D,S          \\ \hline
 \end{longtable}
 
 \noindent
@@ -9089,7 +9092,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
 {\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & kW/m$^2$/K     & B,D          \\ \hline
-{\ct HP}                                        & $\cal H'$ (pressure correction)                   & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HRRPUL}                                    & $\int \dq''' \, dx \, dy$                         & kW/m           & D            \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, d\bs$                                & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
