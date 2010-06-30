@@ -1,7 +1,7 @@
 &HEAD CHID='UL_SFPE_25', TITLE='25 ft ceiling with 100 mm grid spacing' /
 
-&MESH IJK= 50, 50,38, XB=10.25,20.25,10.25,20.25,0.0,7.6 /
-&MESH IJK= 50, 50,38, XB=10.25,20.25,20.25,30.25,0.0,7.6 / 
+&MESH IJK= 100, 100, 76, XB=10.25,20.25,10.25,20.25,0.0,7.6 /
+&MESH IJK= 100, 100, 76, XB=10.25,20.25,20.25,30.25,0.0,7.6 / 
 
 &TIME TWFIN=600. / 
 
@@ -38,19 +38,128 @@
 &PROP ID='nozzle', SMOKEVIEW_ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=2.422, FLOW_RAMP='fire_ramp' ,
       DROPLET_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
 
-&RAMP ID='fire_ramp', T=  0., F=0.00 /
-&RAMP ID='fire_ramp', T=  1., F=0.14 /
-&RAMP ID='fire_ramp', T= 30., F=0.19 /
-&RAMP ID='fire_ramp', T= 60., F=0.24 /
-&RAMP ID='fire_ramp', T=120., F=0.36 /
-&RAMP ID='fire_ramp', T=150., F=0.43 /
-&RAMP ID='fire_ramp', T=180., F=0.51 /
-&RAMP ID='fire_ramp', T=210., F=0.60 /
-&RAMP ID='fire_ramp', T=240., F=0.69 /
-&RAMP ID='fire_ramp', T=270., F=0.78 /
-&RAMP ID='fire_ramp', T=300., F=0.89 /
-&RAMP ID='fire_ramp', T=330., F=1.00 /
-&RAMP ID='fire_ramp', T=600., F=1.00 /
+&RAMP ID='fire_ramp' T=  0, F=0.0025/
+&RAMP ID='fire_ramp', T=  5, F=0.0056/
+&RAMP ID='fire_ramp', T= 10, F=0.0100/
+&RAMP ID='fire_ramp', T= 15, F=0.0156/
+&RAMP ID='fire_ramp', T= 20, F=0.0225/
+&RAMP ID='fire_ramp', T= 25, F=0.0306/
+&RAMP ID='fire_ramp', T= 30, F=0.0400/
+&RAMP ID='fire_ramp', T= 35, F=0.0506/
+&RAMP ID='fire_ramp', T= 40, F=0.0624/
+&RAMP ID='fire_ramp', T= 45, F=0.0656/
+&RAMP ID='fire_ramp', T= 50, F=0.0688/
+&RAMP ID='fire_ramp', T= 55, F=0.0721/
+&RAMP ID='fire_ramp', T= 60, F=0.0755/
+&RAMP ID='fire_ramp', T= 65, F=0.0790/
+&RAMP ID='fire_ramp', T= 70, F=0.0825/
+&RAMP ID='fire_ramp', T= 75, F=0.0862/
+&RAMP ID='fire_ramp', T= 80, F=0.0899/
+&RAMP ID='fire_ramp', T= 85, F=0.0936/
+&RAMP ID='fire_ramp', T= 90, F=0.0975/
+&RAMP ID='fire_ramp', T= 95, F=0.1014/
+&RAMP ID='fire_ramp', T=100, F=0.1055/
+&RAMP ID='fire_ramp', T=105, F=0.1096/
+&RAMP ID='fire_ramp', T=110, F=0.1137/
+&RAMP ID='fire_ramp', T=115, F=0.1180/
+&RAMP ID='fire_ramp', T=120, F=0.1223/
+&RAMP ID='fire_ramp', T=125, F=0.1267/
+&RAMP ID='fire_ramp', T=130, F=0.1312/
+&RAMP ID='fire_ramp', T=135, F=0.1358/
+&RAMP ID='fire_ramp', T=140, F=0.1404/
+&RAMP ID='fire_ramp', T=145, F=0.1451/
+&RAMP ID='fire_ramp', T=150, F=0.1499/
+&RAMP ID='fire_ramp', T=155, F=0.1548/
+&RAMP ID='fire_ramp', T=160, F=0.1597/
+&RAMP ID='fire_ramp', T=165, F=0.1648/
+&RAMP ID='fire_ramp', T=170, F=0.1699/
+&RAMP ID='fire_ramp', T=175, F=0.1751/
+&RAMP ID='fire_ramp', T=180, F=0.1803/
+&RAMP ID='fire_ramp', T=185, F=0.1857/
+&RAMP ID='fire_ramp', T=190, F=0.1911/
+&RAMP ID='fire_ramp', T=195, F=0.1966/
+&RAMP ID='fire_ramp', T=200, F=0.2022/
+&RAMP ID='fire_ramp', T=205, F=0.2078/
+&RAMP ID='fire_ramp', T=210, F=0.2136/
+&RAMP ID='fire_ramp', T=215, F=0.2194/
+&RAMP ID='fire_ramp', T=220, F=0.2253/
+&RAMP ID='fire_ramp', T=225, F=0.2312/
+&RAMP ID='fire_ramp', T=230, F=0.2373/
+&RAMP ID='fire_ramp', T=235, F=0.2434/
+&RAMP ID='fire_ramp', T=240, F=0.2559/
+&RAMP ID='fire_ramp', T=245, F=0.2559/
+&RAMP ID='fire_ramp', T=250, F=0.2622/
+&RAMP ID='fire_ramp', T=255, F=0.2678/
+&RAMP ID='fire_ramp', T=260, F=0.2752/
+&RAMP ID='fire_ramp', T=265, F=0.2818/
+&RAMP ID='fire_ramp', T=270, F=0.2884/
+&RAMP ID='fire_ramp', T=275, F=0.2952/
+&RAMP ID='fire_ramp', T=280, F=0.3020/
+&RAMP ID='fire_ramp', T=285, F=0.3089/
+&RAMP ID='fire_ramp', T=290, F=0.3159/
+&RAMP ID='fire_ramp', T=295, F=0.3230/
+&RAMP ID='fire_ramp', T=300, F=0.3301/
+&RAMP ID='fire_ramp', T=305, F=0.3373/
+&RAMP ID='fire_ramp', T=310, F=0.3446/
+&RAMP ID='fire_ramp', T=315, F=0.3520/
+&RAMP ID='fire_ramp', T=320, F=0.3594/
+&RAMP ID='fire_ramp', T=325, F=0.3670/
+&RAMP ID='fire_ramp', T=330, F=0.3746/
+&RAMP ID='fire_ramp', T=335, F=0.3822/
+&RAMP ID='fire_ramp', T=340, F=0.3900/
+&RAMP ID='fire_ramp', T=345, F=0.3978/
+&RAMP ID='fire_ramp', T=350, F=0.4058/
+&RAMP ID='fire_ramp', T=355, F=0.4138/
+&RAMP ID='fire_ramp', T=360, F=0.4218/
+&RAMP ID='fire_ramp', T=365, F=0.4300/
+&RAMP ID='fire_ramp', T=370, F=0.4382/
+&RAMP ID='fire_ramp', T=375, F=0.4465/
+&RAMP ID='fire_ramp', T=380, F=0.4549/
+&RAMP ID='fire_ramp', T=385, F=0.4634/
+&RAMP ID='fire_ramp', T=390, F=0.4719/
+&RAMP ID='fire_ramp', T=395, F=0.4805/
+&RAMP ID='fire_ramp', T=400, F=0.4892/
+&RAMP ID='fire_ramp', T=405, F=0.4980/
+&RAMP ID='fire_ramp', T=410, F=0.5068/
+&RAMP ID='fire_ramp', T=415, F=0.5158/
+&RAMP ID='fire_ramp', T=420, F=0.5248/
+&RAMP ID='fire_ramp', T=425, F=0.5339/
+&RAMP ID='fire_ramp', T=430, F=0.5430/
+&RAMP ID='fire_ramp', T=435, F=0.5523/
+&RAMP ID='fire_ramp', T=440, F=0.5616/
+&RAMP ID='fire_ramp', T=445, F=0.5710/
+&RAMP ID='fire_ramp', T=450, F=0.5805/
+&RAMP ID='fire_ramp', T=455, F=0.5900/
+&RAMP ID='fire_ramp', T=460, F=0.5997/
+&RAMP ID='fire_ramp', T=465, F=0.6094/
+&RAMP ID='fire_ramp', T=470, F=0.6192/
+&RAMP ID='fire_ramp', T=475, F=0.6290/
+&RAMP ID='fire_ramp', T=480, F=0.6390/
+&RAMP ID='fire_ramp', T=485, F=0.6490/
+&RAMP ID='fire_ramp', T=490, F=0.6591/
+&RAMP ID='fire_ramp', T=495, F=0.6693/
+&RAMP ID='fire_ramp', T=500, F=0.6795/
+&RAMP ID='fire_ramp', T=505, F=0.6899/
+&RAMP ID='fire_ramp', T=510, F=0.7003/
+&RAMP ID='fire_ramp', T=515, F=0.7108/
+&RAMP ID='fire_ramp', T=520, F=0.7213/
+&RAMP ID='fire_ramp', T=525, F=0.7320/
+&RAMP ID='fire_ramp', T=530, F=0.7427/
+&RAMP ID='fire_ramp', T=535, F=0.7535/
+&RAMP ID='fire_ramp', T=540, F=0.7644/
+&RAMP ID='fire_ramp', T=545, F=0.7754/
+&RAMP ID='fire_ramp', T=550, F=0.7864/
+&RAMP ID='fire_ramp', T=555, F=0.7975/
+&RAMP ID='fire_ramp', T=560, F=0.8087/
+&RAMP ID='fire_ramp', T=565, F=0.8200/
+&RAMP ID='fire_ramp', T=570, F=0.8313/
+&RAMP ID='fire_ramp', T=575, F=0.8428/
+&RAMP ID='fire_ramp', T=580, F=0.8543/
+&RAMP ID='fire_ramp', T=585, F=0.8658/
+&RAMP ID='fire_ramp', T=590, F=0.8775/
+&RAMP ID='fire_ramp', T=595, F=0.8892/
+&RAMP ID='fire_ramp', T=600, F=0.9011/
+
 
 &DUMP DT_DEVC=10. /
 

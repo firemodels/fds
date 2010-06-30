@@ -1,9 +1,9 @@
 &HEAD CHID='UL_SFPE_35', TITLE='35 ft ceiling with 100 mm grid spacing' /
 
-&MESH IJK= 50, 50, 53, XB=10.25,20.25,10.25,20.25,0.0,10.6 /
-&MESH IJK= 50, 50, 53, XB=10.25,20.25,20.25,30.25,0.0,10.6 / 
+&MESH IJK= 100, 100, 106, XB=10.25,20.25,10.25,20.25,0.0,10.6 /
+&MESH IJK= 100, 100, 106, XB=10.25,20.25,20.25,30.25,0.0,10.6 / 
 
-&TIME TWFIN=600. / 
+&TIME TWFIN=300. / 
 
 &MATL ID                 = 'CEILING TILE'
       FYI                = 'Data as provided by UL'
@@ -35,30 +35,72 @@
       QUANTITIES(1:2)='DROPLET_DIAMETER','DROPLET_TEMPERATURE',
       DIAMETER=100.,HEAT_OF_COMBUSTION=45000. /
 
-&PROP ID='nozzle', SMOKEVIEW_ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=4.844, FLOW_RAMP='fire_ramp' ,
+&PROP ID='nozzle', SMOKEVIEW_ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=4.844, FLOW_RAMP='FIRE' ,
       DROPLET_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
 
-&RAMP ID='fire_ramp', T=  0., F=0.00 /
-&RAMP ID='fire_ramp', T=  1., F=0.07 /
-&RAMP ID='fire_ramp', T= 30., F=0.09 /
-&RAMP ID='fire_ramp', T= 60., F=0.12 /
-&RAMP ID='fire_ramp', T=120., F=0.18 /
-&RAMP ID='fire_ramp', T=150., F=0.22 /
-&RAMP ID='fire_ramp', T=180., F=0.26 /
-&RAMP ID='fire_ramp', T=210., F=0.30 /
-&RAMP ID='fire_ramp', T=240., F=0.34 /
-&RAMP ID='fire_ramp', T=270., F=0.39 /
-&RAMP ID='fire_ramp', T=300., F=0.44 /
-&RAMP ID='fire_ramp', T=330., F=0.50 /
-&RAMP ID='fire_ramp', T=360., F=0.56 /
-&RAMP ID='fire_ramp', T=390., F=0.62 /
-&RAMP ID='fire_ramp', T=420., F=0.68 /
-&RAMP ID='fire_ramp', T=450., F=0.75 /
-&RAMP ID='fire_ramp', T=480., F=0.82 /
-&RAMP ID='fire_ramp', T=510., F=0.89 /
-&RAMP ID='fire_ramp', T=540., F=0.97 /
-&RAMP ID='fire_ramp', T=560., F=1.00 /
-&RAMP ID='fire_ramp', T=600., F=1.00 /
+&RAMP ID='FIRE', T=  0, F=0.0019/
+&RAMP ID='FIRE', T=  5, F=0.0042/
+&RAMP ID='FIRE', T= 10, F=0.0075/
+&RAMP ID='FIRE', T= 15, F=0.0117/
+&RAMP ID='FIRE', T= 20, F=0.0169/
+&RAMP ID='FIRE', T= 25, F=0.0230/
+&RAMP ID='FIRE', T= 30, F=0.0300/
+&RAMP ID='FIRE', T= 35, F=0.0380/
+&RAMP ID='FIRE', T= 40, F=0.0468/
+&RAMP ID='FIRE', T= 45, F=0.0492/
+&RAMP ID='FIRE', T= 50, F=0.0516/
+&RAMP ID='FIRE', T= 55, F=0.0541/
+&RAMP ID='FIRE', T= 60, F=0.0566/
+&RAMP ID='FIRE', T= 65, F=0.0592/
+&RAMP ID='FIRE', T= 70, F=0.0619/
+&RAMP ID='FIRE', T= 75, F=0.0646/
+&RAMP ID='FIRE', T= 80, F=0.0674/
+&RAMP ID='FIRE', T= 85, F=0.0702/
+&RAMP ID='FIRE', T= 90, F=0.0731/
+&RAMP ID='FIRE', T= 95, F=0.0761/
+&RAMP ID='FIRE', T=100, F=0.0791/
+&RAMP ID='FIRE', T=105, F=0.0822/
+&RAMP ID='FIRE', T=110, F=0.0853/
+&RAMP ID='FIRE', T=115, F=0.0885/
+&RAMP ID='FIRE', T=120, F=0.0917/
+&RAMP ID='FIRE', T=125, F=0.0950/
+&RAMP ID='FIRE', T=130, F=0.0984/
+&RAMP ID='FIRE', T=135, F=0.1018/
+&RAMP ID='FIRE', T=140, F=0.1053/
+&RAMP ID='FIRE', T=145, F=0.1088/
+&RAMP ID='FIRE', T=150, F=0.1124/
+&RAMP ID='FIRE', T=155, F=0.1161/
+&RAMP ID='FIRE', T=160, F=0.1198/
+&RAMP ID='FIRE', T=165, F=0.1236/
+&RAMP ID='FIRE', T=170, F=0.1274/
+&RAMP ID='FIRE', T=175, F=0.1313/
+&RAMP ID='FIRE', T=180, F=0.1353/
+&RAMP ID='FIRE', T=185, F=0.1393/
+&RAMP ID='FIRE', T=190, F=0.1433/
+&RAMP ID='FIRE', T=195, F=0.1474/
+&RAMP ID='FIRE', T=200, F=0.1516/
+&RAMP ID='FIRE', T=205, F=0.1559/
+&RAMP ID='FIRE', T=210, F=0.1602/
+&RAMP ID='FIRE', T=215, F=0.1645/
+&RAMP ID='FIRE', T=220, F=0.1689/
+&RAMP ID='FIRE', T=225, F=0.1734/
+&RAMP ID='FIRE', T=230, F=0.1780/
+&RAMP ID='FIRE', T=235, F=0.1825/
+&RAMP ID='FIRE', T=240, F=0.1872/
+&RAMP ID='FIRE', T=245, F=0.1919/
+&RAMP ID='FIRE', T=250, F=0.1967/
+&RAMP ID='FIRE', T=255, F=0.2015/
+&RAMP ID='FIRE', T=260, F=0.2064/
+&RAMP ID='FIRE', T=265, F=0.2113/
+&RAMP ID='FIRE', T=270, F=0.2163/
+&RAMP ID='FIRE', T=275, F=0.2214/
+&RAMP ID='FIRE', T=280, F=0.2265/
+&RAMP ID='FIRE', T=285, F=0.2317/
+&RAMP ID='FIRE', T=290, F=0.2369/
+&RAMP ID='FIRE', T=295, F=0.2422/
+&RAMP ID='FIRE', T=300, F=0.2476/
+
+
 
 &DUMP DT_DEVC=10. /
 
