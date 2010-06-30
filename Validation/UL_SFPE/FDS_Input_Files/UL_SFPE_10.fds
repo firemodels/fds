@@ -1,7 +1,7 @@
 &HEAD CHID='UL_SFPE_10', TITLE='10 ft ceiling with 100 mm grid spacing' /
 
-&MESH IJK=50,50,15, XB=10.25,20.25,10.25,20.25,0.0,3.0 /
-&MESH IJK=50,50,15, XB=10.25,20.25,20.25,30.25,0.0,3.0 / 
+&MESH IJK=100,100,30, XB=10.25,20.25,10.25,20.25,0.0,3.0 /
+&MESH IJK=100,100,30, XB=10.25,20.25,20.25,30.25,0.0,3.0 / 
 
 &TIME TWFIN=600. / 
 
@@ -38,11 +38,37 @@
 &PROP ID='nozzle', SMOKEVIEW_ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=0.511, FLOW_RAMP='fire_ramp' ,
       DROPLET_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
 
-&RAMP ID='fire_ramp', T=  0., F=0.00 /
-&RAMP ID='fire_ramp', T=  1., F=0.68 /
-&RAMP ID='fire_ramp', T= 30., F=0.89 /
-&RAMP ID='fire_ramp', T= 44., F=1.00 /
-&RAMP ID='fire_ramp', T=600., F=1.00 /
+&RAMP ID='fire_ramp', T=  0., F=0.0178 /
+&RAMP ID='fire_ramp', T=  5., F=0.0400 /
+&RAMP ID='fire_ramp', T= 10., F=0.0711 /
+&RAMP ID='fire_ramp', T= 15., F=0.1111 /
+&RAMP ID='fire_ramp', T= 20., F=0.1600 /
+&RAMP ID='fire_ramp', T= 25., F=0.2177 /
+&RAMP ID='fire_ramp', T= 30., F=0.2844 /
+&RAMP ID='fire_ramp', T= 35., F=0.3599 /
+&RAMP ID='fire_ramp', T= 40., F=0.4436 /
+&RAMP ID='fire_ramp', T= 45., F=0.4661 /
+&RAMP ID='fire_ramp', T= 50., F=0.4891 /
+&RAMP ID='fire_ramp', T= 55., F=0.5126 /
+&RAMP ID='fire_ramp', T= 60., F=0.5368 /
+&RAMP ID='fire_ramp', T= 65., F=0.5614 /
+&RAMP ID='fire_ramp', T= 70., F=0.5867 /
+&RAMP ID='fire_ramp', T= 75., F=0.6124 /
+&RAMP ID='fire_ramp', T= 80., F=0.6388 /
+&RAMP ID='fire_ramp', T= 85., F=0.6657 /
+&RAMP ID='fire_ramp', T= 90., F=0.6931 /
+&RAMP ID='fire_ramp', T= 95., F=0.7211 /
+&RAMP ID='fire_ramp', T=100., F=0.7497 /
+&RAMP ID='fire_ramp', T=105., F=0.7788 /
+&RAMP ID='fire_ramp', T=110., F=0.8085 /
+&RAMP ID='fire_ramp', T=115., F=0.8387 /
+&RAMP ID='fire_ramp', T=120., F=0.8695 /
+&RAMP ID='fire_ramp', T=125., F=0.9008 /
+&RAMP ID='fire_ramp', T=130., F=0.9327 /
+&RAMP ID='fire_ramp', T=135., F=0.9651 /
+&RAMP ID='fire_ramp', T=140., F=0.9981 /
+&RAMP ID='fire_ramp', T=145., F=1.0000 /
+&RAMP ID='fire_ramp', T=600., F=1.0000 /
 
 &DUMP DT_DEVC=10. /
 
