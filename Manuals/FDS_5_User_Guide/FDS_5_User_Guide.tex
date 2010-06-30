@@ -2037,9 +2037,9 @@ Do not specify either linear transformation points or {\ct IDERIV=0} points at c
 the mesh boundaries.
 \end{warning}
 
-\subsection{Choosing Optimum Mesh Dimensions}
+\subsection{Mesh Resolution}
 
-A common question asked by new FDS users is, ``What size mesh should I use?''
+A common question asked by new FDS users is, ``What should my grid spacing be?''
 The answer is not easy because it depends considerably on what you are trying
 to accomplish. In general, you should build an FDS input file using a relatively
 coarse mesh, and then gradually refine the mesh until you do not see
@@ -2064,8 +2064,118 @@ for evaluating the spread of smoke and heat through a building from a
 sizable fire, but may not be appropriate to study a very small, smoldering source\footnote{For the validation study sponsored by the
 U.S. Nuclear Regulatory Commission~\cite{NUREG_1824}, the $D^*/\dx$ values ranged from 4 to 16.}.
 
+\subsection{\emph{A Posteriori} Mesh Quality Metrics}
 
+The quality of a particular simulation is most directly tied to grid resolution.  Three output quantities are suggested for measuring errors in the velocity and scalar fields:
+\begin{enumerate}
+\item A model for the fraction of unresolved kinetic energy called the \emph{measure of turbulence resolution} (similar to what is often called the `Pope criterion' \cite{Pope:2004}), MTR
+\item A model for the fraction of unresolved scalar energy fluctuations called \emph{measure of scalar resolution} \cite{Vervisch:2010}, MSR
+\item A \emph{wavelet-based error measure} \cite{McDermott:2010}, WEM
+\end{enumerate}
+Examples:
 
+\footnotesize
+\begin{verbatim}
+&SLCF PBY=0, QUANTITY='TURBULENCE RESOLUTION' /
+&SLCF PBY=0, QUANTITY='SCALAR RESOLUTION', SPEC_ID='HELIUM', CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='WAVELET ERROR', SPEC_ID='FUEL', CELL_CENTERED=.TRUE. /
+\end{verbatim} \normalsize
+Note that {\tt SPEC\_ID} is required for MSR and WEM.  Also, {\tt CELL\_CENTERED} is optional for any of the three metrics.
+
+\subsubsection{Measure of Turbulence Resolution}
+\label{mtr}
+In FDS, the user may output a scalar quantity which we refer to as the \emph{measure of turbulence resolution}, defined locally as
+\begin{eqnarray}
+\mbox{MTR}(\mathbf{x},t) = \frac{k_{sgs}}{k_{res} + k_{sgs}}
+\end{eqnarray}
+where
+\vskip-.6cm
+\begin{eqnarray}
+k_{res} &=& \mbox{$\frac{1}{2}$}\tilde{u}_i \tilde{u}_i \\
+k_{sgs} &=& \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i)
+\end{eqnarray}
+Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  The model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored. The basic idea is to provide the user with an approximation to the Pope criterion \cite{Pope:2004}, $M$, which is easily accessible in Smokeview (the FDS visualization tool).  In Smokeview, the user may readily time average MTR in a specified plane.  The time average of MTR is a reasonable estimate of $M$.  The measure falls within the range [0,1], with 0 indicating perfect resolution and 1 indicating poor resolution.  The concept is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
+\begin{figure}[ht]
+\centering
+\begin{tabular}{rl}
+\includegraphics[width=0.4\linewidth]{FIGURES/mtr_resolved_signal} &
+\includegraphics[width=0.4\linewidth]{FIGURES/mtr_unresolved_signal}
+\end{tabular}
+\vskip-0.2cm
+\caption{(Left) Resolved signal, MTR is small. (Right) Unresolved signal, MTR is close to unity.}
+\label{fig_mtr}
+\end{figure}
+
+For the canonical case of isotropic turbulence Pope actually defines LES such that $M<0.2$.  That is, LES requires resolution of 80\% of the kinetic energy in the flow field (because this puts the grid Nyquist limit within the inertial subrange).  The question remains as to whether this critical value is sufficient or necessary for a given engineering problem.  As shown in \cite{McDermott:2010}, maintaining mean values of MTR near 0.2 indeed provides satisfactory results (simulation results within experimental error bounds) for mean velocities and species concentrations in nonreacting, buoyant plumes.
+
+\subsubsection{Measure of Scalar Resolution}
+\label{mtr}
+The \emph{measure of turbulence resolution} is defined locally as
+\begin{eqnarray}
+\mbox{MSR}(\mathbf{x},t) = \frac{T_{sgs}}{T_{res} + T_{sgs}}
+\end{eqnarray}
+where
+\vskip-.6cm
+\begin{eqnarray}
+T_{res} &=& \tilde{\varphi}^2 \\
+T_{sgs} &=& (\tilde{\varphi} - \hat{\tilde{\varphi}})^2
+\end{eqnarray}
+Here again the model for the SGS scalar energy fluctuations is taken from scale similarity \cite{Bardina:1980}.  The field $\hat{\tilde{\varphi}}$ is test filtered at a scale $2\Delta$.  The cross-term energy (i.e. $\langle 2 \tilde{\varphi}\varphi^{\prime} \rangle$, where $\varphi^\prime = \varphi - \tilde{\varphi}$) is ignored, but this does not affect the bounds of the measure.  Further, it can be shown that this term is small if sufficient resolution is used. There is evidence to suggest that the requirements for scalar resolution may be somewhat more stringent than for the velocity field \cite{Vervisch:2010}.  Therefore, currently the best advice is to keep the mean value of MSR less than 0.2.
+
+\subsubsection{Wavelet Error Measure}
+\label{wavelets}
+We begin by providing background on the simple Haar wavelet \cite{Nievergelt:1999}.  For a thorough and more sophisticated review of wavelet methods, the reader is referred to Schneider and Vasilyev \cite{Schneider:2010}.
+
+Suppose the scalar function $f(r)$ is sampled at discrete points $r_j$, separated by a distance $h$, giving values $s_j$.  Defining the \emph{unit step function} over the interval $[r_1,r_2]$ by
+\begin{eqnarray}
+\varphi_{[r_1,r_2]} = \left\{ \begin{array}{ll} 1 & \quad \mbox{if} \quad r_1 \le r < r_2 \\ 0 & \quad \mbox{otherwise} \end{array} \right.
+\end{eqnarray}
+the simplest possible reconstruction of the signal is the step function approximation
+\begin{eqnarray}
+f(r) \approx \sum_j s_j \varphi_{[r_j,r_j+h]}(r)
+\end{eqnarray}
+By ``viewing'' the signal at a coarser resolution, say $2h$, an identical reconstruction of the function $f$ over the interval $[r_j,r_j+2h]$ may be obtained from
+\begin{eqnarray}
+\label{eqn_wavelet_decomp}
+f_{[r_j,r_j+2h]}(r) = \underbrace{\mbox{$\frac{s_j+s_{j+1}}{2}$}}_a \,\varphi_{[r_j,r_j+2h]}(r) + \underbrace{\mbox{$\frac{s_j-s_{j+1}}{2}$}}_c \,\psi_{[r_j,r_j+2h]}(r)
+\end{eqnarray}
+where $a$ is the \emph{average} coefficient and $c$ is the \emph{wavelet} coefficient.  The Haar \emph{mother wavelet} (Figure \ref{fig_haar_mother}) is identified as
+\begin{eqnarray}
+\psi_{[r_1,r_2]}(r) = \left\{ \begin{array}{ll} 1 & \quad \mbox{if} \quad r_1\le r < \frac{1}{2}(r_1+r_2) \\ -1 & \quad \mbox{if} \quad \frac{1}{2}(r_1+r_2)\le r < r_2 \end{array} \right.
+\end{eqnarray}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\linewidth]{FIGURES/haar_mother}
+\vskip-0.2cm
+\caption{Haar mother wavelet on the interval [0,1].}
+\label{fig_haar_mother}
+\end{figure}
+
+The decomposition of the signal shown in (\ref{eqn_wavelet_decomp}) may be repeated at ever coarser resolutions.  The result is a \emph{wavelet transform}. The procedure is entirely analogous to the Fourier transform, but with compact support.  If we look at a 1D signal with $2^m$ points, the repeated application of (\ref{eqn_wavelet_decomp}) results in an $m \times m$ matrix of averages $\mathbf{a}$ with components $a_{ij}$ and an $m \times m$ wavelet coefficient matrix $\mathbf{c}$ with components $c_{ij}$.  Each row $i$ of $\mathbf{a}$ may be reconstructed from the $i+1$ row of $\mathbf{a}$ and $\mathbf{c}$.  Because of this and because small values of the wavelet coefficient matrix may be discarded, dramatic compression of the signal may be obtained.
+
+Here we are interested in using the wavelet analysis to say something about the local level of error in grid resolution.  Very simply, we ask what can be discerned from a sample of four data points along a line.  Roughly speaking we might expect to see one of the four scenarios depicted in Figure \ref{fig_wavelet_transforms}.  Within each plot window we also show the results of a Haar wavelet transform for that signal.  Looking first at the two top plots, on the left we have a step function and on the right we have a straight line.  Intuitively, we expect large error for the step function and small error for the line.  The following error measure achieves this goal:
+\vskip-.6cm
+\begin{eqnarray}
+\mbox{WEM}(\mathbf{x},t) = \max_{x,y,z}\left( \frac{|c_{11} + c_{12}| - |c_{21}|}{|a_{21}|} \right)
+\end{eqnarray}
+Note that we have arbitrarily scaled the measure so that a step function leads to WEM of unity.  In practice the transform is performed in all coordinate directions and the max value is reported.  The scalar value may be output to Smokeview at the desired time interval.
+\begin{figure}[ht]
+\centering
+\begin{tabular}{rl}
+\includegraphics[width=0.4\linewidth]{FIGURES/haar_step} &
+\includegraphics[width=0.4\linewidth]{FIGURES/haar_line} \\
+\includegraphics[width=0.4\linewidth]{FIGURES/haar_eddy} &
+\includegraphics[width=0.4\linewidth]{FIGURES/haar_extr}
+\end{tabular}
+\vskip-0.2cm
+\caption{Averages and coefficients for local Haar wavelet transforms on four typical signals.}
+\label{fig_wavelet_transforms}
+\end{figure}
+
+Looking now at the two plots on the bottom of Figure \ref{fig_wavelet_transforms}, the signal on the left, which may indicate spurious oscillations or unresolved turbulent motion, leads to $\mbox{WEM} = 2$ (note that this limit differs from the upper bound of unity for MTR and MSR).  Our measure therefore views this situation as the worst case in a sense.  The signal to the lower right is indicative of an extremum, which actually is easily resolved by most centered spatial schemes and results again in $\mbox{WEM}=0$.
+
+In \cite{McDermott:2010}, the time average of WEM was reported for LES of a nonreacting buoyant plume at three grid resolutions.  From this study, the best advice currently is to maintain average values of WEM less than 0.5.
 
 
 

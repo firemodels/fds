@@ -1780,7 +1780,7 @@ that ``model'' their impact on the approximate form of the governing equations.
 This section contains a simple explanation of how these terms are modeled
 in FDS. Note that this discussion is quite different than what it typically found in the
 literature, thus the reader is encouraged to consider other explanations of the technique in the references that are
-listed in a review article by Pope~\cite{Pope:LES}.
+listed in a review article by Pope~\cite{Pope:2004}.
 
 There is a small term in the energy equation
 known as the {\em dissipation rate}, $\epsilon$,
@@ -2537,7 +2537,7 @@ this is that FDS is applied over length scales ranging from millimeters to tens 
 is sometimes too coarse to expect the simple mixing time model to work effectively.
 A scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
 heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses by default a value of 2500~kW/m$^3$ as an upper bound\footnote{Note that
-for DNS, FDS imposes a less restrictive upper bound on the local heat release rate per unit volume. It is 
+for DNS, FDS imposes a less restrictive upper bound on the local heat release rate per unit volume. It is
 \be \dq_{\max}''' = 200/\dx + 2500 \quad \hbox{kW/m}^3 \ee
 The value of 200~kW/m$^2$ is an upper bound on the heat release rate per unit area of flame sheet.}
 on the local value of the heat release rate per unit volume. Typically, this bound only affects fires whose value of $Q^*$
