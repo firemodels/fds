@@ -30,6 +30,7 @@ unsigned char cpuusage(void);
 int get_ncores(void);
 float get_load(void);
 float get_host_load(char *host);
+unsigned char cpuusage_host(char *host,int ncores);
 #endif
 
 #ifdef pp_LINUX
@@ -51,6 +52,7 @@ int main(int argc, char **argv){
   int cpu_usage, cpu_usage_max=25;
 #ifdef pp_LINUX  
   char command_buffer[1024];
+  FILE *stream=NULL;
 #endif  
 
   int itime;
@@ -58,6 +60,11 @@ int main(int argc, char **argv){
   char *command;
   char *command_arg;
   int n;
+
+#ifdef pp_LINUX  
+  hostlistfile=NULL;
+  host=NULL;
+#endif  
 
   prog=argv[0];
 
@@ -82,10 +89,28 @@ int main(int argc, char **argv){
               if(delay_time<0.0)delay_time=0.0;
             }
 		        break;
+#ifdef WIN32		        
           case 'h':
             usage(prog);
             return 1;
             break;
+#endif
+#ifdef pp_LINUX
+          case 'h':
+            if(strlen(arg)<=2||strcmp(arg,"-hosts")!=0){
+              usage(prog);
+              return 1;
+            }
+            else{
+              i++;
+              if(i<argc){
+                arg=argv[i];
+                hostlistfile=malloc(strlen(arg)+1);
+                strcpy(hostlistfile,arg);
+              }
+            }
+            break;
+#endif
           case 'u':
             i++;
             if(i<argc){
@@ -113,6 +138,40 @@ int main(int argc, char **argv){
 
     }
   }
+#ifdef pp_LINUX
+  nhostinfo=0;
+  if(hostlistfile!=NULL){
+    stream=fopen(hostlistfile,"r");
+  }
+  if(hostlistfile!=NULL&&stream!=NULL){
+    char buffer[255];
+
+    while(!feof(stream)){
+      if(fgets(buffer,255,stream)==NULL)break;
+      nhostinfo++;
+    }
+    if(nhostinfo>0){
+      hostdata *hd;
+
+      hostinfo=malloc(nhostinfo*sizeof(hostdata));
+      hd = hostinfo;
+      rewind(stream);
+      while(!feof(stream)){
+        char *hostname;
+
+        if(fgets(buffer,255,stream)==NULL)break;
+        trim(buffer);
+        hostname=malloc(strlen(buffer)+1);
+        strcpy(hostname,buffer);
+        hd->hostname=hostname;
+        hd->ncores=get_host_ncores(hostname);
+        hd++;
+      }
+
+    }
+  }
+  if(stream!=NULL)fclose(stream);
+#endif
 
   if(argstart<0)return 0;
 
@@ -127,17 +186,42 @@ int main(int argc, char **argv){
   cpu_usage=cpuusage();
   Sleep(200);
   cpu_usage=cpuusage();
+#ifdef WIN32
   while(cpu_usage>cpu_usage_max){
     Sleep(2000);
     cpu_usage=cpuusage();
     Sleep(200);
     cpu_usage=cpuusage();
   }
-#ifdef WIN32
   command=argv[argstart];
   _spawnvp(_P_NOWAIT,command, argv+argstart);
 #endif
 #ifdef pp_LINUX
+  if(hostinfo==NULL){
+    host=NULL;
+    while(cpu_usage>cpu_usage_max){
+      cpu_usage=cpuusage();
+      Sleep(1000);
+    }
+  }
+  else{
+    int doit=0;
+
+    while(doit==0){
+      for(i=0;i<nhostinfo;i++){
+        hostdata *hd;
+
+        hd = hostinfo + i;
+        host = hd->hostname;
+        cpu_usage=cpuusage_host(host,hd->ncores);
+        if(cpu_usage<cpu_usage_max){
+          doit=1;
+          break;
+        }
+      }
+      if(doit==0)Sleep(1000);
+    }
+  }
   strcpy(command_buffer,"");
   for(i=argstart;i<argc;i++){
     arg=argv[i];
@@ -175,6 +259,9 @@ void usage(char *prog){
 
   printf("  -d dtime  - wait dtime seconds before running prog in the background\n");
   printf("  -h        - display this message\n");
+#ifdef pp_LINUX  
+  printf("  -host hostfiles - file containing a list of host names to run jobs on\n");
+#endif  
   printf("  -u max    - wait to run prog until cpu usage is less than max (25-100%s)\n",pp);
   printf("  -v        - display version information\n");
   printf("  prog      - program to run in the background\n");
@@ -264,6 +351,9 @@ unsigned char cpuusage()
 }
 #endif
 #ifdef pp_LINUX
+
+/* ------------------ get_ncores ------------------------ */
+
 int get_ncores(void){
   FILE *stream;
   int ncores=0;
@@ -281,6 +371,41 @@ int get_ncores(void){
   fclose(stream);
   return ncores;
 }
+
+/* ------------------ get_host_ncores ------------------------ */
+
+int get_host_ncores(char *host){
+  FILE *stream;
+  char buffer[1024];
+  char command[1024];
+  char localfile[1024];
+  int ncores;
+  
+  strcpy(localfile,"cpuinfo.");
+  strcat(localfile,host);
+
+  strcpy(command,"scp ");
+  strcat(command,host);
+  strcat(command,":/proc/cpuinfo ");
+  strcat(command,localfile);
+
+  system(command);
+
+  stream=fopen(localfile,"r");
+  if(stream==NULL)return 1;
+  while(!feof(stream)){
+    if(fgets(buffer,255,stream)==NULL)break;
+    if(strlen(buffer)<9)continue;
+    buffer[9]=0;
+    if(strcmp(buffer,"processor")==0)ncores++;
+  }
+  if(ncores==0)ncores=1;
+  fclose(stream);
+  return ncores;
+}
+
+/* ------------------ get_host_load ------------------------ */
+
 float get_host_load(char *host){
   FILE *stream;
   char buffer[1024];
@@ -305,6 +430,9 @@ float get_host_load(char *host){
   fclose(stream);
   return load1;
 }
+
+/* ------------------ get_load ------------------------ */
+
 float get_load(void){
   FILE *stream;
   char buffer[255];
@@ -317,6 +445,21 @@ float get_load(void){
   fclose(stream);
   return load1;
 }
+
+/* ------------------ cpuusage ------------------------ */
+
+unsigned char cpuusage_host(char *host, int ncores){
+  float load;
+  unsigned char usage;
+
+  load = get_host_load(host);
+  if(load>ncores)load=ncores;
+  usage = 100*(load/(float)ncores);
+  return usage;
+}
+
+/* ------------------ cpuusage ------------------------ */
+
 unsigned char cpuusage(){
   unsigned char usage;
   float load;
