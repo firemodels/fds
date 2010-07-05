@@ -2,17 +2,20 @@
 \newcommand{\paper}{chapter }
 %\newcommand{\paper}{paper }
 
-\chapter{Uncertainty}
+\chapter{Quantifying Model Uncertainty}
 
 \section{Introduction}
 
-The purpose of this \paper can best be described with a simple example.
+Although there are numerous definitions of uncertainty in regard to fire modeling, the most clearly understood is
+probably by way of a simple example.
 Suppose a fire model is used to estimate the likelihood that electrical control cables would be damaged due to
 a fire.  It is assumed that the fire is ignited within an electrical cabinet, and that
 damage to exterior cables is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C.
 The model predicts that the maximum surface temperature of the cables would be 350~$^\circ$C.
 Does this mean that there is no chance of damage? The answer is no, because the input parameters, like the heat release rate of
-the cabinet fire, and the model assumptions, like the way the cable is modeled, are uncertain.
+the cabinet fire, and the model assumptions, like the way the fire and the cables are modeled, are uncertain. The effect of the
+two combined -- the parameter uncertainty and the model uncertainty -- represent the total uncertainty in the
+predicted temperature.
 
 Uncertainty analysis has long been a part of fire science. Indeed, fire modeling has its origins in risk assessment and uncertainty analysis. The scenario above,
 for example, was considered by Sui and Apostolakis in the early 1980s~\cite{Sui:RE1982} as part of their development of risk models for
@@ -29,15 +32,15 @@ analysis has not. There are a number of reasons for this, including:
 Whether or not these are valid does not change the fact that detailed uncertainty analyses are rarely performed in practice. At best, model developers
 and users publish validation studies whose conclusions are expressed in ways like this: ``The model generally over-predicts the measured temperatures
 by about 10~\%,'' or ``The model predictions are within about 20~\% of the measured heat fluxes.'' This information helps to inform the decision of
-the AHJ, but only in the most qualitative sense. In particular, if the model has been shown to over-predict the quantity of interest, it is considered
+the Authority Having Jurisdiction (AHJ), but only in the most qualitative sense. In particular, if the model has been shown to over-predict the quantity of interest, it is considered
 ``conservative,'' and its subsequent predictions are assessed in that light.
 
 As performance based design increases the use of fire modeling, and the results of the model are incorporated within a statistical framework,
 like a probabilistic risk assessment (PRA), there is a need for a more formal approach to uncertainty that is still tractable for the practicing
 engineer. Using the example above, the answer to the question as to whether or not cables would be damaged in a fire could be expressed in terms of
-the graph shown in Fig.~\ref{bell_curve}. This is the classic Gaussian or normal distribution -- the ``bell curve.'' The area underneath the curve is 1, and
+a statistical distribution like the graph shown in Fig.~\ref{bell_curve}. The area underneath the curve is 1, and
 the area indicated by the shaded region is the probability that even though the model has predicted 350~$^\circ$C, there is still a chance that
-the cables could be damaged because of uncertainty in the model and its input parameters.
+the cables could be damaged because of the uncertainty in the model and its input parameters.
 \begin{figure}[t]
 \begin{center}
 \includegraphics[width=5.in]{FIGURES/bell_curve}
@@ -46,21 +49,8 @@ the cables could be damaged because of uncertainty in the model and its input pa
 \label{bell_curve}
 \end{figure}
 
-This \paper suggests a methodology for quantifying the uncertainty of a model prediction that results from both the uncertainty of
-its input parameters and the uncertainty associated with the physical assumptions of the model itself.
-The approach is to develop simple expressions for the mean and standard deviation of the distribution shown in
-Fig.~\ref{bell_curve}. The overall procedure is not a dramatic departure from current
-practice, but it does better quantify the uncertainty of the prediction and it distinguishes the relative contributions of
-the uncertainty of the mathematical model and the uncertainty of the input parameters.
-Too often the two are lumped together, in which case there is no way to know
-the source of the uncertainty, ``user effects'' or the model itself.
-
-
-
-\section{Definitions of Uncertainty}
-
-The uncertainty in the prediction of a fire model is related to the model's input parameters and
-the model's physical assumptions and mathematical approximations. The two are commonly referred to as
+The uncertainty in the prediction of a fire model results from the model's input parameters and
+the model's physical and mathematical assumptions. The two are commonly referred to as
 the {\em parameter uncertainty} and the {\em model uncertainty}, respectively. In general, there are numerous input
 parameters and numerous subroutines that are part of any fire model calculation. Uncertainty analysis seeks to
 assess the impact of each on the final prediction, a considerable problem given all the variables involved.
@@ -69,82 +59,16 @@ a number of useful empirical correlations have
 been developed over the past few decades that provide simple mathematical relationships between the most important input parameters
 and output quantities that are of interest in a fire analysis. Second, there is a considerable amount of
 experimental measurements against which to compare the results of numerical simulations.
-It is proposed that the empirical correlations should be used to assess {\em parameter uncertainty},
-and the experimental measurements should be used
-to assess {\em model uncertainty}. The two should then be combined to express the total uncertainty of the
-model prediction.
 
-In order to calculate the model uncertainty by way of experimental measurements, the {\em experimental uncertainty}
-needs to be quantified as well. The following sections explain these various forms of uncertainties and suggest ways
-to quantify them.
-
-\subsection{Parameter Uncertainty}
-
-A common technique for assessing parameter uncertainty is to randomly select input parameters
-from postulated distributions and then to run numerous trials with the model~\cite{SFPE:Notarianni}. These methods
-are relatively easy to apply if the model results can be calculated quickly, allowing numerous random samples of the input
-parameters to be evaluated. However, this is much more time-consuming for a CFD model, which may take hours or days to run
-a single simulation. An alternative strategy to assess parameter uncertainty is to consider simplified models of
-fire behavior. In a recent fire model validation study conducted by the U.S.~Nuclear Regulatory Commission~\cite{NUREG_1824}, Hamins
-examined a number of empirical formulae that are widely used in fire protection engineering to determine the
-most important input parameters and their effect on model predictions.
-For example, it has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise, $T-T_0$, due to
-a compartment fire is proportional to the heat release rate, $\dQ$, raised to the two-thirds power:
-\be T-T_0 = C \, \dQ^{\frac{2}{3}} \ee
-The constant, $C$, involves a number of geometric and thermo-physical parameters that are unique to the given
-fire scenario. By way of differentials, this empirical relationship can be expressed in the form:
-\be \frac{\Delta T}{T-T_0} \approx \frac{2}{3} \, \frac{\Delta \dQ}{\dQ}  \ee
-In words, the relative change in the temperature rise is approximately two-thirds the relative change
-in the heat release rate. Assuming that the numerical model exhibits the same functional relationship between the compartment
-temperature and the heat release rate, there is now a way to express the uncertainty of the model prediction as a function
-of the uncertainty of this most
-important input parameter. Often, the uncertainty of a measurement is expressed in the form of a 95~\% confidence interval,
-(two standard deviations or 2$\sigma$).
-Thus, if the heat release rate of a fire is assumed with 95~\% confidence to be
-within 15~\% of the reported measurement, then the temperature
-predicted by the model has an uncertainty\footnote{An uncertainty that is expressed in the form of a
-percentage typically means one or two {\em relative} standard deviations, often denoted with a tilde,
-$\widetilde{\sigma}=\sigma/\mu$.} of at least 10~\%.
-
-Next, suppose that there are several input parameters with a significant impact on the model prediction. Assuming a similar
-analysis can be performed for these parameters, the uncertainty of the model prediction can be expressed as a function of its
-input parameters in the following way:
-\be
-   \widetilde{\sigma}_P^2 = \sum_i p_i^2 \, \widetilde{\sigma}_i^2  \label{parameter_uncertainty}
-\ee
-The terms $\widetilde{\sigma}_i$ are the relative standard deviations of the various input parameters,
-$p_i$ are the respective power dependencies (See Table~\ref{Parameter_Uncertainty}), and
-$\widetilde{\sigma_P}$ is the total contribution of the input parameters to the uncertainty of the model prediction.
-Because it is assumed that the uncertainty of the various input parameters are uncorrelated, they are combined by
-quadrature, or the summing of squares.
-
-\begin{table}[t]
-\caption{Sensitivity of model outputs from Volume 2 of NUREG-1824~\cite{NUREG_1824}. }
-\begin{center}
-\begin{tabular}{|l|c|c|}
-\hline
-Output Quantity                                 & Input Parameter(s)    & Power Dependence, $p$ \\ \hline \hline
-HGL Temperature                                 & HRR                   & 2/3    \\ \hline
-HGL Depth                                       & Door Height           & 1      \\ \hline
-Ceiling Jet Temperature                         & HRR                   &        \\ \hline
-Plume Temperature                               & HRR                   &        \\ \hline
-Gas Concentration                               & HRR                   & 1/2    \\ \hline
-                                                & HRR                   & 1      \\ \cline{2-3}
-\raisebox{1.5ex}[0pt]{Smoke Concentration}      & Soot Yield            & 1      \\ \hline
-                                                & HRR                   & 2      \\ \cline{2-3}
-Compartment Pressure                            & Leakage Rate          & 2      \\ \cline{2-3}
-                                                & Ventilation Rate      & 2      \\ \hline
-Heat Flux                                       & Heat Flux             & 4/3    \\ \hline
-Surface Temperature                             & HRR                   & 2/3    \\ \hline
-\end{tabular}
-\end{center}
-\label{Parameter_Uncertainty}
-\end{table}
+This \paper suggests a methodology for quantifying the {\em model uncertainty}; that is, the accuracy of the model, not its
+input parameters. The procedure is not a dramatic departure from the current
+practice of fire model validation in that it relies mainly on comparisons of model predictions and experimental measurements. In
+assessing the accuracy of the measurements, however, there is a need to quantify how the measured parameters in the experiments
+affect the reported results. This suggests a method of handling {\em parameter uncertainty} for the model as well.
 
 
 
-
-\subsection{Model Uncertainty}
+\subsection{Sources of Model Uncertainty}
 
 A deterministic fire model is based on fundamental conservation laws of mass, momentum and energy,
 applied either to entire compartments or smaller control
@@ -196,48 +120,6 @@ measurements against which the model predictions are compared must be quantified
 
 \subsection{Experimental Uncertainty}
 
-A fire model validation study typically consists of comparing point measurements from a wide variety of fire experiments
-with corresponding model predictions.
-Figure~\ref{temp_history} is a typical result for a single point measurement, and given that usually
-dozens of such measurements are made during each experiment,
-and potentially dozens of experiments are conducted as part of a test series, hundreds of such plots can be
-produced for any given quantity of interest.
-\begin{figure}[t]
-\begin{center}
-\includegraphics[height=2.5in]{FIGURES/sample_time_history}
-\end{center}
-\caption[Sample time history plots.]{Example of a typical time history comparison of model prediction and experimental measurement.}
-\label{temp_history}
-\end{figure}
-Usually, the data is condensed into a more tractable form by way of a single metric with which to
-compare the two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999}
-discuss various possible metrics. A commonly used metric is simply to compare the measured and predicted peak values.
-If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
-this exercise is a pair of numbers for each plot, $(E_i,M_i)$, that can be depicted graphically as shown in Fig.~\ref{scatterplot}.
-The diagonal line in the plot indicates where a prediction and measurement agree.
-But because there is uncertainty associated with each, it cannot be said that the model is perfect if its predictions
-agree exactly with measurements.
-There needs to be a way of quantifying the uncertainties of each before any conclusions can be drawn.
-Such an exercise would result in the uncertainty
-bars\footnote{The data in Fig.~\ref{scatterplot} was extracted from Ref.~\cite{NUREG_1824}.
-The uncertainty bars are for demonstration only.}
-shown in the figure. The
-horizontal bar associated with each point represents the uncertainty in the measurement itself.
-For example, a thermocouple used to measure a gas
-temperature has uncertainty. The vertical bar, however, results from the combination of the model
-and parameter uncertainty, like the heat release rate and material properties that are reported by the experimentalist.
-The {\em experimental uncertainty} is the combination of the measurement and input parameter uncertainty.
-Decoupling the model from the experimental uncertainty is the subject of the analysis below.
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[height=3.in]{FIGURES/scatterplot}
-\end{center}
-\caption[Sample scatter plot.]{Example of a typical scatter plot of model predictions and experimental measurements.}
-\label{scatterplot}
-\end{figure}
-
-
 In a recent fire model validation study conducted by the U.S.~Nuclear Regulatory Commission~\cite{NUREG_1824},
 Hamins estimated the experimental uncertainty for several full-scale fire experiments. There were
 two uncertainty estimates needed for each quantity of interest. The first was an estimate, expressed in the
@@ -245,11 +127,62 @@ form of a 95~\% confidence interval, of the
 uncertainty in the measurement of the quantity itself. For example, reported gas and surface temperatures
 were made with thermocouples of various designs (bare-bead,
 shielded, aspirated) with different size beads, metals, and so on. For each, one can estimate the
-uncertainty in the reported measurement. Next, the
+uncertainty in the reported measurement.
+
+Next, the
 uncertainty of the measurements of the reported test parameters was estimated, including the heat release rate,
 leakage area, ventilation rate, material
-properties, and so on. Using the technique described above, the contribution to the uncertainty of the
-reported measurement was made based on the uncertainty of the reported input parameter.
+properties, and so on. It was then necessary to calculate how the uncertainty in these parameters contributed to
+the uncertainty of the reported measurement. To do this, Hamins
+examined a number of empirical formulae that are widely used in fire protection engineering to determine the
+most important test parameters and their effect on the measured results. These formulae provided the means of propagating
+the parameter uncertainties through the experiment.
+For example, it has been shown~\cite{SFPE:Walton} that the hot gas layer temperature rise, $T-T_0$, due to
+a compartment fire is proportional to the heat release rate, $\dQ$, raised to the two-thirds power:
+\be T-T_0 = C \, \dQ^{\frac{2}{3}} \ee
+The constant, $C$, involves a number of geometric and thermo-physical parameters that are unique to the given
+fire scenario. By way of differentials, this empirical relationship can be expressed in the form:
+\be \frac{\Delta T}{T-T_0} \approx \frac{2}{3} \, \frac{\Delta \dQ}{\dQ}  \ee
+In words, the relative change in the temperature rise is approximately two-thirds the relative change
+in the heat release rate. Assuming that the numerical model exhibits the same functional relationship between the compartment
+temperature and the heat release rate, there is now a way to express the uncertainty of the model prediction as a function
+of the uncertainty of this most
+important input parameter. Often, the uncertainty of a measurement is expressed in the form of a 95~\% confidence interval,
+(two standard deviations or 2$\sigma$).
+Thus, if the heat release rate of a fire is assumed with 95~\% confidence to be
+within 15~\% of the reported measurement, then the temperature
+predicted by the model has an uncertainty\footnote{An uncertainty that is expressed in the form of a
+percentage typically means one or two {\em relative} standard deviations, often denoted with a tilde,
+$\widetilde{\sigma}=\sigma/\mu$.} of at least 10~\%.
+
+Table~\ref{Parameter_Uncertainty} lists the most important physical parameters associated with various
+measured quantities in the experiments and their power dependence.
+
+
+\begin{table}[t]
+\caption{Sensitivity of model outputs from Volume 2 of NUREG-1824~\cite{NUREG_1824}. }
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+Output Quantity                                 & Input Parameter(s)    & Power Dependence \\ \hline \hline
+HGL Temperature                                 & HRR                   & 2/3    \\ \hline
+HGL Depth                                       & Door Height           & 1      \\ \hline
+Ceiling Jet Temperature                         & HRR                   &        \\ \hline
+Plume Temperature                               & HRR                   &        \\ \hline
+Gas Concentration                               & HRR                   & 1/2    \\ \hline
+                                                & HRR                   & 1      \\ \cline{2-3}
+\raisebox{1.5ex}[0pt]{Smoke Concentration}      & Soot Yield            & 1      \\ \hline
+                                                & HRR                   & 2      \\ \cline{2-3}
+Compartment Pressure                            & Leakage Rate          & 2      \\ \cline{2-3}
+                                                & Ventilation Rate      & 2      \\ \hline
+Heat Flux                                       & Heat Flux             & 4/3    \\ \hline
+Surface Temperature                             & HRR                   & 2/3    \\ \hline
+\end{tabular}
+\end{center}
+\label{Parameter_Uncertainty}
+\end{table}
+
+
 It was assumed that the measurement and parameter uncertainty are uncorrelated, and they were combined by
 quadrature (summing of squares) to yield a combined
 experimental uncertainty. Another way to look at this is to recognize that the combined uncertainty is
@@ -302,8 +235,51 @@ Surface Temperature             & 0.14    \\ \hline
 This section describes a method for calculating the {\em model uncertainty}. In terms of the example given above, this
 is the answer to the question, ``350~$^\circ$C plus or minus what?'' The focus is on the model, not the parameter, uncertainty;
 thus, it is assumed, for the moment, that the input parameters are not subject to any uncertainty.
-In that case, how good is the prediction, assuming the fire scenario is exactly defined? The answer to this question is based solely on
+In that case, how good is the prediction, assuming the fire scenario is exactly defined?
+The answer to this question is based solely on
 the model's track record for predicting cable temperatures in controlled validation experiments.
+
+A fire model validation study typically consists of comparing point measurements from a wide variety of fire experiments
+with corresponding model predictions.
+Figure~\ref{temp_history} is a typical result for a single point measurement, and given that usually
+dozens of such measurements are made during each experiment,
+and potentially dozens of experiments are conducted as part of a test series, hundreds of such plots can be
+produced for any given quantity of interest.
+\begin{figure}[t]
+\begin{center}
+\includegraphics[height=2.5in]{FIGURES/sample_time_history}
+\end{center}
+\caption[Sample time history plots.]{Example of a typical time history comparison of model prediction and experimental measurement.}
+\label{temp_history}
+\end{figure}
+Usually, the data is condensed into a more tractable form by way of a single metric with which to
+compare the two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999}
+discuss various possible metrics. A commonly used metric is simply to compare the measured and predicted peak values.
+If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
+this exercise is a pair of numbers for each plot, $(E_i,M_i)$, that can be depicted graphically as shown in Fig.~\ref{scatterplot}.
+The diagonal line in the plot indicates where a prediction and measurement agree.
+But because there is uncertainty associated with each, it cannot be said that the model is perfect if its predictions
+agree exactly with measurements.
+There needs to be a way of quantifying the uncertainties of each before any conclusions can be drawn.
+Such an exercise would result in the uncertainty
+bars\footnote{The data in Fig.~\ref{scatterplot} was extracted from Ref.~\cite{NUREG_1824}.
+The uncertainty bars are for demonstration only.}
+shown in the figure. The
+horizontal bar associated with each point represents the uncertainty in the measurement itself.
+For example, a thermocouple used to measure a gas
+temperature has uncertainty. The vertical bar, however, results from the combination of the model
+and parameter uncertainty, like the heat release rate and material properties that are reported by the experimentalist.
+The {\em experimental uncertainty} is the combination of the measurement and input parameter uncertainty.
+Decoupling the model from the experimental uncertainty is the subject of the analysis below.
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[height=3.in]{FIGURES/scatterplot}
+\end{center}
+\caption[Sample scatter plot.]{Example of a typical scatter plot of model predictions and experimental measurements.}
+\label{scatterplot}
+\end{figure}
+
 
 Actually, the ``plus or minus'' uncertainty bounds are expressed as a statistical distribution. In other words, the
 prediction is not expressed merely as 350~$^\circ$C, but rather as a random variable with a given mean, $\mu$, and standard
