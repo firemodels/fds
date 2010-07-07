@@ -31,6 +31,7 @@ REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW, YSUM,YY_GET(1:N_SPECIES),ZZ_GET(1:N
             H_G,H_G_A,TMP_G
 TYPE(SURFACE_TYPE), POINTER :: SF
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,I,J,K,IPZ,IOPZ
+TYPE(VENTS_TYPE), POINTER :: VT
  
 IF (SOLID_PHASE_ONLY) RETURN
 IF (PERIODIC_TEST==3) RETURN
@@ -695,6 +696,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
    WALL_LOOP3: DO IW=1,NWC
       !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_22'
       IOR = IJKW(4,IW)
+      
       WALL_CELL_TYPE: SELECT CASE (BOUNDARY_TYPE(IW))
          CASE (NULL_BOUNDARY)
             UWS(IW) = 0._EB
@@ -750,6 +752,28 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                JJG = IJKW(7,IW) 
                KKG = IJKW(8,IW) 
                UWS(IW) = UWS(IW)*RHOA/RHO_F(IW)
+            ENDIF
+            IF (VENT_INDEX(IW)>0) THEN 
+               VT=>VENTS(VENT_INDEX(IW))
+               IF (VT%N_EDDY>0) THEN ! Synthetic Eddy Method
+                  II = IJKW(1,IW)
+                  JJ = IJKW(2,IW)
+                  KK = IJKW(3,IW)
+                  SELECT CASE(IOR)
+                     CASE( 1)
+                        UWS(IW) = UWS(IW) - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
+                     CASE(-1)
+                        UWS(IW) = UWS(IW) + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
+                     CASE( 2)
+                        UWS(IW) = UWS(IW) - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%V_EDDY(II,KK)
+                     CASE(-2)
+                        UWS(IW) = UWS(IW) + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%V_EDDY(II,KK)
+                     CASE( 3)
+                        UWS(IW) = UWS(IW) - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%W_EDDY(II,JJ)
+                     CASE(-3)
+                        UWS(IW) = UWS(IW) + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%W_EDDY(II,JJ)
+                  END SELECT
+               ENDIF
             ENDIF
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
             II = IJKW(1,IW)
