@@ -1146,15 +1146,16 @@ USE TURBULENCE, ONLY: WERNER_WENGLE_WALL_MODEL
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),MU_DUIDXJ_0(2),DUIDXJ_0(2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
-            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),DUMMY
+            MU_DUIDXJ_USE(2),DUIDXJ_USE(2),DUMMY,VEL_EDDY
 INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
             VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,IBCM,IBCP,ITMP,ICD_SGN,ICDO_SGN
-LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE
+LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
                                        V_X=>NULL(),V_Z=>NULL(),W_X=>NULL(),W_Y=>NULL(),RHOP=>NULL(),VEL_OTHER=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (OMESH_TYPE), POINTER :: OM=>NULL()
+TYPE (VENTS_TYPE), POINTER :: VT
 
 IF (SOLID_PHASE_ONLY) RETURN
 
@@ -1177,7 +1178,6 @@ ELSE
    WW => W
    RHOP => RHO
 ENDIF
-
 
 ! Set the boundary velocity place holder to some large negative number
 
@@ -1349,6 +1349,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             JJGP = J_CELL(ICPP)
             KKGP = K_CELL(ICPP)
          ENDIF
+         
          ! Throw out edge orientations that need not be processed
    
          IF (BOUNDARY_TYPE(IWM)==NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
@@ -1371,7 +1372,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ELSEIF (SURFACE(IBCP)%SPECIFIED_NORMAL_VELOCITY) THEN
                SF=>SURFACE(IBCP)
             ELSE
-               SF => SURFACE(MAX(IBCM,IBCP))
+               SF=>SURFACE(MAX(IBCM,IBCP))
             ENDIF
             VELOCITY_BC_INDEX = SF%VELOCITY_BC_INDEX
 
@@ -1379,11 +1380,55 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
             MUA = 0.5_EB*(MU(IIGM,JJGM,KKGM) + MU(IIGP,JJGP,KKGP))
 
+            ! Set up synthetic eddy method (experimental)
+            
+            SYNTHETIC_EDDY_METHOD = .FALSE.
+            IF (IWM>0 .AND. IWP>0) THEN
+               IF (VENT_INDEX(IWM)==VENT_INDEX(IWP)) THEN
+                  IF (VENT_INDEX(IWM)>0) THEN
+                     VT=>VENTS(VENT_INDEX(IWM))
+                     IF (VT%N_EDDY>0) SYNTHETIC_EDDY_METHOD=.TRUE.
+                  ENDIF
+               ENDIF
+            ENDIF
+            
             ! Determine if there is a tangential velocity component
 
-            IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY) THEN
+            VEL_T_IF: IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY .AND. .NOT.SYNTHETIC_EDDY_METHOD) THEN
                VEL_T = 0._EB
-            ELSE
+            ELSE VEL_T_IF
+               VEL_EDDY = 0._EB
+               SYNTHETIC_EDDY_IF: IF (SYNTHETIC_EDDY_METHOD) THEN
+                  IS_SELECT: SELECT CASE(IS) ! unsigned vent orientation
+                     CASE(1) ! yz plane
+                        SELECT CASE(IEC) ! edge orientation
+                           CASE(2)
+                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ,KK+1))
+                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(JJ,KK)+VT%W_EDDY(JJ,KK+1))
+                           CASE(3)
+                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(JJ,KK)+VT%V_EDDY(JJ+1,KK))
+                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(JJ,KK)+VT%U_EDDY(JJ+1,KK))
+                        END SELECT
+                     CASE(2) ! zx plane
+                        SELECT CASE(IEC)
+                           CASE(3)
+                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II+1,KK))
+                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,KK)+VT%U_EDDY(II+1,KK))
+                           CASE(1)
+                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,KK)+VT%W_EDDY(II,KK+1))
+                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,KK)+VT%V_EDDY(II,KK+1))
+                        END SELECT
+                     CASE(3) ! xy plane
+                        SELECT CASE(IEC)
+                           CASE(1)
+                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II,JJ+1))
+                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%V_EDDY(II,JJ)+VT%V_EDDY(II,JJ+1))
+                           CASE(2)
+                              IF (ICD==1) VEL_EDDY = 0.5_EB*(VT%U_EDDY(II,JJ)+VT%U_EDDY(II+1,JJ))
+                              IF (ICD==2) VEL_EDDY = 0.5_EB*(VT%W_EDDY(II,JJ)+VT%W_EDDY(II+1,JJ))
+                        END SELECT
+                  END SELECT IS_SELECT
+               ENDIF SYNTHETIC_EDDY_IF
                IF (SF%T_IGN==T_BEGIN .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                   TSI = T
                ELSE
@@ -1392,10 +1437,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
                PROFILE_FACTOR = 1._EB
                IF (SF%PROFILE==ATMOSPHERIC) PROFILE_FACTOR = (MAX(0._EB,ZC(KK)-GROUND_LEVEL)/SF%Z0)**SF%PLE
                RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
-               IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = SF%VEL_T(2)
-               IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = SF%VEL_T(1)
+               IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = SF%VEL_T(2) + VEL_EDDY
+               IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = SF%VEL_T(1) + VEL_EDDY
                VEL_T = PROFILE_FACTOR*RAMP_T*VEL_T
-            ENDIF
+            ENDIF VEL_T_IF
  
             ! Choose the appropriate boundary condition to apply
 

@@ -136,7 +136,8 @@ TYPE SURFACE_TYPE
    CHARACTER(30), DIMENSION(0:MAX_SPECIES) :: RAMP_MF
    CHARACTER(60) :: ID,TEXTURE_MAP
    CHARACTER(100) :: FYI='null'
-!                                                               Boundary vegetation
+
+   ! Boundary vegetation
    LOGICAL  :: VEGETATION=.FALSE.,VEG_NO_BURN=.FALSE.
    INTEGER  :: NVEG_L
    REAL(EB) :: VEG_CHARFRAC,VEG_DRAG_INI,VEG_ELEMENT_DENSITY,VEG_HEIGHT,VEG_INITIAL_TEMP,VEG_LOAD, &
@@ -145,7 +146,7 @@ TYPE SURFACE_TYPE
    REAL(EB), POINTER, DIMENSION(:) :: VEG_INCM_RADFCT_L,VEG_FINCM_RADFCT_L,VEG_FINCP_RADFCT_L !add index for mult veg
    REAL(EB), POINTER, DIMENSION(:,:) :: VEG_SEMISSM_RADFCT_L,VEG_SEMISSP_RADFCT_L !add index for mult veg
 
-!                                                               Level Set Firespread
+   ! Level Set Firespread
    REAL(EB) :: VEG_LSET_IGNITE_T
 
 END TYPE SURFACE_TYPE
@@ -215,6 +216,14 @@ TYPE VENTS_TYPE
                MASS_FRACTION(MAX_SPECIES)=-1._EB,DYNAMIC_PRESSURE=0._EB,FVEL=-999._EB,RFAC=0.5_EB
    LOGICAL :: ACTIVATED=.TRUE.,BOUNDARY_FORCING=.FALSE.
    CHARACTER(30) :: DEVC_ID='null',CTRL_ID='null',ID='null'
+   ! turbulent inflow (experimental)
+   INTEGER :: N_EDDY=0
+   REAL(EB) :: R_IJ(3,3)=0._EB,A_IJ(3,3),L_EDDY=0._EB,EDDY_BOX_VOLUME=0._EB, &
+               X_EDDY_MIN=0._EB,X_EDDY_MAX=0._EB, &
+               Y_EDDY_MIN=0._EB,Y_EDDY_MAX=0._EB, &
+               Z_EDDY_MIN=0._EB,Z_EDDY_MAX=0._EB
+   REAL(EB), POINTER, DIMENSION(:,:) :: U_EDDY,V_EDDY,W_EDDY
+   REAL(EB), POINTER, DIMENSION(:) :: X_EDDY,Y_EDDY,Z_EDDY,CU_EDDY,CV_EDDY,CW_EDDY
 END TYPE VENTS_TYPE
  
 TYPE TABLES_TYPE
