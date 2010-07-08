@@ -21,14 +21,17 @@ for k= 1:45
 hold on
 %Load Experimental Data
     [exp_header,exp_data] = dvcread('Activation_Times.csv',1);
-
 %Plot FDS v. Exp. Data
- 
-    plot(exp_data(1:4,k),fds_data(1:4,k),'rp');
- 
+%Obstructed ceiling cases get blue triangles, smooth get red circles
+
+if k==4||k==5||k==9||k==10||k==14||k==15||k==19||k==20||k==24||k==25||k==29||k==30||k==34||k==35||k==39||k==40||k==44||k==45
+ K(1) = plot(exp_data(1:4,k),fds_data(1:4,k),'b^'); 
+else  
+ K(2)= plot(exp_data(1:4,k),fds_data(1:4,k),'ro');
+end
 end
 
-%Format plot    
+%Format the Plot    
     xmin = 0 ;
     ymin = 0;
     xmax = 220;
@@ -39,9 +42,15 @@ end
     xlabel('Measured Activation Time')
     ylabel('Predicted Activation Time')
     
-    TITLE(['Activation Times: Measured v. Predicted'])
- hold off
+    h =legend(K,'Obstructed Ceiling',' Smooth Ceiling','Location','SouthEast');
+    set(h,'Interpreter','LaTeX')
+    
+    title(['Activation Times: Measured v. Predicted'])
+    
+    hold off
  
+    
+   
 %Print the Plot 
      print(gcf,'-dpdf',['../../../Manuals/FDS_5_Validation_Guide/FIGURES/Vettori_Flat_Ceiling/Vettori_Activation_Time'])
 
