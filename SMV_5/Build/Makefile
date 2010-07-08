@@ -207,6 +207,17 @@ intel_osx_64 : exe       = smv5_osx_64
 intel_osx_64 : $(obj)
 	icpc -m64 -o $(bin)/$(exe) -static-intel $(obj)  -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
+# ------------- make depend ----------------
+
+depend : FFLAGS    = -MM 
+depend : CFLAGS    = -MM
+depend : CC        = gcc
+depend : CPP       = g++
+depend : FC        = gfortran
+depend : exe       = smv5_linux_32
+
+depend : $(obj)
+
 # ------------- Linux 32 ----------------
 #  32 bit linux (acrux) using gnu compilers 
 
