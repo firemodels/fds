@@ -4,6 +4,7 @@ MODULE PRES
  
 USE PRECISION_PARAMETERS
 USE MESH_POINTERS
+USE SCARC_SOLVER
 
 IMPLICIT NONE
 
@@ -330,8 +331,30 @@ END SELECT
  
 SELECT CASE(IPS)
    CASE(:1) 
-      IF (.NOT.TWO_D) CALL H3CZSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
-      IF (TWO_D .AND. .NOT. CYLINDRICAL) CALL H2CZSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
+      IF (.NOT.TWO_D) THEN
+         SELECT CASE(SCARC_METHOD)
+            CASE(0)
+               CALL H3CZSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
+            CASE(1)
+               write(*,*) 'Still experimental ...'
+               stop
+               CALL SCARC_CG3D(NM)
+            CASE(2)
+               write(*,*) 'Still experimental ...'
+               stop
+               CALL SCARC_MG3D(NM)
+         END SELECT
+      ENDIF
+      IF (TWO_D .AND. .NOT. CYLINDRICAL) THEN
+         SELECT CASE(SCARC_METHOD)
+            CASE(0)
+               CALL H2CZSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
+            CASE(1)
+               CALL SCARC_CG2D(NM)
+            CASE(2)
+               CALL SCARC_MG2D(NM)
+         END SELECT
+      ENDIF
       IF (TWO_D .AND.       CYLINDRICAL) CALL H2CYSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PTB,SAVE1,WORK)
    CASE(2) 
       CALL H3CZSS(BYS,BYF,BXS,BXF,BZST,BZFT,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HY)
@@ -397,53 +420,68 @@ END SELECT
 
 ! Apply boundary conditions to H
 
-!$OMP DO COLLAPSE(2) PRIVATE(K,J)
-DO K=1,KBAR
+IF (SCARC_METHOD>0) THEN
+
+   ! boundary conditions on ghost cells are set pointwise (not facewise)
+   ! perform local data exchange to get consistent solution (most probably redundant, has to be checked)
+   IF (PREDICTOR) THEN
+      CALL SCARC_GHOSTCELLS(H,NM)
+      CALL SCARC_UPDATE(MYID,NUPDATE_H)
+   ELSE
+      CALL SCARC_GHOSTCELLS(HS,NM)
+      CALL SCARC_UPDATE(MYID,NUPDATE_HS)
+   ENDIF
+
+ELSE
+
+   !$OMP DO COLLAPSE(2) PRIVATE(K,J)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         IF (LBC==3 .OR. LBC==4)             HP(0,J,K)    = HP(1,J,K)    - DXI*BXS(J,K)
+         IF (LBC==3 .OR. LBC==2 .OR. LBC==6) HP(IBP1,J,K) = HP(IBAR,J,K) + DXI*BXF(J,K)
+         IF (LBC==1 .OR. LBC==2)             HP(0,J,K)    =-HP(1,J,K)    + 2._EB*BXS(J,K)
+         IF (LBC==1 .OR. LBC==4 .OR. LBC==5) HP(IBP1,J,K) =-HP(IBAR,J,K) + 2._EB*BXF(J,K)
+         IF (LBC==5 .OR. LBC==6)             HP(0,J,K) = HP(1,J,K)
+         IF (LBC==0) THEN
+            HP(0,J,K) = HP(IBAR,J,K)
+            HP(IBP1,J,K) = HP(1,J,K)
+         ENDIF
+      ENDDO
+   ENDDO
+   !$OMP END DO NOWAIT
+   
+   !$OMP DO COLLAPSE(2) PRIVATE(K,I)
+   DO K=1,KBAR
+      DO I=1,IBAR
+         IF (MBC==3 .OR. MBC==4) HP(I,0,K)    = HP(I,1,K)    - DETA*BYS(I,K)
+         IF (MBC==3 .OR. MBC==2) HP(I,JBP1,K) = HP(I,JBAR,K) + DETA*BYF(I,K)
+         IF (MBC==1 .OR. MBC==2) HP(I,0,K)    =-HP(I,1,K)    + 2._EB*BYS(I,K)
+         IF (MBC==1 .OR. MBC==4) HP(I,JBP1,K) =-HP(I,JBAR,K) + 2._EB*BYF(I,K)
+         IF (MBC==0) THEN
+            HP(I,0,K) = HP(I,JBAR,K)
+            HP(I,JBP1,K) = HP(I,1,K)
+         ENDIF
+      ENDDO
+   ENDDO
+   !$OMP END DO NOWAIT
+   
+   !$OMP DO COLLAPSE(2) PRIVATE(J,I)
    DO J=1,JBAR
-      IF (LBC==3 .OR. LBC==4)             HP(0,J,K)    = HP(1,J,K)    - DXI*BXS(J,K)
-      IF (LBC==3 .OR. LBC==2 .OR. LBC==6) HP(IBP1,J,K) = HP(IBAR,J,K) + DXI*BXF(J,K)
-      IF (LBC==1 .OR. LBC==2)             HP(0,J,K)    =-HP(1,J,K)    + 2._EB*BXS(J,K)
-      IF (LBC==1 .OR. LBC==4 .OR. LBC==5) HP(IBP1,J,K) =-HP(IBAR,J,K) + 2._EB*BXF(J,K)
-      IF (LBC==5 .OR. LBC==6)             HP(0,J,K) = HP(1,J,K)
-      IF (LBC==0) THEN
-         HP(0,J,K) = HP(IBAR,J,K)
-         HP(IBP1,J,K) = HP(1,J,K)
-      ENDIF
+      DO I=1,IBAR
+         IF (EVACUATION_ONLY(NM)) CYCLE
+         IF (NBC==3 .OR. NBC==4)  HP(I,J,0)    = HP(I,J,1)    - DZETA*BZS(I,J)
+         IF (NBC==3 .OR. NBC==2)  HP(I,J,KBP1) = HP(I,J,KBAR) + DZETA*BZF(I,J)
+         IF (NBC==1 .OR. NBC==2)  HP(I,J,0)    =-HP(I,J,1)    + 2._EB*BZS(I,J)
+         IF (NBC==1 .OR. NBC==4)  HP(I,J,KBP1) =-HP(I,J,KBAR) + 2._EB*BZF(I,J)
+         IF (NBC==0) THEN
+            HP(I,J,0) = HP(I,J,KBAR)
+            HP(I,J,KBP1) = HP(I,J,1)
+         ENDIF
+      ENDDO
    ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO COLLAPSE(2) PRIVATE(K,I)
-DO K=1,KBAR
-   DO I=1,IBAR
-      IF (MBC==3 .OR. MBC==4) HP(I,0,K)    = HP(I,1,K)    - DETA*BYS(I,K)
-      IF (MBC==3 .OR. MBC==2) HP(I,JBP1,K) = HP(I,JBAR,K) + DETA*BYF(I,K)
-      IF (MBC==1 .OR. MBC==2) HP(I,0,K)    =-HP(I,1,K)    + 2._EB*BYS(I,K)
-      IF (MBC==1 .OR. MBC==4) HP(I,JBP1,K) =-HP(I,JBAR,K) + 2._EB*BYF(I,K)
-      IF (MBC==0) THEN
-         HP(I,0,K) = HP(I,JBAR,K)
-         HP(I,JBP1,K) = HP(I,1,K)
-      ENDIF
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-
-!$OMP DO COLLAPSE(2) PRIVATE(J,I)
-DO J=1,JBAR
-   DO I=1,IBAR
-      IF (EVACUATION_ONLY(NM)) CYCLE
-      IF (NBC==3 .OR. NBC==4)  HP(I,J,0)    = HP(I,J,1)    - DZETA*BZS(I,J)
-      IF (NBC==3 .OR. NBC==2)  HP(I,J,KBP1) = HP(I,J,KBAR) + DZETA*BZF(I,J)
-      IF (NBC==1 .OR. NBC==2)  HP(I,J,0)    =-HP(I,J,1)    + 2._EB*BZS(I,J)
-      IF (NBC==1 .OR. NBC==4)  HP(I,J,KBP1) =-HP(I,J,KBAR) + 2._EB*BZF(I,J)
-      IF (NBC==0) THEN
-         HP(I,J,0) = HP(I,J,KBAR)
-         HP(I,J,KBP1) = HP(I,J,1)
-      ENDIF
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
-!$OMP END PARALLEL
+   !$OMP END DO NOWAIT
+   !$OMP END PARALLEL
+ENDIF
 
 ! Optional check of the accuracy of the pressure solver
 
