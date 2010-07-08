@@ -16,7 +16,7 @@ VPATH = ../FDS_Source
 # note: objf_serial and objf_mpi contain only Fortran routines ie not isob.c
 
 objf_serial = prec.o mpis.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
-             ieva.o pois.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
+             ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
              mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 obj_serial = isob.o $(objf_serial)
 
@@ -24,7 +24,7 @@ objwinf_serial = $(objf_serial:.o=.obj)
 objwin_serial = $(obj_serial:.o=.obj)
 
 objf_mpi = prec.o mpip.o smvv.o cons.o devc.o type.o mesh.o func.o irad.o \
-          ieva.o scrc.o pois.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
+          ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
           mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 obj_mpi = isob.o $(objf_mpi)
 
@@ -464,7 +464,7 @@ mesh.o : prec.o type.o
 func.o : prec.o cons.o type.o mesh.o
 turb.o : func.o prec.o cons.o mesh.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
-scrc.o : prec.o cons.o mesh.o func.o
+scrc.o : prec.o cons.o mesh.o func.o pois.o
 irad.o : func.o prec.o cons.o type.o mesh.o
 ieva.o : func.o prec.o cons.o type.o mesh.o
 fire.o : func.o prec.o cons.o type.o mesh.o
@@ -491,7 +491,7 @@ mesh.obj : prec.obj type.obj
 func.obj : prec.obj cons.obj type.obj mesh.obj
 turb.obj : func.obj prec.obj cons.obj mesh.obj
 ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
-scrc.obj : prec.obj cons.obj mesh.obj func.obj
+scrc.obj : prec.obj cons.obj mesh.obj func.obj pois.obj
 irad.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 ieva.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj
