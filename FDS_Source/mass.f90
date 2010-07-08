@@ -1505,7 +1505,8 @@ WALL_LOOP: DO IW=1,NWC
    METHOD_ID = SF%SPECIES_BC_INDEX
    IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) METHOD_ID = INFLOW_OUTFLOW
    IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL/=0) METHOD_ID = EMB_BC
-      
+   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .AND. IJKW(9,IW)>0) METHOD_ID = 999
+   
    ! Apply the different species boundary conditions
    METHOD_OF_MASS_TRANSFER: SELECT CASE(METHOD_ID)
 
@@ -1586,20 +1587,37 @@ WALL_LOOP: DO IW=1,NWC
                !ZZ(4) = RHOP(IIG,JJG,2)
                FZ(II,JJ,KK-1,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
          END SELECT
+         
+      CASE (999) METHOD_OF_MASS_TRANSFER
+
+         SELECT CASE(IOR)
+            CASE( 1)
+               FX(II,JJ,KK,0)   = UVW_SAVE(IW)*RHO_F(IW)*R(II)
+            CASE(-1)
+               FX(II-1,JJ,KK,0) = UVW_SAVE(IW)*RHO_F(IW)*R(II-1)
+            CASE( 2)  
+               FY(II,JJ,KK,0)   = UVW_SAVE(IW)*RHO_F(IW)
+            CASE(-2)
+               FY(II,JJ-1,KK,0) = UVW_SAVE(IW)*RHO_F(IW)
+            CASE( 3)
+               FZ(II,JJ,KK,0)   = UVW_SAVE(IW)*RHO_F(IW)
+            CASE(-3)
+               FZ(II,JJ,KK-1,0) = UVW_SAVE(IW)*RHO_F(IW)
+         END SELECT
             
       CASE DEFAULT METHOD_OF_MASS_TRANSFER
 
          SELECT CASE(IOR)
             CASE( 1)
-               FX(II,JJ,KK,0) = UU(II,JJ,KK)*RHO_F(IW)*R(II)
+               FX(II,JJ,KK,0)   = UU(II,JJ,KK)*RHO_F(IW)*R(II)
             CASE(-1)
                FX(II-1,JJ,KK,0) = UU(II-1,JJ,KK)*RHO_F(IW)*R(II-1)
-            CASE( 2)   
-               FY(II,JJ,KK,0) = VV(II,JJ,KK)*RHO_F(IW)
+            CASE( 2)  
+               FY(II,JJ,KK,0)   = VV(II,JJ,KK)*RHO_F(IW)
             CASE(-2)
                FY(II,JJ-1,KK,0) = VV(II,JJ-1,KK)*RHO_F(IW)
             CASE( 3)
-               FZ(II,JJ,KK,0) = WW(II,JJ,KK)*RHO_F(IW)
+               FZ(II,JJ,KK,0)   = WW(II,JJ,KK)*RHO_F(IW)
             CASE(-3)
                FZ(II,JJ,KK-1,0) = WW(II,JJ,KK-1)*RHO_F(IW)
          END SELECT
@@ -1670,6 +1688,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       METHOD_ID = SF%SPECIES_BC_INDEX
       IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) METHOD_ID = INFLOW_OUTFLOW
       IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL/=0) METHOD_ID = EMB_BC
+      IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .AND. IJKW(9,IW)>0) METHOD_ID = 999
       
       ! Apply the different species boundary conditions
       METHOD_OF_MASS_TRANSFER2: SELECT CASE(METHOD_ID)
@@ -1764,6 +1783,23 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO,KKO+1)*M2%YY(IIO,JJO,KKO+1,N)
                   IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO,KKO+1)*M2%YYS(IIO,JJO,KKO+1,N)
                   FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,FLUX_LIMITER)
+            END SELECT
+            
+         CASE (999) METHOD_OF_MASS_TRANSFER2
+
+            SELECT CASE(IOR)
+               CASE( 1)
+                  FX(II,JJ,KK,N)   =(FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N))*R(II)
+               CASE(-1)
+                  FX(II-1,JJ,KK,N) =(FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N))*R(II-1)
+               CASE( 2)   
+                  FY(II,JJ,KK,N)   = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
+               CASE(-2)
+                  FY(II,JJ-1,KK,N) = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
+               CASE( 3)
+                  FZ(II,JJ,KK,N)   = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
+               CASE(-3)
+                  FZ(II,JJ,KK-1,N) = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
             END SELECT
             
          CASE DEFAULT METHOD_OF_MASS_TRANSFER2
