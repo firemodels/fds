@@ -1233,7 +1233,7 @@ IF (FDS6) THEN
    ! reread the line to pick up any user-specified options
    REWIND(LU_INPUT)
    CALL CHECKREAD('MISC',LU_INPUT,IOS)
-   READ(LU_INPUT,MISC)
+   IF (IOS==0) READ(LU_INPUT,MISC)
    REWIND(LU_INPUT)
 ENDIF
 
