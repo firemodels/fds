@@ -4,7 +4,6 @@ USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
 USE MEMORY_FUNCTIONS, ONLY: CHKMEMERR
-USE POIS, ONLY: H2CZIS, H3CZSS, H2CZSS, H2CYSS, H3CSSS
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE MPI
  
@@ -12,112 +11,111 @@ IMPLICIT NONE
 
 PRIVATE
 
-PUBLIC SCARC_INITIALIZE, SCARC_METHOD, SCARC_TIMINGS, NUPDATE_H, NUPDATE_HS, SCARC_PRECON, SCARC_COMPARE, SCARC_DEBUG, SCARC_NIT, &
-       SCARC_EPS, SCARC_EPS_REL, SCARC_EPS_STOP, SCARC_PERIODIC, SCARC_CG3D, SCARC_CG2D, SCARC_MG2D, &
-       SCARC_GHOSTCELLS, SCARC_UPDATE
+!!! Public subprograms (called from main and pres)
+PUBLIC SCARC_INITIALIZE, SCARC_TIMINGS
+PUBLIC SCARC_CG2D, SCARC_CG3D, SCARC_MG2D, SCARC_GHOSTCELLS, SCARC_UPDATE
  
-!INTEGER :: MPI_COMM_WORLD=0, MPI_DOUBLE_PRECISION=0, MPI_INTEGER=0, MPI_SUM=0
-!INTEGER :: MPI_REQUEST_NULL=0, MPI_STATUS_SIZE=0
- 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!! Global variables
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-CHARACTER (40) :: SCARC_MSG='msg/   _scarc'              ! name of file for ScaRC debug messages
-INTEGER        :: SCARC_METHOD=0                         ! method for pressure solver (0:FFT/1:CG/2:MG)
-INTEGER        :: SCARC_DEBUG=0                          ! debug level (0: no debug messages)
-INTEGER        :: SCARC_COMPARE=0                        ! print out vectors for comparison in separate program
-INTEGER        :: SCARC_PERIODIC=0                       ! periodic boundary conditions (0:no/1:yes)
-INTEGER        :: SCARC_CASE=0                           ! choose different initial solution
-INTEGER        :: SCARC_COUNT=2                          ! counter for comparison vectors 
-INTEGER        :: SCARC_COUNT2                           ! counter2 for comparison vectors
-INTEGER        :: SCARC_PRECON=4            
-INTEGER        :: SCARC_PRECON_CG=4                      ! preconditioner for cg-method (default: SSOR)
-INTEGER        :: SCARC_SMOOTH=3                         ! smoother for mg-method (default: GSTRIX)
-INTEGER        :: SCARC_NIT=1000
-INTEGER        :: SCARC_NIT_CG=1000                      ! max number of iterations for cg-method
-INTEGER        :: SCARC_NIT_MG=1000                      ! max number of iterations for mg-method
-INTEGER        :: SCARC_NIT_SM=1000                      ! max number of iterations for smoothing-method
-REAL (EB)      :: SCARC_EPS=1.E-6_EB
-REAL (EB)      :: SCARC_EPS_REL=1.E-2_EB
-REAL (EB)      :: SCARC_EPS_STOP=1.E+6_EB
-REAL (EB)      :: SCARC_EPS_CG=1.E-6_EB                  ! convergence accuracy for cg-method
-REAL (EB)      :: SCARC_EPS_MG=1.E-6_EB                  ! convergence accuracy for mg-method
-REAL (EB)      :: SCARC_EPS_SM=1.E-6_EB                  ! convergence accuracy for smoothing-method
-REAL (EB)      :: SCARC_EPS_REL_CG=1.E-2_EB              ! relative accuracy for cg-method
-REAL (EB)      :: SCARC_EPS_REL_MG=1.E-2_EB              ! relative accuracy for mg-method
-REAL (EB)      :: SCARC_EPS_REL_SM=1.E-2_EB              ! relative accuracy for smoothing-method
-REAL (EB)      :: SCARC_EPS_STOP_CG=1.E+6_EB             ! divergence accuracy for cg-method
-REAL (EB)      :: SCARC_EPS_STOP_MG=1.E+6_EB             ! divergence accuracy for mg-method
-REAL (EB)      :: SCARC_EPS_STOP_SM=1.E+6_EB             ! divergence accuracy for mg-method
+!!! Public variables (needed in main, read, press, divg)
+PUBLIC SCARC_METHOD, SCARC_DEBUG, SCARC_COMPARE, SCARC_PERIODIC, SCARC_CASE
+PUBLIC SCARC_UPDATE_FULL, SCARC_UPDATE_VEL, SCARC_UPDATE_FV, SCARC_UPDATE_H, SCARC_UPDATE_HS
+PUBLIC SCARC_NIT_MG, SCARC_EPS_CONV_MG, SCARC_EPS_DIVG_MG, SCARC_SMOOTH_MG, SCARC_BREL_MG, SCARC_OMEGA_MG
+PUBLIC SCARC_NIT_CG, SCARC_EPS_CONV_CG, SCARC_EPS_DIVG_CG, SCARC_PRECON_CG, SCARC_BREL_CG, SCARC_OMEGA_CG
+PUBLIC SCARC_NIT_SM, SCARC_EPS_CONV_SM, SCARC_EPS_DIVG_SM, SCARC_PRECON_SM, SCARC_BREL_SM, SCARC_OMEGA_SM
+PUBLIC SCARC_NIT_CO, SCARC_EPS_CONV_CO, SCARC_EPS_DIVG_CO, SCARC_PRECON_CO, SCARC_BREL_CO, SCARC_OMEGA_CO
+PUBLIC SCARC_EPS_REL
 
+CHARACTER (40) :: SCARC_MSG='msg/   _scarc'          ! name of file for ScaRC debug messages
+INTEGER        :: SCARC_METHOD=0                     ! method for pressure solver (0:FFT/1:CG/2:MG)
+INTEGER        :: SCARC_DEBUG=0                      ! debug level (0: no debug messages)
+INTEGER        :: SCARC_COMPARE=0                    ! print out vectors for comparison in separate program
+INTEGER        :: SCARC_PERIODIC=0                   ! periodic boundary conditions (0:no/1:yes)
+INTEGER        :: SCARC_CASE=0                       ! choose different initial solution
+INTEGER        :: SCARC_COUNT=2, &                   ! counter for comparison vectors 
+                  SCARC_COUNT2                       ! counter2 for comparison vectors
+INTEGER        :: SCARC_SMOOTH_MG=3, &               ! smoother for mg-method (default: GSTRIX)
+                  SCARC_PRECON_CG=4, &               ! preconditioner for cg-method (default: SSOR)
+                  SCARC_PRECON_SM=4, &               ! preconditioner for cg-method (default: SSOR)
+                  SCARC_PRECON_CO=4                  ! preconditioner for cg-method (default: SSOR)
+INTEGER        :: SCARC_NIT_MG   =1000, &            ! max number of iterations for mg
+                  SCARC_NIT_CG   =1000, &            ! max number of iterations for cg
+                  SCARC_NIT_SM   =1000, &            ! max number of iterations for smoother
+                  SCARC_NIT_CO   =1000               ! max number of iterations for coarse grid solver
+REAL (EB)      :: SCARC_EPS_CONV_MG=1.E-6_EB, &      ! convergence epsilon for mg
+                  SCARC_EPS_CONV_CG=1.E-6_EB, &      ! convergence epsilon for cg
+                  SCARC_EPS_CONV_SM=1.E-6_EB, &      ! convergence epsilon for smoother
+                  SCARC_EPS_CONV_CO=1.E-6_EB         ! convergence epsilon for coarse grid solver
+REAL (EB)      :: SCARC_EPS_DIVG_MG=1.E+6_EB, &      ! divergence epsilon for mg
+                  SCARC_EPS_DIVG_CG=1.E+6_EB, &      ! divergence epsilon for cg
+                  SCARC_EPS_DIVG_SM=1.E+6_EB, &      ! divergence epsilon for smoother
+                  SCARC_EPS_DIVG_CO=1.E+6_EB         ! divergence epsilon for coarse grid solver
+REAL (EB)      :: SCARC_OMEGA_MG=1.E+0_EB, &         ! relaxation parameter for mg
+                  SCARC_OMEGA_CG=1.E+0_EB, &         ! relaxation parameter for cg
+                  SCARC_OMEGA_SM=1.E+0_EB, &         ! relaxation parameter for smoother
+                  SCARC_OMEGA_CO=1.E+0_EB            ! relaxation parameter for coarse grid solver
+REAL (EB)      :: SCARC_EPS_REL =1.E-2_EB            ! minimum relative accuracy for all methods
+LOGICAL        :: SCARC_BREL_MG=.TRUE., &            ! relative accuracy for mg 
+                  SCARC_BREL_CG=.TRUE., &            ! relative accuracy for cg 
+                  SCARC_BREL_SM=.TRUE., &            ! relative accuracy for smoother
+                  SCARC_BREL_CO=.TRUE.               ! relative accuracy for coarse grid solver 
 
-LOGICAL :: BEDGE, BDIAG     ! diagonal communication needed ?
+INTEGER, PARAMETER :: SCARC_UPDATE_FULL = 1, &       ! Full update of all relevant vectors along internal boundaries
+                      SCARC_UPDATE_VEL  = 2, &       ! Only update of velocity
+                      SCARC_UPDATE_FV   = 3, &       ! Only update of FVX, FVY(3D) and FVZ
+                      SCARC_UPDATE_H    = 4, &       ! Only update of H
+                      SCARC_UPDATE_HS   = 5          ! Only update of HS
 
-INTEGER :: NumMaster, NumSlaves
-INTEGER :: myMasterId, mySlaveId, myself
-INTEGER :: MpiGroupWorld, MpiGroupSlaves
-INTEGER :: myMPI_COMM_WORLD, myMpi_COMM_SLAVES
-INTEGER :: NumExclude, RankExclude (4)
- 
-INTEGER :: NTYPE_NONE = 0,  &
-           NTYPE_UPDATE = -1
+!!! Private variables only for ScaRC
+INTEGER, PARAMETER :: NCOM_TYPE_NONE   =  0,  &      ! pure communication along internal boundaries
+                      NCOM_TYPE_MATVEC = -1          ! matrix-vector communication along internal boundaries
 
-INTEGER :: NCOM_TYPE_GLOBAL= 1, &
-           NCOM_TYPE_LOCAL = 2
+INTEGER, PARAMETER :: NTYPE_GLOBAL= 1, &             ! (matrix-)vector operations are performed globally
+                      NTYPE_LOCAL = 2                ! (matrix-)vector operations are performed locally
 
-INTEGER :: NCOM_INIT = 0, &
-           NCOM_MATV = 1, &
-           NCOM_FACE = 1, &
-           NCOM_EDGE = 2, &
-           NCOM_DIAG = 3, &
-           NCOM_FULL = 4
+INTEGER, PARAMETER :: NCOM_INIT = 0, &               ! Different types for communication routines
+                      NCOM_MATV = 1, &
+                      NCOM_FACE = 1, &
+                      NCOM_EDGE = 2, &
+                      NCOM_DIAG = 3, &
+                      NCOM_FULL = 4
 
-INTEGER :: NUPDATE_FULL    = 1, &
-           NUPDATE_MEDIUM  = 2, &
-           NUPDATE_VEL     = 3, &
-           NUPDATE_FV      = 4, &
-           NUPDATE_Q       = 5, &
-           NUPDATE_H       = 6, &
-           NUPDATE_HS      = 7
+INTEGER, PARAMETER :: NDEFCOR_NONE    = 0, &         ! Different defect-correction schemes as 
+                      NDEFCOR_JACOBI  = 1, &         ! preconditioner for CG or smoother for MG
+                      NDEFCOR_GS      = 2, &
+                      NDEFCOR_SOR     = 3, &
+                      NDEFCOR_SSOR    = 4, &
+                      NDEFCOR_ILU     = 5, &
+                      NDEFCOR_TRI1    = 6, &
+                      NDEFCOR_TRI2    = 8, &
+                      NDEFCOR_ADI     = 9, &
+                      NDEFCOR_GSTRIX  =10, &
+                      NDEFCOR_GSTRIY  =11, &
+                      NDEFCOR_GSTRIZ  =13, &
+                      NDEFCOR_GSADI   =14
 
-INTEGER :: NSMOOTH_NONE    = 0, &
-           NSMOOTH_JACOBI  = 1, &
-           NSMOOTH_GS      = 2, &
-           NSMOOTH_SOR     = 3, &
-           NSMOOTH_SSOR    = 4, &
-           NSMOOTH_ILU     = 5, &
-           NSMOOTH_TRI1    = 6, &
-           NSMOOTH_TRI2    = 8, &
-           NSMOOTH_ADI     = 9, &
-           NSMOOTH_GSTRI1  =10, &
-           NSMOOTH_GSTRI2  =11, &
-           NSMOOTH_GSADI   =12
-
-
+! some communication parameters
 INTEGER :: NEXCHANGE_EXTENDED = 1
- 
-INTEGER :: NNLEVEL = 10, NLEVEL1=1
-
+INTEGER :: NNLEVEL = 10
 INTEGER :: SNODE, RNODE, NDIAG
 INTEGER :: NFACE, NEDGE, NVRTX
+LOGICAL :: BEDGE, BDIAG                              ! edge and diagonal communication really needed ?
  
-! protocol information for data exchange
-INTEGER :: NREQ_FACE, NREQ_EDGE, NREQ_DIAG
-!INTEGER :: TAG_FACE  , TAG_EDGE  , TAG_DIAG
+INTEGER :: NREQ_FACE, NREQ_EDGE, NREQ_DIAG           ! protocol information for data exchange
 INTEGER, ALLOCATABLE, DIMENSION (:)    :: REQ_FACE,  REQ_EDGE,  REQ_DIAG
 INTEGER, ALLOCATABLE, DIMENSION (:, :) :: TAGS_FACE, TAGS_EDGE, TAGS_DIAG
 INTEGER, ALLOCATABLE, DIMENSION (:, :) :: STAT_FACE, STAT_EDGE, STAT_DIAG
- 
-! Alte Strukturen, nochmal checken !!!
-!INTEGER :: IJKW2_FACE (6, 12), IJKW2_EDGE (12, 12), IJKW2_DIAG (8, 12)
-INTEGER, ALLOCATABLE, DIMENSION (:, :)    :: NBR_FACE, NBR_EDGE, NBR_DIAG
+INTEGER, ALLOCATABLE, DIMENSION (:, :) :: NBR_FACE, NBR_EDGE, NBR_DIAG
 
-INTEGER, PARAMETER :: N_TIMERS_SCARC=35
+INTEGER, PARAMETER :: N_TIMERS_SCARC=35              ! time measurements within ScaRC
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TUSED_SCARC
 REAL(EB):: SCARC_TNOW
 
-
+INTEGER :: NumMaster, NumSlaves                      ! experimental code for including a master process
+INTEGER :: myMasterId, mySlaveId, myself              
+INTEGER :: MpiGroupWorld, MpiGroupSlaves               
+INTEGER :: myMPI_COMM_WORLD, myMpi_COMM_SLAVES         
+INTEGER :: NumExclude, RankExclude (4)                
  
+
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Scarc type for multigrid level on 'own' mesh
@@ -174,15 +172,10 @@ TYPE SCARC_LEVEL_TYPE
    REAL (EB), POINTER, DIMENSION (:, :, :) :: Z_FACE, Z_EDGE, Z_DIAG
  
    ! iteration parameters for solver method on corresponding level
-   REAL (EB) :: RES, RESIN, OMEGA, CAPPA
-   REAL (EB) :: OMEGA_MG, OMEGA_SMOOTH=0.8E+0_EB
-   REAL (EB) :: RES_MG, RES_SMOOTH
-   REAL (EB) :: RESIN_MG, RESIN_SMOOTH
-   REAL (EB) :: CAPPA_MG, CAPPA_SMOOTH
-   REAL (EB) :: EPS, EPS_REL
-   INTEGER   :: ITE, NIT
-   INTEGER   :: ITE_MG, NIT_MG
-   INTEGER   :: ITE_SMOOTH, NIT_SMOOTH
+   REAL (EB) :: RES_CG, RESIN_CG, OMEGA_CG, CAPPA_CG
+   REAL (EB) :: RES_MG, RESIN_MG, OMEGA_MG, CAPPA_MG
+   REAL (EB) :: RES_SM, RESIN_SM, OMEGA_SM, CAPPA_SM
+   REAL (EB) :: RES_CO, RESIN_CO, OMEGA_CO, CAPPA_CO
 
 END TYPE SCARC_LEVEL_TYPE
  
@@ -243,7 +236,6 @@ TYPE SCARC_TYPE
    ! local and global scalar products (used for all levels)
    REAL (EB) :: SP_LOCAL, SP_GLOBAL
    REAL (EB), POINTER, DIMENSION (:) :: SP_LOCAL0, SP_GLOBAL0
-   REAL (EB) :: EPS_CONV, EPS_DIVG, EPS_REL, EPS, RES, RESIN, CAPPA
  
 
    ! neighborship description arrays
@@ -264,9 +256,6 @@ TYPE SCARC_TYPE
    INTEGER :: MIBAR_MIN, MJBAR_MIN, MKBAR_MIN, MESH_MIN
 
    TYPE (SCARC_LEVEL_TYPE), POINTER, DIMENSION (:) :: SLEVEL
- 
-   ! some iteration parameters
-   LOGICAL :: BPRECON, BGSADI, BREL_ERR
  
 END TYPE SCARC_TYPE
 
@@ -297,11 +286,7 @@ TYPE (OSCARC_TYPE),       POINTER ::  OS
 TYPE (SCARC_LEVEL_TYPE),  POINTER ::  SL,  SLMAX,  SLMIN,  SLHI,  SLLO
 TYPE (OSCARC_LEVEL_TYPE), POINTER :: OSL, OSLMAX, OSLMIN, OSLHI, OSLLO
 
-
-!!INCLUDE 'mpif.h'
- 
 CONTAINS
- 
  
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -333,7 +318,6 @@ S => SCARC (NM)
 ALLOCATE (S%OSCARC(NMESHES), STAT=IZERO)
 CALL CHKMEMERR ('SCARC_INITIALIZE', 'OSCARC', IZERO)
 
-
 !!!
 !!! Open debug-file if requested
 !!!
@@ -353,8 +337,6 @@ CALL ChkMemErr('SCARC_INITIALIZE','TUSED_SCARC',IZERO)
 TUSED_SCARC      = 0._EB
 TUSED_SCARC(0,:) = SECOND()
 
-
-
 !!!
 !!! store mesh dimensions on each direction of each mesh within SCARC-structure;
 !!! get minimum step size over all meshes for each direction
@@ -368,7 +350,6 @@ CALL CHKMEMERR ('SCARC_INITIALIZE', 'S%MJBAR', IZERO)
 ALLOCATE (S%MKBAR(NMESHES), STAT=IZERO)
 CALL CHKMEMERR ('SCARC_INITIALIZE', 'S%MKBAR', IZERO)
 
- 
 S%MIBAR_MIN=100000
 S%MJBAR_MIN=100000
 S%MKBAR_MIN=100000
@@ -396,13 +377,6 @@ DO IM=1,NMESHES
       KMIN=IM
    ENDIF
 
-   IF (SCARC_DEBUG>=2) THEN
-      WRITE(9,*) '------------------ Mesh ',IM,'--------'
-      WRITE(9,*) 'S%MIBAR(',IM,')=',S%MIBAR(IM)
-      IF (TWO_D) WRITE(9,*) 'S%MJBAR(',IM,')=',S%MJBAR(IM)
-      WRITE(9,*) 'S%MKBAR(',IM,')=',S%MKBAR(IM)
-   ENDIF
-
 ENDDO
 
 
@@ -411,7 +385,6 @@ IF (SCARC_DEBUG>=2) THEN
    IF (TWO_D) WRITE(9,*) 'S%MJBAR_MIN=',S%MJBAR_MIN
    WRITE(9,*) 'S%MKBAR_MIN=',S%MKBAR_MIN
 ENDIF
-
 
 !!!
 !!! Determine number of grid levels  (1 for CG-method, NLEVEL for MG-method)
@@ -424,7 +397,6 @@ S%MLEVEL0=0
 ALLOCATE (S%MLEVEL(NMESHES), STAT=IZERO)
 CALL CHKMEMERR ('SCARC_INITIALIZE', 'S%MLEVEL', IZERO)
 S%MLEVEL=0
- 
  
 S%NLEVEL=100000
 DO IM=1,NMESHES
@@ -565,6 +537,7 @@ IF (SCARC_DEBUG>=2) WRITE(9,*) 'Leaving scarc_initialize'
 
 TUSED_SCARC(24,NM)=TUSED_SCARC(24,NM)+SECOND()-TNOW_INITIALIZE
 TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_INITIALIZE
+
 END SUBROUTINE SCARC_INITIALIZE
  
 
@@ -579,8 +552,6 @@ INTEGER :: NM, I, K, ILEVEL
 INTEGER :: IBAR0, JBAR0, KBAR0, IZERO=0, IERR=0
 TYPE (MESH_TYPE), POINTER :: M
 REAL(EB):: TNOW_MESHES2D
-!!INCLUDE 'mpif.h'
- 
 
 TNOW_MESHES2D = SECOND()
 
@@ -595,14 +566,12 @@ GRID_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
 
    SL => S%SLEVEL(ILEVEL)
 
-
    ! ----------------------------------------------------------------------------------
    ! numbers of cells in x-, y- and z-direction for level 'ILEVEL'
    ! ----------------------------------------------------------------------------------
    SL%IBAR=IBAR0
    SL%JBAR=1
    SL%KBAR=KBAR0
-
 
    ! ----------------------------------------------------------------------------------
    ! step widths in x-, y- and z-direction for level 'ILEVEL'
@@ -614,7 +583,6 @@ GRID_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
    SL%DXI=1.0_EB/SL%DX
    SL%DYI=1.0_EB/SL%DY
    SL%DZI=1.0_EB/SL%DZ
-
 
    ! ----------------------------------------------------------------------------------
    ! x-, y-, and z-coordinates for level 'ILEVEL'
@@ -661,7 +629,6 @@ GRID_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
       ENDIF
    ENDDO
 
-
    ! ----------------------------------------------------------------------------------
    ! Get global number of grid cells
    ! ----------------------------------------------------------------------------------
@@ -672,8 +639,6 @@ GRID_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
       SL%NCELLS_GLOBAL = SL%NCELLS_LOCAL
    ENDIF
     
-    
-
    ! ----------------------------------------------------------------------------------
    ! print debug information if requested
    ! ----------------------------------------------------------------------------------
@@ -739,7 +704,6 @@ INTEGER :: NM, I, K, ILEVEL
 INTEGER :: IBAR0, JBAR0, KBAR0, IZERO=0, IERR=0
 TYPE (MESH_TYPE), POINTER :: M
 REAL(EB):: TNOW_MESHES3D
-!!INCLUDE 'mpif.h'
 
 TNOW_MESHES3D = SECOND()
  
@@ -748,7 +712,6 @@ M => MESHES(NM)
 IBAR0=M%IBAR
 JBAR0=M%JBAR
 KBAR0=M%KBAR
-
 
 GRID_LEVEL_LOOP3D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
 
@@ -761,7 +724,6 @@ GRID_LEVEL_LOOP3D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
    SL%JBAR=JBAR0
    SL%KBAR=KBAR0
 
-
    ! ----------------------------------------------------------------------------------
    ! step widths in x-, y- and z-direction for level 'ILEVEL'
    ! ----------------------------------------------------------------------------------
@@ -772,7 +734,6 @@ GRID_LEVEL_LOOP3D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
    SL%DXI=1.0_EB/SL%DX
    SL%DYI=1.0_EB/SL%DY
    SL%DZI=1.0_EB/SL%DZ
-
 
    ! ----------------------------------------------------------------------------------
    ! x-, y-, and z-coordinates for level 'ILEVEL'
@@ -827,7 +788,6 @@ GRID_LEVEL_LOOP3D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
       ENDIF
    ENDDO
 
-
    ! ----------------------------------------------------------------------------------
    ! Get global number of grid cells
    ! ----------------------------------------------------------------------------------
@@ -838,8 +798,6 @@ GRID_LEVEL_LOOP3D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
       SL%NCELLS_GLOBAL = SL%NCELLS_LOCAL
    ENDIF
     
-    
-
    ! ----------------------------------------------------------------------------------
    ! print debug information if requested
    ! ----------------------------------------------------------------------------------
@@ -895,10 +853,6 @@ TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_MESHES3D
 END SUBROUTINE SCARC_INITIALIZE_MESHES3D
  
  
- 
- 
- 
- 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! determine neighborship/communication structure for data exchange for 2D-case
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -925,8 +879,6 @@ REAL(EB):: XIN, YIN, ZIN
 REAL(EB):: TNOW_NEIGHBORS2D
 TYPE (MESH_TYPE), POINTER :: M
  
-!!INCLUDE 'mpif.h'
- 
 TNOW_NEIGHBORS2D = SECOND()
 
 IF (SCARC_DEBUG >= 2) THEN
@@ -941,7 +893,6 @@ IF (SCARC_DEBUG >= 2) THEN
    CALL flush (9)
 ENDIF
     
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Determine initial values
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2319,13 +2270,6 @@ TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_NEIGHBORS2D
 
 END SUBROUTINE SCARC_INITIALIZE_NEIGHBORS2D
 
-
-
- 
-
- 
- 
- 
  
 !------------------------------------------------------------------------------------
 ! determine neighborship/communication structure for data exchange in 2D
@@ -2335,23 +2279,11 @@ SUBROUTINE SCARC_INITIALIZE_COMMUNICATION2D (NM)
 INTEGER :: IM, NM, NOM, ILEVEL, IREFINE
 INTEGER :: IMIN, IMAX, JMIN, JMAX, KMIN, KMAX, ILMAX
 INTEGER :: TAG_FACE, TAG_DIAG
-INTEGER :: I1, J1
 INTEGER :: IZERO
 REAL(EB):: TNOW_COMMUNICATION2D
 
-!INCLUDE 'mpif.h'
- 
 TNOW_COMMUNICATION2D = SECOND()
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) '=========================================================================='
-   WRITE (9,*) '=== SCARC_INITIALIZE_COMMUNICATION2D ',NM
-   WRITE (9,*) '=========================================================================='
-   WRITE (9,*) 'NM=', NM
-   CALL flush (9)
-ENDIF
- 
-
 S => SCARC (NM)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2371,8 +2303,6 @@ TAGS_FACE = 0
 
 ALLOCATE (TAGS_DIAG(NMESHES, NMESHES))
 TAGS_DIAG = 0
- 
- 
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Create unique tags arrays for face, edge and vertex exchanges
@@ -2394,15 +2324,6 @@ DO IM = 1, NMESHES
  
    ENDDO
 ENDDO 
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'NM=',NM
-   WRITE (9,*) 'TAGS_FACE:'
-   WRITE (9, '(4i16)') ((TAGS_FACE(I1, J1), I1=1, NMESHES), J1=1, NMESHES)
-   WRITE (9,*) 'TAGS_DIAG:'
-   WRITE (9, '(4i16)') ((TAGS_DIAG(I1, J1), I1=1, NMESHES), J1=1, NMESHES)
-ENDIF
- 
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Initialize level structures on neighboring meshes
@@ -2439,18 +2360,6 @@ OSLEVEL_LOOP2D: DO NOM=1,NMESHES
          ENDDO
       ENDIF
 
-      IF (SCARC_DEBUG>=2) THEN
-         WRITE(9,*) 'S%NLEVEL=',S%NLEVEL
-         WRITE(9,*) 'S%NLEVEL_DIFF=',S%NLEVEL_DIFF
-         WRITE(9,*) 'OS%SLEVEL(',ILMAX,')%NW_FACE=', OS%SLEVEL(ILMAX)%NW_FACE
-         IF (S%NLEVEL_DIFF/=0) THEN
-            DO ILEVEL=S%NLEVEL_MAX-1,S%NLEVEL_MIN
-               WRITE(9,*) 'OS%SLEVEL(',ILEVEL,')%NW_FACE=', OS%SLEVEL(ILEVEL)%NW_FACE
-            ENDDO
-         ENDIF
-         call flush(9)
-      ENDIF
-
    ENDIF
 
    IF (SLMAX%NIC_DIAG(NM,NOM)/=0.AND.SLMAX%NIC_DIAG(NOM,NM)/=0) THEN
@@ -2477,18 +2386,6 @@ OSLEVEL_LOOP2D: DO NOM=1,NMESHES
             OS%SLEVEL(ILEVEL)%IJKW_DIAG = 0
 
          ENDDO
-      ENDIF
-      IF (SCARC_DEBUG>=2) THEN
-         WRITE(9,*) 'HIERHALLO'
-         WRITE(9,*) 'S%NLEVEL=',S%NLEVEL
-         WRITE(9,*) 'S%NLEVEL_DIFF=',S%NLEVEL_DIFF
-         WRITE(9,*) 'OS%SLEVEL(',ILMAX,')%NW_DIAG=', OS%SLEVEL(ILMAX)%NW_DIAG
-         IF (S%NLEVEL_DIFF/=0) THEN
-            DO ILEVEL=S%NLEVEL_MAX-1,S%NLEVEL_MIN
-               WRITE(9,*) 'OS%SLEVEL(',ILEVEL,')%NW_DIAG=', OS%SLEVEL(ILEVEL)%NW_DIAG
-            ENDDO
-         ENDIF
-         call flush(9)
       ENDIF
 
    ENDIF
@@ -2606,26 +2503,19 @@ COM_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
          WRITE (9,'(a,i2,a,i2,a,i2,a,a,i2,a,i2,a,i2,a,i2,a,i2,a,i2,a,i2,a,i2,a)') 'LEVEL ',ILEVEL,&
                      ': allocate VRTX-vectors for SCARC(', NM, ')%OSCARC(', NOM, ')',&
                      '%VEC(',IMIN,':',IMAX,',',JMIN,':',JMAX,',',KMIN,':',KMAX,')'
-         CALL flush (9)
        ENDIF
 
    ENDDO DIAG_NBR_LOOP2D
 
 ENDDO COM_LEVEL_LOOP2D
  
- 
-IF (SCARC_DEBUG >= 2) write (9,*) 'BEFORE SCARC_RECEIVE'
- 
 DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
    CALL SCARC_RECEIVE (NCOM_INIT, ILEVEL)    
-   CALL SCARC_EXCHANGE(NCOM_INIT, ILEVEL, NTYPE_NONE)
+   CALL SCARC_EXCHANGE(NCOM_INIT, ILEVEL, NCOM_TYPE_NONE)
 ENDDO
- 
-IF (SCARC_DEBUG >= 2) write (9,*) 'Leaving SCARC_INITIALIZE_COMMUNICATION2D'
  
 TUSED_SCARC(3,NM)=TUSED_SCARC(3,NM)+SECOND()-TNOW_COMMUNICATION2D
 TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_COMMUNICATION2D
- 
 END SUBROUTINE SCARC_INITIALIZE_COMMUNICATION2D
  
  
@@ -2659,23 +2549,12 @@ REAL(EB):: DBC
 REAL(EB):: TNOW_MATRICES2D
 TYPE (MESH_TYPE), POINTER :: M
  
-!INCLUDE 'mpif.h'
- 
 TNOW_MATRICES2D = SECOND()
 
 IERR = 0
  
 M => MESHES(NM)
  
-
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) '==========================================================================='
-   WRITE (9,*) '=== SCARC_INITIALIZE_MATRICES2D ',NM
-   WRITE (9,*) '==========================================================================='
-   WRITE (9,*) 'NLEVEL_MAX=',S%NLEVEL_MAX
-   WRITE (9,*) 'NLEVEL_MIN=',S%NLEVEL_MIN
-ENDIF
-
 !!!
 !!! Initialize matrices on each level (only 1 level for CG)
 !!!
@@ -2693,11 +2572,6 @@ MATRIX_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
    ALLOCATE (SL%AG(1:SL%NCELLS_LOCAL, 1:NDIAG), STAT=IZERO)
    CALL CHKMEMERR ('SCARC_INITIALIZE_MATRICES2D', 'SL%AG', IZERO)
    SL%AG = 0.0_EB
-    
-   !!! Allocate local matrix corresponding to the band-wise storage technique
-   !ALLOCATE (SL%AL(1:SL%NCELLS_LOCAL, 1:NDIAG), STAT=IZERO)
-   !CALL CHKMEMERR ('SCARC_INITIALIZE_MATRICES2D', 'SL%AL', IZERO)
-    
     
    SL%DXI2=1.0_EB/(SL%DX)**2
    SL%DZI2=1.0_EB/(SL%DZ)**2
@@ -2740,20 +2614,10 @@ MATRIX_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
    !SL%AL = SL%AG
     
    IF (ILEVEL/=S%NLEVEL_MIN) THEN
-      IF (SCARC_DEBUG>=2) write(9,*) 'CALLING GSTRIX_INIT on level ', ILEVEL
       CALL SCARC_PRECON_GSTRIX2D_INIT(ILEVEL,NM)
    ENDIF
 
    IF (ILEVEL/=S%NLEVEL_MAX) CYCLE
-
-   IF (SCARC_DEBUG>=2) THEN
-      WRITE(9,*) 'BOUNDARY_TYPE'
-      WRITE(9,'(16i4)') (M%BOUNDARY_TYPE(ICELL),ICELL=1,M%NEWC)
-      WRITE(9,*) 'IJKW'
-      DO IW=1,M%NEWC+4
-         WRITE(9,'(i4,a,15i4)') IW,' : ',(M%IJKW(ICELL,IW),ICELL=1,15)
-      ENDDO
-   ENDIF
 
    DO ICELL = 1,SL%NW_FACE
 
@@ -2778,11 +2642,6 @@ MATRIX_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
             DBC= SL%DZI2
       END SELECT
 
-      if (Scarc_debug.ge.8) then
-         WRITE(9,*) 'ICELL=',ICELL,' :I=',I,': K=',K,': IW=',IW,': BT=',M%BOUNDARY_TYPE(IW)
-      endif
-
-
       !IF (M%BOUNDARY_TYPE(IW)==OPEN_BOUNDARY.OR.(M%BOUNDARY_TYPE(IW)==NULL_BOUNDARY.AND.NOM.NE.0)) THEN
       IF (M%BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
           M%PRESSURE_BC_INDEX(IW)=DIRICHLET
@@ -2803,63 +2662,45 @@ MATRIX_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
       !
       !IF (M%BOUNDARY_TYPE(IW) == OPEN_BOUNDARY) THEN    
       IF (M%PRESSURE_BC_INDEX(IW) == DIRICHLET) THEN
-
-         SL%AG(IC, 1) = SL%AG(IC, 1) - DBC
-         !SL%AL(IC, 1) = SL%AL(IC, 1) - DBC
-
-         IF (SCARC_DEBUG .GE. 4) &
-           write (9,'(a,i3,a,i2,a,i3,a,f12.6,a,i3,a,i3)') 'IW=',IW, &
-              ': Dirichlet ',IOR,':AG(',IC,',1)=',SL%AG(IC,1),': BT=',M%BOUNDARY_TYPE(IW),': NOM=',NOM
-
+         IF (SCARC_DEBUG .GE. 4) write(9,1001) IW, IOR, SL%AG(IC,1),M%BOUNDARY_TYPE(IW),NOM
       !
       ! set Dirichlet BC's for AL (NOT for AG!) along internal boundaries
       !
       !ELSE IF (NOM /= 0)  THEN    
       ELSE IF (M%PRESSURE_BC_INDEX(IW) == INTERNAL) THEN
-
-         !SL%AL(IC, 1) = SL%AL(IC, 1) - DBC
-         IF (SCARC_DEBUG .GE. 4) &
-           write (9,'(a,i3,a,i2,a,i3,a,f12.6,a,i3,a,i3)') 'IW=',IW, &
-              ': Nothing   ',IOR,':AG(',IC,',1)=',SL%AG(IC,1),': BT=',M%BOUNDARY_TYPE(IW),': NOM=',NOM
-
-
+         IF (SCARC_DEBUG .GE. 4) write(9,1003) IW, IOR, SL%AG(IC,1),M%BOUNDARY_TYPE(IW),NOM
       !
       ! set Neumann BC's for AG and AL at all other nodes
       !
       !ELSE 
       ELSE IF (M%PRESSURE_BC_INDEX(IW) == NEUMANN) THEN
-
          SL%AG(IC, 1) = SL%AG(IC, 1) + DBC
-         !SL%AL(IC, 1) = SL%AL(IC, 1) + DBC
-
-         IF (SCARC_DEBUG .GE. 4) &
-           write (9,'(a,i3,a,i2,a,i3,a,f12.6,a,i3,a,i3)') 'IW=',IW, &
-              ': Neumann   ',IOR,':AG(',IC,',1)=',SL%AG(IC,1),': BT=',M%BOUNDARY_TYPE(IW),': NOM=',NOM
-
+         IF (SCARC_DEBUG .GE. 4) write(9,1002) IW, IOR, SL%AG(IC,1),M%BOUNDARY_TYPE(IW),NOM
       ENDIF
 
    ENDDO
 
-
+   SL%ASUBX = SL%DXI2
+   SL%ASUBZ = SL%DZI2
+ 
    IF (SCARC_DEBUG >= 2) THEN
+      WRITE(9,'(16i4)') (M%BOUNDARY_TYPE(ICELL),ICELL=1,M%NEWC)
+      WRITE(9,*) 'IJKW'
+      DO IW=1,M%NEWC+4
+         WRITE(9,'(i4,a,15i4)') IW,' : ',(M%IJKW(ICELL,IW),ICELL=1,15)
+      ENDDO
       WRITE (9,*) 'ASUB=', SL%ASUB
       WRITE (9,*)
       WRITE (9,*) 'GLOBAL MATRIX AG:'
       DO IC = 1, SL%NCELLS_LOCAL
          WRITE (9, '(5f12.4)') SL%AG(IC, 2),SL%AG(IC,3),SL%AG(IC,1),SL%AG(IC,4),SL%AG(IC,5)
-         IF (Mod(IC, SL%IBAR) == 0) write (9,*) '---------------------------------------------&
-                                                &--------------------'
+         IF (Mod(IC, SL%IBAR) == 0) write (9,*) '---------------------------------&
+                                                &--------------------------------'
       ENDDO
-   ENDIF
-    
-   SL%ASUBX = SL%DXI2
-   SL%ASUBZ = SL%DZI2
- 
-   IF (SCARC_DEBUG >= 2) THEN
-     write (9,*) 'SL%ASUBX=', SL%ASUBX
-     WRITE (9,*) 'LBC=', LBC
-     WRITE (9,*) 'MBC=', MBC
-     WRITE (9,*) 'NBC=', NBC
+      write (9,*) 'SL%ASUBX=', SL%ASUBX
+      WRITE (9,*) 'LBC=', LBC
+      WRITE (9,*) 'MBC=', MBC
+      WRITE (9,*) 'NBC=', NBC
    ENDIF
 
 ENDDO MATRIX_LEVEL_LOOP2D
@@ -2868,6 +2709,9 @@ ENDDO MATRIX_LEVEL_LOOP2D
 TUSED_SCARC(4,NM)=TUSED_SCARC(4,NM)+SECOND()-TNOW_MATRICES2D
 TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_MATRICES2D
 
+1001 FORMAT('IW=',i3,': Dirichlet ',i2,':AG(',i3,'1)=',f12.6,': BT=',i3,': NOM=',i3)
+1002 FORMAT('IW=',i3,': Neumann   ',i2,':AG(',i3,'1)=',f12.6,': BT=',i3,': NOM=',i3)
+1003 FORMAT('IW=',i3,': Nothing   ',i2,':AG(',i3,'1)=',f12.6,': BT=',i3,': NOM=',i3)
 END SUBROUTINE SCARC_INITIALIZE_MATRICES2D
  
 
@@ -2882,22 +2726,12 @@ REAL(EB):: DBC
 REAL(EB):: TNOW_MATRICES3D
 TYPE (MESH_TYPE), POINTER :: M
  
-!INCLUDE 'mpif.h'
- 
 TNOW_MATRICES3D = SECOND()
 
 IERR = 0
  
 M => MESHES(NM)
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) '==========================================================================='
-   WRITE (9,*) '=== SCARC_INITIALIZE_MATRICES3D ',NM
-   WRITE (9,*) '==========================================================================='
-   WRITE (9,*) 'NLEVEL_MAX=',S%NLEVEL_MAX
-   WRITE (9,*) 'NLEVEL_MIN=',S%NLEVEL_MIN
-ENDIF
-
 !!!
 !!! Initialize matrices on each level (only 1 level for CG)
 !!!
@@ -2914,10 +2748,6 @@ MATRIX_LEVEL_LOOP3D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
    ALLOCATE (SL%AG(1:SL%NCELLS_LOCAL, 1:NDIAG), STAT=IZERO)
    CALL CHKMEMERR ('SCARC_INITIALIZE_MATRICES3D', 'SL%AG', IZERO)
    SL%AG = 0.0_EB
-    
-   !!! Allocate local matrix corresponding to the band-wise storage technique
-   !ALLOCATE (SL%AL(1:SL%NCELLS_LOCAL, 1:NDIAG), STAT=IZERO)
-   !CALL CHKMEMERR ('SCARC_INITIALIZE_MATRICES3D', 'SL%AL', IZERO)
     
    SL%DXI2=1.0_EB/(SL%DX)**2
    SL%DYI2=1.0_EB/(SL%DY)**2
@@ -3103,9 +2933,6 @@ TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_MATRICES3D
 END SUBROUTINE SCARC_INITIALIZE_MATRICES3D
 
 
- 
-
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
 !!! Initialize global 2D-solver methods (cg/mg)
@@ -3119,31 +2946,16 @@ REAL(EB):: TNOW_SOLVER2D
  
 TNOW_SOLVER2D = SECOND()
  
-IF (SCARC_DEBUG >= 2) THEN
-   write (9,*) '=========== STARTING SCARC_INITIALIZE_SOLVER'
-   flush (9)
-ENDIF
-
 IZERO = 0
-
-!!! CG-parameters for global and local solves
-S%BPRECON   = .TRUE.
-S%BGSADI    = .FALSE.
-
 
 S => SCARC (NM)
 
 !!!
 !!! Initialize SLEVEL-structures for single levels
 !!!
-
 LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
 
-IF (SCARC_DEBUG>=2) WRITE(9,*) 'ILEVEL=',ILEVEL
-
    SL => S%SLEVEL(ILEVEL)
-
-IF (SCARC_DEBUG>=2) WRITE(9,*)' ALLOCATE SCARC(',NM,')%SLEVEL(',ILEVEL,')'
 
    IBP0=SL%IBAR+1
    KBP0=SL%KBAR+1
@@ -3254,13 +3066,6 @@ REAL(EB):: TNOW_SOLVER3D
  
 TNOW_SOLVER3D = SECOND()
  
-IF (SCARC_DEBUG >= 2) write (9,*) '=========== STARTING SCARC_INITIALIZE_SOLVER'
-
-
-!!! CG-parameters for global and local solves
-S%BPRECON   = .TRUE.
-S%BGSADI    = .FALSE.
-
 IZERO = 0
 
 S => SCARC (NM)
@@ -3380,305 +3185,316 @@ END SUBROUTINE SCARC_INITIALIZE_SOLVER3D
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
-!!! Perform global cg-method based on global possion-matrix
+!!! Perform global 2D cg-method based on global possion-matrix
 !!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_CG2D (NM)
  
-INTEGER ::  NM, ILMAX, ITE, IREL, ICONV, ITYPE, IERR, IPRECON, I, K
+INTEGER ::  NM, ILMAX, ITE_CG, IERR, I, K
 REAL (EB) :: SIGMA0, SIGMA1, ALPHA, GAMMA
 REAL (EB) :: TNOW_CG2D
+LOGICAL BCONV
 TYPE (MESH_TYPE),  POINTER :: M
- 
-!INCLUDE 'mpif.h'
  
 TNOW_CG2D = SECOND()
 IERR = 0
+BCONV = .TRUE.
 
 S  => SCARC (NM)
 M  => MESHES (NM)
 
-ILMAX = S%NLEVEL_MAX
-SL => S%SLEVEL(ILMAX)
+! cg only works in finest grid level
+ILMAX =  S%NLEVEL_MAX                              
+SL    => S%SLEVEL(ILMAX)
  
-! initialize working vectors
-SL%G = 0.0_EB
+! get right hand side 
+DO K = 1, KBAR                                     ! 
+   DO I = 1, IBAR
+      SL%F (I, 1, K) = M%PRHS (I, 1, K)
+   ENDDO
+ENDDO
+
+! re-initialize auxiliary vectors
+SL%G = 0.0_EB                   
 SL%Y = 0.0_EB
 SL%R = 0.0_EB
 SL%D = 0.0_EB
 SL%X = 0.0_EB
  
-DO K = 1, KBAR
-   DO I = 1, IBAR
-      SL%F (I, 1, K) = M%PRHS (I, 1, K)
-   ENDDO
-ENDDO
- 
-IF (SCARC_DEBUG >= 3) THEN
-   WRITE (9,*) 'Starting SCARC_CG2D'
-   WRITE (9,*) 'NMESHES=:', NMESHES
-   WRITE (9,*) 'IBAR=:', IBAR
-   WRITE (9,*) 'JBAR=:', JBAR
-   WRITE (9,*) 'KBAR=:', KBAR
-   WRITE (9,*) 'SCARC_NIT=:', SCARC_NIT
-   WRITE (9,*) 'SCARC_EPS=:', SCARC_EPS
-   WRITE (9,*) 'SCARC_EPS_REL=:', SCARC_EPS_REL
-   WRITE (9,*) 'ncells_global=:', SL%Ncells_global
-ENDIF
-CALL SCARC_COMPARE_SINGLE (SL%X, 'SARC', 1, 'X1    ',0)
-CALL SCARC_COMPARE_SINGLE (SL%F, 'SARC', 1, 'F1    ',0)
- 
- 
-!!!
-!!! initialize some parameters
-!!!
-ITYPE = NCOM_TYPE_GLOBAL
-IREL = 0
-ICONV = 0
-IPRECON = 2
- 
-!!!
-!!! set boundary conditions along exterior boundaries
-!!!
+! set boundary conditions along exterior boundaries
 CALL SCARC_SETBDRY2D (ILMAX, NM)
  
- 
-!!!
 !!! calculate initial defect Y = B - A*X and get l2-norm of it
-!!!
-CALL SCARC_MATVEC2D (SL%AG, SL%X, SL%R, 1.0_EB, 0.0_EB, NM, ITYPE, ILMAX, 3)
-IF (SCARC_DEBUG>=2) WRITE(9,*) 'SCARC_CG2D: FIRST MATVEC2D'
+CALL SCARC_MATVEC2D (SL%AG, SL%X, SL%R, 1.0_EB, 0.0_EB, NM, NTYPE_GLOBAL, ILMAX, 3)
 CALL SCARC_VECADD2D (SL%F, SL%R,-1.0_EB, 1.0_EB, ILMAX, NM)
-CALL SCARC_L2NORM2D (SL%R, SL%RES, ILMAX, NM, ITYPE)
-SL%RESIN = SL%RES
+CALL SCARC_L2NORM2D (SL%R, SL%RES_CG, ILMAX, NM, NTYPE_GLOBAL)
+SL%RESIN_CG = SL%RES_CG
  
-IF (SCARC_DEBUG >= 3) THEN
-   WRITE (9,*) 'Initial DEFECT '
-   WRITE (9,*) 'RES=', SL%RES
-   WRITE (9,*) 'SL%X:'
-   WRITE (9, '(a,10f12.6)') '2: S%SP_LOCAL0=', (S%SP_LOCAL0(I), I=1, NMESHES)
-ENDIF
-CALL SCARC_COMPARE_SINGLE (SL%X, 'SARC', 1, 'X3    ',0)
-CALL SCARC_COMPARE_SINGLE (SL%F, 'SARC', 1, 'F3    ',0)
-CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'R3    ',0)
- 
- 
-IF (S%BPRECON) THEN
- 
-   IF (SCARC_PRECON == 1) THEN
-      WRITE (*,*) 'IPRECON=1 not yet implemented!'
-   ELSE IF (SCARC_PRECON == 2) THEN
+! initial preconditioning
+SELECT CASE(SCARC_PRECON_CG)
+   CASE(NDEFCOR_NONE) 
+      SIGMA0 = SL%RESIN_CG * SL%RESIN_CG
+   CASE(NDEFCOR_JACOBI) 
       CALL SCARC_VECCOPY2D (SL%R, SL%G, ILMAX, NM)
       CALL SCARC_PRECON_JACOBI2D (SL%AG, SL%G, ILMAX, NM)
-   ELSE IF (SCARC_PRECON == 3) THEN
+      CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA0, ILMAX, NM)
+   CASE(NDEFCOR_SSOR) 
       CALL SCARC_VECCOPY2D (SL%R, SL%G, ILMAX, NM)
       CALL SCARC_PRECON_GS2D (SL%AG, SL%G, ILMAX, NM)
-   ELSE IF (SCARC_PRECON == 4) THEN
+      CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA0, ILMAX, NM)
+   CASE(NDEFCOR_GSTRIX) 
       CALL SCARC_VECCOPY2D (SL%R, SL%G, ILMAX, NM)
       CALL SCARC_PRECON_SSOR2D (SL%AG, SL%G, ILMAX, NM)
-   ENDIF
- 
-   CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA0, ILMAX, NM)
- 
-ELSE
-   SIGMA0 = SL%RESIN * SL%RESIN
-ENDIF
- 
-IF (SCARC_DEBUG >= 3) THEN
-   WRITE (9,*) 'After initial Precon '
-   WRITE (9,*) 'Sigma0=', SIGMA0
-   WRITE (9,*) 'SL%X:'
-   WRITE (9, '(a,10f12.6)') '4: S%SP_LOCAL0=', (S%SP_LOCAL0(I), I=1, NMESHES)
-   CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'R4    ',0)
-   CALL SCARC_COMPARE_SINGLE (SL%G, 'SARC', 1, 'G4    ',0)
-   CALL flush (9)
-ENDIF
- 
+      CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA0, ILMAX, NM)
+END SELECT
 CALL SCARC_VECADD2D (SL%G, SL%D,-1.0_EB, 0.0_EB, ILMAX, NM)
  
-IF (SCARC_DEBUG >= 3) THEN
-   WRITE (9,*) 'After initial vecadd SL%D'
-   WRITE (9, '(a,10f12.6)') '5: S%SP_LOCAL0=', (S%SP_LOCAL0(I), I=1, &
-    NMESHES)
-   CALL flush (9)
-ENDIF
-CALL SCARC_COMPARE_SINGLE (SL%D, 'SARC', 1, 'D4    ',0)
+!
+! start defect correction loop
+!
+CG_LOOP2D: DO ITE_CG = 1, SCARC_NIT_CG
  
- 
-!!!
-!!! start defect correction loop
-!!!
-CG_LOOP2D: DO ITE = 1, SCARC_NIT
- 
-   IF (SCARC_DEBUG >= 3) WRITE (9,*) '=========================== STARTING CG-LOOP ', ITE
-
- 
-!!!  calculate new defect and get L2-norm of it
-   CALL SCARC_MATVEC2D (SL%AG, SL%D, SL%Y, 1.0_EB, 0.0_EB, NM, ITYPE, ILMAX, 5)
+   ! calculate new defect and get L2-norm of it
+   CALL SCARC_MATVEC2D (SL%AG, SL%D, SL%Y, 1.0_EB, 0.0_EB, NM, NTYPE_GLOBAL, ILMAX, 5)
    CALL SCARC_SCALPROD2D (SL%D, SL%Y, ALPHA, ILMAX, NM)
 
+   ! get new descent direction
    ALPHA = SIGMA0 / ALPHA
- 
    CALL SCARC_VECADD2D (SL%D, SL%X, ALPHA, 1.0_EB, ILMAX, NM)
    CALL SCARC_VECADD2D (SL%Y, SL%R, ALPHA, 1.0_EB, ILMAX, NM)
-   CALL SCARC_L2NORM2D (SL%R, SL%RES, ILMAX, NM, ITYPE)
+   CALL SCARC_L2NORM2D (SL%R, SL%RES_CG, ILMAX, NM, NTYPE_GLOBAL)
 
-   IF (SCARC_DEBUG >= 2) THEN
-      CALL SCARC_COMPARE_SINGLE (SL%Y, 'SARC', 1, 'DNEW   ',0)
-      CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'YNEW   ',0)
-      CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'XNEW   ',0)
-      CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'RNEW   ',0)
-   ENDIF
  
-   IF (SCARC_DEBUG >= 3) THEN
-      WRITE (9,*) 'New DEFECT in iteration ', ITE, ': ALPHA=', ALPHA
-      WRITE (9,*) 'New Iterate in iteration ', ITE
-      WRITE (9, '(a10,f22.16)') 'ALPHA=', ALPHA
-      WRITE (9, '(a10,f22.16)') 'SIGMA0=', SIGMA0
-      WRITE (9, '(a10,f22.16)') 'RES=', SL%RES
-      WRITE (9, '(a,10f12.6)') '6: S%SP_LOCAL0=', (S%SP_LOCAL0(I), I=1, NMESHES)
-      CALL SCARC_COMPARE_SINGLE (SL%Y, 'SARC', 1, 'Y5    ',0)
-      CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'R5    ',0)
-      CALL flush (9)
-   ENDIF
-   CALL SCARC_COMPARE_SINGLE (SL%X, 'SARC', 1, 'XITE   ',0)
- 
- 
-   !if (MOD(ITE,1)==0) write(*,'(a,i4,a,f25.16,a,f25.16)') '### SCARC_CG, ite=',ITE,' RES=',SL%RES,'  ####'
-   !IF (NM == 1 .AND. SCARC_DEBUG >= 1) write (9, '(a,i4,a,f25.16,a,f25.16)') '&
-   IF (SCARC_DEBUG >= 1) write (9, '(a,i4,a,f25.16,a,f25.16)') '### SCARC_CG, ite=', ITE, ' RES=', SL%RES, '  ####'
- 
-!!!  stop in case of convergence or divergence
-   IF (IREL == 1) THEN
-      IF (SL%RES <= SL%RESIN*SCARC_EPS) ICONV = 1
+   !  exit loop in case of convergence or divergence
+   IF (SCARC_DEBUG >= 1) write (9,1000) ITE_CG, SL%RES_CG
+   IF (SCARC_BREL_CG) THEN
+      IF (SL%RES_CG <= SL%RESIN_CG*SCARC_EPS_CONV_CG) BCONV = .TRUE.
    ELSE
-      IF (SL%RES <= SCARC_EPS .AND. SL%RES <= SL%RESIN*SCARC_EPS_REL) ICONV = 1
+      IF (SL%RES_CG <= SCARC_EPS_CONV_CG .AND. SL%RES_CG <= SL%RESIN_CG*SCARC_EPS_REL) BCONV = .TRUE.
    ENDIF
-   IF (SL%RES > 10000.0_EB) ICONV = - 1
-   IF (Abs(ICONV) == 1) EXIT CG_LOOP2D
+   IF (SL%RES_CG > SCARC_EPS_DIVG_CG) BCONV = .FALSE.
+   IF (.NOT.BCONV) EXIT CG_LOOP2D
  
- 
-!!! preconditioning
-   IF (S%BPRECON) THEN
- 
-      IF (SCARC_PRECON == 1) THEN
-         CALL SCARC_RECEIVE (NCOM_FULL, ILMAX)   !Aufruf 2,0
-         CALL SCARC_EXCHANGE (NCOM_FULL, ILMAX, NTYPE_NONE)
-         WRITE (*,*) 'IPRECON=1 not yet implemented!'
-!     CALL SCARC_CG0(SL%R,NM)
-      ELSE IF (SCARC_PRECON == 2) THEN
+   ! preconditioning
+   SELECT CASE(SCARC_PRECON_CG)
+      CASE(NDEFCOR_NONE)
+         SIGMA1 = SL%RES_CG * SL%RES_CG
+      CASE(NDEFCOR_JACOBI)
          CALL SCARC_VECCOPY2D (SL%R, SL%G, ILMAX, NM)
          CALL SCARC_PRECON_JACOBI2D (SL%AG, SL%G, ILMAX, NM)
-      ELSE IF (SCARC_PRECON == 3) THEN
+         CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA1, ILMAX, NM)
+      CASE(NDEFCOR_GS)
          CALL SCARC_VECCOPY2D (SL%R, SL%G, ILMAX, NM)
          CALL SCARC_PRECON_GS2D (SL%AG, SL%G, ILMAX, NM)
-      ELSE IF (SCARC_PRECON == 4) THEN
+         CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA1, ILMAX, NM)
+      CASE(NDEFCOR_SSOR)
          CALL SCARC_VECCOPY2D (SL%R, SL%G, ILMAX, NM)
          CALL SCARC_PRECON_SSOR2D (SL%AG, SL%G, ILMAX, NM)
-      ENDIF
- 
-      CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA1, ILMAX, NM)
- 
-   ELSE
-      SIGMA1 = SL%RES * SL%RES
-   ENDIF
- 
-   CALL SCARC_COMPARE_SINGLE (SL%G, 'SARC', 1, 'G6    ',0)
+         CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA1, ILMAX, NM)
+   END SELECT
  
    GAMMA = SIGMA1 / SIGMA0
    SIGMA0 = SIGMA1
- 
-   IF (SCARC_DEBUG >= 3) THEN
-      WRITE (9,*) 'After Precon in iteration ', ITE
-      WRITE (9,*) 'Sigma0=', SIGMA0
-      WRITE (9,*) 'Gamma =', GAMMA
-      CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'R4    ',0)
-      CALL flush (9)
-   ENDIF
- 
    CALL SCARC_VECADD2D (SL%G, SL%D,-1.0_EB, GAMMA, ILMAX, NM)
- 
-   IF (SCARC_DEBUG >= 3) CALL SCARC_COMPARE_SINGLE (SL%D, 'SARC', 1, 'D7    ',0)
  
 ENDDO CG_LOOP2D
  
- 
-IF (SCARC_DEBUG >= 2) THEN
-   write (9,*) 'AFTER CG_LOOP2D:A'
-   write (9,*) 'RESIN=',SL%RESIN
-   write (9,*) 'RES  =',SL%RES
-   write (9,*) 'CAPPA  =',SL%CAPPA
-ENDIF
- 
-!!! 'bad end'
-IF (ICONV ==-1) THEN
-   ITE = - 1
-   SL%CAPPA = 1.0_EB
- 
-!!! 'good end'
-ELSE
-   IF (SL%RESIN >= 1.0E-70_EB) THEN
-      SL%RESIN = SL%RES / SL%RESIN
-      SL%CAPPA = SL%RESIN ** (1.0_EB/ITE)
-   ELSE IF (ITE == 0) THEN
-      SL%CAPPA = 0.0_EB
+! convergence or divergence ?
+IF (BCONV) THEN             
+   IF (SL%RESIN_CG >= 1.0E-70_EB) THEN
+      SL%RESIN_CG = SL%RES_CG / SL%RESIN_CG
+      SL%CAPPA_CG = SL%RESIN_CG ** (1.0_EB/ITE_CG)
+   ELSE IF (ITE_CG == 0) THEN
+      SL%CAPPA_CG = 0.0_EB
    ENDIF
+ELSE                       
+   ITE_CG = - 1
+   SL%CAPPA_CG = 1.0_EB
 ENDIF
+IF (SCARC_DEBUG >= 1) WRITE (9,2000) ITE_CG, SL%RES_CG, SL%CAPPA_CG 
+IF (NM == 1)          WRITE (*,2000) ITE_CG, SL%RES_CG, SL%CAPPA_CG
  
-IF (SCARC_DEBUG >= 2) THEN
-   write (9,*) 'AFTER CG_LOOP2D'
-   write (9,*) 'RESIN=',SL%RESIN
-   write (9,*) 'RES  =',SL%RES
-   write (9,*) 'CAPPA  =',SL%CAPPA
-ENDIF
- 
-IF (SCARC_DEBUG >= 1) THEN
-   WRITE (9, '(a,i4,a,f12.6,a,f12.5)') 'SCARC_CG: Ite=', ITE, ': Res=', SL%RES,' : Kappa=', SL%CAPPA 
-ENDIF
-IF (NM == 1) write (*, '(a20,i4,a,e12.6,a,e12.6)') 'SCARC_CG: Ite=', ITE, &
-             ': Res =', SL%RES, ': Kappa=', SL%CAPPA
- 
- 
+! shift solution back to vector PRHS
 DO K = 1, KBAR
    DO I = 1, IBAR
       M%PRHS (I, 1, K) = SL%X(I, 1, K)
    ENDDO
 ENDDO
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'Leaving SCARC_CG2D'
-   CALL flush (9)
-ENDIF
-CALL SCARC_COMPARE_SINGLE (SL%X, 'SARC', 1, 'XFINAL',0)
- 
 TUSED_SCARC(6,NM)=TUSED_SCARC(6,NM)+SECOND()-TNOW_CG2D
 TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_CG2D
 
+1000 FORMAT ('SCARC_CG: #iterations= ',i4,': residuum=',f12.6)
+2000 FORMAT ('SCARC_CG: #iterations= ',i4,': residuum=',f12.6,': convergence rate=',f12.5)
 END SUBROUTINE SCARC_CG2D
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!
+!!! Perform global 3D cg-method based on global possion-matrix
+!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUBROUTINE SCARC_CG3D (NM)
+ 
+INTEGER ::  NM, ILMAX, ITE_CG, IERR, I, K
+REAL (EB) :: SIGMA0, SIGMA1, ALPHA, GAMMA
+REAL (EB) :: TNOW_CG3D
+LOGICAL BCONV
+TYPE (MESH_TYPE),  POINTER :: M
+ 
+TNOW_CG3D = SECOND()
+IERR = 0
+BCONV = .TRUE.
+NREQ_FACE=0                   ! check if really necessary ...
+NREQ_EDGE=0
+NREQ_DIAG=0
+
+S  => SCARC (NM)
+M  => MESHES (NM)
+
+! cg only works in finest grid level
+ILMAX =  S%NLEVEL_MAX                              
+SL    => S%SLEVEL(ILMAX)
+ 
+! get right hand side 
+DO K = 1, KBAR                                     ! 
+   DO I = 1, IBAR
+      SL%F (I, 1, K) = M%PRHS (I, 1, K)
+   ENDDO
+ENDDO
+
+! re-initialize auxiliary vectors
+SL%G = 0.0_EB                   
+SL%Y = 0.0_EB
+SL%R = 0.0_EB
+SL%D = 0.0_EB
+SL%X = 0.0_EB
+ 
+! set boundary conditions along exterior boundaries
+CALL SCARC_SETBDRY3D (ILMAX, NM)
+ 
+!!! calculate initial defect Y = B - A*X and get l2-norm of it
+CALL SCARC_MATVEC3D (SL%AG, SL%X, SL%R, 1.0_EB, 0.0_EB, NM, NTYPE_GLOBAL, ILMAX, 3)
+CALL SCARC_VECADD3D (SL%F, SL%R,-1.0_EB, 1.0_EB, ILMAX, NM)
+CALL SCARC_L2NORM3D (SL%R, SL%RES_CG, ILMAX, NM, NTYPE_GLOBAL)
+SL%RESIN_CG = SL%RES_CG
+ 
+! initial preconditioning
+SELECT CASE(SCARC_PRECON_CG)
+   CASE(NDEFCOR_NONE) 
+      SIGMA0 = SL%RESIN_CG * SL%RESIN_CG
+   CASE(NDEFCOR_JACOBI) 
+      CALL SCARC_VECCOPY3D (SL%R, SL%G, ILMAX, NM)
+      CALL SCARC_PRECON_JACOBI3D (SL%AG, SL%G, ILMAX, NM)
+      CALL SCARC_SCALPROD3D (SL%R, SL%G, SIGMA0, ILMAX, NM)
+   CASE(NDEFCOR_SSOR) 
+      CALL SCARC_VECCOPY3D (SL%R, SL%G, ILMAX, NM)
+      CALL SCARC_PRECON_GS3D (SL%AG, SL%G, ILMAX, NM)
+      CALL SCARC_SCALPROD3D (SL%R, SL%G, SIGMA0, ILMAX, NM)
+   CASE(NDEFCOR_GSTRIX) 
+      CALL SCARC_VECCOPY3D (SL%R, SL%G, ILMAX, NM)
+      CALL SCARC_PRECON_SSOR3D (SL%AG, SL%G, ILMAX, NM)
+      CALL SCARC_SCALPROD3D (SL%R, SL%G, SIGMA0, ILMAX, NM)
+END SELECT
+CALL SCARC_VECADD3D (SL%G, SL%D,-1.0_EB, 0.0_EB, ILMAX, NM)
+ 
+!
+! start defect correction loop
+!
+CG_LOOP3D: DO ITE_CG = 1, SCARC_NIT_CG
+ 
+   ! calculate new defect and get L2-norm of it
+   CALL SCARC_MATVEC3D (SL%AG, SL%D, SL%Y, 1.0_EB, 0.0_EB, NM, NTYPE_GLOBAL, ILMAX, 5)
+   CALL SCARC_SCALPROD3D (SL%D, SL%Y, ALPHA, ILMAX, NM)
+
+   ! get new descent direction
+   ALPHA = SIGMA0 / ALPHA
+   CALL SCARC_VECADD3D (SL%D, SL%X, ALPHA, 1.0_EB, ILMAX, NM)
+   CALL SCARC_VECADD3D (SL%Y, SL%R, ALPHA, 1.0_EB, ILMAX, NM)
+   CALL SCARC_L2NORM3D (SL%R, SL%RES_CG, ILMAX, NM, NTYPE_GLOBAL)
 
  
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   !  exit loop in case of convergence or divergence
+   IF (SCARC_DEBUG >= 1) write (9,1000) ITE_CG, SL%RES_CG
+   IF (SCARC_BREL_CG) THEN
+      IF (SL%RES_CG <= SL%RESIN_CG*SCARC_EPS_CONV_CG) BCONV = .TRUE.
+   ELSE
+      IF (SL%RES_CG <= SCARC_EPS_CONV_CG .AND. SL%RES_CG <= SL%RESIN_CG*SCARC_EPS_REL) BCONV = .TRUE.
+   ENDIF
+   IF (SL%RES_CG > SCARC_EPS_DIVG_CG) BCONV = .FALSE.
+   IF (.NOT.BCONV) EXIT CG_LOOP3D
+ 
+   ! preconditioning
+   SELECT CASE(SCARC_PRECON_CG)
+      CASE(NDEFCOR_NONE)
+         SIGMA1 = SL%RES_CG * SL%RES_CG
+      CASE(NDEFCOR_JACOBI)
+         CALL SCARC_VECCOPY3D (SL%R, SL%G, ILMAX, NM)
+         CALL SCARC_PRECON_JACOBI3D (SL%AG, SL%G, ILMAX, NM)
+         CALL SCARC_SCALPROD3D (SL%R, SL%G, SIGMA1, ILMAX, NM)
+      CASE(NDEFCOR_GS)
+         CALL SCARC_VECCOPY3D (SL%R, SL%G, ILMAX, NM)
+         CALL SCARC_PRECON_GS3D (SL%AG, SL%G, ILMAX, NM)
+         CALL SCARC_SCALPROD3D (SL%R, SL%G, SIGMA1, ILMAX, NM)
+      CASE(NDEFCOR_SSOR)
+         CALL SCARC_VECCOPY3D (SL%R, SL%G, ILMAX, NM)
+         CALL SCARC_PRECON_SSOR3D (SL%AG, SL%G, ILMAX, NM)
+         CALL SCARC_SCALPROD3D (SL%R, SL%G, SIGMA1, ILMAX, NM)
+   END SELECT
+ 
+   GAMMA = SIGMA1 / SIGMA0
+   SIGMA0 = SIGMA1
+   CALL SCARC_VECADD3D (SL%G, SL%D,-1.0_EB, GAMMA, ILMAX, NM)
+ 
+ENDDO CG_LOOP3D
+ 
+! convergence or divergence ?
+IF (BCONV) THEN             
+   IF (SL%RESIN_CG >= 1.0E-70_EB) THEN
+      SL%RESIN_CG = SL%RES_CG / SL%RESIN_CG
+      SL%CAPPA_CG = SL%RESIN_CG ** (1.0_EB/ITE_CG)
+   ELSE IF (ITE_CG == 0) THEN
+      SL%CAPPA_CG = 0.0_EB
+   ENDIF
+ELSE                       
+   ITE_CG = - 1
+   SL%CAPPA_CG = 1.0_EB
+ENDIF
+IF (SCARC_DEBUG >= 1) WRITE (9,2000) ITE_CG, SL%RES_CG, SL%CAPPA_CG 
+IF (NM == 1)          WRITE (*,2000) ITE_CG, SL%RES_CG, SL%CAPPA_CG
+ 
+! shift solution back to vector PRHS
+DO K = 1, KBAR
+   DO I = 1, IBAR
+      M%PRHS (I, 1, K) = SL%X(I, 1, K)
+   ENDDO
+ENDDO
+ 
+TUSED_SCARC(6,NM)=TUSED_SCARC(6,NM)+SECOND()-TNOW_CG3D
+TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_CG3D
+
+1000 FORMAT ('SCARC_CG: #iterations= ',i4,': residuum=',f12.6)
+2000 FORMAT ('SCARC_CG: #iterations= ',i4,': residuum=',f12.6,': convergence rate=',f12.5)
+END SUBROUTINE SCARC_CG3D
+
+ 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
 !!! Perform global MG-method based on global possion-matrix
 !!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_MG2D (NM)
  
-INTEGER :: NM, ITE, IREL, ICONV, ITYPE, ICYCLE
-INTEGER :: IERR, IPRECON, ILEVEL, ILMAX
+INTEGER :: NM, ITE_MG, NCONV_INFO, ITYPE, ICYCLE
+INTEGER :: IERR, ILEVEL, ILMAX
 INTEGER :: I, K, IBAR0, JBAR0, KBAR0
 REAL (EB) :: TNOW_MG2D
-LOGICAL BMATVEC, BCONV, BRELERR
+LOGICAL BMATVEC, BCONV
 !TYPE (SCARC_LEVEL_TYPE), POINTER :: SL, SLHI, SLLO
 TYPE (MESH_TYPE),  POINTER :: M
  
-!INCLUDE 'mpif.h'
- 
 TNOW_MG2D = SECOND()
 
- 
 ! initialize working vectors
 S    => SCARC (NM)
 M    => MESHES (NM)
@@ -3686,7 +3502,6 @@ M    => MESHES (NM)
 ILMAX =  S%NLEVEL_MAX
 SLHI  => S%SLEVEL(ILMAX)
  
-
 ! initialize working vectors
 SLHI%G = 0.0_EB
 SLHI%Y = 0.0_EB
@@ -3705,8 +3520,8 @@ IF (SCARC_DEBUG >= 3) THEN
    WRITE (9,*) 'IBAR=:', SLHI%IBAR
    WRITE (9,*) 'JBAR=:', SLHI%JBAR
    WRITE (9,*) 'KBAR=:', SLHI%KBAR
-   WRITE (9,*) 'SCARC_NIT=:', SCARC_NIT
-   WRITE (9,*) 'SCARC_EPS=:', SCARC_EPS
+   WRITE (9,*) 'SCARC_NIT_MG=:', SCARC_NIT_MG
+   WRITE (9,*) 'SCARC_EPS_CONV_MG=:', SCARC_EPS_CONV_MG
    WRITE (9,*) 'SCARC_EPS_REL=:', SCARC_EPS_REL
    CALL SCARC_COMPARE_SINGLE (SLHI%X, 'SARC', 1, 'X1    ',0)
    CALL SCARC_COMPARE_SINGLE (SLHI%F, 'SARC', 1, 'F1    ',0)
@@ -3715,23 +3530,16 @@ ENDIF
 !!!
 !!! initialize some method parameters
 !!!
-ITYPE = NCOM_TYPE_GLOBAL
-IREL = 0
-ICONV = 0
-IPRECON = 2
+ITYPE = NTYPE_GLOBAL
+NCONV_INFO = 0
  
 NREQ_FACE = 0
 NREQ_EDGE = 0
 NREQ_DIAG = 0
 
 IERR = 0
-BCONV  =.FALSE.
-BRELERR=.TRUE.
+BCONV =.TRUE.
 ICYCLE=1      ! V-cycle
- 
-S%EPS_CONV=1.0E-10_EB
-S%EPS_DIVG=1.0E+6_EB
-S%EPS_REL=1.0E-2_EB
  
 IBAR0=SLHI%IBAR
 JBAR0=SLHI%JBAR
@@ -3754,9 +3562,7 @@ IF (S%NLEVEL==1) THEN
 !!! ------------------------------------------------------------------------------------
 ELSE
 
-   !!!
    !!! save cycle counts for MG-iteration
-   !!!
    S%KCYCLE(2,S%NLEVEL_MAX)=1
    DO ILEVEL=S%NLEVEL_MIN+1,S%NLEVEL_MAX-1
       IF (ICYCLE==0) THEN
@@ -3766,46 +3572,35 @@ ELSE
       ENDIF
    ENDDO
      
-    
-   !!!
    !!! calculate initial defect on finest level, Y = B - A*X, and get l2-norm of it
-   !!!
 !WRITE(9,*) 'KOMMUNIKATIONSPARAMETER 3 prüfen, anders als bei CG !!!'
 !write(*,*) 'KOMMUNIKATIONSPARAMETER 3 prüfen, anders als bei CG !!!'
    ILEVEL=ILMAX
-   CALL SCARC_MATVEC2D (SLHI%AG, SLHI%X, SLHI%D, 1.0_EB, 0.0_EB, NM, ITYPE, ILEVEL, 3)
+   CALL SCARC_MATVEC2D (SLHI%AG, SLHI%X, SLHI%D, 1.0_EB, 0.0_EB, NM, NTYPE_GLOBAL, ILEVEL, 3)
+   CALL SCARC_VECADD2D (SLHI%F , SLHI%D, 1.0_EB, -1.0_EB, ILEVEL, NM)
+   CALL SCARC_L2NORM2D (SLHI%D , SLHI%RES_MG, ILEVEL, NM, NTYPE_GLOBAL)
 
-   CALL SCARC_COMPARE_SINGLE (SLHI%D, 'SARC', 1, 'D1    ',0)
-
-   CALL SCARC_VECADD2D (SLHI%F, SLHI%D,1.0_EB, -1.0_EB, ILEVEL, NM)
-   CALL SCARC_L2NORM2D (SLHI%D, SLHI%RES, ILEVEL, NM, ITYPE)
-
-   S%ITE   = 0
-   S%RESIN = SLHI%RES
+   ITE_MG   = 0
+   SLHI%RESIN_MG = SLHI%RES_MG
     
    !WRITE(*,*) 'Info muss noch an Master geschickt werden'
-   !WRITE(9,*) 'Info muss noch an Master geschickt werden'
-
-   !CALL SCARC_MASTER_INFO (SLHI%ITE, SLHI%RESIN)
+   !CALL SCARC_MASTER_INFO (SLHI%ITE, SLHI%RESIN_MG)
 
    !!!
    !!! Debug values if requested
    !!!
-   IF (SCARC_DEBUG >= 3) THEN
-      WRITE (9,*) 'RESIN=', SLHI%RESIN
-      CALL flush (9)
-   ENDIF
+   IF (SCARC_DEBUG >= 3) WRITE (9,*) 'RESIN_MG=', SLHI%RESIN_MG
    CALL SCARC_COMPARE_SINGLE (SLHI%X, 'SARC', 1, 'X3    ',0)
    CALL SCARC_COMPARE_SINGLE (SLHI%F, 'SARC', 1, 'F3    ',0)
    CALL SCARC_COMPARE_SINGLE (SLHI%R, 'SARC', 1, 'R3    ',0)
     
-   IF (SLHI%RES<S%EPS_CONV) THEN
+   IF (SLHI%RES_MG<SCARC_EPS_CONV_MG) THEN
       WRITE(*,*) 'Good end - muss noch gestoppt werden'
       WRITE(9,*) 'Good end - muss noch gestoppt werden'
       goto 200
    ENDIF
     
-   IF (SLHI%RES>S%EPS_DIVG) THEN
+   IF (SLHI%RES_MG>SCARC_EPS_DIVG_MG) THEN
       WRITE(*,*) 'Bad end - muss noch gestoppt werden'
       WRITE(9,*) 'Bad end - muss noch gestoppt werden'
       goto 210
@@ -3817,12 +3612,10 @@ ELSE
    !!!
    !WRITE(*,*) 'HALLO HIER BESSEREN WERT FUER SCARC_NIT!!'
    !WRITE(9,*) 'HALLO HIER BESSEREN WERT FUER SCARC_NIT!!'
-   MG_LOOP2D: DO ITE = 1, SCARC_NIT
+   MG_LOOP2D: DO ITE_MG = 1, SCARC_NIT_MG
     
-      S%ITE=ITE
-
       IF (SCARC_DEBUG >= 3) THEN
-         WRITE (9,*) '=========================== STARTING MG-LOOP ', ITE
+         WRITE (9,*) '=========================== STARTING MG-LOOP ', ITE_MG
       ENDIF
 
       !!! set level-information
@@ -3931,12 +3724,11 @@ ELSE
       !!! ------------------------------------------------------------------------
       !!! Defect calculation
       !!! ------------------------------------------------------------------------
-      CALL SCARC_MATVEC2D (SLHI%AG, SLHI%X, SLHI%D, 1.0_EB, 0.0_EB, NM, ITYPE, ILEVEL, 3)
-      CALL SCARC_VECADD2D (SLHI%F, SLHI%D,1.0_EB, -1.0_EB, ILEVEL, NM)
-      CALL SCARC_L2NORM2D (SLHI%D, S%RES, ILEVEL, NM, ITYPE)
+      CALL SCARC_MATVEC2D (SLHI%AG, SLHI%X, SLHI%D, 1.0_EB, 0.0_EB, NM, NTYPE_GLOBAL, ILEVEL, 3)
+      CALL SCARC_VECADD2D (SLHI%F , SLHI%D,1.0_EB, -1.0_EB, ILEVEL, NM)
+      CALL SCARC_L2NORM2D (SLHI%D , SLHI%RES_MG, ILEVEL, NM, NTYPE_GLOBAL)
 
-      IF (SCARC_DEBUG>=2) WRITE(9,*) 'SCARC-Multigrid, iteration ',S%ITE,': residuum=',S%RES
-      !IF (NM==1) write(*,*) 'SCARC-MG2D      :  Iteration ',S%ITE,': Residuum=',S%RES
+      IF (SCARC_DEBUG>=2) WRITE(9,*) 'SCARC-Multigrid, iteration ',ITE_MG,': residuum=',SLHI%RES_MG
 
       !!! ------------------------------------------------------------------------
       !!! Send error information to Master
@@ -3948,21 +3740,21 @@ ELSE
       !!! ------------------------------------------------------------------------
       !!! Convergence or divergence ?
       !!! ------------------------------------------------------------------------
-      IF (SL%RES>S%EPS_DIVG) THEN
+      IF (SLHI%RES_MG>SCARC_EPS_DIVG_MG) THEN
          WRITE(*,*) 'Bad end - muss noch gestoppt werden'
          WRITE(9,*) 'Bad end - muss noch gestoppt werden'
       ENDIF
 
       IF (SCARC_DEBUG >=2) THEN
-         WRITE(9,*) 'S%EPS_CONV=',S%EPS_CONV
-         WRITE(9,*) 'S%RES=',S%RES
-         WRITE(9,*) 'S%RESIN=',S%RESIN
+         WRITE(9,*) 'SLHI%RES_MG=',SLHI%RES_MG
+         WRITE(9,*) 'SLHI%RESIN_MG=',SLHI%RESIN_MG
       ENDIF
 
-      IF (S%BREL_ERR) THEN
-         IF (S%RES <= S%RESIN*S%EPS_CONV) BCONV=.TRUE.
+      IF (SCARC_BREL_MG) THEN
+         IF (SLHI%RES_MG <= SLHI%RESIN_MG*SCARC_EPS_CONV_MG) BCONV=.TRUE.
       ELSE
-         IF (S%RES <= S%EPS_CONV .AND. S%RES <= S%RESIN*S%EPS_CONV) BCONV=.TRUE.
+         IF (SLHI%RES_MG <= SCARC_EPS_CONV_MG .AND. &
+             SLHI%RES_MG <= SLHI%RESIN_MG*SCARC_EPS_CONV_MG) BCONV=.TRUE.
       ENDIF
       IF (BCONV) GOTO 200
     
@@ -3975,25 +3767,25 @@ ELSE
 200 CONTINUE
    IF (SCARC_DEBUG >=2) THEN
       WRITE(9,*) 'BEI 200'
-      WRITE(9,*) 'S%RES  =',S%RES
-      WRITE(9,*) 'S%RESIN=',S%RESIN
-      WRITE(9,*) 'S%ITE  =',S%ITE
+      WRITE(9,*) 'SLHI%RES_MG  =',SLHI%RES_MG
+      WRITE(9,*) 'SLHI%RESIN_MG=',SLHI%RESIN_MG
+      WRITE(9,*) 'ITE_MG  =',ITE_MG
    ENDIF
-   IF (S%RESIN>1.0E-70_EB) S%RESIN=S%RES/S%RESIN
-   IF (S%ITE==0) THEN
-      S%CAPPA=0.0_EB
+   IF (SLHI%RESIN_MG>1.0E-70_EB) SLHI%RESIN_MG=SLHI%RES_MG/SLHI%RESIN_MG
+   IF (ITE_MG==0) THEN
+      SLHI%CAPPA_MG=0.0_EB
    ELSE
-      S%CAPPA=S%RESIN**(1.0_EB/REAL(S%ITE,EB))
+      SLHI%CAPPA_MG=SLHI%RESIN_MG**(1.0_EB/REAL(ITE_MG,EB))
    ENDIF
-   IF (SCARC_DEBUG>=2)    WRITE(9,*) 'S%CAPPA=',S%CAPPA
+   IF (SCARC_DEBUG>=2)    WRITE(9,*) 'SLHI%CAPPA_MG=',SLHI%CAPPA_MG
 
    GOTO 250
     
    !!! ------------------------------------------------------------------------
    !!! Bad end
    !!! ------------------------------------------------------------------------
-210 S%ITE=SCARC_NIT
-    S%CAPPA=1.0_EB
+210 ITE_MG=-1
+    SLHI%CAPPA_MG=1.0_EB
 
    !!! ------------------------------------------------------------------------
    !!! Print convergence information
@@ -4001,8 +3793,8 @@ ELSE
 250 CONTINUE
 !250 CALL SCARC_INFO_CAPPA(S%NLEVEL)
 
-IF (SCARC_DEBUG>=2) WRITE(9,*) 'SCARC-Multigrid: convergence rate=',S%CAPPA
-!IF (NM==1) write(*,*) 'SCARC_MG2D      : Convergence rate=',S%CAPPA, ', Number of iterations ',S%ITE
+IF (SCARC_DEBUG>=2) WRITE(9,*) 'SCARC-Multigrid: convergence rate=',SLHI%CAPPA_MG
+!IF (NM==1) write(*,*) 'SCARC_MG2D      : Convergence rate=',SLHI%CAPPA_MG, ', Number of iterations ',ITE_MG
   
 ENDIF
  
@@ -4019,27 +3811,147 @@ END SUBROUTINE SCARC_MG2D
 
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!
+!!! Perform global 2D cg-method based on global possion-matrix
+!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUBROUTINE SCARC_COARSE2D (ILEVEL, NM)
+ 
+INTEGER ::  NM, ILEVEL, ITE_CO, IERR, I, K
+REAL (EB) :: SIGMA0, SIGMA1, ALPHA, GAMMA
+REAL (EB) :: TNOW_COARSE
+LOGICAL BCONV
+TYPE (MESH_TYPE),  POINTER :: M
+ 
+TNOW_COARSE = SECOND()
+IERR = 0
+BCONV = .TRUE.
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!
-!!! Perform smoothing in SCARC_MG2D
-!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!SUBROUTINE SCARC_MASTER_INFO(ITE,RES)
+S  => SCARC (NM)
+M  => MESHES (NM)
+
+! cg only works in finest grid level
+SL    => S%SLEVEL(ILEVEL)
+ 
+! get right hand side 
+DO K = 1, KBAR                                     ! 
+   DO I = 1, IBAR
+      SL%F (I, 1, K) = M%PRHS (I, 1, K)
+   ENDDO
+ENDDO
+
+! re-initialize auxiliary vectors
+SL%G = 0.0_EB                   
+SL%Y = 0.0_EB
+SL%R = 0.0_EB
+SL%D = 0.0_EB
+SL%X = 0.0_EB
+ 
+!!! calculate initial defect Y = B - A*X and get l2-norm of it
+CALL SCARC_MATVEC2D (SL%AG, SL%X, SL%R, 1.0_EB, 0.0_EB, NM, NTYPE_GLOBAL, ILEVEL, 3)
+CALL SCARC_VECADD2D (SL%F, SL%R,-1.0_EB, 1.0_EB, ILEVEL, NM)
+CALL SCARC_L2NORM2D (SL%R, SL%RES_CO, ILEVEL, NM, NTYPE_GLOBAL)
+SL%RESIN_CO = SL%RES_CO
+ 
+! initial preconditioning
+SELECT CASE(SCARC_PRECON_CO)
+   CASE(NDEFCOR_NONE) 
+      SIGMA0 = SL%RESIN_CO * SL%RESIN_CO
+   CASE(NDEFCOR_JACOBI) 
+      CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
+      CALL SCARC_PRECON_JACOBI2D (SL%AG, SL%G, ILEVEL, NM)
+      CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA0, ILEVEL, NM)
+   CASE(NDEFCOR_SSOR) 
+      CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
+      CALL SCARC_PRECON_GS2D (SL%AG, SL%G, ILEVEL, NM)
+      CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA0, ILEVEL, NM)
+   CASE(NDEFCOR_GSTRIX) 
+      CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
+      CALL SCARC_PRECON_SSOR2D (SL%AG, SL%G, ILEVEL, NM)
+      CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA0, ILEVEL, NM)
+END SELECT
+CALL SCARC_VECADD2D (SL%G, SL%D,-1.0_EB, 0.0_EB, ILEVEL, NM)
+ 
 !
-!REAL (EB):: RES
-!INTEGER  :: ITE
+! start defect correction loop
 !
-!! if master process: receive from slaves
-!IF (MYID==0) THEN
-!
-!    WRITE(9,*) 'Hallo, ich bin der Master'
-!! if slave process: send to master
-!ELSE
-!    WRITE(9,*) 'Hallo, ich bin ein Slave'
-!ENDIF
-!
-!END SUBROUTINE SCARC_MASTER_INFO
+CO_LOOP2D: DO ITE_CO = 1, SCARC_NIT_CO
+ 
+   ! calculate new defect and get L2-norm of it
+   CALL SCARC_MATVEC2D (SL%AG, SL%D, SL%Y, 1.0_EB, 0.0_EB, NM, NTYPE_GLOBAL, ILEVEL, 5)
+   CALL SCARC_SCALPROD2D (SL%D, SL%Y, ALPHA, ILEVEL, NM)
+
+   ! get new descent direction
+   ALPHA = SIGMA0 / ALPHA
+   CALL SCARC_VECADD2D (SL%D, SL%X, ALPHA, 1.0_EB, ILEVEL, NM)
+   CALL SCARC_VECADD2D (SL%Y, SL%R, ALPHA, 1.0_EB, ILEVEL, NM)
+   CALL SCARC_L2NORM2D (SL%R, SL%RES_CO, ILEVEL, NM, NTYPE_GLOBAL)
+
+ 
+   !  exit loop in case of convergence or divergence
+   IF (SCARC_DEBUG >= 1) write (9,1000) ITE_CO, SL%RES_CO
+   IF (SCARC_BREL_CO) THEN
+      IF (SL%RES_CO <= SL%RESIN_CO*SCARC_EPS_CONV_CO) BCONV = .TRUE.
+   ELSE
+      IF (SL%RES_CO <= SCARC_EPS_CONV_CO .AND. SL%RES_CO <= SL%RESIN_CO*SCARC_EPS_REL) BCONV = .TRUE.
+   ENDIF
+   IF (SL%RES_CO > SCARC_EPS_DIVG_CO) BCONV = .FALSE.
+   IF (.NOT.BCONV) EXIT CO_LOOP2D
+ 
+   ! preconditioning
+   SELECT CASE(SCARC_PRECON_CO)
+      CASE(NDEFCOR_NONE)
+         SIGMA1 = SL%RES_CO * SL%RES_CO
+      CASE(NDEFCOR_JACOBI)
+         CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
+         CALL SCARC_PRECON_JACOBI2D (SL%AG, SL%G, ILEVEL, NM)
+         CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA1, ILEVEL, NM)
+      CASE(NDEFCOR_GS)
+         CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
+         CALL SCARC_PRECON_GS2D (SL%AG, SL%G, ILEVEL, NM)
+         CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA1, ILEVEL, NM)
+      CASE(NDEFCOR_SSOR)
+         CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
+         CALL SCARC_PRECON_SSOR2D (SL%AG, SL%G, ILEVEL, NM)
+         CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA1, ILEVEL, NM)
+   END SELECT
+ 
+   GAMMA = SIGMA1 / SIGMA0
+   SIGMA0 = SIGMA1
+   CALL SCARC_VECADD2D (SL%G, SL%D,-1.0_EB, GAMMA, ILEVEL, NM)
+ 
+ENDDO CO_LOOP2D
+ 
+! convergence or divergence ?
+IF (BCONV) THEN             
+   IF (SL%RESIN_CO >= 1.0E-70_EB) THEN
+      SL%RESIN_CO = SL%RES_CO / SL%RESIN_CO
+      SL%CAPPA_CO = SL%RESIN_CO ** (1.0_EB/ITE_CO)
+   ELSE IF (ITE_CO == 0) THEN
+      SL%CAPPA_CO = 0.0_EB
+   ENDIF
+ELSE                       
+   ITE_CO = - 1
+   SL%CAPPA_CO = 1.0_EB
+ENDIF
+IF (SCARC_DEBUG >= 1) WRITE (9,2000) ITE_CO, SL%RESIN_CO, SL%CAPPA_CO 
+IF (NM == 1)          WRITE (*,2000) ITE_CO, SL%RESIN_CO, SL%CAPPA_CO
+ 
+! shift solution back to vector PRHS
+DO K = 1, KBAR
+   DO I = 1, IBAR
+      M%PRHS (I, 1, K) = SL%X(I, 1, K)
+   ENDDO
+ENDDO
+ 
+TUSED_SCARC(9,NM)=TUSED_SCARC(9,NM)+SECOND()-TNOW_COARSE
+TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_COARSE
+
+1000 FORMAT ('SCARC_CO: #iterations= ',i4,': residuum=',f12.6)
+2000 FORMAT ('SCARC_CO: #iterations= ',i4,': residuum=',f12.6,': convergence rate=',f12.5)
+END SUBROUTINE SCARC_COARSE2D
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -4051,11 +3963,10 @@ SUBROUTINE SCARC_SMOOTHER2D(AG, X, F, D, BMATVEC, ILEVEL, NM)
 
 REAL (EB), POINTER, DIMENSION (:, :)    :: AG
 REAL (EB), POINTER, DIMENSION (:, :, :) :: X, F, D
-REAL (EB):: RES, OMEGA_SMOOTH, RES_SMOOTH, RESIN_SMOOTH, CAPPA_SMOOTH, EPS_SMOOTH, EPS_REL
-INTEGER :: NM, NIT_SMOOTH, ITE_SMOOTH
-INTEGER :: ILEVEL, ITYPE
-LOGICAL :: BMATVEC, BL2NORM=.TRUE., BRELERR=.TRUE.
+INTEGER :: NM
+INTEGER :: ILEVEL, ITE_SM
 REAL(EB):: TNOW_SMOOTHER2D
+LOGICAL :: BMATVEC, BL2NORM=.TRUE.       ! necessary ???
 
 
 TNOW_SMOOTHER2D = SECOND()
@@ -4065,29 +3976,21 @@ SL => S%SLEVEL(ILEVEL)
 CALL SCARC_COMPARE_SINGLE_LEV (X, 'SARC', 1, 'SMOX  ',0,NM,ILEVEL)
 CALL SCARC_COMPARE_SINGLE_LEV (F, 'SARC', 1, 'SMOF  ',0,NM,ILEVEL)
 
-ITYPE=NCOM_TYPE_GLOBAL  ! ??????????????
 IF (BMATVEC) THEN
-   CALL SCARC_MATVEC2D (AG, X, D, 1.0_EB, 0.0_EB, NM, ITYPE, ILEVEL, 3)   ! global MATVEC
+   CALL SCARC_MATVEC2D (AG, X, D, 1.0_EB, 0.0_EB, NM, NTYPE_GLOBAL, ILEVEL, 3)   ! global MATVEC
    CALL SCARC_VECADD2D (F, D, 1.0_EB, -1.0_EB, ILEVEL, NM)
    CALL SCARC_COMPARE_SINGLE_LEV (D, 'SARC', 1, 'SMOD  ',0,NM,ILEVEL)
-   IF (BL2NORM) CALL SCARC_L2NORM2D (D, RES, ILEVEL, NM, ITYPE)
+   IF (BL2NORM) CALL SCARC_L2NORM2D (D, SL%RES_SM, NTYPE_GLOBAL, NM, NTYPE_GLOBAL)
 ENDIF
 
-! still experimental - must be possible to read in those parameters ...
-ITE_SMOOTH=0
-NIT_SMOOTH=5
-OMEGA_SMOOTH=0.8E+0_EB
-EPS_SMOOTH=1.0E-2_EB
-EPS_REL=1.0E+0_EB
-RESIN_SMOOTH=RES
-!WRITE(*,1000) ITE_SMOOTH, RESIN_SMOOTH
+!WRITE(*,1000) SL%ITE_SM, SL%RESIN_SM
 
-IF (RESIN_SMOOTH>1.0E+4_EB) GOTO 210 
+IF (SL%RESIN_SM>SCARC_EPS_DIVG_SM) GOTO 210 
 
-SMOOTH_LOOP2D: DO ITE_SMOOTH=1,NIT_SMOOTH
+SMOOTH_LOOP2D: DO ITE_SM=1,SCARC_NIT_SM
  
    !Y=0.0_EB    ! nötig ??
-   !WRITE(9,*) 'SMOOTHER, ITERATION ',ITE_SMOOTH
+   !WRITE(9,*) 'SMOOTHER, ITERATION ',ITE_SM
    !WRITE(*,*) 'HALLO: MATRIX-SHIFT ODER NICHT ??*'
 
    !CALL SCARC_MATRIX_SHIFT(ILEVEL)
@@ -4099,44 +4002,44 @@ SMOOTH_LOOP2D: DO ITE_SMOOTH=1,NIT_SMOOTH
 
    !CALL SCARC_UPDATE_BDRY
 
-   CALL SCARC_VECADD2D(D, X, OMEGA_SMOOTH, 1.0_EB, ILEVEL, NM)
+   CALL SCARC_VECADD2D(D, X, SCARC_OMEGA_SM, 1.0_EB, ILEVEL, NM)
 
-   CALL SCARC_MATVEC2D (AG, X, D, 1.0_EB, 0.0_EB, NM, ITYPE, ILEVEL, 3)   ! global MATVEC
+   CALL SCARC_MATVEC2D (AG, X, D, 1.0_EB, 0.0_EB, NM, NTYPE_GLOBAL, ILEVEL, 3)   ! global MATVEC
    CALL SCARC_VECADD2D (F, D, 1.0_EB, -1.0_EB, ILEVEL, NM)
-   IF (BL2NORM) CALL SCARC_L2NORM2D (D, RES_SMOOTH, ILEVEL, NM, ITYPE)
+   IF (BL2NORM) CALL SCARC_L2NORM2D (D, SL%RES_SM, ILEVEL, NM, NTYPE_GLOBAL)
 
-   !WRITE(*,1000) ITE_SMOOTH, RES_SMOOTH
-   !WRITE(9,1000) ITE_SMOOTH, RES_SMOOTH
+   !WRITE(*,1000) ITE_SMO, RES_SM
+   !WRITE(9,1000) ITE_SMO, RES_SM
 
    IF (BL2NORM) THEN
-      IF (BRELERR) THEN
-         IF (RES_SMOOTH<=RESIN_SMOOTH*EPS_SMOOTH) GOTO 200
+      IF (SCARC_BREL_SM) THEN
+         IF (SL%RES_SM<=SL%RESIN_SM*SCARC_EPS_CONV_SM) GOTO 200
       ELSE
-         IF (RES_SMOOTH<=EPS_SMOOTH.AND.RES_SMOOTH<=RESIN_SMOOTH*EPS_REL) GOTO 200
+         IF (SL%RES_SM<=SCARC_EPS_CONV_SM.AND.SL%RES_SM<=SL%RESIN_SM*SCARC_EPS_REL) GOTO 200
       ENDIF
 
-      IF (RES_SMOOTH>1.0E+6_EB) goto 210
+      IF (SL%RES_SM>1.0E+6_EB) goto 210
    ENDIF
 ENDDO SMOOTH_LOOP2D
 
-200 IF (RES_SMOOTH>1.0E-70_EB) THEN
-       CAPPA_SMOOTH=RES_SMOOTH/RESIN_SMOOTH
-       CAPPA_SMOOTH=CAPPA_SMOOTH**(1.0_EB/REAL(ITE_SMOOTH,EB))
+200 IF (SL%RES_SM>1.0E-70_EB) THEN
+       SL%CAPPA_SM=SL%RES_SM/SL%RESIN_SM
+       SL%CAPPA_SM=SL%CAPPA_SM**(1.0_EB/REAL(ITE_SM,EB))
     ELSE
-       CAPPA_SMOOTH=0.0_EB
+       SL%CAPPA_SM=0.0_EB
     ENDIF
 
     GOTO 250
 
-210 ITE_SMOOTH=NIT_SMOOTH
-    CAPPA_SMOOTH=1.0_EB
+210 ITE_SM=-1
+    SL%CAPPA_SM=1.0_EB
 
     GOTO 250
 
 250 CONTINUE
-    !WRITE(*,*) 'SCARC_SMOOTHER2D: Convergence rate ', CAPPA_SMOOTH, ' Iterations ',ITE_SMOOTH
+    !WRITE(*,*) 'SCARC_SMOOTHER2D: Convergence rate ', SL%CAPPA_SM, ' Iterations ',ITE_SMOOTH
 
-!WRITE(9,*) 'TRARA3, LEAVING SMOOTHER2D, CAPPA_SMOOTH=',CAPPA_SMOOTH
+!WRITE(9,*) 'TRARA3, LEAVING SMOOTHER2D, SL%CAPPA_SM=',SL%CAPPA_SM
 
 TUSED_SCARC(8,NM)=TUSED_SCARC(8,NM)+SECOND()-TNOW_SMOOTHER2D
 TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_SMOOTHER2D
@@ -4144,450 +4047,8 @@ TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_SMOOTHER2D
 END SUBROUTINE SCARC_SMOOTHER2D
 
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!
-!!! Solve global coarse grid problem by cg-method
-!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE SCARC_COARSE2D (ILEVEL, NM)
- 
-INTEGER :: NM, ILEVEL
-INTEGER :: ITE, IREL, ICONV, ITYPE, IERR, IPRECON
-REAL (EB) :: SIGMA0, SIGMA1, ALPHA, GAMMA
-REAL (EB) :: TNOW_COARSE2D
- 
- 
-TNOW_COARSE2D = SECOND()
-
-SL => S%SLEVEL(ILEVEL)
- 
-IERR = 0
- 
-! initialize working vectors
-SL%G = 0.0_EB
-SL%Y = 0.0_EB
-SL%R = 0.0_EB
-SL%D = 0.0_EB
-SL%X = 0.0_EB
- 
-!!!
-!!! initialize some method parameters
-!!!
-ITYPE = NCOM_TYPE_GLOBAL
-IREL = 0
-ICONV = 0
-IPRECON = 2
- 
-!CALL SCARC_SETBDRY2D (ILEVEL, NM)
- 
- 
-!!!
-!!! calculate initial defect Y = B - A*X and get l2-norm of it
-!!!
-CALL SCARC_MATVEC2D (SL%AG, SL%X, SL%R, 1.0_EB, 0.0_EB, NM, ITYPE, ILEVEL, 3)
-CALL SCARC_VECADD2D (SL%F, SL%R,-1.0_EB, 1.0_EB, ILEVEL, NM)
-CALL SCARC_L2NORM2D (SL%R, SL%RES, ILEVEL, NM, ITYPE)
-SL%RESIN = SL%RES
- 
-IF (S%BPRECON) THEN
-   IF (SCARC_PRECON == 1) THEN
-      WRITE (*,*) 'IPRECON=1 not yet implemented!'
-   ELSE IF (SCARC_PRECON == 2) THEN
-      CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
-      CALL SCARC_PRECON_JACOBI2D (SL%AG, SL%G, ILEVEL, NM)
-   ELSE IF (SCARC_PRECON == 3) THEN
-      CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
-      CALL SCARC_PRECON_GS2D (SL%AG, SL%G, ILEVEL, NM)
-   ELSE IF (SCARC_PRECON == 4) THEN
-      CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
-      CALL SCARC_PRECON_SSOR2D (SL%AG, SL%G, ILEVEL, NM)
-   ENDIF
-   CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA0, ILEVEL, NM)
-ELSE
-   SIGMA0 = SL%RESIN * SL%RESIN
-ENDIF
-CALL SCARC_VECADD2D (SL%G, SL%D,-1.0_EB, 0.0_EB, ILEVEL, NM)
- 
-!!!
-!!! start defect correction loop
-!!!
-CG_LOOP2D: DO ITE = 1, SCARC_NIT
- 
-!!!  calculate new defect and get L2-norm of it
-   CALL SCARC_MATVEC2D (SL%AG, SL%D, SL%Y, 1.0_EB, 0.0_EB, NM, ITYPE, ILEVEL, 5)
-   CALL SCARC_SCALPROD2D (SL%D, SL%Y, ALPHA, ILEVEL, NM)
-
-   ALPHA = SIGMA0 / ALPHA
- 
-   CALL SCARC_VECADD2D (SL%D, SL%X, ALPHA, 1.0_EB, ILEVEL, NM)
-   CALL SCARC_VECADD2D (SL%Y, SL%R, ALPHA, 1.0_EB, ILEVEL, NM)
-   CALL SCARC_L2NORM2D (SL%R, SL%RES, ILEVEL, NM, ITYPE)
-
-   IF (SCARC_DEBUG >= 1) write (9, '(a,i4,a,f25.16,a,f25.16)') &
-                        '### SCARC_COARSE2D, ite=', ITE, ' RES=', SL%RES, '  ####'
- 
-!!!  stop in case of convergence or divergence
-   IF (IREL == 1) THEN
-      IF (SL%RES <= SL%RESIN*SCARC_EPS) ICONV = 1
-   ELSE
-      IF (SL%RES <= SCARC_EPS .AND. SL%RES <= SL%RESIN*SCARC_EPS_REL) ICONV = 1
-   ENDIF
-   IF (SL%RES > 10000.0_EB) ICONV = - 1
-   IF (Abs(ICONV) == 1) EXIT CG_LOOP2D
- 
-!!! preconditioning
-   IF (S%BPRECON) THEN
-      IF (SCARC_PRECON == 1) THEN
-         WRITE (*,*) 'IPRECON=1 not yet implemented!'
-      ELSE IF (SCARC_PRECON == 2) THEN
-         CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
-         CALL SCARC_PRECON_JACOBI2D (SL%AG, SL%G, ILEVEL, NM)
-      ELSE IF (SCARC_PRECON == 3) THEN
-         CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
-         CALL SCARC_PRECON_GS2D (SL%AG, SL%G, ILEVEL, NM)
-      ELSE IF (SCARC_PRECON == 4) THEN
-         CALL SCARC_VECCOPY2D (SL%R, SL%G, ILEVEL, NM)
-         CALL SCARC_PRECON_SSOR2D (SL%AG, SL%G, ILEVEL, NM)
-      ENDIF
-      CALL SCARC_SCALPROD2D (SL%R, SL%G, SIGMA1, ILEVEL, NM)
-   ELSE
-      SIGMA1 = SL%RES * SL%RES
-   ENDIF
- 
-   GAMMA = SIGMA1 / SIGMA0
-   SIGMA0 = SIGMA1
-   CALL SCARC_VECADD2D (SL%G, SL%D,-1.0_EB, GAMMA, ILEVEL, NM)
- 
-ENDDO CG_LOOP2D
- 
-!!! 'bad end'
-IF (ICONV ==-1) THEN
-   ITE = - 1
-   SL%CAPPA = 1.0_EB
- 
-!!! 'good end'
-ELSE
-   IF (SL%RESIN >= 1.0E-70_EB) THEN
-      SL%RESIN = SL%RES / SL%RESIN
-      SL%CAPPA = SL%RESIN ** (1.0_EB/ITE)
-   ELSE IF (ITE == 0) THEN
-      SL%CAPPA = 0.0_EB
-   ENDIF
-ENDIF
- 
-IF (SCARC_DEBUG >= 1) THEN
-   WRITE (9, '(a,i4,a,f12.6,a,f12.5)') 'SCARC_COARSE: Ite=', ITE, ': Res=', SL%RES,'  Kappa=', SL%CAPPA
-ENDIF
- 
-TUSED_SCARC(9,NM)=TUSED_SCARC(9,NM)+SECOND()-TNOW_COARSE2D
-TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_COARSE2D
-
-END SUBROUTINE SCARC_COARSE2D
 
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!
-!!! Perform smoothing in SCARC_MG2D
-!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!SUBROUTINE SCARC_DEFCOR(AG, X, F, ILEVEL, NM)
-
-!REAL (EB), POINTER, DIMENSION (:, :)    :: AG
-!REAL (EB), POINTER, DIMENSION (:, :, :) :: X, F
-!INTEGER :: ILEVEL, NM
-
-
-!WRITE(*,*) 'MUSS NOCH PROGRAMMIERT WERDEN'
- 
-!END SUBROUTINE SCARC_DEFCOR
-
- 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!
-!!! Perform global cg-method based on global possion-matrix in 3D
-!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE SCARC_CG3D (NM)
- 
-INTEGER :: NM, ILEVEL
-INTEGER :: ITE, IREL, ICONV, ITYPE, I, J, K, IERR, IPRECON
-REAL (EB):: SIGMA0, SIGMA1, ALPHA, GAMMA
-REAL (EB) :: TNOW_CG3D
- 
-TYPE (MESH_TYPE), POINTER :: M
- 
-!INCLUDE 'mpif.h'
- 
-TNOW_CG3D = SECOND()
-
-S => SCARC (NM)
-M => MESHES (NM)
- 
-NREQ_FACE = 0
-NREQ_EDGE = 0
-NREQ_DIAG = 0
-
-IERR = 0
- 
-ILEVEL=S%NLEVEL_MAX
- 
-! initialize working vectors
-SL%G = 0.0_EB
-SL%Y = 0.0_EB
-SL%R = 0.0_EB
-SL%D = 0.0_EB
- 
- 
-DO K = 0, KBAR + 1
-   DO J = 0, JBAR + 1
-      DO I = 0, IBAR + 1
-         SL%X (I, J, K) = M%H(I, J, K)
-      ENDDO
-   ENDDO
-ENDDO
- 
-SL%F = 0.0_EB
-DO K = 1, KBAR + 1
-   DO J = 1, JBAR + 1
-      DO I = 1, IBAR + 1
-         SL%F (I, J, K) = M%PRHS(I, J, K)
-      ENDDO
-   ENDDO
-ENDDO
- 
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'Starting SCARC_CG3D'
-   WRITE (9,*) 'IBAR=:', IBAR
-   WRITE (9,*) 'JBAR=:', JBAR
-   WRITE (9,*) 'KBAR=:', KBAR
-   CALL SCARC_COMPARE_SINGLE (M%H, 'SARC', 1, 'H1    ',0)
-   CALL SCARC_COMPARE_SINGLE (SL%X, 'SARC', 1, 'X1    ',0)
-   CALL SCARC_COMPARE_SINGLE (SL%F, 'SARC', 1, 'F1    ',0)
-   CALL flush (9)
-ENDIF
- 
-!!!
-!!! initialize some method parameters
-!!!
-ITYPE = NCOM_TYPE_GLOBAL
-IREL = 0
-ICONV = 0
-IPRECON = 2
- 
-!SL%NIT    =5000
-!SL%EPS    =1.0E-16_EB
-!SL%EPS_REL=1.0E-2_EB
- 
- 
-!!!
-!!! initialize boundary values
-!!!
-CALL SCARC_SETBDRY3D (ILEVEL, NM)
- 
- 
-!!!
-!!! calculate initial defect Y = B - A*X and get l2-norm of it
-!!!
-CALL SCARC_MATVEC3D (SL%AG, SL%X, SL%R, 1.0_EB, 0.0_EB, NM, ITYPE, ILEVEL, 3)
-CALL SCARC_VECADD3D (SL%F, SL%R,-1.0_EB, 1.0_EB, ILEVEL, NM)
-CALL SCARC_L2NORM3D (SL%R, SL%RES, ILEVEL, NM, ITYPE)
-SL%RESIN = SL%RES
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'Initial DEFECT '
-   WRITE (9,*) 'RES=', SL%RES
-   WRITE (9,*) 'SL%X:'
-   CALL SCARC_COMPARE_SINGLE (SL%X, 'SARC', 1, 'X3    ',0)
-   CALL SCARC_COMPARE_SINGLE (SL%F, 'SARC', 1, 'F3    ',0)
-   CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'R3    ',0)
-   CALL flush (9)
-ENDIF
- 
- 
-IF (S%BPRECON) THEN
- 
-   IF (SCARC_PRECON == 1) THEN
-      WRITE (*,*) 'IPRECON=1 not yet implemented!'
-   ELSE IF (SCARC_PRECON == 2) THEN
-      CALL SCARC_VECCOPY3D (SL%R, SL%G, ILEVEL, NM)
-      CALL SCARC_PRECON_JACOBI3D (SL%AG, SL%G, ILEVEL, NM)
-   ELSE IF (SCARC_PRECON == 3) THEN
-      CALL SCARC_VECCOPY3D (SL%R, SL%G, ILEVEL, NM)
-      CALL SCARC_PRECON_GS3D (SL%AG, SL%G, ILEVEL, NM)
-   ELSE IF (SCARC_PRECON == 4) THEN
-      CALL SCARC_VECCOPY3D (SL%R, SL%G, ILEVEL, NM)
-      CALL SCARC_PRECON_SSOR3D (SL%AG, SL%G, ILEVEL, NM)
-   ENDIF
- 
-   CALL SCARC_SCALPROD3D (SL%R, SL%G, SIGMA0, ILEVEL, NM)
- 
-ELSE
-   SIGMA0 = SL%RESIN * SL%RESIN
-ENDIF
- 
-CALL SCARC_VECADD3D (SL%G, SL%D,-1.0_EB, 0.0_EB, ILEVEL, NM)
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'After initial Precon '
-   WRITE (9,*) 'Sigma0=', SIGMA0
-   WRITE (9,*) 'SL%X:'
-   CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'R4    ',0)
-   CALL SCARC_COMPARE_SINGLE (SL%G, 'SARC', 1, 'G4    ',0)
-   CALL SCARC_COMPARE_SINGLE (SL%D, 'SARC', 1, 'D4    ',0)
-   CALL flush (9)
-ENDIF
- 
-!!!
-!!! start defect correction loop
-!!!
-CG_LOOP3D: DO ITE = 1, SCARC_NIT
- 
-   IF (SCARC_DEBUG >= 2) write (9,*) '=========================== STARTING CG-&
-  &LOOP ', ITE
- 
-!!!  calculate new defect and get L2-norm of it
-   CALL SCARC_MATVEC3D (SL%AG, SL%D, SL%Y, 1.0_EB, 0.0_EB, NM, ITYPE, ILEVEL, 5)
- 
-   IF (SCARC_DEBUG >= 2) CALL SCARC_COMPARE_SINGLE (SL%Y, 'SARC', 1, 'Y4    ',0)
- 
-   CALL SCARC_SCALPROD3D (SL%D, SL%Y, ALPHA, NLEVEL1, NM)
-   ALPHA = SIGMA0 / ALPHA
- 
-   IF (SCARC_DEBUG >= 2) CALL SCARC_COMPARE_SINGLE (SL%Y, 'SARC', 1, 'Y5    ',0)
- 
-   CALL SCARC_VECADD3D (SL%D, SL%X, ALPHA, 1.0_EB, ILEVEL, NM)
-   CALL SCARC_VECADD3D (SL%Y, SL%R, ALPHA, 1.0_EB, ILEVEL, NM)
- 
-   CALL SCARC_L2NORM3D (SL%R, SL%RES, ILEVEL, NM, ITYPE)
- 
-   IF (SCARC_DEBUG >= 2) THEN
-      WRITE (9,*) 'New DEFECT in iteration ', ITE, ': ALPHA=', ALPHA
-      WRITE (9,*) 'New Iterate in iteration ', ITE
-      WRITE (9,*) 'RES=', SL%RES
-      CALL flush (9)
-   ENDIF
-   CALL SCARC_COMPARE_SINGLE (SL%X, 'SARC', 1, 'X5    ',0)
-   CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'R5    ',0)
- 
-   IF (NM == 1 .AND. SCARC_DEBUG >= 2) write (9, '(a,i4,a,f25.16,a,f25.16)') '&
-  &### SCARC_CG, ite=', ITE, ' RES=', SL%RES, '  ####'
-   IF (Mod(ITE, 200) == 0 .AND. SCARC_DEBUG == 1) write (9, '(a,i4,a,f25.16,a,f2&
-  &5.16)') '### SCARC_CG, ite=', ITE, ' RES=', SL%RES, '  ####'
- 
-!!!  stop in case of convergence or divergence
-   IF (IREL == 1) THEN
-      IF (SL%RES <= SL%RESIN*SCARC_EPS) ICONV = 1
-   ELSE
-      IF (SL%RES <= SCARC_EPS .AND. SL%RES <= SL%RESIN*SCARC_EPS_REL) ICONV = 1
-   ENDIF
-   IF (SL%RES > 100000.0_EB) ICONV = - 1
-   IF (Abs(ICONV) == 1) EXIT CG_LOOP3D
- 
-!!! preconditioning
-   IF (S%BPRECON) THEN
- 
-      IF (SCARC_PRECON == 1) THEN
-         WRITE(*,*) 'HALLO, HIER ALLE KOMMUNIKATIONSTYPEN EINZELN AUFLISTEN !!!'
-         CALL SCARC_RECEIVE (NCOM_FULL, ILEVEL)  !Aufruf 2,0
-         CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NTYPE_NONE)
-         WRITE (*,*) 'IPRECON=1 not yet implemented!'
-!     CALL SCARC_CG0(SL%R,NM)
-      ELSE IF (SCARC_PRECON == 2) THEN
-         WRITE(*,*) 'HALLO, HIER ALLE KOMMUNIKATIONSTYPEN EINZELN AUFLISTEN !!!'
-         CALL SCARC_VECCOPY3D (SL%R, SL%G, ILEVEL, NM)
-         CALL SCARC_PRECON_JACOBI3D (SL%AG, SL%G, ILEVEL, NM)
-      ELSE IF (SCARC_PRECON == 3) THEN
-         WRITE(*,*) 'HALLO, HIER ALLE KOMMUNIKATIONSTYPEN EINZELN AUFLISTEN !!!'
-         CALL SCARC_VECCOPY3D (SL%R, SL%G, ILEVEL, NM)
-         CALL SCARC_PRECON_GS3D (SL%AG, SL%G, ILEVEL, NM)
-      ELSE IF (SCARC_PRECON == 4) THEN
-         WRITE(*,*) 'HALLO, HIER ALLE KOMMUNIKATIONSTYPEN EINZELN AUFLISTEN !!!'
-         CALL SCARC_VECCOPY3D (SL%R, SL%G, ILEVEL, NM)
-         CALL SCARC_PRECON_SSOR3D (SL%AG, SL%G, ILEVEL, NM)
-      ENDIF
- 
-      CALL SCARC_SCALPROD3D (SL%R, SL%G, SIGMA1, NLEVEL1, NM)
- 
-   ELSE
-      SIGMA1 = SL%RES * SL%RES
-   ENDIF
- 
-   IF (SCARC_DEBUG >= 3) CALL SCARC_COMPARE_SINGLE (SL%G, 'SARC', 1, 'G6    ',0)
- 
-   GAMMA = SIGMA1 / SIGMA0
-   SIGMA0 = SIGMA1
- 
-   CALL SCARC_VECADD3D (SL%G, SL%D,-1.0_EB, GAMMA, ILEVEL, NM)
- 
-   IF (SCARC_DEBUG >= 2) THEN
-      WRITE (9,*) 'After Precon in iteration ', ITE
-      WRITE (9,*) 'Sigma0=', SIGMA0
-      WRITE (9,*) 'Gamma =', GAMMA
-      CALL SCARC_COMPARE_SINGLE (SL%R, 'SARC', 1, 'R7    ',0)
-      CALL SCARC_COMPARE_SINGLE (SL%D, 'SARC', 1, 'D7    ',0)
-      CALL flush (9)
-   ENDIF
- 
-ENDDO CG_LOOP3D
- 
-IF (SCARC_DEBUG >= 2) write (9,*) 'AFTER CG_LOOP3D'
- 
- 
-!!! 'bad end'
-IF (ICONV ==-1) THEN
-   ITE = - 1
-   SL%CAPPA = 1.0_EB
- 
-!!! 'good end'
-ELSE
-   IF (SL%RESIN >= 1.0E-70_EB) THEN
-      SL%RESIN = SL%RES / SL%RESIN
-      SL%CAPPA = SL%RESIN ** (1.0_EB/ITE)
-   ELSE IF (ITE == 0) THEN
-      SL%CAPPA = 0.0_EB
-   ENDIF
-ENDIF
- 
- 
-IF (NM == 1) write (*, '(a20,i4,a,e12.6,a,e12.6)') 'SCARC_CG: Ite=', ITE, ': Res&
-  &=', SL%RES, ': Kappa=', SL%CAPPA
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9, '(a,i4,a,f12.6,a,f12.5)') 'SCARC_CG: Ite=', ITE, ': Res=', SL%RES, '&
-  &: Kappa=', SL%CAPPA
-   CALL flush (9)
-ENDIF
-CALL flush (6)
- 
- 
-DO K = 0, KBAR + 1
-   DO J = 0, JBAR + 1
-      DO I = 0, IBAR + 1
-         M%H (I, J, K) = SL%X(I, J, K)
-      ENDDO
-   ENDDO
-ENDDO
- 
-DO K = 1, KBAR + 1
-   DO J = 1, JBAR + 1
-      DO I = 1, IBAR + 1
-         M%PRHS (I, J, K) = SL%X(I, J, K)
-      ENDDO
-   ENDDO
-ENDDO
- 
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) '-------SOL: SL%X:'
-   CALL SCARC_COMPARE_SINGLE (SL%X, 'SARC', 1, 'XFINAL',0)
-   CALL flush (9)
-ENDIF
-
-TUSED_SCARC(6,NM)=TUSED_SCARC(6,NM)+SECOND()-TNOW_CG3D
-TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_CG3D
- 
-END SUBROUTINE SCARC_CG3D
- 
  
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -4611,25 +4072,10 @@ TNOW_MATVEC2D = SECOND()
  
 SL => S%SLEVEL(ILEVEL)
  
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! print debug messages !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-IF (SCARC_DEBUG > 2) THEN
-   WRITE (9,*) 'BEFORE MATVEC: '
-   WRITE (9,*) 'TWO_D=', TWO_D
-   WRITE (9,*) 'KBAR=', KBAR
-   WRITE (9,*) 'JBAR=', JBAR
-   WRITE (9,*) 'IBAR=', IBAR
-   WRITE (9,*) 'A1=', A1
-   WRITE (9,*) 'A2=', A2
-   CALL SCARC_COMPARE_SINGLE_LEV (X, 'SARC', 1, 'matx12',0, NM, ILEVEL)
-   CALL SCARC_COMPARE_SINGLE_LEV (Y, 'SARC', 1, 'maty12',0, NM, ILEVEL)
-ENDIF
- 
- 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Perform 2D-matrix-vector-multiplication
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 DO K = 1, SL%KBAR
-IF (SCARC_DEBUG>=6) WRITE(9,*) '================================== K=',K
    DO I = 1, SL%IBAR
       IC = (K-1) * SL%IBAR + I
       Y (I, 1, K) =    A1 * (  A(IC, 1)*X(I  , 1, K  ) &
@@ -4638,38 +4084,22 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) '================================== K=',K
                              + A(IC, 4)*X(I+1, 1, K  ) &
                              + A(IC, 5)*X(I  , 1, K+1))&
                      + A2 * Y (I, 1, K)
-   IF (SCARC_DEBUG>=6) WRITE(9,'(a,5f9.2,a,5f9.2,a,f9.2)') 'A: ',A(IC,1),A(IC,2),A(IC,3),A(IC,4),A(IC,5),&
-                       '   X: ',X(I,1,K),X(I,1,K-1),X(I-1,1,K),X(I+1,1,K),X(I,1,K+1),'   ===> Y: ',Y(I,1,K)
    ENDDO
 ENDDO
 IF (SCARC_DEBUG>=2) WRITE(9,*) 'UFF8'
  
  
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! print debug messages !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-IF (SCARC_DEBUG > 2) THEN
-   CALL SCARC_COMPARE_SINGLE_LEV (Y, 'SARC', 1, 'maty13',0,NM, ILEVEL)
-   CALL flush (9)
-ENDIF
- 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Perform data exchange at interior boundaries
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-IF ((ITYPE == NCOM_TYPE_GLOBAL) .AND. (NMESHES > 1)) THEN
+IF ((ITYPE == NTYPE_GLOBAL) .AND. (NMESHES > 1)) THEN
    NREQ_FACE = 0
    NREQ_EDGE = 0
    NREQ_DIAG = 0
    CALL SCARC_RECEIVE (NCOM_MATV,  ILEVEL)   
    CALL SCARC_EXCHANGE (NCOM_MATV,  ILEVEL, IMV)
-   CALL SCARC_COMPARE_SINGLE0 (Y, 'SARC', 1, 'maty14',0)
 ENDIF
  
- 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! print debug messages !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-IF (SCARC_DEBUG > 2) THEN
-   WRITE (9,*) '------->> HALLO AFTER SCARC_EXCHANGE: Y:'
-   CALL flush (9)
-   !CALL SCARC_COMPARE_SINGLE0 (Y, 'SARC', 1, 'maty1 ',0)
-ENDIF
  
 TUSED_SCARC(10,NM)=TUSED_SCARC(10,NM)+SECOND()-TNOW_MATVEC2D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_MATVEC2D
@@ -4693,62 +4123,34 @@ REAL (EB), POINTER, DIMENSION (:, :) :: A
 REAL (EB), POINTER, DIMENSION (:, :, :) :: X, Y
 REAL (EB):: TNOW_MATVEC3D
 INTEGER :: NM, ITYPE
-INTEGER :: I, J, K, LL, IC, IMV, ILEVEL
+INTEGER :: I, J, K, IC, IMV, ILEVEL
  
  
 TNOW_MATVEC3D = SECOND()
- 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! print debug messages !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-IF (SCARC_DEBUG > 2) THEN
-   WRITE (9,*) 'BEFORE MATVEC: '
-!  CALL SCARC_COMPARE_SINGLE(X,'SARC',1,'matX  ',0)
-!  CALL SCARC_COMPARE_SINGLE(Y,'SARC',1,'maty  ',0)
-   WRITE (9,*) 'TWO_D=', TWO_D
-   WRITE (9,*) 'KBAR=', KBAR
-   WRITE (9,*) 'JBAR=', JBAR
-   WRITE (9,*) 'IBAR=', IBAR
-ENDIF
- 
-!X=REAL(NM,EB)
-!Y=0.0_EB
-!X=1.0_EB
-!Y=0.0_EB
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Perform 3D-matrix-vector-multiplication
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 DO K = 1, KBAR
-   IF (SCARC_DEBUG > 2) write (9,*) 'K=', K, ' ==============================&
-  &======='
    DO J = 1, JBAR
       DO I = 1, IBAR
          IC = (K-1) * IBAR * JBAR + (J-1) * IBAR + I
-!WRITE(9,'(8f22.16)') y(i,j,k),(A(IC,kk),kk=1,7)
-         Y (I, J, K) = A1 * (A(IC, 1)*X(I, J, K-1)+A(IC, 2)*X(I, J-1, K)+A(IC, &
-          3)*X(I-1, J, K)+A(IC, 4)*X(I, J, K)+A(IC, 5)*X(I+1, J, K)+A(IC, &
-          6)*X(I, J+1, K)+A(IC, 7)*X(I, J, K+1)) + A2 * Y (I, J, K)
-         IF (SCARC_DEBUG > 2) write (9, '(a,i2,a,i2,a,i2,a,i3,a,7f6.0,a,f22.1&
-        &6)') '(', I, ',', J, ',', K, '):A(', IC, '):', (A(IC, LL), LL=1, 7), '-&
-        &-> Y=', Y (I, J, K)
+         Y(I, J, K) = A1 * ( A(IC, 1) *X (I  , J  , K-1)   &
+                         +   A(IC, 2) *X (I  , J-1, K  )   &
+                         +   A(IC, 3) *X (I-1, J  , K  )   &
+                         +   A(IC, 4) *X (I  , J  , K  )   &
+                         +   A(IC, 5) *X (I+1, J  , K  )   &
+                         +   A(IC, 6) *X (I  , J+1, K  )   &
+                         +   A(IC, 7) *X (I  , J  , K+1) ) &
+                    + A2 * Y (I, J, K)
       ENDDO
-      IF (SCARC_DEBUG > 2) write (9,*) '-------------------------------------&
-     &'
    ENDDO
 ENDDO
- 
- 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! print debug messages !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-IF (SCARC_DEBUG > 2) THEN
-   WRITE (9,*) '------->> HALLO BEFORE SCARC_EXCHANGE: Y:'
-!  CALL SCARC_COMPARE_SINGLE(Y,'SARC',1,'maty2 ',0)
-   CALL flush (9)
-ENDIF
- 
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Perform data exchange at interior boundaries
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-IF ((ITYPE == NCOM_TYPE_GLOBAL) .AND. (NMESHES > 1)) THEN
+IF ((ITYPE == NTYPE_GLOBAL) .AND. (NMESHES > 1)) THEN
    NREQ_FACE = 0
    NREQ_EDGE = 0
    NREQ_DIAG = 0
@@ -4757,12 +4159,6 @@ IF ((ITYPE == NCOM_TYPE_GLOBAL) .AND. (NMESHES > 1)) THEN
    CALL SCARC_EXCHANGE (NCOM_MATV,  ILEVEL, IMV)
 ENDIF
  
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! print debug messages !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-IF (SCARC_DEBUG > 2) THEN
-   WRITE (9,*) '------->> HALLO AFTER SCARC_EXCHANGE: Y:'
-!  CALL SCARC_COMPARE_SINGLE(Y,'SARC',1,'maty3 ',0)
-   CALL flush (9)
-ENDIF
  
 TUSED_SCARC(10,NM)=TUSED_SCARC(10,NM)+SECOND()-TNOW_MATVEC3D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_MATVEC3D
@@ -4889,6 +4285,8 @@ TUSED_SCARC(13,NM)=TUSED_SCARC(13,NM)+SECOND()-TNOW_BDRY_RESIDUUM
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_BDRY_RESIDUUM
 END SUBROUTINE SCARC_BDRY_RESIDUUM
 
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!
 !!! add two vectors:
@@ -4903,38 +4301,21 @@ REAL (EB), POINTER, DIMENSION (:, :, :) :: X, Y
 INTEGER :: I, K, ILEVEL, NM
 REAL(EB):: TNOW_VECADD2D
  
-
 TNOW_VECADD2D = SECOND()
+
 SL => S%SLEVEL(ILEVEL)
- 
-IF (SCARC_DEBUG >= 6) THEN
-   WRITE (9,*) 'BEFORE VECADD'
-   WRITE (9,*) 'A1=', A1
-   WRITE (9,*) 'A2=', A2
-   WRITE (9,*) ' X:'
-   DO K = SL%KBAR + 1, 0, - 1
-      WRITE (9, '(5f10.5)') (X(I, 1, K), I=0, SL%IBAR+1)
-   ENDDO
-   WRITE (9,*) ' Y:'
-   DO K = SL%KBAR + 1, 0, - 1
-      WRITE (9, '(5f10.5)') (Y(I, 1, K), I=0, SL%IBAR+1)
-   ENDDO
-ENDIF
- 
  
 IF (A2 == 0.0_EB) THEN
    IF (A1 /= 1.0_EB) THEN
       DO K = 1, SL%KBAR
          DO I = 1, SL%IBAR
             Y (I, 1, K) = A1 * X (I, 1, K)
- IF (SCARC_DEBUG>=6) WRITE(9,*) 'Y(',I,',1,',K,')=',Y(I,1,K)
          ENDDO
       ENDDO
    ELSE
       DO K = 1, SL%KBAR
          DO I = 1, SL%IBAR
             Y (I, 1, K) = X (I, 1, K)
- IF (SCARC_DEBUG>=6) WRITE(9,*) 'Y(',I,',1,',K,')=',Y(I,1,K)
          ENDDO
       ENDDO
    ENDIF
@@ -4943,26 +4324,15 @@ ELSE
       DO K = 1, SL%KBAR
          DO I = 1, SL%IBAR
             Y (I, 1, K) = A1 * X (I, 1, K) + A2 * Y (I, 1, K)
- IF (SCARC_DEBUG>=6) WRITE(9,*) 'Y(',I,',1,',K,')=',Y(I,1,K)
          ENDDO
       ENDDO
    ELSE
       DO K = 1, SL%KBAR
          DO I = 1, SL%IBAR
             Y (I, 1, K) = X (I, 1, K) + A2 * Y (I, 1, K)
- IF (SCARC_DEBUG>=6) WRITE(9,*) 'Y(',I,',1,',K,')=',Y(I,1,K)
          ENDDO
       ENDDO
    ENDIF
-ENDIF
- 
- 
-IF (SCARC_DEBUG >= 6) THEN
-   WRITE (9,*) 'AFTER VECADD'
-   WRITE (9,*) ' Y:'
-   DO K = SL%KBAR + 1, 0, - 1
-      WRITE (9, '(5f10.5)') (Y(I, 1, K), I=0, SL%IBAR+1)
-   ENDDO
 ENDIF
  
 TUSED_SCARC(14,NM)=TUSED_SCARC(14,NM)+SECOND()-TNOW_VECADD2D
@@ -4988,28 +4358,12 @@ TNOW_VECADD3D = SECOND()
  
 SL => S%SLEVEL(ILEVEL)
 
-IF (SCARC_DEBUG >= 6) THEN
-   WRITE (9,*) 'BEFORE VECADD'
-   WRITE (9,*) 'A1=', A1
-   WRITE (9,*) 'A2=', A2
-   WRITE (9,*) ' X:'
-   DO K = SL%KBAR + 1, 0, - 1
-      WRITE (9, '(5f10.5)') ((X(I, J, K), I=0, SL%IBAR+1), J=SL%JBAR+1, 1,-1)
-   ENDDO
-   WRITE (9,*) ' Y:'
-   DO K = SL%KBAR + 1, 0, - 1
-      WRITE (9, '(5f10.5)') ((Y(I, J, K), I=0, SL%IBAR+1), J=SL%JBAR+1, 1,-1)
-   ENDDO
-ENDIF
- 
- 
 IF (A2 == 0.0_EB) THEN
    IF (A1 /= 1.0_EB) THEN
       DO K = 1, SL%KBAR
          DO J = 1, SL%JBAR
             DO I = 1, SL%IBAR
                Y (I, J, K) = A1 * X (I, J, K)
-!WRITE(9,*) 'Y(',I,',J,',K,')=',Y(I,J,K)
             ENDDO
          ENDDO
       ENDDO
@@ -5018,7 +4372,6 @@ IF (A2 == 0.0_EB) THEN
          DO J = 1, SL%JBAR
             DO I = 1, SL%IBAR
                Y (I, J, K) = X (I, J, K)
-!WRITE(9,*) 'Y(',I,',J,',K,')=',Y(I,J,K)
             ENDDO
          ENDDO
       ENDDO
@@ -5029,7 +4382,6 @@ ELSE
          DO J = 1, SL%JBAR
             DO I = 1, SL%IBAR
                Y (I, J, K) = A1 * X (I, J, K) + A2 * Y (I, J, K)
-!WRITE(9,*) 'Y(',I,',J,',K,')=',Y(I,J,K)
             ENDDO
          ENDDO
       ENDDO
@@ -5038,22 +4390,11 @@ ELSE
          DO J = 1, SL%KBAR
             DO I = 1, SL%IBAR
                Y (I, J, K) = X (I, J, K) + A2 * Y (I, J, K)
-!WRITE(9,*) 'Y(',I,',J,',K,')=',Y(I,J,K)
             ENDDO
          ENDDO
       ENDDO
    ENDIF
 ENDIF
- 
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'AFTER VECADD'
-   WRITE (9,*) ' Y:'
-   DO K = SL%KBAR + 1, 1, - 1
-      WRITE (9, '(5f10.5)') ((Y(I, J, K), I=1, SL%IBAR+1), J=SL%JBAR+1, 1,-1)
-   ENDDO
-ENDIF
- 
  
 TUSED_SCARC(14,NM)=TUSED_SCARC(14,NM)+SECOND()-TNOW_VECADD3D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_VECADD3D
@@ -5076,34 +4417,11 @@ TNOW_VECCOPY2D = SECOND()
  
 SL => S%SLEVEL(ILEVEL)
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'BEFORE VECCOPY2D'
-   WRITE (9,*) ' X:'
-   DO K = SL%KBAR, 1, - 1
-      WRITE (9, '(4f10.4)') (X(I, 1, K), I=1, SL%IBAR)
-   ENDDO
-   WRITE (9,*) ' Y:'
-   DO K = SL%KBAR, 1, - 1
-      WRITE (9, '(4f10.4)') (Y(I, 1, K), I=1, SL%IBAR)
-   ENDDO
-ENDIF
- 
- 
 DO K = 1, SL%KBAR
    DO I = 1, SL%IBAR
       Y (I, 1, K) = X (I, 1, K)
-!    WRITE(9,*) 'Y(',I,',1,',K,')=',Y(I,1,K)
    ENDDO
 ENDDO
- 
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'AFTER VECCOPY'
-   WRITE (9,*) ' Y:'
-   DO K = SL%KBAR, 1, - 1
-      WRITE (9, '(4f10.4)') (Y(I, 1, K), I=1, SL%IBAR)
-   ENDDO
-ENDIF
  
 TUSED_SCARC(15,NM)=TUSED_SCARC(15,NM)+SECOND()-TNOW_VECCOPY2D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_VECCOPY2D
@@ -5125,36 +4443,13 @@ TNOW_VECCOPY3D = SECOND()
  
 SL => S%SLEVEL(ILEVEL)
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'BEFORE VECCOPY'
-   WRITE (9,*) ' X:'
-   DO K = SL%KBAR, 1, - 1
-      WRITE (9, '(4f10.4)') ((X(I, J, K), I=1, SL%IBAR), J=SL%JBAR, 1,-1)
-   ENDDO
-   WRITE (9,*) ' Y:'
-   DO K = SL%KBAR, 1, - 1
-      WRITE (9, '(4f10.4)') ((Y(I, J, K), I=1, SL%IBAR), J=SL%JBAR, 1,-1)
-   ENDDO
-ENDIF
- 
- 
 DO K = 1, SL%KBAR
    DO J = 1, SL%JBAR
       DO I = 1, SL%IBAR
          Y (I, J, K) = X (I, J, K)
-!      WRITE(9,*) 'Y(',I,',J,',K,')=',Y(I,J,K)
       ENDDO
    ENDDO
 ENDDO
- 
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'AFTER VECCOPY3D'
-   WRITE (9,*) ' Y:'
-   DO K = SL%KBAR, 1, - 1
-      WRITE (9, '(4f10.4)') ((Y(I, J, K), I=1, SL%IBAR), J=SL%JBAR, 1,-1)
-   ENDDO
-ENDIF
  
 TUSED_SCARC(15,NM)=TUSED_SCARC(15,NM)+SECOND()-TNOW_VECCOPY3D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_VECCOPY3D
@@ -5177,60 +4472,34 @@ REAL (EB), POINTER, DIMENSION (:, :, :) :: X, Y
 INTEGER :: ILEVEL, I, K, IM, NM, IERR
 REAL(EB):: TNOW_SCALPROD2D
  
-!INCLUDE 'mpif.h'
- 
 TNOW_SCALPROD2D = SECOND()
  
 SL => S%SLEVEL(ILEVEL)
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'SCAL_PROD2D'
-   WRITE (9,*) 'NMESHES=', NMESHES
-   WRITE (9,*) 'IBAR=', SL%IBAR
-   WRITE (9,*) 'KBAR=', SL%KBAR
-   CALL SCARC_COMPARE_SINGLE (X, 'SARC', 1, 'X      ',0)
-   CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y      ',0)
-ENDIF
- 
  
 SP = 0.0_EB
 DO K = 1, SL%KBAR
    DO I = 1, SL%IBAR
       SP = SP + X (I, 1, K) * Y (I, 1, K)
-      IF (SCARC_DEBUG >= 2) write (9, 1001) I, K, X (I, 1, K), Y (I, 1, K), SP
    ENDDO
 ENDDO
  
-IF (SCARC_DEBUG >= 4) write (9,*) 'SP=', SP
- 
 IF (NMESHES > 1) THEN
- 
+
    S%SP_LOCAL0 = 0.0_EB
    S%SP_LOCAL0 (NM) = SP
- 
    S%SP_GLOBAL0 = 0.0_EB
+
    CALL MPI_ALLREDUCE (S%SP_LOCAL0(1), S%SP_GLOBAL0(1), NMESHES, &
-    MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
- 
-   IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_LOCAL0='
-   IF (SCARC_DEBUG >= 2) write (9, '(f22.16)') (S%SP_LOCAL0(I), I=1, &
-    NMESHES)
-   IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_GLOBAL0='
-   IF (SCARC_DEBUG >= 2) write (9, '(f22.16)') (S%SP_GLOBAL0(I), I=1, &
-    NMESHES)
- 
+                       MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
    SP = 0.0_EB
    DO IM = 1, NMESHES
       SP = SP + S%SP_GLOBAL0(IM)
    ENDDO
  
 ENDIF
-IF (SCARC_DEBUG >= 2) write (9,*) 'SCALPROD2D: SP=', SP
 
 TUSED_SCARC(16,NM)=TUSED_SCARC(16,NM)+SECOND()-TNOW_SCALPROD2D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_SCALPROD2D
- 
-1001     FORMAT ('sp=sp+[', i4, ',1,', i4, ']:[', f22.16, '*', f22.16, ']:', f22.16)
 END SUBROUTINE SCARC_SCALPROD2D
  
  
@@ -5248,61 +4517,37 @@ REAL (EB), POINTER, DIMENSION (:, :, :) :: X, Y
 INTEGER :: ILEVEL, I, J, K, IM, NM, IERR
 REAL(EB):: TNOW_SCALPROD3D
  
-!INCLUDE 'mpif.h'
- 
 TNOW_SCALPROD3D = SECOND()
  
 SL => S%SLEVEL(ILEVEL)
 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'SCAL_PROD3D'
-   CALL SCARC_COMPARE_SINGLE (X, 'SARC', 1, 'X      ',0)
-   CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y      ',0)
-ENDIF
- 
- 
 SP = 0.0_EB
 DO K = 1, SL%KBAR
    DO J = 1, SL%JBAR
       DO I = 1, SL%IBAR
          SP = SP + X (I, J, K) * Y (I, J, K)
-         IF (SCARC_DEBUG >= 2) write (9, 1002) I, J, K, X (I, J, K) * Y (I, J, &
-          K), SP
       ENDDO
    ENDDO
 ENDDO
- 
-IF (SCARC_DEBUG > 2) write (9,*) 'SP=', SP
  
 IF (NMESHES > 1) THEN
  
    S%SP_LOCAL0 = 0.0_EB
    S%SP_LOCAL0 (NM) = SP
- 
    S%SP_GLOBAL0 = 0.0_EB
+
    CALL MPI_ALLREDUCE (S%SP_LOCAL0(1), S%SP_GLOBAL0(1), NMESHES, &
-    MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
- 
-   IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_LOCAL0='
-   IF (SCARC_DEBUG >= 2) write (9, '(f22.16)') (S%SP_LOCAL0(I), I=1, &
-    NMESHES)
-   IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_GLOBAL0='
-   IF (SCARC_DEBUG >= 2) write (9, '(f22.16)') (S%SP_GLOBAL0(I), I=1, &
-    NMESHES)
+                       MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
  
    SP = 0.0_EB
    DO IM = 1, NMESHES
       SP = SP + S%SP_GLOBAL0(IM)
    ENDDO
-   IF (SCARC_DEBUG >= 2) write (9,*) 'SP=', SP
  
 ENDIF
 
 TUSED_SCARC(16,NM)=TUSED_SCARC(16,NM)+SECOND()-TNOW_SCALPROD3D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_SCALPROD3D
- 
-1002 FORMAT ('sp=sp+[', i4, ',', i4, ',', i4, ']:[', f12.6, ']:', f24.12)
- 
 END SUBROUTINE SCARC_SCALPROD3D
  
  
@@ -5325,45 +4570,25 @@ INTEGER :: NM, ITYPE
 INTEGER :: ILEVEL, IM, IERR, I, K
 REAL(EB):: TNOW_L2NORM2D
  
-!INCLUDE 'mpif.h'
- 
 TNOW_L2NORM2D = SECOND()
  
 SL => S%SLEVEL(ILEVEL)
 
-IF (SCARC_DEBUG >= 6) THEN
-   WRITE (9,*) '========= L2NORM , ITYPE=', ITYPE
-   WRITE (9,*) 'NMESHES=', NMESHES
-   WRITE (9,*) 'NM=', NM
-   CALL SCARC_COMPARE_SINGLE_LEV (X, 'SARC', 1, 'X     ',0, NM, ILEVEL)
-ENDIF
- 
- 
 !!! build local scalar product (x,x)
 S%SP_LOCAL = 0.0_EB
 DO K = 1, SL%KBAR
    DO I = 1, SL%IBAR
       S%SP_LOCAL = S%SP_LOCAL + X (I, 1, K) * X (I, 1, K)
-      IF (SCARC_DEBUG >= 6) write (9, 1002) I, K, X (I, 1, K), X (I, 1, K), &
-       S%SP_LOCAL
    ENDDO
 ENDDO
  
-IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_LOCAL=', S%SP_LOCAL
- 
 !!! scale with number of local cells
-IF (ITYPE == NCOM_TYPE_LOCAL) THEN
+IF (ITYPE == NTYPE_LOCAL) THEN
  
    SP = Sqrt (S%SP_LOCAL/REAL(SL%NCELLS_LOCAL, EB))
  
-   IF (SCARC_DEBUG >= 2) THEN
-      WRITE (9,*) 'SL%NCELLS_LOCAL=', SL%NCELLS_LOCAL
-      WRITE (9,*) 'S%SP_LOCAL=', S%SP_LOCAL
-      WRITE (9,*) 'NMESHES=', NMESHES
-   ENDIF
- 
 !!! sum up globally and scale with global number of nodes
-ELSE IF (ITYPE == NCOM_TYPE_GLOBAL) THEN
+ELSE IF (ITYPE == NTYPE_GLOBAL) THEN
  
    IF (NMESHES > 1) THEN
  
@@ -5374,35 +4599,23 @@ ELSE IF (ITYPE == NCOM_TYPE_GLOBAL) THEN
       CALL MPI_ALLREDUCE (S%SP_LOCAL0(1), S%SP_GLOBAL0(1), NMESHES, &
                           MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
  
-      IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_LOCALA=',S%SP_LOCAL/SL%NCELLS_LOCAL
-      IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_LOCAL0='
-      IF (SCARC_DEBUG >= 2) write (9, '(f22.16)') (S%SP_LOCAL0(I), I=1, NMESHES)
-      IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_GLOBAL0='
-      IF (SCARC_DEBUG >= 2) write (9, '(f22.16)') (S%SP_GLOBAL0(I), I=1, NMESHES)
- 
       S%SP_GLOBAL = 0.0_EB
       DO IM = 1, NMESHES
          S%SP_GLOBAL = S%SP_GLOBAL + S%SP_GLOBAL0(IM)
-         IF (SCARC_DEBUG >= 4) write (9,*) 'S%SP_GLOBAL=', S%SP_GLOBAL
       ENDDO
    ELSE
       S%SP_GLOBAL = S%SP_LOCAL
    ENDIF
- 
    SP = Sqrt (S%SP_GLOBAL/REAL(SL%NCELLS_GLOBAL, EB))
- 
-   IF (SCARC_DEBUG >= 2) write (9,*) 'SL%NCELLS_GLOBAL=', SL%NCELLS_GLOBAL
-   IF (SCARC_DEBUG >= 2) write (9,*) 'L2NORM2D  : SP=', SP
- 
+
 ELSE
  
    WRITE (*,*) 'Wrong type for SCARC_L2NORM2D ', ITYPE
  
 ENDIF
+
 TUSED_SCARC(17,NM)=TUSED_SCARC(17,NM)+SECOND()-TNOW_L2NORM2D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_L2NORM2D
- 
-1002     FORMAT ('sp=sp+[', i4, ',', i4, ']:[', f12.6, '*', f12.6, ']:', f12.6)
 END SUBROUTINE SCARC_L2NORM2D
  
  
@@ -5422,12 +4635,7 @@ INTEGER :: NM, ITYPE
 INTEGER :: ILEVEL, IM, IERR, I, J, K
 REAL(EB):: TNOW_L2NORM3D
  
-!INCLUDE 'mpif.h'
- 
 TNOW_L2NORM3D = SECOND()
- 
-IF (SCARC_DEBUG >= 2) write (9,*) '========= L2NORM , ITYPE=', ITYPE
-IF (SCARC_DEBUG >= 2) write (9,*) 'NMESHES=', NMESHES
  
 SL => S%SLEVEL(ILEVEL)
  
@@ -5437,7 +4645,6 @@ DO K = 1, SL%KBAR
    DO J = 1, SL%JBAR
       DO I = 1, SL%IBAR
          S%SP_LOCAL = S%SP_LOCAL + X (I, J, K) * X (I, J, K)
-!if (SCARC_DEBUG.ge.2) WRITE(9,1002) I,J,K,X(I,J,K)*X(I,J,K),SP
       ENDDO
    ENDDO
 ENDDO
@@ -5445,16 +4652,12 @@ ENDDO
 IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_LOCAL=', S%SP_LOCAL
  
 !!! scale with number of local cells
-IF (ITYPE == NCOM_TYPE_LOCAL) THEN
+IF (ITYPE == NTYPE_LOCAL) THEN
  
    SP = Sqrt (S%SP_LOCAL/REAL(SL%NCELLS_LOCAL, EB))
  
-   IF (SCARC_DEBUG >= 2) write (9,*) 'SL%NCELLS_LOCAL=', SL%NCELLS_LOCAL
-   IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_LOCAL=', S%SP_LOCAL
-   IF (SCARC_DEBUG >= 2) write (9,*) 'NMESHES=', NMESHES
- 
 !!! sum up globally and scale with global number of nodes
-ELSE IF (ITYPE == NCOM_TYPE_GLOBAL) THEN
+ELSE IF (ITYPE == NTYPE_GLOBAL) THEN
  
    IF (NMESHES > 1) THEN
  
@@ -5463,28 +4666,17 @@ ELSE IF (ITYPE == NCOM_TYPE_GLOBAL) THEN
  
       S%SP_GLOBAL0 = 0.0_EB
       CALL MPI_ALLREDUCE (S%SP_LOCAL0(1), S%SP_GLOBAL0(1), NMESHES, &
-       MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
- 
-      IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_LOCAL0='
-      IF (SCARC_DEBUG >= 2) write (9, '(f22.16)') (S%SP_LOCAL0(I), I=1, &
-       NMESHES)
-      IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_GLOBAL0='
-      IF (SCARC_DEBUG >= 2) write (9, '(f22.16)') (S%SP_GLOBAL0(I), I=1, &
-       NMESHES)
+                          MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
  
       S%SP_GLOBAL = 0.0_EB
       DO IM = 1, NMESHES
          S%SP_GLOBAL = S%SP_GLOBAL + S%SP_GLOBAL0(IM)
-         IF (SCARC_DEBUG >= 2) write (9,*) 'S%SP_GLOBAL=', S%SP_GLOBAL
       ENDDO
    ELSE
       S%SP_GLOBAL = S%SP_LOCAL
    ENDIF
  
    SP = Sqrt (S%SP_GLOBAL/REAL(SL%NCELLS_GLOBAL, EB))
- 
-   IF (SCARC_DEBUG >= 2) write (9,*) 'SL%NCELLS_GLOBAL=', SL%NCELLS_GLOBAL
-   IF (SCARC_DEBUG >= 2) write (9,*) 'SP=', SP
  
 ELSE
  
@@ -5514,34 +4706,15 @@ SL => S%SLEVEL(ILEVEL)
 
 TNOW_JACOBI2D = SECOND()
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'BEFORE PRECON_JACOBI2D: Y'
-   WRITE (9,*) 'Y:'
-   !CALL SCARC_COMPARE_SINGLE_LEV (Y, 'SARC', 1, 'Y     ',0, NM, ILEVEL)
-ENDIF
- 
- 
-
 DO K = 1, SL%KBAR
    DO I = 1, SL%IBAR
       IC = (K-1) * SL%IBAR + I
       Y (I, 1, K) = Y (I, 1, K) / A (IC, 1)
-      IF (SCARC_DEBUG >= 2) write (9, '(a,i3,a,f8.2,a,f18.12)') 'A(', IC, ')=',&
-        A (IC, 1), ': Y=', Y (I, 1, K)
    ENDDO
-   IF (SCARC_DEBUG >= 2) write (9,*) '========================================&
-  &======'
 ENDDO
  
- 
-IF (SCARC_DEBUG >= 4) THEN
-   WRITE (9,*)
-   WRITE (9,*) 'AFTER  PRECON_JACOBI: Y'
-   !CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
 TUSED_SCARC(18,NM)=TUSED_SCARC(18,NM)+SECOND()-TNOW_JACOBI2D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_JACOBI2D
- 
 END SUBROUTINE SCARC_PRECON_JACOBI2D
  
  
@@ -5561,12 +4734,6 @@ SL => S%SLEVEL(ILEVEL)
 
 TNOW_JACOBI3D = SECOND()
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'BEFORE PRECON_JACOBI3D: Y'
-   !CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
- 
- 
 DO K = 1, SL%KBAR
    DO J = 1, SL%JBAR
       DO I = 1, SL%IBAR
@@ -5576,23 +4743,13 @@ DO K = 1, SL%KBAR
             Y (I, J, K) = Y (I, J, K) / A (IC, 3)
          ELSE
             Y (I, J, K) = Y (I, J, K) / A (IC, 4)
-            IF (SCARC_DEBUG >= 2) write (9, '(a,i3,a,f8.2,a,f18.12)') 'A(', &
-             IC, ')=', A (IC, 4), ': Y=', Y (I, J, K)
          ENDIF
       ENDDO
-      IF (SCARC_DEBUG >= 2) write (9,*) '-------------'
    ENDDO
-   IF (SCARC_DEBUG >= 2) write (9,*) '========================================&
-  &======'
 ENDDO
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'AFTER  PRECON_JACOBI3D: Y'
-   !CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
 TUSED_SCARC(18,NM)=TUSED_SCARC(18,NM)+SECOND()-TNOW_JACOBI3D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_JACOBI3D
- 
 END SUBROUTINE SCARC_PRECON_JACOBI3D
  
  
@@ -5605,19 +4762,12 @@ SUBROUTINE SCARC_PRECON_GS2D (A, Y, ILEVEL, NM)
 REAL (EB), POINTER, DIMENSION (:, :) :: A
 REAL (EB), POINTER, DIMENSION (:, :, :) :: Y
 REAL (EB) :: AUX, OMEGA
-INTEGER :: I, J, K, IC, ILEVEL, NM
+INTEGER :: I, K, IC, ILEVEL, NM
 REAL(EB):: TNOW_GS2D
 
 TNOW_GS2D = SECOND()
 
 SL => S%SLEVEL(ILEVEL)
-
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'BEFORE PRECON_GS2D: Y'
-   !CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
- 
- 
 OMEGA = 1.0_EB
  
 DO K = 1, SL%KBAR
@@ -5626,21 +4776,11 @@ DO K = 1, SL%KBAR
  
       AUX = AUX + A (IC, 1) * Y (I, 1, K-1) + A (IC, 2) * Y (I-1, 1, K)
       Y (I, 1, K) = (Y(I, 1, K)-AUX*OMEGA) / A (IC, 3)
-      IF (SCARC_DEBUG >= 2) write (9, '(a,i3,a,f8.2,a,f18.12)') 'A(', IC, ')=',&
-        A (IC, 3), ': Y=', Y (I, J, K)
    ENDDO
-   IF (SCARC_DEBUG >= 2) write (9,*) '========================================&
-  &======'
 ENDDO
  
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'AFTER  PRECON_GS: Y'
-   !CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
 TUSED_SCARC(19,NM)=TUSED_SCARC(19,NM)+SECOND()-TNOW_GS2D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_GS2D
- 
 END SUBROUTINE SCARC_PRECON_GS2D
  
  
@@ -5657,16 +4797,10 @@ REAL (EB) :: AUX, OMEGA
 INTEGER :: I, J, K, IC, ILEVEL, NM
 REAL (EB) :: TNOW_GS3D
 
- 
 TNOW_GS3D = SECOND()
  
 SL => S%SLEVEL(ILEVEL)
 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'BEFORE PRECON_GS3D: Y'
-   !CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
- 
 OMEGA = 1.0_EB
  
 DO K = 1, SL%KBAR
@@ -5677,17 +4811,9 @@ DO K = 1, SL%KBAR
          AUX = A (IC, 1) * Y (I, J, K-1) + A (IC, 2) * Y (I, J-1, K) + A (IC, 3) &
           * Y (I-1, J, K)
          Y (I, J, K) = (Y(I, J, K)-OMEGA*AUX) / A (IC, 4)
-         IF (SCARC_DEBUG >= 2) write (9, '(a,i3,a,f8.2,a,f18.12,a,f18.12)') 'A&
-        &(', IC, ')=', A (IC, 4), ': AUX=', AUX, ': Y=', Y (I, J, K)
       ENDDO
-      IF (SCARC_DEBUG >= 2) write (9,*) '-------------'
    ENDDO
 ENDDO
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'AFTER  PRECON_GS3D: Y'
-   !CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
  
 TUSED_SCARC(19,NM)=TUSED_SCARC(19,NM)+SECOND()-TNOW_GS3D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_GS3D
@@ -5711,11 +4837,6 @@ TNOW_SSOR2D = SECOND()
 
 SL => S%SLEVEL(ILEVEL)
  
-IF (SCARC_DEBUG >= 4) THEN
-   WRITE (9,*) 'BEFORE PRECON_SSOR2D: Y'
-   CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
- 
 OMEGA = 1.5_EB
  
 DO K = 1, SL%KBAR
@@ -5723,11 +4844,7 @@ DO K = 1, SL%KBAR
       IC = (K-1) * SL%IBAR + I
       AUX = A (IC, 2) * Y (I, 1, K-1) + A (IC, 3) * Y (I-1, 1, K)
       Y (I, 1, K) = (Y(I, 1, K)-AUX*OMEGA) / A (IC, 1)
-      IF (SCARC_DEBUG >= 2) write (9, '(a,i3,a,f8.2,a,f18.12,a,f18.12)') 'A(', &
-       IC, ')=', A (IC, 1), ': AUX=', AUX, ': Y=', Y (I, 1, K)
    ENDDO
-   IF (SCARC_DEBUG >= 2) write (9,*) '========================================&
-  &======'
 ENDDO
  
 DO K = SL%KBAR, 1, - 1
@@ -5735,20 +4852,11 @@ DO K = SL%KBAR, 1, - 1
       IC = (K-1) * SL%IBAR + I
       AUX = A (IC, 5) * Y (I, 1, K+1) + A (IC, 4) * Y (I+1, 1, K)
       Y (I, 1, K) = Y (I, 1, K) - AUX * OMEGA / A (IC, 1)
-      IF (SCARC_DEBUG >= 2) write (9, '(a,i3,a,f8.2,a,f18.12,a,f18.12)') 'A(', &
-       IC, ')=', A (IC, 1), ': AUX=', AUX, ': Y=', Y (I, 1, K)
    ENDDO
-   IF (SCARC_DEBUG >= 2) write (9,*) '========================================&
-  &======'
 ENDDO
  
-IF (SCARC_DEBUG >= 4) THEN
-   WRITE (9,*) 'AFTER  PRECON_SSOR: Y'
-   CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
 TUSED_SCARC(20,NM)=TUSED_SCARC(20,NM)+SECOND()-TNOW_SSOR2D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_SSOR2D
- 
 END SUBROUTINE SCARC_PRECON_SSOR2D
  
  
@@ -5768,12 +4876,6 @@ TNOW_SSOR3D = SECOND()
 
 SL => S%SLEVEL(ILEVEL)
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'BEFORE PRECON_SSOR: Y'
-   CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
- 
- 
 OMEGA = 1.6_EB
  
 DO K = 1, SL%KBAR
@@ -5784,38 +4886,19 @@ DO K = 1, SL%KBAR
          AUX = A (IC, 1) * Y (I, J, K-1) + A (IC, 2) * Y (I, J-1, K) + A (IC, 3) &
           * Y (I-1, J, K)
          Y (I, J, K) = (Y(I, J, K)-AUX*OMEGA) / A (IC, 4)
-         IF (SCARC_DEBUG >= 2) write (9, '(a,i3,a,f8.2,a,f18.12,a,f18.12)') 'A&
-        &(', IC, ')=', A (IC, 4), ': AUX=', AUX, ': Y=', Y (I, J, K)
       ENDDO
-      IF (SCARC_DEBUG >= 2) write (9,*) '-------------'
    ENDDO
-   IF (SCARC_DEBUG >= 2) write (9,*) '========================================&
-  &======'
 ENDDO
  
 DO K = SL%KBAR, 1, - 1
    DO J = SL%JBAR, 1, - 1
       DO I = SL%IBAR, 1, - 1
- 
          IC = (K-1) * SL%IBAR * SL%JBAR + (J-1) * SL%IBAR + I
- 
-         AUX = A (IC, 7) * Y (I, J, K+1) + A (IC, 6) * Y (I, J+1, K) + A (IC, 5) &
-          * Y (I+1, J, K)
- 
+         AUX = A (IC, 7) * Y (I, J, K+1) + A (IC, 6) * Y (I, J+1, K) + A (IC, 5) * Y (I+1, J, K)
          Y (I, J, K) = Y (I, J, K) - AUX * OMEGA / A (IC, 4)
-         IF (SCARC_DEBUG >= 2) write (9, '(a,i3,a,f8.2,a,f18.12,a,f18.12)') 'A&
-        &(', IC, ')=', A (IC, 4), ': AUX=', AUX, ': Y=', Y (I, J, K)
       ENDDO
-      IF (SCARC_DEBUG >= 2) write (9,*) '-------------'
    ENDDO
-   IF (SCARC_DEBUG >= 2) write (9,*) '========================================&
-  &======'
 ENDDO
- 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) 'AFTER  PRECON_SSOR3D: Y'
-   CALL SCARC_COMPARE_SINGLE (Y, 'SARC', 1, 'Y     ',0)
-ENDIF
  
 TUSED_SCARC(20,NM)=TUSED_SCARC(20,NM)+SECOND()-TNOW_SSOR3D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_SSOR3D
@@ -6049,24 +5132,9 @@ TYPE (OSCARC_TYPE), POINTER :: OSNM
 TYPE (SCARC_LEVEL_TYPE),  POINTER ::  SNML
 TYPE (OSCARC_LEVEL_TYPE), POINTER :: OSNML
 
-!INCLUDE 'mpif.h'
-
 TNOW_RECEIVE = SECOND()
 
 RECEIVE_MESH_LOOP: DO NM=1,NMESHES
-
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) '======================================================='
-   WRITE(9,*) 'SCARC_RECEIVE:NREQ_FACE=',NREQ_FACE
-   WRITE(9,*) 'SCARC_RECEIVE:NREQ_EDGE=',NREQ_EDGE
-   WRITE(9,*) 'SCARC_RECEIVE:NREQ_DIAG=',NREQ_DIAG
-   WRITE(9,*) 'SCARC_RECEIVE: NM=',NM
-   WRITE(9,*) 'SCARC_RECEIVE: NMESHES=',NMESHES
-   WRITE(9,*) 'SCARC_RECEIVE: ILEVEL=',ILEVEL
-   WRITE(9,*) 'SCARC_RECEIVE: CODE=',CODE
-   WRITE(9,*) 'SCARC_RECEIVE: MYID=',MYID
-   WRITE(9,*) 'SCARC_RECEIVE: PROCESS(NM)=',PROCESS(NM)
-ENDIF
 
    IF (PROCESS(NM)/=MYID) CYCLE RECEIVE_MESH_LOOP
  
@@ -6084,8 +5152,6 @@ ENDIF
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       RECEIVE_FACE_IF: IF (SNML%NIC_FACE(NM,NOM)/=0 .AND. SNML%NIC_FACE(NOM,NM)/=0) THEN
     
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'IN RECEIVE_FACE_IF'
-
          OSNM  => SCARC(NM)%OSCARC(NOM)                  ! corresponds to M3
          OSNML => SCARC(NM)%OSCARC(NOM)%SLEVEL(ILEVEL)   ! ... for the level 'ILEVEL'
 
@@ -6096,10 +5162,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'IN RECEIVE_FACE_IF'
          INIT_FACE_IF: IF (CODE==NCOM_INIT) THEN
 
             NREQ_FACE = NREQ_FACE+1
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) 'SCARC_RECEIVE_FACE_INIT: NREQ_FACE=',NREQ_FACE
-   WRITE(9,*) 'SCARC_RECEIVE_FACE_INIT: NW_FACE  =',17*OSNML%NW_FACE
-ENDIF
             CALL MPI_IRECV(OSNML%IJKW_FACE(1,1),17*OSNML%NW_FACE,MPI_INTEGER,SNODE, &
                            TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
@@ -6108,7 +5170,6 @@ ENDIF
                ALLOCATE (OSNM%RECV_FACE(ILEN_FACE))
                OSNM%RECV_FACE = 0.0_EB
             ENDIF
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE_FACE_INIT: ilen_face  =',ilen_face
 
          ENDIF INIT_FACE_IF
    
@@ -6116,7 +5177,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE_FACE_INIT: ilen_face  =',ilen_face
          MATV_FACE_IF: IF (CODE==NCOM_MATV) THEN
 
             NREQ_FACE = NREQ_FACE+1
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE_FACE_MATV: LENGTH  =',OSNM%RECV_FACE
             CALL MPI_IRECV(OSNM%RECV_FACE(1),SIZE(OSNM%RECV_FACE),MPI_DOUBLE_PRECISION,&
                         SNODE,TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
@@ -6126,7 +5186,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE_FACE_MATV: LENGTH  =',OSNM%RECV_FA
          FULL_FACE_IF: IF (CODE==NCOM_FULL) THEN
 
             NREQ_FACE = NREQ_FACE+1
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE_FACE_FULL: LENGTH  =',SIZE(OSNM%RECV_FACE)
             CALL MPI_IRECV(OSNM%RECV_FACE(1),SIZE(OSNM%RECV_FACE),MPI_DOUBLE_PRECISION,&
                            SNODE,TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
@@ -6184,8 +5243,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE_FACE_FULL: LENGTH  =',SIZE(OSNM%RE
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       RECEIVE_DIAG_IF: IF (BDIAG.AND.SNML%NIC_DIAG(NM,NOM)/=0 .AND. SNML%NIC_DIAG(NOM,NM)/=0) THEN
     
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'IN RECEIVE_DIAG_IF'
-
          OSNM  => SCARC(NM)%OSCARC(NOM)                  ! corresponds to M3
          OSNML => SCARC(NM)%OSCARC(NOM)%SLEVEL(ILEVEL)   ! ... for the level 'ILEVEL'
 
@@ -6200,30 +5257,15 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'IN RECEIVE_DIAG_IF'
 
          ILEN_DIAG=(IMAX-IMIN+1)*(JMAX-JMIN+1)*(KMAX-KMIN+1)
 
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) 'SCARC_RECEIVE_DIAG: IMIN=',IMIN
-   WRITE(9,*) 'SCARC_RECEIVE_DIAG: IMAX=',IMAX
-   WRITE(9,*) 'SCARC_RECEIVE_DIAG: JMIN=',JMIN
-   WRITE(9,*) 'SCARC_RECEIVE_DIAG: JMAX=',JMAX
-   WRITE(9,*) 'SCARC_RECEIVE_DIAG: KMIN=',KMIN
-   WRITE(9,*) 'SCARC_RECEIVE_DIAG: KMAX=',KMAX
-   WRITE(9,*) 'SCARC_RECEIVE_DIAG: ILEN_DIAG=',ILEN_DIAG
-ENDIF
-
       !!! Initialize the communication structures for receiving face data
          INIT_DIAG_IF: IF (CODE==NCOM_INIT) THEN
 
             NREQ_DIAG = NREQ_DIAG+1
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) 'SCARC_RECEIVE_DIAG_INIT: NREQ_diag=',NREQ_diag
-   WRITE(9,*) 'SCARC_RECEIVE_DIAG_INIT: NW_FACE  =',17*OSNML%NW_diag
-ENDIF
             CALL MPI_IRECV(OSNML%IJKW_DIAG(1,1),17*OSNML%NW_DIAG,MPI_INTEGER,SNODE, &
                            TAG_DIAG,MPI_COMM_WORLD,REQ_DIAG(NREQ_DIAG),IERR)
 
             IF (SNML%NIC_DIAG(NM, NOM) > 0) THEN
                ILEN_DIAG=(MAX(SNML%NIC_DIAG(NM, NOM), SNML%NIC_DIAG(NOM, NM))+2)*2+1   ! extended
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE_DIAG_INIT: ilen_diag  =',ilen_diag
                ALLOCATE (OSNM%RECV_DIAG(ILEN_DIAG))
                OSNM%RECV_DIAG = 0.0_EB
             ENDIF
@@ -6235,7 +5277,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE_DIAG_INIT: ilen_diag  =',ilen_diag
          FULL_DIAG_IF: IF (CODE==NCOM_FULL) THEN
 
             NREQ_DIAG = NREQ_DIAG+1
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE_DIAG_INIT: LENGTH  =',SIZE(OSNM%RECV_DIAG)
             CALL MPI_IRECV(OSNM%RECV_DIAG(1),SIZE(OSNM%RECV_DIAG),MPI_DOUBLE_PRECISION,&
                            SNODE,TAG_DIAG,MPI_COMM_WORLD,REQ_DIAG(NREQ_DIAG),IERR)
 
@@ -6246,11 +5287,9 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE_DIAG_INIT: LENGTH  =',SIZE(OSNM%RE
    ENDDO RECEIVE_OMESH_LOOP
 ENDDO RECEIVE_MESH_LOOP
 
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_RECEIVE: READY'
 
 TUSED_SCARC(22,MYID+1)=TUSED_SCARC(22,MYID+1)+SECOND()-TNOW_RECEIVE
 TUSED_SCARC(0,MYID+1) =TUSED_SCARC(0,MYID+1) +SECOND()-TNOW_RECEIVE
-
 END SUBROUTINE SCARC_RECEIVE
  
  
@@ -6276,21 +5315,9 @@ TYPE (OSCARC_TYPE), POINTER :: OSNM, OSNOM
 TYPE (SCARC_LEVEL_TYPE),  POINTER ::  SNML,  SNOML
 TYPE (OSCARC_LEVEL_TYPE), POINTER :: OSNML, OSNOML
 
-!INCLUDE 'mpif.h'
-
 TNOW_EXCHANGE = SECOND()
 
 SNM => SCARC(NM)
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) '======================== SCARC_EXCHANGE:'
-   WRITE(9,*) 'SCARC_EXCHANGE   :NREQ_FACE=',NREQ_FACE
-   WRITE(9,*) 'SCARC_EXCHANGE   :NREQ_EDGE=',NREQ_EDGE
-   WRITE(9,*) 'SCARC_EXCHANGE   :NREQ_DIAG=',NREQ_DIAG
-   WRITE(9,*) 'SCARC_EXCHANGE   :ILEVEL=',ILEVEL
-   WRITE(9,*) 'SCARC_EXCHANGE   :CODE=',CODE
-   WRITE(9,*) 'SCARC_EXCHANGE   :NREQ_FACE=',NREQ_FACE
-   WRITE(9,*) 'SCARC_EXCHANGE   :NREQ_DIAG=',NREQ_DIAG
-ENDIF
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Sample communication data in corresponding SEND-buffers
@@ -6307,7 +5334,6 @@ EXCHANGE_SEND_MESH_LOOP: DO NM=1,NMESHES
       SNM  => SCARC(NM)                     ! corresponds to M
       SNML => SCARC(NM)%SLEVEL(ILEVEL)      ! ... for the level 'ILEVEL'
 
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE:   SNML zeigt auf SCARC(',NM,')%SLEVEL(',ILEVEL,')'
 
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       !!! FACE communication
@@ -6319,53 +5345,15 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE:   SNML zeigt auf SCARC(',NM,')%S
 
          TAG_FACE = TAGS_FACE(NM,NOM)
     
-!         IMIN=SNML%I_MIN_FACE(NOM,NM)
-!         IMAX=SNML%I_MAX_FACE(NOM,NM)
-!         JMIN=SNML%J_MIN_FACE(NOM,NM)
-!         JMAX=SNML%J_MAX_FACE(NOM,NM)
-!         KMIN=SNML%K_MIN_FACE(NOM,NM)
-!         KMAX=SNML%K_MAX_FACE(NOM,NM)
-!
-         !ILEN_FACE=(IMAX-IMIN+1)*(JMAX-JMIN+1)*(KMAX-KMIN+1)
-
-!WRITE(9,*) 'SCARC_EXCHANGE:   I_MIN_FACE:'
-!WRITE(9,'(2i4)') ((SNML%I_MIN_FACE(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-!WRITE(9,*) 'SCARC_EXCHANGE:   I_MAX:'
-!WRITE(9,'(2i4)') ((SNML%I_MAX_FACE(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-!WRITE(9,*) 'SCARC_EXCHANGE:   J_MIN:'
-!WRITE(9,'(2i4)') ((SNML%J_MIN_FACE(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-!WRITE(9,*) 'SCARC_EXCHANGE:   J_MAX:'
-!WRITE(9,'(2i4)') ((SNML%J_MAX_FACE(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-!WRITE(9,*) 'SCARC_EXCHANGE:   K_MIN:'
-!WRITE(9,'(2i4)') ((SNML%K_MIN_FACE(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-!WRITE(9,*) 'SCARC_EXCHANGE:   K_MAX:'
-!WRITE(9,'(2i4)') ((SNML%K_MAX_FACE(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-!WRITE(9,*) 'SCARC_EXCHANGE:   IOR_FACE:'
-!WRITE(9,'(2i4)') ((SNM%IOR_FACE(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-!
-!WRITE(9,*) 'SCARC_EXCHANGE: IMIN=',IMIN
-!WRITE(9,*) 'SCARC_EXCHANGE: IMAX=',IMAX
-!WRITE(9,*) 'SCARC_EXCHANGE: JMIN=',JMIN
-!WRITE(9,*) 'SCARC_EXCHANGE: JMAX=',JMAX
-!WRITE(9,*) 'SCARC_EXCHANGE: KMIN=',KMIN
-!WRITE(9,*) 'SCARC_EXCHANGE: KMAX=',KMAX
-!WRITE(9,*) 'SCARC_EXCHANGE: ILEN_FACE=',ILEN_FACE
-!WRITE(9,*) 'SCARC_EXCHANGE :CODE=',CODE
-!WRITE(9,*) 'SCARC_EXCHANGE :NM =',NM
-!WRITE(9,*) 'SCARC_EXCHANGE :NOM=',NOM
-
          !!! Initialize the communication structures for sending data
          EXCHANGE_INIT_FACE_IF: IF (CODE==NCOM_INIT) THEN
     
             ! initialize communication structures for face exchange
             IF (RNODE/=SNODE) THEN
               NREQ_FACE = NREQ_FACE+1
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FACE_INIT: NREQ_FACE=',NREQ_FACE
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FACE_INIT: NW_FACE  =',17*SNML%NW_FACE
               CALL MPI_ISEND(SNML%IJKW_FACE(1,1),17*SNML%NW_FACE,MPI_INTEGER,SNODE, &
                              TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
                ILEN_FACE=(MAX(SNML%NIC_FACE(NM, NOM), SNML%NIC_FACE(NOM, NM))+2)*2+1   ! extended
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FACE_INIT: ilen_face  =',ilen_Face
                ALLOCATE (OSNM%SEND_FACE(ILEN_FACE))
                OSNM%SEND_FACE = 0.0_EB
             ENDIF
@@ -6376,7 +5364,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FACE_INIT: ilen_face  =',ilen_Fac
          EXCHANGE_MATV_FACE_IF: IF (CODE==NCOM_MATV) THEN
             IF (RNODE/=SNODE) THEN
 
-   WRITE(9,*) 'IMV=',IMV
             LL = 0
             IWW = 0
             PACK_SEND_FACE0: DO IW=1,OSNML%NW_FACE
@@ -6394,8 +5381,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FACE_INIT: ilen_face  =',ilen_Fac
                            WRITE(*,*) 'WRONG MATVEC-TYPE'
                            stop
                         ENDIF
-IF (SCARC_DEBUG>=6) WRITE(9,'(i4,a,i4,a,2e16.6,3i4)') IW,': SCARC_EXCHANGE_FACE_MATV: SENDING SEND_FACE(',LL+1,')=', &
-                                OSNM%SEND_FACE(LL+1), OSNM%SEND_FACE(LL+2), II,JJ,KK
                         LL = LL+2
                      ENDDO
                   ENDDO
@@ -6403,26 +5388,11 @@ IF (SCARC_DEBUG>=6) WRITE(9,'(i4,a,i4,a,2e16.6,3i4)') IW,': SCARC_EXCHANGE_FACE_
             ENDDO PACK_SEND_FACE0
             OSNM%SEND_FACE(IWW*2+1) = -999.0_EB
             NREQ_FACE=NREQ_FACE+1
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FACE_MATV: LENGTH=',IWW*2+1
             CALL MPI_ISEND(OSNM%SEND_FACE(1),IWW*2+1,MPI_DOUBLE_PRECISION,SNODE, &
                            TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SEND_FACE=',OSNM%SEND_FACE(1)
-
-
-
             ELSE
-
-!              IMIN = SNML%I_MIN_FACE(NOM,NM)
-!              IMAX = SNML%I_MAX_FACE(NOM,NM)
-!              JMIN = SNML%J_MIN_FACE(NOM,NM)
-!              JMAX = SNML%J_MAX_FACE(NOM,NM)
-!              KMIN = SNML%K_MIN_FACE(NOM,NM)
-!              KMAX = SNML%K_MAX_FACE(NOM,NM)
-!     
-!              OSNOM=>SCARC(NOM)%OSCARC(NM)
-!              OSNOM%D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= SNM%D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
-!
+                write(*,*) 'Not yet implemented'
             ENDIF
          ENDIF  EXCHANGE_MATV_FACE_IF
    
@@ -6434,7 +5404,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SEND_FACE=',OSNM%SEND_FACE(1)
             LL = 0
             IWW = 0
             PACK_SEND_FACE: DO IW=1,OSNML%NW_FACE
-!WRITE(9,'(i4,a,17i4)') IW,': ',OSNML%IJKW_FACE(1:17,IW)
                IF (OSNML%IJKW_FACE(9,IW)/=NM) CYCLE PACK_SEND_FACE
                DO KK=OSNML%IJKW_FACE(12,IW),OSNML%IJKW_FACE(15,IW)
                   DO JJ=OSNML%IJKW_FACE(11,IW),OSNML%IJKW_FACE(14,IW)
@@ -6442,11 +5411,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SEND_FACE=',OSNM%SEND_FACE(1)
                         IWW = IWW + 1
                         OSNM%SEND_FACE(LL+1) = REAL(IW,EB)
                         OSNM%SEND_FACE(LL+2) = SNML%Z(II,JJ,KK)
-IF (SCARC_DEBUG>=6) WRITE(9,'(i4,a,i4,a,2e16.6,3i4)') IW,':SCARC_EXCHANGE_FACE_FULL: SENDING SEND_FACE(',LL+1,')=', &
-                                OSNM%SEND_FACE(LL+1), OSNM%SEND_FACE(LL+2), II,JJ,KK
-!IF (SCARC_DEBUG>=6) THEN
-!WRITE(9,*) 'SNML%Z=',LL+1,IW,SNML%Z(II,JJ,KK),OSNM%SEND_FACE(LL+2)
-!ENDIF
                         LL = LL+2
                      ENDDO
                   ENDDO
@@ -6454,16 +5418,12 @@ IF (SCARC_DEBUG>=6) WRITE(9,'(i4,a,i4,a,2e16.6,3i4)') IW,':SCARC_EXCHANGE_FACE_F
             ENDDO PACK_SEND_FACE
             OSNM%SEND_FACE(IWW*2+1) = -999.0_EB
             NREQ_FACE=NREQ_FACE+1
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FACE_FULL: LENGTH=',IWW*2+1
             CALL MPI_ISEND(OSNM%SEND_FACE(1),IWW*2+1,MPI_DOUBLE_PRECISION,SNODE, &
                            TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
 
          ELSE
-!            OSNOM=>SCARC(NOM)%OSCARC(NM)
-!            WRITE(*,*)  'ACHTUNG: UNTERSCHEIDUNG face, edge vertex, IMIN ???'
-!            WRITE(9,*)  'ACHTUNG: UNTERSCHEIDUNG face, edge vertex, IMIN ???'
-!            OSNOM%D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= SNM%D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+                write(*,*) 'Not yet implemented'
          ENDIF 
 
          ENDIF EXCHANGE_FULL_FACE_IF
@@ -6506,7 +5466,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FACE_FULL: LENGTH=',IWW*2+1
                   DO JJ=JMIN,JMAX
                      DO II=IMIN,IMAX
                         OSNM%SEND_EDGE(LL+1) = SNML%Z(II,JJ,KK)
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FULL: SENDING SEND_EDGE(',LL+1,')=',OSNM%SEND_EDGE(LL+1), II, JJ, KK
                         LL = LL+1
                      ENDDO
                   ENDDO
@@ -6517,10 +5476,7 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FULL: SENDING SEND_EDGE(',LL+1,')
             ENDIF
 
          ELSE
-!            OSNOM=>SCARC(NOM)%OSCARC(NM)
-!            WRITE(*,*)  'ACHTUNG: UNTERSCHEIDUNG face, edge vertex, IMIN ???'
-!            WRITE(9,*)  'ACHTUNG: UNTERSCHEIDUNG face, edge vertex, IMIN ???'
-!            OSNOM%D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= SNM%D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+                write(*,*) 'Not yet implemented'
          ENDIF EXCHANGE_FULL_EDGE_IF
 
       ENDIF EDGE_IF
@@ -6547,7 +5503,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_FULL: SENDING SEND_EDGE(',LL+1,')
     
             IF (SNML%NIC_DIAG(NM, NOM) > 0 .AND. RNODE/=SNODE) THEN
                ILEN_DIAG=(MAX(SNML%NIC_DIAG(NM, NOM), SNML%NIC_DIAG(NOM, NM))+2)*2+1   ! extended
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_DIAG_INIT: ILEN_DIAG=',ILEN_DIAG
                ALLOCATE (OSNM%SEND_DIAG(ILEN_DIAG))
                OSNM%SEND_DIAG = 0.0_EB
             ENDIF
@@ -6558,7 +5513,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_DIAG_INIT: ILEN_DIAG=',ILEN_DIAG
          EXCHANGE_FULL_DIAG_IF: IF (CODE==NCOM_FULL) THEN
             IF (RNODE/=SNODE) THEN
 
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'INIT_DIAG: NW-DIAG=',OSNML%NW_DIAG
                LL = 0
                IWW = 0
                PACK_SEND_DIAG: DO IW=1,OSNML%NW_DIAG
@@ -6569,7 +5523,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'INIT_DIAG: NW-DIAG=',OSNML%NW_DIAG
                            IWW = IWW + 1
                            OSNM%SEND_DIAG(LL+1) = REAL(IW,EB)
                            OSNM%SEND_DIAG(LL+2) = SNML%Z(II,JJ,KK)
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_DIAG_FULL: SENDING SEND_DIAG(',LL+2,')=',OSNM%SEND_DIAG(LL+2), II, JJ, KK
                            LL = LL+2
                         ENDDO
                      ENDDO
@@ -6577,18 +5530,13 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_DIAG_FULL: SENDING SEND_DIAG(',LL
                ENDDO PACK_SEND_DIAG
                OSNM%SEND_DIAG(IWW*2+1) = -999.0_EB
                NREQ_DIAG=NREQ_DIAG+1
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_DIAG_FULL: LENGTH=',IWW*2+1
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_DIAG_FULL: SIZE=',SIZE(OSNM%SEND_DIAG)
                CALL MPI_ISEND(OSNM%SEND_DIAG(1),IWW*2+1,MPI_DOUBLE_PRECISION,SNODE, &
                               TAG_DIAG,MPI_COMM_WORLD,REQ_DIAG(NREQ_DIAG),IERR)
 
             ENDIF
 
          ELSE
-!            OSNOM=>SCARC(NOM)%OSCARC(NM)
-!            WRITE(*,*)  'ACHTUNG: UNTERSCHEIDUNG face, edge vertex, IMIN ???'
-!            WRITE(9,*)  'ACHTUNG: UNTERSCHEIDUNG face, edge vertex, IMIN ???'
-!            OSNOM%D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)= SNM%D(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
+                write(*,*) 'Not yet implemented'
          ENDIF EXCHANGE_FULL_DIAG_IF
 
       ENDIF DIAG_IF
@@ -6596,35 +5544,14 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE_DIAG_FULL: SIZE=',SIZE(OSNM%SEND_
    ENDDO EXCHANGE_RECV_MESH_LOOP
 ENDDO EXCHANGE_SEND_MESH_LOOP
 
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'SCARC_EXCHANGE: AFTER FIRST LOOP'
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Information from Mesh NM is RECV'ed by Mesh NOM.  
 !!! NOM is the receiver, NM is the sender.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) 'SCARC_EXCHANGE: NREQ_FACE=',NREQ_FACE
-   WRITE(9,*) 'SCARC_EXCHANGE: NREQ_EDGE=',NREQ_EDGE
-   WRITE(9,*) 'SCARC_EXCHANGE: NREQ_DIAG=',NREQ_DIAG
-   WRITE(9,*) 'SCARC_EXCHANGE: BEDGE=',BEDGE
-   WRITE(9,*) 'SCARC_EXCHANGE: BDIAG=',BDIAG
-   WRITE(9,*) 'SCARC_EXCHANGE: IERR=',IERR
-   WRITE(9,*) 'SCARC_EXCHANGE: REQ_FACE(1)=',REQ_FACE(1)
-   WRITE(9,*) 'SCARC_EXCHANGE: REQ_FACE(2)=',REQ_FACE(2)
-ENDIF
-
 CALL MPI_WAITALL(NREQ_FACE,REQ_FACE(1:NREQ_FACE),STAT_FACE,IERR)
 IF (BEDGE) CALL MPI_WAITALL(NREQ_EDGE,REQ_EDGE(1:NREQ_EDGE),STAT_EDGE,IERR)
-IF (BDIAG) THEN
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'WAITING FOR DIAG COMM, NREQ_DIAG=',NREQ_DIAG
-   CALL MPI_WAITALL(NREQ_DIAG,REQ_DIAG(1:NREQ_DIAG),STAT_DIAG,IERR)
-ENDIF
-
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) 'IERR=',IERR
-   WRITE(9,*) 'SCARC_EXCHANGE:CODE=',CODE
-   WRITE(9,*) 'AFTER WAIT '
-ENDIF
+IF (BDIAG) CALL MPI_WAITALL(NREQ_DIAG,REQ_DIAG(1:NREQ_DIAG),STAT_DIAG,IERR)
 
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -6642,10 +5569,6 @@ EXCHANGE_SEND2_MESH_LOOP: DO NOM=1,NMESHES
       SNOM  => SCARC(NOM)                     ! corresponds to M4
       SNOML => SCARC(NOM)%SLEVEL(ILEVEL)      ! ... for the level 'ILEVEL'
 
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) 'SNOM   zeigt auf SCARC(',NOM,')'
-   WRITE(9,*) 'SNOML  zeigt auf SCARC(',NOM,')%SLEVEL(',ILEVEL,')'
-ENDIF
 
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       !!! FACE communication
@@ -6655,12 +5578,6 @@ ENDIF
          OSNOM => SCARC(NOM)%OSCARC(NM)                   ! corresponds to M2
          OSNOML=> SCARC(NOM)%OSCARC(NM)%SLEVEL(ILEVEL)  ! ... for the level 'ILEVEL'
 
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) 'FACE: OSNOM  zeigt auf SCARC(',NOM,')%OSCARC(',NM,')'
-   WRITE(9,*) 'FACE: OSNOML zeigt auf SCARC(',NOM,')%OSCARC(',NM,')%SLEVEL(',ILEVEL,')'
-   WRITE(9,*) 'FACE: CODE=',CODE
-ENDIF
-    
          !!! Extract data for matrix-vector communication
          RECV_FACE_MATV_IF: IF (CODE==NCOM_MATV) THEN
      
@@ -6671,55 +5588,39 @@ ENDIF
             ELSE IF (ABS(SNOM%IOR_FACE(NM,NOM))==3) THEN
                ASUB=SNOML%ASUBZ
             ENDIF
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'ASUB=',ASUB
 
             IF (RNODE/=SNODE) THEN
                LL = 0
 
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'RECV_FACE:',OSNOM%RECV_FACE
                UNPACK_RECV_FACE0: DO
                   IW = NINT(OSNOM%RECV_FACE(LL+1))
-IF (SCARC_DEBUG>=6) WRITE(9,*) '====================== IW=', IW
                   IF (IW==-999) EXIT UNPACK_RECV_FACE0
-IF (SCARC_DEBUG>=6) WRITE(9,'(a,17i4)') 'IJKW_FACE=',SNOML%IJKW_FACE(1:17,IW)
                   ZSUM=0.0_EB
                   DO KK=SNOML%IJKW_FACE(12,IW),SNOML%IJKW_FACE(15,IW)
                      DO JJ=SNOML%IJKW_FACE(11,IW),SNOML%IJKW_FACE(14,IW)
                         DO II=SNOML%IJKW_FACE(10,IW),SNOML%IJKW_FACE(13,IW)
                            OSNOML%Z_FACE(II,JJ,KK) = OSNOM%RECV_FACE(LL+2)
                            ZSUM=ZSUM+OSNOM%RECV_FACE(LL+2)
-IF (SCARC_DEBUG>=6) WRITE(9,'(i3,a,i3,a,e12.4,3i3,e12.4)') IW,': SCARC_EXCHANGE_RECV_FACE_FULL:RECV_FACE(',LL+2,')=',&
-            OSNOM%RECV_FACE(LL+2), II, JJ, KK, ZSUM
                            LL = LL+2
-!WRITE(9,*)  LL,II,JJ,KK
-!IF (LL>14) stop
                         ENDDO
                      ENDDO
                   ENDDO
                   I=SNOML%IJKW_FACE(6,IW)
                   J=SNOML%IJKW_FACE(7,IW)
                   K=SNOML%IJKW_FACE(8,IW)
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'Uff1', I, J, K, IW
                   ISUM = (SNOML%IJKW_FACE(13,IW)-SNOML%IJKW_FACE(10,IW)+1) * &
                          (SNOML%IJKW_FACE(14,IW)-SNOML%IJKW_FACE(11,IW)+1) * &
                          (SNOML%IJKW_FACE(15,IW)-SNOML%IJKW_FACE(12,IW)+1)
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'ISUM=',ISUM, ': ZSUM_MEAN=',ZSUM/REAL(ISUM,EB),': ASUB*ZSUM_MEAN=',ASUB*ZSUM/REAL(ISUM,EB)
 
                   IF (IMV==1 .OR. IMV==5) THEN
                      yold=SNOML%Y(I,J,K)
                      SNOML%Y(I, J, K) = SNOML%Y(I, J, K) + ASUB * ZSUM/REAL(ISUM,EB)
-IF (SCARC_DEBUG>=6) WRITE(9,'(i3,a,i2,a,i2,a,i2,a,2e12.4)') IW,&
-      ':1SCARC_EXCHANGE_RECV_FACE_FULL: ====> Y(',I,',',J,',',K,')=',SNOML%Y(I,J,K),yold
                   ELSE IF (IMV==2 .OR. IMV==6) THEN
                      yold=SNOML%G(I,J,K)
                      SNOML%G(I, J, K) = SNOML%G(I, J, K) + ASUB * ZSUM/REAL(ISUM,EB)
-IF (SCARC_DEBUG>=6) WRITE(9,'(i3,a,i2,a,i2,a,i2,a,2e12.4)') IW,&
-      ':2SCARC_EXCHANGE_RECV_FACE_FULL: ====> G(',I,',',J,',',K,')=',SNOML%G(I,J,K),yold
                   ELSE IF (IMV==3) THEN
                      yold=SNOML%R(I,J,K)
                      SNOML%R(I, J, K) = SNOML%R(I, J, K) + ASUB * ZSUM/REAL(ISUM,EB)
-IF (SCARC_DEBUG>=6) WRITE(9,'(i3,a,i2,a,i2,a,i2,a,2e12.4)') IW,&
-      ':3SCARC_EXCHANGE_RECV_FACE_FULL: ====> R(',I,',',J,',',K,')=',SNOML%R(I,J,K),yold
                   ENDIF
                ENDDO UNPACK_RECV_FACE0
             ENDIF
@@ -6734,7 +5635,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,'(i3,a,i2,a,i2,a,i2,a,2e12.4)') IW,&
                LL = 0
                UNPACK_RECV_FACE: DO
                   IW = NINT(OSNOM%RECV_FACE(LL+1))
-IF (SCARC_DEBUG>=6) WRITE(9,*) '====================== IW=', IW
                   IF (IW==-999) EXIT UNPACK_RECV_FACE
                   ZSUM=0.0_EB
                   DO KK=SNOML%IJKW_FACE(12,IW),SNOML%IJKW_FACE(15,IW)
@@ -6753,7 +5653,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) '====================== IW=', IW
                          (SNOML%IJKW_FACE(14,IW)-SNOML%IJKW_FACE(11,IW)+1) * &
                          (SNOML%IJKW_FACE(15,IW)-SNOML%IJKW_FACE(12,IW)+1)
                   SNOML%Z(I, J, K) = ZSUM/REAL(ISUM,EB)
-IF (SCARC_DEBUG>=6) WRITE(9,*) IW,': SCARC_EXCHANGE_RECV_FACE_FULL: ====> Z(',I,',',J,',',K,')=',SNOML%Z(I,J,K)
                ENDDO UNPACK_RECV_FACE
 
             ENDIF
@@ -6783,20 +5682,11 @@ write(*,*) 'ACHTUNG: EDGE: STIMMT NOCH NICHT !!!!!!!!!!!!!!!!!!'
                   JMAX=SNOML%J_MAX_EDGE(NM,NOM)
                   KMIN=SNOML%K_MIN_EDGE(NM,NOM)
                   KMAX=SNOML%K_MAX_EDGE(NM,NOM)
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) 'NCOM_FULL: SCARC_EXCHANGE: IMIN=',IMIN
-   WRITE(9,*) 'NCOM_FULL: SCARC_EXCHANGE: IMAX=',IMAX
-   WRITE(9,*) 'NCOM_FULL: SCARC_EXCHANGE: JMIN=',JMIN
-   WRITE(9,*) 'NCOM_FULL: SCARC_EXCHANGE: JMAX=',JMAX
-   WRITE(9,*) 'NCOM_FULL: SCARC_EXCHANGE: KMIN=',KMIN
-   WRITE(9,*) 'NCOM_FULL: SCARC_EXCHANGE: KMAX=',KMAX
-ENDIF
                LL = 0
                DO KK=KMIN,KMAX
                   DO JJ=JMIN,JMAX
                      DO II=IMIN,IMAX
                         SNOML%Z(II, JJ, KK) = OSNOM%RECV_EDGE(LL+1)
-IF (SCARC_DEBUG>=6) WRITE(9,*) NOM,': RECEIVING from ',NM,': Z(',II,',',JJ,',',KK,')=',OSNOM%RECV_EDGE(LL+1)
                         LL = LL+1
                      ENDDO
                   ENDDO
@@ -6806,11 +5696,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) NOM,': RECEIVING from ',NM,': Z(',II,',',JJ,',',K
 
       ENDIF RECV_EDGE_IF
 
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(9,*) 'BDIAG=',BDIAG
-   WRITE(9,*) 'NIC_DIAG=',SNOML%NIC_DIAG(NOM,NM)
-   WRITE(9,*) 'NIC_DIAG=',SNOML%NIC_DIAG(NM,NOM)
-ENDIF
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       !!! DIAG communication
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -6830,10 +5715,8 @@ ENDIF
    
             IF (RNODE/=SNODE) THEN
                LL = 0
-IF (SCARC_DEBUG>=6) WRITE(9,'(a,20f8.2)') 'RECV_DIAG=',OSNOM%RECV_DIAG
                UNPACK_RECV_DIAG: DO
                   IW = NINT(OSNOM%RECV_DIAG(LL+1))
-IF (SCARC_DEBUG>=6) WRITE(9,*) '====================== IW=', IW
                   IF (IW==-999) EXIT UNPACK_RECV_DIAG
                   ZSUM=0.0_EB
                   DO KK=SNOML%IJKW_DIAG(12,IW),SNOML%IJKW_DIAG(15,IW)
@@ -6852,7 +5735,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) '====================== IW=', IW
                          (SNOML%IJKW_DIAG(14,IW)-SNOML%IJKW_DIAG(11,IW)+1) * &
                          (SNOML%IJKW_DIAG(15,IW)-SNOML%IJKW_DIAG(12,IW)+1)
                   SNOML%Z(I, J, K) = ZSUM/REAL(ISUM,EB)
-IF (SCARC_DEBUG>=6) WRITE(9,*) IW,': SCARC_EXCHANGE_RECV_DIAG: ====> Z(',I,',',J,',',K,')=',SNOML%Z(I,J,K)
                ENDDO UNPACK_RECV_DIAG
 
             ENDIF
@@ -6865,7 +5747,6 @@ IF (SCARC_DEBUG>=6) WRITE(9,*) IW,': SCARC_EXCHANGE_RECV_DIAG: ====> Z(',I,',',J
    ENDDO EXCHANGE_RECV2_MESH_LOOP
    
 ENDDO EXCHANGE_SEND2_MESH_LOOP
-IF (SCARC_DEBUG>=6) WRITE(9,*) 'AFTER SEND_LOOP '
 
 TUSED_SCARC(23,MYID+1)=TUSED_SCARC(23,MYID+1)+SECOND()-TNOW_EXCHANGE
 TUSED_SCARC(0,MYID+1) =TUSED_SCARC(0,MYID+1) +SECOND()-TNOW_EXCHANGE
@@ -6881,7 +5762,7 @@ END SUBROUTINE SCARC_EXCHANGE
 SUBROUTINE SCARC_GHOSTCELLS (HP,NM)
 REAL (EB), POINTER, DIMENSION (:, :, :) :: HP
 INTEGER :: NM, IW, IOR0
-INTEGER :: I0, J0, K0, I1, J1, K1, I, K
+INTEGER :: I0, J0, K0, I1, J1, K1
 REAL(EB):: TNOW_GHOSTCELLS
  
 TYPE (SCARC_TYPE),  POINTER ::  S
@@ -6894,42 +5775,6 @@ S => SCARC(NM)
 SL => S%SLEVEL(S%NLEVEL_MAX)
 M  => MESHES(NM)
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) '========================Starting SCARC_PRESSURE_GHOSTCELLS2D'
-   WRITE (9,*)
-   WRITE (9,*) 'NM   :',NM
-   WRITE (9,*) 'NLEVEL_MAX:',S%NLEVEL_MAX
-   WRITE (9,*) 'IBAR0:',M%IBAR
-   WRITE (9,*) 'KBAR0:',M%KBAR
-   WRITE (9,*) 'NW_FACE:',SL%NW_FACE
-   WRITE (9,*) 'NEWC:',M%NEWC
-   WRITE (9,*)
-   WRITE (9,*) 'DXI :',DXI
-   WRITE (9,*) 'DYI :',DETA
-   WRITE (9,*) 'DZI :',DZETA
-   WRITE (9,*)
-   WRITE (9,*) 'IJKW:'
-   WRITE (9,'(15i4)') M%IJKW
-   WRITE (9,*)
-   WRITE (9,*) 'BTYPE:'
-   WRITE (9,'(8i4)') M%PRESSURE_BC_INDEX(1:M%NEWC)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BXS:'
-   WRITE (9,'(8f16.6)') (M%BXS(1, K), K=1, M%KBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BXF:'
-   WRITE (9,'(8f16.6)') (M%BXF(M%IBAR, K), K=1, M%KBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BZS:'
-   WRITE (9,'(8f16.6)') (M%BZS(I, 1), I=1, M%IBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BZF:'
-   WRITE (9,'(8f16.6)') (M%BZF(I, M%JBAR), I=1, M%IBAR)
-   WRITE (9,*)
-   WRITE (9,*)
-
-ENDIF
-
 DO IW = 1, M%NEWC
 
    I0 = M%IJKW(1,IW)
@@ -6984,7 +5829,6 @@ ENDDO
  
 TUSED_SCARC(25,NM)=TUSED_SCARC(25,NM)+SECOND()-TNOW_GHOSTCELLS
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_GHOSTCELLS
-
 END SUBROUTINE SCARC_GHOSTCELLS
  
  
@@ -7007,46 +5851,6 @@ TNOW_SETBDRY2D = SECOND()
 SL => S%SLEVEL(ILEVEL)
 M  => MESHES(NM)
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) '========================Starting SCARC_SETBDRY2D'
-   WRITE (9,*)
-   WRITE (9,*) 'NM   :',NM
-   WRITE (9,*) 'ILEVEL:',ILEVEL
-   WRITE (9,*) 'IBAR0:',SL%IBAR
-   WRITE (9,*) 'KBAR0:',SL%KBAR
-   WRITE (9,*) 'NW_FACE:',SL%NW_FACE
-   WRITE (9,*)
-   WRITE (9,*) 'DXI :',SL%DXI
-   WRITE (9,*) 'DZI :',SL%DZI
-   WRITE (9,*)
-   WRITE (9,*) 'DXI2:',SL%DXI2
-   WRITE (9,*) 'DZI2:',SL%DZI2
-   WRITE (9,*)
-   WRITE (9,*) 'IJKW0:'
-   WRITE (9,'(17i4)') SL%IJKW_FACE
-   WRITE (9,*)
-   WRITE (9,*) 'BTYPE:'
-   WRITE (9,'(8i4)') M%PRESSURE_BC_INDEX(1:SL%NW_FACE)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BXS:'
-   WRITE (9,*) (M%BXS(1, K), K=1, M%KBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BXF:'
-   WRITE (9,*) (M%BXF(1, K), K=1, M%KBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BZS:'
-   WRITE (9,*) (M%BZS(I, 1), I=1, M%IBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BZF:'
-   WRITE (9,*) (M%BZF(I, 1), I=1, M%IBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'F(.,.):INIT'
-   WRITE (9, '(8e16.8)') ((SL%F(I, 1, K), I=1, SL%IBAR), K=SL%KBAR, 1,-1)
-   WRITE (9,*)
-   WRITE (9,*)
-
-ENDIF
-
 DO IW = 1, M%NEWC
 
    I = M%IJKW(6,IW)
@@ -7091,20 +5895,12 @@ DO IW = 1, M%NEWC
 
 ENDDO
 
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*)
-   WRITE (9,*) 'AFTER CHANGE: F(.,.)'
-   WRITE (9,*) 'IBAR=', IBAR
-   WRITE (9,*) 'KBAR=', KBAR
-   WRITE (9, '(8e16.8)') ((SL%F(I, 1, K), I=1, SL%IBAR), K=SL%KBAR, 1,-1)
-ENDIF
  
 TUSED_SCARC(26,NM)=TUSED_SCARC(26,NM)+SECOND()-TNOW_SETBDRY2D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_SETBDRY2D
 
 1000 FORMAT(i3,': IOR=',i3,': Dirichlet :F(',i2,',',i2,',',i2,')=',e25.16,i5,i5)
 2000 FORMAT(i3,': IOR=',i3,': Neumann   :F(',i2,',',i2,',',i2,')=',e25.16,i5,i5)
-
 END SUBROUTINE SCARC_SETBDRY2D
  
  
@@ -7126,52 +5922,6 @@ TNOW_SETBDRY3D = SECOND()
 SL => S%SLEVEL(ILEVEL)
 M  => MESHES(NM)
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*) '========================Starting SCARC_SETBDRY3D'
-   WRITE (9,*)
-   WRITE (9,*) 'NM   :',NM
-   WRITE (9,*) 'ILEVEL:',ILEVEL
-   WRITE (9,*) 'IBAR0:',SL%IBAR
-   WRITE (9,*) 'KBAR0:',SL%KBAR
-   WRITE (9,*) 'NW_FACE:',SL%NW_FACE
-   WRITE (9,*)
-   WRITE (9,*) 'DXI :',SL%DXI
-   WRITE (9,*) 'DZI :',SL%DZI
-   WRITE (9,*)
-   WRITE (9,*) 'DXI2:',SL%DXI2
-   WRITE (9,*) 'DZI2:',SL%DZI2
-   WRITE (9,*)
-   WRITE (9,*) 'IJKW0:'
-   WRITE (9,'(17i4)') SL%IJKW_FACE
-   WRITE (9,*)
-   WRITE (9,*) 'BTYPE:'
-   WRITE (9,'(8i4)') M%PRESSURE_BC_INDEX(1:SL%NW_FACE)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BXS:'
-   WRITE (9,*) (M%BXS(1, K), K=1, M%KBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BXF:'
-   WRITE (9,*) (M%BXF(1, K), K=1, M%KBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BYS:'                               ! to be checked
-   WRITE (9,*) (M%BYS(J, 1), J=1, M%JBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BYF:'
-   WRITE (9,*) (M%BYF(J, 1), J=1, M%JBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BZS:'
-   WRITE (9,*) (M%BZS(I, 1), I=1, M%IBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'M%BZF:'
-   WRITE (9,*) (M%BZF(I, 1), I=1, M%IBAR)
-   WRITE (9,*)
-   WRITE (9,*) 'F(.,.):INIT'
-   WRITE (9, '(8e16.8)') ((SL%F(I, 1, K), I=1, SL%IBAR), K=SL%KBAR, 1,-1)
-   WRITE (9,*)
-   WRITE (9,*)
-
-ENDIF
-
 DO IW = 1, M%NEWC
 
    I = M%IJKW(6,IW)
@@ -7216,13 +5966,6 @@ DO IW = 1, M%NEWC
 
 ENDDO
  
-IF (SCARC_DEBUG >= 2) THEN
-   WRITE (9,*)
-   WRITE (9,*) 'AFTER CHANGE: F(.,.)'
-   WRITE (9,*) 'IBAR=', IBAR
-   WRITE (9,*) 'KBAR=', KBAR
-   WRITE (9, '(8e16.8)') ((SL%F(I, 1, K), I=1, SL%IBAR), K=SL%KBAR, 1,-1)
-ENDIF
  
 TUSED_SCARC(27,NM)=TUSED_SCARC(27,NM)+SECOND()-TNOW_SETBDRY3D
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_SETBDRY3D
@@ -7249,53 +5992,38 @@ S => SCARC(NM)
  
 UPDATE_LEVEL_LOOP: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
 
-   IF (ITYPE == NUPDATE_FULL) THEN
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%U, NM, ILEVEL, 'U     ')
+   SELECT CASE(ITYPE)
+      CASE(SCARC_UPDATE_FULL)
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%U, NM, ILEVEL, 'U     ')
+         IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%V, NM, ILEVEL, 'V     ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%W, NM, ILEVEL, 'W     ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%H, NM, ILEVEL, 'H     ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%D, NM, ILEVEL, 'D     ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%RHO, NM, ILEVEL, 'RHO   ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%MU, NM, ILEVEL, 'MU    ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%US, NM, ILEVEL, 'US    ')
+         IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%VS, NM, ILEVEL, 'VS    ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%WS, NM, ILEVEL, 'WS    ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS    ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%RHOS, NM, ILEVEL, 'RHOS  ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS    ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DDDT, NM, ILEVEL, 'DDDT  ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%Q, NM, ILEVEL, 'Q     ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%QR, NM, ILEVEL, 'QR    ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%TMP, NM, ILEVEL, 'TMP   ')
+      CASE(SCARC_UPDATE_VEL)
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%U, NM, ILEVEL, 'U     ')
       IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%V, NM, ILEVEL, 'V     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%W, NM, ILEVEL, 'W     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%H, NM, ILEVEL, 'H     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%D, NM, ILEVEL, 'D     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%RHO, NM, ILEVEL, 'RHO   ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%MU, NM, ILEVEL, 'MU    ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%US, NM, ILEVEL, 'US    ')
-      IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%VS, NM, ILEVEL, 'VS    ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%WS, NM, ILEVEL, 'WS    ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS    ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%RHOS, NM, ILEVEL, 'RHOS  ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS    ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DDDT, NM, ILEVEL, 'DDDT  ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%Q, NM, ILEVEL, 'Q     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%QR, NM, ILEVEL, 'QR    ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%TMP, NM, ILEVEL, 'TMP   ')
-   ELSE IF (ITYPE == NUPDATE_MEDIUM) THEN
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%U, NM, ILEVEL, 'U     ')
-      IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%V, NM, ILEVEL, 'V     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%W, NM, ILEVEL, 'W     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%H, NM, ILEVEL, 'H     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%D, NM, ILEVEL, 'D     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%US, NM, ILEVEL, 'US    ')
-      IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%VS, NM, ILEVEL, 'VS    ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%WS, NM, ILEVEL, 'WS    ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS    ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS   ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DDDT, NM, ILEVEL, 'DDDT   ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%TMP, NM, ILEVEL, 'TMP    ')
-   ELSE IF (ITYPE == NUPDATE_VEL) THEN
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%U, NM, ILEVEL, 'U     ')
-      IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%V, NM, ILEVEL, 'V     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%W, NM, ILEVEL, 'W     ')
-   ELSE IF (ITYPE == NUPDATE_FV) THEN
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVX, NM, ILEVEL, 'FVX   ')
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%W, NM, ILEVEL, 'W     ')
+      CASE(SCARC_UPDATE_FV)
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVX, NM, ILEVEL, 'FVX   ')
       IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVY, NM, ILEVEL, 'FVY   ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVZ, NM, ILEVEL, 'FVZ   ')
-   ELSE IF (ITYPE == NUPDATE_Q) THEN
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%Q, NM, ILEVEL, 'Q     ')
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%QR, NM, ILEVEL, 'QR    ')
-   ELSE IF (ITYPE == NUPDATE_H) THEN
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%H, NM, ILEVEL, 'H     ')
-   ELSE IF (ITYPE == NUPDATE_HS) THEN
-      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%HS, NM, ILEVEL, 'HS    ')
-   ENDIF
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVZ, NM, ILEVEL, 'FVZ   ')
+      CASE(SCARC_UPDATE_H)
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%H, NM, ILEVEL, 'H     ')
+      CASE(SCARC_UPDATE_HS)
+         CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%HS, NM, ILEVEL, 'HS    ')
+   END SELECT
 
 ENDDO UPDATE_LEVEL_LOOP
  
@@ -7314,51 +6042,38 @@ TNOW_UPDATE_LEVEL=SECOND()
  
 NM = MYID + 1
  
-IF (ITYPE == NUPDATE_FULL) THEN
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%U, NM, ILEVEL, 'U     ')
-   IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%V, NM, ILEVEL, 'V     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%W, NM, ILEVEL, 'W     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%H, NM, ILEVEL, 'H     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%D, NM, ILEVEL, 'D     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%RHO, NM, ILEVEL, 'RHO   ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%MU, NM, ILEVEL, 'MU    ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%US, NM, ILEVEL, 'US    ')
-   IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%VS, NM, ILEVEL, 'VS    ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%WS, NM, ILEVEL, 'WS    ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS    ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%RHOS, NM, ILEVEL, 'RHOS  ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS    ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DDDT, NM, ILEVEL, 'DDDT  ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%Q, NM, ILEVEL, 'Q     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%QR, NM, ILEVEL, 'QR    ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%TMP, NM, ILEVEL, 'TMP   ')
-ELSE IF (ITYPE == NUPDATE_MEDIUM) THEN
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%U, NM, ILEVEL, 'U     ')
-   IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%V, NM, ILEVEL, 'V     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%W, NM, ILEVEL, 'W     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%H, NM, ILEVEL, 'H     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%D, NM, ILEVEL, 'D     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%US, NM, ILEVEL, 'US    ')
-   IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%VS, NM, ILEVEL, 'VS    ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%WS, NM, ILEVEL, 'WS    ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS    ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS   ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DDDT, NM, ILEVEL, 'DDDT   ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%TMP, NM, ILEVEL, 'TMP    ')
-ELSE IF (ITYPE == NUPDATE_VEL) THEN
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%U, NM, ILEVEL, 'U     ')
-   IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%V, NM, ILEVEL, 'V     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%W, NM, ILEVEL, 'W     ')
-ELSE IF (ITYPE == NUPDATE_FV) THEN
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVX, NM, ILEVEL, 'FVX   ')
-   IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVY, NM, ILEVEL, 'FVY   ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVZ, NM, ILEVEL, 'FVZ   ')
-ELSE IF (ITYPE == NUPDATE_Q) THEN
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%Q, NM, ILEVEL, 'Q     ')
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%QR, NM, ILEVEL, 'QR    ')
-ELSE IF (ITYPE == NUPDATE_H) THEN
-   CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%H, NM, ILEVEL, 'H     ')
-ENDIF
+SELECT CASE(ITYPE)
+   CASE(SCARC_UPDATE_FULL)
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%U, NM, ILEVEL, 'U     ')
+      IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%V, NM, ILEVEL, 'V     ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%W, NM, ILEVEL, 'W     ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%H, NM, ILEVEL, 'H     ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%D, NM, ILEVEL, 'D     ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%RHO, NM, ILEVEL, 'RHO   ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%MU, NM, ILEVEL, 'MU    ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%US, NM, ILEVEL, 'US    ')
+      IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%VS, NM, ILEVEL, 'VS    ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%WS, NM, ILEVEL, 'WS    ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS    ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%RHOS, NM, ILEVEL, 'RHOS  ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DS, NM, ILEVEL, 'DS    ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%DDDT, NM, ILEVEL, 'DDDT  ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%Q, NM, ILEVEL, 'Q     ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%QR, NM, ILEVEL, 'QR    ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%TMP, NM, ILEVEL, 'TMP   ')
+   CASE(SCARC_UPDATE_VEL)
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%U, NM, ILEVEL, 'U     ')
+      IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%V, NM, ILEVEL, 'V     ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%W, NM, ILEVEL, 'W     ')
+   CASE(SCARC_UPDATE_FV)
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVX, NM, ILEVEL, 'FVX   ')
+      IF ( .NOT. TWO_D) CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVY, NM, ILEVEL, 'FVY   ')
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%FVZ, NM, ILEVEL, 'FVZ   ')
+   CASE(SCARC_UPDATE_H)
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%H, NM, ILEVEL, 'H     ')
+   CASE(SCARC_UPDATE_HS)
+      CALL SCARC_UPDATE_QUANTITY (MESHES(NM)%HS, NM, ILEVEL, 'H     ')
+END SELECT
  
 TUSED_SCARC(29,NM)=TUSED_SCARC(29,NM)+SECOND()-TNOW_UPDATE_LEVEL
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_UPDATE_LEVEL
@@ -7374,20 +6089,16 @@ END SUBROUTINE SCARC_UPDATE_LEVEL
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_UPDATE_QUANTITY (Z, NM, ILEVEL, CNAME)
 REAL (EB), POINTER, DIMENSION (:, :, :) :: Z
-INTEGER :: NM, ILEVEL, I, J, K, III, JJJ, NVRTX
+INTEGER :: NM, ILEVEL, I, J, K
 CHARACTER (4) :: CNAME
 REAL(EB):: TNOW_UPDATE_QUANTITY
  
-!INCLUDE 'mpif.h'
- 
-
 TNOW_UPDATE_QUANTITY = SECOND()
 
 SL => S%SLEVEL(ILEVEL)
  
 IF (NMESHES > 1) THEN
  
-   if (SCARC_DEBUG>=2) WRITE(9,*) 'UPDATING ',CNAME
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! 2D
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -7398,11 +6109,10 @@ IF (NMESHES > 1) THEN
             SL%Z (I, 1, K) = Z (I, 1, K)
          ENDDO
       ENDDO
-      IF (SCARC_DEBUG >= 6) CALL SCARC_COMPARE_SINGLE0 (Z, 'SARC', 1, 'ZIN   ',0)
       NREQ_FACE = 0
       NREQ_DIAG = 0
       CALL SCARC_RECEIVE (NCOM_FULL, ILEVEL)   !Aufruf 2,0
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NTYPE_UPDATE)
+      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NCOM_TYPE_MATVEC)
       DO K = 0, KBAR + 1
          DO I = 0, IBAR + 1
             Z (I, 1, K) = SL%Z(I, 1, K)
@@ -7415,10 +6125,7 @@ IF (NMESHES > 1) THEN
          Z(0,1,0)=Z(0,1,1)
          Z(0,1,SL%KBAR+1)=Z(0,1,SL%KBAR)
       ENDIF
-      IF (SCARC_DEBUG >= 6) CALL SCARC_COMPARE_SINGLE0 (Z, 'SARC', 1, 'ZOUT  ',0)
 
-
- 
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! 3D
@@ -7433,42 +6140,12 @@ IF (NMESHES > 1) THEN
          ENDDO
       ENDDO
  
-      IF (SCARC_DEBUG >= 6) THEN
-         WRITE (9,*) 'SCARC_UPDATE_QUANTITY: ==================================='
-         WRITE (9,*) 'SCARC_UPDATE_QUANTITY: NMESHES=', NMESHES
-         WRITE (9,*) 'SCARC_UPDATE_QUANTITY: NM=', NM
-         WRITE (9,*) 'SCARC_UPDATE_QUANTITY: CNAME=', CNAME
-         WRITE (9,*) 'SCARC_UPDATE_QUANTITY: TWO_D=', TWO_D
-         WRITE (9,*) 'NBR_DIAG:'
-         WRITE (9, '( 8i4)') ((NBR_DIAG(JJJ, III), III=1, NVRTX), JJJ=1, NMESHES)
-         WRITE (9,*) 'NBR_DIAG(', NM, '):'
-         WRITE (9, '( 8i4)') (NBR_DIAG(NM, III), III=1, NVRTX)
-         WRITE (9,*) 'NBR_EDGE:'
-         WRITE (9, '( 12i4)') ((NBR_EDGE(JJJ, III), III=1, 12), JJJ=1, NMESHES)
-         WRITE (9,*) 'NBR_EDGE(', NM, '):'
-         WRITE (9, '( 12i4)') (NBR_EDGE(NM, III), III=1, 12)
-         WRITE (9,*)
-         WRITE (9,*) '-------SCARC_COPYBDRY : BEFORE EXCHANGE Z'
-         DO K = KBAR + 1, 0, - 1
-            WRITE (9, '(6f10.5)') ((Z(I, J, K), I=0, IBAR+1), J=JBAR+1, 0,-1)
-            WRITE (9,*) '---------------------------------------'
-         ENDDO
-         WRITE (9,*) '-------SCARC_COPYBDRY : BEFORE EXCHANGE SL%Z'
-         DO K = KBAR + 1, 0, - 1
-            WRITE (9, '(6f10.5)') ((SL%Z(I, J, K), I=0, IBAR+1), J=JBAR+1, 0,-1)
-            WRITE (9,*) '---------------------------------------'
-         ENDDO
-         CALL flush (9)
-      ENDIF
- 
- 
       NREQ_FACE = 0
       NREQ_EDGE = 0
       NREQ_DIAG = 0
  
       CALL SCARC_RECEIVE (NCOM_FULL, ILEVEL)  !Aufruf 2,0
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NTYPE_UPDATE)
- 
+      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NCOM_TYPE_MATVEC)
  
       DO K = 0, KBAR + 1
          DO J = 0, JBAR + 1
@@ -7477,22 +6154,6 @@ IF (NMESHES > 1) THEN
             ENDDO
          ENDDO
       ENDDO
- 
-      IF (SCARC_DEBUG >= 6) THEN
-         WRITE (9,*) '-------SCARC_COPYBDRY : AFTER EXCHANGE SL%Y'
-         IF (NMESHES == 1) THEN
-            DO K = KBAR + 1, 0, - 1
-               WRITE (9, '(10f10.5)') ((SL%Z(I, J, K), I=0, IBAR+1), J=JBAR+1, 0,-1)
-               WRITE (9,*) '---------------------------------------'
-            ENDDO
-         ELSE
-            DO K = KBAR + 1, 0, - 1
-               WRITE (9, '(6f10.5)') ((SL%Z(I, J, K), I=0, IBAR+1), J=JBAR+1, 0,-1)
-               WRITE (9,*) '---------------------------------------'
-            ENDDO
-         ENDIF
-         CALL flush (9)
-      ENDIF
  
    ENDIF
  
@@ -7511,11 +6172,9 @@ END SUBROUTINE SCARC_UPDATE_QUANTITY
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_UPDATE_QUANTITY2 (Z, NM, ILEVEL, CNAME)
 REAL (EB), POINTER, DIMENSION (:, :, :) :: Z
-INTEGER :: NM, ILEVEL, I, J, K, III, JJJ, NVRTX
+INTEGER :: NM, ILEVEL, I, J, K
 CHARACTER (4) :: CNAME
 REAL(EB):: TNOW_UPDATE_QUANTITY
- 
-!INCLUDE 'mpif.h'
  
 TNOW_UPDATE_QUANTITY = SECOND()
 SL => S%SLEVEL(ILEVEL)
@@ -7532,54 +6191,45 @@ IF (NMESHES > 1) THEN
             SL%Z (I, 1, K) = Z (I, 1, K)
          ENDDO
       ENDDO
-      IF (SCARC_DEBUG >= 6) CALL SCARC_COMPARE_SINGLE0 (SL%Z, 'SARC', 1, 'ZIN   ',0)
       NREQ_FACE = 0
       NREQ_DIAG = 0
       CALL SCARC_RECEIVE (NCOM_FULL, ILEVEL)   !Aufruf 2,0
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NTYPE_UPDATE)
+      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NCOM_TYPE_MATVEC)
       DO K = 0, KBAR + 1
          DO I = 0, IBAR + 1
             Z (I, 1, K) = SL%Z(I, 1, K)
          ENDDO
       ENDDO
-      IF (SCARC_DEBUG >= 6) CALL SCARC_COMPARE_SINGLE0 (SL%Z, 'SARC', 1, 'ZOUT  ',0)
-
-
  
       DO K = 0, KBAR + 1
          DO I = 0, IBAR + 1
             SL%Z (I, 1, K) = Z (I, 0, K)
          ENDDO
       ENDDO
-      IF (SCARC_DEBUG >= 6) CALL SCARC_COMPARE_SINGLE0 (SL%Z, 'SARC', 1, 'ZIN   ',0)
       NREQ_FACE = 0
       NREQ_DIAG = 0
       CALL SCARC_RECEIVE (NCOM_FULL, ILEVEL)   !Aufruf 2,0
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NTYPE_UPDATE)
+      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NCOM_TYPE_MATVEC)
       DO K = 0, KBAR + 1
          DO I = 0, IBAR + 1
             Z (I, 0, K) = SL%Z(I, 1, K)
          ENDDO
       ENDDO
-      IF (SCARC_DEBUG >= 6) CALL SCARC_COMPARE_SINGLE0 (SL%Z, 'SARC', 1, 'ZOUT  ',0)
- 
 
       DO K = 0, KBAR + 1
          DO I = 0, IBAR + 1
             SL%Z (I, 1, K) = Z (I, 2, K)
          ENDDO
       ENDDO
-      IF (SCARC_DEBUG >= 6) CALL SCARC_COMPARE_SINGLE0 (SL%Z, 'SARC', 1, 'ZIN   ',0)
       NREQ_FACE = 0
       NREQ_DIAG = 0
       CALL SCARC_RECEIVE (NCOM_FULL, ILEVEL)   !Aufruf 2,0
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NTYPE_UPDATE)
+      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NCOM_TYPE_MATVEC)
       DO K = 0, KBAR + 1
          DO I = 0, IBAR + 1
             Z (I, 2, K) = SL%Z(I, 1, K)
          ENDDO
       ENDDO
-      IF (SCARC_DEBUG >= 6) CALL SCARC_COMPARE_SINGLE0 (SL%Z, 'SARC', 1, 'ZOUT  ',0)
  
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -7595,42 +6245,12 @@ IF (NMESHES > 1) THEN
          ENDDO
       ENDDO
  
-      IF (SCARC_DEBUG >= 6) THEN
-         WRITE (9,*) 'SCARC_UPDATE_QUANTITY: ==================================='
-         WRITE (9,*) 'SCARC_UPDATE_QUANTITY: NMESHES=', NMESHES
-         WRITE (9,*) 'SCARC_UPDATE_QUANTITY: NM=', NM
-         WRITE (9,*) 'SCARC_UPDATE_QUANTITY: CNAME=', CNAME
-         WRITE (9,*) 'SCARC_UPDATE_QUANTITY: TWO_D=', TWO_D
-         WRITE (9,*) 'NBR_DIAG:'
-         WRITE (9, '( 8i4)') ((NBR_DIAG(JJJ, III), III=1, NVRTX), JJJ=1, NMESHES)
-         WRITE (9,*) 'NBR_DIAG(', NM, '):'
-         WRITE (9, '( 8i4)') (NBR_DIAG(NM, III), III=1, NVRTX)
-         WRITE (9,*) 'NBR_EDGE:'
-         WRITE (9, '( 12i4)') ((NBR_EDGE(JJJ, III), III=1, 12), JJJ=1, NMESHES)
-         WRITE (9,*) 'NBR_EDGE(', NM, '):'
-         WRITE (9, '( 12i4)') (NBR_EDGE(NM, III), III=1, 12)
-         WRITE (9,*)
-         WRITE (9,*) '-------SCARC_COPYBDRY : BEFORE EXCHANGE Z'
-         DO K = KBAR + 1, 0, - 1
-            WRITE (9, '(6f10.5)') ((Z(I, J, K), I=0, IBAR+1), J=JBAR+1, 0,-1)
-            WRITE (9,*) '---------------------------------------'
-         ENDDO
-         WRITE (9,*) '-------SCARC_COPYBDRY : BEFORE EXCHANGE SL%Z'
-         DO K = KBAR + 1, 0, - 1
-            WRITE (9, '(6f10.5)') ((SL%Z(I, J, K), I=0, IBAR+1), J=JBAR+1, 0,-1)
-            WRITE (9,*) '---------------------------------------'
-         ENDDO
-         CALL flush (9)
-      ENDIF
- 
- 
       NREQ_FACE = 0
       NREQ_EDGE = 0
       NREQ_DIAG = 0
  
       CALL SCARC_RECEIVE (NCOM_FULL, ILEVEL)  !Aufruf 2,0
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NTYPE_UPDATE)
- 
+      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NCOM_TYPE_MATVEC)
  
       DO K = 0, KBAR + 1
          DO J = 0, JBAR + 1
@@ -7639,25 +6259,7 @@ IF (NMESHES > 1) THEN
             ENDDO
          ENDDO
       ENDDO
- 
-      IF (SCARC_DEBUG >= 6) THEN
-         WRITE (9,*) '-------SCARC_COPYBDRY : AFTER EXCHANGE SL%Y'
-         IF (NMESHES == 1) THEN
-            DO K = KBAR + 1, 0, - 1
-               WRITE (9, '(10f10.5)') ((SL%Z(I, J, K), I=0, IBAR+1), J=JBAR+1, 0,-1)
-               WRITE (9,*) '---------------------------------------'
-            ENDDO
-         ELSE
-            DO K = KBAR + 1, 0, - 1
-               WRITE (9, '(6f10.5)') ((SL%Z(I, J, K), I=0, IBAR+1), J=JBAR+1, 0,-1)
-               WRITE (9,*) '---------------------------------------'
-            ENDDO
-         ENDIF
-         CALL flush (9)
-      ENDIF
- 
    ENDIF
- 
 ENDIF
  
 TUSED_SCARC(30,NM)=TUSED_SCARC(30,NM)+SECOND()-TNOW_UPDATE_QUANTITY
@@ -8008,8 +6610,6 @@ INTEGER:: NM, N, IERR, I
 INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_SCARC, DISPLS_SCARC, COUNTS_SCARC_TIMERS, DISPLS_SCARC_TIMERS
 CHARACTER(25) :: NAME_SCARC(0:N_TIMERS_SCARC)
 REAL(EB) :: TPCNT_SCARC(0:N_TIMERS_SCARC)
-
-!INCLUDE 'mpif.h'
 
 IERR=0
  
