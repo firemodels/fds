@@ -13,11 +13,12 @@ clear all
 addpath 'scripts'
 
 [saved_data,drange] = dataplot('validation');
-scatplot(saved_data,drange)
-beyler_hood
-sandia_helium_plume
-sandia_methane_fire
-BRE_spray
-Cup_burner
+%Vettori
+% scatplot(saved_data,drange)
+% beyler_hood
+% sandia_helium_plume
+% sandia_methane_fire
+% BRE_spray
+% Cup_burner
 
 display('validation scripts completed successfully!')
