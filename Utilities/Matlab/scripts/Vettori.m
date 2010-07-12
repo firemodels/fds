@@ -7,7 +7,7 @@ clear all
 clc
 
 
-addpath('../../../Validation/Vettori_Flat_Ceiling/Experimental_Data');
+addpath('../../Validation/Vettori_Flat_Ceiling/Experimental_Data');
 
 %Load FDS Output
 M= importdata('Vettori_filenames.csv');
@@ -52,7 +52,7 @@ end
     
    
 %Print the Plot 
-     print(gcf,'-dpdf',['../../../Manuals/FDS_5_Validation_Guide/FIGURES/Vettori_Flat_Ceiling/Vettori_Activation_Time'])
+     print(gcf,'-dpdf',['../../Manuals/FDS_5_Validation_Guide/FIGURES/Vettori_Flat_Ceiling/Vettori_Activation_Time'])
 
  %Brag about accomplishments
      disp('Great Success')
