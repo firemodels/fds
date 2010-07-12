@@ -32,6 +32,13 @@ end
 end
 
 %Format the Plot    
+plot_style
+set(gcf,'DefaultLineLineWidth',Line_Width)
+set(gca,'FontSize',Title_Font_Size)
+set(gca,'FontName',Font_Name)
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+
     xmin = 0 ;
     ymin = 0;
     xmax = 220;
@@ -45,14 +52,18 @@ end
     h =legend(K,'Obstructed Ceiling',' Smooth Ceiling','Location','SouthEast');
     set(h,'Interpreter','LaTeX')
     
-    title(['Activation Times: Measured v. Predicted'])
+    title({'Vettori Flat Ceiling';'Activation Times: Measured v. Predicted'})
     
     hold off
  
     
    
 %Print the Plot 
-     print(gcf,'-dpdf',['../../Manuals/FDS_5_Validation_Guide/FIGURES/Vettori_Flat_Ceiling/Vettori_Activation_Time'])
+        set(gcf,'Visible',Figure_Visibility);
+        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);      
+        print(gcf,'-dpdf',['../../Manuals/FDS_5_Validation_Guide/FIGURES/Vettori_Flat_Ceiling/Vettori_Activation_Time'])
 
- %Brag about accomplishments
+%Brag about accomplishments
      disp('Great Success')
