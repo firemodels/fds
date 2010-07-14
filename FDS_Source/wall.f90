@@ -453,7 +453,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
             ENDDO
          ENDIF CONSUME_MASS
 
-         ! Compute the ghost cell value of the species to get the right mass flux
+         ! Compute the cell face value of the species mass fraction to get the right mass flux
  
          RHO_G = RHOP(IIG,JJG,KKG)
          UN    = MFT/RHO_F(IW)

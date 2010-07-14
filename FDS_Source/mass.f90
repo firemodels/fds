@@ -1688,44 +1688,44 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       METHOD_ID = SF%SPECIES_BC_INDEX
       IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) METHOD_ID = INFLOW_OUTFLOW
       IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL/=0) METHOD_ID = EMB_BC
-      IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .AND. IJKW(9,IW)>0) METHOD_ID = 999
+      !!IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .AND. IJKW(9,IW)>0) METHOD_ID = 999
       
       ! Apply the different species boundary conditions
       METHOD_OF_MASS_TRANSFER2: SELECT CASE(METHOD_ID)
       
-!         CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER2
-!
-!            SELECT CASE(IOR)
-!               CASE( 1)
-!                  FX(II,JJ,KK,N)   = 0._EB
-!               CASE(-1)
-!                  FX(II-1,JJ,KK,N) = 0._EB
-!               CASE( 2)   
-!                  FY(II,JJ,KK,N)   = 0._EB
-!               CASE(-2)
-!                  FY(II,JJ-1,KK,N) = 0._EB
-!               CASE( 3)
-!                  FZ(II,JJ,KK,N)   = 0._EB
-!               CASE(-3)
-!                  FZ(II,JJ,KK-1,N) = 0._EB
-!            END SELECT
-!            
-!         CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER2
-!         
-!            SELECT CASE(IOR)
-!               CASE( 1)
-!                  FX(II,JJ,KK,N)   = MASSFLUX(IW,N)*R(II)
-!               CASE(-1)
-!                  FX(II-1,JJ,KK,N) = -MASSFLUX(IW,N)*R(II-1)
-!               CASE( 2)   
-!                  FY(II,JJ,KK,N)   = MASSFLUX(IW,N)
-!               CASE(-2)
-!                  FY(II,JJ-1,KK,N) = -MASSFLUX(IW,N)
-!               CASE( 3)
-!                  FZ(II,JJ,KK,N)   = MASSFLUX(IW,N)
-!               CASE(-3)
-!                  FZ(II,JJ,KK-1,N) = -MASSFLUX(IW,N)
-!            END SELECT
+         CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER2
+
+            SELECT CASE(IOR)
+               CASE( 1)
+                  FX(II,JJ,KK,N)   = 0._EB
+               CASE(-1)
+                  FX(II-1,JJ,KK,N) = 0._EB
+               CASE( 2)   
+                  FY(II,JJ,KK,N)   = 0._EB
+               CASE(-2)
+                  FY(II,JJ-1,KK,N) = 0._EB
+               CASE( 3)
+                  FZ(II,JJ,KK,N)   = 0._EB
+               CASE(-3)
+                  FZ(II,JJ,KK-1,N) = 0._EB
+            END SELECT
+            
+         CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER2
+         
+            SELECT CASE(IOR)
+               CASE( 1)
+                  FX(II,JJ,KK,N)   = MASSFLUX(IW,N)*R(II)
+               CASE(-1)
+                  FX(II-1,JJ,KK,N) = -MASSFLUX(IW,N)*R(II-1)
+               CASE( 2)   
+                  FY(II,JJ,KK,N)   = MASSFLUX(IW,N)
+               CASE(-2)
+                  FY(II,JJ-1,KK,N) = -MASSFLUX(IW,N)
+               CASE( 3)
+                  FZ(II,JJ,KK,N)   = MASSFLUX(IW,N)
+               CASE(-3)
+                  FZ(II,JJ,KK-1,N) = -MASSFLUX(IW,N)
+            END SELECT
             
          CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER2
             NOM = IJKW(9,IW)
@@ -1785,22 +1785,22 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                   FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,FLUX_LIMITER)
             END SELECT
             
-         CASE (999) METHOD_OF_MASS_TRANSFER2
-
-            SELECT CASE(IOR)
-               CASE( 1)
-                  FX(II,JJ,KK,N)   =(FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N))*R(II)
-               CASE(-1)
-                  FX(II-1,JJ,KK,N) =(FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N))*R(II-1)
-               CASE( 2)   
-                  FY(II,JJ,KK,N)   = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
-               CASE(-2)
-                  FY(II,JJ-1,KK,N) = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
-               CASE( 3)
-                  FZ(II,JJ,KK,N)   = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
-               CASE(-3)
-                  FZ(II,JJ,KK-1,N) = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
-            END SELECT
+!         CASE (999) METHOD_OF_MASS_TRANSFER2
+!
+!            SELECT CASE(IOR)
+!               CASE( 1)
+!                  FX(II,JJ,KK,N)   =(FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N))*R(II)
+!               CASE(-1)
+!                  FX(II-1,JJ,KK,N) =(FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N))*R(II-1)
+!               CASE( 2)   
+!                  FY(II,JJ,KK,N)   = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
+!               CASE(-2)
+!                  FY(II,JJ-1,KK,N) = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
+!               CASE( 3)
+!                  FZ(II,JJ,KK,N)   = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
+!               CASE(-3)
+!                  FZ(II,JJ,KK-1,N) = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
+!            END SELECT
             
          CASE DEFAULT METHOD_OF_MASS_TRANSFER2
 
