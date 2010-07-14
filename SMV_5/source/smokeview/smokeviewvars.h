@@ -525,6 +525,7 @@ SVEXTERN float sensorrelsize,sensorrelsizeMIN;
 SVEXTERN float linewidth, ventlinewidth, highlight_linewidth;
 SVEXTERN float sliceoffset_factor, ventoffset_factor;
 
+SVEXTERN int selectedcolorbar_index,selectedcolorbar_index2;
 SVEXTERN int planar_terrain_slice;
 SVEXTERN int nrgb;
 SVEXTERN int nrgb_ini;
@@ -532,7 +533,7 @@ SVEXTERN int nrgb2_ini;
 SVEXTERN int rgb_white, rgb_yellow, rgb_blue, rgb_red;
 SVEXTERN int rgb_green, rgb_magenta, rgb_cyan, rgb_black;
 SVEXTERN int numColorbars;
-SVEXTERN int setbw,colorbarflip;
+SVEXTERN int setbw,colorbarflip,showcolorbarlines;
 SVEXTERN int setbwSAVE;
 SVEXTERN int background_flip;
 SVEXTERN float transparentlevel;
