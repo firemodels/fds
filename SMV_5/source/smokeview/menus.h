@@ -400,6 +400,14 @@ void ColorBarMenu(int value){
       update_extreme();
       updatecolors(-1);
       break;
+    case -8:
+      showcolorbarlines=1-showcolorbarlines;
+      if(showcolorbarlines==1){
+        p3cont2d=SHADED_CONTOURS;
+        update_plot3d_display();
+      }
+      updatecolors(-1);
+      break;
     case -11:
      background_flip = 1-background_flip;
      updatecolors(-1);
@@ -5547,6 +5555,12 @@ static int in_menu=0;
   }
   else{
     glutAddMenuEntry("  Flip colorbar",-2);
+  }
+  if(showcolorbarlines==1){
+    glutAddMenuEntry("  *Use colorbar lines",-8);
+  }
+  else{
+    glutAddMenuEntry("  Use colorbar lines",-8);
   }
   glutAddMenuEntry("  Cycle colorbar",-3);
   glutAddMenuEntry("  Reset",-4);

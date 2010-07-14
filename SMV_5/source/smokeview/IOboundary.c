@@ -1280,6 +1280,7 @@ void drawpatch_texture(const mesh *meshi){
 
   /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
 
+  if(showcolorbarlines==1&&transparentflag==1)transparenton();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
@@ -1468,6 +1469,7 @@ void drawpatch_texture(const mesh *meshi){
   }
   glEnd();
   glDisable(GL_TEXTURE_1D);
+  if(showcolorbarlines==1&&transparentflag==1)transparentoff();
 }
 
 /* ------------------ drawpatch_texture_threshold ------------------------ */

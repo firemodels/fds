@@ -31,7 +31,9 @@ extern "C" void writeini(int var);
 extern "C" void ScriptMenu(int var);
 extern "C" void update_glui_smoke3dframestep(void);
 extern "C" void ParticlePropShowMenu(int value);
+extern "C" void colorbar_global2local(void);
 
+void COLORBAR_CB(int var);
 void SETslicemax(int setslicemax, float slicemax);
 void SETslicemin(int setslicemin, float slicemin);
 void BUTTON_hide_CB(int var);
@@ -108,6 +110,8 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define LOAD_FILES 92
 #define COLORBAR_EXTREME2 109
 #define TRANSPARENTLEVEL 110
+#define COLORBAR_LINES 111
+#define COLORBAR_LIST2 112
 
 #define UPDATE_VECTOR 101
 
@@ -150,6 +154,7 @@ GLUI_Panel *panel_script2a=NULL;
 GLUI_Panel *panel_script2b=NULL;
 GLUI_Panel *panel_script3=NULL;
 GLUI_Listbox *LIST_scriptlist=NULL;
+GLUI_Listbox *LISTBOX_colorbar2=NULL;
 GLUI_Listbox *LIST_ini_list=NULL;
 GLUI_Button *BUTTON_ini_load=NULL;
 GLUI_Rollout *rollout_SCRIPT=NULL;
@@ -167,6 +172,8 @@ GLUI_Rollout *rollout_AUTOLOAD=NULL;
 GLUI_Rollout *rollout_compress=NULL;
 GLUI *glui_bounds=NULL;
 GLUI_Rollout *panel_plot3d=NULL,*panel_evac=NULL,*panel_part=NULL,*panel_slice=NULL,*panel_bound=NULL,*panel_iso=NULL,*panel_smoke3d=NULL;
+GLUI_Rollout *panel_time=NULL,*panel_colorbar=NULL;
+
 GLUI_RadioGroup *bf_rlist=NULL, *p3rlist=NULL,*slice_rlist=NULL;
 GLUI_RadioGroup *part5_rlist=NULL;
 GLUI_RadioGroup *iso_isotype=NULL;
@@ -178,6 +185,7 @@ GLUI_EditText *con_slice_chopmin=NULL, *con_slice_chopmax=NULL;
 GLUI_EditText *con_part_chopmin=NULL, *con_part_chopmax=NULL;
 GLUI_RadioGroup *con_slice_setmin=NULL, *con_slice_setmax=NULL;
 GLUI_Checkbox *showchar_checkbox=NULL, *showonlychar_checkbox;
+GLUI_Checkbox *CHECKBOX_showcolorbarlines=NULL;
 GLUI_Checkbox *CHECKBOX_extreme2=NULL;
 GLUI_Checkbox *startup_checkbox=NULL;
 GLUI_Checkbox *check_overwrite_all=NULL;
@@ -232,6 +240,12 @@ GLUI_RadioGroup *con_part_setmin=NULL, *con_part_setmax=NULL;
 GLUI_EditText *con_p3_min=NULL, *con_p3_max=NULL;
 GLUI_EditText *con_p3_chopmin=NULL, *con_p3_chopmax=NULL;
 GLUI_RadioGroup *con_p3_setmin=NULL, *con_p3_setmax=NULL;
+
+/* ------------------ update_colorbar_list2 ------------------------ */
+
+extern "C" void update_colorbar_list2(void){
+  LISTBOX_colorbar2->set_int_val(selectedcolorbar_index2);
+}
 
 /* ------------------ update_update_extreme2 ------------------------ */
 
@@ -456,9 +470,7 @@ extern "C" void glui_bounds_setup(int main_window){
     plot3d_display=glui_bounds->add_radiogroup_to_panel(panel_contours,&p3cont2d,UPDATEPLOT,PLOT3D_CB);
     glui_bounds->add_radiobutton_to_group(plot3d_display,"Shaded Contours");
     glui_bounds->add_radiobutton_to_group(plot3d_display,"Stepped Contours");
-#ifdef pp_LINE
     glui_bounds->add_radiobutton_to_group(plot3d_display,"Line Contours");
-#endif
     
     //glui_bounds->add_column_to_panel(panel_pan3);
     panel_vector = glui_bounds->add_panel_to_panel(panel_pan3,"Vector");
@@ -594,11 +606,29 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata);
     Slice_CB(FILETYPEINDEX);
   }
-  SPINNER_timebounds=glui_bounds->add_spinner("Set time:",GLUI_SPINNER_FLOAT,&glui_time,SET_TIME,Slice_CB);
+
+  glui_bounds->add_separator();
+  panel_time = glui_bounds->add_rollout("Time",false);
+  SPINNER_timebounds=glui_bounds->add_spinner_to_panel(panel_time,"Set time:",GLUI_SPINNER_FLOAT,&glui_time,SET_TIME,Slice_CB);
   SPINNER_timebounds->set_float_limits(0.0,3600.0*24);
 
-  glui_bounds->add_checkbox("Smooth colorbar labels",&axissmooth);
-  CHECKBOX_extreme2=glui_bounds->add_checkbox("Highlight extreme data",&show_extremedata,
+  panel_colorbar = glui_bounds->add_rollout("Data coloring",false);
+  if(ncolorbars>0){
+    selectedcolorbar_index2=-1;
+    LISTBOX_colorbar2=glui_bounds->add_listbox_to_panel(panel_colorbar,"Colorbar:",&selectedcolorbar_index2,COLORBAR_LIST2,Slice_CB);
+
+    for(i=0;i<ncolorbars;i++){
+      colorbardata *cbi;
+
+      cbi = colorbarinfo + i;
+      cbi->label_ptr=cbi->label;
+      LISTBOX_colorbar2->add_item(i,cbi->label_ptr);
+    }
+    LISTBOX_colorbar2->set_int_val(colorbartype);
+  }
+  glui_bounds->add_checkbox_to_panel(panel_colorbar,"Smooth colorbar labels",&axissmooth);
+  CHECKBOX_showcolorbarlines=glui_bounds->add_checkbox_to_panel(panel_colorbar,"Lines",&showcolorbarlines,COLORBAR_LINES,Slice_CB);
+  CHECKBOX_extreme2=glui_bounds->add_checkbox_to_panel(panel_colorbar,"Highlight extreme data",&show_extremedata,
     COLORBAR_EXTREME2,Slice_CB);
 
 #ifdef pp_COMPRESS
@@ -898,6 +928,14 @@ void PLOT3D_CB(int var){
     updatemenu=1;
     break;
   case UPDATEPLOT:
+    if(p3cont2d==LINE_CONTOURS){
+      showcolorbarlines=1;
+      p3cont2d=SHADED_CONTOURS;
+    }
+    else{
+      showcolorbarlines=0;
+    }
+    updatecolors(-1);
     updatemenu=1;
     GLUTPOSTREDISPLAY
     break;
@@ -1630,6 +1668,18 @@ extern "C" void Slice_CB(int var){
   updatemenu=1;
   if(var==COLORBAR_EXTREME2){
     update_extreme();
+    return;
+  }
+  if(var==COLORBAR_LIST2){
+      selectedcolorbar_index=LISTBOX_colorbar2->get_int_val();
+      update_colorbar_list();
+      ColorBarMenu(selectedcolorbar_index);
+      colorbar_global2local();
+  }
+  if(var==COLORBAR_LINES){
+    if(showcolorbarlines==1)p3cont2d=SHADED_CONTOURS;
+    update_plot3d_display();
+    updatecolors(-1);
     return;
   }
   if(var==SET_TIME){

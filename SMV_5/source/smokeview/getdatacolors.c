@@ -2095,6 +2095,32 @@ void updatecolors(int changecolorindex){
       }
     }
   }
+  if(showcolorbarlines==1){
+    {
+      for(n=0;n<nrgb_full;n++){
+        rgb_full2[n][3]=rgb_full[n][3];
+        rgb_full[n][3]=0;
+      }
+      for(n=0;n<11;n++){
+        int nnm1,nn,nnp1;
+        
+        if(n==0){
+          nn=1;
+        }
+        else if(n==10){
+          nn=254;
+        }
+        else{
+          nn=1+n*25.4;
+        }
+        nnm1=nn-1;
+        nnp1=nn+1;
+        rgb_full[nnm1][3]=rgb_full2[nnm1][3];
+        rgb_full[nn][3]=rgb_full2[nn][3];
+        rgb_full[nnp1][3]=rgb_full2[nnp1][3];
+      }
+    }
+  }
   if(colorbarflip==1){
     {
       int nnn;

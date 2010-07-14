@@ -34,6 +34,9 @@ EXTERNCPP int get_token_loc(char *var,sv_object_frame *frame);
 EXTERNCPP void get_indep_var_indices(sv_object *smv_object,char **var_indep_strings, int nvars_indep,int *index);
 EXTERNCPP void get_evac_indices(sv_object *smv_object, int *evac_index,int *nevac_index);
 EXTERNCPP void update_glui_set_view_xyz(float *xyz);
+EXTERNCPP void update_colorbar_list(void);
+EXTERNCPP void update_colorbar_list2(void);
+
 EXTERNCPP void update_glui_plot3dtype(void);
 EXTERNCPP void update_glui_isotype(void);
 EXTERNCPP void init_device(device *devicei, float *xyz, float *xyzn, int state0,int nparams, float *params, char *labelptr);

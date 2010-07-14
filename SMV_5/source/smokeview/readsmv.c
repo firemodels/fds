@@ -8165,11 +8165,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"P3CONT2D",8)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&p3cont2d);
-#ifdef pp_LINE
       if(p3cont2d>2)p3cont2d=2;
-#else
-      if(p3cont2d>1)p3cont2d=1;
-#endif
       continue;
       }
     if(match(buffer,"P3VIEW",6)==1){
