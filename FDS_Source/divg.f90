@@ -255,6 +255,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          DO J=0,JBAR
             DO I=0,IBAR
                !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_05'
+               
+               ! H_RHO_D_DYDX
                TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
                ITMP = MIN(5000,NINT(TMP_G))
                YY_GET=0._EB
@@ -263,6 +265,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
                HDIFF = (H_G-H_G_A)*TMP_G
                H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
+               
+               ! H_RHO_D_DYDY
                TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
                ITMP = MIN(5000,NINT(TMP_G))
                YY_GET=0._EB
@@ -271,6 +275,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
                HDIFF = (H_G-H_G_A)*TMP_G
                H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
+               
+               ! H_RHO_D_DYDZ
                TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
                ITMP = MIN(5000,NINT(TMP_G))
                YY_GET=0._EB
