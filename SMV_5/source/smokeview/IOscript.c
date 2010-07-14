@@ -1068,11 +1068,7 @@ void script_plot3dprops(scriptdata *scripti){
 
   p3cont2d = scripti->ival4;
   if(p3cont2d<0)p3cont2d=0;
-#ifdef pp_LINE
   if(p3cont2d>2)p3cont2d=2;
-#else
-  if(p3cont2d>1)p3cont2d=1;
-#endif
   update_plot3d_display();
 
   if(visVector==1&&ReadPlot3dFile==1){

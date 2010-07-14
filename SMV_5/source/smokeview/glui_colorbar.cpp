@@ -73,7 +73,6 @@ GLUI_EditText *EDITTEXT_colorbar_label=NULL;
 GLUI_StaticText *STATICTEXT_left=NULL, *STATICTEXT_right=NULL;
 
 
-int selectedcolorbar_index;
 int cb_rgb[3],cb_up_rgb[3],cb_down_rgb[3];
 int cb_usecolorbar_extreme;
 
@@ -97,6 +96,11 @@ extern "C" void colorbar_global2local(void);
 
 void COLORBAR_CB(int var);
 
+/* ------------------ update_colorbar_list ------------------------ */
+
+extern "C" void update_colorbar_list(void){
+  LISTBOX_colorbar->set_int_val(selectedcolorbar_index);
+}
 
 /* ------------------ update_camera_label ------------------------ */
 
@@ -397,11 +401,9 @@ void COLORBAR_CB(int var){
     break;
   case COLORBAR_LIST:
     {
-      int icolorbar;
-
-
-      icolorbar=LISTBOX_colorbar->get_int_val();
-      ColorBarMenu(icolorbar);
+      selectedcolorbar_index2=LISTBOX_colorbar->get_int_val();
+      update_colorbar_list2();
+      ColorBarMenu(selectedcolorbar_index2);
       colorbar_global2local();
     }
     break;
