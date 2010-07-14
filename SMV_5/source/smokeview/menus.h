@@ -452,8 +452,10 @@ void ColorBarMenu(int value){
   }
   if(value>=0){
     colorbartype=value;
+    selectedcolorbar_index2=colorbartype;
     current_colorbar=colorbarinfo+colorbartype;
     update_colorbar_type();
+    update_colorbar_list2();
     if(value==bw_colorbar_index){
       setbw=1;
     }
