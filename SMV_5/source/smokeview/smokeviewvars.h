@@ -544,6 +544,10 @@ SVEXTERN int nrgb_full;
 SVEXTERN int nrgb_cad;
 SVEXTERN float eyexfactor, eyeyfactor, eyezfactor;
 SVEXTERN int transparent_state;
+#ifdef pp_TIME
+SVEXTERN float tload_begin, tload_end, tload_skip;
+SVEXTERN int use_tload;
+#endif
 
 SVEXTERN float frameinterval;
 

@@ -84,6 +84,9 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define TURB_DATA 202
 #define UNLOAD_QDATA 203
 #define SET_TIME 204
+#ifdef pp_TIME
+#define TBOUNDS 205
+#endif
 
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
@@ -203,6 +206,13 @@ GLUI_Checkbox *CHECKBOX_skip_subslice=NULL;
 GLUI_Checkbox *CHECKBOX_turb_slice=NULL;
 GLUI_Checkbox *CHECKBOX_average_slice=NULL;
 GLUI_Checkbox *CHECKBOX_unload_qdata=NULL;
+#ifdef pp_TIME
+GLUI_Checkbox *CHECKBOX_use_tload=NULL;
+GLUI_Spinner *SPINNER_tload_begin=NULL;
+GLUI_Spinner *SPINNER_tload_end=NULL;
+GLUI_Spinner *SPINNER_tload_skip=NULL;
+GLUI_Panel *panel_time2=NULL;
+#endif
 
 GLUI_Spinner *SPINNER_plot3d_vectorpointsize=NULL,*SPINNER_plot3d_vectorlinewidth=NULL;
 GLUI_Spinner *SPINNER_sliceaverage=NULL;
@@ -611,6 +621,14 @@ extern "C" void glui_bounds_setup(int main_window){
   panel_time = glui_bounds->add_rollout("Time",false);
   SPINNER_timebounds=glui_bounds->add_spinner_to_panel(panel_time,"Set time:",GLUI_SPINNER_FLOAT,&glui_time,SET_TIME,Slice_CB);
   SPINNER_timebounds->set_float_limits(0.0,3600.0*24);
+#ifdef pp_TIME
+  panel_time2 = glui_bounds->add_panel_to_panel(panel_time,"time loading parameters",true);
+  CHECKBOX_use_tload=glui_bounds->add_checkbox_to_panel(panel_time2,"Use time bounds/skip to load data",&use_tload,TBOUNDS,Slice_CB);
+  SPINNER_tload_begin=glui_bounds->add_spinner_to_panel(panel_time2,"tmin",GLUI_SPINNER_FLOAT,&tload_begin,TBOUNDS,Slice_CB);
+  SPINNER_tload_end=glui_bounds->add_spinner_to_panel(panel_time2,"tmax",GLUI_SPINNER_FLOAT,&tload_end,TBOUNDS,Slice_CB);
+  SPINNER_tload_skip=glui_bounds->add_spinner_to_panel(panel_time2,"tskip",GLUI_SPINNER_FLOAT,&tload_skip,TBOUNDS,Slice_CB);
+  SPINNER_tload_skip->disable();
+#endif
 
   panel_colorbar = glui_bounds->add_rollout("Data coloring",false);
   if(ncolorbars>0){
@@ -1686,6 +1704,11 @@ extern "C" void Slice_CB(int var){
     settimeval(glui_time);
     return;
   }
+#ifdef pp_TIME
+  if(var==TBOUNDS&&use_tload==1){
+    update_tbounds();
+  }
+#endif
   ASSERT(con_slice_min!=NULL);
   ASSERT(con_slice_max!=NULL);
   switch (var){
