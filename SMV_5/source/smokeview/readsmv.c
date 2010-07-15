@@ -6851,7 +6851,7 @@ int readini2(char *inifile, int localfile){
 #ifdef pp_TIME
     if(match(buffer,"TLOAD",5)==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %f %f",&use_tload,&tload_begin,&tload_end,&tload_skip);
+      sscanf(buffer,"%i %f %i %f %i %f",&use_tload_begin,&tload_begin,&use_tload_end,&tload_end,&use_tload_step,&tload_step);
     }
 #endif
     if(match(buffer,"MESHOFFSET",10)==1){
@@ -9344,7 +9344,7 @@ void writeini(int flag){
 #ifdef pp_TIME
   fprintf(fileout,"(0/1 min max skip (1=set, 0=unset)\n\n");
   fprintf(fileout,"TLOAD\n");
-  fprintf(fileout," %i %f %f %f\n",use_tload,tload_begin,tload_end,tload_skip);
+  fprintf(fileout," %i %f %i %f %i %f\n",use_tload_begin,tload_begin,use_tload_end,tload_end,use_tload_step,tload_step);
 #else
   fprintf(fileout,"(0/1 min 0/1 max (1=set, 0=unset)\n\n");
   fprintf(fileout,"T_PARTICLES\n");
@@ -10373,24 +10373,28 @@ void init_evac_prop(void){
 /* ------------------ update_tbounds ------------------------ */
 
 void update_tbounds(void){
-  settmin_p=use_tload;
-  settmax_p=use_tload;
+  settmin_p=use_tload_begin;
+  settmax_p=use_tload_end;
   tmin_p=tload_begin;
   tmax_p=tload_end;
-  settmin_s=use_tload;
-  settmax_s=use_tload;
+
+  settmin_s=use_tload_begin;
+  settmax_s=use_tload_end;
   tmin_s=tload_begin;
   tmax_s=tload_end;
-  settmin_i=use_tload;
-  settmax_i=use_tload;
+
+  settmin_i=use_tload_begin;
+  settmax_i=use_tload_end;
   tmin_i=tload_begin;
   tmax_i=tload_end;
-  settmin_s=use_tload;
-  settmax_s=use_tload;
+
+  settmin_s=use_tload_begin;
+  settmax_s=use_tload_end;
   tmin_s=tload_begin;
   tmax_s=tload_end;
-  settmin_b=use_tload;
-  settmax_b=use_tload;
+
+  settmin_b=use_tload_begin;
+  settmax_b=use_tload_end;
   tmin_b=tload_begin;
   tmax_b=tload_end;
 }
