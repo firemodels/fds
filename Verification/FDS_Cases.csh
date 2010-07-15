@@ -19,10 +19,7 @@ $RUNFDS Fires cable_tray                          fire46
 $RUNFDS Fires couch                               fire47
 $RUNFDS Fires room_fire                           fire51
 $RUNFDS Fires spray_burner                        fire52
-$RUNFDS Flowfields dancing_eddies                 fire53
-$RUNFDS Flowfields duct_flow                      fire53
 $RUNFDS Flowfields gas_filling                    fire54
-$RUNFDS Flowfields hallways                       fire55
 $RUNFDS Flowfields helium_2d                      fire56
 $RUNFDS Flowfields jet_fan                        fire57
 $RUNFDS Flowfields sawtooth                       fire58
@@ -53,6 +50,9 @@ $RUNFDS Pressure_Effects pressure_boundary        fire64
 $RUNFDS Pressure_Effects pressure_rise            fire65
 $RUNFDS Pressure_Effects zone_break               fire66
 $RUNFDS Pressure_Effects zone_shape               fire67
+$RUNFDS Pressure_Solver dancing_eddies            fire53
+$RUNFDS Pressure_Solver duct_flow                 fire53
+$RUNFDS Pressure_Solver hallways                  fire55
 $RUNFDS Pyrolysis cable_11_insulation_mcc         fire68
 $RUNFDS Pyrolysis cable_23_insulation_mcc         fire68
 $RUNFDS Pyrolysis cable_701_insulation_mcc        fire68
