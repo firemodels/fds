@@ -1416,14 +1416,12 @@ void initvars1(void){
 
   frameinterval=1.0;
 
-#ifdef pp_TIME
   use_tload_begin=0;
   use_tload_end=0;
-  use_tload_step=0;
+  use_tload_skip=0;
   tload_begin=0.0;
   tload_end=1.0;
-  tload_step=-1.0;
-#endif
+  tload_skip=0;
 
   defaulttour_loaded=0;
   blockages_dirty=0;
