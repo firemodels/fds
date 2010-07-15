@@ -6848,12 +6848,10 @@ int readini2(char *inifile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
-#ifdef pp_TIME
     if(match(buffer,"TLOAD",5)==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f %i %f",&use_tload_begin,&tload_begin,&use_tload_end,&tload_end,&use_tload_step,&tload_step);
+      sscanf(buffer,"%i %f %i %f %i %i",&use_tload_begin,&tload_begin,&use_tload_end,&tload_end,&use_tload_skip,&tload_skip);
     }
-#endif
     if(match(buffer,"MESHOFFSET",10)==1){
       int meshnum;
 
@@ -7302,26 +7300,6 @@ int readini2(char *inifile, int localfile){
       update_projection_type();
       continue;
     }
-    if(match(buffer,"T_PARTICLES",11)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&settmin_p,&tmin_p,&settmax_p,&tmax_p);
-      continue;
-    }
-    if(match(buffer,"T_SLICE",7)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&settmin_s,&tmin_s,&settmax_s,&tmax_s);
-      continue;
-    }
-    if(match(buffer,"T_ISO",5)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&settmin_i,&tmin_i,&settmax_i,&tmax_i);
-      continue;
-    }
-    if(match(buffer,"T_BOUNDARY",10)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&settmin_b,&tmin_b,&settmax_b,&tmax_b);
-      continue;
-    }
     if(match(buffer,"V_PARTICLES",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i %f",&setpartmin,&partmin,&setpartmax,&partmax);
@@ -7533,20 +7511,6 @@ int readini2(char *inifile, int localfile){
       if(nmeshes<2&&highlight_flag!=0)highlight_flag=1;
       continue;
     }
-    if(match(buffer,"PARTFRAMESTEP",13)==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&partframestep);
-	    if(partframestep<1)partframestep=1;
-      partframeskip=partframestep-1;
-      continue;
-    }
-    if(match(buffer,"EVACFRAMESTEP",13)==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&evacframestep);
-	    if(evacframestep<1)evacframestep=1;
-      evacframeskip=evacframestep-1;
-      continue;
-    }
     if(match(buffer,"USENISTLOGO",11)==1){
 	    fgets(buffer,255,stream);
 	    sscanf(buffer,"%i",&use_nistlogo);
@@ -7564,20 +7528,6 @@ int readini2(char *inifile, int localfile){
           output_slicedata=0;
         }
       }
-      continue;
-    }
-    if(match(buffer,"SLICEFRAMESTEP",14)==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&sliceframestep);
-	    if(sliceframestep<1)sliceframestep=1;
-      sliceframeskip=sliceframestep-1;
-      continue;
-    }
-    if(match(buffer,"SMOKE3DFRAMESTEP",16)==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&smoke3dframestep);
-	    if(smoke3dframestep<1)smoke3dframestep=1;
-      smoke3dframeskip=smoke3dframestep-1;
       continue;
     }
     if(match(buffer,"SMOKE3DZIPSTEP",14)==1){
@@ -7599,13 +7549,6 @@ int readini2(char *inifile, int localfile){
 	    sscanf(buffer,"%i",&isozipstep);
 	    if(isozipstep<1)isozipstep=1;
       isozipskip=isozipstep-1;
-      continue;
-    }
-    if(match(buffer,"BOUNDFRAMESTEP",14)==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&boundframestep);
-	    if(boundframestep<1)boundframestep=1;
-      boundframeskip=boundframestep-1;
       continue;
     }
     if(match(buffer,"BOUNDZIPSTEP",12)==1){
@@ -8423,13 +8366,6 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",diffuselight,diffuselight+1,diffuselight+2);
       UpdateLIGHTS=1;
-      continue;
-    }
-    if(match(buffer,"ISOFRAMESTEP",12)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&isoframestep);
-      if(isoframestep<1)isoframestep=1;
-      isoframeskip=isoframestep-1;
       continue;
     }
     if(match(buffer,"LABELSTARTUPVIEW",16)==1){
@@ -9341,21 +9277,9 @@ void writeini(int flag){
 
   fprintf(fileout,"\nTIME MIN/MAX\n");
   fprintf(fileout,"------------\n");
-#ifdef pp_TIME
   fprintf(fileout,"(0/1 min max skip (1=set, 0=unset)\n\n");
   fprintf(fileout,"TLOAD\n");
-  fprintf(fileout," %i %f %i %f %i %f\n",use_tload_begin,tload_begin,use_tload_end,tload_end,use_tload_step,tload_step);
-#else
-  fprintf(fileout,"(0/1 min 0/1 max (1=set, 0=unset)\n\n");
-  fprintf(fileout,"T_PARTICLES\n");
-  fprintf(fileout," %i %f %i %f\n",settmin_p,tmin_p,settmax_p,tmax_p);
-  fprintf(fileout,"T_SLICE\n");
-  fprintf(fileout," %i %f %i %f\n",settmin_s,tmin_s,settmax_s,tmax_s);
-  fprintf(fileout,"T_ISO\n");
-  fprintf(fileout," %i %f %i %f\n",settmin_i,tmin_i,settmax_i,tmax_i);
-  fprintf(fileout,"T_BOUNDARY\n");
-  fprintf(fileout," %i %f %i %f\n",settmin_b,tmin_b,settmax_b,tmax_b);
-#endif
+  fprintf(fileout," %i %f %i %f %i %i\n",use_tload_begin,tload_begin,use_tload_end,tload_end,use_tload_skip,tload_skip);
 
   fprintf(fileout,"\nVALUE MIN/MAX\n");
   fprintf(fileout,"-------------\n");
@@ -9468,14 +9392,6 @@ void writeini(int flag){
   fprintf(fileout," %i\n",nopart);
   fprintf(fileout,"PARTPOINTSTEP\n");
   fprintf(fileout," %i\n",partpointstep);
-  fprintf(fileout,"PARTFRAMESTEP\n");
-  fprintf(fileout," %i\n",partframestep);
-  fprintf(fileout,"EVACFRAMESTEP\n");
-  fprintf(fileout," %i\n",evacframestep);
-  fprintf(fileout,"SLICEFRAMESTEP\n");
-  fprintf(fileout," %i\n",sliceframestep);
-  fprintf(fileout,"SMOKE3DFRAMESTEP\n");
-  fprintf(fileout," %i\n",smoke3dframestep);
   fprintf(fileout,"SLICEAVERAGE\n");
   fprintf(fileout," %i %f %i %i\n",slice_average_flag,slice_average_interval,vis_slice_average,slice_turbprop_flag);
   fprintf(fileout,"SMOKE3DZIPSTEP\n");
@@ -9484,12 +9400,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",isozipstep);
   fprintf(fileout,"SLICEZIPSTEP\n");
   fprintf(fileout," %i\n",slicezipstep);
-  fprintf(fileout,"BOUNDFRAMESTEP\n");
-  fprintf(fileout," %i\n",boundframestep);
   fprintf(fileout,"BOUNDZIPSTEP\n");
   fprintf(fileout," %i\n",boundzipstep);
-  fprintf(fileout,"ISOFRAMESTEP\n");
-  fprintf(fileout," %i\n",isoframestep);
   fprintf(fileout,"SHOWTRACERSALWAYS\n");
   fprintf(fileout," %i\n",show_tracers_always);
  
@@ -10368,34 +10280,3 @@ void init_evac_prop(void){
   prop_evacdefault->ntextures=0;
 }
 
-#ifdef pp_TIME
-
-/* ------------------ update_tbounds ------------------------ */
-
-void update_tbounds(void){
-  settmin_p=use_tload_begin;
-  settmax_p=use_tload_end;
-  tmin_p=tload_begin;
-  tmax_p=tload_end;
-
-  settmin_s=use_tload_begin;
-  settmax_s=use_tload_end;
-  tmin_s=tload_begin;
-  tmax_s=tload_end;
-
-  settmin_i=use_tload_begin;
-  settmax_i=use_tload_end;
-  tmin_i=tload_begin;
-  tmax_i=tload_end;
-
-  settmin_s=use_tload_begin;
-  settmax_s=use_tload_end;
-  tmin_s=tload_begin;
-  tmax_s=tload_end;
-
-  settmin_b=use_tload_begin;
-  settmax_b=use_tload_end;
-  tmin_b=tload_begin;
-  tmax_b=tload_end;
-}
-#endif

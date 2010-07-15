@@ -16,7 +16,6 @@
 #define SMVVERSION "Test"
 #undef pp_release
 #define pp_SLICECONTOURS
-#define pp_TIME
 #endif
 
 #ifdef pp_ALPHA

@@ -32,18 +32,14 @@ extern "C" void ScriptMenu(int var);
 extern "C" void update_glui_smoke3dframestep(void);
 extern "C" void ParticlePropShowMenu(int value);
 extern "C" void colorbar_global2local(void);
-#ifdef pp_TIME
 extern "C" void ReloadMenu(int var);
-#endif
 
 void COLORBAR_CB(int var);
 void SETslicemax(int setslicemax, float slicemax);
 void SETslicemin(int setslicemin, float slicemin);
 void BUTTON_hide_CB(int var);
 void PART_CB(int var), Bound_CB(int var), Slice_CB(int var), PLOT3D_CB(int var), Iso_CB(int var), Smoke3D_CB(int var);
-#ifdef pp_TIME
 void Time_CB(int var);
-#endif
 void Script_CB(int var);
 void boundmenu(GLUI_Rollout **rollout_bound, GLUI_Rollout **rollout_chop, GLUI_Panel *panel, char *button_title,
           GLUI_EditText **con_min,GLUI_EditText **con_max,
@@ -90,11 +86,9 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define TURB_DATA 202
 #define UNLOAD_QDATA 203
 #define SET_TIME 204
-#ifdef pp_TIME
 #define TBOUNDS 205
 #define TBOUNDS_USE 206
 #define RELOAD_DATA 207
-#endif
 
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
@@ -214,13 +208,12 @@ GLUI_Checkbox *CHECKBOX_skip_subslice=NULL;
 GLUI_Checkbox *CHECKBOX_turb_slice=NULL;
 GLUI_Checkbox *CHECKBOX_average_slice=NULL;
 GLUI_Checkbox *CHECKBOX_unload_qdata=NULL;
-#ifdef pp_TIME
 GLUI_Checkbox *CHECKBOX_use_tload_begin=NULL;
 GLUI_Checkbox *CHECKBOX_use_tload_end=NULL;
-GLUI_Checkbox *CHECKBOX_use_tload_step=NULL;
+GLUI_Checkbox *CHECKBOX_use_tload_skip=NULL;
 GLUI_Spinner *SPINNER_tload_begin=NULL;
 GLUI_Spinner *SPINNER_tload_end=NULL;
-GLUI_Spinner *SPINNER_tload_step=NULL;
+GLUI_Spinner *SPINNER_tload_skip=NULL;
 GLUI_Panel *panel_time2=NULL;
 GLUI_Panel *panel_time1a=NULL;
 GLUI_Panel *panel_time2a=NULL;
@@ -228,17 +221,10 @@ GLUI_Panel *panel_time2b=NULL;
 GLUI_Panel *panel_time2c=NULL;
 GLUI_Button *BUTTON_RELOAD=NULL;
 GLUI_Button *BUTTON_SETTIME=NULL;
-#endif
 
 GLUI_Spinner *SPINNER_plot3d_vectorpointsize=NULL,*SPINNER_plot3d_vectorlinewidth=NULL;
 GLUI_Spinner *SPINNER_sliceaverage=NULL;
-GLUI_Spinner *SPINNER_boundframestep=NULL;
-GLUI_Spinner *SPINNER_sliceframestep=NULL;
-GLUI_Spinner *SPINNER_partframestep=NULL;
-GLUI_Spinner *SPINNER_evacframestep=NULL;
 GLUI_Spinner *SPINNER_partpointstep=NULL;
-GLUI_Spinner *SPINNER_isoframestep=NULL;
-GLUI_Spinner *SPINNER2_smoke3dframestep=NULL;
 GLUI_Spinner *SPINNER_smoke3dzipstep=NULL;
 GLUI_Spinner *SPINNER_slicezipstep=NULL;
 GLUI_Spinner *SPINNER_isozipstep=NULL;
@@ -306,10 +292,6 @@ extern "C" void glui_bounds_setup(int main_window){
 
   if(nsmoke3d_files>0){
     panel_smoke3d = glui_bounds->add_rollout("3D Smoke",false);
-  
-    SPINNER2_smoke3dframestep=glui_bounds->add_spinner_to_panel(panel_smoke3d,"Frame Skip",GLUI_SPINNER_INT,&smoke3dframeskip,
-      FRAMELOADING,Smoke3D_CB);
-    SPINNER2_smoke3dframestep->set_int_limits(0,100);
   }
 
   /*  Boundary File Bounds   */
@@ -355,9 +337,6 @@ extern "C" void glui_bounds_setup(int main_window){
       NULL,NULL,NULL,NULL,
       DONT_UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
       Bound_CB);
-      SPINNER_boundframestep=glui_bounds->add_spinner_to_panel(panel_bound,"Frame Skip",
-        GLUI_SPINNER_INT,&boundframeskip,FRAMELOADING,Bound_CB);
-      SPINNER_boundframestep->set_int_limits(0,100);
 
   }
 
@@ -365,9 +344,6 @@ extern "C" void glui_bounds_setup(int main_window){
 
   if(niso_files>0){
     panel_iso = glui_bounds->add_rollout("Isosurface",false);
-    SPINNER_isoframestep=glui_bounds->add_spinner_to_panel(panel_iso,"Frame Skip",GLUI_SPINNER_INT,&isoframeskip,
-      FRAMELOADING,Iso_CB);
-    SPINNER_isoframestep->set_int_limits(0,100);
     
     SPINNER_isopointsize=glui_bounds->add_spinner_to_panel(panel_iso,"Point size",GLUI_SPINNER_FLOAT,
       &isopointsize);
@@ -444,9 +420,6 @@ extern "C" void glui_bounds_setup(int main_window){
         &setpartchopmin,&setpartchopmax,&partchopmin,&partchopmax,
         DONT_UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
         PART_CB);
-        SPINNER_partframestep=glui_bounds->add_spinner_to_panel(panel_part,"Frame Skip",GLUI_SPINNER_INT,
-          &partframeskip,FRAMELOADING,PART_CB);
-        SPINNER_partframestep->set_int_limits(0,100);
         if(partinfo!=NULL&&partinfo->version==0){
           SPINNER_partpointstep=glui_bounds->add_spinner_to_panel(panel_part,"Point Skip",GLUI_SPINNER_INT,
             &partpointskip,FRAMELOADING,PART_CB);
@@ -473,9 +446,6 @@ extern "C" void glui_bounds_setup(int main_window){
     panel_evac = glui_bounds->add_rollout("Evacuation",false);
     glui_bounds->add_checkbox_to_panel(panel_evac,"Select Avatar",&select_avatar);
    // glui_bounds->add_checkbox_to_panel(panel_evac,"View from selected Avatar",&view_from_selected_avatar);
-    SPINNER_evacframestep=glui_bounds->add_spinner_to_panel(panel_evac,"Frame Skip",GLUI_SPINNER_INT,&evacframeskip,
-      FRAMELOADING,PART_CB);
-    SPINNER_evacframestep->set_int_limits(0,100);
   }
 
   /* Plot3D file bounds */
@@ -584,8 +554,6 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_bounds->add_button_to_panel(panel_slice_transform,"Transform data",TRANSFORM_SLICE,Slice_CB);
     glui_bounds->add_button_to_panel(panel_slice_transform,"Reset data",RESET_SLICE,Slice_CB);
 #endif
-    SPINNER_sliceframestep=glui_bounds->add_spinner_to_panel(panel_slice,"Frame Skip",GLUI_SPINNER_INT,&sliceframeskip,FRAMELOADING,Slice_CB);
-    SPINNER_sliceframestep->set_int_limits(0,100);
     SPINNER_transparentlevel=glui_bounds->add_spinner_to_panel(panel_slice,"Transparent level",GLUI_SPINNER_FLOAT,&transparentlevel,TRANSPARENTLEVEL,Slice_CB);
     SPINNER_transparentlevel->set_float_limits(0.0,1.0);
     CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Averaged Slice Data",&slice_average_flag,AVERAGE_DATA,Slice_CB);
@@ -635,14 +603,13 @@ extern "C" void glui_bounds_setup(int main_window){
 
   glui_bounds->add_separator();
   panel_time = glui_bounds->add_rollout("Time",false);
-  panel_time1a = glui_bounds->add_panel_to_panel(panel_time,"Set time",true);
+  panel_time1a = glui_bounds->add_panel_to_panel(panel_time,"",false);
   SPINNER_timebounds=glui_bounds->add_spinner_to_panel(panel_time1a,"time:",GLUI_SPINNER_FLOAT,&glui_time);
   glui_bounds->add_column_to_panel(panel_time1a,false);
   SPINNER_timebounds->set_float_limits(0.0,3600.0*24);
   BUTTON_SETTIME=glui_bounds->add_button_to_panel(panel_time1a,"Set",SET_TIME,Time_CB);
   
-#ifdef pp_TIME
-  panel_time2 = glui_bounds->add_panel_to_panel(panel_time,"data loading time bounds",true);
+  panel_time2 = glui_bounds->add_panel_to_panel(panel_time,"Data Loading",true);
 
   panel_time2a = glui_bounds->add_panel_to_panel(panel_time2,"",false);
   SPINNER_tload_begin=glui_bounds->add_spinner_to_panel(panel_time2a,"tmin",GLUI_SPINNER_FLOAT,&tload_begin,TBOUNDS,Time_CB);
@@ -655,15 +622,14 @@ extern "C" void glui_bounds_setup(int main_window){
   CHECKBOX_use_tload_end=glui_bounds->add_checkbox_to_panel(panel_time2b,"",&use_tload_end,TBOUNDS_USE,Time_CB);
 
   panel_time2c = glui_bounds->add_panel_to_panel(panel_time2,"",false);
-  SPINNER_tload_step=glui_bounds->add_spinner_to_panel(panel_time2c,"step",GLUI_SPINNER_FLOAT,&tload_step,TBOUNDS,Time_CB);
+  SPINNER_tload_skip=glui_bounds->add_spinner_to_panel(panel_time2c,"frame skip",GLUI_SPINNER_INT,&tload_skip,TBOUNDS,Time_CB);
   glui_bounds->add_column_to_panel(panel_time2c,false);
-  CHECKBOX_use_tload_step=glui_bounds->add_checkbox_to_panel(panel_time2c,"",&use_tload_step,TBOUNDS_USE,Time_CB);
-  SPINNER_tload_step->disable();
+  CHECKBOX_use_tload_skip=glui_bounds->add_checkbox_to_panel(panel_time2c,"",&use_tload_skip,TBOUNDS_USE,Time_CB);
+  SPINNER_tload_skip->set_int_limits(0,100);
   
-  BUTTON_RELOAD=glui_bounds->add_button_to_panel(panel_time2,"Reload data",RELOAD_DATA,Time_CB);
+  BUTTON_RELOAD=glui_bounds->add_button_to_panel(panel_time2,"Reload",RELOAD_DATA,Time_CB);
 
   Time_CB(TBOUNDS_USE);
-#endif
 
   panel_colorbar = glui_bounds->add_rollout("Data Coloring",false);
   if(ncolorbars>0){
@@ -1720,9 +1686,8 @@ void Time_CB(int var){
   case SET_TIME:
     settimeval(glui_time);
     break;
-#ifdef pp_TIME
   case TBOUNDS:
-    if(use_tload_begin==1||use_tload_end==1||use_tload_step==1){
+    if(use_tload_begin==1||use_tload_end==1||use_tload_skip==1){
       update_tbounds();
     }
     break;
@@ -1739,18 +1704,17 @@ void Time_CB(int var){
     else{
       SPINNER_tload_end->disable();
     }
-    if(use_tload_step==1){
-      SPINNER_tload_step->enable();
+    if(use_tload_skip==1){
+      SPINNER_tload_skip->enable();
     }
     else{
-      SPINNER_tload_step->disable();
+      SPINNER_tload_skip->disable();
     }
     update_tbounds();
     break;
   case RELOAD_DATA:
     ReloadMenu(0);
     break;
-#endif
   }
 }
 
@@ -2129,7 +2093,6 @@ extern "C" void update_plot3d_display(void){
 /* ------------------ update2_glui_smoke3dframestep ------------------------ */
 
 extern "C" void update2_glui_smoke3dframestep(void){
-  SPINNER2_smoke3dframestep->set_int_val(smoke3dframeskip);
 }
 
 /* ------------------ open_smokeplane ------------------------ */
@@ -2154,5 +2117,57 @@ extern "C" void updateGluiTimeBounds(float time_min, float time_max){
   if(SPINNER_timebounds!=NULL){
     SPINNER_timebounds->set_float_limits(time_min,time_max);
   }
+}
+
+/* ------------------ update_tbounds ------------------------ */
+
+void update_tbounds(void){
+  settmin_p=use_tload_begin;
+  settmax_p=use_tload_end;
+  tmin_p=tload_begin;
+  tmax_p=tload_end;
+
+  settmin_s=use_tload_begin;
+  settmax_s=use_tload_end;
+  tmin_s=tload_begin;
+  tmax_s=tload_end;
+
+  settmin_i=use_tload_begin;
+  settmax_i=use_tload_end;
+  tmin_i=tload_begin;
+  tmax_i=tload_end;
+
+  settmin_s=use_tload_begin;
+  settmax_s=use_tload_end;
+  tmin_s=tload_begin;
+  tmax_s=tload_end;
+
+  settmin_b=use_tload_begin;
+  settmax_b=use_tload_end;
+  tmin_b=tload_begin;
+  tmax_b=tload_end;
+
+  if(use_tload_skip==1){
+    smoke3dframeskip=tload_skip;
+    boundframeskip=tload_skip;
+    isoframeskip=tload_skip;
+    partframeskip=tload_skip;
+    evacframeskip=tload_skip;
+    sliceframeskip=tload_skip;
+  }
+  else{
+    smoke3dframeskip=0;
+    boundframeskip=0;
+    isoframeskip=0;
+    partframeskip=0;
+    evacframeskip=0;
+    sliceframeskip=0;
+  }
+
+  Smoke3D_CB(FRAMELOADING);
+  Bound_CB(FRAMELOADING);
+  Iso_CB(FRAMELOADING);
+  PART_CB(FRAMELOADING);
+  Slice_CB(FRAMELOADING);
 }
 
