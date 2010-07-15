@@ -1,0 +1,22 @@
+The Vettori Sloped Ceiling cases are named according to the following conventions:
+
+
+Vettori_Sloped_(W)(X)(Y)(Z).xxx
+
+(W) Refers to the angle of the ceiling
+F  = Flat Ceiling
+13 = Sloped 13 degrees
+24 = Sloped 24 degrees
+
+(X) Refers to the beams on the ceiling
+S  = Smooth ceiling, no beams
+O  = Obstructed ceiling, two beams
+
+(Y) Refers to the Heat Release Rate of the fire
+F  = Fast Heat Release Rate
+S  = Slow Heat Release Rate
+
+(Z) Refers to the placement of the burner
+C  = Corner posistion, in the corner of the front right of the room 
+W  = Wall Posistion, adjacent to the back wall, centered between the side walls
+D  = Detached Posistion, In the Center of the room, removed from all walls. Sometimes refered to as open posistion in the NISTIR report.
