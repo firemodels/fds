@@ -1,9 +1,3 @@
-1 test a couple of wui display issues
-2 test internally defined colorbars used for terrain visualization
-3 test removal of leading blanks in file names
-4 test SPINNER in slice dialog box for setting transparency level
-5 test code for dispalying slice files overlaying terrain maps
-6 test spinner for setting time
-7 test removal of slice file hiding option
-8 test code for reducing memory allocations
-9 test code for using middle and right mouse button for translating scene (after turning off menus with M key)
+1. implement a new procedure for drawing line contours (by modifying colorbar rather than using marching squares
+2. test logic for preventing smokeview window from being expanded greater than the current screen resolution
+3. test time min/max load widgets
