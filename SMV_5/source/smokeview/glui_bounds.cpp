@@ -32,12 +32,18 @@ extern "C" void ScriptMenu(int var);
 extern "C" void update_glui_smoke3dframestep(void);
 extern "C" void ParticlePropShowMenu(int value);
 extern "C" void colorbar_global2local(void);
+#ifdef pp_TIME
+extern "C" void ReloadMenu(int var);
+#endif
 
 void COLORBAR_CB(int var);
 void SETslicemax(int setslicemax, float slicemax);
 void SETslicemin(int setslicemin, float slicemin);
 void BUTTON_hide_CB(int var);
 void PART_CB(int var), Bound_CB(int var), Slice_CB(int var), PLOT3D_CB(int var), Iso_CB(int var), Smoke3D_CB(int var);
+#ifdef pp_TIME
+void Time_CB(int var);
+#endif
 void Script_CB(int var);
 void boundmenu(GLUI_Rollout **rollout_bound, GLUI_Rollout **rollout_chop, GLUI_Panel *panel, char *button_title,
           GLUI_EditText **con_min,GLUI_EditText **con_max,
@@ -86,6 +92,8 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define SET_TIME 204
 #ifdef pp_TIME
 #define TBOUNDS 205
+#define TBOUNDS_USE 206
+#define RELOAD_DATA 207
 #endif
 
 #define SCRIPT_START 31
@@ -207,11 +215,19 @@ GLUI_Checkbox *CHECKBOX_turb_slice=NULL;
 GLUI_Checkbox *CHECKBOX_average_slice=NULL;
 GLUI_Checkbox *CHECKBOX_unload_qdata=NULL;
 #ifdef pp_TIME
-GLUI_Checkbox *CHECKBOX_use_tload=NULL;
+GLUI_Checkbox *CHECKBOX_use_tload_begin=NULL;
+GLUI_Checkbox *CHECKBOX_use_tload_end=NULL;
+GLUI_Checkbox *CHECKBOX_use_tload_step=NULL;
 GLUI_Spinner *SPINNER_tload_begin=NULL;
 GLUI_Spinner *SPINNER_tload_end=NULL;
-GLUI_Spinner *SPINNER_tload_skip=NULL;
+GLUI_Spinner *SPINNER_tload_step=NULL;
 GLUI_Panel *panel_time2=NULL;
+GLUI_Panel *panel_time1a=NULL;
+GLUI_Panel *panel_time2a=NULL;
+GLUI_Panel *panel_time2b=NULL;
+GLUI_Panel *panel_time2c=NULL;
+GLUI_Button *BUTTON_RELOAD=NULL;
+GLUI_Button *BUTTON_SETTIME=NULL;
 #endif
 
 GLUI_Spinner *SPINNER_plot3d_vectorpointsize=NULL,*SPINNER_plot3d_vectorlinewidth=NULL;
@@ -619,18 +635,37 @@ extern "C" void glui_bounds_setup(int main_window){
 
   glui_bounds->add_separator();
   panel_time = glui_bounds->add_rollout("Time",false);
-  SPINNER_timebounds=glui_bounds->add_spinner_to_panel(panel_time,"Set time:",GLUI_SPINNER_FLOAT,&glui_time,SET_TIME,Slice_CB);
+  panel_time1a = glui_bounds->add_panel_to_panel(panel_time,"Set time",true);
+  SPINNER_timebounds=glui_bounds->add_spinner_to_panel(panel_time1a,"time:",GLUI_SPINNER_FLOAT,&glui_time);
+  glui_bounds->add_column_to_panel(panel_time1a,false);
   SPINNER_timebounds->set_float_limits(0.0,3600.0*24);
+  BUTTON_SETTIME=glui_bounds->add_button_to_panel(panel_time1a,"Set",SET_TIME,Time_CB);
+  
 #ifdef pp_TIME
-  panel_time2 = glui_bounds->add_panel_to_panel(panel_time,"time loading parameters",true);
-  CHECKBOX_use_tload=glui_bounds->add_checkbox_to_panel(panel_time2,"Use time bounds/skip to load data",&use_tload,TBOUNDS,Slice_CB);
-  SPINNER_tload_begin=glui_bounds->add_spinner_to_panel(panel_time2,"tmin",GLUI_SPINNER_FLOAT,&tload_begin,TBOUNDS,Slice_CB);
-  SPINNER_tload_end=glui_bounds->add_spinner_to_panel(panel_time2,"tmax",GLUI_SPINNER_FLOAT,&tload_end,TBOUNDS,Slice_CB);
-  SPINNER_tload_skip=glui_bounds->add_spinner_to_panel(panel_time2,"tskip",GLUI_SPINNER_FLOAT,&tload_skip,TBOUNDS,Slice_CB);
-  SPINNER_tload_skip->disable();
+  panel_time2 = glui_bounds->add_panel_to_panel(panel_time,"data loading time bounds",true);
+
+  panel_time2a = glui_bounds->add_panel_to_panel(panel_time2,"",false);
+  SPINNER_tload_begin=glui_bounds->add_spinner_to_panel(panel_time2a,"tmin",GLUI_SPINNER_FLOAT,&tload_begin,TBOUNDS,Time_CB);
+  glui_bounds->add_column_to_panel(panel_time2a,false);
+  CHECKBOX_use_tload_begin=glui_bounds->add_checkbox_to_panel(panel_time2a,"",&use_tload_begin,TBOUNDS_USE,Time_CB);
+
+  panel_time2b = glui_bounds->add_panel_to_panel(panel_time2,"",false);
+  SPINNER_tload_end=glui_bounds->add_spinner_to_panel(panel_time2b,"tmax",GLUI_SPINNER_FLOAT,&tload_end,TBOUNDS,Time_CB);
+  glui_bounds->add_column_to_panel(panel_time2b,false);
+  CHECKBOX_use_tload_end=glui_bounds->add_checkbox_to_panel(panel_time2b,"",&use_tload_end,TBOUNDS_USE,Time_CB);
+
+  panel_time2c = glui_bounds->add_panel_to_panel(panel_time2,"",false);
+  SPINNER_tload_step=glui_bounds->add_spinner_to_panel(panel_time2c,"step",GLUI_SPINNER_FLOAT,&tload_step,TBOUNDS,Time_CB);
+  glui_bounds->add_column_to_panel(panel_time2c,false);
+  CHECKBOX_use_tload_step=glui_bounds->add_checkbox_to_panel(panel_time2c,"",&use_tload_step,TBOUNDS_USE,Time_CB);
+  SPINNER_tload_step->disable();
+  
+  BUTTON_RELOAD=glui_bounds->add_button_to_panel(panel_time2,"Reload data",RELOAD_DATA,Time_CB);
+
+  Time_CB(TBOUNDS_USE);
 #endif
 
-  panel_colorbar = glui_bounds->add_rollout("Data coloring",false);
+  panel_colorbar = glui_bounds->add_rollout("Data Coloring",false);
   if(ncolorbars>0){
     selectedcolorbar_index2=-1;
     LISTBOX_colorbar2=glui_bounds->add_listbox_to_panel(panel_colorbar,"Colorbar:",&selectedcolorbar_index2,COLORBAR_LIST2,Slice_CB);
@@ -1676,6 +1711,49 @@ void PART_CB(int var){
   }
 }
 
+/* ------------------ Time_CB ------------------------ */
+
+void Time_CB(int var){
+
+  updatemenu=1;
+  switch (var){
+  case SET_TIME:
+    settimeval(glui_time);
+    break;
+#ifdef pp_TIME
+  case TBOUNDS:
+    if(use_tload_begin==1||use_tload_end==1||use_tload_step==1){
+      update_tbounds();
+    }
+    break;
+  case TBOUNDS_USE:
+    if(use_tload_begin==1){
+      SPINNER_tload_begin->enable();
+    }
+    else{
+      SPINNER_tload_begin->disable();
+    }
+    if(use_tload_end==1){
+      SPINNER_tload_end->enable();
+    }
+    else{
+      SPINNER_tload_end->disable();
+    }
+    if(use_tload_step==1){
+      SPINNER_tload_step->enable();
+    }
+    else{
+      SPINNER_tload_step->disable();
+    }
+    update_tbounds();
+    break;
+  case RELOAD_DATA:
+    ReloadMenu(0);
+    break;
+#endif
+  }
+}
+
 /* ------------------ SLICE_CB ------------------------ */
 
 extern "C" void Slice_CB(int var){
@@ -1700,15 +1778,6 @@ extern "C" void Slice_CB(int var){
     updatecolors(-1);
     return;
   }
-  if(var==SET_TIME){
-    settimeval(glui_time);
-    return;
-  }
-#ifdef pp_TIME
-  if(var==TBOUNDS&&use_tload==1){
-    update_tbounds();
-  }
-#endif
   ASSERT(con_slice_min!=NULL);
   ASSERT(con_slice_max!=NULL);
   switch (var){
