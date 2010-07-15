@@ -562,13 +562,13 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   nframes_found=0;
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
   for(i=0;i<smoke3di->n_times_full;i++){
-	  EGZ_FREAD(&time,4,1,SMOKE3DFILE);
-    if(EGZ_FEOF(SMOKE3DFILE)!=0){
+	EGZ_FREAD(&time,4,1,SMOKE3DFILE);
+    if(EGZ_FEOF(SMOKE3DFILE)!=0||(use_tload_end==1&&time>tload_end)){
       smoke3di->n_times_full=i;
       smoke3di->n_times=nframes_found;
       break;
     }
-
+    if(use_tload_begin==1&&time<tload_begin)smoke3di->use_smokeframe[i]=0;
     if(smoke3di->use_smokeframe[i]==1){
       printf("3D smoke/fire time=%.2f",time);
     }
@@ -928,7 +928,8 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist_found, int *
     sscanf(buffer,"%f",&time);
     iframe++;
     if(time<=time_max)continue;
-    if(iii%smoke3dframestep==0){
+    if(use_tload_end==1&&time>tload_end)break;
+    if(iii%smoke3dframestep==0&&(use_tload_begin==0||time>=tload_begin)){
       nframes_found++;
       time_max=time;
     }
@@ -1008,12 +1009,13 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist_found, int *
     }
 #endif
     *use_smokeframe_full=0;
+    if(use_tload_end==1&&time>tload_end)break;
     if(time<=time_max){
       use_smokeframe_full++;
       continue;
     }
 
-    if(iii%smoke3dframestep==0){
+    if(iii%smoke3dframestep==0&&(use_tload_begin==0||time>=tload_begin)){
       *use_smokeframe_full=1;
       *time_found++=time;
       time_max=time;
