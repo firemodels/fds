@@ -41,7 +41,7 @@ T = 3600;
 % dz = (z_max-z_min)/N(3);
 dx = 20;
 dy = 20;
-dz = 10;
+dz = 5;
 N = [round((x_max-x_min)/dx), round((y_max-y_min)/dy), round((z_max-z_min)/dz)]
 for i=1:3
     if mod(N(i),2)~=0; N(i)=N(i)+1; end
@@ -111,8 +111,8 @@ misc = ['      TMPA=15.0'];         fprintf(fid,'%s\n',misc);
 misc = ['      LAPSE_RATE=-0.01'];  fprintf(fid,'%s\n',misc);
 misc = ['      HUMIDITY=95.0'];     fprintf(fid,'%s\n',misc);
 misc = ['      PERIODIC_TEST=100']; fprintf(fid,'%s\n',misc);
-misc = ['      U0=6.0, MEAN_FORCING_U=.TRUE.']; fprintf(fid,'%s\n',misc);
-misc = ['      V0=16.0,MEAN_FORCING_V=.TRUE.']; fprintf(fid,'%s\n',misc);
+misc = ['      U0=6.0, MEAN_FORCING(1)=.TRUE.']; fprintf(fid,'%s\n',misc);
+misc = ['      V0=16.0,MEAN_FORCING(2)=.TRUE.']; fprintf(fid,'%s\n',misc);
 misc = ['      SURF_DEFAULT=''terrain''/']; fprintf(fid,'%s\n',misc);
 fprintf(fid,'%s\n','  '); % blank line
 
