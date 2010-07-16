@@ -1,6 +1,6 @@
 &HEAD CHID='NRCC_Facade_Win_4_06_MW', TITLE='Oleszkiewicz Experiments' /
 
-&MESH IJK=72,64,108, XB=-3.6,3.6,-1.6,4.8,-0.1,10.7 /
+&MESH IJK=72,80,108, XB=-3.6,3.6,-3.2,4.8,-0.1,10.7 /
 &TIME T_END=180.0 /
 
 &MISC SURF_DEFAULT='WALL' /
