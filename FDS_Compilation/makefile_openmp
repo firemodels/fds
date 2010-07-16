@@ -161,6 +161,7 @@ openmp_mpi_intel_linux_32 : setup $(obj_mpi)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 openmp_intel_linux_64 : FFLAGS = -m64 -static -vec_report0
+#openmp_intel_linux_64 : FFLAGS = -m64 -vec_report0
 openmp_intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
 openmp_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_intel_linux_64 : FOPTIMIZATIONFLAGS = -O3
