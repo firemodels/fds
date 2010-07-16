@@ -1,0 +1,68 @@
+&HEAD CHID='NRCC_Facade_Win_5_05_MW', TITLE='Oleszkiewicz Experiments' /
+
+&MESH IJK=72,64,108, XB=-3.6,3.6,-1.6,4.8,-0.1,10.7 /
+&TIME T_END=180.0 /
+
+&MISC SURF_DEFAULT='WALL' /
+
+&MATL ID='CONCRETE',
+      SPECIFIC_HEAT=0.88,
+      CONDUCTIVITY=1.37,
+      DENSITY=2100. /
+
+&SURF ID='WALL',
+      COLOR='GRAY 50',
+      BACKING='EXPOSED',
+      MATL_ID='CONCRETE',
+      THICKNESS=0.1 /
+
+&SURF ID='Burner', COLOR='RED', HRRPUA=3618. /  5.5 MW Fire
+ SURF ID='Burner', COLOR='RED', HRRPUA=4539. /  6.9 MW Fire
+ SURF ID='Burner', COLOR='RED', HRRPUA=5658. /  8.6 MW Fire
+ SURF ID='Burner', COLOR='RED', HRRPUA=6776. / 10.3 MW Fire
+
+&PROP ID='Heat Flux Gauge', GAUGE_TEMPERATURE=50.0 /
+&DEVC ID='Tot_Flux', QUANTITY='GAUGE HEAT FLUX',      XB=0.0,0.0,0.0,0.0,2.75,10.25, POINTS=76, IOR=-2, PROP_ID='Heat Flux Gauge' /
+&DEVC ID='Con_Flux', QUANTITY='CONVECTIVE HEAT FLUX', XB=0.0,0.0,0.0,0.0,2.75,10.25, POINTS=76, IOR=-2 /
+&DEVC ID='Rad_Flux', QUANTITY='RADIATIVE HEAT FLUX',  XB=0.0,0.0,0.0,0.0,2.75,10.25, POINTS=76, IOR=-2 /
+
+&OBST XB=-3.3, 3.3,-0.4, 5.0,-0.1, 0.0 / Base
+&OBST XB=-3.1,-3.0, 0.0, 4.6, 0.0,10.3 / Left Wall
+&OBST XB= 3.0, 3.1, 0.0, 4.6, 0.0,10.3 / Right Wall
+&OBST XB=-3.0, 3.0, 4.5, 4.6, 0.0,10.3 / Back Wall
+&OBST XB=-3.0, 3.0, 0.0, 0.1, 0.0,10.3 / Front Wall
+&OBST XB=-3.0, 3.0, 0.1, 4.5, 2.8, 2.9 / Ceiling 1
+&OBST XB=-3.0, 3.0, 0.1, 4.5,10.2,10.3 / Ceiling 3
+
+&OBST XB=-1.9,-1.8, 0.4, 4.2, 0.5, 0.6, SURF_IDS='Burner','WALL','WALL' / Burner 1
+&OBST XB=-0.7,-0.6, 0.4, 4.2, 0.5, 0.6, SURF_IDS='Burner','WALL','WALL' / Burner 2
+&OBST XB= 0.6, 0.7, 0.4, 4.2, 0.5, 0.6, SURF_IDS='Burner','WALL','WALL' / Burner 3
+&OBST XB= 1.8, 1.9, 0.4, 4.2, 0.5, 0.6, SURF_IDS='Burner','WALL','WALL' / Burner 4
+
+ HOLE XB=-0.5, 0.5,-0.1, 0.2, 0.7, 2.7 / 0.94 m by 2.00 m Window
+ HOLE XB=-0.5, 0.5,-0.1, 0.2, 0.0, 2.7 / 0.94 m by 2.70 m Window
+ HOLE XB=-1.3, 1.3,-0.1, 0.2, 1.3, 2.7 / 2.60 m by 1.37 m Window
+ HOLE XB=-1.3, 1.3,-0.1, 0.2, 0.7, 2.7 / 2.60 m by 2.00 m Window
+&HOLE XB=-1.3, 1.3,-0.1, 0.2, 0.0, 2.7 / 2.60 m by 2.70 m Window
+
+&HOLE XB=-3.2, 3.2, 0.2, 4.4, 2.9, 6.1 / Windows, second level, left and right
+&HOLE XB=-3.2, 3.2, 0.2, 4.4, 6.5, 9.7 / Windows, third level, left and right
+&HOLE XB=-2.7,-0.1, 4.4, 4.7, 2.9, 6.1 / Back Window, second level
+&HOLE XB= 0.1, 2.7, 4.4, 4.7, 2.9, 6.1 / Back Window, second level
+&HOLE XB=-2.7,-0.1, 4.4, 4.7, 6.5, 9.7 / Back Window, second level
+&HOLE XB= 0.1, 2.7, 4.4, 4.7, 6.5, 9.7 / Back Window, second level
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&BNDF QUANTITY='CONVECTIVE HEAT FLUX'/
+&BNDF QUANTITY='GAUGE HEAT FLUX'/
+&BNDF QUANTITY='RADIATIVE HEAT FLUX'/
+
+&SLCF PBX=0., QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+
+&TAIL /
+
