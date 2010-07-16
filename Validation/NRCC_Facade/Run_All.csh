@@ -22,6 +22,6 @@ $RUNFDS Current_Results NRCC_Facade_Win_4_10_MW fire58 &
 $RUNFDS Current_Results NRCC_Facade_Win_5_05_MW fire58 &
 $RUNFDS Current_Results NRCC_Facade_Win_5_06_MW fire59 &
 $RUNFDS Current_Results NRCC_Facade_Win_5_08_MW fire59 &
-$RUNFDS Current_Results NRCC_Facade_Win_5_10_MW fire78 &
+$RUNFDS Current_Results NRCC_Facade_Win_5_10_MW fire61 &
 
 echo FDS cases submitted
