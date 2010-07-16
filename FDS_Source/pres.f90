@@ -4,8 +4,8 @@ MODULE PRES
  
 USE PRECISION_PARAMETERS
 USE MESH_POINTERS
-USE SCARC_SOLVER, ONLY: SCARC_METHOD, SCARC_CG3D, SCARC_CG2D, SCARC_MG2D, SCARC_GHOSTCELLS, &
-                        SCARC_UPDATE, SCARC_UPDATE_H, SCARC_UPDATE_HS
+USE SCARC_SOLVER, ONLY: SCARC_METHOD, SCARC_CG3D, SCARC_CG2D, SCARC_MG2D, SCARC_BICG2D,  &
+                        SCARC_GHOSTCELLS, SCARC_UPDATE
 
 IMPLICIT NONE
 
@@ -334,25 +334,31 @@ SELECT CASE(IPS)
    CASE(:1) 
       IF (.NOT.TWO_D) THEN
          SELECT CASE(SCARC_METHOD)
-            CASE(0)
+            CASE('FFT')
                CALL H3CZSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
-            CASE(1)
+            CASE('CG')
                write(*,*) 'Still experimental ...'
                stop
-               CALL SCARC_CG3D(NM)
-            CASE(2)
+               !CALL SCARC_CG3D(NM)
+            CASE('BICG')
                write(*,*) 'Still experimental ...'
                stop
-      !!!      CALL SCARC_MG3D(NM)
+               !CALL SCARC_BICG3D(NM)
+            CASE('MG')
+               write(*,*) 'Still experimental ...'
+               stop
+               !CALL SCARC_MG3D(NM)
          END SELECT
       ENDIF
       IF (TWO_D .AND. .NOT. CYLINDRICAL) THEN
          SELECT CASE(SCARC_METHOD)
-            CASE(0)
+            CASE('FFT')
                CALL H2CZSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
-            CASE(1)
+            CASE('CG')
                CALL SCARC_CG2D(NM)
-            CASE(2)
+            CASE('BICG')
+               CALL SCARC_BICG2D(NM)
+            CASE('MG')
                CALL SCARC_MG2D(NM)
          END SELECT
       ENDIF
@@ -421,16 +427,16 @@ END SELECT
 
 ! Apply boundary conditions to H
 
-IF (SCARC_METHOD>0) THEN
+IF (SCARC_METHOD/='FFT') THEN
 
    ! boundary conditions on ghost cells are set pointwise (not facewise)
    ! perform local data exchange to get consistent solution (most probably redundant, has to be checked)
    IF (PREDICTOR) THEN
       CALL SCARC_GHOSTCELLS(H,NM)
-      CALL SCARC_UPDATE(MYID,SCARC_UPDATE_H)
+      CALL SCARC_UPDATE(MYID,'H   ')
    ELSE
       CALL SCARC_GHOSTCELLS(HS,NM)
-      CALL SCARC_UPDATE(MYID,SCARC_UPDATE_HS)
+      CALL SCARC_UPDATE(MYID,'HS  ')
    ENDIF
 
 ELSE

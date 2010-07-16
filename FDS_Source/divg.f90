@@ -1101,7 +1101,7 @@ ELSE TRUE_PROJECTION
    
    ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
    
-   IF (SCARC_METHOD==0) THEN
+   IF (SCARC_METHOD=='FFT') THEN
       !$OMP DO PRIVATE(IW,IIG,JJG,KKG)
       DO IW=1,NEWC
          IF (IJKW(9,IW)==0) CYCLE
