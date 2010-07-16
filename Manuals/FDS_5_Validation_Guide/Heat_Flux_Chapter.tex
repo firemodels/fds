@@ -468,25 +468,86 @@ Control Cable B, Horizontal Cable Tray D, Power Cable F and Vertical Cable Tray 
 
 \clearpage
 
+\section{NRCC Facade Heat Flux Measurements}
+
+Figure~\ref{NRCC_Facade_Image} displays the simulation of a 10.3~MW fire inside and outside of a small
+enclosure. The purpose of the experiment was to measure the heat flux to the exterior facade. The
+FDS heat flux predictions are made at the location of the green points.
+
+\begin{figure}[h!]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=5.0in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_10_MW_0467}
+\end{tabular}
+\end{center}
+\caption[Smokeview rendering of NRCC Facade experiment.]
+{Smokeview rendering of one of the NRCC Facade experiments. The door is
+0.94~m by 2.70~m tall (referred to as ``Window 2'' in the comparison plots). The
+fire is 10.3~MW.}
+\label{NRCC_Facade_Image}
+\end{figure}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_1_05_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_1_06_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_1_08_MW} &
+  \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_05_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_06_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_08_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_2_10_MW} 
+\end{tabular*}
+\label{NRCC_Facade_1}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_05_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_06_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_08_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_3_10_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_05_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_06_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_08_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_4_10_MW}
+\end{tabular*}
+\label{NRCC_Facade_2}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_05_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_06_MW} \\
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_08_MW} &
+\includegraphics[height=2.2in]{FIGURES/NRCC_Facade/NRCC_Facade_Win_5_10_MW}
+\end{tabular*}
+\label{NRCC_Facade_3}
+\end{figure}
+
+
+\clearpage
+
 \section{BRE Spray Tests, Attenuation of Thermal Radiation in Water Spray}
 
 Attenuation of thermal radiation in water sprays was measured using three full-cone type hydraulic nozzles and eight pressures for
-each nozzle. The droplet boundary conditions were determined by assuming $d_m \propto p^{-1/3}$ and $v \propto p^{1/2}$ type of 
+each nozzle. The droplet boundary conditions were determined by assuming $d_m \propto p^{-1/3}$ and $v \propto p^{1/2}$ type of
 dependences between the droplet size, speed and pressure, and by comparing the predicted and measured results at the PDPA measurement location
-0.7 m below the nozzles. For practical reasons, measured median diameter $d_{v50}$ is compared against mean diameter $d_{43}$. For the vertical velocity, 
-arithmetic mean of the droplets is used. These results represent a validation of the boundary conditions. 
+0.7 m below the nozzles. For practical reasons, measured median diameter $d_{v50}$ is compared against mean diameter $d_{43}$. For the vertical velocity,
+arithmetic mean of the droplets is used. These results represent a validation of the boundary conditions.
 The actual validation of radiation attenuation is performed by comparing the experimental and measured attenuations.
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=2.8in]{FIGURES/BRE_Spray/BRE_Spray_W} &
-\includegraphics[width=2.8in]{FIGURES/BRE_Spray/BRE_Spray_Diameter} 
+\includegraphics[width=2.8in]{FIGURES/BRE_Spray/BRE_Spray_Diameter}
 \end{tabular*}
 \label{BRE_Spray_W_and_diam}
 \caption{Comparison of experimental and predicted droplet speeds and mean diameters for the three nozzles and different pressures.}
 \end{figure}
 \begin{figure}[p]
 \begin{tabular}{c}
-\includegraphics[width=5.0in]{FIGURES/BRE_Spray/BRE_Spray_Attenuation} 
+\includegraphics[width=5.0in]{FIGURES/BRE_Spray/BRE_Spray_Attenuation}
 \end{tabular}
 \label{BRE_Spray_Attenuation}
 \caption[Summary radiation attenuations, BRE Spray test series.]{Summary radiation attenuations in the BRE Spray test series.}
