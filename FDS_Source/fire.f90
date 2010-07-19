@@ -211,6 +211,7 @@ DO K=1,KBAR
             ELSE
                DELTA2 = DX(I)*DZ(K)
             ENDIF
+            IF (MAX_FILTER_WIDTH) DELTA2=MAX(DX(I),DY(J),DZ(K))**2
             IF (DYNSMAG) THEN
                CS2 = C_DYNSMAG(I,J,K)**2
             ELSE
@@ -433,6 +434,7 @@ DO K=1,KBAR
             ELSE
                DELTA2 = DX(I)*DZ(K)
             ENDIF
+            IF (MAX_FILTER_WIDTH) DELTA2=MAX(DX(I),DY(J),DZ(K))**2
             MIX_TIME(I,J,K) = C_EDC*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
          ENDIF
          IF (Y_FU_0 < Y_O2_0/RN%O2_F_RATIO) THEN
