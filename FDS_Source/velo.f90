@@ -132,6 +132,7 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
             ELSE
                DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
             ENDIF
+            IF (MAX_FILTER_WIDTH) DELTA=MAX(DX(I),DY(J),DZ(K))
             DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
             DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
             DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
