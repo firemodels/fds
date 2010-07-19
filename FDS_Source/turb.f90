@@ -1540,6 +1540,7 @@ DO K = N_LO(3),N_HI(3)
             ELSE
                DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
             ENDIF
+            IF (MAX_FILTER_WIDTH) DELTA=MAX(DX(I),DY(J),DZ(K))
             C_DYNSMAG(I,J,K) = SQRT(MLHAT(I,J,K)/MMHAT(I,J,K))/DELTA
          ENDIF
          
