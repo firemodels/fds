@@ -4570,7 +4570,50 @@ levels or time step displayed.
 %------------------------ File Formats -------------------------------------------
 %---------------------------------------------------------------------------------
 
-\chapter{File Formats}
+\chapter{File Formats and Extensions}
+\section{FDS and Smokeview File Extensions}
+
+\subsection{FDS file extensions}
+\blist
+\hitem{.bf} File containing boundary file data.
+
+\hitem{.end} File containing endian information.
+
+\hitem{.fds} File containing the FDS input file.
+
+\hitem{.iso} File containing iso-surface data
+
+\hitem{.out} File containing FDS output.
+
+\hitem{.prt} File containing particle file data using FDS 4 and earlier.
+
+\hitem{.prt5} File containing particle file data using FDS 5 and later.
+
+\hitem{.q} File containing PLOT3D data.
+
+\hitem{.sf} File containing slice file data.
+
+\hitem{.s3d} File containing 3D smoke, HRRPUV data.
+\elist
+
+\subsection{Smokeview file extensions}
+
+\blist
+
+\hitem{.ini} File containing Smokeview configuration settings.
+
+\hitem{.smv} File containing Smokeview keyword data.
+
+\hitem{.ssf} File containing a Smokeview script.
+
+\hitem{.svz} File containing compressed boundary, slice or 3D smoke/fire data.  The .svz extension is appended to the .bf, .sf or .s3d extension respectively.
+
+\hitem{.sz} File containing sizing information for uncompressed data files.  The .sz files contain information about each data frame used by Smokeview to allocate memory.
+
+\hitem{.szz} File containing sizing information for compressed .svz files (files compressed with Smokezip with a .svz extension).
+
+\elist
+
 \section{Smokeview Preference File Format (.ini files)}
 \label{sectionconfig}
 \label{appendixini}
