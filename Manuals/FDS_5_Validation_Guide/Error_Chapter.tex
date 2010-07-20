@@ -49,8 +49,8 @@ the cables could be damaged because of the uncertainty in the model and its inpu
 \label{bell_curve}
 \end{figure}
 
-The uncertainty in the prediction of a fire model results from the model's input parameters and
-the model's physical and mathematical assumptions. The two are commonly referred to as
+The uncertainty in a model prediction is a function of the selected input parameters and
+the physical and mathematical assumptions. The two are commonly referred to as
 the {\em parameter uncertainty} and the {\em model uncertainty}, respectively. In general, there are numerous input
 parameters and numerous subroutines that are part of any fire model calculation. Uncertainty analysis seeks to
 assess the impact of each on the final prediction, a considerable problem given all the variables involved.
@@ -113,12 +113,45 @@ changes in events, like a door opening or sprinkler actuation, can lead to signi
 Rather than attempt to decompose the model into its constituent parts and assess the uncertainty of
 each, the strategy adopted here is to compare model predictions to as many
 experiments as possible. This has been the traditional approach for quantifying model uncertainty in fire
-protection engineering because of the relative abundance of test data.
-However, before the model uncertainty can be quantified, the uncertainty of the
-measurements against which the model predictions are compared must be quantified. This is discussed in the next section.
+protection engineering because of the relative abundance of test data. Consider, for example, the
+plot shown in Fig.~\ref{scatterplot}. This is the typical outcome of a validation study, where in this case a series of
+heat flux measurements are compared with model predictions.
+The diagonal line indicates where the prediction and measurement agree.
+But because there is uncertainty associated with each, it cannot be said that the model is perfect if its predictions
+agree exactly with measurements.
+There needs to be a way of quantifying the uncertainties of each before any conclusions can be drawn.
+Such an exercise would result in the uncertainty
+bars\footnote{The data in Fig.~\ref{scatterplot} was extracted from Ref.~\cite{NUREG_1824}.
+The uncertainty bars are for demonstration only.}
+shown in the figure. The
+horizontal bar associated with each point represents the uncertainty in the measurement itself.
+For example, the heat flux gauge is subject to uncertainty due to its design and fabrication.
+Because the horizontal bar represents the experimental uncertainty, it is assumed that the vertical
+bar represents the model uncertainty. This is only partially true. In fact the vertical bar represents the total
+uncertainty of the prediction, which is a combination of the {\em model} and {\em parameter} uncertainties. The physical
+input parameters, like the heat release rate and material properties, are based on measurements that are reported
+in the documentation of the experiment.
+The total {\em experimental uncertainty} is represented by all of the horizontal bar and part of the vertical.
+If the {\em experimental uncertainty} can be quantified, then the {\em model uncertainty} can be obtained as a result.
 
 
-\subsection{Experimental Uncertainty}
+\begin{figure}[t]
+\begin{center}
+\includegraphics[height=3.in]{FIGURES/scatterplot}
+\end{center}
+\caption[Sample scatter plot.]{Example of a typical scatter plot of model predictions and experimental measurements.}
+\label{scatterplot}
+\end{figure}
+
+
+\subsection{Quantifying the Experimental Uncertainty}
+
+As discussed in the previous section, the {\em experimental uncertainty} is a combination of the uncertainty
+in the measurement of the quantity of interest, like the gas temperature or heat flux, along with the propagated
+uncertainty of the measured test parameters, like the heat release rate or material properties.
+``Propagated uncertainty'' is, in this case, what has been referred to above as the parameter uncertainty.
+It is not the uncertainty of the parameter itself, but rather the uncertainty in the predicted quantity
+resulting from the uncertainty of the parameter.
 
 In a recent fire model validation study conducted by the U.S.~Nuclear Regulatory Commission~\cite{NUREG_1824},
 Hamins estimated the experimental uncertainty for several full-scale fire experiments. There were
@@ -155,8 +188,6 @@ predicted by the model has an uncertainty\footnote{An uncertainty that is expres
 percentage typically means one or two {\em relative} standard deviations, often denoted with a tilde,
 $\widetilde{\sigma}=\sigma/\mu$.} of at least 10~\%.
 
-Table~\ref{Parameter_Uncertainty} lists the most important physical parameters associated with various
-measured quantities in the experiments and their power dependence.
 
 
 \begin{table}[t]
@@ -182,20 +213,22 @@ Surface Temperature                             & HRR                   & 2/3   
 \label{Parameter_Uncertainty}
 \end{table}
 
+The uncertainty of each measurement is expressed as a relative standard deviation. The uncertainty of the measured
+\underline{o}utput quantity is denoted $\widetilde{\sigma}_o$, and the uncertainty of each
+significant \underline{i}nput parameter is denoted $\widetilde{\sigma}_i$.
+Assuming that all the uncertainties are uncorrelated, they are combined via the expression:
+\be
+   \widetilde{\sigma}_E^2 = \widetilde{\sigma}_o^2 + \sum_i p_i^2 \, \widetilde{\sigma}_i^2  \label{comb_unc}
+\ee
+The factors, $p_i$, represent the power dependencies of the individual input parameters.
+Table~\ref{Parameter_Uncertainty} lists the most important physical parameters associated with various
+measured quantities in the experiments and their power dependence.
 
-It was assumed that the measurement and parameter uncertainty are uncorrelated, and they were combined by
-quadrature (summing of squares) to yield a combined
-experimental uncertainty. Another way to look at this is to recognize that the combined uncertainty is
-represented as the diagonal of the rectangle formed
-from the horizontal and vertical uncertainty/error bars in Fig.~\ref{scatterplot}.
 
-Hamins performed this exercise for ten quantities of interest in the U.S. NRC validation study.
+Hamins estimated the combined experimental uncertainties for ten quantities of interest in the U.S.~NRC validation study.
 The results are summarized in Table~\ref{Uncertainty}, with
 each combined uncertainty reported in the form of a 95~\% confidence interval ({\em i.e.} $2 \, \widetilde{\sigma}_E$).
-The tilde above the $\sigma$ denotes a
-{\em relative uncertainty}, which is a convenient way to report it because it is assumed that the uncertainty in the
-reported value is proportional to
-its magnitude. This assumption is made throughout the analysis for both measurement uncertainty and model error.
+It is assumed throughout that both experiment and model uncertainties can be expressed in relative terms.
 The assumption is based on a
 qualitative assessment of dozens of scatter plots similar to that shown in Fig.~\ref{scatterplot} that show
 the scattered points to form an expanding ``wedge''
@@ -257,28 +290,7 @@ compare the two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {
 discuss various possible metrics. A commonly used metric is simply to compare the measured and predicted peak values.
 If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
 this exercise is a pair of numbers for each plot, $(E_i,M_i)$, that can be depicted graphically as shown in Fig.~\ref{scatterplot}.
-The diagonal line in the plot indicates where a prediction and measurement agree.
-But because there is uncertainty associated with each, it cannot be said that the model is perfect if its predictions
-agree exactly with measurements.
-There needs to be a way of quantifying the uncertainties of each before any conclusions can be drawn.
-Such an exercise would result in the uncertainty
-bars\footnote{The data in Fig.~\ref{scatterplot} was extracted from Ref.~\cite{NUREG_1824}.
-The uncertainty bars are for demonstration only.}
-shown in the figure. The
-horizontal bar associated with each point represents the uncertainty in the measurement itself.
-For example, a thermocouple used to measure a gas
-temperature has uncertainty. The vertical bar, however, results from the combination of the model
-and parameter uncertainty, like the heat release rate and material properties that are reported by the experimentalist.
-The {\em experimental uncertainty} is the combination of the measurement and input parameter uncertainty.
-Decoupling the model from the experimental uncertainty is the subject of the analysis below.
 
-\begin{figure}[t]
-\begin{center}
-\includegraphics[height=3.in]{FIGURES/scatterplot}
-\end{center}
-\caption[Sample scatter plot.]{Example of a typical scatter plot of model predictions and experimental measurements.}
-\label{scatterplot}
-\end{figure}
 
 
 Actually, the ``plus or minus'' uncertainty bounds are expressed as a statistical distribution. In other words, the
