@@ -474,7 +474,7 @@ end do
 
 close (unit = file_num)
 
-1	format (i3.3)
+1 format (i3.3)
 
 END SUBROUTINE spectrum_f90
 
@@ -1039,7 +1039,7 @@ IMPLICIT NONE
 800   if(i1rng-np1)805,900,900
 805   do 860 i3=1,ntot,np2
       i2max=i3+np2-np1
-      do 860 i2=i3,i2max,np1
+      do 861 i2=i3,i2max,np1
       imin=i2+i1rng
       imax=i2+np1-2
       jmax=2*i3+np1-imin
@@ -1052,16 +1052,20 @@ IMPLICIT NONE
       data(i+1)=-data(j+1)
 840   j=j-2
 850   j=jmax
-      do 860 i=imin,imax,np0
+      do 862 i=imin,imax,np0
       data(i)=data(j)
       data(i+1)=-data(j+1)
-860   j=j-np0
+      j=j-np0
+862   continue
+861   continue
+860   continue
 !
 !     end of loop on each dimension
 !
 900   np0=np1
       np1=np2
-910   nprev=n
+      nprev=n
+910   continue
 
       ! reshape data back to 3D complex array
       
@@ -1822,7 +1826,7 @@ DO K = N_LO(3),N_HI(3)
    DO J = N_LO(2),N_HI(2)
       DO I = N_LO(1),N_HI(1)
 
-         IF (KRES(I,J,K)>TURBULENT_KINETIC_ENERGY_TOLERANCE) THEN
+         IF (KRES(I,J,K)>TKE_TOLERANCE) THEN
             KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
             MTR(I,J,K) = KSGS/(KRES(I,J,K)+KSGS)
          ELSE
@@ -3926,13 +3930,13 @@ REAL(EB), INTENT(IN) :: UU(0:1,0:1,0:1),DXI(3),LL(3)
 !
 !===========================================================
 
-TRILINEAR = UU(0,0,0)*(LL(1)-DXI(1))*(LL(2)-DXI(2))*(LL(3)-DXI(3)) +	&
-            UU(1,0,0)*DXI(1)*(LL(2)-DXI(2))*(LL(3)-DXI(3)) +		&
-            UU(0,1,0)*(LL(1)-DXI(1))*DXI(2)*(LL(3)-DXI(3)) +		&
-            UU(0,0,1)*(LL(1)-DXI(1))*(LL(2)-DXI(2))*DXI(3) +		&
-            UU(1,0,1)*DXI(1)*(LL(2)-DXI(2))*DXI(3) +			&
-            UU(0,1,1)*(LL(1)-DXI(1))*DXI(2)*DXI(3) +			&
-            UU(1,1,0)*DXI(1)*DXI(2)*(LL(3)-DXI(3)) +			&
+TRILINEAR = UU(0,0,0)*(LL(1)-DXI(1))*(LL(2)-DXI(2))*(LL(3)-DXI(3)) +    &
+            UU(1,0,0)*DXI(1)*(LL(2)-DXI(2))*(LL(3)-DXI(3)) +            &
+            UU(0,1,0)*(LL(1)-DXI(1))*DXI(2)*(LL(3)-DXI(3)) +            &
+            UU(0,0,1)*(LL(1)-DXI(1))*(LL(2)-DXI(2))*DXI(3) +            &
+            UU(1,0,1)*DXI(1)*(LL(2)-DXI(2))*DXI(3) +                    &
+            UU(0,1,1)*(LL(1)-DXI(1))*DXI(2)*DXI(3) +                    &
+            UU(1,1,0)*DXI(1)*DXI(2)*(LL(3)-DXI(3)) +                    &
             UU(1,1,1)*DXI(1)*DXI(2)*DXI(3)
 
 TRILINEAR = TRILINEAR/(LL(1)*LL(2)*LL(3))
