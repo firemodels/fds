@@ -668,7 +668,7 @@ GRID_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
       WRITE(9,*) 'NMESHES=', NMESHES
       WRITE(9,*) 'NCELLS_LOCAL=', SL%NCELLS_LOCAL
       WRITE(9,*) 'NCELLS_GLOBAL=', SL%NCELLS_GLOBAL
-      CALL flush (9)
+      !CALL flush (9)
    ENDIF
 
    IBAR0=IBAR0/2
@@ -827,7 +827,7 @@ GRID_LEVEL_LOOP3D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
       WRITE(9,*) 'NMESHES=', NMESHES
       WRITE(9,*) 'NCELLS_LOCAL=', SL%NCELLS_LOCAL
       WRITE(9,*) 'NCELLS_GLOBAL=', SL%NCELLS_GLOBAL
-      CALL flush (9)
+      !CALL flush (9)
    ENDIF
 
    IBAR0=IBAR0/2
@@ -879,7 +879,7 @@ IF (SCARC_DEBUG >= 2) THEN
    WRITE (9,*) 'HIER SCHAUEN, WELCHES GEBRAUCHT WIRD'
    WRITE (9,*) 'NEWC=', M%NEWC
    WRITE (9,*) 'NWC=', M%NWC
-   CALL flush (9)
+   !CALL flush (9)
 ENDIF
     
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -977,7 +977,7 @@ IF (SCARC_DEBUG>=2) THEN
    WRITE(9,*) 'NDIAG_NBR(1:2,2,2)=',S%NDIAG_NBR(1,2,2), S%NDIAG_NBR(2,2,2)
    WRITE(9,*) 'NDIAG_NBR(1:2,2,3)=',S%NDIAG_NBR(1,2,3), S%NDIAG_NBR(2,2,3)
    WRITE(9,*) 'NDIAG_NBR(1:2,2,4)=',S%NDIAG_NBR(1,2,4), S%NDIAG_NBR(2,2,4)
-   flush(9)
+   !flush(9)
 ENDIF
       
 
@@ -1169,7 +1169,7 @@ IF (SCARC_DEBUG >= 2) THEN
    WRITE(9,'(4i4)') ((SLMAX%K_MIN_FACE(IM,JM),JM=1,NMESHES),IM=1,NMESHES)
    WRITE(9,*) 'K_MAX0:'
    WRITE(9,'(4i4)') ((SLMAX%K_MAX_FACE(IM,JM),JM=1,NMESHES),IM=1,NMESHES)
-   flush(9)
+   !flush(9)
 ENDIF
 
 IF (USE_MPI) THEN
@@ -1203,7 +1203,7 @@ IF (SCARC_DEBUG >= 2) THEN
    WRITE(9,'(4i4)') ((SLMAX%K_MIN_FACE(IM,JM),JM=1,NMESHES),IM=1,NMESHES)
    WRITE(9,*) 'K_MAX0:'
    WRITE(9,'(4i4)') ((SLMAX%K_MAX_FACE(IM,JM),JM=1,NMESHES),IM=1,NMESHES)
-   flush(9)
+   !flush(9)
 ENDIF
 
 SLMAX%I_MIN_FACE = TRANSPOSE(SLMAX%I_MIN_FACE)
@@ -1232,7 +1232,7 @@ IF (SCARC_DEBUG>=2) THEN
    WRITE(9,'(2i4)') ((SLMAX%K_MAX_FACE(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
    WRITE(9,*) 'IOR_FACE:'
    WRITE(9,'(2i4)') ((S%IOR_FACE(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   call flush(9)
+   !call flush(9)
 ENDIF
 
     
@@ -1429,7 +1429,7 @@ SEARCH_DIAG_NBR2D: DO IVRTX=1,S%NVRTX0
             WRITE(9,*) 'IIO_MAX=',IIO_MAX
             WRITE(9,*) 'KKO_MIN=',KKO_MIN
             WRITE(9,*) 'KKO_MAX=',KKO_MAX
-            flush(9)
+            !flush(9)
          ENDIF
 
       ENDIF
@@ -1524,7 +1524,7 @@ IF (SCARC_DEBUG >= 2) THEN
       WRITE (9, '(2i4)') (SLMAX%NIC_DIAG(IM,JM),IM=1,NMESHES)
    ENDDO
    write (9,*) 'USE_MPI=',USE_MPI
-   flush(9)
+   !flush(9)
 ENDIF
 
 IF (USE_MPI) THEN
@@ -1596,7 +1596,7 @@ IF (SCARC_DEBUG >= 2) THEN
                      SLMAX%K_MIN_FACE(NM,IM),':',SLMAX%K_MAX_FACE(NM,IM),')'
       ENDIF
    ENDDO
-   flush(9)
+   !flush(9)
 ENDIF
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1623,7 +1623,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_PRECON_CG =='MG') THEN
          WRITE(9,*) 'SLLO%NW_FACE=',SLLO%NW_FACE
          WRITE(9,*) 'SLLO%IBAR       =',SLLO%IBAR 
          WRITE(9,*) 'SLLO%KBAR       =',SLLO%KBAR 
-         flush(9)
+         !flush(9)
       ENDIF
    
       IW_LO=1
@@ -2184,7 +2184,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_PRECON_CG =='MG') THEN
          DO JM=1,NMESHES
             WRITE (9, '(10i5)') (SLLO%I_MIN_FACE(IM,JM),IM=1,NMESHES)
          ENDDO
-         flush(9)
+         !flush(9)
       ENDIF
 
       IF (USE_MPI) THEN
@@ -2440,7 +2440,7 @@ COM_LEVEL_LOOP2D: DO ILEVEL=S%NLEVEL_MAX,S%NLEVEL_MIN,-1
          WRITE (9,'(a,i2,a,i2,a,i2,a,a,i2,a,i2,a,i2,a,i2,a,i2,a,i2,a,i2,a,i2,a)') 'LEVEL ',ILEVEL,&
                      ': allocate FACE-vectors for SCARC(', NM, ')%OSCARC(', NOM, ')',&
                      '%VEC(',IMIN,':',IMAX,',',JMIN,':',JMAX,',',KMIN,':',KMAX,')'
-         CALL flush (9)
+         !CALL flush (9)
       ENDIF
     
    ENDDO FACE_NBR_LOOP2D
@@ -7299,7 +7299,7 @@ IF (SCARC_DEBUG >= 2) THEN
          ENDDO
       ENDIF
    ENDIF
-   CALL flush (9)
+   !CALL flush (9)
 ENDIF
  
 END SUBROUTINE SCARC_COMPARE_SINGLE
@@ -7347,7 +7347,7 @@ IF (SCARC_DEBUG >= 2) THEN
          ENDDO
       ENDIF
    ENDIF
-   CALL flush (9)
+   !CALL flush (9)
 ENDIF
 END SUBROUTINE SCARC_COMPARE_SINGLE0
  
@@ -7396,7 +7396,7 @@ IF (SCARC_DEBUG >= 2) THEN
          ENDDO
       ENDIF
    ENDIF
-   CALL flush (9)
+   !CALL flush (9)
 ENDIF
  
  
@@ -7482,7 +7482,7 @@ IF (SCARC_DEBUG >= 2) THEN
          ENDDO
       ENDIF
    ENDIF
-   CALL flush (9)
+   !CALL flush (9)
 ENDIF
  
 END SUBROUTINE SCARC_COMPARE_SINGLE02

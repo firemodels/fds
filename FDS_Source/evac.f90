@@ -4703,7 +4703,7 @@ CONTAINS
                ('DoorCounter', i=1,N_DOORS), &
                ('TargetExitCounter', i=1,N_EXITS-n_co_exits), &
                ('TargetDoorCounter', i=1,N_DOORS), &
-               ('DensityCounter', i=1,(j_density-j_ntargets)), &
+               ('DensityCounter', i=1,j_density-j_ntargets), &
                'Agents','FED_Index','FED_Index'
           WRITE (LU_EVACCSV,tcform) 'EVAC_Time','AllAgents', &
                (TRIM(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
@@ -4737,7 +4737,7 @@ CONTAINS
                ('DoorCounter', i=1,N_DOORS), &
                ('TargetExitCounter', i=1,N_EXITS-n_co_exits), &
                ('TargetDoorCounter', i=1,N_DOORS), &
-               ('DensityCounter', i=1,(j_density-j_ntargets))
+               ('DensityCounter', i=1,j_density-j_ntargets)
           WRITE (LU_EVACCSV,tcform) 'EVAC_Time','AllAgents', &
                (TRIM(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
                (TRIM(EVAC_CORRS(i)%ID), i=1,n_corrs), &

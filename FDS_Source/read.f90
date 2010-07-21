@@ -1104,7 +1104,7 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,PRESSURE_RELAX_FACTOR,RELAXATION_FACTOR,FYI, &
                 H_EDDY,H_LOGLAW,H_CHILTON_COLBURN,LIMITING_DT_RATIO, &
                 NOBIAS,VAN_DRIEST,HRRPUVCUT_MAX,EMBEDDED_MESH,RUN_AVG_FAC,THERMOPHORETIC_DEPOSITION,TURBULENT_DEPOSITION, &
                 VEG_LEVEL_SET,CP_FTMP,HRRPUV_MAX_SMV,EXTINCTION2,TERRAIN_IMAGE,NEW_EVAP, &
-                SCALAR_ENERGY_TOLERANCE,TURBULENT_KINETIC_ENERGY_TOLERANCE,MEAN_FORCING,RFAC_FORCING,MAX_FILTER_WIDTH
+                SCALAR_ENERGY_TOLERANCE,TKE_TOLERANCE,MEAN_FORCING,RFAC_FORCING,MAX_FILTER_WIDTH
  
 ! Physical constants
  
@@ -3762,7 +3762,7 @@ READ_MATL_LOOP: DO N=1,N_MATL
 
       DO NN=1,N_REACTIONS
          IF (REFERENCE_TEMPERATURE(NN)<-TMPM  .AND. (E(NN)< 0._EB .OR. A(NN)<0._EB)) THEN
-            WRITE(MESSAGE,'(A,A,A,I2,A)') 'ERROR: Problem with MATL ',TRIM(ID),', REAC ',NN,'. Set REFERENCE_TEMPERATURE or E and A'
+            WRITE(MESSAGE,'(A,A,A,I2,A)') 'ERROR: Problem with MATL ',TRIM(ID),', REAC ',NN,'. Set REFERENCE_TEMPERATURE or E, A'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          IF (NU_FUEL(NN)==0._EB .AND. NU_WATER(NN)==0._EB .AND. NU_RESIDUE(NN)==0._EB .AND. SUM(NU_GAS(NN,:))==0._EB) THEN
@@ -5715,8 +5715,8 @@ MESH_LOOP: DO NM=1,NMESHES
                   IF (SURFACE(OB%IBC(NNN))%BURN_AWAY) THEN
                      OB%CONSUMABLE = .TRUE.
                      IF (.NOT.SAWTOOTH) THEN
-                        IF (ID=='null') WRITE(MESSAGE,'(A,I5,A)')'ERROR: OBST ',N,       ' cannot be BURN_AWAY and SAWTOOTH=.FALSE.'
-                        IF (ID/='null') WRITE(MESSAGE,'(A,A,A)') 'ERROR: OBST ',TRIM(ID),' cannot be BURN_AWAY and SAWTOOTH=.FALSE.'
+                        IF (ID=='null')WRITE(MESSAGE,'(A,I5,A)')'ERROR: OBST ',N,       ' cannot be BURN_AWAY and SAWTOOTH=.FALSE.'
+                        IF (ID/='null')WRITE(MESSAGE,'(A,A,A)') 'ERROR: OBST ',TRIM(ID),' cannot be BURN_AWAY and SAWTOOTH=.FALSE.'
                         CALL SHUTDOWN(MESSAGE)
                      ENDIF
                   ENDIF
@@ -6525,8 +6525,8 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF (MESH_ID/='null' .AND. MESH_ID/=MESH_NAME(NM))  REJECT_VENT = .TRUE.
  
       IF (XB(3)==XB(4) .AND. TWO_D .AND. NN<NVO-1) THEN
-         IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)')'ERROR: VENT ',NN,      ' cannot be specified on a y boundary in a 2D calculation'
-         IF (ID/='null') WRITE(MESSAGE,'(A,A,A)') 'ERROR: VENT ',TRIM(ID),' cannot be specified on a y boundary in a 2D calculation'
+         IF (ID=='null')WRITE(MESSAGE,'(A,I4,A)')'ERROR: VENT ',NN,      ' cannot be specified on a y boundary in a 2D calculation'
+         IF (ID/='null')WRITE(MESSAGE,'(A,A,A)') 'ERROR: VENT ',TRIM(ID),' cannot be specified on a y boundary in a 2D calculation'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
  
@@ -8317,8 +8317,7 @@ MESH_LOOP: DO NM=1,NMESHES
             SL%FIRE_LINE = FIRE_LINE
             SL%LEVEL_SET_FIRE_LINE = LEVEL_SET_FIRE_LINE
             IF (LEVEL_SET_FIRE_LINE .AND. .NOT. VEG_LEVEL_SET) THEN
-               WRITE(MESSAGE,'(A,A,A)') "ERROR: In order to have a level fire line slice file, &
-                                         VEG_LEVEL_SET must be TRUE on &MISC to run the LS model"
+               WRITE(MESSAGE,'(A)') "ERROR: VEG_LEVEL_SET must be TRUE on MISC line to run the LS model"
                CALL SHUTDOWN(MESSAGE)
             ENDIF
          ELSE
