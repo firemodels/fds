@@ -33,7 +33,7 @@ echo Updating %linux_fdsdir% in the Linux repository on acrux to SVN revision: %
 plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %linux_fdsdir% %fds_revision% acrux.cfr.nist.gov
 
 echo.
-echo Updating %linux_fdsdir% in the OSX repository on bluesky to SVN revision: %fds_revision%
-plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %linux_fdsdir% %fds_revision% bluesky.cfr.nist.gov
+echo Updating %linux_fdsdir% in the OSX repository on %OSXHOST% to SVN revision: %fds_revision%
+plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %linux_fdsdir% %fds_revision% %OSXHOST%
 
 pause

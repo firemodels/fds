@@ -30,6 +30,6 @@ plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% acr
 
 echo.
 echo Updating the OSX repository, %linux_svn_root%, to the latest revision
-plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% bluesky.cfr.nist.gov
+plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% %OSXHOST%
 
 pause

@@ -2,7 +2,7 @@
 
 set SVNROOT=~/FDS-SMV
 #set OSXHOST=tiger.cfr.nist.gov
-set OSXHOST=bluesky.cfr.nist.gov
+set OSXHOST=$1
 set LINUX64HOST=fire79
 
 echo
