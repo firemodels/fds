@@ -652,7 +652,7 @@ void keyboard(unsigned char key, int x, int y){
   GLUTPOSTREDISPLAY
   updatemenu=1;
   key2 = (char)key;
-  if(key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='M'
+  if(key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='M'&&key2!='A'
 #ifdef pp_CULL
     &&key2!='C'
 #endif
@@ -661,6 +661,12 @@ void keyboard(unsigned char key, int x, int y){
 #endif
     &&isupper(key2))key2=tolower(key2); /* map upper case characters to lower */
 
+  if(strncmp((const char *)&key2,"A",1)==0){
+    axissmooth=1-axissmooth;
+    update_colorbar_smooth();
+    updatemenu=1;
+    return;
+  }
 #ifdef pp_LIGHT
   if(strncmp((const char *)&key2,"L",1)==0){
     show_smokelighting = 1 - show_smokelighting;
