@@ -117,6 +117,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define TRANSPARENTLEVEL 110
 #define COLORBAR_LINES 111
 #define COLORBAR_LIST2 112
+#define COLORBAR_SMOOTH 113
 
 #define UPDATE_VECTOR 101
 
@@ -191,6 +192,7 @@ GLUI_EditText *con_part_chopmin=NULL, *con_part_chopmax=NULL;
 GLUI_RadioGroup *con_slice_setmin=NULL, *con_slice_setmax=NULL;
 GLUI_Checkbox *showchar_checkbox=NULL, *showonlychar_checkbox;
 GLUI_Checkbox *CHECKBOX_showcolorbarlines=NULL;
+GLUI_Checkbox *CHECKBOX_axissmooth=NULL;
 GLUI_Checkbox *CHECKBOX_extreme2=NULL;
 GLUI_Checkbox *startup_checkbox=NULL;
 GLUI_Checkbox *check_overwrite_all=NULL;
@@ -252,6 +254,12 @@ GLUI_RadioGroup *con_part_setmin=NULL, *con_part_setmax=NULL;
 GLUI_EditText *con_p3_min=NULL, *con_p3_max=NULL;
 GLUI_EditText *con_p3_chopmin=NULL, *con_p3_chopmax=NULL;
 GLUI_RadioGroup *con_p3_setmin=NULL, *con_p3_setmax=NULL;
+
+/* ------------------ update_colorbar_smooth ------------------------ */
+
+extern "C" void update_colorbar_smooth(void){
+  CHECKBOX_axissmooth->set_int_val(axissmooth);
+}
 
 /* ------------------ update_colorbar_list2 ------------------------ */
 
@@ -645,7 +653,7 @@ extern "C" void glui_bounds_setup(int main_window){
     }
     LISTBOX_colorbar2->set_int_val(colorbartype);
   }
-  glui_bounds->add_checkbox_to_panel(panel_colorbar,"Smooth colorbar labels",&axissmooth);
+  CHECKBOX_axissmooth=glui_bounds->add_checkbox_to_panel(panel_colorbar,"Smooth colorbar labels",&axissmooth,COLORBAR_SMOOTH,Slice_CB);
   CHECKBOX_showcolorbarlines=glui_bounds->add_checkbox_to_panel(panel_colorbar,"Lines",&showcolorbarlines,COLORBAR_LINES,Slice_CB);
   CHECKBOX_extreme2=glui_bounds->add_checkbox_to_panel(panel_colorbar,"Highlight extreme data",&show_extremedata,
     COLORBAR_EXTREME2,Slice_CB);
@@ -1740,6 +1748,10 @@ extern "C" void Slice_CB(int var){
     if(showcolorbarlines==1)p3cont2d=SHADED_CONTOURS;
     update_plot3d_display();
     updatecolors(-1);
+    return;
+  }
+  if(var==COLORBAR_SMOOTH){
+    updatemenu=1;
     return;
   }
   ASSERT(con_slice_min!=NULL);
