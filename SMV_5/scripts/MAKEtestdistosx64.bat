@@ -25,7 +25,7 @@ set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
 
 echo making OSX test distribution archive
-plink %svn_logon% %scriptdir%/MAKEtestdistosx64.csh %smv_revision%
+plink %svn_logon% %scriptdir%/MAKEtestdistosx64.csh %smv_revision% %OSXHOST%
 
 echo downloading OSX test distribution archive
 pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_osx_64.tar.gz ..\for_bundle\to_google\.

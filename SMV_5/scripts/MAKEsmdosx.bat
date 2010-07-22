@@ -24,7 +24,7 @@ cd %svn_root%\smv_5\scripts
 set scriptdir=FDS-SMV/SMV_5/scripts
 echo Building 32 and 64 bit OSX versions of smokediff
 
-plink %svn_logon% %scriptdir%/ssh_command.csh bluesky.cfr.nist.gov %scriptdir% MAKEsmdosx.csh
+plink %svn_logon% %scriptdir%/ssh_command.csh %OSXHOST% %scriptdir% MAKEsmdosx.csh
 
 echo.
 echo compilation complete

@@ -39,7 +39,7 @@ set scriptdir=FDS-SMV/SMV_5/scripts
 set bundledir=FDS-SMV/SMV_5/for_bundle
 
 plink %svn_logon% %scriptdir%/svn_update.csh
-plink %svn_logon% %scriptdir%/make_smvs.csh
+plink %svn_logon% %scriptdir%/make_smvs.csh %OSXHOST%
 plink %svn_logon% %scriptdir%/make_dists.csh %version%
 
 echo downloading Linux Smokeview files

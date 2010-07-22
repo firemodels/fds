@@ -23,7 +23,7 @@ cd %svn_root%\smv_5\scripts
 
 set scriptdir=FDS-SMV/SMV_5/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.csh bluesky %scriptdir% COPYsmzosx.csh
+plink %svn_logon% %scriptdir%/ssh_command.csh %OSXHOST% %scriptdir% COPYsmzosx.csh
 
 echo.
 echo copy complete
