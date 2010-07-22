@@ -399,6 +399,7 @@ void InitOpenGL(void){
   light_position1[3]=0.f;
 
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
+//xxx  glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,GL_TRUE);
   updateLights(1);
 
   {

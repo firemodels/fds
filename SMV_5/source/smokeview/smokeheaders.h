@@ -27,6 +27,7 @@ int SUB_portfrustum(int quad,
                    GLdouble fleft, GLdouble fright, GLdouble fdown, GLdouble fup, GLdouble fnear, GLdouble ffar,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
+EXTERNCPP void update_colorbar_smooth(void);
 EXTERNCPP void update_tbounds(void);
 EXTERNCPP void updateGluiTimeBounds(float time_min, float time_max);
 EXTERNCPP void settimeval(float timeval);
