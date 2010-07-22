@@ -2,7 +2,7 @@
 set version=$1
 set revision=$2
 set SVNROOT=~/FDS-SMV
-set OSXHOST=bluesky.cfr.nist.gov
+set OSXHOST=$3
 
 set BINDIR=$SVNROOT/SMV_5/bin
 set FORBUNDLE=$SVNROOT/SMV_5/for_bundle
