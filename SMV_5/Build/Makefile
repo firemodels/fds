@@ -51,7 +51,7 @@ objwin = $(obj:.o=.obj)
 
 # include file directory locations (should be the same for all builds)
 
-INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui -I $(INC_DIR)/gd -I $(SOURCE_DIR)/shared
+INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui -I $(INC_DIR)/gd -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview
 
 #*** General Purpose Rules ***
 

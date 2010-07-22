@@ -1,5 +1,5 @@
 SOURCE_DIR = ../../../SMV_5/source/
-INC_DIR = -I $(SOURCE_DIR)/shared
+INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip
 FILTERC =
 FILTERF =
 
@@ -14,8 +14,8 @@ OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 
 # Definition of the object variables
 
-obj = assert.o CNV3dsmoke.o CNVboundary.o CNViso.o CNVpart.o CNVplot3d.o CNVslice.o csphere.o dmalloc.o egz_stdio.o endian.o histogram.o main.o readfiles.o utilities.o getdata.o getsizes.o
-objwin = main.obj dmalloc.obj assert.obj utilities.obj readsmv.obj IOdboundary.obj IOdslice.obj IOdplot.obj getdata.obj getsizes.obj histogram.obj
+obj = assert.o CNV3dsmoke.o CNVboundary.o CNViso.o CNVpart.o CNVplot3d.o CNVslice.o csphere.o dmalloc.o egz_stdio.o endian.o histogram.o main.o readfiles.o utilities.o getdata.o getsizes.o isobox.o
+objwin = main.obj dmalloc.obj assert.obj utilities.obj readsmv.obj IOdboundary.obj IOdslice.obj IOdplot.obj getdata.obj getsizes.obj histogram.obj isobox.obj
 
 #*** General Purpose Rules ***
 
