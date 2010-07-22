@@ -211,7 +211,7 @@ DO K=1,KBAR
             ELSE
                DELTA2 = DX(I)*DZ(K)
             ENDIF
-            IF (MAX_FILTER_WIDTH) DELTA2=MAX(DX(I),DY(J),DZ(K))**2
+            IF (USE_MAX_FILTER_WIDTH) DELTA2=MAX(DX(I),DY(J),DZ(K))**2
             IF (DYNSMAG) THEN
                CS2 = C_DYNSMAG(I,J,K)**2
             ELSE
@@ -425,7 +425,7 @@ DO K=1,KBAR
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_0,ITMP)            
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_N,ICFT)
             DYAIR = DYF * (1._EB - Y_FU_0) / Y_O2_0 * RN%O2_F_RATIO
-            IF ( (DYF*H_F_0 + DYAIR*H_G_0)*TMP(I,J,K) + DYF*DELTAH_F < (DYF*H_F_N + DYAIR*H_G_N)*RN%CRIT_FLAME_TMP) CYCLE
+            IF ( (DYF*H_F_0 + DYAIR*H_G_0)*TMP(I,J,K) + DYF*DELTAH_F < (DYF*H_F_N + DYAIR*H_G_N)*RN%CRIT_FLAME_TMP ) CYCLE
          ENDIF IF_SUPPRESSION2
                         
          IF (LES .AND. EDDY_DISSIPATION) THEN
@@ -434,7 +434,7 @@ DO K=1,KBAR
             ELSE
                DELTA2 = DX(I)*DZ(K)
             ENDIF
-            IF (MAX_FILTER_WIDTH) DELTA2=MAX(DX(I),DY(J),DZ(K))**2
+            IF (USE_MAX_FILTER_WIDTH) DELTA2=MAX(DX(I),DY(J),DZ(K))**2
             MIX_TIME(I,J,K) = C_EDC*SC*RHO(I,J,K)*DELTA2/MU(I,J,K)
          ENDIF
          IF (Y_FU_0 < Y_O2_0/RN%O2_F_RATIO) THEN
