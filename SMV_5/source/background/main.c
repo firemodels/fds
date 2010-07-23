@@ -165,6 +165,7 @@ int main(int argc, char **argv){
         strcpy(hostname,buffer);
         hd->hostname=hostname;
         hd->ncores=get_host_ncores(hostname);
+        printf("host: %s ncores=%i\n",hostname,hd->ncores);
         hd++;
       }
 
@@ -182,11 +183,9 @@ int main(int argc, char **argv){
 
 #ifdef WIN32
   GetSystemTimesAddress();
-#endif
   cpu_usage=cpuusage();
   Sleep(200);
   cpu_usage=cpuusage();
-#ifdef WIN32
   while(cpu_usage>cpu_usage_max){
     Sleep(2000);
     cpu_usage=cpuusage();
@@ -198,6 +197,9 @@ int main(int argc, char **argv){
 #endif
 #ifdef pp_LINUX
   if(hostinfo==NULL){
+    cpu_usage=cpuusage();
+    Sleep(200);
+    cpu_usage=cpuusage();
     host=NULL;
     while(cpu_usage>cpu_usage_max){
       cpu_usage=cpuusage();
@@ -210,10 +212,13 @@ int main(int argc, char **argv){
     while(doit==0){
       for(i=0;i<nhostinfo;i++){
         hostdata *hd;
+        float fusage;
 
         hd = hostinfo + i;
         host = hd->hostname;
         cpu_usage=cpuusage_host(host,hd->ncores);
+        fusage=(float)cpu_uage/255.0;
+        printf("host: %s cpu_usage=%f\n",host,fusage);
         if(cpu_usage<cpu_usage_max){
           doit=1;
           break;
