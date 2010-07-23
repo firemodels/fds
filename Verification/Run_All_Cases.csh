@@ -13,10 +13,11 @@ setenv BASEDIR `pwd`
 setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds.csh
 
 # To run the "background" version of this script, 
+# comment the line above contaiing RUNFDS
 # uncomment the two lines below containing RUNFDS and BACKGROUND
 
 #setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds_bg.csh
-#setenv BACKGROUND "$SVNROOT/Utilities/background/INTEL_LINUX_32/background -u 50 -d 10"
+#setenv BACKGROUND "$SVNROOT/Utilities/background/INTEL_LINUX_32/background -hosts ~/run_nodes -u 50 -d 10"
 
 echo FDS cases submitted
 

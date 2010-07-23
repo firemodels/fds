@@ -53,6 +53,7 @@ int main(int argc, char **argv){
   int cpu_usage, cpu_usage_max=25;
 #ifdef pp_LINUX  
   char command_buffer[1024];
+  char working_dir[1024];
   FILE *stream=NULL;
 #endif  
 
@@ -202,6 +203,7 @@ int main(int argc, char **argv){
   _spawnvp(_P_NOWAIT,command, argv+argstart);
 #endif
 #ifdef pp_LINUX
+  strcpy(command_buffer,"");
   if(hostinfo==NULL){
     cpu_usage=cpuusage();
     Sleep(200);
@@ -228,23 +230,27 @@ int main(int argc, char **argv){
         if(cpu_usage<cpu_usage_max){
           if(debug==1)printf(" host %s is now free\n",host);
           doit=1;
+          getcwd(working_dir,1024);
+          strcat(command_buffer,"ssh ");
+          strcat(command_buffer,host);
+          strcat(command_buffer," \"( cd ");
+          strcat(command_buffer,working_dir);
+          strcat(command_buffer,";");
           break;
         }
       }
       if(doit==0)Sleep(1000);
     }
   }
-  strcpy(command_buffer,"");
   for(i=argstart;i<argc;i++){
     arg=argv[i];
     strcat(command_buffer,arg);
-    if(i==argc-1){
-      strcat(command_buffer,"  &");    
-    }
-    else{
+    if(i<argc-1){
       strcat(command_buffer," ");    
     }
   }
+  if(nhostinfo>0)strcat(command_buffer,")\"");
+  strcat(command_buffer,"&");
   printf("submitting command: %s\n",command_buffer);
   system(command_buffer);
 #endif
@@ -273,7 +279,7 @@ void usage(char *prog){
   printf("  -debug    - display debug messages\n");
   printf("  -h        - display this message\n");
 #ifdef pp_LINUX  
-  printf("  -host hostfiles - file containing a list of host names to run jobs on\n");
+  printf("  -hosts hostfiles - file containing a list of host names to run jobs on\n");
 #endif  
   printf("  -u max    - wait to run prog until cpu usage is less than max (25-100%s)\n",pp);
   printf("  -v        - display version information\n");
