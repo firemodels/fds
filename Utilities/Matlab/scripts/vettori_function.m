@@ -1,5 +1,4 @@
 function[T] = vettori_function(file)
-%addpath('Y:\FDS-SMV\Validation');
 text=fileread(file);
 
 for j =1:4
