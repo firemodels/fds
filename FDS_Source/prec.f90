@@ -18,9 +18,9 @@ INTEGER, PARAMETER :: EB = SELECTED_REAL_KIND(12)
 INTEGER, PARAMETER :: SPC = KIND((1._FB,1._FB))
 INTEGER, PARAMETER :: DPC = KIND((1._EB,1._EB))
 
-! Hardwired bounds for certain species and ZONE arrays
+! Hardwired bounds for certain species arrays
 
-INTEGER, PARAMETER :: MAX_SPECIES=20, MAX_LEAK_PATHS=20
+INTEGER, PARAMETER :: MAX_SPECIES=20
 
 ! Hardwired bounds for surface and material arrays
 
