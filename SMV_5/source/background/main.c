@@ -47,6 +47,7 @@ void Sleep(int ticks){
 int main(int argc, char **argv){
   char *prog;
   int i;
+  int debug;
   int argstart=-1;
   float delay_time=0.0;
   int cpu_usage, cpu_usage_max=25;
@@ -64,8 +65,12 @@ int main(int argc, char **argv){
 #ifdef pp_LINUX  
   hostlistfile=NULL;
   host=NULL;
-#endif  
+#ifdef pp_LINUX
+  sprintf(pid,"%i",getpid());
+#endif
+#endif
 
+  debug=0;
   prog=argv[0];
 
   if(argc==1){
@@ -81,25 +86,26 @@ int main(int argc, char **argv){
     if(arg[0]=='-'){
       if(lenarg>1){
         switch(arg[1]){
-	        case 'd':
-            i++;
-            if(i<argc){
-              arg=argv[i];
-              sscanf(arg,"%f",&delay_time);
-              if(delay_time<0.0)delay_time=0.0;
+          case 'd':
+            if(strlen(arg)<=2||strcmp(arg,"-debug")!=0){
+              i++;
+              if(i<argc){
+                arg=argv[i];
+                sscanf(arg,"%f",&delay_time);
+                if(delay_time<0.0)delay_time=0.0;
+              }
             }
-		        break;
-#ifdef WIN32		        
-          case 'h':
-            usage(prog);
-            return 1;
+            else{
+		          debug=1;
+		        }
             break;
-#endif
-#ifdef pp_LINUX
           case 'h':
+#ifdef pp_LINUX
             if(strlen(arg)<=2||strcmp(arg,"-hosts")!=0){
+#endif
               usage(prog);
               return 1;
+#ifdef pp_LINUX
             }
             else{
               i++;
@@ -109,8 +115,8 @@ int main(int argc, char **argv){
                 strcpy(hostlistfile,arg);
               }
             }
-            break;
 #endif
+            break;
           case 'u':
             i++;
             if(i<argc){
@@ -217,9 +223,10 @@ int main(int argc, char **argv){
         hd = hostinfo + i;
         host = hd->hostname;
         cpu_usage=cpuusage_host(host,hd->ncores);
-        fusage=(float)cpu_uage/255.0;
-        printf("host: %s cpu_usage=%f\n",host,fusage);
+        fusage=(float)cpu_usage/255.0;
+        if(debug==1)printf("host: %s cpu_usage=%f\n",host,fusage);
         if(cpu_usage<cpu_usage_max){
+          if(debug==1)printf(" host %s is now free\n",host);
           doit=1;
           break;
         }
@@ -238,7 +245,7 @@ int main(int argc, char **argv){
       strcat(command_buffer," ");    
     }
   }
-  printf("now running: %s\n",command_buffer);
+  printf("submitting command: %s\n",command_buffer);
   system(command_buffer);
 #endif
   return 0;
@@ -256,13 +263,14 @@ void usage(char *prog){
 
   printf("\n");
   printf("background %s(%i) - %s\n",prog_version,svn_num,__DATE__);
-  printf("  Runs a windows program in the background\n\nUsage:\n\n");
+  printf("  Runs a program in the background when resources are available\n\nUsage:\n\n");
   printf("  %s",prog);
   printf(" [-d delay time (s) -h -u max_usage -v] prog [arguments]\n\n");
 
   printf("where\n\n");
 
   printf("  -d dtime  - wait dtime seconds before running prog in the background\n");
+  printf("  -debug    - display debug messages\n");
   printf("  -h        - display this message\n");
 #ifdef pp_LINUX  
   printf("  -host hostfiles - file containing a list of host names to run jobs on\n");
@@ -384,28 +392,37 @@ int get_host_ncores(char *host){
   char buffer[1024];
   char command[1024];
   char localfile[1024];
-  int ncores;
+  int ncores=0;
   
-  strcpy(localfile,"cpuinfo.");
+  strcpy(localfile,"/tmp/cpuinfo.");
   strcat(localfile,host);
+  strcat(localfile,".");
+  strcat(localfile,pid);
 
-  strcpy(command,"scp ");
+  strcpy(command,"ssh ");
   strcat(command,host);
-  strcat(command,":/proc/cpuinfo ");
+  strcat(command," cat /proc/cpuinfo >");
   strcat(command,localfile);
 
   system(command);
 
   stream=fopen(localfile,"r");
-  if(stream==NULL)return 1;
+  if(stream==NULL){
+    printf("unable to open %s\n",localfile);
+    return 1;
+  }
   while(!feof(stream)){
     if(fgets(buffer,255,stream)==NULL)break;
     if(strlen(buffer)<9)continue;
     buffer[9]=0;
     if(strcmp(buffer,"processor")==0)ncores++;
   }
-  if(ncores==0)ncores=1;
+  if(ncores==0){
+    printf("0 cores found in %s\n",localfile);
+    ncores=1;
+  }
   fclose(stream);
+  unlink(localfile);
   return ncores;
 }
 
@@ -418,12 +435,14 @@ float get_host_load(char *host){
   char localfile[1024];
   float load1;
   
-  strcpy(localfile,"loadavg.");
+  strcpy(localfile,"/tmp/loadavg.");
   strcat(localfile,host);
+  strcat(localfile,".");
+  strcat(localfile,pid);
 
-  strcpy(command,"scp ");
+  strcpy(command,"ssh ");
   strcat(command,host);
-  strcat(command,":/proc/loadavg ");
+  strcat(command," cat /proc/loadavg >");
   strcat(command,localfile);
 
   system(command);
@@ -433,6 +452,7 @@ float get_host_load(char *host){
   if(fgets(buffer,255,stream)==NULL)return 1.0;
   sscanf(buffer,"%f",&load1);
   fclose(stream);
+  unlink(localfile);
   return load1;
 }
 
