@@ -32,7 +32,7 @@ if not %upload_win32% == 1 goto endif_win32
   set glabels=Type-Installer,OpSys-Windows,%level%
   set dplatform=32 bit Windows
   set platform=win32
-  set summary=Smokeview %version% for %dplatform% (SVN r%smv_revision%)
+  set summary=Smokeview %smv_version% for %dplatform% (SVN r%smv_revision%)
   set exe=smv_%smv_version%_%platform%.exe
   echo.
   echo Uploading %summary% - %exe%
