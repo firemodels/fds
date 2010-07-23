@@ -2066,7 +2066,7 @@ U.S. Nuclear Regulatory Commission~\cite{NUREG_1824}, the $D^*/\dx$ values range
 
 \subsection{\emph{A Posteriori} Mesh Quality Metrics}
 \label{info:meshquality}
-The quality of a particular simulation is most directly tied to grid resolution.  Three output quantities are suggested for measuring errors in the velocity and scalar fields:
+The quality of a particular simulation is most directly tied to grid resolution.  Three slice file output quantities are suggested here for measuring errors in the velocity and scalar fields:
 \begin{enumerate}
 \item A model for the fraction of unresolved kinetic energy called the \emph{measure of turbulence resolution} (similar to what is often called the `Pope criterion' \cite{Pope:2004}), MTR
 \item A model for the fraction of unresolved scalar energy fluctuations called \emph{measure of scalar resolution} \cite{Vervisch:2010}, MSR
@@ -2077,10 +2077,10 @@ Examples:
 \footnotesize
 \begin{verbatim}
 &SLCF PBY=0, QUANTITY='TURBULENCE RESOLUTION' /
-&SLCF PBY=0, QUANTITY='SCALAR RESOLUTION', SPEC_ID='HELIUM', CELL_CENTERED=.TRUE. /
-&SLCF PBY=0, QUANTITY='WAVELET ERROR', SPEC_ID='FUEL', CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='SCALAR RESOLUTION', QUANTITY2='MASS FRACTION', SPEC_ID='HELIUM' /
+&SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV', CELL_CENTERED=.TRUE. /
 \end{verbatim} \normalsize
-Note that {\tt SPEC\_ID} is required for MSR and WEM.  Also, {\tt CELL\_CENTERED} is optional for any of the three metrics.
+Note that an additional scalar {\tt QUANTITY2} is required for MSR and WEM.  {\tt QUANTITY2} may be any output quantity appropriate for {\tt SLCF}. Also, {\tt CELL\_CENTERED} is optional for any of the three metrics.
 
 \subsubsection{Measure of Turbulence Resolution}
 
@@ -2139,7 +2139,7 @@ By ``viewing'' the signal at a coarser resolution, say $2h$, an identical recons
 \label{eqn_wavelet_decomp}
 f_{[r_j,r_j+2h]}(r) = \underbrace{\mbox{$\frac{s_j+s_{j+1}}{2}$}}_a \,\varphi_{[r_j,r_j+2h]}(r) + \underbrace{\mbox{$\frac{s_j-s_{j+1}}{2}$}}_c \,\psi_{[r_j,r_j+2h]}(r)
 \end{eqnarray}
-where $a$ is the \emph{average} coefficient and $c$ is the \emph{wavelet} coefficient.  The Haar \emph{mother wavelet} (Figure \ref{fig_haar_mother}) is identified as
+where $a$ is as the \emph{average} coefficient and $c$ is as the \emph{wavelet} coefficient.  The Haar \emph{mother wavelet} (Figure \ref{fig_haar_mother}) is identified as
 \begin{eqnarray}
 \psi_{[r_1,r_2]}(r) = \left\{ \begin{array}{ll} 1 & \quad \mbox{if} \quad r_1\le r < \frac{1}{2}(r_1+r_2) \\ -1 & \quad \mbox{if} \quad \frac{1}{2}(r_1+r_2)\le r < r_2 \end{array} \right.
 \end{eqnarray}
@@ -9025,7 +9025,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct RADIATIVE HEAT FLUX GAS}                   & See Section~\ref{info:heat_flux}              & kW/m$^2$       & D            \\ \hline
 {\ct RADIOMETER}                                & See Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Relative humidity                             & \%             & D,I,P,S      \\ \hline
-{\ct SCALAR RESOLUTION}$^{****}$                &  See Section~\ref{info:meshquality}           &                & D,S          \\ \hline
+{\ct SCALAR RESOLUTION}$^{*****}$               &  See Section~\ref{info:meshquality}           &                & S            \\ \hline
 {\ct SOOT VOLUME FRACTION}                      & $\rho Y_s(Z)/\rho_s$                          & mol/mol        & D,I,P,S      \\ \hline
 {\ct SPECIFIC ENTHALPY}                         & $\sum Y_\alpha \int_0^T c_{p,\alpha}(T') \, dT'$  & kJ/kg    & D,I,P,S        \\ \hline
 {\ct SPECIFIC HEAT}                             & $c_p$                                         & kJ/kg/K        & D,I,P,S      \\ \hline
@@ -9049,17 +9049,18 @@ remember that all output quantity names ought to be in single quotes.
 {\ct WALL CLOCK TIME}                           & Elapsed wall clock time                       & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
 {\ct WALL THICKNESS}                            & See Section~\ref{info:material_components}    & m              & B,D          \\ \hline
-{\ct WAVELET ERROR}$^{****}$                    & See Section~\ref{info:meshquality}            &                & D,S          \\ \hline
+{\ct WAVELET ERROR}$^{*****}$                   & See Section~\ref{info:meshquality}            &                & S            \\ \hline
 \end{longtable}
 
 \noindent
 \begin{tabbing}
-$^*$    \hspace{0.2in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+$^{*}$  \hspace{0.25in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
 $^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
 $^{***}$               \> Add {\ct VELO\_INDEX=1} to the input line if you want to multiply the velocity by the sign of $u$. \\
                        \> Use the indices 2 and 3 for $v$ and $w$, respectively.\\
 $^{****}$              \> Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
-                       \> Do not use for {\ct MIXTURE FRACTION}.
+                       \> Do not use for {\ct MIXTURE FRACTION}.\\
+$^{*****}$             \> Quantity requires specification of an additional scalar using {\ct QUANTITY2}.
 \end{tabbing}
 
 
