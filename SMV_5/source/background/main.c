@@ -53,7 +53,7 @@ int main(int argc, char **argv){
   int cpu_usage, cpu_usage_max=25;
 #ifdef pp_LINUX  
   char command_buffer[1024];
-  char working_dir[1024];
+  char user_path[1024];
   FILE *stream=NULL;
 #endif  
 
@@ -66,9 +66,8 @@ int main(int argc, char **argv){
 #ifdef pp_LINUX  
   hostlistfile=NULL;
   host=NULL;
-#ifdef pp_LINUX
+  strcpy(user_path,"");
   sprintf(pid,"%i",getpid());
-#endif
 #endif
 
   debug=0;
@@ -118,6 +117,17 @@ int main(int argc, char **argv){
             }
 #endif
             break;
+#ifdef pp_LINUX
+          case 'p':
+            i++;
+            if(i<argc){
+              arg=argv[i];
+              if(strlen(arg)>0){
+                strcpy(user_path,arg);
+              }
+            }
+            break;
+#endif
           case 'u':
             i++;
             if(i<argc){
@@ -230,11 +240,13 @@ int main(int argc, char **argv){
         if(cpu_usage<cpu_usage_max){
           if(debug==1)printf(" host %s is now free\n",host);
           doit=1;
-          getcwd(working_dir,1024);
+          if(strlen(user_path)==0){
+            getcwd(user_path,1024);
+          }
           strcat(command_buffer,"ssh ");
           strcat(command_buffer,host);
           strcat(command_buffer," \"( cd ");
-          strcat(command_buffer,working_dir);
+          strcat(command_buffer,user_path);
           strcat(command_buffer,";");
           break;
         }
@@ -280,6 +292,7 @@ void usage(char *prog){
   printf("  -h        - display this message\n");
 #ifdef pp_LINUX  
   printf("  -hosts hostfiles - file containing a list of host names to run jobs on\n");
+  printf("  -p path   - specify directory path to change to after ssh'ing to remote host\n");
 #endif  
   printf("  -u max    - wait to run prog until cpu usage is less than max (25-100%s)\n",pp);
   printf("  -v        - display version information\n");
