@@ -1,7 +1,7 @@
 &HEAD CHID='NRCC_Facade_Win_2_08_MW', TITLE='Oleszkiewicz Experiments' /
 
 &MESH IJK=72,80,108, XB=-3.6,3.6,-3.2,4.8,-0.1,10.7 /
-&TIME T_END=180.0 /
+&TIME T_END=1800.0, TIME_SHRINK_FACTOR=10. /
 
 &MISC SURF_DEFAULT='WALL' /
 
