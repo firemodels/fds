@@ -11,9 +11,12 @@ addpath('../../Validation/Vettori_Sloped_Ceiling');
 
 for n=1:72
 %Name FDS results file
-file = ['../../Validation/Vettori_Sloped_Ceiling/FDS_Output/Vettori_Sloped_',char(B(n+1,14)),'.out'];
+file = ['../../Validation/Vettori_Sloped_Ceiling/FDS_Output_Files/Vettori_Sloped_',char(B(n+1,14)),'.out'];
 
 %Import FDS Data
+%An error will occur at this point if within the simulated time the
+%sprinkler never activated. It is advised that excess time be provided to
+%compensate for this issue and ensure that all sprinklers activate.
 fds_data(:,n) = vettori_sloped_function(file);
 
 %Import Experimental Data
@@ -21,24 +24,12 @@ E(n,:)=A(n,8:11);
 end
 
 %Orient Experimental Data
-exp_data = D';
+exp_data = E';
 
 %Plot Data, subdivided by obstruction and ceiling slope
 for n=1:72
-if n<=12
-    K(1) = plot(exp_data(1:4,n),fds_data(1:4,n),'r^');
-elseif 12<n<=24
-    K(2) = plot(exp_data(1:4,n),fds_data(1:4,n),'rd')
-elseif 24<n<=36
-    K(3) = plot(exp_data(1:4,n),fds_data(1:4,n),'bo')
-elseif 36<n<=48
-    K(4) = plot(exp_data(1:4,n),fds_data(1:4,n),'bs')
-elseif 48<n<=60
-    K(5) = plot(exp_data(1:4,n),fds_data(1:4,n),'gp')
-else
-    K(3) = plot(exp_data(1:4,n),fds_data(1:4,n),'gh')
-end
-
+K(1) = plot(exp_data(1:4,n),fds_data(1:4,n),'r^');
+hold on
 end
 
 %Format the Plot 
@@ -59,9 +50,6 @@ axis([xmin xmax ymin ymax]);
 
 xlabel('Measured Activation Time')
 ylabel('Predicted Activation Time')
-
-h =legend(K,'Flat Smooth','Flat Obstructed','13 Degree Smooth','13 Degree Obstructed','24 Degree Smooth','24 Degree Obstructed','Location','SouthEast');
-set(h,'Interpreter','LaTeX')
 
 text(0.05*xmax,0.95*ymax,'Vettori Sloped Ceiling Activation Times','FontSize',14,'FontName','Times','Interpreter','LaTeX')
 
