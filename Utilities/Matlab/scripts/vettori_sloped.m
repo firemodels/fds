@@ -6,7 +6,7 @@ clear all; close all; clc;
 addpath('../../Validation/Vettori_Sloped_Ceiling');
 
 %Import sorting information
-[A,B,C] =xlsread('Vettori_Sloped_Guide.csv');
+[A,B,C] =xlsread('Experimental_Data/Vettori_Sloped_Guide.csv');
 
 
 for n=1:72
