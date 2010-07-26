@@ -1754,8 +1754,6 @@ extern "C" void Slice_CB(int var){
     updatemenu=1;
     return;
   }
-  ASSERT(con_slice_min!=NULL);
-  ASSERT(con_slice_max!=NULL);
   switch (var){
     case TRANSPARENTLEVEL:
       updatecolors(-1);
@@ -1828,16 +1826,19 @@ extern "C" void Slice_CB(int var){
     }
     break;
   case CHOPVALMIN:
+    ASSERT(con_slice_min!=NULL);
     con_slice_min->set_float_val(slicemin);
     SETslicemin(setslicemin,slicemin);
     updatechopcolors();
     break;
   case CHOPVALMAX:
+    ASSERT(con_slice_max!=NULL);
     con_slice_max->set_float_val(slicemax);
     SETslicemax(setslicemax,slicemax);
     updatechopcolors();
     break;
   case SETVALMIN:
+    ASSERT(con_slice_min!=NULL);
     switch (setslicemin){
     case PERCENTILE_MIN:
     case GLOBAL_MIN:
@@ -1851,6 +1852,7 @@ extern "C" void Slice_CB(int var){
     SETslicemin(setslicemin,slicemin);
     break;
   case SETVALMAX:
+    ASSERT(con_slice_max!=NULL);
     switch (setslicemax){
     case PERCENTILE_MAX:
     case GLOBAL_MAX:
@@ -1864,10 +1866,12 @@ extern "C" void Slice_CB(int var){
     SETslicemax(setslicemax,slicemax);
     break;
   case VALMIN:
+    ASSERT(con_slice_min!=NULL);
     con_slice_min->set_float_val(slicemin);
     SETslicemin(setslicemin,slicemin);
     break;
   case VALMAX:
+    ASSERT(con_slice_max!=NULL);
     con_slice_max->set_float_val(slicemax);
     SETslicemax(setslicemax,slicemax);
     break;
@@ -1893,6 +1897,7 @@ extern "C" void Slice_CB(int var){
       }
     }
     setslicebounds(list_slice_index);
+    ASSERT(con_slice_min!=NULL);
     con_slice_min->set_float_val(slicemin);
     switch (setslicemin){
     case PERCENTILE_MIN:
@@ -1903,6 +1908,7 @@ extern "C" void Slice_CB(int var){
       con_slice_min->enable();
       break;
     }
+    ASSERT(con_slice_max!=NULL);
     con_slice_max->set_float_val(slicemax);
     switch (setslicemax){
     case PERCENTILE_MIN:
