@@ -62,7 +62,7 @@ void printhrr(void){
 void readhrr(int flag, int *errorcode){
   FILE *HRRFILE;
   int ntimes, nfirst;
-  char buffer[1024];
+  char buffer[10240];
   float *hrrtime, *hrrval;
   int display=0;
   int ntimes_saved;
