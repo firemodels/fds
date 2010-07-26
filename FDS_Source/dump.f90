@@ -5799,8 +5799,9 @@ IF (N_DEVC > 0) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' DEVICE Activation Times'
    DO N=1,N_DEVC
       DV => DEVICE(N)
-     IF (DV%T_CHANGE < 100000._EB) WRITE(LU_OUTPUT,'(I4,2X,A,F8.1,A)') N,DV%ID,DV%T_CHANGE,' s'
-!     IF (DV%T_CHANGE > 100000._EB) WRITE(LU_OUTPUT,'(I4,2X,A,A)')      N,DV%ID,'No Activation'
+      IF (DV%SETPOINT>1.E6_EB) CYCLE
+      IF (DV%T_CHANGE < 100000._EB) WRITE(LU_OUTPUT,'(I4,2X,A,F8.1,A)') N,DV%ID,DV%T_CHANGE,' s'
+      IF (DV%T_CHANGE > 100000._EB) WRITE(LU_OUTPUT,'(I4,2X,A,A)')      N,DV%ID,'No Activation'
    ENDDO
 ENDIF
 
