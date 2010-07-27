@@ -51,7 +51,7 @@ void init_histogram(histogramdata *histgram){
     histgram->buckets[i]=0;
   }
   histgram->ntotal=0;
-  histgram->valmin=pow(10.0,20.0);
+  histgram->valmin=(float)pow(10.0,20.0);
   histgram->valmax=-histgram->valmin;
 }
 
@@ -66,7 +66,7 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
     histgram->buckets[i]=0;
   }
   if(nvals==0){
-    valmin=pow(10.0,20.0);
+    valmin=(float)pow(10.0,20.0);
     valmax=-valmin;
   }
   else{
@@ -137,7 +137,7 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
       int ival;
 
       if(bucket1copy[i]!=0){
-        val = histgram1->valmin + (i+0.5)*dbucket1;
+        val = (float)(histgram1->valmin + (float)(i+0.5)*dbucket1);
         valmin_new=HMIN(valmin_new,val);
         valmax_new=HMAX(valmax_new,val);
         ival = (val-valmin_new)/dbucket_new;
@@ -146,7 +146,7 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
         histgram1->buckets[ival]+=bucket1copy[i];
       }
       if(histgram2->buckets[i]!=0){
-        val = histgram2->valmin + (i+0.5)*dbucket2;
+        val = (float)(histgram2->valmin + (i+0.5)*dbucket2);
         valmin_new=HMIN(valmin_new,val);
         valmax_new=HMAX(valmax_new,val);
         ival = (val-valmin_new)/dbucket_new;
