@@ -117,10 +117,6 @@ void add_unit_class(flowlabels *label){
   int i;
 
  #ifdef pp_SMOKEDIFF
- #else
-  return; // disable this functino for now
-#endif
-
   nunitclasses++;
   ResizeMemory((void **)&unitclasses,nunitclasses*sizeof(f_units));
 
@@ -143,6 +139,10 @@ void add_unit_class(flowlabels *label){
   units[1].scale[0]=0.1667;
   units[1].scale[1]=0.0;
   units[1].rel_defined=0;
+ #else
+  return; // disable this functino for now
+#endif
+
 
 }
 
