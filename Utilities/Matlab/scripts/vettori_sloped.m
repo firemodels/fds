@@ -27,7 +27,19 @@ exp_data = E';
 
 %Plot Data, subdivided by obstruction and ceiling slope
 for n=1:72
-K(1) = plot(exp_data(1:4,n),fds_data(1:4,n),'r^');
+    if n<12
+        K(1) = plot(exp_data(1:4,n),fds_data(1:4,n),'r^');
+    elseif n>12 & n<=24
+        K(2) = plot(exp_data(1:4,n),fds_data(1:4,n),'rd');   
+    elseif n>24 & n<=36
+        K(3) = plot(exp_data(1:4,n),fds_data(1:4,n),'go');
+    elseif n>36 & n<=48
+        K(4) = plot(exp_data(1:4,n),fds_data(1:4,n),'gs');
+    elseif n>48 & n<60
+        K(5) = plot(exp_data(1:4,n),fds_data(1:4,n),'bp');
+    elseif n>60 & n<=72
+        K(6) = plot(exp_data(1:4,n),fds_data(1:4,n),'bh');
+    end
 hold on
 end
 
@@ -49,6 +61,9 @@ axis([xmin xmax ymin ymax]);
 
 xlabel('Measured Activation Time')
 ylabel('Predicted Activation Time')
+
+h = legend(K,'Flat Smooth','Flat Obstructed','13 Smooth','13 Obstructed','24 Smooth','24 Obstructed','Location','SouthEast');
+set(h,'Interpreter','LaTeX')
 
 text(0.05*xmax,0.95*ymax,'Vettori Sloped Ceiling Activation Times','FontSize',14,'FontName','Times','Interpreter','LaTeX')
 

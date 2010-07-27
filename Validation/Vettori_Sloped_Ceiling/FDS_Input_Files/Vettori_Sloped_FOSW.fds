@@ -4,6 +4,7 @@
 
 &TIME T_END=300/
 
+&MISC TMPA=24./
 
 %%Burner Wall
 &OBST XB=3.3, 4, 4.5, 5.5, 0.00, 0.30 /
