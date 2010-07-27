@@ -48,6 +48,9 @@ axis([xmin xmax ymin ymax]);
 xlabel('Measured Activation Time')
 ylabel('Predicted Activation Time')
 
+h = legend(K,'Obstructed Ceiling','Smooth Ceiling','Location','SouthEast');
+set(h,'Interpreter','LaTeX')
+
 text(0.05*xmax,0.95*ymax,'Vettori Flat Ceiling Activation Times','FontSize',14,'FontName','Times','Interpreter','LaTeX')
 
 hold off
