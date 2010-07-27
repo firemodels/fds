@@ -952,6 +952,56 @@ return
 
 end subroutine getslicesizes
 
+!  ------------------ openoart ------------------------ 
+
+subroutine openpart(partfilename, unit, endian, error)
+
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_openpart@20' :: openpart
+#endif
+
+implicit none
+
+character(len=*) :: partfilename
+logical :: exists
+
+integer, intent(in) :: endian, unit
+integer, intent(out) :: error
+logical :: connected
+
+
+integer :: lu11
+
+error=0
+lu11 = unit
+inquire(unit=lu11,opened=connected)
+if(connected)close(lu11)
+
+inquire(file=trim(partfilename),exist=exists)
+if(exists)then
+#ifdef pp_cvf
+if(endian.eq.1)then
+  open(unit=lu11,file=trim(partfilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+ else
+  open(unit=lu11,file=trim(partfilename),form="unformatted",action="read",shared)
+endif
+#elif pp_LAHEY
+if(endian.eq.1)then
+  open(unit=lu11,file=trim(partfilename),form="unformatted",action="read",convert="BIG_ENDIAN")
+ else
+  open(unit=lu11,file=trim(partfilename),form="unformatted",action="read")
+endif
+#else
+  open(unit=lu11,file=trim(partfilename),form="unformatted",action="read")
+#endif
+ else
+  error=1
+  return
+endif
+
+return
+end subroutine openpart
+
 !  ------------------ openslice ------------------------ 
 
 subroutine openslice(slicefilename, unit, endian, is1, is2, js1, js2, ks1, ks2, error)
