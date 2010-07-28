@@ -7767,7 +7767,6 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f ",&vectorlinewidth);
       continue;
     }
-
     if(match(buffer,"STREAKLINEWIDTH",15)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f ",&streaklinewidth);
@@ -7776,6 +7775,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"LINEWIDTH",9)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f ",&linewidth);
+      solidlinewidth=linewidth;
       continue;
     }
     if(match(buffer,"VENTLINEWIDTH",13)==1){

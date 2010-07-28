@@ -1394,7 +1394,9 @@ void initvars1(void){
   sensorrelsizeMIN=0.0;
 
   linewidth=2.0, ventlinewidth=2.0, highlight_linewidth=4.0;
+  solidlinewidth=linewidth;
   sliceoffset_factor=0.1f, ventoffset_factor=0.1f;
+  visBLOCKold=-1;
 
   nrgb=NRGB;
   nrgb_ini=0;
