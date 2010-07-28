@@ -213,7 +213,7 @@ typedef struct {
   float *texture_origin;
   float normal[3];
   float *color;
-  float *linewidth;
+  float *linecolor,*linewidth;
   float approx_center_coord[3];
   float dist2eye;
   int meshindex, blockageindex;
