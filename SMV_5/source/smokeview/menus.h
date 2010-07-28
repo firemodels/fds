@@ -1756,7 +1756,7 @@ void TextureShowMenu(int value){
     }
   }
   if(texturedisplay==1){
-    if(value!=visBLOCKOutline&&value!=visBLOCKHide){
+    if(value!=visBLOCKOutline&&value!=visBLOCKSolidOutline&&value!=visBLOCKHide){
       BlockageMenu(visBLOCKAsInput);
     }
   }
@@ -3577,7 +3577,9 @@ void BlockageMenu(int value){
    case visBLOCKNormal:
    case visBLOCKOutline:
    case visBLOCKHide:
+   case visBLOCKSolidOutline:
      visBlocks=value;
+     if(value==visBLOCKSolidOutline||visBLOCKold==visBLOCKSolidOutline)updatefaces=1;
      update_trainer_outline();
      break;
    case BLOCKlocation_grid:
@@ -3616,6 +3618,7 @@ void BlockageMenu(int value){
      }
      break;
   }
+  visBLOCKold=value;
   updatemenu=1;  
  // updatefaces=1;
   updatefacelists=1;
@@ -4303,6 +4306,12 @@ static int in_menu=0;
   }
    else{
      glutAddMenuEntry("   Outline",visBLOCKOutline);
+   }
+  if(visBlocks==visBLOCKSolidOutline){
+    glutAddMenuEntry("   *Solid and Outline",visBLOCKSolidOutline);
+  }
+   else{
+     glutAddMenuEntry("   Solid and Outline",visBLOCKSolidOutline);
    }
   if(visBlocks==visBLOCKHide){
     glutAddMenuEntry("   *Hidden",visBLOCKHide);

@@ -1356,7 +1356,12 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       faceptr->hidden=0;
       faceptr->patchpresent=0;
       faceptr->blockageindex=-2;
-      faceptr->linewidth=&linewidth;
+      if(visBlocks==visBLOCKSolidOutline){
+        faceptr->linewidth=&solidlinewidth;
+      }
+      else{
+        faceptr->linewidth=&linewidth;
+      }
       faceptr->showtimelist_handle=&bc->showtimelist;
       faceptr->del=bc->del;
       faceptr->invisible=bc->invisible;
@@ -1436,6 +1441,12 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
         ASSERT(FFALSE);
         break;
       }
+      if(visBlocks==visBLOCKSolidOutline){
+        faceptr->linecolor=foregroundcolor;
+      }
+      else{
+        faceptr->linecolor=faceptr->color;
+      }
     }
     if(vi!=NULL){
       if(vi->useventcolor==1){
@@ -1454,6 +1465,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
         faceptr->color=vi->surf[j]->color;
         faceptr->transparent=vi->surf[j]->transparent;
       }
+      faceptr->linecolor=faceptr->color;
     }
 
 
@@ -1841,13 +1853,13 @@ void update_facelists(void){
       }
 
       if((
-         visBlocks==visBLOCKOutline&&j<vent_offset)||
+         (visBlocks==visBLOCKOutline||visBlocks==visBLOCKSolidOutline)&&j<vent_offset)||
          (facej->patchpresent==1&&(vis_threshold==0||vis_onlythreshold==0||do_threshold==0))||
          (facej->type==2&&visBlocks==visBLOCKAsInput)||
          ((j>=vent_offset&&j<vent_offset+meshi->nvents)&&vi->isOpenvent==1&&visOpenVentsAsOutline==1)
         ){
         meshi->face_outlines[n_outlines++]=facej;
-        continue;
+        if(visBlocks!=visBLOCKSolidOutline)continue;
       }
       if(j<vent_offset){
         int drawing_texture=0;
@@ -2150,7 +2162,7 @@ void draw_faces(){
             glLineWidth(*facei->linewidth);
           }
           glBegin(GL_LINES);
-          glColor3fv(facei->color);
+          glColor3fv(facei->linecolor);
           glVertex3fv(vertices+0);
           glVertex3fv(vertices+3);
           glVertex3fv(vertices+3);
@@ -4237,7 +4249,7 @@ void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawi
   *drawing_vent_transparent=0;
   if(ntotal_smooth_blockages>0&&updatesmoothblocks==0){
     if(visSmoothAsNormal==0||visBlocks==visBLOCKAsInput){
-      if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKHide)*drawing_smooth=1;
+      if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKSolidOutline&&visBlocks!=visBLOCKHide)*drawing_smooth=1;
     }
   }
   if(ntransparentblocks>0){

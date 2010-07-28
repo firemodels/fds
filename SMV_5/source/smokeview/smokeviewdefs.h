@@ -140,6 +140,7 @@ void _sniffErrors(char *whereat);
 
 #define visBLOCKAsInput 1
 #define visBLOCKNormal 8
+#define visBLOCKSolidOutline 12
 //#define visBLOCKFacet 3
 //#define visBLOCKSmooth 4
 #define visBLOCKOutline 2
