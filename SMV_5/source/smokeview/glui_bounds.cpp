@@ -1287,6 +1287,7 @@ extern "C" void add_scriptlist(char *file, int id){
           LIST_ini_list->add_item(inifile->id,inifile->file);
         }
       }
+      writeini(LOCAL_INI);
       break;
     case SCRIPT_LOADINI:
       {
