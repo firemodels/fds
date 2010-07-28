@@ -722,7 +722,6 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
   NewMemory((void **)&parti->data5,parti->nclasses*parti->nframes*sizeof(part5data));
   NewMemory((void **)&parti->ptimes,parti->nframes*sizeof(float));
 
-
   // free memory for x, y, z frame data 
 
   for(i=0;i<parti->nclasses;i++){

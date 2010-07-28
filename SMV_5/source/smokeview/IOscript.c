@@ -192,7 +192,6 @@ inifiledata *insert_inifile(char *file){
   inifiledata *inifile;
   int idmax=-1;
 
-  if(file_exist(file)==0)return NULL;
   for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
     if(inifile->id>idmax)idmax=inifile->id;
     if(inifile->file==NULL)continue;
