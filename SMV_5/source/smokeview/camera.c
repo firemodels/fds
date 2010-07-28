@@ -210,7 +210,7 @@ void copy_camera(camera *to, camera *from){
     update_glui_zoom();
   }
   to->dirty=1;
-  if(to==camera_current){
+  if(to==camera_current&&updateclipvals==0){
     cam2clip(camera_current);
   }
 }
