@@ -887,7 +887,6 @@ SUBROUTINE DIVERGENCE_PART_2(NM)
 ! Finish computing the divergence of the flow, D, and then compute its time derivative, DDDT
 
 USE COMP_FUNCTIONS, ONLY: SECOND
-USE SCARC_SOLVER, ONLY: SCARC_METHOD
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
 REAL(EB) :: RDT,TNOW,P_EQUILIBRIUM_NUM,P_EQUILIBRIUM_DEN,RF
@@ -1101,7 +1100,7 @@ ELSE TRUE_PROJECTION
    
    ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
    
-   IF (SCARC_METHOD=='FFT') THEN
+   NO_SCARC_IF: IF (PRES_METHOD /='SCARC') THEN
       !$OMP DO PRIVATE(IW,IIG,JJG,KKG)
       DO IW=1,NEWC
          IF (IJKW(9,IW)==0) CYCLE
@@ -1112,7 +1111,7 @@ ELSE TRUE_PROJECTION
          IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
       ENDDO
       !$OMP END DO
-   ENDIF
+   ENDIF NO_SCARC_IF
 
 ENDIF TRUE_PROJECTION
 !$OMP END PARALLEL

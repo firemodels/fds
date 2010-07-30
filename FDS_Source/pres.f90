@@ -4,8 +4,7 @@ MODULE PRES
  
 USE PRECISION_PARAMETERS
 USE MESH_POINTERS
-USE SCARC_SOLVER, ONLY: SCARC_METHOD, SCARC_CG3D, SCARC_CG2D, SCARC_MG2D, SCARC_BICG2D,  &
-                        SCARC_GHOSTCELLS, SCARC_UPDATE
+USE SCARC_SOLVER, ONLY: SCARC_METHOD, SCARC_CG2D, SCARC_CG3D, SCARC_MG2D ,SCARC_MG3D, SCARC_BICG2D, SCARC_BICG3D
 
 IMPLICIT NONE
 
@@ -333,34 +332,32 @@ END SELECT
 SELECT CASE(IPS)
    CASE(:1) 
       IF (.NOT.TWO_D) THEN
-         SELECT CASE(SCARC_METHOD)
-            CASE('FFT')
-               CALL H3CZSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
-            CASE('CG')
-               write(*,*) 'Still experimental ...'
-               stop
-               !CALL SCARC_CG3D(NM)
-            CASE('BICG')
-               write(*,*) 'Still experimental ...'
-               stop
-               !CALL SCARC_BICG3D(NM)
-            CASE('MG')
-               write(*,*) 'Still experimental ...'
-               stop
-               !CALL SCARC_MG3D(NM)
-         END SELECT
+         IF (PRES_METHOD == 'SCARC') THEN
+            SELECT CASE(SCARC_METHOD)
+               CASE('CG')
+                  CALL SCARC_CG3D(NM,HP,PRHS)
+               CASE('BICG')
+                  CALL SCARC_BICG3D(NM,HP,PRHS)
+               CASE('MG')
+                  CALL SCARC_MG3D(NM,HP,PRHS)
+            END SELECT
+         ELSE
+            CALL H3CZSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
+         ENDIF
       ENDIF
       IF (TWO_D .AND. .NOT. CYLINDRICAL) THEN
-         SELECT CASE(SCARC_METHOD)
-            CASE('FFT')
-               CALL H2CZSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
-            CASE('CG')
-               CALL SCARC_CG2D(NM)
-            CASE('BICG')
-               CALL SCARC_BICG2D(NM)
-            CASE('MG')
-               CALL SCARC_MG2D(NM)
-         END SELECT
+         IF (PRES_METHOD == 'SCARC') THEN
+            SELECT CASE(SCARC_METHOD)
+               CASE('CG')
+                  CALL SCARC_CG2D(NM,HP,PRHS)
+               CASE('BICG')
+                  CALL SCARC_BICG2D(NM,HP,PRHS)
+               CASE('MG')
+                  CALL SCARC_MG2D(NM,HP,PRHS)
+            END SELECT
+         ELSE
+            CALL H2CZSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
+         ENDIF
       ENDIF
       IF (TWO_D .AND.       CYLINDRICAL) CALL H2CYSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PTB,SAVE1,WORK)
    CASE(2) 
@@ -379,67 +376,56 @@ SELECT CASE(IPS)
       CALL H2CZSS(BXS,BXF,BYS,BYF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
 END SELECT
  
-! Put output of Poisson solver into the H array
 
-!$OMP PARALLEL
-SELECT CASE(IPS)
-   CASE(:1,4,7)
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               HP(I,J,K) = PRHS(I,J,K)
+NO_SCARC_IF: IF (PRES_METHOD /= 'SCARC') THEN
+
+   ! Put output of Poisson solver into the H array
+   
+   !$OMP PARALLEL
+   SELECT CASE(IPS)
+      CASE(:1,4,7)
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  HP(I,J,K) = PRHS(I,J,K)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-      !$OMP END DO
-   CASE(2)
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               HP(I,J,K) = PRHS(J,I,K)
+         !$OMP END DO
+      CASE(2)
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  HP(I,J,K) = PRHS(J,I,K)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-      !$OMP END DO
-   CASE(3,6)
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               HP(I,J,K) = PRHS(K,J,I)
+         !$OMP END DO
+      CASE(3,6)
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  HP(I,J,K) = PRHS(K,J,I)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-      !$OMP END DO
-   CASE(5)
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               HP(I,J,K) = PRHS(I,K,J)
+         !$OMP END DO
+      CASE(5)
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  HP(I,J,K) = PRHS(I,K,J)
+               ENDDO
             ENDDO
          ENDDO
-      ENDDO
-      !$OMP END DO
-END SELECT 
-
-! Apply boundary conditions to H
-
-IF (SCARC_METHOD/='FFT') THEN
-
-   ! boundary conditions on ghost cells are set pointwise (not facewise)
-   ! perform local data exchange to get consistent solution (most probably redundant, has to be checked)
-   IF (PREDICTOR) THEN
-      CALL SCARC_GHOSTCELLS(H,NM)
-      CALL SCARC_UPDATE(MYID,'H   ')
-   ELSE
-      CALL SCARC_GHOSTCELLS(HS,NM)
-      CALL SCARC_UPDATE(MYID,'HS  ')
-   ENDIF
-
-ELSE
+         !$OMP END DO
+   END SELECT 
+   
+   ! Apply boundary conditions to H
 
    !$OMP DO COLLAPSE(2) PRIVATE(K,J)
    DO K=1,KBAR
@@ -488,7 +474,8 @@ ELSE
    ENDDO
    !$OMP END DO NOWAIT
    !$OMP END PARALLEL
-ENDIF
+
+ENDIF NO_SCARC_IF
 
 ! Optional check of the accuracy of the pressure solver
 
