@@ -9,9 +9,9 @@ USE MPI
  
 IMPLICIT NONE
 
-CHARACTER(255), PARAMETER :: scrchid='$Id: mesh.f90 6197 2010-05-11 13:20:05Z mcgratta $'
-CHARACTER(255), PARAMETER :: scrcrev='$Revision: 6197 $'
-CHARACTER(255), PARAMETER :: scrcdate='$Date: 2010-05-11 09:20:05 -0400 (Tue, 11 May 2010) $'
+CHARACTER(255), PARAMETER :: scrchid='$Id$'
+CHARACTER(255), PARAMETER :: scrcrev='$Revision$'
+CHARACTER(255), PARAMETER :: scrcdate='$Date$'
 
 PRIVATE
 
