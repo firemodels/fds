@@ -12,6 +12,7 @@
 #define NHIST_BUCKETS 100000
 typedef struct {
   int buckets[NHIST_BUCKETS];
+  int defined;
   float valmin, valmax;
   int ntotal;
 } histogramdata;
