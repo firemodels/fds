@@ -977,7 +977,7 @@ lu11 = unit
 inquire(unit=lu11,opened=connected)
 if(connected)close(lu11)
 
-inquire(file=trim(partfilename),exist=exists)
+inquire(file=partfilename,exist=exists)
 if(exists)then
 #ifdef pp_cvf
 if(endian.eq.1)then
@@ -992,7 +992,7 @@ if(endian.eq.1)then
   open(unit=lu11,file=trim(partfilename),form="unformatted",action="read")
 endif
 #else
-  open(unit=lu11,file=trim(partfilename),form="unformatted",action="read")
+  open(unit=lu11,file=partfilename,form="unformatted",action="read")
 #endif
  else
   error=1
@@ -1059,7 +1059,7 @@ read(lu11,iostat=error)is1, is2, js1, js2, ks1, ks2
 return
 end subroutine openslice
 
-!  ------------------ closeslice ------------------------ 
+!  ------------------ closefortranfile ------------------------ 
 
 subroutine closefortranfile(unit)
 
@@ -1229,3 +1229,104 @@ if(error.ne.0)close(lu15)
 
 return
 end subroutine openboundary
+
+!  ------------------ getpartheader1 ------------------------ 
+
+subroutine getpartheader1(unit,nclasses)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_getpartheader1@8' :: getpartheader1
+#endif
+implicit none
+
+integer, intent(in) :: unit
+integer, intent(out) :: nclasses
+
+integer :: one,version
+
+read(unit)one
+read(unit)version
+
+read(unit)nclasses
+
+return
+
+end subroutine getpartheader1
+
+!  ------------------ getpartheader2 ------------------------ 
+
+subroutine getpartheader2(unit,nclasses,nquantities)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_getpartheader2@12' :: getpartheader2
+#endif
+implicit none
+
+integer, intent(in) :: unit,nclasses
+integer, intent(out), dimension(nclasses) :: nquantities
+
+character(len=30) :: clabel
+integer :: i, j, dummy
+
+
+do i = 1, nclasses
+  read(unit)nquantities(i),dummy
+  do j=1, nquantities(i)
+    read(unit)clabel
+    read(unit)clabel
+  end do
+end do
+
+return
+
+end subroutine getpartheader2
+
+!  ------------------ getpartdataframe ------------------------ 
+
+subroutine getpartdataframe(unit,nclasses,nquantities,npoints,time,tagdata,pdata,error)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_getpartdataframe@28' :: getpartdataframe
+#endif
+implicit none
+
+integer, intent(in) :: unit,nclasses
+integer, intent(in), dimension(nclasses) :: nquantities
+integer, intent(out), dimension(nclasses) :: npoints
+real, intent(out), dimension(*) :: pdata
+integer, intent(out), dimension(*) :: tagdata
+real, intent(out) :: time
+integer, intent(out) :: error
+
+integer :: pstart, pend
+integer :: tagstart, tagend
+integer :: i, j, nparticles, dummy
+
+pend=0
+tagend=0
+error=0
+read(unit,iostat=error)time
+if(error.ne.0)return
+do i = 1, nclasses
+  read(unit,iostat=error)nparticles
+  if(error.ne.0)return
+  npoints(i)=nparticles
+  
+  pstart=pend+1
+  pend=pstart+3*nparticles-1
+  read(unit,iostat=error)(pdata(j),j=pstart,pend)
+  if(error.ne.0)return
+
+  tagstart = tagend + 1
+  tagend = tagstart + nparticles - 1
+  read(unit,iostat=error)(tagdata(j),j=tagstart,tagend)
+  if(error.ne.0)return
+
+  if(nquantities(i).gt.0)then
+    pstart = pend + 1
+    pend = pstart + nparticles*nquantities(i) - 1
+    read(unit,iostat=error)(pdata(j),j=pstart,pend)
+    if(error.ne.0)return
+  endif
+end do
+error=0
+
+end subroutine getpartdataframe
+
