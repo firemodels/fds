@@ -676,6 +676,7 @@ int slicedup(slice *slicej, int islice){
   }
   return 0;
 }
+
 /* ------------------ Get_Slice_Bounds ------------------------ */
 
 void Get_Slice_Bounds(void){
@@ -710,6 +711,7 @@ void Get_Slice_Bounds(void){
       update_histogram(sliceframe,sliceframesize,slicei->histogram);
     }
     FREEMEMORY(sliceframe);
+    FORTclosefortranfile(&unit1);
   }
   for(i=0;i<nslice_files;i++){
     slice *slicei;
