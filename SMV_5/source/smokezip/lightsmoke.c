@@ -247,7 +247,7 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
     //        repeat 1-4 until there are no more trial  nodes
 
     while(first_trial!=last_trial->prev){
-      nodedata *ti,*maxti;
+      nodedata *maxti;
       float maxdist;
 
       maxti=first_trial->next;

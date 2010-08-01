@@ -98,14 +98,15 @@ unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer
 /* ------------------ readlabels ------------------------ */
 
 int readlabels(flowlabels *flowlabel, FILE *stream){
-  char buffer[255];
+#define BUFFERSIZE 255
+  char buffer[BUFFERSIZE];
   unsigned int len;
 
   flowlabel->longlabel=NULL;
   flowlabel->shortlabel=NULL;
   flowlabel->unit=NULL;
 
-  if(fgets(buffer,255,stream)==NULL)return 2;
+  if(fgets(buffer,BUFFERSIZE,stream)==NULL)return 2;
 
   len=strlen(buffer);
   buffer[len-1]='\0';
@@ -114,8 +115,7 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
 
-
-  if(fgets(buffer,255,stream)==NULL)return 2;
+  if(fgets(buffer,BUFFERSIZE,stream)==NULL)return 2;
   len=strlen(buffer);
   buffer[len-1]='\0';
   trim(buffer);
@@ -123,7 +123,7 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
 
-  if(fgets(buffer,255,stream)==NULL)return 2;
+  if(fgets(buffer,BUFFERSIZE,stream)==NULL)return 2;
   len=strlen(buffer);
   buffer[len-1]='\0';
   trim(buffer);

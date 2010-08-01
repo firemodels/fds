@@ -68,6 +68,9 @@ int main(int argc, char **argv){
   get_slice_bounds=0;
   get_plot3d_bounds=0;
   get_boundary_bounds=0;
+#ifdef pp_PART
+  get_part_bounds=0;
+#endif
 #ifdef pp_LIGHT
   make_lighting_file=0;
   albedo=(float)0.3;
@@ -97,7 +100,11 @@ int main(int argc, char **argv){
   nsmoke3d_files=0;
 #ifdef pp_PART
   npart_files=0;
+  npartclassinfo=0;
   partinfo=NULL;
+  partclassinfo=NULL;
+  maxpart5propinfo=0;
+  npart5propinfo=0;
 #endif
   nslice_files=0;
   sliceinfo=NULL;
@@ -152,6 +159,9 @@ int main(int argc, char **argv){
           get_slice_bounds=1;
           get_plot3d_bounds=1;
           get_boundary_bounds=1;
+#ifdef pp_PART
+          get_part_bounds=1;
+#endif
         }
         else if(strcmp(arg,"-bb")==0){
           get_boundary_bounds=1;
@@ -162,6 +172,11 @@ int main(int argc, char **argv){
         else if(strcmp(arg,"-bp")==0){
           get_plot3d_bounds=1;
         }
+#ifdef pp_PART
+        else if(strcmp(arg,"-bP")==0){
+          get_part_bounds=1;
+        }
+#endif
         else{
           overwrite_b=1;
         }
@@ -172,6 +187,11 @@ int main(int argc, char **argv){
       case '3':
         overwrite_s=1;
         break;
+#ifdef  pp_PART
+      case 'P':
+        overwrite_part=1;
+        break;
+#endif
       case 'p':
         overwrite_plot3d=1;
         break;
@@ -181,6 +201,9 @@ int main(int argc, char **argv){
         overwrite_slice=1;
         overwrite_iso=1;
         overwrite_plot3d=1;
+#ifdef pp_PART
+        overwrite_part=1;
+#endif
         break;
       case 'i':
         overwrite_iso=1;
@@ -356,20 +379,6 @@ int main(int argc, char **argv){
     }
   }
 
-#ifdef pp_PART
-  if(npart_files>0){
-    partinfo[0].dup=0;
-    for(i=1;i<npart_files;i++){
-      part *parti; 
-
-      parti = partinfo + i;
-
-      parti->dup=0;
-      partdup(parti,i);
-    }
-  }
-#endif
-
   if(getendian()==1){
       printf("Smokezip running on a big endian computer.\n");
   }
@@ -544,11 +553,17 @@ void usage(char *prog){
   printf("  -b  - overwrites boundary compressed files\n");
   printf("  -i  - overwrites iso-surface compressed files\n");
   printf("  -p  - overwrites PLOT3D files\n");
+#ifdef pp_PART
+  printf("  -P  - overwrites particle files\n");
+#endif
   printf("  -f  - overwrites all compressed files\n");
   printf("  -bounds - estimate data bounds for all file types\n");
   printf("  -bb - estimate data bounds for boundary files\n");
   printf("  -bs - estimate data bounds for slice files\n");
   printf("  -bp - estimate data bounds for plot3d files\n");
+#ifdef pp_PART
+  printf("  -bP - estimate data bounds for particle files\n");
+#endif
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 
   printf("  -demo - Creates the files (compressed and .svd ) needed by the\n");

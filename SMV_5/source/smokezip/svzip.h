@@ -175,6 +175,34 @@ typedef struct {
 } smoke3d;
 
 #ifdef pp_PART
+
+/* --------------------------  part5prop ------------------------------------ */
+
+typedef struct {
+  flowlabels label;
+  float valmin, valmax;
+  histogramdata *histogram;
+  int setvalmin, setvalmax;
+} part5prop;
+
+/* --------------------------  partclass ------------------------------------ */
+
+typedef struct {
+  char *name;
+  int ntypes;
+  flowlabels *labels;
+} part5class;
+
+/* --------------------------  part5data ------------------------------------ */
+
+typedef struct {
+  int npoints,n_rtypes, n_itypes;
+  int *tags,*sort_tags;
+  float *rvals;
+  unsigned char *irvals;
+  unsigned char **cvals;
+} part5data;
+
 /* --------------------------  part ------------------------------------ */
 
 typedef struct {
@@ -183,8 +211,12 @@ typedef struct {
   int seq_id, autozip;
   int setvalmin, setvalmax;
   float valmin, valmax;
-  flowlabels label;
-  int dup;
+  flowlabels *label;
+
+  int nclasses;
+  part5class **classptr;
+  part5data *data5;
+
 } part;
 #endif
 
@@ -245,10 +277,9 @@ void getpdf(float *vals, int nvals, pdfdata *pdf);
 void mergepdf(pdfdata *pdf1, pdfdata *pdf2, pdfdata *pdfmerge);
 void smoothlabel(float *a, float *b, int n);
 #ifdef pp_PART
-unsigned char getpartcolor(float val);
 void compress_parts(void);
 part *getpart(char *string);
-int partdup(part *partj, int ipart);
+part5prop *getpartprop(char *string);
 void convert_part(part *parti);
 #endif
 void compress_patches(void);
@@ -261,6 +292,9 @@ void readini2(char *file2);
 int convert_boundary(patch *patchi, int pass);
 void Get_Boundary_Bounds(void);
 void Get_Slice_Bounds(void);
+#ifdef pp_PART
+void Get_Part_Bounds(void);
+#endif
 void convert_3dsmoke(smoke3d *smoke3di);
 void compress_smoke3ds(void);
 int match(const char *buffer, const char *key, unsigned int lenkey);
@@ -274,20 +308,28 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
 #endif
 
 #ifdef pp_noappend
+#define FORTgetpartheader1 getpartheader1
+#define FORTgetpartheader2 getpartheader2
+#define FORTgetpartdataframe getpartdataframe
 #define FORTclosefortranfile closefortranfile
 #define FORTgetboundaryheader1 getboundaryheader1
 #define FORTgetboundaryheader2 getboundaryheader2
 #define FORTopenboundary openboundary
 #define FORTgetpatchdata getpatchdata
 #define FORTopenslice openslice
+#define FORTopenpart openpart
 #define FORTgetsliceframe getsliceframe
 #else
+#define FORTgetpartheader1 getpartheader1_
+#define FORTgetpartheader2 getpartheader2_
+#define FORTgetpartdataframe getpartdataframe_
 #define FORTclosefortranfile closefortranfile_
 #define FORTgetboundaryheader1 getboundaryheader1_
 #define FORTgetboundaryheader2 getboundaryheader2_
 #define FORTopenboundary openboundary_
 #define FORTgetpatchdata getpatchdata_
 #define FORTopenslice openslice_
+#define FORTopenpart openpart_
 #define FORTgetsliceframe getsliceframe_
 #endif
 #ifdef WIN32
@@ -295,6 +337,17 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
 #else
 #define STDCALL extern void
 #endif
+
+//subroutine getpartheader1(unit,nclasses)
+//subroutine getpartheader2(unit,nclasses,nquantities)
+//subroutine getpartdataframe(unit,nclasses,nquantities,npoints,time,tagdata,pdata)
+STDCALL FORTopenpart(char *partfilename, int *unit, int *endian, int *error, FILE_SIZE lenfile);
+STDCALL FORTgetpartheader1(int *unit, int *nclasses);
+STDCALL FORTgetpartheader2(int *unit, int *nclasses, int *nquantities);
+STDCALL FORTgetpartdataframe(int *unit, int *nclasses, int *nquantities, int *npoints, float *time, int *tagdata, float *pdata, int *error);
+
+STDCALL FORTclosefortranfile(int *lunit);
+
 STDCALL FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
                          float *patchtimes,float *pqq, int *ndummy, int *error);
 STDCALL FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
@@ -303,6 +356,7 @@ STDCALL FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber,
                                int *endian, int *npatch, int *error, FILE_SIZE lenfile);
 STDCALL FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
+
 STDCALL FORTgetsliceframe(int *lu11,
                           int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                           float *time,float *qframe,int *slicetest, int *error);
@@ -339,8 +393,13 @@ EXTERN int nmeshes;
 EXTERN int overwrite_slice;
 EXTERN int overwrite_plot3d;
 #ifdef pp_PART
+EXTERN int overwrite_part;
 EXTERN part *partinfo;
 EXTERN int npart_files;
+EXTERN int npartclassinfo;
+EXTERN part5class *partclassinfo;
+EXTERN part5prop *part5propinfo;
+EXTERN int maxpart5propinfo, npart5propinfo;
 #endif
 EXTERN int nsmoke3d_files;
 EXTERN int endianswitch,overwrite_b,overwrite_s;
@@ -362,4 +421,7 @@ EXTERN char *endianfile;
 EXTERN spherepoints sphereinfo;
 EXTERN int autozip, make_demo;
 EXTERN int get_bounds, get_slice_bounds, get_plot3d_bounds, get_boundary_bounds;
+#ifdef pp_PART
+EXTERN int get_part_bounds;
+#endif
 
