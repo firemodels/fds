@@ -24,9 +24,10 @@ int readsmv(char *smvfile){
   int ismoke3d, ismoke3d_seq;
   int islice, islice_seq;
 #ifdef pp_PART
-  int ipart,ipart_seq;
+  int ipart_seq;
 #endif
-  char buffer[255];
+#define BUFFERSIZE 255
+  char buffer[BUFFERSIZE];
 #ifdef pp_LIGHT
   int nobsts, nvents;
   int open_index,isurf;
@@ -47,7 +48,7 @@ int readsmv(char *smvfile){
   }
 
   while(!feof(streamsmv)){
-    if(fgets(buffer,255,streamsmv)==NULL)break;
+    if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
     CheckMemory;
     if(strncmp(buffer," ",1)==0)continue;
 
@@ -60,7 +61,7 @@ int readsmv(char *smvfile){
     if(match(buffer,"SURFACE",7) == 1){
       char *surf_label;
 
-      if(fgets(buffer,255,streamsmv)==NULL)break;
+      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       surf_label=trim_front(buffer);
       if(strcmp(surf_label,"OPEN")==0){
@@ -100,10 +101,29 @@ int readsmv(char *smvfile){
 #ifdef pp_PART
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ CLASS_OF_PARTICLES++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"CLASS_OF_PARTICLES",18) == 1){
+      int i,nclasses;
+
+      npartclassinfo++;
+      fgets(buffer,BUFFERSIZE,streamsmv);
+      fgets(buffer,BUFFERSIZE,streamsmv);
+      fgets(buffer,BUFFERSIZE,streamsmv);
+      sscanf(buffer,"%i",&nclasses);
+      if(nclasses>0)maxpart5propinfo+=nclasses;
+      for(i=0;i<nclasses;i++){
+        fgets(buffer,BUFFERSIZE,streamsmv);
+      }
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ PART ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PART",4) == 1){
+    if(match(buffer,"PRT5",4) == 1){
       npart_files++;
       continue;
     }
@@ -275,6 +295,12 @@ int readsmv(char *smvfile){
       parti->valmin=0.0;
     }
   }
+  if(npartclassinfo>0){
+    NewMemory((void **)&partclassinfo,npartclassinfo*sizeof(part5class));
+  }
+  if(maxpart5propinfo>0){
+    NewMemory((void **)&part5propinfo,maxpart5propinfo*sizeof(part5prop));
+  }
 #endif
   
   // read in smv file a second time to compress files
@@ -282,8 +308,10 @@ int readsmv(char *smvfile){
   ipatch=0;
   ipatch_seq=0;
 #ifdef pp_PART
-  ipart=0;
   ipart_seq=0;
+  npartclassinfo=0;
+  npart5propinfo=0;
+  npart_files=0;
 #endif
   iplot3d=0;
   iplot3d_seq=0;
@@ -304,7 +332,7 @@ int readsmv(char *smvfile){
   while(!feof(streamsmv)){
     patch *patchi;
 
-    if(fgets(buffer,255,streamsmv)==NULL)break;
+    if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
     CheckMemory;
     if(strncmp(buffer," ",1)==0)continue;
   /*
@@ -317,7 +345,7 @@ int readsmv(char *smvfile){
       int one;
 
       endf=1;
-      if(fgets(buffer,255,streamsmv)==NULL)break;
+      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       strcpy(endianfilebase,buffer);
       FREEMEMORY(endianfile);
@@ -350,7 +378,7 @@ int readsmv(char *smvfile){
 
       meshi=meshinfo+igrid;
       igrid++;
-      fgets(buffer,255,streamsmv);
+      fgets(buffer,BUFFERSIZE,streamsmv);
       sscanf(buffer,"%i %i %i",&meshi->ibar,&meshi->jbar,&meshi->kbar);
       continue;
     }
@@ -364,7 +392,7 @@ int readsmv(char *smvfile){
 
       meshi=meshinfo+ipdim;
       ipdim++;
-      fgets(buffer,255,streamsmv);
+      fgets(buffer,BUFFERSIZE,streamsmv);
       sscanf(buffer,"%f %f %f %f %f %f",&meshi->xbar0,&meshi->xbar,&meshi->ybar0,&meshi->ybar,&meshi->zbar0,&meshi->zbar);
       continue;
     }
@@ -374,7 +402,7 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"SYST",4) == 1){
-      if(fgets(buffer,255,streamsmv)==NULL)break;
+      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       syst=1;
       trim(buffer);
       if(match(buffer,"SGI",3) == 1||match(buffer,"AIX",3)==1){
@@ -420,7 +448,7 @@ int readsmv(char *smvfile){
       ismoke3d_seq++;
       smoke3di->seq_id = ismoke3d_seq;
       smoke3di->autozip = 0;
-      if(fgets(buffer,255,streamsmv)==NULL)break;
+      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       buffer2=trim_front(buffer);
       filelen=strlen(buffer2);
@@ -488,14 +516,14 @@ int readsmv(char *smvfile){
       int i;
 
       meshi = meshinfo + nobsts++;
-      fgets(buffer,255,streamsmv);
+      fgets(buffer,BUFFERSIZE,streamsmv);
       sscanf(buffer,"%i",&meshi->nobsts);
       if(meshi->nobsts<0)meshi->nobsts=0;
       if(meshi->nobsts==0)continue;
 
       NewMemory((void **)&meshi->obstinfo,meshi->nobsts*sizeof(obstdata));
       for(i=0;i<meshi->nobsts;i++){
-        fgets(buffer,255,streamsmv);
+        fgets(buffer,BUFFERSIZE,streamsmv);
       }
       for(i=0;i<meshi->nobsts;i++){
         int *ib;
@@ -503,7 +531,7 @@ int readsmv(char *smvfile){
 
         obsti = meshi->obstinfo + i;
         ib=obsti->ib;
-        fgets(buffer,255,streamsmv);
+        fgets(buffer,BUFFERSIZE,streamsmv);
         sscanf(buffer,"%i %i %i %i %i %i",ib,ib+1,ib+2,ib+3,ib+4,ib+5);
       }
     }
@@ -517,7 +545,7 @@ int readsmv(char *smvfile){
       int i;
 
       meshi = meshinfo + nvents++;
-      fgets(buffer,255,streamsmv);
+      fgets(buffer,BUFFERSIZE,streamsmv);
       sscanf(buffer,"%i",&meshi->nvents);
       if(meshi->nvents<0)meshi->nvents=0;
       if(meshi->nvents==0)continue;
@@ -529,7 +557,7 @@ int readsmv(char *smvfile){
         int idum;
 
         venti = meshi->ventinfo + i;
-        fgets(buffer,255,streamsmv);
+        fgets(buffer,BUFFERSIZE,streamsmv);
         sscanf(buffer,"%f %f %f %f %f %f %i %i",&dum,&dum,&dum,&dum,&dum,&dum,&idum,&venti->surf_index);
         if(venti->surf_index==open_index){
           venti->is_open=1;
@@ -544,7 +572,7 @@ int readsmv(char *smvfile){
 
         venti = meshi->ventinfo + i;
         ib=venti->ib;
-        fgets(buffer,255,streamsmv);
+        fgets(buffer,BUFFERSIZE,streamsmv);
         sscanf(buffer,"%i %i %i %i %i %i",ib,ib+1,ib+2,ib+3,ib+4,ib+5);
       }
     }
@@ -552,11 +580,63 @@ int readsmv(char *smvfile){
 #ifdef pp_PART
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++ CLASS_OF_PARTICLES +++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+
+    if(match(buffer,"CLASS_OF_PARTICLES",18) == 1){
+      part5class *partclassi;
+      int j;
+      char *percen;
+
+      partclassi = partclassinfo + npartclassinfo;
+
+      fgets(buffer,BUFFERSIZE,streamsmv);
+      percen=strchr(buffer,'%');
+      if(percen!=NULL)percen=0;
+      trim(buffer);
+      NewMemory((void **)&partclassi->name,strlen(buffer)+1);
+      strcpy(partclassi->name,buffer);
+
+      fgets(buffer,BUFFERSIZE,streamsmv);
+
+      fgets(buffer,BUFFERSIZE,streamsmv);
+      sscanf(buffer,"%i",&partclassi->ntypes);
+      if(partclassi->ntypes>0){
+        NewMemory((void **)&partclassi->labels,partclassi->ntypes*sizeof(flowlabels));
+        for(j=0;j<partclassi->ntypes;j++){
+          flowlabels *labelj;
+          part5prop *part5propi;
+
+          labelj = partclassi->labels+j;
+          labelj->longlabel=NULL;
+          labelj->shortlabel=NULL;
+          labelj->unit=NULL;
+          readlabels(labelj,streamsmv);
+          part5propi=getpartprop(labelj->shortlabel);
+          if(part5propi==NULL){
+            part5propi = part5propinfo + npart5propinfo;
+            part5propi->label.shortlabel=labelj->shortlabel;
+            part5propi->setvalmin=0;
+            part5propi->valmin=1.0;
+            part5propi->setvalmax=0;
+            part5propi->valmax=0.0;
+            npart5propinfo++;
+          }
+        }
+      }
+      npartclassinfo++;
+      continue;
+    }
+    
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ PART ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PART",4) == 1){
+    if(match(buffer,"PRT5",4) == 1){
       int version=0,dummy;
+      int i;
       char *buffer2;
       int len;
       part *parti;
@@ -568,36 +648,46 @@ int readsmv(char *smvfile){
         sscanf(buffer2,"%i %i",&dummy,&version);
       }
 
-      parti = partinfo + ipart;
+      parti = partinfo + npart_files;
       ipart_seq++;
       parti->seq_id = ipart_seq;
       parti->autozip = 0;
 
-      if(fgets(buffer,255,streamsmv)==NULL)break;
+      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
-      if(strlen(buffer)<=0)break;
-      if(getfileinfo(buffer,sourcedir,&filesize)==0){
-        NewMemory((void **)&parti->file,(unsigned int)(strlen(buffer)+lensourcedir+1));
-        NewMemory((void **)&parti->filebase,(unsigned int)(strlen(buffer)+1));
-        STRCPY(parti->filebase,buffer);
+      buffer2=trim_front(buffer);
+      if(strlen(buffer2)<=0)break;
+      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
+        NewMemory((void **)&parti->file,(unsigned int)(strlen(buffer2)+lensourcedir+1));
+        NewMemory((void **)&parti->filebase,(unsigned int)(strlen(buffer2)+1));
+        STRCPY(parti->filebase,buffer2);
         if(sourcedir!=NULL){
           STRCPY(parti->file,sourcedir);
-          STRCAT(parti->file,buffer);
+          STRCAT(parti->file,buffer2);
         }
         else{
-          STRCPY(parti->file,buffer);
-        }
-        if(readlabels(&parti->label,streamsmv)==2){
-          printf("*** Warning: problem reading BNDF entry\n");
-          break;
+          STRCPY(parti->file,buffer2);
         }
         parti->filesize=filesize;
-        ipart++;
+        npart_files++;
       }
       else{
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
-        if(readlabels(&partinfo[ipart].label,streamsmv)==2)break;
-        npart_files--;
+        printf("*** Warning: the file, %s, does not exist.\n",buffer2);
+      }
+      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
+      sscanf(buffer,"%i",&parti->nclasses);
+      if(parti->nclasses>0){
+        NewMemory((void **)&parti->classptr,parti->nclasses*sizeof(part5class *));
+      }
+      else{
+        parti->nclasses=0;
+      }
+      for(i=0;i<parti->nclasses;i++){
+        int classindex;
+
+        if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
+        sscanf(buffer,"%i",&classindex);
+        parti->classptr[i]=partclassinfo + classindex - 1;
       }
       continue;
     }
@@ -625,7 +715,7 @@ int readsmv(char *smvfile){
       patchi->autozip = 0;
       patchi->version=version;
 
-      if(fgets(buffer,255,streamsmv)==NULL)break;
+      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)<=0)break;
@@ -725,7 +815,7 @@ int readsmv(char *smvfile){
           NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
       }
 
-      if(fgets(buffer,255,streamsmv)==NULL)break;
+      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)<=0)break;
@@ -815,7 +905,7 @@ int readsmv(char *smvfile){
       plot3di->plot3d_mesh=meshinfo + blocknumber;
       plot3di->time=time;
 
-      if(fgets(buffer,255,streamsmv)==NULL)break;
+      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       if(strlen(buffer)<=0)break;
       if(getfileinfo(buffer,sourcedir,&filesize)==0){
@@ -885,7 +975,7 @@ int readsmv(char *smvfile){
       isoi->file=NULL;
       isoi->filebase=NULL;
 
-      if(fgets(buffer,255,streamsmv)==NULL)break;
+      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)<=0)break;
@@ -1053,25 +1143,25 @@ void readini2(char *inifile){
   // pass 1
 
   while(!feof(stream)){
-    if(fgets(buffer,255,stream)==NULL)break;
+    if(fgets(buffer,BUFFERSIZE,stream)==NULL)break;
 
     if(match(buffer,"L_POINT",7)==1){
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       nlightinfo++;
       continue;
     }
     if(match(buffer,"L_MOVEPOINT",7)==1){
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       nlightinfo++;
       continue;
     }
     if(match(buffer,"L_LINE",6)==1){
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       nlightinfo++;
       continue;
     }
     if(match(buffer,"L_REGION",7)==1){
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       nlightinfo++;
       continue;
     }
@@ -1087,11 +1177,11 @@ void readini2(char *inifile){
 
 #endif
   while(!feof(stream)){
-    if(fgets(buffer,255,stream)==NULL)break;
+    if(fgets(buffer,BUFFERSIZE,stream)==NULL)break;
 
 #ifdef pp_LIGHT
     if(match(buffer,"L_PHOTONS",9)==1){
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       sscanf(buffer,"%i",&nphotons);
       if(nphotons<1)nphotons=NPHOTONS;
       continue;
@@ -1099,7 +1189,7 @@ void readini2(char *inifile){
     if(match(buffer,"L_MINMAX",7)==1){
       float l_min=light_min, l_max=light_max;
 
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       sscanf(buffer,"%f %f",&l_min,&l_max);
       if(l_min<=0.0||l_max<=0.0){
         printf("*** error: light flux bounds must be positive\n");
@@ -1131,7 +1221,7 @@ void readini2(char *inifile){
         float *xyz;
   
         xyz = lighti->xyz1;
-        fgets(buffer,255,stream);
+        fgets(buffer,BUFFERSIZE,stream);
         sscanf(buffer,"%f %f %f %f %f",xyz,xyz+1,xyz+2,&lighti->q,&lighti->radius);
       }
       else{
@@ -1139,11 +1229,11 @@ void readini2(char *inifile){
 
         xyz = lighti->xyz1;
         xyz2 = lighti->xyz2;
-        fgets(buffer,255,stream);
+        fgets(buffer,BUFFERSIZE,stream);
         sscanf(buffer,"%f %f %f %f %f",&lighti->t1,  xyz,  xyz+1, xyz+2,&lighti->radius);
-        fgets(buffer,255,stream);
+        fgets(buffer,BUFFERSIZE,stream);
         sscanf(buffer,"%f %f %f %f",&lighti->t2, xyz2, xyz2+1,xyz2+2);
-        fgets(buffer,255,stream);
+        fgets(buffer,BUFFERSIZE,stream);
         sscanf(buffer,"%f",&lighti->q);
       }
 
@@ -1164,7 +1254,7 @@ void readini2(char *inifile){
       lighti->dir=0;
       xyz1 = lighti->xyz1;
       xyz2 = lighti->xyz2;
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       lighti->radius=0.5/39.37;
       sscanf(buffer,"%f %f %f %f %f %f %f %f",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,&lighti->q,&lighti->radius);
       if(lighti->radius<0.05/39.37)lighti->radius=0.05/39.37;
@@ -1188,7 +1278,7 @@ void readini2(char *inifile){
       lighti->type=2;
       xyz1 = lighti->xyz1;
       xyz2 = lighti->xyz2;
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       sscanf(buffer,"%f %f %f %f %f %f %f %i",xyz1,xyz1+1,xyz1+2,xyz2,xyz2+1,xyz2+2,&lighti->qflux,&dir);
       if(abs(dir)>3)dir=0;
       lighti->dir=dir;
@@ -1213,7 +1303,7 @@ void readini2(char *inifile){
       continue;
     }
     if(match(buffer,"L_DELTA",7)==1){
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       sscanf(buffer,"%f",&light_delta);
       continue;
     }
@@ -1223,7 +1313,7 @@ void readini2(char *inifile){
       float slicemin, slicemax;
       slice *slicei;
 
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setslicemin,&slicemin,&setslicemax,&slicemax,buffer2);
       type_buffer=trim_front(buffer2);
@@ -1244,7 +1334,7 @@ void readini2(char *inifile){
 
       plot3di = plot3dinfo;
 
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       nplot3d_vars=5;
       sscanf(buffer,"%i",&nplot3d_vars);
       if(nplot3d_vars<0)nplot3d_vars=0;
@@ -1255,7 +1345,7 @@ void readini2(char *inifile){
         int setvalmin, setvalmax;
         float valmin, valmax;
 
-        fgets(buffer,255,stream);
+        fgets(buffer,BUFFERSIZE,stream);
         sscanf(buffer,"%i %i %f %i %f",&iplot3d,&setvalmin,&valmin,&setvalmax,&valmax);
         iplot3d--;
         if(iplot3d>=0&&iplot3d<5){
@@ -1272,7 +1362,7 @@ void readini2(char *inifile){
       float chopslicemin, chopslicemax;
       slice *slicei;
 
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setchopslicemin,&chopslicemin,&setchopslicemax,&chopslicemax,buffer2);
       type_buffer=trim_front(buffer2);
@@ -1290,7 +1380,7 @@ void readini2(char *inifile){
       int setpatchmin, setpatchmax;
       float patchmin, patchmax;
 
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setpatchmin,&patchmin,&setpatchmax,&patchmax,buffer2);
       type_buffer=trim_front(buffer2);
@@ -1305,25 +1395,25 @@ void readini2(char *inifile){
       continue;
     }
     if(frameskip<1&&match(buffer,"SLICEZIPSTEP",12)==1){
-	    fgets(buffer,255,stream);
+	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&slicezipstep);
 	    if(slicezipstep<1)slicezipstep=1;
       continue;
     }
     if(frameskip<1&&match(buffer,"ISOZIPSTEP",10)==1){
-	    fgets(buffer,255,stream);
+	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&isozipstep);
 	    if(isozipstep<1)isozipstep=1;
       continue;
     }
     if(frameskip<1&&match(buffer,"SMOKE3DZIPSTEP",14)==1){
-	    fgets(buffer,255,stream);
+	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&smoke3dzipstep);
 	    if(smoke3dzipstep<1)smoke3dzipstep=1;
       continue;
     }
     if(frameskip<1&&match(buffer,"BOUNDZIPSTEP",12)==1){
-	    fgets(buffer,255,stream);
+	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&boundzipstep);
 	    if(boundzipstep<1)boundzipstep=1;
       continue;
@@ -1333,19 +1423,19 @@ void readini2(char *inifile){
     if(match(buffer,"V_PARTICLES",11)==1){
       int setpartmin, setpartmax;
       float partmin, partmax;
-      part *parti;
+      part5prop *partpropi;
 
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setpartmin,&partmin,&setpartmax,&partmax,buffer2);
       type_buffer=trim_front(buffer2);
       trim(type_buffer);
-      parti=getpart(type_buffer);
-      if(parti!=NULL){
-        parti->setvalmax=setpartmax;
-        parti->setvalmin=setpartmin;
-        parti->valmax=partmax;
-        parti->valmin=partmin;
+      partpropi=getpartprop(type_buffer);
+      if(partpropi!=NULL){
+        partpropi->setvalmax=setpartmax;
+        partpropi->setvalmin=setpartmin;
+        partpropi->valmax=partmax;
+        partpropi->valmin=partmin;
       }
       continue;
     }
@@ -1355,10 +1445,10 @@ void readini2(char *inifile){
       int i;
       int seq_id;
 
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       sscanf(buffer,"%i",&nslice_auto);
       for(i=0;i<nslice_auto;i++){
-        fgets(buffer,255,stream);
+        fgets(buffer,BUFFERSIZE,stream);
         sscanf(buffer,"%i",&seq_id);
         get_startup_slice(seq_id);
       }
@@ -1369,10 +1459,10 @@ void readini2(char *inifile){
       int i;
       int seq_id;
 
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       sscanf(buffer,"%i",&n3dsmokes);
       for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,255,stream);
+        fgets(buffer,BUFFERSIZE,stream);
         sscanf(buffer,"%i",&seq_id);
         get_startup_iso(seq_id);
       }
@@ -1383,10 +1473,10 @@ void readini2(char *inifile){
       int i;
       int seq_id;
 
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       sscanf(buffer,"%i",&n3dsmokes);
       for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,255,stream);
+        fgets(buffer,BUFFERSIZE,stream);
         sscanf(buffer,"%i",&seq_id);
         get_startup_smoke(seq_id);
       }
@@ -1397,10 +1487,10 @@ void readini2(char *inifile){
       int i;
       int seq_id;
 
-      fgets(buffer,255,stream);
+      fgets(buffer,BUFFERSIZE,stream);
       sscanf(buffer,"%i",&n3dsmokes);
       for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,255,stream);
+        fgets(buffer,BUFFERSIZE,stream);
         sscanf(buffer,"%i",&seq_id);
         get_startup_patch(seq_id);
       }
