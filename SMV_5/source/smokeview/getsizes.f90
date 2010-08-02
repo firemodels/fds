@@ -1232,19 +1232,19 @@ end subroutine openboundary
 
 !  ------------------ getpartheader1 ------------------------ 
 
-subroutine getpartheader1(unit,nclasses,size)
+subroutine getpartheader1(unit,nclasses,fdsversion,size)
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_getpartheader1@12' :: getpartheader1
+!DEC$ ATTRIBUTES ALIAS:'_getpartheader1@16' :: getpartheader1
 #endif
 implicit none
 
 integer, intent(in) :: unit
-integer, intent(out) :: nclasses,size
+integer, intent(out) :: nclasses,fdsversion,size
 
-integer :: one,version
+integer :: one
 
 read(unit)one
-read(unit)version
+read(unit)fdsversion
 
 read(unit)nclasses
 size=12
