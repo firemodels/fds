@@ -13,7 +13,6 @@ Quantity          = parameters(find(strcmp(headers,'Quantity')));
 Group_Key_Label   = parameters(find(strcmp(headers,'Group_Key_Label')));
 Group_Style       = parameters(find(strcmp(headers,'Group_Style')));
 Fill_Color        = parameters(find(strcmp(headers,'Fill_Color')));
-Dataname          = char(parameters(find(strcmp(headers,'Dataname'))));
 d1_Filename       = [vdir,char(parameters(find(strcmp(headers,'d1_Filename'))))];
 d1_Col_Name_Row   = str2num(char(parameters(find(strcmp(headers,'d1_Col_Name_Row')))));
 d1_Ind_Col_Name   = char(parameters(find(strcmp(headers,'d1_Ind_Col_Name'))));
@@ -51,7 +50,6 @@ Scale_Dep         = str2num(char(parameters(find(strcmp(headers,'Scale_Dep')))))
 Flip_Axis         = char(parameters(find(strcmp(headers,'Flip_Axis'))));
 Title_Position    = str2num(char(parameters(find(strcmp(headers,'Title_Position')))));
 Key_Position      = char(parameters(find(strcmp(headers,'Key_Position'))));
-Plot_Width        = str2num(char(parameters(find(strcmp(headers,'Plot_Width')))));
 Plot_Type         = char(parameters(find(strcmp(headers,'Plot_Type'))));
 Plot_Filename     = char(parameters(find(strcmp(headers,'Plot_Filename'))));
 
