@@ -1232,14 +1232,14 @@ end subroutine openboundary
 
 !  ------------------ getpartheader1 ------------------------ 
 
-subroutine getpartheader1(unit,nclasses)
+subroutine getpartheader1(unit,nclasses,size)
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_getpartheader1@8' :: getpartheader1
+!DEC$ ATTRIBUTES ALIAS:'_getpartheader1@12' :: getpartheader1
 #endif
 implicit none
 
 integer, intent(in) :: unit
-integer, intent(out) :: nclasses
+integer, intent(out) :: nclasses,size
 
 integer :: one,version
 
@@ -1247,6 +1247,7 @@ read(unit)one
 read(unit)version
 
 read(unit)nclasses
+size=12
 
 return
 
@@ -1254,21 +1255,24 @@ end subroutine getpartheader1
 
 !  ------------------ getpartheader2 ------------------------ 
 
-subroutine getpartheader2(unit,nclasses,nquantities)
+subroutine getpartheader2(unit,nclasses,nquantities,size)
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_getpartheader2@12' :: getpartheader2
+!DEC$ ATTRIBUTES ALIAS:'_getpartheader2@16' :: getpartheader2
 #endif
 implicit none
 
 integer, intent(in) :: unit,nclasses
 integer, intent(out), dimension(nclasses) :: nquantities
+integer, intent(out) :: size
 
 character(len=30) :: clabel
 integer :: i, j, dummy
 
+size=0
 
 do i = 1, nclasses
   read(unit)nquantities(i),dummy
+  size=size+4+2*nquantities(i)*(4+30+4)
   do j=1, nquantities(i)
     read(unit)clabel
     read(unit)clabel
@@ -1281,9 +1285,9 @@ end subroutine getpartheader2
 
 !  ------------------ getpartdataframe ------------------------ 
 
-subroutine getpartdataframe(unit,nclasses,nquantities,npoints,time,tagdata,pdata,error)
+subroutine getpartdataframe(unit,nclasses,nquantities,npoints,time,tagdata,pdata,size,error)
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_getpartdataframe@28' :: getpartdataframe
+!DEC$ ATTRIBUTES ALIAS:'_getpartdataframe@32' :: getpartdataframe
 #endif
 implicit none
 
@@ -1293,16 +1297,18 @@ integer, intent(out), dimension(nclasses) :: npoints
 real, intent(out), dimension(*) :: pdata
 integer, intent(out), dimension(*) :: tagdata
 real, intent(out) :: time
-integer, intent(out) :: error
+integer, intent(out) :: size,error
 
 integer :: pstart, pend
 integer :: tagstart, tagend
 integer :: i, j, nparticles, dummy
 
+size=0
 pend=0
 tagend=0
 error=0
 read(unit,iostat=error)time
+size=4
 if(error.ne.0)return
 do i = 1, nclasses
   read(unit,iostat=error)nparticles
@@ -1325,6 +1331,7 @@ do i = 1, nclasses
     read(unit,iostat=error)(pdata(j),j=pstart,pend)
     if(error.ne.0)return
   endif
+  size=size+4+(4*3*nparticles)+4*nparticles+4*nparticles*nquantities(i)
 end do
 error=0
 
