@@ -7,7 +7,7 @@
 
 &TIME T_END=3600. /
 
-Construction
+Construction information
 
 &MISC SURF_DEFAULT='CONCRETE WALL'/
 
