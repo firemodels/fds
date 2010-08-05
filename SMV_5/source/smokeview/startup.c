@@ -1341,7 +1341,7 @@ void initvars1(void){
 #endif
   visHRRlabel=0;
   visBlocklabel=1;
-  visOpenVents=1,visDummyVents=1;
+  visOpenVents=1,visDummyVents=1;visOtherVents=1;
   visOpenVentsAsOutline=0;
   visTitle0=1, visTitle1=1, visTitle2=1;
   ntitles=0,ititle=0;

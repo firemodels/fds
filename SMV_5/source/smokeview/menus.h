@@ -3524,7 +3524,10 @@ void VentMenu(int value){
   if(value==-1)return;
   switch (value){
   case 10:
-    visVents=1-visVents;
+    visVents=1;
+    visOpenVents=1;
+    visDummyVents=1;
+    visOtherVents=1;
     break;
   case 14:
     visOpenVents=1-visOpenVents;
@@ -3546,6 +3549,15 @@ void VentMenu(int value){
    case 20:
      show_transparent_vents=1-show_transparent_vents;
      updatefaces=1;
+     break;
+   case 21:
+     visOtherVents=1-visOtherVents;
+     break;
+   case 22:
+     visVents=0;
+     visOpenVents=0;
+     visDummyVents=0;
+     visOtherVents=0;
      break;
   default:
     ASSERT(FFALSE);
@@ -4652,15 +4664,29 @@ static int in_menu=0;
       ntotal_vents+=meshi->nvents;
     }
     if(ntotal_vents>0){
-      if(visVents==1)glutAddMenuEntry("*All",10);
-      if(visVents==0)glutAddMenuEntry("All",10);
       if(nopenvents>0){
-        if(visOpenVents==1)glutAddMenuEntry("  *Open Vents",14);
-        if(visOpenVents==0)glutAddMenuEntry("  Open Vents",14);
+        if(visOpenVents==1)glutAddMenuEntry("*Open",14);
+        if(visOpenVents==0)glutAddMenuEntry("Open",14);
       }
       if(ndummyvents>0){
-        if(visDummyVents==1)glutAddMenuEntry("  *Dummy Vents",16);
-        if(visDummyVents==0)glutAddMenuEntry("  Dummy Vents",16);
+        if(visDummyVents==1)glutAddMenuEntry("*Exterior",16);
+        if(visDummyVents==0)glutAddMenuEntry("Exterior",16);
+      }
+      if(ntotal_vents>nopenvents+ndummyvents){
+        if(visOtherVents==1)glutAddMenuEntry("*Other",21);
+        if(visOtherVents==0)glutAddMenuEntry("Other",21);
+      }
+      if(visOpenVents==1&&visDummyVents==1&&visOtherVents==1){
+        glutAddMenuEntry("*Show All",10);
+      }
+      else{
+        glutAddMenuEntry("Show All",10);
+      }
+      if(visOpenVents==0&&visDummyVents==0&&visOtherVents==0){
+        glutAddMenuEntry("*Hide All",22);
+      }
+      else{
+        glutAddMenuEntry("Hide All",22);
       }
       glutAddMenuEntry("-",-1);
       if(nopenvents_nonoutline>0){
@@ -4835,7 +4861,7 @@ static int in_menu=0;
 /* --------------------------------geometry menu -------------------------- */
 
   CREATEMENU(geometrymenu,GeometryMenu);
-  if(showedit==0&&ntotal_blockages>0)glutAddSubMenu("Blockages",blockagemenu);
+  if(showedit==0&&ntotal_blockages>0)glutAddSubMenu("Obstacles",blockagemenu);
   if(nobject_defs>0){
     int num_activedevices=0;
 
@@ -4857,7 +4883,7 @@ static int in_menu=0;
   if(nterraininfo>0){
     glutAddSubMenu("Terrain",terrain_showmenu);
   }
- glutAddSubMenu("Vents",ventmenu);
+ glutAddSubMenu("Surfaces",ventmenu);
  if(ntotal_blockages>0||isZoneFireModel==0){
     glutAddSubMenu("Grid",gridslicemenu);
   }

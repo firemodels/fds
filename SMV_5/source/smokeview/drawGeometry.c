@@ -1806,9 +1806,9 @@ void update_facelists(void){
       }
       if(j>=vent_offset&&j<vent_offset+meshi->nvents){
         vi = meshi->ventinfo+j-vent_offset;
-        if(visVents==0)continue;
         if(visOpenVents==0&&vi->isOpenvent==1)continue;
         if(visDummyVents==0&&vi->dummy==1)continue;
+        if(visOtherVents==0&&vi->isOpenvent==0&&vi->dummy==0)continue;
         if(patchi!=NULL&&
           patchi->loaded==1&&
           patchi->display==1&&
