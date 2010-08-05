@@ -7338,6 +7338,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             XYZ(3) = MESHES(1)%ZS
             MESH_NUMBER = 1
          ELSE
+            IF (ALL(EVACUATION_ONLY)) CYCLE READ_DEVC_LOOP
             WRITE(MESSAGE,'(A,A,A)') 'WARNING: DEVC ',TRIM(ID),' is not within any mesh.'  
             IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
             CYCLE READ_DEVC_LOOP
@@ -7663,6 +7664,7 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
             CYCLE BUILD_INPUT
          ENDIF
       END DO DEVC_LOOP
+      IF (ALL(EVACUATION_ONLY)) CYCLE BUILD_INPUT
    WRITE(MESSAGE,'(A,I5,A,A)')  'ERROR: CTRL ',NC,' cannot locate item for input ', TRIM(CF%INPUT_ID(NN))
    CALL SHUTDOWN(MESSAGE)
    END DO BUILD_INPUT

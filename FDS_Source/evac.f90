@@ -264,7 +264,7 @@ MODULE EVAC
   ! Save device data for the evacuation calculation
   TYPE EVAC_DEVC_TYPE
      REAL(EB) :: T_Change=0._EB
-     LOGICAL :: CURRENT=.FALSE., PRIOR=.FALSE.
+     LOGICAL :: CURRENT=.FALSE., PRIOR=.FALSE., USE_NOW=.FALSE.
      INTEGER :: I_Devc=0, I_Devc_Evac=0, I_Type=0
      CHARACTER(30) :: DEVC_ID='null'
   END TYPE EVAC_DEVC_TYPE
@@ -4400,7 +4400,7 @@ CONTAINS
                 EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = DEVICE_INPUT  ! 1
                 EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
              END DO DEVC_LOOP
-             CTRL_LOOP: DO I = 1, N_DEVC
+             CTRL_LOOP: DO I = 1, N_CTRL
                 CV => CONTROL(I)
                 IF (.NOT. DV%EVACUATION) CYCLE CTRL_LOOP
                 N_DEVC_EVAC = N_DEVC_EVAC + 1
@@ -4528,7 +4528,6 @@ CONTAINS
                    EVAC_DEVICES(j)%T_Change = tmpout1
                    EVAC_DEVICES(j)%CURRENT = CURRENT_STATE
                    EVAC_DEVICES(j)%PRIOR = PRIOR_STATE
-                   WRITE (LU_EVACOUT,*)'*** ',TRIM(DEVC_ID), ntmp1, ntmp2, CURRENT_STATE, PRIOR_STATE, tmpout1
                 END DO
              END IF New_Format_m3
           END DO TIME_LOOP
@@ -4654,7 +4653,7 @@ CONTAINS
                 IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP_WRITE
                 N_DEVC_EVAC = N_DEVC_EVAC + 1
              END DO DEVC_LOOP_WRITE
-             CTRL_LOOP_WRITE: DO I = 1, N_DEVC
+             CTRL_LOOP_WRITE: DO I = 1, N_CTRL
                 CV => CONTROL(I)
                 IF (.NOT. CV%EVACUATION) CYCLE CTRL_LOOP_WRITE
                 N_DEVC_EVAC = N_DEVC_EVAC + 1
@@ -4677,7 +4676,7 @@ CONTAINS
                 EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = DEVICE_INPUT  ! 1
                 EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
              END DO DEVC_LOOP_WRITE_2
-             CTRL_LOOP_WRITE_2: DO I = 1, N_DEVC
+             CTRL_LOOP_WRITE_2: DO I = 1, N_CTRL
                 CV => CONTROL(I)
                 IF (.NOT. DV%EVACUATION) CYCLE CTRL_LOOP_WRITE_2
                 N_DEVC_EVAC = N_DEVC_EVAC + 1
@@ -5811,6 +5810,7 @@ CONTAINS
              EVAC_DEVICES(N_DEVC_WRITE)%T_Change = DV%T_CHANGE
              EVAC_DEVICES(N_DEVC_WRITE)%CURRENT  = DV%CURRENT_STATE
              EVAC_DEVICES(N_DEVC_WRITE)%PRIOR    = DV%PRIOR_STATE
+             EVAC_DEVICES(N_DEVC_WRITE)%USE_NOW  = .FALSE.
           END IF
        END DO DEVC_LOOP_0
        CTRL_LOOP_0: DO I = 1, N_CTRL
@@ -5821,6 +5821,7 @@ CONTAINS
              EVAC_DEVICES(N_DEVC_WRITE)%T_Change = CV%T_CHANGE
              EVAC_DEVICES(N_DEVC_WRITE)%CURRENT  = CV%CURRENT_STATE
              EVAC_DEVICES(N_DEVC_WRITE)%PRIOR    = CV%PRIOR_STATE
+             EVAC_DEVICES(N_DEVC_WRITE)%USE_NOW  = .FALSE.
           END IF
        END DO CTRL_LOOP_0
     END IF
@@ -6074,6 +6075,7 @@ CONTAINS
                    WRITE (LU_EVACFED) N_TMP, N_DEVC_WRITE_TMP, EVAC_DEVICES(I)%CURRENT, &
                         EVAC_DEVICES(I)%PRIOR, REAL(EVAC_DEVICES(I)%T_Change,FB)
                    EVAC_DEVICES(I)%PRIOR = EVAC_DEVICES(I)%CURRENT
+                   EVAC_DEVICES(I)%USE_NOW = .TRUE.
                 END IF
              END DO DEVC_LOOP_2
           ELSE                    ! Read FED from a file
@@ -6114,6 +6116,7 @@ CONTAINS
                 EVAC_DEVICES(j)%T_Change = T_CHANGE
                 EVAC_DEVICES(j)%CURRENT = CURRENT_STATE
                 EVAC_DEVICES(j)%PRIOR = PRIOR_STATE
+                EVAC_DEVICES(I)%USE_NOW = .TRUE.
              END DO DEVC_LOOP_3
           END IF
        END IF
@@ -6743,12 +6746,16 @@ CONTAINS
              END IF
 
              ! Check the evacuation devices for the detection by thme
-             DO J = 1, N_DEVC_EVAC
-                IF (EVAC_DEVICES(J)%T_Change<=T .AND. EVAC_DEVICES(J)%CURRENT==.TRUE. .AND. HR%TDET > T) THEN
-                   Write(lu_err,*)'**** ',T,' Detection by device ', TRIM(EVAC_DEVICES(J)%DEVC_ID)
-                   HR%TDET = MIN(HR%TDET,T)
-                END IF
-             END DO
+             IF (HR%TDET > T) THEN
+                DO J = 1, N_DEVC_EVAC
+                   IF (EVAC_DEVICES(J)%T_Change<=T .AND. EVAC_DEVICES(J)%CURRENT==.TRUE. .AND. &
+                        EVAC_DEVICES(J)%USE_NOW) THEN
+                      WRITE(LU_EVACOUT,FMT='(A,I6,A,A,A,F8.2,A)') ' Agent n:o ', HR%ILABEL, ' detection by ', &
+                           TRIM(EVAC_DEVICES(J)%DEVC_ID), ' at', T, ' s'
+                      HR%TDET = MIN(HR%TDET,T)
+                   END IF
+                END DO
+             END IF
           END IF
           HR%V0_FAC = SMOKE_SPEED_FAC
 
