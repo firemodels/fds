@@ -1333,8 +1333,8 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
             CP,H_NEW,YY_GET(1:N_SPECIES),M_GAS_NEW,MW_GAS,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_REF,&
-            TMP_G_NEW,DT_SUM,DCPDT
-INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,N_SUBSTEPS,ITMP,IBC
+            TMP_G_NEW,DT_SUM,DCPDT,TMP_WGT,YY_GETA(1:N_SPECIES)
+INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,N_SUBSTEPS,ITMP,IBC,ITCOUNT
 INTEGER, INTENT(IN) :: NM
 LOGICAL :: TEMPITER
 TYPE (DROPLET_TYPE), POINTER :: DR=>NULL()
@@ -1489,10 +1489,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             R_DROP   = DR%R
             M_DROP   = FTPR*R_DROP**3
             TMP_DROP = DR%TMP
-            ITMP     = NINT(TMP_DROP)
-            H_V      = PC%H_V(ITMP)
-            C_DROP   = PC%C_P(ITMP)
-            H_L      = PC%C_P_BAR(ITMP)*TMP_DROP-H_L_REF
+            ITMP     = INT(TMP_DROP)
+            TMP_WGT  = TMP_DROP - AINT(TMP_DROP)
+            H_V      = PC%H_V(ITMP)+TMP_WGT*(PC%H_V(ITMP+1)-PC%H_V(ITMP))
+            C_DROP   = PC%C_P(ITMP)+TMP_WGT*(PC%C_P(ITMP+1)-PC%C_P(ITMP))
+            H_L      = (PC%C_P_BAR(ITMP)+TMP_WGT*(PC%C_P_BAR(ITMP+1)-PC%C_P_BAR(ITMP)))*TMP_DROP-H_L_REF
             WGT      = DR%PWT
             DHOR     = H_V*MW_DROP/R0   
 
@@ -1648,32 +1649,36 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
             ! Update gas temperature and determine new subtimestep
             DELTA_H_G = (H_L + H_V - PC%H_V_CORRECTOR)
-            ITMP = MAX(1,MIN(5000,NINT(TMP_G)))
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP)            
+            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP_G)            
             H_G_OLD = M_GAS*CP*TMP_G
             M_GAS_NEW = M_GAS + WGT*M_VAP
             TMP_G_NEW = TMP_G
             H_NEW = H_G_OLD + (DELTA_H_G * M_VAP - Q_CON_GAS) * WGT 
             IF (H_NEW > 0._EB) THEN
-               YY_GET = YY_GET * M_GAS/M_GAS_NEW
+               YY_GET = YY_GET * M_GAS/M_GAS_NEW               
                YY_GET(IGAS) = YY_GET(IGAS) + WGT*M_VAP/M_GAS_NEW
                TMP_G_I = TMP_G
                TEMPITER = .TRUE.
+               ITCOUNT = 0
                ITERATE_TEMP: DO WHILE (TEMPITER)
                   TEMPITER=.FALSE.
-                  ITMP = MAX(1,MIN(5000,NINT(TMP_G_I)))
-                  IF (N_SPECIES == 0 ) THEN
-                     CP2 = Y2CPBAR_C(ITMP)
-                     CP = Y2CPBAR_C(ITMP+1)
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,TMP_G_I)
+                  IF (TMP_G_I < 4999._EB) THEN
+                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP_G_I+1)
+                     DCPDT = CP-CP2                     
                   ELSE
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,ITMP)
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,ITMP+1)
+                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP_G_I-1)                  
+                     DCPDT = CP2-CP
                   ENDIF
-                  ! Compute approximation of d(cp)/dT
-                  DCPDT = CP-CP2
+                  ! Compute approximation of d(cp)/dT                  
                   TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP2+TMP_G_I*DCPDT))
-!                  TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(CP2*M_GAS_NEW)
+                  TMP_G_I = MAX(TMPMIN,TMP_G_I)
+                  ITCOUNT = ITCOUNT + 1
                   IF (ABS(TMP_G_NEW-TMP_G_I) > 0.5_EB) TEMPITER = .TRUE.
+                  IF (ITCOUNT > 10) THEN
+                     TMP_G_NEW = 0.5_EB*(TMP_G_I + TMP_G_NEW)
+                     EXIT ITERATE_TEMP
+                  ENDIF
                   TMP_G_NEW = TMP_G_I
                ENDDO ITERATE_TEMP
             ELSE
@@ -1681,7 +1686,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                CYCLE TIME_ITERATION_LOOP
             ENDIF
-            IF (ABS(TMP_G_NEW/TMP_G - 1._EB) > 0.2_EB) THEN
+            IF (ABS(TMP_G_NEW/TMP_G - 1._EB) > 0.05_EB) THEN
                DT_SUBSTEP = DT_SUBSTEP * 0.5_EB            
                N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
@@ -1701,8 +1706,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
             YY_GET = 0._EB
             YY_GET(IGAS) = 1._EB
-            ITMP = MIN(5000,NINT(TMP_G))
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,ITMP)
+            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,TMP_G)
             DELTA_H_G = (DELTA_H_G - CP2 * TMP_G) 
             
             ! Compute contribution to the divergence
