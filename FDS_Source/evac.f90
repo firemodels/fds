@@ -95,8 +95,8 @@ MODULE EVAC
      REAL(EB) :: FAC_V0_UP=1._EB, FAC_V0_DOWN=1._EB, FAC_V0_HORI=1._EB
      REAL(EB) :: cos_x=1._EB, cos_y=1._EB, sin_x=0._EB, sin_y=0._EB
      CHARACTER(60) :: ID='null'
-     CHARACTER(26) :: GRID_NAME='null'
-     CHARACTER(26) :: VENT_FFIELD='null'
+     CHARACTER(30) :: GRID_NAME='null'
+     CHARACTER(30) :: VENT_FFIELD='null'
      INTEGER, DIMENSION(3) :: RGB=-1
      INTEGER :: IMESH=0, IOR=0, I_VENT_FFIELD=0
      REAL(EB) :: UBAR0=0._EB, VBAR0=0._EB
@@ -155,7 +155,7 @@ MODULE EVAC
      CHARACTER(60) :: ID='null', PERS_ID='null', EVAC_ID='null'
      CHARACTER(60) :: TO_NODE='null'
      CHARACTER(30) :: GRID_NAME='null'
-     CHARACTER(26) :: VENT_FFIELD='null'
+     CHARACTER(30) :: VENT_FFIELD='null'
      INTEGER :: I_VENT_FFIELD=0, Avatar_Color_Index=0
      INTEGER, DIMENSION(3) :: RGB=-1
      REAL(EB), DIMENSION(3) :: ORIENTATION=0.0_EB
@@ -178,7 +178,7 @@ MODULE EVAC
      CHARACTER(60) :: ID='null'
      CHARACTER(60) :: TO_NODE='null'
      CHARACTER(30) :: GRID_NAME='null'
-     CHARACTER(26) :: VENT_FFIELD='null'
+     CHARACTER(30) :: VENT_FFIELD='null'
      INTEGER :: I_VENT_FFIELD=0, Avatar_Color_Index=0
      INTEGER, DIMENSION(3) :: RGB=-1
      REAL(EB), DIMENSION(3) :: ORIENTATION=0.0_EB
@@ -244,8 +244,6 @@ MODULE EVAC
      REAL(EB), DIMENSION(3) :: ORIENTATION=0.0_EB
   END TYPE EVAC_ENTR_TYPE
   !
-  ! coordinates. the person type ('soccer_fan' etc) are also
-  ! defined here for these persons.
   TYPE EVAC_NODE_TYPE
      INTEGER :: Node_Index=0, IMESH=0
      CHARACTER(60) :: ID='null', Node_Type='null'
@@ -268,6 +266,19 @@ MODULE EVAC
      INTEGER :: I_Devc=0, I_Devc_Evac=0, I_Type=0
      CHARACTER(30) :: DEVC_ID='null'
   END TYPE EVAC_DEVC_TYPE
+  !
+  ! The EDEV namelists, which contain information how the agents
+  ! act to the device and/or control information.
+  TYPE EVAC_EDEV_TYPE
+     CHARACTER(60) :: ID='null', PERS_ID='null', EVAC_ID='null'
+     CHARACTER(30) :: MESH_ID='null'
+     CHARACTER(30), POINTER, DIMENSION(:) :: INPUT_ID =>NULL()
+     INTEGER, POINTER, DIMENSION(:) :: INPUT_DEVC_INDEX =>NULL()
+     INTEGER :: I_PRE_DIST=0
+     REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
+     REAL(EB) :: TIME_DELAY=0._EB, PROB=0._EB
+     LOGICAL :: GLOBAL=.TRUE.
+  END TYPE EVAC_EDEV_TYPE
   !
   !
   ! Next holds door information for groups
@@ -311,6 +322,9 @@ MODULE EVAC
   ! Holds the information of the PERS-lines.
   TYPE (EVAC_PERS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: EVAC_PERSON_CLASSES
 
+  ! Holds the information of the EDEV-lines.
+  TYPE (EVAC_EDEV_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: EVAC_EDEV
+
   ! Holds the information of the devices used in the evacuation calculation.
   TYPE (EVAC_DEVC_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: EVAC_DEVICES
   !
@@ -321,7 +335,7 @@ MODULE EVAC
   REAL(EB) GTrunSet1, GTrunSet2
   !
   INTEGER :: NPC_EVAC, NPC_PERS, N_EXITS, N_DOORS, N_ENTRYS, &
-       N_CORRS, N_EGRIDS, N_NODES, N_HOLES, N_SSTANDS, N_STRS, N_CO_EXITS, N_DEVC_EVAC
+       N_CORRS, N_EGRIDS, N_NODES, N_HOLES, N_SSTANDS, N_STRS, N_CO_EXITS, N_DEVC_EVAC, N_EDEV
   INTEGER :: NPPS
   INTEGER :: ILABEL_last, I_FED_FILE_FORMAT=-3
   ! I_FED_FILE_FORMAT: -1 Mesh, Corr, Door, and Exit data on the FED file
@@ -393,7 +407,7 @@ CONTAINS
     INTEGER :: IOS, IZERO, N, I, J, K, IOR
     CHARACTER(30) QUANTITY, MAX_HUMANS_RAMP
     CHARACTER(60) FYI,ID,PERS_ID,TO_NODE,EVAC_ID, DEFAULT_PROPERTIES
-    CHARACTER(26) FLOW_FIELD_ID
+    CHARACTER(30) FLOW_FIELD_ID
     INTEGER :: DIAMETER_DIST,VELOCITY_DIST,PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST
     REAL(EB) :: VEL_MEAN,VEL_PARA,VEL_PARA2,VEL_LOW,VEL_HIGH, &
          DIA_MEAN,DIA_PARA,DIA_PARA2,DIA_LOW,DIA_HIGH, &
@@ -405,12 +419,12 @@ CONTAINS
     INTEGER :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, i_avatar_color, MAX_HUMANS, AGENT_TYPE
     REAL(EB) :: MAX_FLOW, WIDTH, TIME_START, TIME_STOP, WIDTH1, &
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED, TIME_OPEN, TIME_CLOSE
-    REAL(EB) :: UBAR0, VBAR0
-    LOGICAL :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, EXIT_SIGN, KEEP_XY, USE_V0, SHOW, COUNT_DENSITY
+    REAL(EB) :: UBAR0, VBAR0, TIME_DELAY
+    LOGICAL :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, EXIT_SIGN, KEEP_XY, USE_V0, SHOW, COUNT_DENSITY, GLOBAL
     LOGICAL :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA, OUTPUT_DENSITY, &
          OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, OUTPUT_MOTIVE_ANGLE, OUTPUT_ACCELERATION
     INTEGER, DIMENSION(3) :: RGB, AVATAR_RGB
-    CHARACTER(26) :: VENT_FFIELD, MESH_ID, EVAC_MESH
+    CHARACTER(30) :: VENT_FFIELD, MESH_ID, EVAC_MESH
     REAL(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED
     CHARACTER(25) :: COLOR, DEAD_COLOR, AVATAR_COLOR
 
@@ -420,7 +434,7 @@ CONTAINS
     INTEGER N_LANDINGS, NL, NODES_TMP(500)
     LOGICAL :: RIGHT_HANDED, LEFT_HANDED
 
-    CHARACTER(26), DIMENSION(51) :: KNOWN_DOOR_NAMES
+    CHARACTER(30), DIMENSION(51) :: KNOWN_DOOR_NAMES
     REAL(EB), DIMENSION(51) :: KNOWN_DOOR_PROBS
 
     INTEGER :: ii,jj,kk
@@ -491,6 +505,9 @@ CONTAINS
          FAC_DOOR_QUEUE, FAC_DOOR_ALPHA, FAC_DOOR_WAIT, CF_MIN_B, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, FAC_DOOR_OLD, FAC_DOOR_OLD2, &
          R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE
+
+    NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, &
+         PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH
     !
     IF (.NOT. ANY(EVACUATION_GRID)) THEN
        N_EVAC = 0
@@ -581,6 +598,8 @@ CONTAINS
     ! Write (LU_ERR,*) 'Evac: Read evho namelists'
     CALL READ_EVSS
     ! Write (LU_ERR,*) 'Evac: Read inclines'
+    CALL READ_EDEV
+    ! Write (LU_ERR,*) 'Evac: Read evac devices'
 
     IF (MYID /= MAX(0,EVAC_PROCESS)) RETURN
 
@@ -743,6 +762,20 @@ CONTAINS
 236      IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with STRS line')
       END DO COUNT_STRS_LOOP
 235   REWIND(LU_INPUT)
+      !
+      ! Determine total number of EDEV lines in the input file
+      !
+      N_EDEV = 0
+      COUNT_EDEV_LOOP: DO
+         CALL CHECKREAD('EDEV',LU_INPUT,IOS) 
+         IF (IOS == 1) THEN
+            EXIT COUNT_EDEV_LOOP
+         END IF
+         READ(LU_INPUT,NML=EDEV,END=237,ERR=238,IOSTAT=IOS)
+         N_EDEV = N_EDEV + 1
+238      IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with EDEV line')
+      END DO COUNT_EDEV_LOOP
+237   REWIND(LU_INPUT)
 
       SELECT CASE (COLOR_METHOD)
       CASE (-1)
@@ -843,6 +876,11 @@ CONTAINS
          IF (N_STRS > 0 ) THEN
             ALLOCATE(EVAC_STRS(N_STRS),STAT=IZERO)
             CALL ChkMemErr('READ','EVAC_STRS',IZERO)
+         END IF
+
+         IF (N_EDEV > 0 ) THEN
+            ALLOCATE(EVAC_EDEV(N_EDEV),STAT=IZERO)
+            CALL ChkMemErr('READ','EVAC_EDEV',IZERO)
          END IF
 
          ALLOCATE(EVAC_PERSON_CLASSES(0:NPC_PERS),STAT=IZERO)
@@ -3733,6 +3771,38 @@ CONTAINS
 
     END SUBROUTINE READ_EVAC_LINES
 
+    SUBROUTINE READ_EDEV
+      IMPLICIT NONE
+      !
+      ! Read the EDEV lines
+      !
+      ! Local variables
+      TYPE (EVAC_EDEV_TYPE),  POINTER :: EDV=>NULL()
+
+      READ_EDEV_LOOP: DO N = 1, N_EDEV
+         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_EDEV_LOOP
+         EDV=>EVAC_EDEV(N)
+         !
+         ID            = 'null'
+         EVAC_ID       = 'null'
+         PERS_ID       = 'null'
+         MESH_ID       = 'null'
+         !
+         CALL CHECKREAD('EDEV',LU_INPUT,IOS)
+         IF (IOS == 1) THEN
+            EXIT READ_EDEV_LOOP
+         END IF
+         READ(LU_INPUT,EDEV,END=30,IOSTAT=IOS)
+         !
+         EDV%ID        = ID
+         EDV%EVAC_ID   = EVAC_ID
+         EDV%PERS_ID   = PERS_ID
+         ! 
+      END DO READ_EDEV_LOOP
+30    REWIND(LU_INPUT)
+
+    END SUBROUTINE READ_EDEV
+
     SUBROUTINE READ_EVHO
       IMPLICIT NONE
       !
@@ -6226,7 +6296,7 @@ CONTAINS
     REAL(EB) :: GAME, GATH, GACM
     !
     INTEGER :: I_OLD_FFIELD, IZERO, IMODE_OLD, I_STRS_DOOR, NM_STRS_INDEX
-    CHARACTER(26) :: NAME_OLD_FFIELD
+    CHARACTER(30) :: NAME_OLD_FFIELD
     !
     REAL(EB) :: P2P_TORQUE, FC_X, FC_Y, OMEGA_NEW, ANGLE, A1, TC_Z, FC_X1, FC_Y1
     REAL(EB) :: OMEGA_MAX, OMEGA_0, FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, TAU_FAC, SPEED_X, SPEED_Y
@@ -6748,7 +6818,7 @@ CONTAINS
              ! Check the evacuation devices for the detection by thme
              IF (HR%TDET > T) THEN
                 DO J = 1, N_DEVC_EVAC
-                   IF (EVAC_DEVICES(J)%T_Change<=T .AND. EVAC_DEVICES(J)%CURRENT==.TRUE. .AND. &
+                   IF (EVAC_DEVICES(J)%T_Change<=T .AND. EVAC_DEVICES(J)%CURRENT .AND. &
                         EVAC_DEVICES(J)%USE_NOW) THEN
                       WRITE(LU_EVACOUT,FMT='(A,I6,A,A,A,F8.2,A)') ' Agent n:o ', HR%ILABEL, ' detection by ', &
                            TRIM(EVAC_DEVICES(J)%DEVC_ID), ' at', T, ' s'
@@ -9227,7 +9297,7 @@ CONTAINS
       INTEGER :: IE,I,N_TMP, ISTAT, IOR_NEW, INODE2, IMESH2, N, IOR
       INTEGER :: NEW_FFIELD_I, COLOR_INDEX, I_TARGET, INODE, STR_INDX, STR_SUB_INDX
       CHARACTER(60) :: TO_NODE
-      CHARACTER(26) :: NEW_FFIELD_NAME
+      CHARACTER(30) :: NEW_FFIELD_NAME
       LOGICAL :: KEEP_XY, UPSTREAM, NO_TO_NODE
       TYPE (EVAC_DOOR_TYPE), POINTER :: PDX =>NULL()
       TYPE (HUMAN_TYPE), POINTER :: HR =>NULL()
@@ -9436,7 +9506,7 @@ CONTAINS
       INTEGER :: IE,I,N_TMP, ISTAT, IOR_NEW, INODE2, IMESH2, N, IOR
       INTEGER :: NEW_FFIELD_I, COLOR_INDEX, I_TARGET, INODE, STR_INDX, STR_SUB_INDX
       CHARACTER(60) :: TO_NODE
-      CHARACTER(26) :: NEW_FFIELD_NAME
+      CHARACTER(30) :: NEW_FFIELD_NAME
       LOGICAL :: KEEP_XY
       TYPE (EVAC_CORR_TYPE),  POINTER :: PCX=>NULL()
       TYPE (CORR_LL_TYPE), POINTER :: NOW_LL=>NULL(), TMP_LL=>NULL(), NEXT_LL=>NULL(), PREV_LL=>NULL()
@@ -9628,7 +9698,7 @@ CONTAINS
       REAL(EB), INTENT(IN) :: T
       INTEGER, INTENT(INOUT) :: NEW_FFIELD_I
       LOGICAL, INTENT(IN) :: KEEP_XY
-      CHARACTER(26), INTENT(INOUT) :: NEW_FFIELD_NAME
+      CHARACTER(30), INTENT(INOUT) :: NEW_FFIELD_NAME
       TYPE (HUMAN_TYPE), POINTER :: HR
       !
       ! Local variables
@@ -12313,7 +12383,7 @@ CONTAINS
     REAL(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o
     INTEGER :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index
     INTEGER :: i, i_o, izero, nm_tmp, I_Agent_Type
-    CHARACTER(26) :: name_old_ffield, name_new_ffield
+    CHARACTER(30) :: name_old_ffield, name_new_ffield
     LOGICAL :: PP_see_door
     REAL(EB) :: T_tmp, T_tmp1, Width
     INTEGER :: N_queue, ii
