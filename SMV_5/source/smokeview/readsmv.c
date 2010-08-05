@@ -8075,6 +8075,11 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&visDummyVents);
       continue;
       }
+    if(match(buffer,"SHOWOTHERVENTS",14)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&visOtherVents);
+      continue;
+      }
     if(match(buffer,"SHOWTICKS",9)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visTicks);
@@ -9625,6 +9630,8 @@ void writeini(int flag){
   fprintf(fileout," %i %i\n",visOpenVents,visOpenVentsAsOutline);
   fprintf(fileout,"SHOWDUMMYVENTS\n");
   fprintf(fileout," %i\n",visDummyVents);
+  fprintf(fileout,"SHOWOTHERVENTS\n");
+  fprintf(fileout," %i\n",visOtherVents);
   fprintf(fileout,"SHOWSLICEINOBST\n");
   fprintf(fileout," %i\n",show_slice_in_obst);
   fprintf(fileout,"SKIPEMBEDSLICE\n");

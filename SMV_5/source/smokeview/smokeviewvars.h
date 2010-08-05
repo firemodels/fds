@@ -479,7 +479,7 @@ SVEXTERN int autoterrain,manual_terrain;
 SVEXTERN float zterrain_max, zterrain_min;
 SVEXTERN int revision_smv, revision_fds;
 SVEXTERN int visBlocklabel;
-SVEXTERN int visOpenVents,visDummyVents;
+SVEXTERN int visOpenVents,visDummyVents,visOtherVents;
 SVEXTERN int visOpenVentsAsOutline;
 SVEXTERN int visTitle0, visTitle1, visTitle2;
 SVEXTERN int ntitles,ititle;
