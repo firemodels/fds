@@ -28,7 +28,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP,FX,FY,FZ
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW, YSUM,YY_GET(1:N_SPECIES),ZZ_GET(1:N_MIX_SPECIES), &
             HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,VDOT_LEAK,TIME_RAMP_FACTOR,ZONE_VOLUME,CP_MF,DELTA_P,PRES_RAMP_FACTOR,&
-            H_G,H_G_A,TMP_G
+            H_G,H_G_A,TMP_G,TMP_WGT
 TYPE(SURFACE_TYPE), POINTER :: SF
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,I,J,K,IPZ,IOPZ
 TYPE(VENTS_TYPE), POINTER :: VT
@@ -141,13 +141,14 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       !$OMP WORKSHARE
       RHO_D = 0._EB
       !$OMP END WORKSHARE
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP)
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,TMP_WGT)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_01'
-               ITMP = MIN(5000,NINT(TMP(I,J,K)))
-               RHO_D(I,J,K) = RHOP(I,J,K)*SPECIES(N)%D(ITMP)
+               ITMP = MIN(4999,INT(TMP(I,J,K)))
+               TMP_WGT = TMP(I,J,K) - ITMP
+               RHO_D(I,J,K) = RHOP(I,J,K)*(SPECIES(N)%D(ITMP)+TMP_WGT*(SPECIES(N)%D(ITMP+1)-SPECIES(N)%D(ITMP)))
             ENDDO 
          ENDDO
       ENDDO
@@ -158,15 +159,14 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       !$OMP WORKSHARE
       RHO_D = 0._EB
       !$OMP END WORKSHARE
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YSUM)
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,YSUM)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_02'
-               ITMP = MIN(5000,NINT(TMP(I,J,K)))
                YSUM = SUM(YYP(I,J,K,:)) - SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
                ZZ_GET(:) = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
-               CALL GET_DIFFUSIVITY(ZZ_GET,YSUM,RHO_D(I,J,K),ITMP)
+               CALL GET_DIFFUSIVITY(ZZ_GET,YSUM,RHO_D(I,J,K),TMP(I,J,K))
                RHO_D(I,J,K) = RHOP(I,J,K)*RHO_D(I,J,K)
             ENDDO
          ENDDO
@@ -250,7 +250,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       H_RHO_D_DYDZ => WORK6
       !$OMP END SINGLE
 
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,TMP_G,ITMP,YY_GET,H_G_A,H_G,HDIFF)
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,TMP_G,YY_GET,H_G_A,H_G,HDIFF)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
@@ -258,31 +258,28 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                
                ! H_RHO_D_DYDX
                TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
-               ITMP = MIN(5000,NINT(TMP_G))
                YY_GET=0._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,ITMP)
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,TMP_G)
                YY_GET(N) = 1._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,TMP_G)               
                HDIFF = (H_G-H_G_A)*TMP_G
                H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
                
                ! H_RHO_D_DYDY
                TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
-               ITMP = MIN(5000,NINT(TMP_G))
                YY_GET=0._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,ITMP)
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,TMP_G)
                YY_GET(N) = 1._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,TMP_G)               
                HDIFF = (H_G-H_G_A)*TMP_G
                H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
                
                ! H_RHO_D_DYDZ
                TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
-               ITMP = MIN(5000,NINT(TMP_G))
                YY_GET=0._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,ITMP)
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,TMP_G)
                YY_GET(N) = 1._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,TMP_G)               
                HDIFF = (H_G-H_G_A)*TMP_G
                H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
             ENDDO
@@ -290,7 +287,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       ENDDO
       !$OMP END DO
 
-      !$OMP DO PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,ITMP,YY_GET,H_G_A,H_G,HDIFF,RHO_D_DYDN)
+      !$OMP DO PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,YY_GET,H_G_A,H_G,HDIFF,RHO_D_DYDN)
       WALL_LOOP2: DO IW=1,NWC
          !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_06'
          IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2
@@ -298,12 +295,11 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          JJG = IJKW(7,IW)
          KKG = IJKW(8,IW)
          IOR  = IJKW(4,IW)
-         TMP_G = 0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW))
-         ITMP = MIN(5000,NINT(TMP_G))         
+         TMP_G = 0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW))      
          YY_GET=0._EB
-         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,ITMP)
+         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,TMP_G)
          YY_GET(N) = 1._EB
-         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
+         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,TMP_G)               
          HDIFF = (H_G-H_G_A)*TMP_G
          RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
          SELECT CASE(IOR)
@@ -391,16 +387,15 @@ SPECIES_LOOP: DO N=1,N_SPECIES
  
 !   SPECIES_DIFFUSION_2: IF (.NOT.MIXTURE_FRACTION) THEN
    SPECIES_DIFFUSION_2: IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) THEN
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YY_GET,H_G_A,H_G,HDIFF)
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,YY_GET,H_G_A,H_G,HDIFF)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_11'               
-               ITMP = MIN(5000,INT(TMP(I,J,K)))
                YY_GET=0._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,ITMP)
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,TMP_G)
                YY_GET(N) = 1._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,ITMP)               
+               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,TMP_G)               
                HDIFF = (H_G-H_G_A)*TMP(I,J,K)
                DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
             ENDDO
@@ -430,28 +425,28 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
  
    K_DNS_OR_LES: IF (DNS .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       IF (N_SPECIES > 0 ) THEN
-         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YY_GET) 
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,YY_GET) 
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                   !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_12'
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  ITMP = MIN(5000,NINT(TMP(I,J,K)))
                   YY_GET(:) = YYP(I,J,K,:)
-                  CALL GET_CONDUCTIVITY(YY_GET,KP(I,J,K),ITMP)    
+                  CALL GET_CONDUCTIVITY(YY_GET,KP(I,J,K),TMP(I,J,K))    
                ENDDO
             ENDDO
          ENDDO
          !$OMP END DO
       ELSE
-         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP)
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,TMP_WGT)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                   !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_13'
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  ITMP = MIN(5000,NINT(TMP(I,J,K)))
-                  KP(I,J,K) = Y2K_C(ITMP)*SPECIES(0)%MW
+                  ITMP = MIN(4999,INT(TMP(I,J,K)))
+                  TMP_WGT = TMP(I,J,K) - ITMP
+                  KP(I,J,K) = (Y2K_C(ITMP)+TMP_WGT*(Y2K_C(ITMP+1)-Y2K_C(ITMP)))*SPECIES(0)%MW
                ENDDO
             ENDDO
          ENDDO
@@ -473,27 +468,27 @@ ENERGY: IF (.NOT.ISOTHERMAL .AND. .NOT.EVACUATION_ONLY(NM)) THEN
     
       CP_FTMP_IF: IF (CP_FTMP) THEN
          IF (N_SPECIES > 0) THEN
-            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,YY_GET,CP_MF)
+            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,YY_GET,CP_MF)
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
                      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                     ITMP = MIN(5000,NINT(TMP(I,J,K)))
                      YY_GET(:) = YYP(I,J,K,:)
-                     CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,ITMP)  
+                     CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,TMP(I,J,K))  
                      KP(I,J,K) = MU(I,J,K)*CP_MF*RPR  
                   ENDDO
                ENDDO
             ENDDO
             !$OMP END DO
          ELSE
-            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP)
+            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,TMP_WGT)
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
                      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                     ITMP = MIN(5000,NINT(TMP(I,J,K)))
-                     KP(I,J,K) = MU(I,J,K)*Y2CP_C(ITMP)*RPR
+                     ITMP = MIN(4999,INT(TMP(I,J,K)))
+                     TMP_WGT = TMP(I,J,K) - ITMP
+                     KP(I,J,K) = MU(I,J,K)*(Y2CP_C(ITMP)+TMP_WGT*(Y2CP_C(ITMP+1)-Y2CP_C(ITMP)))*RPR
                   ENDDO
                ENDDO
             ENDDO
@@ -608,30 +603,30 @@ ENDIF ENERGY
 RTRM => WORK1
 
 IF (N_SPECIES==0 .OR. EVACUATION_ONLY(NM)) THEN
-  !$OMP PARALLEL DO PRIVATE(K,J,I,ITMP)
+  !$OMP PARALLEL DO PRIVATE(K,J,I,ITMP,TMP_WGT)
    DO K=1,KBAR
       IF (EVACUATION_ONLY(NM)) CYCLE
       DO J=1,JBAR
          DO I=1,IBAR
             !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_17'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = MIN(5000,NINT(TMP(I,J,K)))
-            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM0/Y2CP_C(ITMP)
+            ITMP = MIN(4999,INT(TMP(I,J,K)))
+            TMP_WGT = TMP(I,J,K) - ITMP
+            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM0/(Y2CP_C(ITMP)+TMP_WGT*(Y2CP_C(ITMP+1)-Y2CP_C(ITMP)))
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
       ENDDO 
    ENDDO
    !$OMP END PARALLEL DO
 ELSE
-   !$OMP PARALLEL DO PRIVATE(K,J,I,ITMP,YY_GET,CP_MF)
+   !$OMP PARALLEL DO PRIVATE(K,J,I,YY_GET,CP_MF)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_18'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = MIN(5000,NINT(TMP(I,J,K)))
             YY_GET(:) = YYP(I,J,K,:)
-            CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,ITMP)
+            CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,TMP(I,J,K))
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_MF
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
