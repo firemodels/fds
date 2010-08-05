@@ -1313,6 +1313,9 @@ void RenderMenu(int value){
       rendertourcount=0;
       tourangle=0.0;
     }
+    if(stept==0){
+      keyboard('t',0,0);
+    }
     RenderState(1);
     itime=0;
     for(i=0;i<nslice_files;i++){
