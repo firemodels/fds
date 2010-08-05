@@ -194,7 +194,7 @@ d,0,VTT,rd,r,McCaffrey_Plume/Experimental_Data/McCaffrey_Plume.csv,1,Height,2,Ve
 d,0,VTT,rd,r,McCaffrey_Plume/Experimental_Data/McCaffrey_Plume.csv,1,Height,2,Vel 57 kW,Exp (Vel 57 kW),k-,0,10000,0,10000,0,McCaffrey_Plume/FDS_Output_Files/McCaffrey_57_kW_fds2ascii.csv,1,Z,3,W-VELOCITY,FDS (W-VELOCITY),k--,0,10000,0,10000,0,max,"Plume Velocity, McCaffrey 57 kW",Height (m),Velocity (m/s),0,6,1,0,5,1,yes,0.1 0.90,SouthWest,linear,FDS_5_Validation_Guide/FIGURES/McCaffrey_Plume/McCaffrey_Plume_Velocity_57_kW
 s,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 s,Flame Height,,,,,,,,,,k-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-d,0,Heskestad Flame Height,ko,k,Flame_Height/Experimental_Data/Heskestad_Correlation.csv,1,Q*,2,L/D,Heskestad Correlation,k-,0,100000,0,100000,0.1,Flame_Height/FDS_Output_Files/FDS_Flame_Height.csv,1,Q*,2,L/D (RI=5)|L/D (RI=10)|L/D (RI=20),FDS ($D^*/\delta x=5$)|FDS ($D^*/\delta x=10$)|FDS ($D^*/\delta x=20$),ko|ro|go,0,100000,0,100000,0,max,Flame Height,Q*,L$_f$/D,0.1,10000,1,0.1,1000,1,no,0.1 0.90,SouthEast,loglog,FDS_5_Validation_Guide/FIGURES/Heskestad/Flame_Height
+d,0,Heskestad Flame Height,ko,k,Flame_Height/Experimental_Data/Heskestad_Correlation.csv,1,Q*,2,L/D,Heskestad Correlation,k-,0,100000,0,100000,0.1,Flame_Height/FDS_Output_Files/FDS_Flame_Height.csv,1,Q*,2,L/D (RI=5)|L/D (RI=10)|L/D (RI=20),FDS ($D^*/\delta x=5$)|FDS ($D^*/\delta x=10$)|FDS ($D^*/\delta x=20$),ksq|r^|go,0,100000,0,100000,0,max,Flame Height,Q*,L$_f$/D,0.1,10000,1,0.1,1000,1,no,0.1 0.90,SouthEast,loglog,FDS_5_Validation_Guide/FIGURES/Heskestad/Flame_Height
 s,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 s,Ceiling Jet,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 s,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
