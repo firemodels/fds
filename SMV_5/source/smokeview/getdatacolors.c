@@ -380,7 +380,7 @@ void getBoundaryLabels(
 /* ------------------ updatePart5extremes ------------------------ */
 
 void updatePart5extremes(void){
-  int i,j,k,m;
+  int ii,i,j,k,m;
   part5data *datacopy;
   float *diameter_data, *length_data, *azimuth_data, *elevation_data;
   float *u_vel_data, *v_vel_data, *w_vel_data;
@@ -396,10 +396,10 @@ void updatePart5extremes(void){
   }
 
 
-  for(i=0;i<npart_files;i++){
+  for(ii=0;ii<npart_files;ii++){
     particle *parti;
 
-    parti = partinfo + i;
+    parti = partinfo + ii;
     if(parti->loaded==0||parti->display==0)continue;
     datacopy = parti->data5;
     for(i=0;i<parti->nframes;i++){
