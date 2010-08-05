@@ -59,7 +59,7 @@ CONTAINS
 SUBROUTINE COMBUSTION_MF
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_SPECIFIC_GAS_CONSTANT,GET_AVERAGE_SPECIFIC_HEAT
-REAL(EB) :: Y_FU_0,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DELTA2,& 
+REAL(EB) :: Y_FU_0,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DELTA,DELTA2,ACCEL, & 
             Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,RHOX, &
             X_FU,X_O2,X_FU_0,X_O2_0,X_FU_S,X_O2_S,X_FU_N,X_O2_N,CO_TO_O2,CRIT_FLAME_TMPA, &
             Y_FU_MAX,TMP_F_MIN,Y_F_CORR,Z_2_MIN,Z_2_MIN_FAC,WGT,OMWGT,Q_BOUND_1,Q_BOUND_2,Q_BOUND_3,YY_GET(1:N_SPECIES), &
@@ -72,7 +72,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: Y_O2=>NULL(),Y_O2_NEW=>NULL(),MIX_TIME=>N
 ! Misc initializations
 
 Y_O2     => WORK1
-MIX_TIME => WORK2
+MIX_TIME => WORK2 ! need an array because MIX_TIME is reused in CO_PRODUCTION
 !$OMP PARALLEL SHARED(Y_O2,RSUM)
 !$OMP WORKSHARE
 Y_O2     =  0._EB
@@ -117,7 +117,7 @@ HFAC_F  = RN%HEAT_OF_COMBUSTION/DT
 !$OMP END SINGLE
 
 !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,IC,Y_FU_0,Y_O2_0,Y_O2_MAX,Y_FU_MAX,TMP_MIN,TMP_F_MIN,IOR,II,JJ,KK,IW) &
-!$OMP PRIVATE(Y_O2_CORR,Y_F_CORR,DYF,DELTA2,Q_BOUND_1,Q_BOUND_2,Q_NEW,CRIT_FLAME_TMPA,YY_GET,DYAIR)
+!$OMP PRIVATE(Y_O2_CORR,Y_F_CORR,DYF,ACCEL,DELTA,DELTA2,Q_BOUND_1,Q_BOUND_2,Q_NEW,CRIT_FLAME_TMPA,YY_GET,ITMP,DYAIR)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -199,23 +199,48 @@ DO K=1,KBAR
 
          ENDIF IF_SUPPRESSION
          
-         LES_IF: IF (LES) THEN
-            IF (.NOT.TWO_D) THEN
-               DELTA2 = (DX(I)*DY(J)*DZ(K))**TWTH
+         LES_IF: IF (LES .AND. FIXED_RESIDENCE_TIME<0._EB) THEN
+            
+            IF (USE_MAX_FILTER_WIDTH) THEN
+               DELTA=MAX(DX(I),DY(J),DZ(K))
             ELSE
-               DELTA2 = DX(I)*DZ(K)
+               IF (.NOT.TWO_D) THEN
+                  DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
+               ELSE
+                  DELTA = SQRT(DX(I)*DZ(K))
+               ENDIF
             ENDIF
-            IF (USE_MAX_FILTER_WIDTH) DELTA2=MAX(DX(I),DY(J),DZ(K))**2
-            IF (DYNSMAG) THEN
-               CS2 = C_DYNSMAG(I,J,K)**2
-            ELSE
-               CS2 = CSMAG**2
-            ENDIF
-            MIX_TIME(I,J,K)=MAX(DT,C_EDC*SC*RHO(I,J,K)*CS2*DELTA2/MU(I,J,K))
+ 
+            EXPERIMENTAL_IF: IF (FIXED_RESIDENCE_TIME<-9.8_EB) THEN
+               ! experimental
+               ACCEL = GRAV
+               !ACCEL = 0.5_EB*SQRT( (FVX(I-1,J,K)+FVX(I,J,K))**2 + &
+               !                     (FVY(I,J-1,K)+FVY(I,J,K))**2 + &
+               !                     (FVZ(I,J,K-1)+FVZ(I,J,K))**2    ) + 1.E-10_EB
+               MIX_TIME(I,J,K)=MAX(DT,C_EDC*SQRT(DELTA/ACCEL))
+            ELSE EXPERIMENTAL_IF
+               ! FDS 5 default
+               IF (DYNSMAG) THEN
+                  CS2 = C_DYNSMAG(I,J,K)**2
+               ELSE
+                  CS2 = CSMAG**2
+               ENDIF
+               DELTA2 = DELTA**2
+               MIX_TIME(I,J,K)=MAX(DT,C_EDC*SC*RHO(I,J,K)*CS2*DELTA2/MU(I,J,K))
+            ENDIF EXPERIMENTAL_IF
+            
          ENDIF LES_IF
          
-         DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)
-         Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
+         IF (FIXED_RESIDENCE_TIME>0._EB) MIX_TIME(I,J,K)=MAX(DT,FIXED_RESIDENCE_TIME)
+         IF (Y_FU_0 < Y_O2_0/RN%O2_F_RATIO) THEN
+            DYF = Y_FU_0 * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
+         ELSE
+            DYF = Y_O2_0/RN%O2_F_RATIO * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
+         ENDIF
+         Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F
+         
+         !DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)
+         !Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
          
          Q_BOUND_2 = Q_UPPER
          Q_NEW = MIN(Q_BOUND_1,Q_BOUND_2)

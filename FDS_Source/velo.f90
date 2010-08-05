@@ -2046,7 +2046,6 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               !!UVW = (ABS(UU(I,J,K)) + ABS(VV(I,J,K)) + ABS(WW(I,J,K)))*MAX(RDXN(I),RDYN(J),RDZN(K))
                UVW = ABS(UU(I,J,K)*RDXN(I)) + ABS(VV(I,J,K)*RDYN(J)) + ABS(WW(I,J,K)*RDZN(K))
                UVW = UVW + ABS(DP(I,J,K))
                IF (UVW>=P_UVWMAX) THEN
@@ -2076,7 +2075,6 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               !!UVW = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)*MAX(RDXN(I),RDYN(J),RDZN(K))
                UVW = SQRT( (UU(I,J,K)*RDXN(I))**2 + (VV(I,J,K)*RDYN(J))**2 + (WW(I,J,K)*RDZN(K))**2 )
                UVW = UVW + ABS(DP(I,J,K))
                IF (UVW>=P_UVWMAX) THEN
@@ -2084,6 +2082,40 @@ SELECT_VELOCITY_NORM: SELECT CASE (CFL_VELOCITY_NORM)
                   P_ICFL=I
                   P_JCFL=J
                   P_KCFL=K
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO NOWAIT
+      !$OMP CRITICAL
+      IF (P_UVWMAX>=UVWMAX) THEN
+         UVWMAX = P_UVWMAX
+         ICFL=P_ICFL
+         JCFL=P_JCFL
+         KCFL=P_KCFL
+      ENDIF
+      !$OMP END CRITICAL
+      !$OMP END PARALLEL
+   CASE(3)
+      !$OMP PARALLEL DEFAULT(NONE) PRIVATE(P_ICFL,P_JCFL,P_KCFL) &
+      !$OMP FIRSTPRIVATE(P_UVWMAX) SHARED(UVWMAX,ICFL,JCFL,KCFL,UU,VV,WW,RDXN,RDYN,RDZN,IBAR,JBAR,KBAR,DP)
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,UODX,VODY,WODZ,UVW)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               ! Experimental:
+               ! The idea here is that basing the time scale off the acceleration should also account for
+               ! VN (Von Neumann), GR (gravity), and BARO (baroclinic torque), or whatever other physics
+               ! you decide to include in F_i.
+               UODX = SQRT(ABS(FVX(I,J,K))*RDXN(I))
+               VODY = SQRT(ABS(FVY(I,J,K))*RDYN(J))
+               WODZ = SQRT(ABS(FVZ(I,J,K))*RDZN(K))
+               UVW  = MAX(UODX,VODY,WODZ) + ABS(DP(I,J,K))
+               IF (UVW>=P_UVWMAX) THEN
+                  P_UVWMAX = UVW
+                  P_ICFL = I
+                  P_JCFL = J
+                  P_KCFL = K
                ENDIF
             ENDDO
          ENDDO
@@ -2123,6 +2155,11 @@ WALL_LOOP: DO IW=1,NWC
 ENDDO WALL_LOOP
 
 UVWMAX = MAX(UVWMAX,IBM_UVWMAX) ! for moving immersed boundary method
+IF (CHECK_GR) THEN ! resolve gravity waves
+   UVWMAX = MAX(UVWMAX, SQRT(ABS(GVEC(1))*MAXVAL(RDX)), &
+                        SQRT(ABS(GVEC(2))*MAXVAL(RDY)), &
+                        SQRT(ABS(GVEC(3))*MAXVAL(RDZ))  )
+ENDIF
 
 CFL = DT*UVWMAX
  
