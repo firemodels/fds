@@ -75,12 +75,57 @@ void convert_part(part *parti){
   int endiandata;
   int *tagdata;
   float *pdata;
-  int i;
+  int sizebefore=0, sizeafter=0, size;
+  int one=1, zero=0, fileversion=0, fdsversion;
+  unsigned int *int_buffer_uncompressed;
+  unsigned char *int_buffer_compressed;
+  unsigned char *char_buffer_uncompressed,*char_buffer_compressed;
+  mesh *partmesh;
+  float xmin, xmax,  ymin, ymax, zmin, zmax;
+  uLongf ncompressed_zlib;
+  int percent_done;
+  int percent_next=10;
+  int data_loc;
+  int count=0;
+
+   //*** PARTICLE FILE FORMATS
+
+  //*** FDS FORMAT (FORTRAN - each FORTRAN record has a 4 byte header and a 4 byte trailer surrounding the data)
+
+
+
+  //*** ZLIB format (C - no extra bytes surrounding data) 
+
+  //*** header
+  // endian
+  // completion (0/1)
+  // fileversion (compressed particle file format version)
+  // fds version 
+  // global min max (used to perform conversion)
+  // nclasses
+  // quantities_1, ..., quantities_nclasses
+
+  //*** data frame
+  // time
+  // points_1, ..., points_nclasses
+  // ntotal_int, ntotal_char
+  // ncompressedpoints
+  // xyz_1, ..., xyz_ncompressedpoints
+  // ncompresseddata
+  // data_1, ..., data_ncompresseddata
+
 
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
 
   partfile=parti->file;
+  partmesh=parti->partmesh;
+  xmin = partmesh->xbar0;
+  xmax = partmesh->xbar;
+  ymin = partmesh->ybar0;
+  ymax = partmesh->ybar;
+  zmin = partmesh->zbar0;
+  zmax = partmesh->zbar;
 
   // check if part file is accessible
 
@@ -117,7 +162,7 @@ void convert_part(part *parti){
     strcpy(partsizefile_svz,destdir);
   }
   strcpy(partsizefile_svz,partfile);
-  strcat(partsizefile_svz,".sz");
+  strcat(partsizefile_svz,".sz2");
   partsizestream=fopen(partsizefile_svz,"w");
 
   if(partsizestream==NULL){
@@ -129,52 +174,175 @@ void convert_part(part *parti){
 
   printf("  Compressing %s\n",parti->file);
 
-  NewMemory((void **)&pdata,1000000*sizeof(float));
-  NewMemory((void **)&tagdata,1000000*sizeof(int));
+#define BUFFER_SIZE 1000000
+  NewMemory((void **)&pdata,BUFFER_SIZE*sizeof(float));
+  NewMemory((void **)&tagdata,BUFFER_SIZE*sizeof(int));
+  NewMemory((void **)&int_buffer_uncompressed,BUFFER_SIZE*sizeof(unsigned int));
+  NewMemory((void **)&int_buffer_compressed,BUFFER_SIZE*sizeof(unsigned char));
+  NewMemory((void **)&char_buffer_uncompressed,BUFFER_SIZE*sizeof(unsigned char));
+  NewMemory((void **)&char_buffer_compressed,BUFFER_SIZE*sizeof(unsigned char));
 
   lenfile=strlen(parti->file);
   FORTopenpart(parti->file,&unit,&endiandata,&error,lenfile);
 
-  FORTgetpartheader1(&unit,&nclasses);
+  FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
   NewMemory((void **)&nquantities,nclasses*sizeof(int));
   NewMemory((void **)&npoints,nclasses*sizeof(int));
+  sizebefore+=size;
 
-  FORTgetpartheader2(&unit,&nclasses,nquantities);
+  FORTgetpartheader2(&unit,&nclasses,nquantities,&size);
+  sizebefore+=size;
+
+  fwrite(&one,4,1,partstream);           // write out a 1 to determine "endianness" when file is read in later
+  fwrite(&zero,4,1,partstream);          // write out a zero now, then a one just before file is closed
+  fwrite(&fileversion,4,1,partstream);   // write out compressed fileversion in case file format changes later
+  fwrite(&fdsversion,4,1,partstream);       // fds file version
+  sizeafter=16;
+  fwrite(&nclasses,4,1,partstream);
+  fwrite(nquantities,4,nclasses,partstream);
+  sizeafter+=4*(1+nclasses);
+
 
   error=0;
   for(;;){
     float *x, *y, *z, *vals;
-    int j,k;
+    int j;
+    unsigned int *xbuff, *ybuff, *zbuff, *tbuff, *tagdataptr, ntotal_int, ntotal_char;
+    unsigned char *cbuff;
+    int ncompressed_int, ncompressed_char;
 
-    FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time,tagdata,pdata,&error);
+    FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time,tagdata,pdata,&size,&error);
     if(error!=0)break;
 
+    fwrite(&time,4,1,partstream);
+    fwrite(npoints,4,nclasses,partstream);
+    sizeafter+=4*(1+nclasses);
+    sizebefore+=size;
+
     vals=pdata;
+    tagdataptr=(unsigned int *)tagdata;
+    xbuff = int_buffer_uncompressed;
+    cbuff = char_buffer_uncompressed;
+    ntotal_int=0;
+    ntotal_char=0;
     for(j=0;j<nclasses;j++){
       part5class *classi;
+      int k;
 
       if(npoints[j]==0)continue;
-      classi=parti->classptr[i];
+      ybuff = xbuff + npoints[j];
+      zbuff = ybuff + npoints[j];
+      tbuff = zbuff + npoints[j];
+      classi=parti->classptr[j];
       x = vals;
       y = x + npoints[j];
       z = y + npoints[j];
+
+      for(k=0;k<npoints[j];k++){
+        xbuff[k] = 1024*(x[k]-xmin)/(xmax-xmin);
+        ybuff[k] = 1024*(y[k]-ymin)/(ymax-ymin);
+        zbuff[k] = 1024*(z[k]-zmin)/(zmax-zmin);
+        tbuff[k] = tagdataptr[k];
+      }
+      ntotal_int+=4*npoints[j];
+      xbuff = tbuff + npoints[j];
       vals = z + npoints[j];
+      tagdataptr += npoints[j];
+      ntotal_char+=nquantities[j]*npoints[j];
+
       for(k=0;k<nquantities[j];k++){
         part5prop *propi;
+        int cval,kk;
+        float denom;
           
         propi=getpartprop(classi->labels[k].shortlabel);
+        denom=propi->valmax-propi->valmin;
+        if(denom<=0.0)denom=1.0;
 
+        for(kk=0;kk<npoints[j];kk++){
+          if(vals[kk]<propi->valmin){
+            cval=0;
+          }
+          else if(vals[kk]>propi->valmax){
+            cval=255;
+          }
+          else{
+            cval = 1+253*(vals[kk]-propi->valmin)/denom;
+            if(cval<1){
+              cval=1;
+            }
+            else if(cval>254){
+              cval=254;
+            }
+          }
+          cbuff[kk]=cval;
+        }
+        cbuff += npoints[j];
         vals += npoints[j];
       }
     }
+
+    // compress data
+
+    fwrite(&ntotal_int,4,1,partstream);
+    fwrite(&ntotal_char,4,1,partstream);
+
+    ncompressed_int=0;
+    if(ntotal_int>0){
+      ncompressed_zlib=BUFFER_SIZE;
+      compress(int_buffer_compressed, &ncompressed_zlib, (unsigned char *)int_buffer_uncompressed, 4*ntotal_int);
+      ncompressed_int = ncompressed_zlib;
+      sizeafter+=(4+ncompressed_int);
+      fwrite(&ncompressed_int,4,1,partstream);
+      fwrite(&int_buffer_compressed,1,ncompressed_int,partstream);
+    }
+
+    ncompressed_char=0;
+    if(ntotal_char>0){
+      ncompressed_zlib=BUFFER_SIZE;
+      compress(char_buffer_compressed, &ncompressed_zlib, char_buffer_uncompressed, ntotal_char);
+      ncompressed_char = ncompressed_zlib;
+      sizeafter+=(4+ncompressed_char);
+      fwrite(&ncompressed_char,4,1,partstream);
+      fwrite(&char_buffer_compressed,1,ncompressed_char,partstream);
+    }
+
+    fprintf(partsizestream,"%f %i %i %i %i\n",time,(int)ntotal_int,(int)ntotal_char,ncompressed_int,ncompressed_char);
+
+    data_loc=sizebefore;
+    percent_done=100.0*(float)data_loc/(float)parti->filesize;
+    if(percent_done>percent_next){
+      printf(" %i%s",percent_next,pp);
+      fflush(stdout);
+      percent_next+=10;
+    }
+    count++;
   }
 
+  printf(" 100%s completed\n",pp);
   FREEMEMORY(nquantities);
   FREEMEMORY(npoints);
   FREEMEMORY(pdata);
   FREEMEMORY(tagdata);
+  FREEMEMORY(int_buffer_uncompressed);
+  FREEMEMORY(int_buffer_compressed);
+  FREEMEMORY(char_buffer_uncompressed);
+  FREEMEMORY(char_buffer_compressed);
 
   FORTclosefortranfile(&unit);
+  fclose(partstream);
+  fclose(partsizestream);
+  {
+    char before_label[256],after_label[256],xxx[2];
+
+    strcpy(xxx,"X");
+    getfilesizelabel(sizebefore,before_label);
+    getfilesizelabel(sizeafter,after_label);
+    printf("    records=%i, ",count);
+    printf("Sizes: original=%s, ",before_label);
+    printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+  }
+
 }
 
 /* ------------------ Get_Part_Bounds ------------------------ */
@@ -183,6 +351,7 @@ void Get_Part_Bounds(void){
   int i;
   float *pdata;
   int *tagdata;
+  int fdsversion;
 
   int endiandata;
 
@@ -212,7 +381,7 @@ void Get_Part_Bounds(void){
     int nclasses;
     int *nquantities, *npoints;
     float time;
-    int error;
+    int error, size;
 
 
     parti = partinfo + i;
@@ -220,18 +389,18 @@ void Get_Part_Bounds(void){
     lenfile=strlen(parti->file);
     FORTopenpart(parti->file,&unit,&endiandata,&error1,lenfile);
 
-    FORTgetpartheader1(&unit,&nclasses);
+    FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
     NewMemory((void **)&nquantities,nclasses*sizeof(int));
     NewMemory((void **)&npoints,nclasses*sizeof(int));
 
-    FORTgetpartheader2(&unit,&nclasses,nquantities);
+    FORTgetpartheader2(&unit,&nclasses,nquantities,&size);
 
     error=0;
     for(;;){
       float *x, *y, *z, *vals;
       int j,k;
 
-      FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time,tagdata,pdata,&error);
+      FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time,tagdata,pdata,&size,&error);
       if(error!=0)break;
 
       vals=pdata;

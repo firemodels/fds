@@ -212,11 +212,11 @@ typedef struct {
   int setvalmin, setvalmax;
   float valmin, valmax;
   flowlabels *label;
+  mesh *partmesh;
 
   int nclasses;
   part5class **classptr;
   part5data *data5;
-
 } part;
 #endif
 
@@ -338,13 +338,10 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
 #define STDCALL extern void
 #endif
 
-//subroutine getpartheader1(unit,nclasses)
-//subroutine getpartheader2(unit,nclasses,nquantities)
-//subroutine getpartdataframe(unit,nclasses,nquantities,npoints,time,tagdata,pdata)
 STDCALL FORTopenpart(char *partfilename, int *unit, int *endian, int *error, FILE_SIZE lenfile);
-STDCALL FORTgetpartheader1(int *unit, int *nclasses);
-STDCALL FORTgetpartheader2(int *unit, int *nclasses, int *nquantities);
-STDCALL FORTgetpartdataframe(int *unit, int *nclasses, int *nquantities, int *npoints, float *time, int *tagdata, float *pdata, int *error);
+STDCALL FORTgetpartheader1(int *unit, int *nclasses, int *fdsversion, int *size);
+STDCALL FORTgetpartheader2(int *unit, int *nclasses, int *nquantities, int *size);
+STDCALL FORTgetpartdataframe(int *unit, int *nclasses, int *nquantities, int *npoints, float *time, int *tagdata, float *pdata, int *size, int *error);
 
 STDCALL FORTclosefortranfile(int *lunit);
 
