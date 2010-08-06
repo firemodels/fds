@@ -4388,10 +4388,10 @@
 
  DEVICE Activation Times
 
-   1  TC_1_1                           192.3 s
-   6  TC_2_1                           196.9 s
-  11  TC_3_1                           190.3 s
-  16  TC_4_1                           203.0 s
+   1  SPK_1                            192.3 s
+   6  SPK_2                            196.9 s
+  11  SPK_3                            190.3 s
+  16  SPK_4                            203.0 s
 
 
  CPU Time Usage, Mesh   1
