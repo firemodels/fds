@@ -53,6 +53,8 @@ MODULE MPI
 ! WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  USE PRECISION_PARAMETERS, ONLY : DPC
+
 !
 ! LAM version
 ! This file is generated from configure; do not edit it manually.
@@ -131,9 +133,12 @@ MODULE MPI
 !
 ! global variables
 !
-       double complex MPI_BOTTOM, MPI_ARGV_NULL
-       double complex MPI_ARGVS_NULL, MPI_ERRCODES_IGNORE
-       double complex MPI_STATUS_IGNORE, MPI_STATUSES_IGNORE
+       complex(DPC) :: MPI_BOTTOM, MPI_ARGV_NULL
+       complex(DPC) :: MPI_ARGVS_NULL, MPI_ERRCODES_IGNORE
+       complex(DPC) :: MPI_STATUS_IGNORE, MPI_STATUSES_IGNORE
+!       double complex MPI_BOTTOM, MPI_ARGV_NULL
+!       double complex MPI_ARGVS_NULL, MPI_ERRCODES_IGNORE
+!       double complex MPI_STATUS_IGNORE, MPI_STATUSES_IGNORE
        common/mpi_bottom/MPI_BOTTOM
        common/mpi_argv_null/MPI_ARGV_NULL
        common/mpi_argvs_null/MPI_ARGVS_NULL
