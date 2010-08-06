@@ -1,0 +1,421 @@
+
+ Fire Dynamics Simulator
+
+ Compilation Date : Tue, 15 Jun 2010
+ Version          : 5.5.0 Serial
+
+ OpenMP Disabled
+
+ SVN Revision No. : 6333
+
+ Job TITLE        : Analytical solution to the 2d Navier-Stokes equations, SVN $Revision: 2066 $
+ Job ID string    : ns2d_64
+
+
+ Grid Dimensions, Mesh     1
+
+   Cells in the X Direction            64
+   Cells in the Y Direction             1
+   Cells in the Z Direction            64
+
+
+ Physical Dimensions, Mesh     1
+
+   Length (m)                        6.283
+   Width  (m)                        0.100
+   Height (m)                        6.283
+   Initial Time Step (s)            0.062
+
+
+ Miscellaneous Parameters
+
+   Simulation Start Time (s)          0.0
+   Simulation End Time (s)            6.3
+   Ambient Temperature (C)          20.00
+
+
+ Species Information
+
+   AIR                           
+   Gas Species
+   Background Species
+   Molecular Weight (g/mol)         24.06
+   Initial Mass Fraction            1.000
+   Viscosity (kg/m/s)   Ambient: 1.00E-10
+                          500 C: 1.00E-10
+                         1000 C: 1.00E-10
+                         1500 C: 1.00E-10
+   Therm. Cond. (W/m/K) Ambient: 1.44E-07
+                          500 C: 1.56E-07
+                         1000 C: 1.69E-07
+                         1500 C: 1.77E-07
+   Spec. Heat (J/kg/K)  Ambient: 1.01E+03
+                          500 C: 1.09E+03
+                         1000 C: 1.19E+03
+                         1500 C: 1.24E+03
+
+
+ Material Information
+
+
+ Surface Conditions
+
+   0 INERT (DEFAULT)
+     Wall or Vent Temperature (C)    20.0
+
+   1 OPEN
+     Passive Vent to Atmosphere
+
+   2 MIRROR
+     Symmetry Plane
+
+   3 INTERPOLATED
+
+   4 PERIODIC
+
+   5 HVAC
+
+
+ Device Coordinates
+
+     1 Coords:     3.14     0.00     3.14, Make: null, ID: UVEL, Quantity: U-VELOCITY
+     2 Coords:     3.14     0.00     3.14, Make: null, ID: PRES, Quantity: PRESSURE
+     3 Coords:     3.14     0.00     3.14, Make: null, ID: VISC, Quantity: VISCOSITY
+
+
+ PLOT3D Information
+
+   Sampling Interval (s)               1.3
+
+   1 Quantity: TEMPERATURE
+   2 Quantity: U-VELOCITY
+   3 Quantity: V-VELOCITY
+   4 Quantity: W-VELOCITY
+   5 Quantity: HRRPUV
+
+
+ Slice File Information, Mesh     1
+
+   Sampling Interval (s)             0.006
+
+   1 Nodes:   0  64   1   1   0  64, Quantity: VELOCITY
+   2 Nodes:   0  64   1   1   0  64, Quantity: U-VELOCITY
+   3 Nodes:   0  64   1   1   0  64, Quantity: W-VELOCITY
+   4 Nodes:   0  64   1   1   0  64, Quantity: DENSITY
+   5 Nodes:   0  64   1   1   0  64, Quantity: H
+   6 Nodes:   0  64   1   1   0  64, Quantity: PRESSURE
+   7 Nodes:   0  64   1   1   0  64, Quantity: VISCOSITY
+   8 Nodes:   0  64   1   1   0  64, Quantity: DIVERGENCE
+
+
+ Radiation Model Information
+
+   Number of control angles   60
+   Time step increment         2
+   Angle increment             4
+   Phi band   N_theta Solid angle
+     1:       60  0.21
+   Constant absorption coeff.   0.00
+ 
+ 
+
+ Run Time Diagnostics
+
+       Time Step       1   June 15, 2010  12:46:07
+       ----------------------------------------------
+       CPU/step:     0.070 s, Total CPU:      0.07 s
+       Time step:  0.00741 s, Total time:     0.01 s
+       Max CFL number:  0.23E+00 at ( 17,  1, 64)
+       Max divergence:  0.19E-13 at ( 55,  1, 51)
+       Min divergence: -0.22E-13 at ( 57,  1, 48)
+       Poisson Error :  0.44E-12
+       Max VN  number:  0.44E-09 at ( 64,  1, 64)
+ 
+       Time Step       2   June 15, 2010  12:46:07
+       ----------------------------------------------
+       CPU/step:     0.032 s, Total CPU:      0.10 s
+       Time step:  0.00815 s, Total time:     0.02 s
+       Max CFL number:  0.25E+00 at ( 17,  1, 64)
+       Max divergence:  0.23E-13 at ( 46,  1, 21)
+       Min divergence: -0.24E-13 at ( 46,  1, 41)
+       Poisson Error :  0.46E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step       3   June 15, 2010  12:46:07
+       ----------------------------------------------
+       CPU/step:     0.041 s, Total CPU:      0.14 s
+       Time step:  0.00737 s, Total time:     0.02 s
+       Max CFL number:  0.23E+00 at ( 17,  1, 64)
+       Max divergence:  0.26E-13 at ( 56,  1, 51)
+       Min divergence: -0.25E-13 at ( 46,  1, 41)
+       Poisson Error :  0.53E-12
+       Max VN  number:  0.44E-09 at ( 64,  1, 64)
+ 
+       Time Step       4   June 15, 2010  12:46:07
+       ----------------------------------------------
+       CPU/step:     0.031 s, Total CPU:      0.17 s
+       Time step:  0.00810 s, Total time:     0.03 s
+       Max CFL number:  0.25E+00 at ( 17,  0, 64)
+       Max divergence:  0.29E-13 at ( 59,  1, 48)
+       Min divergence: -0.27E-13 at ( 51,  1, 44)
+       Poisson Error :  0.51E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step       5   June 15, 2010  12:46:07
+       ----------------------------------------------
+       CPU/step:     0.043 s, Total CPU:      0.22 s
+       Time step:  0.00737 s, Total time:     0.04 s
+       Max CFL number:  0.22E+00 at ( 17,  0, 64)
+       Max divergence:  0.32E-13 at ( 59,  1, 48)
+       Min divergence: -0.25E-13 at ( 51,  1, 44)
+       Poisson Error :  0.53E-12
+       Max VN  number:  0.44E-09 at ( 64,  1, 64)
+ 
+       Time Step       6   June 15, 2010  12:46:07
+       ----------------------------------------------
+       CPU/step:     0.035 s, Total CPU:      0.25 s
+       Time step:  0.00810 s, Total time:     0.05 s
+       Max CFL number:  0.25E+00 at ( 17,  0, 64)
+       Max divergence:  0.36E-13 at ( 59,  1, 48)
+       Min divergence: -0.29E-13 at ( 59,  1, 44)
+       Poisson Error :  0.52E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step       7   June 15, 2010  12:46:07
+       ----------------------------------------------
+       CPU/step:     0.044 s, Total CPU:      0.30 s
+       Time step:  0.00737 s, Total time:     0.05 s
+       Max CFL number:  0.22E+00 at (  1,  1, 49)
+       Max divergence:  0.36E-13 at ( 59,  1, 48)
+       Min divergence: -0.32E-13 at ( 40,  1, 18)
+       Poisson Error :  0.45E-12
+       Max VN  number:  0.44E-09 at ( 64,  1, 64)
+ 
+       Time Step       8   June 15, 2010  12:46:07
+       ----------------------------------------------
+       CPU/step:     0.029 s, Total CPU:      0.32 s
+       Time step:  0.00811 s, Total time:     0.06 s
+       Max CFL number:  0.25E+00 at (  1,  1, 49)
+       Max divergence:  0.43E-13 at ( 59,  1, 48)
+       Min divergence: -0.34E-13 at ( 57,  1, 45)
+       Poisson Error :  0.40E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step       9   June 15, 2010  12:46:07
+       ----------------------------------------------
+       CPU/step:     0.042 s, Total CPU:      0.37 s
+       Time step:  0.00737 s, Total time:     0.07 s
+       Max CFL number:  0.23E+00 at (  1,  1, 49)
+       Max divergence:  0.43E-13 at ( 59,  1, 48)
+       Min divergence: -0.38E-13 at ( 60,  1, 46)
+       Poisson Error :  0.47E-12
+       Max VN  number:  0.44E-09 at ( 64,  1, 64)
+ 
+       Time Step      10   June 15, 2010  12:46:07
+       ----------------------------------------------
+       CPU/step:     0.031 s, Total CPU:      0.40 s
+       Time step:  0.00810 s, Total time:     0.08 s
+       Max CFL number:  0.25E+00 at (  1,  0, 49)
+       Max divergence:  0.41E-13 at ( 59,  1, 48)
+       Min divergence: -0.36E-13 at ( 59,  1, 44)
+       Poisson Error :  0.48E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step      20   June 15, 2010  12:46:08
+       ----------------------------------------------
+       CPU/step:     0.039 s, Total CPU:      0.78 s
+       Time step:  0.00810 s, Total time:     0.15 s
+       Max CFL number:  0.25E+00 at (  2,  1, 50)
+       Max divergence:  0.61E-13 at ( 42,  1, 39)
+       Min divergence: -0.52E-13 at ( 57,  1, 45)
+       Poisson Error :  0.43E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step      30   June 15, 2010  12:46:09
+       ----------------------------------------------
+       CPU/step:     0.036 s, Total CPU:      1.14 s
+       Time step:  0.00810 s, Total time:     0.23 s
+       Max CFL number:  0.25E+00 at ( 19,  0,  2)
+       Max divergence:  0.77E-13 at ( 42,  1, 39)
+       Min divergence: -0.60E-13 at ( 35,  1, 12)
+       Poisson Error :  0.48E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step      40   June 15, 2010  12:46:11
+       ----------------------------------------------
+       CPU/step:     0.036 s, Total CPU:      1.51 s
+       Time step:  0.00810 s, Total time:     0.31 s
+       Max CFL number:  0.25E+00 at ( 20,  1,  3)
+       Max divergence:  0.76E-13 at ( 42,  1, 39)
+       Min divergence: -0.73E-13 at (  5,  1, 44)
+       Poisson Error :  0.49E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step      50   June 15, 2010  12:46:12
+       ----------------------------------------------
+       CPU/step:     0.042 s, Total CPU:      1.93 s
+       Time step:  0.00810 s, Total time:     0.39 s
+       Max CFL number:  0.25E+00 at (  4,  0, 52)
+       Max divergence:  0.83E-13 at ( 42,  1, 39)
+       Min divergence: -0.85E-13 at (  5,  1, 44)
+       Poisson Error :  0.50E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step      60   June 15, 2010  12:46:13
+       ----------------------------------------------
+       CPU/step:     0.052 s, Total CPU:      2.45 s
+       Time step:  0.00810 s, Total time:     0.46 s
+       Max CFL number:  0.25E+00 at (  5,  1, 53)
+       Max divergence:  0.93E-13 at ( 42,  1, 39)
+       Min divergence: -0.10E-12 at (  5,  1, 44)
+       Poisson Error :  0.44E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step      70   June 15, 2010  12:46:15
+       ----------------------------------------------
+       CPU/step:     0.053 s, Total CPU:      2.97 s
+       Time step:  0.00810 s, Total time:     0.54 s
+       Max CFL number:  0.25E+00 at ( 22,  0,  5)
+       Max divergence:  0.94E-13 at ( 42,  1, 39)
+       Min divergence: -0.10E-12 at (  5,  1, 52)
+       Poisson Error :  0.47E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step      80   June 15, 2010  12:46:18
+       ----------------------------------------------
+       CPU/step:     0.046 s, Total CPU:      3.44 s
+       Time step:  0.00810 s, Total time:     0.62 s
+       Max CFL number:  0.25E+00 at ( 23,  0,  6)
+       Max divergence:  0.96E-13 at ( 55,  1, 46)
+       Min divergence: -0.12E-12 at (  5,  1, 52)
+       Poisson Error :  0.49E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step      90   June 15, 2010  12:46:19
+       ----------------------------------------------
+       CPU/step:     0.043 s, Total CPU:      3.87 s
+       Time step:  0.00810 s, Total time:     0.70 s
+       Max CFL number:  0.25E+00 at ( 24,  1,  7)
+       Max divergence:  0.11E-12 at ( 42,  1, 39)
+       Min divergence: -0.14E-12 at ( 20,  1, 64)
+       Poisson Error :  0.53E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step     100   June 15, 2010  12:46:22
+       ----------------------------------------------
+       CPU/step:     0.047 s, Total CPU:      4.34 s
+       Time step:  0.00810 s, Total time:     0.77 s
+       Max CFL number:  0.25E+00 at (  8,  0, 56)
+       Max divergence:  0.11E-12 at ( 42,  1, 39)
+       Min divergence: -0.14E-12 at (  5,  1, 52)
+       Poisson Error :  0.48E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step     200   June 15, 2010  12:46:40
+       ----------------------------------------------
+       CPU/step:     0.047 s, Total CPU:      9.03 s
+       Time step:  0.00810 s, Total time:     1.55 s
+       Max CFL number:  0.25E+00 at ( 32,  1, 16)
+       Max divergence:  0.21E-12 at ( 19,  1,  6)
+       Min divergence: -0.18E-12 at (  5,  1, 48)
+       Poisson Error :  0.61E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step     300   June 15, 2010  12:47:00
+       ----------------------------------------------
+       CPU/step:     0.046 s, Total CPU:     13.60 s
+       Time step:  0.00811 s, Total time:     2.32 s
+       Max CFL number:  0.25E+00 at ( 24,  1,  8)
+       Max divergence:  0.28E-12 at ( 31,  1, 18)
+       Min divergence: -0.24E-12 at ( 64,  1, 52)
+       Poisson Error :  0.48E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step     400   June 15, 2010  12:47:19
+       ----------------------------------------------
+       CPU/step:     0.046 s, Total CPU:     18.18 s
+       Time step:  0.00810 s, Total time:     3.09 s
+       Max CFL number:  0.25E+00 at ( 48,  0, 31)
+       Max divergence:  0.36E-12 at ( 36,  1, 26)
+       Min divergence: -0.29E-12 at (  5,  1, 48)
+       Poisson Error :  0.47E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step     500   June 15, 2010  12:47:35
+       ----------------------------------------------
+       CPU/step:     0.043 s, Total CPU:     22.53 s
+       Time step:  0.00810 s, Total time:     3.87 s
+       Max CFL number:  0.25E+00 at (  7,  0, 56)
+       Max divergence:  0.39E-12 at ( 28,  1, 10)
+       Min divergence: -0.33E-12 at ( 64,  1, 52)
+       Poisson Error :  0.47E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step     600   June 15, 2010  12:47:49
+       ----------------------------------------------
+       CPU/step:     0.043 s, Total CPU:     26.83 s
+       Time step:  0.00810 s, Total time:     4.64 s
+       Max CFL number:  0.25E+00 at ( 64,  1, 47)
+       Max divergence:  0.46E-12 at ( 31,  1, 18)
+       Min divergence: -0.41E-12 at ( 64,  1, 52)
+       Poisson Error :  0.50E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step     700   June 15, 2010  12:48:03
+       ----------------------------------------------
+       CPU/step:     0.047 s, Total CPU:     31.51 s
+       Time step:  0.00810 s, Total time:     5.41 s
+       Max CFL number:  0.25E+00 at (  8,  1, 55)
+       Max divergence:  0.56E-12 at ( 31,  1, 18)
+       Min divergence: -0.43E-12 at ( 64,  1, 52)
+       Poisson Error :  0.49E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step     800   June 15, 2010  12:48:14
+       ----------------------------------------------
+       CPU/step:     0.044 s, Total CPU:     35.90 s
+       Time step:  0.00810 s, Total time:     6.19 s
+       Max CFL number:  0.25E+00 at ( 15,  0, 63)
+       Max divergence:  0.57E-12 at ( 31,  1, 18)
+       Min divergence: -0.48E-12 at ( 33,  1, 46)
+       Poisson Error :  0.43E-12
+       Max VN  number:  0.48E-09 at ( 64,  1, 64)
+ 
+       Time Step     813   June 15, 2010  12:48:15
+       ----------------------------------------------
+       CPU/step:     0.043 s, Total CPU:     36.45 s
+       Time step:  0.00737 s, Total time:     6.29 s
+       Max CFL number:  0.22E+00 at ( 64,  0, 48)
+       Max divergence:  0.57E-12 at ( 31,  1, 18)
+       Min divergence: -0.48E-12 at ( 33,  1, 46)
+       Poisson Error :  0.56E-12
+       Max VN  number:  0.44E-09 at ( 64,  1, 64)
+ 
+
+
+ DEVICE Activation Times
+
+
+
+ CPU Time Usage, Mesh   1
+
+                 CPU (s)        %  
+       ----------------------------
+       MAIN        37.56     100.00
+       DIVG         2.72       7.23
+       MASS         2.08       5.55
+       VELO        19.65      52.33
+       PRES         1.74       4.63
+       WALL         1.02       2.72
+       DUMP         4.84      12.90
+       PART         0.00       0.00
+       RADI         2.88       7.68
+       FIRE         0.00       0.00
+       COMM         1.51       4.03
+       SubTot      36.45      97.06
+
+
+ Time Stepping Wall Clock Time (s):      127.905
+ Total Elapsed Wall Clock Time (s):      127.999
+
+STOP: FDS completed successfully
