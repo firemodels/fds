@@ -46,7 +46,7 @@ end
 %Format the Plot 
 
 plot_style
-%set(gcf,'DefaultLineLineWidth',Line_Width)
+set(gcf,'DefaultLineLineWidth',Line_Width)
 set(gca,'FontSize',Title_Font_Size)
 set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
@@ -59,8 +59,8 @@ ymax = xmax;
 plot([xmin xmax],[ymin ymax],'k-');
 axis([xmin xmax ymin ymax]);
 
-xlabel('Measured Activation Time')
-ylabel('Predicted Activation Time')
+xlabel('Measured Activation Time (s)')
+ylabel('Predicted Activation Time (s)')
 
 h = legend(K,'Flat Smooth','Flat Obstructed','13 Smooth','13 Obstructed','24 Smooth','24 Obstructed','Location','SouthEast');
 set(h,'Interpreter','LaTeX')
