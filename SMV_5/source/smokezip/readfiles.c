@@ -373,7 +373,7 @@ int readsmv(char *smvfile){
       continue;
     }
 
-    if(doiso==1&&match(buffer,"GRID",4) == 1){
+    if(match(buffer,"GRID",4) == 1){
       mesh *meshi;
 
       meshi=meshinfo+igrid;
@@ -387,7 +387,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ PDIM ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(doiso==1&&match(buffer,"PDIM",4) == 1){
+    if(match(buffer,"PDIM",4) == 1){
       mesh *meshi;
 
       meshi=meshinfo+ipdim;
@@ -635,7 +635,7 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PRT5",4) == 1){
-      int version=0,dummy;
+      int version=0,meshindex=1;
       int i;
       char *buffer2;
       int len;
@@ -645,10 +645,13 @@ int readsmv(char *smvfile){
       len=strlen(buffer);
       if(len>4){
         buffer2=buffer+4;
-        sscanf(buffer2,"%i %i",&dummy,&version);
+        sscanf(buffer2,"%i %i",&meshindex,&version);
+        meshindex--;
+
       }
 
       parti = partinfo + npart_files;
+      parti->partmesh = meshinfo + meshindex;
       ipart_seq++;
       parti->seq_id = ipart_seq;
       parti->autozip = 0;
