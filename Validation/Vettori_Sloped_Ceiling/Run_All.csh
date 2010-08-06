@@ -31,14 +31,14 @@ $RUNFDS Current_Results Vettori_Sloped_13OSD fire54 &
 $RUNFDS Current_Results Vettori_Sloped_13OSC fire54 &
 $RUNFDS Current_Results Vettori_Sloped_24SSW fire55 &
 $RUNFDS Current_Results Vettori_Sloped_24SSD fire55 &
-$RUNFDS Current_Results Vettori_Sloped_24SSC fire74 &
-$RUNFDS Current_Results Vettori_Sloped_24SFW fire74 &
-$RUNFDS Current_Results Vettori_Sloped_24SFD fire75 &
-$RUNFDS Current_Results Vettori_Sloped_24SFC fire75 &
-$RUNFDS Current_Results Vettori_Sloped_24OFW fire76 &
-$RUNFDS Current_Results Vettori_Sloped_24OFD fire76 &
-$RUNFDS Current_Results Vettori_Sloped_24OFC fire77 &
-$RUNFDS Current_Results Vettori_Sloped_24OSW fire77 &
+$RUNFDS Current_Results Vettori_Sloped_24SSC fire56 &
+$RUNFDS Current_Results Vettori_Sloped_24SFW fire56 &
+$RUNFDS Current_Results Vettori_Sloped_24SFD fire57 &
+$RUNFDS Current_Results Vettori_Sloped_24SFC fire57 &
+$RUNFDS Current_Results Vettori_Sloped_24OFW fire58 &
+$RUNFDS Current_Results Vettori_Sloped_24OFD fire58 &
+$RUNFDS Current_Results Vettori_Sloped_24OFC fire59 &
+$RUNFDS Current_Results Vettori_Sloped_24OSW fire59 &
 $RUNFDS Current_Results Vettori_Sloped_24OSD fire79 &
 $RUNFDS Current_Results Vettori_Sloped_24OSC fire79 &
 
