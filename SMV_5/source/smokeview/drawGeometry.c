@@ -2298,6 +2298,7 @@ void draw_transparent_faces(){
 
   if(drawing_transparent==1)transparenton();
 
+  if(nface_transparent>0){
   glEnable(GL_LIGHTING);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
   glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
@@ -2366,8 +2367,9 @@ void draw_transparent_faces(){
   glEnd();
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
+  }
 
-  if(nface_transparent_double==1){
+  if(nface_transparent_double>0){
   glEnable(GL_LIGHTING);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
   glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
