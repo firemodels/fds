@@ -219,6 +219,8 @@ void convert_part(part *parti){
     sizeafter+=4*(1+nclasses);
     sizebefore+=size;
 
+    fprintf(partsizestream,"%f\n",time);
+
     vals=pdata;
     tagdataptr=(unsigned int *)tagdata;
     xbuff = int_buffer_uncompressed;
@@ -228,6 +230,11 @@ void convert_part(part *parti){
     for(j=0;j<nclasses;j++){
       part5class *classi;
       int k;
+
+      fprintf(partsizestream," %i ",npoints[j]);
+      if(j<nclasses-1){
+        fprintf(partsizestream," \n");
+      }
 
       if(npoints[j]==0)continue;
       ybuff = xbuff + npoints[j];
@@ -307,7 +314,7 @@ void convert_part(part *parti){
       fwrite(&char_buffer_compressed,1,ncompressed_char,partstream);
     }
 
-    fprintf(partsizestream,"%f %i %i %i %i\n",time,(int)ntotal_int,(int)ntotal_char,ncompressed_int,ncompressed_char);
+    fprintf(partsizestream," %i %i %i %i\n",(int)ntotal_int,(int)ntotal_char,ncompressed_int,ncompressed_char);
 
     data_loc=sizebefore;
     percent_done=100.0*(float)data_loc/(float)parti->filesize;
@@ -405,10 +412,10 @@ void Get_Part_Bounds(void){
 
       vals=pdata;
       for(j=0;j<nclasses;j++){
-        part5class *classi;
+        part5class *classj;
 
         if(npoints[j]==0)continue;
-        classi=parti->classptr[i];
+        classj=parti->classptr[j];
         x = vals;
         y = x + npoints[j];
         z = y + npoints[j];
@@ -416,7 +423,7 @@ void Get_Part_Bounds(void){
         for(k=0;k<nquantities[j];k++){
           part5prop *propi;
           
-          propi=getpartprop(classi->labels[k].shortlabel);
+          propi=getpartprop(classj->labels[k].shortlabel);
           update_histogram(vals,npoints[j],propi->histogram);
 
           vals += npoints[j];
