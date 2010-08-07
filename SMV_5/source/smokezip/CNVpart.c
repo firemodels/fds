@@ -87,6 +87,7 @@ void convert_part(part *parti){
   int percent_next=10;
   int data_loc;
   int count=0;
+  int compression_level;
 
    //*** PARTICLE FILE FORMATS
 
@@ -101,6 +102,7 @@ void convert_part(part *parti){
   // completion (0/1)
   // fileversion (compressed particle file format version)
   // fds version 
+  // compression level
   // global min max (used to perform conversion)
   // nclasses
   // quantities_1, ..., quantities_nclasses
@@ -126,6 +128,9 @@ void convert_part(part *parti){
   ymax = partmesh->ybar;
   zmin = partmesh->zbar0;
   zmax = partmesh->zbar;
+
+#define COMPRESSION_LEVEL 1024
+  compression_level=COMPRESSION_LEVEL;
 
   // check if part file is accessible
 
@@ -196,12 +201,12 @@ void convert_part(part *parti){
   fwrite(&one,4,1,partstream);           // write out a 1 to determine "endianness" when file is read in later
   fwrite(&zero,4,1,partstream);          // write out a zero now, then a one just before file is closed
   fwrite(&fileversion,4,1,partstream);   // write out compressed fileversion in case file format changes later
-  fwrite(&fdsversion,4,1,partstream);       // fds file version
-  sizeafter=16;
-  fwrite(&nclasses,4,1,partstream);
+  fwrite(&fdsversion,4,1,partstream);    // fds file version
+  fwrite(&compression_level,4,1,partstream);
+  sizeafter=20;
+  fwrite(&nclasses,4,1,partstream);      // compression level
   fwrite(nquantities,4,nclasses,partstream);
   sizeafter+=4*(1+nclasses);
-
 
   error=0;
   for(;;){
@@ -246,9 +251,9 @@ void convert_part(part *parti){
       z = y + npoints[j];
 
       for(k=0;k<npoints[j];k++){
-        xbuff[k] = 1024*(x[k]-xmin)/(xmax-xmin);
-        ybuff[k] = 1024*(y[k]-ymin)/(ymax-ymin);
-        zbuff[k] = 1024*(z[k]-zmin)/(zmax-zmin);
+        xbuff[k] = compression_level*(x[k]-xmin)/(xmax-xmin);
+        ybuff[k] = compression_level*(y[k]-ymin)/(ymax-ymin);
+        zbuff[k] = compression_level*(z[k]-zmin)/(zmax-zmin);
         tbuff[k] = tagdataptr[k];
       }
       ntotal_int+=4*npoints[j];
@@ -389,7 +394,8 @@ void Get_Part_Bounds(void){
     int *nquantities, *npoints;
     float time;
     int error, size;
-
+    int nquantities_total;
+    int j;
 
     parti = partinfo + i;
     printf("  Examining %s\n",parti->file);
@@ -401,11 +407,21 @@ void Get_Part_Bounds(void){
     NewMemory((void **)&npoints,nclasses*sizeof(int));
 
     FORTgetpartheader2(&unit,&nclasses,nquantities,&size);
+    nquantities_total=0;
+    for(j=0;j<nclasses;j++){
+      nquantities_total+=nquantities[j];
+    }
+    if(nquantities_total==0){
+      FREEMEMORY(nquantities);
+      FREEMEMORY(npoints);
+      FORTclosefortranfile(&unit);
+      continue;
+    }
 
     error=0;
     for(;;){
       float *x, *y, *z, *vals;
-      int j,k;
+      int k;
 
       FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time,tagdata,pdata,&size,&error);
       if(error!=0)break;
