@@ -217,7 +217,7 @@ DO K=1,KBAR
                !ACCEL = 0.5_EB*SQRT( (FVX(I-1,J,K)+FVX(I,J,K))**2 + &
                !                     (FVY(I,J-1,K)+FVY(I,J,K))**2 + &
                !                     (FVZ(I,J,K-1)+FVZ(I,J,K))**2    ) + 1.E-10_EB
-               MIX_TIME(I,J,K)=MAX(DT,C_EDC*SQRT(DELTA/ACCEL))
+               MIX_TIME(I,J,K)=C_EDC*SQRT(DELTA/ACCEL)
             ELSE EXPERIMENTAL_IF
                ! FDS 5 default
                IF (DYNSMAG) THEN
@@ -231,7 +231,7 @@ DO K=1,KBAR
             
          ENDIF LES_IF
          
-         IF (FIXED_RESIDENCE_TIME>0._EB) MIX_TIME(I,J,K)=MAX(DT,FIXED_RESIDENCE_TIME)
+         IF (FIXED_RESIDENCE_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_RESIDENCE_TIME
          IF (Y_FU_0 < Y_O2_0/RN%O2_F_RATIO) THEN
             DYF = Y_FU_0 * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
          ELSE

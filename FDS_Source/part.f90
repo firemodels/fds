@@ -557,6 +557,12 @@ OVERALL_INSERT_LOOP: DO
       END SELECT
    
       ! Assign properties to the initial droplets/particles
+      
+      IF (IN%DROPLET_INIT_FILE) THEN
+         ! open input file
+         OPEN(IN%LU_DROPLET,FILE=IN%DROPLET_FILENAME,ACTION='READ')
+         READ(IN%LU_DROPLET,*) ! skip header line
+      ENDIF
    
       MASS_SUM = 0._EB
       INSERT_PARTICLE_LOOP: DO I=1,N_INITIAL
@@ -566,22 +572,31 @@ OVERALL_INSERT_LOOP: DO
             CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
             DROPLET=>MESHES(NM)%DROPLET
          ENDIF
-         DR=>DROPLET(NLP)     
-         BLOCK_OUT_LOOP:  DO
-        !!  CALL RANDOM_CONE(DR%X,DR%Y,DR%Z,0.5_EB*(X2+X1),0.5_EB*(Y2+Y1),Z1,0.25_EB,0.5_EB)
-            CALL RANDOM_RECTANGLE(DR%X,DR%Y,DR%Z,X1,X2,Y1,Y2,Z1,Z2)
-            II = CELLSI(FLOOR((DR%X-XS)*RDXINT)) + 1._EB
-            JJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT)) + 1._EB
-            KK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT)) + 1._EB
-            IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT BLOCK_OUT_LOOP
-         ENDDO BLOCK_OUT_LOOP
-         DR%U   = 0._EB                     ! No initial velocity
-         DR%V   = 0._EB
-         DR%W   = 0._EB
-         DR%TMP = PC%TMP_INITIAL            ! Initial temperature
+         DR=>DROPLET(NLP)
+         
+         INIT_FILE_IF: IF (IN%DROPLET_INIT_FILE) THEN
+            READ(IN%LU_DROPLET,*) DR%X,DR%Y,DR%Z,DR%U,DR%V,DR%W,DR%R,DR%TMP,DR%PWT
+            DR%R = DR%R*0.5E-6_EB ! convert diameter in microns to radius in meters
+            DR%TMP = DR%TMP+TMPM  ! convert Celcius to Kelvins
+            DR%PWT = MAX(DT,IN%DT_INSERT)*DR%PWT/(PC%FTPR*DR%R**3) ! convert mass flow rate to particle weight factor
+         ELSE INIT_FILE_IF
+            BLOCK_OUT_LOOP:  DO
+           !!  CALL RANDOM_CONE(DR%X,DR%Y,DR%Z,0.5_EB*(X2+X1),0.5_EB*(Y2+Y1),Z1,0.25_EB,0.5_EB)
+               CALL RANDOM_RECTANGLE(DR%X,DR%Y,DR%Z,X1,X2,Y1,Y2,Z1,Z2)
+               II = CELLSI(FLOOR((DR%X-XS)*RDXINT)) + 1._EB
+               JJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT)) + 1._EB
+               KK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT)) + 1._EB
+               IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT BLOCK_OUT_LOOP
+            ENDDO BLOCK_OUT_LOOP
+            DR%U   = 0._EB                     ! No initial velocity
+            DR%V   = 0._EB
+            DR%W   = 0._EB
+            DR%R   = 0._EB                     ! Radius is zero unless DIAMETER has been specified
+            DR%TMP = PC%TMP_INITIAL            ! Initial temperature
+            DR%PWT = 1._EB                     ! Weighting factor is one unless changed below
+         ENDIF INIT_FILE_IF
+         
          DR%T   = T                         ! Insertion time is current time
-         DR%R   = 0._EB                     ! Radius is zero unless DIAMETER has been specified
-         DR%PWT = 1._EB                     ! Weighting factor is one unless changed below
          DR%IOR = 0                         ! Orientation of solid surface (0 means the droplet/particle is not attached)
          DR%CLASS = IPC                     ! Class identifier
          DR%TAG   = PARTICLE_TAG            ! Unique integer tag
@@ -593,7 +608,7 @@ OVERALL_INSERT_LOOP: DO
          DR%SPLAT   = .FALSE.
          DR%WALL_INDEX = 0
     
-         IF (PC%DIAMETER>0._EB) THEN
+         IF (PC%DIAMETER>0._EB .AND. .NOT.IN%DROPLET_INIT_FILE) THEN
             IF (PC%MONODISPERSE) THEN
                DR%R   = 0.5_EB*PC%DIAMETER
                DR%PWT = 1._EB
@@ -609,8 +624,9 @@ OVERALL_INSERT_LOOP: DO
                   DR%R = 0.5_EB*PC%MAXIMUM_DIAMETER
                ENDIF
             ENDIF
-            MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
+            !MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3
          ENDIF
+         MASS_SUM = MASS_SUM + DR%PWT*PC%FTPR*DR%R**3 ! if r=0 the sum will stay 0
     
          ! Process special particles that are associated with a particular SURFace type
    
@@ -637,6 +653,8 @@ OVERALL_INSERT_LOOP: DO
          ENDIF
    
       ENDDO INSERT_PARTICLE_LOOP
+      
+      IF (IN%DROPLET_INIT_FILE) CLOSE(IN%LU_DROPLET)
     
       ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
       

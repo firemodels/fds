@@ -1880,25 +1880,6 @@ ALLOCATE(VEG_TOTAL_MOIST_MASS(NMESHES),STAT=IZERO)
 CALL ChkMemErr('INIT','VEG_TOTAL_MOIST_MASS',IZERO)  
 VEG_TOTAL_MOIST_MASS=0._EB
 
-! PERM (particle advection scheme)
-IF (.FALSE.) THEN
-   ! Initialize Moore-Penrose pseudoinverse
-   ALLOCATE(MATRIX_BPLUS(12,8),STAT=IZERO)
-   CALL ChkMemErr('INIT','MATRIX_BPLUS',IZERO)  
-   MATRIX_BPLUS(1,:)  = (/-7,-2,-2,-1, 7, 2, 2, 1/)
-   MATRIX_BPLUS(2,:)  = (/-2,-1,-7,-2, 2, 1, 7, 2/)
-   MATRIX_BPLUS(3,:)  = (/-2,-7,-1,-2, 2, 7, 1, 2/)
-   MATRIX_BPLUS(4,:)  = (/-1,-2,-2,-7, 1, 2, 2, 7/)
-   MATRIX_BPLUS(5,:)  = (/-7,-2, 7, 2,-2,-1, 2, 1/)
-   MATRIX_BPLUS(6,:)  = (/-2,-1, 2, 1,-7,-2, 7, 2/)
-   MATRIX_BPLUS(7,:)  = (/-2,-7, 2, 7,-1,-2, 1, 2/)
-   MATRIX_BPLUS(8,:)  = (/-1,-2, 1, 2,-2,-7, 2, 7/)
-   MATRIX_BPLUS(9,:)  = (/-7, 7,-2, 2,-2, 2,-1, 1/)
-   MATRIX_BPLUS(10,:) = (/-2, 2,-7, 7,-1, 1,-2, 2/)
-   MATRIX_BPLUS(11,:) = (/-2, 2,-1, 1,-7, 7,-2, 2/)
-   MATRIX_BPLUS(12,:) = (/-1, 1,-2, 2,-2, 2,-7, 7/)
-   MATRIX_BPLUS = MATRIX_BPLUS/12._EB
-ENDIF
  
 END SUBROUTINE INITIALIZE_GLOBAL_VARIABLES
  
