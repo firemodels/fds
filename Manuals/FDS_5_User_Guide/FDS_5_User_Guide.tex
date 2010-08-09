@@ -6323,7 +6323,8 @@ The number per ``batch'' depends on how they are introduced.
 If more particles are desired, lower the input value of this parameter. The default value is 0.01~s. Note that this
 parameter should be specified on the {\ct SURF}, {\ct PROP}, or {\ct INIT} line, depending on whether the particles/droplets
 originate at a surface, a sprinkler or nozzle, or a volume. Versions prior to FDS~5.5 had this parameter listed on the
-{\ct PART} line.
+{\ct PART} line. Note that if you introduce particles or droplets via an {\ct INIT} line, you must specify a value for {\ct DT\_INSERT}. Otherwise, particles or
+droplets will only be introduced initially. 
 \item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
 file {\bf CHID.prt5}. This parameter can be used to reduce the size
 of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default
@@ -9858,7 +9859,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}               & m/s                   & 1.0       \\ \hline
 {\ct DROPLET\_VELOCITY}                 & Real          & Initial droplet velocity                  & m/s                   & 0.0       \\ \hline
 {\ct DROPLETS\_PER\_SECOND}             & Integer       & Drops per second per head                 &                       & 5000      \\ \hline
-{\ct DT\_INSERT}                        & Real          & Time between insertions                   & s                     & 0.01      \\ \hline
+{\ct DT\_INSERT}                        & Real          & Time between particle insertions          & s                     & 0.01      \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Sprinkler or nozzle flow rate             & L/min                 &           \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & Time {\ct RAMP} for flow                  &                       &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & Time constant for flow                    &                       & 0.0       \\ \hline
