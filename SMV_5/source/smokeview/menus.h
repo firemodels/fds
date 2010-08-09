@@ -6441,7 +6441,10 @@ static int in_menu=0;
     glutAddMenuEntry("Animation keyboard commands",1);
     glutAddMenuEntry("  t: set/unset single time step mode",6);
     glutAddMenuEntry("  o: reset animation to the initial time",6);
-    glutAddMenuEntry("  T: toggle texture method for drawing slice and boundary colors",6);
+    glutAddMenuEntry("  T: toggle method for interpolating data color ",6);
+    if(cellcenter_slice_active==1){
+      glutAddMenuEntry("     (also, toggles cell center display on/off)",6);
+    }
     glutAddMenuEntry("  u: reload files",6);
     glutAddMenuEntry("1-9: number of frames to skip",6);
     displayblank=1;
@@ -6471,10 +6474,6 @@ static int in_menu=0;
   glutAddMenuEntry("  -: decrement time step, 2D contour planes, 3D contour levels",2);
   glutAddMenuEntry("  space bar: increment time step, 2D contour planes, 3D contour levels",2);
   glutAddMenuEntry("",1);
-  glutAddMenuEntry("  SHIFT+t: toggle slice file color interpolation methods",2);
-  if(cellcenter_slice_active==1){
-    glutAddMenuEntry("           (also, toggles cell center display on/off)",2);
-  }
   glutAddMenuEntry("  ALT+v: toggle projection  method (between perspective and size preserving)",2);
   if(n_embedded_meshes>0){
     glutAddMenuEntry("  ALT+u: toggle coarse slice display in embedded mesh",2);
