@@ -18,7 +18,7 @@ CONTAINS
 SUBROUTINE DIVERGENCE_PART_1(T,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_DIFFUSIVITY,GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT
+USE PHYSICAL_FUNCTIONS, ONLY: GET_DIFFUSIVITY,GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT_DIFF
 
 ! Compute contributions to the divergence term
  
@@ -258,29 +258,21 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                
                ! H_RHO_D_DYDX
                TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
-               YY_GET=0._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,TMP_G)
-               YY_GET(N) = 1._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,TMP_G)               
-               HDIFF = (H_G-H_G_A)*TMP_G
+               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G)               
+               HDIFF = H_G*TMP_G
                H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
                
                ! H_RHO_D_DYDY
                TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
-               YY_GET=0._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,TMP_G)
-               YY_GET(N) = 1._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,TMP_G)               
-               HDIFF = (H_G-H_G_A)*TMP_G
+               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G)               
+               HDIFF = H_G*TMP_G
                H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
                
                ! H_RHO_D_DYDZ
                TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
                YY_GET=0._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,TMP_G)
-               YY_GET(N) = 1._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,TMP_G)               
-               HDIFF = (H_G-H_G_A)*TMP_G
+               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G)               
+               HDIFF = H_G*TMP_G
                H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
             ENDDO
          ENDDO
@@ -296,11 +288,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          KKG = IJKW(8,IW)
          IOR  = IJKW(4,IW)
          TMP_G = 0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW))      
-         YY_GET=0._EB
-         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,TMP_G)
-         YY_GET(N) = 1._EB
-         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,TMP_G)               
-         HDIFF = (H_G-H_G_A)*TMP_G
+         CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G)               
+         HDIFF = H_G*TMP_G
          RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
          SELECT CASE(IOR)
             CASE( 1) 
@@ -392,11 +381,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          DO J=1,JBAR
             DO I=1,IBAR
                !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_11'               
-               YY_GET=0._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_A,TMP_G)
-               YY_GET(N) = 1._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G,TMP_G)               
-               HDIFF = (H_G-H_G_A)*TMP(I,J,K)
+               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP(I,J,K))          
+               HDIFF = H_G*TMP_G
                DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
             ENDDO
          ENDDO
@@ -1196,6 +1182,5 @@ READ (MODULE_DATE,'(I5)') MODULE_REV
 WRITE(MODULE_DATE,'(A)') divgdate
 
 END SUBROUTINE GET_REV_divg
-
  
 END MODULE DIVG
