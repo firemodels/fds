@@ -1403,7 +1403,7 @@ void CCisoheader(char *isofile,
 }
 
 
-/* ------------------ isoheader ------------------------ */
+/* ------------------ isotheader ------------------------ */
 
 void CCtisoheader(char *isofile, 
                  char *isolonglabel, char *isoshortlabel, char *isounits,
