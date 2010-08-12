@@ -77,6 +77,12 @@ SV_EXTERN void CCtisoheader(char *isofile,
 SV_EXTERN void isoout(FILE *isostream,float t, int timeindex, isosurface *surface, int *error);
 SV_EXTERN void CCisosurface2file(char *isofile, float *t, float *data, int *iblank, float *level, int *nlevels,
      float *xplt, int *nx, float *yplt, int *ny, float *zplt, int *nz,int *isooffset, int *reduce_triangles, int *error);
+SV_EXTERN void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, float *data2, int *iblank, 
+						float *level, int *nlevels,
+                   float *xplt, int *nx, 
+                   float *yplt, int *ny, 
+                   float *zplt, int *nz,
+                   int *isooffset, int *reduce_triangles, int *error);
 #endif
 SV_EXTERN int CompressIsosurface(isosurface *surface, int reduce_triangles, 
                         float xmin, float xmax,
