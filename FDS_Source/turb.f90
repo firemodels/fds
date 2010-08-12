@@ -2756,13 +2756,13 @@ G_DATA(1,1,1) = DUDX(II+1,JJ+1,KK+1)
 END SUBROUTINE GETGRAD
 
 
-REAL(EB) FUNCTION VELTAN2D(UU,UW,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL)
+REAL(EB) FUNCTION VELTAN2D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL)
 IMPLICIT NONE
 
-REAL(EB), INTENT(IN) :: UU(2),UW(2),NN(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
+REAL(EB), INTENT(IN) :: U_VELO(2),U_SURF(2),NN(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
 INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(2,2),SS(2),SLIP_COEF,ETA,AA,BB,US0,DUMMY
-REAL(EB) :: US,UN,US_WALL,UN_WALL,DPDS,DUSDS,DUSDN,TSN
+REAL(EB) :: C(2,2),SS(2),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY, &
+            U_STRM,U_NORM,U_STRM_WALL,U_NORM_WALL,DPDS,DUSDS,DUSDN,TSN
 INTEGER :: SUBIT
 
 ! Cartesian grid coordinate system orthonormal basis vectors
@@ -2779,12 +2779,12 @@ C(2,1) = DOT_PRODUCT(YY,SS)
 C(2,2) = DOT_PRODUCT(YY,NN)
 
 ! transform velocity (see Pope, Eq. A.17)
-US = C(1,1)*UU(1) + C(2,1)*UU(2)
-UN = C(1,2)*UU(1) + C(2,2)*UU(2)
+U_STRM = C(1,1)*U_VELO(1) + C(2,1)*U_VELO(2)
+U_NORM = C(1,2)*U_VELO(1) + C(2,2)*U_VELO(2)
 
 ! transform wall velocity
-US_WALL = C(1,1)*UW(1) + C(2,1)*UW(2)
-UN_WALL = C(1,2)*UW(1) + C(2,2)*UW(2)
+U_STRM_WALL = C(1,1)*U_SURF(1) + C(2,1)*U_SURF(2)
+U_NORM_WALL = C(1,2)*U_SURF(1) + C(2,2)*U_SURF(2)
 
 ! transform pressure gradient
 DPDS = C(1,1)*GRADP(1) + C(2,1)*GRADP(2)
@@ -2803,57 +2803,57 @@ TSN = C(1,1)*C(1,2)*TAU_IJ(1,1) + C(1,1)*C(2,2)*TAU_IJ(1,2) &
 ! update boundary layer equations
 
 ! update wall-normal velocity
-UN = UN_WALL + DN*(DIVU-0.5_EB*DUSDS)
+U_NORM = U_NORM_WALL + DN*(DIVU-0.5_EB*DUSDS)
 
 ! ODE solution
 IF (DNS) THEN
-   ETA = UN + RRHO*MU/DN
+   ETA = U_NORM + RRHO*MU/DN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA/DN)
-   BB  = (TWTH*US_WALL/DN + ONSI*DUSDN)*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+   BB  = (TWTH*U_STRM_WALL/DN + ONSI*DUSDN)*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
    !AA  = -0.5_EB*(DUSDS + ETA/DN)
    !BB  = 0.5_EB*US_WALL/DN*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
-   US = ((AA*US + BB)*EXP(AA*DT) - BB)/AA
+   U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
 ELSE
-   US0 = US
+   U_STRM_0 = U_STRM
    DO SUBIT=1,1
-      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,DUMMY,US-US_WALL,MU*RRHO,DN,0._EB)
+      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,DUMMY,U_STRM-U_STRM_WALL,MU*RRHO,DN,0._EB)
       !IF (SLIP_COEF< -1._EB .OR. SLIP_COEF>-1._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
       ETA = RRHO*(1-SLIP_COEF)*MU/(2._EB*DN**2)
-      AA  = -(0.5_EB*DUSDS + TWTH*UN/DN + ETA)
-      BB  = ETA*US_WALL - (UN*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
-      US = ((AA*US0 + BB)*EXP(AA*DT) - BB)/AA
+      AA  = -(0.5_EB*DUSDS + TWTH*U_NORM/DN + ETA)
+      BB  = ETA*U_STRM_WALL - (U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+      U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
    ENDDO
 ENDIF
 
 ! transform velocity back to Cartesian component I_VEL
-VELTAN2D = C(I_VEL,1)*US + C(I_VEL,2)*UN
+VELTAN2D = C(I_VEL,1)*U_STRM + C(I_VEL,2)*U_NORM
 
 END FUNCTION VELTAN2D
 
 
-REAL(EB) FUNCTION VELTAN3D(UU,UW,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL,ROUGHNESS)
+REAL(EB) FUNCTION VELTAN3D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL,ROUGHNESS)
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT, NORM2
 IMPLICIT NONE
 
-REAL(EB), INTENT(IN) :: UU(3),UW(3),NN(3),DN,DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),DT,RRHO,MU,ROUGHNESS
+REAL(EB), INTENT(IN) :: U_VELO(3),U_SURF(3),NN(3),DN,DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),DT,RRHO,MU,ROUGHNESS
 INTEGER, INTENT(IN) :: I_VEL
-REAL(EB) :: C(3,3),SS(3),PP(3),SLIP_COEF,ETA,AA,BB,US0,DUMMY,UU_REL(3)
-REAL(EB) :: US,UP,UN,DPDS,DUSDS,DUSDN,TSN
+REAL(EB) :: C(3,3),SS(3),PP(3),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY,U_RELA(3), &
+            U_STRM,U_ORTH,U_NORM,DPDS,DUSDS,DUSDN,TSN
 INTEGER :: SUBIT,I,J
 
 ! Cartesian grid coordinate system orthonormal basis vectors
 REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0._EB/),E3=(/0._EB,0._EB,1._EB/)
 
-UU_REL = UU-UW
-IF (DOT_PRODUCT(NN,UU_REL)<1.E-6_EB) THEN
-   VELTAN3D = UU(I_VEL)
+U_RELA = U_VELO-U_SURF
+IF (DOT_PRODUCT(NN,U_RELA)<1.E-6_EB) THEN
+   VELTAN3D = U_VELO(I_VEL)
    RETURN
 ENDIF
 
-! find a vector PP in the tangent plane of the surface and orthogonal to UU-UW
-CALL CROSS_PRODUCT(PP,NN,UU_REL)
+! find a vector PP in the tangent plane of the surface and orthogonal to U_VELO-U_SURF
+CALL CROSS_PRODUCT(PP,NN,U_RELA)
 PP = PP/NORM2(PP) ! normalize to unit vector
 
 ! define the streamwise unit vector SS
@@ -2871,12 +2871,12 @@ C(3,2) = DOT_PRODUCT(E3,PP)
 C(3,3) = DOT_PRODUCT(E3,NN)
 
 ! transform velocity (see Pope, Eq. A.17)
-US = C(1,1)*(UU(1)-UW(1)) + C(2,1)*(UU(2)-UW(2)) + C(3,1)*(UU(3)-UW(3))
-UP = C(1,2)*(UU(1)-UW(1)) + C(2,2)*(UU(2)-UW(2)) + C(3,2)*(UU(3)-UW(3))
-UN = C(1,3)*(UU(1)-UW(1)) + C(2,3)*(UU(2)-UW(2)) + C(3,3)*(UU(3)-UW(3))
+U_STRM = C(1,1)*U_RELA(1) + C(2,1)*U_RELA(2) + C(3,1)*U_RELA(3)
+U_ORTH = C(1,2)*U_RELA(1) + C(2,2)*U_RELA(2) + C(3,2)*U_RELA(3)
+U_NORM = C(1,3)*U_RELA(1) + C(2,3)*U_RELA(2) + C(3,3)*U_RELA(3)
 
 !! check UP, should be zero
-!print *, UP
+!print *, U_ORTH
 
 ! transform pressure gradient
 DPDS = C(1,1)*GRADP(1) + C(2,1)*GRADP(2) + C(3,1)*GRADP(3)
@@ -2896,32 +2896,32 @@ ENDDO
 ! update boundary layer equations
 
 ! update wall-normal velocity
-UN = DN*(DIVU-0.5_EB*DUSDS)
+U_NORM = DN*(DIVU-0.5_EB*DUSDS)
 
 ! ODE solution
 IF (DNS) THEN
-   ETA = UN + RRHO*MU/DN
+   ETA = U_NORM + RRHO*MU/DN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA/DN)
-   BB  = ONSI*DUSDN*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+   BB  = ONSI*DUSDN*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
    !AA  = -0.5_EB*(DUSDS + ETA/DN)
    !BB  = 0.5_EB*US_WALL/DN*ETA - (UN*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
-   US = ((AA*US + BB)*EXP(AA*DT) - BB)/AA
+   U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
 ELSE
-   US0 = US
+   U_STRM_0 = U_STRM
    DO SUBIT=1,1
-      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,DUMMY,US,MU*RRHO,DN,ROUGHNESS)
+      CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,DUMMY,U_STRM,MU*RRHO,DN,ROUGHNESS)
       !IF (SLIP_COEF< -1._EB .OR. SLIP_COEF>-1._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
       ETA = RRHO*(1-SLIP_COEF)*MU/(2._EB*DN**2)
-      AA  = -(0.5_EB*DUSDS + TWTH*UN/DN + ETA)
-      BB  = -(UN*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
-      US = ((AA*US0 + BB)*EXP(AA*DT) - BB)/AA
+      AA  = -(0.5_EB*DUSDS + TWTH*U_NORM/DN + ETA)
+      BB  = -(U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
+      U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
    ENDDO
 ENDIF
 
 ! transform velocity back to Cartesian component I_VEL
-VELTAN3D = C(I_VEL,1)*US + C(I_VEL,3)*UN + UW(I_VEL)
+VELTAN3D = C(I_VEL,1)*U_STRM + C(I_VEL,3)*U_NORM + U_SURF(I_VEL)
 
 END FUNCTION VELTAN3D
 
