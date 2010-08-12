@@ -116,7 +116,7 @@ int convert_iso(iso *isoi){
     if(isostream!=NULL){
       fclose(isostream);
       printf("  %s exists.\n",isofile_svz);
-      printf("     Use the -f option to overwrite boundary or 3d smoke files\n");
+      printf("     Use the -f option to overwrite smokezip compressed files\n");
       return 0;
     }
   }

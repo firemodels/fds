@@ -50,20 +50,82 @@ part5prop *getpartprop(char *string){
 
 void compress_parts(void){
   int i;
-  
- // if(get_part_bounds==1){
- //   Get_Part_Bounds();
- // }
+  int needbounds=0;
+  int convertable=0;
+
   for(i=0;i<npart_files;i++){
     part *parti;
 
     parti = partinfo + i;
-    if(piso==1){
-      part2iso(parti);
+    if(convertable_part(parti)==1){
+      convertable=1;
+      break;
     }
-   // if(autozip==1&&parti->autozip==0)continue;
-   // convert_part(parti);
   }
+
+  for(i=0;i<npart5propinfo;i++){
+    part5prop *propi;
+
+    propi = part5propinfo + i;
+    if(propi->setvalmax!=1||propi->setvalmin!=1){
+      needbounds=1;
+      break;
+    }
+  }
+
+  if(convertable==1&&needbounds==1&&get_part_bounds==1){
+    Get_Part_Bounds();
+  }
+
+  for(i=0;i<npart_files;i++){
+    part *parti;
+
+    parti = partinfo + i;
+    if(autozip==1&&parti->autozip==0)continue;
+    convert_part(parti);
+  }
+}
+
+/* ------------------ compress_patches ------------------------ */
+
+void convert_parts2iso(void){
+  int i;
+  
+  if(partfile2iso==0)return;
+  for(i=0;i<npart_files;i++){
+    part *parti;
+
+    parti = partinfo + i;
+    part2iso(parti);
+  }
+}
+
+/* ------------------ convertable_part ------------------------ */
+
+int convertable_part(part *parti){
+  char partfile_svz[256];
+  char *partfile;
+  FILE *stream;
+
+  partfile=parti->file;
+
+  if(getfileinfo(partfile,NULL,NULL)!=0)return 0;
+
+  stream=fopen(partfile,"rb");
+  if(stream==NULL)return 0;
+  fclose(stream);
+
+  // set up compressed particle file
+
+  strcpy(partfile_svz,"");
+  if(destdir!=NULL){
+    strcpy(partfile_svz,destdir);
+  }
+  strcat(partfile_svz,partfile);
+  strcat(partfile_svz,".svz");
+  stream=fopen(partfile_svz,"wb");
+  if(stream==NULL)return 0;
+  return 1;
 }
 
 /* ------------------ compress_part ------------------------ */
@@ -172,15 +234,43 @@ void convert_part(part *parti){
     strcpy(partsizefile_svz,destdir);
   }
   strcpy(partsizefile_svz,partfile);
-  strcat(partsizefile_svz,".sz2");
-//  partsizestream=fopen(partsizefile_svz,"w");
+  strcat(partsizefile_svz,".szz");
+  partsizestream=fopen(partsizefile_svz,"w");
 
-//  if(partsizestream==NULL){
-//    printf("The file %s could not be opened for writing\n",partsizefile_svz);
-//    fclose(PARTFILEstream);
-//    fclose(partstream);
-//    return;
- // }
+  if(partsizestream==NULL){
+    printf("The file %s could not be opened for writing\n",partsizefile_svz);
+    fclose(PARTFILEstream);
+    fclose(partstream);
+    return;
+ }
+
+  if(cleanfiles==1){
+    partstream=fopen(partfile_svz,"rb");
+    if(partstream!=NULL){
+      fclose(partstream);
+      printf("  Removing %s.\n",partfile_svz);
+      UNLINK(partfile_svz);
+      filesremoved++;
+    }
+    partsizestream=fopen(partsizefile_svz,"rb");
+    if(partsizestream!=NULL){
+      fclose(partsizestream);
+      printf("  Removing %s.\n",partsizefile_svz);
+      UNLINK(partsizefile_svz);
+      filesremoved++;
+    }
+    return;
+  }
+
+  if(overwrite_part==0){
+    partstream=fopen(partfile_svz,"rb");
+    if(partstream!=NULL){
+      fclose(partstream);
+      printf("  %s exists.\n",partfile_svz);
+      printf("     Use the -f option to overwrite smokezip compressed files\n");
+      return;
+    }
+  }
 
   printf("  Compressing %s\n",parti->file);
 
@@ -369,7 +459,6 @@ void Get_Part_Bounds(void){
   float *pdata;
   int *tagdata;
   int fdsversion;
-
   int endiandata;
 
   endiandata=getendian();
