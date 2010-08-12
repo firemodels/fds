@@ -180,7 +180,6 @@ int convert_slice(slice *slicei){
     }
   }
 
-
   if(cleanfiles==1){
     slicestream=fopen(slicefile_svz,"rb");
     if(slicestream!=NULL){
@@ -204,7 +203,7 @@ int convert_slice(slice *slicei){
     if(slicestream!=NULL){
       fclose(slicestream);
       printf("  %s exists.\n",slicefile_svz);
-      printf("     Use the -f option to overwrite boundary, slice or 3d smoke files\n");
+      printf("     Use the -f option to overwrite smokezip compressed files\n");
       return 0;
     }
   }

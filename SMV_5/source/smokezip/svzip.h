@@ -283,9 +283,11 @@ void mergepdf(pdfdata *pdf1, pdfdata *pdf2, pdfdata *pdfmerge);
 void smoothlabel(float *a, float *b, int n);
 #ifdef pp_PART
 void compress_parts(void);
+void convert_parts2iso(void);
 part *getpart(char *string);
 part5prop *getpartprop(char *string);
 void convert_part(part *parti);
+int convertable_part(part *parti);
 #endif
 void compress_patches(void);
 patch *getpatch(char *string);
@@ -425,7 +427,7 @@ EXTERN int autozip, make_demo;
 EXTERN int get_bounds, get_slice_bounds, get_plot3d_bounds, get_boundary_bounds;
 #ifdef pp_PART
 EXTERN int get_part_bounds;
-EXTERN int piso;
+EXTERN int partfile2iso;
 #endif
 EXTERN char smvfilecopy[1024];
 

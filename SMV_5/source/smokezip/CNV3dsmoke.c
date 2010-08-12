@@ -152,7 +152,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
     if(smoke3dstream!=NULL){
       fclose(smoke3dstream);
       printf("  %s exists.\n",smoke3dfile_svz);
-      printf("     Use the -f option to overwrite boundary or 3d smoke files\n");
+      printf("     Use the -f option to overwrite smokezip compressed files\n");
       return;
     }
   }
