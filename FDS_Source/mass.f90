@@ -1215,16 +1215,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
    ENDDO
    
    IF (CLIP_MASS_FRACTION) THEN
-      DO N=1,N_SPECIES
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  YYS(I,J,K,N) = MIN(YYS(I,J,K,N),1._EB)
-                  YYS(I,J,K,N) = MAX(YYS(I,J,K,N),0._EB)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
+      YYS(1:IBAR,1:JBAR,1:KBAR,1:N) = MAX(0._EB,MIN(1._EB,YYS(1:IBAR,1:JBAR,1:KBAR,1:N)))
    ELSE
       CALL CHECK_MASS_FRACTION
    ENDIF
