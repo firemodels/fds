@@ -45,6 +45,7 @@ int main(int argc, char **argv){
   int i;
   int endian_fds;
   int endian_info;
+  int doit_smoke3d=1, doit_boundary=1, doit_slice=1, doit_particle=1, doit_plot3d=1, doit_iso=1;
 
 #ifdef pp_LIGHT
   nphotons=NPHOTONS;
@@ -70,7 +71,7 @@ int main(int argc, char **argv){
   get_boundary_bounds=0;
 #ifdef pp_PART
   get_part_bounds=0;
-  piso=0;
+  partfile2iso=0;
 #endif
 #ifdef pp_LIGHT
   make_lighting_file=0;
@@ -182,6 +183,29 @@ int main(int argc, char **argv){
           overwrite_b=1;
         }
         break;
+      case 'n':
+        if(strcmp(arg,"-n3")==0){
+          doit_smoke3d=0;
+        }
+        else if(strcmp(arg,"-nb")==0){
+          doit_boundary=0;
+        }
+        else if(strcmp(arg,"-np")==0){
+          doit_plot3d=0;
+        }
+        else if(strcmp(arg,"-nP")==0){
+          doit_particle=0;
+        }
+        else if(strcmp(arg,"-ni")==0){
+          doit_iso=0;
+        }
+        else if(strcmp(arg,"-ns")==0){
+          doit_slice=0;
+        }
+        else if(strcmp(arg,"-no_chop")==0){
+          no_chop=1;
+        }
+        break;
       case '2':
         overwrite_slice=1;
         break;
@@ -194,8 +218,8 @@ int main(int argc, char **argv){
         break;
 #endif
       case 'p':
-        if(strcmp(arg,"-piso")==0){
-          piso=1;
+        if(strcmp(arg,"-part2iso")==0){
+          partfile2iso=1;
         }
         else{
           overwrite_plot3d=1;
@@ -219,14 +243,6 @@ int main(int argc, char **argv){
         break;
       case 'e':
         endian_info=1;
-        break;
-      case 'n':
-        if(lenarg==2){
-        }
-        else if(strcmp(arg,"-no_chop")==0){
-          no_chop=1;
-        }
-        i++;
         break;
       case 's':
         if(i+1>=argc)break;
@@ -317,7 +333,7 @@ int main(int argc, char **argv){
     ext=filebase+filelen-4;
     if(strcmp(ext,".smv")==0)addext=0;
   }
-  if(piso==1){
+  if(partfile2iso==1){
     char srcfile[1024];
 
     strcpy(srcfile,smvfile);
@@ -428,14 +444,15 @@ int main(int argc, char **argv){
 
   readini(inifile);
 
-  compress_patches();
-  compress_smoke3ds();
-  compress_slices();
-  compress_plot3ds();
+  if(doit_boundary)compress_patches();
+  if(doit_smoke3d==1)compress_smoke3ds();
+  if(doit_slice==1)compress_slices();
+  if(doit_plot3d==1)compress_plot3ds();
 #ifdef pp_PART
-  compress_parts();
+  if(doit_particle==1)compress_parts();
+  convert_parts2iso();
 #endif
-  if(doiso==1)compress_isos();
+  if(doiso==1&&doit_iso==1)compress_isos();
 
   if(cleanfiles==0&&destdir!=NULL){
     printf("Copying .smv, .ini and .end files to %s directory\n",destdir);
@@ -588,13 +605,11 @@ void usage(char *prog){
   strcpy(pp,"%");
   printf("\n");
   printf("  smokezip %s(%i) - %s\n\n",smv_version,svn_num,__DATE__);
-  printf("  Compresses Smokeview 3D smoke, slice, iso-surface and boundary files\n\n");
+  printf("  Compresses various Smokeview data files\n\n");
   printf("  %s",prog);
-  printf(" [-c -f -3 -b -s -i -skip skipval -no_chop]");
-#ifdef pp_LIGHT
-  printf("[-a val -l]");
-#endif
-  printf("  [-c -d destdir -s sourcedir] casename\n\n");
+  printf(" [options]");
+  printf("  casename\n\n");
+  printf("  options:\n");
   printf("  -2  - overwrites 2d slice compressed files\n");
   printf("  -3  - overwrites 3d smoke files\n");
   printf("  -b  - overwrites boundary compressed files\n");
@@ -602,7 +617,7 @@ void usage(char *prog){
   printf("  -p  - overwrites PLOT3D files\n");
 #ifdef pp_PART
   printf("  -P  - overwrites particle files\n");
-  printf("  -piso - generate an isosurface file from particle data\n");
+  printf("  -part2iso - generate isosurfaces from particle data\n");
 #endif
   printf("  -f  - overwrites all compressed files\n");
   printf("  -bounds - estimate data bounds for all file types\n");
@@ -611,6 +626,14 @@ void usage(char *prog){
   printf("  -bp - estimate data bounds for plot3d files\n");
 #ifdef pp_PART
   printf("  -bP - estimate data bounds for particle files\n");
+#endif
+  printf("  -n3 - do not compress 3d smoke files\n");
+  printf("  -nb - do not compress boundary files\n");
+  printf("  -np - do not compress PLOT3D files\n");
+  printf("  -ni - do not compress isosurface files\n");
+  printf("  -ns - do not compress slice files\n");
+#ifdef pp_PART
+  printf("  -nP - do not compress particle files\n");
 #endif
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 

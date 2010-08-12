@@ -106,7 +106,7 @@ int convert_plot3d(plot3d *plot3di){
     if(plot3dstream!=NULL){
       fclose(plot3dstream);
       printf("  %s exists.\n",plot3dfile_svz);
-      printf("     Use the -f option to overwrite boundary, slice, plot3d or 3d smoke files\n");
+      printf("     Use the -f option to overwrite smokezip compressed files\n");
       return 0;
     }
   }
