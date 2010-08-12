@@ -264,10 +264,10 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 
 ! Velocities relative to the p-cell center
-REAL(EB) :: U_E,U_W,U_N,U_S,U_T,U_B
-REAL(EB) :: V_E,V_W,V_N,V_S,V_T,V_B
-REAL(EB) :: W_E,W_W,W_N,W_S,W_T,W_B
-REAL(EB) :: DELTA,SKK
+REAL(EB) :: U_E,U_W,U_N,U_S,U_T,U_B,U_P2
+REAL(EB) :: V_E,V_W,V_N,V_S,V_T,V_B,V_P2
+REAL(EB) :: W_E,W_W,W_N,W_S,W_T,W_B,W_P2
+REAL(EB) :: DELTA,SKK,TEMP_TERM
 INTEGER :: I,J,K,N_LO(3),N_HI(3),ARRAY_LO(3),ARRAY_HI(3)
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,UP,VP,WP,RHOP,RHOPHAT
@@ -342,28 +342,30 @@ DO K = N_LO(3),N_HI(3)
 
          U_E = UU(I,J,K)
          U_W = UU(I-1,J,K)
-         U_N = 0.25_EB*( UU(I,J,K) + UU(I-1,J,K) + UU(I,J+1,K) + UU(I-1,J+1,K) )
-         U_S = 0.25_EB*( UU(I,J,K) + UU(I-1,J,K) + UU(I,J-1,K) + UU(I-1,J-1,K) )
-         U_T = 0.25_EB*( UU(I,J,K) + UU(I-1,J,K) + UU(I,J,K+1) + UU(I-1,J,K+1) )
-         U_B = 0.25_EB*( UU(I,J,K) + UU(I-1,J,K) + UU(I,J,K-1) + UU(I-1,J,K-1) )
+         UP(I,J,K) = 0.5_EB*(U_E + U_W)
+         U_P2 = 0.5_EB*UP(I,J,K)
+         U_N = U_P2+0.25_EB*(UU(I,J+1,K) + UU(I-1,J+1,K) )
+         U_S = U_P2+0.25_EB*(UU(I,J-1,K) + UU(I-1,J-1,K) )
+         U_T = U_P2+0.25_EB*(UU(I,J,K+1) + UU(I-1,J,K+1) )
+         U_B = U_P2+0.25_EB*(UU(I,J,K-1) + UU(I-1,J,K-1) )
 
          V_N = VV(I,J,K)
          V_S = VV(I,J-1,K)
-         V_E = 0.25_EB*( VV(I,J,K) + VV(I,J-1,K) + VV(I+1,J,K) + VV(I+1,J-1,K) )
-         V_W = 0.25_EB*( VV(I,J,K) + VV(I,J-1,K) + VV(I-1,J,K) + VV(I-1,J-1,K) )
-         V_T = 0.25_EB*( VV(I,J,K) + VV(I,J-1,K) + VV(I,J,K+1) + VV(I,J-1,K+1) )
-         V_B = 0.25_EB*( VV(I,J,K) + VV(I,J-1,K) + VV(I,J,K-1) + VV(I,J-1,K-1) )
+         VP(I,J,K) = 0.5_EB*(V_N + V_S)
+         V_P2 = 0.5_EB*VP(I,J,K)         
+         V_E = V_P2+0.25_EB*(VV(I+1,J,K) + VV(I+1,J-1,K) )
+         V_W = V_P2+0.25_EB*(VV(I-1,J,K) + VV(I-1,J-1,K) )
+         V_T = V_P2+0.25_EB*(VV(I,J,K+1) + VV(I,J-1,K+1) )
+         V_B = V_P2+0.25_EB*(VV(I,J,K-1) + VV(I,J-1,K-1) )
 
          W_T = WW(I,J,K)
          W_B = WW(I,J,K-1)
-         W_E = 0.25_EB*( WW(I,J,K) + WW(I,J,K-1) + WW(I+1,J,K) + WW(I+1,J,K-1) ) 
-         W_W = 0.25_EB*( WW(I,J,K) + WW(I,J,K-1) + WW(I-1,J,K) + WW(I-1,J,K-1) )
-         W_N = 0.25_EB*( WW(I,J,K) + WW(I,J,K-1) + WW(I,J+1,K) + WW(I,J+1,K-1) )
-         W_S = 0.25_EB*( WW(I,J,K) + WW(I,J,K-1) + WW(I,J-1,K) + WW(I,J-1,K-1) )
-
-         UP(I,J,K) = 0.5_EB*(U_E + U_W)
-         VP(I,J,K) = 0.5_EB*(V_N + V_S)
          WP(I,J,K) = 0.5_EB*(W_T + W_B)
+         W_P2 = 0.5_EB*WP(I,J,K)
+         W_E = W_P2+0.25_EB*(WW(I+1,J,K) + WW(I+1,J,K-1) ) 
+         W_W = W_P2+0.25_EB*(WW(I-1,J,K) + WW(I-1,J,K-1) )
+         W_N = W_P2+0.25_EB*(WW(I,J+1,K) + WW(I,J+1,K-1) )
+         W_S = W_P2+0.25_EB*(WW(I,J-1,K) + WW(I,J-1,K-1) )
 
          ! calculate the grid strain rate tensor
          
@@ -480,13 +482,13 @@ M23 => WORK6
 DO K = N_LO(3),N_HI(3)
    DO J = N_LO(2),N_HI(2)
       DO I = N_LO(1),N_HI(1)
-      
-         M11(I,J,K) = 2._EB*(BETAHAT11(I,J,K) - ALPHA*RHOPHAT(I,J,K)*SSHAT(I,J,K)*SHAT11(I,J,K))
-         M22(I,J,K) = 2._EB*(BETAHAT22(I,J,K) - ALPHA*RHOPHAT(I,J,K)*SSHAT(I,J,K)*SHAT22(I,J,K))
-         M33(I,J,K) = 2._EB*(BETAHAT33(I,J,K) - ALPHA*RHOPHAT(I,J,K)*SSHAT(I,J,K)*SHAT33(I,J,K))
-         M12(I,J,K) = 2._EB*(BETAHAT12(I,J,K) - ALPHA*RHOPHAT(I,J,K)*SSHAT(I,J,K)*SHAT12(I,J,K))
-         M13(I,J,K) = 2._EB*(BETAHAT13(I,J,K) - ALPHA*RHOPHAT(I,J,K)*SSHAT(I,J,K)*SHAT13(I,J,K))
-         M23(I,J,K) = 2._EB*(BETAHAT23(I,J,K) - ALPHA*RHOPHAT(I,J,K)*SSHAT(I,J,K)*SHAT23(I,J,K))
+         TEMP_TERM = ALPHA*RHOPHAT(I,J,K)*SSHAT(I,J,K)
+         M11(I,J,K) = 2._EB*(BETAHAT11(I,J,K) - TEMP_TERM*SHAT11(I,J,K))
+         M22(I,J,K) = 2._EB*(BETAHAT22(I,J,K) - TEMP_TERM*SHAT22(I,J,K))
+         M33(I,J,K) = 2._EB*(BETAHAT33(I,J,K) - TEMP_TERM*SHAT33(I,J,K))
+         M12(I,J,K) = 2._EB*(BETAHAT12(I,J,K) - TEMP_TERM*SHAT12(I,J,K))
+         M13(I,J,K) = 2._EB*(BETAHAT13(I,J,K) - TEMP_TERM*SHAT13(I,J,K))
+         M23(I,J,K) = 2._EB*(BETAHAT23(I,J,K) - TEMP_TERM*SHAT23(I,J,K))
          
       ENDDO
    ENDDO
@@ -583,7 +585,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: RUU,RVV,RWW,RUV,RUW,RVW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RU,RV,RW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RUU_HAT,RVV_HAT,RWW_HAT,RUV_HAT,RUW_HAT,RVW_HAT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RU_HAT,RV_HAT,RW_HAT
-
+REAL(EB) :: INV_RHOPHAT
 TYPE(MESH_TYPE), POINTER :: M
 INTEGER :: I,J,K,N_LO(3),N_HI(3),ARRAY_LO(3),ARRAY_HI(3)
 
@@ -689,12 +691,13 @@ DO K=N_LO(3),N_HI(3)
    DO J=N_LO(2),N_HI(2)
       DO I=N_LO(1),N_HI(1)
          IF (RHOPHAT(I,J,K)>0._EB) THEN
-            L11(I,J,K) = RUU_HAT(I,J,K) - RU_HAT(I,J,K)*RU_HAT(I,J,K)/RHOPHAT(I,J,K)
-            L22(I,J,K) = RVV_HAT(I,J,K) - RV_HAT(I,J,K)*RV_HAT(I,J,K)/RHOPHAT(I,J,K)
-            L33(I,J,K) = RWW_HAT(I,J,K) - RW_HAT(I,J,K)*RW_HAT(I,J,K)/RHOPHAT(I,J,K)
-            L12(I,J,K) = RUV_HAT(I,J,K) - RU_HAT(I,J,K)*RV_HAT(I,J,K)/RHOPHAT(I,J,K)
-            L13(I,J,K) = RUW_HAT(I,J,K) - RU_HAT(I,J,K)*RW_HAT(I,J,K)/RHOPHAT(I,J,K)
-            L23(I,J,K) = RVW_HAT(I,J,K) - RV_HAT(I,J,K)*RW_HAT(I,J,K)/RHOPHAT(I,J,K)
+            INV_RHOPHAT = 1._EB/RHOPHAT(I,J,K)
+            L11(I,J,K) = RUU_HAT(I,J,K) - RU_HAT(I,J,K)*RU_HAT(I,J,K)*INV_RHOPHAT 
+            L22(I,J,K) = RVV_HAT(I,J,K) - RV_HAT(I,J,K)*RV_HAT(I,J,K)*INV_RHOPHAT 
+            L33(I,J,K) = RWW_HAT(I,J,K) - RW_HAT(I,J,K)*RW_HAT(I,J,K)*INV_RHOPHAT 
+            L12(I,J,K) = RUV_HAT(I,J,K) - RU_HAT(I,J,K)*RV_HAT(I,J,K)*INV_RHOPHAT 
+            L13(I,J,K) = RUW_HAT(I,J,K) - RU_HAT(I,J,K)*RW_HAT(I,J,K)*INV_RHOPHAT 
+            L23(I,J,K) = RVW_HAT(I,J,K) - RV_HAT(I,J,K)*RW_HAT(I,J,K)*INV_RHOPHAT 
          ELSE
             L11(I,J,K) = 0._EB
             L22(I,J,K) = 0._EB
@@ -764,13 +767,13 @@ INTEGER, INTENT(IN) :: N_LO,N_HI
 REAL(EB), INTENT(IN) :: U(N_LO:N_HI)
 REAL(EB), INTENT(OUT) :: UBAR(N_LO:N_HI)
 INTEGER :: J
-REAL(EB), POINTER, DIMENSION(:) :: UU
+!REAL(EB), POINTER, DIMENSION(:) :: UU
 REAL(EB),PARAMETER:: W(-1:1) = (/0.25_EB,0.5_EB,0.25_EB/)   ! trapezoid rule
 !REAL(EB),PARAMETER::W(-1:1) = (/ONSI,TWTH,ONSI/)           ! Simpson's rule
 
 
-UU => WORK
-UU(N_LO:N_HI) = U
+!UU => WORK
+!UU(N_LO:N_HI) = U
 
 ! Filter the u field to obtain ubar
 DO J=N_LO+1,N_HI-1
@@ -2928,3 +2931,4 @@ END FUNCTION VELTAN3D
 
 
 END MODULE COMPLEX_GEOMETRY
+

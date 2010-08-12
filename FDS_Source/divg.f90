@@ -270,7 +270,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                
                ! H_RHO_D_DYDZ
                TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
-               YY_GET=0._EB
                CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G)               
                HDIFF = H_G*TMP_G
                H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
@@ -1184,3 +1183,4 @@ WRITE(MODULE_DATE,'(A)') divgdate
 END SUBROUTINE GET_REV_divg
  
 END MODULE DIVG
+
