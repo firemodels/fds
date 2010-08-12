@@ -67,6 +67,7 @@ typedef struct {
 typedef struct {
   int ibar, jbar, kbar;
   float *xplt, *yplt, *zplt;
+  float *xpltcell, *ypltcell, *zpltcell;
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float dx, dy, dz;
   float dxx, dyy, dzz;
@@ -179,6 +180,9 @@ typedef struct {
 /* --------------------------  part5prop ------------------------------------ */
 
 typedef struct {
+  int used;
+  char isofilename[1024];
+  float *partvals;
   flowlabels label;
   float valmin, valmax;
   histogramdata *histogram;
@@ -270,6 +274,7 @@ void getfilesizelabel(int size, char *sizelabel);
 void initpdf(pdfdata *pdf);
 int getfileinfo(char *filename, char *sourcedir, int *filesize);
 void filecopy(char *destdir, char *file, char *filebase);
+void copyfile(char *destfile, char *sourcefile);
 void makesvd(char *destdir, char *smvfile);
 void trimzeros(char *line);
 void usage(char *prog);
@@ -420,5 +425,7 @@ EXTERN int autozip, make_demo;
 EXTERN int get_bounds, get_slice_bounds, get_plot3d_bounds, get_boundary_bounds;
 #ifdef pp_PART
 EXTERN int get_part_bounds;
+EXTERN int piso;
 #endif
+EXTERN char smvfilecopy[1024];
 

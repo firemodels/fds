@@ -14,6 +14,7 @@ char CNVpart_revision[]="$Revision$";
 #include "egz_stdio.h"
 #include "svzip.h"
 #include "MALLOC.h"
+#include "isodefs.h"
 
 
 
@@ -29,6 +30,7 @@ void endian_switch(void *val, int nval);
 #define READBR(var,size) READ(var,size);if(returncode==0)break;
 #define SEEK returncode=fseek(PARTFILE,4,SEEK_CUR)
 #define SEEKBR SEEK;if(returncode!=0)break
+void part2iso(part *parti);
 
 
 /* ------------------ getpartprop ------------------------ */
@@ -49,15 +51,18 @@ part5prop *getpartprop(char *string){
 void compress_parts(void){
   int i;
   
-  if(get_part_bounds==1){
-    Get_Part_Bounds();
-  }
+ // if(get_part_bounds==1){
+ //   Get_Part_Bounds();
+ // }
   for(i=0;i<npart_files;i++){
     part *parti;
 
     parti = partinfo + i;
-    if(autozip==1&&parti->autozip==0)continue;
-    convert_part(parti);
+    if(piso==1){
+      part2iso(parti);
+    }
+   // if(autozip==1&&parti->autozip==0)continue;
+   // convert_part(parti);
   }
 }
 
@@ -168,14 +173,14 @@ void convert_part(part *parti){
   }
   strcpy(partsizefile_svz,partfile);
   strcat(partsizefile_svz,".sz2");
-  partsizestream=fopen(partsizefile_svz,"w");
+//  partsizestream=fopen(partsizefile_svz,"w");
 
-  if(partsizestream==NULL){
-    printf("The file %s could not be opened for writing\n",partsizefile_svz);
-    fclose(PARTFILEstream);
-    fclose(partstream);
-    return;
-  }
+//  if(partsizestream==NULL){
+//    printf("The file %s could not be opened for writing\n",partsizefile_svz);
+//    fclose(PARTFILEstream);
+//    fclose(partstream);
+//    return;
+ // }
 
   printf("  Compressing %s\n",parti->file);
 
@@ -224,7 +229,7 @@ void convert_part(part *parti){
     sizeafter+=4*(1+nclasses);
     sizebefore+=size;
 
-    fprintf(partsizestream,"%f\n",time);
+//    fprintf(partsizestream,"%f\n",time);
 
     vals=pdata;
     tagdataptr=(unsigned int *)tagdata;
@@ -236,10 +241,10 @@ void convert_part(part *parti){
       part5class *classi;
       int k;
 
-      fprintf(partsizestream," %i ",npoints[j]);
-      if(j<nclasses-1){
-        fprintf(partsizestream," \n");
-      }
+//      fprintf(partsizestream," %i ",npoints[j]);
+  //    if(j<nclasses-1){
+  //      fprintf(partsizestream," \n");
+  //    }
 
       if(npoints[j]==0)continue;
       ybuff = xbuff + npoints[j];
@@ -319,7 +324,7 @@ void convert_part(part *parti){
       fwrite(&char_buffer_compressed,1,ncompressed_char,partstream);
     }
 
-    fprintf(partsizestream," %i %i %i %i\n",(int)ntotal_int,(int)ntotal_char,ncompressed_int,ncompressed_char);
+//    fprintf(partsizestream," %i %i %i %i\n",(int)ntotal_int,(int)ntotal_char,ncompressed_int,ncompressed_char);
 
     data_loc=sizebefore;
     percent_done=100.0*(float)data_loc/(float)parti->filesize;
@@ -343,7 +348,7 @@ void convert_part(part *parti){
 
   FORTclosefortranfile(&unit);
   fclose(partstream);
-  fclose(partsizestream);
+//  fclose(partsizestream);
   {
     char before_label[256],after_label[256],xxx[2];
 
@@ -468,6 +473,255 @@ void Get_Part_Bounds(void){
     printf(" %s min: %f max: %f\n",propi->label.shortlabel,propi->valmin,propi->valmax);
     FREEMEMORY(propi->histogram);
   }
-
 }
+
+#define GETINDEX(ival,xval,xmin,dx,nx) \
+          ival = ((xval)-(xmin))/(dx);\
+          if(ival<0)ival=0;\
+          if(ival>(nx)-1)ival=(nx)-1;
+
+#define IJKVAL(ix,iy,iz) (ix) + (iy)*nx + (iz)*nx*ny
+
+  /* ------------------ part2iso ------------------------ */
+
+void part2iso(part *parti){
+  float *pdata;
+  int *tagdata;
+  int fdsversion;
+
+  int endiandata;
+
+  FILE_SIZE lenfile;
+  int unit=15;
+  int error1;
+  int nclasses;
+  int *nquantities, *npoints, *partindex;
+  float time;
+  int error, size;
+  int nquantities_total;
+  int j;
+  int npartcount, i;
+  mesh *partmesh;
+  int nx, ny, nz;
+  char *isofile, tisofile[1024];
+  char isolonglabel[32], isoshortlabel[32], isounits[32];
+  int nlevels;
+  float levels[1];
+  int isooffset=1, reduce_triangles=1;
+  float *xpltcell, *ypltcell, *zpltcell;
+  int data2flag=1;
+  float *partcount;
+  char smvappen[1024];
+  FILE *SMVAPPEN=NULL;
+
+  endiandata=getendian();
+  if(endianswitch==1)endiandata=1-endiandata;
+
+  NewMemory((void **)&pdata,1000000*sizeof(float));
+  NewMemory((void **)&tagdata,1000000*sizeof(int));
+  NewMemory((void **)&partindex,1000000*sizeof(int));
+
+  lenfile=strlen(parti->file);
+  FORTopenpart(parti->file,&unit,&endiandata,&error1,lenfile);
+
+  FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
+  NewMemory((void **)&nquantities,nclasses*sizeof(int));
+  NewMemory((void **)&npoints,nclasses*sizeof(int));
+
+  FORTgetpartheader2(&unit,&nclasses,nquantities,&size);
+
+  partmesh = parti->partmesh;
+  npartcount = partmesh->ibar*partmesh->jbar*partmesh->kbar;
+  nx = partmesh->ibar;
+  ny = partmesh->jbar;
+  nz = partmesh->kbar;
+  xpltcell = partmesh->xpltcell;
+  ypltcell = partmesh->ypltcell;
+  zpltcell = partmesh->zpltcell;
+
+  NewMemory((void **)&isofile,strlen(parti->file)+5);
+  strcpy(isofile,parti->file);
+  strcat(isofile,".iso");
+
+  NewMemory((void **)&tisofile,strlen(parti->file)+6);
+  strcpy(tisofile,parti->file);
+  strcat(tisofile,".tiso");
+
+  strcpy(isolonglabel,"particle boundary");
+  strcpy(isoshortlabel,"pbound");
+  strcpy(isounits,"");
+
+  nlevels=1;
+  levels[0]=0.5;
+
+  for(i=0;i<npart5propinfo;i++){
+    part5prop *propi;
+
+    propi = part5propinfo + i;
+    propi->used=0;
+  }
+  for(j=0;j<nclasses;j++){
+    int k;
+
+    for(k=0;k<nquantities[j];k++){
+      part5class *classj;
+      part5prop *propi;
+      flowlabels *labels;
+
+      classj=parti->classptr[j];
+      propi=getpartprop(classj->labels[k].shortlabel);
+      propi->used=1;
+    }
+  }
+
+  NewMemory((void **)&partcount,npartcount*sizeof(float));
+
+  for(i=0;i<npart5propinfo;i++){
+    part5prop *propi;
+
+    propi = part5propinfo + i;
+    if(propi->used==0)continue;
+
+    NewMemory((void **)&propi->partvals,npartcount*sizeof(float));
+  }
+
+  CCisoheader(isofile,isolonglabel,isoshortlabel,isounits,levels,&nlevels,&error);
+
+  SMVAPPEN=fopen(smvfilecopy,"a");
+
+  fprintf(SMVAPPEN,"ISOF\n");
+  fprintf(SMVAPPEN," %s\n",isofile);
+  fprintf(SMVAPPEN," %s\n",isolonglabel);
+  fprintf(SMVAPPEN," %s\n",isoshortlabel);
+  fprintf(SMVAPPEN," %s\n",isounits);
+
+  for(i=0;i<npart5propinfo;i++){
+    part5prop *propi;
+    flowlabels *labels;
+
+    propi = part5propinfo + i;
+    if(propi->used==0)continue;
+
+    labels = &propi->label;
+    strcpy(propi->isofilename,parti->file);
+    strcat(propi->isofilename,"_");
+    strcat(propi->isofilename,labels->shortlabel);
+    strcat(propi->isofilename,".tiso");
+    CCtisoheader(propi->isofilename, labels->longlabel, labels->shortlabel, labels->unit, levels, &nlevels, &error);
+
+    fprintf(SMVAPPEN,"TISOF\n");
+    fprintf(SMVAPPEN," %s\n",propi->isofilename);
+    fprintf(SMVAPPEN," %s\n",isolonglabel);
+    fprintf(SMVAPPEN," %s\n",isoshortlabel);
+    fprintf(SMVAPPEN," %s\n",isounits);
+    fprintf(SMVAPPEN," %s\n",labels->longlabel);
+    fprintf(SMVAPPEN," %s\n",labels->shortlabel);
+    fprintf(SMVAPPEN," %s\n",labels->unit);
+  }
+  fclose(SMVAPPEN);
+
+  error=0;
+  for(;;){
+    float *x, *y, *z, *vals;
+    int k;
+
+    FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time,tagdata,pdata,&size,&error);
+    printf("time=%f\n",time);
+    if(error!=0)break;
+
+    for(j=0;j<npartcount;j++){
+      partcount[j]=0.0;
+    }
+    for(i=0;i<npart5propinfo;i++){
+      part5prop *propi;
+
+      propi = part5propinfo + i;
+      if(propi->used==0)continue;
+
+      for(j=0;j<npartcount;j++){
+        propi->partvals[j]=0.0;
+      }
+    }
+
+    vals=pdata;
+    for(j=0;j<nclasses;j++){
+      part5class *classj;
+
+      if(npoints[j]==0)continue;
+      classj=parti->classptr[j];
+      x = vals;
+      y = x + npoints[j];
+      z = y + npoints[j];
+      vals = z + npoints[j];
+
+// construct 3D particle density array
+
+      for(i=0;i<npoints[j];i++){
+        int ix, iy, iz;
+        int ijkval;
+
+        GETINDEX(ix,x[i],partmesh->xbar0,partmesh->dx,partmesh->ibar);
+        GETINDEX(iy,y[i],partmesh->ybar0,partmesh->dy,partmesh->jbar);
+        GETINDEX(iz,z[i],partmesh->zbar0,partmesh->dz,partmesh->kbar);
+        ijkval = IJKVAL(ix,iy,iz);
+        partindex[i]=ijkval;
+        partcount[ijkval]++;
+      }
+      for(k=0;k<nquantities[j];k++){
+        part5prop *propi;
+        int data2flag=1;
+        char *vallabel;
+          
+        propi=getpartprop(classj->labels[k].shortlabel);
+
+        for(i=0;i<npoints[j];i++){
+          int ix, iy, iz;
+          int ijkval;
+
+          ijkval = partindex[i];
+          propi->partvals[ijkval]+=vals[i];
+        }
+        for(i=0;i<npartcount;i++){
+          if(partcount[i]>0){
+            propi->partvals[i]/=partcount[i];
+          }
+        }
+        vals += npoints[j];
+      }
+    }
+    CCisosurface2file(isofile, &time, partcount, NULL, levels, &nlevels,
+        xpltcell, &nx, ypltcell, &ny, zpltcell, &nz,
+        &isooffset, &reduce_triangles, &error);
+
+    for(i=0;i<npart5propinfo;i++){
+      part5prop *propi;
+
+      propi = part5propinfo + i;
+      if(propi->used==0)continue;
+
+      CCisosurfacet2file(propi->isofilename, &time, partcount, &data2flag, propi->partvals, NULL, levels, &nlevels,
+            xpltcell, &nx, ypltcell, &ny, zpltcell, &nz,
+            &isooffset, &reduce_triangles, &error);
+    }
+  }
+
+  FREEMEMORY(nquantities);
+  FREEMEMORY(npoints);
+  FREEMEMORY(partcount);
+  FREEMEMORY(isofile);
+  FORTclosefortranfile(&unit);
+
+  FREEMEMORY(pdata);
+  FREEMEMORY(tagdata);
+  FREEMEMORY(partindex);
+
+  for(i=0;i<npart5propinfo;i++){
+    part5prop *propi;
+
+    propi = part5propinfo + i;
+    if(propi->used==0)continue;
+    FREEMEMORY(propi->partvals);
+  }
+}
+
 #endif
