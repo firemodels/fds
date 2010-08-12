@@ -211,22 +211,12 @@ DO K=1,KBAR
                ENDIF
             ENDIF
  
-            EXPERIMENTAL_IF: IF (FIXED_RESIDENCE_TIME<-9.8_EB) THEN
+            EXPERIMENTAL_IF: IF (FDS6) THEN
                ! experimental
-               ACCEL = GRAV
-               !ACCEL = 0.5_EB*SQRT( (FVX(I-1,J,K)+FVX(I,J,K))**2 + &
-               !                     (FVY(I,J-1,K)+FVY(I,J,K))**2 + &
-               !                     (FVZ(I,J,K-1)+FVZ(I,J,K))**2    ) + 1.E-10_EB
-               MIX_TIME(I,J,K)=C_EDC*SQRT(DELTA/ACCEL)
+               MIX_TIME(I,J,K)=MIN(DELTA**2/0.1_EB,SQRT(DELTA/GRAV))
             ELSE EXPERIMENTAL_IF
                ! FDS 5 default
-               IF (DYNSMAG) THEN
-                  CS2 = C_DYNSMAG(I,J,K)**2
-               ELSE
-                  CS2 = CSMAG**2
-               ENDIF
-               DELTA2 = DELTA**2
-               MIX_TIME(I,J,K)=MAX(DT,C_EDC*SC*RHO(I,J,K)*CS2*DELTA2/MU(I,J,K))
+               MIX_TIME(I,J,K)=C_EDC*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)
             ENDIF EXPERIMENTAL_IF
             
          ENDIF LES_IF

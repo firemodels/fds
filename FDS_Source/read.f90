@@ -2055,8 +2055,6 @@ IF (DNS) HRRPUV_AVERAGE     = 0._EB
 IF (FDS6) THEN
    HRRPUV_AVERAGE       = 2500._EB
    HRRPUA_SHEET         = 200._EB
-   FIXED_RESIDENCE_TIME = -100._EB
-   C_EDC                = 1._EB
 ENDIF
 ID                          = 'null'
 Y_F_INLET                   = 1._EB
