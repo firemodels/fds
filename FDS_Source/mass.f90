@@ -24,10 +24,11 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,ISOTHERMAL,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN_BOUNDARY,INTERPOLATED_BOUNDARY, &
                             PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,DEBUG_OPENMP,NOBIAS
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: FXYZ,PMDT,UDRHODN,TNOW
+REAL(EB) :: FXYZ,PMDT,UDRHODN,TNOW,ZZ(4)=0._EB
 INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR
 REAL(EB), POINTER, DIMENSION(:) :: UWP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UDRHODX,VDRHODY,WDRHODZ,EPSX,EPSY,EPSZ
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UDRHODX,VDRHODY,WDRHODZ,EPSX,EPSY,EPSZ, &
+                                       RHOYYP=>NULL(),FX=>NULL(),FY=>NULL(),FZ=>NULL()
  
 IF (EVACUATION_ONLY(NM)) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
@@ -79,75 +80,151 @@ ENDDO
  
 NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
    
-   !$OMP SINGLE
-   UDRHODX => WORK4
-   VDRHODY => WORK5
-   WDRHODZ => WORK6
-   !$OMP END SINGLE
+   FLUX_LIMITER_IF: IF (FLUX_LIMITER==-1) THEN ! FDS 5 default
    
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_02'
-            UDRHODX(I,J,K) = UU(I,J,K)*(RHOP(I+1,J,K)-RHOP(I,J,K))*RDXN(I)
-            VDRHODY(I,J,K) = VV(I,J,K)*(RHOP(I,J+1,K)-RHOP(I,J,K))*RDYN(J)
-            WDRHODZ(I,J,K) = WW(I,J,K)*(RHOP(I,J,K+1)-RHOP(I,J,K))*RDZN(K)
+      !$OMP SINGLE
+      UDRHODX => WORK4
+      VDRHODY => WORK5
+      WDRHODZ => WORK6
+      !$OMP END SINGLE
+   
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_02'
+               UDRHODX(I,J,K) = UU(I,J,K)*(RHOP(I+1,J,K)-RHOP(I,J,K))*RDXN(I)
+               VDRHODY(I,J,K) = VV(I,J,K)*(RHOP(I,J+1,K)-RHOP(I,J,K))*RDYN(J)
+               WDRHODZ(I,J,K) = WW(I,J,K)*(RHOP(I,J,K+1)-RHOP(I,J,K))*RDZN(K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-   !$OMP END DO
+      !$OMP END DO
 
-   !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR,UDRHODN)
-   WLOOP: DO IW=1,NWC
-      !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_03'
-      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
-          BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WLOOP
-      II  = IJKW(1,IW) 
-      IIG = IJKW(6,IW)
-      JJ  = IJKW(2,IW) 
-      JJG = IJKW(7,IW)
-      KK  = IJKW(3,IW) 
-      KKG = IJKW(8,IW)
-      IOR = IJKW(4,IW)
-      UDRHODN = 2._EB*UWP(IW)*(RHO_F(IW)-RHOP(IIG,JJG,KKG))*RDN(IW)
-      SELECT CASE(IOR)
-         CASE( 1)
-            UDRHODX(II,JJ,KK)   = UDRHODN
-         CASE(-1) 
-            UDRHODX(II-1,JJ,KK) = UDRHODN
-         CASE( 2) 
-            VDRHODY(II,JJ,KK)   = UDRHODN
-         CASE(-2) 
-            VDRHODY(II,JJ-1,KK) = UDRHODN
-         CASE( 3) 
-            WDRHODZ(II,JJ,KK)   = UDRHODN
-         CASE(-3) 
-            WDRHODZ(II,JJ,KK-1) = UDRHODN
-      END SELECT
-   ENDDO WLOOP
-   !$OMP END DO
+      !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR,UDRHODN)
+      WLOOP: DO IW=1,NWC
+         !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_03'
+         IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
+             BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WLOOP
+         II  = IJKW(1,IW) 
+         IIG = IJKW(6,IW)
+         JJ  = IJKW(2,IW) 
+         JJG = IJKW(7,IW)
+         KK  = IJKW(3,IW) 
+         KKG = IJKW(8,IW)
+         IOR = IJKW(4,IW)
+         UDRHODN = 2._EB*UWP(IW)*(RHO_F(IW)-RHOP(IIG,JJG,KKG))*RDN(IW)
+         SELECT CASE(IOR)
+            CASE( 1)
+               UDRHODX(II,JJ,KK)   = UDRHODN
+            CASE(-1) 
+               UDRHODX(II-1,JJ,KK) = UDRHODN
+            CASE( 2) 
+               VDRHODY(II,JJ,KK)   = UDRHODN
+            CASE(-2) 
+               VDRHODY(II,JJ-1,KK) = UDRHODN
+            CASE( 3) 
+               WDRHODZ(II,JJ,KK)   = UDRHODN
+            CASE(-3) 
+               WDRHODZ(II,JJ,KK-1) = UDRHODN
+         END SELECT
+      ENDDO WLOOP
+      !$OMP END DO
 
-   !$OMP WORKSHARE
-   FRHO = 0._EB
-   !$OMP END WORKSHARE
+      !$OMP WORKSHARE
+      FRHO = 0._EB
+      !$OMP END WORKSHARE
    
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,FXYZ)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            FXYZ   = .5_EB*(UDRHODX(I,J,K)  *(1._EB-EPSX(I,J,K))   +  &
-                            UDRHODX(I-1,J,K)*(1._EB+EPSX(I-1,J,K)) +  &
-                            VDRHODY(I,J,K)  *(1._EB-EPSY(I,J,K))   +  &
-                            VDRHODY(I,J-1,K)*(1._EB+EPSY(I,J-1,K)) +  &
-                            WDRHODZ(I,J,K)  *(1._EB-EPSZ(I,J,K))   +  &
-                            WDRHODZ(I,J,K-1)*(1._EB+EPSZ(I,J,K-1)) )
-            FRHO(I,J,K) = FXYZ + RHOP(I,J,K)*DP(I,J,K)
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,FXYZ)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               FXYZ   = .5_EB*(UDRHODX(I,J,K)  *(1._EB-EPSX(I,J,K))   +  &
+                               UDRHODX(I-1,J,K)*(1._EB+EPSX(I-1,J,K)) +  &
+                               VDRHODY(I,J,K)  *(1._EB-EPSY(I,J,K))   +  &
+                               VDRHODY(I,J-1,K)*(1._EB+EPSY(I,J-1,K)) +  &
+                               WDRHODZ(I,J,K)  *(1._EB-EPSZ(I,J,K))   +  &
+                               WDRHODZ(I,J,K-1)*(1._EB+EPSZ(I,J,K-1)) )
+               FRHO(I,J,K) = FXYZ + RHOP(I,J,K)*DP(I,J,K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-   !$OMP END DO
+      !$OMP END DO
+   
+   ELSE FLUX_LIMITER_IF
+   
+      !$OMP SINGLE
+      FX=>WORK4
+      FY=>WORK5
+      FZ=>WORK6
+      !$OMP END SINGLE
+   
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+            
+               ZZ(2) = RHOP(I,J,K)
+               ZZ(3) = RHOP(I+1,J,K)
+               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,1)
+               
+               ZZ(2) = RHOP(I,J,K)
+               ZZ(3) = RHOP(I,J+1,K)
+               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,1)
+               
+               ZZ(2) = RHOP(I,J,K)
+               ZZ(3) = RHOP(I,J,K+1)
+               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,1)
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+      
+      !$OMP DO PRIVATE(IW,IIG,JJG,KKG,IOR)
+      WLOOP_FL: DO IW=1,NWC
+         IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
+             BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WLOOP_FL
+         II  = IJKW(1,IW) 
+         JJ  = IJKW(2,IW)
+         KK  = IJKW(3,IW)
+         IOR = IJKW(4,IW)
+         SELECT CASE(IOR)
+            CASE( 1)
+               FX(II,JJ,KK)   = UU(II,JJ,KK)*RHO_F(IW)
+            CASE(-1) 
+               FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*RHO_F(IW)
+            CASE( 2) 
+               FY(II,JJ,KK)   = VV(II,JJ,KK)*RHO_F(IW)
+            CASE(-2) 
+               FY(II,JJ-1,KK) = VV(II,JJ-1,KK)*RHO_F(IW)
+            CASE( 3) 
+               FZ(II,JJ,KK)   = WW(II,JJ,KK)*RHO_F(IW)
+            CASE(-3) 
+               FZ(II,JJ,KK-1) = WW(II,JJ,KK-1)*RHO_F(IW)
+         END SELECT
+      ENDDO WLOOP_FL
+      !$OMP END DO
+   
+      !$OMP WORKSHARE
+      FRHO = 0._EB
+      !$OMP END WORKSHARE
+   
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               FRHO(I,J,K) = (FX(I,J,K)-FX(I-1,J,K))*RDX(I) &
+                           + (FY(I,J,K)-FY(I,J-1,K))*RDY(J) &
+                           + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+      
+   ENDIF FLUX_LIMITER_IF
+   
 ENDIF NOT_ISOTHERMAL_IF
 !$OMP END PARALLEL 
 
@@ -157,77 +234,160 @@ ENDIF NOT_ISOTHERMAL_IF
 IF (N_SPECIES > 0) THEN
    IF (PREDICTOR) YYP => YY
    IF (CORRECTOR) YYP => YYS
-   UDRHODX => WORK4
-   VDRHODY => WORK5
-   WDRHODZ => WORK6
+   !UDRHODX => WORK4
+   !VDRHODY => WORK5
+   !WDRHODZ => WORK6
+   IF (FLUX_LIMITER/=-1) RHOYYP => WORK7
 ENDIF
  
 SPECIES_LOOP: DO N=1,N_SPECIES
 
-   !$OMP PARALLEL
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_04'
-            UDRHODX(I,J,K) = UU(I,J,K)*( RHOP(I+1,J,K)*YYP(I+1,J,K,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDXN(I)
-            VDRHODY(I,J,K) = VV(I,J,K)*( RHOP(I,J+1,K)*YYP(I,J+1,K,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDYN(J)
-            WDRHODZ(I,J,K) = WW(I,J,K)*( RHOP(I,J,K+1)*YYP(I,J,K+1,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDZN(K)
+   FLUX_LIMITER_IF2: IF (FLUX_LIMITER==-1) THEN
+   
+      !$OMP SINGLE
+      UDRHODX => WORK4
+      VDRHODY => WORK5
+      WDRHODZ => WORK6
+      !$OMP END SINGLE
+
+      !$OMP PARALLEL
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_04'
+               UDRHODX(I,J,K) = UU(I,J,K)*( RHOP(I+1,J,K)*YYP(I+1,J,K,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDXN(I)
+               VDRHODY(I,J,K) = VV(I,J,K)*( RHOP(I,J+1,K)*YYP(I,J+1,K,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDYN(J)
+               WDRHODZ(I,J,K) = WW(I,J,K)*( RHOP(I,J,K+1)*YYP(I,J,K+1,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDZN(K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-   !$OMP END DO
+      !$OMP END DO
  
-   ! Correct U d(RHO*Y)/dx etc. on boundaries
+      ! Correct U d(RHO*Y)/dx etc. on boundaries
 
-   !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR,UDRHODN) 
-   WLOOP2: DO IW=1,NWC
-      !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_05'
-      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
-          BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WLOOP2
-      II  = IJKW(1,IW) 
-      IIG = IJKW(6,IW)
-      JJ  = IJKW(2,IW) 
-      JJG = IJKW(7,IW)
-      KK  = IJKW(3,IW) 
-      KKG = IJKW(8,IW)
-      IOR = IJKW(4,IW)
-      UDRHODN = 2._EB*UWP(IW)*( RHO_F(IW)*YY_F(IW,N) - RHOP(IIG,JJG,KKG)*YYP(IIG,JJG,KKG,N) )*RDN(IW)
-      SELECT CASE(IOR)
-         CASE( 1)
-            UDRHODX(II,JJ,KK)   = UDRHODN
-         CASE(-1)
-            UDRHODX(II-1,JJ,KK) = UDRHODN
-         CASE( 2)
-            VDRHODY(II,JJ,KK)   = UDRHODN
-         CASE(-2) 
-            VDRHODY(II,JJ-1,KK) = UDRHODN
-         CASE( 3) 
-            WDRHODZ(II,JJ,KK)   = UDRHODN
-         CASE(-3) 
-            WDRHODZ(II,JJ,KK-1) = UDRHODN
-      END SELECT
-   ENDDO WLOOP2
-   !$OMP END DO
+      !$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR,UDRHODN) 
+      WLOOP2: DO IW=1,NWC
+         !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_05'
+         IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
+             BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WLOOP2
+         II  = IJKW(1,IW) 
+         IIG = IJKW(6,IW)
+         JJ  = IJKW(2,IW) 
+         JJG = IJKW(7,IW)
+         KK  = IJKW(3,IW) 
+         KKG = IJKW(8,IW)
+         IOR = IJKW(4,IW)
+         UDRHODN = 2._EB*UWP(IW)*( RHO_F(IW)*YY_F(IW,N) - RHOP(IIG,JJG,KKG)*YYP(IIG,JJG,KKG,N) )*RDN(IW)
+         SELECT CASE(IOR)
+            CASE( 1)
+               UDRHODX(II,JJ,KK)   = UDRHODN
+            CASE(-1)
+               UDRHODX(II-1,JJ,KK) = UDRHODN
+            CASE( 2)
+               VDRHODY(II,JJ,KK)   = UDRHODN
+            CASE(-2) 
+               VDRHODY(II,JJ-1,KK) = UDRHODN
+            CASE( 3) 
+               WDRHODZ(II,JJ,KK)   = UDRHODN
+            CASE(-3) 
+               WDRHODZ(II,JJ,KK-1) = UDRHODN
+         END SELECT
+      ENDDO WLOOP2
+      !$OMP END DO
  
-  ! Sum up the convective and diffusive terms in the transport equation and store in DEL_RHO_D_DEL_Y
+     ! Sum up the convective and diffusive terms in the transport equation and store in DEL_RHO_D_DEL_Y
 
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,FXYZ)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            FXYZ   = .5_EB*(UDRHODX(I,J,K)  *(1._EB-EPSX(I,J,K))   +  &
-                            UDRHODX(I-1,J,K)*(1._EB+EPSX(I-1,J,K)) +  &
-                            VDRHODY(I,J,K)  *(1._EB-EPSY(I,J,K))   +  &
-                            VDRHODY(I,J-1,K)*(1._EB+EPSY(I,J-1,K)) +  &
-                            WDRHODZ(I,J,K)  *(1._EB-EPSZ(I,J,K))   +  &
-                            WDRHODZ(I,J,K-1)*(1._EB+EPSZ(I,J,K-1)) ) 
-            DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N) + FXYZ + RHOP(I,J,K)*YYP(I,J,K,N)*DP(I,J,K) 
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,FXYZ)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               FXYZ   = .5_EB*(UDRHODX(I,J,K)  *(1._EB-EPSX(I,J,K))   +  &
+                               UDRHODX(I-1,J,K)*(1._EB+EPSX(I-1,J,K)) +  &
+                               VDRHODY(I,J,K)  *(1._EB-EPSY(I,J,K))   +  &
+                               VDRHODY(I,J-1,K)*(1._EB+EPSY(I,J-1,K)) +  &
+                               WDRHODZ(I,J,K)  *(1._EB-EPSZ(I,J,K))   +  &
+                               WDRHODZ(I,J,K-1)*(1._EB+EPSZ(I,J,K-1)) ) 
+               DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N) + FXYZ + RHOP(I,J,K)*YYP(I,J,K,N)*DP(I,J,K) 
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
-   !$OMP END DO
-   !$OMP END PARALLEL
+      !$OMP END DO
+      !$OMP END PARALLEL
+   
+   ELSE FLUX_LIMITER_IF2
+   
+      !$OMP SINGLE
+      FX=>WORK4
+      FY=>WORK5
+      FZ=>WORK6
+      !$OMP END SINGLE
+   
+      !$OMP WORKSHARE
+      RHOYYP=RHOP*YYP(:,:,:,N)
+      !$OMP END WORKSHARE
+   
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+            
+               ZZ(2) = RHOYYP(I,J,K)
+               ZZ(3) = RHOYYP(I+1,J,K)
+               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,1)
+               
+               ZZ(2) = RHOYYP(I,J,K)
+               ZZ(3) = RHOYYP(I,J+1,K)
+               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,1)
+               
+               ZZ(2) = RHOYYP(I,J,K)
+               ZZ(3) = RHOYYP(I,J,K+1)
+               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,1)
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+      
+      !$OMP DO PRIVATE(IW,IIG,JJG,KKG,IOR)
+      WLOOP2_FL: DO IW=1,NWC
+         IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
+             BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WLOOP2_FL
+         II  = IJKW(1,IW) 
+         JJ  = IJKW(2,IW)
+         KK  = IJKW(3,IW)
+         IOR = IJKW(4,IW)
+         SELECT CASE(IOR)
+            CASE( 1)
+               FX(II,JJ,KK)   = UU(II,JJ,KK)*RHO_F(IW)*YY_F(IW,N)
+            CASE(-1) 
+               FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*RHO_F(IW)*YY_F(IW,N)
+            CASE( 2) 
+               FY(II,JJ,KK)   = VV(II,JJ,KK)*RHO_F(IW)*YY_F(IW,N)
+            CASE(-2) 
+               FY(II,JJ-1,KK) = VV(II,JJ-1,KK)*RHO_F(IW)*YY_F(IW,N)
+            CASE( 3) 
+               FZ(II,JJ,KK)   = WW(II,JJ,KK)*RHO_F(IW)*YY_F(IW,N)
+            CASE(-3) 
+               FZ(II,JJ,KK-1) = WW(II,JJ,KK-1)*RHO_F(IW)*YY_F(IW,N)
+         END SELECT
+      ENDDO WLOOP2_FL
+      !$OMP END DO
+   
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N)      & ! from previous time step
+                                        + (FX(I,J,K)-FX(I-1,J,K))*RDX(I) &
+                                        + (FY(I,J,K)-FY(I,J-1,K))*RDY(J) &
+                                        + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   
+   ENDIF FLUX_LIMITER_IF2
  
 ENDDO SPECIES_LOOP
  
@@ -1215,7 +1375,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
    ENDDO
    
    IF (CLIP_MASS_FRACTION) THEN
-      YYS(1:IBAR,1:JBAR,1:KBAR,1:N) = MAX(0._EB,MIN(1._EB,YYS(1:IBAR,1:JBAR,1:KBAR,1:N)))
+      YYS(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES) = MAX(0._EB,MIN(1._EB,YYS(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES)))
    ELSE
       CALL CHECK_MASS_FRACTION
    ENDIF
@@ -1326,16 +1486,7 @@ ELSEIF (CORRECTOR) THEN
    ENDDO
    
    IF (CLIP_MASS_FRACTION) THEN
-      DO N=1,N_SPECIES
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  YY(I,J,K,N) = MAX(YY(I,J,K,N),0._EB)
-                  YY(I,J,K,N) = MIN(YY(I,J,K,N),1._EB)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
+      YY(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES) = MAX(0._EB,MIN(1._EB,YY(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES)))
    ELSE
       CALL CHECK_MASS_FRACTION
    ENDIF
