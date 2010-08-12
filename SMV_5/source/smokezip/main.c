@@ -70,6 +70,7 @@ int main(int argc, char **argv){
   get_boundary_bounds=0;
 #ifdef pp_PART
   get_part_bounds=0;
+  piso=0;
 #endif
 #ifdef pp_LIGHT
   make_lighting_file=0;
@@ -193,7 +194,12 @@ int main(int argc, char **argv){
         break;
 #endif
       case 'p':
-        overwrite_plot3d=1;
+        if(strcmp(arg,"-piso")==0){
+          piso=1;
+        }
+        else{
+          overwrite_plot3d=1;
+        }
         break;
       case 'f':
         overwrite_b=1;
@@ -311,6 +317,16 @@ int main(int argc, char **argv){
     ext=filebase+filelen-4;
     if(strcmp(ext,".smv")==0)addext=0;
   }
+  if(piso==1){
+    char srcfile[1024];
+
+    strcpy(srcfile,smvfile);
+    if(addext==1)strcat(srcfile,".smv");
+    strcpy(smvfilecopy,smvfile);
+    strcat(smvfilecopy,"_smvzip.smv");
+    copyfile(smvfilecopy,srcfile);
+  }
+
   if(addext==1)strcat(smvfile,".smv");
   
   // construct ini file name
@@ -478,8 +494,39 @@ void filecopy(char *destdir, char *file, char *filebase){
     if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
     if(eof==1)break;
   }
+  fclose(streamin);
+  fclose(streamout);
 }
        
+/* ------------------ copyfile ------------------------ */
+
+void copyfile(char *destfile, char *sourcefile){
+  char buffer[SIZEBUFFER];
+  FILE *streamin;
+  FILE *streamout;
+  size_t chars_in;
+
+  streamin=fopen(sourcefile,"rb");
+  if(streamin==NULL)return;
+
+  streamout=fopen(destfile,"wb");
+  if(streamout==NULL){
+    fclose(streamin);
+    return;
+  }
+  printf("  Copying %s to %s\n",sourcefile,destfile);
+  for(;;){
+    int eof;
+       
+    eof=0;
+    chars_in=fread(buffer,1,SIZEBUFFER,streamin);
+    if(chars_in!=SIZEBUFFER)eof=1;
+    if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
+    if(eof==1)break;
+  }
+  fclose(streamin);
+  fclose(streamout);
+}
        
 /* ------------------ makesvd ------------------------ */
 
@@ -555,6 +602,7 @@ void usage(char *prog){
   printf("  -p  - overwrites PLOT3D files\n");
 #ifdef pp_PART
   printf("  -P  - overwrites particle files\n");
+  printf("  -piso - generate an isosurface file from particle data\n");
 #endif
   printf("  -f  - overwrites all compressed files\n");
   printf("  -bounds - estimate data bounds for all file types\n");
