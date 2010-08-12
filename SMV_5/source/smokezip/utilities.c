@@ -101,6 +101,7 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
 #define BUFFERSIZE 255
   char buffer[BUFFERSIZE];
   unsigned int len;
+  char *buffer2;
 
   flowlabel->longlabel=NULL;
   flowlabel->shortlabel=NULL;
@@ -110,26 +111,29 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
 
   len=strlen(buffer);
   buffer[len-1]='\0';
-  trim(buffer);
-  len=strlen(buffer);
+  buffer2=trim_front(buffer);
+  trim(buffer2);
+  len=strlen(buffer2);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->longlabel,buffer);
+  STRCPY(flowlabel->longlabel,buffer2);
 
   if(fgets(buffer,BUFFERSIZE,stream)==NULL)return 2;
   len=strlen(buffer);
   buffer[len-1]='\0';
-  trim(buffer);
-  len=strlen(buffer);
+  buffer2=trim_front(buffer);
+  trim(buffer2);
+  len=strlen(buffer2);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->shortlabel,buffer);
+  STRCPY(flowlabel->shortlabel,buffer2);
 
   if(fgets(buffer,BUFFERSIZE,stream)==NULL)return 2;
   len=strlen(buffer);
   buffer[len-1]='\0';
-  trim(buffer);
-  len=strlen(buffer);
+  buffer2=trim_front(buffer);
+  trim(buffer2);
+  len=strlen(buffer2);
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->unit,buffer);
+  STRCPY(flowlabel->unit,buffer2);
   return 0;
 }
 
