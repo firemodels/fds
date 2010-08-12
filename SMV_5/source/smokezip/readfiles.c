@@ -616,7 +616,9 @@ int readsmv(char *smvfile){
           part5propi=getpartprop(labelj->shortlabel);
           if(part5propi==NULL){
             part5propi = part5propinfo + npart5propinfo;
+            part5propi->label.longlabel=labelj->longlabel;
             part5propi->label.shortlabel=labelj->shortlabel;
+            part5propi->label.unit=labelj->unit;
             part5propi->setvalmin=0;
             part5propi->valmin=1.0;
             part5propi->setvalmax=0;
@@ -1019,6 +1021,7 @@ int readsmv(char *smvfile){
       mesh *meshi;
       int ii, jj, kk;
       float *xplt, *yplt, *zplt;
+      float *xpltcell, *ypltcell, *zpltcell;
 #ifdef pp_LIGHT
       float dx, dy, dz;
       float pi, rad;
@@ -1053,6 +1056,14 @@ int readsmv(char *smvfile){
       xplt[meshi->ibar]=meshi->xbar;
       CheckMemory;
 
+      meshi->xpltcell=NULL;
+      NewMemory((void **)&meshi->xpltcell,meshi->ibar*sizeof(float));
+      xpltcell = meshi->xpltcell;
+      for(ii=0;ii<meshi->ibar;ii++){
+        xpltcell[ii] = meshi->xbar0 + (ii+0.5)*meshi->dx;
+      }
+      CheckMemory;
+
       meshi->yplt=NULL;
       NewMemory((void **)&meshi->yplt,(meshi->jbar+1)*sizeof(float));
       yplt = meshi->yplt;
@@ -1062,6 +1073,14 @@ int readsmv(char *smvfile){
       yplt[meshi->jbar]=meshi->ybar;
       CheckMemory;
 
+      meshi->ypltcell=NULL;
+      NewMemory((void **)&meshi->ypltcell,meshi->jbar*sizeof(float));
+      ypltcell = meshi->ypltcell;
+      for(ii=0;ii<meshi->jbar;ii++){
+        ypltcell[ii] = meshi->ybar0 + (ii+0.5)*meshi->dy;
+      }
+      CheckMemory;
+
       meshi->zplt=NULL;
       NewMemory((void **)&meshi->zplt,(meshi->kbar+1)*sizeof(float));
       zplt = meshi->zplt;
@@ -1069,6 +1088,14 @@ int readsmv(char *smvfile){
         zplt[kk] = meshi->zbar0 + kk*meshi->dz;
       }
       zplt[meshi->kbar]=meshi->zbar;
+      CheckMemory;
+
+      meshi->zpltcell=NULL;
+      NewMemory((void **)&meshi->zpltcell,meshi->kbar*sizeof(float));
+      zpltcell = meshi->zpltcell;
+      for(ii=0;ii<meshi->kbar;ii++){
+        zpltcell[ii] = meshi->zbar0 + (ii+0.5)*meshi->dz;
+      }
       CheckMemory;
 
 #ifdef pp_LIGHT
