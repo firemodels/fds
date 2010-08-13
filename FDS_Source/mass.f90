@@ -24,8 +24,8 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,ISOTHERMAL,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN_BOUNDARY,INTERPOLATED_BOUNDARY, &
                             PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,DEBUG_OPENMP,NOBIAS
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: FXYZ,PMDT,UDRHODN,TNOW,ZZ(4)=0._EB
-INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR
+REAL(EB) :: FXYZ,PMDT,UDRHODN,TNOW,ZZ(4)
+INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,ICM,ICP,FL
 REAL(EB), POINTER, DIMENSION(:) :: UWP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UDRHODX,VDRHODY,WDRHODZ,EPSX,EPSY,EPSZ, &
                                        RHOYYP=>NULL(),FX=>NULL(),FY=>NULL(),FZ=>NULL()
@@ -165,17 +165,24 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
          DO J=0,JBAR
             DO I=0,IBAR
             
-               ZZ(2) = RHOP(I,J,K)
-               ZZ(3) = RHOP(I+1,J,K)
-               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,1)
+               ZZ(1:4) = RHOP(I-1:I+2,J,K)
+               FL = FLUX_LIMITER
+               ICM = CELL_INDEX(I-1,J,K)
+               ICP = CELL_INDEX(I+2,J,K)
+               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
+               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FL)*R(I)
                
-               ZZ(2) = RHOP(I,J,K)
-               ZZ(3) = RHOP(I,J+1,K)
-               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,1)
+               ZZ(1:4) = RHOP(I,J-1:J+2,K)
+               ICM = CELL_INDEX(I,J-1,K)
+               ICP = CELL_INDEX(I,J+2,K)
+               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
+               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FL)
                
-               ZZ(2) = RHOP(I,J,K)
-               ZZ(3) = RHOP(I,J,K+1)
-               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,1)
+               ZZ(1:4) = RHOP(I,J,K-1:K+2)
+               ICM = CELL_INDEX(I,J,K-1)
+               ICP = CELL_INDEX(I,J,K+2)
+               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
+               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FL)
             ENDDO
          ENDDO
       ENDDO
@@ -191,9 +198,9 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
          IOR = IJKW(4,IW)
          SELECT CASE(IOR)
             CASE( 1)
-               FX(II,JJ,KK)   = UU(II,JJ,KK)*RHO_F(IW)
+               FX(II,JJ,KK)   = UU(II,JJ,KK)*RHO_F(IW)*R(II)
             CASE(-1) 
-               FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*RHO_F(IW)
+               FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*RHO_F(IW)*R(II-1)
             CASE( 2) 
                FY(II,JJ,KK)   = VV(II,JJ,KK)*RHO_F(IW)
             CASE(-2) 
@@ -215,8 +222,8 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               FRHO(I,J,K) = (FX(I,J,K)-FX(I-1,J,K))*RDX(I) &
-                           + (FY(I,J,K)-FY(I,J-1,K))*RDY(J) &
+               FRHO(I,J,K) = (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
+                           + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
                            + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
@@ -332,17 +339,25 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          DO J=0,JBAR
             DO I=0,IBAR
             
-               ZZ(2) = RHOYYP(I,J,K)
-               ZZ(3) = RHOYYP(I+1,J,K)
-               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,1)
+               ZZ(1:4) = RHOYYP(I-1:I+2,J,K)
+               FL = FLUX_LIMITER
+               ICM = CELL_INDEX(I-1,J,K)
+               ICP = CELL_INDEX(I+2,J,K)
+               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
+               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FL)*R(I)
                
-               ZZ(2) = RHOYYP(I,J,K)
-               ZZ(3) = RHOYYP(I,J+1,K)
-               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,1)
+               ZZ(1:4) = RHOYYP(I,J-1:J+2,K)
+               ICM = CELL_INDEX(I,J-1,K)
+               ICP = CELL_INDEX(I,J+2,K)
+               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
+               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FL)
                
-               ZZ(2) = RHOYYP(I,J,K)
-               ZZ(3) = RHOYYP(I,J,K+1)
-               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,1)
+               ZZ(1:4) = RHOYYP(I,J,K-1:K+2)
+               FL = FLUX_LIMITER
+               ICM = CELL_INDEX(I,J,K-1)
+               ICP = CELL_INDEX(I,J,K+2)
+               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
+               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FL)
             ENDDO
          ENDDO
       ENDDO
@@ -358,9 +373,9 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          IOR = IJKW(4,IW)
          SELECT CASE(IOR)
             CASE( 1)
-               FX(II,JJ,KK)   = UU(II,JJ,KK)*RHO_F(IW)*YY_F(IW,N)
+               FX(II,JJ,KK)   = UU(II,JJ,KK)*RHO_F(IW)*YY_F(IW,N)*R(II)
             CASE(-1) 
-               FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*RHO_F(IW)*YY_F(IW,N)
+               FX(II-1,JJ,KK) = UU(II-1,JJ,KK)*RHO_F(IW)*YY_F(IW,N)*R(II-1)
             CASE( 2) 
                FY(II,JJ,KK)   = VV(II,JJ,KK)*RHO_F(IW)*YY_F(IW,N)
             CASE(-2) 
@@ -378,9 +393,9 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N)      & ! from previous time step
-                                        + (FX(I,J,K)-FX(I-1,J,K))*RDX(I) &
-                                        + (FY(I,J,K)-FY(I,J-1,K))*RDY(J) &
+               DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N)             &
+                                        + (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
+                                        + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
                                         + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
@@ -558,7 +573,8 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDIF
    ENDIF
 
-! Extract predicted temperature at next time step from Equation of State
+   ! Extract predicted temperature at next time step from Equation of State
+   
    IF (.NOT. ISOTHERMAL) THEN
       IF (N_SPECIES==0) THEN
          !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
