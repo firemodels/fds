@@ -248,10 +248,10 @@ void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuf
 
     while(first_trial!=last_trial->prev){
       nodedata *maxti;
-      float maxdist;
+//      float maxdist;
 
       maxti=first_trial->next;
-      maxdist=maxti->totaldist;
+  //    maxdist=maxti->totaldist;
       /*
       if(maxdist!=255.0){
         for(ti=maxti->next;ti!=last_trial;ti=ti->next){

@@ -45,7 +45,7 @@ int main(int argc, char **argv){
   int i;
   int endian_fds;
   int endian_info;
-  int doit_smoke3d=1, doit_boundary=1, doit_slice=1, doit_particle=1, doit_plot3d=1, doit_iso=1;
+  int doit_smoke3d=1, doit_boundary=1, doit_slice=1, doit_particle=0, doit_plot3d=1, doit_iso=1;
 
 #ifdef pp_LIGHT
   nphotons=NPHOTONS;
@@ -181,6 +181,11 @@ int main(int argc, char **argv){
 #endif
         else{
           overwrite_b=1;
+        }
+        break;
+      case 'y':
+        if(strcmp(arg,"-yP")==0){
+          doit_particle=1;
         }
         break;
       case 'n':
@@ -634,6 +639,7 @@ void usage(char *prog){
   printf("  -ns - do not compress slice files\n");
 #ifdef pp_PART
   printf("  -nP - do not compress particle files\n");
+  printf("  -yP - compress particle files\n");
 #endif
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 
