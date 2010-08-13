@@ -63,7 +63,7 @@ REAL(EB) :: Y_FU_0,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DELTA,DELTA2,ACCEL
             Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,RHOX, &
             X_FU,X_O2,X_FU_0,X_O2_0,X_FU_S,X_O2_S,X_FU_N,X_O2_N,CO_TO_O2,CRIT_FLAME_TMPA, &
             Y_FU_MAX,TMP_F_MIN,Y_F_CORR,Z_2_MIN,Z_2_MIN_FAC,WGT,OMWGT,Q_BOUND_1,Q_BOUND_2,Q_BOUND_3,YY_GET(1:N_SPECIES), &
-            ZETA,CS2,H_F_0,H_F_N,H_G_0,H_G_N,DYAIR,DELTAH_F,TAU_D,TAU_U,TAU_G
+            ZETA,CS2,H_F_0,H_F_N,H_G_0,H_G_N,DYAIR,DELTAH_F,TAU_D,TAU_U,TAU_G,EPSK,KSGS
 REAL(EB), PARAMETER :: Y_FU_MIN=1.E-10_EB,Y_O2_MIN=1.E-10_EB,X_O2_MIN=1.E-16_EB,X_FU_MIN=1.E-16_EB,Y_CO_MIN=1.E-10_EB, &
                        M_MIN=0.1_EB,M_MAX=0.3_EB
 INTEGER :: NODETS,I,J,K,II,JJ,KK,IOR,IC,IW,IWA(-3:3),ITMP,ICFT
@@ -199,7 +199,7 @@ DO K=1,KBAR
 
          ENDIF IF_SUPPRESSION
          
-         LES_IF: IF (LES .AND. FIXED_RESIDENCE_TIME<0._EB) THEN
+         LES_IF: IF (LES .AND. FIXED_MIXING_TIME<0._EB) THEN
             
             IF (USE_MAX_FILTER_WIDTH) THEN
                DELTA=MAX(DX(I),DY(J),DZ(K))
@@ -213,9 +213,11 @@ DO K=1,KBAR
  
             EXPERIMENTAL_IF: IF (FDS6) THEN
                ! experimental
-               TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)
-               TAU_U = DELTA/(SQRT(KRES(I,J,K))+1.E-10_EB)
-               TAU_G = SQRT(DELTA/(GRAV+1.E-10_EB))
+               TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! diffusion time scale
+               EPSK = SC*KRES(I,J,K)/TAU_D              ! ke dissipation rate, assumes production=dissipation
+               KSGS = 1.5_EB*(EPSK*DELTA/PI)**TWTH      ! estimate of subgrid ke, from Kolmogorov spectrum  
+               TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB) ! advective time scale
+               TAU_G = SQRT(DELTA/(GRAV+1.E-10_EB))     ! acceleration time scale
                MIX_TIME(I,J,K)=MIN(TAU_D,TAU_U,TAU_G)
             ELSE EXPERIMENTAL_IF
                ! FDS 5 default
@@ -224,7 +226,7 @@ DO K=1,KBAR
             
          ENDIF LES_IF
          
-         IF (FIXED_RESIDENCE_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_RESIDENCE_TIME
+         IF (FIXED_MIXING_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_MIXING_TIME
          IF (Y_FU_0 < Y_O2_0/RN%O2_F_RATIO) THEN
             DYF = Y_FU_0 * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
          ELSE
