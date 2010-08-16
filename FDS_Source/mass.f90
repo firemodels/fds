@@ -161,23 +161,38 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
       !$OMP END SINGLE
    
       !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=0,KBAR
-         DO J=0,JBAR
+      DO K=1,KBAR
+         DO J=1,JBAR
             DO I=0,IBAR
-            
                ZZ(1:4) = RHOP(I-1:I+2,J,K)
                FL = FLUX_LIMITER
                ICM = CELL_INDEX(I-1,J,K)
                ICP = CELL_INDEX(I+2,J,K)
                IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
                FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FL)*R(I)
-               
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+      
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
                ZZ(1:4) = RHOP(I,J-1:J+2,K)
                ICM = CELL_INDEX(I,J-1,K)
                ICP = CELL_INDEX(I,J+2,K)
                IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
                FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FL)
-               
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+      
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
                ZZ(1:4) = RHOP(I,J,K-1:K+2)
                ICM = CELL_INDEX(I,J,K-1)
                ICP = CELL_INDEX(I,J,K+2)
@@ -335,23 +350,38 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       !$OMP END WORKSHARE
    
       !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=0,KBAR
-         DO J=0,JBAR
+      DO K=1,KBAR
+         DO J=1,JBAR
             DO I=0,IBAR
-            
                ZZ(1:4) = RHOYYP(I-1:I+2,J,K)
                FL = FLUX_LIMITER
                ICM = CELL_INDEX(I-1,J,K)
                ICP = CELL_INDEX(I+2,J,K)
                IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
                FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FL)*R(I)
-               
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+      
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
                ZZ(1:4) = RHOYYP(I,J-1:J+2,K)
                ICM = CELL_INDEX(I,J-1,K)
                ICP = CELL_INDEX(I,J+2,K)
                IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
                FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FL)
-               
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+      
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
                ZZ(1:4) = RHOYYP(I,J,K-1:K+2)
                FL = FLUX_LIMITER
                ICM = CELL_INDEX(I,J,K-1)
@@ -1352,6 +1382,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             RHOS(I,J,K) = RHO(I,J,K) - DT*( RDX(I)*(FX(I,J,K,0)-FX(I-1,J,K,0))*RRN(I) &
                                           + RDY(J)*(FY(I,J,K,0)-FY(I,J-1,K,0)) &
                                           + RDZ(K)*(FZ(I,J,K,0)-FZ(I,J,K-1,0)) )
@@ -1369,6 +1400,7 @@ SELECT_SUBSTEP: IF (PREDICTOR) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                YYN(I,J,K,N) = RHOYYP(I,J,K,N)   
                YYS(I,J,K,N) = RHOYYP(I,J,K,N) - DT*( RDX(I)*(FX(I,J,K,N)-FX(I-1,J,K,N))*RRN(I) &
                                                    + RDY(J)*(FY(I,J,K,N)-FY(I,J-1,K,N)) &
@@ -1456,6 +1488,7 @@ ELSEIF (CORRECTOR) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             RHOS(I,J,K) = RHOS(I,J,K) - DT*( RDX(I)*(FX(I,J,K,0)-FX(I-1,J,K,0))*RRN(I) &
                                            + RDY(J)*(FY(I,J,K,0)-FY(I,J-1,K,0)) &
                                            + RDZ(K)*(FZ(I,J,K,0)-FZ(I,J,K-1,0)) )
@@ -1468,7 +1501,8 @@ ELSEIF (CORRECTOR) THEN
    DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
-            DO I=1,IBAR             
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                YYS(I,J,K,N) = RHOYYP(I,J,K,N) - DT*( RDX(I)*(FX(I,J,K,N)-FX(I-1,J,K,N))*RRN(I) &
                                                    + RDY(J)*(FY(I,J,K,N)-FY(I,J-1,K,N)) &
                                                    + RDZ(K)*(FZ(I,J,K,N)-FZ(I,J,K-1,N)) )
