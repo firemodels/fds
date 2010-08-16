@@ -199,7 +199,7 @@ DO K=1,KBAR
 
          ENDIF IF_SUPPRESSION
          
-         LES_IF: IF (LES .AND. FIXED_MIXING_TIME<0._EB) THEN
+         LES_IF: IF (LES .AND. FIXED_MIX_TIME<0._EB) THEN
             
             IF (USE_MAX_FILTER_WIDTH) THEN
                DELTA=MAX(DX(I),DY(J),DZ(K))
@@ -211,9 +211,9 @@ DO K=1,KBAR
                ENDIF
             ENDIF
  
-            EXPERIMENTAL_IF: IF (FDS6) THEN
+            EXPERIMENTAL_IF: IF (NEW_MIX_TIME) THEN
                ! experimental
-               TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! diffusion time scale
+               TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! diffusive time scale
                EPSK = SC*KRES(I,J,K)/TAU_D              ! ke dissipation rate, assumes production=dissipation
                KSGS = 1.5_EB*(EPSK*DELTA/PI)**TWTH      ! estimate of subgrid ke, from Kolmogorov spectrum  
                TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB) ! advective time scale
@@ -226,7 +226,7 @@ DO K=1,KBAR
             
          ENDIF LES_IF
          
-         IF (FIXED_MIXING_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_MIXING_TIME
+         IF (FIXED_MIX_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_MIX_TIME
          IF (Y_FU_0 < Y_O2_0/RN%O2_F_RATIO) THEN
             DYF = Y_FU_0 * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
          ELSE
