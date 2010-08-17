@@ -281,6 +281,22 @@ HEAT_FLUX_LOOP: DO IW=1,NWC+NVWC
          ELSE
             YY_F(IW,1:N_SPECIES)      = RHO_YY_F(1:N_SPECIES)/RHO_F(IW)
             YYP(II,JJ,KK,1:N_SPECIES) = 2._EB*YY_F(IW,1:N_SPECIES) - YY_G_ALL(1:N_SPECIES)
+            IF (FLUX_LIMITER/=-1) THEN
+               SELECT CASE(IOR)
+                  CASE(-1)
+                     YYP(II+1,JJ,KK,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                  CASE( 1)
+                     YYP(II-1,JJ,KK,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                  CASE(-2)
+                     YYP(II,JJ+1,KK,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                  CASE( 2)
+                     YYP(II,JJ-1,KK,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                  CASE(-3)
+                     YYP(II,JJ,KK+1,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                  CASE( 3)
+                     YYP(II,JJ,KK-1,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+               END SELECT
+            ENDIF
             YY_GET(1:N_SPECIES) = MAX(0._EB,YYP(II,JJ,KK,1:N_SPECIES))
             CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM_W)
             TMP(II,JJ,KK) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM_W*RHOP(II,JJ,KK))
@@ -541,7 +557,7 @@ SUBROUTINE DENSITY_BC
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
 REAL(EB) :: YY_GET(1:N_SPECIES),RSUM_F
-INTEGER  :: IW,II,JJ,KK
+INTEGER  :: IW,II,JJ,KK,IOR
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP=>NULL()
@@ -565,6 +581,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
    II  = IJKW(1,IW)
    JJ  = IJKW(2,IW)
    KK  = IJKW(3,IW)
+   IOR = IJKW(4,IW)
 
    ! Determine ghost cell value of RSUM=R0*Sum(Y_i/M_i) 
 
@@ -588,6 +605,22 @@ WALL_CELL_LOOP: DO IW=1,NWC
          RHOP(II,JJ,KK) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM(II,JJ,KK)*TMP(II,JJ,KK))
       ELSE
          RHOP(II,JJ,KK) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM0*TMP(II,JJ,KK))
+      ENDIF
+      IF (FLUX_LIMITER/=-1) THEN
+         SELECT CASE(IOR)
+            CASE(-1)
+               RHOP(II+1,JJ,KK) = RHOP(II,JJ,KK)
+            CASE( 1)
+               RHOP(II-1,JJ,KK) = RHOP(II,JJ,KK)
+            CASE(-2)
+               RHOP(II,JJ+1,KK) = RHOP(II,JJ,KK)
+            CASE( 2)
+               RHOP(II,JJ-1,KK) = RHOP(II,JJ,KK)
+            CASE(-3)
+               RHOP(II,JJ,KK+1) = RHOP(II,JJ,KK)
+            CASE( 3)
+               RHOP(II,JJ,KK-1) = RHOP(II,JJ,KK)
+         END SELECT
       ENDIF
    ENDIF
  
