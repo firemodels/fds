@@ -10,31 +10,31 @@ Suppose that a fire model is used to estimate the likelihood that an electrical 
 a fire. It is assumed that the cable loses functionality when its surface temperature reaches 400~$^\circ$C,
 and the model predicts that the cable temperature could reach as high as 350~$^\circ$C.
 Does this mean that there is no chance of damage? The answer is no, because the input parameters, like the heat release rate of
-the fire, and the model assumptions, like the way the cables are modeled, are uncertain. The combination of the 
+the fire, and the model assumptions, like the way the cables are modeled, are uncertain. The combination of the
 two -- the {\em parameter uncertainty} and the {\em model uncertainty} -- leave open the possibility that the cable temperature could exceed
-400~$^\circ$C. 
+400~$^\circ$C.
 
-This \paper addresses {\em model uncertainty} only and suggests a simple method to quantify it. While parameter uncertainty is certainly an 
+This \paper addresses {\em model uncertainty} only and suggests a simple method to quantify it. While parameter uncertainty is certainly an
 important consideration in fire modeling, its treatment varies considerably depending on the particular application. For example, in what is often
 referred to as a ``bounding analysis,'' the model input parameters are chosen so as to simulate a ``maximum credible'' or ``worst case'' fire. In other cases,
 a ``base case'' model is created, based on best estimates of the input parameters, followed by a series of simulations to assess the impact of the more
-important parameters on the prediction. 
+important parameters on the prediction.
 Sometimes entire statistical distributions of the input parameters are ``propagated'' through the model in a variety of ways, leading to
 a statistical distribution of the model output. Notarianni and Parry survey these techniques in the SFPE Handbook~\cite{Notarianni:SFPE}.
-Regardless of how the parameter uncertainty is treated, there is a need to quantify separately the two types of uncertainty.  
+Regardless of how the parameter uncertainty is treated, there is a need to quantify separately the two types of uncertainty.
 
 The issue of model uncertainty has been around as long as the models themselves. The scenario above,
 for example, was considered by Siu and Apostolakis in the early 1980s~\cite{Siu:RE1982} as part of their development of risk models for
 nuclear power plants. The fire models at the
-time were relatively simple. In fact, many were engineering correlations in the form of simple formulae. This made the methods for 
+time were relatively simple. In fact, many were engineering correlations in the form of simple formulae. This made the methods for
 quantifying their uncertainty reasonably tractable because each formula consisted of only a handful of physical parameters. Over the past
 thirty years, however, both fire modeling and the corresponding methods of uncertainty analysis have become far more complex. The current
-generation of computational fluid dynamics fire models require such a large number of physical and numerical parameters that it is considered 
+generation of computational fluid dynamics fire models require such a large number of physical and numerical parameters that it is considered
 too cumbersome to estimate model uncertainty by systematically assessing their combined effect on the final prediction. The more
-practical approach is to compare model predictions with actual fire experiments in a validation study, the conclusions of which typically come in the form of statements like: 
+practical approach is to compare model predictions with actual fire experiments in a validation study, the conclusions of which typically come in the form of statements like:
 ``The model generally over-predicts the measured temperatures
-by about 10~\%,'' or ``The model predictions are within about 20~\% of the measured heat fluxes.'' This information is helpful, 
-at the very least to demonstrate that the model is appropriate for the given application. 
+by about 10~\%,'' or ``The model predictions are within about 20~\% of the measured heat fluxes.'' This information is helpful,
+at the very least to demonstrate that the model is appropriate for the given application.
 However, even the statement that the model over-predicts measured temperatures by 10~\% is useful not only to gain acceptance of the model but also
 to provide a better sense of the model's accuracy, and a greater level of assurance in answering the question posed above. Knowing that the model
 not only predicted a temperature of 350~$^\circ$C, but also that the model tends to over-predict temperatures by a certain amount, increases the confidence that
@@ -52,7 +52,7 @@ the temperature could exceed 400~$^\circ$C.
 
 This \paper suggests a methodology for expressing {\em model uncertainty} by way of a distribution like the one shown in Fig.~\ref{bell_curve}.
 The procedure is not a dramatic departure from the current
-practice of fire model validation in that it relies entirely on comparisons of model predictions and experimental measurements. 
+practice of fire model validation in that it relies entirely on comparisons of model predictions and experimental measurements.
 
 
 
@@ -253,14 +253,41 @@ Surface Temperature             & 0.14    \\ \hline
 
 \section{Calculating Model Uncertainty}
 
-This section describes a method for calculating the {\em model uncertainty}. In terms of the example given above, this
-is the answer to the question, ``350~$^\circ$C plus or minus what?'' The focus is on the model, not the parameter, uncertainty;
-thus, it is assumed, for the moment, that the input parameters are not subject to any uncertainty.
-In that case, how good is the prediction, assuming the fire scenario is exactly defined?
-The answer to this question is based solely on
-the model's track record for predicting cable temperatures in controlled validation experiments.
+This section describes a method for calculating the {\em model uncertainty}. In terms of the example given in the Introduction, this
+is the answer to the question, ``350~$^\circ$C plus or minus what?'' Actually, the ``plus or minus'' uncertainty bounds are expressed as a statistical distribution. 
+That is, the model prediction of the ``true'' temperature of the cable, $\theta$, is expressed in the
+following way\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
+with mean, $\mu$, and standard deviation, $\sigma$.}:
+\be
+   \theta \; | \; 350 \sim N \left( \frac{350}{\delta} \; , \; \widetilde{\sigma}_M^2
+   \left( \frac{350}{\delta} \right)^2 \right) \label{truthexample}
+\ee
+In words, given a model prediction of 350~$^\circ$C, the expected value of the true temperature is assumed to be normally distributed
+with the given mean and standard deviation. The values of $\delta$ and $\widetilde{\sigma}_M$ are calculated based on the
+comparison of model predictions with experimental measurements, and this calculation is discussed below. First, however, 
+there are a few very important assumptions that need to be justified.
+\begin{enumerate}
+\item The distribution is assumed to be normal. Given the
+complexity of the models, it would be difficult to postulate a more precise functional relationship.
+The same is true of the form of the distribution. Given the complexity of the models and the experiments,
+it would be difficult to justify
+any particular distribution. In fact, the very reason for developing this method of quantifying model
+uncertainty based on validation
+experiments is because the model algorithm itself is too complicated to work with directly
+as a means of estimating the error. However, if
+the distributions were better characterized, the methodology presented here could be generalized appropriately.
+\item The degree to which the model under or over-predicts the ``truth'' is expressed as a multiplicative bias factor, $\delta$; thus,
+the mean of the distribution in this case is $350/\delta$. If $\delta<1$, the model tends to under-predict, in which case it is 
+assumed that the true value would be greater than 350. If $\delta>1$, it is assumed that the true value would be less than 350.
+\item The standard deviation of the distribution is expressed as a fixed percentage of the mean,
+$\widetilde{\sigma}=\sigma/\mu$. This is based on the observation that the results of past validation exercises,
+when plotted as shown in Fig.~\ref{scatterplot}, suggest
+that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value.
+\end{enumerate}
 
-A fire model validation study typically consists of comparing point measurements from a wide variety of fire experiments
+With these assumptions in mind, it remains to show how the two parameters, $\delta$ and $\widetilde{\sigma}_M$, are calculated using the 
+results of a model validation study.
+Such a study typically consists of comparing point measurements from a wide variety of fire experiments
 with corresponding model predictions.
 Figure~\ref{temp_history} is a typical result for a single point measurement, and given that usually
 dozens of such measurements are made during each experiment,
@@ -279,46 +306,7 @@ discuss various possible metrics. A commonly used metric is simply to compare th
 If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
 this exercise is a pair of numbers for each plot, $(E_i,M_i)$, that can be depicted graphically as shown in Fig.~\ref{scatterplot}.
 
-
-
-Actually, the ``plus or minus'' uncertainty bounds are expressed as a statistical distribution. In other words, the
-prediction is not expressed merely as 350~$^\circ$C, but rather as a random variable with a given mean, $\mu$, and standard
-deviation, $\sigma$. There are a few very important assumptions to make at the start:
-\begin{enumerate}
-\item The distribution is assumed to be normal.
-\item The degree to which the model under or over-predicts the ``truth'' is expressed as a multiplicative bias factor, $\delta$; thus,
-the mean of the distribution is $M/\delta$, where $M$ is the model prediction.
-\item The standard deviation of the distribution is expressed as a fixed percentage of the mean,
-$\widetilde{\sigma}=\sigma/\mu$.
-\end{enumerate}
-Under these assumptions, the ``true'' temperature of the cable, $\theta$, is expressed in the
-following way\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
-with mean, $\mu$, and standard deviation, $\sigma$.}:
-\be
-   \theta \; | \; 350 \sim N \left( \frac{350}{\delta} \; , \; \widetilde{\sigma}_M^2
-   \left( \frac{350}{\delta} \right)^2 \right) \label{truthexample}
-\ee
-In words, given a model prediction of 350~$^\circ$C, the expected value of the true temperature is assumed to be normally distributed
-with the given mean and standard deviation. The values of $\delta$ and $\widetilde{\sigma}_M$ are calculated based on the
-comparison of model predictions with experimental measurements. This calculation is discussed below. First, however, the
-assumptions above require justification.
-
-The first assumption is based on the observation that the results of past validation exercises,
-when plotted as shown in Fig.~\ref{scatterplot}, suggest
-that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value.
-Furthermore, given the
-complexity of the models, it would be difficult to postulate a more precise functional relationship.
-The same is true of the form of the distribution. Given the complexity of the models and the experiments,
-it would be difficult to justify
-any particular distribution. In fact, the very reason for developing this method of quantifying model
-uncertainty based on validation
-experiments is because the model algorithm itself is too complicated to work with directly
-as a means of estimating the error. However, if
-the distributions were better characterized, the methodology presented here could be generalized appropriately.
-
 With these assumptions in mind, a relatively simple method of analyzing the data can be developed.
-A general discussion of Bayesian data analysis can be found in
-Ref.~\cite{Gelman:Stats}.
 Assume that the set of model predictions and the corresponding set of experimental measurements are denoted
 $M_i$ and $E_i$, respectively, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers
 expressing the increase in the value of a quantity above its ambient.
@@ -349,7 +337,7 @@ multiplied by a bias factor, $\delta$:
 \be
    M \; | \; \theta \sim N \left(\delta \, \theta \, , \, \sigma_M^2 \right) \label{mdist}
 \ee
-The standard deviation, $\sigma_M$, and the bias factor, $\delta$, represent the model uncertainty. 
+The standard deviation, $\sigma_M$, and the bias factor, $\delta$, represent the model uncertainty.
 Again, the delta method renders a distribution for $\ln M$ whose parameters can be expressed in terms of a
 relative standard deviation:
 \be
@@ -403,20 +391,22 @@ the true value of the model output quantity, $\theta$, given the model predictio
 \be
    \theta \; | \; M \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widehat{\widetilde{\sigma}_M^2} \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth}
 \ee
-This formula has been obtained by dividing by the bias factor, $\delta$, in Eq.~(\ref{thetaeq}).
-Below, there is an example of how one might make use of this formula in practice.
-First, however, the accuracy of the procedure just described needs to be verified.
+This formula has been obtained\footnote{Note that if $X \sim N(\mu,\sigma^2)$, then
+$cX \sim N ( c \mu , (c \sigma)^2)$.} by dividing by the bias factor, $\delta$, in Eq.~(\ref{thetaeq}). The two parameters, $\hat{\delta}$ and $\widehat{\widetilde{\sigma}_M}$,
+indicate the accuracy of the model in comparison to experimental measurements. If $\hat{\delta}=1$ and $\widehat{\widetilde{\sigma}_M}=\widetilde{\sigma}_E$, then the
+model is of comparable accuracy to the measurements themselves. It is important to note that $\widehat{\widetilde{\sigma}_M}$ cannot be less than
+$\widetilde{\sigma}_E$ because it is not possible to demonstrate that the model is more accurate than the measurements against which it is compared. This is not to say that the model
+cannot be more accurate than the measurements; rather, that the model cannot be shown to be more accurate than the measurements.
+
+
 
 \section{Verifying the Procedure}
 
-The statistical analysis described in the previous section is difficult to understand without a fairly good background in Bayesian analysis. However,
-the calculation itself is no more difficult than determining means and standard deviations of a few columns of numbers and it can be easily done with
-a simple spreadsheet program.
-
-To better illustrate the process, and also to verify this procedure, start with 1000 uniformly distributed
-random numbers, $\theta_i$, between 0 and 1000. These numbers represent a particular quantity of interest, like a gas temperature at a particular
-point and at a particular time, and it is assumed that these values
-have no uncertainty -- they represent the ``truth.'' Of course, the true values can never be known, but for this hypothetical exercise they are assumed.
+This section illustrates the meaning of the estimated parameters $\hat{\delta}$ and $\widehat{\widetilde{\sigma}_M}$.
+Suppose that 1000 fire experiments are conducted, and that for each experiment the
+temperature at a given point and at a given time is known. For the sake of this exercise, assume that these values can be represented by 1000 uniformly distributed
+random numbers, $\theta_i$, between 0 and 1000. These values have no uncertainty -- they represent the ``truth.''
+Of course, the true values can never be known, but for this hypothetical exercise they are assumed.
 Next, with $\theta_i$ as the mean, a normally-distributed random variable is chosen that represents a hypothetical measurement, $E_i$.
 The relative standard deviation of the distribution, $\widetilde{\sigma}_E$, is assumed known. In the same way, a normally-distributed
 random variable is chosen that represents a hypothetical
