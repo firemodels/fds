@@ -569,7 +569,7 @@ MAIN_LOOP: DO
  
       CALL INSERT_DROPLETS_AND_PARTICLES(T(NM),NM)
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,1)
-      IF (FLUX_LIMITER<0 .AND. (.NOT.ISOTHERMAL .OR. N_SPECIES>0)) CALL MASS_FINITE_DIFFERENCES(NM)
+      IF (NEW_FLUX_LIMITER .AND. (.NOT.ISOTHERMAL .OR. N_SPECIES>0)) CALL MASS_FINITE_DIFFERENCES(NM)
    ENDDO COMPUTE_FINITE_DIFFERENCES_1
 
    ! Estimate quantities at next time step, and decrease/increase time step if necessary based on CFL condition
@@ -582,7 +582,7 @@ MAIN_LOOP: DO
 
       ! Predict density and mass fractions at next time step, and then start the divergence calculation
       
-      IF (FLUX_LIMITER>=0) THEN
+      IF (FLUX_LIMITER>=0 .AND. .NOT.NEW_FLUX_LIMITER) THEN
          COMPUTE_FLUX_LOOP: DO NM=1,NMESHES
             IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_FLUX_LOOP
             IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) CALL SCALARF(NM)
@@ -603,7 +603,7 @@ MAIN_LOOP: DO
       COMPUTE_DENSITY_LOOP: DO NM=1,NMESHES
          IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DENSITY_LOOP
          IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
-            IF (FLUX_LIMITER>=0) THEN
+            IF (FLUX_LIMITER>=0 .AND. .NOT.NEW_FLUX_LIMITER) THEN
                !!CALL SCALARF(NM)
                CALL DENSITY_TVD(NM)
             ELSE
@@ -803,7 +803,7 @@ MAIN_LOOP: DO
 
    ! Finite differences for mass and momentum equations for the second half of the time step
    
-   IF (FLUX_LIMITER>=0) THEN
+   IF (FLUX_LIMITER>=0 .AND. .NOT.NEW_FLUX_LIMITER) THEN
       DO NM=1,NMESHES
          IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE
          IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) CALL SCALARF(NM)
@@ -827,7 +827,7 @@ MAIN_LOOP: DO
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_FINITE_DIFFERENCES_2
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,1)
       IF (.NOT.ISOTHERMAL .OR. N_SPECIES>0) THEN
-         IF (FLUX_LIMITER>=0) THEN
+         IF (FLUX_LIMITER>=0 .AND. .NOT.NEW_FLUX_LIMITER) THEN
             !!CALL SCALARF(NM)
             CALL DENSITY_TVD(NM)
          ELSE
