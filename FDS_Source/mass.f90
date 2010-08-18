@@ -25,10 +25,10 @@ USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,ISOTHERMAL,NULL_BOUNDARY,POROUS_BOUNDARY,O
                             PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,DEBUG_OPENMP,NOBIAS
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: FXYZ,PMDT,UDRHODN,TNOW,ZZ(4)
-INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,ICM,ICP,FL
+INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR
 REAL(EB), POINTER, DIMENSION(:) :: UWP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UDRHODX,VDRHODY,WDRHODZ,EPSX,EPSY,EPSZ, &
-                                       RHOYYP=>NULL(),FX=>NULL(),FY=>NULL(),FZ=>NULL()
+                                       FX=>NULL(),FY=>NULL(),FZ=>NULL()
  
 IF (EVACUATION_ONLY(NM)) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
@@ -165,11 +165,7 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
          DO J=1,JBAR
             DO I=0,IBAR
                ZZ(1:4) = RHOP(I-1:I+2,J,K)
-               FL = FLUX_LIMITER
-               ICM = CELL_INDEX(I-1,J,K)
-               ICP = CELL_INDEX(I+2,J,K)
-               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FL)*R(I)
+               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)*R(I)
             ENDDO
          ENDDO
       ENDDO
@@ -180,10 +176,7 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
          DO J=0,JBAR
             DO I=1,IBAR
                ZZ(1:4) = RHOP(I,J-1:J+2,K)
-               ICM = CELL_INDEX(I,J-1,K)
-               ICP = CELL_INDEX(I,J+2,K)
-               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FL)
+               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
@@ -194,10 +187,7 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
          DO J=1,JBAR
             DO I=1,IBAR
                ZZ(1:4) = RHOP(I,J,K-1:K+2)
-               ICM = CELL_INDEX(I,J,K-1)
-               ICP = CELL_INDEX(I,J,K+2)
-               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FL)
+               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
@@ -256,10 +246,6 @@ ENDIF NOT_ISOTHERMAL_IF
 IF (N_SPECIES > 0) THEN
    IF (PREDICTOR) YYP => YY
    IF (CORRECTOR) YYP => YYS
-   !UDRHODX => WORK4
-   !VDRHODY => WORK5
-   !WDRHODZ => WORK6
-   IF (FLUX_LIMITER/=-1) RHOYYP => WORK7
 ENDIF
  
 SPECIES_LOOP: DO N=1,N_SPECIES
@@ -345,20 +331,12 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       FZ=>WORK6
       !$OMP END SINGLE
    
-      !$OMP WORKSHARE
-      RHOYYP=RHOP*YYP(:,:,:,N)
-      !$OMP END WORKSHARE
-   
       !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=0,IBAR
-               ZZ(1:4) = RHOYYP(I-1:I+2,J,K)
-               FL = FLUX_LIMITER
-               ICM = CELL_INDEX(I-1,J,K)
-               ICP = CELL_INDEX(I+2,J,K)
-               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FL)*R(I)
+               ZZ(1:4) = RHOP(I-1:I+2,J,K)*YYP(I-1:I+2,J,K,N)
+               FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)*R(I)
             ENDDO
          ENDDO
       ENDDO
@@ -368,11 +346,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO K=1,KBAR
          DO J=0,JBAR
             DO I=1,IBAR
-               ZZ(1:4) = RHOYYP(I,J-1:J+2,K)
-               ICM = CELL_INDEX(I,J-1,K)
-               ICP = CELL_INDEX(I,J+2,K)
-               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FL)
+               ZZ(1:4) = RHOP(I,J-1:J+2,K)*YYP(I,J-1:J+2,K,N)
+               FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
@@ -382,12 +357,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       DO K=0,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               ZZ(1:4) = RHOYYP(I,J,K-1:K+2)
-               FL = FLUX_LIMITER
-               ICM = CELL_INDEX(I,J,K-1)
-               ICP = CELL_INDEX(I,J,K+2)
-               IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FL)
+               ZZ(1:4) = RHOP(I,J,K-1:K+2)*YYP(I,J,K-1:K+2,N)
+               FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
             ENDDO
          ENDDO
       ENDDO
@@ -449,7 +420,7 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
                             CHANGE_TIME_STEP,ISOTHERMAL,TMPA,N_ZONE,MIXTURE_FRACTION_SPECIES, &
                             GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED, &
-                            RSUM0,DEBUG_OPENMP
+                            RSUM0,DEBUG_OPENMP,CLIP_MASS_FRACTION
 REAL(EB) :: WFAC,DTRATIO,OMDTRATIO,TNOW,YY_GET(1:N_SPECIES)
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
@@ -566,7 +537,11 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Correct mass fractions above or below clip limits
 
-   CALL CHECK_MASS_FRACTION
+   IF (CLIP_MASS_FRACTION) THEN
+      YYS(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES) = MAX(0._EB,MIN(1._EB,YYS(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES)))
+   ELSE
+      CALL CHECK_MASS_FRACTION
+   ENDIF
 
    ! Predict background pressure at next time step
 
@@ -715,7 +690,11 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Correct mass fractions above or below clip limits
 
-   CALL CHECK_MASS_FRACTION
+   IF (CLIP_MASS_FRACTION) THEN
+      YY(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES) = MAX(0._EB,MIN(1._EB,YY(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES)))
+   ELSE
+      CALL CHECK_MASS_FRACTION
+   ENDIF
 
    ! Correct background pressure
 
@@ -2108,7 +2087,7 @@ REAL(EB) :: R,B,DU_UP,DU_LOC
 !                            A
 !         U(1)        U(2)        U(3)        U(4)
 
-IF (A>0._EB) THEN
+WIND_DIRECTION_IF: IF (A>0._EB) THEN
     
    ! the flow is left to right
    DU_UP  = U(2)-U(1)
@@ -2125,18 +2104,18 @@ IF (A>0._EB) THEN
       CASE(2) ! SUPERBEE, Roe (1986)
          IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*(U(3)-U(2))
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
       CASE(3) ! MINMOD
          IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*(U(3)-U(2))
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
       CASE(4) ! CHARM
          IF (ABS(DU_UP)>0._EB) R = DU_LOC/DU_UP
          IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*(U(2)-U(1))
+         SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_UP
    END SELECT
     
-ELSE
+ELSE WIND_DIRECTION_IF
 
    ! the flow is right to left
    DU_UP  = U(4)-U(3)
@@ -2153,70 +2132,22 @@ ELSE
       CASE(2) ! SUPERBEE, Roe (1986)
          IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
-         SCALAR_FACE_VALUE = U(3) + 0.5_EB*B*(U(2)-U(3))
+         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
       CASE(3) ! MINMOD
          IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(1._EB,R))
-         SCALAR_FACE_VALUE = U(3) + 0.5_EB*B*(U(2)-U(3))
+         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
       CASE(4) ! CHARM
          IF (ABS(DU_UP)>0._EB) R = DU_LOC/DU_UP
          IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
-         SCALAR_FACE_VALUE = U(3) + 0.5_EB*B*(U(3)-U(4))
+         SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_UP
     END SELECT
     
-ENDIF
+ENDIF WIND_DIRECTION_IF
 
 END FUNCTION SCALAR_FACE_VALUE
 
 
-
-REAL(EB) FUNCTION MINVAL_GASPHASE(PHI)
-
-REAL(EB), INTENT(IN) :: PHI(0:IBP1,0:JBP1,0:KBP1)
-
-! local
-INTEGER :: I,J,K
-
-MINVAL_GASPHASE = HUGE(1._EB)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (.NOT.SOLID(CELL_INDEX(I,J,K))) THEN
-            IF (PHI(I,J,K)<MINVAL_GASPHASE) THEN
-               MINVAL_GASPHASE = PHI(I,J,K)
-            ENDIF
-         ENDIF
-      ENDDO
-   ENDDO
-ENDDO
-
-END FUNCTION MINVAL_GASPHASE
-
-
-REAL(EB) FUNCTION MAXVAL_GASPHASE(PHI)
-
-REAL(EB), INTENT(IN) :: PHI(0:IBP1,0:JBP1,0:KBP1)
-
-! local
-INTEGER :: I,J,K
-
-MAXVAL_GASPHASE = -HUGE(1._EB)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (.NOT.SOLID(CELL_INDEX(I,J,K))) THEN
-            IF (PHI(I,J,K)>MAXVAL_GASPHASE) THEN
-               MAXVAL_GASPHASE = PHI(I,J,K)
-            ENDIF
-         ENDIF
-      ENDDO
-   ENDDO
-ENDDO
-
-END FUNCTION MAXVAL_GASPHASE
-
-
-!---------------------------------------------------------------------------
 
 SUBROUTINE GET_REV_mass(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
