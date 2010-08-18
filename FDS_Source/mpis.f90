@@ -1,6 +1,6 @@
 MODULE MPI
 
-USE PRECISION_PARAMETERS, ONLY : DPC
+USE PRECISION_PARAMETERS, ONLY : DPC, EB
 
        integer LAM_MAJOR_VERSION, LAM_MINOR_VERSION
        integer LAM_RELEASE_VERSION
@@ -210,263 +210,1300 @@ USE PRECISION_PARAMETERS, ONLY : DPC
        parameter (MPI_MAXLOC=36)
        parameter (MPI_MINLOC=37)
        parameter (MPI_REPLACE=38)
-      double precision MPI_WTIME, MPI_WTICK !, PMPI_WTIME, PMPI_WTICK
-      external MPI_WTIME, MPI_WTICK !, PMPI_WTIME, PMPI_WTICK
+      !double precision MPI_WTIME, MPI_WTICK !, PMPI_WTIME, PMPI_WTICK
+      !external MPI_WTIME, MPI_WTICK !, PMPI_WTIME, PMPI_WTICK      ! S.Kilian: now within 'contains'-environment
+
   integer mpi_failure
   parameter ( mpi_failure = 1 )
   integer mpi_product
   parameter ( mpi_product = 4 )
+  
+  integer dummy
+  logical dummyl
+  character dummyc
 
-END MODULE MPI
+  !
+  ! S.Kilian: new interfaces
+  !
+
+  interface mpi_gatherv
+    module procedure mpi_gatherv_int1    , mpi_gatherv_int2,    mpi_gatherv_int3, &
+                     mpi_gatherv_real1   , mpi_gatherv_real2,   mpi_gatherv_real3,&
+                     mpi_gatherv_logical1, mpi_gatherv_logical2,mpi_gatherv_logical3
+  end interface mpi_gatherv
+
+  interface mpi_allgather
+    module procedure mpi_allgather_int1    , mpi_allgather_int2,  &
+                     mpi_allgather_real1   , mpi_allgather_real2, &
+                     mpi_allgather_logical1, mpi_allgather_logical2
+  end interface mpi_allgather
+
+  interface mpi_allgatherv
+    module procedure mpi_allgatherv_int1    , mpi_allgatherv_int2, &
+                     mpi_allgatherv_real1   , mpi_allgatherv_real2,&
+                     mpi_allgatherv_logical1, mpi_allgatherv_logical2
+  end interface mpi_allgatherv
+
+  interface mpi_reduce
+    module procedure mpi_reduce_int0    , mpi_reduce_int1,   &
+                     mpi_reduce_real0   , mpi_reduce_real1,  &
+                     mpi_reduce_logical0, mpi_reduce_logical1
+  end interface mpi_reduce
+
+  interface mpi_allreduce
+    module procedure mpi_allreduce_int0    , mpi_allreduce_int1,   &
+                     mpi_allreduce_real0   , mpi_allreduce_real1,  &
+                     mpi_allreduce_logical0, mpi_allreduce_logical1
+  end interface mpi_allreduce
+
+  interface mpi_recv_init
+    module procedure mpi_recv_init_int0    , mpi_recv_init_int1,    &
+                     mpi_recv_init_real0   , mpi_recv_init_real1,   &
+                     mpi_recv_init_logical0, mpi_recv_init_logical1,&
+                     mpi_recv_init_char0   , mpi_recv_init_char1   
+  end interface mpi_recv_init
+
+  interface mpi_send_init
+    module procedure mpi_send_init_int0    , mpi_send_init_int1,    &
+                     mpi_send_init_real0   , mpi_send_init_real1,   &
+                     mpi_send_init_logical0, mpi_send_init_logical1,&
+                     mpi_send_init_char0   , mpi_send_init_char1   
+  end interface mpi_send_init
+
+  interface mpi_recv
+    module procedure mpi_recv_int0    , mpi_recv_int1,    &
+                     mpi_recv_real0   , mpi_recv_real1,   &
+                     mpi_recv_logical0, mpi_recv_logical1,&
+                     mpi_recv_char0   , mpi_recv_char1   
+  end interface mpi_recv
+
+  interface mpi_send
+    module procedure mpi_send_int0    , mpi_send_int1,     &
+                     mpi_send_real0   , mpi_send_real1,    &
+                     mpi_send_logical0, mpi_send_logical1, &
+                     mpi_send_char0   , mpi_send_char1
+  end interface mpi_send
+
+  interface mpi_isend
+    module procedure mpi_isend_int0    , mpi_isend_int1,     &
+                     mpi_isend_real0   , mpi_isend_real1,    &
+                     mpi_isend_logical0, mpi_isend_logical1, &
+                     mpi_isend_char0   , mpi_isend_char1   
+  end interface mpi_isend
+
+  interface mpi_irecv
+    module procedure mpi_irecv_int0    , mpi_irecv_int1,     &
+                     mpi_irecv_real0   , mpi_irecv_real1,    &
+                     mpi_irecv_logical0, mpi_irecv_logical1, &
+                     mpi_irecv_char0   , mpi_irecv_char1
+  end interface mpi_irecv
+
+  interface mpi_bcast
+    module procedure mpi_bcast_int0   , mpi_bcast_int1,      &
+                     mpi_bcast_real0   , mpi_bcast_real1,    &
+                     mpi_bcast_logical0, mpi_bcast_logical1
+  end interface mpi_bcast
+
+  interface mpi_startall
+     module procedure mpi_startall_scalar, mpi_startall_array
+  end interface mpi_startall
+
+  interface mpi_waitall
+     module procedure mpi_waitall_scalar, mpi_waitall_array
+  end interface mpi_waitall
+
+  !
+  ! S.Kilian: end of new interfaces
+  !
+
+  contains
+
+
+!
+! S.Kilian: new type-sensitive routines
+!
+subroutine mpi_gatherv_int1 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  integer:: data1
+  integer, dimension(:) :: data2
+  integer:: ierror
+  integer, dimension(:) :: ndispls
+  integer, dimension(:) :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1) + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
+end subroutine
+subroutine mpi_gatherv_int2 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  integer:: data1
+  integer, dimension(:,:) :: data2
+  integer:: ierror
+  integer, dimension(:) :: ndispls
+  integer, dimension(:) :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1) + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
+end subroutine
+subroutine mpi_gatherv_int3 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  integer:: data1
+  integer, dimension(:,:,:) :: data2
+  integer:: ierror
+  integer, dimension(:) :: ndispls
+  integer, dimension(:) :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1,1) + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
+end subroutine
+subroutine mpi_gatherv_real1 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:) :: data2
+  integer:: ierror
+  integer, dimension(:) :: ndispls
+  integer, dimension(:) :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1) + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
+end subroutine
+subroutine mpi_gatherv_real2 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:,:) :: data2
+  integer:: ierror
+  integer, dimension(:) :: ndispls
+  integer, dimension(:) :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1) + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
+end subroutine
+subroutine mpi_gatherv_real3 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:,:,:) :: data2
+  integer:: ierror
+  integer, dimension(:) :: ndispls
+  integer, dimension(:) :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1,1) + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
+end subroutine
+subroutine mpi_gatherv_logical1 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  logical:: data1
+  logical, dimension(:) :: data2
+  integer:: ierror
+  integer, dimension(:) :: ndispls
+  integer, dimension(:) :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummyl = data1
+  dummyl = data2(1) 
+  dummy = nsend + sendtype + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
+end subroutine
+subroutine mpi_gatherv_logical2 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  logical:: data1
+  logical, dimension(:,:) :: data2
+  integer:: ierror
+  integer, dimension(:) :: ndispls
+  integer, dimension(:) :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummyl = data1
+  dummyl = data2(1,1) 
+  dummy = nsend + sendtype + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
+end subroutine
+subroutine mpi_gatherv_logical3 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  logical:: data1
+  logical, dimension(:,:,:) :: data2
+  integer:: ierror
+  integer, dimension(:) :: ndispls
+  integer, dimension(:) :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummyl = data1
+  dummyl = data2(1,1,1)  
+  dummy = nsend + sendtype + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
+end subroutine
+
+
+subroutine mpi_allgather_int1 ( data1, nsend, sendtype,data2, nrecv, recvtype, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  integer:: data1
+  integer, dimension(:) :: data2
+  integer:: ierror
+  integer:: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1) + nrecv + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgather_int2 ( data1, nsend, sendtype,data2, nrecv, recvtype, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  integer:: data1
+  integer, dimension(:,:) :: data2
+  integer:: ierror
+  integer:: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1) + nrecv + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgather_real1 ( data1, nsend, sendtype,data2, nrecv, recvtype, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:) :: data2
+  integer:: ierror
+  integer:: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1) + nrecv + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgather_real2 ( data1, nsend, sendtype,data2, nrecv, recvtype, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:,:) :: data2
+  integer:: ierror
+  integer:: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1) + nrecv + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgather_logical1 ( data1, nsend, sendtype,data2, nrecv, recvtype, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  logical:: data1
+  logical, dimension(:) :: data2
+  integer:: ierror
+  integer:: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummyl = data1
+  dummyl = data2(1) 
+  dummy = nsend + sendtype + nrecv + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgather_logical2 ( data1, nsend, sendtype,data2, nrecv, recvtype, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  logical:: data1
+  logical, dimension(:,:) :: data2
+  integer:: ierror
+  integer:: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummyl = data1
+  dummyl = data2(1,1) 
+  dummy = nsend + sendtype + nrecv + recvtype + comm + ierror
+end subroutine
+
+
+subroutine mpi_allgatherv_int1 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, comm, ierror )
+  integer:: nsend
+  integer:: comm
+  integer:: data1
+  integer, dimension(:):: data2
+  integer:: ierror
+  integer, dimension(:):: ndispls
+  integer, dimension(:):: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1) + nrecv(1) + ndispls(1) + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgatherv_int2 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, comm, ierror )
+  integer:: nsend
+  integer:: comm
+  integer:: data1
+  integer, dimension(:,:):: data2
+  integer:: ierror
+  integer, dimension(:):: ndispls
+  integer, dimension(:):: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1) + nrecv(1) + ndispls(1) + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgatherv_real1 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, comm, ierror )
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:):: data2
+  integer:: ierror
+  integer, dimension(:):: ndispls
+  integer, dimension(:):: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1) + nrecv(1) + ndispls(1) + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgatherv_real2 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, comm, ierror )
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:,:):: data2
+  integer:: ierror
+  integer, dimension(:):: ndispls
+  integer, dimension(:):: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1) + nrecv(1) + ndispls(1) + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgatherv_logical1 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, comm, ierror )
+  integer:: nsend
+  integer:: comm
+  logical:: data1
+  logical, dimension(:):: data2
+  integer:: ierror
+  integer, dimension(:):: ndispls
+  integer, dimension(:):: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummyl = data1
+  dummyl = data2(1) 
+  dummy = nsend + sendtype + nrecv(1) + ndispls(1) + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgatherv_logical2 ( data1, nsend, sendtype, data2, nrecv, ndispls, &
+  recvtype, comm, ierror )
+  integer:: nsend
+  integer:: comm
+  logical:: data1
+  logical, dimension(:,:):: data2
+  integer:: ierror
+  integer, dimension(:):: ndispls
+  integer, dimension(:):: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummyl = data1
+  dummyl = data2(1,1) 
+  dummy = nsend + sendtype + nrecv(1) + ndispls(1) + recvtype + comm + ierror
+end subroutine
+
+
+subroutine mpi_reduce_int0( data1, data2, n, datatype, operation, receiver, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer:: data1
+  integer:: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  integer:: receiver
+  dummy = data1 + data2 + n + datatype + operation + receiver + comm + ierror
+end subroutine
+subroutine mpi_reduce_int1 ( data1, data2, n, datatype, operation, receiver, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:) :: data1
+  integer:: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  integer:: receiver
+  dummy = data1(1) + data2 + n + datatype + operation + receiver + comm + ierror
+end subroutine
+subroutine mpi_reduce_real0( data1, data2, n, datatype, operation, receiver, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data1
+  real(eb):: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  integer:: receiver
+  dummy = data1 + data2 + n + datatype + operation + receiver + comm + ierror
+end subroutine
+subroutine mpi_reduce_real1( data1, data2, n, datatype, operation, receiver, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:) :: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  integer:: receiver
+  dummy = data1 + data2(1) + n + datatype + operation + receiver + comm + ierror
+end subroutine
+subroutine mpi_reduce_logical0( data1, data2, n, datatype, operation, receiver, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data1
+  logical:: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  integer:: receiver
+  dummyl = data1
+  dummyl = data2 
+  dummy = n + datatype + operation + receiver + comm + ierror
+end subroutine
+subroutine mpi_reduce_logical1( data1, data2, n, datatype, operation, receiver, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data1
+  logical, dimension(:) :: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  integer:: receiver
+  dummyl = data1
+  dummyl = data2(1) 
+  dummy = n + datatype + operation + receiver + comm + ierror
+end subroutine
+
+
+subroutine mpi_allreduce_int0 ( data1, data2, n, datatype, operation, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer:: data1
+  integer:: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  dummy = data1 + data2 + n + datatype + operation + comm + ierror
+end subroutine
+subroutine mpi_allreduce_int1 ( data1, data2, n, datatype, operation, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:) :: data1
+  integer:: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  dummy = data1(1) + data2 + n + datatype + operation + comm + ierror
+end subroutine
+subroutine mpi_allreduce_real0( data1, data2, n, datatype, operation, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data1
+  real(eb):: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  dummy = data1 + data2 + n + datatype + operation + comm + ierror
+end subroutine
+subroutine mpi_allreduce_real1( data1, data2, n, datatype, operation, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb), dimension(:) :: data1
+  real(eb):: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  dummy = data1(1) + data2 + n + datatype + operation + comm + ierror
+end subroutine
+subroutine mpi_allreduce_logical0 ( data1, data2, n, datatype, operation, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data1
+  logical:: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  dummyl = data1
+  dummyl = data2
+  dummy = n + datatype + operation + comm + ierror
+end subroutine
+subroutine mpi_allreduce_logical1( data1, data2, n, datatype, operation, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical, dimension(:) :: data1
+  logical:: data2
+  integer:: datatype
+  integer:: ierror
+  integer:: operation
+  dummyl = data1(1)
+  dummyl = data2
+  dummy = n + datatype + operation + comm + ierror
+end subroutine
+
+
+subroutine mpi_recv_init_int0( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummy = data + n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_recv_init_int1( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummy = data(1) + n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_recv_init_real0( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummy = data + n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_recv_init_real1( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb), dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummy = data(1) + n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_recv_init_logical0( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummyl = data
+  dummy = n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_recv_init_logical1( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummyl = data(1)
+  dummy = n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_recv_init_char0( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummyc = data
+  dummy = n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_recv_init_char1( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummyc = data(1)
+  dummy = n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+
+
+subroutine mpi_send_init_int0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_send_init_int1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data(1) + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_send_init_real0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_send_init_real1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb), dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data(1) + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_send_init_logical0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyl = data
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_send_init_logical1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyl = data(1)
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_send_init_char0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyc = data
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_send_init_char1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyc = data(1)
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+
+
+subroutine mpi_recv_int0 ( data, n, datatype, iproc, itag, comm, istatus, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer, dimension(:) :: istatus
+  integer:: itag
+  dummy = data + n + datatype + iproc + itag + comm + istatus(1) + ierror
+end subroutine
+subroutine mpi_recv_int1 ( data, n, datatype, iproc, itag, comm, istatus, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer, dimension(:) :: istatus
+  integer:: itag
+  dummy = data(1) + n + datatype + iproc + itag + comm + istatus(1) + ierror
+end subroutine
+subroutine mpi_recv_real0 ( data, n, datatype, iproc, itag, comm, istatus, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer, dimension(:) :: istatus
+  integer:: itag
+  dummy = data + n + datatype + iproc + itag + comm + istatus(1) + ierror
+end subroutine
+subroutine mpi_recv_real1 ( data, n, datatype, iproc, itag, comm, istatus, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb), dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer, dimension(:) :: istatus
+  integer:: itag
+  dummy = data(1) + n + datatype + iproc + itag + comm + istatus(1) + ierror
+end subroutine
+subroutine mpi_recv_logical0 ( data, n, datatype, iproc, itag, comm, istatus, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer, dimension(:) :: istatus
+  integer:: itag
+  dummyl = data
+  dummy = n + datatype + iproc + itag + comm + istatus(1) + ierror
+end subroutine
+subroutine mpi_recv_logical1 ( data, n, datatype, iproc, itag, comm, istatus, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer, dimension(:) :: istatus
+  integer:: itag
+  dummyl = data(1)
+  dummy = n + datatype + iproc + itag + comm + istatus(1) + ierror
+end subroutine
+subroutine mpi_recv_char0 ( data, n, datatype, iproc, itag, comm, istatus, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer, dimension(:) :: istatus
+  integer:: itag
+  dummyc = data
+  dummy = n + datatype + iproc + itag + comm + istatus(1) + ierror
+end subroutine
+subroutine mpi_recv_char1 ( data, n, datatype, iproc, itag, comm, istatus, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer, dimension(:) :: istatus
+  integer:: itag
+  dummyc = data(1)
+  dummy = n + datatype + iproc + itag + comm + istatus(1) + ierror
+end subroutine
+
+
+subroutine mpi_send_int0( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummy = data + n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_send_int1( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummy = data(1) + n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_send_real0( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummy = data + n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_send_real1( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb), dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummy = data(1) + n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_send_logical0( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummyl = data
+  dummy = n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_send_logical1( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical, dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummyl = data(1)
+  dummy = n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_send_char0( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummyc = data
+  dummy = n + datatype + iproc + itag + comm + ierror
+end subroutine
+subroutine mpi_send_char1( data, n, datatype, iproc, itag, comm, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character, dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  dummyc = data(1)
+  dummy = n + datatype + iproc + itag + comm + ierror
+end subroutine
+
+
+subroutine mpi_irecv_int0 ( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummy = data + n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_irecv_int1 ( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummy = data(1) + n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_irecv_real0 ( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummy = data + n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_irecv_real1 ( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb), dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummy = data(1) + n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_irecv_logical0 ( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummyl = data
+  dummy = n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_irecv_logical1 ( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummyl = data(1)
+  dummy = n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_irecv_char0 ( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummyc = data
+  dummy = n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+subroutine mpi_irecv_char1 ( data, n, datatype, iproc, itag, comm, irequest, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: irequest
+  integer:: itag
+  dummyc = data(1)
+  dummy = n + datatype + iproc + itag + comm + irequest + ierror
+end subroutine
+
+
+subroutine mpi_isend_int0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_isend_int1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  integer, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data(1) + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_isend_real0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_isend_real1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  real(eb), dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummy = data(1) + n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_isend_logical0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyl = data
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_isend_logical1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  logical, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyl = data(1)
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_isend_char0 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyc = data
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+subroutine mpi_isend_char1 ( data, n, datatype, iproc, itag, comm, request, ierror )
+  implicit none
+  integer:: n
+  integer:: comm
+  character, dimension(:) :: data
+  integer:: datatype
+  integer:: ierror
+  integer:: iproc
+  integer:: itag
+  integer:: request
+  dummyc = data(1)
+  dummy = n + datatype + iproc + itag + comm + request + ierror
+end subroutine
+
+
+subroutine mpi_bcast_int0 ( data, n, datatype, node, comm, ierror )
+  integer:: n
+  integer:: comm
+  integer:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: node
+  dummy = data + n + datatype + node + comm + ierror
+end subroutine
+subroutine mpi_bcast_int1 ( data, n, datatype, node, comm, ierror )
+  integer:: n
+  integer:: comm
+  integer, dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: node
+  dummy = data(1) + n + datatype + node + comm + ierror
+end subroutine
+subroutine mpi_bcast_real0 ( data, n, datatype, node, comm, ierror )
+  integer:: n
+  integer:: comm
+  real(eb):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: node
+  dummy = data + n + datatype + node + comm + ierror
+end subroutine
+subroutine mpi_bcast_real1 ( data, n, datatype, node, comm, ierror )
+  integer:: n
+  integer:: comm
+  real(eb), dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: node
+  dummy = data(1) + n + datatype + node + comm + ierror
+end subroutine
+subroutine mpi_bcast_logical0 ( data, n, datatype, node, comm, ierror )
+  integer:: n
+  integer:: comm
+  logical:: data
+  integer:: datatype
+  integer:: ierror
+  integer:: node
+  dummyl = data
+  dummy =  n + datatype + node + comm + ierror
+end subroutine
+subroutine mpi_bcast_logical1 ( data, n, datatype, node, comm, ierror )
+  integer:: n
+  integer:: comm
+  logical, dimension(:):: data
+  integer:: datatype
+  integer:: ierror
+  integer:: node
+  dummyl = data(1)
+  dummy = n + datatype + node + comm + ierror
+end subroutine
+
+
+subroutine mpi_startall_scalar ( icount, irequest, ierror )
+  implicit none
+  integer:: icount
+  integer:: ierror
+  integer:: irequest
+  dummy = icount + irequest + ierror
+end subroutine
+subroutine mpi_startall_array ( icount, irequest, ierror )
+  implicit none
+  integer:: icount
+  integer:: ierror
+  integer, dimension(:):: irequest
+  dummy = icount + irequest(1) + ierror
+end subroutine
+
+
+subroutine mpi_waitall_scalar ( icount, irequest, istatus, ierror )
+  integer:: icount
+  integer:: ierror
+  integer:: irequest
+  integer:: istatus
+  dummy = icount + irequest + istatus + ierror
+end subroutine
+subroutine mpi_waitall_array ( icount, irequest, istatus, ierror )
+  integer:: icount
+  integer:: ierror
+  integer, dimension(:)   :: irequest
+  integer, dimension(:,:) :: istatus
+  dummy = icount + irequest(1) + istatus(1,1) + ierror
+end subroutine
 
 
 subroutine mpi_get_processor_name(pname, pnamelen, ierror)
-  implicit none
   character(*) :: pname
   integer pnamelen
   integer ierror
   pname = 'null'
+  dummy = pnamelen + ierror
 end subroutine
-
-
-subroutine mpi_allreduce ( data1, data2, n, datatype, operation, comm, ierror )
-  implicit none
-  integer n
-  integer comm
-  integer data1(n)
-  integer data2(n)
-  integer datatype
-  integer ierror
-  integer operation
-end subroutine
-
-
-
-subroutine mpi_allgather ( data1, nsend, sendtype,data2, nrecv, recvtype, comm, ierror )
-
-  implicit none
-
-  integer nsend
-  integer comm
-  integer data1(nsend)
-  integer data2(nsend)
-  integer ierror
-  integer nrecv
-  integer recvtype
-  integer sendtype
-
-end subroutine
-
-
-
-subroutine mpi_allgatherv ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, comm, ierror )
-
-  implicit none
-
-  integer nsend
-  integer comm
-  integer data1(nsend)
-  integer data2(nsend)
-  integer ierror
-  integer ndispls
-  integer nrecv
-  integer recvtype
-  integer sendtype
-
-end subroutine
-
-
-
-subroutine mpi_gatherv ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
-
-  implicit none
-
-  integer nsend
-  integer comm
-  integer data1(nsend)
-  integer data2(nsend)
-  integer ierror
-  integer ndispls
-  integer nrecv
-  integer recvtype
-  integer recvnode
-  integer sendtype
-
-end subroutine
-
 
 
 subroutine mpi_barrier ( comm, ierror )
-
-  implicit none
-
   integer comm
   integer ierror
-
-end subroutine
-
-
-
-subroutine mpi_bcast ( data, n, datatype, node, comm, ierror )
-
-  implicit none
-
-  integer n
-  integer comm
-  integer data(n)
-  integer datatype
-  integer ierror
-  integer node
-
+  dummy = comm + ierror
 end subroutine
 
 
 subroutine mpi_comm_size ( comm, nprocs, ierror )
-  implicit none
-
   integer comm
   integer ierror
   integer nprocs
-
   nprocs = 1
-
+  dummy = comm + ierror
 end subroutine
-
 
 
 subroutine mpi_comm_rank ( comm, me, ierror )
-
-  implicit none
-
   integer comm
   integer ierror
   integer me
-
   me = 0
-
+  dummy = comm + ierror
 end subroutine
-
 
 
 subroutine mpi_finalize ( ierror )
-
-  implicit none
-
   integer ierror
-
+  dummy = ierror
 end subroutine
-
 
 
 subroutine mpi_init ( ierror )
-
-  implicit none
-
   integer ierror
-
+  dummy = ierror
 end subroutine
-
-
-subroutine mpi_recv_init ( data, n, datatype, iproc, itag, comm, irequest, ierror )
-  implicit none
-  integer n
-  integer comm
-  integer data(n)
-  integer datatype
-  integer ierror
-  integer iproc
-  integer irequest
-  integer itag
-end subroutine mpi_recv_init
-
-
-subroutine mpi_irecv ( data, n, datatype, iproc, itag, comm, irequest, ierror )
-
-  implicit none
-
-  integer n
-  integer comm
-  integer data(n)
-  integer datatype
-  integer ierror
-  integer iproc
-  integer irequest
-  integer itag
-
-
-end subroutine
-
-
-subroutine mpi_send_init( data, n, datatype, iproc, itag, comm, request, ierror )
-  implicit none
-  integer n
-  integer comm
-  integer data(n)
-  integer datatype
-  integer ierror
-  integer iproc
-  integer itag
-  integer request
-end subroutine mpi_send_init
-
-
-subroutine mpi_isend ( data, n, datatype, iproc, itag, comm, request, ierror )
-
-  implicit none
-
-  integer n
-  integer comm
-  integer data(n)
-  integer datatype
-  integer ierror
-  integer iproc
-  integer itag
-  integer request
-
-  request = 0
-
-end subroutine
-
-
-
-subroutine mpi_recv ( data, n, datatype, iproc, itag, comm, istatus, ierror )
-
-  implicit none
-
-  integer n
-  integer comm
-  integer data(n)
-  integer datatype
-  integer ierror
-  integer iproc
-  integer istatus
-  integer itag
-
-end subroutine
-
-
-
-subroutine mpi_reduce ( data1, data2, n, datatype, operation, receiver, comm, ierror )
-
-  implicit none
-
-  integer n
-  integer comm
-  integer data1(n)
-  integer data2
-  integer datatype
-  integer ierror
-  integer operation
-  integer receiver
-
-end subroutine
-
 
 
 subroutine mpi_rsend ( data, n, datatype, iproc, itag, comm, ierror )
-
-  implicit none
-
   integer n
   integer comm
   integer data(n)
@@ -474,72 +1511,26 @@ subroutine mpi_rsend ( data, n, datatype, iproc, itag, comm, ierror )
   integer ierror
   integer iproc
   integer itag
-
+  dummy = data(1) + n + datatype + iproc + itag + comm + ierror
 end subroutine
-
-
-
-subroutine mpi_send ( data, n, datatype, iproc, itag, comm, ierror )
-
-  implicit none
-
-  integer n
-  integer comm
-  integer data(n)
-  integer datatype
-  integer ierror
-  integer iproc
-  integer itag
-
-end subroutine
-
 
 
 subroutine mpi_wait ( irequest, istatus, ierror )
-
-  implicit none
-
   integer ierror
   integer irequest
   integer istatus
-
+  dummy = irequest + istatus + ierror 
  end subroutine
 
 
-subroutine mpi_startall ( icount, irequest, ierror )
-  implicit none
-  integer icount
-  integer ierror
-  integer irequest
-end subroutine mpi_startall
-
-
-
-subroutine mpi_waitall ( icount, irequest, istatus, ierror )
-
-  implicit none
-
-  integer icount
-  integer ierror
-  integer irequest
-  integer istatus
-
-end subroutine
-
-
-
 function mpi_wtime ( )
-
-  implicit none
-
   integer count
   integer count_max
   integer count_rate
   real ( kind = 8 ) mpi_wtime
-
   call system_clock ( count, count_rate, count_max )
-  mpi_wtime = real ( count, kind = 8 ) / real ( count_rate, kind = 8 )
-  
+  mpi_wtime = real ( count, kind = 8 ) / real ( count_rate, kind = 8 )  
 end function
 
 
+END MODULE MPI
