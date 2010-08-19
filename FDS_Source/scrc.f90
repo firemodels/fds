@@ -614,7 +614,12 @@ GRID_LEVEL_LOOP2D: DO ILEVEL=S%NLMAX,S%NLMIN,-1
    ! ----------------------------------------------------------------------------------
    SL%NCELLS_LOCAL = SL%IBAR * SL%KBAR 
    IF (NMESHES>1) THEN
-      CALL MPI_ALLREDUCE(SL%NCELLS_LOCAL,SL%NCELLS_GLOBAL,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+      IF (USE_MPI) THEN
+        CALL MPI_ALLREDUCE(SL%NCELLS_LOCAL,SL%NCELLS_GLOBAL,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+      ELSE
+         WRITE(*,*) 'Serial version not yet implemented'
+         stop
+      ENDIF
    ELSE
       SL%NCELLS_GLOBAL = SL%NCELLS_LOCAL
    ENDIF
@@ -773,7 +778,12 @@ GRID_LEVEL_LOOP3D: DO ILEVEL=S%NLMAX,S%NLMIN,-1
    ! ----------------------------------------------------------------------------------
    SL%NCELLS_LOCAL = SL%IBAR * SL%KBAR 
    IF (NMESHES>1) THEN
-      CALL MPI_ALLREDUCE(SL%NCELLS_LOCAL,SL%NCELLS_GLOBAL,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+      IF (USE_MPI) THEN
+         CALL MPI_ALLREDUCE(SL%NCELLS_LOCAL,SL%NCELLS_GLOBAL,1,MPI_INTEGER,MPI_SUM,MPI_COMM_WORLD,IERR)
+      ELSE
+         WRITE(*,*) 'Serial version not yet implemented'
+         stop
+      ENDIF
    ELSE
       SL%NCELLS_GLOBAL = SL%NCELLS_LOCAL
    ENDIF
@@ -1187,6 +1197,9 @@ IF (USE_MPI) THEN
                        SLMAX%K_MAX_FACE,COUNTS2D,DISPLS2D,MPI_INTEGER,MPI_COMM_WORLD,IERR)
    CALL MPI_ALLGATHERV(SLMAX%NIC_FACE(1,DISPLS(MYID)+1),  COUNTS2D(MYID),MPI_INTEGER,&
                        SLMAX%NIC_FACE,  COUNTS2D,DISPLS2D,MPI_INTEGER,MPI_COMM_WORLD,IERR)
+ELSE
+   WRITE(*,*) 'Serial version not yet implemented'
+   stop
 ENDIF
 
 IF (SCARC_DEBUG >= 4) THEN
@@ -1876,6 +1889,9 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG') THEN
                              SLLO%K_MAX_FACE,COUNTS2D,DISPLS2D,MPI_INTEGER,MPI_COMM_WORLD,IERR)
          CALL MPI_ALLGATHERV(SLLO%NIC_FACE(1,DISPLS(MYID)+1),  COUNTS2D(MYID),MPI_INTEGER,&
                              SLLO%NIC_FACE,  COUNTS2D,DISPLS2D,MPI_INTEGER,MPI_COMM_WORLD,IERR)
+      ELSE
+         WRITE(*,*) 'Serial version not yet implemented'
+         stop
       ENDIF
 
       SLLO%I_MIN_FACE = TRANSPOSE(SLLO%I_MIN_FACE)
@@ -4889,8 +4905,13 @@ ENDDO
  
 ! compute global scalarproduct in case of multi-mesh computation 
 IF (NMESHES > 1) THEN
-   CALL MPI_ALLREDUCE (SP, SPG, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
-   SP = SPG
+   IF (USE_MPI) THEN
+      CALL MPI_ALLREDUCE (SP, SPG, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
+      SP = SPG
+   ELSE
+      WRITE(*,*) 'Serial version not yet implemented'
+      stop
+   ENDIF
 ENDIF
 
 SCARC_SCALPROD2D = SP
@@ -4929,8 +4950,13 @@ ENDDO
  
 ! compute global scalarproduct in case of multi-mesh computation 
 IF (NMESHES > 1) THEN
-   CALL MPI_ALLREDUCE (SP, SPG, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
-   SP = SPG
+   IF (USE_MPI) THEN
+      CALL MPI_ALLREDUCE (SP, SPG, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
+      SP = SPG
+   ELSE
+      WRITE(*,*) 'Serial version not yet implemented'
+      stop
+   ENDIF
 ENDIF
 
 SCARC_SCALPROD3D = SP
@@ -4971,8 +4997,13 @@ ENDDO
 IF (ITYPE == NTYPE_LOCAL .OR. NMESHES==1) THEN                
    SP = Sqrt (SP/REAL(SL%NCELLS_LOCAL, EB))                   ! scale with local  number of cells
 ELSE IF (ITYPE == NTYPE_GLOBAL) THEN                          
-   CALL MPI_ALLREDUCE (SP, SPG, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
-   SP = Sqrt (SPG/REAL(SL%NCELLS_GLOBAL, EB))                 ! scale with global number of cells
+   IF (USE_MPI) THEN
+      CALL MPI_ALLREDUCE (SP, SPG, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
+      SP = Sqrt (SPG/REAL(SL%NCELLS_GLOBAL, EB))                 ! scale with global number of cells
+   ELSE
+      WRITE(*,*) 'Serial version not yet implemented'
+      stop
+   ENDIF
 ELSE
    WRITE (*,*) 'Wrong type for SCARC_L2NORM2D ', ITYPE
 ENDIF
@@ -5016,8 +5047,13 @@ ENDDO
 IF (ITYPE == NTYPE_LOCAL .OR. NMESHES==1) THEN                
    SP = Sqrt (SP/REAL(SL%NCELLS_LOCAL, EB))                   ! scale with local number of cells
 ELSE IF (ITYPE == NTYPE_GLOBAL) THEN                          
-   CALL MPI_ALLREDUCE (SP, SPG, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
-   SP = Sqrt (SPG/REAL(SL%NCELLS_GLOBAL, EB))                 ! scale with global number of cells
+   IF (USE_MPI) THEN
+      CALL MPI_ALLREDUCE (SP, SPG, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, IERR)
+      SP = Sqrt (SPG/REAL(SL%NCELLS_GLOBAL, EB))                 ! scale with global number of cells
+   ELSE
+      WRITE(*,*) 'Serial version not yet implemented'
+      stop
+   ENDIF
 ELSE
    WRITE (*,*) 'Wrong type for SCARC_L2NORM3D ', ITYPE
 ENDIF
@@ -6017,8 +6053,8 @@ RECEIVE_MESH_LOOP: DO NM=1,NMESHES
          INIT_FACE_IF: IF (CODE==NCOM_INIT) THEN
 
             NREQ_FACE = NREQ_FACE+1
-            CALL MPI_IRECV(OSNML%IJKW_FACE(1,1),17*OSNML%NW_FACE,MPI_INTEGER,SNODE, &
-                           TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
+            IF (USE_MPI) CALL MPI_IRECV(OSNML%IJKW_FACE(1,1),17*OSNML%NW_FACE,MPI_INTEGER,SNODE, &
+                                        TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
             IF (SCARC_DEBUG>=6) THEN
                WRITE(9,*) 'RECEIVE: INIT: LEVEL=',ILEVEL
@@ -6046,8 +6082,8 @@ RECEIVE_MESH_LOOP: DO NM=1,NMESHES
          MATV_FACE_IF: IF (CODE==NCOM_MATV) THEN
 
             NREQ_FACE = NREQ_FACE+1
-            CALL MPI_IRECV(OSNML%RECV_FACE(1),SIZE(OSNML%RECV_FACE),MPI_DOUBLE_PRECISION,&
-                        SNODE,TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
+            IF (USE_MPI) CALL MPI_IRECV(OSNML%RECV_FACE(1),SIZE(OSNML%RECV_FACE),MPI_DOUBLE_PRECISION,&
+                                        SNODE,TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
             IF (SCARC_DEBUG>=8) THEN
                WRITE(9,*) 'RECEIVE: MATV: receive length',SIZE(OSNML%RECV_FACE)
@@ -6077,9 +6113,9 @@ RECEIVE_MESH_LOOP: DO NM=1,NMESHES
          FULL_FACE_IF: IF (CODE==NCOM_FULL) THEN
 
             NREQ_FACE = NREQ_FACE+1
-               IF (SCARC_DEBUG>=8) WRITE(9,*) 'RECEIVE:', SIZE(OSNML%RECV_FACE)
-            CALL MPI_IRECV(OSNML%RECV_FACE(1),SIZE(OSNML%RECV_FACE),MPI_DOUBLE_PRECISION,&
-                           SNODE,TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
+            IF (SCARC_DEBUG>=8) WRITE(9,*) 'RECEIVE:', SIZE(OSNML%RECV_FACE)
+            IF (USE_MPI) CALL MPI_IRECV(OSNML%RECV_FACE(1),SIZE(OSNML%RECV_FACE),MPI_DOUBLE_PRECISION,&
+                                        SNODE,TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
          ENDIF FULL_FACE_IF
 
@@ -6164,8 +6200,8 @@ EXCHANGE_SEND_MESH_LOOP: DO NM=1,NMESHES
             IF (RNODE/=SNODE) THEN
 
                NREQ_FACE = NREQ_FACE+1
-               CALL MPI_ISEND(SNML%IJKW_FACE(1,1),17*SNML%NW_FACE,MPI_INTEGER,SNODE, &
-                             TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
+               IF (USE_MPI) CALL MPI_ISEND(SNML%IJKW_FACE(1,1),17*SNML%NW_FACE,MPI_INTEGER,SNODE, &
+                                           TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
                IF (SCARC_DEBUG>=6) THEN
                  WRITE(9,*) '============================================================='
@@ -6248,8 +6284,8 @@ if (SCARC_DEBUG>=6) write(9,*) 'IW=',IW,': Z(',II,',',JJ,',',KK,')=',SNML%Z(II,J
             ENDDO PACK_SEND_FACE0
             OSNML%SEND_FACE(IWW*2+1) = -999.0_EB
             NREQ_FACE=NREQ_FACE+1
-            CALL MPI_ISEND(OSNML%SEND_FACE(1),IWW*2+1,MPI_DOUBLE_PRECISION,SNODE, &
-                           TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
+            IF (USE_MPI) CALL MPI_ISEND(OSNML%SEND_FACE(1),IWW*2+1,MPI_DOUBLE_PRECISION,SNODE, &
+                                        TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
 if (SCARC_DEBUG>=8) THEN
    write(9,*) 'EXCHANGE: MATV: sending ', IWW*2+1
@@ -6295,8 +6331,8 @@ ENDIF
             ENDDO PACK_SEND_FACE
             OSNML%SEND_FACE(IWW*2+1) = -999.0_EB
             NREQ_FACE=NREQ_FACE+1
-            CALL MPI_ISEND(OSNML%SEND_FACE(1),IWW*2+1,MPI_DOUBLE_PRECISION,SNODE, &
-                           TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
+            IF (USE_MPI) CALL MPI_ISEND(OSNML%SEND_FACE(1),IWW*2+1,MPI_DOUBLE_PRECISION,SNODE, &
+                                        TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
 
 
          ELSE
@@ -6319,7 +6355,7 @@ IF (SCARC_DEBUG>=8) THEN
    write(9,*) 'REQ_FACE=',REQ_FACE(1:NREQ_FACE)
 ENDIF
    
-CALL MPI_WAITALL(NREQ_FACE,REQ_FACE(1:NREQ_FACE),STAT_FACE,IERR)
+IF (USE_MPI) CALL MPI_WAITALL(NREQ_FACE,REQ_FACE(1:NREQ_FACE),STAT_FACE,IERR)
 
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
