@@ -210,8 +210,6 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
        parameter (MPI_MAXLOC=36)
        parameter (MPI_MINLOC=37)
        parameter (MPI_REPLACE=38)
-      !double precision MPI_WTIME, MPI_WTICK !, PMPI_WTIME, PMPI_WTICK
-      !external MPI_WTIME, MPI_WTICK !, PMPI_WTIME, PMPI_WTICK      ! S.Kilian: now within 'contains'-environment
 
   integer mpi_failure
   parameter ( mpi_failure = 1 )
@@ -221,10 +219,6 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
   integer dummy
   logical dummyl
   character dummyc
-
-  !
-  ! S.Kilian: new interfaces
-  !
 
   interface mpi_gatherv
     module procedure mpi_gatherv_int1    , mpi_gatherv_int2,    mpi_gatherv_int3, &
@@ -305,23 +299,16 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
   end interface mpi_bcast
 
   interface mpi_startall
-     module procedure mpi_startall_scalar, mpi_startall_array
+     module procedure mpi_startall_int0, mpi_startall_int1
   end interface mpi_startall
 
   interface mpi_waitall
-     module procedure mpi_waitall_scalar, mpi_waitall_array
+     module procedure mpi_waitall_int0, mpi_waitall_int1
   end interface mpi_waitall
-
-  !
-  ! S.Kilian: end of new interfaces
-  !
 
   contains
 
 
-!
-! S.Kilian: new type-sensitive routines
-!
 subroutine mpi_gatherv_int1 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
   implicit none
   integer:: nsend
@@ -1425,14 +1412,14 @@ subroutine mpi_bcast_logical1 ( data, n, datatype, node, comm, ierror )
 end subroutine
 
 
-subroutine mpi_startall_scalar ( icount, irequest, ierror )
+subroutine mpi_startall_int0 ( icount, irequest, ierror )
   implicit none
   integer:: icount
   integer:: ierror
   integer:: irequest
   dummy = icount + irequest + ierror
 end subroutine
-subroutine mpi_startall_array ( icount, irequest, ierror )
+subroutine mpi_startall_int1 ( icount, irequest, ierror )
   implicit none
   integer:: icount
   integer:: ierror
@@ -1441,14 +1428,14 @@ subroutine mpi_startall_array ( icount, irequest, ierror )
 end subroutine
 
 
-subroutine mpi_waitall_scalar ( icount, irequest, istatus, ierror )
+subroutine mpi_waitall_int0 ( icount, irequest, istatus, ierror )
   integer:: icount
   integer:: ierror
   integer:: irequest
   integer:: istatus
   dummy = icount + irequest + istatus + ierror
 end subroutine
-subroutine mpi_waitall_array ( icount, irequest, istatus, ierror )
+subroutine mpi_waitall_int1 ( icount, irequest, istatus, ierror )
   integer:: icount
   integer:: ierror
   integer, dimension(:)   :: irequest
@@ -1500,18 +1487,6 @@ end subroutine
 subroutine mpi_init ( ierror )
   integer ierror
   dummy = ierror
-end subroutine
-
-
-subroutine mpi_rsend ( data, n, datatype, iproc, itag, comm, ierror )
-  integer n
-  integer comm
-  integer data(n)
-  integer datatype
-  integer ierror
-  integer iproc
-  integer itag
-  dummy = data(1) + n + datatype + iproc + itag + comm + ierror
 end subroutine
 
 
