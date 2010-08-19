@@ -10,10 +10,11 @@ plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-data_dir = '../../../../FDS-SMV/Verification/Scalar_Analytical_Solution/';
-plot_dir = '../../../../FDS-SMV/Manuals/FDS_5_Verification_Guide/SCRIPT_FIGURES/';
+data_dir = '../../../Verification/Scalar_Analytical_Solution/';
+plot_dir = '../../../Manuals/FDS_5_Verification_Guide/SCRIPT_FIGURES/';
 
 % central differencing, FL=0
+
 M_FL0_16 = csvread([data_dir,'compression_wave_FL0_16_devc.csv'],2,0);
 M_FL0_32 = csvread([data_dir,'compression_wave_FL0_32_devc.csv'],2,0);
 M_FL0_64 = csvread([data_dir,'compression_wave_FL0_64_devc.csv'],2,0);
