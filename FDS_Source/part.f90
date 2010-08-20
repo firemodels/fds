@@ -916,7 +916,7 @@ DROPLET_LOOP: DO I=1,NLP
       MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
       DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
 
-      DRAG_CALC: IF (DR%IOR==0 .AND. DR%RE>0) THEN
+      DRAG_CALC: IF ((DR%IOR==0 .AND. DR%RE>0) .OR. NEW_FLUID_PARTICLE) THEN
 
          IF (PC%DRAG_LAW==USER_DRAG) THEN
             C_DRAG = PC%USER_DRAG_COEFFICIENT
@@ -936,7 +936,7 @@ DROPLET_LOOP: DO I=1,NLP
             ! droplet age is larger than smallest characteristic breakup time
             AGE_IF: IF ((T-DR%T) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
                IF (PC%MONODISPERSE) THEN
-                  RD       = THROHALF*RD
+                  RD    = THROHALF*RD
                ELSE
                   DO WHILE (RD >= DR%R)
                      CHILD_RADIUS = PC%BREAKUP_CHILD_DIAMETER*DR%R*PC%CHILD_R_CDF(:)
@@ -1029,22 +1029,32 @@ DROPLET_LOOP: DO I=1,NLP
                Y_OLD = DR%Y
                Z_OLD = DR%Z
                
-               ! analytical solution for droplet position based on drag only
-               DR%X = DR%X + (U_OLD+ALPHA*UBAR)/OPA*DT + ALPHA/BETA*(U_OLD-UBAR)/OPA*LOG(OBDT)
-               DR%Y = DR%Y + (V_OLD+ALPHA*VBAR)/OPA*DT + ALPHA/BETA*(V_OLD-VBAR)/OPA*LOG(OBDT)
-               DR%Z = DR%Z + (W_OLD+ALPHA*WBAR)/OPA*DT + ALPHA/BETA*(W_OLD-WBAR)/OPA*LOG(OBDT)
+               IF (BETA>1.E-9_EB) THEN
+                  ! analytical solution for droplet position based on drag only
+                  DR%X = DR%X + (U_OLD+ALPHA*UBAR)/OPA*DT + ALPHA/BETA*(U_OLD-UBAR)/OPA*LOG(OBDT)
+                  DR%Y = DR%Y + (V_OLD+ALPHA*VBAR)/OPA*DT + ALPHA/BETA*(V_OLD-VBAR)/OPA*LOG(OBDT)
+                  DR%Z = DR%Z + (W_OLD+ALPHA*WBAR)/OPA*DT + ALPHA/BETA*(W_OLD-WBAR)/OPA*LOG(OBDT)
+                  
+                  ! fluid momentum source term
+                  MPOM = DR%PWT*DR_MASS/RHO_G/RVC
+                  DR%A_X = DR%A_X + MPOM*(U_OLD-DR%U)/DT ! inefficient, should /DT later.
+                  DR%A_Y = DR%A_Y + MPOM*(V_OLD-DR%V)/DT
+                  DR%A_Z = DR%A_Z + MPOM*(W_OLD-DR%W)/DT
+               ELSE
+                  ! no drag
+                  DR%X = DR%X + DR%U*DT
+                  DR%Y = DR%Y + DR%V*DT
+                  DR%Z = DR%Z + DR%W*DT
+                  DR%A_X  = 0._EB
+                  DR%A_Y  = 0._EB
+                  DR%A_Z  = 0._EB
+               ENDIF
                
-               ! fluid momentum source term
-               MPOM = DR%PWT*DR_MASS/RHO_G/RVC
-               DR%A_X = DR%A_X + MPOM*(U_OLD-DR%U)/DT ! inefficient, should /DT later.
-               DR%A_Y = DR%A_Y + MPOM*(V_OLD-DR%V)/DT
-               DR%A_Z = DR%A_Z + MPOM*(W_OLD-DR%W)/DT
-               
+               ! gravitational acceleration
                U_OLD = DR%U
                V_OLD = DR%V
                W_OLD = DR%W
                
-               ! gravitational acceleration
                DR%U = DR%U + GVEC(1)*DT
                DR%V = DR%V + GVEC(2)*DT
                DR%W = DR%W + GVEC(3)*DT
