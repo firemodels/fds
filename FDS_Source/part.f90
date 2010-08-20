@@ -770,13 +770,15 @@ REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,SFAC,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
             RD,T,C_DRAG,XI,YJ,ZK,MU_AIR,WE_G,DROP_VOL_FRAC,DROP_DEN, &
             DTSP,DTMIN,UBAR,VBAR,WBAR,BFAC,GRVT1,GRVT2,GRVT3,AUREL,AVREL,AWREL,CONST, &
             UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION(-3:3),SURFACE_DROPLET_DIAMETER, &
-            T_BU_BAG,T_BU_STRIP,B_1,THROHALF,P_UVWMAX,UVWMAX
+            T_BU_BAG,T_BU_STRIP,B_1,THROHALF,P_UVWMAX,UVWMAX, &
+            ALPHA,BETA,DR_MASS,FP_MASS,OBDT,OPA,BDTOA,U_OLD,V_OLD,W_OLD,MPOM
 REAL(EB) :: CHILD_RADIUS(0:NDC)
 LOGICAL :: HIT_SOLID
 INTEGER :: ICN,I,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,IW,N,NITER,IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IOR_OLD,IC,IOR_FIRST,IML
 INTEGER, INTENT(IN) :: NM
 TYPE (DROPLET_TYPE), POINTER :: DR=>NULL()
 TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: NDPC=>NULL() ! number of droplets per cell
 
 SURFACE_DROPLET_DIAMETER = 0.001_EB  ! All droplets adjusted to this size when on solid (m)
 THROHALF = (0.5_EB)**(1./3.)
@@ -788,6 +790,21 @@ GRVT3 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GZ)*GVEC(3)
 
 UVWMAX = 0._EB
 P_UVWMAX = UVWMAX
+
+IF (NEW_FLUID_PARTICLE) THEN
+   NDPC=>WORK1
+   NDPC=0._EB
+   DO I=1,NLP
+      DR => DROPLET(I)
+      XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
+      YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
+      ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
+      II  = FLOOR(XI+1._EB)
+      JJ  = FLOOR(YJ+1._EB)
+      KK  = FLOOR(ZK+1._EB)
+      IF (DR%PWT>0._EB) NDPC(II,JJ,KK)=NDPC(II,JJ,KK)+1._EB
+   ENDDO
+ENDIF
 
 ! Loop through all Lagrangian particles and move them one time step
 
@@ -837,7 +854,11 @@ DROPLET_LOOP: DO I=1,NLP
    UVW = MAX( ABS(DR%U)*RDX(II),ABS(DR%V)*RDY(JJ),ABS(DR%W)*RDZ(KK) )
    P_UVWMAX = MAX(P_UVWMAX,UVW)
    IF (UVW/=0._EB) DTMIN = MIN(DTMIN,1._EB/UVW)
-   NITER = MAX(1,CEILING(DT/DTMIN))
+   IF (NEW_FLUID_PARTICLE) THEN
+      NITER = 1
+   ELSE
+      NITER = MAX(1,CEILING(DT/DTMIN))
+   ENDIF
    DTSP  = DT/REAL(NITER,EB)
     
    ! Iterate over a single time step
@@ -873,7 +894,7 @@ DROPLET_LOOP: DO I=1,NLP
     
       ! If the particle is just a massless tracer, just move it and go on to the next particle
 
-      IF (PC%MASSLESS) THEN
+      IF (PC%MASSLESS .OR. DR%PWT==0._EB) THEN
          DR%U = UBAR
          DR%V = VBAR
          DR%W = WBAR 
@@ -945,38 +966,105 @@ DROPLET_LOOP: DO I=1,NLP
             DROP_VOL_FRAC = DROP_DEN/PC%DENSITY 
             IF (DROP_VOL_FRAC > PC%DENSE_VOLUME_FRACTION) C_DRAG = WAKE_REDUCTION(DROP_VOL_FRAC,DR%RE,C_DRAG)
          ENDIF
+         
+         ! Fluid-Particle Momentum Transfer
+         
+         NEW_FLUID_PARTICLE_IF: IF (.NOT.NEW_FLUID_PARTICLE) THEN
 
-         ! Calculate gas phase force transfer terms, A_X, A_Y, and A_Z
+            ! Calculate gas phase force transfer terms, A_X, A_Y, and A_Z
 
-         IF (.NOT. PC%TREE) THEN
-            SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
-            DR%A_X  = (REAL(N-1,EB)*DR%A_X + SFAC*UREL*RVC)/REAL(N,EB)
-            DR%A_Y  = (REAL(N-1,EB)*DR%A_Y + SFAC*VREL*RVC)/REAL(N,EB)
-            DR%A_Z  = (REAL(N-1,EB)*DR%A_Z + SFAC*WREL*RVC)/REAL(N,EB)
-         ELSE !raised vegetation drag and vaporization
-            SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
-            DR%A_X  = SFAC*UREL - DR%VEG_MLR*UBAR/RHO_G
-            DR%A_Y  = SFAC*VREL - DR%VEG_MLR*VBAR/RHO_G
-            DR%A_Z  = SFAC*WREL - DR%VEG_MLR*WBAR/RHO_G
-         ENDIF
-
-         ! Update velocity components for moving droplets/particles
-
-         IF (.NOT.PC%STATIC) THEN
-            CONST   = 8._EB*PC%DENSITY*RD/(3._EB*RHO_G*C_DRAG*QREL)
-            BFAC    = EXP(-DTSP/CONST)
-            IF (SPATIAL_GRAVITY_VARIATION) THEN
-               GRVT1 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GX)*GVEC(1) 
-               GRVT2 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GY)*GVEC(2) 
-               GRVT3 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GZ)*GVEC(3) 
+            IF (.NOT. PC%TREE) THEN
+               SFAC    = DR%PWT*RDS*PIO2*QREL*C_DRAG
+               DR%A_X  = (REAL(N-1,EB)*DR%A_X + SFAC*UREL*RVC)/REAL(N,EB)
+               DR%A_Y  = (REAL(N-1,EB)*DR%A_Y + SFAC*VREL*RVC)/REAL(N,EB)
+               DR%A_Z  = (REAL(N-1,EB)*DR%A_Z + SFAC*WREL*RVC)/REAL(N,EB)
+            ELSE !raised vegetation drag and vaporization
+               SFAC    = PC%VEG_DRAG_COEFFICIENT*PC%VEG_SV*DR%VEG_PACKING_RATIO*QREL*C_DRAG
+               DR%A_X  = SFAC*UREL - DR%VEG_MLR*UBAR/RHO_G
+               DR%A_Y  = SFAC*VREL - DR%VEG_MLR*VBAR/RHO_G
+               DR%A_Z  = SFAC*WREL - DR%VEG_MLR*WBAR/RHO_G
             ENDIF
-            AUREL   = CONST*GRVT1
-            AVREL   = CONST*GRVT2
-            AWREL   = CONST*GRVT3
-            DR%U    = UBAR + (UREL+AUREL)*BFAC - AUREL
-            DR%V    = VBAR + (VREL+AVREL)*BFAC - AVREL
-            DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
-         ENDIF
+
+            ! Update velocity components for moving droplets/particles
+
+            IF (.NOT.PC%STATIC) THEN
+               CONST   = 8._EB*PC%DENSITY*RD/(3._EB*RHO_G*C_DRAG*QREL)
+               BFAC    = EXP(-DTSP/CONST)
+               IF (SPATIAL_GRAVITY_VARIATION) THEN
+                  GRVT1 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GX)*GVEC(1) 
+                  GRVT2 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GY)*GVEC(2) 
+                  GRVT3 = -EVALUATE_RAMP(DR%X,DUMMY,I_RAMP_GZ)*GVEC(3) 
+               ENDIF
+               AUREL   = CONST*GRVT1
+               AVREL   = CONST*GRVT2
+               AWREL   = CONST*GRVT3
+               DR%U    = UBAR + (UREL+AUREL)*BFAC - AUREL
+               DR%V    = VBAR + (VREL+AVREL)*BFAC - AVREL
+               DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
+            ENDIF
+         
+         ELSE NEW_FLUID_PARTICLE_IF
+                    
+            NEW_FP_STATIC_IF: IF (.NOT.PC%STATIC) THEN
+
+               FP_MASS = RHO_G/RVC/NDPC(II,JJ,KK) ! fluid parcel mass
+               DR_MASS = PC%DENSITY*FOTH*PI*RDC ! droplet mass
+               
+               BETA = 0.5_EB*RHO_G*C_DRAG*PI*RDS*(1._EB/DR_MASS+1._EB/FP_MASS)*QREL
+               OBDT = 1._EB+BETA*DT
+            
+               ALPHA = FP_MASS/DR_MASS
+               OPA   = 1._EB+ALPHA
+               BDTOA = BETA*DT/OPA
+
+               U_OLD = DR%U
+               V_OLD = DR%V
+               W_OLD = DR%W
+            
+               DR%U = ( U_OLD + (U_OLD+ALPHA*UBAR)*BDTOA )/OBDT
+               DR%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT
+               DR%W = ( W_OLD + (W_OLD+ALPHA*WBAR)*BDTOA )/OBDT
+               
+               X_OLD = DR%X
+               Y_OLD = DR%Y
+               Z_OLD = DR%Z
+               
+               ! analytical solution for droplet position based on drag only
+               DR%X = DR%X + (U_OLD+ALPHA*UBAR)/OPA*DT + ALPHA/BETA*(U_OLD-UBAR)/OPA*LOG(OBDT)
+               DR%Y = DR%Y + (V_OLD+ALPHA*VBAR)/OPA*DT + ALPHA/BETA*(V_OLD-VBAR)/OPA*LOG(OBDT)
+               DR%Z = DR%Z + (W_OLD+ALPHA*WBAR)/OPA*DT + ALPHA/BETA*(W_OLD-WBAR)/OPA*LOG(OBDT)
+               
+               ! fluid momentum source term
+               MPOM = DR%PWT*DR_MASS/RHO_G/RVC
+               DR%A_X = DR%A_X + MPOM*(U_OLD-DR%U)/DT ! inefficient, should /DT later.
+               DR%A_Y = DR%A_Y + MPOM*(V_OLD-DR%V)/DT
+               DR%A_Z = DR%A_Z + MPOM*(W_OLD-DR%W)/DT
+               
+               U_OLD = DR%U
+               V_OLD = DR%V
+               W_OLD = DR%W
+               
+               ! gravitational acceleration
+               DR%U = DR%U + GVEC(1)*DT
+               DR%V = DR%V + GVEC(2)*DT
+               DR%W = DR%W + GVEC(3)*DT
+               
+               DR%X = DR%X + 0.5_EB*(DR%U+U_OLD)*DT
+               DR%Y = DR%Y + 0.5_EB*(DR%V+V_OLD)*DT
+               DR%Z = DR%Z + 0.5_EB*(DR%W+W_OLD)*DT
+               
+            ELSE NEW_FP_STATIC_IF ! particle velocity is zero
+
+               BETA = 0.5_EB*RVC*C_DRAG*(DR%PWT*PI*RDS)*QREL
+               OBDT = 1._EB+BETA*DT
+
+               DR%A_X = DR%A_X + UBAR*(1._EB/OBDT-1._EB)/DT ! inefficient, should /DT later.
+               DR%A_Y = DR%A_Y + VBAR*(1._EB/OBDT-1._EB)/DT
+               DR%A_Z = DR%A_Z + WBAR*(1._EB/OBDT-1._EB)/DT
+            
+            ENDIF NEW_FP_STATIC_IF
+         
+         ENDIF NEW_FLUID_PARTICLE_IF
 
       ELSE DRAG_CALC ! No drag
 
@@ -992,14 +1080,16 @@ DROPLET_LOOP: DO I=1,NLP
     
       ! Update droplet position
 
-      X_OLD = DR%X
-      Y_OLD = DR%Y
-      Z_OLD = DR%Z
-
-      DR%X  = DR%X + DR%U*DTSP
-      DR%Y  = DR%Y + DR%V*DTSP
-      DR%Z  = DR%Z + DR%W*DTSP
-    
+      IF (.NOT.NEW_FLUID_PARTICLE) THEN
+         X_OLD = DR%X
+         Y_OLD = DR%Y
+         Z_OLD = DR%Z
+      
+         DR%X  = DR%X + DR%U*DTSP
+         DR%Y  = DR%Y + DR%V*DTSP
+         DR%Z  = DR%Z + DR%W*DTSP
+      ENDIF
+      
       ! Droplet hits the floor
     
       IF (POROUS_FLOOR .AND. DR%Z<ZS .AND. PC%EVAP_INDEX>0) THEN
