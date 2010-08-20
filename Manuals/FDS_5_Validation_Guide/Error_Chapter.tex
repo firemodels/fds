@@ -254,7 +254,7 @@ Surface Temperature             & 0.14    \\ \hline
 \section{Calculating Model Uncertainty}
 
 This section describes a method for calculating the {\em model uncertainty}. In terms of the example given in the Introduction, this
-is the answer to the question, ``350~$^\circ$C plus or minus what?'' Actually, the ``plus or minus'' uncertainty bounds are expressed as a statistical distribution. 
+is the answer to the question, ``350~$^\circ$C plus or minus what?'' Actually, the ``plus or minus'' uncertainty bounds are expressed as a statistical distribution.
 That is, the model prediction of the ``true'' temperature of the cable, $\theta$, is expressed in the
 following way\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
 with mean, $\mu$, and standard deviation, $\sigma$.}:
@@ -264,7 +264,7 @@ with mean, $\mu$, and standard deviation, $\sigma$.}:
 \ee
 In words, given a model prediction of 350~$^\circ$C, the expected value of the true temperature is assumed to be normally distributed
 with the given mean and standard deviation. The values of $\delta$ and $\widetilde{\sigma}_M$ are calculated based on the
-comparison of model predictions with experimental measurements, and this calculation is discussed below. First, however, 
+comparison of model predictions with experimental measurements, and this calculation is discussed below. First, however,
 there are a few very important assumptions that need to be justified.
 \begin{enumerate}
 \item The distribution is assumed to be normal. Given the
@@ -277,7 +277,7 @@ experiments is because the model algorithm itself is too complicated to work wit
 as a means of estimating the error. However, if
 the distributions were better characterized, the methodology presented here could be generalized appropriately.
 \item The degree to which the model under or over-predicts the ``truth'' is expressed as a multiplicative bias factor, $\delta$; thus,
-the mean of the distribution in this case is $350/\delta$. If $\delta<1$, the model tends to under-predict, in which case it is 
+the mean of the distribution in this case is $350/\delta$. If $\delta<1$, the model tends to under-predict, in which case it is
 assumed that the true value would be greater than 350. If $\delta>1$, it is assumed that the true value would be less than 350.
 \item The standard deviation of the distribution is expressed as a fixed percentage of the mean,
 $\widetilde{\sigma}=\sigma/\mu$. This is based on the observation that the results of past validation exercises,
@@ -285,7 +285,7 @@ when plotted as shown in Fig.~\ref{scatterplot}, suggest
 that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value.
 \end{enumerate}
 
-With these assumptions in mind, it remains to show how the two parameters, $\delta$ and $\widetilde{\sigma}_M$, are calculated using the 
+With these assumptions in mind, it remains to show how the two parameters, $\delta$ and $\widetilde{\sigma}_M$, are calculated using the
 results of a model validation study.
 Such a study typically consists of comparing point measurements from a wide variety of fire experiments
 with corresponding model predictions.
@@ -387,7 +387,7 @@ going to strike 10~cm to the left of the intended target. However, if the marksm
 intended target to compensate for the defect. If that is the case, it can no longer be assumed that the intended target was 10~cm to the right of the bullet hole.
 
 In summary, assuming that the modeler has not modified the input parameters to compensate for a known bias in the model,
-the true value of the model output quantity, $\theta$, given the model prediction, $M$, is assumed to be normally distributed with the following mean and standard deviation:
+the true value of the model output quantity, $\theta$, given the model prediction, $M$, is normally distributed with the following mean and standard deviation:
 \be
    \theta \; | \; M \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widehat{\widetilde{\sigma}_M^2} \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth}
 \ee
