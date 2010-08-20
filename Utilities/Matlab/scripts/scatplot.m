@@ -76,6 +76,7 @@ for j=qrange
         n_pts = length(nonzeros(Measured_Metric));
         E_bar = mean(log(nonzeros(Measured_Metric)));
         M_bar = mean(log(nonzeros(Predicted_Metric)));
+        normality = lillietest(log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric)));
         u  = sqrt( sum( ( (log(nonzeros(Predicted_Metric))-log(nonzeros(Measured_Metric))) - (M_bar-E_bar) ).^2 )/(n_pts-1) );
         Sigma_E = Sigma_2_E/200;
         Sigma_E = min(u/sqrt(2),Sigma_E);
@@ -86,7 +87,7 @@ for j=qrange
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--') 
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--') 
        
-         if strcmp(Model_Error,'yes')
+         if strcmp(Model_Error,'yes') & normality==0
              plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max],'r-')
              plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1+2*Sigma_M)],'r--')
              plot([Plot_Min,Plot_Max],[Plot_Min,delta*Plot_Max*(1-2*Sigma_M)],'r--')
@@ -111,7 +112,7 @@ for j=qrange
                  ['$2 \, \sigma_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
          end
          
-        if strcmp(Model_Error,'yes')
+        if strcmp(Model_Error,'yes') & normality==0
             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
                 ['$2 \, \sigma_M$=',num2str(2*Sigma_M,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
             
