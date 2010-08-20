@@ -3,6 +3,7 @@
 &MESH IJK=4,4,4,XB=-0.5,0.5,-0.5,0.5,-0.5,0.5 /
 
 &TIME   T_END=25/
+
 &MISC   NOISE=.FALSE.,
     DNS=.TRUE.,
     GVEC=0,0,0, 
@@ -17,7 +18,7 @@
     CONSTANT_PROPERTIES=.TRUE.
     /
 
-&DUMP DT_SLCF = 10000, DT_DEVC = 0.1, DT_PL3D = 10000.,DT_PART=10000 /
+&DUMP DT_PART=10000 /
 
 ! Environment
 
@@ -31,8 +32,9 @@
 &SURF ID='WALL'
       FREE_SLIP=.TRUE.
       ADIABATIC=.TRUE.
-      COLOR="GOLD"
+      COLOR='GOLD'
 /
+
 &INIT XB=    0    0    -0.375    -0.375    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
 &INIT XB=    0    0    -0.125    -0.125    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
 &INIT XB=    0    0    0.125    0.125    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
@@ -53,12 +55,10 @@
 &INIT XB=    0    0    0.125    0.125    0.375    0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
 &INIT XB=    0    0    0.375    0.375    0.375    0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
 
-
-
 &PART ID='Drops'
       WATER=.TRUE.
       EVAPORATE=.FALSE.
-      DENSE_VOLUME_FRACTION = 1.
+      DENSE_VOLUME_FRACTION=1.
       DIAMETER=10000.
       MONODISPERSE=.TRUE.
       SAMPLING_FACTOR=1
