@@ -1016,24 +1016,24 @@ DROPLET_LOOP: DO I=1,NLP
                ALPHA = FP_MASS/DR_MASS
                OPA   = 1._EB+ALPHA
                BDTOA = BETA*DT/OPA
+               
+               X_OLD = DR%X
+               Y_OLD = DR%Y
+               Z_OLD = DR%Z
 
                U_OLD = DR%U
                V_OLD = DR%V
                W_OLD = DR%W
             
-               DR%U = ( U_OLD + (U_OLD+ALPHA*UBAR)*BDTOA )/OBDT
-               DR%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT
-               DR%W = ( W_OLD + (W_OLD+ALPHA*WBAR)*BDTOA )/OBDT
-               
-               X_OLD = DR%X
-               Y_OLD = DR%Y
-               Z_OLD = DR%Z
+               DR%U = ( U_OLD + (U_OLD+ALPHA*UBAR)*BDTOA )/OBDT + GVEC(1)*DT
+               DR%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT + GVEC(2)*DT
+               DR%W = ( W_OLD + (W_OLD+ALPHA*WBAR)*BDTOA )/OBDT + GVEC(3)*DT
                
                IF (BETA>1.E-9_EB) THEN
-                  ! analytical solution for droplet position based on drag only
-                  DR%X = DR%X + (U_OLD+ALPHA*UBAR)/OPA*DT + ALPHA/BETA*(U_OLD-UBAR)/OPA*LOG(OBDT)
-                  DR%Y = DR%Y + (V_OLD+ALPHA*VBAR)/OPA*DT + ALPHA/BETA*(V_OLD-VBAR)/OPA*LOG(OBDT)
-                  DR%Z = DR%Z + (W_OLD+ALPHA*WBAR)/OPA*DT + ALPHA/BETA*(W_OLD-WBAR)/OPA*LOG(OBDT)
+                  ! analytical solution for droplet position
+                  DR%X = X_OLD + (U_OLD+ALPHA*UBAR)/OPA*DT + ALPHA/BETA*(U_OLD-UBAR)/OPA*LOG(OBDT) + GVEC(1)*DT*DT
+                  DR%Y = Y_OLD + (V_OLD+ALPHA*VBAR)/OPA*DT + ALPHA/BETA*(V_OLD-VBAR)/OPA*LOG(OBDT) + GVEC(2)*DT*DT
+                  DR%Z = Z_OLD + (W_OLD+ALPHA*WBAR)/OPA*DT + ALPHA/BETA*(W_OLD-WBAR)/OPA*LOG(OBDT) + GVEC(3)*DT*DT
                   
                   ! fluid momentum source term
                   MPOM = DR%PWT*DR_MASS/RHO_G/RVC
@@ -1042,26 +1042,14 @@ DROPLET_LOOP: DO I=1,NLP
                   DR%A_Z = DR%A_Z + MPOM*(W_OLD-DR%W)/DT
                ELSE
                   ! no drag
-                  DR%X = DR%X + DR%U*DT
-                  DR%Y = DR%Y + DR%V*DT
-                  DR%Z = DR%Z + DR%W*DT
+                  DR%X = X_OLD + (U_OLD + GVEC(1)*DT)*DT
+                  DR%Y = Y_OLD + (V_OLD + GVEC(2)*DT)*DT
+                  DR%Z = Z_OLD + (W_OLD + GVEC(3)*DT)*DT
+                  
                   DR%A_X  = 0._EB
                   DR%A_Y  = 0._EB
                   DR%A_Z  = 0._EB
                ENDIF
-               
-               ! gravitational acceleration
-               U_OLD = DR%U
-               V_OLD = DR%V
-               W_OLD = DR%W
-               
-               DR%U = DR%U + GVEC(1)*DT
-               DR%V = DR%V + GVEC(2)*DT
-               DR%W = DR%W + GVEC(3)*DT
-               
-               DR%X = DR%X + 0.5_EB*(DR%U+U_OLD)*DT
-               DR%Y = DR%Y + 0.5_EB*(DR%V+V_OLD)*DT
-               DR%Z = DR%Z + 0.5_EB*(DR%W+W_OLD)*DT
                
             ELSE NEW_FP_STATIC_IF ! particle velocity is zero
 
