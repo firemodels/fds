@@ -2135,11 +2135,9 @@ void initvars0(void){
   sorted_surfidlist=NULL,inv_sorted_surfidlist=NULL;
   trainer_filename=NULL;
   test_filename=NULL;
-#ifdef pp_ISOOUT
   filename_sb=NULL;
   STREAM_SB=NULL;
   read_smoothobst=0;
-#endif
   smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
   default_script=NULL;
   first_scriptfile.id=-1;

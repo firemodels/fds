@@ -708,11 +708,9 @@ SVEXTERN char *targfilename;
 SVEXTERN int pass_through;
 SVEXTERN int *sorted_surfidlist,*inv_sorted_surfidlist,nsorted_surfidlist;
 SVEXTERN char *trainer_filename, *test_filename;
-#ifdef pp_ISOOUT
 SVEXTERN char *filename_sb;
 SVEXTERN int read_smoothobst;
 SVEXTERN FILE *STREAM_SB;
-#endif
 #ifdef pp_MESSAGE
 SVEXTERN int show_glui_warning,show_glui_error,show_glui_abort;
 #endif
