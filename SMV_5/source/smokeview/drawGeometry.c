@@ -2881,7 +2881,6 @@ void update_smooth_blockages(void){
 
   blocktotal=0;
 
-#ifdef pp_ISOOUT
   if(menusmooth==0){
     STREAM_SB=fopen(filename_sb,"rb");
   }
@@ -2908,7 +2907,6 @@ void update_smooth_blockages(void){
     read_smoothobst=0;
     STREAM_SB=fopen(filename_sb,"wb");
   }
-#endif
 
   for(i=0;i<nmeshes;i++){
     meshi = meshinfo + i;
@@ -2920,16 +2918,12 @@ void update_smooth_blockages(void){
       meshi=meshinfo+i;
 
       for(j=0;j<meshi->nsmoothblockages_list;j++){
-#ifdef pp_ISOOUT
         if(read_smoothobst==1){
           printf("Reading smooth blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
         }
         else{
           printf("Smoothing blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
         }
-#else
-        printf("Smoothing blockage %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
-#endif
         sb=meshi->smoothblockages_list+j;
 
         getsmoothblockparms(meshi,sb);
@@ -3061,7 +3055,6 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
     }
   }
 }
-#ifdef pp_ISOOUT
 /* ------------------ ReadSmoothIsoSurface ------------------------ */
 
 int ReadSmoothIsoSurface(isosurface *asurface){
@@ -3150,7 +3143,6 @@ void WriteSmoothIsoSurface(isosurface *asurface){
   }
 
 }
-#endif
 
 /* ------------------ MakeIsoBlockages ------------------------ */
 
@@ -3170,10 +3162,9 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
   
   int ii, jj, kk;
   int im1, jm1, km1;
-#ifdef pp_ISOOUT
   int read_error=0;
-#endif
 
+#undef cellindex
 #define cellindex(i,j,k) ((i)+(j)*(ibar+2)+(k)*(ibar+2)*(jbar+2))
 #define nodeindex(i,j,k) ((i)+(j)*(ibar+3)+(k)*(ibar+3)*(jbar+3))
 
@@ -3213,9 +3204,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
   for(iblockcolor=0;iblockcolor<meshi->nsmoothblockagecolors;iblockcolor++){
 
     rgbtemp=meshi->smoothblockagecolors + 4*iblockcolor;
-#ifdef pp_ISOOUT
     if(read_smoothobst==0){
-#endif
       cellcopy=cell;
       nodecopy=node;
       for(i=0;i<(ibar+2)*(jbar+2)*(kbar+2);i++){
@@ -3302,14 +3291,11 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
           }
         }
       }
-#ifdef pp_ISOOUT
     }
-#endif
     asurface=NULL;
     NewMemory((void **)&asurface,sizeof(isosurface));
     level=0.250;
     InitIsosurface(asurface, level, rgbtemp,0);
-#ifdef pp_ISOOUT
     if(read_smoothobst==1){
       // read in smoothed iso info here
       read_error=ReadSmoothIsoSurface(asurface);
@@ -3320,7 +3306,6 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
       }
     }
     if(read_smoothobst==0){
-#endif
       GetIsosurface(asurface, node, NULL, NULL, level,
                      xplt2, ibar+3, yplt2, jbar+3, zplt2, kbar+3,
                      1);
@@ -3330,11 +3315,9 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
           yplt2[0],yplt2[jbar+2],
           zplt2[0],zplt2[kbar+2]);
       SmoothIsoSurface(asurface);
-#ifdef pp_ISOOUT
       // write out smoothed iso info here
       if(read_error==0)WriteSmoothIsoSurface(asurface);
     }
-#endif
 
     if(meshi->blockagesurfaces!=NULL)meshi->blockagesurfaces[iblockcolor]=asurface;
     meshi->blockagesurface=asurface;
@@ -3342,6 +3325,201 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
   }
   FREEMEMORY(node); FREEMEMORY(cell);
   FREEMEMORY(xplt2);FREEMEMORY(yplt2);FREEMEMORY(zplt2);
+  return;
+}
+/* ------------------ MakeIsoBlockages ------------------------ */
+
+void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
+//xxx experimental smooth blockage generation routine
+  blockagedata *bc;
+  float *cell=NULL;
+  int *nabor=NULL;
+  int ib,i,j,k,iblockcolor;
+  int imin, imax, jmin, jmax, kmin, kmax;
+  float val;
+  isosurface *asurface;
+  float level;
+  float vals[8];
+  float *xplt2, *yplt2, *zplt2;
+  float *xplt,*yplt,*zplt;
+  float *rgbtemp,*rgbtemp2;
+  int ibar,jbar,kbar;
+  
+  int ii, jj, kk;
+  int im1, jm1, km1;
+  int read_error=0;
+
+#define cellindex(i,j,k) ((i)+(j)*ibar+(k)*ibar*jbar)
+
+  xplt=meshi->xplt;
+  yplt=meshi->yplt;
+  zplt=meshi->zplt;
+  ibar=meshi->ibar;
+  jbar=meshi->jbar;
+  kbar=meshi->kbar;
+
+  NewMemory((void **)&cell,ibar*jbar*kbar*sizeof(float));
+  NewMemory((void **)&nabor,ibar*jbar*kbar*sizeof(int));
+
+  NewMemory((void **)&xplt2,ibar*sizeof(float));
+  NewMemory((void **)&yplt2,jbar*sizeof(float));
+  NewMemory((void **)&zplt2,kbar*sizeof(float));
+
+  for(i=0;i<ibar;i++){
+    xplt2[i]=(xplt[i]+xplt[i+1])/2.0;
+  }
+  for(i=0;i<jbar;i++){
+    yplt2[i]=(yplt[i]+yplt[i+1])/2.0;
+  }
+  for(i=0;i<kbar;i++){
+    zplt2[i]=(zplt[i]+zplt[i+1])/2.0;
+  }
+
+  meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
+  meshi->smoothblockagecolors=sb->smoothblockagecolors;
+  meshi->blockagesurfaces=sb->smoothblockagesurfaces;
+
+  for(iblockcolor=0;iblockcolor<meshi->nsmoothblockagecolors;iblockcolor++){
+
+    rgbtemp=meshi->smoothblockagecolors + 4*iblockcolor;
+    if(read_smoothobst==0){
+      for(i=0;i<ibar*jbar*kbar;i++){
+        cell[i]=0.0;
+        nabor[i]=0;
+      }
+      for(ib=0;ib<meshi->nbptrs;ib++){
+        bc=meshi->blockageinfoptrs[ib];
+        if(bc->type!=BLOCK_smooth||bc->del==1)continue;
+        if(isblockagevisible(bc,sb->time)!=1)continue;
+        rgbtemp2=bc->color;
+        if(fabs(rgbtemp[0]-rgbtemp2[0])<0.0001&&
+           fabs(rgbtemp[1]-rgbtemp2[1])<0.0001&&
+           fabs(rgbtemp[2]-rgbtemp2[2])<0.0001&&
+           fabs(rgbtemp[3]-rgbtemp2[3])<0.0001
+           ){
+          imin = bc->ijk[IMIN];
+          imax = bc->ijk[IMAX];
+          jmin = bc->ijk[JMIN];
+          jmax = bc->ijk[JMAX];
+          kmin = bc->ijk[KMIN];
+          kmax = bc->ijk[KMAX];
+          for(k=kmin;k<kmax;k++){
+            for(j=jmin;j<jmax;j++){
+              for(i=imin;i<imax;i++){
+                cell[cellindex(i,j,k)]=1.0;
+                nabor[cellindex(i,j,k)]=1;
+              }
+            }
+          }
+        }
+      }
+    }
+    for(k=1;k<kbar-1;k++){
+      for(j=1;j<jbar-1;j++){
+        for(i=1;i<ibar-1;i++){
+          int im1jk,ip1jk;
+          int ijm1k,ijp1k;
+          int ijkm1,ijkp1;
+          int ijk;
+
+          ijk = cellindex(i,j,k); 
+          if(nabor[ijk]!=1)continue;
+          im1jk = cellindex(i-1,j,k); 
+          ip1jk = cellindex(i+1,j,k); 
+          ijm1k = cellindex(i,j-1,k); 
+          ijp1k = cellindex(i,j+1,k); 
+          ijkm1 = cellindex(i,j,k-1); 
+          ijkp1 = cellindex(i,j,k+1);
+          if(nabor[im1jk]==0)nabor[im1jk]=2;
+          if(nabor[ip1jk]==0)nabor[ip1jk]=2;
+          if(nabor[ijm1k]==0)nabor[ijm1k]=2;
+          if(nabor[ijp1k]==0)nabor[ijp1k]=2;
+          if(nabor[ijkm1]==0)nabor[ijkm1]=2;
+          if(nabor[ijkp1]==0)nabor[ijkp1]=2;
+        }
+      }
+    }
+    for(k=1;k<kbar-1;k++){
+      for(j=1;j<jbar-1;j++){
+        for(i=1;i<ibar-1;i++){
+          int im1jk,ip1jk;
+          int ijm1k,ijp1k;
+          int ijkm1,ijkp1;
+          int ijk;
+
+          ijk = cellindex(i,j,k); 
+          if(nabor[ijk]!=2)continue;
+          im1jk = cellindex(i-1,j,k); 
+          ip1jk = cellindex(i+1,j,k); 
+          ijm1k = cellindex(i,j-1,k); 
+          ijp1k = cellindex(i,j+1,k); 
+          ijkm1 = cellindex(i,j,k-1); 
+          ijkp1 = cellindex(i,j,k+1);
+          cell[ijk]=(cell[im1jk]+cell[ip1jk]);
+          cell[ijk]+=(cell[ijm1k]+cell[ijp1k]);
+          cell[ijk]+=(cell[ijkm1]+cell[ijkp1]);
+          cell[ijk]/=6.0;
+        }
+      }
+    }
+    for(k=1;k<kbar-1;k++){
+      for(j=1;j<jbar-1;j++){
+        for(i=1;i<ibar-1;i++){
+          int ip1jkm1,ip1jk,ip1jkp1,ip1jkm2,ip1jkp2;
+          int ijk;
+
+          ijk = cellindex(i,j,k); 
+          if(nabor[ijk]!=2)continue;
+          ip1jk = cellindex(i+1,j,k); 
+          ip1jkm2 = cellindex(i+1,j,k-2);
+          ip1jkm1 = cellindex(i+1,j,k-1);
+          ip1jk   = cellindex(i+1,j,k);
+          ip1jkp1 = cellindex(i+1,j,k+1);
+          ip1jkp2 = cellindex(i+1,j,k+2);
+          if(nabor[ip1jk]==1&&nabor[ip1jkp1]==1&&nabor[ip1jkp2]==1){
+            cell[ijk]=5.0/6.0;
+          }
+          if(nabor[ip1jkm1]==1&&nabor[ip1jk]==1&&nabor[ip1jkp1]==1){
+            cell[ijk]=0.5;
+          }
+          if(nabor[ip1jkm2]==1&&nabor[ip1jkm1]==1&&nabor[ip1jk]==1){
+            cell[ijk]=1.0/6.0;
+          }
+        }
+      }
+    }
+    asurface=NULL;
+    NewMemory((void **)&asurface,sizeof(isosurface));
+    level=0.50;
+    InitIsosurface(asurface, level, rgbtemp,0);
+    if(read_smoothobst==1){
+      // read in smoothed iso info here
+      read_error=ReadSmoothIsoSurface(asurface);
+      if(read_error!=0){
+        read_smoothobst=0;
+        printf(" *** warning: unexpected end of file encountered while\n");
+        printf("              reading the smooth blockage file.\n");
+      }
+    }
+    if(read_smoothobst==0){
+      GetIsosurface(asurface, cell, NULL, NULL, level,
+                     xplt2, ibar, yplt2, jbar, zplt2, kbar,
+                     1);
+      GetNormalSurface(asurface);
+      CompressIsosurface(asurface,1,
+          xplt2[0],xplt2[ibar-1],
+          yplt2[0],yplt2[jbar-1],
+          zplt2[0],zplt2[kbar-1]);
+      SmoothIsoSurface(asurface);
+      // write out smoothed iso info here
+      if(read_error==0)WriteSmoothIsoSurface(asurface);
+    }
+
+    if(meshi->blockagesurfaces!=NULL)meshi->blockagesurfaces[iblockcolor]=asurface;
+    meshi->blockagesurface=asurface;
+    if(sb->smoothblockagesurfaces!=NULL)sb->smoothblockagesurfaces[iblockcolor]=asurface;
+  }
+  FREEMEMORY(cell); FREEMEMORY(xplt2);FREEMEMORY(yplt2);FREEMEMORY(zplt2);
   return;
 }
 
