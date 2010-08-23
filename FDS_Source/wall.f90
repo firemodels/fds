@@ -282,19 +282,20 @@ HEAT_FLUX_LOOP: DO IW=1,NWC+NVWC
             YY_F(IW,1:N_SPECIES)      = RHO_YY_F(1:N_SPECIES)/RHO_F(IW)
             YYP(II,JJ,KK,1:N_SPECIES) = 2._EB*YY_F(IW,1:N_SPECIES) - YY_G_ALL(1:N_SPECIES)
             IF (FLUX_LIMITER/=-1) THEN
+               ! use second-order extrapolation of first ghost cell value to second ghost cell
                SELECT CASE(IOR)
                   CASE(-1)
-                     YYP(II+1,JJ,KK,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                     YYP(II+1,JJ,KK,1:N_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_SPECIES)-YYP(II-1,JJ,KK,1:N_SPECIES)))
                   CASE( 1)
-                     YYP(II-1,JJ,KK,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                     YYP(II-1,JJ,KK,1:N_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_SPECIES)-YYP(II+1,JJ,KK,1:N_SPECIES)))
                   CASE(-2)
-                     YYP(II,JJ+1,KK,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                     YYP(II,JJ+1,KK,1:N_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_SPECIES)-YYP(II,JJ-1,KK,1:N_SPECIES)))
                   CASE( 2)
-                     YYP(II,JJ-1,KK,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                     YYP(II,JJ-1,KK,1:N_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_SPECIES)-YYP(II,JJ+1,KK,1:N_SPECIES)))
                   CASE(-3)
-                     YYP(II,JJ,KK+1,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                     YYP(II,JJ,KK+1,1:N_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_SPECIES)-YYP(II,JJ,KK-1,1:N_SPECIES)))
                   CASE( 3)
-                     YYP(II,JJ,KK-1,1:N_SPECIES) = YYP(II,JJ,KK,1:N_SPECIES)
+                     YYP(II,JJ,KK-1,1:N_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_SPECIES)-YYP(II,JJ,KK+1,1:N_SPECIES)))
                END SELECT
             ENDIF
             YY_GET(1:N_SPECIES) = MAX(0._EB,YYP(II,JJ,KK,1:N_SPECIES))
@@ -607,19 +608,20 @@ WALL_CELL_LOOP: DO IW=1,NWC
          RHOP(II,JJ,KK) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM0*TMP(II,JJ,KK))
       ENDIF
       IF (FLUX_LIMITER/=-1) THEN
+         ! second-order extrapolation of first ghost cell value to second ghost cell
          SELECT CASE(IOR)
             CASE(-1)
-               RHOP(II+1,JJ,KK) = RHOP(II,JJ,KK)
+               RHOP(II+1,JJ,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II-1,JJ,KK))
             CASE( 1)
-               RHOP(II-1,JJ,KK) = RHOP(II,JJ,KK)
+               RHOP(II-1,JJ,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II+1,JJ,KK))
             CASE(-2)
-               RHOP(II,JJ+1,KK) = RHOP(II,JJ,KK)
+               RHOP(II,JJ+1,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ-1,KK))
             CASE( 2)
-               RHOP(II,JJ-1,KK) = RHOP(II,JJ,KK)
+               RHOP(II,JJ-1,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ+1,KK))
             CASE(-3)
-               RHOP(II,JJ,KK+1) = RHOP(II,JJ,KK)
+               RHOP(II,JJ,KK+1) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ,KK-1))
             CASE( 3)
-               RHOP(II,JJ,KK-1) = RHOP(II,JJ,KK)
+               RHOP(II,JJ,KK-1) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ,KK+1))
          END SELECT
       ENDIF
    ENDIF
