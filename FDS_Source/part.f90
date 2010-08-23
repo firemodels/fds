@@ -1007,7 +1007,7 @@ DROPLET_LOOP: DO I=1,NLP
                     
             NEW_FP_STATIC_IF: IF (.NOT.PC%STATIC) THEN
 
-               FP_MASS = RHO_G/RVC/NDPC(II,JJ,KK) ! fluid parcel mass
+               FP_MASS = (RHO_G/RVC)/NDPC(II,JJ,KK) ! fluid parcel mass
                DR_MASS = PC%DENSITY*FOTH*PI*RDC ! droplet mass
                
                BETA = 0.5_EB*RHO_G*C_DRAG*PI*RDS*(1._EB/DR_MASS+1._EB/FP_MASS)*QREL
@@ -1030,12 +1030,12 @@ DROPLET_LOOP: DO I=1,NLP
                DR%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT
                DR%W = ( W_OLD + (W_OLD+ALPHA*WBAR)*BDTOA )/OBDT
                
-               IF (BETA>1.E-9_EB) THEN
+               IF (BETA>ZERO_P) THEN
                   ! fluid momentum source term
-                  MPOM = DR%PWT*DR_MASS/RHO_G/RVC
-                  DR%A_X = DR%A_X + MPOM*(U_OLD-DR%U)/DT ! inefficient, should /DT later.
-                  DR%A_Y = DR%A_Y + MPOM*(V_OLD-DR%V)/DT
-                  DR%A_Z = DR%A_Z + MPOM*(W_OLD-DR%W)/DT
+                  MPOM = DR%PWT*DR_MASS/(RHO_G/RVC)
+                  DR%A_X = MPOM*(U_OLD-DR%U)/DT ! inefficient, should /DT later.
+                  DR%A_Y = MPOM*(V_OLD-DR%V)/DT
+                  DR%A_Z = MPOM*(W_OLD-DR%W)/DT
                   
                   ! gravitational acceleration
                   DR%U = DR%U + GVEC(1)*DT
@@ -1062,9 +1062,9 @@ DROPLET_LOOP: DO I=1,NLP
                BETA = 0.5_EB*RVC*C_DRAG*(DR%PWT*PI*RDS)*QREL
                OBDT = 1._EB+BETA*DT
 
-               DR%A_X = DR%A_X + UBAR*(1._EB/OBDT-1._EB)/DT ! inefficient, should /DT later.
-               DR%A_Y = DR%A_Y + VBAR*(1._EB/OBDT-1._EB)/DT
-               DR%A_Z = DR%A_Z + WBAR*(1._EB/OBDT-1._EB)/DT
+               DR%A_X = UBAR*(1._EB/OBDT-1._EB)/DT ! inefficient, should /DT later.
+               DR%A_Y = VBAR*(1._EB/OBDT-1._EB)/DT
+               DR%A_Z = WBAR*(1._EB/OBDT-1._EB)/DT
             
             ENDIF NEW_FP_STATIC_IF
          
