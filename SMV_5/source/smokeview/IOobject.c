@@ -577,7 +577,9 @@ void draw_devices(void){
     glPushMatrix();
     glTranslatef(xyz[0],xyz[1],xyz[2]);
 
-    if(active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0){
+    if((active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0)||
+      STRCMP(devicei->object->label,"thermocouple")==0
+      ){
       float *xyznorm;
 
       xyznorm = devicei->xyznorm;
