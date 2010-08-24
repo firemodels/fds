@@ -1096,7 +1096,7 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,PRESSURE_RELAX_FACTOR,RELAXATION_FACTOR,FYI, &
                 CFL_MAX,CFL_MIN,VN_MAX,VN_MIN,SOLID_PHASE_ONLY,SMOKE_ALBEDO,GROUND_LEVEL, &
                 AL2O3,SHARED_FILE_SYSTEM, &
                 FLUX_LIMITER,FREEZE_VELOCITY,CFL_VELOCITY_NORM,PERIODIC_TEST, &
-                WIND_ONLY,TERRAIN_CASE,TURB_INIT,COMPUTE_VISCOSITY_TWICE, &
+                WIND_ONLY,TERRAIN_CASE,COMPUTE_VISCOSITY_TWICE, &
                 CONSTANT_PROPERTIES,FLUXMAX,DYNSMAG,DSMAG_FREQ, &
                 CHECK_KINETIC_ENERGY,PROJECTION,FISHPAK_BC,FORCE_VECTOR,DEBUG_OPENMP, &
                 FDS6,COMBUSTION2,CLIP_MASS_FRACTION,STORE_MU_DNS,CHECK_VN,CHECK_GR, &
@@ -1105,7 +1105,7 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,PRESSURE_RELAX_FACTOR,RELAXATION_FACTOR,FYI, &
                 NOBIAS,VAN_DRIEST,HRRPUVCUT_MAX,EMBEDDED_MESH,RUN_AVG_FAC,THERMOPHORETIC_DEPOSITION,TURBULENT_DEPOSITION, &
                 VEG_LEVEL_SET,CP_FTMP,HRRPUV_MAX_SMV,EXTINCTION2,TERRAIN_IMAGE,NEW_EVAP, &
                 SCALAR_ENERGY_TOLERANCE,TKE_TOLERANCE,MEAN_FORCING,RFAC_FORCING,USE_MAX_FILTER_WIDTH,NEW_FLUX_LIMITER, &
-                NEW_FLUID_PARTICLE,WFDS
+                NEW_FLUID_PARTICLE,WFDS,PATCH_VELOCITY
  
 ! Physical constants
  
@@ -6955,11 +6955,11 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 REAL(EB) :: TEMPERATURE,DENSITY,MASS_FRACTION(MAX_SPECIES),RR_SUM,YY_GET(1:N_SPECIES),MASS_PER_VOLUME,MASS_PER_TIME,DT_INSERT
 INTEGER  :: N,NN,NNN,II,JJ,KK,NS,NUMBER_INITIAL_DROPLETS,N_INIT_NEW,N_INIT_READ
-CHARACTER(30) :: PART_ID,SHAPE,MULT_ID,DROPLET_FILENAME
+CHARACTER(30) :: PART_ID,SHAPE,MULT_ID,DROPLET_FILENAME,ORIGIN='CENTER',PROF_ID='null'
 TYPE(INITIALIZATION_TYPE), POINTER :: IN
 TYPE(MULTIPLIER_TYPE), POINTER :: MR
 NAMELIST /INIT/ XB,TEMPERATURE,DENSITY,MASS_FRACTION,MASS_PER_TIME,MASS_PER_VOLUME,NUMBER_INITIAL_DROPLETS, &
-                PART_ID,SHAPE,DT_INSERT,MULT_ID,DROPLET_FILENAME
+                PART_ID,SHAPE,DT_INSERT,MULT_ID,DROPLET_FILENAME,PROF_ID,ORIGIN
  
 N_INIT = 0
 N_INIT_READ = 0
@@ -7112,6 +7112,24 @@ INIT_LOOP: DO N=1,N_INIT_READ
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
             ENDIF
+            
+            ! Special case where INIT is used to patch a velocity profile
+            PATCH_VELOCITY_IF: IF (PATCH_VELOCITY) THEN
+               SELECT CASE(ORIGIN)
+                  CASE('CENTER')
+                     IN%X0 = 0.5_EB*(IN%X1+IN%X2)
+                     IN%Y0 = 0.5_EB*(IN%Y1+IN%Y2)
+                     IN%Z0 = 0.5_EB*(IN%Z1+IN%Z2)
+                  CASE('CORNER')
+                     IN%X0 = IN%X1
+                     IN%Y0 = IN%Y1
+                     IN%Z0 = IN%Z1
+                  CASE DEFAULT
+                     WRITE(MESSAGE,'(A)') 'ERROR: ORIGIN specified incorrectly on INIT'
+                     CALL SHUTDOWN(MESSAGE)
+               END SELECT
+               IN%PROF_ID = PROF_ID
+            ENDIF PATCH_VELOCITY_IF
          
          ENDDO I_MULT_LOOP
       ENDDO J_MULT_LOOP
@@ -8058,10 +8076,10 @@ END SUBROUTINE PROC_DEVC
 SUBROUTINE READ_PROF
  
 INTEGER :: N,NM,MESH_NUMBER,NN,N_PROFO,IOR
-REAL(EB) :: XYZ(3)
+REAL(EB) :: XYZ(3),P0=0._EB,PX(3)=0._EB,PXX(3,3)=0._EB
 CHARACTER(30) :: QUANTITY
 TYPE (PROFILE_TYPE), POINTER :: PF
-NAMELIST /PROF/ XYZ,QUANTITY,IOR,ID,FYI
+NAMELIST /PROF/ XYZ,QUANTITY,IOR,ID,FYI,P0,PX,PXX
  
 N_PROF = 0
 REWIND(LU_INPUT)
@@ -8104,44 +8122,63 @@ PROF_LOOP: DO NN=1,N_PROFO
    CALL CHECKREAD('PROF',LU_INPUT,IOS)
    IF (IOS==1) EXIT PROF_LOOP
    READ(LU_INPUT,PROF) 
+   
+   NOT_PATCH_PROFILE_IF: IF (.NOT.PATCH_VELOCITY) THEN
  
-! Check for bad PROF quantities or coordinates
+      ! Check for bad PROF quantities or coordinates
 
-   IF (IOR==0) THEN
-      WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Specify orientation of PROF ' ,NN,' using the parameter IOR'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-
-   BAD = .FALSE.
- 
-   MESH_LOOP: DO NM=1,NMESHES
-      IF (.NOT.EVACUATION_ONLY(NM)) THEN      
-         M=>MESHES(NM)
-         IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
-            MESH_NUMBER = NM
-            EXIT MESH_LOOP
-         ENDIF
+      IF (IOR==0) THEN
+         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Specify orientation of PROF ' ,NN,' using the parameter IOR'
+         CALL SHUTDOWN(MESSAGE)
       ENDIF
-      IF (NM==NMESHES) BAD = .TRUE.
-   ENDDO MESH_LOOP
+
+      BAD = .FALSE.
  
-   IF (BAD) THEN
-      N      = N-1
-      N_PROF = N_PROF-1
-      CYCLE PROF_LOOP
-   ENDIF
+      MESH_LOOP: DO NM=1,NMESHES
+         IF (.NOT.EVACUATION_ONLY(NM)) THEN      
+            M=>MESHES(NM)
+            IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
+               MESH_NUMBER = NM
+               EXIT MESH_LOOP
+            ENDIF
+         ENDIF
+         IF (NM==NMESHES) BAD = .TRUE.
+      ENDDO MESH_LOOP
  
-! Assign parameters to the PROFILE array
+      IF (BAD) THEN
+         N      = N-1
+         N_PROF = N_PROF-1
+         CYCLE PROF_LOOP
+      ENDIF
+   
+      ! Assign parameters to the PROFILE array
  
-   PF => PROFILE(N)
-   PF%ORDINAL = NN
-   PF%MESH    = MESH_NUMBER
-   PF%ID   = ID
-   PF%QUANTITY = QUANTITY
-   PF%X       = XYZ(1)
-   PF%Y       = XYZ(2)
-   PF%Z       = XYZ(3)
-   PF%IOR     = IOR
+      PF => PROFILE(N)
+      PF%ORDINAL = NN
+      PF%MESH    = MESH_NUMBER
+      PF%ID   = ID
+      PF%QUANTITY = QUANTITY
+      PF%X       = XYZ(1)
+      PF%Y       = XYZ(2)
+      PF%Z       = XYZ(3)
+      PF%IOR     = IOR
+   
+   ELSE NOT_PATCH_PROFILE_IF
+   
+      ! Experimental patch velocity profile
+      
+      PF => PROFILE(N)
+      PF%P0 = P0   ! value at origin of Taylor expansion
+      DO J=1,3
+         PF%PX(J) = PX(J)          ! first derivative of P evaluated at origin
+         DO I=1,3
+            PF%PXX(I,J) = PXX(I,J) ! second derivative of P evaluated at origin
+         ENDDO
+      ENDDO
+      PF%ID  = ID
+      PF%QUANTITY = QUANTITY
+      
+   ENDIF NOT_PATCH_PROFILE_IF
  
 ENDDO PROF_LOOP
 REWIND(LU_INPUT)
