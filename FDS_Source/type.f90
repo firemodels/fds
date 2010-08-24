@@ -259,7 +259,7 @@ TYPE HUMAN_TYPE
    REAL(EB) :: TempMax1=0._EB, FluxMax1=0._EB, TempMax2=0._EB, FluxMax2=0._EB, Density=0._EB
    REAL(EB) :: P_detect_tot=0._EB, v0_fac=1._EB
    INTEGER  :: IOR=-1, ILABEL=0, COLOR_INDEX=0, INODE=0, IMESH=-1, IPC=0, IEL=0, I_FFIELD=0
-   INTEGER  :: GROUP_ID=0, DETECT1=0, GROUP_SIZE=0, I_Target=0, I_DoorAlgo=0, STRS_Direction = 1
+   INTEGER  :: GROUP_ID=0, DETECT1=0, GROUP_SIZE=0, I_Target=0, I_DoorAlgo=0, I_Door_Mode=0, STRS_Direction = 1
    INTEGER  :: STR_SUB_INDX, SKIP_WALL_FORCE_IOR
    LOGICAL  :: SHOW=.TRUE., NewRnd=.TRUE.
 END TYPE HUMAN_TYPE
