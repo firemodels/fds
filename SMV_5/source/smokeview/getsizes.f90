@@ -1287,7 +1287,7 @@ end subroutine getpartheader2
 
 subroutine getpartdataframe(unit,nclasses,nquantities,npoints,time,tagdata,pdata,size,error)
 #ifdef pp_cvf
-!DEC$ ATTRIBUTES ALIAS:'_getpartdataframe@32' :: getpartdataframe
+!DEC$ ATTRIBUTES ALIAS:'_getpartdataframe@36' :: getpartdataframe
 #endif
 implicit none
 
