@@ -27,7 +27,7 @@ MODULE EVAC
 !  Use MESH_POINTERS, ONLY: DT,IJKW,BOUNDARY_TYPE,XW,YW,WALL_INDEX,POINT_TO_MESH
 !  Use EVAC_MESH_POINTERS
   USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION, FED
-  USE DCDFLIB, ONLY :  DCDFLIB_Gamma => Gamma
+  USE DCDFLIB, ONLY : DCDFLIB_Gamma => Gamma
   USE DEVICE_VARIABLES
   USE CONTROL_VARIABLES
   !
@@ -40,7 +40,7 @@ MODULE EVAC
   PRIVATE
   ! Public subprograms (called from the main program or read or dump)
   PUBLIC EVACUATE_HUMANS, INITIALIZE_EVACUATION, INIT_EVAC_GROUPS
-  PUBLIC READ_EVAC, DUMP_EVAC, DUMP_EVAC_CSV, PREPARE_TO_EVACUATE
+  PUBLIC READ_EVAC, DUMP_EVAC, DUMP_EVAC_CSV, PREPARE_TO_EVACUATE, CLEAN_AFTER_EVACUATE
   PUBLIC EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS, GET_REV_EVAC
   ! Public variables (needed in the main program):
   ! Public variables (needed in the dump routine):
@@ -274,7 +274,7 @@ MODULE EVAC
      CHARACTER(30) :: MESH_ID='null'
      CHARACTER(30), POINTER, DIMENSION(:) :: INPUT_ID =>NULL()
      INTEGER, POINTER, DIMENSION(:) :: INPUT_DEVC_INDEX =>NULL()
-     INTEGER :: I_PRE_DIST=0
+     INTEGER :: I_PRE_DIST=0, IMESH=0, N_INPUTS=0
      REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
      REAL(EB) :: TIME_DELAY=0._EB, PROB=0._EB
      LOGICAL :: GLOBAL=.TRUE.
@@ -405,7 +405,7 @@ CONTAINS
     REAL(EB) :: XB(6), XB1(6), XB2(6)
     REAL(EB), DIMENSION(3) :: XYZ, XYZ_SMOKE
     INTEGER :: IOS, IZERO, N, I, J, K, IOR
-    CHARACTER(30) QUANTITY, MAX_HUMANS_RAMP
+    CHARACTER(30) QUANTITY, MAX_HUMANS_RAMP, INPUT_ID(40)
     CHARACTER(60) FYI,ID,PERS_ID,TO_NODE,EVAC_ID, DEFAULT_PROPERTIES
     CHARACTER(30) FLOW_FIELD_ID
     INTEGER :: DIAMETER_DIST,VELOCITY_DIST,PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST
@@ -425,7 +425,7 @@ CONTAINS
          OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, OUTPUT_MOTIVE_ANGLE, OUTPUT_ACCELERATION
     INTEGER, DIMENSION(3) :: RGB, AVATAR_RGB
     CHARACTER(30) :: VENT_FFIELD, MESH_ID, EVAC_MESH
-    REAL(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED
+    REAL(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED, PROB
     CHARACTER(25) :: COLOR, DEAD_COLOR, AVATAR_COLOR
 
     ! Stairs variables
@@ -506,8 +506,8 @@ CONTAINS
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, FAC_DOOR_OLD, FAC_DOOR_OLD2, &
          R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE
 
-    NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, &
-         PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH
+    NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, INPUT_ID, &
+         PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH, PROB
     !
     IF (.NOT. ANY(EVACUATION_GRID)) THEN
        N_EVAC = 0
@@ -3777,16 +3777,26 @@ CONTAINS
       ! Read the EDEV lines
       !
       ! Local variables
-      TYPE (EVAC_EDEV_TYPE),  POINTER :: EDV=>NULL()
+      TYPE (EVAC_EDEV_TYPE), POINTER :: EDV=>NULL()
 
       READ_EDEV_LOOP: DO N = 1, N_EDEV
          IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_EDEV_LOOP
-         EDV=>EVAC_EDEV(N)
+         EDV => EVAC_EDEV(N)
          !
          ID            = 'null'
          EVAC_ID       = 'null'
          PERS_ID       = 'null'
          MESH_ID       = 'null'
+         TIME_DELAY    = 0.0_EB
+         GLOBAL        = .TRUE.
+         PROB          = 0.0_EB
+         PRE_EVAC_DIST = -1
+         PRE_MEAN      = 0.0_EB
+         PRE_PARA      = 0.0_EB
+         PRE_PARA2     = 0.0_EB
+         PRE_LOW       = 0.0_EB
+         PRE_HIGH      = HUGE(PRE_HIGH)
+         INPUT_ID      = 'null'
          !
          CALL CHECKREAD('EDEV',LU_INPUT,IOS)
          IF (IOS == 1) THEN
@@ -3794,10 +3804,64 @@ CONTAINS
          END IF
          READ(LU_INPUT,EDEV,END=30,IOSTAT=IOS)
          !
-         EDV%ID        = ID
-         EDV%EVAC_ID   = EVAC_ID
-         EDV%PERS_ID   = PERS_ID
-         ! 
+         EDV%ID         = TRIM(ID)
+         EDV%EVAC_ID    = TRIM(EVAC_ID)
+         EDV%PERS_ID    = TRIM(PERS_ID)
+         EDV%GLOBAL     = GLOBAL
+         EDV%TIME_DELAY = TIME_DELAY
+         EDV%PROB       = MIN(1.0_EB,MAX(0.0_EB,PROB))
+         EDV%Tpre_mean  = PRE_MEAN
+         EDV%Tpre_para  = PRE_PARA
+         EDV%Tpre_para2 = PRE_PARA2
+         EDV%Tpre_low   = PRE_LOW
+         EDV%Tpre_high  = PRE_HIGH
+
+         ! Check which main evacuation mesh if MESH_ID given
+         EDV%IMESH     = 0
+         EDV%MESH_ID   = TRIM(MESH_ID)
+         IF (TRIM(MESH_ID) /= 'null') THEN
+            EDV_MeshLoop: DO I = 1, NMESHES
+               IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I) .AND. &
+                    TRIM(MESH_ID) == TRIM(MESH_NAME(i))) THEN
+                  EDV%IMESH = I
+                  EXIT EDV_MeshLoop
+               END IF
+            END DO EDV_MeshLoop
+         END IF
+         IF (TRIM(MESH_ID) /= 'null' .AND. EDV%IMESH == 0) THEN
+            IF (TRIM(ID)=='null') THEN
+               WRITE(MESSAGE,'(A,I5,A,A,A)')  'ERROR: EDEV ',N,', ',TRIM(MESH_ID),' is not a main evacuation mesh'
+            ELSE
+               WRITE(MESSAGE,'(A,A,A,A,A)')  'ERROR: EDEV ',TRIM(ID),', ',TRIM(MESH_ID),' is not a main evacuation mesh'
+            END IF
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
+         IF (TRIM(MESH_ID) == 'null' .AND. .NOT.GLOBAL) THEN
+            WRITE(MESSAGE,'(A,I4,A)')  'ERROR: EDEV ',N,' is not global, it must have MESH_ID'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
+
+         ! Check the INPUT_IDs
+         EDV%N_INPUTS  = 0
+         INPUT_COUNT: DO
+            IF (EDV%N_INPUTS==40) EXIT INPUT_COUNT
+            IF (INPUT_ID(EDV%N_INPUTS+1)=='null') EXIT INPUT_COUNT
+            EDV%N_INPUTS  = EDV%N_INPUTS + 1
+         END DO INPUT_COUNT
+         IF (EDV%N_INPUTS==0) THEN
+            IF (TRIM(ID)=='null') THEN
+               WRITE(MESSAGE,'(A,I5,A)')  'ERROR: EDEV ',N,' must have at least one input'
+            ELSE
+               WRITE(MESSAGE,'(A,A,A)')  'ERROR: EDEV ',TRIM(ID),' must have at least one input'
+            END IF
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
+         ALLOCATE(EDV%INPUT_ID(EDV%N_INPUTS),STAT=IZERO)
+         CALL ChkMemErr('READ_EVAC','INPUT_ID',IZERO) 
+         ALLOCATE(EDV%INPUT_DEVC_INDEX(EDV%N_INPUTS),STAT=IZERO)
+         CALL ChkMemErr('READ_EVAC','INPUT_DEVC_INDEX',IZERO) 
+         EDV%INPUT_ID(1:EDV%N_INPUTS) = INPUT_ID(1:EDV%N_INPUTS)
+
       END DO READ_EDEV_LOOP
 30    REWIND(LU_INPUT)
 
@@ -4322,7 +4386,7 @@ CONTAINS
     ! Local variables
     CHARACTER(50) tcform
     CHARACTER(30) DEVC_ID
-    INTEGER n_cols, i, j, nm, izero, j_ntargets, j_density, n_devc_read
+    INTEGER n_cols, i, j,k, nm, izero, j_ntargets, j_density, n_devc_read
     LOGICAL L_fed_read, L_fed_save, L_eff_read, L_eff_save, L_status, CURRENT_STATE, PRIOR_STATE
     INTEGER(4) n_egrids_tmp, ibar_tmp, jbar_tmp, kbar_tmp, &
          ntmp1, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6, IOS, N
@@ -4335,6 +4399,7 @@ CONTAINS
     TYPE (MESH_TYPE), POINTER :: MFF =>NULL()
     TYPE (DEVICE_TYPE), POINTER :: DV =>NULL()
     TYPE (CONTROL_TYPE), POINTER :: CV =>NULL()
+    TYPE (EVAC_EDEV_TYPE), POINTER :: EDV=>NULL()
     !
 
     ! Logical unit numbers
@@ -4407,10 +4472,10 @@ CONTAINS
     fed_max_alive = 0.0_EB
     fed_max = 0.0_EB
     !
-    IF (APPEND) THEN
+    APPEND_IF: IF (APPEND) THEN
        OPEN (LU_EVACCSV,file=FN_EVACCSV,form='formatted',status='old', position='append')
        !
-       IF (L_fed_save) THEN
+       FED_SAVE_RESTART: IF (L_fed_save) THEN
           OPEN (LU_EVACFED,file=FN_EVACFED,form='unformatted', status='old',position='rewind')
           READ (LU_EVACFED,IOSTAT=IOS) ntmp1
           IF (ios.NE.0) THEN
@@ -4446,7 +4511,7 @@ CONTAINS
              CLOSE (LU_EVACFED)
              CALL SHUTDOWN(MESSAGE)
           END IF
-          IF (I_FED_FILE_FORMAT==-3) THEN
+          EVAC_DEVICES_RESTART: IF (I_FED_FILE_FORMAT==-3) THEN
              ! Next loop is for evacuation devices (like heat detectors)
              READ (LU_EVACFED,IOSTAT=IOS) ntmp1
              IF (IOS.NE.0) THEN
@@ -4487,7 +4552,7 @@ CONTAINS
                 CLOSE (LU_EVACFED)
                 CALL SHUTDOWN(MESSAGE)
              END IF
-          END IF
+          END IF EVAC_DEVICES_RESTART
 
           ! Position the FED file at the correct position, i.e., at the restart point.
           ! The FED file might have some time points after the restart time, because
@@ -4610,9 +4675,9 @@ CONTAINS
                WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.2.2)'
           IF (I_FED_FILE_FORMAT==-1) &
                WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version <= 2.2.1)'
-       END IF
+       END IF FED_SAVE_RESTART
        ! 
-       IF (L_fed_read) THEN
+       FED_READ_RESTART: IF (L_fed_read) THEN
           INQUIRE (file=FN_EVACFED,exist=L_status)
           IF (.NOT. L_status) THEN
              WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', TRIM(FN_EVACFED), ', FED and soot not used'
@@ -4634,8 +4699,8 @@ CONTAINS
                 CALL SHUTDOWN(MESSAGE)
              END IF
           END IF
-       END IF
-       IF (L_eff_read) THEN
+       END IF FED_READ_RESTART
+       EFF_READ_RESTART: IF (L_eff_read) THEN
           INQUIRE (file=FN_EVACEFF,exist=L_status)
           IF (L_status) THEN
              WRITE (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', TRIM(FN_EVACEFF), ' is used'
@@ -4657,7 +4722,7 @@ CONTAINS
              WRITE(MESSAGE,'(A,2I4)') 'ERROR: Init Evac Dumps: EFF, no restart yet'
              CALL SHUTDOWN(MESSAGE)
           END IF
-       END IF
+       END IF EFF_READ_RESTART
        !
        IF ( l_fed_read .OR. l_fed_save ) n_dead = 0
        !
@@ -4689,9 +4754,9 @@ CONTAINS
          CALL SHUTDOWN(MESSAGE)
        END IF
 
-    ELSE                      ! replace files
+    ELSE ! not a restart, rewrite files or just read in
        !
-       IF (L_fed_save) THEN
+       FED_SAVE: IF (L_fed_save) THEN
           l_fed_read = .FALSE.
           I_EVAC = IBCLR(I_EVAC,3)  ! do not read FED
           OPEN (LU_EVACFED,file=FN_EVACFED,form='unformatted', status='replace')
@@ -4716,7 +4781,7 @@ CONTAINS
           n_egrids_tmp = n_egrids
           WRITE (LU_EVACFED) ntmp1
           WRITE (LU_EVACFED) n_egrids_tmp, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6
-          IF (I_FED_FILE_FORMAT==-3) THEN
+          EVAC_DEVICES_IF: IF (I_FED_FILE_FORMAT==-3) THEN
              N_DEVC_EVAC = 0
              DEVC_LOOP_WRITE: DO I = 1, N_DEVC
                 DV => DEVICE(I)
@@ -4758,7 +4823,23 @@ CONTAINS
                 EVAC_DEVICES(N_DEVC_EVAC)%I_Type      = CONTROL_INPUT  ! 2
                 EVAC_DEVICES(N_DEVC_EVAC)%I_Devc_Evac = N_DEVC_EVAC
              END DO CTRL_LOOP_WRITE_2
-          END IF
+             ! Check the inputs for the EDEV namelist array EVAC_EDEV(1:N_EDEV)
+             EDEV_LOOP: DO I = 1, N_EDEV
+                EDV => EVAC_EDEV(I)
+                EDV%INPUT_DEVC_INDEX(:) = 0
+                INPUTS_LOOP: DO J = 1, EDV%N_INPUTS
+                   DEVICES_LOOP: DO K = 1, N_DEVC_EVAC
+                      IF (TRIM(EDV%INPUT_ID(J)) == TRIM(EVAC_DEVICES(K)%DEVC_ID)) THEN
+                         EDV%INPUT_DEVC_INDEX(J) = K
+                         CYCLE INPUTS_LOOP
+                      END IF
+                   END DO DEVICES_LOOP
+                   WRITE(MESSAGE,'(A,I5,A,A,A)')  'ERROR: EDEV ',I,' input ',TRIM(EDV%INPUT_ID(J)),' is not found'
+                   CALL SHUTDOWN(MESSAGE)
+                END DO INPUTS_LOOP
+             END DO EDEV_LOOP
+          END IF EVAC_DEVICES_IF
+
           WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', TRIM(FN_EVACFED), ' is calculated and used'
           IF (I_FED_FILE_FORMAT==-3) &
                WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.3.1)'
@@ -4766,17 +4847,17 @@ CONTAINS
                WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.2.2)'
           IF (I_FED_FILE_FORMAT==-1) &
                WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version <= 2.2.1)'
-       END IF
+       END IF FED_SAVE
        ! 
-       IF (L_fed_read) THEN
+       FED_READ: IF (L_fed_read) THEN
           INQUIRE (file=FN_EVACFED,exist=L_status)
-          IF (.NOT. L_status) THEN
+          NO_FED_AT_DISK: IF (.NOT. L_status) THEN
              WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac No FED File: ', TRIM(FN_EVACFED), ', FED and soot not used'
              l_fed_read = .FALSE.
              l_fed_save = .FALSE.
              I_EVAC = IBCLR(I_EVAC,3)  ! do not read FED
              I_EVAC = IBCLR(I_EVAC,1)  ! do not save FED
-          ELSE
+          ELSE 
              OPEN (LU_EVACFED,file=FN_EVACFED,form='unformatted', status='old')
              READ (LU_EVACFED,Iostat=ios) ntmp1
              IF (ios.NE.0) THEN
@@ -4849,11 +4930,11 @@ CONTAINS
                 IF (I_FED_FILE_FORMAT==-1) &
                      WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version <= 2.2.1)'
              END IF
-          END IF
-       END IF
+          END IF NO_FED_AT_DISK
+       END IF FED_READ
        ! 
        ! Number of evac flow fields is same as the number of all evac grids.
-       IF (L_eff_read) THEN
+       EFF_READ: IF (L_eff_read) THEN
           ios = 3
           INQUIRE (file=FN_EVACEFF,exist=L_status)
           IF (L_status) THEN
@@ -4883,7 +4964,7 @@ CONTAINS
              I_EVAC = IBCLR(I_EVAC,2) ! do not read EFF
              I_EVAC = IBSET(I_EVAC,0) ! save EFF
           END IF
-       END IF  ! L_eff_read
+       END IF EFF_READ
        !
        ALLOCATE(CTEMP(MAX(1,N_EXITS)), STAT = IZERO)
        CALL ChkMemErr('INITIALIZE_EVAC_DUMPS','CTEMP', IZERO)
@@ -4911,16 +4992,7 @@ CONTAINS
           ! first row: units (or variable class)
           ! second row: variable name
           ! third row-: data
-          ! Write (LU_EVACCSV,*) n_cols+3
           WRITE (tcform,'(a,i4.4,a)') "(",n_cols+3+(j_density-j_ntargets),"(a,','),a)"
-          ! Write (LU_EVACCSV,tcform) 'Time','Humans', &
-          !      ('Floor', i=1,n_egrids), &
-          !      ('Corridor', i=1,n_corrs), &
-          !      ('Exit', i=1,n_exits), &
-          !      ('Door', i=1,n_doors), &
-          !      ('Exit', i=1,n_exits-n_co_exits), &
-          !      ('Door', i=1,n_doors), &
-          !      'Fed','Fed','Fed'
           WRITE (LU_EVACCSV,tcform) 's','AgentsInside', &
                ('AgentsInsideMesh', i=1,n_egrids), &
                ('AgentsInsideCorr', i=1,n_corrs), &
@@ -4946,15 +5018,7 @@ CONTAINS
           ! first row: units (or variable class)
           ! second row: variable name
           ! third row-: data
-          ! Write (LU_EVACCSV,*) n_cols
           WRITE (tcform,'(a,i4.4,a)') "(",n_cols+(j_density-j_ntargets),"(a,','),a)"
-          ! Write (LU_EVACCSV,tcform) 'Time','Humans', &
-          !      ('Floor', i=1,n_egrids), &
-          !      ('Corridor', i=1,n_corrs), &
-          !      ('Exit', i=1,n_exits), &
-          !      ('Door', i=1,n_doors), &
-          !      ('Exit', i=1,n_exits-n_co_exits), &
-          !      ('Door', i=1,n_doors)
           WRITE (LU_EVACCSV,tcform) 's','AgentsInside', &
                ('AgentsInsideMesh', i=1,n_egrids), &
                ('AgentsInsideCorr', i=1,n_corrs), &
@@ -4973,10 +5037,10 @@ CONTAINS
                (TRIM(CTEMP(i)), i=j_ntargets+1,j_density)
        END IF
        DEALLOCATE(CTEMP)
-    END IF                  ! if-append-else
+    END IF APPEND_IF
     ! 
     ! Read the evac flow fields from the disk, if they exist.
-    IF ( L_eff_read .OR. APPEND) THEN
+    IF (L_eff_read .OR. APPEND) THEN
        ios = 0
        ReadEffLoop: DO nm = 1, NMESHES
           IF (EVACUATION_ONLY(NM)) THEN
@@ -5042,7 +5106,7 @@ CONTAINS
        EVAC_Z_MAX = MAX(EVAC_Z_MAX,REAL(MFF%ZF,FB))
     END DO
 
-    ! write STRS properties
+    ! Write STRS properties
     IF (MYID==MAX(0,EVAC_PROCESS)) THEN
        DO N = 1, N_STRS
           WRITE (LU_EVACOUT,'(A,A)')      '  Stair ',TRIM(EVAC_STRS(N)%ID)
@@ -5811,7 +5875,7 @@ CONTAINS
     REAL(EB), INTENT(INOUT) :: T_SAVE
     !
     ! Local variables
-    INTEGER :: NM, NOM, I, J, I1, J1, K1
+    INTEGER :: NM, NOM, I, J, K, I1, J1, K1
     INTEGER :: IOS, IZERO, N_DEVC_WRITE
     LOGICAL L_USE_FED, L_FED_READ, L_FED_SAVE, CURRENT_STATE, PRIOR_STATE
     REAL(EB) DT_SAVE, TNOW, T_CHANGE
@@ -5822,6 +5886,7 @@ CONTAINS
     REAL(EB), ALLOCATABLE, DIMENSION(:) :: YY_GET
     TYPE (DEVICE_TYPE), POINTER :: DV =>NULL()
     TYPE (CONTROL_TYPE), POINTER :: CV =>NULL()
+    TYPE (EVAC_EDEV_TYPE), POINTER :: EDV=>NULL()
 
     EXCHANGE_EVACUATION=.FALSE.
     !
@@ -6126,8 +6191,8 @@ CONTAINS
           END DO EXIT_LOOP
        END IF
 
-       IF (I_FED_FILE_FORMAT == -3) THEN
-          IF (L_FED_SAVE) THEN
+       EDEVICES_IN_FED: IF (I_FED_FILE_FORMAT == -3) THEN
+          EDEV_FED_SAVE: IF (L_FED_SAVE) THEN
              ! Next loop is for evacuation devices (like heat detectors)
              N_DEVC_WRITE_TMP = 0
              DEVC_LOOP: DO I = 1, N_DEVC_EVAC
@@ -6148,7 +6213,7 @@ CONTAINS
                    EVAC_DEVICES(I)%USE_NOW = .TRUE.
                 END IF
              END DO DEVC_LOOP_2
-          ELSE                    ! Read FED from a file
+          ELSE  ! Read evacuation devices info from the FED file
              READ (LU_EVACFED,IOSTAT=IOS) N_DEVC_WRITE_TMP
              IF (IOS.NE.0 .OR. N_DEVC_WRITE_TMP > N_DEVC_EVAC) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error1 for DEVC'
@@ -6188,8 +6253,25 @@ CONTAINS
                 EVAC_DEVICES(j)%PRIOR = PRIOR_STATE
                 EVAC_DEVICES(I)%USE_NOW = .TRUE.
              END DO DEVC_LOOP_3
-          END IF
-       END IF
+             IF (ICYC==1) THEN
+                ! Check the inputs for the EDEV namelist array EVAC_EDEV(1:N_EDEV)
+                EDEV_LOOP: DO I = 1, N_EDEV
+                   EDV => EVAC_EDEV(I)
+                   EDV%INPUT_DEVC_INDEX(:) = 0
+                   INPUTS_LOOP: DO J = 1, EDV%N_INPUTS
+                      DEVICES_LOOP: DO K = 1, N_DEVC_EVAC
+                         IF (TRIM(EDV%INPUT_ID(J)) == TRIM(EVAC_DEVICES(K)%DEVC_ID)) THEN
+                            EDV%INPUT_DEVC_INDEX(J) = K
+                            CYCLE INPUTS_LOOP
+                         END IF
+                      END DO DEVICES_LOOP
+                      WRITE(MESSAGE,'(A,I5,A,A,A)')  'ERROR: EDEV ',I,' input ',TRIM(EDV%INPUT_ID(J)),' is not found'
+                      CALL SHUTDOWN(MESSAGE)
+                   END DO INPUTS_LOOP
+                END DO EDEV_LOOP
+             END IF
+          END IF EDEV_FED_SAVE
+       END IF EDEVICES_IN_FED
 
        IF (L_FED_SAVE) DEALLOCATE(YY_GET)
 
@@ -6207,8 +6289,7 @@ CONTAINS
   SUBROUTINE PREPARE_TO_EVACUATE(ICYC)
     IMPLICIT NONE
     !
-    ! Do the mesh independent initializations for the 
-    ! subroutine EVACUATE_HUMANS.
+    ! Do the mesh independent initializations for the subroutine EVACUATE_HUMANS.
     !
     ! Passed variables
     INTEGER, INTENT(IN) :: ICYC
@@ -6253,6 +6334,24 @@ CONTAINS
 
   END SUBROUTINE PREPARE_TO_EVACUATE
 !
+  SUBROUTINE CLEAN_AFTER_EVACUATE(ICYC,I_MODE)
+    IMPLICIT NONE
+    !
+    ! Do the mesh independent clean up for the subroutine EVACUATE_HUMANS.
+    !
+    ! Passed variables
+    INTEGER, INTENT(IN) :: ICYC, I_MODE
+    !
+    ! Local variables
+    ! 
+    LOGICAL, INTRINSIC :: BTEST
+    IF (.NOT.ANY(EVACUATION_GRID)) RETURN
+    IF (ICYC < 1) RETURN
+    ! Check if FED is used
+    IF (BTEST(I_MODE,3) .OR. BTEST(I_MODE,1)) EVAC_DEVICES(:)%USE_NOW = .FALSE.
+
+  END SUBROUTINE CLEAN_AFTER_EVACUATE
+!
   SUBROUTINE EVACUATE_HUMANS(TIN,NM,ICYC)
     IMPLICIT NONE
     !
@@ -6286,9 +6385,8 @@ CONTAINS
          SPEED_MAX, DELTA_MIN, DT_SUM, C_YEFF, LAMBDAW, B_WALL, A_WALL, &
          T, CONTACT_F, SOCIAL_F, SMOKE_BETA, SMOKE_ALPHA, SMOKE_SPEED_FAC
     INTEGER :: IIE, JJE, IIO, JJO, III, JJJ, I_EGRID, I_TMP
-    REAL(EB) :: X_NOW, Y_NOW, D_HUMANS, D_WALLS, DTSP_NEW, &
-         FAC_TIM, DT_GROUP_DOOR, X11, Y11, SPEED, TPRE
-    LOGICAL PP_SEE_EACH
+    REAL(EB) :: X_NOW, Y_NOW, D_HUMANS, D_WALLS, DTSP_NEW, FAC_TIM, DT_GROUP_DOOR, X11, Y11, SPEED, TPRE
+    LOGICAL PP_SEE_EACH, L_FIRST_PASS, USE_FED
     LOGICAL L_EFF_READ, L_EFF_SAVE, L_DEAD
     REAL(EB) :: COS_X, COS_Y, SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP, HR_Z, HR_A, HR_B, HR_TAU, HR_TAU_INER
     !
@@ -6310,6 +6408,10 @@ CONTAINS
     INTEGER, DIMENSION(:), ALLOCATABLE :: BLOCK_LIST
     !
     REAL(EB), DIMENSION(:), ALLOCATABLE :: HERDING_LIST_DOORS
+    INTEGER, DIMENSION(10) :: HERDING_LIST_IHUMAN
+    REAL(EB), DIMENSION(10) :: HERDING_LIST_P2PDIST
+    INTEGER :: HERDING_LIST_N
+    REAL(EB) :: HERDING_LIST_P2PMAX
     !
     REAL(EB) :: D_HUMANS_MIN, D_WALLS_MIN
     REAL(EB) :: TNOW, TNOW13, TNOW14, TNOW15
@@ -6327,9 +6429,15 @@ CONTAINS
     TYPE (HUMAN_TYPE),       POINTER :: HR=>NULL(), HRE=>NULL()
     TYPE (EVACUATION_TYPE),  POINTER :: HPT =>NULL()
     TYPE (EVAC_ENTR_TYPE),   POINTER :: PNX =>NULL()
+    TYPE (EVAC_EDEV_TYPE),   POINTER :: EDV=>NULL()
+    !
+    LOGICAL, INTRINSIC :: BTEST
     !
     IF ( .NOT.(EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM)) ) RETURN
     TNOW=SECOND()
+    ! Check if FED is used
+    USE_FED = .FALSE.
+    IF (BTEST(I_EVAC,3) .OR. BTEST(I_EVAC,1)) USE_FED = .TRUE.
     !
     ! Maximun speed of the agents.  
     VMAX_TIMO      = V_MAX
@@ -6408,16 +6516,14 @@ CONTAINS
        END IF
     END DO
     ! 
+    L_FIRST_PASS = .TRUE.
     HUMAN_TIME_LOOP: DO WHILE ( DT_SUM < DT )
        ! DT is the fds flow calculation time step.
-       ! Sometimes agent time step is smaller than the fire time step, so
-       ! syncronize the agent clock correctly.
-       ! TSTEPS: Time steps of the agent movement algorithm for different meshes,
-       ! which were calculated at the end of the previous main time step.
-       ! DTSP: The present time step for the agent movement algorithm, which may be
-       ! smaller than the fds main time step DT.
+       ! Sometimes agent time step is smaller than the fire time step, so syncronize the agent clock correctly.
+       ! TSTEPS: Time steps of the agent movement algorithm for different meshes, which were calculated at the 
+       !         end of the previous main time step.
+       ! DTSP: The present time step for the agent movement algorithm, which may be smaller than the fds main time step DT.
        DTSP = MIN( (DT-DT_SUM), TSTEPS(NM) )
-
        DT_SUM = DT_SUM + DTSP
        T = TIN - DT + DT_SUM     ! Current time for the agents
 
@@ -6548,10 +6654,6 @@ CONTAINS
        IF (T > 0.0_EB .AND. .NOT.NM_STRS_MESH) THEN
           CHANGE_DOOR_LOOP: DO I = 1, N_HUMANS
              HR => HUMAN(I)
-!!$             ! Check and cycle if in stairs
-!!$             CHECK_STRS_LOOP0: DO N = 1, N_STRS
-!!$                IF (EVAC_STRS(N)%IMESH == HR%IMESH) CYCLE CHANGE_DOOR_LOOP
-!!$             END DO CHECK_STRS_LOOP0
 
              I_OLD_FFIELD    = HR%I_FFIELD
              NAME_OLD_FFIELD = TRIM(MESH_NAME(I_OLD_FFIELD))
@@ -6574,29 +6676,58 @@ CONTAINS
 
                    CALL CHANGE_TARGET_DOOR(NM,NM,I,J,J1,I_EGRID,1,HR%X,HR%Y,I_TARGET,COLOR_INDEX,I_NEW_FFIELD,HR)
 
-                   ! HR%I_DoorAlgo: 1 rational agents, 2 known doors, 3 herding, 0 main evac ff
-                   ! Herding behaviour: Count the number of other agents to the doors around this agent
-                   ! If no (good) target door found (I_Target=0) ==> Try "herding", i.e., check the other agents around
+                   ! HR%I_DoorAlgo: 1 rational agents, 2 known doors, 3 herding, 0 main evac mesh ff
+                   ! Herding behaviour: Count and weight by the distance the target doors of the other
+                   ! agents around this agent.  The five (or less) nearest neighbor agents are used.
                    Herding_Type_Agent: IF ( HR%I_DoorAlgo==3 .OR. (HR%I_Target==0 .AND. HR%I_DoorAlgo>0)) THEN
                       IF (HR%I_DoorAlgo==3 .AND. HR%I_Target/=0 .AND. (I_HERDING_TYPE==1 .OR. I_HERDING_TYPE==3)) THEN
                          I_TARGET = I_TARGET_OLD
                       ELSE
-                         HERDING_LIST_DOORS = 0.0_EB  ! Real array, can be given weights in the future
+                         HERDING_LIST_DOORS = 0.0_EB    ! Real array, weights by the p2p distance (linear function)
+                         HERDING_LIST_IHUMAN = 0        ! indices of the ten closest other agents
+                         ! Now 5 neighbors are checked (for future the array has maximum of 10 places)
+                         HERDING_LIST_P2PDIST(1:5) = HUGE(HERDING_LIST_P2PMAX) ! person to person distances (squares)
+                         HERDING_LIST_P2PDIST(6:10) = 0.0_EB ! person to person distances (squares)
+                         HERDING_LIST_N = 0 ! number of neighbors (max 10, see dimension)
+                         HERDING_LIST_P2PMAX = HUGE(HERDING_LIST_P2PMAX)
                          Other_Agent_Loop: DO IE = 1, N_HUMANS
                             IF (I==IE) CYCLE Other_Agent_Loop
                             HRE => HUMAN(IE)
                             P2P_DIST = (HRE%X-HR%X)**2 + (HRE%Y-HR%Y)**2
                             IF (P2P_DIST > R_HERDING**2) CYCLE Other_Agent_Loop
-                            P2P_DIST = SQRT(P2P_DIST)
                             ! Check, that the persons are seeing each other, i.e., there are no walls between.
                             PP_SEE_EACH = SEE_EACH_OTHER(NM, HR%X, HR%Y, HRE%X, HRE%Y)
                             IF (.NOT. PP_SEE_EACH) CYCLE Other_Agent_Loop
+                            IF (P2P_DIST <= HERDING_LIST_P2PMAX) THEN
+                               ! Dot product used to check if the other agent is walking towards the agent
+                               IF (ABS(HRE%I_Target)>0) THEN
+                                  EVEL = (HRE%X-HR%X)*HRE%UBAR + (HRE%Y-HR%Y)*HRE%VBAR
+                                  IF (EVEL < 0.2_EB) CYCLE Other_Agent_Loop
+                               END IF
+                               IF (HERDING_LIST_N < 5) THEN
+                                  ! List is not yet full, all agents are ok
+                                  HERDING_LIST_N = HERDING_LIST_N + 1
+                                  HERDING_LIST_IHUMAN(HERDING_LIST_N) = IE
+                                  HERDING_LIST_P2PDIST(HERDING_LIST_N) = P2P_DIST
+                               ELSE
+                                  ! There are already five agents in the list, find the furthest one
+                                  I_TMP = MAXVAL(MAXLOC(HERDING_LIST_P2PDIST))
+                                  HERDING_LIST_IHUMAN(I_TMP) = IE
+                                  HERDING_LIST_P2PDIST(I_TMP) = P2P_DIST
+                               END IF
+                               HERDING_LIST_P2PMAX = MAXVAL(HERDING_LIST_P2PDIST)
+                            END IF
+                         END DO Other_Agent_Loop
+                         Other_Agent_Loop_2: DO IE = 1, HERDING_LIST_N
+                            HRE => HUMAN(HERDING_LIST_IHUMAN(IE))
+                            P2P_DIST = (HRE%X-HR%X)**2 + (HRE%Y-HR%Y)**2
+                            P2P_DIST = SQRT(P2P_DIST)
                             IF (ABS(HRE%I_Target)>0) THEN
                                ! Linear weight function
                                HERDING_LIST_DOORS(ABS(HRE%I_Target)) = HERDING_LIST_DOORS(ABS(HRE%I_Target)) + &
                                     W0_HERDING -((W0_HERDING-WR_HERDING)/R_HERDING)*P2P_DIST
                             END IF
-                         END DO Other_Agent_Loop
+                         END DO Other_Agent_Loop_2
                          DO II = 1, N_DOORS+N_EXITS
                             IF (HERDING_LIST_DOORS(II)>0.0_EB) THEN
                                ! Make it symmetrical with respect the doors. The order of the doors
@@ -6784,7 +6915,8 @@ CONTAINS
           KKZ = FLOOR(ZK+0.5_EB)
           HR%W = 0.0_EB
           SMOKE_SPEED_FAC = 1.0_EB
-          IF (T > T_BEGIN) THEN
+          IF (.NOT.L_DEAD .AND. T <= HR%TDET) HR%DETECT1 = IBSET(HR%DETECT1,0)  ! Detected by the T_det distribution, bit 0
+          Not_Init_Phase_Use_FED: IF (T > T_BEGIN .AND. ICYC > 1 .AND. USE_FED) THEN
              ! Calculate purser's fractional effective dose (FED)
              ! Note: Purser uses minutes, here DT is in seconds
              ! FED_DOSE = FED_LCO*FED_VCO2 + FED_LO
@@ -6813,35 +6945,40 @@ CONTAINS
              ! Check the smoke density for the detection by smoke
              IF (.NOT.L_DEAD .AND. HUMAN_GRID(II,JJ)%SOOT_DENS > TDET_SMOKE_DENS) THEN
                 HR%TDET = MIN(HR%TDET,T)
+                HR%DETECT1 = IBSET(HR%DETECT1,1)  ! Detected by the local smoke consentration, bit 1
              END IF
 
-             ! Check the evacuation devices for the detection by thme
-             IF (HR%TDET > T) THEN
-                DO J = 1, N_DEVC_EVAC
-                   IF (EVAC_DEVICES(J)%T_Change<=T .AND. EVAC_DEVICES(J)%CURRENT .AND. &
-                        EVAC_DEVICES(J)%USE_NOW) THEN
-                      WRITE(LU_EVACOUT,FMT='(A,I6,A,A,A,F8.2,A)') ' Agent n:o ', HR%ILABEL, ' detection by ', &
-                           TRIM(EVAC_DEVICES(J)%DEVC_ID), ' at', T, ' s'
-                      HR%TDET = MIN(HR%TDET,T)
-                   END IF
-                END DO
+             ! Check the evacuation devices for the detection
+             IF (L_FIRST_PASS) THEN
+                EDEV_LOOP: DO J = 1, N_EDEV
+                   EDV => EVAC_EDEV(J)
+                   INPUTS_LOOP: DO N = 1, EDV%N_INPUTS
+                      KK = EDV%INPUT_DEVC_INDEX(N)
+                      IF (EVAC_DEVICES(KK)%T_Change <= T .AND. EVAC_DEVICES(KK)%CURRENT .AND. &
+                           EVAC_DEVICES(KK)%USE_NOW) THEN
+                         CALL TPRE_GENERATION(EDV%i_pre_dist,EDV%Tpre_low,EDV%Tpre_high,EDV%Tpre_mean,EDV%Tpre_para, &
+                              EDV%Tpre_para2,TPRE)
+                         HR%DETECT1 = IBSET(HR%DETECT1,2)  ! Detected by some device, bit 2
+                         IF (T+TPRE < HR%TDET+HR%TPRE) THEN
+                            WRITE(LU_EVACOUT,FMT='(A,I6,A,A,A,F8.2,A,F6.2,A)') ' Agent n:o ', HR%ILABEL, ' detection by ', &
+                                 TRIM(EVAC_DEVICES(KK)%DEVC_ID), ' at', T, ' s, new Tpre is ', TPRE, ' s'
+                            HR%TDET = T
+                            HR%TPRE = TPRE
+                         ELSE
+                            WRITE(LU_EVACOUT,FMT='(A,I6,A,A,A,F8.2,A)') ' Agent n:o ', HR%ILABEL, ' detection by ', &
+                                 TRIM(EVAC_DEVICES(KK)%DEVC_ID), ' at', T, ' s'
+                         END IF
+                      END IF
+                   END DO INPUTS_LOOP
+                END DO EDEV_LOOP
              END IF
-          END IF
+          END IF Not_Init_Phase_Use_FED
           HR%V0_FAC = SMOKE_SPEED_FAC
 
           ! ========================================================
           ! Calculate persons prefered walking direction V0
           ! ========================================================
           N = NM_STRS_INDEX
-!!$          NM_STRS_MESH = .FALSE.
-!!$          N = 0
-!!$          STRSMESHLOOP: DO J = 1, N_STRS
-!!$             IF (EVAC_STRS(J)%IMESH==NM) THEN     
-!!$                NM_STRS_MESH = .TRUE.
-!!$                N = J
-!!$                EXIT STRSMESHLOOP
-!!$             END IF
-!!$          END DO STRSMESHLOOP
           IF (TAU_CHANGE_V0 > 1.0E-12_EB) THEN
              ! Stairs mesh: next subroutine call is needed to set up the targets etc correctly,
              ! but UBAR,VBAR are not needed.
@@ -8391,6 +8528,7 @@ CONTAINS
 
        ! Save the maximum time steps allowed by the SC-VV algorithm
        TSTEPS(NM) = DTSP_NEW
+       IF (L_FIRST_PASS) L_FIRST_PASS = .FALSE.
 
     END DO HUMAN_TIME_LOOP
     DEALLOCATE(BLOCK_GRID_N)
@@ -8772,8 +8910,25 @@ CONTAINS
       END IF
       IF (I_HERDING_TYPE>1 .AND. HR%I_Target==0 .AND. HR%I_DoorAlgo==3) THEN
          ! Herding type agent whitout any target door: do not move
-         UBAR = 0.0_EB
-         VBAR = 0.0_EB
+         DIST_TO_DOOR_TMP = 0.0_EB
+         IF (HR%I_Door_Mode < 0) THEN
+            IF (EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_TYPE == 'Door') THEN
+               DIST_TO_DOOR_TMP = SQRT((HR%X - 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%X1 + &
+                    EVAC_DOORS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%X2))**2 + &
+                    (HR%Y - 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%Y1 + &
+                    EVAC_DOORS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%Y2))**2)
+            END IF
+            IF (EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_TYPE == 'Entry') THEN
+               DIST_TO_DOOR_TMP = SQRT((HR%X - 0.5_EB*(EVAC_ENTRYS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%X1 + &
+                    EVAC_ENTRYS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%X2))**2 + &
+                    (HR%Y - 0.5_EB*(EVAC_ENTRYS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%Y1 + &
+                    EVAC_ENTRYS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%Y2))**2)
+            END IF
+            IF (DIST_TO_DOOR_TMP > 3.0_EB) HR%I_Door_Mode = 0
+         ELSE
+            UBAR = 0.0_EB
+            VBAR = 0.0_EB
+         END IF
       END IF
 
       J = MAX(0,HR%GROUP_ID)
@@ -9359,9 +9514,8 @@ CONTAINS
                   INODE  = PDX%INODE
                   INODE2 = PDX%INODE2
                END IF
-               CALL CHECK_TARGET_NODE(INODE,INODE2,ISTAT,XX,YY,ZZ,IOR_NEW, &
-                    IMESH2,T,NEW_FFIELD_NAME,NEW_FFIELD_I,COLOR_INDEX,&
-                    I_TARGET, KEEP_XY, ANGLE, STR_INDX, STR_SUB_INDX, HR)
+               CALL CHECK_TARGET_NODE(INODE,INODE2,ISTAT,XX,YY,ZZ,IOR_NEW, IMESH2,T,NEW_FFIELD_NAME,NEW_FFIELD_I, &
+                    COLOR_INDEX, I_TARGET, KEEP_XY, ANGLE, STR_INDX, STR_SUB_INDX, HR)
                IF (ISTAT == 0 ) THEN
                   ! Put person to a new node, i.e., target node has empty space
                   HR%X = XX
@@ -9405,15 +9559,19 @@ CONTAINS
                         HR%FFIELD_NAME = TRIM(NEW_FFIELD_NAME)
                         HR%I_FFIELD = NEW_FFIELD_I
                      END IF
+                     HR%I_Door_Mode = 0  ! Default, not a herding agent
+                     IF (I_Target/=0 .AND. HR%I_DoorAlgo==3) HR%I_Door_Mode = 1  ! Found a target door/exit
                      HR%I_TARGET = I_TARGET
                      HR%X_OLD = HR%X
                      HR%Y_OLD = HR%Y
                      ! IOR is the direction where the human is ejected.
                      IF (EVAC_NODE_LIST(INODE2)%NODE_TYPE == 'Door') THEN
                         IOR = - EVAC_DOORS(EVAC_NODE_LIST(INODE2)%NODE_INDEX)%IOR
+                        IF (I_Target==0 .AND. HR%I_DoorAlgo==3) HR%I_Door_Mode = -INODE2
                      END IF
                      IF (EVAC_NODE_LIST(INODE2)%NODE_TYPE == 'Entry') THEN
                         IOR = EVAC_ENTRYS(EVAC_NODE_LIST(INODE2)%NODE_INDEX)%IOR
+                        IF (I_Target==0 .AND. HR%I_DoorAlgo==3) HR%I_Door_Mode = -INODE2
                      END IF
                      IF (EVAC_NODE_LIST(INODE2)%NODE_TYPE == 'Floor') THEN
                         ! For STRS the first node should be DOOR
@@ -9674,14 +9832,12 @@ CONTAINS
       !
     END SUBROUTINE CHECK_CORRS
     !
-    SUBROUTINE CHECK_TARGET_NODE(INODE,INODE2,ISTAT,XX,YY,ZZ,IOR_NEW, &
-         IMESH2,T,NEW_FFIELD_NAME,NEW_FFIELD_I,COLOR_INDEX,I_TARGET,KEEP_XY,ANGLE,&
-         STR_INDX, STR_SUB_INDX, HR)
+    SUBROUTINE CHECK_TARGET_NODE(INODE,INODE2,ISTAT,XX,YY,ZZ,IOR_NEW,IMESH2,T,NEW_FFIELD_NAME,NEW_FFIELD_I, &
+         COLOR_INDEX,I_TARGET,KEEP_XY,ANGLE,STR_INDX, STR_SUB_INDX, HR)
       IMPLICIT NONE
       !
       ! Check, that the target node is free.
-      ! If target node is DOOR/ENTRY, try to put person to the
-      ! floor. 
+      ! If target node is DOOR/ENTRY, try to put person to the floor. 
       !
       ! IOR_NEW = 1: target is a DOOR or ENTRY
       !           3: Target is a corridor
@@ -9921,7 +10077,7 @@ CONTAINS
                IF (j > 0) I_Target = Group_Known_Doors(j)%I_Target
             ELSE
 
-               CALL Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, HR%X, HR%Y, I_Target, color_index, new_ffield_i, HR)
+               CALL Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, xx, yy, I_Target, color_index, new_ffield_i, HR)
 
                new_ffield_name = TRIM(MESH_NAME(new_ffield_i))
                IF ( j > 0 ) THEN
@@ -11448,6 +11604,123 @@ CONTAINS
     HR%Omega = 0.0_EB  ! rad/s
     !
   END SUBROUTINE CLASS_PROPERTIES
+
+  SUBROUTINE TPRE_GENERATION(i_pre_dist,Tpre_low,Tpre_high,Tpre_mean,Tpre_para,Tpre_para2,TPRE_OUT)
+    IMPLICIT NONE
+    !
+    ! Passed variables
+    INTEGER, INTENT(IN) :: i_pre_dist
+    REAL(EB), INTENT(IN) :: Tpre_low,Tpre_high,Tpre_mean,Tpre_para,Tpre_para2
+    REAL(EB), INTENT(OUT) :: TPRE_OUT
+    !
+    ! Local variables
+    ! How many rnd numbers per one call to the rnd routine
+    INTEGER, PARAMETER  :: n_rnd=1, n_max_par=4
+    INTEGER  :: n_par, RandomType
+    ! No more than 4 numbers needed to specify the distributions
+    REAL(EB) :: RandomPara(n_max_par)
+    REAL(EB) :: rnd_vec(n_rnd)
+    ! 1: uniform (TESTED: OK)
+    ! 2: Truncated normal (TESTED: OK)
+    ! 3: gamma  (TESTED: OK)
+    ! 4: normal (TESTED: OK)
+    ! 5: lognormal (TESTED: OK)
+    ! 6: beta (TESTED: OK)
+    ! 7: Triangular (TESTED: OK)
+    ! 8: Weibull (TESTED: OK) (alpha=1: Exponential)
+    ! 9: Gumbel (TESTED: OK)
+
+    SELECT CASE(I_PRE_DIST)
+    CASE(-1)
+       CALL SHUTDOWN('ERROR: Tpre_Generation: -1')
+    CASE(0)
+       TPRE_OUT = MAX(0._EB,Tpre_mean)
+    CASE(1)   ! Uniform
+       ! Parameters: (ave,min,max) ave not used
+       n_par = 3
+       Randomtype = 1
+       RandomPara(1) = 0.5_EB*(Tpre_high+Tpre_low)
+       RandomPara(2) = Tpre_low
+       RandomPara(3) = Tpre_high
+       CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
+       TPRE_OUT = MAX(0._EB,rnd_vec(1))
+    CASE(2)   ! Truncated Normal
+       ! Parameters: (ave,sigma,min,max)
+       n_par = 4
+       Randomtype = 2
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       RandomPara(3) = Tpre_low
+       RandomPara(4) = Tpre_high
+       CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
+       TPRE_OUT = MAX(0._EB,rnd_vec(1))
+    CASE(3)   ! Gamma
+       ! Parameters: (ave,alpha,beta) ave not used
+       n_par = 3
+       Randomtype = 3
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       RandomPara(3) = Tpre_para2
+       CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
+       TPRE_OUT = MAX(0._EB,rnd_vec(1))
+    CASE(4)   ! Normal
+       ! Parameters: (ave,sigma)
+       n_par = 2
+       Randomtype = 4
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
+       TPRE_OUT = MAX(0._EB,rnd_vec(1))
+    CASE(5)   ! LogNormal
+       ! mean and variance of log(x) should be given
+       ! Parameters: (ave,sigma) of ln(x)
+       n_par = 4
+       Randomtype = 5
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       RandomPara(3) = Tpre_high  ! high end cutoff
+       RandomPara(4) = Tpre_para2 ! shift
+       CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
+       TPRE_OUT = MAX(0._EB,rnd_vec(1))
+    CASE(6)   ! Beta
+       ! Parameters: (ave,a,b) ave not used
+       n_par = 3
+       Randomtype = 6
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       RandomPara(3) = Tpre_para2
+       CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
+       TPRE_OUT = MAX(0._EB,rnd_vec(1))
+    CASE(7)   ! Triangular
+       ! Parameters: (peak,min,max)
+       n_par = 3
+       Randomtype = 7
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_low
+       RandomPara(3) = Tpre_high
+       CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
+       TPRE_OUT = MAX(0._EB,rnd_vec(1))
+    CASE(8)   ! Weibull  (alpha=1: Exponential)
+       ! Parameters: (ave,alpha,lambda)
+       n_par = 3
+       Randomtype = 8
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       RandomPara(3) = Tpre_para2
+       CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
+       TPRE_OUT = MAX(0._EB,rnd_vec(1))
+    CASE(9)   ! Gumbel
+       ! Parameters: (ave,alpha)
+       n_par = 2
+       Randomtype = 9
+       RandomPara(1) = Tpre_mean
+       RandomPara(2) = Tpre_para
+       CALL RandomNumbers(n_rnd, n_par, RandomType, RandomPara(1:n_par), rnd_vec)
+       TPRE_OUT = MAX(0._EB,rnd_vec(1))
+    CASE Default
+       CALL SHUTDOWN('ERROR: Tpre_Generation I_PRE_DIST')
+    END SELECT
+  END SUBROUTINE TPRE_GENERATION
 !
   SUBROUTINE RE_ALLOCATE_HUMANS(CODE,NM)
     IMPLICIT NONE
