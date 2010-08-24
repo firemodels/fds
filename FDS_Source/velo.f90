@@ -644,30 +644,32 @@ ENDDO
 
 ! Surface vegetation drag 
 
-VEG_DRAG(0,:) = VEG_DRAG(1,:)
-K=1
-DO J=1,JBAR
-  DO I=0,IBAR
-      VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2) ! VEG_UMAG=KRES(I,J,K)
-      FVX(I,J,K) = FVX(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*UU(I,J,K)
-  ENDDO
-ENDDO
+WFDS_IF: IF (WFDS) THEN
+   VEG_DRAG(0,:) = VEG_DRAG(1,:)
+   K=1
+   DO J=1,JBAR
+      DO I=0,IBAR
+         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2) ! VEG_UMAG=KRES(I,J,K)
+         FVX(I,J,K) = FVX(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*UU(I,J,K)
+      ENDDO
+   ENDDO
 
-VEG_DRAG(:,0) = VEG_DRAG(:,1)
-DO J=0,JBAR
-  DO I=1,IBAR
-      VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
-      FVY(I,J,K) = FVY(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*VV(I,J,K)
-  ENDDO
-ENDDO
+   VEG_DRAG(:,0) = VEG_DRAG(:,1)
+   DO J=0,JBAR
+      DO I=1,IBAR
+         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
+         FVY(I,J,K) = FVY(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*VV(I,J,K)
+      ENDDO
+   ENDDO
 
-DO J=1,JBAR
-  DO I=1,IBAR
-      VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
-      FVZ(I,J,K) = FVZ(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*WW(I,J,K)
-  ENDDO
-ENDDO
- 
+   DO J=1,JBAR
+      DO I=1,IBAR
+         VEG_UMAG = SQRT(UU(I,J,K)**2 + VV(I,J,K)**2 + WW(I,J,K)**2)
+         FVZ(I,J,K) = FVZ(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*WW(I,J,K)
+      ENDDO
+   ENDDO
+ENDIF WFDS_IF
+
 ! Baroclinic torque correction
  
 IF (BAROCLINIC .AND. .NOT.EVACUATION_ONLY(NM)) CALL BAROCLINIC_CORRECTION(T)
