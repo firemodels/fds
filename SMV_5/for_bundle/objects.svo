@@ -41,6 +41,18 @@
    // ************ static object definitions - single frame/state ********************
 
 OBJECTDEF
+ thermocouple
+ 0 0 0 setrgb
+ 90.0 rotatex
+ 0.005 0.005 0.005 scalexyz
+ 2.0 drawsphere
+ 153 153 153 setrgb
+ push 3.4 0.0 3.5 translate 90.0 rotatey 0.5 5.0 drawdisk pop
+ push  45.0 rotatey 0.5 5.0 drawdisk pop
+ push 3.4 0.0 -3.5 translate 90.0 rotatey 0.5 5.0 drawdisk pop
+ push  135.0 rotatey 0.5 5.0 drawdisk pop
+
+OBJECTDEF
  target
  153 153 153 setrgb
  0.0 0.0 -0.005 translate 0.2 0.01 drawdisk
