@@ -38,12 +38,12 @@ value of dT should be equal to the time averaged Q_abs.
 
 &PART ID='drops'
       STATIC = .TRUE.
+      WATER=.TRUE.
       INITIAL_TEMPERATURE = 0.
       VAPORIZATION_TEMPERATURE = 1000.
-      MELTING_TEMPERATURE = 0.
+      MELTING_TEMPERATURE = -273.15
       HEAT_OF_VAPORIZATION = 0.01
       SPECIFIC_HEAT = 1.0
-      WATER=.TRUE.
       DIAMETER=1000.
       MINIMUM_DIAMETER=10.
       SAMPLING_FACTOR=1 /
