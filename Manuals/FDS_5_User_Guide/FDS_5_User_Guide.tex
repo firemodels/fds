@@ -3590,9 +3590,11 @@ through the wall into the space behind the wall, the attribute
 {\ct BACKING='EXPOSED'} should be listed on the {\ct SURF} line. This feature only works
 if the wall is less than or equal to one mesh cell thick, and if there is a non-zero volume
 of computational domain on the other side of the wall. Obviously, if
-the wall is an external boundary of the domain, the heat is lost
-to an ambient temperature void.
+the wall is an external boundary of the domain, the heat is lost to an ambient temperature void. The same happens if the back side 
+gas cell cannot be found.
 
+The back side emissivity of the surface can be controlled by specifying {\ct EMISSIVITY\_BACK} on the {\ct SURF} line. If not specified, the back side
+emissivity will be calculated during the simulations as a mass-weighted sum of the {\ct MATL} emissivities.
 
 \subsection{Initial and Back Side Temperature}
 
@@ -10111,7 +10113,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Heat flux at surface              & kW/m$^2$            & 0.                      \\ \hline
 {\ct DUCT\_PATH}                      & Int.~Pair       & Pressure Zones for fans           &                     & 0,0                     \\ \hline
 {\ct E\_COEFFICIENT}                  & Real            & Extinguishing coefficient         & m$^2$/kg/s          & 0.                      \\ \hline
-{\ct EMISSIVITY}                      & Real            & Emissivity                        &                     & 0.9                     \\ \hline
+{\ct EMISSIVITY}                      & Real            & Emissivity (front)                &                     & 0.9                     \\ \hline
+{\ct EMISSIVITY\_BACK}                & Real            & Emissivity (back)                 &                     &                         \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & See Section~\ref{info:WALL_MODEL} &                     & {\ct .FALSE.}           \\ \hline
 {\ct FYI}                             & Character       & Comment String                    &                     &                         \\ \hline
