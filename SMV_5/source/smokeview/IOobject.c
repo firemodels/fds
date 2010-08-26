@@ -540,6 +540,8 @@ void draw_devices(void){
     int save_use_displaylist;
     propdata *prop;
     int j;
+    int doit;
+    float dpsi;
 
     devicei = deviceinfo + i;
     prop=devicei->prop;
@@ -577,6 +579,7 @@ void draw_devices(void){
     glPushMatrix();
     glTranslatef(xyz[0],xyz[1],xyz[2]);
 
+    doit=0;
     if((active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0)||
       STRCMP(devicei->object->label,"thermocouple")==0
       ){
@@ -587,14 +590,18 @@ void draw_devices(void){
       xyznorm[1]=world_eyepos[1]-devicei->xyz[1];
       xyznorm[2]=world_eyepos[2]-devicei->xyz[2];
 
-      get_elevaz(xyznorm,&devicei->dtheta,devicei->rotate_axis);
+      get_elevaz(xyznorm,&devicei->dtheta,devicei->rotate_axis, &dpsi);
+      doit=1;
     }
     {
       float cos_az, sin_az;
-      float *axis;
+      float *axis,axis2[2];
 
       axis = devicei->rotate_axis;
       glRotatef(devicei->dtheta,axis[0],axis[1],axis[2]);
+      if(doit==1){
+          glRotatef(-dpsi,0.0,0.0,1.0);
+      }
     }
     if(sensorrelsize!=1.0){
       glScalef(sensorrelsize,sensorrelsize,sensorrelsize);

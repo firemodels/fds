@@ -1578,7 +1578,6 @@ typedef struct {
     if(match(buffer,"SMOKE3D",7) == 1||
        match(buffer,"VSMOKE3D",8) == 1){
       size_t lenbuffer;
-      int idummy;
       float temp_val=-1.0;
       char *buffer_temp;
 
@@ -2091,7 +2090,7 @@ typedef struct {
         }
         init_device(devicei,xyz,xyzn,state0,nparams,params,labelptr);
       }
-      get_elevaz(devicei->xyznorm,&devicei->dtheta,devicei->rotate_axis);
+      get_elevaz(devicei->xyznorm,&devicei->dtheta,devicei->rotate_axis,NULL);
       if(nparams_textures>0){
         fgets(buffer,255,stream);
         trim(buffer);
@@ -4149,7 +4148,7 @@ typedef struct {
           else{
             devicecopy->object = get_SVOBJECT_type(device_label,thcp_object_backup);
           }
-          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis);
+          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
     
           init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
           devicecopy->prop=NULL;
@@ -4219,7 +4218,7 @@ typedef struct {
           else{
             devicecopy->object = get_SVOBJECT_type(device_label,sprinkler_upright_object_backup);
           }
-          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis);
+          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
     
           init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
 
@@ -4336,7 +4335,7 @@ typedef struct {
           else{
             devicecopy->object = get_SVOBJECT_type(device_label,heat_detector_object_backup);
           }
-          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis);
+          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
 
           init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
 
@@ -4436,7 +4435,7 @@ typedef struct {
         else{
           devicecopy->object = get_SVOBJECT_type(device_label,smoke_detector_object_backup);
         }
-        get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis);
+        get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
     
         init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
 
@@ -10162,7 +10161,7 @@ void update_loaded_lists(void){
 
 /* ------------------ get_elevaz ------------------------ */
 
-void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis){
+void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis, float *dpsi){
   float norm2;
   float pi;
   float az, elev;
@@ -10177,6 +10176,15 @@ void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis){
   rotate_axis[1]= xyznorm[0];
   rotate_axis[2]=0.0;
   normalize(rotate_axis,2);
+  if(dpsi!=NULL){
+    float xyznorm2[2];
+
+    xyznorm2[0]=xyznorm[0];
+    xyznorm2[1]=xyznorm[1];
+    normalize(xyznorm2,2);
+    *dpsi = 180.0*acos(xyznorm2[1])/pi;
+    if(xyznorm2[0]<0.0)*dpsi=-(*dpsi);
+  }
 }
 
 /* ------------------ getfile_modtime ------------------------ */
