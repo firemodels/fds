@@ -102,7 +102,7 @@ EXTERNCPP void to_lower(char *string);
 EXTERNCPP void init_object_defs(void);
 EXTERNCPP void update_device_textures(void);
 EXTERNCPP char *get_device_label(char *buffer);
-EXTERNCPP void get_elevaz(float *xyznorm,float *dtheta, float *rotate_axis);
+EXTERNCPP void get_elevaz(float *xyznorm,float *dtheta, float *rotate_axis, float *dpsi);
 EXTERNCPP void drawTargetNorm(void);
 EXTERNCPP void draw_devices(void);
 EXTERNCPP void free_SVOBJECT(sv_object *object);
