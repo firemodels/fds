@@ -53,7 +53,7 @@ value of dT should be equal to the time averaged Q_abs.
 	PART_ID = 'drops' /
 
 
-&DEVC QUANTITY='WATER RADIATION LOSS', ID = 'Absorption'
+&DEVC QUANTITY='PARTICLE RADIATION LOSS', ID = 'Absorption'
 	STATISTICS = 'VOLUME INTEGRAL', XB = 0,3,0,3,0,3 /
 &DEVC QUANTITY='ADT', PART_ID='drops', ID = 'ADT'
 	STATISTICS = 'VOLUME MEAN', XB = 1,2,1,2,1,2 /
