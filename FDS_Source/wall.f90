@@ -1117,22 +1117,9 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          IF (ML%NU_FUEL(1)>0._EB) MFLUX = MFLUX/ML%NU_FUEL(1)
          ! gas phase 
          YY_GET = MAX(0._EB,YY(IIG,JJG,KKG,:))
-   !      Y_MF_G = YY_GET(I_FUEL)                      ! OLD
-         CALL GET_MASS_FRACTION(YY_GET,I_FUEL,Y_MF_G)  ! NEW
-   !      CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_G)     ! OLD
-         RSUM_G = RSUM(IIG,JJG,KKG)                    ! NEW
-         ! wall values
-   !      YY_GET = MAX(0._EB,YY_F(IW,:))
-   !      Y_MF_W = YY_GET(I_FUEL)
-   !      CALL GET_MOLECULAR_WEIGHT(YY_GET,RSUM_W)
-         ! Weighted average of wall and gas values
-         ! Alvernative 1
-   !      YPRSUM  = 0.2*(Y_MF_W/RSUM_W) + 0.8*(Y_MF_G/RSUM_G)
+         CALL GET_MASS_FRACTION(YY_GET,I_FUEL,Y_MF_G)  
+         RSUM_G = RSUM(IIG,JJG,KKG)                    
          YPRSUM  = Y_MF_G/RSUM_G
-         ! Alternative 2
-   !      YY_S    = 0.2*Y_MF_W+0.8*Y_MF_G
-   !      RSUM_S  = 0.2*RSUM_W+0.8*RSUM_G
-   !      YPRSUM  = YY_S/RSUM_S
          HVRG    = REACTION(1)%MW_FUEL*ML%H_R(1)/R0
          PPSURF  = MIN(1._EB,(R0/REACTION(1)%MW_FUEL)*YPRSUM)
          PPCLAUS = MIN(1._EB,EXP(HVRG*(1./ML%TMP_BOIL-1./WC%TMP_S(1))))
