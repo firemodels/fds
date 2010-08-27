@@ -121,6 +121,7 @@ $RUNFDS Radiation radiation_plane_layer_6_2       fire45
 $RUNFDS Radiation radiation_plane_layer_6_3       fire45
 $RUNFDS Radiation radiation_plane_layer_6_4       fire51
 $RUNFDS Radiation radiation_plane_layer_6_5       fire51
+$RUNFDS Radiation thermocouples                   fire51
 $RUNFDS Radiation wall_internal_radiation         fire52
 $RUNFDS Species FED_Device                        fire52
 $RUNFDS Sprinklers_and_Sprays activate_sprinklers fire52
