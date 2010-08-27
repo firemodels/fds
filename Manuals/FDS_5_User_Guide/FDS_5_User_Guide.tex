@@ -487,6 +487,9 @@ water droplet transport on solid objects.
 
 Dr.~Chris Lautenberger of University of California, Berkeley, has helped in development and improving the documentation of the pyrolysis models.
 
+Prof.~Ofodike Ezekoye and Craig Weinschenk of the University of Texas, Austin, helped to formulate and test the thermocouple model within FDS. This work was
+based on an earlier analysis by Stephen Welsh and Philip Rubini.
+
 Finally, on the following pages is a list of individuals and organizations who have volunteered their time and effort to
 ``beta test'' FDS and Smokeview prior to its official release. Their contribution is invaluable because there is simply no other way
 to test all of the various features of the model.
@@ -3590,7 +3593,7 @@ through the wall into the space behind the wall, the attribute
 {\ct BACKING='EXPOSED'} should be listed on the {\ct SURF} line. This feature only works
 if the wall is less than or equal to one mesh cell thick, and if there is a non-zero volume
 of computational domain on the other side of the wall. Obviously, if
-the wall is an external boundary of the domain, the heat is lost to an ambient temperature void. The same happens if the back side 
+the wall is an external boundary of the domain, the heat is lost to an ambient temperature void. The same happens if the back side
 gas cell cannot be found.
 
 The back side emissivity of the surface can be controlled by specifying {\ct EMISSIVITY\_BACK} on the {\ct SURF} line. If not specified, the back side
@@ -6326,7 +6329,7 @@ If more particles are desired, lower the input value of this parameter. The defa
 parameter should be specified on the {\ct SURF}, {\ct PROP}, or {\ct INIT} line, depending on whether the particles/droplets
 originate at a surface, a sprinkler or nozzle, or a volume. Versions prior to FDS~5.5 had this parameter listed on the
 {\ct PART} line. Note that if you introduce particles or droplets via an {\ct INIT} line, you must specify a value for {\ct DT\_INSERT}. Otherwise, particles or
-droplets will only be introduced initially. 
+droplets will only be introduced initially.
 \item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
 file {\bf CHID.prt5}. This parameter can be used to reduce the size
 of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default
@@ -8382,18 +8385,21 @@ If multiple meshes are being used, the vertical path {\em cannot} cross mesh bou
 
 
 
-\subsection{The True Gas Temperature vs. the Measured Gas Temperature}
+\subsection{Thermocouples}
 \label{info:THERMOCOUPLE}
 
-The output quantity {\ct THERMOCOUPLE} is the temperature
-of the thermocouple itself, usually close to the gas temperature, but not
-always. It is determined by solving the following equation
-for $T_{TC}$ iteratively~\cite{Welsh:1}
-\be \epsilon_{TC} (\sigma T_{TC}^4- U/4) + h(T_{TC}-T_g) = 0 \label{TC}  \ee
-where $\epsilon_{TC}$ is the emissivity of the thermocouple, $U$ is the
-integrated radiative intensity, $T_g$ is the true gas temperature, and
+The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocouple. The thermocouple temperature lags the true gas temperature by an amount determined mainly
+by its bead size. It is found by solving the following equation for the thermocouple temperature, $T_{\hbox{\tiny TC}}$~\cite{Welsh:1}
+\be 
+   \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, \frac{dT_{\hbox{\tiny TC}}}{dt} = \epsilon_{\hbox{\tiny TC}} \, (U/4 - \sigma T_{\hbox{\tiny TC}}^4) + h(T_g - T_{\hbox{\tiny TC}}) = 0 
+   \label{TC}  
+\ee
+where $\epsilon_{\hbox{\tiny TC}}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_g$ is the true gas temperature, and
 $h$ is the heat transfer coefficient to a small sphere,
-$h=k_a \NU/\PR/d_{TC}$. The bead {\ct BEAD\_DIAMETER} and {\ct BEAD\_EMISSIVITY} are given on the associated {\ct PROP} line.
+$h=k \, \NU / d_{\hbox{\tiny TC}}$. 
+The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line.
+The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and
+0.44~kJ/kg/K, respectively.
 See the discussion on heat transfer to a water
 droplet in the Technical Reference Guide for details of the convective
 heat transfer to a small sphere.
@@ -9851,8 +9857,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ALPHA\_E}                          & Real          & Smoke detector parameter                  &                       & 0.0       \\ \hline
 {\ct BETA\_C}                           & Real          & Smoke detector parameter                  &                       & 1.0       \\ \hline
 {\ct BETA\_E}                           & Real          & Smoke detector parameter                  &                       & 1.0       \\ \hline
+{\ct BEAD\_DENSITY}                     & Real          & Density of TC bead                        & kg/m$^3$              & 8908.     \\ \hline
 {\ct BEAD\_DIAMETER}                    & Real          & Diameter of TC bead                       & m                     & 0.001     \\ \hline
 {\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of TC bead                     &                       & 0.85      \\ \hline
+{\ct BEAD\_SPECIFIC\_HEAT}              & Real          & Specific Heat of TC bead                  & kJ/kg/K               & 0.44      \\ \hline
 {\ct CABLE\_DIAMETER}                   & Real          & See Section~\ref{info:THIEF}              & m                     & 0.02      \\ \hline
 {\ct CABLE\_FAILURE\_TEMPERATURE}       & Real          & See Section~\ref{info:THIEF}              & $^\circ$C             & 400       \\ \hline
 {\ct CABLE\_JACKET\_THICKNESS}          & Real          & See Section~\ref{info:THIEF}              & m                     & 0.002     \\ \hline

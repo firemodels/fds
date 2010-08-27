@@ -999,9 +999,9 @@ where we show the solution at specific points in time corresponding to the initi
 and the trough of the first compression cycle.  The initial condition for the density is specified as $\rho(x,0) = 1$ and the amplitude and frequency are set to unity, $B=1$ and $\omega=1$.
 
 \begin{figure}[ht]
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_peak_trough.pdf}
+  %    \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_peak_trough.pdf}
    \caption{(Left) Analytical solution for the 1D continuity equation at various points in time. The
-domain is periodic on an interval of 2\pi.}
+domain is periodic on an interval of $2\pi$.}
    \label{fig_pulsating_2D_wave_peak_trough}
 \end{figure}
 
@@ -1056,8 +1056,8 @@ An example of the solution to (\ref{eqn_2dsoln}) is shown in Figure \ref{fig_pul
 
 \begin{figure}[ht]
    \begin{tabular}{rl}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series_pi.pdf} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence_pi.pdf}
+ %     \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series_pi.pdf} &
+  %    \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence_pi.pdf}
    \end{tabular}
    \caption{(Left) Time series of $\rho$ at the position $(x,y) = (\pi, \pi)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for Superbee and CHARM, the scalar transport schemes in FDS.  All schemes are second-order accurate.}
    \label{fig_pulsating_2D_wave_pi}
@@ -1065,8 +1065,8 @@ An example of the solution to (\ref{eqn_2dsoln}) is shown in Figure \ref{fig_pul
 
 \begin{figure}[ht]
     \begin{tabular}{rl}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series.pdf} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence.pdf}
+ %     \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series.pdf} &
+  %    \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence.pdf}
    \end{tabular}
          \caption{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for Superbee and CHARM, the scalar transport schemes in FDS.  All schemes are second-order accurate.}
    \label{fig_pulsating 2D wave}
@@ -1608,6 +1608,26 @@ lines are FDS results and the dark lines are the HEATING results. An example inp
 \label{heat_conduction_kc}
 \end{figure}
 
+
+\clearpage
+
+\section{Simple Thermocouple Model (\texorpdfstring{{\bf thermocouples}}{thermocouples})}
+
+This example tests the simple thermocouple model in FDS. It consists of a box whose walls and gas temperatures are fixed at 500~$^\circ$C. Inside the box are three
+thermocouples with bead diameters of 1, 2, and 3~mm. Also included in the box are three ``targets'' -- small solid objects whose surfaces are assumed to be composed of
+small spheres of the same diameter as the thermocouples. Figure~\ref{thermocouples} compares the temperature rise of the objects. The thermocouple model is not compared
+with an analytical solutions. This is
+simply a comparison of the thermally-thin thermocouple calculation with the thermally-thick ``target'' calculation. Small differences in temperature are due to slightly different
+flow conditions in different regions of the box, and numerical error due to node spacing and time step size.
+
+\begin{figure}[ht]
+\noindent
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/thermocouples}
+\end{center}
+\caption[The {\bf thermocouples} test case.]{Comparison of thermally-thin and thick heat conduction into a small sphere.}
+\label{thermocouples}
+\end{figure}
 
 
 
