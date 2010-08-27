@@ -1109,21 +1109,27 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,PRESSURE_RELAX_FACTOR,RELAXATION_FACTOR,FYI, &
  
 ! Physical constants
  
-R0      = 8314.472_EB        ! Universal Gas Constant (J/kmol/K) (NIST Physics Constants)
-R1      = 1.986257E-03_EB    ! Universal Gas Constant (kcal/mol/K)
-TMPA    = 20._EB             ! Ambient temperature (C)
-GRAV    = 9.80665_EB         ! Acceleration of gravity (m/s**2)
-GAMMA   = 1.4_EB             ! Heat capacity ratio for air
-P_INF   = 101325._EB         ! Ambient pressure (Pa)
-P_STP   = 101325._EB         ! Standard pressure (Pa)
-TMPM    = 273.15_EB          ! Melting temperature of water (K)
-SIGMA   = 5.67E-8_EB         ! Stefan-Boltzmann constant (W/m**2/K**4)
-C_P_W   = 4184._EB           ! Specific Heat of Water (J/kg/K)
-MW_AIR  = 1._EB/(Y_O2_INFTY/32._EB+(1._EB-Y_O2_INFTY)/28._EB) ! g/mol
-HUMIDITY= -1._EB             ! Relative Humidity
-RHO_SOOT= 1850._EB           ! Density of soot particle (kg/m3)
-SMOKE_ALBEDO= 0.3            ! Albedo of smoke
-RESTART_CHID = CHID
+R0           = 8314.472_EB                                         ! Universal Gas Constant (J/kmol/K) (NIST Physics Constants)
+R1           = 1.986257E-03_EB                                     ! Universal Gas Constant (kcal/mol/K)
+TMPA         = 20._EB                                              ! Ambient temperature (C)
+GRAV         = 9.80665_EB                                          ! Acceleration of gravity (m/s**2)
+GAMMA        = 1.4_EB                                              ! Heat capacity ratio for air
+P_INF        = 101325._EB                                          ! Ambient pressure (Pa)
+P_STP        = 101325._EB                                          ! Standard pressure (Pa)
+TMPM         = 273.15_EB                                           ! Melting temperature of water (K)
+SIGMA        = 5.67E-8_EB                                          ! Stefan-Boltzmann constant (W/m**2/K**4)
+C_P_W        = 4184._EB                                            ! Specific Heat of Water (J/kg/K)
+MU_AIR_0     = 1.8E-5_EB                                           ! Dynamic Viscosity of Air at 20 C (kg/m/s)
+CP_AIR_0     = 1012._EB                                            ! Specific Heat of Air at 20 C (J/kg/K)
+PR_AIR       = 0.7_EB
+K_AIR_0      = MU_AIR_0*CP_AIR_0/PR_AIR                            ! Thermal Conductivity of Air at 20 C (W/m/K)
+MW_AIR       = 1._EB/(Y_O2_INFTY/32._EB+(1._EB-Y_O2_INFTY)/28._EB) ! g/mol
+RHO_SOOT     = 1850._EB                                            ! Density of soot particle (kg/m3)
+SMOKE_ALBEDO = 0.3                                                 ! Albedo of smoke
+
+! Variables that are initially set to -1. These are to be reset later.
+
+HUMIDITY     = -1._EB             ! Relative Humidity
  
 ! Empirical heat transfer constants
  
@@ -1132,6 +1138,7 @@ C_HORIZONTAL      = 1.52_EB  ! Horizontal free convection
 C_FORCED          = 0.037_EB ! Forced convection coefficient for plates
 C_FORCED_CYLINDER = 0.664_EB ! Forced convection coefficient for cylinders
 C_FORCED_SPHERE   = 0.6_EB   ! Forced convection coefficient for spheres
+PR_ONTH           = PR_AIR**ONTH
 
 H_FIXED                 = -1.      ! obsolete, moved to SURF
 ASSUMED_GAS_TEMPERATURE = -1000.   ! Assumed gas temperature, used for diagnostics
@@ -1149,8 +1156,9 @@ SPECIFIC_ENTHALPY = -1._EB
 REFERENCE_TEMPERATURE = 25._EB
 MW      = 0._EB   
 
-! Logical constants
+! Miscellaneous constants
 
+RESTART_CHID   = CHID
 RESTART        = .FALSE.
 RADIATION      = .TRUE.
 CO_PRODUCTION  = .FALSE.
@@ -1271,7 +1279,6 @@ TREF_BACKGROUND = REFERENCE_TEMPERATURE
 HCH    = C_HORIZONTAL
 HCV    = C_VERTICAL
 IF (ISOTHERMAL) RADIATION = .FALSE.
-!C_FORCED = C_FORCED*(1012._EB)*(1.8E-5_EB)**0.2_EB / (0.7_EB)**(2._EB/3._EB)
 ASSUMED_GAS_TEMPERATURE = ASSUMED_GAS_TEMPERATURE + TMPM
 TEX_ORI = TEXTURE_ORIGIN
 FVEC = FORCE_VECTOR
@@ -3320,7 +3327,7 @@ SUBROUTINE READ_PROP
 USE DEVICE_VARIABLES
 USE MATH_FUNCTIONS, ONLY : GET_RAMP_INDEX,GET_TABLE_INDEX
 REAL(EB) :: ACTIVATION_OBSCURATION,ACTIVATION_TEMPERATURE,ALPHA_C,ALPHA_E,BETA_C,BETA_E, &
-            BEAD_DIAMETER,BEAD_EMISSIVITY, &
+            BEAD_DIAMETER,BEAD_EMISSIVITY,BEAD_SPECIFIC_HEAT,BEAD_DENSITY, &
             CONDUIT_DIAMETER,CONDUIT_THICKNESS,CABLE_MASS_PER_LENGTH,CABLE_DIAMETER, &
             CABLE_JACKET_THICKNESS,CABLE_FAILURE_TEMPERATURE, &
             C_FACTOR,CHARACTERISTIC_VELOCITY,DT_INSERT,ORIFICE_DIAMETER, &
@@ -3335,7 +3342,7 @@ CHARACTER(30) :: SMOKEVIEW_ID(SMOKEVIEW_OBJECTS_DIMENSION),QUANTITY='null',PART_
 TYPE (PROPERTY_TYPE), POINTER :: PY
 
 NAMELIST /PROP/ ACTIVATION_OBSCURATION,ACTIVATION_TEMPERATURE,ALPHA_C,ALPHA_E,BETA_C,BETA_E, &
-                BEAD_DIAMETER,BEAD_EMISSIVITY, &
+                BEAD_DIAMETER,BEAD_EMISSIVITY,BEAD_SPECIFIC_HEAT,BEAD_DENSITY, &
                 CONDUIT_DIAMETER,CONDUIT_THICKNESS,CABLE_MASS_PER_LENGTH,CABLE_DIAMETER, &
                 CABLE_JACKET_THICKNESS,CABLE_FAILURE_TEMPERATURE, &
                 C_FACTOR,CHARACTERISTIC_VELOCITY,DROPLETS_PER_SECOND,DT_INSERT,ORIFICE_DIAMETER, &
@@ -3389,8 +3396,10 @@ READ_PROP_LOOP: DO N=0,N_PROP
    PY%ALPHA_E                  = ALPHA_E
    PY%BETA_C                   = BETA_C
    PY%BETA_E                   = BETA_E
+   PY%BEAD_DENSITY             = BEAD_DENSITY
    PY%BEAD_DIAMETER            = BEAD_DIAMETER
    PY%BEAD_EMISSIVITY          = BEAD_EMISSIVITY
+   PY%BEAD_SPECIFIC_HEAT       = BEAD_SPECIFIC_HEAT*1000._EB
    PY%CABLE_DIAMETER           = CABLE_DIAMETER
    PY%CABLE_JACKET_THICKNESS   = CABLE_JACKET_THICKNESS
    PY%CABLE_MASS_PER_LENGTH    = CABLE_MASS_PER_LENGTH
@@ -3435,6 +3444,8 @@ READ_PROP_LOOP: DO N=0,N_PROP
             PY%SMOKEVIEW_ID(1) = 'sensor'
          CASE('spot obscuration','CHAMBER OBSCURATION')
             PY%SMOKEVIEW_ID(1) = 'smoke_detector'
+         CASE('THERMOCOUPLE')
+            PY%SMOKEVIEW_ID(1) = 'thermocouple'
       END SELECT
    ENDIF
    PY%SMOKEVIEW_PARAMETERS = SMOKEVIEW_PARAMETERS
@@ -3547,8 +3558,10 @@ ALPHA_C                  = 1.8_EB      ! m, Heskestad Length Scale
 ALPHA_E                  = 0.0_EB
 BETA_C                   = -1.0_EB
 BETA_E                   = -1.0_EB
+BEAD_DENSITY             = 8908._EB    ! kg/m3 (Nickel)
 BEAD_DIAMETER            = 0.001       ! m
 BEAD_EMISSIVITY          = 0.85_EB
+BEAD_SPECIFIC_HEAT       = 0.44_EB     ! kJ/kg/K (Nickel)
 CABLE_FAILURE_TEMPERATURE= 400._EB     ! C
 CABLE_DIAMETER           = 0.02_EB     ! m
 CABLE_JACKET_THICKNESS   = 0.002_EB    ! m
@@ -4526,15 +4539,15 @@ READ_SURF_LOOP: DO N=0,N_SURF
       ENDIF
 
       SELECT CASE(SF%GEOMETRY)
-      CASE(SURF_CARTESIAN)
-         SF%CONV_LENGTH = 0._EB
-         IF ((LENGTH<0._EB).AND.(WIDTH<0._EB)) SF%CONV_LENGTH = 1.0_EB
-         IF (LENGTH > 0._EB) SF%CONV_LENGTH = LENGTH
-         IF (WIDTH > 0._EB) SF%CONV_LENGTH = SQRT(SF%CONV_LENGTH**2 + WIDTH**2)
-      CASE(SURF_CYLINDRICAL)
-         SF%CONV_LENGTH = PI*RADIUS
-      CASE(SURF_SPHERICAL)
-         SF%CONV_LENGTH = 2._EB*RADIUS
+         CASE(SURF_CARTESIAN)
+            SF%CONV_LENGTH = 0._EB
+            IF ((LENGTH<0._EB).AND.(WIDTH<0._EB)) SF%CONV_LENGTH = 1.0_EB
+            IF (LENGTH > 0._EB) SF%CONV_LENGTH = LENGTH
+            IF (WIDTH > 0._EB) SF%CONV_LENGTH = SQRT(SF%CONV_LENGTH**2 + WIDTH**2)
+         CASE(SURF_CYLINDRICAL)
+            SF%CONV_LENGTH = PI*RADIUS
+         CASE(SURF_SPHERICAL)
+            SF%CONV_LENGTH = 2._EB*RADIUS
       END SELECT
    ENDIF
 
@@ -7395,7 +7408,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       DV%CONVERSION_FACTOR= CONVERSION_FACTOR
       DV%DEPTH            = DEPTH
       DV%IOR              = IOR
-      IF (ID=='null') WRITE(ID,'(A7,I4)') 'Device_',N_DEVC
+      IF (ID=='null') WRITE(ID,'(A7,I4.4)') 'Device_',N_DEVC
       DV%ID               = ID
       IF (POINTS>1)DV%LINE= N_DEVC_LINE
       DV%POINT            = I_POINT
@@ -7870,6 +7883,10 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
          DV%SETPOINT = PROPERTY(DV%PROP_INDEX)%ACTIVATION_TEMPERATURE
          DV%TMP_L    = PROPERTY(DV%PROP_INDEX)%INITIAL_TEMPERATURE
+
+      CASE ('THERMOCOUPLE')
+
+         DV%TMP_L = PROPERTY(DV%PROP_INDEX)%INITIAL_TEMPERATURE
 
       CASE ('RADIATIVE_FLUX_GAS','RADIATIVE HEAT FLUX GAS')
 
