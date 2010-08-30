@@ -27,7 +27,11 @@ Rem This file is included in the smokeview user's guide
 set smvug="%CD%\..\Manuals\SMV_5_User_Guide\"
 echo | fds5 2> "%smvug%\figures\fds5.version"
 
-call SMV_Cases.bat
-erase FDS_Cases.bat
+echo creating FDS case list from SMV_Cases.csh
+..\Utilities\Data_Processing\csh2bat SMV_Cases.csh SMV_Cases.bat
 
+call SMV_Cases.bat
+
+erase FDS_Cases.bat
+erase SMV_Cases.bat
 pause
