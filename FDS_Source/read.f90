@@ -1233,6 +1233,7 @@ IF (FDS6) THEN
       FLUX_LIMITER=2
       DYNSMAG=.TRUE.
    ENDIF
+   BAROCLINIC=.TRUE.
    NOBIAS=.TRUE.
    CHECK_VN=.TRUE.
    CHECK_GR=.TRUE.
@@ -1244,13 +1245,14 @@ IF (FDS6) THEN
    NEW_MIX_TIME=.TRUE.
    FLUXMAX=1.E10_EB
    NEW_FLUID_PARTICLE=.TRUE.
+
    ! reread the line to pick up any user-specified options
+
    REWIND(LU_INPUT)
    CALL CHECKREAD('MISC',LU_INPUT,IOS)
    IF (IOS==0) READ(LU_INPUT,MISC)
    REWIND(LU_INPUT)
 ENDIF
-
 
 ! Temperature conversions
 
@@ -4781,8 +4783,6 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
  
    SF%PYROLYSIS_MODEL = PYROLYSIS_NONE
    BURNING  = .FALSE.
-   BLOWING  = .FALSE.
-   SUCKING  = .FALSE.
    IF (SF%N_LAYERS > 0) THEN
       DO NN=1,SF%N_MATL
          ML => MATERIAL(SF%MATL_INDEX(NN))
@@ -4800,14 +4800,19 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       SF%PYROLYSIS_MODEL = PYROLYSIS_SPECIFIED
    ENDIF
 
+   ! Make decisions based on whether there is forced ventilation at the surface
+
+   BLOWING  = .FALSE.
+   SUCKING  = .FALSE.
    IF (SF%VEL<0._EB .OR. SF%VOLUME_FLUX<0._EB) BLOWING = .TRUE.
    IF (SF%VEL>0._EB .OR. SF%VOLUME_FLUX>0._EB) SUCKING = .TRUE.
    IF (BLOWING .OR. SUCKING) SF%SPECIFIED_NORMAL_VELOCITY = .TRUE.
+   IF (SUCKING) SF%FREE_SLIP = .TRUE.
 
    IF (BURNING .AND. (BLOWING .OR. SUCKING)) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot have a specified velocity or volume flux'
       CALL SHUTDOWN(MESSAGE)
-      ENDIF
+   ENDIF
  
    ! set predefined HRRPUA
 
@@ -4886,6 +4891,7 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    ! Boundary fuel model for vegetation
+
    IF (SF%VEGETATION) SF%SPECIES_BC_INDEX = SPECIFIED_MASS_FLUX
  
    ! Texture map info
