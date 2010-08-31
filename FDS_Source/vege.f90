@@ -93,6 +93,7 @@ TREE_LOOP: DO NCT=1,N_TREES
          DR%Y = REAL(NYB,EB)
          DR%Z = REAL(NZB,EB)
          DR%CLASS = IPC
+         DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
          VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
         ENDIF
        ENDDO   
@@ -138,6 +139,7 @@ TREE_LOOP: DO NCT=1,N_TREES
          DR%Y = REAL(NYB,EB)
          DR%Z = REAL(NZB,EB)
          DR%CLASS = IPC
+         DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
          VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
         ENDIF
        ENDDO   
@@ -177,6 +179,7 @@ TREE_LOOP: DO NCT=1,N_TREES
          DR%Y = REAL(NYB,EB)
          DR%Z = REAL(NZB,EB)
          DR%CLASS = IPC
+         DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
          VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
         ENDIF
        ENDDO   
@@ -212,6 +215,7 @@ TREE_LOOP: DO NCT=1,N_TREES
              DR%Y = REAL(NYB,EB)
              DR%Z = REAL(NZB,EB)
              DR%CLASS = IPC
+             DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
              VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
             ENDIF
            ENDDO   
@@ -264,6 +268,7 @@ TREE_LOOP: DO NCT=1,N_TREES
          DR%Y = REAL(NYB,EB)
          DR%Z = REAL(NZB,EB)
          DR%CLASS = IPC
+         DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
          VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
         ENDIF
        ENDDO   
