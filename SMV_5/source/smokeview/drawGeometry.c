@@ -3349,6 +3349,7 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
   int im1, jm1, km1;
   int read_error=0;
 
+#undef cellindex
 #define cellindex(i,j,k) ((i)+(j)*ibar+(k)*ibar*jbar)
 
   xplt=meshi->xplt;
