@@ -557,12 +557,6 @@ OVERALL_INSERT_LOOP: DO
       END SELECT
    
       ! Assign properties to the initial droplets/particles
-      
-      IF (IN%DROPLET_INIT_FILE) THEN
-         ! open input file
-         OPEN(IN%LU_DROPLET,FILE=IN%DROPLET_FILENAME,ACTION='READ')
-         READ(IN%LU_DROPLET,*) ! skip header line
-      ENDIF
    
       MASS_SUM = 0._EB
       INSERT_PARTICLE_LOOP: DO I=1,N_INITIAL
@@ -574,12 +568,21 @@ OVERALL_INSERT_LOOP: DO
          ENDIF
          DR=>DROPLET(NLP)
          
-         INIT_FILE_IF: IF (IN%DROPLET_INIT_FILE) THEN
-            READ(IN%LU_DROPLET,*) DR%X,DR%Y,DR%Z,DR%U,DR%V,DR%W,DR%R,DR%TMP,DR%PWT
-            DR%R = DR%R*0.5E-6_EB ! convert diameter in microns to radius in meters
-            DR%TMP = DR%TMP+TMPM  ! convert Celcius to Kelvins
-            DR%PWT = MAX(DT,IN%DT_INSERT)*DR%PWT/(PC%FTPR*DR%R**3) ! convert mass flow rate to particle weight factor
-         ELSE INIT_FILE_IF
+         POINTWISE_IF: IF (IN%POINTWISE_DROPLET_INIT) THEN
+            DR%X = IN%X0
+            DR%Y = IN%Y0
+            DR%Z = IN%Z0
+            DR%U = IN%U0
+            DR%V = IN%V0
+            DR%W = IN%W0
+            DR%R = IN%RADIUS
+            DR%TMP = IN%TEMPERATURE
+            IF (DR%R>0._EB) THEN
+               DR%PWT = IN%DT_INSERT*IN%MASS_PER_TIME/(PC%FTPR*DR%R**3)
+            ELSE
+               DR%PWT = 0._EB
+            ENDIF
+         ELSE POINTWISE_IF
             BLOCK_OUT_LOOP:  DO
            !!  CALL RANDOM_CONE(DR%X,DR%Y,DR%Z,0.5_EB*(X2+X1),0.5_EB*(Y2+Y1),Z1,0.25_EB,0.5_EB)
                CALL RANDOM_RECTANGLE(DR%X,DR%Y,DR%Z,X1,X2,Y1,Y2,Z1,Z2)
@@ -594,7 +597,7 @@ OVERALL_INSERT_LOOP: DO
             DR%R   = 0._EB                     ! Radius is zero unless DIAMETER has been specified
             DR%TMP = PC%TMP_INITIAL            ! Initial temperature
             DR%PWT = 1._EB                     ! Weighting factor is one unless changed below
-         ENDIF INIT_FILE_IF
+         ENDIF POINTWISE_IF
          
          DR%T   = T                         ! Insertion time is current time
          DR%IOR = 0                         ! Orientation of solid surface (0 means the droplet/particle is not attached)
@@ -608,7 +611,7 @@ OVERALL_INSERT_LOOP: DO
          DR%SPLAT   = .FALSE.
          DR%WALL_INDEX = 0
     
-         IF (PC%DIAMETER>0._EB .AND. .NOT.IN%DROPLET_INIT_FILE) THEN
+         IF (PC%DIAMETER>0._EB .AND. .NOT.IN%POINTWISE_DROPLET_INIT) THEN
             IF (PC%MONODISPERSE) THEN
                DR%R   = 0.5_EB*PC%DIAMETER
                DR%PWT = 1._EB
@@ -653,18 +656,19 @@ OVERALL_INSERT_LOOP: DO
          ENDIF
    
       ENDDO INSERT_PARTICLE_LOOP
-      
-      IF (IN%DROPLET_INIT_FILE) CLOSE(IN%LU_DROPLET)
     
-      ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
+      POINTWISE_IF2: IF (.NOT.IN%POINTWISE_DROPLET_INIT) THEN
+       
+         ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
       
-      IF (MASS_PER_TIME>0._EB) MASS_PER_VOLUME = MASS_PER_TIME*IN%DT_INSERT/BLOCK_VOLUME
+         IF (MASS_PER_TIME>0._EB) MASS_PER_VOLUME = MASS_PER_TIME*IN%DT_INSERT/BLOCK_VOLUME
 
-      IF (MASS_PER_VOLUME>0._EB) DROPLET(NLP-N_INITIAL+1:NLP)%PWT = & 
-                                 DROPLET(NLP-N_INITIAL+1:NLP)%PWT*MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
+         IF (MASS_PER_VOLUME>0._EB) DROPLET(NLP-N_INITIAL+1:NLP)%PWT = & 
+                                    DROPLET(NLP-N_INITIAL+1:NLP)%PWT*MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
+                                    
+      ENDIF POINTWISE_IF2
 
    ENDDO VOLUME_INSERT_LOOP
-
 
    ! Reset particle/droplet insertion clocks
  
@@ -791,7 +795,7 @@ GRVT3 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GZ)*GVEC(3)
 UVWMAX = 0._EB
 P_UVWMAX = UVWMAX
 
-IF (NEW_FLUID_PARTICLE) THEN
+IF (NEW_PARTICLE_METHOD) THEN
    NDPC=>WORK1
    NDPC=0._EB
    DO I=1,NLP
@@ -854,7 +858,7 @@ DROPLET_LOOP: DO I=1,NLP
    UVW = MAX( ABS(DR%U)*RDX(II),ABS(DR%V)*RDY(JJ),ABS(DR%W)*RDZ(KK) )
    P_UVWMAX = MAX(P_UVWMAX,UVW)
    IF (UVW/=0._EB) DTMIN = MIN(DTMIN,1._EB/UVW)
-   IF (NEW_FLUID_PARTICLE) THEN
+   IF (NEW_PARTICLE_METHOD) THEN
       NITER = 1
    ELSE
       NITER = MAX(1,CEILING(DT/DTMIN))
@@ -916,7 +920,7 @@ DROPLET_LOOP: DO I=1,NLP
       MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
       DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
 
-      DRAG_CALC: IF ((DR%IOR==0 .AND. DR%RE>0) .OR. NEW_FLUID_PARTICLE) THEN
+      DRAG_CALC: IF ((DR%IOR==0 .AND. DR%RE>0) .OR. NEW_PARTICLE_METHOD) THEN
 
          IF (PC%DRAG_LAW==USER_DRAG) THEN
             C_DRAG = PC%USER_DRAG_COEFFICIENT
@@ -969,7 +973,7 @@ DROPLET_LOOP: DO I=1,NLP
          
          ! Fluid-Particle Momentum Transfer
          
-         NEW_FLUID_PARTICLE_IF: IF (.NOT.NEW_FLUID_PARTICLE) THEN
+         NEW_PARTICLE_METHOD_IF: IF (.NOT.NEW_PARTICLE_METHOD) THEN
 
             ! Calculate gas phase force transfer terms, A_X, A_Y, and A_Z
 
@@ -1003,9 +1007,9 @@ DROPLET_LOOP: DO I=1,NLP
                DR%W    = WBAR + (WREL+AWREL)*BFAC - AWREL
             ENDIF
          
-         ELSE NEW_FLUID_PARTICLE_IF
+         ELSE NEW_PARTICLE_METHOD_IF
                     
-            NEW_FP_STATIC_IF: IF (.NOT.PC%STATIC) THEN
+            NEW_PARTICLE_STATIC_IF: IF (.NOT.PC%STATIC) THEN
 
                FP_MASS = (RHO_G/RVC)/NDPC(II,JJ,KK) ! fluid parcel mass
                DR_MASS = PC%DENSITY*FOTH*PI*RDC ! droplet mass
@@ -1057,7 +1061,7 @@ DROPLET_LOOP: DO I=1,NLP
                   DR%Z = Z_OLD + (W_OLD + GVEC(3)*DT)*DT
                ENDIF
                
-            ELSE NEW_FP_STATIC_IF ! particle velocity is zero
+            ELSE NEW_PARTICLE_STATIC_IF ! particle velocity is zero
 
                BETA = 0.5_EB*RVC*C_DRAG*(DR%PWT*PI*RDS)*QREL
                OBDT = 1._EB+BETA*DT
@@ -1066,9 +1070,9 @@ DROPLET_LOOP: DO I=1,NLP
                DR%A_Y = VBAR*(1._EB/OBDT-1._EB)/DT
                DR%A_Z = WBAR*(1._EB/OBDT-1._EB)/DT
             
-            ENDIF NEW_FP_STATIC_IF
+            ENDIF NEW_PARTICLE_STATIC_IF
          
-         ENDIF NEW_FLUID_PARTICLE_IF
+         ENDIF NEW_PARTICLE_METHOD_IF
 
       ELSE DRAG_CALC ! No drag
 
@@ -1084,7 +1088,7 @@ DROPLET_LOOP: DO I=1,NLP
     
       ! Update droplet position
 
-      IF (.NOT.NEW_FLUID_PARTICLE) THEN
+      IF (.NOT.NEW_PARTICLE_METHOD) THEN
          X_OLD = DR%X
          Y_OLD = DR%Y
          Z_OLD = DR%Z
