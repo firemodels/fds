@@ -1511,7 +1511,7 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
   for(i=0;i<*nlevels;i++){
     InitIsosurface(&surface,level[i],NULL,i);
     surface.dataflag=0;
-    if(GetIsosurface(&surface,data,NULL,iblank,level[i],xplt,*nx,yplt,*ny,zplt,*nz,*isooffset)!=0){
+    if(GetIsosurface(&surface,data,NULL,(const char *)iblank,level[i],xplt,*nx,yplt,*ny,zplt,*nz,*isooffset)!=0){
       *error=1;
       return;
     }
@@ -1569,7 +1569,7 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
   for(i=0;i<*nlevels;i++){
     InitIsosurface(&surface,level[i],NULL,i);
     surface.dataflag=dataflag;
-    if(GetIsosurface(&surface,data,tdata,iblank,level[i],xplt,*nx,yplt,*ny,zplt,*nz,*isooffset)!=0){
+    if(GetIsosurface(&surface,data,tdata,(const char *)iblank,level[i],xplt,*nx,yplt,*ny,zplt,*nz,*isooffset)!=0){
       *error=1;
       return;
     }

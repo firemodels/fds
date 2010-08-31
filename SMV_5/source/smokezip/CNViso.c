@@ -328,7 +328,12 @@ int convert_iso(iso *isoi){
       }
       if(ntriangles_i>0&&nvertices_i>0){
         int i;
+#ifdef WIN32
+        uLongf ncompressed;
+//        int ncompressed;
+#else
         int ncompressed;
+#endif
         int nfull;
 
         // allocate buffer needed for compression
@@ -565,7 +570,7 @@ int convert_iso(iso *isoi){
         fwrite(&ncompressed,4,1,isostream);
         fwrite(compressed_buffer,1,ncompressed,isostream);
         sizeafter+=(8+ncompressed);
-        fprintf(isosizestream," %i %i %i %i\n",nvertices_i,ntriangles_i,nfull,ncompressed);
+        fprintf(isosizestream," %i %i %i %i\n",nvertices_i,ntriangles_i,nfull,(int)ncompressed);
 
 
         data_loc=EGZ_FTELL(ISOFILE);

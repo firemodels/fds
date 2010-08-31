@@ -37,6 +37,7 @@
 
 #define EGZ
 #define USE_ZLIB
+#define pp_PART
 
 #undef pp_release
 #define pp_release
@@ -52,7 +53,6 @@
 #define pp_LIGHT
 #undef pp_release
 #define SMZVERSION "test"
-#define pp_PART
 #endif
 
 #ifdef WIN32
