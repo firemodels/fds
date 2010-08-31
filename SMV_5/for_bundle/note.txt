@@ -1,3 +1,0 @@
-1. implement a new procedure for drawing line contours (by modifying colorbar rather than using marching squares
-2. test logic for preventing smokeview window from being expanded greater than the current screen resolution
-3. test time min/max load widgets
