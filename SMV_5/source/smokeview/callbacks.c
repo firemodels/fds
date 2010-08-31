@@ -500,15 +500,12 @@ void motion(int xm, int ym){
     temp = (int)(1.2*dwinH);
     if(xm>screenWidth-dwinWW){
       int ii;
-      unsigned char *cc;
 
       yy = screenHeight - ym;
       factor=(yy-temp)/(screenHeight-temp);
       factor *= (nrgb+1.0)/(nrgb-0.5);
       if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
       ifactor=(int)(255*factor);
-
-      cc=current_colorbar->index_node;
 
       if(ifactor>250)ifactor=250;
       if(ifactor<5)ifactor=5;
