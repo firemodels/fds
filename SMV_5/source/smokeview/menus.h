@@ -4418,15 +4418,15 @@ static int in_menu=0;
     for(i=1;i<nrgb-1;i++){
       if(colorlabeliso!=NULL){
         char *colorlabel;
-        char levellabel[256];
+        char levellabel2[256];
 
         colorlabel=&colorlabeliso[plotn-1][nrgb-2-i][0];
-        strcpy(levellabel,"");
+        strcpy(levellabel2,"");
         if(plotiso[plotn-1]==nrgb-2-i&&visiso==1){
-          strcat(levellabel,"*");
+          strcat(levellabel2,"*");
         }
-        strcat(levellabel,colorlabel);
-        glutAddMenuEntry(levellabel,nrgb-2-i);
+        strcat(levellabel2,colorlabel);
+        glutAddMenuEntry(levellabel2,nrgb-2-i);
       }
       else{
         if(plotiso[plotn]==i&&visiso==1){

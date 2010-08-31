@@ -327,7 +327,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 #ifdef pp_LIGHT
   EGZ_FILE *LIGHTFILE;
   int light_info[2];
-  int light_version;
+  //int light_version;
 #endif
   int error;
   int ncomp_smoke_total;
@@ -542,7 +542,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       return;
     }
     EGZ_FREAD(light_info,4,2,LIGHTFILE);
-    light_version=light_info[1];
+    //light_version=light_info[1];
   }
 #endif
   

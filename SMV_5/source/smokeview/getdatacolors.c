@@ -438,7 +438,8 @@ void updatePart5extremes(void){
 void getPart5Colors(particle *parti, int nlevel){
   int i,j,k,m;
   part5data *datacopy;
-  float *diameter_data, *length_data, *azimuth_data, *elevation_data;
+  // float *diameter_data;
+  float *length_data, *azimuth_data, *elevation_data;
   float *u_vel_data, *v_vel_data, *w_vel_data;
 
   datacopy = parti->data5;
@@ -500,7 +501,7 @@ void getPart5Colors(particle *parti, int nlevel){
       }
       //** do some data conversion if the right data columns are present
       azimuth_data=NULL;
-      diameter_data=NULL;
+//      diameter_data=NULL;
       elevation_data=NULL;
       length_data=NULL;
       u_vel_data=NULL;
@@ -511,7 +512,7 @@ void getPart5Colors(particle *parti, int nlevel){
         azimuth_data=datacopy->rvals+partclassi->col_azimuth*datacopy->npoints;
       }
       if(partclassi->col_diameter>=0){
-        diameter_data=datacopy->rvals+partclassi->col_diameter*datacopy->npoints;
+       // diameter_data=datacopy->rvals+partclassi->col_diameter*datacopy->npoints;
       }
       if(partclassi->col_elevation>=0){
         elevation_data=datacopy->rvals+partclassi->col_elevation*datacopy->npoints;
@@ -2102,21 +2103,21 @@ void updatecolors(int changecolorindex){
         rgb_full[n][3]=0;
       }
       for(n=0;n<11;n++){
-        int nnm1,nn,nnp1;
+        int nnm1,nnp0,nnp1;
         
         if(n==0){
-          nn=1;
+          nnp0=1;
         }
         else if(n==10){
-          nn=254;
+          nnp0=254;
         }
         else{
-          nn=1+n*25.4;
+          nnp0=1+n*25.4;
         }
-        nnm1=nn-1;
-        nnp1=nn+1;
+        nnm1=nnp0-1;
+        nnp1=nnp0+1;
         rgb_full[nnm1][3]=rgb_full2[nnm1][3];
-        rgb_full[nn][3]=rgb_full2[nn][3];
+        rgb_full[nnp0][3]=rgb_full2[nnp0][3];
         rgb_full[nnp1][3]=rgb_full2[nnp1][3];
       }
     }
