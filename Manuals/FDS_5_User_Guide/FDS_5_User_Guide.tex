@@ -883,8 +883,7 @@ fds5 job_name.fds
 The character string {\ct job\_name} is usually
 designated within the input file as the {\ct CHID}. It is recommended that the
 name of the input file and the {\ct CHID} be the same so that all of the
-files associated with a given calculation have a consistent name.
-The progress of a simulation is indicated by diagnostic output that is written
+files associated with a given calculation have a consistent name.  The progress of a simulation is indicated by diagnostic output that is written
 out onto the screen. Detailed diagnostic information is automatically
 written to a file {\bf CHID.out}, where {\ct CHID} is a character
 string, usually the same as {\ct job\_name}, designated in the input file..
@@ -1547,7 +1546,11 @@ If, for example, {\ct CHID='WTC\_05\_v5'}, it is convenient to
 name the input data file {\ct WTC\_05\_v5.fds} so that the input file
 can be associated with the output files. No periods or spaces are allowed in
 {\ct CHID} because the output files are tagged with suffixes that
-are meaningful to certain computer operating systems.
+are meaningful to certain computer operating systems.  If this is specified as:
+\begin{verbatim}
+CHID='%INPUTFILENAME%'
+\end{verbatim}
+then {\ct CHID} will be set to the name of the input file minus any suffix such as {\ct .fds}.
 \item {\ct TITLE} is a string of 60 characters or less that describes the
 simulation. It is simply descriptive text that is passed to various output files.
 \end{description}
@@ -2219,6 +2222,7 @@ Automatically sets {\ct RADIATION} to {\ct .FALSE.}
 \item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the
 development of a perfectly symmetric flow when the boundary
 and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.}
+\item[{\ct OVERWRITE}] If {\ct .FALSE.} FDS checks for the existence of  {\ct CHID.out} and stops execution if it exists.
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
 \item[{\ct RADIATION}] A logical parameter indicating whether radiation transport ought to be calculated. The default is {\ct .TRUE.}
 \item[{\ct SUPPRESSION}] A logical parameter indicating whether FDS should include gas phase flame extinction. The default is {\ct .TRUE.}
@@ -9609,6 +9613,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MW}                        & Real          & Molecular Weight (Section~\ref{info:SPEC})    &  g/mol        &                   \\ \hline
 {\ct NOISE}                     & Logical       & Toggle initial noise on and off               &               & {\ct .TRUE.}      \\ \hline
 %{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution             &               & 7                 \\ \hline
+{\ct OVERWRITE}                 & Logical       & Prevevts overwriting of output files               &               & {\ct .TRUE.}      \\ \hline
 {\ct PR}                        & Real          & Prandtl number (LES only)                     &               & 0.5               \\ \hline
 {\ct P\_INF}                    & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
 %{\ct PERIODIC\_TEST}           & Integer       & Initial condition for verification test       &               & 0                 \\ \hline
