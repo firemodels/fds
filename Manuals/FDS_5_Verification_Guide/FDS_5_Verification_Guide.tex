@@ -1052,23 +1052,14 @@ y_0(y,t) &=& 2 \arctan\left( \tan\left[\frac{y}{2}\right] \exp\left[-\frac{B}{\o
 \end{eqnarray}
 Note that the initial condition $q_0(x,y,t)$ is restricted to cases where $\frac{\partial q_0}{\partial x}$ is independent of $y$ and $\frac{\partial q_0}{\partial y}$ is independent of $x$.  That is, the function $q_0$ must be \emph{additively separable}.
 
-An example of the solution to (\ref{eqn_2dsoln}) is shown in Figure \ref{fig_pulsating_2D_wave_pi} and Figure \ref{fig_pulsating 2D wave}. The analytical time series of the density at positions $(x,y) = (\pi,\pi)$ and $(x,y) = (3\pi/2, 3\pi/2)$ are shown with black lines. There are two sets of graphs for these two points in the domain to provide more evidence in support of the pulsating 2D continuity equation's second-order convergence. FDS is run with the CHARM flux limiter scheme (as this is a DNS flow field). The solution at successively finer grid resolutions is plotted and compared with the analytical solution, demonstrating convergence of the scheme. On the right side of the figures, we demonstrate second-order convergence of the Surperbee and CHARM limiter schemes in FDS. The initial condition for the density is specified as $\rho(x,0) = 1$ and the amplitude and frequency are set to unity, $B=1$ and $\omega=1$.
-
-\begin{figure}[ht]
-   \begin{tabular}{rl}
- %     \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series_pi.pdf} &
-  %    \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence_pi.pdf}
-   \end{tabular}
-   \caption{(Left) Time series of $\rho$ at the position $(x,y) = (\pi, \pi)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for Superbee and CHARM, the scalar transport schemes in FDS.  All schemes are second-order accurate.}
-   \label{fig_pulsating_2D_wave_pi}
-\end{figure}
+An example of the solution to (\ref{eqn_2dsoln}) is shown in Figure \ref{fig_pulsating 2D wave}. The initial condition for the density is specified as $\rho(\mathbf{x},0) = 1$ and the amplitude and frequency are set to unity, $B=1$ and $\omega=1$.  FDS is run with three scalar transport schemes: central differencing, Superbee, and the CHARM flux limiter. The solution at $(x,y) = (3\pi/2, 3\pi/2)$ for successively finer grid resolutions is plotted as a time series on the left and may be compared with the analytical solution (black line). On the right, we confirm second-order convergence for the FDS implementation.  Central differencing and the CHARM limiter outperform Superbee for this problem because the solution is relatively smooth.
 
 \begin{figure}[ht]
     \begin{tabular}{rl}
- %     \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series.pdf} &
-  %    \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence.pdf}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series.pdf} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence.pdf}
    \end{tabular}
-         \caption{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for Superbee and CHARM, the scalar transport schemes in FDS.  All schemes are second-order accurate.}
+         \caption{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the Superbee limiter. (Right) Convergence plot for central differencing, Superbee, and CHARM.  All schemes are second-order accurate.}
    \label{fig_pulsating 2D wave}
 \end{figure}
 
