@@ -11,33 +11,37 @@ UNLOADALL
 UNLOADALL
 LOADFILE
 onetree_surf_1mesh.prt5_temp.tiso
-SETTIMEVAL
- 10.05
-RENDERONCE
- onetree_surf_1mesh_isotemp_10
-SETTIMEVAL
- 30.05
-RENDERONCE
- onetree_surf_1mesh_isotemp_30
+SETVIEWPOINT
+ view 1
 SETTIMEVAL
  60.0
 RENDERONCE
- onetree_surf_1mesh_isotemp_60
+ onetree_surf_1mesh_isotemp_view1_60
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ onetree_surf_1mesh_isotemp_view2_60
+SETVIEWPOINT
+ view 3
+RENDERONCE
+ onetree_surf_1mesh_isotemp_view3_60
 UNLOADALL
 UNLOADALL
 LOADFILE
 onetree_surf_1mesh.prt5.svz
-SETTIMEVAL
- 10.05
-RENDERONCE
- onetree_surf_1mesh_parttemp_10
-SETTIMEVAL
- 30.05
-RENDERONCE
- onetree_surf_1mesh_parttemp_30
+SETVIEWPOINT
+ view 1
 SETTIMEVAL
  60.0
 RENDERONCE
- onetree_surf_1mesh_parttemp_60
+ onetree_surf_1mesh_parttemp_view1_60
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ onetree_surf_1mesh_parttemp_view2_60
+SETVIEWPOINT
+ view 3
+RENDERONCE
+ onetree_surf_1mesh_parttemp_view3_60
 
 
