@@ -186,7 +186,7 @@ Volume I: User's Guide
 
 
 \flushright{\today \\
-Smokeview Version 5.5.6 \\
+Smokeview Version 5.5.8 \\
 $SVN Repository$~$Revision$}
 %
 \vfill
@@ -2746,16 +2746,14 @@ and an isosurface generated from these same particles.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_10}&
-\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_10}\\
-particles at 10.0~s s&isosurface at 10.0~s\\
-\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_30}&
-\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_30}\\
- particles at 30.0~s s&isosurface at 30.0~s\\
- \includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_60}&
- \includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_60}\\
- particles at 60.0~s s&isosurface at 60.0~s
- &\raisebox{0.0ex}[0pt]{\includegraphics[height=8.0in]{figures/iso_colorbar_10_100}}\\
+\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view1_60}&
+\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view1_60}\\
+\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view2_60}&
+\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view2_60}\\
+\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view3_60}&
+\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view3_60}\\
+particles at 60.0~s s&isosurface at 60.0~s
+&\raisebox{0.0ex}[0pt]{\includegraphics[height=8.0in]{figures/iso_colorbar_10_100}}\\
 \\
 \end{tabular}
 \end{center}
@@ -3653,7 +3651,7 @@ should result in the same views.
 Particle files may be converted to isosurface files using the
 {\tt -part2iso}\ option as in {\tt smokezip -part2iso casename}.  The resulting isosurface file hilights
 particle boundaries (where particle density is 0.5 particles per grid cell).
-These isosurface files are accessible in the .smv file named {\tt casename_smvzip.smv}.
+These isosurface files are accessible in the .smv file named {\tt casename\_smvzip.smv}.
 
 \chapter{Differencing - Using Smokediff to compare two FDS cases}
 
