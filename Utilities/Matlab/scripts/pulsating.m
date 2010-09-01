@@ -78,7 +78,7 @@ H(4)=plot(t_FL2_128,rho_fds_FL2_128,'r--','LineWidth',Line_Width); hold on
 
 xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter','LaTeX')
 ylabel('Density (kg/m$^3$)','FontSize',Title_Font_Size,'Interpreter','LaTeX')
-axis([0 12.5 0 3])
+axis([0 12.5 0 2])
 legend_handle=legend(H,'FDS N=16','FDS N=32','FDS N=64','FDS N=128','Analytical Solution','Location','NorthEast');
 legend boxoff
 set(legend_handle,'FontSize',Title_Font_Size,'Interpreter','LaTeX')
