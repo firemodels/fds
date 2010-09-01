@@ -381,7 +381,7 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             DO I=1,IBAR
                !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_11'               
                CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP(I,J,K))          
-               HDIFF = H_G*TMP_G
+               HDIFF = H_G*TMP(I,J,K)
                DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
             ENDDO
          ENDDO
