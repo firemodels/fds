@@ -2502,11 +2502,18 @@ Figure \ref{figstreak} shows a snapshot of the same kitchen fire using streak li
 \includegraphics[height=4.0in]{SCRIPT_FIGURES/thouse5_streak_060}
 \end{center}
 
-\caption{Townhouse kitchen fire visualized using streak lines.  The {\em pin heads}\
- shows flow conditions at 10~s, the corresponding {\em tails}\ shows conditions 0.25~s .
- }
+\caption{Townhouse kitchen fire visualized using streak lines.
+The {\em pin heads}\ shows flow conditions at 10~s, the corresponding
+{\em tails}\ shows conditions 0.25~s.}
 \label{figstreak}%
 \end{figure}
+
+Particle file data may be converted to an isosurace
+using Smokezip.  The isosurface location is defined in terms of particle density
+and the isosurface color is defined in terms of averaged particle values.
+See  Chapter \ref{ch:smokezip} for more details on using Smokezip for
+generating isosurface files from particle files and Section \ref{section:isosurace}
+for some examples.
 
 \section{2D Shaded Contours and Vector Slices - Slice Files}
 
@@ -2682,6 +2689,7 @@ for the boundary file data is allocated for only one time step
 rather than for all time steps.
 
 \section{3D Contours - Isosurface Files}
+\label{section:isosurface}
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
@@ -2721,6 +2729,40 @@ the line:
 \end{verbatim}
 to the FDS input file.  A complete list of isosurface quantities may be
 found in Ref.~\cite{FDS_Users_Guide_5}
+
+Smokezip may be used to generate isosurfaces from particle data.
+Isosurface locations indicate a boundary separating particle and no-particle regions,
+{\em i.e.}\ wherever particle density is
+0.5 particles per grid cell.  Isosurface  coloring is determined
+using averaged particle data.  Representing particle data with an isosurface
+is useful when particles are used to model objects such as trees
+especially when the objects are viewed up close.  See Chapter
+\ref{ch:smokezip} for more details on generating isosurface files from
+particle files.  Figure \ref{figisoparticle} shows a snapshot of a
+burning tree modeled using particles.  The tree is visualized using both particles
+and an isosurface generated from these same particles.
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_10}&
+\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_10}\\
+particles at 10.0~s s&isosurface at 10.0~s\\
+\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_30}&
+\includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_30}\\
+ particles at 30.0~s s&isosurface at 30.0~s\\
+ \includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_60}&
+ \includegraphics[height=\figheightAbar]{../SMV_5_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_60}\\
+ particles at 60.0~s s&isosurface at 60.0~s
+ &\raisebox{0.0ex}[0pt]{\includegraphics[height=8.0in]{figures/iso_colorbar_10_100}}\\
+\\
+\end{tabular}
+\end{center}
+
+\caption{Tree fire visualized using particles and isosurfaces generated from  particles.}
+\label{figisoparticle}%
+\end{figure}
 
 \section{Static Data - Plot3D Files} Data stored in Plot3D files
 use a format developed by NASA~\cite{PLOT3D} and are used by many
@@ -3566,6 +3608,7 @@ m
 
 
 \chapter{Compression - Using Smokezip to reduce FDS file sizes}
+\label{ch:smokezip}
 
 \begin{figure}[\figoptions]
 \centerline{\includegraphics[width=1.6736in]{figures/figBOUND1} }
@@ -3606,6 +3649,11 @@ Smokeview. Smokezip uses percentile min and max bounds if the
 casename.ini file does not exist. The algorithms for determining
 the data mappings used by Smokeview and Smokezip are identical so it
 should result in the same views.
+
+Particle files may be converted to isosurface files using the
+{\tt -part2iso}\ option as in {\tt smokezip -part2iso casename}.  The resulting isosurface file hilights
+particle boundaries (where particle density is 0.5 particles per grid cell).
+These isosurface files are accessible in the .smv file named {\tt casename_smvzip.smv}.
 
 \chapter{Differencing - Using Smokediff to compare two FDS cases}
 
