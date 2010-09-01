@@ -553,7 +553,9 @@ OVERALL_INSERT_LOOP: DO
             Z1 = MAX(IN%Z1,ZS) 
             Z2 = MIN(IN%Z2,ZF)
             BLOCK_VOLUME = (X2-X1)*(Y2-Y1)*(Z2-Z1)
-         CASE ('CONE')
+         CASE('CONE')
+         CASE('POINT')
+            IF (IN%X0>XF .OR. IN%X0<XS .OR. IN%Y0>YF .OR. IN%Y0<YS .OR. IN%Z0>ZF .OR. IN%Z0<ZS) CYCLE VOLUME_INSERT_LOOP
       END SELECT
    
       ! Assign properties to the initial droplets/particles
