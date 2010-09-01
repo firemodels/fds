@@ -24,6 +24,7 @@ run scripts/turb_model
 run scripts/wall_model
 run scripts/pyrolysis
 run scripts/birch_tga
+run scripts/pulsating
 run scripts/compression_wave
 run scripts/plate_view_factor
 
