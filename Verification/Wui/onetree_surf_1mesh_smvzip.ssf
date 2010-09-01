@@ -1,0 +1,43 @@
+// put rendered files in specified directory
+
+RENDERDIR
+ ..\..\Manuals\SMV_5_Verification_Guide\SCRIPT_FIGURES
+
+// render slice files
+
+// render iso files (solid)
+
+UNLOADALL
+UNLOADALL
+LOADFILE
+onetree_surf_1mesh.prt5_temp.tiso
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ onetree_surf_1mesh_isotemp_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ onetree_surf_1mesh_isotemp_30
+SETTIMEVAL
+ 60.0
+RENDERONCE
+ onetree_surf_1mesh_isotemp_60
+UNLOADALL
+UNLOADALL
+LOADFILE
+onetree_surf_1mesh.prt5.svz
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ onetree_surf_1mesh_parttemp_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ onetree_surf_1mesh_parttemp_30
+SETTIMEVAL
+ 60.0
+RENDERONCE
+ onetree_surf_1mesh_parttemp_60
+
+
