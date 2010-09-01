@@ -7180,6 +7180,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
                   WRITE(MESSAGE,'(A)') 'ERROR: NUMBER_INITIAL_DROPLETS=1 for pointwise insert'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
+               IN%SHAPE = 'POINT'
                IN%NUMBER_INITIAL_DROPLETS=1     ! one droplet per INIT line
                IN%POINTWISE_DROPLET_INIT=.TRUE. ! flag for insert loop
                IN%X0 = XYZ(1) + MR%DX0
