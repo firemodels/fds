@@ -237,7 +237,7 @@ DO K=1,KBAR
             ENDIF
             Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F
          ELSE NEW_DYF_IF
-            ! FDS5 default
+            ! FDS 5 default
             DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)
             Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
          ENDIF NEW_DYF_IF
