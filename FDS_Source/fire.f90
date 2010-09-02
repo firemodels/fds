@@ -227,15 +227,19 @@ DO K=1,KBAR
          ENDIF LES_IF
          
          IF (FIXED_MIX_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_MIX_TIME
-         IF (Y_FU_0 < Y_O2_0/RN%O2_F_RATIO) THEN
-            DYF = Y_FU_0 * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
-         ELSE
-            DYF = Y_O2_0/RN%O2_F_RATIO * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
-         ENDIF
-         Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F
          
-         !DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)
-         !Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
+         NEW_DYF_IF: IF (NEW_MIX_TIME) THEN
+            IF (Y_FU_0 < Y_O2_0/RN%O2_F_RATIO) THEN
+               DYF = Y_FU_0 * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
+            ELSE
+               DYF = Y_O2_0/RN%O2_F_RATIO * (1._EB -EXP(-DT/MIX_TIME(I,J,K)))
+            ENDIF
+            Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F
+         ELSE NEW_DYF_IF
+            ! FDS5 default
+            DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)
+            Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
+         ENDIF NEW_DYF_IF
          
          Q_BOUND_2 = Q_UPPER
          Q_NEW = MIN(Q_BOUND_1,Q_BOUND_2)
