@@ -23,7 +23,7 @@ cd %svn_root%\smv_5\scripts
 
 set scriptdir=FDS-SMV/SMV_5/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.csh fire79 %scriptdir% COPYsmdlinux.csh
+plink %svn_logon% %scriptdir%/ssh_command.csh %COMPILEHOST% %scriptdir% COPYsmdlinux.csh
 
 echo.
 echo copy complete

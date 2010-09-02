@@ -23,6 +23,6 @@ set target=mpi_intel_linux_64
 set fdsdir=%linux_svn_root%/FDS_Compilation/mpi_intel_linux_64
 set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts
 
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% fire79
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% %COMPILEHOST%
 
 pause

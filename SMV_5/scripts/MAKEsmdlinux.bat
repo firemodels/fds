@@ -25,7 +25,7 @@ set scriptdir=FDS-SMV/SMV_5/scripts
 echo Building 32 and 64 bit Linux versions of smokediff
 
 
-plink %svn_logon% %scriptdir%/ssh_command.csh fire79 %scriptdir% MAKEsmdlinux.csh
+plink %svn_logon% %scriptdir%/ssh_command.csh %COMPILEHOST% %scriptdir% MAKEsmdlinux.csh
 
 echo.
 echo compilation complete

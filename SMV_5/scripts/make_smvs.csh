@@ -3,7 +3,7 @@
 set SVNROOT=~/FDS-SMV
 #set OSXHOST=tiger.cfr.nist.gov
 set OSXHOST=$1
-set LINUX64HOST=fire79
+set LINUX64HOST=fire70
 
 echo
 echo building 32 bit Linux Smokeview
