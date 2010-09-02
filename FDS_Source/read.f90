@@ -3999,7 +3999,7 @@ PROC_MATL_LOOP: DO N=1,N_MATL
 
    ! Adjust burn rate if heat of combustion is different from the gas phase reaction value
 
-   DO J = 1,ML%N_REACTIONS   
+   DO J = 1,MAX(1,ML%N_REACTIONS)
 
       IF (MIXTURE_FRACTION) THEN
          IF (N_REACTIONS > 0) THEN
@@ -4848,6 +4848,12 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          SF%MASS_FLUX(I_FUEL) = SF%HRRPUA/ (RN%HEAT_OF_COMBUSTION*RN%Y_F_INLET)
       ENDIF
       IF (SF%MLRPUA>0._EB) SF%MASS_FLUX(I_FUEL) = SF%MLRPUA
+      ! Adjust burning rate according to the difference of heats of combustion
+      IF (SF%N_LAYERS > 0) THEN
+         ML => MATERIAL(SF%MATL_INDEX(1))
+         SF%ADJUST_BURN_RATE(I_FUEL) = ML%ADJUST_BURN_RATE(1,I_FUEL)
+         SF%MASS_FLUX(I_FUEL)        = SF%MASS_FLUX(I_FUEL)/SF%ADJUST_BURN_RATE(I_FUEL)
+      ENDIF
       SF%TAU(I_FUEL)        = SF%TAU(TIME_HEAT)
       SF%RAMP_MF(I_FUEL)    = SF%RAMP_Q
       SF%RAMP_INDEX(I_FUEL) = SF%RAMP_INDEX(TIME_HEAT) 
