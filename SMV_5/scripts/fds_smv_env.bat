@@ -19,6 +19,7 @@ set linux_username=%username%
 set google_username=%username%
 set linux_hostname=acrux.cfr.nist.gov
 set OSXHOST=tiger.cfr.nist.gov
+set COMPILEHOST=fire70
 
 Rem ----------- for uploading to Google Code -----------------
 
