@@ -3124,12 +3124,19 @@ an adiabatic boundary condition is used
 
 The boundary condition is discretized
 \be -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\dx_{\ha}} = \dq''_c{}^{(n+1)} + \dq''_r{}^{(n+1)} \ee
-The convective and radiative fluxes at the next time step are approximated
-\begin{eqnarray}
-\dq''_c{}^{(n+1)} &\approx& \dq''_c{}^n - h\left( T_{s,\ha}^{n+1} - T_{s,\ha}^n \right) \\
-\dq''_r{}^{(n+1)} &\approx& \dq''_r{}^n - 4 \; \epsilon \; \sigma \; T_{s,\ha}^{n^3} \left(
-  T_{s,\ha}^{n+1} - T_{s,\ha}^n \right)  \end{eqnarray}
+The convective flux at the next time step is computed as
+\be
+\dq''_c{}^{(n+1)} = h\left( T_{g} - 
+ 	0.5 \left(T_{s,\ha}^n + T_{s,\ha}^{n+1}\right) \right) 
+\ee
+and the radiative flux at the next time step is approximated with a
+linearized form
+\be
+\dq''_r{}^{(n+1)} \approx \dq''_r{}^n - 4 \; \epsilon \; \sigma \; T_{s,\ha}^{n^3} \left(
+  T_{s,\ha}^{n+1} - T_{s,\ha}^n \right)  
+\ee
 The wall temperature is defined $T_w \equiv T_{s,\ha}=(T_{s,0}+T_{s,1})/2$.
+
 
 The size and number of solid phase cells
 can change during the course of a calculation as solid material is converted to gas. The size of each cell is reduced such that the cell density remains
