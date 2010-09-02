@@ -4378,6 +4378,8 @@ The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \item  For reacting surfaces, the surface density is computed as a sum of the layer densities multiplied by the layer thicknesses.
 This value can be over-ridden by setting {\ct SURFACE\_DENSITY} on the {\ct SURF} line. For surfaces with prescribed HRR
 ({\ct HRRPUA}), {\ct SURFACE\_DENSITY} parameter is the only way of defining the mass of the object.
+\item For surfaces with prescribed HRR ({\ct HRRPUA}) or prescribed mass loss rate ({\ct MLRPUA}) AND thermally thick heat conduction, 
+the mass flux is affected by the heats of combustion defined for the gas phase reaction and the first listed material ({\ct MATL}) component.
 \item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant
 amount of extra memory has to be set aside to store additional surface information as the rectangular block is
 eaten away.
