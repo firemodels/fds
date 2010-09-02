@@ -146,7 +146,7 @@ Volume II: Technical Reference Guide
 \vspace{.25in}
 
 \flushright{\today \\
-Smokeview Version 5.5.6 \\
+Smokeview Version 5.5.8 \\
 SVN Repository~$Revision$}
 
 \vfill
@@ -1119,20 +1119,29 @@ The Smokeview verification guide~\cite{Smokeview_Verification_Guide_5} shows tha
 \item Split region to be contoured into a number of cubes, each cube aligned with the underlying FDS grid.
 \item For  each cube:
 \begin{enumerate}
-\item Number cube corners as illustrated in Figure \ref{figisosetup}.
+\item Number cube corners from 0 to 7 as illustrated in Figure \ref{figisosetup}.
 \item For each cube corner beginning with corner 0: assign 1 if value exceeds $L$, 0 otherwise.
 \item Use resulting 8 digit binary number $(0\rightarrow 255)$ to determine the case number to be plotted.
 \item Triangulate cube surface, storing vertex locations and edge numbers according to case
 \end{enumerate}
-\item Triangle decimation.  Eliminate any triangle that has two or more vertices {\em closest}\ to the same underlying FDS mesh node.
-If this is the case, then remove this triangle's vertices, replacing them with a vertex with coordinates that are the average of the coordinates of the three removed vertices.  Then re-triangulate using this new vertex.  This process is illustrated in Figure \ref{figdecimate}.
-\item Estimate normal directions.  For each vertex:
+\item Triangle decimation.  Eliminate small triangles (any triangle with two or more vertices {\em closest}\ to the same node).
+Replace removed triangle vertices with a vertex with coordinates that are the average of the three removed vertices coordinates.  Re-triangulate using this new vertex.  This process is illustrated in Figure \ref{figdecimate}.
+\item Estimate normal directions (to be associated with a vertex).  For each vertex:
 \begin{enumerate}
-\item determine the slope of the triangle sharing the vertex
-\item construct a weighted average of triangle slopes where weights sum to 1.0 and are inversely proportional to triangle's area
+\item determine triangles sharing the vertex
+\item determine the normal vector (normalized with length 1.0) of each triangle using the vertex
+\item construct a harmonic weighted average of triangle normal vectors where all weights sum to 1.0 and each weight is inversely proportional to the corresponding triangle area
 \item store the resulting average along with vertex data
 \end{enumerate}
 \end{enumerate}
+
+\paragraph{Vertex normals in 3D} An averaged normal vector, $V_i$, for vertex $i$ may then be determined by summing over all triangles $n$ connected to a vertex $i$ as in
+\begin{eqnarray*}
+V_{i}&=&\sum_n\frac{U_n}{A_n}/\sum_n\frac{1}{A_n}
+=\sum_n\frac{u_n\times v_n}{||u_n\times v_n||^2}/\sum_n\frac{1}{||u_n\times v_n||}
+\end{eqnarray*}
+where for the $n$'th triangle, $u_n$ and $v_n$ are two sides, $A_n=||u_n\times v_n||$ is the triangle area and $U_n=u_n\times v_n/A_n$ is a unit vector normal to the triangle.
+
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1185,7 +1194,34 @@ after decimation
 % -------------------  Section on isosurface slope derivation ------------------------
 %
 
-%\include{isoslope}
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=5.0in]{figures/3point_line_smooth}
+\end{center}
+\caption{Setup for determining the slope of a smooth curve passing through three points.}
+\label{figlinesmooth}%
+\end{figure}
+
+\paragraph{Vertex normals in 2D} The use of inverse area weights or harmonic averages to construct average normal vectors at isosurface vertices is justified by the following two dimensional example.  As illustrated in Figure \ref{figlinesmooth}, consider the quadratic $y(x)=A+Bx+Cx^2$ with $y(-\Delta x_2)=0$, $y(0)=1$ and $y(\Delta x_1)=0$ .  The slope at $x=0$ is given by $y'(0)=B$.  Likewise, the slope of the vector perpendicular to this curve at $x=0$ is $-1/B$.  The coefficient $B$ may be determined from the two simultaneous equations $y(\Delta x_1)=0$ and  $(y(-\Delta x_2)=0$ (note that $A=1$ since $y(0)=1$) or
+\begin{eqnarray*}
+1+B\Delta x_1 + C \Delta x_1^2 &= &0\\
+1-B\Delta x_2 + C \Delta x_2^2 &= &0
+\end{eqnarray*}
+which has solution
+\begin{eqnarray*}
+B&=&\frac{\Delta x_1^2-\Delta x_2^2}{\Delta x_1\Delta x_2(\Delta x_1+\Delta x_2)}=
+\frac{\Delta x_1-\Delta x_2}{\Delta x_1\Delta x_2}\\
+\end{eqnarray*}
+The slope $N$ of the normal at $x=0$ is then given by
+\begin{eqnarray*}
+N=-\frac{1}{B}&=&\frac{1}{1/\Delta x_1-1/\Delta x_2}
+\end{eqnarray*}
+The slope $N_1$ of the normal to the line segment between $(0,1)$ and $(\Delta x_1,0)$ is $N_1=\Delta x_1$.
+The slope $N_2$ of the normal to the line segment between $(-\Delta x_2,0)$ and (0,1) is $N_2=-\Delta x_2$.
+Therefore the average slope $N$ may be expressed in terms of $N_1$ and $N_2$ as
+\begin{eqnarray*}
+N=\frac{1}{1/N_1+1/N_2}
+\end{eqnarray*}
 
 %
 % -------------------  Visualizing Data Realistically ------------------------
