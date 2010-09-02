@@ -45,7 +45,10 @@ int main(int argc, char **argv){
   int i;
   int endian_fds;
   int endian_info;
-  int doit_smoke3d=1, doit_boundary=1, doit_slice=1, doit_particle=0, doit_plot3d=1, doit_iso=1;
+  int doit_smoke3d=1, doit_boundary=1, doit_slice=1, doit_plot3d=1, doit_iso=1;
+#ifdef pp_PART2
+  int doit_particle=0;
+#endif
 
 #ifdef pp_LIGHT
   nphotons=NPHOTONS;
@@ -174,7 +177,7 @@ int main(int argc, char **argv){
         else if(strcmp(arg,"-bp")==0){
           get_plot3d_bounds=1;
         }
-#ifdef pp_PART
+#ifdef pp_PART2
         else if(strcmp(arg,"-bP")==0){
           get_part_bounds=1;
         }
@@ -183,11 +186,13 @@ int main(int argc, char **argv){
           overwrite_b=1;
         }
         break;
+#ifdef pp_PART2
       case 'y':
         if(strcmp(arg,"-yP")==0){
           doit_particle=1;
         }
         break;
+#endif
       case 'n':
         if(strcmp(arg,"-n3")==0){
           doit_smoke3d=0;
@@ -198,9 +203,11 @@ int main(int argc, char **argv){
         else if(strcmp(arg,"-np")==0){
           doit_plot3d=0;
         }
+#ifdef pp_PART2
         else if(strcmp(arg,"-nP")==0){
           doit_particle=0;
         }
+#endif
         else if(strcmp(arg,"-ni")==0){
           doit_iso=0;
         }
@@ -217,7 +224,7 @@ int main(int argc, char **argv){
       case '3':
         overwrite_s=1;
         break;
-#ifdef  pp_PART
+#ifdef  pp_PART2
       case 'P':
         overwrite_part=1;
         break;
@@ -236,7 +243,7 @@ int main(int argc, char **argv){
         overwrite_slice=1;
         overwrite_iso=1;
         overwrite_plot3d=1;
-#ifdef pp_PART
+#ifdef pp_PART2
         overwrite_part=1;
 #endif
         break;
@@ -453,8 +460,10 @@ int main(int argc, char **argv){
   if(doit_smoke3d==1)compress_smoke3ds();
   if(doit_slice==1)compress_slices();
   if(doit_plot3d==1)compress_plot3ds();
-#ifdef pp_PART
+#ifdef pp_PART2
   if(doit_particle==1)compress_parts();
+#endif
+#ifdef pp_PART
   convert_parts2iso();
 #endif
   if(doiso==1&&doit_iso==1)compress_isos();
@@ -620,8 +629,10 @@ void usage(char *prog){
   printf("  -b  - overwrites boundary compressed files\n");
   printf("  -i  - overwrites iso-surface compressed files\n");
   printf("  -p  - overwrites PLOT3D files\n");
-#ifdef pp_PART
+#ifdef pp_PART2
   printf("  -P  - overwrites particle files\n");
+#endif
+#ifdef pp_PART
   printf("  -part2iso - generate isosurfaces from particle data\n");
 #endif
   printf("  -f  - overwrites all compressed files\n");
@@ -629,7 +640,7 @@ void usage(char *prog){
   printf("  -bb - estimate data bounds for boundary files\n");
   printf("  -bs - estimate data bounds for slice files\n");
   printf("  -bp - estimate data bounds for plot3d files\n");
-#ifdef pp_PART
+#ifdef pp_PART2
   printf("  -bP - estimate data bounds for particle files\n");
 #endif
   printf("  -n3 - do not compress 3d smoke files\n");
@@ -637,7 +648,7 @@ void usage(char *prog){
   printf("  -np - do not compress PLOT3D files\n");
   printf("  -ni - do not compress isosurface files\n");
   printf("  -ns - do not compress slice files\n");
-#ifdef pp_PART
+#ifdef pp_PART2
   printf("  -nP - do not compress particle files\n");
   printf("  -yP - compress particle files\n");
 #endif
