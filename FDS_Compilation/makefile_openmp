@@ -57,6 +57,7 @@ mass.o: FFLAGS += $(FOPENMPFLAGS)
 fire.o: FFLAGS += $(FOPENMPFLAGS)
 divg.o: FFLAGS += $(FOPENMPFLAGS)
 velo.o: FFLAGS += $(FOPENMPFLAGS)
+pres.o: FFLAGS += $(FOPENMPFLAGS)
 read.o: FOPTIMIZATIONFLAGS = -O0
 
 func.obj: FFLAGS += $(FOPENMPFLAGS)
@@ -66,6 +67,7 @@ mass.obj: FFLAGS += $(FOPENMPFLAGS)
 fire.obj: FFLAGS += $(FOPENMPFLAGS)
 divg.obj: FFLAGS += $(FOPENMPFLAGS)
 velo.obj: FFLAGS += $(FOPENMPFLAGS)
+pres.obj: FFLAGS += $(FOPENMPFLAGS)
 read.obj: FOPTIMIZATIONFLAGS = -Od
 
 .f90.o:
