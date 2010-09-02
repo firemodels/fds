@@ -8071,6 +8071,8 @@ that the entire plane $y=5.3$ slicing through the domain be saved.
 {\ct PBX} and {\ct PBZ} control planes perpendicular to the
 $x$ and $z$ axes, respectively.
 
+If the ``slice'' is a volume specified with {\ct XB}, then its output frequency is controlled by the parameter {\ct DT\_SL3D}.  By default, FDS sets {\ct DT\_SL3D=(T\_END-T\_BEGIN)/5}, the same default frequency as Plot3D file output.  The user may specify a different value of {\ct DT\_SL3D} on {\ct DUMP}.  The user is cautioned that 3D slice files can become extremely large if {\ct DT\_SL3D} is small.
+
 Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} If two {\ct SLCF}
 entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity
 component slices will be created.
