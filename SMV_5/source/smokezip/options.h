@@ -62,7 +62,7 @@
 #endif
 
 #ifdef pp_release
-#define SMZVERSION "1.2.6"
+#define SMZVERSION "1.3"
 #endif
 
 #ifdef X64
