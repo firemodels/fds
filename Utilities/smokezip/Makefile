@@ -59,10 +59,11 @@ ms_win_32 : $(objwin)
 
 intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
 intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
+intel_win_32 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
-intel_win_32 : exe       = smokezip.exe
+intel_win_32 : exe       = smokezip.exe $(IMAGELIBDIR)/smokeview_fort.lib $(IMAGELIBDIR)/zlib.lib
 
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin)
