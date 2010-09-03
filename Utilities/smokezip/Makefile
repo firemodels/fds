@@ -1,9 +1,11 @@
 SOURCE_DIR = ../../../SMV_5/source/
-INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip
+BUILD_DIR = $(SOURCE_DIR)/../Build
+LIB_DIR = $(BUILD_DIR)/LIBS
+INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip -I $(SOURCE_DIR)/include
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/smokezip $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview
+VPATH = $(SOURCE_DIR)/smokezip $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview 
 bin = .
 
 #LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
@@ -14,8 +16,8 @@ OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 
 # Definition of the object variables
 
-obj = assert.o CNV3dsmoke.o CNVboundary.o CNViso.o CNVpart.o CNVplot3d.o CNVslice.o csphere.o dmalloc.o egz_stdio.o endian.o histogram.o main.o readfiles.o utilities.o getdata.o getsizes.o isobox.o
-objwin = main.obj dmalloc.obj assert.obj utilities.obj readsmv.obj IOdboundary.obj IOdslice.obj IOdplot.obj getdata.obj getsizes.obj histogram.obj isobox.obj
+obj =    assert.o   CNV3dsmoke.o   CNVboundary.o   CNViso.o   CNVpart.o   CNVplot3d.o   CNVslice.o   csphere.o   dmalloc.o   egz_stdio.o   endian.o   histogram.o   main.o   readfiles.o   utilities.o   getdata.o   getsizes.o   isobox.o
+objwin = assert.obj CNV3dsmoke.obj CNVboundary.obj CNViso.obj CNVpart.obj CNVplot3d.obj CNVslice.obj csphere.obj dmalloc.obj egz_stdio.obj endian.obj histogram.obj main.obj readfiles.obj utilities.obj getdata.obj getsizes.obj isobox.obj
 
 #*** General Purpose Rules ***
 
@@ -64,6 +66,20 @@ intel_win_32 : exe       = smokezip.exe
 
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin)
+
+# ------------- Win 64 ----------------
+#  64 bit windows
+
+intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
+intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
+intel_win_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
+intel_win_64 : CC        = icl
+intel_win_64 : CPP       = icl
+intel_win_64 : FC        = ifort
+intel_win_64 : exe       = smokezip64.exe
+
+intel_win_64 : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(IMAGELIBDIR)/smokeview_fort_64.lib $(IMAGELIBDIR)/zlib.lib
 
 # ------------- Linux 32 ----------------
 #  32 bit linux
