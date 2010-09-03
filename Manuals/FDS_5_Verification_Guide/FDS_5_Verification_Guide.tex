@@ -530,9 +530,11 @@ viscosity, the model uses a viscosity of the form
 \be
   \mu_{\hbox{\tiny LES}} =  \rho \,  (C_s\, \Delta)^2  \, |S|
 \ee
-where $C_s$  is an empirical constant, $\Delta$ is a length on the order of the size of a grid  cell,  and  the  deformation   term  $|S|$  is  related  to  the Dissipation Function (see FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5} for details). Related to the ``turbulent  viscosity'' are  comparable
+where $C_s$  is an empirical constant, $\Delta$ is a length on the order of the size of a grid  cell,  and  the  deformation   term  $|S|$  is  
+related  to  the Dissipation Function (see FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for details). Related to the ``turbulent  viscosity'' are  comparable
 expressions  for  the thermal conductivity  and  material diffusivity:  \be  k_{\hbox{\tiny LES}}  = \frac{\mu_{\hbox{\tiny  LES}}   \;  c_p}{\PR_t}
-\quad   ;  \quad  (\rho D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC_t}  \ee  where $\PR_t$ and $\SC_t$ are the turbulent Prandtl and Schmidt numbers, respectively.  Thus, $C_s$, $\PR_t$  and $\SC_t$ are  a set  of  empirical constants.  Most  FDS users
+\quad   ;  \quad  (\rho D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC_t}  \ee  where $\PR_t$ and $\SC_t$ are the turbulent Prandtl and Schmidt numbers, respectively.  
+Thus, $C_s$, $\PR_t$  and $\SC_t$ are  a set  of  empirical constants.  Most  FDS users
 simply use  the default values  of (0.2,0.5,0.5), but some have  explored their effect on the solution of the equations.
 
 In an effort  to validate FDS with some  simple room temperature data, Zhang~{\em et al.}~\cite{Zhang:2}  tried different combinations of the
@@ -886,7 +888,12 @@ For rough walls the momentum flux normal to the wall is balanced by inviscid dra
 \subsubsection{Laminar}
 \label{laminar}
 
-As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2D laminar (Poiseuille) flow calculation of flow through a straight channel.  The FDS input files are stored in the repository \cite{FDS-SMV_repository} under {\tt poiseuille\_*}. The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.  The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.  The fluid density is $\rho = 1.2$ kg m$^{-3}$ and the viscosity is $0.025$ kg m$^{-1}$ s$^{-1}$.  The mean pressure drop is prescribed to be $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H \approx 160$.  The (Moody) friction factor $f$, which satisfies
+As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2D laminar (Poiseuille) flow calculation of 
+flow through a straight channel.  
+The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.  
+The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.  
+The fluid density is $\rho = 1.2$ kg m$^{-3}$ and the viscosity is $0.025$ kg m$^{-1}$ s$^{-1}$.  
+The mean pressure drop is prescribed to be $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H \approx 160$.  The (Moody) friction factor $f$, which satisfies
 \begin{equation}
 \label{eqn_moodyf}
 \Delta p = f \frac{L}{H} \frac{1}{2} \rho \bar{u}^2 \,\mbox{,}
@@ -910,10 +917,14 @@ To verify the WW wall model for turbulent flow we perform 3D LES of a square cha
 \label{eqn_colebrook}
 \frac{1}{\sqrt{f}} = -2.0 \log_{\scriptsize 10} \left( \frac{z_0/H}{3.7} + \frac{2.51}{\mbox{Re}_H\sqrt{f}} \right) \,\mbox{,}
 \end{equation}
-which is a fit to the turbulent range of the Moody chart (see e.g. \cite{MYO}).  The parameter $z_0/H$ is the relative roughness where $H$ is the hydraulic diameter of the pipe or channel and Re$_H$ is the Reynolds number based on $H$.  FDS input files are stored in the repository \cite{FDS-SMV_repository} as {\tt moody\_*}. To provide a qualitative picture of the flow field, Figure \ref{fig_channel_flow_setup} shows contours of streamwise velocity for the case $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ and $N_z=32$.
+which is a fit to the turbulent range of the Moody chart (for example, see Ref.~\cite{MYO}).  The parameter $z_0/H$ is the relative 
+roughness where $H$ is the hydraulic diameter of the pipe or channel and Re$_H$ is the Reynolds number based on $H$.  
+To provide a qualitative picture of the flow field, Figure~\ref{fig_channel_flow_setup} shows contours of streamwise velocity 
+for the case $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ and $N_z=32$.
 \begin{table}
 \begin{center}
-\caption{\label{tab_zplus} \small Case matrix and friction factor results for turbulent channel flow with smooth walls.  The height of the first grid cell $\delta z$ is given in viscous units $z^+$ for each case.  Additionally, the table gives the nominal Reynolds number Re$_H$ and the FDS friction factor results compared to the Colebrook equation (\ref{eqn_colebrook}).}
+\caption{\label{tab_zplus} \small Case matrix and friction factor results for turbulent channel flow with smooth walls.  
+The height of the first grid cell $\delta z$ is given in viscous units $z^+$ for each case.  Additionally, the table gives the nominal Reynolds number Re$_H$ and the FDS friction factor results compared to the Colebrook equation (\ref{eqn_colebrook}).}
 \vspace{0.5cm}
 \begin{tabular}{|*{9}{l|}}
 \hline
@@ -1754,6 +1765,7 @@ result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s.
 \end{figure}
 
 
+\clearpage
 
 \section{Enthalpy of solid materials (\texorpdfstring{{\bf enthalpy}}{enthalpy})}
 
@@ -1786,6 +1798,7 @@ Note that the ``analytical'' solution is actually a simple numerical integration
 This example tests a number of features, including the reaction rate, mass weighted specific heats, and radiation boundary conditions. Note that the
 convective heat transfer has been turned off, and the correct steady-state temperature is calculated by FDS.
 
+\clearpage
 
 \section{A Simple Two-Step Pyrolysis Example (\texorpdfstring{{\bf two\_step\_solid\_reaction}}{two\_step\_solid\_reaction})}
 

@@ -1531,7 +1531,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 The first thing to do when setting up an input file is to give the
 job a name.  The name of the job is important because often a project
 involves numerous simulations in which case the names of the individual
-simulations can help organize the effort.  The namelist group {\ct HEAD} contains
+simulations should be meaningful and help to organize the project.  The namelist group {\ct HEAD} contains
 two parameters, as in this example:
 
 \footnotesize
@@ -1546,11 +1546,8 @@ If, for example, {\ct CHID='WTC\_05\_v5'}, it is convenient to
 name the input data file {\ct WTC\_05\_v5.fds} so that the input file
 can be associated with the output files. No periods or spaces are allowed in
 {\ct CHID} because the output files are tagged with suffixes that
-are meaningful to certain computer operating systems.  If this is specified as:
-\begin{verbatim}
-CHID='%INPUTFILENAME%'
-\end{verbatim}
-then {\ct CHID} will be set to the name of the input file minus any suffix such as {\ct .fds}.
+are meaningful to certain computer operating systems.  If {\ct CHID} is not
+specified, then it will be set to the name of the input file minus everything at and beyond the first period.
 \item {\ct TITLE} is a string of 60 characters or less that describes the
 simulation. It is simply descriptive text that is passed to various output files.
 \end{description}
@@ -2070,118 +2067,10 @@ for evaluating the spread of smoke and heat through a building from a
 sizable fire, but may not be appropriate to study a very small, smoldering source\footnote{For the validation study sponsored by the
 U.S. Nuclear Regulatory Commission~\cite{NUREG_1824}, the $D^*/\dx$ values ranged from 4 to 16.}.
 
-\subsection{\emph{A Posteriori} Mesh Quality Metrics}
-\label{info:meshquality}
-The quality of a particular simulation is most directly tied to grid resolution.  Three slice file output quantities are suggested here for measuring errors in the velocity and scalar fields:
-\begin{enumerate}
-\item A model for the fraction of unresolved kinetic energy called the \emph{measure of turbulence resolution} (similar to what is often called the `Pope criterion' \cite{Pope:2004}), MTR
-\item A model for the fraction of unresolved scalar energy fluctuations called \emph{measure of scalar resolution} \cite{Vervisch:2010}, MSR
-\item A \emph{wavelet-based error measure} \cite{McDermott:2010}, WEM
-\end{enumerate}
-Examples:
-
-\footnotesize
-\begin{verbatim}
-&SLCF PBY=0, QUANTITY='TURBULENCE RESOLUTION' /
-&SLCF PBY=0, QUANTITY='SCALAR RESOLUTION', QUANTITY2='MASS FRACTION', SPEC_ID='HELIUM' /
-&SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV', CELL_CENTERED=.TRUE. /
-\end{verbatim} \normalsize
-Note that an additional scalar {\tt QUANTITY2} is required for MSR and WEM.  {\tt QUANTITY2} may be any output quantity appropriate for {\tt SLCF}. Also, {\tt CELL\_CENTERED} is optional for any of the three metrics.
-
-\subsubsection{Measure of Turbulence Resolution}
-
-In FDS, the user may output a scalar quantity which we refer to as the \emph{measure of turbulence resolution}, defined locally as
-\begin{eqnarray}
-\mbox{MTR}(\mathbf{x},t) = \frac{k_{sgs}}{k_{res} + k_{sgs}}
-\end{eqnarray}
-where
-\vskip-.6cm
-\begin{eqnarray}
-k_{res} &=& \mbox{$\frac{1}{2}$}\tilde{u}_i \tilde{u}_i \\
-k_{sgs} &=& \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i)
-\end{eqnarray}
-Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  The model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored. The basic idea is to provide the user with an approximation to the Pope criterion \cite{Pope:2004}, $M$, which is easily accessible in Smokeview (the FDS visualization tool).  In Smokeview, the user may readily time average MTR in a specified plane.  The time average of MTR is a reasonable estimate of $M$.  The measure falls within the range [0,1], with 0 indicating perfect resolution and 1 indicating poor resolution.  The concept is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
-\begin{figure}[ht]
-\centering
-\begin{tabular}{rl}
-\includegraphics[width=0.4\linewidth]{FIGURES/mtr_resolved_signal} &
-\includegraphics[width=0.4\linewidth]{FIGURES/mtr_unresolved_signal}
-\end{tabular}
-\vskip-0.2cm
-\caption{(Left) Resolved signal, MTR is small. (Right) Unresolved signal, MTR is close to unity.}
-\label{fig_mtr}
-\end{figure}
-
-For the canonical case of isotropic turbulence Pope actually defines LES such that $M<0.2$.  That is, LES requires resolution of 80\% of the kinetic energy in the flow field (because this puts the grid Nyquist limit within the inertial subrange).  The question remains as to whether this critical value is sufficient or necessary for a given engineering problem.  As shown in \cite{McDermott:2010}, maintaining mean values of MTR near 0.2 indeed provides satisfactory results (simulation results within experimental error bounds) for mean velocities and species concentrations in nonreacting, buoyant plumes.
-
-\subsubsection{Measure of Scalar Resolution}
-\label{mtr}
-The \emph{measure of turbulence resolution} is defined locally as
-\begin{eqnarray}
-\mbox{MSR}(\mathbf{x},t) = \frac{T_{sgs}}{T_{res} + T_{sgs}}
-\end{eqnarray}
-where
-\vskip-.6cm
-\begin{eqnarray}
-T_{res} &=& \tilde{\varphi}^2 \\
-T_{sgs} &=& (\tilde{\varphi} - \hat{\tilde{\varphi}})^2
-\end{eqnarray}
-Here again the model for the SGS scalar energy fluctuations is taken from scale similarity \cite{Bardina:1980}.  The field $\hat{\tilde{\varphi}}$ is test filtered at a scale $2\Delta$.  The cross-term energy (i.e. $\langle 2 \tilde{\varphi}\varphi^{\prime} \rangle$, where $\varphi^\prime = \varphi - \tilde{\varphi}$) is ignored, but this does not affect the bounds of the measure.  Further, it can be shown that this term is small if sufficient resolution is used. There is evidence to suggest that the requirements for scalar resolution may be somewhat more stringent than for the velocity field \cite{Vervisch:2010}.  Therefore, currently the best advice is to keep the mean value of MSR less than 0.2.
-
-\subsubsection{Wavelet Error Measure}
-\label{wavelets}
-We begin by providing background on the simple Haar wavelet \cite{Nievergelt:1999}.  For a thorough and more sophisticated review of wavelet methods, the reader is referred to Schneider and Vasilyev \cite{Schneider:2010}.
-
-Suppose the scalar function $f(r)$ is sampled at discrete points $r_j$, separated by a distance $h$, giving values $s_j$.  Defining the \emph{unit step function} over the interval $[r_1,r_2]$ by
-\begin{eqnarray}
-\varphi_{[r_1,r_2]} = \left\{ \begin{array}{ll} 1 & \quad \mbox{if} \quad r_1 \le r < r_2 \\ 0 & \quad \mbox{otherwise} \end{array} \right.
-\end{eqnarray}
-the simplest possible reconstruction of the signal is the step function approximation
-\begin{eqnarray}
-f(r) \approx \sum_j s_j \varphi_{[r_j,r_j+h]}(r)
-\end{eqnarray}
-By ``viewing'' the signal at a coarser resolution, say $2h$, an identical reconstruction of the function $f$ over the interval $[r_j,r_j+2h]$ may be obtained from
-\begin{eqnarray}
-\label{eqn_wavelet_decomp}
-f_{[r_j,r_j+2h]}(r) = \underbrace{\mbox{$\frac{s_j+s_{j+1}}{2}$}}_a \,\varphi_{[r_j,r_j+2h]}(r) + \underbrace{\mbox{$\frac{s_j-s_{j+1}}{2}$}}_c \,\psi_{[r_j,r_j+2h]}(r)
-\end{eqnarray}
-where $a$ is as the \emph{average} coefficient and $c$ is as the \emph{wavelet} coefficient.  The Haar \emph{mother wavelet} (Figure \ref{fig_haar_mother}) is identified as
-\begin{eqnarray}
-\psi_{[r_1,r_2]}(r) = \left\{ \begin{array}{ll} 1 & \quad \mbox{if} \quad r_1\le r < \frac{1}{2}(r_1+r_2) \\ -1 & \quad \mbox{if} \quad \frac{1}{2}(r_1+r_2)\le r < r_2 \end{array} \right.
-\end{eqnarray}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.5\linewidth]{FIGURES/haar_mother}
-\vskip-0.2cm
-\caption{Haar mother wavelet on the interval [0,1].}
-\label{fig_haar_mother}
-\end{figure}
-
-The decomposition of the signal shown in (\ref{eqn_wavelet_decomp}) may be repeated at ever coarser resolutions.  The result is a \emph{wavelet transform}. The procedure is entirely analogous to the Fourier transform, but with compact support.  If we look at a 1D signal with $2^m$ points, the repeated application of (\ref{eqn_wavelet_decomp}) results in an $m \times m$ matrix of averages $\mathbf{a}$ with components $a_{ij}$ and an $m \times m$ wavelet coefficient matrix $\mathbf{c}$ with components $c_{ij}$.  Each row $i$ of $\mathbf{a}$ may be reconstructed from the $i+1$ row of $\mathbf{a}$ and $\mathbf{c}$.  Because of this and because small values of the wavelet coefficient matrix may be discarded, dramatic compression of the signal may be obtained.
-
-Here we are interested in using the wavelet analysis to say something about the local level of error in grid resolution.  Very simply, we ask what can be discerned from a sample of four data points along a line.  Roughly speaking we might expect to see one of the four scenarios depicted in Figure \ref{fig_wavelet_transforms}.  Within each plot window we also show the results of a Haar wavelet transform for that signal.  Looking first at the two top plots, on the left we have a step function and on the right we have a straight line.  Intuitively, we expect large error for the step function and small error for the line.  The following error measure achieves this goal:
-\vskip-.6cm
-\begin{eqnarray}
-\mbox{WEM}(\mathbf{x},t) = \max_{x,y,z}\left( \frac{|c_{11} + c_{12}| - |c_{21}|}{|a_{21}|} \right)
-\end{eqnarray}
-Note that we have arbitrarily scaled the measure so that a step function leads to WEM of unity.  In practice the transform is performed in all coordinate directions and the max value is reported.  The scalar value may be output to Smokeview at the desired time interval.
-\begin{figure}[ht]
-\centering
-\begin{tabular}{rl}
-\includegraphics[width=0.4\linewidth]{FIGURES/haar_step} &
-\includegraphics[width=0.4\linewidth]{FIGURES/haar_line} \\
-\includegraphics[width=0.4\linewidth]{FIGURES/haar_eddy} &
-\includegraphics[width=0.4\linewidth]{FIGURES/haar_extr}
-\end{tabular}
-\vskip-0.2cm
-\caption{Averages and coefficients for local Haar wavelet transforms on four typical signals.}
-\label{fig_wavelet_transforms}
-\end{figure}
-
-Looking now at the two plots on the bottom of Figure \ref{fig_wavelet_transforms}, the signal on the left, which may indicate spurious oscillations or unresolved turbulent motion, leads to $\mbox{WEM} = 2$ (note that this limit differs from the upper bound of unity for MTR and MSR).  Our measure therefore views this situation as the worst case in a sense.  The signal to the lower right is indicative of an extremum, which actually is easily resolved by most centered spatial schemes and results again in $\mbox{WEM}=0$.
-
-In \cite{McDermott:2010}, the time average of WEM was reported for LES of a nonreacting buoyant plume at three grid resolutions.  From this study, the best advice currently is to maintain average values of WEM less than 0.5.
+\begin{warning}
+\noindent
+There are a number of special output quantities that provide local measures of grid resolution. See Section~\ref{info:meshquality} for details.
+\end{warning}
 
 
 
@@ -2364,11 +2253,17 @@ The pressure term is written like this so that a separable elliptic partial diff
 the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable.
 This term is sometimes referred to as the baroclinic torque, and it is responsible for
 generating vorticity due to the non-alignment of pressure and density gradients.
-In versions of FDS prior to 5.5, the second term was included only as an option.
-Starting with FDS~5.5, however, the baroclinic torque is included by default. It can be excluded by setting
-{\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line, but this is only recommended for diagnostic purposes. For example, in the simple helium plume test case below,
+For an LES calculation, it can be included by setting {\ct BAROCLINIC=.TRUE.} on the {\ct MISC} line. For DNS, it is included by default.
+For example, in the simple helium plume test case below,
 neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant.
 For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
+
+\begin{warning}
+\noindent
+In versions of FDS prior to 5.5.0, {\ct BAROCLINIC=.FALSE.} was the default for LES.
+For FDS~5.5.0 and 5.5.1, however, {\ct BAROCLINIC} was set to {\ct .TRUE.} by default. Its use was responsible for numerical instabilities in a number
+of cases. In test versions of FDS~6, the problems do not occur, thus {\ct BAROCLINIC=.TRUE.} for test versions of FDS~6.
+\end{warning}
 
 
 
@@ -3327,6 +3222,8 @@ materials applied to that surface.
 \end{warning}
 
 
+
+\clearpage
 
 \section{Surface Temperature and Heat Flux}
 
@@ -4378,7 +4275,7 @@ The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \item  For reacting surfaces, the surface density is computed as a sum of the layer densities multiplied by the layer thicknesses.
 This value can be over-ridden by setting {\ct SURFACE\_DENSITY} on the {\ct SURF} line. For surfaces with prescribed HRR
 ({\ct HRRPUA}), {\ct SURFACE\_DENSITY} parameter is the only way of defining the mass of the object.
-\item For surfaces with prescribed HRR ({\ct HRRPUA}) or prescribed mass loss rate ({\ct MLRPUA}) AND thermally thick heat conduction, 
+\item For surfaces with prescribed HRR ({\ct HRRPUA}) or prescribed mass loss rate ({\ct MLRPUA}) AND thermally thick heat conduction,
 the mass flux is affected by the heats of combustion defined for the gas phase reaction and the first listed material ({\ct MATL}) component.
 \item Use {\ct BURN\_AWAY} parameter cautiously. If an object has the potential of burning away, a significant
 amount of extra memory has to be set aside to store additional surface information as the rectangular block is
@@ -4429,7 +4326,7 @@ the ratio of heats of combustion
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away1} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away2} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away3} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away4} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away4}
 \end{tabular*}
 \caption[Output of {\bf box\_burn\_away} test cases.]{Output of {\bf box\_burn\_away} test cases.}
 \label{box_burn_away}
@@ -4440,7 +4337,7 @@ the ratio of heats of combustion
 
 
 
-\newpage
+\clearpage
 
 \section{Testing Your Pyrolysis Model}
 \label{solid_phase_verification}
@@ -4939,7 +4836,7 @@ applied to a {\ct VENT}.
 
 
 
-
+\clearpage
 
 \section{Species and Species Mass Flux Boundary Conditions}
 
@@ -4971,6 +4868,7 @@ mass flux of species.  To obtain a guaranteed mass flux of a species, you should
 \end{warning}
 
 
+\clearpage
 
 \section{Special Topic: Pressure Boundary Conditions}
 \label{info:pressure_boundary}
@@ -5033,6 +4931,7 @@ the right portal.}
 \end{figure}
 
 
+\clearpage
 
 \section{Special Topic: Fires and Flows in the Outdoors}
 \label{info:stratification}
@@ -5073,7 +4972,14 @@ turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} 
 \section{Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
 
-The no-slip condition implies that the continuum tangential gas velocity at a surface is zero.  In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value. In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field.  For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). For an LES (Large Eddy Simulation), the Werner-Wengle wall model is applied for smooth walls and a log law is applied for rough walls.  The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for wall model details.  To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line.  In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on {\ct SURF}.
+The no-slip condition implies that the continuum tangential gas velocity at a surface is zero.  
+In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value. 
+In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field.  
+For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). 
+For an LES (Large Eddy Simulation), the Werner-Wengle wall model is applied for smooth walls and a log law is applied for rough walls.  
+The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for wall model details.  
+To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line.  
+In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on {\ct SURF}.
 
 \begin{warning}
 \noindent
@@ -8407,13 +8313,13 @@ If multiple meshes are being used, the vertical path {\em cannot} cross mesh bou
 
 The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocouple. The thermocouple temperature lags the true gas temperature by an amount determined mainly
 by its bead size. It is found by solving the following equation for the thermocouple temperature, $T_{\hbox{\tiny TC}}$~\cite{Welsh:1}
-\be 
-   \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, \frac{dT_{\hbox{\tiny TC}}}{dt} = \epsilon_{\hbox{\tiny TC}} \, (U/4 - \sigma T_{\hbox{\tiny TC}}^4) + h(T_g - T_{\hbox{\tiny TC}}) = 0 
-   \label{TC}  
+\be
+   \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, \frac{dT_{\hbox{\tiny TC}}}{dt} = \epsilon_{\hbox{\tiny TC}} \, (U/4 - \sigma T_{\hbox{\tiny TC}}^4) + h(T_g - T_{\hbox{\tiny TC}}) = 0
+   \label{TC}
 \ee
 where $\epsilon_{\hbox{\tiny TC}}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_g$ is the true gas temperature, and
 $h$ is the heat transfer coefficient to a small sphere,
-$h=k \, \NU / d_{\hbox{\tiny TC}}$. 
+$h=k \, \NU / d_{\hbox{\tiny TC}}$.
 The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line.
 The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and
 0.44~kJ/kg/K, respectively.
@@ -8863,9 +8769,123 @@ of 1, 2 or 3 to indicate that the velocity ought to have the same sign as $u$, $
 with measurements. For Plot3D files, add {\ct PLOT3D\_VELO\_INDEX(N)=...} to the {\ct DUMP} line, where {\ct N} refers to the Plot3D quantity 1, 2, 3, 4 or 5.
 
 
+\subsection{\emph{A Posteriori} Mesh Quality Metrics}
+\label{info:meshquality}
+The quality of a particular simulation is most directly tied to grid resolution.  Three slice file output quantities are suggested here for measuring errors in the velocity and scalar fields:
+\begin{enumerate}
+\item A model for the fraction of unresolved kinetic energy called the \emph{measure of turbulence resolution} (similar to what is often called the `Pope criterion' \cite{Pope:2004}), MTR
+\item A model for the fraction of unresolved scalar energy fluctuations called \emph{measure of scalar resolution} \cite{Vervisch:2010}, MSR
+\item A \emph{wavelet-based error measure} \cite{McDermott:2010}, WEM
+\end{enumerate}
+Examples:
+
+\footnotesize
+\begin{verbatim}
+&SLCF PBY=0, QUANTITY='TURBULENCE RESOLUTION' /
+&SLCF PBY=0, QUANTITY='SCALAR RESOLUTION', QUANTITY2='MASS FRACTION', SPEC_ID='HELIUM' /
+&SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV', CELL_CENTERED=.TRUE. /
+\end{verbatim} \normalsize
+Note that an additional scalar {\ct QUANTITY2} is required for MSR and WEM.  {\ct QUANTITY2} may be any output quantity appropriate for {\ct SLCF}. 
+Also, {\ct CELL\_CENTERED} is optional for any of the three metrics.
+
+\subsubsection{Measure of Turbulence Resolution}
+
+In FDS, the user may output a scalar quantity which we refer to as the \emph{measure of turbulence resolution}, defined locally as
+\begin{eqnarray}
+\mbox{MTR}(\mathbf{x},t) = \frac{k_{sgs}}{k_{res} + k_{sgs}}
+\end{eqnarray}
+where
+\vskip-.6cm
+\begin{eqnarray}
+k_{res} &=& \mbox{$\frac{1}{2}$}\tilde{u}_i \tilde{u}_i \\
+k_{sgs} &=& \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i)
+\end{eqnarray}
+Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  The model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored. The basic idea is to provide the user with an approximation to the Pope criterion \cite{Pope:2004}, $M$, which is easily accessible in Smokeview (the FDS visualization tool).  In Smokeview, the user may readily time average MTR in a specified plane.  The time average of MTR is a reasonable estimate of $M$.  The measure falls within the range [0,1], with 0 indicating perfect resolution and 1 indicating poor resolution.  The concept is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
+\begin{figure}[ht]
+\centering
+\begin{tabular}{rl}
+\includegraphics[width=0.4\linewidth]{FIGURES/mtr_resolved_signal} &
+\includegraphics[width=0.4\linewidth]{FIGURES/mtr_unresolved_signal}
+\end{tabular}
+\vskip-0.2cm
+\caption{(Left) Resolved signal, MTR is small. (Right) Unresolved signal, MTR is close to unity.}
+\label{fig_mtr}
+\end{figure}
+
+For the canonical case of isotropic turbulence Pope actually defines LES such that $M<0.2$.  That is, LES requires resolution of 80\% of the kinetic energy in the flow field (because this puts the grid Nyquist limit within the inertial subrange).  The question remains as to whether this critical value is sufficient or necessary for a given engineering problem.  As shown in \cite{McDermott:2010}, maintaining mean values of MTR near 0.2 indeed provides satisfactory results (simulation results within experimental error bounds) for mean velocities and species concentrations in nonreacting, buoyant plumes.
+
+\subsubsection{Measure of Scalar Resolution}
+\label{mtr}
+The \emph{measure of turbulence resolution} is defined locally as
+\begin{eqnarray}
+\mbox{MSR}(\mathbf{x},t) = \frac{T_{sgs}}{T_{res} + T_{sgs}}
+\end{eqnarray}
+where
+\vskip-.6cm
+\begin{eqnarray}
+T_{res} &=& \tilde{\varphi}^2 \\
+T_{sgs} &=& (\tilde{\varphi} - \hat{\tilde{\varphi}})^2
+\end{eqnarray}
+Here again the model for the SGS scalar energy fluctuations is taken from scale similarity \cite{Bardina:1980}.  The field $\hat{\tilde{\varphi}}$ is test filtered at a scale $2\Delta$.  The cross-term energy (i.e. $\langle 2 \tilde{\varphi}\varphi^{\prime} \rangle$, where $\varphi^\prime = \varphi - \tilde{\varphi}$) is ignored, but this does not affect the bounds of the measure.  Further, it can be shown that this term is small if sufficient resolution is used. There is evidence to suggest that the requirements for scalar resolution may be somewhat more stringent than for the velocity field \cite{Vervisch:2010}.  Therefore, currently the best advice is to keep the mean value of MSR less than 0.2.
+
+\subsubsection{Wavelet Error Measure}
+\label{wavelets}
+We begin by providing background on the simple Haar wavelet \cite{Nievergelt:1999}.  For a thorough and more sophisticated review of wavelet methods, the reader is referred to Schneider and Vasilyev \cite{Schneider:2010}.
+
+Suppose the scalar function $f(r)$ is sampled at discrete points $r_j$, separated by a distance $h$, giving values $s_j$.  Defining the \emph{unit step function} over the interval $[r_1,r_2]$ by
+\begin{eqnarray}
+\varphi_{[r_1,r_2]} = \left\{ \begin{array}{ll} 1 & \quad \mbox{if} \quad r_1 \le r < r_2 \\ 0 & \quad \mbox{otherwise} \end{array} \right.
+\end{eqnarray}
+the simplest possible reconstruction of the signal is the step function approximation
+\begin{eqnarray}
+f(r) \approx \sum_j s_j \varphi_{[r_j,r_j+h]}(r)
+\end{eqnarray}
+By ``viewing'' the signal at a coarser resolution, say $2h$, an identical reconstruction of the function $f$ over the interval $[r_j,r_j+2h]$ may be obtained from
+\begin{eqnarray}
+\label{eqn_wavelet_decomp}
+f_{[r_j,r_j+2h]}(r) = \underbrace{\mbox{$\frac{s_j+s_{j+1}}{2}$}}_a \,\varphi_{[r_j,r_j+2h]}(r) + \underbrace{\mbox{$\frac{s_j-s_{j+1}}{2}$}}_c \,\psi_{[r_j,r_j+2h]}(r)
+\end{eqnarray}
+where $a$ is as the \emph{average} coefficient and $c$ is as the \emph{wavelet} coefficient.  The Haar \emph{mother wavelet} (Figure \ref{fig_haar_mother}) is identified as
+\begin{eqnarray}
+\psi_{[r_1,r_2]}(r) = \left\{ \begin{array}{ll} 1 & \quad \mbox{if} \quad r_1\le r < \frac{1}{2}(r_1+r_2) \\ -1 & \quad \mbox{if} \quad \frac{1}{2}(r_1+r_2)\le r < r_2 \end{array} \right.
+\end{eqnarray}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.5\linewidth]{FIGURES/haar_mother}
+\vskip-0.2cm
+\caption{Haar mother wavelet on the interval [0,1].}
+\label{fig_haar_mother}
+\end{figure}
+
+The decomposition of the signal shown in (\ref{eqn_wavelet_decomp}) may be repeated at ever coarser resolutions.  The result is a \emph{wavelet transform}. The procedure is entirely analogous to the Fourier transform, but with compact support.  If we look at a 1D signal with $2^m$ points, the repeated application of (\ref{eqn_wavelet_decomp}) results in an $m \times m$ matrix of averages $\mathbf{a}$ with components $a_{ij}$ and an $m \times m$ wavelet coefficient matrix $\mathbf{c}$ with components $c_{ij}$.  Each row $i$ of $\mathbf{a}$ may be reconstructed from the $i+1$ row of $\mathbf{a}$ and $\mathbf{c}$.  Because of this and because small values of the wavelet coefficient matrix may be discarded, dramatic compression of the signal may be obtained.
+
+Here we are interested in using the wavelet analysis to say something about the local level of error in grid resolution.  Very simply, we ask what can be discerned from a sample of four data points along a line.  Roughly speaking we might expect to see one of the four scenarios depicted in Figure \ref{fig_wavelet_transforms}.  Within each plot window we also show the results of a Haar wavelet transform for that signal.  Looking first at the two top plots, on the left we have a step function and on the right we have a straight line.  Intuitively, we expect large error for the step function and small error for the line.  The following error measure achieves this goal:
+\vskip-.6cm
+\begin{eqnarray}
+\mbox{WEM}(\mathbf{x},t) = \max_{x,y,z}\left( \frac{|c_{11} + c_{12}| - |c_{21}|}{|a_{21}|} \right)
+\end{eqnarray}
+Note that we have arbitrarily scaled the measure so that a step function leads to WEM of unity.  In practice the transform is performed in all coordinate directions and the max value is reported.  The scalar value may be output to Smokeview at the desired time interval.
+\begin{figure}[ht]
+\centering
+\begin{tabular}{rl}
+\includegraphics[width=0.4\linewidth]{FIGURES/haar_step} &
+\includegraphics[width=0.4\linewidth]{FIGURES/haar_line} \\
+\includegraphics[width=0.4\linewidth]{FIGURES/haar_eddy} &
+\includegraphics[width=0.4\linewidth]{FIGURES/haar_extr}
+\end{tabular}
+\vskip-0.2cm
+\caption{Averages and coefficients for local Haar wavelet transforms on four typical signals.}
+\label{fig_wavelet_transforms}
+\end{figure}
+
+Looking now at the two plots on the bottom of Figure \ref{fig_wavelet_transforms}, the signal on the left, which may indicate spurious oscillations or unresolved turbulent motion, leads to $\mbox{WEM} = 2$ (note that this limit differs from the upper bound of unity for MTR and MSR).  Our measure therefore views this situation as the worst case in a sense.  The signal to the lower right is indicative of an extremum, which actually is easily resolved by most centered spatial schemes and results again in $\mbox{WEM}=0$.
+
+In \cite{McDermott:2010}, the time average of WEM was reported for LES of a nonreacting buoyant plume at three grid resolutions.  From this study, the best advice currently is to maintain average values of WEM less than 0.5.
 
 
 
+\clearpage
 
 
 \section{Extracting Numbers from the Output Data Files}
