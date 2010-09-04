@@ -22,5 +22,4 @@ call %envfile%
 
 call %svn_root%\SMV_5\scripts\MAKEsmdwin64.bat
 call %svn_root%\SMV_5\scripts\MAKEsmzwin64.bat
-call %svn_root%\SMV_5\scripts\MAKEbgwin64.bat
 call %svn_root%\SMV_5\scripts\MAKEf2awin64.bat
