@@ -57,7 +57,7 @@ erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
 
 echo.
-echo Installation complete.  Press any key to continue.
+echo Press any key to complete Installation.
 pause>NUL
 erase "%CD%"\wrapup_fds_install.bat
 
