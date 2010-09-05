@@ -83,7 +83,7 @@ no_target:
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : INC = -I ../../source/include -I ../../source/shared
+intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview
 intel_win_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
 intel_win_64 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
 intel_win_64 : FFLAGS    = -O2 -fpp -D pp_PART5 -D pp_cvf /Qvec_report0
@@ -100,7 +100,7 @@ intel_win_64 : $(objwin)
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_test_64 : INC = -I ../../source/include -I ../../source/shared
+intel_win_test_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview
 intel_win_test_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
 intel_win_test_64 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
 intel_win_test_64 : FFLAGS    = -O2 -fpp -D pp_PART5 -D pp_cvf -D pp_BETA /Qvec_report0
@@ -116,7 +116,7 @@ intel_win_test_64 : $(objwin)
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : INC = -I ../../source/include -I ../../source/shared
+intel_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview
 intel_win_32 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
 intel_win_32 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
 intel_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5 /Qvec_report0
@@ -133,7 +133,7 @@ intel_win_32 : $(objwin)
 # ------------- Win test 32 ----------------
 #  32 bit windows
 
-intel_win_test_32 : INC = -I ../../source/include -I ../../source/shared
+intel_win_test_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview
 intel_win_test_32 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
 intel_win_test_32 : WINLIBS = kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
 intel_win_test_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5  -D pp_BETA /Qvec_report0
