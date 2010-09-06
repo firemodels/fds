@@ -28,4 +28,3 @@ $RUNFDS Visualization sprinkler_many              fire47
 $RUNFDS Visualization thouse5                     fire47
 $RUNFDS Visualization transparency                fire47
 $RUNFDS Wui fire_line                             fire51
-$RUNFDS Wui onetree_surf_1mesh                    fire51
