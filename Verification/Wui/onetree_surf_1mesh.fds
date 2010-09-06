@@ -9,7 +9,7 @@
 &TRNZ IDERIV=2,CC=0,PC=0.0 /
 
 - Duration of simulation in seconds
-&TIME T_END=120 / 
+&TIME T_END=60 / 
 
 - Miscellaneous parameters
 &MISC BAROCLINIC=.TRUE. /
