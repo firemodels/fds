@@ -367,7 +367,7 @@ deviation of the combined distribution is defined as:
 Recall that $\widetilde{\sigma}_E$ is known and the expression on the right can be evaluated using the pairs of measured and
 predicted values. An estimate of $\delta$ can be found using the mean of the distribution:
 \be
-   \hat{\delta} = \exp \left( \overline{\ln M}-\overline{\ln E}+\frac{ \widehat{\widetilde{\sigma}_M^2}}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right)
+   \hat{\delta} = \exp \left( \overline{\ln M}-\overline{\ln E}+\frac{ \widehat{\widetilde{\sigma}_M^2}}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right) \label{delta}
 \ee
 Taking the assumed normal distribution of the model prediction, $M$, in Eq.~(\ref{mdist}) and using
 a Bayesian argument\footnote{The form of Bayes theorem used here states that the posterior distribution is the product of
@@ -390,23 +390,60 @@ has a manufacturers defect such that, on average, it shoots 10~cm to the left of
 going to strike 10~cm to the left of the intended target. However, if the marksman knows of the defect, he or she will probably aim 10~cm to the right of the
 intended target to compensate for the defect. If that is the case, it can no longer be assumed that the intended target was 10~cm to the right of the bullet hole.
 
-In summary, assuming that the modeler has not modified the input parameters to compensate for a known bias in the model,
-the true value of the model output quantity, $\theta$, given the model prediction, $M$, is normally distributed with the following mean and standard deviation:
+The final step in the derivation is to rewrite Eq.~(\ref{thetaeq}) as:
 \be
    \theta \; | \; M \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widehat{\widetilde{\sigma}_M^2} \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth}
 \ee
 This formula has been obtained\footnote{Note that if $X \sim N(\mu,\sigma^2)$, then
-$cX \sim N ( c \mu , (c \sigma)^2)$.} by dividing by the bias factor, $\delta$, in Eq.~(\ref{thetaeq}). The two parameters, $\hat{\delta}$ and $\widehat{\widetilde{\sigma}_M}$,
-indicate the accuracy of the model in comparison to experimental measurements. If $\hat{\delta}=1$ and $\widehat{\widetilde{\sigma}_M}=\widetilde{\sigma}_E$, then the
-model is of comparable accuracy to the measurements themselves. It is important to note that $\widehat{\widetilde{\sigma}_M}$ cannot be less than
-$\widetilde{\sigma}_E$ because it is not possible to demonstrate that the model is more accurate than the measurements against which it is compared. This is not to say that the model
-cannot be more accurate than the measurements; rather, that the model cannot be shown to be more accurate than the measurements.
+$cX \sim N ( c \mu , (c \sigma)^2)$.} by dividing by the bias factor, $\delta$, in Eq.~(\ref{thetaeq}). To summarize, given a model prediction, $M$,
+of a particular quantity of interest ({\em e.g.} a cable temperature), the true (but unknown) value of this quantity is normally distributed. The mean value
+and variance of this normal distribution are based solely on comparisons of model predictions with past experiments that are similar to the particular fire
+scenario being analyzed. The performance of the model is quantified by the estimators of the parameters, $\hat{\delta}$ and $\widehat{\widetilde{\sigma}_M}$, which
+have been corrected to account for uncertainties associated with the experimental measurements. 
+If $\hat{\delta} \approx 1$ and $\widehat{\widetilde{\sigma}_M} \approx \widetilde{\sigma}_E$, then the
+model can be considered of comparable accuracy to the measurements. 
 
 
+\section{Procedure}
 
-\section{Verifying the Procedure}
+This section describes how to make use of Eq.~(\ref{truth}). Referring to the sample problem given above, suppose a fire model is being used to estimate the likelihood that
+electrical control cables could be damaged due to a fire in a compartment. 
+Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C. 
+What is the likelihood that the cables would be damaged if the
+model predicts that the maximum surface temperature of the cables is 350~$^\circ$C. Assuming that the input parameters are not in question, the following
+procedure is suggested:
+\begin{enumerate}
+\item Assemble a collection of model predictions, $M_i$, and experimental measurements, $E_i$, from 
+past experiments involving objects with similar thermal characteristics as the cables in question. 
+How ``similar'' the experiment is to the hypothetical scenario under study can be quantified by way of
+various parameters, like the thermal inertia of the object, the size of the fire, the size of the compartment, and so on. Obtain estimates of the
+experimental uncertainty from those who conducted the experiments or follow the procedure outlined by Hamins~\cite{NUREG_1824}. Express the
+experimental uncertainty in relative terms, $\widetilde{\sigma}_E$.
+\item Calculate the bias factor, $\delta$, and relative standard deviation, $\tilde{\sigma}_M$, from Eqs.~(\ref{delta}) and (\ref{stdev}), respectively.
+For this example, assume that $\delta=1.03$ and that $\widetilde{\sigma}_M=0.10$. 
+\item Consider the distribution, Eq.~(\ref{truth}), of the ``true'' temperature, $\theta$, shown graphically in Fig.~\ref{bell_curve}.
+The vertical lines indicate the ``critical'' temperature at which damage is assumed to occur ($T_c=400$~$^\circ$C), and the temperature predicted by the
+model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
+The mean and standard deviation in Eq.~(\ref{truth}) are calculated:
+\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad
+   \sigma = \widetilde{\sigma}_M \, \frac{M}{\hat{\delta}} = 0.10 \times \frac{330}{1.03} = 32 \; ^\circ \hbox{C}  \ee
+respectively. The shaded area beneath the bell curve is the probability that the ``true'' temperature can exceed the
+critical value, $T_c=400$~$^\circ$C, which can be expressed via the {\em complimentary error function}:
+\be P(T>T_c) = \frac{1}{2} \hbox{efrc} \left( \frac{T_c - \mu}{\sigma \sqrt{2}} \right) \approx 0.03  \ee
+This means that there is a 3~\% chance that the cables could become damaged, assuming that the model's input parameters are not
+subject to uncertainty. 
+\end{enumerate}
+Of course, this analysis is not complete. It could never be assumed that the input parameters for a model calculation are perfect. At the very least, the heat
+release rate of the fire would be selected from a range of plausible values. This selection, along with that of other parameters, would likely broaden the
+bell curve shown in Fig.~\ref{bell_curve}. 
 
-This section illustrates the meaning of the estimated parameters $\hat{\delta}$ and $\widehat{\widetilde{\sigma}_M}$.
+ 
+
+\section{Verifying the Calculation of the Uncertainty Parameters}
+
+This section demonstrates the accuracy of the calculation of the estimated model uncertainty parameters $\hat{\delta}$ and $\widehat{\widetilde{\sigma}_M}$. To do so,
+hypothetical values of experimental measurements and model predictions are selected from known distributions to check that the estimates of the model
+bias and standard deviation are accurate.
 Suppose that 1000 fire experiments are conducted, and that for each experiment the
 temperature at a given point and at a given time is known. For the sake of this exercise, assume that these values can be represented by 1000 uniformly distributed
 random numbers, $\theta_i$, between 0 and 1000. These values have no uncertainty -- they represent the ``truth.''
@@ -497,36 +534,6 @@ Average & 1.030            &    0.101            \\ \hline
 
 
 
-\section{Making Use of the Model Uncertainty}
-
-The previous sections describes a method of quantifying the model uncertainty by comparing its predictions with experimental measurements. But how does one make use of the computed
-model bias and relative error? This is best answered with an example. Suppose the model is being used to estimate the likelihood that
-electrical control cables could be damaged due to
-a fire in a compartment. Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C. It is also assumed that the fire is
-ignited within an electrical cabinet and the heat release rate of the fire is a specified function of time, and that all other input
-parameters for the model are known and provided. Finally, it is assumed, for the time being, that there is no uncertainty
-associated with any of these assumptions. What is the likelihood that the cables would be damaged if that fire were to occur? The calculation is performed, and the
-model predicts that the maximum surface temperature of the cables is 350~$^\circ$C. Does this mean that there is no chance of damage, assuming that the input parameters
-and assumptions are not in question at the moment? The answer is no, because the model itself is subject to error. So what is the chance that the
-cables could actually reach temperatures greater than 400~$^\circ$C?
-
-Before answering this question, first consider past experiments for which model predictions have been compared to measured surface temperatures of objects
-with similar thermal characteristics as the cables in question. How ``similar'' the experiment is to the hypothetical scenario under study can be quantified by way of
-various parameters, like the thermal inertia of the object, the size of the fire, the size of the compartment, and so on. Next, the results of the validation study can be
-analyzed following the procedure spelled out above, which provides an estimate of the bias factor, $\delta$, and relative error, $\tilde{\sigma}_M$, for the model
-predictions of this particular quantity. For the sake of argument, assume a bias factor is 1.03; that is, on average, the model has been shown to over-predict
-surface temperatures by 3~\%. Also assume that the relative error has been calculated and it is 0.10~. These are the same values that were assumed in the second example
-of the previous section.
-Now, consider the graph shown in Fig.~\ref{bell_curve}.
-The vertical lines indicate the ``threshold'' temperature at which damage is assumed to occur (400~$^\circ$C), and the temperature predicted by the
-model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
-The bell curve is taken as a normal distribution whose mean and standard deviation are obtained from Eq.~(\ref{truth}) and calculated here:
-\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad
-   \sigma = \widetilde{\sigma}_M \, \frac{M}{\hat{\delta}} = 0.10 \times \frac{330}{1.03} = 32 \; ^\circ \hbox{C}  \ee
-respectively. The shaded area beneath the bell curve is the probability (0.03 in this case) that the ``true'' temperature can exceed 400~$^\circ$C.
-This means that there is a 3~\% chance that the cables could
-become damaged {\em based solely on the fact that the model is not a perfect representation of reality.}
-
 
 
 \section{Limitations}
@@ -547,7 +554,7 @@ to present the data as is shown in Figure~\ref{Normality} for Plume Temperature 
 The value of the validation process outlined above is that it is
 possible at any step to stop and accept the raw output of the study as the basis for making an assessment of the model.
 The uncertainty analysis is valid only to the extent that sufficient experimental data with quantified uncertainty estimates is available.
-It does more harm than good to attempt to quantify the model uncertainty with insufficient means to do so.
+
 
 \begin{figure}[t]
 \begin{tabular}{ll}
@@ -563,12 +570,18 @@ Wall Temperature indicate the $2 \widetilde{\sigma}$ bounds for the experiments 
 \end{figure}
 
 
-Another concern with the above procedure is that an over-estimate of the experimental uncertainty will result in an under-estimate of the model uncertainty. Keep
-in mind that the model can never be shown to be more accurate than the experimental measurements against which it is compared. The model may be, in fact, more
-accurate than a particular set of measurements, but these measurements cannot be used to prove it. This rule is demonstrated
+Another concern with the above procedure is that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, results in an under-estimate of the 
+model uncertainty, $\widetilde{\sigma}_M$. Note that $\widehat{\widetilde{\sigma}_M}$ cannot be less than
+$\widetilde{\sigma}_E$ because it is not possible to demonstrate that the model is more accurate than the measurements against which it is compared. This is not to say that the model
+cannot be more accurate than the measurements; rather, that the model cannot be shown to be more accurate than the measurements. This rule is demonstrated
 mathematically by Eq.~(\ref{stdev}) where it is observed that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, can result in
-the square root of a negative number, an imaginary number. In the case that the computed model uncertainty is less than the estimated experimental uncertainty, the
-latter must be re-evaluated, or the number of data points needs to be seriously questioned.
+the square root of a negative number, an imaginary number. In the case that the computed model uncertainty is less than the estimated experimental uncertainty, there are
+two courses of action. First, it may be that the number of data points in the validation study is too small. If only a few model predictions are compared to corresponding
+measurements, and the difference between the two is so small that the calculated model uncertainty is imaginary, then more data points should be collected
+to determine if this remains the case. If it does, then 
+the calculation of the experimental uncertainty, $\widetilde{\sigma}_E$, should be re-evaluated. The experimental uncertainties listed in
+Table~\ref{Uncertainty} are based on the analysis of 26 experiments that were used in a particular validation study. If other experiments are used to evaluate the
+model, these values need to be recalculated following the procedure presented by Hamins~\cite{NUREG_1824}.
 
 
 
