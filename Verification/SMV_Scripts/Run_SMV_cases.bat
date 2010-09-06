@@ -6,7 +6,7 @@ set BASEDIR=%CD%\..
 set SVNROOT=%BASEDIR%\..\
 
 Rem set FDS=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
-set FDS=background -d 1 -u 90 %SVNROOT%\FDS_Compilation\intel_win_64\fds5_win_64
+set FDS=background -d 1 -u 90 %SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 
@@ -30,7 +30,7 @@ call %SCRIPT_DIR%\SMV_Cases.bat
 
 erase %SCRIPT_DIR%\SMV_Cases.bat
 
-cd %BASEDIR%
+cd %BASEDIR%\SMV_scripts
 call run_wui_tree_test
 
 cd %BASEDIR%
