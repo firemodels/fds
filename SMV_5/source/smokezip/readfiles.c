@@ -1362,6 +1362,7 @@ void readini2(char *inifile){
       plot3d *plot3di;
       int i;
 
+      if(plot3dinfo==NULL)continue;
       plot3di = plot3dinfo;
 
       fgets(buffer,BUFFERSIZE,stream);
