@@ -52,35 +52,33 @@ ms_win_32 : CPP       = cl
 ms_win_32 : FC        = ifort
 ms_win_32 : exe       = smokezip.exe
 ms_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib
 
 # ------------- Win 32 ----------------
 #  32 bit windows
 
 intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
 intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
-intel_win_32 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
-intel_win_32 : exe       = smokezip.exe $(IMAGELIBDIR)/smokeview_fort.lib $(IMAGELIBDIR)/zlib.lib
+intel_win_32 : exe       = smokezip.exe
 
 intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib
 
 # ------------- Win 64 ----------------
 #  64 bit windows
 
 intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
 intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
-intel_win_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokezip64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(IMAGELIBDIR)/smokeview_fort_64.lib $(IMAGELIBDIR)/zlib.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/smokeview_fort_64.lib $(LIB_DIR)/lib_win_intel_64/zlib.lib
 
 # ------------- Linux 32 ----------------
 #  32 bit linux
