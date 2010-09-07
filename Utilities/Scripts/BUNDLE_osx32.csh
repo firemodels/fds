@@ -26,6 +26,8 @@ setenv fds5mpiout fds5_mpi_osx_32
 setenv fds2ascii fds2ascii_osx_32
 setenv fds2asciidir intel_osx_32
 
+setenv PLATFORM OSX32
+
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh
 
 
