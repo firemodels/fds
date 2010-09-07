@@ -17,6 +17,7 @@ set forbundle=$fds_smvroot/SMV_5/for_bundle
 set texturedir=$forbundle/textures
 set fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
 set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
+set manifest=$bundledir/bin/RELEASE_INFO.txt
 
 cd $googledir
 rm -rf $bundlebase
@@ -39,7 +40,7 @@ endif
 # smokeview
 
 echo copying $smokeview from $smvbindir on $smvhost
-scp $smvhost\:$smvbindir/$smokeview $bundledir/bin/.
+scp -q $smvhost\:$smvbindir/$smokeview $bundledir/bin/.
 
 echo copying textures
 cp $texturedir/*.png $bundledir/bin/textures/.
@@ -48,20 +49,47 @@ cp $texturedir/*.jpg $bundledir/bin/textures/.
 # smokediff
 
 echo copying $smokediff from $smokediffdir on $fdshost
-scp $fdshost\:$smokediffroot/$smokediffdir/$smokediff $bundledir/bin/.
+scp -q $fdshost\:$smokediffroot/$smokediffdir/$smokediff $bundledir/bin/.
 
 # smokezip
 
 echo copying $smokezip from $smokezipdir on $fdshost
-scp $fdshost\:$smokeziproot/$smokezipdir/$smokezip $bundledir/bin/.
+scp -q $fdshost\:$smokeziproot/$smokezipdir/$smokezip $bundledir/bin/.
 
 # FDS 
 
 echo copying $fds5 from $fds5dir on $fdshost
-scp $fdshost\:$fdsroot/$fds5dir/$fds5 $bundledir/bin/$fds5out
+scp -q $fdshost\:$fdsroot/$fds5dir/$fds5 $bundledir/bin/$fds5out
 
 echo copying $fds5mpi from $fds5dir on $fdshost
-scp $fdshost\:$fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/$fds5mpiout
+scp -q $fdshost\:$fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/$fds5mpiout
+
+echo
+echo Creating Manifiest
+echo $PLATFORM FDS-Smokeview bundle created > $manifest
+date >> $manifest
+echo  >> $manifest
+echo Versions:>> $manifest
+echo  >> $manifest
+
+echo -------------------------- >> $manifest
+ssh -q $fdshost " echo 0 | $fdsroot/$fds5dir/$fds5" >>& $manifest
+
+echo  >> $manifest
+echo -------------------------- >> $manifest
+ssh -q $fdshost $fds2asciiroot/$fds2asciidir/$fds2ascii -v >> $manifest
+
+echo  >> $manifest
+echo -------------------------- >> $manifest
+ssh -q $smvhost $smvbindir/$smokeview -v >> $manifest
+echo  >> $manifest
+echo -------------------------- >> $manifest
+ssh -q $fdshost $smokediffroot/$smokediffdir/$smokediff -v >> $manifest
+echo  >> $manifest
+echo -------------------------- >> $manifest
+ssh -q $fdshost  $smokeziproot/$smokezipdir/$smokezip -v >> $manifest
+
+cat $manifest | Mail -s " $PLATFORM" glenn.forney@nist.gov
 
 if ($?OSXBUNDLE) then
 echo copying OSX launcher script
@@ -73,7 +101,7 @@ echo copying smokeview.ini from $forbundle
 cp $forbundle/smokeview.ini $bundledir/bin/.
 
 echo copying $fds2ascii from $fds2asciiroot on $fdshost
-scp $fdshost\:$fds2asciiroot/$fds2asciidir/$fds2ascii $bundledir/bin/.
+scp -q $fdshost\:$fds2asciiroot/$fds2asciidir/$fds2ascii $bundledir/bin/.
 
 echo Copying documentation
 cp $bundle_setup/Overview.html $bundledir/Documentation/.
