@@ -1368,16 +1368,16 @@ at the $(n+1)$st time level, the density is corrected
      +\rho_{ijk}^{(n+1)_e}\right)} {\ha \dt}
     + (\bu \cdot \nabla \rho)_{ijk}^{(n+1)_e}
     = -\rho_{ijk}^{(n+1)_e} (\nabla \cdot \bu)^{(n+1)_e}_{ijk} \ee
-The species conservation equations are differenced the same way, with the addition of diffusion and source terms:
+The species conservation equations are differenced the same way, with the addition of the diffusion term (including turbulent diffusion):
 \be  \frac{(\rho Y_\alpha)_{ijk}^{(n+1)_e}-(\rho Y_\alpha)_{ijk}^n}{\dt}
     + \cdots  = \cdots +
-    (\nabla \cdot \rho D_\alpha \nabla Y_\alpha)_{ijk}^n  + \dm_{\alpha,ijk}''' \ee
+    (\nabla \cdot \rho D_\alpha \nabla Y_\alpha)_{ijk}^n \ee
 at the predictor step, and
 \be \frac{(\rho Y_\alpha)_{ijk}^{(n+1)}-\ha\left((\rho Y_\alpha)_{ijk}^n
      +(\rho Y_\alpha)_{ijk}^{(n+1)_e}\right)} {\ha \dt}
     + \cdots = \cdots
-    + (\nabla \cdot \rho D_\alpha \nabla Y_\alpha)_{ijk}^{(n+1)_e}  + \dm_{\alpha,ijk}''' \ee
-at the corrector step.
+    + (\nabla \cdot \rho D_\alpha \nabla Y_\alpha)_{ijk}^{(n+1)_e} \ee
+at the corrector step.  Mass source terms due to chemistry or evaporation, for example, are time split and applied after the corrector step (see Section \ref{sec_time_splitting}).
 
 The convective terms are written as upwind-biased differences in the
 predictor step and downwind-biased differences in the corrector step~\cite{Continillo:1}.
@@ -1421,7 +1421,7 @@ locating regions where a non-physical solution exists and then redistributing ma
 Typically this results in some increased numerical diffusion; however, this is partially mitigated
 since at any one time step, the correction is applied to a small number of cells.
 
-The flux correction scheme is performed in both the predictor and corrector steps after updating the species mass
+The flux correction scheme (see Appendix \ref{app_boundedness} for details) is performed in both the predictor and corrector steps after updating the species mass
 fractions, $Y_\alpha$.  For each species, two loops are performed over each computational mesh.  The first loop searches for
 and corrects under-shoots, and the second loop searches for and corrects over-shoots.  An under-shoot occurs if the
 mass fraction of a species is less than its permissible minimum, typically 0,  or if there was an outflux of that
@@ -1437,7 +1437,59 @@ with a value less than the absolute minimum for the species than it is for an ov
 for the species.
 
 
+\subsection{Flux Limiters}
+\label{sec_flux_limiters}
 
+When a \emph{flux limiter} is chosen for scalar transport (set {\ct FLUX\_LIMITER=1-4} on {\ct MISC}), FDS formulates the density and species advection terms in ``flux divergence'' form.  For example, the predictor step of the continuity equation is discretized as
+\be  \frac{\rho_{ijk}^{(n+1)_e}-\rho_{ijk}^n}{\dt}
+    + \nabla \cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^n = 0
+\ee
+In 1D, we would have
+\be  \frac{\rho_{i}^{(n+1)_e}-\rho_{i}^n}{\dt}
+    + \frac{\overline{\rho}^{FL}_{i+1/2} u_{i+1/2} - \overline{\rho}^{FL}_{i-1/2} u_{i-1/2}}{\dx} = 0
+\ee
+
+Note that the `1/2' indicates a face value for a particular cell ($i,j,k$). A flux-limited scalar value (density in this case) premultiplies the staggered, face-centered velocity to form the scalar advective flux.  Think of the flux limiter as a form of interpolation which depends on the local state of the flow field and scalar data. Consider face $i$ between cells $i$ and $i+1$ and let $\phi$ denote a general scalar variable.  The local ($loc$) and upstream ($up$) data variations are
+\begin{eqnarray}
+\delta \phi_{loc} &=& \phi_{i+1}-\phi_i \nonumber\\
+\delta \phi_{up}  &=& \left\{ \begin{array}{ll} \phi_i-\phi_{i-1} & \mbox{if} \quad u_i>0 \\ \phi_{i+2}-\phi_{i+1} & \mbox{if} \quad u_i<0 \end{array} \right. \nonumber
+\end{eqnarray}
+The limiter function $B(r)$ depends on the upstream-to-local data ratio, $r=\delta \phi_{up}/\delta \phi_{loc}$ \cite{Toro}.  In FDS, options for this function are:
+\begin{enumerate}
+\item[]{\tt FLUX\_LIMITER=0\,\,\,} Central Differencing  \begin{equation} B(r) = 1 \end{equation}
+\item[]{\tt FLUX\_LIMITER=1\,\,\,} First-order Upwinding (Godunov's Scheme) \begin{equation} B(r) = 0 \end{equation}
+\item[]{\tt FLUX\_LIMITER=2\,\,\,} Superbee (recommended for LES) \begin{equation} B(r) = \max(0,\min(2r,1),\min(r,2)) \end{equation}
+\item[]{\tt FLUX\_LIMITER=3\,\,\,} MINMOD \begin{equation} B(r) = \max(0,\min(1,r)) \end{equation}
+\end{enumerate}
+Once $B(r)$ has been determined, the scalar face value is found from
+\begin{equation}
+\label{eqn_flux_limiter}
+\overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2}(\phi_{i+1}-\phi_i) & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
+\phi_{i+1} &+& B(r) \,\frac{1}{2}(\phi_i-\phi_{i+1}) & \mbox{if} \quad u_i<0 \end{array} \right.
+\end{equation}
+
+\paragraph{Special Case} [{\tt FLUX\_LIMITER=4}] CHARM (recommended for DNS) For this limiter the FDS implementation uses the reciprocal definition of the data ratio, $r = \delta C_{loc}/\delta C_{up}$.  The limiter function is given by \cite{Zhou:1995,Kempf:2003}
+\begin{equation}
+B(r) = \frac{r(3r+1)}{(r+1)^2}
+\end{equation}
+and the scalar face value is then determined from
+\begin{equation}
+\label{eqn_charm_limiter}
+\overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2}(\phi_i-\phi_{i-1}) & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
+\phi_{i+1} &+& B(r) \,\frac{1}{2}(\phi_{i+1}-\phi_{i+2}) & \mbox{if} \quad u_i<0 \end{array} \right.
+\end{equation}
+
+\paragraph{Remark} In practice, we set $r=0$ initially and only compute $r$ if the denominator is not zero.  Note that for $\delta \phi_{loc}=0$ it does not matter which limiter (0-3) is used: all the limiters yield the same scalar face value.  For CHARM, we set both $r=0$ and $B=0$ initially and only compute $B$ if $r>0$ (this requires data variations to have the same sign), else CHARM reduces to Godunov's scheme.
+
+\paragraph{Remark} Central differencing ({\ct FLUX\_LIMITER=0}), Godunov's scheme ({\ct FLUX\_LIMITER=1}), and MINMOD ({\ct FLUX\_LIMITER=3}) are essentially included for completeness, debugging, and educational purposes.  These schemes have little utility in practice.
+
+
+\subsection{Time Splitting for Mass Source Terms}
+\label{sec_time_splitting}
+After the corrector step for the transport scheme, source terms are applied to the scalars.  The source terms are evaluated using the results from the corrected scalar transport scheme (denoted with an asterisk *):
+\be
+\frac{(\rho Y_\alpha)_{ijk}^{n+1}-(\rho Y_\alpha)_{ijk}^*}{\dt} =  \dm_{\alpha,ijk}'''(\mathbf{Y}^*,T^*)
+\ee
 
 
 \subsection{Discretizing the Divergence}
@@ -3126,14 +3178,14 @@ The boundary condition is discretized
 \be -k_{s,1} \frac{T_{s,1}^{n+1}-T_{s,0}^{n+1}}{\dx_{\ha}} = \dq''_c{}^{(n+1)} + \dq''_r{}^{(n+1)} \ee
 The convective flux at the next time step is computed as
 \be
-\dq''_c{}^{(n+1)} = h\left( T_{g} - 
- 	0.5 \left(T_{s,\ha}^n + T_{s,\ha}^{n+1}\right) \right) 
+\dq''_c{}^{(n+1)} = h\left( T_{g} -
+ 	0.5 \left(T_{s,\ha}^n + T_{s,\ha}^{n+1}\right) \right)
 \ee
 and the radiative flux at the next time step is approximated with a
 linearized form
 \be
 \dq''_r{}^{(n+1)} \approx \dq''_r{}^n - 4 \; \epsilon \; \sigma \; T_{s,\ha}^{n^3} \left(
-  T_{s,\ha}^{n+1} - T_{s,\ha}^n \right)  
+  T_{s,\ha}^{n+1} - T_{s,\ha}^n \right)
 \ee
 The wall temperature is defined $T_w \equiv T_{s,\ha}=(T_{s,0}+T_{s,1})/2$.
 
