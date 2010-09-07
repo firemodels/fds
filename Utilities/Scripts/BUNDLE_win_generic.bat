@@ -7,7 +7,8 @@ set basename=FDS_%fds_version%_SMV_%smv_version%_win%platform%
 set in_pdf=%svn_root%\Manuals\All_PDF_Files
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_smokediff=%svn_root%\Utilities\smokediff
-set in_smokezip=%svn_root%\Utilities\smokezip
+Rem set in_smokezip=%svn_root%\Utilities\smokezip
+set in_smokezip=%svn_root%\SMV_5\for_bundle
 set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV_5\for_bundle\
 
@@ -21,6 +22,7 @@ set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
 set out_examples=%out_bundle%\FDS5\Examples
 
+set manifest=%out_bin%\RELEASE_INFO.txt
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 set wikify=%svn_root%\Utilities\Scripts\wikify.py
 
@@ -54,7 +56,8 @@ if "%platform%"=="32" copy %in_smokediff%\intel_win_32\smokediff.exe     %out_bi
 if "%platform%"=="64" copy %in_smokediff%\intel_win_64\smokediff64.exe   %out_bin%\smokediff_win_64.exe
 
 echo Copying smokezip to the bin directory
-if "%platform%"=="32" copy %in_smokezip%\intel_win_32\smokezip.exe     %out_bin%\smokezip.exe
+Rem if "%platform%"=="32" copy %in_smokezip%\intel_win_32\smokezip.exe     %out_bin%\smokezip.exe
+if "%platform%"=="32" copy %in_smokezip%\smokezip32_release.exe     %out_bin%\smokezip.exe
 if "%platform%"=="64" copy %in_smokezip%\intel_win_64\smokezip64.exe   %out_bin%\smokezip_win_64.exe
 
 echo Copying fds2ascii to the bin directory
@@ -63,6 +66,68 @@ if "%platform%"=="64" copy %in_fds2ascii%\intel_win_64\fds2ascii_win_64.exe     
 
 echo Copying background to the bin directory
 copy %in_background%\intel_win_32\background.exe %out_bin%\background.exe
+
+echo.
+echo Creating Manifiest
+echo FDS-Smokeview bundle created > %manifest%
+date /t >> %manifest%
+time /t >> %manifest%
+echo. >> %manifest%
+echo Versions:>> %manifest%
+echo. >> %manifest%
+
+if "%platform%"=="64" GOTO endif_32
+echo -------------------------- >> %manifest%
+echo | %out_bin%\fds5.exe 2>> %manifest%
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+echo | %out_bin%\fds5_mpi.exe 2>> %manifest%
+
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+%out_bin%\fds2ascii.exe -v >>%manifest%
+
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+%out_bin%\smokeview.exe -v >> %manifest%
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+%out_bin%\smokediff.exe -v >> %manifest%
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+%out_bin%\smokezip.exe -v >> %manifest%
+
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+%out_bin%\background.exe -v >> %manifest%
+:endif_32
+
+if "%platform%"=="32" GOTO endif_64 
+echo -------------------------- >> %manifest%
+echo | %out_bin%\fds5_win_%platform%.exe 2>> %manifest%
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+echo | %out_bin%\fds5_mpi_win_%platform%.exe 2>> %manifest%
+
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+%out_bin%\fds2ascii_win_64.exe -v >> %manifest%
+
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+%out_bin%\smokeview.exe -v >> %manifest%
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+%out_bin%\smokediff_win_64.exe >> %manifest%
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+%out_bin%\smokezip_win_64.exe >> %manifest%
+
+echo. >> %manifest%
+echo -------------------------- >> %manifest%
+%out_bin%\background.exe -v >> %manifest%
+:endif_64
+
 
 echo.
 echo Copying auxillary files to the bin directory
