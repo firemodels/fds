@@ -308,16 +308,16 @@ DO NM=1,NMESHES
 ENDDO
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
  
-! Initialize ScaRC solver
-
-IF (PRES_METHOD == 'SCARC') CALL SCARC_INITIALIZE(MYID+1)
-
 ! Initialize Mesh Exchange Arrays (All Nodes)
 
 N_REQ=0  ! Counter for MPI requests
 CALL POST_RECEIVES(0)
 CALL MESH_EXCHANGE(0)
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+
+! Initialize ScaRC solver
+
+IF (PRES_METHOD == 'SCARC') CALL SCARC_INITIALIZE(MYID+1)
 
 ! Initialize turb arrays
 
