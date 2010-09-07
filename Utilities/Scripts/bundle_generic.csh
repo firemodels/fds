@@ -73,21 +73,21 @@ echo Versions:>> $manifest
 echo  >> $manifest
 
 echo -------------------------- >> $manifest
-ssh -q $fdshost " echo 0 | $fdsroot/$fds5dir/$fds5" >>& $manifest
+ssh -q $runhost " echo 0 | $fdsroot/$fds5dir/$fds5" >>& $manifest
 
 echo  >> $manifest
 echo -------------------------- >> $manifest
-ssh -q $fdshost $fds2asciiroot/$fds2asciidir/$fds2ascii -v >> $manifest
+ssh -q $runhost $fds2asciiroot/$fds2asciidir/$fds2ascii -v >> $manifest
 
 echo  >> $manifest
 echo -------------------------- >> $manifest
-ssh -q $smvhost $smvbindir/$smokeview -v >> $manifest
+ssh -q $runhost $smvbindir/$smokeview -v >> $manifest
 echo  >> $manifest
 echo -------------------------- >> $manifest
-ssh -q $fdshost $smokediffroot/$smokediffdir/$smokediff -v >> $manifest
+ssh -q $runhost $smokediffroot/$smokediffdir/$smokediff -v >> $manifest
 echo  >> $manifest
 echo -------------------------- >> $manifest
-ssh -q $fdshost  $smokeziproot/$smokezipdir/$smokezip -v >> $manifest
+ssh -q $runhost  $smokeziproot/$smokezipdir/$smokezip -v >> $manifest
 
 cat $manifest | Mail -s " $PLATFORM" glenn.forney@nist.gov
 

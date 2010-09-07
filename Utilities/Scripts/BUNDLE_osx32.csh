@@ -7,6 +7,7 @@ setenv bundlebase $2
 setenv fdshost $3
 setenv smvhost $3
 setenv OSXBUNDLE
+setenv runhost bluesky.cfr.nist.gov
 
 setenv smokezipdir INTEL_OSX_32
 setenv smokediffdir INTEL_OSX_32
