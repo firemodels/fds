@@ -596,7 +596,7 @@ void part2iso(part *parti){
   char isolonglabel[32], isoshortlabel[32], isounits[32];
   int nlevels;
   float levels[1];
-  int isooffset=1, reduce_triangles=1;
+  int reduce_triangles=1;
   float *xpltcell, *ypltcell, *zpltcell;
   int data2flag=1;
   float *partcount;
@@ -780,7 +780,7 @@ void part2iso(part *parti){
     }
     CCisosurface2file(isofile, &time, partcount, NULL, levels, &nlevels,
         xpltcell, &nx, ypltcell, &ny, zpltcell, &nz,
-        &isooffset, &reduce_triangles, &error);
+        &reduce_triangles, &error);
 
     for(i=0;i<npart5propinfo;i++){
       part5prop *propi;
@@ -790,7 +790,7 @@ void part2iso(part *parti){
 
       CCisosurfacet2file(propi->isofilename, &time, partcount, &data2flag, propi->partvals, NULL, levels, &nlevels,
             xpltcell, &nx, ypltcell, &ny, zpltcell, &nz,
-            &isooffset, &reduce_triangles, &error);
+            &reduce_triangles, &error);
     }
   }
 
