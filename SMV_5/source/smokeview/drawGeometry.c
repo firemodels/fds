@@ -3307,8 +3307,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
     }
     if(read_smoothobst==0){
       GetIsosurface(asurface, node, NULL, NULL, level,
-                     xplt2, ibar+3, yplt2, jbar+3, zplt2, kbar+3,
-                     1);
+                     xplt2, ibar+3, yplt2, jbar+3, zplt2, kbar+3);
       GetNormalSurface(asurface);
       CompressIsosurface(asurface,1,
           xplt2[0],xplt2[ibar+2],
@@ -3504,8 +3503,7 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
     }
     if(read_smoothobst==0){
       GetIsosurface(asurface, cell, NULL, NULL, level,
-                     xplt2, ibar, yplt2, jbar, zplt2, kbar,
-                     1);
+                     xplt2, ibar, yplt2, jbar, zplt2, kbar);
       GetNormalSurface(asurface);
       CompressIsosurface(asurface,1,
           xplt2[0],xplt2[ibar-1],

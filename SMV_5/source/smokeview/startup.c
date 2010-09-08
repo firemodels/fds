@@ -1277,7 +1277,6 @@ void initvars1(void){
   visAIso=1;
   surfincrement=0,visiso=0;
   isotest=0;
-  isooffset=1,offsetmax=5;
   isolevelindex=0, isolevelindex2=0;
   pref=101325.,pamb=0.,tamb=288.;
   ntc_total=0, nspr_total=0, nheat_total=0;
