@@ -53,12 +53,12 @@ copy %in_smv%\smokeview%platform%_release.exe   %out_bin%\smokeview.exe
 
 echo Copying smokediff to the bin directory
 if "%platform%"=="32" copy %in_smokediff%\intel_win_32\smokediff.exe     %out_bin%\smokediff.exe
-if "%platform%"=="64" copy %in_smokediff%\intel_win_64\smokediff64.exe   %out_bin%\smokediff_win_64.exe
+if "%platform%"=="64" copy %in_smokediff%\intel_win_64\smokediff_64.exe   %out_bin%\smokediff_win_64.exe
 
 echo Copying smokezip to the bin directory
 Rem if "%platform%"=="32" copy %in_smokezip%\intel_win_32\smokezip.exe     %out_bin%\smokezip.exe
 if "%platform%"=="32" copy %in_smokezip%\smokezip32_release.exe     %out_bin%\smokezip.exe
-if "%platform%"=="64" copy %in_smokezip%\intel_win_64\smokezip64.exe   %out_bin%\smokezip_win_64.exe
+if "%platform%"=="64" copy %in_smokezip%\smokezip64_release.exe   %out_bin%\smokezip_win_64.exe
 
 echo Copying fds2ascii to the bin directory
 if "%platform%"=="32" copy %in_fds2ascii%\intel_win_32\fds2ascii_win_32.exe     %out_bin%\fds2ascii.exe
@@ -204,7 +204,7 @@ echo Compressing FDS/Smokeview distribution
 cd %to_google%
 if exist %basename%.zip erase %basename%.zip
 cd %basename%\fds\fds5\
-wzzip -a -r -el -xExamples\*.csv -P ..\..\..\%basename%.zip *
+wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip *
 
 Rem create an installation file from the zipped bundle directory
 
@@ -216,3 +216,6 @@ echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\Program Files\FDS\FDS5" -c wrapup_fds_install.bat
 Rem wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -mokcancel %bundleinfo%\message.txt %basename%.zip -c wrapup_fds_install.bat
+
+type %manifest%
+pause
