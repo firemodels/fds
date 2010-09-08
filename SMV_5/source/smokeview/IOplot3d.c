@@ -1316,7 +1316,7 @@ void updatesurface(void){
     freesurface(currentsurfptr);
     InitIsosurface(currentsurfptr, level, rgb_plot3d_contour[colorindex],-999);
     GetIsosurface(currentsurfptr,qdata+(plotn-1)*plot3dsize,NULL,iblank_cell,level,
-      xplt,ibar+1,yplt,jbar+1,zplt,kbar+1,isooffset);
+      xplt,ibar+1,yplt,jbar+1,zplt,kbar+1);
     GetNormalSurface(currentsurfptr);
     CompressIsosurface(currentsurfptr,1,
         xplt[0],xplt[ibar],
@@ -1332,7 +1332,7 @@ void updatesurface(void){
       freesurface(currentsurf2ptr);
       InitIsosurface(currentsurf2ptr, level2, rgb_plot3d_contour[colorindex2],-999);
       GetIsosurface(currentsurf2ptr,qdata+(plotn-1)*plot3dsize,NULL,iblank_cell,level2,
-        xplt,ibar+1,yplt,jbar+1,zplt,kbar+1,isooffset);
+        xplt,ibar+1,yplt,jbar+1,zplt,kbar+1);
       GetNormalSurface(currentsurf2ptr);
       CompressIsosurface(currentsurf2ptr,1,
         xplt[0],xplt[ibar],

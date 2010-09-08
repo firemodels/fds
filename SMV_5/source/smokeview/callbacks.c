@@ -1129,13 +1129,6 @@ void keyboard(unsigned char key, int x, int y){
     handleiso();
     return;
   }
-  if(strncmp((const char *)&key2,"b",1)==0&&visiso==1&&unload_qdata==0){
-    isooffset+=FlowDir;
-    if(isooffset<1)isooffset=offsetmax;
-    if(isooffset>offsetmax)isooffset=1;
-    updatesurface();
-    return;
-  }
   if(strncmp((const char *)&key2,"v",1)==0){
     int state;
     
