@@ -35,6 +35,9 @@ echo Copying program files
 if $?INTELLIB then
 cp $bundle_setup/README_LINUX.html $bundledir/bin/.
 cp -r $bundle_setup/$INTELLIB $bundledir/bin/.
+set SETLDPATH="setenv LD_LIBRARY_PATH $bundle_setup/$INTELLIB;" 
+else
+set SETLDPATH=
 endif
 
 # smokeview
@@ -81,13 +84,13 @@ ssh -q $runhost $fds2asciiroot/$fds2asciidir/$fds2ascii -v >> $manifest
 
 echo  >> $manifest
 echo -------------------------- >> $manifest
-ssh -q $runhost $smvbindir/$smokeview -v >> $manifest
+ssh -q $runhost \( $SETLDPATH  $smvbindir/$smokeview -v \) >> $manifest
 echo  >> $manifest
 echo -------------------------- >> $manifest
-ssh -q $runhost $smokediffroot/$smokediffdir/$smokediff -v >> $manifest
+ssh -q $runhost \( $SETLDPATH  $smokediffroot/$smokediffdir/$smokediff -v \) >> $manifest
 echo  >> $manifest
 echo -------------------------- >> $manifest
-ssh -q $runhost  $smokeziproot/$smokezipdir/$smokezip -v >> $manifest
+ssh -q $runhost \( $SETLDPATH  $smokeziproot/$smokezipdir/$smokezip -v \) >> $manifest
 
 cat $manifest | Mail -s " $PLATFORM" glenn.forney@nist.gov
 
