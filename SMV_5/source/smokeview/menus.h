@@ -1612,20 +1612,6 @@ void IsoSurfaceTypeMenu(int value){
   }
 }
 
-/* ------------------ IsoBlockMenu ------------------------ */
-
-void IsoBlockMenu(int value){
-  if(ReadPlot3dFile==1){
-    isooffset=value;
-    if(isooffset<1)isooffset=offsetmax;
-    if(isooffset>offsetmax)isooffset=1;
-    updatesurface();
-    updateshowstep(1,ISO);
-    updatemenu=1;  
-    GLUTPOSTREDISPLAY
-  }
-}
-
 /* ------------------ IsoSurfaceMenu ------------------------ */
 
 void IsoSurfaceMenu(int value){
@@ -4456,21 +4442,6 @@ static int in_menu=0;
     }
   }
 
-/* --------------------------------iso block menu -------------------------- */
-
-  if(nplot3d_files>0){
-    CREATEMENU(isoblockmenu,IsoBlockMenu);
-    for(i=1;i<=offsetmax;i++){
-      if(isooffset==i){
-        sprintf(chari,"*%i",i);
-      }
-      else{
-        sprintf(chari,"%i",i);
-      }
-      glutAddMenuEntry(chari,i);
-    }
-  }
-
 /* --------------------------------iso variable menu -------------------------- */
 
   if(nplot3d_files>0){
@@ -4510,7 +4481,6 @@ static int in_menu=0;
     CREATEMENU(isosurfacemenu,IsoSurfaceMenu);
     glutAddSubMenu("Solution Variable",isovariablemenu);
     glutAddSubMenu("Solution Value",levelmenu);
-    glutAddSubMenu("Block Size",isoblockmenu);
     glutAddSubMenu("Surface Type",isosurfacetypemenu);
     glutAddMenuEntry("Hide",1);
   }

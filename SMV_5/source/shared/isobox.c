@@ -504,8 +504,7 @@ int GetIsosurface(isosurface *surface,
                   float level,
                   const float *xplt, int nx, 
                   const float *yplt, int ny, 
-                  const float *zplt, int nz,
-                   int isooffset
+                  const float *zplt, int nz
                    ){
 #define ijkcell(i,j,k) ((i)+(j)*ibar+(k)*ijbar)
 #define ij(i,j) ((i)+(j)*nx)
@@ -533,26 +532,26 @@ int GetIsosurface(isosurface *surface,
     tvalsptr=tvals;
     tvertptr=tvert;
   }
-  for(i=0;i<nx-isooffset;){
+  for(i=0;i<nx-1;){
     xx[0]=xplt[i];
-    xx[1]=xplt[i+isooffset];
-    for(j=0;j<ny-isooffset;){
+    xx[1]=xplt[i+1];
+    for(j=0;j<ny-1;){
       yy[0]=yplt[j];
-      yy[1]=yplt[j+isooffset];
+      yy[1]=yplt[j+1];
       ijbase = ij(i,j);
-      for(k=0;k<nz-isooffset;){
+      for(k=0;k<nz-1;){
         ijkbase = ijbase + k*nxy;
-        ip1jk = ijkbase + isooffset;
-        ijkp1 = ijkbase + isooffset*nxy;
-        ip1jkp1 = ijkbase + isooffset*(1+nxy);
-        ijp1k = ijkbase + isooffset*nx;
-        ip1jp1k = ijkbase + isooffset*(1+nx);
-        ijp1kp1 = ijkbase + isooffset*(nx+nxy);
-        ip1jp1kp1 = ijkbase + isooffset*(1+nx+nxy);
+        ip1jk = ijkbase + 1;
+        ijkp1 = ijkbase + nxy;
+        ip1jkp1 = ijkbase + 1+nxy;
+        ijp1k = ijkbase + nx;
+        ip1jp1k = ijkbase + 1+nx;
+        ijp1kp1 = ijkbase + nx+nxy;
+        ip1jp1kp1 = ijkbase + 1+nx+nxy;
 
-        if(isooffset!=1||iblank_cell==NULL||iblank_cell[ijkcell(i,j,k)]!=0){
+        if(iblank_cell==NULL||iblank_cell[ijkcell(i,j,k)]!=0){
           zz[0]=zplt[k];
-          zz[1]=zplt[k+isooffset];
+          zz[1]=zplt[k+1];
 
           nodeindexes[0]=ijkbase;
           nodeindexes[1]=ijp1k;
@@ -590,11 +589,11 @@ int GetIsosurface(isosurface *surface,
                               closestnodes, nvert, triangles, ntriangles)!=0)return 1;
 
         }
-        k+=isooffset;
+        k++;
       }
-      j+=isooffset;
+      j++;
     }
-    i+=isooffset;
+    i++;
   }
   surface->defined=1;
   return 0;
@@ -1496,7 +1495,7 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
                    float *xplt, int *nx, 
                    float *yplt, int *ny, 
                    float *zplt, int *nz,
-                   int *isooffset, int *reduce_triangles, int *error
+                   int *reduce_triangles, int *error
                    ){
   isosurface surface;
   int i;
@@ -1511,7 +1510,7 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
   for(i=0;i<*nlevels;i++){
     InitIsosurface(&surface,level[i],NULL,i);
     surface.dataflag=0;
-    if(GetIsosurface(&surface,data,NULL,(const char *)iblank,level[i],xplt,*nx,yplt,*ny,zplt,*nz,*isooffset)!=0){
+    if(GetIsosurface(&surface,data,NULL,(const char *)iblank,level[i],xplt,*nx,yplt,*ny,zplt,*nz)!=0){
       *error=1;
       return;
     }
@@ -1546,7 +1545,7 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
                    float *xplt, int *nx, 
                    float *yplt, int *ny, 
                    float *zplt, int *nz,
-                   int *isooffset, int *reduce_triangles, int *error
+                   int *reduce_triangles, int *error
                    ){
   isosurface surface;
   int i;
@@ -1569,7 +1568,7 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
   for(i=0;i<*nlevels;i++){
     InitIsosurface(&surface,level[i],NULL,i);
     surface.dataflag=dataflag;
-    if(GetIsosurface(&surface,data,tdata,(const char *)iblank,level[i],xplt,*nx,yplt,*ny,zplt,*nz,*isooffset)!=0){
+    if(GetIsosurface(&surface,data,tdata,(const char *)iblank,level[i],xplt,*nx,yplt,*ny,zplt,*nz)!=0){
       *error=1;
       return;
     }

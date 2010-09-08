@@ -832,10 +832,7 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
 void readpart5(char *file, int ifile, int flag, int *errorcode){
   size_t lenfile;
   int error=0;
-  int ibar,jbar,kbar;
   particle *parti;
-  int blocknumber;
-  mesh *meshi;
   int nf_all;
   int local_starttime0, local_stoptime0;
   float delta_time0, delta_time;
@@ -847,15 +844,8 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   freeallpart5data(parti);
 
-  blocknumber=parti->blocknumber;
-  meshi=meshinfo+blocknumber;
-  
   if(parti->loaded==0&&flag==UNLOAD)return;
 
-
-  ibar=meshi->ibar;
-  jbar=meshi->jbar;
-  kbar=meshi->kbar;
 
   *errorcode=0;
   partfilenum=ifile;
@@ -902,11 +892,6 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   printf("Sizing particle data: %s\n",file);
   getpart5header(parti, partframestep, &nf_all);
 
-  offsetmax=5;
-  if(offsetmax>ibar/4)offsetmax=ibar/4;
-  if(offsetmax>jbar/4)offsetmax=jbar/4;
-  if(offsetmax>kbar/4)offsetmax=kbar/4;
-  
   printf("Loading particle data: %s\n",file);
   getpart5data(parti,partframestep,partpointstep, nf_all, &delta_time, &file_size);
   updateglui();
@@ -1134,10 +1119,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     printf("*** warning: the particle file:%s is empty\n",file);
     return;
   }
-  offsetmax=5;
-  if(offsetmax>ibar/4)offsetmax=ibar/4;
-  if(offsetmax>jbar/4)offsetmax=jbar/4;
-  if(offsetmax>kbar/4)offsetmax=kbar/4;
   if(nspr>0){
     if(tspr==NULL){
       return_code=NewMemory((void **)&tspr,sizeof(float)*nspr);

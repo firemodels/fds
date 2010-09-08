@@ -418,7 +418,6 @@ SVEXTERN int showtarget;
 SVEXTERN int visAIso;
 SVEXTERN int surfincrement,visiso;
 SVEXTERN int  isotest;
-SVEXTERN int isooffset,offsetmax;
 SVEXTERN int isolevelindex, isolevelindex2;
 SVEXTERN float pref,pamb,tamb;
 SVEXTERN int ntc_total, nspr_total, nheat_total;
