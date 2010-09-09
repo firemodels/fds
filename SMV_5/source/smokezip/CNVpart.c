@@ -802,7 +802,7 @@ void part2iso(part *parti){
       if(propi->used==0)continue;
 
       CCisosurfacet2file(propi->isofilename, &time, partcount, &data2flag, propi->partvals, NULL, levels, &nlevels,
-            xpltcell, &nx2, ypltcell, &ny2, zpltcell2, &nz2,
+            xpltcell, &nx2, ypltcell, &ny2, zpltcell, &nz2,
             &reduce_triangles, &error);
     }
   }

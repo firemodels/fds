@@ -1082,7 +1082,7 @@ int readsmv(char *smvfile){
       CheckMemory;
 
       meshi->zplt=NULL;
-      NewMemory((void **)&meshi->zplt,(meshi->kbar+1)*sizeof(float));
+      NewMemory((void **)&meshi->zplt,(meshi->kbar+2)*sizeof(float));
       zplt = meshi->zplt+1;
       for(kk=-1;kk<meshi->kbar+1;kk++){
         zplt[kk] = meshi->zbar0 + kk*meshi->dz;
@@ -1123,7 +1123,8 @@ int readsmv(char *smvfile){
 
 void readini(char *casenameini){
   char *smoketemp;
-  char globalini[256];
+  char globalini[256],smokeviewini[256];
+  char *globaliniptr, *smokeviewiniptr;
 #ifdef pp_cvf
 char dirseparator[]="\\";
 #else
@@ -1139,9 +1140,11 @@ char dirseparator[]="/";
     strcat(globalini,dirseparator);
     strcat(globalini,"smokeview.ini");
   }
-  
-  if(globalini!=NULL)readini2(globalini);
-  readini2("smokeview.ini");
+  globaliniptr=globalini;
+  smokeviewiniptr=smokeviewini;
+  strcpy(smokeviewini,"smokeview.ini");
+  if(smoketemp!=NULL)readini2(globaliniptr);
+  readini2(smokeviewiniptr);
   readini2(casenameini);
 #ifdef pp_LIGHT
   {
