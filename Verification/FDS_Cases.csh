@@ -25,6 +25,7 @@ $RUNFDS Flowfields helium_2d                      fire56
 $RUNFDS Flowfields jet_fan                        fire57
 $RUNFDS Flowfields sawtooth                       fire58
 $RUNFDS Flowfields tangential_velocity            fire59
+$RUNFDS Flowfields symmetry_test                  fire59
 $RUNFDS Heat_Transfer adiabatic_net_flux          fire51
 $RUNFDS Heat_Transfer heat_conduction_a           fire52
 $RUNFDS Heat_Transfer heat_conduction_b           fire53
