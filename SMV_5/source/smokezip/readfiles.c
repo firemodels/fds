@@ -1082,9 +1082,9 @@ int readsmv(char *smvfile){
       CheckMemory;
 
       meshi->zplt=NULL;
-      NewMemory((void **)&meshi->zplt,(meshi->kbar+2)*sizeof(float));
-      zplt = meshi->zplt+1;
-      for(kk=-1;kk<meshi->kbar+1;kk++){
+      NewMemory((void **)&meshi->zplt,(meshi->kbar+1)*sizeof(float));
+      zplt = meshi->zplt;
+      for(kk=0;kk<meshi->kbar;kk++){
         zplt[kk] = meshi->zbar0 + kk*meshi->dz;
       }
       zplt[meshi->kbar]=meshi->zbar;
@@ -1092,8 +1092,8 @@ int readsmv(char *smvfile){
 
       meshi->zpltcell=NULL;
       NewMemory((void **)&meshi->zpltcell,(meshi->kbar+2)*sizeof(float));
-      zpltcell = meshi->zpltcell;
-      for(ii=0;ii<meshi->kbar;ii++){
+      zpltcell = meshi->zpltcell+1;
+      for(ii=-1;ii<meshi->kbar+1;ii++){
         zpltcell[ii] = meshi->zbar0 + (ii+0.5)*meshi->dz;
       }
       CheckMemory;
