@@ -569,7 +569,7 @@ void Get_Part_Bounds(void){
           if(ival<0)ival=0;\
           if(ival>(nx)-1)ival=(nx)-1;
 
-#define IJKVAL(ix,iy,iz) (ix) + (iy)*nx + (iz)*nx*ny
+#define IJKVAL(ix,iy,iz) (ix) + (iy)*nx2 + (iz)*nx2*ny2
 
   /* ------------------ part2iso ------------------------ */
 
@@ -602,6 +602,8 @@ void part2iso(part *parti){
   float *partcount;
   char smvappen[1024];
   FILE *SMVAPPEN=NULL;
+  int nx2, ny2, nz2;
+  float xmin, ymin, zmin;
 
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
@@ -620,10 +622,21 @@ void part2iso(part *parti){
   FORTgetpartheader2(&unit,&nclasses,nquantities,&size);
 
   partmesh = parti->partmesh;
-  npartcount = partmesh->ibar*partmesh->jbar*partmesh->kbar;
+
   nx = partmesh->ibar;
   ny = partmesh->jbar;
   nz = partmesh->kbar;
+
+  nx2 = nx+2;
+  ny2 = ny+2;
+  nz2 = nz+2;
+
+  npartcount = nx2*ny2*nz2;
+
+  xmin = partmesh->xbar0-partmesh->dx;
+  ymin = partmesh->ybar0-partmesh->dy;
+  zmin = partmesh->zbar0-partmesh->dz;
+  
   xpltcell = partmesh->xpltcell;
   ypltcell = partmesh->ypltcell;
   zpltcell = partmesh->zpltcell;
@@ -749,9 +762,9 @@ void part2iso(part *parti){
         int ix, iy, iz;
         int ijkval;
 
-        GETINDEX(ix,x[i],partmesh->xbar0,partmesh->dx,partmesh->ibar);
-        GETINDEX(iy,y[i],partmesh->ybar0,partmesh->dy,partmesh->jbar);
-        GETINDEX(iz,z[i],partmesh->zbar0,partmesh->dz,partmesh->kbar);
+        GETINDEX(ix,x[i],xmin,partmesh->dx,nx2);
+        GETINDEX(iy,y[i],ymin,partmesh->dy,ny2);
+        GETINDEX(iz,z[i],zmin,partmesh->dz,nz2);
         ijkval = IJKVAL(ix,iy,iz);
         partindex[i]=ijkval;
         partcount[ijkval]++;
@@ -779,7 +792,7 @@ void part2iso(part *parti){
       }
     }
     CCisosurface2file(isofile, &time, partcount, NULL, levels, &nlevels,
-        xpltcell, &nx, ypltcell, &ny, zpltcell, &nz,
+        xpltcell, &nx2, ypltcell, &ny2, zpltcell, &nz2,
         &reduce_triangles, &error);
 
     for(i=0;i<npart5propinfo;i++){
@@ -789,7 +802,7 @@ void part2iso(part *parti){
       if(propi->used==0)continue;
 
       CCisosurfacet2file(propi->isofilename, &time, partcount, &data2flag, propi->partvals, NULL, levels, &nlevels,
-            xpltcell, &nx, ypltcell, &ny, zpltcell, &nz,
+            xpltcell, &nx2, ypltcell, &ny2, zpltcell2, &nz2,
             &reduce_triangles, &error);
     }
   }
