@@ -20,6 +20,7 @@ smokeview -runscript room_fire
 cd ..\Flowfields
 smokeview -runscript helium_2d
 smokeview -runscript sawtooth
+smokeview -runscript symmetry_test
 
 cd ..\Miscellaneous
 smokeview -runscript pyramid
