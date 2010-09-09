@@ -530,10 +530,10 @@ viscosity, the model uses a viscosity of the form
 \be
   \mu_{\hbox{\tiny LES}} =  \rho \,  (C_s\, \Delta)^2  \, |S|
 \ee
-where $C_s$  is an empirical constant, $\Delta$ is a length on the order of the size of a grid  cell,  and  the  deformation   term  $|S|$  is  
+where $C_s$  is an empirical constant, $\Delta$ is a length on the order of the size of a grid  cell,  and  the  deformation   term  $|S|$  is
 related  to  the Dissipation Function (see FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for details). Related to the ``turbulent  viscosity'' are  comparable
 expressions  for  the thermal conductivity  and  material diffusivity:  \be  k_{\hbox{\tiny LES}}  = \frac{\mu_{\hbox{\tiny  LES}}   \;  c_p}{\PR_t}
-\quad   ;  \quad  (\rho D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC_t}  \ee  where $\PR_t$ and $\SC_t$ are the turbulent Prandtl and Schmidt numbers, respectively.  
+\quad   ;  \quad  (\rho D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC_t}  \ee  where $\PR_t$ and $\SC_t$ are the turbulent Prandtl and Schmidt numbers, respectively.
 Thus, $C_s$, $\PR_t$  and $\SC_t$ are  a set  of  empirical constants.  Most  FDS users
 simply use  the default values  of (0.2,0.5,0.5), but some have  explored their effect on the solution of the equations.
 
@@ -888,11 +888,11 @@ For rough walls the momentum flux normal to the wall is balanced by inviscid dra
 \subsubsection{Laminar}
 \label{laminar}
 
-As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2D laminar (Poiseuille) flow calculation of 
-flow through a straight channel.  
-The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.  
-The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.  
-The fluid density is $\rho = 1.2$ kg m$^{-3}$ and the viscosity is $0.025$ kg m$^{-1}$ s$^{-1}$.  
+As verification of the no-slip boundary condition and further verification of the momentum solver in FDS, we perform a simple 2D laminar (Poiseuille) flow calculation of
+flow through a straight channel.
+The height of the channel is $H=1$ m and the length of the channel is $L=8$ m.
+The number of grid cells in the streamwise direction $x$ is $N_x = 8$.  The number of cells in the wall-normal direction $z$ is varied $N_z = \{8,16,32,64\}$.
+The fluid density is $\rho = 1.2$ kg m$^{-3}$ and the viscosity is $0.025$ kg m$^{-1}$ s$^{-1}$.
 The mean pressure drop is prescribed to be $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H \approx 160$.  The (Moody) friction factor $f$, which satisfies
 \begin{equation}
 \label{eqn_moodyf}
@@ -917,13 +917,13 @@ To verify the WW wall model for turbulent flow we perform 3D LES of a square cha
 \label{eqn_colebrook}
 \frac{1}{\sqrt{f}} = -2.0 \log_{\scriptsize 10} \left( \frac{z_0/H}{3.7} + \frac{2.51}{\mbox{Re}_H\sqrt{f}} \right) \,\mbox{,}
 \end{equation}
-which is a fit to the turbulent range of the Moody chart (for example, see Ref.~\cite{MYO}).  The parameter $z_0/H$ is the relative 
-roughness where $H$ is the hydraulic diameter of the pipe or channel and Re$_H$ is the Reynolds number based on $H$.  
-To provide a qualitative picture of the flow field, Figure~\ref{fig_channel_flow_setup} shows contours of streamwise velocity 
+which is a fit to the turbulent range of the Moody chart (for example, see Ref.~\cite{MYO}).  The parameter $z_0/H$ is the relative
+roughness where $H$ is the hydraulic diameter of the pipe or channel and Re$_H$ is the Reynolds number based on $H$.
+To provide a qualitative picture of the flow field, Figure~\ref{fig_channel_flow_setup} shows contours of streamwise velocity
 for the case $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ and $N_z=32$.
 \begin{table}
 \begin{center}
-\caption{\label{tab_zplus} \small Case matrix and friction factor results for turbulent channel flow with smooth walls.  
+\caption{\label{tab_zplus} \small Case matrix and friction factor results for turbulent channel flow with smooth walls.
 The height of the first grid cell $\delta z$ is given in viscous units $z^+$ for each case.  Additionally, the table gives the nominal Reynolds number Re$_H$ and the FDS friction factor results compared to the Colebrook equation (\ref{eqn_colebrook}).}
 \vspace{0.5cm}
 \begin{tabular}{|*{9}{l|}}
@@ -1236,6 +1236,28 @@ Adding in the work due to the pressure yields the change in total enthalpy:
 \end{tabular*}
 \caption[The isentropic2 case.]{Density, pressure, temperature, and enthalpy rise due to the injection of nitrogen into a sealed compartment.}
 \label{isentropic2}
+\end{figure}
+
+
+
+\clearpage
+
+\subsection{Checking for Coding Errors (\texorpdfstring{{\bf symmetry\_test}}{symmetry\_test})}
+
+This example is a very simple test to determine if there are coding errors in the basic flow solver. A closed box, 1~m on a side, has 6 injection vents, one centered on each face.
+Air is pumped into the box at a rate of 0.5~m/s. Anything that might lead to an asymmetry in the flow field is turned off, for example, gravity, atmospheric stratification,
+natural convection, and random noise. The resulting flow field is shown at the left in Fig.~\ref{symmetry_test}. On the right are plots of the three components of velocity
+at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw
+this off almost immediately.
+
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test.png} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test.pdf} 
+\end{tabular*}
+\caption[The symmetry\_test case.]{Flow field (left) and velocity component plot (right) for the symmetry\_test case.}
+\label{symmetry_test}
 \end{figure}
 
 
