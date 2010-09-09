@@ -17,6 +17,9 @@
 #define IN_ISOBOX
 #include "isodefs.h"
 
+#define ijkcell(i,j,k) ((i)+(j)*ibar+(k)*ijbar)
+#define ij(i,j) ((i)+(j)*nx)
+
 // svn revision character string
 char isobox_revision[]="$Revision$";
 
@@ -506,9 +509,6 @@ int GetIsosurface(isosurface *surface,
                   const float *yplt, int ny, 
                   const float *zplt, int nz
                    ){
-#define ijkcell(i,j,k) ((i)+(j)*ibar+(k)*ijbar)
-#define ij(i,j) ((i)+(j)*nx)
-
   int ibar,ijbar;
   float xvert[12], yvert[12], zvert[12], tvert[12], *tvertptr=NULL;
   int triangles[18];
@@ -532,14 +532,14 @@ int GetIsosurface(isosurface *surface,
     tvalsptr=tvals;
     tvertptr=tvert;
   }
-  for(i=0;i<nx-1;){
+  for(i=0;i<nx-1;i++){
     xx[0]=xplt[i];
     xx[1]=xplt[i+1];
-    for(j=0;j<ny-1;){
+    for(j=0;j<ny-1;j++){
       yy[0]=yplt[j];
       yy[1]=yplt[j+1];
       ijbase = ij(i,j);
-      for(k=0;k<nz-1;){
+      for(k=0;k<nz-1;k++){
         ijkbase = ijbase + k*nxy;
         ip1jk = ijkbase + 1;
         ijkp1 = ijkbase + nxy;
@@ -585,15 +585,13 @@ int GetIsosurface(isosurface *surface,
           GetIsobox(xx, yy, zz, vals, tvalsptr, nodeindexes, level,
                     xvert, yvert, zvert, tvertptr, closestnodes, &nvert, triangles, &ntriangles);
 
-          if(UpdateIsosurface(surface, xvert, yvert, zvert, tvertptr, 
-                              closestnodes, nvert, triangles, ntriangles)!=0)return 1;
-
+          if(nvert>0||ntriangles>0){
+            if(UpdateIsosurface(surface, xvert, yvert, zvert, tvertptr, 
+                                closestnodes, nvert, triangles, ntriangles)!=0)return 1;
+          }
         }
-        k++;
       }
-      j++;
     }
-    i++;
   }
   surface->defined=1;
   return 0;
