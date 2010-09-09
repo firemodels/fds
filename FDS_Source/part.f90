@@ -657,6 +657,12 @@ OVERALL_INSERT_LOOP: DO
             IJKW(8,DR%WALL_INDEX) = KK
          ENDIF
    
+         IF (PC%N_SPLIT>1) THEN
+            DR%PWT = DR%PWT/REAL(PC%N_SPLIT,EB)
+            IPC = PC%SPLIT_PART_INDEX
+            PC => PARTICLE_CLASS(IPC)
+         ENDIF
+         
       ENDDO INSERT_PARTICLE_LOOP
     
       POINTWISE_IF2: IF (.NOT.IN%POINTWISE_DROPLET_INIT) THEN
@@ -789,6 +795,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: NDPC=>NULL() ! number of droplets per cel
 SURFACE_DROPLET_DIAMETER = 0.001_EB  ! All droplets adjusted to this size when on solid (m)
 THROHALF = (0.5_EB)**(1./3.)
 B_1 = 10._EB
+B_1 = 5._EB
+!B_1 = sqrt(3._EB)
 
 GRVT1 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(1) 
 GRVT2 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(2) 
@@ -1856,15 +1864,15 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
    ! Second loop is for summing the part quantities
 
+   DROP_DEN = 0._EB
+   DROP_TMP = 0._EB
+   DROP_RAD = 0._EB
+   DROP_AREA = 0._EB
+
    PART_CLASS_SUM_LOOP: DO N_PC = 1,N_PART
 
       PC => PARTICLE_CLASS(N_PC)
       IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_SUM_LOOP
-
-      DROP_DEN = 0._EB
-      DROP_TMP = 0._EB
-      DROP_RAD = 0._EB
-      DROP_AREA = 0._EB
 
       DROPLET_LOOP_2: DO I=1,NLP
 
@@ -1919,22 +1927,20 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
       ENDDO DROPLET_LOOP_2
 
-      ! Compute cumulative quantities for droplet "clouds"
-    
-      DROP_RAD = DROP_RAD/(DROP_DEN+1.E-10_EB)
-      DROP_TMP = DROP_TMP/(DROP_DEN+1.E-10_EB)
-    
-      AVG_DROP_RAD(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_RAD(:,:,:,EVAP_INDEX )+DROP_DEN*DROP_RAD) &
-                                          /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
-      AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_TMP(:,:,:,EVAP_INDEX )+DROP_DEN*DROP_TMP) &
-                                          /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
-      AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,EVAP_INDEX ))
-      AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = RUN_AVG_FAC*AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + OMRAF*DROP_DEN
-      AVG_DROP_AREA(:,:,:,EVAP_INDEX) = RUN_AVG_FAC*AVG_DROP_AREA(:,:,:,EVAP_INDEX) + OMRAF*DROP_AREA
-      WHERE (AVG_DROP_DEN(:,:,:,EVAP_INDEX )<0.0001_EB .AND. DROP_DEN==0._EB) AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = 0.0_EB
-
    ENDDO PART_CLASS_SUM_LOOP
 
+  ! Compute cumulative quantities for droplet "clouds"
+
+   DROP_RAD = DROP_RAD/(DROP_DEN+1.E-10_EB)
+   DROP_TMP = DROP_TMP/(DROP_DEN+1.E-10_EB)
+   AVG_DROP_RAD(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_RAD(:,:,:,EVAP_INDEX )+DROP_DEN*DROP_RAD) &
+                                       /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
+   AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = (AVG_DROP_DEN(:,:,:,EVAP_INDEX )*AVG_DROP_TMP(:,:,:,EVAP_INDEX )+DROP_DEN*DROP_TMP) &
+                                       /(AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + DROP_DEN + 1.0E-10_EB)
+   AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,EVAP_INDEX ))
+   AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = RUN_AVG_FAC*AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + OMRAF*DROP_DEN
+   AVG_DROP_AREA(:,:,:,EVAP_INDEX) = RUN_AVG_FAC*AVG_DROP_AREA(:,:,:,EVAP_INDEX) + OMRAF*DROP_AREA
+   WHERE (AVG_DROP_DEN(:,:,:,EVAP_INDEX )<0.0001_EB .AND. DROP_DEN==0._EB) AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = 0.0_EB
 
 ENDDO EVAP_INDEX_LOOP
 
