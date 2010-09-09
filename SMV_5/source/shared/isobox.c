@@ -945,13 +945,14 @@ int UpdateIsosurface(isosurface *surface,
     if(tvert!=NULL)ts = surface->tvert + noldvert;
     cn = surface->closestnodes + noldvert;
 
-    for(n=0;n<nvert;n++){
-      xs[n] = xvert[n];
-      ys[n] = yvert[n];
-      zs[n] = zvert[n];
-      if(tvert!=NULL&&ts!=NULL)ts[n]=tvert[n];
-      cn[n] = closestnodes[n];
+    memcpy(xs,xvert,nvert*sizeof(float));
+    memcpy(ys,yvert,nvert*sizeof(float));
+    memcpy(zs,zvert,nvert*sizeof(float));
+    if(tvert!=NULL&&ts!=NULL){
+      memcpy(ts,tvert,nvert*sizeof(float));
     }
+    memcpy(cn,closestnodes,nvert*sizeof(int));
+
     surface->nvertices = noldvert + nvert;
   }
 
