@@ -2,7 +2,7 @@
       TITLE='Single processor One tree over surface fuel, uses fuel element model' /
 
 - Specify number of grid cells (IJK) and domain size (XB, meters) in x,y,z directons
-&MESH IJK=160,30,60, XB=-4,12,-3,0,0,6 /
+&MESH IJK=80,15,30, XB=-4,12,-3,0,0,6 /
 
 - Stretch computation grid in the z direction
 &TRNZ IDERIV=1,CC=0,PC=0.5 /
