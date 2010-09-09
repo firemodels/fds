@@ -200,7 +200,7 @@ DO K=1,KBAR
 
          ENDIF IF_SUPPRESSION
          
-         LES_IF: IF (LES .AND. FIXED_MIX_TIME<0._EB) THEN
+         LES_IF: IF (LES .OR. NEW_MIX_TIME) THEN
             
             IF (USE_MAX_FILTER_WIDTH) THEN
                DELTA=MAX(DX(I),DY(J),DZ(K))
