@@ -80,11 +80,25 @@ intel_win_64 : exe       = smokezip64.exe
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/smokeview_fort_64.lib $(LIB_DIR)/lib_win_intel_64/zlib.lib
 
+# ------------- Linux 32 profile ----------------
+#  32 bit linux
+
+intel_linux_32p : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
+intel_linux_32p : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX -p
+intel_linux_32p : FORTLIBDIR = $(LINUX32FORTLIBDIR)
+intel_linux_32p : CC        = icc
+intel_linux_32p : CPP       = icc
+intel_linux_32p : FC        = ifort
+intel_linux_32p : exe       = smokezip_linux_32p
+
+intel_linux_32p : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) -p -lifcore -L $(FORTLIBDIR) ../linux_lib32/libz.a
+
 # ------------- Linux 32 ----------------
 #  32 bit linux
 
 intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
-intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
+intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX 
 intel_linux_32 : FORTLIBDIR = $(LINUX32FORTLIBDIR)
 intel_linux_32 : CC        = icc
 intel_linux_32 : CPP       = icc
@@ -92,7 +106,7 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokezip_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) -lifcore -L $(FORTLIBDIR) ../linux_lib32/libz.a
+	$(CPP) -o $(bin)/$(exe) $(obj) -p -lifcore -L $(FORTLIBDIR) ../linux_lib32/libz.a
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
