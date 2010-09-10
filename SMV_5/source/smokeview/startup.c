@@ -96,6 +96,9 @@ int initcase_c(int argc, char **argv){
     input_file=smvfilename;
     return_code=readsmv(input_file);
   }
+  if(smvtempfilename!=NULL){
+    remove(smvtempfilename);
+  }
   switch (return_code){
     case 1:
 #ifdef pp_MESSAGE
@@ -930,6 +933,7 @@ void InitOpenGL(void){
 /* ------------------ initvars1 ------------------------ */
 
 void initvars1(void){
+  smvtempfilename=NULL;
   usemenu=1;
   arg_iblank=0;
   use_iblank=1;
