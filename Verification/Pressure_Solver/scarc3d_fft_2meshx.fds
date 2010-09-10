@@ -1,9 +1,11 @@
-&HEAD CHID='scarc3d_fft_1mesh',TITLE='Simple 3D Scarc Test Case' /
+&HEAD CHID='scarc3d_fft_2meshx',TITLE='Simple 3D Scarc Test Case' /
 
-&MESH IJK=6,6,6,  XB=0.0,0.6,0.0,0.6,0.0,0.6 /
+&MESH IJK=3,6,6,  XB=0.0,0.3,0.0,0.6,0.0,0.6 /
+&MESH IJK=3,6,6,  XB=0.3,0.6,0.0,0.6,0.0,0.6 /
 
 &MISC NOISE=.FALSE.
       GVEC = 0.0, 0.0, 0.0 /
+&PRES VELOCITY_TOLERANCE=0.00001 /
 
 &TIME TWFIN = 2.0
       DT    = 1.0E-1 /
