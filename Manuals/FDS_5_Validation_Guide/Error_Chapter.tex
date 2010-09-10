@@ -42,7 +42,7 @@ not only predicted a temperature of 350~$^\circ$C, but also that the model tends
 the postulated fire would not cause the cable to fail. The probability of cable failure could be quantified further via a statistical distribution
 like the one shown in Fig.~\ref{bell_curve}. The area indicated by the shaded region is the probability that the temperature will exceed 400~$^\circ$C,
 even though the model has predicted a peak temperature of only 350~$^\circ$C.
-\begin{figure}[t]
+\begin{figure}[ht]
 \begin{center}
 \includegraphics[width=5.in]{FIGURES/bell_curve}
 \end{center}
@@ -127,7 +127,7 @@ The total {\em experimental uncertainty} is represented by all of the horizontal
 If the {\em experimental uncertainty} can be quantified, then the {\em model uncertainty} can be obtained as a result.
 
 
-\begin{figure}[t]
+\begin{figure}[ht]
 \begin{center}
 \includegraphics[height=3.in]{FIGURES/scatterplot}
 \end{center}
@@ -182,7 +182,7 @@ $\widetilde{\sigma}=\sigma/\mu$.} of at least 10~\%.
 
 
 
-\begin{table}[t]
+\begin{table}[ht]
 \caption{Sensitivity of model outputs from Volume 2 of NUREG-1824~\cite{NUREG_1824}. }
 \begin{center}
 \begin{tabular}{|l|c|c|}
@@ -190,8 +190,6 @@ $\widetilde{\sigma}=\sigma/\mu$.} of at least 10~\%.
 Output Quantity                                 & Input Parameter(s)    & Power Dependence \\ \hline \hline
 HGL Temperature                                 & HRR                   & 2/3    \\ \hline
 HGL Depth                                       & Door Height           & 1      \\ \hline
-Ceiling Jet Temperature                         & HRR                   &        \\ \hline
-Plume Temperature                               & HRR                   &        \\ \hline
 Gas Concentration                               & HRR                   & 1/2    \\ \hline
                                                 & HRR                   & 1      \\ \cline{2-3}
 \raisebox{1.5ex}[0pt]{Smoke Concentration}      & Soot Yield            & 1      \\ \hline
@@ -227,8 +225,7 @@ the scattered points to form an expanding ``wedge''
 about the diagonal line, or some other off-diagonal line due to an assumed bias in the model predictions.
 This assessment is a critical component of the
 analysis described in the next section.
-
-\begin{table}[t]
+\begin{table}[ht]
 \caption{Summary of Hamins' uncertainty estimates~\cite{NUREG_1824}. }
 \begin{center}
 \begin{tabular}{|l|c|}
@@ -252,52 +249,21 @@ Surface Temperature             & 0.14    \\ \hline
 
 
 
-
-
-
 \section{Calculating Model Uncertainty}
 
-This section describes a method for calculating the {\em model uncertainty}. In terms of the example given in the Introduction, this
-is the answer to the question, ``350~$^\circ$C plus or minus what?'' Actually, the ``plus or minus'' uncertainty bounds are expressed as a statistical distribution.
-That is, the model prediction of the ``true'' temperature of the cable, $\theta$, is expressed in the
-following way\footnote{$N(\mu,\sigma^2)$ denotes a normal (Gaussian) distribution
-with mean, $\mu$, and standard deviation, $\sigma$.}:
-\be
-   \theta \; | \; 350 \sim N \left( \frac{350}{\delta} \; , \; \widetilde{\sigma}_M^2
-   \left( \frac{350}{\delta} \right)^2 \right) \label{truthexample}
-\ee
-In words, given a model prediction of 350~$^\circ$C, the expected value of the true temperature is assumed to be normally distributed
-with the given mean and standard deviation. The values of $\delta$ and $\widetilde{\sigma}_M$ are calculated based on the
-comparison of model predictions with experimental measurements, and this calculation is discussed below. First, however,
-there are a few very important assumptions that need to be justified.
-\begin{enumerate}
-\item The distribution is assumed to be normal. Given the
-complexity of the models, it would be difficult to postulate a more precise functional relationship.
-The same is true of the form of the distribution. Given the complexity of the models and the experiments,
-it would be difficult to justify
-any particular distribution. In fact, the very reason for developing this method of quantifying model
-uncertainty based on validation
-experiments is because the model algorithm itself is too complicated to work with directly
-as a means of estimating the error. However, if
-the distributions were better characterized, the methodology presented here could be generalized appropriately.
-\item The degree to which the model under or over-predicts the ``truth'' is expressed as a multiplicative bias factor, $\delta$; thus,
-the mean of the distribution in this case is $350/\delta$. If $\delta<1$, the model tends to under-predict, in which case it is
-assumed that the true value would be greater than 350. If $\delta>1$, it is assumed that the true value would be less than 350.
-\item The standard deviation of the distribution is expressed as a fixed percentage of the mean,
-$\widetilde{\sigma}=\sigma/\mu$. This is based on the observation that the results of past validation exercises,
-when plotted as shown in Fig.~\ref{scatterplot}, suggest
-that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value.
-\end{enumerate}
+This section describes a method for calculating the {\em model uncertainty}. Specifically, this entails developing formulae for
+the mean and standard deviation of a statistical distribution like the one shown in Fig.~\ref{bell_curve}. These formulae are functions
+solely of the model predictions and the experimental measurements against which the model is compared. The objective is to
+characterize the performance of the model in predicting a given quantity of interest ({\em e.g.} the hot gas layer temperature) with two
+parameters; one that expresses the tendency for the model to under or over-predict the true value of the quantity and one that expresses the degree of scatter
+about the true value.
 
-With these assumptions in mind, it remains to show how the two parameters, $\delta$ and $\widetilde{\sigma}_M$, are calculated using the
-results of a model validation study.
-Such a study typically consists of comparing point measurements from a wide variety of fire experiments
-with corresponding model predictions.
-Figure~\ref{temp_history} is a typical result for a single point measurement, and given that usually
+The predicted and measured values of the quantity of interest are obtained from one or more validation studies.
+Figure~\ref{temp_history} is a typical example of a comparison of model and measurement. Given that usually
 dozens of such measurements are made during each experiment,
 and potentially dozens of experiments are conducted as part of a test series, hundreds of such plots can be
 produced for any given quantity of interest.
-\begin{figure}[t]
+\begin{figure}[ht]
 \begin{center}
 \includegraphics[height=2.5in]{FIGURES/sample_time_history}
 \end{center}
@@ -308,11 +274,7 @@ Usually, the data is condensed into a more tractable form by way of a single met
 compare the two curves like the ones shown in Fig.~\ref{temp_history}. Peacock {\em et al.}~\cite{Peacock:FSJ1999}
 discuss various possible metrics. A commonly used metric is simply to compare the measured and predicted peak values.
 If the data is spiky, some form of time-averaging can be used. Regardless of the exact form of the metric, what results from
-this exercise is a pair of numbers for each plot, $(E_i,M_i)$, that can be depicted graphically as shown in Fig.~\ref{scatterplot}.
-
-With these assumptions in mind, a relatively simple method of analyzing the data can be developed.
-Assume that the set of model predictions and the corresponding set of experimental measurements are denoted
-$M_i$ and $E_i$, respectively, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers
+this exercise is a pair of numbers for each time history, $(E_i,M_i)$, where $i$ ranges from 1 to $n$ and both $M_i$ and $E_i$ are positive numbers
 expressing the increase in the value of a quantity above its ambient.
 As mentioned above, measurements from full-scale fire experiments often lack uncertainty estimates. In cases where the uncertainty is
 reported, it is usually expressed as either a standard deviation or confidence interval about the measured value. In other words, there is rarely
@@ -332,8 +294,9 @@ $$g(X) \sim N \left( g(\mu) + g''(\mu) \, \sigma^2/2 \, , \, (g'(\mu) \, \sigma)
    \ln E \; | \; \theta \sim N \left( \ln \theta - \frac{\widetilde{\sigma}_E^2}{2} \, , \,\widetilde{\sigma}_E^2 \right) \label{eeq}
 \ee
 The purpose of applying the natural log to the random variable is so that its variance can be expressed in terms of the
-relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. This is convenient because it is assumed that the relative
-uncertainty is constant for each quantity of interest. The quantities and uncertainty values are listed in Table~\ref{Uncertainty}.
+relative uncertainty, $\widetilde{\sigma}_E=\sigma_E/\theta$. This is the way that experimental uncertainties are reported. In addition,
+the results of past validation exercises, when plotted as shown in Fig.~\ref{scatterplot}, form a wedge-shaped pattern that suggests
+that the difference between predicted and measured values is roughly proportional to the magnitude of the measured value.
 
 It cannot be assumed, as in the case of the experimental measurements, that the model predictions have no systematic bias. Instead,
 it is assumed that the model predictions are normally distributed about the true values
@@ -350,24 +313,58 @@ relative standard deviation:
 \ee
 Combining Eq.~(\ref{eeq}) with Eq.~(\ref{meq}) yields:
 \be
-   \ln M  - \ln E \sim N \left( \ln \delta - \frac{\widetilde{\sigma}_M^2}{2}+\frac{\widetilde{\sigma}_E^2}{2} \; ,
+   \ln M  - \ln E = \ln(M/E) \sim N \left( \ln \delta - \frac{\widetilde{\sigma}_M^2}{2}+\frac{\widetilde{\sigma}_E^2}{2} \; ,
    \; \widetilde{\sigma}_M^2+\widetilde{\sigma}_E^2 \right) \label{lnMeq}
 \ee
-What is now needed is a way to estimate the mean and standard deviation of this combined distribution. First, define:
+Equation~(\ref{lnMeq}) is important because it does not involve the unknown $\theta$, but rather the known predicted and measured values of the quantity
+of interest plus an estimate of the experimental uncertainty. Until now, it has been assumed that all of the relevant uncertainties can be characterized
+by normal distributions. Equation~(\ref{lnMeq}) can be used to test this assumption, whereas Eqs.~(\ref{mdist}) and (\ref{expunc}) cannot.
+An examination of the results of the NRC/EPRI validation study discussed above~\cite{NUREG_1824}
+indicates that in cases where the number of pairs of $M$ and $E$ were greater than about 20, the values of $\ln (M/E)$ passed a test for
+normality\footnote{The Kolmogorov-Smirnov test for
+normality was used with a $p$-value of 0.05. The $p$-value determines the probability of being incorrect in concluding that the data is not normally distributed.}, whereas when
+there were less values, the values often did not pass the normality test. Figure~\ref{Normality} contains two sets of data for the model Fire Dynamics Simulator (FDS).
+There were 124 point comparisons of Wall Temperature, for which $\ln (M/E)$ conforms quite well to a normal distribution. However, there were only 9 point comparisons
+for Plume Temperature, for which $\ln (M/E)$ does not conform.
+From this point onward, it is assumed that the validation data is normally distributed. Alternative techniques for assessing model uncertainty with limited
+experimental data have been proposed, for example, see Ref.~\cite{Siu:1992}.
+\begin{figure}[ht!]
+\begin{tabular}{ll}
+\includegraphics[width=3.2in]{FIGURES/Wall_Temperature_Scatter} &
+\includegraphics[width=3.2in]{FIGURES/Wall_Temperature_Normality}
+\end{tabular}
+\caption[Testing the normality of validation data.]{The results of normality testing for a set of data taken from Reference~\cite{NUREG_1824}. On the
+left is a comparison of measured vs predicted wall temperatures, and on the right is the distribution of $\ln(M/E)$. Note that the off-diagonal lines in the scatter plot
+indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and the model (short dash).}
+\label{Normality}
+\end{figure}
+
+Returning to Eq.~(\ref{lnMeq}), what is now needed is a way to estimate the mean and standard deviation of the distribution. First, define:
 \be
-   \overline{\ln M} = \frac{1}{n} \, \sum_{i=1}^n \, \ln M_i  \quad ; \quad
-   \overline{\ln E} = \frac{1}{n} \, \sum_{i=1}^n \, \ln E_i
+   \overline{\ln (M/E)} = \frac{1}{n} \, \sum_{i=1}^n \, \ln (M_i/E_i)
 \ee
-The least squares estimate\footnote{Note that $\hat{\sigma}$ denotes an estimate of $\sigma$.} of the standard
-deviation of the combined distribution is defined as:
+The least squares estimate of the standard deviation of the combined distribution is defined as:
 \be
-   \widehat{ \widetilde{\sigma}_M^2 } + \widetilde{\sigma}_E^2  = \frac{1}{n-1} \sum_{i=1}^n \,
-   \left[ \left(\ln M_i - \ln E_i \right) - \left( \overline{\ln M} - \overline{\ln E} \right)  \right]^2 \label{stdev}
+   \widetilde{\sigma}_M^2 + \widetilde{\sigma}_E^2 \approx \frac{1}{n-1} \sum_{i=1}^n \,
+   \left[ \ln (M_i/E_i) - \overline{\ln (M/E)}  \right]^2 \label{stdev}
 \ee
 Recall that $\widetilde{\sigma}_E$ is known and the expression on the right can be evaluated using the pairs of measured and
-predicted values. An estimate of $\delta$ can be found using the mean of the distribution:
+predicted values. Keep in mind that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, will necessarily result in an under-estimate of the
+model uncertainty, $\widetilde{\sigma}_M$. In particular, note that $\widetilde{\sigma}_M$ cannot be less than
+$\widetilde{\sigma}_E$ because it is not possible to demonstrate that the model is more accurate than the measurements against which it is compared. This is not to say that the model
+cannot be more accurate than the measurements; rather, that the model cannot be shown to be more accurate than the measurements. This rule is demonstrated
+mathematically by Eq.~(\ref{stdev}) where it is observed that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, can result in
+the square root of a negative number, an imaginary number. In the case that the computed model uncertainty is less than the estimated experimental uncertainty, there are
+two courses of action. First, it may be that the number of data points in the validation study is too small. If only a few model predictions are compared to corresponding
+measurements, and the difference between the two is so small that the calculated model uncertainty is imaginary, then more data points should be collected
+to determine if this remains the case. If it does, then
+the calculation of the experimental uncertainty, $\widetilde{\sigma}_E$, should be re-evaluated. The experimental uncertainties listed in
+Table~\ref{Uncertainty} are based on the analysis of 26 experiments that were used in a particular validation study. If other experiments are used to evaluate the
+model, these values need to be recalculated following the procedure presented by Hamins~\cite{NUREG_1824}.
+
+An estimate of $\delta$ can be found using the mean of the distribution:
 \be
-   \hat{\delta} = \exp \left( \overline{\ln M}-\overline{\ln E}+\frac{ \widehat{\widetilde{\sigma}_M^2}}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right) \label{delta}
+   \delta \approx \exp \left( \overline{\ln (M/E)} + \frac{ \widetilde{\sigma}_M^2}{2}-\frac{\widetilde{\sigma}_E^2}{2} \right) \label{delta}
 \ee
 Taking the assumed normal distribution of the model prediction, $M$, in Eq.~(\ref{mdist}) and using
 a Bayesian argument\footnote{The form of Bayes theorem used here states that the posterior distribution is the product of
@@ -392,197 +389,52 @@ intended target to compensate for the defect. If that is the case, it can no lon
 
 The final step in the derivation is to rewrite Eq.~(\ref{thetaeq}) as:
 \be
-   \theta \; | \; M \sim N \left( \frac{M}{\hat{\delta}} \; , \; \widehat{\widetilde{\sigma}_M^2} \left( \frac{M}{\hat{\delta}} \right)^2 \right) \label{truth}
+   \theta \; | \; M \sim N \left( \frac{M}{\delta} \; , \; \widetilde{\sigma}_M^2 \left( \frac{M}{\delta} \right)^2 \right) \label{truth}
 \ee
 This formula has been obtained\footnote{Note that if $X \sim N(\mu,\sigma^2)$, then
 $cX \sim N ( c \mu , (c \sigma)^2)$.} by dividing by the bias factor, $\delta$, in Eq.~(\ref{thetaeq}). To summarize, given a model prediction, $M$,
 of a particular quantity of interest ({\em e.g.} a cable temperature), the true (but unknown) value of this quantity is normally distributed. The mean value
 and variance of this normal distribution are based solely on comparisons of model predictions with past experiments that are similar to the particular fire
-scenario being analyzed. The performance of the model is quantified by the estimators of the parameters, $\hat{\delta}$ and $\widehat{\widetilde{\sigma}_M}$, which
-have been corrected to account for uncertainties associated with the experimental measurements. 
-If $\hat{\delta} \approx 1$ and $\widehat{\widetilde{\sigma}_M} \approx \widetilde{\sigma}_E$, then the
-model can be considered of comparable accuracy to the measurements. 
+scenario being analyzed. The performance of the model is quantified by the estimators of the parameters, $\delta$ and $\widetilde{\sigma}_M$, which
+have been corrected to account for uncertainties associated with the experimental measurements.
+If $\delta \approx 1$ and $\widetilde{\sigma}_M \approx \widetilde{\sigma}_E$, then the
+model can be considered of comparable accuracy to the measurements.
 
 
-\section{Procedure}
+\section{Example}
 
 This section describes how to make use of Eq.~(\ref{truth}). Referring to the sample problem given above, suppose a fire model is being used to estimate the likelihood that
-electrical control cables could be damaged due to a fire in a compartment. 
-Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C. 
+electrical control cables could be damaged due to a fire in a compartment.
+Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C.
 What is the likelihood that the cables would be damaged if the
 model predicts that the maximum surface temperature of the cables is 350~$^\circ$C. Assuming that the input parameters are not in question, the following
 procedure is suggested:
 \begin{enumerate}
-\item Assemble a collection of model predictions, $M_i$, and experimental measurements, $E_i$, from 
-past experiments involving objects with similar thermal characteristics as the cables in question. 
+\item Assemble a collection of model predictions, $M_i$, and experimental measurements, $E_i$, from
+past experiments involving objects with similar thermal characteristics as the cables in question.
 How ``similar'' the experiment is to the hypothetical scenario under study can be quantified by way of
 various parameters, like the thermal inertia of the object, the size of the fire, the size of the compartment, and so on. Obtain estimates of the
 experimental uncertainty from those who conducted the experiments or follow the procedure outlined by Hamins~\cite{NUREG_1824}. Express the
 experimental uncertainty in relative terms, $\widetilde{\sigma}_E$.
 \item Calculate the bias factor, $\delta$, and relative standard deviation, $\tilde{\sigma}_M$, from Eqs.~(\ref{delta}) and (\ref{stdev}), respectively.
-For this example, assume that $\delta=1.03$ and that $\widetilde{\sigma}_M=0.10$. 
-\item Consider the distribution, Eq.~(\ref{truth}), of the ``true'' temperature, $\theta$, shown graphically in Fig.~\ref{bell_curve}.
+For this example, assume that $\delta=1.03$ and that $\widetilde{\sigma}_M=0.10$.
+\end{enumerate}
+
+Consider the distribution, Eq.~(\ref{truth}), of the ``true'' temperature, $\theta$, shown graphically in Fig.~\ref{bell_curve}.
 The vertical lines indicate the ``critical'' temperature at which damage is assumed to occur ($T_c=400$~$^\circ$C), and the temperature predicted by the
 model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
 The mean and standard deviation in Eq.~(\ref{truth}) are calculated:
 \be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad
-   \sigma = \widetilde{\sigma}_M \, \frac{M}{\hat{\delta}} = 0.10 \times \frac{330}{1.03} = 32 \; ^\circ \hbox{C}  \ee
+   \sigma = \widetilde{\sigma}_M \, \frac{M}{\delta} = 0.10 \times \frac{330}{1.03} = 32 \; ^\circ \hbox{C}  \ee
 respectively. The shaded area beneath the bell curve is the probability that the ``true'' temperature can exceed the
 critical value, $T_c=400$~$^\circ$C, which can be expressed via the {\em complimentary error function}:
 \be P(T>T_c) = \frac{1}{2} \hbox{efrc} \left( \frac{T_c - \mu}{\sigma \sqrt{2}} \right) \approx 0.03  \ee
 This means that there is a 3~\% chance that the cables could become damaged, assuming that the model's input parameters are not
-subject to uncertainty. 
-\end{enumerate}
+subject to uncertainty.
+
 Of course, this analysis is not complete. It could never be assumed that the input parameters for a model calculation are perfect. At the very least, the heat
 release rate of the fire would be selected from a range of plausible values. This selection, along with that of other parameters, would likely broaden the
-bell curve shown in Fig.~\ref{bell_curve}. 
-
- 
-
-\section{Verifying the Calculation of the Uncertainty Parameters}
-
-This section demonstrates the accuracy of the calculation of the estimated model uncertainty parameters $\hat{\delta}$ and $\widehat{\widetilde{\sigma}_M}$. To do so,
-hypothetical values of experimental measurements and model predictions are selected from known distributions to check that the estimates of the model
-bias and standard deviation are accurate.
-Suppose that 1000 fire experiments are conducted, and that for each experiment the
-temperature at a given point and at a given time is known. For the sake of this exercise, assume that these values can be represented by 1000 uniformly distributed
-random numbers, $\theta_i$, between 0 and 1000. These values have no uncertainty -- they represent the ``truth.''
-Of course, the true values can never be known, but for this hypothetical exercise they are assumed.
-Next, with $\theta_i$ as the mean, a normally-distributed random variable is chosen that represents a hypothetical measurement, $E_i$.
-The relative standard deviation of the distribution, $\widetilde{\sigma}_E$, is assumed known. In the same way, a normally-distributed
-random variable is chosen that represents a hypothetical
-model prediction, $M_i$. The mean of distribution $\delta \, \theta_i$ and the relative standard deviation, $\widetilde{\sigma}_M$,
-is specified.
-This procedure creates 1000 pairs of $(E_i,M_i)$ with which the procedure outlined in the previous section can be tested.
-Using the 1000 pairs of values and the experimental uncertainty, $\widetilde{\sigma}_E$, the specified model bias, $\hat{\delta}$,
-and relative error, $\widetilde{\sigma}_M$, of the hypothetical model predictions should be accurately estimated.
-
-Two examples are considered. For the first example, assume that the model has no bias ($\delta=1$) and that the relative uncertainty of the measurements and the
-relative error of the model are both 0.1, or 10~\%. The scatter plot on the left side of Fig.~\ref{Case_1_Scatter} displays the model predicted values compared to the
-true values. The dashed lines indicate the 95~\% confidence interval; that is, it is expected that 95~\% of the points should fall between these
-lines, whose slopes are plus and minus 20~\% ($2\, \widetilde{\sigma}_M$) of the diagonal line. Of course, this plot cannot exist in a real situation, because the true
-values are never known. Instead, the only way to present the data is via the scatter plot on the right side of Fig.~\ref{Case_1_Scatter}. Here, the measured values, $E_i$, are
-compared with the predicted values, $M_i$. The same dashed lines are carried over from the plot on the left. Because the predicted values are being compared
-with measurements that have uncertainty, it appears that the model uncertainty is greater than it actually is because the data points are now scattered noticeably beyond the
-original uncertainty bounds. In this hypothetical example, the model is
-assumed to be as accurate as the measurements, yet the comparison makes it seem as if the model is less accurate than the experiments. The procedure outlined
-above, which makes use of only the measured and predicted values, is able to extract from the data the fact that the hypothetical model has a
-relative error of 10~\%, not the roughly 15~\% that one would infer from the plot if the experimental uncertainty were not taken into account.
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[height=3.2in]{FIGURES/Case_1_Scatter_T_vs_M}
-\includegraphics[height=3.2in]{FIGURES/Case_1_Scatter_E_vs_M}
-\end{center}
-\caption[Verification of the model uncertainty calculation, Case 1.]{(Left) A comparison of predicted and ``true'' values for 1000 hypothetical
-experiments in which the model predictions and experimental measurements have the same accuracy.
-(Right) The same data, except now the predicted values are compared to measured values. On both plots, the uncertainty bounds apply to both
-the predicted and measured values.}
-\label{Case_1_Scatter}
-\end{figure}
-
-
-For the second example, the hypothetical model predictions and the experimental measurements are more realistic. Assume now that the
-measured quantity is surface temperature, and that the relative uncertainty of the measured values, $\widetilde{\sigma}_E=0.07$, is obtained from Table~\ref{Uncertainty}.
-We assume the model has a bias factor of 1.03 and its relative error is 0.10 in order to generate a set of hypothetical model predictions.
-A graphical representation of the data is shown in Fig.~\ref{Case_2_Scatter}. Note that the
-experimental uncertainty bounds are represented by solid lines, and the model bias and relative error are represented by the dashed lines.
-Each are expressed as 95~\% confidence intervals ($2 \, \widetilde{\sigma}$).
-
-\begin{figure}[t]
-\begin{center}
-\includegraphics[height=3.2in]{FIGURES/Case_2_Scatter_T_vs_M}
-\includegraphics[height=3.2in]{FIGURES/Case_2_Scatter_E_vs_M}
-\end{center}
-\caption[Verification of the model uncertainty calculation, Case 2.]{(Left) A comparison of predicted and ``true'' values for 1000 hypothetical
-experiments. The short dashed lines indicate the bias, $\delta=1.03$, and the relative error, $2\widetilde{\sigma}_M=0.20$, of the model predictions.
-The solid, off-diagonal lines indicate the relative uncertainty, $2\widetilde{\sigma}_E=0.14$ of the experimental measurements.
-(Right) The same data, except now the predicted values are compared to measured values. On both plots, the uncertainty bounds are the same.}
-\label{Case_2_Scatter}
-\end{figure}
-
-The statistical procedure outlined above ought to provide estimates of the bias factor, $\delta$, and standard deviation, $\widetilde{\sigma}_M$, for the
-hypothetical model predictions. The results of seven random trials are shown in Table~\ref{trials}. For each trial, values representing the model
-predictions and experimental measurements were randomly selected based on the assumed distributions. The calculation procedure discussed above was applied to these
-hypothetical values. The resulting estimates of the model bias and relative error were not exactly the same as those used to generate the data
-because the calculation procedure relies on truncated Taylor series approximations.
-However, given the fact that the experimental uncertainty estimate,
-$\widetilde{\sigma}_E$, is often only a gross approximation in its own right, the accuracy of the procedure is more than adequate, as indicated by the average values
-of the seven trials.
-
-\begin{table}[t]
-\caption{Estimated bias and relative error from random trials used to verify the analysis. }
-\begin{center}
-\begin{tabular}{|c|c|c|}
-\hline
-Trial   & Bias Factor      & Relative Error \\ \hline \hline
-Exact   & 1.030            &    0.100            \\ \hline \hline
-1       & 1.031            &    0.097            \\ \hline
-2       & 1.028            &    0.101            \\ \hline
-3       & 1.026            &    0.108            \\ \hline
-4       & 1.034            &    0.100            \\ \hline
-5       & 1.027            &    0.105            \\ \hline
-6       & 1.035            &    0.100            \\ \hline
-7       & 1.029            &    0.097            \\ \hline \hline
-Average & 1.030            &    0.101            \\ \hline
-\end{tabular}
-\end{center}
-\label{trials}
-\end{table}
-
-
-
-
-
-
-
-\section{Limitations}
-
-The above verification exercises are valuable in assuring that the procedure works as designed, but it also points out a few issues that need to be addressed. First, any
-statistical procedure is based on the law of averages, or, in other words, more data is better than less. It is costly to conduct an extensive number of
-fire experiments to assess the accuracy of the model; thus, sometimes there just is not enough data to apply the above statistical procedure.
-Second, it has been assumed throughout the analysis that all of the relevant uncertainties can be characterized by normal distributions. Specifically, that the
-values of $\ln (M/E)$ are normally distributed. What if they are not? An examination of the results of the NRC/EPRI validation study discussed above~\cite{NUREG_1824}
-indicates that in cases where the number of pairs of $M$ and $E$ were greater than about 20, the values of $\ln (M/E)$ passed a test for normality\footnote{The Kolmogorov-Smirnov test for
-normality was used with a $p$-value of 0.05. The $p$-value determines the probability of being incorrect in concluding that the data is not normally distributed.}, whereas when
-there were less values, the values often did not pass the normality test. Figure~\ref{Normality} contains two sets of data for the model Fire Dynamics Simulator (FDS).
-There were 124 point comparisons of wall temperature, for which $\ln (M/E)$ conforms quite well to a normal distribution. However, there were only 9 point comparisons
-for plume temperature, for which $\ln (M/E)$ does not conform.
-
-In cases where there is not enough data and/or the data cannot be considered normally distributed, it is preferable
-to present the data as is shown in Figure~\ref{Normality} for Plume Temperature with only uncertainty bounds for the experiments, assuming the information is available.
-The value of the validation process outlined above is that it is
-possible at any step to stop and accept the raw output of the study as the basis for making an assessment of the model.
-The uncertainty analysis is valid only to the extent that sufficient experimental data with quantified uncertainty estimates is available.
-
-
-\begin{figure}[t]
-\begin{tabular}{ll}
-\includegraphics[width=3.2in]{FIGURES/Wall_Temperature_Scatter} &
-\includegraphics[width=3.2in]{FIGURES/Plume_Temperature_Scatter} \\
-\includegraphics[width=3.2in]{FIGURES/Wall_Temperature_Normality} &
-\includegraphics[width=3.2in]{FIGURES/Plume_Temperature_Normality}
-\end{tabular}
-\caption[Testing the normality of validation data.]{The results of normality testing for two sets of data taken from Reference~\cite{NUREG_1824}. On the
-left, measured vs predicted wall temperatures, and on the right, plume temperatures. Note that the off-diagonal lines in the scatter plot for
-Wall Temperature indicate the $2 \widetilde{\sigma}$ bounds for the experiments (long dash) and the model (short dash).}
-\label{Normality}
-\end{figure}
-
-
-Another concern with the above procedure is that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, results in an under-estimate of the 
-model uncertainty, $\widetilde{\sigma}_M$. Note that $\widehat{\widetilde{\sigma}_M}$ cannot be less than
-$\widetilde{\sigma}_E$ because it is not possible to demonstrate that the model is more accurate than the measurements against which it is compared. This is not to say that the model
-cannot be more accurate than the measurements; rather, that the model cannot be shown to be more accurate than the measurements. This rule is demonstrated
-mathematically by Eq.~(\ref{stdev}) where it is observed that an over-estimate of the experimental uncertainty, $\widetilde{\sigma}_E$, can result in
-the square root of a negative number, an imaginary number. In the case that the computed model uncertainty is less than the estimated experimental uncertainty, there are
-two courses of action. First, it may be that the number of data points in the validation study is too small. If only a few model predictions are compared to corresponding
-measurements, and the difference between the two is so small that the calculated model uncertainty is imaginary, then more data points should be collected
-to determine if this remains the case. If it does, then 
-the calculation of the experimental uncertainty, $\widetilde{\sigma}_E$, should be re-evaluated. The experimental uncertainties listed in
-Table~\ref{Uncertainty} are based on the analysis of 26 experiments that were used in a particular validation study. If other experiments are used to evaluate the
-model, these values need to be recalculated following the procedure presented by Hamins~\cite{NUREG_1824}.
-
+bell curve shown in Fig.~\ref{bell_curve}.
 
 
 \section{Conclusion}
@@ -590,8 +442,6 @@ model, these values need to be recalculated following the procedure presented by
 A procedure has been proposed to estimate model uncertainty by way of comparisons of model predictions with experimental measurements whose uncertainty has been
 quantified. For clarity of presentation, issues associated with the selection of experiments, metrics of comparison, and presentation of results, have not been
 discussed in detail because these decisions are application-specific and best left to the end user or AHJ.
-
-\clearpage
 
 
 
