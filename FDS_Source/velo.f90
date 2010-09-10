@@ -150,9 +150,9 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
             
             EMC_IF: IF (ENSEMBLE_MEAN_CLOSURE) THEN
                NU = MU(I,J,K)/RHOP(I,J,K)
-               RE_DELTA = SS*DELTA**2/NU
+               RE_DELTA = C_EMC*SS*DELTA**2/NU
                IF (RE_DELTA>1._EB) THEN
-                  RE_EMC = C_EMC*( SQRT(RE_DELTA**2-1._EB) + ASIN(1._EB/RE_DELTA) - PIO2 )
+                  RE_EMC = SQRT(RE_DELTA**2-1._EB) + ASIN(1._EB/RE_DELTA) - PIO2
                   CS = SQRT(RE_EMC/RE_DELTA)*CSMAG
                ELSE
                   CS = 0._EB

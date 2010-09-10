@@ -7202,7 +7202,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: PART_ID ',TRIM(PART_ID),' does not exist'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-			      IN%NUMBER_INITIAL_DROPLETS = NUMBER_INITIAL_DROPLETS*PARTICLE_CLASS(IN%PART_INDEX)%N_SPLIT
+               IN%NUMBER_INITIAL_DROPLETS = NUMBER_INITIAL_DROPLETS*PARTICLE_CLASS(IN%PART_INDEX)%N_SPLIT
             ENDIF
             
             ! Special case: INIT is used to patch a velocity profile
