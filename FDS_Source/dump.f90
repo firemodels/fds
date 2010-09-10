@@ -4135,6 +4135,8 @@ SELECT CASE(IND)
       Y_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
       GAS_PHASE_OUTPUT = Y_MF_INT/Y_EQUIL * 100._EB      
       
+   CASE(22)  ! HS
+      GAS_PHASE_OUTPUT = HS(II,JJ,KK)
    CASE(23)  ! KINETIC ENERGY (per unit mass) -- do not average because this operation is dissipative
       UU   = U(MIN(IBAR,II),JJ,KK)
       VV   = V(II,MIN(JBAR,JJ),KK)
