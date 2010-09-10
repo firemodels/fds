@@ -40,7 +40,7 @@ PUBLIC SCARC_MG_OMEGA , SCARC_CG_OMEGA  , SCARC_BICG_OMEGA  , SCARC_SM_OMEGA  , 
 PUBLIC SCARC_MG_NLDIFF
 
 
-CHARACTER (40) :: SCARC_FN='scarc.mesh   '               ! file name for ScaRC debug messages
+CHARACTER (40) :: SCARC_FN='scarc.mesh   '           ! file name for ScaRC debug messages
 CHARACTER (10) :: SCARC_METHOD='null'                ! name of method for the solution of the pressure equation
 
 INTEGER        :: SCARC_DEBUG=0,     &               ! debug level (0: no debug messages)
@@ -7949,7 +7949,6 @@ TYPE (OSCARC_LEVEL_TYPE), POINTER :: OSNML, OSNOML
 
 TNOW_EXCHANGE = SECOND()
 
-SNM => SCARC(NM)
  
 IERR=0
 IF (SCARC_DEBUG>=8) WRITE(SCARC_LU,*) 'SCARC_EXCHANGE: ', IMV1, IMV2
