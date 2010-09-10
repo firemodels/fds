@@ -8,8 +8,7 @@
 &TIME TWFIN = 2.0
       DT    = 1.0E-1 /
 
-&PRES SCARC_METHOD    = 'BICG'
-      SCARC_DEBUG     =  2
+&PRES SCARC_METHOD      = 'BICG'
       SCARC_BICG_PRECON = 'JACOBI'
       SCARC_BICG_EPS    = 1E-16
       SCARC_BICG_NIT    =  1000    /
