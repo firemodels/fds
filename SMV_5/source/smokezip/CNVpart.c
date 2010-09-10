@@ -601,7 +601,7 @@ void part2iso(part *parti){
   int data2flag=1;
   float *partcount;
   char smvappen[1024];
-  FILE *SMVAPPEN=NULL;
+  FILE *SMVISOFILE=NULL;
   int nx2, ny2, nz2;
   float xmin, ymin, zmin;
 
@@ -689,13 +689,13 @@ void part2iso(part *parti){
 
   CCisoheader(isofile,isolonglabel,isoshortlabel,isounits,levels,&nlevels,&error);
 
-  SMVAPPEN=fopen(smvfilecopy,"a");
+  SMVISOFILE=fopen(smvisofile,"w");
 
-  fprintf(SMVAPPEN,"ISOF\n");
-  fprintf(SMVAPPEN," %s\n",isofile);
-  fprintf(SMVAPPEN," %s\n",isolonglabel);
-  fprintf(SMVAPPEN," %s\n",isoshortlabel);
-  fprintf(SMVAPPEN," %s\n",isounits);
+  fprintf(SMVISOFILE,"ISOF\n");
+  fprintf(SMVISOFILE," %s\n",isofile);
+  fprintf(SMVISOFILE," %s\n",isolonglabel);
+  fprintf(SMVISOFILE," %s\n",isoshortlabel);
+  fprintf(SMVISOFILE," %s\n",isounits);
 
   for(i=0;i<npart5propinfo;i++){
     part5prop *propi;
@@ -711,16 +711,16 @@ void part2iso(part *parti){
     strcat(propi->isofilename,".tiso");
     CCtisoheader(propi->isofilename, labels->longlabel, labels->shortlabel, labels->unit, levels, &nlevels, &error);
 
-    fprintf(SMVAPPEN,"TISOF\n");
-    fprintf(SMVAPPEN," %s\n",propi->isofilename);
-    fprintf(SMVAPPEN," %s\n",isolonglabel);
-    fprintf(SMVAPPEN," %s\n",isoshortlabel);
-    fprintf(SMVAPPEN," %s\n",isounits);
-    fprintf(SMVAPPEN," %s\n",labels->longlabel);
-    fprintf(SMVAPPEN," %s\n",labels->shortlabel);
-    fprintf(SMVAPPEN," %s\n",labels->unit);
+    fprintf(SMVISOFILE,"TISOF\n");
+    fprintf(SMVISOFILE," %s\n",propi->isofilename);
+    fprintf(SMVISOFILE," %s\n",isolonglabel);
+    fprintf(SMVISOFILE," %s\n",isoshortlabel);
+    fprintf(SMVISOFILE," %s\n",isounits);
+    fprintf(SMVISOFILE," %s\n",labels->longlabel);
+    fprintf(SMVISOFILE," %s\n",labels->shortlabel);
+    fprintf(SMVISOFILE," %s\n",labels->unit);
   }
-  fclose(SMVAPPEN);
+  fclose(SMVISOFILE);
 
   error=0;
   for(;;){
