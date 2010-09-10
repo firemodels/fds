@@ -4842,9 +4842,9 @@ static int in_menu=0;
       sv_object *obj_typei;
 
       obj_typei = object_defs[i];
-      if(obj_typei->used==1)num_activedevices++;
+      if(obj_typei->used_by_device==1)num_activedevices++;
     }
-    if(isZoneFireModel==0||(isZoneFireModel==1&&num_activedevices>1)){
+    if(num_activedevices>0){
       glutAddSubMenu("Objects",showobjectsmenu);
     }
   }
