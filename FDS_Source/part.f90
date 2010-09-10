@@ -1423,10 +1423,12 @@ CALL REMOVE_DROPLETS(T,NM)
 CONTAINS
 
 REAL(EB) FUNCTION  WAKE_REDUCTION(DROP_VOL_FRAC,RE,C_DRAG)
+
+! Compute C_DRAG reduction due to the wake effect (Ramirez, Munoz et al. 2007)
+
 REAL(EB)DROP_VOL_FRAC, RE, C_DRAG
 REAL(EB) WAKE_VEL, LODM, RELOD
-! Compute C_DRAG reduction due to the wake effect
-! Ramírez-Muñoz et al. 2007.
+
 IF (DROP_VOL_FRAC <= 0._EB) THEN
    WAKE_REDUCTION = C_DRAG
 ELSE
