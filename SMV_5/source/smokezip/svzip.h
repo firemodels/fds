@@ -429,5 +429,5 @@ EXTERN int get_bounds, get_slice_bounds, get_plot3d_bounds, get_boundary_bounds;
 EXTERN int get_part_bounds;
 EXTERN int partfile2iso;
 #endif
-EXTERN char smvfilecopy[1024];
+EXTERN char smvisofile[1024];
 

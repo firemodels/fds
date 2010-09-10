@@ -38,7 +38,6 @@ int main(int argc, char **argv){
   char smvfile[1024];
   char smvfilebase[1024];
   char *ext;
-  int addext=1;
   char inifile[1024];
   char inifilebase[1024];
   char *prog;
@@ -332,6 +331,14 @@ int main(int argc, char **argv){
     usage(prog);
     return 1;
   }
+  filelen=strlen(filebase);
+  if(filelen>4){
+    ext=filebase+filelen-4;
+    if(strcmp(ext,".smv")==0){
+      ext[0]=0;
+      filelen=strlen(filebase);
+    }
+  }
   if(sourcedir==NULL){
     strcpy(smvfile,filebase);
   }
@@ -340,22 +347,12 @@ int main(int argc, char **argv){
     strcat(smvfile,filebase);
   }
   strcpy(smvfilebase,filebase);
-  filelen=strlen(filebase);
-  if(filelen>4){
-    ext=filebase+filelen-4;
-    if(strcmp(ext,".smv")==0)addext=0;
-  }
   if(partfile2iso==1){
-    char srcfile[1024];
-
-    strcpy(srcfile,smvfile);
-    if(addext==1)strcat(srcfile,".smv");
-    strcpy(smvfilecopy,smvfile);
-    strcat(smvfilecopy,"_smvzip.smv");
-    copyfile(smvfilecopy,srcfile);
+    strcpy(smvisofile,smvfile);
+    strcat(smvisofile,".isosmv");
   }
 
-  if(addext==1)strcat(smvfile,".smv");
+  strcat(smvfile,".smv");
   
   // construct ini file name
 
