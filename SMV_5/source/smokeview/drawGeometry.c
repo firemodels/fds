@@ -3326,30 +3326,27 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
   FREEMEMORY(xplt2);FREEMEMORY(yplt2);FREEMEMORY(zplt2);
   return;
 }
-/* ------------------ MakeIsoBlockages ------------------------ */
+/* ------------------ MakeIsoBlockages2 ------------------------ */
 
 void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
 //xxx experimental smooth blockage generation routine
   blockagedata *bc;
   float *cell=NULL;
-  int *nabor=NULL;
   int ib,i,j,k,iblockcolor;
   int imin, imax, jmin, jmax, kmin, kmax;
-  float val;
   isosurface *asurface;
   float level;
-  float vals[8];
   float *xplt2, *yplt2, *zplt2;
+  float *XPLT2, *YPLT2, *ZPLT2;
   float *xplt,*yplt,*zplt;
   float *rgbtemp,*rgbtemp2;
   int ibar,jbar,kbar;
+  int nx2, ny2, nz2;
   
   int ii, jj, kk;
-  int im1, jm1, km1;
   int read_error=0;
 
-#undef cellindex
-#define cellindex(i,j,k) ((i)+(j)*ibar+(k)*ibar*jbar)
+#define cellindex2(i,j,k) ((i+1)+(j+1)*nx2+(k+1)*nx2*ny2)
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
@@ -3357,23 +3354,37 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
   ibar=meshi->ibar;
   jbar=meshi->jbar;
   kbar=meshi->kbar;
+  nx2=ibar+2;
+  ny2=jbar+2;
+  nz2=kbar+2;
 
-  NewMemory((void **)&cell,ibar*jbar*kbar*sizeof(float));
-  NewMemory((void **)&nabor,ibar*jbar*kbar*sizeof(int));
+  NewMemory((void **)&cell,nx2*ny2*nz2*sizeof(float));
 
-  NewMemory((void **)&xplt2,ibar*sizeof(float));
-  NewMemory((void **)&yplt2,jbar*sizeof(float));
-  NewMemory((void **)&zplt2,kbar*sizeof(float));
+  NewMemory((void **)&XPLT2,nx2*sizeof(float));
+  NewMemory((void **)&YPLT2,ny2*sizeof(float));
+  NewMemory((void **)&ZPLT2,nz2*sizeof(float));
+
+  xplt2 = XPLT2+1;
+  yplt2 = YPLT2+1;
+  zplt2 = ZPLT2+1;
 
   for(i=0;i<ibar;i++){
     xplt2[i]=(xplt[i]+xplt[i+1])/2.0;
   }
+  xplt2[-1]  =xplt2[0]-(xplt[1]-xplt[0]);
+  xplt2[ibar]=xplt2[ibar-1]+(xplt[ibar]-xplt[ibar-1]);
+
   for(i=0;i<jbar;i++){
     yplt2[i]=(yplt[i]+yplt[i+1])/2.0;
   }
+  yplt2[-1]=yplt2[0]-(yplt[1]-yplt[0]);
+  yplt2[jbar]=yplt2[jbar-1]+(yplt[jbar]-yplt[jbar-1]);
+
   for(i=0;i<kbar;i++){
     zplt2[i]=(zplt[i]+zplt[i+1])/2.0;
   }
+  zplt2[-1]=zplt2[0]-(zplt[1]-zplt[0]);
+  zplt2[kbar]=zplt2[kbar-1]+(zplt[kbar]-zplt[kbar-1]);
 
   meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
   meshi->smoothblockagecolors=sb->smoothblockagecolors;
@@ -3383,9 +3394,8 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
 
     rgbtemp=meshi->smoothblockagecolors + 4*iblockcolor;
     if(read_smoothobst==0){
-      for(i=0;i<ibar*jbar*kbar;i++){
+      for(i=0;i<nx2*ny2*nz2;i++){
         cell[i]=0.0;
-        nabor[i]=0;
       }
       for(ib=0;ib<meshi->nbptrs;ib++){
         bc=meshi->blockageinfoptrs[ib];
@@ -3406,84 +3416,9 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
           for(k=kmin;k<kmax;k++){
             for(j=jmin;j<jmax;j++){
               for(i=imin;i<imax;i++){
-                cell[cellindex(i,j,k)]=1.0;
-                nabor[cellindex(i,j,k)]=1;
+                cell[cellindex2(i,j,k)]=1.0;
               }
             }
-          }
-        }
-      }
-    }
-    for(k=1;k<kbar-1;k++){
-      for(j=1;j<jbar-1;j++){
-        for(i=1;i<ibar-1;i++){
-          int im1jk,ip1jk;
-          int ijm1k,ijp1k;
-          int ijkm1,ijkp1;
-          int ijk;
-
-          ijk = cellindex(i,j,k); 
-          if(nabor[ijk]!=1)continue;
-          im1jk = cellindex(i-1,j,k); 
-          ip1jk = cellindex(i+1,j,k); 
-          ijm1k = cellindex(i,j-1,k); 
-          ijp1k = cellindex(i,j+1,k); 
-          ijkm1 = cellindex(i,j,k-1); 
-          ijkp1 = cellindex(i,j,k+1);
-          if(nabor[im1jk]==0)nabor[im1jk]=2;
-          if(nabor[ip1jk]==0)nabor[ip1jk]=2;
-          if(nabor[ijm1k]==0)nabor[ijm1k]=2;
-          if(nabor[ijp1k]==0)nabor[ijp1k]=2;
-          if(nabor[ijkm1]==0)nabor[ijkm1]=2;
-          if(nabor[ijkp1]==0)nabor[ijkp1]=2;
-        }
-      }
-    }
-    for(k=1;k<kbar-1;k++){
-      for(j=1;j<jbar-1;j++){
-        for(i=1;i<ibar-1;i++){
-          int im1jk,ip1jk;
-          int ijm1k,ijp1k;
-          int ijkm1,ijkp1;
-          int ijk;
-
-          ijk = cellindex(i,j,k); 
-          if(nabor[ijk]!=2)continue;
-          im1jk = cellindex(i-1,j,k); 
-          ip1jk = cellindex(i+1,j,k); 
-          ijm1k = cellindex(i,j-1,k); 
-          ijp1k = cellindex(i,j+1,k); 
-          ijkm1 = cellindex(i,j,k-1); 
-          ijkp1 = cellindex(i,j,k+1);
-          cell[ijk]=(cell[im1jk]+cell[ip1jk]);
-          cell[ijk]+=(cell[ijm1k]+cell[ijp1k]);
-          cell[ijk]+=(cell[ijkm1]+cell[ijkp1]);
-          cell[ijk]/=6.0;
-        }
-      }
-    }
-    for(k=1;k<kbar-1;k++){
-      for(j=1;j<jbar-1;j++){
-        for(i=1;i<ibar-1;i++){
-          int ip1jkm1,ip1jk,ip1jkp1,ip1jkm2,ip1jkp2;
-          int ijk;
-
-          ijk = cellindex(i,j,k); 
-          if(nabor[ijk]!=2)continue;
-          ip1jk = cellindex(i+1,j,k); 
-          ip1jkm2 = cellindex(i+1,j,k-2);
-          ip1jkm1 = cellindex(i+1,j,k-1);
-          ip1jk   = cellindex(i+1,j,k);
-          ip1jkp1 = cellindex(i+1,j,k+1);
-          ip1jkp2 = cellindex(i+1,j,k+2);
-          if(nabor[ip1jk]==1&&nabor[ip1jkp1]==1&&nabor[ip1jkp2]==1){
-            cell[ijk]=5.0/6.0;
-          }
-          if(nabor[ip1jkm1]==1&&nabor[ip1jk]==1&&nabor[ip1jkp1]==1){
-            cell[ijk]=0.5;
-          }
-          if(nabor[ip1jkm2]==1&&nabor[ip1jkm1]==1&&nabor[ip1jk]==1){
-            cell[ijk]=1.0/6.0;
           }
         }
       }
@@ -3501,16 +3436,15 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
         printf("              reading the smooth blockage file.\n");
       }
     }
-    if(read_smoothobst==0){
+    else{
       GetIsosurface(asurface, cell, NULL, NULL, level,
-                     xplt2, ibar, yplt2, jbar, zplt2, kbar);
+                     xplt2-1, nx2, yplt2-1, ny2, zplt2-1, nz2);
       GetNormalSurface(asurface);
       CompressIsosurface(asurface,1,
-          xplt2[0],xplt2[ibar-1],
-          yplt2[0],yplt2[jbar-1],
-          zplt2[0],zplt2[kbar-1]);
+          xplt2[-1],xplt2[ibar],
+          yplt2[-1],yplt2[jbar],
+          zplt2[-1],zplt2[kbar]);
       SmoothIsoSurface(asurface);
-      // write out smoothed iso info here
       if(read_error==0)WriteSmoothIsoSurface(asurface);
     }
 
@@ -3518,7 +3452,10 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
     meshi->blockagesurface=asurface;
     if(sb->smoothblockagesurfaces!=NULL)sb->smoothblockagesurfaces[iblockcolor]=asurface;
   }
-  FREEMEMORY(cell); FREEMEMORY(xplt2);FREEMEMORY(yplt2);FREEMEMORY(zplt2);
+  FREEMEMORY(cell); 
+  FREEMEMORY(XPLT2);
+  FREEMEMORY(YPLT2);
+  FREEMEMORY(ZPLT2);
   return;
 }
 
