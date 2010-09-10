@@ -3497,7 +3497,7 @@ void Args(int argc, char **argv){
   len_memory=len+strlen(part_ext)+100;
   NewMemory((void **)&fdsprefix,(unsigned int)len_memory);
   STRCPY(fdsprefix,argi);
-  FREEMEMORY(smvfilename);
+  if(smvtempfilename==NULL)FREEMEMORY(smvfilename);
   FREEMEMORY(trainer_filename);
   FREEMEMORY(test_filename);
   FREEMEMORY(filename_sb)
@@ -3576,6 +3576,34 @@ void Args(int argc, char **argv){
     if(fds_filein!=NULL){
       getnewfilename();
     }
+  }
+
+  // if smokezip created part2iso files then concatenate .smv entries found in the .isosmv file 
+  // to the end of the .smv file creating a new .smv file.  Then read in that .smv file.
+
+  if(smvtempfilename==NULL){
+    char *smvisofilename;
+    FILE *stream_iso=NULL;
+
+    NewMemory((void **)&smvisofilename,len+7+1);
+    STRCPY(smvisofilename,fdsprefix);
+    STRCAT(smvisofilename,".isosmv");
+    stream_iso=fopen(smvisofilename,"r");
+    if(smvtempfilename==NULL&&stream_iso!=NULL){
+      int return_val;
+
+      fclose(stream_iso);
+      smvtempfilename=tmpnam(NULL);
+      return_val=filecat(smvfilename,smvisofilename,smvtempfilename);
+      if(return_val==-1){
+        remove(smvtempfilename);
+        smvtempfilename=NULL;
+      }
+      else{
+        smvfilename=smvtempfilename;
+      }
+    }
+    FREEMEMORY(smvisofilename);
   }
 
   if(trainer_filename==NULL){
@@ -4159,6 +4187,58 @@ int RectangleInFrustum( float *x11, float *x12, float *x22, float *x21){
       return 0;
    }
    return 1;
+}
+
+/* ------------------ filecat ------------------------ */
+
+int filecat(char *file_in1, char *file_in2, char *file_out){
+#define SIZEBUFFER 10000
+  char buffer[SIZEBUFFER];
+  FILE *stream_in1, *stream_in2, *stream_out;
+  int chars_in;
+
+  if(file_in1==NULL||file_in2==NULL||file_out==NULL)return -1;
+
+  stream_in1=fopen(file_in1,"r");
+  if(stream_in1==NULL)return -1;
+
+  stream_in2=fopen(file_in2,"r");
+  if(stream_in2==NULL){
+    fclose(stream_in1);
+    return -1;
+  }
+
+  stream_out=fopen(file_out,"w");
+  if(stream_out==NULL){
+    fclose(stream_in1);
+    fclose(stream_in2);
+    return -1;
+  }
+
+  for(;;){
+    int eof;
+       
+    eof=0;
+    chars_in=fread(buffer,1,SIZEBUFFER,stream_in1);
+    if(chars_in!=SIZEBUFFER)eof=1;
+    if(chars_in>0)fwrite(buffer,chars_in,1,stream_out);
+    if(eof==1)break;
+  }
+  fclose(stream_in1);
+
+  for(;;){
+    int eof;
+       
+    eof=0;
+    chars_in=fread(buffer,1,SIZEBUFFER,stream_in2);
+    if(chars_in!=SIZEBUFFER)eof=1;
+    if(chars_in>0)fwrite(buffer,chars_in,1,stream_out);
+    if(eof==1)break;
+  }
+  fclose(stream_in2);
+  fclose(stream_out);
+  return 0;
+
 }
 
 #include "menus.h"
