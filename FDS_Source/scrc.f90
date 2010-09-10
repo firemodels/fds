@@ -40,7 +40,7 @@ PUBLIC SCARC_MG_OMEGA , SCARC_CG_OMEGA  , SCARC_BICG_OMEGA  , SCARC_SM_OMEGA  , 
 PUBLIC SCARC_MG_NLDIFF
 
 
-CHARACTER (40) :: SCARC_FN='msg/   _scarc'           ! file name for ScaRC debug messages
+CHARACTER (40) :: SCARC_FN='scarc.mesh   '               ! file name for ScaRC debug messages
 CHARACTER (10) :: SCARC_METHOD='null'                ! name of method for the solution of the pressure equation
 
 INTEGER        :: SCARC_DEBUG=0,     &               ! debug level (0: no debug messages)
@@ -293,7 +293,7 @@ CALL CHKMEMERR ('SCARC_INITIALIZE', 'OSCARC', IERR)
 !!! Open debug-file if requested
 !!!
 IF (SCARC_DEBUG >= 1) THEN
-WRITE (SCARC_FN(5:7), '(i3.3)') NM
+WRITE (SCARC_FN(11:13), '(i3.3)') NM
 SCARC_LU = GET_FILE_NUMBER()
 OPEN (SCARC_LU, FILE=SCARC_FN)
 ENDIF
