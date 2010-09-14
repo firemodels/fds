@@ -1121,8 +1121,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          IF (WC%RHO_S(1,N)==0._EB) CYCLE MATERIAL_LOOP2
          IF (ML%NU_FUEL(1)>0._EB) MFLUX = MFLUX/ML%NU_FUEL(1)
          ! gas phase 
-         YY_GET = MAX(0._EB,YY(IIG,JJG,KKG,:))
-         CALL GET_MASS_FRACTION(YY_GET,I_FUEL,Y_MF_G)  
+         Y_MF_G = MAX(0._EB,YY(IIG,JJG,KKG,I_FUEL))
          RSUM_G = RSUM(IIG,JJG,KKG)                    
          YPRSUM  = Y_MF_G/RSUM_G
          HVRG    = REACTION(1)%MW_FUEL*ML%H_R(1)/R0
