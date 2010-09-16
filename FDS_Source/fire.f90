@@ -233,7 +233,7 @@ DO K=1,KBAR
             YY_GET(:) = YY(I,J,K,:)
             CALL GET_CONDUCTIVITY(YY_GET,KP,TMP(I,J,K))
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP(I,J,K))  
-            S_L = LAMINAR_FLAME_SPEED(TMPA,1._EB)
+            S_L = LAMINAR_FLAME_SPEED(TMPA,RN%O2_F_RATIO/(Y_O2_0/Y_FU_0))
             IF (S_L>0._EB) TAU_CHEM = KP/(RHO(I,J,K)*CP*S_L*S_L)
             MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIX_TIME(I,J,K))           
          ENDIF CHEM_IF
@@ -732,17 +732,19 @@ ENDDO
 END SUBROUTINE COMBUSTION_BC
 
 
-REAL(EB) FUNCTION LAMINAR_FLAME_SPEED(TMP_U,PHI)
+REAL(EB) FUNCTION LAMINAR_FLAME_SPEED(TMP_U,EQ_RAT)
 IMPLICIT NONE
 
 REAL(EB), INTENT(IN) :: TMP_U     ! temperature of unburned gases
-REAL(EB), INTENT(IN) :: PHI       ! equivalence ratio (F/A)/(F/A)_stoic
+REAL(EB), INTENT(IN) :: EQ_RAT    ! equivalence ratio (F/A)/(F/A)_stoic
 REAL(EB), PARAMETER :: TMP_REF=298._EB
-REAL(EB) :: S_L_REF,GAMMA
+REAL(EB) :: S_L_REF,GAMMA,PHI
 
 ! Reference:
 ! Stephen Turns, 'An Introduction to Combustion: Concepts and Applications', Chapter 8
 ! see Eq. (8.33)
+!
+! Metghalachi and Keck, Burning Velocities at High P and T, Combustion and Flame, 48:191-210 (1982).
 !
 ! Comments:
 ! For now, we base S_L on the data for Propane. Pressue is assumed to be 1 atm.
@@ -752,10 +754,13 @@ REAL(EB) :: S_L_REF,GAMMA
 REAL(EB), PARAMETER :: PHI_M = 1.08_EB
 REAL(EB), PARAMETER :: B_M   = 0.3422_EB  ! m/s
 REAL(EB), PARAMETER :: B2    = -1.3865_EB ! m/s
+REAL(EB), PARAMETER :: PHI_MIN = 0.8_EB ! lower limit of M&K data
+REAL(EB), PARAMETER :: PHI_MAX = 1.4_EB ! upper limit of M&K data
 ! ---------------------------------------------
 
-S_L_REF = MAX(0._EB,B_M + B2*(PHI-PHI_M)**2)
-GAMMA = MAX(0._EB,2.18_EB - 0.8_EB*(PHI-1._EB))
+PHI = MIN(MAX(PHI_MIN,EQ_RAT),PHI_MAX)
+S_L_REF = B_M + B2*(PHI-PHI_M)**2
+GAMMA = 2.18_EB - 0.8_EB*(PHI-1._EB)
 
 LAMINAR_FLAME_SPEED = S_L_REF*(MAX(TMP_U,TMP_REF)/TMP_REF)**GAMMA
 
