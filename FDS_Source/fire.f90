@@ -58,12 +58,12 @@ CONTAINS
 
 SUBROUTINE COMBUSTION_MF
 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_SPECIFIC_GAS_CONSTANT,GET_AVERAGE_SPECIFIC_HEAT
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_SPECIFIC_GAS_CONSTANT,GET_AVERAGE_SPECIFIC_HEAT,GET_CONDUCTIVITY
 REAL(EB) :: Y_FU_0,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DELTA,DELTA2,ACCEL, & 
             Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,RHOX, &
             X_FU,X_O2,X_FU_0,X_O2_0,X_FU_S,X_O2_S,X_FU_N,X_O2_N,CO_TO_O2,CRIT_FLAME_TMPA, &
             Y_FU_MAX,TMP_F_MIN,Y_F_CORR,Z_2_MIN,Z_2_MIN_FAC,WGT,OMWGT,Q_BOUND_1,Q_BOUND_2,Q_BOUND_3,YY_GET(1:N_SPECIES), &
-            ZETA,CS2,H_F_0,H_F_N,H_G_0,H_G_N,DYAIR,DELTAH_F,TAU_D,TAU_U,TAU_G,EPSK,KSGS
+            ZETA,CS2,H_F_0,H_F_N,H_G_0,H_G_N,DYAIR,DELTAH_F,TAU_D,TAU_U,TAU_G,EPSK,KSGS,KP,CP,S_L,TAU_CHEM
 REAL(EB), PARAMETER :: Y_FU_MIN=1.E-10_EB,Y_O2_MIN=1.E-10_EB,X_O2_MIN=1.E-16_EB,X_FU_MIN=1.E-16_EB,Y_CO_MIN=1.E-10_EB, &
                        M_MIN=0.1_EB,M_MAX=0.3_EB
 INTEGER :: NODETS,I,J,K,II,JJ,KK,IOR,IC,IW,IWA(-3:3),ITMP,ICFT
@@ -226,6 +226,17 @@ DO K=1,KBAR
             ENDIF EXPERIMENTAL_IF
             
          ENDIF LES_IF
+         
+         ! chemical time scale
+         CHEM_IF: IF (CHECK_CHEMICAL_TIME_SCALE) THEN
+            TAU_CHEM = 0._EB ! infinitely fast chemistry
+            YY_GET(:) = YY(I,J,K,:)
+            CALL GET_CONDUCTIVITY(YY_GET,KP,TMP(I,J,K))
+            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP(I,J,K))  
+            S_L = LAMINAR_FLAME_SPEED(TMPA,1._EB)
+            IF (S_L>0._EB) TAU_CHEM = KP/(RHO(I,J,K)*CP*S_L*S_L)
+            MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIX_TIME(I,J,K))           
+         ENDIF CHEM_IF
          
          IF (FIXED_MIX_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_MIX_TIME
          
@@ -719,6 +730,37 @@ ENDDO
 !$OMP END PARALLEL DO
 
 END SUBROUTINE COMBUSTION_BC
+
+
+REAL(EB) FUNCTION LAMINAR_FLAME_SPEED(TMP_U,PHI)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: TMP_U     ! temperature of unburned gases
+REAL(EB), INTENT(IN) :: PHI       ! equivalence ratio (F/A)/(F/A)_stoic
+REAL(EB), PARAMETER :: TMP_REF=298._EB
+REAL(EB) :: S_L_REF,GAMMA
+
+! Reference:
+! Stephen Turns, 'An Introduction to Combustion: Concepts and Applications', Chapter 8
+! see Eq. (8.33)
+!
+! Comments:
+! For now, we base S_L on the data for Propane. Pressue is assumed to be 1 atm.
+
+! data for Propane from Turns
+! ---------------------------------------------
+REAL(EB), PARAMETER :: PHI_M = 1.08_EB
+REAL(EB), PARAMETER :: B_M   = 0.3422_EB  ! m/s
+REAL(EB), PARAMETER :: B2    = -1.3865_EB ! m/s
+! ---------------------------------------------
+
+S_L_REF = MAX(0._EB,B_M + B2*(PHI-PHI_M)**2)
+GAMMA = MAX(0._EB,2.18_EB - 0.8_EB*(PHI-1._EB))
+
+LAMINAR_FLAME_SPEED = S_L_REF*(MAX(TMP_U,TMP_REF)/TMP_REF)**GAMMA
+
+END FUNCTION LAMINAR_FLAME_SPEED
+
 
 END SUBROUTINE COMBUSTION
 
