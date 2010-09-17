@@ -57,7 +57,7 @@ ms_win_32 : $(objwin)
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
+intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D NDEBUG -D _CONSOLE -D pp_WIN_INTEL
 intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
@@ -70,7 +70,7 @@ intel_win_32 : $(objwin)
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
+intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D NDEBUG -D _CONSOLE -D pp_WIN_INTEL
 intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
