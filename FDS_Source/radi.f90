@@ -550,7 +550,8 @@ USE MIEV
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP 
 USE DEVICE_VARIABLES, ONLY : DEVICE_TYPE,DEVICE, GAS_CELL_RAD_FLUX, GAS_CELL_RAD_DEVC_INDEX, N_GAS_CELL_RAD_DEVC
 REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
-            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,COSINE,KFST4_ALTERNATIVE,EFLUX,TYY_FAC
+            ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,COSINE,KFST4_ALTERNATIVE,EFLUX,TYY_FAC, &
+            AIU_SUM, A_SUM
 INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
@@ -559,7 +560,7 @@ REAL(EB) :: XID,YJD,ZKD,YY_GET(1:N_SPECIES),KAPPA_PART,SURFACE_AREA
 INTEGER :: IPC,IID,JJD,KKD,ID
 LOGICAL :: UPDATE_INTENSITY
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KFST4=>NULL(), IL=>NULL(), UIIOLD=>NULL(), KAPPAW=>NULL(), &
-                                       KFST4W=>NULL(), EXTCOE=>NULL(), SCAEFF=>NULL()
+                                       KFST4W=>NULL(), EXTCOE=>NULL(), SCAEFF=>NULL(),IL_UP=>NULL()
 REAL(EB), POINTER, DIMENSION(:)     :: OUTRAD_W=>NULL(), INRAD_W=>NULL()
 INTEGER, INTENT(IN) :: NM
 TYPE (OMESH_TYPE), POINTER :: M2=>NULL()
@@ -575,6 +576,7 @@ EXTCOE   => WORK4
 KAPPAW   => WORK5
 SCAEFF   => WORK6
 KFST4W   => WORK7
+IL_UP    => WORK8
 OUTRAD_W => WALL_WORK1
 INRAD_W  => WALL_WORK2
  
@@ -599,10 +601,6 @@ IF (UPDATE_INTENSITY) THEN
    QRADIN = 0._EB
 ENDIF
  
-! Zero out radiative flux to VIRTUAL_PARTICLES
-
-IF (VIRTUAL_PARTICLES .AND. UPDATE_INTENSITY) DROPLET(1:NLP)%ILW = 0._EB
-
 ! Loop over spectral bands
  
 BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
@@ -908,9 +906,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            ILZU = WALL(IW)%ILW(N,IBND)
                         ENDIF
                      ENDIF
-                     RAP = 1._EB/(AXD+AYD+AZ+EXTCOE(I,J,K)*VC*RSA(N))
-                     IL(I,J,K) = MAX(0._EB, RAP * (AXU*ILXU + AYU*ILYU + AZ*ILZU +  &
-                                 VC*RSA(N)*RFPI*( KFST4(I,J,K)+KFST4W(I,J,K) +RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                     AIU_SUM = AXU*ILXU + AYU*ILYU + AZ*ILZU
+                     A_SUM = AXD + AYD + AZ
+                     RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
+                     IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
+                                 ( KFST4(I,J,K)+KFST4W(I,J,K) +RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                     IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                   ENDDO CILOOP
                ENDDO CKLOOP
 
@@ -937,9 +938,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                            AX = 0.5*AX
                         ENDIF
                      ENDIF
-                     RAP = 1._EB/(AX+AZ+EXTCOE(I,J,K)*VC*RSA(N))
-                     IL(I,J,K) = MAX(0._EB, RAP * (AX*ILXU + AZ*ILZU + &
-                                 VC*RSA(N)*RFPI*(KFST4(I,J,K)+KFST4W(I,J,K) +  RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) ) 
+                     AIU_SUM = AX*ILXU + AZ*ILZU 
+                     A_SUM = AX + AZ
+                     RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
+                     IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
+                                    (KFST4(I,J,K)+KFST4W(I,J,K) +  RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) ) 
+                     IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                   ENDDO I2LOOP
                ENDDO K2LOOP
 
@@ -977,9 +981,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                               ILZU = WALL(IW)%ILW(N,IBND)
                            ENDIF
                         ENDIF
-                        RAP = 1._EB/(AX+AY+AZ+EXTCOE(I,J,K)*VC*RSA(N))
-                        IL(I,J,K) = MAX(0._EB, RAP * ( AX*ILXU + AY*ILYU + AZ*ILZU + &
-                                    VC*RSA(N)*RFPI*( KFST4(I,J,K)+KFST4W(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                        A_SUM = AX + AY + AZ
+                        AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU 
+                        RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
+                        IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
+                                       ( KFST4(I,J,K)+KFST4W(I,J,K) + RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
+                        IF (VIRTUAL_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                      ENDDO ILOOP
                   ENDDO JLOOP
                ENDDO KLOOP
@@ -1060,12 +1067,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                DROPLET_RADIATION_LOOP: DO I_DROP=1,NLP
                   DR => DROPLET(I_DROP)
                   PC => PARTICLE_CLASS(DR%CLASS)
+                  IF (PC%N_SPLIT < 2) CYCLE DROPLET_RADIATION_LOOP
                   IBC = PC%SURF_INDEX
                   IF (IBC<1) CYCLE DROPLET_RADIATION_LOOP
                   IW = DR%WALL_INDEX
-                  COSINE = PC%ORIENTATION(1)*DLX(N)+PC%ORIENTATION(2)*DLY(N)+PC%ORIENTATION(3)*DLZ(N)
-                  IF (COSINE <0._EB) WALL(IW)%ILW(N,IBND) = -COSINE * IL(IJKW(1,IW),IJKW(2,IW),IJKW(3,IW))
-!                  DR%ILW = MAX(DR%ILW,IL(IJKW(1,IW),IJKW(2,IW),IJKW(3,IW))*PI)
+                  COSINE = PC%ORIENTATION(DR%SPLIT_IOR,1)*DLX(N) + &
+                           PC%ORIENTATION(DR%SPLIT_IOR,2)*DLY(N) + &
+                           PC%ORIENTATION(DR%SPLIT_IOR,3)*DLZ(N)
+                  IF (COSINE <0._EB) WALL(IW)%ILW(N,IBND) = -COSINE * IL_UP(IJKW(1,IW),IJKW(2,IW),IJKW(3,IW))
                ENDDO DROPLET_RADIATION_LOOP
             ENDIF
 

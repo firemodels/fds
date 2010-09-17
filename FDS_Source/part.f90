@@ -658,10 +658,9 @@ OVERALL_INSERT_LOOP: DO
          ENDIF
    
          IF (PC%N_SPLIT>1) THEN
+            DR%SPLIT_IOR = MOD(I-1,PC%N_SPLIT)+1
             DR%PWT = DR%PWT/REAL(PC%N_SPLIT,EB)
-            IPC = PC%SPLIT_PART_INDEX
-            PC => PARTICLE_CLASS(IPC)
-         ENDIF
+         ENDIF            
          
       ENDDO INSERT_PARTICLE_LOOP
     
