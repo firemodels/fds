@@ -5092,7 +5092,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
 }
 
 #ifdef USE_ZLIB
-/* ------------------ updatesmoke3d ------------------------ */
+/* ------------------ uncompress_slicedataframe ------------------------ */
 
 void uncompress_slicedataframe(slice *sd,int iframe){
   unsigned int countin;

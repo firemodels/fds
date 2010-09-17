@@ -3456,7 +3456,8 @@ void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata,
   EGZ_FCLOSE(stream);
 }
 
-/* ------------------ updatesmoke3d ------------------------ */
+/* ------------------ uncompress_patchdataframe ------------------------ */
+
 #ifdef USE_ZLIB
 void uncompress_patchdataframe(mesh *meshi,int local_iframe){
   unsigned int countin;

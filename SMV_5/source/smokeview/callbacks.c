@@ -2351,21 +2351,19 @@ void update_framenumber(int changetime){
         sd->islice=sd->slicetimeslist[itime];
       }
     }
-    {
+    if(show3dsmoke==1){
       smoke3d *smoke3di;
 
-      if(show3dsmoke==1){
-        for(i=0;i<nsmoke3d_files;i++){
-          smoke3di = smoke3dinfo + i;
-          if(smoke3di->loaded==0||smoke3di->display==0)continue;
-          smoke3di->iframe=smoke3di->timeslist[itime];
-          if(smoke3di->iframe!=smoke3di->lastiframe){
-            smoke3di->lastiframe=smoke3di->iframe;
-            updatesmoke3d(smoke3di);
-          }
+      for(i=0;i<nsmoke3d_files;i++){
+        smoke3di = smoke3dinfo + i;
+        if(smoke3di->loaded==0||smoke3di->display==0)continue;
+        smoke3di->iframe=smoke3di->timeslist[itime];
+        if(smoke3di->iframe!=smoke3di->lastiframe){
+          smoke3di->lastiframe=smoke3di->iframe;
+          updatesmoke3d(smoke3di);
         }
-        if(nsmoke3d_files>0)mergesmoke3dcolors();
       }
+      if(nsmoke3d_files>0)mergesmoke3dcolors();
     }
     if(showpatch==1){
       for(i=0;i<nmeshes;i++){
