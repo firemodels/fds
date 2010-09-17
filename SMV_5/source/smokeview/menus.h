@@ -6141,8 +6141,8 @@ static int in_menu=0;
   if(showshooterDLG==0)glutAddMenuEntry("Particle Tracking...",27);
 #endif
   if(nsmoke3d_files>0){
-    if(showbounds==1)glutAddMenuEntry("*Smoke3D Parameters...  ALT+s",20);
-    if(showbounds==0)glutAddMenuEntry("Smoke3D Parameters...  ALT+s",20);
+    if(showbounds==1)glutAddMenuEntry("*3D Smoke Parameters...  ALT+s",20);
+    if(showbounds==0)glutAddMenuEntry("3D Smoke Parameters...  ALT+s",20);
   }
   if(showgluistereo==1)glutAddMenuEntry("*Stereo Parameters...",19);
   if(showgluistereo==0)glutAddMenuEntry("Stereo Parameters...",19);

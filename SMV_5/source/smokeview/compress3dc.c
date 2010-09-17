@@ -252,14 +252,15 @@ void *mt_compress_svzip(void *arg){
 
   LOCK_COMPRESS
   compress_svzip2();
-  UNLOCK_COMPRESS
   updatemenu=1;
+  UNLOCK_COMPRESS
   pthread_exit(NULL);
   return NULL;
 
    }
 #endif
-/* ------------------ compreess_svzip ------------------------ */
+
+/* ------------------ compress_svzip ------------------------ */
 
 void compress_svzip(void){
 #ifdef pp_THREAD
