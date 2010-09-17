@@ -1592,40 +1592,40 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   CASE(1)
                      IF (ICD==1) THEN
                         VEL_OTHER => OM%WS
-                     ELSE
+                     ELSE ! ICD=2
                         VEL_OTHER => OM%VS
-                     ENDIF !ICD==2
+                     ENDIF
                   CASE(2)
                      IF (ICD==1) THEN
                         VEL_OTHER => OM%US
-                     ELSE !ICD==2
+                     ELSE ! ICD=2
                         VEL_OTHER => OM%WS
                      ENDIF
-                  CASE(3) !ICD==2
+                  CASE(3) 
                      IF (ICD==1) THEN
                         VEL_OTHER => OM%VS
-                     ELSE
+                     ELSE ! ICD=2
                         VEL_OTHER => OM%US
                      ENDIF
                END SELECT
             ELSE
                SELECT CASE(IEC)
-                  CASE(1) !ICD==2
+                  CASE(1) 
                      IF (ICD==1) THEN
                         VEL_OTHER => OM%W
-                     ELSE
+                     ELSE ! ICD=2
                         VEL_OTHER => OM%V
                      ENDIF
-                  CASE(2) !ICD==2
+                  CASE(2)
                      IF (ICD==1) THEN
                         VEL_OTHER => OM%U
-                     ELSE !ICD==2
+                     ELSE ! ICD=2
                         VEL_OTHER => OM%W
                      ENDIF
                   CASE(3)
                      IF (ICD==1) THEN
                         VEL_OTHER => OM%V
-                     ELSE !ICD==2
+                     ELSE ! ICD=2
                         VEL_OTHER => OM%U
                      ENDIF
                END SELECT
@@ -1638,28 +1638,22 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE(1)
                   IF (ICD==1) THEN
                      VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
-                  ELSE !ICD=2
+                  ELSE ! ICD=2
                      VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
                   ENDIF
-                  MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II,JJ+1,KK) + MU(II,JJ+1,KK+1) + MU(II,JJ,KK+1) )
                CASE(2)
                   IF (ICD==1) THEN
                      VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
-                  ELSE !ICD==2
+                  ELSE ! ICD=2
                      VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)-1)
                   ENDIF
-                  MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ,KK+1) + MU(II,JJ,KK+1) )
                CASE(3)
                   IF (ICD==1) THEN
                      VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD),JJO(ICD)-1,KKO(ICD))
-                  ELSE !ICD==2
+                  ELSE ! ICD==2
                      VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
                   ENDIF
-                  MUA = 0.25_EB*(MU(II,JJ,KK) + MU(II+1,JJ,KK) + MU(II+1,JJ+1,KK) + MU(II,JJ+1,KK) )
             END SELECT
-            DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-            MU_DUIDXJ(ICD_SGN) = MUA*I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-            ALTERED_GRADIENT(ICD_SGN) = .TRUE.
             
          ENDIF INTERPOLATION_IF
 
@@ -1674,7 +1668,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF (CORRECTOR .AND. JJ>0 .AND. JJ<JBAR .AND. KK>0 .AND. KK<KBAR) THEN
                  IF (ICD==1) THEN
                     W_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
-                 ELSE !ICD==2
+                 ELSE ! ICD=2
                     V_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ENDIF
                ENDIF
@@ -1686,7 +1680,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. KK>0 .AND. KK<KBAR) THEN
                  IF (ICD==1) THEN
                     U_Z(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
-                 ELSE !ICD==2
+                 ELSE ! ICD=2
                     W_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ENDIF
                ENDIF
@@ -1698,7 +1692,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
                IF (CORRECTOR .AND. II>0 .AND. II<IBAR .AND. JJ>0 .AND. JJ<JBAR) THEN
                  IF (ICD==1) THEN
                     V_X(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
-                 ELSE !ICD==2
+                 ELSE ! ICD=2
                     U_Y(II,JJ,KK) = 0.5_EB*(VEL_GHOST+VEL_GAS)
                  ENDIF
                ENDIF
@@ -1706,7 +1700,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
       ENDDO ORIENTATION_LOOP
    
    ENDDO SIGN_LOOP
+
    ! Save vorticity and viscous stress for use in momentum equation
+
    DUIDXJ_0(1)    = (UUP(2)-UUM(2))/DXX(1)
    DUIDXJ_0(2)    = (UUP(1)-UUM(1))/DXX(2)
    MU_DUIDXJ_0(1) = MUA*DUIDXJ_0(1)
