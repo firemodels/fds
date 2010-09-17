@@ -132,6 +132,13 @@ intel_linux_32 : FCOMPL = ifort
 intel_linux_32 : CCOMPL = icc
 intel_linux_32 : obj = fds5_intel_linux_32
 intel_linux_32 : setup $(obj_serial)
+
+intel_linux_32_profile : FFLAGS = -m32 -O2 -static -vec_report0 -p
+intel_linux_32_profile : CFLAGS = -m32 -O2 -Dpp_noappend -vec_report0 -p
+intel_linux_32_profile : FCOMPL = ifort
+intel_linux_32_profile : CCOMPL = icc
+intel_linux_32_profile : obj = fds5_intel_linux_32_profile
+intel_linux_32_profile : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 intel_linux_64 : FFLAGS = -m64 -O3 -static -vec_report0
