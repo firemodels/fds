@@ -2,6 +2,10 @@
 !  ------------------ endian_open ------------------------ 
 
 integer function endian_open(file,lunit,endian)
+#ifdef pp_cvf
+!DEC$ ATTRIBUTES ALIAS:'_endian_open@16' :: endian_open
+#endif
+
 character(len=*), intent(in) :: file
 integer, intent(in) :: lunit, endian
 
