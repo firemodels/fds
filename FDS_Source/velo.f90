@@ -1701,6 +1701,10 @@ EDGE_LOOP: DO IE=1,N_EDGES
    
    ENDDO SIGN_LOOP
 
+   ! If the edge is on an interpolated boundary, cycle
+
+   IF (EDGE_TYPE(IE,1)==INTERPOLATED_EDGE .OR. EDGE_TYPE(IE,2)==INTERPOLATED_EDGE) CYCLE EDGE_LOOP
+
    ! Save vorticity and viscous stress for use in momentum equation
 
    DUIDXJ_0(1)    = (UUP(2)-UUM(2))/DXX(1)
