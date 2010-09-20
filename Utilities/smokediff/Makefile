@@ -58,7 +58,7 @@ ms_win_32 : $(objwin)
 #  32 bit windows
 
 intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
-intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
+intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
@@ -71,14 +71,14 @@ intel_win_32 : $(objwin)
 #  64 bit windows
 
 intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D X64 -D WIN32
-intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D pp_PART5
+intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokediff_64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) ../../../SMV_5/Build/LIBS/lib_win_intel_64/smokeview_fort_64.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin)
 
 # ------------- Linux 32 ----------------
 #  32 bit linux
