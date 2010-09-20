@@ -16,10 +16,10 @@ echo
 echo filling distribution directory
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
-copy smokeview64_test.exe %smvdir%\smokeview.exe
-copy smokediff64_release.exe %smvdir%\smokediff.exe
-copy smokezip64_test.exe %smvdir%\smokezip.exe
-copy background.exe %smvdir%\background.exe
+copy ..\bin\smv5_win_test_64.exe %smvdir%\smokeview.exe
+copy ..\..\Utilities\smokediff\INTEL_WIN_64\smokediff_64.exe %smvdir%\smokediff.exe
+copy ..\..\Utilities\smokezip\INTEL_WIN_64\smokezip_64.exe %smvdir%\smokezip.exe
+copy ..\..\Utilities\background\INTEL_WIN_32\background.exe %smvdir%\background.exe
 copy objects.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
 copy pthreadVC.dll %smvdir%\.
