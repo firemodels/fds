@@ -16,8 +16,8 @@ OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 
 # Definition of the object variables
 
-obj =    assert.o   CNV3dsmoke.o   CNVboundary.o   CNViso.o   CNVpart.o   CNVplot3d.o   CNVslice.o   csphere.o   dmalloc.o   egz_stdio.o   endian.o   histogram.o   main.o   readfiles.o   utilities.o   getdata.o   getsizes.o   isobox.o
-objwin = assert.obj CNV3dsmoke.obj CNVboundary.obj CNViso.obj CNVpart.obj CNVplot3d.obj CNVslice.obj csphere.obj dmalloc.obj egz_stdio.obj endian.obj histogram.obj main.obj readfiles.obj utilities.obj getdata.obj getsizes.obj isobox.obj
+obj =    assert.o CNV3dsmoke.o CNVboundary.o CNViso.o CNVpart.o CNVplot3d.o CNVslice.o csphere.o dmalloc.o egz_stdio.o endian.o histogram.o main.o readfiles.o utilities.o isobox.o getdata.o getsizes.o
+objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
 
@@ -46,7 +46,7 @@ no_target:
 #  32 bit windows (ms visual studio C compiler)
 
 ms_win_32 : CFLAGS    = -O2 -D WIN32
-ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5
+ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5 /iface:stdref
 ms_win_32 : CC        = cl
 ms_win_32 : CPP       = cl
 ms_win_32 : FC        = ifort
@@ -57,7 +57,7 @@ ms_win_32 : $(objwin)
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D NDEBUG -D _CONSOLE -D pp_WIN_INTEL
+intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
 intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
@@ -70,12 +70,12 @@ intel_win_32 : $(objwin)
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D NDEBUG -D _CONSOLE -D pp_WIN_INTEL
+intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
 intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
-intel_win_64 : exe       = smokezip64.exe
+intel_win_64 : exe       = smokezip_64.exe
 
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/zlib.lib
