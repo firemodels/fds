@@ -218,7 +218,7 @@ DO K=1,KBAR
                EPSK = SC*KRES(I,J,K)/TAU_D              ! ke dissipation rate, assumes production=dissipation
                KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH     ! estimate of subgrid ke, from Kolmogorov spectrum  
                TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB) ! advective time scale
-               TAU_G = SQRT(DELTA/(GRAV+1.E-10_EB))     ! acceleration time scale
+               TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB))     ! acceleration time scale
                MIX_TIME(I,J,K)=MIN(TAU_D,TAU_U,TAU_G)
             ELSE EXPERIMENTAL_IF
                ! FDS 5 default
