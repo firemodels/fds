@@ -3,7 +3,9 @@
 
 integer function endian_open(file,lunit,endian)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_endian_open@16' :: endian_open
+#endif
 #endif
 
 character(len=*), intent(in) :: file
@@ -51,7 +53,9 @@ end function endian_open
 
 subroutine fcreate_part5sizefile(part5file, part5sizefile, angle_flag, error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_fcreate_part5sizefile@24' :: fcreate_part5sizefile
+#endif
 #endif
 implicit none
 character(len=*), intent(in) :: part5file, part5sizefile
@@ -157,7 +161,9 @@ end subroutine fcreate_part5sizefile
 
 subroutine getisosize(isofilename,endian,nisopoints,nisotriangles,nisolevels,nisosteps,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getisosize@32' :: getisosize
+#endif
 #endif
 implicit none
 character(len=*), intent(in) :: isofilename
@@ -242,7 +248,9 @@ end subroutine getisosize
 
 subroutine getzonesize(zonefilename,nzonet,nrooms,nfires,endian,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getzonesize@28' :: getzonesize
+#endif
 #endif
 implicit none
 character(len=*) :: zonefilename
@@ -329,7 +337,9 @@ end subroutine getzonesize
 
 subroutine getxyzsize(xyzfilename,ibp1,jbp1,kbp1,endian,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getxyzsize@28' :: getxyzsize
+#endif
 #endif
 implicit none
 
@@ -377,7 +387,9 @@ end subroutine getxyzsize
 
 subroutine closezone()
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_closezone@0' :: closezone
+#endif
 #endif
 implicit none
 
@@ -396,7 +408,9 @@ end subroutine closezone
 
 subroutine closeiso()
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_closeiso@0' :: closeiso
+#endif
 #endif
 implicit none
 
@@ -415,7 +429,9 @@ end subroutine closeiso
 
 subroutine closepatch()
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_closepatch@0' :: closepatch
+#endif
 #endif
 implicit none
 
@@ -434,7 +450,9 @@ end subroutine closepatch
 
 subroutine closepart()
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_closepart@0' :: closepart
+#endif
 #endif
 implicit none
 
@@ -454,7 +472,9 @@ end subroutine closepart
 subroutine getpatchsizes1(patchfilename,patchlonglabel,patchshortlabel,patchunit, &
        endian,npatch,headersize,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getpatchsizes1@48' :: getpatchsizes1
+#endif
 #endif
 implicit none
 
@@ -517,7 +537,9 @@ end subroutine getpatchsizes1
 
 subroutine getpatchsizes2(version,npatch,npatchsize,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,headersize,framesize)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getpatchsizes2@48' :: getpatchsizes2
+#endif
 #endif
 implicit none
 integer, intent(in) :: version, npatch
@@ -557,7 +579,9 @@ end subroutine getpatchsizes2
 
 subroutine getsizesa(partfilename,npartpoints,npartframes)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getsizesa@16' :: getsizesa
+#endif
 #endif
 implicit none
 
@@ -612,7 +636,9 @@ end subroutine getsizesa
 
 subroutine getsizes(partfilename,ibar,jbar,kbar,nb,nv,nspr,mxframepoints,endian, showstaticsmoke, error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getsizes@48' :: getsizes
+#endif
 #endif
 implicit none
 
@@ -693,7 +719,9 @@ end subroutine getsizes
 subroutine getsizes2(settmin_p,tmin_p,settmax_p,tmax_p,nspr,frameloadstep,partpointstep,npartpoints,npartframes,error)
                    
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getsizes2@40' :: getsizes2
+#endif
 #endif
 
 implicit none
@@ -773,7 +801,9 @@ end subroutine getsizes2
 subroutine getsliceparms(slicefilename, endian, ip1, ip2, jp1, jp2, kp1, kp2, slice3d, error)
 
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getsliceparms@44' :: getsliceparms
+#endif
 #endif
 
 implicit none
@@ -847,7 +877,9 @@ subroutine getslicesizes(slicefilename, nslicei, nslicej, nslicek, nsteps, slice
    headersize, framesize, statfile)
 
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getslicesizes@64' :: getslicesizes
+#endif
 #endif
 
 implicit none
@@ -961,7 +993,9 @@ end subroutine getslicesizes
 subroutine openpart(partfilename, unit, endian, error)
 
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_openpart@20' :: openpart
+#endif
 #endif
 
 implicit none
@@ -1011,7 +1045,9 @@ end subroutine openpart
 subroutine openslice(slicefilename, unit, endian, is1, is2, js1, js2, ks1, ks2, error)
 
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_openslice@44' :: openslice
+#endif
 #endif
 
 implicit none
@@ -1068,7 +1104,9 @@ end subroutine openslice
 subroutine closefortranfile(unit)
 
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_closefortranfile@4' :: closefortranfile
+#endif
 #endif
 
 implicit none
@@ -1085,7 +1123,9 @@ end subroutine closefortranfile
 
 subroutine getboundaryheader1(boundaryfilename,boundaryunitnumber,endian,npatch,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getboundaryheader1@24' :: getboundaryheader1
+#endif
 #endif
 implicit none
 
@@ -1140,7 +1180,9 @@ end subroutine getboundaryheader1
 
 subroutine getboundaryheader2(boundaryunitnumber,version,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchdir)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getboundaryheader2@40' :: getboundaryheader2
+#endif
 #endif
 implicit none
 integer, intent(in) :: boundaryunitnumber, version, npatch
@@ -1172,7 +1214,9 @@ end subroutine getboundaryheader2
 
 subroutine openboundary(boundaryfilename,boundaryunitnumber,endian,version,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_openboundary@24' :: openboundary
+#endif
 #endif
 implicit none
 
@@ -1238,7 +1282,9 @@ end subroutine openboundary
 
 subroutine getpartheader1(unit,nclasses,fdsversion,size)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getpartheader1@16' :: getpartheader1
+#endif
 #endif
 implicit none
 
@@ -1261,7 +1307,9 @@ end subroutine getpartheader1
 
 subroutine getpartheader2(unit,nclasses,nquantities,size)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getpartheader2@16' :: getpartheader2
+#endif
 #endif
 implicit none
 
@@ -1291,7 +1339,9 @@ end subroutine getpartheader2
 
 subroutine getpartdataframe(unit,nclasses,nquantities,npoints,time,tagdata,pdata,size,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getpartdataframe@36' :: getpartdataframe
+#endif
 #endif
 implicit none
 
