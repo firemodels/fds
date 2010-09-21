@@ -70,8 +70,8 @@ intel_win_32 : $(objwin)
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
-intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
+intel_win_64 : CFLAGS    = -Od /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
+intel_win_64 : FFLAGS    = -Od /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /iface:stdref
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
