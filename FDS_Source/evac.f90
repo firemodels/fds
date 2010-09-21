@@ -6692,6 +6692,20 @@ CONTAINS
              IF (GROUP_LIST(J)%GROUP_I_FFIELDS(I_EGRID) == 0) THEN
                 ! Test if this group/agent should update the exit door (exp. distribution)
                 CALL RANDOM_NUMBER(RN)
+                IF (ABS(HR%I_TARGET) > 0) THEN
+                   ! Check, if the target door is closed.
+                   IF (ABS(HR%I_TARGET) <= N_DOORS) THEN
+                      IF (ABS(EVAC_DOORS(ABS(HR%I_TARGET))%IMODE)==2) THEN
+                         HR%I_TARGET = 0
+                         RN = 2.0_EB ! update door, present one is closed
+                      END IF
+                   ELSE
+                      IF (ABS(EVAC_EXITS(ABS(HR%I_TARGET)-N_DOORS)%IMODE)==2) THEN
+                         HR%I_TARGET = 0
+                         RN = 2.0_EB ! update door, present one is closed
+                      END IF
+                   END IF
+                END IF
                 IF (RN > EXP(-DTSP/DT_GROUP_DOOR) ) THEN
                    I_TARGET_OLD = HR%I_TARGET 
                    N_CHANGE_TRIALS = N_CHANGE_TRIALS + 1
@@ -6724,7 +6738,7 @@ CONTAINS
                             PP_SEE_EACH = SEE_EACH_OTHER(NM, HR%X, HR%Y, HRE%X, HRE%Y)
                             IF (.NOT. PP_SEE_EACH) CYCLE Other_Agent_Loop
                             IF (ABS(HRE%I_Target) > 0 .AND. P2P_DIST < TIM_DIST) THEN
-                               IF (ABS(HRE%I_TARGET) <= N_DOORS ) THEN
+                               IF (ABS(HRE%I_TARGET) <= N_DOORS) THEN
                                   x11 = 0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%X1 + &
                                        EVAC_DOORS(ABS(HRE%I_TARGET))%X2)
                                   y11 = 0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%Y1 + &
@@ -6738,10 +6752,10 @@ CONTAINS
                                        (HRE%Y-0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%Y1 + &
                                        EVAC_DOORS(ABS(HRE%I_TARGET))%Y2))**2)
                                ELSE
-                                  x11 = 0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET))%X1 + &
-                                       EVAC_EXITS(ABS(HRE%I_TARGET))%X2)
-                                  y11 = 0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET))%Y1 + &
-                                       EVAC_EXITS(ABS(HRE%I_TARGET))%Y2)
+                                  x11 = 0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X1 + &
+                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X2)
+                                  y11 = 0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y1 + &
+                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y2)
                                   EVEL = SQRT((HR%X-0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X1 + &
                                        EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X2))**2 + &
                                        (HR%Y-0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y1 + &
@@ -9990,6 +10004,7 @@ CONTAINS
       I_TARGET = 0
       STR_INDX = 0
       STR_SUB_INDX = 0
+      NM_STRS_MESH = .FALSE.
 
       ! Where is the person going to?
       SELECTTARGETTYPE: SELECT CASE (EVAC_NODE_LIST(INODE2)%NODE_TYPE)
