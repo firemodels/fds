@@ -48,7 +48,7 @@ MODULE EVAC
        EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE, EVAC_SSTAND_TYPE, NPC_EVAC, N_HOLES, &
        EVACUATION_TYPE, EVAC_HOLE_TYPE, EVACUATION, EVAC_HOLES
   !
-  CHARACTER(255):: EVAC_VERSION = '2.3.0'
+  CHARACTER(255):: EVAC_VERSION = '2.3.1'
   CHARACTER(255) :: EVAC_COMPILE_DATE
   INTEGER :: EVAC_MODULE_REV
   !
@@ -218,7 +218,7 @@ MODULE EVAC
      INTEGER, POINTER, DIMENSION(:) :: NODE_IOR =>NULL(), NODE_TYPE =>NULL(), NODES_IN =>NULL()
      INTEGER, POINTER, DIMENSION(:) :: NODES_OUT =>NULL(), I_CORE =>NULL()
      CHARACTER(60) :: ID
-     CHARACTER(24) :: MESH_ID
+     CHARACTER(30) :: MESH_ID
      LOGICAL RIGHT_HANDED
   END TYPE EVAC_STRS_TYPE
   !
@@ -359,7 +359,8 @@ MODULE EVAC
        HUMAN_SMOKE_HEIGHT, TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, &
        CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
        CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, FAC_DOOR_QUEUE, FAC_DOOR_ALPHA,&
-       FAC_DOOR_WAIT, CF_MIN_B, FAC_DOOR_OLD, FAC_DOOR_OLD2, R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE
+       FAC_DOOR_WAIT, CF_MIN_B, FAC_DOOR_OLD, FAC_DOOR_OLD2, R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, &
+       DOT_HERDING
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -504,7 +505,7 @@ CONTAINS
          CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, &
          FAC_DOOR_QUEUE, FAC_DOOR_ALPHA, FAC_DOOR_WAIT, CF_MIN_B, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, FAC_DOOR_OLD, FAC_DOOR_OLD2, &
-         R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE
+         R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, DOT_HERDING
 
     NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, INPUT_ID, &
          PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH, PROB
@@ -1027,9 +1028,10 @@ CONTAINS
       FAC_DOOR_OLD    = 0.1_EB  ! The present door is considered "smoke free" longer than others
       FAC_DOOR_OLD2   = 0.9_EB  ! The present door is considered "not too much smoke" longer than others
 
-      R_HERDING       = 5.0_EB  ! Herding agents: How far to look, the radius
-      W0_HERDING      = 1.0_EB  ! Herding agents: Weight at the distance r=0 (linear function)
-      WR_HERDING      = 1.0_EB  ! Herding agents: Weight at the distance r=R_HERDING
+      R_HERDING       =  5.0_EB  ! Herding agents: How far to look, the radius
+      W0_HERDING      = 10.0_EB  ! Herding agents: Weight at the distance r=0 (linear function)
+      WR_HERDING      =  0.0_EB  ! Herding agents: Weight at the distance r=R_HERDING
+      DOT_HERDING     = -0.2_EB  ! Herding agents: dot product parameter (do not count agents that are heading towards)
       I_HERDING_TYPE  = 0       ! Herding agents: >1 do not move if no door (0 default ffield)
 
       OUTPUT_SPEED         = .FALSE.
@@ -2215,6 +2217,10 @@ CONTAINS
          IF (ii > 1) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' not an unique mesh found '
             CALL SHUTDOWN(MESSAGE)
+         END IF
+         ! Use the main evacuation mesh flow field if none is given
+         IF (TRIM(FLOW_FIELD_ID) == 'null') THEN
+            FLOW_FIELD_ID = TRIM(MESH_NAME(PDX%IMESH))
          END IF
 
          nm = PDX%IMESH
@@ -4670,7 +4676,7 @@ CONTAINS
 
           WRITE (LU_EVACOUT,fmt='(a,a,a)') ' FDS+Evac FED File: ', TRIM(FN_EVACFED), ' is calculated and used'
           IF (I_FED_FILE_FORMAT==-3) &
-               WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.3.1)'
+               WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.3.0)'
           IF (I_FED_FILE_FORMAT==-2) &
                WRITE (LU_EVACOUT,fmt='(a,I2,a)') ' FDS+Evac FED File Format: ', I_FED_FILE_FORMAT, ' (version >= 2.2.2)'
           IF (I_FED_FILE_FORMAT==-1) &
@@ -5748,6 +5754,7 @@ CONTAINS
           I_TMP = 0
           DO I = 1, M%N_HUMANS
              HR => M%HUMAN(I)
+             HR%I_Door_Mode = 0 ! Default, no target door yet
              ! GROUP_ID > 0: +GROUP_ID
              ! GROUP_ID < 0: -HUMAN_ID (lonely humans)
              J  =  MAX(0,HR%GROUP_ID)
@@ -6375,7 +6382,7 @@ CONTAINS
     REAL(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
     INTEGER ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
     INTEGER  IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, IBC
-    REAL(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, TIM_DIST
+    REAL(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, TIM_DIST, EVEL2
     REAL(EB), DIMENSION(4) :: D_XY
     LOGICAL, DIMENSION(4) :: FOUNDWALL_XY
     INTEGER :: ISTAT, STRS_INDX, I_TARGET, COLOR_INDEX, I_NEW_FFIELD, I_TARGET_OLD
@@ -6383,10 +6390,10 @@ CONTAINS
     !
     REAL(EB) ::  SCAL_PROD_OVER_RSQR, U_NEW, V_NEW, VMAX_TIMO, COSPHIFAC, &
          SPEED_MAX, DELTA_MIN, DT_SUM, C_YEFF, LAMBDAW, B_WALL, A_WALL, &
-         T, CONTACT_F, SOCIAL_F, SMOKE_BETA, SMOKE_ALPHA, SMOKE_SPEED_FAC
+         T, CONTACT_F, SOCIAL_F, SMOKE_BETA, SMOKE_ALPHA, SMOKE_SPEED_FAC, tmp1, tmp2
     INTEGER :: IIE, JJE, IIO, JJO, III, JJJ, I_EGRID, I_TMP
     REAL(EB) :: X_NOW, Y_NOW, D_HUMANS, D_WALLS, DTSP_NEW, FAC_TIM, DT_GROUP_DOOR, X11, Y11, SPEED, TPRE
-    LOGICAL PP_SEE_EACH, L_FIRST_PASS, USE_FED
+    LOGICAL PP_SEE_EACH, L_FIRST_PASS, USE_FED, PP_SEE_DOOR
     LOGICAL L_EFF_READ, L_EFF_SAVE, L_DEAD
     REAL(EB) :: COS_X, COS_Y, SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP, HR_Z, HR_A, HR_B, HR_TAU, HR_TAU_INER
     !
@@ -6648,6 +6655,21 @@ CONTAINS
           END IF
        END DO
 
+       Door_Mode_Loop: DO I = 1, N_HUMANS
+          ! Check if the agent is moving towards a door or other target.
+          ! Other agents can only follow agents moving towards doors ("herding mode").
+          ! I_DoorAlgo=0: Use the main evacuation mesh flow field ("stupid agents"), do not follow these.
+          ! I_Door_Mode:  0) no target door or not moving, 1) target door + moving, <0) came out form a door
+          !               or an entry, but does not have target door
+          HR=>HUMAN(I)
+          IF (HR%I_DoorAlgo == 0) CYCLE Door_Mode_Loop
+          J  =  MAX(0,HR%GROUP_ID)  ! group index > 0 (=0 for lonely agents)
+          J1 = -MIN(0,HR%GROUP_ID)  ! lonely agent index > 0
+          IF (J1 > 0 .AND. (HR%I_Target /= 0 .AND. HR%I_DoorAlgo > 0) .AND. T > HR%TPRE+HR%TDET) HR%I_Door_Mode = 1
+          IF (J > 0 .AND. (HR%I_Target /= 0 .AND. HR%I_DoorAlgo > 0) .AND. T > GROUP_LIST(J)%TPRE + GROUP_LIST(J)%TDOOR) &
+               HR%I_Door_Mode = 1
+       END DO Door_Mode_Loop
+       
        ! ========================================================
        ! Change target door?
        ! ========================================================
@@ -6664,7 +6686,7 @@ CONTAINS
              IF (GROUP_LIST(J)%COMPLETE == 0) CYCLE CHANGE_DOOR_LOOP
 
              ! Agents start to move towards the exit after the pre-evacuation (reaction) time.
-             IF (J == 0 .AND. T < HR%TPRE+HR%TDET) CYCLE CHANGE_DOOR_LOOP   ! LONELY AGENTS
+             IF (J == 0 .AND. T < HR%TPRE+HR%TDET .AND. HR%I_Target/=0) CYCLE CHANGE_DOOR_LOOP   ! LONELY AGENTS
              IF (J > 0 .AND. T < GROUP_LIST(J)%TPRE + GROUP_LIST(J)%TDOOR) CYCLE CHANGE_DOOR_LOOP ! GROUPS
 
              IF (GROUP_LIST(J)%GROUP_I_FFIELDS(I_EGRID) == 0) THEN
@@ -6673,14 +6695,15 @@ CONTAINS
                 IF (RN > EXP(-DTSP/DT_GROUP_DOOR) ) THEN
                    I_TARGET_OLD = HR%I_TARGET 
                    N_CHANGE_TRIALS = N_CHANGE_TRIALS + 1
-
                    CALL CHANGE_TARGET_DOOR(NM,NM,I,J,J1,I_EGRID,1,HR%X,HR%Y,I_TARGET,COLOR_INDEX,I_NEW_FFIELD,HR)
-
                    ! HR%I_DoorAlgo: 1 rational agents, 2 known doors, 3 herding, 0 main evac mesh ff
                    ! Herding behaviour: Count and weight by the distance the target doors of the other
                    ! agents around this agent.  The five (or less) nearest neighbor agents are used.
-                   Herding_Type_Agent: IF ( HR%I_DoorAlgo==3 .OR. (HR%I_Target==0 .AND. HR%I_DoorAlgo>0)) THEN
+                   ! I_HERDING_TYPE 0: default herding, 1: keep the first choice, 2: do not move, 
+                   !                3: do not move + keep the first choice
+                   Herding_Type_Agent: IF (HR%I_DoorAlgo==3 .OR. (HR%I_Target==0 .AND. HR%I_DoorAlgo>0)) THEN
                       IF (HR%I_DoorAlgo==3 .AND. HR%I_Target/=0 .AND. (I_HERDING_TYPE==1 .OR. I_HERDING_TYPE==3)) THEN
+                         ! These herding agents keep the first choise
                          I_TARGET = I_TARGET_OLD
                       ELSE
                          HERDING_LIST_DOORS = 0.0_EB    ! Real array, weights by the p2p distance (linear function)
@@ -6690,20 +6713,59 @@ CONTAINS
                          HERDING_LIST_P2PDIST(6:10) = 0.0_EB ! person to person distances (squares)
                          HERDING_LIST_N = 0 ! number of neighbors (max 10, see dimension)
                          HERDING_LIST_P2PMAX = HUGE(HERDING_LIST_P2PMAX)
+                         TIM_DIST = HUGE(TIM_DIST)
                          Other_Agent_Loop: DO IE = 1, N_HUMANS
                             IF (I==IE) CYCLE Other_Agent_Loop
                             HRE => HUMAN(IE)
                             P2P_DIST = (HRE%X-HR%X)**2 + (HRE%Y-HR%Y)**2
-                            IF (P2P_DIST > R_HERDING**2) CYCLE Other_Agent_Loop
+                            IF (P2P_DIST > R_HERDING**2 .AND. HRE%I_Target==0) CYCLE Other_Agent_Loop
+                            IF (P2P_DIST > R_HERDING**2 .AND. HRE%I_Door_Mode <= 0) CYCLE Other_Agent_Loop
                             ! Check, that the persons are seeing each other, i.e., there are no walls between.
                             PP_SEE_EACH = SEE_EACH_OTHER(NM, HR%X, HR%Y, HRE%X, HRE%Y)
                             IF (.NOT. PP_SEE_EACH) CYCLE Other_Agent_Loop
+                            IF (ABS(HRE%I_Target) > 0 .AND. P2P_DIST < TIM_DIST) THEN
+                               IF (ABS(HRE%I_TARGET) <= N_DOORS ) THEN
+                                  x11 = 0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%X1 + &
+                                       EVAC_DOORS(ABS(HRE%I_TARGET))%X2)
+                                  y11 = 0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%Y1 + &
+                                       EVAC_DOORS(ABS(HRE%I_TARGET))%Y2)
+                                  EVEL = SQRT((HR%X-0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%X1 + &
+                                       EVAC_DOORS(ABS(HRE%I_TARGET))%X2))**2 + &
+                                       (HR%Y-0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%Y1 + &
+                                       EVAC_DOORS(ABS(HRE%I_TARGET))%Y2))**2)
+                                  EVEL2 = SQRT((HRE%X-0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%X1 + &
+                                       EVAC_DOORS(ABS(HRE%I_TARGET))%X2))**2 + &
+                                       (HRE%Y-0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%Y1 + &
+                                       EVAC_DOORS(ABS(HRE%I_TARGET))%Y2))**2)
+                               ELSE
+                                  x11 = 0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET))%X1 + &
+                                       EVAC_EXITS(ABS(HRE%I_TARGET))%X2)
+                                  y11 = 0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET))%Y1 + &
+                                       EVAC_EXITS(ABS(HRE%I_TARGET))%Y2)
+                                  EVEL = SQRT((HR%X-0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X1 + &
+                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X2))**2 + &
+                                       (HR%Y-0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y1 + &
+                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y2))**2)
+                                  EVEL2 = SQRT((HRE%X-0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X1 + &
+                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X2))**2 + &
+                                       (HRE%Y-0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y1 + &
+                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y2))**2)
+                               END IF
+                               PP_SEE_DOOR = SEE_DOOR(NM, 0, 1, HR%X, HR%Y, x11, y11, tmp1, tmp2)
+                               x_now =((HR%X-HRE%X)*HRE%UBAR + (HR%Y-HRE%Y)*HRE%VBAR) / ( &
+                                 MAX(0.01_EB,SQRT(HRE%UBAR**2+HRE%VBAR**2))*SQRT((HRE%X-HR%X)**2+(HRE%Y-HR%Y)**2) )
+                               ! The other agent should be closer to the door if the door is visible.
+                               ! If it is not visible the other agent should go away.
+                               IF ((EVEL2 < 0.5_EB*EVEL .AND. PP_SEE_DOOR) .OR. &
+                                    ( (x_now < 0.0_EB .OR. EVEL2 < 0.9_EB*EVEL) .AND. .NOT.PP_SEE_DOOR)) THEN 
+                                  TIM_DIST = P2P_DIST
+                                  IF (PP_SEE_DOOR) HR%I_Target2 = ABS(HRE%I_Target)
+                                  IF (.NOT.PP_SEE_DOOR) HR%I_Target2 = -ABS(HRE%I_Target)
+                               END IF
+                            END IF
+                            IF (P2P_DIST > R_HERDING**2) CYCLE Other_Agent_Loop
                             IF (P2P_DIST <= HERDING_LIST_P2PMAX) THEN
                                ! Dot product used to check if the other agent is walking towards the agent
-                               IF (ABS(HRE%I_Target)>0) THEN
-                                  EVEL = (HRE%X-HR%X)*HRE%UBAR + (HRE%Y-HR%Y)*HRE%VBAR
-                                  IF (EVEL < 0.2_EB) CYCLE Other_Agent_Loop
-                               END IF
                                IF (HERDING_LIST_N < 5) THEN
                                   ! List is not yet full, all agents are ok
                                   HERDING_LIST_N = HERDING_LIST_N + 1
@@ -6720,18 +6782,20 @@ CONTAINS
                          END DO Other_Agent_Loop
                          Other_Agent_Loop_2: DO IE = 1, HERDING_LIST_N
                             HRE => HUMAN(HERDING_LIST_IHUMAN(IE))
-                            P2P_DIST = (HRE%X-HR%X)**2 + (HRE%Y-HR%Y)**2
-                            P2P_DIST = SQRT(P2P_DIST)
-                            IF (ABS(HRE%I_Target)>0) THEN
-                               ! Linear weight function
-                               HERDING_LIST_DOORS(ABS(HRE%I_Target)) = HERDING_LIST_DOORS(ABS(HRE%I_Target)) + &
-                                    W0_HERDING -((W0_HERDING-WR_HERDING)/R_HERDING)*P2P_DIST
-                            END IF
+                            IF (HRE%I_Door_Mode <= 0) CYCLE Other_Agent_Loop_2
+                            IF (ABS(HRE%I_Target)==0) CYCLE Other_Agent_Loop_2 
+                            EVEL = ((HR%X-HRE%X)*HRE%UBAR + (HR%Y-HRE%Y)*HRE%VBAR) / ( &
+                                 MAX(0.01_EB,SQRT(HRE%UBAR**2+HRE%VBAR**2))*SQRT((HRE%X-HR%X)**2+(HRE%Y-HR%Y)**2) )
+                            IF (EVEL > DOT_HERDING) CYCLE Other_Agent_Loop_2
+                            ! Linear weight function
+                            P2P_DIST = SQRT((HRE%X-HR%X)**2 + (HRE%Y-HR%Y)**2)
+                            HERDING_LIST_DOORS(ABS(HRE%I_Target)) = HERDING_LIST_DOORS(ABS(HRE%I_Target)) + &
+                                 W0_HERDING -((W0_HERDING-WR_HERDING)/R_HERDING)*P2P_DIST
                          END DO Other_Agent_Loop_2
                          DO II = 1, N_DOORS+N_EXITS
                             IF (HERDING_LIST_DOORS(II)>0.0_EB) THEN
-                               ! Make it symmetrical with respect the doors. The order of the doors
-                               ! is now random if they are equal.
+                               ! Make it symmetrical with respect the doors. 
+                               ! The order of the doors is now random if they are equal.
                                CALL RANDOM_NUMBER(RN)
                                HERDING_LIST_DOORS(II) = HERDING_LIST_DOORS(II) + 0.0001_EB*RN
                             END IF
@@ -6740,26 +6804,35 @@ CONTAINS
                          EVEL = 0.0_EB
                          DO II = 1, N_DOORS+N_EXITS
                             IF (HERDING_LIST_DOORS(II)>EVEL) THEN
-                               I_TMP = II
+                               I_TMP = -II  ! Set the door non-visible status
                                EVEL = HERDING_LIST_DOORS(II)
                             END IF
                          END DO
-                         IF (I_TMP>0) THEN  ! Found neighbors
+                         IF (I_TMP /= 0 .AND. HR%I_Door_Mode == 0) THEN
+                            ! Found a door using herding algorithm, start to move after one second.
+                            HR%TPRE = DT_GROUP_DOOR
+                            HR%TDET = MIN(T,HR%TDET)
+                         END IF
+                         IF (I_TARGET_OLD==0 .AND. I_TMP==0 .AND. ABS(HR%I_Target2) > 0 .AND. T > HR%TPRE+HR%TDET) THEN
+                            CALL RANDOM_NUMBER(RN)
+                            IF (RN > 0.9_EB) I_TMP = HR%I_Target2
+                         END IF
+                         IF (ABS(I_TMP) > 0) THEN  ! Found neighbors
                             I_TARGET = I_TMP
-                            IF (I_TMP > N_DOORS) THEN
-                               I_New_FField = EVAC_EXITS(I_TMP-N_DOORS)%I_VENT_FFIELD
+                            IF (ABS(I_TMP) > N_DOORS) THEN
+                               I_New_FField = EVAC_EXITS(ABS(I_TMP)-N_DOORS)%I_VENT_FFIELD
                             ELSE
-                               I_New_FField = EVAC_DOORS(I_TMP)%I_VENT_FFIELD
+                               I_New_FField = EVAC_DOORS(ABS(I_TMP))%I_VENT_FFIELD
                             END IF
                             HR%I_FFIELD = I_New_FField
                             HR%FFIELD_NAME = TRIM(MESH_NAME(I_New_FField))
                          ELSE
-                            IF (ABS(I_TARGET_OLD)>0) THEN  ! Go to the old direction
+                            IF (ABS(I_TARGET_OLD)>0) THEN  ! Go to the old target door
                                I_TARGET = I_TARGET_OLD
-                               I_New_FField = I_OLD_FFIELD 
-                            ELSE
+                               I_New_FField = I_OLD_FFIELD
+                            ELSE  ! no target door set, set the default flow field
                                I_TARGET = 0
-                               IF (HR%IEL > 0 ) THEN  
+                               IF (HR%IEL > 0) THEN  
                                   ! The agent is from some evac line
                                   HPT => EVACUATION(HR%IEL)
                                   IF (HPT%IMESH == NM) THEN
@@ -6780,17 +6853,43 @@ CONTAINS
                                      HR%FFIELD_NAME = TRIM(MESH_NAME(NM))
                                   END IF
                                END IF
+                               IF (HR%I_Door_Mode < 0) THEN
+                                  IF (EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_TYPE == 'Door') THEN
+                                     HR%FFIELD_NAME = &
+                                          TRIM(EVAC_DOORS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%GRID_NAME)
+                                     II_LOOP1: DO II = 1, NMESHES
+                                        IF (EVACUATION_ONLY(II) .AND. TRIM(HR%FFIELD_NAME) == TRIM(MESH_NAME(II))) THEN
+                                           I_NEW_FFIELD = II
+                                           EXIT II_LOOP1
+                                        END IF
+                                     END DO II_LOOP1
+                                  END IF
+                                  IF (EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_TYPE == 'Entry') THEN
+                                     HR%FFIELD_NAME = &
+                                          TRIM(EVAC_ENTRYS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%GRID_NAME)
+                                     II_LOOP2: DO II = 1, NMESHES
+                                        IF (EVACUATION_ONLY(II) .AND. TRIM(HR%FFIELD_NAME) == TRIM(MESH_NAME(II))) THEN
+                                           I_NEW_FFIELD = II
+                                           EXIT II_LOOP2
+                                        END IF
+                                     END DO II_LOOP2
+                                  END IF
+                               END IF
                             END IF
+                            HR%I_FFIELD = I_New_FField
+                            HR%FFIELD_NAME = TRIM(MESH_NAME(I_New_FField))
                          END IF
                          COLOR_INDEX = HR%COLOR_INDEX
                          IF (COLOR_METHOD == 4) THEN
-                            IF (I_TMP>0 .AND. I_TMP<=N_DOORS ) COLOR_INDEX = EVAC_DOORS(I_TMP)%Avatar_Color_Index
-                            IF (I_TMP>N_DOORS .AND. I_TMP<=N_DOORS+N_EXITS) &
-                                 COLOR_INDEX = EVAC_EXITS(I_TMP-N_DOORS)%Avatar_Color_Index
+                            IF (ABS(I_TARGET)>0 .AND. ABS(I_TARGET)<=N_DOORS ) &
+                                 COLOR_INDEX = EVAC_DOORS(ABS(I_TARGET))%Avatar_Color_Index
+                            IF (ABS(I_TARGET)>N_DOORS .AND. ABS(I_TARGET)<=N_DOORS+N_EXITS) &
+                                 COLOR_INDEX = EVAC_EXITS(ABS(I_TARGET)-N_DOORS)%Avatar_Color_Index
                          END IF
                          IF (COLOR_METHOD == 5) COLOR_INDEX = EVAC_AVATAR_NCOLOR ! default, cyan
                          HR%I_TARGET = I_TARGET 
                          HR%COLOR_INDEX = COLOR_INDEX
+                         I_TARGET_OLD = I_TARGET  ! No Nash iterations
                       END IF
                    END IF Herding_Type_Agent
 
@@ -6915,7 +7014,7 @@ CONTAINS
           KKZ = FLOOR(ZK+0.5_EB)
           HR%W = 0.0_EB
           SMOKE_SPEED_FAC = 1.0_EB
-          IF (.NOT.L_DEAD .AND. T <= HR%TDET) HR%DETECT1 = IBSET(HR%DETECT1,0)  ! Detected by the T_det distribution, bit 0
+          IF (.NOT.L_DEAD .AND. T >= HR%TDET) HR%DETECT1 = IBSET(HR%DETECT1,0)  ! Detected by the T_det distribution, bit 0
           Not_Init_Phase_Use_FED: IF (T > T_BEGIN .AND. ICYC > 1 .AND. USE_FED) THEN
              ! Calculate purser's fractional effective dose (FED)
              ! Note: Purser uses minutes, here DT is in seconds
@@ -7099,7 +7198,7 @@ CONTAINS
 
           ! Add self-driving force and torque
           EVEL = SQRT(UBAR**2 + VBAR**2)
-          IF (EVEL > 0.0_EB) THEN
+          IF (EVEL > 0.001_EB) THEN
              !Inclines: U,V are the (x,y) plane projection velocities
              
              SPEED_X = SPEED_XP*(0.5_EB + SIGN(0.5_EB,UBAR)) + SPEED_XM*(0.5_EB - SIGN(0.5_EB,UBAR)) 
@@ -7151,11 +7250,12 @@ CONTAINS
           ! check, if a new random force is needed on next time step.
           ! Poisson distribution, i.e., the agents do not have memory.
           ! P[NO CHANGE DURING DT] = EXP(-DTSP/HR%TAU)
-          IF ( GATH > 0.0_EB .AND. T > T_BEGIN ) THEN
+          IF (GATH > 0.0_EB .AND. T > T_BEGIN) THEN
              CALL RANDOM_NUMBER(RN)
-             IF ( RN > EXP(-DTSP/(0.2_EB*HR_TAU)) ) HR%NEWRND = .TRUE.
-             IF ( HR%NEWRND ) THEN
+             IF (RN > EXP(-DTSP/(0.2_EB*HR_TAU))) HR%NEWRND = .TRUE.
+             IF (HR%NEWRND) THEN
                 HR%NEWRND = .FALSE.
+                IF (EVEL<0.001_EB) GATH=GATH/100._EB  ! No prefered direction, stand still
                 GATH = GATH*(HR%SPEED/1.3_EB)**2
                 ! GATH is found to be more or less nice for speeds about 1.3 m/s
                 HR%KSI = (GAUSSRAND(GAME, GATH, GACM))
@@ -7165,14 +7265,14 @@ CONTAINS
                 ! Random noice variance: GATH = MAX( GATH, GATH*(100.0_EB-110.0_EB*ABS(EVEL/HR%SPEED)) )
                 ! Above GATH is found to be more or less nice for speeds about 1.3 m/s
                 ! Scale the random force by the current target speed V0 (Note: SQRT(GATH) = STD.DEV.)
-                ! NOTE: SPEED REDUCTION DUE TO SMOKE IS TREATED ELSEWHERE.
+                ! NOTE: Speed reduction due to smoke is treated elsewhere.
                 HR%KSI = ABS(HR%KSI)
                 HR%KSI = MAX(HR%KSI, HR%KSI*10.0_EB*(1.0_EB-MIN(0.9_EB,EVEL/HR%SPEED)))
              END IF
           END IF
 
           ! Add random force term
-          IF ( GATH > 0.0_EB .AND. T > T_BEGIN ) THEN
+          IF (GATH > 0.0_EB .AND. T > T_BEGIN) THEN
              U_NEW = U_NEW + 0.5_EB*DTSP*HR%V0_FAC*HR%MASS*HR%KSI*COS(HR%ETA)/HR%MASS
              V_NEW = V_NEW + 0.5_EB*DTSP*HR%V0_FAC*HR%MASS*HR%KSI*SIN(HR%ETA)/HR%MASS
              OMEGA_NEW = OMEGA_NEW + 0.5_EB*DTSP* 1.0_EB*SIGN(HR%KSI,HR%ETA-PI)
@@ -8402,7 +8502,7 @@ CONTAINS
           END IF
 
           EVEL = SQRT(UBAR**2 + VBAR**2)
-          IF (T > TPRE .AND. EVEL > 0.0_EB) THEN
+          IF (T > TPRE .AND. EVEL > 0.0001_EB) THEN
              SPEED = SPEED_YP*(0.5_EB + SIGN(0.5_EB,VBAR)) + SPEED_YM*(0.5_EB - SIGN(0.5_EB,VBAR)) 
              SPEED = SPEED*HR%V0_FAC
              TAU_FAC = (SPEED*(VBAR/EVEL))**2
@@ -8416,7 +8516,7 @@ CONTAINS
 
           ! Add self-propelling force terms, self-consistent VV
           EVEL = SQRT(UBAR**2 + VBAR**2)
-          IF (EVEL > 0.0_EB) THEN
+          IF (EVEL > 0.0001_EB) THEN
              SPEED = SPEED_XP*(0.5_EB + SIGN(0.5_EB,UBAR)) + SPEED_XM*(0.5_EB - SIGN(0.5_EB,UBAR)) 
              SPEED = SPEED*HR%V0_FAC
              U_NEW = (U_NEW + 0.5_EB*(DTSP/HR_TAU)*SPEED*(UBAR/EVEL)) / FAC_TIM
@@ -8908,8 +9008,9 @@ CONTAINS
          UBAR = 0.0_EB
          VBAR = 0.0_EB
       END IF
-      IF (I_HERDING_TYPE>1 .AND. HR%I_Target==0 .AND. HR%I_DoorAlgo==3) THEN
-         ! Herding type agent whitout any target door: do not move
+      IF (I_HERDING_TYPE>1 .AND. HR%I_Target==0 .AND. HR%I_DoorAlgo>0) THEN
+         ! Herding type agent without any target door: do not move
+         ! Agent without any target door: do not move
          DIST_TO_DOOR_TMP = 0.0_EB
          IF (HR%I_Door_Mode < 0) THEN
             IF (EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_TYPE == 'Door') THEN
@@ -8925,12 +9026,13 @@ CONTAINS
                     EVAC_ENTRYS(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_INDEX)%Y2))**2)
             END IF
             IF (DIST_TO_DOOR_TMP > 3.0_EB) HR%I_Door_Mode = 0
+            ! Herding agents that do not have any target will stop after 3 m from the
+            ! door/entr they use to came to this floor.
          ELSE
             UBAR = 0.0_EB
             VBAR = 0.0_EB
          END IF
       END IF
-
       J = MAX(0,HR%GROUP_ID)
       IF (J == 0 ) THEN
          GROUP_LIST(0)%TPRE = HR%TPRE + HR%TDET
@@ -8980,13 +9082,13 @@ CONTAINS
          END IF
       END IF
 
-      IF ( T <= TPRE ) THEN
-         ! No movement yet
+      EVEL = UBAR**2 + VBAR**2  ! (UBAR,VBAR) is an unit vector
+      IF  (T <= TPRE .OR. EVEL < 0.01_EB) THEN
+         ! No movement yet or no direction
          UBAR = 0.0_EB
          VBAR = 0.0_EB
-         HR_TAU = MAX(0.1_EB,HR%TAU/10.0_EB)
       END IF
-      IF ( T <= T_BEGIN ) THEN
+      IF (T <= T_BEGIN) THEN
          ! Initialization phase, i.e., flow field calculation
          UBAR = 0.0_EB
          VBAR = 0.0_EB
@@ -9522,6 +9624,7 @@ CONTAINS
                   HR%Y = YY
                   HR%Z = ZZ
                   HR%ANGLE = ANGLE
+                  HR%I_Target2 = 0
                   IF (STR_INDX>0) HR%STR_SUB_INDX = STR_SUB_INDX
                   IF (KEEP_XY .AND. IOR_NEW == HUMAN_TARGET_UNSPECIFIED) THEN
                      IF (EVAC_NODE_LIST(INODE2)%NODE_TYPE == 'Door') THEN
@@ -9542,6 +9645,20 @@ CONTAINS
 
                   HR%IOR = IOR_NEW
                   IF (IOR_NEW == HUMAN_TARGET_UNSPECIFIED .OR. IOR_NEW == HUMAN_STRS_TARGET) THEN
+                     HR%I_Door_Mode = 0  ! Default, main evacuation flow field agent
+                     IF (I_Target/=0 .AND. HR%I_DoorAlgo>0) HR%I_Door_Mode = 1  ! Found a target door/exit
+                     IF (I_Target==0 .AND. HR%I_DoorAlgo>0) HR%I_Door_Mode = -INODE2
+                     IF (EVAC_NODE_LIST(INODE2)%NODE_TYPE == 'Door') THEN
+                        IOR = - EVAC_DOORS(EVAC_NODE_LIST(INODE2)%NODE_INDEX)%IOR
+                     END IF
+                     IF (EVAC_NODE_LIST(INODE2)%NODE_TYPE == 'Entry') THEN
+                        IOR = EVAC_ENTRYS(EVAC_NODE_LIST(INODE2)%NODE_INDEX)%IOR
+                     END IF
+                     IF (EVAC_NODE_LIST(INODE2)%NODE_TYPE == 'Floor') THEN
+                        ! For STRS the first node should be DOOR
+                        IOR = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%IOR
+                     END IF
+
                      ! DOOR/ENTRY or STRS-mesh
                      IF (HR%IMESH /= IMESH2 ) THEN
                         ! Put the person to a new floor
@@ -9559,24 +9676,19 @@ CONTAINS
                         HR%FFIELD_NAME = TRIM(NEW_FFIELD_NAME)
                         HR%I_FFIELD = NEW_FFIELD_I
                      END IF
-                     HR%I_Door_Mode = 0  ! Default, not a herding agent
-                     IF (I_Target/=0 .AND. HR%I_DoorAlgo==3) HR%I_Door_Mode = 1  ! Found a target door/exit
                      HR%I_TARGET = I_TARGET
+                     IF (COLOR_METHOD == 4) THEN
+                        IF (ABS(I_TARGET)>0 .AND. ABS(I_TARGET)<=N_DOORS) &
+                             HR%COLOR_INDEX = EVAC_DOORS(ABS(I_TARGET))%Avatar_Color_Index
+                        IF (ABS(I_TARGET)>N_DOORS .AND. ABS(I_TARGET)<=N_DOORS+N_EXITS) &
+                             HR%COLOR_INDEX = EVAC_EXITS(ABS(I_TARGET)-N_DOORS)%Avatar_Color_Index
+                        IF (I_TARGET==0) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR ! default, cyan
+                     END IF
+                     IF (COLOR_METHOD==5 .AND. (HR%I_DoorAlgo==3 .OR. &
+                          (I_Target==0 .AND. HR%I_DoorAlgo>0))) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR ! default, cyan
                      HR%X_OLD = HR%X
                      HR%Y_OLD = HR%Y
                      ! IOR is the direction where the human is ejected.
-                     IF (EVAC_NODE_LIST(INODE2)%NODE_TYPE == 'Door') THEN
-                        IOR = - EVAC_DOORS(EVAC_NODE_LIST(INODE2)%NODE_INDEX)%IOR
-                        IF (I_Target==0 .AND. HR%I_DoorAlgo==3) HR%I_Door_Mode = -INODE2
-                     END IF
-                     IF (EVAC_NODE_LIST(INODE2)%NODE_TYPE == 'Entry') THEN
-                        IOR = EVAC_ENTRYS(EVAC_NODE_LIST(INODE2)%NODE_INDEX)%IOR
-                        IF (I_Target==0 .AND. HR%I_DoorAlgo==3) HR%I_Door_Mode = -INODE2
-                     END IF
-                     IF (EVAC_NODE_LIST(INODE2)%NODE_TYPE == 'Floor') THEN
-                        ! For STRS the first node should be DOOR
-                        IOR = EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%IOR
-                     END IF
                      IF ( ABS(IOR) == 1 ) THEN
                         HR%U = V*IOR
                         HR%V = 0.0_EB
@@ -10080,6 +10192,7 @@ CONTAINS
                CALL Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, xx, yy, I_Target, color_index, new_ffield_i, HR)
 
                new_ffield_name = TRIM(MESH_NAME(new_ffield_i))
+               !TImo: parempi ilisi olla muuttamatta mitään, jos ei ovea löydy.
                IF ( j > 0 ) THEN
                   Group_List(j)%GROUP_I_FFIELDS(i_tmp) = new_ffield_i
                END IF
@@ -10353,6 +10466,7 @@ CONTAINS
       HR%GROUP_ID = 0
       HR%I_Target = 0
       HR%I_DoorAlgo = PNX%I_AGENT_TYPE
+      HR%I_Door_Mode = 0 ! Default, no target door yet
       !
       IF (ABS(ior) == 1) irnmax = INT(PNX%Width*4.0_EB)
       IF (ABS(ior) == 2) irnmax = INT(PNX%Width*4.0_EB)
@@ -12332,7 +12446,7 @@ CONTAINS
           ! from (i,j)==>(inew,j):    iw and iw2 are zero, iw1 does not matter
           !                           ic=ic2 ==> iw=iw2
           ! from (i,j)==>(inew,jnew): iw1 and iw2 are zero, iw does not matter
-          IF ((i==i_old .AND. iw/=0) .OR. (i/=i_old .AND. (iw1/=0 .OR. iw2/=0)) .AND. (idoor .NE. itarget)) THEN
+          IF ((j==j_old .AND. iw/=0) .OR. (j/=j_old .AND. (iw1/=0 .OR. iw2/=0)) .AND. (idoor .NE. itarget)) THEN
              See_door = .FALSE.
              ave_K = MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS
              max_fed = M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
@@ -12648,7 +12762,8 @@ CONTAINS
     ! Passed variables
     INTEGER, INTENT(IN) :: nm, nm2, ie, j, j1, i_egrid, imode
     REAL(EB), INTENT(IN) :: xx, yy
-    INTEGER, INTENT(OUT)  :: I_Target, I_Color, I_Field
+    INTEGER, INTENT(OUT)  :: I_Target, I_Color
+    INTEGER, INTENT(INOUT)  :: I_Field
     TYPE (HUMAN_TYPE), POINTER :: HR
     !
     ! Local variables
@@ -12672,12 +12787,17 @@ CONTAINS
     END IF
 
     I_Agent_Type = HR%I_DoorAlgo
-    IF (imode == 1 .AND. I_Agent_Type==3) Return
     i_old_ffield = HR%I_FFIELD
     IF (i_old_ffield > 0) THEN
        name_old_ffield = TRIM(MESH_NAME(i_old_ffield))
     ELSE
        name_old_ffield = TRIM(MESH_NAME(nm_tmp))
+    END IF
+    IF (imode==1 .AND. I_Agent_Type==3 .AND. HR%I_Target/=0 .AND. (I_HERDING_TYPE==1 .OR. I_HERDING_TYPE==3)) THEN
+       ! These herding agents keep the first choise
+       I_Target = HR%I_Target
+       I_Color = HR%COLOR_INDEX
+       RETURN
     END IF
     IF (HR%IEL > 0 ) THEN
        ! Agent HR originates from an evac line
@@ -12861,7 +12981,7 @@ CONTAINS
     ! Now Is_Know_Door means: known + correct floor
 
     ! Agent types: 1 rational agents, 2 known doors, 3 herding, 0 main evac ff
-    IF (I_Agent_Type == 0 .OR. I_Agent_Type == 3) THEN  ! main evac ff (or evac/entr line ff)
+    IF (I_Agent_Type == 0) THEN  ! main evac ff (or evac/entr line ff)
        Is_Known_Door(:)   = .FALSE.
        Is_Visible_Door(:) = .FALSE.
     END IF
@@ -12896,6 +13016,8 @@ CONTAINS
           END IF
           ! Rational Agents know all visible doors (and the given known doors)
           IF (I_Agent_Type==1 .AND. Is_Visible_Door(i)) Is_Known_Door(i) = .TRUE.
+          ! Herding agents do not use visible doors if they are not known doors
+          IF (I_Agent_Type==3 .AND. .NOT.Is_Known_Door(i)) Is_Visible_Door(i) = .FALSE.
        END IF ! correct main evac mesh
     END DO ! all doors and exits
 
@@ -13139,11 +13261,20 @@ CONTAINS
                    IF (Is_Known_Door(i_tmp) .AND. .NOT. Is_Visible_Door(i_tmp)) color_index = 5
                    IF (.NOT. Is_Known_Door(i_tmp) .AND. Is_Visible_Door(i_tmp)) color_index = 6
                 ELSE    ! no match 
-                   ! No door found (or too much smoke), use the main evac grid ffield
-                   ! Note: This should be changed in later versions of the program.
+                   ! No door found (or too much smoke), use the main evac mesh ffield by default.
+                   ! Note: Now there is a herding algorithm and it is also used for "normal" agents
+                   !       if they do not have any door.  If I_HERDING_TYPE > 1 then the "lost"
+                   !       agents are not moving (v0=0), otherwise they are following the main
+                   !       evacuation mesh flow field.  Exception: If agents came from a door/entr
+                   !       to the room then they continue about 3 m away from the door and stop there.
                    i_tmp = 0
-                   name_new_ffield = TRIM(MESH_NAME(nm_tmp))
-                   i_new_ffield    = nm_tmp
+                   IF (imode /= 2) THEN
+                      i_new_ffield    = nm_tmp
+                      name_new_ffield = TRIM(MESH_NAME(i_new_ffield))
+                   ELSE ! Came out of a door or an entry
+                      i_new_ffield = I_Field
+                      name_new_ffield = TRIM(MESH_NAME(i_new_ffield))
+                   END IF
                    IF (imode == 0) THEN  ! Initialization call, use evac line info
                       name_new_ffield = TRIM(HPT%GRID_NAME)
                       i_new_ffield    = HPT%I_VENT_FFIELDS(0)
@@ -13169,14 +13300,17 @@ CONTAINS
           I_Field  = i_new_ffield
           RETURN
        END IF
+       I_Field = i_new_ffield
 
     ELSE ! No known/visible door
        i_tmp = 0 ! no door found
        color_index = EVAC_AVATAR_NCOLOR ! default, cyan
        IF (imode == 2) THEN   ! check_target_node calls
           I_Target = 0
+          i_new_ffield = I_Field
+          name_new_ffield = TRIM(MESH_NAME(i_new_ffield))
           I_Color  = color_index
-          I_Field  = nm_tmp
+          I_Field  = i_new_ffield
           RETURN
        END IF
        IF (HR%IEL > 0 ) THEN  
@@ -13200,6 +13334,7 @@ CONTAINS
           END IF
           IF (Color_Method == 4) color_index = EVAC_AVATAR_NCOLOR
        END IF
+       I_Field = i_new_ffield
     END IF ! Any known or visible door
     HR%I_Target = i_tmp
     IF (imode < 2) I_Target = i_tmp
