@@ -1,6 +1,6 @@
 &HEAD CHID = 'BRE_Spray_A_3' TITLE='Radiation atten. test (Murrel et al. 1995)' /
-&MESH IJK = 60,30,45, XB = -2,2,-1,1,0,3 /
- MESH IJK = 40,20,30, XB = -2,2,-1,1,0,3 /
+ MESH IJK = 60,30,45, XB = -2,2,-1,1,0,3 /
+&MESH IJK = 40,20,30, XB = -2,2,-1,1,0,3 /
 &TIME T_END=15.,DT = 0.05 /
 &DUMP DT_PL3D = 30.0 DT_DEVC = 0.1 /
 &DEVC  XYZ = 0.0, 0.0,2.24, 
@@ -19,7 +19,7 @@
  SMOKEVIEW_ID='sprinkler_upright' /
 &PART  ID='water drops', 
  WATER = .TRUE., 
- DIAMETER = 166.406705844152 /
+ DIAMETER = 173.340318587659 /
 &RADI NUMBER_RADIATION_ANGLES = 1000  /
 &MISC FLUXMAX = 1000000 /
 &DEVC XYZ = 2.0,0.00,1.50,  QUANTITY = 'GAUGE HEAT FLUX', ID = 'flux' IOR = -1 /
@@ -54,8 +54,11 @@
 &VENT MB = 'YMIN', SURF_ID = 'OPEN' /
 &VENT MB = 'YMAX', SURF_ID = 'OPEN' /
 &VENT MB = 'ZMAX', SURF_ID = 'OPEN' /
+&VENT MB = 'ZMIN', SURF_ID = 'OPEN' /
+ #
 &VENT XB = -2.0,-2.0,-0.5,0.5,1.0,2.0, SURF_ID = 'HOT' /
-&SURF ID='HOT',TMP_FRONT = 900.0, TAU_T = 0.0, COLOR = 'RED'
+&SURF ID='HOT',TMP_FRONT = 900.0, TAU_T = 0.0, COLOR = 'RED' H_FIXED = 0. /
+ #
 &VENT XB = 2.0,2.0,-0.5,0.5,1.0,2.0, SURF_ID = 'COOL',  /
 &SURF ID='COOL',TMP_FRONT = 20.0, COLOR = 'BLUE' /
 &TAIL /
