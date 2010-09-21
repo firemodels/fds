@@ -302,6 +302,10 @@ DO K=0,M%KBP1
    M%RHO(:,:,K) = M%RHO_0(K)
    M%TMP(:,:,K) = M%TMP_0(K)
 ENDDO
+! fill second ghost cell ------------
+M%RHO(:,:,-1)       = M%RHO_0(0)
+M%RHO(:,:,M%KBP1+1) = M%RHO_0(M%KBP1)
+! -----------------------------------
 M%RHOS    = M%RHO
 IF (.NOT.EVACUATION_ONLY(NM)) M%FRHO    = 0._EB
 M%U       = U0
