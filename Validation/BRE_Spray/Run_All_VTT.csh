@@ -1,7 +1,7 @@
 #!/bin/csh -f
 setenv SVNROOT ~/FDS-SMV
 setenv FDS $SVNROOT/FDS_Compilation/intel_linux_64/fds5_intel_linux_64
-set RUNFDS=$SVNROOT/Utilities/Scripts/runfds_sge.csh
+set RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
 setenv BASEDIR `pwd`
 
 cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/Current_Results
