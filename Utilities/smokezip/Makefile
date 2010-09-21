@@ -1,7 +1,7 @@
 SOURCE_DIR = ../../../SMV_5/source/
 BUILD_DIR = $(SOURCE_DIR)/../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
-INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip -I $(SOURCE_DIR)/include
+INC_DIR = -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
 FILTERC =
 FILTERF =
 
@@ -16,7 +16,7 @@ OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 
 # Definition of the object variables
 
-obj =    assert.o CNV3dsmoke.o CNVboundary.o CNViso.o CNVpart.o CNVplot3d.o CNVslice.o csphere.o dmalloc.o egz_stdio.o endian.o histogram.o main.o readfiles.o utilities.o isobox.o getdata.o getsizes.o
+obj =    main.o CNV3dsmoke.o CNVboundary.o CNViso.o CNVpart.o CNVplot3d.o CNVslice.o assert.o csphere.o dmalloc.o egz_stdio.o endian.o histogram.o readfiles.o utilities.o isobox.o getdata.o getsizes.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
@@ -57,8 +57,8 @@ ms_win_32 : $(objwin)
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
-intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
+intel_win_32 : CFLAGS    = -Od /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
+intel_win_32 : FFLAGS    = -Od /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
