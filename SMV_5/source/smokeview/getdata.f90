@@ -2,7 +2,9 @@
 
 subroutine getzonedata(nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getzonedata@40' :: getzonedata
+#endif
 #endif
 implicit none
 integer, intent(in) :: nrooms, nfires
@@ -54,7 +56,9 @@ end subroutine getzonedata
 
 subroutine getxyzdata(iblank,nx,ny,nz,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getxyzdata@20' :: getxyzdata
+#endif
 #endif
 implicit none
 
@@ -79,7 +83,9 @@ end subroutine getxyzdata
 
 subroutine getpatchdata(lunit,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,npqq,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getpatchdata@48' :: getpatchdata
+#endif
 #endif
 implicit none
 
@@ -125,7 +131,9 @@ end subroutine getpatchdata
 
 subroutine getdata1(ipart,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getdata1@8' :: getdata1
+#endif
 #endif
 
 implicit none
@@ -186,7 +194,9 @@ end subroutine getdata1
 subroutine getdata2a(nmax,nspr,x,y,z,t,stime,np,ns,error)
                    
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getdata2a@40' :: getdata2a
+#endif
 #endif
 
   implicit none
@@ -239,7 +249,9 @@ end subroutine getdata2a
 subroutine getdata2b(partfilename, x, y, z, tpart, bframe, sframe, stimes, &
                      npartpoints, npartframes, mxpoints, mxframes, error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getdata2b@56' :: getdata2b
+#endif
 #endif
 implicit none
 character(len=*), intent(in) :: partfilename
@@ -328,7 +340,9 @@ subroutine getdata2(xs,ys,zs,&
       	    				error)
                    
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getdata2@128' :: getdata2
+#endif
 #endif
 
 implicit none
@@ -564,7 +578,9 @@ subroutine getslicedata(slicefilename,longlabel,shortlabel,units,&
             is1,is2,js1,js2,ks1,ks2,idir,qmin,qmax,qdata,times,nstepsmax,sliceframestep,&
 			endian,settmin_s,settmax_s,tmin_s,tmax_s)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getslicedata@104' :: getslicedata
+#endif
 #endif
 
 implicit none
@@ -746,7 +762,9 @@ end subroutine getslicedata
 
 subroutine getsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,testslice,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getsliceframe@44' :: getsliceframe
+#endif
 #endif
 
 implicit none
@@ -798,7 +816,9 @@ end subroutine getsliceframe
 subroutine endianout(endianfilename)
 implicit none
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_endianout@8' :: endianout
+#endif
 #endif
 character(len=*) :: endianfilename
 integer :: one
@@ -813,7 +833,9 @@ end subroutine endianout
 
 subroutine outsliceheader(slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_outsliceheader@40' :: outsliceheader
+#endif
 #endif
 
 implicit none
@@ -848,7 +870,9 @@ end subroutine outsliceheader
 
 subroutine outsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_outsliceframe@40' :: outsliceframe
+#endif
 #endif
 
 implicit none
@@ -878,7 +902,9 @@ end subroutine outsliceframe
 
 subroutine outboundaryheader(boundaryfilename,boundaryunitnumber,npatches,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_outboundaryheader@48' :: outboundaryheader
+#endif
 #endif
 implicit none
 
@@ -911,7 +937,9 @@ end subroutine outboundaryheader
 
 subroutine outpatchframe(lunit,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,error)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_outpatchframe@44' :: outpatchframe
+#endif
 #endif
 implicit none
 
@@ -949,7 +977,9 @@ end subroutine outpatchframe
 subroutine getplot3dqa(qfilename,nx,ny,nz,qq,error)
 
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getplot3dqa@28' :: getplot3dqa
+#endif
 #endif
 implicit none
 
@@ -1008,7 +1038,9 @@ end subroutine getplot3dqa
 subroutine getplot3dq(qfilename,nx,ny,nz,qq,error,endian,isotest)
 
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getplot3dq@36' :: getplot3dq
+#endif
 #endif
 implicit none
 
@@ -1102,7 +1134,9 @@ end subroutine getplot3dq
 
 subroutine plot3dout(outfile, nx, ny, nz, qout, error3)
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_plot3dout@28' :: plot3dout
+#endif
 #endif
 implicit none
 
@@ -1137,7 +1171,9 @@ end subroutine plot3dout
 SUBROUTINE color2rgb(RGB,COLOR)
 
 #ifdef pp_cvf
+#ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_color2rgb@12' :: color2rgb
+#endif
 #endif
 ! Translate character string of a color name to RGB value
 
