@@ -1149,6 +1149,27 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Figure \ref{fi
    \label{fig_compression_wave}
 \end{figure}
 
+\clearpage
+
+\section{Scalar Transport (move\_slug)}
+
+In this section we demonstrate the qualitative behavior of the Superbee flux limiter scheme for transport of a square wave.  The diffusivity is set to zero and the advecting velocity is constant and uniform $\mathbf{u} = [1.0\,\,\,1.0]$.  The domain is the unit square with a passive scalar marker initialized to zero everywhere, except for two `slugs' of mass.  The first slug is set to unity over the region $x \times z = [0.125,\,0.375] \times [0.125,\,0.375]$.  The second slug is set to 1/2 over the region $x \times z = [0.500,\,0.750] \times [0.500,\,0.750]$.  With the scalar bounds set to [0,1], these slugs demonstrate both the boundedness and TVD (total variation diminishing) behavior of the transport scheme.
+
+This case also tests two different types of boundary conditions applied in FDS.  First, the domain is periodic and the simulation runs for one flow through time.  The scalar slugs therefore ideally arrive back to their original locations with as little diffusion as possible.  Also, the domain is broken into four equally sized meshes, each with $40 \times 40$ uniform cells.  To increase temporal accuracy and focus on the potential spacial error, we run the case with a CFL of 0.25.  In FDS, we refer to the mesh interface as an `interpolated boundary'.
+
+The results of the test are shown visually in Figure \ref{fig_move_slug}.  The upper-left image shows the initial condition.  The black lines indicate the mesh interfaces.  To the right of the initial condition we show the first slug crossing the mesh interfaces without incurring spurious noise.  The lower left image shows the final result for the Superbee limiter.  By comparison with a first-order scheme (lower right), this test case confirms that relatively low levels of diffusion are incurred at both periodic and interpolated boundaries in FDS.
+
+\begin{figure}[t]
+   \begin{tabular}{rl}
+      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_t0.png} &
+      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_tm.png} \\
+      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_tf.png} &
+      \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL1_tf.png} \\
+   \end{tabular}
+   \caption{(Upper left) Initial condition. (Upper right) Superbee solution after 0.175 seconds showing the scalar slug cleanly passing through the mesh interface. (Lower left) Final result for Superbee after one flow through time.  (Lower right) Result for first-order upwinding after one flow through time, illustrating the relatively low dissipation of the Superbee scheme.  Note that, though the first-order scheme is available as an option in FDS, it is presented here for comparison purposes only.  In practice, the higher order Superbee scheme is preferred for LES (FDS default).}
+   \label{fig_move_slug}
+\end{figure}
+
 
 \clearpage
 
