@@ -55,6 +55,7 @@ $PDIR/fds2ascii < $WDIR/Qs=p1_RI=20_fds2ascii.input
 $PDIR/fds2ascii < $WDIR/Qs=p2_RI=20_fds2ascii.input
 $PDIR/fds2ascii < $WDIR/Qs=p5_RI=20_fds2ascii.input
 cp Qs*fds2ascii.csv $WDIR
+cp Qs*hrr.csv       $WDIR
 cd $WDIR
 $PDIR/flame_height > $WDIR/FDS_Flame_Height.csv
 cd ./
