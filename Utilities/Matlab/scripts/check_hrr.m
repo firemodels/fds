@@ -39,6 +39,7 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Q*','Interpreter','LaTeX','FontSize',Label_Font_Size)
 ylabel('FDS Q (kW)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+text(.3,2e7,'Flame Height Heat Release Verification','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
 hh=legend(K,'$D^*/\delta x=5$','$D^*/\delta x=10$','$D^*/\delta x=20$','correct','Location','Southeast');
 set(hh,'Interpreter','LaTeX','FontSize',Key_Font_Size)
 
