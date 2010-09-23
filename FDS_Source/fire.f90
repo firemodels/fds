@@ -216,7 +216,7 @@ DO K=1,KBAR
                ! experimental
                TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! diffusive time scale
                EPSK = SC*KRES(I,J,K)/TAU_D              ! ke dissipation rate, assumes production=dissipation
-               KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH     ! estimate of subgrid ke, from Kolmogorov spectrum  
+               KSGS = 1.5_EB*(EPSK*DELTA/PI)**TWTH     ! estimate of subgrid ke, from Kolmogorov spectrum  
                TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB) ! advective time scale
                TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB))     ! acceleration time scale
                MIX_TIME(I,J,K)=MIN(TAU_D,TAU_U,TAU_G)
