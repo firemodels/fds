@@ -8,12 +8,12 @@
 
 The most effective way of introducing the subject of uncertainty in fire modeling is by way of an example.
 Suppose that a fire model is used to estimate the likelihood that an electrical control cable could be damaged by
-a fire. It is assumed that the cable loses functionality when its surface temperature reaches 400~$^\circ$C,
-and the model predicts that the cable temperature could reach as high as 350~$^\circ$C.
+a fire. It is assumed that the cable loses functionality when its surface temperature reaches 200~$^\circ$C,
+and the model predicts that the cable temperature could reach as high as 175~$^\circ$C.
 Does this mean that there is no chance of damage? The answer is no, because the input parameters, like the heat release rate of
 the fire, and the model assumptions, like the way the cables are modeled, are uncertain. The combination of the
 two -- the {\em parameter uncertainty} and the {\em model uncertainty} -- leave open the possibility that the cable temperature could exceed
-400~$^\circ$C.
+200~$^\circ$C.
 
 This \paper addresses {\em model uncertainty} only and suggests a simple method to quantify it. While parameter uncertainty is certainly an
 important consideration in fire modeling, its treatment varies considerably depending on the particular application. For example, in what is often
@@ -38,10 +38,10 @@ by about 10~\%,'' or ``The model predictions are within about 20~\% of the measu
 at the very least to demonstrate that the model is appropriate for the given application.
 However, even the statement that the model over-predicts measured temperatures by 10~\% is useful not only to gain acceptance of the model but also
 to provide a better sense of the model's accuracy, and a greater level of assurance in answering the question posed above. Knowing that the model
-not only predicted a temperature of 350~$^\circ$C, but also that the model tends to over-predict temperatures by a certain amount, increases the confidence that
+not only predicted a temperature of 175~$^\circ$C, but also that the model tends to over-predict temperatures by a certain amount, increases the confidence that
 the postulated fire would not cause the cable to fail. The probability of cable failure could be quantified further via a statistical distribution
-like the one shown in Fig.~\ref{bell_curve}. The area indicated by the shaded region is the probability that the temperature will exceed 400~$^\circ$C,
-even though the model has predicted a peak temperature of only 350~$^\circ$C.
+like the one shown in Fig.~\ref{bell_curve}. The area indicated by the shaded region is the probability that the temperature will exceed 200~$^\circ$C,
+even though the model has predicted a peak temperature of only 175~$^\circ$C.
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=5.in]{FIGURES/bell_curve}
@@ -73,7 +73,7 @@ One critical approximation is the discretization of the governing equations. For
 the partial derivative of the density, $\rho$,
 with respect to the spatial coordinate, $x$, can be written in approximate form as:
 \be \frac{\partial \rho}{\partial x} = \frac{\rho_{i+1} - \rho_{i-1}}{2 \, \dx} + \mathcal{O}(\dx^2) \ee
-where $\dx$ is the grid spacing chosen by the model user.
+where $\rho_i$ is the average value of the density in the $i$th grid cell and $\dx$ is the spacing between cells.
 The second term on the right represents all of the terms of order $\dx^2$ and higher in the Taylor
 series expansion and are known collectively as the
 {\em discretization error}. These extra terms are simply dropped from
@@ -93,7 +93,7 @@ from its transport equations, radiation solver, solid phase heat transfer routin
 empirical mass, momentum and energy transfer routines at the wall, and so on.
 It has been suggested by some that
 a means to quantify the model uncertainty is to combine the uncertainties of all the model
-components in a way similar to that of the input parameters.
+components.
 However, such an exercise is very difficult, especially for a computational fluid dynamics (CFD) model,
 for a number of reasons. First, fire involves
 a complicated interaction of gas and solid phase phenomena that are closely coupled.
@@ -319,14 +319,13 @@ Combining Eq.~(\ref{eeq}) with Eq.~(\ref{meq}) yields:
 Equation~(\ref{lnMeq}) is important because it does not involve the unknown $\theta$, but rather the known predicted and measured values of the quantity
 of interest plus an estimate of the experimental uncertainty. Until now, it has been assumed that all of the relevant uncertainties can be characterized
 by normal distributions. Equation~(\ref{lnMeq}) can be used to test this assumption, whereas Eqs.~(\ref{mdist}) and (\ref{expunc}) cannot.
-An examination of the results of the NRC/EPRI validation study discussed above~\cite{NUREG_1824}
-indicates that in cases where the number of pairs of $M$ and $E$ were greater than about 20, the values of $\ln (M/E)$ passed a test for
+An examination of the results of the validation study discussed above~\cite{NUREG_1824}
+indicates that in cases where the number of pairs of $M$ and $E$ is greater than about 20, the values of $\ln (M/E)$ pass a test for
 normality\footnote{The Kolmogorov-Smirnov test for
 normality was used with a $p$-value of 0.05. The $p$-value determines the probability of being incorrect in concluding that the data is not normally distributed.}, whereas when
-there were less values, the values often did not pass the normality test. Figure~\ref{Normality} contains two sets of data for the model Fire Dynamics Simulator (FDS).
-There were 124 point comparisons of Wall Temperature, for which $\ln (M/E)$ conforms quite well to a normal distribution. However, there were only 9 point comparisons
-for Plume Temperature, for which $\ln (M/E)$ does not conform.
-From this point onward, it is assumed that the validation data is normally distributed. Alternative techniques for assessing model uncertainty with limited
+there are less values, normality cannot be assumed. Figure~\ref{Normality} contains a set of data from the validation study.
+There were 124 point comparisons of measured and predicted Wall Temperatures, for which $\ln (M/E)$ conforms quite well to a normal distribution. 
+If normality cannot be assumed, alternative techniques for assessing model uncertainty with limited
 experimental data have been proposed, for example, see Ref.~\cite{Siu:1992}.
 \begin{figure}[ht!]
 \begin{tabular}{ll}
@@ -405,9 +404,9 @@ model can be considered of comparable accuracy to the measurements.
 
 This section describes how to make use of Eq.~(\ref{truth}). Referring to the sample problem given above, suppose a fire model is being used to estimate the likelihood that
 electrical control cables could be damaged due to a fire in a compartment.
-Damage is assumed to occur when the surface temperature of any cable reaches 400~$^\circ$C.
+Damage is assumed to occur when the surface temperature of any cable reaches 200~$^\circ$C.
 What is the likelihood that the cables would be damaged if the
-model predicts that the maximum surface temperature of the cables is 350~$^\circ$C. Assuming that the input parameters are not in question, the following
+model predicts that the maximum surface temperature of the cables is 175~$^\circ$C. Assuming that the input parameters are not in question, the following
 procedure is suggested:
 \begin{enumerate}
 \item Assemble a collection of model predictions, $M_i$, and experimental measurements, $E_i$, from
@@ -417,31 +416,34 @@ various parameters, like the thermal inertia of the object, the size of the fire
 experimental uncertainty from those who conducted the experiments or follow the procedure outlined by Hamins~\cite{NUREG_1824}. Express the
 experimental uncertainty in relative terms, $\widetilde{\sigma}_E$.
 \item Calculate the bias factor, $\delta$, and relative standard deviation, $\tilde{\sigma}_M$, from Eqs.~(\ref{delta}) and (\ref{stdev}), respectively.
-For this example, assume that $\delta=1.03$ and that $\widetilde{\sigma}_M=0.10$.
+For the data shown in Fig.~\ref{Normality}, $\delta=1.13$ and that $\widetilde{\sigma}_M=0.20$.
 \end{enumerate}
-
 Consider the distribution, Eq.~(\ref{truth}), of the ``true'' temperature, $\theta$, shown graphically in Fig.~\ref{bell_curve}.
-The vertical lines indicate the ``critical'' temperature at which damage is assumed to occur ($T_c=400$~$^\circ$C), and the temperature predicted by the
-model (350~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 330~$^\circ$C.
+The vertical lines indicate the ``critical'' temperature at which damage is assumed to occur ($T_c=200$~$^\circ$C), and the temperature predicted by the
+model (175~$^\circ$C). Given an ambient temperature of 20~$^\circ$C, the predicted temperature rise, $M$, is 155~$^\circ$C.
 The mean and standard deviation in Eq.~(\ref{truth}) are calculated:
-\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{330}{1.03} = 340.4 \; ^\circ \hbox{C}  \quad ; \quad
-   \sigma = \widetilde{\sigma}_M \, \frac{M}{\delta} = 0.10 \times \frac{330}{1.03} = 32 \; ^\circ \hbox{C}  \ee
+\be \mu = 20 + \frac{M}{\delta} = 20 + \frac{155}{1.13} = 157 \; ^\circ \hbox{C}  \quad ; \quad
+   \sigma = \widetilde{\sigma}_M \, \frac{M}{\delta} = 0.20 \times \frac{155}{1.13} = 27 \; ^\circ \hbox{C}  \ee
 respectively. The shaded area beneath the bell curve is the probability that the ``true'' temperature can exceed the
-critical value, $T_c=400$~$^\circ$C, which can be expressed via the {\em complimentary error function}:
-\be P(T>T_c) = \frac{1}{2} \hbox{efrc} \left( \frac{T_c - \mu}{\sigma \sqrt{2}} \right) \approx 0.03  \ee
-This means that there is a 3~\% chance that the cables could become damaged, assuming that the model's input parameters are not
+critical value, $T_c=200$~$^\circ$C, which can be expressed via the {\em complimentary error function}:
+\be P(T>T_c) = \frac{1}{2} \hbox{erfc} \left( \frac{T_c - \mu}{\sigma \sqrt{2}} \right) = \frac{1}{2} \hbox{erfc} \left( \frac{200 - 157}{27 \sqrt{2}} \right) \approx 0.06  \ee
+This means that there is a 6~\% chance that the cables could become damaged, assuming that the model's input parameters are not
 subject to uncertainty.
 
-Of course, this analysis is not complete. It could never be assumed that the input parameters for a model calculation are perfect. At the very least, the heat
-release rate of the fire would be selected from a range of plausible values. This selection, along with that of other parameters, would likely broaden the
-bell curve shown in Fig.~\ref{bell_curve}.
 
 
 \section{Conclusion}
 
-A procedure has been proposed to estimate model uncertainty by way of comparisons of model predictions with experimental measurements whose uncertainty has been
-quantified. For clarity of presentation, issues associated with the selection of experiments, metrics of comparison, and presentation of results, have not been
-discussed in detail because these decisions are application-specific and best left to the end user or AHJ.
+A method has been proposed to estimate model uncertainty by way of comparisons of model predictions with experimental measurements whose uncertainty has been
+quantified. The method is ideal for complex numerical models for which a systematic analysis of sub-components is impractical, but for which there exists a relatively 
+large amount of experimental data with which to evaluate the accuracy of the model predictions. If the uncertainty in the experiments can be quantified, the 
+uncertainty in the model can then be expressed in the form of a normal distribution whose mean and standard deviation are estimated from the relative difference between
+the predicted and measured values.
+
+This method only addresses model uncertainty. It does not account for the uncertainty associated with the model input parameters. How the {\em parameter uncertainty} is
+treated depends greatly on the type of application. Regardless of how the parameter uncertainty is calculated, the model uncertainty needs to be addressed
+independently. In fact, it is incumbent on the model developers to express the uncertainty of the model in as simple a form as possible to enable the end user to 
+assess the impact of parameter uncertainty and then combine the two forms of uncertainty into a final result. 
 
 
 
