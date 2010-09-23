@@ -71,7 +71,7 @@ void Render(int view_mode){
     if(view_mode==VIEW_LEFT)RenderOnceNowL=0;
     if(view_mode==VIEW_RIGHT)RenderOnceNowR=0;
     if(RenderOnceNowR==0&&RenderOnceNowL==0){
-      RenderState(0);
+      if(render_double_state==0)RenderState(0);
       RenderSkip=1;
     }
   }
