@@ -2496,8 +2496,14 @@ the inflow exactly because of inaccuracies at the solid and mesh boundaries. The
 \section{Special Topic: Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
 \label{info:CLIP}
 
-On rare occasions you might need to set upper or lower bounds on the density, temperature, or species mass fractions. The parameters
-listed in Table~\ref{tbl:CLIP} are for diagnostic purposes only.
+The algorithms in FDS are designed to work within a certain range of values for the thermodynamic quantities density, temperature and mass fraction. To prevent unphysical results, 
+there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range
+errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on user input, but it is not
+possible in all cases to anticipate just how low or high a given value might be. Thus, 
+on rare occasions you might need to set upper or lower bounds on the density, temperature, or species mass fractions. These parameters are input under the
+namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be
+``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an
+unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
 
 
 
@@ -4972,13 +4978,13 @@ turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} 
 \section{Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
 
-The no-slip condition implies that the continuum tangential gas velocity at a surface is zero.  
-In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value. 
-In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field.  
-For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default). 
-For an LES (Large Eddy Simulation), the Werner-Wengle wall model is applied for smooth walls and a log law is applied for rough walls.  
-The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for wall model details.  
-To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line.  
+The no-slip condition implies that the continuum tangential gas velocity at a surface is zero.
+In turbulent flow the velocity increases rapidly through a boundary layer that is only a few millimeters thick to its ``free-stream'' value.
+In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field.
+For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default).
+For an LES (Large Eddy Simulation), the Werner-Wengle wall model is applied for smooth walls and a log law is applied for rough walls.
+The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for wall model details.
+To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line.
 In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on {\ct SURF}.
 
 \begin{warning}
@@ -8785,7 +8791,7 @@ Examples:
 &SLCF PBY=0, QUANTITY='SCALAR RESOLUTION', QUANTITY2='MASS FRACTION', SPEC_ID='HELIUM' /
 &SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV', CELL_CENTERED=.TRUE. /
 \end{verbatim} \normalsize
-Note that an additional scalar {\ct QUANTITY2} is required for MSR and WEM.  {\ct QUANTITY2} may be any output quantity appropriate for {\ct SLCF}. 
+Note that an additional scalar {\ct QUANTITY2} is required for MSR and WEM.  {\ct QUANTITY2} may be any output quantity appropriate for {\ct SLCF}.
 Also, {\ct CELL\_CENTERED} is optional for any of the three metrics.
 
 \subsubsection{Measure of Turbulence Resolution}
