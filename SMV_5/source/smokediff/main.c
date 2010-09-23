@@ -21,6 +21,7 @@ char main_revision[]="$Revision$";
 int main(int argc, char **argv){
 
   char *smv1=NULL, *smv2=NULL, *arg;
+  char smv1_out[1024];
   char smoke1[1024], smoke2[1024], smv_out[1024];
   FILE *stream_out, *stream_in1, *stream_in2;
   int no_plot3d=0, no_slice=0, no_boundary=0;
@@ -134,7 +135,10 @@ int main(int argc, char **argv){
     }
   }
 
+  strcpy(smv1_out,"");
   if(smv1!=NULL){
+    strcat(smv1_out,smv1);
+    strcat(smv1_out,".smv");
     fullfile(smoke1,sourcedir1,smv1);
     strcat(smoke1,".smv");
   }
@@ -153,7 +157,7 @@ int main(int argc, char **argv){
     }
     return 1;
   }
-  make_outfile(smv_out,destdir,smoke1,".smv");
+  make_outfile(smv_out,destdir,smv1_out,".smv");
 
   stream_out=fopen(smv_out,"w");
   if(stream_out==NULL){
