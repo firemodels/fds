@@ -385,7 +385,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         NewMemory((void **)&plot3di->histogram[4],sizeof(histogramdata));
       
         CheckMemory;
-        strcpy(plot3di->file,full_file);
+        strcpy(plot3di->file,trim_front(buffer));
         CheckMemory;
         if(readlabels(plot3di->labels+0,streamsmv)==2)break;
         if(readlabels(plot3di->labels+1,streamsmv)==2)break;
@@ -471,7 +471,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         endian=getendian();
         NewMemory((void **)&slicei->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
-        STRCPY(slicei->file,full_file);
+        STRCPY(slicei->file,trim_front(buffer));
         if(readlabels(&slicei->label,streamsmv)==2){
           printf("*** Warning: problem reading SLCF entry\n");
           break;
@@ -553,7 +553,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
         NewMemory((void **)&boundaryi->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&boundaryi->histogram,sizeof(histogramdata));
-        STRCPY(boundaryi->file,full_file);
+        STRCPY(boundaryi->file,trim_front(buffer));
         if(readlabels(&boundaryi->label,streamsmv)==2){
           printf("*** Warning: problem reading BNDF entry\n");
           break;
@@ -562,7 +562,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         lenfile=strlen(full_file);
         endian=getendian();
         boundaryunitnumber=15;
-        FORTgetboundaryheader1(boundaryi->file,&boundaryunitnumber,&endian, &npatches, &error, lenfile);
+        FORTgetboundaryheader1(full_file,&boundaryunitnumber,&endian, &npatches, &error, lenfile);
         if(npatches>0){
           int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2, *patchdir, *patch2index, *patchsize, *qoffset;
           int i;
