@@ -218,21 +218,20 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       KKG = IJKW(8,IW) 
       RHODW(IW,N) = RHO_D(IIG,JJG,KKG)
       RHO_D_DYDN  = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
-      DEL_RHO_D_DEL_Y(IIG,JJG,KKG,N) = DEL_RHO_D_DEL_Y(IIG,JJG,KKG,N) - RHO_D_DYDN*RDN(IW)
       IOR = IJKW(4,IW)
       SELECT CASE(IOR) 
          CASE( 1)
-            RHO_D_DYDX(IIG-1,JJG,KKG) = 0._EB
+            RHO_D_DYDX(IIG-1,JJG,KKG) =  RHO_D_DYDN
          CASE(-1)
-            RHO_D_DYDX(IIG,JJG,KKG)   = 0._EB
+            RHO_D_DYDX(IIG,JJG,KKG)   = -RHO_D_DYDN
          CASE( 2)
-            RHO_D_DYDY(IIG,JJG-1,KKG) = 0._EB
+            RHO_D_DYDY(IIG,JJG-1,KKG) =  RHO_D_DYDN
          CASE(-2)
-            RHO_D_DYDY(IIG,JJG,KKG)   = 0._EB
+            RHO_D_DYDY(IIG,JJG,KKG)   = -RHO_D_DYDN
          CASE( 3)
-            RHO_D_DYDZ(IIG,JJG,KKG-1) = 0._EB
+            RHO_D_DYDZ(IIG,JJG,KKG-1) =  RHO_D_DYDN
          CASE(-3)
-            RHO_D_DYDZ(IIG,JJG,KKG)   = 0._EB
+            RHO_D_DYDZ(IIG,JJG,KKG)   = -RHO_D_DYDN
       END SELECT
       
       IF (FLUX_LIMITER>=0 .AND. .NOT.NEW_FLUX_LIMITER) FW(IW,N) = -SIGN(1._EB,REAL(IOR,EB))*RHO_D_DYDN
@@ -295,19 +294,18 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
          SELECT CASE(IOR)
             CASE( 1) 
-               H_RHO_D_DYDX(IIG-1,JJG,KKG) = 0._EB
+               H_RHO_D_DYDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DYDN
             CASE(-1) 
-               H_RHO_D_DYDX(IIG,JJG,KKG)   = 0._EB
+               H_RHO_D_DYDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
             CASE( 2) 
-               H_RHO_D_DYDY(IIG,JJG-1,KKG) = 0._EB
+               H_RHO_D_DYDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DYDN
             CASE(-2) 
-               H_RHO_D_DYDY(IIG,JJG,KKG)   = 0._EB
+               H_RHO_D_DYDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
             CASE( 3) 
-               H_RHO_D_DYDZ(IIG,JJG,KKG-1) = 0._EB
+               H_RHO_D_DYDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DYDN
             CASE(-3) 
-               H_RHO_D_DYDZ(IIG,JJG,KKG)   = 0._EB
+               H_RHO_D_DYDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
          END SELECT
-         DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - RDN(IW)*HDIFF*RHO_D_DYDN
       ENDDO WALL_LOOP2
       !!$OMP END DO
       !$OMP END SINGLE
@@ -352,9 +350,9 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             DO J=1,JBAR
                DO I=1,IBAR
                   !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_09'
-                  DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + (RHO_D_DYDX(I,J,K)-RHO_D_DYDX(I-1,J,K))*RDX(I) + &
-                                                                        (RHO_D_DYDY(I,J,K)-RHO_D_DYDY(I,J-1,K))*RDY(J) + &
-                                                                        (RHO_D_DYDZ(I,J,K)-RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+                  DEL_RHO_D_DEL_Y(I,J,K,N) = (RHO_D_DYDX(I,J,K)-RHO_D_DYDX(I-1,J,K))*RDX(I) + &
+                                             (RHO_D_DYDY(I,J,K)-RHO_D_DYDY(I,J-1,K))*RDY(J) + &
+                                             (RHO_D_DYDZ(I,J,K)-RHO_D_DYDZ(I,J,K-1))*RDZ(K)
                ENDDO
             ENDDO
          ENDDO
@@ -367,9 +365,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          DO K=1,KBAR
             DO I=1,IBAR
                !!$ IF ((K == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_10'
-               DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) + &
-                                                              (R(I)*RHO_D_DYDX(I,J,K)-R(I-1)*RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                                              (     RHO_D_DYDZ(I,J,K)-       RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+               DEL_RHO_D_DEL_Y(I,J,K,N) = (R(I)*RHO_D_DYDX(I,J,K)-R(I-1)*RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                          (     RHO_D_DYDZ(I,J,K)-       RHO_D_DYDZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
          !$OMP END DO
@@ -377,7 +374,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
    
    ! Compute -Sum h_n del dot rho*D del Y_n
  
-!   SPECIES_DIFFUSION_2: IF (.NOT.MIXTURE_FRACTION) THEN
    SPECIES_DIFFUSION_2: IF (SPECIES(N)%MODE/=MIXTURE_FRACTION_SPECIES) THEN
       !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,H_G,HDIFF)
       DO K=1,KBAR
@@ -634,22 +630,20 @@ ENDIF
 
 ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Y_n
 
-!SPECIES_DIFFUSION_3: IF (.NOT.MIXTURE_FRACTION) THEN
-   DO N=1,N_SPECIES
-      IF (EVACUATION_ONLY(NM)) CYCLE
-      IF (SPECIES(N)%MODE == MIXTURE_FRACTION_SPECIES) CYCLE
-      !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               !!$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_19'
-               DP(I,J,K) = DP(I,J,K) + (SPECIES(N)%RCON-SPECIES(0)%RCON)/(RSUM(I,J,K)*RHOP(I,J,K))*DEL_RHO_D_DEL_Y(I,J,K,N)
-            ENDDO
+DO N=1,N_SPECIES
+   IF (EVACUATION_ONLY(NM)) CYCLE
+   IF (SPECIES(N)%MODE == MIXTURE_FRACTION_SPECIES) CYCLE
+   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            !!$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_19'
+            DP(I,J,K) = DP(I,J,K) + (SPECIES(N)%RCON-SPECIES(0)%RCON)/(RSUM(I,J,K)*RHOP(I,J,K))*DEL_RHO_D_DEL_Y(I,J,K,N)
          ENDDO
       ENDDO
-      !$OMP END PARALLEL DO
    ENDDO
-!ENDIF SPECIES_DIFFUSION_3
+   !$OMP END PARALLEL DO
+ENDDO
 
 ! Add contribution of evaporating droplets
  
