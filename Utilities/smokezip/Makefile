@@ -19,6 +19,9 @@ OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 obj =    main.o CNV3dsmoke.o CNVboundary.o CNViso.o CNVpart.o CNVplot3d.o CNVslice.o assert.o csphere.o dmalloc.o egz_stdio.o endian.o histogram.o readfiles.o utilities.o isobox.o getdata.o getsizes.o
 objwin = $(obj:.o=.obj)
 
+# main has to be compiled without optimization (on a Windows PC) otherwise errors occcur
+main.obj: CFLAGS = -Od /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
+
 #*** General Purpose Rules ***
 
 no_target:
@@ -57,8 +60,8 @@ ms_win_32 : $(objwin)
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -Od /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
-intel_win_32 : FFLAGS    = -Od /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
+intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32 -D pp_WIN_INTEL
+intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdref
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
