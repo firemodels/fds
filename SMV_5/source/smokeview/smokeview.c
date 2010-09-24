@@ -1805,9 +1805,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ render scene +++++++++++++++++++++++++ */
 
-#ifdef pp_RENDER
   Render(view_mode);
-#endif
 
  /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
@@ -3841,9 +3839,6 @@ void usage(char **argv){
 #endif
 #ifdef pp_release
     printf(" pp_release");
-#endif
-#ifdef pp_RENDER
-    printf(", pp_RENDER");
 #endif
 #ifdef pp_SHOOTER
     printf(", pp_SHOOTER");

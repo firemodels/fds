@@ -395,14 +395,12 @@ EXTERNCPP void handle_eyeview(int flag);
 
 EXTERNCPP void checktimebound(void);
 EXTERNCPP void getrgb(unsigned int val, unsigned char *rr, unsigned char *gg, unsigned char *bb);
-#ifdef pp_RENDER
 EXTERNCPP unsigned char *readpicture(char *filename, int *width, int *height);
 #ifdef pp_JPEG
 EXTERNCPP unsigned char *readjpeg(const char *filename,int *width, int *height, int skip);
 #endif
 EXTERNCPP unsigned char *readrgb(const char *name, int *width, int *height);
 EXTERNCPP unsigned char *readpng(const char *filename,int *width, int *height);
-#endif
 
 EXTERNCPP void update_whichface(int which_face);
 EXTERNCPP void update_blockvals(int flag);
