@@ -237,9 +237,6 @@ void _sniffErrors(char *whereat);
 #define Render640 994
 #define RenderWindow 993
 #define Render2Window 992
-#define RenderFull 991
-#define Render2Full 990
-#define Render4Full 989
 #define LABELLEN 30
 #define dwinW 150
 

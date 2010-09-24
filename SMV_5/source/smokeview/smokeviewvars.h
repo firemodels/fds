@@ -58,7 +58,7 @@ SVEXTERN int n_embedded_meshes;
 
 SVEXTERN int force_isometric;
 SVEXTERN int updategluiview;
-SVEXTERN int render_double,render_double_state;
+SVEXTERN int render_double,render_double_state,render_double_menu;
 SVEXTERN int usetexturebar;
 #ifdef pp_LIGHT
 SVEXTERN int show_smokelighting;

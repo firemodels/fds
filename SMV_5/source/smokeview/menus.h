@@ -1236,53 +1236,41 @@ void RenderMenu(int value){
   }
   switch (value){
   case Render320:
+    render_double_menu=0;
     render_option=value;
     render_double_state=0;
     renderW=320;
     renderH=240;
     break;
   case Render640:
+    render_double_menu=0;
     render_option=value;
     render_double_state=0;
     renderW=640;
     renderH=480;
     break;
   case Render2Window:
+    render_double_menu=1;
     render_option=value;
     renderW=2*screenWidth;
     renderH=2*screenHeight;
     render_double_state=2;
     break;
   case RenderWindow:
+    render_double_menu=0;
     render_option=value;
     render_double_state=0;
     renderW=0;
     renderH=0;
     break;
-  case RenderFull:
-    render_option=value;
-    render_double_state=0;
-    renderW=max_screenWidth;
-    renderH=max_screenHeight;
-    break;
-  case Render2Full:
-    render_option=value;
-    renderW=2*max_screenWidth;
-    renderH=2*max_screenHeight;
-    render_double_state=2;
-    break;
-  case Render4Full:
-    render_option=value;
-    renderW=4*max_screenWidth;
-    renderH=4*max_screenHeight;
-    render_double_state=4;
-    break;
   case RenderCancel:
+    render_double_menu=0;
     render_double=0;
     render_double_state=0;
     RenderState(0);
     break;
   case RenderOnce:
+    if(render_double_menu==1)render_double_state=1;
     if(render_double_state!=0){
       render_double=render_double_state;
       keyboard('R',0,0);
