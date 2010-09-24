@@ -2982,13 +2982,11 @@ void LoadSmoke3DMenu(int value){
     }
   }
   if(value==-9){
-    lock_allsmoke=1;
     for(i=0;i<nsmoke3d_files;i++){
       smoke3di = smoke3dinfo + i;
       if(smoke3di->loaded==1)continue;
       readsmoke3d(i,LOAD,&errorcode);
     }
-    lock_allsmoke=0;
   }
   if(value<=-10){
     value = -(value + 10);

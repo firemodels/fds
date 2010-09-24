@@ -17,12 +17,6 @@
 #endif
 
 
-#ifndef CPP
-#ifdef pp_THREAD
-#include <pthread.h>
-#endif
-#endif
-
 #ifdef pp_SPHERE
 #include "csphere.h"
 #endif
@@ -31,6 +25,8 @@
 #include "smokeviewdefs.h"
 #include "smokeheaders.h"
 #endif
+
+#include "threader.h"
 
 SVEXTERN int usemenu;
 SVEXTERN float hrrpuv_iso_color[4];
@@ -606,16 +602,6 @@ SVEXTERN int nsmoothblocks,nopenvents,nopenvents_nonoutline,ndummyvents,ntranspa
 SVEXTERN int ntotal_smooth_blockages;
 SVEXTERN float veclengths[NVECLENGTHS];
 SVEXTERN float texture_origin[3];
-
-#ifndef CPP
-#ifdef pp_THREAD
-SVEXTERN pthread_mutex_t mutexCOMPRESS;
-SVEXTERN pthread_t smooth_block_thread_id;
-SVEXTERN pthread_t compress_thread_id;
-#endif
-#endif
-
-SVEXTERN int lock_allsmoke;
 
 SVEXTERN unsigned char rgb_below_min[3], rgb_above_max[3];
 SVEXTERN int colorbar_select_index,update_colorbar_select_index;
