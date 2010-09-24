@@ -6238,6 +6238,7 @@ static int in_menu=0;
 #endif
   glutAddSubMenu("Rotation",rotatetypemenu);
   glutAddSubMenu("Max Frame Rate",frameratemenu);
+  glutAddSubMenu("Render",rendermenu);
   if(showfontmenu==1)glutAddSubMenu("Font Size",fontmenu);
 //  glutAddSubMenu("Aperture",aperturemenu);
 #ifdef pp_ALPHA
