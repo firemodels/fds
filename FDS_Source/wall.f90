@@ -604,7 +604,14 @@ WALL_CELL_LOOP: DO IW=1,NWC
 
    IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) RHO_F(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM_F*TMP_F(IW)) 
 
-   ! Actually set the ghost cell value of density in the ghost cell if it is a solid wall
+   ! Actually set the ghost cell values of density if it is a solid wall
+   
+   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .AND. FLUX_LIMITER/=-1) THEN
+      RHOP(II,JJ,KK) = RHO_F(IW)
+      IF (N_SPECIES>0) YYP(II,JJ,KK,1:N_SPECIES) = YY_F(IW,1:N_SPECIES)
+   ENDIF
+   
+   ! Set ghost cell values for open and interpolated boundaries
 
    IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
       IF (N_SPECIES>0) THEN
