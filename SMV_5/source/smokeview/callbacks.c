@@ -1206,7 +1206,6 @@ void keyboard(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"r",1)==0
     ||strncmp((const char *)&key2,"R",1)==0
     ){
-#ifdef pp_RENDER
     int rflag=0;
 
     if(strncmp((const char *)&key2,"R",1)==0){
@@ -1270,9 +1269,6 @@ void keyboard(unsigned char key, int x, int y){
       RenderOnceNowR=1;
     }
     RenderState(1);
-#else
-    printf("*** rendering not supported in this version of Smokeview\n");
-#endif
     return;
   }
 
@@ -2127,7 +2123,6 @@ void Display(void){
         ShowScene(RENDER,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
         if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
       }
-#ifdef pp_RENDER
       else{
         GLubyte *screenbuffers[4];
         int renderdoublenow=0;
@@ -2177,7 +2172,6 @@ void Display(void){
           RenderSkip=1;
         }
       }
-#endif
     }
   }
   if(touring == 1 ){

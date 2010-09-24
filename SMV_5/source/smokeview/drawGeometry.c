@@ -798,18 +798,15 @@ void readcad2geom(cadgeom *cd){
 
     texti = &cdi->textureinfo;
     texti->file=NULL;
-#ifdef pp_RENDER
     if(len>0){
       NewMemory((void **)&texti->file,len+1);
       strcpy(texti->file,buffer);
     }
-#endif
     texti->display=0;
     texti->loaded=0;
     texti->used=0;
     texti->name=0;
 
-#ifdef pp_RENDER
     if(texti->file!=NULL){
       int texwid, texht;
       unsigned char *floortex;
@@ -836,7 +833,6 @@ void readcad2geom(cadgeom *cd){
       texti->loaded=1;
       printf(" - completed\n");
     }
-#endif
   }
 
   /* read in [FACES] info */
