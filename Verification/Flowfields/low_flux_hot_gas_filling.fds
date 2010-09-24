@@ -1,0 +1,28 @@
+&HEAD CHID='low_flux_hot_gas_filling', TITLE='Low flux of hot gas into a box' /
+
+&MESH IJK=20,20,20, XB=-2,2,-2,2,0,4 /
+
+&TIME T_END=60. /
+
+&DUMP DT_PL3D=1.E10, MASS_FILE=.TRUE. /
+
+&MISC SURF_DEFAULT='adiabatic wall' /
+
+&SPEC ID='PROPANE' /
+
+&SURF ID='adiabatic wall', ADIABATIC=.TRUE./
+&SURF ID='burner', MASS_FLUX(1)=0.0001, TMP_FRONT=500. / use low flux to test diffusion effect
+
+&VENT XB=-0.5, 0.5,-0.5, 0.5,0.0,0.0,  SURF_ID='burner', COLOR='RED' / 
+&VENT XB=-0.5, 0.5,-0.5, 0.5,4.0,4.0,  SURF_ID='burner', COLOR='RED' / 
+&VENT XB=-2.0,-2.0,-0.5, 0.5,1.5,2.5,  SURF_ID='burner', COLOR='RED' / 
+&VENT XB= 2.0, 2.0,-0.5, 0.5,1.5,2.5,  SURF_ID='burner', COLOR='RED' / 
+&VENT XB=-0.5, 0.5,-2.0,-2.0,1.5,2.5,  SURF_ID='burner', COLOR='RED' / 
+&VENT XB=-0.5, 0.5, 2.0, 2.0,1.5,2.5,  SURF_ID='burner', COLOR='RED' / 
+
+&SLCF PBY=0.0, QUANTITY='PROPANE', VECTOR=.TRUE. /
+&SLCF PBY=0.0, QUANTITY='TEMPERATURE' /
+&SLCF PBY=0.0, QUANTITY='PRESSURE' /
+
+&TAIL /
+
