@@ -1497,7 +1497,36 @@ co-ordinate systems.
 
 This chapter contains examples that test the computations related to species concentrations, gas properties and combustion.
 
-\section{Fractional Effective Dose (FED)(\texorpdfstring{{\bf FED\_Device}}{FED\_Device}) }
+\section{Boundary Conditions}
+
+For most problems involving fire or combustion, \emph{the} most important parameter of a model is the total heat release.  It is therefore extremely important to assure that the correct amount of fuel is injected into the FDS computational domain.  Below we present a series of test cases for the species boundary conditions.
+
+\subsection{Specified Mass Flux (low\_flux\_hot\_gas\_filling)}
+
+The specification of the fuel mass flux is probably the most commonly used boundary condition for specifying a fire.  When the user specifies the {\ct HRRPUA} (heat release rate per unit area), FDS divides this input by the heat of combustion for the specified fuel (propane by default) and uses this values as the specified mass flux $\dot{m}_{\alpha}^{\prime\prime}$ at the {\ct VENT}.  This seems simple enough.  But the problem is complicated by the fact that the total species flux is the sum of the advective and diffusive fluxes,
+\begin{equation}
+\label{eqn_total_flux}
+\dot{m}_{\alpha}^{\prime\prime} = \rho Y_{\alpha} u_n - \rho D_\alpha \frac{\partial Y_\alpha}{\partial n}
+\end{equation}
+where $u_n$ is the face normal mass-average velocity and $\partial/\partial n$ is the gradient normal to the face.  The velocity is determined from the total mass flux and the density at the face,
+\begin{equation}
+\label{eqn_un}
+u_n = \frac{\sum_\alpha \dot{m}_{\alpha}^{\prime\prime}}{\rho(\mathbf{Y},T)}
+\end{equation}
+The density is computed using old values of the face mass fractions and the face temperature which may be specified or computed depending on choices made by the user.  The new face mass fraction is then set to satisfy (\ref{eqn_total_flux}).  The test case below is designed to exercise contributions from both the advective and diffusive terms in this boundary condition.
+
+In the test case, we inject propane into a cube with 1 m$^2$ vents on all six faces.  We specify the {\ct MASS\_FLUX} of propane to be 0.0001 kg/(m$^2$ s) and the temperature of the face of the {\ct VENT} ({\ct TMP\_FRONT}) is specified to be 500 $^\circ$C.  The box is initially filled with air at standard conditions.  We {\ct DUMP} a {\ct MASS\_FILE} and compare the accumulation of propane with the specified rate.  The results are shown in Figure \ref{fig_low_flux_hot_gas_filling}.
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/low_flux_hot_gas_filling_domain} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/low_flux_hot_gas_filling}
+\end{tabular*}
+\caption[Low flux of hot gas into a closed domain]{Test of specified mass flux boundary condition for low mass flux and specified temperature on the face of the {\ct VENT}. (Left) Image of the domain showing contours of propane mass fraction. (Right) Comparison of the accumulated mass of propane with the FDS values reported in the {\ct \_mass} file.}
+\label{fig_low_flux_hot_gas_filling}
+\end{figure}
+
+\section{Fractional Effective Dose (\texorpdfstring{{\bf FED\_Device}}{FED\_Device}) }
 
 The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapasitation
 due to the combustion gases.  The present version of FDS uses only the concentrations of the gases CO, CO${}_2$, and O${}_2$ to
