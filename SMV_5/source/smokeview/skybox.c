@@ -19,7 +19,6 @@
 // svn revision character string
 char skybox_revision[]="$Revision$";
 
-#ifdef pp_RENDER
 /* ------------------ loadskytexture ------------------------ */
 
 void loadskytexture(char *filebase, texture *texti){
@@ -60,7 +59,6 @@ void loadskytexture(char *filebase, texture *texti){
   texti->loaded=1;
   return;
 }
-#endif
 /* ------------------ free_skybox ------------------------ */
 
 void free_skybox(void){
