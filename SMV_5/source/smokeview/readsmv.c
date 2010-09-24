@@ -4943,10 +4943,7 @@ typedef struct {
     readhrr(LOAD, &errorcode);
   }
 
-#ifdef pp_THREAD
-  if(mt_compress==1)pthread_mutex_init(&mutexCOMPRESS,NULL);
-#endif
-
+  init_multi_threading();
   init_part5prop();
   init_plot3dtimelist();
 

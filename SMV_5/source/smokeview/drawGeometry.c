@@ -12,9 +12,6 @@
 #else
 #include <GL/glut.h>
 #endif
-#ifdef pp_THREAD
-#include <pthread.h>
-#endif
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "ASSERT.h"
@@ -2823,48 +2820,6 @@ void update_selectfaces(void){
       }
     }
   }
-}
-
-/* ------------------ mt_update_smooth_blockages ------------------------ */
-#ifdef pp_THREAD
-void *mt_update_smooth_blockages(void *arg){
-
-  if(ifsmoothblock()==1){
-    printf("Smoothing blockages in the background\n");
-    update_smooth_blockages();
-    updatefacelists=1;
-  }
-  pthread_exit(NULL);
-  return NULL;
-
-   }
-#endif
-
-/* ------------------ smooth_blockages ------------------------ */
-
-void smooth_blockages(void){
-  smoothing_blocks=1;
-#ifdef pp_THREAD
-  if(mt_compress==1){
-    pthread_create( 
-      &smooth_block_thread_id,
-      NULL, 
-      mt_update_smooth_blockages, 
-      NULL
-      );
-  }
-  else{
-    blocksneedsmoothing=ifsmoothblock();
-    if(blocksneedsmoothing==1){
-      update_smooth_blockages();
-    }
-  }
-#else
-    blocksneedsmoothing=ifsmoothblock();
-    if(blocksneedsmoothing==1){
-      update_smooth_blockages();
-    }
-#endif
 }
 
 /* ------------------ update_smooth_blockages ------------------------ */
