@@ -1538,8 +1538,6 @@ void initvars1(void){
   texture_origin[1]=0.0;
   texture_origin[2]=0.0;
 
-  lock_allsmoke=0;
-
   visVentLines=0, visVentSolid=1;
   isZoneFireModel=0;
   output_slicedata=0;
@@ -2275,6 +2273,7 @@ int getmaxrevision(void){
   MAXREV(string_util_revision);
   MAXREV(sv_api_revision);
   MAXREV(shaders_revision);
+  MAXREV(threader_revision);
   MAXREV(unit_revision);
   return max_revision;
 }
