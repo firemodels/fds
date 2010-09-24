@@ -27,5 +27,6 @@ run scripts/birch_tga
 run scripts/pulsating
 run scripts/compression_wave
 run scripts/plate_view_factor
+run scripts/low_flux_hot_gas_filling
 
 display('verification scripts completed successfully!')
