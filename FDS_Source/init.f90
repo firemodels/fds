@@ -2558,6 +2558,23 @@ IF (CR_INDEX==1) CREATE = .TRUE.
  
 CALL BLOCK_CELL(NM,I1+1,I2,J1+1,J2,K1+1,K2,CR_INDEX,OBST_INDEX)
  
+! If the OBSTruction is to be removed, set density and mass fractions to ambient value
+
+IF (REMOVE) THEN
+   DO K=K1+1,K2
+      DO J=J1+1,J2
+         DO I=I1+1,I2
+            RHOS(I,J,K) = RHOA
+            RHO(I,J,K)  = RHOA
+            IF (N_SPECIES>0) THEN
+               YY(I,J,K,1:N_SPECIES)  = SPECIES(1:N_SPECIES)%YY0
+               YYS(I,J,K,1:N_SPECIES) = SPECIES(1:N_SPECIES)%YY0
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
 ! Process the x boundaries of the OBSTruction
 
 DO K=K1+1,K2
