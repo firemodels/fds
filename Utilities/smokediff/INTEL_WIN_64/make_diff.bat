@@ -2,9 +2,9 @@
 
 Rem windows batch file to build smokediff from the command line
 
-IF "%SETUP_IFORT_COMPILER11%"=="1" GOTO envexist
+IF "%SETUP_IFORT_COMPILER_INTEL64%"=="1" GOTO envexist
 
-set SETUP_IFORT_COMPILER11=1
+set SETUP_IFORT_COMPILER_INTEL64=1
 
 echo Setting up compiler environment
 call "%IFORT_COMPILER11%\bin\ifortvars" intel64
