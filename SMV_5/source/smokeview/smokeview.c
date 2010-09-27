@@ -1642,16 +1642,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
             drawslice_terrain(sd);
           }
           else{
-#ifdef pp_FRACTILE          
-            if(usetexturebar==1){
-              drawslice_texture(sd);
-            }
-            else{
-              drawslice_texture_fractile(sd);
-            }
-#else
             drawslice_texture(sd);
-#endif
           }
         }
       }
@@ -3806,9 +3797,6 @@ void usage(char **argv){
 #endif
 #ifdef EGZ
     printf(", EGZ");
-#endif
-#ifdef pp_FRACTILE
-    printf(", pp_FRACTILE");
 #endif
 #ifdef pp_GPU
     printf(", pp_GPU");
