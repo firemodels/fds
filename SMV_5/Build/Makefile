@@ -94,7 +94,7 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smv5_win_64
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib $(IMAGELIBDIR)\pthreadVC2_x64.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib $(IMAGELIBDIR)\pthreadVC2_x64.lib $(IMAGELIBDIR)\glew32_x64.lib
 
 
 # ------------- Win 64 ----------------
@@ -111,7 +111,7 @@ intel_win_test_64 : FC        = ifort
 intel_win_test_64 : exe       = smv5_win_test_64
 
 intel_win_test_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib $(IMAGELIBDIR)\pthreadVC2_x64.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) opengl32.lib $(WINLIBS) $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib $(IMAGELIBDIR)\pthreadVC2_x64.lib  $(IMAGELIBDIR)\glew32_x64.lib
 
 # ------------- Win 32 ----------------
 #  32 bit windows
