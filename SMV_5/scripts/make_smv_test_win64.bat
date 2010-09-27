@@ -23,6 +23,7 @@ copy ..\..\Utilities\background\INTEL_WIN_32\background.exe %smvdir%\background.
 copy objects.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
 copy pthreadVC2_x64.dll %smvdir%\.
+copy glew32_x64.dll %smvdir%\.
 copy note.txt %smvdir%\.
 mkdir %smvdir%\textures
 copy textures\*.jpg %smvdir%\textures
