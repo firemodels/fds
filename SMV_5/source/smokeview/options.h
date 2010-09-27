@@ -74,9 +74,6 @@
 #define FILE_SIZE unsigned int
 #endif
 
-#ifndef X64
-#define pp_THREAD
-#endif
 
 //#define pp_HIDEMULTI
 #define pp_MESSAGE
@@ -85,6 +82,7 @@
 #define EGZ
 #define USE_ZLIB
 //#define NO_GLUTPOSTDISPLAY
+#define pp_THREAD
 
 #ifdef NO_GLUTPOSTDISPLAY
 #define GLUTPOSTREDISPLAY
