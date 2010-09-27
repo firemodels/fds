@@ -1053,6 +1053,7 @@ void initvars1(void){
 
   render_double=0;
   render_double_state=0;
+  render_from_menu=0;
   usetexturebar=1;
   percentile_level=0.01;
 

@@ -1249,13 +1249,6 @@ void RenderMenu(int value){
     renderW=640;
     renderH=480;
     break;
-  case Render2Window:
-    render_double_menu=1;
-    render_option=value;
-    renderW=2*screenWidth;
-    renderH=2*screenHeight;
-    render_double_state=2;
-    break;
   case RenderWindow:
     render_double_menu=0;
     render_option=value;
@@ -1263,13 +1256,15 @@ void RenderMenu(int value){
     renderW=0;
     renderH=0;
     break;
-  case RenderCancel:
-    render_double_menu=0;
-    render_double=0;
-    render_double_state=0;
-    RenderState(0);
+  case Render2Window:
+    render_double_menu=1;
+    render_option=value;
+    renderW=2*screenWidth;
+    renderH=2*screenHeight;
+    render_double_state=2;
     break;
   case RenderOnce:
+    render_from_menu=1;
     if(render_double_menu==1)render_double_state=1;
     if(render_double_state!=0){
       render_double=render_double_state;
@@ -1279,6 +1274,12 @@ void RenderMenu(int value){
       keyboard('r',0,0);
     }
      break;
+  case RenderCancel:
+    render_double_menu=0;
+    render_double=0;
+    render_double_state=0;
+    RenderState(0);
+    break;
   case RenderPNG:
      renderfiletype=0;
      updatemenu=1;  
