@@ -12,6 +12,8 @@
 #include "lint.h"
 #endif
 
+//*** turn on options that set version names
+
 #ifdef pp_BETA
 #define SMVVERSION "Test"
 #undef pp_release
@@ -36,19 +38,26 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 
+//*** turn on Windows only options
+
+#undef pp_OPEN
 #ifdef WIN32
 
-#ifndef X64
 #define pp_memstatus
-#endif
 #define pp_COMPRESS
 #define pp_noappend
 #include "pragmas.h"
-
 #define pp_GPU
 #define pp_CULL
 // #define pp_GPU_BLANK
+#ifdef pp_BETA
+#define pp_OPEN
 #endif
+
+
+#endif
+
+//*** turn on BIT64 if compiled on a 64 bit platform
 
 #ifdef X64
 #undef BIT64
@@ -73,6 +82,7 @@
 #define FILE_SIZE unsigned int
 #endif
 
+//*** turn on options available on all platforms
 
 //#define pp_HIDEMULTI
 #define pp_MESSAGE
@@ -90,12 +100,7 @@
 #endif
 
 
-#ifdef pp_ALPHA
-#undef USE_ZLIB
-#undef pp_THREAD
-//#define pp_LIGHT
-//#define pp_SHOWLIGHT
-#endif
+//*** turn on options available in test versions of smokeview 
 
 #ifdef pp_BETA
 // #define pp_FRACTILE
@@ -110,11 +115,4 @@
 
 #ifndef pp_OSX
 #define pp_JPEG
-#endif
-
-#undef pp_OPEN
-#ifdef WIN32
-#ifdef pp_BETA
-#define pp_OPEN
-#endif
 #endif
