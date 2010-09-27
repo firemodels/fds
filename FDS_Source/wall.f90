@@ -282,7 +282,7 @@ HEAT_FLUX_LOOP: DO IW=1,NWC+NVWC
             YY_F(IW,1:N_SPECIES)      = RHO_YY_F(1:N_SPECIES)/RHO_F(IW)
             YYP(II,JJ,KK,1:N_SPECIES) = 2._EB*YY_F(IW,1:N_SPECIES) - YY_G_ALL(1:N_SPECIES)
             IF (FLUX_LIMITER/=-1) THEN
-               ! use second-order extrapolation of first ghost cell value to second ghost cell
+               ! use second-order extrapolation of first ghost cell value to second ghost cell (see also DENSITY_BC for RHOP)
                SELECT CASE(IOR)
                   CASE(-1)
                      YYP(II+1,JJ,KK,1:N_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_SPECIES)-YYP(II-1,JJ,KK,1:N_SPECIES)))
@@ -603,13 +603,6 @@ WALL_CELL_LOOP: DO IW=1,NWC
    ! Compute density at boundary cell face
 
    IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) RHO_F(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM_F*TMP_F(IW)) 
-
-   ! Actually set the ghost cell values of density if it is a solid wall
-   
-   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .AND. FLUX_LIMITER/=-1) THEN
-      RHOP(II,JJ,KK) = RHO_F(IW)
-      IF (N_SPECIES>0) YYP(II,JJ,KK,1:N_SPECIES) = YY_F(IW,1:N_SPECIES)
-   ENDIF
    
    ! Set ghost cell values for open and interpolated boundaries
 
@@ -622,7 +615,7 @@ WALL_CELL_LOOP: DO IW=1,NWC
          RHOP(II,JJ,KK) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM0*TMP(II,JJ,KK))
       ENDIF
       IF (FLUX_LIMITER/=-1) THEN
-         ! second-order extrapolation of first ghost cell value to second ghost cell
+         ! second-order extrapolation of first ghost cell value to second ghost cell (see also THERMAL_BC for YYP)
          SELECT CASE(IOR)
             CASE(-1)
                RHOP(II+1,JJ,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II-1,JJ,KK))
