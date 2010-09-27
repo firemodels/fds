@@ -1214,6 +1214,10 @@ void keyboard(unsigned char key, int x, int y){
     }
     else{
       render_double=0;
+      if(render_from_menu==0){
+        renderW=0;
+        renderH=0;
+      }
     }
     if(scriptoutstream!=NULL){
       if(ntimes>0){
@@ -1269,6 +1273,7 @@ void keyboard(unsigned char key, int x, int y){
       RenderOnceNowR=1;
     }
     RenderState(1);
+    render_from_menu=0;
     return;
   }
 
