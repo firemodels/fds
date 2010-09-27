@@ -23,7 +23,7 @@ copy background.exe %smvdir%\background.exe
 copy smokediff64_release.exe %smvdir%\smokediff64.exe
 copy objects.svo %smvdir%\.
 copy glew32.dll %smvdir%\.
-copy pthreadVC.dll %smvdir%\.
+copy pthreadVC2_x64.dll %smvdir%\.
 copy readme.html %smvdir%\release_notes.html
 
 echo
