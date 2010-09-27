@@ -21,9 +21,8 @@ copy ..\..\Utilities\smokediff\INTEL_WIN_64\smokediff_64.exe %smvdir%\smokediff.
 copy ..\..\Utilities\smokezip\INTEL_WIN_64\smokezip_64.exe %smvdir%\smokezip.exe
 copy ..\..\Utilities\background\INTEL_WIN_32\background.exe %smvdir%\background.exe
 copy objects.svo %smvdir%\.
-copy glew32.dll %smvdir%\.
-copy pthreadVC2_x64.dll %smvdir%\.
 copy glew32_x64.dll %smvdir%\.
+copy pthreadVC2_x64.dll %smvdir%\.
 copy note.txt %smvdir%\.
 mkdir %smvdir%\textures
 copy textures\*.jpg %smvdir%\textures
