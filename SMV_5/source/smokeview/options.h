@@ -103,7 +103,6 @@
 //*** turn on options available in test versions of smokeview 
 
 #ifdef pp_BETA
-// #define pp_FRACTILE
 #define pp_LIGHT
 #define pp_SHOOTER
 #define pp_TRANSFORMxxx
