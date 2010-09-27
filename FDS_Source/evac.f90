@@ -6743,29 +6743,20 @@ CONTAINS
                                        EVAC_DOORS(ABS(HRE%I_TARGET))%X2)
                                   y11 = 0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%Y1 + &
                                        EVAC_DOORS(ABS(HRE%I_TARGET))%Y2)
-                                  EVEL = SQRT((HR%X-0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%X1 + &
-                                       EVAC_DOORS(ABS(HRE%I_TARGET))%X2))**2 + &
-                                       (HR%Y-0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%Y1 + &
-                                       EVAC_DOORS(ABS(HRE%I_TARGET))%Y2))**2)
-                                  EVEL2 = SQRT((HRE%X-0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%X1 + &
-                                       EVAC_DOORS(ABS(HRE%I_TARGET))%X2))**2 + &
-                                       (HRE%Y-0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%Y1 + &
-                                       EVAC_DOORS(ABS(HRE%I_TARGET))%Y2))**2)
                                ELSE
                                   x11 = 0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X1 + &
                                        EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X2)
                                   y11 = 0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y1 + &
                                        EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y2)
-                                  EVEL = SQRT((HR%X-0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X1 + &
-                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X2))**2 + &
-                                       (HR%Y-0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y1 + &
-                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y2))**2)
-                                  EVEL2 = SQRT((HRE%X-0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X1 + &
-                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X2))**2 + &
-                                       (HRE%Y-0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y1 + &
-                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y2))**2)
                                END IF
                                PP_SEE_DOOR = SEE_DOOR(NM, 0, 1, HR%X, HR%Y, x11, y11, tmp1, tmp2)
+                               IF (PP_SEE_DOOR) THEN
+                                  EVEL  = SQRT((HR%X-x11)**2  + (HR%Y-y11)**2)  ! L2 norm
+                                  EVEL2 = SQRT((HRE%X-x11)**2 + (HRE%Y-y11)**2) ! L2 norm
+                               ELSE
+                                  EVEL  = ABS(HR%X-x11)  + ABS(HR%Y-y11)  ! L1 norm
+                                  EVEL2 = ABS(HRE%X-x11) + ABS(HRE%Y-y11) ! L1 norm
+                               END IF
                                x_now =((HR%X-HRE%X)*HRE%UBAR + (HR%Y-HRE%Y)*HRE%VBAR) / ( &
                                  MAX(0.01_EB,SQRT(HRE%UBAR**2+HRE%VBAR**2))*SQRT((HRE%X-HR%X)**2+(HRE%Y-HR%Y)**2) )
                                ! The other agent should be closer to the door if the door is visible.
@@ -13155,12 +13146,16 @@ CONTAINS
                    i_o = EVAC_EXITS( EVAC_Node_List(i+n_egrids+N_ENTRYS)%Node_Index)%I_VENT_FFIELD
                 END IF
                 IF (FED_DOOR_CRIT > 0.0_EB) THEN
-                   L2_tmp = FED_max_Door(i)*SQRT((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
+                   ! L2_tmp = FED_max_Door(i)*SQRT((x1_old-x_o)**2 + (y1_old-y_o)**2)/Speed
+                   ! Now L1 norm for non-visible doors (21.9.2010)
+                   L2_tmp = FED_max_Door(i)*(ABS(x1_old-x_o) + ABS(y1_old-y_o))/Speed
                 ELSE
                    l2_tmp = K_ave_Door(i)
                 END IF
                 IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD*L2_tmp
-                T_tmp  = SQRT((x_o-x1_old)**2 + (y_o-y1_old)**2)
+                ! T_tmp  = SQRT((x_o-x1_old)**2 + (y_o-y1_old)**2)
+                ! Now L1 norm for non-visible doors (21.9.2010)
+                T_tmp  = ABS(x_o-x1_old) + ABS(y_o-y1_old)
                 IF (i_o == i_old_ffield) T_tmp = T_tmp*FAC_DOOR_WAIT
                 IF (T_tmp < L2_min .AND. L2_tmp < ABS(FED_DOOR_CRIT)) THEN
                    L2_min = MAX(0.0_EB,T_tmp)
@@ -13247,13 +13242,27 @@ CONTAINS
                       END IF
                       IF (FED_DOOR_CRIT > 0.0_EB) THEN
                          IF (j > 0) THEN
-                            L2_tmp = Group_List(j)%IntDose + FED_max_Door(i) * SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
+                            IF (Is_Visible_Door(i)) THEN
+                               L2_tmp = Group_List(j)%IntDose + FED_max_Door(i) * SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
+                            ELSE
+                               ! Use L1 norm for non-visible doors
+                               L2_tmp = Group_List(j)%IntDose + FED_max_Door(i) * (ABS(x1_old-x_o)+ABS(y1_old-y_o))/Speed
+                            END IF
                          ELSE
-                            L2_tmp = HR%IntDose + FED_max_Door(i) * SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
+                            IF (Is_Visible_Door(i)) THEN
+                               L2_tmp = HR%IntDose + FED_max_Door(i) * SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)/Speed
+                            ELSE
+                               ! Use L1 norm for non-visible doors
+                               L2_tmp = HR%IntDose + FED_max_Door(i) * (ABS(x1_old-x_o)+ABS(y1_old-y_o))/Speed
+                            END IF
                          END IF
                       ELSE
                          ! Check that visibility > 0.5*distance to the door
-                         l2_tmp = (SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)*0.5_EB)/(3.0_EB/K_ave_Door(i))
+                         IF (Is_Visible_Door(i)) THEN
+                            l2_tmp = SQRT((x1_old-x_o)**2+(y1_old-y_o)**2)*0.5_EB/(3.0_EB/K_ave_Door(i))
+                         ELSE
+                            l2_tmp = (ABS(x1_old-x_o)+ABS(y1_old-y_o))*0.5_EB/(3.0_EB/K_ave_Door(i))
+                         END IF
                       END IF
                       IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD2*L2_tmp
                       IF (L2_tmp < L2_min) THEN
