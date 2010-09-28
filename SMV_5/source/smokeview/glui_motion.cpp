@@ -325,12 +325,13 @@ extern "C" void glui_motion_setup(int main_window){
   LIST_windowsize->add_item(1,"-");
   LIST_windowsize->add_item(2, "320x240");
   LIST_windowsize->add_item(3, "640x480");
-  LIST_windowsize->add_item(7, "720x480(480p)");
+  LIST_windowsize->add_item(7, "720x480");
   if(max_screenWidth>=800&&max_screenHeight>=480)LIST_windowsize->add_item(4, "800x640");
   if(max_screenWidth>=1024&&max_screenHeight>=768)  LIST_windowsize->add_item(5,"1024x768");
-  if(max_screenWidth>=1280&&max_screenHeight>=720)  LIST_windowsize->add_item(9,"1280x720(720p)");
+  if(max_screenWidth>=1280&&max_screenHeight>=720)  LIST_windowsize->add_item(9,"1280x720");
   if(max_screenWidth>=1280&&max_screenHeight>=1024)  LIST_windowsize->add_item(6,"1280x1024");
-  if(max_screenWidth>=1920&&max_screenHeight>=1080)  LIST_windowsize->add_item(8,"1920x1080(1080p)");
+  if(max_screenWidth>=1440&&max_screenHeight>=1024)  LIST_windowsize->add_item(10,"1440x1080");
+  if(max_screenWidth>=1920&&max_screenHeight>=1080)  LIST_windowsize->add_item(8,"1920x1080");
   update_windowsizelist();
 
   SPINNER_window_width = glui_motion->add_spinner_to_panel(panel_projection,"width",GLUI_SPINNER_INT,&glui_screenWidth);
@@ -482,6 +483,9 @@ extern "C" void update_windowsizelist(void){
   }
   if(screenWidth==1920&&screenHeight==1080){
     windowsize_pointer=8;
+  }
+  if(screenWidth==1440&&screenHeight==1080){
+    windowsize_pointer=10;
   }
   if(screenWidth==1280&&screenHeight==720){
     windowsize_pointer=9;
@@ -687,6 +691,10 @@ extern "C" void TRANSLATE_CB(int var){
         case 9:
           glui_screenWidth=1280;
           glui_screenHeight=720;
+          break;
+        case 10:
+          glui_screenWidth=1440;
+          glui_screenHeight=1080;
           break;
         case 4:
           glui_screenWidth=800;
