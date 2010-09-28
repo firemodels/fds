@@ -26,6 +26,8 @@
 
 // define mutex's and thread_ids
 
+MT_EXTERN int mt_compress
+
 #ifndef CPP
 #ifdef pp_THREAD
 MT_EXTERN pthread_mutex_t mutexCOMPRESS;
