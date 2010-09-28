@@ -2974,8 +2974,7 @@ void LoadSmoke3DMenu(int value){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-  readsmoke3d(value,LOAD,&errorcode);
-
+    readsmoke3d(value,LOAD,&errorcode);
   }
   else if(value==-1){
     for(i=0;i<nsmoke3d_files;i++){
