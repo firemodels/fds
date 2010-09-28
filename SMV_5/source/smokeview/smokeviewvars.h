@@ -838,7 +838,6 @@ SVEXTERN colorbardata *colorbarinfo,*current_colorbar;
 
 SVEXTERN int update_load_startup;
 SVEXTERN int do_threshold;
-SVEXTERN int mt_compress;
 SVEXTERN int ntotal_blockages;
 SVEXTERN int updateindexcolors;
 SVEXTERN int show_path_knots;

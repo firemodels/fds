@@ -21,6 +21,7 @@ void compress_svzip2(void);
 
 void init_multi_threading(void){
 #ifdef pp_THREAD
+  mt_compress=1;
   if(mt_compress==1)pthread_mutex_init(&mutexCOMPRESS,NULL);
 #endif
 }
@@ -80,6 +81,7 @@ void *mt_update_smooth_blockages(void *arg){
 #endif
 
 /* ------------------ smooth_blockages ------------------------ */
+
 #ifdef pp_THREAD
 void smooth_blockages(void){
   smoothing_blocks=1;

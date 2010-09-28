@@ -1664,7 +1664,6 @@ void initvars1(void){
   ncolorbars=0;
   update_load_startup=0;
   do_threshold=0;
-  mt_compress=1;
   updateindexcolors=0;
   show_path_knots=0;
   keyframe_snap=0;
