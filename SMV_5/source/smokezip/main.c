@@ -347,7 +347,7 @@ int main(int argc, char **argv){
     strcat(smvfile,filebase);
   }
   strcpy(smvfilebase,filebase);
-  if(partfile2iso==1){
+  if(partfile2iso==1||cleanfiles==1){
     strcpy(smvisofile,smvfile);
     strcat(smvisofile,".isosmv");
   }
@@ -512,7 +512,6 @@ void filecopy(char *destdir, char *file, char *filebase){
     fclose(streamin);
     return;
   }
-  printf("  Copying %s to %s\n",file,destdir);
   for(;;){
     int eof;
        
