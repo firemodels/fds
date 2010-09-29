@@ -91,7 +91,7 @@ void compress_parts(void){
 void convert_parts2iso(void){
   int i;
   
-  if(partfile2iso==0)return;
+  if(partfile2iso==0&&cleanfiles==0)return;
   for(i=0;i<npart_files;i++){
     part *parti;
 
@@ -580,6 +580,7 @@ void part2iso(part *parti){
 
   int endiandata;
 
+  int blocknumber;
   FILE_SIZE lenfile;
   int unit=15;
   int error1;
@@ -605,6 +606,40 @@ void part2iso(part *parti){
   int nx2, ny2, nz2;
   float xmin, ymin, zmin;
 
+
+  if(cleanfiles==1){
+    FILE *stream;
+
+    stream=fopen(smvisofile,"rb");
+    if(stream!=NULL){
+      fclose(stream);
+      printf("  Removing %s.\n",smvisofile);
+      UNLINK(smvisofile);
+      filesremoved++;
+    }
+    for(i=0;i<npart5propinfo;i++){
+      part5prop *propi;
+      flowlabels *labels;
+      char isofilename[1024];
+      
+      propi = part5propinfo + i;
+      labels = &propi->label;
+      strcpy(isofilename,parti->file);
+      strcat(isofilename,"_");
+      strcat(isofilename,labels->shortlabel);
+      strcat(isofilename,".tiso");
+
+      stream=fopen(isofilename,"rb");
+      if(stream!=NULL){
+        fclose(stream);
+        printf("  Removing %s.\n",isofilename);
+        UNLINK(isofilename);
+        filesremoved++;
+      }
+    }
+    return;
+  }
+
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
 
@@ -622,6 +657,8 @@ void part2iso(part *parti){
   FORTgetpartheader2(&unit,&nclasses,nquantities,&size);
 
   partmesh = parti->partmesh;
+
+  blocknumber = partmesh-meshinfo + 1;
 
   nx = partmesh->ibar;
   ny = partmesh->jbar;
@@ -689,13 +726,19 @@ void part2iso(part *parti){
 
   CCisoheader(isofile,isolonglabel,isoshortlabel,isounits,levels,&nlevels,&error);
 
-  SMVISOFILE=fopen(smvisofile,"w");
+  if(parti==partinfo){
+    SMVISOFILE=fopen(smvisofile,"w");
+  }
+  else{
+    SMVISOFILE=fopen(smvisofile,"a");
+  }
 
-  fprintf(SMVISOFILE,"ISOF\n");
+  fprintf(SMVISOFILE,"ISOF %i\n",blocknumber);
   fprintf(SMVISOFILE," %s\n",isofile);
   fprintf(SMVISOFILE," %s\n",isolonglabel);
   fprintf(SMVISOFILE," %s\n",isoshortlabel);
   fprintf(SMVISOFILE," %s\n",isounits);
+  fprintf(SMVISOFILE,"\n");
 
   for(i=0;i<npart5propinfo;i++){
     part5prop *propi;
@@ -711,7 +754,7 @@ void part2iso(part *parti){
     strcat(propi->isofilename,".tiso");
     CCtisoheader(propi->isofilename, labels->longlabel, labels->shortlabel, labels->unit, levels, &nlevels, &error);
 
-    fprintf(SMVISOFILE,"TISOF\n");
+    fprintf(SMVISOFILE,"TISOF %i\n",blocknumber);
     fprintf(SMVISOFILE," %s\n",propi->isofilename);
     fprintf(SMVISOFILE," %s\n",isolonglabel);
     fprintf(SMVISOFILE," %s\n",isoshortlabel);
@@ -719,6 +762,7 @@ void part2iso(part *parti){
     fprintf(SMVISOFILE," %s\n",labels->longlabel);
     fprintf(SMVISOFILE," %s\n",labels->shortlabel);
     fprintf(SMVISOFILE," %s\n",labels->unit);
+    fprintf(SMVISOFILE," \n");
   }
   fclose(SMVISOFILE);
 
