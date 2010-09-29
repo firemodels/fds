@@ -912,18 +912,19 @@ int readsmv(char *smvfile){
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
-      if(strlen(buffer)<=0)break;
-      if(getfileinfo(buffer,sourcedir,&filesize)==0){
-        NewMemory((void **)&plot3di->file,(unsigned int)(strlen(buffer)+lensourcedir+1));
-        NewMemory((void **)&plot3di->filebase,(unsigned int)(strlen(buffer)+1));
-        STRCPY(plot3di->filebase,buffer);
+      buffer2=trim_front(buffer);
+      if(strlen(buffer2)<=0)break;
+      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
+        NewMemory((void **)&plot3di->file,(unsigned int)(strlen(buffer2)+lensourcedir+1));
+        NewMemory((void **)&plot3di->filebase,(unsigned int)(strlen(buffer2)+1));
+        STRCPY(plot3di->filebase,buffer2);
         if(sourcedir!=NULL){
           STRCPY(plot3di->file,sourcedir);
-          STRCAT(plot3di->file,buffer);
         }
         else{
-          STRCPY(plot3di->file,buffer);
+          STRCPY(plot3di->file,"");
         }
+        STRCAT(plot3di->file,buffer2);
         if(readlabels(&plot3di->labels[0],streamsmv)==2||
            readlabels(&plot3di->labels[1],streamsmv)==2||
            readlabels(&plot3di->labels[2],streamsmv)==2||
