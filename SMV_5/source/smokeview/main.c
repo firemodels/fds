@@ -102,9 +102,6 @@ int main(int argc, char **argv){
 
     CheckMemory;
     Args(argc, argv_sv);
-//    if(texturedir!=NULL){
-//      printf("Texture directory: %s\n",texturedir);
-//    }
     version();
     printf("\n");
     if(smokezippath!=NULL)printf("Smokezip file: %s found\n",smokezippath);
