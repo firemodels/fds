@@ -426,7 +426,11 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       !!$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IBC,UN)
       WLOOP2_FL: DO IW=1,NWC
          IBC = IJKW(5,IW)
-         IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) CYCLE WLOOP2_FL
+         ! We CYCLE on NO_MASS_FLUX for RHO because UU, etc. must be used to preserve the exact divergence and
+         ! therefore the temperature.  It would be desirable to have precisely the same condition for YY, but
+         ! this has shown to lead to spurious creation of species near boundaries. So we have commented this
+         ! line out.  It is left here to remind us of the descrepancy with the RHO loop above.
+         !!IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) CYCLE WLOOP2_FL
          IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY   .OR. &
              BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
              BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)            CYCLE WLOOP2_FL
