@@ -28,7 +28,7 @@ RENDERONCE
 UNLOADALL
 UNLOADALL
 LOADFILE
-onetree_surf_1mesh.prt5.svz
+onetree_surf_1mesh.prt5
 SETVIEWPOINT
  view 1
 SETTIMEVAL
