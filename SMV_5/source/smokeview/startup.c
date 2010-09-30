@@ -86,7 +86,7 @@ int initcase_c(int argc, char **argv){
     else{
       input_file=smvfilename;
     }
-    return_code=readsmv(input_file);
+    return_code=readsmv(input_file,smvisofilename);
     if(return_code==0){
       show_trainer();
       show_load_alert();
@@ -94,10 +94,7 @@ int initcase_c(int argc, char **argv){
   }
   else{
     input_file=smvfilename;
-    return_code=readsmv(input_file);
-  }
-  if(smvtempfilename!=NULL){
-    remove(smvtempfilename);
+    return_code=readsmv(input_file,smvisofilename);
   }
   switch (return_code){
     case 1:
@@ -933,7 +930,6 @@ void InitOpenGL(void){
 /* ------------------ initvars1 ------------------------ */
 
 void initvars1(void){
-  smvtempfilename=NULL;
   usemenu=1;
   arg_iblank=0;
   use_iblank=1;

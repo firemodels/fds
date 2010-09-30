@@ -701,7 +701,7 @@ SVEXTERN int show_glui_warning,show_glui_error,show_glui_abort;
 #endif
 SVEXTERN time_t smv_modtime;
 SVEXTERN float temp_threshold;
-SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir,*smvtempfilename;
+SVEXTERN char *smvfilename, *smvmenufile,*databasefilename,*smvprogdir,*smvisofilename;
 SVEXTERN scriptfiledata first_scriptfile, last_scriptfile, *default_script;
 SVEXTERN scriptdata *scriptinfo, *current_script_command;
 SVEXTERN char *script_dir_path;

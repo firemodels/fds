@@ -3486,7 +3486,6 @@ void Args(int argc, char **argv){
   len_memory=len+strlen(part_ext)+100;
   NewMemory((void **)&fdsprefix,(unsigned int)len_memory);
   STRCPY(fdsprefix,argi);
-  if(smvtempfilename==NULL)FREEMEMORY(smvfilename);
   FREEMEMORY(trainer_filename);
   FREEMEMORY(test_filename);
   FREEMEMORY(filename_sb)
@@ -3570,29 +3569,19 @@ void Args(int argc, char **argv){
   // if smokezip created part2iso files then concatenate .smv entries found in the .isosmv file 
   // to the end of the .smv file creating a new .smv file.  Then read in that .smv file.
 
-  if(smvtempfilename==NULL){
-    char *smvisofilename;
+  {
     FILE *stream_iso=NULL;
 
     NewMemory((void **)&smvisofilename,len+7+1);
     STRCPY(smvisofilename,fdsprefix);
     STRCAT(smvisofilename,".isosmv");
     stream_iso=fopen(smvisofilename,"r");
-    if(smvtempfilename==NULL&&stream_iso!=NULL){
-      int return_val;
-
+    if(stream_iso!=NULL){
       fclose(stream_iso);
-      smvtempfilename=tmpnam(NULL);
-      return_val=filecat(smvfilename,smvisofilename,smvtempfilename);
-      if(return_val==-1){
-        remove(smvtempfilename);
-        smvtempfilename=NULL;
-      }
-      else{
-        smvfilename=smvtempfilename;
-      }
     }
-    FREEMEMORY(smvisofilename);
+    else{
+      FREEMEMORY(smvisofilename);
+    }
   }
 
   if(trainer_filename==NULL){
@@ -4180,7 +4169,8 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
   FILE *stream_in1, *stream_in2, *stream_out;
   int chars_in;
 
-  if(file_in1==NULL||file_in2==NULL||file_out==NULL)return -1;
+  if(file_in1==NULL||file_in2==NULL)return -1;
+  if(file_out==NULL)return -2;
 
   stream_in1=fopen(file_in1,"r");
   if(stream_in1==NULL)return -1;
@@ -4195,7 +4185,7 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
   if(stream_out==NULL){
     fclose(stream_in1);
     fclose(stream_in2);
-    return -1;
+    return -2;
   }
 
   for(;;){
