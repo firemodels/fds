@@ -45,6 +45,6 @@ smokeview -runscript sprinkler_many
 
 cd %wui%
 smokeview -runscript fire_line
-smokeview -runscript onetree_surf_1mesh_smvzip
+smokeview -runscript onetree_surf_1mesh
 
-cd ..\SMV_scripts
+cd ..\scripts
