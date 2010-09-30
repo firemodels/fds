@@ -30,7 +30,7 @@ call %SCRIPT_DIR%\SMV_Cases.bat
 
 erase %SCRIPT_DIR%\SMV_Cases.bat
 
-cd %BASEDIR%\SMV_scripts
+cd %SCRIPT_DIR%
 call run_wui_tree_test
 
 cd %BASEDIR%
