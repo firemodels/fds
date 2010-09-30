@@ -228,7 +228,7 @@ void svWINAPI sv_unload(void){
     }
     glutDetachMenu(GLUT_RIGHT_BUTTON);
     InitMenus(UNLOAD);
-    readsmv(NULL);
+    readsmv(NULL,NULL);
     glutSetWindow(mainwindow_id);
     glutHideWindow();
     FreeAllMemory();

@@ -103,7 +103,7 @@ void init_prop(propdata *propi, int nsmokeview_ids, char *label){
 
 /* ------------------ readsmv ------------------------ */
 
-int readsmv(char *file){
+int readsmv(char *file, char *file2){
 
 /* read the .smv file */
 
@@ -157,7 +157,7 @@ int readsmv(char *file){
   int ibartemp=2, jbartemp=2, kbartemp=2;
   size_t len;
   int  n;
-  FILE *stream;
+  FILE *stream=NULL,*stream1=NULL,*stream2=NULL;
   FILE *ENDIANfile;
   char buffer[255],buffer2[255],*bufptr;
   char *buffer3;
@@ -473,7 +473,17 @@ int readsmv(char *file){
   if(NewMemory((void **)&LESendian,4)==0)return 2;
   STRCPY(LESendian,"");
 
-  if( (stream=fopen(file,"r"))==NULL)return 1;
+  stream1=fopen(file,"r");
+  if(stream1==NULL)return 1;
+  if(file2!=NULL){
+    stream2=fopen(file2,"r");
+    if(stream2==NULL){
+      fclose(stream1);
+      return 1;
+    }
+  }
+  stream=stream1;
+
   getfile_modtime(file, &smv_modtime);
   
   printf("\nReading: %s\n",file);
@@ -484,12 +494,22 @@ int readsmv(char *file){
    ************************************************************************
  */
 
+#define BREAK \
+      if((stream==stream1&&stream2==NULL)||stream==stream2)break;\
+      stream=stream2;\
+      continue
+
   nbtemp=0; nvents=0; igrid=0; ioffset=0;
   ntc_total=0, nspr_total=0, nheat_total=0;
   printf("reading input file\n");
   printf("   pass 1\n");
-  while(!feof(stream)){
-    if(fgets(buffer,255,stream)==NULL)break;
+  for(;;){
+    if(feof(stream)!=0){
+      BREAK;
+    }
+    if(fgets(buffer,255,stream)==NULL){
+      BREAK;
+    }
     if(strncmp(buffer," ",1)==0)continue;
 
     /* 
@@ -594,13 +614,17 @@ int readsmv(char *file){
       continue;
     }
     if(match(buffer,"DATABASE",8)==1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       buffer3=trim_front(buffer);
       trim(buffer3);
       len=strlen(buffer3);
       if(STAT(buffer3,&statbuffer)==0){
         FREEMEMORY(databasefilename);
-        if(NewMemory((void **)&databasefilename,(unsigned int)(len+1))==0)break;
+        if(NewMemory((void **)&databasefilename,(unsigned int)(len+1))==0){
+          BREAK;
+        }
         strcpy(databasefilename,buffer3);
       }
       continue;
@@ -608,13 +632,17 @@ int readsmv(char *file){
 
     if(match(buffer,"REVISION",8)==1){
       revision_fds=-1;
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       sscanf(buffer,"%i",&revision_fds);
       if(revision_fds<0)revision_fds=-1;
       continue;
     }
     if(match(buffer,"TOFFSET",7)==1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       sscanf(buffer,"%f %f %f",texture_origin,texture_origin+1,texture_origin+2);
       continue;
     }
@@ -626,7 +654,9 @@ int readsmv(char *file){
 
     if(match(buffer,"CADTEXTUREPATH",14) == 1||
        match(buffer,"TEXTUREDIR",10) == 1){
-      if(fgets(buffer,255,stream)==NULL)break;
+         if(fgets(buffer,255,stream)==NULL){
+           BREAK;
+         }
       trim(buffer);
       {
         size_t texturedirlen;
@@ -642,7 +672,9 @@ int readsmv(char *file){
     }
 
     if(match(buffer,"VIEWTIMES",9) == 1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       sscanf(buffer,"%f %f %i",&view_tstart,&view_tstop,&view_ntimes);
       if(view_ntimes<2)view_ntimes=2;
       ReallocTourMemory();
@@ -1030,17 +1062,24 @@ int readsmv(char *file){
   ndeviceinfo=0;
   noutlineinfo=0;
   if(noffset==0)ioffset=1;
-  rewind(stream);
+  rewind(stream1);
+  if(stream2!=NULL)rewind(stream2);
+  stream=stream1;
   printf("   pass 1 completed\n");
   printf("   pass 2\n");
-  while(!feof(stream)){
+  for(;;){
+    if(feof(stream)!=0){
+      BREAK;
+    }
 
     if(noGRIDpresent==1&&startpass==1){
       strcpy(buffer,"GRID");
       startpass=0;
     }
     else{
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
     }
 
@@ -1061,16 +1100,22 @@ int readsmv(char *file){
 
       propi = propinfo + npropinfo;
 
-      if(fgets(proplabel,255,stream)==NULL)break; // prop label
+      if(fgets(proplabel,255,stream)==NULL){
+        BREAK;  // prop label
+      }
       trim(proplabel);
       fbuffer=trim_front(proplabel);
 
-      if(fgets(buffer,255,stream)==NULL)break; // number of smokeview_id's
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;  // number of smokeview_id's
+      }
       sscanf(buffer,"%i",&nsmokeview_ids);
 
       init_prop(propi,nsmokeview_ids,fbuffer);
       for(i=0;i<nsmokeview_ids;i++){
-        if(fgets(buffer,255,stream)==NULL)break; // smokeview_id
+        if(fgets(buffer,255,stream)==NULL){
+          BREAK; // smokeview_id
+        }
         trim(buffer);
         fbuffer=trim_front(buffer);
         lenbuf=strlen(fbuffer);
@@ -1082,7 +1127,9 @@ int readsmv(char *file){
       propi->smv_object=propi->smv_objects[0];
       propi->smokeview_id=propi->smokeview_ids[0];
 
-      if(fgets(buffer,255,stream)==NULL)break; // keyword_values
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK; // keyword_values
+      }
       sscanf(buffer,"%i",&propi->nvars_indep);
       propi->vars_indep=NULL;
       propi->svals=NULL;
@@ -1420,11 +1467,15 @@ typedef struct {
         b1 b2 b3 e1 e2 e3 nb
         ticklength tickdir tickcolor (r g b) tickwidth 
         */
-        if(fgets(buffer,255,stream)==NULL)break;
+        if(fgets(buffer,255,stream)==NULL){
+          BREAK;
+        }
         *nbarst=0;
         sscanf(buffer,"%f %f %f %f %f %f %i",begt,begt+1,begt+2,endt,endt+1,endt+2,nbarst);
         if(*nbarst<1)*nbarst=1;
-        if(fgets(buffer,255,stream)==NULL)break;
+        if(fgets(buffer,255,stream)==NULL){
+          BREAK;
+        }
         {
           float *rgbtemp;
 
@@ -1500,7 +1551,9 @@ typedef struct {
     if(match(buffer,"OUTLINE",7) == 1){
       noutlineinfo++;
       outlinei = outlineinfo + noutlineinfo - 1;
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       sscanf(buffer,"%i",&outlinei->nlines);
       if(outlinei->nlines>0){
         x1=NULL;
@@ -1531,7 +1584,9 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"CADGEOM",7) == 1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       bufptr=trim_string(buffer);
       len=strlen(bufptr);
       cadgeominfo[ncadgeom].order=NULL;
@@ -1602,7 +1657,7 @@ typedef struct {
       }
       if(fgets(buffer,255,stream)==NULL){
         nsmoke3d_files--;
-        break;
+        BREAK;
       }
       bufptr=trim_string(buffer);
       len=strlen(buffer);
@@ -1898,7 +1953,7 @@ typedef struct {
       zonei = zoneinfo + izone;
       if(fgets(buffer,255,stream)==NULL){
         nzone--;
-        break;
+        BREAK;
       }
       bufptr=trim_string(buffer);
       len=strlen(bufptr);
@@ -1958,7 +2013,9 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"AMBIENT",7)==1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       sscanf(buffer,"%f %f %f",&pref,&pamb,&tamb);
       continue;
     }
@@ -1976,7 +2033,9 @@ typedef struct {
       iroom++;
       roomi = roominfo + iroom - 1;
       roomi->valid=0;
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       sscanf(buffer,"%f %f %f",&roomi->dx,&roomi->dy,&roomi->dz);
       roomi->valid=1;
       if(fgets(buffer,255,stream)==NULL){
@@ -2396,12 +2455,17 @@ typedef struct {
    ************************************************************************
  */
 
-  rewind(stream);
+  rewind(stream1);
+  if(stream2!=NULL)rewind(stream2);
+  stream=stream1;
   printf("   pass 2 completed\n");
   printf("   pass 3\n");
   startpass=1;
 
-  while(!feof(stream)){
+  for(;;){
+    if(feof(stream)!=0){
+      BREAK;
+    }
 
     if(nvent==0){
       nvent=0;
@@ -2413,7 +2477,9 @@ typedef struct {
         startpass=0;
       }
       else{
-        if(fgets(buffer,255,stream)==NULL)break;
+        if(fgets(buffer,255,stream)==NULL){
+          BREAK;
+        }
         if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
       }
     }
@@ -2505,7 +2571,7 @@ typedef struct {
       }
       if(fgets(buffer,255,stream)==NULL){
         nplot3d_files--;
-        break;
+        BREAK;
       }
       bufptr=trim_string(buffer);
       len=strlen(bufptr);
@@ -2616,7 +2682,9 @@ typedef struct {
       zvi = zventinfo + nzvents - 1;
       if(match(buffer,"VFLOWGEOM",9)==1)zonevent_orien=1;
       zvi->vent_orien=zonevent_orien;
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       color[0]=1.0;
       color[1]=0.0;
       color[2]=1.0;
@@ -2720,7 +2788,9 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"TITLE1",6)==1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       bufptr=trim_string(buffer);
       strcpy(TITLE1,bufptr);
       continue;
@@ -2731,7 +2801,9 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"TITLE2",6)==1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       bufptr=trim_string(buffer);
       strcpy(TITLE2,bufptr);
       continue;
@@ -2743,7 +2815,9 @@ typedef struct {
   */
     if(match(buffer,"FIRE",4)==1){
       ifire++;
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       sscanf(buffer,"%i %f %f %f",&roomnumber,&fireinfo[ifire-1].x,
         &fireinfo[ifire-1].y,&fireinfo[ifire-1].z);
       if(roomnumber>=1&&roomnumber<=nrooms){
@@ -3468,7 +3542,7 @@ typedef struct {
       parti->autoload=0;
       if(fgets(buffer,255,stream)==NULL){
         npart_files--;
-        break;
+        BREAK;
       }
 
       bufptr=trim_string(buffer);
@@ -3598,7 +3672,7 @@ typedef struct {
 
       if(fgets(buffer,255,stream)==NULL){
         ntarg_files--;
-        break;
+        BREAK;
       }
       len=strlen(buffer);
       buffer[len-1]='\0';
@@ -3627,7 +3701,9 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"SYST",4) == 1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       len=strlen(buffer);
       buffer[len-1]='\0';
       STRCPY(LESsystem,buffer);
@@ -3639,7 +3715,9 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"ENDIAN",6) == 1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       len=strlen(buffer);
       buffer[len-1]='\0';
       strncpy(LESendian,buffer,1);
@@ -3652,7 +3730,9 @@ typedef struct {
   */
     /* ENDF superscedes ENDIAN */
     if(match(buffer,"ENDF",4) == 1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       bufptr=trim_string(buffer);
       len=strlen(bufptr);
       NewMemory((void **)&endianfilename,(unsigned int)(len+1));
@@ -3676,7 +3756,9 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"INPF",4) == 1){
-      if(fgets(buffer,255,stream)==NULL)break;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       bufptr=trim_string(buffer);
 
       len=strlen(bufptr);
@@ -3721,7 +3803,7 @@ typedef struct {
   */
     if(match(buffer,"CHID",4) == 1){
       if(fgets(buffer,255,stream)==NULL){
-        break;
+        BREAK;
       }
       bufptr=trim_string(buffer);
       len=strlen(bufptr);
@@ -3781,7 +3863,7 @@ typedef struct {
       }
       if(fgets(buffer,255,stream)==NULL){
         nslice_files--;
-        break;
+        BREAK;
       }
 
       bufptr=trim_string(buffer);
@@ -3905,7 +3987,7 @@ typedef struct {
 
       if(fgets(buffer,255,stream)==NULL){
         npatch_files--;
-        break;
+        BREAK;
       }
 
       bufptr=trim_string(buffer);
@@ -3988,7 +4070,7 @@ typedef struct {
       }
       if(fgets(buffer,255,stream)==NULL){
         niso_files--;
-        break;
+        BREAK;
       }
 
       isoi->seq_id=nn_iso;
@@ -4601,12 +4683,20 @@ typedef struct {
    ************************************************************************
  */
 
-  rewind(stream);
+  rewind(stream1);
+  if(stream2!=NULL)rewind(stream2);
+  stream=stream2;
   printf("   pass 3 completed\n");
   if(do_pass4==1||autoterrain==1)printf("   pass 4\n");
 
-  while((autoterrain==1||do_pass4==1)&&!feof(stream)){
-    if(fgets(buffer,255,stream)==NULL)break;
+  while((autoterrain==1||do_pass4==1)){
+    if(feof(stream)!=0){
+      BREAK;
+    }
+
+    if(fgets(buffer,255,stream)==NULL){
+      BREAK;
+    }
     if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
 
     if(match(buffer,"MINMAXBNDF",10) == 1){
@@ -5622,7 +5712,8 @@ typedef struct {
 #endif
 
 
-  fclose(stream);
+  fclose(stream1);
+  if(stream2!=NULL)fclose(stream2);
   stream=NULL;
   update_selectfaces();
   updateslicetypes();
