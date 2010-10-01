@@ -1284,9 +1284,6 @@ void drawiso(const mesh *meshi,int tranflag){
     glEnd();
     antialias(0);
   }
-
-
-
 }
 
 /* ------------------ drawtiso ------------------------ */
