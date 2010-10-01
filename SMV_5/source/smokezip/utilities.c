@@ -339,9 +339,6 @@ int getmaxrevision(void){
   MAXREV(main_revision);
   MAXREV(readfiles_revision);
   MAXREV(utilities_revision);
-#ifdef pp_LIGHT
-  MAXREV(lightsmoke_revision);
-#endif
   return max_revision;
 }
 

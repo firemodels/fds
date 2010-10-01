@@ -44,13 +44,11 @@
 
 #ifdef pp_ALPHA
 #undef pp_release
-#define pp_LIGHT
 #define SMZVERSION "experimental"
 //#define pp_RLETEST
 #endif
 
 #ifdef pp_BETA
-#define pp_LIGHT
 #undef pp_release
 #define SMZVERSION "test"
 #define pp_PART2
