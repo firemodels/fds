@@ -55,9 +55,6 @@ int setSmokeShaders() {
     "uniform float hrrcutoff;"
     "uniform float smoke_shade;"
 	"uniform int is_smoke;"
-#ifdef pp_LIGHT
-    "attribute float smoke_color;"
-#endif
     "uniform float smoke3d_rthick;"
     "uniform int adjustalphaflag;"
     "varying vec4 newcolor;"
@@ -70,11 +67,7 @@ int setSmokeShaders() {
     "{"
     "  float alpha,r;"
     "  float term1, term2, term3, term4;"
-#ifdef pp_LIGHT
-    "  float s_color;"
-#else
     "  float s_shade;"
-#endif
 	"  int draw_hrr;"
   "  if(hrrcutoff>0.0&&hrr>hrrcutoff){"
 	"    draw_hrr=1;"
@@ -100,13 +93,8 @@ int setSmokeShaders() {
   "    }"
     // newcolor.a *= (1.0 - pow(1.0-gl_Color.a,aspectratio*top/bottom));
   "    alpha /= smoke3d_rthick;"
-#ifdef pp_LIGHT
-  "    s_color = smoke_color/255.0;"
-  "    newcolor = vec4(s_color,s_color,s_color,alpha);"
-#else
   "    s_shade = smoke_shade/255.0;"
   "    newcolor = vec4(s_shade,s_shade,s_shade,alpha);"
-#endif
   "  }"
 #ifdef pp_GPU_BLANK
   "  fblank=blank;"
@@ -162,9 +150,6 @@ int setSmokeShaders() {
   if(error_code!=1)return error_code;
   GPU_hrrcutoff = glGetUniformLocation(p_smoke,"hrrcutoff");
   GPU_hrr = glGetAttribLocation(p_smoke,"hrr");
-#ifdef pp_LIGHT
-  GPU_smokecolor = glGetAttribLocation(p_smoke,"smoke_color");
-#endif
   GPU_smokealpha = glGetAttribLocation(p_smoke,"smoke_alpha");
   GPU_blank = glGetAttribLocation(p_smoke,"blank");
   GPU_skip = glGetUniformLocation(p_smoke,"skip");

@@ -962,10 +962,6 @@ typedef struct _smoke3d {
   int seq_id,autoload;
   char *file;
   char *comp_file, *reg_file;
-#ifdef pp_LIGHT
-  int use_lighting_file;
-  char *light_file;
-#endif
   int loaded, display, d_display;
   int soot_loaded,water_loaded,hrrpuv_loaded;
   int blocknumber;
@@ -988,13 +984,6 @@ typedef struct _smoke3d {
   unsigned char *smoke_comp_all;
   unsigned char *smoke_state_list;
   smokedata smoke, light;
-#ifdef pp_LIGHT
-  int ncomp_light_total;
-  int *nchars_compressed_light, *nchars_compressed_light_full;
-  unsigned char *lightframe_in, *lightframe_out, **lightframe_comp_list;
-  unsigned char *lightview_tmp;
-  unsigned char *light_comp_all;
-#endif
   unsigned char *hrrpuv_color, *water_color, *soot_color;
   int hrrpuv_index, water_index, soot_index;
   int dir;

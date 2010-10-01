@@ -936,9 +936,6 @@ void initvars1(void){
   levelset_colorbar=-1;
   wallthickness_colorbar=-1;
   show_slice_terrain=0;
-#ifdef pp_LIGHT
-  show_smokelighting=0;
-#endif
 #ifdef pp_SHOOTER
   glui_time=0.0;
   last_prop_display=-1;

@@ -338,9 +338,6 @@ int readsmv(char *file, char *file2){
       for(i=0;i<nsmoke3d_files;i++){
         smoke3di = smoke3dinfo + i;
         freesmoke3d(smoke3di);
-#ifdef pp_LIGHT
-        FREEMEMORY(smoke3di->light_file);
-#endif
         FREEMEMORY(smoke3di->comp_file);
         FREEMEMORY(smoke3di->reg_file);
       }
@@ -1670,10 +1667,6 @@ typedef struct {
         if(NewMemory((void **)&smoke3di->reg_file,(unsigned int)(len+1))==0)return 2;
         STRCPY(smoke3di->reg_file,bufptr);
 
-#ifdef pp_LIGHT
-        smoke3di->use_lighting_file=0;
-        smoke3di->light_file=NULL;
-#endif
         smoke3di->seq_id=nn_smoke3d;
         smoke3di->autoload=0;
         smoke3di->version=-1;
@@ -1691,14 +1684,6 @@ typedef struct {
         smoke3di->use_smokeframe=NULL;
         smoke3di->nchars_compressed_smoke=NULL;
         smoke3di->nchars_compressed_smoke_full=NULL,
-#ifdef pp_LIGHT
-        smoke3di->nchars_compressed_light=NULL;
-        smoke3di->light_comp_all=NULL;
-        smoke3di->lightframe_in=NULL;
-        smoke3di->lightframe_out=NULL;
-        smoke3di->lightframe_comp_list=NULL;
-        smoke3di->lightview_tmp=NULL;
-#endif
 
         smoke3di->display=0;
         smoke3di->loaded=0;
@@ -1746,26 +1731,6 @@ typedef struct {
         else{
           smoke3di->type=1;
         }
-#ifdef pp_LIGHT
-        STRCPY(buffer2,buffer);
-        STRCAT(buffer2,".lvz");
-
-        len=lenbuffer+4;
-        if(NewMemory((void **)&smoke3di->light_file,(unsigned int)(len+1))==0)return 2;
-        STRCPY(smoke3di->light_file,buffer2);
-
-        if(STAT(smoke3di->light_file,&statbuffer)==0){
-          FILE *light_stream;
-
-          light_stream=fopen(smoke3di->light_file,"rb");
-          if(light_stream!=NULL){
-            fclose(light_stream);
-            smoke3di->use_lighting_file=1;
-          }
-        }
-
-#endif
-
       }
       continue;
     }
@@ -7114,14 +7079,6 @@ int readini2(char *inifile, int localfile){
       if(trainerview!=2&&trainerview!=3)trainerview=1;
       continue;
     }
-#ifdef pp_LIGHT
-    if(match(buffer,"SMOKELIGHTING",13)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_smokelighting);
-      if(show_smokelighting!=0)show_smokelighting=1;
-      continue;
-    }
-#endif
     if(match(buffer,"SMOOTHBLOCKSOLID",16)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&smooth_block_solid);
@@ -9967,10 +9924,6 @@ void writeini(int flag){
   fprintf(fileout," %i %i %i\n",fire_red,fire_green,fire_blue);
   fprintf(fileout,"FIREDEPTH\n");
   fprintf(fileout," %f\n",fire_halfdepth);
-#ifdef pp_LIGHT
-  fprintf(fileout,"SMOKELIGHTING\n");
-  fprintf(fileout," %i\n",show_smokelighting);
-#endif
 
   if(colorbartype!=colorbartype_default){
     fprintf(fileout,"COLORBARTYPE\n");
