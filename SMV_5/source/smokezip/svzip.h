@@ -12,24 +12,6 @@
 
 #include "histogram.h"
 
-#ifdef pp_LIGHT
-#define NPHOTONS 100000
-#define NRAD 10
-#define NTHETA 10
-#define NPSI 10
-
-#define ACCEPTED 0
-#define TRIAL 1
-#define UNKNOWN 2
-typedef struct _nodedata {
-  float totaldist, nodedist;
-  struct _nodedata *nabors[6];
-  struct _nodedata *next, *prev;
-  int state; // 0=accepted 1=trial 2=unknown
-} nodedata;
-
-#endif
-
 #ifdef pp_PART
 #define rgb_white 12
 #define rgb_yellow 13
@@ -50,20 +32,6 @@ typedef struct _nodedata {
 #endif
 
 
-#ifdef pp_LIGHT
-/* --------------------------  ventdata ------------------------------------ */
-
-typedef struct {
-  int ib[6],surf_index,is_open;
-} ventdata;
-
-/* --------------------------  obstdata ------------------------------------ */
-
-typedef struct {
-  int ib[6];
-} obstdata;
-#endif
-
 typedef struct {
   int ibar, jbar, kbar;
   float *xplt, *yplt, *zplt;
@@ -71,15 +39,6 @@ typedef struct {
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float dx, dy, dz;
   float dxx, dyy, dzz;
-#ifdef pp_LIGHT
-  float cell_volume, cell_surface_area, cell_cross_sectional_area;
-  float *photon_cell;
-  float *light_cell_radiance;
-  float dxyzmax;
-  int nvents, nobsts;
-  obstdata *obstinfo;
-  ventdata *ventinfo;
-#endif
 } mesh;
 
 /* --------------------------  flowlabels ------------------------------------ */
@@ -164,13 +123,6 @@ typedef struct {
   char *file,*filebase;
   int seq_id, autozip;
   int nx, ny, nz, filesize;
-#ifdef pp_LIGHT
-  mesh *smoke_mesh;
-  nodedata *nodeinfo;
-  float *light_q_rect;
-  int type;
-  flowlabels label;
-#endif
   unsigned char *compressed_lightingbuffer;
   uLongf ncompressed_lighting_zlib;
 } smoke3d;
@@ -222,17 +174,6 @@ typedef struct {
   part5class **classptr;
   part5data *data5;
 } part;
-#endif
-
-#ifdef pp_LIGHT
-typedef struct {
-  int type,dir;
-  int nstep;
-  int move;
-  float t1, t2;
-  float radius, area;
-  float xyz1[3], xyz2[3], q, qflux;
-} lightdata;
 #endif
 
 #define PDFMAX 100000
@@ -308,11 +249,6 @@ int match(const char *buffer, const char *key, unsigned int lenkey);
 void trim(char *line);
 void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *normal, float *area);
 float atan3(float y, float x);
-#ifdef pp_LIGHT
-void light_smoke(smoke3d *smoke3di,unsigned char *full_lightingbuffer, float *val_buffer, unsigned char *alpha_buffer);
-void set_lightfield(smoke3d *smoke3di,float xyz[3], float hrr);
-void update_lightfield(float time, smoke3d *smoke3di, unsigned char *lightingbuffer);
-#endif
 
 #ifdef pp_noappend
 #define FORTgetpartheader1 getpartheader1
@@ -371,21 +307,10 @@ STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian,
 EXTERN int frameskip;
 EXTERN int no_chop;
 EXTERN unsigned char *full_alphabuffer;
-#ifdef pp_LIGHT
-EXTERN float *full_logalphabuffer;
-EXTERN int nphotons;
-#endif
 EXTERN patch *patchinfo;
 EXTERN mesh *meshinfo;
 EXTERN smoke3d *smoke3dinfo;
 EXTERN int npatch_files;
-#ifdef pp_LIGHT
-EXTERN int make_lighting_file;
-EXTERN int nlightinfo;
-EXTERN lightdata *lightinfo;
-EXTERN float light_delta;
-EXTERN float *light_cdf;
-#endif
 
 EXTERN int nslice_files, niso_files, nplot3d_files;
 
@@ -416,9 +341,6 @@ EXTERN char pp[2];
 EXTERN int smoke3dzipstep, boundzipstep, slicezipstep;
 EXTERN int isozipstep,doiso;
 EXTERN int filesremoved;
-#ifdef pp_LIGHT
-EXTERN float albedo, light_min, light_max;
-#endif
 EXTERN int endf, syst;
 EXTERN char endianfilebase[1024];
 EXTERN char *endianfile;
