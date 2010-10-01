@@ -79,10 +79,14 @@ void get_smokezippath(char *progdir, char **zippath){
 
   if(progdir!=NULL){
     len=strlen(progdir);
-    NewMemory((void **)zippath,len+13);
+    NewMemory((void **)zippath,len+20);
     strcpy(*zippath,progdir);
 #ifdef WIN32
+#ifdef X64
+    strcat(*zippath,"smokezip_win_64.exe");
+#else
     strcat(*zippath,"smokezip.exe");
+#endif
 #else
     strcat(*zippath,"smokezip");
 #endif
