@@ -170,68 +170,6 @@ else{\
 #define SETBVALS
 #endif
 
-#ifdef pp_LIGHT
-#define DRAWVERTEXGPU(XX,YY,ZZ) \
-  value[0]=alphaf_in[n11];\
-  value[1]=alphaf_in[n12];\
-  value[2]=alphaf_in[n22];\
-  value[3]=alphaf_in[n21];\
-  if(adjustalphaflag==2||adjustalphaflag==3){\
-    if(iblank_smoke3d!=NULL){\
-      if(iblank_smoke3d[n11]==0)value[0]=0;\
-      if(iblank_smoke3d[n12]==0)value[1]=0;\
-      if(iblank_smoke3d[n22]==0)value[2]=0;\
-      if(iblank_smoke3d[n21]==0)value[3]=0;\
-    }\
-  }\
-  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
-  SETBVALS\
-  if(smoke3di->use_lighting_file==1&&show_smokelighting){\
-    lvalue[0]=(float)light_color[n11];\
-    lvalue[1]=(float)light_color[n12];\
-    lvalue[2]=(float)light_color[n22];\
-    lvalue[3]=(float)light_color[n21];\
-  }\
-  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
-    xyzindex=xyzindex1;                                  \
-  }                                                      \
-  else{                                                  \
-    xyzindex=xyzindex2;                                  \
-  }                                                      \
-  if(firecolor==NULL){\
-    if(smoke3di->use_lighting_file==1&&show_smokelighting==1){\
-      for(node=0;node<6;node++){                             \
-        mm = xyzindex[node];                                 \
-        GPU_BLANK \
-        glVertexAttrib1f(GPU_smokecolor,(float)lvalue[mm]); \
-        glVertexAttrib1f(GPU_smokealpha,(float)value[mm]); \
-        glVertex3f(XX,YY,ZZ);                                \
-      }\
-    }\
-    else{\
-      glVertexAttrib1f(GPU_smokecolor,(float)smoke_shade/255.0); \
-      for(node=0;node<6;node++){                             \
-        mm = xyzindex[node];                                 \
-        GPU_BLANK \
-        glVertexAttrib1f(GPU_smokealpha,(float)value[mm]); \
-        glVertex3f(XX,YY,ZZ);                                \
-      }\
-    }\
-  }\
-  else{\
-    fvalue[0]=firecolor[n11];\
-    fvalue[1]=firecolor[n12];\
-    fvalue[2]=firecolor[n22];\
-    fvalue[3]=firecolor[n21];\
-    for(node=0;node<6;node++){                             \
-      mm = xyzindex[node];                                 \
-      GPU_BLANK \
-      glVertexAttrib1f(GPU_smokealpha,(float)value[mm]);\
-      glVertexAttrib1f(GPU_hrr,(float)fvalue[mm]);\
-      glVertex3f(XX,YY,ZZ);                                \
-    }\
-}
-#else
 #define DRAWVERTEXGPU(XX,YY,ZZ) \
   value[0]=alphaf_in[n11];\
   value[1]=alphaf_in[n12];\
@@ -273,7 +211,6 @@ else{\
       glVertex3f(XX,YY,ZZ);                                \
     }\
 }
-#endif
 #define DRAWVERTEXGPUTERRAIN(XX,YY,ZZ) \
   z_offset[0]=znode_offset[m11];\
   z_offset[1]=znode_offset[m12];\
@@ -324,11 +261,6 @@ else{\
 void readsmoke3d(int ifile,int flag, int *errorcode){
   smoke3d *smoke3di,*smoke3dj;
   EGZ_FILE *SMOKE3DFILE;
-#ifdef pp_LIGHT
-  EGZ_FILE *LIGHTFILE;
-  int light_info[2];
-  //int light_version;
-#endif
   int error;
   int ncomp_smoke_total;
   int ncomp_smoke_total_skipped;
@@ -336,10 +268,6 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   FILE_SIZE file_size=0;
   int local_starttime0=0, local_stoptime0=0;  
   float delta_time, delta_time0;
-#ifdef pp_LIGHT
-  int ncomp_light_total;
-  int ncomp_light_total_skipped;
-#endif
   int iii,ii,i,j;
   int nxyz[8];
   int nchars[2];
@@ -387,26 +315,12 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     return;
   }
   CheckMemory;
-#ifdef pp_LIGHT
-  if(getsmoke3d_sizes(smoke3di->file,
-    smoke3di->light_file,smoke3di->use_lighting_file,
-    smoke3di->version,&smoke3di->times, &smoke3di->use_smokeframe,
-                 &smoke3di->nchars_uncompressed, 
-                 &smoke3di->nchars_compressed_smoke,
-                 &smoke3di->nchars_compressed_smoke_full,
-                 &smoke3di->nchars_compressed_light,
-                 &smoke3di->nchars_compressed_light_full,
-                 &smoke3di->n_times,
-                 &smoke3di->n_times_full
-                 )==1){
-#else
   if(getsmoke3d_sizes(smoke3di->file,smoke3di->version,&smoke3di->times, &smoke3di->use_smokeframe,
                  &smoke3di->nchars_uncompressed, 
                  &smoke3di->nchars_compressed_smoke,
                  &smoke3di->nchars_compressed_smoke_full,
                  &smoke3di->n_times,
                  &smoke3di->n_times_full)==1){
-#endif
     readsmoke3d(ifile,UNLOAD,&error);
     *errorcode=1;
     printf("*** error: problems sizing 3d smoke data for %s\n",smoke3di->file);
@@ -430,26 +344,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     smoke3di->smoke_state_list[i]=2;
   }
 
-#ifdef pp_LIGHT
-  if(smoke3di->use_lighting_file==1){
-    if(NewMemory((void **)&smoke3di->lightframe_comp_list,smoke3di->n_times_full*sizeof(unsigned char *))==0||
-       NewMemory((void **)&smoke3di->lightframe_in,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
-       NewMemory((void **)&smoke3di->lightview_tmp,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
-       NewMemory((void **)&smoke3di->lightframe_out,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0){
-       readsmoke3d(ifile,UNLOAD,&error);
-       *errorcode=1;
-       printf("*** error: problems allocating memory for 3d smoke file: %s\n",smoke3di->file);
-       return;
-    }
-  }
-#endif
-
   ncomp_smoke_total=0;
   ncomp_smoke_total_skipped=0;
-#ifdef pp_LIGHT
-  ncomp_light_total=0;
-  ncomp_light_total_skipped=0;
-#endif
   for(i=0;i<smoke3di->n_times_full;i++){
     ncomp_smoke_total+=smoke3di->nchars_compressed_smoke_full[i];
     if(smoke3di->use_smokeframe[i]==1){
@@ -464,25 +360,6 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   }
   smoke3di->ncomp_smoke_total=ncomp_smoke_total_skipped;
 
-#ifdef pp_LIGHT
-  if(smoke3di->use_lighting_file==1){
-    for(i=0;i<smoke3di->n_times_full;i++){
-      ncomp_light_total+=smoke3di->nchars_compressed_light_full[i];
-      if(smoke3di->use_smokeframe[i]==1){
-        ncomp_light_total_skipped+=smoke3di->nchars_compressed_light_full[i];
-      }
-    }
-    if(NewMemory((void **)&smoke3di->light_comp_all,ncomp_light_total_skipped*sizeof(unsigned char))==0){
-      readsmoke3d(ifile,UNLOAD,&error);
-      *errorcode=1;
-       printf("*** error: problems allocating memory for 3d smoke file: %s\n",smoke3di->file);
-      return;
-    }
-    smoke3di->ncomp_light_total=ncomp_light_total_skipped;
-
-  }
-#endif
-
   ncomp_smoke_total=0;
   i=0;
   for(ii=0;ii<smoke3di->n_times_full;ii++){
@@ -493,60 +370,21 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     }
   }
 
-#ifdef pp_LIGHT
-  if(smoke3di->use_lighting_file==1){
-    ncomp_light_total=0;
-    i=0;
-    for(ii=0;ii<smoke3di->n_times_full;ii++){
-    //  if(smoke3di->load_frames[ii]==1){
-        smoke3di->lightframe_comp_list[i]=smoke3di->light_comp_all+ncomp_light_total;
-        ncomp_light_total+=smoke3di->nchars_compressed_light[i];
-        i++;
-    //  }
-    }
-  }
-#endif
-
 // read in data
 
   getfile_size(smoke3di->file,&file_size);
 #ifdef EGZ
   SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"rb",0,2);
-#ifdef pp_LIGHT
-  if(smoke3di->use_lighting_file==1){
-    LIGHTFILE=EGZ_FOPEN(smoke3di->light_file,"rb",0,2);
-  }
-  else{
-    LIGHTFILE=NULL;
-  }
-#endif
 #endif
 #ifndef EGZ
   SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"rb");
-#ifdef pp_LIGHT
-  if(smoke3di->use_lighting_file==1){
-    LIGHTFILE=EGZ_FOPEN(smoke3di->light_file,"rb");
-  }
-#endif
 #endif
   if(SMOKE3DFILE==NULL){
     readsmoke3d(ifile,UNLOAD,&error);
     *errorcode=1;
     return;
   }
-#ifdef pp_LIGHT
-  if(smoke3di->use_lighting_file==1){
-    if(LIGHTFILE==NULL){
-      readsmoke3d(ifile,UNLOAD,&error);
-      *errorcode=1;
-      return;
-    }
-    EGZ_FREAD(light_info,4,2,LIGHTFILE);
-    //light_version=light_info[1];
-  }
-#endif
-  
-  
+
   EGZ_FREAD(nxyz,4,8,SMOKE3DFILE);
   smoke3di->is1=nxyz[2];
   smoke3di->is2=nxyz[3];
@@ -615,50 +453,6 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     EGZ_FCLOSE(SMOKE3DFILE);
   }
 
-#ifdef pp_LIGHT
-  // read light data
-
-  if(smoke3di->use_lighting_file==1){
-    ii=-1;
-    nframes_found=0;
-    for(i=0;i<smoke3di->n_times_full;i++){
-      size_t time_read;
-      int nlight_chars;
-
-	    time_read=EGZ_FREAD(&time,4,1,LIGHTFILE);
-      if(time_read==0||EGZ_FEOF(LIGHTFILE)!=0)break;
-
-      if(i%smoke3dframestep==0)printf("lighting time=%.2f",time);
-
-      EGZ_FREAD(&nlight_chars,4,1,LIGHTFILE);
-      if(EGZ_FEOF(LIGHTFILE)!=0)break;
-
-      if(i%smoke3dframestep==0){
-        float complevel;
-
-        ii++;
-        nframes_found++;
-        EGZ_FREAD(smoke3di->lightframe_comp_list[ii],1,smoke3di->nchars_compressed_light[ii],LIGHTFILE);
-        if(EGZ_FEOF(LIGHTFILE)!=0)break;
-
-        complevel=10.0*(float)smoke3di->nchars_uncompressed/(float)nlight_chars;
-        complevel=(int)complevel;
-        complevel/=10.0;
-        sprintf(compstring," compression ratio: %.1f",complevel);
-        trim(compstring);
-        trimzeros(compstring);
-        printf("%s\n",compstring);
-      }
-      else{
-        EGZ_FSEEK(LIGHTFILE,smoke3di->nchars_compressed_light_full[i],SEEK_CUR);
-        if(EGZ_FEOF(LIGHTFILE)!=0)break;
-      }
-    }
-    if(LIGHTFILE!=NULL){
-      EGZ_FCLOSE(LIGHTFILE);
-    }
-  }
-#endif
   smoke3di->loaded=1;
   smoke3di->display=1;
   setsmokecolorflags();
@@ -769,43 +563,21 @@ void setsmokecolorflags(void){
 }
 
 /* ------------------ getsmoke3d_sizes ------------------------ */
-#ifdef pp_LIGHT
-int getsmoke3d_sizes(char *smokefile, 
-                     char *lightfile, int uselight,
-                     int version, float **timelist_found, int **use_smokeframe,
-                      int *nchars_smoke_uncompressed, 
-                      int **nchars_smoke_compressed_found,
-                      int **nchars_smoke_compressed_full,
-                      int **nchars_light_compressed,
-                      int **nchars_light_compressedfull,
-                      int *n_times_found,int *n_times_full){
-#else
 int getsmoke3d_sizes(char *smokefile, int version, float **timelist_found, int **use_smokeframe,
                       int *nchars_smoke_uncompressed, 
                       int **nchars_smoke_compressed_found,
                       int **nchars_smoke_compressed_full,
                       int *n_times_found,int *n_times_full){
-#endif
   char textfilename[1024],textfilename2[1024],buffer[255];
   char *textptr;
   FILE *TEXTFILE=NULL;
   EGZ_FILE *SMOKE3DFILE;
-#ifdef pp_LIGHT
-  EGZ_FILE *LIGHTFILE=NULL;
-#endif
   int nframes_found;
   float time,time_max,*time_found=NULL;
   int *use_smokeframe_full;
   int nch_uncompressed,nch_smoke_compressed;
-#ifdef pp_LIGHT
-  int nch_light_compressed;
-#endif
   int *nch_smoke_compressed_full=NULL;
   int *nch_smoke_compressed_found=NULL;
-#ifdef pp_LIGHT
-  int *nch_light_compressedfullptr=NULL;
-  int *nch_light_compressedptr=NULL;
-#endif
   int nxyz[8];
   int nchars[2];
   int skip;
@@ -846,26 +618,14 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist_found, int *
     if(TEXTFILE==NULL)return 1;  // can't write size file in temp directory so give up
 #ifdef EGZ
     SMOKE3DFILE=EGZ_FOPEN(smokefile,"rb",0,2);
-#ifdef pp_LIGHT
-    if(uselight==1)LIGHTFILE=EGZ_FOPEN(lightfile,"rb",0,2);
-#endif
 #endif
 #ifndef EGZ
     SMOKE3DFILE=EGZ_FOPEN(smokefile,"rb");
-#ifdef pp_LIGHT
-    if(uselight==1)LIGHTFILE=EGZ_FOPEN(lightfile,"rb");
-#endif
 #endif
     if(SMOKE3DFILE==NULL){
       fclose(TEXTFILE);
       return 1;
     }
-#ifdef pp_LIGHT
-    if(uselight==1&&LIGHTFILE==NULL){
-      fclose(TEXTFILE);
-      return 1;
-    }
-#endif
 
     EGZ_FREAD(nxyz,4,8,SMOKE3DFILE);
 
@@ -874,45 +634,21 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist_found, int *
 
     time_max=-1000000.0;
     for(;;){
-#ifdef pp_LIGHT
-      int light_size;
-#endif
-
       EGZ_FREAD(&time,4,1,SMOKE3DFILE);
       if(EGZ_FEOF(SMOKE3DFILE)!=0)break;
       fprintf(TEXTFILE,"%f",time);
       EGZ_FREAD(nchars,4,2,SMOKE3DFILE);
-
-#ifdef pp_LIGHT
-      if(uselight==1){
-        EGZ_FSEEK(LIGHTFILE,4,SEEK_CUR);  // time
-        EGZ_FREAD(&light_size,4,1,LIGHTFILE); // size of buffer
-        EGZ_FSEEK(LIGHTFILE,light_size,SEEK_CUR); // buffer
-      }
-      if(version==0){
-        fprintf(TEXTFILE," %i %i",nchars[0],nchars[1]);
-      }
-      else{
-        fprintf(TEXTFILE," %i -1 %i",nchars[0],nchars[1]);
-      }
-      if(uselight==1)fprintf(TEXTFILE," %i ",light_size);
-      fprintf(TEXTFILE,"\n");
-#else
       if(version==0){
         fprintf(TEXTFILE," %i %i\n",nchars[0],nchars[1]);
       }
       else{
         fprintf(TEXTFILE," %i -1 %i \n",nchars[0],nchars[1]);
       }
-#endif
       skip = nchars[1];
       EGZ_FSEEK(SMOKE3DFILE,skip,SEEK_CUR);
     }
 
     EGZ_FCLOSE(SMOKE3DFILE);
-#ifdef pp_LIGHT
-    if(LIGHTFILE!=NULL)EGZ_FCLOSE(LIGHTFILE);
-#endif
     fclose(TEXTFILE);
     TEXTFILE=fopen(textfilename,"r");
   }
@@ -949,23 +685,11 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist_found, int *
     NewMemory((void **)&time_found,nframes_found*sizeof(float));
     NewMemory((void **)&nch_smoke_compressed_full,(*n_times_full)*sizeof(int));
     NewMemory((void **)&nch_smoke_compressed_found,(*n_times_found)*sizeof(int));
-#ifdef pp_LIGHT
-    if(uselight==1){
-      NewMemory((void **)&nch_light_compressedfullptr,(*n_times_full)*sizeof(int));  // check definition
-      NewMemory((void **)&nch_light_compressedptr,(*n_times_found)*sizeof(int));
-    }
-#endif
   }
   *use_smokeframe=use_smokeframe_full;
   *timelist_found=time_found;
   *nchars_smoke_compressed_full=nch_smoke_compressed_full;
   *nchars_smoke_compressed_found=nch_smoke_compressed_found;
-#ifdef pp_LIGHT
-  if(uselight==1){
-    *nchars_light_compressedfull=nch_light_compressedfullptr;
-    *nchars_light_compressed=nch_light_compressedptr;
-  }
-#endif
 
   fgets(buffer,255,TEXTFILE);
   n_times_full2=0;
@@ -976,38 +700,13 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist_found, int *
     if(fgets(buffer,255,TEXTFILE)==NULL)break;
     n_times_full2++;
     if(n_times_full2>*n_times_full)break;
-#ifdef pp_LIGHT
-    if(uselight==1){
-      if(version==0){
-        sscanf(buffer,"%f %i %i %i",&time,&nch_uncompressed,&nch_smoke_compressed,&nch_light_compressed);
-      }
-      else{
-        sscanf(buffer,"%f %i %i %i %i",&time,&nch_uncompressed,&dummy,&nch_smoke_compressed,&nch_light_compressed);
-      }
-    }
-    else{
-      if(version==0){
-        sscanf(buffer,"%f %i %i",&time,&nch_uncompressed,&nch_smoke_compressed);
-      }
-      else{
-        sscanf(buffer,"%f %i %i %i",&time,&nch_uncompressed,&dummy,&nch_smoke_compressed);
-      }
-    }
-#else
     if(version==0){
       sscanf(buffer,"%f %i %i",&time,&nch_uncompressed,&nch_smoke_compressed);
     }
     else{
       sscanf(buffer,"%f %i %i %i",&time,&nch_uncompressed,&dummy,&nch_smoke_compressed);
     }
-#endif
     *nch_smoke_compressed_full++=nch_smoke_compressed;
-#ifdef pp_LIGHT
-    // variables for nch_light_compressed
-    if(uselight==1){
-      *nch_light_compressedfullptr++=nch_light_compressed;
-    }
-#endif
     *use_smokeframe_full=0;
     if(use_tload_end==1&&time>tload_end)break;
     if(time<=time_max){
@@ -1020,11 +719,6 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist_found, int *
       *time_found++=time;
       time_max=time;
       *nch_smoke_compressed_found++=nch_smoke_compressed;
-#ifdef pp_LIGHT
-      if(uselight==1){
-        *nch_light_compressedptr++=nch_light_compressed;
-      }
-#endif
     }
     use_smokeframe_full++;
     iii++;
@@ -1046,17 +740,6 @@ void freesmoke3d(smoke3d *smoke3di){
   FREEMEMORY(smoke3di->use_smokeframe);
   FREEMEMORY(smoke3di->nchars_compressed_smoke_full);
   FREEMEMORY(smoke3di->nchars_compressed_smoke);
-#ifdef pp_LIGHT
-  if(smoke3di->use_lighting_file==1){
-    FREEMEMORY(smoke3di->nchars_compressed_light_full);
-    FREEMEMORY(smoke3di->nchars_compressed_light);
-  }
-  FREEMEMORY(smoke3di->light_comp_all);
-  FREEMEMORY(smoke3di->lightframe_in);
-  FREEMEMORY(smoke3di->lightframe_out);
-  FREEMEMORY(smoke3di->lightframe_comp_list);
-  FREEMEMORY(smoke3di->lightview_tmp);
-#endif
   FREEMEMORY(smoke3di->smoke_state_list);
   FREEMEMORY(smoke3di->smoke_comp_all);
   FREEMEMORY(smoke3di->smokeframe_comp_list);
@@ -1086,15 +769,6 @@ void updatesmoke3d(smoke3d *smoke3di){
     uncompress(
       smoke3di->smokeframe_in,&countout,
       smoke3di->smokeframe_comp_list[iframe],countin);
-#ifdef pp_LIGHT
-    if(smoke3di->use_lighting_file==1){
-      countin = smoke3di->nchars_compressed_light[iframe];
-      countout=smoke3di->nchars_uncompressed;
-      uncompress(
-        smoke3di->lightframe_in,&countout,
-        smoke3di->lightframe_comp_list[iframe],countin);
-    }
-#endif
 #endif
     break;
   default:
@@ -1122,9 +796,6 @@ void mergesmoke3dcolors(void){
   int i,j;
   smoke3d *smoke3di,*smoke3dref;
   unsigned char smoke[3]; //{0,0,0};
-#ifdef pp_LIGHT
-  unsigned char *smokeptr;
-#endif
   unsigned char fire[3]; //{255,128,0};
   unsigned char water[3]={205,205,255};
 
@@ -1236,29 +907,6 @@ void mergesmoke3dcolors(void){
     mergealpha=meshi->merge_alpha;
     if(sootcolor!=NULL){
       if(firecolor==NULL&&watercolor==NULL){
-#ifdef pp_LIGHT
-        if(smoke3dref->use_lighting_file==1&&show_smokelighting==1){
-          smokeptr = smoke3dref->lightframe_in;
-          for(j=0;j<smoke3di->nchars_uncompressed;j++){
-            *mergecolor++=*smokeptr;
-            *mergecolor++=*smokeptr;
-            *mergecolor++=*smokeptr++;
-            mergecolor++;
-            *mergealpha=sootcolor[j]>>smoke3d_thick;
-            mergealpha++;
-          }
-        }
-        else{
-          for(j=0;j<smoke3di->nchars_uncompressed;j++){
-            *mergecolor++=smoke[0];
-            *mergecolor++=smoke[1];
-            *mergecolor++=smoke[2];
-            mergecolor++;
-            *mergealpha=sootcolor[j]>>smoke3d_thick;
-            mergealpha++;
-          }
-        }
-#else
         for(j=0;j<smoke3di->nchars_uncompressed;j++){
           *mergecolor++=smoke[0];
           *mergecolor++=smoke[1];
@@ -1267,7 +915,6 @@ void mergesmoke3dcolors(void){
           *mergealpha=sootcolor[j]>>smoke3d_thick;
           mergealpha++;
         }
-#endif
         continue;
       }
       if(firecolor!=NULL&&watercolor==NULL){
@@ -3207,9 +2854,6 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 
   int nx,ny,nz;
   unsigned char *alphaf_in;
-#ifdef pp_LIGHT
-  unsigned char *light_color=NULL;
-#endif
   int xyzindex1[6],xyzindex2[6],*xyzindex,node,mm;
   float xnode[4],znode[4],ynode[4];
   int skip;
@@ -3227,9 +2871,6 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 
   unsigned char value[4];
   float bvalue[4];
-#ifdef pp_LIGHT
-  float lvalue[4];
-#endif
   unsigned char fvalue[4];
 
   mesh *meshi;
@@ -3277,11 +2918,6 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   yplt=meshi->yplt;
   zplt=meshi->zplt;
   alphaf_in=smoke3di->smokeframe_in;
-#ifdef pp_LIGHT
-  if(smoke3di->use_lighting_file==1){
-    light_color=smoke3di->lightframe_in;
-  }
-#endif
 
   is1 = smoke3di->is1;
   is2 = smoke3di->is2;
@@ -4406,9 +4042,6 @@ void drawsmoke3dCULL(void){
   float *xplt, *yplt, *zplt;
   int nx,ny;
   unsigned char *alphaf_in;
-#ifdef pp_LIGHT
-  unsigned char *light_color=NULL;
-#endif
   int xyzindex1[6],xyzindex2[6],*xyzindex,node,mm;
   float xnode[4],znode[4],ynode[4];
   int iterm, jterm, kterm,nxy;
@@ -4426,9 +4059,6 @@ void drawsmoke3dCULL(void){
   unsigned char value[4];
 #ifdef pp_GPU_BLANK
   unsigned char bvalue[4];
-#endif
-#ifdef pp_LIGHT
-  float lvalue[4];
 #endif
   unsigned char fvalue[4];
 
@@ -4518,11 +4148,6 @@ void drawsmoke3dCULL(void){
       zplt=meshi->zplt;
       alphaf_in=smoke3di->smokeframe_in;
       iblank_smoke3d = meshi->iblank_smoke3d;
-#ifdef pp_LIGHT
-      if(smoke3di->use_lighting_file==1){
-        light_color=smoke3di->lightframe_in;
-      }
-#endif
 
       is1 = smoke3di->is1;
       is2 = smoke3di->is2;

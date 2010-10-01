@@ -56,9 +56,7 @@ SVEXTERN int force_isometric;
 SVEXTERN int updategluiview;
 SVEXTERN int render_double,render_double_state,render_double_menu,render_from_menu;
 SVEXTERN int usetexturebar;
-#ifdef pp_LIGHT
 SVEXTERN int show_smokelighting;
-#endif
 SVEXTERN int sb_atstart;
 #ifdef pp_CULL
 SVEXTERN int cullactive, show_cullports, cull_portsize;
@@ -73,9 +71,6 @@ SVEXTERN int GPU_aspectratio;
 SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr;
 SVEXTERN int GPU_firecolor, GPU_is_smoke;
 SVEXTERN int GPU_smokeshade,GPU_smokealpha;
-#ifdef pp_LIGHT
-SVEXTERN int GPU_smokecolor;
-#endif
 SVEXTERN int GPU_blank;
 SVEXTERN int GPU_adjustalphaflag;
 SVEXTERN unsigned int GPU_depthtexture;
