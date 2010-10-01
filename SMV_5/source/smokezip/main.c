@@ -49,9 +49,6 @@ int main(int argc, char **argv){
   int doit_particle=0;
 #endif
 
-#ifdef pp_LIGHT
-  nphotons=NPHOTONS;
-#endif
   frameskip=-1;
   no_chop=0;
   autozip=0;
@@ -74,16 +71,6 @@ int main(int argc, char **argv){
 #ifdef pp_PART
   get_part_bounds=0;
   partfile2iso=0;
-#endif
-#ifdef pp_LIGHT
-  make_lighting_file=0;
-  albedo=(float)0.3;
-  nlightinfo=0;
-  lightinfo=NULL;
-  light_cdf=NULL;
-  light_delta = 0.3;
-  light_min=1.0;
-  light_max=5.0;
 #endif
   overwrite_slice=0;
   overwrite_plot3d=0;
@@ -136,27 +123,9 @@ int main(int argc, char **argv){
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
-#ifdef pp_LIGHT
-      case 'l':
-        make_lighting_file=1;
-        break;
-      case 'a':
-        arg2=argv[i+1];
-        if(strcmp(arg2,"auto")==0){
-          autozip=1;
-        }
-        else{
-          sscanf(arg2,"%f",&albedo);
-          if(albedo<0.0)albedo=0.0;
-          if(albedo>1.0)albedo=1.0;
-          i++;
-        }
-        break;
-#else
       case 'a':
         autozip=1;
         break;
-#endif
       case 'b':
         if(strcmp(arg,"-bounds")==0){
           get_bounds=1;
@@ -659,11 +628,6 @@ void usage(char *prog){
   printf("  -no_chop - do not chop or truncate slice data.  Smokezip by default will compress\n");
   printf("             slice data truncating data above and below values specified in the .ini file\n");
   printf("  -auto - compress only files that are auto-loaded by Smokeview\n");
-#ifdef pp_LIGHT
-  printf("  -l  - create lighting file used with 3d smoke\n");
-  printf("  -a albedo  - specifies albedo (0.0 to 1.0) of 3d smoke.\n");
-  printf("               Used with the -l option\n");
-#endif
   printf("  -c  - cleans or removes all compressed files\n");
   printf("  -h  - display this message\n\n");
   printf("  casename - Smokeview .smv file\n");
