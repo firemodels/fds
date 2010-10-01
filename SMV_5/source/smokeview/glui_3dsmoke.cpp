@@ -68,9 +68,6 @@ GLUI_Checkbox *CHECKBOX_test_smokesensors=NULL;
 #ifdef pp_GPU
 GLUI_Checkbox *CHECKBOX_smokeGPU=NULL;
 #endif
-#ifdef pp_LIGHT
-GLUI_Checkbox *CHECKBOX_showlight=NULL;
-#endif
 GLUI_Checkbox *CHECKBOX_smokedrawtest=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest2=NULL;
 GLUI_Checkbox *CHECKBOX_smoke3d_external=NULL;
@@ -228,21 +225,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     GLUI_SPINNER_INT,&smoke3d_thick,SMOKE_THICK,SMOKE_3D_CB);
   SPINNER_smoke3d_thick->set_int_limits(0,7);
 #endif
-#ifdef pp_LIGHT
-  {
-    int use_light_checkbox=0;
-
-    for(i=0;i<nsmoke3d_files;i++){
-      smoke3d *smoke3di;
-
-      smoke3di = smoke3dinfo + i;
-      if(smoke3di->use_lighting_file==1)use_light_checkbox=1;
-    }
-    if(use_light_checkbox==1){
-      CHECKBOX_showlight=glui_3dsmoke->add_checkbox_to_panel(panel_smoke,"Lighting",&show_smokelighting);
-    }
-  }
-#endif
 #ifdef _DEBUG
   CHECKBOX_smoke3d_external=glui_3dsmoke->add_checkbox_to_panel(panel_smoke,"View smoke externally (ONLY)",&smoke3d_external);
 #endif
@@ -315,15 +297,6 @@ extern "C" void hide_glui_3dsmoke(void){
 extern "C" void show_glui_3dsmoke(void){
   if(glui_3dsmoke!=NULL)glui_3dsmoke->show();
 }
-
-
-#ifdef pp_LIGHT
-/* ------------------ update_showlight ------------------------ */
-
-extern "C" void update_showlight(void){
-  if(CHECKBOX_showlight!=NULL)CHECKBOX_showlight->set_int_val(show_smokelighting);
-}
-#endif
 
 /* ------------------ show_glui_3dsmoke ------------------------ */
 

@@ -3796,9 +3796,6 @@ void usage(char **argv){
 #ifdef pp_JPEG
     printf(", pp_JPEG");
 #endif
-#ifdef pp_LIGHT
-    printf(", pp_LIGHT");
-#endif
 #ifdef pp_memstatus
     printf(", pp_memstatus");
 #endif

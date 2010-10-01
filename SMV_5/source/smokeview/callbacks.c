@@ -653,9 +653,6 @@ void keyboard(unsigned char key, int x, int y){
 #ifdef pp_CULL
     &&key2!='C'
 #endif
-#ifdef pp_LIGHT
-    &&key2!='L'
-#endif
     &&isupper(key2))key2=tolower(key2); /* map upper case characters to lower */
 
   if(strncmp((const char *)&key2,"A",1)==0){
@@ -664,14 +661,6 @@ void keyboard(unsigned char key, int x, int y){
     updatemenu=1;
     return;
   }
-#ifdef pp_LIGHT
-  if(strncmp((const char *)&key2,"L",1)==0){
-    show_smokelighting = 1 - show_smokelighting;
-    update_showlight();
-    updatemenu=1;
-    return;
-  }
-#endif
 #ifdef _DEBUG 
   if(nsmoke3d_files>0&&strncmp((const char *)&key2,"l",1)==0){
     smokecullflag=1-smokecullflag;

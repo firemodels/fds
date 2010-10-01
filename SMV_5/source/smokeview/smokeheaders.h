@@ -690,24 +690,12 @@ EXTERNCPP void smooth_blockages(void);
 EXTERNCPP void freesmoke3d(smoke3d *smoke3di);
 EXTERNCPP void readsmoke(int ifile,int flag, int *errorcode);
 EXTERNCPP void readsmoke3d(int ifile,int flag, int *errorcode);
-#ifdef pp_LIGHT
-EXTERNCPP void update_showlight(void);
-EXTERNCPP int getsmoke3d_sizes(char *smokefile, char *lightfile, int uselight, int version, 
-                      float **timelist, int **use_smokeframe,
-                      int *nchars_uncompressed, 
-                      int **nchars_compressed,
-                      int **nchars_compressed_full,
-                      int **nchars_light_compressed,
-                      int **nchars_light_compressedfull,
-                      int *nframes, int *nframes_full);
-#else
 EXTERNCPP int getsmoke3d_sizes(char *smokefile, int version, 
                       float **timelist, int **use_smokeframe,
                       int *nchars_uncompressed, 
                       int **nchars_compressed,
                       int **nchars_compressed_full,
                       int *nframes, int *nframes_full);
-#endif
 EXTERNCPP void readslice(char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void readtarget(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void update_smooth_blockages(void);
