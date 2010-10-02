@@ -37,4 +37,3 @@ void *thread_function(void *dummyPtr){
    pthread_mutex_unlock( &mutex1 );
    return NULL;
 }
-\c
