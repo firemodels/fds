@@ -52,6 +52,7 @@
 #undef pp_release
 #define SMZVERSION "test"
 #define pp_PART2
+#define pp_THREAD
 #endif
 
 #ifdef WIN32

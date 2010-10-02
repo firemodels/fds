@@ -582,7 +582,7 @@ void part2iso(part *parti){
 
   int blocknumber;
   FILE_SIZE lenfile;
-  int unit=15;
+  int unit;
   int error1;
   int nclasses;
   int *nquantities, *npoints, *partindex;
@@ -605,7 +605,6 @@ void part2iso(part *parti){
   FILE *SMVISOFILE=NULL;
   int nx2, ny2, nz2;
   float xmin, ymin, zmin;
-
 
   if(cleanfiles==1){
     FILE *stream;

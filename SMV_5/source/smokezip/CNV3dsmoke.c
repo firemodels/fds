@@ -25,6 +25,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
   FILE *smoke3dstream=NULL,*smoke3dsizestream=NULL;
   EGZ_FILE *SMOKE3DFILE=NULL;
   char smoke3dfile_svz[1024], smoke3dsizefile_svz[1024];
+  unsigned char *full_alphabuffer;
   int nxyz[9];
   int nx, ny, nz;
   int version;
@@ -213,8 +214,10 @@ void convert_3dsmoke(smoke3d *smoke3di){
     data_loc=EGZ_FTELL(SMOKE3DFILE);
     percent_done=100.0*(float)data_loc/(float)smoke3di->filesize;
     if(percent_done>percent_next){
-      printf(" %i%s",percent_next,pp);
-      fflush(stdout);
+        printf(" %i%s",percent_next,pp);
+        LOCK_SMOKE;
+        fflush(stdout);
+        UNLOCK_SMOKE;
       percent_next+=10;
     }
 
@@ -240,11 +243,15 @@ void convert_3dsmoke(smoke3d *smoke3di){
     printf("Sizes: original=%s, ",before_label);
 
     printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    LOCK_SMOKE;
+    fflush(stdout);
+    UNLOCK_SMOKE;
   }
 
   // close files and free buffers
 
   EGZ_FCLOSE(SMOKE3DFILE);
+
   fclose(smoke3dstream);
   fclose(smoke3dsizestream);
   FREEMEMORY(full_alphabuffer);
@@ -264,6 +271,33 @@ void compress_smoke3ds(void){
     convert_3dsmoke(smoke3di);
     CheckMemory;
   }
-
 }
+#ifdef pp_THREAD
+/* ------------------ convert_smoke3ds ------------------------ */
 
+void MT_compress_smoke3ds(void){
+  int i;
+  smoke3d *smoke3di;
+  pthread_t *thread_ids;
+
+  if(nsmoke3d_files<=0)return;
+
+  CheckMemory;
+  NewMemory((void **)&thread_ids,nsmoke3d_files*sizeof(pthread_t));
+  CheckMemory;
+
+  for(i=0;i<nsmoke3d_files;i++){
+    smoke3di = smoke3dinfo + i;
+    if(autozip==1&&smoke3di->autozip==0)continue;
+    pthread_create(&thread_ids[i],NULL,MT_convert_3dsmoke,(void *)(smoke3di));
+  }
+
+  printf("\n");
+  for(i=0;i<nsmoke3d_files;i++){
+    smoke3di = smoke3dinfo + i;
+    if(autozip==1&&smoke3di->autozip==0)continue;
+    pthread_join(thread_ids[i],NULL);
+  }
+  FREEMEMORY(thread_ids);
+}
+#endif
