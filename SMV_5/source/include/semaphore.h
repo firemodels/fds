@@ -1,11 +1,11 @@
 /*
- * Module: sched.h
+ * Module: semaphore.h
  *
  * Purpose:
- *      Provides an implementation of POSIX realtime extensions
- *      as defined in 
+ *	Semaphores aren't actually part of the PThreads standard.
+ *	They are defined by the POSIX Standard:
  *
- *              POSIX 1003.1b-1993      (POSIX.1b)
+ *		POSIX 1003.1b-1993	(POSIX.1b)
  *
  * --------------------------------------------------------------------------
  *
@@ -36,8 +36,8 @@
  *      if not, write to the Free Software Foundation, Inc.,
  *      59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-#ifndef _SCHED_H
-#define _SCHED_H
+#if !defined( SEMAPHORE_H )
+#define SEMAPHORE_H
 
 #undef PTW32_LEVEL
 
@@ -64,7 +64,6 @@
 #define PTW32_LEVEL PTW32_LEVEL_MAX
 /* Include everything */
 #endif
-
 
 #if __GNUC__ && ! defined (__declspec)
 # error Please upgrade your GNU compiler to one that supports __declspec.
@@ -113,66 +112,55 @@
 #endif
 #endif /* PTW32_LEVEL >= PTW32_LEVEL_MAX */
 
-#if defined(__MINGW32__) || defined(_UWIN)
-#if PTW32_LEVEL >= PTW32_LEVEL_MAX
-/* For pid_t */
-#  include <sys/types.h>
-/* Required by Unix 98 */
-#  include <time.h>
-#endif /* PTW32_LEVEL >= PTW32_LEVEL_MAX */
-#else
-typedef int pid_t;
-#endif
-
-/* Thread scheduling policies */
-
-enum {
-  SCHED_OTHER = 0,
-  SCHED_FIFO,
-  SCHED_RR,
-  SCHED_MIN   = SCHED_OTHER,
-  SCHED_MAX   = SCHED_RR
-};
-
-struct sched_param {
-  int sched_priority;
-};
+#define _POSIX_SEMAPHORES
 
 #ifdef __cplusplus
 extern "C"
 {
-#endif                          /* __cplusplus */
+#endif				/* __cplusplus */
 
-PTW32_DLLPORT int __cdecl sched_yield (void);
+#ifndef HAVE_MODE_T
+typedef unsigned int mode_t;
+#endif
 
-PTW32_DLLPORT int __cdecl sched_get_priority_min (int policy);
 
-PTW32_DLLPORT int __cdecl sched_get_priority_max (int policy);
+typedef struct sem_t_ * sem_t;
 
-PTW32_DLLPORT int __cdecl sched_setscheduler (pid_t pid, int policy);
+PTW32_DLLPORT int __cdecl sem_init (sem_t * sem,
+			    int pshared,
+			    unsigned int value);
 
-PTW32_DLLPORT int __cdecl sched_getscheduler (pid_t pid);
+PTW32_DLLPORT int __cdecl sem_destroy (sem_t * sem);
 
-/*
- * Note that this macro returns ENOTSUP rather than
- * ENOSYS as might be expected. However, returning ENOSYS
- * should mean that sched_get_priority_{min,max} are
- * not implemented as well as sched_rr_get_interval.
- * This is not the case, since we just don't support
- * round-robin scheduling. Therefore I have chosen to
- * return the same value as sched_setscheduler when
- * SCHED_RR is passed to it.
- */
-#define sched_rr_get_interval(_pid, _interval) \
-  ( errno = ENOTSUP, (int) -1 )
+PTW32_DLLPORT int __cdecl sem_trywait (sem_t * sem);
 
+PTW32_DLLPORT int __cdecl sem_wait (sem_t * sem);
+
+PTW32_DLLPORT int __cdecl sem_timedwait (sem_t * sem,
+				 const struct timespec * abstime);
+
+PTW32_DLLPORT int __cdecl sem_post (sem_t * sem);
+
+PTW32_DLLPORT int __cdecl sem_post_multiple (sem_t * sem,
+				     int count);
+
+PTW32_DLLPORT int __cdecl sem_open (const char * name,
+			    int oflag,
+			    mode_t mode,
+			    unsigned int value);
+
+PTW32_DLLPORT int __cdecl sem_close (sem_t * sem);
+
+PTW32_DLLPORT int __cdecl sem_unlink (const char * name);
+
+PTW32_DLLPORT int __cdecl sem_getvalue (sem_t * sem,
+				int * sval);
 
 #ifdef __cplusplus
-}                               /* End of extern "C" */
-#endif                          /* __cplusplus */
+}				/* End of extern "C" */
+#endif				/* __cplusplus */
 
 #undef PTW32_LEVEL
 #undef PTW32_LEVEL_MAX
 
-#endif                          /* !_SCHED_H */
-
+#endif				/* !SEMAPHORE_H */
