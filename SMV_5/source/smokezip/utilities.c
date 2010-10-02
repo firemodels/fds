@@ -339,6 +339,7 @@ int getmaxrevision(void){
   MAXREV(main_revision);
   MAXREV(readfiles_revision);
   MAXREV(utilities_revision);
+  MAXREV(threader_revision);
   return max_revision;
 }
 
