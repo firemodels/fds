@@ -17,3 +17,4 @@ extern char main_revision[];
 extern char readfiles_revision[];
 extern char stats_revision[];
 extern char lightsmoke_revision[];
+extern char threader_revision[];
