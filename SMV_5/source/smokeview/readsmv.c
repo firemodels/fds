@@ -4650,7 +4650,7 @@ typedef struct {
 
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
-  stream=stream2;
+  stream=stream1;
   printf("   pass 3 completed\n");
   if(do_pass4==1||autoterrain==1)printf("   pass 4\n");
 
