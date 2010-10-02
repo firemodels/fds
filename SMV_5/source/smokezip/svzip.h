@@ -11,6 +11,7 @@
 #define UNLINK unlink
 
 #include "histogram.h"
+#include "threader.h"
 
 #ifdef pp_PART
 #define rgb_white 12
@@ -306,7 +307,6 @@ STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian,
 
 EXTERN int frameskip;
 EXTERN int no_chop;
-EXTERN unsigned char *full_alphabuffer;
 EXTERN patch *patchinfo;
 EXTERN mesh *meshinfo;
 EXTERN smoke3d *smoke3dinfo;

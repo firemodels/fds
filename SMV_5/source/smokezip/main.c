@@ -49,6 +49,10 @@ int main(int argc, char **argv){
   int doit_particle=0;
 #endif
 
+#ifdef pp_THREAD
+  mt_part2iso=0;
+  mt_smoke=0;
+#endif
   frameskip=-1;
   no_chop=0;
   autozip=0;
@@ -274,6 +278,12 @@ int main(int argc, char **argv){
           i++;
         }
         break;
+#ifdef pp_THREAD
+      case 't':
+        mt_part2iso=0;
+        mt_smoke=1;
+        break;
+#endif
       case 'h':
         usage(prog);
         return 1;
@@ -300,6 +310,9 @@ int main(int argc, char **argv){
     usage(prog);
     return 1;
   }
+#ifdef pp_THREAD
+  init_multi_threading();
+#endif
   filelen=strlen(filebase);
   if(filelen>4){
     ext=filebase+filelen-4;
@@ -423,7 +436,20 @@ int main(int argc, char **argv){
   readini(inifile);
 
   if(doit_boundary)compress_patches();
-  if(doit_smoke3d==1)compress_smoke3ds();
+#ifdef pp_THREAD
+  if(doit_smoke3d==1){
+    if(mt_smoke==1){
+      MT_compress_smoke3ds();
+    }
+    else{
+      compress_smoke3ds();
+    }
+  }
+#else
+  if(doit_smoke3d==1){
+    compress_smoke3ds();
+  }
+#endif
   if(doit_slice==1)compress_slices();
   if(doit_plot3d==1)compress_plot3ds();
 #ifdef pp_PART2
