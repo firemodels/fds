@@ -16,7 +16,7 @@ OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 
 # Definition of the object variables
 
-obj =    main.o CNV3dsmoke.o CNVboundary.o CNViso.o CNVpart.o CNVplot3d.o CNVslice.o assert.o csphere.o dmalloc.o egz_stdio.o endian.o histogram.o readfiles.o utilities.o isobox.o getdata.o getsizes.o
+obj =    main.o CNV3dsmoke.o CNVboundary.o CNViso.o CNVpart.o CNVplot3d.o CNVslice.o assert.o csphere.o dmalloc.o egz_stdio.o endian.o histogram.o readfiles.o utilities.o isobox.o threader.o getdata.o getsizes.o
 objwin = $(obj:.o=.obj)
 
 # main has to be compiled without optimization (on a Windows PC) otherwise errors occcur
@@ -55,7 +55,7 @@ ms_win_32 : CPP       = cl
 ms_win_32 : FC        = ifort
 ms_win_32 : exe       = smokezip.exe
 ms_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib  $(LIB_DIR)/lib_win_intel_32/pthreadVC2.lib
 
 # ------------- Win 32 ----------------
 #  32 bit windows
@@ -68,7 +68,7 @@ intel_win_32 : FC        = ifort
 intel_win_32 : exe       = smokezip.exe
 
 intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib $(LIB_DIR)/lib_win_intel_32/pthreadVC2.lib
 
 # ------------- Win 64 ----------------
 #  64 bit windows
@@ -81,7 +81,7 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokezip_64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/zlib.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/zlib.lib $(LIB_DIR)/lib_win_intel_64/pthreadVC2_x64.lib
 
 # ------------- Linux 32 profile ----------------
 #  32 bit linux
