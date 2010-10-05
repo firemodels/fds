@@ -1,12 +1,13 @@
 !  ------------------ getzonedata ------------------------ 
 
-subroutine getzonedata(nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,error)
+subroutine getzonedata(zonefilename,nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getzonedata@40' :: getzonedata
+!DEC$ ATTRIBUTES ALIAS:'_getzonedata@44' :: getzonedata
 #endif
 #endif
 implicit none
+character(len=*) :: zonefilename
 integer, intent(in) :: nrooms, nfires
 integer, intent(inout) :: nzonet
 real, intent(out), dimension(nrooms*nzonet) :: zonepr, zoneylay, zonetl, zonetu
@@ -14,10 +15,35 @@ real, intent(out), dimension(nfires*nzonet) :: zoneqfire
 real, intent(out), dimension(nzonet) :: zonet
 integer , intent(out) :: error
 
+integer  :: file_unit
 integer :: lu26,i,j,ii,ii2,idummy,version
 real :: dummy, qdot
+logical :: isopen, exists
 
-lu26 = 26
+call get_file_unit(file_unit,26)
+lu26 = file_unit
+
+inquire(unit=lu26,opened=isopen)
+
+if(isopen)close(lu26)
+inquire(file=trim(zonefilename),exist=exists)
+if(exists)then
+#ifdef pp_cvf
+endian2=0
+endian2=endian
+if(endian2.eq.1)then
+  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+ else
+  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",shared)
+endif
+#else
+  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
+#endif
+ else
+  write(6,*)'The zone file name, ',trim(zonefilename),' does not exist'
+  error=1
+  return
+endif
 
 read(lu26)version
 read(lu26)idummy
@@ -51,33 +77,6 @@ end do
 
 close(lu26)
 end subroutine getzonedata
-
-!  ------------------ getxyzdata ------------------------ 
-
-subroutine getxyzdata(iblank,nx,ny,nz,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getxyzdata@20' :: getxyzdata
-#endif
-#endif
-implicit none
-
-integer :: lu24
-real :: dummyx, dummyy, dummyz
-integer, intent(in) :: nx, ny, nz
-integer, dimension(nx,ny,nz) :: iblank
-integer, intent(out) :: error
-integer :: i,j,k
-
-error=0
-lu24=24
-read(LU24,iostat=error)(((dummyx,I=1,nx),J=1,ny),K=1,nz),&
-(((dummyy,I=1,nx),J=1,ny),K=1,nz),          &
-(((dummyz,I=1,nx),J=1,ny),K=1,nz),          &
-(((iblank(i,j,k),i=1,nx),j=1,ny),k=1,nz)
-close(lu24)
-return
-end subroutine getxyzdata
 
 !  ------------------ getpatchdata ------------------------ 
 
@@ -129,7 +128,7 @@ end subroutine getpatchdata
 
 !  ------------------ getdata1 ------------------------ 
 
-subroutine getdata1(ipart,error)
+subroutine getdata1(file_unit,ipart,error)
 #ifdef pp_cvf
 #ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getdata1@8' :: getdata1
@@ -138,6 +137,7 @@ subroutine getdata1(ipart,error)
 
 implicit none
 
+integer, intent(in) :: file_unit
 integer, intent(out) :: ipart, error
 
 integer :: lu10
@@ -149,7 +149,7 @@ integer :: ibar, jbar, kbar
 real :: dummy
 integer :: nb1, idummy
 
-lu10 = 10
+lu10 = file_unit
 error=0
 
 read(lu10,iostat=error) sarx,sary,swpar,ipart,ndum2
@@ -189,149 +189,10 @@ end do
 return
 end subroutine getdata1
 
-!  ------------------ getdata2a ------------------------ 
-
-subroutine getdata2a(nmax,nspr,x,y,z,t,stime,np,ns,error)
-                   
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getdata2a@40' :: getdata2a
-#endif
-#endif
-
-  implicit none
-
-  integer, intent(in) :: nspr,nmax
-  real, dimension(*), intent(out) :: x, y, z, t
-  real, intent(out) ::  stime
-  integer, intent(out) :: np, ns, error
-  
-  integer :: lu10, nn, i, naspr
-  integer, dimension(:), allocatable :: ispr
-
-  lu10 = 10
-
-  if(nspr.gt.0)allocate(ispr(nspr))
-
-  read(lu10,iostat=error) stime,np,nn,(ispr(i),i=1,nspr)
-  if(error.ne.0)go to 999
-  naspr = 0
-  do i = 1, nspr
-    if(ispr(i).ne.0)naspr = naspr + 1
-  end do
-
-  read(lu10,iostat=error) (x(i),i=1,np),(y(i),i=1,np),(z(i),i=1,np),(t(i),i=1,np)
-  if(error.ne.0)go to 999
-
-  ns = 0
-  if(naspr.ne.0)then       ! read in sprinkler data
-    read(lu10,iostat=error) ns
-    if(error.ne.0)go to 999
-	if(np+ns.gt.nmax)then
-	  error=1
-	  go to 999
-	endif
-    read(lu10,iostat=error) (x(i),i=np+1,np+ns),(y(i),i=np+1,np+ns),(z(i),i=np+1,np+ns)
-    if(error.ne.0)go to 999
-  end if
-
-999 continue
-if(nspr.gt.0)deallocate(ispr)
-close(lu10)
-return
-end subroutine getdata2a
 
 !  ------------------ getdata2 ------------------------ 
 
-!STDCALL FORTgetdata2b(short *xs, short *yparts, short *zparts, float *tpart,
-!                       int *bframe,int *sframe,float *stimes,int *npartpoints,int *mxframes, int *nframes,
-!                      float *xbar0, float *xbar, float *ybar0, float *ybar, float *zbar0, float *zbar, int *error);
-subroutine getdata2b(partfilename, x, y, z, tpart, bframe, sframe, stimes, &
-                     npartpoints, npartframes, mxpoints, mxframes, error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getdata2b@56' :: getdata2b
-#endif
-#endif
-implicit none
-character(len=*), intent(in) :: partfilename
-real, dimension(*), intent(out) :: x, y, z
-integer, dimension(*), intent(out) :: bframe, sframe
-real, intent(out), dimension(*) :: tpart, stimes
-integer, intent(in) :: mxframes, mxpoints
-integer, intent(out) :: npartpoints
-integer, intent(out) :: npartframes,error
-
-integer :: lu10, i, nparts, nlines, nxyzvals
-logical :: connected, opened, exists
-character(len=255) :: line
-real :: t_or_x
-real, allocatable, dimension(:) :: xyzvals
-integer :: jbeg, jend, j
-integer :: ipoint
-
-lu10 = 10
-error=0
-npartpoints=0
-npartframes=0
-inquire(unit=lu10,opened=connected)
-if(connected)close(lu10)
-
-inquire(file=trim(partfilename),exist=exists)
-if(exists)then
-#ifdef pp_cvf
-  open(unit=lu10,file=trim(partfilename),form="formatted",action="read",shared)
-#else
-  open(unit=lu10,file=trim(partfilename),form="formatted",action="read")
-#endif
- else
-  write(6,*)'The particle file name, ',trim(partfilename),' does not exist'
-  error=-1
-endif
-do i = 1, 5
-  read(lu10,'(a)')line
-end do
-nxyzvals=10
-allocate(xyzvals(nxyzvals))
-ipoint=0
-do 
-  read(lu10,*,end=999)t_or_x,nparts
-  write(6,*)"frame: ",ipoint+1,"t =",t_or_x," npoints=",nparts
-  nlines = (nparts-1)*3/6 + 1
-  if(6*nlines>nxyzvals)then
-    nxyzvals=6*nlines
-    deallocate(xyzvals)
-    allocate(xyzvals(nxyzvals))
-  endif
-  do i = 1, nlines
-    jbeg=6*(i-1) + 1
-    jend = jbeg + 5
-    if(jend.gt.nparts*3)jend=nparts*3
-    read(lu10,*,end=999)(xyzvals(j),j=jbeg,jend)
-  end do
-  do i = 1, nparts
-    ipoint = ipoint + 1
-    x(ipoint) = t_or_x
-    y(ipoint) = xyzvals(i)
-    z(ipoint) = xyzvals(nparts+i)
-    tpart(ipoint) = xyzvals(2*nparts+i)
-  end do
-  npartpoints = npartpoints + nparts
-  npartframes = npartframes + 1
-  sframe(npartframes) = nparts
-  stimes(npartframes) = t_or_x
-end do
-999 continue
-  bframe(1)=0
-  do i=2,npartframes
-    bframe(i) = bframe(i-1)+sframe(i-1)
-  end do
-
-end subroutine getdata2b
-
-!  ------------------ getdata2 ------------------------ 
-
-subroutine getdata2(xs,ys,zs,&
+subroutine getdata2(file_unit,xs,ys,zs,&
                     t,&
                     sprinkflag,isprink,tspr,bframe,sframe,sprframe,stimes,nspr,nmax,mxframes,nframes,&
                     settmin_p,settmax_p,tmin_p,tmax_p,frameloadstep,partpointstep, &
@@ -341,7 +202,7 @@ subroutine getdata2(xs,ys,zs,&
                    
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getdata2@128' :: getdata2
+!DEC$ ATTRIBUTES ALIAS:'_getdata2@132' :: getdata2
 #endif
 #endif
 
@@ -352,7 +213,7 @@ integer(2), dimension(*) :: xs, ys, zs
 integer, dimension(*) :: bframe, sframe, sprframe
 character(len=1), dimension(*) :: isprink
 real, dimension(*) ::  stimes,tspr
-integer, intent(in) :: nspr,nmax, mxframes
+integer, intent(in) :: file_unit,nspr,nmax, mxframes
 integer, intent(out) :: nframes,error
 integer, intent(in) :: settmin_p, settmax_p, frameloadstep, partpointstep
 integer, intent(out) :: sprinkflag
@@ -374,7 +235,7 @@ integer :: factor
 logical :: load, allocated
 integer :: nf, npoints
 
-lu10 = 10
+lu10 = file_unit
 factor=2**15
 
 nframes = 0
@@ -574,12 +435,12 @@ end subroutine getdirval
 
 !  ------------------ getslicedata ------------------------ 
 
-subroutine getslicedata(slicefilename,longlabel,shortlabel,units,&
+subroutine getslicedata(file_unit,slicefilename,longlabel,shortlabel,units,&
             is1,is2,js1,js2,ks1,ks2,idir,qmin,qmax,qdata,times,nstepsmax,sliceframestep,&
 			endian,settmin_s,settmax_s,tmin_s,tmax_s)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getslicedata@104' :: getslicedata
+!DEC$ ATTRIBUTES ALIAS:'_getslicedata@108' :: getslicedata
 #endif
 #endif
 
@@ -587,6 +448,7 @@ implicit none
 
 character(len=*) :: slicefilename, longlabel, shortlabel,units
 
+integer, intent(in) :: file_unit
 real, intent(out) :: qmin, qmax
 real, intent(out), dimension(*) :: qdata
 real, intent(out), dimension(*) :: times
@@ -613,8 +475,9 @@ logical :: connected, load
 integer :: ii, kk
 integer :: joff, koff
 integer :: count
+integer :: funit
 
-lu11 = 11
+lu11 = file_unit
 joff = 0
 koff = 0
 inquire(unit=lu11,opened=connected)
@@ -629,15 +492,7 @@ if(endian.eq.1)then
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
 endif
 #else
-#ifdef pp_LAHEY
-if(endian.eq.1)then
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
-endif
-#else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
-#endif
 #endif
  else
   write(6,*)'the slice file ',trim(slicefilename),' does not exist'
@@ -822,16 +677,21 @@ implicit none
 #endif
 character(len=*) :: endianfilename
 integer :: one
+integer :: file_unit
 
-open(unit=31,file=trim(endianfilename),form="unformatted")
+file_unit=31
+
+call get_file_unit(file_unit,file_unit)
+open(unit=file_unit,file=trim(endianfilename),form="unformatted")
 one=1
 write(31)one
+close(file_unit)
 return
 end subroutine endianout
 
 !  ------------------ outsliceheader ------------------------ 
 
-subroutine outsliceheader(slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
+subroutine outsliceheader(file_unit,slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
 #ifdef pp_cvf
 #ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_outsliceheader@40' :: outsliceheader
@@ -840,6 +700,7 @@ subroutine outsliceheader(slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error
 
 implicit none
 
+integer, intent(in) :: file_unit
 character(len=*) :: slicefilename
 integer, intent(in) :: unit
 integer, intent(in) :: ip1, ip2, jp1, jp2, kp1, kp2
@@ -972,67 +833,6 @@ return
 
 end subroutine outpatchframe
 
-!  ------------------ getplot3dqa ------------------------ 
-
-subroutine getplot3dqa(qfilename,nx,ny,nz,qq,error)
-
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getplot3dqa@28' :: getplot3dqa
-#endif
-#endif
-implicit none
-
-character(len=*) :: qfilename
-integer, intent(in) :: nx, ny, nz
-integer, intent(out) :: error
-real, dimension(nx,ny,nz,5)  :: qq
-real, dimension(ny*nz) :: qbuffer
-
-integer :: u_in, error2, i, j, k, kbeg, kend, nlines
-logical :: connected, exists
-character(len=255) :: line
-
-  u_in=10
-  inquire(unit=u_in,opened=connected)
-  if(connected)close(u_in)
-  
-
-  error=0
-  inquire(file=trim(qfilename),exist=exists)
-  if(exists)then
-#ifdef pp_cvf
-    open(unit=u_in,file=trim(qfilename),form="formatted",action="read",shared,iostat=error2)
-#else
-    open(unit=u_in,file=trim(qfilename),form="formatted",action="read",iostat=error2)
-#endif
-   else
-    write(6,*)'The file name, ',trim(qfilename),' does not exist'
-    return
-  endif
-
-do i = 1, 4
-  read(u_in,'(a)')line
-end do
-nlines = (ny*nz-1)/6 + 1
-do i = 1, nx
-  read(u_in,'(a)')line
-  do j = 1, nlines
-    kbeg = 6*(j-1) + 1
-    kend = kbeg + 5
-    if(kend.gt.ny*nz)kend=ny*nz
-    read(u_in,*)(qbuffer(k),k=kbeg,kend)
-  end do
-  do j = 1, ny
-    do k = 1, nz
-      qq(i,j,k,1:5) = qbuffer(j+(k-1)*ny)
-    end do
-  end do
-end do
-return 
-
-end subroutine getplot3dqa
-
 !  ------------------ getplot3dq ------------------------ 
 
 subroutine getplot3dq(qfilename,nx,ny,nz,qq,error,endian,isotest)
@@ -1054,6 +854,7 @@ real :: dum1, dum2, dum3, dum4
 logical :: exists
 integer :: error2
 real :: dummy, qval
+integer :: funit
 
 integer :: nxpts, nypts, nzpts
 integer :: i, j, k, n
@@ -1063,12 +864,12 @@ integer :: u_in
 logical :: connected
 
 if(isotest.eq.0)then
-  u_in=10
+  call get_file_unit(u_in,70)
   inquire(unit=u_in,opened=connected)
   if(connected)close(u_in)
 
   error=0
-  inquire(file=trim(qfilename),exist=exists)
+  inquire(file=qfilename,exist=exists)
   if(exists)then
 #ifdef pp_cvf
   if(endian.eq.1)then
@@ -1077,15 +878,7 @@ if(isotest.eq.0)then
     open(unit=u_in,file=trim(qfilename),form="unformatted",action="read",shared,iostat=error2)
   endif
 #else
-#ifdef pp_LAHEY
-  if(endian.eq.1)then
-    open(unit=u_in,file=trim(qfilename),form="unformatted",action="read",iostat=error2,convert="BIG_ENDIAN")
-   else
-    open(unit=u_in,file=trim(qfilename),form="unformatted",action="read",iostat=error2)
-  endif
-#else
-    open(unit=u_in,file=trim(qfilename),form="unformatted",action="read",iostat=error2)
-#endif
+    open(unit=u_in,file=qfilename,form="unformatted",action="read",iostat=error2)
 #endif
    else
     write(6,*)'The file name, ',trim(qfilename),' does not exist'
@@ -1099,11 +892,12 @@ if(isotest.eq.0)then
     read(u_in,iostat=error)((((qq(i,j,k,n),i=1,nxpts),j=1,nypts),k=1,nzpts),n=1,5)
    else
     error = 1
-	  write(6,*)"*** Fatal error in getplot3dq ***"
+	write(6,*)"*** Fatal error in getplot3dq ***"
   	write(6,*)"Grid size found in plot3d file was:",nxpts,nypts,nzpts
   	write(6,*)"Was expecting:",nx,ny,nz
   	stop
   endif
+  close(u_in)
  else
     do i = 1, nx
     do j = 1, ny
@@ -1125,8 +919,6 @@ if(isotest.eq.0)then
   end do
   error = 0
 endif
-close(u_in)
-
 return
 end subroutine getplot3dq
 
@@ -1149,10 +941,11 @@ integer :: u_out
 logical :: connected
 integer :: i, j, k, n
 real :: dummy
+integer :: funit
 
 error3 = 0
 
-u_out=13
+call get_file_unit(u_out,70)
 inquire(unit=u_out,opened=connected)
 if(connected)close(u_out)
 
@@ -1717,4 +1510,28 @@ CASE DEFAULT
 END SELECT
 
 END SUBROUTINE COLOR2RGB
+
+!  ------------------ funit ------------------------ 
+
+subroutine get_file_unit(funit,first_unit)
+
+#ifdef pp_cvf
+#ifndef X64
+!DEC$ ATTRIBUTES ALIAS:'_get_file_unit@8' :: get_file_unit
+#endif
+#endif
+
+integer, intent(in) :: first_unit
+integer, intent(out) :: funit
+logical :: is_open
+
+do funit=first_unit,32767
+  inquire(UNIT=funit,OPENED=is_open)
+  if(is_open)cycle;
+  return
+end do
+funit=-1
+return
+end subroutine get_file_unit
+
 
