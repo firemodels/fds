@@ -196,10 +196,12 @@ void diff_boundaryes(FILE *stream_out){
     printf("Subtracting %s from %s\n",fullfile2,fullfile1);
 
     unit1=11;
+    FORTget_file_unit(&unit1,&unit1);
     len1=strlen(fullfile1);
     FORTopenboundary(fullfile1,&unit1,&caseinfo->endian,&boundary1->version,&error1,len1);
 
     unit2=12;
+    FORTget_file_unit(&unit2,&unit2);
     len2=strlen(fullfile2);
     FORTopenboundary(fullfile2,&unit2,&caseinfo->endian,&boundary2->version,&error2,len2);
 
@@ -229,6 +231,7 @@ void diff_boundaryes(FILE *stream_out){
         ii++;
       }
       unit3=15;
+      FORTget_file_unit(&unit3,&unit3);
       len3=strlen(outfile);
       size_sofar=0;
       FORToutboundaryheader(outfile,&unit3,&boundary1->npatches,
