@@ -123,7 +123,7 @@ void readzone(char *file, int ifile, int flag, int *errorcode){
     return;
   }
   CheckMemory;
-  FORTgetzonedata(file,&nzonet,&nrooms, &nfires, zonet,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&error,zonefilelen);
+  FORTgetzonedata(file,&nzonet,&nrooms, &nfires, zonet,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&endian,&error,zonefilelen);
   CheckMemory;
   ii = 0;
   for(i=0;i<nzonet;i++){
