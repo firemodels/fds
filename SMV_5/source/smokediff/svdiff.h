@@ -160,6 +160,7 @@ int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout);
 #define FORToutboundaryheader outboundaryheader
 #define FORToutpatchframe outpatchframe
 #define FORTendianout endianout
+#define FORTget_file_unit get_file_unit
 #else
 #define FORTgetsliceparms getsliceparms_
 #define FORTclosefortranfile closefortranfile_
@@ -176,7 +177,9 @@ int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout);
 #define FORToutboundaryheader outboundaryheader_
 #define FORToutpatchframe outpatchframe_
 #define FORTendianout endianout_
+#define FORTget_file_unit get_file_unit_
 #endif
+STDCALL FORTget_file_unit(int *file_unit, int *file_unit_start);
 STDCALL FORToutpatchframe(int *lunit, int *npatch,
                           int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2,
                           float *patchtime, float *pqq, int *error);
@@ -204,7 +207,7 @@ STDCALL FORTclosefortranfile(int *unit);
 STDCALL FORToutsliceframe(int *unit3,
                           int *is1a,int *is1b,int *js1a,int *js1b,int *ks1a,int *ks1b,
                           float *time1,float *qframeout, int *error);
-STDCALL FORToutsliceheader(char *outfile,int *unit3,
+STDCALL FORToutsliceheader(int *file_unit,char *outfile,int *unit3,
                              int *is1a,int *is2a,int *js1a,int *js2a,int *ks1a,int *ks2a,
                              int *error1,int len);
 STDCALL FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, int len);
