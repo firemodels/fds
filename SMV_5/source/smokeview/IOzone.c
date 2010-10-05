@@ -24,6 +24,7 @@ void readzone(char *file, int ifile, int flag, int *errorcode){
   int error,ntotal,i,j,ii;
   int nrooms2,nfires2;
   size_t zonefilelen;
+  int fort_unit;
 
   *errorcode=0;
   if(zoneinfo[ifile].loaded==0&&flag==UNLOAD)return;
@@ -56,9 +57,9 @@ void readzone(char *file, int ifile, int flag, int *errorcode){
     updatemenu=1;
     return;
   }
-    zonefilelen = strlen(file);
-    FORTgetzonesize(file,&nzonet,&nrooms2,&nfires2,&endian,&error,zonefilelen);
-    CheckMemory;
+  zonefilelen = strlen(file);
+  FORTgetzonesize(file,&nzonet,&nrooms2,&nfires2,&endian,&error,zonefilelen);
+  CheckMemory;
   if(error!=0||nrooms!=nrooms2||nzonet==0){
     showzone=0;
     updatetimes();
@@ -79,7 +80,6 @@ void readzone(char *file, int ifile, int flag, int *errorcode){
      NewMemory((void **)&zoneunits       ,LABELLEN)==0||
      NewMemory((void **)&zonelevels      ,nrgb*sizeof(float))==0){
     *errorcode=1;
-    FORTclosezone();
     return;
   }
   CheckMemory;
@@ -89,7 +89,11 @@ void readzone(char *file, int ifile, int flag, int *errorcode){
   ntotal = nrooms*nzonet;
 
   if(ntotal>0){
-    FREEMEMORY(zonet); FREEMEMORY(zoneylay); FREEMEMORY(zonetl); FREEMEMORY(zonetu); FREEMEMORY(zonepr);
+    FREEMEMORY(zonet); 
+    FREEMEMORY(zoneylay); 
+    FREEMEMORY(zonetl); 
+    FREEMEMORY(zonetu); 
+    FREEMEMORY(zonepr);
     if(NewMemory((void **)&zonet      ,ntotal*sizeof(float))==0||
        NewMemory((void **)&zoneylay   ,ntotal*sizeof(float))==0||
        NewMemory((void **)&zonetu     ,ntotal*sizeof(float))==0||
@@ -97,28 +101,29 @@ void readzone(char *file, int ifile, int flag, int *errorcode){
        NewMemory((void **)&zonepr     ,ntotal*sizeof(float))==0||
        NewMemory((void **)&hazardcolor,ntotal*sizeof(unsigned char))==0){
       *errorcode=1;
-      FORTclosezone();
       return;
     }
     if(nfires!=0){
       FREEMEMORY(zoneqfire);
       if(NewMemory((void **)&zoneqfire,nfires*nzonet*sizeof(float))==0){
         *errorcode=1;
-        FORTclosezone();
         return;
       }
     }
-    else{zoneqfire=NULL;}
+    else{
+      zoneqfire=NULL;
+    }
     FREEMEMORY(izonetu);
     if(NewMemory((void **)&izonetu,ntotal*sizeof(unsigned char))==0){
       *errorcode=1;
-      FORTclosezone();
       return;
     }
   }
-  else{return;}
+  else{
+    return;
+  }
   CheckMemory;
-  FORTgetzonedata(&nzonet,&nrooms, &nfires, zonet,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&error);
+  FORTgetzonedata(file,&nzonet,&nrooms, &nfires, zonet,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&error,zonefilelen);
   CheckMemory;
   ii = 0;
   for(i=0;i<nzonet;i++){

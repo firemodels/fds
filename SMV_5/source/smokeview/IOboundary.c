@@ -68,6 +68,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   FILE_SIZE file_size=0;
   int local_starttime0=0, local_stoptime0=0;  
   float delta_time, delta_time0;
+  int file_unit;
 
   if(patchinfo[ifile].loaded==0&&flag==UNLOAD)return;
 
@@ -188,11 +189,12 @@ void readpatch(int ifile, int flag, int *errorcode){
   }
 
   lenfile = strlen(file);
-
+  file_unit=15;
+  get_file_unit(&file_unit,&file_unit);
   if(patchinfo[ifile].compression_type==0){
     FILE_SIZE labellen=LABELLEN;
 
-    FORTgetpatchsizes1(file,patchlonglabel,patchshortlabel,patchunit,&endian,&meshi->npatches,&headersize,&error,
+    FORTgetpatchsizes1(&file_unit,file,patchlonglabel,patchshortlabel,patchunit,&endian,&meshi->npatches,&headersize,&error,
                        lenfile,labellen,labellen,labellen);
     if(error!=0){
       readpatch(ifile,UNLOAD,&error);
@@ -223,7 +225,7 @@ void readpatch(int ifile, int flag, int *errorcode){
        NewMemory((void **)&meshi->blockstart  ,sizeof(int)*(1+meshi->npatches))==0){
       *errorcode=1;
       if(patchinfo[ifile].compression_type==0){
-        FORTclosepatch();
+        FORTclosefortranfile(&file_unit);
       }
       readpatch(ifile,UNLOAD,&error);
       return;
@@ -231,7 +233,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   }
 
   if(patchinfo[ifile].compression_type==0){
-    FORTgetpatchsizes2(&patchinfo[ifile].version,
+    FORTgetpatchsizes2(&file_unit,&patchinfo[ifile].version,
       &meshi->npatches,&meshi->npatchsize,
       meshi->pi1,meshi->pi2,meshi->pj1,meshi->pj2,meshi->pk1,meshi->pk2,meshi->patchdir,
       &headersize,&framesize);
@@ -299,7 +301,7 @@ void readpatch(int ifile, int flag, int *errorcode){
       patchinfo[ifile].loaded=0;
       patchinfo[ifile].display=0;
       if(patchinfo[ifile].compression_type==0){
-        FORTclosepatch();
+        FORTclosefortranfile(&file_unit);
       }
       readpatch(ifile,UNLOAD,&error);
       return;
@@ -663,7 +665,7 @@ void readpatch(int ifile, int flag, int *errorcode){
       NewMemory((void **)&meshi->pqq,sizeof(float)*meshi->npatchsize)==0||
       NewMemory((void **)&meshi->ipqq,sizeof(unsigned char)*npqq)==0){
       *errorcode=1;
-      FORTclosepatch();
+      FORTclosefortranfile(&file_unit);
       readpatch(ifile,UNLOAD,&error);
       return;
     }
@@ -683,7 +685,9 @@ void readpatch(int ifile, int flag, int *errorcode){
   NewMemory((void **)&meshi->zipsize,sizeof(unsigned int)*mxpatch_frames);
   if(meshi->patchtimes==NULL){
     *errorcode=1;
-    if(patchinfo[ifile].compression_type!=2)FORTclosepatch();
+    if(patchinfo[ifile].compression_type!=2){
+      FORTclosefortranfile(&file_unit);
+    }
     readpatch(ifile,UNLOAD,&error);
     return;
   }
@@ -695,7 +699,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   else{
     if(meshi->pqq==NULL){
       *errorcode=1;
-      FORTclosepatch();
+      FORTclosefortranfile(&file_unit);
       readpatch(ifile,UNLOAD,&error);
       return;
     }
@@ -721,6 +725,7 @@ void readpatch(int ifile, int flag, int *errorcode){
           int lunit=15;
           int npqqi;
 
+          FORTget_file_unit(&lunit,&lunit);
           FORTgetpatchdata(&lunit,&meshi->npatches,
           meshi->pi1,meshi->pi2,
           meshi->pj1,meshi->pj2,
@@ -818,7 +823,7 @@ void readpatch(int ifile, int flag, int *errorcode){
            ){
             *errorcode=1;
             readpatch(ifile,UNLOAD,&error);
-            FORTclosepatch();
+            FORTclosefortranfile(&file_unit);
             return;
           }
         }
@@ -838,7 +843,7 @@ void readpatch(int ifile, int flag, int *errorcode){
     npqq = meshi->npatch_frames*meshi->npatchsize;
     if(npqq==0||NewMemory((void **)&meshi->ipqq,sizeof(unsigned char)*npqq)==0){
       *errorcode=1;
-      FORTclosepatch();
+      FORTclosefortranfile(&file_unit);
       readpatch(ifile,UNLOAD,&error);
       return;
     }
@@ -847,7 +852,9 @@ void readpatch(int ifile, int flag, int *errorcode){
   printf("computing boundary color levels \n");
   if(NewMemory((void **)&colorlabelpatch,MAXRGB*sizeof(char *))==0){
     *errorcode=1;
-    if(loadpatchbysteps!=2)FORTclosepatch();
+    if(loadpatchbysteps!=2){
+      FORTclosefortranfile(&file_unit);
+    }
     readpatch(ifile,UNLOAD,&error);
     return;
   }
@@ -857,7 +864,9 @@ void readpatch(int ifile, int flag, int *errorcode){
   for(n=0;n<nrgb;n++){
     if(NewMemory((void **)&colorlabelpatch[n],11)==0){
       *errorcode=1;
-      if(loadpatchbysteps!=2)FORTclosepatch();
+      if(loadpatchbysteps!=2){
+        FORTclosefortranfile(&file_unit);
+      }
       readpatch(ifile,UNLOAD,&error);
       return;
     }
