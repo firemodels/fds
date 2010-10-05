@@ -30,12 +30,6 @@ if(endian.eq.0)then
  else
   open(unit=lunit,file=trim(file),form="unformatted",action="read",shared)
 endif
-#elif pp_LAHEY
-if(endian.eq.0)then
-  open(unit=lunit,file=trim(file),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lunit,file=trim(file),form="unformatted",action="read")
-endif
 #else
 open(unit=lunit,file=trim(file),form="unformatted",action="read")
 #endif
@@ -197,14 +191,6 @@ if(endian2.eq.1)then
  else
   open(unit=lu20,file=trim(isofilename),form="unformatted",action="read",shared)
 endif
-#elif pp_LAHEY
-endian2=0
-endian2=endian
-if(endian2.eq.1)then
-  open(unit=lu20,file=trim(isofilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu20,file=trim(isofilename),form="unformatted",action="read")
-endif
 #else	   
   open(unit=lu20,file=trim(isofilename),form="unformatted",action="read")
 #endif
@@ -261,8 +247,11 @@ logical :: isopen, exists
 integer :: lu26, version
 integer :: i, endian2
 real :: dummy, dummy2
+integer :: exit_all
+integer :: file_unit
 
-lu26 = 26
+call get_file_unit(file_unit,26)
+lu26 = file_unit
 error = 0
 
 inquire(unit=lu26,opened=isopen)
@@ -277,14 +266,6 @@ if(endian2.eq.1)then
   open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
  else
   open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",shared)
-endif
-#elif pp_LAHEY
-endian2=0
-endian2=endian
-if(endian2.eq.1)then
-  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
 endif
 #else
   open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read")
@@ -305,171 +286,36 @@ if(error.ne.0)then
   return
 endif
 do
+  exit_all=0
   read(lu26,iostat=error)dummy
   if(error.ne.0)then
     error = 0
-    rewind(lu26)
-    return
+    exit
   endif
   do i = 1, nrooms
     read(lu26,iostat=error)dummy,dummy,dummy,dummy
-    if(error.ne.0)then
-      error = 0
-      rewind(lu26)
-      return
-    endif
+    if(error.eq.0)cycle
+    error = 0
+    exit_all=1
+    exit
   end do 
+  if(exit_all.eq.1)exit
   do i = 1, nfires
     read(lu26,iostat=error)dummy,dummy2
-    if(error.ne.0)then
-      error=0
-      rewind(lu26)
-      return
-    endif
+    if(error.eq.0)cycle
+    error = 0
+    exit_all=1
+    exit
   end do
+  if(exit_all.eq.1)exit
   nzonet = nzonet + 1
 end do
-
+close(lu26)
 end subroutine getzonesize
-
-
-!  ------------------ getxyzsize ------------------------ 
-
-subroutine getxyzsize(xyzfilename,ibp1,jbp1,kbp1,endian,error)
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getxyzsize@28' :: getxyzsize
-#endif
-#endif
-implicit none
-
-character(len=*) :: xyzfilename
-integer, intent(in) :: endian
-integer, intent(out) :: ibp1, jbp1, kbp1, error
-
-logical isopen, exists
-integer :: lu24
-
-error=0
-lu24 = 24
-
-inquire(unit=lu24,opened=isopen)
-
-if(isopen)close(lu24)
-inquire(file=trim(xyzfilename),exist=exists)
-if(exists)then
-#ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu24,file=trim(xyzfilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu24,file=trim(xyzfilename),form="unformatted",action="read",shared)
-endif
-#elif pp_LAHEY
-if(endian.eq.1)then
-  open(unit=lu24,file=trim(xyzfilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu24,file=trim(xyzfilename),form="unformatted",action="read")
-endif
-#else
-  open(unit=lu24,file=trim(xyzfilename),form="unformatted",action="read")
-#endif
- else
-  write(6,*)'The xyz file name, ',trim(xyzfilename),' does not exist'
-  error=1
-  return
-endif
-
-read(LU24,iostat=error) IBP1,JBP1,KBP1
-end subroutine getxyzsize
-
-
-!  ------------------ closezone ------------------------ 
-
-subroutine closezone()
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_closezone@0' :: closezone
-#endif
-#endif
-implicit none
-
-integer :: lu26
-logical :: isopen
-
-lu26 = 26
-inquire(unit=lu26,opened=isopen)
-
-if(isopen)close(lu26)
-
-return
-end subroutine closezone
-
-!  ------------------ closeiso ------------------------ 
-
-subroutine closeiso()
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_closeiso@0' :: closeiso
-#endif
-#endif
-implicit none
-
-integer :: lu20
-logical :: isopen
-
-lu20 = 20
-inquire(unit=lu20,opened=isopen)
-
-if(isopen)close(lu20)
-
-return
-end subroutine closeiso
-
-!  ------------------ closepatch ------------------------ 
-
-subroutine closepatch()
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_closepatch@0' :: closepatch
-#endif
-#endif
-implicit none
-
-integer :: lu15
-logical :: isopen
-
-lu15 = 15
-inquire(unit=lu15,opened=isopen)
-
-if(isopen)close(lu15)
-
-return
-end subroutine closepatch
-
-!  ------------------ closepart ------------------------ 
-
-subroutine closepart()
-#ifdef pp_cvf
-#ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_closepart@0' :: closepart
-#endif
-#endif
-implicit none
-
-integer :: lu10
-logical :: isopen
-
-lu10 = 10
-inquire(unit=lu10,opened=isopen)
-
-if(isopen)close(lu10)
-
-return
-end subroutine closepart
 
 !  ------------------ getpatchsizes1 ------------------------ 
 
-subroutine getpatchsizes1(patchfilename,patchlonglabel,patchshortlabel,patchunit, &
+subroutine getpatchsizes1(file_unit,patchfilename,patchlonglabel,patchshortlabel,patchunit, &
        endian,npatch,headersize,error)
 #ifdef pp_cvf
 #ifndef X64
@@ -479,7 +325,7 @@ subroutine getpatchsizes1(patchfilename,patchlonglabel,patchshortlabel,patchunit
 implicit none
 
 character(len=*) :: patchfilename, patchlonglabel, patchshortlabel, patchunit
-integer, intent(in) :: endian
+integer, intent(in) :: endian,file_unit
 integer, intent(out) :: npatch
 integer, intent(out) :: headersize
 
@@ -489,7 +335,7 @@ logical :: exists
 logical :: isopen
 
 error=0
-lu15 = 15
+lu15 = file_unit
 inquire(unit=lu15,opened=isopen)
 
 if(isopen)close(lu15)
@@ -500,12 +346,6 @@ if(endian.eq.1)then
   open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
  else
   open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read",shared)
-endif
-#elif pp_LAHEY
-if(endian.eq.1)then
-  open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read")
 endif
 #else
   open(unit=lu15,file=trim(patchfilename),form="unformatted",action="read")
@@ -535,14 +375,14 @@ end subroutine getpatchsizes1
 
 !  ------------------ getpatchsizes2 ------------------------ 
 
-subroutine getpatchsizes2(version,npatch,npatchsize,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,headersize,framesize)
+subroutine getpatchsizes2(file_unit,version,npatch,npatchsize,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,headersize,framesize)
 #ifdef pp_cvf
 #ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getpatchsizes2@48' :: getpatchsizes2
 #endif
 #endif
 implicit none
-integer, intent(in) :: version, npatch
+integer, intent(in) :: version, npatch,file_unit
 integer, intent(out) :: npatchsize
 integer, intent(out), dimension(npatch) :: pi1, pi2, pj1, pj2, pk1, pk2, patchdir
 integer, intent(inout) :: headersize
@@ -551,7 +391,7 @@ integer, intent(out) :: framesize
 integer :: n, lu15
 integer :: i1, i2, j1, j2, k1, k2
 
-lu15 = 15
+lu15 = file_unit
 npatchsize = 0
 do n = 1, npatch
   if(version.eq.0)then
@@ -634,7 +474,7 @@ end subroutine getsizesa
 
 !  ------------------ getsizes ------------------------ 
 
-subroutine getsizes(partfilename,ibar,jbar,kbar,nb,nv,nspr,mxframepoints,endian, showstaticsmoke, error)
+subroutine getsizes(file_unit,partfilename,ibar,jbar,kbar,nb,nv,nspr,mxframepoints,endian, showstaticsmoke, error)
 #ifdef pp_cvf
 #ifndef X64
 !DEC$ ATTRIBUTES ALIAS:'_getsizes@48' :: getsizes
@@ -643,7 +483,7 @@ subroutine getsizes(partfilename,ibar,jbar,kbar,nb,nv,nspr,mxframepoints,endian,
 implicit none
 
 integer, intent(out) :: nb, nv, nspr, mxframepoints, showstaticsmoke, error
-integer, intent(in) :: ibar, jbar, kbar
+integer, intent(in) :: file_unit,ibar, jbar, kbar
 
 integer :: lu10, ii, i, j, k
 integer, intent(in) :: endian
@@ -654,7 +494,7 @@ logical :: exists, connected
 integer :: ibar1, jbar1, kbar1
 
 
-lu10 = 10
+lu10 = file_unit
 error=0
 inquire(unit=lu10,opened=connected)
 if(connected)close(lu10)
@@ -666,12 +506,6 @@ if(endian.eq.1)then
   open(unit=lu10,file=trim(partfilename),form="unformatted",action="read",convert="BIG_ENDIAN",shared)
  else
   open(unit=lu10,file=trim(partfilename),form="unformatted",action="read",shared)
-endif
-#elif pp_LAHEY
-if(endian.eq.1)then
-  open(unit=lu10,file=trim(partfilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu10,file=trim(partfilename),form="unformatted",action="read")
 endif
 #else
   open(unit=lu10,file=trim(partfilename),form="unformatted",action="read")
@@ -716,17 +550,17 @@ end subroutine getsizes
 
 !  ------------------ getsizes2 ------------------------ 
 
-subroutine getsizes2(settmin_p,tmin_p,settmax_p,tmax_p,nspr,frameloadstep,partpointstep,npartpoints,npartframes,error)
+subroutine getsizes2(file_unit,settmin_p,tmin_p,settmax_p,tmax_p,nspr,frameloadstep,partpointstep,npartpoints,npartframes,error)
                    
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getsizes2@40' :: getsizes2
+!DEC$ ATTRIBUTES ALIAS:'_getsizes2@44' :: getsizes2
 #endif
 #endif
 
 implicit none
 
-integer, intent(in) :: settmin_p, settmax_p, nspr
+integer, intent(in) :: file_unit,settmin_p, settmax_p, nspr
 real, intent(in) :: tmin_p, tmax_p
 integer, intent(in) :: frameloadstep, partpointstep
 integer, intent(out) :: npartpoints, npartframes, error
@@ -743,7 +577,7 @@ real :: stime
 integer :: nf
 logical :: load
 
-lu10 = 10
+lu10 = file_unit
 
 npartframes = 0
 npartpoints = 0
@@ -839,12 +673,6 @@ if(endian.eq.1)then
  else
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
 endif
-#elif pp_LAHEY
-if(endian.eq.1)then
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
-endif
 #else
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
 #endif
@@ -918,12 +746,6 @@ if(endian.eq.1)then
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
  else
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
-endif
-#elif pp_LAHEY
-if(endian.eq.1)then
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
 endif
 #else
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
@@ -1023,12 +845,6 @@ if(endian.eq.1)then
  else
   open(unit=lu11,file=trim(partfilename),form="unformatted",action="read",shared)
 endif
-#elif pp_LAHEY
-if(endian.eq.1)then
-  open(unit=lu11,file=trim(partfilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu11,file=trim(partfilename),form="unformatted",action="read")
-endif
 #else
   open(unit=lu11,file=partfilename,form="unformatted",action="read")
 #endif
@@ -1040,9 +856,50 @@ endif
 return
 end subroutine openpart
 
+!  ------------------ openfortranfile ------------------------ 
+
+subroutine openfortranfile(file_name, file_unit, endian, error)
+
+#ifdef pp_cvf
+#ifndef X64
+!DEC$ ATTRIBUTES ALIAS:'_openfortranfile@20' :: openfortranfile
+#endif
+#endif
+
+implicit none
+
+character(len=*), intent(in) :: file_name
+integer, intent(inout) :: file_unit
+integer, intent(in) :: endian
+integer, intent(out) :: error
+
+logical :: exists
+
+error=0
+exists=.true.
+
+inquire(file=file_name,exist=exists)
+if(exists)then
+#ifdef pp_cvf
+if(endian.eq.1)then
+  open(unit=file_unit,file=file_name,form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+ else
+  open(unit=file_unit,file=file_name,form="unformatted",action="read",shared)
+endif
+#else
+  open(unit=file_unit,file=file_name,form="unformatted",action="read")
+#endif
+ else
+  error=1
+  return
+endif
+
+return
+end subroutine openfortranfile
+
 !  ------------------ openslice ------------------------ 
 
-subroutine openslice(slicefilename, unit, endian, is1, is2, js1, js2, ks1, ks2, error)
+subroutine openslice(slicefilename, unitnum, endian, is1, is2, js1, js2, ks1, ks2, error)
 
 #ifdef pp_cvf
 #ifndef X64
@@ -1055,21 +912,22 @@ implicit none
 character(len=*) :: slicefilename
 logical :: exists
 
-integer, intent(in) :: endian, unit
+integer, intent(in) :: endian
+integer, intent(inout) :: unitnum
 integer, intent(out) :: is1, is2, js1, js2, ks1, ks2
 integer, intent(out) :: error
 logical :: connected
 character(len=30) :: longlbl, shortlbl, unitlbl
-
+integer :: funit
+integer :: len1
 
 integer :: lu11
 
 error=0
-lu11 = unit
-inquire(unit=lu11,opened=connected)
-if(connected)close(lu11)
+lu11 = unitnum;
+exists=.true.
 
-inquire(file=trim(slicefilename),exist=exists)
+inquire(file=slicefilename,exist=exists)
 if(exists)then
 #ifdef pp_cvf
 if(endian.eq.1)then
@@ -1077,14 +935,8 @@ if(endian.eq.1)then
  else
   open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
 endif
-#elif pp_LAHEY
-if(endian.eq.1)then
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
-endif
 #else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
+  open(unit=lu11,file=slicefilename,form="unformatted",action="read")
 #endif
  else
   error=1
@@ -1130,7 +982,8 @@ subroutine getboundaryheader1(boundaryfilename,boundaryunitnumber,endian,npatch,
 implicit none
 
 character(len=*), intent(in) :: boundaryfilename
-integer, intent(in) :: boundaryunitnumber, endian
+integer, intent(in) :: endian
+integer, intent(inout) :: boundaryunitnumber
 integer, intent(out) :: npatch, error
 
 character(len=30) :: patchlonglabel, patchshortlabel, patchunit
@@ -1138,8 +991,10 @@ character(len=30) :: patchlonglabel, patchshortlabel, patchunit
 integer :: lu15, lenshort, lenunits
 logical :: exists
 logical :: isopen
+integer :: funit
 
 error=0
+call get_file_unit(boundaryunitnumber,boundaryunitnumber)
 lu15 = boundaryunitnumber
 inquire(unit=lu15,opened=isopen)
 
@@ -1151,12 +1006,6 @@ if(endian.eq.1)then
   open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
  else
   open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",shared)
-endif
-#elif pp_LAHEY
-if(endian.eq.1)then
-  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
 endif
 #else
   open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
@@ -1237,25 +1086,19 @@ lu15 = boundaryunitnumber
 inquire(unit=lu15,opened=isopen)
 
 if(isopen)close(lu15)
-inquire(file=trim(boundaryfilename),exist=exists)
+inquire(file=boundaryfilename,exist=exists)
 if(exists)then
 #ifdef pp_cvf
 if(endian.eq.1)then
-  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+  open(unit=lu15,file=boundaryfilename,form="unformatted",action="read",shared,convert="BIG_ENDIAN")
  else
-  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",shared)
-endif
-#elif pp_LAHEY
-if(endian.eq.1)then
-  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read",convert="BIG_ENDIAN")
- else
-  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
+  open(unit=lu15,file=boundaryfilename,form="unformatted",action="read",shared)
 endif
 #else
-  open(unit=lu15,file=trim(boundaryfilename),form="unformatted",action="read")
+  open(unit=lu15,file=boundaryfilename,form="unformatted",action="read")
 #endif
  else
-  write(6,*)'The boundary file name, ',trim(boundaryfilename),' does not exist'
+  write(6,*)'The boundary file name, ',boundaryfilename,' does not exist'
   error=1
   return
 endif
