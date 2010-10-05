@@ -319,7 +319,7 @@ subroutine getpatchsizes1(file_unit,patchfilename,patchlonglabel,patchshortlabel
        endian,npatch,headersize,error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getpatchsizes1@48' :: getpatchsizes1
+!DEC$ ATTRIBUTES ALIAS:'_getpatchsizes1@52' :: getpatchsizes1
 #endif
 #endif
 implicit none
@@ -378,7 +378,7 @@ end subroutine getpatchsizes1
 subroutine getpatchsizes2(file_unit,version,npatch,npatchsize,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,headersize,framesize)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getpatchsizes2@48' :: getpatchsizes2
+!DEC$ ATTRIBUTES ALIAS:'_getpatchsizes2@52' :: getpatchsizes2
 #endif
 #endif
 implicit none
@@ -477,7 +477,7 @@ end subroutine getsizesa
 subroutine getsizes(file_unit,partfilename,ibar,jbar,kbar,nb,nv,nspr,mxframepoints,endian, showstaticsmoke, error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getsizes@48' :: getsizes
+!DEC$ ATTRIBUTES ALIAS:'_getsizes@52' :: getsizes
 #endif
 #endif
 implicit none
