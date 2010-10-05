@@ -1,14 +1,14 @@
 !  ------------------ getzonedata ------------------------ 
 
-subroutine getzonedata(zonefilename,nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,error)
+subroutine getzonedata(zonefilename,nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,endian,error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getzonedata@44' :: getzonedata
+!DEC$ ATTRIBUTES ALIAS:'_getzonedata@52' :: getzonedata
 #endif
 #endif
 implicit none
 character(len=*) :: zonefilename
-integer, intent(in) :: nrooms, nfires
+integer, intent(in) :: nrooms, nfires,endian
 integer, intent(inout) :: nzonet
 real, intent(out), dimension(nrooms*nzonet) :: zonepr, zoneylay, zonetl, zonetu
 real, intent(out), dimension(nfires*nzonet) :: zoneqfire
@@ -29,9 +29,7 @@ if(isopen)close(lu26)
 inquire(file=trim(zonefilename),exist=exists)
 if(exists)then
 #ifdef pp_cvf
-endian2=0
-endian2=endian
-if(endian2.eq.1)then
+if(endian.eq.1)then
   open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
  else
   open(unit=lu26,file=trim(zonefilename),form="unformatted",action="read",shared)
@@ -131,7 +129,7 @@ end subroutine getpatchdata
 subroutine getdata1(file_unit,ipart,error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getdata1@8' :: getdata1
+!DEC$ ATTRIBUTES ALIAS:'_getdata1@12' :: getdata1
 #endif
 #endif
 
@@ -694,7 +692,7 @@ end subroutine endianout
 subroutine outsliceheader(file_unit,slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_outsliceheader@40' :: outsliceheader
+!DEC$ ATTRIBUTES ALIAS:'_outsliceheader@44' :: outsliceheader
 #endif
 #endif
 

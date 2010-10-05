@@ -68,8 +68,8 @@ STDCALL FORTgetsliceparms(char *file,int *endian,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,int *slice3d, int *error,FILE_SIZE lenfile);
 STDCALL FORTgetzonesize(char *zonefilename, int *nzonet, int *nrooms, int *nfires, int *endian, int *error, FILE_SIZE len);
 STDCALL FORTgetzonedata(char *zonefilename, int *nzonet, int *nrooms, int *nfires, 
-                        float *zonet, float *zoneqfire, float *zonepr, float *zoneylay,float *zonetl,float *zonetu, int *error, 
-                        FILE_SIZE len);
+                        float *zonet, float *zoneqfire, float *zonepr, float *zoneylay,float *zonetl,float *zonetu, int *endian,
+                        int *error, FILE_SIZE len);
 STDCALL FORTgetxyzdata(int *iblank,int *nx,int *ny,int *nz,int *error);
 STDCALL FORTgetpatchsizes1(int *file_unit,char *patchfilename,char *patchlonglabel,char *patchshortlabel,char *patchunit,
                            int *endian,int *npatch, int *headersize, int *error,
