@@ -1009,6 +1009,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   int blocknumber;
   mesh *meshi;
   float offset_x, offset_y, offset_z;
+  int file_unit;
 
   parti=partinfo+ifile;
   if(parti->version==1){
@@ -1073,7 +1074,9 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
   
   printf("Sizing particle data: %s\n",file);
-  FORTgetsizes(file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian,&staticframe0,&error,lenfile);
+  file_unit=15;
+  get_file_unit(&file_unit,&file_unit);
+  FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian,&staticframe0,&error,lenfile);
   STRCPY(partsizefile,file);
   STRCAT(partsizefile,".sz");
   statfile=STAT(file,&statbuffer);
@@ -1090,8 +1093,8 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     }
   }
   if(readpartsize==1){
-    FORTgetdata1(&parttype,&error);
-    FORTgetsizes2(&settmin_p,&tmin_p,&settmax_p,&tmax_p,
+    FORTgetdata1(&file_unit,&parttype,&error);
+    FORTgetsizes2(&file_unit,&settmin_p,&tmin_p,&settmax_p,&tmax_p,
                      &nspr, &partframestep, &partpointstep, &npartpoints, &npartframes, &error);
     sizefile=fopen(partsizefile,"w");
     if(sizefile!=NULL){
@@ -1101,7 +1104,9 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     else{
       printf("*** warning:  unable to write to %s\n",partsizefile);
     }
-    FORTgetsizes(file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian,&staticframe0,&error,lenfile);
+    file_unit=15;
+    get_file_unit(&file_unit,&file_unit);
+    FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian,&staticframe0,&error,lenfile);
   }
   npartpoints2=npartpoints;
   npartframes2=npartframes;
@@ -1128,7 +1133,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     }
      if(return_code==0){
       *errorcode=1;
-      FORTclosepart();
+      FORTclosefortranfile(&file_unit);
       readpart("",ifile,UNLOAD,&error);
       return;
     }
@@ -1136,7 +1141,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
 
   if(NewMemory((void **)&parti->ptimes,sizeof(float)*mxframes)==0){
     *errorcode=1;
-    FORTclosepart();
+    FORTclosefortranfile(&file_unit);
     readpart("",ifile,UNLOAD,&error);
     return;
   }
@@ -1144,7 +1149,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
      NewMemory((void **)&parti->yparts,npartpoints*sizeof(short))==0||
      NewMemory((void **)&parti->zparts,npartpoints*sizeof(short))==0){
     *errorcode=1;
-    FORTclosepart();
+    FORTclosefortranfile(&file_unit);
     readpart("",ifile,UNLOAD,&error);
     return;
   }
@@ -1157,7 +1162,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
      NewMemory((void **)&parti->sframe,mxframes*sizeof(int))==0||
      NewMemory((void **)&parti->sprframe,mxframes*sizeof(int))==0){
       *errorcode=1;
-      FORTclosepart();
+      FORTclosefortranfile(&file_unit);
       readpart("",ifile,UNLOAD,&error);
       return;
   }
@@ -1170,7 +1175,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
 
 
   printf("Loading particle data: %s\n",file);
-  FORTgetdata1(&parttype,&error);
+  FORTgetdata1(&file_unit,&parttype,&error);
   if(partfilenum>=0&&partfilenum<npart_files){
     partshortlabel=partinfo[partfilenum].label.shortlabel;
     partunitlabel=partinfo[partfilenum].label.unit;
@@ -1191,7 +1196,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   offset_x=meshi->offset[0];
   offset_y=meshi->offset[1];
   offset_z=meshi->offset[2];
-  FORTgetdata2(
+  FORTgetdata2(&file_unit,
     parti->xparts,parti->yparts,parti->zparts,
     parti->tpart,&parti->droplet_type,parti->isprink,
     tspr,parti->bframe,parti->sframe,parti->sprframe,parti->ptimes,&nspr,&npartpoints,&mxframes,&parti->nframes,
@@ -1270,7 +1275,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   partmin=tmin;
   partmax=tmax;
   if(NewMemory((void **)&colorlabelpart,MAXRGB*sizeof(char *))==0){
-    FORTclosepart();
+    FORTclosefortranfile(&file_unit);
     readpart("",ifile,UNLOAD,&error);
     *errorcode=1;
     return;
@@ -1279,7 +1284,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   for(n=0;n<nrgb;n++){
     if(NewMemory((void **)&colorlabelpart[n],11)==0){
       *errorcode=1;
-      FORTclosepart();
+      FORTclosefortranfile(&file_unit);
       readpart("",ifile,UNLOAD,&error);
       return;
     }
@@ -1295,13 +1300,13 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   if(ResizeMemory((void **)&parti->xparts,nmax*sizeof(short))==0||
      ResizeMemory((void **)&parti->yparts,nmax*sizeof(short))==0||
      ResizeMemory((void **)&parti->zparts,nmax*sizeof(short))==0){
-    FORTclosepart();
+    FORTclosefortranfile(&file_unit);
     *errorcode=1;
     readpart("",ifile,UNLOAD,&error);
     return;
   }
   if(ResizeMemory((void **)&parti->itpart,nmax*sizeof(unsigned char))==0){
-    FORTclosepart();
+    FORTclosefortranfile(&file_unit);
     *errorcode=1;
     readpart("",ifile,UNLOAD,&error);
     return;
