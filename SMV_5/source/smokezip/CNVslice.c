@@ -15,6 +15,8 @@
 // svn revision character string
 char CNVslice_revision[]="$Revision$";
 
+void mt_update_slice_hist(void);
+
 #ifdef pp_RLETEST
 
 #ifndef pp_cvf
@@ -458,7 +460,9 @@ int convert_slice(slice *slicei){
       percent_done=100.0*(float)data_loc/(float)slicei->filesize;
       if(percent_done>percent_next){
         printf(" %i%s",percent_next,pp);
+        LOCK_COMPRESS;
         fflush(stdout);
+        UNLOCK_COMPRESS;
         percent_next+=10;
       }
       for(i=0;i<framesize;i++){
@@ -591,72 +595,88 @@ slice *getslice(char *string){
 
 /* ------------------ compress_slices ------------------------ */
 
-void compress_slices(void){
+void *compress_slices(void *arg){
   int i;
   slice *slicei, *sb;
 //  float valmin, valmax;
 
-  printf("\n");
-  for(i=0;i<nslice_files;i++){
-    slicei = sliceinfo + i;
-    if(autozip==1&&slicei->autozip==0)continue;
-    slicei->count=0;
-  }
-  if(get_slice_bounds==1){
-    Get_Slice_Bounds();
-  }
-  for(i=0;i<nslice_files;i++){
-    char *label;
+  if(nslice_files<=0)return NULL;
+  LOCK_SLICE;
+  if(first_slice==1){
+    first_slice=0;
+    if(cleanfiles==1){
+      for(i=0;i<nslice_files;i++){
+        slicei = sliceinfo + i;
+        convert_slice(slicei);
+      }
+      return NULL;
+    }
+    for(i=0;i<nslice_files;i++){
+      slicei = sliceinfo + i;
+      if(autozip==1&&slicei->autozip==0)continue;
+      slicei->count=0;
+    }
+    if(get_slice_bounds==1){
+      Get_Slice_Bounds();
+    }
+    for(i=0;i<nslice_files;i++){
+      char *label;
 
-    slicei = sliceinfo + i;
-    if(autozip==1&&slicei->autozip==0)continue;
-    slicei->doit=1;
+      slicei = sliceinfo + i;
+      if(autozip==1&&slicei->autozip==0)continue;
+      slicei->doit=1;
 
-    sb=getslice(slicei->label.shortlabel);
-    if(sb==NULL)slicei->doit=0;
-    label = slicei->label.longlabel;
-    if(make_demo==1&&(strcmp(label,"TEMPERATURE")==0||strcmp(label,"oxygen")==0)){
-      slicei->setvalmax=1;
-      slicei->setvalmin=1;
-      if(strcmp(label,"TEMPERATURE")==0){
-        slicei->valmax=620.0;
-        slicei->valmin=20.0;
+      sb=getslice(slicei->label.shortlabel);
+      if(sb==NULL)slicei->doit=0;
+      label = slicei->label.longlabel;
+      if(make_demo==1&&(strcmp(label,"TEMPERATURE")==0||strcmp(label,"oxygen")==0)){
+        slicei->setvalmax=1;
+        slicei->setvalmin=1;
+        if(strcmp(label,"TEMPERATURE")==0){
+          slicei->valmax=620.0;
+          slicei->valmin=20.0;
+        }
+        else{
+          slicei->valmax=0.23;
+          slicei->valmin=0.0;
+        }
       }
       else{
-        slicei->valmax=0.23;
-        slicei->valmin=0.0;
+        if(sb!=NULL){
+          if(sb->setvalmax!=1||sb->setvalmin!=1)slicei->doit=0;
+        }
+        slicei->setvalmax=sb->setvalmax;
+        slicei->setvalmin=sb->setvalmin;
+        slicei->valmax=sb->valmax;
+        slicei->valmin=sb->valmin;
       }
+      sb->count++;
     }
-    else{
-      if(sb!=NULL){
-        if(sb->setvalmax!=1||sb->setvalmin!=1)slicei->doit=0;
-      }
-      slicei->setvalmax=sb->setvalmax;
-      slicei->setvalmin=sb->setvalmin;
-      slicei->valmax=sb->valmax;
-      slicei->valmin=sb->valmin;
-    }
-    sb->count++;
   }
+  UNLOCK_SLICE;
 
   // convert and compress files
 
   for(i=0;i<nslice_files;i++){
     slicei = sliceinfo + i;
     if(autozip==1&&slicei->autozip==0)continue;
+    LOCK_SLICE;
+    if(slicei->inuse==1){
+      UNLOCK_SLICE;
+      continue;
+    }
+    slicei->inuse=1;
+    UNLOCK_SLICE;
 
     if(slicei->doit==1){
       convert_slice(slicei);
     }
     else{
-      if(cleanfiles==0){
-        printf("%s not compressed\n",slicei->file);
-        printf("  Min and Max for %s not set in .ini file\n",slicei->label.shortlabel);
-      }
+      printf("%s not compressed\n",slicei->file);
+      printf("  Min and Max for %s not set in .ini file\n",slicei->label.shortlabel);
     }
   }
-
-
+  return NULL;
 }
 
 /* ------------------ slicedup ------------------------ */
@@ -676,6 +696,83 @@ int slicedup(slice *slicej, int islice){
   return 0;
 }
 
+/* ------------------ update_slice_hist ------------------------ */
+
+void update_slice_hist(void){
+  int i;
+
+  int endiandata;
+
+  endiandata=getendian();
+  for(i=0;i<nslice_files;i++){
+    slice *slicei;
+    int unit_start,unit1;
+    FILE_SIZE lenfile;
+    int error1;
+    float slicetime1, *sliceframe;
+    int sliceframesize;
+    int is1, is2, js1, js2, ks1, ks2;
+    int testslice;
+
+    slicei = sliceinfo + i;
+
+    LOCK_SLICE_BOUND;
+    if(slicei->inuse_getbounds==1){
+      UNLOCK_SLICE_BOUND;
+      continue;
+    }
+    slicei->inuse_getbounds=1;
+    UNLOCK_SLICE_BOUND;
+
+    lenfile=strlen(slicei->file);
+    
+    unit_start = 15;
+    LOCK_SLICE_BOUND;
+    FORTget_file_unit(&unit1,&unit_start);
+    FORTopenslice(slicei->file,&unit1,&endiandata,&is1,&is2,&js1,&js2,&ks1,&ks2,&error1,lenfile);
+    UNLOCK_SLICE_BOUND;
+
+    sliceframesize=(is2+1-is1)*(js2+1-js1)*(ks2+1-ks1);
+    NewMemory((void **)&sliceframe,sliceframesize*sizeof(float));
+    init_histogram(slicei->histogram);
+    testslice=0;
+    while(error1==0){
+      FORTgetsliceframe(&unit1, &is1, &is2, &js1, &js2, &ks1, &ks2, &slicetime1, sliceframe, &testslice,&error1);
+      update_histogram(sliceframe,sliceframesize,slicei->histogram);
+    }
+    FREEMEMORY(sliceframe);
+    
+    LOCK_SLICE_BOUND;
+    FORTclosefortranfile(&unit1);
+    UNLOCK_SLICE_BOUND;
+  }
+}
+
+/* ------------------ MT_update_slice_hist ------------------------ */
+
+void *MT_update_slice_hist(void *arg){
+  update_slice_hist();
+  return NULL;
+}
+
+/* ------------------ mt_update_slice_hist ------------------------ */
+
+void mt_update_slice_hist(void){
+  pthread_t *thread_ids;
+  int i;
+
+  NewMemory((void **)&thread_ids,mt_nthreads*sizeof(pthread_t));
+
+  for(i=0;i<mt_nthreads;i++){
+    pthread_create(&thread_ids[i],NULL,MT_update_slice_hist,NULL);
+  }
+
+  for(i=0;i<mt_nthreads;i++){
+    pthread_join(thread_ids[i],NULL);
+  }
+  FREEMEMORY(thread_ids);
+}
+
 /* ------------------ Get_Slice_Bounds ------------------------ */
 
 void Get_Slice_Bounds(void){
@@ -689,29 +786,20 @@ void Get_Slice_Bounds(void){
   printf("Determining slice file bounds\n");
   for(i=0;i<nslice_files;i++){
     slice *slicei;
-    int unit1=15;
-    int lenfile;
-    int error1;
-    float slicetime1, *sliceframe;
-    int sliceframesize;
-    int is1, is2, js1, js2, ks1, ks2;
-    int testslice;
 
     slicei = sliceinfo + i;
-    printf("  Examining %s\n",slicei->file);
-    lenfile=strlen(slicei->file);
-    FORTopenslice(slicei->file,&unit1,&endiandata,&is1,&is2,&js1,&js2,&ks1,&ks2,&error1,lenfile);
-    sliceframesize=(is2+1-is1)*(js2+1-js1)*(ks2+1-ks1);
-    NewMemory((void **)&sliceframe,sliceframesize*sizeof(float));
-    init_histogram(slicei->histogram);
-    testslice=0;
-    while(error1==0){
-      FORTgetsliceframe(&unit1, &is1, &is2, &js1, &js2, &ks1, &ks2, &slicetime1, sliceframe, &testslice,&error1);
-      update_histogram(sliceframe,sliceframesize,slicei->histogram);
-    }
-    FREEMEMORY(sliceframe);
-    FORTclosefortranfile(&unit1);
+    slicei->inuse_getbounds=0;
   }
+#ifdef pp_THREAD
+  if(mt_compress==1&&mt_nthreads>1){
+    mt_update_slice_hist();
+  }
+  else{
+    update_slice_hist();
+  }
+#else
+  update_slice_hist();
+#endif
   for(i=0;i<nslice_files;i++){
     slice *slicei;
     int j;

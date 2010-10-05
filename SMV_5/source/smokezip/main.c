@@ -44,14 +44,21 @@ int main(int argc, char **argv){
   int i;
   int endian_fds;
   int endian_info;
-  int doit_smoke3d=1, doit_boundary=1, doit_slice=1, doit_plot3d=1, doit_iso=1;
-#ifdef pp_PART2
-  int doit_particle=0;
-#endif
+
+  doit_smoke3d=1;
+  doit_boundary=1;
+  doit_slice=1;
+  doit_plot3d=1;
+  doit_iso=1;
+  doit_particle=0;
 
 #ifdef pp_THREAD
-  mt_part2iso=0;
-  mt_smoke=0;
+  mt_compress=0;
+  mt_nthreads=1;
+  first_initsphere=1;
+  first_slice=1;
+  first_patch=1;
+  first_plot3d=1;
 #endif
   frameskip=-1;
   no_chop=0;
@@ -280,8 +287,14 @@ int main(int argc, char **argv){
         break;
 #ifdef pp_THREAD
       case 't':
-        mt_part2iso=0;
-        mt_smoke=1;
+        mt_compress=1;
+        if(i+1<argc){
+          arg2=argv[i+1];
+          sscanf(arg2,"%i",&mt_nthreads);
+          if(mt_nthreads<1)mt_nthreads=1;
+          if(mt_nthreads>NTHREADS_MAX)mt_nthreads=NTHREADS_MAX;
+          i++;
+        }
         break;
 #endif
       case 'h':
@@ -311,7 +324,7 @@ int main(int argc, char **argv){
     return 1;
   }
 #ifdef pp_THREAD
-  init_multi_threading();
+  init_pthread_mutexes();
 #endif
   filelen=strlen(filebase);
   if(filelen>4){
@@ -435,30 +448,22 @@ int main(int argc, char **argv){
 
   readini(inifile);
 
-  if(doit_boundary)compress_patches();
-#ifdef pp_THREAD
-  if(doit_smoke3d==1){
-    if(mt_smoke==1){
-      MT_compress_smoke3ds();
-    }
-    else{
-      compress_smoke3ds();
-    }
-  }
-#else
-  if(doit_smoke3d==1){
-    compress_smoke3ds();
-  }
-#endif
-  if(doit_slice==1)compress_slices();
-  if(doit_plot3d==1)compress_plot3ds();
 #ifdef pp_PART2
-  if(doit_particle==1)compress_parts();
+//  if(doit_particle==1)compress_parts(NULL);
 #endif
 #ifdef pp_PART
-  convert_parts2iso();
+//  convert_parts2iso();
 #endif
-  if(doiso==1&&doit_iso==1)compress_isos();
+#ifdef pp_THREAD
+  if(mt_compress==1&&mt_nthreads>1){
+   // mt_compress_all();
+  }
+  else{
+   // compress_all(NULL);
+  }
+#else
+  compress_all(NULL);
+#endif
 
   if(cleanfiles==0&&destdir!=NULL){
     printf("Copying .smv, .ini and .end files to %s directory\n",destdir);
@@ -472,10 +477,76 @@ int main(int argc, char **argv){
   if(make_demo==1){
     makesvd(destdir,smvfile);
   }
-
   return 0;
 }
-       
+
+/* ------------------ mt_compress_all ------------------------ */
+#ifdef pp_THREAD
+void mt_compress_all(void){
+  int i;
+  pthread_t *thread_ids;
+
+  NewMemory((void **)&thread_ids,mt_nthreads*sizeof(pthread_t));
+
+  for(i=0;i<mt_nthreads;i++){
+    pthread_create(&thread_ids[i],NULL,compress_all,NULL);
+  }
+
+  for(i=0;i<mt_nthreads;i++){
+    pthread_join(thread_ids[i],NULL);
+  }
+  FREEMEMORY(thread_ids);
+}
+#endif
+
+/* ------------------ compress_all ------------------------ */
+
+void *compress_all(void *arg){
+#ifdef pp_THREAD
+  pthread_t thread_ids[5];
+#endif
+
+#ifdef pp_THREAD
+  if(mt_compress==1&&mt_nthreads>1){
+    if(doit_boundary==1){
+      pthread_create(&thread_ids[0],NULL,compress_patches,NULL);
+    }
+    if(doit_slice==1){
+      pthread_create(&thread_ids[1],NULL,compress_slices,NULL);
+    }
+    if(doit_smoke3d==1){
+      pthread_create(&thread_ids[2],NULL,compress_smoke3ds,NULL);
+    }
+    if(doiso==1&&doit_iso==1){
+      pthread_create(&thread_ids[3],NULL,compress_isos,NULL);
+    }
+    if(doit_plot3d==1){
+      pthread_create(&thread_ids[4],NULL,compress_plot3ds,NULL);
+    }
+
+    if(doit_boundary==1)pthread_join(thread_ids[0],NULL);
+    if(doit_slice==1)pthread_join(thread_ids[1],NULL);
+    if(doit_smoke3d==1)pthread_join(thread_ids[2],NULL);
+    if(doiso==1&&doit_iso==1)pthread_join(thread_ids[3],NULL);
+    if(doit_plot3d==1)pthread_join(thread_ids[4],NULL);
+  }
+  else{
+    if(doit_boundary==1)compress_patches(NULL);
+    if(doit_slice==1)compress_slices(NULL);
+    if(doit_smoke3d==1)compress_smoke3ds(NULL);
+    if(doiso==1&&doit_iso==1)compress_isos(NULL);
+    if(doit_plot3d==1)compress_plot3ds(NULL);
+  }
+#else
+  if(doit_boundary==1)compress_patches(NULL);
+  if(doit_slice==1)compress_slices(NULL);
+  if(doit_smoke3d==1)compress_smoke3ds(NULL);
+  if(doiso==1&&doit_iso==1)compress_isos(NULL);
+  if(doit_plot3d==1)compress_plot3ds(NULL);
+#endif
+  return NULL;
+}
+
 /* ------------------ filecopy ------------------------ */
 
 #define SIZEBUFFER 1000000

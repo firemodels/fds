@@ -18,33 +18,19 @@ void part2iso(part *parti);
 
 /* ------------------ init_all_threads ------------------------ */
 
-void init_multi_threading(void){
+void init_pthread_mutexes(void){
 #ifdef pp_THREAD
-  if(mt_part2iso==1)pthread_mutex_init(&mutexPART2ISO,NULL);
-  if(mt_smoke==1)pthread_mutex_init(&mutexSMOKE,NULL);
+  if(mt_compress==1){
+    pthread_mutex_init(&mutexCOMPRESS,NULL);
+    pthread_mutex_init(&mutexPATCH,NULL);
+    pthread_mutex_init(&mutexPATCH_BOUND,NULL);
+    pthread_mutex_init(&mutexSLICE,NULL);
+    pthread_mutex_init(&mutexSLICE_BOUND,NULL);
+    pthread_mutex_init(&mutexISOS,NULL);
+    pthread_mutex_init(&mutexSMOKE,NULL);
+    pthread_mutex_init(&mutexPLOT3D,NULL);
+  }
 #endif
 }
-
-// ************** multi threaded blockage smoothing **********************
-
-/* ------------------ MT_part2iso ------------------------ */
-#ifdef pp_THREAD
-void *MT_part2iso(void *arg){
-  part *parti;
-
-  parti = (part *)arg;
-  part2iso(parti);
-  return NULL;
-
-}
-
-void *MT_convert_3dsmoke(void *arg){
-  smoke3d *smoke3di;
-
-  smoke3di = (smoke3d *)arg;
-  convert_3dsmoke(smoke3di);
-  return NULL;
-}
-#endif
 
 
