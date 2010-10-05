@@ -15,11 +15,18 @@
 // svn revision character string
 char CNViso_revision[]="$Revision$";
 
-int sortflag;
-
 void getisosizes(EGZ_FILE *isostreamptr,float **levelsptr, int *nisolevels, int *sizebefore);
 void endian_switch(void *val, int nval);
 int tri_compare( const void *arg1, const void *arg2 );
+int tri_compare1( const void *arg1, const void *arg2 );
+int tri_compare2( const void *arg1, const void *arg2 );
+int tri_compare4( const void *arg1, const void *arg2 );
+
+/* ------------------ convert_iso ------------------------ */
+
+int convert_iso(iso *isoi){
+
+int sortflag;
 int *triangles_i;
 unsigned char *triangles1_i;
 unsigned short *triangles2_i;
@@ -29,10 +36,6 @@ int nsortMAX=-1;
 unsigned char  *triangle1_copy=NULL;
 unsigned short *triangle2_copy=NULL;
 int   *triangle_copy=NULL;
-
-/* ------------------ convert_iso ------------------------ */
-
-int convert_iso(iso *isoi){
 
   char isofile_svz[1024], isosizefile_svz[1024];
   EGZ_FILE *ISOFILE;
@@ -56,7 +59,6 @@ int convert_iso(iso *isoi){
   int one=1;
   float time_max;
 //  float *isolevels;
-
 
   strcpy(xxx,"X");
 
@@ -493,8 +495,6 @@ int convert_iso(iso *isoi){
             continue;
           }
         }
-        
-//  qsort( (float *)times, (size_t)ntimes, sizeof( float ), compare );
 
         {
           nsort=ntriangles_i/3;
@@ -521,27 +521,29 @@ int convert_iso(iso *isoi){
           else if(nvertices_i>=65536){
             sortflag=4;
           }
-          qsort((int *)sortindex,(size_t)ntriangles_i/3,sizeof(int),tri_compare);
           switch (sortflag){
           case 1:
+            qsort((unsigned char *)triangles1_i,(size_t)ntriangles_i/3,3*sizeof(unsigned char),tri_compare1);
             for(i=0;i<ntriangles_i/3;i++){
-              triangle1_copy[3*i+0]=triangles1_i[3*sortindex[i]+0];
-              triangle1_copy[3*i+1]=triangles1_i[3*sortindex[i]+1];
-              triangle1_copy[3*i+2]=triangles1_i[3*sortindex[i]+2];
+              triangle1_copy[3*i+0]=triangles1_i[3*i+0];
+              triangle1_copy[3*i+1]=triangles1_i[3*i+1];
+              triangle1_copy[3*i+2]=triangles1_i[3*i+2];
             }
             break;
           case 2:
+            qsort((unsigned short *)triangles2_i,(size_t)ntriangles_i/3,3*sizeof(unsigned short),tri_compare2);
             for(i=0;i<ntriangles_i/3;i++){
-              triangle2_copy[3*i+0]=triangles2_i[3*sortindex[i]+0];
-              triangle2_copy[3*i+1]=triangles2_i[3*sortindex[i]+1];
-              triangle2_copy[3*i+2]=triangles2_i[3*sortindex[i]+2];
+              triangle2_copy[3*i+0]=triangles2_i[3*i+0];
+              triangle2_copy[3*i+1]=triangles2_i[3*i+1];
+              triangle2_copy[3*i+2]=triangles2_i[3*i+2];
             }
             break;
           case 4:
+            qsort((int *)triangles_i,(size_t)ntriangles_i/3,3*sizeof(int),tri_compare4);
             for(i=0;i<ntriangles_i/3;i++){
-              triangle_copy[3*i+0]=triangles_i[3*sortindex[i]+0];
-              triangle_copy[3*i+1]=triangles_i[3*sortindex[i]+1];
-              triangle_copy[3*i+2]=triangles_i[3*sortindex[i]+2];
+              triangle_copy[3*i+0]=triangles_i[3*i+0];
+              triangle_copy[3*i+1]=triangles_i[3*i+1];
+              triangle_copy[3*i+2]=triangles_i[3*i+2];
             }
             break;
           }
@@ -577,16 +579,20 @@ int convert_iso(iso *isoi){
         percent_done=100.0*(float)data_loc/(float)isoi->filesize;
         if(percent_done>percent_next){
           printf(" %i%s",percent_next,pp);
+          LOCK_COMPRESS;
           fflush(stdout);
+          UNLOCK_COMPRESS;
           percent_next+=10;
         }
       }
     }
+    LOCK_ISOS;
     if(memory_fail==1){
       printf("memory allocation error\n");
       break;
     }
     iframe++;
+    UNLOCK_ISOS;
   }
 wrapup:
   FREELOCAL_ISO;
@@ -602,9 +608,6 @@ wrapup:
     printf("Sizes: original=%s, ",before_label);
     printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
   }
-
-
-
   return 0;
 }
 
@@ -614,7 +617,7 @@ wrapup:
 //  short *triangles2_i;
 
 /* ------------------ compare ------------------------ */
-
+/*
 int tri_compare( const void *arg1, const void *arg2 ){
   int i, j;
   unsigned char x1[3], y1[3];
@@ -681,37 +684,108 @@ int tri_compare( const void *arg1, const void *arg2 ){
   }
   return 0;
 }
+*/
+/* ------------------ tri_compare4 ------------------------ */
+
+int tri_compare4( const void *arg1, const void *arg2 ){
+  int *x1, *y1;
+
+  x1=(int *)arg1;
+  y1=(int *)arg2;
+
+  if(x1[0]<y1[0])return -1;
+  if(x1[0]>y1[0])return 1;
+
+  if(x1[1]<y1[1])return -1;
+  if(x1[1]>y1[1])return 1;
+
+  if(x1[2]<y1[2])return -1;
+  if(x1[2]>y1[2])return 1;
+
+  return 0;
+}
+
+/* ------------------ tri_compare2 ------------------------ */
+
+int tri_compare2( const void *arg1, const void *arg2 ){
+  unsigned short *x1, *y1;
+
+  x1=(unsigned short *)arg1;
+  y1=(unsigned short *)arg2;
+
+  if(x1[0]<y1[0])return -1;
+  if(x1[0]>y1[0])return 1;
+
+  if(x1[1]<y1[1])return -1;
+  if(x1[1]>y1[1])return 1;
+
+  if(x1[2]<y1[2])return -1;
+  if(x1[2]>y1[2])return 1;
+
+  return 0;
+}
+
+/* ------------------ tri_compare1 ------------------------ */
+
+int tri_compare1( const void *arg1, const void *arg2 ){
+  unsigned char *x1, *y1;
+
+  x1=(unsigned char *)arg1;
+  y1=(unsigned char *)arg2;
+
+  if(x1[0]<y1[0])return -1;
+  if(x1[0]>y1[0])return 1;
+
+  if(x1[1]<y1[1])return -1;
+  if(x1[1]>y1[1])return 1;
+
+  if(x1[2]<y1[2])return -1;
+  if(x1[2]>y1[2])return 1;
+
+  return 0;
+}
 
 /* ------------------ convert_iso ------------------------ */
 
-void compress_isos(void){
+void *compress_isos(void *arg){
   int i;
   iso *isoi;
 
   if(niso_files>0){
-    initspherepoints(&sphereinfo,14);
+    LOCK_ISOS;
+    if(first_initsphere==1){
+      first_initsphere=0;
+      initspherepoints(&sphereinfo,14);
+    }
+    UNLOCK_ISOS;
   // convert and compress files
     printf("\n");
     for(i=0;i<niso_files;i++){
       isoi = isoinfo + i;
       if(autozip==1&&isoi->autozip==0)continue;
+      LOCK_ISOS;
+      if(isoi->inuse==1){
+        UNLOCK_ISOS;
+        continue;
+      }
+      isoi->inuse=1;
+      UNLOCK_ISOS;
       convert_iso(isoi);
     }
   }
+  return NULL;
 }
 
 /* ------------------ getisosizes ------------------------ */
 
 void getisosizes(EGZ_FILE *ISOFILE,float **levelsptr, int *nisolevels, int *sizebefore){
-	int len[3],labellengths=0;
-	int nlevels;
-//	int version;
+  int len[3],labellengths=0;
+  int nlevels;
   int one;
 
   *sizebefore=0;
   EGZ_FREAD(&one,4,1,ISOFILE);
   *sizebefore+=4;
-//  version=1;
   EGZ_FREAD(len,4,3,ISOFILE);
   *sizebefore+=12;
   labellengths=len[0]+len[1]+len[2];
@@ -728,5 +802,4 @@ void getisosizes(EGZ_FILE *ISOFILE,float **levelsptr, int *nisolevels, int *size
   }
   EGZ_FREAD(*levelsptr,4,nlevels,ISOFILE);
   *sizebefore+=(4*nlevels);
-
 }

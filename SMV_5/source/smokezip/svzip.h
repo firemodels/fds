@@ -1,6 +1,10 @@
 // $Date$ 
 // $Revision$
 // $Author$
+
+//***********************
+//************* #definess
+//***********************
 #ifdef INMAIN
 #define EXTERN
 #else
@@ -32,6 +36,12 @@
 #define STAT stat
 #endif
 
+//***********************
+//************* structures
+//***********************
+
+/* --------------------------  mesh ------------------------------------ */
+
 
 typedef struct {
   int ibar, jbar, kbar;
@@ -53,6 +63,7 @@ typedef struct {
 typedef struct {
   char *file,*filebase;
   int filesize;
+  int inuse,inuse_getbounds;
   int seq_id, autozip;
   int doit, done;
   int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2, *patchdir, *patchsize;
@@ -65,8 +76,11 @@ typedef struct {
   int dup;
 } patch;
 
+/* --------------------------  iso ------------------------------------ */
+
 typedef struct {
   int blocknumber;
+  int inuse;
   char *file, *filebase;
   flowlabels label;
   int filesize;
@@ -79,8 +93,11 @@ typedef struct {
   int nisolevels,nisosteps;
 } iso;
 
+/* --------------------------  slice ------------------------------------ */
+
 typedef struct {
   char *file,*filebase;
+  int inuse,inuse_getbounds;
   int filesize;
   int seq_id,autozip;
   int doit, done, count;
@@ -95,13 +112,18 @@ typedef struct {
   int rle;
 } slice;
 
+/* --------------------------  bound ------------------------------------ */
+
 typedef struct {
   int setvalmin, setvalmax;
   float valmin, valmax;
 } bound;
 
+/* --------------------------  plot3d ------------------------------------ */
+
 typedef struct {
   char *file,*filebase;
+  int inuse;
   float time;
   int blocknumber;
   mesh *plot3d_mesh;
@@ -114,6 +136,8 @@ typedef struct {
   int dup;
 } plot3d;
 
+/* --------------------------  vert ------------------------------------ */
+
 typedef struct {
   float normal[3];
 } vert;
@@ -122,6 +146,7 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  int inuse;
   int seq_id, autozip;
   int nx, ny, nz, filesize;
   unsigned char *compressed_lightingbuffer;
@@ -164,6 +189,7 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  int inuse;
   int filesize;
   int seq_id, autozip;
   int setvalmin, setvalmax;
@@ -188,6 +214,12 @@ typedef struct {
 #define GET_INTERVAL(xyz,xyz0,dxyz) ((xyz)-(xyz0))/(dxyz)
 
 
+//***********************
+//************* headers
+//***********************
+
+void *compress_all(void *arg);
+void mt_compress_all(void);
 void rand_absdir(float xyz[3], int dir);
 void rand_cone_dir(float xyz[3], float dir[3], float mincosangle);
 void rand_sphere_dir(float xyz[3]);
@@ -207,11 +239,11 @@ int readsmv(char *file);
 int getendian(void);
 int convert_slice(slice *slicei);
 slice *getslice(char *string);
-void compress_slices(void);
-void compress_isos(void);
+void *compress_slices(void *arg);
+void *compress_isos(void *arg);
 int plot3ddup(plot3d *plot3dj, int iplot3d);
 int slicedup(slice *slicej, int islice);
-void compress_plot3ds(void);
+void *compress_plot3ds(void *arg);
 void getfilesizelabel(int size, char *sizelabel);
 void initpdf(pdfdata *pdf);
 int getfileinfo(char *filename, char *sourcedir, int *filesize);
@@ -224,28 +256,27 @@ void getpdf(float *vals, int nvals, pdfdata *pdf);
 void mergepdf(pdfdata *pdf1, pdfdata *pdf2, pdfdata *pdfmerge);
 void smoothlabel(float *a, float *b, int n);
 #ifdef pp_PART
-void compress_parts(void);
+void compress_parts(void *arg);
 void convert_parts2iso(void);
 part *getpart(char *string);
 part5prop *getpartprop(char *string);
 void convert_part(part *parti);
 int convertable_part(part *parti);
 #endif
-void compress_patches(void);
+void *compress_patches(void *arg);
 patch *getpatch(char *string);
 char *trim_front(char *line);
 int patchdup(patch *patchj, int ipatch);
 int readlabels(flowlabels *flowlabel, FILE *stream);
 void readini(char *file);
 void readini2(char *file2);
-int convert_boundary(patch *patchi, int pass);
 void Get_Boundary_Bounds(void);
 void Get_Slice_Bounds(void);
 #ifdef pp_PART
 void Get_Part_Bounds(void);
 #endif
 void convert_3dsmoke(smoke3d *smoke3di);
-void compress_smoke3ds(void);
+void *compress_smoke3ds(void *arg);
 int match(const char *buffer, const char *key, unsigned int lenkey);
 void trim(char *line);
 void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *normal, float *area);
@@ -263,6 +294,7 @@ float atan3(float y, float x);
 #define FORTopenslice openslice
 #define FORTopenpart openpart
 #define FORTgetsliceframe getsliceframe
+#define FORTget_file_unit get_file_unit
 #else
 #define FORTgetpartheader1 getpartheader1_
 #define FORTgetpartheader2 getpartheader2_
@@ -275,6 +307,7 @@ float atan3(float y, float x);
 #define FORTopenslice openslice_
 #define FORTopenpart openpart_
 #define FORTgetsliceframe getsliceframe_
+#define FORTget_file_unit get_file_unit_
 #endif
 #ifdef WIN32
 #define STDCALL extern void _stdcall
@@ -282,6 +315,7 @@ float atan3(float y, float x);
 #define STDCALL extern void
 #endif
 
+STDCALL FORTget_file_unit(int *file_unit,int *file_unit_start);
 STDCALL FORTopenpart(char *partfilename, int *unit, int *endian, int *error, FILE_SIZE lenfile);
 STDCALL FORTgetpartheader1(int *unit, int *nclasses, int *fdsversion, int *size);
 STDCALL FORTgetpartheader2(int *unit, int *nclasses, int *nquantities, int *size);
@@ -305,6 +339,16 @@ STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian,
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
                       int *error, FILE_SIZE lenfile);
 
+//***********************
+//************* variables
+//***********************
+
+EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d, doit_iso;
+#ifdef pp_PART2
+EXTERN int doit_particle;
+#endif
+
+EXTERN int first_initsphere,first_slice,first_patch,first_plot3d;
 EXTERN int frameskip;
 EXTERN int no_chop;
 EXTERN patch *patchinfo;

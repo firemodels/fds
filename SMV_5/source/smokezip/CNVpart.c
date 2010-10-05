@@ -48,7 +48,7 @@ part5prop *getpartprop(char *string){
 
 /* ------------------ compress_patches ------------------------ */
 
-void compress_parts(void){
+void compress_parts(void *arg){
   int i;
   int needbounds=0;
   int convertable=0;
@@ -133,8 +133,8 @@ int convertable_part(part *parti){
 void convert_part(part *parti){
   FILE *PARTFILEstream,*partstream,*partsizestream;
   char *partfile, partfile_svz[256], partsizefile_svz[256];
-  int lenfile;
-  int unit=15;
+  FILE_SIZE lenfile;
+  int unit;
   int nclasses;
   int *nquantities, *npoints;
   float time;
@@ -283,6 +283,8 @@ void convert_part(part *parti){
   NewMemory((void **)&char_buffer_compressed,BUFFER_SIZE*sizeof(unsigned char));
 
   lenfile=strlen(parti->file);
+  unit=15;
+  FORTget_file_unit(&unit,&unit);
   FORTopenpart(parti->file,&unit,&endiandata,&error,lenfile);
 
   FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
@@ -420,7 +422,9 @@ void convert_part(part *parti){
     percent_done=100.0*(float)data_loc/(float)parti->filesize;
     if(percent_done>percent_next){
       printf(" %i%s",percent_next,pp);
+      LOCK_COMPRESS;
       fflush(stdout);
+      UNLOCK_COMPRESS;
       percent_next+=10;
     }
     count++;
