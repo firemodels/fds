@@ -172,7 +172,7 @@ int convert_plot3d(plot3d *plot3di){
         plot3dframe_uncompressed[kk++]=ival;
       }
     }
-    compress(plot3dframe_compressed,&ncompressed_zlib,plot3dframe_uncompressed,framesize);
+    compress(plot3dframe_compressed,&ncompressed_zlib,plot3dframe_uncompressed,5*framesize);
     sizeafter=16+ncompressed_zlib;
     sizebefore=5*framesize*sizeof(float);
   }
@@ -183,7 +183,7 @@ int convert_plot3d(plot3d *plot3di){
   fwrite(&version,4,1,plot3dstream);       // fds plot3d file version
   fwrite(minmax,4,10,plot3dstream);        // write out min/max bounds for each plot3d file component
   fwrite(ijkbar,4,3,plot3dstream);         // write out ibar, jbar, kbar
-  fwrite(plot3dframe_uncompressed,1,ncompressed_zlib,plot3dstream);  // write out compressed plot3d data
+  fwrite(plot3dframe_compressed,1,ncompressed_zlib,plot3dstream);  // write out compressed plot3d data
 
   //*** PLOT3D FILE FORMAT
 
@@ -247,36 +247,48 @@ plot3d *getplot3d(char *string){
 
 /* ------------------ compress_plot3ds ------------------------ */
 
-void compress_plot3ds(void){
+void *compress_plot3ds(void *arg){
   int i, j;
   plot3d *plot3di, *pb;
 
   printf("\n");
-  for(i=0;i<nplot3d_files;i++){
-    plot3di = plot3dinfo + i;
-    if(autozip==1&&plot3di->autozip==0)continue;
-    plot3di->count=0;
-  }
-  for(i=0;i<nplot3d_files;i++){
-    plot3di = plot3dinfo + i;
-    if(autozip==1&&plot3di->autozip==0)continue;
-    plot3di->doit=1;
-
-    pb=plot3dinfo;
-    for(j=0;j<5;j++){
-      plot3di->bounds[j].setvalmin=pb->bounds[j].setvalmin;
-      plot3di->bounds[j].setvalmax=pb->bounds[j].setvalmax;
-      plot3di->bounds[j].valmin=pb->bounds[j].valmin;
-      plot3di->bounds[j].valmax=pb->bounds[j].valmax;
+  LOCK_PLOT3D;
+  if(first_plot3d==1){
+    first_plot3d=0;
+    for(i=0;i<nplot3d_files;i++){
+      plot3di = plot3dinfo + i;
+      if(autozip==1&&plot3di->autozip==0)continue;
+      plot3di->count=0;
     }
-    pb->count++;
+    for(i=0;i<nplot3d_files;i++){
+      plot3di = plot3dinfo + i;
+      if(autozip==1&&plot3di->autozip==0)continue;
+      plot3di->doit=1;
+
+      pb=plot3dinfo;
+      for(j=0;j<5;j++){
+        plot3di->bounds[j].setvalmin=pb->bounds[j].setvalmin;
+        plot3di->bounds[j].setvalmax=pb->bounds[j].setvalmax;
+        plot3di->bounds[j].valmin=pb->bounds[j].valmin;
+        plot3di->bounds[j].valmax=pb->bounds[j].valmax;
+      }
+      pb->count++;
+    }
   }
+  UNLOCK_PLOT3D;
 
   // convert and compress files
 
   for(i=0;i<nplot3d_files;i++){
     plot3di = plot3dinfo + i;
     if(autozip==1&&plot3di->autozip==0)continue;
+    LOCK_PLOT3D;
+    if(plot3di->inuse==1){
+      UNLOCK_PLOT3D;
+      continue;
+    }
+    plot3di->inuse=1;
+    UNLOCK_PLOT3D;
 
     if(plot3di->doit==1){
       convert_plot3d(plot3di);
@@ -288,6 +300,7 @@ void compress_plot3ds(void){
       }
     }
   }
+  return NULL;
 }
 
 /* ------------------ plot3ddup ------------------------ */

@@ -28,6 +28,7 @@ int readsmv(char *smvfile){
 #endif
 #define BUFFERSIZE 255
   char buffer[BUFFERSIZE];
+
   igrid=0;
   ipdim=0;
   streamsmv=fopen(smvfile,"r");
@@ -404,6 +405,8 @@ int readsmv(char *smvfile){
       ismoke3d_seq++;
       smoke3di->seq_id = ismoke3d_seq;
       smoke3di->autozip = 0;
+      smoke3di->inuse=0;
+
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       buffer2=trim_front(buffer);
@@ -512,6 +515,7 @@ int readsmv(char *smvfile){
       ipart_seq++;
       parti->seq_id = ipart_seq;
       parti->autozip = 0;
+      parti->inuse=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
@@ -573,6 +577,7 @@ int readsmv(char *smvfile){
       ipatch_seq++;
       patchi->seq_id = ipatch;
       patchi->autozip = 0;
+      patchi->inuse=0;
       patchi->version=version;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
@@ -596,7 +601,8 @@ int readsmv(char *smvfile){
         }
         patchi->filesize=filesize;
         if(get_boundary_bounds==1){
-          int lenfile, endian, npatches, error, boundaryunitnumber;
+          int endian, npatches, error, boundaryunitnumber;
+          FILE_SIZE lenfile;
 
           NewMemory((void **)&patchi->histogram,sizeof(histogramdata));
           lenfile=strlen(patchi->file);
@@ -670,9 +676,10 @@ int readsmv(char *smvfile){
       slicei->version=version;
       slicei->seq_id = islice_seq;
       slicei->autozip = 0;
+      slicei->inuse=0;
         
       if(get_slice_bounds==1){
-          NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
+        NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
       }
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
@@ -764,6 +771,7 @@ int readsmv(char *smvfile){
       plot3di->version=version;
       plot3di->plot3d_mesh=meshinfo + blocknumber;
       plot3di->time=time;
+      plot3di->inuse=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
@@ -835,6 +843,7 @@ int readsmv(char *smvfile){
       isoi->blocknumber=blocknumber;
       isoi->file=NULL;
       isoi->filebase=NULL;
+      isoi->inuse=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
