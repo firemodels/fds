@@ -8344,10 +8344,10 @@ radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX
 flux with a measurement, you often need to use {\ct 'GAUGE HEAT FLUX'}.
 The difference between {\ct 'NET HEAT FLUX'} and {\ct 'GAUGE HEAT FLUX'} is that
 the former is the rate at which energy is absorbed by the solid surface;
-the latter is the amount of energy that would be absorbed if the surface were cold (or some specified temperature):
-$$\dq_r''/\epsilon +\dq_c'' + h(T_w-T_\infty) + \sigma (T_w^4-T_\infty^4)$$
+the latter is the amount of energy that would be absorbed if the surface were cold (or some specified temperature $T_G$):
+$$\dq_r''/\epsilon +\dq_c'' + h(T_w-T_G) + \sigma (T_w^4-T_G^4)$$
 If the heat flux gauge used in an experiment has a temperature other
-than ambient, set {\ct GAUGE\_TEMPERATURE} on the {\ct PROP} line
+than ambient, set {\ct GAUGE\_TEMPERATURE} ($T_G$) on the {\ct PROP} line
 associated with the device.  When comparing against a radiometer
 measurement, use {\ct RADIOMETER}:
 $$\dq_r''/\epsilon + \sigma (T_w^4-T_\infty^4) $$
