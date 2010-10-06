@@ -571,6 +571,11 @@ int GetIsosurface(isosurface *surface,
           vals[6]=data[ip1jp1kp1];
           vals[7]=data[ip1jkp1];
 
+          if(vals[0]>level&&vals[1]>level&&vals[2]>level&&vals[3]>level&&
+             vals[4]>level&&vals[5]>level&&vals[6]>level&&vals[7]>level)continue;
+          if(vals[0]<level&&vals[1]<level&&vals[2]<level&&vals[3]<level&&
+             vals[4]<level&&vals[5]<level&&vals[6]<level&&vals[7]<level)continue;
+
           if(tdata!=NULL){
             tvals[0]=tdata[ijkbase];
             tvals[1]=tdata[ijp1k];
