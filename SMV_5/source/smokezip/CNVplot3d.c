@@ -96,7 +96,9 @@ int convert_plot3d(plot3d *plot3di){
       fclose(plot3dstream);
       printf("  Removing %s.\n",plot3dfile_svz);
       UNLINK(plot3dfile_svz);
+      LOCK_COMPRESS;
       filesremoved++;
+      UNLOCK_COMPRESS;
     }
     return 0;
   }

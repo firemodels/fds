@@ -99,14 +99,18 @@ void convert_3dsmoke(smoke3d *smoke3di){
       fclose(smoke3dstream);
       printf("  Removing %s.\n",smoke3dfile_svz);
       UNLINK(smoke3dfile_svz);
+      LOCK_COMPRESS;
       filesremoved++;
+      UNLOCK_COMPRESS;
     }
     smoke3dsizestream=fopen(smoke3dsizefile_svz,"r");
     if(smoke3dsizestream!=NULL){
       fclose(smoke3dsizestream);
       printf("  Removing %s.\n",smoke3dsizefile_svz);
       UNLINK(smoke3dsizefile_svz);
+      LOCK_COMPRESS;
       filesremoved++;
+      UNLOCK_COMPRESS;
     }
     return;
   }

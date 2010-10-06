@@ -189,7 +189,7 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
-  int inuse;
+  int inuse,inuse_part2iso;
   int filesize;
   int seq_id, autozip;
   int setvalmin, setvalmax;
@@ -257,9 +257,10 @@ void mergepdf(pdfdata *pdf1, pdfdata *pdf2, pdfdata *pdfmerge);
 void smoothlabel(float *a, float *b, int n);
 #ifdef pp_PART
 void compress_parts(void *arg);
-void convert_parts2iso(void);
+void *convert_parts2iso(void *arg);
 part *getpart(char *string);
 part5prop *getpartprop(char *string);
+int getpartprop_index(char *string);
 void convert_part(part *parti);
 int convertable_part(part *parti);
 #endif
@@ -348,7 +349,7 @@ EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d, doit_iso;
 EXTERN int doit_particle;
 #endif
 
-EXTERN int first_initsphere,first_slice,first_patch,first_plot3d;
+EXTERN int first_initsphere,first_slice,first_patch,first_plot3d,first_part2iso,first_part2iso_smvopen;
 EXTERN int frameskip;
 EXTERN int no_chop;
 EXTERN patch *patchinfo;

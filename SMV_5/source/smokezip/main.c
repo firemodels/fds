@@ -59,6 +59,8 @@ int main(int argc, char **argv){
   first_slice=1;
   first_patch=1;
   first_plot3d=1;
+  first_part2iso=1;
+  first_part2iso_smvopen=1;
 #endif
   frameskip=-1;
   no_chop=0;
@@ -448,18 +450,12 @@ int main(int argc, char **argv){
 
   readini(inifile);
 
-#ifdef pp_PART2
-//  if(doit_particle==1)compress_parts(NULL);
-#endif
-#ifdef pp_PART
-//  convert_parts2iso();
-#endif
 #ifdef pp_THREAD
   if(mt_compress==1&&mt_nthreads>1){
-   // mt_compress_all();
+    mt_compress_all();
   }
   else{
-   // compress_all(NULL);
+    compress_all(NULL);
   }
 #else
   compress_all(NULL);
@@ -503,7 +499,7 @@ void mt_compress_all(void){
 
 void *compress_all(void *arg){
 #ifdef pp_THREAD
-  pthread_t thread_ids[5];
+  pthread_t thread_ids[6];
 #endif
 
 #ifdef pp_THREAD
@@ -523,12 +519,20 @@ void *compress_all(void *arg){
     if(doit_plot3d==1){
       pthread_create(&thread_ids[4],NULL,compress_plot3ds,NULL);
     }
+    pthread_create(&thread_ids[5],NULL,convert_parts2iso,NULL);
+#ifdef pp_PART2
+//  if(doit_particle==1){
+//    pthread_create(&thread_ids[6],NULL,compress_parts,NULL);
+//  }
+#endif
 
     if(doit_boundary==1)pthread_join(thread_ids[0],NULL);
     if(doit_slice==1)pthread_join(thread_ids[1],NULL);
     if(doit_smoke3d==1)pthread_join(thread_ids[2],NULL);
     if(doiso==1&&doit_iso==1)pthread_join(thread_ids[3],NULL);
     if(doit_plot3d==1)pthread_join(thread_ids[4],NULL);
+    pthread_join(thread_ids[5],NULL);
+    //if(doit_particle==1)pthread_create(&thread_ids[6],NULL,compress_parts,NULL);
   }
   else{
     if(doit_boundary==1)compress_patches(NULL);
@@ -536,6 +540,8 @@ void *compress_all(void *arg){
     if(doit_smoke3d==1)compress_smoke3ds(NULL);
     if(doiso==1&&doit_iso==1)compress_isos(NULL);
     if(doit_plot3d==1)compress_plot3ds(NULL);
+    convert_parts2iso(NULL);
+    //if(doit_particle)compress_parts(NULL);
   }
 #else
   if(doit_boundary==1)compress_patches(NULL);
@@ -543,6 +549,9 @@ void *compress_all(void *arg){
   if(doit_smoke3d==1)compress_smoke3ds(NULL);
   if(doiso==1&&doit_iso==1)compress_isos(NULL);
   if(doit_plot3d==1)compress_plot3ds(NULL);
+  convert_parts2iso(NULL);
+  //if(doit_particle)compress_parts(NULL);
+  
 #endif
   return NULL;
 }
