@@ -33,6 +33,19 @@ void endian_switch(void *val, int nval);
 void part2iso(part *parti);
 
 
+/* ------------------ getpartprop_index ------------------------ */
+
+int getpartprop_index(char *string){
+  int i;
+  part5prop *partpropi;
+
+  for(i=0;i<npart5propinfo;i++){
+    partpropi = part5propinfo + i;
+    if(strcmp(partpropi->label.shortlabel,string)==0)return i;
+  }
+  return -1;
+}
+
 /* ------------------ getpartprop ------------------------ */
 
 part5prop *getpartprop(char *string){
@@ -88,16 +101,77 @@ void compress_parts(void *arg){
 
 /* ------------------ compress_patches ------------------------ */
 
-void convert_parts2iso(void){
+void *convert_parts2iso(void *arg){
   int i;
   
-  if(partfile2iso==0&&cleanfiles==0)return;
-  for(i=0;i<npart_files;i++){
-    part *parti;
+  LOCK_PART2ISO;
+  if(first_part2iso==1){
+    first_part2iso=0;
+  
+    if(cleanfiles==1){
+      FILE *stream;
+      int j;
 
-    parti = partinfo + i;
-    part2iso(parti);
+      stream=fopen(smvisofile,"rb");
+      if(stream!=NULL){
+        fclose(stream);
+        printf("  Removing %s.\n",smvisofile);
+        UNLINK(smvisofile);
+        LOCK_COMPRESS;
+        filesremoved++;
+        UNLOCK_COMPRESS;
+      }
+      for(j=0;j<npart_files;j++){
+        part *parti;
+
+        parti = partinfo + j;
+
+        for(i=0;i<npart5propinfo;i++){
+          part5prop *propi;
+          flowlabels *labels;
+          char isofilename[1024];
+      
+          propi = part5propinfo + i;
+          labels = &propi->label;
+          strcpy(isofilename,parti->file);
+          strcat(isofilename,"_");
+          strcat(isofilename,labels->shortlabel);
+          strcat(isofilename,".tiso");
+
+          stream=fopen(isofilename,"rb");
+          if(stream!=NULL){
+            fclose(stream);
+            printf("  Removing %s.\n",isofilename);
+            UNLINK(isofilename);
+            LOCK_COMPRESS;
+            filesremoved++;
+            UNLOCK_COMPRESS;
+          }
+        }
+      }
+      UNLOCK_PART2ISO;
+      return NULL;
+    }
   }
+  UNLOCK_PART2ISO;
+
+  if(partfile2iso==1){
+    for(i=0;i<npart_files;i++){
+      part *parti;
+
+      parti = partinfo + i;
+      LOCK_PART2ISO;
+      if(parti->inuse_part2iso==1){
+        UNLOCK_PART2ISO;
+        continue;
+      }
+      parti->inuse_part2iso=1;
+      UNLOCK_PART2ISO;
+
+      part2iso(parti);
+    }
+  }
+  return NULL;
 }
 
 /* ------------------ convertable_part ------------------------ */
@@ -250,14 +324,18 @@ void convert_part(part *parti){
       fclose(partstream);
       printf("  Removing %s.\n",partfile_svz);
       UNLINK(partfile_svz);
+      LOCK_COMPRESS;
       filesremoved++;
+      UNLOCK_COMPRESS;
     }
     partsizestream=fopen(partsizefile_svz,"rb");
     if(partsizestream!=NULL){
       fclose(partsizestream);
       printf("  Removing %s.\n",partsizefile_svz);
       UNLINK(partsizefile_svz);
+      LOCK_COMPRESS;
       filesremoved++;
+      UNLOCK_COMPRESS;
     }
     return;
   }
@@ -284,8 +362,10 @@ void convert_part(part *parti){
 
   lenfile=strlen(parti->file);
   unit=15;
+  LOCK_COMPRESS;
   FORTget_file_unit(&unit,&unit);
   FORTopenpart(parti->file,&unit,&endiandata,&error,lenfile);
+  UNLOCK_COMPRESS;
 
   FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
   NewMemory((void **)&nquantities,nclasses*sizeof(int));
@@ -440,7 +520,9 @@ void convert_part(part *parti){
   FREEMEMORY(char_buffer_uncompressed);
   FREEMEMORY(char_buffer_compressed);
 
+  LOCK_COMPRESS;
   FORTclosefortranfile(&unit);
+  UNLOCK_COMPRESS;
   fclose(partstream);
 //  fclose(partsizestream);
   {
@@ -486,7 +568,7 @@ void Get_Part_Bounds(void){
   for(i=0;i<npart_files;i++){
     part *parti;
     FILE_SIZE lenfile;
-    int unit=15;
+    int unit;
     int error1;
     int nclasses;
     int *nquantities, *npoints;
@@ -498,7 +580,11 @@ void Get_Part_Bounds(void){
     parti = partinfo + i;
     printf("  Examining %s\n",parti->file);
     lenfile=strlen(parti->file);
+    LOCK_COMPRESS;
+    unit=15;
+    FORTget_file_unit(&unit,&unit);
     FORTopenpart(parti->file,&unit,&endiandata,&error1,lenfile);
+    UNLOCK_COMPRESS;
 
     FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
     NewMemory((void **)&nquantities,nclasses*sizeof(int));
@@ -512,7 +598,9 @@ void Get_Part_Bounds(void){
     if(nquantities_total==0){
       FREEMEMORY(nquantities);
       FREEMEMORY(npoints);
+      LOCK_COMPRESS;
       FORTclosefortranfile(&unit);
+      UNLOCK_COMPRESS;
       continue;
     }
 
@@ -547,8 +635,10 @@ void Get_Part_Bounds(void){
 
     FREEMEMORY(nquantities);
     FREEMEMORY(npoints);
-
+     
+    LOCK_COMPRESS;
     FORTclosefortranfile(&unit);
+    UNLOCK_COMPRESS;
   }
 
   FREEMEMORY(pdata);
@@ -609,39 +699,7 @@ void part2iso(part *parti){
   FILE *SMVISOFILE=NULL;
   int nx2, ny2, nz2;
   float xmin, ymin, zmin;
-
-  if(cleanfiles==1){
-    FILE *stream;
-
-    stream=fopen(smvisofile,"rb");
-    if(stream!=NULL){
-      fclose(stream);
-      printf("  Removing %s.\n",smvisofile);
-      UNLINK(smvisofile);
-      filesremoved++;
-    }
-    for(i=0;i<npart5propinfo;i++){
-      part5prop *propi;
-      flowlabels *labels;
-      char isofilename[1024];
-      
-      propi = part5propinfo + i;
-      labels = &propi->label;
-      strcpy(isofilename,parti->file);
-      strcat(isofilename,"_");
-      strcat(isofilename,labels->shortlabel);
-      strcat(isofilename,".tiso");
-
-      stream=fopen(isofilename,"rb");
-      if(stream!=NULL){
-        fclose(stream);
-        printf("  Removing %s.\n",isofilename);
-        UNLINK(isofilename);
-        filesremoved++;
-      }
-    }
-    return;
-  }
+  part5prop *part5propinfo_copy;
 
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
@@ -651,7 +709,11 @@ void part2iso(part *parti){
   NewMemory((void **)&partindex,1000000*sizeof(int));
 
   lenfile=strlen(parti->file);
+  unit=15;
+  LOCK_COMPRESS;
+  FORTget_file_unit(&unit,&unit);
   FORTopenpart(parti->file,&unit,&endiandata,&error1,lenfile);
+  UNLOCK_COMPRESS;
 
   FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
   NewMemory((void **)&nquantities,nclasses*sizeof(int));
@@ -696,10 +758,12 @@ void part2iso(part *parti){
   nlevels=1;
   levels[0]=0.5;
 
+  NewMemory((void **)&part5propinfo_copy,npart5propinfo*sizeof(part5prop));
+
   for(i=0;i<npart5propinfo;i++){
     part5prop *propi;
 
-    propi = part5propinfo + i;
+    propi = part5propinfo_copy + i;
     propi->used=0;
   }
   for(j=0;j<nclasses;j++){
@@ -711,7 +775,7 @@ void part2iso(part *parti){
       flowlabels *labels;
 
       classj=parti->classptr[j];
-      propi=getpartprop(classj->labels[k].shortlabel);
+      propi=part5propinfo_copy+getpartprop_index(classj->labels[k].shortlabel);
       propi->used=1;
     }
   }
@@ -721,7 +785,7 @@ void part2iso(part *parti){
   for(i=0;i<npart5propinfo;i++){
     part5prop *propi;
 
-    propi = part5propinfo + i;
+    propi = part5propinfo_copy + i;
     if(propi->used==0)continue;
 
     NewMemory((void **)&propi->partvals,npartcount*sizeof(float));
@@ -729,7 +793,9 @@ void part2iso(part *parti){
 
   CCisoheader(isofile,isolonglabel,isoshortlabel,isounits,levels,&nlevels,&error);
 
-  if(parti==partinfo){
+  LOCK_PART2ISO;
+  if(first_part2iso_smvopen==1){
+    first_part2iso_smvopen=0;
     SMVISOFILE=fopen(smvisofile,"w");
   }
   else{
@@ -739,18 +805,20 @@ void part2iso(part *parti){
   fprintf(SMVISOFILE,"ISOF %i\n",blocknumber);
   fprintf(SMVISOFILE," %s\n",isofile);
   fprintf(SMVISOFILE," %s\n",isolonglabel);
+  
   fprintf(SMVISOFILE," %s\n",isoshortlabel);
   fprintf(SMVISOFILE," %s\n",isounits);
   fprintf(SMVISOFILE,"\n");
 
   for(i=0;i<npart5propinfo;i++){
-    part5prop *propi;
+    part5prop *propi,*propi_ro;
     flowlabels *labels;
 
-    propi = part5propinfo + i;
+    propi_ro = part5propinfo + i;
+    propi = part5propinfo_copy + i;
     if(propi->used==0)continue;
 
-    labels = &propi->label;
+    labels = &propi_ro->label;
     strcpy(propi->isofilename,parti->file);
     strcat(propi->isofilename,"_");
     strcat(propi->isofilename,labels->shortlabel);
@@ -768,6 +836,7 @@ void part2iso(part *parti){
     fprintf(SMVISOFILE," \n");
   }
   fclose(SMVISOFILE);
+  UNLOCK_PART2ISO;
 
   error=0;
   for(;;){
@@ -784,7 +853,7 @@ void part2iso(part *parti){
     for(i=0;i<npart5propinfo;i++){
       part5prop *propi;
 
-      propi = part5propinfo + i;
+      propi = part5propinfo_copy + i;
       if(propi->used==0)continue;
 
       for(j=0;j<npartcount;j++){
@@ -821,7 +890,7 @@ void part2iso(part *parti){
         int data2flag=1;
         char *vallabel;
           
-        propi=getpartprop(classj->labels[k].shortlabel);
+        propi=part5propinfo_copy+getpartprop_index(classj->labels[k].shortlabel);
 
         for(i=0;i<npoints[j];i++){
           int ix, iy, iz;
@@ -845,7 +914,7 @@ void part2iso(part *parti){
     for(i=0;i<npart5propinfo;i++){
       part5prop *propi;
 
-      propi = part5propinfo + i;
+      propi = part5propinfo_copy + i;
       if(propi->used==0)continue;
 
       CCisosurfacet2file(propi->isofilename, &time, partcount, &data2flag, propi->partvals, NULL, levels, &nlevels,
@@ -858,7 +927,9 @@ void part2iso(part *parti){
   FREEMEMORY(npoints);
   FREEMEMORY(partcount);
   FREEMEMORY(isofile);
+  LOCK_COMPRESS;
   FORTclosefortranfile(&unit);
+  UNLOCK_COMPRESS;
 
   FREEMEMORY(pdata);
   FREEMEMORY(tagdata);
@@ -867,10 +938,13 @@ void part2iso(part *parti){
   for(i=0;i<npart5propinfo;i++){
     part5prop *propi;
 
-    propi = part5propinfo + i;
+    propi = part5propinfo_copy + i;
     if(propi->used==0)continue;
+
+    FREEMEMORY(propi->partvals);
     FREEMEMORY(propi->partvals);
   }
+  FREEMEMORY(part5propinfo_copy);
 }
 
 #endif
