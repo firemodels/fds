@@ -29,6 +29,7 @@ void init_pthread_mutexes(void){
     pthread_mutex_init(&mutexISOS,NULL);
     pthread_mutex_init(&mutexSMOKE,NULL);
     pthread_mutex_init(&mutexPLOT3D,NULL);
+    pthread_mutex_init(&mutexPART2ISO,NULL);
   }
 #endif
 }
