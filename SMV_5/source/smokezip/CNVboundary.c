@@ -79,14 +79,18 @@ int clean_boundary(patch *patchi){
     fclose(boundarystream);
     printf("  Removing %s.\n",boundaryfile_svz);
     UNLINK(boundaryfile_svz);
+    LOCK_COMPRESS;
     filesremoved++;
+    UNLOCK_COMPRESS;
   }
   boundarysizestream=fopen(boundarysizefile_svz,"rb");
   if(boundarysizestream!=NULL){
     fclose(boundarysizestream);
     printf("  Removing %s.\n",boundarysizefile_svz);
     UNLINK(boundarysizefile_svz);
+    LOCK_COMPRESS;
     filesremoved++;
+    UNLOCK_COMPRESS;
   }
   return 0;
 }
@@ -549,12 +553,12 @@ void update_patch_hist(void){
     pk1 = patchi->pk1;
     pk2 = patchi->pk2;
 
-    LOCK_PATCH_BOUND;
+    LOCK_COMPRESS;
     unit_start=15;
     FORTget_file_unit(&unit1,&unit_start);
     printf("patch bound unit=%i\n",unit1);
     FORTopenboundary(patchi->file,&unit1,&endiandata,&patchi->version,&error1,lenfile);
-    UNLOCK_PATCH_BOUND;
+    UNLOCK_COMPRESS;
 
     patchframesize=0;
     for(j=0;j<patchi->npatches;j++){
@@ -569,9 +573,9 @@ void update_patch_hist(void){
         pi1, pi2, pj1, pj2, pk1, pk2, &patchtime1, patchframe, &ndummy,&error1);
       update_histogram(patchframe,patchframesize,patchi->histogram);
     }
-    LOCK_PATCH_BOUND;
+    LOCK_COMPRESS;
     FORTclosefortranfile(&unit1);
-    UNLOCK_PATCH_BOUND;
+    UNLOCK_COMPRESS;
     FREEMEMORY(patchframe);
   }
 }

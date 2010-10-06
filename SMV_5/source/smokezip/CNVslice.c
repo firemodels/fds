@@ -188,14 +188,18 @@ int convert_slice(slice *slicei){
       fclose(slicestream);
       printf("  Removing %s.\n",slicefile_svz);
       UNLINK(slicefile_svz);
+      LOCK_COMPRESS;
       filesremoved++;
+      UNLOCK_COMPRESS;
     }
     slicesizestream=fopen(slicesizefile_svz,"rb");
     if(slicesizestream!=NULL){
       fclose(slicesizestream);
       printf("  Removing %s.\n",slicesizefile_svz);
       UNLINK(slicesizefile_svz);
+      LOCK_COMPRESS;
       filesremoved++;
+      UNLOCK_COMPRESS;
     }
     return 0;
   }
@@ -727,10 +731,10 @@ void update_slice_hist(void){
     lenfile=strlen(slicei->file);
     
     unit_start = 15;
-    LOCK_SLICE_BOUND;
+    LOCK_COMPRESS;
     FORTget_file_unit(&unit1,&unit_start);
     FORTopenslice(slicei->file,&unit1,&endiandata,&is1,&is2,&js1,&js2,&ks1,&ks2,&error1,lenfile);
-    UNLOCK_SLICE_BOUND;
+    UNLOCK_COMPRESS;
 
     sliceframesize=(is2+1-is1)*(js2+1-js1)*(ks2+1-ks1);
     NewMemory((void **)&sliceframe,sliceframesize*sizeof(float));
@@ -742,9 +746,9 @@ void update_slice_hist(void){
     }
     FREEMEMORY(sliceframe);
     
-    LOCK_SLICE_BOUND;
+    LOCK_COMPRESS;
     FORTclosefortranfile(&unit1);
-    UNLOCK_SLICE_BOUND;
+    UNLOCK_COMPRESS;
   }
 }
 

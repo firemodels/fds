@@ -516,6 +516,7 @@ int readsmv(char *smvfile){
       parti->seq_id = ipart_seq;
       parti->autozip = 0;
       parti->inuse=0;
+      parti->inuse_part2iso=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);

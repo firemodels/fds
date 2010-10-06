@@ -101,14 +101,18 @@ int   *triangle_copy=NULL;
       fclose(isostream);
       printf("  Removing %s.\n",isofile_svz);
       UNLINK(isofile_svz);
+      LOCK_COMPRESS;
       filesremoved++;
+      UNLOCK_COMPRESS;
     }
     isosizestream=fopen(isosizefile_svz,"rb");
     if(isosizestream!=NULL){
       fclose(isosizestream);
       printf("  Removing %s.\n",isosizefile_svz);
       UNLINK(isosizefile_svz);
+      LOCK_COMPRESS;
       filesremoved++;
+      UNLOCK_COMPRESS;
     }
     return 0;
   }
