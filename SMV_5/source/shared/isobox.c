@@ -1501,7 +1501,6 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
   FILE *isostream=NULL;
 
 #ifdef _DEBUG
-  printf("before surface creation:");
   PrintMemoryInfo;
 #endif
   isostream=fopen(isofile,"ab");
@@ -1532,7 +1531,6 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
   }
   fclose(isostream);
 #ifdef _DEBUG
-  printf("after surface creation:");
   PrintMemoryInfo;
 #endif
 }
@@ -1559,7 +1557,6 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
 
 
 #ifdef _DEBUG
-  printf("before surface creation:");
   PrintMemoryInfo;
 #endif
   isostream=fopen(isofile,"ab");
@@ -1590,7 +1587,6 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
   }
   fclose(isostream);
 #ifdef _DEBUG
-  printf("after surface creation:");
   PrintMemoryInfo;
 #endif
 }
