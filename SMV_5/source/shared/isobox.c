@@ -23,10 +23,6 @@
 // svn revision character string
 char isobox_revision[]="$Revision$";
 
-unsigned short *vertices=NULL;
-int *rank=NULL,*sortedlist=NULL;
-int *closestnodes=NULL;
-
 /* ------------------ GetIsobox ------------------------ */
 
 void GetIsobox(const float *x, 
@@ -605,42 +601,47 @@ int GetIsosurface(isosurface *surface,
 /* ------------------ compareisonodes ------------------------ */
 
 int compareisonodes( const void *arg1, const void *arg2 ){
-  int i, j;
-  i=*(int *)arg1;
-  j=*(int *)arg2;
-  i *= 3;
-  j *= 3;
-  if(vertices[i]<vertices[j])return -1;
-  if(vertices[i]>vertices[j])return 1;
-  i++; j++;
-  if(vertices[i]<vertices[j])return -1;
-  if(vertices[i]>vertices[j])return 1;
-  i++; j++;
-  if(vertices[i]<vertices[j])return -1;
-  if(vertices[i]>vertices[j])return 1;
+  sortdata *sdi, *sdj;
+  unsigned short *vi, *vj;
+
+  sdi=(sortdata *)arg1;
+  sdj=(sortdata *)arg2;
+  vi = sdi->vertex;
+  vj = sdj->vertex;
+  if(vi[0]<vj[0])return -1;
+  if(vi[0]>vj[0])return 1;
+  if(vi[1]<vj[1])return -1;
+  if(vi[1]>vj[1])return 1;
+  if(vi[2]<vj[2])return -1;
+  if(vi[2]>vj[2])return 1;
   return 0;
 }
 
 /* ------------------ computerank ------------------------ */
 
 int computerank( const void *arg1, const void *arg2 ){
-  int i, j;
-  i=*(int *)arg1;
-  j=*(int *)arg2;
-  if(sortedlist[i]<sortedlist[j])return -1;
-  if(sortedlist[i]>sortedlist[j])return 1;
+  rankdata *rdi, *rdj;
+  int sorti, sortj;
+
+  rdi=(rankdata *)arg1;
+  rdj=(rankdata *)arg2;
+  sorti = rdi->rank;
+  sortj = rdj->rank;
+  if(sorti<sortj)return -1;
+  if(sorti>sortj)return 1;
   return 0;
 }
 
 /* ------------------ order_closestnodes ------------------------ */
 
 int order_closestnodes( const void *arg1, const void *arg2 ){
-  int i, j;
-  int ii,jj;
-  i=*(int *)arg1;
-  j=*(int *)arg2;
-  ii = closestnodes[i];
-  jj = closestnodes[j];
+  orderdata *oi, *oj;
+  int ii, jj;
+
+  oi=(orderdata *)arg1;
+  oj=(orderdata *)arg2;
+  ii = oi->closest;
+  jj = oj->closest;
   if(ii<jj)return -1;
   if(ii>jj)return 1;
   return 0;
@@ -668,7 +669,12 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
   float tmin, tmax, tmaxmin;
   int flag;
   unsigned short *tvertices,*newtvertices;
-
+  sortdata *sortinfo;
+  rankdata *rankinfo;
+  orderdata *orderinfo;
+  unsigned short *vertices=NULL;
+  int *rank=NULL,*sortedlist=NULL,*closestnodes=NULL;
+ 
   nvertices=surface->nvertices;
   if(nvertices==0)return 0;
   vertices=surface->vertices;
@@ -698,12 +704,18 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
      NewMemory((void **)&rank,nvertices*sizeof(int))==0||
      NewMemory((void **)&map,nvertices*sizeof(int))==0||
      NewMemory((void **)&map2,nvertices*sizeof(int))==0||
-     NewMemory((void **)&sortedlist,nvertices*sizeof(int))==0){
+     NewMemory((void **)&sortedlist,nvertices*sizeof(int))==0||
+     NewMemory((void **)&sortinfo,nvertices*sizeof(sortdata))==0||
+     NewMemory((void **)&rankinfo,nvertices*sizeof(rankdata))==0||
+     NewMemory((void **)&orderinfo,nvertices*sizeof(orderdata))==0){
     FREEMEMORY(vertices);
     FREEMEMORY(rank);
     FREEMEMORY(map);
     FREEMEMORY(map2);
     FREEMEMORY(sortedlist);
+    FREEMEMORY(sortinfo);
+    FREEMEMORY(rankinfo);
+    FREEMEMORY(orderinfo);
     return 1;
   }
 
@@ -748,15 +760,45 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
   	rank[i]=i;
   }
 
-  qsort((int *)sortedlist,(size_t)nvertices,sizeof(int),compareisonodes);
-  qsort((int *)rank,(size_t)nvertices,sizeof(int),computerank);
+  for(i=0;i<nvertices;i++){
+    sortdata *sdi;
+
+    sdi = sortinfo + i;
+    sdi->index=sortedlist[i];
+    sdi->vertex[0]=vertices[3*i+0];
+    sdi->vertex[1]=vertices[3*i+1];
+    sdi->vertex[2]=vertices[3*i+2];
+  }
+  qsort((sortdata *)sortinfo,(size_t)nvertices,sizeof(sortdata),compareisonodes);
+
+  for(i=0;i<nvertices;i++){
+    sortdata *sdi;
+
+    sdi = sortinfo + i;
+    sortedlist[i]=sdi->index;
+  }
+  
+  for(i=0;i<nvertices;i++){
+    rankdata *rdi;
+
+    rdi = rankinfo + i;
+    rdi->index=rank[i];
+    rdi->rank=sortedlist[i];
+  }
+  qsort((rankdata *)rank,(size_t)nvertices,sizeof(rankdata),computerank);
+  for(i=0;i<nvertices;i++){
+    rankdata *rdi;
+
+    rdi = rankinfo + i;
+    rank[i]=rdi->index;
+  }
 
   j=0;
   map[0]=0;
   map2[0]=0;
   nmap2=1;
   for(i=1;i<nvertices;i++){
-    if(compareisonodes(sortedlist+i-1,sortedlist+i)!=0){
+    if(compareisonodes(sortinfo+i-1,sortinfo+i)!=0){
   	  j++;
   	  map2[j]=i;
   	  nmap2++;
@@ -845,9 +887,23 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
     return 1;
   }
   for(i=0;i<nvertices;i++){
+    orderdata *oi;
+
+    oi = orderinfo + i;
+
+    oi->index=i;
+    oi->closest=closestnodes[i];
     ordered_closestnodes[i]=i;
   }
-  qsort((int *)ordered_closestnodes,(size_t)nvertices,sizeof(int),order_closestnodes);
+  qsort((orderdata *)orderinfo,(size_t)nvertices,sizeof(orderdata),order_closestnodes);
+  for(i=0;i<nvertices;i++){
+    orderdata *oi;
+
+    oi = orderinfo + i;
+
+    ordered_closestnodes[i]=oi->index;
+  }
+
   if(NewMemory((void **)&vertexmap,nvertices*sizeof(int))==0||
      NewMemory((void **)&inverse_vertexmap,nvertices*sizeof(int))==0){
     FREEMEMORY(vertexmap);
