@@ -20,10 +20,7 @@
 #endif
 #include "egz_stdio.h"
 #include "MALLOC.h"
-#include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 int cull_count=0;
 
@@ -36,7 +33,7 @@ char IOsmoke_revision[]="$Revision$";
 
 char *textFileRead(char *fn);
 
-//              alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE);\
+//              alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE);
 
 #define ADJUSTALPHA(ALPHAIN,ASPECTRATIO,NORM,NORMTYPE) \
             alphaf_out[n]=0;\
@@ -680,12 +677,12 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist_found, int *
   }
   *n_times_found=nframes_found;
   *n_times_full=iframe+1;
-  if(nframes_found>0){
-    NewMemory((void **)&use_smokeframe_full,*n_times_full*sizeof(float));
-    NewMemory((void **)&time_found,nframes_found*sizeof(float));
-    NewMemory((void **)&nch_smoke_compressed_full,(*n_times_full)*sizeof(int));
-    NewMemory((void **)&nch_smoke_compressed_found,(*n_times_found)*sizeof(int));
-  }
+
+  NewMemory((void **)&use_smokeframe_full,*n_times_full*sizeof(float));
+  NewMemory((void **)&time_found,nframes_found*sizeof(float));
+  NewMemory((void **)&nch_smoke_compressed_full,(*n_times_full)*sizeof(int));
+  NewMemory((void **)&nch_smoke_compressed_found,(*n_times_found)*sizeof(int));
+
   *use_smokeframe=use_smokeframe_full;
   *timelist_found=time_found;
   *nchars_smoke_compressed_full=nch_smoke_compressed_full;
@@ -1313,8 +1310,8 @@ void drawsmoke3d(smoke3d *smoke3di){
 
   // +++++++++++++++++++++++++++++++++++ DIR 2 +++++++++++++++++++++++++++++++++++++++
 
-case 2:
-case -2:
+  case 2:
+  case -2:
 
     // ++++++++++++++++++  adjust transparency +++++++++++++++++
 
@@ -3074,8 +3071,8 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 
   // +++++++++++++++++++++++++++++++++++ DIR 2 +++++++++++++++++++++++++++++++++++++++
 
-case 2:
-case -2:
+  case 2:
+  case -2:
 
     aspectratio=meshi->dy;
     glUniform1f(GPU_aspectratio,aspectratio);
@@ -3998,7 +3995,6 @@ int init_cull_exts(void){
   char version_label[256];
   char version_label2[256];
   int i, major,  minor;
-  float version;
   const GLubyte *version_string;
   int err;
 
@@ -4389,79 +4385,131 @@ void drawsmoke3dCULL(void){
 
   // +++++++++++++++++++++++++++++++++++ DIR 4 +++++++++++++++++++++++++++++++++++++++
 
-  case 4:
-  case -4:
-      for(k=culli->kbeg; k<culli->kend; k++){
-        kterm = (k-ks1)*nxy;
-        z1 = zplt[k];
-        z3 = zplt[k+1];
-        znode[0]=z1;
-        znode[1]=z1;
-        znode[2]=z3;
-        znode[3]=z3;
+      case 4:
+      case -4:
+        for(k=culli->kbeg; k<culli->kend; k++){
+          kterm = (k-ks1)*nxy;
+          z1 = zplt[k];
+          z3 = zplt[k+1];
+          znode[0]=z1;
+          znode[1]=z1;
+          znode[2]=z3;
+          znode[3]=z3;
 
-        for(i=culli->ibeg;i<culli->iend;i++){
-          iterm = (i-is1);
-          x1 = xplt[i];
-          x3 = xplt[i+1];
+          for(i=culli->ibeg;i<culli->iend;i++){
+            iterm = (i-is1);
+            x1 = xplt[i];
+            x3 = xplt[i+1];
 
-          xnode[0]=x1;
-          xnode[1]=x3;
-          xnode[2]=x3;
-          xnode[3]=x1;
+            xnode[0]=x1;
+            xnode[1]=x3;
+            xnode[2]=x3;
+            xnode[3]=x1;
 
-          j = culli->jend-(i-culli->ibeg);
-          jterm = (j-js1)*nx;
+            j = culli->jend-(i-culli->ibeg);
+            jterm = (j-js1)*nx;
 
-          yy1=yplt[j];
-          y3=yplt[j-1];
+            yy1=yplt[j];
+            y3=yplt[j-1];
 
-          ynode[0]=yy1;
-          ynode[1]=y3;
-          ynode[2]=y3;
-          ynode[3]=yy1;
+            ynode[0]=yy1;
+            ynode[1]=y3;
+            ynode[2]=y3;
+            ynode[3]=yy1;
 
-          n11 = iterm+jterm+kterm;
-          n12 = n11 - nx + 1;
-          n22 = n12 + nxy;
-          n21 = n11 + nxy;
+            n11 = iterm+jterm+kterm;
+            n12 = n11 - nx + 1;
+            n22 = n12 + nxy;
+            n21 = n11 + nxy;
 
 //        n11 = (j-js1)*nx   + (i-is1)   + (k-ks1)*nx*ny;
 //        n12 = (j-1-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
 //        n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
 //        n21 = (j-js1)*nx   + (i-is1)   + (k+1-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
-            int m, m11, m12, m22, m21;
+            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+              int m, m11, m12, m22, m21;
 
-            m = iterm+jterm;
-            m11 = m;
-            m12 = m11 - nx + 1;
-            m22 = m12;
-            m21 = m11;
-            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
-          }
-          else{
-            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+              m = iterm+jterm;
+              m11 = m;
+              m12 = m11 - nx + 1;
+              m22 = m12;
+              m21 = m11;
+              DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+            }
+            else{
+              DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+            }
           }
         }
-      }
-    break;
+        break;
 
   // +++++++++++++++++++++++++++++++++++ DIR 5 +++++++++++++++++++++++++++++++++++++++
 
-  case 5:
-  case -5:
-      for(k=culli->kbeg; k<culli->kend; k++){
-        kterm = (k-ks1)*nxy;
-        z1 = zplt[k];
-        z3 = zplt[k+1];
-        znode[0]=z1;
-        znode[1]=z1;
-        znode[2]=z3;
-        znode[3]=z3;
+      case 5:
+      case -5:
+        for(k=culli->kbeg; k<culli->kend; k++){
+          kterm = (k-ks1)*nxy;
+          z1 = zplt[k];
+          z3 = zplt[k+1];
+          znode[0]=z1;
+          znode[1]=z1;
+          znode[2]=z3;
+          znode[3]=z3;
 
-        for(i=culli->ibeg;i<culli->iend;i++){
+          for(i=culli->ibeg;i<culli->iend;i++){
+            iterm = (i-is1);
+            x1 = xplt[i];
+            x3 = xplt[i+1];
+
+            xnode[0]=x1;
+            xnode[1]=x3;
+            xnode[2]=x3;
+            xnode[3]=x1;
+
+            j = culli->jbeg+(i-culli->ibeg);
+            jterm = (j-js1)*nx;
+
+            yy1=yplt[j];
+            y3=yplt[j+1];
+
+            ynode[0]=yy1;
+            ynode[1]=y3;
+            ynode[2]=y3;
+            ynode[3]=yy1;
+
+            n11 = jterm + iterm + kterm;
+            n12 = n11 + nx + 1;
+            n22 = n12 + nxy;
+            n21 = n11 + nxy;
+
+        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n12 = (j+1-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
+        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+        //    n21 = (j-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
+
+            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+              int m, m11, m12, m22, m21;
+
+              m = iterm+jterm;
+              m11 = m;
+              m12 = m11 + nx + 1;
+              m22 = m12;
+              m21 = m11;
+              DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+            }
+            else{
+              DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+            }
+          }
+        }
+        break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 6 +++++++++++++++++++++++++++++++++++++++
+
+      case 6:
+      case -6:
+        for(i=culli->ibeg; i<culli->iend; i++){
           iterm = (i-is1);
           x1 = xplt[i];
           x3 = xplt[i+1];
@@ -4471,7 +4519,184 @@ void drawsmoke3dCULL(void){
           xnode[2]=x3;
           xnode[3]=x1;
 
-          j = culli->jbeg+(i-culli->ibeg);
+          for(j=culli->jend;j>culli->jbeg;j--){
+
+            k = culli->kbeg-(j-culli->jend);
+            jterm = (j-js1)*nx;
+
+            yy1=yplt[j];
+            y3=yplt[j-1];
+
+            ynode[0]=yy1;
+            ynode[1]=yy1;
+            ynode[2]=y3;
+            ynode[3]=y3;
+
+            kterm = (k-ks1)*nxy;
+            z1 = zplt[k];
+            z3 = zplt[k+1];
+            znode[0]=z1;
+            znode[1]=z1;
+            znode[2]=z3;
+            znode[3]=z3;
+
+
+            n11 = jterm + iterm + kterm;
+            n12 = n11 + 1;
+            n22 = n12 -nx + nxy;
+            n21 = n11 -nx +  nxy;
+
+        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n12 = (j-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
+        //    n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+        //    n21 = (j-1-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
+
+            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+              int m, m11, m12, m22, m21;
+
+              m = iterm+jterm;
+              m11 = m;
+              m12 = m11 + 1;
+              m22 = m12 - nx;
+              m21 = m11 - nx;
+              DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+            }
+            else{
+              DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+            }
+          }
+        }
+        break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 7 +++++++++++++++++++++++++++++++++++++++
+
+      case 7:
+      case -7:
+        for(i=culli->ibeg; i<culli->iend; i++){
+          iterm = (i-is1);
+          x1 = xplt[i];
+          x3 = xplt[i+1];
+
+          xnode[0]=x1;
+          xnode[1]=x3;
+          xnode[2]=x3;
+          xnode[3]=x1;
+
+          for(j=culli->jbeg;j<culli->jend;j++){
+
+            k = culli->kbeg+(j-culli->jbeg);
+            jterm = (j-js1)*nx;
+
+            yy1=yplt[j];
+            y3=yplt[j+1];
+
+            ynode[0]=yy1;
+            ynode[1]=yy1;
+            ynode[2]=y3;
+            ynode[3]=y3;
+
+            kterm = (k-ks1)*nxy;
+            z1 = zplt[k];
+            z3 = zplt[k+1];
+            znode[0]=z1;
+            znode[1]=z1;
+            znode[2]=z3;
+            znode[3]=z3;
+
+
+            n11 = jterm + iterm + kterm;
+            n12 = n11 + 1;
+            n22 = n12 +nx + nxy;
+            n21 = n11 +nx +  nxy;
+
+        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n12 = (j-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
+        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
+        //    n21 = (j+1-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
+
+            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+              int m, m11, m12, m22, m21;
+
+              m = iterm+jterm;
+              m11 = m;
+              m12 = m11 + 1;
+              m22 = m12 + nx;
+              m21 = m11 + nx;
+              DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+            }
+            else{
+              DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+            }
+          }
+        }
+        break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 8 +++++++++++++++++++++++++++++++++++++++
+
+      case 8:
+      case -8:
+        for(j=culli->jbeg; j<culli->jend; j++){
+          jterm = (j-js1)*nx;
+
+          yy1=yplt[j];
+          y3=yplt[j+1];
+
+          ynode[0]=yy1;
+          ynode[1]=yy1;
+          ynode[2]=y3;
+          ynode[3]=y3;
+
+          for(i=culli->ibeg;i<culli->iend;i++){
+            iterm = (i-is1);
+            x1 = xplt[i];
+            x3 = xplt[i+1];
+
+            xnode[0]=x1;
+            xnode[1]=x3;
+            xnode[2]=x3;
+            xnode[3]=x1;
+
+            k = culli->kend-(i-culli->ibeg);
+            kterm = (k-ks1)*nxy;
+            z1 = zplt[k];
+            z3 = zplt[k-1];
+            znode[0]=z1;
+            znode[1]=z3;
+            znode[2]=z3;
+            znode[3]=z1;
+
+            n11 = jterm + iterm + kterm;
+            n12 = n11 + 1-nx;
+            n22 = n12 + nx;
+            n21 = n11 +nx ;
+
+        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+        //    n12 = (j-js1)*nx + (i+1-is1) + (k-1-ks1)*nx*ny;
+        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k-1-ks1)*nx*ny;
+        //    n21 = (j+1-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
+
+            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+              int m, m11, m12, m22, m21;
+
+              m = iterm+jterm;
+              m11 = m;
+              m12 = m11 + 1 - nx;
+              m22 = m12 + nx;
+              m21 = m11 + nx;
+              DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+            }
+            else{
+              DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+            }
+          }
+        }
+        break;
+
+  // +++++++++++++++++++++++++++++++++++ DIR 9 +++++++++++++++++++++++++++++++++++++++
+
+      case 9:
+      case -9:
+        for(j=culli->jbeg; j<culli->jend; j++){
           jterm = (j-js1)*nx;
 
           yy1=yplt[j];
@@ -4482,285 +4707,56 @@ void drawsmoke3dCULL(void){
           ynode[2]=y3;
           ynode[3]=yy1;
 
-          n11 = jterm + iterm + kterm;
-          n12 = n11 + nx + 1;
-          n22 = n12 + nxy;
-          n21 = n11 + nxy;
+          for(i=culli->ibeg;i<culli->iend;i++){
+            iterm = (i-is1);
+            x1 = xplt[i];
+            x3 = xplt[i+1];
 
-        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
-        //    n12 = (j+1-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
-        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
-        //    n21 = (j-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
+            xnode[0]=x1;
+            xnode[1]=x1;
+            xnode[2]=x3;
+            xnode[3]=x3;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
-            int m, m11, m12, m22, m21;
+            k = culli->kbeg+(i-culli->ibeg);
+            kterm = (k-ks1)*nxy;
+            z1 = zplt[k];
+            z3 = zplt[k+1];
+            znode[0]=z1;
+            znode[1]=z1;
+            znode[2]=z3;
+            znode[3]=z3;
 
-            m = iterm+jterm;
-            m11 = m;
-            m12 = m11 + nx + 1;
-            m22 = m12;
-            m21 = m11;
-            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
-          }
-          else{
-            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
-          }
-        }
-      }
-    break;
-
-  // +++++++++++++++++++++++++++++++++++ DIR 6 +++++++++++++++++++++++++++++++++++++++
-
-  case 6:
-  case -6:
-      for(i=culli->ibeg; i<culli->iend; i++){
-        iterm = (i-is1);
-        x1 = xplt[i];
-        x3 = xplt[i+1];
-
-        xnode[0]=x1;
-        xnode[1]=x3;
-        xnode[2]=x3;
-        xnode[3]=x1;
-
-        for(j=culli->jend;j>culli->jbeg;j--){
-
-          k = culli->kbeg-(j-culli->jend);
-          jterm = (j-js1)*nx;
-
-          yy1=yplt[j];
-          y3=yplt[j-1];
-
-          ynode[0]=yy1;
-          ynode[1]=yy1;
-          ynode[2]=y3;
-          ynode[3]=y3;
-
-          kterm = (k-ks1)*nxy;
-          z1 = zplt[k];
-          z3 = zplt[k+1];
-          znode[0]=z1;
-          znode[1]=z1;
-          znode[2]=z3;
-          znode[3]=z3;
-
-
-          n11 = jterm + iterm + kterm;
-          n12 = n11 + 1;
-          n22 = n12 -nx + nxy;
-          n21 = n11 -nx +  nxy;
-
-        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
-        //    n12 = (j-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
-        //    n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
-        //    n21 = (j-1-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
-
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
-            int m, m11, m12, m22, m21;
-
-            m = iterm+jterm;
-            m11 = m;
-            m12 = m11 + 1;
-            m22 = m12 - nx;
-            m21 = m11 - nx;
-            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
-          }
-          else{
-            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
-          }
-        }
-      }
-    break;
-
-  // +++++++++++++++++++++++++++++++++++ DIR 7 +++++++++++++++++++++++++++++++++++++++
-
-  case 7:
-  case -7:
-      for(i=culli->ibeg; i<culli->iend; i++){
-        iterm = (i-is1);
-        x1 = xplt[i];
-        x3 = xplt[i+1];
-
-        xnode[0]=x1;
-        xnode[1]=x3;
-        xnode[2]=x3;
-        xnode[3]=x1;
-
-        for(j=culli->jbeg;j<culli->jend;j++){
-
-          k = culli->kbeg+(j-culli->jbeg);
-          jterm = (j-js1)*nx;
-
-          yy1=yplt[j];
-          y3=yplt[j+1];
-
-          ynode[0]=yy1;
-          ynode[1]=yy1;
-          ynode[2]=y3;
-          ynode[3]=y3;
-
-          kterm = (k-ks1)*nxy;
-          z1 = zplt[k];
-          z3 = zplt[k+1];
-          znode[0]=z1;
-          znode[1]=z1;
-          znode[2]=z3;
-          znode[3]=z3;
-
-
-          n11 = jterm + iterm + kterm;
-          n12 = n11 + 1;
-          n22 = n12 +nx + nxy;
-          n21 = n11 +nx +  nxy;
-
-        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
-        //    n12 = (j-js1)*nx + (i+1-is1) + (k-ks1)*nx*ny;
-        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
-        //    n21 = (j+1-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
-
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
-            int m, m11, m12, m22, m21;
-
-            m = iterm+jterm;
-            m11 = m;
-            m12 = m11 + 1;
-            m22 = m12 + nx;
-            m21 = m11 + nx;
-            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
-          }
-          else{
-            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
-          }
-        }
-      }
-    break;
-
-  // +++++++++++++++++++++++++++++++++++ DIR 8 +++++++++++++++++++++++++++++++++++++++
-
-  case 8:
-  case -8:
-      for(j=culli->jbeg; j<culli->jend; j++){
-        jterm = (j-js1)*nx;
-
-        yy1=yplt[j];
-        y3=yplt[j+1];
-
-        ynode[0]=yy1;
-        ynode[1]=yy1;
-        ynode[2]=y3;
-        ynode[3]=y3;
-
-        for(i=culli->ibeg;i<culli->iend;i++){
-          iterm = (i-is1);
-          x1 = xplt[i];
-          x3 = xplt[i+1];
-
-          xnode[0]=x1;
-          xnode[1]=x3;
-          xnode[2]=x3;
-          xnode[3]=x1;
-
-          k = culli->kend-(i-culli->ibeg);
-          kterm = (k-ks1)*nxy;
-          z1 = zplt[k];
-          z3 = zplt[k-1];
-          znode[0]=z1;
-          znode[1]=z3;
-          znode[2]=z3;
-          znode[3]=z1;
-
-          n11 = jterm + iterm + kterm;
-          n12 = n11 + 1-nx;
-          n22 = n12 + nx;
-          n21 = n11 +nx ;
-
-        //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
-        //    n12 = (j-js1)*nx + (i+1-is1) + (k-1-ks1)*nx*ny;
-        //    n22 = (j+1-js1)*nx + (i+1-is1) + (k-1-ks1)*nx*ny;
-        //    n21 = (j+1-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
-
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
-            int m, m11, m12, m22, m21;
-
-            m = iterm+jterm;
-            m11 = m;
-            m12 = m11 + 1 - nx;
-            m22 = m12 + nx;
-            m21 = m11 + nx;
-            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
-          }
-          else{
-            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
-          }
-        }
-      }
-    break;
-
-  // +++++++++++++++++++++++++++++++++++ DIR 9 +++++++++++++++++++++++++++++++++++++++
-
-  case 9:
-  case -9:
-      for(j=culli->jbeg; j<culli->jend; j++){
-        jterm = (j-js1)*nx;
-
-        yy1=yplt[j];
-        y3=yplt[j+1];
-
-        ynode[0]=yy1;
-        ynode[1]=y3;
-        ynode[2]=y3;
-        ynode[3]=yy1;
-
-        for(i=culli->ibeg;i<culli->iend;i++){
-          iterm = (i-is1);
-          x1 = xplt[i];
-          x3 = xplt[i+1];
-
-          xnode[0]=x1;
-          xnode[1]=x1;
-          xnode[2]=x3;
-          xnode[3]=x3;
-
-          k = culli->kbeg+(i-culli->ibeg);
-          kterm = (k-ks1)*nxy;
-          z1 = zplt[k];
-          z3 = zplt[k+1];
-          znode[0]=z1;
-          znode[1]=z1;
-          znode[2]=z3;
-          znode[3]=z3;
-
-          n11 = jterm + iterm + kterm;
-          n12 = n11 + nx;
-          n22 = n12 + 1 + nxy;
-          n21 = n11 + 1 + nxy ;
+            n11 = jterm + iterm + kterm;
+            n12 = n11 + nx;
+            n22 = n12 + 1 + nxy;
+            n21 = n11 + 1 + nxy ;
 
         //    n11 = (j-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
         //    n12 = (j+1-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
-            int m, m11, m12, m22, m21;
+            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+              int m, m11, m12, m22, m21;
 
-            m = iterm+jterm;
-            m11 = m;
-            m12 = m11 + nx;
-            m22 = m12 + 1;
-            m21 = m11 + 1;
-            DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
-          }
-          else{
-            DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+              m = iterm+jterm;
+              m11 = m;
+              m12 = m11 + nx;
+              m22 = m12 + 1;
+              m21 = m11 + 1;
+              DRAWVERTEXGPUTERRAIN(xnode[mm],ynode[mm],znode[mm])
+            }
+            else{
+              DRAWVERTEXGPU(xnode[mm],ynode[mm],znode[mm])
+            }
           }
         }
+        break;
+      default:
+        ASSERT(FFALSE);
+        break;
       }
-    break;
-    default:
-      ASSERT(FFALSE);
-      break;
     }
-  }
   glEnd();
   sniffErrors("in drawsmoke3dcull 12");
   transparentoff();
@@ -4808,7 +4804,7 @@ void updatesmoke3dmenulabels(void){
 /* ------------------ adjustalpha ------------------------ */
 
 unsigned char adjustalpha(unsigned char alpha, float factor){
-  double val, term, top, bottom, rr;
+  double val, rr;
   int i;
   float falpha;
   float term1, term2, term3, term4;
@@ -5444,7 +5440,7 @@ void get_cullskips(mesh *meshi, int cullflag, int *iiskip, int *jjskip, int *kks
     /* ------------------ initcullplane ------------------------ */
 
 void initcullplane(int cullflag){
-  int ii;
+  int iii;
   int iskip, jskip, kskip;
   int nx, ny, nz;
   int nxx, nyy, nzz;
@@ -5462,11 +5458,11 @@ void initcullplane(int cullflag){
   cp = cullplaneinfo;
   ncullplaneinfo=0;
 
-  for(ii=0;ii<nmeshes;ii++){
+  for(iii=0;iii<nmeshes;iii++){
     mesh *meshi;
     culldata *culli;
 
-    meshi=meshinfo+ii;
+    meshi=meshinfo+iii;
 
     meshi->culldefined=0;
     if(meshi->cull_smoke3d==NULL)continue;
@@ -5501,6 +5497,8 @@ void initcullplane(int cullflag){
             cp->norm[1]=0.0;
             cp->norm[2]=0.0;
             switch (meshi->smokedir) {
+              int ii, jj, kk;
+
               case 1:
               case -1:
                 for(ii=ibeg;ii<iend;ii++){
@@ -5990,8 +5988,8 @@ void initcullplane(int cullflag){
     }
   }
 
-  for(ii=0;ii<ncullplaneinfo;ii++){
-    sort_cullplaneinfo[ii]=cullplaneinfo+ii;
+  for(iii=0;iii<ncullplaneinfo;iii++){
+    sort_cullplaneinfo[iii]=cullplaneinfo+iii;
   }
   if(ncullplaneinfo>1){
     qsort((cullplanedata *)sort_cullplaneinfo,(size_t)ncullplaneinfo,
@@ -6010,7 +6008,6 @@ int cullplane_compare( const void *arg1, const void *arg2 ){
 
   if(cpi->dir==cpj->dir){
     float di, dj;
-    float dx, dy, dz;
 
     di = cpi->norm[0]*cpi->xmin + cpi->norm[1]*cpi->ymin + cpi->norm[2]*cpi->zmin;
     dj = cpj->norm[0]*cpj->xmin + cpj->norm[1]*cpj->ymin + cpj->norm[2]*cpj->zmin;
@@ -6036,7 +6033,6 @@ void initcull(int cullflag){
   int ibeg, iend, jbeg, jend, kbeg, kend;
   float xbeg, xend, ybeg, yend, zbeg, zend;
   int iskip, jskip, kskip;
-  cullplanedata *cpx, *cpy, *cpz;
 
   update_initcull=0;
   update_initcullplane=1;
@@ -6120,7 +6116,7 @@ void initcull(int cullflag){
 /* ------------------ setPixelCount ------------------------ */
 
 void setPixelCount(void){
-  int imesh,icull,n;
+  int imesh,n;
 
   have_setpixelcount=1;
   if(show_cullports==0){

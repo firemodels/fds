@@ -308,20 +308,20 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
             &nnode2,xlinecopy,ylinecopy,
             &casen,blankit);
           if(nnode!=0){
-          if(casen!=40||lastcasenum!=40){
+            if(casen!=40||lastcasenum!=40){
               nnodes += nnode;
               xnodecopy += nnode;
               ynodecopy += nnode;
               polysize[npolys]=nnode;
               npolys++;
-           }
+            }
             else{
               xnodecopy[-2]=xnodecopy[2];
               xnodecopy[-1]=xnodecopy[3];
               ynodecopy[-2]=ynodecopy[2];
               ynodecopy[-1]=ynodecopy[3];
-           }
-           lastcasenum=casen;
+            }
+            lastcasenum=casen;
           }
           if(nnode2!=0){
             xlinecopy += nnode2;

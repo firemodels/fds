@@ -9,10 +9,7 @@
 #include <string.h>
 #include "flowfiles.h"
 #include "MALLOC.h"
-#include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 // svn revision character string
 char IOobject_revision[]="$Revision$";
@@ -261,7 +258,6 @@ void initcircle(unsigned int npoints);
 static float *xcirc=NULL, *ycirc=NULL;
 static int ncirc;
 static float *cos_long=NULL, *sin_long=NULL, *cos_lat=NULL, *sin_lat=NULL;
-static int nlat, nlong;
 static float specular[4]={0.4,0.4,0.4,1.0};
 unsigned char *rgbimage=NULL;
 int rgbsize=0;
@@ -2750,11 +2746,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     num_op=0;
     num_outop=0;
     return_val=1;
- }
- *opptr=op;
- *num_opptr=num_op;
- *num_outopptr=num_outop;
- return return_val;
+  }
+  *opptr=op;
+  *num_opptr=num_op;
+  *num_outopptr=num_outop;
+  return return_val;
 }
 
 /* ----------------------- get_token_loc ----------------------------- */
@@ -3010,7 +3006,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     }
     else{
       toki->type=TOKEN_FLOAT;
-      sscanf(toki->token,"%f%",&toki->var);
+      sscanf(toki->token,"%f",&toki->var);
       toki->varptr=&toki->var;
     }
   }

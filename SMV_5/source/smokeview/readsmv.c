@@ -23,9 +23,7 @@
 #include "csphere.h"
 #endif
 
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 // svn revision character string
 char readsmv_revision[]="$Revision$";

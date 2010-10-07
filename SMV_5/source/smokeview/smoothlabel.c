@@ -12,6 +12,9 @@ char smoothlabel_revision[]="$Revision$";
 void smoothlabel(float *a, float *b, int n){
   double delta, factor, logdelta;
   int ndigits;
+  double half;
+
+  half=0.5;
 
   delta = ((double)*b-(double)*a)/(double)(n-2);
   if(delta==0.0)return;
@@ -19,9 +22,9 @@ void smoothlabel(float *a, float *b, int n){
   ndigits=logdelta-1;
   if(logdelta<=1)ndigits--;
   factor = 5*pow(10,ndigits);
-  delta = (int)(delta/factor + 0.5d)*factor;
+  delta = (int)(delta/factor + half)*factor;
 
-  *a = factor*(int)(*a/factor+0.5d);
+  *a = factor*(int)(*a/factor+half);
   *b = *a + (n-2)*delta;
 
 }

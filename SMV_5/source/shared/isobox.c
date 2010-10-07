@@ -699,6 +699,9 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
     surface->tvertices=tvertices;
   }
 
+  sortinfo=NULL;
+  rankinfo=NULL;
+  orderinfo=NULL;
   FREEMEMORY(vertices); FREEMEMORY(rank);
   if(NewMemory((void **)&vertices,3*nvertices*sizeof(unsigned short))==0||
      NewMemory((void **)&rank,nvertices*sizeof(int))==0||
@@ -1561,9 +1564,7 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
   int i;
   FILE *isostream=NULL;
 
-#ifdef _DEBUG
   PrintMemoryInfo;
-#endif
   isostream=fopen(isofile,"ab");
   *error = 0;
   for(i=0;i<*nlevels;i++){
@@ -1591,9 +1592,7 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
     freesurface(&surface);
   }
   fclose(isostream);
-#ifdef _DEBUG
   PrintMemoryInfo;
-#endif
 }
 
 /* ------------------ CCisosurface2file ------------------------ */
@@ -1617,9 +1616,7 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
   }
 
 
-#ifdef _DEBUG
   PrintMemoryInfo;
-#endif
   isostream=fopen(isofile,"ab");
   *error = 0;
   for(i=0;i<*nlevels;i++){
@@ -1647,9 +1644,7 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
     freesurface(&surface);
   }
   fclose(isostream);
-#ifdef _DEBUG
   PrintMemoryInfo;
-#endif
 }
 #endif
 

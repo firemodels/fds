@@ -14,10 +14,7 @@
 #endif
 #include "egz_stdio.h"
 #include "MALLOC.h"
-#include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 // svn revision character string
 char IOiso_revision[]="$Revision$";
@@ -113,7 +110,6 @@ void getisoheader(const char *isofile, EGZ_FILE **isostreamptr,
 
 void getcisolevels(const char *isofile, float **levelsptr, int *nisolevels){
   EGZ_FILE *isostream;
-  char buffer[1024];
   int one;
 
   *nisolevels=0;
@@ -1783,7 +1779,6 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
   short *norm1,*norm2,*norm3,*vertexnorm=NULL;
   int ntriangles;
   float xyzmin[3], xyzmaxdiff_local;
-  static int jjj=0;
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
   int drawing_smooth;
   int transparenton_flag=0;
@@ -2250,7 +2245,6 @@ void sync_isobounds(int isottype){
 
   for(i=0;i<niso_files;i++){
     iso *isoi;
-    mesh *meshi;
 
     isoi = isoinfo + i;
     if(isoi->loaded==0||isoi->type!=iisotype||isoi->dataflag==0)continue;
@@ -2270,7 +2264,6 @@ void sync_isobounds(int isottype){
 
   for(i=0;i<niso_files;i++){
     iso *isoi;
-    mesh *meshi;
 
     isoi = isoinfo + i;
     if(isoi->loaded==0||isoi->type!=iisotype||isoi->dataflag==0)continue;

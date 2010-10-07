@@ -15,11 +15,8 @@
 #endif
 #include <math.h>
 #include "flowfiles.h"
-#include "ASSERT.h"
 #include "MALLOC.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 // svn revision character string
 char IOshooter_revision[]="$Revision$";

@@ -633,7 +633,7 @@ SVEXTERN int ntreeinfo, nterraininfo, visTerrainType;
 SVEXTERN float treecolor[4], treecharcolor[4], trunccolor[4];
 SVEXTERN int showterrain;
 SVEXTERN float rgb_terrain[10][4];
-SVEXTERN tourdata *tourinfo,default_tour;
+SVEXTERN tourdata *tourinfo;
 SVEXTERN keyframe **tourknotskeylist;
 SVEXTERN tourdata **tourknotstourlist;
 SVEXTERN keyframe *selected_frame;
