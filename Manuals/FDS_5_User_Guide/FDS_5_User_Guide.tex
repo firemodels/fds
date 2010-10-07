@@ -4974,6 +4974,91 @@ By default, FDS assumes that the density and pressure decrease with height, rega
 application or domain size. For most simulations, this effect is negligible, but it can be
 turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line.
 
+\section{Special Topic: HVAC Systems: The {\ct HVAC} Namelist Group (\ref{hvacinputs})}
+\label{info:HVAC}
+
+There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC system.  If the ability to transport heat and comubstion products through a duct network or the ability to fully account for the pressurization of a compartment due to a fire on the flows in a duct network is important, one can make use of a coupled HVAC network solver.  The solver computes the flows through a duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts or where a duct segment connects to the FDS computational domain.  The current HVAC solver does not allow for mass storage in the duct network (i.e. what goes in during a timestep, goes out during a timestep).  HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and coupled to the FDS control function capability.  The 
+user can select from three fan models. 
+
+The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.  An HVAC network is defined by providing inputs for the ducts, duct nodes, and any fans or dampers present in the system.  Additionally the user must define the locations where the HVAC network joins the computational domain.  The basic syntax for an {\ct HVAC} component is:
+
+\scriptsize
+\begin{verbatim}
+&HVAC TYPE_ID='componenttype',ID='componentname',.../
+\end{verbatim}\normalsize
+
+Where:
+
+\begin{description}
+\item[{\ct TYPE\_ID}] Is a chacracter string the indicates the type of component that namelist group is defining.   {\ct TYPE\_ID} can be {\ct DUCT}, {\ct NODE}, or {\ct FAN}.
+\item[{\ct ID}] Is a character string giving a name to the component.  The name must be unique amongst all other components of that type.
+\end{description}
+
+The inputs for an HVAC duct are:
+
+\scriptsize
+\begin{verbatim}
+&HVAC TYPE_ID='DUCT',ID='ductname',NODE_ID='node 1','node 2',DIAMETER=2.,AREA=3.14,
+      LOSS=1.,1.,ROUGHNESS=0.001,VOLUME_FLOW=1.,DAMPER=.FALSE.,FAN='FAN_ID',
+      REVERSE=.FALSE.,DEVC_ID='DEVCname',CTRL_ID='ctrlname'/
+\end{verbatim}\normalsize
+
+
+Where:
+
+\begin{description}
+\item[{\ct AREA}] Is the area in $m^2$ of the duct.  One of {\ct AREA} or {\ct DIAMETER} must be defined.
+\item[{\ct CTRL\_ID}] Is the {\ct ID} of a {\ct CTRL} function for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
+\item[{\ct DAMPER}] Is a logical variable indicating the precense of a damper in the duct.  The state of the damper is controlled by function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
+\item[{\ct DEVC\_ID}]  Is the {\ct ID} of a {\ct DEVC} for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
+\item[{\ct DIAMETER}]  Is the diameter in $m$ of the duct.  One of {\ct AREA} or {\ct DIAMETER} must be defined.
+\item[{\ct FAN}] Is the {\ct ID} of a fan located in the duct. Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
+\item[{\ct LOSS}] Is a pair of real numbers giving the forward and reverse flow loss in the duct.
+\item[{\ct NODE\_ID}] Gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
+\item[{\ct REVERSE}]  Is a logical variable that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} is from the second node to the first node.
+\item[{\ct ROUGHNESS}]  Is the absolute roughness in $m$ of the duct which is used in computing the friction factor for the duct.
+\item[{\ct VOLUME\_FLOW}] Defines a fixed volumetric flow rate in $m^3/s$ in the duct.  {\ct VOLUME\_FLOW} cannot be used in conjunction with {\ct FAN\_ID}.
+\end{description}
+
+The inputs for an HVAC node are:
+
+\scriptsize
+\begin{verbatim}
+&HVAC TYPE_ID='NODE',ID='nodename',DUCT_ID='duct 1','duct 2',..'duct n',VENT_ID='vent',
+      LOSS_ARRAY=lossarray, AMBIENT=.FALSE., XYZ=x,y,z/
+\end{verbatim}\normalsize
+
+Where:
+
+\begin{description}
+\item[{\ct AMBIENT}] Is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient (i.e. it is equivalent to the {\ct OPEN} boundary condition on {\ct SURF}).
+\item[{\ct DUCT\_ID}] Gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
+\item[{\ct LOSS}] Is an $nxn$ array of real numbers giving the flow losses for the node.  {\ct LOSS(x,y)} is the loss from duct x to duct y.
+\item[{\ct VENT\_ID}] If the node connects to the FDS computational domain.  {\ct VENT\_ID} is the name of the {\ct VENT} where the connection occurs.
+\item[{\ct XYZ}] Is a triplet of real numbers giving the coordinates of the node.  This location is used to compute bouyancy heads.  If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will computed it as the centriod of the {\ct VENT}.
+\end{description}
+
+The inputs for an HVAC fan are:
+
+\scriptsize
+\begin{verbatim}
+&HVAC TYPE='FAN',ID='fanname',RAMP_ID='rampname',VOLUME_FLOW=volumeflow,
+      MAX_FLOW=maxflow,MAX_PRESSURE=maxpressure,LOSS=offloss/
+\end{verbatim}\normalsize
+
+Where:
+
+\begin{description}
+\item[{\ct LOSS}] Is the flow loss through the fan when it is not operational.
+\item[{\ct MAX\_FLOW}] Is the maximum volumetric flow of the fan in $m^3/s$.  This input activates a quadratic fan model.
+\item[{\ct MAX\_PRESSURE}] the stall pressure of the fan in $Pa$.  This input activates a quadratic fan model.
+\item[{\ct RAMP\_ID}] Is the name of a {\ct RAMP} that contains a fan curve table of fan volumetric flow in $m^3/s$ vs the pressure drop across the fan in $Pa$.  node connects to the FDS computational domain.
+{\ct VOLUME\_FLOW} is the fixed volumetric flow of the fan in $m^3/s$.
+\end{description}
+
+Note that only one set of fan model inputs ({\ct VOLUME\_FLOW}, {\ct RAMP\_ID}, or {\ct MAX\_FLOW + MAX\_PRESSURE}) should be specified.
+
+Note that {\ct FAN} defines a class of fans rather than one specific fan; therefore, more than one duct can reference a single {\ct FAN}.
 
 \section{Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
@@ -9439,6 +9524,50 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 \vspace{\baselineskip}
+
+
+\section{\texorpdfstring{{\tt HVAC}}{HVAC} (HVAC System Defintion)}
+
+
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Initial Conditions]{For more information see Section~\ref{info:HVAC}.}
+\label{tbl:hvacinputs} \\
+\hline
+\multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Defintion)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Defintion)} \\
+\hline \hline
+\endhead
+{\ct AMBIENT}                   & Logical           & Node is connected to the ambient                   &               &  .FALSE.      \\ \hline
+{\ct AREA}                      & Real              & Area of a duct                          & $m^2$         &               \\ \hline
+{\ct CTRL\_ID}                  & Character         & Name of {\ct CTRL} controlling a fan or damper   &               &  'null'       \\ \hline
+{\ct DAMPER}                    & Logical           & Damper is present in a duct                      &               &  .FALSE.      \\ \hline
+{\ct DEVC\_ID}                  & Character         & Name of {\ct DEVC} controlling a fan or damper   &               &  'null'       \\ \hline
+{\ct DUCT\_ID}                  & Character Array   & Name of ducts connected to a node         &               &               \\ \hline
+{\ct DIAMETER}                  & Real              & Diameter of a duct                      &  m            &               \\ \hline
+{\ct FAN\_ID}                   & Character         & Name of a fan in a duct                          &               &  'null'       \\ \hline
+{\ct ID}                        & Character         & Name of component                          &               &               \\ \hline
+{\ct LENGTH}                    & Real              & Length of a duct                        &  m            &               \\ \hline
+{\ct LOSS}                      & Real Array        & Flow loss coefficients for a duct or node    &               &               \\ \hline
+{\ct MAX\_FLOW}                 & Real              & Maximum volumetric flow for a quadratic fan                 &  $m^3$        &               \\ \hline
+{\ct MAX\_PRESSURE}             & Real              & Stall pressure for a quadratic fan                 &  Pa           &               \\ \hline
+{\ct NODE\_ID}                  & Character Doublet & Name of nodes connected to a duct         &               &               \\ \hline
+{\ct RAMP\_ID}                  & Character         & Name of {\ct RAMP} containing a fan curve  &               &  'null'       \\ \hline
+{\ct ROUGHNESS}                 & Real              & Absolute roughness of a duct                        &  m            &               \\ \hline
+{\ct TYPE\_ID}                  & Character         & Type of component                          &               &               \\ \hline
+{\ct VENT\_ID}                  & Character         & Name of the {\ct VENT} the node is connected to  &               &  'null'       \\ \hline
+{\ct VOLUME\_FLOW}              & Real              & Fixed volumetric flow of a duct                        &  $m^3$        &               \\ \hline
+{\ct XYZ}                       & Real Triplet      & Coordinates of a node                        &  m            &               \\ \hline
+\end{longtable}
+
+
+\vspace{\baselineskip}
+
 
 
 \section{\texorpdfstring{{\tt INIT}}{INIT} (Initial Conditions)}
