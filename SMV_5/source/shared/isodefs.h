@@ -55,6 +55,23 @@ typedef struct {
   int compression_type;
 } isosurface;
 
+typedef struct {
+  int index;
+  unsigned short vertex[3];
+} sortdata;
+
+typedef struct {
+  int index;
+  int rank;
+} rankdata;
+
+typedef struct {
+  int index;
+  int closest;
+} orderdata;
+
+
+
 #ifndef pp_DRAWISO
 
 #ifndef pp_noappend
