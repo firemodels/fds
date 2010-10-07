@@ -14,7 +14,6 @@
 #endif
 #include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 #include "smokeviewapi.h"
 
 // svn revision character string
@@ -26,7 +25,7 @@ char main_revision[]="$Revision$";
 
 int main(int argc, char **argv){
   char **argv_sv;
-
+ 
   initMM();
   initvars0();
   initcolors();

@@ -24,10 +24,7 @@
 #include "flowfiles.h"
 #include "smokeviewapi.h"
 #include "MALLOC.h"
-#include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 // svn revision character string
 char unit_revision[]="$Revision$";
@@ -39,7 +36,6 @@ f_units *get_unit_class(char *unit){
 
   for(i=0;i<nunitclasses;i++){
     f_units *unitclass;
-    int j;
 
     unitclass = unitclasses + i;
     if(strlen(unit)!=strlen(unitclass->units->unit))continue;
@@ -93,7 +89,6 @@ void set_unit_vis(void){
 
     for(j=0;j<nplot3d_files;j++){
       plot3d *plot3dj;
-      char *shortlabel;
       int n;
       
       plot3dj = plot3dinfo + j;
@@ -112,9 +107,11 @@ void set_unit_vis(void){
 /* ------------------ add_unit_class ------------------------ */
 
 void add_unit_class(flowlabels *label){
+#ifdef pp_SMOKEDIFF
   f_units *ut;
   f_unit *units;
   int i;
+#endif
 
  #ifdef pp_SMOKEDIFF
   nunitclasses++;
@@ -181,7 +178,6 @@ void init_unit_defs(void){
   }
   for(j=0;j<nplot3d_files;j++){
     plot3d *plot3dj;
-    char *shortlabel;
     int n;
       
     plot3dj = plot3dinfo + j;
@@ -255,7 +251,7 @@ void update_unit_defs(void){
           valmin=plot3dj->diff_valmin[n];
           valmax=plot3dj->diff_valmax[n];
         }
-         else{
+        else{
           if(plot3dj->diff_valmin[n]<valmin)valmin=plot3dj->diff_valmin[n];
           if(plot3dj->diff_valmax[n]>valmax)valmax=plot3dj->diff_valmax[n];
         }
@@ -284,7 +280,7 @@ void update_unit_defs(void){
 /* ------------------ getunitinfo ------------------------ */
 
 void getunitinfo(const char *unitlabel, int *unitclass, int *unittype){
-  int i,j;
+  int i;
   *unitclass=-1;
   *unittype=-1;
   for(i=0;i<nunitclasses;i++){

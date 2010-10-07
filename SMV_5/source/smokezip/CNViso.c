@@ -522,7 +522,7 @@ int   *triangle_copy=NULL;
           else if(nvertices_i>=256&&nvertices_i<65536){
             sortflag=2;
           }
-          else if(nvertices_i>=65536){
+          else {
             sortflag=4;
           }
           switch (sortflag){
@@ -593,6 +593,7 @@ int   *triangle_copy=NULL;
     LOCK_ISOS;
     if(memory_fail==1){
       printf("memory allocation error\n");
+      UNLOCK_ISOS;
       break;
     }
     iframe++;

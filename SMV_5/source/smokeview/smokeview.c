@@ -24,10 +24,8 @@
 #include "flowfiles.h"
 #include "smokeviewapi.h"
 #include "MALLOC.h"
-#include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
+
 /* dummy change to bump revision number to 5.1.5 */
 
 #ifdef WIN32
@@ -59,7 +57,6 @@ int SUB_portortho(int quad,
     glLoadIdentity();
     gluOrtho2D(x_left,x_right,x_down,x_top);
     return 1;
-    break;
   case 1:
     n_left = 2*i_left - s_left;
     n_down = 2*i_down - s_down;
@@ -132,7 +129,6 @@ int SUB_portfrustum(int quad,
         (double)x_near,(double)x_far);
     }
     return 1;
-    break;
   case 1:
     n_left = 2*i_left - s_left;
     n_down = 2*i_down - s_down;
@@ -178,7 +174,6 @@ int SUB_portfrustum(int quad,
         (double)x_near,(double)x_far);
     }
     return 1;
-    break;
   default:
     ASSERT(FFALSE);
     break;
@@ -1135,7 +1130,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       setColorbarClipPlanes(1);
     }
     sniffErrors("after setColorbarClipPlanes 1");
-}
+  }
 
   if(eyeview==1&&nskyboxinfo>0)draw_skybox();
 
@@ -1265,26 +1260,26 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw simulation frame (corners at (0,0,0) and (xbar,ybar,zbar) +++++++++++++++++++++++++ */
 
-     if(isZoneFireModel==0&&visFrame==1&&highlight_flag==2){
-       drawoutlines();
-       sniffErrors("after drawoutlines");
-     }
+    if(isZoneFireModel==0&&visFrame==1&&highlight_flag==2){
+      drawoutlines();
+      sniffErrors("after drawoutlines");
+    }
 
 
 /* ++++++++++++++++++++++++ draw mesh +++++++++++++++++++++++++ */
 
-     if(setPDIM==1){
-       if(visGrid==1){
-         int igrid;
-         mesh *meshi;
+    if(setPDIM==1){
+      if(visGrid==1){
+        int igrid;
+        mesh *meshi;
 
-         for(igrid=0;igrid<nmeshes;igrid++){
-           meshi=meshinfo+igrid;
-           drawgrid(meshi);
-           sniffErrors("drawgrid");
-         }
-       }
-     }
+        for(igrid=0;igrid<nmeshes;igrid++){
+          meshi=meshinfo+igrid;
+          drawgrid(meshi);
+          sniffErrors("drawgrid");
+        }
+      }
+    }
   } /* end of if(mode==RENDER) code segment */
 
 
@@ -2203,37 +2198,37 @@ void updateShow(void){
     )
     )showtime=1;
     if(plotstate==DYNAMIC_PLOTS&&ReadIsoFile==1&&visAIso!=0&&isoflag==1)showtime2=1;
-  if(plotstate==DYNAMIC_PLOTS){
-    if(smoke3dflag==1)show3dsmoke=1;
-    if(partflag==1)showsmoke=1;
-    if(evacflag==1)showevac=1;
-    if(showevac==1&&parttype>0){
-      showevac_colorbar=1;
-      if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0){
-        showevac_colorbar=0;
-      }
-    }
-    if(patchflag==1)showpatch=1;
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo+i;
-      meshi->visInteriorPatches=0;
-    }
-    if(showpatch==1&&visPatchType[0]==1){
-      for(i=0;i<nmeshes;i++){
-        meshi=meshinfo+i;
-        if(meshi->patchtimes==NULL)continue;
-        patchi = patchinfo+meshi->patchfilenum;
-        if(patchi->loaded==1&&patchi->display==1&&patchi->type==ipatchtype){
-          meshi->visInteriorPatches=1;
+    if(plotstate==DYNAMIC_PLOTS){
+      if(smoke3dflag==1)show3dsmoke=1;
+      if(partflag==1)showsmoke=1;
+      if(evacflag==1)showevac=1;
+      if(showevac==1&&parttype>0){
+        showevac_colorbar=1;
+        if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0){
+          showevac_colorbar=0;
         }
       }
-    }
-    if(sliceflag==1)showslice=1;
-    if(vsliceflag==1)showvslice=1;
-    if(ReadZoneFile==1&&visZone==1&&visTimeZone==1)showzone=1;
-    if(ReadIsoFile==1&&visAIso!=0){
-      showiso=1;
-    }
+      if(patchflag==1)showpatch=1;
+      for(i=0;i<nmeshes;i++){
+        meshi=meshinfo+i;
+        meshi->visInteriorPatches=0;
+      }
+      if(showpatch==1&&visPatchType[0]==1){
+        for(i=0;i<nmeshes;i++){
+          meshi=meshinfo+i;
+          if(meshi->patchtimes==NULL)continue;
+          patchi = patchinfo+meshi->patchfilenum;
+          if(patchi->loaded==1&&patchi->display==1&&patchi->type==ipatchtype){
+            meshi->visInteriorPatches=1;
+          }
+        }
+      }
+      if(sliceflag==1)showslice=1;
+      if(vsliceflag==1)showvslice=1;
+      if(ReadZoneFile==1&&visZone==1&&visTimeZone==1)showzone=1;
+      if(ReadIsoFile==1&&visAIso!=0){
+        showiso=1;
+      }
     if(ReadTargFile==1&&visTarg==1)showtarget=1;
 #ifdef pp_SHOOTER
     if(shooter_flag==1)showshooter=1;

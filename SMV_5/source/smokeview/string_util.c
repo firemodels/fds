@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include "MALLOC.h"
-#include "ASSERT.h"
-#include "smokeheaders.h"
 #include "smokeviewvars.h"
 
 // svn revision character string

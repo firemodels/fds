@@ -17,10 +17,7 @@
 #endif
 #include <math.h>
 #include "MALLOC.h"
-#include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 // svn revision character string
 char IOpart_revision[]="$Revision$";
@@ -1128,10 +1125,10 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     if(tspr==NULL){
       return_code=NewMemory((void **)&tspr,sizeof(float)*nspr);
     }
-     else{
+    else{
       return_code=ResizeMemory((void **)&tspr,sizeof(float)*nspr);
     }
-     if(return_code==0){
+    if(return_code==0){
       *errorcode=1;
       FORTclosefortranfile(&file_unit);
       readpart("",ifile,UNLOAD,&error);

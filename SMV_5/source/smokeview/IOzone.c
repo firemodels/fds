@@ -9,10 +9,7 @@
 #include <math.h>
 #include "flowfiles.h"
 #include "MALLOC.h"
-#include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 // svn revision character string
 char IOzone_revision[]="$Revision$";

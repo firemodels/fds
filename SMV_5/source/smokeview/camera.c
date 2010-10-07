@@ -9,9 +9,7 @@
 #include <string.h>
 #include "MALLOC.h"
 #include "flowfiles.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 char camera_revision[]="$Revision$";
 

@@ -163,7 +163,6 @@ extern "C" void show_glui_wui(void){
 /* ------------------ WUI_CB ------------------------ */
 
 extern "C" void WUI_CB(int var){
-  int i;
   int fire_line_type;
 
   switch (var){

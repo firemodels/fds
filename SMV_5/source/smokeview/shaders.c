@@ -12,9 +12,7 @@ char shaders_revision[]="$Revision$";
 #include <GL/glew.h>
 #include "MALLOC.h"
 #include "flowfiles.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 GLhandleARB v,f,p_smoke, p_slice ;
 char *textFileRead(char *fn);

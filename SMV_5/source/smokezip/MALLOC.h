@@ -90,4 +90,4 @@ void FreeMemory(void *pv);
 mallocflag ValidPointer(void *pv, size_t size);
 
 #endif
-#define FREEMEMORY(f) if((f)!=NULL){FreeMemory((f));(f)=NULL;}
+#define FREEMEMORY(f) if((void *)(f)!=NULL){FreeMemory((void *)(f));(f)=NULL;}
