@@ -4077,18 +4077,69 @@ at the sampling locations with their flow rates after applying the appropriate t
 
 
 
+\chapter{Heating, Ventilation, and Air Conditioning (HVAC)}
+
+HVAC systems are found throughout the built environment.  During a fire, HVAC ducts can serve
+as a path for heat and combustion products to be moved through a building.  In some facilities, such as data centers and clean rooms, fire detection devices are placed inside of HVAC ducts.  Lastly, HVAC systems may serve as part of the fire protection system for a building when used to exhaust smoke or maintain stairwell pressurization.
+
+Previous versions of FDS, have only had the ability to specify either fixed flow boundary conditions (velocity or mass flux) or a simple pressure boundary condition.  While these inputs could adequately represent very simple HVAC features, they could not model an entire multi-room system.  There was no coupling of the mass, momentum, and energy solutions amongst the multiple inlets and outlets comprising the HVAC network.  To address this limitation, an HVAC network solver has been added to FDS.
 
 
+\section{HVAC Governing Equations}
+
+The overall HVAC solver is based on the MELCOR~\cite{MELCOR} thermal hydraulic solver.  MELCOR is a computer code for simulating accidents in nuclear power plant containment buildings.  The Fire and Smoke Simulator (FSSIM)~\cite{FSSIM}, a network fire model, has shown prior success in using the MELCOR solver to model fire spread and smoke movement in the presence of complex ventilation systems.
+
+The MELCOR solver uses an explicit conservation of mass and energy combined with an implicit solver for the conservation of momentum.  An HVAC system is represented as network of nodes and ducts where a node represents where a duct joins with the FDS computational domain or where multiple ducts are joined such as a tee.  A duct segment in the network represents any continuous flow path not interrupted by a node and as such may include multiple fittings (elbows, expansion or contractions, etc.) and may have varying area over its length.  The current implementation of the model does not account for mass storage with an HVAC network. The nodal conservation equations are:
 
 
+Mass:
 
+\be \sum\limits_{j~connected~to~node~i} \rho_j u_j A_j = 0   \label{HVACmass} \ee
 
+Energy:
 
+\be \sum\limits_{j~connected~to~node~i} \rho_j u_j A_j h_j= 0   \label{HVACenergy} \ee
 
+Momentum:
 
+\be \rho_j L_j \frac{d u_j}{d t} = \left(P_i - P_k\right)+\left(\rho g \Delta z\right)_j+\Delta P_j - \frac{1}{2}K_j \rho_j \left| u_j \right| u_j  \label{HVACmomentum} \ee
 
+where $u$ is the duct velocity, $A$ is the duct area, $h$ is the enthalpy of the fluid in the duct, the subscript $j$ indicates a duct segment, the subscripts $i$ and $k$ indicate nodes (where one or more ducts join or where a duct terminates in a compartment), $\Delta P$ is a fixed source of momenumt (a fan or blower), $L$ is the length of the duct segment, and $K$ is the friction loss of the duct segement.  
 
+Since nodes have no volume, the mass and energy conservation equations are merely that what flows into a node, must also flow out of the node.  In the momentum equation the terms on the right hand side are: the pressure gradient between the upstream and the downstream node, the buoyancy head, pressure rise due to an external source (e.g. a fan or blower), and the pressure losses due to wall friction or the presence of duct fittings.  
 
+\section{HVAC Solution Procedure}
+
+The momentum equation, Eq. ~\ref{HVACmomentum}, is non-linear with respect to velocity due to
+the loss term.  Additionally, the pressure difference between two nodes in the network is  impacted by the pressure change at all nodes coupled to that duct either directly (part of the same duct network) or indirectly (connected to the same compartment as another duct network).  Solving the momentum equation, requries accounting for both of these.  This is done with the following discretization:
+
+\be u^n_j=u^{n+1}_j \frac{\Delta t^n}{\rho_j L_j} \left(\tilde{P}^n_i - \tilde{P}^n_k\right)+\left(\rho g \Delta z\right)^{n-1}_j+\Delta P^{n-1}_j - \frac{1}{2}K_j \left(\left|u^{n-}_j-u^{n+}_j\right|u^n-\left|u^{n+}_j \right|u^{n-}_j \right)  \label{HVACdiscretemomentum} \ee
+
+The superscripts $n+$ and $n-$ on the velocity are used to linearize the flow loss in a duct to avoid a non-linear differential equation for velocity.  The $n+$ superscript is the prior iteration value and the $n-$ is either the prior iteration value or zero if flow reversal occurred.  This approach, rather than ${u^n_j}^2$, is used to speed convergence when duct flows are near zero to avoid large changes in K if the forward and reverse losses are markededly different.  
+
+Note that the node pressures are not expressed as $P^n_i$, but rather as $\tilde{P}^n_i$.  This indicates an extrapolated pressure at the end of the current timestep rather than the actual end of time step pressure.  The pressure in a compartment is a function of the mass and energy flows into and out of that compartment.  If that compartment is connected to other compartments by doors or other openings, then the pressure is also dependent upon flows into and out those other compartments.  Those mass and energy flows include both those being predicted by the HVAC model and those being predicted by the CFD model.   For example, in \ref{hvacpresure}, the un-shaded compartments have pressure solutions that are dependent upon the flows predicted by both the HVAC model and the CFD model and all of those compartments need to be included in the extrapolated pressure for those compartments.
+Since the two models are not fully coupled, the extrapolated pressure is an estimate of the pressure at the end of the time step based upon the pressure rise for the prior time step.
+
+\begin{figure}
+   \begin{center}
+      \scalebox{0.8}{\includegraphics{FIGURES/hvacpressure.png}}
+      \caption{\label{fig_lawofthewall} \small Illustration of interdependent pressure solutions.  All unshaded compartments have pressures that are dependent upon each other.}
+   \end{center}
+\end{figure}
+
+The extrapolated pressure for a compartment can be determined by using \ref{concon} and correcting the integral over velocity for the current solution of all interdependent HVAC flows into or out of an FDS pressure zone:
+
+\be \tilde{P}^n_i=P^{n-1}_i+\left(\frac{dP^{n-1}_i}{dt} + \frac{{\sum \limits{j~in~zone~m} u^{n-1}_j A^{n-1}_j} - {\sum\limits{j~in~zone~m} u^n_j A^n_j}}{\int_{\Omega_m} {\cal P} \, dV}\right)\Delta t^n  \label{HVACextrapolatedpressure} \ee
+
+If we seperate the HVAC sovled velocities into a pressure zone from the FDS solved velocities into a pressure zone and then substitute \ref{HVACextrapolatedpressure} into \ref{HVACdiscretemomentum} we obtain the following:
+
+\be u^n_j \left( 1+frac{K_j}{2 L_j} \left| u^{n-}_j-u^{n+}_j \right| \right) - \frac{\Delta {t^n}^2}{\rho_j L_j} \frac{{\sum\limits{j~in~zone~i} u^n_j A^n_j}-{\sum\limits{j~in~zone~k} u^n_j A^n_j}}{{\int_{\Omega_m} {\cal P} \, dV}}=u^{n-1}_j+ \frac{\Delta {t^n}^2}{\rho_j L_j} \left(\tilde{P}^n_{i,non-HVAC}-\tilde{P}^n_{k,non-HVAC}+\left(\rho g \Delta z \right)_j+\Delta P_j \right)+frac{K_j}{2 L_j}\left|u^{n+}_j\right| \left|u^{n-}_j\right| \label{HVACfullexpansion}\ee
+
+If node $i$ or node $k$ for duct $j$ in \ref{HVACfullexpansion} is an internal duct node, then extrapolated pressures are not computed and the actual node pressure is solved for.  Applying \ref {HVACfullexpansion} to each duct results in a linear set of equations.  Adding additional equations to the set for the mass conservation at internal duct nodes, results in complete set of equations.
+
+The solution scheme is as follows.  Determine the boundary conditions at all points where the HVAC network joins the FDS computational domain using the previous timestep values.  Compute the extrapolated pressures for each pressure zone using the previous iteration (previous timestep if the first iteration).  Assemble the linear set of equations for conservation of momentum and conservation of mass.  Solve the equation and check the solution for errors in mass conservation, flow reversal over the time step, and the magnitude of change in the velocity solution for each duct.  If any convergence check fails, the solution is re-iterated wiht new extrapolated pressures.  Densities and enthalpies are taken as the upwind values in each iteration.
+
+\section{HVAC Boundary Conditions (Coupling the HVAC solver to the FDS solver)}
 
 
 
