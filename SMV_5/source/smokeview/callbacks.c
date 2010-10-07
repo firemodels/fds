@@ -18,10 +18,7 @@
 #include "flowfiles.h"
 #include "smokeviewapi.h"
 #include "MALLOC.h"
-#include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 #define KEY_ALT 0
 #define KEY_CTRL 1
@@ -1752,8 +1749,8 @@ void handle_move_keys(int  key){
       case KEY_SHIFT:
         local_speed_factor=4.0;
       default:
-      getnewpos(eye_xyz,dx,-dy,0.0,local_speed_factor);
-      break;
+        getnewpos(eye_xyz,dx,-dy,0.0,local_speed_factor);
+        break;
       }
     }
     break;

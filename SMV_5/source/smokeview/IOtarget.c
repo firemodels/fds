@@ -12,9 +12,7 @@
 #include <GL/glut.h>
 #endif
 #include "MALLOC.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 // svn revision character string
 char IOtarget_revision[]="$Revision$";

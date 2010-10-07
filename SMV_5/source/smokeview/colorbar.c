@@ -8,9 +8,7 @@
 #include <math.h>
 #include "flowfiles.h"
 #include "MALLOC.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 char colorbar_revision[]="$Revision$";
 

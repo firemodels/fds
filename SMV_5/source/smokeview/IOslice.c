@@ -14,10 +14,7 @@
 #include <GL/glut.h>
 #endif
 #include "MALLOC.h"
-#include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 #include "contourdefs.h"
 
 
@@ -1032,7 +1029,6 @@ void updateslicemenulabels(void){
   char label[128];
   multislice *mslicei;
   slice *sd,*sdold;
-  float delta;
 
   if(nslice_files>0){
     mslicei = multisliceinfo;
@@ -1126,7 +1122,6 @@ void updatevslicemenulabels(void){
   slice *sd, *sdold;
   vslice *vsd, *vsdold;
   multivslice *mvslicei;
-  float delta;
   char label[128];
 
 
@@ -1338,8 +1333,6 @@ void getsliceparams(void){
         sprintf(sd->slicedir,"Y=%f",position);
       }
       if(sd->ks1==sd->ks2){
-        terraindata *terri;
-
         sd->idir=3;
         position = meshi->zplt_orig[ks1];
         if(sd->cellcenter==1){

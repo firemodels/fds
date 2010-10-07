@@ -8,7 +8,6 @@
 #include <string.h>
 #include <stdio.h>
 #include "MALLOC.h"
-#include "ASSERT.h"
 #ifdef _DEBUG
 static int checkmemoryflag=1;
 #endif
@@ -263,7 +262,7 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int l
   }
   else{
     strncpy(pbi->filename,file2,255);
-    strcat(pbi->filename,(char)0);
+    strcat(pbi->filename,"\0");
   }
 
   varname2 = strchr(varname,ampersand);
@@ -278,7 +277,7 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int l
   }
   else{
     strncpy(pbi->varname,varname2,255);
-    strcat(pbi->varname,(char)0);
+    strcat(pbi->varname,"\0");
   }
   return return_code;
 }
@@ -298,14 +297,14 @@ mallocflag __ResizeMemory(void **ppv, size_t size, char *varname, char *file, in
   }
   else{
     strncpy(pbi->filename,file,255);
-    strcat(pbi->filename,(char)0);
+    strcat(pbi->filename,"\0");
   }
   if(strlen(varname)<256){
     strcpy(pbi->varname,varname);
   }
   else{
     strncpy(pbi->varname,varname,255);
-    strcat(pbi->varname,(char)0);
+    strcat(pbi->varname,"\0");
   }
   return return_code;
 }

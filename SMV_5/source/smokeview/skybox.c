@@ -14,7 +14,6 @@
 #endif
 #include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 
 // svn revision character string
 char skybox_revision[]="$Revision$";

@@ -15,9 +15,7 @@
 #endif
 #include "flowfiles.h"
 #include "MALLOC.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 #include "svn_revision.h"
 
 // svn revision character string
@@ -1159,8 +1157,11 @@ void initvars1(void){
   glui_screenWidth=640, glui_screenHeight=480;
   windowsize_pointer=0;
   sethazardcolor=0;
-  mxpoints=MAXPOINTS,mxframes=MAXFRAMES,mxframepoints;
-  mxpoints_orig=MAXPOINTS,mxframes_orig=MAXFRAMES;
+  mxpoints=MAXPOINTS;
+  mxframes=MAXFRAMES;
+  mxframepoints=MAXPOINTS;
+  mxpoints_orig=MAXPOINTS;
+  mxframes_orig=MAXFRAMES;
   mxpoints_comm=0, mxframes_comm=0;
   timedrag=0,colordrag=0,colorsplitdrag=0;
   isonormtype=1,showisonormals=0;
@@ -1270,7 +1271,8 @@ void initvars1(void){
   test_smokesensors=0;
   active_smokesensors=0;
   loadplot3dall=0;
-  visTarg = 0, ReadTargFile;
+  visTarg = 0;
+  ReadTargFile=0;
   showtarget=0;
   visAIso=1;
   surfincrement=0,visiso=0;
@@ -1560,7 +1562,9 @@ void initvars1(void){
   apertures[3]=90.;
   planar_terrain_slice=0;
 
-  aperture=60.,aperture_glui,aperture_default;
+  aperture=60.;
+  aperture_glui=aperture;
+  aperture_default=aperture;
   zooms[0]=0.25;
   zooms[1]=0.5;
   zooms[2]=1.0;
@@ -1920,7 +1924,7 @@ void initvars1(void){
    iso_ambient[4] = 0.75;
    iso_ambient[5] = 0.80;
    iso_ambient[6] = 0.80;
-   iso_ambient[7] = 3,00;
+   iso_ambient[7] = 3.00;
    iso_ambient[8] = 0.00;
    iso_ambient[9] = 0.96;
   iso_ambient[10] = 0.28;
@@ -2083,8 +2087,12 @@ void initvars0(void){
   cadgeominfo=NULL;
 
   ventcolor=NULL;
-  meshinfo=NULL,current_mesh=NULL, mesh_save=NULL, mesh_last=NULL, loaded_isomesh=NULL;
-  tourinfo=NULL,default_tour;
+  meshinfo=NULL;
+  current_mesh=NULL;
+  mesh_save=NULL;
+  mesh_last=NULL;
+  loaded_isomesh=NULL;
+  tourinfo=NULL;
 
   treeinfo=NULL;
   ntreeinfo=0;

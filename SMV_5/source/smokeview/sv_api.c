@@ -18,10 +18,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "isodefs.h"
-#include "smokeheaders.h"
 #include "smokeviewapi.h"
 #include "flowfiles.h"
-#include "smokeviewdefs.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 
