@@ -30,7 +30,7 @@ void endian_switch(void *val, int nval);
 #define READBR(var,size) READ(var,size);if(returncode==0)break;
 #define SEEK returncode=fseek(PARTFILE,4,SEEK_CUR)
 #define SEEKBR SEEK;if(returncode!=0)break
-void part2iso(part *parti);
+void part2iso(part *parti,int *thread_index);
 
 
 /* ------------------ getpartprop_index ------------------------ */
@@ -174,7 +174,7 @@ void *convert_parts2iso(void *arg){
       parti->inuse_part2iso=1;
       UNLOCK_PART2ISO;
 
-      part2iso(parti);
+      part2iso(parti,thread_index);
     }
   }
   return NULL;
@@ -673,7 +673,7 @@ void Get_Part_Bounds(void){
 
   /* ------------------ part2iso ------------------------ */
 
-void part2iso(part *parti){
+void part2iso(part *parti, int *thread_index){
   float *pdata;
   int *tagdata;
   int fdsversion;
@@ -706,6 +706,9 @@ void part2iso(part *parti){
   int nx2, ny2, nz2;
   float xmin, ymin, zmin;
   part5prop *part5propinfo_copy;
+  int percent_done;
+  float file_size;
+  int percent_next=10;
 
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
@@ -845,12 +848,33 @@ void part2iso(part *parti){
   UNLOCK_PART2ISO;
 
   error=0;
+  file_size=0.0;
   for(;;){
     float *x, *y, *z, *vals;
     int k;
 
     FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time,tagdata,pdata,&size,&error);
-    printf("time=%f\n",time);
+
+    file_size+=size;
+
+    percent_done=100.0*(float)file_size/(float)parti->filesize;
+#ifdef pp_THREAD
+    thread_stats[*thread_index]=percent_done;
+    if(percent_done>percent_next){
+      LOCK_PRINT;
+      print_thread_stats();
+      UNLOCK_PRINT;
+      percent_next+=10;
+    }
+#else
+    if(percent_done>percent_next){
+      printf(" %i%s",percent_next,pp);
+      LOCK_COMPRESS;
+      fflush(stdout);
+      UNLOCK_COMPRESS;
+      percent_next+=10;
+    }
+#endif
     if(error!=0)break;
 
     for(j=0;j<npartcount;j++){
@@ -928,6 +952,23 @@ void part2iso(part *parti){
             &reduce_triangles, &error);
     }
   }
+
+#ifdef pp_THREAD
+  LOCK_PRINT;
+    printf("\n%s converted to:\n",parti->file);
+    printf("       %s\n",isofile);
+    for(i=0;i<npart5propinfo;i++){
+      part5prop *propi;
+
+      propi = part5propinfo_copy + i;
+      if(propi->used==0)continue;
+      printf("       %s\n",propi->isofilename);
+    }
+    printf("\n");
+    thread_stats[*thread_index]=-1;
+  UNLOCK_PRINT;
+
+#endif
 
   FREEMEMORY(nquantities);
   FREEMEMORY(npoints);

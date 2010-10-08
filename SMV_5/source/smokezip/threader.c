@@ -49,7 +49,7 @@ void print_thread_stats(void){
     char pp[2];
 
     strcpy(pp,"%");
-    printf("Thread completion:");
+    printf("Status:");
     for(i=0;i<mt_nthreads;i++){
       if(thread_stats[i]>0)printf(" %i:%i%s",i+1,thread_stats[i],pp);
     }
