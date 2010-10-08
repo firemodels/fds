@@ -291,7 +291,7 @@ int readsmv(char *smvfile){
   ismoke3d=0;
   ismoke3d_seq=0;
   rewind(streamsmv);
-  if(cleanfiles==0)printf("Compressing .bf, .iso, .s3d, and .sf data files referenced in %s\n",smvfile);
+  if(cleanfiles==0)printf("Compressing .bf, .iso, .s3d, and .sf data files referenced in %s\n\n",smvfile);
   if(cleanfiles==1){
     printf("Removing compressed .bf, .iso, .s3d and .sf data files referenced in %s\n",smvfile);
     printf("   (Each removal occurs only if the corresponding uncompressed file exists)\n\n");

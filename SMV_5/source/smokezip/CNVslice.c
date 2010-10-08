@@ -58,7 +58,7 @@ void endian_switch(void *val, int nval);
 
 // unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out)
 
-int convert_slice(slice *slicei){
+int convert_slice(slice *slicei, int *thread_index){
 
   char slicefile_svz[1024], slicesizefile_svz[1024];
 #ifdef pp_RLETEST
@@ -242,7 +242,7 @@ int convert_slice(slice *slicei){
   printf("    using min=%s %s",cval,units);
   sprintf(cval,"%f",slicei->valmax);
   trimzeros(cval);
-  printf(" max=%s %s\n",cval,units);
+  printf(" max=%s %s\n\n",cval,units);
   valmin=slicei->valmin;
   valmax=slicei->valmax;
   denom = valmax-valmin;
@@ -462,6 +462,15 @@ int convert_slice(slice *slicei){
    
       data_loc=ftell(SLICEFILE);
       percent_done=100.0*(float)data_loc/(float)slicei->filesize;
+#ifdef pp_THREAD
+      thread_stats[*thread_index]=percent_done;
+      if(percent_done>percent_next){
+        LOCK_PRINT;
+        print_thread_stats();
+        UNLOCK_PRINT;
+        percent_next+=10;
+      }
+#else
       if(percent_done>percent_next){
         printf(" %i%s",percent_next,pp);
         LOCK_COMPRESS;
@@ -469,6 +478,7 @@ int convert_slice(slice *slicei){
         UNLOCK_COMPRESS;
         percent_next+=10;
       }
+#endif
       for(i=0;i<framesize;i++){
         int ival;
         int icol, jrow, index2;
@@ -552,7 +562,9 @@ int convert_slice(slice *slicei){
   }
 
 wrapup:
+#ifndef pp_THREAD
     printf(" 100%s completed\n",pp);
+#endif
     FREEMEMORY(sliceframe_data);
     FREEMEMORY(sliceframe_compressed);
     FREEMEMORY(sliceframe_uncompressed);
@@ -574,9 +586,16 @@ wrapup:
 
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
+#ifdef pp_THREAD
+    LOCK_PRINT;
+    printf("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",slicei->file,before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    thread_stats[*thread_index]=-1;
+    UNLOCK_PRINT;
+#else
     printf("    records=%i, ",count);
     printf("Sizes: original=%s, ",before_label);
     printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+#endif
   }
 
   return 1;
@@ -602,7 +621,10 @@ slice *getslice(char *string){
 void *compress_slices(void *arg){
   int i;
   slice *slicei, *sb;
-//  float valmin, valmax;
+  int *thread_index;
+
+  thread_index = (int *)arg;
+
 
   if(nslice_files<=0)return NULL;
   LOCK_SLICE;
@@ -611,7 +633,7 @@ void *compress_slices(void *arg){
     if(cleanfiles==1){
       for(i=0;i<nslice_files;i++){
         slicei = sliceinfo + i;
-        convert_slice(slicei);
+        convert_slice(slicei,thread_index);
       }
       return NULL;
     }
@@ -673,7 +695,7 @@ void *compress_slices(void *arg){
     UNLOCK_SLICE;
 
     if(slicei->doit==1){
-      convert_slice(slicei);
+      convert_slice(slicei,thread_index);
     }
     else{
       printf("%s not compressed\n",slicei->file);
