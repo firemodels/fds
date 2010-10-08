@@ -62,7 +62,7 @@ typedef struct {
 
 typedef struct {
   int index;
-  int rank;
+  int sortedlist;
 } rankdata;
 
 typedef struct {
