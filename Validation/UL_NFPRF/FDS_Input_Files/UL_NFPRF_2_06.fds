@@ -1,4 +1,4 @@
-&HEAD CHID='UL_NFPRF_2_01',TITLE='UL/NFPRF Heptane Burner Series 2, Test 1' /
+&HEAD CHID='UL_NFPRF_2_06',TITLE='UL/NFPRF Heptane Burner Series 2, Test 6' /
 
 &MESH IJK=102,108,45, XB=0,30.5,0,30.5,0.0,9.0 /
 
@@ -261,7 +261,7 @@ Spray Burners
 
 Vent Link
 
-&DEVC ID='vent link', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=100000., INITIAL_STATE=.FALSE. / 
+&DEVC ID='vent link', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=.01., INITIAL_STATE=.FALSE. / 
 
 
 Actuated Sprinklers
