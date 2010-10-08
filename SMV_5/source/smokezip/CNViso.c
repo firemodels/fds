@@ -24,7 +24,7 @@ int tri_compare4( const void *arg1, const void *arg2 );
 
 /* ------------------ convert_iso ------------------------ */
 
-int convert_iso(iso *isoi){
+int convert_iso(iso *isoi, int *thread_index){
 
 int sortflag;
 int *triangles_i;
@@ -582,6 +582,7 @@ int   *triangle_copy=NULL;
         data_loc=EGZ_FTELL(ISOFILE);
         percent_done=100.0*(float)data_loc/(float)isoi->filesize;
 #ifdef pp_THREAD
+        thread_stats[*thread_index]=percent_done;
         if(percent_done>percent_next){
           LOCK_PRINT;
           print_thread_stats();
@@ -624,6 +625,7 @@ wrapup:
 #ifdef pp_THREAD
     LOCK_PRINT;
     printf("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",isoi->file,before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    thread_stats[*thread_index]=-1;
     UNLOCK_PRINT;
 #else
     printf("Sizes: original=%s, ",before_label);
@@ -772,6 +774,9 @@ int tri_compare1( const void *arg1, const void *arg2 ){
 void *compress_isos(void *arg){
   int i;
   iso *isoi;
+  int *thread_index;
+
+  thread_index=(int *)arg;
 
   if(niso_files>0){
     LOCK_ISOS;
@@ -792,7 +797,7 @@ void *compress_isos(void *arg){
       }
       isoi->inuse=1;
       UNLOCK_ISOS;
-      convert_iso(isoi);
+      convert_iso(isoi,thread_index);
     }
   }
   return NULL;
