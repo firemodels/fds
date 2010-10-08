@@ -237,7 +237,7 @@ void version(void);
 unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
 int readsmv(char *file);
 int getendian(void);
-int convert_slice(slice *slicei);
+int convert_slice(slice *slicei, int *thread_index);
 slice *getslice(char *string);
 void *compress_slices(void *arg);
 void *compress_isos(void *arg);
@@ -261,7 +261,7 @@ void *convert_parts2iso(void *arg);
 part *getpart(char *string);
 part5prop *getpartprop(char *string);
 int getpartprop_index(char *string);
-void convert_part(part *parti);
+void convert_part(part *parti, int *thread_index);
 int convertable_part(part *parti);
 #endif
 void *compress_patches(void *arg);
@@ -276,7 +276,7 @@ void Get_Slice_Bounds(void);
 #ifdef pp_PART
 void Get_Part_Bounds(void);
 #endif
-void convert_3dsmoke(smoke3d *smoke3di);
+void convert_3dsmoke(smoke3d *smoke3di, int *thread_index);
 void *compress_smoke3ds(void *arg);
 int match(const char *buffer, const char *key, unsigned int lenkey);
 void trim(char *line);
@@ -397,4 +397,5 @@ EXTERN int get_part_bounds;
 EXTERN int partfile2iso;
 #endif
 EXTERN char smvisofile[1024];
+EXTERN int *thread_stats;
 

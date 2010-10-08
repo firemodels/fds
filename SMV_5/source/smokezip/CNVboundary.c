@@ -97,7 +97,7 @@ int clean_boundary(patch *patchi){
 
 /* ------------------ convert_boundary ------------------------ */
 
-int convert_boundary(patch *patchi){
+int convert_boundary(patch *patchi, int *thread_index){
   FILE *BOUNDARYFILE=NULL;
   char boundaryfile_svz[1024], boundarysizefile_svz[1024];
   FILE *boundarystream=NULL,*boundarysizestream=NULL;
@@ -221,7 +221,7 @@ int convert_boundary(patch *patchi){
   printf("    using min=%s %s",cval,units);
   sprintf(cval,"%f",patchi->valmax);
   trimzeros(cval);
-  printf(" max=%s %s\n",cval,units);
+  printf(" max=%s %s\n\n",cval,units);
 
 
   fwrite(&one,4,1,boundarystream);           // write out a 1 to determine "endianness" when file is read in later
@@ -302,7 +302,9 @@ int convert_boundary(patch *patchi){
     if(NewMemory((void **)&patchvals,npatchfull*sizeof(float))==0)goto wrapup;
     if(NewMemory((void **)&full_boundarybuffer,npatchfull)==0)goto wrapup;
     if(NewMemory((void **)&compressed_boundarybuffer,ncompressed_zlibSAVE)==0)goto wrapup;
+#ifndef pp_THREAD
     printf("  Compressing: ");
+#endif
     time_max=-1000000.0;
     while(feof(BOUNDARYFILE)==0){
       int j ;
@@ -371,16 +373,26 @@ int convert_boundary(patch *patchi){
 
       data_loc=ftell(BOUNDARYFILE);
       percent_done=100.0*(float)data_loc/(float)patchi->filesize;
+#ifdef pp_THREAD
+      thread_stats[*thread_index]=percent_done;
       if(percent_done>percent_next){
-        printf(" %i%s",percent_next,pp);
-        LOCK_COMPRESS;
-        fflush(stdout);
-        UNLOCK_COMPRESS;
+        LOCK_PRINT;
+        print_thread_stats();
+        UNLOCK_PRINT;
         percent_next+=10;
       }
+#else
+      if(percent_done>percent_next){
+        printf(" %i%s",percent_next,pp);
+        fflush(stdout);
+        percent_next+=10;
+      }
+#endif
     }
 wrapup:
+#ifndef pp_THREAD
     printf(" 100%s completed\n",pp);
+#endif
     FREEMEMORY(ijks);
     FREEMEMORY(patchvals);
     FREEMEMORY(full_boundarybuffer);
@@ -396,9 +408,16 @@ wrapup:
     char before_label[256],after_label[256];
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
+#ifdef pp_THREAD
+    LOCK_PRINT;
+    printf("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",patchi->file,before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    thread_stats[*thread_index]=-1;
+    UNLOCK_PRINT;
+#else
     printf("    records=%i, ",count);
     printf("Sizes: original=%s, ",before_label);
     printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+#endif
   }
 
   return 1;
@@ -442,6 +461,9 @@ void *compress_patches(void *arg){
   int i;
   patch *patchi;
   patch *pb;
+  int *thread_index;
+
+  thread_index = (int *)arg;
 
   if(npatch_files<=0)return NULL;
   LOCK_PATCH;
@@ -505,7 +527,7 @@ void *compress_patches(void *arg){
       patchi->inuse=1;
       UNLOCK_PATCH;
     
-      convert_boundary(patchi);
+      convert_boundary(patchi,thread_index);
     }
     else{
       printf("%s not compressed\n",patchi->file);
@@ -542,7 +564,6 @@ void update_patch_hist(void){
     }
     patchi->inuse_getbounds=1;
     UNLOCK_PATCH_BOUND;
-    printf("bf bound index: %i\n",i);
 
     printf("  Examining %s\n",patchi->file);
     lenfile=strlen(patchi->file);
@@ -556,7 +577,6 @@ void update_patch_hist(void){
     LOCK_COMPRESS;
     unit_start=15;
     FORTget_file_unit(&unit1,&unit_start);
-    printf("patch bound unit=%i\n",unit1);
     FORTopenboundary(patchi->file,&unit1,&endiandata,&patchi->version,&error1,lenfile);
     UNLOCK_COMPRESS;
 
@@ -601,7 +621,6 @@ void mt_update_patch_hist(void){
   }
 
   for(i=0;i<mt_nthreads;i++){
-    printf("just before join %i\n",i);
     pthread_join(thread_ids[i],NULL);
   }
   FREEMEMORY(thread_ids);

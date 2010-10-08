@@ -162,7 +162,7 @@ int   *triangle_copy=NULL;
   // nbuffer
   // buffer(0), ..., buffer(nbuffer-1)
 
-  if(cleanfiles==0)printf("Compressing iso-surface file %s\n",isoi->file);
+  if(cleanfiles==0)printf("Compressing iso-surface file %s\n]n",isoi->file);
 
   fwrite(&one,4,1,isostream);
   fwrite(&isoi->nisolevels,4,1,isostream);
@@ -581,6 +581,14 @@ int   *triangle_copy=NULL;
 
         data_loc=EGZ_FTELL(ISOFILE);
         percent_done=100.0*(float)data_loc/(float)isoi->filesize;
+#ifdef pp_THREAD
+        if(percent_done>percent_next){
+          LOCK_PRINT;
+          print_thread_stats();
+          UNLOCK_PRINT;
+          percent_next+=10;
+        }
+#else
         if(percent_done>percent_next){
           printf(" %i%s",percent_next,pp);
           LOCK_COMPRESS;
@@ -588,6 +596,7 @@ int   *triangle_copy=NULL;
           UNLOCK_COMPRESS;
           percent_next+=10;
         }
+#endif
       }
     }
     LOCK_ISOS;
@@ -601,7 +610,9 @@ int   *triangle_copy=NULL;
   }
 wrapup:
   FREELOCAL_ISO;
+#ifndef pp_THREAD
   printf(" 100%s completed\n",pp);
+#endif
   EGZ_FCLOSE(ISOFILE);
   fclose(isostream);
   fclose(isosizestream);
@@ -610,8 +621,14 @@ wrapup:
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
 //    printf("    records=%i, ",count);
+#ifdef pp_THREAD
+    LOCK_PRINT;
+    printf("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",isoi->file,before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    UNLOCK_PRINT;
+#else
     printf("Sizes: original=%s, ",before_label);
     printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+#endif
   }
   return 0;
 }

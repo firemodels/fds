@@ -225,8 +225,14 @@ int convert_plot3d(plot3d *plot3di){
     strcpy(xxx,"X");
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
+#ifdef pp_THREAD
+    LOCK_PRINT;
+    printf("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",plot3di->file,before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    UNLOCK_PRINT;
+#else
     printf("Sizes: original=%s, ",before_label);
     printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+#endif
   }
 
   return 1;
@@ -253,7 +259,6 @@ void *compress_plot3ds(void *arg){
   int i, j;
   plot3d *plot3di, *pb;
 
-  printf("\n");
   LOCK_PLOT3D;
   if(first_plot3d==1){
     first_plot3d=0;
