@@ -41,6 +41,8 @@
 #define UNLOCK_PLOT3D if(mt_compress==1)pthread_mutex_unlock(&mutexPLOT3D);
 #define   LOCK_PART2ISO if(mt_compress==1)pthread_mutex_lock(&mutexPART2ISO);
 #define UNLOCK_PART2ISO if(mt_compress==1)pthread_mutex_unlock(&mutexPART2ISO);
+#define   LOCK_PRINT if(mt_compress==1)pthread_mutex_lock(&mutexPRINT);
+#define UNLOCK_PRINT if(mt_compress==1)pthread_mutex_unlock(&mutexPRINT);
 #else
 #define LOCK_COMPRESS
 #define UNLOCK_COMPRESS
@@ -60,6 +62,8 @@
 #define UNLOCK_PLOT3D
 #define   LOCK_PART2ISO
 #define UNLOCK_PART2ISO
+#define   LOCK_PRINT
+#define UNLOCK_PRINT
 #endif
 
 // define mutex's and thread_ids
@@ -72,10 +76,12 @@ MT_EXTERN int mt_nthreads;
 #ifndef CPP
 #ifdef pp_THREAD
 MT_EXTERN pthread_mutex_t mutexCOMPRESS,mutexPATCH,mutexSLICE,mutexISOS,mutexSMOKE,mutexPLOT3D;
-MT_EXTERN pthread_mutex_t mutexSLICE_BOUND,mutexPATCH_BOUND,mutexPART2ISO;
+MT_EXTERN pthread_mutex_t mutexSLICE_BOUND,mutexPATCH_BOUND,mutexPART2ISO,mutexPRINT;
 #endif
 #endif
 
 void init_pthread_mutexes(void);
+void print_thread_stats(void);
+
 #define NTHREADS_MAX 16
 

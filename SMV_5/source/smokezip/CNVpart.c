@@ -65,6 +65,9 @@ void compress_parts(void *arg){
   int i;
   int needbounds=0;
   int convertable=0;
+  int *thread_index;
+
+  thread_index=(int *)arg;
 
   for(i=0;i<npart_files;i++){
     part *parti;
@@ -95,7 +98,7 @@ void compress_parts(void *arg){
 
     parti = partinfo + i;
     if(autozip==1&&parti->autozip==0)continue;
-    convert_part(parti);
+    convert_part(parti,thread_index);
   }
 }
 
@@ -103,6 +106,9 @@ void compress_parts(void *arg){
 
 void *convert_parts2iso(void *arg){
   int i;
+  int *thread_index;
+
+  thread_index=(int *)arg;
   
   LOCK_PART2ISO;
   if(first_part2iso==1){
@@ -204,7 +210,7 @@ int convertable_part(part *parti){
 
 /* ------------------ compress_part ------------------------ */
 
-void convert_part(part *parti){
+void convert_part(part *parti, int *thread_index){
   FILE *PARTFILEstream,*partstream,*partsizestream;
   char *partfile, partfile_svz[256], partsizefile_svz[256];
   FILE_SIZE lenfile;
@@ -350,7 +356,7 @@ void convert_part(part *parti){
     }
   }
 
-  printf("  Compressing %s\n",parti->file);
+  printf("  Compressing %s\n\n",parti->file);
 
 #define BUFFER_SIZE 1000000
   NewMemory((void **)&pdata,BUFFER_SIZE*sizeof(float));

@@ -481,78 +481,40 @@ int main(int argc, char **argv){
 void mt_compress_all(void){
   int i;
   pthread_t *thread_ids;
+  int *index;
 
   NewMemory((void **)&thread_ids,mt_nthreads*sizeof(pthread_t));
+  NewMemory((void **)&index,mt_nthreads*sizeof(int));
+  NewMemory((void **)&thread_stats,mt_nthreads*sizeof(int));
 
   for(i=0;i<mt_nthreads;i++){
-    pthread_create(&thread_ids[i],NULL,compress_all,NULL);
+    index[i]=i;
+    pthread_create(&thread_ids[i],NULL,compress_all,&index[i]);
+    thread_stats[i]=-1;
   }
 
   for(i=0;i<mt_nthreads;i++){
     pthread_join(thread_ids[i],NULL);
   }
   FREEMEMORY(thread_ids);
+  FREEMEMORY(index);
+  FREEMEMORY(thread_stats);
 }
 #endif
 
 /* ------------------ compress_all ------------------------ */
 
 void *compress_all(void *arg){
-#ifdef pp_THREAD
-  pthread_t thread_ids[6];
-#endif
+  int *thread_index;
 
-#ifdef pp_THREAD
-  if(mt_compress==1&&mt_nthreads>1){
-    if(doit_boundary==1){
-      pthread_create(&thread_ids[0],NULL,compress_patches,NULL);
-    }
-    if(doit_slice==1){
-      pthread_create(&thread_ids[1],NULL,compress_slices,NULL);
-    }
-    if(doit_smoke3d==1){
-      pthread_create(&thread_ids[2],NULL,compress_smoke3ds,NULL);
-    }
-    if(doiso==1&&doit_iso==1){
-      pthread_create(&thread_ids[3],NULL,compress_isos,NULL);
-    }
-    if(doit_plot3d==1){
-      pthread_create(&thread_ids[4],NULL,compress_plot3ds,NULL);
-    }
-    pthread_create(&thread_ids[5],NULL,convert_parts2iso,NULL);
-#ifdef pp_PART2
-//  if(doit_particle==1){
-//    pthread_create(&thread_ids[6],NULL,compress_parts,NULL);
-//  }
-#endif
-
-    if(doit_boundary==1)pthread_join(thread_ids[0],NULL);
-    if(doit_slice==1)pthread_join(thread_ids[1],NULL);
-    if(doit_smoke3d==1)pthread_join(thread_ids[2],NULL);
-    if(doiso==1&&doit_iso==1)pthread_join(thread_ids[3],NULL);
-    if(doit_plot3d==1)pthread_join(thread_ids[4],NULL);
-    pthread_join(thread_ids[5],NULL);
-    //if(doit_particle==1)pthread_create(&thread_ids[6],NULL,compress_parts,NULL);
-  }
-  else{
-    if(doit_boundary==1)compress_patches(NULL);
-    if(doit_slice==1)compress_slices(NULL);
-    if(doit_smoke3d==1)compress_smoke3ds(NULL);
-    if(doiso==1&&doit_iso==1)compress_isos(NULL);
-    if(doit_plot3d==1)compress_plot3ds(NULL);
-    convert_parts2iso(NULL);
-    //if(doit_particle)compress_parts(NULL);
-  }
-#else
-  if(doit_boundary==1)compress_patches(NULL);
-  if(doit_slice==1)compress_slices(NULL);
-  if(doit_smoke3d==1)compress_smoke3ds(NULL);
-  if(doiso==1&&doit_iso==1)compress_isos(NULL);
-  if(doit_plot3d==1)compress_plot3ds(NULL);
-  convert_parts2iso(NULL);
+  thread_index=(int *)(arg);
+  if(doit_boundary==1)compress_patches(thread_index);
+  if(doit_slice==1)compress_slices(thread_index);
+  if(doit_smoke3d==1)compress_smoke3ds(thread_index);
+  if(doiso==1&&doit_iso==1)compress_isos(thread_index);
+  if(doit_plot3d==1)compress_plot3ds(thread_index);
+  convert_parts2iso(thread_index);
   //if(doit_particle)compress_parts(NULL);
-  
-#endif
   return NULL;
 }
 

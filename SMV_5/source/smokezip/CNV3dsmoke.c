@@ -20,7 +20,7 @@ char CNV3dsmoke_revision[]="$Revision$";
 
 /* ------------------ convert_3dsmoke ------------------------ */
 
-void convert_3dsmoke(smoke3d *smoke3di){
+void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   unsigned char *compressed_alphabuffer;
   FILE *smoke3dstream=NULL,*smoke3dsizestream=NULL;
   EGZ_FILE *SMOKE3DFILE=NULL;
@@ -52,7 +52,7 @@ void convert_3dsmoke(smoke3d *smoke3di){
 //int compress (Bytef *dest,   uLongf *destLen, const Bytef *source, uLong sourceLen);
 //int uncompress (Bytef *dest,   uLongf *destLen, const Bytef *source, uLong sourceLen);
 
-  if(cleanfiles==0)printf("Compressing 3D smokefile %s\n",smoke3dfile);
+  if(cleanfiles==0)printf("Compressing 3D smokefile %s\n\n",smoke3dfile);
 
   strcpy(pp,"%");
   strcpy(xxx,"X");
@@ -176,7 +176,9 @@ void convert_3dsmoke(smoke3d *smoke3di){
   count=-1;
   sizebefore=8;
   sizeafter=8;
+#ifndef pp_THREAD
   printf("  Compressing: ");
+#endif
   time_max=-1000000.0;
   for(;;){
     EGZ_FREAD(&time,4,1,SMOKE3DFILE);
@@ -217,13 +219,21 @@ void convert_3dsmoke(smoke3d *smoke3di){
 
     data_loc=EGZ_FTELL(SMOKE3DFILE);
     percent_done=100.0*(float)data_loc/(float)smoke3di->filesize;
+#ifdef pp_THREAD
+    thread_stats[*thread_index]=percent_done;
     if(percent_done>percent_next){
-        printf(" %i%s",percent_next,pp);
-        LOCK_COMPRESS;
-        fflush(stdout);
-        UNLOCK_COMPRESS;
+      LOCK_PRINT;
+      print_thread_stats();
+      UNLOCK_PRINT;
       percent_next+=10;
     }
+#else
+    if(percent_done>percent_next){
+      printf(" %i%s",percent_next,pp);
+      fflush(stdout);
+      percent_next+=10;
+    }
+#endif
 
     // write out new entries in the size (sz) file
 
@@ -236,6 +246,19 @@ void convert_3dsmoke(smoke3d *smoke3di){
 
     fprintf(smoke3dsizestream,"%f %i %i %i\n",time,nfull,ncompressed_rle,(int)ncompressed_zlib);
   }
+#ifdef pp_THREAD
+  LOCK_PRINT;
+  {
+    char before_label[256],after_label[256];
+  
+    getfilesizelabel(sizebefore,before_label);
+    getfilesizelabel(sizeafter,after_label);
+    printf("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",smoke3di->file,before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    fflush(stdout);
+    thread_stats[*thread_index]=-1;
+  }
+  UNLOCK_PRINT;
+#else
   printf(" 100%s completed\n",pp);
   printf("  records=%i, ",count);
   {
@@ -247,10 +270,9 @@ void convert_3dsmoke(smoke3d *smoke3di){
     printf("Sizes: original=%s, ",before_label);
 
     printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
-    LOCK_COMPRESS;
     fflush(stdout);
-    UNLOCK_COMPRESS;
   }
+#endif
 
   // close files and free buffers
 
@@ -267,6 +289,9 @@ void convert_3dsmoke(smoke3d *smoke3di){
 void *compress_smoke3ds(void *arg){
   int i;
   smoke3d *smoke3di;
+  int *thread_index;
+
+  thread_index = (int *)arg;
 
   for(i=0;i<nsmoke3d_files;i++){
     smoke3di = smoke3dinfo + i;
@@ -278,7 +303,7 @@ void *compress_smoke3ds(void *arg){
     }
     smoke3di->inuse=1;
     UNLOCK_SMOKE;
-    convert_3dsmoke(smoke3di);
+    convert_3dsmoke(smoke3di,thread_index);
     CheckMemory;
   }
   return NULL;
