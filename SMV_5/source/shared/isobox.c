@@ -625,8 +625,8 @@ int computerank( const void *arg1, const void *arg2 ){
 
   rdi=(rankdata *)arg1;
   rdj=(rankdata *)arg2;
-  sorti = rdi->rank;
-  sortj = rdj->rank;
+  sorti = rdi->sortedlist;
+  sortj = rdj->sortedlist;
   if(sorti<sortj)return -1;
   if(sorti>sortj)return 1;
   return 0;
@@ -786,9 +786,9 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
 
     rdi = rankinfo + i;
     rdi->index=rank[i];
-    rdi->rank=sortedlist[i];
+    rdi->sortedlist=sortedlist[i];
   }
-  qsort((rankdata *)rank,(size_t)nvertices,sizeof(rankdata),computerank);
+  qsort((rankdata *)rankinfo,(size_t)nvertices,sizeof(rankdata),computerank);
   for(i=0;i<nvertices;i++){
     rankdata *rdi;
 
@@ -977,6 +977,9 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
   FREEMEMORY(ordered_closestnodes);
   FREEMEMORY(vertexmap);
   FREEMEMORY(inverse_vertexmap);
+  FREEMEMORY(sortinfo);
+  FREEMEMORY(rankinfo);
+  FREEMEMORY(orderinfo);
 
   return 0;
 
