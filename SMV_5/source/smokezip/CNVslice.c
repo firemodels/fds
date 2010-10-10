@@ -102,6 +102,15 @@ int convert_slice(slice *slicei, int *thread_index){
   FILE *SLICEFILE;
   FILE *slicestream,*slicesizestream;
 
+#ifdef pp_THREAD
+  if(cleanfiles==0){
+    int fileindex;
+
+    fileindex = slicei + 1 - sliceinfo;
+    sprintf(threadinfo[*thread_index].label,"sf_%i",fileindex);
+  }
+#endif
+
   slice_file=slicei->file;
   version=slicei->version;
 
@@ -231,7 +240,9 @@ int convert_slice(slice *slicei, int *thread_index){
 
   // read and write slice header
 
+#ifndef pp_THREAD
   if(cleanfiles==0)printf("Compressing slice file (%s) %s\n",filetype,slice_file);
+#endif
 
   strcpy(units,"");
   unit=slicei->label.unit;
@@ -239,10 +250,14 @@ int convert_slice(slice *slicei, int *thread_index){
   trim(units);
   sprintf(cval,"%f",slicei->valmin);
   trimzeros(cval);
+#ifndef pp_THREAD
   printf("    using min=%s %s",cval,units);
+#endif
   sprintf(cval,"%f",slicei->valmax);
   trimzeros(cval);
+#ifndef pp_THREAD
   printf(" max=%s %s\n\n",cval,units);
+#endif
   valmin=slicei->valmin;
   valmax=slicei->valmax;
   denom = valmax-valmin;
@@ -463,7 +478,7 @@ int convert_slice(slice *slicei, int *thread_index){
       data_loc=ftell(SLICEFILE);
       percent_done=100.0*(float)data_loc/(float)slicei->filesize;
 #ifdef pp_THREAD
-      thread_stats[*thread_index]=percent_done;
+      threadinfo[*thread_index].stat=percent_done;
       if(percent_done>percent_next){
         LOCK_PRINT;
         print_thread_stats();
@@ -587,10 +602,9 @@ wrapup:
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
 #ifdef pp_THREAD
-    LOCK_PRINT;
-    printf("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",slicei->file,before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
-    thread_stats[*thread_index]=-1;
-    UNLOCK_PRINT;
+    slicei->compressed=1;
+    sprintf(slicei->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    threadinfo[*thread_index].stat=-1;
 #else
     printf("    records=%i, ",count);
     printf("Sizes: original=%s, ",before_label);

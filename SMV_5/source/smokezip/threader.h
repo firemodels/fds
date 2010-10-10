@@ -20,6 +20,12 @@
 #define MT_EXTERN extern CCC
 #endif
 
+typedef struct {
+  int file_index, thread_index, stat;
+  char label[256];
+} threaddata;
+
+
 // setup LOCKS
 
 #ifdef pp_THREAD

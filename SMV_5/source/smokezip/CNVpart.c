@@ -264,6 +264,15 @@ void convert_part(part *parti, int *thread_index){
   // data_1, ..., data_ncompresseddata
 
 
+#ifdef pp_THREAD
+  {
+    int fileindex;
+
+    fileindex = parti + 1 - partinfo;
+    sprintf(threadinfo[*thread_index].label,"prt5_%i",fileindex);
+  }
+#endif
+
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
 
@@ -710,6 +719,16 @@ void part2iso(part *parti, int *thread_index){
   float file_size;
   int percent_next=10;
 
+  parti->compressed2=0;
+#ifdef pp_THREAD
+  if(cleanfiles==0){
+    int fileindex;
+
+    fileindex = parti + 1 - partinfo;
+    sprintf(threadinfo[*thread_index].label,"prt2iso_%i",fileindex);
+  }
+#endif
+
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
 
@@ -859,7 +878,7 @@ void part2iso(part *parti, int *thread_index){
 
     percent_done=100.0*(float)file_size/(float)parti->filesize;
 #ifdef pp_THREAD
-    thread_stats[*thread_index]=percent_done;
+    threadinfo[*thread_index].stat=percent_done;
     if(percent_done>percent_next){
       LOCK_PRINT;
       print_thread_stats();
@@ -954,19 +973,41 @@ void part2iso(part *parti, int *thread_index){
   }
 
 #ifdef pp_THREAD
-  LOCK_PRINT;
-    printf("\n%s converted to:\n",parti->file);
-    printf("       %s\n",isofile);
+  {
+    int nconv=1;
+    int lenfile;
+    char **summaries;
+
+    for(i=0;i<npart5propinfo;i++){
+      part5prop *propi;
+
+      propi = part5propinfo_copy + i;
+      if(propi->used==1)nconv++;
+    }
+
+    NewMemory((void **)&summaries,nconv*sizeof(char *));
+    
+    lenfile=strlen(isofile);
+    NewMemory((void **)&summaries[0],lenfile+1);
+    strcpy(summaries[0],isofile);
+
+    parti->summaries=summaries;
+    parti->nsummaries=nconv;
+
+    nconv=1;
     for(i=0;i<npart5propinfo;i++){
       part5prop *propi;
 
       propi = part5propinfo_copy + i;
       if(propi->used==0)continue;
-      printf("       %s\n",propi->isofilename);
+      lenfile=strlen(propi->isofilename);
+      NewMemory((void **)&summaries[nconv],lenfile+1);
+      strcpy(summaries[nconv],propi->isofilename);
+      nconv++;
     }
-    printf("\n");
-    thread_stats[*thread_index]=-1;
-  UNLOCK_PRINT;
+    parti->compressed2=1;
+    threadinfo[*thread_index].stat=-1;
+  }
 
 #endif
 

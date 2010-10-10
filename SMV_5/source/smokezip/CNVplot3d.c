@@ -46,6 +46,7 @@ int convert_plot3d(plot3d *plot3di){
   float minmax[10];
   int ijkbar[3];
 
+  plot3di->compressed=0;
   plot3d_file=plot3di->file;
   version=plot3di->version;
 
