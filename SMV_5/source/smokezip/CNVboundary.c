@@ -132,7 +132,16 @@ int convert_boundary(patch *patchi, int *thread_index){
 
   boundary_file=patchi->file;
   version=patchi->version;
+  patchi->compressed=0;
 
+#ifdef pp_THREAD
+  {
+    int fileindex;
+
+    fileindex = patchi + 1 - patchinfo;
+    sprintf(threadinfo[*thread_index].label,"bf_%i",fileindex);
+  }
+#endif
   strcpy(pp,"%");
   strcpy(xxx,"X");
 
@@ -209,8 +218,9 @@ int convert_boundary(patch *patchi, int *thread_index){
   
 
   // read and write boundary header
-
+#ifndef pp_THREAD
   printf("Compressing boundary file (%s) %s\n",filetype,boundary_file);
+#endif
 
   strcpy(units,"");
   unit=patchi->label.unit;
@@ -218,10 +228,14 @@ int convert_boundary(patch *patchi, int *thread_index){
   trim(units);
   sprintf(cval,"%f",patchi->valmin);
   trimzeros(cval);
+#ifndef pp_THREAD
   printf("    using min=%s %s",cval,units);
+#endif
   sprintf(cval,"%f",patchi->valmax);
   trimzeros(cval);
+#ifndef pp_THRAD
   printf(" max=%s %s\n\n",cval,units);
+#endif
 
 
   fwrite(&one,4,1,boundarystream);           // write out a 1 to determine "endianness" when file is read in later
@@ -374,7 +388,7 @@ int convert_boundary(patch *patchi, int *thread_index){
       data_loc=ftell(BOUNDARYFILE);
       percent_done=100.0*(float)data_loc/(float)patchi->filesize;
 #ifdef pp_THREAD
-      thread_stats[*thread_index]=percent_done;
+      threadinfo[*thread_index].stat=percent_done;
       if(percent_done>percent_next){
         LOCK_PRINT;
         print_thread_stats();
@@ -409,10 +423,9 @@ wrapup:
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
 #ifdef pp_THREAD
-    LOCK_PRINT;
-    printf("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",patchi->file,before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
-    thread_stats[*thread_index]=-1;
-    UNLOCK_PRINT;
+    patchi->compressed=1;
+    sprintf(patchi->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    threadinfo[*thread_index].stat=-1;
 #else
     printf("    records=%i, ",count);
     printf("Sizes: original=%s, ",before_label);

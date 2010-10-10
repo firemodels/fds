@@ -62,6 +62,8 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  char summary[1024];
+  int compressed;
   int filesize;
   int inuse,inuse_getbounds;
   int seq_id, autozip;
@@ -80,6 +82,8 @@ typedef struct {
 
 typedef struct {
   int blocknumber;
+  char summary[1024];
+  int compressed;
   int inuse;
   char *file, *filebase;
   flowlabels label;
@@ -97,6 +101,8 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  char summary[1024];
+  int compressed;
   int inuse,inuse_getbounds;
   int filesize;
   int seq_id,autozip;
@@ -123,6 +129,8 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  char summary[1024];
+  int compressed;
   int inuse;
   float time;
   int blocknumber;
@@ -146,6 +154,8 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  char summary[1024];
+  int compressed;
   int inuse;
   int seq_id, autozip;
   int nx, ny, nz, filesize;
@@ -189,6 +199,10 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  char summary[1024], summary2[1024];
+  char **summaries;
+  int nsummaries;
+  int compressed,compressed2;
   int inuse,inuse_part2iso;
   int filesize;
   int seq_id, autozip;
@@ -218,6 +232,7 @@ typedef struct {
 //************* headers
 //***********************
 
+void print_summary(void);
 void *compress_all(void *arg);
 void mt_compress_all(void);
 void rand_absdir(float xyz[3], int dir);
@@ -397,5 +412,5 @@ EXTERN int get_part_bounds;
 EXTERN int partfile2iso;
 #endif
 EXTERN char smvisofile[1024];
-EXTERN int *thread_stats;
+EXTERN threaddata *threadinfo;
 

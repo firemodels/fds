@@ -291,7 +291,9 @@ int readsmv(char *smvfile){
   ismoke3d=0;
   ismoke3d_seq=0;
   rewind(streamsmv);
+#ifndef pp_THREAD
   if(cleanfiles==0)printf("Compressing .bf, .iso, .s3d, and .sf data files referenced in %s\n\n",smvfile);
+#endif
   if(cleanfiles==1){
     printf("Removing compressed .bf, .iso, .s3d and .sf data files referenced in %s\n",smvfile);
     printf("   (Each removal occurs only if the corresponding uncompressed file exists)\n\n");
@@ -406,6 +408,7 @@ int readsmv(char *smvfile){
       smoke3di->seq_id = ismoke3d_seq;
       smoke3di->autozip = 0;
       smoke3di->inuse=0;
+      smoke3di->compressed=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
@@ -516,6 +519,8 @@ int readsmv(char *smvfile){
       parti->seq_id = ipart_seq;
       parti->autozip = 0;
       parti->inuse=0;
+      parti->compressed=0;
+      parti->compressed2=0;
       parti->inuse_part2iso=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
@@ -579,6 +584,7 @@ int readsmv(char *smvfile){
       patchi->seq_id = ipatch;
       patchi->autozip = 0;
       patchi->inuse=0;
+      patchi->compressed=0;
       patchi->version=version;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
@@ -678,6 +684,7 @@ int readsmv(char *smvfile){
       slicei->seq_id = islice_seq;
       slicei->autozip = 0;
       slicei->inuse=0;
+      slicei->compressed=0;
         
       if(get_slice_bounds==1){
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
@@ -773,6 +780,7 @@ int readsmv(char *smvfile){
       plot3di->plot3d_mesh=meshinfo + blocknumber;
       plot3di->time=time;
       plot3di->inuse=0;
+      plot3di->compressed=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
@@ -845,6 +853,7 @@ int readsmv(char *smvfile){
       isoi->file=NULL;
       isoi->filebase=NULL;
       isoi->inuse=0;
+      isoi->compressed=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
