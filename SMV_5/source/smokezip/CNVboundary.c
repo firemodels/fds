@@ -139,7 +139,7 @@ int convert_boundary(patch *patchi, int *thread_index){
     int fileindex;
 
     fileindex = patchi + 1 - patchinfo;
-    sprintf(threadinfo[*thread_index].label,"bf_%i",fileindex);
+    sprintf(threadinfo[*thread_index].label,"bf %i",fileindex);
   }
 #endif
   strcpy(pp,"%");
@@ -233,7 +233,7 @@ int convert_boundary(patch *patchi, int *thread_index){
 #endif
   sprintf(cval,"%f",patchi->valmax);
   trimzeros(cval);
-#ifndef pp_THRAD
+#ifndef pp_THREAD
   printf(" max=%s %s\n\n",cval,units);
 #endif
 

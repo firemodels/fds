@@ -269,7 +269,7 @@ void convert_part(part *parti, int *thread_index){
     int fileindex;
 
     fileindex = parti + 1 - partinfo;
-    sprintf(threadinfo[*thread_index].label,"prt5_%i",fileindex);
+    sprintf(threadinfo[*thread_index].label,"prt5 %i",fileindex);
   }
 #endif
 
@@ -725,7 +725,7 @@ void part2iso(part *parti, int *thread_index){
     int fileindex;
 
     fileindex = parti + 1 - partinfo;
-    sprintf(threadinfo[*thread_index].label,"prt2iso_%i",fileindex);
+    sprintf(threadinfo[*thread_index].label,"prt2iso %i",fileindex);
   }
 #endif
 

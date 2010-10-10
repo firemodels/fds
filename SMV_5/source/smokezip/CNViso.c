@@ -66,7 +66,7 @@ int   *triangle_copy=NULL;
     int fileindex;
 
     fileindex = isoi + 1 - isoinfo;
-    sprintf(threadinfo[*thread_index].label,"iso_%i",fileindex);
+    sprintf(threadinfo[*thread_index].label,"iso %i",fileindex);
   }
 #endif
 

@@ -107,7 +107,7 @@ int convert_slice(slice *slicei, int *thread_index){
     int fileindex;
 
     fileindex = slicei + 1 - sliceinfo;
-    sprintf(threadinfo[*thread_index].label,"sf_%i",fileindex);
+    sprintf(threadinfo[*thread_index].label,"sf %i",fileindex);
   }
 #endif
 
@@ -240,10 +240,6 @@ int convert_slice(slice *slicei, int *thread_index){
 
   // read and write slice header
 
-#ifndef pp_THREAD
-  if(cleanfiles==0)printf("Compressing slice file (%s) %s\n",filetype,slice_file);
-#endif
-
   strcpy(units,"");
   unit=slicei->label.unit;
   if(strlen(unit)>0)strcat(units,unit);
@@ -251,12 +247,17 @@ int convert_slice(slice *slicei, int *thread_index){
   sprintf(cval,"%f",slicei->valmin);
   trimzeros(cval);
 #ifndef pp_THREAD
-  printf("    using min=%s %s",cval,units);
+  if(cleanfiles==0){
+    printf("Compressing slice file (%s) %s\n",filetype,slice_file);
+    printf("    using min=%s %s",cval,units);
+  }
 #endif
   sprintf(cval,"%f",slicei->valmax);
   trimzeros(cval);
 #ifndef pp_THREAD
-  printf(" max=%s %s\n\n",cval,units);
+  if(cleanfiles==0){
+    printf(" max=%s %s\n\n",cval,units);
+  }
 #endif
   valmin=slicei->valmin;
   valmax=slicei->valmax;
@@ -823,7 +824,9 @@ void Get_Slice_Bounds(void){
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
 
+#ifndef pp_THREAD
   printf("Determining slice file bounds\n");
+#endif
   for(i=0;i<nslice_files;i++){
     slice *slicei;
 
