@@ -43,7 +43,7 @@ void print_thread_stats(void){
 
   sum=0;
   for(i=0;i<mt_nthreads;i++){
-    if(thread_stats[i]>0)sum++;
+    if(threadinfo[i].stat>0)sum++;
   }
   if(sum>0){
     char pp[2];
@@ -51,7 +51,10 @@ void print_thread_stats(void){
     strcpy(pp,"%");
     printf("Status:");
     for(i=0;i<mt_nthreads;i++){
-      if(thread_stats[i]>0)printf(" %i:%i%s",i+1,thread_stats[i],pp);
+      threaddata *ti;
+
+      ti = threadinfo+i;
+      if(ti->stat>0)printf(" %s:%i%s",ti->label,ti->stat,pp);
     }
     printf("\n");
   }
