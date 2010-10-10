@@ -40,21 +40,27 @@ void init_pthread_mutexes(void){
 void print_thread_stats(void){
   int i;
   int sum;
+  int lastthread;
 
   sum=0;
   for(i=0;i<mt_nthreads;i++){
-    if(threadinfo[i].stat>0)sum++;
+    if(threadinfo[i].stat>0){
+      sum++;
+      lastthread=i;
+    }
   }
   if(sum>0){
     char pp[2];
 
     strcpy(pp,"%");
-    printf("Status:");
     for(i=0;i<mt_nthreads;i++){
       threaddata *ti;
 
       ti = threadinfo+i;
-      if(ti->stat>0)printf(" %s:%i%s",ti->label,ti->stat,pp);
+      if(ti->stat>0){
+        printf(" %s(%i%s)",ti->label,ti->stat,pp);
+        if(lastthread!=i)printf(",");
+      }
     }
     printf("\n");
   }
