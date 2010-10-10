@@ -485,20 +485,22 @@ void mt_compress_all(void){
 
   NewMemory((void **)&thread_ids,mt_nthreads*sizeof(pthread_t));
   NewMemory((void **)&index,mt_nthreads*sizeof(int));
-  NewMemory((void **)&thread_stats,mt_nthreads*sizeof(int));
+  NewMemory((void **)&threadinfo,mt_nthreads*sizeof(threaddata));
 
   for(i=0;i<mt_nthreads;i++){
     index[i]=i;
     pthread_create(&thread_ids[i],NULL,compress_all,&index[i]);
-    thread_stats[i]=-1;
+    threadinfo[i].stat=-1;
   }
 
   for(i=0;i<mt_nthreads;i++){
     pthread_join(thread_ids[i],NULL);
   }
+
+  print_summary();
   FREEMEMORY(thread_ids);
   FREEMEMORY(index);
-  FREEMEMORY(thread_stats);
+  FREEMEMORY(threadinfo);
 }
 #endif
 
@@ -512,7 +514,7 @@ void *compress_all(void *arg){
   if(doit_slice==1)compress_slices(thread_index);
   if(doit_smoke3d==1)compress_smoke3ds(thread_index);
   if(doiso==1&&doit_iso==1)compress_isos(thread_index);
-  if(doit_plot3d==1)compress_plot3ds(thread_index);
+ // if(doit_plot3d==1)compress_plot3ds(thread_index);
   convert_parts2iso(thread_index);
   //if(doit_particle)compress_parts(NULL);
   return NULL;
@@ -702,4 +704,110 @@ void usage(char *prog){
   printf("  Min and max bounds used to compress boundary files are obtained\n");
   printf("  from the casename.ini file or calculated by %s if casename.ini \n",prog);
   printf("  does not exist.  See http://fire.nist.gov/fds for more information.\n");
+}
+       
+/* ------------------ usage ------------------------ */
+
+void print_summary(void){
+  int i;
+  int nsum;
+
+  printf("\n");
+  nsum=0;
+  for(i=0;i<nslice_files;i++){
+    slice *slicei;
+
+    slicei = sliceinfo + i;
+    if(slicei->compressed==1)nsum++;
+  }
+  if(nsum>0){
+    for(i=0;i<nslice_files;i++){
+      slice *slicei;
+      flowlabels *label;
+
+      slicei = sliceinfo + i;
+      if(slicei->compressed==0)continue;
+      label=&slicei->label;
+      printf("%s (%s)\n  %s\n",slicei->file,label->longlabel,slicei->summary);
+      printf("  using: min=%f %s, max=%f %s \n\n",slicei->valmin,label->unit,slicei->valmax,label->unit);
+    }
+  }
+
+  nsum=0;
+  for(i=0;i<nsmoke3d_files;i++){
+    smoke3d *smoke3di;
+
+    smoke3di = smoke3dinfo + i;
+    if(smoke3di->compressed==1)nsum++;
+  }
+  if(nsum>0){
+    for(i=0;i<nsmoke3d_files;i++){
+      smoke3d *smoke3di;
+
+      smoke3di = smoke3dinfo + i;
+      if(smoke3di->compressed==0)continue;
+      printf("%s\n  %s\n\n",smoke3di->file,smoke3di->summary);
+    }
+  }
+
+  nsum=0;
+  for(i=0;i<npatch_files;i++){
+    patch *patchi;
+
+    patchi = patchinfo + i;
+    if(patchi->compressed==1)nsum++;
+  }
+  if(nsum>0){
+    for(i=0;i<npatch_files;i++){
+      patch *patchi;
+      flowlabels *label;
+
+      patchi = patchinfo + i;
+      if(patchi->compressed==0)continue;
+      label=&patchi->label;
+      printf("%s (%s)\n  %s\n",patchi->file,label->longlabel,patchi->summary);
+      printf("  using: min=%f %s, max=%f %s \n\n",patchi->valmin,label->unit,patchi->valmax,label->unit);
+    }
+  }
+
+  nsum=0;
+  for(i=0;i<niso_files;i++){
+    iso *isoi;
+
+    isoi = isoinfo + i;
+    if(isoi->compressed==1)nsum++;
+  }
+  if(nsum>0){
+    for(i=0;i<niso_files;i++){
+      iso *isoi;
+
+      isoi = isoinfo + i;
+      if(isoi->compressed==0)continue;
+      printf("%s\n  %s\n\n",isoi->file,isoi->summary);
+    }
+  }
+
+  nsum=0;
+  for(i=0;i<npart_files;i++){
+    part *parti;
+
+    parti = partinfo + i;
+    if(parti->compressed2==1)nsum++;
+  }
+  if(nsum>0){
+    for(i=0;i<npart_files;i++){
+      int j;
+      part *parti;
+
+      parti = partinfo + i;
+      if(parti->compressed2==0)continue;
+ 
+      printf("%s converted to:\n",parti->file);
+      for(j=0;j<parti->nsummaries;j++){
+        printf("  %s\n",parti->summaries[j]);
+      }
+      printf("\n");
+    }
+  }
+
 }
