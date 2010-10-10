@@ -57,7 +57,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     int fileindex;
 
     fileindex = smoke3di + 1 - smoke3dinfo;
-    sprintf(threadinfo[*thread_index].label,"s3d_%i",fileindex);
+    sprintf(threadinfo[*thread_index].label,"s3d %i",fileindex);
 #else
     printf("Compressing 3D smokefile %s\n\n",smoke3dfile);
 #endif
