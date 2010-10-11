@@ -762,6 +762,7 @@ void update_slice_hist(void){
     }
     slicei->inuse_getbounds=1;
     UNLOCK_SLICE_BOUND;
+    printf("  Examining %s\n",slicei->file);
 
     lenfile=strlen(slicei->file);
     
@@ -821,9 +822,7 @@ void Get_Slice_Bounds(void){
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
 
-#ifndef pp_THREAD
   printf("Determining slice file bounds\n");
-#endif
   for(i=0;i<nslice_files;i++){
     slice *slicei;
 
