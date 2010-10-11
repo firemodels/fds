@@ -451,7 +451,7 @@ int main(int argc, char **argv){
   readini(inifile);
 
 #ifdef pp_THREAD
-  if(mt_compress==1&&mt_nthreads>1){
+  if(mt_compress==1){
     mt_compress_all();
   }
   else{
