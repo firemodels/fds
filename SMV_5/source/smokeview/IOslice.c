@@ -2934,7 +2934,7 @@ void drawvolslice_texture(const slice *sd){
    glEnd();
   }
   if(meshi->visy==1){
-   constval = yplt[sd->js1+meshi->ploty]+offset_slice*sd->sliceoffset;
+   constval = yplt[meshi->ploty]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
      float xmid;
