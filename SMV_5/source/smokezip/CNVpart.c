@@ -1016,7 +1016,8 @@ void part2iso(part *parti, int *thread_index){
     parti->compressed2=1;
     threadinfo[*thread_index].stat=-1;
   }
-
+#else
+  printf(" 100%s completed\n",pp);
 #endif
 
   FREEMEMORY(nquantities);
