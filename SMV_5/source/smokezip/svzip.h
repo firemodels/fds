@@ -62,6 +62,7 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  int unit_start;
   char summary[1024];
   int compressed;
   int filesize;
@@ -82,6 +83,7 @@ typedef struct {
 
 typedef struct {
   int blocknumber;
+  int unit_start;
   char summary[1024];
   int compressed;
   int inuse;
@@ -101,6 +103,7 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  int unit_start;
   char summary[1024];
   int compressed;
   int inuse,inuse_getbounds;
@@ -129,6 +132,7 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  int unit_start;
   char summary[1024];
   int compressed;
   int inuse;
@@ -154,6 +158,7 @@ typedef struct {
 
 typedef struct {
   char *file,*filebase;
+  int unit_start;
   char summary[1024];
   int compressed;
   int inuse;
@@ -200,6 +205,7 @@ typedef struct {
 typedef struct {
   char *file,*filebase;
   char summary[1024], summary2[1024];
+  int unit_start;
   char **summaries;
   int nsummaries;
   int compressed,compressed2;
