@@ -604,9 +604,7 @@ int   *triangle_copy=NULL;
 #else
         if(percent_done>percent_next){
           printf(" %i%s",percent_next,pp);
-          LOCK_COMPRESS;
           fflush(stdout);
-          UNLOCK_COMPRESS;
           percent_next+=10;
         }
 #endif

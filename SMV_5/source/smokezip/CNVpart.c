@@ -376,9 +376,8 @@ void convert_part(part *parti, int *thread_index){
   NewMemory((void **)&char_buffer_compressed,BUFFER_SIZE*sizeof(unsigned char));
 
   lenfile=strlen(parti->file);
-  unit=15;
   LOCK_COMPRESS;
-  FORTget_file_unit(&unit,&unit);
+  FORTget_file_unit(&unit,&parti->unit_start);
   FORTopenpart(parti->file,&unit,&endiandata,&error,lenfile);
   UNLOCK_COMPRESS;
 
@@ -597,7 +596,7 @@ void Get_Part_Bounds(void){
     lenfile=strlen(parti->file);
     LOCK_COMPRESS;
     unit=15;
-    FORTget_file_unit(&unit,&unit);
+    FORTget_file_unit(&unit,&parti->unit_start);
     FORTopenpart(parti->file,&unit,&endiandata,&error1,lenfile);
     UNLOCK_COMPRESS;
 
@@ -737,9 +736,8 @@ void part2iso(part *parti, int *thread_index){
   NewMemory((void **)&partindex,1000000*sizeof(int));
 
   lenfile=strlen(parti->file);
-  unit=15;
   LOCK_COMPRESS;
-  FORTget_file_unit(&unit,&unit);
+  FORTget_file_unit(&unit,&parti->unit_start);
   FORTopenpart(parti->file,&unit,&endiandata,&error1,lenfile);
   UNLOCK_COMPRESS;
 
@@ -888,9 +886,7 @@ void part2iso(part *parti, int *thread_index){
 #else
     if(percent_done>percent_next){
       printf(" %i%s",percent_next,pp);
-      LOCK_COMPRESS;
       fflush(stdout);
-      UNLOCK_COMPRESS;
       percent_next+=10;
     }
 #endif

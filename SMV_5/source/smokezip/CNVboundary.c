@@ -561,7 +561,7 @@ void update_patch_hist(void){
 
   for(i=0;i<npatch_files;i++){
     patch *patchi;
-    int unit1,unit_start;
+    int unit1;
     FILE_SIZE lenfile;
     int error1;
     int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2;
@@ -588,8 +588,7 @@ void update_patch_hist(void){
     pk2 = patchi->pk2;
 
     LOCK_COMPRESS;
-    unit_start=15;
-    FORTget_file_unit(&unit1,&unit_start);
+    FORTget_file_unit(&unit1,&patchi->unit_start);
     FORTopenboundary(patchi->file,&unit1,&endiandata,&patchi->version,&error1,lenfile);
     UNLOCK_COMPRESS;
 
