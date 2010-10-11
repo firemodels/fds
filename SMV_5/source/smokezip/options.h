@@ -39,7 +39,9 @@
 #define USE_ZLIB
 #define pp_PART
 #define pp_PART2
+#ifndef pp_OSX
 #define pp_THREAD
+#endif
 
 #undef pp_release
 #define pp_release

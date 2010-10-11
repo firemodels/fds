@@ -173,7 +173,10 @@ int   *triangle_copy=NULL;
   // buffer(0), ..., buffer(nbuffer-1)
 
 #ifndef pp_THREAD
-  if(cleanfiles==0)printf("Compressing iso-surface file %s\n]n",isoi->file);
+  if(cleanfiles==0){
+    printf("Compressing iso-surface file %s\n",isoi->file);
+    printf(" ");
+  }
 #endif
 
   fwrite(&one,4,1,isostream);
@@ -637,8 +640,8 @@ wrapup:
     sprintf(isoi->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
     threadinfo[*thread_index].stat=-1;
 #else
-    printf("Sizes: original=%s, ",before_label);
-    printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("  Sizes: original=%s, ",before_label);
+    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
 #endif
   }
   return 0;
