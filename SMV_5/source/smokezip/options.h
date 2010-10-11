@@ -38,7 +38,6 @@
 #define EGZ
 #define USE_ZLIB
 #define pp_PART
-#define pp_PART2
 #ifndef pp_OSX
 #define pp_THREAD
 #endif
@@ -55,6 +54,7 @@
 #ifdef pp_BETA
 #undef pp_release
 #define SMZVERSION "test"
+#define pp_PART2
 #endif
 
 #ifdef WIN32
