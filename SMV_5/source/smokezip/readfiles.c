@@ -18,6 +18,7 @@ char readfiles_revision[]="$Revision$";
 int readsmv(char *smvfile){
   
   FILE *streamsmv;
+  int unit_start=15;
   int iiso,igrid,ipdim, iiso_seq;
   int ipatch,ipatch_seq;
   int iplot3d, iplot3d_seq;
@@ -404,6 +405,7 @@ int readsmv(char *smvfile){
       char *buffer2;
 
       smoke3di = smoke3dinfo + ismoke3d;
+      smoke3di->unit_start=unit_start++;
       ismoke3d_seq++;
       smoke3di->seq_id = ismoke3d_seq;
       smoke3di->autozip = 0;
@@ -514,6 +516,7 @@ int readsmv(char *smvfile){
       }
 
       parti = partinfo + npart_files;
+      parti->unit_start=unit_start++;
       parti->partmesh = meshinfo + meshindex;
       ipart_seq++;
       parti->seq_id = ipart_seq;
@@ -580,6 +583,7 @@ int readsmv(char *smvfile){
       }
 
       patchi = patchinfo + ipatch;
+      patchi->unit_start = unit_start++;
       ipatch_seq++;
       patchi->seq_id = ipatch;
       patchi->autozip = 0;
@@ -680,6 +684,7 @@ int readsmv(char *smvfile){
 
       islice_seq++;
       slicei = sliceinfo + islice;
+      slicei->unit_start=unit_start++;
       slicei->version=version;
       slicei->seq_id = islice_seq;
       slicei->autozip = 0;
@@ -773,6 +778,7 @@ int readsmv(char *smvfile){
       }
 
       plot3di = plot3dinfo + iplot3d;
+      plot3di->unit_start=unit_start++;
       iplot3d_seq++;
       plot3di->seq_id = iplot3d;
       plot3di->autozip = 0;
@@ -844,6 +850,7 @@ int readsmv(char *smvfile){
 
       CheckMemory;
       isoi = isoinfo + iiso;
+      isoi->unit_start=unit_start++;
       iiso_seq++;
       isoi->seq_id = iiso_seq;
       isoi->autozip = 0;

@@ -489,9 +489,7 @@ int convert_slice(slice *slicei, int *thread_index){
 #else
       if(percent_done>percent_next){
         printf(" %i%s",percent_next,pp);
-        LOCK_COMPRESS;
         fflush(stdout);
-        UNLOCK_COMPRESS;
         percent_next+=10;
       }
 #endif
@@ -747,7 +745,7 @@ void update_slice_hist(void){
   endiandata=getendian();
   for(i=0;i<nslice_files;i++){
     slice *slicei;
-    int unit_start,unit1;
+    int unit1;
     FILE_SIZE lenfile;
     int error1;
     float slicetime1, *sliceframe;
@@ -767,9 +765,8 @@ void update_slice_hist(void){
 
     lenfile=strlen(slicei->file);
     
-    unit_start = 15;
     LOCK_COMPRESS;
-    FORTget_file_unit(&unit1,&unit_start);
+    FORTget_file_unit(&unit1,&slicei->unit_start);
     FORTopenslice(slicei->file,&unit1,&endiandata,&is1,&is2,&js1,&js2,&ks1,&ks2,&error1,lenfile);
     UNLOCK_COMPRESS;
 
