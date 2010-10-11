@@ -50,7 +50,9 @@ int main(int argc, char **argv){
   doit_slice=1;
   doit_plot3d=1;
   doit_iso=1;
+#ifdef pp_PART2
   doit_particle=0;
+#endif
 
   first_initsphere=1;
   first_slice=1;
@@ -516,7 +518,9 @@ void *compress_all(void *arg){
   if(doiso==1&&doit_iso==1)compress_isos(thread_index);
  // if(doit_plot3d==1)compress_plot3ds(thread_index);
   convert_parts2iso(thread_index);
-  //if(doit_particle)compress_parts(NULL);
+#ifdef pp_PART2
+  if(doit_particle)compress_parts(NULL);
+#endif
   return NULL;
 }
 
