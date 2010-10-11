@@ -5668,7 +5668,7 @@ CONTAINS
     INTEGER, DIMENSION(:) :: MESH_STOP_STATUS
     !
     ! Local variables
-    INTEGER I,J, IZERO, nom, j1, ii, i_target_old, i_change_old, i_tmp, i_tmp2
+    INTEGER I,J, IZERO, nom, j1, ii, i_target_old, i_change_old, i_tmp, i_tmp2, I_MODE
     INTEGER :: i_egrid, i_target, color_index, i_new_ffield
     REAL(EB) :: evel, TNOW
     ! 
@@ -5728,6 +5728,12 @@ CONTAINS
        DO I = 1, M%N_HUMANS
           HR => M%HUMAN(I)
           J = MAX(0,HR%GROUP_ID)
+          J1 = -MIN(0,HR%GROUP_ID)
+          IF (j > 0) THEN    ! The agent is a member of a group
+             Group_Known_Doors(j)%N_nodes = -1
+          ELSE    ! The agent is a lonely one
+             Human_Known_Doors(j1)%N_nodes = -1
+          END IF
           GROUP_LIST(J)%GROUP_SIZE = GROUP_LIST(J)%GROUP_SIZE + 1
           GROUP_LIST(J)%GROUP_X    = GROUP_LIST(J)%GROUP_X + HR%X
           GROUP_LIST(J)%GROUP_Y    = GROUP_LIST(J)%GROUP_Y + HR%Y
@@ -5749,6 +5755,7 @@ CONTAINS
        I_TMP = 0
        I_TMP2 = -1
        IF (M%N_HUMANS < 1) CYCLE
+       I_MODE = 0
        DO WHILE (.NOT.(I_CHANGE_OLD == N_CHANGE_DOORS) .AND. .NOT.(I_TMP2 == I_TMP)) ! Iterate Nash equilibrium
           I_CHANGE_OLD = N_CHANGE_DOORS
           I_TMP = 0
@@ -5764,7 +5771,7 @@ CONTAINS
              IF (GROUP_LIST(J)%GROUP_I_FFIELDS(I_EGRID) == 0) THEN
                 I_TARGET_OLD = HR%I_TARGET
                 N_CHANGE_TRIALS = N_CHANGE_TRIALS + 1
-                CALL CHANGE_TARGET_DOOR(NOM, NOM, I, J, J1, I_EGRID, 0, HR%X, HR%Y, I_TARGET, COLOR_INDEX, I_NEW_FFIELD, HR)
+                CALL CHANGE_TARGET_DOOR(NOM, NOM, I, J, J1, I_EGRID, I_MODE, HR%X, HR%Y, I_TARGET, COLOR_INDEX, I_NEW_FFIELD, HR)
                 IF (ABS(I_TARGET_OLD) .NE. ABS(I_TARGET)) THEN
                    N_CHANGE_DOORS = N_CHANGE_DOORS + 1
                    I_TMP = I
@@ -5818,6 +5825,7 @@ CONTAINS
           END IF
           IF (N_CHANGE_DOORS/MAX(1,M%N_HUMANS) > 10*M%N_HUMANS) I_TMP2 = I_TMP
           IF (ABS(FAC_DOOR_QUEUE) <= 0.001_EB) I_CHANGE_OLD = N_CHANGE_DOORS  ! DO NOT ITERATE THE NASH EQUILIBRIUM
+          I_MODE = 1  ! change_target_door initializations have now been done
        END DO         ! Nash iterations
        IF (ABS(FAC_DOOR_QUEUE) > 0.001_EB) WRITE(LU_EVACOUT,FMT='(A,F14.2,A,I8)') &
             ' INIT: Changes per agent ', REAL(N_CHANGE_DOORS,EB)/REAL(M%N_HUMANS,EB), &
