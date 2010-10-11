@@ -219,7 +219,7 @@ int convert_boundary(patch *patchi, int *thread_index){
 
   // read and write boundary header
 #ifndef pp_THREAD
-  printf("Compressing boundary file (%s) %s\n",filetype,boundary_file);
+  printf("Compressing %s (%s)\n",boundary_file,filetype);
 #endif
 
   strcpy(units,"");
@@ -229,12 +229,12 @@ int convert_boundary(patch *patchi, int *thread_index){
   sprintf(cval,"%f",patchi->valmin);
   trimzeros(cval);
 #ifndef pp_THREAD
-  printf("    using min=%s %s",cval,units);
+  printf("  using min=%s %s",cval,units);
 #endif
   sprintf(cval,"%f",patchi->valmax);
   trimzeros(cval);
 #ifndef pp_THREAD
-  printf(" max=%s %s\n\n",cval,units);
+  printf(" max=%s %s\n",cval,units);
 #endif
 
 
@@ -317,7 +317,7 @@ int convert_boundary(patch *patchi, int *thread_index){
     if(NewMemory((void **)&full_boundarybuffer,npatchfull)==0)goto wrapup;
     if(NewMemory((void **)&compressed_boundarybuffer,ncompressed_zlibSAVE)==0)goto wrapup;
 #ifndef pp_THREAD
-    printf("  Compressing: ");
+    printf(" ");
 #endif
     time_max=-1000000.0;
     while(feof(BOUNDARYFILE)==0){
@@ -427,9 +427,9 @@ wrapup:
     sprintf(patchi->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
     threadinfo[*thread_index].stat=-1;
 #else
-    printf("    records=%i, ",count);
+    printf("  records=%i, ",count);
     printf("Sizes: original=%s, ",before_label);
-    printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
 #endif
   }
 
@@ -610,9 +610,12 @@ void update_patch_hist(void){
     UNLOCK_COMPRESS;
     FREEMEMORY(patchframe);
   }
+#ifndef pp_THREAD
+  printf("\n");
+#endif
 }
 
-
+#ifdef pp_THREAD
 /* ------------------ MT_update_slice_hist ------------------------ */
 
 void *MT_update_patch_hist(void *arg){
@@ -637,6 +640,7 @@ void mt_update_patch_hist(void){
   }
   FREEMEMORY(thread_ids);
 }
+#endif
 
 /* ------------------ get_boundary_bounds ------------------------ */
 

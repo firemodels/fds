@@ -38,6 +38,7 @@ void init_pthread_mutexes(void){
 /* ------------------ print_thread_stats ------------------------ */
 
 void print_thread_stats(void){
+#ifdef pp_THREAD
   int i;
   int sum;
   int lastthread;
@@ -64,6 +65,7 @@ void print_thread_stats(void){
     }
     printf("\n");
   }
+#endif
 }
 
 
