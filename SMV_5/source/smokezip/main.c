@@ -52,15 +52,15 @@ int main(int argc, char **argv){
   doit_iso=1;
   doit_particle=0;
 
-#ifdef pp_THREAD
-  mt_compress=0;
-  mt_nthreads=1;
   first_initsphere=1;
   first_slice=1;
   first_patch=1;
   first_plot3d=1;
   first_part2iso=1;
   first_part2iso_smvopen=1;
+#ifdef pp_THREAD
+  mt_compress=0;
+  mt_nthreads=1;
 #endif
   frameskip=-1;
   no_chop=0;
@@ -440,10 +440,10 @@ int main(int argc, char **argv){
     endian_fds=getendian()+endianswitch;
     if(endian_fds==2)endian_fds=0;
     if(endian_fds==1){
-      printf("FDS was run on a big endian computer. \n");
+      printf("FDS was run on a big endian computer. \n\n");
     }
     else{
-      printf("FDS was run on a little endian computer.\n");
+      printf("FDS was run on a little endian computer.\n\n");
     }
   }
   if(endian_info==1)return 0;

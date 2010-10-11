@@ -726,6 +726,8 @@ void part2iso(part *parti, int *thread_index){
     fileindex = parti + 1 - partinfo;
     sprintf(threadinfo[*thread_index].label,"prt2iso %i",fileindex);
   }
+#else
+  printf("Converting %s to\n",parti->file);
 #endif
 
   endiandata=getendian();
@@ -836,6 +838,10 @@ void part2iso(part *parti, int *thread_index){
   fprintf(SMVISOFILE," %s\n",isounits);
   fprintf(SMVISOFILE,"\n");
 
+#ifndef pp_THREAD
+  printf("  %s\n",isofile);
+#endif
+
   for(i=0;i<npart5propinfo;i++){
     part5prop *propi,*propi_ro;
     flowlabels *labels;
@@ -850,6 +856,9 @@ void part2iso(part *parti, int *thread_index){
     strcat(propi->isofilename,labels->shortlabel);
     strcat(propi->isofilename,".tiso");
     CCtisoheader(propi->isofilename, labels->longlabel, labels->shortlabel, labels->unit, levels, &nlevels, &error);
+#ifndef pp_THREAD
+    printf("  %s\n",propi->isofilename);
+#endif
 
     fprintf(SMVISOFILE,"TISOF %i\n",blocknumber);
     fprintf(SMVISOFILE," %s\n",propi->isofilename);
@@ -864,6 +873,9 @@ void part2iso(part *parti, int *thread_index){
   fclose(SMVISOFILE);
   UNLOCK_PART2ISO;
 
+#ifndef pp_THREAD
+  printf(" ");
+#endif
   error=0;
   file_size=0.0;
   for(;;){

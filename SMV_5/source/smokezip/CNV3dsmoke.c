@@ -59,7 +59,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     fileindex = smoke3di + 1 - smoke3dinfo;
     sprintf(threadinfo[*thread_index].label,"s3d %i",fileindex);
 #else
-    printf("Compressing 3D smokefile %s\n\n",smoke3dfile);
+    printf("Compressing 3D smokefile %s\n",smoke3dfile);
 #endif
   }
 
@@ -185,9 +185,6 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   count=-1;
   sizebefore=8;
   sizeafter=8;
-#ifndef pp_THREAD
-  printf("  Compressing: ");
-#endif
   time_max=-1000000.0;
   for(;;){
     EGZ_FREAD(&time,4,1,SMOKE3DFILE);
@@ -277,7 +274,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
     printf("Sizes: original=%s, ",before_label);
 
-    printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
     fflush(stdout);
   }
 #endif

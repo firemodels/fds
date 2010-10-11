@@ -248,15 +248,16 @@ int convert_slice(slice *slicei, int *thread_index){
   trimzeros(cval);
 #ifndef pp_THREAD
   if(cleanfiles==0){
-    printf("Compressing slice file (%s) %s\n",filetype,slice_file);
-    printf("    using min=%s %s",cval,units);
+    printf("Compressing %s (%s)\n",slice_file,filetype);
+    printf("  using min=%s %s",cval,units);
   }
 #endif
   sprintf(cval,"%f",slicei->valmax);
   trimzeros(cval);
 #ifndef pp_THREAD
   if(cleanfiles==0){
-    printf(" max=%s %s\n\n",cval,units);
+    printf(" max=%s %s\n",cval,units);
+    printf(" ");
   }
 #endif
   valmin=slicei->valmin;
@@ -605,9 +606,9 @@ wrapup:
     sprintf(slicei->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
     threadinfo[*thread_index].stat=-1;
 #else
-    printf("    records=%i, ",count);
+    printf("  records=%i, ",count);
     printf("Sizes: original=%s, ",before_label);
-    printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
 #endif
   }
 
@@ -786,7 +787,7 @@ void update_slice_hist(void){
     UNLOCK_COMPRESS;
   }
 }
-
+#ifdef pp_THREAD
 /* ------------------ MT_update_slice_hist ------------------------ */
 
 void *MT_update_slice_hist(void *arg){
@@ -811,6 +812,7 @@ void mt_update_slice_hist(void){
   }
   FREEMEMORY(thread_ids);
 }
+#endif
 
 /* ------------------ Get_Slice_Bounds ------------------------ */
 
