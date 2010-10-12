@@ -27,6 +27,13 @@ int SUB_portfrustum(int quad,
                    GLdouble fleft, GLdouble fright, GLdouble fdown, GLdouble fup, GLdouble fnear, GLdouble ffar,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
+
+EXTERNCPP int last_slice_loadstack(void);
+EXTERNCPP void push_slice_loadstack(int sliceindex);
+EXTERNCPP void remove_slice_loadstack(int sliceindex);
+EXTERNCPP int last_vslice_loadstack(void);
+EXTERNCPP void push_vslice_loadstack(int sliceindex);
+EXTERNCPP void remove_vslice_loadstack(int sliceindex);
 EXTERNCPP int filecat(char *file_in1, char *file_in2, char *file_out);
 EXTERNCPP void update_colorbar_smooth(void);
 EXTERNCPP void update_tbounds(void);

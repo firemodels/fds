@@ -2747,9 +2747,17 @@ void UnloadVSliceMenu(int value){
   if(value>=0){
     readvslice(value,UNLOAD,&errorcode);
   }
-  else{
+  else if(value==-1){
     for(i=0;i<nvslice;i++){
       readvslice(i,UNLOAD,&errorcode);
+    }
+  }
+  else if(value==-2){
+    int unload_index;
+
+    unload_index=last_vslice_loadstack();
+    if(unload_index>=0&&unload_index<nvslice){
+      readvslice(unload_index,UNLOAD,&errorcode);
     }
   }
 }
@@ -2889,8 +2897,18 @@ void UnloadSliceMenu(int value){
     readslice("",value,UNLOAD,&errorcode);
   }
   else{
-    for(i=0;i<nslice_files;i++){
-      readslice("",i,UNLOAD,&errorcode);
+    if(value==-1){
+      for(i=0;i<nslice_files;i++){
+        readslice("",i,UNLOAD,&errorcode);
+      }
+    }
+    else if(value==-2){
+      int unload_index;
+
+      unload_index=last_slice_loadstack();
+      if(unload_index>=0&&unload_index<nslice_files){
+        readslice("",unload_index,UNLOAD,&errorcode);
+      }
     }
   }
 }
@@ -6717,6 +6735,8 @@ static int in_menu=0;
       if(vd->loaded==0)continue;
       glutAddMenuEntry(vd->menulabel2,i);
     }
+    glutAddMenuEntry("-",-999);
+    //glutAddMenuEntry("Unload Last",-2);
     glutAddMenuEntry("Unload All",-1);
 
     if(nvslice0>0){
@@ -6936,6 +6956,8 @@ static int in_menu=0;
           glutAddMenuEntry(menulabel,sliceorderindex[i]);
         }
       }
+      glutAddMenuEntry("-",-999);
+      glutAddMenuEntry("Unload Last",-2);
       glutAddMenuEntry("Unload All",-1);
 
 //*** this is where I would put the "sub-slice" menus ordered by type
