@@ -1053,9 +1053,6 @@ void initvars1(void){
   strcpy(script_renderfile,"");
   trainerview=1;
   show_bothsides_int=1;
-  show_hrrcutoff=1;
-  show_hrrcutoff_active=0;
-  hrrpuv_loaded=0;
   show_bothsides_ext=0;
   show_slice_in_obst=0;
   skip_slice_in_embedded_mesh=0;
