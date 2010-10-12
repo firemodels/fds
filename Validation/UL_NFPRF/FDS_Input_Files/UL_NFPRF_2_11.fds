@@ -66,15 +66,15 @@
 
 &OBST XB=    0, 30.50,     0, 30.50, 8.2, 8.8, SURF_IDS='CEILING TILE','SHEET METAL','CEILING TILE' / False Ceiling
 &HOLE XB=  5.49,  6.71, 17.45, 19.86, 8.2, 8.5,/ Vent Recess 1
-&HOLE XB=  5.49,  6.71, 17.45, 19.86, 8.5, 8.8, DEVC_ID='vent link' / Vent Hole 1
+&HOLE XB=  5.49,  6.71, 17.45, 19.86, 8.5, 8.8, DEVC_ID='vent link 1' / Vent Hole 1
 &HOLE XB= 11.58, 12.80, 17.45, 19.86, 8.2, 8.5,/ Vent Recess 2
-&HOLE XB= 11.58, 12.80, 17.45, 19.86, 8.5, 8.8, DEVC_ID='vent link' / Vent Hole 2
+&HOLE XB= 11.58, 12.80, 17.45, 19.86, 8.5, 8.8, DEVC_ID='vent link 2' / Vent Hole 2
 &HOLE XB= 26.82, 28.04, 17.45, 19.86, 8.2, 8.5,/ Vent Recess 3
-&HOLE XB= 26.82, 28.04, 17.45, 19.86, 8.5, 8.8, DEVC_ID='vent link' / Vent Hole 3
+&HOLE XB= 26.82, 28.04, 17.45, 19.86, 8.5, 8.8, DEVC_ID='vent link 3' / Vent Hole 3
 &HOLE XB= 11.58, 12.80,  2.21,  4.65, 8.2, 8.5,/ Vent Recess 4
-&HOLE XB= 11.58, 12.80,  2.21,  4.65, 8.5, 8.8, DEVC_ID='vent link' / Vent Hole 4
+&HOLE XB= 11.58, 12.80,  2.21,  4.65, 8.5, 8.8, DEVC_ID='vent link 4' / Vent Hole 4
 &HOLE XB= 26.82, 28.04,  2.21,  4.65, 8.2, 8.5,/ Vent Recess 5
-&HOLE XB= 26.82, 28.04,  2.21,  4.65, 8.5, 8.8, DEVC_ID='vent link' / Vent Hole 5
+&HOLE XB= 26.82, 28.04,  2.21,  4.65, 8.5, 8.8, DEVC_ID='vent link 5' / Vent Hole 5
 
 &OBST XB= 9.5, 9.5, 0.0, 30.5, 6.4, 8.2, SURF_ID='SHEET METAL' / West  Draft Curtain
 &OBST XB=30.5,30.5, 0.0, 23.1, 6.4, 8.2, SURF_ID='SHEET METAL' / East  Draft Curtain
@@ -256,7 +256,11 @@ Spray Burners
 
 Vent Link
 
-&DEVC ID='vent link', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=100000., INITIAL_STATE=.FALSE. / 
+&DEVC ID='vent link 1', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=100000., INITIAL_STATE=.FALSE. / 
+&DEVC ID='vent link 2', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=100000., INITIAL_STATE=.FALSE. / 
+&DEVC ID='vent link 3', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=100000., INITIAL_STATE=.FALSE. / 
+&DEVC ID='vent link 4', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=100000., INITIAL_STATE=.FALSE. / 
+&DEVC ID='vent link 5', XYZ=24.5,18.5,7.5, QUANTITY='TIME', SETPOINT=100000., INITIAL_STATE=.FALSE. / 
 
 
 Actuated Sprinklers
