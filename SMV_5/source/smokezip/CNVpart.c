@@ -161,6 +161,8 @@ void *convert_parts2iso(void *arg){
   }
   UNLOCK_PART2ISO;
 
+  if(cleanfiles==1)return NULL;
+
   if(partfile2iso==1){
     for(i=0;i<npart_files;i++){
       part *parti;

@@ -320,6 +320,10 @@ int main(int argc, char **argv){
     }
   }
 
+#ifdef pp_THREAD
+  if(cleanfiles==1)mt_nthreads=1;
+#endif
+
   // construct smv filename
   
   if(filebase==NULL){
