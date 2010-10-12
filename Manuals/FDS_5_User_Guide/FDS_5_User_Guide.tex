@@ -2496,10 +2496,10 @@ the inflow exactly because of inaccuracies at the solid and mesh boundaries. The
 \section{Special Topic: Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
 \label{info:CLIP}
 
-The algorithms in FDS are designed to work within a certain range of values for the thermodynamic quantities density, temperature and mass fraction. To prevent unphysical results, 
+The algorithms in FDS are designed to work within a certain range of values for the thermodynamic quantities density, temperature and mass fraction. To prevent unphysical results,
 there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range
 errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on user input, but it is not
-possible in all cases to anticipate just how low or high a given value might be. Thus, 
+possible in all cases to anticipate just how low or high a given value might be. Thus,
 on rare occasions you might need to set upper or lower bounds on the density, temperature, or species mass fractions. These parameters are input under the
 namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be
 ``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an
@@ -3725,6 +3725,13 @@ be used to mimic the ``$t$-squared'' curve -- the whole point of the exercise is
 Eventually, the fire goes out as the ring grows past the boundary of the rectangle.
 Some trial and error is probably required to find the {\ct SPREAD\_RATE} that
 leads to a desired time history of the heat release rate.
+
+\begin{warning}
+If the starting time of the simulation, {\ct T\_BEGIN}, is not zero, be aware that the default start time of the radially spreading
+fire is {\ct T\_BEGIN}, not zero. This is also true of {\ct TAU\_Q}, but it is not true of {\ct RAMP\_Q}. Because this might be 
+confusing, if you start the calculation at a time other than zero, do a quick test to ensure that the ramps or fire spread behave as
+expected.
+\end{warning}
 
 
 
@@ -4977,8 +4984,8 @@ turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} 
 \section{Special Topic: HVAC Systems: The {\ct HVAC} Namelist Group (\ref{hvacinputs})}
 \label{info:HVAC}
 
-There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC system.  If the ability to transport heat and comubstion products through a duct network or the ability to fully account for the pressurization of a compartment due to a fire on the flows in a duct network is important, one can make use of a coupled HVAC network solver.  The solver computes the flows through a duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts or where a duct segment connects to the FDS computational domain.  The current HVAC solver does not allow for mass storage in the duct network (i.e. what goes in during a timestep, goes out during a timestep).  HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and coupled to the FDS control function capability.  The 
-user can select from three fan models. 
+There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC system.  If the ability to transport heat and comubstion products through a duct network or the ability to fully account for the pressurization of a compartment due to a fire on the flows in a duct network is important, one can make use of a coupled HVAC network solver.  The solver computes the flows through a duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts or where a duct segment connects to the FDS computational domain.  The current HVAC solver does not allow for mass storage in the duct network (i.e. what goes in during a timestep, goes out during a timestep).  HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and coupled to the FDS control function capability.  The
+user can select from three fan models.
 
 The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.  An HVAC network is defined by providing inputs for the ducts, duct nodes, and any fans or dampers present in the system.  Additionally the user must define the locations where the HVAC network joins the computational domain.  The basic syntax for an {\ct HVAC} component is:
 
