@@ -187,7 +187,7 @@ void readpatch(int ifile, int flag, int *errorcode){
 
   lenfile = strlen(file);
   file_unit=15;
-  get_file_unit(&file_unit,&file_unit);
+  FORTget_file_unit(&file_unit,&file_unit);
   if(patchinfo[ifile].compression_type==0){
     FILE_SIZE labellen=LABELLEN;
 
