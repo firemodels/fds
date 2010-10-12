@@ -129,6 +129,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
       val->display=display;
       val->vloaded=0;
     }
+    remove_vslice_loadstack(ivslice);
     vd->loaded=0;
     vd->display=0;
     showvslice=0;
@@ -237,6 +238,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
     }
   }
   velocity_range = valmax - valmin;
+  push_vslice_loadstack(ivslice);
   
 #ifdef _DEBUG
   printf("After vslice load: ");
@@ -386,7 +388,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       GetMemoryInfo(num_memblocks_unload,num_memblocks_load);
       WASSERT(num_memblocks_unload+sd->num_memblocks==0,"Possible Memory Leak");
 #endif
-
+      remove_slice_loadstack(slicefilenumber);
       return;
     }
     GetMemoryInfo(num_memblocks_load,0);
@@ -748,7 +750,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       ColorBarMenu(levelset_colorbar);
     }
   }
-
+  push_slice_loadstack(slicefilenumber);
   GLUTPOSTREDISPLAY
 }
 /* ------------------ outputslicebounds ------------------------ */
@@ -4920,5 +4922,95 @@ float getsliceval(slice *sd, unsigned char ival){
 
   returnval = (sd->valmax*ival + sd->valmin*(255-ival))/255.0;
   return returnval;
+}
+
+/* ------------------ push_slice_loadstack ------------------------ */
+
+void push_slice_loadstack(int sliceindex){
+  int i;
+
+  if(islice_loadstack<nslice_loadstack){
+    for(i=0;i<islice_loadstack;i++){
+      if(slice_loadstack[i]==sliceindex)return;
+    }
+    slice_loadstack[islice_loadstack++]=sliceindex;
+  }
+}
+
+/* ------------------ remove_slice_loadstack ------------------------ */
+
+void remove_slice_loadstack(int sliceindex){
+  int i;
+
+  for(i=islice_loadstack-1;i>=0;i--){
+    if(slice_loadstack[i]==sliceindex){
+      int j;
+
+      for(j=i;j<islice_loadstack-1;j++){
+        slice_loadstack[j]=slice_loadstack[j+1];
+      }
+      islice_loadstack--;
+      break;
+    }
+  }
+}
+
+/* ------------------ last_slice_loadstack ------------------------ */
+
+int last_slice_loadstack(void){
+  int return_val;
+
+  if(islice_loadstack-1>=0&&islice_loadstack-1<nslice_loadstack){
+    return_val=slice_loadstack[islice_loadstack-1];
+  }
+  else{
+    return_val=-1;
+  }
+  return return_val;
+}
+
+/* ------------------ push_vslice_loadstack ------------------------ */
+
+void push_vslice_loadstack(int vsliceindex){
+  int i;
+
+  if(ivslice_loadstack<nvslice_loadstack){
+    for(i=0;i<ivslice_loadstack;i++){
+      if(vslice_loadstack[i]==vsliceindex)return;
+    }
+    vslice_loadstack[ivslice_loadstack++]=vsliceindex;
+  }
+}
+
+/* ------------------ remove_vslice_loadstack ------------------------ */
+
+void remove_vslice_loadstack(int vsliceindex){
+  int i;
+
+  for(i=ivslice_loadstack-1;i>=0;i--){
+    if(vslice_loadstack[i]==vsliceindex){
+      int j;
+
+      for(j=i;j<ivslice_loadstack-1;j++){
+        vslice_loadstack[j]=vslice_loadstack[j+1];
+      }
+      ivslice_loadstack--;
+      break;
+    }
+  }
+}
+
+/* ------------------ last_slice_loadstack ------------------------ */
+
+int last_vslice_loadstack(void){
+  int return_val;
+
+  if(ivslice_loadstack-1>=0&&ivslice_loadstack-1<nvslice_loadstack){
+    return_val=vslice_loadstack[ivslice_loadstack-1];
+  }
+  else{
+    return_val=-1;
+  }
+  return return_val;
 }
 
