@@ -832,12 +832,7 @@ void Get_Slice_Bounds(void){
     slicei->inuse_getbounds=0;
   }
 #ifdef pp_THREAD
-  if(mt_compress==1){
-    mt_update_slice_hist();
-  }
-  else{
-    update_slice_hist();
-  }
+  mt_update_slice_hist();
 #else
   update_slice_hist();
 #endif

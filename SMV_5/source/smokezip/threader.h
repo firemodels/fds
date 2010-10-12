@@ -29,26 +29,26 @@ typedef struct {
 // setup LOCKS
 
 #ifdef pp_THREAD
-#define LOCK_COMPRESS if(mt_compress==1)pthread_mutex_lock(&mutexCOMPRESS);
-#define UNLOCK_COMPRESS if(mt_compress==1)pthread_mutex_unlock(&mutexCOMPRESS);
-#define LOCK_PATCH if(mt_compress==1)pthread_mutex_lock(&mutexPATCH);
-#define UNLOCK_PATCH if(mt_compress==1)pthread_mutex_unlock(&mutexPATCH);
-#define LOCK_PATCH_BOUND if(mt_compress==1)pthread_mutex_lock(&mutexPATCH_BOUND);
-#define UNLOCK_PATCH_BOUND if(mt_compress==1)pthread_mutex_unlock(&mutexPATCH_BOUND);
-#define LOCK_SLICE if(mt_compress==1)pthread_mutex_lock(&mutexSLICE);
-#define UNLOCK_SLICE if(mt_compress==1)pthread_mutex_unlock(&mutexSLICE);
-#define LOCK_SLICE_BOUND if(mt_compress==1)pthread_mutex_lock(&mutexSLICE_BOUND);
-#define UNLOCK_SLICE_BOUND if(mt_compress==1)pthread_mutex_unlock(&mutexSLICE_BOUND);
-#define LOCK_ISOS if(mt_compress==1)pthread_mutex_lock(&mutexISOS);
-#define UNLOCK_ISOS if(mt_compress==1)pthread_mutex_unlock(&mutexISOS);
-#define LOCK_SMOKE if(mt_compress==1)pthread_mutex_lock(&mutexSMOKE);
-#define UNLOCK_SMOKE if(mt_compress==1)pthread_mutex_unlock(&mutexSMOKE);
-#define LOCK_PLOT3D if(mt_compress==1)pthread_mutex_lock(&mutexPLOT3D);
-#define UNLOCK_PLOT3D if(mt_compress==1)pthread_mutex_unlock(&mutexPLOT3D);
-#define   LOCK_PART2ISO if(mt_compress==1)pthread_mutex_lock(&mutexPART2ISO);
-#define UNLOCK_PART2ISO if(mt_compress==1)pthread_mutex_unlock(&mutexPART2ISO);
-#define   LOCK_PRINT if(mt_compress==1)pthread_mutex_lock(&mutexPRINT);
-#define UNLOCK_PRINT if(mt_compress==1)pthread_mutex_unlock(&mutexPRINT);
+#define LOCK_COMPRESS      pthread_mutex_lock(&mutexCOMPRESS);
+#define UNLOCK_COMPRESS    pthread_mutex_unlock(&mutexCOMPRESS);
+#define LOCK_PATCH         pthread_mutex_lock(&mutexPATCH);
+#define UNLOCK_PATCH       pthread_mutex_unlock(&mutexPATCH);
+#define LOCK_PATCH_BOUND   pthread_mutex_lock(&mutexPATCH_BOUND);
+#define UNLOCK_PATCH_BOUND pthread_mutex_unlock(&mutexPATCH_BOUND);
+#define LOCK_SLICE         pthread_mutex_lock(&mutexSLICE);
+#define UNLOCK_SLICE       pthread_mutex_unlock(&mutexSLICE);
+#define LOCK_SLICE_BOUND   pthread_mutex_lock(&mutexSLICE_BOUND);
+#define UNLOCK_SLICE_BOUND pthread_mutex_unlock(&mutexSLICE_BOUND);
+#define LOCK_ISOS          pthread_mutex_lock(&mutexISOS);
+#define UNLOCK_ISOS        pthread_mutex_unlock(&mutexISOS);
+#define LOCK_SMOKE         pthread_mutex_lock(&mutexSMOKE);
+#define UNLOCK_SMOKE       pthread_mutex_unlock(&mutexSMOKE);
+#define LOCK_PLOT3D        pthread_mutex_lock(&mutexPLOT3D);
+#define UNLOCK_PLOT3D      pthread_mutex_unlock(&mutexPLOT3D);
+#define LOCK_PART2ISO      pthread_mutex_lock(&mutexPART2ISO);
+#define UNLOCK_PART2ISO    pthread_mutex_unlock(&mutexPART2ISO);
+#define LOCK_PRINT         pthread_mutex_lock(&mutexPRINT);
+#define UNLOCK_PRINT       pthread_mutex_unlock(&mutexPRINT);
 #else
 #define LOCK_COMPRESS
 #define UNLOCK_COMPRESS

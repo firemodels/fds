@@ -61,7 +61,6 @@ int main(int argc, char **argv){
   first_part2iso=1;
   first_part2iso_smvopen=1;
 #ifdef pp_THREAD
-  mt_compress=0;
   mt_nthreads=2;
 #endif
   frameskip=-1;
@@ -453,12 +452,7 @@ int main(int argc, char **argv){
   readini(inifile);
 
 #ifdef pp_THREAD
-  if(mt_compress==1){
-    mt_compress_all();
-  }
-  else{
-    compress_all(NULL);
-  }
+  mt_compress_all();
 #else
   compress_all(NULL);
 #endif
