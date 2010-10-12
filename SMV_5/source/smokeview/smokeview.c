@@ -332,16 +332,13 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
 #endif
 
 
-#ifdef pp_memstatus
-  MEMSTATUS(0,&availmemory,NULL,NULL);
-#endif
-
   if(
     (visTimeLabels==1&&showtime==1)||
     (showtime==1&&
       (visFramerate==1||benchmark==1||
        (vis_slice_average==1&&show_slice_average&&(slice_average_flag==1||slice_turbprop_flag==1))
       )
+      ||(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)
     )
 #ifdef pp_memstatus
     ||visAvailmemory==1
@@ -401,7 +398,7 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       sprintf(frameratelabel," AVG: %4.1f",slice_average_interval);
       outputText((float)(xtimeright+0.025),0.56, frameratelabel); // test print
     }
-    if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL&&showtime==1){
+    if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL){
       char hrrcut_label[256];
       int ihrrcut;
       float xxl, xxr, yyl, yyu, ddx=0.03, ddy=0.2;
@@ -425,6 +422,7 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
     }
 #ifdef pp_memstatus
     if(visAvailmemory==1){
+      MEMSTATUS(0,&availmemory,NULL,NULL);
       sprintf(frameratelabel," Mem Load:%u%s",availmemory,percen);
       if((benchmark==1||visFramerate==1)&&showtime==1){
         outputText((float)(xtimeright+0.025),0.32f, frameratelabel);
@@ -686,6 +684,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 #ifdef pp_memstatus
       ||visAvailmemory==1
 #endif
+      ||(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)
     ){
     down=0.75*dwinH;
   }
