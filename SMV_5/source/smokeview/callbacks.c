@@ -646,7 +646,7 @@ void keyboard(unsigned char key, int x, int y){
   GLUTPOSTREDISPLAY
   updatemenu=1;
   key2 = (char)key;
-  if(key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='M'&&key2!='A'
+  if(key2!='L'&&key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='M'&&key2!='A'
 #ifdef pp_CULL
     &&key2!='C'
 #endif
@@ -656,6 +656,10 @@ void keyboard(unsigned char key, int x, int y){
     axissmooth=1-axissmooth;
     update_colorbar_smooth();
     updatemenu=1;
+    return;
+  }
+  if(strncmp((const char *)&key2,"L",1)==0){
+    UnloadSliceMenu(-2);
     return;
   }
 #ifdef _DEBUG 

@@ -928,7 +928,6 @@ void InitOpenGL(void){
 /* ------------------ initvars1 ------------------------ */
 
 void initvars1(void){
-  usemenu=1;
   arg_iblank=0;
   use_iblank=1;
   levelset_colorbar=-1;
@@ -2009,6 +2008,7 @@ void initvars0(void){
   current_script_command=NULL;
   script_dir_path=NULL;
   scriptinfo=NULL;
+
   nscriptinfo=0;
   demo_option=0;
   current_mesh=NULL;

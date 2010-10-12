@@ -12,10 +12,11 @@
 
 #ifdef INMAIN
 #define SVEXTERN
+#define SVDECL(var,val)  var=val
 #else
 #define SVEXTERN extern CCC
+#define SVDECL(var,val)  var
 #endif
-
 
 #ifdef pp_SPHERE
 #include "csphere.h"
@@ -28,7 +29,7 @@
 
 #include "threader.h"
 
-SVEXTERN int usemenu;
+SVEXTERN int SVDECL(usemenu,1);
 SVEXTERN float hrrpuv_iso_color[4];
 SVEXTERN int show_slice_terrain;
 SVEXTERN int npropinfo;
@@ -640,6 +641,11 @@ SVEXTERN keyframe *selected_frame;
 SVEXTERN tourdata *selected_tour;
 SVEXTERN int callfrom_tourglui;
 SVEXTERN int showtours_whenediting;
+
+SVEXTERN int SVDECL(*slice_loadstack,NULL),  SVDECL(nslice_loadstack,0),  SVDECL(islice_loadstack,0);
+SVEXTERN int SVDECL(*mslice_loadstack,NULL), SVDECL(nmslice_loadstack,0), SVDECL(imslice_loadstack,0);
+SVEXTERN int SVDECL(*vslice_loadstack,NULL), SVDECL(nvslice_loadstack,0), SVDECL(ivslice_loadstack,0);
+SVEXTERN int SVDECL(*mvslice_loadstack,NULL),SVDECL(nmvslice_loadstack,0),SVDECL(imvslice_loadstack,0);
 
 SVEXTERN float xtimeleft, xtimeright;
 SVEXTERN int showstereo, showstereoOLD, show_parallax, showstereo_frame;

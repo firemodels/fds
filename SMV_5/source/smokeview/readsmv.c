@@ -946,7 +946,22 @@ int readsmv(char *file, char *file2){
     if(NewMemory( (void **)&vsliceinfo, 3*nslice_files*sizeof(vslice) )==0||
        NewMemory( (void **)&sliceinfo,  nslice_files*sizeof(slice)    )==0||
        NewMemory( (void **)&slicetypes, nslice_files*sizeof(int)      )==0||
-       NewMemory( (void **)&vslicetypes,3*nslice_files*sizeof(int)    )==0){return 2;}
+       NewMemory( (void **)&slice_loadstack, nslice_files*sizeof(int)      )==0||
+       NewMemory( (void **)&vslice_loadstack, nslice_files*sizeof(int)      )==0||
+       NewMemory( (void **)&mslice_loadstack, nslice_files*sizeof(int)      )==0||
+       NewMemory( (void **)&mvslice_loadstack, nslice_files*sizeof(int)      )==0||
+       NewMemory( (void **)&vslicetypes,3*nslice_files*sizeof(int)    )==0){
+       return 2;
+    }
+    nslice_loadstack=nslice_files;
+    islice_loadstack=0;
+    nvslice_loadstack=nslice_files;
+    ivslice_loadstack=0;
+    nmslice_loadstack=nslice_files;
+    imslice_loadstack=0;
+    nmvslice_loadstack=nslice_files;
+    imvslice_loadstack=0;
+       
   }
   if(nsmoke3d_files>0){
     if(NewMemory( (void **)&smoke3dinfo, nsmoke3d_files*sizeof(smoke3d))==0)return 2;
