@@ -695,6 +695,8 @@ void *compress_slices(void *arg){
   }
   UNLOCK_SLICE;
 
+  if(cleanfiles==1)return NULL;
+
   // convert and compress files
 
   for(i=0;i<nslice_files;i++){

@@ -525,6 +525,8 @@ void *compress_patches(void *arg){
   }
   UNLOCK_PATCH;
 
+  if(cleanfiles==1)return NULL;
+
   // convert and compress files
 
   for(i=0;i<npatch_files;i++){
