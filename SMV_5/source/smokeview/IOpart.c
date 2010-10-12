@@ -1072,7 +1072,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   
   printf("Sizing particle data: %s\n",file);
   file_unit=15;
-  get_file_unit(&file_unit,&file_unit);
+  FORTget_file_unit(&file_unit,&file_unit);
   FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian,&staticframe0,&error,lenfile);
   STRCPY(partsizefile,file);
   STRCAT(partsizefile,".sz");
@@ -1102,7 +1102,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
       printf("*** warning:  unable to write to %s\n",partsizefile);
     }
     file_unit=15;
-    get_file_unit(&file_unit,&file_unit);
+    FORTget_file_unit(&file_unit,&file_unit);
     FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian,&staticframe0,&error,lenfile);
   }
   npartpoints2=npartpoints;

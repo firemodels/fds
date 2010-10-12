@@ -482,7 +482,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         return;
       }
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
-      get_file_unit(&file_unit,&file_unit);
+      FORTget_file_unit(&file_unit,&file_unit);
       FORTgetslicedata(&file_unit,file,slicelonglabels,sliceshortlabels,sliceunits,
                    &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,&sd->idir,
                    &qmin,&qmax,sd->qslicedata,sd->slicetimes,&sd->nsteps,&sliceframestep, &endian,
