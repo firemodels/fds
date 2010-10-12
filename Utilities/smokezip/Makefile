@@ -1,7 +1,8 @@
 SOURCE_DIR = ../../../SMV_5/source/
 BUILD_DIR = $(SOURCE_DIR)/../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
-INC_DIR = -I $(SOURCE_DIR)/include2 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
+INC2_DIR = -I $(SOURCE_DIR)/include2  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
+INC_DIR =  -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
 FILTERC =
 FILTERF =
 
@@ -33,7 +34,7 @@ no_target:
 .c.obj:
 	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 .c.o:
-	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
+	$(CC) -c $(CFLAGS) $(FILTERC) $(INC2_DIR) $<
 .F90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 .f90.obj:
