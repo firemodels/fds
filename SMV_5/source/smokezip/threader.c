@@ -20,18 +20,16 @@ void part2iso(part *parti);
 
 void init_pthread_mutexes(void){
 #ifdef pp_THREAD
-  if(mt_compress==1){
-    pthread_mutex_init(&mutexCOMPRESS,NULL);
-    pthread_mutex_init(&mutexPATCH,NULL);
-    pthread_mutex_init(&mutexPATCH_BOUND,NULL);
-    pthread_mutex_init(&mutexSLICE,NULL);
-    pthread_mutex_init(&mutexSLICE_BOUND,NULL);
-    pthread_mutex_init(&mutexISOS,NULL);
-    pthread_mutex_init(&mutexSMOKE,NULL);
-    pthread_mutex_init(&mutexPLOT3D,NULL);
-    pthread_mutex_init(&mutexPART2ISO,NULL);
-    pthread_mutex_init(&mutexPRINT,NULL);
-  }
+  pthread_mutex_init(&mutexCOMPRESS,NULL);
+  pthread_mutex_init(&mutexPATCH,NULL);
+  pthread_mutex_init(&mutexPATCH_BOUND,NULL);
+  pthread_mutex_init(&mutexSLICE,NULL);
+  pthread_mutex_init(&mutexSLICE_BOUND,NULL);
+  pthread_mutex_init(&mutexISOS,NULL);
+  pthread_mutex_init(&mutexSMOKE,NULL);
+  pthread_mutex_init(&mutexPLOT3D,NULL);
+  pthread_mutex_init(&mutexPART2ISO,NULL);
+  pthread_mutex_init(&mutexPRINT,NULL);
 #endif
 }
 
