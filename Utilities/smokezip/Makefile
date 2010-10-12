@@ -56,7 +56,7 @@ ms_win_32 : CPP       = cl
 ms_win_32 : FC        = ifort
 ms_win_32 : exe       = smokezip.exe
 ms_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib  $(LIB_DIR)/lib_win_intel_32/pthreadVC2.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib  $(LIB_DIR)/lib_win_intel_32/pthreadVC.lib
 
 # ------------- Win 32 ----------------
 #  32 bit windows
@@ -69,7 +69,7 @@ intel_win_32 : FC        = ifort
 intel_win_32 : exe       = smokezip.exe
 
 intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib $(LIB_DIR)/lib_win_intel_32/pthreadVC2.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib $(LIB_DIR)/lib_win_intel_32/pthreadVC.lib
 
 # ------------- Win 64 ----------------
 #  64 bit windows
