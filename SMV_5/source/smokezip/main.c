@@ -62,7 +62,7 @@ int main(int argc, char **argv){
   first_part2iso_smvopen=1;
 #ifdef pp_THREAD
   mt_compress=0;
-  mt_nthreads=1;
+  mt_nthreads=2;
 #endif
   frameskip=-1;
   no_chop=0;
@@ -690,6 +690,9 @@ void usage(char *prog){
 #ifdef pp_PART2
   printf("  -nP - do not compress particle files\n");
   printf("  -yP - compress particle files\n");
+#endif
+#ifdef pp_THREAD
+  printf("  -t nthread - Compress nthread files at a time (up to %i)\n",NTHREADS_MAX);
 #endif
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("               to view the case) to the directory destdir\n"); 
