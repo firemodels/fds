@@ -650,7 +650,7 @@ SVEXTERN int SVDECL(*mvslice_loadstack,NULL),SVDECL(nmvslice_loadstack,0),SVDECL
 SVEXTERN float xtimeleft, xtimeright;
 SVEXTERN int showstereo, showstereoOLD, show_parallax, showstereo_frame;
 
-SVEXTERN int show_hrrcutoff, show_hrrcutoff_active, hrrpuv_loaded;
+SVEXTERN int SVDECL(show_hrrcutoff,1), SVDECL(show_hrrcutoff_active,0),SVDECL(hrrpuv_loaded,0);
 SVEXTERN int showglui3dsmoke;
 SVEXTERN int showgluitour;
 SVEXTERN int showalert;
