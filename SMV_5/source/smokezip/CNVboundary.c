@@ -660,12 +660,7 @@ void Get_Boundary_Bounds(void){
     patchi->inuse_getbounds=0;
   }
 #ifdef pp_THREAD
-  if(mt_compress==1){
-    mt_update_patch_hist();
-  }
-  else{
-    update_patch_hist();
-  }
+  mt_update_patch_hist();
 #else
   update_patch_hist();
 #endif
