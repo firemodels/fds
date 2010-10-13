@@ -3695,13 +3695,12 @@ combustion model.
 
 Sometimes it is desired that a fire spread radially at some specified
 rate. Rather than trying to design material properties
-to achieve this, you can alternatively use a {\ct VENT} in a special way.
-If the {\ct SURF\_ID} associated with a {\ct VENT}
-defines a specified heat release rate, {\ct HRRPUA}, and
-time history, {\ct RAMP\_Q} or {\ct TAU\_Q}, you can also specify {\ct
-XYZ} and {\ct SPREAD\_RATE} on the {\ct VENT} line.
-Then the fire is directed to start at the point {\ct XYZ} and spread
-radially at a rate of {\ct SPREAD\_RATE} (m/s). The ramp-up begins at
+to achieve this, you can alternatively use a {\ct VENT} or a {\ct SURF} line in a special way.
+First, you need to add a {\ct SURF} line with 
+a specified heat release rate, {\ct HRRPUA}, and an optional
+time history parameter, {\ct RAMP\_Q} or {\ct TAU\_Q}. Then, you can also specify {\ct XYZ} and {\ct SPREAD\_RATE} on either the {\ct VENT} or {\ct SURF} line.
+The fire is directed to start at the point {\ct XYZ} at the time designated by {\ct T\_BEGIN} and spread
+radially at a rate of {\ct SPREAD\_RATE} (m/s). The optional ramp-up of the HRR begins at
 the time when the fire arrives at a given point.
 For example, the lines
 
@@ -3728,7 +3727,7 @@ leads to a desired time history of the heat release rate.
 
 \begin{warning}
 If the starting time of the simulation, {\ct T\_BEGIN}, is not zero, be aware that the default start time of the radially spreading
-fire is {\ct T\_BEGIN}, not zero. This is also true of {\ct TAU\_Q}, but it is not true of {\ct RAMP\_Q}. Because this might be 
+fire is {\ct T\_BEGIN}, not zero. This is also true of {\ct TAU\_Q}, but it is not true of {\ct RAMP\_Q}. Because this might be
 confusing, if you start the calculation at a time other than zero, do a quick test to ensure that the ramps or fire spread behave as
 expected.
 \end{warning}
@@ -10373,6 +10372,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
 {\ct RGB(3)}                          & Int.~Triplet    & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                       & Real            & Wall roughness height             & m                   & 0.                      \\ \hline
+{\ct SPREAD\_RATE}                    & Real            & See Section~\ref{info:spread}     & m/s                 & 0.0                     \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
 {\ct SURFACE\_DENSITY}                & Real            & See Section~\ref{info:BURN_AWAY}  & kg/m$^2$            & 0.0                     \\ \hline
 {\ct TAU\_EF}                         & Real            & Ramp time for external flux       & s                   & 1.                      \\ \hline
@@ -10391,6 +10391,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VEL    }                         & Real            & Normal velocity                   & m/s                 & 0.                      \\ \hline
 {\ct VEL\_T }                         & Real Pair       & Tangential velocity comps.        & m/s                 & 0.                      \\ \hline
 {\ct VOLUME\_FLUX}                    & Real            & Normal velocity x vent area       & m$^3$/s             & 0.                      \\ \hline
+{\ct XYZ(3)}                          & Real Triplet    & See Section~\ref{info:spread}     &  m                  &                         \\ \hline
 {\ct Z0 }                             & Real            & Atmospheric profile origin        &  m                  & 10.                     \\ \hline
 \end{longtable}
 

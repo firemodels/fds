@@ -2325,11 +2325,11 @@ PROCESS_VENT: IF (I_VENT>0) THEN
       END SELECT
    ENDIF
  
-   ! Check if fire spreads radially
+   ! Check if fire spreads radially over this vent
  
    IF (VT%X0>-1.E5_EB) THEN
       DIST = SQRT((M%XW(IW)-VT%X0)**2 +(M%YW(IW)-VT%Y0)**2 +(M%ZW(IW)-VT%Z0)**2)
-      T_ACTIVATE = T_BEGIN+DIST/VT%FIRE_SPREAD_RATE
+      T_ACTIVATE = T_BEGIN + DIST/VT%FIRE_SPREAD_RATE
    ENDIF
 
    ! Miscellaneous settings
@@ -2338,18 +2338,28 @@ PROCESS_VENT: IF (I_VENT>0) THEN
    IF (VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .AND. .NOT.M%SOLID(ICG)) M%BOUNDARY_TYPE(IW) = MIRROR_BOUNDARY
 
 ENDIF PROCESS_VENT
+
+! Assign the SURFace type for the boundary cell
+
+SF => SURFACE(IBCX)
  
+! Check if fire spreads radially over this surface type
+
+IF (SF%XYZ(1)>-1.E5_EB) THEN
+   DIST = SQRT((M%XW(IW)-SF%XYZ(1))**2 +(M%YW(IW)-SF%XYZ(2))**2 +(M%ZW(IW)-SF%XYZ(3))**2)
+   T_ACTIVATE = T_BEGIN + DIST/SF%FIRE_SPREAD_RATE
+ENDIF
+
 ! Set ignition time of each boundary cell
  
 IF (T_ACTIVATE < T_BEGIN) THEN
-   M%TW(IW) = SURFACE(IBCX)%T_IGN
+   M%TW(IW) = SF%T_IGN
 ELSE
    M%TW(IW) = T_ACTIVATE
 ENDIF
  
 ! Miscellaneous initializations
 
-SF => SURFACE(IBCX)
 M%E_WALL(IW) = SF%EMISSIVITY
 IF (.NOT.EVACUATION_ONLY(NM)) M%NPPCW(IW)  = SF%NPPC      ! Number of particles per cell
 
