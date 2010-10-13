@@ -948,6 +948,8 @@ int readsmv(char *file, char *file2){
        NewMemory( (void **)&slicetypes, nslice_files*sizeof(int)      )==0||
        NewMemory( (void **)&slice_loadstack, nslice_files*sizeof(int)      )==0||
        NewMemory( (void **)&vslice_loadstack, nslice_files*sizeof(int)      )==0||
+       NewMemory( (void **)&subslice_menuindex, nslice_files*sizeof(int)      )==0||
+       NewMemory( (void **)&subvslice_menuindex, nslice_files*sizeof(int)      )==0||
        NewMemory( (void **)&mslice_loadstack, nslice_files*sizeof(int)      )==0||
        NewMemory( (void **)&mvslice_loadstack, nslice_files*sizeof(int)      )==0||
        NewMemory( (void **)&vslicetypes,3*nslice_files*sizeof(int)    )==0){
