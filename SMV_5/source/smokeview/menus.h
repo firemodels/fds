@@ -2863,12 +2863,12 @@ void LoadVSliceMenu(int value){
     }
     return;
   }
-  if(value==-20){
+  else if(value==-20){
     showallslicevectors=1-showallslicevectors;
     updatemenu=1;  
     GLUTPOSTREDISPLAY
   }
-  if(value>=0){
+  else if(value>=0){
     vslice *vslicei;
     slice *slicei;
 
@@ -2881,6 +2881,32 @@ void LoadVSliceMenu(int value){
       file=slicei->file;
       fprintf(scriptoutstream,"LOADVFILE\n");
       fprintf(scriptoutstream," %s\n",file);
+    }
+  }
+  else{
+    int submenutype;
+    char *submenulabel;
+    vslice *vslicei;
+    slice *slicei;
+    int dir;
+
+    value = -(1000 + value);
+    submenutype=value/4;
+    dir=value%4;
+    submenutype=subvslice_menuindex[submenutype];
+    vslicei = vsliceinfo + submenutype;
+    slicei = sliceinfo + vslicei->ival;
+    submenulabel = slicei->label.longlabel;
+    for(i=0;i<nvslice;i++){
+      char *longlabel;
+      int errorcode;
+
+      vslicei = vsliceinfo + i;
+      slicei=sliceinfo + vslicei->ival;
+      longlabel = slicei->label.longlabel;
+      if(strcmp(longlabel,submenulabel)!=0)continue;
+      if(dir!=0&&dir!=slicei->idir)continue;
+      readvslice(i,LOAD,&errorcode);
     }
   }
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
@@ -3174,8 +3200,33 @@ void LoadSliceMenu(int value){
     readslice(file,value,LOAD,&errorcode);
   }
   else{
-    for(i=0;i<nslice_files;i++){
-      readslice("",i,UNLOAD,&errorcode);
+    if(value==-1){
+      for(i=0;i<nslice_files;i++){
+        readslice("",i,UNLOAD,&errorcode);
+      }
+    }
+    else{
+      int submenutype;
+      char *submenulabel;
+      slice *slicei;
+      int dir;
+
+      value = -(1000 + value);
+      submenutype=value/4;
+      dir=value%4;
+      submenutype=subslice_menuindex[submenutype];
+      slicei = sliceinfo + submenutype;
+      submenulabel = slicei->label.longlabel;
+      for(i=0;i<nslice_files;i++){
+        char *longlabel;
+        int errorcode;
+
+        slicei = sliceinfo + i;
+        longlabel = slicei->label.longlabel;
+        if(strcmp(longlabel,submenulabel)!=0)continue;
+        if(dir!=0&&dir!=slicei->idir)continue;
+        readslice(slicei->file,i,LOAD,&errorcode);
+      }
     }
   }
   updatemenu=1;  
@@ -6740,7 +6791,7 @@ static int in_menu=0;
     glutAddMenuEntry("Unload All",-1);
 
     if(nvslice0>0){
-      vslice *vd, *vdim1;
+      vslice *vd, *vdim1,*vdip1;
       if(nvslice>0){
         nloadsubvslicemenu=1;
         for(ii=1;ii<nvslice;ii++){
@@ -6761,18 +6812,24 @@ static int in_menu=0;
         }
         nloadsubvslicemenu=0;
         for(ii=0;ii<nvslice;ii++){
-          slice *sd, *sdm1;
+          slice *sd, *sdm1, *sdp1;
 
           i=vsliceorderindex[ii];
           vd = vsliceinfo + i;
-          if(ii>0)vdim1 = vsliceinfo + vsliceorderindex[ii-1];
           sd = sliceinfo + vd->ival;
-          if(ii>0)sdm1 = sliceinfo + vdim1->ival;
+          
+          if(ii!=0){
+            vdim1 = vsliceinfo + vsliceorderindex[ii-1];
+            sdm1 = sliceinfo + vdim1->ival;
+          }
+          if(ii!=nvslice-1){
+            vdip1 = vsliceinfo + vsliceorderindex[ii+1];
+            sdp1 = sliceinfo + vdip1->ival;
+          }
+          
           if(ii==0||strcmp(sd->label.longlabel,sdm1->label.longlabel)!=0){
             CREATEMENU(loadsubvslicemenu[nloadsubvslicemenu],LoadVSliceMenu);
-            nloadsubvslicemenu++;
           }
-          sd = sliceinfo + vd->ival;
           if(vd->loaded==1){
             STRCPY(menulabel,check);
             STRCAT(menulabel,sd->menulabel);
@@ -6781,6 +6838,17 @@ static int in_menu=0;
             STRCPY(menulabel,sd->menulabel);
           }
           if(sd->vec_comp==0||showallslicevectors==1)glutAddMenuEntry(menulabel,i);
+          if(ii==nvslice-1||strcmp(sd->label.longlabel,sdp1->label.longlabel)!=0){
+            subvslice_menuindex[nloadsubvslicemenu]=vsliceorderindex[ii];
+            glutAddMenuEntry("-",-999);
+            glutAddMenuEntry("Load All x",-1000-4*nloadsubvslicemenu-1);
+            glutAddMenuEntry("Load All y",-1000-4*nloadsubvslicemenu-2);
+            glutAddMenuEntry("Load All z",-1000-4*nloadsubvslicemenu-3);
+            glutAddMenuEntry("Load All",-1000-4*nloadsubvslicemenu);
+          }
+          if(ii==0||strcmp(sd->label.longlabel,sdm1->label.longlabel)!=0){
+            nloadsubvslicemenu++;
+          }
         }
         CREATEMENU(vslicemenu,LoadVSliceMenu);
         nloadsubvslicemenu=0;
@@ -6975,13 +7043,14 @@ static int in_menu=0;
       }
       iloadsubslicemenu=0;
       for(i=0;i<nslice_files;i++){
-        slice *sd,*sdim1;
+        slice *sd,*sdim1,*sdip1;
 
+        if(i!=0)sdim1 = sliceinfo + sliceorderindex[i-1];
         sd = sliceinfo + sliceorderindex[i];
-        sdim1 = sliceinfo + sliceorderindex[i-1];
+        if(i!=nslice_files-1)sdip1 = sliceinfo + sliceorderindex[i+1];
+
         if(i==0||strcmp(sd->label.longlabel,sdim1->label.longlabel)!=0){
           CREATEMENU(loadsubslicemenu[iloadsubslicemenu],LoadSliceMenu);
-          iloadsubslicemenu++;
         }
         if(sd->loaded==1){
           STRCPY(menulabel,check);
@@ -6991,6 +7060,17 @@ static int in_menu=0;
           STRCPY(menulabel,sd->menulabel);
         }
         glutAddMenuEntry(menulabel,sliceorderindex[i]);
+        if(i==nslice_files-1||strcmp(sd->label.longlabel,sdip1->label.longlabel)!=0){
+          subslice_menuindex[iloadsubslicemenu]=sliceorderindex[i];
+          glutAddMenuEntry("-",-999);
+          glutAddMenuEntry("Load All x",-1000-4*iloadsubslicemenu-1);
+          glutAddMenuEntry("Load All y",-1000-4*iloadsubslicemenu-2);
+          glutAddMenuEntry("Load All z",-1000-4*iloadsubslicemenu-3);
+          glutAddMenuEntry("Load All",-1000-4*iloadsubslicemenu);
+        }
+        if(i==0||strcmp(sd->label.longlabel,sdim1->label.longlabel)!=0){
+          iloadsubslicemenu++;
+        }
       }
       CREATEMENU(loadslicemenu,LoadSliceMenu);
       iloadsubslicemenu=0;
