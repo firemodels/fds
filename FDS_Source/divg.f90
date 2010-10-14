@@ -741,9 +741,9 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             IF (BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .AND. IOR>0) UWS(IW) = -UWS(IW)  ! One-way flow through POROUS plate
             IF (EVACUATION_ONLY(NM)) UWS(IW) = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*UW0(IW)
             IF (SURFACE(IBC)%MASS_FLUX_TOTAL /= 0._EB) THEN
-               IIG = IJKW(6,IW) 
-               JJG = IJKW(7,IW) 
-               KKG = IJKW(8,IW) 
+               !!IIG = IJKW(6,IW) ??
+               !!JJG = IJKW(7,IW) ??
+               !!KKG = IJKW(8,IW) ??
                UWS(IW) = UWS(IW)*RHOA/RHO_F(IW)
             ENDIF
             IF (VENT_INDEX(IW)>0) THEN 
