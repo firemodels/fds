@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "MALLOC.h"
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
 static int checkmemoryflag=1;
 #endif
 #ifdef WIN32
@@ -30,7 +30,7 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
     if(availmem!=NULL)*availmem=stat.dwMemoryLoad;
     if(totalmem!=NULL)*totalmem=stat.dwTotalPhys/(1024*1024);
     if(physmemused!=NULL)*physmemused=(stat.dwTotalPhys-stat.dwAvailPhys)/(1024*1024);
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
     if(size!=0&&size<=stat.dwAvailPhys-0.1*stat.dwTotalPhys){
       printf("*** Available Memory: %i M \n",
            (int)stat.dwAvailPhys/(1024*1024));
@@ -63,7 +63,7 @@ void initMM(void){
 
 mallocflag _NewMemory(void **ppv, size_t size){
   void **ppb=(void **)ppv;
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
   char *c;
 #endif
   int infoblocksize;
@@ -91,7 +91,7 @@ mallocflag _NewMemory(void **ppv, size_t size){
     *ppb=NULL;
   }
 
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
   {
     CheckMemory;
     if(*ppb != NULL){
@@ -131,7 +131,7 @@ void FreeAllMemory(void){
 /* ------------------ FreeMemory ------------------------ */
 
 void FreeMemory(void *pv){
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
   int len_memory;
 #endif
   int infoblocksize;
@@ -140,7 +140,7 @@ void FreeMemory(void *pv){
   ASSERT(pv != NULL);
   infoblocksize=(sizeof(MMdata)+3)/4;
   infoblocksize*=4;
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
   {
     CheckMemory;
     len_memory=sizeofBlock((char *)pv);
@@ -164,7 +164,7 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
   bbyte **ppold, *pbNew;
   int infoblocksize;
   MMdata *this_ptr, *prev_ptr, *next_ptr;
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
   char *c;
   size_t sizeOld;
 #endif
@@ -174,7 +174,7 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
 
   ppold=(bbyte **)ppv;
   ASSERT(ppold != NULL && sizeNew != 0);
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
   {
     CheckMemory;
     sizeOld = sizeofBlock(*ppold);
@@ -206,7 +206,7 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
     this_ptr->prev=prev_ptr;
     this_ptr->marker=markerByte;
   }
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
     {
       if(sizeofDebugByte!=0){
         c = pbNew + infoblocksize + sizeNew;
@@ -223,7 +223,7 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
   return (pbNew != NULL);
 }
 
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
 /* ------------------ pointer comparison defines ------------------------ */
 
 #define fPtrLess(pLeft, pRight)   ((pLeft) <  (pRight))
@@ -480,7 +480,7 @@ size_t sizeofBlock(bbyte *pb){
 
 /* ------------------ ValidPointer ------------------------ */
 
-mallocflag ValidPointer(void *pv, size_t size){
+mallocflag _ValidPointer(void *pv, size_t size){
   blockinfo *pbi;
   bbyte *pb = (bbyte *)pv;
 
