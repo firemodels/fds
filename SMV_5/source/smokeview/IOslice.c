@@ -382,7 +382,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       updateglui();
       update_unit_defs();
       updatetimes();
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
       printf("After slice unload: ");
       PrintMemoryInfo;
       GetMemoryInfo(num_memblocks_unload,num_memblocks_load);
@@ -709,7 +709,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   if(sd->compression_type==0){
     ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
   }
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
   printf("After slice file load: ");
   GetMemoryInfo(sd->num_memblocks,num_memblocks_load);
   PrintMemoryInfo;

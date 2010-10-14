@@ -20,6 +20,10 @@
 #define pp_SLICECONTOURS
 #endif
 
+#ifdef _DEBUG  // comment out following line if debugging REALLY large cases (to avoid memory checks)
+#define pp_MEMDEBUG
+#endif
+
 #ifdef pp_ALPHA
 #define SMVVERSION "Experimental"
 #undef pp_release
