@@ -719,11 +719,9 @@ void readpatch(int ifile, int flag, int *errorcode){
     if(loadpatchbysteps==0||loadpatchbysteps==1){
       for (n=0;n<boundframestep;n++){
         if(error==0){
-          int lunit=15;
           int npqqi;
 
-          FORTget_file_unit(&lunit,&lunit);
-          FORTgetpatchdata(&lunit,&meshi->npatches,
+          FORTgetpatchdata(&file_unit,&meshi->npatches,
           meshi->pi1,meshi->pi2,
           meshi->pj1,meshi->pj2,
           meshi->pk1,meshi->pk2,
