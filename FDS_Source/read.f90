@@ -4729,7 +4729,7 @@ VEL_T                   = 0._EB
 VEL                     = 0._EB
 VOLUME_FLUX             = 0._EB
 WIDTH                   = -1._EB
-XYZ                     = -1.E-6_EB
+XYZ                     = -1.E6_EB
 Z0                      = 10._EB
 
 VEGETATION                 = .FALSE.
