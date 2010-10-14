@@ -29,7 +29,7 @@ REAL(EB) :: FXYZ,PMDT,UDRHODN,TNOW,ZZ(4),UN,RHO_D_DYDN
 INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,IBC
 REAL(EB), POINTER, DIMENSION(:) :: UWP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UDRHODX,VDRHODY,WDRHODZ,EPSX,EPSY,EPSZ, &
-                                       FX=>NULL(),FY=>NULL(),FZ=>NULL()
+                                       FX=>NULL(),FY=>NULL(),FZ=>NULL(),MASS_COR=>NULL()
  
 IF (EVACUATION_ONLY(NM)) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
@@ -161,6 +161,8 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
       FX=>WORK4
       FY=>WORK5
       FZ=>WORK6
+      MASS_COR=>WORK7
+      MASS_COR=0._EB
       !$OMP END SINGLE
    
       !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ)
@@ -199,20 +201,55 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
       !$OMP SINGLE PRIVATE(IW,II,JJ,KK,IOR,IBC,UN)
       !!$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IBC,UN)
       WLOOP_FL: DO IW=1,NWC
-         IBC = IJKW(5,IW)
-         IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) CYCLE WLOOP_FL
+         
          IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY   .OR. &
              BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
              BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)            CYCLE WLOOP_FL
+             
          II  = IJKW(1,IW) 
          JJ  = IJKW(2,IW)
          KK  = IJKW(3,IW)
          IOR = IJKW(4,IW)
-         UN = -SIGN(1._EB,REAL(IOR,EB))*UWP(IW)
+         IBC = IJKW(5,IW)
+         IIG = IJKW(6,IW)
+         JJG = IJKW(7,IW)
+         KKG = IJKW(8,IW)
+         
+         SELECT CASE(IOR)
+            CASE( 1)
+               UN = UU(II,JJ,KK)
+            CASE(-1)
+               UN = UU(II-1,JJ,KK)
+            CASE( 2)
+               UN = VV(II,JJ,KK)
+            CASE(-2)
+               UN = VV(II,JJ-1,KK)
+            CASE( 3)
+               UN = WW(II,JJ,KK)
+            CASE(-3)
+               UN = WW(II,JJ,KK-1)
+         END SELECT
          IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
-         IF ((SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY)&
-             .AND. N_SPECIES>0._EB) THEN
-            UN = SIGN(1._EB,REAL(IOR,EB))*SUM(MASSFLUX(IW,0:N_SPECIES))/RHO_F(IW)
+         !!IF (SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY) THEN
+         !!   UN = SIGN(1._EB,REAL(IOR,EB))*SUM(MASSFLUX(IW,0:N_SPECIES))/RHO_F(IW)
+         !!ENDIF
+         IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN
+            RHO_F(IW)=RHOP(IIG,JJG,KKG)
+            UN=0._EB
+            SELECT CASE(IOR)
+               CASE( 1)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*UU(II,JJ,KK)*RDX(IIG)
+               CASE(-1)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*UU(II-1,JJ,KK)*RDX(IIG)
+               CASE( 2)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*VV(II,JJ,KK)*RDY(JJG)
+               CASE(-2)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*VV(II,JJ-1,KK)*RDY(JJG)
+               CASE( 3)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*WW(II,JJ,KK)*RDZ(KKG)
+               CASE(-3)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*WW(II,JJ,KK-1)*RDZ(KKG)
+            END SELECT
          ENDIF
          
          ! compute flux on the face of the wall cell
@@ -286,7 +323,8 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                FRHO(I,J,K) = (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
                            + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
-                           + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)
+                           + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)        &
+                           - MASS_COR(I,J,K)
             ENDDO
          ENDDO
       ENDDO
@@ -386,6 +424,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       FX=>WORK4
       FY=>WORK5
       FZ=>WORK6
+      MASS_COR=>WORK7
+      MASS_COR=0._EB
       !$OMP END SINGLE
    
       !$OMP PARALLEL
@@ -425,30 +465,59 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       !$OMP SINGLE PRIVATE(IW,II,JJ,KK,IOR,IBC,UN)
       !!$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IBC,UN)
       WLOOP2_FL: DO IW=1,NWC
-         IBC = IJKW(5,IW)
-         ! We CYCLE on NO_MASS_FLUX for RHO because UU, etc. must be used to preserve the exact divergence and
-         ! therefore the temperature.  It would be desirable to have precisely the same condition for YY, but
-         ! this has shown to lead to spurious creation of species near boundaries. So we have commented this
-         ! line out.  It is left here to remind us of the descrepancy with the RHO loop above.
-         !!IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) CYCLE WLOOP2_FL
+
          IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY   .OR. &
              BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
              BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)            CYCLE WLOOP2_FL
-         II  = IJKW(1,IW) 
-         IIG = IJKW(6,IW)
-         JJ  = IJKW(2,IW) 
-         JJG = IJKW(7,IW)
+             
+         II  = IJKW(1,IW)
+         JJ  = IJKW(2,IW)
          KK  = IJKW(3,IW) 
-         KKG = IJKW(8,IW)
          IOR = IJKW(4,IW)
+         IBC = IJKW(5,IW)
+         IIG = IJKW(6,IW)
+         JJG = IJKW(7,IW)
+         KKG = IJKW(8,IW)
          
-         UN = -SIGN(1._EB,REAL(IOR,EB))*UWP(IW)
+         SELECT CASE(IOR)
+            CASE( 1)
+               UN = UU(II,JJ,KK)
+            CASE(-1)
+               UN = UU(II-1,JJ,KK)
+            CASE( 2)
+               UN = VV(II,JJ,KK)
+            CASE(-2)
+               UN = VV(II,JJ-1,KK)
+            CASE( 3)
+               UN = WW(II,JJ,KK)
+            CASE(-3)
+               UN = WW(II,JJ,KK-1)
+         END SELECT
          IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
          IF ((SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY)&
              .AND. YY_F(IW,N)>0._EB) THEN
             ! recreate diffusive flux from divg b/c UWP based on old RHODW
             RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
             UN = SIGN(1._EB,REAL(IOR,EB))*(MASSFLUX(IW,N) + RHO_D_DYDN)/(RHO_F(IW)*YY_F(IW,N))
+         ENDIF
+         IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN
+            RHO_F(IW)=RHOP(IIG,JJG,KKG)
+            YY_F(IW,N)=YYP(IIG,JJG,KKG,N)
+            UN=0._EB
+            SELECT CASE(IOR)
+               CASE( 1)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*YY_F(IW,N)*UU(II,JJ,KK)*RDX(IIG)
+               CASE(-1)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*YY_F(IW,N)*UU(II-1,JJ,KK)*RDX(IIG)
+               CASE( 2)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*YY_F(IW,N)*VV(II,JJ,KK)*RDY(JJG)
+               CASE(-2)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*YY_F(IW,N)*VV(II,JJ-1,KK)*RDY(JJG)
+               CASE( 3)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*YY_F(IW,N)*WW(II,JJ,KK)*RDZ(KKG)
+               CASE(-3)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*YY_F(IW,N)*WW(II,JJ,KK-1)*RDZ(KKG)
+            END SELECT
          ENDIF
          
          ! compute flux on the face of the wall cell
@@ -519,7 +588,8 @@ SPECIES_LOOP: DO N=1,N_SPECIES
                DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N)             &
                                         + (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
                                         + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
-                                        + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)
+                                        + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)        &
+                                        - MASS_COR(I,J,K)
             ENDDO
          ENDDO
       ENDDO

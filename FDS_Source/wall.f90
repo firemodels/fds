@@ -454,9 +454,9 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
          SUM_MASSFLUX_LOOP: DO N=0,N_SPECIES
             IF (SF%MASS_FLUX(N) > 0._EB) THEN  ! Use user-specified ramp-up of mass flux
                IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(N)>=1) THEN
-                  TSI = T
+                  TSI = T + DT
                ELSE
-                  TSI = T - TW(IW)
+                  TSI = T + DT - TW(IW)
                ENDIF
                MASSFLUX(IW,N) = EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*SF%MASS_FLUX(N)
                IF ((N==I_FUEL).AND.(EW(IW)>0._EB)) MASSFLUX(IW,N) = MASSFLUX(IW,N)*EXP(-EW(IW))
