@@ -36,13 +36,13 @@ MMEXTERN MMdata *MMfirstptr, *MMlastptr;
 
 #define debugByte 0xE1
 #define markerByte 0xE1
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
   #define sizeofDebugByte 1
 #else
   #define sizeofDebugByte 0
 #endif
 
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
 #define NewMemory(f,g) __NewMemory((f),(g),(#f),__FILE__,__LINE__)
 #define ResizeMemory(f,g) __ResizeMemory((f),(g),(#f),__FILE__,__LINE__)
 #else
@@ -63,13 +63,14 @@ void _memorystatus(unsigned int size,unsigned int *availmem, unsigned int *memus
 #define MEMSTATUS(f,g,h,i)
 #endif
 
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
 void _CheckMemory(void);
 void _CheckMemoryOn(void);
 void _CheckMemoryOff(void);
 void _PrintMemoryInfo(void);
 void _PrintAllMemoryInfo(void);
 int _GGetMemoryInfo(void);
+#define ValidPointer(pv,size) _ValidPointer(pv, size)
 #define CheckMemory _CheckMemory()
 #define CheckMemoryOn _CheckMemoryOn()
 #define CheckMemoryOff _CheckMemoryOff()
@@ -81,6 +82,7 @@ char *_strcat(char *s1, const char *s2);
 #define STRCPY(f,g) _strcpy((f),(g))
 #define STRCAT(f,g) _strcat((f),(g))
 #else
+#define ValidPointer(pv,size)
 #define CheckMemory
 #define CheckMemoryOn
 #define CheckMemoryOff
@@ -91,7 +93,7 @@ char *_strcat(char *s1, const char *s2);
 #define GetMemoryInfo(f,g)
 #endif
 
-#ifdef _DEBUG
+#ifdef pp_MEMDEBUG
 typedef struct BLOCKINFO {
   struct BLOCKINFO *pbiNext;
   bbyte *pb;
@@ -113,7 +115,7 @@ mallocflag _NewMemory(void **ppv, size_t size);
 void FreeMemory(void *pv);
 void initMM(void);
 void FreeAllMemory(void);
-mallocflag ValidPointer(void *pv, size_t size);
+mallocflag _ValidPointer(void *pv, size_t size);
 
 #endif
 #define FREEMEMORY(f) if((f)!=NULL){FreeMemory((f));(f)=NULL;}
