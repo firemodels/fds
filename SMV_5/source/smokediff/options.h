@@ -45,6 +45,10 @@
 #undef pp_release
 #define pp_release
 
+#ifdef _DEBUG
+#define pp_MEMDEBUG
+#endif
+
 #ifdef pp_BETA
 #undef pp_release
 #define SMDiffVERSION "test"

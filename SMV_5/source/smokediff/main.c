@@ -28,6 +28,7 @@ int main(int argc, char **argv){
   int i;
   int open_smokeview=0;
 
+  initMM();
 #ifdef WIN32
   strcpy(dirseparator,"\\");
 #else
