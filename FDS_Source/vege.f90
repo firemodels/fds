@@ -31,7 +31,7 @@ USE MEMORY_FUNCTIONS, ONLY: RE_ALLOCATE_DROPLETS
 REAL(EB) CROWN_LENGTH,CROWN_VOLUME,TANGENT,CROWN_WIDTH,CROWN_WIDTH_BOTTOM
 REAL(EB) DX_RING,DZ_RING,INNER_RADIUS,OUTER_RADIUS,R_CTR_CYL,  &
          RING_BOTTOM,RING_TOP,SLANT_WIDTH
-REAL(EB) V_CELL,XLOC,YLOC,ZLOC
+REAL(EB) V_CELL,XLOC,YLOC,ZLOC,X_EXTENT,Y_EXTENT,Z_EXTENT
 INTEGER NCT,NLP_TREE,NLP_RECT_VEG,N_TREE,NXB,NYB,NZB,IPC
 INTEGER I,II,I_OUTER_RING,JJ,KK,K_BOTTOM_RING
 INTEGER, INTENT(IN) :: NM
@@ -217,6 +217,16 @@ TREE_LOOP: DO NCT=1,N_TREES
              DR%CLASS = IPC
              DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
              VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
+             X_EXTENT = XF_RECT_VEG(NCT) - XS_RECT_VEG(NCT)
+             Y_EXTENT = YF_RECT_VEG(NCT) - YS_RECT_VEG(NCT)
+             Z_EXTENT = ZF_RECT_VEG(NCT) - ZS_RECT_VEG(NCT)
+             DR%VEG_VOLFRACTION = 1._EB
+!            IF (X_EXTENT < DX(NXB)) DR%VEG_VOLFRACTION = DR%VEG_VOLFRACTION*X_EXTENT/DX(NXB)
+!            IF (Y_EXTENT < DY(NYB)) DR%VEG_VOLFRACTION = DR%VEG_VOLFRACTION*Y_EXTENT/DY(NYB)
+             IF (Z_EXTENT < DZ(NZB)) DR%VEG_VOLFRACTION = DR%VEG_VOLFRACTION*Z_EXTENT/DZ(NZB)
+!            print*,'veg_volfraction',z_extent,dz(nzb),dr%veg_volfraction
+!            print*,'veg_volfraction',xs_rect_veg(nct),xf_rect_veg(nct),ys_rect_veg(nct),yf_rect_veg(nct), &
+!                                     zs_rect_veg(nct),zf_rect_veg(nct),z_extent,dz(nzb),DR%VEG_VOLFRACTION
             ENDIF
            ENDDO   
           ENDIF
@@ -586,6 +596,7 @@ DROPLET_LOOP: DO I=1,NLP
    IF_DEHYDRATION: IF (MPV_MOIST > MPV_MOIST_MIN .AND. TMP_VEG_NEW > TMP_H2O_BOIL) THEN
      Q_FOR_DRYING   = (TMP_VEG_NEW - TMP_H2O_BOIL)/DTMP_VEG * QNET_VEG
      MPV_MOIST_LOSS = MIN(DT*Q_FOR_DRYING/H_VAP_H2O,MPV_MOIST-MPV_MOIST_MIN)
+     MPV_MOIST_LOSS = DR%VEG_VOLFRACTION*MPV_MOIST_LOSS !accounts for veg not filling grid cell in z
      MPV_MOIST_LOSS = MIN(MPV_MOIST_LOSS,MPV_MOIST_LOSS_MAX) !use specified max
      TMP_VEG_NEW       = TMP_H2O_BOIL
      DR%VEG_MOIST_MASS = MPV_MOIST - MPV_MOIST_LOSS !kg/m^3
@@ -605,6 +616,7 @@ DROPLET_LOOP: DO I=1,NLP
      MPV_VOLIT    = Q_VOLIT*0.00000239_EB
      MPV_VOLIT    = MAX(MPV_VOLIT,0._EB)
      MPV_VOLIT    = MIN(MPV_VOLIT,MPV_VOLIT_MAX) !user specified max
+     MPV_VOLIT    = DR%VEG_VOLFRACTION*MPV_VOLIT !accounts for veg not filling grid cell in z
      MPV_VOLIT    = MIN(MPV_VOLIT,(MPV_VEG-MPV_VEG_MIN))
      MPV_VEG      = MPV_VEG - MPV_VOLIT
      Q_VOLIT      = MPV_VOLIT*418000._EB
@@ -675,6 +687,7 @@ DROPLET_LOOP: DO I=1,NLP
 !Handle veg. fuel elements if element mass <= prescribed char mass
      IF (MPV_VEG <= MPV_VEG_MIN .AND. .NOT. PC%VEG_CHAR_OXIDATION) THEN
        IF(PC%VEG_REMOVE_CHARRED) DR%R = 0.0001_EB*PC%KILL_RADIUS !fuel element will be removed
+       VEG_FUEL_AND_CHAR_MASS = MPV_VEG_MIN
      ENDIF
 !Enthalpy of volatiles using Cp,volatiles(T) from Ritchie
      H_SENS_VEG_VOLIT = 0.0445*(TMP_VEG**1.5 - TMP_GAS**1.5) - 0.136*(TMP_VEG - TMP_GAS)
@@ -709,10 +722,9 @@ DROPLET_LOOP: DO I=1,NLP
      ENDIF
      IF (MPV_CHAR <= MPV_CHAR_MIN) THEN 
        DR%VEG_CHAR_MASS = 0.0_EB
+       VEG_FUEL_AND_CHAR_MASS = MPV_CHAR_MIN
        IF(PC%VEG_REMOVE_CHARRED) DR%R = 0.0001_EB*PC%KILL_RADIUS !fuel element will be removed
      ENDIF
-!    MW_VEG_MOIST_TERM = MPV_MOIST_LOSS/MW_H2O
-!    Q_VEG_MOIST  = MPV_MOIST_LOSS*CP_H2O*(TMP_VEG - TMPA)
    ENDIF IF_CHAR_OXIDATION_2
   ENDIF IF_CHAR_OXIDATION
 
@@ -820,7 +832,7 @@ INTEGER  ::  IBC,IW
 INTEGER  ::  I,IIG,JJG,KKG
 REAL(EB) :: CP_MOIST_AND_VEG,DZVEG_L,ETAVEG_H,H_CONV_FDS_WALL,H_CONV_L, &
             KAPPA_VEG,LAMBDA_AIR,QRADM_INC,QRADP_INC, &
-            TMP_BOIL,TMPG_A,TMP_G,DTMP_L,DTMP_FDS_WALL
+            TMP_BOIL,TMPG_A,TMP_G,DTMP_L,DTMP_FDS_WALL,RE_VEG_PART,U2,V2
 INTEGER  IIVEG_L,IVEG_L,J,LBURN,NVEG_L
 !REAL(EB), ALLOCATABLE, DIMENSION(:) :: VEG_DIV_QRNET_EMISS,VEG_DIV_QRNET_INC,
 !         VEG_QRNET_EMISS,VEG_QRNET_INC,VEG_QRM_EMISS,VEG_QRP_EMISS, VEG_QRM_INC,VEG_QRP_INC
@@ -841,7 +853,6 @@ TYPE (SURFACE_TYPE), POINTER :: SF =>NULL()
 
 CALL POINT_TO_MESH(NM)
 
-
 TMP_BOIL  = 373._EB
 CP_H2O    = 4190._EB !J/kg/K specific heat of water
 H_VAP_H2O = 2259._EB*1000._EB !J/kg/K heat of vaporization of water
@@ -849,8 +860,8 @@ DT_BC     = T - VEG_CLOCK_BC
 RDT_BC    = 1.0_EB/DT_BC
 
 ! Thermal degradation approach parameters
-  VEG_DEGRADATION_LINEAR = .TRUE.
-  VEG_DEGRADATION_ARRHENIUS = .FALSE.
+! VEG_DEGRADATION_LINEAR    = .TRUE.
+! VEG_DEGRADATION_ARRHENIUS = .FALSE.
   fuel_elem_degrad = .true.
   fds4_degrad      = .false.
 !
@@ -864,6 +875,10 @@ VEG_WALL_CELL_LOOP: DO IW=1,NWC
   SF  => SURFACE(IBC)
 !
   IF (.NOT. SF%VEGETATION) CYCLE VEG_WALL_CELL_LOOP
+
+  VEG_DEGRADATION_LINEAR    = SF%VEG_LINEAR_DEGRAD
+  VEG_DEGRADATION_ARRHENIUS = SF%VEG_ARRHENIUS_DEGRAD
+
   WC  => WALL(IW)
 
   IIG = IJKW(6,IW)
@@ -871,6 +886,7 @@ VEG_WALL_CELL_LOOP: DO IW=1,NWC
   KKG = IJKW(8,IW)
   TMP_G = TMP(IIG,JJG,KKG)
   CHAR_FCTR = 1._EB - SF%VEG_CHARFRAC
+  IF(SF%VEG_NO_BURN) WC%VEG_HEIGHT = SF%VEG_HEIGHT
   VEG_DRAG(IIG,JJG) = SF%VEG_DRAG_INI*(SF%VEG_CHARFRAC + CHAR_FCTR*WC%VEG_HEIGHT/SF%VEG_HEIGHT)
 
   IF(SF%VEG_NO_BURN) CYCLE VEG_WALL_CELL_LOOP
@@ -905,11 +921,15 @@ VEG_WALL_CELL_LOOP: DO IW=1,NWC
   ENDDO
   WC%VEG_HEIGHT = REAL(NVEG_L-LBURN,EB)*DZVEG_L
   LBURN = 0._EB !keep charred veg
-! MPA_MOIST_LOSS_MAX = DT_BC*0.1_EB/REAL(NVEG_L-LBURN,EB) !upper bound based on F19 AU grassland exp U = 5 m/s
+! MPA_VOLIT_MAX      = DT_BC*0.1_EB/REAL(NVEG_L-LBURN,EB) !upper bound F19 AU exp U = 5 m/s
+! MPA_VOLIT_MAX      = DT_BC*0.8_EB/REAL(NVEG_L-LBURN,EB) !upper bound F19 AU exp d=20 m U = 20 m/s
+  !FIRELINE_MLR_MAX = w*R*(1-ChiChar)
+  MPA_VOLIT_MAX      = SF%FIRELINE_MLR_MAX*DT_BC*DX(IIG)/REAL(NVEG_L-LBURN,EB) 
+  MPA_MOIST_LOSS_MAX = MPA_VOLIT_MAX
 ! MPA_MOIST_LOSS_MAX = DT_BC*0.05_EB/REAL(NVEG_L-LBURN,EB)
 ! MPA_VOLIT_MAX      = DT_BC*0.05_EB/REAL(NVEG_L-LBURN,EB)
-  MPA_MOIST_LOSS_MAX = 9999999._EB
-  MPA_VOLIT_MAX      = 9999999._EB
+! MPA_MOIST_LOSS_MAX = 9999999._EB
+! MPA_VOLIT_MAX      = 9999999._EB
 
 ! Factors for computing divergence of incident and self emission radiant fluxes
 ! in vegetation fuel bed. These need to be recomputed as the height of the
@@ -967,20 +987,20 @@ VEG_WALL_CELL_LOOP: DO IW=1,NWC
   TMPG_A     = (TMP_G*0.0033_EB)**1.5
   LAMBDA_AIR = 0.026_EB*RHO(IIG,JJG,KKG)*0.861_EB*TMPG_A
 !Albini assumes quiescent air
-! H_CONV = 0.35*LAMBDA_AIR*SF%VEG_SVRATIO*0.25
+! H_CONV_L = 0.35*LAMBDA_AIR*SF%VEG_SVRATIO*0.25
 !Holman "Heat Transfer",5th Edition, McGraw-Hill, 1981 p.285 
 !assumes vertical cylinder laminar air flow
-! H_CONV = 1.42*(DTMP/VEG_HEIGHT_S(IBC))**0.25 !W/m^2/C
+! H_CONV_L = 1.42*(DTMP/VEG_HEIGHT_S(IBC))**0.25 !W/m^2/C
 !Porterie allow for air flow
 ! U2 = 0.25*(U(IIG,JJG,KKG)+U(IIG-1,JJG,KKG))**2
 ! V2 = 0.25*(V(IIG,JJG,KKG)+V(IIG,JJG-1,KKG))**2
 ! RE_VEG_PART = SQRT(U2 + V2)*2./SF%VEG_SVRATIO/TMPG_A/15.11E-6
-! H_CONV = 0.5*LAMBDA_AIR*0.683*RE_VEG_PART**0.466*0.5*SF%VEG_SVRATIO
+! H_CONV_L = 0.5*LAMBDA_AIR*0.683*RE_VEG_PART**0.466*0.5*SF%VEG_SVRATIO
 !
   DTMP_FDS_WALL   = TMP_G - TMP_F(IW)
   H_CONV_FDS_WALL = 1.42_EB*(ABS(DTMP_FDS_WALL)/DZVEG_L)**0.25
   QCONF_FDS_WALL  = H_CONV_FDS_WALL*DTMP_FDS_WALL
-  QCONF(IW)       = QCONF_FDS_WALL !W/m^2
+! QCONF(IW)       = QCONF_FDS_WALL !W/m^2
 ! print*,'dtmp_fds_wall,qconf',dtmp_fds_wall,qconf(iw)
 ! print*,'tmp_g,tmp_f(iw)',tmp_g,tmp_f(iw)
 ! SF%VEG_DIVQNET_L(1) = SF%VEG_PACKING*SF%VEG_SVRATIO*QCONF_L*DZVEG_L !W/m^2
@@ -995,7 +1015,8 @@ VEG_WALL_CELL_LOOP: DO IW=1,NWC
     SF%VEG_DIVQNET_L(I) = SF%VEG_PACKING*SF%VEG_SVRATIO*QCONF_L*DZVEG_L !W/m^2
 !   QCONF(IW) = QCONF(IW) + QCONF_L !W/m^2
   ENDDO
-! QCONF(IW) = SUM(SF%VEG_DIVQNET_L) !*RDN(IW)*WC%VEG_HEIGHT
+  QCONF(IW) = SUM(SF%VEG_DIVQNET_L) !*RDN(IW)*WC%VEG_HEIGHT
+! qconf(iw) = 0.0_EB
 !
 ! Compute +/- radiation fluxes and their divergence due to self emission within vegetation
   LAYER_RAD_FLUXES: IF (LBURN .LT. NVEG_L) THEN
@@ -1033,7 +1054,9 @@ VEG_WALL_CELL_LOOP: DO IW=1,NWC
 !   print*,'vege: QRADIN(IW)',qradin(iw)
     ETAVEG_H  = (NVEG_L - LBURN)*DETA_VEG
     !this QRADP_INC ensures zero net radiant fluxes at bottom of vegetation
-    QRADP_INC = QRADM_INC*SF%VEG_FINCM_RADFCT_L(NVEG_L-LBURN) + VEG_QRM_EMISS(NVEG_L-LBURN)
+    IF(SF%VEG_GROUND_ZERO_RAD) QRADP_INC = QRADM_INC*SF%VEG_FINCM_RADFCT_L(NVEG_L-LBURN) + VEG_QRM_EMISS(NVEG_L-LBURN)
+    !this QRADP_INC assumes the ground stays at ambient temperature
+    IF(.NOT. SF%VEG_GROUND_ZERO_RAD) QRADP_INC = SIGMA*SF%VEG_GROUND_TEMP**4
 !   QRADP_INC = SIGMA*WC%VEG_TMP_L(NVEG_L)**4*EXP(-ETAVEG_H) + VEG_QRM_EMISS(NVEG_L-LBURN) !fds4
     VEG_QRM_INC   = 0.0_EB ; VEG_QRP_INC = 0.0_EB 
     VEG_QRNET_INC = 0.0_EB ; VEG_DIV_QRNET_INC = 0.0_EB
@@ -1174,11 +1197,13 @@ VEG_WALL_CELL_LOOP: DO IW=1,NWC
 
       ENDIF IF_DIVQ_L_GE_0
       
+      IF(MPA_VEG <= MPA_VEG_MIN) TMP_VEG_NEW = TMP_G
       WC%VEG_TMP_L(IVEG_L) = TMP_VEG_NEW
 
     ENDDO LAYER_LOOP1
 
-    WC%VEG_TMP_L(LBURN) = WC%VEG_TMP_L(LBURN+1)
+!   WC%VEG_TMP_L(LBURN) = WC%VEG_TMP_L(LBURN+1)
+    WC%VEG_TMP_L(LBURN) = TMP_G
 
   endif if_fuel_elem_degrad
 
@@ -1221,14 +1246,14 @@ VEG_WALL_CELL_LOOP: DO IW=1,NWC
 
 ! Volitalization of vegetation(Arrhenius)
       IF_VOLITALIZATION_2: IF(MPA_VEG > MPA_VEG_MIN) THEN
-        MPA_VOLIT    = MAX(SF%VEG_CHARFRAC*DT_BC*MPA_VEG*A_PYR_VEG*EXP(-E_PYR_VEG/TMP_VEG),0._EB)
+        MPA_VOLIT    = CHAR_FCTR*DT_BC*MPA_VEG*A_PYR_VEG*EXP(-E_PYR_VEG/TMP_VEG)
         MPA_VOLIT    = MIN(MPA_VOLIT,(MPA_VEG-MPA_VEG_MIN))
         MPA_VEG      = MPA_VEG - MPA_VOLIT
         WC%VEG_FUELMASS_L(IVEG_L) = MPA_VEG
       ENDIF IF_VOLITALIZATION_2
 
-      MASSFLUX(IW,I_FUEL)= MASSFLUX(IW,I_FUEL) + MPA_VOLIT/DT_BC
-      IF (I_WATER /= 0) MASSFLUX(IW,I_WATER) = MASSFLUX(IW,I_WATER) + MPA_MOIST/DT_BC
+      MASSFLUX(IW,I_FUEL)= MASSFLUX(IW,I_FUEL) + MPA_VOLIT*RDT_BC
+      IF (I_WATER /= 0) MASSFLUX(IW,I_WATER) = MASSFLUX(IW,I_WATER) + MPA_MOIST*RDT_BC
 
 ! Vegetation temperature (Arrhenius)
       CP_VEG = (0.01_EB + 0.0037_EB*TMP_VEG)*1000._EB !W/kg/K
@@ -1241,6 +1266,7 @@ VEG_WALL_CELL_LOOP: DO IW=1,NWC
 
   ENDIF IF_VEG_DEGRADATION_ARRHENIUS
   
+  WC%VEG_TMP_L(LBURN) = TMP_G
   MASSFLUX_ACTUAL(IW,I_FUEL) = MASSFLUX(IW,I_FUEL)
   IF (I_WATER /= 0) MASSFLUX_ACTUAL(IW,I_WATER) = MASSFLUX(IW,I_WATER)
  
@@ -1249,13 +1275,13 @@ VEG_WALL_CELL_LOOP: DO IW=1,NWC
 ! TMP_F(IW) = WC%VEG_TMP_L(NVEG_L)
 ! IF (LBURN < NVEG_L)  TMP_F(IW) = WC%VEG_TMP_L(1+LBURN)
   IF (LBURN < NVEG_L) THEN
-!   TMP_F(IW) = WC%VEG_TMP_L(1+LBURN)
-    TMP_F(IW) = ((VEG_QRP_INC(0)+VEG_QRP_EMISS(0))/SIGMA)**.25 !as done in FDS4
+    TMP_F(IW) = WC%VEG_TMP_L(1+LBURN)
+!   TMP_F(IW) = ((VEG_QRP_INC(0)+VEG_QRP_EMISS(0))/SIGMA)**.25 !as done in FDS4
   ELSE
     TMP_F(IW) = TMP_G !Tveg=Tgas if veg is completely burned
 !   TMP_F(IW) = TMPA  !Tveg=Tambient if veg is completely burned
   ENDIF
-! TMP_F(IW) = MAX(TMP_F(IW),TMPA)
+  TMP_F(IW) = MAX(TMP_F(IW),TMPA)
 
 ENDDO VEG_WALL_CELL_LOOP
 
@@ -1268,7 +1294,9 @@ SUBROUTINE LEVEL_SET_FIRESPREAD(NM)
 !
 ! Level set based modeling of fire spread across terrain. Currently, no computation of the wind field 
 ! is needed. Instead, U0 and V0 which are specified on the MISC line of the input file, are used for 
-! the wind field. Does use the terrain and extent of the vegetation as defined in the fds input file.
+! the wind field. Does use the extent of the vegetation as defined in the fds input file. Spread rate 
+! is dependent on the terrain slope according to McArthur's rules. Head, flank, and back fire ROS
+! are currently hard coded below.
 !
 ! Issues:
 ! 1) Need to make level set computation mesh dependent so the the LS slice file
@@ -1359,7 +1387,7 @@ ALLOCATE(ROS_BACKU(NX_LS,NY_LS))   ; CALL ChkMemErr('VEGE:LEVEL SET','ROS_BACKU'
 !ROS_HEAD_U0_INFW = R_HEAD_U0_INFW
 !ROS_HEAD_U_INFW  = R_HEAD_U_INFW
 ROS_HEAD         = 14._EB  !9.5 from wfds flat terrain run
-ROS_FLANK        = 5.0_EB  !4.2 from wfds flat terrain run   
+ROS_FLANK        = 4.0_EB  !4.2 from wfds flat terrain run   
 ROS_BACKU        = 0.1_EB !wind dependent (in general) back fire ROS need look up table for wind depend
 ! Currently slope dependence of head and back fires are from MkV Forest Danger Meter (hardcoded below)
 !ROS_HEADS        = 2._EB  !slope dependent head fire ROS 
@@ -1681,7 +1709,7 @@ SUBROUTINE LEVEL_SET_SPREAD_RATE
 !
 ! Compute components of spread rate vector
 !
-INTEGER :: I,J,IM1,IM2,IP1,IP2,JM1,JP1
+INTEGER :: I,J,IM1,IM2,IP1,IP2,JM1,JP1,NEXP_WIND
 REAL(EB) :: COS_THETA_WIND,COS_THETA_SLOPE,COS_THETA_WIND_H,COS_THETA_WIND_B, &
             COS_THETA_SLOPE_H,COS_THETA_SLOPE_B,DPHIDX,DPHIDY,F_EAST,F_WEST,F_NORTH,F_SOUTH, &
             GRAD_SLOPE_DOT_NORMAL_FIRELINE,MAG_F,MAG_SR,MAG_U,WIND_DOT_NORMAL_FIRELINE
@@ -1689,6 +1717,7 @@ REAL(EB) :: RAD_TO_DEGREE,DEGREES_SLOPE
 REAL(EB), DIMENSION(:)   :: NORMAL_FIRELINE(2)
  
 RAD_TO_DEGREE = 90._EB/ASIN(1._EB)
+NEXP_WIND = 1
 
 IF (RK2_PREDICTOR_LS) PHI0_LS = PHI_LS
 IF (.NOT. RK2_PREDICTOR_LS) PHI0_LS = PHI1_LS
@@ -1746,8 +1775,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_HEADS = 0.33_EB*ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_HEADS =         ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_HEADS =  3._EB*ROS_HEAD(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1757,7 +1786,7 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_HEADS =  0.50_EB*ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_HEADS =  0.75_EB*ROS_HEAD(I,J)
     MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND + &
+             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1766,8 +1795,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = -0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS =         -ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = -3.0_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1776,8 +1805,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = 0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS = 0.50_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = 0.75_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1837,8 +1866,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_HEADS = 0.33_EB*ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_HEADS =         ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_HEADS =  3._EB*ROS_HEAD(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1847,8 +1876,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_HEADS =  0.33_EB*ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_HEADS =  0.50_EB*ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_HEADS =  0.75_EB*ROS_HEAD(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1857,8 +1886,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = -0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS =         -ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = -3.0_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1867,8 +1896,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = 0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS = 0.50_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = 0.75_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1925,8 +1954,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_HEADS = 0.33_EB*ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_HEADS =         ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_HEADS =  3._EB*ROS_HEAD(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1935,8 +1964,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_HEADS =  0.33_EB*ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_HEADS =  0.50_EB*ROS_HEAD(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_HEADS =  0.75_EB*ROS_HEAD(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1945,8 +1974,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = -0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS =         -ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = -3.0_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1955,8 +1984,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = 0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS = 0.50_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = 0.75_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
