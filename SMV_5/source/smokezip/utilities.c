@@ -74,7 +74,7 @@ unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer
 
   nn=0;
   buffer_in_end  = buffer_in  + nchars_in;
-
+  if(buffer_out==NULL)return 0;
   while(buffer_in<buffer_in_end){
     if(*buffer_in==MARK){
       if(buffer_in+2>=buffer_in_end)break;

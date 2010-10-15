@@ -14,7 +14,6 @@
 #endif
 #include "egz_stdio.h"
 #include "MALLOC.h"
-#include "ASSERT.h"
 #include <sys/stat.h>
 #include <string.h>
 #include <math.h>
