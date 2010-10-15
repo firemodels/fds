@@ -11,12 +11,6 @@
 #include "egz_stdio.h"
 #endif
 
-#ifdef CPP
-#define EXTERNCPP extern "C"
-#else
-#define EXTERNCPP
-#endif
-
 int SUB_portortho(int quad, 
                    GLint i_left, GLint i_down, GLsizei i_width, GLsizei i_height,
                    GLdouble x_left, GLdouble x_right, GLdouble x_bottom, GLdouble x_top,
@@ -67,9 +61,6 @@ EXTERNCPP void keyboard(unsigned char key, int x, int y);
 EXTERNCPP void get_newscriptfilename(char *newscriptfilename);
 EXTERNCPP void init_avatar(void);
 EXTERNCPP void drawselect_avatars(void);
-#ifdef pp_GPU
-EXTERNCPP int log_base2(float xx);
-#endif
 EXTERNCPP void readterrain(char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
                                  int allocate_memory);
@@ -255,9 +246,6 @@ EXTERNCPP int getZoneColor(float t, float tmin, float tmax, int nlevel);
 EXTERNCPP void fill_roomdata(int izone);
 EXTERNCPP void update_overwrite(void);
 EXTERNCPP void compress_svzip(void);
-EXTERNCPP char *getdir(char *argi);
-EXTERNCPP char *which(char *prog);
-EXTERNCPP char *lastname(char *argi);
 EXTERNCPP void drawTargets(void);
 EXTERNCPP void drawBlockages(int mode, int flag);
 EXTERNCPP void drawLabels(void);
@@ -397,8 +385,6 @@ EXTERNCPP void updatepatchmenulabels(void);
 EXTERNCPP void updateslicemenulabels(void);
 EXTERNCPP void updatevslicemenulabels(void);
 EXTERNCPP void updateplot3dmenulabels(void);
-EXTERNCPP void trimzeros(char *line);
-EXTERNCPP void trimmzeros(char *line);
 EXTERNCPP void handle_eyeview(int flag);
 
 EXTERNCPP void checktimebound(void);
@@ -642,10 +628,6 @@ EXTERNCPP void drawselect_faces(void);
 EXTERNCPP void allocate_faces(void);
 EXTERNCPP void update_facelists(void);
 EXTERNCPP void update_faces(void);
-EXTERNCPP char *trim_front(char *line);
-EXTERNCPP char *trim_string(char *buffer);
-EXTERNCPP char *trim_front_back(char *line);
-EXTERNCPP void trim(char *line);
 EXTERNCPP void drawticks(void);
 EXTERNCPP void set_startup_view(void);
 EXTERNCPP void add_list_view(char *label_in);
@@ -671,7 +653,6 @@ EXTERNCPP void getslicedatabounds(const slice *sd, float *pmin, float *pmax);
 EXTERNCPP void scalefloat2string(float floatfrom, char *stringto, const float *scale, float range);
 EXTERNCPP void scalestring(const char *stringfrom, char *stringto, const float *scale, float range);
 EXTERNCPP void num2string(char *string, float tval, float range);
-EXTERNCPP float frexp10(float x, int *exp10);
 EXTERNCPP int initcase_c(int argc, char **argv);
 
 

@@ -2,6 +2,7 @@
 // $Revision$
 // $Author$
 
+#define CPP
 #include "options.h"
 #include <string.h>
 #ifdef pp_OSX
@@ -11,7 +12,6 @@
 #endif
 #include "glui.h"
 #include "flowfiles.h"
-#define CPP
 #include "ASSERT.h"
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"

@@ -1219,24 +1219,6 @@ void getIsoLabels(float local_tmin, float local_tmax, int nlevel,
   num2string(&labels[nlevel-1][0],tval,range);
 }
 
-/* ------------------ frexp10 ------------------------ */
-
-float frexp10(float x, int *exp10){
-  float xabs, mantissa;
-
-  xabs = fabs((double)x);
-  if(x==0.0f){
-    *exp10=0;
-    return 0.0f;
-  }
-  mantissa = log10((double)xabs);
-  *exp10 = (int)floor((double)mantissa);
-      
-  mantissa = pow((double)10.0f,(double)mantissa-(double)*exp10);
-  if(x<0)mantissa = -mantissa;
-  return mantissa;
-}
-
 #define DYFONT (-0.5)
 
 /* ------------------ get_label_position ------------------------ */

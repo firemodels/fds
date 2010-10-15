@@ -2,6 +2,7 @@
 // $Revision: 1222 $
 // $Author: gforney $
 
+#define CPP
 #include "options.h"
 #include <string.h>
 #ifdef pp_OSX
@@ -12,7 +13,6 @@
 #include <math.h>
 #include "glui.h"
 #include "flowfiles.h"
-#define CPP
 #include "ASSERT.h"
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
