@@ -636,7 +636,7 @@ float get_vecfactor(int *ivec){
 }
 /* ------------------ keyboard ------------------------ */
 
-void keyboard(unsigned char key, int x, int y){
+void keyboard_2(unsigned char key, int x, int y){
   char key2;
   int skip2;
   char one='1';
@@ -1329,6 +1329,15 @@ void keyboard(unsigned char key, int x, int y){
     updatesurface(); 
   }
 }
+
+/* ------------------ keyboard ------------------------ */
+
+void keyboard(unsigned char key, int x, int y){
+  glutDetachMenu(GLUT_RIGHT_BUTTON);
+  keyboard_2(key,x,y);
+  glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
 #ifdef pp_GPU_CULL_STATE
 /* ------------------ print_gpu_cull_state ------------------------ */
 
