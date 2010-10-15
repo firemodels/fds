@@ -3,13 +3,10 @@
 // $Author$
 
 #include "options.h"
-int htonl(int token);
-int ntohl(int token);
-int getendian(void);
-#define BIG_ENDIAN 1
-#define LITTLE_ENDIAN 0
+#include "endian.h"
 
 // svn revision character string
+
 char endian_revision[]="$Revision$";
 
 /* ------------------ getendian ------------------------ */
@@ -21,56 +18,6 @@ int getendian(void){
   cval = (char *)&val+1;
   return (int)(*cval);
 }
-
-/* ------------------ htonl ------------------------ */
-
-int htonl(int val){ // convert val from host to network format
-  int *val2ptr;
-  unsigned char *buffer;
-  unsigned char buffer2[4];
-
-  //  if the host is a BIG_ENDIAN computer then there is nothing to do
-  //  (since network format == BIG_ENDIAN)
-
-  if(getendian()==BIG_ENDIAN)return val;
-  
-  buffer=(unsigned char *)&val;
-
-  buffer2[0]=*(buffer+3);
-  buffer2[1]=*(buffer+2);
-  buffer2[2]=*(buffer+1);
-  buffer2[3]=*buffer;
-
-  val2ptr=(int *)&buffer2;
-  return *val2ptr;
-
-}
-
-/* ------------------ ntohl ------------------------ */
-
-int ntohl(int val){ // convert val from network to host format
-  int *val2ptr;
-  unsigned char *buffer;
-  unsigned char buffer2[4];
-
-
-  //  if the host is a BIG_ENDIAN computer then there is nothing to do
-  //  (since network format == BIG_ENDIAN)
-
-  if(getendian()==BIG_ENDIAN)return val;
-  
-  buffer=(unsigned char *)&val;
-
-  buffer2[0]=*(buffer+3);
-  buffer2[1]=*(buffer+2);
-  buffer2[2]=*(buffer+1);
-  buffer2[3]=*buffer;
-
-  val2ptr=(int *)&buffer2;
-  return *val2ptr;
-
-}
-
 
 /* ------------------ endian_switch ------------------------ */
 

@@ -8,11 +8,10 @@
 #include <string.h>
 #include "egz_stdio.h"
 #include "MALLOC.h"
+#include "endian.h"
 
 // svn revision character string
 char egz_stdio_revision[]="$Revision$";
-
-int getendian(void);
 
 /* ------------------ EGZ_FCLOSE ------------------------ */
 

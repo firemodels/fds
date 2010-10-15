@@ -18,6 +18,7 @@
 #include <math.h>
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "endian.h"
 
 // svn revision character string
 char IOpart_revision[]="$Revision$";
@@ -31,7 +32,6 @@ void PART_CB_INIT(void);
 void update_all_partvis(particle *parti);
 void update_partvis(int first_frame,particle *parti, part5data *datacopy, int nclasses);
 int get_tagindex(const particle *parti, part5data **data, int tagval);
-void endian_switch(void *val, int nval);
 #define READPASS 1
 #define READFAIL 0
 #define SEEKPASS 0
