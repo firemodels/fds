@@ -1,5 +1,5 @@
 SOURCE_DIR = ../../../SMV_5/source/
-INC_DIR = -I $(SOURCE_DIR)/shared
+INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokediff
 FILTERC =
 FILTERF =
 
