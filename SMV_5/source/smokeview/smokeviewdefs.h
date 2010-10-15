@@ -289,13 +289,5 @@ void _sniffErrors(char *whereat);
 #define DRAW_SOLID 0
 #define DRAW_TRANSPARENT 1
 
-#ifdef X64
-#define STRUCTSTAT struct __stat64
-#define STAT _stat64
-#else
-#define STRUCTSTAT struct stat
-#define STAT stat
-#endif
-
 #endif
 

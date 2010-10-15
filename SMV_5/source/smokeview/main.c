@@ -2,8 +2,8 @@
 // $Revision$
 // $Author$
 
-#include "options.h"
 #define INMAIN
+#include "options.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
