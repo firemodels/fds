@@ -985,6 +985,17 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
 
 }
 
+
+/* ------------------ UpdateIsosurface ------------------------ */
+
+int MergeIsosurface(isosurface *to_surface, isosurface *from_surface){
+  int return_val;
+  return_val=UpdateIsosurface(to_surface,
+    from_surface->xvert,from_surface->yvert,from_surface->zvert,from_surface->tvert,
+    from_surface->closestnodes,from_surface->nvertices,
+    from_surface->triangles,from_surface->ntriangles);
+  return return_val;
+}
 /* ------------------ UpdateIsosurface ------------------------ */
 
 int UpdateIsosurface(isosurface *surface, 
@@ -1449,7 +1460,9 @@ void CCisoheader(char *isofile,
   int len[3];
 
 
+  *error=-1;
   isostream=fopen(isofile,"wb");
+  if(isostream==NULL)return;
 
   len[0]=strlen(isolonglabel)+1;
   len[1]=strlen(isoshortlabel)+1;
@@ -1464,7 +1477,7 @@ void CCisoheader(char *isofile,
   fwrite(nlevels,4,1,isostream);
   fwrite(levels,4,*nlevels,isostream);
   fclose(isostream);
-
+  *error=0;
 }
 
 
@@ -1479,7 +1492,9 @@ void CCtisoheader(char *isofile,
   int one=1;
 
 
+  *error=-1;
   isostream=fopen(isofile,"wb");
+  if(isostream==NULL)return;
 
   len[0]=strlen(isolonglabel)+1;
   len[1]=strlen(isoshortlabel)+1;
@@ -1495,7 +1510,7 @@ void CCtisoheader(char *isofile,
   fwrite(nlevels,4,1,isostream);
   fwrite(levels,4,*nlevels,isostream);
   fclose(isostream);
-
+  *error=0;
 }
 
 /* ------------------ isoout ------------------------ */
@@ -1569,6 +1584,8 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
 
   PrintMemoryInfo;
   isostream=fopen(isofile,"ab");
+  *error=-1;
+  if(isostream==NULL)return;
   *error = 0;
   for(i=0;i<*nlevels;i++){
     InitIsosurface(&surface,level[i],NULL,i);
@@ -1621,6 +1638,8 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
 
   PrintMemoryInfo;
   isostream=fopen(isofile,"ab");
+  *error=-1;
+  if(isostream==NULL)return;
   *error = 0;
   for(i=0;i<*nlevels;i++){
     InitIsosurface(&surface,level[i],NULL,i);
