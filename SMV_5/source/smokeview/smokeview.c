@@ -1451,9 +1451,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw animated isosurfaces +++++++++++++++++++++++++ */
 
-#ifdef pp_SPHERE
     //if(isoinfo!=NULL)drawspherepoints(sphereinfo);
-#endif
   if(showiso==1){
     iso *isoi;
     mesh *meshi;
@@ -3816,9 +3814,6 @@ void usage(char **argv){
 #endif
 #ifdef pp_SMOKETEST
     printf(", pp_SMOKETEST");
-#endif
-#ifdef pp_SPHERE
-    printf(", pp_SPHERE");
 #endif
 #ifdef pp_THREAD
     printf(", pp_THREAD");

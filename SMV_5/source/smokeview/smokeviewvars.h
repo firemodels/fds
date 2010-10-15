@@ -18,9 +18,7 @@
 #define SVDECL(var,val)  var
 #endif
 
-#ifdef pp_SPHERE
 #include "csphere.h"
-#endif
 
 #ifndef CPP
 #include "smokeviewdefs.h"
@@ -110,9 +108,7 @@ SVEXTERN float set_view_xyz[3];
 SVEXTERN char INIfile[1024];
 SVEXTERN char WRITEINIfile[1024];
 
-#ifdef pp_SPHERE
-SVEXTERN spherepoints *sphereinfo, *wui_sphereinfo;
-#endif
+SVEXTERN spherepoints SVDECL(*sphereinfo,NULL), SVDECL(*wui_sphereinfo,NULL);
 
 SVEXTERN float tourcol_selectedpathline[3];
 SVEXTERN float tourcol_selectedpathlineknots[3];

@@ -2026,10 +2026,8 @@ void initvars0(void){
   izonetu=NULL;
   tspr=NULL;
 
-#ifdef pp_SPHERE
   sphereinfo=NULL;
   wui_sphereinfo=NULL;
-#endif
 
   tour_t=NULL, tour_t2=NULL, tour_dist=NULL, tour_dist2=NULL, tour_dist3=NULL;
   colorbarinfo=NULL;
@@ -2214,9 +2212,7 @@ int getmaxrevision(void){
   MAXREV(camera_revision);
   MAXREV(colorbar_revision);
   MAXREV(compress3dc_revision);
-#ifdef pp_SPHERE
   MAXREV(csphere_revision);
-#endif
   MAXREV(dmalloc_revision);
   MAXREV(drawGeometry_revision);
   MAXREV(egz_stdio_revision);
