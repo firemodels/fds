@@ -2,6 +2,7 @@
 // $Revision$
 // $Author$
 
+#define CPP
 #include "options.h"
 #ifdef pp_SHOOTER
 #include <string.h>
@@ -13,7 +14,6 @@
 #include <math.h>
 #include "glui.h"
 #include "flowfiles.h"
-#define CPP
 #include "ASSERT.h"
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"

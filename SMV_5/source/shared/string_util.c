@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "MALLOC.h"
-#include "smokeviewvars.h"
+#include "string_util.h"
 
 // svn revision character string
 char string_util_revision[]="$Revision$";
@@ -23,7 +23,6 @@ char *getdir(char *progname){
   size_t i,nprogname;
   char *c;
   char *progpath;
-  int lenprogpath;
 
   nprogname=strlen(progname);
   c = progname+nprogname-1;
@@ -403,7 +402,6 @@ void parse_string(char *string, char **tokens, int *ntokens){
 int fileexist(char *filename){
   STRUCTSTAT statbuffer;
   int statfile;
-  char buffer[1024];
 
   statfile=STAT(filename,&statbuffer);
   return statfile;
@@ -488,4 +486,21 @@ float MAX(float x,float y){
   }
 }
 
+/* ------------------ frexp10 ------------------------ */
+
+float frexp10(float x, int *exp10){
+  float xabs, mantissa;
+
+  xabs = fabs((double)x);
+  if(x==0.0f){
+    *exp10=0;
+    return 0.0f;
+  }
+  mantissa = log10((double)xabs);
+  *exp10 = (int)floor((double)mantissa);
+      
+  mantissa = pow((double)10.0f,(double)mantissa-(double)*exp10);
+  if(x<0)mantissa = -mantissa;
+  return mantissa;
+}
 

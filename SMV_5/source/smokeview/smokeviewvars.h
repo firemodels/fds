@@ -4,20 +4,6 @@
 
 #include <time.h>
 
-#ifdef CPP
-#define CCC "C"
-#else
-#define CCC
-#endif
-
-#ifdef INMAIN
-#define SVEXTERN
-#define SVDECL(var,val)  var=val
-#else
-#define SVEXTERN extern CCC
-#define SVDECL(var,val)  var
-#endif
-
 #include "csphere.h"
 
 #ifndef CPP
@@ -26,6 +12,7 @@
 #endif
 
 #include "threader.h"
+#include "string_util.h"
 
 SVEXTERN int SVDECL(usemenu,1);
 SVEXTERN float hrrpuv_iso_color[4];
@@ -96,8 +83,6 @@ SVEXTERN int slice_bounds_dialog;
 
 SVEXTERN int dwinHbase;
 SVEXTERN int dwinH;
-
-SVEXTERN char dirseparator[3];
 
 SVEXTERN float xtemp;
 
