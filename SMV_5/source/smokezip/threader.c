@@ -14,8 +14,6 @@
 // svn revision character string
 char threader_revision[]="$Revision$";
 
-void part2iso(part *parti);
-
 /* ------------------ init_all_threads ------------------------ */
 
 void init_pthread_mutexes(void){
