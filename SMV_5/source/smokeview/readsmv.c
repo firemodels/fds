@@ -19,9 +19,7 @@
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include <pthread.h>
-#ifdef pp_SPHERE
 #include "csphere.h"
-#endif
 
 #include "smokeviewvars.h"
 
@@ -200,7 +198,6 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(terraininfo);
   nterraininfo=0;
   niso_compressed=0;
-#ifdef pp_SPHERE
   if(sphereinfo==NULL){
     NewMemory((void **)&sphereinfo,sizeof(spherepoints));
     initspherepoints(sphereinfo,14);
@@ -209,7 +206,6 @@ int readsmv(char *file, char *file2){
     NewMemory((void **)&wui_sphereinfo,sizeof(spherepoints));
     initspherepoints(wui_sphereinfo,14);
   }
-#endif
 
   ntotal_blockages=0;
   ntotal_smooth_blockages=0;
