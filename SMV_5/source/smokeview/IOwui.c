@@ -15,6 +15,7 @@
 #endif
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "endian.h"
 
 // svn revision character string
 char IOwui_revision[]="$Revision$";
@@ -23,7 +24,6 @@ void init_tnode(terraindata *terri);
 void init_tnorm(terraindata *terri);
 void init_terraincell(terraindata *terri);
 void free_terraincell(terraindata *terri);
-void endian_switch(void *val, int nval);
 
 #define ijcell2(i,j) nxcell*(j) + (i)
 #define ijnode2(i,j) ((nxcell+1)*(j) + (i))

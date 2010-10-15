@@ -16,16 +16,13 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "contourdefs.h"
-
+#include "endian.h"
 
 // svn revision character string
 char IOslice_revision[]="$Revision$";
 
 int endianswitch;
 void update_slice_contours(int slice_type_index, float line_min, float line_max,int nline_values);
-int int_switch(int val);
-float float_switch(float val);
-void endian_switch(void *val, int nval);
 void WUI_CB(int var);
 #define TERRAIN_FIRE_LINE_UPDATE 39
 
