@@ -1,9 +1,8 @@
-#include "options.h"
 // $Date$ 
 // $Revision$
 // $Author$
 
-#ifdef pp_SPHERE
+#include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
 #ifdef pp_DRAWISO
@@ -15,7 +14,6 @@
 #endif
 #include "egz_stdio.h"
 #include "MALLOC.h"
-#include "ASSERT.h"
 #include <sys/stat.h>
 #include <string.h>
 #include <math.h>
@@ -130,7 +128,7 @@ void initspherepoints(spherepoints *sphereinfo, int n){
       yfrom = *xyzfrom++;
       zfrom = *xyzfrom++;
 
-      xyzto = sphereinfo->normals + 3*(sphereinfo->vallist[ibeg]-1);
+      xyzto = sphereinfo->normals + 3*(sphereinfo->vallist[ibeg]-sphereinfo->nlong[ibeg]);
       for(ii=ibeg;ii<=iend;ii++){
         for(jj=0;jj<sphereinfo->nlong[ii];jj++){
           if(xyzto==xyzfrom-3){
@@ -340,5 +338,4 @@ void drawspherepoints(spherepoints *spherei){
     }
   }
 }
-#endif
 #endif
