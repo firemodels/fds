@@ -44,7 +44,7 @@ int   *triangle_copy=NULL;
   int nvertices_i, ntriangles_i;
   unsigned char *vertexnorm;
   unsigned short *vertices_i;
-  int iframe, j, jj, skip;
+  int j, jj, skip;
   float time;
   int sizebefore, sizeafter;
   int nvertices_iMAX=-1, ntriangles_iMAX=-1, ntriangles1_iMAX=-1, ntriangles2_iMAX=-1;
@@ -195,7 +195,6 @@ int   *triangle_copy=NULL;
   vertinfo=NULL;
 
   jj=-1;
-  iframe=0;
   time_max=-1000000.0;
   for(;;){
     int memory_fail=0;
@@ -619,7 +618,6 @@ int   *triangle_copy=NULL;
       UNLOCK_ISOS;
       break;
     }
-    iframe++;
     UNLOCK_ISOS;
   }
 wrapup:

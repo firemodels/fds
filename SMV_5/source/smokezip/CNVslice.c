@@ -93,7 +93,9 @@ int convert_slice(slice *slicei, int *thread_index){
   int chop_min, chop_max;
   uLongf ncompressed_zlib;
   int ncompressed_save;
+#ifndef pp_THREAD
   int count=0;
+#endif
   int ncol, nrow, idir;
   int endian_rle_switch;
   float time_max;
@@ -475,7 +477,9 @@ int convert_slice(slice *slicei, int *thread_index){
       if(time<time_max)continue;
       time_max=time;
 
+#ifndef pp_THREAD
       count++;
+#endif
    
       data_loc=ftell(SLICEFILE);
       percent_done=100.0*(float)data_loc/(float)slicei->filesize;
@@ -649,6 +653,7 @@ void *compress_slices(void *arg){
         slicei = sliceinfo + i;
         convert_slice(slicei,thread_index);
       }
+      UNLOCK_SLICE;
       return NULL;
     }
     for(i=0;i<nslice_files;i++){
