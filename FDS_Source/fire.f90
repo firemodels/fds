@@ -214,11 +214,12 @@ DO K=1,KBAR
  
             EXPERIMENTAL_IF: IF (NEW_MIX_TIME) THEN
                ! experimental
-               TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! diffusive time scale
-               EPSK = SC*KRES(I,J,K)/TAU_D              ! ke dissipation rate, assumes production=dissipation
-               KSGS = 1.5_EB*(EPSK*DELTA/PI)**TWTH     ! estimate of subgrid ke, from Kolmogorov spectrum  
-               TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB) ! advective time scale
-               TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB))     ! acceleration time scale
+               TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)   ! diffusive time scale
+               !KSGS = C*1.5_EB*(EPSK*DELTA/PI)**TWTH     ! estimate of subgrid ke, from Kolmogorov spectrum
+               !EPSK = SC*KSGS/TAU_D                      ! ke dissipation rate, assumes production=dissipation
+               KSGS = 1.15_EB*(DELTA*SC/TAU_D)**2 ! 1.15 = (C*1.5)^3/pi^2, where C = 1.5 is Kolomogorov constant
+               TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB)   ! advective time scale
+               TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
                MIX_TIME(I,J,K)=MIN(TAU_D,TAU_U,TAU_G)
             ELSE EXPERIMENTAL_IF
                ! FDS 5 default
