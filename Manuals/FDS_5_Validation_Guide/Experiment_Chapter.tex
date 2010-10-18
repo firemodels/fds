@@ -134,6 +134,70 @@ and 11 are positioned above and below the ceiling tile directly above Position B
 as 1--9. The same pattern is followed at Positions C and D, with thermocouples 21--31 at C and 32--42 at D.} \label{layout}
 \end{figure}
 
+
+\begin{figure}[p]
+\begin{center}
+\setlength{\unitlength}{.054166in}
+\begin{picture}(120,120)
+
+\linethickness{1mm}
+\put(0,0){\framebox(120,120)[tc]{ }}
+\put(60,118){\makebox(0,0){North Wall}}
+\put(60,  2){\makebox(0,0){South Wall}}
+
+\linethickness{.5mm}
+\put(10,10){\framebox(100,100)[tl]{ }}
+
+\thinlines
+\put(117,67){\vector(0,-1){67}}
+\put(117,73){\vector(0, 1){47}}
+\put(117,70){\makebox(0,0){$120'$}}
+\put(113,57){\vector(0,-1){47}}
+\put(113,63){\vector(0, 1){47}}
+\put(113,60){\makebox(0,0){$100'$}}
+\put(10.0,86.0){\dashbox{1}(30.0,24.0)[tl]{ }}
+\put(40.,10.5){\dashbox{1}(69.5,75.5)[tl]{              }}
+
+\thicklines
+\put(48.,16.){\framebox(4,8){ }}
+\put(48.,67.){\framebox(4,8){ }}
+\put(28.,67.){\framebox(4,8){ }}
+\put(98.,67.){\framebox(4,8){ }}
+\put(98.,16.){\framebox(4,8){ }}
+
+\large
+\put(68.5,49.5){\dashbox{.5}(3,3)[c]{D}}
+\put(48.5,69.5){\dashbox{.5}(3,3)[c]{A}}
+\put(48.5,79.5){\dashbox{.5}(3,3)[c]{B}}
+\put(58.5,59.5){\dashbox{.5}(3,3)[c]{C}}
+\put(38.5,54.5){\dashbox{.5}(3,3)[c]{E}}
+\put(38.5,84.5){\dashbox{.5}(3,3)[c]{F}}
+\normalsize
+
+\multiput(15,11)(0,10){10}{\circle*{.8}}
+\multiput(25,11)(0,10){10}{\circle*{.8}}
+\multiput(35,11)(0,10){10}{\circle*{.8}}
+\multiput(45,11)(0,10){10}{\circle*{.8}}
+\multiput(55,11)(0,10){10}{\circle*{.8}}
+\multiput(65,11)(0,10){10}{\circle*{.8}}
+\multiput(75,11)(0,10){10}{\circle*{.8}}
+\multiput(85,11)(0,10){10}{\circle*{.8}}
+\multiput(95,11)(0,10){10}{\circle*{.8}}
+\multiput(105,11)(0,10){10}{\circle*{.8}}
+
+\end{picture}
+\end{center}
+\caption[Configuration of the second series of heptane spray burner tests. ]
+{\bf Plan view of large scale fire test facility with the burner,
+vent and draft curtain positions for the second series of heptane
+burner tests.  The sprinklers are indicated
+by the solid circles and are spaced 10~ft apart. The branch lines run
+north to south. The vents are 4 ft by 8 ft. }
+\label{burnerlayoutA}
+\end{figure}
+
+
+
 \begin{description}
 \item[Ceiling:] The ceiling was raised to a height of 7.6~m and instrumented with thermocouples and other measurement devices. The ceiling was constructed of
 0.6~m by 1.2~m by 1.6~cm UL fire-rated Armstrong Ceramaguard (Item 602B) ceiling tiles. The manufacturer reported the
@@ -164,49 +228,7 @@ Temperature measurements were recorded at 104 locations. Type K 0.0625~in diamet
 temperatures near the ceiling, (ii) temperatures of the ceiling jet, and (iii) temperatures near the vent.
 \end{description}
 
-The UL/NFPRF test results (Series I) are summarized in Table~\ref{ULmatrix}.
 
-
-\begin{table}[h!]
-\begin{center}
-\begin{tabular}{|c||c|c|c|c|c|c|}
-\hline
-\multicolumn{7}{|c|}{\bf Heptane Spray Burner Test Series I}  \\ \hline \hline
-Test & Burner & Vent                    & First         & Total      & Draft    & Heat Release Rate \\
-No.  & Pos.   & Operation               & Actuation (s) & Actuations & Curtains & MW @ s \\
-\hline \hline
-I-1   & B  & Closed                     & 65            & 11        & Yes  & 4.4 @ 50  \\ \hline
-I-2   & B  & Manual (0:40)              & 66            & 12        & Yes  & 4.4 @ 50  \\ \hline
-I-3   & B  & Manual (1:30)              & 64            & 12        & Yes  & 4.4 @ 50  \\ \hline
-I-4   & C  & Closed                     & 60            & 10        & Yes  & 4.4 @ 50  \\ \hline
-I-5   & C  & Manual (0:40)              & 72            & 9         & Yes  & 4.4 @ 50  \\ \hline
-I-6   & C  & Manual (1:30)              & 62            & 8         & Yes  & 4.4 @ 50  \\ \hline
-I-7   & C  & 74$^\circ$C link (DNO)     & 70            & 10        & Yes  & 4.4 @ 50  \\ \hline
-I-8   & B  & 74$^\circ$C link (9:26)    & 60            & 11        & Yes  & 4.4 @ 50  \\ \hline
-I-9   & D  & 74$^\circ$C link (DNO)     & 70            & 12        & Yes  & 4.4 @ 50  \\ \hline
-I-10  & D  & Manual (0:40)              & 72            & 13        & Yes  & 4.4 @ 50  \\ \hline
-I-11  & D  & 74$^\circ$C link (4:48)    & N/A           & N/A       & Yes  & 4.4 @ 50  \\ \hline
-I-12  & A  & Closed                     & 68            & 14        & Yes  & 4.4 @ 50  \\ \hline
-I-13  & A  & 74$^\circ$C link (1:04)    & 69            & 5         & Yes  & 6.0 @ 60  \\ \hline
-I-14  & A  & Manual (0:40)              & 74            & 7         & Yes  & 5.8 @ 60  \\ \hline
-I-15  & A  & Manual (1:30)              & 64            & 5         & Yes  & 5.8 @ 60  \\ \hline
-I-16  & A  & 74$^\circ$C link (1:46)    & 106           & 4         & Yes  & 5.0 @ 110 \\ \hline \hline
-I-17  & B  & 100$^\circ$C link (DNO)    & 58            & 4         & No   & 4.6 @ 50 \\ \hline
-I-18  & C  & 100$^\circ$C link (DNO)    & 58            & 4         & No   & 3.7 @ 50 \\ \hline
-I-19  & A  & 100$^\circ$C link (10:00)  & 56            & 10        & No   & 4.6 @ 50 \\ \hline
-I-20  & A  & 74$^\circ$C link (1:20)    & 54            & 4         & No   & 4.2 @ 50 \\ \hline
-I-21  & C  & 74$^\circ$C link (7:00)    & 58            & 10        & No   & 4.6 @ 50 \\ \hline
-I-22  & D  & 100$^\circ$C link (DNO)    & 60            & 6         & No   & 4.6 @ 50 \\ \hline
-\end{tabular}
-\end{center}
-\caption[Results of the UL/NFPRF Experiments.]
-{\bf Results of the UL/NFPRF Experiments. Note that DNO means
-``Did Not Open''. Also note, the fires grew at a rate proportional
-to the square of the time until a certain flow rate of fuel was achieved
-at which time the flow rate was held steady. Thus, the ``Heat Release Rate''
-was the size of the fire at the time when the fuel supply was leveled off.}
-\label{ULmatrix}
-\end{table}
 
 
 \clearpage
@@ -464,7 +486,7 @@ Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width 
 
 Rodney Bryant of the Fire Research Division at NIST performed a series of velocity measurements of the gas
 velocity within the doorway of a standard ISO~9705 compartment for fires ranging from
-34~kW to 511~kW~\cite{Bryant:FSJ2009}. A doorway
+34~kW to 511~kW~\cite{Bryant:FSJ2009,Bryant:EF2009,Bryant:CS2010}. A doorway
 served as the only vent for the enclosure. It included a jamb of 30~cm extending outward
 to facilitate the laser measurements. The entire compartment was elevated 0.3~m off the floor of the laboratory.
 
