@@ -25,7 +25,7 @@ char main_revision[]="$Revision$";
 
 int main(int argc, char **argv){
   char **argv_sv;
- 
+  
   initMM();
   initvars0();
   initcolors();
