@@ -228,7 +228,6 @@ void svWINAPI sv_unload(void){
     for(i=0;i<nsmoke3d_files;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
     }
-    glutDetachMenu(GLUT_RIGHT_BUTTON);
     InitMenus(UNLOAD);
     readsmv(NULL,NULL);
     glutSetWindow(mainwindow_id);

@@ -644,9 +644,8 @@ void keyboard_2(unsigned char key, int x, int y){
   int i;
 
   GLUTPOSTREDISPLAY
-  updatemenu=1;
   key2 = (char)key;
-  if(key2!='L'&&key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='M'&&key2!='A'
+  if(key2!='L'&&key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='A'
 #ifdef pp_CULL
     &&key2!='C'
 #endif
@@ -655,7 +654,6 @@ void keyboard_2(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"A",1)==0){
     axissmooth=1-axissmooth;
     update_colorbar_smooth();
-    updatemenu=1;
     return;
   }
   if(strncmp((const char *)&key2,"L",1)==0){
@@ -716,7 +714,6 @@ void keyboard_2(unsigned char key, int x, int y){
 
   if(strncmp((const char *)&key,"#",1)==0){
     writeini(LOCAL_INI);
-    updatemenu=1;
     return;
   }
   
@@ -736,7 +733,6 @@ void keyboard_2(unsigned char key, int x, int y){
       trainer_mode=0;
       hide_trainer();
     }
-    updatemenu=1;
     return;
   }
   if(strncmp((const char *)&key2,"S",1)==0){
@@ -866,7 +862,6 @@ void keyboard_2(unsigned char key, int x, int y){
     visTimeLabels = 1 - visTimeLabels;
     if(visTimeLabels==0)printf("Time bar hidden\n");
     if(visTimeLabels==1)printf("Time bar visible\n");
-    updatemenu=1;
     return;
   }
   if(strncmp((const char *)&key2,"e",1)==0){
@@ -913,19 +908,6 @@ void keyboard_2(unsigned char key, int x, int y){
     }
     return;
   }
-  if(strncmp((const char *)&key2,"]",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-    if(usemenu==1&&state==GLUT_ACTIVE_ALT){
-      printf("re-attaching menus to right mouse button\n");
-      glutDetachMenu(GLUT_RIGHT_BUTTON);
-      InitMenus(LOAD);
-      glutAttachMenu(GLUT_RIGHT_BUTTON);
-    }
-    return;
-  }
-
   if(strncmp((const char *)&key2,"j",1)==0&&eyeview==EYE_CENTERED){
     int state;
 
@@ -952,20 +934,6 @@ void keyboard_2(unsigned char key, int x, int y){
     if(highlight_flag>2&&noutlineinfo>0)highlight_flag=0;
     if(highlight_flag>1&&noutlineinfo==0)highlight_flag=0;
     printf("outline mode=%i\n",highlight_flag);
-    return;
-  }
-  if(strncmp((const char *)&key2,"M",1)==0){
-    updatemenu=1;
-    usemenu=1-usemenu;
-    glutDetachMenu(GLUT_RIGHT_BUTTON);
-    if(usemenu==1){
-      InitMenus(LOAD);
-      glutAttachMenu(GLUT_RIGHT_BUTTON);
-      printf(" Menus turned on.  Type M to turn off.\n");
-    }
-    else{
-      printf(" Menus turned off.  Type M to turn on.\n");
-    }
     return;
   }
   if(strncmp((const char *)&key2,"m",1)==0){
@@ -1122,7 +1090,6 @@ void keyboard_2(unsigned char key, int x, int y){
       case GLUT_ACTIVE_ALT:
         projection_type = 1 - projection_type;
         TRANSLATE_CB(PROJECTION);
-        updatemenu=1;
         break;
       default:
         visVector=1-visVector;
@@ -1295,14 +1262,12 @@ void keyboard_2(unsigned char key, int x, int y){
 
   if(strncmp((const char *)&key2,"-",1)==0||strncmp((const char *)&key2,"_",1)==0){
     FlowDir=-1;
-    updatemenu=0;
   }
    else if(strncmp((const char *)&key2," ",1)==0||
      strncmp((const char *)&key2,"=",1)==0||
      strncmp((const char *)&key2,"+",1)==0
      ){
      FlowDir=1;
-     updatemenu=0;
    }
 
   if(plotstate==DYNAMIC_PLOTS){
@@ -1333,9 +1298,9 @@ void keyboard_2(unsigned char key, int x, int y){
 /* ------------------ keyboard ------------------------ */
 
 void keyboard(unsigned char key, int x, int y){
-  glutDetachMenu(GLUT_RIGHT_BUTTON);
   keyboard_2(key,x,y);
-  glutAttachMenu(GLUT_RIGHT_BUTTON);
+  GLUTPOSTREDISPLAY
+  updatemenu=1;
 }
 
 #ifdef pp_GPU_CULL_STATE
@@ -1949,22 +1914,12 @@ void Display(void){
      update_colorbar_select_index=0;
      updatecolors(colorbar_select_index);
    }
-  if(updatemenu==1){
-    if(usemenu==1){
-      if(menustatus==GLUT_MENU_NOT_IN_USE){
-        glutDetachMenu(GLUT_RIGHT_BUTTON);
-        InitMenus(LOAD);
-        glutAttachMenu(GLUT_RIGHT_BUTTON);
-      }
-      else{
-#ifdef _DEBUG
-        printf("menus in use, will not be updated\n");
-#endif
-      /* 
-      menus are being used used so keep re-displaying scene until
-      user does something to cause menus to not be used
-      */
-      }
+  if(updatemenu==1&&usemenu==1){
+    if(menustatus==GLUT_MENU_NOT_IN_USE){
+      glutDetachMenu(GLUT_RIGHT_BUTTON);
+      InitMenus(LOAD);
+      glutAttachMenu(GLUT_RIGHT_BUTTON);
+      updatemenu=0;
     }
   }
 
