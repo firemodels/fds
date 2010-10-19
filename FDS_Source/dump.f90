@@ -2200,6 +2200,9 @@ END SUBROUTINE WRITE_STATUS_FILES
 SUBROUTINE INITIALIZE_DIAGNOSTIC_FILE
 USE RADCONS, ONLY: NRT,RSA,NRP,TIME_STEP_INCREMENT,ANGLE_INCREMENT,PATH_LENGTH
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP 
+USE SCARC_SOLVER, ONLY: SCARC_METHOD,SCARC_CG_PRECON,SCARC_BICG_PRECON, SCARC_SM_PRECON,SCARC_CG_EPS,&
+                        SCARC_BICG_EPS,SCARC_MG_EPS,SCARC_CG_NIT,SCARC_BICG_NIT,SCARC_MG_NIT
+
 INTEGER :: NM,I,NN,N,NR,NL,NS
 REAL(EB) SD
 CHARACTER(30) :: QUANTITY
@@ -2666,6 +2669,34 @@ WRITE_RADIATION: IF (RADIATION) THEN
    ENDIF
 ENDIF WRITE_RADIATION
  
+! Write out SCARC info
+
+WRITE_SCARC: IF (PRES_METHOD=='SCARC') THEN
+   WRITE(LU_OUTPUT,'(//A/)')   ' ScaRC Information'
+   WRITE(LU_OUTPUT,'(A,A10)')   '   global solver:     ', SCARC_METHOD
+   SELECT CASE(SCARC_METHOD)
+      CASE('CG')
+         WRITE(LU_OUTPUT,'(A,A10)')  '   preconditioner:    ', SCARC_CG_PRECON
+         IF (SCARC_CG_PRECON=='MG') THEN
+            WRITE(LU_OUTPUT,'(A,A10)') '   MG-smoother:       ', SCARC_SM_PRECON
+         ENDIF
+         WRITE(LU_OUTPUT,'(A,I10)')   '   max iterations:    ', SCARC_CG_NIT
+         WRITE(LU_OUTPUT,'(A,E10.2)') '   stopping accuracy: ', SCARC_CG_EPS
+      CASE('BICG')
+         WRITE(LU_OUTPUT,'(A,A10)')  '   preconditioner:    ', SCARC_BICG_PRECON
+         IF (SCARC_BICG_PRECON=='MG') THEN
+            WRITE(LU_OUTPUT,'(A,A10)') '   MG-smoother:       ', SCARC_SM_PRECON
+         ENDIF
+         WRITE(LU_OUTPUT,'(A,I10)')   '   max iterations:    ', SCARC_BICG_NIT
+         WRITE(LU_OUTPUT,'(A,E10.2)') '   stopping accuracy: ', SCARC_BICG_EPS
+      CASE('MG')
+         WRITE(LU_OUTPUT,'(A,A10)')  '   preconditioner:    ', SCARC_SM_PRECON
+         WRITE(LU_OUTPUT,'(A,I10)')   '   max iterations:    ', SCARC_MG_NIT
+         WRITE(LU_OUTPUT,'(A,E10.2)') '   stopping accuracy: ', SCARC_MG_EPS
+   END SELECT
+ENDIF WRITE_SCARC
+
+
 WRITE(LU_OUTPUT,*)
 WRITE(LU_OUTPUT,*)
  
@@ -2954,6 +2985,7 @@ SUBROUTINE WRITE_DIAGNOSTICS(T)
 ! current time for the physical system, and current number of
 ! particles in the system.
 
+USE SCARC_SOLVER, ONLY: SCARC_METHOD, SCARC_CAPPA, SCARC_NIT, SCARC_RES
 REAL(EB), INTENT(IN) :: T(NMESHES)
 INTEGER :: NM,DATE_TIME(8),II,JJ,KK
 CHARACTER(10) :: BIG_BEN(3),MONTH
@@ -3001,6 +3033,11 @@ IF (ITERATE_PRESSURE) THEN
    WRITE(LU_OUTPUT,'(7X,A,I6)') 'Pressure Iterations: ',PRESSURE_ITERATIONS
    WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Velocity Error: ',MAXVAL(VELOCITY_ERROR_MAX), &
                                                ' on Mesh ',NM,' at (',II,JJ,KK,')'
+ENDIF
+IF (PRES_METHOD=='SCARC') THEN
+   WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_NIT, &
+                                              ', residual ',SCARC_RES,&
+                                              ', convergence rate  ',SCARC_CAPPA
 ENDIF
 WRITE(LU_OUTPUT,'(7X,A)') '----------------------------------------------'
 
