@@ -1703,7 +1703,13 @@ EDGE_LOOP: DO IE=1,N_EDGES
 
    ! If the edge is on an interpolated boundary, cycle
 
-   IF (EDGE_TYPE(IE,1)==INTERPOLATED_EDGE .OR. EDGE_TYPE(IE,2)==INTERPOLATED_EDGE) CYCLE EDGE_LOOP
+   IF (EDGE_TYPE(IE,1)==INTERPOLATED_EDGE .OR. EDGE_TYPE(IE,2)==INTERPOLATED_EDGE) THEN
+      PROCESS_EDGE = .FALSE.
+      DO IS=5,8
+         IF (SOLID(IJKE(IS,IE))) PROCESS_EDGE = .TRUE.
+      ENDDO
+      IF (.NOT.PROCESS_EDGE) CYCLE EDGE_LOOP
+   ENDIF
 
    ! Save vorticity and viscous stress for use in momentum equation
 
