@@ -270,6 +270,8 @@ __glutCreateMenuWithExit(GLUTselectCB selectFunc, void (__cdecl *exitfunc)(int))
 void APIENTRY
 glutDestroyMenu(int menunum)
 {
+  int i,allmenusgone=1;
+
   GLUTmenu *menu = __glutGetMenuByNum(menunum);
   GLUTmenuItem *item, *next;
 
@@ -279,6 +281,16 @@ glutDestroyMenu(int menunum)
   assert(menu->id == menunum - 1);
   DestroyMenu(menu->win);
   menuList[menunum - 1] = NULL;
+  for(i=0;i<menuListSize;i++){
+    if(menuList[i]!=NULL){
+      allmenusgone=0;
+      break;
+    }
+  }
+  if(allmenusgone==1){
+    uniqueMenuHandler=1;
+  }
+
   /* free all menu entries */
   item = menu->list;
   while (item) {
