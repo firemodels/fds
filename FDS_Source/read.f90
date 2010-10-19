@@ -7094,29 +7094,27 @@ NN = 0
 
 INIT_LOOP: DO N=1,N_INIT_READ
 
-   XB(1)         = -1000000._EB
-   XB(2)         =  1000000._EB
-   XB(3)         = -1000000._EB
-   XB(4)         =  1000000._EB
-   XB(5)         = -1000000._EB
-   XB(6)         =  1000000._EB
-   TEMPERATURE   = -1000._EB
-   DENSITY       = -1000._EB
-   MASS_FRACTION =  0._EB
-   DO NNN=1,N_SPECIES
-      MASS_FRACTION(NNN) = SPECIES(NNN)%YY0
-   ENDDO
-   MASS_PER_TIME   = -1._EB
-   MASS_PER_VOLUME = -1._EB
-   MULT_ID         = 'null'
-   NUMBER_INITIAL_DROPLETS = 0
-   DT_INSERT       = -1._EB
-   PART_ID = 'null'
-   PROF_ID = 'null'
-   SHAPE   = 'BLOCK'
-   XYZ     = (/-1.E6_EB,-1.E6_EB,-1.E6_EB/)
-   UVW     = (/0._EB,0._EB,0._EB/)
-   DIAMETER = 0._EB
+   DENSITY                    = -1000._EB
+   DIAMETER                   =  0._EB
+   DT_INSERT                  = -1._EB
+   MASS_FRACTION              =  0._EB
+   MASS_FRACTION(1:N_SPECIES) = SPECIES(1:N_SPECIES)%YY0
+   MASS_PER_TIME              = -1._EB
+   MASS_PER_VOLUME            = -1._EB
+   MULT_ID                    = 'null'
+   NUMBER_INITIAL_DROPLETS    =  0
+   PART_ID                    = 'null'
+   PROF_ID                    = 'null'
+   SHAPE                      = 'BLOCK'
+   TEMPERATURE                = -1000._EB
+   UVW                        =  0._EB
+   XYZ                        = -1.E6_EB
+   XB(1)                      = -1000000._EB
+   XB(2)                      =  1000000._EB
+   XB(3)                      = -1000000._EB
+   XB(4)                      =  1000000._EB
+   XB(5)                      = -1000000._EB
+   XB(6)                      =  1000000._EB
  
    CALL CHECKREAD('INIT',LU_INPUT,IOS)
    IF (IOS==1) EXIT INIT_LOOP
@@ -7158,6 +7156,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
                IN%Z2 = XB(6) + MR%DZ0 + II*MR%DXB(6)
             ENDIF
 
+            IN%VOLUME        = (IN%X2-IN%X1)*(IN%Y2-IN%Y1)*(IN%Z2-IN%Z1)
             IN%TEMPERATURE   = TEMPERATURE + TMPM
             IN%DENSITY       = DENSITY
             IN%MASS_FRACTION = MASS_FRACTION
@@ -7187,16 +7186,26 @@ INIT_LOOP: DO N=1,N_INIT_READ
             IN%MASS_PER_TIME           = MASS_PER_TIME
             IN%MASS_PER_VOLUME         = MASS_PER_VOLUME
             IN%NUMBER_INITIAL_DROPLETS = NUMBER_INITIAL_DROPLETS
+
+            IF ( (IN%MASS_PER_TIME>0._EB .OR. IN%MASS_PER_VOLUME>0._EB) .AND. IN%VOLUME==0._EB) THEN
+               WRITE(MESSAGE,'(A,I4,A)') 'ERROR: INIT ',N,' XB has no volume'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
             
             IF (DT_INSERT<0._EB) THEN
                IN%DT_INSERT = T_END-T_BEGIN+10.
             ELSE
                IN%DT_INSERT = DT_INSERT
             ENDIF
+
+            ! Set up a clock to keep track of particle insertions
+
             ALLOCATE(IN%PARTICLE_INSERT_CLOCK(NMESHES),STAT=IZERO)
             CALL ChkMemErr('READ','PARTICLE_INSERT_CLOCK',IZERO)
             IN%PARTICLE_INSERT_CLOCK = T_BEGIN
          
+            ! Assign an index to identify the particle class
+
             IF (PART_ID/='null') THEN
                DO NS=1,N_PART
                   IF (PART_ID==PARTICLE_CLASS(NS)%ID) THEN
@@ -7213,6 +7222,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
             ENDIF
             
             ! Special case: INIT is used to patch a velocity profile
+
             PATCH_VELOCITY_IF: IF (PATCH_VELOCITY) THEN
                SELECT CASE(ORIGIN)
                   CASE('CENTER')
@@ -7231,6 +7241,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
             ENDIF PATCH_VELOCITY_IF
             
             ! Special case: POINTWISE_DROPLET_INIT
+
             POINTWISE_DROPLET_IF: IF (ANY(XYZ>-1000._EB)) THEN
                IF (NUMBER_INITIAL_DROPLETS>1) THEN
                   WRITE(MESSAGE,'(A)') 'ERROR: NUMBER_INITIAL_DROPLETS=1 for pointwise insert'
@@ -7246,8 +7257,6 @@ INIT_LOOP: DO N=1,N_INIT_READ
                IN%V0 = UVW(2)
                IN%W0 = UVW(3)
                IN%RADIUS = DIAMETER*0.5E-6_EB        ! convert diameter (microns) to radius (meters)
-               !!IN%TEMPERATURE = TEMPERATURE + TMPM ! see above
-               !!IN%MASS_PER_TIME = MASS_PER_TIME    ! see above
             ENDIF POINTWISE_DROPLET_IF
          
          ENDDO I_MULT_LOOP
@@ -7255,6 +7264,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
    ENDDO K_MULT_LOOP
 
 ENDDO INIT_LOOP
+
 REWIND(LU_INPUT)
 
 END SUBROUTINE READ_INIT
