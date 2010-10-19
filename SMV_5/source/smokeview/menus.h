@@ -4043,7 +4043,7 @@ static int menu_count=0;
 static int in_menu=0;
 #endif
 
-
+updatemenu=0;
 #ifdef _DEBUG
   printf("Updating Menus %i In menu %i\n",menu_count++,in_menu);
   in_menu=1;
@@ -4179,10 +4179,8 @@ static int in_menu=0;
 
       menui = menuinfo + i;
 
-      menuvar = menui->menuvar;
-      if(menuvar!=0){
-        glutDestroyMenu(menuvar);
-        menuvar=0;
+      if(menui->menuvar>0){
+        glutDestroyMenu(menui->menuvar);
       }
     }
     nmenus=0;

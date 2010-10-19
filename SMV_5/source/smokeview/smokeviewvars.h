@@ -419,7 +419,7 @@ SVEXTERN int blockage_index;
 
 SVEXTERN int windowresized;
 
-SVEXTERN int updatemenu, first_display;
+SVEXTERN int SVDECL(updatemenu,0), first_display;
 SVEXTERN int updatezoommenu;
 SVEXTERN int updatemenu_count;
 SVEXTERN int no_graphics;

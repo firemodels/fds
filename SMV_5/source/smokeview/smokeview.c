@@ -3480,7 +3480,7 @@ void Args(int argc, char **argv){
   STRCPY(fdsprefix,argi);
   FREEMEMORY(trainer_filename);
   FREEMEMORY(test_filename);
-  FREEMEMORY(filename_sb)
+  FREEMEMORY(filename_sb);
 
   strcpy(inputfilename_ext,"");
 
