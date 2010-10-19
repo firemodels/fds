@@ -1247,32 +1247,6 @@ CONTAINS
                FAC_V0_DOWN = 0.790_EB
                FAC_V0_HORI = 1.0_EB
                DEFAULT_PROPERTIES='Female' ! Female body size etc.
-!!$            CASE ('IMO_MaleCrew','imo_malecrew','IMO_MALECREW')
-!!$               IF (VELOCITY_DIST < 0) THEN
-!!$                  VELOCITY_DIST = 1
-!!$                  VEL_LOW  = 1.11_EB
-!!$                  VEL_HIGH = 1.85_EB
-!!$                  VEL_MEAN = 0.5_EB*(VEL_LOW+VEL_HIGH)
-!!$               END IF
-!!$               ! Stairs down,up 0.76-1.26 0.5-0.84 (like males <30)
-!!$               !  down about 0.683, up 0.452
-!!$               FAC_V0_UP   = 0.452_EB
-!!$               FAC_V0_DOWN = 0.683_EB
-!!$               FAC_V0_HORI = 1.0_EB
-!!$               DEFAULT_PROPERTIES='Male' ! Male body size etc.
-!!$            CASE ('IMO_FemaleCrew','imo_femalecrew','IMO_FEMALECREW')
-!!$               IF (VELOCITY_DIST < 0) THEN
-!!$                  VELOCITY_DIST = 1
-!!$                  VEL_LOW  = 0.93_EB
-!!$                  VEL_HIGH = 0.55_EB
-!!$                  VEL_MEAN = 0.5_EB*(VEL_LOW+VEL_HIGH)
-!!$               END IF
-!!$               ! Stairs down,up 0.56-0.94 0.47-0.79 (like femals <30)
-!!$               !  down about 0.604, up 0.507
-!!$               FAC_V0_UP   = 0.507_EB
-!!$               FAC_V0_DOWN = 0.604_EB
-!!$               FAC_V0_HORI = 1.0_EB
-!!$               DEFAULT_PROPERTIES='Female' ! Female body size etc.
             CASE Default
             END SELECT
 
@@ -6782,12 +6756,12 @@ CONTAINS
                                IF (HERDING_LIST_N < 5) THEN
                                   ! List is not yet full, all agents are ok
                                   HERDING_LIST_N = HERDING_LIST_N + 1
-                                  HERDING_LIST_IHUMAN(HERDING_LIST_N) = IE
+                                  HERDING_LIST_IHUMAN(HERDING_LIST_N) = +IE
                                   HERDING_LIST_P2PDIST(HERDING_LIST_N) = P2P_DIST
                                ELSE
                                   ! There are already five agents in the list, find the furthest one
                                   I_TMP = MAXVAL(MAXLOC(HERDING_LIST_P2PDIST))
-                                  HERDING_LIST_IHUMAN(I_TMP) = IE
+                                  HERDING_LIST_IHUMAN(I_TMP) = +IE
                                   HERDING_LIST_P2PDIST(I_TMP) = P2P_DIST
                                END IF
                                HERDING_LIST_P2PMAX = MAXVAL(HERDING_LIST_P2PDIST)
@@ -7094,13 +7068,13 @@ CONTAINS
           IF (TAU_CHANGE_V0 > 1.0E-12_EB) THEN
              ! Stairs mesh: next subroutine call is needed to set up the targets etc correctly,
              ! but UBAR,VBAR are not needed.
-             IF (NM_STRS_MESH) CALL FIND_PREFERED_DIRECTION(I, N, T,T_BEGIN, L_DEAD, NM_STRS_MESH, &
+             IF (NM_STRS_MESH) CALL FIND_PREFERRED_DIRECTION(I, N, T,T_BEGIN, L_DEAD, NM_STRS_MESH, &
                   II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
              ! Collision avoidance (incl. counterflow), do not update v0 on every time step.
              UBAR = HR%UBAR; VBAR = HR%VBAR
           ELSE
              ! Update v0 on every time step, no collision avoidance.
-             CALL FIND_PREFERED_DIRECTION(I, N, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
+             CALL FIND_PREFERRED_DIRECTION(I, N, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
                   II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
           END IF
           ! ========================================================
@@ -7327,7 +7301,7 @@ CONTAINS
                 COS_Y = ESS%COS_Y
                 SELECT CASE (ESS%IOR)
                 CASE(-1)
-                   X1 = X1 - COS_X*(ESS%ESC_SPEEDUP-ESS%ESC_SPEEDDN)*DTSP
+                   X1 = X1 + COS_X*(ESS%ESC_SPEEDUP-ESS%ESC_SPEEDDN)*DTSP
                 CASE(+1)
                    X1 = X1 - COS_X*(ESS%ESC_SPEEDUP-ESS%ESC_SPEEDDN)*DTSP
                 CASE(-2)
@@ -7623,7 +7597,7 @@ CONTAINS
              A_WALL = MIN(A_WALL, CF_FAC_A_WALL*FAC_A_WALL*HR_A)
           END IF
           !
-          ! PSYCHOLOGICAL FORCE: CUT-OFF WHEN ACCELERATION BELOW 0.0001 M/S**2
+          ! Psychological force: Cut-off when acceleration below 0.0001 m/s**2
           P2P_DIST_MAX = HR%B*LOG(HR%A/0.0001_EB)
           P2P_DIST_MAX = MIN(P2P_DIST_MAX, 5.0_EB)  ! 5.0 m is the maximum range of pp-force
           IF ( HR%SUMFORCES2 > 0.1_EB ) THEN
@@ -7631,14 +7605,24 @@ CONTAINS
              P2P_DIST_MAX = MIN( P2P_DIST_MAX, -HR%B*LOG(HR%SUMFORCES2/(100.0_EB*HR%A)) )
           END IF
           P2P_DIST_MAX = MAX(P2P_DIST_MAX, 3.0_EB*HR%B)
-          ! Next is the max distance for the collision avoidance, counterflow, etc.
-          P2P_SUUNTA_MAX = MAX(P2P_DIST_MAX, 3.0_EB)
+          !
+          ! Collision avoidance (incl. counterflow)
+          ! Do not do collision avoidance on every time step, do it every 0.1 s on the average by default.
+          IF (TAU_CHANGE_V0 > 1.0E-12_EB) THEN
+             CALL RANDOM_NUMBER(RNCF)
+          ELSE
+             RNCF = -1.0_EB ; ANGLE_OLD = 0.0_EB ; COMMITMENT = 0.0_EB
+          END IF
+          IF ( RNCF > EXP(-DTSP/TAU_CHANGE_V0) ) THEN
+             ! Collision avoidance needs some range, at least 3.0 m
+             P2P_SUUNTA_MAX = MAX(P2P_DIST_MAX, 3.0_EB)
+          ELSE
+             P2P_SUUNTA_MAX = P2P_DIST_MAX
+          END IF
 
           ! Speed up the dead agent loop, only contact forces are needed.
           IF (L_DEAD) P2P_DIST_MAX = 0.0_EB
           IF (L_DEAD) P2P_SUUNTA_MAX = 0.0_EB
-          ! Check if counterflow algorithm is not used.
-          IF (TAU_CHANGE_V0 < 1.E-12_EB) P2P_SUUNTA_MAX = P2P_DIST_MAX
 
           ! In which grid cell is the agent, new coordinates:
           XI = CELLSI(FLOOR((HR%X-XS)*RDXINT))
@@ -7659,7 +7643,7 @@ CONTAINS
           ! Calculate persons prefered walking direction
           ! ========================================================
           N = NM_STRS_INDEX
-          CALL FIND_PREFERED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
+          CALL FIND_PREFERRED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
                IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
           ! (UBAR,VBAR) is now the direction of the flow field of the evacuation mesh
           ! leading towards the chosen door (or the main evacuation field).  It has
@@ -7795,14 +7779,6 @@ CONTAINS
           ! ========================================================
           ! Collision avoidance (incl. counterflow)
           ! ========================================================
-          ! Do not do this on every time step, do it every 0.1 s on the average by default.
-          IF (TAU_CHANGE_V0 > 1.0E-12_EB) THEN
-             CALL RANDOM_NUMBER(RNCF)
-          ELSE
-             RNCF = -1.0_EB
-             ANGLE_OLD = 0.0_EB
-             COMMITMENT = 0.0_EB
-          END IF
           CHANGE_V0_RNCF0: IF ( RNCF > EXP(-DTSP/TAU_CHANGE_V0) ) THEN
 
              V_HR = MAX(0.1_EB,MIN(1.0_EB,SQRT(HR%U**2 + HR%V**2)/HR%SPEED))
@@ -8656,7 +8632,7 @@ CONTAINS
 
   CONTAINS
 
-    SUBROUTINE FIND_PREFERED_DIRECTION(I, NOUT, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
+    SUBROUTINE FIND_PREFERRED_DIRECTION(I, NOUT, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
          II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
       IMPLICIT NONE
       !
@@ -8706,6 +8682,11 @@ CONTAINS
          WRITE(MESSAGE,'(A,I6,A)') 'ERROR: EVACUATE_HUMANS, mesh ', HR%I_FFIELD, ' is not an evacuation flow field.'
          CALL SHUTDOWN(MESSAGE)
       END IF
+      IF (T <= T_BEGIN) THEN
+         ! Initialization phase, i.e., flow field calculation
+         UBAR = 0.0_EB ; VBAR = 0.0_EB ; HR_TAU = HR%TAU
+         RETURN
+      END IF
       ! 
       ! Determine if the mesh is a stairs-mesh
       IF (NM_STRS_MESH) THEN
@@ -8714,17 +8695,6 @@ CONTAINS
          STRS_INDX = N
          STRP=>EVAC_STRS(N)
       END IF
-!!$      NM_STRS_MESH = .FALSE.
-!!$      STRSMESHLOOP: DO N = 1, N_STRS
-!!$         IF (EVAC_STRS(N)%IMESH==NM) THEN     
-!!$            NM_NOW = NM
-!!$            NM_STRS_MESH = .TRUE.
-!!$            STRS_INDX = N
-!!$            STRP=>EVAC_STRS(N)
-!!$            NOUT = N
-!!$            EXIT STRSMESHLOOP
-!!$         END IF
-!!$      END DO STRSMESHLOOP
 
       MFF=>MESHES(NM_NOW)  ! Pointer to the flow field mesh
 
@@ -8957,21 +8927,6 @@ CONTAINS
          END IF
       END IF If_StrsMesh
       IF (STRAIGHT_LINE_TO_TARGET) THEN
-!!$         UBAR = X_TARGET-HR%X
-!!$         VBAR = Y_TARGET-HR%Y
-!!$         DOOR_DIST = SQRT((X_TARGET-HR%X)**2+(Y_TARGET-HR%Y)**2)
-!!$         IF ( DOOR_DIST < 0.5_EB*DOOR_WIDTH ) THEN
-!!$            SELECT CASE(DOOR_IOR)
-!!$            CASE(-1,+1)
-!!$               UBAR = SIGN(1.0_EB,UBAR)
-!!$               VBAR = 0._EB
-!!$               HR%SKIP_WALL_FORCE_IOR = NINT(UBAR)
-!!$            CASE(-2,+2)
-!!$               UBAR = 0._EB
-!!$               VBAR = SIGN(1.0_EB,VBAR)
-!!$               HR%SKIP_WALL_FORCE_IOR = NINT(VBAR)*2
-!!$            END SELECT
-!!$         END IF
          UBAR = X_TARGET-HR%X
          VBAR = Y_TARGET-HR%Y
          DOOR_DIST = SQRT((X_TARGET-HR%X)**2+(Y_TARGET-HR%Y)**2)
@@ -9010,16 +8965,13 @@ CONTAINS
 
       EVEL = SQRT(UBAR**2 + VBAR**2)  ! (UBAR,VBAR) is an unit vector
       IF (EVEL > 0.0_EB) THEN
-         UBAR = UBAR/EVEL
-         VBAR = VBAR/EVEL
+         UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
       ELSE
          ! No v0 found for the current location of the agent, use previous value
-         UBAR = HR%UBAR
-         VBAR = HR%VBAR
+         UBAR = HR%UBAR ; VBAR = HR%VBAR
       END IF
       IF (L_DEAD) THEN
-         UBAR = 0.0_EB
-         VBAR = 0.0_EB
+         UBAR = 0.0_EB ; VBAR = 0.0_EB
       END IF
       IF (I_HERDING_TYPE>1 .AND. HR%I_Target==0 .AND. HR%I_DoorAlgo>0) THEN
          ! Herding type agent without any target door: do not move
@@ -9042,8 +8994,7 @@ CONTAINS
             ! Herding agents that do not have any target will stop after 3 m from the
             ! door/entr they use to came to this floor.
          ELSE
-            UBAR = 0.0_EB
-            VBAR = 0.0_EB
+            UBAR = 0.0_EB ; VBAR = 0.0_EB
          END IF
       END IF
       J = MAX(0,HR%GROUP_ID)
@@ -9064,19 +9015,17 @@ CONTAINS
             HR%UBAR_CENTER = HR%UBAR_CENTER / EVEL
             HR%VBAR_CENTER = HR%VBAR_CENTER / EVEL
          ELSE
-            HR%UBAR_CENTER = 0.0_EB
-            HR%VBAR_CENTER = 0.0_EB
+            HR%UBAR_CENTER = 0.0_EB ; HR%VBAR_CENTER = 0.0_EB
          END IF
       ELSE
-         HR%UBAR_CENTER = 0.0_EB ! Only one person in the group
-         HR%VBAR_CENTER = 0.0_EB ! Only one person in the group
+         ! Only one person in the group
+         HR%UBAR_CENTER = 0.0_EB ; HR%VBAR_CENTER = 0.0_EB
       END IF
 
       IF ( J > 0 ) THEN
          ! Group is already gathered together, but not yet moving towards the door
          IF (GROUP_LIST(J)%COMPLETE == 1 .AND. T <= GROUP_LIST(J)%TPRE+GROUP_LIST(J)%TDOOR) THEN
-            UBAR = 0.0_EB
-            VBAR = 0.0_EB
+            UBAR = 0.0_EB ; VBAR = 0.0_EB
          END IF
 
          EVEL = UBAR**2 + VBAR**2
@@ -9090,25 +9039,17 @@ CONTAINS
                  ((1-GROUP_EFF)*VBAR + GROUP_EFF*HR%VBAR_CENTER)**2)
          ELSE
             ! The group is still in the gathering phase
-            UBAR = HR%UBAR_CENTER
-            VBAR = HR%VBAR_CENTER
+            UBAR = HR%UBAR_CENTER ; VBAR = HR%VBAR_CENTER
          END IF
       END IF
 
       EVEL = UBAR**2 + VBAR**2  ! (UBAR,VBAR) is an unit vector
       IF  (T <= TPRE .OR. EVEL < 0.01_EB) THEN
          ! No movement yet or no direction
-         UBAR = 0.0_EB
-         VBAR = 0.0_EB
-      END IF
-      IF (T <= T_BEGIN) THEN
-         ! Initialization phase, i.e., flow field calculation
-         UBAR = 0.0_EB
-         VBAR = 0.0_EB
-         HR_TAU = HR%TAU
+         UBAR = 0.0_EB ; VBAR = 0.0_EB
       END IF
       RETURN
-    END SUBROUTINE FIND_PREFERED_DIRECTION
+    END SUBROUTINE FIND_PREFERRED_DIRECTION
 
 
     SUBROUTINE GETSTAIRSPEEDANDZ(SPEED_XM,SPEED_XP, SPEED_YM,SPEED_YP,SP,HP)
@@ -9443,13 +9384,18 @@ CONTAINS
       ! Local variables
       REAL(EB) X_OLD, Y_OLD, PEXX1, PEXX2, PEXY1, PEXY2
       INTEGER :: IE,I,N_TMP
+      LOGICAL :: L_INIT_IOR
       TYPE (EVAC_EXIT_TYPE), POINTER :: PEX =>NULL()
       TYPE (HUMAN_TYPE), POINTER :: HR =>NULL()
       !
-      HUMAN(:)%IOR = 0
+      L_INIT_IOR = .TRUE.
+      ! HUMAN(:)%IOR = 0
       PEXLOOP: DO IE = 1, N_EXITS
          PEX=>EVAC_EXITS(IE)
          IF (PEX%IMESH /= NM ) CYCLE PEXLOOP
+         IF (L_INIT_IOR) THEN
+            HUMAN(:)%IOR = 0 ; L_INIT_IOR = .FALSE.
+         END IF
          SELECT CASE (PEX%IOR)
          CASE (-1,+1)
             PEXX1 = PEX%X1
@@ -9568,20 +9514,24 @@ CONTAINS
       INTEGER :: NEW_FFIELD_I, COLOR_INDEX, I_TARGET, INODE, STR_INDX, STR_SUB_INDX
       CHARACTER(60) :: TO_NODE
       CHARACTER(30) :: NEW_FFIELD_NAME
-      LOGICAL :: KEEP_XY, UPSTREAM, NO_TO_NODE
+      LOGICAL :: KEEP_XY, UPSTREAM, NO_TO_NODE, L_INIT_IOR
       TYPE (EVAC_DOOR_TYPE), POINTER :: PDX =>NULL()
       TYPE (HUMAN_TYPE), POINTER :: HR =>NULL()
       !
-      KEEP_XY = .FALSE.
-      NO_TO_NODE = .FALSE.
-      HUMAN(:)%IOR = HUMAN_NO_TARGET
+      L_INIT_IOR = .TRUE.
+      ! HUMAN(:)%IOR = HUMAN_NO_TARGET
       PDXLOOP: DO IE = 1, N_DOORS
+         NO_TO_NODE = .FALSE.
+         KEEP_XY = .FALSE.
          PDX=>EVAC_DOORS(IE)
          IF (Trim(PDX%TO_NODE)=='null') NO_TO_NODE = .TRUE.
          ! Note: IMESH2 is not good for corr targets
          IF (NO_TO_NODE) CYCLE PDXLOOP
          IF (PDX%IMESH /= NM .AND. PDX%IMESH2 /= NM) CYCLE PDXLOOP
          IF (PDX%IMESH /= NM .AND. .NOT.NM_STRS_MESH) CYCLE PDXLOOP
+         IF (L_INIT_IOR) THEN
+            HUMAN(:)%IOR = 0 ; L_INIT_IOR = .FALSE.
+         END IF
          KEEP_XY = PDX%KEEP_XY
          SELECT CASE (PDX%IOR)
          CASE (-1,+1)
@@ -10943,89 +10893,6 @@ CONTAINS
       Social_F = Social_F + ABS(F_soc)
 
     END SUBROUTINE Wall_SocialForces
-!!$    Subroutine Wall_SocialForces(nm, x_tmp, y_tmp, r_tmp, p2p_dist_max, d_xy, P2P_U, P2P_V, Social_F, FoundWall_xy)
-!!$      Implicit None
-!!$
-!!$      ! wall - agent social forces
-!!$      !
-!!$      ! Inputs:  FoundWall_xy(1-4): True for solid walls (False for outflow VENTs)
-!!$      !          x/y_tmp: coordinates of the centres of the spheres (1-3 used)
-!!$      !                   1: right, 2: centre, 3: left circle
-!!$      !          r_tmp: radii of the spheres
-!!$      !          p2p_dist_max: cutoff distance of the social force
-!!$      ! Outputs: 
-!!$      !          P2P_U/V: Forces x/y directions
-!!$      !          Social_F: Radial social line force
-!!$      !
-!!$
-!!$      Integer, Intent(IN) :: nm
-!!$      Real(EB), Intent(IN) :: x_tmp, y_tmp, r_tmp, p2p_dist_max
-!!$      !Real(EB), Dimension(6), Intent(IN) :: x_tmp, y_tmp, r_tmp
-!!$      Real(EB), Dimension(4), Intent(IN) :: d_xy
-!!$      Logical, Dimension(4), Intent(IN) :: FoundWall_xy
-!!$      Real(EB), Intent(INOUT) :: P2P_U, P2P_V, Social_F
-!!$      !
-!!$      Integer :: is, idir
-!!$      Real(EB) :: CosPhiFac, dist
-!!$
-!!$      ! -x direction
-!!$      is   = -1
-!!$      idir =  1
-!!$      dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
-!!$      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
-!!$         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-!!$            CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
-!!$            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-!!$         Else
-!!$            CosPhiFac = 1.0_EB
-!!$         End If
-!!$         P2P_U = P2P_U - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-!!$         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-!!$      End If
-!!$
-!!$      is   = +1
-!!$      idir =  2
-!!$      dist = Abs(d_xy(idir) - x_tmp) ! wall - agent centre distance
-!!$      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
-!!$         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-!!$            CosPhiFac = (is*HR%U)/Sqrt(HR%U**2+HR%V**2)
-!!$            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-!!$         Else
-!!$            CosPhiFac = 1.0_EB
-!!$         End If
-!!$         P2P_U = P2P_U - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-!!$         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-!!$      End If
-!!$
-!!$      is   = -1
-!!$      idir =  3
-!!$      dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
-!!$      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
-!!$         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-!!$            CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
-!!$            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-!!$         Else
-!!$            CosPhiFac = 1.0_EB
-!!$         End If
-!!$         P2P_V = P2P_V - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-!!$         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-!!$      End If
-!!$
-!!$      is   = +1
-!!$      idir =  4
-!!$      dist = Abs(d_xy(idir) - y_tmp) ! wall - agent centre distance
-!!$      If (dist-r_tmp <= P2P_DIST_MAX .And. FoundWall_xy(idir)) Then
-!!$         If ( (HR%U**2+HR%V**2) > 0.0_EB ) Then
-!!$            CosPhiFac = (is*HR%V)/Sqrt(HR%U**2+HR%V**2)
-!!$            CosPhiFac = LambdaW + 0.5_EB*(1.0_EB-LambdaW)*(1.0_EB+CosPhiFac)
-!!$         Else
-!!$            CosPhiFac = 1.0_EB
-!!$         End If
-!!$         P2P_V = P2P_V - is*A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall )
-!!$         Social_F = Social_F + Abs(A_Wall*CosPhiFac*Exp( -(dist-r_tmp)/B_Wall ))
-!!$      End If
-!!$
-!!$    End Subroutine Wall_SocialForces
 
     SUBROUTINE Wall_ContactForces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, d_xy,&
          P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy)
@@ -12953,6 +12820,7 @@ CONTAINS
                 Is_Known_Door(N_DOORS+i) = .FALSE.
              END IF
           END DO
+          HR%I_Door_Mode = 0 ! Initialization
        END IF  ! imode=0, Initialization call
 
     ELSE
@@ -13019,7 +12887,7 @@ CONTAINS
           ! EXIT_SIGN, unless it is already been a target door for this agent/group.
           IF (PP_see_door) THEN
              IF (EVAC_Node_List(n_egrids+N_ENTRYS+i)%Node_Type == 'Door') THEN
-                IF (.NOT. EVAC_DOORS(i)%EXIT_SIGN .AND. .NOT. HR%I_Target == i .AND. &
+                IF (.NOT. EVAC_DOORS(i)%EXIT_SIGN .AND. .NOT. ABS(HR%I_Target) == i .AND. &
                     .NOT. Is_Known_Door(i)) THEN
                      ! no exit sign, not the current target door, not known
                    Is_Visible_Door(i) = .FALSE.
