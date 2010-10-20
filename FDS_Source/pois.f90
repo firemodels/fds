@@ -199,6 +199,7 @@ SUBROUTINE H3CZSS(BDXS,BDXF,BDYS,BDYF,BDZS,BDZF,LDIMF,MDIMF,F,  &
 ! +--------------------------------------------------------------------+
 
 
+USE GLOBAL_CONSTANTS, ONLY: PRES_METHOD
 REAL(EB):: BDXS(MDIMF,*), BDXF(MDIMF,*), BDYS(LDIMF,*), BDYF(LDIMF,*), BDZS(LDIMF,*), BDZF(LDIMF,*), &
            F(LDIMF,MDIMF,*),SAVE(-3:*),W(*),H(0:*), PERTRB
 INTEGER:: LDIMF, MDIMF
@@ -238,106 +239,110 @@ ID = IC + L
 IS = 12 + 4*L
 
 
+IF (PRES_METHOD /= 'SCARC') THEN
+
 !                               ENTER BOUNDARY DATA FOR X-BOUNDARIES
 
-IF (LP==2 .OR. LP==3) THEN
-  DO K = 1,N
-    DO J = 1,M
-      F(1,J,K) = F(1,J,K) - 2._EB*BDXS(J,K)*SAVE(IA)
-    END DO
-  END DO
-END IF
+   IF (LP==2 .OR. LP==3) THEN
+     DO K = 1,N
+       DO J = 1,M
+         F(1,J,K) = F(1,J,K) - 2._EB*BDXS(J,K)*SAVE(IA)
+       END DO
+     END DO
+   END IF
+   
+   IF (LP==4 .OR. LP==5) THEN
+     DO K = 1,N
+       DO J = 1,M
+         F(1,J,K) = F(1,J,K) + SAVE(IA)*DX*BDXS(J,K)
+       END DO
+     END DO
+   END IF
+   
+   IF (LP==2 .OR. LP==5) THEN
+     DO K = 1,N
+       DO J = 1,M
+         F(L,J,K) = F(L,J,K) - 2._EB*BDXF(J,K)*SAVE(ID-1)
+       END DO
+     END DO
+   END IF
+   
+   IF (LP==3 .OR. LP==4) THEN
+     DO K = 1,N
+       DO J = 1,M
+         F(L,J,K) = F(L,J,K) - SAVE(ID-1)*DX*BDXF(J,K)
+       END DO
+     END DO
+   END IF
+   
+   !                               ENTER BOUNDARY DATA FOR Y-BOUNDARIES
+   
+   IF (MP==2 .OR. MP==3) THEN
+     DO K = 1,N
+       DO I = 1,L
+         F(I,1,K) = F(I,1,K) - BDYS(I,K)*TWDYSQ
+       END DO
+     END DO
+   END IF
+   
+   IF (MP==4 .OR. MP==5) THEN
+     DO K = 1,N
+       DO I = 1,L
+         F(I,1,K) = F(I,1,K) + BDYS(I,K)*DLYRCP
+       END DO
+     END DO
+   END IF
+   
+   IF (MP==2 .OR. MP==5) THEN
+     DO K = 1,N
+       DO I = 1,L
+         F(I,M,K) = F(I,M,K) - BDYF(I,K)*TWDYSQ
+       END DO
+     END DO
+   END IF
+   
+   IF (MP==3 .OR. MP==4) THEN
+     DO K = 1,N
+       DO I = 1,L
+         F(I,M,K) = F(I,M,K) - BDYF(I,K)*DLYRCP
+       END DO
+     END DO
+   END IF
+   
+   !                               ENTER BOUNDARY DATA FOR Z-BOUNDARIES
+   
+   IF (NP==2 .OR. NP==3) THEN
+     DO J = 1,M
+       DO I = 1,L
+         F(I,J,1) = F(I,J,1) - BDZS(I,J)*TWDZSQ
+       END DO
+     END DO
+   END IF
+   
+   IF (NP==4 .OR. NP==5) THEN
+     DO J = 1,M
+       DO I = 1,L
+         F(I,J,1) = F(I,J,1) + BDZS(I,J)*DLZRCP
+       END DO
+     END DO
+   END IF
+   
+   IF (NP==2 .OR. NP==5) THEN
+     DO J = 1,M
+       DO I = 1,L
+         F(I,J,N) = F(I,J,N) - BDZF(I,J)*TWDZSQ
+       END DO
+     END DO
+   END IF
+   
+   IF (NP==3 .OR. NP==4) THEN
+     DO J = 1,M
+       DO I = 1,L
+         F(I,J,N) = F(I,J,N) - BDZF(I,J)*DLZRCP
+       END DO
+     END DO
+   END IF
 
-IF (LP==4 .OR. LP==5) THEN
-  DO K = 1,N
-    DO J = 1,M
-      F(1,J,K) = F(1,J,K) + SAVE(IA)*DX*BDXS(J,K)
-    END DO
-  END DO
-END IF
-
-IF (LP==2 .OR. LP==5) THEN
-  DO K = 1,N
-    DO J = 1,M
-      F(L,J,K) = F(L,J,K) - 2._EB*BDXF(J,K)*SAVE(ID-1)
-    END DO
-  END DO
-END IF
-
-IF (LP==3 .OR. LP==4) THEN
-  DO K = 1,N
-    DO J = 1,M
-      F(L,J,K) = F(L,J,K) - SAVE(ID-1)*DX*BDXF(J,K)
-    END DO
-  END DO
-END IF
-
-!                               ENTER BOUNDARY DATA FOR Y-BOUNDARIES
-
-IF (MP==2 .OR. MP==3) THEN
-  DO K = 1,N
-    DO I = 1,L
-      F(I,1,K) = F(I,1,K) - BDYS(I,K)*TWDYSQ
-    END DO
-  END DO
-END IF
-
-IF (MP==4 .OR. MP==5) THEN
-  DO K = 1,N
-    DO I = 1,L
-      F(I,1,K) = F(I,1,K) + BDYS(I,K)*DLYRCP
-    END DO
-  END DO
-END IF
-
-IF (MP==2 .OR. MP==5) THEN
-  DO K = 1,N
-    DO I = 1,L
-      F(I,M,K) = F(I,M,K) - BDYF(I,K)*TWDYSQ
-    END DO
-  END DO
-END IF
-
-IF (MP==3 .OR. MP==4) THEN
-  DO K = 1,N
-    DO I = 1,L
-      F(I,M,K) = F(I,M,K) - BDYF(I,K)*DLYRCP
-    END DO
-  END DO
-END IF
-
-!                               ENTER BOUNDARY DATA FOR Z-BOUNDARIES
-
-IF (NP==2 .OR. NP==3) THEN
-  DO J = 1,M
-    DO I = 1,L
-      F(I,J,1) = F(I,J,1) - BDZS(I,J)*TWDZSQ
-    END DO
-  END DO
-END IF
-
-IF (NP==4 .OR. NP==5) THEN
-  DO J = 1,M
-    DO I = 1,L
-      F(I,J,1) = F(I,J,1) + BDZS(I,J)*DLZRCP
-    END DO
-  END DO
-END IF
-
-IF (NP==2 .OR. NP==5) THEN
-  DO J = 1,M
-    DO I = 1,L
-      F(I,J,N) = F(I,J,N) - BDZF(I,J)*TWDZSQ
-    END DO
-  END DO
-END IF
-
-IF (NP==3 .OR. NP==4) THEN
-  DO J = 1,M
-    DO I = 1,L
-      F(I,J,N) = F(I,J,N) - BDZF(I,J)*DLZRCP
-    END DO
-  END DO
 END IF
 
 PERTRB = 0._EB 
@@ -6652,6 +6657,7 @@ SUBROUTINE H2CZSS(BDXS,BDXF,BDYS,BDYF,LDIMF,F,PERTRB,SAVE,W,H)
 ! |                                                                    |
 ! +--------------------------------------------------------------------+
 
+USE GLOBAL_CONSTANTS, ONLY: PRES_METHOD
 REAL(EB)  BDXS(*)
 REAL(EB)  BDXF(*)
 REAL(EB)  BDYS(*)
@@ -6692,56 +6698,60 @@ ID = IC + L
 IS = 9 + 4*L
 
 
+IF (PRES_METHOD /= 'SCARC') THEN
+
 !                               ENTER BOUNDARY DATA FOR X-BOUNDARIES
 
-IF (LP==2 .OR. LP==3) THEN
-  DO J = 1,M
-    F(1,J) = F(1,J) - 2._EB*BDXS(J)*SAVE(IA)
-  END DO
-END IF
+   IF (LP==2 .OR. LP==3) THEN
+     DO J = 1,M
+       F(1,J) = F(1,J) - 2._EB*BDXS(J)*SAVE(IA)
+     END DO
+   END IF
+   
+   IF (LP==4 .OR. LP==5) THEN
+     DO J = 1,M
+       F(1,J) = F(1,J) + SAVE(IA)*DX*BDXS(J)
+     END DO
+   END IF
+   
+   IF (LP==2 .OR. LP==5) THEN
+     DO J = 1,M
+       F(L,J) = F(L,J) - 2._EB*BDXF(J)*SAVE(ID-1)
+     END DO
+   END IF
+   
+   IF (LP==3 .OR. LP==4) THEN
+     DO J = 1,M
+       F(L,J) = F(L,J) - SAVE(ID-1)*DX*BDXF(J)
+     END DO
+   END IF
+   
+   !                               ENTER BOUNDARY DATA FOR Y-BOUNDARIES
+   
+   IF (MP==2 .OR. MP==3) THEN
+     DO I = 1,L
+       F(I,1) = F(I,1) - BDYS(I)*TWDYSQ
+     END DO
+   END IF
+   
+   IF (MP==4 .OR. MP==5) THEN
+     DO I = 1,L
+       F(I,1) = F(I,1) + BDYS(I)*DLYRCP
+     END DO
+   END IF
+   
+   IF (MP==2 .OR. MP==5) THEN
+     DO I = 1,L
+       F(I,M) = F(I,M) - BDYF(I)*TWDYSQ
+     END DO
+   END IF
+   
+   IF (MP==3 .OR. MP==4) THEN
+     DO I = 1,L
+       F(I,M) = F(I,M) - BDYF(I)*DLYRCP
+     END DO
+   END IF
 
-IF (LP==4 .OR. LP==5) THEN
-  DO J = 1,M
-    F(1,J) = F(1,J) + SAVE(IA)*DX*BDXS(J)
-  END DO
-END IF
-
-IF (LP==2 .OR. LP==5) THEN
-  DO J = 1,M
-    F(L,J) = F(L,J) - 2._EB*BDXF(J)*SAVE(ID-1)
-  END DO
-END IF
-
-IF (LP==3 .OR. LP==4) THEN
-  DO J = 1,M
-    F(L,J) = F(L,J) - SAVE(ID-1)*DX*BDXF(J)
-  END DO
-END IF
-
-!                               ENTER BOUNDARY DATA FOR Y-BOUNDARIES
-
-IF (MP==2 .OR. MP==3) THEN
-  DO I = 1,L
-    F(I,1) = F(I,1) - BDYS(I)*TWDYSQ
-  END DO
-END IF
-
-IF (MP==4 .OR. MP==5) THEN
-  DO I = 1,L
-    F(I,1) = F(I,1) + BDYS(I)*DLYRCP
-  END DO
-END IF
-
-IF (MP==2 .OR. MP==5) THEN
-  DO I = 1,L
-    F(I,M) = F(I,M) - BDYF(I)*TWDYSQ
-  END DO
-END IF
-
-IF (MP==3 .OR. MP==4) THEN
-  DO I = 1,L
-    F(I,M) = F(I,M) - BDYF(I)*DLYRCP
-  END DO
 END IF
 
 PERT=0._EB
