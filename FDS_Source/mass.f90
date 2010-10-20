@@ -230,27 +230,33 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
                UN = WW(II,JJ,KK-1)
          END SELECT
          IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
-         !!IF (SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY) THEN
-         !!   UN = SIGN(1._EB,REAL(IOR,EB))*SUM(MASSFLUX(IW,0:N_SPECIES))/RHO_F(IW)
-         !!ENDIF
-         IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN
-            RHO_F(IW)=RHOP(IIG,JJG,KKG)
-            UN=0._EB
+         
+         MASS_COR_IF: IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX        .OR. &
+                          SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
+                          SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY)      THEN
+             
+            IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN 
+               RHO_F(IW)=RHOP(IIG,JJG,KKG)
+               UN=0._EB
+            ELSE
+               UN = SIGN(1._EB,REAL(IOR,EB))*SUM(MASSFLUX(IW,0:N_SPECIES))/RHO_F(IW)
+            ENDIF
+            
             SELECT CASE(IOR)
                CASE( 1)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*UU(II,JJ,KK)*RDX(IIG)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(UU(II,JJ,KK)-UN)*RDX(IIG)
                CASE(-1)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*UU(II-1,JJ,KK)*RDX(IIG)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(UU(II-1,JJ,KK)-UN)*RDX(IIG)
                CASE( 2)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*VV(II,JJ,KK)*RDY(JJG)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(VV(II,JJ,KK)-UN)*RDY(JJG)
                CASE(-2)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*VV(II,JJ-1,KK)*RDY(JJG)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(VV(II,JJ-1,KK)-UN)*RDY(JJG)
                CASE( 3)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*WW(II,JJ,KK)*RDZ(KKG)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(WW(II,JJ,KK)-UN)*RDZ(KKG)
                CASE(-3)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*WW(II,JJ,KK-1)*RDZ(KKG)
+                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(WW(II,JJ,KK-1)-UN)*RDZ(KKG)
             END SELECT
-         ENDIF
+         ENDIF MASS_COR_IF
          
          ! compute flux on the face of the wall cell
          SELECT CASE(IOR)
