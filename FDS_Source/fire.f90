@@ -63,11 +63,13 @@ REAL(EB) :: Y_FU_0,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DELTA,DELTA2,ACCEL
             Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,RHOX, &
             X_FU,X_O2,X_FU_0,X_O2_0,X_FU_S,X_O2_S,X_FU_N,X_O2_N,CO_TO_O2,CRIT_FLAME_TMPA, &
             Y_FU_MAX,TMP_F_MIN,Y_F_CORR,Z_2_MIN,Z_2_MIN_FAC,WGT,OMWGT,Q_BOUND_1,Q_BOUND_2,Q_BOUND_3,YY_GET(1:N_SPECIES), &
-            ZETA,CS2,H_F_0,H_F_N,H_G_0,H_G_N,DYAIR,DELTAH_F,TAU_D,TAU_U,TAU_G,EPSK,KSGS,KP,CP,S_L,TAU_CHEM
+            ZETA,CS2,H_F_0,H_F_N,H_G_0,H_G_N,DYAIR,DELTAH_F,TAU_D,TAU_U,TAU_G,EPSK,KSGS,KP,CP,S_L,TAU_CHEM, &
+            DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS2,S12,S13,S23
 REAL(EB), PARAMETER :: Y_FU_MIN=1.E-10_EB,Y_O2_MIN=1.E-10_EB,X_O2_MIN=1.E-16_EB,X_FU_MIN=1.E-16_EB,Y_CO_MIN=1.E-10_EB, &
                        M_MIN=0.1_EB,M_MAX=0.3_EB
 INTEGER :: NODETS,I,J,K,II,JJ,KK,IOR,IC,IW,IWA(-3:3),ITMP,ICFT
-REAL(EB), POINTER, DIMENSION(:,:,:) :: Y_O2=>NULL(),Y_O2_NEW=>NULL(),MIX_TIME=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: Y_O2=>NULL(),Y_O2_NEW=>NULL(),MIX_TIME=>NULL(), &
+                                       UU=>NULL(),VV=>NULL(),WW=>NULL()
 
 ! Misc initializations
 
@@ -113,6 +115,12 @@ ENDIF
 
 RN => REACTION(1)
 HFAC_F  = RN%HEAT_OF_COMBUSTION/DT
+
+IF (NEW_MIX_TIME) THEN
+   UU => US
+   VV => VS
+   WW => WS
+ENDIF
 
 !$OMP END SINGLE
 
@@ -215,9 +223,25 @@ DO K=1,KBAR
             EXPERIMENTAL_IF: IF (NEW_MIX_TIME) THEN
                ! experimental
                TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)   ! diffusive time scale
-               !KSGS = C*1.5_EB*(EPSK*DELTA/PI)**TWTH     ! estimate of subgrid ke, from Kolmogorov spectrum
-               !EPSK = SC*KSGS/TAU_D                      ! ke dissipation rate, assumes production=dissipation
-               KSGS = 1.15_EB*(DELTA*SC/TAU_D)**2 ! 1.15 = (C*1.5)^3/pi^2, where C = 1.5 is Kolomogorov constant
+               
+               ! compute local filtered strain
+               DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
+               DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
+               DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
+               DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
+               DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
+               DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
+               DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
+               DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
+               DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
+               S12 = 0.5_EB*(DUDY+DVDX)
+               S13 = 0.5_EB*(DUDZ+DWDX)
+               S23 = 0.5_EB*(DVDZ+DWDY)
+               SS2 = 2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2))
+               
+               EPSK = MU(I,J,K)/RHO(I,J,K)*SS2       ! ke dissipation rate, assumes production=dissipation
+               KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH  ! estimate of subgrid ke, from Kolmogorov spectrum
+
                TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB)   ! advective time scale
                TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
                MIX_TIME(I,J,K)=MIN(TAU_D,TAU_U,TAU_G)
