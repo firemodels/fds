@@ -248,11 +248,13 @@ LOGICAL :: TREE_CASE=.FALSE.
 ! Level Set vegetation fire spread
 
 INTEGER  :: LIMITER_LS,NX_LS,NY_LS
-REAL(EB) :: DX_LS,DY_LS,PHI_MIN_LS,PHI_MAX_LS,ROS_0,ROS_HEADS,ROS_BACKS
+REAL(EB) :: DT_LS,DX_LS,DY_LS,PHI_MIN_LS,PHI_MAX_LS,ROS_0,ROS_HEADS,ROS_BACKS, &
+            TIME_FLANKFIRE_QUENCH,TIME_LS
 LOGICAL  :: RK2_PREDICTOR_LS,VEG_LEVEL_SET
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: FLUX0_LS,FLUX1_LS,PHI_LS,PHI0_LS,PHI1_LS,ROS_BACKU, &
                                          ROS_HEAD,ROS_HEAD_U0_INFW,ROS_HEAD_U_INFW,ROS_FLANK, &
-                                         SR_X_LS,SR_Y_LS,U_LS,V_LS,Z_LS,DZTDX,DZTDY,MAG_ZT
+                                         SR_X_LS,SR_Y_LS,U_LS,V_LS,Z_LS,DZTDX,DZTDY,MAG_ZT, &
+                                         FLANKFIRE_LIFETIME,WIND_EXP
 
 ! Terrain parameters
 
