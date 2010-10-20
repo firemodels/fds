@@ -1306,7 +1306,7 @@ SUBROUTINE LEVEL_SET_FIRESPREAD(NM)
 !
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I_FLANK,I,IBC,IM1,IM2,II,IIG,IP1,IP2,IW,J,JJG,JM1,JP1,LU_SLCF_LS,N_FINAL,N_FIRES,N_STEPS_OUT,N_TIME
-REAL(EB) :: DT_LS,VEG_MOISTURE_LS
+REAL(EB) :: VEG_MOISTURE_LS
 REAL(EB) :: LX,SR_MAX,T_FINAL,U_AMBIENT,UMAG,UMAX_LS, V_AMBIENT,VMAX_LS,XMAX_LS,XMIN_LS, &
             YMIN_LS,YMAX_LS
 REAL(EB) :: G_EAST,G_WEST,G_SOUTH,G_NORTH
@@ -1317,7 +1317,7 @@ REAL(EB) :: DT_OUTPUT
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: X0_FIRE,Y0_FIRE,X_LS,Y_LS
 LOGICAL :: HEAD_WIDTH_DEPENDENCE
 !
-REAL(FB) :: TIME_LS
+REAL(FB) :: TIME_LS_OUT
 REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: PHI_OUT
 CHARACTER(30) :: SMOKEVIEW_LABEL,SMOKEVIEW_BAR_LABEL,UNITS
 
@@ -1384,12 +1384,23 @@ ALLOCATE(ROS_HEAD(NX_LS,NY_LS))    ; CALL ChkMemErr('VEGE:LEVEL SET','ROS_HEAD',
 !ALLOCATE(ROS_HEAD_U_INFW(NX_LS,NY_LS))  ; CALL ChkMemErr('VEGE:LEVEL SET','ROS_HEAD_U_INFW',IZERO)
 ALLOCATE(ROS_FLANK(NX_LS,NY_LS))   ; CALL ChkMemErr('VEGE:LEVEL SET','ROS_FLANK',IZERO)
 ALLOCATE(ROS_BACKU(NX_LS,NY_LS))   ; CALL ChkMemErr('VEGE:LEVEL SET','ROS_BACKU',IZERO)
+ALLOCATE(FLANKFIRE_LIFETIME(NX_LS,NY_LS))   ; CALL ChkMemErr('VEGE:LEVEL SET','FLANKFIRE_LIFETIME',IZERO)
+ALLOCATE(WIND_EXP(NX_LS,NY_LS))   ; CALL ChkMemErr('VEGE:LEVEL SET','WIND_EXP',IZERO)
+
+FLANKFIRE_LIFETIME = 0.0_EB !handles finite lenght (lifetime) flankfires. For
+!                            quenching flanks with lifetimes > TIME_FLANKFIRE_QUENCH
+TIME_FLANKFIRE_QUENCH = 20.0_EB !flankfire lifetime in seconds
 
 !ROS_HEAD_U0_INFW = R_HEAD_U0_INFW
 !ROS_HEAD_U_INFW  = R_HEAD_U_INFW
-ROS_HEAD         = 14._EB  !9.5 from wfds flat terrain run
-ROS_FLANK        = 4.0_EB  !4.2 from wfds flat terrain run   
-ROS_BACKU        = 0.1_EB !wind dependent (in general) back fire ROS need look up table for wind depend
+!--- Bernardo Trails ROS from wfds runs
+!ROS_HEAD         = 14._EB  !9.5 from wfds flat terrain run
+!ROS_FLANK        = 4.0_EB  !4.2 from wfds flat terrain run   
+!ROS_BACKU        = 0.1_EB !wind dependent (in general) back fire ROS need look up table for wind depend
+!--- Bernardo Trails ROS from wfds runs
+ROS_HEAD         = 3.9_EB  
+ROS_FLANK        = 0.4_EB   
+ROS_BACKU        = 0.0_EB 
 ! Currently slope dependence of head and back fires are from MkV Forest Danger Meter (hardcoded below)
 !ROS_HEADS        = 2._EB  !slope dependent head fire ROS 
 !ROS_BACKS        = 0.1_EB !slope dependent back fire ROS
@@ -1400,26 +1411,50 @@ ROS_BACKU        = 0.1_EB !wind dependent (in general) back fire ROS need look u
 
 ! Assign spread rates (i.e., vegetation types) to locations on terrain
 
+ROS_HEAD  = 0.0_EB
+ROS_FLANK = 0.0_EB
+ROS_BACKU = 0.0_EB
+WIND_EXP  = 1.0_EB
+
+!print*,'surface ros',surface%veg_lset_ros_head
+!print*,'surface wind_exp',surface%veg_lset_wind_exp
+
 ROS_WALL_CELL_LOOP: DO IW=1,NWC
+
+  IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE ROS_WALL_CELL_LOOP
 
   IBC = IJKW(5,IW)
   SF  => SURFACE(IBC)
 
-  WC  => WALL(IW)
+  IF (.NOT. SF%VEG_LSET_SPREAD) CYCLE ROS_WALL_CELL_LOOP
+
+! WC  => WALL(IW)
 
   IIG = IJKW(6,IW)
   JJG = IJKW(7,IW)
+!print*,'IIG,JJG',iig,jjg
+!print*,'ROS_HEAD',SF%VEG_LSET_ROS_HEAD
+!print*,'ROS_HEAD,ROS_FLANK,ROS_BACK',SF%VEG_LSET_ROS_HEAD,SF%VEG_LSET_ROS_FLANK,SF%VEG_LSET_ROS_BACK
 
-  IF (SF%VEG_NO_BURN) THEN
+!print*,'IIG,JJG',iig,jjg
+!print*,'ROS_HEAD',SF%VEG_LSET_ROS_HEAD
+  ROS_HEAD(IIG,JJG)  = SF%VEG_LSET_ROS_HEAD
+  ROS_FLANK(IIG,JJG) = SF%VEG_LSET_ROS_FLANK
+  ROS_BACKU(IIG,JJG) = SF%VEG_LSET_ROS_BACK
+  WIND_EXP(IIG,JJG)  = SF%VEG_LSET_WIND_EXP
+
+! IF (SF%VEG_NO_BURN) THEN
 !  ROS_HEAD_U0_INFW(IIG,JJG) =  0.0_EB
 !  ROS_HEAD_U_INFW(IIG,JJG)  =  0.0_EB
-   ROS_HEAD(IIG,JJG)         =  0.0_EB
-   ROS_FLANK(IIG,JJG)        =  0.0_EB
-   ROS_BACKU(IIG,JJG)        =  0.0_EB
-  ENDIF
+!  ROS_HEAD(IIG,JJG)         =  0.0_EB
+!  ROS_FLANK(IIG,JJG)        =  0.0_EB
+!  ROS_BACKU(IIG,JJG)        =  0.0_EB
+! ENDIF
 
 
 ENDDO ROS_WALL_CELL_LOOP
+
+print*,'ROS_HEAD max',MAXVAL(ROS_HEAD)
 
 !
 !C_F = 0.2_EB
@@ -1430,8 +1465,8 @@ LIMITER_LS = 1 !MINMOD
 !LIMITER_LS = 3 !First order upwinding
 !
 ! -- Output file
-DT_OUTPUT = 1._EB
-TIME_LS = 0._EB
+DT_OUTPUT  = 1._EB
+TIME_LS    = 0._EB
 LU_SLCF_LS = 9999
 SMOKEVIEW_LABEL = 'phifield'
 SMOKEVIEW_BAR_LABEL = 'phifield'
@@ -1497,7 +1532,9 @@ VMAX_LS  = MAXVAL(ABS(V_LS))
 !SR_MAX   = MAX(SR_MAX,ROS_HEADS)
 !SR_X_MAX =  MAXVAL(ROS_HEAD)
 SR_MAX   = MAXVAL(ROS_HEAD)
+print*,'SR_MAX',sr_max
 SR_MAX   = MAX(SR_MAX,MAXVAL(ROS_FLANK))
+print*,'SR_MAX',sr_max
 SR_MAX   = 2._EB*SR_MAX !rough accounting for upslope spread aligned with wind
 !DT_LS    = MIN(DX_LS,DY_LS)/SR_MAX
 DT_LS = 0.25_EB*MIN(DX_LS,DY_LS)/SR_MAX
@@ -1693,7 +1730,8 @@ ENDDO IGNITOR_WALL_CELL_LOOP
 !--- Output slice file for smokeview
  IF (MOD(N_TIME,N_STEPS_OUT) < 0.0001_EB) THEN
   PHI_OUT = PHI_LS
-  WRITE(LU_SLCF_LS) TIME_LS
+  TIME_LS_OUT = TIME_LS
+  WRITE(LU_SLCF_LS) TIME_LS_OUT
 !negative for consistency with wall thicknes output from wfds
   WRITE(LU_SLCF_LS) ((-PHI_OUT(I,J),I=1,NX_LS),J=1,NY_LS) 
 ! WRITE(LU_SLCF_LS) ((1.,I=1,NX_LS),J=1,NY_LS)
@@ -1710,15 +1748,16 @@ SUBROUTINE LEVEL_SET_SPREAD_RATE
 !
 ! Compute components of spread rate vector
 !
-INTEGER :: I,J,IM1,IM2,IP1,IP2,JM1,JP1,NEXP_WIND
+INTEGER :: I,J,IM1,IM2,IP1,IP2,JM1,JP1
 REAL(EB) :: COS_THETA_WIND,COS_THETA_SLOPE,COS_THETA_WIND_H,COS_THETA_WIND_B, &
             COS_THETA_SLOPE_H,COS_THETA_SLOPE_B,DPHIDX,DPHIDY,F_EAST,F_WEST,F_NORTH,F_SOUTH, &
-            GRAD_SLOPE_DOT_NORMAL_FIRELINE,MAG_F,MAG_SR,MAG_U,WIND_DOT_NORMAL_FIRELINE
+            GRAD_SLOPE_DOT_NORMAL_FIRELINE,MAG_F,MAG_SR,MAG_U,WIND_DOT_NORMAL_FIRELINE,NEXP_WIND
 REAL(EB) :: RAD_TO_DEGREE,DEGREES_SLOPE
 REAL(EB), DIMENSION(:)   :: NORMAL_FIRELINE(2)
  
 RAD_TO_DEGREE = 90._EB/ASIN(1._EB)
-NEXP_WIND = 1
+!NEXP_WIND = 2
+
 
 IF (RK2_PREDICTOR_LS) PHI0_LS = PHI_LS
 IF (.NOT. RK2_PREDICTOR_LS) PHI0_LS = PHI1_LS
@@ -1771,6 +1810,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
    ROS_HEADS = 0.0_EB
    ROS_BACKS = 0.0_EB
 
+   NEXP_WIND = WIND_EXP(I,J)
+
 ! Spread with the wind and upslope
    IF(COS_THETA_WIND >= 0._EB .AND. COS_THETA_SLOPE >= 0._EB) THEN
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_HEADS = 0.33_EB*ROS_HEAD(I,J)
@@ -1780,6 +1821,9 @@ FLUX_ILOOP: DO I = 1,NX_LS
              (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
+!  IF(ABS(COS_THETA_WIND) < 0.5_EB .AND. MAG_F > 0._EB) MAG_SR = 0.0_EB
+!  IF(ABS(COS_THETA_WIND) < 0.5_EB .AND. MAG_F > 0._EB) FLANKFIRE_LIFETIME(I,J) = FLANKFIRE_LIFETIME(I,J) + DT_LS
+!  IF(FLANKFIRE_LIFETIME(I,J) > TIME_FLANKFIRE_QUENCH) MAG_SR = 0.0_EB
 
 ! Spread with the wind and downsslope
    IF(COS_THETA_WIND >= 0._EB .AND. COS_THETA_SLOPE < 0._EB) THEN
@@ -1789,6 +1833,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND*COS_THETA_SLOPE) + &
              (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
+!   if(cos_theta_wind == 0._EB) FLANKFIRE_LIFETIME(I,J) = FLANKFIRE_LIFETIME(I,J) + DT_LS
+!   if(flankfire_lifetime(i,j) > time_flankfire_quench) mag_sr = 0.0_EB
    ENDIF
 
 ! Spread against the wind and upslope
@@ -1796,8 +1842,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = -0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS =         -ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = -3.0_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB - ABS(COS_THETA_WIND)**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*(-ABS(COS_THETA_WIND)**NEXP_WIND) + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1806,8 +1852,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = 0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS = 0.50_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = 0.75_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB - ABS(COS_THETA_WIND)**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*(-ABS(COS_THETA_WIND)**NEXP_WIND) + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1862,6 +1908,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
    ROS_HEADS = 0.0_EB
    ROS_BACKS = 0.0_EB
 
+   NEXP_WIND = WIND_EXP(I,J)
+
 ! Spread with the wind and upslope
    IF(COS_THETA_WIND >= 0._EB .AND. COS_THETA_SLOPE >= 0._EB) THEN
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_HEADS = 0.33_EB*ROS_HEAD(I,J)
@@ -1870,6 +1918,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
              (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
+!   if(cos_theta_wind == 0._EB) FLANKFIRE_LIFETIME(I,J) = FLANKFIRE_LIFETIME(I,J) + DT_LS
+!   if(flankfire_lifetime(i,j) > time_flankfire_quench) mag_sr = 0.0_EB
    ENDIF
 
 ! Spread with the wind and downsslope
@@ -1880,6 +1930,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
              (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
+!   if(cos_theta_wind == 0._EB) FLANKFIRE_LIFETIME(I,J) = FLANKFIRE_LIFETIME(I,J) + DT_LS
+!   if(flankfire_lifetime(i,j) > time_flankfire_quench) mag_sr = 0.0_EB
    ENDIF
 
 ! Spread against the wind and upslope
@@ -1887,8 +1939,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = -0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS =         -ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = -3.0_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB - ABS(COS_THETA_WIND)**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*(-ABS(COS_THETA_WIND)**NEXP_WIND) + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1897,8 +1949,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = 0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS = 0.50_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = 0.75_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB - ABS(COS_THETA_WIND)**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*(-ABS(COS_THETA_WIND)**NEXP_WIND) + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1949,6 +2001,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
    MAG_SR    = 0.0_EB
    ROS_HEADS = 0.0_EB
    ROS_BACKS = 0.0_EB
+   
+   NEXP_WIND = WIND_EXP(I,J)
 
 ! Spread with the wind and upslope
    IF(COS_THETA_WIND >= 0._EB .AND. COS_THETA_SLOPE >= 0._EB) THEN
@@ -1958,6 +2012,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
              (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
+!   if(cos_theta_wind == 0._EB) FLANKFIRE_LIFETIME(I,J) = FLANKFIRE_LIFETIME(I,J) + DT_LS
+!   if(flankfire_lifetime(i,j) > time_flankfire_quench) mag_sr = 0.0_EB
    ENDIF
 
 ! Spread with the wind and downsslope
@@ -1968,6 +2024,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
              (ROS_HEAD(I,J) - ROS_FLANK(I,J))*COS_THETA_WIND**NEXP_WIND + &
              (ROS_HEADS     - ROS_FLANK(I,J))*COS_THETA_SLOPE  !magnitude of spread rate
+!   if(cos_theta_wind == 0._EB) FLANKFIRE_LIFETIME(I,J) = FLANKFIRE_LIFETIME(I,J) + DT_LS
+!   if(flankfire_lifetime(i,j) > time_flankfire_quench) mag_sr = 0.0_EB
    ENDIF
 
 ! Spread against the wind and upslope
@@ -1975,8 +2033,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = -0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS =         -ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = -3.0_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB - ABS(COS_THETA_WIND)**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*(-ABS(COS_THETA_WIND)**NEXP_WIND) + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
@@ -1985,8 +2043,8 @@ FLUX_ILOOP: DO I = 1,NX_LS
     IF(DEGREES_SLOPE >= 5._EB .AND. DEGREES_SLOPE < 10._EB)  ROS_BACKS = 0.33_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 10._EB .AND. DEGREES_SLOPE < 20._EB) ROS_BACKS = 0.50_EB*ROS_BACKU(I,J)
     IF(DEGREES_SLOPE >= 20._EB)                              ROS_BACKS = 0.75_EB*ROS_BACKU(I,J)
-    MAG_SR = ROS_FLANK(I,J)*(1._EB + COS_THETA_WIND**NEXP_WIND*COS_THETA_SLOPE) + &
-             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*COS_THETA_WIND**NEXP_WIND + &
+    MAG_SR = ROS_FLANK(I,J)*(1._EB - ABS(COS_THETA_WIND)**NEXP_WIND*COS_THETA_SLOPE) + &
+             (ROS_FLANK(I,J) - ROS_BACKU(I,J))*(-ABS(COS_THETA_WIND)**NEXP_WIND) + &
              (ROS_FLANK(I,J) - ROS_BACKS)*COS_THETA_SLOPE  !magnitude of spread rate
    ENDIF
 
