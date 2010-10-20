@@ -49,7 +49,11 @@ int main(int argc, char **argv){
   doit_smoke3d=1;
   doit_boundary=1;
   doit_slice=1;
+#ifdef pp_PLOT3D
   doit_plot3d=1;
+#else
+  doit_plot3d=0;
+#endif
   doit_iso=1;
 #ifdef pp_PART2
   doit_particle=0;
@@ -145,7 +149,9 @@ int main(int argc, char **argv){
         if(strcmp(arg,"-bounds")==0){
           get_bounds=1;
           get_slice_bounds=1;
+#ifdef pp_PLOT3D
           get_plot3d_bounds=1;
+#endif
           get_boundary_bounds=1;
 #ifdef pp_PART
           get_part_bounds=1;
@@ -157,9 +163,11 @@ int main(int argc, char **argv){
         else if(strcmp(arg,"-bs")==0){
           get_slice_bounds=1;
         }
+#ifdef pp_PLOT3D
         else if(strcmp(arg,"-bp")==0){
           get_plot3d_bounds=1;
         }
+#endif
 #ifdef pp_PART2
         else if(strcmp(arg,"-bP")==0){
           get_part_bounds=1;
@@ -183,9 +191,11 @@ int main(int argc, char **argv){
         else if(strcmp(arg,"-nb")==0){
           doit_boundary=0;
         }
+#ifdef pp_PLOT3D
         else if(strcmp(arg,"-np")==0){
           doit_plot3d=0;
         }
+#endif
 #ifdef pp_PART2
         else if(strcmp(arg,"-nP")==0){
           doit_particle=0;
@@ -216,16 +226,20 @@ int main(int argc, char **argv){
         if(strcmp(arg,"-part2iso")==0){
           partfile2iso=1;
         }
+#ifdef pp_PLOT3D
         else{
           overwrite_plot3d=1;
         }
+#endif
         break;
       case 'f':
         overwrite_b=1;
         overwrite_s=1;
         overwrite_slice=1;
         overwrite_iso=1;
+#ifdef pp_PLOT3D
         overwrite_plot3d=1;
+#endif
 #ifdef pp_PART2
         overwrite_part=1;
 #endif
@@ -389,6 +403,7 @@ int main(int argc, char **argv){
       }
     }
   }
+#ifdef pp_PLOT3D
   if(nplot3d_files>0){
     plot3dinfo[0].dup=0;
     for(i=1;i<nplot3d_files;i++){
@@ -400,6 +415,7 @@ int main(int argc, char **argv){
       plot3ddup(plot3di,i);
     }
   }
+#endif
   if(npatch_files>0){
     patchinfo[0].dup=0;
     for(i=1;i<npatch_files;i++){
@@ -515,7 +531,9 @@ void *compress_all(void *arg){
   if(doit_slice==1)compress_slices(thread_index);
   if(doit_smoke3d==1)compress_smoke3ds(thread_index);
   if(doiso==1&&doit_iso==1)compress_isos(thread_index);
- // if(doit_plot3d==1)compress_plot3ds(thread_index);
+#ifdef pp_PLOT3D
+  if(doit_plot3d==1)compress_plot3ds(thread_index);
+#endif
   convert_parts2iso(thread_index);
 #ifdef pp_PART2
   if(doit_particle)compress_parts(NULL);
@@ -657,59 +675,66 @@ void usage(char *prog){
   strcpy(pp,"%");
   printf("\n");
   printf("  smokezip %s(%i) - %s\n\n",smv_version,svn_num,__DATE__);
-  printf("  Compresses various Smokeview data files\n\n");
-  printf("  %s",prog);
-  printf(" [options]");
-  printf("  casename\n\n");
-  printf("  options:\n");
+  printf("  Compress FDS data files\n\n");
+  printf("  %s [options] casename\n\n",prog);
+  printf("  casename - Smokeview .smv file for case to be compressed\n\n");
+  printf("options:\n");
+  printf("  -c  - cleans or removes all compressed files\n");
+#ifdef pp_THREAD
+  printf("  -t nthread - Compress nthread files at a time (up to %i)\n",NTHREADS_MAX);
+#endif
+  printf("overwrite options:\n");
+  printf("  -f  - overwrites all compressed files\n");
   printf("  -2  - overwrites 2d slice compressed files\n");
   printf("  -3  - overwrites 3d smoke files\n");
   printf("  -b  - overwrites boundary compressed files\n");
   printf("  -i  - overwrites iso-surface compressed files\n");
+#ifdef pp_PLOT3D
   printf("  -p  - overwrites PLOT3D files\n");
+#endif
 #ifdef pp_PART2
   printf("  -P  - overwrites particle files\n");
 #endif
 #ifdef pp_PART
   printf("  -part2iso - generate isosurfaces from particle data\n");
 #endif
-  printf("  -f  - overwrites all compressed files\n");
+  printf("bound options:\n");
   printf("  -bounds - estimate data bounds for all file types\n");
   printf("  -bb - estimate data bounds for boundary files\n");
   printf("  -bs - estimate data bounds for slice files\n");
+  printf("  -no_chop - do not chop or truncate slice data.  Smokezip compresses\n");
+  printf("        slice data truncating data above and below chop values\n");
+  printf("        specified in the .ini file\n");
+#ifdef pp_PLOT3D
   printf("  -bp - estimate data bounds for plot3d files\n");
+#endif
 #ifdef pp_PART2
   printf("  -bP - estimate data bounds for particle files\n");
 #endif
+  printf("compress options:\n");
   printf("  -n3 - do not compress 3d smoke files\n");
   printf("  -nb - do not compress boundary files\n");
+#ifdef pp_PLOT3D
   printf("  -np - do not compress PLOT3D files\n");
+#endif
   printf("  -ni - do not compress isosurface files\n");
   printf("  -ns - do not compress slice files\n");
 #ifdef pp_PART2
   printf("  -nP - do not compress particle files\n");
   printf("  -yP - compress particle files\n");
 #endif
-#ifdef pp_THREAD
-  printf("  -t nthread - Compress nthread files at a time (up to %i)\n",NTHREADS_MAX);
-#endif
-  printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
-  printf("               to view the case) to the directory destdir\n"); 
-  printf("  -demo - Creates the files (compressed and .svd ) needed by the\n");
-  printf("          Smokeview demonstrator mode.  Compresses files that are autoloaded, \n");
-  printf("          uses (20.0,620.0) and (0.0,0.23) for temperature and oxygen bounds and\n");
-  printf("          creates the .svd file which activates the Smokeview demonstrator mode.\n");
-  printf("  -s sourcedir - specifies directory containing source files\n");
-  printf("  -skip skipval - skip frames when compressing files\n");
-  printf("  -no_chop - do not chop or truncate slice data.  Smokezip by default will compress\n");
-  printf("             slice data truncating data above and below values specified in the .ini file\n");
+  printf("output options:\n");
   printf("  -auto - compress only files that are auto-loaded by Smokeview\n");
-  printf("  -c  - cleans or removes all compressed files\n");
+  printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
+  printf("        to view the case) to the directory destdir\n"); 
+  printf("  -s sourcedir - specifies directory containing source files\n");
+  printf("  -demo - Creates the files (compressed and .svd ) needed by the\n");
+  printf("        Smokeview demonstrator mode.  Compresses files that are autoloaded, \n");
+  printf("        uses (20.0,620.0) and (0.0,0.23) for temperature and oxygen bounds\n");
+  printf("        and creates the .svd file which activates the Smokeview demonstrator\n");
+  printf("        mode.\n");
+  printf("  -skip skipval - skip frames when compressing files\n\n");
   printf("  -h  - display this message\n\n");
-  printf("  casename - Smokeview .smv file\n");
-  printf("  Min and max bounds used to compress boundary files are obtained\n");
-  printf("  from the casename.ini file or calculated by %s if casename.ini \n",prog);
-  printf("  does not exist.  See http://fire.nist.gov/fds for more information.\n");
 }
        
 /* ------------------ usage ------------------------ */
