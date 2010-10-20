@@ -18,6 +18,8 @@ smokeview -version > SCRIPT_FIGURES\smokeview.version
 smokezip -help > SCRIPT_FIGURES\smokezip.help
 smokediff -help > SCRIPT_FIGURES\smokediff.help
 smokediff -v > SCRIPT_FIGURES\smokediff.version
+background -help > SCRIPT_FIGURES\background.help
+background -version > SCRIPT_FIGURES\background.version
 
 cd %smvvg%
 erase SCRIPT_FIGURES\*.version
