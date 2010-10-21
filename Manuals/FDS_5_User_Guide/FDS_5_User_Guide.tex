@@ -3696,7 +3696,7 @@ combustion model.
 Sometimes it is desired that a fire spread radially at some specified
 rate. Rather than trying to design material properties
 to achieve this, you can alternatively use a {\ct VENT} or a {\ct SURF} line in a special way.
-First, you need to add a {\ct SURF} line with 
+First, you need to add a {\ct SURF} line with
 a specified heat release rate, {\ct HRRPUA}, and an optional
 time history parameter, {\ct RAMP\_Q} or {\ct TAU\_Q}. Then, you can also specify {\ct XYZ} and {\ct SPREAD\_RATE} on either the {\ct VENT} or {\ct SURF} line.
 The fire is directed to start at the point {\ct XYZ} at the time designated by {\ct T\_BEGIN} and spread
@@ -4918,7 +4918,7 @@ a time-dependent pressure boundary at the end of a tunnel. The tunnel is 10~m lo
 with a fire in the middle and a pressure boundary imposed on the right side. The left side ({\ct XMIN}) is
 just an {\ct OPEN} boundary with no pressure specified. It is assumed to be at ambient pressure.
 
-\scriptsize
+\footnotesize
 \begin{verbatim}
 &VENT MB = 'XMIN' SURF_ID = 'OPEN' /
 &VENT MB = 'XMAX' SURF_ID = 'OPEN', DYNAMIC_PRESSURE=2.4, PRESSURE_RAMP='wind_ramp' /
@@ -4980,91 +4980,114 @@ By default, FDS assumes that the density and pressure decrease with height, rega
 application or domain size. For most simulations, this effect is negligible, but it can be
 turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} line.
 
-\section{Special Topic: HVAC Systems: The {\ct HVAC} Namelist Group (\ref{hvacinputs})}
+\clearpage
+
+\section{Special Topic: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group}
 \label{info:HVAC}
 
-There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC system.  If the ability to transport heat and comubstion products through a duct network or the ability to fully account for the pressurization of a compartment due to a fire on the flows in a duct network is important, one can make use of a coupled HVAC network solver.  The solver computes the flows through a duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts or where a duct segment connects to the FDS computational domain.  The current HVAC solver does not allow for mass storage in the duct network (i.e. what goes in during a timestep, goes out during a timestep).  HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and coupled to the FDS control function capability.  The
+There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC (Heating, Ventilation,
+Air Conditioning) system.  
+If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment 
+due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a 
+duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts or where a duct segment connects to the FDS computational domain.  
+The current HVAC solver does not allow for mass storage in the duct network ({\em i.e.} what goes in during a time step, goes out during a time step).  
+HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and coupled to the FDS control function capability.  The
 user can select from three fan models.
 
-The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.  An HVAC network is defined by providing inputs for the ducts, duct nodes, and any fans or dampers present in the system.  Additionally the user must define the locations where the HVAC network joins the computational domain.  The basic syntax for an {\ct HVAC} component is:
+The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.  
+An HVAC network is defined by providing inputs for the ducts, duct nodes, and any fans or dampers present in the system.  
+Additionally the user must define the locations where the HVAC network joins the computational domain.  The basic syntax for an {\ct HVAC} component is:
 
-\scriptsize
+\footnotesize
 \begin{verbatim}
-&HVAC TYPE_ID='componenttype',ID='componentname',.../
+&HVAC TYPE_ID='componenttype', ID='componentname', ... /
 \end{verbatim}\normalsize
 
-Where:
+\noindent
+where:
 
 \begin{description}
-\item[{\ct TYPE\_ID}] Is a chacracter string the indicates the type of component that namelist group is defining.   {\ct TYPE\_ID} can be {\ct DUCT}, {\ct NODE}, or {\ct FAN}.
-\item[{\ct ID}] Is a character string giving a name to the component.  The name must be unique amongst all other components of that type.
+\item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct 'DUCT'}, {\ct 'NODE'}, or {\ct 'FAN'}.
+\item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type.
 \end{description}
 
+\noindent
 The inputs for an HVAC duct are:
 
-\scriptsize
+\footnotesize
 \begin{verbatim}
-&HVAC TYPE_ID='DUCT',ID='ductname',NODE_ID='node 1','node 2',DIAMETER=2.,AREA=3.14,
-      LOSS=1.,1.,ROUGHNESS=0.001,VOLUME_FLOW=1.,DAMPER=.FALSE.,FAN='FAN_ID',
-      REVERSE=.FALSE.,DEVC_ID='DEVCname',CTRL_ID='ctrlname'/
+&HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', DIAMETER=2., AREA=3.14,
+      LOSS=1.,1., ROUGHNESS=0.001, VOLUME_FLOW=1., DAMPER=.FALSE., FAN='FAN_ID',
+      REVERSE=.FALSE., DEVC_ID='DEVCname', CTRL_ID='ctrlname' /
 \end{verbatim}\normalsize
 
-
-Where:
+\noindent
+where:
 
 \begin{description}
-\item[{\ct AREA}] Is the area in $m^2$ of the duct.  One of {\ct AREA} or {\ct DIAMETER} must be defined.
-\item[{\ct CTRL\_ID}] Is the {\ct ID} of a {\ct CTRL} function for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
-\item[{\ct DAMPER}] Is a logical variable indicating the precense of a damper in the duct.  The state of the damper is controlled by function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
-\item[{\ct DEVC\_ID}]  Is the {\ct ID} of a {\ct DEVC} for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
-\item[{\ct DIAMETER}]  Is the diameter in $m$ of the duct.  One of {\ct AREA} or {\ct DIAMETER} must be defined.
-\item[{\ct FAN}] Is the {\ct ID} of a fan located in the duct. Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
-\item[{\ct LOSS}] Is a pair of real numbers giving the forward and reverse flow loss in the duct.
-\item[{\ct NODE\_ID}] Gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
-\item[{\ct REVERSE}]  Is a logical variable that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} is from the second node to the first node.
-\item[{\ct ROUGHNESS}]  Is the absolute roughness in $m$ of the duct which is used in computing the friction factor for the duct.
-\item[{\ct VOLUME\_FLOW}] Defines a fixed volumetric flow rate in $m^3/s$ in the duct.  {\ct VOLUME\_FLOW} cannot be used in conjunction with {\ct FAN\_ID}.
+\item[{\ct AREA}] is the area of the duct in m$^2$. Either {\ct AREA} or {\ct DIAMETER} must be defined.
+\item[{\ct CTRL\_ID}] is the {\ct ID} of a {\ct CTRL} function for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
+\item[{\ct DAMPER}] is a logical variable indicating the presence of a damper in the duct.  The state of the damper is controlled by 
+function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
+\item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
+\item[{\ct DIAMETER}]  is the diameter (m) of the duct. Either {\ct AREA} or {\ct DIAMETER} must be defined.
+\item[{\ct FAN}] is the {\ct ID} of a fan located in the duct. Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
+\item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse flow loss in the duct.
+\item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
+\item[{\ct REVERSE}]  is a logical variable that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} is from the second node to the first node.
+\item[{\ct ROUGHNESS}]  is the absolute roughness in m of the duct that is used to compute the friction factor for the duct.
+\item[{\ct VOLUME\_FLOW}] defines a fixed volumetric flow rate (m$^3$/s) in the duct.  {\ct VOLUME\_FLOW} cannot be used in conjunction with {\ct FAN\_ID}.
 \end{description}
 
+\noindent
 The inputs for an HVAC node are:
 
-\scriptsize
+\footnotesize
 \begin{verbatim}
-&HVAC TYPE_ID='NODE',ID='nodename',DUCT_ID='duct 1','duct 2',..'duct n',VENT_ID='vent',
-      LOSS_ARRAY=lossarray, AMBIENT=.FALSE., XYZ=x,y,z/
+&HVAC TYPE_ID='NODE', ID='nodename', DUCT_ID='duct 1','duct 2',..'duct n', VENT_ID='vent',
+      LOSS_ARRAY=lossarray, AMBIENT=.FALSE., XYZ=x,y,z /
 \end{verbatim}\normalsize
 
-Where:
+\noindent
+where:
 
 \begin{description}
-\item[{\ct AMBIENT}] Is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient (i.e. it is equivalent to the {\ct OPEN} boundary condition on {\ct SURF}).
-\item[{\ct DUCT\_ID}] Gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
-\item[{\ct LOSS}] Is an $nxn$ array of real numbers giving the flow losses for the node.  {\ct LOSS(x,y)} is the loss from duct x to duct y.
-\item[{\ct VENT\_ID}] If the node connects to the FDS computational domain.  {\ct VENT\_ID} is the name of the {\ct VENT} where the connection occurs.
-\item[{\ct XYZ}] Is a triplet of real numbers giving the coordinates of the node.  This location is used to compute bouyancy heads.  If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will computed it as the centriod of the {\ct VENT}.
+\item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient ({\em i.e.} it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
+\item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
+\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss from duct {\ct I} to duct {\ct J}.
+\item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the connection occurs if the node connects to the FDS computational domain. 
+\item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.  
+If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
 \end{description}
 
+\noindent
 The inputs for an HVAC fan are:
 
-\scriptsize
+\footnotesize
 \begin{verbatim}
-&HVAC TYPE='FAN',ID='fanname',RAMP_ID='rampname',VOLUME_FLOW=volumeflow,
-      MAX_FLOW=maxflow,MAX_PRESSURE=maxpressure,LOSS=offloss/
+&HVAC TYPE='FAN', ID='fanname', RAMP_ID='rampname', VOLUME_FLOW=volumeflow,
+      MAX_FLOW=maxflow, MAX_PRESSURE=maxpressure, LOSS=offloss /
 \end{verbatim}\normalsize
 
-Where:
+\noindent
+where:
 
 \begin{description}
-\item[{\ct LOSS}] Is the flow loss through the fan when it is not operational.
-\item[{\ct MAX\_FLOW}] Is the maximum volumetric flow of the fan in $m^3/s$.  This input activates a quadratic fan model.
-\item[{\ct MAX\_PRESSURE}] the stall pressure of the fan in $Pa$.  This input activates a quadratic fan model.
-\item[{\ct RAMP\_ID}] Is the name of a {\ct RAMP} that contains a fan curve table of fan volumetric flow in $m^3/s$ vs the pressure drop across the fan in $Pa$.  node connects to the FDS computational domain.
-{\ct VOLUME\_FLOW} is the fixed volumetric flow of the fan in $m^3/s$.
+\item[{\ct LOSS}] is the flow loss through the fan when it is not operational.
+\item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
+\item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in Pa.  This input activates a quadratic fan model.
+\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of volumetric flow rates (m$^3$/s) versus the pressure drop across the fan (Pa).  
+{\ct VOLUME\_FLOW} is the fixed volumetric flow of the fan (m$^3$/s).
 \end{description}
 
+\noindent
 Note that only one set of fan model inputs ({\ct VOLUME\_FLOW}, {\ct RAMP\_ID}, or {\ct MAX\_FLOW + MAX\_PRESSURE}) should be specified.
 
-Note that {\ct FAN} defines a class of fans rather than one specific fan; therefore, more than one duct can reference a single {\ct FAN}.
+Also note that {\ct FAN} defines a class of fans rather than one specific fan. Therefore, more than one duct can reference a single {\ct FAN}.
+
+\clearpage
+
+
 
 \section{Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
@@ -6026,10 +6049,9 @@ of the material and {\ct k} refers to the {\ct k}'th explicitly-defined gas spec
 mixture fraction and water vapor, assuming each is implicitly-defined and its order in the list of
 species is obtained from the output file {\bf CHID.out}.
 
-For consistency, the {\ct HEAT\_OF\_COMBUSTION(j,k)} can also be specified
-separately for each reaction and species. These values are
-used only if the corresponding heat of combustion for the gaseous
-species is greater than zero.
+For consistency, the {\ct HEAT\_OF\_COMBUSTION(j)} can also be specified for each reaction. These values are
+used only if the corresponding heats of combustion for the gaseous
+species are greater than zero.
 
 In the example below, the pyrolysis of wood is included within a simulation that uses
 a finite-rate reaction instead of the default mixture fraction model. Notice in this case that
@@ -6056,7 +6078,7 @@ mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted t
       NU_RESIDUE              = 0.18
       NU_GAS(1,1:4)           = 0.82,0,0,0
       HEAT_OF_REACTION        = 430.
-      HEAT_OF_COMBUSTION(1,1) = 14500.
+      HEAT_OF_COMBUSTION      = 14500.
       RESIDUE                 = 'CHAR' /
 \end{verbatim} \normalsize
 
@@ -9569,7 +9591,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \vspace{\baselineskip}
 
 
-\section{\texorpdfstring{{\tt HVAC}}{HVAC} (HVAC System Defintion)}
+\section{\texorpdfstring{{\tt HVAC}}{HVAC} (HVAC System Definition)}
 
 
 \setlength\LTleft{0pt}
@@ -9578,34 +9600,34 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \caption[Initial Conditions]{For more information see Section~\ref{info:HVAC}.}
 \label{tbl:hvacinputs} \\
 \hline
-\multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Defintion)} \\
+\multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Definition)} \\
 \hline \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
-\multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Defintion)} \\
+\multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Definition)} \\
 \hline \hline
 \endhead
-{\ct AMBIENT}                   & Logical           & Node is connected to the ambient                   &               &  .FALSE.      \\ \hline
-{\ct AREA}                      & Real              & Area of a duct                          & $m^2$         &               \\ \hline
-{\ct CTRL\_ID}                  & Character         & Name of {\ct CTRL} controlling a fan or damper   &               &  'null'       \\ \hline
-{\ct DAMPER}                    & Logical           & Damper is present in a duct                      &               &  .FALSE.      \\ \hline
-{\ct DEVC\_ID}                  & Character         & Name of {\ct DEVC} controlling a fan or damper   &               &  'null'       \\ \hline
-{\ct DUCT\_ID}                  & Character Array   & Name of ducts connected to a node         &               &               \\ \hline
-{\ct DIAMETER}                  & Real              & Diameter of a duct                      &  m            &               \\ \hline
-{\ct FAN\_ID}                   & Character         & Name of a fan in a duct                          &               &  'null'       \\ \hline
-{\ct ID}                        & Character         & Name of component                          &               &               \\ \hline
-{\ct LENGTH}                    & Real              & Length of a duct                        &  m            &               \\ \hline
-{\ct LOSS}                      & Real Array        & Flow loss coefficients for a duct or node    &               &               \\ \hline
-{\ct MAX\_FLOW}                 & Real              & Maximum volumetric flow for a quadratic fan                 &  $m^3$        &               \\ \hline
-{\ct MAX\_PRESSURE}             & Real              & Stall pressure for a quadratic fan                 &  Pa           &               \\ \hline
-{\ct NODE\_ID}                  & Character Doublet & Name of nodes connected to a duct         &               &               \\ \hline
-{\ct RAMP\_ID}                  & Character         & Name of {\ct RAMP} containing a fan curve  &               &  'null'       \\ \hline
-{\ct ROUGHNESS}                 & Real              & Absolute roughness of a duct                        &  m            &               \\ \hline
-{\ct TYPE\_ID}                  & Character         & Type of component                          &               &               \\ \hline
-{\ct VENT\_ID}                  & Character         & Name of the {\ct VENT} the node is connected to  &               &  'null'       \\ \hline
-{\ct VOLUME\_FLOW}              & Real              & Fixed volumetric flow of a duct                        &  $m^3$        &               \\ \hline
-{\ct XYZ}                       & Real Triplet      & Coordinates of a node                        &  m            &               \\ \hline
+{\ct AMBIENT}                   & Logical           & Node is connected to the ambient                  &               &  {\ct .FALSE.}        \\ \hline
+{\ct AREA}                      & Real              & Area of a duct                                    & m$^2$         &                       \\ \hline
+{\ct CTRL\_ID}                  & Character         & Name of {\ct CTRL} controlling a fan or damper    &               &  {\ct 'null'}         \\ \hline
+{\ct DAMPER}                    & Logical           & Damper is present in a duct                       &               &  {\ct .FALSE.}        \\ \hline
+{\ct DEVC\_ID}                  & Character         & Name of {\ct DEVC} controlling a fan or damper    &               &  {\ct 'null'}         \\ \hline
+{\ct DUCT\_ID}                  & Character Array   & Name of ducts connected to a node                 &               &                       \\ \hline
+{\ct DIAMETER}                  & Real              & Diameter of a duct                                &  m            &                       \\ \hline
+{\ct FAN\_ID}                   & Character         & Name of a fan in a duct                           &               &  {\ct 'null'}         \\ \hline
+{\ct ID}                        & Character         & Name of component                                 &               &                       \\ \hline
+{\ct LENGTH}                    & Real              & Length of a duct                                  &  m            &                       \\ \hline
+{\ct LOSS}                      & Real Array        & Flow loss coefficients for a duct or node         &               &                       \\ \hline
+{\ct MAX\_FLOW}                 & Real              & Maximum volumetric flow for a quadratic fan       &  m$^3$/s      &                       \\ \hline
+{\ct MAX\_PRESSURE}             & Real              & Stall pressure for a quadratic fan                &  Pa           &                       \\ \hline
+{\ct NODE\_ID}                  & Character Doublet & Name of nodes connected to a duct                 &               &                       \\ \hline
+{\ct RAMP\_ID}                  & Character         & Name of {\ct RAMP} containing a fan curve         &               &  {\ct 'null'}         \\ \hline
+{\ct ROUGHNESS}                 & Real              & Absolute roughness of a duct                      &  m            &                       \\ \hline
+{\ct TYPE\_ID}                  & Character         & Type of component                                 &               &                       \\ \hline
+{\ct VENT\_ID}                  & Character         & Name of the {\ct VENT} the node is connected to   &               &  {\ct 'null'}         \\ \hline
+{\ct VOLUME\_FLOW}              & Real              & Fixed volumetric flow of a duct                   &  m$^3$/s      &                       \\ \hline
+{\ct XYZ}                       & Real Triplet      & Coordinates of a node                             &  m            &                       \\ \hline
 \end{longtable}
 
 
@@ -9704,8 +9726,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EMISSIVITY    }          & Real        & Emissivity                                &                   & 0.9    \\ \hline
 {\ct FYI}                     & Character   & Comment String (has no effect)            &                   &        \\ \hline
 {\ct HEATING\_RATE}           & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
-{\ct HEAT\_OF\_COMBUSTION(:,II)}& Real array& Heats of combustion for species {\ct II}  & kJ/kg             & 0.     \\ \hline
-{\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of reaction                         & kJ/kg             & 0.     \\ \hline
+{\ct HEAT\_OF\_COMBUSTION(:)} & Real array  & Heats of Combustion for each reaction     & kJ/kg             &        \\ \hline
+{\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of Reaction for each reaction       & kJ/kg             & 0.     \\ \hline
 {\ct INITIAL\_VAPOR\_FLUX}    & Real        & Initial evaporation rate                  & m$^2$/(sm$^2$)    & 0.0005   \\ \hline
 {\ct ID     }                 & Character   & IDentifier                                &                   &        \\ \hline
 {\ct THRESHOLD\_TEMPERATURE}  & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15 \\ \hline
