@@ -231,17 +231,9 @@ NOT_ISOTHERMAL_IF: IF (.NOT.ISOTHERMAL) THEN
          END SELECT
          IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
          
-         MASS_COR_IF: IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX        .OR. &
-                          SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
-                          SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY)      THEN
-             
-            IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN 
-               RHO_F(IW)=RHOP(IIG,JJG,KKG)
-               UN=0._EB
-            ELSE
-               UN = SIGN(1._EB,REAL(IOR,EB))*SUM(MASSFLUX(IW,0:N_SPECIES))/RHO_F(IW)
-            ENDIF
-            
+         MASS_COR_IF: IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN
+            RHO_F(IW)=RHOP(IIG,JJG,KKG)
+            UN=0._EB
             SELECT CASE(IOR)
                CASE( 1)
                   MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(UU(II,JJ,KK)-UN)*RDX(IIG)
@@ -505,25 +497,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
             ! recreate diffusive flux from divg b/c UWP based on old RHODW
             RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
             UN = SIGN(1._EB,REAL(IOR,EB))*(MASSFLUX(IW,N) + RHO_D_DYDN)/(RHO_F(IW)*YY_F(IW,N))
-         ENDIF
-         IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN
-            RHO_F(IW)=RHOP(IIG,JJG,KKG)
-            YY_F(IW,N)=YYP(IIG,JJG,KKG,N)
-            UN=0._EB
-            SELECT CASE(IOR)
-               CASE( 1)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*YY_F(IW,N)*UU(II,JJ,KK)*RDX(IIG)
-               CASE(-1)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*YY_F(IW,N)*UU(II-1,JJ,KK)*RDX(IIG)
-               CASE( 2)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*YY_F(IW,N)*VV(II,JJ,KK)*RDY(JJG)
-               CASE(-2)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*YY_F(IW,N)*VV(II,JJ-1,KK)*RDY(JJG)
-               CASE( 3)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*YY_F(IW,N)*WW(II,JJ,KK)*RDZ(KKG)
-               CASE(-3)
-                  MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*YY_F(IW,N)*WW(II,JJ,KK-1)*RDZ(KKG)
-            END SELECT
          ENDIF
          
          ! compute flux on the face of the wall cell
