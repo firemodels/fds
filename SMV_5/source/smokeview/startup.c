@@ -1403,8 +1403,6 @@ void initvars1(void){
   setbwSAVE=setbw;
   background_flip=1;
   transparentlevel=0.8f;
-  transparentflag=1;
-  transparentflagVOL=1;
   transparentflagSAVE=1;
   antialiasflag=1;
   nrgb_full=256;
