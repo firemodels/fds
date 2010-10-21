@@ -510,7 +510,7 @@ SVEXTERN int setbw,colorbarflip,showcolorbarlines;
 SVEXTERN int setbwSAVE;
 SVEXTERN int background_flip;
 SVEXTERN float transparentlevel;
-SVEXTERN int transparentflag,transparentflagVOL;
+SVEXTERN int SVDECL(transparentflag,1);
 SVEXTERN int transparentflagSAVE;
 SVEXTERN int antialiasflag;
 SVEXTERN int nrgb_full;

@@ -554,6 +554,8 @@ EXTERNCPP float MAX(float x, float y);
 EXTERNCPP void drawslice_terrain(const slice *sd);
 EXTERNCPP void drawvolslice_terrain(const slice *sd);
 EXTERNCPP void drawvolslice_texture(const slice *sd);
+EXTERNCPP void drawvolslice_cellcenter(const slice *sd);
+EXTERNCPP void drawvolslice_cellcenter_interp(const slice *sd);
 EXTERNCPP int new_multi(slice *sdold,slice *sd);
 EXTERNCPP int hide_slice2(slice *sdi,slice *sdj);
 EXTERNCPP void drawvolslice(const slice *sd);

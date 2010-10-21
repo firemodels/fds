@@ -1835,19 +1835,6 @@ void updateshowstep(int val, int slicedir){
       meshi->visy=current_mesh->visy;
       meshi->visz=current_mesh->visz;
     }
-    {
-      int nplanes=0;
-
-      if(current_mesh->visx==1)nplanes++;
-      if(current_mesh->visy==1)nplanes++;
-      if(current_mesh->visz==1)nplanes++;
-      if(nplanes<=1){
-        transparentflagVOL=1;
-      }
-      else{
-        transparentflagVOL=0;
-      }
-    }
   }
 }
 

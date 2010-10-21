@@ -1640,7 +1640,17 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       }
       else{
         if(sd->volslice==1){
-          drawvolslice(sd);
+          if(sd->cellcenter==1){
+            if(cellcenter_interp==1){
+              drawvolslice_cellcenter_interp(sd);
+            }
+            else{
+              drawvolslice_cellcenter(sd);
+            }
+          }
+          else{
+            drawvolslice(sd);
+          }
         }
         else{
           if(sd->cellcenter==1){
@@ -3435,6 +3445,7 @@ void Args(int argc, char **argv){
     exit(1);
   }
   if(strncmp(argv[1],"-ini",3)==0){
+    init_camera_list();
     InitOpenGL();
     updatecolors(-1);
     writeini(GLOBAL_INI);
@@ -3442,6 +3453,7 @@ void Args(int argc, char **argv){
   }
 
   if(strncmp(argv[1],"-ng_ini",6)==0){
+    init_camera_list();
     no_graphics=1;
     updatecolors(-1);
     writeini(GLOBAL_INI);
