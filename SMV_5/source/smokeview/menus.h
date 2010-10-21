@@ -6458,6 +6458,7 @@ updatemenu=0;
       glutAddMenuEntry("     (also, toggles cell center display on/off)",6);
     }
     glutAddMenuEntry("  u: reload files",6);
+    glutAddMenuEntry("  L: unload last slice file loaded",6);
     glutAddMenuEntry("1-9: number of frames to skip",6);
     displayblank=1;
   }
