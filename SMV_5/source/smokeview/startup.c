@@ -1201,11 +1201,8 @@ void initvars1(void){
   loadpatchbysteps=0;
   settargetmin=0, settargetmax=0;
   setpartchopmin=0, setpartchopmax=0;
-  setslicechopmin=0, setslicechopmax=0;
   partchopmin=1.0,  partchopmax=0.;
   slicechopmin=0, slicechopmax=0;
-  setpatchchopmin=0, setpatchchopmax=0;
-  patchchopmin=0,  patchchopmax=0;
 
   temp_threshold=400.0;
   vis_onlythreshold=0, vis_threshold=0;
@@ -1995,11 +1992,15 @@ int getrevision(char *svn){
 /* ------------------ initvars0 ------------------------ */
 
 void initvars0(void){
+  int i;
 
 #ifdef pp_GPU
   GPU_depthtexture=0;
 #endif
 
+  for(i=0;i<256;i++){
+    boundarylevels256[i]=(float)i/255.0;
+  }
   current_script_command=NULL;
   script_dir_path=NULL;
   scriptinfo=NULL;
@@ -2064,8 +2065,6 @@ void initvars0(void){
   outlineinfo=NULL;
   sliceorderindex=NULL,vsliceorderindex=NULL,partorderindex=NULL;
   patchorderindex=NULL,isoorderindex=NULL,plot3dorderindex=NULL;
-  slicebounds=NULL;
-  isobounds=NULL;
   vsliceinfo=NULL;
   smoke3dinfo=NULL;
   labelinfo=NULL;
@@ -2181,7 +2180,6 @@ void initvars0(void){
   zonescale=NULL;
   plotiso=NULL;
   times=NULL;
-  patchlabellist=NULL;
   sliceindex=NULL;
   isoindex=NULL;
   face_transparent=NULL;

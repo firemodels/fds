@@ -458,6 +458,7 @@ EXTERNCPP void hide_glui_edit(void);
 
 EXTERNCPP void updateslicelistindex(int sfn);
 EXTERNCPP void updatepatchlistindex(int patchfilenum);
+EXTERNCPP void updatepatchlistindex2(char *label);
 EXTERNCPP void updateplot3dlistindex(void);
 EXTERNCPP int getindex(float key, const float *list, int nlist);
 EXTERNCPP void transparentoff(void);

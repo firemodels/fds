@@ -48,7 +48,8 @@ GLUI_Spinner *SPINNER_tick_dx0=NULL;
 GLUI_Spinner *SPINNER_tick_dy0=NULL;
 GLUI_Spinner *SPINNER_tick_dz0=NULL;
 GLUI_Panel *panel_transparency=NULL;
-GLUI_Spinner *SPINNER_labels_transparency=NULL;
+GLUI_Spinner *SPINNER_labels_transparency_face=NULL;
+GLUI_Spinner *SPINNER_labels_transparency_data=NULL;
 GLUI_Checkbox *CHECKBOX_labels_colorbar=NULL;
 GLUI_Checkbox *CHECKBOX_labels_timebar=NULL;
 GLUI_Checkbox *CHECKBOX_labels_ticks=NULL;
@@ -155,16 +156,16 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_flip=glui_labels->add_checkbox_to_panel(panel_label1,"Flip Background",&background_flip,LABELS_flip,Labels_CB);
   CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(panel_label1,"Shades of Grey",&setbw,LABELS_shade,Labels_CB);
 
+  panel_transparency = glui_labels->add_panel_to_panel(panel_label1,"Transparency");
+  CHECKBOX_labels_transparent=glui_labels->add_checkbox_to_panel(panel_transparency,"Activate",&transparentflag,LABELS_transparent,Labels_CB);
+  CHECKBOX_labels_transparent_override=glui_labels->add_checkbox_to_panel(panel_transparency,"Override",&transparency_override,LABELS_transparent,Labels_CB);
   if(nface_transparent>0){
-    panel_transparency = glui_labels->add_panel_to_panel(panel_label1,"Transparency");
-    CHECKBOX_labels_transparent=glui_labels->add_checkbox_to_panel(panel_transparency,"Activate",&transparentflag,LABELS_transparent,Labels_CB);
-    CHECKBOX_labels_transparent_override=glui_labels->add_checkbox_to_panel(panel_transparency,"Override",&transparency_override,LABELS_transparent,Labels_CB);
-    SPINNER_labels_transparency=glui_labels->add_spinner_to_panel(panel_transparency,"Override value",GLUI_SPINNER_FLOAT,&transparency_level,LABELS_transparent,Labels_CB);
-    SPINNER_labels_transparency->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
+    SPINNER_labels_transparency_face=glui_labels->add_spinner_to_panel(panel_transparency,"Geometry transparency",GLUI_SPINNER_FLOAT,&transparency_level,LABELS_transparent,Labels_CB);
+    SPINNER_labels_transparency_face->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
   }
-  else{
-    CHECKBOX_labels_transparent=glui_labels->add_checkbox_to_panel(panel_label1,"Transparency",&transparentflag,LABELS_transparent,Labels_CB);
-  }
+  SPINNER_labels_transparency_data=glui_labels->add_spinner_to_panel(panel_transparency,"Data transparency",GLUI_SPINNER_FLOAT,&transparentlevel,LABELS_transparent,Labels_CB);
+  SPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
+
   Labels_CB(LABELS_transparent);
 
   CHECKBOX_labels_hms=glui_labels->add_checkbox_to_panel(panel_label1,"hms time label",&vishmsTimelabel,LABELS_HMS,Labels_CB);
@@ -472,14 +473,23 @@ void Labels_CB(int var){
       if(transparentflag==1)CHECKBOX_labels_transparent_override->enable();
       if(transparentflag==0)CHECKBOX_labels_transparent_override->disable();
     }
-    if(SPINNER_labels_transparency!=NULL){
+    if(SPINNER_labels_transparency_face!=NULL){
       if(transparentflag==1&&transparency_override==1){
-        SPINNER_labels_transparency->enable();
+        SPINNER_labels_transparency_face->enable();
       }
       else{
-        SPINNER_labels_transparency->disable();
+        SPINNER_labels_transparency_face->disable();
       }
     }
+    if(SPINNER_labels_transparency_data!=NULL){
+      if(transparentflag==1&&transparency_override==1){
+        SPINNER_labels_transparency_data->enable();
+      }
+      else{
+        SPINNER_labels_transparency_data->disable();
+      }
+    }
+    updatechopcolors();
     break;
   case LABELS_close:
     hide_glui_labels();
