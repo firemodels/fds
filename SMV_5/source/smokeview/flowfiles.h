@@ -1004,6 +1004,8 @@ typedef struct {
   int num_memblocks;
   int setvalmin, setvalmax;
   float valmin, valmax;
+  int setchopmin, setchopmax;
+  float chopmin, chopmax;
   float local_valmin, local_valmax;
   float diff_valmin, diff_valmax;
   int blocknumber,loaded,display;

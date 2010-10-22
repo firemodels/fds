@@ -188,6 +188,7 @@ GLUI_RadioButton *plot3d_iso_hidden=NULL;
 GLUI_RadioGroup *plot3d_display=NULL;
 GLUI_EditText *con_slice_min=NULL, *con_slice_max=NULL;
 GLUI_EditText *con_slice_chopmin=NULL, *con_slice_chopmax=NULL;
+GLUI_EditText *con_patch_chopmin=NULL, *con_patch_chopmax=NULL;
 GLUI_EditText *con_part_chopmin=NULL, *con_part_chopmax=NULL;
 GLUI_RadioGroup *con_slice_setmin=NULL, *con_slice_setmax=NULL;
 GLUI_Checkbox *showchar_checkbox=NULL, *showonlychar_checkbox;
@@ -202,7 +203,7 @@ GLUI_Checkbox *check_multi_task=NULL;
 GLUI_Checkbox *con_slice_setchopmin=NULL;
 GLUI_Checkbox *con_slice_setchopmax=NULL;
 GLUI_Checkbox *con_p3_setchopmin=NULL, *con_p3_setchopmax=NULL;
-GLUI_Checkbox *con_bf_setchopmin=NULL, *con_bf_setchopmax=NULL;
+GLUI_Checkbox *con_patch_setchopmin=NULL, *con_patch_setchopmax=NULL;
 GLUI_Checkbox *con_part_setchopmin=NULL, *con_part_setchopmax=NULL;
 GLUI_Checkbox *showtracer_checkbox=NULL;
 GLUI_Checkbox *CHECKBOX_cellcenter_slice_interp=NULL;
@@ -243,9 +244,8 @@ GLUI_Spinner *SPINNER_vectorlinewidth=NULL;
 
 
 
-GLUI_EditText *con_bf_min=NULL, *con_bf_max=NULL;
-GLUI_EditText *con_bf_chopmin=NULL, *con_bf_chopmax=NULL;
-GLUI_RadioGroup *con_bf_setmin=NULL, *con_bf_setmax=NULL;
+GLUI_EditText *con_patch_min=NULL, *con_patch_max=NULL;
+GLUI_RadioGroup *con_patch_setmin=NULL, *con_patch_setmax=NULL;
 
 
 GLUI_EditText *con_part_min=NULL, *con_part_max=NULL;
@@ -339,14 +339,17 @@ extern "C" void glui_bounds_setup(int main_window){
     }
 
     boundmenu(&rollout_BOUNDARY,NULL,panel_bound,"Reload Boundary File(s)",
-      &con_bf_min,&con_bf_max,&con_bf_setmin,&con_bf_setmax,
-      NULL,NULL,NULL,NULL,
+      &con_patch_min,&con_patch_max,&con_patch_setmin,&con_patch_setmax,
+      &con_patch_setchopmin, &con_patch_setchopmax,
+      &con_patch_chopmin, &con_patch_chopmax,
       &setpatchmin,&setpatchmax,&patchmin,&patchmax,
-      NULL,NULL,NULL,NULL,
+      &setpatchchopmin, &setpatchchopmax,
+      &patchchopmin, &patchchopmax,
       DONT_UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
       Bound_CB);
+    updatepatchlistindex2(patchinfo[0].label.shortlabel);
+   }
 
-  }
 
   /*  Iso File Load Bounds   */
 
@@ -406,7 +409,6 @@ extern "C" void glui_bounds_setup(int main_window){
       PART_CB(SETVALMIN);
       PART_CB(SETVALMAX);
     }
-
 
     {
       char boundmenulabel[100];
@@ -1334,7 +1336,7 @@ extern "C" void add_scriptlist(char *file, int id){
 
 /* ------------------ Bound_CB ------------------------ */
 
-  void Bound_CB(int var){
+void Bound_CB(int var){
   patch *pi;
   int i;
 
@@ -1344,24 +1346,44 @@ extern "C" void add_scriptlist(char *file, int id){
     boundzipstep=boundzipskip+1;
     updatemenu=1;
     break;
+  case CHOPUPDATE:
+    updatechopcolors();
+    break;
   case SETCHOPMINVAL:
+    updatechopcolors();
+    local2globalpatchbounds(patchlabellist[list_patch_index]);
+    printf("setpatchchopmin=%i\n",setpatchchopmin);
     switch (setpatchchopmin){
       case 0:
-        con_bf_chopmin->disable();
+      con_patch_chopmin->disable();
       break;
       case 1:
-        con_bf_chopmin->enable();
+      con_patch_chopmin->enable();
       break;
     }
   case SETCHOPMAXVAL:
+    updatechopcolors();
+    local2globalpatchbounds(patchlabellist[list_patch_index]);
     switch (setpatchchopmax){
       case 0:
-        con_bf_chopmax->disable();
+      con_patch_chopmax->disable();
       break;
       case 1:
-        con_bf_chopmax->enable();
+      con_patch_chopmax->enable();
       break;
     }
+    break;
+  case CHOPVALMIN:
+    ASSERT(con_patch_min!=NULL);
+    con_patch_min->set_float_val(patchmin);
+    local2globalpatchbounds(patchlabellist[list_patch_index]);
+    updatechopcolors();
+    break;
+  case CHOPVALMAX:
+    ASSERT(con_patch_max!=NULL);
+    con_patch_max->set_float_val(patchmax);
+    local2globalpatchbounds(patchlabellist[list_patch_index]);
+    updatechopcolors();
     break;
   case SHOWCHAR:
     if(showchar_checkbox!=NULL&&showonlychar_checkbox!=NULL){
@@ -1379,13 +1401,34 @@ extern "C" void add_scriptlist(char *file, int id){
     local2globalpatchbounds(patchlabellist[list_patch_index_old]);
     global2localpatchbounds(patchlabellist[list_patch_index]);
 
-    con_bf_min->set_float_val(patchmin);
-    con_bf_max->set_float_val(patchmax);
+    con_patch_min->set_float_val(patchmin);
+    con_patch_max->set_float_val(patchmax);
+    con_patch_chopmin->set_float_val(patchchopmin);
+    con_patch_chopmax->set_float_val(patchchopmax);
 
     Bound_CB(SETVALMIN);
     Bound_CB(SETVALMAX);
-    if(con_bf_setmin!=NULL)con_bf_setmin->set_int_val(setpatchmin);
-    if(con_bf_setmax!=NULL)con_bf_setmax->set_int_val(setpatchmax);
+    if(con_patch_setmin!=NULL)con_patch_setmin->set_int_val(setpatchmin);
+    if(con_patch_setmax!=NULL)con_patch_setmax->set_int_val(setpatchmax);
+    if(con_patch_setchopmin!=NULL)con_patch_setchopmin->set_int_val(setpatchchopmin);
+    if(con_patch_setchopmax!=NULL)con_patch_setchopmax->set_int_val(setpatchchopmax);
+
+    switch (setpatchchopmin){
+      case 0:
+      con_patch_chopmin->disable();
+      break;
+      case 1:
+      con_patch_chopmin->enable();
+      break;
+    }
+    switch (setpatchchopmax){
+      case 0:
+      con_patch_chopmax->disable();
+      break;
+      case 1:
+      con_patch_chopmax->enable();
+      break;
+    }
 
     list_patch_index_old = list_patch_index;
     break;
@@ -1393,10 +1436,10 @@ extern "C" void add_scriptlist(char *file, int id){
     switch (setpatchmin){
     case PERCENTILE_MIN:
     case GLOBAL_MIN:
-      con_bf_min->disable();
+      con_patch_min->disable();
       break;
     case SET_MIN:
-      con_bf_min->enable();
+      con_patch_min->enable();
       break;
     }
     Bound_CB(FILEUPDATE);
@@ -1405,23 +1448,16 @@ extern "C" void add_scriptlist(char *file, int id){
     switch (setpatchmax){
     case PERCENTILE_MAX:
     case GLOBAL_MAX:
-      con_bf_max->disable();
+      con_patch_max->disable();
       break;
     case SET_MAX:
-      con_bf_max->enable();
+      con_patch_max->enable();
       break;
     }
     Bound_CB(FILEUPDATE);
   break;
   case FILEUPDATE:
-    for(i=0;i<npatch_files;i++){
-      if(strcmp(patchinfo[i].label.shortlabel,patchlabellist[list_patch_index])==0){
-        patchinfo[i].valmin=patchmin;
-        patchinfo[i].valmax=patchmax;
-        patchinfo[i].setvalmin=setpatchmin;
-        patchinfo[i].setvalmax=setpatchmax;
-      }
-    }
+    local2globalpatchbounds(patchlabellist[list_patch_index]);
     break;
   case FILERELOAD:
     Bound_CB(FILEUPDATE);
@@ -1430,8 +1466,8 @@ extern "C" void add_scriptlist(char *file, int id){
       if(pi->loaded==0)continue;
       LoadPatchMenu(i);
     }
-    con_bf_min->set_float_val(patchmin);
-    con_bf_max->set_float_val(patchmax);
+    con_patch_min->set_float_val(patchmin);
+    con_patch_max->set_float_val(patchmax);
     break;
   case COMPRESS_FILES:
     compress_svzip();
@@ -1463,32 +1499,65 @@ extern "C" void add_scriptlist(char *file, int id){
     break;
   }
 }
+
 /* ------------------ updatepatchlistindex ------------------------ */
 
 extern "C" void updatepatchlistindex(int patchfilenum){
   int i;
+  if(bf_rlist==NULL)return;
   for(i=0;i<npatch2;i++){
     if(strcmp(patchlabellist[i],patchinfo[patchfilenum].label.shortlabel)==0){
       bf_rlist->set_int_val(i);
       list_patch_index_old=list_patch_index;
       global2localpatchbounds(patchlabellist[i]);
-      con_bf_setmin->set_int_val(setpatchmin);
-      con_bf_setmax->set_int_val(setpatchmax);
-      con_bf_min->set_float_val(patchmin);
-      con_bf_max->set_float_val(patchmax);
+      con_patch_setmin->set_int_val(setpatchmin);
+      con_patch_setmax->set_int_val(setpatchmax);
+      con_patch_min->set_float_val(patchmin);
+      con_patch_max->set_float_val(patchmax);
+
+      con_patch_setchopmin->set_int_val(setpatchchopmin);
+      con_patch_setchopmax->set_int_val(setpatchchopmax);
+      con_patch_chopmin->set_float_val(patchchopmin);
+      con_patch_chopmax->set_float_val(patchchopmax);
+
       if(setpatchmin==SET_MIN){
-        con_bf_min->enable();
+        con_patch_min->enable();
       }
       else{
-        con_bf_min->disable();
+        con_patch_min->disable();
       }
       if(setpatchmax==SET_MAX){
-        con_bf_max->enable();
+        con_patch_max->enable();
       }
       else{
-        con_bf_max->disable();
+        con_patch_max->disable();
+      }
+
+      if(setpatchchopmin==SET_MIN){
+        con_patch_chopmin->enable();
+      }
+      else{
+        con_patch_chopmin->disable();
+      }
+      if(setpatchchopmax==SET_MAX){
+        con_patch_chopmax->enable();
+      }
+      else{
+        con_patch_chopmax->disable();
       }
       return;
+    }
+  }
+}
+
+/* ------------------ updatepatchlistindex2 ------------------------ */
+
+extern "C" void updatepatchlistindex2(char *label){
+  int i;
+  for(i=0;i<npatch2;i++){
+    if(strcmp(patchlabellist[i],label)==0){
+      updatepatchlistindex(patchlabellist_index[i]);
+      break;
     }
   }
 }
