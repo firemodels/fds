@@ -2333,6 +2333,13 @@ typedef struct {
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 
+  glGenTextures(1,&texture_patch_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+
   glGenTextures(1,&texture_plot3d_colorbar_id);
   glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
@@ -5643,7 +5650,9 @@ typedef struct {
   if(npatch_files>0){
     npatch2=0;
     FREEMEMORY(patchlabellist);
-    if(NewMemory((void **)&patchlabellist,npatch_files*sizeof(char *))==0)return 2;
+    FREEMEMORY(patchlabellist_index);
+    if(NewMemory((void **)&patchlabellist,npatch_files*sizeof(char *))==0||
+       NewMemory((void **)&patchlabellist_index,npatch_files*sizeof(int))==0)return 2;
     for(i=0;i<npatch_files;i++){
       patchinfo[i].firstshort=1;
       patchinfo[i].valmin=1.0;
@@ -5655,6 +5664,7 @@ typedef struct {
         canshow_threshold=1;
       }
       patchlabellist[npatch2]=patchinfo[i].label.shortlabel;
+      patchlabellist_index[npatch2]=i;
       npatch2++;
       for(n=0;n<i;n++){
         if(strcmp(patchinfo[i].label.shortlabel,patchinfo[n].label.shortlabel)==0){
@@ -6868,8 +6878,6 @@ int readini2(char *inifile, int localfile){
   int iplot3d, isetmin, isetmax;
   float p3mintemp, p3maxtemp;
   float *scale;
-  float valmin, valmax;
-  int setvalmin, setvalmax;
   FILE *stream;
   int i;
   int j;
@@ -7405,6 +7413,9 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"V_SLICE",7)==1){
+      float valmin, valmax;
+      int setvalmin, setvalmax;
+
 #ifdef pp_SLICECONTOURS
       char *level_val;
 #endif
@@ -7464,6 +7475,9 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"C_SLICE",7)==1){
+      float valmin, valmax;
+      int setvalmin, setvalmax;
+
       fgets(buffer,255,stream);
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
@@ -7488,6 +7502,9 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"V_ISO",5)==1){
+      float valmin, valmax;
+      int setvalmin, setvalmax;
+
       fgets(buffer,255,stream);
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
@@ -7512,6 +7529,9 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"C_ISO",5)==1){
+      float valmin, valmax;
+      int setvalmin, setvalmax;
+
       fgets(buffer,255,stream);
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
@@ -7539,6 +7559,29 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i %f %s",&setpatchmin,&patchmin,&setpatchmax,&patchmax,buffer2);
       if(strcmp(buffer2,"")!=0)local2globalpatchbounds(buffer2);
+      continue;
+    }
+    if(match(buffer,"C_BOUNDARY",10)==1){
+      float valmin, valmax;
+      int setvalmin, setvalmax;
+      char *buffer2ptr;
+      int lenbuffer2;
+
+      fgets(buffer,255,stream);
+      strcpy(buffer2,"");
+      sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
+      trim(buffer2);
+      buffer2ptr=trim_front(buffer2);
+      lenbuffer2=strlen(buffer2ptr);
+      for(i=0;i<npatch_files;i++){
+        if(lenbuffer2==0||strcmp(patchinfo[i].label.shortlabel,buffer2ptr)==0){
+          patchinfo[i].chopmin=valmin;
+          patchinfo[i].chopmax=valmax;
+          patchinfo[i].setchopmin=setvalmin;
+          patchinfo[i].setchopmax=setvalmax;
+        }
+      }
+      updatepatchlistindex2(buffer2ptr);
       continue;
     }
     if(match(buffer,"V_ZONE",6)==1){
@@ -9403,6 +9446,17 @@ void writeini(int flag){
         patchinfo[i].label.shortlabel
         );
     }
+  }
+  for(i=0;i<npatch2;i++){
+    int ii;
+
+    ii = patchlabellist_index[i];
+    fprintf(fileout,"C_BOUNDARY\n");
+    fprintf(fileout," %i %f %i %f %s\n",
+      patchinfo[ii].setchopmin,patchinfo[ii].chopmin,
+      patchinfo[ii].setchopmax,patchinfo[ii].chopmax,
+      patchinfo[ii].label.shortlabel
+      );
   }
   fprintf(fileout,"V_ZONE\n");
   fprintf(fileout," %i %f %i %f\n",setzonemin,zonemin,setzonemax,zonemax);

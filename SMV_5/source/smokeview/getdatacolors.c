@@ -1959,10 +1959,16 @@ void initcadcolors(void){
 void update_texturebar(void){
   glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
+
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
+
+  glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
+
   glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
+
   glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
 }
@@ -2222,9 +2228,8 @@ void updatecolors(int changecolorindex){
 
 /* ------------------ updatechopcolors ------------------------ */
 
-void updatechopcolors(){
+void updatechopcolors(void){
   int i;
-  float smin, smax;
   int ichopmin=0,ichopmax=nrgb_full;
 #define NCHOP 8  
   int ii;
@@ -2234,21 +2239,96 @@ void updatechopcolors(){
     rgb_iso[4*i+0]=rgb_full[i][0];
     rgb_iso[4*i+1]=rgb_full[i][1];
     rgb_iso[4*i+2]=rgb_full[i][2];
-    rgb_iso[4*i+3]=rgb_full[i][3];
+    if(rgb_full[i][3]>0.001){
+      rgb_iso[4*i+3]=transparentlevel;
+    }
+    else{
+      rgb_iso[4*i+3]=0.0;
+    }
+
     rgb_slice[4*i+0]=rgb_full[i][0];
     rgb_slice[4*i+1]=rgb_full[i][1];
     rgb_slice[4*i+2]=rgb_full[i][2];
-    rgb_slice[4*i+3]=rgb_full[i][3];
+    if(rgb_full[i][3]>0.001){
+      rgb_slice[4*i+3]=transparentlevel;
+    }
+    else{
+      rgb_slice[4*i+3]=0.0;
+    }
+
     rgb_part[4*i+0]=rgb_full[i][0];
     rgb_part[4*i+1]=rgb_full[i][1];
     rgb_part[4*i+2]=rgb_full[i][2];
     rgb_part[4*i+3]=rgb_full[i][3];
+    if(rgb_full[i][3]>0.001){
+      rgb_part[4*i+3]=transparentlevel;
+    }
+    else{
+      rgb_part[4*i+3]=0.0;
+    }
+
     rgb_plot3d[4*i+0]=rgb_full[i][0];
     rgb_plot3d[4*i+1]=rgb_full[i][1];
     rgb_plot3d[4*i+2]=rgb_full[i][2];
     rgb_plot3d[4*i+3]=rgb_full[i][3];
+    if(rgb_full[i][3]>0.001){
+      rgb_plot3d[4*i+3]=transparentlevel;
+    }
+    else{
+      rgb_plot3d[4*i+3]=0.0;
+    }
+
+    rgb_patch[4*i+0]=rgb_full[i][0];
+    rgb_patch[4*i+1]=rgb_full[i][1];
+    rgb_patch[4*i+2]=rgb_full[i][2];
+    if(rgb_full[i][3]>0.001){
+      rgb_patch[4*i+3]=transparentlevel;
+    }
+    else{
+      rgb_patch[4*i+3]=0.0;
+    }
+  }
+  {
+    float smin, smax;
+
+    smin = boundarylevels256[0];
+    smax = boundarylevels256[255];
+
+    if(setpatchchopmin==1){
+      printf("updating chop colors with transparentlevel=%f\n",transparentlevel);
+      ichopmin=nrgb_full*(patchchopmin-smin)/(smax-smin);
+      if(ichopmin<0)ichopmin=0;
+      if(ichopmin>nrgb_full-1)ichopmin=nrgb_full-1;
+      for(i=0;i<ichopmin;i++){
+        rgb_patch[4*i+3]=0.0;
+      }
+      for(i=ichopmin-NCHOP;i<ichopmin;i++){
+        if(i<=0)continue;
+        if(i>nrgb_full-1)continue;
+        ii = i - (ichopmin-NCHOP);
+        if(ii>NCHOP-1)continue;
+        rgb_patch[4*i+3]=transparentlevel*(float)ii/(float)(NCHOP-1);
+      }
+    }
+    if(setpatchchopmax==1){
+      ichopmax=nrgb_full*(patchchopmax - smin)/(smax-smin);
+      if(ichopmax<0)ichopmax=0;
+      if(ichopmax>nrgb_full-1)ichopmax=nrgb_full-1;
+      for(i=ichopmax;i<nrgb_full;i++){
+        rgb_patch[4*i+3]=0.0;
+      }
+      for(i=ichopmax;i<ichopmax+NCHOP;i++){
+        if(i<=0)continue;
+        if(i>nrgb_full-1)continue;
+        ii = NCHOP-1-(i - ichopmax);
+        if(ii>NCHOP-1)continue;
+        rgb_patch[4*i+3]=transparentlevel*(float)ii/(float)(NCHOP-1);
+      }
+    }
   }
   if(slicebounds!=NULL&&islicetype!=-1){
+    float smin, smax;
+
     smin=slicebounds[islicetype].valmin;
     smax=slicebounds[islicetype].valmax;
  
