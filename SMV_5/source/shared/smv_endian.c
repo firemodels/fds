@@ -3,7 +3,7 @@
 // $Author$
 
 #include "options.h"
-#include "endian.h"
+#include "smv_endian.h"
 
 // svn revision character string
 
