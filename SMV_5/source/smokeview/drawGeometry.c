@@ -1740,7 +1740,7 @@ void update_facelists(void){
     local_showpatch=0;
     loadpatch=0;
     patchfilenum=meshi->patchfilenum;
-    if(patchfilenum>=0&&patchfilenum<npatch_files){
+    if(hidepatchsurface==1&&patchfilenum>=0&&patchfilenum<npatch_files){
       patchi = patchinfo + patchfilenum;
       if(patchi->loaded==1)loadpatch=1;
       if(patchi->display==1)local_showpatch=1;
@@ -1976,21 +1976,17 @@ void draw_faces(){
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
 
-//  if(transparentflag==1)transparenton();
-
   if(nface_normals_single>0){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
     glEnable(GL_COLOR_MATERIAL);
-   // if(cullfaces==1)glDisable(GL_CULL_FACE); // DEBUG WORK AROUND
     glBegin(GL_QUADS);
     for(j=0;j<nmeshes;j++){
       meshi=meshinfo + j;
       if(meshi->blockvis==0)continue;
       for(i=0;i<meshi->nface_normals_single;i++){
         facei = meshi->face_normals_single[i];
-       // if(blocklocation==BLOCKlocation_grid||showedit==1){
         if(blocklocation==BLOCKlocation_grid){
           vertices = facei->approx_vertex_coords;
         }
@@ -2047,7 +2043,6 @@ void draw_faces(){
       }
     }
     glEnd();
-  //  if(cullfaces==1)glEnable(GL_CULL_FACE); // DEBUG WORK AROUND
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
@@ -2062,7 +2057,6 @@ void draw_faces(){
       meshi=meshinfo + j;
       for(i=0;i<meshi->nface_normals_double;i++){
         facei = meshi->face_normals_double[i];
-       // if(blocklocation==BLOCKlocation_grid||showedit==1){
         if(blocklocation==BLOCKlocation_grid){
           vertices = facei->approx_vertex_coords;
         }
@@ -2195,7 +2189,6 @@ void draw_faces(){
           tvertices = facei->exact_texture_coords;
         }
 
-//        if(facei->type2==VENT_face)glDisable(GL_CULL_FACE);
         if(facei->type2==BLOCK_face&&cullfaces==0)glDisable(GL_CULL_FACE);
 
 
@@ -2223,7 +2216,6 @@ void draw_faces(){
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
   }
-//  if(transparentflag==1)transparentoff();
 }
 
 
@@ -2339,13 +2331,13 @@ void draw_transparent_faces(){
        fabs(new_color[1]-old_color[1])>0.0001||
        fabs(new_color[2]-old_color[2])>0.0001||
        fabs(new_color[3]-old_color[3])>0.0001||
-       transparency_override==1
+       use_transparency_geom==1
        ){
       old_color[0]=new_color[0];
       old_color[1]=new_color[1];
       old_color[2]=new_color[2];
       old_color[3]=new_color[3];
-      if(transparency_override==1)old_color[3]=transparency_level;
+      if(use_transparency_geom==1)old_color[3]=transparency_geom;
       glColor4fv(old_color);
     }
     glNormal3fv(facei->normal);

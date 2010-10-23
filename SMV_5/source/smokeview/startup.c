@@ -1399,8 +1399,6 @@ void initvars1(void){
   setbw=0,colorbarflip=0,showcolorbarlines=0;
   setbwSAVE=setbw;
   background_flip=1;
-  transparentlevel=0.8f;
-  transparentflagSAVE=1;
   antialiasflag=1;
   nrgb_full=256;
   nrgb_cad=256;
@@ -1769,8 +1767,6 @@ void initvars1(void){
   buffertype=DOUBLE_BUFFER;
   benchmark=0;
   opengldefined=0;
-  transparency_level=0.0;
-  transparency_override=0;
 
   dwinHbase=60;
   dwinH=60;

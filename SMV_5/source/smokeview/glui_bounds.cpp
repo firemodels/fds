@@ -82,6 +82,8 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define TRANSFORM_SLICE 23
 #define RESET_SLICE 24
 #endif
+#define HIDEPATCHSURFACE 25
+#define DATA_transparent 26
 #define AVERAGE_DATA 201
 #define TURB_DATA 202
 #define UNLOAD_QDATA 203
@@ -135,6 +137,7 @@ GLUI_Button *BUTTON_compress=NULL;
 #ifdef pp_TRANSFORM
 GLUI_Panel *panel_slice_transform=NULL;
 #endif
+GLUI_Spinner *SPINNER_labels_transparency_data=NULL;
 GLUI_Panel *panel_pan1=NULL;
 GLUI_Panel *panel_pan2=NULL;
 GLUI_Panel *panel_pan3=NULL;
@@ -179,6 +182,7 @@ GLUI_Rollout *rollout_compress=NULL;
 GLUI *glui_bounds=NULL;
 GLUI_Rollout *panel_plot3d=NULL,*panel_evac=NULL,*panel_part=NULL,*panel_slice=NULL,*panel_bound=NULL,*panel_iso=NULL,*panel_smoke3d=NULL;
 GLUI_Rollout *panel_time=NULL,*panel_colorbar=NULL;
+GLUI_Panel *panel_transparency2=NULL;
 
 GLUI_RadioGroup *bf_rlist=NULL, *p3rlist=NULL,*slice_rlist=NULL;
 GLUI_RadioGroup *part5_rlist=NULL;
@@ -192,6 +196,7 @@ GLUI_EditText *con_patch_chopmin=NULL, *con_patch_chopmax=NULL;
 GLUI_EditText *con_part_chopmin=NULL, *con_part_chopmax=NULL;
 GLUI_RadioGroup *con_slice_setmin=NULL, *con_slice_setmax=NULL;
 GLUI_Checkbox *showchar_checkbox=NULL, *showonlychar_checkbox;
+GLUI_Checkbox *CHECKBOX_transparentflag=NULL;
 GLUI_Checkbox *CHECKBOX_showcolorbarlines=NULL;
 GLUI_Checkbox *CHECKBOX_axissmooth=NULL;
 GLUI_Checkbox *CHECKBOX_extreme2=NULL;
@@ -254,6 +259,14 @@ GLUI_RadioGroup *con_part_setmin=NULL, *con_part_setmax=NULL;
 GLUI_EditText *con_p3_min=NULL, *con_p3_max=NULL;
 GLUI_EditText *con_p3_chopmin=NULL, *con_p3_chopmax=NULL;
 GLUI_RadioGroup *con_p3_setmin=NULL, *con_p3_setmax=NULL;
+
+
+/* ------------------ transparency ------------------------ */
+
+extern "C" void update_transparency(void){
+  CHECKBOX_transparentflag->set_int_val(use_transparency_data);
+}
+
 
 /* ------------------ update_colorbar_smooth ------------------------ */
 
@@ -319,10 +332,8 @@ extern "C" void glui_bounds_setup(int main_window){
       }
       if(activate_threshold==1){
         glui_bounds->add_separator_to_panel(panel_bound);
-        showchar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show temp threshold",
-          &vis_threshold,SHOWCHAR,Bound_CB);
-        showonlychar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show only temp threshold",
-          &vis_onlythreshold,SHOWCHAR,Bound_CB);
+        showchar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show temp threshold",&vis_threshold,SHOWCHAR,Bound_CB);
+        showonlychar_checkbox=glui_bounds->add_checkbox_to_panel(panel_bound,"Show only temp threshold",&vis_onlythreshold,SHOWCHAR,Bound_CB);
         glui_bounds->add_spinner_to_panel(panel_bound,"temp threshold (C)",GLUI_SPINNER_FLOAT,
           &temp_threshold);
         Bound_CB(SHOWCHAR);
@@ -336,7 +347,7 @@ extern "C" void glui_bounds_setup(int main_window){
         glui_bounds->add_spinner_to_panel(panel_bound,"temp threshold (C)",GLUI_SPINNER_FLOAT,&temp_threshold);
         Bound_CB(SHOWCHAR);
       }
-    }
+  }
 
     boundmenu(&rollout_BOUNDARY,NULL,panel_bound,"Reload Boundary File(s)",
       &con_patch_min,&con_patch_max,&con_patch_setmin,&con_patch_setmax,
@@ -641,7 +652,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   Time_CB(TBOUNDS_USE);
 
-  panel_colorbar = glui_bounds->add_rollout("Data Coloring",false);
+  panel_colorbar = glui_bounds->add_rollout("Data Coloring/Transparency",false);
   if(ncolorbars>0){
     selectedcolorbar_index2=-1;
     LISTBOX_colorbar2=glui_bounds->add_listbox_to_panel(panel_colorbar,"Colorbar:",&selectedcolorbar_index2,COLORBAR_LIST2,Slice_CB);
@@ -659,6 +670,10 @@ extern "C" void glui_bounds_setup(int main_window){
   CHECKBOX_showcolorbarlines=glui_bounds->add_checkbox_to_panel(panel_colorbar,"Lines",&showcolorbarlines,COLORBAR_LINES,Slice_CB);
   CHECKBOX_extreme2=glui_bounds->add_checkbox_to_panel(panel_colorbar,"Highlight extreme data",&show_extremedata,
     COLORBAR_EXTREME2,Slice_CB);
+  CHECKBOX_transparentflag=glui_bounds->add_checkbox_to_panel(panel_colorbar,"Use transparency:",&use_transparency_data,DATA_transparent,Slice_CB);
+  SPINNER_labels_transparency_data=glui_bounds->add_spinner_to_panel(panel_colorbar,"transparency level",GLUI_SPINNER_FLOAT,&transparentlevel,DATA_transparent,Slice_CB);
+  SPINNER_labels_transparency_data->set_w(0);
+  SPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
@@ -1341,6 +1356,9 @@ void Bound_CB(int var){
   int i;
 
   switch (var) {
+  case HIDEPATCHSURFACE:
+    updatefacelists=1;
+    break;
   case FRAMELOADING:
     boundframestep=boundframeskip+1;
     boundzipstep=boundzipskip+1;
@@ -1361,6 +1379,19 @@ void Bound_CB(int var){
       con_patch_chopmin->enable();
       break;
     }
+    {
+      int hidepatchsurface_old;
+
+      
+      hidepatchsurface_old=hidepatchsurface;
+      if(setpatchchopmin==1||setpatchchopmax==1){
+        hidepatchsurface=0;
+      }
+      else{
+        hidepatchsurface=1;
+      }
+      if(hidepatchsurface_old!=hidepatchsurface)updatefacelists=1;
+    }
   case SETCHOPMAXVAL:
     updatechopcolors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
@@ -1371,6 +1402,19 @@ void Bound_CB(int var){
       case 1:
       con_patch_chopmax->enable();
       break;
+    }
+    {
+      int hidepatchsurface_old;
+
+      
+      hidepatchsurface_old=hidepatchsurface;
+      if(setpatchchopmin==1||setpatchchopmax==1){
+        hidepatchsurface=0;
+      }
+      else{
+        hidepatchsurface=1;
+      }
+      if(hidepatchsurface_old!=hidepatchsurface)updatefacelists=1;
     }
     break;
   case CHOPVALMIN:
@@ -1431,6 +1475,19 @@ void Bound_CB(int var){
     }
 
     list_patch_index_old = list_patch_index;
+    {
+      int hidepatchsurface_old;
+
+      
+      hidepatchsurface_old=hidepatchsurface;
+      if(setpatchchopmin==1||setpatchchopmax==1){
+        hidepatchsurface=0;
+      }
+      else{
+        hidepatchsurface=1;
+      }
+      if(hidepatchsurface_old!=hidepatchsurface)updatefacelists=1;
+    }
     break;
   case SETVALMIN:
     switch (setpatchmin){
@@ -1804,6 +1861,11 @@ extern "C" void Slice_CB(int var){
   slice *sd;
 
   updatemenu=1;
+  if(var==DATA_transparent){
+    updatechopcolors();
+    return;
+  }
+
   if(var==COLORBAR_EXTREME2){
     update_extreme();
     return;
