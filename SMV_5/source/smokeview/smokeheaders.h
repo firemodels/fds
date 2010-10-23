@@ -30,6 +30,7 @@ EXTERNCPP void push_vslice_loadstack(int sliceindex);
 EXTERNCPP void remove_vslice_loadstack(int sliceindex);
 EXTERNCPP int filecat(char *file_in1, char *file_in2, char *file_out);
 EXTERNCPP void update_colorbar_smooth(void);
+EXTERNCPP void update_transparency(void);
 EXTERNCPP void update_tbounds(void);
 EXTERNCPP void updateGluiTimeBounds(float time_min, float time_max);
 EXTERNCPP void settimeval(float timeval);

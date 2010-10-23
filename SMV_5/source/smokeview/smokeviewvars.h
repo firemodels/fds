@@ -510,9 +510,8 @@ SVEXTERN int numColorbars;
 SVEXTERN int setbw,colorbarflip,showcolorbarlines;
 SVEXTERN int setbwSAVE;
 SVEXTERN int background_flip;
-SVEXTERN float transparentlevel;
-SVEXTERN int SVDECL(transparentflag,1);
-SVEXTERN int transparentflagSAVE;
+SVEXTERN float SVDECL(transparentlevel,0.8);
+SVEXTERN int SVDECL(use_transparency_data,1);
 SVEXTERN int antialiasflag;
 SVEXTERN int nrgb_full;
 SVEXTERN int nrgb_cad;
@@ -976,9 +975,10 @@ SVEXTERN int nface_outlines, nface_textures, nface_transparent;
 SVEXTERN int nface_normals_single, nface_normals_double, nface_transparent_double, nvent_transparent;
 SVEXTERN int show_transparent_vents;
 SVEXTERN int show_bothsides_int, show_bothsides_ext;
-SVEXTERN float transparency_level;
-SVEXTERN int transparency_override;
+SVEXTERN float SVDECL(transparency_geom,0.2);
+SVEXTERN int SVDECL(use_transparency_geom,0);
 SVEXTERN facedata **face_transparent;
+SVEXTERN int SVDECL(hidepatchsurface,0);
 #ifdef INMAIN
   SVEXTERN float rgb_baseBASE[MAXRGB][4]=
 {

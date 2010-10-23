@@ -8078,8 +8078,7 @@ int readini2(char *inifile, int localfile){
       }
     if(match(buffer,"TRANSPARENT",11)==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&transparentflag);
-//      transparentflagSAVE=transparentflag;
+      sscanf(buffer,"%i %f",&use_transparency_data,&transparentlevel);
       continue;
       }
     if(match(buffer,"VENTCOLOR",9)==1){
@@ -9615,7 +9614,7 @@ void writeini(int flag){
     }
   }
   fprintf(fileout,"TRANSPARENT\n");
-  fprintf(fileout," %i\n",transparentflag);
+  fprintf(fileout," %i %f\n",use_transparency_data,transparentlevel);
   fprintf(fileout,"SURFINC\n");
   fprintf(fileout," %i\n",surfincrement);
   fprintf(fileout,"P3DSURFACETYPE\n");

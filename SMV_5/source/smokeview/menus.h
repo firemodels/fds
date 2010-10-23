@@ -421,9 +421,10 @@ void ColorBarMenu(int value){
      set_labels_controls();
      break;
    case -13:
-     transparentflag=1-transparentflag;
+     use_transparency_data=1-use_transparency_data;
      updatecolors(-1);
      set_labels_controls();
+     update_transparency();
      break;
    case -14:
      colorbarflip=1-colorbarflip;updatecolors(-1);
@@ -5632,7 +5633,7 @@ updatemenu=0;
   else{
     glutAddMenuEntry("  Color/*BW",-12);
   }
-  if(transparentflag==1){
+  if(use_transparency_data==1){
     glutAddMenuEntry("  *Transparent (data)",-13);
   }
   else{

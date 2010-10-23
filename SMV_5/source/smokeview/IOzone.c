@@ -315,7 +315,7 @@ void drawroomgeom(void){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
 
 /* draw the frame */
 
@@ -423,7 +423,7 @@ void drawroomgeom(void){
     }
   }
 
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 
@@ -614,7 +614,7 @@ void drawroomdata(void){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
 
   izonetubase = izonetu + izone*nrooms;
   hazardcolorbase = hazardcolor + izone*nrooms;
@@ -681,7 +681,7 @@ void drawroomdata(void){
       }
     }
   }
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 
