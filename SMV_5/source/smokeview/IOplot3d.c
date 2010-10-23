@@ -515,13 +515,13 @@ void drawplot3d_texture(mesh *meshi){
     drawstaticiso(currentsurfptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
     if(surfincrement!=0)drawstaticiso(currentsurf2ptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
     if(visGrid!=0){
-      if(transparentflag==1)transparentoff();
+      if(use_transparency_data==1)transparentoff();
       if(cullfaces==1)glEnable(GL_CULL_FACE);
       return;
     }
   }
 
-  if(transparentflag==1){
+  if(use_transparency_data==1){
     transparenton();
   }
   if(visVector==0&&p3cont2d==SHADED_CONTOURS){
@@ -855,7 +855,7 @@ void drawplot3d_texture(mesh *meshi){
   if(visVector==0&&p3cont2d==SHADED_CONTOURS){
     glDisable(GL_TEXTURE_1D);
   }
-  if(transparentflag==1){
+  if(use_transparency_data==1){
     transparentoff();
   }
   if(cullfaces==1)glEnable(GL_CULL_FACE);
@@ -935,13 +935,13 @@ void drawplot3d(mesh *meshi){
     drawstaticiso(currentsurfptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
     if(surfincrement!=0)drawstaticiso(currentsurf2ptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
     if(visGrid!=0){
-      if(transparentflag==1)transparentoff();
+      if(use_transparency_data==1)transparentoff();
       if(cullfaces==1)glEnable(GL_CULL_FACE);
       return;
     }
   }
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
 
   /* +++++++++++++++++++++++++++   draw yz contours +++++++++++++++++++++++++++++++++++++ */
 
@@ -1262,7 +1262,7 @@ void drawplot3d(mesh *meshi){
       glEnd();
     }
   }
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }

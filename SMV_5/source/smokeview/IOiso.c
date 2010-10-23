@@ -1822,7 +1822,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     if(
       trans_flag==DRAW_TRANSPARENT&&
       (
-      (data_type==0&&transparentflag==1)||
+      (data_type==0&&use_transparency_data==1)||
       (data_type==1&&drawing_blockage_transparent==1)
       )
       ){

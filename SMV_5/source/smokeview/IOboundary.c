@@ -1268,8 +1268,20 @@ void drawpatch_texture(const mesh *meshi){
   patch *patchi;
   mesh *meshblock;
   float clear_color[4]={1.0,1.0,1.0,1.0};
+  float dboundx,dboundy,dboundz;
+  float *xplt, *yplt, *zplt;
 
   if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)return;
+
+  if(hidepatchsurface==0){
+    xplt=meshi->xplt;
+    yplt=meshi->yplt;
+    zplt=meshi->zplt;
+
+    dboundx = (xplt[1]-xplt[0])/10.0;
+    dboundy = (yplt[1]-yplt[0])/10.0;
+    dboundz = (zplt[1]-zplt[0])/10.0;
+  }
 
   patchtimes=meshi->patchtimes;
   visPatches=meshi->visPatches;
@@ -1299,7 +1311,7 @@ void drawpatch_texture(const mesh *meshi){
 
   /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
 
-  if((transparentflag==1&&showcolorbarlines==1)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
+  if((use_transparency_data==1&&showcolorbarlines==1)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
@@ -1370,7 +1382,9 @@ void drawpatch_texture(const mesh *meshi){
   /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
 
   nn=0;
-  glBegin(GL_TRIANGLES);
+  if(hidepatchsurface==1){
+    glBegin(GL_TRIANGLES);
+  }
   for(n=0;n<meshi->npatches;n++){
     iblock = meshi->blockonpatch[n];
     meshblock=meshi->meshonpatch[n];
@@ -1387,6 +1401,21 @@ void drawpatch_texture(const mesh *meshi){
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
       ipqqcopy = ipqqi + blockstart[n];
+      if(hidepatchsurface==0){
+        glPushMatrix();
+        switch (meshi->patchdir[n]){
+          case 1:
+            glTranslatef(dboundx,0.0,0.0);
+            break;
+          case 2:
+            glTranslatef(0.0,-dboundy,0.0);
+            break;
+          case 3:
+            glTranslatef(0.00,0.0,dboundz);
+            break;
+        }
+        glBegin(GL_TRIANGLES);
+      }
       for(irow=0;irow<nrow-1;irow++){
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
         ipq1 = ipqqcopy + irow*ncol;
@@ -1423,6 +1452,10 @@ void drawpatch_texture(const mesh *meshi){
           xyzp1+=3;
           xyzp2+=3;
         }
+      }
+      if(hidepatchsurface==0){
+        glEnd();
+        glPopMatrix();
       }
     }
     nn += patchrow[n]*patchcol[n];
@@ -1447,6 +1480,21 @@ void drawpatch_texture(const mesh *meshi){
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
       ipqqcopy = ipqqi + blockstart[n];
+      if(hidepatchsurface==0){
+        glPushMatrix();
+        switch (meshi->patchdir[n]){
+          case -1:
+            glTranslatef(-dboundx,0.0,0.0);
+            break;
+          case -2:
+            glTranslatef(0.0,dboundy,0.0);
+            break;
+          case -3:
+            glTranslatef(0.0,0.0,-dboundz);
+            break;
+        }
+        glBegin(GL_TRIANGLES);
+      }
       for(irow=0;irow<nrow-1;irow++){
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
         ip1 = patchblankcopy + irow*ncol;
@@ -1483,12 +1531,18 @@ void drawpatch_texture(const mesh *meshi){
           xyzp2+=3;
         }
       }
+      if(hidepatchsurface==0){
+        glEnd();
+        glPopMatrix();
+      }
     }
     nn += patchrow[n]*patchcol[n];
   }
-  glEnd();
+  if(hidepatchsurface==1){
+    glEnd();
+  }
   glDisable(GL_TEXTURE_1D);
-  if((transparentflag==1&&showcolorbarlines==1)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
+  if((use_transparency_data==1&&showcolorbarlines==1)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
 }
 
 /* ------------------ drawpatch_texture_threshold ------------------------ */
@@ -2067,7 +2121,7 @@ void drawpatch(const mesh *meshi){
 
   /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
 
-  if((transparentflag==1&&showcolorbarlines==1)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
+  if((use_transparency_data==1&&showcolorbarlines==1)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
   nn =0;
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
@@ -2339,7 +2393,7 @@ void drawpatch(const mesh *meshi){
     nn += patchrow[n]*patchcol[n];
   }
   glEnd();
-  if((transparentflag==1&&showcolorbarlines==1)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
+  if((use_transparency_data==1&&showcolorbarlines==1)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
 }
 
 /* ------------------ drawpatch_cellcenter ------------------------ */

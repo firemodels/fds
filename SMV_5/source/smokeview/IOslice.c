@@ -2048,7 +2048,7 @@ void drawslice(const slice *sd){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
   if(sd->idir==1){
    constval = xplt[sd->is1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
@@ -2209,7 +2209,7 @@ void drawslice(const slice *sd){
    }
    glEnd();
   }
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -2251,7 +2251,7 @@ void drawslice_cellcenter(const slice *sd){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
   if(sd->idir==1){
    int ii1, ii2;
 
@@ -2352,7 +2352,7 @@ void drawslice_cellcenter(const slice *sd){
    }
    glEnd();
   }
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -2386,7 +2386,7 @@ void drawslice_cellcenter_interp(const slice *sd){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
@@ -2546,7 +2546,7 @@ void drawslice_cellcenter_interp(const slice *sd){
    glEnd();
   }
   glDisable(GL_TEXTURE_1D);
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -2584,7 +2584,7 @@ void drawslice_texture(const slice *sd){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
@@ -2735,7 +2735,7 @@ void drawslice_texture(const slice *sd){
    glEnd();
   }
   glDisable(GL_TEXTURE_1D);
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -2768,7 +2768,7 @@ void drawslice_terrain(const slice *sd){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
@@ -2828,7 +2828,7 @@ void drawslice_terrain(const slice *sd){
    glEnd();
   }
   glDisable(GL_TEXTURE_1D);
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -2865,7 +2865,7 @@ void drawvolslice_texture(const slice *sd){
   nxy = nx*ny;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
@@ -3048,7 +3048,7 @@ void drawvolslice_texture(const slice *sd){
    glEnd();
   }
   glDisable(GL_TEXTURE_1D);
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 
@@ -3141,7 +3141,7 @@ void drawvolslice_terrain(const slice *sd){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
@@ -3346,7 +3346,7 @@ void drawvolslice_terrain(const slice *sd){
    glEnd();
   }
   glDisable(GL_TEXTURE_1D);
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -3388,7 +3388,7 @@ void drawvolslice_cellcenter(const slice *sd){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
   if(meshi->visx==1){
    int iislice,iislice2;
 
@@ -3520,7 +3520,7 @@ void drawvolslice_cellcenter(const slice *sd){
    }
    glEnd();
   }
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -3557,7 +3557,7 @@ void drawvolslice_cellcenter_interp(const slice *sd){
   nxy = nx*ny;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
@@ -3752,7 +3752,7 @@ void drawvolslice_cellcenter_interp(const slice *sd){
    glEnd();
   }
   glDisable(GL_TEXTURE_1D);
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 
@@ -3793,7 +3793,7 @@ void drawvolslice(const slice *sd){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(transparentflag==1)transparenton();
+  if(use_transparency_data==1)transparenton();
   if(meshi->visx==1){
    int iislice;
 
@@ -3951,7 +3951,7 @@ void drawvolslice(const slice *sd){
    }
    glEnd();
   }
-  if(transparentflag==1)transparentoff();
+  if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
