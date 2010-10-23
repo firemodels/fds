@@ -16,7 +16,7 @@
 
 #include "histogram.h"
 #include "threader.h"
-#include "endian.h"
+#include "smv_endian.h"
 
 #ifdef pp_PART
 #define rgb_white 12
