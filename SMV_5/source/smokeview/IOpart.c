@@ -18,7 +18,7 @@
 #include <math.h>
 #include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "endian.h"
+#include "smv_endian.h"
 
 // svn revision character string
 char IOpart_revision[]="$Revision$";

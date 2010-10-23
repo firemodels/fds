@@ -20,7 +20,7 @@
 #include "MALLOC.h"
 #include <pthread.h>
 #include "csphere.h"
-#include "endian.h"
+#include "smv_endian.h"
 
 #include "smokeviewvars.h"
 

@@ -8,7 +8,7 @@
 #include <string.h>
 #include "egz_stdio.h"
 #include "MALLOC.h"
-#include "endian.h"
+#include "smv_endian.h"
 
 // svn revision character string
 char egz_stdio_revision[]="$Revision$";
