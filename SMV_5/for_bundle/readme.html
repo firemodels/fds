@@ -21,10 +21,14 @@
 
 <ul>
 
-<li>test (build 6976) - October 19, 2010
+<li>test (build 7002) - October 23, 2010
 <p>Smokeview change log
 
 <ol>
+<li>enhancement: add option to chop or truncate boundary file data (same capability as exists now with slice files) - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1233&can=1&sort=-id">Issue 1233</a>)
+<li>enhancement: add cell center display for 3D slice files - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1231&can=1&sort=-id">Issue 1231</a>)
 <li>enhancement: add GPU support, multi-threading and memory status display to the 64 bit windows version of Smokeview
 <li>enhancement: add Load All, Load x, Load y and Load z options to the slice file load menu -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1218&can=1&sort=-id">Issue 1218</a>)
@@ -50,6 +54,7 @@ option may be invoked from the menus or using the "L" key -
 <li>fix: make rendering from menu consistent with rendering from keyboard ('r', 'R') and fix problems with 2x rendering from the menu - 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1204&can=1&sort=-id">Issue 1204</a>)
 
+<li>internal: change file name endian.c and endian.h to smv_endian.c and smv_endian.h to avoid name collisions on Linux and OSX systems
 <li>internal: update data loading routines (which use Fortran) to use get_fortran_unit routine .  A necessary step step in making smokeview data loading thread safe.
 <li>internal: reorganize code files moving those that are used in more than one program (smokeview, smokezip or smokediff) to a shared directory for use by all
 <li>internal: use pp_MEMDEBUG processing dirctive for memory debugging (so it can be turned off for really big cases and still have some debugging with _DEBUG)
