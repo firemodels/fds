@@ -16,7 +16,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "contourdefs.h"
-#include "endian.h"
+#include "smv_endian.h"
 
 // svn revision character string
 char IOslice_revision[]="$Revision$";
