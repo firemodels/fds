@@ -429,21 +429,25 @@ The images for this test were created automatically by running the smokeview scr
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{rccl}
+\begin{tabular}{rcccl}
  0.0~s
- & \includegraphics[height=\figheightD]{SCRIPT_FIGURES/plume5c_bound_00}
- & \includegraphics[height=\figheightD]{SCRIPT_FIGURES/plume5c_bound_cell_00}\\
+ & \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_00}
+ & \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_chop_00}
+ & \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_cell_00}\\
  10.0~s&
- \includegraphics[height=\figheightD]{SCRIPT_FIGURES/plume5c_bound_10}&
- \includegraphics[height=\figheightD]{SCRIPT_FIGURES/plume5c_bound_cell_10}\\
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_10}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_chop_10}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_cell_10}\\
  30.0~s&
- \includegraphics[height=\figheightD]{SCRIPT_FIGURES/plume5c_bound_30}&
- \includegraphics[height=\figheightD]{SCRIPT_FIGURES/plume5c_bound_cell_30}\\
-&cell averaged  data&cell centered data\\
- &&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_30}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_chop_30}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_bound_cell_30}\\
+&cell averaged  data&chopped data&cell centered data\\
+ &&&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
   \end{tabular}
 \end{center}
- \caption[Boundary file test.]{Boundary file test. The upper obstacle is initialized to 600.0~\degC\ and should be red for the $t=0.0$~s images.}
+ \caption[Boundary file test.]{Boundary file test. The upper obstacle is initialized to 600.0~\degC\ and should be red for the $t=0.0$~s images.
+  For the chopped contours, the color near the chop boundary should match the color near 140.0~\degC\ in the colorbar.}
 \label{figboundtest}%
 \end{figure}
 
