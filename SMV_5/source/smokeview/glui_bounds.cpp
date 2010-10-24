@@ -347,7 +347,7 @@ extern "C" void glui_bounds_setup(int main_window){
         glui_bounds->add_spinner_to_panel(panel_bound,"temp threshold (C)",GLUI_SPINNER_FLOAT,&temp_threshold);
         Bound_CB(SHOWCHAR);
       }
-  }
+    }
 
     boundmenu(&rollout_BOUNDARY,NULL,panel_bound,"Reload Boundary File(s)",
       &con_patch_min,&con_patch_max,&con_patch_setmin,&con_patch_setmax,
@@ -359,7 +359,8 @@ extern "C" void glui_bounds_setup(int main_window){
       DONT_UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
       Bound_CB);
     updatepatchlistindex2(patchinfo[0].label.shortlabel);
-   }
+    update_hidepatchsurface();
+  }
 
 
   /*  Iso File Load Bounds   */
@@ -1370,7 +1371,6 @@ void Bound_CB(int var){
   case SETCHOPMINVAL:
     updatechopcolors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
-    printf("setpatchchopmin=%i\n",setpatchchopmin);
     switch (setpatchchopmin){
       case 0:
       con_patch_chopmin->disable();
@@ -1379,19 +1379,7 @@ void Bound_CB(int var){
       con_patch_chopmin->enable();
       break;
     }
-    {
-      int hidepatchsurface_old;
-
-      
-      hidepatchsurface_old=hidepatchsurface;
-      if(setpatchchopmin==1||setpatchchopmax==1){
-        hidepatchsurface=0;
-      }
-      else{
-        hidepatchsurface=1;
-      }
-      if(hidepatchsurface_old!=hidepatchsurface)updatefacelists=1;
-    }
+    update_hidepatchsurface();
   case SETCHOPMAXVAL:
     updatechopcolors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
@@ -1403,19 +1391,7 @@ void Bound_CB(int var){
       con_patch_chopmax->enable();
       break;
     }
-    {
-      int hidepatchsurface_old;
-
-      
-      hidepatchsurface_old=hidepatchsurface;
-      if(setpatchchopmin==1||setpatchchopmax==1){
-        hidepatchsurface=0;
-      }
-      else{
-        hidepatchsurface=1;
-      }
-      if(hidepatchsurface_old!=hidepatchsurface)updatefacelists=1;
-    }
+    update_hidepatchsurface();
     break;
   case CHOPVALMIN:
     ASSERT(con_patch_min!=NULL);
@@ -1475,19 +1451,7 @@ void Bound_CB(int var){
     }
 
     list_patch_index_old = list_patch_index;
-    {
-      int hidepatchsurface_old;
-
-      
-      hidepatchsurface_old=hidepatchsurface;
-      if(setpatchchopmin==1||setpatchchopmax==1){
-        hidepatchsurface=0;
-      }
-      else{
-        hidepatchsurface=1;
-      }
-      if(hidepatchsurface_old!=hidepatchsurface)updatefacelists=1;
-    }
+    update_hidepatchsurface();
     break;
   case SETVALMIN:
     switch (setpatchmin){

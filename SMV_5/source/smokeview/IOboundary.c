@@ -1238,6 +1238,7 @@ void global2localpatchbounds(const char *key){
       patchchopmax=patchinfo[i].chopmax;
       setpatchchopmin=patchinfo[i].setchopmin;
       setpatchchopmax=patchinfo[i].setchopmax;
+      update_hidepatchsurface();
       
       local2globalpatchbounds(key);
       return;
@@ -3547,4 +3548,20 @@ void uncompress_patchdataframe(mesh *meshi,int local_iframe){
 
 }
 #endif
+
+/* ------------------ update_hidepatchsurface ------------------------ */
+
+void update_hidepatchsurface(void){
+  int hidepatchsurface_old;
+      
+  hidepatchsurface_old=hidepatchsurface;
+  if(setpatchchopmin==1||setpatchchopmax==1){
+    hidepatchsurface=0;
+  }
+  else{
+    hidepatchsurface=1;
+  }
+  if(hidepatchsurface_old!=hidepatchsurface)updatefacelists=1;
+}
+
 
