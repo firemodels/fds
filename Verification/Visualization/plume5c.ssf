@@ -283,7 +283,7 @@ RENDERONCE
 
 UNLOADALL
 LOADINIFILE
- plume5c_bound.ini
+ plume5c_bound_cellcenter.ini
 LOADFILE
  plume5c_04.bf
 SETTIMEVAL
@@ -298,6 +298,26 @@ SETTIMEVAL
  30.05
 RENDERONCE
  plume5c_bound_cell_30
+
+// render chopped boundary files
+
+UNLOADALL
+LOADINIFILE
+ plume5c_bound_chop.ini
+LOADFILE
+ plume5c_03.bf
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_bound_chop_00
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plume5c_bound_chop_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_bound_chop_30
 
 // render 3D smoke files
 
