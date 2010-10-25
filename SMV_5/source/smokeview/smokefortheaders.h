@@ -15,6 +15,7 @@
 #define STDCALL extern void
 #endif
 #ifndef pp_noappend
+#define FORTopenboundary openboundary_
 #define FORTfcreate_part5sizefile fcreate_part5sizefile_
 #define FORTgetzonesize getzonesize_
 #define FORTgetzonedata getzonedata_
@@ -35,7 +36,10 @@
 #define FORTcolor2rgb color2rgb_
 #define FORTget_file_unit get_file_unit_
 #define FORTclosefortranfile closefortranfile_
+#define FORTgetboundaryheader1 getboundaryheader1_
+#define FORTgetboundaryheader2 getboundaryheader2_
 #else
+#define FORTopenboundary openboundary
 #define FORTfcreate_part5sizefile fcreate_part5sizefile
 #define FORTgetzonesize getzonesize
 #define FORTgetzonedata getzonedata
@@ -55,8 +59,16 @@
 #define FORTcolor2rgb color2rgb
 #define FORTget_file_unit get_file_unit
 #define FORTclosefortranfile closefortranfile 
+#define FORTgetboundaryheader1 getboundaryheader1
+#define FORTgetboundaryheader2 getboundaryheader2
 #endif
 
+STDCALL FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
+                               int *endian, int *npatch, int *error, FILE_SIZE lenfile);
+STDCALL FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
+                               int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
+STDCALL FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
+                         int *endian, int *version, int *error, FILE_SIZE len);
 STDCALL FORTclosefortranfile(int *lunit);
 STDCALL FORTget_file_unit(int *funit, int *first_unit);
 STDCALL FORTcolor2rgb(int *rgb, char *color, FILE_SIZE colorsize);

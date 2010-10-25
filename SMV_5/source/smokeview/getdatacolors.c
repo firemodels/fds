@@ -216,7 +216,7 @@ void remap_patchdata(patch *patchi,float valmin, float valmax, int *extreme_min,
 void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it, 
               int settmin, float *ttmin, int settmax, float *ttmax,
               float *tmin_global, float *tmax_global,
-              int ndatalevel, int nlevel,
+              int nlevel,
               char **labels, char *scale, float *tvals256,
               int *extreme_min, int *extreme_max
               ){
@@ -224,7 +224,7 @@ void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it,
   float *tcopy, factor, tval, range;
   int expmin, expmax;
   int itt;
-  float local_tmin, local_tmax, tmin2, tmax2;
+  float new_tmin, new_tmax, tmin2, tmax2;
   histogramdata full_histogram;
   int i,j;
   patch *patchj;
@@ -233,7 +233,7 @@ void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it,
 
   for(j=0;j<npatch_files;j++){
     patchj=patchinfo+j;
-    if(patchj->loaded==0||patchj->type!=ipatchtype)continue;
+    if(patchj->type!=patchi->type||patchj->cellcenter!=patchi->cellcenter)continue;
     merge_histogram(&full_histogram,patchj->histogram);
   }
 
@@ -260,75 +260,69 @@ void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it,
   if(settmax!=SET_MAX){
     *ttmax=tmax2;
   }
-  local_tmin = *ttmin;
-  local_tmax = *ttmax;
+  new_tmin = *ttmin;
+  new_tmax = *ttmax;
 
-  patchi->local_valmin=local_tmin;
-  patchi->local_valmax=local_tmax;
+  patchi->local_valmin=new_tmin;
+  patchi->local_valmax=new_tmax;
 
   CheckMemory;
-  for(j=0;j<npatch_files;j++){
-    patchj=patchinfo+j;
-    if(patchj->loaded==0||patchj->type!=ipatchtype||patchi==patchj)continue;
-    remap_patchdata(patchj,local_tmin,local_tmax,extreme_min,extreme_max);
-  }
-  CheckMemory;
-  range = local_tmax - local_tmin;
+  range = new_tmax - new_tmin;
   factor = 0.0f;
-  if(range!=0.0f)factor = (ndatalevel-2)/range;
+  if(range!=0.0f)factor = 253/range;
   for(n=0;n<nt;n++){
     float val;
 
     val = *t;
 
-    if(val<local_tmin){
+    if(val<new_tmin){
       itt=0;
       *extreme_min=1;
     }
-    else if(val>local_tmax){
-      itt=ndatalevel-1;
+    else if(val>new_tmax){
+      itt=255;
       *extreme_max=1;
     }
     else{
-      itt=1+(int)(factor*(val-local_tmin));
+      itt=1+(int)(factor*(val-new_tmin));
     }
     if(itt<0)itt=0;
-    if(itt>ndatalevel-1)itt=ndatalevel-1;
+    if(itt>255)itt=255;
     *it=itt;
     it++;
     t++;
   }
   CheckMemory;
   STRCPY(scale,"");
-  frexp10(local_tmax, &expmax);
-  frexp10(local_tmin, &expmin);
+  frexp10(new_tmax, &expmax);
+  frexp10(new_tmin, &expmin);
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<-2||expmin>2)){
-    local_tmin *= pow((double)10.0,(double)-expmin);
-    local_tmax *= pow((double)10.0,(double)-expmin);
+    new_tmin *= pow((double)10.0,(double)-expmin);
+    new_tmax *= pow((double)10.0,(double)-expmin);
     sprintf(scale,"*10^%i",expmin);
   }
   if(expmin==0&&(expmax<EXPMIN||expmax>EXPMAX)){
-    local_tmin *= pow((double)10.0,(double)-expmax);
-    local_tmax *= pow((double)10.0,(double)-expmax);
+    new_tmin *= pow((double)10.0,(double)-expmax);
+    new_tmax *= pow((double)10.0,(double)-expmax);
     sprintf(scale,"*10^%i",expmax);
   }
   if(expmax==0&&(expmin<EXPMIN||expmin>EXPMAX)){
-    local_tmin *= pow((double)10.0,(double)-expmin);
-    local_tmax *= pow((double)10.0,(double)-expmin);
+    new_tmin *= pow((double)10.0,(double)-expmin);
+    new_tmax *= pow((double)10.0,(double)-expmin);
     sprintf(scale,"*10^%i",expmin);
   }
-  range = local_tmax - local_tmin;
+  range = new_tmax - new_tmin;
   factor = range/(nlevel-2);
   for (n=1;n<nlevel-2;n++){
-    tval = local_tmin + (n-1)*factor;
+    tval = new_tmin + (n-1)*factor;
     num2string(&labels[n][0],tval,range);
   }
-  tval = local_tmin + (nlevel-3)*factor;
+  tval = new_tmin + (nlevel-3)*factor;
   for(n=0;n<256;n++){
-    tvals256[n] = (local_tmin*(255-n) + n*local_tmax)/255.;
+    tvals256[n] = (new_tmin*(255-n) + n*new_tmax)/255.;
   }
   num2string(&labels[nlevel-2][0],tval,range);
-  tval = local_tmax;
+  tval = new_tmax;
   num2string(&labels[nlevel-1][0],tval,range);
 }
 

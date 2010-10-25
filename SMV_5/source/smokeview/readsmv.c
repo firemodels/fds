@@ -104,6 +104,7 @@ int readsmv(char *file, char *file2){
 
 /* read the .smv file */
 
+  int unit_start=20;
   device *devicecopy;
   int do_pass4=0;
   outline *outlinei;
@@ -4000,6 +4001,9 @@ typedef struct {
       patchi->autoload=0;
       patchi->loaded=0;
       patchi->display=0;
+      patchi->inuse=0;
+      patchi->inuse_getbounds=0;
+      patchi->unit_start=unit_start++;
       meshinfo[blocknumber].patchfilenum=-1;
       if(STAT(patchi->file,&statbuffer)==0){
         if(patchi->cellcenter==1){
@@ -4016,6 +4020,7 @@ typedef struct {
         if(readlabels(&patchi->label,stream)==2)return 2;
         npatch_files--;
       }
+      init_histogram(patchi->histogram);
       continue;
     }
 

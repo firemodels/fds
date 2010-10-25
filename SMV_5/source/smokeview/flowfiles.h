@@ -996,9 +996,12 @@ typedef struct {
   int seq_id, autoload;
   char *file,*size_file;
   char *comp_file, *reg_file;
+  //int *patchsize;
   int version;
   int cellcenter;
   int type;
+  int inuse,inuse_getbounds;
+  int unit_start;
   int firstshort;
   int compression_type;
   int num_memblocks;

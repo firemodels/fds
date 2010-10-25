@@ -22,6 +22,7 @@ int SUB_portfrustum(int quad,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
 
+EXTERNCPP void update_patch_hist(patch *patchi);
 EXTERNCPP void update_hidepatchsurface(void);
 EXTERNCPP int last_slice_loadstack(void);
 EXTERNCPP void push_slice_loadstack(int sliceindex);
@@ -727,7 +728,7 @@ EXTERNCPP void getBoundaryColors2(float *t, int nt, unsigned char *it,
 EXTERNCPP void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it, 
               int settmin, float *tmin, int settmax, float *tmax, 
               float *tmin_global, float *tmax_global,
-              int ndatalevel, int nlevel,
+              int nlevel,
               char **labels, char *scale, float *tvals256,
               int *extreme_min, int *extreme_max);
 EXTERNCPP void getBoundaryLabels(

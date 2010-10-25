@@ -42,6 +42,12 @@ float get_histogram_value(histogramdata *histgram, float cdf){
   return histgram->valmax;
 }
 
+/* ------------------ complete_histogram ------------------------ */
+
+void complete_histogram(histogramdata *histgram){
+  histgram->complete=1;
+}
+
 /* ------------------ init_histogram ------------------------ */
 
 void init_histogram(histogramdata *histgram){
@@ -54,6 +60,7 @@ void init_histogram(histogramdata *histgram){
   histgram->ntotal=0;
   histgram->valmin=(float)pow(10.0,20.0);
   histgram->valmax=-histgram->valmin;
+  histgram->complete=0;
 }
 
 /* ------------------ copy_data2histogram ------------------------ */
