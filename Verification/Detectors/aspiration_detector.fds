@@ -1,23 +1,24 @@
 Burner in Smokeview should be purple.
-At end of simulation take the soot density for sp1 and interpolate to get soot density at end time - 0.2 s.  
-Do same for sp2 and sp3 using their delay.  
+At end of simulation average the soot density for sp1 at 150 s, sp2 at 100 s and sp3 at 50 s.
 Compute flowrate weighted average and convert to kg/m^2.  
-Using default value of extinction coefficient, percent obscuration of asp1 should be 17.97 % at T_END.
+Using default value of extinction coefficient, 45.6 % at T_END.
 
 &HEAD CHID='aspiration_detector', TITLE='Test of aspiration detector, SVN $Revision$' /
 
 &MESH IJK = 10,10,10, XB=-1.,1.,-1.,1.,-1.,1. /
-
+&MISC RADIATION=.FALSE./
 &TIME T_END=200. /
 &DUMP NFRAMES=200 DT_PL3D = 10000. /
 
+&DUMP MASS_FILE=.TRUE./
+
 &REAC SOOT_YIELD=0.001/
 
-&SURF ID='FLOWIN',MASS_FLUX(2)=1.0,COLOR='PURPLE'/
-&SURF ID='FLOWOUT',MASS_FLUX_TOTAL=-1.0,COLOR='GREEN'/
+&SURF ID='FLOWIN',MASS_FLUX(0)=0.940468,MASS_FLUX(2)=0.059532,COLOR='PURPLE'/
+&SURF ID='FLOWOUT',MASS_FLUX_TOTAL=1.,COLOR='GREEN'/
 
-&VENT XB=-0.5,0.5,-0.5,0.5,-1.,-1.,SURF_ID='FLOWIN'/
-&VENT XB=-0.5,0.5,-0.5,0.5,1.,1.,SURF_ID='FLOWOUT'/
+&VENT XB=-0.5, 0.5,-0.5, 0.5,-1.,-1.,SURF_ID='FLOWIN'/
+&VENT XB=-0.5, 0.5,-0.5, 0.5,1.,1.,SURF_ID='FLOWOUT'/
 
 &DEVC XYZ=0.0,0.5,0.5, QUANTITY='DENSITY', SPEC_ID='soot', FLOWRATE=0.3, DELAY=50,ID='sp1', DEVC_ID='asp1' /
 &DEVC XYZ=0.0,0.5,0.5, QUANTITY='DENSITY', SPEC_ID='soot', FLOWRATE=0.3, DELAY=100,ID='sp2',DEVC_ID='asp1' /
@@ -25,3 +26,5 @@ Using default value of extinction coefficient, percent obscuration of asp1 shoul
 &DEVC XYZ=0.0,0.0,0.0, QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0./
 
 &TAIL /
+
+
