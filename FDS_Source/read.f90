@@ -4032,8 +4032,8 @@ PROC_MATL_LOOP: DO N=1,N_MATL
 
    ! Adjust burn rate if heat of combustion is different from the gas phase reaction value
 
-   IF (N_REACTIONS>0 .AND. ML%N_REACTIONS>0) THEN
-      DO J=1,ML%N_REACTIONS
+   IF (N_REACTIONS>0) THEN
+      DO J=1,MAX(1,ML%N_REACTIONS)
          IF (CO_PRODUCTION) THEN
             RN => REACTION(2)         
          ELSE
