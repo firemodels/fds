@@ -538,6 +538,7 @@ DO K=1,KBAR
          DTXZDZ= RDZ(K) *(TXZP-TXZM)
          VTRM  = RRHO*(DTXXDX + DTXYDY + DTXZDZ)
          FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) + GX(I)*AH - VTRM - RRHO*FVEC(1) - DU_FORCING
+!if (nm==1 .and. i==4 .and. j==4 .and. k==1) write(0,*) PREDICTOR,IEYM,TAU_E(IEYM, 1),FVX(I,J,K)
       ENDDO 
    ENDDO   
 ENDDO
@@ -1654,6 +1655,14 @@ EDGE_LOOP: DO IE=1,N_EDGES
                      VEL_GHOST = WGT*VEL_OTHER(IIO(ICD),JJO(ICD),KKO(ICD)) + OMW*VEL_OTHER(IIO(ICD)-1,JJO(ICD),KKO(ICD))
                   ENDIF
             END SELECT
+
+            IF (ICD==1) THEN
+               IF (IOR<0) UUP(2) = VEL_GHOST
+               IF (IOR>0) UUM(2) = VEL_GHOST
+            ELSE ! ICD=2
+               IF (IOR<0) UUP(1) = VEL_GHOST
+               IF (IOR>0) UUM(1) = VEL_GHOST
+            ENDIF
             
          ENDIF INTERPOLATION_IF
 
@@ -1751,6 +1760,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ENDIF
          OME_E(IE,ICD_SGN) =    DUIDXJ_USE(1) -    DUIDXJ_USE(2)
          TAU_E(IE,ICD_SGN) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)    
+!if (nm==1 .and. ii==4 .and. jj==4 .and. kk==0 .and. iec==2) write(0,*) icd_sgn,IE,MU_DUIDXJ_USE(1),MU_DUIDXJ_USE(2)
       ENDDO ORIENTATION_LOOP_2
    ENDDO SIGN_LOOP_2
 
