@@ -2263,17 +2263,20 @@ void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor){
 
 /* ----------------------- get_SMVOBJECT_type ----------------------------- */
 
-sv_object *get_SVOBJECT_type(char *label,sv_object *default_object){
+sv_object *get_SVOBJECT_type(char *olabel,sv_object *default_object){
   int i;
   sv_object *objecti;
+  char label[256],*labelptr;
 
-  if(label==NULL)return default_object;
+  if(olabel==NULL)return default_object;
+  strcpy(label,olabel);
+  labelptr=label;
   trim(label);
-  label = trim_front(label);
-  if(strlen(label)==0)return default_object;
+  labelptr = trim_front(label);
+  if(strlen(labelptr)==0)return default_object;
   for(i=0;i<nobject_defs;i++){
     objecti = object_defs[i];
-    if(STRCMP(label,objecti->label)==0){
+    if(STRCMP(labelptr,objecti->label)==0){
       objecti->used=1;
       return objecti;
     }
