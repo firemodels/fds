@@ -2,6 +2,7 @@
 // $Revision$
 // $Author$
 
+EXTERNCPP int is_file_newer(char *file1, char *file2);
 EXTERNCPP char *getdir(char *progname);
 EXTERNCPP char *lastname(char *argi);
 EXTERNCPP void trim(char *line);

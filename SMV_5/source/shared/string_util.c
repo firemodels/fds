@@ -15,7 +15,21 @@
 // svn revision character string
 char string_util_revision[]="$Revision$";
 
-// extern char dirseparator[];
+/* ------------------ is_file_newer ------------------------ */
+
+int is_file_newer(char *file1, char *file2){
+  STRUCTSTAT statbuff1, statbuff2;
+  int statfile1, statfile2;
+
+  if(file1==NULL||file2==NULL)return -1;
+
+  statfile1=STAT(file1,&statbuff1);
+  statfile2=STAT(file2,&statbuff2);
+  if(statfile1!=0||statfile2!=0)return -1;
+
+  if(statbuff1.st_mtime>statbuff2.st_mtime)return 1;
+  return 0;
+}
 
 /* ------------------ rootdir ------------------------ */
 
