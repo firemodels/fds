@@ -18,7 +18,6 @@ static int checkmemoryflag=1;
 // svn revision character string
 char dmalloc_revision[]="$Revision$";
 
-
 /* ------------------ _memorystatus ------------------------ */
 
 #ifdef pp_memstatus
