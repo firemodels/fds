@@ -6781,8 +6781,6 @@ int matchonly(char *buffer, const char *key, unsigned int lenkey){
 /* ------------------ readini ------------------------ */
 
 int readini(int scriptconfigfile){
-  STRUCTSTAT statbuff1, statbuff2, statbuff3, statbuff4;
-  int statfile1=-1, statfile2=-1, statfile3=-1, statfile4=-1;
   char smvprogini[1024];
   char *smvprogini_ptr=NULL;
 
@@ -6791,6 +6789,7 @@ int readini(int scriptconfigfile){
   strcpy(smvprogini,"");
   if(smvprogdir!=NULL)strcat(smvprogini,smvprogdir);
   strcat(smvprogini,"smokeview.ini");
+  smvprogini_ptr=smokeviewini;
   if(smokeviewini!=NULL){
 #ifdef WIN32
     if(STRCMP(smvprogini,smokeviewini)!=0)smvprogini_ptr=smvprogini;
@@ -6799,63 +6798,36 @@ int readini(int scriptconfigfile){
 #endif
   }
   
-  // check if configuration files exist
-
-  if(smokeviewini!=NULL)statfile1=STAT(smokeviewini,&statbuff1);
-  if(smvprogini_ptr!=NULL){
-    statfile2=STAT(smvprogini_ptr,&statbuff2);
-    if(statfile2!=0)smvprogini_ptr=NULL;
-  }
-  if(INIfile!=NULL)statfile3=STAT(INIfile,&statbuff3);
-  if(caseinifilename!=NULL)statfile4=STAT(caseinifilename,&statbuff4);
-
   // check if config files read in earlier were modifed later
 
-  if(is_file_newer(smokeviewini,smvprogini_ptr)==1){
-    printf("*** warning: The initialization file, %s,\n is newer than %s \n",smokeviewini,smvprogini_ptr);
-  }
-  if(is_file_newer(smokeviewini,INIfile)==1){
-    printf("*** warning: The initialization file, %s, is newer than %s \n",smokeviewini,INIfile);
-  }
-  if(is_file_newer(smokeviewini,caseinifilename)==1){
-    printf("*** warning: The initialization file, %s, is newer than %s \n",smokeviewini,caseinifilename);
-  }
-
-  if(is_file_newer(smvprogini,INIfile)==1){
-    printf("*** warning: The initialization file, %s, is newer than %s \n",smvprogini_ptr,INIfile);
+  if(is_file_newer(smvprogini_ptr,INIfile)==1){
+    printf("*** warning: The config file, %s, is newer than %s \n",smvprogini_ptr,INIfile);
   }
   if(is_file_newer(smvprogini_ptr,caseinifilename)==1){
-    printf("*** warning: The initialization file, %s, is newer than %s \n",smvprogini_ptr,caseinifilename);
+    printf("*** warning: The config file, %s, is newer than %s \n",smvprogini_ptr,caseinifilename);
   }
-
   if(is_file_newer(INIfile,caseinifilename)==1){
-    printf("*** warning: The initialization file, %s, is newer than  %s \n",INIfile,caseinifilename);
+    printf("*** warning: The conig file, %s, is newer than  %s \n",INIfile,caseinifilename);
   }
 
   // read in config files if they exist
 
   // smokeview.ini ini in install directory
 
-  if(statfile1==0&&smokeviewini!=NULL){
-    if(readini2(smokeviewini,0)==2)return 2;
-    update_terrain_options();
-  }
-
-  // smokeview.ini in smokeview directory (could be different than above)
-
-  if(statfile2==0&&smvprogini_ptr!=NULL){
+  if(smvprogini_ptr!=NULL){
     if(readini2(smvprogini_ptr,0)==2)return 2;
+    update_terrain_options();
   }
 
   // smokeview.ini in case directory
 
-  if(statfile3==0&&INIfile!=NULL){
+  if(INIfile!=NULL){
     if(readini2(INIfile,0)==2)return 2;
   }
 
   // read in casename.ini
 
-  if(statfile4==0&&caseinifilename!=NULL){
+  if(caseinifilename!=NULL){
     if(readini2(caseinifilename,1)==2)return 2;
   }
 
