@@ -211,6 +211,43 @@ void remap_patchdata(patch *patchi,float valmin, float valmax, int *extreme_min,
   }
 }
 
+/* ------------------ update_patch_bounds ------------------------ */
+
+void update_patch_bounds(patch *patchi){
+  histogramdata full_histogram;
+  bounddata *boundi;
+  int j;
+
+  boundi = &patchi->bounds;
+  if(boundi->defined==1)return;
+  init_histogram(&full_histogram);
+
+  for(j=0;j<npatch_files;j++){
+    patch *patchj;
+
+    patchj=patchinfo+j;
+    if(patchj->type!=patchi->type||patchj->cellcenter!=patchi->cellcenter)continue;
+    merge_histogram(&full_histogram,patchj->histogram);
+  }
+
+  boundi->global_min = get_histogram_value(&full_histogram, 0.0);
+  boundi->global_max = get_histogram_value(&full_histogram, 1.0);
+  boundi->percentile_min = get_histogram_value(&full_histogram, percentile_level);
+  boundi->percentile_max = get_histogram_value(&full_histogram, 1.0-percentile_level);
+  boundi->defined=1;
+
+  for(j=0;j<npatch_files;j++){
+    bounddata *boundj;
+    patch *patchj;
+
+    patchj=patchinfo+j;
+    if(patchi==patchj||patchj->type!=patchi->type||patchj->cellcenter!=patchi->cellcenter)continue;
+
+    boundj = &patchj->bounds;
+    memcpy(boundj,boundi,sizeof(bounddata));
+  }
+}
+
 /* ------------------ getBoundaryColors3 ------------------------ */
 
 void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it, 
@@ -225,31 +262,24 @@ void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it,
   int expmin, expmax;
   int itt;
   float new_tmin, new_tmax, tmin2, tmax2;
-  histogramdata full_histogram;
   int i,j;
   patch *patchj;
 
-  init_histogram(&full_histogram);
-
-  for(j=0;j<npatch_files;j++){
-    patchj=patchinfo+j;
-    if(patchj->type!=patchi->type||patchj->cellcenter!=patchi->cellcenter)continue;
-    merge_histogram(&full_histogram,patchj->histogram);
-  }
+  update_patch_bounds(patchi);
 
   CheckMemory;
-  tmin2=get_histogram_value(&full_histogram, 0.0);
-  tmax2=get_histogram_value(&full_histogram, 1.0);
+  tmin2=patchi->bounds.global_min;
+  tmax2=patchi->bounds.global_max;
 
   *tmin_global = tmin2;
   *tmax_global = tmax2;
   *extreme_min=0;
   *extreme_max=0;
   if(settmin==PERCENTILE_MIN){
-    tmin2=get_histogram_value(&full_histogram, percentile_level); 
+    tmin2=patchi->bounds.percentile_min;
   }
   if(settmax==PERCENTILE_MAX){
-    tmax2=get_histogram_value(&full_histogram, 1.0-percentile_level); 
+    tmax2=patchi->bounds.percentile_max;
   }
   if(axissmooth==1){
     smoothlabel(&tmin2,&tmax2,nrgb);

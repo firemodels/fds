@@ -4003,7 +4003,12 @@ typedef struct {
       patchi->display=0;
       patchi->inuse=0;
       patchi->inuse_getbounds=0;
+      patchi->bounds.defined=0;
       patchi->unit_start=unit_start++;
+      patchi->setchopmin=0;
+      patchi->chopmin=1.0;
+      patchi->setchopmax=0;
+      patchi->chopmax=0.0;
       meshinfo[blocknumber].patchfilenum=-1;
       if(STAT(patchi->file,&statbuffer)==0){
         if(patchi->cellcenter==1){
@@ -4013,6 +4018,7 @@ typedef struct {
           if(readlabels(&patchi->label,stream)==2)return 2;
         }
         NewMemory((void **)&patchi->histogram,sizeof(histogramdata));
+        init_histogram(patchi->histogram);
         ipatch++;
       }
       else{
@@ -4020,7 +4026,6 @@ typedef struct {
         if(readlabels(&patchi->label,stream)==2)return 2;
         npatch_files--;
       }
-      init_histogram(patchi->histogram);
       continue;
     }
 
@@ -6805,24 +6810,24 @@ int readini(int scriptconfigfile){
 
   // check if config files read in earlier were modifed later
 
-  if(statfile1==0&&statfile2==0&&statbuff1.st_mtime>statbuff2.st_mtime){
+  if(is_file_newer(smokeviewini,smvprogini_ptr)==1){
     printf("*** warning: The initialization file, %s,\n is newer than %s \n",smokeviewini,smvprogini_ptr);
   }
-  if(statfile1==0&&statfile3==0&&statbuff1.st_mtime>statbuff3.st_mtime){
+  if(is_file_newer(smokeviewini,INIfile)==1){
     printf("*** warning: The initialization file, %s, is newer than %s \n",smokeviewini,INIfile);
   }
-  if(statfile1==0&&statfile4==0&&statbuff1.st_mtime>statbuff4.st_mtime){
+  if(is_file_newer(smokeviewini,caseinifilename)==1){
     printf("*** warning: The initialization file, %s, is newer than %s \n",smokeviewini,caseinifilename);
   }
 
-  if(statfile2==0&&statfile3==0&&statbuff2.st_mtime>statbuff3.st_mtime){
+  if(is_file_newer(smvprogini,INIfile)==1){
     printf("*** warning: The initialization file, %s, is newer than %s \n",smvprogini_ptr,INIfile);
   }
-  if(statfile2==0&&statfile4==0&&statbuff2.st_mtime>statbuff4.st_mtime){
+  if(is_file_newer(smvprogini_ptr,caseinifilename)==1){
     printf("*** warning: The initialization file, %s, is newer than %s \n",smvprogini_ptr,caseinifilename);
   }
 
-  if(statfile3==0&&statfile4==0&&statbuff3.st_mtime>statbuff4.st_mtime){
+  if(is_file_newer(INIfile,caseinifilename)==1){
     printf("*** warning: The initialization file, %s, is newer than  %s \n",INIfile,caseinifilename);
   }
 
@@ -7565,6 +7570,35 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i %f %i %f %s",&setpatchmin,&patchmin,&setpatchmax,&patchmax,buffer2);
       if(strcmp(buffer2,"")!=0)local2globalpatchbounds(buffer2);
       continue;
+    }
+    if(match(buffer,"B_BOUNDARY",10)==1){
+      float gmin, gmax;
+      float pmin, pmax;
+      int cellcenter;
+      char *buffer2ptr;
+      int lenbuffer2;
+
+      fgets(buffer,255,stream);
+      strcpy(buffer2,"");
+      sscanf(buffer,"%f %f %f %f %i %s",&gmin,&pmin,&pmax,&gmax,&cellcenter,buffer2);
+      trim(buffer2);
+      buffer2ptr=trim_front(buffer2);
+      lenbuffer2=strlen(buffer2ptr);
+      for(i=0;i<npatch_files;i++){
+        patch *patchi;
+
+        patchi = patchinfo +i;
+        if(lenbuffer2!=0&&strcmp(patchi->label.shortlabel,buffer2ptr)==0&&patchi->cellcenter==cellcenter&&is_file_newer(inifile,patchi->file)==1){
+          bounddata *boundi;
+
+          boundi = &patchi->bounds;
+          boundi->defined=1;
+          boundi->global_min=gmin;
+          boundi->global_max=gmax;
+          boundi->percentile_min=pmin;
+          boundi->percentile_max=pmax;
+        }
+      }
     }
     if(match(buffer,"C_BOUNDARY",10)==1){
       float valmin, valmax;
@@ -9453,14 +9487,42 @@ void writeini(int flag){
   }
   for(i=0;i<npatch2;i++){
     int ii;
+    bounddata *boundi;
+    patch *patchi;
 
     ii = patchlabellist_index[i];
+    patchi = patchinfo + ii;
     fprintf(fileout,"C_BOUNDARY\n");
     fprintf(fileout," %i %f %i %f %s\n",
-      patchinfo[ii].setchopmin,patchinfo[ii].chopmin,
-      patchinfo[ii].setchopmax,patchinfo[ii].chopmax,
-      patchinfo[ii].label.shortlabel
+      patchi->setchopmin,patchi->chopmin,
+      patchi->setchopmax,patchi->chopmax,
+      patchi->label.shortlabel
       );
+  }
+  for(i=0;i<npatch_files;i++){
+    int ii;
+    bounddata *boundi;
+    patch *patchi;
+    int skipi;
+    int j;
+
+    skipi = 0;
+    patchi = patchinfo + i;
+    if(patchi->bounds.defined==0)continue;
+    for(j=0;j<i-1;j++){
+      patch *patchj;
+
+      patchj = patchinfo + j;
+      if(patchi->type==patchj->type&&patchi->cellcenter==patchj->cellcenter){
+        skipi=1;
+        break;
+      }
+    }
+    if(skipi==1)continue;
+
+    boundi = &patchi->bounds;
+    fprintf(fileout,"B_BOUNDARY\n");
+    fprintf(fileout," %f %f %f %f %i %s\n",boundi->global_min,boundi->percentile_min,boundi->percentile_max,boundi->global_max,patchi->cellcenter,patchi->label.shortlabel);
   }
   fprintf(fileout,"V_ZONE\n");
   fprintf(fileout," %i %f %i %f\n",setzonemin,zonemin,setzonemax,zonemax);

@@ -8,6 +8,15 @@
 #include "isodefs.h"
 #include "histogram.h"
 
+
+/* --------------------------  bounds ------------------------------------ */
+
+typedef struct {
+  float percentile_min, percentile_max;
+  float global_min, global_max;
+  int defined;
+} bounddata;
+
 /* --------------------------  point ------------------------------------ */
 #define PROPVARMAX 100
 typedef struct {
@@ -1017,6 +1026,7 @@ typedef struct {
   char menulabel[128];
   int extreme_min, extreme_max;
   histogramdata *histogram;
+  bounddata bounds;
 
 } patch;
 

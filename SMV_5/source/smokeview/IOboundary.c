@@ -3676,6 +3676,20 @@ void update_hidepatchsurface(void){
   if(hidepatchsurface_old!=hidepatchsurface)updatefacelists=1;
 }
 
+
+/* ------------------ update_patch_hist ------------------------ */
+
+void update_all_patch_hist(void){
+  int i;
+
+  for(i=0;i<npatch_files;i++){
+    patch *patchi;
+
+    patchi = patchinfo + i;
+    update_patch_hist(patchi);
+  }
+}
+
 /* ------------------ update_patch_hist ------------------------ */
 
 void update_patch_hist(patch *patchj){
@@ -3684,9 +3698,6 @@ void update_patch_hist(patch *patchj){
  // int endianswitch;
 
   endiandata=getendian();
- // if(endianswitch==1)endiandata=1-endiandata;
-
-
 
   for(i=0;i<npatch_files;i++){
     int endian, npatches, error, boundaryunitnumber;
@@ -3701,7 +3712,7 @@ void update_patch_hist(patch *patchj){
     mesh *meshi;
 
     patchi = patchinfo + i;
-    if(patchi->inuse_getbounds==1||patchi->histogram->complete==1||patchi->type!=patchj->type||patchi->cellcenter!=patchj->cellcenter)continue;
+    if(patchi->inuse_getbounds==1||patchi->histogram->complete==1||patchi->type!=patchj->type||patchi->cellcenter!=patchj->cellcenter||patchi->bounds.defined==1)continue;
 
     patchi->inuse_getbounds=1;
     meshi = meshinfo + patchi->blocknumber;
