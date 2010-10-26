@@ -53,7 +53,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS,S12,S13,S23,DELTA,CS,YY_GET(1:N_SPECIES), &
-            DAMPING_FACTOR,MU_WALL,YPLUS,TMP_WGT,NU,RE_DELTA,RE_EMC=0._EB
+            DAMPING_FACTOR,MU_WALL,YPLUS,TMP_WGT
 INTEGER :: I,J,K,ITMP,IIG,JJG,KKG,II,JJ,KK,IW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP=>NULL()
@@ -147,18 +147,6 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
             SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
             
             IF (DYNSMAG) CS = C_DYNSMAG(I,J,K)
-            
-            EMC_IF: IF (ENSEMBLE_MEAN_CLOSURE) THEN
-               NU = MU(I,J,K)/RHOP(I,J,K)
-               RE_DELTA = C_EMC*SS*DELTA**2/NU
-               IF (RE_DELTA>1._EB) THEN
-                  RE_EMC = SQRT(RE_DELTA**2-1._EB) + ASIN(1._EB/RE_DELTA) - PIO2
-                  CS = SQRT(RE_EMC/RE_DELTA)*CSMAG
-               ELSE
-                  CS = 0._EB
-               ENDIF
-            ENDIF EMC_IF
-            
             MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
          ENDDO
       ENDDO

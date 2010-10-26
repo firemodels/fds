@@ -14,7 +14,7 @@ CHARACTER(255), PARAMETER :: massdate='$Date$'
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,RHOP,DP
 
-PUBLIC MASS_FINITE_DIFFERENCES,DENSITY,GET_REV_mass,SCALARF,DENSITY_TVD
+PUBLIC MASS_FINITE_DIFFERENCES,DENSITY,GET_REV_mass
  
  
 CONTAINS
@@ -1294,32 +1294,32 @@ SPECIESLOOP: DO N=1,N_SPECIES
                  YPK = YY_F(IW_A( 3),N)  
                ENDIF
             ENDIF           
-            YMIN  = MIN(YMI,YPI,YMJ,YPJ,YMK,YPK)
+            YMIN = MIN(YMI,YPI,YMJ,YPJ,YMK,YPK)
             YMIN = MAX(YMIN,YYMIN(N))
             IF ((DEL_RHO_D_DEL_Y(I,J,K,N) > 0._EB .AND. Y00 < YMIN) .OR. Y00 < YYMIN(N)) THEN
                RHY0  = RHOP(I,J,K)  *(YMIN - Y00)
-               IF (LC(-1) .AND. YMI>YMIN) THEN! .AND. DEL_RHO_D_DEL_Y(I-1,J,K,N) < 0._EB) THEN
+               IF (LC(-1) .AND. YMI>YMIN) THEN
                   RHYMI = RHOP(I-1,J,K)*(YMI - YMIN)
                   SUM  = SUM + RHYMI 
                   ISUM = ISUM + 1
                ELSE
                   LC(-1) = .FALSE.
                ENDIF
-               IF (LC( 1) .AND. YPI>YMIN) THEN! .AND. DEL_RHO_D_DEL_Y(I+1,J,K,N) < 0._EB) THEN
+               IF (LC( 1) .AND. YPI>YMIN) THEN
                   RHYPI = RHOP(I+1,J,K)*(YPI - YMIN)
                   SUM  = SUM + RHYPI
                   ISUM = ISUM + 1
                ELSE
                   LC( 1) = .FALSE.
                ENDIF
-               IF (LC(-2) .AND. YMJ>YMIN) THEN! .AND. DEL_RHO_D_DEL_Y(I,J-1,K,N) < 0._EB) THEN
+               IF (LC(-2) .AND. YMJ>YMIN) THEN
                   RHYMJ = RHOP(I,J-1,K)*(YMJ - YMIN)
                   SUM  = SUM + RHYMJ
                   ISUM = ISUM + 1
                ELSE
                   LC(-2) = .FALSE.
                ENDIF
-               IF (LC( 2) .AND. YPJ>YMIN) THEN! .AND. DEL_RHO_D_DEL_Y(I,J+1,K,N) < 0._EB) THEN
+               IF (LC( 2) .AND. YPJ>YMIN) THEN
                   RHYPJ = RHOP(I,J+1,K)*(YPJ - YMIN)
                   SUM  = SUM + RHYPJ
                   ISUM = ISUM + 1
@@ -1327,14 +1327,14 @@ SPECIESLOOP: DO N=1,N_SPECIES
                ELSE
                   LC( 2) = .FALSE.
                ENDIF
-               IF (LC(-3) .AND. YMK>YMIN) THEN! .AND. DEL_RHO_D_DEL_Y(I,J,K-1,N) < 0._EB) THEN
+               IF (LC(-3) .AND. YMK>YMIN) THEN
                RHYMK = RHOP(I,J,K-1)*(YMK - YMIN)
                   SUM  = SUM + RHYMK
                   ISUM = ISUM + 1
                ELSE
                   LC(-3) = .FALSE.
                ENDIF
-               IF (LC( 3) .AND. YPK>YMIN) THEN! .AND. DEL_RHO_D_DEL_Y(I,J,K+1,N) < 0._EB) THEN
+               IF (LC( 3) .AND. YPK>YMIN) THEN
                   RHYPK = RHOP(I,J,K+1)*(YPK - YMIN)
                   SUM  = SUM + RHYPK
                   ISUM = ISUM + 1
@@ -1418,46 +1418,46 @@ SPECIESLOOP: DO N=1,N_SPECIES
             ELSE
                YPK = YY_F(IW_A( 3),N)  
             ENDIF           
-            YMAX  = MAX(YMI,YPI,YMJ,YPJ,YMK,YPK)
+            YMAX = MAX(YMI,YPI,YMJ,YPJ,YMK,YPK)
             YMAX = MIN(YMAX,YYMAX(N))            
             IF ((DEL_RHO_D_DEL_Y(I,J,K,N) < 0._EB .AND. Y00 > YMAX) .OR. Y00 > YYMAX(N)) THEN
                RHY0  = RHOP(I,J,K)  *(Y00 - YMAX)
-               IF (LC(-1) .AND. YMI<YMAX) THEN! .AND. DEL_RHO_D_DEL_Y(I-1,J,K,N) > 0._EB) THEN
+               IF (LC(-1) .AND. YMI<YMAX) THEN
                   RHYMI = RHOP(I-1,J,K)*(YMAX - YMI)
                   SUM  = SUM + RHYMI
                   ISUM = ISUM + 1
                ELSE
                   LC(-1) = .FALSE.
                ENDIF
-               IF (LC( 1) .AND. YPI<YMAX) THEN! .AND. DEL_RHO_D_DEL_Y(I+1,J,K,N) > 0._EB) THEN
+               IF (LC( 1) .AND. YPI<YMAX) THEN
                   RHYPI = RHOP(I+1,J,K)*(YMAX - YPI)
                   SUM  = SUM + RHYPI
                   ISUM = ISUM + 1
                ELSE
                   LC( 1) = .FALSE.
                ENDIF
-               IF (LC(-2) .AND. YMJ<YMAX) THEN! .AND. DEL_RHO_D_DEL_Y(I,J-1,K,N) > 0._EB) THEN
+               IF (LC(-2) .AND. YMJ<YMAX) THEN
                   RHYMJ = RHOP(I,J-1,K)*(YMAX - YMJ)
                   SUM  = SUM + RHYMJ
                   ISUM = ISUM + 1
                ELSE
                   LC(-2) = .FALSE.
                ENDIF
-               IF (LC( 2) .AND. YPJ<YMAX) THEN! .AND. DEL_RHO_D_DEL_Y(I,J+1,K,N) > 0._EB) THEN
+               IF (LC( 2) .AND. YPJ<YMAX) THEN
                   RHYPJ = RHOP(I,J+1,K)*(YMAX - YPJ)
                   SUM  = SUM + RHYPJ
                   ISUM = ISUM + 1
                ELSE
                   LC( 2) = .FALSE.
                ENDIF
-               IF (LC(-3) .AND. YMK<YMAX) THEN! .AND. DEL_RHO_D_DEL_Y(I,J,K-1,N) > 0._EB) THEN
+               IF (LC(-3) .AND. YMK<YMAX) THEN
                   RHYMK = RHOP(I,J,K-1)*(YMAX - YMK)
                   SUM  = SUM + RHYMK
                   ISUM = ISUM + 1
                ELSE
                   LC(-3) = .FALSE.
                ENDIF
-               IF (LC( 3) .AND. YPK<YMAX) THEN! .AND. DEL_RHO_D_DEL_Y(I,J,K+1,N) > 0._EB) THEN
+               IF (LC( 3) .AND. YPK<YMAX) THEN
                   RHYPK = RHOP(I,J,K+1)*(YMAX - YPK)
                   SUM  = SUM + RHYPK
                   ISUM = ISUM + 1
@@ -1494,747 +1494,6 @@ ENDDO SPECIESLOOP
 RETURN
 
 END SUBROUTINE CHECK_MASS_FRACTION
-
-
-!===========================================================================
-! The following are experimental scalar transport routines which are invoked
-! by setting FLUX_LIMITER = {0,1,2,3,4} on the MISC line.  See the function
-! SCALAR_FACE_VALUE below for a description of the FLUX_LIMITER value. ~RJM
-!===========================================================================
-
-SUBROUTINE DENSITY_TVD(NM)
-
-! Update the density and species mass fractions
-
-USE COMP_FUNCTIONS, ONLY: SECOND 
-USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
-USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
-                            CHANGE_TIME_STEP,ISOTHERMAL,TMPA, N_ZONE,MIXTURE_FRACTION_SPECIES, LU_ERR, &
-                            GAS_SPECIES, MIXTURE_FRACTION,R0,SOLID_PHASE_ONLY,TUSED,FLUX_LIMITER, &
-                            RSUM0,CHECK_KINETIC_ENERGY,CYLINDRICAL,CLIP_MASS_FRACTION
-REAL(EB) :: TNOW,YY_GET(1:N_SPECIES)
-INTEGER  :: I,J,K,N
-INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,FX,FY,FZ,YYN
-
- 
-IF (EVACUATION_ONLY(NM)) RETURN
-IF (SOLID_PHASE_ONLY) RETURN
-
-TNOW=SECOND()
-CALL POINT_TO_MESH(NM)
-
-FX => SCALAR_SAVE1
-FY => SCALAR_SAVE2
-FZ => SCALAR_SAVE3
-RHOYYP => SCALAR_SAVE4
-YYN => SCALAR_SAVE5
-
-SELECT_SUBSTEP: IF (PREDICTOR) THEN
-   
-   ! Update the density
-   
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            RHOS(I,J,K) = RHO(I,J,K) - DT*( RDX(I)*(FX(I,J,K,0)-FX(I-1,J,K,0))*RRN(I) &
-                                          + RDY(J)*(FY(I,J,K,0)-FY(I,J-1,K,0)) &
-                                          + RDZ(K)*(FZ(I,J,K,0)-FZ(I,J,K-1,0)) )
-         ENDDO
-      ENDDO
-   ENDDO
-   
-   ! Correct densities above or below clip limits
-
-   CALL CHECK_DENSITY
-   
-   ! Update mass fractions
-   
-   DO N=1,N_SPECIES
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               YYN(I,J,K,N) = RHOYYP(I,J,K,N)   
-               YYS(I,J,K,N) = RHOYYP(I,J,K,N) - DT*( RDX(I)*(FX(I,J,K,N)-FX(I-1,J,K,N))*RRN(I) &
-                                                   + RDY(J)*(FY(I,J,K,N)-FY(I,J-1,K,N)) &
-                                                   + RDZ(K)*(FZ(I,J,K,N)-FZ(I,J,K-1,N)) )
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
-  
-   ! Extract REALIZABLE YY from REALIZABLE RHO*YY
-   
-   DO N=1,N_SPECIES
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               YYS(I,J,K,N) = YYS(I,J,K,N)/RHOS(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
-   
-   IF (CLIP_MASS_FRACTION) THEN
-      YYS(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES) = MAX(0._EB,MIN(1._EB,YYS(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES)))
-   ELSE
-      CALL CHECK_MASS_FRACTION
-   ENDIF
-
-   ! Predict background pressure at next time step
-
-   DO I=1,N_ZONE
-      PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
-   ENDDO
-
-   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
-   
-   IF (N_SPECIES>0) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR       
-               YY_GET(:) = YYS(I,J,K,:)
-               CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-      IF (ISOTHERMAL) THEN
-         DO K=0,KBP1
-            DO J=0,JBP1
-               DO I=0,IBP1
-                  RHOS(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(TMPA*RSUM(I,J,K))
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
-   ENDIF
-
-   ! Extract predicted temperature at next time step from Equation of State
-   
-   IF (.NOT. ISOTHERMAL) THEN
-      IF (N_SPECIES==0) THEN
-         DO K=0,KBP1
-            DO J=0,JBP1
-               DO I=0,IBP1
-                  TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHOS(I,J,K))
-               ENDDO
-            ENDDO
-         ENDDO
-      ELSE
-         DO K=0,KBP1
-            DO J=0,JBP1
-               DO I=0,IBP1
-                  TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
-      TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
-   ENDIF
-     
-! The CORRECTOR step   
-
-ELSEIF (CORRECTOR) THEN
-
-   ! Update the density
-   
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            RHOS(I,J,K) = RHOS(I,J,K) - DT*( RDX(I)*(FX(I,J,K,0)-FX(I-1,J,K,0))*RRN(I) &
-                                           + RDY(J)*(FY(I,J,K,0)-FY(I,J-1,K,0)) &
-                                           + RDZ(K)*(FZ(I,J,K,0)-FZ(I,J,K-1,0)) )
-         ENDDO
-      ENDDO
-   ENDDO
-   
-   ! Update mass fractions
-   
-   DO N=1,N_SPECIES
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               YYS(I,J,K,N) = RHOYYP(I,J,K,N) - DT*( RDX(I)*(FX(I,J,K,N)-FX(I-1,J,K,N))*RRN(I) &
-                                                   + RDY(J)*(FY(I,J,K,N)-FY(I,J-1,K,N)) &
-                                                   + RDZ(K)*(FZ(I,J,K,N)-FZ(I,J,K-1,N)) )
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
-   
-   ! Corrector step
-   
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            RHO(I,J,K) = 0.5_EB*( RHO(I,J,K) + RHOS(I,J,K) )
-         ENDDO
-      ENDDO
-   ENDDO
-   
-   ! Correct densities above or below clip limits
-
-   CALL CHECK_DENSITY
-   
-   DO N=1,N_SPECIES
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               YY(I,J,K,N) = 0.5_EB*( YYN(I,J,K,N) + YYS(I,J,K,N) )/RHO(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
-   
-   IF (CLIP_MASS_FRACTION) THEN
-      YY(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES) = MAX(0._EB,MIN(1._EB,YY(1:IBAR,1:JBAR,1:KBAR,1:N_SPECIES)))
-   ELSE
-      CALL CHECK_MASS_FRACTION
-   ENDIF
-   
-   ! Correct background pressure
-
-   DO I=1,N_ZONE
-      PBAR(:,I) = .5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_S_DT(I)*DT)
-   ENDDO
- 
-   ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
-   
-   IF (N_SPECIES>0) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR   
-               YY_GET(:) = YY(I,J,K,:)
-               CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-      IF (ISOTHERMAL) THEN
-         DO K=0,KBP1
-            DO J=0,JBP1
-               DO I=0,IBP1
-                  RHO(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(TMPA*RSUM(I,J,K))
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
-   ENDIF
-
-   ! Extract predicted temperature at next time step from Equation of State
-   
-   IF (.NOT. ISOTHERMAL) THEN
-      IF (N_SPECIES==0) THEN
-         DO K=0,KBP1
-            DO J=0,JBP1
-               DO I=0,IBP1
-                  TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHO(I,J,K))
-               ENDDO
-            ENDDO
-         ENDDO
-      ELSE
-         DO K=0,KBP1
-            DO J=0,JBP1
-               DO I=0,IBP1
-                  TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF
-      TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
-   ENDIF
-   
-ENDIF SELECT_SUBSTEP
-
-TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
- 
-END SUBROUTINE DENSITY_TVD
-
-
-SUBROUTINE SCALARF(NM)
-USE COMP_FUNCTIONS, ONLY: SECOND
-USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,PREDICTOR,CORRECTOR,FLUX_LIMITER,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN_BOUNDARY, &
-                            LU_ERR,INTERPOLATED_BOUNDARY,MYID,NO_MASS_FLUX,SOLID_BOUNDARY,INTERPOLATED_SURF_INDEX,  &
-                            OPEN_SURF_INDEX,MIRROR_BOUNDARY,MIRROR_SURF_INDEX,SPECIFIED_MASS_FLUX,INFLOW_OUTFLOW,   &
-                            CYLINDRICAL,INTERPOLATED_BC,TUSED,EMB_BC,HVAC_BOUNDARY
-
-! Computes the scalar advective and diffusive flux
-INTEGER, INTENT(IN) :: NM
-INTEGER :: I,J,K,N,II,JJ,KK,IOR,IW,IIG,JJG,KKG,IBC,METHOD_ID,NOM,IIO,JJO,KKO,ICM,ICP,FL
-REAL(EB) :: ZZ(4),TNOW
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP,UU,VV,WW
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHOYYP,YYP,FX,FY,FZ
-TYPE (SURFACE_TYPE), POINTER :: SF
-TYPE (OMESH_TYPE), POINTER :: M2
-REAL(EB), POINTER, DIMENSION(:) :: UWP
-
-! Notes:
-!
-! At the moment (FDS 5.4.2) it is critical that SCALARF stay WITHIN the CHANGE_TIME_STEP loop.  I am writing
-! myself this note because everytime I go back and try to debug something I wonder why SCALARF just does not
-! sit outside this loop in the same way as MASS_FINITE_DIFFERENCES.  The reason is that DIVERGENCE_PART_1
-! initializes the FX (flux) arrays and adds the diffusive flux to this array.  So, if SCALARF is computed
-! outside the CHANGE_TIME_STEP loop and we happen to iterate on the loop then we clear the advective flux
-! and we are left with only the diffusive flux.
-
-TNOW=SECOND()
-CALL POINT_TO_MESH(NM)
-
-FX => SCALAR_SAVE1
-FY => SCALAR_SAVE2
-FZ => SCALAR_SAVE3
-RHOYYP => SCALAR_SAVE4
-!! eliminate diffusion for testing
-!FX = 0._EB
-!FY = 0._EB
-!FZ = 0._EB
-
-IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
-   UWP  => UW
-   RHOP => RHO
-   IF (N_SPECIES > 0) YYP => YY
-ELSE
-   UU => US
-   VV => VS
-   WW => WS
-   UWP  => UWS
-   RHOP => RHOS
-   IF (N_SPECIES > 0) YYP => YYS
-ENDIF
-
-! Density flux
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBM1
-         ZZ(1:4) = RHOP(I-1:I+2,J,K)
-         FL = FLUX_LIMITER
-         ICM = CELL_INDEX(I-1,J,K)
-         ICP = CELL_INDEX(I+2,J,K)
-         IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-         FX(I,J,K,0) = R(I)*UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FL)
-      ENDDO
-   ENDDO
-ENDDO
-
-DO K=1,KBAR
-   DO J=1,JBM1
-      DO I=1,IBAR
-         ZZ(1:4) = RHOP(I,J-1:J+2,K)
-         ICM = CELL_INDEX(I,J-1,K)
-         ICP = CELL_INDEX(I,J+2,K)
-         IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-         FY(I,J,K,0) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FL)
-      ENDDO
-   ENDDO
-ENDDO
-
-DO K=1,KBM1
-   DO J=1,JBAR
-      DO I=1,IBAR
-         ZZ(1:4) = RHOP(I,J,K-1:K+2)
-         ICM = CELL_INDEX(I,J,K-1)
-         ICP = CELL_INDEX(I,J,K+2)
-         IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-         FZ(I,J,K,0) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FL)
-      ENDDO
-   ENDDO
-ENDDO
-
-! Compute mass fluxes at boundaries
-
-WALL_LOOP: DO IW=1,NWC
-   IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP
-   II  = IJKW(1,IW)
-   JJ  = IJKW(2,IW)
-   KK  = IJKW(3,IW)
-   IBC = IJKW(5,IW)
-   IIG = IJKW(6,IW)
-   JJG = IJKW(7,IW)
-   KKG = IJKW(8,IW)
-   IOR = IJKW(4,IW)
-   IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
-      IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) IBC = INTERPOLATED_SURF_INDEX
-      IF (BOUNDARY_TYPE(IW)==MIRROR_BOUNDARY)       IBC = MIRROR_SURF_INDEX
-   ENDIF
-   SF => SURFACE(IBC)
-   METHOD_ID = SF%SPECIES_BC_INDEX
-   IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) METHOD_ID = INFLOW_OUTFLOW
-   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL/=0) METHOD_ID = EMB_BC
-   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .AND. IJKW(9,IW)>0) METHOD_ID = 999
-   
-   ! Apply the different species boundary conditions
-   METHOD_OF_MASS_TRANSFER: SELECT CASE(METHOD_ID)
-   
-!      CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER
-!         
-!         SELECT CASE(IOR)
-!            CASE( 1)
-!               FX(II,JJ,KK,0)   = 0._EB
-!            CASE(-1)
-!               FX(II-1,JJ,KK,0) = 0._EB
-!            CASE( 2)   
-!               FY(II,JJ,KK,0)   = 0._EB
-!            CASE(-2)
-!               FY(II,JJ-1,KK,0) = 0._EB
-!            CASE( 3)
-!               FZ(II,JJ,KK,0)   = 0._EB
-!            CASE(-3)
-!               FZ(II,JJ,KK-1,0) = 0._EB
-!         END SELECT
-   
-!      CASE (SPECIFIED_MASS_FLUX,HVAC_BOUNDARY) METHOD_OF_MASS_TRANSFER
-!         
-!         SELECT CASE(IOR)
-!            CASE( 1)
-!               FX(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))*R(II)
-!            CASE(-1)
-!               FX(II-1,JJ,KK,0) = -SUM(MASSFLUX(IW,:))*R(II-1)
-!            CASE( 2)   
-!               FY(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))
-!            CASE(-2)
-!               FY(II,JJ-1,KK,0) = -SUM(MASSFLUX(IW,:))
-!            CASE( 3)
-!               FZ(II,JJ,KK,0)   = SUM(MASSFLUX(IW,:))
-!            CASE(-3)
-!               FZ(II,JJ,KK-1,0) = -SUM(MASSFLUX(IW,:))
-!         END SELECT
-
-      CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER
-         NOM = IJKW(9,IW)
-         IIO = IJKW(10,IW)
-         JJO = IJKW(11,IW)
-         KKO = IJKW(12,IW)
-         M2  => OMESH(NOM)
-      
-         SELECT CASE(IOR)
-            CASE( 1)
-               IF (PREDICTOR) ZZ(1) = M2%RHO(IIO-1,JJO,KKO)
-               IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO-1,JJO,KKO)
-               IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)
-               IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)
-               ZZ(3) = RHOP(IIG,JJG,KKG)
-               ZZ(4) = RHOP(IIG+1,JJG,KKG)
-               !debug...
-               !ZZ(1) = RHOP(IBM1,JJG,KKG)
-               !ZZ(2) = RHOP(IBAR,JJG,KKG)
-               !ZZ(3) = RHOP(1,JJG,KKG)
-               !ZZ(4) = RHOP(2,JJG,KKG)
-               FX(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)*R(II)
-            CASE(-1)
-               ZZ(1) = RHOP(IIG-1,JJG,KKG)
-               ZZ(2) = RHOP(IIG,JJG,KKG)
-               IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)
-               IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)
-               IF (PREDICTOR) ZZ(4) = M2%RHO(IIO+1,JJO,KKO)
-               IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO+1,JJO,KKO)
-               !debug...
-               !ZZ(1) = RHOP(IBM1,JJG,KKG)
-               !ZZ(2) = RHOP(IBAR,JJG,KKG)
-               !ZZ(3) = RHOP(1,JJG,KKG)
-               !ZZ(4) = RHOP(2,JJG,KKG)
-               FX(II-1,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)*R(II-1)
-            CASE( 2)
-               IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO-1,KKO)
-               IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO,JJO-1,KKO)
-               IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)
-               IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)
-               ZZ(3) = RHOP(IIG,JJG,KKG)
-               ZZ(4) = RHOP(IIG,JJG+1,KKG)
-               FY(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
-            CASE(-2)
-               ZZ(1) = RHOP(IIG,JJG-1,KKG)
-               ZZ(2) = RHOP(IIG,JJG,KKG)
-               IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)
-               IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)
-               IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO+1,KKO)
-               IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO+1,KKO)
-               FY(II,JJ-1,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
-            CASE( 3)
-               IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO,KKO-1)
-               IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO,JJO,KKO-1)
-               IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)
-               IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)
-               ZZ(3) = RHOP(IIG,JJG,KKG)
-               ZZ(4) = RHOP(IIG,JJG,KKG+1)
-               !degug...
-               !ZZ(1) = RHOP(IIG,JJG,KBM1)
-               !ZZ(2) = RHOP(IIG,JJG,KBAR)
-               !ZZ(3) = RHOP(IIG,JJG,1)
-               !ZZ(4) = RHOP(IIG,JJG,2)
-               FZ(II,JJ,KK,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
-            CASE(-3)
-               ZZ(1) = RHOP(IIG,JJG,KKG-1)
-               ZZ(2) = RHOP(IIG,JJG,KKG)
-               IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)
-               IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)
-               IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO,KKO+1)
-               IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO,KKO+1)
-               !debug...
-               !ZZ(1) = RHOP(IIG,JJG,KBM1)
-               !ZZ(2) = RHOP(IIG,JJG,KBAR)
-               !ZZ(3) = RHOP(IIG,JJG,1)
-               !ZZ(4) = RHOP(IIG,JJG,2)
-               FZ(II,JJ,KK-1,0) = UVW_SAVE(IW)*SCALAR_FACE_VALUE(UVW_SAVE(IW),ZZ,FLUX_LIMITER)
-         END SELECT
-         
-      CASE (999) METHOD_OF_MASS_TRANSFER
-
-         SELECT CASE(IOR)
-            CASE( 1)
-               FX(II,JJ,KK,0)   = UVW_SAVE(IW)*RHO_F(IW)*R(II)
-            CASE(-1)
-               FX(II-1,JJ,KK,0) = UVW_SAVE(IW)*RHO_F(IW)*R(II-1)
-            CASE( 2)  
-               FY(II,JJ,KK,0)   = UVW_SAVE(IW)*RHO_F(IW)
-            CASE(-2)
-               FY(II,JJ-1,KK,0) = UVW_SAVE(IW)*RHO_F(IW)
-            CASE( 3)
-               FZ(II,JJ,KK,0)   = UVW_SAVE(IW)*RHO_F(IW)
-            CASE(-3)
-               FZ(II,JJ,KK-1,0) = UVW_SAVE(IW)*RHO_F(IW)
-         END SELECT
-            
-      CASE DEFAULT METHOD_OF_MASS_TRANSFER
-      
-         SELECT CASE(IOR)
-            CASE( 1)
-               FX(II,JJ,KK,0)   = UU(II,JJ,KK)*RHO_F(IW)*R(II)
-            CASE(-1)
-               FX(II-1,JJ,KK,0) = UU(II-1,JJ,KK)*RHO_F(IW)*R(II-1)
-            CASE( 2)  
-               FY(II,JJ,KK,0)   = VV(II,JJ,KK)*RHO_F(IW)
-            CASE(-2)
-               FY(II,JJ-1,KK,0) = VV(II,JJ-1,KK)*RHO_F(IW)
-            CASE( 3)
-               FZ(II,JJ,KK,0)   = WW(II,JJ,KK)*RHO_F(IW)
-            CASE(-3)
-               FZ(II,JJ,KK-1,0) = WW(II,JJ,KK-1)*RHO_F(IW)
-         END SELECT
-      
-   END SELECT METHOD_OF_MASS_TRANSFER
-      
-ENDDO WALL_LOOP
-
-! Compute species advective fluxes at interior cell faces and 
-! add to diffusive flux which is already stored in FX,FY,FZ.
-
-DO N=1,N_SPECIES
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-            RHOYYP(I,J,K,N) = RHOP(I,J,K)*YYP(I,J,K,N)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDDO
-
-SPECIES_LOOP: DO N=1,N_SPECIES
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBM1
-            ZZ(1:4) = RHOYYP(I-1:I+2,J,K,N)
-            FL = FLUX_LIMITER
-            ICM = CELL_INDEX(I-1,J,K)
-            ICP = CELL_INDEX(I+2,J,K)
-            IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-            FX(I,J,K,N) = R(I)*(FX(I,J,K,N) + UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FL))
-         ENDDO
-      ENDDO
-   ENDDO
-
-   DO K=1,KBAR
-      DO J=1,JBM1
-         DO I=1,IBAR
-            ZZ(1:4) = RHOYYP(I,J-1:J+2,K,N)
-            FL = FLUX_LIMITER
-            ICM = CELL_INDEX(I,J-1,K)
-            ICP = CELL_INDEX(I,J+2,K)
-            IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-            FY(I,J,K,N) = FY(I,J,K,N) + VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FL)
-         ENDDO
-      ENDDO
-   ENDDO
-
-   DO K=1,KBM1
-      DO J=1,JBAR
-         DO I=1,IBAR
-            ZZ(1:4) = RHOYYP(I,J,K-1:K+2,N)
-            FL = FLUX_LIMITER
-            ICM = CELL_INDEX(I,J,K-1)
-            ICP = CELL_INDEX(I,J,K+2)
-            IF (SOLID(ICM).OR.SOLID(ICP)) FL=1
-            FZ(I,J,K,N) = FZ(I,J,K,N) + WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FL)
-         ENDDO
-      ENDDO
-   ENDDO
-
-   ! Compute species fluxes at boundaries
-
-   WALL_LOOP2: DO IW=1,NWC
-      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2
-      II  = IJKW(1,IW)
-      JJ  = IJKW(2,IW)
-      KK  = IJKW(3,IW)
-      IOR = IJKW(4,IW)
-      IBC = IJKW(5,IW)
-      IIG = IJKW(6,IW)
-      JJG = IJKW(7,IW)
-      KKG = IJKW(8,IW)
-      IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) THEN
-         IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) IBC = INTERPOLATED_SURF_INDEX
-         IF (BOUNDARY_TYPE(IW)==MIRROR_BOUNDARY)       IBC = MIRROR_SURF_INDEX
-      ENDIF
-      SF => SURFACE(IBC)
-      METHOD_ID = SF%SPECIES_BC_INDEX
-      IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) METHOD_ID = INFLOW_OUTFLOW
-      IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL/=0) METHOD_ID = EMB_BC
-      !!IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .AND. IJKW(9,IW)>0) METHOD_ID = 999
-      
-      ! Apply the different species boundary conditions
-      METHOD_OF_MASS_TRANSFER2: SELECT CASE(METHOD_ID)
-      
-         CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER2
-
-            SELECT CASE(IOR)
-               CASE( 1)
-                  FX(II,JJ,KK,N)   = 0._EB
-               CASE(-1)
-                  FX(II-1,JJ,KK,N) = 0._EB
-               CASE( 2)   
-                  FY(II,JJ,KK,N)   = 0._EB
-               CASE(-2)
-                  FY(II,JJ-1,KK,N) = 0._EB
-               CASE( 3)
-                  FZ(II,JJ,KK,N)   = 0._EB
-               CASE(-3)
-                  FZ(II,JJ,KK-1,N) = 0._EB
-            END SELECT
-            
-         CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER2
-         
-            SELECT CASE(IOR)
-               CASE( 1)
-                  FX(II,JJ,KK,N)   = MASSFLUX(IW,N)*R(II)
-               CASE(-1)
-                  FX(II-1,JJ,KK,N) = -MASSFLUX(IW,N)*R(II-1)
-               CASE( 2)   
-                  FY(II,JJ,KK,N)   = MASSFLUX(IW,N)
-               CASE(-2)
-                  FY(II,JJ-1,KK,N) = -MASSFLUX(IW,N)
-               CASE( 3)
-                  FZ(II,JJ,KK,N)   = MASSFLUX(IW,N)
-               CASE(-3)
-                  FZ(II,JJ,KK-1,N) = -MASSFLUX(IW,N)
-            END SELECT
-            
-         CASE (INTERPOLATED_BC) METHOD_OF_MASS_TRANSFER2
-            NOM = IJKW(9,IW)
-            IIO = IJKW(10,IW)
-            JJO = IJKW(11,IW)
-            KKO = IJKW(12,IW)
-            M2  => OMESH(NOM)
-               
-            SELECT CASE(IOR)
-               CASE( 1)
-                  IF (PREDICTOR) ZZ(1) = M2%RHO(IIO-1,JJO,KKO)*M2%YY(IIO-1,JJO,KKO,N)
-                  IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO-1,JJO,KKO)*M2%YYS(IIO-1,JJO,KKO,N)
-                  IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
-                  IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)                  
-                  ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(4) = RHOYYP(IIG+1,JJG,KKG,N)
-                  FX(II,JJ,KK,N) = (FX(II,JJ,KK,N) + UU(II,JJ,KK)*SCALAR_FACE_VALUE(UU(II,JJ,KK),ZZ,FLUX_LIMITER))*R(II)
-               CASE(-1)
-                  ZZ(1) = RHOYYP(IIG-1,JJG,KKG,N)
-                  ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
-                  IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
-                  IF (PREDICTOR) ZZ(4) = M2%RHO(IIO+1,JJO,KKO)*M2%YY(IIO+1,JJO,KKO,N)
-                  IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO+1,JJO,KKO)*M2%YYS(IIO+1,JJO,KKO,N)
-                  FX(II-1,JJ,KK,N) = (FX(II-1,JJ,KK,N) + UU(II-1,JJ,KK)*SCALAR_FACE_VALUE(UU(II-1,JJ,KK),ZZ,FLUX_LIMITER))*R(II-1)
-               CASE( 2)
-                  IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO-1,KKO)*M2%YY(IIO,JJO-1,KKO,N)
-                  IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO,JJO-1,KKO)*M2%YYS(IIO,JJO-1,KKO,N)
-                  IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
-                  IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
-                  ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(4) = RHOYYP(IIG,JJG+1,KKG,N)
-                  FY(II,JJ,KK,N) = FY(II,JJ,KK,N) + VV(II,JJ,KK)*SCALAR_FACE_VALUE(VV(II,JJ,KK),ZZ,FLUX_LIMITER)
-               CASE(-2)
-                  ZZ(1) = RHOYYP(IIG,JJG-1,KKG,N)
-                  ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
-                  IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
-                  IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO+1,KKO)*M2%YY(IIO,JJO+1,KKO,N)
-                  IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO+1,KKO)*M2%YYS(IIO,JJO+1,KKO,N)
-                  FY(II,JJ-1,KK,N) = FY(II,JJ-1,KK,N) + VV(II,JJ-1,KK)*SCALAR_FACE_VALUE(VV(II,JJ-1,KK),ZZ,FLUX_LIMITER)
-               CASE( 3)
-                  IF (PREDICTOR) ZZ(1) = M2%RHO(IIO,JJO,KKO-1)*M2%YY(IIO,JJO,KKO-1,N)
-                  IF (CORRECTOR) ZZ(1) = M2%RHOS(IIO,JJO,KKO-1)*M2%YYS(IIO,JJO,KKO-1,N)
-                  IF (PREDICTOR) ZZ(2) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
-                  IF (CORRECTOR) ZZ(2) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
-                  ZZ(3) = RHOYYP(IIG,JJG,KKG,N)
-                  ZZ(4) = RHOYYP(IIG,JJG,KKG+1,N)
-                  FZ(II,JJ,KK,N) = FZ(II,JJ,KK,N) + WW(II,JJ,KK)*SCALAR_FACE_VALUE(WW(II,JJ,KK),ZZ,FLUX_LIMITER)
-               CASE(-3)
-                  ZZ(1) = RHOYYP(IIG,JJG,KKG-1,N)
-                  ZZ(2) = RHOYYP(IIG,JJG,KKG,N)
-                  IF (PREDICTOR) ZZ(3) = M2%RHO(IIO,JJO,KKO)*M2%YY(IIO,JJO,KKO,N)
-                  IF (CORRECTOR) ZZ(3) = M2%RHOS(IIO,JJO,KKO)*M2%YYS(IIO,JJO,KKO,N)
-                  IF (PREDICTOR) ZZ(4) = M2%RHO(IIO,JJO,KKO+1)*M2%YY(IIO,JJO,KKO+1,N)
-                  IF (CORRECTOR) ZZ(4) = M2%RHOS(IIO,JJO,KKO+1)*M2%YYS(IIO,JJO,KKO+1,N)
-                  FZ(II,JJ,KK-1,N) = FZ(II,JJ,KK-1,N) + WW(II,JJ,KK-1)*SCALAR_FACE_VALUE(WW(II,JJ,KK-1),ZZ,FLUX_LIMITER)
-            END SELECT
-            
-!         CASE (999) METHOD_OF_MASS_TRANSFER2
-!
-!            SELECT CASE(IOR)
-!               CASE( 1)
-!                  FX(II,JJ,KK,N)   =(FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N))*R(II)
-!               CASE(-1)
-!                  FX(II-1,JJ,KK,N) =(FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N))*R(II-1)
-!               CASE( 2)   
-!                  FY(II,JJ,KK,N)   = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
-!               CASE(-2)
-!                  FY(II,JJ-1,KK,N) = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
-!               CASE( 3)
-!                  FZ(II,JJ,KK,N)   = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
-!               CASE(-3)
-!                  FZ(II,JJ,KK-1,N) = FW(IW,N) + UVW_SAVE(IW)*RHO_F(IW)*YY_F(IW,N)
-!            END SELECT
-            
-         CASE DEFAULT METHOD_OF_MASS_TRANSFER2
-
-            SELECT CASE(IOR)
-               CASE( 1)
-                  FX(II,JJ,KK,N)   =(FW(IW,N) + UU(II,JJ,KK)*RHO_F(IW)*YY_F(IW,N))*R(II)
-               CASE(-1)
-                  FX(II-1,JJ,KK,N) =(FW(IW,N) + UU(II-1,JJ,KK)*RHO_F(IW)*YY_F(IW,N))*R(II-1)
-               CASE( 2)   
-                  FY(II,JJ,KK,N)   = FW(IW,N) + VV(II,JJ,KK)*RHO_F(IW)*YY_F(IW,N)
-               CASE(-2)
-                  FY(II,JJ-1,KK,N) = FW(IW,N) + VV(II,JJ-1,KK)*RHO_F(IW)*YY_F(IW,N)
-               CASE( 3)
-                  FZ(II,JJ,KK,N)   = FW(IW,N) + WW(II,JJ,KK)*RHO_F(IW)*YY_F(IW,N)
-               CASE(-3)
-                  FZ(II,JJ,KK-1,N) = FW(IW,N) + WW(II,JJ,KK-1)*RHO_F(IW)*YY_F(IW,N)
-            END SELECT
-      
-      END SELECT METHOD_OF_MASS_TRANSFER2
-      
-   ENDDO WALL_LOOP2
-
-ENDDO SPECIES_LOOP
-
-TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
-END SUBROUTINE SCALARF
 
 
 REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
