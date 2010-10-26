@@ -590,7 +590,7 @@ int readsmv(char *file, char *file2){
       continue;
     }
     if(
-       matchonly(buffer,"SPRK",4) == 1||
+        matchonly(buffer,"SPRK",4) == 1||
        matchonly(buffer,"HEAT",4) == 1||
        matchonly(buffer,"SMOD",4) == 1||
        matchonly(buffer,"THCP",4) == 1
@@ -2468,6 +2468,7 @@ typedef struct {
         if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
       }
     }
+    printf("buffer=%s\n",buffer);
     CheckMemory;
 
   /*
@@ -4346,7 +4347,7 @@ typedef struct {
     ++++++++++++++++++++++ HEAT ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(matchonly(buffer,"HEAT",4) == 1){
+    if(match(buffer,"HEAT",4) == 1&&match(buffer,"HEAT_ACT",8) != 1){
       mesh *meshi;
       char *device_label;
 
@@ -4406,6 +4407,7 @@ typedef struct {
           get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
 
           init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
+          devicecopy->prop=NULL;
 
           devicecopy++;
           ndeviceinfo++;
