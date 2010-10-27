@@ -15,6 +15,65 @@
 // svn revision character string
 char string_util_revision[]="$Revision$";
 
+/* ------------------ randint ------------------------ */
+
+int randint(int min, int max){
+  int return_val;
+
+  if (min>max){
+    return_val = max+((min-max+1)*rand()/(RAND_MAX+1.0));
+  }
+  else{
+    return_val = min+((max-min+1)*rand()/(RAND_MAX+1.0));
+  }
+  return return_val;
+}
+
+/* ------------------ randstr ------------------------ */
+
+char *randstr(char* str, int length){
+    int i;
+
+    if (str==NULL||length<=0)return NULL;
+
+    for (i=0;i<length;i++){
+      str[i]=(char)randint(65,90);
+    }
+    str[length]=0;
+    return str;
+}
+
+/* ------------------ can_write_to_dir ------------------------ */
+
+int can_write_to_dir(char *dir){
+  char full_name[1024];
+  char file_name[1024], *file_name_ptr;
+  FILE *stream;
+  char dirseparator[3];
+
+#ifdef WIN32
+  strcpy(dirseparator,"\\");
+#else
+  strcpy(dirseparator,"/");
+#endif
+
+  file_name_ptr=randstr(file_name,20);
+  if(file_name_ptr==NULL)return 0;
+  strcpy(full_name,"");
+  if(dir!=NULL&&strcmp(dir,".")!=0&&strlen(dir)>0){
+    strcat(full_name,dir);
+    strcat(full_name,dirseparator);
+  }
+
+  strcat(full_name,file_name_ptr);
+  
+  stream=fopen(full_name,"wb");
+  if(stream==NULL)return 0;
+  fclose(stream);
+  remove(full_name);
+  return 1;
+}
+
 /* ------------------ is_file_newer ------------------------ */
 
 int is_file_newer(char *file1, char *file2){
