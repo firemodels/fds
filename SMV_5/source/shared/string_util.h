@@ -26,6 +26,7 @@ EXTERNCPP char *which(char *progname);
 EXTERNCPP float MIN(float x,float y);
 EXTERNCPP float MAX(float x,float y);
 EXTERNCPP float frexp10(float x, int *exp10);
+EXTERNCPP int can_write_to_dir(char *dir);
 
 
 SVEXTERN char dirseparator[3];

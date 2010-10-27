@@ -246,6 +246,7 @@ void update_patch_bounds(patch *patchi){
     boundj = &patchj->bounds;
     memcpy(boundj,boundi,sizeof(bounddata));
   }
+  writeboundini();
 }
 
 /* ------------------ getBoundaryColors3 ------------------------ */

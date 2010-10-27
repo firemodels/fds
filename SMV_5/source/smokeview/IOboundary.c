@@ -18,6 +18,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "smv_endian.h"
+#include "smokeviewdefs.h"
 
 // svn revision character string
 char IOboundary_revision[]="$Revision$";
@@ -2520,6 +2521,7 @@ void drawpatch_cellcenter(const mesh *meshi){
 
   /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
 
+  if((use_transparency_data==1&&showcolorbarlines==1)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
   nn =0;
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
@@ -2719,9 +2721,10 @@ void drawpatch_cellcenter(const mesh *meshi){
     }
     nn += patchrow[n]*patchcol[n];
   }
-  if(hidepatchsurface==0){
+  if(hidepatchsurface==1){
     glEnd();
   }
+  if((use_transparency_data==1&&showcolorbarlines==1)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
 }
 
 /* ------------------ drawolythreshold ------------------------ */
@@ -3695,8 +3698,9 @@ void update_all_patch_hist(void){
 void update_patch_hist(patch *patchj){
   int i;
   int endiandata;
- // int endianswitch;
+  int first=1;
 
+  if(patchj->setvalmax==SET_MAX&&patchj->setvalmin==SET_MIN)return;
   endiandata=getendian();
 
   for(i=0;i<npatch_files;i++){
@@ -3717,6 +3721,10 @@ void update_patch_hist(patch *patchj){
     patchi->inuse_getbounds=1;
     meshi = meshinfo + patchi->blocknumber;
 
+    if(first==1){
+      printf("Determining %s percentile and global data bounds\n",patchi->label.longlabel);
+      first=0;
+    }
     printf("  Examining %s\n",patchi->file);
     lenfile=strlen(patchi->file);
 
