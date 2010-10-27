@@ -700,7 +700,7 @@ SVEXTERN char *hrrfilename;
 SVEXTERN hrrdata *hrrinfo;
 SVEXTERN char *smokezippath;
 SVEXTERN char *INI_fds_filein, *fds_filein, *fds_fileout,*fds_fileout2;
-SVEXTERN char *caseinifilename;
+SVEXTERN char SVDECL(*caseinifilename,NULL),SVDECL(*boundinifilename,NULL);
 SVEXTERN char *zonelonglabels, *zoneshortlabels, *zoneunits;
 SVEXTERN char *smokeviewini;
 SVEXTERN int overwrite_all,erase_all;

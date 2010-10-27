@@ -3529,6 +3529,11 @@ void Args(int argc, char **argv){
   STRCPY(caseinifilename,fdsprefix);
   STRCAT(caseinifilename,ini_ext);
 
+  FREEMEMORY(boundinifilename);
+  NewMemory((void **)&boundinifilename,len+5+1);
+  STRCPY(boundinifilename,fdsprefix);
+  STRCAT(boundinifilename,".bini");
+
   if(smvfilename==NULL){
     STRUCTSTAT statbuffer;
 

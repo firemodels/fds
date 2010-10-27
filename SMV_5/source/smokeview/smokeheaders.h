@@ -620,6 +620,8 @@ EXTERNCPP void setventdirs(void);
 EXTERNCPP int nodeinblockage(const mesh *meshi, int i,int j,int k, int *imesh, int *iblockage);
 EXTERNCPP int nodeinvent(const mesh *gb, int i,int j,int k, int dir);
 EXTERNCPP void MenuStatus(int status, int x, int y);
+EXTERNCPP void writeboundini(void);
+EXTERNCPP void readboundini(void);
 EXTERNCPP int readini2(char *inifile, int localfile);
 EXTERNCPP int match(char *buffer, const char *key, unsigned int lenkey);
 EXTERNCPP int matchonly(char *buffer, const char *key, unsigned int lenkey);

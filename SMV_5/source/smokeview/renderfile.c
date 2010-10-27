@@ -78,35 +78,6 @@ void Render(int view_mode){
 
 //void pauseSV(void);
 
-
-  /* ------------------ can_write_to_dir ------------------------ */
-
-int can_write_to_dir(char *dir){
-  char full_name[1024];
-  char temp_name[1024];
-  FILE *stream;
-
-  if(dir==NULL)return 0;
-
-  strcpy(temp_name,fdsprefix);
-  strcat(temp_name,".write_test");
-
-  if(strcmp(dir,".")==0||strlen(dir)==0){
-    strcpy(full_name,temp_name);
-  }
-  else{
-    strcpy(full_name,dir);
-    strcat(full_name,dirseparator);
-    strcat(full_name,temp_name);
-  }
-  stream=fopen(full_name,"wb");
-  if(stream==NULL)return 0;
-  fclose(stream);
-  remove(full_name);
-
-  return 1;
-}
-
   /* ------------------ RenderFrame ------------------------ */
 
 void RenderFrame(int view_mode){
