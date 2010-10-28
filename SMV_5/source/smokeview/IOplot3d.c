@@ -226,7 +226,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
      return;
   }
 
-  getfile_size(file,&file_size);
+  file_size=get_filesize(file);
   plot3dfilelen = strlen(file);
   printf("Loading plot3d data: %s\n",file);
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
@@ -1984,8 +1984,9 @@ void init_plot3dtimelist(void){
   plot3d *plot3di;
   float lasttime,val;
 
+  FREEMEMORY(plot3dtimelist);
   nplot3dtimelist=0;
-  if(plot3dtimelist==NULL&&nplot3d_files>0){
+  if(nplot3d_files>0){
     NewMemory((void **)&plot3dtimelist,nplot3d_files*sizeof(float));
   }
   if(plot3dtimelist==NULL)return;

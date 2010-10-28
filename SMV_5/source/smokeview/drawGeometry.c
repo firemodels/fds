@@ -2827,7 +2827,7 @@ void update_smooth_blockages(void){
   if(STREAM_SB!=NULL){
     time_t sb_modtime;
 
-    getfile_modtime(filename_sb, &sb_modtime);
+    sb_modtime=file_modtime(filename_sb);
     if(sb_modtime!=0&&smv_modtime!=0&&smv_modtime>sb_modtime){
       fclose(STREAM_SB);
       STREAM_SB=NULL;

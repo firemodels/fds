@@ -1946,7 +1946,6 @@ void SmokeviewiniMenu(int value){
   GLUTPOSTREDISPLAY
 }
 
-
 /* ------------------ PeriodicReloads ------------------------ */
 
 void PeriodicReloads(int value){
@@ -2161,6 +2160,7 @@ void LoadUnloadMenu(int value){
       if(isoi->loaded==0)continue;
       readiso(isoi->file,i,LOAD,&errorcode);
     }
+    readsmv_dynamic(smvfilename);
     UNLOCK_COMPRESS
   //  plotstate=DYNAMIC_PLOTS;
   //  visSmoke=1;
@@ -7285,7 +7285,7 @@ updatemenu=0;
         plot3di = plot3dinfo + i;
         plot3dim1 = plot3dinfo + im1;
         if(fabs(plot3di->time-plot3dim1->time)>0.1){
-          if(nmeshes>1)glutAddMenuEntry("  All Meshes",-100000+nloadsubplot3dmenu-1);
+          if(nmeshes>1)glutAddMenuEntry("  All meshes",-100000+nloadsubplot3dmenu-1);
           CREATEMENU(loadsubplot3dmenu[nloadsubplot3dmenu],LoadPlot3dMenu);
           nloadsubplot3dmenu++;
         }
@@ -7296,7 +7296,7 @@ updatemenu=0;
         strcat(menulabel,plot3di->menulabel);
         glutAddMenuEntry(menulabel,i);
       }
-      if(nmeshes>1)glutAddMenuEntry("  All Meshes",-100000+nloadsubplot3dmenu-1);
+      if(nmeshes>1)glutAddMenuEntry("  All meshes",-100000+nloadsubplot3dmenu-1);
 
       nloadsubplot3dmenu=0;
       CREATEMENU(loadplot3dmenu,LoadPlot3dMenu);

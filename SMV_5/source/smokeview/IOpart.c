@@ -143,7 +143,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
   PART5FILE=fopen(reg_file,"rb");
   if(PART5FILE==NULL)return;
 
-  getfile_size(reg_file,file_size);
+  *file_size=get_filesize(reg_file);
   fseek(PART5FILE,4,SEEK_CUR);fread(&one,4,1,PART5FILE);fseek(PART5FILE,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
 
