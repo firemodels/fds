@@ -15,6 +15,22 @@
 // svn revision character string
 char string_util_revision[]="$Revision$";
 
+
+/* ------------------ file_modtime ------------------------ */
+
+time_t file_modtime(char *filename){
+  STRUCTSTAT statbuffer;
+  time_t return_val;
+  int statfile;
+
+  return_val=0;
+  if(filename==NULL)return return_val;
+  statfile=STAT(filename,&statbuffer);
+  if(statfile!=0)return return_val;
+  return_val = statbuffer.st_mtime;
+  return return_val;
+}
+
 /* ------------------ randint ------------------------ */
 
 int randint(int min, int max){
@@ -472,12 +488,15 @@ void parse_string(char *string, char **tokens, int *ntokens){
 
   /* ------------------ getfileinfo ------------------------ */
 
-int fileexist(char *filename){
+int file_exists(char *filename){
   STRUCTSTAT statbuffer;
-  int statfile;
 
-  statfile=STAT(filename,&statbuffer);
-  return statfile;
+  if(STAT(filename,&statbuffer)==0){
+    return 1;
+  }
+  else{
+    return 0;
+  }
 }
 
 /* ------------------ array2string ------------------------ */
@@ -518,7 +537,7 @@ char *which(char *progname){
     strcpy(fullpath,dir);
     strcat(fullpath,dirsep);
     strcat(fullpath,prog);
-    if(fileexist(fullpath)==0){
+    if(file_exists(fullpath)==1){
       lendir=strlen(dir);
       if(lendir<=0)continue;
       NewMemory((void **)&returndir,(unsigned int)(lendir+2));

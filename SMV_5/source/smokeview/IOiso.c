@@ -19,7 +19,6 @@
 // svn revision character string
 char IOiso_revision[]="$Revision$";
 
-// dummy change to force revision update
 void sync_isobounds(int isottype);
 void unloadiso(mesh *gb);
 
@@ -350,7 +349,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 
     getisoheader(ib->comp_file,&isostream,ib->size_file,&nisopoints, &nisotriangles,&nbuffer,&maxfullbuffer, &maxcompbuffer,
       &meshi->isolevels, &meshi->nisolevels, &meshi->nisosteps, isoframestep, &ib->normaltable, &ib->nnormaltable);
-    getfile_size(ib->comp_file,&file_size);
+    file_size=get_filesize(ib->comp_file);
     if(nbuffer>0){
       NewMemory((void **)&ib->comp_buffer,nbuffer);
       maxfullbuffer=1.01*maxfullbuffer+600;
@@ -366,7 +365,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       &ib->tmin, &ib->tmax,
       endian_data);
 
-    getfile_size(file,&file_size);
+    file_size=get_filesize(file);
   }
   if(meshi->isolevels==NULL){
     readiso("",ifile,UNLOAD,&error);

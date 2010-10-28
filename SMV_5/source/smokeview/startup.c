@@ -94,6 +94,7 @@ int initcase_c(int argc, char **argv){
     input_file=smvfilename;
     return_code=readsmv(input_file,smvisofilename);
   }
+  readsmv_dynamic(input_file);
   switch (return_code){
     case 1:
 #ifdef pp_MESSAGE
