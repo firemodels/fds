@@ -187,6 +187,30 @@ SETTIMEVAL
 RENDERONCE
  thouse5_bound_cell_060
 
+// render boundary file (cell averaged, truncated)
+
+UNLOADALL
+LOADINIFILE
+ thouse5_bound_trunc.ini
+LOADFILE
+ thouse5_03.bf
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_bound_trunc_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_bound_trunc_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_bound_trunc_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_bound_trunc_060
+
 // render particles
 
 UNLOADALL
