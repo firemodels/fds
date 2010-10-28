@@ -98,6 +98,714 @@ void init_prop(propdata *propi, int nsmokeview_ids, char *label){
   propi->rotate_angle=0.0;
 }
 
+/* ------------------ readsmv_dynamic ------------------------ */
+
+void readsmv_dynamic(char *file){
+  char buffer[255],buffer2[255];
+  FILE *stream;
+  int ioffset;
+  float time;
+  int nn;
+  blockagedata *bc;
+  int i,j;
+  int nn_plot3d=0,iplot3d=0;
+  int do_pass2=0, do_pass3=0, minmaxpl3d=0;
+
+  updatefacelists=1;
+  updatemenu=1;
+  if(nplot3d_files>0){
+    int n;
+
+    for(i=0;i<nplot3d_files;i++){
+      plot3d *plot3di;
+
+      plot3di = plot3dinfo + i;
+      for(n=0;n<6;n++){
+        freelabels(&plot3di->label[n]);
+      }
+      FREEMEMORY(plot3di->reg_file);
+      FREEMEMORY(plot3di->comp_file);
+    }
+    FREEMEMORY(plot3dinfo);
+  }
+  nplot3d_files=0;
+
+  stream=fopen(file,"r");
+  if(stream==NULL)return;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi=meshinfo+i;
+    meshi->nsmoothblockages_list=1;
+    meshi->smoothblockages_list=NULL;
+    for(j=0;j<meshi->nbptrs;j++){
+      blockagedata *bc;
+
+      bc=meshi->blockageinfoptrs[j];
+      bc->nshowtime=0;
+      FREEMEMORY(bc->showtime);
+      FREEMEMORY(bc->showhide);
+    }
+    for(j=0;j<meshi->nvents;j++){
+      ventdata *vi;
+
+      vi = meshi->ventinfo + j;
+      vi->nshowtime=0;
+      FREEMEMORY(vi->showhide);
+      FREEMEMORY(vi->showtime);
+    }
+  }
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+
+    devicei = deviceinfo + i;
+    devicei->nstate_changes=0;
+    FREEMEMORY(devicei->act_times);
+    FREEMEMORY(devicei->state_values);
+  }
+
+  ioffset=0;
+
+  // ------------------------------- pass 1 dynamic - start ------------------------------------
+
+  for(;;){
+    if(fgets(buffer,255,stream)==NULL)break;
+    if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ OFFSET ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"OFFSET",6) == 1){
+      mesh *meshi;
+
+      ioffset++;
+      continue;
+    }
+/*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+      if(match(buffer,"PL3D",4) == 1){
+      do_pass2=1;
+      nplot3d_files++;
+      continue;
+   
+    }
+/*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ OPEN_VENT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"OPEN_VENT",9) == 1||match(buffer,"CLOSE_VENT",10)==1){
+      mesh *meshi;
+      int len;
+      ventdata *vi;
+      int showvent, blocknumber, tempval;
+  
+      do_pass2=1;
+      showvent=1;
+      if(match(buffer,"CLOSE_VENT",10) == 1)showvent=0;
+      if(nmeshes>1){
+        blocknumber=ioffset-1;
+      }
+      else{
+        blocknumber=0;
+      }
+      trim(buffer);
+      len=strlen(buffer);
+      if(showvent==1){
+        if(len>10){
+          sscanf(buffer+10,"%i",&blocknumber);
+          blocknumber--;
+          if(blocknumber<0)blocknumber=0;
+          if(blocknumber>nmeshes-1)blocknumber=nmeshes-1;
+        }
+      }
+      else{
+        if(len>11){
+          sscanf(buffer+11,"%i",&blocknumber);
+          blocknumber--;
+          if(blocknumber<0)blocknumber=0;
+          if(blocknumber>nmeshes-1)blocknumber=nmeshes-1;
+        }
+      }
+      meshi=meshinfo + blocknumber;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f",&tempval,&time);
+      tempval--;
+      if(meshi->ventinfo==NULL||tempval<0||tempval>=meshi->nvents)continue;
+      nn=tempval;
+      vi=meshi->ventinfo+nn;
+      vi->nshowtime++;
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SHOW_OBST ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"SHOW_OBST",9) == 1||match(buffer,"HIDE_OBST",9)==1){
+      mesh *meshi;
+      int blocknumber,blocktemp,showobst,tempval;
+
+      do_pass2=1;
+      if(nmeshes>1){
+        blocknumber=ioffset-1;
+      }
+      else{
+        blocknumber=0;
+      }
+      if(strlen(buffer)>10){
+        sscanf(buffer,"%s %i",buffer2,&blocktemp);
+        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
+      }
+      showobst=0;
+      if(match(buffer,"SHOW_OBST",9) == 1)showobst=1;
+      meshi=meshinfo + blocknumber;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f",&tempval,&time);
+      tempval--;
+      if(tempval<0||tempval>=meshi->nbptrs)continue;
+      nn=tempval;
+      bc=meshi->blockageinfoptrs[nn];
+      bc->nshowtime++;
+      meshi->nsmoothblockages_list++;
+      if(meshi->nsmoothblockages_list>0)use_menusmooth=1;
+      continue;
+    }
+
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ DEVICE_ACT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"DEVICE_ACT",10) == 1){
+      device *devicei;
+      int idevice;
+      float act_time;
+      int act_state;
+
+      do_pass2=1;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f %i",&idevice,&act_time,&act_state);
+      idevice--;
+      if(idevice>=0&&idevice<ndeviceinfo){
+        devicei = deviceinfo + idevice;
+        devicei->act_time=act_time;
+        devicei->nstate_changes++;
+      }
+
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ HEAT_ACT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"HEAT_ACT",8) == 1){
+      mesh *meshi;
+      int blocknumber,blocktemp;
+
+      if(nmeshes>1){
+        blocknumber=ioffset-1;
+      }
+      else{
+        blocknumber=0;
+      }
+      if(strlen(buffer)>9){
+        sscanf(buffer,"%s %i",buffer2,&blocktemp);
+        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
+      }
+      meshi=meshinfo + blocknumber;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f",&nn,&time);
+      if(meshi->theat!=NULL && nn>=1 && nn <= meshi->nheat){
+        int idev;
+        int count=0;
+
+        meshi->theat[nn-1]=time;
+        for(idev=0;idev<ndeviceinfo;idev++){
+          device *devicei;
+
+          devicei = deviceinfo + idev;
+          if(devicei->type==DEVICE_HEAT){
+            count++;
+            if(nn==count){
+              devicei->act_time=time;
+              break;
+            }
+          }
+        }
+      }
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SPRK_ACT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"SPRK_ACT",8) == 1){
+      mesh *meshi;
+      int blocknumber,blocktemp;
+
+      if(nmeshes>1){
+        blocknumber=ioffset-1;
+      }
+      else{
+        blocknumber=0;
+      }
+      if(strlen(buffer)>9){
+        sscanf(buffer,"%s %i",buffer2,&blocktemp);
+        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
+      }
+      meshi=meshinfo + blocknumber;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f",&nn,&time);
+      if(meshi->tspr!=NULL && nn <= meshi->nspr && nn > 0){
+        int idev;
+        int count=0;
+
+        meshi->tspr[nn-1]=time;
+
+        for(idev=0;idev<ndeviceinfo;idev++){
+          device *devicei;
+
+          devicei = deviceinfo + idev;
+          if(devicei->type==DEVICE_SPRK){
+            count++;
+            if(nn==count){
+              devicei->act_time=time;
+              break;
+            }
+          }
+        }
+      }
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SMOD_ACT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"SMOD_ACT",8) == 1){
+      int idev;
+      int count=0;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f",&nn,&time);
+      for(idev=0;idev<ndeviceinfo;idev++){
+        device *devicei;
+
+        devicei = deviceinfo + idev;
+        if(devicei->type==DEVICE_SMOKE){
+          count++;
+          if(nn==count){
+            devicei->act_time=time;
+            break;
+          }
+        }
+      }
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ MINMAXPL3D +++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"MINMAXPL3D",10) == 1){
+      minmaxpl3d=1;
+      do_pass2=1;
+      continue;
+    }
+  }
+
+  // ------------------------------- pass 1 dynamic - end ------------------------------------
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int nlist;
+
+    meshi=meshinfo+i;
+
+    nlist=meshi->nsmoothblockages_list+2; // add an entry for t=0.0
+    FREEMEMORY(meshi->smoothblockages_list);
+    NewMemory((void **)&meshi->smoothblockages_list,nlist*sizeof(smoothblockage));
+
+    meshi->nsmoothblockages_list++;
+
+    for(j=0;j<nlist;j++){
+      smoothblockage *sb;
+
+      sb=meshi->smoothblockages_list+j;
+      sb->smoothblockagecolors=NULL;
+      sb->smoothblockagesurfaces=NULL;
+      sb->nsmoothblockagecolors=0;
+    }
+    meshi->nsmoothblockages_list=1;
+    meshi->smoothblockages_list[0].time=-1.0;
+    meshi->nsmoothblockages_list++;
+  }
+  FREEMEMORY(plot3dinfo);
+  if(nplot3d_files>0){
+    if(NewMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d))==0)return;
+  }
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+
+    devicei = deviceinfo + i;
+    devicei->istate_changes=0;
+  }
+
+  ioffset=0;
+  rewind(stream);
+
+  // ------------------------------- pass 2 dynamic - start ------------------------------------
+
+  while(do_pass2==1){
+    if(fgets(buffer,255,stream)==NULL)break;
+    if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ OFFSET ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"OFFSET",6) == 1){
+      mesh *meshi;
+
+      ioffset++;
+      continue;
+    }
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"PL3D",4) == 1){
+      plot3d *plot3di;
+      int len,blocknumber,blocktemp;
+      char *bufptr;
+
+      if(minmaxpl3d==1)do_pass3=1;
+      nn_plot3d++;
+      trim(buffer);
+      len=strlen(buffer);
+      blocknumber = 0;
+      if(nmeshes>1){
+        blocknumber=ioffset-1;
+      }
+      else{
+        blocknumber=0;
+      }
+      if(strlen(buffer)>5){
+        sscanf(buffer,"%s %f %i",buffer2,&time,&blocktemp);
+        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
+      }
+      else{
+        time=-1.0;
+      }
+      if(fgets(buffer,255,stream)==NULL){
+        nplot3d_files--;
+        break;
+      }
+      bufptr=trim_string(buffer);
+      len=strlen(bufptr);
+
+      plot3di=plot3dinfo+iplot3d;
+      plot3di->blocknumber=blocknumber;
+      plot3di->seq_id=nn_plot3d;
+      plot3di->autoload=0;
+      plot3di->time=time;
+      plot3di->loaded=0;
+      plot3di->display=0;
+
+      NewMemory((void **)&plot3di->reg_file,(unsigned int)(len+1));
+      STRCPY(plot3di->reg_file,bufptr);
+
+      NewMemory((void **)&plot3di->comp_file,(unsigned int)(len+4+1));
+      STRCPY(plot3di->comp_file,bufptr);
+      STRCAT(plot3di->comp_file,".svz");
+
+      if(file_exists(plot3di->comp_file)==1){
+        plot3di->compression_type=1;
+        plot3di->file=plot3di->comp_file;
+      }
+      else{
+        plot3di->compression_type=0;
+        plot3di->file=plot3di->reg_file;
+      }
+      //disable compression for now
+      plot3di->compression_type=0;
+      plot3di->file=plot3di->reg_file;
+
+      if(file_exists(plot3di->file)==0){
+        int n;
+
+        for(n=0;n<5;n++){
+          if(readlabels(&plot3di->label[n],stream)==2)return;
+        }
+        nplot3d_files--;
+      }
+      else{
+        int n;
+
+        plot3di->u = -1;
+        plot3di->v = -1;
+        plot3di->w = -1;
+        for(n=0;n<5;n++){
+          char *UVEL="U-VEL", *VVEL="V-VEL", *WVEL="W-VEL";
+
+          if(readlabels(&plot3di->label[n],stream)==2)return;
+          if(match(plot3di->label[n].shortlabel,UVEL,5) == 1){
+            plot3di->u = n;
+          }
+          if(match(plot3di->label[n].shortlabel,VVEL,5) == 1){
+            plot3di->v = n;
+          }
+          if(match(plot3di->label[n].shortlabel,WVEL,5) == 1){
+            plot3di->w = n;
+          }
+        }
+        if(plot3di->u>-1||plot3di->v>-1||plot3di->w>-1){
+          plot3di->nvars=mxplot3dvars;
+        }
+        else{
+          plot3di->nvars=5;
+        }
+        if(NewMemory((void **)&plot3di->label[5].longlabel,6)==0)return;
+        if(NewMemory((void **)&plot3di->label[5].shortlabel,6)==0)return;
+        if(NewMemory((void **)&plot3di->label[5].unit,4)==0)return;
+
+        STRCPY(plot3di->label[5].longlabel,"Speed");
+        STRCPY(plot3di->label[5].shortlabel,"Speed");
+        STRCPY(plot3di->label[5].unit,"m/s");
+
+        STRCPY(plot3di->longlabel,"");
+        for(n=0;n<5;n++){
+          STRCAT(plot3di->longlabel,plot3di->label[n].shortlabel);
+          if(n!=4)STRCAT(plot3di->longlabel,", ");
+        }
+
+        iplot3d++;
+      }
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ OPEN_VENT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"OPEN_VENT",9) == 1||match(buffer,"CLOSE_VENT",10)==1){
+      mesh *meshi;
+      int len,showvent,blocknumber,tempval;
+      ventdata *vi;
+
+      showvent=1;
+      if(match(buffer,"CLOSE_VENT",10) == 1)showvent=0;
+      if(nmeshes>1){
+        blocknumber=ioffset-1;
+      }
+      else{
+        blocknumber=0;
+      }
+      trim(buffer);
+      len=strlen(buffer);
+      if(showvent==1){
+        if(len>10){
+          sscanf(buffer+10,"%i",&blocknumber);
+          blocknumber--;
+          if(blocknumber<0)blocknumber=0;
+          if(blocknumber>nmeshes-1)blocknumber=nmeshes-1;
+        }
+      }
+      else{
+        if(len>11){
+          sscanf(buffer+11,"%i",&blocknumber);
+          blocknumber--;
+          if(blocknumber<0)blocknumber=0;
+          if(blocknumber>nmeshes-1)blocknumber=nmeshes-1;
+        }
+      }
+      meshi=meshinfo + blocknumber;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f",&tempval,&time);
+      tempval--;
+      if(meshi->ventinfo==NULL)continue;
+      if(tempval<0||tempval>=meshi->nvents)continue;
+      nn=tempval;
+      vi=meshi->ventinfo+nn;
+      if(vi->showtime==NULL){
+        NewMemory((void **)&vi->showtime,(vi->nshowtime+1)*sizeof(float));
+        NewMemory((void **)&vi->showhide,(vi->nshowtime+1)*sizeof(unsigned char));
+        vi->nshowtime=1;
+        vi->showtime[0]=0.0;
+        vi->showhide[0]=1;
+      }
+      if(showvent==1){
+        vi->showhide[vi->nshowtime]=1;
+      }
+      else{
+        vi->showhide[vi->nshowtime]=0;
+      }
+      vi->showtime[vi->nshowtime++]=time;
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SHOW_OBST ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"SHOW_OBST",9) == 1||match(buffer,"HIDE_OBST",9)==1){
+      mesh *meshi;
+      int nlist,blocknumber,tempval,showobst,blocktemp;
+
+      if(nmeshes>1){
+        blocknumber=ioffset-1;
+      }
+      else{
+        blocknumber=0;
+      }
+      if(strlen(buffer)>10){
+        sscanf(buffer,"%s %i",buffer2,&blocktemp);
+        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
+      }
+      showobst=0;
+      if(match(buffer,"SHOW_OBST",9) == 1)showobst=1;
+      meshi=meshinfo + blocknumber;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f",&tempval,&time);
+      tempval--;
+      if(tempval<0||tempval>=meshi->nbptrs)continue;
+      nn=tempval;
+      bc=meshi->blockageinfoptrs[nn];
+
+      meshi->nsmoothblockages_list++;
+      nlist=meshi->nsmoothblockages_list;
+      if(nlist==2&&time!=0.0){          //  insert time=0.0 into list if not there
+        meshi->smoothblockages_list[1].time=0.0;
+        meshi->nsmoothblockages_list++;
+        nlist++;
+      }
+      meshi->smoothblockages_list[nlist-1].time=time;
+      if(time==meshi->smoothblockages_list[nlist-2].time){
+        nlist--;
+        meshi->nsmoothblockages_list=nlist;
+      }
+
+      if(bc->showtime==NULL){
+        if(time!=0.0)bc->nshowtime++;
+        NewMemory((void **)&bc->showtime,bc->nshowtime*sizeof(float));
+        NewMemory((void **)&bc->showhide,bc->nshowtime*sizeof(unsigned char));
+        bc->nshowtime=0;
+        if(time!=0.0){
+          bc->nshowtime=1;
+          bc->showtime[0]=0.0;
+          if(showobst==1){
+            bc->showhide[0]=0;
+          }
+          else{
+            bc->showhide[0]=1;
+          }
+        }
+      }
+      bc->nshowtime++;
+      if(showobst==1){
+        bc->showhide[bc->nshowtime-1]=1;
+      }
+      else{
+        bc->showhide[bc->nshowtime-1]=0;
+      }
+      bc->showtime[bc->nshowtime-1]=time;
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ DEVICE_ACT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"DEVICE_ACT",10) == 1){
+      device *devicei;
+      int idevice;
+      float act_time;
+      int act_state=1;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %f %i",&idevice,&act_time,&act_state);
+      idevice--;
+      if(idevice>=0&&idevice<ndeviceinfo){
+        int istate;
+
+        devicei = deviceinfo + idevice;
+        devicei->act_time=act_time;
+        if(devicei->act_times==NULL){
+          devicei->nstate_changes++;
+          NewMemory((void **)&devicei->act_times,devicei->nstate_changes*sizeof(int));
+          NewMemory((void **)&devicei->state_values,devicei->nstate_changes*sizeof(int));
+          devicei->act_times[0]=0.0;
+          devicei->state_values[0]=devicei->state0;
+          devicei->istate_changes++;
+        }
+        istate = devicei->istate_changes++;
+        devicei->act_times[istate]=act_time;
+        devicei->state_values[istate]=act_state;
+      }
+      continue;
+    }
+
+  }
+
+  // ------------------------------- pass 2 dynamic - end ------------------------------------
+
+  rewind(stream);
+
+  // ------------------------------- pass 3 dynamic - start ------------------------------------
+
+  while(do_pass3==1){
+    if(fgets(buffer,255,stream)==NULL)break;
+    if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ MINMAXPL3D +++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"MINMAXPL3D",10) == 1){
+      char *file_ptr, file2[1024];
+      float valmin[5], valmax[5];
+      float percentile_min[5], percentile_max[5];
+
+      fgets(buffer,255,stream);
+      strcpy(file2,buffer);
+      file_ptr = file2;
+      trim(file2);
+      file_ptr = trim_front(file2);
+
+      for(i=0;i<5;i++){
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f",valmin +i,valmax+i, percentile_min+i,percentile_max+i);
+      }
+
+      for(i=0;i<nplot3d_files;i++){
+        plot3d *plot3di;
+
+        plot3di = plot3dinfo + i;
+        if(strcmp(file_ptr,plot3di->file)==0){
+          for(j=0;j<5;j++){
+            plot3di->diff_valmin[j]=percentile_min[j];
+            plot3di->diff_valmax[j]=percentile_max[j];
+          }
+          break;
+        }
+      }
+      continue;
+    }
+  }
+
+  fclose(stream);
+  updateplot3dmenulabels();
+  init_plot3dtimelist();
+}
+
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(char *file, char *file2){
@@ -145,7 +853,6 @@ int readsmv(char *file, char *file2){
   int roomnumber;
   float width,ventoffset,bottom,top;
   blockagedata *bc;
-  plot3d *p;
   int igrid;
   int ioffset;
   float *xplttemp,*yplttemp,*zplttemp;
@@ -163,9 +870,6 @@ int readsmv(char *file, char *file2){
   float *xsprcopy, *ysprcopy, *zsprcopy;
   float *xheatcopy, *yheatcopy, *zheatcopy;
   int nn;
-  char *UVEL="U-VEL";
-  char *VVEL="V-VEL";
-  char *WVEL="W-VEL";
   int i, j, k;
   STRUCTSTAT statbuffer,statbuffer2;
   texture *texti,*textj;
@@ -178,7 +882,6 @@ int readsmv(char *file, char *file2){
   int nn_patch=0;
   int nn_iso=0;
   int nn_part=0;
-  int nn_plot3d=0;
   int nn_slice=0;
 
   npropinfo=0;
@@ -319,14 +1022,6 @@ int readsmv(char *file, char *file2){
   }
   nzone=0;
 
-  if(nplot3d_files>0){
-    for(i=0;i<nplot3d_files;i++){
-      for(n=0;n<6;n++)freelabels(&plot3dinfo[i].label[n]);
-      FREEMEMORY(plot3dinfo[i].file);
-    }
-    FREEMEMORY(plot3dinfo);
-  }
-  nplot3d_files=0;
   if(nsmoke3d_files>0){
     {
       smoke3d *smoke3di;
@@ -477,7 +1172,7 @@ int readsmv(char *file, char *file2){
   }
   stream=stream1;
 
-  getfile_modtime(file, &smv_modtime);
+  smv_modtime=file_modtime(file);
   
   printf("\nReading: %s\n",file);
 
@@ -552,11 +1247,6 @@ int readsmv(char *file, char *file2){
        match(buffer,"CLASS_OF_HUMANS",15) == 1){
       npartclassinfo++;
       continue;
-    }
-    if(match(buffer,"PL3D",4) == 1){
-      nplot3d_files++;
-      continue;
-   
     }
     if(match(buffer,"AUTOTERRAIN",11) == 1){
       int len_buffer;
@@ -971,10 +1661,6 @@ int readsmv(char *file, char *file2){
 //  updatecolors(-1);
 #endif
 
-  FREEMEMORY(plot3dinfo);
-  if(nplot3d_files>0){
-    if(NewMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d))==0)return 2;
-  }
   FREEMEMORY(patchinfo);
   FREEMEMORY(patchtypes);
   if(npatch_files!=0){
@@ -2138,29 +2824,6 @@ typedef struct {
       ndeviceinfo++;
       continue;
     }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ DEVICE_ACT ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"DEVICE_ACT",10) == 1){
-      device *devicei;
-      int idevice;
-      float act_time;
-      int act_state;
-
-      do_pass4=1;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i",&idevice,&act_time,&act_state);
-      idevice--;
-      if(idevice>=0&&idevice<ndeviceinfo){
-        devicei = deviceinfo + idevice;
-        devicei->act_time=act_time;
-        devicei->nstate_changes++;
-      }
-
-      continue;
-    }
   }
 /* 
    ************************************************************************
@@ -2530,111 +3193,6 @@ typedef struct {
       }
       continue;
     }
-
-    /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"PL3D",4) == 1){
-      nn_plot3d++;
-      trim(buffer);
-      len=strlen(buffer);
-      blocknumber = 0;
-      if(nmeshes>1){
-        blocknumber=ioffset-1;
-      }
-      else{
-        blocknumber=0;
-      }
-      if(strlen(buffer)>5){
-        sscanf(buffer,"%s %f %i",buffer2,&time,&blocktemp);
-        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
-      }
-      else{
-        time=-1.0;
-      }
-      if(fgets(buffer,255,stream)==NULL){
-        nplot3d_files--;
-        BREAK;
-      }
-      bufptr=trim_string(buffer);
-      len=strlen(bufptr);
-
-      p=plot3dinfo+iplot3d;
-      p->blocknumber=blocknumber;
-      p->seq_id=nn_plot3d;
-      p->autoload=0;
-      p->time=time;
-      p->loaded=0;
-      p->display=0;
-
-      NewMemory((void **)&p->reg_file,(unsigned int)(len+1));
-      STRCPY(p->reg_file,bufptr);
-
-      NewMemory((void **)&p->comp_file,(unsigned int)(len+4+1));
-      STRCPY(p->comp_file,bufptr);
-      STRCAT(p->comp_file,".svz");
-
-      if(STAT(p->comp_file,&statbuffer)==0){
-        p->compression_type=1;
-        p->file=p->comp_file;
-      }
-      else{
-        p->compression_type=0;
-        p->file=p->reg_file;
-      }
-      //disable compression for now
-      p->compression_type=0;
-      p->file=p->reg_file;
-
-      if(STAT(p->file,&statbuffer)!=0){
-        for(n=0;n<5;n++){
-          if(readlabels(&p->label[n],stream)==2)return 2;
-        }
-        nplot3d_files--;
-      }
-      else{
-        p->u = -1;
-        p->v = -1;
-        p->w = -1;
-        for(n=0;n<5;n++){
-          if(readlabels(&p->label[n],stream)==2)return 2;
-          if(match(p->label[n].shortlabel,UVEL,5) == 1){
-            p->u = n;
-          }
-          if(match(p->label[n].shortlabel,VVEL,5) == 1){
-            p->v = n;
-          }
-          if(match(p->label[n].shortlabel,WVEL,5) == 1){
-            p->w = n;
-          }
-        }
-        if(p->u>-1||p->v>-1||p->w>-1){
-          p->nvars=mxplot3dvars;
-        }
-        else{
-          p->nvars=5;
-        }
-        if(NewMemory((void **)&p->label[5].longlabel,6)==0)return 2;
-        if(NewMemory((void **)&p->label[5].shortlabel,6)==0)return 2;
-        if(NewMemory((void **)&p->label[5].unit,4)==0)return 2;
-
-        STRCPY(p->label[5].longlabel,"Speed");
-        STRCPY(p->label[5].shortlabel,"Speed");
-        STRCPY(p->label[5].unit,"m/s");
-
-        STRCPY(p->longlabel,"");
-        for(n=0;n<5;n++){
-          STRCAT(p->longlabel,p->label[n].shortlabel);
-          if(n!=4)STRCAT(p->longlabel,", ");
-        }
-
-        iplot3d++;
-      }
-      continue;
-    }
-
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ OFFSET ++++++++++++++++++++++++++++++
@@ -4300,49 +4858,6 @@ typedef struct {
     }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ SPRK_ACT ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"SPRK_ACT",8) == 1){
-      mesh *meshi;
-
-      if(nmeshes>1){
-        blocknumber=ioffset-1;
-      }
-      else{
-        blocknumber=0;
-      }
-      if(strlen(buffer)>9){
-        sscanf(buffer,"%s %i",buffer2,&blocktemp);
-        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
-      }
-      meshi=meshinfo + blocknumber;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&nn,&time);
-      if(meshi->tspr!=NULL && nn <= meshi->nspr && nn > 0){
-        meshi->tspr[nn-1]=time;
-        {
-          int idev;
-          int count=0;
-
-          for(idev=0;idev<ndeviceinfo;idev++){
-            device *devicei;
-
-            devicei = deviceinfo + idev;
-            if(devicei->type==DEVICE_SPRK){
-              count++;
-              if(nn==count){
-                devicei->act_time=time;
-                break;
-              }
-            }
-          }
-        }
-      }
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ HEAT ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
@@ -4418,49 +4933,6 @@ typedef struct {
     }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ HEAT_ACT ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"HEAT_ACT",8) == 1){
-      mesh *meshi;
-
-      if(nmeshes>1){
-        blocknumber=ioffset-1;
-      }
-      else{
-        blocknumber=0;
-      }
-      if(strlen(buffer)>9){
-        sscanf(buffer,"%s %i",buffer2,&blocktemp);
-        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
-      }
-      meshi=meshinfo + blocknumber;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&nn,&time);
-      if(meshi->theat!=NULL && nn <= meshi->nheat && nn > 0){
-        meshi->theat[nn-1]=time;
-        {
-          int idev;
-          int count=0;
-
-          for(idev=0;idev<ndeviceinfo;idev++){
-            device *devicei;
-
-            devicei = deviceinfo + idev;
-            if(devicei->type==DEVICE_HEAT){
-              count++;
-              if(nn==count){
-                devicei->act_time=time;
-                break;
-              }
-            }
-          }
-        }
-      }
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ SMOD ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
@@ -4512,110 +4984,6 @@ typedef struct {
         ndeviceinfo++;
 
       }
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ SMOD_ACT ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"SMOD_ACT",8) == 1){
-      int idev;
-      int count=0;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&nn,&time);
-      for(idev=0;idev<ndeviceinfo;idev++){
-        device *devicei;
-
-        devicei = deviceinfo + idev;
-        if(devicei->type==DEVICE_SMOKE){
-          count++;
-          if(nn==count){
-            devicei->act_time=time;
-            break;
-          }
-        }
-      }
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ SHOW_OBST ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"SHOW_OBST",9) == 1||match(buffer,"HIDE_OBST",9)==1){
-      mesh *meshi;
-
-      do_pass4=1;
-      if(nmeshes>1){
-        blocknumber=ioffset-1;
-      }
-      else{
-        blocknumber=0;
-      }
-      if(strlen(buffer)>10){
-        sscanf(buffer,"%s %i",buffer2,&blocktemp);
-        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
-      }
-      showobst=0;
-      if(match(buffer,"SHOW_OBST",9) == 1)showobst=1;
-      meshi=meshinfo + blocknumber;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&tempval,&time);
-      tempval--;
-      if(tempval<0||tempval>=meshi->nbptrs)continue;
-      nn=tempval;
-      bc=meshi->blockageinfoptrs[nn];
-      bc->nshowtime++;
-      meshi->nsmoothblockages_list++;
-      if(meshi->nsmoothblockages_list>0)use_menusmooth=1;
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ OPEN_VENT ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"OPEN_VENT",9) == 1||match(buffer,"CLOSE_VENT",10)==1){
-      mesh *meshi;
-
-      do_pass4=1;
-      showvent=1;
-      if(match(buffer,"CLOSE_VENT",10) == 1)showvent=0;
-      if(nmeshes>1){
-        blocknumber=ioffset-1;
-      }
-      else{
-        blocknumber=0;
-      }
-      trim(buffer);
-      len=strlen(buffer);
-      if(showvent==1){
-        if(len>10){
-          sscanf(buffer+10,"%i",&blocknumber);
-          blocknumber--;
-          if(blocknumber<0)blocknumber=0;
-          if(blocknumber>nmeshes-1)blocknumber=nmeshes-1;
-        }
-      }
-      else{
-        if(len>11){
-          sscanf(buffer+11,"%i",&blocknumber);
-          blocknumber--;
-          if(blocknumber<0)blocknumber=0;
-          if(blocknumber>nmeshes-1)blocknumber=nmeshes-1;
-        }
-      }
-      meshi=meshinfo + blocknumber;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&tempval,&time);
-      tempval--;
-      if(meshi->ventinfo==NULL)continue;
-      if(tempval<0||tempval>=meshi->nvents)continue;
-      nn=tempval;
-      vi=meshi->ventinfo+nn;
-      vi->nshowtime++;
       continue;
     }
   }
@@ -4720,36 +5088,6 @@ typedef struct {
       }
       continue;
     }
-    if(match(buffer,"MINMAXPL3D",10) == 1){
-      char *file_ptr, file2[1024];
-      float valmin[5], valmax[5];
-      float percentile_min[5], percentile_max[5];
-
-      fgets(buffer,255,stream);
-      strcpy(file2,buffer);
-      file_ptr = file2;
-      trim(file2);
-      file_ptr = trim_front(file2);
-
-      for(i=0;i<5;i++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",valmin +i,valmax+i, percentile_min+i,percentile_max+i);
-      }
-
-      for(i=0;i<nplot3d_files;i++){
-        plot3d *plot3di;
-
-        plot3di = plot3dinfo + i;
-        if(strcmp(file_ptr,plot3di->file)==0){
-          for(j=0;j<5;j++){
-            plot3di->diff_valmin[j]=percentile_min[j];
-            plot3di->diff_valmax[j]=percentile_max[j];
-          }
-          break;
-        }
-      }
-      continue;
-    }
     if(match(buffer,"MINMAXSLCF",10) == 1){
       char *file_ptr, file2[1024];
       float valmin, valmax;
@@ -4819,177 +5157,6 @@ typedef struct {
       }
       continue;
     }
-
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ DEVICE_ACT ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-
-    if(match(buffer,"DEVICE_ACT",10) == 1){
-      device *devicei;
-      int idevice;
-      float act_time;
-      int act_state=1;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i",&idevice,&act_time,&act_state);
-      idevice--;
-      if(idevice>=0&&idevice<ndeviceinfo){
-        int istate;
-
-        devicei = deviceinfo + idevice;
-        devicei->act_time=act_time;
-        if(devicei->act_times==NULL){
-          devicei->nstate_changes++;
-          NewMemory((void **)&devicei->act_times,devicei->nstate_changes*sizeof(int));
-          NewMemory((void **)&devicei->state_values,devicei->nstate_changes*sizeof(int));
-          devicei->act_times[0]=0.0;
-          devicei->state_values[0]=devicei->state0;
-          devicei->istate_changes++;
-        }
-        istate = devicei->istate_changes++;
-        devicei->act_times[istate]=act_time;
-        devicei->state_values[istate]=act_state;
-      }
-
-      continue;
-    }
-
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ SHOW_OBST ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-
-    if(match(buffer,"SHOW_OBST",9) == 1||match(buffer,"HIDE_OBST",9)==1){
-      mesh *meshi;
-      int nlist;
-
-      if(nmeshes>1){
-        blocknumber=ioffset-1;
-      }
-      else{
-        blocknumber=0;
-      }
-      if(strlen(buffer)>10){
-        sscanf(buffer,"%s %i",buffer2,&blocktemp);
-        if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
-      }
-      showobst=0;
-      if(match(buffer,"SHOW_OBST",9) == 1)showobst=1;
-/*
-    implement a better strategy for setting this variable
-
-      if(match(buffer,"HIDE_OBST",9) == 1)show_slice_in_obst=1;
-      */
-      meshi=meshinfo + blocknumber;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&tempval,&time);
-      tempval--;
-      if(tempval<0||tempval>=meshi->nbptrs)continue;
-      nn=tempval;
-      bc=meshi->blockageinfoptrs[nn];
-
-      meshi->nsmoothblockages_list++;
-      nlist=meshi->nsmoothblockages_list;
-      if(nlist==2&&time!=0.0){          //  insert time=0.0 into list if not there
-        meshi->smoothblockages_list[1].time=0.0;
-        meshi->nsmoothblockages_list++;
-        nlist++;
-      }
-      meshi->smoothblockages_list[nlist-1].time=time;
-      if(time==meshi->smoothblockages_list[nlist-2].time){
-        nlist--;
-        meshi->nsmoothblockages_list=nlist;
-      }
-
-      if(bc->showtime==NULL){
-        if(time!=0.0)bc->nshowtime++;
-        NewMemory((void **)&bc->showtime,bc->nshowtime*sizeof(float));
-        NewMemory((void **)&bc->showhide,bc->nshowtime*sizeof(unsigned char));
-        bc->nshowtime=0;
-        if(time!=0.0){
-          bc->nshowtime=1;
-          bc->showtime[0]=0.0;
-          if(showobst==1){
-            bc->showhide[0]=0;
-          }
-          else{
-            bc->showhide[0]=1;
-          }
-        }
-      }
-      bc->nshowtime++;
-      if(showobst==1){
-        bc->showhide[bc->nshowtime-1]=1;
-      }
-      else{
-        bc->showhide[bc->nshowtime-1]=0;
-      }
-      bc->showtime[bc->nshowtime-1]=time;
-      continue;
-    }
-
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ OPEN_VENT ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"OPEN_VENT",9) == 1||match(buffer,"CLOSE_VENT",10)==1){
-      mesh *meshi;
-
-      showvent=1;
-      if(match(buffer,"CLOSE_VENT",10) == 1)showvent=0;
-      if(nmeshes>1){
-        blocknumber=ioffset-1;
-      }
-      else{
-        blocknumber=0;
-      }
-      trim(buffer);
-      len=strlen(buffer);
-      if(showvent==1){
-        if(len>10){
-          sscanf(buffer+10,"%i",&blocknumber);
-          blocknumber--;
-          if(blocknumber<0)blocknumber=0;
-          if(blocknumber>nmeshes-1)blocknumber=nmeshes-1;
-        }
-      }
-      else{
-        if(len>11){
-          sscanf(buffer+11,"%i",&blocknumber);
-          blocknumber--;
-          if(blocknumber<0)blocknumber=0;
-          if(blocknumber>nmeshes-1)blocknumber=nmeshes-1;
-        }
-      }
-      meshi=meshinfo + blocknumber;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&tempval,&time);
-      tempval--;
-      if(meshi->ventinfo==NULL)continue;
-      if(tempval<0||tempval>=meshi->nvents)continue;
-      nn=tempval;
-      vi=meshi->ventinfo+nn;
-      if(vi->showtime==NULL){
-        NewMemory((void **)&vi->showtime,(vi->nshowtime+1)*sizeof(float));
-        NewMemory((void **)&vi->showhide,(vi->nshowtime+1)*sizeof(unsigned char));
-        vi->nshowtime=1;
-        vi->showtime[0]=0.0;
-        vi->showhide[0]=1;
-      }
-      if(showvent==1){
-        vi->showhide[vi->nshowtime]=1;
-      }
-      else{
-        vi->showhide[vi->nshowtime]=0;
-      }
-      vi->showtime[vi->nshowtime++]=time;
-      continue;
-    }
-
   }
 
   if(do_pass4==1)printf("   pass 4 completed\n");
@@ -5030,7 +5197,6 @@ typedef struct {
 
   init_multi_threading();
   init_part5prop();
-  init_plot3dtimelist();
 
   if(noutlineinfo>0){
     highlight_flag=2;
@@ -5744,7 +5910,6 @@ typedef struct {
   updatevslicetypes();
   updatepatchmenulabels();
   updateisomenulabels();
-  updateplot3dmenulabels();
   updatepartmenulabels();
   updatetourmenulabels();
   init_user_ticks();
@@ -10378,32 +10543,19 @@ void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis, float *dpsi){
   }
 }
 
-/* ------------------ getfile_modtime ------------------------ */
+/* ------------------ get_filesize ------------------------ */
 
-void getfile_modtime(char *filename, time_t *modtime){
+FILE_SIZE get_filesize(const char *filename){
   STRUCTSTAT statbuffer;
   int statfile;
+  FILE_SIZE return_val;
 
-  *modtime=0;
-  if(filename==NULL)return;
+  return_val=0;
+  if(filename==NULL)return return_val;
   statfile=STAT(filename,&statbuffer);
-  if(statfile!=0)return;
-  *modtime = statbuffer.st_mtime;
-  return;
-}
-
-/* ------------------ getfile_size ------------------------ */
-
-void getfile_size(const char *filename, FILE_SIZE *filesize){
-  STRUCTSTAT statbuffer;
-  int statfile;
-
-  *filesize=0;
-  if(filename==NULL)return;
-  statfile=STAT(filename,&statbuffer);
-  if(statfile!=0)return;
-  *filesize = statbuffer.st_size;
-  return;
+  if(statfile!=0)return return_val;
+  return_val = statbuffer.st_size;
+  return return_val;
 }
 
 /* ------------------ file_exit ------------------------ */

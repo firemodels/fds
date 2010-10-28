@@ -369,7 +369,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
 // read in data
 
-  getfile_size(smoke3di->file,&file_size);
+  file_size=get_filesize(smoke3di->file);
 #ifdef EGZ
   SMOKE3DFILE=EGZ_FOPEN(smoke3di->file,"rb",0,2);
 #endif

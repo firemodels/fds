@@ -2,8 +2,14 @@
 // $Revision$
 // $Author$
 
+EXTERNCPP int can_write_to_dir(char *dir);
+EXTERNCPP int file_exists(char *filename);
+EXTERNCPP char *which(char *progname);
+EXTERNCPP FILE_SIZE get_filesize(const char *filename);
+EXTERNCPP time_t file_modtime(char *filename);
 EXTERNCPP int is_file_newer(char *file1, char *file2);
 EXTERNCPP char *getdir(char *progname);
+
 EXTERNCPP char *lastname(char *argi);
 EXTERNCPP void trim(char *line);
 EXTERNCPP char *trim_front(char *line);
@@ -21,12 +27,9 @@ EXTERNCPP int log_base2(float xx);
 #endif
 EXTERNCPP void array2string(float *vals, int nvals, char *string);
 EXTERNCPP void parse_string(char *string, char **tokens, int *ntokens);
-EXTERNCPP int fileexist(char *filename);
-EXTERNCPP char *which(char *progname);
 EXTERNCPP float MIN(float x,float y);
 EXTERNCPP float MAX(float x,float y);
 EXTERNCPP float frexp10(float x, int *exp10);
-EXTERNCPP int can_write_to_dir(char *dir);
 
 
 SVEXTERN char dirseparator[3];

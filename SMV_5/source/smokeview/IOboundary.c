@@ -708,7 +708,7 @@ void readpatch(int ifile, int flag, int *errorcode){
     meshi->npatch_frames=0;
   }
 
-  getfile_size(file,&file_size);
+  file_size=get_filesize(file);
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
   for (i=0;i<mxpatch_frames;){
     if(loadpatchbysteps==1){

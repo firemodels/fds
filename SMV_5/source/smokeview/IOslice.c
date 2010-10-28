@@ -389,7 +389,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       return;
     }
     GetMemoryInfo(num_memblocks_load,0);
-    getfile_size(file,&file_size);
+    file_size=get_filesize(file);
 
     slicefilelen = strlen(file);
     if(settmax_s==0&&settmin_s==0){
