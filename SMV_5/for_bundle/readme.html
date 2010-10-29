@@ -21,10 +21,13 @@
 
 <ul>
 
-<li>test (build 7002) - October 23, 2010
+<li>5.6 (build 7032) - October 29, 2010
 <p>Smokeview change log
 
 <ol>
+<li>enhancement: add option to re-read .smv file after FDS updates it -
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1227&can=1&sort=-id">Issue 1227</a>)
+
 <li>enhancement: add option to chop or truncate boundary file data (same capability as exists now with slice files) - 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1233&can=1&sort=-id">Issue 1233</a>)
 <li>enhancement: add cell center display for 3D slice files - 
@@ -37,12 +40,14 @@ option may be invoked from the menus or using the "L" key -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1218&can=1&sort=-id">Issue 1218</a>)
 <li>enhancement: add choice of 1440x1080 screen resolution to Motion/View/Render dialog box (for making high resolution animations)
 
+<li>usability: improve determination of boundary file min/max bounds
 <li>usability: show hrrpuv cutoff label when timebar is hidden - 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1213&can=1&sort=-id">Issue 1213</a>)
 <li>usability: make isosurface generation more efficient by rejecting trivial cases earlier in the generation process
 <li>usability: modify readsmv to read in two files (2nd file created by smokezip which contains entries for additional isosurface surfaces) - addresses issue 1208
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1208&can=1&sort=-id">Issue 1208</a>)
 
+<li>fix: eliminate a memory leak occuring when re-reading the .smv file.
 <li>fix: fix problem in graphics library causing Smokeview menus to hang -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1218&can=1&sort=-id">Issue 1218</a>)
 <li>fix: fix problem with Fortran unit numbers when reading boundary files
