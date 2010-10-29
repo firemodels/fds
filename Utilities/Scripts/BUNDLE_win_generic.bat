@@ -42,29 +42,40 @@ mkdir %out_uninstall%
 Rem Copy FDS, Smokeview and other needed files to the bin  directory
 
 echo.
-echo Copying FDS to the bin directory
+if "%platform%"=="32" echo copying fds5_win_%platform%.exe
 if "%platform%"=="32" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\fds5.exe
+
+if "%platform%"=="32" echo copying fds5_mpi_win_%platform%.exe
 if "%platform%"=="32" copy %fdsmpidir%\fds5_mpi_win_%platform%.exe  %out_bin%\fds5_mpi.exe
+
+if "%platform%"=="64" echo copying fds5_win_%platform%.exe
 if "%platform%"=="64" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\.
+
+if "%platform%"=="64" echo copying fds5_mpi_win_%platform%.exe
 if "%platform%"=="64" copy %fdsmpidir%\fds5_mpi_win_%platform%.exe  %out_bin%\.
 
-echo Copying Smokeview to the bin directory
+echo copying smokeview%platform%_release.exe
 copy %in_smv%\smokeview%platform%_release.exe   %out_bin%\smokeview.exe
 
-echo Copying smokediff to the bin directory
-if "%platform%"=="32" copy %in_smokediff%\intel_win_32\smokediff.exe     %out_bin%\smokediff.exe
+if "%platform%"=="32" echo copying smokediff.exe
+if "%platform%"=="32" copy smokediff.exe     %out_bin%\smokediff.exe
+
+if "%platform%"=="64" echo copying smokediff_64.exe
 if "%platform%"=="64" copy %in_smokediff%\intel_win_64\smokediff_64.exe   %out_bin%\smokediff_win_64.exe
 
-echo Copying smokezip to the bin directory
-Rem if "%platform%"=="32" copy %in_smokezip%\intel_win_32\smokezip.exe     %out_bin%\smokezip.exe
+if "%platform%"=="32" echo copying smokezip32_release.exe
 if "%platform%"=="32" copy %in_smokezip%\smokezip32_release.exe     %out_bin%\smokezip.exe
+
+if "%platform%"=="64" echo copying smokezip64_release.exe
 if "%platform%"=="64" copy %in_smokezip%\smokezip64_release.exe   %out_bin%\smokezip_win_64.exe
 
-echo Copying fds2ascii to the bin directory
+if "%platform%"=="32" echo copying fds2ascii_win_32.exe
 if "%platform%"=="32" copy %in_fds2ascii%\intel_win_32\fds2ascii_win_32.exe     %out_bin%\fds2ascii.exe
+
+if "%platform%"=="64" echo copying fds2ascii_win_64.exe
 if "%platform%"=="64" copy %in_fds2ascii%\intel_win_64\fds2ascii_win_64.exe     %out_bin%\fds2ascii_win_64.exe
 
-echo Copying background to the bin directory
+echo copying background.exe
 copy %in_background%\intel_win_32\background.exe %out_bin%\background.exe
 
 echo.
@@ -142,7 +153,10 @@ copy %in_smv%\textures\*.png          %out_textures%\.
 
 echo.
 echo Copying Uninstaller to Uninstall directory
+echo copying uninstall_fds5.bat
 copy "%bundleinfo%\uninstall_fds5.bat"             "%out_uninstall%\Uninstall.bat"
+
+echo copying set_path%platform%.exe
 copy "%bundleinfo%\set_path%platform%.exe"         "%out_uninstall%\set_path.exe"
 
 Rem Include documentation in the bundle only if the variable, docs_include_in_bundles,
