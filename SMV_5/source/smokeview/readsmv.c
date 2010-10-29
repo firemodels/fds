@@ -137,7 +137,7 @@ void readsmv_dynamic(char *file){
 
     meshi=meshinfo+i;
     meshi->nsmoothblockages_list=1;
-    meshi->smoothblockages_list=NULL;
+    FREEMEMORY(meshi->smoothblockages_list);
     for(j=0;j<meshi->nbptrs;j++){
       blockagedata *bc;
 
@@ -187,7 +187,8 @@ void readsmv_dynamic(char *file){
     ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-      if(match(buffer,"PL3D",4) == 1){
+
+    if(match(buffer,"PL3D",4) == 1){
       do_pass2=1;
       nplot3d_files++;
       continue;
@@ -447,7 +448,6 @@ void readsmv_dynamic(char *file){
     meshi->smoothblockages_list[0].time=-1.0;
     meshi->nsmoothblockages_list++;
   }
-  FREEMEMORY(plot3dinfo);
   if(nplot3d_files>0){
     if(NewMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d))==0)return;
   }
