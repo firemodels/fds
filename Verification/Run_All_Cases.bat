@@ -4,13 +4,19 @@ set svn_drive=d:
 set BASEDIR=%CD%
 set SVNROOT=%BASEDIR%\..\
 
-set FDS=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
-Rem set FDS=background -u 75 -d 10 %SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
+set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
+
+Rem Use the first "FDS" definition to execute one FDS at a time in the forground.
+Rem Use the second "FDS" def to execute more than one FDS in the background
+
+set FDS=%FDSEXE%
+Rem set FDS=background -u 75 -d 10 %FDSEXE%
 
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 
 echo You are about to run the Verification Test Suite.
+echo Press any key to begin.
 pause > Nul
 
 Rem -------------------------
@@ -32,19 +38,19 @@ Rem This file is included in the smokeview user's guide
 Rem -----------------------------------------------------------------------
 
 set smvug="%CD%\..\Manuals\SMV_5_User_Guide\"
-echo | fds5 2> "%smvug%\figures\fds5.version"
+echo | %FDSEXE% 2> "%smvug%\figures\fds5.version"
 
 Rem -------------------------
 Rem run FDS veriication cases
 Rem -------------------------
-cd %BASEDIR%\SMV_scripts
+cd %BASEDIR%\scripts
 echo creating FDS case list from SMV_Cases.csh
 ..\..\Utilities\Data_Processing\csh2bat SMV_Cases.csh SMV_Cases.bat
 
 call SMV_Cases.bat
 erase SMV_Cases.bat
 
-cd %BASEDIR%\SMV_scripts
+cd %BASEDIR%\scripts
 call run_wui_tree_test
 
 pause
