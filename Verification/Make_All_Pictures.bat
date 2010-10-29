@@ -40,7 +40,7 @@ smokeview -runscript objects_dynamic
 
 
 Rem generate Smokeview figures
-cd ..\SMV_Scripts
-Rem call Make_SMV_Pictures
+cd ..\scripts
+call Make_SMV_Pictures
 
 
