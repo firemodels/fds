@@ -31,6 +31,10 @@ smokeview -runscript ns2d_64
 cd ..\Pressure_Effects
 smokeview -runscript pressure_boundary
 
+cd ..\Scalar_Analytical_Solution
+smokeview -runscript move_slug
+smokeview -runscript move_slug_fl1
+
 cd ..\Sprinklers_and_Sprays
 smokeview -runscript cascade
 
