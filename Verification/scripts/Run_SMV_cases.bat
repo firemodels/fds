@@ -5,8 +5,19 @@ set SCRIPT_DIR=%CD%
 set BASEDIR=%CD%\..
 set SVNROOT=%BASEDIR%\..\
 
-Rem set FDS=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
-set FDS=background -d 1 -u 90 %SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
+Rem Choose one of the following four FDS "definitions" by commenting all lines but one.
+
+Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
+set FDSEXE=fds5
+Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds5_win_64
+Rem set FDSEXE=fds5_win_64
+
+Rem Choose one of the following run options by commenting the line you don't want to use.
+Rem Use the first "FDS" definition to run one case at a time in the forground.
+Rem Use the second "FDS" definition to execute more than one case at a time in the background
+
+Rem set FDS=%FDSEXE%
+set FDS=background -u 75 -d 10 %FDSEXE%
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 
@@ -24,7 +35,7 @@ Rem create a text file containing the FDS5 version used to run these tests.
 Rem This file is included in the smokeview user's guide
 
 set smvug="%CD%\..\Manuals\SMV_5_User_Guide\"
-echo | %FDS% 2> "%smvug%\figures\fds5.version"
+echo | %FDSEXE% 2> "%smvug%\figures\fds5.version"
 
 call %SCRIPT_DIR%\SMV_Cases.bat
 
