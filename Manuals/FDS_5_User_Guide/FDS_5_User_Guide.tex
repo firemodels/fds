@@ -1492,6 +1492,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 {\ct DUMP}  & Output Parameters            & \ref{info:DUMP} & \ref{tbl:DUMP}  \\ \hline
 {\ct HEAD}  & Input File Header            & \ref{info:HEAD} & \ref{tbl:HEAD}  \\ \hline
 {\ct HOLE}  & Obstruction Cutout           & \ref{info:HOLE} & \ref{tbl:HOLE}  \\ \hline
+{\ct HVAC}  & Heating, Vent., Air Cond.    & \ref{info:HVAC} & \ref{tbl:HVAC}  \\ \hline
 {\ct INIT}  & Initial Condition            & \ref{info:INIT} & \ref{tbl:INIT}  \\ \hline
 {\ct ISOF}  & Isosurface File Output       & \ref{info:ISOF} & \ref{tbl:ISOF}  \\ \hline
 {\ct MATL}  & Material Property            & \ref{info:MATL} & \ref{tbl:MATL}  \\ \hline
@@ -4986,16 +4987,16 @@ turned off completely by setting {\ct STRATIFICATION=.FALSE.} on the {\ct MISC} 
 \label{info:HVAC}
 
 There are occasions where simply defining fixed flow and fixed species boundary conditions is not sufficient to model the behavior of an HVAC (Heating, Ventilation,
-Air Conditioning) system.  
-If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment 
-due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a 
-duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts or where a duct segment connects to the FDS computational domain.  
-The current HVAC solver does not allow for mass storage in the duct network ({\em i.e.} what goes in during a time step, goes out during a time step).  
+Air Conditioning) system.
+If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment
+due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
+duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts or where a duct segment connects to the FDS computational domain.
+The current HVAC solver does not allow for mass storage in the duct network ({\em i.e.} what goes in during a time step, goes out during a time step).
 HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and coupled to the FDS control function capability.  The
 user can select from three fan models.
 
-The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.  
-An HVAC network is defined by providing inputs for the ducts, duct nodes, and any fans or dampers present in the system.  
+The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.
+An HVAC network is defined by providing inputs for the ducts, duct nodes, and any fans or dampers present in the system.
 Additionally the user must define the locations where the HVAC network joins the computational domain.  The basic syntax for an {\ct HVAC} component is:
 
 \footnotesize
@@ -5027,7 +5028,7 @@ where:
 \begin{description}
 \item[{\ct AREA}] is the area of the duct in m$^2$. Either {\ct AREA} or {\ct DIAMETER} must be defined.
 \item[{\ct CTRL\_ID}] is the {\ct ID} of a {\ct CTRL} function for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
-\item[{\ct DAMPER}] is a logical variable indicating the presence of a damper in the duct.  The state of the damper is controlled by 
+\item[{\ct DAMPER}] is a logical variable indicating the presence of a damper in the duct.  The state of the damper is controlled by
 function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
 \item[{\ct DIAMETER}]  is the diameter (m) of the duct. Either {\ct AREA} or {\ct DIAMETER} must be defined.
@@ -5055,8 +5056,8 @@ where:
 \item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient ({\em i.e.} it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
 \item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
 \item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss from duct {\ct I} to duct {\ct J}.
-\item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the connection occurs if the node connects to the FDS computational domain. 
-\item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.  
+\item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the connection occurs if the node connects to the FDS computational domain.
+\item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
 \end{description}
 
@@ -5076,7 +5077,7 @@ where:
 \item[{\ct LOSS}] is the flow loss through the fan when it is not operational.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in Pa.  This input activates a quadratic fan model.
-\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of volumetric flow rates (m$^3$/s) versus the pressure drop across the fan (Pa).  
+\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of volumetric flow rates (m$^3$/s) versus the pressure drop across the fan (Pa).
 {\ct VOLUME\_FLOW} is the fixed volumetric flow of the fan (m$^3$/s).
 \end{description}
 
@@ -9281,35 +9282,37 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
 
-Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC system.  Quantities for a duct require the specification of a {\ct DUCT\_ID}, and quantities for a nodet require the specification of a {\ct NODE\_ID}.  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}
+Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  Quantities for a duct require the specification 
+of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\ct NODE\_ID}.  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}.
 
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|}
-\caption[Output quantities.]{Summary of frequently used output quantities.}
+\begin{longtable}{|l|l|l|@{\extracolsep{\fill}}}
+\caption[Output quantities.]{Summary of HVAC output quantities.}
 \label{tab:hvacoutput} \\
 \hline
-{\ct QUANTITY}                           & Symbol                                        & Units           \\
+{\ct QUANTITY}                                  & Symbol                                    & Units           \\
 \hline \hline
 \endfirsthead
-\caption[]{Summary of frequently used output quantities (continued).} \\
+\caption[]{Summary of HVAC output quantities (continued).} \\
 \hline
-{\ct QUANTITY}                           & Symbol                                        & Units           \\
+{\ct QUANTITY}                                  & Symbol                                    & Units           \\
 \hline \hline
 \endhead
-{\ct DUCT DENSITY}                              & Desnsity of the flow in a duct     &  kg/$m^3$             \\ \hline
-{\ct DUCT MASS FLOW}                            & Mass flow in a duct                 &  kg/s             \\ \hline
-{\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct                 &  kg/kg             \\ \hline
-{\ct DUCT TEMPERATURE}                          & Temperature of the flow in a duct                 & $^\circ$C              \\ \hline
-{\ct DUCT VELOCITY}                             & Velocity of a duct                 &  m/s             \\ \hline
-{\ct DUCT VOLUME FLOW}                          & Volumetric flow in a duct                 &  $m^3$/s             \\ \hline
-{\ct DUCT VOLUME FRACTION}                      & Volume fraction of a species in a duct     &  mol/mol             \\ \hline
-{\ct NODE DENSITY}                              & Desnsity of the flow through a node     &  kg/$m^3$             \\ \hline
-{\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node                 &  kg/kg             \\ \hline
-{\ct NODE Pressume}                             & Pressure of a node                 &       Pa           \\ \hline
-{\ct NODE TEMPERATURE}                          & Temperature of the flow though a node                  $^\circ$C              \\ \hline
-{\ct NODE VOLUME FRACTION}                      & Volume fraction of a species in a node     &  mol/mol             \\ \hline
+{\ct DUCT DENSITY}                              & Density of the flow in a duct             &  kg/m$^3$             \\ \hline
+{\ct DUCT MASS FLOW}                            & Mass flow in a duct                       &  kg/s                 \\ \hline
+{\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct      &  kg/kg                \\ \hline
+{\ct DUCT TEMPERATURE}                          & Temperature of the flow in a duct         & $^\circ$C             \\ \hline
+{\ct DUCT VELOCITY}                             & Velocity of a duct                        &  m/s                  \\ \hline
+{\ct DUCT VOLUME FLOW}                          & Volumetric flow in a duct                 &  m$^3$/s              \\ \hline
+{\ct DUCT VOLUME FRACTION}                      & Volume fraction of a species in a duct    &  mol/mol              \\ \hline
+{\ct NODE DENSITY}                              & Density of the flow through a node        &  kg/m$^3$             \\ \hline
+{\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node      &  kg/kg                \\ \hline
+{\ct NODE Pressure}                             & Pressure of a node                        &       Pa              \\ \hline
+{\ct NODE TEMPERATURE}                          & Temperature of the flow though a node     & $^\circ$C             \\ \hline
+{\ct NODE VOLUME FRACTION}                      & Volume fraction of a species in a node    &  mol/mol              \\ \hline
 \end{longtable}
+
 
 
 \chapter{Alphabetical List of Input Parameters}
@@ -9598,7 +9601,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
 \caption[Initial Conditions]{For more information see Section~\ref{info:HVAC}.}
-\label{tbl:hvacinputs} \\
+\label{tbl:HVAC} \\
 \hline
 \multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Definition)} \\
 \hline \hline
