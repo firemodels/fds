@@ -143,8 +143,20 @@ echo -------------------------- >> %manifest%
 echo.
 echo Copying auxillary files to the bin directory
 copy %in_smv%\objects.svo             %out_bin%\.
-copy %in_smv%\pthreadVC.dll           %out_bin%\.
-copy %in_smv%\glew32.dll              %out_bin%\.
+
+if "%platform%"=="32" echo copying pthreadVC.dll
+if "%platform%"=="32" copy %in_smv%\pthreadVC.dll           %out_bin%\.
+
+if "%platform%"=="64" echo copying pthreadVC2_x64.dll
+if "%platform%"=="64" copy %in_smv%\pthreadVC2_x64.dll         %out_bin%\.
+
+if "%platform%"=="32" echo copying glew32.dll
+if "%platform%"=="32" copy %in_smv%\glew32.dll              %out_bin%\.
+
+if "%platform%"=="64" echo copying glew32_x64.dll
+if "%platform%"=="64" copy %in_smv%\glew32_x64.dll              %out_bin%\.
+
+
 copy %in_smv%\smokeview.ini           %out_bin%\.
 echo.
 echo Copying textures to the bin\textures directory
