@@ -5,9 +5,9 @@
 
 &MISC HRRPUV_MAX_SMV=1300.0 /
 
-&DUMP NFRAMES=400 /
+&DUMP NFRAMES=4000 /
 
-&TIME TWFIN=1. /  Total simulation time
+&TIME TWFIN=5. /  Total simulation time
 
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
