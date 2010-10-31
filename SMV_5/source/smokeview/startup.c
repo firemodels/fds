@@ -1219,7 +1219,6 @@ void initvars1(void){
   canshow_threshold=1;
   settmin_p=0, settmin_b=0, settmin_s=0, settmin_z=0, settmin_i=0;
   settmax_p=0, settmax_b=0, settmax_s=0, settmax_z=0, settmax_i=0;
-  set_no_part=0;
   tmin_p=1., tmin_b=1., tmin_s=1., tmin_z=1., tmin_i=1.;
   tmax_p=0., tmax_b=0., tmax_s=0., tmax_z=0., tmax_i=0.;
   patchmin=1., patchmax=0.;
