@@ -673,6 +673,7 @@ SVEXTERN char *fdsprefix, *fdsprefix2;
 SVEXTERN char *endianfilename;
 SVEXTERN char *targfilename;
 
+SVEXTERN int SVDECL(update_bounds,0);
 SVEXTERN int pass_through;
 SVEXTERN int *sorted_surfidlist,*inv_sorted_surfidlist,nsorted_surfidlist;
 SVEXTERN char *trainer_filename, *test_filename;

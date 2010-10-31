@@ -3612,7 +3612,12 @@ void Args(int argc, char **argv){
   set_no_part=0;
   for (i=1;i<argc;i++){
     if(strncmp(argv[i],"-",1)!=0)continue;
-    if(strncmp(argv[i],"-ini",3)==0)writeini(GLOBAL_INI);
+    if(strncmp(argv[i],"-ini",3)==0){
+      writeini(GLOBAL_INI);
+    }
+    else if(strncmp(argv[i],"-update_bounds",14)==0){
+      update_bounds=1;
+    }
     else if(strncmp(argv[i],"-part",5)==0){
       set_no_part=0; 
     }

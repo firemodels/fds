@@ -22,8 +22,9 @@ int SUB_portfrustum(int quad,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
 
-EXTERNCPP void update_all_patch_hist(void);
-EXTERNCPP void update_patch_hist(patch *patchi);
+EXTERNCPP void update_patch_bounds(patch *patchi);
+EXTERNCPP void Update_All_Patch_Bounds(void);
+EXTERNCPP int update_patch_hist(patch *patchi);
 EXTERNCPP void update_hidepatchsurface(void);
 EXTERNCPP int last_slice_loadstack(void);
 EXTERNCPP void push_slice_loadstack(int sliceindex);

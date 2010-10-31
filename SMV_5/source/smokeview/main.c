@@ -107,6 +107,10 @@ int main(int argc, char **argv){
     sv_startup_c(argc,argv_sv);
     CheckMemory;
     startup_flag=initcase_c(argc,argv_sv);
+    if(update_bounds==1){
+      Update_All_Patch_Bounds();
+      return 0;
+    }
     if(startup_flag==0){
       sv_update();
     }
