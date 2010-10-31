@@ -3462,6 +3462,9 @@ void LoadPatchMenu(int value){
     force_redisplay=1;
     update_framenumber(0);
   }
+  else if(value==-3){
+    Update_All_Patch_Bounds();
+  }
   else{
     for(i=0;i<npatch_files;i++){
       readpatch(i,UNLOAD,&errorcode);
@@ -7436,7 +7439,6 @@ updatemenu=0;
             }
           }
           glutAddMenuEntry("-",-2);
-
           for(ii=0;ii<npatch_files;ii++){
             patch *patch1, *patch2;
 
@@ -7461,7 +7463,8 @@ updatemenu=0;
           }
         }
       }
-
+      glutAddMenuEntry("-",-2);
+      glutAddMenuEntry("Update bounds",-3);
       if(npatchloaded>1){
         glutAddSubMenu("Unload",unloadpatchmenu);
       }

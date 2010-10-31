@@ -3682,25 +3682,34 @@ void update_hidepatchsurface(void){
 
 /* ------------------ update_patch_hist ------------------------ */
 
-void update_all_patch_hist(void){
+void Update_All_Patch_Bounds(void){
   int i;
+  int total=0;
 
   for(i=0;i<npatch_files;i++){
     patch *patchi;
 
     patchi = patchinfo + i;
-    update_patch_hist(patchi);
+    total+=update_patch_hist(patchi);
+    update_patch_bounds(patchi);
+  }
+  if(total==0){
+    printf("Boundary file bounds already computed.\n");
+  }
+  else{
+    printf("Bounds for %i boundary files computed\n",total);
   }
 }
 
 /* ------------------ update_patch_hist ------------------------ */
 
-void update_patch_hist(patch *patchj){
+int update_patch_hist(patch *patchj){
   int i;
   int endiandata;
   int first=1;
+  int sum=0;
 
-  if(patchj->setvalmax==SET_MAX&&patchj->setvalmin==SET_MIN)return;
+  if(patchj->setvalmax==SET_MAX&&patchj->setvalmin==SET_MIN)return 0;
   endiandata=getendian();
 
   for(i=0;i<npatch_files;i++){
@@ -3726,6 +3735,7 @@ void update_patch_hist(patch *patchj){
       first=0;
     }
     printf("  Examining %s\n",patchi->file);
+    sum++;
     lenfile=strlen(patchi->file);
 
     FORTget_file_unit(&unit1,&patchi->unit_start);
@@ -3781,6 +3791,7 @@ void update_patch_hist(patch *patchj){
     FREEMEMORY(patchsize);
     complete_histogram(patchi->histogram);
   }
+  return sum;
 }
 
 
