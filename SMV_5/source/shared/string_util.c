@@ -544,7 +544,7 @@ char *which(char *progname){
       strcpy(returndir,dir);
       strcat(returndir,dirsep);
 #ifdef pp_BETA
-      printf("%s found in directory %s\n",prog,dir);
+      printf("Using %s found in %s\n\n",prog,dir);
 #endif
       return returndir;
     }

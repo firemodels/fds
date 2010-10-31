@@ -2987,9 +2987,6 @@ void Init(void){
     initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb);
   }
 
-  if(set_no_part!=1&&nopart!=1&&npart_files>0){
-    readpart(partinfo[0].file,0,LOAD,&errorcode);
-  }
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;
     meshi->currentsurf.defined=0;
@@ -3609,7 +3606,6 @@ void Args(int argc, char **argv){
     STRCAT(filename_sb,".sb");
   }
 
-  set_no_part=0;
   for (i=1;i<argc;i++){
     if(strncmp(argv[i],"-",1)!=0)continue;
     if(strncmp(argv[i],"-ini",3)==0){
@@ -3619,14 +3615,8 @@ void Args(int argc, char **argv){
       no_graphics=1;
       update_bounds=1;
     }
-    else if(strncmp(argv[i],"-part",5)==0){
-      set_no_part=0; 
-    }
     else if(strncmp(argv[i],"-demo",5)==0){
        demo_option=1;
-    }
-    else if(strncmp(argv[i],"-nopart",7)==0){
-      set_no_part=1; 
     }
     else if(strncmp(argv[i],"-stereo",7)==0){
       if(benchmark==0){
@@ -3648,7 +3638,8 @@ void Args(int argc, char **argv){
     else if(strncmp(argv[i],"-points",7)==0){
       ++i;
       if(i<argc){
-        mxpoints_comm = atol(argv[i]);mxpoints=mxpoints_comm;
+        mxpoints_comm = atol(argv[i]);
+        mxpoints=mxpoints_comm;
       }
     }
     else if(strncmp(argv[i],"-frames",7)==0){
@@ -3660,7 +3651,7 @@ void Args(int argc, char **argv){
     else if(strncmp(argv[i],"-isotest",8)==0){
       isotest=1;
     }
-    else if(strncmp(argv[i],"-help",5)==0){
+    else if(strncmp(argv[i],"-h",2)==0){
       usage(argv);
       exit(0);
     }
@@ -3705,6 +3696,7 @@ void Args(int argc, char **argv){
     else {
       printf(" unknown option: %s\n",argv[i]);
       usage(argv);scanf("%s",buffer);exit(1);
+      exit(0);
     }
   }
 }
@@ -3762,25 +3754,23 @@ void version(void){
 
 void usage(char **argv){
   printf("%s\n",TITLERELEASE);
-  printf("Visualize fire/smoke flow simulations.  All parameters are optional.\n\n");
-  printf("Usage:\n\n");
-  printf("%s casename -points m -frames n -ini -ng_ini -part -nopart -stereo -demo\n",argv[0]);
-  printf("            -runscript -script scriptname\n\n");
+  printf("Visualize fire/smoke flow simulations.\n\n");
+  printf("Usage: %s [options] casename\n\n",argv[0]);
   printf("where \n\n");
-  printf("  casename = project id (file names without the extension)\n");
-  printf("         m = maximum number of particles.  Default=%i\n",MAXPOINTS);
-  printf("         n = maximum number of particle frames.  Default=%i\n",MAXFRAMES);
-  printf("     -demo = activate demonstrator mode of Smokeview\n");
-  printf("     -help = display this message\n");
-  printf("      -ini = output default smokeview parameters to smokeview.ini\n");
-  printf("   -ng_ini = same as -ini .  Used when console does not have graphics setup\n");
-  printf("     -part = load particle file if present \n");
-  printf("   -nopart = do not load particle file \n");
-  printf("   -stereo = activate stereo mode (if supported)\n");
-  printf("  -version = display version information\n");
-  printf("-runscript = run the script file, casename.ssf, at startup\n");
-  printf("-script scriptfile = run the script file, scriptfile, at startup\n");
-  printf("    -build = show pre-preprocessing directives used to build smokeview\n");
+  printf(" casename       - project id (file names without the extension)\n");
+  printf(" -build         - pre-processing directives used in this build of Smokeview\n");
+  printf(" -demo          - demonstrator mode of Smokeview\n");
+  printf(" -frame nframes - maximum number of particle frames.  Default=%i\n",MAXFRAMES);
+  printf(" -help          - display this message\n");
+  printf(" -ini           - output default smokeview parameters to smokeview.ini\n");
+  printf(" -ng_ini        - No graphics version of -ini.\n");
+  printf(" -points npoints - maximum number of particles.  Default=%i\n",MAXPOINTS);
+  printf(" -runscript     - run the script file, casename.ssf, at startup\n");
+  printf(" -script scriptfile - run the script file, scriptfile, at startup\n");
+  printf(" -stereo        - activate stereo mode (if supported by the hardware)\n");
+  printf(" -update_bounds - calculate boundary file bounds and output to casename.bini\n");
+  printf(" -version       - display version information\n");
+
   if(showbuild==1){
     printf("  \n");
     printf("  Smokeview was built with the following pre-processing directives set:\n");

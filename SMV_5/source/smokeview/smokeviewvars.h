@@ -339,7 +339,6 @@ SVEXTERN float isochopmin, isochopmax;
 SVEXTERN int vis_onlythreshold, vis_threshold, canshow_threshold, activate_threshold;
 SVEXTERN int settmin_p, settmin_b, settmin_s, settmin_z, settmin_i;
 SVEXTERN int settmax_p, settmax_b, settmax_s, settmax_z, settmax_i;
-SVEXTERN int set_no_part;
 SVEXTERN float tmin_p, tmin_b, tmin_s, tmin_z, tmin_i;
 SVEXTERN float tmax_p, tmax_b, tmax_s, tmax_z, tmax_i;
 SVEXTERN float patchmin, patchmax;
