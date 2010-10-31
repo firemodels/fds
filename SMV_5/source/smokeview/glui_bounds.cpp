@@ -686,10 +686,6 @@ extern "C" void glui_bounds_setup(int main_window){
       &overwrite_all,OVERWRITE,Bound_CB);
     check_compress_autoloaded=glui_bounds->add_checkbox_to_panel(rollout_compress,"Compress only autoloaded files",
       &compress_autoloaded,COMPRESS_AUTOLOADED,Bound_CB);
-#ifdef _DEBUG
-    check_multi_task=glui_bounds->add_checkbox_to_panel(rollout_compress,"Multi-thread Compression",
-      &mt_compress);
-#endif
     if(nslice_files>0){
       SPINNER_slicezipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"Slice Frame Skip",GLUI_SPINNER_INT,&slicezipskip,
         FRAMELOADING,Slice_CB);
