@@ -3680,12 +3680,13 @@ void update_hidepatchsurface(void){
 }
 
 
-/* ------------------ update_patch_hist ------------------------ */
+/* ------------------ Update_All_Patch_Bounds ------------------------ */
 
-void Update_All_Patch_Bounds(void){
+void Update_All_Patch_Bounds_st(void){
   int i;
   int total=0;
 
+  LOCK_COMPRESS;
   for(i=0;i<npatch_files;i++){
     patch *patchi;
 
@@ -3699,6 +3700,7 @@ void Update_All_Patch_Bounds(void){
   else{
     printf("Bounds for %i boundary files computed\n",total);
   }
+  UNLOCK_COMPRESS;
 }
 
 /* ------------------ update_patch_hist ------------------------ */

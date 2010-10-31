@@ -24,6 +24,7 @@ int SUB_portfrustum(int quad,
 
 EXTERNCPP void update_patch_bounds(patch *patchi);
 EXTERNCPP void Update_All_Patch_Bounds(void);
+EXTERNCPP void Update_All_Patch_Bounds_st(void);
 EXTERNCPP int update_patch_hist(patch *patchi);
 EXTERNCPP void update_hidepatchsurface(void);
 EXTERNCPP int last_slice_loadstack(void);

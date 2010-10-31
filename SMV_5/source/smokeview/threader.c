@@ -21,8 +21,7 @@ void compress_svzip2(void);
 
 void init_multi_threading(void){
 #ifdef pp_THREAD
-  mt_compress=1;
-  if(mt_compress==1)pthread_mutex_init(&mutexCOMPRESS,NULL);
+  pthread_mutex_init(&mutexCOMPRESS,NULL);
 #endif
 }
 
@@ -46,17 +45,7 @@ void *mt_compress_svzip(void *arg){
 /* ------------------ compress_svzip ------------------------ */
 #ifdef pp_THREAD
 void compress_svzip(void){
-  if(mt_compress==1){
-    pthread_create( 
-      &compress_thread_id, 
-      NULL, 
-      mt_compress_svzip, 
-      NULL
-      );
-  }
-  else{
-    compress_svzip2();
-  }
+  pthread_create(&compress_thread_id,NULL,mt_compress_svzip,NULL);
 }
 #else
 void compress_svzip(void){
@@ -85,20 +74,7 @@ void *mt_update_smooth_blockages(void *arg){
 #ifdef pp_THREAD
 void smooth_blockages(void){
   smoothing_blocks=1;
-  if(mt_compress==1){
-    pthread_create( 
-      &smooth_block_thread_id,
-      NULL, 
-      mt_update_smooth_blockages, 
-      NULL
-      );
-  }
-  else{
-    blocksneedsmoothing=ifsmoothblock();
-    if(blocksneedsmoothing==1){
-      update_smooth_blockages();
-    }
-  }
+  pthread_create(&smooth_block_thread_id,NULL,mt_update_smooth_blockages,NULL);
 }
 #else
 void smooth_blockages(void){
@@ -109,3 +85,22 @@ void smooth_blockages(void){
     }
 }
 #endif
+
+
+/* ------------------ Update_All_Patch_Bounds ------------------------ */
+
+#ifdef pp_THREAD
+void *Update_All_Patch_Bounds_mt(void *arg){
+  Update_All_Patch_Bounds_st();
+  pthread_exit(NULL);
+  return NULL;
+}
+void Update_All_Patch_Bounds(void){
+  pthread_create(&update_all_patch_bounds_id,NULL,Update_All_Patch_Bounds_mt,NULL);
+}
+#else
+void Update_All_Patch_Bounds(void){
+  Update_All_Patch_Bounds_st();
+}
+#endif
+
