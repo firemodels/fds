@@ -3616,13 +3616,14 @@ void Args(int argc, char **argv){
       writeini(GLOBAL_INI);
     }
     else if(strncmp(argv[i],"-update_bounds",14)==0){
+      no_graphics=1;
       update_bounds=1;
     }
     else if(strncmp(argv[i],"-part",5)==0){
       set_no_part=0; 
     }
     else if(strncmp(argv[i],"-demo",5)==0){
-      demo_option=1;
+       demo_option=1;
     }
     else if(strncmp(argv[i],"-nopart",7)==0){
       set_no_part=1; 

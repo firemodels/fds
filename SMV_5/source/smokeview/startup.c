@@ -137,6 +137,7 @@ int initcase_c(int argc, char **argv){
   CheckMemory;
   readini(0);
   readboundini();
+  if(no_graphics==1)return 0;
 
   if(sb_atstart==1){
     smooth_blockages();
@@ -241,15 +242,18 @@ void sv_startup_c(int argc, char **argv){
 #ifdef pp_OSX
   getcwd(workingdir,1000);
 #endif
-  printf("\nInitializing Glut - ");
-  glutInit(&argc, argv);
-  printf("initialized\n");
+  if(no_graphics==0){
+    printf("\nInitializing Glut - ");
+    glutInit(&argc, argv);
+    printf("initialized\n");
+  }
 #ifdef pp_OSX
   chdir(workingdir);
 #endif
 
   mxpoints=mxpoints_orig;
   mxframes=mxframes_orig;
+  if(no_graphics==0){
 #ifdef _DEBUG
   printf("Initializing Smokeview graphics window - ");
 #endif
@@ -257,18 +261,21 @@ void sv_startup_c(int argc, char **argv){
 #ifdef _DEBUG
   printf("initialized\n");
 #endif
-
-  max_screenWidth = glutGet(GLUT_SCREEN_WIDTH);
-  max_screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
-  if(trainer_mode==1){
-    int TRAINER_WIDTH;
-    TRAINER_WIDTH=300;
-    screenWidth = glutGet(GLUT_SCREEN_WIDTH)-TRAINER_WIDTH;
-    screenHeight = glutGet(GLUT_SCREEN_HEIGHT)-50; 
-    max_screenWidth = screenWidth;
-    max_screenHeight = screenHeight;
   }
-  InitOpenGL();
+
+  if(no_graphics==0){
+    max_screenWidth = glutGet(GLUT_SCREEN_WIDTH);
+    max_screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
+    if(trainer_mode==1){
+      int TRAINER_WIDTH;
+      TRAINER_WIDTH=300;
+      screenWidth = glutGet(GLUT_SCREEN_WIDTH)-TRAINER_WIDTH;
+      screenHeight = glutGet(GLUT_SCREEN_HEIGHT)-50; 
+      max_screenWidth = screenWidth;
+      max_screenHeight = screenHeight;
+    }
+    InitOpenGL();
+  }
 
   NewMemory((void **)&rgbptr,MAXRGB*sizeof(float *));
   for(i=0;i<MAXRGB;i++){
@@ -1534,7 +1541,6 @@ void initvars1(void){
 
   right_green=0.0;
   right_blue=1.0;
-  no_graphics=0;
   showstereo=0;
   showstereoOLD=showstereo;
   showstereo_frame=2;
