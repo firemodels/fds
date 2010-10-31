@@ -423,7 +423,7 @@ SVEXTERN int windowresized;
 SVEXTERN int SVDECL(updatemenu,0), first_display;
 SVEXTERN int updatezoommenu;
 SVEXTERN int updatemenu_count;
-SVEXTERN int no_graphics;
+SVEXTERN int SVDECL(no_graphics,0);
 
 SVEXTERN int updatefaces,updatefacelists;
 SVEXTERN int updateOpenSMVFile;
