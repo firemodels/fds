@@ -2928,6 +2928,7 @@ typedef struct {
 
   // check to see if texture files exist .
   // If so, then convert to OpenGL format 
+  
   for(i=0;i<ntextures;i++){
     unsigned char *floortex;
     int texwid, texht;
@@ -2954,7 +2955,7 @@ typedef struct {
       printf("%s - duplicate\n",texti->file);
       continue;
     }
-    if(no_graphics==0){
+    if(use_graphics==1){
       CheckMemory;
       glGenTextures(1,&texti->name);
       glBindTexture(GL_TEXTURE_2D,texti->name);
@@ -2977,59 +2978,60 @@ typedef struct {
       texti->loaded=1;
       printf(" - completed\n");
     }
-    CheckMemory;
-    if(ntextures==0)FREEMEMORY(textureinfo);
+  }
+  
+  CheckMemory;
+  if(ntextures==0)FREEMEMORY(textureinfo);
 
   // define colobar textures
 
-    printf("      Loading colorbar texture: ");
+  printf("      Loading colorbar texture: ");
 
-    glGenTextures(1,&texture_colorbar_id);
-    glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
-    glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glGenTextures(1,&texture_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 
-    glGenTextures(1,&texture_slice_colorbar_id);
-    glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
-    glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glGenTextures(1,&texture_slice_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 
-    glGenTextures(1,&texture_patch_colorbar_id);
-    glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
-    glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glGenTextures(1,&texture_patch_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 
-    glGenTextures(1,&texture_plot3d_colorbar_id);
-    glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
-    glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glGenTextures(1,&texture_plot3d_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 
-    glGenTextures(1,&texture_iso_colorbar_id);
-    glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
-    glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  }
+  glGenTextures(1,&texture_iso_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 
   CheckMemory;
 
   printf(" - completed\n");
 #ifdef pp_GPU
-  if(no_graphics==0){
+  if(use_graphics==1){
     createDepthTexture();
   }
 #endif
 
-  if(autoterrain==1&&no_graphics==0){
+  if(autoterrain==1&&use_graphics==1){
     texture *tt;
     unsigned char *floortex;
     int texwid, texht;
@@ -3054,7 +3056,7 @@ typedef struct {
       printf(" - failed\n");
     }
     FREEMEMORY(floortex);
-    if(errorcode==0&&no_graphics==0){
+    if(errorcode==0&&use_graphics==1){
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -9595,7 +9597,7 @@ void writeini(int flag){
   fprintf(fileout," %f\n",sprinklerabssize);
   fprintf(fileout,"SPHERESEGS\n");
   fprintf(fileout," %i\n",device_sphere_segments);
-  if(no_graphics==0&&
+  if(use_graphics==1&&
      (screenWidth == glutGet(GLUT_SCREEN_WIDTH)||screenHeight == glutGet(GLUT_SCREEN_HEIGHT))
     ){
     fprintf(fileout,"WINDOWWIDTH\n");
@@ -10432,7 +10434,7 @@ void writeini(int flag){
     fprintf(fileout,"# Smokeview Version: %s\n",SMVVERSION);
     fprintf(fileout,"# Smokeview Revision Number: %i\n",svn_num);
     fprintf(fileout,"# Smokeview Compile Date: %s\n",__DATE__);
-    if(no_graphics==0){
+    if(use_graphics==1){
       char version_label[256];
       char *glversion=NULL;
 
@@ -10471,7 +10473,7 @@ void writeini(int flag){
     fprintf(fileout,"# Platform: LINUX64\n");
 #endif
 
-    if(no_graphics==0){
+    if(use_graphics==1){
       GLint nred, ngreen, nblue, ndepth, nalpha;
 
       glGetIntegerv(GL_RED_BITS,&nred);    

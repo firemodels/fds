@@ -18,6 +18,7 @@
 #define SMVVERSION "Test"
 #undef pp_release
 #define pp_SLICECONTOURS
+#define pp_SHOWLIGHT
 #endif
 
 #ifdef _DEBUG  // comment out following line if debugging REALLY large cases (to avoid memory checks)

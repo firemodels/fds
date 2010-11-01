@@ -137,7 +137,7 @@ int initcase_c(int argc, char **argv){
   CheckMemory;
   readini(0);
   readboundini();
-  if(no_graphics==1)return 0;
+  if(use_graphics==0)return 0;
 
   if(sb_atstart==1){
     smooth_blockages();
@@ -242,7 +242,7 @@ void sv_startup_c(int argc, char **argv){
 #ifdef pp_OSX
   getcwd(workingdir,1000);
 #endif
-  if(no_graphics==0){
+  if(use_graphics==1){
     printf("\nInitializing Glut - ");
     glutInit(&argc, argv);
     printf("initialized\n");
@@ -253,17 +253,15 @@ void sv_startup_c(int argc, char **argv){
 
   mxpoints=mxpoints_orig;
   mxframes=mxframes_orig;
-  if(no_graphics==0){
+  if(use_graphics==1){
 #ifdef _DEBUG
-  printf("Initializing Smokeview graphics window - ");
+    printf("Initializing Smokeview graphics window - ");
 #endif
-  glutInitWindowSize(screenWidth, screenHeight);
+    glutInitWindowSize(screenWidth, screenHeight);
 #ifdef _DEBUG
-  printf("initialized\n");
+    printf("initialized\n");
 #endif
-  }
 
-  if(no_graphics==0){
     max_screenWidth = glutGet(GLUT_SCREEN_WIDTH);
     max_screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
     if(trainer_mode==1){
