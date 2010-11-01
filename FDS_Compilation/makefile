@@ -509,7 +509,7 @@ divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj
 mass.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj
 radi.obj : func.obj prec.obj cons.obj type.obj mesh.obj irad.obj
 evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj
-pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.o
+pres.obj : func.obj prec.obj cons.obj type.obj mesh.obj pois.obj velo.obj scrc.obj
 part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj
 vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj part.obj
 hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
