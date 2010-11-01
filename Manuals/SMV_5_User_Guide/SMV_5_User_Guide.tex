@@ -3817,11 +3817,11 @@ General strategies for improving Smokeview's ability to visualize cases and ther
 
 \chapter{Command Line Options}
 \label{sectioncommand} \Smokeview\ may be run from a command
-shell.  Furthermore, command line options may be invoked in order
-to alter \smokeview's startup behavior. Normally these options are
-not necessary.  However, they may be used for cases with very
-large particle files or to generate a preference or customization
-file. To obtain a list of command line options, type:
+shell.  Various command line options are available altering 
+\smokeview's startup behavior such as creating a configuration
+file, using stereo, using the demo mode
+or running a script.
+To obtain a list of command line options, type:
 \begin{verbatim}
 smokeview -help
 \end{verbatim}
@@ -3831,32 +3831,6 @@ smokeview -help
 \scriptsize
 \verbatiminput{SCRIPT_FIGURES/smokeview.help}
 }
-
-\noindent The {\tt -nopart} option is used to prevent a particle
-file from being loaded at startup. The {\tt -points} and {\tt
--frames} options are used to load more than the default 5,000,000
-points or 500 frames where a frame is data for one time step. To
-load up to 6,000,000 points and 1000 frames then type:
-\begin{verbatim}
-smokeview casename -points 6000000 -frames 1000
-\end{verbatim}
-\noindent where in both cases {\tt casename} is the basename of
-the \fds\ output files. The same effect may be achieved by using:
-\begin{verbatim}
-MAXPOINTS
-6000000
-MAXFRAMES
-1000
-\end{verbatim}
-\noindent in the \svini\ or {\tt casename.ini} file.
-This file may be created with the {\tt -ini} option and contains
-many other customizable \smokeview\ parameters. The {\tt
--benchmark} option is used to measure the performance of
-\smokeview. The {\tt -benchmark} option causes \smokeview\ to
-produce precise timings by outputting frame rates based upon one
-cycle through the timing loop rather than using moving averages.
-The {\tt -stereo} option may used to access stereo hardware (often
-called quad buffering) if it is available.
 
 %---------------------------------------------------------------------------------
 %------------------------ Menu Options -------------------------------------------
