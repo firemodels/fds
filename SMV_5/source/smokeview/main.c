@@ -109,6 +109,9 @@ int main(int argc, char **argv){
     startup_flag=initcase_c(argc,argv_sv);
     if(update_bounds==1){
       Update_All_Patch_Bounds();
+#ifdef pp_THREAD
+      pthread_join(update_all_patch_bounds_id,NULL);
+#endif
       return 0;
     }
     if(startup_flag==0){

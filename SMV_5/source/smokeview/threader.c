@@ -86,7 +86,6 @@ void smooth_blockages(void){
 }
 #endif
 
-
 /* ------------------ Update_All_Patch_Bounds ------------------------ */
 
 #ifdef pp_THREAD

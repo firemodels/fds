@@ -113,7 +113,7 @@ void add_unit_class(flowlabels *label){
   int i;
 #endif
 
- #ifdef pp_SMOKEDIFF
+#ifdef pp_SMOKEDIFF
   nunitclasses++;
   ResizeMemory((void **)&unitclasses,nunitclasses*sizeof(f_units));
 
