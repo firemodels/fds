@@ -3451,7 +3451,7 @@ void Args(int argc, char **argv){
 
   if(strncmp(argv[1],"-ng_ini",6)==0){
     init_camera_list();
-    no_graphics=1;
+    use_graphics=0;
     updatecolors(-1);
     writeini(GLOBAL_INI);
     exit(0);
@@ -3612,7 +3612,7 @@ void Args(int argc, char **argv){
       writeini(GLOBAL_INI);
     }
     else if(strncmp(argv[i],"-update_bounds",14)==0){
-      no_graphics=1;
+      use_graphics=0;
       update_bounds=1;
     }
     else if(strncmp(argv[i],"-demo",5)==0){
@@ -3695,8 +3695,8 @@ void Args(int argc, char **argv){
     }
     else {
       printf(" unknown option: %s\n",argv[i]);
-      usage(argv);scanf("%s",buffer);exit(1);
-      exit(0);
+      usage(argv);
+      exit(1);
     }
   }
 }
@@ -3776,75 +3776,79 @@ void usage(char **argv){
   printf(" -version       - display version information\n");
 
   if(showbuild==1){
-    printf("  \n");
-    printf("  Smokeview was built with the following pre-processing directives set:\n");
+    char label[1024],*labelptr;
+
+    labelptr=label+2;
+    strcpy(label,"");
 #ifdef pp_ALPHA
-    printf(" pp_ALPHA");
+    strcat(label,", pp_ALPHA");
 #endif
 #ifdef pp_COMPRESS
-    printf(", pp_COMPRESS");
+    strcat(label,", pp_COMPRESS");
 #endif
 #ifdef pp_CULL
-    printf(", pp_CULL");
+    strcat(label,", pp_CULL");
 #endif
 #ifdef _DEBUG
-    printf(" _DEBUG");
+    strcat(label," _DEBUG");
 #endif
 #ifdef pp_DRAWISO
-    printf(", pp_DRAWISO");
+    strcat(label,", pp_DRAWISO");
 #endif
 #ifdef EGZ
-    printf(", EGZ");
+    strcat(label,", EGZ");
 #endif
 #ifdef pp_GPU
-    printf(", pp_GPU");
+    strcat(label,", pp_GPU");
 #endif
 #ifdef ISO_DEBUG
-    printf(", ISO_DEBUG");
+    strcat(label,", ISO_DEBUG");
 #endif
 #ifdef pp_JPEG
-    printf(", pp_JPEG");
+    strcat(label,", pp_JPEG");
 #endif
 #ifdef pp_memstatus
-    printf(", pp_memstatus");
+    strcat(label,", pp_memstatus");
 #endif
 #ifdef pp_MESSAGE
-    printf(", pp_MESSAGE");
+    strcat(label,", pp_MESSAGE");
 #endif
 #ifdef pp_OPEN
-    printf(", pp_OPEN");
+    strcat(label,", pp_OPEN");
 #endif
 #ifdef pp_noappend
-    printf(", pp_noappend");
+    strcat(label,", pp_noappend");
 #endif
 #ifdef pp_OSX
-    printf(", pp_OSX");
+    strcat(label,", pp_OSX");
 #endif
 #ifdef pp_release
-    printf(" pp_release");
+    strcat(label," pp_release");
 #endif
 #ifdef pp_SHOOTER
-    printf(", pp_SHOOTER");
+    strcat(label,", pp_SHOOTER");
 #endif
 #ifdef pp_SHOWLIGHT
-    printf(", pp_SHOWLIGHT");
+    strcat(label,", pp_SHOWLIGHT");
 #endif
 #ifdef pp_SMOKETEST
-    printf(", pp_SMOKETEST");
+    strcat(label,", pp_SMOKETEST");
 #endif
 #ifdef pp_THREAD
-    printf(", pp_THREAD");
+    strcat(label,", pp_THREAD");
 #endif
 #ifdef X64
-    printf(", X64");
+    strcat(label,", X64");
 #endif
 #ifdef USE_ZLIB
-    printf(", USE_ZLIB");
+    strcat(label,", USE_ZLIB");
 #endif
 #ifdef WIN32
-    printf(", WIN32");
+    strcat(label,", WIN32");
 #endif
-    printf("\n");
+    printf("  \n");
+    printf("  Smokeview was built with the following pre-processing directives set:\n\n");
+    printf("%s \n",labelptr);
   }
 }
 
