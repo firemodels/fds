@@ -2554,7 +2554,7 @@ T_LOOP_1: DO J=1,5000
          Y2H_G_C(J)   =  SUM(Y2Y_C(:)* H_TMP(:)) + Y2CP_C(J) 
          Y2CPBAR_C(J) =   Y2H_G_C(J)
       ENDIF
-      Y2MU_C(J)    = SUM(Y2Y_C(1:N_STATE_SPECIES) * MU_TMP(:N_STATE_SPECIES))
+      Y2MU_C(J)    = SUM(Y2Y_C(1:N_STATE_SPECIES) * MU_TMP(1,:N_STATE_SPECIES))
       Y2K_C(J)     = SUM(Y2Y_C(1:N_STATE_SPECIES) * K_TMP(1:N_STATE_SPECIES))      
       Y2D_C(J)     = SUM(Y2Y_C(1:N_STATE_SPECIES) * D_TMP(1:N_STATE_SPECIES))            
    ENDIF 
