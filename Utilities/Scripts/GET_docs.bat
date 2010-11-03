@@ -5,7 +5,7 @@ Rem Batch file used to svn info for FDS, Smokeview and the SVN test cases
 set envfile=%homedrive%\%homepath%\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
-echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
+echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
 echo as an example.
 echo.
 echo Aborting now...
@@ -31,7 +31,7 @@ copy %mandir%\FDS_5_User_Guide.pdf %docbasedir%\.
 copy %mandir%\FDS_5_Validation_Guide.pdf %docbasedir%\.
 copy %mandir%\FDS_5_Verification_Guide.pdf %docbasedir%\.
 
-copy %mandir%\SMV_5_User_Guide.pdf %docbasedir%\.
+copy %mandir%\SMV_User_Guide.pdf %docbasedir%\.
 
 cd %docbasedir%
 if exist %togoogle%\%zipbase%.zip erase %togoogle%\%zipbase%.zip

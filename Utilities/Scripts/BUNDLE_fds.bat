@@ -5,7 +5,7 @@ Rem Script to bundle fds and smokeview into an installation file
 set envfile=%homedrive%\%homepath%\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
-echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
+echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
 echo as an example.
 echo.
 echo Aborting now...
@@ -19,7 +19,7 @@ call %envfile%
 
 set in_pdf=%svn_root%\Manuals\All_PDF_Files
 set in_fds=%svn_root%\Utilities\to_google\fds_%fds_version%_%fds_revision%_win32
-set in_smv=%svn_root%\SMV_5\for_bundle\to_google\smv_%smv_version%_%smv_revision%_win32
+set in_smv=%svn_root%\SMV\for_bundle\to_google\smv_%smv_version%_%smv_revision%_win32
 
 set to_google=%svn_root%\Utilities\to_google
 set basename=FDS_%fds_version%-SMV_%smv_version%_Windows
@@ -50,7 +50,7 @@ echo Copying files to Documentation directory
 
 copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_doc%\.
 copy %in_pdf%\FDS_5_Validation_Guide.pdf          %out_doc%\.
-copy %in_pdf%\SMV_5_User_Guide.pdf                %out_doc%\.
+copy %in_pdf%\SMV_User_Guide.pdf                %out_doc%\.
 copy %in_pdf%\FDS_5_User_Guide.pdf                %out_doc%\.
 copy %in_pdf%\FDS_5_Verification_Guide.pdf        %out_doc%\.
 
