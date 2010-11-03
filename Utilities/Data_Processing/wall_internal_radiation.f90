@@ -13,7 +13,7 @@ read(10,*)
 read(10,*) t,(flux(i),i=1,5)
 close(10)
 
-open(11,file='../../Manuals/FDS_5_Verification_Guide/SCRIPT_FIGURES/wall_internal_radiation.tex',form='formatted',status='replace')
+open(11,file='../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/wall_internal_radiation.tex',form='formatted',status='replace')
 
 write(11,'(a)') "\begin{center}"
 write(11,'(a)') "\begin{tabular}{|c|c|c|} \hline"
