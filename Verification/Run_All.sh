@@ -8,7 +8,7 @@ export BASEDIR=`pwd`
 
 echo FDS cases submitted
 
-cd $BASEDIR/SMV_Scripts
+cd $BASEDIR/scripts
 
 ./SMV_Cases.csh
 
