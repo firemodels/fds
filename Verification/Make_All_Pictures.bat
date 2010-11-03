@@ -2,11 +2,11 @@
 
 echo.
 echo erasing User Guide scripted figures generated previously
-erase ..\Manuals\FDS_5_User_Guide\SCRIPT_FIGURES\*.png
+erase ..\Manuals\FDS_User_Guide\SCRIPT_FIGURES\*.png
 
 echo.
 echo erasing Verification scripted figures generated previously
-erase ..\Manuals\FDS_5_Verification_Guide\SCRIPT_FIGURES\*.png
+erase ..\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES\*.png
 
 cd Controls
 smokeview -runscript activate_vents
