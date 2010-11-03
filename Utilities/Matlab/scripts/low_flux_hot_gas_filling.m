@@ -27,7 +27,7 @@ set(hh,'Interpreter','LaTeX','FontSize',Key_Font_Size)
 
 % print to pdf
 
-plotdir = '../../../Manuals/FDS_5_Verification_Guide/SCRIPT_FIGURES/';
+plotdir = '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 Plot_Filename = 'low_flux_hot_gas_filling';
 
 set(gcf,'Visible','on');

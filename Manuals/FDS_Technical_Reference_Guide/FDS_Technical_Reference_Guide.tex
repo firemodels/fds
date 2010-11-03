@@ -166,11 +166,11 @@
 
 \begin{minipage}[t][9in][s]{6.5in}
 
-\huge \flushright{NIST Special Publication 1018-5}
+\huge \flushright{NIST Special Publication 1018}
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ \Large Volume 1: Mathematical Model}
+\Huge \flushright{Fire Dynamics Simulator \\ Technical Reference Guide \\ \Large Volume 1: Mathematical Model}
 
 \vspace{.5in}
 
@@ -179,8 +179,6 @@
 Kevin McGrattan \\
 Simo Hostikka \\
 Jason Floyd \\
-Howard Baum \\
-Ronald Rehm \\
 William Mell \\
 Randall McDermott}
 
@@ -207,19 +205,17 @@ VTT Technical Research Centre of Finland  }
 
 \begin{minipage}[t][9in][s]{6.5in}
 
-\huge \flushright{NIST Special Publication 1018-5}
+\huge \flushright{NIST Special Publication 1018}
 
 \vspace{.75in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ Technical Reference Guide \\ \Large Volume 1: Mathematical Model}
+\Huge \flushright{Fire Dynamics Simulator \\ Technical Reference Guide \\ \Large Volume 1: Mathematical Model}
 
 \vspace{.25in}
 
 \normalsize
 \flushright{
 Kevin McGrattan \\
-Howard Baum \\
-Ronald Rehm \\
 William Mell \\
 Randall McDermott \\
 {\em Fire Research Division} \\
@@ -266,8 +262,8 @@ entities, materials, or equipment are necessarily the best available for the pur
 \vspace{3in}
 
 \large
-\flushright{\bf National Institute of Standards and Technology Special Publication 1018-5 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1018-5, \pageref{LastPage} pages (October 2007) \\
+\flushright{\bf National Institute of Standards and Technology Special Publication 1018 \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1018, \pageref{LastPage} pages (October 2007) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -297,10 +293,10 @@ provides the theoretical basis for the Fire Dynamics Simulator (FDS), following 
 the ``Standard Guide for
 Evaluating the Predictive Capability of Deterministic Fire Models,'' ASTM~E~1355~\cite{ASTM:E1355}.
 It is the first of a four volume set of companion documents, referred to
-collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}. Volumes 2, 3 and 4 describe the model
+collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}. Volumes 2, 3 and 4 describe the model
 verification, experimental validation, and configuration management, respectively.
 
-A separate document, {\em Fire Dynamics Simulator, User's Guide}~\cite{FDS_Users_Guide_5} describes how the FDS software is
+A separate document, {\em Fire Dynamics Simulator, User's Guide}~\cite{FDS_Users_Guide} describes how the FDS software is
 actually used.
 
 
@@ -332,8 +328,6 @@ the products are necessarily those best suited for the intended purpose.
 \item[Kevin McGrattan] is a mathematician in the Building and Fire Research Laboratory (BFRL) of NIST. He received a bachelors of science degree from the School of Engineering and Applied Science of Columbia University in 1987 and a doctorate at the Courant Institute of New York University in 1991. He joined the NIST staff in 1992 and has since worked on the development of fire models, most notably the Fire Dynamics Simulator.
 \item[Simo Hostikka] is a Senior Research Scientist at VTT Technical Research Centre of Finland. He received a master of science (technology) degree in 1997 and a doctorate in 2008 from the Department of Engineering Physics and Mathematics of the Helsinki University of Technology.  He is the principal developer of the radiation and solid phase sub-models within FDS.
 \item[Jason Floyd] is a Senior Engineer at Hughes Associates, Inc., in Baltimore, Maryland. He received a bachelors of science and Ph.D. in the Nuclear Engineering Program of the University of Maryland. After graduating, he won a National Research Council Post-Doctoral Fellowship at the Building and Fire Research Laboratory of NIST, where he developed the combustion algorithm within FDS. He is currently funded by NIST under grant 70NANB8H8161 from the Fire Research Grants Program (15 USC 278f). He is the principal developer of the multi-parameter mixture fraction combustion model and control logic within FDS.
-\item[Howard Baum] is a NIST Fellow {\em emeritus}. He received a bachelors of science degree from Brooklyn Polytechnic Institute in 1957 and a doctorate from Harvard University in 1964. After joining the staff of the National Bureau of Standards (now NIST), he, along with Ronald Rehm, developed the low Mach number formulation of the Navier-Stokes equations that is still the core transport algorithm within FDS.
-\item[Ronald Rehm] is a former NIST fellow, currently retired but still active in a number of projects at NIST. He received a bachelors of science degree from Purdue University in 1960 and a doctorate from the Massachusetts Institute of Technology in 1965. Along with Howard Baum, he formulated the original numerical scheme that evolved over 25 years into the current FDS solver.
 \item[Randall McDermott] joined the research staff of the Building and Fire Research Lab in 2008. He received a B.S.~degree from the University of Tulsa in Chemical Engineering in 1994 and a doctorate at the University of Utah in 2005. His research interests include subgrid-scale models and numerical methods for large-eddy simulation, adaptive mesh refinement, immersed boundary methods, and Lagrangian particle methods.
 \item[William (Ruddy) Mell] is an applied mathematician in BFRL. He holds a B.S. degree from the University of Minnesota (1994) and doctorate from the University of Washington (1994). His research interests include the development of large eddy simulation methods and sub-models applicable to the physics of large fires in buildings, vegetation, and the wildland-urban interface.
 \end{description}
@@ -664,7 +658,7 @@ A significant part of the FDS input file directs the code to output various quan
 actual experiment, the user must decide before the calculation begins what information to save. There is no way to
 recover information after the calculation is over if it was not requested at the start.
 
-A complete description of the input parameters required by FDS can be found in the FDS User's Guide~\cite{FDS_Users_Guide_5}.
+A complete description of the input parameters required by FDS can be found in the FDS User's Guide~\cite{FDS_Users_Guide}.
 
 
 \subsection{Output Quantities}
@@ -714,7 +708,7 @@ animated contour slices of computed gas variables and animated surface data.
 Smokeview also presents contours and vector plots of static data anywhere
 within a scene at a fixed time.
 
-A complete list of FDS output quantities and formats is given in Ref.~\cite{FDS_Users_Guide_5}.
+A complete list of FDS output quantities and formats is given in Ref.~\cite{FDS_Users_Guide}.
 Details on the use of Smokeview are found in Ref.~\cite{Smokeview_Users_Guide_5}.
 
 
@@ -875,7 +869,7 @@ regularly published in peer-reviewed journals and conference proceedings. In add
 is used world-wide by fire protection engineering firms who review the technical details of
 the model related to their particular application. Some of these firms also publish in the
 open literature reports documenting internal efforts to validate the model for a particular
-use. Many of these studies are referenced in Volume 3 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
+use. Many of these studies are referenced in Volume 3 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
 
 \subsection{Survey of the Relevant Fire and Combustion Literature}
@@ -883,8 +877,8 @@ use. Many of these studies are referenced in Volume 3 of the FDS Technical Refer
 \label{Relevantdocs}
 
 FDS has two separate manuals --
-the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}
-and the FDS User's Guide~\cite{FDS_Users_Guide_5}. The Technical Reference Guide is broken into three volumes: (1)~Mathematical Model, (2)~Verification, and (3)~Experimental Validation.
+the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}
+and the FDS User's Guide~\cite{FDS_Users_Guide}. The Technical Reference Guide is broken into three volumes: (1)~Mathematical Model, (2)~Verification, and (3)~Experimental Validation.
 Smokeview has its own User's Guide~\cite{Smokeview_Users_Guide_5}. The FDS and Smokeview User Guides only describe the mechanics of using the
 computer programs. The
 Technical Reference Guides provides the theory, algorithm details, and verification and validation work.
@@ -971,7 +965,7 @@ Recently, the US Nuclear Regulatory Commission (US NRC) published a seven-volume
 study of five different fire models used for nuclear power plant applications~\cite{NUREG_1824}. Two of the models are essentially a set
 of empirically-based correlations in the form of engineering ``spread sheets.'' Two of the models are classic two-zone fire models, one of which
 is the NIST developed CFAST. FDS is the sole CFD model in the study. More on the study and its results can be found in Volume~3 of the
-FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
+FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 
 Besides formal internal and peer review, FDS is subjected to continuous scrutiny because
 it is available free of charge to the general public and is used
@@ -4080,54 +4074,54 @@ at the sampling locations with their flow rates after applying the appropriate t
 \chapter{Heating, Ventilation, and Air Conditioning (HVAC)}
 
 HVAC systems are found throughout the built environment.  During a fire, HVAC ducts can serve
-as a path for heat and combustion products to be moved through a building.  In some facilities, such as data centers and clean rooms, fire detection devices are placed inside of HVAC ducts.  
+as a path for heat and combustion products to be moved through a building.  In some facilities, such as data centers and clean rooms, fire detection devices are placed inside of HVAC ducts.
 HVAC systems may also serve as part of the fire protection system for a building when used to exhaust smoke or maintain stairwell pressurization.
 
-Previous versions of FDS, have only had the ability to specify either fixed flow boundary conditions (velocity or mass flux) or a simple pressure boundary condition.  
-While these inputs could adequately represent very simple HVAC features, they could not model an entire multi-room system.  
-There was no coupling of the mass, momentum, and energy solutions amongst the multiple inlets and outlets comprising the HVAC network.  
+Previous versions of FDS, have only had the ability to specify either fixed flow boundary conditions (velocity or mass flux) or a simple pressure boundary condition.
+While these inputs could adequately represent very simple HVAC features, they could not model an entire multi-room system.
+There was no coupling of the mass, momentum, and energy solutions amongst the multiple inlets and outlets comprising the HVAC network.
 To address this limitation, an HVAC network solver has been added to FDS.
 
 
 \section{HVAC Governing Equations}
 
-The overall HVAC solver is based on the MELCOR~\cite{MELCOR} thermal hydraulic solver.  MELCOR is a computer code for simulating accidents in nuclear power plant containment buildings.  
-The Fire and Smoke Simulator (FSSIM)~\cite{FSSIM}, a network fire model, has shown prior success in using the MELCOR solver to model fire spread and smoke movement 
+The overall HVAC solver is based on the MELCOR~\cite{MELCOR} thermal hydraulic solver.  MELCOR is a computer code for simulating accidents in nuclear power plant containment buildings.
+The Fire and Smoke Simulator (FSSIM)~\cite{FSSIM}, a network fire model, has shown prior success in using the MELCOR solver to model fire spread and smoke movement
 in the presence of complex ventilation systems.
 
-The MELCOR solver uses an explicit conservation of mass and energy combined with an implicit solver for the conservation of momentum.  
-An HVAC system is represented as network of nodes and ducts where a node represents where a duct joins with the FDS computational domain or where multiple ducts are joined such as a tee.  
-A duct segment in the network represents any continuous flow path not interrupted by a node and as such may include multiple fittings (elbows, expansions, or contractions, etc.) 
+The MELCOR solver uses an explicit conservation of mass and energy combined with an implicit solver for the conservation of momentum.
+An HVAC system is represented as network of nodes and ducts where a node represents where a duct joins with the FDS computational domain or where multiple ducts are joined such as a tee.
+A duct segment in the network represents any continuous flow path not interrupted by a node and as such may include multiple fittings (elbows, expansions, or contractions, etc.)
 and may have varying area over its length.  The current implementation of the model does not account for mass storage with an HVAC network. The nodal conservation equations of
 mass, energy, and momentum (in that order) are:
 \be \sum\limits_{j} \rho_j \, u_j \, A_j = 0   \label{HVACmass} \ee
 \be \sum\limits_{j} \rho_j \, u_j \, A_j \, h_j= 0   \label{HVACenergy} \ee
 \be \rho_j L_j \frac{d u_j}{d t} = \left(P_i - P_k\right)+\left(\rho g \Delta z\right)_j+\Delta P_j - \frac{1}{2}K_j \rho_j \left| u_j \right| u_j  \label{HVACmomentum} \ee
-where $u$ is the duct velocity, $A$ is the duct area, $h$ is the enthalpy of the fluid in the duct. 
-The subscript $j$ indicates a duct segment, the subscripts $i$ and $k$ indicate nodes (where one or more ducts join or where a duct terminates in a compartment). 
+where $u$ is the duct velocity, $A$ is the duct area, $h$ is the enthalpy of the fluid in the duct.
+The subscript $j$ indicates a duct segment, the subscripts $i$ and $k$ indicate nodes (where one or more ducts join or where a duct terminates in a compartment).
 $\Delta P$ is a fixed source of momentum (a fan or blower), $L$ is the length of the duct segment, and $K$ is the friction loss of the duct segment.
 
-Since nodes have no volume, the mass and energy conservation equations state that what flows into a node must also flow out.  
-In the momentum equation the terms on the right hand side are: the pressure gradient between the upstream and the downstream node, the buoyancy head, 
+Since nodes have no volume, the mass and energy conservation equations state that what flows into a node must also flow out.
+In the momentum equation the terms on the right hand side are: the pressure gradient between the upstream and the downstream node, the buoyancy head,
 pressure rise due to an external source (e.g. a fan or blower), and the pressure losses due to wall friction or the presence of duct fittings.
 
 \section{HVAC Solution Procedure}
 
 The momentum equation, Eq.~(\ref{HVACmomentum}), is non-linear with respect to velocity due to
-the loss term.  Additionally, the pressure difference between two nodes in the network is impacted by the pressure change at all 
-nodes coupled to that duct either directly (part of the same duct network) or indirectly (connected to the same compartment as another duct network).  
+the loss term.  Additionally, the pressure difference between two nodes in the network is impacted by the pressure change at all
+nodes coupled to that duct either directly (part of the same duct network) or indirectly (connected to the same compartment as another duct network).
 Solving the momentum equation, requires accounting for both of these.  This is done with the following discretization:
-\be u^{n+1}_j=u^{n}_j + \frac{\Delta t^n}{\rho_j L_j} \left[ \left(\tilde{P}^n_i - \tilde{P}^n_k\right)+\left(\rho g \Delta z\right)^{n-1}_j+\Delta P^{n-1}_j - 
+\be u^{n+1}_j=u^{n}_j + \frac{\Delta t^n}{\rho_j L_j} \left[ \left(\tilde{P}^n_i - \tilde{P}^n_k\right)+\left(\rho g \Delta z\right)^{n-1}_j+\Delta P^{n-1}_j -
    \frac{1}{2}K_j \left(\left|u^{n-}_j-u^{n+}_j\right|u^n-\left|u^{n+}_j \right|u^{n-}_j \right) \right] \label{HVACdiscretemomentum} \ee
-The superscripts $n+$ and $n-$ on the velocity are used to linearize the flow loss in a duct to avoid a non-linear differential equation for velocity.  
-The $n+$ superscript is the prior iteration value and the $n-$ is either the prior iteration value or zero if flow reversal occurred.  
+The superscripts $n+$ and $n-$ on the velocity are used to linearize the flow loss in a duct to avoid a non-linear differential equation for velocity.
+The $n+$ superscript is the prior iteration value and the $n-$ is either the prior iteration value or zero if flow reversal occurred.
 This approach is used to speed convergence when duct flows are near zero to avoid large changes in $K$ if the forward and reverse losses are markedly different.
 
-Note that the node pressures are not expressed as $P^n_i$, but rather as $\tilde{P}^n_i$.  This indicates an extrapolated pressure at the end of the current time step 
-rather than the actual pressure at the end of the time step.  The pressure in a compartment is a function of the mass and energy flowing in and out.  
-If that compartment is connected to other compartments by doors or other openings, then the pressure is also dependent upon flows into and out those other compartments.  
-Those mass and energy flows include both those being predicted by the HVAC model and those being predicted by the CFD model.   
-For example, in Fig.~\ref{hvacpressure}, the un-shaded compartments have pressure solutions that are dependent upon the flows predicted by both the 
+Note that the node pressures are not expressed as $P^n_i$, but rather as $\tilde{P}^n_i$.  This indicates an extrapolated pressure at the end of the current time step
+rather than the actual pressure at the end of the time step.  The pressure in a compartment is a function of the mass and energy flowing in and out.
+If that compartment is connected to other compartments by doors or other openings, then the pressure is also dependent upon flows into and out those other compartments.
+Those mass and energy flows include both those being predicted by the HVAC model and those being predicted by the CFD model.
+For example, in Fig.~\ref{hvacpressure}, the un-shaded compartments have pressure solutions that are dependent upon the flows predicted by both the
 HVAC model and the CFD model and all of those compartments need to be included in the extrapolated pressure for those compartments.
 Since the two models are not fully coupled, the extrapolated pressure is an estimate of the pressure at the end of the time step based upon the pressure rise for the prior time step.
 
@@ -4138,27 +4132,27 @@ Since the two models are not fully coupled, the extrapolated pressure is an esti
    \end{center}
 \end{figure}
 
-The extrapolated pressure for a compartment can be determined by using Eq.~(\ref{concon}) and correcting the integral over velocity for the current solution of 
+The extrapolated pressure for a compartment can be determined by using Eq.~(\ref{concon}) and correcting the integral over velocity for the current solution of
 all interdependent HVAC flows into or out of an FDS pressure zone:
-\be \tilde{P}^n_i=P^{n-1}_i+\left(\frac{dP^{n-1}_i}{dt} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} {\cal P} \, dV}\right)\Delta t^n  
+\be \tilde{P}^n_i=P^{n-1}_i+\left(\frac{dP^{n-1}_i}{dt} + \frac{{\sum_j u^{n-1}_j A^{n-1}_j} - {\sum_j u^n_j A^n_j}}{\int_{\Omega_m} {\cal P} \, dV}\right)\Delta t^n
    \label{HVACextrapolatedpressure} \ee
-If we separate the HVAC solved velocities into a pressure zone from the FDS solved velocities into a pressure zone and then substitute Eq.~\ref{HVACextrapolatedpressure} into 
+If we separate the HVAC solved velocities into a pressure zone from the FDS solved velocities into a pressure zone and then substitute Eq.~\ref{HVACextrapolatedpressure} into
 Eq.~(\ref{HVACdiscretemomentum}) we obtain the following:
 \begin{eqnarray}
    u^n_j \left( 1+\frac{K_j}{2 L_j} \left| u^{n-}_j-u^{n+}_j \right| \right) &-&
     \frac{\Delta {t^n}^2}{\rho_j L_j} \frac{{\sum_{j\in i} u^n_j A^n_j}-{\sum_{j\in k} u^n_j A^n_j}}{{\int_{\Omega_m} {\cal P} \, dV}}= \nonumber \\
-  & & u^{n-1}_j+ \frac{\Delta {t^n}^2}{\rho_j L_j} 
+  & & u^{n-1}_j+ \frac{\Delta {t^n}^2}{\rho_j L_j}
   \left(\tilde{P}^n_i-\tilde{P}^n_k +  (\rho g \Delta z)_j + \Delta P_j \right) +
   \frac{K_j}{2 L_j}\left|u^{n+}_j\right| \left|u^{n-}_j\right| \label{HVACfullexpansion}
 \end{eqnarray}
-If node $i$ or node $k$ for duct $j$ in Eq.~(\ref{HVACfullexpansion}) is an internal duct node, then extrapolated pressures are not computed and the actual node pressure is solved for.  
-Applying Eq.~(\ref{HVACfullexpansion}) to each duct results in a linear set of equations.  
+If node $i$ or node $k$ for duct $j$ in Eq.~(\ref{HVACfullexpansion}) is an internal duct node, then extrapolated pressures are not computed and the actual node pressure is solved for.
+Applying Eq.~(\ref{HVACfullexpansion}) to each duct results in a linear set of equations.
 Adding additional equations to the set for the mass conservation at internal duct nodes, results in complete set of equations.
 
-The solution scheme is as follows.  Determine the boundary conditions at all points where the HVAC network joins the FDS computational domain using the previous time step values.  
-Compute the extrapolated pressures for each pressure zone using the previous iteration (previous time step if the first iteration).  
-Assemble the linear set of equations for conservation of momentum and conservation of mass.  
-Solve the equation and check the solution for errors in mass conservation, flow reversal over the time step, and the magnitude of change in the velocity solution for each duct.  
+The solution scheme is as follows.  Determine the boundary conditions at all points where the HVAC network joins the FDS computational domain using the previous time step values.
+Compute the extrapolated pressures for each pressure zone using the previous iteration (previous time step if the first iteration).
+Assemble the linear set of equations for conservation of momentum and conservation of mass.
+Solve the equation and check the solution for errors in mass conservation, flow reversal over the time step, and the magnitude of change in the velocity solution for each duct.
 If any convergence check fails, the solution is re-iterated wiht new extrapolated pressures.  Density and enthalpy values are taken as the upwind values in each iteration.
 
 %\section{HVAC Boundary Conditions (Coupling the HVAC solver to the FDS solver)}

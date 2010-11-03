@@ -1,5 +1,5 @@
 RENDERDIR
- ../../Manuals/FDS_5_User_Guide/SCRIPT_FIGURES
+ ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
 LOADFILE
  helium_2d_04.sf
 SETTIMEVAL
