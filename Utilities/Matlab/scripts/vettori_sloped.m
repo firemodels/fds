@@ -78,7 +78,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[paper_width paper_height]);
 set(gcf,'PaperPosition',[0 0 paper_width paper_height]);      
-print(gcf,'-dpdf',['../../Manuals/FDS_5_Validation_Guide/FIGURES/Vettori_Sloped_Ceiling/Vettori_Sloped_Activation_Time'])
+print(gcf,'-dpdf',['../../Manuals/FDS_Validation_Guide/FIGURES/Vettori_Sloped_Ceiling/Vettori_Sloped_Activation_Time'])
 
 %Brag about accomplishments
 

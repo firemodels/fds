@@ -137,12 +137,12 @@
 \begin{minipage}[t][9in][s]{6.5in}
 
 \huge
-\flushright{NIST Special Publication 1018-5}
+\flushright{NIST Special Publication 1018}
 
 \vspace{1in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\
+\flushright{Fire Dynamics Simulator \\
 Technical Reference Guide \\ \LARGE Volume 2: Verification}
 
 \vspace{.5in}
@@ -169,12 +169,12 @@ Jason Floyd}
 \begin{minipage}[t][9in][s]{6.5in}
 
 \huge
-\flushright{NIST Special Publication 1018-5}
+\flushright{NIST Special Publication 1018}
 
 \vspace{1.in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\
+\flushright{Fire Dynamics Simulator \\
 Technical Reference Guide \\ \LARGE Volume 2: Verification }
 
 \vspace{.5in}
@@ -228,7 +228,7 @@ National Institute of Standards and Technology \\
 
 This is Volume 2 of the FDS Technical Reference Guide. Volume 1 describes the mathematical model and
 numerical method. Volume 3 documents past and present experimental validation work. Instructions for
-using FDS are contained in a separate User's Guide~\cite{FDS_Users_Guide_5}.
+using FDS are contained in a separate User's Guide~\cite{FDS_Users_Guide}.
 
 The three volumes of the FDS Technical Reference Guide are based in part on the ``Standard Guide for
 Evaluating the Predictive Capability of Deterministic Fire Models,'' ASTM~E~1355~\cite{ASTM:E1355}.
@@ -531,7 +531,7 @@ viscosity, the model uses a viscosity of the form
   \mu_{\hbox{\tiny LES}} =  \rho \,  (C_s\, \Delta)^2  \, |S|
 \ee
 where $C_s$  is an empirical constant, $\Delta$ is a length on the order of the size of a grid  cell,  and  the  deformation   term  $|S|$  is
-related  to  the Dissipation Function (see FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for details). Related to the ``turbulent  viscosity'' are  comparable
+related  to  the Dissipation Function (see FDS Technical Reference Guide~\cite{FDS_Math_Guide} for details). Related to the ``turbulent  viscosity'' are  comparable
 expressions  for  the thermal conductivity  and  material diffusivity:  \be  k_{\hbox{\tiny LES}}  = \frac{\mu_{\hbox{\tiny  LES}}   \;  c_p}{\PR_t}
 \quad   ;  \quad  (\rho D)_{\hbox{\tiny  LES}}  =\frac{\mu_{\hbox{\tiny  LES}}}{\SC_t}  \ee  where $\PR_t$ and $\SC_t$ are the turbulent Prandtl and Schmidt numbers, respectively.
 Thus, $C_s$, $\PR_t$  and $\SC_t$ are  a set  of  empirical constants.  Most  FDS users
@@ -865,7 +865,7 @@ The remainder of this section is organized as follows. In Section \ref{formulati
 \subsection{Formulation}
 \label{formulation}
 
-Details of the FDS formulation are given in the Technical Guide \cite{FDS_Math_Guide_5}.  Here we provide only the salient components of the model necessary for treatment of constant density channel flow.
+Details of the FDS formulation are given in the Technical Guide \cite{FDS_Math_Guide}.  Here we provide only the salient components of the model necessary for treatment of constant density channel flow.
 
 The filtered continuity and momentum equations are:
 \begin{equation}
@@ -1153,21 +1153,21 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Figure \ref{fi
 
 \section{Scalar Transport (move\_slug)}
 
-In this section we demonstrate the qualitative behavior of the Superbee flux limiter scheme for transport of a square wave.  
-The diffusivity is set to zero and the advecting velocity is constant and uniform $\mathbf{u} = [1.0\,\,\,1.0]$.  
-The domain is the unit square with a passive scalar marker initialized to zero everywhere, except for two `slugs' of mass.  
-The first slug is set to unity over the region $x \times z = [0.125,\,0.375] \times [0.125,\,0.375]$.  
-The second slug is set to 1/2 over the region $x \times z = [0.500,\,0.750] \times [0.500,\,0.750]$.  
+In this section we demonstrate the qualitative behavior of the Superbee flux limiter scheme for transport of a square wave.
+The diffusivity is set to zero and the advecting velocity is constant and uniform $\mathbf{u} = [1.0\,\,\,1.0]$.
+The domain is the unit square with a passive scalar marker initialized to zero everywhere, except for two `slugs' of mass.
+The first slug is set to unity over the region $x \times z = [0.125,\,0.375] \times [0.125,\,0.375]$.
+The second slug is set to 1/2 over the region $x \times z = [0.500,\,0.750] \times [0.500,\,0.750]$.
 With the scalar bounds set to [0,1], these slugs demonstrate both the boundedness and TVD (total variation diminishing) behavior of the transport scheme.
 
-This case also tests two different types of boundary conditions applied in FDS.  First, the domain is periodic and the simulation runs for one flow through time.  
-The scalar slugs therefore ideally arrive back to their original locations with as little diffusion as possible.  
-Also, the domain is broken into four equally sized meshes, each with $40 \times 40$ uniform cells.  
+This case also tests two different types of boundary conditions applied in FDS.  First, the domain is periodic and the simulation runs for one flow through time.
+The scalar slugs therefore ideally arrive back to their original locations with as little diffusion as possible.
+Also, the domain is broken into four equally sized meshes, each with $40 \times 40$ uniform cells.
 To increase temporal accuracy and focus on the potential spacial error, we run the case with a CFL of 0.25.  In FDS, we refer to the mesh interface as an `interpolated boundary'.
 
-The results of the test are shown visually in Figure \ref{fig_move_slug}.  The upper-left image shows the initial condition.  
-The black lines indicate the mesh interfaces.  To the right of the initial condition we show the first slug crossing the mesh interfaces without incurring spurious noise.  
-The lower left image shows the final result for the Superbee limiter.  By comparison with a first-order scheme (lower right), 
+The results of the test are shown visually in Figure \ref{fig_move_slug}.  The upper-left image shows the initial condition.
+The black lines indicate the mesh interfaces.  To the right of the initial condition we show the first slug crossing the mesh interfaces without incurring spurious noise.
+The lower left image shows the final result for the Superbee limiter.  By comparison with a first-order scheme (lower right),
 this test case confirms that relatively low levels of diffusion are incurred at both periodic and interpolated boundaries in FDS.
 
 \begin{figure}[t]

@@ -260,11 +260,11 @@
 \begin{minipage}[t][9in][s]{6.25in}
 
 \huge
-\flushright{NIST Special Publication 1019-5}
+\flushright{NIST Special Publication 1019}
 
 \vspace{1in}
 
-\Huge \flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide }
+\Huge \flushright{Fire Dynamics Simulator \\ User's Guide }
 
 \vspace{.5in}
 
@@ -297,12 +297,12 @@ VTT Technical Research Centre of Finland  }
 \begin{minipage}[t][9in][s]{6.25in}
 
 \huge
-\flushright{NIST Special Publication 1019-5}
+\flushright{NIST Special Publication 1019}
 
 \vspace{.75in}
 
 \Huge
-\flushright{Fire Dynamics Simulator (Version 5) \\ User's Guide}
+\flushright{Fire Dynamics Simulator \\ User's Guide}
 
 \vspace{.25in}
 
@@ -355,8 +355,8 @@ entities, materials, or equipment are necessarily the best available for the pur
 \vspace{3in}
 
 \large
-\flushright{\bf National Institute of Standards and Technology Special Publication 1019-5 \\
-Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019-5, \pageref{LastPage} pages (October 2007) \\
+\flushright{\bf National Institute of Standards and Technology Special Publication 1019 \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~1019, \pageref{LastPage} pages (October 2007) \\
 CODEN: NSPUE2 }
 
 \vfill
@@ -383,7 +383,7 @@ This Guide describes how to use the Fire Dynamics Simulator (FDS) version 5. Bec
 the current version number on the inside front jacket of this manual.
 
 Note that this Guide does not provide the background theory for FDS. A four volume set of companion documents, referred to
-collectively as the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}, contains details about the governing
+collectively as the FDS Technical Reference Guide~\cite{FDS_Math_Guide}, contains details about the governing
 equations and numerical methods, model verification, experimental validation, and configuration management.
 The FDS User's Guide contains limited information on how to operate Smokeview, the companion
 visualization program for FDS. Its full capability is described in the Smokeview User's Guide~\cite{Smokeview_Users_Guide_5}.
@@ -594,7 +594,8 @@ The software described in this document, Fire Dynamics Simulator (FDS), is a com
 fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the
 Navier-Stokes equations appropriate for low-speed, thermally-driven flow
 with an emphasis on smoke and heat transport from fires.
-The formulation of the equations and the numerical algorithm are contained the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
+The formulation of the equations and the numerical algorithm are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+Verification and Validation of the model are discussed in the FDS Verification~\cite{FDS_Verification_Guide} and Validation~\cite{FDS_Validation_Guide} Guides.
 
 Smokeview is a separate visualization program that is used to display the
 results of an FDS simulation.
@@ -2371,7 +2372,7 @@ the thermal conductivity and material diffusivity, are related to the turbulent 
 The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be
 constant for a given scenario. Although it is not recommended for most calculations, you can modify
 $C_s=0.2$, $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct CSMAG}, {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed
-discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5}.
+discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 
 
@@ -5098,7 +5099,7 @@ In turbulent flow the velocity increases rapidly through a boundary layer that i
 In most practical simulations, it is not possible to resolve this boundary layer directly; thus, an empirical model is used to represent its effect on the overall flow field.
 For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is computed directly from the resolved velocity near the wall ({\ct NO\_SLIP=.TRUE.} by default).
 For an LES (Large Eddy Simulation), the Werner-Wengle wall model is applied for smooth walls and a log law is applied for rough walls.
-The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5} for wall model details.
+The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details.
 To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line.
 In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on {\ct SURF}.
 
@@ -5779,7 +5780,7 @@ the relevant physical mechanisms occur at length scales smaller than a
 single mesh cell. Flames are extinguished due to lowered
 temperatures and dilution of the oxygen supply. A simple
 suppression algorithm has been implemented in FDS that attempts to
-gauge whether or not a flame is viable at the fuel-oxygen interface. The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
+gauge whether or not a flame is viable at the fuel-oxygen interface. The Technical Reference Guide~\cite{FDS_Math_Guide}
 contains more details about how the mechanism works. The only
 parameters you can control are the Limiting
 Oxygen Index, {\ct X\_O2\_LL},
@@ -5823,7 +5824,7 @@ present.
 \subsection{Special Topic: CO Production}
 
 An algorithm has been implemented that computes the combustion as a two step reaction that
-predicts the formation and destruction of CO.  The Technical Reference Guide~\cite{FDS_Tech_Guide_5}
+predicts the formation and destruction of CO.  The Technical Reference Guide~\cite{FDS_Math_Guide}
 contains more details about how the mechanism works. This algorithm is used when
 {\ct CO\_PRODUCTION} is set to {\ct .TRUE.} on the {\ct MISC} line. Even though the algorithm predicts
 CO formation and its eventual oxidation at elevated temperature, it cannot predict the post-flame
@@ -6158,7 +6159,7 @@ on the gas temperature and the chemical composition. By default, the {\ct RADIAT
 There are several ways to improve the performance of the Finite Volume
 Method in solving the radiation transport equation (RTE), most of which
 increase the computation time. The solver has two modes of
-operation -- a gray gas model (default) and a wide band model~\cite{FDS_Math_Guide_5}.
+operation -- a gray gas model (default) and a wide band model~\cite{FDS_Math_Guide}.
 Modifications to these models can be made via parameters on the
 {\ct RADI} line. If running in gray gas mode (default), increase the number
 of angles from the default 100 with the integer parameter
@@ -6629,7 +6630,7 @@ shrink and no additional gaseous species need to be declared.
 
 Note that the absorption of thermal radiation by water ({\ct WATER=.TRUE.}) or fuel droplets ({\ct FUEL=.TRUE.}) is
 handled in FDS with fairly well-established physical sub-models, the details
-of which are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide_5}.
+of which are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 However, for arbitrary particles or droplets, there is no assumed radiative absorption.
 
 
@@ -6868,7 +6869,7 @@ droplets that land on the floor continue to move horizontally in randomly select
 directions; bouncing off obstructions, and consuming CPU time.
 
 For more information about sprinklers, their activation and spray dynamics, read the FDS
-Technical Reference Guide~\cite{FDS_Math_Guide_5}.
+Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
@@ -9235,7 +9236,7 @@ $^{*****}$             \> Quantity requires specification of an additional scala
 \label{info:oddoutputquantities}
 
 Table~\ref{tab:oddoutput} below lists some less often used output quantities. These are mainly used for diagnostic purposes. Explanations for most can
-be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5}.
+be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
@@ -9282,7 +9283,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide_5
 \section{Summary of HVAC Output Quantities}
 \label{info:hvacoutputquantities}
 
-Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  Quantities for a duct require the specification 
+Table~\ref{tab:hvacoutput} summarizes the various Output Quantities for HVAC systems.  Quantities for a duct require the specification
 of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\ct NODE\_ID}.  Mass and volume fraction outputs also require the specification of a {\ct SPEC\_ID}.
 
 \setlength\LTleft{0pt}
