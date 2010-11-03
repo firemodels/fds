@@ -28,7 +28,7 @@ echo Uploading Smokeview %level% version=test revision=%smv_revision%
 pause
 
 %svn_drive%
-cd %svn_root%\smv_5\for_bundle\to_google
+cd %svn_root%\smv\for_bundle\to_google
 
 Rem --------------- 64 bit Windows ----------------
 if not %upload_win64% == 1 goto endif_win64

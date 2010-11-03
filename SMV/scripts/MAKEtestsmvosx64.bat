@@ -22,7 +22,7 @@ echo.
 echo Using SVN revision %smv_revision% to build a 64 bit test OSX Smokeview
 
 %svn_drive%
-cd %svn_root%\smv_5\scripts
+cd %svn_root%\smv\scripts
 set version=%smv_version%_%smv_revision%
 
 set scriptdir=FDS-SMV/SMV/scripts

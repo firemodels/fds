@@ -18,7 +18,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\smv_5\scripts
+cd %svn_root%\smv\scripts
 set version=%smv_version%
 
 set scriptdir=FDS-SMV/SMV/scripts

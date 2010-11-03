@@ -20,7 +20,7 @@ call %envfile%
 echo Building 32 and 64 bit Linux versions of fds2ascii
 
 %svn_drive%
-cd %svn_root%\smv_5\scripts
+cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
 

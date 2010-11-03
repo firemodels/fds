@@ -24,7 +24,7 @@ echo Running Smokeview installer:  smv_test_%smv_revision%_%platform%.exe
 pause
 
 %svn_drive%
-cd %svn_root%\smv_5\for_bundle\to_google
+cd %svn_root%\smv\for_bundle\to_google
 
 call smv_test_%smv_revision%_%platform%.exe
 pause
