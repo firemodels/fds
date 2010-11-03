@@ -1,4 +1,4 @@
-SOURCE_DIR = ../../SMV_5/source/
+SOURCE_DIR = ../../SMV/source/
 INSTALL_DIR = ../Scripts/bundle_setup 
 FILTERC =
 FILTERF =
