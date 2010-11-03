@@ -10,14 +10,14 @@ setenv SVNROOT ~/FDS-SMV
 setenv FDS $SVNROOT/FDS_Compilation/intel_linux_32/fds5_intel_linux_32
 setenv BASEDIR `pwd`
 
-setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds.csh
+#setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds.csh
 
 # To run the "background" version of this script, 
 # comment the line above contaiing RUNFDS
 # uncomment the two lines below containing RUNFDS and BACKGROUND
 
-#setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds_bg.csh
-#setenv BACKGROUND "$SVNROOT/Utilities/background/INTEL_LINUX_32/background -hosts ~/run_nodes -u 50 -d 10"
+setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds_bg.csh
+setenv BACKGROUND "$SVNROOT/Utilities/background/INTEL_LINUX_32/background -hosts ~/run_nodes -u 75 -d 5"
 
 echo FDS cases submitted
 

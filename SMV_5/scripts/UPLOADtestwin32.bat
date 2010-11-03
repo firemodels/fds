@@ -7,7 +7,7 @@ Rem batch file, MAKEtest.bat, has already been run.
 set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
-echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
+echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
 echo as an example.
 echo.
 echo Aborting now...

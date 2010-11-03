@@ -22,7 +22,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV_5\for_bundle
+cd %svn_root%\SMV\for_bundle
 echo copy objects.svo to %ProgramFiles%\fds\fds5\bin
 pause
 copy objects.svo "%ProgramFiles%"\fds\fds5\bin

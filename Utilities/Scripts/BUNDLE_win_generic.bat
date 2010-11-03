@@ -8,9 +8,9 @@ set in_pdf=%svn_root%\Manuals\All_PDF_Files
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_smokediff=%svn_root%\Utilities\smokediff
 Rem set in_smokezip=%svn_root%\Utilities\smokezip
-set in_smokezip=%svn_root%\SMV_5\for_bundle
+set in_smokezip=%svn_root%\SMV\for_bundle
 set in_background=%svn_root%\Utilities\background
-set in_smv=%svn_root%\SMV_5\for_bundle\
+set in_smv=%svn_root%\SMV\for_bundle\
 
 set to_google=%svn_root%\Utilities\to_google
 set out_bundle=%to_google%\%basename%\FDS
@@ -186,8 +186,8 @@ echo.
 echo Copying Documentation to the Documentation directory
 
 copy %in_pdf%\FDS_5_User_Guide.pdf               %out_guides%\.
-copy %in_pdf%\SMV_5_User_Guide.pdf               %out_guides%\.
-copy %in_pdf%\SMV_5_Technical_Reference_Guide.pdf %out_guides%\.
+copy %in_pdf%\SMV_User_Guide.pdf               %out_guides%\.
+copy %in_pdf%\SMV_Technical_Reference_Guide.pdf %out_guides%\.
 copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_guides%\.
 copy "%in_smv%\readme.html"                      "%out_guides%\Smokeview_release_notes.html"
 
