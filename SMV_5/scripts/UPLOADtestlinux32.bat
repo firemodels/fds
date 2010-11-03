@@ -7,7 +7,7 @@ Rem batch file, MAKEtest.bat, has already been run.
 set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
-echo Create a file named %envfile% and use SMV_5/scripts/fds_smv_env_template.bat
+echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
 echo as an example.
 echo.
 echo Aborting now...
@@ -19,7 +19,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV_5\for_bundle\to_google
+cd %svn_root%\SMV\for_bundle\to_google
 
 Rem ----------------------------------------------------------
 Rem should not need to edit any lines below

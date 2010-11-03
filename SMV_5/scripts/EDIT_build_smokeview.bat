@@ -22,5 +22,5 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV_5\
+cd %svn_root%\SMV\
 start wordpad build_smokeview.html

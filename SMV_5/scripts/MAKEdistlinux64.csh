@@ -3,8 +3,8 @@ set version=$1
 set revision=$2
 set SVNROOT=~/FDS-SMV
 
-set BINDIR=$SVNROOT/SMV_5/bin
-set FORBUNDLE=$SVNROOT/SMV_5/for_bundle
+set BINDIR=$SVNROOT/SMV/bin
+set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set LINUXDIR=smv_$version\_linux64
 
 cd $FORBUNDLE

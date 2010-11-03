@@ -12,8 +12,8 @@ set googledir=$fds_smvroot/Utilities/to_google
 set bundledir=$bundlebase/FDS/FDS5
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
 set mandir=$fds_smvroot/Manuals/All_PDF_Files
-set smvbindir=$scp_fds_smvroot/SMV_5/bin
-set forbundle=$fds_smvroot/SMV_5/for_bundle
+set smvbindir=$scp_fds_smvroot/SMV/bin
+set forbundle=$fds_smvroot/SMV/for_bundle
 set texturedir=$forbundle/textures
 set fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
 set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
@@ -96,7 +96,7 @@ cat $manifest | Mail -s " $PLATFORM" glenn.forney@nist.gov
 
 if ($?OSXBUNDLE) then
 echo copying OSX launcher script
-cp $bundle_setup/FDS-SMV_5_OSX_Launcher.app.zip $bundledir/bin/.
+cp $bundle_setup/FDS-SMV_OSX_Launcher.app.zip $bundledir/bin/.
 cp $bundle_setup/README_OSX.html $bundledir/bin/.
 endif
 
@@ -109,8 +109,8 @@ scp -q $fdshost\:$fds2asciiroot/$fds2asciidir/$fds2ascii $bundledir/bin/.
 echo Copying documentation
 cp $bundle_setup/Overview.html $bundledir/Documentation/.
 cp $mandir/FDS_5_User_Guide.pdf $bundledir/Documentation/.
-cp $mandir/SMV_5_User_Guide.pdf $bundledir/Documentation/.
-cp $mandir/SMV_5_Technical_Reference_Guide.pdf $bundledir/Documentation/.
+cp $mandir/SMV_User_Guide.pdf $bundledir/Documentation/.
+cp $mandir/SMV_Technical_Reference_Guide.pdf $bundledir/Documentation/.
 cp $mandir/FDS_5_Technical_Reference_Guide.pdf $bundledir/Documentation/.
 
 echo Copy objects.svo

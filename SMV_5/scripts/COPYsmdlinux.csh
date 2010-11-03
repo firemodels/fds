@@ -2,6 +2,6 @@
 set SVNROOT=~/FDS-SMV
 
 cd $SVNROOT/Utilities/smokediff/INTEL_LINUX_32
-cp -v smokediff_linux_32 $SVNROOT/SMV_5/bin/.
+cp -v smokediff_linux_32 $SVNROOT/SMV/bin/.
 cd $SVNROOT/Utilities/smokediff/INTEL_LINUX_64
-cp -v smokediff_linux_64 $SVNROOT/SMV_5/bin/.
+cp -v smokediff_linux_64 $SVNROOT/SMV/bin/.
