@@ -45,7 +45,7 @@ set(hh,'Interpreter','LaTeX','FontSize',Key_Font_Size)
 
 % print to pdf
 
-plotdir = '../../Manuals/FDS_5_Validation_Guide/FIGURES/Heskestad/';
+plotdir = '../../Manuals/FDS_Validation_Guide/FIGURES/Heskestad/';
 Plot_Filename = 'Flame_Height_check_hrr';
 
 set(gcf,'PaperUnits',Paper_Units);

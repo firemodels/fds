@@ -6,7 +6,7 @@ function []=power_spectrum(spectrum_file,dt_puff,slope_scale,xaxis_title,yaxis_t
                            devc_file,devc_col,tmin,tmax,dt,spectrum_style,nyquist_style, ...
                            title1,title2)
 
-plotdir = ['../../Manuals/FDS_5_Validation_Guide/FIGURES/'];
+plotdir = ['../../Manuals/FDS_Validation_Guide/FIGURES/'];
 
 M = csvread(devc_file,2,0);
 

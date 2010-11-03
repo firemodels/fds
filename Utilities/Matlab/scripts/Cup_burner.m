@@ -115,7 +115,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_5_Validation_Guide/FIGURES/Cup_Burner/Cup_Burner_volfrac');
+print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/Cup_Burner/Cup_Burner_volfrac');
 
 
 % plot Y
@@ -159,6 +159,6 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_5_Validation_Guide/FIGURES/Cup_Burner/Cup_Burner_massfrac');
+print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/Cup_Burner/Cup_Burner_massfrac');
 
 %close all
