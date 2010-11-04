@@ -2726,6 +2726,7 @@ CONTAINS
 
       ! Read the STRS line
       READ_STRS_LOOP: DO N = 1,N_STRS
+         IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_STRS_LOOP
          STRP=>EVAC_STRS(N)
          !
          ID                          = 'null'
