@@ -67,8 +67,6 @@
 /
 &SURF ID='Exhaust' COLOR= 'BLUE' MASS_FLUX_TOTAL=0.516 /
 
-&MISC RESTART=.TRUE./
- 
 
 &VENT XB=4.4,5.2,0,0,0,2, SURF_ID='OPEN' / door
 &VENT XB=0,0,1.8,2.1,0.35,0.65, SURF_ID='OPEN' / inlet duct
