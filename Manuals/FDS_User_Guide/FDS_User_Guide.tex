@@ -8440,8 +8440,9 @@ by its bead size. It is found by solving the following equation for the thermoco
 \ee
 where $\epsilon_{\hbox{\tiny TC}}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_g$ is the true gas temperature, and
 $h$ is the heat transfer coefficient to a small sphere,
-$h=k \, \NU / d_{\hbox{\tiny TC}}$.
-The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line.
+$h=k \, \NU / d_{\hbox{\tiny TC}}$. 
+The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the
+calculated value of the heat transfer coefficient, set {\ct BEAD\_H\_FIXED} on the {\ct PROP} line (W/m$^2$/K).
 The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and
 0.44~kJ/kg/K, respectively.
 See the discussion on heat transfer to a water
@@ -10099,10 +10100,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ALPHA\_E}                          & Real          & Smoke detector parameter                  &                       & 0.0       \\ \hline
 {\ct BETA\_C}                           & Real          & Smoke detector parameter                  &                       & 1.0       \\ \hline
 {\ct BETA\_E}                           & Real          & Smoke detector parameter                  &                       & 1.0       \\ \hline
-{\ct BEAD\_DENSITY}                     & Real          & Density of TC bead                        & kg/m$^3$              & 8908.     \\ \hline
-{\ct BEAD\_DIAMETER}                    & Real          & Diameter of TC bead                       & m                     & 0.001     \\ \hline
-{\ct BEAD\_EMISSIVITY}                  & Real          & Emissivity of TC bead                     &                       & 0.85      \\ \hline
-{\ct BEAD\_SPECIFIC\_HEAT}              & Real          & Specific Heat of TC bead                  & kJ/kg/K               & 0.44      \\ \hline
+{\ct BEAD\_DENSITY}                     & Real          & See Section~\ref{info:THERMOCOUPLE}       & kg/m$^3$              & 8908.     \\ \hline
+{\ct BEAD\_DIAMETER}                    & Real          & See Section~\ref{info:THERMOCOUPLE}       & m                     & 0.001     \\ \hline
+{\ct BEAD\_EMISSIVITY}                  & Real          & See Section~\ref{info:THERMOCOUPLE}       &                       & 0.85      \\ \hline
+{\ct BEAD\_H\_FIXED}                    & Real          & See Section~\ref{info:THERMOCOUPLE}       & W/m$^2$/K             &           \\ \hline
+{\ct BEAD\_SPECIFIC\_HEAT}              & Real          & See Section~\ref{info:THERMOCOUPLE}       & kJ/kg/K               & 0.44      \\ \hline
 {\ct CABLE\_DIAMETER}                   & Real          & See Section~\ref{info:THIEF}              & m                     & 0.02      \\ \hline
 {\ct CABLE\_FAILURE\_TEMPERATURE}       & Real          & See Section~\ref{info:THIEF}              & $^\circ$C             & 400       \\ \hline
 {\ct CABLE\_JACKET\_THICKNESS}          & Real          & See Section~\ref{info:THIEF}              & m                     & 0.002     \\ \hline
