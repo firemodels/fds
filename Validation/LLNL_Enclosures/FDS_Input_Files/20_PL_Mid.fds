@@ -1,18 +1,11 @@
-&HEAD
-      CHID= '20_PL_Mid'
-      TITLE= '1986 LLNL Enclosure Fire Tests'
-/
+&HEAD CHID='20_PL_Mid', TITLE= '1986 LLNL Enclosure Fire Tests' /
 &TIME
       T_BEGIN= 0
       T_END= 6000
 /
 &MESH IJK=30,20,45, XB=0,6,0,4,0,4.5 /Mesh 1, Description
 &ZONE XB=0,6,0,4,0,4.5, LEAK_AREA(0) = 0.0223 / Zone for leakage through walls
-&MISC
-      RADIATION=.FALSE.
-      SUPPRESSION=.TRUE.
-      TMPA=16
-/
+&MISC TMPA=16 /
 &REAC
       ID= 'Methane'
       FYI= 'C_1 H_4'
@@ -66,9 +59,6 @@
       TRANSPARENCY=0.5
 /
 &SURF ID='Exhaust' COLOR= 'BLUE' MASS_FLUX_TOTAL=0.476 /
-
-&MISC RESTART=.TRUE./
- 
 
 &VENT XB=4.4,5.2,0,0,0,2, SURF_ID='OPEN' / door
 &VENT XB=0,0,1.8,2.1,0.35,0.65, SURF_ID='OPEN' / inlet duct
