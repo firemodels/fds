@@ -3825,8 +3825,12 @@ CONTAINS
          ! Check the INPUT_IDs
          EDV%N_INPUTS  = 0
          INPUT_COUNT: DO
-            IF (EDV%N_INPUTS==40) EXIT INPUT_COUNT
-            IF (INPUT_ID(EDV%N_INPUTS+1)=='null') EXIT INPUT_COUNT
+            IF (EDV%N_INPUTS==40) THEN
+               EXIT INPUT_COUNT
+            END IF
+            IF (INPUT_ID(EDV%N_INPUTS+1)=='null') THEN
+               EXIT INPUT_COUNT
+            END IF
             EDV%N_INPUTS  = EDV%N_INPUTS + 1
          END DO INPUT_COUNT
          IF (EDV%N_INPUTS==0) THEN
