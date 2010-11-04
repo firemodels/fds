@@ -4384,13 +4384,17 @@ SELECT CASE(IND)
       ELSE
          TMP_G = TMP(II,JJ,KK)
       ENDIF
-      UU      = U(II,JJ,KK)
-      VV      = V(II,JJ,KK)
-      WW      = W(II,JJ,KK)
-      VEL2    = UU**2+VV**2+WW**2
-      RE_D    = RHO(II,JJ,KK)*SQRT(VEL2)*PY%BEAD_DIAMETER/MU_AIR_0
-      NUSSELT = 2._EB + C_FORCED_SPHERE*SQRT(RE_D)*PR_ONTH
-      H_TC    = NUSSELT*K_AIR_0/PY%BEAD_DIAMETER
+      IF (PY%BEAD_H_FIXED<0._EB) THEN
+         UU      = U(II,JJ,KK)
+         VV      = V(II,JJ,KK)
+         WW      = W(II,JJ,KK)
+         VEL2    = UU**2+VV**2+WW**2
+         RE_D    = RHO(II,JJ,KK)*SQRT(VEL2)*PY%BEAD_DIAMETER/MU_AIR_0
+         NUSSELT = 2._EB + C_FORCED_SPHERE*SQRT(RE_D)*PR_ONTH
+         H_TC    = NUSSELT*K_AIR_0/PY%BEAD_DIAMETER
+      ELSE
+         H_TC    = PY%BEAD_H_FIXED
+      ENDIF
       RHS      = (6._EB/(PY%BEAD_DENSITY*PY%BEAD_SPECIFIC_HEAT*PY%BEAD_DIAMETER))* &
                  ( H_TC*(TMP_G-DV%TMP_L) + PY%BEAD_EMISSIVITY*(0.25_EB*UII(II,JJ,KK)-SIGMA*DV%TMP_L**4) )
       DV%TMP_L = DV%TMP_L + DT*RHS
