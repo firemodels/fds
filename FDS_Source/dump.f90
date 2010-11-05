@@ -1725,20 +1725,18 @@ EVAC_ONLY5: IF (ANY(EVACUATION_GRID).AND.MYID==MAX(0,EVAC_PROCESS)) THEN
       WRITE(LU_SMV,'(/A)') 'DEVICE'
       WRITE(LU_SMV,'(A)') 'evacdoor'
       WRITE(LU_SMV,'(6F12.5,2I2)') XX,YY,ZZ,-EVAC_DOORS(N)%ORIENTATION(1:3),0,9
-      ! WRITE(LU_SMV,'(3F6.2,3I6)') EVAC_DOORS(N)%WIDTH, 0.05, EVAC_DOORS(N)%HEIGHT, EVAC_DOORS(N)%RGB(1:3)
-      ! x y z translate for the arrow (cone)
-      ! xx: upwards, yy: right, zz: towards the door
+      ! x y z translate for the arrow (cone);  xx: upwards, yy: right, zz: towards the door
       IF (ABS(EVAC_DOORS(N)%IOR) <= 1) THEN
          WRITE(LU_SMV,'(3F6.2,3I6)') EVAC_DOORS(N)%WIDTH, 0.05, EVAC_DOORS(N)%HEIGHT, EVAC_DOORS(N)%RGB(1:3)
          ZZ = (EVAC_DOORS(N)%Y - YY)
          YY = -EVAC_DOORS(N)%IOR*(EVAC_DOORS(N)%X - XX)
          XX = ZZ
-         ZZ = 0.5_EB*EVAC_DOORS(N)%IOR*EVAC_DOORS(N)%HEIGHT
+         ZZ = EVAC_DOORS(N)%IOR*(0.5_EB*EVAC_DOORS(N)%HEIGHT + (EVAC_DOORS(N)%XYZ_Z - EVAC_DOORS(N)%Z))
       ELSE
          WRITE(LU_SMV,'(3F6.2,3I6)') EVAC_DOORS(N)%HEIGHT, 0.05, EVAC_DOORS(N)%WIDTH, EVAC_DOORS(N)%RGB(1:3)
          YY = -EVAC_DOORS(N)%IOR*(EVAC_DOORS(N)%Y - YY)/2.0_EB
          ZZ = (EVAC_DOORS(N)%X - XX)
-         XX = 0.25_EB*EVAC_DOORS(N)%IOR*EVAC_DOORS(N)%HEIGHT
+         XX = 0.5_EB*EVAC_DOORS(N)%IOR*(0.5_EB*EVAC_DOORS(N)%HEIGHT + (EVAC_DOORS(N)%XYZ_Z - EVAC_DOORS(N)%Z))
       ENDIF
       WRITE(LU_SMV,'(3F10.3)') ZZ, XX, YY
    ENDDO
@@ -1750,20 +1748,18 @@ EVAC_ONLY5: IF (ANY(EVACUATION_GRID).AND.MYID==MAX(0,EVAC_PROCESS)) THEN
       WRITE(LU_SMV,'(/A)') 'DEVICE'
       WRITE(LU_SMV,'(A)') 'evacdoor'
       WRITE(LU_SMV,'(6F12.5,2I2)') XX,YY,ZZ,-EVAC_EXITS(N)%ORIENTATION(1:3),0,9
-      ! WRITE(LU_SMV,'(3F6.2,3I6)') EVAC_EXITS(N)%WIDTH, 0.05, EVAC_EXITS(N)%HEIGHT, EVAC_EXITS(N)%RGB(1:3)
-      ! x y z translate for the arrow (cone)
-      ! xx: upwards, yy: right, zz: towards the door
+      ! x y z translate for the arrow (cone);  xx: upwards, yy: right, zz: towards the door
       IF (ABS(EVAC_EXITS(N)%IOR) <= 1) THEN
          WRITE(LU_SMV,'(3F6.2,3I6)') EVAC_EXITS(N)%WIDTH, 0.05, EVAC_EXITS(N)%HEIGHT, EVAC_EXITS(N)%RGB(1:3)
          ZZ = (EVAC_EXITS(N)%Y - YY)
          YY = -EVAC_EXITS(N)%IOR*(EVAC_EXITS(N)%X - XX)
          XX = ZZ
-         ZZ = 0.5_EB*EVAC_EXITS(N)%IOR*EVAC_EXITS(N)%HEIGHT
+         ZZ = EVAC_EXITS(N)%IOR*(0.5_EB*EVAC_EXITS(N)%HEIGHT + (EVAC_EXITS(N)%XYZ_Z - EVAC_EXITS(N)%Z))
       ELSE
          WRITE(LU_SMV,'(3F6.2,3I6)') EVAC_EXITS(N)%HEIGHT, 0.05, EVAC_EXITS(N)%WIDTH, EVAC_EXITS(N)%RGB(1:3)
          YY = -EVAC_EXITS(N)%IOR*(EVAC_EXITS(N)%Y - YY)/2.0_EB
          ZZ = (EVAC_EXITS(N)%X - XX)
-         XX = 0.25_EB*EVAC_EXITS(N)%IOR*EVAC_EXITS(N)%HEIGHT
+         XX = 0.5_EB*EVAC_EXITS(N)%IOR*(0.5_EB*EVAC_EXITS(N)%HEIGHT + (EVAC_EXITS(N)%XYZ_Z - EVAC_EXITS(N)%Z))
       ENDIF
       WRITE(LU_SMV,'(3F10.3)') ZZ, XX, YY
    ENDDO
