@@ -12,5 +12,5 @@ call "%IFORT_COMPILER11%\bin\iclvars" ia32_intel64
 
 :envexist
 erase *.obj
-make VPATH="../../../SMV_5/source/set_path" -f ../Makefile intel_win_64
+make VPATH="../../../SMV/source/set_path" -f ../Makefile intel_win_64
 pause
