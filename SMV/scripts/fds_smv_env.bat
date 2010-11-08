@@ -1,10 +1,10 @@
 @echo off
 Rem ------ FDS/Smokeview version and revision numbers ---------
 
-set smv_version=5.5.8
-set smv_revision=6710
-set fds_version=5.5.2
-set fds_revision=6706
+set smv_version=5.6
+set smv_revision=7032
+set fds_version=5.5.3
+set fds_revision=7031
 
 Rem ---------- FDS-Smokeview repository settings ------------
 
