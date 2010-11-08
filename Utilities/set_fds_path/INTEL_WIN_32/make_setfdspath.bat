@@ -11,5 +11,5 @@ call "%IFORT_COMPILER11%\bin\ifortvars" ia32
 call "%IFORT_COMPILER11%\bin\iclvars" ia32
 :envexist
 erase *.obj
-make VPATH="../../../SMV_5/source/set_path" -f ../Makefile intel_win_32
+make VPATH="../../../SMV/source/set_path" -f ../Makefile intel_win_32
 pause
