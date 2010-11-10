@@ -1,4 +1,4 @@
-&HEAD CHID='NBS_100O_v5', TITLE='NBS Multiroom Test 100O' /
+&HEAD CHID='NBS_100O', TITLE='NBS Multiroom Test 100O' /
 
 &MESH IJK= 24,34,22, XB=9.8,12.2,0.0,3.4,0.0,2.2 /
 &MESH IJK=122,24,24, XB=0.0,12.2,3.4,5.8,0.0,2.4 /

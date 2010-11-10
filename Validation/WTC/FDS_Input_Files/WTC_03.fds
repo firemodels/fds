@@ -1,4 +1,4 @@
-&HEAD CHID='WTC_03_v5',TITLE='WTC Phase 1, Test 3, Version 5' /
+&HEAD CHID='WTC_03',TITLE='WTC Phase 1, Test 3, Version 5' /
 
 &MESH IJK=90,36,38, XB=-1.0,8.0,-1.8,1.8,0.0,3.82 /
 &TIME TWFIN=3600. /
