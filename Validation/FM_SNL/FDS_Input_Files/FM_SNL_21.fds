@@ -1,4 +1,4 @@
-&HEAD CHID='FM_SNL_21_v5', TITLE='FM-SNL Test 21' /
+&HEAD CHID='FM_SNL_21', TITLE='FM-SNL Test 21' /
 
 &MESH IJK=24,48,64, XB= 8.0,10.4, 4.0, 8.8, 0.0, 6.1 /
 &MESH IJK=40,44,32, XB= 0.0, 8.0, 0.0, 8.8, 0.0, 6.1 /
