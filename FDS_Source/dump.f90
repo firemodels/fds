@@ -1709,17 +1709,20 @@ DO N=1,N_GEOM
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'VZ=', RR(1,3)*G%U0 + RR(2,3)*G%V0 + RR(3,3)*G%W0
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'ROTATE_RATE=',G%OMEGA*180._EB/PI
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'D=',2._EB*G%RADIUS
+   IF (G%ISHAPE==ICYLINDER) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',2._EB*G%HL(2)
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'XMAX=',G%X+G%RADIUS
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'YMAX=',G%Y+G%RADIUS
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'ZMAX=',G%Z+G%RADIUS
    WRITE(LU_SMV,'(1X,3A)') 'tfile="t%',TRIM(G%TFILE),'"'
    
    WRITE(LU_SMV,'(/A)') 'DEVICE'
-   !SELECT CASE(G%ISHAPE)
-      !CASE(ISPHERE)
+   SELECT CASE(G%ISHAPE)
+      CASE(ISPHERE)
          WRITE(LU_SMV,'(1X,A)') 'geom'
          WRITE(LU_SMV,'(6F12.5,2I3,2A)') G%X,G%Y,G%Z,G%XOR,G%YOR,G%ZOR,0,0,' % ',G%ID
-      !CASE(ICYLINDER)
+      CASE(ICYLINDER)
+         WRITE(LU_SMV,'(1X,A)') 'geom'
+         WRITE(LU_SMV,'(6F12.5,2I3,2A)') G%X,G%Y,G%Z,G%XOR,G%YOR,G%ZOR,0,0,' % ',G%ID
       !   WRITE(LU_SMV,'(A)') 'geom'
       !   WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,0._EB,0._EB,1._EB,0,7
       !   WRITE(LU_SMV,'(5F12.5,I5)') REAL(G%RGB,EB)/255._EB,2._EB*G%RADIUS,2._EB*G%HL(2),-90
@@ -1733,7 +1736,7 @@ DO N=1,N_GEOM
       !   WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,(/G%XOR-G%X,G%YOR-G%Y,G%ZOR-G%Z/),0,4
       !   WRITE(LU_SMV,'(4F12.5)') REAL(G%RGB,EB)/255._EB,2._EB*G%RADIUS
    
-   !END SELECT
+   END SELECT
 ENDDO
 
 ENDIF MASTER_NODE_IF
@@ -3784,7 +3787,7 @@ USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_STRINGS
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_ENTRYS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: VALUE,STAT_VALUE,SUM_VALUE,VOL,WGT
-INTEGER :: NM,N,I,J,K,STAT_COUNT,IW,IBC,I_STATE
+INTEGER :: NM,N,I,J,K,STAT_COUNT,IW,IBC,I_STATE,IND
 LOGICAL :: NOT_FOUND
  
 CALL POINT_TO_MESH(NM)
@@ -3872,6 +3875,29 @@ DEVICE_LOOP: DO N=1,N_DEVC
                                           GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
                            IF (DV%IOR==3) STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)* &
                                           GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
+                        CASE('TENSOR SURFACE INTEGRAL')
+                           ! similar to 'AREA INTEGRAL' but multiplies by outward unit normal and sums along outside of volume XB
+                           
+                           IND=0
+                           IF (DV%QUANTITY=='F_X') IND=1
+                           IF (DV%QUANTITY=='F_Y') IND=2
+                           IF (DV%QUANTITY=='F_Z') IND=3
+                           
+                           IF (DV%I1/=DV%I2) THEN
+                              IF (I==DV%I1) STAT_VALUE = STAT_VALUE - RC(I)*DY(J)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,-1,NM)
+                              IF (I==DV%I2) STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,+1,NM)
+                           ENDIF
+                           
+                           IF (DV%J1/=DV%J2) THEN              
+                              IF (J==DV%J1) STAT_VALUE = STAT_VALUE - DX(I)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,-2,NM)
+                              IF (J==DV%J2) STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,+2,NM)
+                           ENDIF
+                        
+                           IF (DV%K1/=DV%K2) THEN
+                              IF (K==DV%K1) STAT_VALUE = STAT_VALUE - DX(I)*DY(J)*TENSOR_OUTPUT(I,J,K,IND,-3,NM)
+                              IF (K==DV%K2) STAT_VALUE = STAT_VALUE + DX(I)*DY(J)*TENSOR_OUTPUT(I,J,K,IND,+3,NM)
+                           ENDIF
+                        
                         CASE('VOLUME MEAN')
                            STAT_VALUE = STAT_VALUE + &
                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%SPEC_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)*VOL
@@ -4140,15 +4166,8 @@ SELECT CASE(IND)
    CASE( 8)  ! W-VELOCITY
       GAS_PHASE_OUTPUT = W(II,JJ,KK)
    CASE( 9)  ! PRESSURE
-      UU   = 0.5_EB*(U(MIN(IBAR,II),JJ,KK)+U(MAX(0,II-1),JJ,KK))
-      VV   = 0.5_EB*(V(II,MIN(JBAR,JJ),KK)+V(II,MAX(0,JJ-1),KK))
-      WW   = 0.5_EB*(W(II,JJ,MIN(KBAR,KK))+W(II,JJ,MAX(0,KK-1)))
-      VEL2 = UU**2+VV**2+WW**2
-      GAS_PHASE_OUTPUT  = PBAR(KK,PRESSURE_ZONE(II,JJ,KK)) + RHO(II,JJ,KK)*(H(II,JJ,KK)-.5_EB*VEL2) - P_0(KK)
+      GAS_PHASE_OUTPUT  = PBAR(KK,PRESSURE_ZONE(II,JJ,KK)) + RHO(II,JJ,KK)*(H(II,JJ,KK)-KRES(II,JJ,KK)) - P_0(KK)
    CASE(10)  ! VELOCITY
-      UU   = 0.5_EB*(U(MIN(IBAR,II),JJ,KK)+U(MAX(0,II-1),JJ,KK))
-      VV   = 0.5_EB*(V(II,MIN(JBAR,JJ),KK)+V(II,MAX(0,JJ-1),KK))
-      WW   = 0.5_EB*(W(II,JJ,MIN(KBAR,KK))+W(II,JJ,MAX(0,KK-1)))
       SELECT CASE(ABS(VELO_INDEX))
          CASE DEFAULT
             SGN = 1._EB
@@ -4159,8 +4178,7 @@ SELECT CASE(IND)
          CASE(3)
             SGN = SIGN(1._EB,WW)*SIGN(1,VELO_INDEX)
       END SELECT
-      VEL2 = UU**2+VV**2+WW**2
-      GAS_PHASE_OUTPUT  = SGN*SQRT(VEL2)
+      GAS_PHASE_OUTPUT = SGN*SQRT(2._EB*KRES(II,JJ,KK))
    CASE(11)  ! HRRPUV
       GAS_PHASE_OUTPUT = Q(II,JJ,KK)*0.001_EB
    CASE(12)  ! H
@@ -4325,7 +4343,16 @@ SELECT CASE(IND)
 
    CASE(60)  ! ACTUATED SPRINKLERS
       GAS_PHASE_OUTPUT = N_ACTUATED_SPRINKLERS
-
+      
+   CASE(61)  ! U_MASK
+      GAS_PHASE_OUTPUT = U_MASK(II,JJ,KK)
+   CASE(62)  ! V_MASK
+      GAS_PHASE_OUTPUT = V_MASK(II,JJ,KK)
+   CASE(63)  ! W_MASK
+      GAS_PHASE_OUTPUT = W_MASK(II,JJ,KK)
+   CASE(64)  ! P_MASK
+      GAS_PHASE_OUTPUT = P_MASK(II,JJ,KK)  
+      
    CASE(90)  ! MASS FRACTION
       IF (SPEC_INDEX<0) THEN
          GAS_PHASE_OUTPUT = Y_SPECIES/(1._EB-Y_H2O)
@@ -5003,6 +5030,158 @@ SELECT CASE(IND)
 END SELECT   
    
 END FUNCTION HVAC_OUTPUT
+
+
+REAL(EB) FUNCTION TENSOR_OUTPUT(II,JJ,KK,IND,IOR,NM)
+
+! Compute local total stress tensor and dot with unit normal
+
+INTEGER, INTENT(IN) :: II,JJ,KK,IND,IOR,NM
+REAL(EB) :: U_I,U_J,RHOP,MUA,HP,KP,S_IJ,DIV,TAU_IJ,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY
+
+TENSOR_OUTPUT = 0._EB
+
+CALL POINT_TO_MESH(NM)
+
+COMPONENT_SELECT: SELECT CASE(IND)
+   CASE(1)
+      NORMAL_SELECT_1: SELECT CASE(IOR)
+         CASE(+1)
+            U_I  = U(II,JJ,KK)
+            U_J  = U(II,JJ,KK)
+            RHOP = 0.5_EB*( RHO(II,JJ,KK)+ RHO(II+1,JJ,KK))
+            MUA  = 0.5_EB*(  MU(II,JJ,KK)+  MU(II+1,JJ,KK))
+            HP   = 0.5_EB*(   H(II,JJ,KK)+   H(II+1,JJ,KK))
+            KP   = 0.5_EB*(KRES(II,JJ,KK)+KRES(II+1,JJ,KK))
+            DIV  = 0.5_EB*(   D(II,JJ,KK)+   D(II+1,JJ,KK)) 
+            S_IJ = 0.5_EB*(RDX(II+1)*(U(II+1,JJ,KK)-U(II,JJ,KK)) + RDX(II)*(U(II,JJ,KK)-U(II-1,JJ,KK)))  
+         CASE(-1)
+            U_I  = U(II-1,JJ,KK)
+            U_J  = U(II-1,JJ,KK)
+            RHOP = 0.5_EB*( RHO(II-1,JJ,KK)+ RHO(II,JJ,KK))
+            MUA  = 0.5_EB*(  MU(II-1,JJ,KK)+  MU(II,JJ,KK))
+            HP   = 0.5_EB*(   H(II-1,JJ,KK)+   H(II,JJ,KK))
+            KP   = 0.5_EB*(KRES(II-1,JJ,KK)+KRES(II,JJ,KK))
+            DIV  = 0.5_EB*(   D(II-1,JJ,KK)+   D(II,JJ,KK))
+            S_IJ = 0.5_EB*(RDX(II)*(U(II,JJ,KK)-U(II-1,JJ,KK)) + RDX(II-1)*(U(II-1,JJ,KK)-U(II-2,JJ,KK)))
+         CASE(+2)
+            U_I  = 0.25_EB*(U(II,JJ,KK)+U(II-1,JJ,KK)+U(II-1,JJ+1,KK)+U(II,JJ+1,KK))
+            U_J  = V(II,JJ,KK)
+            RHOP = 0.5_EB*( RHO(II,JJ,KK)+ RHO(II,JJ+1,KK))
+            MUA  = 0.5_EB*(  MU(II,JJ,KK)+  MU(II,JJ+1,KK))
+            HP   = 0._EB
+            KP   = 0._EB
+            DIV  = 0._EB
+            DUDY = 0.5_EB*(RDYN(JJ)*(U(II,JJ+1,KK)-U(II,JJ,KK)) + RDYN(JJ)*(U(II-1,JJ+1,KK)-U(II-1,JJ,KK)))
+            DVDX = 0.5_EB*(RDXN(II)*(V(II+1,JJ,KK)-V(II,JJ,KK)) + RDXN(II-1)*(V(II,JJ,KK)-V(II-1,JJ,KK)))
+            S_IJ = 0.5_EB*(DUDY+DVDX)
+         CASE(-2)
+            U_I  = 0.25_EB*(U(II,JJ,KK)+U(II,JJ-1,KK)+U(II-1,JJ-1,KK)+U(II-1,JJ,KK))
+            U_J  = V(II,JJ-1,KK)
+            RHOP = 0.5_EB*( RHO(II,JJ-1,KK)+ RHO(II,JJ,KK))
+            MUA  = 0.5_EB*(  MU(II,JJ-1,KK)+  MU(II,JJ,KK))
+            HP   = 0._EB
+            KP   = 0._EB
+            DIV  = 0._EB
+            DUDY = 0.5_EB*(RDYN(JJ-1)*(U(II,JJ,KK)-U(II,JJ-1,KK)) + RDYN(JJ-1)*(U(II-1,JJ,KK)-U(II-1,JJ-1,KK)))
+            DVDX = 0.5_EB*(RDXN(II)*(V(II+1,JJ-1,KK)-V(II,JJ-1,KK)) + RDXN(II-1)*(V(II,JJ-1,KK)-V(II-1,JJ-1,KK)))
+            S_IJ = 0.5_EB*(DUDY+DVDX)
+         CASE(+3)
+            U_I  = 0.25_EB*(U(II,JJ,KK)+U(II-1,JJ,KK)+U(II-1,JJ,KK+1)+U(II,JJ,KK+1))
+            U_J  = W(II,JJ,KK)
+            RHOP = 0.5_EB*( RHO(II,JJ,KK)+ RHO(II,JJ,KK+1))
+            MUA  = 0.5_EB*(  MU(II,JJ,KK)+  MU(II,JJ,KK+1))
+            HP   = 0._EB
+            KP   = 0._EB
+            DIV  = 0._EB
+            DUDZ = 0.5_EB*(RDZN(KK)*(U(II,JJ,KK+1)-U(II,JJ,KK)) + RDZN(KK)*(U(II-1,JJ,KK+1)-U(II-1,JJ,KK)))
+            DWDX = 0.5_EB*(RDXN(II)*(W(II+1,JJ,KK)-W(II,JJ,KK)) + RDXN(II-1)*(W(II,JJ,KK)-W(II-1,JJ,KK)))
+            S_IJ = 0.5_EB*(DUDZ+DWDX)
+         CASE(-3)
+            U_I  = 0.25_EB*(U(II,JJ,KK)+U(II,JJ,KK-1)+U(II-1,JJ,KK-1)+U(II-1,JJ,KK))
+            U_J  = W(II,JJ,KK-1)
+            RHOP = 0.5_EB*( RHO(II,JJ,KK-1)+ RHO(II,JJ,KK))
+            MUA  = 0.5_EB*(  MU(II,JJ,KK-1)+  MU(II,JJ,KK))
+            HP   = 0._EB
+            KP   = 0._EB
+            DIV  = 0._EB
+            DUDZ = 0.5_EB*(RDZN(KK-1)*(U(II,JJ,KK)-U(II,JJ,KK-1)) + RDZN(KK-1)*(U(II-1,JJ,KK)-U(II-1,JJ,KK-1)))
+            DWDX = 0.5_EB*(RDXN(II)*(W(II+1,JJ,KK-1)-W(II,JJ,KK-1)) + RDXN(II-1)*(W(II,JJ,KK-1)-W(II-1,JJ,KK-1)))
+            S_IJ = 0.5_EB*(DUDZ+DWDX)
+      END SELECT NORMAL_SELECT_1
+   CASE(2)
+      ! need for 3D
+   CASE(3)
+      NORMAL_SELECT_3: SELECT CASE(IOR)
+         CASE(+1)
+            U_I  = 0.25_EB*(W(II,JJ,KK)+W(II+1,JJ,KK)+W(II+1,JJ,KK-1)+W(II,JJ,KK-1))
+            U_J  = U(II,JJ,KK)
+            RHOP = 0.5_EB*( RHO(II,JJ,KK)+ RHO(II+1,JJ,KK))
+            MUA  = 0.5_EB*(  MU(II,JJ,KK)+  MU(II+1,JJ,KK))
+            HP   = 0._EB
+            KP   = 0._EB
+            DIV  = 0._EB
+            DWDX = 0.5_EB*(RDXN(II)*(W(II+1,JJ,KK)-W(II,JJ,KK)) + RDXN(II)*(W(II+1,JJ,KK-1)-W(II,JJ,KK-1)))
+            DUDZ = 0.5_EB*(RDZN(KK)*(U(II,JJ,KK+1)-U(II,JJ,KK)) + RDZN(KK-1)*(U(II,JJ,KK)-U(II,JJ,KK-1)))
+            S_IJ = 0.5_EB*(DWDX+DUDZ)
+         CASE(-1)
+            U_I  = 0.25_EB*(W(II-1,JJ,KK)+W(II,JJ,KK)+W(II,JJ,KK-1)+W(II-1,JJ,KK-1))
+            U_J  = U(II-1,JJ,KK)
+            RHOP = 0.5_EB*( RHO(II-1,JJ,KK)+ RHO(II,JJ,KK))
+            MUA  = 0.5_EB*(  MU(II-1,JJ,KK)+  MU(II,JJ,KK))
+            HP   = 0._EB
+            KP   = 0._EB
+            DIV  = 0._EB
+            DWDX = 0.5_EB*(RDXN(II-1)*(W(II,JJ,KK)-W(II-1,JJ,KK)) + RDXN(II-1)*(W(II,JJ,KK-1)-W(II-1,JJ,KK-1)))
+            DUDZ = 0.5_EB*(RDZN(KK)*(U(II-1,JJ,KK+1)-U(II-1,JJ,KK)) + RDZN(KK-1)*(U(II-1,JJ,KK)-U(II-1,JJ,KK-1)))
+            S_IJ = 0.5_EB*(DWDX+DUDZ)
+         CASE(+2)
+            U_I  = 0.25_EB*(W(II,JJ,KK)+W(II,JJ+1,KK)+W(II,JJ+1,KK-1)+W(II,JJ,KK-1))
+            U_J  = V(II,JJ,KK)
+            RHOP = 0.5_EB*( RHO(II,JJ,KK)+ RHO(II,JJ+1,KK))
+            MUA  = 0.5_EB*(  MU(II,JJ,KK)+  MU(II,JJ+1,KK))
+            HP   = 0._EB
+            KP   = 0._EB
+            DIV  = 0._EB
+            DWDY = 0.5_EB*(RDYN(JJ)*(W(II,JJ+1,KK)-W(II,JJ,KK)) + RDYN(JJ)*(W(II,JJ+1,KK-1)-W(II,JJ,KK-1)))
+            DVDZ = 0.5_EB*(RDZN(KK)*(V(II,JJ,KK+1)-V(II,JJ,KK)) + RDZN(KK-1)*(V(II,JJ,KK)-V(II,JJ,KK-1)))
+            S_IJ = 0.5_EB*(DWDY+DVDZ)
+         CASE(-2)
+            U_I  = 0.25_EB*(W(II,JJ,KK)+W(II,JJ-1,KK)+W(II-1,JJ-1,KK)+W(II-1,JJ,KK))
+            U_J  = V(II,JJ-1,KK)
+            RHOP = 0.5_EB*( RHO(II,JJ-1,KK)+ RHO(II,JJ,KK))
+            MUA  = 0.5_EB*(  MU(II,JJ-1,KK)+  MU(II,JJ,KK))
+            HP   = 0._EB
+            KP   = 0._EB
+            DIV  = 0._EB
+            DWDY = 0.5_EB*(RDYN(JJ-1)*(W(II,JJ,KK)-W(II,JJ-1,KK)) + RDYN(JJ-1)*(W(II,JJ,KK-1)-W(II,JJ-1,KK-1)))
+            DVDZ = 0.5_EB*(RDZN(KK)*(V(II,JJ-1,KK+1)-V(II,JJ-1,KK)) + RDZN(KK-1)*(V(II,JJ-1,KK)-V(II,JJ-1,KK-1)))
+            S_IJ = 0.5_EB*(DWDY+DVDZ)
+         CASE(+3)
+            U_I  = W(II,JJ,KK)
+            U_J  = W(II,JJ,KK)
+            RHOP = 0.5_EB*( RHO(II,JJ,KK)+ RHO(II,JJ,KK+1))
+            MUA  = 0.5_EB*(  MU(II,JJ,KK)+  MU(II,JJ,KK+1))
+            HP   = 0.5_EB*(   H(II,JJ,KK)+   H(II,JJ,KK+1))
+            KP   = 0.5_EB*(KRES(II,JJ,KK)+KRES(II,JJ,KK+1))
+            DIV  = 0.5_EB*(   D(II,JJ,KK)+   D(II,JJ,KK+1))
+            S_IJ = 0.5_EB*(RDZ(KK+1)*(W(II,JJ,KK+1)-W(II,JJ,KK)) + RDZ(KK)*(W(II,JJ,KK)-W(II,JJ,KK-1)))
+         CASE(-3)
+            U_I  = W(II,JJ,KK-1)
+            U_J  = W(II,JJ,KK-1)
+            RHOP = 0.5_EB*( RHO(II,JJ,KK-1)+ RHO(II,JJ,KK))
+            MUA  = 0.5_EB*(  MU(II,JJ,KK-1)+  MU(II,JJ,KK))
+            HP   = 0.5_EB*(   H(II,JJ,KK-1)+   H(II,JJ,KK))
+            KP   = 0.5_EB*(KRES(II,JJ,KK-1)+KRES(II,JJ,KK))
+            DIV  = 0.5_EB*(   D(II,JJ,KK-1)+   D(II,JJ,KK))
+            S_IJ = 0.5_EB*(RDZ(KK)*(W(II,JJ,KK)-W(II,JJ,KK-1)) + RDZ(KK-1)*(W(II,JJ,KK-1)-W(II,JJ,KK-2)))
+      END SELECT NORMAL_SELECT_3
+END SELECT COMPONENT_SELECT
+
+TAU_IJ = -2._EB*MUA*(S_IJ - ONTH*DIV)
+TENSOR_OUTPUT = RHOP*U_I*U_J + RHOP*(HP-KP) + TAU_IJ 
+
+END FUNCTION TENSOR_OUTPUT
 
   
 SUBROUTINE DUMP_DEVICES(T)

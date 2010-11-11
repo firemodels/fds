@@ -2426,9 +2426,10 @@ REAL(EB) :: U_IBM,V_IBM,W_IBM,DN
 REAL(EB) :: U_ROT,V_ROT,W_ROT
 REAL(EB) :: PE,PW,PN,PS,PT,PB
 REAL(EB) :: U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVELO(3),XGEOM(3),XCELL(3),XEDGX(3),XEDGY(3),XEDGZ(3),XSURF(3)
-REAL(EB) :: U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),RRHO,MUA
+REAL(EB) :: U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),RRHO,MUA,DUUDT,DVVDT,DWWDT
 INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1
 TYPE(GEOMETRY_TYPE), POINTER :: G
+TYPE(MESH_TYPE), POINTER :: M
 
 ! References:
 !
@@ -2439,20 +2440,22 @@ TYPE(GEOMETRY_TYPE), POINTER :: G
 ! R. McDermott, G. Forney, C. Cruz, and K. McGrattan. A second-order immersed
 ! boundary method with near-wall physics. APS/DFD Annual Meeting, Minneapolis,
 ! MN, Nov. 2009.
+
+M=>MESHES(NM)
  
 IF (PREDICTOR) THEN
    UU => U
    VV => V
    WW => W
    DP => D
-   RHOP => RHO
+   RHOP => RHOS
    HP => H
 ELSE
    UU => US
    VV => VS
    WW => WS
    DP => DS
-   RHOP => RHOS
+   RHOP => RHO
    HP => HS
 ENDIF
 
@@ -2480,7 +2483,7 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
             VBAR(I,J,K) = 0.5_EB*(VV(I,J,K)+VV(I,JM1,K))
             WBAR(I,J,K) = 0.5_EB*(WW(I,J,K)+WW(I,J,KM1))
 
-            PP(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRES(I,J,K))
+            IF (P_MASK(I,J,K)>-1) PP(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRES(I,J,K))
             
             DUDX(I,J,K) = (UU(I,J,K)-UU(IM1,J,K))/DX(I)
             DVDY(I,J,K) = (VV(I,J,K)-VV(I,JM1,K))/DY(J)
@@ -2510,7 +2513,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
    DO K=G%MIN_K(NM),G%MAX_K(NM)
       DO J=G%MIN_J(NM),G%MAX_J(NM)
          DO I=G%MIN_I(NM),G%MAX_I(NM)
-            IF (G%U_MASK(I,J,K)==1) CYCLE ! point is in gas phase
+            IF (M%U_MASK(I,J,K)==1) CYCLE ! point is in gas phase
          
             IJK   = (/I,J,K/)
             XVELO = (/X(I),YC(J),ZC(K)/)
@@ -2520,7 +2523,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
             XEDGZ = (/X(I),Y(J),ZC(K)/)
             DXC   = (/DX(I),DY(J),DZ(K)/)
   
-            SELECT CASE(G%U_MASK(I,J,K))
+            SELECT CASE(M%U_MASK(I,J,K))
                CASE(-1)
                   U_ROT = (XVELO(3)-XGEOM(3))*G%OMEGA_Y - (XVELO(2)-XGEOM(2))*G%OMEGA_Z
                   U_IBM = G%U + U_ROT
@@ -2595,14 +2598,15 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   
                         I_VEL = 1
 
-                        !U_IBM = UU(I,J,K)
                         MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(IP1,J,K))
-                        !!U_IBM = VELTAN2D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL)
                         U_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
                   END SELECT SELECT_METHOD1
             END SELECT
-      
-            FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - (U_IBM-UU(I,J,K))/DT
+            
+            IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+            IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+            
+            FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
         
          ENDDO
       ENDDO
@@ -2612,7 +2616,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
       DO K=G%MIN_K(NM),G%MAX_K(NM)
          DO J=G%MIN_J(NM),G%MAX_J(NM)
             DO I=G%MIN_I(NM),G%MAX_I(NM)
-               IF (G%V_MASK(I,J,K)==1) CYCLE ! point is in gas phase
+               IF (M%V_MASK(I,J,K)==1) CYCLE ! point is in gas phase
          
                IJK   = (/I,J,K/)
                XVELO = (/XC(I),Y(J),ZC(K)/)
@@ -2622,7 +2626,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                XEDGZ = (/X(I),Y(J),ZC(K)/)
                DXC   = (/DX(I),DY(J),DZ(K)/)
          
-               SELECT CASE(G%V_MASK(I,J,K))
+               SELECT CASE(M%V_MASK(I,J,K))
                   CASE(-1)
                      V_ROT = (XVELO(1)-XGEOM(1))*G%OMEGA_Z - (XVELO(3)-XGEOM(3))*G%OMEGA_X
                      V_IBM = G%V + V_ROT
@@ -2697,14 +2701,15 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   
                            I_VEL = 2
 
-                           !V_IBM = VV(I,J,K)
                            MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(I,JP1,K))
-                           !!V_IBM = VELTAN2D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL)
                            V_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
                      END SELECT SELECT_METHOD2
                END SELECT
+               
+               IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+               IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
          
-               FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - (V_IBM-VV(I,J,K))/DT
+               FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
          
             ENDDO
          ENDDO 
@@ -2714,7 +2719,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
    DO K=G%MIN_K(NM),G%MAX_K(NM)
       DO J=G%MIN_J(NM),G%MAX_J(NM)
          DO I=G%MIN_I(NM),G%MAX_I(NM)
-            IF (G%W_MASK(I,J,K)==1) CYCLE
+            IF (M%W_MASK(I,J,K)==1) CYCLE
          
             IJK   = (/I,J,K/)
             XVELO = (/XC(I),YC(J),Z(K)/)
@@ -2724,7 +2729,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
             XEDGZ = (/X(I),Y(J),ZC(K)/)
             DXC   = (/DX(I),DY(J),DZ(K)/) ! assume uniform grids for now
             
-            SELECT CASE(G%W_MASK(I,J,K))
+            SELECT CASE(M%W_MASK(I,J,K))
                CASE(-1)
                   W_ROT = (XVELO(2)-XGEOM(2))*G%OMEGA_X - (XVELO(1)-XGEOM(1))*G%OMEGA_Y
                   W_IBM = G%W + W_ROT
@@ -2797,16 +2802,17 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         TAU_IJ(3,1) = TAU_IJ(1,3)
                         TAU_IJ(3,2) = TAU_IJ(2,3)
                   
-                        I_VEL = 3 ! will change when we go to 3D
+                        I_VEL = 3
                   
-                        !W_IBM = WW(I,J,K)
                         MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(I,J,KP1))
-                        !!W_IBM = VELTAN2D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL)
                         W_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
                   END SELECT SELECT_METHOD3
             END SELECT
+            
+            IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+            IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
          
-            FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - (W_IBM-WW(I,J,K))/DT
+            FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
          
          ENDDO
       ENDDO
