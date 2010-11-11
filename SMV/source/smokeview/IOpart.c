@@ -2057,7 +2057,10 @@ void updatepartmenulabels(void){
       }
       lenlabel=strlen(parti->menulabel);
       if(nmeshes>1){
-        sprintf(label,"Mesh %i",1+parti->blocknumber);
+	    mesh *partmesh;
+
+		partmesh = meshinfo + parti->blocknumber;
+        sprintf(label,"%s",partmesh->label);
         if(lenlabel>0)STRCAT(parti->menulabel,", ");
         STRCAT(parti->menulabel,label);
       }

@@ -1041,7 +1041,10 @@ void updateslicemenulabels(void){
 
     if(nmeshes>1){
       mesh *meshi;
-      sprintf(label,", Mesh %i",1+sd->blocknumber);
+      mesh *slicemesh;
+      
+	  slicemesh = meshinfo + sd->blocknumber;
+      sprintf(label,", %s",slicemesh->label);
       STRCAT(sd->menulabel,label);
       meshi = meshinfo + sd->blocknumber;
       if(nevac>0){
@@ -1090,7 +1093,10 @@ void updateslicemenulabels(void){
         }
       }
       if(nmeshes>1){
-        sprintf(label,", Mesh %i",1+sd->blocknumber);
+	    mesh *slicemesh;
+
+		slicemesh = meshinfo + sd->blocknumber;
+        sprintf(label,", %s",slicemesh->label);
         STRCAT(sd->menulabel,label);
       }
       if(showfiles==1){
@@ -1137,7 +1143,10 @@ void updatevslicemenulabels(void){
     STRCPY(vsd->menulabel,mvslicei->menulabel);
     STRCPY(vsd->menulabel2,mvslicei->menulabel2);
     if(nmeshes>1){
-      sprintf(label,", Mesh %i",1+sd->blocknumber);
+      mesh *slicemesh;
+
+	  slicemesh = meshinfo + sd->blocknumber;
+      sprintf(label,", %s",slicemesh->label);
       STRCAT(vsd->menulabel,label);
     }
     if(showfiles==1){
@@ -1158,7 +1167,10 @@ void updatevslicemenulabels(void){
         STRCAT(mvslicei->menulabel2,mvslicei->menulabel);
       }
       if(nmeshes>1){
-        sprintf(label,", Mesh %i",1+sd->blocknumber);
+	    mesh *slicemesh;
+
+		slicemesh = meshinfo + sd->blocknumber;
+        sprintf(label,", %s",slicemesh->label);
         STRCAT(vsd->menulabel,label);
       }
       if(showfiles==1){

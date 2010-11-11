@@ -3340,7 +3340,10 @@ void updatepatchmenulabels(void){
       patchi = patchinfo + i;
       STRCPY(patchi->menulabel,patchi->label.longlabel);
       if(nmeshes>1){
-        sprintf(label,"Mesh %i",1+patchi->blocknumber);
+	    mesh *patchmesh;
+
+		patchmesh = meshinfo + patchi->blocknumber;
+        sprintf(label,"%s",patchmesh->label);
         STRCAT(patchi->menulabel,", ");
         STRCAT(patchi->menulabel,label);
       }

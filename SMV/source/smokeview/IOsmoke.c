@@ -4794,7 +4794,10 @@ void updatesmoke3dmenulabels(void){
     }
 //    len=strlen(smoke3di->menulabel);
     if(nmeshes>1){
-      sprintf(meshlabel,"Mesh: *%i",smoke3di->blocknumber+1);
+	  mesh *smokemesh;
+
+	  smokemesh = meshinfo + smoke3di->blocknumber;
+      sprintf(meshlabel,"%s",smokemesh->label);
       STRCAT(smoke3di->menulabel," - ");
       STRCAT(smoke3di->menulabel,meshlabel);
     }

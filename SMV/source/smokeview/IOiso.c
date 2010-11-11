@@ -2137,7 +2137,10 @@ void updateisomenulabels(void){
       isoi = isoinfo + i;
       STRCPY(isoi->menulabel,isoi->surface_label.longlabel);
       if(nmeshes>1){
-        sprintf(label,"Mesh %i",1+isoi->blocknumber);
+	    mesh *isomesh;
+
+		isomesh = meshinfo + isoi->blocknumber;
+        sprintf(label,"%s",isomesh->label);
         STRCAT(isoi->menulabel,", ");
         STRCAT(isoi->menulabel,label);
       }
