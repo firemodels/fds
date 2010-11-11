@@ -521,8 +521,32 @@ IF (N_DEVC_LINE>0) THEN
       DV => DEVICE(N)
       IF (DV%LINE>0 .AND. DV%POINT==1) THEN
          NN = NN+1
-         LINE_DEVC_LABEL(NN) = TRIM(DV%ID)//'-x,'//TRIM(DV%ID)//'-y,'//TRIM(DV%ID)//'-z,'//TRIM(DV%ID)
-         LINE_DEVC_UNITS(NN) = 'm,m,m,'//TRIM(DV%UNITS)
+         SELECT CASE(DV%LINE_COORD_CODE)
+            CASE(0)
+               LINE_DEVC_LABEL(NN) = TRIM(DV%ID)
+               LINE_DEVC_UNITS(NN) = TRIM(DV%UNITS)
+            CASE(1)
+               LINE_DEVC_LABEL(NN) = TRIM(DV%X_ID)//','//TRIM(DV%ID)
+               LINE_DEVC_UNITS(NN) = 'm,'//TRIM(DV%UNITS)
+            CASE(2)
+               LINE_DEVC_LABEL(NN) = TRIM(DV%Y_ID)//','//TRIM(DV%ID)
+               LINE_DEVC_UNITS(NN) = 'm,'//TRIM(DV%UNITS)
+            CASE(3)
+               LINE_DEVC_LABEL(NN) = TRIM(DV%Z_ID)//','//TRIM(DV%ID)
+               LINE_DEVC_UNITS(NN) = 'm,'//TRIM(DV%UNITS)
+            CASE(12)
+               LINE_DEVC_LABEL(NN) = TRIM(DV%X_ID)//','//TRIM(DV%Y_ID)//','//TRIM(DV%ID)
+               LINE_DEVC_UNITS(NN) = 'm,m,'//TRIM(DV%UNITS)
+            CASE(13)
+               LINE_DEVC_LABEL(NN) = TRIM(DV%X_ID)//','//TRIM(DV%Z_ID)//','//TRIM(DV%ID)
+               LINE_DEVC_UNITS(NN) = 'm,m,'//TRIM(DV%UNITS)
+            CASE(23)
+               LINE_DEVC_LABEL(NN) = TRIM(DV%Y_ID)//','//TRIM(DV%Z_ID)//','//TRIM(DV%ID)
+               LINE_DEVC_UNITS(NN) = 'm,m,'//TRIM(DV%UNITS)
+            CASE(123)
+               LINE_DEVC_LABEL(NN) = TRIM(DV%X_ID)//','//TRIM(DV%Y_ID)//','//TRIM(DV%Z_ID)//','//TRIM(DV%ID)
+               LINE_DEVC_UNITS(NN) = 'm,m,m,'//TRIM(DV%UNITS)
+         END SELECT
       ENDIF
    ENDDO
 
@@ -5031,11 +5055,44 @@ ENDIF
 
 IF (N_DEVC_LINE>0) THEN
 
-   LINE_DEVC_VALUE = 'NaN,NaN,NaN,NaN'
+   DO N=1,N_DEVC
+      DV => DEVICE(N)
+      IF (DV%LINE>0 .AND. DV%POINT==1) THEN
+         SELECT CASE(DV%LINE_COORD_CODE)
+            CASE(0)
+               LINE_DEVC_VALUE(DV%LINE,:) = 'NaN'
+            CASE(1:3)
+               LINE_DEVC_VALUE(DV%LINE,:) = 'NaN,NaN'
+            CASE(12:23)
+               LINE_DEVC_VALUE(DV%LINE,:) = 'NaN,NaN,NaN'
+            CASE(123)
+               LINE_DEVC_VALUE(DV%LINE,:) = 'NaN,NaN,NaN,NaN'
+         END SELECT
+      ENDIF
+   ENDDO
+
    DO N=1,N_DEVC
       DV => DEVICE(N)
       IF (DV%LINE>0) THEN
-         WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),'(3(ES15.7E3,A),ES15.7E3)') DV%X,',',DV%Y,',',DV%Z,',',DV%VALUE/DV%TIME_INTERVAL
+         SELECT CASE(DV%LINE_COORD_CODE)
+            CASE(0)
+               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),'(ES15.7E3)') DV%VALUE/DV%TIME_INTERVAL
+            CASE(1)
+               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),'(1(ES15.7E3,A),ES15.7E3)') DV%X,',',DV%VALUE/DV%TIME_INTERVAL
+            CASE(2)
+               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),'(1(ES15.7E3,A),ES15.7E3)') DV%Y,',',DV%VALUE/DV%TIME_INTERVAL
+            CASE(3)
+               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),'(1(ES15.7E3,A),ES15.7E3)') DV%Z,',',DV%VALUE/DV%TIME_INTERVAL
+            CASE(12)
+               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),'(2(ES15.7E3,A),ES15.7E3)') DV%X,',',DV%Y,',',DV%VALUE/DV%TIME_INTERVAL
+            CASE(13)
+               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),'(2(ES15.7E3,A),ES15.7E3)') DV%X,',',DV%Z,',',DV%VALUE/DV%TIME_INTERVAL
+            CASE(23)
+               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),'(2(ES15.7E3,A),ES15.7E3)') DV%Y,',',DV%Z,',',DV%VALUE/DV%TIME_INTERVAL
+            CASE(123)
+               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),'(3(ES15.7E3,A),ES15.7E3)') DV%X,',',DV%Y,',',DV%Z,',', &
+                                                                                   DV%VALUE/DV%TIME_INTERVAL
+         END SELECT
       ENDIF
    ENDDO
 

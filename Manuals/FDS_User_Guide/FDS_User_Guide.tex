@@ -8006,10 +8006,15 @@ sextuple coordinate array {\ct XB}, you can direct FDS to create a line of devic
 \normalsize
 
 \noindent
-In a file called {\bf CHID\_line.csv}, there will be 4 columns of data (3 spatial coordinates and the value)
-with the 20 temperature points presented as a running average. The
+In a file called {\bf CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is
+different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and
+$z$ coordinates. The last column contains the 20 temperature points presented as a running average. The
 averaging time is given by {\ct DT\_DEVC\_LINE} on the {\ct DUMP} line. It is 0.25 times the total simulation time by default. This is a convenient
 way to output a time-averaged linear profile of a quantity, like an array of thermocouples.
+
+A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with
+either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add
+{\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates.
 
 
 
@@ -8440,7 +8445,7 @@ by its bead size. It is found by solving the following equation for the thermoco
 \ee
 where $\epsilon_{\hbox{\tiny TC}}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_g$ is the true gas temperature, and
 $h$ is the heat transfer coefficient to a small sphere,
-$h=k \, \NU / d_{\hbox{\tiny TC}}$. 
+$h=k \, \NU / d_{\hbox{\tiny TC}}$.
 The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the
 calculated value of the heat transfer coefficient, set {\ct BEAD\_H\_FIXED} on the {\ct PROP} line (W/m$^2$/K).
 The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and
@@ -9445,36 +9450,39 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\
 \hline \hline
 \endhead
-{\ct BYPASS\_FLOWRATE} & Real            & Aspiration smoke detector parameter                              & kg/s  & 0       \\ \hline
-{\ct CTRL\_ID}         & Character       & Associated {\ct CTRL} line                                       &       &         \\ \hline
-{\ct DELAY}            & Real            & Transport time for an aspiration detector                        & s     & 0       \\ \hline
-{\ct DEVC\_ID}         & Character       & Associated {\ct DEVC} line for aspiration detector               &       &         \\ \hline
-{\ct DUCT\_ID}         & Character       & Associated {\ct HVAC} line for a duct output               &       &         \\ \hline
-{\ct DEPTH}            & Real            & Depth into surface for internal wall temp                        & m     & 0       \\ \hline
-{\ct FLOWRATE}         & Real            & Suction flowrate for an aspiration detector                      & kg/s  & 0       \\ \hline
-{\ct FYI}              & Character       & Comment String (has no effect)                                   &       &         \\ \hline
-{\ct IOR}              & Integer         & Index of Orientation ($\pm$1,$\pm$2,$\pm$3)                      &       &         \\ \hline
-{\ct ID}               & Character       & Identifying label for output                                     &       &         \\ \hline
+{\ct BYPASS\_FLOWRATE} & Real            & Aspiration smoke detector parameter                              & kg/s  & 0             \\ \hline
+{\ct CTRL\_ID}         & Character       & Associated {\ct CTRL} line                                       &       &               \\ \hline
+{\ct DELAY}            & Real            & Transport time for an aspiration detector                        & s     & 0             \\ \hline
+{\ct DEVC\_ID}         & Character       & Associated {\ct DEVC} line for aspiration detector               &       &               \\ \hline
+{\ct DUCT\_ID}         & Character       & Associated {\ct HVAC} line for a duct output                     &       &               \\ \hline
+{\ct DEPTH}            & Real            & Depth into surface for internal wall temp                        & m     & 0             \\ \hline
+{\ct FLOWRATE}         & Real            & Suction flow rate for an aspiration detector                     & kg/s  & 0             \\ \hline
+{\ct FYI}              & Character       & Comment String (has no effect)                                   &       &               \\ \hline
+{\ct HIDE\_COORDINATES}& Logical         & See Section~\ref{info:line_file}                                 &       & {\ct .FALSE.} \\ \hline
+{\ct IOR}              & Integer         & Index of Orientation ($\pm$1,$\pm$2,$\pm$3)                      &       &               \\ \hline
+{\ct ID}               & Character       & Identifying label for output                                     &       &               \\ \hline
 {\ct INITIAL\_STATE}   & Logical         & Initial state of device                                          &       & {\ct .FALSE.} \\ \hline
 {\ct LATCH}            & Logical         & Device cannot change state multiple times                        &       & {\ct .TRUE.}  \\ \hline
-{\ct MATL\_ID}         & Character       & Material identifier (if needed)                                  &       &         \\ \hline
-{\ct NODE\_ID}         & Character       & Associated {\ct HVAC} line for a node output               &       &         \\ \hline
-{\ct ORIENTATION}      & Real Triplet    & Direction vector                                                 &       & 0,0,-1  \\ \hline
-{\ct PART\_ID}         & Character       & Particle identifier (if needed)                                  &       &         \\ \hline
-{\ct POINTS}           & Integer         & See Section~\ref{info:line_file}                                 &       & 1       \\ \hline
-{\ct PROP\_ID}         & Character       & Associated {\ct PROP}erty line                                   &       &         \\ \hline
-{\ct QUANTITY}         & Character       & Name of Quantity to output                                       &       &         \\ \hline
-{\ct ROTATION}         & Real Triplet    & Rotation Angle                                                   & deg   & 0       \\ \hline
-{\ct SETPOINT}         & Real            & Value at which device changes state                              &       &         \\ \hline
-{\ct SPEC\_ID}         & Character       & Species identifier (if needed)                                   &       &         \\ \hline
-{\ct STATISTICS}       & Character       & See Section~\ref{info:statistics}                                &       &         \\ \hline
-{\ct SURF\_ID}         & Character       & See Section~\ref{info:statistics}                                &       &         \\ \hline
-{\ct TIME\_AVERAGED}   & Logical         & See Section~\ref{info:out:DEVC}                                  &       &  {\ct .TRUE.}       \\ \hline
-{\ct TRIP\_DIRECTION}  & Integer         & Sign of derivative at first state change                         &       &  1      \\ \hline
-{\ct VELO\_INDEX}      & Integer         & See Section~\ref{info:velocity}                                  &       &  0      \\ \hline
-{\ct XB(6)}            & Real Sextuplet  & Coordinates of non-point measurement                             & m     &         \\ \hline
-{\ct XYZ}              & Real Triplet    & Physical coordinates                                             & m     &         \\ \hline
-%\end{tabular*}
+{\ct MATL\_ID}         & Character       & Material identifier (if needed)                                  &       &               \\ \hline
+{\ct NODE\_ID}         & Character       & Associated {\ct HVAC} line for a node output                     &       &               \\ \hline
+{\ct ORIENTATION}      & Real Triplet    & Direction vector                                                 &       & 0,0,-1        \\ \hline
+{\ct PART\_ID}         & Character       & Particle identifier (if needed)                                  &       &               \\ \hline
+{\ct POINTS}           & Integer         & See Section~\ref{info:line_file}                                 &       & 1             \\ \hline
+{\ct PROP\_ID}         & Character       & Associated {\ct PROP}erty line                                   &       &               \\ \hline
+{\ct QUANTITY}         & Character       & Name of Quantity to output                                       &       &               \\ \hline
+{\ct ROTATION}         & Real Triplet    & Rotation Angle                                                   & deg   & 0             \\ \hline
+{\ct SETPOINT}         & Real            & Value at which device changes state                              &       &               \\ \hline
+{\ct SPEC\_ID}         & Character       & Species identifier (if needed)                                   &       &               \\ \hline
+{\ct STATISTICS}       & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
+{\ct SURF\_ID}         & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
+{\ct TIME\_AVERAGED}   & Logical         & See Section~\ref{info:out:DEVC}                                  &       &  {\ct .TRUE.} \\ \hline
+{\ct TRIP\_DIRECTION}  & Integer         & Sign of derivative at first state change                         &       &  1            \\ \hline
+{\ct VELO\_INDEX}      & Integer         & See Section~\ref{info:velocity}                                  &       &  0            \\ \hline
+{\ct XB(6)}            & Real Sextuplet  & Coordinates of non-point measurement                             & m     &               \\ \hline
+{\ct X\_ID}            & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-x}   \\ \hline
+{\ct Y\_ID}            & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-y}   \\ \hline
+{\ct Z\_ID}            & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-z}   \\ \hline
+{\ct XYZ}              & Real Triplet    & Physical coordinates                                             & m     &               \\ \hline
 \end{longtable}
 
 
