@@ -1,4 +1,4 @@
-&HEAD CHID='Qs=2000', TITLE='Flame Height Test, Q*=2000' /
+&HEAD CHID='Qs=2000_RI=10', TITLE='Flame Height Test, Q*=2000' /
 
 &MESH IJK=32,32,80, XB=-37.8,37.8,-37.8,37.8,-11.8,177.2 /
 &TIME TWFIN=150. /
