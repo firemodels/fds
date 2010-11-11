@@ -1,10 +1,10 @@
-&HEAD CHID='Qs=2', TITLE='Flame Height Test, Q*=2' /
+&HEAD CHID='Qs=500_RI=10', TITLE='Flame Height Test, Q*=500' /
 
-&MESH IJK=32,32,80, XB=-2.4,2.4,-2.4,2.4,-0.75,11.2 /
-&TIME TWFIN=40. /
+&MESH IJK=32,32,80, XB=-21.7,21.7,-21.7,21.7,-6.8,101.8 /
+&TIME TWFIN=120. /
 
-&SURF ID='burner', HRRPUA=3025., COLOR='RED' /  
-&OBST XB=-0.5,0.5,-0.5,0.5,-0.15,0.0, SURF_IDS='burner','INERT','INERT', THICKEN=.TRUE. /
+&SURF ID='burner', HRRPUA=756362., COLOR='RED' /  
+&OBST XB=-0.5,0.5,-0.5,0.5,-1.4,0.0, SURF_IDS='burner','INERT','INERT', THICKEN=.TRUE. /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
