@@ -15,6 +15,8 @@ void ScriptMenu(int var);
 void add_scriptlist(char *file, int id);
 void update_glui_render();
 void PropMenu(int value);
+void initcircle(unsigned int nsegs);
+
 
 #ifdef WIN32
 
@@ -3801,6 +3803,7 @@ void ShowObjectsMenu(int value){
     device_sphere_segments=value;
     if(oldval!=device_sphere_segments){
       initspheresegs(device_sphere_segments,2*device_sphere_segments);
+      initcircle(device_sphere_segments);
     }
   }
   updatemenu=1;
@@ -4803,6 +4806,12 @@ updatemenu=0;
     }
     else{
       glutAddMenuEntry("   24",-24);
+    }
+    if(device_sphere_segments==48){
+      glutAddMenuEntry("   *48",-48);
+    }
+    else{
+      glutAddMenuEntry("   48",-48);
     }
   }
 
