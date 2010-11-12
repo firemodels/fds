@@ -2107,9 +2107,6 @@ on the order of a millimeter or less in size, or for diagnostic purposes.
 \item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
 \item[{\ct HUMIDITY}] Relative humidity, in units of \%. This need only be specified if there is a source of water in the simulation other than the fire
 itself. Otherwise, water vapor is not explicitly tracked. Default 40~\%.
-\item[{\ct ISOTHERMAL}] A logical parameter that indicates that the calculation does not involve any changes in temperature or
-radiation heat transfer, thus reducing the number of equations that must be solved, and simplifying those that are.
-Automatically sets {\ct RADIATION} to {\ct .FALSE.}
 \item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the
 development of a perfectly symmetric flow when the boundary
 and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.}
@@ -2291,7 +2288,7 @@ An example of an axially-symmetric helium plume is shown in Figure~\ref{helium_p
 &HEAD CHID='helium_2d',TITLE='Axisymmetric Helium Plume' /
 &MESH IJK=72,1,144 XB=0.00,0.08,-0.001,0.001,0.00,0.16, CYLINDRICAL=.TRUE. /
 &TIME TWFIN=5.0 /
-&MISC DNS=.TRUE., ISOTHERMAL=.TRUE. /
+&MISC DNS=.TRUE. /
 &SPEC ID='HELIUM'  /
 &SURF ID='HELIUM', VEL=-0.673, MASS_FRACTION(1)=1.0, TAU_MF(1)=0.3 /
 &VENT MB='XMAX' ,SURF_ID='OPEN' /
@@ -9851,9 +9848,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}         & m             & 0.                  \\ \hline
 {\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
 {\ct H\_EDDY}                   & Logical       & See Section~\ref{info:convection}             &               & {\ct .FALSE.}     \\ \hline
-%moved to SURF%{\ct H\_FIXED}                  & Real          & See Section~\ref{info:convection}             & W/m$^2$/K     &                   \\ \hline
 {\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
-{\ct ISOTHERMAL}                & Logical       & Isothermal calculation                        &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}         &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES}                       & Logical       & Large Eddy Simulation                         &               & {\ct .TRUE.}      \\ \hline
 {\ct MW}                        & Real          & Molecular Weight (Section~\ref{info:SPEC})    &  g/mol        &                   \\ \hline
