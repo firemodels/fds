@@ -34,7 +34,7 @@ echo "smokeview test cases begin" > smokeview.begin
 Rem create a text file containing the FDS5 version used to run these tests.
 Rem This file is included in the smokeview user's guide
 
-set smvug="%CD%\..\Manuals\SMV_5_User_Guide\"
+set smvug="%CD%\..\Manuals\SMV_User_Guide\"
 echo | %FDSEXE% 2> "%smvug%\figures\fds5.version"
 
 call %SCRIPT_DIR%\SMV_Cases.bat
