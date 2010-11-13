@@ -79,7 +79,7 @@ intel_win_64 : FFLAGS    = -Od /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /ifac
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
-intel_win_64 : exe       = smokezip_64.exe
+intel_win_64 : exe       = smokezip_win_64.exe
 
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/zlib.lib $(LIB_DIR)/lib_win_intel_64/pthreadVC2_x64.lib

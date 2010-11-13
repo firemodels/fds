@@ -7,8 +7,7 @@ set basename=FDS_%fds_version%_SMV_%smv_version%_win%platform%
 set in_pdf=%svn_root%\Manuals\All_PDF_Files
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_smokediff=%svn_root%\Utilities\smokediff
-Rem set in_smokezip=%svn_root%\Utilities\smokezip
-set in_smokezip=%svn_root%\SMV\for_bundle
+set in_smokezip=%svn_root%\Utilities\smokezip
 set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV\for_bundle\
 
@@ -61,13 +60,13 @@ if "%platform%"=="32" echo copying smokediff.exe
 if "%platform%"=="32" copy smokediff.exe     %out_bin%\smokediff.exe
 
 if "%platform%"=="64" echo copying smokediff_64.exe
-if "%platform%"=="64" copy %in_smokediff%\intel_win_64\smokediff_64.exe   %out_bin%\smokediff_win_64.exe
+if "%platform%"=="64" copy %in_smokediff%\intel_win_64\smokediff_win_64.exe   %out_bin%\smokediff_win_64.exe
 
-if "%platform%"=="32" echo copying smokezip32_release.exe
-if "%platform%"=="32" copy %in_smokezip%\smokezip32_release.exe     %out_bin%\smokezip.exe
+if "%platform%"=="32" echo copying smokezip.exe
+if "%platform%"=="32" copy %in_smokezip%\intel_win_32\smokezip.exe     %out_bin%\smokezip.exe
 
-if "%platform%"=="64" echo copying smokezip64_release.exe
-if "%platform%"=="64" copy %in_smokezip%\smokezip64_release.exe   %out_bin%\smokezip_win_64.exe
+if "%platform%"=="64" echo copying smokezip_win_64.exe
+if "%platform%"=="64" copy %in_smokezip%\intel_win_64\smokezip_win_64.exe   %out_bin%\smokezip_win_64.exe
 
 if "%platform%"=="32" echo copying fds2ascii_win_32.exe
 if "%platform%"=="32" copy %in_fds2ascii%\intel_win_32\fds2ascii_win_32.exe     %out_bin%\fds2ascii.exe

@@ -75,7 +75,7 @@ intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /ifac
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
-intel_win_64 : exe       = smokediff_64.exe
+intel_win_64 : exe       = smokediff_win_64.exe
 
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin)
