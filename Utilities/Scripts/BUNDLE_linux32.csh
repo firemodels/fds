@@ -8,6 +8,8 @@ setenv fdshost acrux.cfr.nist.gov
 setenv smvhost acrux.cfr.nist.gov
 setenv runhost fire70
 
+setenv manifest manifest_linux_32.html
+
 setenv INTELLIB lib32
 setenv smokezipdir INTEL_LINUX_32
 setenv smokediffdir INTEL_LINUX_32
