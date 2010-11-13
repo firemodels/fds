@@ -9,6 +9,8 @@ setenv fdshost bluesky.cfr.nist.gov
 setenv OSXBUNDLE
 setenv runhost bluesky.cfr.nist.gov
 
+setenv manifest manifest_osx_64.html
+
 setenv smokezipdir INTEL_OSX_64
 setenv smokediffdir INTEL_OSX_64
 setenv fds5dir intel_osx_64
