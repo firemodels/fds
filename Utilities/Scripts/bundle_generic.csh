@@ -17,7 +17,7 @@ set forbundle=$fds_smvroot/SMV/for_bundle
 set texturedir=$forbundle/textures
 set fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
 set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
-set manifest=$bundledir/bin/RELEASE_INFO.txt
+set fullmanifest=$googledir/$bundledir/bin/$manifest
 
 cd $googledir
 rm -rf $bundlebase
@@ -67,32 +67,38 @@ scp -q $fdshost\:$fdsroot/$fds5dir/$fds5 $bundledir/bin/$fds5out
 echo copying $fds5mpi from $fds5dir on $fdshost
 scp -q $fdshost\:$fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/$fds5mpiout
 
+cat <<EOF > $fullmanifest
+<html>
+<head>
+<TITLE>FDS-SMV Bundle Manifest</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" >
+<pre>
+EOF
 echo
-echo Creating Manifiest
-echo $PLATFORM FDS-Smokeview bundle created > $manifest
-date >> $manifest
-echo  >> $manifest
-echo Versions:>> $manifest
-echo  >> $manifest
+echo Creating Manifest
+echo $PLATFORM FDS-Smokeview bundle created >> $fullmanifest
+date >> $fullmanifest
+echo  >> $fullmanifest
+echo Versions:>> $fullmanifest
+echo  >> $fullmanifest
 
-echo -------------------------- >> $manifest
-ssh -q $runhost " echo 0 | $fdsroot/$fds5dir/$fds5" >>& $manifest
+echo ------fds5-------------------- >> $fullmanifest
+ssh -q $runhost " echo 0 | $fdsroot/$fds5dir/$fds5" >>& $fullmanifest
 
-echo  >> $manifest
-echo -------------------------- >> $manifest
-ssh -q $runhost $fds2asciiroot/$fds2asciidir/$fds2ascii -v >> $manifest
+echo  >> $fullmanifest
+echo ------fds2ascii-------------------- >> $fullmanifest
+ssh -q $runhost $fds2asciiroot/$fds2asciidir/$fds2ascii -v >> $fullmanifest
 
-echo  >> $manifest
-echo -------------------------- >> $manifest
-ssh -q $runhost \( $SETLDPATH  $smvbindir/$smokeview -v \) >> $manifest
-echo  >> $manifest
-echo -------------------------- >> $manifest
-ssh -q $runhost \( $SETLDPATH  $smokediffroot/$smokediffdir/$smokediff -v \) >> $manifest
-echo  >> $manifest
-echo -------------------------- >> $manifest
-ssh -q $runhost \( $SETLDPATH  $smokeziproot/$smokezipdir/$smokezip -v \) >> $manifest
-
-cat $manifest | Mail -s " $PLATFORM" glenn.forney@nist.gov
+echo  >> $fullmanifest
+echo ------smokeview-------------------- >> $fullmanifest
+ssh -q $runhost \( $SETLDPATH  $smvbindir/$smokeview -v \) >> $fullmanifest
+echo  >> $fullmanifest
+echo ------smokediff-------------------- >> $fullmanifest
+ssh -q $runhost \( $SETLDPATH  $smokediffroot/$smokediffdir/$smokediff -v \) >> $fullmanifest
+echo  >> $fullmanifest
+echo ------smokezip-------------------- >> $fullmanifest
+ssh -q $runhost \( $SETLDPATH  $smokeziproot/$smokezipdir/$smokezip -v \) >> $fullmanifest
 
 if ($?OSXBUNDLE) then
 echo copying OSX launcher script
@@ -132,6 +138,22 @@ cp $forbundle/readme.html $bundledir/Documentation/SMV_Release_Notes.html
 echo Obtaining example files from the repository
 cp $bundle_setup/readme_examples.html $bundledir/Examples/.
 svn export -q --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification $bundledir/Examples/.
+
+echo >> $fullmanifest
+echo ------file listing---------------------------------- >> $fullmanifest
+set curdir=`pwd`
+cd $googledir/$bundledir
+find . -print >> $fullmanifest
+cd $curdir
+
+cat <<EOF>>$fullmanifest
+</pre>
+</body>
+</html>
+EOF
+
+cp $fullmanifest ~/$manifest
+cat $fullmanifest | Mail -s " $PLATFORM" glenn.forney@nist.gov
 
 echo Building archive
 rm -rf $googledir/$bundlebase.tar
