@@ -1,6 +1,6 @@
 @echo off
 
-Rem  Windows batch file to create a test Smokeview for Windows
+Rem  Windows batch file to create a test Smokeview for 32 bit Windows
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -19,10 +19,6 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV\scripts
-
-set version=test_%smv_revision%
-
-call make_smv_test_win32 %version%
+call %svn_root%\smv\scripts\MAKEtestdistwingen 32
 
 pause

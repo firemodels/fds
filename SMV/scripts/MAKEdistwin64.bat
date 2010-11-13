@@ -19,13 +19,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\smv\scripts
-set version=%smv_version%
 
-set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle
+call %svn_root%\smv\scripts\MAKEdistwingen 64
 
-call make_smv_release_win64.bat %version%
-
-echo win64 Smokeview build finished
 pause

@@ -5,9 +5,6 @@
 #compiler, you would need to type 'make intel_linux_32' at the prompt.
 #To make it in a sub-directory type 'make -f ../Makefile intel_linux_32'
 
-# use the following line if building Smokeview in the directory containing this Makefile
-#SOURCE_DIR = ../source/
-
 # use the following line if building Smokeview in a directory 'below' Makefile
 
 SOURCE_DIR = ../../source/
