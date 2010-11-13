@@ -187,12 +187,8 @@ Rem Include documentation in the bundle only if the variable, docs_include_in_bu
 Rem is not set to 0.  This variable is defined in the fds_smv_env.bat setup  file
 
 echo.
-echo Getting the FDS release notes from the repository.
-svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki "%bundleinfo%\FDS_Release_Notes.wiki"
-
-echo.
-echo Converting the FDS release notes from wiki to html format
-copy "%bundleinfo%\FDS_Release_Notes.htm" > "%out_guides%\FDS_Release_Notes.htm"
+echo Copy converted FDS release notes
+copy "%bundleinfo%\FDS_Release_Notes.htm" "%out_guides%\FDS_Release_Notes.htm"
 
 echo.
 echo Copying Documentation to the Documentation directory
@@ -220,7 +216,6 @@ echo Copying readme_examples.html to the Examples directory
 copy %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
 echo.
 echo Getting the Verification cases from the repository
-pause
 svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
 
 Rem echo.
@@ -243,7 +238,7 @@ echo Compressing FDS/Smokeview distribution
 cd %to_google%
 if exist %basename%.zip erase %basename%.zip
 cd %basename%\fds\fds5\
-wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip *
+wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * > winzip.out
 
 Rem create an installation file from the zipped bundle directory
 
