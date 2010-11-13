@@ -22,7 +22,7 @@ call %envfile%
 
 %svn_drive%
 
-set platform=$1
+set platform=%1
 set BUILDDIR=INTEL_WIN_%platform%
 
 set version=%smv_version%

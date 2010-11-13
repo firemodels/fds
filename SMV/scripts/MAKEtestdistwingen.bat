@@ -20,7 +20,7 @@ call %envfile%
 
 %svn_drive%
 
-set platform=$1
+set platform=%1
 
 set version=test_%smv_revision%
 set zipbase=smv_%version%_win%platform%
