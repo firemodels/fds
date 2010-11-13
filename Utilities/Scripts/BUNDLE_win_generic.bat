@@ -21,7 +21,7 @@ set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
 set out_examples=%out_bundle%\FDS5\Examples
 
-set manifest=%out_bin%\RELEASE_INFO.txt
+set manifest=%out_bin%\manifest.html
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 set wikify=%svn_root%\Utilities\Scripts\wikify.py
 
@@ -39,6 +39,11 @@ mkdir %out_examples%
 mkdir %out_uninstall%
 
 Rem Copy FDS, Smokeview and other needed files to the bin  directory
+
+if "%platform%"=="32" set fds5=fds5.exe
+if "%platform%"=="32" set fds5mpi=fds5_mpi.exe
+if "%platform%"=="64" set fds5=fds5_win_64.exe
+if "%platform%"=="64" set fds5mpi=fds5_mpi_win_64.exe
 
 echo.
 if "%platform%"=="32" echo copying fds5_win_%platform%.exe
@@ -75,11 +80,18 @@ if "%platform%"=="64" echo copying fds2ascii_win_64.exe
 if "%platform%"=="64" copy %in_fds2ascii%\intel_win_64\fds2ascii_win_64.exe     %out_bin%\fds2ascii_win_64.exe
 
 echo copying background.exe
-copy %in_background%\intel_win_32\background.exe %out_bin%\background.exe
+copy %in_background%\intel_win_%platform%\background.exe %out_bin%\background.exe
 
 echo.
 echo Creating Manifiest
-echo FDS-Smokeview bundle created > %manifest%
+
+echo ^<html^> > %manifest%
+echo ^<head^> >> %manifest%
+echo ^<TITLE^>Build FDS^</TITLE^> >> %manifest%
+echo ^</HEAD^> >> %manifest%
+echo ^<BODY BGCOLOR="#FFFFFF" ^> >> %manifest%
+echo ^<pre^> >> %manifest%
+echo FDS-Smokeview bundle created >> %manifest%
 date /t >> %manifest%
 time /t >> %manifest%
 echo. >> %manifest%
@@ -114,10 +126,11 @@ echo -------------------------- >> %manifest%
 
 if "%platform%"=="32" GOTO endif_64 
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds5_win_%platform%.exe 2>> %manifest%
+echo | %out_bin%\fds5_win_64.exe 2>> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds5_mpi_win_%platform%.exe 2>> %manifest%
+
+echo | %out_bin%\fds5_mpi_win_64.exe 2>> %manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
@@ -137,7 +150,8 @@ echo. >> %manifest%
 echo -------------------------- >> %manifest%
 %out_bin%\background.exe -v >> %manifest%
 :endif_64
-
+echo ^</body^> >> %manifest%
+echo ^</html^> >> %manifest%
 
 echo.
 echo Copying auxillary files to the bin directory
@@ -167,26 +181,27 @@ echo Copying Uninstaller to Uninstall directory
 echo copying uninstall_fds5.bat
 copy "%bundleinfo%\uninstall_fds5.bat"             "%out_uninstall%\Uninstall.bat"
 
-echo copying set_path%platform%.exe
-copy "%bundleinfo%\set_path%platform%.exe"         "%out_uninstall%\set_path.exe"
+echo copying set_path.exe
+copy "%bundleinfo%\set_path.exe"         "%out_uninstall%\set_path.exe"
 
 Rem Include documentation in the bundle only if the variable, docs_include_in_bundles,
 Rem is not set to 0.  This variable is defined in the fds_smv_env.bat setup  file
 
 echo.
-echo Getting the FDS release notes from the repository
+echo Getting the FDS release notes from the repository.
 svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki "%bundleinfo%\FDS_Release_Notes.wiki"
 
 echo.
 echo Converting the FDS release notes from wiki to html format
-"%wikify%" -r "%bundleinfo%\FDS_Release_Notes.wiki" > "%out_guides%\FDS_Release_Notes.htm"
+start "%wikify%" -r "%bundleinfo%\FDS_Release_Notes.wiki" > "%out_guides%\FDS_Release_Notes.htm"
+Rem "%wikify%" -r "%bundleinfo%\FDS_Release_Notes.wiki"
 
 echo.
 echo Copying Documentation to the Documentation directory
 
 copy %in_pdf%\FDS_5_User_Guide.pdf               %out_guides%\.
-copy %in_pdf%\SMV_User_Guide.pdf               %out_guides%\.
-copy %in_pdf%\SMV_Technical_Reference_Guide.pdf %out_guides%\.
+copy %in_pdf%\SMV_5_User_Guide.pdf               %out_guides%\.
+copy %in_pdf%\SMV_5_Technical_Reference_Guide.pdf %out_guides%\.
 copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_guides%\.
 copy "%in_smv%\readme.html"                      "%out_guides%\Smokeview_release_notes.html"
 
@@ -207,6 +222,7 @@ echo Copying readme_examples.html to the Examples directory
 copy %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
 echo.
 echo Getting the Verification cases from the repository
+pause
 svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
 
 Rem echo.
@@ -221,7 +237,7 @@ echo Copying wrapup scripts for use in final installation
 copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\FDS5\wrapup_fds_install.bat"
 
 copy "%bundleinfo%\shortcut.exe" "%out_bundle%\FDS5\shortcut.exe"
-copy "%bundleinfo%\set_path.exe" "%out_bundle%\FDS5\set_path.exe"
+"%bundleinfo%\set_path.exe" "%out_bundle%\FDS5\set_path.exe"
 
 echo.
 echo Compressing FDS/Smokeview distribution
@@ -242,5 +258,5 @@ if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\Program Files\FDS\FDS5" -c wrapup_fds_install.bat
 Rem wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -mokcancel %bundleinfo%\message.txt %basename%.zip -c wrapup_fds_install.bat
 
+start explorer %manifest%
 type %manifest%
-pause
