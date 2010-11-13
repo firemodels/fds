@@ -23,7 +23,6 @@ set out_examples=%out_bundle%\FDS5\Examples
 
 set manifest=%out_bin%\manifest.html
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
-set wikify=%svn_root%\Utilities\Scripts\wikify.py
 
 Rem erase the temporary bundle directory if it already exists
 
@@ -193,8 +192,7 @@ svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_No
 
 echo.
 echo Converting the FDS release notes from wiki to html format
-start "%wikify%" -r "%bundleinfo%\FDS_Release_Notes.wiki" > "%out_guides%\FDS_Release_Notes.htm"
-Rem "%wikify%" -r "%bundleinfo%\FDS_Release_Notes.wiki"
+copy "%bundleinfo%\FDS_Release_Notes.htm" > "%out_guides%\FDS_Release_Notes.htm"
 
 echo.
 echo Copying Documentation to the Documentation directory
