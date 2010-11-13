@@ -49,6 +49,19 @@ intel_win_32 : exe       = background.exe
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) 
 
+# ------------- Win 64 ----------------
+#  64 bit windows
+
+intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
+intel_win_64 : FFLAGS    = 
+intel_win_64 : CC        = icl
+intel_win_64 : CPP       = icl
+intel_win_64 : FC        = ifort
+intel_win_64 : exe       = background.exe
+
+intel_win_64 : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin) 
+
 # ------------- Linux 32 ----------------
 #  32 bit linux
 
