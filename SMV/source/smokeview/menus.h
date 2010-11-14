@@ -6761,15 +6761,17 @@ updatemenu=0;
         slice *si, *sim1;
 
         vi = vsliceinfo + (multivsliceinfo+i)->ivslices[0];
-        if(i>0)vim1 = vsliceinfo + (multivsliceinfo+i-1)->ivslices[0];
         si = sliceinfo + vi->ival;
-        if(i>0)sim1 = sliceinfo + vim1->ival;
+		if(i>0){
+		  vim1 = vsliceinfo + (multivsliceinfo+i-1)->ivslices[0];
+          sim1 = sliceinfo + vim1->ival;
+		}
         if(i==0||(i>0&&strcmp(si->label.longlabel,sim1->label.longlabel)!=0)){
           if(si->vec_comp==0||showallslicevectors==1){
             char mlabel[1024], mlabel2[1024];
 
             STRCPY(mlabel,si->label.longlabel);
-            if(i>0&&si->mesh_type!=sim1->mesh_type){
+            if(i==0&&si->mesh_type>0||(i>0&&si->mesh_type!=sim1->mesh_type)){
               sprintf(mlabel2,"*** Evac type %i meshes ***",si->mesh_type);
               glutAddMenuEntry(mlabel2,-999);
             }
@@ -6811,10 +6813,12 @@ updatemenu=0;
 
           i=vsliceorderindex[ii];
           vd = vsliceinfo + i;
-          vdim1 = vsliceinfo + vsliceorderindex[ii-1];
           sd = sliceinfo + vd->ival;
-          sdm1 = sliceinfo + vdim1->ival;
-          if(strcmp(sd->label.longlabel,sdm1->label.longlabel)!=0){
+		  if(ii>0){
+            vdim1 = vsliceinfo + vsliceorderindex[ii-1];
+            sdm1 = sliceinfo + vdim1->ival;
+		  }
+          if(ii==0||strcmp(sd->label.longlabel,sdm1->label.longlabel)!=0){
             nloadsubvslicemenu++;
           }
         }
@@ -6852,11 +6856,21 @@ updatemenu=0;
           if(sd->vec_comp==0||showallslicevectors==1)glutAddMenuEntry(menulabel,i);
           if(ii==nvslice-1||strcmp(sd->label.longlabel,sdp1->label.longlabel)!=0){
             subvslice_menuindex[nloadsubvslicemenu]=vsliceorderindex[ii];
-            glutAddMenuEntry("-",-999);
-            glutAddMenuEntry("Load All x",-1000-4*nloadsubvslicemenu-1);
-            glutAddMenuEntry("Load All y",-1000-4*nloadsubvslicemenu-2);
-            glutAddMenuEntry("Load All z",-1000-4*nloadsubvslicemenu-3);
-            glutAddMenuEntry("Load All",-1000-4*nloadsubvslicemenu);
+			if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
+              glutAddMenuEntry("-",-999);
+			}
+			if(sd->ndirxyz[1]>1){
+              glutAddMenuEntry("Load All x",-1000-4*nloadsubvslicemenu-1);
+			}
+			if(sd->ndirxyz[2]>1){
+              glutAddMenuEntry("Load All y",-1000-4*nloadsubvslicemenu-2);
+			}
+			if(sd->ndirxyz[3]>1){
+              glutAddMenuEntry("Load All z",-1000-4*nloadsubvslicemenu-3);
+			}
+			if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
+              glutAddMenuEntry("Load All",-1000-4*nloadsubvslicemenu);
+			}
           }
           if(ii==0||strcmp(sd->label.longlabel,sdm1->label.longlabel)!=0){
             nloadsubvslicemenu++;
@@ -6869,15 +6883,17 @@ updatemenu=0;
 
           i=vsliceorderindex[ii];
           vd = vsliceinfo + i;
-          if(ii>0)vdim1 = vsliceinfo + vsliceorderindex[ii-1];
           sd = sliceinfo + vd->ival;
-          if(ii>0)sdm1 = sliceinfo + vdim1->ival;
+		  if(ii>0){
+            vdim1 = vsliceinfo + vsliceorderindex[ii-1];
+            sdm1 = sliceinfo + vdim1->ival;
+		  }
           if(ii==0||strcmp(sd->label.longlabel,sdm1->label.longlabel)!=0){
             if(sd->vec_comp==0||showallslicevectors==1){
               char mlabel[1024], mlabel2[1024];
 
               STRCPY(mlabel,sd->label.longlabel);
-              if(ii>0&&sd->mesh_type!=sdm1->mesh_type){
+              if(ii==0&&sd->mesh_type>0||(ii>0&&sd->mesh_type!=sdm1->mesh_type)){
                 sprintf(mlabel2,"*** Evac type %i mesh ***",sd->mesh_type);
                 glutAddMenuEntry(mlabel2,-999);
               }
@@ -7009,7 +7025,7 @@ updatemenu=0;
             char mlabel[1024], mlabel2[1024];
 
             STRCPY(mlabel,sd->label.longlabel);
-            if(i>0&&sd->mesh_type!=sdim1->mesh_type){
+            if(i==0&&sd->mesh_type>0||(i>0&&sd->mesh_type!=sdim1->mesh_type)){
               sprintf(mlabel2,"*** Evac type %i meshes ***",sd->mesh_type);
               glutAddMenuEntry(mlabel2,-999);
             }
@@ -7074,11 +7090,21 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,sliceorderindex[i]);
         if(i==nslice_files-1||strcmp(sd->label.longlabel,sdip1->label.longlabel)!=0){
           subslice_menuindex[iloadsubslicemenu]=sliceorderindex[i];
-          glutAddMenuEntry("-",-999);
-          glutAddMenuEntry("Load All x",-1000-4*iloadsubslicemenu-1);
-          glutAddMenuEntry("Load All y",-1000-4*iloadsubslicemenu-2);
-          glutAddMenuEntry("Load All z",-1000-4*iloadsubslicemenu-3);
-          glutAddMenuEntry("Load All",-1000-4*iloadsubslicemenu);
+		  if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
+            glutAddMenuEntry("-",-999);
+		  }
+		  if(sd->ndirxyz[1]>1){
+            glutAddMenuEntry("Load All x",-1000-4*iloadsubslicemenu-1);
+		  }
+		  if(sd->ndirxyz[2]>1){
+            glutAddMenuEntry("Load All y",-1000-4*iloadsubslicemenu-2);
+		  }
+		  if(sd->ndirxyz[3]>1){
+            glutAddMenuEntry("Load All z",-1000-4*iloadsubslicemenu-3);
+		  }
+		  if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
+            glutAddMenuEntry("Load All",-1000-4*iloadsubslicemenu);
+		  }
         }
         if(i==0||strcmp(sd->label.longlabel,sdim1->label.longlabel)!=0){
           iloadsubslicemenu++;
@@ -7090,12 +7116,12 @@ updatemenu=0;
         slice *sd,*sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
-        sdim1 = sliceinfo + sliceorderindex[i-1];
+        if(i>0)sdim1 = sliceinfo + sliceorderindex[i-1];
         if(i==0||strcmp(sd->label.longlabel,sdim1->label.longlabel)!=0){
           char mlabel[1024],mlabel2[1024];;
 
           STRCPY(mlabel,sd->label.longlabel);
-          if(i>0&&sd->mesh_type!=sdim1->mesh_type){
+          if(i==0&&sd->mesh_type>0||(i>0&&sd->mesh_type!=sdim1->mesh_type)){
             sprintf(mlabel2,"*** Evac type %i mesh ***",sd->mesh_type);
             glutAddMenuEntry(mlabel2,-999);
           }

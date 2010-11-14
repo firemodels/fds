@@ -1459,6 +1459,7 @@ void getsliceparams(void){
   }
 #endif
   updateslicemenulabels();
+  update_slicedir_count();
 }
 
 /* ------------------ updatevslices ------------------------ */
@@ -5426,4 +5427,36 @@ int last_vslice_loadstack(void){
   }
   return return_val;
 }
+
+/* ------------------ update_slicedir_count ------------------------ */
+
+void update_slicedir_count(void){
+  int i,j;
+
+  for(i=0;i<nslice_files;i++){
+	slice *slicei;
+
+    slicei = sliceinfo + i;
+	slicei->ndirxyz[0]=0;
+	slicei->ndirxyz[1]=0;
+	slicei->ndirxyz[2]=0;
+	slicei->ndirxyz[3]=0;
+  }
+  for(i=0;i<nslice_files;i++){
+    slice *slicei, *slicej;
+
+    slicei = sliceinfo + i;
+    if(slicei->idir<1)continue;
+	if(slicei->volslice==1)continue;
+	for(j=0;j<nslice_files;j++){
+	  slicej = sliceinfo + j;
+	  if(slicej->idir<1)continue;
+	  if(slicej->volslice==1)continue;
+      if(strcmp(slicej->label.longlabel,slicei->label.longlabel)!=0)continue;
+	  if(slicej->cellcenter!=slicei->cellcenter)continue;
+      slicei->ndirxyz[slicej->idir]++;
+	}
+  }
+}
+
 

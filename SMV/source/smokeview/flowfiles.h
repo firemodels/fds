@@ -893,6 +893,7 @@ typedef struct {
   float sliceoffset;
   int nslicei, nslicej, nslicek;
   int nslicex, nslicey;
+  int ndirxyz[4];
   int nslicetotal;
   int type;
   int vloaded;
