@@ -4172,11 +4172,11 @@ SELECT CASE(IND)
          CASE DEFAULT
             SGN = 1._EB
          CASE(1)
-            SGN = SIGN(1._EB,UU)*SIGN(1,VELO_INDEX)
+            SGN = SIGN(1._EB,U(II,JJ,KK))*SIGN(1,VELO_INDEX)
          CASE(2)
-            SGN = SIGN(1._EB,VV)*SIGN(1,VELO_INDEX)
+            SGN = SIGN(1._EB,V(II,JJ,KK))*SIGN(1,VELO_INDEX)
          CASE(3)
-            SGN = SIGN(1._EB,WW)*SIGN(1,VELO_INDEX)
+            SGN = SIGN(1._EB,W(II,JJ,KK))*SIGN(1,VELO_INDEX)
       END SELECT
       GAS_PHASE_OUTPUT = SGN*SQRT(2._EB*KRES(II,JJ,KK))
    CASE(11)  ! HRRPUV
