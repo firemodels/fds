@@ -64,13 +64,12 @@ REAL(EB) :: Y_FU_0,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DELTA,DELTA2,ACCEL
 REAL(EB), PARAMETER :: Y_FU_MIN=1.E-10_EB,Y_O2_MIN=1.E-10_EB,X_O2_MIN=1.E-16_EB,X_FU_MIN=1.E-16_EB,Y_CO_MIN=1.E-10_EB, &
                        M_MIN=0.1_EB,M_MAX=0.3_EB
 INTEGER :: NODETS,I,J,K,II,JJ,KK,IOR,IC,IW,IWA(-3:3),ITMP,ICFT
-REAL(EB), POINTER, DIMENSION(:,:,:) :: Y_O2=>NULL(),Y_O2_NEW=>NULL(),MIX_TIME=>NULL(), &
+REAL(EB), POINTER, DIMENSION(:,:,:) :: Y_O2=>NULL(),Y_O2_NEW=>NULL(), &
                                        UU=>NULL(),VV=>NULL(),WW=>NULL()
 
 ! Misc initializations
 
 Y_O2     => WORK1
-MIX_TIME => WORK2 ! need an array because MIX_TIME is reused in CO_PRODUCTION
 !$OMP PARALLEL SHARED(Y_O2,RSUM)
 !$OMP WORKSHARE
 Y_O2     =  0._EB
@@ -240,7 +239,7 @@ DO K=1,KBAR
 
                TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB)   ! advective time scale
                TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
-               MIX_TIME(I,J,K)=MIN(TAU_D,TAU_U,TAU_G)
+               MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(MIN(TAU_D,TAU_U,TAU_G),TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
             ELSE EXPERIMENTAL_IF
                ! FDS 5 default
                MIX_TIME(I,J,K)=C_EDC*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)
