@@ -2253,6 +2253,7 @@ USE GLOBAL_CONSTANTS
 USE MESH_VARIABLES
 USE MESH_POINTERS
 USE TURBULENCE
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 
 IMPLICIT NONE
 
@@ -2294,14 +2295,14 @@ GEOM_LOOP: DO NG=1,N_GEOM
    G%X = G%X0 + G%U*TIME
    G%Y = G%Y0 + G%V*TIME
    G%Z = G%Z0 + G%W*TIME
-   
-   IBM_UVWMAX = MAXVAL((/ABS(G%U),ABS(G%V),ABS(G%W)/))*RDX(1)
-      
+        
    IF (TWO_D) THEN
       DELTA = MIN(M%DX(1),M%DZ(1))
    ELSE
       DELTA = MIN(M%DX(1),M%DY(1),M%DZ(1))
    ENDIF
+   
+   IBM_UVWMAX = MAXVAL((/ABS(G%U),ABS(G%V),ABS(G%W)/))/DELTA
 
    ! find bounding box
 
@@ -2418,38 +2419,38 @@ GEOM_LOOP: DO NG=1,N_GEOM
                CASE(ISPHERE) MASK_SHAPE
                
                   RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA+TOL) M%U_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < DELTA-TOL) M%U_MASK(I,J,K) = 0
                   IF (RP-G%RADIUS < TOL)       M%U_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%Y(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA+TOL) M%V_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < DELTA-TOL) M%V_MASK(I,J,K) = 0
                   IF (RP-G%RADIUS < TOL)       M%V_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%Z(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA+TOL) M%W_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < DELTA-TOL) M%W_MASK(I,J,K) = 0
                   IF (RP-G%RADIUS < TOL)       M%W_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA+TOL) M%P_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < DELTA-TOL) M%P_MASK(I,J,K) = 0
                   IF (RP-G%RADIUS < TOL)       M%P_MASK(I,J,K) = -1
                   
                CASE(ICYLINDER) MASK_SHAPE ! align with y axis for now
                
                   RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA+TOL ) M%U_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)        M%U_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < DELTA-TOL) M%U_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < TOL)    M%U_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA+TOL ) M%V_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)        M%V_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < DELTA-TOL) M%V_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < TOL)    M%V_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%Z(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA+TOL ) M%W_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)        M%W_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < DELTA-TOL) M%W_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < TOL)    M%W_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA+TOL) M%P_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)       M%P_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < DELTA-TOL) M%P_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < TOL)    M%P_MASK(I,J,K) = -1
                   
                CASE(IPLANE) MASK_SHAPE
                
@@ -2580,7 +2581,8 @@ REAL(EB), INTENT(IN) :: XI(3),XU(3)
 INTEGER, INTENT(IN) :: INDU(3),I_VEL,NM
 TYPE(MESH_TYPE), POINTER :: M
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
-INTEGER :: II,JJ,KK
+INTEGER :: II,JJ,KK,N
+CHARACTER(100) :: MESSAGE
 
 M=>MESHES(NM)
 IF (PREDICTOR) THEN
@@ -2593,26 +2595,51 @@ ELSE
    WW => M%WS
 ENDIF
 
-! first assume XI >= XU
 II = INDU(1)
 JJ = INDU(2)
 KK = INDU(3)
-DXI = XI-XU
+
+IF (XI(1)<XU(1)) THEN
+   N=CEILING((XU(1)-XI(1))/M%DX(II))
+   II=MAX(0,II-N)
+   DXI(1)=XI(1)-(XU(1)-REAL(N,EB)*M%DX(II))
+ELSE
+   N=FLOOR((XI(1)-XU(1))/M%DX(II))
+   II=MIN(IBP1,II+N)
+   DXI(1)=XI(1)-(XU(1)+REAL(N,EB)*M%DX(II))
+ENDIF
+
+IF (XI(2)<XU(2)) THEN
+   N=CEILING((XU(2)-XI(2))/M%DY(JJ))
+   JJ=MAX(0,JJ-N)
+   DXI(2)=XI(2)-(XU(2)-REAL(N,EB)*M%DY(JJ))
+ELSE
+   N=FLOOR((XI(2)-XU(2))/M%DY(JJ))
+   JJ=MIN(JBP1,JJ+N)
+   DXI(2)=XI(2)-(XU(2)+REAL(N,EB)*M%DY(JJ))
+ENDIF
+
+IF (XI(3)<XU(3)) THEN
+   N=CEILING((XU(3)-XI(3))/M%DZ(KK))
+   KK=MAX(0,KK-N)
+   DXI(3)=XI(3)-(XU(3)-REAL(N,EB)*M%DZ(KK))
+ELSE
+   N=FLOOR((XI(3)-XU(3))/M%DZ(KK))
+   KK=MIN(KBP1,KK+N)
+   DXI(3)=XI(3)-(XU(3)+REAL(N,EB)*M%DZ(KK))
+ENDIF
+
+IF (ANY(DXI<0._EB)) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: DXI<0 in GETU'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+IF (DXI(1)>M%DX(II) .OR. DXI(2)>M%DY(JJ) .OR. DXI(3)>M%DZ(KK)) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: DXI>DX in GETU'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
 
 SELECT CASE(I_VEL)
    CASE(1)
-      IF (XI(1)<XU(1)) THEN
-         II=MAX(0,II-1)
-         DXI(1)=DXI(1)+M%DX(II)
-      ENDIF
-      IF (XI(2)<XU(2)) THEN
-         JJ=MAX(0,JJ-1)
-         DXI(2)=DXI(2)+M%DYN(JJ)
-      ENDIF
-      IF (XI(3)<XU(3)) THEN
-         KK=MAX(0,KK-1)
-         DXI(3)=DXI(3)+M%DZN(KK)
-      ENDIF
       U_DATA(0,0,0) = UU(II,JJ,KK)
       U_DATA(1,0,0) = UU(II+1,JJ,KK)
       U_DATA(0,1,0) = UU(II,JJ+1,KK)
@@ -2622,18 +2649,6 @@ SELECT CASE(I_VEL)
       U_DATA(1,1,0) = UU(II+1,JJ+1,KK)
       U_DATA(1,1,1) = UU(II+1,JJ+1,KK+1)
    CASE(2)
-      IF (XI(1)<XU(1)) THEN
-         II=MAX(0,II-1)
-         DXI(1)=DXI(1)+M%DXN(II)
-      ENDIF
-      IF (XI(2)<XU(2)) THEN
-         JJ=MAX(0,JJ-1)
-         DXI(2)=DXI(2)+M%DY(JJ)
-      ENDIF
-      IF (XI(3)<XU(3)) THEN
-         KK=MAX(0,KK-1)
-         DXI(3)=DXI(3)+M%DZN(KK)
-      ENDIF
       U_DATA(0,0,0) = VV(II,JJ,KK)
       U_DATA(1,0,0) = VV(II+1,JJ,KK)
       U_DATA(0,1,0) = VV(II,JJ+1,KK)
@@ -2643,18 +2658,6 @@ SELECT CASE(I_VEL)
       U_DATA(1,1,0) = VV(II+1,JJ+1,KK)
       U_DATA(1,1,1) = VV(II+1,JJ+1,KK+1)
    CASE(3)
-      IF (XI(1)<XU(1)) THEN
-         II=MAX(0,II-1)
-         DXI(1)=DXI(1)+M%DXN(II)
-      ENDIF
-      IF (XI(2)<XU(2)) THEN
-         JJ=MAX(0,JJ-1)
-         DXI(2)=DXI(2)+M%DYN(JJ)
-      ENDIF
-      IF (XI(3)<XU(3)) THEN
-         KK=MAX(0,KK-1)
-         DXI(3)=DXI(3)+M%DZ(KK)
-      ENDIF
       U_DATA(0,0,0) = WW(II,JJ,KK)
       U_DATA(1,0,0) = WW(II+1,JJ,KK)
       U_DATA(0,1,0) = WW(II,JJ+1,KK)
@@ -2664,18 +2667,6 @@ SELECT CASE(I_VEL)
       U_DATA(1,1,0) = WW(II+1,JJ+1,KK)
       U_DATA(1,1,1) = WW(II+1,JJ+1,KK+1)
    CASE(4) ! viscosity
-      IF (XI(1)<XU(1)) THEN
-         II=MAX(0,II-1)
-         DXI(1)=DXI(1)+M%DXN(II)
-      ENDIF
-      IF (XI(2)<XU(2)) THEN
-         JJ=MAX(0,JJ-1)
-         DXI(2)=DXI(2)+M%DYN(JJ)
-      ENDIF
-      IF (XI(3)<XU(3)) THEN
-         KK=MAX(0,KK-1)
-         DXI(3)=DXI(3)+M%DZN(KK)
-      ENDIF
       U_DATA(0,0,0) = M%MU(II,JJ,KK)
       U_DATA(1,0,0) = M%MU(II+1,JJ,KK)
       U_DATA(0,1,0) = M%MU(II,JJ+1,KK)
@@ -2697,7 +2688,8 @@ REAL(EB), INTENT(IN) :: XI(3),XU(3)
 INTEGER, INTENT(IN) :: INDU(3),COMP_I,COMP_J,NM
 TYPE(MESH_TYPE), POINTER :: M
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DUDX
-INTEGER :: II,JJ,KK
+INTEGER :: II,JJ,KK,N
+CHARACTER(100) :: MESSAGE
 
 M=>MESHES(NM)
 
@@ -2711,24 +2703,49 @@ IF (COMP_I==3 .AND. COMP_J==1) DUDX => M%IBM_SAVE5
 IF (COMP_I==3 .AND. COMP_J==2) DUDX => M%IBM_SAVE6
 IF (COMP_I==3 .AND. COMP_J==3) DUDX => M%WORK7
 
-! first assume XI >= XU
 II = INDU(1)
 JJ = INDU(2)
 KK = INDU(3)
-DXI = XI-XU
 
 IF (XI(1)<XU(1)) THEN
-   II=MAX(0,II-1)
-   DXI(1)=DXI(1)+M%DX(II)
+   N=CEILING((XU(1)-XI(1))/M%DX(II))
+   II=MAX(0,II-N)
+   DXI(1)=XI(1)-(XU(1)-REAL(N,EB)*M%DX(II))
+ELSE
+   N=FLOOR((XI(1)-XU(1))/M%DX(II))
+   II=MIN(IBP1,II+N)
+   DXI(1)=XI(1)-(XU(1)+REAL(N,EB)*M%DX(II))
 ENDIF
+
 IF (XI(2)<XU(2)) THEN
-   JJ=MAX(0,JJ-1)
-   DXI(2)=DXI(2)+M%DY(JJ)
+   N=CEILING((XU(2)-XI(2))/M%DY(JJ))
+   JJ=MAX(0,JJ-N)
+   DXI(2)=XI(2)-(XU(2)-REAL(N,EB)*M%DY(JJ))
+ELSE
+   N=FLOOR((XI(2)-XU(2))/M%DY(JJ))
+   JJ=MIN(JBP1,JJ+N)
+   DXI(2)=XI(2)-(XU(2)+REAL(N,EB)*M%DY(JJ))
 ENDIF
+
 IF (XI(3)<XU(3)) THEN
-   KK=MAX(0,KK-1)
-   DXI(3)=DXI(3)+M%DZ(KK)
+   N=CEILING((XU(3)-XI(3))/M%DZ(KK))
+   KK=MAX(0,KK-N)
+   DXI(3)=XI(3)-(XU(3)-REAL(N,EB)*M%DZ(KK))
+ELSE
+   N=FLOOR((XI(3)-XU(3))/M%DZ(KK))
+   KK=MIN(KBP1,KK+N)
+   DXI(3)=XI(3)-(XU(3)+REAL(N,EB)*M%DZ(KK))
 ENDIF
+
+IF (ANY(DXI<0._EB)) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: DXI<0 in GETGRAD'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+IF (DXI(1)>M%DX(II) .OR. DXI(2)>M%DY(JJ) .OR. DXI(3)>M%DZ(KK)) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: DXI>DX in GETGRAD'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+
 G_DATA(0,0,0) = DUDX(II,JJ,KK)
 G_DATA(1,0,0) = DUDX(II+1,JJ,KK)
 G_DATA(0,1,0) = DUDX(II,JJ+1,KK)
@@ -2884,6 +2901,7 @@ DO I=1,3
       DUSDS = DUSDS + C(I,1)*C(J,1)*GRADU(I,J)
       DUPDP = DUPDP + C(I,2)*C(J,2)*GRADU(I,J)
       DUNDN = DUNDN + C(I,3)*C(J,3)*GRADU(I,J)
+      
       DUSDN = DUSDN + C(I,1)*C(J,3)*GRADU(I,J)
       TSN   = TSN   + C(I,1)*C(J,3)*TAU_IJ(I,J)
    ENDDO
@@ -2904,7 +2922,7 @@ IF (DNS) THEN
    ETA = U_NORM + RRHO*MU/DN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA/DN)
    BB  = ONSI*DUSDN*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
-   U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
+   IF (ABS(AA)>1.E-10_EB) U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
 ELSE
    U_STRM_0 = U_STRM
    DO SUBIT=1,1
@@ -2915,7 +2933,7 @@ ELSE
       ETA = RRHO*(1-SLIP_COEF)*MU/(2._EB*DN**2)
       AA  = -(0.5_EB*DUSDS + TWTH*U_NORM/DN + ETA)
       BB  = -(U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
-      U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
+      IF (ABS(AA)>1.E-10_EB) U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
    ENDDO
 ENDIF
 
