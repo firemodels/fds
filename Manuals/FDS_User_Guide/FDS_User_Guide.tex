@@ -3509,7 +3509,7 @@ emissivity will be calculated during the simulations as a mass-weighted sum of t
 
 By default, the initial temperature of the solid material is set to
 ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to
-specify a different initial temperature.
+specify a different initial temperature. The layers of the surface can have different initial temperatures.
 Also, the back side temperature boundary condition of a solid can be
 set using the parameter {\ct TMP\_BACK} on the {\ct SURF}
 line. {\ct TMP\_BACK} is not the actual back side surface temperature,
@@ -4138,18 +4138,103 @@ be determined empirically.
 In FDS, the reaction rate expression in Eq.~(\ref{rr}) includes an optional term:
 \be
   r_{ij} = A_{ij} \; Y_{s,i}^{n_{s,ij}} \; \exp \left(-\frac{E_{ij}}{R \, T_s} \right) \;
-  \max\left[0,T_s-T_{thr,ij}\right]^{n_{t,ij}}
+  \max\left[0,S_{thr,ij}(T_s-T_{thr,ij})\right]^{n_{t,ij}}
   \label{rr2}
 \ee
 $T_{thr,ij}$ is an optional ``threshold'' temperature that
 allows the definition of non-Arrhenius pyrolysis functions and
 ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
-By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero;
+$S_{thr,ij}$ is the ''threshold direction'' that allows the triggering of reaction
+when temperature gets ''above '' $T_{thr,ij}$ ($S_{thr,ij}=+1$) or ''below'' $T_{thr,ij}$ ($S_{thr,ij}=-1$).n
+$n_{t,j}$ is prescribed under the name {\ct N\_T(j)} and $S_{thr,ij}$ under {\ct THRESHOLD\_SIGN}.
+
+By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero and $S_{thr,ij}=+1$;
 thus, the last term of Equation~\ref{rr2} does not affect the pyrolysis rate.
 The term can be used to describe a threshold temperature for the pyrolysis
 reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
 is equal to 0 at temperatures below $T_{thr,ij}$ and 1 at temperatures above.
-$n_{t,j}$ is prescribed under the name {\ct N\_T(j)}.
+
+\subsubsection{Special Topic: Simple Phase-Change Reactions}
+
+The threshold temperature described above can be used to simulate simple phase change reactions, such as melting and freezing.
+To make the reaction rate controlled by available energy, i.e. {\em not} kinetics, another optional term should be included
+in the reaction rate formula
+\be
+  r_{ij} = A_{ij}\frac{1}{H_{r,\alpha\beta}\Delta t} \max\left[0,S_{thr,ij}(T_s-T_{thr,ij})\right]^{n_{t,ij}}
+  \label{rr3}
+\ee
+This form of reaction rate can be implemented by setting a logical parameter {\ct PCR(j)=.TRUE.}. The pre-exponental 
+factor $A_{ij}$ should then be given a value that is close or slightly smaller than the specific heat (kJ/kgK) of the material mixture at 
+phase change temperature.
+
+As an example, consider a small amount of liquid water at +10${}^\circ$C, cooled down to -10${}^\circ$C during a 10 min period, and 
+then heated up again to +10${}^\circ$C. The input lines for implementing the freezing and melting reactions are given in Fig.~\ref{water_ice_water_inputs},
+and the complete input file as {\bf water\_ice\_water.fds}. 
+The mass fraction of the liquid water as a function of temperature is plotted in Fig.~\ref{water_ice_water_plot}. The cooling phase is indicated by
+the blue line and heating phase by the red line.
+\begin{figure}[ht]
+\begin{center}
+\begin{minipage}{4in}
+\footnotesize
+\begin{verbatim}
+
+&SURF ID = 'SAMPLE'
+      H_FIXED = 50. 
+      BACKING = 'INSULATED' 
+      THICKNESS = 0.00001
+      MATL_ID = 'LIQUID_WATER' /
+
+&MATL ID = 'LIQUID_WATER'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.60
+      SPECIFIC_HEAT = 4.19 
+      N_REACTIONS = 1
+      PCR(1) = .TRUE.
+      RESIDUE(1) = 'ICE_WATER'
+      NU_RESIDUE(1) = 1.
+      A(1) = 2.0
+      E(1) = 0.
+      N_S(1) = 0.0
+      N_T(1) = 1.0
+      THRESHOLD_SIGN = -1
+      THRESHOLD_TEMPERATURE(1) = 2.
+      HEAT_OF_REACTION(1) = -333. /
+
+&MATL ID = 'ICE_WATER'
+      DENSITY = 1000.
+      CONDUCTIVITY_RAMP = 'KS_ICE'
+      SPECIFIC_HEAT_RAMP = 'CS_ICE' 
+      N_REACTIONS = 1
+      PCR(1) = .TRUE.
+      RESIDUE(1) = 'LIQUID_WATER'
+      NU_RESIDUE(1) = 1.
+      A(1) = 2.0
+      E(1) = 0.
+      N_S(1) = 0.0
+      N_T(1) = 1.0
+      THRESHOLD_TEMPERATURE(1) = -2.
+      HEAT_OF_REACTION(1) = 333. /
+
+&RAMP ID = 'KS_ICE' T =  -50. F = 2.76 /
+&RAMP ID = 'KS_ICE' T =    0. F = 2.22 /
+&RAMP ID = 'CS_ICE' T = -50   F = 1.751 /
+&RAMP ID = 'CS_ICE' T = 0     F = 2.050 /
+\end{verbatim} \normalsize
+\end{minipage}
+\end{center}
+\caption[Input parameters for sample case {\bf water\_ice\_water}.]{Input parameters for sample case {\bf water\_ice\_water}.}
+\label{water_ice_water_inputs}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_ice_water}
+\end{center}
+\caption[Freezing and melting of water]{Freezing and melting of water.}
+\label{water_ice_water_plot}
+\end{figure}
+
+
 
 
 
@@ -4206,7 +4291,7 @@ properties are not all traceable to a measurement.
       COLOR     = 'YELLOW'
       MATL_ID   = 'ETHANOL LIQUID','STEEL','CONCRETE'
       THICKNESS = 0.0091,0.001,0.05
-      TMP_INNER = 18. /
+      TMP_INNER = 18.,18.,15. /
 \end{verbatim} \normalsize
 \end{minipage}
 \caption[Input parameters for sample case {\bf ethanol\_pan}.]{Input parameters for sample case {\bf ethanol\_pan}.}
@@ -9740,6 +9825,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of Reaction for each reaction       & kJ/kg             & 0.     \\ \hline
 {\ct INITIAL\_VAPOR\_FLUX}    & Real        & Initial evaporation rate                  & m$^2$/(sm$^2$)    & 0.0005   \\ \hline
 {\ct ID     }                 & Character   & IDentifier                                &                   &        \\ \hline
+{\ct THRESHOLD\_SIGN}         & Real array  & See Section~\ref{info:solid_pyrolysis}    &                   & 1.0    \\ \hline
 {\ct THRESHOLD\_TEMPERATURE}  & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15 \\ \hline
 {\ct N\_REACTIONS}            & Character   & Number of Reactions                       &                   & 0      \\ \hline
 {\ct N\_S}                    & Real array  & See Section~\ref{info:solid_pyrolysis}    &                   & 1.     \\ \hline
@@ -9747,7 +9833,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NU\_FUEL}                & Real array  & Fuel gas yields                           & kg/kg             & 0.     \\ \hline
 {\ct NU\_GAS(:,II)}           & Real array  & Yields of species {\ct II}                & kg/kg             & 0.     \\ \hline
 {\ct NU\_RESIDUE}             & Real array  & Residue yields                            & kg/kg             & 0.     \\ \hline
-{\ct NU\_WATER}               & Real aray   & Water vapor yields                        & kg/kg             & 0.     \\ \hline
+{\ct NU\_WATER}               & Real array  & Water vapor yields                        & kg/kg             & 0.     \\ \hline
+{\ct PCR(:)}                  & Logical array & Phase-change reaction (\ref{info:solid_pyrolysis}) &         & {\ct.FALSE.}\\ \hline
 {\ct PYROLYSIS\_RANGE}        & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
 {\ct REFERENCE\_TEMPERATURE}  & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &        \\ \hline
 {\ct RESIDUE}                 & Character   & {\ct IDs} of residue {\ct MATL}           &                   &        \\ \hline
@@ -10417,7 +10504,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct THICKNESS(IL)}                   & Real Array      & Thickness of Layer {\ct IL}       & m                   & 0.                      \\ \hline
 {\ct TMP\_BACK}                       & Real            & Back surface temperature BC       & $^\circ$C           & 20.                     \\ \hline
 {\ct TMP\_FRONT}                      & Real            & Front surface temperature         & $^\circ$C           & 20.                     \\ \hline
-{\ct TMP\_INNER}                      & Real            & Initial solid temperature         & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_INNER(IL)}                  & Real Array      & Initial temperature of layer {\ct IL}& $^\circ$C        & 20.                     \\ \hline
 {\ct TRANSPARENCY}                    & Real            & Transparency of obstruction       &    1                &                         \\ \hline
 {\ct VEL    }                         & Real            & Normal velocity                   & m/s                 & 0.                      \\ \hline
 {\ct VEL\_T }                         & Real Pair       & Tangential velocity comps.        & m/s                 & 0.                      \\ \hline

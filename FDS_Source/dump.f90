@@ -2516,7 +2516,7 @@ SURFLOOP: DO N=0,N_SURF
       WRITE(LU_OUTPUT,'(A,F5.2,A)')     '     Reaction products considered from the first ',SF%LAYER_DIVIDE, ' layers.'
       WRITE(LU_OUTPUT,'(A)')            '     Solid Phase Nodes (m):      '
       DO I=0,SF%N_CELLS
-         WRITE(LU_OUTPUT,'(10X,I3, F10.5)') I,SF%X_S(I)
+         WRITE(LU_OUTPUT,'(10X,I4, F10.5)') I,SF%X_S(I)
       ENDDO
       IF (SF%GEOMETRY==SURF_CARTESIAN) THEN
          IF (SF%BACKING==VOID)      WRITE(LU_OUTPUT,'(A)') '     Backing to void'
