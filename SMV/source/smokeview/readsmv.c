@@ -4473,6 +4473,7 @@ typedef struct {
       sd->reload=0;
       sd->nline_contours=0;
       sd->line_contours=NULL;
+	  sd->menu_show=1;
       {
         mesh *meshi;
 
@@ -7215,6 +7216,12 @@ int readini2(char *inifile, int localfile){
       initspheresegs(device_sphere_segments,2*device_sphere_segments);
       continue;
     }
+    if(match(buffer,"SHOWEVACSLICES",14)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&show_evac_slices);
+      if(show_evac_slices!=1)show_evac_slices=0;
+      continue;
+    }
     if(match(buffer,"OFFSETSLICE",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&offset_slice);
@@ -9774,6 +9781,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",boundzipstep);
   fprintf(fileout,"SHOWTRACERSALWAYS\n");
   fprintf(fileout," %i\n",show_tracers_always);
+  fprintf(fileout,"SHOWEVACSLICES\n");
+  fprintf(fileout," %i\n",show_evac_slices);
  
   if(flag==LOCAL_INI){
     fprintf(fileout,"AVATAREVAC\n");

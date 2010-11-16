@@ -937,6 +937,9 @@ int slicecompare( const void *arg1, const void *arg2 ){
 
   slicei = sliceinfo + *(int *)arg1;
   slicej = sliceinfo + *(int *)arg2;
+
+  if(slicei->menu_show>slicej->menu_show)return -1;
+  if(slicei->menu_show<slicej->menu_show)return 1;
   if(slicei->mesh_type<slicej->mesh_type)return -1;
   if(slicei->mesh_type>slicej->mesh_type)return 1;
   if(slicei->slicetype<slicej->slicetype)return -1;
@@ -1021,6 +1024,24 @@ int vslicecompare( const void *arg1, const void *arg2 ){
   return 0;
 }
 
+/* ------------------ update_slice_menu_show ------------------------ */
+
+void update_slice_menu_show(void){
+  int i;
+
+  for(i=0;i<nslice_files;i++){
+	mesh *slicemesh;
+    slice *sd;
+
+    sd = sliceinfo + i;
+	slicemesh = meshinfo + sd->blocknumber;
+	sd->menu_show=1;
+	if(show_evac_slices==0&&slicemesh->mesh_type!=0){
+      sd->menu_show=0;
+	}
+  }
+}
+
 /* ------------------ updateslicemenulabels ------------------------ */
 
 void updateslicemenulabels(void){
@@ -1029,6 +1050,7 @@ void updateslicemenulabels(void){
   multislice *mslicei;
   slice *sd,*sdold;
 
+  update_slice_menu_show();
   if(nslice_files>0){
     mslicei = multisliceinfo;
     sd = sliceinfo + sliceorderindex[0];
@@ -1117,7 +1139,6 @@ void updateslicemenulabels(void){
       STRCAT(sd->menulabel2,sd->menulabel);
     }
   }
-
 }
 
 /* ------------------ updatevslicemenulabels ------------------------ */
@@ -1236,6 +1257,12 @@ int new_multi(slice *sdold,slice *sd){
 
     delta = sdold->delta;
     if(sd->delta>delta)delta=sd->delta;
+    if(abs(sd->xmin-sdold->xmin)<delta&&abs(sd->xmax-sdold->xmax)<delta
+	   &&abs(sd->ymin-sdold->ymin)<delta&&abs(sd->ymax-sdold->ymax)<delta
+	   &&abs(sd->zmin-sdold->zmin)<delta&&abs(sd->zmax-sdold->zmax)<delta
+        ){
+	    return 1;
+	}
     if(strcmp(sd->label.shortlabel,sdold->label.shortlabel)!=0
       ||sd->idir!=sdold->idir
       ||sd->position+delta<sdold->position

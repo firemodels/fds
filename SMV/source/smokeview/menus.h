@@ -7087,7 +7087,7 @@ updatemenu=0;
         else{
           STRCPY(menulabel,sd->menulabel);
         }
-        glutAddMenuEntry(menulabel,sliceorderindex[i]);
+        if(sd->menu_show==1)glutAddMenuEntry(menulabel,sliceorderindex[i]);
         if(i==nslice_files-1||strcmp(sd->label.longlabel,sdip1->label.longlabel)!=0){
           subslice_menuindex[iloadsubslicemenu]=sliceorderindex[i];
 		  if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
@@ -7122,10 +7122,12 @@ updatemenu=0;
 
           STRCPY(mlabel,sd->label.longlabel);
           if(i==0&&sd->mesh_type>0||(i>0&&sd->mesh_type!=sdim1->mesh_type)){
-            sprintf(mlabel2,"*** Evac type %i mesh ***",sd->mesh_type);
-            glutAddMenuEntry(mlabel2,-999);
+            if(sd->menu_show==1){
+              sprintf(mlabel2,"*** Evac type %i mesh ***",sd->mesh_type);
+              glutAddMenuEntry(mlabel2,-999);
+			}
           }
-          glutAddSubMenu(mlabel,loadsubslicemenu[iloadsubslicemenu]);
+          if(sd->menu_show==1)glutAddSubMenu(mlabel,loadsubslicemenu[iloadsubslicemenu]);
           iloadsubslicemenu++;
         }
       }

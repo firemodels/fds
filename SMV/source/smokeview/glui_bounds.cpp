@@ -91,6 +91,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define TBOUNDS 205
 #define TBOUNDS_USE 206
 #define RELOAD_DATA 207
+#define SHOW_EVAC_SLICES 208
 
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
@@ -196,6 +197,7 @@ GLUI_EditText *con_patch_chopmin=NULL, *con_patch_chopmax=NULL;
 GLUI_EditText *con_part_chopmin=NULL, *con_part_chopmax=NULL;
 GLUI_RadioGroup *con_slice_setmin=NULL, *con_slice_setmax=NULL;
 GLUI_Checkbox *showchar_checkbox=NULL, *showonlychar_checkbox;
+GLUI_Checkbox *CHECKBOX_show_evac_slices=NULL;
 GLUI_Checkbox *CHECKBOX_transparentflag=NULL;
 GLUI_Checkbox *CHECKBOX_showcolorbarlines=NULL;
 GLUI_Checkbox *CHECKBOX_axissmooth=NULL;
@@ -620,6 +622,7 @@ extern "C" void glui_bounds_setup(int main_window){
         &cellcenter_interp);
     }
     glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata);
+    CHECKBOX_show_evac_slices=glui_bounds->add_checkbox_to_panel(panel_slice,"Show evac slices",&show_evac_slices,SHOW_EVAC_SLICES,Slice_CB);
     Slice_CB(FILETYPEINDEX);
   }
 
@@ -1847,6 +1850,9 @@ extern "C" void Slice_CB(int var){
     return;
   }
   switch (var){
+    case SHOW_EVAC_SLICES:
+      update_slice_menu_show();
+      break;
     case TRANSPARENTLEVEL:
       updatecolors(-1);
       break;

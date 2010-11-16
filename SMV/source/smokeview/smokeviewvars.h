@@ -14,7 +14,7 @@
 #include "threader.h"
 #include "string_util.h"
 
-SVEXTERN int SVDECL(usemenu,1);
+SVEXTERN int SVDECL(usemenu,1),SVDECL(show_evac_slices,0);
 SVEXTERN float hrrpuv_iso_color[4];
 SVEXTERN int show_slice_terrain;
 SVEXTERN int npropinfo;
