@@ -113,6 +113,7 @@ CALL READ_MATL
 CALL READ_SURF
 CALL READ_OBST
 CALL READ_VENT
+CALL READ_ZONE
 CALL READ_REAC
 CALL READ_SPEC
 CALL READ_EVAC(2)
@@ -127,7 +128,6 @@ CALL PROC_SURF_2  ! Set up remaining SURFace constructs
 CALL READ_DUMP
 CALL READ_CLIP
 CALL READ_INIT
-CALL READ_ZONE
 CALL PROC_WALL    ! Set up grid for 1-D heat transfer in solids
 CALL PROC_CTRL    ! Set up various ConTRoL constructs
 CALL PROC_PROP    ! Set up various PROPerty constructs
@@ -5099,16 +5099,16 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
 
    SF%SPECIES_BC_INDEX = NO_MASS_FLUX
 
-   IF (ANY(SF%MASS_FRACTION>=0._EB) .AND. (ANY(SF%MASS_FLUX/=0._EB).OR.BURNING)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot specify mass fraction with mass flux and/or burning'
+   IF (ANY(SF%MASS_FRACTION>=0._EB) .AND. (ANY(SF%MASS_FLUX/=0._EB) .OR. SF%PYROLYSIS_MODEL/= PYROLYSIS_NONE)) THEN
+      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot specify mass fraction with mass flux and/or pyrolysis'
       CALL SHUTDOWN(MESSAGE)
       ENDIF
    IF (ANY(SF%MASS_FRACTION>=0._EB) .AND. SUCKING) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot specify both mass fraction and outflow velocity'
       CALL SHUTDOWN(MESSAGE)
       ENDIF
-   IF (ANY(SF%LEAK_PATH>=0) .AND. (BLOWING .OR. SUCKING)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot leak and blow at the same time'
+   IF (ANY(SF%LEAK_PATH>=0) .AND. (BLOWING .OR. SUCKING .OR. SF%PYROLYSIS_MODEL/= PYROLYSIS_NONE)) THEN
+      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' cannot leak and specify flow or pyrolysis at the same time'
       CALL SHUTDOWN(MESSAGE)
       ENDIF
    IF (ANY(SF%MASS_FLUX/=0._EB) .AND. (BLOWING .OR. SUCKING)) THEN
@@ -7745,6 +7745,8 @@ NAMELIST /DEVC/ DEPTH,FYI,IOR,ID,ORIENTATION,PROP_ID,QUANTITY,ROTATION,XB,XYZ,IN
 N_DEVC = 0
 N_DEVC_READ = 0
 MAX_DEVC_LINE_POINTS = 0
+N_DEVC_TIME = 0
+N_DEVC_LINE = 0
 
 REWIND(LU_INPUT)
 COUNT_DEVC_LOOP: DO
@@ -7772,8 +7774,6 @@ CALL ChkMemErr('READ','DEVICE',IZERO)
 ! Read in the DEVC lines, keeping track of TIME-history devices, and LINE array devices
 
 N_DEVC      = 0
-N_DEVC_TIME = 0
-N_DEVC_LINE = 0
 
 READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
