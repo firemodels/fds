@@ -2762,7 +2762,11 @@ GEOM_LOOP: DO NG=1,N_GEOM
                            I_VEL = 2
 
                            MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(I,JP1,K))
-                           V_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
+                           
+                           WT = MIN(1._EB,(DN/DELTA)**7._EB)
+                           
+                           V_IBM = WT*V_IBM + &
+                                   (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
                      END SELECT SELECT_METHOD2
                END SELECT
                

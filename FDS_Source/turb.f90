@@ -2332,9 +2332,9 @@ GEOM_LOOP: DO NG=1,N_GEOM
          Z_MAX = G%Z+G%RADIUS
          IBM_UVWMAX = IBM_UVWMAX + G%RADIUS*MAXVAL((/ABS(G%OMEGA_X),ABS(G%OMEGA_Y),ABS(G%OMEGA_Z)/))*RDX(1)
       CASE(ICYLINDER) SELECT_SHAPE ! assume aligned with y axis
-         G%HL(1) = ABS(G%XOR-G%X)
-         G%HL(2) = ABS(G%YOR-G%Y)
-         G%HL(3) = ABS(G%ZOR-G%Z)
+         G%HL(1) = 0.5_EB*(G%X2-G%X1)
+         G%HL(2) = 0.5_EB*(G%Y2-G%Y1)
+         G%HL(3) = 0.5_EB*(G%Z2-G%Z1)
          X_MIN = G%X-G%RADIUS
          Y_MIN = G%Y-G%HL(2)
          Z_MIN = G%Z-G%RADIUS
@@ -2438,19 +2438,20 @@ GEOM_LOOP: DO NG=1,N_GEOM
                
                   RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
                   IF (RP-G%RADIUS < DELTA-TOL) M%U_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)    M%U_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < TOL)       M%U_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
                   IF (RP-G%RADIUS < DELTA-TOL) M%V_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)    M%V_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < TOL)       M%V_MASK(I,J,K) = -1
+                  IF (J==0 .OR. J==JBAR) M%V_MASK = 1 ! deal with boundaries later
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%Z(K)-G%Z)**2 )
                   IF (RP-G%RADIUS < DELTA-TOL) M%W_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)    M%W_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < TOL)       M%W_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
                   IF (RP-G%RADIUS < DELTA-TOL) M%P_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)    M%P_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < TOL)       M%P_MASK(I,J,K) = -1
                   
                CASE(IPLANE) MASK_SHAPE
                
