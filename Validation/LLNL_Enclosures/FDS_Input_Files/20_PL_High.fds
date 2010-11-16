@@ -1,91 +1,85 @@
-&HEAD
-      CHID= '20_PL_High'
-      TITLE= '1986 LLNL Enclosure Fire Tests'
-/
-&TIME
-      T_BEGIN= 0
-      T_END= 6000
-/
+&HEAD CHID= '20_PL_High', TITLE= '1986 LLNL Enclosure Fire Tests' /
+&TIME T_END= 6000 /
+
 &MESH IJK=30,20,45, XB=0,6,0,4,0,4.5 /Mesh 1, Description
-&ZONE XB=0,6,0,4,0,4.5, LEAK_AREA(0) = 0.0223 / Zone for leakage through walls
-&MISC
-      RADIATION=.FALSE.
-      SUPPRESSION=.TRUE.
+&ZONE XB=0,6,0,4,0,4.5, LEAK_AREA(0) = 0.0223 / Zone for leakage through WALLs
+
+&MISC 
       TMPA=16
-/
+      SURF_DEFAULT='WALL' /
+
+&RADI RADIATIVE_FRACTION=0.20 /
+
 &REAC
       ID= 'Methane'
       FYI= 'C_1 H_4'
-      SOOT_YIELD=0.01
+      SOOT_YIELD=0
       C=1
       H=4
-      HEAT_OF_COMBUSTION=50050
-/
+      HEAT_OF_COMBUSTION=50050/
 &MATL
-      ID= 'WallMATL'
+      ID= 'WALL'
       FYI= 'Al2O3-SiO2 Refractory'
       CONDUCTIVITY= 0.39
       DENSITY= 1440
-      SPECIFIC_HEAT= 1
-/
+      SPECIFIC_HEAT= 1/
 &MATL
-      ID= 'CeilMATL'
+      ID= 'CEILING'
       FYI= 'Al2O3-SiO2 Refractory'
       CONDUCTIVITY= 0.63
       DENSITY= 1920
-      SPECIFIC_HEAT= 1
-/
+      SPECIFIC_HEAT= 1/
 &MATL
       ID= 'Marinite'
-      FYI= 'Drop Ceiling Material'
+      FYI= 'DROP CEILING MATERIAL'
       CONDUCTIVITY= 0.12
       DENSITY= 700
-      SPECIFIC_HEAT= 1.12
-/
+      SPECIFIC_HEAT= 1.12/
 &SURF
-      ID= 'Burner'
+      ID= 'BURNER'
       COLOR= 'RED'
-      HRRPUA=800
-/
+      HRRPUA=800/
 &SURF
-      ID= 'Ceiling'
-      MATL_ID= 'CeilMATL'
-      THICKNESS=0.1
-/
+      ID= 'CEILING'
+      MATL_ID= 'CEILING'
+      THICKNESS=0.1/
+
 &SURF
-      ID= 'DropCeiling'
+      ID= 'DROPCEILING'
       MATL_ID= 'Marinite'
       COLOR= 'GRAY'
-      THICKNESS=0.019
-/
+      THICKNESS=0.019/
+
 &SURF
-      ID= 'Wall'
-      MATL_ID= 'WallMATL'
+      ID= 'WALL', 
+      MATL_ID= 'WALL', 
       THICKNESS=0.1
       LEAK_PATH=1,0
-      TRANSPARENCY=0.5
-/
-&SURF ID='Exhaust' COLOR= 'BLUE' MASS_FLUX_TOTAL=0.516 /
+      TRANSPARENCY=0.5/
 
+&SURF ID='EXHAUST' COLOR= 'BLUE' MASS_FLUX_TOTAL=0.516 /
+
+&OBST XB=0,0.3,1.8,2.1,0.65,0.65, SURF_ID='DROPCEILING' / 
+&OBST XB=0,0.3,1.8,1.8,0.35,0.65, SURF_ID='DROPCEILING' / 
+&OBST XB=0,0.3,2.1,2.1,0.35,0.65, SURF_ID='DROPCEILING' / 
+&OBST XB=0.3,0.3,1.8,2.1,0.35,0.65, SURF_ID='DROPCEILING' / 
+&OBST XB=0,6,0,4,3,3, SURF_ID='DROPCEILING' /
+
+&OBST XB=0,6,0,4,4.5,4.5, SURF_ID='CEILING' / 
+&OBST XB=0,6,0,4,0,0, SURF_ID='CEILING' / 
 
 &VENT XB=4.4,5.2,0,0,0,2, SURF_ID='OPEN' / door
 &VENT XB=0,0,1.8,2.1,0.35,0.65, SURF_ID='OPEN' / inlet duct
-&VENT XB=6,6,1.7,2.3,3.2,3.9, SURF_ID='Exhaust' / exhaust duct
-&OBST XB=0,6,0,0,0,4.5, SURF_ID='Wall' / 
-&OBST XB=0,6,4,4,0,4.5, SURF_ID='Wall' / 
-&OBST XB=0,0,0,4,0,4.5, SURF_ID='Wall' / 
-&OBST XB=6,6,0,4,0,4.5, SURF_ID='Wall' / 
-&OBST XB=0,6,0,4,4.5,4.5, SURF_ID='Ceiling' / 
-&OBST XB=0,6,0,4,0,0, SURF_ID='Ceiling' / 
-&VENT XB=2.7,3.2,1.7,2.2,0,0, SURF_ID='Burner' / 
+&VENT XB=6,6,1.7,2.3,3.2,3.9, SURF_ID='EXHAUST' / EXHAUST duct
+
+&VENT XB=2.7,3.2,1.7,2.2,0,0, SURF_ID='BURNER' / 
+
 &HOLE XB=-0.1,0.1,1.8,2.1,0.35,0.65 / inlet duct
-&HOLE XB=5.9,6.1,1.7,2.3,3.2,3.9 / exhaust duct
-&OBST XB=0,6,0,4,3,3, SURF_ID='DropCeiling' / 
+&HOLE XB=5.9,6.1,1.7,2.3,3.2,3.9 / EXHAUST duct
 &HOLE XB=5.2,5.6,1.8,2.2,2.9,3.1 / door
-&OBST XB=0,0.3,1.8,2.1,0.65,0.65, SURF_ID='DropCeiling' / 
-&OBST XB=0,0.3,1.8,1.8,0.35,0.65, SURF_ID='DropCeiling' / 
-&OBST XB=0,0.3,2.1,2.1,0.35,0.65, SURF_ID='DropCeiling' / 
-&OBST XB=0.3,0.3,1.8,2.1,0.35,0.65, SURF_ID='DropCeiling' / 
+
+
+
 &DEVC XYZ=1.5,2,0.15, ID='WestTC1', QUANTITY='TEMPERATURE' / 
 &DEVC XYZ=1.5,2,0.45, ID='WestTC2', QUANTITY='TEMPERATURE' / 
 &DEVC XYZ=1.5,2,0.75, ID='WestTC3', QUANTITY='TEMPERATURE' / 
@@ -134,6 +128,7 @@
 &SLCF PBX= 4.8, QUANTITY= 'U-VELOCITY' /
 &SLCF PBX= 4.8, QUANTITY= 'V-VELOCITY' /
 &SLCF PBX= 4.8, QUANTITY= 'W-VELOCITY' /
+
 &DUMP
       DT_DEVC= 500
       DT_PL3D= 1000
