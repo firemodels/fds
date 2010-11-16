@@ -2426,10 +2426,9 @@ REAL(EB) :: U_IBM,V_IBM,W_IBM,DN
 REAL(EB) :: U_ROT,V_ROT,W_ROT
 REAL(EB) :: PE,PW,PN,PS,PT,PB
 REAL(EB) :: U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVELO(3),XGEOM(3),XCELL(3),XEDGX(3),XEDGY(3),XEDGZ(3),XSURF(3)
-REAL(EB) :: U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),RRHO,MUA,DUUDT,DVVDT,DWWDT
+REAL(EB) :: U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),RRHO,MUA,DUUDT,DVVDT,DWWDT,DELTA,WT
 INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1
 TYPE(GEOMETRY_TYPE), POINTER :: G
-TYPE(MESH_TYPE), POINTER :: M
 
 ! References:
 !
@@ -2437,11 +2436,8 @@ TYPE(MESH_TYPE), POINTER :: M
 ! Boundary Finite-Difference Methods for Three-Dimensional Complex Flow
 ! Simulations. J. Comp. Phys. 161:35-60, 2000.
 !
-! R. McDermott, G. Forney, C. Cruz, and K. McGrattan. A second-order immersed
-! boundary method with near-wall physics. APS/DFD Annual Meeting, Minneapolis,
-! MN, Nov. 2009.
-
-M=>MESHES(NM)
+! R. McDermott. A Direct-Forcing Immersed Boundary Method with Dynamic Velocity
+! Interpolation. APS/DFD Annual Meeting, Long Beach, CA, Nov. 2010.
  
 IF (PREDICTOR) THEN
    UU => U
@@ -2467,30 +2463,14 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
    DUDX => WORK5
    DVDY => WORK6
    DWDZ => WORK7
+     
    PP = 0._EB
    UBAR = 0._EB
    VBAR = 0._EB
    WBAR = 0._EB
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
-         
-            IM1 = MAX(I-1,0)   
-            JM1 = MAX(J-1,0)
-            KM1 = MAX(K-1,0)
-
-            UBAR(I,J,K) = 0.5_EB*(UU(I,J,K)+UU(IM1,J,K))
-            VBAR(I,J,K) = 0.5_EB*(VV(I,J,K)+VV(I,JM1,K))
-            WBAR(I,J,K) = 0.5_EB*(WW(I,J,K)+WW(I,J,KM1))
-
-            IF (P_MASK(I,J,K)>-1) PP(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRES(I,J,K))
-            
-            DUDX(I,J,K) = (UU(I,J,K)-UU(IM1,J,K))/DX(I)
-            DVDY(I,J,K) = (VV(I,J,K)-VV(I,JM1,K))/DY(J)
-            DWDZ(I,J,K) = (WW(I,J,K)-WW(I,J,KM1))/DZ(K)
-         ENDDO
-      ENDDO
-   ENDDO
+   DUDX=0._EB
+   DVDY=0._EB
+   DWDZ=0._EB
    
    DUDY => IBM_SAVE1
    DUDZ => IBM_SAVE2
@@ -2498,6 +2478,47 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
    DVDZ => IBM_SAVE4
    DWDX => IBM_SAVE5
    DWDY => IBM_SAVE6
+   
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+         
+            IP1 = MIN(I+1,IBP1)
+            JP1 = MIN(J+1,JBP1)
+            KP1 = MIN(K+1,KBP1)
+            IM1 = MAX(I-1,0)   
+            JM1 = MAX(J-1,0)
+            KM1 = MAX(K-1,0)
+         
+            P_MASK_IF: IF (P_MASK(I,J,K)>-1) THEN
+               PP(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRES(I,J,K))
+               UBAR(I,J,K) = 0.5_EB*(UU(I,J,K)+UU(IM1,J,K))
+               VBAR(I,J,K) = 0.5_EB*(VV(I,J,K)+VV(I,JM1,K))
+               WBAR(I,J,K) = 0.5_EB*(WW(I,J,K)+WW(I,J,KM1))
+               DUDX(I,J,K) = (UU(I,J,K)-UU(IM1,J,K))/DX(I)
+               DVDY(I,J,K) = (VV(I,J,K)-VV(I,JM1,K))/DY(J)
+               DWDZ(I,J,K) = (WW(I,J,K)-WW(I,J,KM1))/DZ(K)
+            ENDIF P_MASK_IF
+            
+            IF (U_MASK(I,J,K)==-1 .AND. U_MASK(I,JP1,K)==-1) DUDY(I,J,K)=0._EB
+            IF (U_MASK(I,J,K)==-1 .AND. U_MASK(I,J,KP1)==-1) DUDZ(I,J,K)=0._EB
+            
+            IF (V_MASK(I,J,K)==-1 .AND. V_MASK(IP1,J,K)==-1) DVDX(I,J,K)=0._EB
+            IF (V_MASK(I,J,K)==-1 .AND. V_MASK(I,J,KP1)==-1) DVDZ(I,J,K)=0._EB
+            
+            IF (W_MASK(I,J,K)==-1 .AND. W_MASK(IP1,J,K)==-1) DWDX(I,J,K)=0._EB
+            IF (W_MASK(I,J,K)==-1 .AND. W_MASK(I,JP1,K)==-1) DWDY(I,J,K)=0._EB
+            
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   IF (TWO_D) THEN
+      DELTA = MIN(DX(1),DZ(1))
+   ELSE
+      DELTA = MIN(DX(1),DY(1),DZ(1))
+   ENDIF
+   
 ENDIF
 
 GEOM_LOOP: DO NG=1,N_GEOM
@@ -2513,7 +2534,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
    DO K=G%MIN_K(NM),G%MAX_K(NM)
       DO J=G%MIN_J(NM),G%MAX_J(NM)
          DO I=G%MIN_I(NM),G%MAX_I(NM)
-            IF (M%U_MASK(I,J,K)==1) CYCLE ! point is in gas phase
+            IF (U_MASK(I,J,K)==1) CYCLE ! point is in gas phase
          
             IJK   = (/I,J,K/)
             XVELO = (/X(I),YC(J),ZC(K)/)
@@ -2523,7 +2544,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
             XEDGZ = (/X(I),Y(J),ZC(K)/)
             DXC   = (/DX(I),DY(J),DZ(K)/)
   
-            SELECT CASE(M%U_MASK(I,J,K))
+            SELECT CASE(U_MASK(I,J,K))
                CASE(-1)
                   U_ROT = (XVELO(3)-XGEOM(3))*G%OMEGA_Y - (XVELO(2)-XGEOM(2))*G%OMEGA_Z
                   U_IBM = G%U + U_ROT
@@ -2536,7 +2557,8 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         CALL GETX(XI,XVELO,NG)
                         CALL GETU(U_DATA,DXI,XI,XVELO,IJK,1,NM)
                         U_IBM = TRILINEAR(U_DATA,DXI,DXC)
-                        U_IBM = 0.5_EB*(U_IBM+(G%U+U_ROT))
+                        IF (DNS) U_IBM = 0.5_EB*(U_IBM+(G%U+U_ROT)) ! linear profile
+                        IF (LES) U_IBM = 0.9_EB*(U_IBM+(G%U+U_ROT)) ! power law
                      CASE(2)
                         IP1 = MIN(I+1,IBP1)
                         JP1 = MIN(J+1,JBP1)
@@ -2556,6 +2578,12 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         V_ROT  = (XSURF(1)-XGEOM(1))*G%OMEGA_Z - (XSURF(3)-XGEOM(3))*G%OMEGA_X
                         W_ROT  = (XSURF(2)-XGEOM(2))*G%OMEGA_X - (XSURF(1)-XGEOM(1))*G%OMEGA_Y
                         U_GEOM = (/G%U+U_ROT,G%V+V_ROT,G%W+W_ROT/)
+                        
+                        ! store interpolated value
+                        CALL GETU(U_DATA,DXI,XI,XVELO,IJK,1,NM)
+                        U_IBM = TRILINEAR(U_DATA,DXI,DXC)
+                        IF (DNS) U_IBM = 0.5_EB*(U_IBM+(G%U+U_ROT)) ! linear profile
+                        IF (LES) U_IBM = 0.9_EB*(U_IBM+(G%U+U_ROT)) ! power law
 
                         DIVU = 0.5_EB*(DP(I,J,K)+DP(IP1,J,K))
                         
@@ -2599,7 +2627,32 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         I_VEL = 1
 
                         MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(IP1,J,K))
-                        U_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
+                        
+                        !! use 2D for debug
+                        !U_VEC(2)=U_VEC(3)
+                        !U_GEOM(2)=U_GEOM(3)
+                        !N_VEC(2)=N_VEC(3)
+                        !GRADU(1,2)=GRADU(1,3)
+                        !GRADU(2,2)=GRADU(3,3)
+                        !GRADU(2,1)=GRADU(3,1)
+                        !GRADP(2)=GRADP(3)
+                        !TAU_IJ(1,2)=TAU_IJ(1,3)
+                        !TAU_IJ(2,2)=TAU_IJ(3,3)
+                        !TAU_IJ(2,1)=TAU_IJ(3,1)
+                        
+                        !U_IBM = VELTAN2D( U_VEC(1:2),&
+                        !                  U_GEOM(1:2),&
+                        !                  N_VEC(1:2),&
+                        !                  DN,DIVU,&
+                        !                  GRADU(1:2,1:2),&
+                        !                  GRADP(1:2),&
+                        !                  TAU_IJ(1:2,1:2),&
+                        !                  DT,RRHO,MUA,I_VEL)
+                        
+                        WT = MIN(1._EB,(DN/DELTA)**7._EB)
+                        
+                        U_IBM = WT*U_IBM + &
+                                (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
                   END SELECT SELECT_METHOD1
             END SELECT
             
@@ -2616,7 +2669,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
       DO K=G%MIN_K(NM),G%MAX_K(NM)
          DO J=G%MIN_J(NM),G%MAX_J(NM)
             DO I=G%MIN_I(NM),G%MAX_I(NM)
-               IF (M%V_MASK(I,J,K)==1) CYCLE ! point is in gas phase
+               IF (V_MASK(I,J,K)==1) CYCLE ! point is in gas phase
          
                IJK   = (/I,J,K/)
                XVELO = (/XC(I),Y(J),ZC(K)/)
@@ -2626,7 +2679,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                XEDGZ = (/X(I),Y(J),ZC(K)/)
                DXC   = (/DX(I),DY(J),DZ(K)/)
          
-               SELECT CASE(M%V_MASK(I,J,K))
+               SELECT CASE(V_MASK(I,J,K))
                   CASE(-1)
                      V_ROT = (XVELO(1)-XGEOM(1))*G%OMEGA_Z - (XVELO(3)-XGEOM(3))*G%OMEGA_X
                      V_IBM = G%V + V_ROT
@@ -2639,7 +2692,8 @@ GEOM_LOOP: DO NG=1,N_GEOM
                            CALL GETX(XI,XVELO,NG)
                            CALL GETU(U_DATA,DXI,XI,XVELO,IJK,2,NM)
                            V_IBM = TRILINEAR(U_DATA,DXI,DXC)
-                           V_IBM = 0.5_EB*(V_IBM+(G%V+V_ROT))
+                           IF (DNS) V_IBM = 0.5_EB*(V_IBM+(G%V+V_ROT))
+                           IF (LES) V_IBM = 0.9_EB*(V_IBM+(G%V+V_ROT))
                         CASE(2)
                            IP1 = MIN(I+1,IBP1)
                            JP1 = MIN(J+1,JBP1)
@@ -2659,6 +2713,12 @@ GEOM_LOOP: DO NG=1,N_GEOM
                            V_ROT  = (XSURF(1)-XGEOM(1))*G%OMEGA_Z - (XSURF(3)-XGEOM(3))*G%OMEGA_X
                            W_ROT  = (XSURF(2)-XGEOM(2))*G%OMEGA_X - (XSURF(1)-XGEOM(1))*G%OMEGA_Y
                            U_GEOM = (/G%U+U_ROT,G%V+V_ROT,G%W+W_ROT/)
+                           
+                           ! store interpolated value
+                           CALL GETU(U_DATA,DXI,XI,XVELO,IJK,2,NM)
+                           V_IBM = TRILINEAR(U_DATA,DXI,DXC)
+                           IF (DNS) V_IBM = 0.5_EB*(V_IBM+(G%V+V_ROT))
+                           IF (LES) V_IBM = 0.9_EB*(V_IBM+(G%V+V_ROT))
 
                            DIVU = 0.5_EB*(DP(I,J,K)+DP(I,JP1,K))
                         
@@ -2719,7 +2779,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
    DO K=G%MIN_K(NM),G%MAX_K(NM)
       DO J=G%MIN_J(NM),G%MAX_J(NM)
          DO I=G%MIN_I(NM),G%MAX_I(NM)
-            IF (M%W_MASK(I,J,K)==1) CYCLE
+            IF (W_MASK(I,J,K)==1) CYCLE
          
             IJK   = (/I,J,K/)
             XVELO = (/XC(I),YC(J),Z(K)/)
@@ -2729,7 +2789,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
             XEDGZ = (/X(I),Y(J),ZC(K)/)
             DXC   = (/DX(I),DY(J),DZ(K)/) ! assume uniform grids for now
             
-            SELECT CASE(M%W_MASK(I,J,K))
+            SELECT CASE(W_MASK(I,J,K))
                CASE(-1)
                   W_ROT = (XVELO(2)-XGEOM(2))*G%OMEGA_X - (XVELO(1)-XGEOM(1))*G%OMEGA_Y
                   W_IBM = G%W + W_ROT
@@ -2742,7 +2802,8 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         CALL GETX(XI,XVELO,NG)
                         CALL GETU(U_DATA,DXI,XI,XVELO,IJK,3,NM)
                         W_IBM = TRILINEAR(U_DATA,DXI,DXC)
-                        W_IBM = 0.5_EB*(W_IBM+(G%W+W_ROT))
+                        IF (DNS) W_IBM = 0.5_EB*(W_IBM+(G%W+W_ROT)) ! linear profile
+                        IF (LES) W_IBM = 0.9_EB*(W_IBM+(G%W+W_ROT)) ! power law
                      CASE(2)
                         IP1 = MIN(I+1,IBP1)
                         JP1 = MIN(J+1,JBP1)
@@ -2762,6 +2823,12 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         V_ROT  = (XSURF(1)-XGEOM(1))*G%OMEGA_Z - (XSURF(3)-XGEOM(3))*G%OMEGA_X
                         W_ROT  = (XSURF(2)-XGEOM(2))*G%OMEGA_X - (XSURF(1)-XGEOM(1))*G%OMEGA_Y
                         U_GEOM = (/G%U+U_ROT,G%V+V_ROT,G%W+W_ROT/)
+                        
+                        ! store interpolated value
+                        CALL GETU(U_DATA,DXI,XI,XVELO,IJK,3,NM)
+                        W_IBM = TRILINEAR(U_DATA,DXI,DXC)
+                        IF (DNS) W_IBM = 0.5_EB*(W_IBM+(G%W+W_ROT)) ! linear profile
+                        IF (LES) W_IBM = 0.9_EB*(W_IBM+(G%W+W_ROT)) ! power law
                         
                         DIVU = 0.5_EB*(DP(I,J,K)+DP(I,J,KP1))
                        
@@ -2802,10 +2869,35 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         TAU_IJ(3,1) = TAU_IJ(1,3)
                         TAU_IJ(3,2) = TAU_IJ(2,3)
                   
-                        I_VEL = 3
+                        I_VEL = 3 ! 2 only for debug
                   
                         MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(I,J,KP1))
-                        W_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
+                        
+                        !! use 2D for debug
+                        !U_VEC(2)=U_VEC(3)
+                        !U_GEOM(2)=U_GEOM(3)
+                        !N_VEC(2)=N_VEC(3)
+                        !GRADU(1,2)=GRADU(1,3)
+                        !GRADU(2,2)=GRADU(3,3)
+                        !GRADU(2,1)=GRADU(3,1)
+                        !GRADP(2)=GRADP(3)
+                        !TAU_IJ(1,2)=TAU_IJ(1,3)
+                        !TAU_IJ(2,2)=TAU_IJ(3,3)
+                        !TAU_IJ(2,1)=TAU_IJ(3,1)
+                        
+                        !W_IBM = VELTAN2D( U_VEC(1:2),&
+                        !                  U_GEOM(1:2),&
+                        !                  N_VEC(1:2),&
+                        !                  DN,DIVU,&
+                        !                  GRADU(1:2,1:2),&
+                        !                  GRADP(1:2),&
+                        !                  TAU_IJ(1:2,1:2),&
+                        !                  DT,RRHO,MUA,I_VEL)
+                        
+                        WT = MIN(1._EB,(DN/DELTA)**7._EB)
+                        
+                        W_IBM = WT*W_IBM + &
+                                (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
                   END SELECT SELECT_METHOD3
             END SELECT
             
