@@ -220,21 +220,26 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
   logical dummyl
   character dummyc
 
+  interface mpi_scatter
+    module procedure mpi_scatter_real2   , mpi_scatter_real3
+  end interface mpi_scatter
+
+
   interface mpi_gatherv
     module procedure mpi_gatherv_int1    , mpi_gatherv_int2,    mpi_gatherv_int3, &
-                     mpi_gatherv_real1   , mpi_gatherv_real2,   mpi_gatherv_real3,&
+                     mpi_gatherv_real1   , mpi_gatherv_real2,   mpi_gatherv_real3, mpi_gatherv_real4, &
                      mpi_gatherv_logical1, mpi_gatherv_logical2,mpi_gatherv_logical3
   end interface mpi_gatherv
 
   interface mpi_allgather
     module procedure mpi_allgather_int1    , mpi_allgather_int2,  &
-                     mpi_allgather_real1   , mpi_allgather_real2, &
+                     mpi_allgather_real1   , mpi_allgather_real2,   mpi_allgather_real3, &
                      mpi_allgather_logical1, mpi_allgather_logical2
   end interface mpi_allgather
 
   interface mpi_allgatherv
     module procedure mpi_allgatherv_int1    , mpi_allgatherv_int2, &
-                     mpi_allgatherv_real1   , mpi_allgatherv_real2,&
+                     mpi_allgatherv_real1   , mpi_allgatherv_real2, mpi_allgatherv_real3, &
                      mpi_allgatherv_logical1, mpi_allgatherv_logical2
   end interface mpi_allgatherv
 
@@ -308,6 +313,32 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
 
   contains
 
+subroutine mpi_scatter_real2 ( data1, nsend, sendtype, data2, nrecv, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:,:) :: data2
+  integer:: ierror
+  integer:: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1) + nrecv + recvtype + recvnode + comm + ierror
+end subroutine
+subroutine mpi_scatter_real3 ( data1, nsend, sendtype, data2, nrecv, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:,:,:) :: data2
+  integer:: ierror
+  integer :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1,1) + nrecv + recvtype + recvnode + comm + ierror
+end subroutine
 
 subroutine mpi_gatherv_int1 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
   implicit none
@@ -392,6 +423,20 @@ subroutine mpi_gatherv_real3 ( data1, nsend, sendtype, data2, nrecv, ndispls, re
   integer:: recvnode
   integer:: sendtype
   dummy = data1 + nsend + sendtype + data2(1,1,1) + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
+end subroutine
+subroutine mpi_gatherv_real4 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:,:,:,:) :: data2
+  integer:: ierror
+  integer, dimension(:) :: ndispls
+  integer, dimension(:) :: nrecv
+  integer:: recvtype
+  integer:: recvnode
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1,1,1) + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
 end subroutine
 subroutine mpi_gatherv_logical1 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
   implicit none
@@ -491,6 +536,18 @@ subroutine mpi_allgather_real2 ( data1, nsend, sendtype,data2, nrecv, recvtype, 
   integer:: sendtype
   dummy = data1 + nsend + sendtype + data2(1,1) + nrecv + recvtype + comm + ierror
 end subroutine
+subroutine mpi_allgather_real3 ( data1, nsend, sendtype,data2, nrecv, recvtype, comm, ierror )
+  implicit none
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:,:,:) :: data2
+  integer:: ierror
+  integer:: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1,1) + nrecv + recvtype + comm + ierror
+end subroutine
 subroutine mpi_allgather_logical1 ( data1, nsend, sendtype,data2, nrecv, recvtype, comm, ierror )
   implicit none
   integer:: nsend
@@ -568,6 +625,18 @@ subroutine mpi_allgatherv_real2 ( data1, nsend, sendtype, data2, nrecv, ndispls,
   integer:: recvtype
   integer:: sendtype
   dummy = data1 + nsend + sendtype + data2(1,1) + nrecv(1) + ndispls(1) + recvtype + comm + ierror
+end subroutine
+subroutine mpi_allgatherv_real3 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, comm, ierror )
+  integer:: nsend
+  integer:: comm
+  real(eb):: data1
+  real(eb), dimension(:,:,:):: data2
+  integer:: ierror
+  integer, dimension(:):: ndispls
+  integer, dimension(:):: nrecv
+  integer:: recvtype
+  integer:: sendtype
+  dummy = data1 + nsend + sendtype + data2(1,1,1) + nrecv(1) + ndispls(1) + recvtype + comm + ierror
 end subroutine
 subroutine mpi_allgatherv_logical1 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, comm, ierror )
   integer:: nsend

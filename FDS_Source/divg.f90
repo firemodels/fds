@@ -661,7 +661,7 @@ ENDIF
 PREDICT_NORMALS: IF (PREDICTOR) THEN
  
    !$OMP WORKSHARE
-   FDS_LEAK_AREA(:,:,NM) = 0._EB
+   !FDS_LEAK_AREA(:,:,NM) = 0._EB
    !$OMP END WORKSHARE
 
    !$OMP DO PRIVATE(IW,IOR,IBC,SF,IPZ,IOPZ,TSI,TIME_RAMP_FACTOR,DELTA_P,PRES_RAMP_FACTOR,II,JJ,KK,VT) 
@@ -677,17 +677,17 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             SF => SURFACE(IBC)
             EVAC_IF_NOT: IF (.NOT.EVACUATION_ONLY(NM)) THEN
             IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. SF%SPECIES_BC_INDEX==INTERPOLATED_BC .OR. &
-                SF%SPECIES_BC_INDEX==HVAC_BOUNDARY) CYCLE WALL_LOOP3
-            IF (SF%LEAK_PATH(1) == PRESSURE_ZONE_WALL(IW) .OR. SF%LEAK_PATH(2)==PRESSURE_ZONE_WALL(IW)) THEN
-               IPZ  = PRESSURE_ZONE_WALL(IW)
-               IF (IPZ/=SF%LEAK_PATH(1)) THEN
-                  IOPZ = SF%LEAK_PATH(1)
-               ELSE
-                  IOPZ = SF%LEAK_PATH(2)
-               ENDIF
-               !$OMP ATOMIC
-               FDS_LEAK_AREA(IPZ,IOPZ,NM) = FDS_LEAK_AREA(IPZ,IOPZ,NM) + AW(IW)
-            ENDIF
+                SF%SPECIES_BC_INDEX==HVAC_BOUNDARY .OR. ANY(SF%LEAK_PATH>0._EB)) CYCLE WALL_LOOP3
+            !IF (SF%LEAK_PATH(1) == PRESSURE_ZONE_WALL(IW) .OR. SF%LEAK_PATH(2)==PRESSURE_ZONE_WALL(IW)) THEN
+            !   IPZ  = PRESSURE_ZONE_WALL(IW)
+            !   IF (IPZ/=SF%LEAK_PATH(1)) THEN
+            !      IOPZ = SF%LEAK_PATH(1)
+            !   ELSE
+            !      IOPZ = SF%LEAK_PATH(2)
+            !   ENDIF
+            !   !$OMP ATOMIC
+            !   FDS_LEAK_AREA(IPZ,IOPZ,NM) = FDS_LEAK_AREA(IPZ,IOPZ,NM) + AW(IW)
+            !ENDIF
             ENDIF EVAC_IF_NOT
             IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                TSI = T + DT
@@ -811,33 +811,33 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
 
    ! Calculate leakage and fan flows to all other pressure zones
 
-   U_LEAK = 0._EB
-   OTHER_ZONE_LOOP: DO IOPZ=0,N_ZONE
-      IF (IOPZ == IPZ) CYCLE OTHER_ZONE_LOOP
-      DELTA_P = PBAR(1,IPZ) - PBAR(1,IOPZ)
-      IF (FDS_LEAK_AREA(IPZ,IOPZ,NM) > 0._EB) THEN
-         VDOT_LEAK = SIGN(1._EB,DELTA_P)*MIN(ACTUAL_LEAK_AREA(IPZ,IOPZ)*SQRT(2._EB*ABS(DELTA_P)/RHOA), &
-                                             ABS(DELTA_P)*RDT*ZONE_VOLUME/(GAMMA*PBAR(1,IPZ)))
-         U_LEAK(IOPZ) = FDS_LEAK_AREA_RATIO(IPZ,IOPZ,NM)*VDOT_LEAK/FDS_LEAK_AREA(IPZ,IOPZ,NM)
-      ENDIF
-   ENDDO OTHER_ZONE_LOOP
+   !U_LEAK = 0._EB
+   !OTHER_ZONE_LOOP: DO IOPZ=0,N_ZONE
+   !   IF (IOPZ == IPZ) CYCLE OTHER_ZONE_LOOP
+   !   DELTA_P = PBAR(1,IPZ) - PBAR(1,IOPZ)
+   !   IF (FDS_LEAK_AREA(IPZ,IOPZ,NM) > 0._EB) THEN
+   !      VDOT_LEAK = SIGN(1._EB,DELTA_P)*MIN(ACTUAL_LEAK_AREA(IPZ,IOPZ)*SQRT(2._EB*ABS(DELTA_P)/RHOA), &
+   !                                          ABS(DELTA_P)*RDT*ZONE_VOLUME/(GAMMA*PBAR(1,IPZ)))
+   !      U_LEAK(IOPZ) = FDS_LEAK_AREA_RATIO(IPZ,IOPZ,NM)*VDOT_LEAK/FDS_LEAK_AREA(IPZ,IOPZ,NM)
+   !   ENDIF
+   !ENDDO OTHER_ZONE_LOOP
 
    ! Calculate the volume flux to the boundary of the pressure zone (int u dot dA)
 
    WALL_LOOP4: DO IW=1,NWC
       IF (PRESSURE_ZONE_WALL(IW) /= IPZ)     CYCLE WALL_LOOP4
       IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IW)/=POROUS_BOUNDARY) CYCLE WALL_LOOP4
-      IBC = IJKW(5,IW)
-      SF=>SURFACE(IBC)
-      IF ((SF%LEAK_PATH(1)==IPZ .OR. SF%LEAK_PATH(2)==IPZ) .AND. PREDICTOR) THEN
-         IF (SF%LEAK_PATH(1)==IPZ) THEN
-            IOPZ = SF%LEAK_PATH(2)
-         ELSE
-            IOPZ = SF%LEAK_PATH(1)
-         ENDIF
-         UWS(IW) = UWS(IW) + U_LEAK(IOPZ)
-         IF (IW<=NEWC) DUWDT(IW) = RDT*(UWS(IW)-UW(IW))   ! DUWDT is needed by Poisson solver only at external boundary
-      ENDIF
+   !   IBC = IJKW(5,IW)
+   !   SF=>SURFACE(IBC)
+   !   IF ((SF%LEAK_PATH(1)==IPZ .OR. SF%LEAK_PATH(2)==IPZ) .AND. PREDICTOR) THEN
+   !      IF (SF%LEAK_PATH(1)==IPZ) THEN
+   !         IOPZ = SF%LEAK_PATH(2)
+   !      ELSE
+   !         IOPZ = SF%LEAK_PATH(1)
+   !      ENDIF
+   !      UWS(IW) = UWS(IW) + U_LEAK(IOPZ)
+   !      IF (IW<=NEWC) DUWDT(IW) = RDT*(UWS(IW)-UW(IW))   ! DUWDT is needed by Poisson solver only at external boundary
+   !   ENDIF
       USUM(IPZ,NM) = USUM(IPZ,NM) + UWS(IW)*AW(IW)  
    ENDDO WALL_LOOP4
  
