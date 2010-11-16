@@ -1000,7 +1000,7 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
             ! Reaction rate in 1/s
             REACTION_RATE = ML%A(J)*(WC%RHO_S(I,N)/RHO_S0)**ML%N_S(J)*EXP(-ML%E(J)/(R0*WC%TMP_S(I)))
             ! power term
-            DTMP = WC%TMP_S(I)-ML%TMP_THR(J)
+            DTMP = ML%THR_SIGN(J)*(WC%TMP_S(I)-ML%TMP_THR(J))
             IF (ML%N_T(J)/=0._EB) THEN
                IF (DTMP > 0._EB) THEN
                   REACTION_RATE = REACTION_RATE * DTMP**ML%N_T(J)
@@ -1009,6 +1009,10 @@ WALL_CELL_LOOP: DO IW=1,NWC+NVWC
                ENDIF
             ELSE ! threshold
                IF (DTMP < 0._EB) REACTION_RATE = 0._EB
+            ENDIF
+            ! Phase change reaction?
+            IF (ML%PCR(J)) THEN
+               REACTION_RATE = REACTION_RATE / ((ABS(ML%H_R(J))/1000._EB) * DT_BC)
             ENDIF
             ! Reaction rate in kg/(m3s)
             REACTION_RATE = RHO_S0 * REACTION_RATE

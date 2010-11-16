@@ -71,6 +71,8 @@ $RUNFDS Pyrolysis pyrolysis_2                     fire51
 $RUNFDS Pyrolysis specified_hrr                   fire52
 $RUNFDS Pyrolysis thermoplastic                   fire53
 $RUNFDS Pyrolysis two_step_solid_reaction         fire54
+$RUNFDS Pyrolysis water_ice_water                 fire54
+$RUNFDS Pyrolysis pcm_slab                        fire54
 $RUNFDS Radiation droplet_absorption_cart         fire55
 $RUNFDS Radiation droplet_absorption_cyl          fire55
 $RUNFDS Radiation emissivity                      fire55
