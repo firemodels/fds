@@ -1787,41 +1787,86 @@ void drawdisk(float diameter, float height, unsigned char *rgbcolor){
   int i;
 
   if(ncirc==0)initcircle(CIRCLE_SEGS);
-  glBegin(GL_QUADS);
-  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+  if(object_outlines==0){
+    glBegin(GL_QUADS);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
-  for(i=0;i<ncirc;i++){
-    glNormal3f(xcirc[i],ycirc[i],0.0);
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0); // 1
+    for(i=0;i<ncirc;i++){
+      glNormal3f(xcirc[i],ycirc[i],0.0);
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0); // 1
 
-    glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0); // 2
+      glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0); // 2
+ 
+      glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height); // 3
 
-    glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height); // 3
+      glNormal3f(xcirc[i],ycirc[i],0.0);
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height); // 4
+    }
+    glEnd();
 
-    glNormal3f(xcirc[i],ycirc[i],0.0);
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height); // 4
+    glBegin(GL_TRIANGLES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+    glNormal3f(0.0,0.0,-1.0);
+    for(i=0;i<ncirc;i++){
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+      glVertex3f(                    0.0,                    0.0,0.0);
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0);
+    }
+    glNormal3f(0.0,0.0,1.0);
+    for(i=0;i<ncirc;i++){
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height);
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height);
+      glVertex3f(                    0.0,                    0.0, height);
+    }
+    glEnd();
   }
-  glEnd();
+  else{
+    glBegin(GL_LINES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
-  glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+    for(i=0;i<ncirc;i++){
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0); // 1
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0); // 2
 
-  glNormal3f(0.0,0.0,-1.0);
-  for(i=0;i<ncirc;i++){
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
-    glVertex3f(                    0.0,                    0.0,0.0);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0);
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0); // 2
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height); // 3
+ 
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height); // 3
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height); // 4
+
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height); // 4
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0); // 1
+    }
+    glEnd();
+
+    glBegin(GL_LINES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+    for(i=0;i<ncirc;i++){
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+	  glVertex3f(                    0.0,                    0.0,0.0);
+
+	  glVertex3f(                    0.0,                    0.0,0.0);
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0);
+
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0);
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,0.0);
+    }
+    for(i=0;i<ncirc;i++){
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height);
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height);
+
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height);
+	  glVertex3f(                    0.0,                    0.0, height);
+
+	  glVertex3f(                    0.0,                    0.0, height);
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height);
+    }
+    glEnd();
   }
-  glNormal3f(0.0,0.0,1.0);
-  for(i=0;i<ncirc;i++){
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height);
-    glVertex3f(                    0.0,                    0.0, height);
-  }
-  glEnd();
-
 }
 
 /* ----------------------- drawarcdisk ----------------------------- */
@@ -1891,41 +1936,89 @@ void drawcdisk(float diameter, float height, unsigned char *rgbcolor){
 
   if(ncirc==0)initcircle(CIRCLE_SEGS);
 
-  glBegin(GL_QUADS);
-  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+  if(object_outlines==0){
+    glBegin(GL_QUADS);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
-  for(i=0;i<ncirc;i++){
-    glNormal3f(xcirc[i],ycirc[i],0.0);
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,-height/2.00); // 1
+    for(i=0;i<ncirc;i++){
+      glNormal3f(xcirc[i],ycirc[i],0.0);
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,-height/2.00); // 1
 
-    glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,-height/2.0); // 2
+      glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,-height/2.0); // 2
 
-    glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height/2.0); // 3
+      glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height/2.0); // 3
 
-    glNormal3f(xcirc[i],ycirc[i],0.0);
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height/2.0); // 4
+      glNormal3f(xcirc[i],ycirc[i],0.0);
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height/2.0); // 4
+    }
+    glEnd();
   }
-  glEnd();
+  else{
+    glBegin(GL_LINES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
 
-  glBegin(GL_TRIANGLES);
-  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+    for(i=0;i<ncirc;i++){
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,-height/2.00); // 1
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,-height/2.0); // 2
 
-  glNormal3f(0.0,0.0,-1.0);
-  for(i=0;i<ncirc;i++){
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,-height/2.0);
-    glVertex3f(                    0.0,                    0.0,-height/2.0);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,-height/2.0);
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,-height/2.0); // 2
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height/2.0); // 3
+
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height/2.0); // 3
+	  glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height/2.0); // 4
+
+	  glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height/2.0); // 4
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,-height/2.00); // 1
+    }
+    glEnd();
   }
-  glNormal3f(0.0,0.0,1.0);
-  for(i=0;i<ncirc;i++){
-    glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height/2.0);
-    glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height/2.0);
-    glVertex3f(                    0.0,                    0.0, height/2.0);
-  }
-  glEnd();
 
+  if(object_outlines==0){
+    glBegin(GL_TRIANGLES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+    glNormal3f(0.0,0.0,-1.0);
+    for(i=0;i<ncirc;i++){
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,-height/2.0);
+      glVertex3f(                    0.0,                    0.0,-height/2.0);
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,-height/2.0);
+    }
+    glNormal3f(0.0,0.0,1.0);
+    for(i=0;i<ncirc;i++){
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height/2.0);
+      glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height/2.0);
+      glVertex3f(                    0.0,                    0.0, height/2.0);
+    }
+    glEnd();
+  }
+  else{
+    glBegin(GL_LINES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+    for(i=0;i<ncirc;i++){
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,-height/2.0);
+	  glVertex3f(                    0.0,                    0.0,-height/2.0);
+
+	  glVertex3f(                    0.0,                    0.0,-height/2.0);
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,-height/2.0);
+
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,-height/2.0);
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0,-height/2.0);
+    }
+    for(i=0;i<ncirc;i++){
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height/2.0);
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height/2.0);
+
+	  glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height/2.0);
+	  glVertex3f(                    0.0,                    0.0, height/2.0);
+
+	  glVertex3f(                    0.0,                    0.0, height/2.0);
+      glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height/2.0);
+    }
+    glEnd();
+  }
 }
 
 /* ----------------------- drawhexdisk ----------------------------- */

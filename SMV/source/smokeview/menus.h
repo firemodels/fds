@@ -3793,6 +3793,9 @@ void ShowObjectsMenu(int value){
   else if(value==-3){
     select_device=1-select_device;
   }
+  else if(value==-4){
+    object_outlines=1-object_outlines;
+  }
   else if(value==-999){
   }
   else{
@@ -4884,6 +4887,8 @@ updatemenu=0;
         glutAddMenuEntry("Select",-3);
       }
     }
+    if(object_outlines==0)glutAddMenuEntry("Outline",-4);
+    if(object_outlines==1)glutAddMenuEntry("*Outline",-4);
     glutAddMenuEntry("Show All",-1);
     glutAddMenuEntry("Hide All",-2);
     glutAddMenuEntry("-",-999);
