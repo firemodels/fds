@@ -1039,6 +1039,12 @@ void update_slice_menu_show(void){
 	if(show_evac_slices==0&&slicemesh->mesh_type!=0){
       sd->menu_show=0;
 	}
+	if(strcmp(sd->label.longlabel,"Direction")==0&&constant_evac_coloring==1){
+      sd->constant_color=direction_color_ptr;
+	}
+	else{
+      sd->constant_color=NULL;
+	}
   }
 }
 
@@ -4040,8 +4046,13 @@ void drawvvolslice(const vslice *vd){
      yy1 = yplttemp[j];
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip;
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(iblank[ijk(meshi->plotx,j,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
          GET_VEC_DXYZ(u,dx);
@@ -4066,8 +4077,13 @@ void drawvvolslice(const vslice *vd){
      yy1 = yplttemp[j];
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip;
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(iblank[ijk(meshi->plotx,j,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
          GET_VEC_DXYZ(u,dx);
@@ -4095,8 +4111,13 @@ void drawvvolslice(const vslice *vd){
 
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip; 
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(iblank[ijk(i,meshi->ploty,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
          GET_VEC_DXYZ(u,dx);
@@ -4120,8 +4141,13 @@ void drawvvolslice(const vslice *vd){
 
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip; 
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(iblank[ijk(i,meshi->ploty,k)]==1&&rgb_ptr[3]>0.5){
          z1 = zplttemp[k];
          GET_VEC_DXYZ(u,dx);
@@ -4146,9 +4172,13 @@ void drawvvolslice(const vslice *vd){
      x1 = xplttemp[i];
      for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
        n+=vectorskip*sd->nslicek; 
-
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(iblank[ijk(i,j,meshi->plotz)]==1&&rgb_ptr[3]>0.5){
          yy1 = yplttemp[j];
          GET_VEC_DXYZ(u,dx);
@@ -4172,9 +4202,13 @@ void drawvvolslice(const vslice *vd){
      x1 = xplttemp[i];
      for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
        n+=vectorskip*sd->nslicek; 
-
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(iblank[ijk(i,j,meshi->plotz)]==1&&rgb_ptr[3]>0.5){
          yy1 = yplttemp[j];
          GET_VEC_DXYZ(u,dx);
@@ -4464,8 +4498,13 @@ void drawvslice(const vslice *vd){
      yy1 = yplttemp[j];
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip;
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(show_slice_in_obst==1||(iblank[ijk(sd->is1,j,k)]==1&&rgb_ptr[3]>0.5)){
          z1 = zplttemp[k];
          GET_VEC_DXYZ(u,dx);
@@ -4489,8 +4528,13 @@ void drawvslice(const vslice *vd){
      yy1 = yplttemp[j];
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip;
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(show_slice_in_obst==1||(iblank[ijk(sd->is1,j,k)]==1&&rgb_ptr[3]>0.5)){
          z1 = zplttemp[k];
          GET_VEC_DXYZ(u,dx);
@@ -4516,8 +4560,13 @@ void drawvslice(const vslice *vd){
 
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip; 
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(show_slice_in_obst==1||(iblank[ijk(i,sd->js1,k)]==1&&rgb_ptr[3]>0.5)){
          z1 = zplttemp[k];
          GET_VEC_DXYZ(u,dx);
@@ -4539,8 +4588,13 @@ void drawvslice(const vslice *vd){
 
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip; 
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(show_slice_in_obst==1||(iblank[ijk(i,sd->js1,k)]==1&&rgb_ptr[3]>0.5)){
          z1 = zplttemp[k];
          GET_VEC_DXYZ(u,dx);
@@ -4563,8 +4617,13 @@ void drawvslice(const vslice *vd){
      x1 = xplttemp[i];
      for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
        n+=vectorskip;
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(show_slice_in_obst==1||(iblank[ijk(i,j,sd->ks1)]==1&&rgb_ptr[3]>0.5)){
          yy1 = yplttemp[j];
          GET_VEC_DXYZ(u,dx);
@@ -4586,8 +4645,13 @@ void drawvslice(const vslice *vd){
      x1 = xplttemp[i];
      for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
        n+=vectorskip;
-       i11 = sd->slicepoint[n];
-       rgb_ptr = rgb_slice + 4*i11;
+	   if(sd->constant_color==NULL){
+         i11 = sd->slicepoint[n];
+         rgb_ptr = rgb_slice + 4*i11;
+	   }
+	   else{
+	     rgb_ptr = sd->constant_color;
+	   }
        if(show_slice_in_obst==1||(iblank[ijk(i,j,sd->ks1)]==1&&rgb_ptr[3]>0.5)){
          yy1 = yplttemp[j];
          GET_VEC_DXYZ(u,dx);

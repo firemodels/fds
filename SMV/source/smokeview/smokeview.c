@@ -1986,6 +1986,8 @@ void updateLights(int pos){
 
 void updateShow(void){
   int i,evacflag,sliceflag,vsliceflag,partflag,patchflag,isoflag,smoke3dflag,tisoflag;
+  int slicecolorbarflag, vslicecolorbarflag;
+
 #ifdef pp_SHOOTER
   int shooter_flag;
 #endif
@@ -2074,6 +2076,7 @@ void updateShow(void){
     }
   }
   sliceflag=0;
+  slicecolorbarflag=0;
   if(visTimeSlice==1){
     for(ii=0;ii<nslice_loaded;ii++){
       i=slice_loaded_list[ii];
@@ -2081,6 +2084,20 @@ void updateShow(void){
       if(sd->display==0||sd->type!=islicetype)continue;
       if(sd->nsteps>0){
         sliceflag=1;
+        break;
+      }
+    }
+    for(ii=0;ii<nslice_loaded;ii++){
+      mesh *slicemesh;
+
+      i=slice_loaded_list[ii];
+      sd = sliceinfo+i;
+	  slicemesh = meshinfo + sd->blocknumber;
+      if(sd->display==0||sd->type!=islicetype)continue;
+	  if(sd->constant_color==NULL&&show_evac_colorbar==0&&slicemesh->mesh_type!=0)continue;
+	  if(sd->constant_color!=NULL)continue;
+      if(sd->nsteps>0){
+        slicecolorbarflag=1;
         break;
       }
     }
@@ -2123,12 +2140,27 @@ void updateShow(void){
     }
   }
   vsliceflag=0;
+  vslicecolorbarflag=0;
   if(visTimeSlice==1){
     for(i=0;i<nvslice;i++){
       vd = vsliceinfo+i;
       if(vd->loaded==0||vd->display==0)continue;
       if(sliceinfo[vd->ival].type!=islicetype)continue;
       vsliceflag=1;
+      break;
+    }
+    for(i=0;i<nvslice;i++){
+      mesh *slicemesh;
+	  slice *sd;
+
+      vd = vsliceinfo+i;
+	  sd = sliceinfo + vd->ival;
+	  slicemesh = meshinfo + sd->blocknumber;
+      if(vd->loaded==0||vd->display==0)continue;
+      if(sliceinfo[vd->ival].type!=islicetype)continue;
+	  if(sd->constant_color==NULL&&show_evac_colorbar==0&&slicemesh->mesh_type!=0)continue;
+	  if(sd->constant_color!=NULL)continue;
+      vslicecolorbarflag=1;
       break;
     }
   }
@@ -2269,7 +2301,7 @@ void updateShow(void){
   numColorbars=0;
   if(ReadEvacFile==1)numColorbars++;
   if(ReadPartFile==1)numColorbars++;
-  if(plotstate==DYNAMIC_PLOTS&&(sliceflag==1||vsliceflag==1))numColorbars++;
+  if(plotstate==DYNAMIC_PLOTS&&(slicecolorbarflag==1||vslicecolorbarflag==1))numColorbars++;
   if(plotstate==DYNAMIC_PLOTS&&patchflag==1)numColorbars++;
   if(plotstate==DYNAMIC_PLOTS&&ReadZoneFile==1)numColorbars++;
   if(plotstate==DYNAMIC_PLOTS&&tisoflag==1){

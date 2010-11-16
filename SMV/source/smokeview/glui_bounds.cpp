@@ -92,6 +92,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define TBOUNDS_USE 206
 #define RELOAD_DATA 207
 #define SHOW_EVAC_SLICES 208
+#define DATA_EVAC_COLORING 209
 
 #define SCRIPT_START 31
 #define SCRIPT_STOP 32
@@ -138,6 +139,7 @@ GLUI_Button *BUTTON_compress=NULL;
 #ifdef pp_TRANSFORM
 GLUI_Panel *panel_slice_transform=NULL;
 #endif
+GLUI_Panel *panel_evac_direction=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_data=NULL;
 GLUI_Panel *panel_pan1=NULL;
 GLUI_Panel *panel_pan2=NULL;
@@ -198,6 +200,9 @@ GLUI_EditText *con_part_chopmin=NULL, *con_part_chopmax=NULL;
 GLUI_RadioGroup *con_slice_setmin=NULL, *con_slice_setmax=NULL;
 GLUI_Checkbox *showchar_checkbox=NULL, *showonlychar_checkbox;
 GLUI_Checkbox *CHECKBOX_show_evac_slices=NULL;
+GLUI_Checkbox *CHECKBOX_constant_coloring=NULL;
+GLUI_Checkbox *CHECKBOX_show_evac_color=NULL;
+GLUI_Checkbox *CHECKBOX_data_coloring=NULL;
 GLUI_Checkbox *CHECKBOX_transparentflag=NULL;
 GLUI_Checkbox *CHECKBOX_showcolorbarlines=NULL;
 GLUI_Checkbox *CHECKBOX_axissmooth=NULL;
@@ -269,11 +274,19 @@ extern "C" void update_transparency(void){
   CHECKBOX_transparentflag->set_int_val(use_transparency_data);
 }
 
-
 /* ------------------ update_colorbar_smooth ------------------------ */
 
 extern "C" void update_colorbar_smooth(void){
   CHECKBOX_axissmooth->set_int_val(axissmooth);
+}
+
+/* ------------------ update_evac_parms ------------------------ */
+
+extern "C" void update_evac_parms(void){
+  if(CHECKBOX_show_evac_slices!=NULL)CHECKBOX_show_evac_slices->set_int_val(show_evac_slices);
+  if(CHECKBOX_constant_coloring!=NULL)CHECKBOX_constant_coloring->set_int_val(constant_evac_coloring);
+  if(CHECKBOX_data_coloring!=NULL)CHECKBOX_data_coloring->set_int_val(data_evac_coloring);
+  if(CHECKBOX_show_evac_color!=NULL)CHECKBOX_show_evac_color->set_int_val(show_evac_colorbar);
 }
 
 /* ------------------ update_colorbar_list2 ------------------------ */
@@ -469,6 +482,11 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_active=1;
     panel_evac = glui_bounds->add_rollout("Evacuation",false);
     glui_bounds->add_checkbox_to_panel(panel_evac,"Select Avatar",&select_avatar);
+    CHECKBOX_show_evac_slices=glui_bounds->add_checkbox_to_panel(panel_evac,"Show slice menus",&show_evac_slices,SHOW_EVAC_SLICES,Slice_CB);
+    panel_evac_direction=glui_bounds->add_panel_to_panel(panel_evac,"Direction Vectors");
+    CHECKBOX_constant_coloring=glui_bounds->add_checkbox_to_panel(panel_evac_direction,"Constant coloring",&constant_evac_coloring,SHOW_EVAC_SLICES,Slice_CB);
+    CHECKBOX_data_coloring=glui_bounds->add_checkbox_to_panel(panel_evac_direction,"Data coloring",&data_evac_coloring,DATA_EVAC_COLORING,Slice_CB);
+    CHECKBOX_show_evac_color=glui_bounds->add_checkbox_to_panel(panel_evac_direction,"Show colorbar (when data coloring)",&show_evac_colorbar,SHOW_EVAC_SLICES,Slice_CB);
    // glui_bounds->add_checkbox_to_panel(panel_evac,"View from selected Avatar",&view_from_selected_avatar);
   }
 
@@ -622,7 +640,6 @@ extern "C" void glui_bounds_setup(int main_window){
         &cellcenter_interp);
     }
     glui_bounds->add_checkbox_to_panel(panel_slice,"Output data to file",&output_slicedata);
-    CHECKBOX_show_evac_slices=glui_bounds->add_checkbox_to_panel(panel_slice,"Show evac slices",&show_evac_slices,SHOW_EVAC_SLICES,Slice_CB);
     Slice_CB(FILETYPEINDEX);
   }
 
@@ -1851,7 +1868,14 @@ extern "C" void Slice_CB(int var){
   }
   switch (var){
     case SHOW_EVAC_SLICES:
+      data_evac_coloring = 1-constant_evac_coloring;
       update_slice_menu_show();
+      if(CHECKBOX_data_coloring!=NULL)CHECKBOX_data_coloring->set_int_val(data_evac_coloring);
+      break;
+    case DATA_EVAC_COLORING:
+      constant_evac_coloring = 1-data_evac_coloring;
+      update_slice_menu_show();
+     if(CHECKBOX_constant_coloring!=NULL)CHECKBOX_constant_coloring->set_int_val(constant_evac_coloring);
       break;
     case TRANSPARENTLEVEL:
       updatecolors(-1);

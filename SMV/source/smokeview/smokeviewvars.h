@@ -15,6 +15,8 @@
 #include "string_util.h"
 
 SVEXTERN int SVDECL(usemenu,1),SVDECL(show_evac_slices,0);
+SVEXTERN float direction_color[4], SVDECL(*direction_color_ptr,NULL);
+SVEXTERN int SVDECL(constant_evac_coloring,1),SVDECL(data_evac_coloring,1),SVDECL(show_evac_colorbar,0);
 SVEXTERN float hrrpuv_iso_color[4];
 SVEXTERN int show_slice_terrain;
 SVEXTERN int npropinfo;

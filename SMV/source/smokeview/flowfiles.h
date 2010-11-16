@@ -856,6 +856,7 @@ typedef struct {
   int ncompressed;
   int slicetype;
   int menu_show;
+  float *constant_color;
   float qval256[256];
   char slicedir[50];
   int loaded, display, benchvis;

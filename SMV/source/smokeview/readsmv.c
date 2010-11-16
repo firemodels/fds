@@ -4474,6 +4474,7 @@ typedef struct {
       sd->nline_contours=0;
       sd->line_contours=NULL;
 	  sd->menu_show=1;
+	  sd->constant_color=NULL;
       {
         mesh *meshi;
 
@@ -7218,8 +7219,25 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWEVACSLICES",14)==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_evac_slices);
+      sscanf(buffer,"%i %i %i",&show_evac_slices,&constant_evac_coloring,&show_evac_colorbar);
       if(show_evac_slices!=1)show_evac_slices=0;
+      if(constant_evac_coloring!=1)constant_evac_coloring=0;
+	  data_evac_coloring=1-constant_evac_coloring;
+      if(show_evac_colorbar!=1)show_evac_colorbar=0;
+      update_slice_menu_show();
+      update_evac_parms();
+      continue;
+    }
+    if(match(buffer,"DIRECTIONCOLOR",14)==1){
+      float *dc;
+
+	  dc = direction_color;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f",dc,dc+1,dc+2);
+	  dc[3]=1.0;
+	  direction_color_ptr=getcolorptr(direction_color);
+      update_slice_menu_show();  
+      update_evac_parms();
       continue;
     }
     if(match(buffer,"OFFSETSLICE",11)==1){
@@ -9782,7 +9800,9 @@ void writeini(int flag){
   fprintf(fileout,"SHOWTRACERSALWAYS\n");
   fprintf(fileout," %i\n",show_tracers_always);
   fprintf(fileout,"SHOWEVACSLICES\n");
-  fprintf(fileout," %i\n",show_evac_slices);
+  fprintf(fileout," %i %i %i\n",show_evac_slices,constant_evac_coloring,show_evac_colorbar);
+  fprintf(fileout,"DIRECTIONCOLOR\n");
+  fprintf(fileout," %f %f %f\n",direction_color[0],direction_color[1],direction_color[2]);
  
   if(flag==LOCAL_INI){
     fprintf(fileout,"AVATAREVAC\n");

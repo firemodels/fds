@@ -935,6 +935,11 @@ void InitOpenGL(void){
 /* ------------------ initvars1 ------------------------ */
 
 void initvars1(void){
+  direction_color[0]=39.0/255.0;
+  direction_color[1]=64.0/255.0;
+  direction_color[2]=139.0/255.0;
+  direction_color[3]=1.0;
+  direction_color_ptr=getcolorptr(direction_color);
   arg_iblank=0;
   use_iblank=1;
   levelset_colorbar=-1;
