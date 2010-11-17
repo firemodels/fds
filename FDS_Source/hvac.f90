@@ -337,7 +337,7 @@ DO ND = 1, N_DUCTS
    ENDIF   
 ENDDO
 
-DO NN = 1, N_DUCTNODES
+NODE_LOOP: DO NN = 1, N_DUCTNODES
    DN => DUCTNODE(NN)
    IF (DN%LEAKAGE) THEN
       DN%TMP_V  = TMPA
@@ -355,7 +355,7 @@ DO NN = 1, N_DUCTNODES
          TMP_WGT = TMPA - ITMP
          DN%CP_V = Y2CP_C(ITMP)+TMP_WGT*(Y2CP_C(ITMP+1)-Y2CP_C(ITMP))
       ENDIF        
-      CYCLE
+      CYCLE NODE_LOOP
    ENDIF   
    IF (DN%VENT_ID /= 'null') THEN
       MESH_LOOP: DO NM = 1, NMESHES
@@ -458,7 +458,7 @@ DO NN = 1, N_DUCTNODES
    DN%RSUM_V = DN%RSUM
    DN%CP_V   = DN%CP
    DN%RHO_V  = DN%RHO
-ENDDO
+ENDDO NODE_LOOP
 
 !Temp arrays for input processing
 IF (ALLOCATED(DUCT_NODE_A)) DEALLOCATE(DUCT_NODE_A)
@@ -1875,6 +1875,7 @@ DO NZ1 = 0, N_ZONE
          DN1%LEAKAGE = .TRUE.
          DN1%ZONE_INDEX=NZ1
          DN1%MESH_INDEX = 1
+         DN1%N_DUCTS = 1
          DN1%XYZ = (/0._EB,0._EB,0._EB/)
          WRITE(DN1%ID,'(A,1X,I0,1X,I0)') 'LEAK',NZ1,NZ2
          I_DUCTNODE = I_DUCTNODE + 1
@@ -1892,6 +1893,7 @@ DO NZ1 = 0, N_ZONE
          DN2%ZONE_INDEX=NZ2
          DN2%XYZ = (/0._EB,0._EB,0._EB/)
          DN2%MESH_INDEX = 1
+         DN2%N_DUCTS = 1
          WRITE(DN2%ID,'(A,1X,I0,1X,I0)') 'LEAK',NZ2,NZ1
       ENDIF
    ENDDO
