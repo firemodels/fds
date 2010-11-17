@@ -3076,7 +3076,7 @@ The connection matrix associates one incoming direction $l'$ to each mirrored di
 
 
 
-\chapter{Solid Phase}
+\chapter{Solid Phase} \label{SolidPhase}
 
 FDS assumes that solid obstructions consist of multiple layers, with each
 layer composed of multiple material components that can undergo multiple thermal degradation reactions.
@@ -4129,7 +4129,7 @@ the loss term.  Additionally, the pressure difference between two nodes in the n
 nodes coupled to that duct either directly (part of the same duct network) or indirectly (connected to the same compartment as another duct network).
 Solving the momentum equation, requires accounting for both of these.  This is done with the following discretization:
 \be u^{n+1}_j=u^{n}_j + \frac{\Delta t^n}{\rho_j L_j} \left[ \left(\tilde{P}^n_i - \tilde{P}^n_k\right)+\left(\rho g \Delta z\right)^{n-1}_j+\Delta P^{n-1}_j -
-   \frac{1}{2}K_j \left(\left|u^{n-}_j-u^{n+}_j\right|u^n-\left|u^{n+}_j \right|u^{n-}_j \right) \right] \label{HVACdiscretemomentum} \ee
+   \frac{1}{2}K_j \left(\left|u^{n-}_j+u^{n+}_j\right|u^n-\left|u^{n+}_j \right|u^{n-}_j \right) \right] \label{HVACdiscretemomentum} \ee
 The superscripts $n+$ and $n-$ on the velocity are used to linearize the flow loss in a duct to avoid a non-linear differential equation for velocity.
 The $n+$ superscript is the prior iteration value and the $n-$ is either the prior iteration value or zero if flow reversal occurred.
 This approach is used to speed convergence when duct flows are near zero to avoid large changes in $K$ if the forward and reverse losses are markedly different.
@@ -4156,7 +4156,7 @@ all interdependent HVAC flows into or out of an FDS pressure zone:
 If we separate the HVAC solved velocities into a pressure zone from the FDS solved velocities into a pressure zone and then substitute Eq.~\ref{HVACextrapolatedpressure} into
 Eq.~(\ref{HVACdiscretemomentum}) we obtain the following:
 \begin{eqnarray}
-   u^n_j \left( 1+\frac{K_j}{2 L_j} \left| u^{n-}_j-u^{n+}_j \right| \right) &-&
+   u^n_j \left( 1+\frac{K_j}{2 L_j} \left| u^{n-}_j+u^{n+}_j \right| \right) &-&
     \frac{\Delta {t^n}^2}{\rho_j L_j} \frac{{\sum_{j\in i} u^n_j A^n_j}-{\sum_{j\in k} u^n_j A^n_j}}{{\int_{\Omega_m} {\cal P} \, dV}}= \nonumber \\
   & & u^{n-1}_j+ \frac{\Delta {t^n}^2}{\rho_j L_j}
   \left(\tilde{P}^n_i-\tilde{P}^n_k +  (\rho g \Delta z)_j + \Delta P_j \right) +
@@ -4170,12 +4170,44 @@ The solution scheme is as follows.  Determine the boundary conditions at all poi
 Compute the extrapolated pressures for each pressure zone using the previous iteration (previous time step if the first iteration).
 Assemble the linear set of equations for conservation of momentum and conservation of mass.
 Solve the equation and check the solution for errors in mass conservation, flow reversal over the time step, and the magnitude of change in the velocity solution for each duct.
-If any convergence check fails, the solution is re-iterated wiht new extrapolated pressures.  Density and enthalpy values are taken as the upwind values in each iteration.
+If any convergence check fails, the solution is re-iterated with new extrapolated pressures.  Density and enthalpy values are taken as the upwind values in each iteration.
 
-%\section{HVAC Boundary Conditions (Coupling the HVAC solver to the FDS solver)}
+\section{Surface Leakage}
+
+With rare exceptions, walls, floors, and ceilings are not air tight.  Gaps around windows and doors and openings for electrical, mechanical, and other systems provide for small flow paths through surfaces.  These flow paths can be modeled as an equivalent HVAC system where each leakage path is a single duct.  The area of the duct is total leakage area and the terminal nodes of the duct can be considered the entire area of the surfaces defined as participatig in that flow path.  
+
+\section{HVAC Boundary Conditions (Coupling the HVAC solver to the FDS solver)}
+
+\subsection{Boundary Conditions for the HVAC Solver}
+
+Prior to updating the HVAC solution, the inlet conditions ate each ductnode are determined by summing the mass and energy of the gas cells next to ductnode and averaging the pressure.  The total mass and energy along with the average pressure are then used to determine the average temperature.
 
 
+\be \bar{\rho}_i = \frac{\sum\limits_{j} \rho_j \, A_j}{\sum\limits_{j} A_j}  \ee
+\be \bar{Y}_{\alpha,i} = \frac{\sum\limits_{j} Y_{\alpha,j} \, \rho_j \, A_j}{\sum\limits_{j} \rho_j \, A_j}  \ee
+\be \bar{P}_i = \frac{\sum\limits_{j} P_j \, A_j}{\sum\limits_{j} A_j}  \ee
+\be \bar{h}_i =  \frac{\sum\limits_{j} \rho_j \, A_j, c_p(T_j,Y_j)}{\sum\limits_{j}  \rho_j, A_j} \ee
+\be \bar{T}_i = \frac{\bar{h}_i}{ c_p (\bar{T}_i,\bar{Y}_i)} \ee
 
+
+where $i$ is a ductnode and $j$ are the gas cells adjacent to the node.
+
+\subsection{Boundary Conditions for the FDS Hydrodynamic Solver}
+
+For wall cells containing inflow from an HVAC duct that is not leakage flow, $T_w$ is set to the value in the connected duct.  If the flow is a leakage flow, then $T_w$ is computed based on the thermal properties assigned to the surface (see Chapter ~\ref{SolidPhase}) .  The remaining wall boundary conditions are computed as follows:
+
+\be \dot{m}''' = \frac{u_d \, \rho_d \, A_d}/{A_v} \ee
+\be \dot{m}'''_{\alpha} = Y_{\alpha,d} \, \dot{m}''' \ee
+
+where $d$ is the attached duct and $A_v$ is the total area of the vent (which in the case of leakage flow is the total area of all surfaces for that leak path).
+
+\be u_w = \frac{\dot{m}'''}/{\rho_w} \ee
+\be \rho_w = \frac {p \, \bar{W}}{R \, T_w} \ee
+\be Y_{\alpha,w} = \frac{\dot{m}'''_{\alpha} + \frac{2 \, \rho_w \, D \, Y_{\alpha,gas}}{\delta n}}{ \frac{2 \, \rho_w \, D}{\delta n}+u_w \, \rho_w} \ee
+
+The above three equations are solved iteratively with a limit of 20 iterations (typically only one or two iterations are needed).
+
+For wall cells with outflow to an HVAC duct, the wall boundary conditions are set to gas cell values except for a leakage flow where the temperature is computed based on the thermal properties assigned to the surface.
 
 \chapter{Conclusion}
 
