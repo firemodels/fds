@@ -22,6 +22,10 @@ smokeview -runscript helium_2d
 smokeview -runscript sawtooth
 smokeview -runscript symmetry_test
 
+cd ..\HVAC
+smokeview -runscript HVAC_mass_conservation
+smokeview -runscript HVAC_energy_pressure
+
 cd ..\Miscellaneous
 smokeview -runscript pyramid
 

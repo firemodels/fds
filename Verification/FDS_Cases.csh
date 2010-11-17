@@ -27,6 +27,9 @@ $RUNFDS Flowfields sawtooth                       fire58
 $RUNFDS Flowfields tangential_velocity            fire59
 $RUNFDS Flowfields symmetry_test                  fire59
 $RUNFDS Flowfields low_flux_hot_gas_filling       fire51
+$RUNFDS HVAC HVAC_flow_loss                       fire52
+$RUNFDS HVAC HVAC_mass_conservation               fire53
+$RUNFDS HVAC HVAC_energy_pressure                 fire54
 $RUNFDS Heat_Transfer adiabatic_net_flux          fire51
 $RUNFDS Heat_Transfer heat_conduction_a           fire52
 $RUNFDS Heat_Transfer heat_conduction_b           fire53
