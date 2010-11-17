@@ -2652,7 +2652,8 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         WT = MIN(1._EB,(DN/DELTA)**7._EB)
                         
                         U_IBM = WT*U_IBM + &
-                                (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
+                                (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ, &
+                                                    DT,RRHO,MUA,I_VEL,G%ROUGHNESS,U_IBM)
                   END SELECT SELECT_METHOD1
             END SELECT
             
@@ -2766,7 +2767,8 @@ GEOM_LOOP: DO NG=1,N_GEOM
                            WT = MIN(1._EB,(DN/DELTA)**7._EB)
                            
                            V_IBM = WT*V_IBM + &
-                                   (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
+                                   (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ, &
+                                                       DT,RRHO,MUA,I_VEL,G%ROUGHNESS,V_IBM)
                      END SELECT SELECT_METHOD2
                END SELECT
                
@@ -2901,7 +2903,8 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         WT = MIN(1._EB,(DN/DELTA)**7._EB)
                         
                         W_IBM = WT*W_IBM + &
-                                (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS)
+                                (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ, &
+                                                    DT,RRHO,MUA,I_VEL,G%ROUGHNESS,W_IBM)
                   END SELECT SELECT_METHOD3
             END SELECT
             
