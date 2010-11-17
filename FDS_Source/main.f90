@@ -99,8 +99,8 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
 
 WRITE(VERSION_STRING,'(A)') '5.5.3'
 
-!! WRITE(VERSION_STRING,'(A)') '6.0.0' ! Set these two lines to temporarily create FDS 6 code for validation work
-!! FDS6=.TRUE.
+!!WRITE(VERSION_STRING,'(A)') '6.0.0' ! Set these two lines to temporarily create FDS 6 code for validation work
+!!FDS6=.TRUE.
 
 IF (INDEX(mainrev,':',BACK=.TRUE.)>0) THEN
    WRITE(REVISION_DATE,'(A)',IOSTAT=IOS,ERR=5) mainrev(INDEX(mainrev,':')+1:LEN_TRIM(mainrev)-2)
@@ -2799,6 +2799,11 @@ IF (MODULE_REV > REV_NUMBER) THEN
    WRITE(REV_DATE,'(A)') MODULE_DATE
 ENDIF
 CALL GET_REV_func(MODULE_REV,MODULE_DATE)
+IF (MODULE_REV > REV_NUMBER) THEN
+   REV_NUMBER = MODULE_REV
+   WRITE(REV_DATE,'(A)') MODULE_DATE
+ENDIF
+CALL GET_REV_hvac(MODULE_REV,MODULE_DATE)
 IF (MODULE_REV > REV_NUMBER) THEN
    REV_NUMBER = MODULE_REV
    WRITE(REV_DATE,'(A)') MODULE_DATE
