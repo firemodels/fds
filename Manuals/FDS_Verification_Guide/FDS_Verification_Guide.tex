@@ -2289,11 +2289,23 @@ Finally, note that in this example that a water droplet will evaporate until the
 \end{figure}
 
 
+\chapter{Heating, Ventilating, and Air Conditioning (HVAC)}
 
+\section{Duct Flow Losses (HVAC\_flow\_loss)}
 
+Steady-state flow in a duct is given by
 
+\be \frac{K \rho \, u^2}{2} = \Delta p \label {HVAC_steady_state}\ee
 
+where K is the loss coefficient for the duct and $\Delta P$ is the pressure drop across the duct.  A simple duct network is created from three 0.1 m$^2$ ducts connected with a tee.  One of the ducts is assigned a constant flow rate of 0.3 m$^3$/s.  The other two ducts are given loss cofficients of 4 and 16 and are given inlets at the same elevation.  Based on the above equation, it can be seen that since the ducts have the same conditions at there nodes, that once steady state is reached taht the velocities in the three ducts should be 3 m/s, 2 m/s, and 1 m/s.
 
+\section{HVAC Mass Conservation (HVAC\_mass\_conservation)}
+
+A 1 m x 1 m x 1 m compartment is initialized with the lower half of the compartment being filled with a species. called {\ct SPEC1} having the same molecular weight as air.  An HVAC system of two ducts is created with one duct taking suction from the lower half and discharging into the upper half, and the second duct taking suction from the upper half and discharging into the lower half.  The two ducts are assigned the same volume flow rate.  It is expected that the total mass in the compartment will be conserved, that the mass of the second species will be conserved, and that at the start of the computation a slice file of species will show pure ambient being discharged in the lower half and pure {\ct SPEC1} being discharged in the upper half.
+
+\section{HVAC Energy Conservation and Pressure (HVAC\_energy\_pressure)}
+
+A 1 m x 1 m x 1 m compartment is divided into two equal compartments by a vertical wall.  The left side of the comparment is initialized to twice the ambient temperature.  A simple HVAC system of two 0.1 m$^2$ ducts is created.  The first duct takes suction from the lower left half and discharges into the lower right half, and this duct is given a fixed volume flow rate 0.1 m$^3$/s.  The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1.  It is expected that the total mass will be conserved, the total energy will be conserved, that at the start of the computation that hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation that the pressure difference between the two sides will be xx Pa based on Eq.~\ref{HVAC_steady_state}
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
