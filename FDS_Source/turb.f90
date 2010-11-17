@@ -853,7 +853,7 @@ REAL(EB), PARAMETER :: GAMMA=2._EB/(1._EB+B)
 REAL(EB), PARAMETER :: RKAPPA=2.44_EB ! 1./von Karman constant
 REAL(EB), PARAMETER :: BTILDE=7.44_EB ! see Pope p. 297 (constant has been modified)
 
-REAL(EB) :: U_TAU,TAU_W,NU_OVER_DZ,Z_PLUS,TAU_ROUGH
+REAL(EB) :: U_TAU,TAU_W,NUODZ,Z_PLUS,TAU_ROUGH
 
 ! References (for smooth walls):
 !
@@ -902,13 +902,13 @@ IF (ROUGHNESS>0._EB) THEN
    TAU_ROUGH = ( U1/(RKAPPA*LOG(0.5_EB*DZ/ROUGHNESS)+BTILDE) )**2 ! actually tau_w/rho
 ENDIF
 ! Werner-Wengle
-NU_OVER_DZ = NU/DZ
-TAU_W = (ALPHA*(NU_OVER_DZ)**BETA + ETA*(NU_OVER_DZ)**B*ABS(U1))**GAMMA ! actually tau_w/rho
+NUODZ = NU/DZ
+TAU_W = (ALPHA*(NUODZ)**BETA + ETA*(NUODZ)**B*ABS(U1))**GAMMA ! actually tau_w/rho
 TAU_W = MAX(TAU_W,TAU_ROUGH)
 U_TAU = SQRT(TAU_W)
 Z_PLUS = DZ/(NU/(U_TAU+1.E-10_EB))
 IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
-   SF = 1._EB-TAU_W/(NU/DZ*ABS(U1)) ! log layer
+   SF = 1._EB-TAU_W/(NUODZ*ABS(U1)) ! log layer
 ELSE
    SF = -1._EB ! viscous sublayer
 ENDIF
@@ -982,8 +982,7 @@ VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
    VT%EDDY_BOX_VOLUME = (VT%X_EDDY_MAX-VT%X_EDDY_MIN)*(VT%Y_EDDY_MAX-VT%Y_EDDY_MIN)*(VT%Z_EDDY_MAX-VT%Z_EDDY_MIN)
    
    EDDY_LOOP: DO NE=1,VT%N_EDDY
-   
-      IERROR = 0; CALL EDDY_POSITION(NE,NV,NM,IERROR)
+      IERROR=1; CALL EDDY_POSITION(NE,NV,NM,IERROR)
       CALL EDDY_AMPLITUDE(NE,NV,NM)
    ENDDO EDDY_LOOP
    
@@ -2333,9 +2332,9 @@ GEOM_LOOP: DO NG=1,N_GEOM
          Z_MAX = G%Z+G%RADIUS
          IBM_UVWMAX = IBM_UVWMAX + G%RADIUS*MAXVAL((/ABS(G%OMEGA_X),ABS(G%OMEGA_Y),ABS(G%OMEGA_Z)/))*RDX(1)
       CASE(ICYLINDER) SELECT_SHAPE ! assume aligned with y axis
-         G%HL(1) = ABS(G%XOR-G%X)
-         G%HL(2) = ABS(G%YOR-G%Y)
-         G%HL(3) = ABS(G%ZOR-G%Z)
+         G%HL(1) = 0.5_EB*(G%X2-G%X1)
+         G%HL(2) = 0.5_EB*(G%Y2-G%Y1)
+         G%HL(3) = 0.5_EB*(G%Z2-G%Z1)
          X_MIN = G%X-G%RADIUS
          Y_MIN = G%Y-G%HL(2)
          Z_MIN = G%Z-G%RADIUS
@@ -2439,19 +2438,20 @@ GEOM_LOOP: DO NG=1,N_GEOM
                
                   RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
                   IF (RP-G%RADIUS < DELTA-TOL) M%U_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)    M%U_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < TOL)       M%U_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
                   IF (RP-G%RADIUS < DELTA-TOL) M%V_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)    M%V_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < TOL)       M%V_MASK(I,J,K) = -1
+                  IF (J==0 .OR. J==JBAR)       M%V_MASK = -1 ! deal with boundaries later
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%Z(K)-G%Z)**2 )
                   IF (RP-G%RADIUS < DELTA-TOL) M%W_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)    M%W_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < TOL)       M%W_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
                   IF (RP-G%RADIUS < DELTA-TOL) M%P_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)    M%P_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < TOL)       M%P_MASK(I,J,K) = -1
                   
                CASE(IPLANE) MASK_SHAPE
                
@@ -2836,11 +2836,11 @@ VELTAN2D = C(I_VEL,1)*U_STRM + C(I_VEL,2)*U_NORM
 END FUNCTION VELTAN2D
 
 
-REAL(EB) FUNCTION VELTAN3D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL,ROUGHNESS)
+REAL(EB) FUNCTION VELTAN3D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL,ROUGHNESS,U_INT)
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT, NORM2
 IMPLICIT NONE
 
-REAL(EB), INTENT(IN) :: U_VELO(3),U_SURF(3),NN(3),DN,DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),DT,RRHO,MU,ROUGHNESS
+REAL(EB), INTENT(IN) :: U_VELO(3),U_SURF(3),NN(3),DN,DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),DT,RRHO,MU,ROUGHNESS,U_INT
 INTEGER, INTENT(IN) :: I_VEL
 REAL(EB) :: C(3,3),SS(3),PP(3),SLIP_COEF,ETA,AA,BB,U_STRM_0,DUMMY,U_RELA(3), &
             U_STRM,U_ORTH,U_NORM,DPDS,DUSDS,DUSDN,TSN,DUPDP,DUNDN
@@ -2916,25 +2916,36 @@ ENDDO
 ! update boundary layer equations
 
 ! update wall-normal velocity
-U_NORM = DN*(DIVU-0.5_EB*(DUSDS+DUPDP))
+U_NORM = DN*(DIVU-0.5_EB*DUSDS)
 
 ! ODE solution
 IF (DNS) THEN
    ETA = U_NORM + RRHO*MU/DN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA/DN)
    BB  = ONSI*DUSDN*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
-   IF (ABS(AA)>1.E-10_EB) U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
+   IF (AA/=0._EB) THEN
+      U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
+   ELSE
+      VELTAN3D = U_INT
+      RETURN
+   ENDIF
 ELSE
    U_STRM_0 = U_STRM
    DO SUBIT=1,1
       CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,DUMMY,U_STRM,MU*RRHO,DN,ROUGHNESS)
-      !IF (SLIP_COEF< -1._EB .OR. SLIP_COEF>-1._EB) THEN
+      !IF (SLIP_COEF<-100._EB .OR. SLIP_COEF>100._EB) THEN
       !   PRINT *,SUBIT,'WARNING: SLIP_COEF=',SLIP_COEF
       !ENDIF
       ETA = RRHO*(1-SLIP_COEF)*MU/(2._EB*DN**2)
       AA  = -(0.5_EB*DUSDS + TWTH*U_NORM/DN + ETA)
       BB  = -(U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
-      IF (ABS(AA)>1.E-10_EB) U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
+      !print *,MU*RRHO*DT/(DN**2)
+      IF (AA/=0._EB) THEN
+         U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
+      ELSE
+         VELTAN3D = U_INT
+         RETURN
+      ENDIF
    ENDDO
 ENDIF
 
