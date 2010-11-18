@@ -2335,8 +2335,20 @@ A 1 m x 1 m x 1 m compartment is divided into two equal compartments by a vertic
 \label{fig_HVAC_e_p}
 \end{figure}
 
-\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+\section{Multiple zone leakage (leak\_test\_2)}
 
-\section{Multiple zone leakage (
+Two compartments are defined: A 5 m x 4 m x 3. 2 m comparment containing a second 3.6 m x 2.4 m x 2.4 m compartment, see Figure~\ref{fig_HVAC_leak_fan}.  The interior compartment is connected to the exterior compartment both by a fan (quadratic fan curve with a maximum volumetric flow of 0.005 m$^3$/s and a maximum pressure of 1000 Pa) and by an 0.0001 m$^2$ leakage path.  The interior compartment is also connected to the ambient by an 0.0001 m$^2$ leakage path.  The fan is defined with a 1 s tanh ramp to reach full power.  When the simulation starts the fan will begin to remove air from the outer comparment and discharge it into the inner compartment.  As the pressure rises, the leakage flows will slowly increase until the leakage flow is equal to the flow from the fan.  Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two comparments will decrease until the pressure of the interior compartment is equal to that of the ambient.  At this point in time, no more leakage flow will occur to the ambient and the fan flow will equal intra-compartment leakage flow.  Given the leakage area and the fan curve, this will occur when the pressure difference between the two compartments is 598 Pa.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2_vector} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2.pdf} }
+   \end{tabular*}
+   \caption{Vector plot of pressure at 10 s with geometry clipped to show compartment interiors (left) and line plot of zone pressures (right)}
+   \label{fig_HVAC_leak_fan}
+\end{figure}
+
+
+\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
 \end{document}
