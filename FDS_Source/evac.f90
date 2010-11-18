@@ -43,7 +43,8 @@ MODULE EVAC
   PUBLIC N_DOORS, N_EXITS, N_ENTRYS, N_SSTANDS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_SSTANDS, & 
        EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE, EVAC_SSTAND_TYPE, NPC_EVAC, N_HOLES, &
        EVACUATION_TYPE, EVAC_HOLE_TYPE, EVAC_EVACS, EVAC_HOLES, N_CO_EXITS, N_DOOR_MESHES
-  PUBLIC EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, EMESH_NM, EMESH_NFIELDS, EVAC_FDS6
+  PUBLIC EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, EMESH_NM, EMESH_NFIELDS, &
+       EMESH_INDEX, EVAC_FDS6
   !
   CHARACTER(255):: EVAC_VERSION = '2.4.0'
   CHARACTER(255) :: EVAC_COMPILE_DATE
@@ -356,6 +357,7 @@ MODULE EVAC
   INTEGER, DIMENSION(:), ALLOCATABLE :: EMESH_NFIELDS
   INTEGER, DIMENSION(:,:), ALLOCATABLE :: EMESH_IJK
   REAL(EB), DIMENSION(:,:), ALLOCATABLE :: EMESH_XB
+  INTEGER, DIMENSION(:), ALLOCATABLE :: EMESH_INDEX
   ! Holds the VENT information of the EXIT/DOOR lines for READ_MESH etc.
   TYPE (EVAC_EMESH_EXITS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: EMESH_EXITS
 
@@ -585,15 +587,15 @@ CONTAINS
        END IF
 
        CALL COUNT_EVAC_NODES(1)
-       ALLOCATE(EMESH_ID(MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
+       ALLOCATE(EMESH_ID(     MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_ID',IZERO) 
-       ALLOCATE(EMESH_NM(MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
+       ALLOCATE(EMESH_NM(     MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_NM',IZERO) 
        ALLOCATE(EMESH_NFIELDS(MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_NFIELDS',IZERO) 
-       ALLOCATE(EMESH_XB(6,MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
+       ALLOCATE(EMESH_XB(6,   MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_XB',IZERO) 
-       ALLOCATE(EMESH_IJK(3,MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
+       ALLOCATE(EMESH_IJK(3,  MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_IJK',IZERO) 
        ! Array for the exit+door information (not for the count only exits)
        ALLOCATE(EMESH_EXITS(MAX(1,N_EXITS-N_CO_EXITS+N_DOORS)), STAT=IZERO)
@@ -633,7 +635,7 @@ CONTAINS
           IF (.NOT.EVACUATION)                   CYCLE MESH_LOOP ! skip fire meshes
           IF (.NOT.EVAC_HUMANS .AND. EVACUATION) CYCLE MESH_LOOP ! skip additional evac meshes
 
-          ! Increase the evacuation MESH counter by 1
+          ! Increase the main evacuation MESH counter by 1
           NM = NM + 1
 
           ! Reorder XB coordinates if necessary
@@ -1290,12 +1292,16 @@ CONTAINS
          END IF EVAC_PROC_IF
 
       ELSE ! IMODE_IF = 2
+         ALLOCATE(EMESH_INDEX(MAX(1,NMESHES)), STAT=IZERO)
+         CALL ChkMemErr('READ_EVAC','EMESH_INDEX',IZERO) 
+         EMESH_INDEX = 0
 
          EVAC_PROC_IF_2: IF (MYID==MAX(0,EVAC_PROCESS)) THEN
             N_EGRIDS = 0
             DO N = 1, NMESHES
                IF (EVACUATION_ONLY(N) .AND. EVACUATION_GRID(N)) THEN
                   N_EGRIDS = N_EGRIDS + 1
+                  EMESH_INDEX(N) = N_EGRIDS
                END IF
             END  DO
 
@@ -2182,8 +2188,10 @@ CONTAINS
          !
          ! Find the implicitely generated mesh behind this exit/door
          I = PEX%I_EMESH_EXITS
-         IF (VENT_FFIELD == 'null' .AND. EMESH_EXITS(I)%NEXIT == N .AND. EMESH_EXITS(I)%IS_EXIT) THEN
-            VENT_FFIELD = TRIM(MESH_NAME(EMESH_EXITS(I)%IMESH))
+         IF (VENT_FFIELD == 'null' .AND. I > 0) THEN
+            IF (EMESH_EXITS(I)%NEXIT == N .AND. EMESH_EXITS(I)%IS_EXIT) THEN
+               VENT_FFIELD = TRIM(MESH_NAME(EMESH_EXITS(I)%IMESH))
+            END IF
          END IF
 
          PEX%IOR = IOR
@@ -2612,8 +2620,10 @@ CONTAINS
          !
          ! Find the implicitely generated mesh behind this exit/door
          I = PDX%I_EMESH_EXITS
-         IF (VENT_FFIELD == 'null' .AND. EMESH_EXITS(I)%NEXIT == N .AND. .NOT.EMESH_EXITS(I)%IS_EXIT) THEN
-            VENT_FFIELD = TRIM(MESH_NAME(EMESH_EXITS(I)%IMESH))
+         IF (VENT_FFIELD == 'null' .AND. I > 0) THEN
+            IF (EMESH_EXITS(I)%NEXIT == N .AND. .NOT.EMESH_EXITS(I)%IS_EXIT) THEN
+               VENT_FFIELD = TRIM(MESH_NAME(EMESH_EXITS(I)%IMESH))
+            END IF
          END IF
 
          IF (TO_NODE == 'null') THEN
@@ -5394,7 +5404,7 @@ CONTAINS
           EVAC_ONLY_NM: IF (EVACUATION_ONLY(NM)) THEN
              MFF=>MESHES(NM)
              IF (EVAC_FDS6) THEN
-                NFIELDS = EMESH_NFIELDS(NM)
+                NFIELDS = EMESH_NFIELDS(EMESH_INDEX(NM))
              ELSE
                 NFIELDS = 1
              END IF
@@ -6703,7 +6713,7 @@ CONTAINS
              JBAR_TMP = MFF%JBAR
              KBAR_TMP = 1
              IF (EVAC_FDS6) THEN
-                NFIELDS = EMESH_NFIELDS(NM_TIM)
+                NFIELDS = EMESH_NFIELDS(EMESH_INDEX(NM_TIM))
              ELSE
                 NFIELDS = 1
              END IF
@@ -6716,6 +6726,7 @@ CONTAINS
                          EXIT LOOP_EXITS
                       END IF
                    END DO LOOP_EXITS
+                   write(lu_err,*)'*** write eff NM, JJ: ',NM_TIM, JJ_NOW, TRIM(EMESH_EXITS(JJ_NOW)%ID)
                 END IF
 
                 WRITE (LU_EVACEFF) IBAR_TMP, JBAR_TMP, KBAR_TMP
@@ -7113,7 +7124,7 @@ CONTAINS
                       END IF
                    ELSE
                       IF (ABS(EVAC_EXITS(ABS(HR%I_TARGET)-N_DOORS)%IMODE)==2 .AND. &
-                           .NOT.EVAC_EXITS(ABS(HR%I_TARGET-N_DOORS))%TARGET_WHEN_CLOSED) THEN
+                           .NOT.EVAC_EXITS(ABS(HR%I_TARGET)-N_DOORS)%TARGET_WHEN_CLOSED) THEN
                          HR%I_TARGET = 0
                          RN = 2.0_EB ! update door, present one is closed
                       END IF
@@ -9472,24 +9483,12 @@ CONTAINS
                      write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
                      write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                   END IF
-!!$                  LOOP_EXITS_1: DO I1 = 1, N_END
-!!$                     IF (EMESH_EXITS(I1)%IS_EXIT .AND. EMESH_EXITS(I1)%NEXIT == N) THEN
-!!$                        JJ_NOW = I1
-!!$                        EXIT LOOP_EXITS_1
-!!$                     END IF
-!!$                  END DO LOOP_EXITS_1
                ELSE
                   JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
                   IF (TRIM(EVAC_DOORS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
                      write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
                      write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                   END IF
-!!$                  LOOP_DOORS_1: DO I1 = 1, N_END
-!!$                     IF (.NOT.EMESH_EXITS(I1)%IS_EXIT .AND. EMESH_EXITS(I1)%NEXIT == N) THEN
-!!$                        JJ_NOW = I1
-!!$                        EXIT LOOP_DOORS_1
-!!$                     END IF
-!!$                  END DO LOOP_DOORS_1
                END IF
                ! JJ_NOW = ABS(HR%I_TARGET)  ! 1,....,n_doors+n_exits
                UBAR = (1.0_EB-(XI-II+1))*EMESH_EXITS(JJ_NOW)%U_EVAC(II-1,JJ) + (XI-II+1)*EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)
