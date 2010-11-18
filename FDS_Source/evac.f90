@@ -43,7 +43,7 @@ MODULE EVAC
   PUBLIC N_DOORS, N_EXITS, N_ENTRYS, N_SSTANDS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_SSTANDS, & 
        EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE, EVAC_SSTAND_TYPE, NPC_EVAC, N_HOLES, &
        EVACUATION_TYPE, EVAC_HOLE_TYPE, EVAC_EVACS, EVAC_HOLES, N_CO_EXITS, N_DOOR_MESHES
-  PUBLIC EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, EMESH_NM
+  PUBLIC EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, EMESH_NM, EMESH_NFIELDS, EVAC_FDS6
   !
   CHARACTER(255):: EVAC_VERSION = '2.4.0'
   CHARACTER(255) :: EVAC_COMPILE_DATE
@@ -153,7 +153,7 @@ MODULE EVAC
      CHARACTER(60) :: TO_NODE='null'
      CHARACTER(30) :: GRID_NAME='null'
      CHARACTER(30) :: VENT_FFIELD='null'
-     INTEGER :: I_VENT_FFIELD=0, Avatar_Color_Index=0
+     INTEGER :: I_VENT_FFIELD=0, Avatar_Color_Index=0, I_EMESH_EXITS=0
      INTEGER, DIMENSION(3) :: RGB=-1
      REAL(EB), DIMENSION(3) :: ORIENTATION=0.0_EB
   END TYPE EVAC_EXIT_TYPE
@@ -177,7 +177,7 @@ MODULE EVAC
      CHARACTER(60) :: TO_NODE='null'
      CHARACTER(30) :: GRID_NAME='null'
      CHARACTER(30) :: VENT_FFIELD='null'
-     INTEGER :: I_VENT_FFIELD=0, Avatar_Color_Index=0
+     INTEGER :: I_VENT_FFIELD=0, Avatar_Color_Index=0, I_EMESH_EXITS=0
      INTEGER, DIMENSION(3) :: RGB=-1
      REAL(EB), DIMENSION(3) :: ORIENTATION=0.0_EB
   END TYPE EVAC_DOOR_TYPE
@@ -346,13 +346,14 @@ MODULE EVAC
   TYPE EVAC_EMESH_EXITS_TYPE
      REAL(EB), DIMENSION(6) :: XB=0.0_EB
      REAL(EB), POINTER, DIMENSION(:,:) :: U_EVAC =>NULL(), V_EVAC =>NULL()
-     INTEGER :: EMESH=0, NEXIT=0, IOR=0, IMESH=0, I_OBST=0, I_VENT=0, MAINMESH=0
+     INTEGER :: EMESH=0, NEXIT=0, IOR=0, IMESH=0, I_OBST=0, I_VENT=0, MAINMESH=0, I_DOORS_EMESH=0
      INTEGER, DIMENSION(3) :: RGB=-1
      LOGICAL :: IS_EXIT=.FALSE., DEFINE_MESH=.TRUE.
      CHARACTER(30) :: ID='null'
   END TYPE EVAC_EMESH_EXITS_TYPE
   CHARACTER(30), DIMENSION(:), ALLOCATABLE :: EMESH_ID
   INTEGER, DIMENSION(:), ALLOCATABLE :: EMESH_NM
+  INTEGER, DIMENSION(:), ALLOCATABLE :: EMESH_NFIELDS
   INTEGER, DIMENSION(:,:), ALLOCATABLE :: EMESH_IJK
   REAL(EB), DIMENSION(:,:), ALLOCATABLE :: EMESH_XB
   ! Holds the VENT information of the EXIT/DOOR lines for READ_MESH etc.
@@ -588,6 +589,8 @@ CONTAINS
        CALL ChkMemErr('READ_EVAC','EMESH_ID',IZERO) 
        ALLOCATE(EMESH_NM(MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_NM',IZERO) 
+       ALLOCATE(EMESH_NFIELDS(MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
+       CALL ChkMemErr('READ_EVAC','EMESH_NFIELDS',IZERO) 
        ALLOCATE(EMESH_XB(6,MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_XB',IZERO) 
        ALLOCATE(EMESH_IJK(3,MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
@@ -672,6 +675,7 @@ CONTAINS
           END IF
           READ(LU_INPUT, EXIT, END=26, IOSTAT=IOS)
           IF (VENT_FFIELD /= 'null') DEFINE_MESH = .FALSE. ! Old input, user gives the door flow meshes
+          EVAC_EXITS(N)%I_EMESH_EXITS = 0  ! Default, for "no flow field" exits
 
           ! Old input used COLOR_INDEX, next lines are needed for that
           IF (MYID==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX.NE.-1) WRITE (LU_ERR,'(A,A)') &
@@ -753,6 +757,7 @@ CONTAINS
           ! 
           ! Save the information needed in READ_MESH, etc.
           IF (DEFINE_MESH) N_DOOR_MESHES = N_DOOR_MESHES + 1
+          IF (DEFINE_MESH) EVAC_EXITS(N)%I_EMESH_EXITS = N_TMP  ! Default, for "no flow field" exits
           EMESH_EXITS(N_TMP)%NEXIT       = N     ! N is the exit line index (including count only ones)
           EMESH_EXITS(N_TMP)%IOR         = IOR
           EMESH_EXITS(N_TMP)%IS_EXIT     = .TRUE.
@@ -787,6 +792,7 @@ CONTAINS
           READ(LU_INPUT, DOOR, END=27, IOSTAT=IOS)
           IF (VENT_FFIELD /= 'null') DEFINE_MESH = .FALSE. ! Old input, user gives the door flow meshes
           IF (TO_NODE     == 'null') DEFINE_MESH = .FALSE. ! This is more or less like an entry.
+          EVAC_DOORS(N)%I_EMESH_EXITS = 0  ! Default, for "no flow field" exits
 
           ! Old input used COLOR_INDEX, next lines are needed for that
           IF (MYID==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX.NE.-1) WRITE (LU_ERR,'(A,A)') &
@@ -862,6 +868,7 @@ CONTAINS
           ! 
           ! Save the information needed in READ_MESH, etc.
           IF (DEFINE_MESH) N_DOOR_MESHES = N_DOOR_MESHES + 1
+          IF (DEFINE_MESH) EVAC_DOORS(N)%I_EMESH_EXITS = N_TMP  ! Default, for "no flow field" exits
           EMESH_EXITS(N_TMP)%NEXIT       = N     ! N is the door line index (including all doors)
           EMESH_EXITS(N_TMP)%IOR         = IOR
           EMESH_EXITS(N_TMP)%IS_EXIT     = .FALSE.
@@ -875,7 +882,7 @@ CONTAINS
        END DO READ_DOOR_LOOP_0
 27     CONTINUE
        REWIND(LU_INPUT)
-       
+
        RETURN  ! imode=1: Initialization call to READ_EVAC
     END IF IF_IMODE_1
 
@@ -2174,14 +2181,10 @@ CONTAINS
          PEX%Z2 = XB(6)
          !
          ! Find the implicitely generated mesh behind this exit/door
-         N_TMP = N_EXITS - N_CO_EXITS
-         FIND_EXIT_FFIELD: DO I = 1, N_TMP
-            IF (VENT_FFIELD == 'null' .AND. EMESH_EXITS(I)%NEXIT == N .AND. EMESH_EXITS(I)%IS_EXIT) THEN
-               VENT_FFIELD = TRIM(MESH_NAME(EMESH_EXITS(I)%IMESH))
-               write(lu_err,*)'*** exit ',TRIM(ID),' vent field ',TRIM(VENT_FFIELD)
-               EXIT FIND_EXIT_FFIELD
-            END IF
-         END DO FIND_EXIT_FFIELD
+         I = PEX%I_EMESH_EXITS
+         IF (VENT_FFIELD == 'null' .AND. EMESH_EXITS(I)%NEXIT == N .AND. EMESH_EXITS(I)%IS_EXIT) THEN
+            VENT_FFIELD = TRIM(MESH_NAME(EMESH_EXITS(I)%IMESH))
+         END IF
 
          PEX%IOR = IOR
          PEX%ID  = TRIM(ID)
@@ -2608,15 +2611,10 @@ CONTAINS
          PDX%Z2 = XB(6)
          !
          ! Find the implicitely generated mesh behind this exit/door
-         N_TMP = N_EXITS - N_CO_EXITS + N_DOORS
-         FIND_DOOR_FFIELD: DO I = N_EXITS - N_CO_EXITS + 1, N_TMP
-            IF (TO_NODE=='null') EXIT FIND_DOOR_FFIELD
-            IF (VENT_FFIELD == 'null' .AND. EMESH_EXITS(I)%NEXIT == N .AND. .NOT.EMESH_EXITS(I)%IS_EXIT) THEN
-               VENT_FFIELD = TRIM(MESH_NAME(EMESH_EXITS(I)%IMESH))
-               write(lu_err,*)'*** door ',TRIM(ID),' vent field ',TRIM(VENT_FFIELD)
-               EXIT FIND_DOOR_FFIELD
-            END IF
-         END DO FIND_DOOR_FFIELD
+         I = PDX%I_EMESH_EXITS
+         IF (VENT_FFIELD == 'null' .AND. EMESH_EXITS(I)%NEXIT == N .AND. .NOT.EMESH_EXITS(I)%IS_EXIT) THEN
+            VENT_FFIELD = TRIM(MESH_NAME(EMESH_EXITS(I)%IMESH))
+         END IF
 
          IF (TO_NODE == 'null') THEN
             TO_NODE = TRIM(ID)
@@ -4716,7 +4714,8 @@ CONTAINS
     ! Local variables
     CHARACTER(50) tcform
     CHARACTER(30) DEVC_ID
-    INTEGER n_cols, i, j,k, nm, izero, j_ntargets, j_density, n_devc_read
+    INTEGER n_cols, i, j,k, nm, izero, j_ntargets, j_density, n_devc_read, IFIELD, NFIELDS, &
+         JJ, JJ_NOW, N_END
     LOGICAL L_fed_read, L_fed_save, L_eff_read, L_eff_save, L_status, CURRENT_STATE, PRIOR_STATE
     INTEGER(4) n_egrids_tmp, ibar_tmp, jbar_tmp, kbar_tmp, &
          ntmp1, ntmp2, ntmp3, ntmp4, ntmp5, ntmp6, IOS, N
@@ -4775,15 +4774,18 @@ CONTAINS
          TRIM(EVAC_COMPILE_DATE(INDEX(EVAC_COMPILE_DATE,'(')+1:INDEX(EVAC_COMPILE_DATE,')')-1))
     WRITE(LU_EVACOUT,'(A,A)')  ' FDS+Evac Version         : ', TRIM(EVAC_VERSION)
     WRITE(LU_EVACOUT,'(A,i0)')  ' FDS+Evac SVN Revision No.: ', EVAC_MODULE_REV
+    IF (EVAC_FDS6) WRITE(LU_EVACOUT,FMT='(A)') ' **************************'
+    IF (EVAC_FDS6) WRITE(LU_EVACOUT,FMT='(A)') ' FDS+Evac EVAC_FDS6 is true'
+    IF (EVAC_FDS6) WRITE(LU_EVACOUT,FMT='(A)') ' **************************'
 
-    WRITE(LU_EVACOUT,fmt='(/a,i2)')  ' FDS+Evac Color_Method    :', COLOR_METHOD
+    WRITE(LU_EVACOUT,FMT='(/A,I2)')  ' FDS+Evac Color_Method    :', COLOR_METHOD
     IF (Fed_Door_Crit >= 0) THEN
-       WRITE(LU_EVACOUT,fmt='(a,f14.8)') ' FDS+Evac Fed_Door_Crit   :', FED_DOOR_CRIT
+       WRITE(LU_EVACOUT,FMT='(A,F14.8)') ' FDS+Evac Fed_Door_Crit   :', FED_DOOR_CRIT
     ELSE
        ! Visibility S = 3/K, K is extinction coeff.
-       WRITE(LU_EVACOUT,fmt='(a,f14.8,a)') ' FDS+Evac Vis_Door_Crit   :', ABS(FED_DOOR_CRIT), ' m'
+       WRITE(LU_EVACOUT,FMT='(A,F14.8,A)') ' FDS+Evac Vis_Door_Crit   :', ABS(FED_DOOR_CRIT), ' m'
     END IF
-    IF (NOT_RANDOM ) WRITE(LU_EVACOUT,fmt='(a)') ' FDS+Evac Random seed is not used.'
+    IF (NOT_RANDOM ) WRITE(LU_EVACOUT,FMT='(A)') ' FDS+Evac Random seed is not used.'
     IF (Fed_Door_Crit < 0) THEN
        ! Visibility S = 3/K, K is extinction coeff.
        FED_DOOR_CRIT = 3.0_EB/FED_DOOR_CRIT ! Extinction coeff (1/m)
@@ -4937,7 +4939,7 @@ CONTAINS
                 READ (LU_EVACFED,IOSTAT=IOS) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4, TMPOUT5, TMPOUT6, TMPOUT7, TMPOUT8
                 IF (IOS.NE.0) THEN
                    WRITE(MESSAGE,'(A)') 'ERROR: Init Evac Dumps, Restart: FED read error'
-                   CLOSE (LU_EVACEFF)
+                   CLOSE (LU_EVACFED)
                    CALL SHUTDOWN(MESSAGE)
                 END IF
              END DO CORR_LOOP
@@ -5041,8 +5043,14 @@ CONTAINS
                 CLOSE (LU_EVACEFF)
                 CALL SHUTDOWN(MESSAGE)
              END IF
-             IF (n_egrids_tmp /= COUNT(EVACUATION_ONLY)) THEN
+             IF (.NOT.EVAC_FDS6 .AND. N_EGRIDS_TMP /= COUNT(EVACUATION_ONLY)) THEN
                 WRITE(MESSAGE,'(A,2I4)') 'ERROR: Init Evac Dumps, Restart: EFF ',n_egrids_tmp, COUNT(EVACUATION_ONLY)
+                CLOSE (LU_EVACEFF)
+                CALL SHUTDOWN(MESSAGE)
+             END IF
+             IF (EVAC_FDS6 .AND. N_EGRIDS_TMP /= SUM(EMESH_NFIELDS)) THEN
+                ! EMESH_NFIELDS(N_EGRIDS) ! How many fields for this main evacuation mesh
+                WRITE(MESSAGE,'(A,2I4)') 'ERROR: Init Evac Dumps, Restart: EFF ',N_EGRIDS_TMP, SUM(EMESH_NFIELDS)
                 CLOSE (LU_EVACEFF)
                 CALL SHUTDOWN(MESSAGE)
              END IF
@@ -5063,21 +5071,27 @@ CONTAINS
           I_EVAC = IBCLR(I_EVAC,0) ! do not save EFF
           I_EVAC = IBSET(I_EVAC,2) ! read EFF
           OPEN (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', status='old')
-          READ (LU_EVACEFF,Iostat=ios) n_egrids_tmp
-          IF (ios.NE.0) THEN
-             ios = 1
+          READ (LU_EVACEFF,IOSTAT=IOS) N_EGRIDS_TMP
+          IF (IOS.NE.0) THEN
+             IOS = 1
              WRITE(LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
              WRITE(LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
              CLOSE (LU_EVACEFF)
           END IF
-          IF (n_egrids_tmp /= COUNT(EVACUATION_ONLY) .AND. ios < 1) THEN
-             ios = 2
+          IF (.NOT.EVAC_FDS6 .AND. N_EGRIDS_TMP /= COUNT(EVACUATION_ONLY) .AND. IOS < 1) THEN
+             IOS = 2
              WRITE(LU_EVACOUT,'(A,2I4)') ' WARNING: Init Evac Dumps: EFF READ ERROR ',n_egrids_tmp, COUNT(EVACUATION_ONLY)
              WRITE(LU_EVACOUT,'(A)')     ' WARNING: EFF file is not read in'
              CLOSE (LU_EVACEFF)
           END IF
+          IF (EVAC_FDS6 .AND. N_EGRIDS_TMP /=  SUM(EMESH_NFIELDS) .AND. IOS < 1) THEN
+             IOS = 2
+             WRITE(LU_EVACOUT,'(A,2I4)') ' WARNING: Init Evac Dumps: EFF READ ERROR ',n_egrids_tmp, SUM(EMESH_NFIELDS)
+             WRITE(LU_EVACOUT,'(A)')     ' WARNING: EFF file is not read in'
+             CLOSE (LU_EVACEFF)
+          END IF
        END IF
-       IF (ios .NE. 0) THEN
+       IF (IOS .NE. 0) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Restart problem: EFF READ ERROR'
          CALL SHUTDOWN(MESSAGE)
        END IF
@@ -5270,24 +5284,30 @@ CONTAINS
              I_EVAC = IBCLR(I_EVAC,0) ! do not save EFF
              I_EVAC = IBSET(I_EVAC,2) ! read EFF
              OPEN (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', status='old')
-             READ (LU_EVACEFF,Iostat=ios) n_egrids_tmp
-             IF (ios.NE.0) THEN
-                ios = 1
+             READ (LU_EVACEFF,IOSTAT=IOS) N_EGRIDS_TMP
+             IF (IOS.NE.0) THEN
+                IOS = 1
                 WRITE(LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
                 WRITE(LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
                 CLOSE (LU_EVACEFF)
              END IF
-             IF (n_egrids_tmp /= COUNT(EVACUATION_ONLY) .AND. ios < 1) THEN
-                ios = 2
+             IF (.NOT.EVAC_FDS6 .AND. N_EGRIDS_TMP /= COUNT(EVACUATION_ONLY) .AND. IOS < 1) THEN
+                IOS = 2
                 WRITE(LU_EVACOUT,'(A,2I4)') ' WARNING: Init Evac Dumps: EFF READ ERROR ',n_egrids_tmp, COUNT(EVACUATION_ONLY)
                 WRITE(LU_EVACOUT,'(A)')     ' WARNING: EFF file is not read in'
                 CLOSE (LU_EVACEFF)
              END IF
+             IF (EVAC_FDS6 .AND. N_EGRIDS_TMP /= SUM(EMESH_NFIELDS) .AND. IOS < 1) THEN
+                IOS = 2
+                WRITE(LU_EVACOUT,'(A,2I4)') ' WARNING: Init Evac Dumps: EFF READ ERROR ',n_egrids_tmp, SUM(EMESH_NFIELDS)
+                WRITE(LU_EVACOUT,'(A)')     ' WARNING: EFF file is not read in'
+                CLOSE (LU_EVACEFF)
+             END IF
           END IF
-          IF (ios .NE. 0) THEN
+          IF (IOS .NE. 0) THEN
              ! Read error ==> recalculate EFF
-             l_eff_save = .TRUE.
-             l_eff_read = .FALSE.
+             L_EFF_SAVE = .TRUE.
+             L_EFF_READ = .FALSE.
              I_EVAC = IBCLR(I_EVAC,2) ! do not read EFF
              I_EVAC = IBSET(I_EVAC,0) ! save EFF
           END IF
@@ -5369,40 +5389,68 @@ CONTAINS
     ! Read the evac flow fields from the disk, if they exist.
     IF (L_eff_read .OR. APPEND) THEN
        ios = 0
-       ReadEffLoop: DO nm = 1, NMESHES
-          IF (EVACUATION_ONLY(NM)) THEN
-             MFF=>MESHES(nm)
-             READ (LU_EVACEFF,Iostat=ios) ibar_tmp, jbar_tmp, kbar_tmp
-             IF (ios .NE. 0) THEN
-                WRITE (LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
-                WRITE (LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
-                CLOSE (LU_EVACEFF)
-                EXIT ReadEffLoop
+       N_END = N_EXITS - N_CO_EXITS + N_DOORS
+       ReadEffLoop: DO NM = 1, NMESHES
+          EVAC_ONLY_NM: IF (EVACUATION_ONLY(NM)) THEN
+             MFF=>MESHES(NM)
+             IF (EVAC_FDS6) THEN
+                NFIELDS = EMESH_NFIELDS(NM)
+             ELSE
+                NFIELDS = 1
              END IF
-             IF ( MFF%IBAR /= ibar_tmp .OR. MFF%JBAR /= jbar_tmp .OR. MFF%KBAR /= kbar_tmp ) THEN
-                ios = 2
-                WRITE (LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
-                WRITE (LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
-                CLOSE (LU_EVACEFF)
-                EXIT ReadEffLoop
-             END IF
-             DO  i = 0, MFF%IBAR+1
-                DO j= 0, MFF%JBAR+1
-                   READ (LU_EVACEFF,Iostat=ios) u_tmp, v_tmp
-                   IF (ios .NE. 0) THEN
-                      WRITE (LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
-                      WRITE (LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
-                      CLOSE (LU_EVACEFF)
-                      EXIT ReadEffLoop
-                   END IF
-                   MFF%U(i,j,:) = u_tmp
-                   MFF%V(i,j,:) = v_tmp
-                   MFF%W(i,j,:) = 0.0_EB
+             DO IFIELD = 1, NFIELDS
+
+                IF (EVAC_FDS6) THEN
+                   LOOP_EXITS: DO JJ = 1, N_END
+                      IF (EMESH_EXITS(JJ)%MAINMESH == NM .AND. EMESH_EXITS(JJ)%I_DOORS_EMESH == IFIELD) THEN
+                         JJ_NOW = JJ
+                         EXIT LOOP_EXITS
+                      END IF
+                   END DO LOOP_EXITS
+                END IF
+                
+                READ (LU_EVACEFF,Iostat=ios) ibar_tmp, jbar_tmp, kbar_tmp
+                IF (IOS .NE. 0) THEN
+                   WRITE (LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
+                   WRITE (LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
+                   CLOSE (LU_EVACEFF)
+                   EXIT ReadEffLoop
+                END IF
+                IF ( MFF%IBAR /= ibar_tmp .OR. MFF%JBAR /= jbar_tmp .OR. MFF%KBAR /= kbar_tmp ) THEN
+                   ios = 2
+                   WRITE (LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
+                   WRITE (LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
+                   CLOSE (LU_EVACEFF)
+                   EXIT ReadEffLoop
+                END IF
+                DO  i = 0, MFF%IBAR+1
+                   DO j= 0, MFF%JBAR+1
+                      READ (LU_EVACEFF,Iostat=ios) u_tmp, v_tmp
+                      IF (ios .NE. 0) THEN
+                         WRITE (LU_EVACOUT,'(A)') ' WARNING: Init Evac Dumps: EFF READ ERROR'
+                         WRITE (LU_EVACOUT,'(A)') ' WARNING: EFF file is not read in'
+                         CLOSE (LU_EVACEFF)
+                         EXIT ReadEffLoop
+                      END IF
+                      IF (EVAC_FDS6) THEN
+                         EMESH_EXITS(JJ_NOW)%U_EVAC(I,J) = REAL(u_tmp,EB)
+                         EMESH_EXITS(JJ_NOW)%V_EVAC(I,J) = REAL(v_tmp,EB)
+                         MFF%U(i,j,:) = REAL(u_tmp,EB)
+                         MFF%V(i,j,:) = REAL(v_tmp,EB)
+                         MFF%W(i,j,:) = 0.0_EB
+                         MFF%KRES(i,j,:) = 0.5_EB*SQRT(REAL(u_tmp,EB)**2 + REAL(v_tmp,EB)**2)
+                       ELSE
+                         MFF%U(i,j,:) = REAL(u_tmp,EB)
+                         MFF%V(i,j,:) = REAL(v_tmp,EB)
+                         MFF%W(i,j,:) = 0.0_EB
+                         MFF%KRES(i,j,:) = 0.5_EB*SQRT(REAL(u_tmp,EB)**2 + REAL(v_tmp,EB)**2)
+                      END IF
+                   END DO
                 END DO
+                MFF%UVW_GHOST(:,1)=-1.E6_EB
+                MFF%UVW_GHOST(:,2)=-1.E6_EB
              END DO
-             MFF%UVW_GHOST(:,1)=-1.E6_EB
-             MFF%UVW_GHOST(:,2)=-1.E6_EB
-          END IF
+          END IF EVAC_ONLY_NM
        END DO ReadEffLoop
        IF (ios .NE. 0) THEN
           ! Read error ==> recalculate EFF
@@ -5420,7 +5468,11 @@ CONTAINS
        l_eff_read = .FALSE.
        I_EVAC = IBCLR(I_EVAC,2)  ! do not read EFF
        OPEN (LU_EVACEFF,file=FN_EVACEFF,form='unformatted', status='replace')
-       n_egrids_tmp = COUNT(EVACUATION_ONLY)
+       IF (EVAC_FDS6) THEN
+          n_egrids_tmp = SUM(EMESH_NFIELDS)
+       ELSE
+          n_egrids_tmp = COUNT(EVACUATION_ONLY)
+       END IF
        WRITE (LU_EVACEFF) n_egrids_tmp
        WRITE (LU_EVACOUT,fmt='(a,a,a/)') ' FDS+Evac EFF File: ', TRIM(FN_EVACEFF), ' is (re)calculated and used'
     END IF
@@ -6632,8 +6684,8 @@ CONTAINS
     ! Local variables
     LOGICAL L_EFF_READ, L_EFF_SAVE
     INTEGER(4) IBAR_TMP, JBAR_TMP, KBAR_TMP
-    INTEGER NM_TIM, I, J
-    REAL(EB) :: EVEL
+    INTEGER NM_TIM, I, J, IFIELD, NFIELDS, N_END, JJ, JJ_NOW
+    REAL(FB) U_TMP, V_TMP, EVEL
     ! 
     TYPE (MESH_TYPE), POINTER :: MFF=>NULL()
 
@@ -6641,26 +6693,46 @@ CONTAINS
 
     L_EFF_READ = BTEST(I_EVAC,2)
     L_EFF_SAVE = BTEST(I_EVAC,0)
-    IF ( ICYC == 0 .AND. L_EFF_SAVE ) THEN
-       DO NM_TIM = 1, NMESHES
-          IF (EVACUATION_ONLY(NM_TIM)) THEN
+    !IF ( ICYC == 0 .AND. L_EFF_SAVE ) THEN
+    IF ((.NOT.EVAC_FDS6 .AND. ICYC == 0 .AND. L_EFF_SAVE ) .OR. (EVAC_FDS6 .AND. ICYC == 1 .AND. L_EFF_SAVE)) THEN
+       N_END = N_EXITS - N_CO_EXITS + N_DOORS
+       WRITE_EFF_LOOP: DO NM_TIM = 1, NMESHES
+          EVAC_ONLY_NM: IF (EVACUATION_ONLY(NM_TIM)) THEN
              MFF=>MESHES(NM_TIM)
              IBAR_TMP = MFF%IBAR
              JBAR_TMP = MFF%JBAR
              KBAR_TMP = 1
-             WRITE (LU_EVACEFF) IBAR_TMP, JBAR_TMP, KBAR_TMP
-             DO  I = 0, MFF%IBAR+1
-                DO J= 0, MFF%JBAR+1
-                   EVEL = SQRT(MFF%U(I,J,1)**2 + MFF%V(I,J,1)**2)
-                   IF (EVEL > 0.0_EB) THEN
-                      WRITE (LU_EVACEFF) REAL(MFF%U(I,J,1)/EVEL,FB), REAL(MFF%V(I,J,1)/EVEL,FB)
-                   ELSE
-                      WRITE (LU_EVACEFF) REAL(0.0_EB,FB), REAL(0.0_EB,FB)
-                   END IF
+             IF (EVAC_FDS6) THEN
+                NFIELDS = EMESH_NFIELDS(NM_TIM)
+             ELSE
+                NFIELDS = 1
+             END IF
+             DO IFIELD = 1, NFIELDS
+
+                IF (EVAC_FDS6) THEN
+                   LOOP_EXITS: DO JJ = 1, N_END
+                      IF (EMESH_EXITS(JJ)%MAINMESH == NM_TIM .AND. EMESH_EXITS(JJ)%I_DOORS_EMESH == IFIELD) THEN
+                         JJ_NOW = JJ
+                         EXIT LOOP_EXITS
+                      END IF
+                   END DO LOOP_EXITS
+                END IF
+
+                WRITE (LU_EVACEFF) IBAR_TMP, JBAR_TMP, KBAR_TMP
+                DO  I = 0, MFF%IBAR+1
+                   DO J= 0, MFF%JBAR+1
+                      IF (EVAC_FDS6) THEN
+                         U_TMP = REAL(EMESH_EXITS(JJ_NOW)%U_EVAC(I,J),FB)
+                         V_TMP = REAL(EMESH_EXITS(JJ_NOW)%V_EVAC(I,J),FB)
+                      ELSE
+                         U_TMP = REAL(MFF%U(I,J,1),FB) ; V_TMP = REAL(MFF%V(I,J,1),FB)
+                      END IF
+                      WRITE (LU_EVACEFF) U_TMP, V_TMP
+                   END DO
                 END DO
              END DO
-          END IF
-       END DO
+          END IF EVAC_ONLY_NM
+       END DO WRITE_EFF_LOOP
        ! Clear the save bit, save is done only once.
        L_EFF_SAVE = .FALSE.
        I_EVAC = IBCLR(I_EVAC,0)
@@ -9104,7 +9176,7 @@ CONTAINS
       TYPE (MESH_TYPE), POINTER :: MFF=>NULL()
       TYPE (HUMAN_TYPE), POINTER :: HR=>NULL()
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
-      INTEGER :: I_TARGET_TMP, INODE, I_TARGET_OLD, III, N_QUEUE
+      INTEGER :: I_TARGET_TMP, INODE, I_TARGET_OLD, III, N_QUEUE, JJ_NOW, N_END
       REAL(EB) :: DIST_TO_DOOR, DIST_TO_DOOR_TMP, X_NODE, Y_NODE, WIDTH, T_TMP1
       REAL(EB) :: ANGLE_HR, ANGLE_XYZ, ANGLE_XB, D_NEW
 
@@ -9390,8 +9462,42 @@ CONTAINS
       ELSE ! If_Strs_Mesh2: Is not a Strs Mesh
          If_BeeLine: IF (HR%I_Door_Mode >= 2 .AND. HR%I_TARGET /= 0 .AND. EVAC_FDS6) THEN
             ! Use the flow field by default
-            UBAR = (1.0_EB-(XI-II+1))*MFF%U(II-1,JJ,1) + (XI-II+1)*MFF%U(II,JJ,1)
-            VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
+            EVAC_FDS6_IF_1: IF (EVAC_FDS6) THEN
+               N = ABS(HR%I_TARGET)
+               N_END = N_EXITS - N_CO_EXITS + N_DOORS
+               IF (N > N_DOORS) THEN
+                  N = N - N_DOORS  ! The exit line number including also count only exits
+                  JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
+                  IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
+                     write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
+                     write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                  END IF
+!!$                  LOOP_EXITS_1: DO I1 = 1, N_END
+!!$                     IF (EMESH_EXITS(I1)%IS_EXIT .AND. EMESH_EXITS(I1)%NEXIT == N) THEN
+!!$                        JJ_NOW = I1
+!!$                        EXIT LOOP_EXITS_1
+!!$                     END IF
+!!$                  END DO LOOP_EXITS_1
+               ELSE
+                  JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
+                  IF (TRIM(EVAC_DOORS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
+                     write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
+                     write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                  END IF
+!!$                  LOOP_DOORS_1: DO I1 = 1, N_END
+!!$                     IF (.NOT.EMESH_EXITS(I1)%IS_EXIT .AND. EMESH_EXITS(I1)%NEXIT == N) THEN
+!!$                        JJ_NOW = I1
+!!$                        EXIT LOOP_DOORS_1
+!!$                     END IF
+!!$                  END DO LOOP_DOORS_1
+               END IF
+               ! JJ_NOW = ABS(HR%I_TARGET)  ! 1,....,n_doors+n_exits
+               UBAR = (1.0_EB-(XI-II+1))*EMESH_EXITS(JJ_NOW)%U_EVAC(II-1,JJ) + (XI-II+1)*EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)
+               VBAR = (1.0_EB-(YJ-JJ+1))*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ-1) + (YJ-JJ+1)*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)
+            ELSE ! EVAC_FDS6_IF_1
+               UBAR = (1.0_EB-(XI-II+1))*MFF%U(II-1,JJ,1) + (XI-II+1)*MFF%U(II,JJ,1)
+               VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
+            END IF EVAC_FDS6_IF_1
             IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 4  ! red
             N = ABS(HR%I_TARGET)
             Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
@@ -9546,10 +9652,49 @@ CONTAINS
                   IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 3  ! blue, xb
                END IF
             END IF
-         ELSE  ! If_BeeLine
+         ELSE  ! If_BeeLine (or not fds6)
             ! Normal case, use the flow field
-            UBAR = (1.0_EB-(XI-II+1))*MFF%U(II-1,JJ,1) + (XI-II+1)*MFF%U(II,JJ,1)
-            VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
+            EVAC_FDS6_IF_2: IF (EVAC_FDS6) THEN
+               N = ABS(HR%I_TARGET)
+               N_END = N_EXITS - N_CO_EXITS + N_DOORS
+               IF (N /= 0) THEN
+                  IF (N > N_DOORS) THEN
+                     N = N - N_DOORS  ! The exit line number including also count only exits
+                     JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
+                     IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
+                        write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
+                        write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                     END IF
+!!$                     LOOP_EXITS_2: DO I1 = 1, N_END
+!!$                        IF (EMESH_EXITS(I1)%IS_EXIT .AND. EMESH_EXITS(I1)%NEXIT == N) THEN
+!!$                           JJ_NOW = I1
+!!$                           EXIT LOOP_EXITS_2
+!!$                        END IF
+!!$                     END DO LOOP_EXITS_2
+                  ELSE
+                     JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
+                     IF (TRIM(EVAC_DOORS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
+                        write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
+                        write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                     END IF
+!!$                     LOOP_DOORS_2: DO I1 = 1, N_END
+!!$                        IF (.NOT.EMESH_EXITS(I1)%IS_EXIT .AND. EMESH_EXITS(I1)%NEXIT == N) THEN
+!!$                           JJ_NOW = I1
+!!$                           EXIT LOOP_DOORS_2
+!!$                        END IF
+!!$                     END DO LOOP_DOORS_2
+                  END IF
+                  IF (EMESH_EXITS(JJ_NOW)%MAINMESH /= NM) write(lu_err,*)'*** find direction error: ',JJ_NOW,NM, &
+                       EMESH_EXITS(JJ_NOW)%MAINMESH,' ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                  UBAR = (1.0_EB-(XI-II+1))*EMESH_EXITS(JJ_NOW)%U_EVAC(II-1,JJ) + (XI-II+1)*EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)
+                  VBAR = (1.0_EB-(YJ-JJ+1))*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ-1) + (YJ-JJ+1)*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)
+               ELSE
+                  UBAR = 0.0_EB; VBAR = 0.0_EB ! Do not move if no target
+               END IF
+            ELSE ! EVAC_FDS6_IF_2
+               UBAR = (1.0_EB-(XI-II+1))*MFF%U(II-1,JJ,1) + (XI-II+1)*MFF%U(II,JJ,1)
+               VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
+            END IF EVAC_FDS6_IF_2
             IF (COLOR_METHOD == 5) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR  ! cyan, normal flow field stuff
          END IF If_BeeLine
       END IF If_Strs_Mesh2
