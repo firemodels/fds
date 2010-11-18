@@ -2585,7 +2585,7 @@ END SUBROUTINE EVAC_CSV
 SUBROUTINE EVAC_EXCHANGE
 IMPLICIT NONE
 LOGICAL EXCHANGE_EVACUATION
-INTEGER NM
+INTEGER NM, II, IVENT, I, J, EMESH, JJ, N_END
  
 ! Fire mesh information ==> Evac meshes
  
@@ -2602,6 +2602,34 @@ DO NM=1,NMESHES
    IF (USE_MPI .AND. MYID/=EVAC_PROCESS) CYCLE
    CALL UPDATE_GLOBAL_OUTPUTS(T(NM),NM)      
 ENDDO
+
+! Save the evacuation flow fields to the arrays U_EVAC and V_EVAC
+
+IF (EVAC_FDS6) THEN
+   N_END = N_EXITS - N_CO_EXITS + N_DOORS
+   DO NM = 1, NMESHES
+      IF (.NOT.ACTIVE_MESH(NM)) CYCLE
+      IF (.NOT.EVACUATION_GRID(NM)) CYCLE
+      IF (USE_MPI .AND. MYID /= EVAC_PROCESS) CYCLE
+      II = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
+      IF (MOD(ABS(ICYC),II)==0) THEN
+         IVENT = (ABS(ICYC))/II + 1
+         LOOP_EXITS: DO JJ = 1, N_END
+            IF (EMESH_EXITS(JJ)%MAINMESH == NM .AND. EMESH_EXITS(JJ)%I_DOORS_EMESH == IVENT) THEN
+               EMESH = EMESH_EXITS(JJ)%EMESH
+               DO J = 0, EMESH_IJK(2,EMESH) + 1
+                  DO I = 0, EMESH_IJK(1,EMESH) + 1
+                     EMESH_EXITS(JJ)%U_EVAC(I,J) = MESHES(NM)%U(I,J,1)
+                     EMESH_EXITS(JJ)%V_EVAC(I,J) = MESHES(NM)%V(I,J,1)
+                  END DO
+               END DO
+               EXIT LOOP_EXITS
+            END IF
+         END DO LOOP_EXITS
+      END IF
+      
+   ENDDO
+END IF
 
 END SUBROUTINE EVAC_EXCHANGE
 
@@ -2629,6 +2657,7 @@ IMPLICIT NONE
 ! Call the evacuation routine and adjust the time steps for the evacuation meshes
  
 REAL(EB) :: T_FIRE, FIRE_DT
+INTEGER :: II
  
 IF (.NOT. ANY(EVACUATION_GRID)) RETURN
  
@@ -2663,8 +2692,14 @@ EVAC_TIME_STEP_LOOP: DO WHILE (T_EVAC < T_FIRE)
          MESHES(NM)%DT_NEXT   = EVAC_DT
          T(NM)                = T_EVAC
          IF (ICYC <= 1 .AND. .NOT.BTEST(I_EVAC, 2) ) THEN
-            ! No flow fields for the main evacuation meshes (Evac version 2.4.0-)
-            IF (ICYC <= 0 .AND. .NOT.EVACUATION_GRID(NM)) ACTIVE_MESH(NM) = .TRUE.
+            IF (.NOT.EVAC_FDS6 .AND. ICYC <= 0 .AND. EVACUATION_ONLY(NM)) ACTIVE_MESH(NM) = .TRUE.
+            IF (EVAC_FDS6 .AND. ICYC <= 0 .AND. EVACUATION_GRID(NM)) THEN
+               II = EVAC_TIME_ITERATIONS / MAXVAL(EMESH_NFIELDS)
+               IF ( (ABS(ICYC)+1) <= EMESH_NFIELDS(NM)*II) THEN
+                  ACTIVE_MESH(NM) = .TRUE.
+               END IF
+            END IF
+            !
             IF (ICYC <= 0) T(NM) = T_EVAC + EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS - EVAC_DT
          ENDIF
          IF (EVACUATION_GRID(NM) ) THEN
