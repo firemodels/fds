@@ -1,4 +1,4 @@
-&HEAD CHID='HVAC_flow_loss',TITLE='Test of duct flow loss' /
+&HEAD CHID='HVAC_flow_loss',TITLE='Test of duct flow loss, SVN $Revision$' /
 
 &MESH IJK=20,20,20, XB=0.,1.,0.,1.,0.,1./
 
