@@ -2297,17 +2297,46 @@ Steady-state flow in a duct is given by
 
 \be \frac{K \rho \, u^2}{2} = \Delta p \label {HVAC_steady_state}\ee
 
-where K is the loss coefficient for the duct and $\Delta P$ is the pressure drop across the duct.  A simple duct network is created from three 0.1 m$^2$ ducts connected with a tee.  One of the ducts is assigned a constant flow rate of 0.3 m$^3$/s.  The other two ducts are given loss cofficients of 4 and 16 and are given inlets at the same elevation.  Based on the above equation, it can be seen that since the ducts have the same conditions at there nodes, that once steady state is reached taht the velocities in the three ducts should be 3 m/s, 2 m/s, and 1 m/s.
+where K is the loss coefficient for the duct and $\Delta P$ is the pressure drop across the duct.  A simple duct network is created from three 0.1 m$^2$ ducts connected with a tee.  One of the ducts is assigned a constant flow rate of 0.3 m$^3$/s.  The other two ducts are given loss cofficients of 4 and 16 and are given inlets at the same elevation.  Based on the above equation, it can be seen that since the ducts have the same conditions at their nodes (both connected to the same tee and both connected to ambient at the same elevation), that once steady state is reached that the velocities in the three ducts should be 3 m/s, 2 m/s, and 1 m/s.
+
+\begin{figure}[t]
+   \begin{center}
+      \includegraphics[height=3.00in]{SCRIPT_FIGURES/HVAC_flow_loss.pdf}
+i      \caption{\label{fig_HVAC_loss} \small Duct velocities with varied duct flow loss.}
+   \end{center}
+\end{figure}
 
 \section{HVAC Mass Conservation (HVAC\_mass\_conservation)}
 
-A 1 m x 1 m x 1 m compartment is initialized with the lower half of the compartment being filled with a species. called {\ct SPEC1} having the same molecular weight as air.  An HVAC system of two ducts is created with one duct taking suction from the lower half and discharging into the upper half, and the second duct taking suction from the upper half and discharging into the lower half.  The two ducts are assigned the same volume flow rate.  It is expected that the total mass in the compartment will be conserved, that the mass of the second species will be conserved, and that at the start of the computation a slice file of species will show pure ambient being discharged in the lower half and pure {\ct SPEC1} being discharged in the upper half.
+A 1 m x 1 m x 1 m compartment is initialized with the lower half of the compartment being filled with a species called {\ct SPEC1} having the same molecular weight as air, see Figure~\ref{fig_HVAC_mass}.   An HVAC system of two ducts is created with one duct taking suction from the lower half (red vent) and discharging into the upper half (blue vent), and the second duct taking suction from the upper half (green vent) and discharging into the lower half (yellow vent).  The two ducts are assigned the same volume flow rate.  It is expected that the total mass in the compartment will be conserved, that the mass of the second species will be conserved (at 50 \% of the total mass), and that at the start of the computation a slice file of species will show pure ambient being discharged in the lower half and pure {\ct SPEC1} being discharged in the upper half.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_conservation} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_conservation.pdf} }
+   \end{tabular*}
+   \caption{SPEC1 mass fraction at 1 s (left) and SPEC1 and total mass (right)}
+   \label{fig_HVAC_mass}
+\end{figure}
 
 \section{HVAC Energy Conservation and Pressure (HVAC\_energy\_pressure)}
 
-A 1 m x 1 m x 1 m compartment is divided into two equal compartments by a vertical wall.  The left side of the comparment is initialized to twice the ambient temperature.  A simple HVAC system of two 0.1 m$^2$ ducts is created.  The first duct takes suction from the lower left half and discharges into the lower right half, and this duct is given a fixed volume flow rate 0.1 m$^3$/s.  The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1.  It is expected that the total mass will be conserved, the total energy will be conserved, that at the start of the computation that hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation that the pressure difference between the two sides will be xx Pa based on Eq.~\ref{HVAC_steady_state}
+A 1 m x 1 m x 1 m compartment is divided into two equal compartments by a vertical wall, see Figure~\ref{fig_HVAC_e_p}.  The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 kJ/kg/K and a specific enthalpy of 298.15 kJ/kg at the reference temperature of 298.15 K.  The left side of the comparment is initialized to twice the ambient temperature.  A simple HVAC system of two 0.1 m$^2$ ducts is created.  The first duct takes suction from the lower left half and discharges into the lower right half, and this duct is given a fixed volume flow rate 0.1 m$^3$/s.  The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 43.6 Pa based on Eq.~\ref{HVAC_steady_state}
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_energy_pressure} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_velocity.pdf} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_enthalpy.pdf} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_pressure.pdf}
+\end{tabular*}
+\caption{Clockwise from top left: Temperature at 1 s, duct velocities, total enthalpy in the domain, and duct node pressures for the top duct}
+\label{fig_HVAC_e_p}
+\end{figure}
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
+\section{Multiple zone leakage (
 
 \end{document}
