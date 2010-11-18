@@ -1,4 +1,4 @@
-&HEAD CHID='HVAC_mass_conservation',TITLE='Mass Conservation' /
+&HEAD CHID='HVAC_mass_conservation',TITLE='Mass Conservation, SVN $Revision$' /
 
 &MESH IJK=20,20,20, XB=0.,1.,0.,1.,0.,1./
 
