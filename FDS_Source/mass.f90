@@ -490,13 +490,12 @@ SPECIES_LOOP: DO N=1,N_SPECIES
          END SELECT
          IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
          IF ((SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
-              SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY .OR. &
-              ANY(SURFACE(IBC)%LEAK_PATH>0._EB)) .AND. YY_F(IW,N)>0._EB) THEN
+              (SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY .OR. &
+              ANY(SURFACE(IBC)%LEAK_PATH>0._EB)) .AND. UWS(IW)<0._EB) .AND. YY_F(IW,N)>0._EB) THEN
             ! recreate diffusive flux from divg b/c UWP based on old RHODW
             RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
             UN = SIGN(1._EB,REAL(IOR,EB))*(MASSFLUX(IW,N) + RHO_D_DYDN)/(RHO_F(IW)*YY_F(IW,N))
          ENDIF
-         
          ! compute flux on the face of the wall cell
          SELECT CASE(IOR)
             CASE( 1)
