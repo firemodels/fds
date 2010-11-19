@@ -5120,6 +5120,7 @@ function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAM
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct REVERSE}]  is a logical variable that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} is from the second node to the first node.
 \item[{\ct ROUGHNESS}]  is the absolute roughness in m of the duct that is used to compute the friction factor for the duct.
+\item[{\ct TAU\_VF}]  defines a tanh ({\ct TAU\_VF} > 0) or t$^2$ ramp ({\ct TAU\_VF} < 0) for the {\ct VOLUME\_FLOW}
 \item[{\ct VOLUME\_FLOW}] defines a fixed volumetric flow rate (m$^3$/s) in the duct.  {\ct VOLUME\_FLOW} cannot be used in conjunction with {\ct FAN\_ID}.
 \end{description}
 
@@ -5160,9 +5161,10 @@ where:
 \item[{\ct LOSS}] is the flow loss through the fan when it is not operational.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in Pa.  This input activates a quadratic fan model.
-\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of volumetric flow rates (m$^3$/s) versus the pressure drop across the fan (Pa).
+\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) .
 {\ct VOLUME\_FLOW} is the fixed volumetric flow of the fan (m$^3$/s).
 \end{description}
+\item[{\ct TAU\_FAN}]  defines a tanh ({\ct TAU\_FAN} > 0) or t$^2$ ramp ({\ct TAU\_FAN} < 0) for the fan.  This is applied to the flowrate computed by any of the three types (constant flow, quadratic, or user defined ramp) of fans.
 
 \noindent
 Note that only one set of fan model inputs ({\ct VOLUME\_FLOW}, {\ct RAMP\_ID}, or {\ct MAX\_FLOW + MAX\_PRESSURE}) should be specified.
@@ -9719,6 +9721,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NODE\_ID}                  & Character Doublet & Name of nodes connected to a duct                 &               &                       \\ \hline
 {\ct RAMP\_ID}                  & Character         & Name of {\ct RAMP} containing a fan curve         &               &  {\ct 'null'}         \\ \hline
 {\ct ROUGHNESS}                 & Real              & Absolute roughness of a duct                      &  m            &                       \\ \hline
+{\ct TAU\_FAN}                  & Real              & Ramp time for a fan               & s                   & 1.                      \\ \hline
+{\ct TAU\_VF}                   & Real              & Ramp time for {\ct VOLUME\_FLOW}               & s                   & 1.                      \\ \hline
 {\ct TYPE\_ID}                  & Character         & Type of component                                 &               &                       \\ \hline
 {\ct VENT\_ID}                  & Character         & Name of the {\ct VENT} the node is connected to   &               &  {\ct 'null'}         \\ \hline
 {\ct VOLUME\_FLOW}              & Real              & Fixed volumetric flow of a duct                   &  m$^3$/s      &                       \\ \hline
