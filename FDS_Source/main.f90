@@ -97,10 +97,10 @@ WALL_CLOCK_START = WALL_CLOCK_TIME()
  
 ! Assign a compilation date (All Nodes)
 
-WRITE(VERSION_STRING,'(A)') '5.5.3'
+!!WRITE(VERSION_STRING,'(A)') '5.5.3'
+!!FDS6=.FALSE.
 
-!!WRITE(VERSION_STRING,'(A)') '6.0.0' ! Set these two lines to temporarily create FDS 6 code for validation work
-!!FDS6=.TRUE.
+WRITE(VERSION_STRING,'(A)') '6.0.0' 
 
 IF (INDEX(mainrev,':',BACK=.TRUE.)>0) THEN
    WRITE(REVISION_DATE,'(A)',IOSTAT=IOS,ERR=5) mainrev(INDEX(mainrev,':')+1:LEN_TRIM(mainrev)-2)
@@ -2318,7 +2318,7 @@ IF (MYID==0) THEN
       DO NOM=1,NMESHES
          ERROR = 2._EB*ABS(VDOT(NM,NOM)-VDOT(NOM,NM))/(ABS(VDOT(NM,NOM)+VDOT(NOM,NM))+1.E-10_EB)
          IF (NM<NOM .AND. ERROR>1.E-5_EB) THEN
-            WRITE(LU_ERR,'(A,I3,A,I3,A,E12.6)') 'Volume Flow Error, Meshes ',NM,' and ',NOM,' = ',ERROR
+            WRITE(LU_ERR,'(A,I3,A,I3,A,E12.5)') 'Volume Flow Error, Meshes ',NM,' and ',NOM,' = ',ERROR
          ENDIF
       ENDDO
    ENDDO
