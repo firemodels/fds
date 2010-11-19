@@ -44,7 +44,7 @@ MODULE EVAC
        EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE, EVAC_SSTAND_TYPE, NPC_EVAC, N_HOLES, &
        EVACUATION_TYPE, EVAC_HOLE_TYPE, EVAC_EVACS, EVAC_HOLES, N_CO_EXITS, N_DOOR_MESHES
   PUBLIC EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, EMESH_NM, EMESH_NFIELDS, &
-       EMESH_INDEX, EVAC_FDS6
+       EMESH_INDEX, EVAC_FDS6, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE
   !
   CHARACTER(255):: EVAC_VERSION = '2.4.0'
   CHARACTER(255) :: EVAC_COMPILE_DATE
@@ -378,7 +378,7 @@ MODULE EVAC
        CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
        CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, FAC_DOOR_QUEUE, FAC_DOOR_ALPHA,&
        FAC_DOOR_WAIT, CF_MIN_B, FAC_DOOR_OLD, FAC_DOOR_OLD2, R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, &
-       DOT_HERDING
+       DOT_HERDING, EVAC_DELTA_SEE
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -546,7 +546,7 @@ CONTAINS
          CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, &
          FAC_DOOR_QUEUE, FAC_DOOR_ALPHA, FAC_DOOR_WAIT, CF_MIN_B, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, FAC_DOOR_OLD, FAC_DOOR_OLD2, &
-         R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, DOT_HERDING, EVAC_FDS6
+         R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, DOT_HERDING, EVAC_FDS6, EVAC_DELTA_SEE
     !
     NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, INPUT_ID, &
          PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH, PROB
@@ -758,7 +758,7 @@ CONTAINS
           XB(6) = EMESH_XB(6,EMESH_EXITS(N_TMP)%EMESH)
           ! 
           ! Save the information needed in READ_MESH, etc.
-          IF (DEFINE_MESH) N_DOOR_MESHES = N_DOOR_MESHES + 1
+          IF (DEFINE_MESH .AND. .NOT.EVAC_FDS6) N_DOOR_MESHES = N_DOOR_MESHES + 1
           IF (DEFINE_MESH) EVAC_EXITS(N)%I_EMESH_EXITS = N_TMP  ! Default, for "no flow field" exits
           EMESH_EXITS(N_TMP)%NEXIT       = N     ! N is the exit line index (including count only ones)
           EMESH_EXITS(N_TMP)%IOR         = IOR
@@ -869,7 +869,7 @@ CONTAINS
           XB(6) = EMESH_XB(6,EMESH_EXITS(N_TMP)%EMESH)
           ! 
           ! Save the information needed in READ_MESH, etc.
-          IF (DEFINE_MESH) N_DOOR_MESHES = N_DOOR_MESHES + 1
+          IF (DEFINE_MESH .AND. .NOT.EVAC_FDS6) N_DOOR_MESHES = N_DOOR_MESHES + 1
           IF (DEFINE_MESH) EVAC_DOORS(N)%I_EMESH_EXITS = N_TMP  ! Default, for "no flow field" exits
           EMESH_EXITS(N_TMP)%NEXIT       = N     ! N is the door line index (including all doors)
           EMESH_EXITS(N_TMP)%IOR         = IOR
@@ -993,6 +993,8 @@ CONTAINS
          COLOR_METHOD       = -1 ! Default is standard human colors in Smokeview
          DEAD_RGB           = (/  0,255,255/) ! cyan
          NPC_PERS = 0
+         EVAC_DELTA_SEE     = 0.29_EB    ! Eye range (plus minus mid smoke level)
+         HUMAN_SMOKE_HEIGHT   = 1.60_EB  ! Nose above floor level
          REWIND(LU_INPUT)
          COUNT_PERS_LOOP: DO
             CALL CHECKREAD('PERS',LU_INPUT,IOS) 
@@ -1339,7 +1341,6 @@ CONTAINS
       ! Z_smoke = XB_z - EVACUATION_Z_OFFSET(NM) + HUMAN_SMOKE_HEIGHT, i.e. position of the nose/eyes
       ! above the floor.  The smoke and gas densities are taken from this level (FED calculation and
       ! visible doors etc.)
-      HUMAN_SMOKE_HEIGHT   = 1.60_EB  ! Nose above floor level
 
       GROUP_EFF         = 0.0_EB
       RADIUS_COMPLETE_0 = 0.2_EB
@@ -5402,6 +5403,7 @@ CONTAINS
        N_END = N_EXITS - N_CO_EXITS + N_DOORS
        ReadEffLoop: DO NM = 1, NMESHES
           EVAC_ONLY_NM: IF (EVACUATION_ONLY(NM)) THEN
+             IF (EVAC_FDS6 .AND. .NOT. EVACUATION_GRID(NM)) CYCLE ReadEffLoop
              MFF=>MESHES(NM)
              IF (EVAC_FDS6) THEN
                 NFIELDS = EMESH_NFIELDS(EMESH_INDEX(NM))
@@ -5449,7 +5451,7 @@ CONTAINS
                          MFF%V(i,j,:) = REAL(v_tmp,EB)
                          MFF%W(i,j,:) = 0.0_EB
                          MFF%KRES(i,j,:) = 0.5_EB*SQRT(REAL(u_tmp,EB)**2 + REAL(v_tmp,EB)**2)
-                       ELSE
+                      ELSE
                          MFF%U(i,j,:) = REAL(u_tmp,EB)
                          MFF%V(i,j,:) = REAL(v_tmp,EB)
                          MFF%W(i,j,:) = 0.0_EB
@@ -5535,7 +5537,7 @@ CONTAINS
     REAL(EB) RN, simoDX, simoDY, TNOW
     REAL(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, &
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
-    INTEGER i,j,k,ii,jj,kk,ipc, izero, n_tmp, ie, nom, I_OBST
+    INTEGER i,j,k,ii,jj,kk,ipc, izero, n_tmp, ie, nom, I_OBST, NM_SEE
     INTEGER i11, i22, group_size
     LOGICAL pp_see_group, is_solid
     INTEGER jjj, iii, i44
@@ -5579,6 +5581,12 @@ CONTAINS
     CALL ChkMemErr('INIT_EVACUATION','HUMAN_GRID',IZERO)
     !
     CALL POINT_TO_MESH(NM)
+    IF (EVAC_FDS6) THEN
+       NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM)
+       write(lu_err,*)'*** init evac nm nm_see ',TRIM(MESH_NAME(NM)),' ',TRIM(MESH_NAME(NM_SEE))
+    ELSE
+       NM_SEE = NM
+    END IF
     !
     ! Initialise HUMAN_GRID
     !
@@ -5911,7 +5919,7 @@ CONTAINS
                       X11 = HR%X
                       Y11 = HR%Y
 
-                      PP_see_group = See_each_other(nm, x11, y11, x1_old, y1_old)
+                      PP_see_group = See_each_other(nm_see, x11, y11, x1_old, y1_old)
                       
                    ELSE
                       PP_see_group = .TRUE.
@@ -6008,7 +6016,7 @@ CONTAINS
                    HR => HUMAN( N_HUMANS - group_size + i44 )
                    X11 = HR%X
                    Y11 = HR%Y
-                   PP_see_group = See_each_other(nm, x11, y11, x1_old, y1_old)
+                   PP_see_group = See_each_other(nm_see, x11, y11, x1_old, y1_old)
 
                    IF ( .NOT. PP_see_group ) THEN 
                       i_endless_loop = i_endless_loop + 1
@@ -6708,6 +6716,7 @@ CONTAINS
        N_END = N_EXITS - N_CO_EXITS + N_DOORS
        WRITE_EFF_LOOP: DO NM_TIM = 1, NMESHES
           EVAC_ONLY_NM: IF (EVACUATION_ONLY(NM_TIM)) THEN
+             IF (EVAC_FDS6 .AND. .NOT. EVACUATION_GRID(NM_TIM)) CYCLE WRITE_EFF_LOOP
              MFF=>MESHES(NM_TIM)
              IBAR_TMP = MFF%IBAR
              JBAR_TMP = MFF%JBAR
@@ -6798,7 +6807,7 @@ CONTAINS
     INTEGER, PARAMETER :: N_SECTORS = 2
     REAL(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
     INTEGER ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
-    INTEGER  IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, IBC
+    INTEGER  IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, IBC, NM_SEE
     REAL(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, TIM_DIST, EVEL2
     REAL(EB), DIMENSION(4) :: D_XY
     LOGICAL, DIMENSION(4) :: FOUNDWALL_XY
@@ -6875,6 +6884,11 @@ CONTAINS
     DT_GROUP_DOOR  = TAU_CHANGE_DOOR
     !
     CALL POINT_TO_MESH(NM)
+    IF (EVAC_FDS6) THEN
+       NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM)
+    ELSE
+       NM_SEE = NM
+    END IF
     !
     ! Find the smallest DELTA_X and/or DELTA_Y.  Note: Evac meshes should not be stretched ones.
     DX_MIN = MINVAL(DX)
@@ -7184,7 +7198,7 @@ CONTAINS
                             IF (P2P_DIST > R_HERDING**2 .AND. HRE%I_Target==0) CYCLE Other_Agent_Loop
                             IF (P2P_DIST > R_HERDING**2 .AND. HRE%I_Door_Mode <= 0) CYCLE Other_Agent_Loop
                             ! Check, that the persons are seeing each other, i.e., there are no walls between.
-                            PP_SEE_EACH = SEE_EACH_OTHER(NM, HR%X, HR%Y, HRE%X, HRE%Y)
+                            PP_SEE_EACH = SEE_EACH_OTHER(NM_SEE, HR%X, HR%Y, HRE%X, HRE%Y)
                             IF (.NOT. PP_SEE_EACH) CYCLE Other_Agent_Loop
                             IF (ABS(HRE%I_Target) > 0 .AND. P2P_DIST < TIM_DIST) THEN
                                IF (ABS(HRE%I_TARGET) <= N_DOORS) THEN
@@ -8585,7 +8599,7 @@ CONTAINS
              V_HR  = MAX(0.1_EB,SQRT(HR%U**2+HR%V**2)/HR%SPEED)
              TIM_DIST = 0.0_EB
              DO III = 1, N_SECTORS
-                ! Awoid walls, do not take a direction where there is a wall closer than
+                ! Avoid walls, do not take a direction where there is a wall closer than
                 ! D_PERP = 0.6 m (perpendicular).
                 IF (ABS(SIN_THETA(III)) > 0.0001_EB) THEN
                    X11 = HR%X + U_THETA(III)*MIN(P2P_SUUNTA_MAX, 0.6_EB/ABS(SIN_THETA(III)))
@@ -9656,40 +9670,38 @@ CONTAINS
             EVAC_FDS6_IF_2: IF (EVAC_FDS6) THEN
                N = ABS(HR%I_TARGET)
                N_END = N_EXITS - N_CO_EXITS + N_DOORS
-               IF (N /= 0) THEN
-                  IF (N > N_DOORS) THEN
-                     N = N - N_DOORS  ! The exit line number including also count only exits
-                     JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
-                     IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
-                        write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
-                        write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+               IF (N==0) THEN
+                  DEFAULT_TARGET: DO JJ_NOW = 1, N_END
+                     IF (EMESH_EXITS(JJ_NOW)%MAINMESH == NM) THEN
+                        N = JJ_NOW
+                        EXIT
                      END IF
-!!$                     LOOP_EXITS_2: DO I1 = 1, N_END
-!!$                        IF (EMESH_EXITS(I1)%IS_EXIT .AND. EMESH_EXITS(I1)%NEXIT == N) THEN
-!!$                           JJ_NOW = I1
-!!$                           EXIT LOOP_EXITS_2
-!!$                        END IF
-!!$                     END DO LOOP_EXITS_2
+                  END DO DEFAULT_TARGET
+                  IF (EMESH_EXITS(N)%IS_EXIT) THEN
+                     N = EMESH_EXITS(N)%NEXIT + N_DOORS ! I_Targer index
                   ELSE
-                     JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
-                     IF (TRIM(EVAC_DOORS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
-                        write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
-                        write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
-                     END IF
-!!$                     LOOP_DOORS_2: DO I1 = 1, N_END
-!!$                        IF (.NOT.EMESH_EXITS(I1)%IS_EXIT .AND. EMESH_EXITS(I1)%NEXIT == N) THEN
-!!$                           JJ_NOW = I1
-!!$                           EXIT LOOP_DOORS_2
-!!$                        END IF
-!!$                     END DO LOOP_DOORS_2
+                     N = EMESH_EXITS(N)%NEXIT  ! I_Targer index
                   END IF
-                  IF (EMESH_EXITS(JJ_NOW)%MAINMESH /= NM) write(lu_err,*)'*** find direction error: ',JJ_NOW,NM, &
-                       EMESH_EXITS(JJ_NOW)%MAINMESH,' ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
-                  UBAR = (1.0_EB-(XI-II+1))*EMESH_EXITS(JJ_NOW)%U_EVAC(II-1,JJ) + (XI-II+1)*EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)
-                  VBAR = (1.0_EB-(YJ-JJ+1))*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ-1) + (YJ-JJ+1)*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)
-               ELSE
-                  UBAR = 0.0_EB; VBAR = 0.0_EB ! Do not move if no target
                END IF
+
+               IF (N > N_DOORS) THEN
+                  N = N - N_DOORS  ! The exit line number including also count only exits
+                  JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
+                  IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
+                     write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
+                     write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                  END IF
+               ELSE
+                  JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
+                  IF (TRIM(EVAC_DOORS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
+                     write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
+                     write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+                  END IF
+               END IF
+               IF (EMESH_EXITS(JJ_NOW)%MAINMESH /= NM) write(lu_err,*)'*** find direction error: ',JJ_NOW,NM, &
+                    EMESH_EXITS(JJ_NOW)%MAINMESH,' ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+               UBAR = (1.0_EB-(XI-II+1))*EMESH_EXITS(JJ_NOW)%U_EVAC(II-1,JJ) + (XI-II+1)*EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)
+               VBAR = (1.0_EB-(YJ-JJ+1))*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ-1) + (YJ-JJ+1)*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)
             ELSE ! EVAC_FDS6_IF_2
                UBAR = (1.0_EB-(XI-II+1))*MFF%U(II-1,JJ,1) + (XI-II+1)*MFF%U(II,JJ,1)
                VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
@@ -9702,7 +9714,7 @@ CONTAINS
       IF (EVEL > 0.0_EB) THEN
          UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
       ELSE
-         ! If no v0 found for the current position of the agent, use the previous value
+         ! If no v0 found for the current position of the agent, use the previous value of the agent
          UBAR = HR%UBAR ; VBAR = HR%VBAR
       END IF
       IF (L_DEAD) THEN
@@ -12998,25 +13010,32 @@ CONTAINS
     !
     ! Local variables
     INTEGER :: i, j, isx, isy, i_r1, i_r2, j_r1, j_r2
-    INTEGER :: i_old, j_old, ic, ic2, iw, iw1, iw2
+    INTEGER :: i_old, j_old, ic, ic2, iw, iw1, iw2, NM_SEE
     REAL(EB) :: x, y
-    TYPE (MESH_TYPE), POINTER :: M =>NULL()
+    TYPE (MESH_TYPE), POINTER :: M =>NULL(), MFF =>NULL()
 
-    M => MESHES(NM)
+    M   => MESHES(NM)
+    IF (EVAC_FDS6) THEN
+       NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM)
+       MFF => MESHES(NM_SEE)
+    ELSE
+       MFF => MESHES(NM)
+    END IF
+
     See_door = .TRUE.  ! Default
     ave_K = 0.0_EB
     max_fed = 0.0_EB
 
     isx = INT(SIGN(1.0_EB,r2_x - r1_x)) ! loop increment +1 or -1
     isy = INT(SIGN(1.0_EB,r2_y - r1_y)) ! loop increment +1 or -1
-    i_r1 = FLOOR(M%CELLSI(FLOOR((r1_x-M%XS)*M%RDXINT)) + 1.0_EB) ! II start
-    i_r2 = FLOOR(M%CELLSI(FLOOR((r2_x-M%XS)*M%RDXINT)) + 1.0_EB) ! II end
-    j_r1 = FLOOR(M%CELLSJ(FLOOR((r1_y-M%YS)*M%RDYINT)) + 1.0_EB) ! JJ start
-    j_r2 = FLOOR(M%CELLSJ(FLOOR((r2_y-M%YS)*M%RDYINT)) + 1.0_EB) ! JJ end
-    i_r1 = MAX(1,MIN(i_r1,M%IBAR)) ! To be sure that indices are always ok.
-    i_r2 = MAX(1,MIN(i_r2,M%IBAR))
-    j_r1 = MAX(1,MIN(j_r1,M%JBAR))
-    j_r2 = MAX(1,MIN(j_r2,M%JBAR))
+    i_r1 = FLOOR(MFF%CELLSI(FLOOR((r1_x-MFF%XS)*MFF%RDXINT)) + 1.0_EB) ! II start
+    i_r2 = FLOOR(MFF%CELLSI(FLOOR((r2_x-MFF%XS)*MFF%RDXINT)) + 1.0_EB) ! II end
+    j_r1 = FLOOR(MFF%CELLSJ(FLOOR((r1_y-MFF%YS)*MFF%RDYINT)) + 1.0_EB) ! JJ start
+    j_r2 = FLOOR(MFF%CELLSJ(FLOOR((r2_y-MFF%YS)*MFF%RDYINT)) + 1.0_EB) ! JJ end
+    i_r1 = MAX(1,MIN(i_r1,MFF%IBAR)) ! To be sure that indices are always ok.
+    i_r2 = MAX(1,MIN(i_r2,MFF%IBAR))
+    j_r1 = MAX(1,MIN(j_r1,MFF%JBAR))
+    j_r2 = MAX(1,MIN(j_r2,MFF%JBAR))
 
     ! Same cell: sees always each other
     IF (ABS(i_r2-i_r1)+ABS(j_r2-j_r1) .LT. 1) THEN
@@ -13036,23 +13055,23 @@ CONTAINS
        i_old = i_r1 ; j_old = j_r1
        y = 0.0_EB
        MainLoopY: DO j = j_r1+isy, j_r2, isy
-          y = y + isy*M%DY(j)
-          x = MAX(M%XS,MIN(M%XF,r1_x + y*(r2_x - r1_x)/(r2_y - r1_y)))
-          i = FLOOR(M%CELLSI(FLOOR((x-M%XS)*M%RDXINT)) + 1.0_EB)
+          y = y + isy*MFF%DY(j)
+          x = MAX(MFF%XS,MIN(MFF%XF,r1_x + y*(r2_x - r1_x)/(r2_y - r1_y)))
+          i = FLOOR(MFF%CELLSI(FLOOR((x-MFF%XS)*MFF%RDXINT)) + 1.0_EB)
           i = isx*MIN(isx*i_r2,isx*i) ! i in interval j_r1...j_r2
-          ic  = M%CELL_INDEX(i_old,j_old,1)
-          ic2 = M%CELL_INDEX(i    ,j_old,1) ! side cell
-          iw  = M%WALL_INDEX(ic, isy*2) ! main direction
-          iw1 = M%WALL_INDEX(ic ,isx*1) ! sideways
-          iw2 = M%WALL_INDEX(ic2,isy*2) ! side + main direction
+          ic  = MFF%CELL_INDEX(i_old,j_old,1)
+          ic2 = MFF%CELL_INDEX(i    ,j_old,1) ! side cell
+          iw  = MFF%WALL_INDEX(ic, isy*2) ! main direction
+          iw1 = MFF%WALL_INDEX(ic ,isx*1) ! sideways
+          iw2 = MFF%WALL_INDEX(ic2,isy*2) ! side + main direction
           IF (iw >0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw ))%HIDDEN .AND. M%OBST_INDEX_W(iw )>0) iw  = 0
+             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw ))%HIDDEN .AND. MFF%OBST_INDEX_W(iw )>0) iw  = 0
           END IF
           IF (iw1>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw1))%HIDDEN .AND. M%OBST_INDEX_W(iw1)>0) iw1 = 0
+             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw1))%HIDDEN .AND. MFF%OBST_INDEX_W(iw1)>0) iw1 = 0
           END IF
           IF (iw2>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw2))%HIDDEN .AND. M%OBST_INDEX_W(iw2)>0) iw2 = 0
+             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw2))%HIDDEN .AND. MFF%OBST_INDEX_W(iw2)>0) iw2 = 0
           END IF
           ! iw is zero, if there is no solid boundary
           ! from (i,j)==>(i,jnew):    iw and iw2 are zero, iw1 does not matter
@@ -13077,23 +13096,23 @@ CONTAINS
        i_old = i_r1 ; j_old = j_r1
        x = 0.0_EB 
        MainLoopX: DO i = i_r1+isx, i_r2, isx
-          x = x + isx*M%DX(i)
-          y = MAX(M%YS,MIN(M%YF,r1_y + x*(r2_y - r1_y)/(r2_x - r1_x)))
-          j = FLOOR(M%CELLSJ(FLOOR((y-M%YS)*M%RDYINT)) + 1.0_EB)
+          x = x + isx*MFF%DX(i)
+          y = MAX(MFF%YS,MIN(MFF%YF,r1_y + x*(r2_y - r1_y)/(r2_x - r1_x)))
+          j = FLOOR(MFF%CELLSJ(FLOOR((y-MFF%YS)*MFF%RDYINT)) + 1.0_EB)
           j = isy*MIN(isy*j_r2,isy*j) ! j in interval j_r1...j_r2
-          ic  = M%CELL_INDEX(i_old,j_old,1)
-          ic2 = M%CELL_INDEX(i_old,j    ,1) ! side cell
-          iw  = M%WALL_INDEX(ic, isx*1) ! main direction
-          iw1 = M%WALL_INDEX(ic ,isy*2) ! sideways
-          iw2 = M%WALL_INDEX(ic2,isx*1) ! side + main direction
+          ic  = MFF%CELL_INDEX(i_old,j_old,1)
+          ic2 = MFF%CELL_INDEX(i_old,j    ,1) ! side cell
+          iw  = MFF%WALL_INDEX(ic, isx*1) ! main direction
+          iw1 = MFF%WALL_INDEX(ic ,isy*2) ! sideways
+          iw2 = MFF%WALL_INDEX(ic2,isx*1) ! side + main direction
           IF (iw >0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw ))%HIDDEN .AND. M%OBST_INDEX_W(iw )>0) iw  = 0
+             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw ))%HIDDEN .AND. MFF%OBST_INDEX_W(iw )>0) iw  = 0
           END IF
           IF (iw1>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw1))%HIDDEN .AND. M%OBST_INDEX_W(iw1)>0) iw1 = 0
+             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw1))%HIDDEN .AND. MFF%OBST_INDEX_W(iw1)>0) iw1 = 0
           END IF
           IF (iw2>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw2))%HIDDEN .AND. M%OBST_INDEX_W(iw2)>0) iw2 = 0
+             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw2))%HIDDEN .AND. MFF%OBST_INDEX_W(iw2)>0) iw2 = 0
           END IF
           ! iw is zero, if there is no solid boundary
           ! from (i,j)==>(inew,j):    iw and iw2 are zero, iw1 does not matter
@@ -13424,7 +13443,7 @@ CONTAINS
     REAL(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o
     REAL(EB) :: X1, Y1, X2, Y2, DOOR_WIDTH, X_XYZ, Y_XYZ
     INTEGER :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index, DOOR_IOR
-    INTEGER :: i, i_o, izero, nm_tmp, I_Agent_Type
+    INTEGER :: i, i_o, izero, nm_tmp, I_Agent_Type, NM_SEE
     CHARACTER(30) :: name_old_ffield, name_new_ffield
     LOGICAL :: PP_see_door
     REAL(EB) :: T_tmp, T_tmp1, Width
@@ -13438,6 +13457,11 @@ CONTAINS
     ELSE
        ! This is for check_target_node
        nm_tmp = nm2
+    END IF
+    IF (EVAC_FDS6) THEN
+       NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM_TMP)
+    ELSE
+       NM_SEE = NM_TMP
     END IF
 
     I_Agent_Type = HR%I_DoorAlgo

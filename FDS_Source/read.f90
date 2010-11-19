@@ -229,9 +229,9 @@ END SUBROUTINE READ_HEAD
  
 SUBROUTINE READ_MESH
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, &
-     EMESH_NM, N_DOOR_MESHES, EMESH_NFIELDS, EVAC_FDS6
+     EMESH_NM, N_DOOR_MESHES, EMESH_NFIELDS, EVAC_FDS6, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE
 
-INTEGER :: IJK(3),NM,CURRENT_MPI_PROCESS,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN
+INTEGER :: IJK(3),NM,CURRENT_MPI_PROCESS,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN,NEVAC_MESHES
 LOGICAL :: EVACUATION, EVAC_HUMANS
 REAL(EB) :: EVAC_Z_OFFSET,XB1,XB2,XB3,XB4,XB5,XB6
 CHARACTER(25) :: COLOR
@@ -243,6 +243,7 @@ TYPE (MULTIPLIER_TYPE), POINTER :: MR
  
 NMESHES = 0
 NMESHES_READ = 0
+NEVAC_MESHES = 0
  
 REWIND(LU_INPUT)
 COUNT_MESH_LOOP: DO
@@ -255,6 +256,7 @@ COUNT_MESH_LOOP: DO
    IF (NO_EVACUATION .AND. EVACUATION) CYCLE COUNT_MESH_LOOP ! skip evacuation meshes
    IF (EVACUATION_DRILL .AND. .NOT.EVACUATION) CYCLE COUNT_MESH_LOOP ! skip fire meshes
    IF (EVACUATION_MC_MODE .AND. .NOT.EVACUATION) CYCLE COUNT_MESH_LOOP ! skip fire meshes
+   IF (EVACUATION .AND. EVAC_FDS6) NEVAC_MESHES = NEVAC_MESHES + 1
    N_MESH_NEW = 1
    IF (MULT_ID/='null') THEN
       DO N=1,N_MULT
@@ -268,7 +270,7 @@ COUNT_MESH_LOOP: DO
 ENDDO COUNT_MESH_LOOP
 15 CONTINUE
 
-IF (.NOT. NO_EVACUATION .AND. .NOT.EVAC_FDS6) NMESHES = NMESHES + N_DOOR_MESHES
+IF (.NOT. NO_EVACUATION) NMESHES = NMESHES + N_DOOR_MESHES + NEVAC_MESHES
 
 ! Allocate parameters associated with the mesh.
  
@@ -405,6 +407,11 @@ MESH_LOOP: DO N=1,NMESHES_READ
             IF (EVAC_HUMANS) EVACUATION_GRID(NM) = .TRUE.
             IF (EVACUATION)  EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET
             IF (EVACUATION)  M%NEWC = 2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
+            IF (EVAC_FDS6 .AND. EVACUATION .AND. .NOT.EVAC_HUMANS) THEN
+               WRITE(MESSAGE,'(A)') 'ERROR: NO DOOR FLOW EVACUATION MESHES IN FDS6'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+
             IF (M%JBAR==1) TWO_D = .TRUE.
             IF (TWO_D .AND. M%JBAR/=1) THEN
                WRITE(MESSAGE,'(A)') 'ERROR: IJK(2) must be 1 for all grids in 2D Calculation'
@@ -510,7 +517,8 @@ CONTAINS
     ! Passed variables
     INTEGER, INTENT(INOUT) :: NM
     ! Local variables
-    INTEGER :: N, N_END, I, J, NN, JMAX
+    INTEGER :: N, N_END, I, J, NN, JMAX, NM_OLD, I_MAIN_EVAC_MESH
+    REAL(EB) :: Z_MID
 
     N = 0
     DO I = 1, NM
@@ -519,6 +527,88 @@ CONTAINS
           EMESH_NM(N) = I
        END IF
     END DO
+
+    NM_OLD = NM
+    LOOP_EMESHES: DO N = 1, NEVAC_MESHES
+       ! Additional meshes for the main evacuation meshes. These will be 
+       ! at different z level than the corresponding main evacuation mesh.
+
+       I_MAIN_EVAC_MESH = NM_OLD - NEVAC_MESHES + N
+
+       ! Set MESH defaults
+
+       RGB   = MESHES(I_MAIN_EVAC_MESH)%RGB
+       COLOR = 'null'
+       ID = TRIM(TRIM('Emesh_' // MESH_NAME(I_MAIN_EVAC_MESH)))
+       MPI_PROCESS = -1
+       LEVEL = 0
+       EVACUATION = .TRUE.
+       EVAC_HUMANS = .FALSE.
+
+       ! Increase the MESH counter by 1
+
+       NM = NM + 1
+
+       ! Fill in MESH related variables
+       
+       M => MESHES(NM)
+       M%MESH_LEVEL = LEVEL
+       M%IBAR = MESHES(I_MAIN_EVAC_MESH)%IBAR
+       M%JBAR = MESHES(I_MAIN_EVAC_MESH)%JBAR
+       M%KBAR = MESHES(I_MAIN_EVAC_MESH)%KBAR
+       IBAR_MAX = MAX(IBAR_MAX,M%IBAR)
+       JBAR_MAX = MAX(JBAR_MAX,M%JBAR)
+       KBAR_MAX = MAX(KBAR_MAX,M%KBAR)
+       EVACUATION_ONLY(NM) = .TRUE.
+       SYNC_TIME_STEP(NM)  = .FALSE.
+       EVACUATION_GRID(NM) = .FALSE.
+       EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET
+       M%NEWC = 2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
+       IF (EVACUATION .AND. M%KBAR/=1) THEN
+          WRITE(MESSAGE,'(A)') 'ERROR: IJK(3) must be 1 for all evacuation grids'
+          CALL SHUTDOWN(MESSAGE)
+       ENDIF
+
+       ! Associate the MESH with the PROCESS
+         
+       PROCESS(NM) = CURRENT_MPI_PROCESS
+       IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') 'Mesh ',NM,' is assigned to Process ',PROCESS(NM)
+       IF (EVACUATION_ONLY(NM) .AND. USE_MPI) EVAC_PROCESS = NUMPROCS-1
+
+       ! Mesh boundary colors
+   
+       IF (ANY(RGB<0) .AND. COLOR=='null') COLOR = 'BLACK'
+       IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
+       ALLOCATE(M%RGB(3))
+       M%RGB = RGB
+   
+       ! Mesh Geometry and Name
+   
+       WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
+       IF (ID/='null') MESH_NAME(NM) = ID
+   
+       Z_MID = 0.5_EB*(MESHES(I_MAIN_EVAC_MESH)%ZS + MESHES(I_MAIN_EVAC_MESH)%ZF)
+       Z_MID = Z_MID - EVACUATION_Z_OFFSET(I_MAIN_EVAC_MESH)  + HUMAN_SMOKE_HEIGHT
+       M%XS    = MESHES(I_MAIN_EVAC_MESH)%XS
+       M%XF    = MESHES(I_MAIN_EVAC_MESH)%XF
+       M%YS    = MESHES(I_MAIN_EVAC_MESH)%YS
+       M%YF    = MESHES(I_MAIN_EVAC_MESH)%YF
+       M%ZS    = Z_MID - EVAC_DELTA_SEE
+       M%ZF    = Z_MID + EVAC_DELTA_SEE
+       M%DXI   = MESHES(I_MAIN_EVAC_MESH)%DXI
+       M%DETA  = MESHES(I_MAIN_EVAC_MESH)%DETA
+       M%DZETA = (M%ZF-M%ZS)/REAL(M%KBAR,EB)
+       M%RDXI  = MESHES(I_MAIN_EVAC_MESH)%RDXI
+       M%RDETA = MESHES(I_MAIN_EVAC_MESH)%RDETA
+       M%RDZETA= 1._EB/M%DZETA
+       M%IBM1  = M%IBAR-1
+       M%JBM1  = M%JBAR-1
+       M%KBM1  = M%KBAR-1
+       M%IBP1  = M%IBAR+1
+       M%JBP1  = M%JBAR+1
+       M%KBP1  = M%KBAR+1
+       WRITE (LU_EVACOUT,FMT='(A,I5,3A)') 'EVAC: Mesh number ', NM, ' name ', TRIM(ID), ' defined for evacuation'
+    END DO LOOP_EMESHES
 
     N_END = N_EXITS - N_CO_EXITS + N_DOORS
     LOOP_EXITS: DO N = 1, N_END
@@ -623,6 +713,7 @@ CONTAINS
        M%IBP1  = M%IBAR+1
        M%JBP1  = M%JBAR+1
        M%KBP1  = M%KBAR+1
+       WRITE (LU_EVACOUT,FMT='(A,I5,3A)') 'EVAC: Mesh number ', NM, ' name ', TRIM(ID), ' defined for evacuation'
     END DO LOOP_EXITS
 
     NN = 0
@@ -631,6 +722,7 @@ CONTAINS
        IF (EVACUATION_GRID(I) .AND. EVACUATION_ONLY(I)) THEN
           J = 0  ! Index of the flow field (for a main evacuation mesh)
           NN = NN + 1 ! Main evacuation mesh index
+          ! NN = EMESH_INDEX(NM)
           EMESH_NFIELDS(NN) = 0  ! How many fields for this main evacuation mesh
           LOOP_EXITS_0: DO N = 1, N_END
              IF (.NOT.EMESH_EXITS(N)%DEFINE_MESH) CYCLE LOOP_EXITS_0
@@ -639,6 +731,7 @@ CONTAINS
              EMESH_EXITS(N)%I_DOORS_EMESH = J
              EMESH_NFIELDS(NN) = J
           END DO LOOP_EXITS_0
+          WRITE(LU_EVACOUT,*) 'EVAC: Emesh ',NN,' ',TRIM(EMESH_ID(NN)),' has ',EMESH_NFIELDS(NN),' door flow fields'
        END IF
     END DO
 
