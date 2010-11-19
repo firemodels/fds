@@ -25,3 +25,4 @@ UL/NFPRF Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,Sout
 "Oxygen, NIST FSE 2008",Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.25,0.03 0.95,SouthEast,4,9,no,FDS_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Oxygen_Concentration
 "Carbon Monoxide, NIST FSE 2008",Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.1,0.03 0.95,SouthEast,4,9,no,FDS_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Carbon_Monoxide_Concentration
 "Carbon Dioxide, NIST FSE 2008",Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0,0.2,0.03 0.95,SouthEast,4,9,no,FDS_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Carbon_Dioxide_Concentration
+"Duct Pressure Drop, ASHRAE Sample 7",Analytical Pressure Drop (Pa),Predicted Pressure Drop (Pa),0,750,0.03 0.95,SouthEast,4,9,no,FDS_Validation_Guide/FIGURES/ScatterPlots/ASHRAE_7_Pressure_Drop
