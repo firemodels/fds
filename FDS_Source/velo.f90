@@ -120,6 +120,7 @@ ENDIF
 
 IF (LES .OR. EVACUATION_ONLY(NM)) THEN
    CS = CSMAG
+   IF (EVACUATION_ONLY(NM)) CS = 0.9_EB
    !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DELTA,DUDX,DVDY,DWDZ,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,S12,S13,S23,SS)
    DO K=1,KBAR
       DO J=1,JBAR
@@ -146,13 +147,12 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
             S23 = 0.5_EB*(DVDZ+DWDY)
             SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
             
-            IF (DYNSMAG) CS = C_DYNSMAG(I,J,K)
+            IF (DYNSMAG .AND. .NOT.EVACUATION_ONLY(NM)) CS = C_DYNSMAG(I,J,K)
             MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
          ENDDO
       ENDDO
    ENDDO
    !$OMP END DO
-   IF (EVACUATION_ONLY(NM)) CS = 0.9_EB
 ENDIF
 
 ! Mirror viscosity into solids and exterior boundary cells
