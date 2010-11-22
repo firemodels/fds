@@ -771,10 +771,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       
       BBF = 1.0_EB
       DO IW = 1,NWC+NVWC
-         IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP_F(IW))
-         IBC = IJKW(5,IW)
-         SF  => SURFACE(IBC)
-         IF (.NOT. SF%INTERNAL_RADIATION) QRADOUT(IW) = E_WALL(IW)*SIGMA*TMP_F(IW)**4
+         IF (BOUNDARY_TYPE(IW) == OPEN_BOUNDARY) THEN
+            BBF = BBFA
+         ELSE
+            IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP_F(IW))
+            IBC = IJKW(5,IW)
+            SF  => SURFACE(IBC)
+            IF (.NOT. SF%INTERNAL_RADIATION) QRADOUT(IW) = E_WALL(IW)*SIGMA*TMP_F(IW)**4
+         ENDIF
          OUTRAD_W(IW) = BBF*RPI*QRADOUT(IW)
       ENDDO
 
@@ -801,6 +805,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ELSE
             UIID(:,:,:,ANGLE_INC_COUNTER) = 0._EB
          ENDIF
+
+         DO IW=1,NWC
+            IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) WALL(IW)%ILW(ANGLE_INC_COUNTER,IBND) = 0._EB
+         ENDDO
  
          ! Set the bounds and increment for the angleloop. Step downdard because in cylindrical case the Nth angle 
          ! boundary condition comes from (N+1)th angle.
@@ -1029,6 +1037,16 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 2
             ENDDO WALL_LOOP2
  
+            WALL_LOOP3: DO IW=1,NWC
+               IF (BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY)   CYCLE WALL_LOOP3 
+               IOR = IJKW(4,IW)
+               IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP3     ! outgoing
+               IIG = IJKW(6,IW)
+               JJG = IJKW(7,IW)
+               KKG = IJKW(8,IW)
+               WALL(IW)%ILW(ANGLE_INC_COUNTER,IBND) = WALL(IW)%ILW(ANGLE_INC_COUNTER,IBND)-DLN(IOR,N)*IL(IIG,JJG,KKG)
+            ENDDO WALL_LOOP3
+
             ! Calculate integrated intensity UIID
  
             IF (WIDE_BAND_MODEL) THEN
@@ -1091,6 +1109,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          EFLUX = EVALUATE_RAMP(T,SF%TAU(TIME_EFLUX),SF%RAMP_INDEX(TIME_EFLUX))*SF%EXTERNAL_FLUX
          QRADIN(IW)  = QRADIN(IW) + E_WALL(IW)*(INRAD_W(IW)+BBFA*EFLUX)
       ENDDO 
+
    ENDIF INTENSITY_UPDATE
  
    ! Save source term for the energy equation (QR = -DIV Q)
@@ -1104,9 +1123,18 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
 ENDDO BAND_LOOP
 
-! Sum up the parts of the intensity
+! Sum up intensities and compute incoming flux at open boundaries
 
-IF (UPDATE_INTENSITY) UII = SUM(UIID, DIM = 4)
+IF (UPDATE_INTENSITY) THEN
+
+   UII = SUM(UIID, DIM = 4)
+
+   DO IW=1,NWC
+      IF (BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) CYCLE 
+      QRADIN(IW)  = SUM(WALL(IW)%ILW)
+   ENDDO 
+
+ENDIF
 
 ! Save source term for the energy equation (QR = -DIV Q). Done only in one-band (gray gas) case.
 
