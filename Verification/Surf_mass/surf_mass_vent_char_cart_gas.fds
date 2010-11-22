@@ -4,7 +4,7 @@
 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 /
 
 &TIME TWFIN=200., DT = 0.01, WALL_INCREMENT = 1 / 
-&DUMP DT_HRR = 0.01, DT_DEVC = 0.01 DT_PL3D = 10000 DT_SLCF = 10000 /
+&DUMP DT_HRR = 0.1, DT_DEVC = 0.1 DT_PL3D = 10000 DT_SLCF = 10000 /
 
 &SURF ID                        = 'Wood'
       BACKING                   = 'INSULATED'
@@ -26,7 +26,7 @@
 	NU_RESIDUE	= 0.5
 	RESIDUE 	= 'CHAR'
 	HEAT_OF_REACTION= 1000
-	HEAT_OF_COMBUSTION(1,1) = 12000/
+	HEAT_OF_COMBUSTION(1) = 12000/
 	
 &SPEC ID = 'fuel_gas', MW = 50. /
 	
