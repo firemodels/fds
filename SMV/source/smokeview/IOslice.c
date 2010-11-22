@@ -7,7 +7,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <math.h>
 #include "flowfiles.h"
+
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
@@ -1263,9 +1265,9 @@ int new_multi(slice *sdold,slice *sd){
 
     delta = sdold->delta;
     if(sd->delta>delta)delta=sd->delta;
-    if(abs(sd->xmin-sdold->xmin)<delta&&abs(sd->xmax-sdold->xmax)<delta
-	   &&abs(sd->ymin-sdold->ymin)<delta&&abs(sd->ymax-sdold->ymax)<delta
-	   &&abs(sd->zmin-sdold->zmin)<delta&&abs(sd->zmax-sdold->zmax)<delta
+    if(fabs(sd->xmin-sdold->xmin)<delta&&fabs(sd->xmax-sdold->xmax)<delta
+	   &&fabs(sd->ymin-sdold->ymin)<delta&&fabs(sd->ymax-sdold->ymax)<delta
+	   &&fabs(sd->zmin-sdold->zmin)<delta&&fabs(sd->zmax-sdold->zmax)<delta
         ){
 	    return 1;
 	}
