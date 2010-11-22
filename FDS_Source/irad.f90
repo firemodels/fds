@@ -1701,7 +1701,9 @@ INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 !     DLN       Wall normal matrix
 !     DPHI0     Opening angle of the cylindrical domain
 !     E_WALL    Wall emissivity
-!     ILW       Radiation intensities on solid walls, mirrors
+!     ILW       Radiation intensities on solid mirrors and mesh interfaces.
+!               Intensity integrals (band specific or angle increment) for solid and open walls
+!     INRAD_W   Incident radiative heat flux on a cell (QRADIN = E_WALL*INRAD_W)
 !     KWR       Array of droplet radii for Mie-calculations
 !     NDG       Number of droplet radii in WQABS and WQSCA arrays
 !     NLMBDMIE  Number of wave lengths in Mie calculations
@@ -1711,9 +1713,12 @@ INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 !     NRT       Number of radiation theta angles
 !     NRP       Number of radiation phi angles on each theta band
 !     NSB       Number of spectral bands (1=gray, 6=wide band, 9=wide band w. CH4)
+!     OUTRAD_W  Emitted intensity from a wall (OUTRAD_W = QRADOUT/PI)
 !     PHIUP     Upper limit of solid angle component PHI
 !     PHILOW    Lower limit of solid angle component PHI
 !     RADTMP    Radiation temperature for absorption properties (Mie)
+!     QRADIN    Absorbed radiative heat flux into a surface cell (solid wall or open)
+!     QRADOUT   Emitted radiative heat flux from a surface (solid wall or open) 
 !     RSA       Array of solid angles
 !     RTMPMAX   Maximum temperature for tabulation of radiative properties
 !     RTMPMIN   Minimum temperature for tabulation of radiative properties
