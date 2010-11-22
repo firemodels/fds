@@ -20,13 +20,15 @@ setenv BASEDIR `pwd`
 setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds_bg.csh
 setenv BACKGROUND "$SVNROOT/Utilities/background/INTEL_LINUX_32/background -hosts ~/run_nodes -u 75 -d 5"
 
+setenv RUNFDSFG $SVNROOT/Utilities/Scripts/runfds_fg.csh
+
 echo FDS cases submitted
 
 ./FDS_Cases.csh
 
-cd $BASEDIR/SMV_Scripts
+cd $BASEDIR/scripts
 
 ./SMV_Cases.csh
 
-cd $BASEDIR/SMV_Scripts
+cd $BASEDIR/scripts
 ./run_wui_tree_test.csh
