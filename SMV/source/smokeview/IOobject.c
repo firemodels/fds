@@ -49,6 +49,8 @@ char IOobject_revision[]="$Revision$";
 #define SV_GTRANSLATE  133
 #define SV_ROTATEAXIS 134
 #define SV_ROTATEEYE 135
+#define SV_INCLUDE 136
+#define SV_INCLUDEF 137
 
 #define SV_TRANSLATE_NUMARGS  3
 #define SV_ROTATEX_NUMARGS    1
@@ -83,6 +85,8 @@ char IOobject_revision[]="$Revision$";
 #define SV_GTRANSLATE_NUMARGS  3
 #define SV_ROTATEAXIS_NUMARGS 4
 #define SV_ROTATEEYE_NUMARGS 0
+#define SV_INCLUDE_NUMARGS 1
+#define SV_INCLUDEF_NUMARGS 2
 
 #define SV_TRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEX_NUMOUTARGS    0
@@ -117,6 +121,8 @@ char IOobject_revision[]="$Revision$";
 #define SV_GTRANSLATE_NUMOUTARGS  0
 #define SV_ROTATEAXIS_NUMOUTARGS 0
 #define SV_ROTATEEYE_NUMOUTARGS 0
+#define SV_INCLUDE_NUMOUTARGS 0
+#define SV_INCLUDEF_NUMOUTARGS 0
 
 
 #define SV_DRAWCUBE      200
@@ -248,7 +254,7 @@ void drawhexdisk(float diameter, float height, unsigned char *rgbcolor);
 void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor);
 void drawring(float d_inner, float d_outer, float height, unsigned char *rgbcolor);
 void drawnotchplate(float diameter, float height, float notchheight, float direction, unsigned char *rgbcolor);
-void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop);
+void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop, int recurse_level);
 sv_object *get_object(char *label);
 void free_object(sv_object *object);
 void remove_comment(char *buffer);
@@ -618,10 +624,10 @@ void draw_devices(void){
       int state;
 
       state=devicei->showstatelist[itime];
-      draw_SVOBJECT(devicei->object,state,prop);
+      draw_SVOBJECT(devicei->object,state,prop,0);
     }
     else{
-      draw_SVOBJECT(devicei->object,devicei->state0,prop);
+      draw_SVOBJECT(devicei->object,devicei->state0,prop,0);
     }
     if(devicei->nparams>0&&prop!=NULL){
       prop->nvars_indep=0;
@@ -671,7 +677,7 @@ void drawTargetNorm(void){
 
 /* ----------------------- draw_SVOBJECT ----------------------------- */
 
-void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
+void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurse_level){
   sv_object_frame *framei;
   tokendata *toknext;
   int *op;
@@ -793,7 +799,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
   }
 
   use_material=0;
-  if(select_device_color_ptr==NULL){
+  if(select_device_color_ptr==NULL&&recurse_level==0){
     glEnable(GL_LIGHTING);
 
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -849,6 +855,32 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
         *argptr=val_result;
       }
       break;
+	case SV_INCLUDE:
+	case SV_INCLUDEF:
+		{
+          sv_object *included_object;
+          int iframe;
+		  char *object_name;
+
+		  if(toki->included_object==NULL){
+		    if(toki->command==SV_INCLUDEF){
+		      iframe=arg[0];
+		    }
+		    else{
+              iframe=0;
+		    }
+            object_name = (toki-1)->string;
+            included_object = get_SVOBJECT_type(object_name,missing_device);
+			toki->included_frame=iframe;
+			toki->included_object=included_object;
+		  }
+		  else{
+            iframe=toki->included_frame;
+            included_object = toki->included_object;
+		  }
+          draw_SVOBJECT(included_object, iframe, NULL, recurse_level+1);
+		}
+		break;
     case SV_ABS:
       if(arg[0]<0.0){
         *argptr=-arg[0];
@@ -1292,7 +1324,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop){
       break;
     }
   }
-  if(use_material==1){
+  if(use_material==1&&recurse_level==0){
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
@@ -3457,6 +3489,16 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     num_op=SV_POP_NUMARGS;
     num_outop=SV_POP_NUMOUTARGS;
   }
+  else if(STRCMP(token,"include")==0){
+    op=SV_INCLUDE;
+    num_op=SV_INCLUDE_NUMARGS;
+    num_outop=SV_INCLUDE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"includef")==0){
+    op=SV_INCLUDEF;
+    num_op=SV_INCLUDEF_NUMARGS;
+    num_outop=SV_INCLUDEF_NUMOUTARGS;
+  }
   else if(STRCMP(token,"abs")==0){
     op=SV_ABS;
     num_op=SV_ABS_NUMARGS;
@@ -3638,6 +3680,8 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
       toki->type=TOKEN_COMMAND;
       error_code=get_token_id(toki->token, &toki->command, &toki->nvars, &toki->noutvars, &use_displaylist);
+	  toki->included_frame=0;
+	  toki->included_object=NULL;
       if(error_code==1){
         frame->error=1;
         printf("*** error: unable to identify the command, %s, while parsing:\n\n",toki->token);

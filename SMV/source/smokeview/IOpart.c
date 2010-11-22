@@ -26,7 +26,7 @@ char IOpart_revision[]="$Revision$";
 int tagscompare( const void *arg1, const void *arg2 );
 void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j);
 
-void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop);
+void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop, int recurse_level);
 void ParticlePropShowMenu(int val);
 void PART_CB_INIT(void);
 void update_all_partvis(particle *parti);
@@ -1546,7 +1546,7 @@ void drawPart5(const particle *parti){
                 }
               }
               copy_dep_vals(partclassi,datacopy,colorptr,prop,j);
-              draw_SVOBJECT(avatar_types[avatar_type],0,prop);
+              draw_SVOBJECT(avatar_types[avatar_type],0,prop,0);
               select_device_color_ptr=NULL;
               avatar_types[avatar_type]->use_displaylist=save_use_displaylist;
               glPopMatrix();
@@ -1618,7 +1618,7 @@ void drawPart5(const particle *parti){
                 partfacedir[1]=ybar0+world_eyepos[1]/xyzmaxdiff-yplts[sy[j]];
                 partfacedir[2]=zbar0+world_eyepos[2]/xyzmaxdiff-zplts[sz[j]];
                 
-                draw_SVOBJECT(prop->smv_object,0,prop);
+                draw_SVOBJECT(prop->smv_object,0,prop,0);
                 glPopMatrix();
               }
             }

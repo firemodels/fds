@@ -597,6 +597,8 @@ typedef struct _tourdata {
 typedef struct _tokendata {
   float var,*varptr,default_val;
   int command,loc,type,reads,nvars,noutvars,is_label,is_string,is_texturefile;
+  struct _sv_object *included_object;
+  int included_frame;
   int texture_index;
   struct _tokendata *next,*elsenext;
   char *token;
