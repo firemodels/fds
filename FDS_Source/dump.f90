@@ -759,15 +759,8 @@ IF_DUMP_SPECIES_INFO: IF (MASS_FILE) THEN
    ENDIF
 ENDIF IF_DUMP_SPECIES_INFO
 
-! Special output dump for UL pan test data
-
-IF (UL_PAN_DATA) THEN
-   LU_UL_PAN_DATA = GET_FILE_NUMBER()
-   OPEN(LU_UL_PAN_DATA,FILE=TRIM(CHID)//'_awmpua.csv',FORM='FORMATTED',STATUS='REPLACE')
-   WRITE(LU_UL_PAN_DATA,'(A)') 'T, XW(IW), YW(IW), ZW(IW), PP(I-J)'
-ENDIF
-
 ! Special output for pressure iteration scheme
+
 IF (VELOCITY_ERROR_FILE) THEN
    OPEN(UNIT=LU_VELOCITY_ERROR,FILE=FN_VELOCITY_ERROR,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
    WRITE(LU_VELOCITY_ERROR,'(A)') 'ICYC, PRESS IT, VELOCITY_ERROR_MAX'
@@ -5811,9 +5804,6 @@ FLOOP: DO NF=1,N_BNDF
                   IC = CELL_INDEX(I,J,KG)
                   IW = WALL_INDEX(IC,-IOR)
                   PP(I,J) = SOLID_PHASE_OUTPUT(NM,IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
-                  ! Special dump of UL pan test data
-                  IF (UL_PAN_DATA .AND. IOR==3 .AND. OUTPUT_QUANTITY(-IND)%NAME=='AMPUA' .AND. MOD(INT(T),100)==0) &
-                     WRITE(LU_UL_PAN_DATA,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
                   IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY .AND. .NOT.SOLID(CELL_INDEX(I,J,KG))) IBK(I,J)=1
                ENDDO
             ENDDO
@@ -5931,9 +5921,6 @@ FLOOP: DO NF=1,N_BNDF
                      IC = CELL_INDEX(I,J,K)
                      IW = WALL_INDEX(IC,-IOR)
                      PP(I,J) = SOLID_PHASE_OUTPUT(NM,IW,IND,BF%SPEC_INDEX,BF%PART_INDEX)
-                     ! Special dump of UL pan test data
-                     IF (UL_PAN_DATA .AND. IOR==3 .AND. OUTPUT_QUANTITY(-IND)%NAME=='AMPUA' .AND. MOD(INT(T),100)==0) &
-                        WRITE(LU_UL_PAN_DATA,"(F10.4,4(',',F10.4))") T,XW(IW),YW(IW),ZW(IW),PP(I,J)
                      IF (BOUNDARY_TYPE(IW)/=NULL_BOUNDARY) IBK(I,J)=1
                   ENDDO
                ENDDO
