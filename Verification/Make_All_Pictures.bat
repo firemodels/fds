@@ -34,6 +34,7 @@ smokeview -runscript ns2d_64
 
 cd ..\Pressure_Effects
 smokeview -runscript pressure_boundary
+smokeview -runscript leak_test_2
 
 cd ..\Scalar_Analytical_Solution
 smokeview -runscript move_slug
