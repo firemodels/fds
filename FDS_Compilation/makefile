@@ -54,6 +54,8 @@ setup_win:
 .c.obj:
 	$(CCOMPL) -c $(CFLAGS) $<
 
+read.o: FFLAGS = -O0
+
 # Windows Intel Compiler, version 11
 
  #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target

@@ -1930,7 +1930,7 @@ T_s(x_f,t) &= & T_f \nonumber
 \end{eqnarray}
 The analytical solutions for the phase interface location and temperature are \cite{Carslaw:1}
 \be
-x_f(t) = 2 \lambda \sqrt{\alpha t}
+x_f(t) = 2 \lambda \sqrt{\alpha_l t}
 \ee
 \begin{eqnarray}
 \frac{T_s(x,t)-T_0}{T_f - T_0} &=& \frac{\erf(x/2\sqrt{\alpha t})} {\erf (x_f/2\sqrt{\alpha t})}\mbox{,}\;\; (0 < x < x_f) \\
@@ -1939,8 +1939,10 @@ x_f(t) = 2 \lambda \sqrt{\alpha t}
 where $\lambda = x_f /2\sqrt{\alpha t}$ is obtained as a root of the (complicated)
 trancendential equation, given in \cite{Carslaw:1}. 
 
-In the test case the thickness of the layer is 50 cm, and the temperature boundary condition is implemented as
-convection to $T_0$ ambient with very high convection coefficient. For material properties, we choose $\rho_s = \rho_l =$ 1000 kg/m$^3$, 
+In the test case, the thickness of the layer cannot be infinite. For practical purposes, a 50 cm thick layer was found to be sufficient.
+The fixed-temperature boundary condition, which is formally not available for the condenced-phase heat transfer solver, 
+is implemented as convection to $T_0$ ambient with very high convection coefficient. 
+For material properties, we choose $\rho_s = \rho_l =$ 1000 kg/m$^3$, 
 $k_s = k_l = 2$ W/Km, $c_s = c_l = 2$ kJ/kgK, $H_{r,\alpha\beta}=300$ kJ/kg, $T_f = 0^\circ$C, $T_i = +15^\circ$C,
 and $T_0 = -15^\circ$C, which leads to a {\em Stefan number} 
 \be
