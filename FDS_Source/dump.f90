@@ -3361,42 +3361,55 @@ END SUBROUTINE DUMP_ISOF
 
 SUBROUTINE DUMP_SMOKE3D(T,NM)
 
+! Write out the transparent smoke/fire data to files. Typically, smoke goes into the file 1, fire (HRRPUV) into file 2.
+
 REAL(EB), INTENT(IN) :: T
 INTEGER,  INTENT(IN) :: NM
-INTEGER  :: DATAFLAG,DATAFLAG2,I,J,K
+INTEGER  :: DATA_FILE_FLAG,DATA_FLAG,I,J,K
 REAL(FB) :: DXX,MASS_EXT_COEF,STIME
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FF=>NULL()
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: QQ_PACK
 
 IF (EVACUATION_ONLY(NM)) RETURN
-DRY=.FALSE.
+
 CALL POINT_TO_MESH(NM)
  
-STIME   = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
+! Miscellaneous settings
+
+DRY   = .FALSE.
+STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
+DXX   = DX(1)
+FF   => WORK3
+
+! If the user desires the "smoke" to be something other than smoke, set the appropriate extinction coefficient
+
 MASS_EXT_COEF = MASS_EXTINCTION_COEFFICIENT
 IF (SMOKE3D_SPEC_INDEX>0) MASS_EXT_COEF = SPECIES(SMOKE3D_SPEC_INDEX)%MASS_EXTINCTION_COEFFICIENT
-DXX     = DX(1)
-FF => WORK3
  
-DATA_LOOP: DO DATAFLAG=1,2
-   DATAFLAG2 = DATAFLAG
-   SELECT CASE(DATAFLAG)
+! Write out 1 or 2 data files. The first usually contains the transparent "smoke", the second usually the fire.
+
+DATA_FILE_LOOP: DO DATA_FILE_FLAG=1,2
+
+   IF (SMOKE3D_QUANTITY_INDEX==11) THEN
+      DATA_FLAG = 2
+   ELSE
+      DATA_FLAG = DATA_FILE_FLAG
+   ENDIF
+
+   SELECT CASE(DATA_FLAG)
       CASE(1)
-         IF (SMOKE3D_QUANTITY_INDEX==11) THEN
-            FF = Q*0.001_EB
-            DATAFLAG2 = 2
-         ELSE
-            DO K=0,KBP1
-               DO J=0,JBP1
-                  DO I=0,IBP1
-                     FF(I,J,K) = RHO(I,J,K)*GAS_PHASE_OUTPUT(I,J,K,SMOKE3D_QUANTITY_INDEX,0,SMOKE3D_SPEC_INDEX,0,0,T,NM)
-                  ENDDO
+         DO K=0,KBP1
+            DO J=0,JBP1
+               DO I=0,IBP1
+                  FF(I,J,K) = RHO(I,J,K)*GAS_PHASE_OUTPUT(I,J,K,SMOKE3D_QUANTITY_INDEX,0,SMOKE3D_SPEC_INDEX,0,0,T,NM)
                ENDDO
             ENDDO
-         ENDIF
+         ENDDO
       CASE(2)
          FF = Q*0.001_EB
    END SELECT
+
+   ! Interpolate data to cell nodes
 
    DO K=0,KBAR
       DO J=0,JBAR
@@ -3407,17 +3420,22 @@ DATA_LOOP: DO DATAFLAG=1,2
       ENDDO
    ENDDO
  
+   ! Pack the data into a 1-D array and call the C routine that writes the file
+
    ALLOCATE(QQ_PACK(IBP1*JBP1*KBP1)) 
    QQ_PACK = PACK(QQ(0:IBAR,0:JBAR,0:KBAR,1),MASK=.TRUE.)
-   CALL SMOKE3DTOFILE(TRIM(FN_SMOKE3D(DATAFLAG,NM))//CHAR(0),STIME,DXX,MASS_EXT_COEF,DATAFLAG2,QQ_PACK,IBP1,JBP1,KBP1,&
+   CALL SMOKE3DTOFILE(TRIM(FN_SMOKE3D(DATA_FILE_FLAG,NM))//CHAR(0),STIME,DXX,MASS_EXT_COEF,DATA_FLAG,QQ_PACK,IBP1,JBP1,KBP1,&
             HRRPUV_MAX_SMV)
    DEALLOCATE(QQ_PACK)
-   IF (SMOKE3D_QUANTITY_INDEX==11) EXIT DATA_LOOP
-ENDDO DATA_LOOP
+   
+   IF (DATA_FLAG==2) EXIT DATA_FILE_LOOP
+
+ENDDO DATA_FILE_LOOP
  
 END SUBROUTINE DUMP_SMOKE3D
  
  
+
 SUBROUTINE DUMP_SLCF(T,NM,IFRMT)
 
 ! Write either Slice File or Plot3D file data to file(s)
