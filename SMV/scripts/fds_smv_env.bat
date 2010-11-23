@@ -25,6 +25,7 @@ set COMPILEHOST=fire70
 
 Rem ----------- for uploading to Google Code -----------------
 
+set upload==%svn_root%\smv\scripts\googlecode_upload.py
 set fds_google_level=Release-3_Maintenance
 set smv_google_level=Release-3_Maintenance
 

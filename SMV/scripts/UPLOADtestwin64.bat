@@ -40,7 +40,7 @@ if not %upload_win64% == 1 goto endif_win64
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
-       googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+       %upload% --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
 :endif_win64
 
 Rem --------------- 32 bit Windows ----------------
@@ -53,7 +53,7 @@ if not %upload_win32% == 1 goto endif_win32
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
-       googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+       %upload% --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
 :endif_win32
 
 Rem --------------- 32 bit Linux ----------------
@@ -67,7 +67,7 @@ if not %upload_linux32% == 1 goto endif_linux32
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
-       googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+       %upload% --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
 :endif_linux32
 
 Rem --------------- 32 bit OSX ----------------
@@ -81,7 +81,7 @@ if not %upload_osx32% == 1 goto endif_osx32
   echo.
   echo Uploading %summary% - %exe%
   echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
-       googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+       %upload% --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
 :endif_osx32
 
 echo.

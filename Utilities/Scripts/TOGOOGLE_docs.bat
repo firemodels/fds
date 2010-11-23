@@ -31,7 +31,7 @@ pause
   set file=%windocs%
   echo.
   echo Uploading %summary% 
-       googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
+       %upload% --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
 
 echo.
 echo Upload complete
@@ -43,7 +43,7 @@ echo Upload complete
   set file=%unixdocs%
   echo.
   echo Uploading %summary% 
-       googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
+       %upload% --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u gforney -l %glabels% %file%
 
 echo .
 echo Upload complete
