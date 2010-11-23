@@ -111,11 +111,9 @@ ENDIF
 RN => REACTION(1)
 HFAC_F  = RN%HEAT_OF_COMBUSTION/DT
 
-IF (NEW_MIX_TIME) THEN
-   UU => US
-   VV => VS
-   WW => WS
-ENDIF
+UU => US
+VV => VS
+WW => WS
 
 !$OMP END SINGLE
 
@@ -216,36 +214,32 @@ DO K=1,KBAR
                ENDIF
             ENDIF
  
-            EXPERIMENTAL_IF: IF (NEW_MIX_TIME) THEN
-               ! experimental
-               TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)   ! diffusive time scale
-               
-               ! compute local filtered strain
-               DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
-               DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
-               DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
-               DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
-               DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
-               DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
-               DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
-               DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
-               DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
-               S12 = 0.5_EB*(DUDY+DVDX)
-               S13 = 0.5_EB*(DUDZ+DWDX)
-               S23 = 0.5_EB*(DVDZ+DWDY)
-               SS2 = 2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2))
-               
-               EPSK = MU(I,J,K)/RHO(I,J,K)*SS2       ! ke dissipation rate, assumes production=dissipation
-               KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH  ! estimate of subgrid ke, from Kolmogorov spectrum
-
-               TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB)   ! advective time scale
-               TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
-               MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(MIN(TAU_D,TAU_U,TAU_G),TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
-            ELSE EXPERIMENTAL_IF
-               ! FDS 5 default
-               MIX_TIME(I,J,K)=C_EDC*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)
-            ENDIF EXPERIMENTAL_IF
+            TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)   ! diffusive time scale
             
+            ! compute local filtered strain
+
+            DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
+            DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
+            DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
+            DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
+            DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
+            DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
+            DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
+            DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
+            DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
+            S12 = 0.5_EB*(DUDY+DVDX)
+            S13 = 0.5_EB*(DUDZ+DWDX)
+            S23 = 0.5_EB*(DVDZ+DWDY)
+            SS2 = 2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2))
+            
+            EPSK = MU(I,J,K)/RHO(I,J,K)*SS2       ! ke dissipation rate, assumes production=dissipation
+            KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH  ! estimate of subgrid ke, from Kolmogorov spectrum
+
+            TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB)   ! advective time scale
+            TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
+
+            MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(MIN(TAU_D,TAU_U,TAU_G),TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
+
          ENDIF LES_IF
          
          ! chemical time scale
@@ -262,14 +256,9 @@ DO K=1,KBAR
          
          IF (FIXED_MIX_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_MIX_TIME
          
-         NEW_DYF_IF: IF (NEW_MIX_TIME) THEN
-            Y_LIMITER = MIN( Y_FU_0, Y_O2_0/RN%O2_F_RATIO, BETA_EDC*Y_P_0 )
-            DYF = Y_LIMITER*(1._EB-EXP(-DT/MIX_TIME(I,J,K)))
-            Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F
-         ELSE NEW_DYF_IF  ! FDS 5 default
-            DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO)
-            Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F*MIN(1._EB,DT/MIX_TIME(I,J,K))
-         ENDIF NEW_DYF_IF
+         Y_LIMITER = MIN( Y_FU_0, Y_O2_0/RN%O2_F_RATIO, BETA_EDC*Y_P_0 )
+         DYF = Y_LIMITER*(1._EB-EXP(-DT/MIX_TIME(I,J,K)))
+         Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F
          
          Q_BOUND_2 = Q_UPPER
          Q_NEW = MIN(Q_BOUND_1,Q_BOUND_2)
