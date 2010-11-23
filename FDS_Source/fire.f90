@@ -125,7 +125,6 @@ DO K=1,KBAR
       DO I=1,IBAR
          IC = CELL_INDEX(I,J,K)
          IF (SOLID(IC)) CYCLE
-         IF (TMP(I,J,K) < RN%AIT) CYCLE
          Y_FU_0  = MAX(0._EB,MIN(1._EB,YY(I,J,K,I_FUEL)))*RN%Y_F_INLET
          IF (Y_FU_0<=Y_FU_MIN) CYCLE
          Y_O2_0  = Y_O2(I,J,K)
