@@ -67,6 +67,9 @@ if "%platform%"=="64" copy pthreadVC2_x64.dll %smvdir%\.
 echo copying note.txt
 copy note.txt %smvdir%\.
 
+echo copying smokeview.ini
+copy smokeview.ini %smvdir%\.
+
 echo copying textures
 mkdir %smvdir%\textures
 copy textures\*.jpg %smvdir%\textures
