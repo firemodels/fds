@@ -24,7 +24,7 @@ cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %COMPILEHOST% %scriptdir% MAKEsmzlinux.csh %smv_revision%
+plink %svn_logon% %scriptdir%/ssh_command.csh %LINUXCOMPILE% %scriptdir% MAKEsmzlinux.csh %smv_revision%
 
 echo.
 echo compilation complete

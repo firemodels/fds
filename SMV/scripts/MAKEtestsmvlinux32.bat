@@ -28,7 +28,7 @@ set scriptdir=FDS-SMV/SMV/scripts
 set bundledir=FDS-SMV/SMV/for_bundle
 set bindir=FDS-SMV/SMV/bin
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %COMPILEHOST% %scriptdir% MAKEtestsmvlinux32.csh %smv_revision%
+plink %svn_logon% %scriptdir%/ssh_command.csh %LINUXCOMPILE% %scriptdir% MAKEtestsmvlinux32.csh %smv_revision%
 
 echo.
 echo compilation complete

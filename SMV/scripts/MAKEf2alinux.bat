@@ -24,7 +24,7 @@ cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %COMPILEHOST% %scriptdir% MAKEf2alinux.csh %smv_revision%
+plink %svn_logon% %scriptdir%/ssh_command.csh %LINUXCOMPILE% %scriptdir% MAKEf2alinux.csh %smv_revision%
 
 echo.
 echo compilation complete
