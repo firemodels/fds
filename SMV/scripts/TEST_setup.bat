@@ -41,13 +41,13 @@ echo linux_hostname=%linux_hostname%
 echo OSXHOST=%OSXHOST%
 echo LINUXCOMPILE=%OSXHOST%
 echo linux_username=%linux_username%
-echo google_username=%google_username%
 echo svn_logon=%svn_logon%
 
 echo.
 echo *** Google Code upload settings
 
 echo.
+echo google_username=%google_username%
 echo google_password_dir=%google_password_dir%
 echo upload=%upload%
 echo fds_google_level=%fds_google_level%
