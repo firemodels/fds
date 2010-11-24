@@ -19,20 +19,22 @@ PUBLIC MASS_FINITE_DIFFERENCES,DENSITY,GET_REV_mass
  
 CONTAINS
  
+
 SUBROUTINE MASS_FINITE_DIFFERENCES(NM)
+
+! Compute spatial differences for density equation
+
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE GLOBAL_CONSTANTS, ONLY: N_SPECIES,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN_BOUNDARY,INTERPOLATED_BOUNDARY, &
-                            PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,DEBUG_OPENMP,NOBIAS,SOLID_BOUNDARY, &
+                            PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,DEBUG_OPENMP,SOLID_BOUNDARY, &
                             NO_MASS_FLUX,SPECIFIED_MASS_FLUX,HVAC_BOUNDARY
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: FXYZ,PMDT,UDRHODN,TNOW,ZZ(4),UN,RHO_D_DYDN
+REAL(EB) :: TNOW,ZZ(4),UN,RHO_D_DYDN
 INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,IBC
 REAL(EB), POINTER, DIMENSION(:) :: UWP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UDRHODX,VDRHODY,WDRHODZ,EPSX,EPSY,EPSZ, &
-                                       FX=>NULL(),FY=>NULL(),FZ=>NULL(),MASS_COR=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: FX=>NULL(),FY=>NULL(),FZ=>NULL(),MASS_COR=>NULL()
  
-IF (EVACUATION_ONLY(NM)) RETURN
-IF (SOLID_PHASE_ONLY) RETURN
+IF (EVACUATION_ONLY(NM) .OR. SOLID_PHASE_ONLY) RETURN
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
@@ -44,7 +46,6 @@ IF (PREDICTOR) THEN
    DP => D
    RHOP => RHO
    UWP  => UW
-   PMDT = DT
 ELSE
    UU => US
    VV => VS
@@ -52,284 +53,183 @@ ELSE
    DP => DS
    RHOP => RHOS
    UWP  => UWS
-   PMDT = -DT
 ENDIF
 
-IF (NOBIAS) PMDT = 0._EB
-
-! Define local CFL numbers
- 
-EPSX => WORK1
-EPSY => WORK2
-EPSZ => WORK3
-
 !$OMP PARALLEL 
-!$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-DO K=0,KBAR
-   DO J=0,JBAR
+
+!$OMP SINGLE
+FX=>WORK4
+FY=>WORK5
+FZ=>WORK6
+MASS_COR=>WORK7
+MASS_COR=0._EB
+!$OMP END SINGLE
+
+!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ)
+DO K=1,KBAR
+   DO J=1,JBAR
       DO I=0,IBAR
-         !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_01'
-         EPSX(I,J,K) = PMDT*UU(I,J,K)*RDXN(I)
-         EPSY(I,J,K) = PMDT*VV(I,J,K)*RDYN(J)
-         EPSZ(I,J,K) = PMDT*WW(I,J,K)*RDZN(K)
+         ZZ(1:4) = RHOP(I-1:I+2,J,K)
+         FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)*R(I)
       ENDDO
    ENDDO
 ENDDO
 !$OMP END DO
 
-! Compute spatial differences for density equation
- 
-FLUX_LIMITER_IF: IF (FLUX_LIMITER==-1) THEN ! FDS 5 default
-
-   !$OMP SINGLE
-   UDRHODX => WORK4
-   VDRHODY => WORK5
-   WDRHODZ => WORK6
-   !$OMP END SINGLE
-
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_02'
-            UDRHODX(I,J,K) = UU(I,J,K)*(RHOP(I+1,J,K)-RHOP(I,J,K))*RDXN(I)
-            VDRHODY(I,J,K) = VV(I,J,K)*(RHOP(I,J+1,K)-RHOP(I,J,K))*RDYN(J)
-            WDRHODZ(I,J,K) = WW(I,J,K)*(RHOP(I,J,K+1)-RHOP(I,J,K))*RDZN(K)
-         ENDDO
+!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ)
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+         ZZ(1:4) = RHOP(I,J-1:J+2,K)
+         FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
       ENDDO
    ENDDO
-   !$OMP END DO
+ENDDO
+!$OMP END DO
 
-   !$OMP SINGLE PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR,UDRHODN)
-   !!$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR,UDRHODN)
-   WLOOP: DO IW=1,NWC
-      !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_03'
-      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
-          BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WLOOP
-      II  = IJKW(1,IW) 
-      IIG = IJKW(6,IW)
-      JJ  = IJKW(2,IW) 
-      JJG = IJKW(7,IW)
-      KK  = IJKW(3,IW) 
-      KKG = IJKW(8,IW)
-      IOR = IJKW(4,IW)
-      UDRHODN = 2._EB*UWP(IW)*(RHO_F(IW)-RHOP(IIG,JJG,KKG))*RDN(IW)
+!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ)
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         ZZ(1:4) = RHOP(I,J,K-1:K+2)
+         FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+!$OMP END DO
+
+!$OMP SINGLE PRIVATE(IW,II,JJ,KK,IOR,IBC,IIG,JJG,KKG,UN,ZZ)
+!!$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IBC,IIG,JJG,KKG,UN,ZZ)
+WLOOP_FL: DO IW=1,NWC
+   
+   IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY   .OR. &
+       BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
+       BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)            CYCLE WLOOP_FL
+       
+   II  = IJKW(1,IW) 
+   JJ  = IJKW(2,IW)
+   KK  = IJKW(3,IW)
+   IOR = IJKW(4,IW)
+   IBC = IJKW(5,IW)
+   IIG = IJKW(6,IW)
+   JJG = IJKW(7,IW)
+   KKG = IJKW(8,IW)
+   
+   SELECT CASE(IOR)
+      CASE( 1)
+         UN = UU(II,JJ,KK)
+   CASE(-1)
+         UN = UU(II-1,JJ,KK)
+      CASE( 2)
+         UN = VV(II,JJ,KK)
+      CASE(-2)
+         UN = VV(II,JJ-1,KK)
+      CASE( 3)
+         UN = WW(II,JJ,KK)
+      CASE(-3)
+         UN = WW(II,JJ,KK-1)
+   END SELECT
+   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+   
+   MASS_COR_IF: IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN
+      RHO_F(IW)=RHOP(IIG,JJG,KKG)
+      UN=0._EB
       SELECT CASE(IOR)
          CASE( 1)
-            UDRHODX(II,JJ,KK)   = UDRHODN
-         CASE(-1) 
-            UDRHODX(II-1,JJ,KK) = UDRHODN
-         CASE( 2) 
-            VDRHODY(II,JJ,KK)   = UDRHODN
-         CASE(-2) 
-            VDRHODY(II,JJ-1,KK) = UDRHODN
-         CASE( 3) 
-            WDRHODZ(II,JJ,KK)   = UDRHODN
-         CASE(-3) 
-            WDRHODZ(II,JJ,KK-1) = UDRHODN
-      END SELECT
-   ENDDO WLOOP
-   !!$OMP END DO
-   !$OMP END SINGLE
-
-   !$OMP WORKSHARE
-   FRHO = 0._EB
-   !$OMP END WORKSHARE
-
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,FXYZ)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            FXYZ   = .5_EB*(UDRHODX(I,J,K)  *(1._EB-EPSX(I,J,K))   +  &
-                            UDRHODX(I-1,J,K)*(1._EB+EPSX(I-1,J,K)) +  &
-                            VDRHODY(I,J,K)  *(1._EB-EPSY(I,J,K))   +  &
-                            VDRHODY(I,J-1,K)*(1._EB+EPSY(I,J-1,K)) +  &
-                            WDRHODZ(I,J,K)  *(1._EB-EPSZ(I,J,K))   +  &
-                            WDRHODZ(I,J,K-1)*(1._EB+EPSZ(I,J,K-1)) )
-            FRHO(I,J,K) = FXYZ + RHOP(I,J,K)*DP(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO
-
-ELSE FLUX_LIMITER_IF
-
-   !$OMP SINGLE
-   FX=>WORK4
-   FY=>WORK5
-   FZ=>WORK6
-   MASS_COR=>WORK7
-   MASS_COR=0._EB
-   !$OMP END SINGLE
-
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=0,IBAR
-            ZZ(1:4) = RHOP(I-1:I+2,J,K)
-            FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZ,FLUX_LIMITER)*R(I)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO
-   
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ)
-   DO K=1,KBAR
-      DO J=0,JBAR
-         DO I=1,IBAR
-            ZZ(1:4) = RHOP(I,J-1:J+2,K)
-            FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZ,FLUX_LIMITER)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO
-   
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ)
-   DO K=0,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            ZZ(1:4) = RHOP(I,J,K-1:K+2)
-            FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZ,FLUX_LIMITER)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO
-   
-   !$OMP SINGLE PRIVATE(IW,II,JJ,KK,IOR,IBC,IIG,JJG,KKG,UN,ZZ)
-   !!$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IBC,IIG,JJG,KKG,UN,ZZ)
-   WLOOP_FL: DO IW=1,NWC
-      
-      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY   .OR. &
-          BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
-          BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)            CYCLE WLOOP_FL
-          
-      II  = IJKW(1,IW) 
-      JJ  = IJKW(2,IW)
-      KK  = IJKW(3,IW)
-      IOR = IJKW(4,IW)
-      IBC = IJKW(5,IW)
-      IIG = IJKW(6,IW)
-      JJG = IJKW(7,IW)
-      KKG = IJKW(8,IW)
-      
-      SELECT CASE(IOR)
-         CASE( 1)
-            UN = UU(II,JJ,KK)
+            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(UU(II,JJ,KK)-UN)*RDX(IIG)
          CASE(-1)
-            UN = UU(II-1,JJ,KK)
+            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(UU(II-1,JJ,KK)-UN)*RDX(IIG)
          CASE( 2)
-            UN = VV(II,JJ,KK)
+            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(VV(II,JJ,KK)-UN)*RDY(JJG)
          CASE(-2)
-            UN = VV(II,JJ-1,KK)
+            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(VV(II,JJ-1,KK)-UN)*RDY(JJG)
          CASE( 3)
-            UN = WW(II,JJ,KK)
+            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(WW(II,JJ,KK)-UN)*RDZ(KKG)
          CASE(-3)
-            UN = WW(II,JJ,KK-1)
+            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(WW(II,JJ,KK-1)-UN)*RDZ(KKG)
       END SELECT
-      IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
-      
-      MASS_COR_IF: IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN
-         RHO_F(IW)=RHOP(IIG,JJG,KKG)
-         UN=0._EB
-         SELECT CASE(IOR)
-            CASE( 1)
-               MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(UU(II,JJ,KK)-UN)*RDX(IIG)
-            CASE(-1)
-               MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(UU(II-1,JJ,KK)-UN)*RDX(IIG)
-            CASE( 2)
-               MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(VV(II,JJ,KK)-UN)*RDY(JJG)
-            CASE(-2)
-               MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(VV(II,JJ-1,KK)-UN)*RDY(JJG)
-            CASE( 3)
-               MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(WW(II,JJ,KK)-UN)*RDZ(KKG)
-            CASE(-3)
-               MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(WW(II,JJ,KK-1)-UN)*RDZ(KKG)
-         END SELECT
-      ENDIF MASS_COR_IF
-      
-      ! compute flux on the face of the wall cell
+   ENDIF MASS_COR_IF
+   
+   ! compute flux on the face of the wall cell
 
-      SELECT CASE(IOR)
-         CASE( 1)
-            FX(II,JJ,KK)   = UN*RHO_F(IW)*R(II)
-         CASE(-1)
-            FX(II-1,JJ,KK) = UN*RHO_F(IW)*R(II-1)
-         CASE( 2)
-            FY(II,JJ,KK)   = UN*RHO_F(IW)
-         CASE(-2)
-            FY(II,JJ-1,KK) = UN*RHO_F(IW)
-         CASE( 3)
-            FZ(II,JJ,KK)   = UN*RHO_F(IW)
-         CASE(-3)
-            FZ(II,JJ,KK-1) = UN*RHO_F(IW)
-      END SELECT
-      
-      ! overwrite first off-wall advective flux if necessary
+   SELECT CASE(IOR)
+      CASE( 1)
+         FX(II,JJ,KK)   = UN*RHO_F(IW)*R(II)
+      CASE(-1)
+         FX(II-1,JJ,KK) = UN*RHO_F(IW)*R(II-1)
+      CASE( 2)
+         FY(II,JJ,KK)   = UN*RHO_F(IW)
+      CASE(-2)
+         FY(II,JJ-1,KK) = UN*RHO_F(IW)
+      CASE( 3)
+         FZ(II,JJ,KK)   = UN*RHO_F(IW)
+      CASE(-3)
+         FZ(II,JJ,KK-1) = UN*RHO_F(IW)
+   END SELECT
+   
+   ! overwrite first off-wall advective flux if necessary
 
-      OFF_WALL_SELECT_1: SELECT CASE(IOR)
-         CASE( 1) OFF_WALL_SELECT_1
-            !      ghost          FX/UU(II+1)
-            ! ///   II   ///  II+1  |  II+2  | ...
-            !                       ^ WALL_INDEX(II+1,+1)
-            IF (UU(II+1,JJ,KK)<0._EB)                    CYCLE WLOOP_FL ! handled by 3D gas phase loop
-            IF (WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0) CYCLE WLOOP_FL ! face II+1 is a wall cell
-            ZZ(1:3) = (/RHO_F(IW),RHOP(II+1:II+2,JJ,KK)/)
-            FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZ,FLUX_LIMITER)*R(II+1)
-         CASE(-1) OFF_WALL_SELECT_1
-            !            FX/UU(II-2)     ghost
-            ! ... |  II-2  |  II-1  ///   II   ///
-            !              ^ WALL_INDEX(II-1,-1)
-            IF (UU(II-2,JJ,KK)>0._EB)                    CYCLE WLOOP_FL ! handled by 3D gas phase loop
-            IF (WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0) CYCLE WLOOP_FL ! face II-2 is a wall cell
-            ZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),RHO_F(IW)/)
-            FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZ,FLUX_LIMITER)*R(II-2)
-         CASE( 2) OFF_WALL_SELECT_1
-            IF (VV(II,JJ+1,KK)<0._EB)                    CYCLE WLOOP_FL
-            IF (WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0) CYCLE WLOOP_FL
-            ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ+1:JJ+2,KK)/)
-            FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZ,FLUX_LIMITER)
-         CASE(-2) OFF_WALL_SELECT_1
-            IF (VV(II,JJ-2,KK)>0._EB)                    CYCLE WLOOP_FL
-            IF (WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0) CYCLE WLOOP_FL
-            ZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),RHO_F(IW)/)
-            FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZ,FLUX_LIMITER)
-         CASE( 3) OFF_WALL_SELECT_1
-            IF (WW(II,JJ,KK+1)<0._EB)                    CYCLE WLOOP_FL
-            IF (WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0) CYCLE WLOOP_FL
-            ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ,KK+1:KK+2)/)
-            FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZ,FLUX_LIMITER)
-         CASE(-3) OFF_WALL_SELECT_1
-            IF (WW(II,JJ,KK-2)>0._EB)                    CYCLE WLOOP_FL
-            IF (WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0) CYCLE WLOOP_FL
-            ZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),RHO_F(IW)/)
-            FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZ,FLUX_LIMITER)
-      END SELECT OFF_WALL_SELECT_1
-      
-   ENDDO WLOOP_FL
-   !!$OMP END DO
-   !$OMP END SINGLE
+   OFF_WALL_SELECT_1: SELECT CASE(IOR)
+      CASE( 1) OFF_WALL_SELECT_1
+         !      ghost          FX/UU(II+1)
+         ! ///   II   ///  II+1  |  II+2  | ...
+         !                       ^ WALL_INDEX(II+1,+1)
+         IF (UU(II+1,JJ,KK)<0._EB)                    CYCLE WLOOP_FL ! handled by 3D gas phase loop
+         IF (WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0) CYCLE WLOOP_FL ! face II+1 is a wall cell
+         ZZ(1:3) = (/RHO_F(IW),RHOP(II+1:II+2,JJ,KK)/)
+         FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZ,FLUX_LIMITER)*R(II+1)
+      CASE(-1) OFF_WALL_SELECT_1
+         !            FX/UU(II-2)     ghost
+         ! ... |  II-2  |  II-1  ///   II   ///
+         !              ^ WALL_INDEX(II-1,-1)
+         IF (UU(II-2,JJ,KK)>0._EB)                    CYCLE WLOOP_FL ! handled by 3D gas phase loop
+         IF (WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0) CYCLE WLOOP_FL ! face II-2 is a wall cell
+         ZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),RHO_F(IW)/)
+         FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZ,FLUX_LIMITER)*R(II-2)
+      CASE( 2) OFF_WALL_SELECT_1
+         IF (VV(II,JJ+1,KK)<0._EB)                    CYCLE WLOOP_FL
+         IF (WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0) CYCLE WLOOP_FL
+         ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ+1:JJ+2,KK)/)
+         FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZ,FLUX_LIMITER)
+      CASE(-2) OFF_WALL_SELECT_1
+         IF (VV(II,JJ-2,KK)>0._EB)                    CYCLE WLOOP_FL
+         IF (WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0) CYCLE WLOOP_FL
+         ZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),RHO_F(IW)/)
+         FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZ,FLUX_LIMITER)
+      CASE( 3) OFF_WALL_SELECT_1
+         IF (WW(II,JJ,KK+1)<0._EB)                    CYCLE WLOOP_FL
+         IF (WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0) CYCLE WLOOP_FL
+         ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ,KK+1:KK+2)/)
+         FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZ,FLUX_LIMITER)
+      CASE(-3) OFF_WALL_SELECT_1
+         IF (WW(II,JJ,KK-2)>0._EB)                    CYCLE WLOOP_FL
+         IF (WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0) CYCLE WLOOP_FL
+         ZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),RHO_F(IW)/)
+         FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZ,FLUX_LIMITER)
+   END SELECT OFF_WALL_SELECT_1
+   
+ENDDO WLOOP_FL
+!!$OMP END DO
+!$OMP END SINGLE
 
-   !$OMP WORKSHARE
-   FRHO = 0._EB
-   !$OMP END WORKSHARE
+!$OMP WORKSHARE
+FRHO = 0._EB
+!$OMP END WORKSHARE
 
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            FRHO(I,J,K) = (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
-                        + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
-                        + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)        &
-                        - MASS_COR(I,J,K)
-         ENDDO
+!$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         FRHO(I,J,K) = (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
+                     + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
+                     + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)        &
+                     - MASS_COR(I,J,K)
       ENDDO
    ENDDO
-   !$OMP END DO
-   
-ENDIF FLUX_LIMITER_IF
-   
+ENDDO
+!$OMP END DO
+
 !$OMP END PARALLEL 
 
 
@@ -342,81 +242,6 @@ ENDIF
  
 SPECIES_LOOP: DO N=1,N_SPECIES
 
-   FLUX_LIMITER_IF2: IF (FLUX_LIMITER==-1) THEN
-   
-      UDRHODX => WORK4
-      VDRHODY => WORK5
-      WDRHODZ => WORK6
-
-      !$OMP PARALLEL
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_04'
-               UDRHODX(I,J,K) = UU(I,J,K)*( RHOP(I+1,J,K)*YYP(I+1,J,K,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDXN(I)
-               VDRHODY(I,J,K) = VV(I,J,K)*( RHOP(I,J+1,K)*YYP(I,J+1,K,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDYN(J)
-               WDRHODZ(I,J,K) = WW(I,J,K)*( RHOP(I,J,K+1)*YYP(I,J,K+1,N)-RHOP(I,J,K)*YYP(I,J,K,N) )*RDZN(K)
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
- 
-      ! Correct U d(RHO*Y)/dx etc. on boundaries
-
-      !$OMP SINGLE PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR,UDRHODN)
-      !!$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR,UDRHODN) 
-      WLOOP2: DO IW=1,NWC
-         !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_FD_05'
-         IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
-             BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WLOOP2
-         II  = IJKW(1,IW) 
-         IIG = IJKW(6,IW)
-         JJ  = IJKW(2,IW) 
-         JJG = IJKW(7,IW)
-         KK  = IJKW(3,IW) 
-         KKG = IJKW(8,IW)
-         IOR = IJKW(4,IW)
-         UDRHODN = 2._EB*UWP(IW)*( RHO_F(IW)*YY_F(IW,N) - RHOP(IIG,JJG,KKG)*YYP(IIG,JJG,KKG,N) )*RDN(IW)
-         SELECT CASE(IOR)
-            CASE( 1)
-               UDRHODX(II,JJ,KK)   = UDRHODN
-            CASE(-1)
-               UDRHODX(II-1,JJ,KK) = UDRHODN
-            CASE( 2)
-               VDRHODY(II,JJ,KK)   = UDRHODN
-            CASE(-2) 
-               VDRHODY(II,JJ-1,KK) = UDRHODN
-            CASE( 3) 
-               WDRHODZ(II,JJ,KK)   = UDRHODN
-            CASE(-3) 
-               WDRHODZ(II,JJ,KK-1) = UDRHODN
-         END SELECT
-      ENDDO WLOOP2
-      !!$OMP END DO
-      !$OMP END SINGLE
- 
-     ! Sum up the convective and diffusive terms in the transport equation and store in DEL_RHO_D_DEL_Y
-
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,FXYZ)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               FXYZ   = .5_EB*(UDRHODX(I,J,K)  *(1._EB-EPSX(I,J,K))   +  &
-                               UDRHODX(I-1,J,K)*(1._EB+EPSX(I-1,J,K)) +  &
-                               VDRHODY(I,J,K)  *(1._EB-EPSY(I,J,K))   +  &
-                               VDRHODY(I,J-1,K)*(1._EB+EPSY(I,J-1,K)) +  &
-                               WDRHODZ(I,J,K)  *(1._EB-EPSZ(I,J,K))   +  &
-                               WDRHODZ(I,J,K-1)*(1._EB+EPSZ(I,J,K-1)) ) 
-               DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N) + FXYZ + RHOP(I,J,K)*YYP(I,J,K,N)*DP(I,J,K) 
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-      !$OMP END PARALLEL
-   
-   ELSE FLUX_LIMITER_IF2
-   
       FX=>WORK4
       FY=>WORK5
       FZ=>WORK6
@@ -572,8 +397,6 @@ SPECIES_LOOP: DO N=1,N_SPECIES
       !$OMP END DO
       !$OMP END PARALLEL
    
-   ENDIF FLUX_LIMITER_IF2
- 
 ENDDO SPECIES_LOOP
  
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
