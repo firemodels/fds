@@ -1,7 +1,7 @@
 &HEAD CHID='Switchgear_Room_MCC', TITLE='MCC fire in a switchgear room'  /
 
-&MESH IJK=40,40,15, XB=0.0, 8.5,0.0,8.5,0.0,3.0 /
-&MESH IJK=40,40,45, XB=8.5,17.1,0.0,8.5,0.0,9.0 /
+&MESH IJK=54,54,20, XB=0.0, 8.5,0.0,8.5,0.0,3.0 /
+&MESH IJK=54,54,60, XB=8.5,17.1,0.0,8.5,0.0,9.0 /
 
 &TIME T_END=3600. /
 
@@ -21,17 +21,23 @@ Construction
 
 Cables
 
+&PROP ID                        = 'Thermoset THIEF Inputs'
+      QUANTITY                  = 'CABLE TEMPERATURE'
+      CABLE_DIAMETER            = 0.015
+      CABLE_JACKET_THICKNESS    = 0.002
+      CABLE_MASS_PER_LENGTH     = 0.4
+      CABLE_FAILURE_TEMPERATURE = 400. / THIEF model inputs
+
 &MATL ID             = 'XPE/Neoprene'
-      SPECIFIC_HEAT  = 1.39
-      CONDUCTIVITY   = 0.235
-      DENSITY        = 1375. 
-      EMISSIVITY     = 0.95 /
+      SPECIFIC_HEAT  = 1.5
+      CONDUCTIVITY   = 0.2
+      DENSITY        = 2264. / Material properties used to define cables in trays
 
 &SURF ID             = 'CABLE'
       COLOR          = 'BLACK'
       MATL_ID        = 'XPE/Neoprene'
       GEOMETRY       = 'CYLINDRICAL'
-      THICKNESS      = 0.0075 /
+      THICKNESS      = 0.0075 / Model of cables in trays
 
 &OBST XB= 2.0, 3.0, 0.0, 8.0, 2.6, 2.7, SURF_ID = 'CABLE' / 
 &OBST XB= 3.0, 7.5, 5.5, 6.5, 2.6, 2.7, SURF_ID = 'CABLE' / 
@@ -79,7 +85,7 @@ Fire
 &RAMP ID='fire ramp', T= 648.0, F=0.81 /
 &RAMP ID='fire ramp', T= 720.0, F=1.00 /
 &RAMP ID='fire ramp', T=1200.0, F=1.00 /
-&RAMP ID='fire ramp', T=1920.0, F=0.00 /
+&RAMP ID='fire ramp', T=2340.0, F=0.00 /
 
 &VENT XB= 2.5, 3.1, 4.0, 4.3, 2.4, 2.4, SURF_ID = 'CABINET FIRE'/
 
@@ -108,19 +114,19 @@ Devices/Outputs
 
 &DUMP DT_DEVC=15., DT_HRR=15. /
 
-&DEVC QUANTITY= 'UPPER TEMPERATURE',ID='HGL_Temp_Low_FDS',   XB= 3.5, 3.5,3.5,3.5,0.0,3.0 /
+&DEVC QUANTITY= 'UPPER TEMPERATURE',ID='HGL_Temp_Low_FDS',   XB= 1.0, 1.0,1.0,1.0,0.0,3.0 /
 &DEVC QUANTITY= 'UPPER TEMPERATURE',ID='HGL_Temp_High_FDS',  XB=13.5,13.5,2.5,2.5,0.0,9.0 /
 
-&DEVC QUANTITY= 'LAYER HEIGHT',     ID='HGL_Height_Low_FDS', XB= 3.5, 3.5,3.5,3.5,0.0,3.0 /
+&DEVC QUANTITY= 'LAYER HEIGHT',     ID='HGL_Height_Low_FDS', XB= 1.0, 1.0,1.0,1.0,0.0,3.0 /
 &DEVC QUANTITY= 'LAYER HEIGHT',     ID='HGL_Height_High_FDS',XB=13.5,13.5,2.5,2.5,0.0,9.0 /
 
-&DEVC QUANTITY= 'INSIDE WALL TEMPERATURE', ID='Temp_Cable_A_FDS', DEPTH=0.002, XB=2.0, 3.0,0.0,8.0,2.5,3.2, SURF_ID='CABLE', STATISTICS='MAX' /
-&DEVC QUANTITY= 'INSIDE WALL TEMPERATURE', ID='Temp_Cable_B_FDS', DEPTH=0.002, XB=3.5, 7.5,5.5,6.5,2.5,3.2, SURF_ID='CABLE', STATISTICS='MAX' /
-&DEVC QUANTITY= 'INSIDE WALL TEMPERATURE', ID='Temp_Cable_C_FDS', DEPTH=0.002, XB=8.7,17.1,3.0,4.0,8.6,9.2, SURF_ID='CABLE', STATISTICS='MAX' /
+&DEVC PROP_ID='Thermoset THIEF Inputs', ID='Temp_Cable_A_FDS', XYZ=2.8,4.15,2.50, ORIENTATION=0.,0.,-1.  /
+&DEVC PROP_ID='Thermoset THIEF Inputs', ID='Temp_Cable_B_FDS', XYZ=3.5,6.00,2.81, ORIENTATION=0.,0., 1.  /
+&DEVC PROP_ID='Thermoset THIEF Inputs', ID='Temp_Cable_C_FDS', XYZ=9.0,3.50,8.90, ORIENTATION=0.,0., 1.  /
 
-&DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cable_A_FDS', XB=2.0, 3.0,0.0,8.0,2.5,3.2, SURF_ID='CABLE', STATISTICS='MAX' /
-&DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cable_B_FDS', XB=3.5, 7.5,5.5,6.5,2.5,3.2, SURF_ID='CABLE', STATISTICS='MAX' /
-&DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cable_C_FDS', XB=8.7,17.1,3.0,4.0,8.6,9.2, SURF_ID='CABLE', STATISTICS='MAX' /
+&DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cable_A_FDS', XYZ=2.8,4.15,2.5, IOR=-3 /
+&DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cable_B_FDS', XYZ=3.5,6.00,2.7, IOR= 3 /
+&DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cable_B_FDS', XYZ=9.0,3.50,8.8, IOR= 3 /
 
 &DEVC QUANTITY= 'WALL TEMPERATURE', ID='Temp_Cabinet_FDS', XB=3.5,7.5,4.9,6.6,0.0,2.4, SURF_ID='CABINET', STATISTICS='MAX' /
 &DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cabinet_FDS', XB=3.5,7.5,4.9,6.6,0.0,2.4, SURF_ID='CABINET', STATISTICS='MAX' /
