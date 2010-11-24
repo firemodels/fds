@@ -7,7 +7,7 @@
         urlcolor=linkblue,     % \href{...}{...} external (URL)
         citecolor=linkred,     % citation number colors
         linkcolor=linknavy,    % \ref{...} and \pageref{...}
-        pdftitle={Fire Dynamics Simulator (Version 5) User's Guide},
+        pdftitle={Fire Dynamics Simulator User's Guide},
         pdfauthor={Kevin McGrattan, Simo Hostikka, Jason Floyd},
         pdfsubject={User Guide},
         pdfkeywords={FDS, Fire Model, NIST, BFRL},
@@ -324,7 +324,7 @@ Jason Floyd \\
 \vspace{.25in}
 
 \flushright{\today \\
-FDS Version 5.5 \\
+FDS Version 6.0 \\
 $SVN Repository$~$Revision$}
 
 \vfill
@@ -379,7 +379,7 @@ Mail: Stop SSOP, Washington, DC 20402-0001 }
 
 \chapter{Preface}
 
-This Guide describes how to use the Fire Dynamics Simulator (FDS) version 5. Because new features are added periodically, check
+This Guide describes how to use the Fire Dynamics Simulator (FDS). Because new features are added periodically, check
 the current version number on the inside front jacket of this manual.
 
 Note that this Guide does not provide the background theory for FDS. A four volume set of companion documents, referred to
@@ -618,7 +618,7 @@ FDS solves numerically a form of the Navier-Stokes equations appropriate
 for low-speed, thermally-driven flow with an emphasis on
 smoke and heat transport from fires. The core algorithm is an
 explicit predictor-corrector scheme, second order accurate in space
-and time. Turbulence is treated by means of the Smagorinsky form of
+and time. Turbulence is treated by means of the dynamic Smagorinsky form of
 Large Eddy Simulation (LES). It is possible to perform a Direct
 Numerical Simulation (DNS) if the underlying numerical mesh is fine
 enough. LES is the default mode of operation.
@@ -678,77 +678,12 @@ Direct Numerical Simulation (DNS).
 \end{description}
 
 
-\section{What's New in FDS 5?}
 
-FDS 5 differs from previous versions in its treatment of solid boundaries and
-gas phase combustion. Among the more important changes are:
-\begin{description}
-\item[{\bf Multi-Step Combustion}] Previous versions of FDS have assumed only one gas
-phase reaction. Now, multiple-step reaction schemes are available to describe local
-extinction, CO production, among various other phenomena. The most important improvements to the combustion model are a more
-accurate heat release rate calculation, and a better treatment of local flame extinction.
-
-\item[{\bf Material Layers}] Past versions of FDS have assumed that solid boundaries
-consist of a single homogenous layer. Now, solid boundaries can be modeled with
-multiple layers of materials, with each material specified via a new namelist
-group called {\ct MATL}. This change makes past input files obsolete.
-
-\item[{\bf Command Line Format}] FDS is still run from the command line, but the syntax
-is slightly different than in previous versions. See Section~\ref{info:runningFDS} for
-details.
-
-\item[{\bf Database}] Previous versions of FDS used a separate ``database'' file to store
-material and reaction parameters. This file is no longer available, and now all
-parameters must be specified within the input file.
-
-\item[{\bf Device Descriptions}] The method used to describe a device and/or sensor
-(Sprinkler, Heat Detector, Thermocouple, etc.) has changed.  See Section~\ref{info:DEVC}
-for more information on defining devices and their properties.  Any device can be used to control
-sprinkler activation and the creation and removal of vents or obstacles.
-
-\item[{\bf Sprinklers}] The external sprinkler files used in previous versions
-are no longer used. All information about sprinklers and other fire-specific devices are
-conveyed in the input file.  Sprinklers are now defined with the new method of describing
-devices mentioned above.  See Section~\ref{info:DEVC} for more information.
-
-\item[{\bf Control Functions}] A new group of input parameters is available to describe functions
-that control sprinkler activation, the creation and removal of vents or obstacles,
-and code execution (termination or dumping of restart files). See Section~\ref{info:CTRL} for details.
-
-\item[{\bf Numerical Mesh}] Previous versions of FDS used separate input groups
-to define the numerical grid and the computational domain.  Now the two groups
-have been merged into a single, simplified {\ct MESH} namelist group. Namelist groups {\ct PDIM} and
-{\ct GRID} shall no longer be used in the input file.  See Section~\ref{info:MESH} for more detail.
-
-\item[{\bf Pressure Zones}] It is possible in FDS 5 to declare individual
-regions in the computational domain to have background pressures different from ambient,
-allowing for calculations of leakage, fan curves, and so forth. See Section~\ref{info:ZONE} for more details.
-
-\item[{\bf Stack Effect and Atmospheric Stratification}] Improvements have been made to
-better characterize a stratified atmosphere and the movement of air in a tall building due
-to temperature differences between inside and outside.
-
-\item[{\bf Adiabatic Surface Temperature}] A new output quantity has been added to
-facilitate using FDS output in thermal and mechanical finite element models.
-See Section~\ref{info:adiabatic} for more information.
-
-\item[{\bf Development, Distribution and Formal User Support}] Starting with FDS 5, an online, open-source
-development environment is being used for configuration management
-(code archiving, revision tracking, bug fixes, user suggestions, and so on).
-See Section~\ref{info:acquire} for more information.
-
-\item[{\bf FDS Verification and Validation Information}] Starting with FDS 5, more
-emphasis has been placed on maintaining a permanent collection of Verification
-and Validation cases.  This improves the quality of each FDS update and release,
-as a standard test suite will now be used to insure that changes
-made to the source code do not degrade FDS output.  This also provides users with a standard
-data set to verify their own installation of FDS and to compare the results that FDS is returning
-on their system to published data.
-\end{description}
 
 
 \chapter{Getting Started}
 \label{info:gettingstarted}
+
 FDS is a computer program that solves equations that describe the evolution of fire.
 It is a Fortran program that reads input parameters from a text file, computes
 a numerical solution to the governing equations, and writes user-specified output data to files.
@@ -854,8 +789,8 @@ FDS can be run from the command prompt, or with a third party Graphical User Int
 In the discussion to follow, it is assumed that FDS is being run from the command prompt.
 FDS can be run on a single computer, using only one CPU, or it can be run on multiple
 computers and use multiple CPUs. For any operating system, there are two FDS executable files.
-The single CPU Windows executable is called {\bf fds5.exe}.
-The parallel executable is called {\bf fds5\_mpi.exe}. The letters ``mpi'' in the filename denote
+The single CPU 32 bit Windows executable is called {\bf fds\_win\_32.exe}.
+The parallel executable is called {\bf fds\_mpi\_win\_32.exe}. The letters ``mpi'' in the filename denote
 Message Passing Interface (MPI), which will be discussed below.
 
 \begin{warning}
@@ -879,8 +814,9 @@ exists in some directory, run the program either in a DOS or Unix command prompt
 Open up a Command Prompt window (click Start, then Run, then type ``cmd''), and change directories (``cd'') to where the
 input file for the case is located, then run the code by typing at the command prompt
 \begin{verbatim}
-fds5 job_name.fds
+fds_win_32 job_name.fds
 \end{verbatim}
+On a 64 bit machine, substitute 64 for 32.
 The character string {\ct job\_name} is usually
 designated within the input file as the {\ct CHID}. It is recommended that the
 name of the input file and the {\ct CHID} be the same so that all of the
@@ -890,7 +826,7 @@ written to a file {\bf CHID.out}, where {\ct CHID} is a character
 string, usually the same as {\ct job\_name}, designated in the input file..
 Screen output can be redirected to a file via the alternative command
 \begin{verbatim}
-fds5 job_name.fds > job_name.err
+fds_win_32 job_name.fds > job_name.err
 \end{verbatim}
 Note that it is also possible to associate the extention ``fds'' with the FDS executable directly, thereby making FDS run by
 double-clicking on the input file. If you do this, note that error messages will be written to the .out file. Also, if you
@@ -905,17 +841,17 @@ Depending on the type of installation, you may need to set various
 path or environment variables in order to invoke FDS without a full
 path reference to the executable. The easiest way to do this is via
 an ``alias'' in your shell start-up script. For the example below,
-it is assumed that {\ct fds5} is aliased to its full path name.
+it is assumed that {\ct fds} is an alias for the specific executable used.
 You may also need to ``chmod + x'' to make the file executable.
 Once this is done, run FDS from the command line by typing:
 \begin{verbatim}
-fds5 job_name.fds
+fds job_name.fds
 \end{verbatim}
 The input parameters are read from the file {\bf job\_name.fds},
 and error statements and other diagnostics are written out to the screen.
 To run the job in the background:
 \begin{verbatim}
-fds5 job_name.fds >& job_name.err &
+fds job_name.fds >& job_name.err &
 \end{verbatim}
 Note that in the latter case, the screen output is stored in the file
 {\bf job\_name.err} and the detailed diagnostics are saved automatically
@@ -954,7 +890,7 @@ The computation on a given FDS mesh is thought of as an individual {\em process}
 MPI handles the transfer of information between these {\em processes}.
 Usually, each mesh is assigned its own {\em process} in a parallel calculation,
 although it is also possible
-assign multiple meshes to a single {\em process}.\footnote{Assigning multiple meshes to a single process was introduced in FDS version 5.3.}
+assign multiple meshes to a single {\em process}.
 In this way, large meshes can be computed on dedicated {\em processors}, while
 smaller meshes can be clustered together in a single {\em process} running on a single {\em processor},
 without the need for MPI message passing between themselves.
@@ -1019,7 +955,7 @@ and the names of the various computers that are to run the job. For
 example, the {\bf config.txt} file might look like this for a job run at NIST with computers named
 fire\_1, fire\_2, and fire\_3:
 \begin{verbatim}
-exe \\fire_1.nist.gov\NIST\FDS\fds5_mpi.exe job_name.fds
+exe \\fire_1.nist.gov\NIST\FDS\fds_mpi_win_32.exe job_name.fds
 dir \\fire_1.nist.gov\Projects\
 hosts
 fire_1.nist.gov 2
@@ -1046,12 +982,12 @@ With LAM/MPI, the computers to be used are linked prior to the actual execution 
 command called a ``lamboot.''
 FDS is then run using the command
 \begin{verbatim}
-mpirun -np 5 fds5_mpi job_name.fds
+mpirun -np 5 fds_mpi_linux_32 job_name.fds
 \end{verbatim}
-where the 5 indicates that 5 processors are to be used. In this case, the executable {\bf fds5\_mpi} is located in the
+where the 5 indicates that 5 processors are to be used. In this case, the executable {\bf fds\_mpi\_linux\_32} is located in the
 working directory. To make the process run in the background
 \begin{verbatim}
-mpirun -np 5 fds5_mpi job_name.fds >& job_name.err &
+mpirun -np 5 fds_mpi_linux_32 job_name.fds >& job_name.err &
 \end{verbatim}
 The file {\bf job\_name.err} contains what is normally printed out to the screen.
 
@@ -1127,7 +1063,7 @@ Minor releases occur every few months, and may cause minor changes in functional
 type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just
 type the executable at the command prompt:
 \begin{verbatim}
-fds5
+fds
 \end{verbatim}
 and the relevant information will appear, along with a date of compilation (useful to you) and a so-called SVN number (useful to us).  The SVN number refers to
 the Subversion repository number of the source code. It allows us to go back in time and recover the exact source code files
@@ -1438,7 +1374,7 @@ Validation Suite} removed for clarity.
       FYI        = 'Heptane, C_7 H_16'
       C          = 7.
       H          = 16.
-      CO_YIELD   = 0.008 
+      CO_YIELD   = 0.008
       SOOT_YIELD = 0.015 /
 
 &OBST XB= 3.5, 4.5,-1.0, 1.0, 0.0, 0.0, SURF_ID='STEEL FLANGE' /  Fire Pan
@@ -1538,7 +1474,7 @@ two parameters, as in this example:
 
 \footnotesize
 \begin{verbatim}
-&HEAD CHID='WTC_05_v5', TITLE='WTC Phase 1, Test 5, FDS version 5' /
+&HEAD CHID='WTC_05', TITLE='WTC Phase 1, Test 5' /
 \end{verbatim}
 \normalsize
 
@@ -1806,9 +1742,7 @@ walked next door.
 Whether
 the calculation is to be run on a single processor, or on multiple processors,
 the rules of prescribing multiple meshes are similar, with some issues to keep in mind. The most important rule of mesh alignment is that
-abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}. The requirement of integral mesh
-alignment is new starting with FDS version 5.1. It is a more restrictive requirement than in previous versions because it was becoming too
-difficult to maintain complete flexibility in alignment while trying to improve the accuracy of the methodology.
+abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}. 
 \begin{figure}[p]
 \begin{picture}(325,600)(0,-20)
 \setlength{\unitlength}{0.02in}
@@ -2713,7 +2647,7 @@ The end result of this input file is to create a pyramid by repeating long, rect
 face in a stair-step pattern. Note in this case the use of {\ct N\_LOWER} and {\ct N\_UPPER} which automatically cause FDS to
 repeat the obstructions in sequence rather than as an array.
 
-Note that the {\ct MULT}iplication functionality works for {\ct MESH} and {\ct INIT} lines. For a {\ct MESH}, it only applies to the
+Note that the {\ct MULT}iplication functionality works for {\ct MESH}, {\ct HOLE}, and {\ct INIT} lines. For a {\ct MESH}, it only applies to the
 bounds ({\ct XB}) of the mesh, not the number of cells.
 
 
@@ -4163,13 +4097,13 @@ in the reaction rate formula
   r_{ij} = A_{ij}\frac{1}{H_{r,\alpha\beta}\Delta t} \max\left[0,S_{thr,ij}(T_s-T_{thr,ij})\right]^{n_{t,ij}}
   \label{rr3}
 \ee
-This form of reaction rate can be implemented by setting a logical parameter {\ct PCR(j)=.TRUE.}. The pre-exponental 
-factor $A_{ij}$ should then be given a value that is close or slightly smaller than the specific heat (kJ/kgK) of the material mixture at 
+This form of reaction rate can be implemented by setting a logical parameter {\ct PCR(j)=.TRUE.}. The pre-exponental
+factor $A_{ij}$ should then be given a value that is close or slightly smaller than the specific heat (kJ/kgK) of the material mixture at
 phase change temperature.
 
-As an example, consider a small amount of liquid water at +10${}^\circ$C, cooled down to -10${}^\circ$C during a 10 min period, and 
+As an example, consider a small amount of liquid water at +10${}^\circ$C, cooled down to -10${}^\circ$C during a 10 min period, and
 then heated up again to +10${}^\circ$C. The input lines for implementing the freezing and melting reactions are given in Fig.~\ref{water_ice_water_inputs},
-and the complete input file as {\bf water\_ice\_water.fds}. 
+and the complete input file as {\bf water\_ice\_water.fds}.
 The mass fraction of the liquid water as a function of temperature is plotted in Fig.~\ref{water_ice_water_plot}. The cooling phase is indicated by
 the blue line and heating phase by the red line.
 \begin{figure}[ht]
@@ -4179,15 +4113,15 @@ the blue line and heating phase by the red line.
 \begin{verbatim}
 
 &SURF ID = 'SAMPLE'
-      H_FIXED = 50. 
-      BACKING = 'INSULATED' 
+      H_FIXED = 50.
+      BACKING = 'INSULATED'
       THICKNESS = 0.00001
       MATL_ID = 'LIQUID_WATER' /
 
 &MATL ID = 'LIQUID_WATER'
       DENSITY = 1000.
       CONDUCTIVITY = 0.60
-      SPECIFIC_HEAT = 4.19 
+      SPECIFIC_HEAT = 4.19
       N_REACTIONS = 1
       PCR(1) = .TRUE.
       RESIDUE(1) = 'ICE_WATER'
@@ -4203,7 +4137,7 @@ the blue line and heating phase by the red line.
 &MATL ID = 'ICE_WATER'
       DENSITY = 1000.
       CONDUCTIVITY_RAMP = 'KS_ICE'
-      SPECIFIC_HEAT_RAMP = 'CS_ICE' 
+      SPECIFIC_HEAT_RAMP = 'CS_ICE'
       N_REACTIONS = 1
       PCR(1) = .TRUE.
       RESIDUE(1) = 'LIQUID_WATER'
@@ -5187,10 +5121,6 @@ The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See t
 To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line.
 In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on {\ct SURF}.
 
-\begin{warning}
-\noindent
-The parameter {\ct SLIP\_FACTOR} is no longer used to set the tangential velocity boundary condition, as of FDS version 5.4.0.
-\end{warning}
 
 
 \clearpage
@@ -5231,10 +5161,8 @@ domain is ``Zone~0.'' If there are no {\ct OPEN} boundaries, the entire computat
 
 There are several restrictions to assigning pressure zones. First, the declared pressure zones must be completely within a region of the
 domain that is bordered by solid obstructions. If the sealed region is not rectangular, FDS will extend the specified {\ct ZONE} boundaries to
-conform to the non-rectangular domain.~\footnote{The extension of pressure zones to non-rectangular regions is a feature that started with
-FDS version 5.3.1.} It is possible to ``break'' pressure zones by removing
-obstructions between them.\footnote{The ability to open pressure zones became available in FDS starting with version 5.3.0. Prior versions prevented it by issuing an
-error statement.} An example of how to break pressure zones is given in Section~\ref{zone_break}.
+conform to the non-rectangular domain. It is possible to ``break'' pressure zones by removing
+obstructions between them. An example of how to break pressure zones is given in Section~\ref{zone_break}.
 Second, pressure zones {\bf can} span multiple meshes, but it is recommended that you check the pressure in each mesh to ensure consistency. Also, if the {\ct ZONE} does span multiple
 meshes, make sure that the specified rectangular coordinates do so as well. This allows FDS to determine the actual extent of the {\ct ZONE} independently for each
 mesh.
@@ -5933,23 +5861,13 @@ Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate
 fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules are invoked by FDS to determine the rate of mixing of fuel and oxygen within
 a given mesh cell at a given time step. This section provides a brief explanation of these rules and the parameters that control them.
 
-In an LES simulation, the heat release rate is computed as
-\be \dq''' = \min \, \left( \dq_{\max}''' \; , \; \frac{ \rho \min \left( Y_\F , Y_\OTWO/s \right) }{\tau} \, \Delta H  \right) \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \ee
-Here, $\tau$ is a mixing time scale~\cite{Raman:CF} given by
-\be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \ee
-The coefficient, $C$, is taken as 0.1 in FDS by default, based on comparisons to various flame height correlations. It is given by
-{\ct C\_EDC} on the {\ct REAC} line. If you do not want to use this model, set \\
-{\ct EDDY\_DISSIPATION=.FALSE.} \\
-on the {\ct REAC} line, in which case $\tau$ becomes the time step, $\dt$.
-There is an additional bound on the local heat release rate per unit volume,
-based on an empirical estimate of the average volumetric heat release rate of a fire.
-Orloff and De Ris~\cite{Orloff:19th_Symposium} suggest a value of 1200~kW/m$^3$ for the entire fire.
-FDS uses by default a value of
-\be \dq_{\max}'''=\frac{\dq_{\max}''}{\dx} + \overline{\dq_{\max}'''} \quad \hbox{kW/m}^3 \ee
-as a local upper bound. The term, $\dq_{\max}''$, is the maximum heat release rate per unit area of flame sheet.
+In an LES simulation, the consumption rate of gaseous fuel is given by the expression:
+\be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad   
+   s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \ee
+Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter equal to 1.
+
+The term, $\dq_{\max}''$, is the maximum heat release rate per unit area of flame sheet.
 It is specified via {\ct HRRPUA\_SHEET} on the {\ct REAC} line. It is 0~kW/m$^2$ by default for LES; 200 for DNS.
-The term, $\overline{\dq_{\max}'''}$, is the maximum heat release rate per unit volume.
-It is specified via {\ct HRRPUV\_AVERAGE} on the {\ct REAC} line. It is 2500~kW/m$^3$ by default for LES; 0 for DNS.
 Further discussion is found in the FDS Technical Reference Guide, Volume 1.
 
 
@@ -7514,8 +7432,8 @@ To learn how to create and remove obstructions multiple times, see Section~\ref{
 
 
 \begin{warning}
-Starting with FDS version 5.3.0, an obstruction that makes up the boundary of a ``pressure zone'' (see Section~\ref{info:ZONE}) {\em can} be created or
-removed. The reason for this restriction prior to 5.3 was that abrupt changes in pressure could cause numerical instabilities.
+An obstruction that makes up the boundary of a ``pressure zone'' (see Section~\ref{info:ZONE}) {\em can} be created or
+removed. 
 \end{warning}
 
 
@@ -9200,9 +9118,8 @@ default combustion model in FDS. If you have defined a species explicitly via a 
 
 
 \begin{warning}
-The format of certain output quantities changed, starting with FDS version 5.2, but the older names originating with version
-5.0 will still be accepted. The new convention is that when an output
-quantity is related to a particular gas species or particle type, then you must specify the appropriate {\ct SPEC\_ID} or
+When an output
+quantity is related to a particular gas species or particle type, you must specify the appropriate {\ct SPEC\_ID} or
 {\ct PART\_ID} on the same input line. Also note that the use of underscores in output quantity names has been eliminated -- just
 remember that all output quantity names ought to be in single quotes.
 \end{warning}
@@ -9680,6 +9597,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID}     & Character         & {\ct ID} of {\ct ConTRoL} to control hole's existence     &       &           \\ \hline
 {\ct DEVC\_ID}     & Character         & {\ct ID} of {\ct DEViCe} to control hole's existence      &       &           \\ \hline
 {\ct FYI}          & Character         & Comment String (has no effect)                            &       &           \\ \hline
+{\ct MULT\_ID }    & Character         & See Section~\ref{info:MULT}                               &       &           \\ \hline
 {\ct RGB(3)   }    & Integer Triplet   & Color indices (0 - 255) for resulting obstruction(s)      &       &           \\ \hline
 {\ct TRANSPARENCY} & Real              & Transparency of obstruction                               &       &           \\ \hline
 {\ct XB(6)    }    & Real Sextuplet    & Physical coordinates                                      & m     &           \\ \hline
@@ -10319,12 +10237,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)          &   cm$^3$/mol/s    &     \\ \hline
+{\ct BETA\_EDC}                           & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
 {\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
-{\ct C\_EDC}                              & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 0.1    \\ \hline
 {\ct CO\_YIELD}                           & Real        & Fraction of CO from the fuel                  & kg/kg             & 0        \\ \hline
 {\ct \tiny CRITICAL\_FLAME\_TEMPERATURE}  & Real        & Suppression criterion                         &   $^\circ$C       & 1427    \\ \hline
 {\ct E}                                   & Real        & Activation Energy (Finite Rate)               &   kJ/kmol         &     \\ \hline
-{\ct EDDY\_DISSIPATION}                   & Logical     & See Section~\ref{info:turbulent_combustion}   &                   & {\ct .TRUE.}    \\ \hline
 {\ct EPUMO2}                              & Real        & Energy per Unit Mass Oxygen                   &   kJ/kg           & 13100    \\ \hline
 {\ct FUEL}                                & Character   & Name of Fuel (Finite Rate)                    &                   & {\ct ETHYLENE}\\ \hline
 {\ct FYI}                                 & Character   & Comment String (has no effect)                &                   &     \\ \hline
@@ -10333,7 +10250,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_OF\_COMBUSTION}                & Real        & Energy per Unit Mass Fuel                     & kJ/kg             &         \\ \hline
 {\ct HRRPUA\_SHEET}                       & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^2$          & 0 (LES); 200 (DNS)    \\ \hline
 {\ct HRRPUV\_AVERAGE}                     & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^3$          & 2500 (LES); 0 (DNS)    \\ \hline
-%{\ct HRRPUV\_AVERAGE\_TIME}               & Real        & See Section~\ref{info:turbulent_combustion}   & s                 & 1.    \\ \hline
 {\ct ID}                                  & Character   & Identifier                                    &                   &     \\ \hline
 {\ct IDEAL}                               & Logical     & Adjust for minor product yields               &                   & {\ct .FALSE.}    \\ \hline
 {\ct \tiny MASS\_EXTINCTION\_COEFFICIENT} & Real        & Visibility parameter                          &  m$^2$/kg         & 8700.    \\ \hline
@@ -10352,7 +10268,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner                  &  kg/kg            & 1.0     \\ \hline
 {\ct Y\_F\_LFL}                           & Real        & Lower Fuel limit (mass fraction)              &  kg/kg            & 0.0     \\ \hline
 {\ct Y\_O2\_INFTY}                        & Real        & Ambient oxygen mass fraction                  &  kg/kg            & 0.232428\\ \hline
-%\end{tabular*}
+{\ct Y\_P\_MIN\_EDC}                      & Real        & See Section~\ref{info:turbulent_combustion}   &  kg/kg            & 0.0001    \\ \hline
 \end{longtable}
 
 
@@ -10676,179 +10592,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 
 
-\chapter{Conversion of Old Input Files to FDS 5}
-
-Many changes and improvements have been made in the latest release FDS 5.
-To make an FDS 4 input data file compatible with the new FDS 5 application,
-a few changes must be made to the file.
-This appendix will point out all the changes that need to be made to convert
-an FDS 4.x input file to the new FDS 5.x format.
-
-\section{Numerical Domain Parameters: \texorpdfstring{{\tt GRID}}{GRID} and \texorpdfstring{{\tt PDIM}}{PDIM} }
-
-In previous versions, the computational domain and numerical mesh were specified via lines of the form:
-
-\footnotesize
-\begin{verbatim}
-&GRID IBAR=30, JBAR=20, KBAR=10 /
-&PDIM XBAR0=0.0, XBAR=3.0, YBAR0=0.0, YBAR=2.0, ZBAR0=0.0, ZBAR=1.0 /
-\end{verbatim} \normalsize
-
-\noindent
-In FDS 5, these two lines are now written via the single line:
-
-\footnotesize
-\begin{verbatim}
-&MESH IJK=30,20,10, XB=0.0,3.0,0.0,2.0,0.0,1.0 /
-\end{verbatim} \normalsize
-
-\noindent
-Rules for multiple meshes and mesh transformations still apply.
-
-\section{Obstructions, Vents, and Holes: \texorpdfstring{{\tt OBST}}{OBST}, \texorpdfstring{{\tt VENT}}{VENT}, and \texorpdfstring{{\tt HOLE}}{HOLE}}
-
-The syntax for these lines is fairly similar to past versions, with the following exceptions:
-\begin{itemize}
-\item For a {\ct VENT} that spans an entire mesh boundary, {\ct CB='XBAR0'} is now {\ct MB='XMIN'}. The character string
-{\ct 'XBAR'} is now {\ct 'XMAX'}. The same applies for the $y$ and $z$ coordinate parameters.
-\item Control parameters like {\ct T\_ACTIVATE}, {\ct HEAT\_REMOVE}, {\em etc.}, are now consolidated into {\ct DEVC\_ID} and
-{\ct CTRL\_ID}. In brief,
-any change to an obstruction, vent, or hole is tied to a specific device or control function. See Sections~\ref{info:DEVC} and
-\ref{info:CTRL} for details.
-\end{itemize}
-
-
-\section{Surface Parameters: \texorpdfstring{{\tt SURF}}{SURF}}
-
-The most significant change to the input file format has been splitting of the {\ct SURF} line. In past versions, the {\ct SURF}
-namelist group contained all the information about a particular boundary type -- its material properties, color, thickness, and so on.
-However, in FDS 5, solid boundaries can now consist of multiple layers of materials, making the old {\ct SURF} line too cumbersome to
-specify. Instead, there is a new namelist group called {\ct MATL} that just contains the properties of a given material. What used to
-be
-
-\footnotesize
-\begin{verbatim}
-&SURF ID        = 'BRICK WALL'
-      RGB       = 0.6,0.2,0.2
-      KS        = 0.69
-      C_P       = 0.84
-      DENSITY   = 1600.
-      BACKING   = 'EXPOSED'
-      THICKNESS = 0.20 /
-\end{verbatim}
-\normalsize
-
-\noindent
-is now given by two input lines:
-
-\footnotesize
-\begin{verbatim}
-&MATL ID             = 'BRICK'
-      CONDUCTIVITY   = 0.69
-      SPECIFIC_HEAT  = 0.84
-      DENSITY        = 1600. /
-
-&SURF ID        = 'BRICK WALL'
-      MATL_ID   = 'BRICK'
-      RGB       = 166,41,41
-      BACKING   = 'EXPOSED'
-      THICKNESS = 0.20 /
-\end{verbatim}
-\normalsize
-
-\noindent
-The surface is still specified the same way as before, for example:
-
-\footnotesize
-\begin{verbatim}
-&OBST XB=0.1, 5.0, 1.0, 1.2, 0.0, 1.0, SURF_ID='BRICK WALL' /
-\end{verbatim}
-\normalsize
-
-\noindent
-Notice the change in the names of the thermal properties {\ct KS} and {\ct C\_P} to {\ct CONDUCTIVITY} and
-{\ct SPECIFIC\_HEAT}, respectively. Notice that the color {\ct RGB} is now specified via integers between 0 and 255, instead of
-real numbers between 0.0 and 1.0. Better yet, just use the {\ct COLOR} Table~\ref{tab:colors}.
-
-
-
-\section{Reaction Parameters: \texorpdfstring{{\tt REAC}}{REAC}}
-
-For most applications, the specification of the combustion reaction has become easier. In past versions,
-you needed to specify the fuel, its molecular weight, soot and/or CO yields, and the ideal stoichiometry of the reaction:
-
-\footnotesize
-\begin{verbatim}
-&REAC ID                 = 'PROPANE'
-      FYI                = 'C_3 H_8'
-      MW                 = 44.
-      SOOT_YIELD         = 0.01
-      NU_O2              = 5.
-      NU_CO2             = 3.
-      NU_H2O             = 4. /
-\end{verbatim}
-\normalsize
-
-\noindent
-Now, you just need to describe the composition of the fuel molecule and any non-ideal product yield. FDS 5 computes what it needs based on
-this information.
-
-\footnotesize
-\begin{verbatim}
-&REAC ID                 = 'PROPANE'
-      SOOT_YIELD         = 0.01
-      C                  = 3.
-      H                  = 8. /
-\end{verbatim}
-\normalsize
-
-
-\section{Device Parameters: \texorpdfstring{{\tt SPRK}}{SPRK}, \texorpdfstring{{\tt SMOD}}{SMOD},
-\texorpdfstring{{\tt HEAT}}{HEAT}, \texorpdfstring{{\tt THCP}}{THCP}}
-
-Past versions of FDS had a variety of ways to specify devices. For example, a sprinkler was specified via a line of the form:
-
-\footnotesize
-\begin{verbatim}
-&SPRK XYZ=4.5,6.7,3.6, MAKE='Acme_K-17', LABEL='spk_34' /
-\end{verbatim} \normalsize
-
-\noindent
-which located the sprinkler at {\ct XYZ} and indicated that the sprinkler's properties were listed in a file called {\bf Acme\_K-17.spk}.
-Smoke and heat detectors were specified via lines of the form:
-
-\footnotesize
-\begin{verbatim}
-&SMOD XYZ=4.5,6.7,3.6, LENGTH=2.6, ACTIVATION_OBSCURATION=1.4, LABEL='sd_34' /
-&HEAT XYZ=4.5,6.7,3.6, RTI=45., ACTIVATION_TEMPERATURE=74., LABEL='hd_39' /
-\end{verbatim} \normalsize
-
-\noindent
-In FDS 5, these devices are all specified in the same way:
-
-\footnotesize
-\begin{verbatim}
-&PROP ID='Acme_K-17', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
-      ACTIVATION_TEMPERATURE=74., PART_ID='water drops', FLOW_RATE=189.3,
-      DROPLET_VELOCITY=10., SPRAY_ANGLE=30.,80.   /
-
-&DEVC ID='spk_34', XYZ=4.5,6.7,3.6, PROP_ID='Acme_K-17' /
-\end{verbatim} \normalsize
-
-\noindent
-Point output via ``thermocouples'' ({\ct THCP}s) are now given by ``devices'' ({\ct DEVC}s):
-
-\footnotesize
-\begin{verbatim}
-&DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='probe_2' /
-\end{verbatim}
-\normalsize
-
-\noindent
-The syntax of the old {\ct THCP} namelist group is almost the same. Just swap {\ct DEVC} for {\ct THCP}, and change {\ct LABEL} to
-{\ct ID}. In FDS 5, any input record is identified via its {\ct ID}.
-
-
 
 
 
@@ -10892,8 +10635,8 @@ It is not a step by step guide, more detailed instructions can be found on Devel
 If a compiled version of FDS exists for the machine on which the
 calculation is to be run and no changes have been made to
 the original source code, there is no need to re-compile the code.
-For example, the file {\bf fds5.exe} is the
-compiled single processor program for a Windows-based PC;
+For example, the file {\bf fds\_win\_32.exe} is the
+compiled single processor program for a 32 bit Windows-based PC;
 thus PC users do not need a
 Fortran compiler and do not need to compile the source code.
 For machines for which an executable has not been compiled, you must
