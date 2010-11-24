@@ -153,7 +153,7 @@ cat <<EOF>>$fullmanifest
 EOF
 
 cp $fullmanifest ~/$manifest
-cat $fullmanifest | Mail -s " $PLATFORM" glenn.forney@nist.gov
+cat $fullmanifest | Mail -s " $PLATFORM" `whoami`
 
 echo Building archive
 rm -rf $googledir/$bundlebase.tar
