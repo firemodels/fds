@@ -6581,66 +6581,90 @@ CONTAINS
 END SUBROUTINE READ_OBST
 
 
+
 SUBROUTINE READ_HOLE
+
 USE CONTROL_VARIABLES, ONLY : CONTROl, N_CTRL
 USE DEVICE_VARIABLES, ONLY : DEVICE, N_DEVC
-CHARACTER(30) :: DEVC_ID,CTRL_ID
+CHARACTER(30) :: DEVC_ID,CTRL_ID,MULT_ID
 CHARACTER(60) :: MESH_ID
 CHARACTER(25) :: COLOR
 LOGICAL :: EVACUATION
-INTEGER :: NM,N_HOLE,NN,NDO,N,I1,I2,J1,J2,K1,K2,RGB(3)
+INTEGER :: NM,N_HOLE,NN,NDO,N,I1,I2,J1,J2,K1,K2,RGB(3),N_HOLE_NEW,N_HOLE_O,II,JJ,KK,NNN
 REAL(EB) :: X1,X2,Y1,Y2,Z1,Z2,TRANSPARENCY
-NAMELIST /HOLE/ XB,FYI,RGB,TRANSPARENCY,EVACUATION,MESH_ID,COLOR,DEVC_ID,CTRL_ID
+NAMELIST /HOLE/ XB,FYI,RGB,TRANSPARENCY,EVACUATION,MESH_ID,COLOR,DEVC_ID,CTRL_ID,MULT_ID
 TYPE(OBSTRUCTION_TYPE), ALLOCATABLE, DIMENSION(:) :: TEMP_OBST
+TYPE(MULTIPLIER_TYPE), POINTER :: MR
 LOGICAL, ALLOCATABLE, DIMENSION(:) :: TEMP_HOLE_EVAC
 
 ALLOCATE(TEMP_OBST(0:6))
 
-N_HOLE  = 0
+N_HOLE    = 0
+N_HOLE_O  = 0
 REWIND(LU_INPUT)
+
 COUNT_LOOP: DO
    CALL CHECKREAD('HOLE',LU_INPUT,IOS)
    IF (IOS==1) EXIT COUNT_LOOP
+   MULT_ID = 'null'
    READ(LU_INPUT,NML=HOLE,END=1,ERR=2,IOSTAT=IOS)
-   N_HOLE = N_HOLE + 1
+   N_HOLE_NEW = 1
+   IF (MULT_ID/='null') THEN
+      DO N=1,N_MULT
+         MR => MULTIPLIER(N)
+         IF (MULT_ID==MR%ID) N_HOLE_NEW = MR%N_COPIES
+      ENDDO
+   ENDIF
+   N_HOLE_O = N_HOLE_O + 1
+   N_HOLE   = N_HOLE   + N_HOLE_NEW
    2 IF (IOS>0) THEN
-      WRITE(MESSAGE,'(A,I5)')  'ERROR: Problem with HOLE number',N_HOLE+1
+      WRITE(MESSAGE,'(A,I5)')  'ERROR: Problem with HOLE number',N_HOLE_O+1
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 ENDDO COUNT_LOOP
 1 REWIND(LU_INPUT)
 
-IF(ANY(EVACUATION_ONLY)) THEN 
-   ALLOCATE(TEMP_HOLE_EVAC(1:N_HOLE))
-   READ_HOLE_EVAC_LOOP: DO N=1,N_HOLE
+! TEMP_HOLE_EVAC(:) indicates if the given HOLE is to be used in the EVACUATION routine
+
+IF (ANY(EVACUATION_ONLY)) THEN 
+   ALLOCATE(TEMP_HOLE_EVAC(1:N_HOLE_O))
+   READ_HOLE_EVAC_LOOP: DO N=1,N_HOLE_O
       EVACUATION = .TRUE.
       CALL CHECKREAD('HOLE',LU_INPUT,IOS)
       IF (IOS==1) EXIT READ_HOLE_EVAC_LOOP
       READ(LU_INPUT,HOLE)
-      TEMP_HOLE_EVAC(1:N_HOLE) = EVACUATION
+      TEMP_HOLE_EVAC(N) = EVACUATION
    ENDDO READ_HOLE_EVAC_LOOP
    REWIND(LU_INPUT)
-   !EVAC: Now TEMP_HOLE_EVAC(:) is FALSE,  if EVACUATION=.FALSE.
-   !EVAC: otherwise it is true (no evac given or evac=true is given)
 ENDIF
  
-READ_HOLE_LOOP: DO N=1,N_HOLE
+READ_HOLE_LOOP: DO N=1,N_HOLE_O
  
+   ! Set default values for the HOLE namelist parameters
+
    DEVC_ID  = 'null'
    CTRL_ID  = 'null'
    MESH_ID  = 'null'
+   MULT_ID  = 'null'
    COLOR    = 'null'
    RGB      = -1
    TRANSPARENCY  = 1._EB
    EVACUATION = .FALSE.
+
+   ! Read the HOLE line
  
    CALL CHECKREAD('HOLE',LU_INPUT,IOS)
    IF (IOS==1) EXIT READ_HOLE_LOOP
    READ(LU_INPUT,HOLE)
  
+   ! Re-order coordinates, if necessary
+
    CALL CHECK_XB(XB)
+
+   ! Loop over all the meshes to determine where the HOLE is
  
    MESH_LOOP: DO NM=1,NMESHES
+
       M=>MESHES(NM)
       CALL POINT_TO_MESH(NM)
  
@@ -6651,223 +6675,247 @@ READ_HOLE_LOOP: DO N=1,N_HOLE
       IF (EVACUATION_ONLY(NM)) THEN 
          IF (.NOT.TEMP_HOLE_EVAC(N)) CYCLE MESH_LOOP
       ENDIF
-!      IF ((.NOT.EVACUATION .AND. EVACUATION_ONLY(NM)) .OR. (EVACUATION .AND. .NOT.EVACUATION_ONLY(NM))) CYCLE MESH_LOOP
  
-      ! Check if hole is contained within the current mesh
- 
-      X1 = XB(1)
-      X2 = XB(2)
-      Y1 = XB(3)
-      Y2 = XB(4)
-      Z1 = XB(5)
-      Z2 = XB(6)
- 
-      IF (X1>=XF .OR. X2<=XS .OR. Y1>YF .OR. Y2<=YS .OR. Z1>ZF .OR. Z2<=ZS) CYCLE MESH_LOOP
- 
-      X1 = MAX(X1,XS-0.001_EB*DX(0))
-      X2 = MIN(X2,XF+0.001_EB*DX(IBP1))
-      Y1 = MAX(Y1,YS-0.001_EB*DY(0))
-      Y2 = MIN(Y2,YF+0.001_EB*DY(JBP1))
-      Z1 = MAX(Z1,ZS-0.001_EB*DZ(0))
-      Z2 = MIN(Z2,ZF+0.001_EB*DZ(KBP1))
- 
-      I1 = NINT( GINV(XB(1)-XS,1,NM)*RDXI   ) 
-      I2 = NINT( GINV(XB(2)-XS,1,NM)*RDXI   )
-      J1 = NINT( GINV(XB(3)-YS,2,NM)*RDETA  ) 
-      J2 = NINT( GINV(XB(4)-YS,2,NM)*RDETA  )
-      K1 = NINT( GINV(XB(5)-ZS,3,NM)*RDZETA ) 
-      K2 = NINT( GINV(XB(6)-ZS,3,NM)*RDZETA )
- 
-      NN=0
-      OBST_LOOP: DO
-         NN=NN+1
-         IF (NN>N_OBST) EXIT OBST_LOOP
-         OB=>OBSTRUCTION(NN)
-         IF (.NOT.OB%PERMIT_HOLE) CYCLE OBST_LOOP
- 
-         ! TEMP_OBST(0) is the intersection of HOLE and OBST
- 
-         TEMP_OBST(0)    = OBSTRUCTION(NN)
- 
-         TEMP_OBST(0)%I1 = MAX(I1,OB%I1)
-         TEMP_OBST(0)%I2 = MIN(I2,OB%I2)
-         TEMP_OBST(0)%J1 = MAX(J1,OB%J1)
-         TEMP_OBST(0)%J2 = MIN(J2,OB%J2)
-         TEMP_OBST(0)%K1 = MAX(K1,OB%K1)
-         TEMP_OBST(0)%K2 = MIN(K2,OB%K2)
- 
-         TEMP_OBST(0)%X1 = MAX(X1,OB%X1)
-         TEMP_OBST(0)%X2 = MIN(X2,OB%X2)
-         TEMP_OBST(0)%Y1 = MAX(Y1,OB%Y1)
-         TEMP_OBST(0)%Y2 = MIN(Y2,OB%Y2)
-         TEMP_OBST(0)%Z1 = MAX(Z1,OB%Z1)
-         TEMP_OBST(0)%Z2 = MIN(Z2,OB%Z2)
- 
-         ! Ignore OBSTs that do not intersect with HOLE or are merely sliced by the hole.
- 
-         IF (TEMP_OBST(0)%I2-TEMP_OBST(0)%I1<0 .OR. TEMP_OBST(0)%J2-TEMP_OBST(0)%J1<0 .OR. &
-             TEMP_OBST(0)%K2-TEMP_OBST(0)%K1<0) CYCLE OBST_LOOP
-         IF (TEMP_OBST(0)%I2-TEMP_OBST(0)%I1==0) THEN 
-            IF (OB%I1<TEMP_OBST(0)%I1 .OR.  OB%I2>TEMP_OBST(0)%I2) CYCLE OBST_LOOP
-         ENDIF
-         IF (TEMP_OBST(0)%J2-TEMP_OBST(0)%J1==0) THEN
-            IF (OB%J1<TEMP_OBST(0)%J1 .OR.  OB%J2>TEMP_OBST(0)%J2) CYCLE OBST_LOOP
-         ENDIF
-         IF (TEMP_OBST(0)%K2-TEMP_OBST(0)%K1==0) THEN
-            IF (OB%K1<TEMP_OBST(0)%K1 .OR.  OB%K2>TEMP_OBST(0)%K2) CYCLE OBST_LOOP
-         ENDIF
- 
-         IF (TEMP_OBST(0)%X2<=X1 .OR. TEMP_OBST(0)%X1>=X2 .OR. TEMP_OBST(0)%Y2<=Y1 .OR. TEMP_OBST(0)%Y1>=Y2 .OR. &
-            TEMP_OBST(0)%Z2<=Z1 .OR. TEMP_OBST(0)%Z1>=Z2)  CYCLE OBST_LOOP
- 
-         ! Start counting new OBSTs that need to be created
- 
-         NDO=0
- 
-         IF ((OB%I1<I1.AND.I1<OB%I2) .OR. (XB(1)>=XS.AND.I1==0.AND.OB%I1==0)) THEN
-            NDO=NDO+1
-            TEMP_OBST(NDO)=OBSTRUCTION(NN)
-            TEMP_OBST(NDO)%I1 = OB%I1
-            TEMP_OBST(NDO)%I2 = I1
-            TEMP_OBST(NDO)%X1 = OB%X1
-            TEMP_OBST(NDO)%X2 = X1
-         ENDIF
- 
-         IF ((OB%I1<I2.AND.I2<OB%I2) .OR. (XB(2)<=XF.AND.I2==IBAR.AND.OB%I2==IBAR)) THEN
-            NDO=NDO+1
-            TEMP_OBST(NDO)=OBSTRUCTION(NN)
-            TEMP_OBST(NDO)%I1 = I2
-            TEMP_OBST(NDO)%I2 = OB%I2
-            TEMP_OBST(NDO)%X1 = X2 
-            TEMP_OBST(NDO)%X2 = OB%X2
-         ENDIF
- 
-         IF ((OB%J1<J1.AND.J1<OB%J2) .OR. (XB(3)>=YS.AND.J1==0.AND.OB%J1==0)) THEN
-            NDO=NDO+1
-            TEMP_OBST(NDO)=OBSTRUCTION(NN)
-            TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
-            TEMP_OBST(NDO)%I2 = MIN(I2,OB%I2)
-            TEMP_OBST(NDO)%X1 = MAX(X1,OB%X1)
-            TEMP_OBST(NDO)%X2 = MIN(X2,OB%X2)
-            TEMP_OBST(NDO)%J1 = OB%J1
-            TEMP_OBST(NDO)%J2 = J1
-            TEMP_OBST(NDO)%Y1 = OB%Y1
-            TEMP_OBST(NDO)%Y2 = Y1
-         ENDIF
- 
-         IF ((OB%J1<J2.AND.J2<OB%J2) .OR. (XB(4)<=YF.AND.J2==JBAR.AND.OB%J2==JBAR)) THEN
-            NDO=NDO+1
-            TEMP_OBST(NDO)=OBSTRUCTION(NN)
-            TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
-            TEMP_OBST(NDO)%I2 = MIN(I2,OB%I2)
-            TEMP_OBST(NDO)%X1 = MAX(X1,OB%X1)
-            TEMP_OBST(NDO)%X2 = MIN(X2,OB%X2)
-            TEMP_OBST(NDO)%J1 = J2    
-            TEMP_OBST(NDO)%J2 = OB%J2
-            TEMP_OBST(NDO)%Y1 = Y2
-            TEMP_OBST(NDO)%Y2 = OB%Y2
-         ENDIF
- 
-         IF ((OB%K1<K1.AND.K1<OB%K2) .OR. (XB(5)>=ZS.AND.K1==0.AND.OB%K1==0)) THEN
-            NDO=NDO+1
-            TEMP_OBST(NDO)=OBSTRUCTION(NN)
-            TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
-            TEMP_OBST(NDO)%I2 = MIN(I2,OB%I2)
-            TEMP_OBST(NDO)%X1 = MAX(X1,OB%X1)
-            TEMP_OBST(NDO)%X2 = MIN(X2,OB%X2)
-            TEMP_OBST(NDO)%J1 = MAX(J1,OB%J1)
-            TEMP_OBST(NDO)%J2 = MIN(J2,OB%J2)
-            TEMP_OBST(NDO)%Y1 = MAX(Y1,OB%Y1)
-            TEMP_OBST(NDO)%Y2 = MIN(Y2,OB%Y2)
-            TEMP_OBST(NDO)%K1 = OB%K1
-            TEMP_OBST(NDO)%K2 = K1
-            TEMP_OBST(NDO)%Z1 = OB%Z1
-            TEMP_OBST(NDO)%Z2 = Z1
-         ENDIF
- 
-         IF ((OB%K1<K2.AND.K2<OB%K2) .OR. (XB(6)<=ZF.AND.K2==KBAR.AND.OB%K2==KBAR)) THEN
-            NDO=NDO+1
-            TEMP_OBST(NDO)=OBSTRUCTION(NN)
-            TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
-            TEMP_OBST(NDO)%I2 = MIN(I2,OB%I2)
-            TEMP_OBST(NDO)%X1 = MAX(X1,OB%X1)
-            TEMP_OBST(NDO)%X2 = MIN(X2,OB%X2)
-            TEMP_OBST(NDO)%J1 = MAX(J1,OB%J1)
-            TEMP_OBST(NDO)%J2 = MIN(J2,OB%J2)
-            TEMP_OBST(NDO)%Y1 = MAX(Y1,OB%Y1)
-            TEMP_OBST(NDO)%Y2 = MIN(Y2,OB%Y2)
-            TEMP_OBST(NDO)%K1 = K2
-            TEMP_OBST(NDO)%K2 = OB%K2
-            TEMP_OBST(NDO)%Z1 = Z2
-            TEMP_OBST(NDO)%Z2 = OB%Z2
-         ENDIF
- 
-         ! Maintain ordinal rank of original obstruction, but negate it. This will be a code for Smokeview.
- 
-         TEMP_OBST(:)%ORDINAL = -OB%ORDINAL
- 
-         ! Re-allocate space of new OBSTs, or remove entry for dead OBST
- 
-         NEW_OBST_IF: IF (NDO>0) THEN
-               CALL RE_ALLOCATE_OBST(NM,N_OBST,NDO)
-               OBSTRUCTION=>M%OBSTRUCTION
-               OBSTRUCTION(N_OBST+1:N_OBST+NDO) = TEMP_OBST(1:NDO)
-               N_OBST = N_OBST + NDO
-         ENDIF NEW_OBST_IF
- 
-         ! If the HOLE is to be created or removed, save it in OBSTRUCTION(NN), the original OBST that was broken up
+      ! Loop over all possible multiples of the HOLE
 
-         DEVC_OR_CTRL: IF (DEVC_ID/='null' .OR. CTRL_ID/='null') THEN
+      MR => MULTIPLIER(0)
+      DO NNN=1,N_MULT
+         IF (MULT_ID==MULTIPLIER(NNN)%ID) MR => MULTIPLIER(NNN)
+      ENDDO
 
-            OBSTRUCTION(NN) = TEMP_OBST(0)
-            OB => OBSTRUCTION(NN)
-            OB%DEVC_ID = DEVC_ID
-            OB%CTRL_ID = CTRL_ID
-            CALL SEARCH_CONTROLLER('HOLE',CTRL_ID,DEVC_ID,OB%DEVC_INDEX,OB%CTRL_INDEX,N)
-            IF (DEVC_ID /='null') THEN
-               OB%REMOVABLE   = .TRUE.
-               OB%HOLE_FILLER = .TRUE.
-               OB%CTRL_INDEX = -1
-               IF (DEVICE(OB%DEVC_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-            ENDIF
-            IF (CTRL_ID /='null') THEN
-               OB%REMOVABLE   = .TRUE.
-               OB%HOLE_FILLER = .TRUE.
-               OB%DEVC_INDEX = -1
-               IF (CONTROL(OB%CTRL_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
-            ENDIF
-            
-            IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.
+      K_MULT_LOOP: DO KK=MR%K_LOWER,MR%K_UPPER
+         J_MULT_LOOP: DO JJ=MR%J_LOWER,MR%J_UPPER
+            I_MULT_LOOP: DO II=MR%I_LOWER,MR%I_UPPER
 
-            SELECT CASE (COLOR)
-               CASE ('INVISIBLE')
-                  OB%COLOR_INDICATOR = -3
-                  OB%RGB(1) = 255
-                  OB%RGB(2) = 204
-                  OB%RGB(3) = 102
-                  OB%TRANSPARENCY = 0._EB
-               CASE ('null')
-                  IF (ANY(RGB>0)) THEN
-                     OB%COLOR_INDICATOR = -3
-                     OB%RGB  = RGB
-                     OB%TRANSPARENCY = TRANSPARENCY
+               IF (.NOT.MR%SEQUENTIAL) THEN
+                  X1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+                  X2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+                  Y1 = XB(3) + MR%DY0 + JJ*MR%DXB(3)
+                  Y2 = XB(4) + MR%DY0 + JJ*MR%DXB(4)
+                  Z1 = XB(5) + MR%DZ0 + KK*MR%DXB(5)
+                  Z2 = XB(6) + MR%DZ0 + KK*MR%DXB(6)
+               ELSE
+                  X1 = XB(1) + MR%DX0 + II*MR%DXB(1)
+                  X2 = XB(2) + MR%DX0 + II*MR%DXB(2)
+                  Y1 = XB(3) + MR%DY0 + II*MR%DXB(3)
+                  Y2 = XB(4) + MR%DY0 + II*MR%DXB(4)
+                  Z1 = XB(5) + MR%DZ0 + II*MR%DXB(5)
+                  Z2 = XB(6) + MR%DZ0 + II*MR%DXB(6)
+               ENDIF
+
+               ! Check if hole is contained within the current mesh
+ 
+               IF (X1>=XF .OR. X2<=XS .OR. Y1>YF .OR. Y2<=YS .OR. Z1>ZF .OR. Z2<=ZS) CYCLE I_MULT_LOOP
+ 
+               ! Assign mesh-limited bounds
+
+               X1 = MAX(X1,XS-0.001_EB*DX(0))
+               X2 = MIN(X2,XF+0.001_EB*DX(IBP1))
+               Y1 = MAX(Y1,YS-0.001_EB*DY(0))
+               Y2 = MIN(Y2,YF+0.001_EB*DY(JBP1))
+               Z1 = MAX(Z1,ZS-0.001_EB*DZ(0))
+               Z2 = MIN(Z2,ZF+0.001_EB*DZ(KBP1))
+ 
+               I1 = NINT( GINV(X1-XS,1,NM)*RDXI   ) 
+               I2 = NINT( GINV(X2-XS,1,NM)*RDXI   )
+               J1 = NINT( GINV(Y1-YS,2,NM)*RDETA  ) 
+               J2 = NINT( GINV(Y2-YS,2,NM)*RDETA  )
+               K1 = NINT( GINV(Z1-ZS,3,NM)*RDZETA ) 
+               K2 = NINT( GINV(Z2-ZS,3,NM)*RDZETA )
+ 
+               NN=0
+               OBST_LOOP: DO
+                  NN=NN+1
+                  IF (NN>N_OBST) EXIT OBST_LOOP
+                  OB=>OBSTRUCTION(NN)
+                  IF (.NOT.OB%PERMIT_HOLE) CYCLE OBST_LOOP
+          
+                  ! TEMP_OBST(0) is the intersection of HOLE and OBST
+          
+                  TEMP_OBST(0)    = OBSTRUCTION(NN)
+          
+                  TEMP_OBST(0)%I1 = MAX(I1,OB%I1)
+                  TEMP_OBST(0)%I2 = MIN(I2,OB%I2)
+                  TEMP_OBST(0)%J1 = MAX(J1,OB%J1)
+                  TEMP_OBST(0)%J2 = MIN(J2,OB%J2)
+                  TEMP_OBST(0)%K1 = MAX(K1,OB%K1)
+                  TEMP_OBST(0)%K2 = MIN(K2,OB%K2)
+          
+                  TEMP_OBST(0)%X1 = MAX(X1,OB%X1)
+                  TEMP_OBST(0)%X2 = MIN(X2,OB%X2)
+                  TEMP_OBST(0)%Y1 = MAX(Y1,OB%Y1)
+                  TEMP_OBST(0)%Y2 = MIN(Y2,OB%Y2)
+                  TEMP_OBST(0)%Z1 = MAX(Z1,OB%Z1)
+                  TEMP_OBST(0)%Z2 = MIN(Z2,OB%Z2)
+ 
+                  ! Ignore OBSTs that do not intersect with HOLE or are merely sliced by the hole.
+ 
+                  IF (TEMP_OBST(0)%I2-TEMP_OBST(0)%I1<0 .OR. TEMP_OBST(0)%J2-TEMP_OBST(0)%J1<0 .OR. &
+                      TEMP_OBST(0)%K2-TEMP_OBST(0)%K1<0) CYCLE OBST_LOOP
+                  IF (TEMP_OBST(0)%I2-TEMP_OBST(0)%I1==0) THEN 
+                     IF (OB%I1<TEMP_OBST(0)%I1 .OR.  OB%I2>TEMP_OBST(0)%I2) CYCLE OBST_LOOP
                   ENDIF
-               CASE DEFAULT
-                  CALL COLOR2RGB(RGB,COLOR)
-                  OB%COLOR_INDICATOR = -3
-                  OB%RGB  = RGB
-                  OB%TRANSPARENCY = TRANSPARENCY
-            END SELECT
-
-         ELSE DEVC_OR_CTRL
-
-            OBSTRUCTION(NN) = OBSTRUCTION(N_OBST)
-            N_OBST = N_OBST-1
-            NN = NN-1
-
-         ENDIF DEVC_OR_CTRL
- 
-      ENDDO OBST_LOOP
+                  IF (TEMP_OBST(0)%J2-TEMP_OBST(0)%J1==0) THEN
+                     IF (OB%J1<TEMP_OBST(0)%J1 .OR.  OB%J2>TEMP_OBST(0)%J2) CYCLE OBST_LOOP
+                  ENDIF
+                  IF (TEMP_OBST(0)%K2-TEMP_OBST(0)%K1==0) THEN
+                     IF (OB%K1<TEMP_OBST(0)%K1 .OR.  OB%K2>TEMP_OBST(0)%K2) CYCLE OBST_LOOP
+                  ENDIF
+          
+                  IF (TEMP_OBST(0)%X2<=X1 .OR. TEMP_OBST(0)%X1>=X2 .OR. TEMP_OBST(0)%Y2<=Y1 .OR. TEMP_OBST(0)%Y1>=Y2 .OR. &
+                     TEMP_OBST(0)%Z2<=Z1 .OR. TEMP_OBST(0)%Z1>=Z2)  CYCLE OBST_LOOP
+          
+                  ! Start counting new OBSTs that need to be created
+          
+                  NDO=0
+          
+                  IF ((OB%I1<I1.AND.I1<OB%I2) .OR. (XB(1)>=XS.AND.I1==0.AND.OB%I1==0)) THEN
+                     NDO=NDO+1
+                     TEMP_OBST(NDO)=OBSTRUCTION(NN)
+                     TEMP_OBST(NDO)%I1 = OB%I1
+                     TEMP_OBST(NDO)%I2 = I1
+                     TEMP_OBST(NDO)%X1 = OB%X1
+                     TEMP_OBST(NDO)%X2 = X1
+                  ENDIF
+          
+                  IF ((OB%I1<I2.AND.I2<OB%I2) .OR. (XB(2)<=XF.AND.I2==IBAR.AND.OB%I2==IBAR)) THEN
+                     NDO=NDO+1
+                     TEMP_OBST(NDO)=OBSTRUCTION(NN)
+                     TEMP_OBST(NDO)%I1 = I2
+                     TEMP_OBST(NDO)%I2 = OB%I2
+                     TEMP_OBST(NDO)%X1 = X2 
+                     TEMP_OBST(NDO)%X2 = OB%X2
+                  ENDIF
+          
+                  IF ((OB%J1<J1.AND.J1<OB%J2) .OR. (XB(3)>=YS.AND.J1==0.AND.OB%J1==0)) THEN
+                     NDO=NDO+1
+                     TEMP_OBST(NDO)=OBSTRUCTION(NN)
+                     TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
+                     TEMP_OBST(NDO)%I2 = MIN(I2,OB%I2)
+                     TEMP_OBST(NDO)%X1 = MAX(X1,OB%X1)
+                     TEMP_OBST(NDO)%X2 = MIN(X2,OB%X2)
+                     TEMP_OBST(NDO)%J1 = OB%J1
+                     TEMP_OBST(NDO)%J2 = J1
+                     TEMP_OBST(NDO)%Y1 = OB%Y1
+                     TEMP_OBST(NDO)%Y2 = Y1
+                  ENDIF
+          
+                  IF ((OB%J1<J2.AND.J2<OB%J2) .OR. (XB(4)<=YF.AND.J2==JBAR.AND.OB%J2==JBAR)) THEN
+                     NDO=NDO+1
+                     TEMP_OBST(NDO)=OBSTRUCTION(NN)
+                     TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
+                     TEMP_OBST(NDO)%I2 = MIN(I2,OB%I2)
+                     TEMP_OBST(NDO)%X1 = MAX(X1,OB%X1)
+                     TEMP_OBST(NDO)%X2 = MIN(X2,OB%X2)
+                     TEMP_OBST(NDO)%J1 = J2    
+                     TEMP_OBST(NDO)%J2 = OB%J2
+                     TEMP_OBST(NDO)%Y1 = Y2
+                     TEMP_OBST(NDO)%Y2 = OB%Y2
+                  ENDIF
+          
+                  IF ((OB%K1<K1.AND.K1<OB%K2) .OR. (XB(5)>=ZS.AND.K1==0.AND.OB%K1==0)) THEN
+                     NDO=NDO+1
+                     TEMP_OBST(NDO)=OBSTRUCTION(NN)
+                     TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
+                     TEMP_OBST(NDO)%I2 = MIN(I2,OB%I2)
+                     TEMP_OBST(NDO)%X1 = MAX(X1,OB%X1)
+                     TEMP_OBST(NDO)%X2 = MIN(X2,OB%X2)
+                     TEMP_OBST(NDO)%J1 = MAX(J1,OB%J1)
+                     TEMP_OBST(NDO)%J2 = MIN(J2,OB%J2)
+                     TEMP_OBST(NDO)%Y1 = MAX(Y1,OB%Y1)
+                     TEMP_OBST(NDO)%Y2 = MIN(Y2,OB%Y2)
+                     TEMP_OBST(NDO)%K1 = OB%K1
+                     TEMP_OBST(NDO)%K2 = K1
+                     TEMP_OBST(NDO)%Z1 = OB%Z1
+                     TEMP_OBST(NDO)%Z2 = Z1
+                  ENDIF
+          
+                  IF ((OB%K1<K2.AND.K2<OB%K2) .OR. (XB(6)<=ZF.AND.K2==KBAR.AND.OB%K2==KBAR)) THEN
+                     NDO=NDO+1
+                     TEMP_OBST(NDO)=OBSTRUCTION(NN)
+                     TEMP_OBST(NDO)%I1 = MAX(I1,OB%I1)
+                     TEMP_OBST(NDO)%I2 = MIN(I2,OB%I2)
+                     TEMP_OBST(NDO)%X1 = MAX(X1,OB%X1)
+                     TEMP_OBST(NDO)%X2 = MIN(X2,OB%X2)
+                     TEMP_OBST(NDO)%J1 = MAX(J1,OB%J1)
+                     TEMP_OBST(NDO)%J2 = MIN(J2,OB%J2)
+                     TEMP_OBST(NDO)%Y1 = MAX(Y1,OB%Y1)
+                     TEMP_OBST(NDO)%Y2 = MIN(Y2,OB%Y2)
+                     TEMP_OBST(NDO)%K1 = K2
+                     TEMP_OBST(NDO)%K2 = OB%K2
+                     TEMP_OBST(NDO)%Z1 = Z2
+                     TEMP_OBST(NDO)%Z2 = OB%Z2
+                  ENDIF
+          
+                  ! Maintain ordinal rank of original obstruction, but negate it. This will be a code for Smokeview.
+          
+                  TEMP_OBST(:)%ORDINAL = -OB%ORDINAL
+          
+                  ! Re-allocate space of new OBSTs, or remove entry for dead OBST
+          
+                  NEW_OBST_IF: IF (NDO>0) THEN
+                        CALL RE_ALLOCATE_OBST(NM,N_OBST,NDO)
+                        OBSTRUCTION=>M%OBSTRUCTION
+                        OBSTRUCTION(N_OBST+1:N_OBST+NDO) = TEMP_OBST(1:NDO)
+                        N_OBST = N_OBST + NDO
+                  ENDIF NEW_OBST_IF
+          
+                  ! If the HOLE is to be created or removed, save it in OBSTRUCTION(NN), the original OBST that was broken up
+         
+                  DEVC_OR_CTRL: IF (DEVC_ID/='null' .OR. CTRL_ID/='null') THEN
+         
+                     OBSTRUCTION(NN) = TEMP_OBST(0)
+                     OB => OBSTRUCTION(NN)
+                     OB%DEVC_ID = DEVC_ID
+                     OB%CTRL_ID = CTRL_ID
+                     CALL SEARCH_CONTROLLER('HOLE',CTRL_ID,DEVC_ID,OB%DEVC_INDEX,OB%CTRL_INDEX,N)
+                     IF (DEVC_ID /='null') THEN
+                        OB%REMOVABLE   = .TRUE.
+                        OB%HOLE_FILLER = .TRUE.
+                        OB%CTRL_INDEX = -1
+                        IF (DEVICE(OB%DEVC_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
+                     ENDIF
+                     IF (CTRL_ID /='null') THEN
+                        OB%REMOVABLE   = .TRUE.
+                        OB%HOLE_FILLER = .TRUE.
+                        OB%DEVC_INDEX = -1
+                        IF (CONTROL(OB%CTRL_INDEX)%INITIAL_STATE) OB%HIDDEN = .TRUE.
+                     ENDIF
+                     
+                     IF (OB%CONSUMABLE)    OB%REMOVABLE = .TRUE.
+         
+                     SELECT CASE (COLOR)
+                        CASE ('INVISIBLE')
+                           OB%COLOR_INDICATOR = -3
+                           OB%RGB(1) = 255
+                           OB%RGB(2) = 204
+                           OB%RGB(3) = 102
+                           OB%TRANSPARENCY = 0._EB
+                        CASE ('null')
+                           IF (ANY(RGB>0)) THEN
+                              OB%COLOR_INDICATOR = -3
+                              OB%RGB  = RGB
+                              OB%TRANSPARENCY = TRANSPARENCY
+                           ENDIF
+                        CASE DEFAULT
+                           CALL COLOR2RGB(RGB,COLOR)
+                           OB%COLOR_INDICATOR = -3
+                           OB%RGB  = RGB
+                           OB%TRANSPARENCY = TRANSPARENCY
+                     END SELECT
+         
+                  ELSE DEVC_OR_CTRL
+         
+                     OBSTRUCTION(NN) = OBSTRUCTION(N_OBST)
+                     N_OBST = N_OBST-1
+                     NN = NN-1
+         
+                  ENDIF DEVC_OR_CTRL
+          
+               ENDDO OBST_LOOP
+            ENDDO I_MULT_LOOP
+         ENDDO J_MULT_LOOP
+      ENDDO K_MULT_LOOP
    ENDDO MESH_LOOP
 ENDDO READ_HOLE_LOOP
  
@@ -6875,10 +6923,13 @@ REWIND(LU_INPUT)
 
 IF(ANY(EVACUATION_ONLY)) DEALLOCATE(TEMP_HOLE_EVAC)
 DEALLOCATE(TEMP_OBST)
+
 END SUBROUTINE READ_HOLE
  
  
+
 SUBROUTINE RE_ALLOCATE_OBST(NM,N_OBST,NDO)
+
 TYPE (OBSTRUCTION_TYPE), ALLOCATABLE, DIMENSION(:) :: DUMMY
 INTEGER, INTENT(IN) :: NM,NDO,N_OBST
 TYPE (MESH_TYPE), POINTER :: M
