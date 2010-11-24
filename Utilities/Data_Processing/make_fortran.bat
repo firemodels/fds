@@ -10,6 +10,5 @@ ifort -o NIST_RSE_1994 NIST_RSE_1994.f90
 ifort -o ns2d ns2d.f90
 ifort -o radiation_box radiation_box.f90
 ifort -o radiation_plane_layer radiation_plane_layer.f90
-ifort -o Ulster_SBI_fds2ascii Ulster_SBI_fds2ascii.f
 ifort -o wall_internal_radiation wall_internal_radiation.f90
 pause
