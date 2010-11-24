@@ -3637,6 +3637,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
    ENDIF
  
    ! Determine what cells need to be evaluated to form cell-corner averages
+
    II1 = I1
    II2 = I2+1
    JJ1 = J1
@@ -3789,28 +3790,28 @@ REAL(EB) :: SUM
 
 SELECT CASE(IOR)
    CASE(1)
-      SUM = C(I,J,K)+C(I,J,K+1)+C(I,J+1,K)+C(I,J+1,K+1)
+      SUM = MAX(C(I,J,K),C(I+1,J,K))+MAX(C(I,J,K+1),C(I+1,J,K+1))+MAX(C(I,J+1,K),C(I+1,J+1,K))+MAX(C(I,J+1,K+1),C(I+1,J+1,K+1))
       IF (SUM==0._EB) THEN
          FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
       ELSE
-         FACE_VALUE = ( A(I,J,K)  *C(I,J,K)   + A(I,J,K+1)  *C(I,J,K+1) + &
-                        A(I,J+1,K)*C(I,J+1,K) + A(I,J+1,K+1)*C(I,J+1,K+1) )/SUM
+         FACE_VALUE = ( A(I,J,K)  *MAX(C(I,J,K),C(I+1,J,K))     + A(I,J,K+1)  *MAX(C(I,J,K+1),C(I+1,J,K)) + &
+                        A(I,J+1,K)*MAX(C(I,J+1,K),C(I+1,J+1,K)) + A(I,J+1,K+1)*MAX(C(I,J+1,K+1),C(I+1,J+1,K+1)) )/SUM
       ENDIF
    CASE(2)
-      SUM = C(I,J,K)+C(I,J,K+1)+C(I+1,J,K)+C(I+1,J,K+1)
+      SUM = MAX(C(I,J,K),C(I,J+1,K))+MAX(C(I,J,K+1),C(I,J+1,K+1))+MAX(C(I+1,J,K),C(I+1,J+1,K))+MAX(C(I+1,J,K+1),C(I+1,J+1,K+1))
       IF (SUM==0._EB) THEN
          FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
       ELSE
-         FACE_VALUE = ( A(I,J,K)  *C(I,J,K)   + A(I,J,K+1)  *C(I,J,K+1) + &
-                        A(I+1,J,K)*C(I+1,J,K) + A(I+1,J,K+1)*C(I+1,J,K+1) )/SUM
+         FACE_VALUE = ( A(I,J,K)  *MAX(C(I,J,K),C(I,J+1,K))     + A(I,J,K+1)  *MAX(C(I,J,K+1),C(I,J+1,K+1)) + &
+                        A(I+1,J,K)*MAX(C(I+1,J,K),C(I+1,J+1,K)) + A(I+1,J,K+1)*MAX(C(I+1,J,K+1),C(I+1,J+1,K+1)) )/SUM
       ENDIF
    CASE(3)
-      SUM = C(I,J,K)+C(I+1,J,K)+C(I,J+1,K)+C(I+1,J+1,K)
+      SUM = MAX(C(I,J,K),C(I,J,K+1))+MAX(C(I+1,J,K),C(I+1,J,K+1))+MAX(C(I,J+1,K),C(I,J+1,K+1))+MAX(C(I+1,J+1,K),C(I+1,J+1,K+1))
       IF (SUM==0._EB) THEN
          FACE_VALUE = OUTPUT_QUANTITY(INDX)%AMBIENT_VALUE
       ELSE
-         FACE_VALUE = ( A(I,J,K)  *C(I,J,K)   + A(I+1,J,K)  *C(I+1,J,K) + &
-                        A(I,J+1,K)*C(I,J+1,K) + A(I+1,J+1,K)*C(I+1,J+1,K) )/SUM
+         FACE_VALUE = ( A(I,J,K)  *MAX(C(I,J,K),C(I,J,K+1))     + A(I+1,J,K)  *MAX(C(I+1,J,K),C(I+1,J,K+1)) + &
+                        A(I,J+1,K)*MAX(C(I,J+1,K),C(I,J+1,K+1)) + A(I+1,J+1,K)*MAX(C(I+1,J+1,K),C(I+1,J+1,K+1)) )/SUM
       ENDIF
 END SELECT
  
