@@ -38,7 +38,7 @@ if not %upload_win32% == 1 goto endif_win32
   set exe=smv_test_%smv_revision%_%platform%.exe
   echo.
   echo Uploading %summary% - %exe%
-  echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+  echo %upload% --passwd-file-dir "%google_password_dir%" --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
        %upload% --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
 :endif_win32
 

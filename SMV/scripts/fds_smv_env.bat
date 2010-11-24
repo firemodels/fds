@@ -1,4 +1,4 @@
-@echo off
+c@echo off
 Rem ------ FDS/Smokeview version and revision numbers ---------
 
 set smv_version=5.6
@@ -24,7 +24,7 @@ set svn_logon=%linux_username%@%linux_hostname%
 
 Rem ----------- for uploading to Google Code -----------------
 
-set google_password_dir=d:\gpf_home\
+set google_password_dir=%HOMEDRIVE%%HOMEPATH%\
 set upload==%svn_root%\smv\scripts\googlecode_upload.py
 set fds_google_level=Release-3_Maintenance
 set smv_google_level=Release-3_Maintenance
