@@ -9,73 +9,64 @@
 <h3>Initial Setup</h3>
 
 <ul>
-<li>Setting up environment definitions
+<li>Defining environment variables used by the scripts
 <ol>
 <li>Open the <tt>Utilities\Scripts</tt> folder and double-click on the file <tt>COPY_fds_smv_env.bat</tt>. 
 This copies <tt>fds-smv_env.bat</tt> to your home directory.
-<li>Open a command shell and type: <tt>notepad fds_smv_env.bat</tt>
-<li>Define your FDS/Smokeview repository location.
+<li><a href="../smv/scripts/EDIT_setup.bat">Click here</a> to update the <tt>fds_smv_env.bat</tt> configuration file.
+(Define your FDS/Smokeview repository location.)
 </ol>
-<p><li>Compilers
+
+<p><li>Compiling software
 <ol>
-<li>Install Intel Fortran.  Intel C/C++ only needs to be installed if you wish to build Smokeview.
-<p><li>Putty - a program used login to a remote Linux or Mac computer.
-<ol>
-<li>Install putty.  Doesn't matter where - just make sure the install directory is in the <em>path</em> .<br> 
-Test the installation by opening up a command shell and typing <tt>plink</tt> at the command line. 
-<li>Set up ssh keys to let you login to the Linux cluster without a password.  Basically you create a public/private pair 
-of ssh keys.  You copy the private key to somewhere on your PC (doesn't matter where) 
-and copy the public key into a file on the Linux cluster.  More precisely:
+<li>Install Intel Fortran.  
+<li>Install Intel C/C++ (only required if you wish to build Smokeview)
+</ol>
+
+<p><li>Communicating with other Computers
+<ul>
+<li>Install putty.  
+<li>Set up ssh keys. (optional - to avoid typing passwords)
 <ol>
 <li>run puttygen
 <li>click on the <tt>SSH-2 RSA</tt> radio button
-<li>click on the <tt>Generate</tt> button.  Pick a <em>pass-phrase</em> that you can easily remember.
-<li>Save the private key into the <tt>c:\bin\keys</tt> directory
+<li>click on the <tt>Generate</tt> button.  Pick a <em>pass-phrase</em>.
+<li>Save the private key on your local computer.
 <li>Save the public key and copy it to the Linux cluster.  Put the key at the end of the file <tt>authorized_key2</tt> which
-is located in the <tt>.ssh</tt> directory (in your home directory)
+is located in the <tt>.ssh</tt> directory in your home directory.
 </ol>
-<li>On your PC, copy the file <tt>Pageant.exe</tt> to <tt>C:\Documents and Settings\gforney\Start Menu\Programs\Startup</tt> 
-(change <tt>gforney</tt> to your user name).  
-<li>Reboot your computer.
-<li>Open <tt>Pageant</tt> (an icon looking like looking like a terminal wearing a black hat should 
-appear in the right side of the task bar).
-This program will direct you to open your private key and ask you for the pass-phrase used to create it. 
-</ol>
-<p><li>Uploading files to googlecode with Python
-<p><a href="http://www.python.org/">Download and install Python</a>
-<p><li>Google password file
-<p>Create a file named <tt>gc.passwd</tt> containing your google password and put it in your windows home directory.
-<p><li>Winzip
+</ul>
+<p><li>Creating Bundles
 <ol>
 <li>Install Winzip version 12, Winzip command line tool and Winzip self extractor.  
 Note, The Winzip command line tool is free but is a separate download from Winzip 12.  
 The Winzip self extractor needs to be purchased separately.
 <li>Put winzip tools in <tt>c:\bin\winzip</tt>
 </ol>
+<p><li>Uploading bundles to googlecode
+<ol>
+<li><a href="http://www.python.org/">Download and install Python</a>
+<li>Create a file named <tt>gc.passwd</tt> containing your google password and put it in your windows home directory.
+</ol>
 </ul>
 
 <h3>Testing the Setup</h3>
 <ul>
-<li><a href="../SMV/scripts/SHOW_setup.bat">Show configuration settings</tt></a> 
-<li><a href="../SMV/scripts/TEST2_setup.bat">Test prerequisites</a> 
+<p><li><a href="../SMV/scripts/TEST_setup.bat">Click here</a> to verify that software tools
+needed by the FDS-Smokeview web scripts are installed.
 </ul>
 
 <h3>Using the Scripts</h3>
-After the environment has been defined and the necessary software has been installed, the script pages below may be used to build
-FDS, Smokeview or other components (presently just the Verification cases).
-
-<p><a href="build_fds.html">FDS Build notes</a> -
+Click on one of these links
+<a href="build_fds.html">FDS Build notes</a> -
 <a href="../SMV/build_smokeview.html">Smokeview Build notes</a> -
 <a href="../Utilities/build_other.html">Other Build Notes</a> -
-<a href="Scripts/EDIT_getting_started.bat">Edit this web page</a>
+to beginning building and/or bundling FDS/Smokeview software and associated tools.
 
 <p><hr>
+<p><a href="Scripts/EDIT_getting_started.bat">Edit this web page</a>
 
-<p><address>
-<A HREF="http://www.nist.gov/el" >Engineering Laboratory</A><BR>
-<a href="http://www.nist.gov" >National Institute of Standards and Technology</a><br>
-Gaithersburg, MD 20899
-</address>
+
 
 
 </BODY>
