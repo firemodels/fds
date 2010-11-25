@@ -1,4 +1,4 @@
-c@echo off
+@echo off
 Rem ------ FDS/Smokeview version and revision numbers ---------
 
 set smv_version=5.6
