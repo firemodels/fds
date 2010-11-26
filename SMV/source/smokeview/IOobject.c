@@ -859,32 +859,32 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
         *argptr=val_result;
       }
       break;
-	case SV_INCLUDE:
-	case SV_INCLUDEF:
-		{
-          sv_object *included_object;
-          int iframe;
-		  char *object_name;
+   	case SV_INCLUDE:
+	  case SV_INCLUDEF:
+	    {
+        sv_object *included_object;
+        int iframe;
+	      char *object_name;
 
-		  if(toki->included_object==NULL){
-		    if(toki->command==SV_INCLUDEF){
-		      iframe=arg[0];
-		    }
-		    else{
-              iframe=0;
-		    }
-            object_name = (toki-1)->string;
-            included_object = get_SVOBJECT_type(object_name,missing_device);
-			toki->included_frame=iframe;
-			toki->included_object=included_object;
-		  }
-		  else{
-            iframe=toki->included_frame;
-            included_object = toki->included_object;
-		  }
-          draw_SVOBJECT(included_object, iframe, NULL, recurse_level+1);
-		}
-		break;
+	      if(toki->included_object==NULL){
+	        if(toki->command==SV_INCLUDEF){
+	          iframe=arg[0];
+		      }
+	        else{
+            iframe=0;
+		      }
+          object_name = (toki-1)->string;
+          included_object = get_SVOBJECT_type(object_name,missing_device);
+	        toki->included_frame=iframe;
+	        toki->included_object=included_object;
+        }
+	      else{
+          iframe=toki->included_frame;
+          included_object = toki->included_object;
+        }
+        draw_SVOBJECT(included_object, iframe, NULL, recurse_level+1);
+      }
+      break;
     case SV_ABS:
       if(arg[0]<0.0){
         *argptr=-arg[0];
@@ -3809,8 +3809,8 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
       toki->type=TOKEN_COMMAND;
       error_code=get_token_id(toki->token, &toki->command, &toki->nvars, &toki->noutvars, &use_displaylist);
-	  toki->included_frame=0;
-	  toki->included_object=NULL;
+	    toki->included_frame=0;
+	    toki->included_object=NULL;
       if(error_code==1){
         frame->error=1;
         printf("*** error: unable to identify the command, %s, while parsing:\n\n",toki->token);
@@ -3831,8 +3831,14 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       }
       if(nargs_actual!=toki->nvars){
         frame->error=1;
-        printf("*** error: The command %s in device %s has %i arguments, %i were expected\n",
-          toki->token,frame->device->label,nargs_actual,toki->nvars);
+        if(toki->nvars==1){
+          printf("*** error: The command %s in device %s has %i arguments, %i was expected\n",
+            toki->token,frame->device->label,nargs_actual,toki->nvars);
+        }
+        else{
+          printf("*** error: The command %s in device %s has %i arguments, %i were expected\n",
+            toki->token,frame->device->label,nargs_actual,toki->nvars);
+        }
       }
       if(nargs_actual==toki->nvars){
         int ii;
@@ -3848,8 +3854,14 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
           noutargs_actual++;
         }
         if(noutargs_actual!=toki->noutvars){
-          printf("*** error: The command %s in device %s has %i output arguments, %i were expected\n",
-            toki->token,frame->device->label,noutargs_actual,toki->noutvars);
+          if(toki->noutvars==1){
+            printf("*** error: The command %s in device %s has %i output arguments, %i was expected\n",
+              toki->token,frame->device->label,noutargs_actual,toki->noutvars);
+            }
+          else{
+            printf("*** error: The command %s in device %s has %i output arguments, %i were expected\n",
+              toki->token,frame->device->label,noutargs_actual,toki->noutvars);
+          }
         }
       }
       ncommands++;
@@ -4079,10 +4091,6 @@ int read_object_defs(char *file){
       remove_comment(buffer);
       trim(buffer);
       label = trim_front(buffer);
-      //xxx debug print
-	  //if(strcmp(label,"human_test")==0){
-      //  printf("we're here\n");
-	 // }
       temp_object=get_object(label);
       if(temp_object!=NULL){
         free_object(temp_object);
