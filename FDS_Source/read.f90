@@ -5205,8 +5205,8 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    ! Ignition Time
 
    SF%T_IGN = T_BEGIN 
-   IF (SF%TMP_IGN<5000._EB)                    SF%T_IGN = T_END
-   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) SF%T_IGN = T_END
+   IF (SF%TMP_IGN<5000._EB)                    SF%T_IGN = HUGE(T_END)
+   IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) SF%T_IGN = HUGE(T_END)
 
    ! Species Arrays and Method of Mass Transfer (SPECIES_BC_INDEX)
 
