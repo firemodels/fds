@@ -24,9 +24,9 @@ OBJECTDEF
  0.0 0.05 0.0 translate "sprinkler_upright" include
 OBJECTDEF
  human_test          // label, name of avatar
- :DUM1 :DUM2 :DUM3 :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0 :HX :HY :HZ
+ :HEADCOLOR="RED" :DUM1 :DUM2 :DUM3 :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0 :HX :HY :HZ
  90.0 rotatez
- "TAN" setcolor // head color  TAN 210 180 140
+ $HEADCOLOR setcolor // head color  TAN 210 180 140
  0.3 0.3 0.3 scalexyz 
  0.0 0.0 0.0 translate
  push  0.0 0.0 5.2 translate 1.1 drawsphere 
@@ -34,7 +34,7 @@ OBJECTDEF
    push -0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
    push  0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
    pop // head
- 28 64 140 setrgb  // body color 
+ 39 64 139 setrgb  // body color 
  push  0.0 0.0 3.55 translate 0.5 0.3 1.0 scalexyz 2.5 drawsphere pop // trunk
  "TAN" setcolor // arm color TAN 210 180 140
  push -0.9 0.0 3.5 translate  35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
@@ -47,9 +47,24 @@ OBJECTDEF
  "RED" setcolor
  1.0 drawsphere
 OBJECTDEF
+ airpack
+ 96 96 96 setrgb
+ push 180.0 rotatey 0.2 drawhsphere pop
+ 0.2 0.55 drawdisk
+ 0.0 0.0 0.55 translate 0.2 drawhsphere
+OBJECTDEF  // used by smokeview to display smoke thickness
+ helmit
+ 255 51 51 setrgb
+ push 0.0 0.0 0.4 translate 0.3 drawhsphere pop
+ 0.3 drawhsphere
+ 0.4 0.02 drawdisk
+OBJECTDEF
  human_with_luggage          // label, name of avatar
- "human_test" include
- 0.5 0.0 0.25 translate 0.5 0.5 0.5 scalexyz "luggage" include
+ push "human_test" include pop
+ push 0.5 0.0 0.25 translate 0.5 0.5 0.5 scalexyz "luggage" include pop
+ push 0.0 0.0 1.65 translate 1.0 1.0 1.0 scalexyz "helmit" include pop
+ push -0.2 0.0 0.80 translate "airpack" include pop
+
 
 
 

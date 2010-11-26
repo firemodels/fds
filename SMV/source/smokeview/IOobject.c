@@ -4079,6 +4079,10 @@ int read_object_defs(char *file){
       remove_comment(buffer);
       trim(buffer);
       label = trim_front(buffer);
+      //xxx debug print
+	  //if(strcmp(label,"human_test")==0){
+      //  printf("we're here\n");
+	 // }
       temp_object=get_object(label);
       if(temp_object!=NULL){
         free_object(temp_object);
