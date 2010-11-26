@@ -1,28 +1,4 @@
 OBJECTDEF
- sensor2
- "sensor" include
- 0.05 0.0 0.0 translate
- "sensor" include
- NEWFRAME
- "sensor" include
- 0.05 0.0 0.0 translate
- "sensor" include
- NEWFRAME
- "sensor" include
- 0.05 0.0 0.0 translate
- "sensor" include
- NEWFRAME
- "sensor" include
- 0.05 0.0 0.0 translate
- "sensor" include
-OBJECTDEF
- sprinkler2
- "sprinkler_upright" include 
- 0.05 0.0 0.0 translate "sprinkler_upright" include
- NEWFRAME
- "sprinkler_upright" include 
- 0.0 0.05 0.0 translate "sprinkler_upright" include
-OBJECTDEF
  fire_fighter
  "TAN" setcolor // head color  TAN 210 180 140
  0.3 0.3 0.3 scalexyz 
