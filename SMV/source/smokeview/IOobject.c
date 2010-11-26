@@ -144,6 +144,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWSQUARE    216
 #define SV_DRAWVENT      217
 #define SV_DRAWCUBEC     218
+#define SV_DRAWHSPHERE   219
 
 #define SV_DRAWCUBE_NUMARGS      1
 #define SV_DRAWSPHERE_NUMARGS    1
@@ -164,6 +165,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWSQUARE_NUMARGS 1
 #define SV_DRAWVENT_NUMARGS 2
 #define SV_DRAWCUBEC_NUMARGS      1
+#define SV_DRAWHSPHERE_NUMARGS    1
 
 #define SV_DRAWCUBE_NUMOUTARGS      0
 #define SV_DRAWSPHERE_NUMOUTARGS    0
@@ -184,6 +186,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWSQUARE_NUMOUTARGS 0
 #define SV_DRAWVENT_NUMOUTARGS 0
 #define SV_DRAWCUBEC_NUMOUTARGS      0
+#define SV_DRAWHSPHERE_NUMOUTARGS    0
 
 #define SV_PUSH       300
 #define SV_POP        301
@@ -242,6 +245,7 @@ void drawarc(float angle, float diameter, unsigned char *rgbcolor);
 void drawcircle(float diameter, unsigned char *rgbcolor);
 void drawpoint(unsigned char *rgbcolor);
 void drawsphere(float diameter, unsigned char *rgbcolor);
+void drawhsphere(float diameter, unsigned char *rgbcolor);
 void drawtsphere(int texture_index, float diameter, unsigned char *rgbcolor);
 void drawcube(float size, unsigned char *rgbcolor);
 void drawcubec(float size, unsigned char *rgbcolor);
@@ -1213,6 +1217,10 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
       drawsphere(arg[0],rgbptr);
       rgbptr=NULL;
       break;
+    case SV_DRAWHSPHERE:
+      drawhsphere(arg[0],rgbptr);
+      rgbptr=NULL;
+      break;
     case SV_DRAWCIRCLE:
       drawcircle(arg[0],rgbptr);
       rgbptr=NULL;
@@ -1485,8 +1493,7 @@ void drawsphere(float diameter, unsigned char *rgbcolor){
         x = cos_long[i]*cos_lat[j];
         y = sin_long[i]*cos_lat[j];
         z = sin_lat[j];
-
-        glNormal3f(x,y,z);
+        glVertex3f(x,y,z);
   
         x = cos_long[i+1]*cos_lat[j];
         y = sin_long[i+1]*cos_lat[j];
@@ -1501,9 +1508,126 @@ void drawsphere(float diameter, unsigned char *rgbcolor){
         x = cos_long[i]*cos_lat[j+1];
         y = sin_long[i]*cos_lat[j+1];
         z = sin_lat[j+1];
-
         glVertex3f(x,y,z);
       }
+    }
+    glEnd();
+  }
+  glPopMatrix();
+}
+
+/* ----------------------- drawhsphere ----------------------------- */
+
+void drawhsphere(float diameter, unsigned char *rgbcolor){
+  int i,j;
+
+  if(cos_lat==NULL)initspheresegs(NLAT,NLONG);
+
+  glPushMatrix();
+  glScalef(diameter/2.0,diameter/2.0,diameter/2.0);
+
+  if(object_outlines==0){
+    glBegin(GL_QUADS);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+    for(j=NLAT/2;j<NLAT;j++){
+      for(i=0;i<NLONG;i++){
+        float x, y, z;
+
+        x = cos_long[i]*cos_lat[j];
+        y = sin_long[i]*cos_lat[j];
+        z = sin_lat[j];
+
+        glNormal3f(x,y,z);
+        glVertex3f(x,y,z);
+  
+        x = cos_long[i+1]*cos_lat[j];
+        y = sin_long[i+1]*cos_lat[j];
+        z = sin_lat[j];
+        glNormal3f(x,y,z);
+        glVertex3f(x,y,z);
+
+        x = cos_long[i+1]*cos_lat[j+1];
+        y = sin_long[i+1]*cos_lat[j+1];
+        z = sin_lat[j+1];
+        glNormal3f(x,y,z);
+        glVertex3f(x,y,z);
+
+        x = cos_long[i]*cos_lat[j+1];
+        y = sin_long[i]*cos_lat[j+1];
+        z = sin_lat[j+1];
+
+        glNormal3f(x,y,z);
+        glVertex3f(x,y,z);
+      }
+    }
+    glEnd();
+    glBegin(GL_TRIANGLES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+    for(i=0;i<NLONG;i++){
+      float x, y, z;
+
+      x = cos_long[i+1];
+      y = sin_long[i+1];
+      z = 0.0;
+
+      glNormal3f(0.0,0.0,-1.0);
+      glVertex3f(x,y,z);
+  
+      x = cos_long[i];
+      y = sin_long[i];
+      z = 0.0;
+      glVertex3f(x,y,z);
+
+      x = 0.0;
+      y = 0.0;
+      z = 0.0;
+      glVertex3f(x,y,z);
+    }
+    glEnd();
+  }
+  else{
+    glBegin(GL_LINE_LOOP);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+    for(j=NLAT/2;j<NLAT;j++){
+      for(i=0;i<NLONG;i++){
+        float x, y, z;
+
+        x = cos_long[i]*cos_lat[j];
+        y = sin_long[i]*cos_lat[j];
+        z = sin_lat[j];
+        glVertex3f(x,y,z);
+
+        x = cos_long[i+1]*cos_lat[j];
+        y = sin_long[i+1]*cos_lat[j];
+        z = sin_lat[j];
+        glVertex3f(x,y,z);
+
+        x = cos_long[i+1]*cos_lat[j+1];
+        y = sin_long[i+1]*cos_lat[j+1];
+        z = sin_lat[j+1];
+        glVertex3f(x,y,z);
+
+        x = cos_long[i]*cos_lat[j+1];
+        y = sin_long[i]*cos_lat[j+1];
+        z = sin_lat[j+1];
+        glVertex3f(x,y,z);
+      }
+    }
+    glEnd();
+    glBegin(GL_LINES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+    for(i=0;i<NLONG;i++){
+      float x, y, z;
+
+      x = cos_long[i];
+      y = sin_long[i];
+      z = 0.0;
+      glVertex3f(x,y,z);
+  
+      x = 0.0;
+      y = 0.0;
+      z = 0.0;
+      glVertex3f(x,y,z);
     }
     glEnd();
   }
@@ -3423,6 +3547,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_DRAWSPHERE;
     num_op=SV_DRAWSPHERE_NUMARGS;
     num_outop=SV_DRAWSPHERE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"drawhsphere")==0){
+    op=SV_DRAWHSPHERE;
+    num_op=SV_DRAWHSPHERE_NUMARGS;
+    num_outop=SV_DRAWHSPHERE_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawline")==0){
     op=SV_DRAWLINE;
