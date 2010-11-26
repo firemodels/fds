@@ -22,10 +22,10 @@ Static devices - single frame
 
 Static devices - multiple frames
 
-&PROP ID='sprinkler2', SMOKEVIEW_ID='sprinkler2' /
+&PROP ID='sprinkler2', SMOKEVIEW_ID='human_with_luggage' /
 &DEVC XYZ=1.5,0.8,1.2, QUANTITY='TEMPERATURE' PROP_ID='sprinkler2', INITIAL_STATE=.FALSE. /
 
-&PROP ID='human', SMOKEVIEW_ID='human_with_luggage' /
+&PROP ID='human', SMOKEVIEW_ID='helmit' /
 &DEVC XYZ=2.5,0.8,1.2, QUANTITY='TEMPERATURE' PROP_ID='human' /
 
 
