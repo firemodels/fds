@@ -3207,6 +3207,30 @@ sv_object *get_SVOBJECT_type(char *olabel,sv_object *default_object){
   return default_object;
 }
 
+/* ----------------------- get_SMVOBJECT_type2 ----------------------------- */
+
+sv_object *get_SVOBJECT_type2(char *olabel,sv_object *default_object){
+  sv_object *object_start, *objecti;
+  char label[256],*labelptr;
+
+  if(olabel==NULL)return default_object;
+  strcpy(label,olabel);
+  labelptr=label;
+  trim(label);
+  labelptr = trim_front(label);
+  if(strlen(labelptr)==0)return default_object;
+  object_start = object_def_first.next;
+  objecti = object_start;
+  for(;objecti->next!=NULL;){
+    if(STRCMP(labelptr,objecti->label)==0){
+      objecti->used=1;
+      return objecti;
+    }
+    objecti=objecti->next;
+  }
+  return default_object;
+}
+
 /* ----------------------- initcircle ----------------------------- */
 
 void initcircle(unsigned int npoints){
@@ -3719,7 +3743,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
   char  object_buffer[100000];
   char object_buffer2[100000];
   int ntokens;
-  char *token,*tokens[100000];
+  char *token,*tokens[100000],*tokens_work[100000];
   char *buffer_ptr=NULL,*buffer2;
   int i;
   int nsymbols,ncommands;
@@ -3754,7 +3778,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
 // count tokens
 
-  parse_string(object_buffer2,tokens,&ntokens);
+  parse_object_string(object_buffer2,tokens_work,tokens,&ntokens);
   frame->ntokens=ntokens;
   if(ntokens>0){
     NewMemory((void **)&frame->tokens,ntokens*sizeof(tokendata));
@@ -3899,7 +3923,6 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
         val=strtok(NULL,"=");
         if(val!=NULL){
           char *quoted_string;
-
 
           quoted_string=strstr(val,"\"");
           if(quoted_string!=NULL){
@@ -4483,8 +4506,10 @@ void init_object_defs(void){
     strcpy(com_buffer, "255 0 0 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
     error_device = init_SVOBJECT1("error_device", com_buffer,1);
 
-    strcpy(com_buffer, "0 0 255 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
-    missing_device = init_SVOBJECT1("missing_device", com_buffer,1);
+    if(missing_device==NULL){
+      strcpy(com_buffer, "0 0 255 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
+      missing_device = init_SVOBJECT1("missing_device", com_buffer,1);
+    }
 
     if(nobject_defs==0){
 
@@ -4942,4 +4967,106 @@ void normalize(float *xyz, int n){
     }
   }
 }
+
+/* ------------------ parse_object_string ------------------------ */
+
+void parse_object_string(char *string, char **tokens_work, char **tokens, int *ntokens){
+  int i, len, in_quote, ntok, in_token, last_in_token,ntok2=0;
+  char *c,*tok;
+
+  c=string;
+  ntok=0;
+  in_quote=0;
+  in_token=0;
+  last_in_token=0;
+  len=strlen(string);
+  for(i=0;i<=len;i++){
+    switch (*c) {
+      case '"':
+        in_quote=1-in_quote;
+        in_token=1;
+        break;
+      case ' ':
+        if(in_quote==0){
+          in_token=0;
+        }
+        break;
+      case 0:
+        in_token=0;
+        break;
+      default:
+        in_token=1;
+        break;
+    }
+    if(in_token>last_in_token){
+      tokens_work[ntok]=c;
+      ntok++;
+    }
+    if(in_token<last_in_token){
+      char *tok;
+
+      *c=0;
+      tok = tokens_work[ntok-1];
+      if(strcmp(tok,"include")==0||strcmp(tok,"includef")==0){
+        int j;
+        sv_object *included_object;
+        int iframe;
+	      char *object_name;
+	      int nparms;
+	      sv_object_frame *frame;
+        int len;
+        sv_object_frame *frame_start, *framei;
+        
+        object_name=tokens_work[ntok-2];
+        if(object_name[0]=='"')object_name++;
+        len=strlen(object_name);
+        if(object_name[len-1]=='"')object_name[len-1]=0;
+        
+        if(missing_device==NULL){
+          char com_buffer[1024];
+        
+          strcpy(com_buffer, "0 0 255 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
+          missing_device = init_SVOBJECT1("missing_device", com_buffer,1);
+        }
+        
+        included_object = get_SVOBJECT_type2(object_name,missing_device);
+        
+        if(strcmp(tok,"includef")==0&&included_object!=missing_device&&ntok>2){
+          char *iframe_label;
+          
+          iframe_label=tokens_work[ntok-3];
+          sscanf(iframe_label,"%i",&iframe);
+          if(iframe<0)iframe=0;
+          if(iframe>included_object->nframes-1)iframe=included_object->nframes-1;
+          nparms=3;
+        }
+        else{
+          iframe=0;
+          nparms=2;
+        }
+        ntok-=nparms;
+        for(j=0,frame=included_object->first_frame.next;frame->next!=NULL;j++,frame=frame->next){
+          if(j==iframe)break;
+        }
+//        frame=included_object->first_frame.next;        
+        for(j=0;j<frame->ntokens;j++){
+          tokens_work[ntok++]=frame->tokens[j].tokenlabel;
+        }
+      }
+    }
+    last_in_token=in_token;
+    c++;
+  }
+  ntok2=0;
+  for(i=0;i<ntok;i++){
+    tok = tokens_work[i];
+    if(tok[0]==':')tokens[ntok2++]=tok;
+  }
+  for(i=0;i<ntok;i++){
+    tok = tokens_work[i];
+    if(tok[0]!=':')tokens[ntok2++]=tok;
+  }
+  *ntokens=ntok2;
+}
+
   

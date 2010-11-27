@@ -604,7 +604,7 @@ SVEXTERN sv_object *target_object_backup;
 SVEXTERN sv_object *sprinkler_upright_object_backup;
 SVEXTERN sv_object *smoke_detector_object_backup;
 SVEXTERN sv_object *thcp_object_backup;
-SVEXTERN sv_object *missing_device;
+SVEXTERN sv_object SVDECL(*missing_device,NULL);
 SVEXTERN sv_object *error_device;
 SVEXTERN sv_object object_def_first, object_def_last;
 SVEXTERN char **device_texture_list;

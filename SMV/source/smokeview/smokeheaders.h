@@ -116,9 +116,10 @@ EXTERNCPP sv_object *parse_SVOBJECT(FILE *stream);
 EXTERNCPP sv_object *init_SVOBJECT1(char *label, char *commands,int visible);
 EXTERNCPP sv_object *init_SVOBJECT2(char *label, char *commandson, char *commandsoff,int visible);
 EXTERNCPP sv_object *get_SVOBJECT_type(char *label, sv_object *default_object);
+EXTERNCPP sv_object *get_SVOBJECT_type2(char *label, sv_object *default_object);
 EXTERNCPP int read_object_defs(char *file);
 EXTERNCPP void freeall_objects(void);
-EXTERNCPP void parse_string(char *string, char **tokens, int *ntokens);
+EXTERNCPP void parse_object_string(char *string, char **tokens, char **tokens2, int *ntokens);
 EXTERNCPP void update_partclass_depend(part5class *partclassi);
 
 EXTERNCPP int get_plot3d_index(mesh *meshi, int dir, float val);

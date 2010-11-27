@@ -443,49 +443,6 @@ void array2string(float *vals, int nvals, char *string){
   strcat(string,cval);
 }
 
-/* ------------------ array2string ------------------------ */
-
-void parse_string(char *string, char **tokens, int *ntokens){
-  int i, len, in_quote, ntok, in_token, last_in_token;
-  char *c;
-
-  c=string;
-  ntok=0;
-  in_quote=0;
-  in_token=0;
-  last_in_token=0;
-  len=strlen(string);
-  for(i=0;i<=len;i++){
-    switch (*c) {
-      case '"':
-        in_quote=1-in_quote;
-        in_token=1;
-        break;
-      case ' ':
-        if(in_quote==0){
-          in_token=0;
-        }
-        break;
-      case 0:
-        in_token=0;
-        break;
-      default:
-        in_token=1;
-        break;
-    }
-    if(in_token>last_in_token){
-      tokens[ntok]=c;
-      ntok++;
-    }
-    if(in_token<last_in_token){
-      *c=0;
-    }
-    last_in_token=in_token;
-    c++;
-  }
-  *ntokens=ntok;
-}
-
   /* ------------------ getfileinfo ------------------------ */
 
 int file_exists(char *filename){

@@ -601,8 +601,7 @@ typedef struct _tokendata {
   int included_frame;
   int texture_index;
   struct _tokendata *next,*elsenext;
-  char *token;
-  char tokenlabel[20];
+  char *token, tokenlabel[64];
   char string[256],default_string[256],*stringptr;
 } tokendata;
 
