@@ -42,9 +42,9 @@ MODULE EVAC
   ! Public variables (needed in the main program or dump):
   PUBLIC N_DOORS, N_EXITS, N_ENTRYS, N_SSTANDS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_SSTANDS, & 
        EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE, EVAC_SSTAND_TYPE, NPC_EVAC, N_HOLES, &
-       EVACUATION_TYPE, EVAC_HOLE_TYPE, EVAC_EVACS, EVAC_HOLES, N_CO_EXITS, N_DOOR_MESHES
+       EVACUATION_TYPE, EVAC_HOLE_TYPE, EVAC_EVACS, EVAC_HOLES, N_CO_EXITS, N_DOOR_MESHES, N_STRS
   PUBLIC EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, EMESH_NM, EMESH_NFIELDS, &
-       EMESH_INDEX, EVAC_FDS6, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE
+       EMESH_INDEX, EVAC_FDS6, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, EVAC_EMESH_STAIRS_TYPE, EMESH_STAIRS
   !
   CHARACTER(255):: EVAC_VERSION = '2.4.0'
   CHARACTER(255) :: EVAC_COMPILE_DATE
@@ -348,10 +348,20 @@ MODULE EVAC
      REAL(EB), DIMENSION(6) :: XB=0.0_EB
      REAL(EB), POINTER, DIMENSION(:,:) :: U_EVAC =>NULL(), V_EVAC =>NULL()
      INTEGER :: EMESH=0, NEXIT=0, IOR=0, IMESH=0, I_OBST=0, I_VENT=0, MAINMESH=0, I_DOORS_EMESH=0
+     INTEGER :: IBAR=0, JBAR=0, KBAR=0
      INTEGER, DIMENSION(3) :: RGB=-1
      LOGICAL :: IS_EXIT=.FALSE., DEFINE_MESH=.TRUE.
      CHARACTER(30) :: ID='null'
   END TYPE EVAC_EMESH_EXITS_TYPE
+  ! Type for strs information needed in READ_MESH to define the main evacuation meshes for stairs.
+  TYPE EVAC_EMESH_STAIRS_TYPE
+     REAL(EB), DIMENSION(6) :: XB=0.0_EB, XB_CORE=0.0_EB
+     REAL(EB) :: EVAC_Z_OFFSET
+     INTEGER :: EMESH=0, NSTRS=0, IMESH=0, N_CORES=0, N_LANDINGS=0, IBAR=0, JBAR=0, KBAR=0, I_OBST=0, I_HOLE=0
+     INTEGER, DIMENSION(3) :: RGB=-1
+     LOGICAL :: DEFINE_MESH=.TRUE.
+     CHARACTER(30) :: ID='null'
+  END TYPE EVAC_EMESH_STAIRS_TYPE
   CHARACTER(30), DIMENSION(:), ALLOCATABLE :: EMESH_ID
   INTEGER, DIMENSION(:), ALLOCATABLE :: EMESH_NM
   INTEGER, DIMENSION(:), ALLOCATABLE :: EMESH_NFIELDS
@@ -360,6 +370,7 @@ MODULE EVAC
   INTEGER, DIMENSION(:), ALLOCATABLE :: EMESH_INDEX
   ! Holds the VENT information of the EXIT/DOOR lines for READ_MESH etc.
   TYPE (EVAC_EMESH_EXITS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: EMESH_EXITS
+  TYPE (EVAC_EMESH_STAIRS_TYPE), DIMENSION(:), ALLOCATABLE, TARGET :: EMESH_STAIRS
 
   !
   REAL(EB), DIMENSION(:,:), ALLOCATABLE :: TT_Evac, FF_Evac
@@ -481,7 +492,7 @@ CONTAINS
     LOGICAL :: EVACUATION, EVAC_HUMANS, SYNCHRONIZE, CYLINDRICAL, NO_EVAC_MESHES
     REAL(EB) :: EVAC_Z_OFFSET
     CHARACTER(30) :: MULT_ID
-    INTEGER :: N_EGRIDS_TMP, NM
+    INTEGER :: N_EGRIDS_TMP, NM, N_CORES
 
     NAMELIST /MESH/ IJK, FYI, ID, SYNCHRONIZE, EVACUATION, EVAC_HUMANS, CYLINDRICAL, XB, RGB, COLOR, EVAC_Z_OFFSET, &
          MPI_PROCESS, LEVEL, MULT_ID
@@ -505,7 +516,7 @@ CONTAINS
          XB1, XB2, RGB, COLOR
     NAMELIST /STRS/ ID, XB, XB_CORE, XB_CORES, TO_NODE, RIGHT_HANDED, LEFT_HANDED, MESH_ID, &
          N_LANDINGS, XB_LANDINGS, VERTICAL_LANDING_SEPARATION, &
-         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI
+         FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, RGB, COLOR, IJK, EVAC_Z_OFFSET
     NAMELIST /EVAC/ NUMBER_INITIAL_PERSONS, QUANTITY, FYI, &
          ID, DTSAM, XB, FLOW_FIELD_ID, PERS_ID, &
          TIME_START, TIME_STOP, IOR, MAX_FLOW, WIDTH, ANGLE, &
@@ -557,6 +568,7 @@ CONTAINS
           N_EVAC = 0
           RETURN ! skip evacuation calculation
        END IF
+
        N_EGRIDS_TMP   = 0
        NMESHES_READ   = 0
        !NMESHES_TMP    = 0
@@ -600,6 +612,9 @@ CONTAINS
        ! Array for the exit+door information (not for the count only exits)
        ALLOCATE(EMESH_EXITS(MAX(1,N_EXITS-N_CO_EXITS+N_DOORS)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_EXITS',IZERO)
+       ! Array for the strs information 
+       ALLOCATE(EMESH_STAIRS(MAX(1,N_STRS)), STAT=IZERO)
+       CALL ChkMemErr('READ_EVAC','EMESH_STAIRS',IZERO)
 
        NM = 0
        MESH_LOOP: DO N = 1, NMESHES_READ
@@ -773,7 +788,7 @@ CONTAINS
        END DO READ_EXIT_LOOP_0
 26     CONTINUE
        REWIND(LU_INPUT)
-       
+
        READ_DOOR_LOOP_0: DO N = 1, N_DOORS
           DEFINE_MESH   = .TRUE.
           ID            = 'null'
@@ -884,6 +899,81 @@ CONTAINS
        END DO READ_DOOR_LOOP_0
 27     CONTINUE
        REWIND(LU_INPUT)
+
+       ! Read the STRS line
+       READ_STRS_LOOP: DO N = 1, N_STRS
+          !
+          ! Set MESH defaults
+          IJK(1)= 10
+          IJK(2)= 10
+          IJK(3)= 1
+          ID                          = 'null'
+          XB                          = 0._EB
+          XB_CORE                     = 0._EB
+          XB_CORES                    = 0._EB
+          XB_LANDINGS                 = 0._EB
+          MESH_ID                     = 'null'
+          N_LANDINGS                  = 0
+          VERTICAL_LANDING_SEPARATION = 0._EB
+          EVAC_Z_OFFSET               = 1.0_EB
+          !
+          CALL CHECKREAD('STRS',LU_INPUT,IOS)
+          IF (IOS == 1) THEN
+             EXIT READ_STRS_LOOP
+          END IF
+          READ(LU_INPUT,STRS,END=32,IOSTAT=IOS)
+
+          ! Reorder XB coordinates if necessary
+          CALL CHECK_XB(XB)
+
+          ! Colors, integer RGB(3), e.g., (23,255,0)
+          IF (ANY(RGB < 0) .AND. COLOR=='null') COLOR = 'BLACK'
+          IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
+
+          ! Count number of cores
+          N_CORES = 0
+          DO I = 1,500
+             IF (ANY(XB_CORES(I,:)/=0._EB)) N_CORES = N_CORES + 1
+          ENDDO
+
+          IF (N_LANDINGS>500) THEN
+             WRITE(MESSAGE,'(A,A,A)') 'ERROR: STRS ',TRIM(ID),' N_LANDINGS > 500'
+             CALL SHUTDOWN(MESSAGE)
+          END IF
+          !N_LANDINGS = N_LANDINGS
+          !N_NODES = 2*N_LANDINGS - 1
+
+          IF (N_CORES == 0) THEN
+             N_CORES = 1
+             XB_CORES(1,1:4) = XB_CORE(1:4)
+             XB_CORES(1,5) = XB(5)
+             XB_CORES(1,6) = XB(6)
+             IF (ALL(XB_CORE==0._EB)) THEN
+                WRITE(MESSAGE,'(3A)') 'ERROR: STRS object ', TRIM(ID), ' has no XB_CORE defined.'
+                CALL SHUTDOWN(MESSAGE)
+             ENDIF
+          ELSE
+             ! For now, just the first one is used (this is under construction)
+             XB_CORES(1,1:6) = XB_CORES(1,1:6)
+             !   XB_CORE(1:N_CORES,1:6) = XB_CORES(1:N_CORES,1:6)
+          ENDIF
+
+          EMESH_STAIRS(N)%IBAR = IJK(1)
+          EMESH_STAIRS(N)%JBAR = IJK(2)
+          EMESH_STAIRS(N)%KBAR = IJK(3) ! kbar = 1 is forced in read_mesh (for now)
+          EMESH_STAIRS(N)%EVAC_Z_OFFSET = EVAC_Z_OFFSET  ! Not yet used properly in read_mesh???
+
+          EMESH_STAIRS(N)%N_CORES = N_CORES
+          EMESH_STAIRS(N)%N_LANDINGS = N_LANDINGS
+          EMESH_STAIRS(N)%NSTRS = N
+          EMESH_STAIRS(N)%RGB = RGB
+          EMESH_STAIRS(N)%ID = TRIM(ID)
+          EMESH_STAIRS(N)%DEFINE_MESH = .TRUE.
+          EMESH_STAIRS(N)%XB = XB
+          EMESH_STAIRS(N)%XB_CORE(1:6) = XB_CORES(1,1:6)
+
+       END DO READ_STRS_LOOP
+32     REWIND(LU_INPUT)
 
        RETURN  ! imode=1: Initialization call to READ_EVAC
     END IF IF_IMODE_1
@@ -1312,7 +1402,7 @@ CONTAINS
                ALLOCATE(EVAC_Node_List(1:N_NODES),STAT=IZERO)
                CALL ChkMemErr('READ','EVAC_NODE_LIST',IZERO) 
             END IF
-            END IF EVAC_PROC_IF_2
+         END IF EVAC_PROC_IF_2
 
       END IF IMODE_IF
 
@@ -2545,6 +2635,12 @@ CONTAINS
                END IF
             END IF
          END DO PDX_MeshLoop
+         PDX_StrsLoop: DO I = 1, N_STRS
+            IF (TRIM(PDX%TO_NODE) == TRIM(EVAC_STRS(I)%ID)) THEN
+               PDX%IMESH2 = EVAC_STRS(I)%IMESH
+               EXIT PDX_StrsLoop
+            END IF
+         END DO PDX_StrsLoop
          IF (PDX%IMESH == 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' problem with IMESH, no mesh found'
             CALL SHUTDOWN(MESSAGE)
@@ -4589,6 +4685,14 @@ CONTAINS
                EXIT NodeLoop
             END IF
          END DO NodeLoop
+         PDX_StrsLoop: DO I = 1, N_STRS
+            ! N_EGRIDS: n_egrids_inputs + n_strs (other are additional meshes, evac_humans=.false.)
+            IF (TRIM(EVAC_DOORS(n)%TO_NODE) == TRIM(EVAC_STRS(I)%ID)) THEN
+               EVAC_DOORS(n)%IMESH2 = EVAC_STRS(I)%IMESH
+               EVAC_DOORS(n)%INODE2 = N_EGRIDS - N_STRS + I
+               EXIT PDX_StrsLoop
+            END IF
+         END DO PDX_StrsLoop
          IF (EVAC_DOORS(n)%INODE2 == 0 .OR. EVAC_DOORS(n)%IMESH2 == 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(EVAC_DOORS(n)%ID),' problem with TO_NODE'
             CALL SHUTDOWN(MESSAGE)
@@ -5583,7 +5687,6 @@ CONTAINS
     CALL POINT_TO_MESH(NM)
     IF (EVAC_FDS6) THEN
        NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM)
-       write(lu_err,*)'*** init evac nm nm_see ',TRIM(MESH_NAME(NM)),' ',TRIM(MESH_NAME(NM_SEE))
     ELSE
        NM_SEE = NM
     END IF
