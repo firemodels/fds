@@ -1,16 +1,14 @@
- FDS+Evac version: FDS 5.4.3, Evac 2.2.1
+ FDS+Evac version: FDS 6.0.0, Evac 2.4.0
 
  A simple test case for memory usage of FDS+Evac.  Evacuation
  part is k=1 mesh ==> surface to volume ratio is large so the
  surface cells/arrays take some memory, but the surface +-u_z
  are not needed in reality, because two dimensional calculation.
 
- evac_memory_test1: Fire + evacuation meshes
+ SVN Revision No. : 7243
+ Peak Memory Usage: 158 196 K (win32 XP, single thread)
 
- SVN Revision No. : 5716
- Peak Memory Usage: 239 548 K (win32 XP, single thread)
-
-&HEAD CHID='evac_memory_test1',TITLE='test for RAM: fire+evac mesh, SVN $Revision: 4582 $' /
+&HEAD CHID='evac_memory_test1',TITLE='test for RAM: fire+evac meshes' /
 
  Fire mesh
 &MESH IJK=100, 80, 4 XB=0.0,50.0, 0.0,40.0, 0.0,2.0 /
@@ -19,20 +17,11 @@
 &MESH IJK=200, 160, 1, XB=0.0,50.0, 0.0,40.0, 1.45,1.55, EVAC_Z_OFFSET=1.5, 
       EVACUATION=.TRUE.,  EVAC_HUMANS=.TRUE., ID = 'FF1stFloor'  /
 
-&MESH IJK=200, 160, 1, XB=0.0,50.0, 0.0,40.0, 1.45,1.55 , 
-      EVACUATION=.TRUE., ID = 'FF1stTop'    /
-&MESH IJK=200, 160, 1, XB=0.0,50.0, 0.0,40.0, 1.45,1.55 , 
-      EVACUATION=.TRUE., ID = 'FF1stBottom' /
-&MESH IJK=200, 160, 1, XB=0.0,50.0, 0.0,40.0, 1.45,1.55 , 
-      EVACUATION=.TRUE., ID = 'FF1stLeft'   /
-&MESH IJK=200, 160, 1, XB=0.0,50.0, 0.0,40.0, 1.45,1.55 , 
-      EVACUATION=.TRUE., ID = 'FF1stRight'  /
-
  
 &TIME TWFIN=10.0, DT=0.1,   /
  
 &MISC SURF_DEFAULT = 'INERT', EVAC_SURF_DEFAULT='EVAC_WALL',
-      EVACUATION_MC_MODE=.FALSE. /
+      EVACUATION_MC_MODE=.FALSE., NO_EVACUATION=.FALSE., EVACUATION_DRILL=.FALSE. /
 
 &DUMP NFRAMES= 10,
       SMOKE3D=.TRUE.,
@@ -62,9 +51,6 @@
       C          = 6.3
       H          = 7.1
       O          = 2.1  /
-
- Boundary condition for the evacuation flow fields:
-&SURF ID = 'OUTFLOW', VEL = +0.000001, TAU_V=0.1 /
 
  Default material for evacuation meshes is INERT and its color
  can not be changed esily in Smokeview. Thus, an evacuation 
@@ -131,57 +117,34 @@
 &OBST XB = 30.0,33.0, 0.0,4.0, 1.5,1.5, EVACUATION=.TRUE. /
 
 
- *********** First floor vents **************
-
-&VENT XB=0.0,0.0,  5.25, 6.45, 1.45,1.55, SURF_ID='OUTFLOW', 
-             MESH_ID='FF1stFloor', EVACUATION=.TRUE./ LeftExit
-&VENT XB=43.25,44.75, 0.0,0.0, 1.45,1.55, SURF_ID='OUTFLOW', 
-             MESH_ID='FF1stFloor', EVACUATION=.TRUE./ BottomExit
-&VENT XB= 50.0, 50.0,  25.25, 26.45, 1.45,1.55, SURF_ID='OUTFLOW', 
-             MESH_ID='FF1stFloor', EVACUATION=.TRUE./ RightExit
-&VENT XB=3.25,4.45,  40.0, 40.0, 1.45,1.55, SURF_ID='OUTFLOW', 
-             MESH_ID='FF1stFloor', EVACUATION=.TRUE./ TopExit
-
- *********** First floor vents ends **************
-
-
  *********** First Floor Doors and Exits **************
 
 &EXIT ID='LeftExit', IOR = -1,
       FYI = 'Comment line',
       COUNT_ONLY=.FALSE. ,
-      VENT_FFIELD = 'FF1stLeft', COLOR='BLACK'
+      COLOR='BLACK'
       XYZ = 0.5, 5.85, 1.50,
       XB = 0.0,0.0,  5.25,6.45, 1.45,1.55 /
-&VENT XB=0.0,0.0,  5.25, 6.45, 1.45,1.55, SURF_ID='OUTFLOW', 
-      MESH_ID='FF1stLeft', EVACUATION=.TRUE./ LeftExit
 
 &EXIT ID='BottomExit', IOR = -2,
       FYI = 'Comment line',
       COUNT_ONLY=.FALSE. ,
-      VENT_FFIELD = 'FF1stBottom', COLOR='BLUE',
+      COLOR='BLUE',
       XYZ = 44.0, 0.5, 1.50,
       XB = 43.25,44.75, 0.00,0.00, 1.45,1.55 / 
-&VENT XB=43.25,44.75, 0.0,0.0, 1.45,1.55, SURF_ID='OUTFLOW', 
-      MESH_ID='FF1stBottom', EVACUATION=.TRUE./ BottomExit
 
 &EXIT ID='RightExit', IOR = +1,
       FYI = 'Comment line',
       COUNT_ONLY=.FALSE. , COLOR='RED',
-      VENT_FFIELD = 'FF1stRight',
       XYZ = 49.5, 25.85, 1.50,
       XB =  50.0, 50.0,  25.25,26.45, 1.45,1.55 / 
-&VENT XB= 50.0, 50.0,  25.25, 26.45, 1.45,1.55, SURF_ID='OUTFLOW', 
-      MESH_ID='FF1stRight', EVACUATION=.TRUE./ RightExit
 
 &EXIT ID='TopExit', IOR = +2,
       FYI = 'Comment line',
       COUNT_ONLY=.FALSE. ,
-      VENT_FFIELD = 'FF1stTop', COLOR='GREEN',
+      COLOR='GREEN',
       XYZ = 3.85, 39.5, 1.50,
       XB = 3.25,4.45,  40.00, 40.00, 1.45,1.55 / 
-&VENT XB=3.25,4.45,  40.0, 40.0, 1.45,1.55, SURF_ID='OUTFLOW', 
-      MESH_ID='FF1stTop', EVACUATION=.TRUE./ TopExit
 
 =======================================================
 ============= EVAC GEOMETRY ENDS ======================
@@ -196,7 +159,7 @@
       DEFAULT_PROPERTIES='Adult',
       PRE_EVAC_DIST=1,PRE_MEAN=1.0,PRE_LOW=0.50,PRE_HIGH=1.5,
       DET_EVAC_DIST=0,DET_MEAN=1.0,
-      NOT_RANDOM = .TRUE.,
+      NOT_RANDOM = .TRUE., EVAC_FDS6=.TRUE.,
       COLOR_METHOD = 0, AVATAR_COLOR='BLUE',
       OUTPUT_SPEED=.TRUE., HUMAN_SMOKE_HEIGHT=1.60,
       FED_DOOR_CRIT= -100.0, TDET_SMOKE_DENS= 1.0 /
@@ -237,7 +200,6 @@
       NUMBER_INITIAL_PERSONS = 100,
       XB = 1.0,49.0,  1.0,39.0, 1.5,1.5
       AVATAR_COLOR = 'YELLOW',
-      FLOW_FIELD_ID = 'FF1stTop',
       KNOWN_DOOR_NAMES = 'BottomExit','TopExit','LeftExit','RightExit',
       KNOWN_DOOR_PROBS = 1.0,1.0,0.0,0.0,
       PERS_ID = 'Adult' / 
