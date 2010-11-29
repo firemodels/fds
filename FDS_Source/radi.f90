@@ -770,7 +770,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ! Compute boundary condition intensity emissivity*sigma*Tw**4/pi or emissivity*QRADOUT/pi for wall with internal radiation
       
       BBF = 1.0_EB
-      DO IW = 1,NWC+NVWC
+      DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS+N_VIRTUAL_WALL_CELLS
          IF (BOUNDARY_TYPE(IW) == OPEN_BOUNDARY) THEN
             BBF = BBFA
          ELSE
@@ -784,7 +784,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
       ! Compute boundary condition term incoming radiation integral
  
-      DO IW = 1,NWC
+      DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE
          IOR = IJKW(4,IW)
          INRAD_W(IW) = SUM(-DLN(IOR,:)* WALL(IW)%ILW(:,IBND),1, DLN(IOR,:)<0._EB)
@@ -806,7 +806,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             UIID(:,:,:,ANGLE_INC_COUNTER) = 0._EB
          ENDIF
 
-         DO IW=1,NWC
+         DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) WALL(IW)%ILW(ANGLE_INC_COUNTER,IBND) = 0._EB
          ENDDO
  
@@ -823,7 +823,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
             ! Boundary conditions: Intensities leaving the boundaries.
             
-            WALL_LOOP1: DO IW=1,NWC
+            WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP1
                IOR = IJKW(4,IW)
                IF (DLN(IOR,N) < 0._EB) CYCLE WALL_LOOP1
@@ -1022,7 +1022,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
             ! Boundary values: Incoming radiation
             
-            WALL_LOOP2: DO IW=1,NWC
+            WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY)   CYCLE WALL_LOOP2     
                IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)   CYCLE WALL_LOOP2  
                IF (BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2  
@@ -1037,7 +1037,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 2
             ENDDO WALL_LOOP2
  
-            WALL_LOOP3: DO IW=1,NWC
+            WALL_LOOP3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                IF (BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY)   CYCLE WALL_LOOP3 
                IOR = IJKW(4,IW)
                IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP3     ! outgoing
@@ -1062,7 +1062,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (EVACUATION_ONLY(NOM)) CYCLE INTERPOLATION_LOOP
                IF (NIC(NOM,NM)==0) CYCLE INTERPOLATION_LOOP
                M2=>OMESH(NOM)
-               OTHER_WALL_LOOP: DO IW=1,MESHES(NOM)%NEWC
+               OTHER_WALL_LOOP: DO IW=1,MESHES(NOM)%N_EXTERNAL_WALL_CELLS
                   IF (M2%IJKW(9,IW)/=NM .OR. M2%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE OTHER_WALL_LOOP
                   IOR = M2%IJKW(4,IW)
                   IF (DLN(IOR,N)<=0._EB) CYCLE OTHER_WALL_LOOP
@@ -1102,7 +1102,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
       ! Compute incoming flux on walls 
 
-      DO IW=1,NWC
+      DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE 
          IBC = IJKW(5,IW)
          SF  => SURFACE(IBC)      
@@ -1129,7 +1129,7 @@ IF (UPDATE_INTENSITY) THEN
 
    UII = SUM(UIID, DIM = 4)
 
-   DO IW=1,NWC
+   DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       IF (BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) CYCLE 
       QRADIN(IW)  = SUM(WALL(IW)%ILW)
    ENDDO 

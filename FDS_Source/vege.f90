@@ -867,7 +867,7 @@ RDT_BC    = 1.0_EB/DT_BC
 !
 ! Loop through vegetation wall cells and burn
 !
-VEG_WALL_CELL_LOOP: DO IW=1,NWC
+VEG_WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
   IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE VEG_WALL_CELL_LOOP
 
@@ -1419,7 +1419,7 @@ WIND_EXP  = 1.0_EB
 !print*,'surface ros',surface%veg_lset_ros_head
 !print*,'surface wind_exp',surface%veg_lset_wind_exp
 
-ROS_WALL_CELL_LOOP: DO IW=1,NWC
+ROS_WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
   IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE ROS_WALL_CELL_LOOP
 
@@ -1693,7 +1693,7 @@ TIMESTEP: DO N_TIME = 1,N_FINAL
 ! ** change to go into the wall cell loop only if time corrensponds to an
 ! ** ignition time. Need to create a separate array with sorted ignition times
 
-IGNITOR_WALL_CELL_LOOP: DO IW=1,NWC
+IGNITOR_WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
   IBC = IJKW(5,IW)
   SF  => SURFACE(IBC)
