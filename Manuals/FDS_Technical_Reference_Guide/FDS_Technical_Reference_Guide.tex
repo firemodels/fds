@@ -2408,19 +2408,8 @@ extinction is still an area of active research in the combustion
 community.
 
 Simple empirical rules can be used to predict local
-extinction based on the oxygen concentration and temperature of
-the gases in the vicinity of the flame sheet.
-Figure~\ref{plotsupp} shows values of temperature and oxygen
-concentration for which burning can and cannot take place. A derivation of the model,
-based on the critical flame temperature concept, is given in Appendix~\ref{mowrer_model}.
-\begin{figure}[ht]
-\begin{minipage}[t]{4.1in}
-\includegraphics[width=4.in]{FIGURES/Extinction_Criteria}
-\caption{Oxygen-temperature phase space showing where combustion
-is allowed and not allowed to take place.}
-\label{plotsupp}
-\end{minipage}
-\end{figure}
+extinction based on the species and temperature present in the flame sheet.  The FDS extinction model consists of two steps. The first step, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second step uses the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur.  This is done by computing the enthalpy of the local gas mixture at both the local temperature and at the limiting flame temperature.  If the local heat release is less than the enthalpy difference between the limiting flame temperature and the local temperature, then combustion will not occur. 
+
 Note that once the local state of the gases falls into the ``No Burn'' zone,
 the state relations (Fig.~\ref{staterelations}) are no longer valid for
 values of $Z$ below stoichiometric, since now some fuel may be mixed

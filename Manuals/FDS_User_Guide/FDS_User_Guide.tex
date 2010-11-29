@@ -5718,6 +5718,7 @@ specified that FDS will ignore the value for {\ct EPUMO2}.
 values represent values for complete combustion ({\ct .TRUE.}) or for incomplete combustion ({\ct .FALSE.}),
 i.e. the values account for the specified $y_{CO}$, $y_{H_2}$, and $y_s$.  If {\ct IDEAL=.TRUE.}, then
 FDS will internally adjust $\Delta H$ to account for products of incomplete combustion. The default value is {\ct .FALSE.}
+\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.  Note that if this parameter is used, then some form of ignition source must be present in order for combution to begin. (Mixture Fraction only, default 0.0 K)
 \end{description}
 
 \noindent
@@ -10236,6 +10237,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
 \hline \hline
 \endhead
+{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Auto ignition temperature (MIxture Fraction)          &   K           &  0
+   \\ \hline
 {\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)          &   cm$^3$/mol/s    &     \\ \hline
 {\ct BETA\_EDC}                           & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
 {\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
