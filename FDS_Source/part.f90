@@ -382,7 +382,7 @@ OVERALL_INSERT_LOOP: DO
    
    ! Loop through all boundary cells and insert particles if appropriate
     
-   WALL_INSERT_LOOP: DO IW=1,NWC
+   WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
     
       IF (T < TW(IW))                        CYCLE WALL_INSERT_LOOP
       IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE WALL_INSERT_LOOP
