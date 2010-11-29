@@ -10663,6 +10663,7 @@ CONTAINS
 
             ! Here person is removed from the corridor (linked list)
             IF (HR%IOR > 0) THEN
+               MESHES(IMESH2)%HUMAN(MESHES(IMESH2)%N_HUMANS)%IOR = HUMAN_NO_TARGET
                PCX%N_INSIDE = PCX%N_INSIDE - 1
                IF (ASSOCIATED(NOW_LL%NEXT)) THEN
                   TMP_LL => NOW_LL%NEXT 
