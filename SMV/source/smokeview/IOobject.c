@@ -3740,19 +3740,19 @@ int get_token_loc(char *var,sv_object_frame *frame){
 /* ----------------------- parse_device_frame ----------------------------- */
 
 char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *frame){
-  char  object_buffer[100000];
-  char object_buffer2[100000];
+#define BUFFER_SIZE 10000
+
+  char  object_buffer[10*BUFFER_SIZE];
   int ntokens;
-  char *token,*tokens[100000],*tokens_work[100000];
+  char *token,*tokens[BUFFER_SIZE];
   char *buffer_ptr=NULL,*buffer2;
   int i;
   int nsymbols,ncommands;
   int ntext=0;
   int ntextures=0;
+  int last_command_index=0;
 
   *eof = 0;
-
-  // concatentate frame
 
   frame->error=0;
   trim(buffer);
@@ -3774,11 +3774,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     strcat(object_buffer," ");
     strcat(object_buffer,buffer2);
   }
-  strcpy(object_buffer2,object_buffer);
-
-// count tokens
-
-  parse_object_string(object_buffer2,tokens_work,tokens,&ntokens);
+  parse_object_string(object_buffer,tokens,&ntokens);
   frame->ntokens=ntokens;
   if(ntokens>0){
     NewMemory((void **)&frame->tokens,ntokens*sizeof(tokendata));
@@ -3793,11 +3789,11 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
   for(i=0;i<ntokens;i++){
     tokendata *toki;
     char c;
-
     token=tokens[i];
     toki = frame->tokens + i;
-    toki->token=token;
+    strcpy(toki->token,token);
     strcpy(toki->tokenlabel,token);
+    strcpy(toki->tokenfulllabel,token);
     toki->reads=0;
 
     c = token[0];
@@ -3847,7 +3843,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
         last_token=frame->command_list[ncommands-1];
         last_token->next=this_token;
         this_token->next=NULL;
-        nargs_actual = this_token-last_token - 1;
+        nargs_actual = i - last_command_index - 1;
       }
       else{
         nargs_actual = toki-first_token;
@@ -3889,6 +3885,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
         }
       }
       ncommands++;
+      last_command_index=i;
     }
     else if(c=='$'){
       char vartoken[255];
@@ -4970,10 +4967,12 @@ void normalize(float *xyz, int n){
 
 /* ------------------ parse_object_string ------------------------ */
 
-void parse_object_string(char *string, char **tokens_work, char **tokens, int *ntokens){
+void parse_object_string(char *string,char **tokens, int *ntokens){
   int i, len, in_quote, ntok, in_token, last_in_token,ntok2=0;
   char *c,*tok;
-
+  char *tokens_head[BUFFER_SIZE], *tokens_tail[BUFFER_SIZE];
+  int in_head=1,nhead=0,ntail=0;
+  
   c=string;
   ntok=0;
   in_quote=0;
@@ -4999,15 +4998,21 @@ void parse_object_string(char *string, char **tokens_work, char **tokens, int *n
         break;
     }
     if(in_token>last_in_token){
-      tokens_work[ntok]=c;
-      ntok++;
+      if(in_head==1&&c[0]==':'){
+        tokens_head[nhead++]=c;
+      }
+      else{
+        tokens_tail[ntail++]=c;
+        in_head=0;
+      }
     }
     if(in_token<last_in_token){
       char *tok;
-
+      int in_head2;
+      
       *c=0;
-      tok = tokens_work[ntok-1];
-      if(strcmp(tok,"include")==0||strcmp(tok,"includef")==0){
+      if(ntail>0)tok = tokens_tail[ntail-1];
+      if(ntail>0&&(strcmp(tok,"include")==0||strcmp(tok,"includef")==0)){
         int j;
         sv_object *included_object;
         int iframe;
@@ -5017,7 +5022,7 @@ void parse_object_string(char *string, char **tokens_work, char **tokens, int *n
         int len;
         sv_object_frame *frame_start, *framei;
         
-        object_name=tokens_work[ntok-2];
+        object_name=tokens_tail[ntail-2];
         if(object_name[0]=='"')object_name++;
         len=strlen(object_name);
         if(object_name[len-1]=='"')object_name[len-1]=0;
@@ -5031,10 +5036,10 @@ void parse_object_string(char *string, char **tokens_work, char **tokens, int *n
         
         included_object = get_SVOBJECT_type2(object_name,missing_device);
         
-        if(strcmp(tok,"includef")==0&&included_object!=missing_device&&ntok>2){
+        if(strcmp(tok,"includef")==0&&included_object!=missing_device&&ntail>2){
           char *iframe_label;
           
-          iframe_label=tokens_work[ntok-3];
+          iframe_label=tokens_tail[ntail-3];
           sscanf(iframe_label,"%i",&iframe);
           if(iframe<0)iframe=0;
           if(iframe>included_object->nframes-1)iframe=included_object->nframes-1;
@@ -5044,13 +5049,24 @@ void parse_object_string(char *string, char **tokens_work, char **tokens, int *n
           iframe=0;
           nparms=2;
         }
-        ntok-=nparms;
+        ntail-=nparms;
         for(j=0,frame=included_object->first_frame.next;frame->next!=NULL;j++,frame=frame->next){
           if(j==iframe)break;
         }
-//        frame=included_object->first_frame.next;        
+        in_head2=1;
         for(j=0;j<frame->ntokens;j++){
-          tokens_work[ntok++]=frame->tokens[j].tokenlabel;
+          char *cc;
+          
+          cc = frame->tokens[j].tokenlabel;
+          if(in_head2==1&&cc[0]==':'){
+            int jj;
+            
+            tokens_head[nhead++]=frame->tokens[j].tokenfulllabel;
+          }
+          else{
+            in_head2=0;
+            tokens_tail[ntail++]=cc;
+          }
         }
       }
     }
@@ -5058,13 +5074,11 @@ void parse_object_string(char *string, char **tokens_work, char **tokens, int *n
     c++;
   }
   ntok2=0;
-  for(i=0;i<ntok;i++){
-    tok = tokens_work[i];
-    if(tok[0]==':')tokens[ntok2++]=tok;
+  for(i=0;i<nhead;i++){
+    tokens[ntok2++]=tokens_head[i];
   }
-  for(i=0;i<ntok;i++){
-    tok = tokens_work[i];
-    if(tok[0]!=':')tokens[ntok2++]=tok;
+  for(i=0;i<ntail;i++){
+    tokens[ntok2++]=tokens_tail[i];
   }
   *ntokens=ntok2;
 }
