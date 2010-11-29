@@ -1820,6 +1820,10 @@ void initvars1(void){
   STRCPY(TITLE,TITLEBASE);
   STRCAT(TITLE,__DATE__);
 #endif
+#ifdef pp_BETA
+  STRCAT(TITLE," - ");
+  STRCAT(TITLE,__TIME__);
+#endif
 
   STRCPY(FULLTITLE,TITLE);
 
