@@ -783,7 +783,8 @@ REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
             UBAR,VBAR,WBAR,GRVT1,GRVT2,GRVT3, &
             UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION(-3:3),SURFACE_DROPLET_DIAMETER, &
             T_BU_BAG,T_BU_STRIP,B_1,THROHALF,P_UVWMAX,UVWMAX, &
-            ALPHA,BETA,DR_MASS,FP_MASS,OBDT,OPA,BDTOA,U_OLD,V_OLD,W_OLD,MPOM,RDT
+            ALPHA,BETA,DR_MASS,FP_MASS,OBDT,OPA,BDTOA,U_OLD,V_OLD,W_OLD,MPOM,RDT,&
+            WAKE_VEL,RE_WAKE
 REAL(EB) :: CHILD_RADIUS(0:NDC)
 LOGICAL :: HIT_SOLID
 INTEGER :: ICN,I,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,IW,IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IOR_OLD,IC,IOR_FIRST,IML
@@ -795,7 +796,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: NDPC=>NULL() ! number of droplets per cel
 SURFACE_DROPLET_DIAMETER = 0.001_EB  ! All droplets adjusted to this size when on solid (m)
 THROHALF = (0.5_EB)**(1./3.)
 
-B_1 = 5._EB
+B_1 =  1.7321_EB ! SQRT(3)
 
 RDT = 1._EB/DT
 
@@ -909,48 +910,71 @@ DROPLET_LOOP: DO I=1,NLP
       C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
    ENDIF
 
-   ! Secondary break-up model
-
-   BREAKUP: IF (PC%BREAKUP) THEN
-      WE_G=RHO(II,JJ,KK)*QREL**2*2._EB*RD/PC%SURFACE_TENSION
-      T_BU_BAG    = T_END-T_BEGIN
-      T_BU_STRIP  = T_END-T_BEGIN
-      ! Breakup conditions according to WAVE model by Reitz (1987)
-      IF (WE_G >= 12.0_EB)             T_BU_BAG   = 1.72_EB*B_1*SQRT(PC%DENSITY*RDC/(2._EB*PC%SURFACE_TENSION))
-      IF (WE_G/SQRT(DR%RE) >= 1.0_EB)  T_BU_STRIP = B_1*(RD/QREL)*SQRT(PC%DENSITY/RHO_G)
-      ! droplet age is larger than smallest characteristic breakup time
-      AGE_IF: IF ((T-DR%T) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
-         IF (PC%MONODISPERSE) THEN
-            RD    = THROHALF*RD
-         ELSE
-            DO WHILE (RD >= DR%R)
-               CHILD_RADIUS = PC%BREAKUP_CHILD_DIAMETER*DR%R*PC%CHILD_R_CDF(:)
-               CALL RANDOM_CHOICE(PC%CHILD_CDF(:),CHILD_RADIUS,NDC,RD)
-            END DO
-            RD = MAX(RD,1.1_EB*PC%MINIMUM_DIAMETER/2._EB)
-         ENDIF
-         DR%RE    = RHO_G*QREL*2._EB*RD/MU_AIR
-         IF (PC%DRAG_LAW==USER_DRAG) THEN
-            C_DRAG = PC%USER_DRAG_COEFFICIENT
-         ELSE
-            C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
-         ENDIF
-
-         DR%PWT   = DR%PWT*RDC/RD**3
-         DR%T     = T
-         DR%R     = RD
-         RDS      = RD*RD
-         RDC      = RD*RDS
-      ENDIF AGE_IF
-   ENDIF BREAKUP
-
-   ! Drag reduction model, except for particles associated with a SURF line
+    ! Drag reduction model, except for particles associated with a SURF line
 
    IF (PC%SURF_INDEX<1) THEN
       DROP_DEN      = AVG_DROP_DEN(II,JJ,KK,PC%EVAP_INDEX) 
       DROP_VOL_FRAC = DROP_DEN/PC%DENSITY 
-      IF (DROP_VOL_FRAC > PC%DENSE_VOLUME_FRACTION) C_DRAG = WAKE_REDUCTION(DROP_VOL_FRAC,DR%RE,C_DRAG)
+      IF (DROP_VOL_FRAC > PC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,DR%RE,C_DRAG,WAKE_VEL)
    ENDIF
+
+  ! Secondary break-up model
+
+   BREAKUP: IF (PC%BREAKUP) THEN
+       
+            ! Use undisturbed wake velocity for breakup calculations
+            WAKE_VEL = WAKE_VEL*QREL
+            RE_WAKE=RHO_G*WAKE_VEL*2._EB*RD/MU_AIR
+            ! Shape Deformation
+            C_DRAG=SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
+            WE_G=RHO(II,JJ,KK)*WAKE_VEL**2*2._EB*RD/PC%SURFACE_TENSION
+            T_BU_BAG    = T_END-T_BEGIN
+            T_BU_STRIP  = T_END-T_BEGIN
+            ! Breakup conditions according to WAVE model by Reitz (1987)
+            IF (WE_G >= 12.0_EB)             T_BU_BAG   = 1.72_EB*B_1*SQRT(PC%DENSITY*RDC/(2._EB*PC%SURFACE_TENSION))
+            IF (WE_G/SQRT(RE_WAKE) >= 1.0_EB)  T_BU_STRIP = B_1*(RD/WAKE_VEL)*SQRT(PC%DENSITY/RHO_G)
+            ! droplet age is larger than smallest characteristic breakup time
+            AGE_IF: IF ((T-DR%T) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
+               IF (PC%MONODISPERSE) THEN
+                  RD    = THROHALF*RD
+               ELSE
+                  DO WHILE (RD >= DR%R)
+                     CHILD_RADIUS = PC%BREAKUP_CHILD_DIAMETER*DR%R*PC%CHILD_R_CDF(:)
+                     CALL RANDOM_CHOICE(PC%CHILD_CDF(:),CHILD_RADIUS,NDC,RD)
+                  END DO
+                  RD = MAX(RD,1.1_EB*PC%MINIMUM_DIAMETER/2._EB)
+               ENDIF
+               DR%RE    = RHO_G*QREL*2._EB*RD/MU_AIR
+               IF (PC%DRAG_LAW==USER_DRAG) THEN
+                  C_DRAG = PC%USER_DRAG_COEFFICIENT
+               ELSE
+                  C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
+               ENDIF
+               
+               DR%PWT   = DR%PWT*RDC/RD**3
+               DR%T     = T
+               DR%R     = RD
+               RDS      = RD*RD
+               RDC      = RD*RDS
+               DR%RE    = RHO_G*QREL*2._EB*RD/MU_AIR
+               WAKE_VEL =1.0
+
+               ! Redo wake reduction and shape deformation for the new drop
+                ! Drag reduction, except for particles associated with a SURF line
+              IF (PC%SURF_INDEX<1) THEN
+                 DROP_DEN      = AVG_DROP_DEN(II,JJ,KK,PC%EVAP_INDEX) 
+                 DROP_VOL_FRAC = DROP_DEN/PC%DENSITY 
+                 IF (DROP_VOL_FRAC > PC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,DR%RE,C_DRAG,WAKE_VEL)
+              ENDIF
+
+               ! Change in drag coefficient due to deformation of droplet shape (We>2)
+               WAKE_VEL=WAKE_VEL*QREL
+               RE_WAKE=RHO_G*WAKE_VEL*2._EB*RD/MU_AIR
+               WE_G=RHO_G*WAKE_VEL**2*2._EB*RD/PC%SURFACE_TENSION
+               C_DRAG=SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
+            ENDIF AGE_IF
+   ENDIF BREAKUP
+
          
    ! Gas-Particle Momentum Transfer
          
@@ -1323,25 +1347,50 @@ CALL REMOVE_DROPLETS(T,NM)
 
 CONTAINS
 
-REAL(EB) FUNCTION  WAKE_REDUCTION(DROP_VOL_FRAC,RE,C_DRAG)
+SUBROUTINE WAKE_REDUCTION(DROP_VOL_FRAC,RE,C_DRAG,WAKE_VEL)
 
 ! Compute C_DRAG reduction due to the wake effect (Ramirez, Munoz et al. 2007)
 
 REAL(EB)DROP_VOL_FRAC, RE, C_DRAG
 REAL(EB) WAKE_VEL, LODM, RELOD
 
-IF (DROP_VOL_FRAC <= 0._EB) THEN
-   WAKE_REDUCTION = C_DRAG
-ELSE
+IF (DROP_VOL_FRAC > 0._EB) THEN
    LODM = (PI/(6._EB*DROP_VOL_FRAC))**(1./3.) - 0.5_EB
    RELOD = RE/(16._EB * LODM)
    WAKE_VEL = 1._EB - 0.5_EB*C_DRAG*(1._EB - EXP(-RELOD))
    WAKE_VEL = MAX(WAKE_VEL,0.15_EB)
-   WAKE_REDUCTION = C_DRAG * WAKE_VEL * (1._EB + (RELOD/LODM)*EXP(-RELOD))
+   C_DRAG = C_DRAG * WAKE_VEL * (1._EB + (RELOD/LODM)*EXP(-RELOD))
+ELSE
+   WAKE_VEL=1.0_EB
 ENDIF
-RETURN
-END FUNCTION WAKE_REDUCTION
 
+RETURN
+END SUBROUTINE WAKE_REDUCTION
+
+! SHAPE DEFORMATION Loth, 2008 
+! E.Loth, Quasi-steady shape and drag of deformable bubbles and drops, International Journal of Multiphase Flow 34 (2008)
+REAL(EB) FUNCTION SHAPE_DEFORMATION(RE,WE,C_DRAG)
+REAL(EB)::RE,WE,C_DRAG,C_DRAGNEW,E
+REAL(EB)::DC_DRAGSTAR,fSN,REWE02
+
+IF(WE>2.0) THEN
+    REWE02=RE*WE**0.2
+    DC_DRAGSTAR=C_DRAG+.38E-2*REWE02+3E-5*REWE02**2+9E-7*REWE02**3
+    fSN=1.0+0.15*RE**.0687
+    C_DRAGNEW=1.0/(3.0*RE)*(DC_DRAGSTAR*(8*RE+72-72*fSN)+72*fSN)
+    C_DRAGNEW=MIN(8.0_EB/3.0_EB,C_DRAG) ! Bounded from above by drag of a disintegrating drop
+    C_DRAG=MAX(C_DRAG,C_DRAGNEW)  
+    ! Absorb effect the of larger projected surface area into C_DRAG.
+    ! Particle movement routines use projected area of a sphere,
+    ! calculate the ratio of projected surface areas of a sphere and an
+    ! ellipsoid of the same volume with aspect ratio E.
+    E=1._EB-0.75_EB*tanh(0.07_EB*WE)
+    SHAPE_DEFORMATION=C_DRAG*E**(-2.0/3.0)
+ELSE
+    SHAPE_DEFORMATION=C_DRAG
+ENDIF    
+
+END FUNCTION SHAPE_DEFORMATION
 END SUBROUTINE MOVE_PARTICLES
 
 
