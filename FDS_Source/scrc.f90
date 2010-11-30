@@ -290,9 +290,9 @@ IERR=0
 !!! Open debug-file if requested
 !!!
 IF (SCARC_DEBUG >= 1) THEN
-WRITE (SCARC_FN, '(A,A,i3.3)') TRIM(CHID),'.scarc',NM
-SCARC_LU = GET_FILE_NUMBER()
-OPEN (SCARC_LU, FILE=SCARC_FN)
+   WRITE (SCARC_FN, '(A,A,i3.3)') TRIM(CHID),'.scarc',NM
+   SCARC_LU = GET_FILE_NUMBER()
+   OPEN (SCARC_LU, FILE=SCARC_FN)
 ENDIF
 
 IF (PRES_METHOD/='SCARC') GOTO 12345
@@ -571,7 +571,7 @@ SL%DY=0.0_EB
 SL%DZ=(M%ZF-M%ZS)/REAL(SL%KBAR,EB)
 
 SL%DXI=1.0_EB/SL%DX
-SL%DYI=1.0_EB/SL%DY
+SL%DYI=1.0_EB
 SL%DZI=1.0_EB/SL%DZ
 
 ! ----------------------------------------------------------------------------------
