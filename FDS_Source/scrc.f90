@@ -147,7 +147,7 @@ INTEGER :: IBAR, JBAR, KBAR
 
 ! number of local and global grid cells on corresponding level
 INTEGER :: NCELLS_LOCAL, NCELLS_GLOBAL
-INTEGER :: NEWC
+INTEGER :: N_EXTERNAL_WALL_CELLS
 
 ! mesh coordinates and step sizes
 REAL (EB) :: DX,    DY,    DZ
@@ -203,7 +203,7 @@ INTEGER :: IBAR, JBAR, KBAR
 
 ! number of local and global grid cells on corresponding level
 INTEGER :: NCELLS_LOCAL, NCELLS_GLOBAL
-INTEGER :: NEWC
+INTEGER :: N_EXTERNAL_WALL_CELLS
 
 ! communication vectors
 REAL (EB), POINTER, DIMENSION (:) :: SEND_FACE, RECV_FACE
@@ -888,7 +888,7 @@ M => MESHES(NM)
 ILMAX =  S%NLMAX
 SLMAX => S%SLEVEL(ILMAX)
 
-SLMAX%NEWC  =  M%N_EXTERNAL_WALL_CELLS
+SLMAX%N_EXTERNAL_WALL_CELLS  =  M%N_EXTERNAL_WALL_CELLS
 SLMAX%IJKW  => M%IJKW
 
 ALLOCATE(SLMAX%NIC(NMESHES,NMESHES))
@@ -962,8 +962,8 @@ WRITE(SCARC_LU,*) '=============================================================
 WRITE(SCARC_LU,*) 'NMESHES=', NMESHES
 WRITE(SCARC_LU,*) 'S%NLEVEL=', S%NLEVEL
 WRITE(SCARC_LU,*) 'HIER SCHAUEN, WELCHES GEBRAUCHT WIRD'
-WRITE(SCARC_LU,*) 'NEWC=', M%N_EXTERNAL_WALL_CELLS
-WRITE(SCARC_LU,*) 'NWC=', M%N_INTERNAL_WALL_CELLS
+WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS=', M%N_EXTERNAL_WALL_CELLS
+WRITE(SCARC_LU,*) 'NWC=', M%N_EXTERNAL_WALL_CELLS + M%N_INTERNAL_WALL_CELLS
 WRITE(SCARC_LU,*) 'BOUNDARY_TYPE:'
 WRITE(SCARC_LU,'(8i4)') (M%BOUNDARY_TYPE(IW),IW=1,M%N_EXTERNAL_WALL_CELLS)
 WRITE(SCARC_LU,*) '----------------------------------'
@@ -1003,7 +1003,7 @@ WRITE(SCARC_LU,*) 'LEVEL=',S%NLMAX
 WRITE(SCARC_LU,*) 'IBAR=',SLMAX%IBAR
 WRITE(SCARC_LU,*) 'JBAR=',SLMAX%JBAR
 WRITE(SCARC_LU,*) 'KBAR=',SLMAX%KBAR
-WRITE(SCARC_LU,*) 'NEWC=',SLMAX%NEWC
+WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS=',SLMAX%N_EXTERNAL_WALL_CELLS
 WRITE(SCARC_LU,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
 WRITE(SCARC_LU,*) "%%% ARRAY IJKW "
 WRITE(SCARC_LU,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
@@ -1046,17 +1046,17 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
    SLHI => S%SLEVEL(ILEVEL+1)
    SLLO => S%SLEVEL(ILEVEL)
 
-   SLLO%NEWC = 2*SLLO%IBAR + 2*SLLO%KBAR
-   ALLOCATE (SLLO%IJKW(15,SLLO%NEWC))
+   SLLO%N_EXTERNAL_WALL_CELLS = 2*SLLO%IBAR + 2*SLLO%KBAR
+   ALLOCATE (SLLO%IJKW(15,SLLO%N_EXTERNAL_WALL_CELLS))
    SLLO%IJKW=0
 
-   ALLOCATE (SLLO%PRESSURE_BC_INDEX(SLLO%NEWC))
+   ALLOCATE (SLLO%PRESSURE_BC_INDEX(SLLO%N_EXTERNAL_WALL_CELLS))
    SLLO%PRESSURE_BC_INDEX=0
 
    IF (SCARC_DEBUG>=2) THEN
       WRITE(SCARC_LU,*) '========== ILEVEL ',ILEVEL
       WRITE(SCARC_LU,*) 'IREFINE=',IREFINE
-      WRITE(SCARC_LU,*) 'SLLO%NEWC=',SLLO%NEWC
+      WRITE(SCARC_LU,*) 'SLLO%N_EXTERNAL_WALL_CELLS=',SLLO%N_EXTERNAL_WALL_CELLS
       WRITE(SCARC_LU,*) 'SLLO%IBAR=',SLLO%IBAR 
       WRITE(SCARC_LU,*) 'SLLO%JBAR=',SLLO%JBAR 
       WRITE(SCARC_LU,*) 'SLLO%KBAR=',SLLO%KBAR 
@@ -1604,13 +1604,13 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
       IF (SCARC_DEBUG >= 6) THEN
          WRITE(SCARC_LU,*) '=================================================='
          WRITE(SCARC_LU,*) '================== LEVEL =',ILEVEL
-         WRITE(SCARC_LU,*) 'NEWC=',SLLO%NEWC
+         WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS=',SLLO%N_EXTERNAL_WALL_CELLS
          WRITE(SCARC_LU,*) 'IJKW:'
-         DO INEWC=1,SLLO%NEWC
+         DO INEWC=1,SLLO%N_EXTERNAL_WALL_CELLS
             WRITE(SCARC_LU, '(i5,a,15i5)') INEWC,':',(SLLO%IJKW(I, INEWC), I=1,15)
          ENDDO
          WRITE(SCARC_LU,*) 'PRESSURE_BC_INDEX:'
-         WRITE(SCARC_LU, '(4i4)') (SLLO%PRESSURE_BC_INDEX(INEWC), INEWC=1,SLLO%NEWC)
+         WRITE(SCARC_LU, '(4i4)') (SLLO%PRESSURE_BC_INDEX(INEWC), INEWC=1,SLLO%N_EXTERNAL_WALL_CELLS)
       ENDIF
 
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1662,7 +1662,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
 
          SLLO%NIC(NOM,NM) = 0
 
-         SEARCH_LOOP: DO INEWC=1,SLLO%NEWC
+         SEARCH_LOOP: DO INEWC=1,SLLO%N_EXTERNAL_WALL_CELLS
 
             ! neighborship structure already known from finest level
             IF (SLLO%IJKW(9,INEWC)/=NOM) CYCLE SEARCH_LOOP
@@ -1746,9 +1746,9 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
       IF (SCARC_DEBUG >= 6) THEN
          WRITE(SCARC_LU,*) '=================================================='
          WRITE(SCARC_LU,*) '================== LEVEL =',ILEVEL
-         WRITE(SCARC_LU,*) 'NEWC=',SLLO%NEWC
+         WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS=',SLLO%N_EXTERNAL_WALL_CELLS
          WRITE(SCARC_LU,*) 'IJKW:'
-         DO INEWC=1,SLLO%NEWC
+         DO INEWC=1,SLLO%N_EXTERNAL_WALL_CELLS
             WRITE(SCARC_LU, '(i5,a,15i5)') INEWC,':',(SLLO%IJKW(I, INEWC), I=1,15)
          ENDDO
          WRITE(SCARC_LU,*) 'NIC:'
@@ -1833,7 +1833,7 @@ M => MESHES(NM)
 ILMAX =  S%NLMAX
 SLMAX => S%SLEVEL(ILMAX)
 
-SLMAX%NEWC  =  M%N_EXTERNAL_WALL_CELLS
+SLMAX%N_EXTERNAL_WALL_CELLS  =  M%N_EXTERNAL_WALL_CELLS
 SLMAX%IJKW  => M%IJKW
 
 ALLOCATE(SLMAX%NIC(NMESHES,NMESHES))
@@ -1898,8 +1898,8 @@ IF (SCARC_DEBUG>=2) THEN
    WRITE(SCARC_LU,*) 'NMESHES=', NMESHES
    WRITE(SCARC_LU,*) 'S%NLEVEL=', S%NLEVEL
    WRITE(SCARC_LU,*) 'HIER SCHAUEN, WELCHES GEBRAUCHT WIRD'
-   WRITE(SCARC_LU,*) 'NEWC=', M%N_EXTERNAL_WALL_CELLS
-   WRITE(SCARC_LU,*) 'NWC=', M%N_INTERNAL_WALL_CELLS
+   WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS=', M%N_EXTERNAL_WALL_CELLS
+   WRITE(SCARC_LU,*) 'NWC=', M%N_EXTERNAL_WALL_CELLS + M%N_INTERNAL_WALL_CELLS
    IF (NMESHES==1) THEN
    WRITE(SCARC_LU,*) 'BOUNDARY_TYPE:'
    WRITE(SCARC_LU,'(8i4)') (M%BOUNDARY_TYPE(IW),IW=1,64)
@@ -1992,11 +1992,11 @@ IF (SCARC_DEBUG>=2) THEN
    WRITE(SCARC_LU,*) 'IBAR=',SLMAX%IBAR
    WRITE(SCARC_LU,*) 'JBAR=',SLMAX%JBAR
    WRITE(SCARC_LU,*) 'KBAR=',SLMAX%KBAR
-   WRITE(SCARC_LU,*) 'NEWC=',SLMAX%NEWC
+   WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS=',SLMAX%N_EXTERNAL_WALL_CELLS
    WRITE(SCARC_LU,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
    WRITE(SCARC_LU,*) "%%% ARRAY IJKW after all INIT_WALL_CELLS in init.f90"
    WRITE(SCARC_LU,*) "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-   WRITE(SCARC_LU,'(16i5)') SLMAX%NEWC, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+   WRITE(SCARC_LU,'(16i5)') SLMAX%N_EXTERNAL_WALL_CELLS, 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
    WRITE(SCARC_LU,*) '-------------------------------------------------------------------'
    !DO IW=1,M%N_EXTERNAL_WALL_CELLS
    IF (NM==0) THEN
@@ -2112,17 +2112,17 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
       SLHI => S%SLEVEL(ILEVEL+1)
       SLLO => S%SLEVEL(ILEVEL)
    
-      SLLO%NEWC = 2*SLLO%IBAR*SLLO%JBAR + 2*SLLO%IBAR*SLLO%KBAR + 2*SLLO%JBAR*SLLO%KBAR
-      ALLOCATE (SLLO%IJKW(15,SLLO%NEWC))
+      SLLO%N_EXTERNAL_WALL_CELLS = 2*SLLO%IBAR*SLLO%JBAR + 2*SLLO%IBAR*SLLO%KBAR + 2*SLLO%JBAR*SLLO%KBAR
+      ALLOCATE (SLLO%IJKW(15,SLLO%N_EXTERNAL_WALL_CELLS))
       SLLO%IJKW=0
 
-      ALLOCATE (SLLO%PRESSURE_BC_INDEX(SLLO%NEWC))
+      ALLOCATE (SLLO%PRESSURE_BC_INDEX(SLLO%N_EXTERNAL_WALL_CELLS))
       SLLO%PRESSURE_BC_INDEX=0
    
       IF (SCARC_DEBUG>=2) THEN
          WRITE(SCARC_LU,*) '========== ILEVEL ',ILEVEL
          WRITE(SCARC_LU,*) 'IREFINE=',IREFINE
-         WRITE(SCARC_LU,*) 'SLLO%NEWC=',SLLO%NEWC
+         WRITE(SCARC_LU,*) 'SLLO%N_EXTERNAL_WALL_CELLS=',SLLO%N_EXTERNAL_WALL_CELLS
          WRITE(SCARC_LU,*) 'SLLO%IBAR=',SLLO%IBAR 
          WRITE(SCARC_LU,*) 'SLLO%JBAR=',SLLO%JBAR 
          WRITE(SCARC_LU,*) 'SLLO%KBAR=',SLLO%KBAR 
@@ -3281,13 +3281,13 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
       IF (SCARC_DEBUG >= 6) THEN
          WRITE(SCARC_LU,*) '=================================================='
          WRITE(SCARC_LU,*) '================== LEVEL =',ILEVEL
-         WRITE(SCARC_LU,*) 'NEWC=',SLLO%NEWC
+         WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS=',SLLO%N_EXTERNAL_WALL_CELLS
          WRITE(SCARC_LU,*) 'IJKW:'
-         DO INEWC=1,SLLO%NEWC
+         DO INEWC=1,SLLO%N_EXTERNAL_WALL_CELLS
             WRITE(SCARC_LU, '(i5,a,15i5)') INEWC,':',(SLLO%IJKW(I, INEWC), I=1,15)
          ENDDO
          WRITE(SCARC_LU,*) 'PRESSURE_BC_INDEX:'
-         WRITE(SCARC_LU, '(4i4)') (SLLO%PRESSURE_BC_INDEX(INEWC), INEWC=1,SLLO%NEWC)
+         WRITE(SCARC_LU, '(4i4)') (SLLO%PRESSURE_BC_INDEX(INEWC), INEWC=1,SLLO%N_EXTERNAL_WALL_CELLS)
       ENDIF
 
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -3339,7 +3339,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
 
          SLLO%NIC(NOM,NM) = 0
 
-         SEARCH_LOOP: DO INEWC=1,SLLO%NEWC
+         SEARCH_LOOP: DO INEWC=1,SLLO%N_EXTERNAL_WALL_CELLS
 
             ! neighborship structure already known from finest level
             IF (SLLO%IJKW(9,INEWC)/=NOM) CYCLE SEARCH_LOOP
@@ -3423,9 +3423,9 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
       IF (SCARC_DEBUG >= 6) THEN
          WRITE(SCARC_LU,*) '=================================================='
          WRITE(SCARC_LU,*) '================== LEVEL =',ILEVEL
-         WRITE(SCARC_LU,*) 'NEWC=',SLLO%NEWC
+         WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS=',SLLO%N_EXTERNAL_WALL_CELLS
          WRITE(SCARC_LU,*) 'IJKW:'
-         DO INEWC=1,SLLO%NEWC
+         DO INEWC=1,SLLO%N_EXTERNAL_WALL_CELLS
             WRITE(SCARC_LU, '(i5,a,15i5)') INEWC,':',(SLLO%IJKW(I, INEWC), I=1,15)
          ENDDO
          WRITE(SCARC_LU,*) 'NIC:'
@@ -3523,16 +3523,16 @@ OSLEVEL_LOOP2D: DO NOM=1,NMESHES
       CALL CHKMEMERR ('SCARC_INIT_COMMUNICATION2D', 'OS%SLEVEL', IERR)
 
       OSLMAX => OS%SLEVEL(ILMAX)
-      OSLMAX%NEWC = 2*S%MIBAR(NOM)              + &
+      OSLMAX%N_EXTERNAL_WALL_CELLS = 2*S%MIBAR(NOM)              + &
                     2*S%MIBAR(NOM)*S%MKBAR(NOM) + &
                     2*S%MKBAR(NOM)
-      !ALLOCATE (OSLMAX%IJKW(15,OSLMAX%NEWC), STAT=IERR)
+      !ALLOCATE (OSLMAX%IJKW(15,OSLMAX%N_EXTERNAL_WALL_CELLS), STAT=IERR)
       !CALL CHKMEMERR ('SCARC_INIT_COMMUNICATION2D', 'OSLMAX%IJKW', IERR)
       !OSLMAX%IJKW = 0
 
       IF (SCARC_DEBUG>=2) THEN
          WRITE(SCARC_LU,*) 'OSLMAX zeigt auf OS%SLEVEL(',ILMAX,')'
-         WRITE(SCARC_LU,*) 'OSLMAX%NEWC=',OSLMAX%NEWC
+         WRITE(SCARC_LU,*) 'OSLMAX%N_EXTERNAL_WALL_CELLS=',OSLMAX%N_EXTERNAL_WALL_CELLS
          !WRITE(SCARC_LU,*) 'SIZE(OSLMAX%IJKW)=',SIZE(OSLMAX%IJKW)
          WRITE(SCARC_LU,*) 'S%NLDIFF=',S%NLDIFF
       ENDIF
@@ -3547,14 +3547,14 @@ OSLEVEL_LOOP2D: DO NOM=1,NMESHES
          IF (SCARC_DEBUG>=2) WRITE(SCARC_LU,*) 'ILEVEL=',ILEVEL
          IF (SCARC_DEBUG>=2) WRITE(SCARC_LU,*) 'IREFINE=',IREFINE
 
-            OS%SLEVEL(ILEVEL)%NEWC=OS%SLEVEL(ILEVEL+1)%NEWC/IREFINE
-            ALLOCATE (OS%SLEVEL(ILEVEL)%IJKW(15,OSLMAX%NEWC), STAT=IERR)
+            OS%SLEVEL(ILEVEL)%N_EXTERNAL_WALL_CELLS=OS%SLEVEL(ILEVEL+1)%N_EXTERNAL_WALL_CELLS/IREFINE
+            ALLOCATE (OS%SLEVEL(ILEVEL)%IJKW(15,OSLMAX%N_EXTERNAL_WALL_CELLS), STAT=IERR)
             CALL CHKMEMERR ('SCARC_INIT_COMMUNICATION2D', 'OS%SLEVEL%IJKW', IERR)
             OS%SLEVEL(ILEVEL)%IJKW = 0
 
             IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) 'OSL zeigt auf OS%SLEVEL(',ILEVEL,')'
-               WRITE(SCARC_LU,*) 'OS%SLEVEL(',ILEVEL,')%NEWC=',OS%SLEVEL(ILEVEL)%NEWC
+               WRITE(SCARC_LU,*) 'OS%SLEVEL(',ILEVEL,')%N_EXTERNAL_WALL_CELLS=',OS%SLEVEL(ILEVEL)%N_EXTERNAL_WALL_CELLS
                WRITE(SCARC_LU,*) 'SIZE(OS%SLEVEL(ILEVEL)%IJKW)=',SIZE(OS%SLEVEL(ILEVEL)%IJKW)
             ENDIF
 
@@ -3584,10 +3584,8 @@ COM_LEVEL_LOOP2D: DO ILEVEL=S%NLMAX,S%NLMIN,-1
       ! get length of communication vectors for different orientation of neighbors
       IMIN = SL%I_MIN(NM,NOM)
       IMAX = SL%I_MAX(NM,NOM)
-      !JMIN = SL%J_MIN(NM,NOM)
-      !JMAX = SL%J_MAX(NM,NOM)
-      JMIN = 1
-      JMAX = 1
+      JMIN = SL%J_MIN(NM,NOM)
+      JMAX = SL%J_MAX(NM,NOM)
       KMIN = SL%K_MIN(NM,NOM)
       KMAX = SL%K_MAX(NM,NOM)
 
@@ -3697,16 +3695,16 @@ OSLEVEL_LOOP3D: DO NOM=1,NMESHES
       CALL CHKMEMERR ('SCARC_INIT_COMMUNICATION3D', 'OS%SLEVEL', IERR)
 
       OSLMAX => OS%SLEVEL(ILMAX)
-      OSLMAX%NEWC = 2*S%MIBAR(NOM)*S%MJBAR(NOM) + &
+      OSLMAX%N_EXTERNAL_WALL_CELLS = 2*S%MIBAR(NOM)*S%MJBAR(NOM) + &
                     2*S%MIBAR(NOM)*S%MKBAR(NOM) + &
                     2*S%MJBAR(NOM)*S%MKBAR(NOM)  
-!      ALLOCATE (OSLMAX%IJKW(15,OSLMAX%NEWC), STAT=IERR)
+!      ALLOCATE (OSLMAX%IJKW(15,OSLMAX%N_EXTERNAL_WALL_CELLS), STAT=IERR)
 !      CALL CHKMEMERR ('SCARC_INIT_COMMUNICATION3D', 'OSLMAX%IJKW', IERR)
 !      OSLMAX%IJKW = 0
 
       IF (SCARC_DEBUG>=2) THEN
          WRITE(SCARC_LU,*) 'OSLMAX zeigt auf OS%SLEVEL(',ILMAX,')'
-         WRITE(SCARC_LU,*) 'OSLMAX%NEWC=',OSLMAX%NEWC
+         WRITE(SCARC_LU,*) 'OSLMAX%N_EXTERNAL_WALL_CELLS=',OSLMAX%N_EXTERNAL_WALL_CELLS
          WRITE(SCARC_LU,*) 'IBAR=',S%MIBAR(NOM)
          WRITE(SCARC_LU,*) 'JBAR=',S%MJBAR(NOM)
          WRITE(SCARC_LU,*) 'KBAR=',S%MKBAR(NOM)
@@ -3721,13 +3719,13 @@ OSLEVEL_LOOP3D: DO NOM=1,NMESHES
 
             IREFINE=IREFINE*2
 
-            IF (MOD(OS%SLEVEL(ILEVEL+1)%NEWC,IREFINE).NE.0) THEN
-               WRITE(*,*) 'NEWC cannot be divided by 2!'         ! only temporarily
+            IF (MOD(OS%SLEVEL(ILEVEL+1)%N_EXTERNAL_WALL_CELLS,IREFINE).NE.0) THEN
+               WRITE(*,*) 'N_EXTERNAL_WALL_CELLS cannot be divided by 2!'         ! only temporarily
                STOP
             ENDIF
 
-            OS%SLEVEL(ILEVEL)%NEWC=OS%SLEVEL(ILEVEL+1)%NEWC/IREFINE
-            ALLOCATE (OS%SLEVEL(ILEVEL)%IJKW(15,OSLMAX%NEWC), STAT=IERR)
+            OS%SLEVEL(ILEVEL)%N_EXTERNAL_WALL_CELLS=OS%SLEVEL(ILEVEL+1)%N_EXTERNAL_WALL_CELLS/IREFINE
+            ALLOCATE (OS%SLEVEL(ILEVEL)%IJKW(15,OSLMAX%N_EXTERNAL_WALL_CELLS), STAT=IERR)
             CALL CHKMEMERR ('SCARC_INIT_COMMUNICATION3D', 'OS%SLEVEL%IJKW', IERR)
             OS%SLEVEL(ILEVEL)%IJKW = 0
 
@@ -3735,7 +3733,7 @@ OSLEVEL_LOOP3D: DO NOM=1,NMESHES
                WRITE(SCARC_LU,*) 'ILEVEL=',ILEVEL
                WRITE(SCARC_LU,*) 'IREFINE=',IREFINE
                WRITE(SCARC_LU,*) 'OSL zeigt auf OS%SLEVEL(',ILEVEL,')'
-               WRITE(SCARC_LU,*) 'OS%SLEVEL(',ILEVEL,')%NEWC=',OS%SLEVEL(ILEVEL)%NEWC
+               WRITE(SCARC_LU,*) 'OS%SLEVEL(',ILEVEL,')%N_EXTERNAL_WALL_CELLS=',OS%SLEVEL(ILEVEL)%N_EXTERNAL_WALL_CELLS
                WRITE(SCARC_LU,*) 'SIZE(OS%SLEVEL(ILEVEL)%IJKW)=',SIZE(OS%SLEVEL(ILEVEL)%IJKW)
             ENDIF
 
@@ -3760,7 +3758,6 @@ COM_LEVEL_LOOP3D: DO ILEVEL=S%NLMAX,S%NLMIN,-1
 
       ! is there a face neighbor ?
       IF (NOM == NM) CYCLE FACE_NBR_LOOP3D
-
       IF (SL%NIC(NM, NOM) == 0 .AND. SL%NIC(NOM, NM) == 0) CYCLE FACE_NBR_LOOP3D
 
       ! get length of communication vectors for different orientation of neighbors
@@ -3917,7 +3914,7 @@ MATRIX_LEVEL_LOOP2D: DO ILEVEL=S%NLMAX,S%NLMIN,-1
 
    IF (BGSTRIX.AND..NOT.BCOARSE) CALL SCARC_PRECON_INIT_GSTRIX2D(ILEVEL,NM)
 
-   BC_INDEX_LOOP: DO IW = 1,SL%NEWC
+   BC_INDEX_LOOP: DO IW = 1,SL%N_EXTERNAL_WALL_CELLS
    
       IF (ILEVEL==S%NLMAX) THEN
        
@@ -4161,7 +4158,7 @@ MATRIX_LEVEL_LOOP3D: DO ILEVEL=S%NLMAX,S%NLMIN,-1
    !IF (ILEVEL/=S%NLMIN) CALL SCARC_PRECON_INIT_GSTRIX3D(ILEVEL,NM)
 
 
-   DO IW = 1,SL%NEWC
+   DO IW = 1,SL%N_EXTERNAL_WALL_CELLS
 
       IF (ILEVEL==S%NLMAX) THEN
    
@@ -4226,7 +4223,7 @@ MATRIX_LEVEL_LOOP3D: DO ILEVEL=S%NLMAX,S%NLMIN,-1
    IF (SCARC_DEBUG >= 2) THEN
       WRITE(SCARC_LU,*) 'ASUB=', SL%ASUB
       WRITE(SCARC_LU,*) 'NCELLS_LOCAL=', SL%NCELLS_LOCAL
-      WRITE(SCARC_LU,*) 'NEWC=', SL%NEWC
+      WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS=', SL%N_EXTERNAL_WALL_CELLS
       WRITE(SCARC_LU,*) 'IBAR=', SL%IBAR
       WRITE(SCARC_LU,*) 'JBAR=', SL%JBAR
       WRITE(SCARC_LU,*) 'KBAR=', SL%KBAR
@@ -4294,7 +4291,7 @@ LEVEL_LOOP2D: DO ILEVEL=S%NLMAX,S%NLMIN,-1
    ! ----------------------------------------------------------------------------
    ! auxiliary vectors for update along internal boundaries
    ! ----------------------------------------------------------------------------
-   ALLOCATE (SL%Z(0:IBP0, 1, 0:KBP0), STAT=IERR)
+   ALLOCATE (SL%Z(0:IBP0, 0:2, 0:KBP0), STAT=IERR)
    CALL CHKMEMERR ('SCARC', 'Z', IERR)
    SL%Z = 0.0_EB
     
@@ -4775,17 +4772,18 @@ DO K = 1, SL%KBAR
    ENDDO
 ENDDO
 
-CALL SCARC_SHOW0(HP,'SCARC_CG3D','HP before GHOSTCELLS')
+CALL SCARC_SHOW0(HP,'SCARC_CG2D','HP before GHOSTCELLS')
 
 ! set ghost cell values along exterior boundaries 
 CALL SCARC_GHOSTCELLS(HP,NM)
 
-CALL SCARC_SHOW0(HP,'SCARC_CG3D','HP after GHOSTCELLS')
+CALL SCARC_SHOW0(HP,'SCARC_CG2D','HP after GHOSTCELLS')
 
 ! get neighbouring data along interior boundaries
-CALL SCARC_UPDATE_LEVEL(HP, NM, ILMAX, 'HPFIN ')
+!CALL SCARC_UPDATE_LEVEL(HP, NM, ILMAX, 'HPFIN ')
+CALL SCARC_UPDATE(HP, NM, 'HPFIN ')
 
-CALL SCARC_SHOW0(HP,'SCARC_CG3D','HP after UPDATE')
+CALL SCARC_SHOW0(HP,'SCARC_CG2D','HP after UPDATE')
 
 TUSED_SCARC(6,NM)=TUSED_SCARC(6,NM)+SECOND()-TNOW_CG2D
 TUSED_SCARC(0,NM)=TUSED_SCARC(0,NM)+SECOND()-TNOW_CG2D
@@ -7260,7 +7258,7 @@ REAL(EB):: TNOW_BDRY_RESIDUUM
 TNOW_BDRY_RESIDUUM = SECOND()
 SL => S%SLEVEL(ILEVEL)
 
-DO INEWC=1,SL%NEWC
+DO INEWC=1,SL%N_EXTERNAL_WALL_CELLS
 
    IF (SL%IJKW(9,INEWC)==0) THEN
 
@@ -8603,7 +8601,7 @@ ENDIF
 
             IF (ILEVEL/=SNM%NLMAX) THEN
                NREQ_FACE = NREQ_FACE+1
-               IF (USE_MPI) CALL MPI_IRECV(OSNML%IJKW(1,1),15*OSNML%NEWC,MPI_INTEGER,SNODE, &
+               IF (USE_MPI) CALL MPI_IRECV(OSNML%IJKW(1,1),15*OSNML%N_EXTERNAL_WALL_CELLS,MPI_INTEGER,SNODE, &
                                            TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
             ELSE
                OSNML%IJKW => MESHES(NM)%OMESH(NOM)%IJKW
@@ -8611,12 +8609,12 @@ ENDIF
 
             IF (SCARC_DEBUG>=6) THEN
                WRITE(SCARC_LU,*) 'RECEIVE: INIT: LEVEL=',ILEVEL
-               WRITE(SCARC_LU,*) 'RECEIVE: INIT: NEWC=',OSNML%NEWC
-               WRITE(SCARC_LU,*) 'RECEIVE: INIT: LEN(IJKW)=',15*OSNML%NEWC
+               WRITE(SCARC_LU,*) 'RECEIVE: INIT: N_EXTERNAL_WALL_CELLS=',OSNML%N_EXTERNAL_WALL_CELLS
+               WRITE(SCARC_LU,*) 'RECEIVE: INIT: LEN(IJKW)=',15*OSNML%N_EXTERNAL_WALL_CELLS
                WRITE(SCARC_LU,'(15i4)') SNML%IJKW
                WRITE(SCARC_LU,*) 'RECEIVE: INIT: SIZE(IJKW):  ',SIZE(OSNML%IJKW)
                WRITE(SCARC_LU,*) 'RECEIVING IJKW(',ILEVEL,'): '
-               DO IW= 1,OSNML%NEWC
+               DO IW= 1,OSNML%N_EXTERNAL_WALL_CELLS
                   WRITE(SCARC_LU,'(15i4)') (MESHES(NM)%OMESH(NOM)%IJKW(II,IW),II=1,15)
                ENDDO
             ENDIF
@@ -8765,19 +8763,19 @@ ENDIF
 
                IF (ILEVEL/=SNM%NLMAX) THEN
                   NREQ_FACE = NREQ_FACE+1
-                  IF (USE_MPI) CALL MPI_ISEND(SNML%IJKW(1,1),15*SNML%NEWC,MPI_INTEGER,SNODE, &
+                  IF (USE_MPI) CALL MPI_ISEND(SNML%IJKW(1,1),15*SNML%N_EXTERNAL_WALL_CELLS,MPI_INTEGER,SNODE, &
                                            TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
                ENDIF
 
                IF (SCARC_DEBUG>=6) THEN
                  WRITE(SCARC_LU,*) '============================================================='
                  WRITE(SCARC_LU,*) 'EXCHANGE: INIT: LEVEL=',ILEVEL
-                 WRITE(SCARC_LU,*) 'EXCHANGE: INIT: SNML%NEWC=',SNML%NEWC
-                 WRITE(SCARC_LU,*) 'EXCHANGE: INIT: LEN(IJKW)=',15*SNML%NEWC
+                 WRITE(SCARC_LU,*) 'EXCHANGE: INIT: SNML%N_EXTERNAL_WALL_CELLS=',SNML%N_EXTERNAL_WALL_CELLS
+                 WRITE(SCARC_LU,*) 'EXCHANGE: INIT: LEN(IJKW)=',15*SNML%N_EXTERNAL_WALL_CELLS
                  !WRITE(SCARC_LU,'(15i4)') SNML%IJKW
                  WRITE(SCARC_LU,*) 'EXCHANGE: INIT: SIZE(IJKW):  ',SIZE(SNML%IJKW)
                  WRITE(SCARC_LU,*) 'SENDING IJKW(',ILEVEL,'): '
-                 DO IW= 1,SNML%NEWC
+                 DO IW= 1,SNML%N_EXTERNAL_WALL_CELLS
                     WRITE(SCARC_LU,'(15i4)') (SNML%IJKW(II,IW),II=1,15)
                  ENDDO
                ENDIF
@@ -8800,16 +8798,16 @@ ENDIF
                WRITE(SCARC_LU,*) '============================================================='
                WRITE(SCARC_LU,*) 'EXCHANGE: MATV: LEVEL=',ILEVEL
                WRITE(SCARC_LU,*) 'EXCHANGE: NM=', NM, ': NOM=',NOM
-               WRITE(SCARC_LU,*) 'NEWC: ',OSNML%NEWC
+               WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS: ',OSNML%N_EXTERNAL_WALL_CELLS
                WRITE(SCARC_LU,*) 'IJKW: '
-               DO IW= 1,OSNML%NEWC
+               DO IW= 1,OSNML%N_EXTERNAL_WALL_CELLS
                   WRITE(SCARC_LU,'(15i4)') (OSNML%IJKW(II,IW),II=1,15)
                ENDDO
             ENDIF
  
             LL = 0
             IWW = 0
-            PACK_SEND_FACE0: DO IW=1,OSNML%NEWC
+            PACK_SEND_FACE0: DO IW=1,OSNML%N_EXTERNAL_WALL_CELLS
                IF (OSNML%IJKW(9,IW)/=NM) CYCLE PACK_SEND_FACE0
                DO KK=OSNML%IJKW(12,IW),OSNML%IJKW(15,IW)
                   DO JJ=OSNML%IJKW(11,IW),OSNML%IJKW(14,IW)
@@ -9056,7 +9054,7 @@ IF (SCARC_DEBUG>=6) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,2f25.16,a,2f12.6,3i3)') &
 IF (SCARC_DEBUG>=6) THEN
    write(scarc_lu,*) 'EINSORTIEREN:'
    write(scarc_lu,*) 'OSNOML%RECV_FACE:'
-   write(scarc_lu,'(3e12.4)') (OSNOML%RECV_FACE(ii),II=1,300)
+   write(scarc_lu,'(3e12.4)') (OSNOML%RECV_FACE(ii),II=1,SIZE(OSNOML%RECV_FACE))
    WRITE(SCARC_LU,*) 'SNOML zeigt auf SCARC(',NOM,')%SLEVEL(',ILEVEL,')'
    WRITE(SCARC_LU,*) 'NM=',NM, ': IOR0=',IOR0
 ENDIF
@@ -9164,19 +9162,20 @@ IF (SCARC_DEBUG>=6) THEN
    write(scarc_lu,*) 'KMIN=',KMIN
    write(scarc_lu,*) 'KMAX=',KMAX
 ENDIF
+
                DO KK=KMIN,KMAX
                   DO JJ=JMIN,JMAX
                      DO II=IMIN,IMAX
                         SELECT CASE(ABS(IOR0))
                         CASE(1)
                            SNOML%Z(NPTR,JJ,KK) = OSNOML%Z_FACE(II,JJ,KK)
-if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'Z(',NPTR,',',JJ,',',KK,')=Z_FACE(',II,',',JJ,',',KK,')=',OSNOML%Z_FACE(II,JJ,KK)
+if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) '1:Z(',NPTR,',',JJ,',',KK,')=Z_FACE(',II,',',JJ,',',KK,')=',OSNOML%Z_FACE(II,JJ,KK)
                         CASE (2)
                            SNOML%Z(II,NPTR,KK) = OSNOML%Z_FACE(II,JJ,KK)
-if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'Z(',II,',',NPTR,',',KK,')=Z_FACE(',II,',',JJ,',',KK,')=',OSNOML%Z_FACE(II,JJ,KK)
+if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) '2:Z(',II,',',NPTR,',',KK,')=Z_FACE(',II,',',JJ,',',KK,')=',OSNOML%Z_FACE(II,JJ,KK)
                         CASE (3)
                            SNOML%Z(II,JJ,NPTR) = OSNOML%Z_FACE(II,JJ,KK)
-if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'Z(',II,',',JJ,',',NPTR,')=Z_FACE(',II,',',JJ,',',KK,')=',OSNOML%Z_FACE(II,JJ,KK)
+if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) '3:Z(',II,',',JJ,',',NPTR,')=Z_FACE(',II,',',JJ,',',KK,')=',OSNOML%Z_FACE(II,JJ,KK)
                         END SELECT
                      ENDDO
                   ENDDO
@@ -9474,92 +9473,39 @@ IF (SCARC_DEBUG>=2) THEN
    WRITE(SCARC_LU,*) 'CNAME=',CNAME
 ENDIF
 
-CALL SCARC_SHOW_LEVEL (Z, 'UPD1', CNAME, ILMAX)
+IF (SCARC_DEBUG>=6) CALL SCARC_SHOW0(Z,'SCARC_UPDATE','Z before update')
+
 IF (NMESHES > 1) THEN
  
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!! 2D
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   IF (TWO_D) THEN
- 
-      DO K = 0, SL%KBAR + 1
+   DO K = 0, SL%KBAR + 1
+      DO J = 0, SL%JBAR + 1
          DO I = 0, SL%IBAR + 1
-            SL%Z (I, 1, K) = Z (I, 0, K)
+            SL%Z (I, J, K) = Z (I, J, K)
          ENDDO
       ENDDO
-      NREQ_FACE = 0
-      CALL SCARC_RECEIVE  (NCOM_FULL, ILMAX)   
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILMAX, NMV_NONE, NMV_NONE)
-      DO K = 0, SL%KBAR + 1
+   ENDDO
+ 
+   NREQ_FACE = 0
+ 
+!CALL SCARC_SHOW0(SL%Z,'SCARC_UPDATE','SL%Z before update')
+
+   CALL SCARC_RECEIVE  (NCOM_FULL, ILMAX) 
+   CALL SCARC_EXCHANGE (NCOM_FULL, ILMAX, NMV_NONE, NMV_NONE)
+
+!CALL SCARC_SHOW0(SL%Z,'SCARC_UPDATE','SL%Z after update')
+ 
+   DO K = 0, SL%KBAR + 1
+      DO J = 0, SL%JBAR + 1
          DO I = 0, SL%IBAR + 1
-            Z (I, 0, K) = SL%Z(I, 1, K)
+            Z (I, J, K) = SL%Z(I, J, K)
          ENDDO
       ENDDO
-
-
-      DO K = 0, SL%KBAR + 1
-         DO I = 0, SL%IBAR + 1
-            SL%Z (I, 1, K) = Z (I, 1, K)
-         ENDDO
-      ENDDO
-      NREQ_FACE = 0
-      CALL SCARC_RECEIVE  (NCOM_FULL, ILMAX)   
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILMAX, NMV_NONE, NMV_NONE)
-      DO K = 0, SL%KBAR + 1
-         DO I = 0, SL%IBAR + 1
-            Z (I, 1, K) = SL%Z(I, 1, K)
-         ENDDO
-      ENDDO
-
-
-      DO K = 0, SL%KBAR + 1
-         DO I = 0, SL%IBAR + 1
-            SL%Z (I, 1, K) = Z (I, 2, K)
-         ENDDO
-      ENDDO
-      NREQ_FACE = 0
-      CALL SCARC_RECEIVE  (NCOM_FULL, ILMAX)   
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILMAX, NMV_NONE, NMV_NONE)
-      DO K = 0, SL%KBAR + 1
-         DO I = 0, SL%IBAR + 1
-            Z (I, 2, K) = SL%Z(I, 1, K)
-         ENDDO
-      ENDDO
-
-
- 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!! 3D
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   ELSE
- 
-      DO K = 0, SL%KBAR + 1
-         DO J = 0, SL%JBAR + 1
-            DO I = 0, SL%IBAR + 1
-               SL%Z (I, J, K) = Z (I, J, K)
-            ENDDO
-         ENDDO
-      ENDDO
- 
-      NREQ_FACE = 0
- 
-CALL SCARC_SHOW_LEVEL (SL%Z, 'UPIN  ', CNAME, ILMAX)
-      CALL SCARC_RECEIVE  (NCOM_FULL, ILMAX) 
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILMAX, NMV_NONE, NMV_NONE)
-CALL SCARC_SHOW_LEVEL (SL%Z, 'UPOUT ', CNAME, ILMAX)
- 
-      DO K = 0, SL%KBAR + 1
-         DO J = 0, SL%JBAR + 1
-            DO I = 0, SL%IBAR + 1
-               Z (I, J, K) = SL%Z(I, J, K)
-            ENDDO
-         ENDDO
-      ENDDO
- 
-   ENDIF
+   ENDDO
  
 ENDIF
-CALL SCARC_SHOW_LEVEL (Z, 'UPD2', CNAME, ILMAX)
+ 
+IF (SCARC_DEBUG>=6) CALL SCARC_SHOW0(Z,'SCARC_UPDATE','Z after update')
+
  
 TUSED_SCARC(30,NM)=TUSED_SCARC(30,NM)+SECOND()-TNOW_UPDATE_QUANTITY
 TUSED_SCARC(0,NM) =TUSED_SCARC(0,NM) +SECOND()-TNOW_UPDATE_QUANTITY
@@ -9585,53 +9531,30 @@ SL => S%SLEVEL(ILEVEL)
  
 IF (NMESHES > 1) THEN
  
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!! 2D
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   IF (TWO_D) THEN
- 
-      DO K = 0, SL%KBAR + 1
-         DO I = 0, SL%IBAR + 1
-            SL%Z (I, 1, K) = Z (I, 1, K)
-         ENDDO
-      ENDDO
-      NREQ_FACE = 0
-      CALL SCARC_RECEIVE  (NCOM_FULL, ILEVEL)   
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NMV_NONE, NMV_NONE)
-      DO K = 0, SL%KBAR + 1
-         DO I = 0, SL%IBAR + 1
-            Z (I, 1, K) = SL%Z(I, 1, K)
-         ENDDO
-      ENDDO
+WRITE(SCARC_LU,*) 'SHAPE(Z)=',SHAPE(Z)
+WRITE(SCARC_LU,*) 'SHAPE(SL%Z)=',SHAPE(SL%Z)
 
- 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!! 3D
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-   ELSE
- 
-      DO K = 0, KBAR + 1
-         DO J = 0, JBAR + 1
-            DO I = 0, IBAR + 1
-               SL%Z (I, J, K) = Z (I, J, K)
-            ENDDO
+   DO K = 0, SL%KBAR + 1
+      DO J = 0, SL%JBAR + 1
+         DO I = 0, SL%IBAR + 1
+            SL%Z (I, J, K) = Z (I, J, K)
          ENDDO
       ENDDO
+   ENDDO
  
-      NREQ_FACE = 0
+   NREQ_FACE = 0
+
+   CALL SCARC_RECEIVE (NCOM_FULL, ILEVEL)  
+   CALL SCARC_EXCHANGE(NCOM_FULL, ILEVEL, NMV_NONE, NMV_NONE)
  
-      CALL SCARC_RECEIVE (NCOM_FULL, ILEVEL)  !Aufruf 2,0
-      CALL SCARC_EXCHANGE (NCOM_FULL, ILEVEL, NMV_NONE, NMV_NONE)
- 
-      DO K = 0, KBAR + 1
-         DO J = 0, JBAR + 1
-            DO I = 0, IBAR + 1
-               Z (I, J, K) = SL%Z(I, J, K)
-            ENDDO
+   DO K = 0, SL%KBAR + 1
+      DO J = 0, SL%JBAR + 1
+         DO I = 0, SL%IBAR + 1
+            Z (I, J, K) = SL%Z(I, J, K)
          ENDDO
       ENDDO
+   ENDDO
  
-   ENDIF
  
 ENDIF
 CALL SCARC_SHOW_LEVEL (Z, 'UPDT', CNAME, ILEVEL)
