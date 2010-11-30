@@ -57,10 +57,10 @@ MODULE EVAC
      REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB,T_START=0._EB, Angle=0._EB
      REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
      REAL(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
-     CHARACTER(60) :: CLASS_NAME='null', ID='null'
+     CHARACTER(60) :: CLASS_NAME='null', ID='null', AVATAR_TYPE_NAME='null'
      CHARACTER(30) :: GRID_NAME='null'
      LOGICAL :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE.
-     INTEGER :: N_INITIAL=0,SAMPLING=0, IPC=0, IMESH=0
+     INTEGER :: N_INITIAL=0,SAMPLING=0, IPC=0, IMESH=0, AVATAR_TYPE_INDEX=0
      INTEGER :: I_PRE_DIST=0, I_DET_DIST=0
      INTEGER :: GN_MIN=0, GN_MAX=0
      INTEGER :: N_VENT_FFIELDS=0, Avatar_Color_Index=0, I_AGENT_TYPE=2
@@ -451,7 +451,7 @@ CONTAINS
     REAL(EB), DIMENSION(3) :: XYZ, XYZ_SMOKE
     INTEGER :: IOS, IZERO, N, I, J, K, IOR
     CHARACTER(30) QUANTITY, MAX_HUMANS_RAMP, INPUT_ID(40)
-    CHARACTER(60) FYI,ID,PERS_ID,TO_NODE,EVAC_ID, DEFAULT_PROPERTIES
+    CHARACTER(60) FYI,ID,PERS_ID,TO_NODE,EVAC_ID, DEFAULT_PROPERTIES, AVATAR_TYPE
     CHARACTER(30) FLOW_FIELD_ID
     INTEGER :: DIAMETER_DIST,VELOCITY_DIST,PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST
     REAL(EB) :: VEL_MEAN,VEL_PARA,VEL_PARA2,VEL_LOW,VEL_HIGH, &
@@ -525,7 +525,7 @@ CONTAINS
          COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
          AVATAR_COLOR, AVATAR_RGB, SHOW, PRE_EVAC_DIST, DET_EVAC_DIST, &
          PRE_MEAN,PRE_PARA,PRE_PARA2,PRE_LOW,PRE_HIGH, &
-         DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE
+         DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE, AVATAR_TYPE
     NAMELIST /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR, SHOW
 
     NAMELIST /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
@@ -1491,7 +1491,7 @@ CONTAINS
       OUTPUT_ACCELERATION  = .FALSE.
       OUTPUT_CONTACT_FORCE = .FALSE.
       OUTPUT_TOTAL_FORCE   = .FALSE.
-      DEAD_COLOR = 'null'
+      DEAD_COLOR           = 'null'
       ! 
       ! Read the PERS lines (no read for default n=0 case)
       !
@@ -3875,11 +3875,13 @@ CONTAINS
       ! Read the EVAC lines
       ! 
       ! Local variables
-      LOGICAL L_TMP
+      LOGICAL :: L_TMP
+      INTEGER :: N_AVATAR_TYPE
       TYPE (EVACUATION_TYPE), POINTER :: HPT=>NULL()
       TYPE (EVAC_PERS_TYPE),  POINTER :: PCP=>NULL()
 
-      READ_EVAC_LOOP: DO N=1,NPC_EVAC
+      N_AVATAR_TYPE = 1 ! The default type index is one and the default name is 'Human'.
+      READ_EVAC_LOOP: DO N = 1, NPC_EVAC
          !
          ID                       = 'null'
          RGB                      = -1
@@ -3891,6 +3893,7 @@ CONTAINS
          MESH_ID                  = 'null'
          EVAC_MESH                = 'null'
          PERS_ID                  = 'null'
+         AVATAR_TYPE              = 'null'
          SAMPLING_FACTOR          = 1      
          NUMBER_INITIAL_PERSONS   = 0
          XB                       = 0.0_EB
@@ -3963,6 +3966,25 @@ CONTAINS
             IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVAC line ', TRIM(ID)
          END IF
+
+         IF (TRIM(AVATAR_TYPE) == 'null' .OR. TRIM(AVATAR_TYPE) == 'Human') THEN
+            HPT%AVATAR_TYPE_INDEX = 1
+            HPT%AVATAR_TYPE_NAME = TRIM('Human')
+         ELSE
+            HPT%AVATAR_TYPE_NAME  = TRIM(AVATAR_TYPE)
+            HPT%AVATAR_TYPE_INDEX = 0
+            Avatar_Type_Loop: DO I = 1, N-1 
+               IF (TRIM(HPT%AVATAR_TYPE_NAME) == TRIM(EVAC_EVACS(N)%AVATAR_TYPE_NAME)) THEN
+                  HPT%AVATAR_TYPE_INDEX = EVAC_EVACS(N)%AVATAR_TYPE_INDEX
+                  EXIT Avatar_Type_Loop
+               END IF
+            END DO Avatar_Type_Loop
+            IF (HPT%AVATAR_TYPE_INDEX == 0) THEN  ! New type found
+               N_AVATAR_TYPE = N_AVATAR_TYPE + 1
+               HPT%AVATAR_TYPE_INDEX = N_AVATAR_TYPE
+            END IF
+         END IF
+
          IF (TRIM(ID) /= 'null') THEN
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_EVACS(I)%ID)) THEN
@@ -4158,12 +4180,16 @@ CONTAINS
       END DO READ_EVAC_LOOP
 25    REWIND(LU_INPUT)
 
-      N_EVAC = 1
+      N_EVAC = MAX(1,N_AVATAR_TYPE)
       ALLOCATE(EVAC_CLASS_NAME(N_EVAC),STAT=IZERO)
       CALL ChkMemErr('READ_EVAC','EVAC_CLASS_NAME',IZERO)
       ALLOCATE(EVAC_CLASS_RGB(3,N_EVAC),STAT=IZERO)
       CALL ChkMemErr('READ_EVAC','EVAC_CLASS_RGB',IZERO)
-      EVAC_CLASS_NAME(1) = 'Human'
+      EVAC_CLASS_NAME(1) = TRIM('Human')
+      DO N = 1, NPC_EVAC
+         I = EVAC_EVACS(N)%AVATAR_TYPE_INDEX
+         EVAC_CLASS_NAME(I) = TRIM(EVAC_EVACS(N)%AVATAR_TYPE_NAME)
+      END DO
       DO N = 1, N_EVAC
          EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE 4
       END DO
@@ -12662,15 +12688,16 @@ CONTAINS
     ! Write the current time to the prt5 file, then start looping through the particle classes
     WRITE(LU_PART(NM)) REAL(T,FB)
 
-    HUMAN_CLASS_LOOP: DO N=1,N_EVAC
+    HUMAN_CLASS_LOOP: DO N = 1, N_EVAC
        ! Count the number of humans to dump out
        !
        NPLIM = 0
-       DO I=1,N_HUMANS
-          HR=>HUMAN(I)
+       DO I = 1, N_HUMANS
+          HR => HUMAN(I)
           IF (HR%COLOR_INDEX < 1) HR%COLOR_INDEX = 1
           IF (HR%COLOR_INDEX > EVAC_AVATAR_NCOLOR) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
-          IF (HR%SHOW .AND. N_EVAC == 1) NPLIM = NPLIM + 1
+          ! IF (HR%SHOW .AND. N_EVAC == 1) NPLIM = NPLIM + 1
+          IF (HR%SHOW .AND. EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N) NPLIM = NPLIM + 1
        END DO
        NPLIM = MIN(NPPS,NPLIM)
        !
@@ -12693,9 +12720,10 @@ CONTAINS
        ! Load human coordinates into single precision array
        !
        NPP = 0
-       PLOOP: DO I=1,N_HUMANS
-          HR=>HUMAN(I)
-          IF (.NOT. HR%SHOW ) CYCLE PLOOP
+       PLOOP: DO I = 1, N_HUMANS
+          HR => HUMAN(I)
+          ! IF (.NOT. HR%SHOW ) CYCLE PLOOP
+          IF (.NOT. (HR%SHOW .AND. EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N)) CYCLE PLOOP
           NPP = NPP + 1
           TA(NPP) = HR%ILABEL
           XP(NPP) = REAL(HR%X,FB)
