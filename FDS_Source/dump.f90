@@ -1347,7 +1347,11 @@ ENDIF EVAC_ONLY3
 EVAC_ONLY4: IF (ANY(EVACUATION_GRID)) THEN
    DO N=1,N_EVAC
       WRITE(LU_SMV,'(/A)') 'CLASS_OF_HUMANS'
-      WRITE(LU_SMV,'(1X,A)') TRIM(EVAC_CLASS_NAME(N))
+      IF (EVAC_FDS6) THEN
+         WRITE(LU_SMV,'(1X,A,A,A)') TRIM(EVAC_CLASS_NAME(N)),' % % ',TRIM(EVAC_CLASS_NAME(N)) // '_props'
+      ELSE
+         WRITE(LU_SMV,'(1X,A)') TRIM(EVAC_CLASS_NAME(N))
+      END IF
       WRITE(LU_SMV,'(3F13.5)') REAL(EVAC_CLASS_RGB(:,N),FB)/255._EB
       WRITE(LU_SMV,'(I3)') EVAC_N_QUANTITIES
       DO NN=1,EVAC_N_QUANTITIES
@@ -1613,6 +1617,22 @@ DO N=0,N_PROP
       WRITE(LU_SMV,'(1X,A)') PY%SMOKEVIEW_PARAMETERS(NN)
    ENDDO
 ENDDO
+
+EVAC_ONLY_PROPS: IF (ANY(EVACUATION_GRID) .AND. EVAC_FDS6) THEN
+   DO N=1,N_EVAC
+      WRITE(LU_SMV,'(/A)') 'PROP'
+      WRITE(LU_SMV,'(1X,A)') TRIM(EVAC_CLASS_NAME(N)) // '_props'
+      WRITE(LU_SMV,'(I3)') 4
+      WRITE(LU_SMV,'(1X,A)') TRIM('human_fixed')
+      WRITE(LU_SMV,'(1X,A)') TRIM('human_altered_with_data')
+      WRITE(LU_SMV,'(1X,A)') TRIM('ellipsoid')
+      WRITE(LU_SMV,'(1X,A)') TRIM('disk')
+      WRITE(LU_SMV,'(I3)') 1
+      DO NN=1,1
+         WRITE(LU_SMV,'(1X,A)') 'D=0.2'
+      ENDDO
+   END DO
+END IF EVAC_ONLY_PROPS
 
 ! Write out DEVICE info to .smv file
 
