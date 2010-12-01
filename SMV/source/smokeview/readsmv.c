@@ -37,6 +37,122 @@ char readsmv_revision[]="$Revision$";
 int GeometryMenu(int var);
 propdata *get_prop_id(char *prop_id);
 void init_evac_prop(void);
+void init_prop(propdata *propi, int nsmokeview_ids, char *label);
+
+/* ------------------ init_default_prop ------------------------ */
+
+void init_default_prop(void){
+/*
+PROP
+ Human_props
+  4
+ human_fixed
+ human_altered_with_data
+ ellipsoid
+ disk
+  1
+ D=0.2
+ */
+  propdata *propi;
+  char *fbuffer;
+  char proplabel[255];
+  int lenbuf;
+  int ntextures;
+  int nsmokeview_ids;
+  char *smokeview_id;
+  char buffer[255];
+  int i;
+  
+  propi = propinfo + npropinfo;
+
+  strcpy(proplabel,"Human_props(default)");
+
+  nsmokeview_ids=4;
+
+  init_prop(propi,nsmokeview_ids,proplabel);
+  for(i=0;i<nsmokeview_ids;i++){
+    if(i==0)strcpy(buffer,"human_fixed");
+    if(i==1)strcpy(buffer,"human_altered_with_data");
+    if(i==2)strcpy(buffer,"ellipsoid");
+    if(i==3)strcpy(buffer,"disk");
+    lenbuf=strlen(buffer);
+    NewMemory((void **)&smokeview_id,lenbuf+1);
+    strcpy(smokeview_id,buffer);
+    propi->smokeview_ids[i]=smokeview_id;
+    propi->smv_objects[i]=get_SVOBJECT_type(propi->smokeview_ids[i],missing_device);
+  }
+  propi->smv_object=propi->smv_objects[0];
+  propi->smokeview_id=propi->smokeview_ids[0];
+
+  propi->nvars_indep=1;
+  propi->vars_indep=NULL;
+  propi->svals=NULL;
+  propi->texturefiles=NULL;
+  ntextures=0;
+  if(propi->nvars_indep>0){
+    NewMemory((void **)&propi->vars_indep,propi->nvars_indep*sizeof(char *));
+    NewMemory((void **)&propi->svals,propi->nvars_indep*sizeof(char *));
+    NewMemory((void **)&propi->fvals,propi->nvars_indep*sizeof(float));
+    NewMemory((void **)&propi->vars_indep_index,propi->nvars_indep*sizeof(int));
+    NewMemory((void **)&propi->texturefiles,propi->nvars_indep*sizeof(char *));
+
+    for(i=0;i<propi->nvars_indep;i++){
+      char *equal;
+
+      propi->svals[i]=NULL;
+      propi->vars_indep[i]=NULL;
+      propi->fvals[i]=0.0;
+      strcpy(buffer,"D=0.2");
+      equal=strchr(buffer,'=');
+      if(equal!=NULL){
+        char *buf1, *buf2, *keyword, *val;
+        int lenkey, lenval;
+        char *texturefile;
+
+        buf1=buffer;
+        buf2=equal+1;
+        *equal=0;
+
+        trim(buf1);
+        keyword=trim_front(buf1);
+        lenkey=strlen(keyword);
+
+        trim(buf2);
+        val=trim_front(buf2);
+        lenval=strlen(val);
+
+        if(lenkey==0||lenval==0)continue;
+
+        if(val[0]=='"'){
+          val[0]=' ';
+          if(val[lenval-1]=='"')val[lenval-1]=' ';
+          trim(val);
+          val=trim_front(val);
+          NewMemory((void **)&propi->svals[i],lenval+1);
+          strcpy(propi->svals[i],val);
+          texturefile=strstr(val,"t%");
+          if(texturefile!=NULL){
+            int lentexture;
+
+            texturefile+=2;
+            texturefile=trim_front(texturefile);
+            propi->texturefiles[ntextures]=propi->svals[i];
+            strcpy(propi->svals[i],texturefile);
+
+            ntextures++;
+          }
+        }
+
+        NewMemory((void **)&propi->vars_indep[i],lenkey+1);
+        strcpy(propi->vars_indep[i],keyword);
+        propi->fvals[i]=0.2; // from input
+      }
+    }
+    get_indep_var_indices(propi->smv_object,propi->vars_indep,propi->nvars_indep,propi->vars_indep_index);
+    get_evac_indices(propi->smv_object,propi->vars_evac_index,&propi->nvars_evac);
+  }
+  propi->ntextures=ntextures;
+}
 
 /* ------------------ update_inilist ------------------------ */
 
@@ -884,7 +1000,7 @@ int readsmv(char *file, char *file2){
   int nn_part=0;
   int nn_slice=0;
 
-  npropinfo=0;
+  npropinfo=1; // the 0'th prop is the default human property
   navatar_colors=0;
   FREEMEMORY(avatar_colors);
 
@@ -1499,7 +1615,7 @@ int readsmv(char *file, char *file2){
 
  if(npropinfo>0){
    NewMemory((void **)&propinfo,npropinfo*sizeof(propdata));
-   npropinfo=0;
+   npropinfo=1; // the 0'th prop is the default human property
  }
  if(nterraininfo>0){
    NewMemory((void **)&terraininfo,nterraininfo*sizeof(terraindata));
@@ -1743,6 +1859,11 @@ int readsmv(char *file, char *file2){
 
     init_object_defs();
 
+  if(npropinfo>0){
+    npropinfo=0;
+    init_default_prop();
+    npropinfo=1;
+  }
 
 /* 
    ************************************************************************
@@ -1937,13 +2058,14 @@ int readsmv(char *file, char *file2){
       part5class *partclassi;
       char *device_ptr;
       char *smokeview_id, *prop_id;
+      char prop_buffer[255];
 
       partclassi = partclassinfo + npartclassinfo;
       partclassi->kind=PARTICLES;
       if(match(buffer,"CLASS_OF_HUMANS",15) == 1)partclassi->kind=HUMANS;
       fgets(buffer,255,stream);
 
-      get_labels(buffer,&device_ptr,&prop_id);
+      get_labels(buffer,partclassi->kind,&device_ptr,&prop_id,prop_buffer);
       if(prop_id!=NULL){
         device_ptr=NULL;
       }
@@ -2748,6 +2870,7 @@ typedef struct {
       int state0=0;
       int nparams=0, nparams_textures=0;
       char *labelptr, *prop_id;
+      char prop_buffer[255];
 
       devicei = deviceinfo + ndeviceinfo;
       devicei->type=DEVICE_DEVICE;
@@ -2759,7 +2882,7 @@ typedef struct {
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
         xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
-      get_labels(buffer,&prop_id,NULL);
+      get_labels(buffer,-1,&prop_id,NULL,prop_buffer);
       devicei->prop=get_prop_id(prop_id);
       if(prop_id!=NULL&&devicei->prop!=NULL&&devicei->prop->smv_object!=NULL){
         devicei->object=devicei->prop->smv_object;
@@ -3152,13 +3275,14 @@ typedef struct {
       char buffer_copy[1024];
       char *smokeview_id, *prop_id;
       int nvar;
+      char prop_buffer[255];
 
       partclassi = partclassinfo + npartclassinfo;
       partclassi->kind=PARTICLES;
       if(match(buffer,"CLASS_OF_HUMANS",15) == 1)partclassi->kind=HUMANS;
       fgets(buffer,255,stream);
 
-      get_labels(buffer,&device_ptr,&prop_id);
+      get_labels(buffer,partclassi->kind,&device_ptr,&prop_id,prop_buffer);
       partclassi->prop=get_prop_id(prop_id);
       update_partclass_depend(partclassi);
 
@@ -10607,7 +10731,7 @@ int file_exist(char *file){
 
 /* ------------------ get_labels ------------------------ */
 
-void get_labels(char *buffer, char **label1, char **label2){
+void get_labels(char *buffer, int kind, char **label1, char **label2, char prop_buffer[255]){
   char *tok0, *tok1, *tok2;
 
   tok0=NULL;
@@ -10626,8 +10750,16 @@ void get_labels(char *buffer, char **label1, char **label2){
     tok2=trim_front(tok2);
     if(strlen(tok2)==0)tok2=NULL;
   }
+  if(label2!=NULL){
+    if(tok2==NULL&&kind==HUMANS){
+      strcpy(prop_buffer,"Human_props(default)");
+      *label2=prop_buffer;
+    }
+    else{
+      *label2=tok2;
+    }
+  }
   if(label1!=NULL)*label1=tok1;
-  if(label2!=NULL)*label2=tok2;
 }
 
 /* ------------------ get_prop_id ------------------------ */
