@@ -1457,32 +1457,36 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     mesh *meshi;
     int i;
 
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo+i;
-      if(meshi->isotimes==NULL||meshi->isofilenum<0)continue;
-      isoi = isoinfo + meshi->isofilenum;
-      if(isoi->loaded==0||isoi->display==0||isoi->type!=iisotype)continue;
-      if(isoi->dataflag==0||usetexturebar==0){
-        drawiso(meshi,DRAW_SOLID);
-      }
-      else{
-        drawtiso(meshi,DRAW_SOLID);
+    if(transparent_state==ALL_SOLID){
+      for(i=0;i<nmeshes;i++){
+        meshi=meshinfo+i;
+        if(meshi->isotimes==NULL||meshi->isofilenum<0)continue;
+        isoi = isoinfo + meshi->isofilenum;
+        if(isoi->loaded==0||isoi->display==0||isoi->type!=iisotype)continue;
+        if(isoi->dataflag==0||usetexturebar==0){
+          drawiso(meshi,DRAW_SOLID);
+        }
+        else{
+          drawtiso(meshi,DRAW_SOLID);
+        }
       }
     }
 
     //  nothing transparent should be drawn before this portion of the code
     //    (ie draw all opaque objects first then draw transparent objects
 
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo+i;
-      if(meshi->isotimes==NULL||meshi->isofilenum<0)continue;
-      isoi = isoinfo + meshi->isofilenum;
-      if(isoi->loaded==0||isoi->display==0||isoi->type!=iisotype)continue;
-      if(isoi->dataflag==0||usetexturebar==0){
-        drawiso(meshi,DRAW_TRANSPARENT);
-      }
-      else{
-        drawtiso(meshi,DRAW_TRANSPARENT);
+    if(transparent_state!=ALL_SOLID){
+      for(i=0;i<nmeshes;i++){
+        meshi=meshinfo+i;
+        if(meshi->isotimes==NULL||meshi->isofilenum<0)continue;
+        isoi = isoinfo + meshi->isofilenum;
+        if(isoi->loaded==0||isoi->display==0||isoi->type!=iisotype)continue;
+        if(isoi->dataflag==0||usetexturebar==0){
+          drawiso(meshi,DRAW_TRANSPARENT);
+        }
+        else{
+          drawtiso(meshi,DRAW_TRANSPARENT);
+        }
       }
     }
   }

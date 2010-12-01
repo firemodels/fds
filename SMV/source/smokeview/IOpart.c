@@ -1515,7 +1515,6 @@ void drawPart5(const particle *parti){
                 prop->fvars_evac[12]=0.0;
                 prop->fvars_evac[13]=0.0;
                 prop->fvars_evac[14]=height[j]/2.0;
-                prop->smv_object=avatar_types[avatar_type];
                 prop->nvars_evac=15;
                 prop->draw_evac=1;
               }

@@ -693,6 +693,7 @@ void readcadgeom(cadgeom *cd){
   fclose(stream);
 
 }
+
 /* ------------------ blockcompare ------------------------ */
 
 int quadcompare( const void *arg1, const void *arg2 ){

@@ -5151,7 +5151,6 @@ updatemenu=0;
 
           if(propi->class_present[j]==0)continue;
           partclassj = partclassinfo + j;
-          if(partclassj->kind==HUMANS)continue;
           CREATEMENU(particlepropshowsubmenu[ntypes],ParticlePropShowMenu);
           ntypes++;
           if(propi->class_vis[j]==1){
@@ -5172,27 +5171,29 @@ updatemenu=0;
               strcpy(menulabel,"using:");
             }
             glutAddMenuEntry(menulabel,-10-5*j);
-            if(partclassj->vis_type==PART_POINTS){
-              glutAddMenuEntry("    *points",-10-5*j-PART_POINTS);
-            }
-            else{
-              glutAddMenuEntry("    points",-10-5*j-PART_POINTS);
-            }
-            if(partclassj->col_diameter>=0||partclassj->device_name!=NULL){
-              if(partclassj->vis_type==PART_SPHERES){
-                glutAddMenuEntry("    *spheres",-10-5*j-PART_SPHERES);
+            if(partclassj->kind!=HUMANS){
+              if(partclassj->vis_type==PART_POINTS){
+                glutAddMenuEntry("    *points",-10-5*j-PART_POINTS);
               }
               else{
-                glutAddMenuEntry("    spheres",-10-5*j-PART_SPHERES);
+                glutAddMenuEntry("    points",-10-5*j-PART_POINTS);
               }
-            }
-            if(partclassj->col_length>=0||partclassj->device_name!=NULL||
-              (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)){
-              if(partclassj->vis_type==PART_LINES){
-                glutAddMenuEntry("    *lines",-10-5*j-PART_LINES);
+              if(partclassj->col_diameter>=0||partclassj->device_name!=NULL){
+                if(partclassj->vis_type==PART_SPHERES){
+                  glutAddMenuEntry("    *spheres",-10-5*j-PART_SPHERES);
+                }
+                else{
+                  glutAddMenuEntry("    spheres",-10-5*j-PART_SPHERES);
+                }
               }
-              else{
-                glutAddMenuEntry("    lines",-10-5*j-PART_LINES);
+              if(partclassj->col_length>=0||partclassj->device_name!=NULL||
+                (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)){
+                if(partclassj->vis_type==PART_LINES){
+                  glutAddMenuEntry("    *lines",-10-5*j-PART_LINES);
+                }
+                else{
+                  glutAddMenuEntry("    lines",-10-5*j-PART_LINES);
+                }
               }
             }
             if(partclassj->smv_device!=NULL&&partclassj->device_name!=NULL||
@@ -5301,7 +5302,7 @@ updatemenu=0;
 
     CREATEMENU(humanpropshowmenu,ParticlePropShowMenu);
     if(npart5prop>=0){
-      glutAddMenuEntry("Color:",-1);
+      glutAddMenuEntry("Color with:",-1);
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
 
@@ -5320,7 +5321,7 @@ updatemenu=0;
       if(part5show==0)glutAddMenuEntry("  *Hide",-5);
       if(part5show==1)glutAddMenuEntry("  Hide",-5);
       glutAddMenuEntry("-",-1);
-      glutAddMenuEntry("Type:",-1);
+      glutAddMenuEntry("Draw",-1);
       ntypes=0;
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
@@ -5341,19 +5342,20 @@ updatemenu=0;
             strcpy(menulabel,"  ");
           }
           strcat(menulabel,partclassj->name);
-          glutAddMenuEntry(menulabel,-10-5*j);
+          glutAddSubMenu(menulabel,particlepropshowsubmenu[ntypes-1]);
         }
-        break;
+        //break;
       }
+      if(ntypes>1){
+        glutAddMenuEntry("  Show All",-2);
+        glutAddMenuEntry("  Hide All",-3);
+      }
+      glutAddMenuEntry("-",-1);
       if(streak5show==1){
         glutAddSubMenu("  *Streaks",particlestreakshowmenu);
       }
       else{
         glutAddSubMenu("  Streaks",particlestreakshowmenu);
-      }
-      if(ntypes>1){
-        glutAddMenuEntry("  Show All",-2);
-        glutAddMenuEntry("  Hide All",-3);
       }
     }
   }
@@ -5900,7 +5902,7 @@ updatemenu=0;
     }
   }
   if(nevac>0&&navatar_types>0){
-    glutAddSubMenu("Use Avatar:",avatarevacmenu);
+   // glutAddSubMenu("Use Avatar:",avatarevacmenu);
   }
 
   if(npart4loaded>0){

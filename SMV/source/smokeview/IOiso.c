@@ -474,12 +474,12 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 
 
         asurface->dataflag=ib->dataflag;
-	      asurface->nvertices=nvertices;
-	      asurface->ntriangles=ntriangles;
-	      asurface->triangles=NULL;
+        asurface->nvertices=nvertices;
+        asurface->ntriangles=ntriangles;
+        asurface->triangles=NULL;
         asurface->triangles1=NULL;
         asurface->triangles2=NULL;
-	      asurface->vertices=NULL;
+        asurface->vertices=NULL;
         asurface->s_norm=NULL;
         
         asurface->vertices=(unsigned short *)asurface->full_bufferframe;
@@ -661,35 +661,35 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
           norm[3*n  ]=(short)(out[0]*32767);
           norm[3*n+1]=(short)(out[1]*32767);
           norm[3*n+2]=(short)(out[2]*32767);
-    	    xyznorm[i1  ] += out[0]*area;
-		      xyznorm[i1+1] += out[1]*area;
-		      xyznorm[i1+2] += out[2]*area;
-		      xyznorm[i2  ] += out[0]*area;
-		      xyznorm[i2+1] += out[1]*area;
-		      xyznorm[i2+2] += out[2]*area;
-		      xyznorm[i3  ] += out[0]*area;
-		      xyznorm[i3+1] += out[1]*area;
-		      xyznorm[i3+2] += out[2]*area;
+          xyznorm[i1  ] += out[0]*area;
+          xyznorm[i1+1] += out[1]*area;
+          xyznorm[i1+2] += out[2]*area;
+          xyznorm[i2  ] += out[0]*area;
+          xyznorm[i2+1] += out[1]*area;
+          xyznorm[i2+2] += out[2]*area;
+          xyznorm[i3  ] += out[0]*area;
+          xyznorm[i3+1] += out[1]*area;
+          xyznorm[i3+2] += out[2]*area;
         }
-	      for(n=0;n<nvertices_i;n++){
-		      ReduceToUnit(xyznorm+3*n);
+        for(n=0;n<nvertices_i;n++){
+          ReduceToUnit(xyznorm+3*n);
           vertexnorm[3*n  ]=(short)(xyznorm[3*n  ]*32767);
           vertexnorm[3*n+1]=(short)(xyznorm[3*n+1]*32767);
           vertexnorm[3*n+2]=(short)(xyznorm[3*n+2]*32767);
         }
-	      FREEMEMORY(xyznorm);
-	      asurface->nvertices=nvertices_i;
-	      asurface->ntriangles=ntriangles_i;
-	      asurface->triangles=triangles_i;
+        FREEMEMORY(xyznorm);
+        asurface->nvertices=nvertices_i;
+        asurface->ntriangles=ntriangles_i;
+        asurface->triangles=triangles_i;
         asurface->triangles1=triangles1_i;
         asurface->triangles2=triangles2_i;
-	      asurface->vertices=vertices_i;
+        asurface->vertices=vertices_i;
         if(ib->dataflag==1){
           asurface->tvertices=tvertices_i;
           asurface->color8=color8;
         }
         asurface->norm=norm;
-	      asurface->vertexnorm=vertexnorm;
+        asurface->vertexnorm=vertexnorm;
 
         asurface++;
       }
@@ -891,6 +891,8 @@ void drawiso(const mesh *meshi,int tranflag){
     glBegin(GL_TRIANGLES);
 
     for(i=0;i<nisolevels;i++){
+      float isocolor_temp[4];
+      
       asurface++;
       icolor=i;
       if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
@@ -930,6 +932,7 @@ void drawiso(const mesh *meshi,int tranflag){
       else{
         iso_color_ptr=iso_colors+4*icolor;
       }
+      //iso_color_ptr=isocolor_temp;
       if(setbw!=0){
         float greylevel;
 
@@ -939,6 +942,12 @@ void drawiso(const mesh *meshi,int tranflag){
         iso_color_tmp[2]=greylevel;
         iso_color_ptr=iso_color_tmp;
       }
+      isocolor_temp[0]=iso_color_ptr[0];
+      isocolor_temp[1]=iso_color_ptr[1];
+      isocolor_temp[2]=iso_color_ptr[2];
+      isocolor_temp[3]=transparentlevel;
+      iso_color_ptr=isocolor_temp;
+      
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,iso_color_ptr);
       vertices_i=asurface->vertices;
       if(asurface->dataflag==1){
