@@ -215,7 +215,7 @@ EXTERNCPP void error_message(char *message);
 EXTERNCPP void abort_message(char *message);
 #endif
 EXTERNCPP sv_object *get_object(char *label);
-EXTERNCPP void get_labels(char *buffer, char **label1, char **label2);
+EXTERNCPP void get_labels(char *buffer, int type, char **label1, char **label2, char prop_buffer[255]);
 EXTERNCPP void snap_view_angles(void);
 #ifdef pp_SHOOTER
 EXTERNCPP mesh *inmesh(float xyz[3]);
