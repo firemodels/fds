@@ -7298,14 +7298,16 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF (XB(3)==XB(4)) VT%TOTAL_INPUT_AREA = (XB(2)-XB(1))*(XB(6)-XB(5))
       IF (XB(5)==XB(6)) VT%TOTAL_INPUT_AREA = (XB(2)-XB(1))*(XB(4)-XB(3))
 
-      XB(1) = MAX(XB(1),XS)
-      XB(2) = MIN(XB(2),XF)
-      XB(3) = MAX(XB(3),YS)
-      XB(4) = MIN(XB(4),YF)
-      XB(5) = MAX(XB(5),ZS)
-      XB(6) = MIN(XB(6),ZF)
+      XB(1) = MAX(XB(1),XS-DX(0))
+      XB(2) = MIN(XB(2),XF+DX(IBP1))
+      XB(3) = MAX(XB(3),YS-DY(0))
+      XB(4) = MIN(XB(4),YF+DY(JBP1))
+      XB(5) = MAX(XB(5),ZS-DZ(0))
+      XB(6) = MIN(XB(6),ZF+DZ(KBP1))
  
-      IF (XB(1)>XF .OR. XB(2)<XS .OR. XB(3)>YF .OR. XB(4)<YS .OR. XB(5)>ZF .OR. XB(6)<ZS) REJECT_VENT = .TRUE.
+      IF (XB(1)>XF+DX(IBP1) .OR. XB(2)<XS-DX(0) .OR. &
+          XB(3)>YF+DY(JBP1) .OR. XB(4)<YS-DY(0) .OR. &
+          XB(5)>ZF+DZ(KBP1) .OR. XB(6)<ZS-DZ(0)) REJECT_VENT = .TRUE.
  
       VT%I1 = NINT( GINV(XB(1)-XS,1,NM)*RDXI   ) 
       VT%I2 = NINT( GINV(XB(2)-XS,1,NM)*RDXI   )
@@ -7618,23 +7620,28 @@ MESH_LOOP_2: DO NM=1,NMESHES
       J2 = VT%J2
       K1 = VT%K1
       K2 = VT%K2
+
+      VT%GHOST_CELLS_ONLY = .TRUE.
  
       SELECT CASE(ABS(VT%IOR))
          CASE(1)
             DO K=K1+1,K2
                DO J=J1+1,J2
+                  IF (J>=1 .AND. J<=JBAR .AND. K>=1 .AND. K<=KBAR) VT%GHOST_CELLS_ONLY = .FALSE.
                   VT%FDS_AREA = VT%FDS_AREA + DY(J)*DZ(K)
                ENDDO
             ENDDO
          CASE(2)
             DO K=K1+1,K2
                DO I=I1+1,I2
+                  IF (I>=1 .AND. I<=IBAR .AND. K>=1 .AND. K<=KBAR) VT%GHOST_CELLS_ONLY = .FALSE.
                   VT%FDS_AREA = VT%FDS_AREA + DX(I)*DZ(K)
                ENDDO
             ENDDO
          CASE(3)
             DO J=J1+1,J2
                DO I=I1+1,I2
+                  IF (I>=1 .AND. I<=IBAR .AND. J>=1 .AND. J<=JBAR) VT%GHOST_CELLS_ONLY = .FALSE.
                   VT%FDS_AREA = VT%FDS_AREA + DX(I)*DY(J)
                ENDDO
             ENDDO

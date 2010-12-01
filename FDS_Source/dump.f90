@@ -2018,20 +2018,20 @@ MESH_LOOP: DO NM=1,NMESHES
          CASE(0)
             CYCLE VENT_LOOP
          CASE(1:2)
-            HI1 = VT%J1+1
-            HI2 = VT%J2
-            VI1 = VT%K1+1
-            VI2 = VT%K2
+            HI1 = MAX(1,VT%J1+1)
+            HI2 = MIN(M%JBAR,VT%J2)
+            VI1 = MAX(1,VT%K1+1)
+            VI2 = MIN(M%KBAR,VT%K2)
          CASE(3:4)
-            HI1 = VT%I1+1
-            HI2 = VT%I2
-            VI1 = VT%K1+1
-            VI2 = VT%K2
+            HI1 = MAX(1,VT%I1+1)
+            HI2 = MIN(M%IBAR,VT%I2)
+            VI1 = MAX(1,VT%K1+1)
+            VI2 = MIN(M%KBAR,VT%K2)
          CASE(5:6)
-            HI1 = VT%I1+1
-            HI2 = VT%I2
-            VI1 = VT%J1+1
-            VI2 = VT%J2
+            HI1 = MAX(1,VT%I1+1)
+            HI2 = MIN(M%IBAR,VT%I2)
+            VI1 = MAX(1,VT%J1+1)
+            VI2 = MIN(M%JBAR,VT%J2)
       END SELECT
 
       IF (VT%BOUNDARY_TYPE==MIRROR_BOUNDARY .OR. VT%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. VT%BOUNDARY_TYPE==PERIODIC_BOUNDARY) THEN
@@ -2130,9 +2130,13 @@ MESH_LOOP: DO NM=1,NMESHES
       IF (VT%BOUNDARY_TYPE==OPEN_BOUNDARY) COLOR_INDEX = -VT%COLOR_INDICATOR
       IF (VT%BOUNDARY_TYPE/=OPEN_BOUNDARY) COLOR_INDEX =  VT%COLOR_INDICATOR
       IF (VT%RGB(1)<0) THEN
-         WRITE(LU_SMV,'(8I5)')        VT%I1,VT%I2,VT%J1,VT%J2,VT%K1,VT%K2,COLOR_INDEX,VT%TYPE_INDICATOR
+         WRITE(LU_SMV,'(8I5)')        MAX(0,VT%I1),MIN(M%IBAR,VT%I2), &
+                                      MAX(0,VT%J1),MIN(M%JBAR,VT%J2), &
+                                      MAX(0,VT%K1),MIN(M%KBAR,VT%K2),COLOR_INDEX,VT%TYPE_INDICATOR
       ELSE
-         WRITE(LU_SMV,'(8I5,4F13.5)') VT%I1,VT%I2,VT%J1,VT%J2,VT%K1,VT%K2,COLOR_INDEX,VT%TYPE_INDICATOR, &
+         WRITE(LU_SMV,'(8I5,4F13.5)') MAX(0,VT%I1),MIN(M%IBAR,VT%I2), &
+                                      MAX(0,VT%J1),MIN(M%JBAR,VT%J2), &
+                                      MAX(0,VT%K1),MIN(M%KBAR,VT%K2),COLOR_INDEX,VT%TYPE_INDICATOR, &
                                       REAL(VT%RGB,FB)/255._FB,VT%TRANSPARENCY
       ENDIF
    ENDDO

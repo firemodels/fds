@@ -506,7 +506,6 @@ DO K=1,KBAR
          DTXZDZ= RDZ(K) *(TXZP-TXZM)
          VTRM  = RRHO*(DTXXDX + DTXYDY + DTXZDZ)
          FVX(I,J,K) = 0.25_EB*(WOMY - VOMZ) + GX(I)*AH - VTRM - RRHO*FVEC(1) - DU_FORCING
-!if (nm==1 .and. i==4 .and. j==4 .and. k==1) write(0,*) PREDICTOR,IEYM,TAU_E(IEYM, 1),FVX(I,J,K)
       ENDDO 
    ENDDO   
 ENDDO
@@ -1394,6 +1393,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ENDIF
          
          ! Throw out edge orientations that need not be processed
+!if (nm==1 .and. ii==4 .and. jj==1 .and. iec==2 .and. kk==4) write(0,*) nom(icd),IOR,BOUNDARY_TYPE(IWM),BOUNDARY_TYPE(IWP)
    
          IF (BOUNDARY_TYPE(IWM)==NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
@@ -1701,7 +1701,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ENDIF
          OME_E(IE,ICD_SGN) =    DUIDXJ_USE(1) -    DUIDXJ_USE(2)
          TAU_E(IE,ICD_SGN) = MU_DUIDXJ_USE(1) + MU_DUIDXJ_USE(2)    
-!if (nm==1 .and. ii==4 .and. jj==4 .and. kk==0 .and. iec==2) write(0,*) icd_sgn,IE,MU_DUIDXJ_USE(1),MU_DUIDXJ_USE(2)
       ENDDO ORIENTATION_LOOP_2
    ENDDO SIGN_LOOP_2
 
