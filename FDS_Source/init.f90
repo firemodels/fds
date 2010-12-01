@@ -34,7 +34,8 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,GET_SPECIFIC_GAS_CONSTANT,GET_SPECIF
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 USE RADCONS, ONLY: UIIDIM
 USE CONTROL_VARIABLES
-INTEGER :: N,I,J,K,II,JJ,KK,NN,IPTS,JPTS,KPTS,N_EDGES_DIM,N_TOTAL_WALL_CELLS,IW,IC,IBC,IOR,IOPZ,IERR,IB,JB,KB,IPC,IPZ,ITMP,NPF
+INTEGER :: N,I,J,K,II,JJ,KK,NN,IPTS,JPTS,KPTS,N_EDGES_DIM,N_TOTAL_WALL_CELLS,IW,IWE,IWG,IC,IBC,IOR,IOPZ, &
+           IERR,IB,JB,KB,IPC,IPZ,ITMP,NPF
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: MU_N,YY_GET(1:N_SPECIES),VC,RTRM,CP_MF,TMP_WGT
 INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR, N_EDGES
@@ -539,9 +540,13 @@ DO N=1,N_PART
    ENDIF
 ENDDO
 
-! Allocate arrays indexed by wall cells (IW)
+! Compute the number of ghost wall cells (external wall cells outside the computational domain)
 
-N_TOTAL_WALL_CELLS = M%N_INTERNAL_WALL_CELLS + M%N_EXTERNAL_WALL_CELLS + M%N_VIRTUAL_WALL_CELLS
+M%N_GHOST_WALL_CELLS = 8*(IBP1+JBP1+KBP1)
+
+! Allocate arrays indexed by wall cells (IW). Note the order of the cells in the overall array.
+
+N_TOTAL_WALL_CELLS = M%N_EXTERNAL_WALL_CELLS + M%N_INTERNAL_WALL_CELLS + M%N_VIRTUAL_WALL_CELLS + M%N_GHOST_WALL_CELLS
 
 ALLOCATE(M%WALL(N_TOTAL_WALL_CELLS),STAT=IZERO)
 CALL ChkMemErr('INIT','WALL',IZERO)
@@ -786,67 +791,105 @@ M%VEG_DRAG = 0._EB
  
 ! Set up boundary arrays for external boundaries of the current mesh
 
-IW = 0
+IWE = 0
+IWG = M%N_EXTERNAL_WALL_CELLS + M%N_INTERNAL_WALL_CELLS + M%N_VIRTUAL_WALL_CELLS
 
-DO K=1,KBAR
-   DO J=1,JBAR
+DO K=0,KBP1
+   DO J=0,JBP1
       I   = 0
       IBC = DEFAULT_SURF_INDEX
       IOR = 1
-      IW  = IW + 1
+      IF (J==0 .OR. J==JBP1 .OR. K==0 .OR. K==KBP1) THEN
+         IWG = IWG + 1
+         IW  = IWG
+      ELSE
+         IWE = IWE + 1
+         IW  = IWE
+      ENDIF
       CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
       IF (IERR>0) RETURN
    ENDDO
 ENDDO
-DO K=1,KBAR
-   DO J=1,JBAR
+DO K=0,KBP1
+   DO J=0,JBP1
       I   = IBP1
       IBC = DEFAULT_SURF_INDEX
       IOR = -1
-      IW  = IW + 1
+      IF (J==0 .OR. J==JBP1 .OR. K==0 .OR. K==KBP1) THEN
+         IWG = IWG + 1
+         IW  = IWG
+      ELSE
+         IWE = IWE + 1
+         IW  = IWE
+      ENDIF
       CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
       IF (IERR>0) RETURN
    ENDDO
 ENDDO
  
-DO K=1,KBAR
-   DO I=1,IBAR
+DO K=0,KBP1
+   DO I=0,IBP1
       J   = 0
       IBC = DEFAULT_SURF_INDEX
       IOR = 2
-      IW  = IW + 1
+      IF (I==0 .OR. I==IBP1 .OR. K==0 .OR. K==KBP1) THEN
+         IWG = IWG + 1
+         IW  = IWG
+      ELSE
+         IWE = IWE + 1
+         IW  = IWE
+      ENDIF
       CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
       IF (IERR>0) RETURN
    ENDDO
 ENDDO
-DO K=1,KBAR
-   DO I=1,IBAR
+DO K=0,KBP1
+   DO I=0,IBP1
       J   = JBP1
       IBC = DEFAULT_SURF_INDEX
       IOR = -2
       IW  = IW + 1
+      IF (I==0 .OR. I==IBP1 .OR. K==0 .OR. K==KBP1) THEN
+         IWG = IWG + 1
+         IW  = IWG
+      ELSE
+         IWE = IWE + 1
+         IW  = IWE
+      ENDIF
       CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
       IF (IERR>0) RETURN
    ENDDO
 ENDDO
  
 IF (.NOT.EVACUATION_ONLY(NM)) THEN
-DO J=1,JBAR
-   DO I=1,IBAR
+DO J=0,JBP1
+   DO I=0,IBP1
       K   = 0
       IBC = DEFAULT_SURF_INDEX
       IOR = 3
-      IW  = IW + 1
+      IF (I==0 .OR. I==IBP1 .OR. J==0 .OR. J==JBP1) THEN
+         IWG = IWG + 1
+         IW  = IWG
+      ELSE
+         IWE = IWE + 1
+         IW  = IWE
+      ENDIF
       CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
       IF (IERR>0) RETURN
    ENDDO
 ENDDO
-DO J=1,JBAR
-   DO I=1,IBAR
+DO J=0,JBP1
+   DO I=0,IBP1
       K   = KBP1
       IBC = DEFAULT_SURF_INDEX
       IOR = -3
-      IW  = IW + 1
+      IF (I==0 .OR. I==IBP1 .OR. J==0 .OR. J==JBP1) THEN
+         IWG = IWG + 1
+         IW  = IWG
+      ELSE
+         IWE = IWE + 1
+         IW  = IWE
+      ENDIF
       CALL INIT_WALL_CELL(NM,I,J,K,0,IW,IOR,IBC,IERR)
       IF (IERR>0) RETURN
    ENDDO
@@ -1393,7 +1436,7 @@ NBC = 3
  
 VENT_LOOP: DO N=1,M%N_VENT
    VT => M%VENTS(N)
-   IF (VT%BOUNDARY_TYPE /= OPEN_BOUNDARY) CYCLE VENT_LOOP
+   IF (VT%BOUNDARY_TYPE /= OPEN_BOUNDARY .OR. VT%GHOST_CELLS_ONLY) CYCLE VENT_LOOP
    IF (VT%I1==0 .AND. VT%I2==0) THEN
       IF (LBC==3) LBC = 2
       IF (LBC==4) LBC = 1
@@ -1983,8 +2026,8 @@ IF (ABS(IOR)==1) THEN
    ENDIF
    M%IJKW(7,IW) = J
    M%IJKW(8,IW) = K
-   M%YW(IW) = 0.5_EB*(M%Y(J)+M%Y(J-1))  
-   M%ZW(IW) = 0.5_EB*(M%Z(K)+M%Z(K-1))
+   M%YW(IW) = M%YC(J)
+   M%ZW(IW) = M%ZC(K)
 ENDIF
 IF (ABS(IOR)==2) THEN
    IF (IOR== 2) THEN
@@ -2001,8 +2044,8 @@ IF (ABS(IOR)==2) THEN
    ENDIF
    M%IJKW(6,IW) = I
    M%IJKW(8,IW) = K
-   M%XW(IW) = 0.5_EB*(M%X(I)+M%X(I-1))
-   M%ZW(IW) = 0.5_EB*(M%Z(K)+M%Z(K-1))
+   M%XW(IW) = M%XC(I)
+   M%ZW(IW) = M%ZC(K)
    IF (.NOT.EVACUATION_ONLY(NM)) M%AW(IW) = M%DX(I)*M%DZ(K)
 ENDIF
 IF (ABS(IOR)==3) THEN
@@ -2020,8 +2063,8 @@ IF (ABS(IOR)==3) THEN
    ENDIF
    M%IJKW(6,IW) = I
    M%IJKW(7,IW) = J
-   M%XW(IW) = 0.5_EB*(M%X(I)+M%X(I-1))
-   M%YW(IW) = 0.5_EB*(M%Y(J)+M%Y(J-1))
+   M%XW(IW) = M%XC(I)
+   M%YW(IW) = M%YC(J)
    IF (.NOT.EVACUATION_ONLY(NM)) M%AW(IW) = M%DX(I)*M%RC(I)*M%DY(J)
 ENDIF
  
@@ -2846,7 +2889,11 @@ ENDIF
 IF (IW1==0 .AND. IW2==0) RETURN
 IF (IW1> 0 .AND. IW2==0) IW = IW1
 IF (IW1==0 .AND. IW2> 0) IW = IW2
-IF (IW1> 0 .AND. IW2> 0) IW = IW2  ! Arbitrary decision
+IF (IW1> 0 .AND. IW2> 0) THEN
+   IW = IW2 
+   IF (IJKW(9,IW1)>0) IW = IW1
+   IF (IJKW(9,IW2)>0) IW = IW2
+ENDIF
  
 ! Assign the Index of the Edge (IE) and add to the list
 
