@@ -639,6 +639,7 @@ END SUBROUTINE DENSITY_BC
 SUBROUTINE HVAC_BC(NM)
 
 ! Compute density at wall from wall temperatures and mass fractions 
+
 USE HVAC_ROUTINES, ONLY : NODE_TMP,NODE_RHO,DUCT_U,LEAK_PATH,NODE_YY
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
 REAL(EB) :: YY_GET(1:N_SPECIES),YY_G(1:N_SPECIES),UN,MFT,DD,RSUM_F
@@ -650,7 +651,6 @@ REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UU=>NULL(),VV=>NULL(),WW=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
-
 
 IF (PREDICTOR) THEN 
    UU => U
@@ -668,11 +668,15 @@ ELSE
    PBAR_P => PBAR
 ENDIF
 
+! Loop over all internal and external wall cells
+
 WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+
    IBC = IJKW(5,IW)
    SF => SURFACE(IBC)   
    IF (SF%SPECIES_BC_INDEX/=HVAC_BOUNDARY .AND. SF%THERMAL_BC_INDEX/=HVAC_BOUNDARY .AND. &
        .NOT. ANY(SF%LEAK_PATH>0._EB)) CYCLE WALL_CELL_LOOP
+
    II  = IJKW(1,IW)
    JJ  = IJKW(2,IW)
    KK  = IJKW(3,IW)
@@ -681,6 +685,8 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    KKG = IJKW(8,IW)
    COUNTER = 0
 
+   ! Compute R*Sum(Y_i/W_i) at the wall
+
    IF (N_SPECIES>0) THEN
       YY_G = YYP(IIG,JJG,KKG,:)
       YY_GET = MAX(0._EB,YY_F(IW,:))
@@ -688,6 +694,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ELSE
       RSUM_F = RSUM0
    ENDIF
+
    IF (VENT_INDEX(IW) > 0 .AND. .NOT. ANY(SF%LEAK_PATH>0._EB)) THEN
       IF (VENTS(VENT_INDEX(IW))%NODE_INDEX > 0) THEN
          DN=VENTS(VENT_INDEX(IW))%NODE_INDEX    
@@ -715,11 +722,16 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       ENDIF      
       MFT = DUCTNODE(DN)%DIR(1)*DUCT_U(DU,NM)*NODE_RHO(DN,NM)/FDS_LEAK_AREA(IZ1,IZ2,1)
    ENDIF
+
    RHO_F(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM_F*TMP_F(IW))  
-   ITER = .TRUE.
    UN =  -MFT/RHO_F(IW)
 
+   ! Iterate to get the appropriate normal velocity and density
+
+   ITER = .TRUE.
+
    DO WHILE (ITER)
+
       ITER = .FALSE.
       RHO_0 = RHO_F(IW)
       TMP_0 = TMP_F(IW)
@@ -730,19 +742,20 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       HEAT_TRANS_COEF(IW) = 0._EB
       QCONF(IW) = 0._EB      
 
-      IF (N_SPECIES==0) THEN
+      SPECIES_IF: IF (N_SPECIES==0) THEN
          MASSFLUX(IW,0) = MFT
          RSUM_F = RSUM0
-      ELSE
+      ELSE SPECIES_IF
          YY_ERR = 0._EB
          IF (UN < 0._EB) THEN
             YY_F(IW,:) = YY_G(:)
          ELSE
-            IF (VENTS(VENT_INDEX(IW))%NODE_INDEX > 0) THEN
-               MASSFLUX(IW,1:N_SPECIES) = -NODE_YY(DN,1:N_SPECIES,NM)*MFT
-               MASSFLUX(IW,0) = -MFT - SUM(MASSFLUX(IW,1:N_SPECIES))
-            ELSE
-               MASSFLUX(IW,:) = 0._EB
+            MASSFLUX(IW,:) = 0._EB
+            IF (VENT_INDEX(IW)>0) THEN
+               IF (VENTS(VENT_INDEX(IW))%NODE_INDEX > 0) THEN
+                  MASSFLUX(IW,1:N_SPECIES) = -NODE_YY(DN,1:N_SPECIES,NM)*MFT
+                  MASSFLUX(IW,0) = -MFT - SUM(MASSFLUX(IW,1:N_SPECIES))
+               ENDIF
             ENDIF
             DO N=1,N_SPECIES
                DD = 2._EB*RHODW(IW,N)*RDN(IW)
@@ -754,15 +767,21 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          YY_GET = MAX(0._EB,YY_F(IW,:))
          CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM_F)
          IF (YY_ERR > 1.E-6_EB) ITER = .TRUE.
-      ENDIF
+      ENDIF SPECIES_IF
+
       RHO_F(IW) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM_F*TMP_F(IW))
-      IF (ABS(RHO_0 - RHO_F(IW))/RHO_0 > 1.E-6_EB .OR. &
-          ABS(TMP_0 - TMP_F(IW))/TMP_0 > 1.E-6_EB) ITER = .TRUE.
+
+      ! Decide to continue iterating
+
+      IF (ABS(RHO_0 - RHO_F(IW))/RHO_0 > 1.E-6_EB .OR. ABS(TMP_0 - TMP_F(IW))/TMP_0 > 1.E-6_EB) ITER = .TRUE.
+
       IF (ABS(UW_0)>0._EB) THEN
-          IF(ABS(UW_0 + UN)/ABS(UW_0) > 1.E-6_EB) ITER = .TRUE.
+          IF (ABS(UW_0 + UN)/ABS(UW_0) > 1.E-6_EB) ITER = .TRUE.
       ENDIF
+
       COUNTER = COUNTER + 1
       IF (COUNTER > 20) ITER = .FALSE.
+
    ENDDO
 
    ! Actually set the ghost cell values of density if it is a solid wall
