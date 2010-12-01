@@ -16,7 +16,6 @@
 &REAC ID='WOOD'
       FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5, dHc = 15MW/kg'
       SOOT_YIELD = 0.02
-      EDDY_DISSIPATION = .TRUE.
       O          = 2.5
       C          = 3.4
       H          = 6.2
