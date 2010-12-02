@@ -595,7 +595,7 @@ DO I=0,SL%IBAR
    ENDIF
 ENDDO
 
-ALLOCATE (SL%YY(0:0), STAT=IERR)
+ALLOCATE (SL%YY(0), STAT=IERR)
 CALL CHKMEMERR ('SCARC_INIT_MESHES2D', 'SL%YY', IERR)
 SL%YY(0) =0.0_EB
 SL%YY_MIN=0.0_EB
@@ -693,7 +693,7 @@ END SUBROUTINE SCARC_INIT_MESHES2D
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_INIT_MESHES3D (NM)
  
-INTEGER :: NM, I, K, ILEVEL
+INTEGER :: NM, I, J, K, ILEVEL
 INTEGER :: IBAR0, JBAR0, KBAR0, IERR
 TYPE (MESH_TYPE), POINTER :: M
 REAL(EB):: TNOW_MESHES3D
@@ -751,19 +751,19 @@ DO I=0,SL%IBAR
    ENDIF
 ENDDO
 
-ALLOCATE (SL%YY(0:SL%KBAR), STAT=IERR)
+ALLOCATE (SL%YY(0:SL%JBAR), STAT=IERR)
 CALL CHKMEMERR ('SCARC_INIT_MESHES3D', 'SL%YY', IERR)
 SL%YY_MIN= 1.0E+5_EB
 SL%YY_MAX=-1.0E+5_EB
 SL%DY_MIN= 1.0E+5_EB
 SL%DY_MAX=-1.0E+5_EB
-DO K=0,SL%KBAR
-   SL%YY(K)=M%YS+K*SL%DY
-   SL%YY_MIN=MIN(SL%YY_MIN,SL%YY(K))
-   SL%YY_MAX=MAX(SL%YY_MAX,SL%YY(K))
-   IF (K>0) THEN
-     SL%DY_MIN=MIN(SL%DX_MIN,ABS(SL%YY(K)-SL%YY(K-1)))
-     SL%DY_MAX=MAX(SL%DX_MAX,ABS(SL%YY(K)-SL%YY(K-1)))
+DO J=0,SL%JBAR
+   SL%YY(J)=M%YS+J*SL%DY
+   SL%YY_MIN=MIN(SL%YY_MIN,SL%YY(J))
+   SL%YY_MAX=MAX(SL%YY_MAX,SL%YY(J))
+   IF (J>0) THEN
+     SL%DY_MIN=MIN(SL%DY_MIN,ABS(SL%YY(J)-SL%YY(J-1)))
+     SL%DY_MAX=MAX(SL%DY_MAX,ABS(SL%YY(J)-SL%YY(J-1)))
    ENDIF
 ENDDO
 
@@ -778,8 +778,8 @@ DO K=0,SL%KBAR
    SL%ZZ_MIN=MIN(SL%ZZ_MIN,SL%ZZ(K))
    SL%ZZ_MAX=MAX(SL%ZZ_MAX,SL%ZZ(K))
    IF (K>0) THEN
-     SL%DZ_MIN=MIN(SL%DX_MIN,ABS(SL%ZZ(K)-SL%ZZ(K-1)))
-     SL%DZ_MAX=MAX(SL%DX_MAX,ABS(SL%ZZ(K)-SL%ZZ(K-1)))
+     SL%DZ_MIN=MIN(SL%DZ_MIN,ABS(SL%ZZ(K)-SL%ZZ(K-1)))
+     SL%DZ_MAX=MAX(SL%DZ_MAX,ABS(SL%ZZ(K)-SL%ZZ(K-1)))
    ENDIF
 ENDDO
 
@@ -8531,8 +8531,7 @@ SUBROUTINE SCARC_RECEIVE (CODE, ILEVEL)
 
 INTEGER :: NM, NOM, CODE, ILEVEL
 INTEGER :: IERR, II, IW
-INTEGER :: ILEN_FACE, IM, JM
-INTEGER :: IMIN, IMAX, JMIN, JMAX, KMIN, KMAX
+INTEGER :: ILEN_FACE
 INTEGER :: TAG_FACE
 REAL(EB):: TNOW_RECEIVE
 
@@ -8571,31 +8570,6 @@ RECEIVE_MESH_LOOP: DO NM=1,NMESHES
 
          TAG_FACE = TAGS_FACE(NM,NOM)
 
-         IMIN=I_MIN(NOM,NM)
-         IMAX=I_MAX(NOM,NM)
-         JMIN=J_MIN(NOM,NM)
-         JMAX=J_MAX(NOM,NM)
-         KMIN=K_MIN(NOM,NM)
-         KMAX=K_MAX(NOM,NM)
-         ILEN_FACE=(IMAX-IMIN+1)*(JMAX-JMIN+1)*(KMAX-KMIN+1)
-
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   I_MIN:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%I_MIN(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   I_MAX:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%I_MAX(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   J_MIN:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%J_MIN(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   J_MAX:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%J_MAX(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   K_MIN:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%K_MIN(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   K_MAX:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%K_MAX(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-ENDIF
-
-    
-
          !!! Initialize the communication structures for receiving face data
          INIT_FACE_IF: IF (CODE==NCOM_INIT) THEN
 
@@ -8620,8 +8594,7 @@ ENDIF
             ENDIF
 
             IF (SNML%NIC(NM, NOM) > 0) THEN
-               !ILEN_FACE=(MAX(SNML%NIC(NM, NOM), SNML%NIC(NOM, NM))+2)*2+1
-               !ILEN_FACE=(MAX(SNML%NIC(NM, NOM), SNML%NIC(NOM, NM)))*2+1
+               ILEN_FACE=(MAX(SNML%NIC(NM, NOM), SNML%NIC(NOM, NM))+2)*2+1
                IF (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'RECEIVE: ILEN_FACE=',ILEN_FACE
                ALLOCATE (OSNML%RECV_FACE(ILEN_FACE))
                OSNML%RECV_FACE = 0.0_EB
@@ -8679,7 +8652,7 @@ SUBROUTINE SCARC_EXCHANGE (CODE, ILEVEL, IMV1, IMV2)
 INTEGER :: NM, NOM, ILEVEL, CODE, IMV1, IMV2, ISUM
 INTEGER :: I, J, K, LL, IW, IWW, IOR0
 INTEGER :: IERR, II, JJ, KK
-INTEGER :: ILEN_FACE, IM, JM, NPTR
+INTEGER :: ILEN_FACE
 INTEGER :: IMIN, IMAX, JMIN, JMAX, KMIN, KMAX
 INTEGER :: TAG_FACE
 
@@ -8732,29 +8705,6 @@ EXCHANGE_SEND_MESH_LOOP: DO NM=1,NMESHES
 
          TAG_FACE = TAGS_FACE(NM,NOM)
     
-         IMIN=I_MIN(NOM,NM)
-         IMAX=I_MAX(NOM,NM)
-         JMIN=J_MIN(NOM,NM)
-         JMAX=J_MAX(NOM,NM)
-         KMIN=K_MIN(NOM,NM)
-         KMAX=K_MAX(NOM,NM)
-         ILEN_FACE=(IMAX-IMIN+1)*(JMAX-JMIN+1)*(KMAX-KMIN+1)
-
-IF (SCARC_DEBUG>=6) THEN
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   I_MIN:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%I_MIN(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   I_MAX:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%I_MAX(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   J_MIN:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%J_MIN(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   J_MAX:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%J_MAX(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   K_MIN:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%K_MIN(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-   WRITE(SCARC_LU,*) 'SCARC_EXCHANGE:   K_MAX:'
-   WRITE(SCARC_LU,'(2i4)') ((SNML%K_MAX(IM,JM),IM=1,NMESHES),JM=1,NMESHES)
-ENDIF
-
          !!! Initialize the communication structures for sending data
          EXCHANGE_INIT_FACE_IF: IF (CODE==NCOM_INIT) THEN
     
@@ -8780,8 +8730,7 @@ ENDIF
                  ENDDO
                ENDIF
 
-               !ILEN_FACE=(MAX(SNML%NIC(NM, NOM), SNML%NIC(NOM, NM))+2)*2+1   ! extended
-               !ILEN_FACE=(MAX(SNML%NIC(NM, NOM), SNML%NIC(NOM, NM)))*2+1 
+               ILEN_FACE=(MAX(SNML%NIC(NM, NOM), SNML%NIC(NOM, NM))+2)*2+1   ! extended
                IF (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'EXCHANGE: ILEN_FACE=',ILEN_FACE
                ALLOCATE (OSNML%SEND_FACE(ILEN_FACE))
                OSNML%SEND_FACE = 0.0_EB
@@ -8799,10 +8748,10 @@ ENDIF
                WRITE(SCARC_LU,*) 'EXCHANGE: MATV: LEVEL=',ILEVEL
                WRITE(SCARC_LU,*) 'EXCHANGE: NM=', NM, ': NOM=',NOM
                WRITE(SCARC_LU,*) 'N_EXTERNAL_WALL_CELLS: ',OSNML%N_EXTERNAL_WALL_CELLS
-               WRITE(SCARC_LU,*) 'IJKW: '
-               DO IW= 1,OSNML%N_EXTERNAL_WALL_CELLS
-                  WRITE(SCARC_LU,'(15i4)') (OSNML%IJKW(II,IW),II=1,15)
-               ENDDO
+               !WRITE(SCARC_LU,*) 'IJKW: '
+               !DO IW= 1,OSNML%N_EXTERNAL_WALL_CELLS
+               !   WRITE(SCARC_LU,'(15i4)') (OSNML%IJKW(II,IW),II=1,15)
+               !ENDDO
             ENDIF
  
             LL = 0
@@ -8878,44 +8827,43 @@ ENDIF
             ENDIF
          ENDIF  EXCHANGE_MATV_FACE_IF
    
-      !!! Perform full exchange including ghost cells
+
+      !!! Perform full exchange including edge (3D!) and vertex information
          EXCHANGE_FULL_FACE_IF: IF (CODE==NCOM_FULL) THEN
+            IF (RNODE/=SNODE) THEN
 
-      IF (SCARC_DEBUG>=6) CALL SCARC_SHOW0(SNML%Z,'RECEIVE','Z before all')
-            IF (RNODE/=SNODE) THEN 
-
-               !OSNML%SEND_FACE=0.0_EB
-               LL = 0
-               DO KK=KMIN,KMAX
-                  DO JJ=JMIN,JMAX
-                     DO II=IMIN,IMAX
-                        OSNML%SEND_FACE(LL+1) = SNML%Z(II,JJ,KK)
-if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'SEND_FACE(',LL+1,')=',SNML%Z(II,JJ,KK), II, JJ, KK
-                        LL=LL+1
+            LL = 0
+            IWW = 0
+            PACK_SEND_FACE: DO IW=1,OSNML%N_EXTERNAL_WALL_CELLS
+               IF (OSNML%IJKW(9,IW)/=NM) CYCLE PACK_SEND_FACE
+               DO KK=OSNML%IJKW(12,IW),OSNML%IJKW(15,IW)
+                  DO JJ=OSNML%IJKW(11,IW),OSNML%IJKW(14,IW)
+                     DO II=OSNML%IJKW(10,IW),OSNML%IJKW(13,IW)
+                        IWW = IWW + 1
+                        OSNML%SEND_FACE(LL+1) = REAL(IW,EB)
+                        OSNML%SEND_FACE(LL+2) = SNML%Z(II,JJ,KK)
+                        LL = LL+2
+!if (SCARC_DEBUG>=8) WRITE(SCARC_LU,*) 'SEND_FACE(',LL,')=',SNML%Z(II,JJ,KK), II, JJ, KK
                      ENDDO
                   ENDDO
                ENDDO
+            ENDDO PACK_SEND_FACE
+            OSNML%SEND_FACE(IWW*2+1) = -999.0_EB
             NREQ_FACE=NREQ_FACE+1
-if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'EXCHANGE: NREQ_FACE=',NREQ_FACE
-if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'EXCHANGE: LENGTH=',SIZE(OSNML%SEND_FACE)
-if (SCARC_DEBUG>=6) THEN 
-   write(scarc_lu,*) 'VERSCHICKEN'
-   write(scarc_lu,'(3e12.4)') (OSNML%SEND_FACE(ii),II=1,SIZE(OSNML%SEND_FACE))
-ENDIF
-            IF (USE_MPI) CALL MPI_ISEND(OSNML%SEND_FACE(1),SIZE(OSNML%SEND_FACE),MPI_DOUBLE_PRECISION,SNODE, &
+            IF (USE_MPI) CALL MPI_ISEND(OSNML%SEND_FACE(1),IWW*2+1,MPI_DOUBLE_PRECISION,SNODE, &
                                         TAG_FACE,MPI_COMM_WORLD,REQ_FACE(NREQ_FACE),IERR)
-
 
 
          ELSE
                 write(*,*) 'Not yet implemented'
-         ENDIF 
+         ENDIF
 
          ENDIF EXCHANGE_FULL_FACE_IF
       ENDIF FACE_IF
 
    ENDDO EXCHANGE_RECV_MESH_LOOP
 ENDDO EXCHANGE_SEND_MESH_LOOP
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -9045,145 +8993,66 @@ IF (SCARC_DEBUG>=6) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,2f25.16,a,2f12.6,3i3)') &
 
          ENDIF RECV_FACE_MATV_IF
 
-
-         !!! Extract data from neighbor on ghost cells
+         !!! Extract data for full communication including edge (3D!) and vertex data
          RECV_FACE_FULL_IF: IF (CODE==NCOM_FULL) THEN
-   
-            IOR0=SNOML%IOR_FACE(NOM,NM)
 
-IF (SCARC_DEBUG>=6) THEN
-   write(scarc_lu,*) 'EINSORTIEREN:'
-   write(scarc_lu,*) 'OSNOML%RECV_FACE:'
-   write(scarc_lu,'(3e12.4)') (OSNOML%RECV_FACE(ii),II=1,SIZE(OSNOML%RECV_FACE))
-   WRITE(SCARC_LU,*) 'SNOML zeigt auf SCARC(',NOM,')%SLEVEL(',ILEVEL,')'
-   WRITE(SCARC_LU,*) 'NM=',NM, ': IOR0=',IOR0
-ENDIF
-         IMIN=I_MIN(NOM,NM)
-         IMAX=I_MAX(NOM,NM)
-         JMIN=J_MIN(NOM,NM)
-         JMAX=J_MAX(NOM,NM)
-         KMIN=K_MIN(NOM,NM)
-         KMAX=K_MAX(NOM,NM)
-
-         OSNOML%Z_FACE=0.0_EB
             IF (RNODE/=SNODE) THEN
-
                LL = 0
-               DO KK=KMIN,KMAX
-                  DO JJ=JMIN,JMAX
-                     DO II=IMIN,IMAX
-                        OSNOML%Z_FACE(II,JJ,KK) = OSNOML%RECV_FACE(LL+1)
+               UNPACK_RECV_FACE: DO
+                  IW = NINT(OSNOML%RECV_FACE(LL+1))
+                  IF (IW==-999) EXIT UNPACK_RECV_FACE
+                  IOR0=ABS(SNOML%IJKW(4,IW))
+
+                  SELECT CASE(IOR0)
+                     CASE(1)
+                        IMIN=SNOML%IJKW(10,IW)
+                        IMAX=SNOML%IJKW(13,IW)
+                        JMIN=SNOML%IJKW(11,IW)-1
+                        JMAX=SNOML%IJKW(14,IW)+1
+                        KMIN=SNOML%IJKW(12,IW)-1
+                        KMAX=SNOML%IJKW(15,IW)+1
+                     CASE(2)
+                        IMIN=SNOML%IJKW(10,IW)-1
+                        IMAX=SNOML%IJKW(13,IW)+1
+                        JMIN=SNOML%IJKW(11,IW)
+                        JMAX=SNOML%IJKW(14,IW)
+                        KMIN=SNOML%IJKW(12,IW)-1
+                        KMAX=SNOML%IJKW(15,IW)+1
+                     CASE(3)
+                        IMIN=SNOML%IJKW(10,IW)-1
+                        IMAX=SNOML%IJKW(13,IW)+1
+                        JMIN=SNOML%IJKW(11,IW)-1
+                        JMAX=SNOML%IJKW(14,IW)+1
+                        KMIN=SNOML%IJKW(12,IW)
+                        KMAX=SNOML%IJKW(15,IW)
+                  END SELECT
+IF (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'NOM=',NOM,': NM=',NM,': IW=',IW,': IOR0=',IOR0
+                  ZSUM=0.0_EB
+                  DO KK=SNOML%IJKW(12,IW),SNOML%IJKW(15,IW)
+                     DO JJ=SNOML%IJKW(11,IW),SNOML%IJKW(14,IW)
+                        DO II=SNOML%IJKW(10,IW),SNOML%IJKW(13,IW)
+                           OSNOML%Z_FACE(II,JJ,KK) = OSNOML%RECV_FACE(LL+2)
+                           ZSUM=ZSUM+OSNOML%RECV_FACE(LL+2)
 if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'RECV_FACE(',II,',',JJ,',',KK,')=',OSNOML%Z_FACE(II,JJ,KK)
-                        LL=LL+1
+                           LL = LL+2
+                        ENDDO
                      ENDDO
                   ENDDO
-               ENDDO
-
-               SELECT CASE(IOR0)
-               CASE(1)
-                  IMIN=SNOML%IBAR
-                  IMAX=SNOML%IBAR
-                  IF (TWO_D) THEN
-                     JMIN=1
-                     JMAX=1
-                  ELSE
-                     JMIN=SNOML%J_MIN(NOM,NM)
-                     JMAX=SNOML%J_MAX(NOM,NM)
-                  ENDIF
-                  KMIN=SNOML%K_MIN(NOM,NM)
-                  KMAX=SNOML%K_MAX(NOM,NM)
-                  NPTR=0
-               CASE(-1)
-                  IMIN=1
-                  IMAX=1
-                  IF (TWO_D) THEN
-                     JMIN=1
-                     JMAX=1
-                  ELSE
-                     JMIN=SNOML%J_MIN(NOM,NM)
-                     JMAX=SNOML%J_MAX(NOM,NM)
-                  ENDIF
-                  KMIN=SNOML%K_MIN(NOM,NM)
-                  KMAX=SNOML%K_MAX(NOM,NM)
-                  NPTR=SNOML%IBAR+1
-               CASE(2)
-                  IMIN=SNOML%I_MIN(NOM,NM)
-                  IMAX=SNOML%I_MAX(NOM,NM)
-                  IF (TWO_D) THEN
-                     JMIN=1
-                     JMAX=1
-                  ELSE
-                     JMIN=SNOML%JBAR
-                     JMAX=SNOML%JBAR
-                  ENDIF
-                  KMIN=SNOML%K_MIN(NOM,NM)
-                  KMAX=SNOML%K_MAX(NOM,NM)
-                  NPTR=0
-               CASE(-2)
-                  IMIN=SNOML%I_MIN(NOM,NM)
-                  IMAX=SNOML%I_MAX(NOM,NM)
-                  JMIN=1
-                  JMAX=1
-                  KMIN=SNOML%K_MIN(NOM,NM)
-                  KMAX=SNOML%K_MAX(NOM,NM)
-                  NPTR=SNOML%JBAR+1
-               CASE(3)
-                  IMIN=SNOML%I_MIN(NOM,NM)
-                  IMAX=SNOML%I_MAX(NOM,NM)
-                  IF (TWO_D) THEN
-                     JMIN=1
-                     JMAX=1
-                  ELSE
-                     JMIN=SNOML%J_MIN(NOM,NM)
-                     JMAX=SNOML%J_MAX(NOM,NM)
-                  ENDIF
-                  KMIN=SNOML%KBAR
-                  KMAX=SNOML%KBAR
-                  NPTR=0
-               CASE(-3)
-                  IMIN=SNOML%I_MIN(NOM,NM)
-                  IMAX=SNOML%I_MAX(NOM,NM)
-                  IF (TWO_D) THEN
-                     JMIN=1
-                     JMAX=1
-                  ELSE
-                     JMIN=SNOML%J_MIN(NOM,NM)
-                     JMAX=SNOML%J_MAX(NOM,NM)
-                  ENDIF
-                  KMIN=1
-                  KMAX=1
-                  NPTR=SNOML%KBAR+1
-               END SELECT
-IF (SCARC_DEBUG>=6) THEN
-   write(scarc_lu,*) 'IMIN=',IMIN
-   write(scarc_lu,*) 'IMAX=',IMAX
-   write(scarc_lu,*) 'JMIN=',JMIN
-   write(scarc_lu,*) 'JMAX=',JMAX
-   write(scarc_lu,*) 'KMIN=',KMIN
-   write(scarc_lu,*) 'KMAX=',KMAX
-ENDIF
-
-               DO KK=KMIN,KMAX
-                  DO JJ=JMIN,JMAX
-                     DO II=IMIN,IMAX
-                        SELECT CASE(ABS(IOR0))
-                        CASE(1)
-                           SNOML%Z(NPTR,JJ,KK) = OSNOML%Z_FACE(II,JJ,KK)
-if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) '1:Z(',NPTR,',',JJ,',',KK,')=Z_FACE(',II,',',JJ,',',KK,')=',OSNOML%Z_FACE(II,JJ,KK)
-                        CASE (2)
-                           SNOML%Z(II,NPTR,KK) = OSNOML%Z_FACE(II,JJ,KK)
-if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) '2:Z(',II,',',NPTR,',',KK,')=Z_FACE(',II,',',JJ,',',KK,')=',OSNOML%Z_FACE(II,JJ,KK)
-                        CASE (3)
-                           SNOML%Z(II,JJ,NPTR) = OSNOML%Z_FACE(II,JJ,KK)
-if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) '3:Z(',II,',',JJ,',',NPTR,')=Z_FACE(',II,',',JJ,',',KK,')=',OSNOML%Z_FACE(II,JJ,KK)
-                        END SELECT
-                     ENDDO
-                  ENDDO
-               ENDDO
+if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'ZSUM=',ZSUM
+                  I=SNOML%IJKW(1,IW)
+                  J=SNOML%IJKW(2,IW)
+                  K=SNOML%IJKW(3,IW)
+                  ISUM = (SNOML%IJKW(13,IW)-SNOML%IJKW(10,IW)+1) * &
+                         (SNOML%IJKW(14,IW)-SNOML%IJKW(11,IW)+1) * &
+                         (SNOML%IJKW(15,IW)-SNOML%IJKW(12,IW)+1)
+                  SNOML%Z(I, J, K) = ZSUM/REAL(ISUM,EB)
+if (SCARC_DEBUG>=6) WRITE(SCARC_LU,*) 'Z(',I,',',J,',',K,')=',SNOML%Z(I,J,K)
+               ENDDO UNPACK_RECV_FACE
 
             ENDIF
-
          ENDIF RECV_FACE_FULL_IF
+
+
 
       ENDIF RECV_FACE_IF
 
