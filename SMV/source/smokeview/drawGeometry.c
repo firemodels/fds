@@ -771,9 +771,9 @@ void readcad2geom(cadgeom *cd){
     t_origin[0]=0.0;
     t_origin[1]=0.0;
     t_origin[2]=0.0;
-    rrgb[0]=-1.0;
-    rrgb[1]=-1.0;
-    rrgb[2]=-1.0;
+    rrgb[0]=-255.0;
+    rrgb[1]=-255.0;
+    rrgb[2]=-255.0;
     rrgb[3]=1.0;
     *shininess=block_shininess;
     lenbuffer=strlen(buffer);
@@ -786,6 +786,10 @@ void readcad2geom(cadgeom *cd){
       rrgb+3,shininess,
       t_origin,t_origin+1,t_origin+2
       );
+      
+    rrgb[0]/=255.0;
+    rrgb[1]/=255.0;
+    rrgb[2]/=255.0;
 
     if(fgets(buffer,255,stream)==NULL)return;
     trim(buffer);
@@ -1065,7 +1069,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
         GLfloat *colorptr;
 
         colorindex2 = 15 + (15*colorindex % 230);
-        colorptr = &rgb_cad[0][0]+colorindex2;
+        colorptr = &rgb_cad[colorindex2][0];
         glColor4fv(colorptr);
         colorindex++;
       }
