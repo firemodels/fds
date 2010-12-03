@@ -58,7 +58,7 @@ MODULE EVAC
      REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
      REAL(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
      CHARACTER(60) :: CLASS_NAME='null', ID='null', AVATAR_TYPE_NAME='null'
-     CHARACTER(30) :: GRID_NAME='null'
+     CHARACTER(30) :: GRID_NAME='null', PROP_ID='null'
      LOGICAL :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE.
      INTEGER :: N_INITIAL=0,SAMPLING=0, IPC=0, IMESH=0, AVATAR_TYPE_INDEX=0
      INTEGER :: I_PRE_DIST=0, I_DET_DIST=0
@@ -148,7 +148,7 @@ MODULE EVAC
      REAL(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      INTEGER :: II=0, JJ=0, KK=0, FED_MESH=0
      LOGICAL :: CHECK_FLOW=.FALSE., COUNT_ONLY=.FALSE., SHOW=.TRUE., COUNT_DENSITY=.FALSE.
-     LOGICAL :: LOCKED_WHEN_CLOSED=.FALSE., TARGET_WHEN_CLOSED=.FALSE.
+     LOGICAL :: LOCKED_WHEN_CLOSED=.FALSE., TARGET_WHEN_CLOSED=.FALSE., WAIT_AT_XYZ=.TRUE.
      INTEGER :: STR_INDX=0, STR_SUB_INDX=0
      CHARACTER(60) :: ID='null', PERS_ID='null', EVAC_ID='null'
      CHARACTER(60) :: TO_NODE='null'
@@ -167,13 +167,13 @@ MODULE EVAC
      REAL(EB) :: X1=0._EB, X2=0._EB, Y1=0._EB, Y2=0._EB, Z1=0._EB, Z2=0._EB, &
           X=0._EB, Y=0._EB, Z=0._EB, Xsmoke=0._EB, Ysmoke=0._EB, Zsmoke=0._EB, &
           TIME_OPEN=0._EB, TIME_CLOSE=0._EB, R_NTARGET=0._EB, XYZ_Z=0._EB
-     INTEGER :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0, IMODE=1
+     INTEGER :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0, IMODE=1, ICORR_TO=0
      INTEGER, DIMENSION(50) :: NTARGET=0
      INTEGER :: STR_INDX=0, STR_SUB_INDX=0
      REAL(EB) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      INTEGER :: II=0, JJ=0, KK=0, FED_MESH=0
      LOGICAL :: CHECK_FLOW=.FALSE., EXIT_SIGN=.FALSE., KEEP_XY=.FALSE., SHOW=.TRUE.
-     LOGICAL :: LOCKED_WHEN_CLOSED=.FALSE., TARGET_WHEN_CLOSED=.FALSE.
+     LOGICAL :: LOCKED_WHEN_CLOSED=.FALSE., TARGET_WHEN_CLOSED=.FALSE., WAIT_AT_XYZ=.TRUE.
      CHARACTER(60) :: ID='null'
      CHARACTER(60) :: TO_NODE='null'
      CHARACTER(30) :: GRID_NAME='null'
@@ -191,13 +191,15 @@ MODULE EVAC
      REAL(EB) :: T_first=0._EB, T_last=0._EB, Flow_max=0._EB, Width1=0._EB, Width2=0._EB
      REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, Width=0._EB
      REAL(EB) :: Eff_Width=0._EB, Eff_Length=0._EB, Eff_Area=0._EB, Fac_Speed=0._EB
+     REAL(EB) :: Travel_Time=0._EB, Time_Wait_To_Fill=0._EB, Time_Last_In=0._EB, Time_Stop=0._EB, Time_Start=0._EB
+     INTEGER :: Elevator_Mode=1
      ! Note: Corridor may have 2 different points, where smoke etc. data is saved.
      REAL(EB), DIMENSION(2) :: FED_CO_CO2_O2=0._EB, SOOT_DENS=0._EB, TMP_G=0._EB, RADFLUX=0._EB
      INTEGER :: FED_MESH=0, FED_MESH2=0
      INTEGER, DIMENSION(2) :: II=0, JJ=0, KK=0
-     INTEGER :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0
+     INTEGER :: IOR=0, ICOUNT=0, INODE=0, INODE2=0, IMESH=0, IMESH2=0, IDOOR_FROM=0
      INTEGER :: MAX_HUMANS_INSIDE=0, n_inside=0
-     LOGICAL :: CHECK_FLOW=.FALSE.
+     LOGICAL :: CHECK_FLOW=.FALSE., ELEVATOR=.FALSE.
      INTEGER, DIMENSION(3) :: RGB=-1
      CHARACTER(60) :: ID='null'
      CHARACTER(60) :: TO_NODE='null'
@@ -227,10 +229,10 @@ MODULE EVAC
      REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, Height=2.0_EB, Z=0.0_EB
      INTEGER :: IOR=0, ICOUNT=0, IPC=0, IMESH=0, INODE=0, IMODE=-1, &
           TO_INODE=0, N_Initial=0, Max_Humans=-1, &
-          STR_INDX=0, STR_SUB_INDX=0
-     CHARACTER(60) :: CLASS_NAME='null', ID='null'
+          STR_INDX=0, STR_SUB_INDX=0, AVATAR_TYPE_INDEX=0
+     CHARACTER(60) :: CLASS_NAME='null', ID='null', AVATAR_TYPE_NAME='null'
      CHARACTER(60) :: TO_NODE='null'
-     CHARACTER(30) :: GRID_NAME='null', Max_Humans_Ramp
+     CHARACTER(30) :: GRID_NAME='null', Max_Humans_Ramp, PROP_ID='null'
      LOGICAL :: After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE.
      INTEGER :: N_VENT_FFIELDS=0, Avatar_Color_Index=0, I_AGENT_TYPE=2
      INTEGER, POINTER, DIMENSION(:) :: I_DOOR_NODES =>NULL()
@@ -464,13 +466,13 @@ CONTAINS
     INTEGER :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, MAX_HUMANS, AGENT_TYPE
     REAL(EB) :: MAX_FLOW, WIDTH, TIME_START, TIME_STOP, WIDTH1, &
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED, TIME_OPEN, TIME_CLOSE
-    REAL(EB) :: UBAR0, VBAR0, TIME_DELAY
+    REAL(EB) :: UBAR0, VBAR0, TIME_DELAY, TRAVEL_TIME
     LOGICAL :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, EXIT_SIGN, KEEP_XY, USE_V0, SHOW, COUNT_DENSITY, GLOBAL
     LOGICAL :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA, OUTPUT_DENSITY, &
          OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, OUTPUT_MOTIVE_ANGLE, OUTPUT_ACCELERATION, &
-         LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED
+         LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED, WAIT_AT_XYZ, ELEVATOR
     INTEGER, DIMENSION(3) :: RGB, AVATAR_RGB
-    CHARACTER(30) :: VENT_FFIELD, MESH_ID, EVAC_MESH
+    CHARACTER(30) :: VENT_FFIELD, MESH_ID, EVAC_MESH, PROP_ID
     REAL(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED, PROB
     CHARACTER(25) :: COLOR, DEAD_COLOR, AVATAR_COLOR
 
@@ -480,7 +482,7 @@ CONTAINS
     INTEGER N_LANDINGS, NL, NODES_TMP(500)
     LOGICAL :: RIGHT_HANDED, LEFT_HANDED
 
-    CHARACTER(30), DIMENSION(51) :: KNOWN_DOOR_NAMES
+    CHARACTER(60), DIMENSION(51) :: KNOWN_DOOR_NAMES
     REAL(EB), DIMENSION(51) :: KNOWN_DOOR_PROBS
 
     INTEGER :: ii,jj,kk
@@ -493,27 +495,28 @@ CONTAINS
     REAL(EB) :: EVAC_Z_OFFSET
     CHARACTER(30) :: MULT_ID
     INTEGER :: N_EGRIDS_TMP, NM, N_CORES
+    INTEGER :: N_AVATAR_TYPE
 
     NAMELIST /MESH/ IJK, FYI, ID, SYNCHRONIZE, EVACUATION, EVAC_HUMANS, CYLINDRICAL, XB, RGB, COLOR, EVAC_Z_OFFSET, &
          MPI_PROCESS, LEVEL, MULT_ID
     NAMELIST /EXIT/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, FYI, COUNT_ONLY, WIDTH, XYZ, VENT_FFIELD, COUNT_DENSITY, &
          MESH_ID, COLOR_INDEX, XYZ_SMOKE, EVAC_ID, PERS_ID, &
-         TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR, SHOW, HEIGHT, LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED
+         TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR, SHOW, HEIGHT, LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED, WAIT_AT_XYZ
     NAMELIST /DOOR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, XYZ, VENT_FFIELD, &
          EXIT_SIGN, MESH_ID, COLOR_INDEX, XYZ_SMOKE, KEEP_XY, &
-         TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR, SHOW, HEIGHT, LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED
+         TIME_OPEN, TIME_CLOSE, EVAC_MESH, RGB, COLOR, SHOW, HEIGHT, LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED, WAIT_AT_XYZ
     NAMELIST /ENTR/ ID, XB, IOR, FLOW_FIELD_ID, MAX_FLOW, &
          FYI, WIDTH, QUANTITY, PERS_ID, TIME_START, &
          TIME_STOP, AFTER_REACTION_TIME, &
          KNOWN_DOOR_NAMES, KNOWN_DOOR_PROBS, &
          MESH_ID, COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
-         AVATAR_COLOR, AVATAR_RGB, MAX_HUMANS, MAX_HUMANS_RAMP, SHOW, HEIGHT, AGENT_TYPE
+         AVATAR_COLOR, AVATAR_RGB, MAX_HUMANS, MAX_HUMANS_RAMP, SHOW, HEIGHT, AGENT_TYPE, AVATAR_TYPE, PROP_ID
     NAMELIST /CORR/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, TO_NODE, FYI, WIDTH, WIDTH1, WIDTH2, &
          EFF_WIDTH, EFF_LENGTH, MAX_HUMANS_INSIDE, FAC_SPEED, &
-         XB1, XB2, RGB, COLOR
+         XB1, XB2, RGB, COLOR, ELEVATOR, TRAVEL_TIME
     NAMELIST /STRS/ ID, XB, XB_CORE, XB_CORES, TO_NODE, RIGHT_HANDED, LEFT_HANDED, MESH_ID, &
          N_LANDINGS, XB_LANDINGS, VERTICAL_LANDING_SEPARATION, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, RGB, COLOR, IJK, EVAC_Z_OFFSET
@@ -525,7 +528,7 @@ CONTAINS
          COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
          AVATAR_COLOR, AVATAR_RGB, SHOW, PRE_EVAC_DIST, DET_EVAC_DIST, &
          PRE_MEAN,PRE_PARA,PRE_PARA2,PRE_LOW,PRE_HIGH, &
-         DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE, AVATAR_TYPE
+         DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE, AVATAR_TYPE, PROP_ID
     NAMELIST /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR, SHOW
 
     NAMELIST /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
@@ -1050,6 +1053,7 @@ CONTAINS
     ILABEL_last = 0
 
     CALL COUNT_EVAC_NODES(2)
+    N_AVATAR_TYPE = 1 ! The default type index is one and the default name is 'Human'.
     CALL READ_PERS
     CALL READ_STRS
     CALL READ_EXIT
@@ -2134,6 +2138,7 @@ CONTAINS
          COLOR_INDEX   = -1
          LOCKED_WHEN_CLOSED = .FALSE.
          TARGET_WHEN_CLOSED = .FALSE.
+         WAIT_AT_XYZ        = .FALSE.
          !
          CALL CHECKREAD('EXIT',LU_INPUT,IOS)
          IF (IOS == 1) THEN
@@ -2299,6 +2304,7 @@ CONTAINS
          PEX%TIME_CLOSE = TIME_CLOSE
          PEX%LOCKED_WHEN_CLOSED = LOCKED_WHEN_CLOSED
          PEX%TARGET_WHEN_CLOSED = TARGET_WHEN_CLOSED
+         PEX%WAIT_AT_XYZ        = WAIT_AT_XYZ
          PEX%IMODE      = -1 ! Exit is open by default
          IF (TIME_OPEN > TIME_CLOSE) THEN
             PEX%IMODE = -1
@@ -2554,6 +2560,7 @@ CONTAINS
          KEEP_XY       = .TRUE.
          LOCKED_WHEN_CLOSED = .FALSE.
          TARGET_WHEN_CLOSED = .FALSE.
+         WAIT_AT_XYZ        = .FALSE.
          !
          CALL CHECKREAD('DOOR',LU_INPUT,IOS)
          IF (IOS == 1) THEN
@@ -2746,6 +2753,8 @@ CONTAINS
          PDX%TIME_CLOSE = TIME_CLOSE
          PDX%LOCKED_WHEN_CLOSED = LOCKED_WHEN_CLOSED
          PDX%TARGET_WHEN_CLOSED = TARGET_WHEN_CLOSED
+         PDX%WAIT_AT_XYZ        = WAIT_AT_XYZ
+         PDX%ICORR_TO   = 0  ! The corr index if target is an elevator corr, otherwise zero
          PDX%IMODE      = -1 ! Door is open by default
          IF (TIME_OPEN > TIME_CLOSE) THEN
             PDX%IMODE = -1
@@ -2964,6 +2973,7 @@ CONTAINS
          FLOW_FIELD_ID = 'null'
          TO_NODE       = 'null'
          CHECK_FLOW    = .FALSE.
+         ELEVATOR      = .FALSE.
          MAX_FLOW      = 0.0_EB
          WIDTH         = 0.0_EB
          WIDTH1        = 0.0_EB
@@ -2971,6 +2981,7 @@ CONTAINS
          FAC_SPEED     = 0.0_EB
          EFF_WIDTH     = 0.0_EB
          EFF_LENGTH    = 0.0_EB
+         TRAVEL_TIME   = -.1_EB
          MAX_HUMANS_INSIDE = 0
          !
          CALL CHECKREAD('CORR',LU_INPUT,IOS)
@@ -2984,7 +2995,6 @@ CONTAINS
                IF (TRIM(ID) == TRIM(EVAC_CORRS(I)%ID)) THEN
                   WRITE(MESSAGE,'(A,I4,A,I4,A,A)') 'ERROR: CORR lines',I,' and',N,', ID strings are not unique: ',TRIM(ID)
                   CALL SHUTDOWN(MESSAGE)
-
                END IF
             END DO
          END IF
@@ -3056,6 +3066,7 @@ CONTAINS
          PCX%T_first    = T_BEGIN
          PCX%T_last     = T_BEGIN
          PCX%ICOUNT     = 0
+         PCX%IDOOR_FROM = 0 ! "Top end door", if exits (could also be corr==>coor, not door==>corr)
 
          PCX%MAX_HUMANS_INSIDE = 0
          IF (MAX_HUMANS_INSIDE > 0 ) THEN
@@ -3065,7 +3076,23 @@ CONTAINS
             CALL SHUTDOWN(MESSAGE)
          END IF
 
-         IF (FAC_SPEED < 0 ) THEN
+         IF (ELEVATOR) THEN
+            PCX%ELEVATOR = .TRUE.
+            IF (TRAVEL_TIME < 0) THEN
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',TRIM(ID),' TRAVEL_TIME < 0 for an elevator'
+               CALL SHUTDOWN(MESSAGE)
+            END IF
+            PCX%Travel_Time = TRAVEL_TIME  ! up-down and down-up times supposed to be the same
+            PCX%Time_Wait_To_Fill = 5.0_EB ! Wait 5 s if there still empty places in the elevator
+            PCX%Time_Last_In = T_BEGIN     ! Time stamp of the last person entered the elevator car
+            PCX%Elevator_Mode = 2          ! 0 moving down, 1 down, 2 up, 3 moving up
+            PCX%Time_Stop = 0.0_EB         ! Time when the car stopped (and doors open)
+            PCX%Time_Start = 0.0_EB        ! Time when the car closed the doors
+            FAC_SPEED = 1.0_EB
+         END IF
+
+
+         IF (FAC_SPEED < 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',TRIM(ID),' FAC_SPEED < 0'
             CALL SHUTDOWN(MESSAGE)
          ELSE
@@ -3423,9 +3450,9 @@ CONTAINS
       IMPLICIT NONE
       !
       ! Now exits, doors, corrs and strs are already read in
-      IF (n_nodes > 0 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
+      IF (N_NODES > 0 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
          n_tmp = 0
-         DO n = 1, NMESHES
+         DO N = 1, NMESHES
             IF (EVACUATION_ONLY(N).AND.EVACUATION_GRID(N)) THEN
                n_tmp = n_tmp + 1
                EVAC_Node_List(n_tmp)%Node_Index = n_tmp
@@ -3435,7 +3462,7 @@ CONTAINS
                EVAC_Node_List(n_tmp)%IMESH      = n
             END IF
          END DO
-         DO n = 1, N_ENTRYS
+         DO N = 1, N_ENTRYS
             n_tmp = n_tmp + 1
             EVAC_ENTRYS(N)%INODE             = n_tmp 
             EVAC_Node_List(n_tmp)%Node_Index = n
@@ -3443,7 +3470,7 @@ CONTAINS
             EVAC_Node_List(n_tmp)%ID         = EVAC_ENTRYS(n)%ID
             EVAC_Node_List(n_tmp)%IMESH      = EVAC_ENTRYS(n)%IMESH
          END DO
-         DO n = 1, N_DOORS
+         DO N = 1, N_DOORS
             n_tmp = n_tmp + 1
             EVAC_DOORS(n)%INODE              = n_tmp 
             EVAC_Node_List(n_tmp)%Node_Index = n
@@ -3451,7 +3478,7 @@ CONTAINS
             EVAC_Node_List(n_tmp)%ID         = EVAC_DOORS(n)%ID
             EVAC_Node_List(n_tmp)%IMESH      = EVAC_DOORS(n)%IMESH
          END DO
-         DO n = 1, N_EXITS
+         DO N = 1, N_EXITS
             n_tmp = n_tmp + 1
             EVAC_EXITS(N)%INODE              = n_tmp 
             EVAC_Node_List(n_tmp)%Node_Index = n
@@ -3459,14 +3486,21 @@ CONTAINS
             EVAC_Node_List(n_tmp)%ID         = EVAC_EXITS(n)%ID
             EVAC_Node_List(n_tmp)%IMESH      = EVAC_EXITS(n)%IMESH
          END DO
-         DO n = 1, n_corrs
+         DO N = 1, N_CORRS
             n_tmp = n_tmp + 1
-            evac_corrs(n)%INODE              = n_tmp 
+            EVAC_CORRS(N)%INODE              = n_tmp 
             EVAC_Node_List(n_tmp)%Node_Index = n
             EVAC_Node_List(n_tmp)%Node_Type  = 'Corr'
             EVAC_Node_List(n_tmp)%ID         = EVAC_CORRS(n)%ID
+            CorrDoorLoop: DO I = 1, N_DOORS
+               IF (TRIM(EVAC_DOORS(I)%TO_NODE)==TRIM(EVAC_CORRS(N)%ID)) THEN
+                  EVAC_CORRS(N)%IDOOR_FROM = I
+                  IF (EVAC_CORRS(N)%ELEVATOR) EVAC_DOORS(I)%ICORR_TO = N
+                  EXIT CorrDoorLoop
+               END IF
+            END DO CorrDoorLoop
          END DO
-         DO n = 1, n_strs
+         DO N = 1, N_STRS
             n_tmp = n_tmp + 1
             EVAC_STRS(n)%INODE               = n_tmp
             EVAC_Node_List(n_tmp)%Node_Index = n
@@ -3475,8 +3509,8 @@ CONTAINS
          END DO
 
          ! Check that door/corr/entry/exit have unique names
-         DO n = 1, n_nodes - 1
-            DO i = n + 1, n_nodes
+         DO N = 1, n_nodes - 1
+            DO I = n + 1, n_nodes
                IF (TRIM(EVAC_Node_List(n)%ID) == TRIM(EVAC_Node_List(i)%ID)) THEN
                   WRITE(MESSAGE,'(8A)') 'ERROR: ', TRIM(EVAC_Node_List(n)%Node_Type), ': ', &
                        TRIM(EVAC_Node_List(n)%ID), ' has same ID as ', &
@@ -3486,8 +3520,8 @@ CONTAINS
             END DO
          END DO
 
-         DO n = 1, N_ENTRYS
-            DO i = 1, EVAC_ENTRYS(n)%N_VENT_FFIELDS
+         DO N = 1, N_ENTRYS
+            DO I = 1, EVAC_ENTRYS(n)%N_VENT_FFIELDS
                IF (EVAC_ENTRYS(n)%I_DOOR_NODES(i) < 0) THEN
                   EVAC_ENTRYS(n)%I_DOOR_NODES(i) = EVAC_EXITS(ABS(EVAC_ENTRYS(n)%I_DOOR_NODES(i)))%INODE
                ELSE IF (EVAC_ENTRYS(n)%I_DOOR_NODES(i) > 0) THEN
@@ -3506,8 +3540,8 @@ CONTAINS
       ! Read the ENTR lines
       !
       ! Local variables
-      INTEGER nm, i1, i2, j1, j2, NR
-      LOGICAL L_TMP
+      INTEGER :: nm, i1, i2, j1, j2, NR
+      LOGICAL :: L_TMP
       TYPE (EVAC_ENTR_TYPE), POINTER :: PNX=>NULL()
       TYPE (EVAC_PERS_TYPE), POINTER :: PCP=>NULL()
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
@@ -3528,6 +3562,8 @@ CONTAINS
          TO_NODE       = 'null'
          PERS_ID       = 'null'
          QUANTITY      = 'null'
+         AVATAR_TYPE   = 'null'
+         PROP_ID       = 'null'
          MAX_FLOW      = 0.0_EB
          WIDTH         = 0.0_EB
          HEIGHT        = 2.0_EB
@@ -3598,6 +3634,28 @@ CONTAINS
          END IF
          IF (COLOR_METHOD == 0 .AND. (MAX_FLOW > 0.0_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) &
               PNX%Avatar_Color_Index = i_avatar_color
+
+         PNX%AVATAR_TYPE_INDEX = 0       ! Defaults for entries that do not generate new agents
+         PNX%AVATAR_TYPE_NAME  = 'null'
+         IF (MAX_FLOW > 0.0_EB .OR. TRIM(MAX_HUMANS_RAMP)/='null') THEN
+            IF (TRIM(AVATAR_TYPE) == 'null' .OR. TRIM(AVATAR_TYPE) == 'Human') THEN
+               PNX%AVATAR_TYPE_INDEX = 1
+               PNX%AVATAR_TYPE_NAME = TRIM('Human')
+            ELSE
+               PNX%AVATAR_TYPE_NAME  = TRIM(AVATAR_TYPE)
+               PNX%AVATAR_TYPE_INDEX = 0
+               Avatar_Type_Loop1: DO I = 1, N-1 
+                  IF (TRIM(PNX%AVATAR_TYPE_NAME) == TRIM(EVAC_ENTRYS(I)%AVATAR_TYPE_NAME)) THEN
+                     PNX%AVATAR_TYPE_INDEX = EVAC_ENTRYS(I)%AVATAR_TYPE_INDEX
+                     EXIT Avatar_Type_Loop1
+                  END IF
+               END DO Avatar_Type_Loop1
+               IF (PNX%AVATAR_TYPE_INDEX == 0) THEN  ! New type found
+                  N_AVATAR_TYPE = N_AVATAR_TYPE + 1
+                  PNX%AVATAR_TYPE_INDEX = N_AVATAR_TYPE
+               END IF
+            END IF
+         END IF
 
          IF (EVAC_MESH /= 'null') THEN
             MESH_ID = EVAC_MESH
@@ -3752,6 +3810,7 @@ CONTAINS
          PNX%IOR        = IOR
          PNX%ID         = ID
          PNX%CLASS_NAME = PERS_ID
+         PNX%PROP_ID    = TRIM(PROP_ID)
 
          ! PNX%Z is used to plot the door on the correct height in Smokeview.
          PNX%Z = 0.5_EB*(PNX%Z1+PNX%Z2) + 0.5_EB*PNX%Height - EVACUATION_Z_OFFSET(PNX%IMESH)
@@ -3876,11 +3935,9 @@ CONTAINS
       ! 
       ! Local variables
       LOGICAL :: L_TMP
-      INTEGER :: N_AVATAR_TYPE
       TYPE (EVACUATION_TYPE), POINTER :: HPT=>NULL()
       TYPE (EVAC_PERS_TYPE),  POINTER :: PCP=>NULL()
 
-      N_AVATAR_TYPE = 1 ! The default type index is one and the default name is 'Human'.
       READ_EVAC_LOOP: DO N = 1, NPC_EVAC
          !
          ID                       = 'null'
@@ -3921,6 +3978,7 @@ CONTAINS
          KNOWN_DOOR_NAMES         = 'null'
          KNOWN_DOOR_PROBS         = 1.0_EB
          AGENT_TYPE               = 2  ! Default is "known door" agent
+         PROP_ID                  = 'null'
          !
          CALL CHECKREAD('EVAC',LU_INPUT,IOS)
          IF (IOS == 1) THEN
@@ -3974,11 +4032,18 @@ CONTAINS
             HPT%AVATAR_TYPE_NAME  = TRIM(AVATAR_TYPE)
             HPT%AVATAR_TYPE_INDEX = 0
             Avatar_Type_Loop: DO I = 1, N-1 
-               IF (TRIM(HPT%AVATAR_TYPE_NAME) == TRIM(EVAC_EVACS(N)%AVATAR_TYPE_NAME)) THEN
-                  HPT%AVATAR_TYPE_INDEX = EVAC_EVACS(N)%AVATAR_TYPE_INDEX
+               IF (TRIM(HPT%AVATAR_TYPE_NAME) == TRIM(EVAC_EVACS(I)%AVATAR_TYPE_NAME)) THEN
+                  HPT%AVATAR_TYPE_INDEX = EVAC_EVACS(I)%AVATAR_TYPE_INDEX
                   EXIT Avatar_Type_Loop
                END IF
             END DO Avatar_Type_Loop
+            Avatar_Type_Loop2: DO I = 1, N_ENTRYS
+               IF (TRIM(HPT%AVATAR_TYPE_NAME) == TRIM(EVAC_ENTRYS(I)%AVATAR_TYPE_NAME) .AND. &
+                    HPT%AVATAR_TYPE_INDEX == 0) THEN
+                  HPT%AVATAR_TYPE_INDEX = EVAC_ENTRYS(I)%AVATAR_TYPE_INDEX
+                  EXIT Avatar_Type_Loop2
+               END IF
+            END DO Avatar_Type_Loop2
             IF (HPT%AVATAR_TYPE_INDEX == 0) THEN  ! New type found
                N_AVATAR_TYPE = N_AVATAR_TYPE + 1
                HPT%AVATAR_TYPE_INDEX = N_AVATAR_TYPE
@@ -4036,6 +4101,7 @@ CONTAINS
          HPT%CLASS_NAME = PERS_ID
          HPT%T_START    = TIME_START
          HPT%I_AGENT_TYPE = AGENT_TYPE
+         HPT%PROP_ID    = TRIM(PROP_ID)
 
          HPT%GN_MIN = GN_MIN
          HPT%GN_MAX = GN_MAX
@@ -4185,10 +4251,23 @@ CONTAINS
       CALL ChkMemErr('READ_EVAC','EVAC_CLASS_NAME',IZERO)
       ALLOCATE(EVAC_CLASS_RGB(3,N_EVAC),STAT=IZERO)
       CALL ChkMemErr('READ_EVAC','EVAC_CLASS_RGB',IZERO)
+      ALLOCATE(EVAC_CLASS_PROP(N_EVAC),STAT=IZERO)
+      CALL ChkMemErr('READ_EVAC','EVAC_CLASS_PROP',IZERO)
       EVAC_CLASS_NAME(1) = TRIM('Human')
+      EVAC_CLASS_PROP = TRIM('null')
+      DO N = 1, N_ENTRYS
+         IF (EVAC_ENTRYS(N)%AVATAR_TYPE_INDEX > 0) THEN
+            I = EVAC_ENTRYS(N)%AVATAR_TYPE_INDEX
+            EVAC_CLASS_NAME(I) = TRIM(EVAC_ENTRYS(N)%AVATAR_TYPE_NAME)
+            IF (TRIM(EVAC_ENTRYS(N)%PROP_ID) /= 'null') EVAC_CLASS_PROP(I) = TRIM(EVAC_ENTRYS(N)%PROP_ID)
+         END IF
+      END DO
       DO N = 1, NPC_EVAC
-         I = EVAC_EVACS(N)%AVATAR_TYPE_INDEX
-         EVAC_CLASS_NAME(I) = TRIM(EVAC_EVACS(N)%AVATAR_TYPE_NAME)
+         IF (EVAC_EVACS(N)%AVATAR_TYPE_INDEX > 0) THEN
+            I = EVAC_EVACS(N)%AVATAR_TYPE_INDEX
+            EVAC_CLASS_NAME(I) = TRIM(EVAC_EVACS(N)%AVATAR_TYPE_NAME)
+            IF (TRIM(EVAC_EVACS(N)%PROP_ID) /= 'null') EVAC_CLASS_PROP(I) = TRIM(EVAC_EVACS(N)%PROP_ID)
+         END IF
       END DO
       DO N = 1, N_EVAC
          EVAC_CLASS_RGB(1:3,N) = (/ 39, 64,139/)  ! ROYAL BLUE 4
@@ -7056,33 +7135,6 @@ CONTAINS
     ALLOCATE(HERDING_LIST_DOORS(MAX(1,N_DOORS+N_EXITS)),STAT=IZERO)
     CALL CHKMEMERR('EVACUATE_HUMANS','HERDING_LIST_DOORS',IZERO)
     ! Initialize some counters etc. for this main evac mesh.
-    DO I = 1, N_DOORS
-       IF (EVAC_DOORS(I)%IMESH == NM) THEN
-          IF (EVAC_DOORS(I)%TIME_OPEN > EVAC_DOORS(I)%TIME_CLOSE) THEN
-             IMODE_OLD=EVAC_DOORS(I)%IMODE
-             IF (TIN >  EVAC_DOORS(I)%TIME_CLOSE .AND. TIN < EVAC_DOORS(I)%TIME_OPEN .AND. IMODE_OLD == -1) EVAC_DOORS(I)%IMODE=+2
-             IF (TIN >= EVAC_DOORS(I)%TIME_OPEN .AND. IMODE_OLD == -2) EVAC_DOORS(I)%IMODE=+1
-          ELSE
-             IMODE_OLD=EVAC_DOORS(I)%IMODE
-             IF (TIN >  EVAC_DOORS(I)%TIME_OPEN .AND. TIN < EVAC_DOORS(I)%TIME_CLOSE .AND. IMODE_OLD == -2) EVAC_DOORS(I)%IMODE=+1
-             IF (TIN >= EVAC_DOORS(I)%TIME_CLOSE .AND. IMODE_OLD==-1) EVAC_DOORS(I)%IMODE=+2
-          END IF
-       END IF
-    END DO
-    DO I = 1, N_EXITS
-       IF (EVAC_EXITS(I)%IMESH == NM .AND. .NOT.EVAC_EXITS(I)%COUNT_ONLY) THEN
-          IF (EVAC_EXITS(I)%TIME_OPEN > EVAC_EXITS(I)%TIME_CLOSE) THEN
-             IMODE_OLD=EVAC_EXITS(I)%IMODE
-             IF (TIN >  EVAC_EXITS(I)%TIME_CLOSE .AND. TIN < EVAC_EXITS(I)%TIME_OPEN .AND. IMODE_OLD==-1) EVAC_EXITS(I)%IMODE=+2
-             IF (TIN >= EVAC_EXITS(I)%TIME_OPEN .AND. IMODE_OLD==-2) EVAC_EXITS(I)%IMODE=+1
-          ELSE
-             IMODE_OLD=EVAC_EXITS(I)%IMODE
-             IF (TIN >  EVAC_EXITS(I)%TIME_OPEN .AND. TIN < EVAC_EXITS(I)%TIME_CLOSE .AND. IMODE_OLD==-2) EVAC_EXITS(I)%IMODE=+1
-             IF (TIN >= EVAC_EXITS(I)%TIME_CLOSE .AND. IMODE_OLD==-1) EVAC_EXITS(I)%IMODE=+2
-          END IF
-       END IF
-    END DO
-    ! 
     L_FIRST_PASS = .TRUE.
     HUMAN_TIME_LOOP: DO WHILE ( DT_SUM < DT )
        ! DT is the fds flow calculation time step.
@@ -7093,6 +7145,72 @@ CONTAINS
        DTSP = MIN( (DT-DT_SUM), TSTEPS(NM) )
        DT_SUM = DT_SUM + DTSP
        T = TIN - DT + DT_SUM     ! Current time for the agents
+
+       DO I = 1, N_DOORS
+          IF (EVAC_DOORS(I)%IMESH == NM .AND. EVAC_DOORS(I)%ICORR_TO == 0) THEN
+             IF (EVAC_DOORS(I)%TIME_OPEN > EVAC_DOORS(I)%TIME_CLOSE) THEN
+                IMODE_OLD = EVAC_DOORS(I)%IMODE
+                IF (T >  EVAC_DOORS(I)%TIME_CLOSE .AND. T < EVAC_DOORS(I)%TIME_OPEN .AND. IMODE_OLD == -1) &
+                     EVAC_DOORS(I)%IMODE=+2
+                IF (T >= EVAC_DOORS(I)%TIME_OPEN .AND. IMODE_OLD == -2) EVAC_DOORS(I)%IMODE=+1
+             ELSE
+                IMODE_OLD = EVAC_DOORS(I)%IMODE
+                IF (T >  EVAC_DOORS(I)%TIME_OPEN .AND. T < EVAC_DOORS(I)%TIME_CLOSE .AND. IMODE_OLD == -2) &
+                     EVAC_DOORS(I)%IMODE=+1
+                IF (T >= EVAC_DOORS(I)%TIME_CLOSE .AND. IMODE_OLD==-1) EVAC_DOORS(I)%IMODE=+2
+             END IF
+          END IF
+          IF (EVAC_DOORS(I)%IMESH == NM .AND. EVAC_DOORS(I)%ICORR_TO > 0) THEN
+             ! Target of the door is an elevator, the corr index is doors%ICORR_TO
+             IF (EVAC_DOORS(I)%TIME_OPEN > EVAC_DOORS(I)%TIME_CLOSE) THEN
+                ! Cycle: T_BEGIN open, close at TIME_CLOSE, open TIME_OPEN and stay open
+                IMODE_OLD = EVAC_DOORS(I)%IMODE
+                IF ((T > EVAC_DOORS(I)%TIME_CLOSE .AND. T <= EVAC_DOORS(I)%TIME_OPEN) .OR. &
+                     EVAC_CORRS(EVAC_DOORS(I)%ICORR_TO)%Elevator_Mode /= 2) THEN
+                   ! The elevator is not in use by the user input or it is not at the floor
+                   IF (IMODE_OLD == -1) EVAC_DOORS(I)%IMODE=+2 ! close the door
+                   IF (IMODE_OLD == +1) EVAC_DOORS(I)%IMODE=-2 ! do not open, let stay closed
+                ELSE
+                   ! The elevator is in use by the user input and it is at the floor
+                   IF (EVAC_CORRS(EVAC_DOORS(I)%ICORR_TO)%Elevator_Mode == 2) THEN
+                      IF (IMODE_OLD == -2) EVAC_DOORS(I)%IMODE=+1 ! open the door
+                      IF (IMODE_OLD == +2) EVAC_DOORS(I)%IMODE=-1 ! stay open
+                   END IF
+                END IF
+             ELSE
+                ! Cycle: T_BEGIN closed, open at TIME_OPEN, close TIME_CLOSE and stay closed
+                IMODE_OLD = EVAC_DOORS(I)%IMODE
+                IF (T < EVAC_DOORS(I)%TIME_OPEN .OR. T > EVAC_DOORS(I)%TIME_CLOSE .OR. &
+                     EVAC_CORRS(EVAC_DOORS(I)%ICORR_TO)%Elevator_Mode /= 2) THEN
+                   ! The elevator is not in use by the user input or it is not at the floor
+                   IF (IMODE_OLD == -1) EVAC_DOORS(I)%IMODE=+2 ! close the door
+                   IF (IMODE_OLD == +1) EVAC_DOORS(I)%IMODE=-2 ! do not open, let stay closed
+                ELSE
+                   ! The elevator is in use by the user input and it is at the floor
+                   IF (EVAC_CORRS(EVAC_DOORS(I)%ICORR_TO)%Elevator_Mode == 2) THEN
+                      IF (IMODE_OLD == -2) EVAC_DOORS(I)%IMODE=+1 ! open the door
+                      IF (IMODE_OLD == +2) EVAC_DOORS(I)%IMODE=-1 ! stay open
+                   END IF
+                END IF
+             END IF
+          END IF
+       END DO
+       DO I = 1, N_EXITS
+          IF (EVAC_EXITS(I)%IMESH == NM .AND. .NOT.EVAC_EXITS(I)%COUNT_ONLY) THEN
+             IF (EVAC_EXITS(I)%TIME_OPEN > EVAC_EXITS(I)%TIME_CLOSE) THEN
+                IMODE_OLD = EVAC_EXITS(I)%IMODE
+                IF (T >  EVAC_EXITS(I)%TIME_CLOSE .AND. T < EVAC_EXITS(I)%TIME_OPEN .AND. IMODE_OLD==-1) &
+                     EVAC_EXITS(I)%IMODE=+2
+                IF (T >= EVAC_EXITS(I)%TIME_OPEN .AND. IMODE_OLD==-2) EVAC_EXITS(I)%IMODE=+1
+             ELSE
+                IMODE_OLD = EVAC_EXITS(I)%IMODE
+                IF (T >  EVAC_EXITS(I)%TIME_OPEN .AND. T < EVAC_EXITS(I)%TIME_CLOSE .AND. IMODE_OLD==-2) &
+                     EVAC_EXITS(I)%IMODE=+1
+                IF (T >= EVAC_EXITS(I)%TIME_CLOSE .AND. IMODE_OLD==-1) EVAC_EXITS(I)%IMODE=+2
+             END IF
+          END IF
+       END DO
+       ! 
 
        DO I = 1, N_DOORS
           IF (EVAC_DOORS(I)%IMESH == NM) THEN
@@ -7288,7 +7406,23 @@ CONTAINS
                          IF (HR%D_Walls > 4.0_EB .AND. HR%DENSITY < 2.0_EB) THEN
                             HR%I_Door_Mode = HR%I_Door_Mode
                          ELSE
-                            HR%I_Door_Mode = 1
+                            IF (ABS(I_TARGET) > N_DOORS) THEN
+                               N = ABS(I_TARGET) - N_DOORS
+                               IF (ABS(EVAC_EXITS(N)%IMODE)==2 .AND. EVAC_EXITS(N)%TARGET_WHEN_CLOSED .AND. &
+                                    EVAC_EXITS(N)%WAIT_AT_XYZ) THEN
+                                  HR%I_Door_Mode = HR%I_Door_Mode
+                               ELSE
+                                  HR%I_Door_Mode = 1
+                               END IF
+                            ELSE
+                               N = ABS(I_TARGET)
+                               IF (ABS(EVAC_DOORS(N)%IMODE)==2 .AND. EVAC_DOORS(N)%TARGET_WHEN_CLOSED .AND. &
+                                    EVAC_DOORS(N)%WAIT_AT_XYZ) THEN
+                                  HR%I_Door_Mode = HR%I_Door_Mode
+                               ELSE
+                                  HR%I_Door_Mode = 1
+                               END IF
+                            END IF
                          END IF
                          ! HR%I_Door_Mode = 2   ! Use bee line towards the door
                       ELSE
@@ -8232,24 +8366,6 @@ CONTAINS
           END IF
           P2P_DIST_MAX = MAX(P2P_DIST_MAX, 3.0_EB*HR%B)
           ! Next is the max distance for the collision avoidance, counterflow, etc.
-          !
-          ! Collision avoidance (incl. counterflow)
-          ! Do not do collision avoidance on every time step, do it every 0.1 s on the average by default.
-          IF (TAU_CHANGE_V0 > 1.0E-12_EB) THEN
-             CALL RANDOM_NUMBER(RNCF)
-          ELSE
-             RNCF = -1.0_EB ; ANGLE_OLD = 0.0_EB ; COMMITMENT = 0.0_EB
-          END IF
-          IF ( RNCF > EXP(-DTSP/TAU_CHANGE_V0) ) THEN
-             ! Collision avoidance needs some range, at least 3.0 m
-             P2P_SUUNTA_MAX = MAX(P2P_DIST_MAX, 3.0_EB)
-          ELSE
-             P2P_SUUNTA_MAX = P2P_DIST_MAX
-          END IF
-
-          ! Speed up the dead agent loop, only contact forces are needed.
-          IF (L_DEAD) P2P_DIST_MAX = 0.0_EB
-          IF (L_DEAD) P2P_SUUNTA_MAX = 0.0_EB
 
           ! In which grid cell is the agent, new coordinates:
           XI = CELLSI(FLOOR((HR%X-XS)*RDXINT))
@@ -8272,6 +8388,9 @@ CONTAINS
           N = NM_STRS_INDEX
           CALL FIND_PREFERRED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
                IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
+          EVEL = UBAR**2 + VBAR**2
+
+
           ! (UBAR,VBAR) is now the direction of the flow field of the evacuation mesh
           ! leading towards the chosen door (or the main evacuation field).  It has
           ! no counterflow corrections yet.
@@ -8282,6 +8401,26 @@ CONTAINS
           ! =======================================================
           ! Update the block_grid array search ranges
           ! =======================================================
+          !
+          ! Collision avoidance (incl. counterflow)
+          ! Do not do collision avoidance on every time step, do it every 0.1 s on the average by default.
+          ! No need for collision avoidance if the target velocity is zero.
+          IF (TAU_CHANGE_V0 > 1.0E-12_EB .AND. EVEL > 0.0_EB) THEN
+             CALL RANDOM_NUMBER(RNCF)
+          ELSE
+             RNCF = -1.0_EB ; ANGLE_OLD = 0.0_EB ; COMMITMENT = 0.0_EB
+          END IF
+          IF ( RNCF > EXP(-DTSP/TAU_CHANGE_V0) ) THEN
+             ! Collision avoidance needs some range, at least 3.0 m
+             P2P_SUUNTA_MAX = MAX(P2P_DIST_MAX, 3.0_EB)
+          ELSE
+             P2P_SUUNTA_MAX = P2P_DIST_MAX
+          END IF
+
+          ! Speed up the dead agent loop, only contact forces are needed.
+          IF (L_DEAD) P2P_DIST_MAX = 0.0_EB
+          IF (L_DEAD) P2P_SUUNTA_MAX = 0.0_EB
+
           BLOCK_LIST = 0
           I_DX = INT((2.0_EB*0.3_EB+MAX(P2P_SUUNTA_MAX,P2P_DIST_MAX))/DX(IIN)) + 1
           J_DY = INT((2.0_EB*0.3_EB+MAX(P2P_SUUNTA_MAX,P2P_DIST_MAX))/DY(JJN)) + 1
@@ -8414,7 +8553,7 @@ CONTAINS
              EVEL = MAX(0.0_EB,MIN(1.0_EB,(HR%U**2+HR%V**2)/HR%SPEED))
              THETA_START = THETA_START - 0.5_EB*(1.0_EB-EVEL)*MAX(0.0_EB,(90.0_EB+THETA_START-0.5_EB*THETA_STEP))
              THETA_STEP = 2.0_EB*ABS(THETA_START)/REAL(N_SECTORS-1,EB)
-             IF(HR%UBAR**2+HR%VBAR**2 < 0.1_EB) THEN
+             IF (HR%UBAR**2 + HR%VBAR**2 < 0.1_EB) THEN
                 HR%UBAR = UBAR; HR%VBAR = VBAR
              END IF
              SUM_SUUNTA = 0.0_EB
@@ -8831,7 +8970,8 @@ CONTAINS
              END IF
           ELSE ! CHANGE_V0_RNCF2
              ! Do not change direction during this time step, use the previous direction
-             IF (TAU_CHANGE_V0 > 1.0E-12_EB) THEN
+             EVEL = UBAR**2 + VBAR**2
+             IF (TAU_CHANGE_V0 > 1.0E-12_EB .AND. EVEL > 0.0_EB) THEN
                 UBAR = HR%UBAR
                 VBAR = HR%VBAR
                 ANGLE_OLD = HR%ANGLE_OLD
@@ -9327,6 +9467,7 @@ CONTAINS
       INTEGER :: N,NM_NOW, STRS_INDX, DOOR_IOR, KKZ, J, I1, J1
       REAL(EB) :: X_TARGET, Y_TARGET, DOOR_WIDTH, DOOR_DIST, EVEL, X1, X2, Y1, Y2, D_TMP, X_XYZ, Y_XYZ, D_X, D_Y
       LOGICAL :: NM_STRS_MESHS, STRAIGHT_LINE_TO_TARGET, Is_Known_Door_tmp, Is_XB_Visible, Is_XYZ_Visible, Is_InFront
+      LOGICAL :: V0_IS_SET_ZERO
       TYPE (MESH_TYPE), POINTER :: MFF=>NULL()
       TYPE (HUMAN_TYPE), POINTER :: HR=>NULL()
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
@@ -9363,6 +9504,7 @@ CONTAINS
       STRAIGHT_LINE_TO_TARGET = .FALSE.
       I_STRS_DOOR = 0
       HR%SKIP_WALL_FORCE_IOR = 0
+      V0_IS_SET_ZERO = .FALSE.
       If_StrsMesh: IF (NM_STRS_MESH) THEN
          IF (HR%I_TARGET == 0) THEN
             CALL FIND_TARGET_NODE_IN_STRS(STRP,HR)
@@ -9520,7 +9662,7 @@ CONTAINS
                      X_NODE = 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X1 + &
                           EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%X2)
                      Y_NODE = 0.5_EB*(EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y1 + &
-                     EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y2)
+                          EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%Y2)
                      I_TARGET_TMP = EVAC_NODE_LIST(INODE)%NODE_INDEX
                      DIST_TO_DOOR_TMP = 50.0_EB*SQRT( (X_NODE-HR%X)**2 + (Y_NODE-HR%Y)**2 ) / &
                           EVAC_DOORS(EVAC_NODE_LIST(INODE)%NODE_INDEX)%R_NTARGET + 1.0_EB
@@ -9641,157 +9783,204 @@ CONTAINS
                VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
             END IF EVAC_FDS6_IF_1
             IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 4  ! red
-            N = ABS(HR%I_TARGET)
             Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
             IF (HR%I_Door_Mode > 2) Is_XB_Visible = .TRUE.
             IF (HR%I_Door_Mode == 2 .OR. HR%I_Door_Mode == 4) Is_XYZ_Visible = .TRUE.
+
+            N = ABS(HR%I_TARGET)
             IF (N>N_DOORS) THEN
                N = N - N_DOORS
-               X_XYZ = EVAC_EXITS(N)%X ; Y_XYZ = EVAC_EXITS(N)%Y
-               X1 = EVAC_EXITS(N)%X1 ; X2 = EVAC_EXITS(N)%X2
-               Y1 = EVAC_EXITS(N)%Y1 ; Y2 = EVAC_EXITS(N)%Y2
-               DOOR_IOR = EVAC_EXITS(N)%IOR
-               DOOR_WIDTH = EVAC_EXITS(N)%WIDTH
-            ELSE
-               X_XYZ = EVAC_DOORS(N)%X ; Y_XYZ = EVAC_DOORS(N)%Y
-               X1 = EVAC_DOORS(N)%X1 ; X2 = EVAC_DOORS(N)%X2
-               Y1 = EVAC_DOORS(N)%Y1 ; Y2 = EVAC_DOORS(N)%Y2
-               DOOR_IOR = EVAC_DOORS(N)%IOR
-               DOOR_WIDTH = EVAC_DOORS(N)%WIDTH
-            END IF
-
-            If_IOR_Is_1: IF (ABS(DOOR_IOR)==1)THEN
-               Y1 = Y1+MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
-               Y2 = Y2-MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
-               Y_TARGET = Y_XYZ
-               D_X = ABS(HR%X-X_XYZ) ; D_Y = ABS(HR%Y-Y_XYZ)
-               EVEL = ABS(ATAN(D_Y/MAX(D_X,0.01_EB)))/(0.5_EB*PI)  ! 0-1 scale for 0-90 degrees
-               IF (HR%Y > Y_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. &
-                    HR%Y < Y_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH)) Y_TARGET = HR%Y
-               IF (HR%Y < Y_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. HR%SeeDoorXYZ1) &
-                    Y_TARGET = Y_XYZ - EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
-               IF (HR%Y > Y_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. HR%SeeDoorXYZ2) &
-                    Y_TARGET = Y_XYZ + EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
-               Y_XYZ = Y_TARGET
-               D_TMP = DOOR_IOR*(X_XYZ-HR%X) ! if < 0 then between door and xyz
-               X_TARGET = 0.5_EB*(X1+X2) ; Y_TARGET = 0.5_EB*(Y1+Y2)
-               D_X = ABS(HR%X-0.5_EB*(X1+X2)) ; D_Y = ABS(HR%Y-0.5_EB*(Y1+Y2))
-               EVEL = ABS(ATAN(D_Y/MAX(D_X,0.01_EB)))/(0.5_EB*PI)  ! 0-1 scale for 0-90 degrees
-               IF (HR%Y > Y1 .AND. HR%Y < Y2) Is_InFront = .TRUE.
-               IF (HR%Y < Y1 .AND. HR%SeeDoorXB1) &
-                    Y_TARGET = 0.5_EB*(Y1+Y2) - EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
-               IF (HR%Y > Y2 .AND. HR%SeeDoorXB2) &
-                    Y_TARGET = 0.5_EB*(Y1+Y2) + EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
-            ELSE ! abs(ior)=2 branch, If_IOR_Is_1
-               X1 = X1+MIN(0.3_EB,0.5_EB*DOOR_WIDTH) ; X2 = X2-MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
-               X_TARGET = X_XYZ
-               D_X = ABS(HR%X-X_XYZ) ; D_Y = ABS(HR%Y-Y_XYZ)
-               EVEL = ABS(ATAN(D_X/MAX(D_Y,0.01_EB)))/(0.5_EB*PI)  ! 0-1 scale for 0-90 degrees
-               IF (HR%X > X_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. &
-                    HR%X < X_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH)) X_TARGET = HR%X
-               IF (HR%X < X_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. HR%SeeDoorXYZ1) &
-                    X_TARGET = X_XYZ - EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
-               IF (HR%X > X_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. HR%SeeDoorXYZ2) &
-                    X_TARGET = X_XYZ + EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
-               X_XYZ = X_TARGET
-               D_TMP = 0.5_EB*DOOR_IOR*(Y_XYZ-HR%Y) ! if < 0 then between door and xyz
-               Y_TARGET = 0.5_EB*(Y1+Y2) ; X_TARGET = 0.5_EB*(X1+X2)
-               D_X = ABS(HR%X-0.5_EB*(X1+X2)) ; D_Y = ABS(HR%Y-0.5_EB*(Y1+Y2))
-               EVEL = ABS(ATAN(D_X/MAX(D_Y,0.01_EB)))/(0.5_EB*PI)  ! 0-1 scale for 0-90 degrees
-               IF (HR%X > X1 .AND. HR%X < X2) Is_InFront = .TRUE.
-               IF (HR%X < X1 .AND. HR%SeeDoorXB1) &
-                    X_TARGET = 0.5_EB*(X1+X2) - EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
-               IF (HR%X > X2 .AND. HR%SeeDoorXB2) &
-                    X_TARGET = 0.5_EB*(X1+X2) + EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
-            END IF If_IOR_Is_1
-
-            IF (D_TMP <= 0.0_EB) Is_XYZ_Visible = .FALSE.  ! use door XB only
-            DOOR_DIST = SQRT((X_XYZ-HR%X)**2+(Y_XYZ-HR%Y)**2)
-            EVEL = MAX(DOOR_WIDTH,SQRT((X_XYZ-0.5_EB*(X1+X2))**2+(Y_XYZ-0.5_EB*(Y1+Y2))**2))
-            IF (DOOR_DIST <= EVEL .AND. Is_XB_Visible) Is_XYZ_Visible = .FALSE.  ! use door XB only
-            EVEL = 1.5_EB*DOOR_WIDTH
-            IF (DOOR_DIST <= EVEL .AND. .NOT.Is_XB_Visible) Is_XYZ_Visible = .FALSE.  ! use flow field
-
-            ! Calculate the angle (left or right) to the door relative to the v0 direction
-            EVEL = SQRT(UBAR**2 + VBAR**2)
-            IF (EVEL > 0.0_EB) THEN
-               EVEL = MAX(0.001_EB,SQRT(UBAR**2 + VBAR**2))
-               IF (VBAR >= 0.0_EB) THEN
-                  ANGLE_HR = ACOS(UBAR/EVEL)
-               ELSE
-                  ANGLE_HR = 2.0_EB*PI - ACOS(UBAR/EVEL)
+               IF (ABS(EVAC_EXITS(N)%IMODE)==2 .AND. EVAC_EXITS(N)%TARGET_WHEN_CLOSED .AND. &
+                    EVAC_EXITS(N)%WAIT_AT_XYZ) THEN
+                  X_XYZ = EVAC_EXITS(N)%X ; Y_XYZ = EVAC_EXITS(N)%Y
+                  DOOR_IOR   = EVAC_EXITS(N)%IOR
+                  DOOR_WIDTH = EVAC_EXITS(N)%WIDTH
+                  IF (ABS(DOOR_IOR)==1) THEN
+                     IF (DOOR_IOR*(HR%X-X_XYZ) > 0.0_EB) THEN
+                        UBAR = 0.0_EB ; VBAR = 0.0_EB
+                        V0_IS_SET_ZERO = .TRUE.
+                        Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
+                     END IF
+                  ELSE
+                     IF (DOOR_IOR*(HR%Y-Y_XYZ) > 0.0_EB) THEN
+                        UBAR = 0.0_EB ; VBAR = 0.0_EB
+                        V0_IS_SET_ZERO = .TRUE.
+                        Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
+                     END IF
+                  END IF
                END IF
-               IF (ANGLE_HR == 2.0_EB*PI) ANGLE_HR = 0.0_EB  ! Agent HR angle is [0,2PI)
             ELSE
-               ANGLE_HR = HR%ANGLE
-            END IF
-                
-            D_NEW = SQRT((X_XYZ-HR%X)**2 + (Y_XYZ-HR%Y)**2)
-            IF ((Y_XYZ-HR%Y) >= 0.0_EB) THEN
-               ANGLE_XYZ = ACOS((X_XYZ-HR%X)/D_NEW)
-            ELSE
-               ANGLE_XYZ = 2.0_EB*PI - ACOS((X_XYZ-HR%X)/D_NEW)
-            END IF
-            IF (ANGLE_XYZ == 2.0_EB*PI) ANGLE_XYZ = 0.0_EB  ! Agent HRE angle is [0,2PI)
-            ANGLE_XYZ = ANGLE_HR - ANGLE_XYZ
-            IF (ANGLE_XYZ >= PI) ANGLE_XYZ = 2.0_EB*PI - ANGLE_XYZ
-            IF (ANGLE_XYZ <= -PI) ANGLE_XYZ = 2.0_EB*PI + ANGLE_XYZ
-            ANGLE_XYZ = -180.0_EB*ANGLE_XYZ/PI  ! Degrees, -180 - +180
-            ! If XYZ is on the right then the angle is negative, i.e., positive direction is anti-clockwise.
-            IF (ANGLE_XYZ < -20.0_EB .AND. HR%DensityR > 1.0_EB .AND. Is_XYZ_Visible) THEN
-               Is_XYZ_Visible = .FALSE.
-               IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
-            END IF
-            IF (ANGLE_XYZ >  20.0_EB .AND. HR%DensityL > 1.0_EB .AND. Is_XYZ_Visible) THEN
-               Is_XYZ_Visible = .FALSE.
-               IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
-            END IF
-
-            D_NEW = SQRT((0.5_EB*(X1+X2)-HR%X)**2 + (0.5_EB*(Y1+Y2)-HR%Y)**2)
-            IF ((0.5_EB*(Y1+Y2)-HR%Y) >= 0.0_EB) THEN
-               ANGLE_XB = ACOS((0.5_EB*(X1+X2)-HR%X)/D_NEW)
-            ELSE
-               ANGLE_XB = 2.0_EB*PI - ACOS((0.5_EB*(X1+X2)-HR%X)/D_NEW)
-            END IF
-            IF (ANGLE_XB == 2.0_EB*PI) ANGLE_XB = 0.0_EB  ! Agent HRE angle is [0,2PI)
-            ANGLE_XB = ANGLE_HR - ANGLE_XB
-            IF (ANGLE_XB >= PI) ANGLE_XB = 2.0_EB*PI - ANGLE_XB
-            IF (ANGLE_XB <= -PI) ANGLE_XB = 2.0_EB*PI + ANGLE_XB
-            ANGLE_XB = -180.0_EB*ANGLE_XB/PI  ! Degrees, -180 - +180
-            ! If XB is on the right then the angle is negative, i.e., positive direction is anti-clockwise.
-            DOOR_DIST = SQRT((0.5_EB*(X1+X1)-HR%X)**2+(0.5_EB*(Y1+Y1)-HR%Y)**2)
-            IF (ANGLE_XB < -20.0_EB .AND. HR%DensityR > 1.0_EB .AND. Is_XB_Visible .AND. DOOR_DIST > DOOR_WIDTH) THEN
-               Is_XB_Visible = .FALSE.
-               IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
-            END IF
-            IF (ANGLE_XB >  20.0_EB .AND. HR%DensityL > 1.0_EB .AND. Is_XB_Visible .AND. DOOR_DIST > DOOR_WIDTH) THEN
-               Is_XB_Visible = .FALSE.
-               IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
-            END IF
-            !IF (ANGLE_XB < -0.0_EB .AND. HR%DensityR > 1.0_EB .AND. HR%DensityL < 0.5_EB) Is_XB_Visible = .FALSE.
-            !IF (ANGLE_XB >  0.0_EB .AND. HR%DensityL > 1.0_EB .AND. HR%DensityR < 0.5_EB) Is_XB_Visible = .FALSE.
-
-            IF (D_TMP > 0 .AND. Is_XYZ_Visible) THEN
-               IF (Is_InFront .AND. Is_XB_Visible) THEN
-                  ! perpendicular to the door plane, i.e., straight
-                  UBAR = REAL(MOD(DOOR_IOR,2),EB) ; VBAR = REAL(DOOR_IOR/2,EB)
-                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 1  ! black, in front, i.e., straight
-               ELSE
-                  ! Aim towards XYZ
-                  UBAR = X_XYZ-HR%X ; VBAR = Y_XYZ-HR%Y
-                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 2  ! yellow, xyz
+               IF (ABS(EVAC_DOORS(N)%IMODE)==2 .AND. EVAC_DOORS(N)%TARGET_WHEN_CLOSED .AND. &
+                    EVAC_DOORS(N)%WAIT_AT_XYZ) THEN
+                  X_XYZ = EVAC_DOORS(N)%X ; Y_XYZ = EVAC_DOORS(N)%Y
+                  DOOR_IOR   = EVAC_DOORS(N)%IOR
+                  DOOR_WIDTH = EVAC_DOORS(N)%WIDTH
+                  IF (ABS(DOOR_IOR)==1) THEN
+                     IF (DOOR_IOR*(HR%X-X_XYZ) > 0.0_EB) THEN
+                        UBAR = 0.0_EB ; VBAR = 0.0_EB
+                        V0_IS_SET_ZERO = .TRUE.
+                        Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
+                     END IF
+                  ELSE
+                     IF (DOOR_IOR*(HR%Y-Y_XYZ) > 0.0_EB) THEN
+                        UBAR = 0.0_EB ; VBAR = 0.0_EB
+                        V0_IS_SET_ZERO = .TRUE.
+                        Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
+                     END IF
+                  END IF
                END IF
-            ELSEIF (Is_XB_Visible) THEN
-               ! D_TMP>0 and xyz not visible .OR. D_TMP<0 for all cases (d_tmp<0: between xb and xyz)
-               ! Nothing visible is corrected below by overwriting ubar,vbar
-               IF (Is_InFront) THEN
-                  ! perpendicular to the door plane, i.e., straight
-                  UBAR = REAL(MOD(DOOR_IOR,2),EB) ; VBAR = REAL(DOOR_IOR/2,EB)
-                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 1  ! black, in front, i.e., straight
+            END IF
+
+            N = ABS(HR%I_TARGET)
+            IF (Is_XB_Visible .OR. Is_XYZ_Visible) THEN
+               IF (N>N_DOORS) THEN
+                  N = N - N_DOORS
+                  X_XYZ = EVAC_EXITS(N)%X ; Y_XYZ = EVAC_EXITS(N)%Y
+                  X1 = EVAC_EXITS(N)%X1 ; X2 = EVAC_EXITS(N)%X2
+                  Y1 = EVAC_EXITS(N)%Y1 ; Y2 = EVAC_EXITS(N)%Y2
+                  DOOR_IOR = EVAC_EXITS(N)%IOR
+                  DOOR_WIDTH = EVAC_EXITS(N)%WIDTH
                ELSE
-                  ! Aim towards XB, towards the "door posts", if not in front
-                  UBAR = X_TARGET-HR%X ; VBAR = Y_TARGET-HR%Y
-                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 3  ! blue, xb
+                  X_XYZ = EVAC_DOORS(N)%X ; Y_XYZ = EVAC_DOORS(N)%Y
+                  X1 = EVAC_DOORS(N)%X1 ; X2 = EVAC_DOORS(N)%X2
+                  Y1 = EVAC_DOORS(N)%Y1 ; Y2 = EVAC_DOORS(N)%Y2
+                  DOOR_IOR = EVAC_DOORS(N)%IOR
+                  DOOR_WIDTH = EVAC_DOORS(N)%WIDTH
+               END IF
+
+               If_IOR_Is_1: IF (ABS(DOOR_IOR)==1)THEN
+                  Y1 = Y1+MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
+                  Y2 = Y2-MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
+                  Y_TARGET = Y_XYZ
+                  D_X = ABS(HR%X-X_XYZ) ; D_Y = ABS(HR%Y-Y_XYZ)
+                  EVEL = ABS(ATAN(D_Y/MAX(D_X,0.01_EB)))/(0.5_EB*PI)  ! 0-1 scale for 0-90 degrees
+                  IF (HR%Y > Y_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. &
+                       HR%Y < Y_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH)) Y_TARGET = HR%Y
+                  IF (HR%Y < Y_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. HR%SeeDoorXYZ1) &
+                       Y_TARGET = Y_XYZ - EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
+                  IF (HR%Y > Y_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. HR%SeeDoorXYZ2) &
+                       Y_TARGET = Y_XYZ + EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
+                  Y_XYZ = Y_TARGET
+                  D_TMP = DOOR_IOR*(X_XYZ-HR%X) ! if < 0 then between door and xyz
+                  X_TARGET = 0.5_EB*(X1+X2) ; Y_TARGET = 0.5_EB*(Y1+Y2)
+                  D_X = ABS(HR%X-0.5_EB*(X1+X2)) ; D_Y = ABS(HR%Y-0.5_EB*(Y1+Y2))
+                  EVEL = ABS(ATAN(D_Y/MAX(D_X,0.01_EB)))/(0.5_EB*PI)  ! 0-1 scale for 0-90 degrees
+                  IF (HR%Y > Y1 .AND. HR%Y < Y2) Is_InFront = .TRUE.
+                  IF (HR%Y < Y1 .AND. HR%SeeDoorXB1) &
+                       Y_TARGET = 0.5_EB*(Y1+Y2) - EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
+                  IF (HR%Y > Y2 .AND. HR%SeeDoorXB2) &
+                       Y_TARGET = 0.5_EB*(Y1+Y2) + EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
+               ELSE ! abs(ior)=2 branch, If_IOR_Is_1
+                  X1 = X1+MIN(0.3_EB,0.5_EB*DOOR_WIDTH) ; X2 = X2-MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
+                  X_TARGET = X_XYZ
+                  D_X = ABS(HR%X-X_XYZ) ; D_Y = ABS(HR%Y-Y_XYZ)
+                  EVEL = ABS(ATAN(D_X/MAX(D_Y,0.01_EB)))/(0.5_EB*PI)  ! 0-1 scale for 0-90 degrees
+                  IF (HR%X > X_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. &
+                       HR%X < X_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH)) X_TARGET = HR%X
+                  IF (HR%X < X_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. HR%SeeDoorXYZ1) &
+                       X_TARGET = X_XYZ - EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
+                  IF (HR%X > X_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH) .AND. HR%SeeDoorXYZ2) &
+                       X_TARGET = X_XYZ + EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
+                  X_XYZ = X_TARGET
+                  D_TMP = 0.5_EB*DOOR_IOR*(Y_XYZ-HR%Y) ! if < 0 then between door and xyz
+                  Y_TARGET = 0.5_EB*(Y1+Y2) ; X_TARGET = 0.5_EB*(X1+X2)
+                  D_X = ABS(HR%X-0.5_EB*(X1+X2)) ; D_Y = ABS(HR%Y-0.5_EB*(Y1+Y2))
+                  EVEL = ABS(ATAN(D_X/MAX(D_Y,0.01_EB)))/(0.5_EB*PI)  ! 0-1 scale for 0-90 degrees
+                  IF (HR%X > X1 .AND. HR%X < X2) Is_InFront = .TRUE.
+                  IF (HR%X < X1 .AND. HR%SeeDoorXB1) &
+                       X_TARGET = 0.5_EB*(X1+X2) - EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
+                  IF (HR%X > X2 .AND. HR%SeeDoorXB2) &
+                       X_TARGET = 0.5_EB*(X1+X2) + EVEL*(0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH))
+               END IF If_IOR_Is_1
+
+               IF (D_TMP <= 0.0_EB) Is_XYZ_Visible = .FALSE.  ! use door XB only
+               DOOR_DIST = SQRT((X_XYZ-HR%X)**2+(Y_XYZ-HR%Y)**2)
+               EVEL = MAX(DOOR_WIDTH,SQRT((X_XYZ-0.5_EB*(X1+X2))**2+(Y_XYZ-0.5_EB*(Y1+Y2))**2))
+               IF (DOOR_DIST <= EVEL .AND. Is_XB_Visible) Is_XYZ_Visible = .FALSE.  ! use door XB only
+               EVEL = 1.5_EB*DOOR_WIDTH
+               IF (DOOR_DIST <= EVEL .AND. .NOT.Is_XB_Visible) Is_XYZ_Visible = .FALSE.  ! use flow field
+
+               ! Calculate the angle (left or right) to the door relative to the v0 direction
+               EVEL = SQRT(UBAR**2 + VBAR**2)
+               IF (EVEL > 0.0_EB) THEN
+                  EVEL = MAX(0.001_EB,SQRT(UBAR**2 + VBAR**2))
+                  IF (VBAR >= 0.0_EB) THEN
+                     ANGLE_HR = ACOS(UBAR/EVEL)
+                  ELSE
+                     ANGLE_HR = 2.0_EB*PI - ACOS(UBAR/EVEL)
+                  END IF
+                  IF (ANGLE_HR == 2.0_EB*PI) ANGLE_HR = 0.0_EB  ! Agent HR angle is [0,2PI)
+               ELSE
+                  ANGLE_HR = HR%ANGLE
+               END IF
+
+               D_NEW = SQRT((X_XYZ-HR%X)**2 + (Y_XYZ-HR%Y)**2)
+               IF ((Y_XYZ-HR%Y) >= 0.0_EB) THEN
+                  ANGLE_XYZ = ACOS((X_XYZ-HR%X)/D_NEW)
+               ELSE
+                  ANGLE_XYZ = 2.0_EB*PI - ACOS((X_XYZ-HR%X)/D_NEW)
+               END IF
+               IF (ANGLE_XYZ == 2.0_EB*PI) ANGLE_XYZ = 0.0_EB  ! Agent HRE angle is [0,2PI)
+               ANGLE_XYZ = ANGLE_HR - ANGLE_XYZ
+               IF (ANGLE_XYZ >= PI) ANGLE_XYZ = 2.0_EB*PI - ANGLE_XYZ
+               IF (ANGLE_XYZ <= -PI) ANGLE_XYZ = 2.0_EB*PI + ANGLE_XYZ
+               ANGLE_XYZ = -180.0_EB*ANGLE_XYZ/PI  ! Degrees, -180 - +180
+               ! If XYZ is on the right then the angle is negative, i.e., positive direction is anti-clockwise.
+               IF (ANGLE_XYZ < -20.0_EB .AND. HR%DensityR > 1.0_EB .AND. Is_XYZ_Visible) THEN
+                  Is_XYZ_Visible = .FALSE.
+                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
+               END IF
+               IF (ANGLE_XYZ >  20.0_EB .AND. HR%DensityL > 1.0_EB .AND. Is_XYZ_Visible) THEN
+                  Is_XYZ_Visible = .FALSE.
+                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
+               END IF
+
+               D_NEW = SQRT((0.5_EB*(X1+X2)-HR%X)**2 + (0.5_EB*(Y1+Y2)-HR%Y)**2)
+               IF ((0.5_EB*(Y1+Y2)-HR%Y) >= 0.0_EB) THEN
+                  ANGLE_XB = ACOS((0.5_EB*(X1+X2)-HR%X)/D_NEW)
+               ELSE
+                  ANGLE_XB = 2.0_EB*PI - ACOS((0.5_EB*(X1+X2)-HR%X)/D_NEW)
+               END IF
+               IF (ANGLE_XB == 2.0_EB*PI) ANGLE_XB = 0.0_EB  ! Agent HRE angle is [0,2PI)
+               ANGLE_XB = ANGLE_HR - ANGLE_XB
+               IF (ANGLE_XB >= PI) ANGLE_XB = 2.0_EB*PI - ANGLE_XB
+               IF (ANGLE_XB <= -PI) ANGLE_XB = 2.0_EB*PI + ANGLE_XB
+               ANGLE_XB = -180.0_EB*ANGLE_XB/PI  ! Degrees, -180 - +180
+               ! If XB is on the right then the angle is negative, i.e., positive direction is anti-clockwise.
+               DOOR_DIST = SQRT((0.5_EB*(X1+X1)-HR%X)**2+(0.5_EB*(Y1+Y1)-HR%Y)**2)
+               IF (ANGLE_XB < -20.0_EB .AND. HR%DensityR > 1.0_EB .AND. Is_XB_Visible .AND. DOOR_DIST > DOOR_WIDTH) THEN
+                  Is_XB_Visible = .FALSE.
+                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
+               END IF
+               IF (ANGLE_XB >  20.0_EB .AND. HR%DensityL > 1.0_EB .AND. Is_XB_Visible .AND. DOOR_DIST > DOOR_WIDTH) THEN
+                  Is_XB_Visible = .FALSE.
+                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
+               END IF
+               !IF (ANGLE_XB < -0.0_EB .AND. HR%DensityR > 1.0_EB .AND. HR%DensityL < 0.5_EB) Is_XB_Visible = .FALSE.
+               !IF (ANGLE_XB >  0.0_EB .AND. HR%DensityL > 1.0_EB .AND. HR%DensityR < 0.5_EB) Is_XB_Visible = .FALSE.
+
+               IF (D_TMP > 0 .AND. Is_XYZ_Visible) THEN
+                  IF (Is_InFront .AND. Is_XB_Visible) THEN
+                     ! perpendicular to the door plane, i.e., straight
+                     UBAR = REAL(MOD(DOOR_IOR,2),EB) ; VBAR = REAL(DOOR_IOR/2,EB)
+                     IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 1  ! black, in front, i.e., straight
+                  ELSE
+                     ! Aim towards XYZ
+                     UBAR = X_XYZ-HR%X ; VBAR = Y_XYZ-HR%Y
+                     IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 2  ! yellow, xyz
+                  END IF
+               ELSEIF (Is_XB_Visible) THEN
+                  ! D_TMP>0 and xyz not visible .OR. D_TMP<0 for all cases (d_tmp<0: between xb and xyz)
+                  ! Nothing visible is corrected below by overwriting ubar,vbar
+                  IF (Is_InFront) THEN
+                     ! perpendicular to the door plane, i.e., straight
+                     UBAR = REAL(MOD(DOOR_IOR,2),EB) ; VBAR = REAL(DOOR_IOR/2,EB)
+                     IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 1  ! black, in front, i.e., straight
+                  ELSE
+                     ! Aim towards XB, towards the "door posts", if not in front
+                     UBAR = X_TARGET-HR%X ; VBAR = Y_TARGET-HR%Y
+                     IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 3  ! blue, xb
+                  END IF
                END IF
             END IF
          ELSE  ! If_BeeLine (or not fds6)
@@ -9820,7 +10009,7 @@ CONTAINS
                      write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
                      write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                   END IF
-               ELSE
+               ELSEIF (N > 0) THEN
                   JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
                   IF (TRIM(EVAC_DOORS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
                      write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
@@ -9844,12 +10033,14 @@ CONTAINS
          UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
       ELSE
          ! If no v0 found for the current position of the agent, use the previous value of the agent
-         UBAR = HR%UBAR ; VBAR = HR%VBAR
+         IF (.NOT.V0_IS_SET_ZERO) THEN 
+            UBAR = HR%UBAR ; VBAR = HR%VBAR
+         END IF
       END IF
       IF (L_DEAD) THEN
          UBAR = 0.0_EB; VBAR = 0.0_EB
       END IF
-      IF (I_HERDING_TYPE>1 .AND. HR%I_Target==0 .AND. HR%I_DoorAlgo>0) THEN
+      IF (I_HERDING_TYPE>1 .AND. HR%I_Target==0 .AND. HR%I_DoorAlgo>0 .AND. .NOT.V0_IS_SET_ZERO) THEN
          ! Herding type agent without any target door: do not move
          ! Agent without any target door: do not move
          DIST_TO_DOOR_TMP = 0.0_EB
@@ -10671,6 +10862,53 @@ CONTAINS
       PCXLOOP: DO IE = 1, N_CORRS
          PCX=>EVAC_CORRS(IE)
          IF (PCX%IMESH2 /= NM) CYCLE PCXLOOP
+         Elevator_If: IF (PCX%ELEVATOR) THEN
+            IF (PCX%Elevator_Mode == 2 .AND. PCX%Time_Start < T .AND. PCX%N_INSIDE > 0)  THEN
+               ! The car is at the upstairs, there is someone in the car, it is time to go down
+               PCX%Time_Stop = PCX%Time_Start + PCX%Travel_Time
+               PCX%Elevator_Mode = 0  ! The car is moving down
+               IF (PCX%IDOOR_FROM > 0) THEN
+                  ! Close the door if it is not yet closed.
+                  IF (EVAC_DOORS(PCX%IDOOR_FROM)%IMODE > -2) EVAC_DOORS(PCX%IDOOR_FROM)%IMODE = +2
+               END IF
+               NULLIFY(PREV_LL)
+               NULLIFY(NOW_LL)
+               NULLIFY(NEXT_LL)
+               IF (ASSOCIATED(PCX%FIRST)) THEN
+                  NOW_LL => PCX%FIRST
+                  IF (ASSOCIATED(PCX%FIRST%NEXT)) NEXT_LL => PCX%FIRST%NEXT
+               END IF
+               HUMLOOP_ELE: DO
+                  IF (.NOT. ASSOCIATED(NOW_LL)) EXIT HUMLOOP_ELE
+                  NOW_LL%T_out = PCX%Time_Stop ! The time when the car is at downstairs
+                  PREV_LL => NOW_LL  ! Save the previous element
+                  IF (ASSOCIATED(NOW_LL%NEXT)) THEN
+                     NOW_LL => NOW_LL%NEXT ! Jump to the next element in LL
+                  ELSE
+                     NULLIFY(NOW_LL)  ! End the loop
+                  END IF
+               END DO HUMLOOP_ELE
+            END IF
+            IF (PCX%Elevator_Mode == 0 .AND. PCX%Time_Stop < T) THEN
+               ! The car is moving down
+               PCX%Elevator_Mode = 1  ! The car is at downstairs
+            END IF
+            IF (PCX%Elevator_Mode == 1 .AND. PCX%N_INSIDE <= 0) THEN
+               ! The car is at the downstairs and it is already empty
+               PCX%Elevator_Mode = 3  ! The car is moving up
+               PCX%Time_Start = T
+               PCX%Time_Stop  = PCX%Time_Start + PCX%Travel_Time
+            END IF
+            IF (PCX%Elevator_Mode == 3 .AND. PCX%Time_Stop < T) THEN
+               ! The car is moving up and coming to the upper floor
+               PCX%Elevator_Mode = 2  ! The car is at upstairs
+               IF (PCX%IDOOR_FROM > 0) THEN
+                  ! Open the door if it is not yet open.
+                  IF (EVAC_DOORS(PCX%IDOOR_FROM)%IMODE /= -1) EVAC_DOORS(PCX%IDOOR_FROM)%IMODE = +1
+               END IF
+            END IF
+         END IF Elevator_If
+
          IF (PCX%N_INSIDE <= 0) CYCLE PCXLOOP
          NULLIFY(PREV_LL)
          NULLIFY(NOW_LL)
@@ -11089,7 +11327,8 @@ CONTAINS
 
       CASE ('Corr') SelectTargetType
          PCX2 => EVAC_CORRS(EVAC_Node_List(INODE2)%Node_Index)
-         IF (PCX2%n_inside < PCX2%MAX_HUMANS_INSIDE) THEN
+         IF ((.NOT.PCX2%ELEVATOR .AND. PCX2%n_inside < PCX2%MAX_HUMANS_INSIDE) .OR. &
+              (PCX2%ELEVATOR .AND. PCX2%Elevator_Mode == 2 .AND. PCX2%n_inside < PCX2%MAX_HUMANS_INSIDE)) THEN
             xx = 0.0_EB ; yy = 0.0_EB ; zz = 0.0_EB ! not used for corridors
             ior_new = 3     ! target is a corridor
             imesh2 = HR%IMESH     ! do not put to an another floor yet
@@ -11101,6 +11340,16 @@ CONTAINS
             TmpCurrent%HUMAN  = HR    ! Save the human data
             TmpCurrent%T_in   = T
             TmpCurrent%T_out  = T + PCX2%Eff_Length/(PCX2%Fac_Speed*HR%v0_fac*HR%Speed)
+            IF (PCX2%ELEVATOR) THEN
+               PCX2%Time_Last_In = T
+               PCX2%Time_Start   = T + PCX2%Time_Wait_To_Fill
+               IF (PCX2%n_inside == PCX2%MAX_HUMANS_INSIDE) THEN
+                  PCX2%Time_Start = T
+                  PCX2%Elevator_Mode = 0 ! Start moving down
+                  PCX2%Time_Stop = T + PCX2%Travel_Time
+               END IF
+               TmpCurrent%T_out  = PCX2%Time_Start + PCX2%Travel_Time
+            END IF
             TmpCurrent%From1_To2 = .TRUE.
             TmpCurrent%Index     = PCX2%n_inside
             TmpCurrent%Next      => PCX2%First
@@ -12697,7 +12946,13 @@ CONTAINS
           IF (HR%COLOR_INDEX < 1) HR%COLOR_INDEX = 1
           IF (HR%COLOR_INDEX > EVAC_AVATAR_NCOLOR) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           ! IF (HR%SHOW .AND. N_EVAC == 1) NPLIM = NPLIM + 1
-          IF (HR%SHOW .AND. EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N) NPLIM = NPLIM + 1
+          IF (HR%SHOW) THEN
+             IF (HR%IEL > 0) THEN
+                IF (EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N) NPLIM = NPLIM + 1
+             ELSE
+                IF (EVAC_ENTRYS(ABS(HR%IEL))%AVATAR_TYPE_INDEX == N) NPLIM = NPLIM + 1
+             END IF
+          END IF
        END DO
        NPLIM = MIN(NPPS,NPLIM)
        !
@@ -12722,8 +12977,13 @@ CONTAINS
        NPP = 0
        PLOOP: DO I = 1, N_HUMANS
           HR => HUMAN(I)
-          ! IF (.NOT. HR%SHOW ) CYCLE PLOOP
-          IF (.NOT. (HR%SHOW .AND. EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N)) CYCLE PLOOP
+          IF (.NOT. HR%SHOW ) CYCLE PLOOP
+          ! IF (.NOT. (HR%SHOW .AND. EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N)) CYCLE PLOOP
+          IF (HR%IEL > 0) THEN
+             IF (.NOT.(EVAC_EVACS(HR%IEL)%AVATAR_TYPE_INDEX == N)) CYCLE PLOOP
+          ELSE
+             IF (.NOT.(EVAC_ENTRYS(ABS(HR%IEL))%AVATAR_TYPE_INDEX == N)) CYCLE PLOOP
+          END IF
           NPP = NPP + 1
           TA(NPP) = HR%ILABEL
           XP(NPP) = REAL(HR%X,FB)
@@ -13618,11 +13878,11 @@ CONTAINS
     END IF
 
     ! Only those doors are possible which are in the same main evac mesh.
-    K_ave_Door(:)      = 0.0_EB
-    FED_max_Door(:)    = 0.0_EB
-    Is_Known_Door(:)   = .FALSE.
-    Is_Visible_Door(:) = .FALSE.
-    Is_BeeLine_Door = .FALSE.
+    K_ave_Door        = 0.0_EB
+    FED_max_Door      = 0.0_EB
+    Is_Known_Door     = .FALSE.
+    Is_Visible_Door   = .FALSE.
+    Is_BeeLine_Door   = .FALSE.
     Is_BeeLineXB_Door = .FALSE.
     ! Group index=0: the agent is from an entry line (no evac line)
     IF ( HR%GROUP_ID /= 0 ) THEN
@@ -13803,9 +14063,9 @@ CONTAINS
 
     ! Agent types: 1 rational agents, 2 known doors, 3 herding, 0 main evac ff
     IF (I_Agent_Type == 0) THEN  ! main evac ff (or evac/entr line ff)
-       Is_Known_Door(:)   = .FALSE.
-       Is_Visible_Door(:) = .FALSE.
-       Is_BeeLine_Door = .FALSE.
+       Is_Known_Door     = .FALSE.
+       Is_Visible_Door   = .FALSE.
+       Is_BeeLine_Door   = .FALSE.
        Is_BeeLineXB_Door = .FALSE.
     END IF
 

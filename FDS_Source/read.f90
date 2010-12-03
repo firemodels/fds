@@ -6678,6 +6678,7 @@ CONTAINS
              RGB(:) = EMESH_EXITS(N)%RGB(:)
              ID = TRIM('Eobst_' // TRIM(MESH_NAME(NM)))
              IF (.NOT.EVAC_FDS6 .AND. EMESH_EXITS(N)%IMESH==NM) EXIT NEND_LOOP_2  ! One VENT per door flow mesh
+             write(lu_err,*)'*** obst defined ',TRIM(ID),' mesh '
           END IF
        END DO NEND_LOOP_2
 
@@ -6699,6 +6700,7 @@ CONTAINS
              XB(6) = EMESH_STAIRS(N)%XB(6)
              RGB(:) = EMESH_STAIRS(N)%RGB(:)
              ID = TRIM('Eobst_' // TRIM(MESH_NAME(NM)))
+             write(lu_err,*)'*** obst defined ',TRIM(ID),' mesh '
           END IF
        END DO NSTRS_LOOP_2
 
@@ -7107,6 +7109,7 @@ CONTAINS
           XB = EMESH_STAIRS(I)%XB
           EVACUATION = .TRUE.
           MESH_ID = TRIM(MESH_NAME(EMESH_STAIRS(I)%IMESH))
+          write(lu_err,*)'*** STRS hole defined for mesh ',TRIM(MESH_ID)
           EXIT NSTRS_LOOP_3
        END DO NSTRS_LOOP_3
     END IF IMODE_3_IF
