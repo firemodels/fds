@@ -42,6 +42,7 @@ EXTERNCPP void update_transparency(void);
 EXTERNCPP void update_tbounds(void);
 EXTERNCPP void updateGluiTimeBounds(float time_min, float time_max);
 EXTERNCPP void settimeval(float timeval);
+EXTERNCPP tokendata *get_token_ptr(char *var,sv_object_frame *frame);
 EXTERNCPP int get_token_loc(char *var,sv_object_frame *frame);
 EXTERNCPP void get_indep_var_indices(sv_object *smv_object,char **var_indep_strings, int nvars_indep,int *index);
 EXTERNCPP void get_evac_indices(sv_object *smv_object, int *evac_index,int *nevac_index);

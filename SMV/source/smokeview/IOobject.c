@@ -682,7 +682,7 @@ void drawTargetNorm(void){
 /* ----------------------- draw_SVOBJECT ----------------------------- */
 
 void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurse_level){
-  sv_object_frame *framei;
+  sv_object_frame *framei,*frame0;
   tokendata *toknext;
   int *op;
   unsigned char *rgbptr;
@@ -701,7 +701,8 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
   if(object->visible==0)return;
   if(iframe>object->nframes-1||iframe<0)iframe=0;
   framei=object->obj_frames[iframe];
-
+  frame0=object->obj_frames[0];
+  
   ASSERT(framei->error==0||framei->error==1);
 
   if(framei->error==1){
@@ -753,16 +754,19 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
 
     // copy time dependent evac data
 
-    if(prop->nvars_evac>0&&prop->draw_evac==1){
-      for(i=0;i<prop->nvars_evac;i++){
-        tokendata *toki;
-        int index;
+    if(prop->draw_evac==1&&frame0->nevac_tokens>0){
+      tokendata *tok00;
+      
+      tok00 = frame0->tokens;
+      for(i=0;i<NEVAC_TOKENS;i++){
+        tokendata *toki,*tok0;
+        int itok;
 
-       // index = prop->vars_evac_index[i];
-        index=i;
-        if(index<0||index>framei->ntokens-1)continue;
-        toki = framei->tokens + index;
-        toki->var=prop->fvars_evac[i];
+        tok0 = frame0->evac_tokens[i];
+        if(tok0==NULL)continue;
+        itok = tok0 - tok00;
+        toki = framei->tokens + itok;
+        toki->var=tok0->evac_var;
       }
     }
 
@@ -3323,6 +3327,7 @@ sv_object *init_SVOBJECT1(char *label, char *commands, int visible){
   framei->error=0;
   framei->use_bw=setbw;
   framei->ntextures=0;
+  framei->nevac_tokens=0;
 
   return object;
 }
@@ -3356,6 +3361,7 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
       framei->display_list_ID=-1;
       framei->use_bw=setbw;
       framei->ntextures=0;
+      framei->nevac_tokens=0;
     }
     else{
       NewMemory((void **)&framei,sizeof(sv_object_frame));
@@ -3366,6 +3372,7 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
       framei->display_list_ID=-1;
       framei->use_bw=setbw;
       framei->ntextures=0;
+      framei->nevac_tokens=0;
     }
   }
   return object;
@@ -3737,6 +3744,24 @@ int get_token_loc(char *var,sv_object_frame *frame){
   return -1;
 }
 
+/* ----------------------- get_token_loc ----------------------------- */
+
+tokendata *get_token_ptr(char *var,sv_object_frame *frame){
+  int i;
+
+  for(i=0;i<frame->nsymbols;i++){
+    int ii;
+    tokendata *toki;
+    char *token_var;
+
+    ii = frame->symbols[i];
+    toki = frame->tokens+ii;
+    token_var = toki->tokenlabel+1;
+    if(STRCMP(var,token_var)==0)return toki;
+  }
+  return NULL;
+}
+
 /* ----------------------- parse_device_frame ----------------------------- */
 
 char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *frame){
@@ -4073,6 +4098,8 @@ int read_object_defs(char *file){
   int ndevices=0;
   int eof=0;
 
+ // freeall_objects();
+  
   stream=fopen(file,"r");
   if(stream==NULL)return 0;
   printf("      Reading device definitions from: %s\n",file);
@@ -4164,6 +4191,7 @@ int read_object_defs(char *file){
       current_frame->display_list_ID=-1;
       current_frame->use_bw=setbw;
       current_frame->device=current_object;
+      current_frame->nevac_tokens=0;
 
       current_object->nframes++;
 
@@ -4451,73 +4479,120 @@ void update_device_textures(void){
 /* ----------------------- init_object_defs ----------------------------- */
 
 void init_object_defs(void){
-    char com_buffer[1024];
-    char com_buffer2[1024];
+  char com_buffer[1024];
+  char com_buffer2[1024];
+  char objectfile[1024];
+  sv_object *objecti,*object_start;
+  int i;
+  
+  svofile_exists = 0;
 
+  if(smvprogdir!=NULL){
+    strcpy(objectfile,smvprogdir);
+    strcat(objectfile,"objects.svo");
+    read_object_defs(objectfile);
+  }
 
-    {
-      char objectfile[1024];
+  strcpy(objectfile,"objects.svo");
+  read_object_defs(objectfile);
 
-      svofile_exists = 0;
+  strcpy(objectfile,fdsprefix);
+  strcat(objectfile,".svo");
+  read_object_defs(objectfile);
 
-      if(smvprogdir!=NULL){
-        strcpy(objectfile,smvprogdir);
-        strcat(objectfile,"objects.svo");
-        read_object_defs(objectfile);
-      }
+  init_avatar();
 
-      strcpy(objectfile,"objects.svo");
-      read_object_defs(objectfile);
-
-      strcpy(objectfile,fdsprefix);
-      strcat(objectfile,".svo");
-      read_object_defs(objectfile);
-
-      init_avatar();
-    }
-
-    if(isZoneFireModel==1){
-      strcpy(com_buffer,"255 255 0 setrgb 0.02 0.05 drawdisk");
-      target_object_backup = init_SVOBJECT1("target", com_buffer,1);
-    }
-    else{
-      strcpy(com_buffer,"255 255 0 setrgb 0.038 drawcube");
-      target_object_backup = init_SVOBJECT1("sensor", com_buffer,1);
-    }
-
+  if(isZoneFireModel==1){
+    strcpy(com_buffer,"255 255 0 setrgb 0.02 0.05 drawdisk");
+    target_object_backup = init_SVOBJECT1("target", com_buffer,1);
+  }
+  else{
     strcpy(com_buffer,"255 255 0 setrgb 0.038 drawcube");
-    thcp_object_backup = init_SVOBJECT1("thcp", com_buffer,1);
+    target_object_backup = init_SVOBJECT1("sensor", com_buffer,1);
+  }
 
-    strcpy(com_buffer, "0 255 0 setrgb 0.038 drawcube");
-    strcpy(com_buffer2,"255 0 0 setrgb 0.038 drawcube");
-    heat_detector_object_backup = init_SVOBJECT2("heat_detector", com_buffer, com_buffer2,1);
+  strcpy(com_buffer,"255 255 0 setrgb 0.038 drawcube");
+  thcp_object_backup = init_SVOBJECT1("thcp", com_buffer,1);
 
-    strcpy(com_buffer, "0 255 0 setrgb 0.038 drawcube");
-    strcpy(com_buffer2,"255 0 0 setrgb 0.038 drawcube");
-    sprinkler_upright_object_backup = init_SVOBJECT2("sprinkler_upright", com_buffer, com_buffer2,1);
+  strcpy(com_buffer, "0 255 0 setrgb 0.038 drawcube");
+  strcpy(com_buffer2,"255 0 0 setrgb 0.038 drawcube");
+  heat_detector_object_backup = init_SVOBJECT2("heat_detector", com_buffer, com_buffer2,1);
 
-    strcpy(com_buffer, "127 127 127 setrgb 0.2 0.05 drawdisk");
-    strcpy(com_buffer2,"255 0 0 setrgb 0.2 0.05 drawdisk");
-    smoke_detector_object_backup = init_SVOBJECT2("smoke_detector", com_buffer, com_buffer2,1);
+  strcpy(com_buffer, "0 255 0 setrgb 0.038 drawcube");
+  strcpy(com_buffer2,"255 0 0 setrgb 0.038 drawcube");
+  sprinkler_upright_object_backup = init_SVOBJECT2("sprinkler_upright", com_buffer, com_buffer2,1);
 
-    strcpy(com_buffer, "255 0 0 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
-    error_device = init_SVOBJECT1("error_device", com_buffer,1);
+  strcpy(com_buffer, "127 127 127 setrgb 0.2 0.05 drawdisk");
+  strcpy(com_buffer2,"255 0 0 setrgb 0.2 0.05 drawdisk");
+  smoke_detector_object_backup = init_SVOBJECT2("smoke_detector", com_buffer, com_buffer2,1);
 
-    if(missing_device==NULL){
-      strcpy(com_buffer, "0 0 255 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
-      missing_device = init_SVOBJECT1("missing_device", com_buffer,1);
-    }
+  strcpy(com_buffer, "255 0 0 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
+  error_device = init_SVOBJECT1("error_device", com_buffer,1);
 
-    if(nobject_defs==0){
+  if(missing_device==NULL){
+    strcpy(com_buffer, "0 0 255 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
+    missing_device = init_SVOBJECT1("missing_device", com_buffer,1);
+  }
 
-      nobject_defs=4;
-      FREEMEMORY(object_defs);
-      NewMemory((void **)&object_defs,4*sizeof(sv_object *));
-      object_defs[0] = target_object_backup;
-      object_defs[1] = heat_detector_object_backup;
-      object_defs[2] = sprinkler_upright_object_backup;
-      object_defs[3] = smoke_detector_object_backup;
-    }
+  if(nobject_defs==0){
+    nobject_defs=4;
+    FREEMEMORY(object_defs);
+    NewMemory((void **)&object_defs,4*sizeof(sv_object *));
+    object_defs[0] = target_object_backup;
+    object_defs[1] = heat_detector_object_backup;
+    object_defs[2] = sprinkler_upright_object_backup;
+    object_defs[3] = smoke_detector_object_backup;
+  }
+  
+  for(i=0;i<navatar_types;i++){
+    sv_object_frame *obj_frame;
+    int n;
+    tokendata **evac_tokens,*evac_token;
+
+    CheckMemory;
+
+    obj_frame=avatar_types[i]->obj_frames[0];
+    evac_tokens = obj_frame->evac_tokens;
+
+    n=0;
+
+    evac_token=get_token_ptr("W",obj_frame);
+    evac_tokens[n++]=evac_token;
+    
+    evac_token=get_token_ptr("D",obj_frame);
+    evac_tokens[n++]=evac_token;
+    
+    evac_token=get_token_ptr("H1",obj_frame);
+    evac_tokens[n++]=evac_token;
+    
+    evac_token=get_token_ptr("SX",obj_frame);
+    evac_tokens[n++]=evac_token;
+    
+    evac_token=get_token_ptr("SY",obj_frame);
+    evac_tokens[n++]=evac_token;
+    
+    evac_token=get_token_ptr("SZ",obj_frame);
+    evac_tokens[n++]=evac_token;
+
+    evac_token=get_token_ptr("R",obj_frame);
+    evac_tokens[n++]=evac_token;
+    
+    evac_token=get_token_ptr("G",obj_frame);
+    evac_tokens[n++]=evac_token;
+    
+    evac_token=get_token_ptr("B",obj_frame);
+    evac_tokens[n++]=evac_token;
+    
+    evac_token=get_token_ptr("HX",obj_frame);
+    evac_tokens[n++]=evac_token;
+    
+    evac_token=get_token_ptr("HY",obj_frame);
+    evac_tokens[n++]=evac_token;
+    
+    evac_token=get_token_ptr("HZ",obj_frame);
+    evac_tokens[n++]=evac_token;
+  }
+  
 }
 
 /* ----------------------- init_avatar ----------------------------- */
@@ -4883,8 +4958,7 @@ void get_indep_var_indices(sv_object *smv_object,
 
 /* ----------------------- get_evac_indices ----------------------------- */
 
-void get_evac_indices(sv_object *smv_object, 
-        int *evac_index,int *nevac_index){
+void get_evac_indices(sv_object *smv_object,int *evac_index,int *nevac_index){
 
   int n;
 

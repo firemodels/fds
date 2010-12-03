@@ -65,16 +65,16 @@ PROP
   
   propi = propinfo + npropinfo;
 
-  strcpy(proplabel,"Human_props(default)");
+  strcpy(proplabel,"Human_props(default)");           // from input
 
-  nsmokeview_ids=4;
+  nsmokeview_ids=4;                                   // from input
 
   init_prop(propi,nsmokeview_ids,proplabel);
   for(i=0;i<nsmokeview_ids;i++){
-    if(i==0)strcpy(buffer,"human_fixed");
-    if(i==1)strcpy(buffer,"human_altered_with_data");
-    if(i==2)strcpy(buffer,"ellipsoid");
-    if(i==3)strcpy(buffer,"disk");
+    if(i==0)strcpy(buffer,"human_fixed");             // from input
+    if(i==1)strcpy(buffer,"human_altered_with_data"); // from input
+    if(i==2)strcpy(buffer,"ellipsoid");               // from input
+    if(i==3)strcpy(buffer,"disk");                    // from input
     lenbuf=strlen(buffer);
     NewMemory((void **)&smokeview_id,lenbuf+1);
     strcpy(smokeview_id,buffer);
@@ -84,7 +84,7 @@ PROP
   propi->smv_object=propi->smv_objects[0];
   propi->smokeview_id=propi->smokeview_ids[0];
 
-  propi->nvars_indep=1;
+  propi->nvars_indep=1;                               // from input
   propi->vars_indep=NULL;
   propi->svals=NULL;
   propi->texturefiles=NULL;
@@ -102,7 +102,7 @@ PROP
       propi->svals[i]=NULL;
       propi->vars_indep[i]=NULL;
       propi->fvals[i]=0.0;
-      strcpy(buffer,"D=0.2");
+      if(i==0)strcpy(buffer,"D=0.2");                 // from input
       equal=strchr(buffer,'=');
       if(equal!=NULL){
         char *buf1, *buf2, *keyword, *val;
@@ -145,11 +145,11 @@ PROP
 
         NewMemory((void **)&propi->vars_indep[i],lenkey+1);
         strcpy(propi->vars_indep[i],keyword);
-        propi->fvals[i]=0.2; // from input
+        sscanf(val,"%f",propi->fvals+i);
       }
     }
     get_indep_var_indices(propi->smv_object,propi->vars_indep,propi->nvars_indep,propi->vars_indep_index);
-    get_evac_indices(propi->smv_object,propi->vars_evac_index,&propi->nvars_evac);
+    get_evac_indices(propi->smv_object,propi->fvars_evac_index,&propi->nvars_evac);
   }
   propi->ntextures=ntextures;
 }
@@ -2012,12 +2012,8 @@ int readsmv(char *file, char *file2){
             sscanf(val,"%f",propi->fvals+i);
           }
         }
-        get_indep_var_indices(propi->smv_object,
-          propi->vars_indep,propi->nvars_indep,
-          propi->vars_indep_index);
-
-        get_evac_indices(propi->smv_object,
-          propi->vars_evac_index,&propi->nvars_evac);
+        get_indep_var_indices(propi->smv_object,propi->vars_indep,propi->nvars_indep,propi->vars_indep_index);
+        get_evac_indices(propi->smv_object,propi->fvars_evac_index,&propi->nvars_evac);
 
       }
       propi->ntextures=ntextures;

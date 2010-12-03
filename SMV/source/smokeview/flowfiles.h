@@ -29,7 +29,7 @@ typedef struct {
   struct _sv_object *smv_object, **smv_objects;
   int ntextures;
   char **texturefiles, **vars_indep, **svals;
-  int vars_indep_index[PROPVARMAX], vars_dep_index[PROPVARMAX], vars_evac_index[PROPVARMAX];
+  int vars_indep_index[PROPVARMAX], vars_dep_index[PROPVARMAX], fvars_evac_index[PROPVARMAX];
   int nvars_indep,      nvars_dep,                   nvars_evac;
   float fvals[PROPVARMAX], fvars_evac[PROPVARMAX], fvars_dep[PROPVARMAX];
   int draw_evac;
@@ -595,7 +595,7 @@ typedef struct _tourdata {
 /* --------------------------  tokendata ------------------------------------ */
 
 typedef struct _tokendata {
-  float var,*varptr,default_val;
+  float var,*varptr,default_val,evac_var;
   int command,loc,type,reads,nvars,noutvars,is_label,is_string,is_texturefile;
   struct _sv_object *included_object;
   int included_frame;
@@ -606,14 +606,15 @@ typedef struct _tokendata {
 } tokendata;
 
 /* --------------------------  sv_object_frame ------------------------------------ */
-
+#define NEVAC_TOKENS 12
 typedef struct _sv_object_frame {
   int use_bw;
   int error;
   int display_list_ID;
   int *symbols, nsymbols;
   tokendata *tokens, **command_list;
-  int ntokens,ncommands,ntextures;
+  tokendata *evac_tokens[NEVAC_TOKENS];
+  int ntokens,ncommands,ntextures,nevac_tokens;
   struct _sv_object *device;
   struct _sv_object_frame *prev, *next;
 } sv_object_frame;

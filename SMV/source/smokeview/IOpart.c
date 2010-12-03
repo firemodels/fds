@@ -1455,26 +1455,6 @@ void drawPart5(const particle *parti){
 
               rgbobject = datacopy->partclassbase->rgb;
 
-              //  0->2   class color
-              //  3->5   width, depth, 1.0 
-              //  6->8   width, depth, height
-              //  9->11  data file color
-              //  12->14 0.0 0.0 height
-
-              // :DUM1 :DUM2 :DUM3 W D H1 :SX :SY :SZ R G B :HX :HY :HZ
-
-              /*
-              valstack[0]=rgbobject[0];
-              valstack[1]=rgbobject[1];
-              valstack[2]=rgbobject[2];
-              valstack[3]=width[j];
-              valstack[4]=depth[j];
-              valstack[5]=1.0;
-              valstack[6]=1.0;
-              valstack[7]=1.0;
-              valstack[8]=height[j];
-              */
-
               is_human_color=0;
 
               if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0&&navatar_colors>0){
@@ -1493,29 +1473,56 @@ void drawPart5(const particle *parti){
                 }
               }
               
-              //  0->2   class color
-              //  3->5   width, depth, 1.0 
-              //  6->8   width, depth, height
-              //  9->11  data file color
-              //  12->14 0.0 0.0 height
-//  :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
+              //  :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
+              //  class color: rgbobject[0], rgbobject[1], rgbobject[2]
+
               if(prop!=NULL){
-                prop->fvars_evac[0]=rgbobject[0];
-                prop->fvars_evac[1]=rgbobject[1];
-                prop->fvars_evac[2]=rgbobject[2];
-                prop->fvars_evac[3]=width[j];
-                prop->fvars_evac[4]=depth[j];
-                prop->fvars_evac[5]=1.0;
-                prop->fvars_evac[6]=1.0;
-                prop->fvars_evac[7]=1.0;
-                prop->fvars_evac[8]=height[j];
-                prop->fvars_evac[9]=255*colorptr[0];
-                prop->fvars_evac[10]=255*colorptr[1];
-                prop->fvars_evac[11]=255*colorptr[2];
-                prop->fvars_evac[12]=0.0;
-                prop->fvars_evac[13]=0.0;
-                prop->fvars_evac[14]=height[j]/2.0;
-                prop->nvars_evac=15;
+                int n;
+                sv_object_frame *obj_frame;
+                tokendata **evac_tokens,*evac_token;
+
+                obj_frame=prop->smv_object->obj_frames[0];
+                evac_tokens = obj_frame->evac_tokens;
+                obj_frame->nevac_tokens=12;
+                
+                n=0;
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=width[j]; //:W
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=depth[j]; //:D
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=1.0;//:H1
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=1.0;//:SX
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=1.0;//:SY
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=height[j];  //:SZ
+                printf("height[%i]=%f\n",j,height[j]);
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=255*colorptr[0]; //:R
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=255*colorptr[1];//:G
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=255*colorptr[2];//:B
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=0.0;//:HX
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=0.0;//:HY
+
+                evac_token=evac_tokens[n++];
+                if(evac_token!=NULL)evac_token->evac_var=height[j]/2.0; //:HZ
                 prop->draw_evac=1;
               }
 
