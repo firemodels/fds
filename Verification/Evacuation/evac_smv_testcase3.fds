@@ -1,14 +1,14 @@
- FDS+Evac version: FDS 5.4.3, Evac 2.2.1
+ FDS+Evac version: FDS 6.0.0, Evac 2.4.0
 
  Two floor evacuation test case, the rooms have two doors.
  See the FDS+Evac Guide, Chapter "Sample Input Files"
 
-&HEAD CHID='evac_smv_testcase3', TITLE='Test 2, evac meshes only, SVN $Revision: 4582 $'  / 
+&HEAD CHID='evac_smv_testcase3', TITLE='Test 2, evac meshes'  / 
 
- No fire meshes, just an evacuation calculation
+ Fire + evacuation meshes
 
  Fire mesh(es).
- MESH IJK=22,20,10, XB= -0.2,10.6,  0.0,10.0, 0.0,5.0 /
+&MESH IJK=22,20,10, XB= -0.2,10.6,  0.0,10.0, 0.0,5.0 /
 
  Evacuation meshes
 &MESH IJK=60,54,1, XB= -0.4,11.6, -0.4,10.4, 0.4,1.6, EVAC_Z_OFFSET=1.0, 
@@ -16,29 +16,18 @@
 &MESH IJK=54,54,1, XB= -0.4,10.4, -0.4,10.4, 3.0,4.2, EVAC_Z_OFFSET=1.0, 
       EVACUATION=.TRUE., EVAC_HUMANS=.TRUE., ID='MainEvacGrid2' /
 
- Additional door flow fields.
- Note: main evacuation grid and the door flow grids should have same XB and IJK.
-&MESH IJK=60,54,1, XB= -0.4,11.6, -0.4,10.4, 0.4,1.6,
-      EVACUATION=.TRUE., ID='LeftExitGrid' /
-&MESH IJK=60,54,1, XB= -0.4,11.6, -0.4,10.4, 0.4,1.6, 
-      EVACUATION=.TRUE., ID='RightExitGrid' /
-
-&MESH IJK=54,54,1, XB= -0.4,10.4, -0.4,10.4, 3.0,4.2,
-      EVACUATION=.TRUE., ID='LeftDoorGrid2' /
-&MESH IJK=54,54,1, XB= -0.4,10.4, -0.4,10.4, 3.0,4.2, 
-      EVACUATION=.TRUE., ID='RightDoorGrid2' /
-
-&TIME T_END=30.0, DT=0.05 / 
+&TIME T_END=10.0, DT=0.05 / 
       defaults: EVAC_DT_FLOWFIELD=0.01, EVAC_DT_STEADY_STATE=0.05,
 
-&MISC SURF_DEFAULT='WALL',
-      RADIATION=.FALSE., EVACUATION_MC_MODE=.FALSE.,
+&MISC SURF_DEFAULT='WALL', NO_EVACUATION=.FALSE., RADIATION=.FALSE.,
       EVAC_PRESSURE_ITERATIONS=15, EVAC_TIME_ITERATIONS=50,
-      EVAC_SURF_DEFAULT= 'EVAC_WALL' / 
+      EVACUATION_MC_MODE=.TRUE., EVACUATION_DRILL=.TRUE. 
+      EVAC_SURF_DEFAULT= 'EVAC_WALL', /
+                EVACUATION_MC_MODE=.FALSE., EVACUATION_DRILL=.FALSE. 
       defaults: EVAC_PRESSURE_ITERATIONS=50, EVAC_TIME_ITERATIONS=50,
 
 &DUMP SMOKE3D=.TRUE.,
-      NFRAMES=30,
+      NFRAMES=10,
       DT_PART=0.5,
       DT_HRR=1.0,
       DT_SLCF=1.0,
@@ -68,13 +57,10 @@
       MATL_ID        = 'GYPSUM PLASTER'
       THICKNESS      = 0.012 /
 
- Boundary condition for the evacuation flow fields:
-&SURF ID = 'OUTFLOW', VEL = +0.000001, TAU_V=0.1 /
-
  Default material for evacuation meshes is INERT and its color
  can not be changed esily in Smokeview. Thus, an evacuation 
  material is defined below, which has only color:
-&SURF ID    = 'EVAC_WALL',  COLOR='RED' / or COLOR
+&SURF ID    = 'EVAC_WALL', COLOR='RED' / or COLOR
 
 ============= FIRE FDS GEOMETRY STARTS ================
 
@@ -99,10 +85,11 @@
 &OBST XB= 3.00, 4.00, 3.00, 4.00, 0.00, 0.60, SURF_ID='INERT' /
 &VENT XB= 3.00, 4.00, 3.00, 4.00, 0.60, 0.60, SURF_ID='BURNER' /
 
- Note, that EVACUATION=.FALSE. should be given for 'MB' vents or
- otherwise these vent are introduce also to the evacuation geometry.
-&VENT MB='YMIN',SURF_ID='OPEN' / 
-&VENT MB='YMAX',SURF_ID='OPEN' / 
+&VENT XB=  4.0,6.0,  10.0,10.0, 0.0,2.0, SURF_ID='OPEN', COLOR='MAGENTA' /
+&VENT XB=  4.0,6.0,   0.0, 0.0, 0.0,2.0, SURF_ID='OPEN', COLOR='MAGENTA' /
+
+&VENT XB= -0.2,-0.2,  4.4,5.6, 0.0,2.0, SURF_ID='OPEN', COLOR='MAGENTA' / Left Exit
+&VENT XB= 10.6,10.6,  4.4,5.6, 0.0,2.0, SURF_ID='OPEN', COLOR='MAGENTA' / Left Exit
 
 ============= FIRE FDS GEOMETRY ENDS ==================
 
@@ -111,62 +98,30 @@
 &HOLE XB= -0.21, 0.01,  7.39,  8.61, 2.60, 4.60, EVACUATION=.TRUE. / Left Door, 2nd floor
 &HOLE XB=  9.99,10.21,  2.39,  3.61, 2.60, 4.60, EVACUATION=.TRUE. / Right Door, 2nd floor
 
- This vent is not at an outer boundary of the domain nor at a solid
- object, thus, there should be an OBST behind it (FDS5 restriction).
-&VENT XB= -0.20,-0.20,  4.40,5.60, 0.40,1.60, SURF_ID='OUTFLOW', 
-      MESH_ID='MainEvacGrid', EVACUATION=.TRUE., RGB=0,0,255 / Left Exit
-&OBST XB= -0.40,-0.20,  4.40,5.60, 0.40,1.60, SURF_ID='INERT',
-      EVACUATION=.TRUE., RGB=30,150,20 / 
-
- This vent is not at an outer boundary of the domain nor at a solid
- object, thus, there should be an OBST behind it (FDS5 restriction).
-&VENT XB= 11.60,11.60,  4.40,5.60, 0.40,1.60, SURF_ID='OUTFLOW', 
-      MESH_ID='MainEvacGrid', EVACUATION=.TRUE., RGB=0,0,255 / Right Exit
-
- This vent is at the outer boundary of the domain, i.e., it is
- on a solid object (by default).
-&VENT XB= 10.20,10.20,  2.40,3.60, 3.0,4.2, SURF_ID='OUTFLOW', 
-      MESH_ID='MainEvacGrid2', EVACUATION=.TRUE., RGB=0,0,255 / Right Door, 2nd
-&OBST XB= 10.20,10.40,  2.40,3.60, 3.0,4.2, SURF_ID='INERT', 
-      EVACUATION=.TRUE., RGB=30,150,20 / Right Door, 2nd
-&VENT XB= -0.20,-0.20,  7.40,8.60, 3.0,4.2, SURF_ID='OUTFLOW', 
-      MESH_ID='MainEvacGrid2', EVACUATION=.TRUE., RGB=0,0,255 / Left Door, 2nd
-&OBST XB= -0.40,-0.20,  7.40,8.60, 3.0,4.2, SURF_ID='INERT', 
-      EVACUATION=.TRUE., RGB=30,150,20 / Left Door, 2nd
-
 &EXIT ID='LeftExit', IOR=-1,
       FYI= 'Comment line',
-      VENT_FFIELD='LeftExitGrid',
       COLOR='YELLOW', HEIGHT=2.0, SHOW=.TRUE.,
       TIME_OPEN=7.2,TIME_CLOSE=12.2,
-      XYZ= 0.20, 2.00, 1.50,
+      XYZ= 0.00, 3.00, 1.00,
       XB= -0.20,-0.20,  4.40,5.60, 0.40,1.60 /
-&VENT XB= -0.20,-0.20,  4.40,5.60, 0.40,1.60, SURF_ID='OUTFLOW', 
-      MESH_ID='LeftExitGrid', EVACUATION=.TRUE./ Left Exit Fan
-      XYZ= 0.20, 5.00, 1.00,
 
 &EXIT ID='RightExit', IOR=+1,
       FYI= 'Comment line',
-      VENT_FFIELD='RightExitGrid',
       COLOR='BLUE', HEIGHT=2.0, SHOW=.TRUE.,
       TIME_CLOSE=7.2,TIME_OPEN=12.2,
-      XYZ= 11.40, 3.00, 1.00,
+      XYZ= 11.40, 5.00, 1.00,
       XB= 11.60,11.60,  4.40,5.60, 0.40,1.60 /
-&VENT XB= 11.60,11.60,  4.40,5.60, 0.40,1.60, SURF_ID='OUTFLOW', 
-      MESH_ID='RightExitGrid', EVACUATION=.TRUE./ Right Exit Fan
 
  Smokeview tests: +y and -y direction exits also
 &EXIT ID='PlusY', IOR=+2,
       FYI= 'Comment line',
-      VENT_FFIELD='RightExitGrid',
       COLOR='BLUE VIOLET', HEIGHT=2.0,
-      XYZ= 4.50, 2.80, 1.00,
+      XYZ= 6.50, 2.80, 1.00,
       XB= 6.0,7.0,  3.0,3.0, 0.40,1.60 /
 &EXIT ID='MinusY', IOR=-2,
       FYI= 'Comment line',
-      VENT_FFIELD='RightExitGrid',
       COLOR='BANANA', HEIGHT=2.0,
-      XYZ= 4.50, 7.20, 1.00,
+      XYZ= 6.50, 7.20, 1.00,
       XB= 6.0,7.0,  7.0,7.0, 0.40,1.60 /
 &ENTR ID='DummyEntry',
       FYI='Comments',COLOR='GREEN',
@@ -209,15 +164,11 @@
 
 &DOOR ID='LeftDoor2nd', IOR=-1,
       FYI= 'Comment line',
-      VENT_FFIELD='LeftDoorGrid2',
       COLOR='RED', HEIGHT=2.0, SHOW=.TRUE.,
       EXIT_SIGN=.TRUE.,
       TO_NODE= 'LeftCorr',
       XYZ= 0.0, 8.00, 3.6,
       XB= -0.20,-0.20,  7.40,8.60, 3.0,4.2 /
-&VENT XB= -0.20,-0.20,  7.40,8.60, 3.0,4.2, SURF_ID='OUTFLOW', 
-      MESH_ID='LeftDoorGrid2', EVACUATION=.TRUE./ Left Door Fan, 2nd
-      XYZ= 0.2, 8.00, 3.6,
 &CORR ID='LeftCorr',
       FYI='Comments',
       MAX_HUMANS_INSIDE=20,
@@ -226,20 +177,17 @@
       TO_NODE='LeftCorrExit' /
 &EXIT ID='LeftCorrExit',
       FYI='A dummy exit, the end point to a corridor object',
-      SHOW=.FALSE.,
+      SHOW=.FALSE., COUNT_ONLY=.TRUE.,
       IOR=-1,
       XB= -0.40,-0.40,  7.40,8.60, 0.40,1.60 /
       
 &DOOR ID='RightDoor2nd', IOR=+1,
       FYI= 'Comment line',
-      VENT_FFIELD='RightDoorGrid2',
       COLOR='GREEN', HEIGHT=2.0, SHOW=.TRUE.,
       EXIT_SIGN=.TRUE.,
       TO_NODE= 'RightCorr',
       XYZ=10.0, 3.00, 3.6,
       XB= 10.20,10.20,  2.40,3.60, 3.0,4.2 /
-&VENT XB= 10.20,10.20,  2.40,3.60, 3.0,4.2, SURF_ID='OUTFLOW', 
-      MESH_ID='RightDoorGrid2', EVACUATION=.TRUE./ Right Door Fan, 2nd
 &CORR ID='RightCorr',
       FYI='Comments',
       MAX_HUMANS_INSIDE=20,
@@ -262,8 +210,7 @@
       DET_EVAC_DIST=0,DET_MEAN=0.0,
       TDET_SMOKE_DENS=0.1 , HUMAN_SMOKE_HEIGHT=1.60,
       DENS_INIT= 4.0, NOT_RANDOM=.TRUE.,
-      OUTPUT_SPEED=.TRUE.,
-      FAC_DOOR_OLD=0.1, FAC_DOOR_OLD2=0.9,
+      OUTPUT_SPEED=.TRUE., EVAC_FDS6=.TRUE.,
       OUTPUT_FED=.TRUE., COLOR_METHOD = 0 /
 
 &PERS ID='Male',
@@ -276,7 +223,7 @@
       FYI='Female diameter and velocity',
       DEFAULT_PROPERTIES='Female',
       PRE_EVAC_DIST=1,PRE_LOW=1.0,PRE_HIGH=2.0,
-      DET_EVAC_DIST=0,DET_MEAN=0.0, /
+      DET_EVAC_DIST=0,DET_MEAN=5.0, /
 
 &PERS ID='Child',
       FYI='Child diameter and velocity',
@@ -292,27 +239,29 @@
 
  1st Floor:
  These humans will go to the left exit, if it is not blocked by smoke.
-&EVAC ID = 'HumanLeftDoorKnown', 
+ EVAC ID = 'HumanLeftDoorKnown', 
       NUMBER_INITIAL_PERSONS = 25,
       XB = 1.0,9.0,  1.0,9.0, 0.4,1.6
       AVATAR_COLOR = 'BLUE',
+      PRE_EVAC_DIST=1,PRE_LOW=10.0,PRE_HIGH=20.0,
+      DET_EVAC_DIST=1,DET_LOW=20.0,DET_HIGH=30.0,DET_MEAN=15.0,
       KNOWN_DOOR_NAMES = 'LeftExit',
-      KNOWN_DOOR_PROBS = 1.0,
+      KNOWN_DOOR_PROBS = 1.0, AVATAR_TYPE='Human',
       PERS_ID = 'Male' / 
 
  These humans will go to the right exit, if it is not blocked by smoke.
-&EVAC ID = 'HumanRightDoorKnown', 
+ EVAC ID = 'HumanRightDoorKnown', 
       NUMBER_INITIAL_PERSONS = 25,
       XB = 1.0,9.0,  1.0,9.0, 0.4,1.6
       AVATAR_COLOR = 'RED',
       KNOWN_DOOR_NAMES = 'RightExit',
-      KNOWN_DOOR_PROBS = 1.0,
+      KNOWN_DOOR_PROBS = 1.0, AVATAR_TYPE='Firefighter',
       PERS_ID = 'Female' / 
 
  If a human has many known doors (at this floor) then she will first try to
  go to the nearest visible known exit door. If there are no visible known doors
  around then she will try other known doors.
-&EVAC ID = 'HumanBothDoorsKnown', 
+ EVAC ID = 'HumanBothDoorsKnown', 
       NUMBER_INITIAL_PERSONS = 25,
       XB = 1.0,9.0,  1.0,9.0, 0.4,1.6
       AVATAR_COLOR = 'GREEN',
@@ -325,9 +274,9 @@
  she follows the given FLOW_FIELD_ID, if she is on that floor, otherwise she
  will follow the flow field of the main evac mesh of the floor.
  Note: exit door = (EXIT) or (DOOR with EXIT_SIGN=.TRUE.) 
-&EVAC ID = 'HumanNoDoorKnown', 
+ EVAC ID = 'HumanNoDoorKnown', 
       NUMBER_INITIAL_PERSONS = 25,
-      XB =  10.4,11.6, -0.4,10.4, 0.4,1.6
+      XB = 1.0,9.0,  1.0,9.0, 0.4,1.6
       AVATAR_COLOR = 'BLACK',
       PERS_ID = 'Adult' / 
 
@@ -338,9 +287,17 @@
  on the first floor.
 
 &EVAC ID = 'Human2ndFloor', 
-      NUMBER_INITIAL_PERSONS = 50,
+      NUMBER_INITIAL_PERSONS = 25,
       XB = 0.5,9.5,  0.5,9.5, 3.0,4.2
-      AVATAR_COLOR = 'BLACK',
+      AVATAR_COLOR = 'BLUE', AVATAR_TYPE='Human',
+      KNOWN_DOOR_NAMES = 'LeftDoor2nd','RightDoor2nd','RightExit',
+      KNOWN_DOOR_PROBS = 0.5,1.0,1.0,
+      PERS_ID = 'Adult' / 
+
+&EVAC ID = 'Firemen2ndFloor', 
+      NUMBER_INITIAL_PERSONS = 10,
+      XB = 0.5,9.5,  0.5,9.5, 3.0,4.2
+      AVATAR_COLOR = 'RED', AVATAR_TYPE='Firefighter',
       KNOWN_DOOR_NAMES = 'LeftDoor2nd','RightDoor2nd','RightExit',
       KNOWN_DOOR_PROBS = 0.5,1.0,1.0,
       PERS_ID = 'Adult' / 
@@ -364,7 +321,7 @@
 &SLCF PBX=3.50, QUANTITY='TEMPERATURE' /
 
  Next lines could be used to plot the evacuation flow fields:
- SLCF PBZ = 1.000, QUANTITY = 'VELOCITY', VECTOR = .TRUE., EVACUATION=.TRUE. / 
- SLCF PBZ = 3.600, QUANTITY = 'VELOCITY', VECTOR = .TRUE., EVACUATION=.TRUE. / 
+&SLCF PBZ = 1.000, QUANTITY = 'VELOCITY', VECTOR = .TRUE., EVACUATION=.TRUE. / 
+&SLCF PBZ = 3.600, QUANTITY = 'VELOCITY', VECTOR = .TRUE., EVACUATION=.TRUE. / 
 
 &TAIL /
