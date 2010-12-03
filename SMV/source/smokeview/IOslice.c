@@ -1263,14 +1263,17 @@ int new_multi(slice *sdold,slice *sd){
   if(sd->volslice==0){
     float delta;
 
-    delta = sdold->delta;
-    if(sd->delta>delta)delta=sd->delta;
-    if(fabs(sd->xmin-sdold->xmin)<delta&&fabs(sd->xmax-sdold->xmax)<delta
+  // sd->delta in physical units
+  // sd->xmin/xmax etc are in scaled units
+  // convert from physical to scaled units using xyzmaxdiff 
+    delta = max(sdold->delta,sd->delta)/xyzmaxdiff;
+    if(fabs(sd->xmin-sdold->xmin)<delta&&fabs(sd->xmax-sdold->xmax)<delta // test whether two slices are identical
 	   &&fabs(sd->ymin-sdold->ymin)<delta&&fabs(sd->ymax-sdold->ymax)<delta
 	   &&fabs(sd->zmin-sdold->zmin)<delta&&fabs(sd->zmax-sdold->zmax)<delta
         ){
 	    return 1;
-	}
+	  }
+	  
     if(strcmp(sd->label.shortlabel,sdold->label.shortlabel)!=0
       ||sd->idir!=sdold->idir
       ||sd->position+delta<sdold->position
