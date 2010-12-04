@@ -1373,21 +1373,21 @@ END SUBROUTINE WAKE_REDUCTION
 ! E.Loth, Quasi-steady shape and drag of deformable bubbles and drops, International Journal of Multiphase Flow 34 (2008)
 REAL(EB) FUNCTION SHAPE_DEFORMATION(RE,WE,C_DRAG)
 REAL(EB)::RE,WE,C_DRAG,C_DRAGNEW,E
-REAL(EB)::DC_DRAGSTAR,fSN,REWE02
+REAL(EB)::DC_DRAGSTAR,fSN,WERE02
 
 IF(WE>2.0) THEN
-    REWE02=RE*WE**0.2
-    DC_DRAGSTAR=C_DRAG+.38E-2*REWE02+3E-5*REWE02**2+9E-7*REWE02**3
+    WERE02=WE*RE**0.2
+    DC_DRAGSTAR=.38E-2*WERE02+3E-5*WERE02**2+9E-7*WERE02**3
     fSN=1.0+0.15*RE**.0687
     C_DRAGNEW=1.0/(3.0*RE)*(DC_DRAGSTAR*(8*RE+72-72*fSN)+72*fSN)
-    C_DRAGNEW=MIN(8.0_EB/3.0_EB,C_DRAG) ! Bounded from above by drag of a disintegrating drop
-    C_DRAG=MAX(C_DRAG,C_DRAGNEW)  
+    C_DRAGNEW=MIN(8.0_EB/3.0_EB,C_DRAGNEW) ! Bounded from above by drag of a disintegrating drop
+    C_DRAGNEW=MAX(C_DRAG,C_DRAGNEW)
     ! Absorb effect the of larger projected surface area into C_DRAG.
     ! Particle movement routines use projected area of a sphere,
     ! calculate the ratio of projected surface areas of a sphere and an
     ! ellipsoid of the same volume with aspect ratio E.
     E=1._EB-0.75_EB*tanh(0.07_EB*WE)
-    SHAPE_DEFORMATION=C_DRAG*E**(-2.0/3.0)
+    SHAPE_DEFORMATION=C_DRAGNEW*E**(-2.0/3.0)
 ELSE
     SHAPE_DEFORMATION=C_DRAG
 ENDIF    
