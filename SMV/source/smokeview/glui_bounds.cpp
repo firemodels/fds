@@ -692,6 +692,9 @@ extern "C" void glui_bounds_setup(int main_window){
   CHECKBOX_extreme2=glui_bounds->add_checkbox_to_panel(panel_colorbar,"Highlight extreme data",&show_extremedata,
     COLORBAR_EXTREME2,Slice_CB);
   CHECKBOX_transparentflag=glui_bounds->add_checkbox_to_panel(panel_colorbar,"Use transparency:",&use_transparency_data,DATA_transparent,Slice_CB);
+#ifdef pp_BETA
+  glui_bounds->add_checkbox_to_panel(panel_colorbar,"Sort transparent surfaces:",&sort_transparency);
+#endif
   SPINNER_labels_transparency_data=glui_bounds->add_spinner_to_panel(panel_colorbar,"transparency level",GLUI_SPINNER_FLOAT,&transparentlevel,DATA_transparent,Slice_CB);
   SPINNER_labels_transparency_data->set_w(0);
   SPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);

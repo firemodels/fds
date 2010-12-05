@@ -14,6 +14,7 @@
 #include "threader.h"
 #include "string_util.h"
 
+SVEXTERN int SVDECL(sort_transparency,1);
 SVEXTERN int SVDECL(object_outlines,0);
 SVEXTERN int SVDECL(usemenu,1),SVDECL(show_evac_slices,0);
 SVEXTERN float direction_color[4], SVDECL(*direction_color_ptr,NULL);

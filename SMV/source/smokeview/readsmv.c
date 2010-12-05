@@ -4802,7 +4802,7 @@ typedef struct {
         isoi->compression_type=0;
         isoi->file=isoi->reg_file;
         if(readlabels(&isoi->surface_label,stream)==2)return 2;
-        getisolevels(isoi->file,dataflag,&isoi->levels,&isoi->nlevels);
+        getisolevels(isoi->file,dataflag,&isoi->levels,&isoi->colorlevels,&isoi->nlevels);
         if(dataflag==1){
           if(readlabels(&isoi->color_label,stream)==2)return 2;
         }

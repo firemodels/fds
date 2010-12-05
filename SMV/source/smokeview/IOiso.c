@@ -129,12 +129,14 @@ void getcisolevels(const char *isofile, float **levelsptr, int *nisolevels){
 
 /* ------------------ getisolevels ------------------------ */
 
-void getisolevels(const char *isofile, int dataflag, float **levelsptr, int *nisolevels){
+void getisolevels(const char *isofile, int dataflag, float **levelsptr, float ***colorlevelsptr, int *nisolevels){
   int one;
   int version;
   int len[3],labellengths=0;
   int nlevels;
   EGZ_FILE *isostreamptr;
+  int i;
+  float **colorlevels=NULL;
 
 #ifdef EGZ
   isostreamptr=EGZ_FOPEN(isofile,"rb",0,2);
@@ -158,6 +160,14 @@ void getisolevels(const char *isofile, int dataflag, float **levelsptr, int *nis
   NewMemory((void **)levelsptr,nlevels*sizeof(float));
   EGZ_FREAD(*levelsptr,4,(unsigned int)(nlevels),isostreamptr);
   EGZ_FCLOSE(isostreamptr);
+  NewMemory((void **)&colorlevels,nlevels*sizeof(float *));
+  for(i=0;i<nlevels;i++){
+    float *colorlevel;
+    
+    colorlevels[i]=NULL;
+  }
+  *colorlevelsptr=colorlevels;
+  
 }
 
 /* ------------------ getisosizes ------------------------ */
@@ -266,34 +276,24 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
 
 void readiso(const char *file, int ifile, int flag, int *errorcode){
   extern int isoframestep;
-  int i,j,n,ii,jj;
-  float out[3];
+  int itime,ilevel,itri,ivert,n,ii,iitime;
   isosurface *asurface;
   int nisopoints, nisotriangles;
   int maxfullbuffer,maxcompbuffer;
   unsigned char *comp_buffer;
   unsigned char *full_buffer;
+  int ntri_total_max=0;
 
   float time, time_max;
   EGZ_FILE *isostream;
-  float *xyznorm=NULL;
 
-  unsigned short *vertices_i=NULL, *tvertices_i=NULL;
-  int *triangles_i; 
-  unsigned char *triangles1_i; 
-  unsigned short *triangles2_i;
-  unsigned char *color8=NULL;
-  int i1, i2, i3;
-  int ntriangles_i, nvertices_i;
-  unsigned short *v1, *v2, *v3;
-  short *norm,*vertexnorm;
-  float area;
-  float isomin, isomax;
   int blocknumber;
   int error;
   int skip;
-  float tcolor, tcolor0, tcolorfactor;
-
+  float factor, offset[3];
+  float *iso_colors;
+  int n_iso_colors;
+  
   mesh *meshi;
   iso *ib;
 
@@ -305,12 +305,11 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
   
   ib = isoinfo+ifile;
+  ib->isoupdate_timestep=-1;
   if(ib->loaded==0&&flag==UNLOAD)return;
-
   blocknumber=ib->blocknumber;
   meshi = meshinfo+blocknumber;
   unloadiso(meshi);
-  FREEMEMORY(meshi->isotimes);
   ib->loaded=0;
   ib->display=0;
   plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -330,8 +329,8 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       iso *isoi;
 
       loaded_isomesh=NULL;
-      for(i=0;i<niso_files;i++){
-        isoi=isoinfo+i;
+      for(ii=0;ii<niso_files;ii++){
+        isoi=isoinfo+ii;
         if(isoi->loaded==1){
           loaded_isomesh=meshinfo+isoi->blocknumber;
           break;
@@ -343,7 +342,21 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   }
   meshi->isofilenum=ifile;
   highlight_mesh = blocknumber;
-   
+  
+  factor = (meshi->xyzmaxdiff/xyzmaxdiff)/65535.0;
+  offset[0]=(meshi->xbar0-xbar0)/xyzmaxdiff;
+  offset[1]=(meshi->ybar0-ybar0)/xyzmaxdiff;
+  offset[2]=(meshi->zbar0-zbar0)/xyzmaxdiff;
+
+  if(iso_ambient_ini==NULL||n_iso_ambient_ini==0){
+    iso_colors=iso_ambient;
+    n_iso_colors=n_iso_ambient;
+  }
+  else{
+    iso_colors=iso_ambient_ini;
+    n_iso_colors=n_iso_ambient_ini;
+  }
+
   if(ib->compression_type==1){
     int nbuffer;
 
@@ -384,21 +397,21 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
     readiso("",ifile,UNLOAD,&error);
     return;
   }
-  for(i=0;i<meshi->nisolevels;i++){
-    meshi->showlevels[i]=1;
+  for(ilevel=0;ilevel<meshi->nisolevels;ilevel++){
+    meshi->showlevels[ilevel]=1;
   }
   isomin=meshi->isolevels[0];
   isomax=meshi->isolevels[0];
   meshi->isomin_index=0;
   meshi->isomax_index=0;
-  for(i=1;i<meshi->nisolevels;i++){
-    if(meshi->isolevels[i]<isomin){
-      isomin=meshi->isolevels[i];
-      meshi->isomin_index=i;
+  for(ilevel=1;ilevel<meshi->nisolevels;ilevel++){
+    if(meshi->isolevels[ilevel]<isomin){
+      isomin=meshi->isolevels[ilevel];
+      meshi->isomin_index=ilevel;
     }
-    if(meshi->isolevels[i]>isomax){
-      isomax=meshi->isolevels[i];
-      meshi->isomax_index=i;
+    if(meshi->isolevels[ilevel]>isomax){
+      isomax=meshi->isolevels[ilevel];
+      meshi->isomax_index=ilevel;
     }
   }
   ASSERT(meshi->animatedsurfaces==NULL);
@@ -415,15 +428,16 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 
   comp_buffer=ib->comp_buffer;
   asurface=meshi->animatedsurfaces;
-  jj=0;
-  i=0;
+  iitime=0;
+  itime=0;
   time_max = -1000000.0;
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
   for(;;){
     int skip_frame;
+    int ntri_total;
 
     skip_frame=0;
-    jj++;
+    iitime++;
   // 1
   // nisolevels
   // levels(0), ..., levels(nisolevels-1)
@@ -437,6 +451,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   // buffer(0), ..., buffer(nbuffer-1)
 
   // ***** 
+
     if(ib->compression_type==1){
       int nvertices, ntriangles, nbuffer, nfull;
       int ibuffer[4];
@@ -444,17 +459,20 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       full_buffer=ib->full_bufferframe;
       EGZ_FREAD(&time,4,1,isostream);
       if(EGZ_FEOF(isostream)!=0)break;
-      meshi->isotimes[i]=time;
+      meshi->isotimes[itime]=time;
       printf("isosurface time=%.2f\n",time);
-      for(j=0;j<meshi->nisolevels;j++){
+      for(ilevel=0;ilevel<meshi->nisolevels;ilevel++){
         EGZ_FREAD(ibuffer,4,4,isostream);
         nvertices=ibuffer[0];
         ntriangles=ibuffer[1];
+        asurface->niso_triangles=ntriangles;
+        asurface->niso_vertices=nvertices;
         nfull=ibuffer[2];
         nbuffer=ibuffer[3];
         asurface->compression_type=ib->compression_type;
         asurface->comp_bufferframe=NULL;
         asurface->full_bufferframe=NULL;
+  
         asurface->ncomp_bufferframe=0;
         asurface->nfull_bufferframe=0;
         if(nbuffer>0){
@@ -474,29 +492,14 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 
 
         asurface->dataflag=ib->dataflag;
-        asurface->nvertices=nvertices;
-        asurface->ntriangles=ntriangles;
-        asurface->triangles=NULL;
-        asurface->triangles1=NULL;
-        asurface->triangles2=NULL;
-        asurface->vertices=NULL;
-        asurface->s_norm=NULL;
         
-        asurface->vertices=(unsigned short *)asurface->full_bufferframe;
-        asurface->s_norm=(unsigned char *)(asurface->full_bufferframe+6*nvertices);
-        if(nvertices>0&&nvertices<256){
-          asurface->triangles1=(unsigned char *)(asurface->full_bufferframe+7*nvertices);
-        }
-        else if(nvertices>=256&&nvertices<65536){
-          asurface->triangles2=(unsigned short *)(asurface->full_bufferframe+7*nvertices);
-        }
-        else if(nvertices>=65536){
-          asurface->triangles=(int *)(asurface->full_bufferframe+7*nvertices);
-        }
-        asurface->tvertices=NULL;
-        asurface->color8=NULL;
-        asurface->norm=NULL;
-	      asurface->vertexnorm=NULL;
+        asurface->iso_triangles=NULL;
+        asurface->iso_vertices=NULL;
+        asurface->niso_triangles=0;
+        asurface->niso_triangles_opaque=0;
+        asurface->niso_triangles_transparent=0;
+        asurface->niso_vertices=0;
+        
         asurface++;
       }
     }
@@ -508,19 +511,26 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
         skip_frame=0;
         time_max=time;
       }
-      meshi->isotimes[i]=time;
-      if(jj%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)||skip_frame==1){
+      meshi->isotimes[itime]=time;
+      if(iitime%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)||skip_frame==1){
       }
       else{
         printf("isosurface time=%f\n",time);
       }
-      for(j=0;j<meshi->nisolevels;j++){
+      ntri_total=0;
+      for(ilevel=0;ilevel<meshi->nisolevels;ilevel++){
+        int nvertices_i, ntriangles_i;
+          
         asurface->dataflag=ib->dataflag;
+        
         EGZ_FREAD(&nvertices_i,4,1,isostream);
         if(EGZ_FEOF(isostream)!=0)break;
         EGZ_FREAD(&ntriangles_i,4,1,isostream);
         if(EGZ_FEOF(isostream)!=0)break;
-        if(jj%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)||skip_frame==1){
+        asurface->niso_triangles=ntriangles_i/3;
+        asurface->niso_vertices=nvertices_i;
+        
+        if(iitime%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)||skip_frame==1){
           skip=0;
           if(nvertices_i<=0||ntriangles_i<=0)continue;
           skip += (6*nvertices_i);
@@ -537,175 +547,176 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
           EGZ_FSEEK(isostream,skip,SEEK_CUR);
           continue;
         }
-        triangles_i=NULL;
-        triangles1_i=NULL;
-        triangles2_i=NULL;
-	      vertices_i=NULL;
-        tvertices_i=NULL;
-        color8=NULL;
-        vertexnorm=NULL;
-        norm=NULL;
-        FREEMEMORY(xyznorm);
-       
-#define FREELOCAL_ISO FREEMEMORY(xyznorm);FREEMEMORY(vertexnorm);FREEMEMORY(vertices_i);FREEMEMORY(tvertices_i);\
-                      FREEMEMORY(triangles1_i);FREEMEMORY(triangles2_i);FREEMEMORY(triangles_i);\
-                      FREEMEMORY(norm);FREEMEMORY(color8)
-
+      
+        asurface->iso_triangles=NULL;
+        asurface->iso_vertices=NULL; 
         if(nvertices_i>0){
-          if( NewMemory((void **)&xyznorm,3*nvertices_i*sizeof(float))==0 ){
-            FREELOCAL_ISO;
-            break;
-          }
-          if(NewMemory((void **)&vertexnorm,3*nvertices_i*sizeof(short))==0){
-            FREELOCAL_ISO;
-            break;
-          }
-          if(NewMemory((void **)&vertices_i,3*nvertices_i*sizeof(unsigned short))==0){
-            FREELOCAL_ISO;
-            break;
-          }
-          if(ib->dataflag==1){
-            if(NewMemory((void **)&tvertices_i,nvertices_i*sizeof(unsigned short))==0){
-              FREELOCAL_ISO;
-              break;
-            }
-            if(NewMemory((void **)&color8,nvertices_i*sizeof(unsigned char))==0){
-              FREELOCAL_ISO;
-              break;
-            }
-          }
-        }
-        for(ii=0;ii<3*nvertices_i;ii++){
-          xyznorm[ii]=0.0;
-        }
-        if(nvertices_i>0){
+          unsigned short *verti;
+          unsigned short *vertices_i;
+          
+          NewMemory((void **)&asurface->iso_vertices,nvertices_i*sizeof(isovert));
+          NewMemory((void **)&vertices_i,3*nvertices_i*sizeof(unsigned short));
+          verti = vertices_i;
           EGZ_FREAD(vertices_i,2,(unsigned int)(3*nvertices_i),isostream);
-        }
-        if(ib->dataflag==1&&nvertices_i>0){
-          EGZ_FREAD(&asurface->tmin,4,1,isostream);
-          EGZ_FREAD(&asurface->tmax,4,1,isostream);
-          EGZ_FREAD(tvertices_i,2,(unsigned int)nvertices_i,isostream);
-          if(ib->tmax>ib->tmin){
-            tcolor0 = (asurface->tmin-ib->tmin)/(ib->tmax-ib->tmin);
-            tcolorfactor = (asurface->tmax-asurface->tmin)/65535.;
-            tcolorfactor /= (ib->tmax-ib->tmin);
-          }
-          else{
-            tcolor0=0.5;
-            tcolorfactor=0.0;
-          }
-          for(ii=0;ii<nvertices_i;ii++){
-            tcolor = tcolor0 + tvertices_i[ii]*tcolorfactor;
-            if(tcolor<0.0)tcolor=0.0;
-            if(tcolor>1.0)tcolor=1.0;
-            color8[ii] = (unsigned char)(tcolor*255);
-          }
-        }
-	      if(EGZ_FEOF(isostream)!=0)break;
-        if(nvertices_i<256&&nvertices_i>0){
-          if(ntriangles_i>0){
-            if(NewMemory((void **)&triangles1_i,ntriangles_i*sizeof(unsigned char))==0){
-              FREELOCAL_ISO;
-              break;
+          for(ivert=0;ivert<nvertices_i;ivert++){
+            isovert *isoverti;
+            float *xyz,*vertnorm;
+            
+            isoverti = asurface->iso_vertices+ivert;
+            xyz = isoverti->xyz;
+            xyz[0]=offset[0]+factor*(*verti++); 
+            xyz[1]=offset[1]+factor*(*verti++); 
+            xyz[2]=offset[2]+factor*(*verti++); 
+            
+            vertnorm=isoverti->norm;
+            vertnorm[0]=0.0;
+            vertnorm[1]=0.0;
+            vertnorm[2]=0.0;
+            if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
+              isoverti->color=hrrpuv_iso_color;
             }
-  	    	  EGZ_FREAD(triangles1_i,1,(unsigned int)ntriangles_i,isostream);
-          }
-        }
-        else if(nvertices_i>=256&&nvertices_i<65536){
-          if(ntriangles_i>0){
-            if(NewMemory((void **)&triangles2_i,ntriangles_i*sizeof(unsigned short))==0){
-              FREELOCAL_ISO;
-              break;
+            else{
+              isoverti->color=iso_colors+4*ilevel;
             }
-  		      EGZ_FREAD(triangles2_i,2,(unsigned int)ntriangles_i,isostream);
           }
-        }
-        else{
-          if(ntriangles_i>0){
-            if(NewMemory((void **)&triangles_i,ntriangles_i*sizeof(int))==0){
-              FREELOCAL_ISO;
-              break;
-            }
-  		      EGZ_FREAD(triangles_i,4,(unsigned int)ntriangles_i,isostream);
-          } 
-        }
-	      if(EGZ_FEOF(isostream)!=0)break;
+          FREEMEMORY(vertices_i);
 
+          if(ib->dataflag==1){
+            unsigned short *tvertices_i;
+            float tcolor0, tcolorfactor, tcolor;
+          
+            EGZ_FREAD(&asurface->tmin,4,1,isostream);
+            EGZ_FREAD(&asurface->tmax,4,1,isostream);
+            NewMemory((void **)&tvertices_i,nvertices_i*sizeof(unsigned short));
+            EGZ_FREAD(tvertices_i,2,(unsigned int)nvertices_i,isostream);
+            if(ib->tmax>ib->tmin){
+              tcolor0 = (asurface->tmin-ib->tmin)/(ib->tmax-ib->tmin);
+              tcolorfactor = (asurface->tmax-asurface->tmin)/65535.;
+              tcolorfactor /= (ib->tmax-ib->tmin);
+            }
+            else{
+              tcolor0=0.5;
+              tcolorfactor=0.0;
+            }
+            for(ivert=0;ivert<nvertices_i;ivert++){
+              isovert *isoverti;
+              unsigned char colorindex;
+                          
+              isoverti = asurface->iso_vertices+ivert;
+              tcolor = tcolor0 + tvertices_i[ivert]*tcolorfactor;
+              if(tcolor<0.0)tcolor=0.0;
+              if(tcolor>1.0)tcolor=1.0;
+              colorindex = (unsigned char)(tcolor*255);
+              isoverti->color = rgb_iso+4*colorindex;
+            }
+            FREEMEMORY(tvertices_i);
+          }
+        }
+        if(EGZ_FEOF(isostream)!=0)break;
         if(ntriangles_i>0){
-          if(NewMemory((void **)&norm,ntriangles_i*sizeof(short))==0){
-            FREELOCAL_ISO;
-            break;
-          }
-        }
-
-        for(n=0;n<ntriangles_i/3;n++){
-          if(nvertices_i<256){
-            i1=3*triangles1_i[3*n];
-            i2=3*triangles1_i[3*n+1];
-            i3=3*triangles1_i[3*n+2];
+          unsigned char *triangles1_i;
+          unsigned short *triangles2_i;
+          int *triangles_i;
+          
+          NewMemory((void **)&triangles_i,ntriangles_i*sizeof(int));
+          if(nvertices_i<256&&nvertices_i>0){
+            NewMemory((void **)&triangles1_i,ntriangles_i*sizeof(unsigned char));
+            EGZ_FREAD(triangles1_i,1,(unsigned int)ntriangles_i,isostream);
+            for(itri=0;itri<ntriangles_i;itri++){
+              triangles_i[itri]=triangles1_i[itri];
+            }
+            FREEMEMORY(triangles1_i);
           }
           else if(nvertices_i>=256&&nvertices_i<65536){
-            i1=3*triangles2_i[3*n];
-            i2=3*triangles2_i[3*n+1];
-            i3=3*triangles2_i[3*n+2];
+            NewMemory((void **)&triangles2_i,ntriangles_i*sizeof(unsigned short));
+            EGZ_FREAD(triangles2_i,2,(unsigned int)ntriangles_i,isostream);
+            for(itri=0;itri<ntriangles_i;itri++){
+              triangles_i[itri]=triangles2_i[itri];
+            }
+            FREEMEMORY(triangles2_i);
           }
           else{
-            i1=3*triangles_i[3*n];
-            i2=3*triangles_i[3*n+1];
-            i3=3*triangles_i[3*n+2];
+            EGZ_FREAD(triangles_i,4,(unsigned int)ntriangles_i,isostream);
+          } 
+          NewMemory((void **)&asurface->iso_triangles,(ntriangles_i/3)*sizeof(isotri));
+          for(itri=0;itri<ntriangles_i/3;itri++){
+            isotri *isotrii;
+              
+            isotrii=asurface->iso_triangles+itri;
+            isotrii->v1=asurface->iso_vertices+triangles_i[3*itri];
+            isotrii->v2=asurface->iso_vertices+triangles_i[3*itri+1];
+            isotrii->v3=asurface->iso_vertices+triangles_i[3*itri+2];
+            if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
+              ib->colorlevels[ilevel]=hrrpuv_iso_color;
+            }
+            else{
+              ib->colorlevels[ilevel]=iso_colors+4*ilevel;
+            }
+            isotrii->color=ib->colorlevels+ilevel;
           }
-          v1=vertices_i+i1;
-          v2=vertices_i+i2;
-          v3=vertices_i+i3;
-          calcNormal2(v1,v2,v3,out,&area);
-          norm[3*n  ]=(short)(out[0]*32767);
-          norm[3*n+1]=(short)(out[1]*32767);
-          norm[3*n+2]=(short)(out[2]*32767);
-          xyznorm[i1  ] += out[0]*area;
-          xyznorm[i1+1] += out[1]*area;
-          xyznorm[i1+2] += out[2]*area;
-          xyznorm[i2  ] += out[0]*area;
-          xyznorm[i2+1] += out[1]*area;
-          xyznorm[i2+2] += out[2]*area;
-          xyznorm[i3  ] += out[0]*area;
-          xyznorm[i3+1] += out[1]*area;
-          xyznorm[i3+2] += out[2]*area;
+          FREEMEMORY(triangles_i);
         }
-        for(n=0;n<nvertices_i;n++){
-          ReduceToUnit(xyznorm+3*n);
-          vertexnorm[3*n  ]=(short)(xyznorm[3*n  ]*32767);
-          vertexnorm[3*n+1]=(short)(xyznorm[3*n+1]*32767);
-          vertexnorm[3*n+2]=(short)(xyznorm[3*n+2]*32767);
-        }
-        FREEMEMORY(xyznorm);
-        asurface->nvertices=nvertices_i;
-        asurface->ntriangles=ntriangles_i;
-        asurface->triangles=triangles_i;
-        asurface->triangles1=triangles1_i;
-        asurface->triangles2=triangles2_i;
-        asurface->vertices=vertices_i;
-        if(ib->dataflag==1){
-          asurface->tvertices=tvertices_i;
-          asurface->color8=color8;
-        }
-        asurface->norm=norm;
-        asurface->vertexnorm=vertexnorm;
+        
+        if(EGZ_FEOF(isostream)!=0)break;
 
+        for(itri=0;itri<ntriangles_i/3;itri++){
+          isotri *isotrii;
+          float *v1, *v2, *v3;
+          float *trinorm, *vertnorm;
+          float area;
+          float out[3];
+                    
+          isotrii = asurface->iso_triangles+itri;
+          v1=isotrii->v1->xyz;
+          v2=isotrii->v2->xyz;
+          v3=isotrii->v3->xyz;
+          calcNormal2f(v1,v2,v3,out,&area);
+          
+          trinorm=isotrii->norm;
+          trinorm[0]=out[0];
+          trinorm[1]=out[1];
+          trinorm[2]=out[2];
+          
+          vertnorm = isotrii->v1->norm;
+          vertnorm[0] += out[0]*area;
+          vertnorm[1] += out[1]*area;
+          vertnorm[2] += out[2]*area;
+          
+          vertnorm = isotrii->v2->norm;
+          vertnorm[0] += out[0]*area;
+          vertnorm[1] += out[1]*area;
+          vertnorm[2] += out[2]*area;
+          
+          vertnorm = isotrii->v3->norm;
+          vertnorm[0] += out[0]*area;
+          vertnorm[1] += out[1]*area;
+          vertnorm[2] += out[2]*area;
+        }
+        for(ivert=0;ivert<nvertices_i;ivert++){
+          ReduceToUnit(asurface->iso_vertices[ivert].norm);
+        }
+        ntri_total+=asurface->niso_triangles;
         asurface++;
       }
+      if(ntri_total>ntri_total_max)ntri_total_max=ntri_total;
     }
+   
     if(ib->compression_type==1){
-      i++;
-      if(i>=meshi->nisosteps)break;
+      itime++;
+      if(itime>=meshi->nisosteps)break;
       continue;
     }
-    if(skip_frame==1||jj%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)){
+    if(skip_frame==1||iitime%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)){
      // if(skip_frame==1)jj--;
     }
     else{
-      i++;
-      if(i>=meshi->nisosteps)break;
+      itime++;
+      if(itime>=meshi->nisosteps)break;
     }
+  }
+  if(ntri_total_max>0){   
+    printf("ntri_total_max=%i\n",ntri_total_max);
+    NewMemory((void **)&ib->isotri_list_full,ntri_total_max*sizeof(isotri *));
   }
   local_stoptime = glutGet(GLUT_ELAPSED_TIME);
   delta_time = (local_stoptime-local_starttime)/1000.0;
@@ -770,27 +781,18 @@ void unloadiso(mesh *meshi){
   if(meshi->isofilenum==-1)return;
   ib = isoinfo + meshi->isofilenum;
   if(meshi->nisosteps>0&&meshi->nisolevels>0){
-    asurface=meshi->animatedsurfaces;
-    CheckMemoryOff;
-    if(ib->compression_type==0){
-      for(n=0;n<meshi->nisosteps;n++){
-        for(j=0;j<meshi->nisolevels;j++){
-          FREEMEMORY(asurface->triangles);
-          FREEMEMORY(asurface->triangles1);
-          FREEMEMORY(asurface->triangles2);
-          FREEMEMORY(asurface->vertices);
-          FREEMEMORY(asurface->norm);
-          FREEMEMORY(asurface->vertexnorm);
-          asurface++;
-        }
-      }
+    for(i=0;i<meshi->nisosteps*meshi->nisolevels;i++){
+      asurface=meshi->animatedsurfaces+i;
+      FREEMEMORY(asurface->iso_triangles);
+      FREEMEMORY(asurface->iso_vertices);
     }
-    CheckMemoryOn;
+    CheckMemoryOff;
     FREEMEMORY(meshi->isotimes);
     FREEMEMORY(meshi->animatedsurfaces);
     FREEMEMORY(meshi->showlevels);
   }
   meshi->nisosteps=0;
+  FREEMEMORY(ib->isotri_list_full);
   FREEMEMORY(ib->comp_bufferframe);
   FREEMEMORY(ib->full_bufferframe);
   FREEMEMORY(ib->comp_buffer);
@@ -843,6 +845,7 @@ void drawiso(const mesh *meshi,int tranflag){
   float *iso_color_ptr;
   int iso_lighting;
 
+  CheckMemory;
   if(meshi->isofilenum>=0){
     isoi = isoinfo + meshi->isofilenum;
   }
@@ -875,8 +878,15 @@ void drawiso(const mesh *meshi,int tranflag){
   }
 
   if(visAIso==1){
-
-    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
+    isotri **iso_list_start;
+    int niso_list_start;
+    float *colorptr=NULL;
+    float *colorptr_old=NULL;
+    
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
+    if(isoi->isoupdate_timestep!=meshi->iiso){
+      update_isotri_list(asurface,isoi);
+    }
     if(cullfaces==1)glDisable(GL_CULL_FACE);
 
     iso_specular[3] = 1.0;
@@ -890,361 +900,90 @@ void drawiso(const mesh *meshi,int tranflag){
     }
     glBegin(GL_TRIANGLES);
 
-    for(i=0;i<nisolevels;i++){
-      float isocolor_temp[4];
-      
-      asurface++;
-      icolor=i;
-      if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
-      if(showlevels[i]==0)continue;
-      if(tranflag==DRAW_TRANSPARENT){
-        if(transparent_state==ALL_TRANSPARENT){
-        }
-        else if(transparent_state==MIN_SOLID){
-          if(i==isomin_index)continue;
-        }
-        else if(transparent_state==MAX_SOLID){
-          if(i==isomax_index)continue;
-        }
-        else if(transparent_state==ALL_SOLID){
-          continue;
-        }
-      }
-      else if(tranflag==DRAW_SOLID){
-        if(transparent_state==ALL_TRANSPARENT){
-          continue;
-        }
-        else if(transparent_state==MIN_SOLID){
-          if(i!=isomin_index)continue;
-        }
-        else if(transparent_state==MAX_SOLID){
-          if(i!=isomax_index)continue;
-        }
-        else if(transparent_state==ALL_SOLID){
-        }
-      }
-      nvertices=asurface->nvertices;
-      ntriangles=asurface->ntriangles/3;
-      if(ntriangles==0)continue;
-      if(i==0&&strcmp(isoi->surface_label.shortlabel,"hrrpuv")==0){
-        iso_color_ptr=hrrpuv_iso_color;
-      }
-      else{
-        iso_color_ptr=iso_colors+4*icolor;
-      }
-      //iso_color_ptr=isocolor_temp;
-      if(setbw!=0){
-        float greylevel;
+    if(tranflag==DRAW_TRANSPARENT){
+      iso_list_start=isoi->isotri_list_tran;
+      niso_list_start=isoi->nisotri_tran;
+    }
+    else{
+      iso_list_start=isoi->isotri_list_opaque;
+      niso_list_start=isoi->nisotri_opaque;
+    }
+    CheckMemory;
+    for(i=0;i<niso_list_start;i++){
+      isotri *tri;
+      float *colorptr;
+        
+      tri=iso_list_start[i];
 
-        greylevel=color2bw(iso_color_ptr);
-        iso_color_tmp[0]=greylevel;
-        iso_color_tmp[1]=greylevel;
-        iso_color_tmp[2]=greylevel;
-        iso_color_ptr=iso_color_tmp;
+      colorptr=*(tri->color);
+      if(colorptr!=colorptr_old){
+        glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colorptr);
+        colorptr_old=colorptr;
       }
-      isocolor_temp[0]=iso_color_ptr[0];
-      isocolor_temp[1]=iso_color_ptr[1];
-      isocolor_temp[2]=iso_color_ptr[2];
-      isocolor_temp[3]=transparentlevel;
-      iso_color_ptr=isocolor_temp;
-      
-      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,iso_color_ptr);
-      vertices_i=asurface->vertices;
-      if(asurface->dataflag==1){
-        tvertices_i=asurface->tvertices;
-        color8 = asurface->color8;
-      }
-      triangles_i=asurface->triangles;
-      triangles1_i=asurface->triangles1;
-      triangles2_i=asurface->triangles2;
-      norm=asurface->norm;
-  	  vertexnorm=asurface->vertexnorm;
-      for(j=0;j<ntriangles;j++){
-        if(nvertices<256){
-          i1=3*triangles1_i[3*j];
-          i2=3*triangles1_i[3*j+1];
-          i3=3*triangles1_i[3*j+2];
-        }
-        else if(nvertices>=256&&nvertices<65536){
-          i1=3*triangles2_i[3*j];
-          i2=3*triangles2_i[3*j+1];
-          i3=3*triangles2_i[3*j+2];
-        }
-        else{
-          i1=3*triangles_i[3*j];
-          i2=3*triangles_i[3*j+1];
-          i3=3*triangles_i[3*j+2];
-        }
-        v1=vertices_i+i1;
-        v2=vertices_i+i2;
-        v3=vertices_i+i3;
-        for(k=0;k<3;k++){
-          vv1[k]=offset[k]+factor*v1[k];
-          vv2[k]=offset[k]+factor*v2[k];
-          vv3[k]=offset[k]+factor*v3[k];
-        }
-        if(asurface->dataflag==1){
-          tval1=color8[i1/3];
-          tval2=color8[i2/3];
-          tval3=color8[i3/3];
-        }
-	    	if(isonormtype==1
-          ||(isonormtype==0&&isoi->compression_type==1)
-          ){
-          if(isoi->compression_type==1){
-            norm1 = isoi->normaltable + 3*asurface->s_norm[i1/3];
-            norm2 = isoi->normaltable + 3*asurface->s_norm[i2/3];
-            norm3 = isoi->normaltable + 3*asurface->s_norm[i3/3];
-          }
-          else{
-            norm1 = vertexnorm+i1;
-	  	      norm2 = vertexnorm+i2;
-		        norm3 = vertexnorm+i3;
-          }
-          if(asurface->dataflag==1){
-            glNormal3sv(norm1);
-            glColor4fv(rgb_full[tval1]);
-            glVertex3fv(vv1);
-
-  		      glNormal3sv(norm2);
-            glColor4fv(rgb_full[tval2]);
-            glVertex3fv(vv2);
-
-   		      glNormal3sv(norm3);
-            glColor4fv(rgb_full[tval3]);
-            glVertex3fv(vv3);
-          }
-          else{
-            glNormal3sv(norm1);
-            glVertex3fv(vv1);
-
-  		      glNormal3sv(norm2);
-            glVertex3fv(vv2);
-
-   		      glNormal3sv(norm3);
-            glVertex3fv(vv3);
-          }
-        }
-		    else{
-          if(asurface->dataflag==1){
-            glNormal3sv(norm);
-            glColor4fv(rgb_full[tval1]);
-            glVertex3fv(vv1);
-
-            glColor4fv(rgb_full[tval2]);
-            glVertex3fv(vv2);
-
-            glColor4fv(rgb_full[tval3]);
-            glVertex3fv(vv3);
-          }
-          else{
-            glNormal3sv(norm);
-            glVertex3fv(vv1);
-            glVertex3fv(vv2);
-            glVertex3fv(vv3);
-          }
-          norm += 3;
-        }
-      }
+   
+      glNormal3fv(tri->v1->norm);
+      glVertex3fv(tri->v1->xyz);
+        
+      glNormal3fv(tri->v2->norm);
+      glVertex3fv(tri->v2->xyz);
+        
+      glNormal3fv(tri->v3->norm);
+      glVertex3fv(tri->v3->xyz);
     }
     glEnd();
-    if(asurface->dataflag==1)glDisable(GL_COLOR_MATERIAL);
 
     glPopAttrib();
 
     if(tranflag==DRAW_TRANSPARENT)transparentoff();
     if(cullfaces==1)glEnable(GL_CULL_FACE);
+    CheckMemory;
   }
 
   if(visAIso==2){
-    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels-1;
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
+    if(isoi->isoupdate_timestep!=meshi->iiso){
+      update_isotri_list(asurface,isoi);
+    }
 
     glPushAttrib(GL_LIGHTING_BIT);
     antialias(1);
     glLineWidth(isolinewidth);
     glBegin(GL_LINES);
-    for(i=0;i<nisolevels;i++){
-      asurface++;
-      if(asurface->dataflag==1)tvertices_i=asurface->tvertices;
-      if(showlevels[i]==0)continue;
-      icolor=i;
-      if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
-      if(setbw==0){
-        iso_color_ptr = iso_colors+4*icolor;
-      }
-      else{
-        float greylevel;
+    for(i=0;i<isoi->nisotri_opaque+isoi->nisotri_tran;i++){
+      isotri *tri;
+        
+      tri=isoi->isotri_list_full[i];
 
-        greylevel=color2bw(iso_colors+4*icolor);
-        iso_color_tmp[0]=greylevel;
-        iso_color_tmp[1]=greylevel;
-        iso_color_tmp[2]=greylevel;
-        iso_color_ptr=iso_color_tmp;
-      }
-      glColor3fv(iso_color_ptr);
-      nvertices=asurface->nvertices;
-      ntriangles=asurface->ntriangles/3;
-      vertices_i=asurface->vertices;
-      triangles_i=asurface->triangles;
-      triangles1_i=asurface->triangles1;
-      triangles2_i=asurface->triangles2;
-      for(j=0;j<ntriangles;j++){
-        if(nvertices<256){
-          i1=3*triangles1_i[3*j];
-          i2=3*triangles1_i[3*j+1];
-          i3=3*triangles1_i[3*j+2];
-        }
-        else if(nvertices>=256&&nvertices<65536){
-          i1=3*triangles2_i[3*j];
-          i2=3*triangles2_i[3*j+1];
-          i3=3*triangles2_i[3*j+2];
-        }
-        else{
-          i1=3*triangles_i[3*j];
-          i2=3*triangles_i[3*j+1];
-          i3=3*triangles_i[3*j+2];
-        }
-        v1=vertices_i+i1;
-        v2=vertices_i+i2;
-        v3=vertices_i+i3;
-        for(k=0;k<3;k++){
-          vv1[k]=offset[k]+factor*v1[k];
-          vv2[k]=offset[k]+factor*v2[k];
-          vv3[k]=offset[k]+factor*v3[k];
-        }
-        if(asurface->dataflag==1){
-          tval1=tvertices_i[i1/3]/256;
-          if(tval1>255)tval1=255;
-          tval2=tvertices_i[i2/3]/256;
-          if(tval2>255)tval2=255;
-          tval3=tvertices_i[i3/3]/256;
-          if(tval3>255)tval3=255;
-        }
-        if(asurface->dataflag==1){
-          glColor4fv(rgb_full[tval1]);
-          glVertex3fv(vv1);
-          glColor4fv(rgb_full[tval2]);
-          glVertex3fv(vv2);
-          glVertex3fv(vv2);
-          glColor4fv(rgb_full[tval3]);
-          glVertex3fv(vv3);
-          glVertex3fv(vv3);
-          glColor4fv(rgb_full[tval1]);
-          glVertex3fv(vv1);
-        }
-        else{
-          glVertex3fv(vv1);
-          glVertex3fv(vv2);
-          glVertex3fv(vv2);
-          glVertex3fv(vv3);
-          glVertex3fv(vv3);
-          glVertex3fv(vv1);
-        }
-      }
+      //glColor4fv(*(tri->color));
+      
+      glColor3fv(*tri->color);
+      glVertex3fv(tri->v1->xyz);
+      glVertex3fv(tri->v2->xyz);
+        
+      glVertex3fv(tri->v2->xyz);
+      glVertex3fv(tri->v3->xyz);
+        
+      glVertex3fv(tri->v3->xyz);
+      glVertex3fv(tri->v1->xyz);
     }
     glEnd();
     antialias(0);
     glPopAttrib();
-
-  }
-
-  if(showisonormals==1){
-    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
-
-    antialias(1);
-    glLineWidth(isolinewidth);
-    glBegin(GL_LINES);
-    for(i=0;i<nisolevels;i++){
-      asurface++;
-      if(showlevels[i]==0)continue;
-      glColor3f((float)1.,(float)1.,(float)1.);
-      nvertices=asurface->nvertices;
-      ntriangles=asurface->ntriangles/3;
-      vertices_i=asurface->vertices;
-      if(asurface->dataflag==1)tvertices_i=asurface->tvertices;
-      triangles_i=asurface->triangles;
-      triangles1_i=asurface->triangles1;
-      triangles2_i=asurface->triangles2;
-      norm=asurface->norm;
-  	  vertexnorm=asurface->vertexnorm;
-      for(j=0;j<ntriangles;j++){
-        if(nvertices<256){
-          i1=3*triangles1_i[3*j];
-          i2=3*triangles1_i[3*j+1];
-          i3=3*triangles1_i[3*j+2];
-        }
-        else if(nvertices>=256&&nvertices<65536){
-          i1=3*triangles2_i[3*j];
-          i2=3*triangles2_i[3*j+1];
-          i3=3*triangles2_i[3*j+2];
-        }
-        else{
-          i1=3*triangles_i[3*j];
-          i2=3*triangles_i[3*j+1];
-          i3=3*triangles_i[3*j+2];
-        }
-        v1=vertices_i+i1;
-        v2=vertices_i+i2;
-        v3=vertices_i+i3;
-        for(k=0;k<3;k++){
-          vv1[k]=offset[k]+factor*v1[k];
-          vv2[k]=offset[k]+factor*v2[k];
-          vv3[k]=offset[k]+factor*v3[k];
-        }
-	    	if(isonormtype==1
-          ||(isonormtype==0&&isoi->compression_type==1)
-          ){
-          if(isoi->compression_type==1){
-            norm1 = isoi->normaltable + 3*asurface->s_norm[i1/3];
-            norm2 = isoi->normaltable + 3*asurface->s_norm[i2/3];
-            norm3 = isoi->normaltable + 3*asurface->s_norm[i3/3];
-          }
-          else{
-            norm1 = vertexnorm+i1;
-	  	      norm2 = vertexnorm+i2;
-		        norm3 = vertexnorm+i3;
-          }
-          for(k=0;k<3;k++){
-            vv1n[k]=vv1[k]+norm1[k]/(8.*32768.)/4.0;
-            vv2n[k]=vv2[k]+norm2[k]/(8.*32768.)/4.0;
-            vv3n[k]=vv3[k]+norm3[k]/(8.*32768.)/4.0;
-          }
-
-          glVertex3fv(vv1);
-          glVertex3fv(vv1n);
-          glVertex3fv(vv2);
-          glVertex3fv(vv2n);
-          glVertex3fv(vv3);
-          glVertex3fv(vv3n);
-        }
-		    else{
-          for(k=0;k<3;k++){
-            vv1n[k]=vv1[k]+norm[k]/(8.*32768.)/4.0;
-            vv2n[k]=vv2[k]+norm[k]/(8.*32768.)/4.0;
-            vv3n[k]=vv3[k]+norm[k]/(8.*32768.)/4.0;
-          }
-          glVertex3fv(vv1);
-          glVertex3fv(vv1n);
-          glVertex3fv(vv2);
-          glVertex3fv(vv2n);
-          glVertex3fv(vv3);
-          glVertex3fv(vv3n);
-          norm += 3;
-        }
-
-      }
-    }
-    glEnd();
-    antialias(0);
   }
 
   if(visAIso==3){
-    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
+    if(isoi->isoupdate_timestep!=meshi->iiso){
+      update_isotri_list(asurface,isoi);
+    }
 
     antialias(1);
     glPointSize(isopointsize);
+    asurface--;
     glBegin(GL_POINTS);
     for(i=0;i<nisolevels;i++){
+      int ivert;
+      
       asurface++;
       if(showlevels[i]==0)continue;
       icolor=i;
@@ -1262,29 +1001,13 @@ void drawiso(const mesh *meshi,int tranflag){
         iso_color_ptr=iso_color_tmp;
       }
       glColor3fv(iso_color_ptr);
-      nvertices=asurface->nvertices;
-      ntriangles=asurface->ntriangles/3;
-      vertices_i=asurface->vertices;
-      if(asurface->dataflag==1)tvertices_i=asurface->tvertices;
-      triangles_i=asurface->triangles;
-      triangles1_i=asurface->triangles1;
-      triangles2_i=asurface->triangles2;
-      for(j=0;j<nvertices;j++){
-        v1=vertices_i+3*j;
-        for(k=0;k<3;k++){
-          vv1[k]=offset[k]+factor*v1[k];
-        }
-        if(asurface->dataflag==1){
-          tval1=tvertices_i[j]/256;
-          if(tval1>255)tval1=255;
-          glColor4fv(rgb_full[tval1]);
-          glVertex3fv(vv1);
-        }
-        else{
-          glVertex3fv(vv1);
-        }
+      
+      for(ivert=0;ivert<asurface->niso_vertices;ivert++){
+        isovert *vi;
+        
+        vi = asurface->iso_vertices+ivert;
+        glVertex3fv(vi->xyz);
       }
-      asurface++;
     }
     glEnd();
     antialias(0);
@@ -2321,3 +2044,1196 @@ void sync_isobounds(int isottype){
     }
   }
 }
+
+/* ------------------ compareisonodes ------------------------ */
+
+int compare_iso_triangles( const void *arg1, const void *arg2 ){
+  isotri *trii, *trij;
+
+  trii = *(isotri **)arg1;
+  trij = *(isotri **)arg2;
+
+  if(trii->distance<trij->distance)return  1;
+  if(trii->distance>trij->distance)return -1;
+  return 0;
+}
+
+/* ------------------ sort_triangles ------------------------ */
+
+void sort_iso_triangles(float *mm){
+  int i;
+  
+  for(i=0;i<niso_files;i++){
+    iso *isoi;
+    int itri;
+    mesh *meshi;
+        
+    isoi = isoinfo+i;
+    if(isoi->loaded==0||isoi->display==0)continue;
+    if(isoi->nisotri_tran==0)continue;
+    
+    meshi = meshinfo + isoi->blocknumber;
+    
+    for(itri=0;itri<isoi->nisotri_tran;itri++){
+      isotri *tri;
+      float xyzeye[3];
+      float xyz[3];
+      
+      tri = isoi->isotri_list_tran[itri];
+      xyz[0] = (tri->v1->xyz[0]+tri->v2->xyz[0]+tri->v3->xyz[0])/3.0;
+      xyz[1] = (tri->v1->xyz[1]+tri->v2->xyz[1]+tri->v3->xyz[1])/3.0;
+      xyz[2] = (tri->v1->xyz[2]+tri->v2->xyz[2]+tri->v3->xyz[2])/3.0;
+      
+      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
+      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
+      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
+      xyzeye[0]/=mscale[0];
+      xyzeye[1]/=mscale[1];
+      xyzeye[2]/=mscale[2];
+      tri->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+    }
+    if(isoi->nisotri_tran>0)qsort((isotri **)isoi->isotri_list_tran,(size_t)isoi->nisotri_tran,sizeof(isotri *),compare_iso_triangles);
+  }
+}
+
+
+/* ------------------ readiso ------------------------ */
+
+void readisoBAK(const char *file, int ifile, int flag, int *errorcode){
+  extern int isoframestep;
+  int i,j,n,ii,jj;
+  float out[3];
+  isosurface *asurface;
+  int nisopoints, nisotriangles;
+  int maxfullbuffer,maxcompbuffer;
+  unsigned char *comp_buffer;
+  unsigned char *full_buffer;
+
+  float time, time_max;
+  EGZ_FILE *isostream;
+  float *xyznorm=NULL;
+
+  unsigned short *vertices_i=NULL, *tvertices_i=NULL;
+  int *triangles_i; 
+  unsigned char *triangles1_i; 
+  unsigned short *triangles2_i;
+  unsigned char *color8=NULL;
+  int i1, i2, i3;
+  int ntriangles_i, nvertices_i;
+  unsigned short *v1, *v2, *v3;
+  short *norm,*vertexnorm;
+  float area;
+  float isomin, isomax;
+  int blocknumber;
+  int error;
+  int skip;
+  float tcolor, tcolor0, tcolorfactor;
+
+  mesh *meshi;
+  iso *ib;
+
+  int local_starttime=0, local_stoptime=0;
+  FILE_SIZE file_size=0;
+  int local_starttime0=0, local_stoptime0=0;  
+  float delta_time, delta_time0;
+
+  local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
+  
+  ib = isoinfo+ifile;
+  if(ib->loaded==0&&flag==UNLOAD)return;
+
+  blocknumber=ib->blocknumber;
+  meshi = meshinfo+blocknumber;
+  unloadiso(meshi);
+  FREEMEMORY(meshi->isotimes);
+  ib->loaded=0;
+  ib->display=0;
+  plotstate=getplotstate(DYNAMIC_PLOTS);
+  updatetimes();
+  *errorcode = 0;
+
+#ifdef _DEBUG
+  if(flag==UNLOAD){
+    printf("After iso unload: ");
+    PrintAllMemoryInfo;
+  }
+#endif
+  update_isotype();
+  if(flag==UNLOAD){
+    updatemenu=1;
+    {
+      iso *isoi;
+
+      loaded_isomesh=NULL;
+      for(i=0;i<niso_files;i++){
+        isoi=isoinfo+i;
+        if(isoi->loaded==1){
+          loaded_isomesh=meshinfo+isoi->blocknumber;
+          break;
+        }
+      }
+      update_iso_showlevels();
+    }
+    return;
+  }
+  meshi->isofilenum=ifile;
+  highlight_mesh = blocknumber;
+   
+  if(ib->compression_type==1){
+    int nbuffer;
+
+    getisoheader(ib->comp_file,&isostream,ib->size_file,&nisopoints, &nisotriangles,&nbuffer,&maxfullbuffer, &maxcompbuffer,
+      &meshi->isolevels, &meshi->nisolevels, &meshi->nisosteps, isoframestep, &ib->normaltable, &ib->nnormaltable);
+    file_size=get_filesize(ib->comp_file);
+    if(nbuffer>0){
+      NewMemory((void **)&ib->comp_buffer,nbuffer);
+      maxfullbuffer=1.01*maxfullbuffer+600;
+      maxcompbuffer=1.01*maxcompbuffer+600;
+      NewMemory((void **)&ib->full_bufferframe,maxfullbuffer);
+      NewMemory((void **)&ib->comp_bufferframe,maxcompbuffer);
+    }
+  }
+  else{
+    getisosizes(file, ib->dataflag, &isostream, 
+      &nisopoints, &nisotriangles, 
+      &meshi->isolevels, &meshi->nisolevels, &meshi->nisosteps, isoframestep, 
+      &ib->tmin, &ib->tmax,
+      endian_data);
+
+    file_size=get_filesize(file);
+  }
+  if(meshi->isolevels==NULL){
+    readiso("",ifile,UNLOAD,&error);
+    *errorcode=1;
+    return;
+  }               
+  ASSERT(meshi->isotimes==NULL);
+  if(NewMemory((void **)&meshi->isotimes,sizeof(float)*meshi->nisosteps)==0){
+    readiso("",ifile,UNLOAD,&error);
+    *errorcode=1;
+    return;
+  }
+  ASSERT(meshi->showlevels==NULL);
+  if(NewMemory((void **)&meshi->showlevels,sizeof(int)*meshi->nisolevels)==0){
+    *errorcode=1;
+    readiso("",ifile,UNLOAD,&error);
+    return;
+  }
+  for(i=0;i<meshi->nisolevels;i++){
+    meshi->showlevels[i]=1;
+  }
+  isomin=meshi->isolevels[0];
+  isomax=meshi->isolevels[0];
+  meshi->isomin_index=0;
+  meshi->isomax_index=0;
+  for(i=1;i<meshi->nisolevels;i++){
+    if(meshi->isolevels[i]<isomin){
+      isomin=meshi->isolevels[i];
+      meshi->isomin_index=i;
+    }
+    if(meshi->isolevels[i]>isomax){
+      isomax=meshi->isolevels[i];
+      meshi->isomax_index=i;
+    }
+  }
+  ASSERT(meshi->animatedsurfaces==NULL);
+  if(NewMemory((void **)&meshi->animatedsurfaces,meshi->nisolevels*meshi->nisosteps*sizeof(isosurface))==0){
+    *errorcode=1;
+    readiso("",ifile,UNLOAD,&error);
+    return;
+  }
+  if(ResizeMemory((void **)&meshi->isotimes,sizeof(float)*meshi->nisosteps)==0){
+    *errorcode=1;
+    readiso("",ifile,UNLOAD,&error);
+    return;
+  }
+
+  comp_buffer=ib->comp_buffer;
+  asurface=meshi->animatedsurfaces;
+  jj=0;
+  i=0;
+  time_max = -1000000.0;
+  local_starttime = glutGet(GLUT_ELAPSED_TIME);
+  for(;;){
+    int skip_frame;
+
+    skip_frame=0;
+    jj++;
+  // 1
+  // nisolevels
+  // levels(0), ..., levels(nisolevels-1)
+  // npoints
+  // xyz(0), ..., xyz(npoints-1)
+
+  // time
+  // nvertices
+  // ntriangles
+  // nbuffer
+  // buffer(0), ..., buffer(nbuffer-1)
+
+  // ***** 
+    if(ib->compression_type==1){
+      int nvertices, ntriangles, nbuffer, nfull;
+      int ibuffer[4];
+
+      full_buffer=ib->full_bufferframe;
+      EGZ_FREAD(&time,4,1,isostream);
+      if(EGZ_FEOF(isostream)!=0)break;
+      meshi->isotimes[i]=time;
+      printf("isosurface time=%.2f\n",time);
+      for(j=0;j<meshi->nisolevels;j++){
+        EGZ_FREAD(ibuffer,4,4,isostream);
+        nvertices=ibuffer[0];
+        ntriangles=ibuffer[1];
+        nfull=ibuffer[2];
+        nbuffer=ibuffer[3];
+        asurface->compression_type=ib->compression_type;
+        asurface->comp_bufferframe=NULL;
+        asurface->full_bufferframe=NULL;
+        asurface->ncomp_bufferframe=0;
+        asurface->nfull_bufferframe=0;
+        if(nbuffer>0){
+          asurface->comp_bufferframe=comp_buffer;
+          asurface->ncomp_bufferframe=nbuffer;
+
+          asurface->full_bufferframe=full_buffer;
+          asurface->nfull_bufferframe=nfull;
+
+          EGZ_FREAD(comp_buffer,1,nbuffer,isostream);
+
+          comp_buffer+=nbuffer;
+          full_buffer+=nfull;
+        }
+        if(settmin_i==1&&time<tmin_i)continue;
+        if(settmax_i==1&&time>tmax_i)continue;
+
+
+        asurface->dataflag=ib->dataflag;
+        asurface->nvertices=nvertices;
+        asurface->ntriangles=ntriangles;
+        asurface->triangles=NULL;
+        asurface->triangles1=NULL;
+        asurface->triangles2=NULL;
+        asurface->vertices=NULL;
+        asurface->s_norm=NULL;
+        
+        asurface->vertices=(unsigned short *)asurface->full_bufferframe;
+        asurface->s_norm=(unsigned char *)(asurface->full_bufferframe+6*nvertices);
+        if(nvertices>0&&nvertices<256){
+          asurface->triangles1=(unsigned char *)(asurface->full_bufferframe+7*nvertices);
+        }
+        else if(nvertices>=256&&nvertices<65536){
+          asurface->triangles2=(unsigned short *)(asurface->full_bufferframe+7*nvertices);
+        }
+        else if(nvertices>=65536){
+          asurface->triangles=(int *)(asurface->full_bufferframe+7*nvertices);
+        }
+        asurface->tvertices=NULL;
+        asurface->color8=NULL;
+        asurface->norm=NULL;
+	      asurface->vertexnorm=NULL;
+        asurface++;
+      }
+    }
+    else{
+      EGZ_FREAD(&time,4,1,isostream);
+      if(EGZ_FEOF(isostream)!=0)break;
+      skip_frame=1;
+      if(time>time_max){
+        skip_frame=0;
+        time_max=time;
+      }
+      meshi->isotimes[i]=time;
+      if(jj%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)||skip_frame==1){
+      }
+      else{
+        printf("isosurface time=%f\n",time);
+      }
+      for(j=0;j<meshi->nisolevels;j++){
+        asurface->dataflag=ib->dataflag;
+        EGZ_FREAD(&nvertices_i,4,1,isostream);
+        if(EGZ_FEOF(isostream)!=0)break;
+        EGZ_FREAD(&ntriangles_i,4,1,isostream);
+        if(EGZ_FEOF(isostream)!=0)break;
+        if(jj%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)||skip_frame==1){
+          skip=0;
+          if(nvertices_i<=0||ntriangles_i<=0)continue;
+          skip += (6*nvertices_i);
+          if(ib->dataflag==1)skip += (8 + 2*nvertices_i);
+  	      if(nvertices_i<256){
+  	        skip += (ntriangles_i);
+          }
+          else if(nvertices_i>=256&&nvertices_i<65536){
+  	        skip += (ntriangles_i*2);
+          }
+	        else{
+  	        skip += (ntriangles_i*4);
+          }
+          EGZ_FSEEK(isostream,skip,SEEK_CUR);
+          continue;
+        }
+        triangles_i=NULL;
+        triangles1_i=NULL;
+        triangles2_i=NULL;
+	      vertices_i=NULL;
+        tvertices_i=NULL;
+        color8=NULL;
+        vertexnorm=NULL;
+        norm=NULL;
+        FREEMEMORY(xyznorm);
+       
+#define FREELOCAL_ISO FREEMEMORY(xyznorm);FREEMEMORY(vertexnorm);FREEMEMORY(vertices_i);FREEMEMORY(tvertices_i);\
+                      FREEMEMORY(triangles1_i);FREEMEMORY(triangles2_i);FREEMEMORY(triangles_i);\
+                      FREEMEMORY(norm);FREEMEMORY(color8)
+
+        if(nvertices_i>0){
+          if( NewMemory((void **)&xyznorm,3*nvertices_i*sizeof(float))==0 ){
+            FREELOCAL_ISO;
+            break;
+          }
+          if(NewMemory((void **)&vertexnorm,3*nvertices_i*sizeof(short))==0){
+            FREELOCAL_ISO;
+            break;
+          }
+          if(NewMemory((void **)&vertices_i,3*nvertices_i*sizeof(unsigned short))==0){
+            FREELOCAL_ISO;
+            break;
+          }
+          if(ib->dataflag==1){
+            if(NewMemory((void **)&tvertices_i,nvertices_i*sizeof(unsigned short))==0){
+              FREELOCAL_ISO;
+              break;
+            }
+            if(NewMemory((void **)&color8,nvertices_i*sizeof(unsigned char))==0){
+              FREELOCAL_ISO;
+              break;
+            }
+          }
+        }
+        for(ii=0;ii<3*nvertices_i;ii++){
+          xyznorm[ii]=0.0;
+        }
+        if(nvertices_i>0){
+          EGZ_FREAD(vertices_i,2,(unsigned int)(3*nvertices_i),isostream);
+        }
+        if(ib->dataflag==1&&nvertices_i>0){
+          EGZ_FREAD(&asurface->tmin,4,1,isostream);
+          EGZ_FREAD(&asurface->tmax,4,1,isostream);
+          EGZ_FREAD(tvertices_i,2,(unsigned int)nvertices_i,isostream);
+          if(ib->tmax>ib->tmin){
+            tcolor0 = (asurface->tmin-ib->tmin)/(ib->tmax-ib->tmin);
+            tcolorfactor = (asurface->tmax-asurface->tmin)/65535.;
+            tcolorfactor /= (ib->tmax-ib->tmin);
+          }
+          else{
+            tcolor0=0.5;
+            tcolorfactor=0.0;
+          }
+          for(ii=0;ii<nvertices_i;ii++){
+            tcolor = tcolor0 + tvertices_i[ii]*tcolorfactor;
+            if(tcolor<0.0)tcolor=0.0;
+            if(tcolor>1.0)tcolor=1.0;
+            color8[ii] = (unsigned char)(tcolor*255);
+          }
+        }
+	      if(EGZ_FEOF(isostream)!=0)break;
+        if(nvertices_i<256&&nvertices_i>0){
+          if(ntriangles_i>0){
+            if(NewMemory((void **)&triangles1_i,ntriangles_i*sizeof(unsigned char))==0){
+              FREELOCAL_ISO;
+              break;
+            }
+  	    	  EGZ_FREAD(triangles1_i,1,(unsigned int)ntriangles_i,isostream);
+          }
+        }
+        else if(nvertices_i>=256&&nvertices_i<65536){
+          if(ntriangles_i>0){
+            if(NewMemory((void **)&triangles2_i,ntriangles_i*sizeof(unsigned short))==0){
+              FREELOCAL_ISO;
+              break;
+            }
+  		      EGZ_FREAD(triangles2_i,2,(unsigned int)ntriangles_i,isostream);
+          }
+        }
+        else{
+          if(ntriangles_i>0){
+            if(NewMemory((void **)&triangles_i,ntriangles_i*sizeof(int))==0){
+              FREELOCAL_ISO;
+              break;
+            }
+  		      EGZ_FREAD(triangles_i,4,(unsigned int)ntriangles_i,isostream);
+          } 
+        }
+	      if(EGZ_FEOF(isostream)!=0)break;
+
+        if(ntriangles_i>0){
+          if(NewMemory((void **)&norm,ntriangles_i*sizeof(short))==0){
+            FREELOCAL_ISO;
+            break;
+          }
+        }
+
+        for(n=0;n<ntriangles_i/3;n++){
+          if(nvertices_i<256){
+            i1=3*triangles1_i[3*n];
+            i2=3*triangles1_i[3*n+1];
+            i3=3*triangles1_i[3*n+2];
+          }
+          else if(nvertices_i>=256&&nvertices_i<65536){
+            i1=3*triangles2_i[3*n];
+            i2=3*triangles2_i[3*n+1];
+            i3=3*triangles2_i[3*n+2];
+          }
+          else{
+            i1=3*triangles_i[3*n];
+            i2=3*triangles_i[3*n+1];
+            i3=3*triangles_i[3*n+2];
+          }
+          v1=vertices_i+i1;
+          v2=vertices_i+i2;
+          v3=vertices_i+i3;
+          calcNormal2(v1,v2,v3,out,&area);
+          norm[3*n  ]=(short)(out[0]*32767);
+          norm[3*n+1]=(short)(out[1]*32767);
+          norm[3*n+2]=(short)(out[2]*32767);
+          xyznorm[i1  ] += out[0]*area;
+          xyznorm[i1+1] += out[1]*area;
+          xyznorm[i1+2] += out[2]*area;
+          xyznorm[i2  ] += out[0]*area;
+          xyznorm[i2+1] += out[1]*area;
+          xyznorm[i2+2] += out[2]*area;
+          xyznorm[i3  ] += out[0]*area;
+          xyznorm[i3+1] += out[1]*area;
+          xyznorm[i3+2] += out[2]*area;
+        }
+        for(n=0;n<nvertices_i;n++){
+          ReduceToUnit(xyznorm+3*n);
+          vertexnorm[3*n  ]=(short)(xyznorm[3*n  ]*32767);
+          vertexnorm[3*n+1]=(short)(xyznorm[3*n+1]*32767);
+          vertexnorm[3*n+2]=(short)(xyznorm[3*n+2]*32767);
+        }
+        FREEMEMORY(xyznorm);
+        asurface->nvertices=nvertices_i;
+        asurface->ntriangles=ntriangles_i;
+        asurface->triangles=triangles_i;
+        asurface->triangles1=triangles1_i;
+        asurface->triangles2=triangles2_i;
+        asurface->vertices=vertices_i;
+        if(ib->dataflag==1){
+          asurface->tvertices=tvertices_i;
+          asurface->color8=color8;
+        }
+        asurface->norm=norm;
+        asurface->vertexnorm=vertexnorm;
+
+        asurface++;
+      }
+    }
+    if(ib->compression_type==1){
+      i++;
+      if(i>=meshi->nisosteps)break;
+      continue;
+    }
+    if(skip_frame==1||jj%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)){
+     // if(skip_frame==1)jj--;
+    }
+    else{
+      i++;
+      if(i>=meshi->nisosteps)break;
+    }
+  }
+  local_stoptime = glutGet(GLUT_ELAPSED_TIME);
+  delta_time = (local_stoptime-local_starttime)/1000.0;
+  EGZ_FCLOSE(isostream);
+  if(*errorcode!=0){
+    unloadiso(meshi);
+    readiso("",ifile,UNLOAD,&error);
+    return;
+    }
+
+
+  ib->loaded=1;
+  ib->display=1;
+  loaded_isomesh=meshinfo+ib->blocknumber;
+  update_iso_showlevels();
+  ReadIsoFile=1;
+  plotstate=getplotstate(DYNAMIC_PLOTS);
+  updatemenu=1;
+  iisotype=getisotype(ib);
+
+  if(ib->dataflag==1){
+    iisottype = getisottype(ib);
+    sync_isobounds(iisottype);
+    setisolabels(ib->tmin, ib->tmax, ib, errorcode);
+    CheckMemory;
+  }
+
+  updatetimes();
+#ifdef _DEBUG
+  printf("After iso load: ");
+  PrintMemoryInfo;
+#endif
+  IDLE();
+
+  local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
+  delta_time0=(local_stoptime0-local_starttime0)/1000.0;
+
+  if(file_size!=0&&delta_time>0.0){
+    float loadrate;
+
+    loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
+    printf(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s (overhead: %.2f s)\n",
+    (float)file_size/1000000.,delta_time,loadrate,delta_time0-delta_time);
+  }
+  else{
+    printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
+    (float)file_size/1000000.,delta_time,delta_time0-delta_time);
+  }
+  GLUTPOSTREDISPLAY
+}
+
+/* ------------------ drawisoBAK ------------------------ */
+
+void drawisoBAK(const mesh *meshi,int tranflag){
+  int i, j,k;
+  float vv1[3],vv2[3],vv3[3];
+  float vv1n[3],vv2n[3],vv3n[3];
+  isosurface *asurface;
+  short *norm;
+  unsigned short *v1, *v2, *v3, tval1=0, tval2=0, tval3=0;
+  unsigned short *vertices_i=NULL,*tvertices_i=NULL;
+  int *triangles_i;
+  unsigned short *triangles2_i;
+  unsigned char *triangles1_i;
+  unsigned char *color8;
+  int nvertices;
+  int i1, i2, i3;
+  short *norm1,*norm2,*norm3,*vertexnorm;
+  float *iso_colors;
+  int n_iso_colors;
+  int icolor;
+  int ntriangles;
+  int *showlevels, nisolevels;
+  int isomin_index,isomax_index;
+  float factor, offset[3];
+  iso *isoi=NULL;
+  float iso_color_tmp[4];
+  float *iso_color_ptr;
+  int iso_lighting;
+
+  if(meshi->isofilenum>=0){
+    isoi = isoinfo + meshi->isofilenum;
+  }
+  if(isoi->dataflag==1){
+    iso_lighting=0;
+  }
+  else{
+    iso_lighting=1;
+  }
+
+  showlevels=meshi->showlevels;
+  nisolevels=meshi->nisolevels;
+  isomin_index=meshi->isomin_index;
+  isomax_index=meshi->isomax_index;
+  factor = (meshi->xyzmaxdiff/xyzmaxdiff)/65535.0;
+  offset[0]=(meshi->xbar0-xbar0)/xyzmaxdiff;
+  offset[1]=(meshi->ybar0-ybar0)/xyzmaxdiff;
+  offset[2]=(meshi->zbar0-zbar0)/xyzmaxdiff;
+
+
+  if(tranflag==DRAW_TRANSPARENT&&visAIso!=1)return;
+
+  if(iso_ambient_ini==NULL||n_iso_ambient_ini==0){
+    iso_colors=iso_ambient;
+    n_iso_colors=n_iso_ambient;
+  }
+  else{
+    iso_colors=iso_ambient_ini;
+    n_iso_colors=n_iso_ambient_ini;
+  }
+
+  if(visAIso==1){
+
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
+    if(cullfaces==1)glDisable(GL_CULL_FACE);
+
+    iso_specular[3] = 1.0;
+    if(tranflag==DRAW_TRANSPARENT)transparenton();
+
+    glPushAttrib(GL_LIGHTING_BIT);
+    if(iso_lighting==1){
+      glEnable(GL_LIGHTING);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
+      glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,iso_shininess);
+    }
+    glBegin(GL_TRIANGLES);
+
+    for(i=0;i<nisolevels;i++){
+      float isocolor_temp[4];
+      
+      asurface++;
+      icolor=i;
+      if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
+      if(showlevels[i]==0)continue;
+      if(tranflag==DRAW_TRANSPARENT){
+        if(transparent_state==ALL_TRANSPARENT){
+        }
+        else if(transparent_state==MIN_SOLID){
+          if(i==isomin_index)continue;
+        }
+        else if(transparent_state==MAX_SOLID){
+          if(i==isomax_index)continue;
+        }
+        else if(transparent_state==ALL_SOLID){
+          continue;
+        }
+      }
+      else if(tranflag==DRAW_SOLID){
+        if(transparent_state==ALL_TRANSPARENT){
+          continue;
+        }
+        else if(transparent_state==MIN_SOLID){
+          if(i!=isomin_index)continue;
+        }
+        else if(transparent_state==MAX_SOLID){
+          if(i!=isomax_index)continue;
+        }
+        else if(transparent_state==ALL_SOLID){
+        }
+      }
+      nvertices=asurface->nvertices;
+      ntriangles=asurface->ntriangles/3;
+      if(ntriangles==0)continue;
+      if(i==0&&strcmp(isoi->surface_label.shortlabel,"hrrpuv")==0){
+        iso_color_ptr=hrrpuv_iso_color;
+      }
+      else{
+        iso_color_ptr=iso_colors+4*icolor;
+      }
+      //iso_color_ptr=isocolor_temp;
+      if(setbw!=0){
+        float greylevel;
+
+        greylevel=color2bw(iso_color_ptr);
+        iso_color_tmp[0]=greylevel;
+        iso_color_tmp[1]=greylevel;
+        iso_color_tmp[2]=greylevel;
+        iso_color_ptr=iso_color_tmp;
+      }
+      isocolor_temp[0]=iso_color_ptr[0];
+      isocolor_temp[1]=iso_color_ptr[1];
+      isocolor_temp[2]=iso_color_ptr[2];
+      isocolor_temp[3]=transparentlevel;
+      iso_color_ptr=isocolor_temp;
+      
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,iso_color_ptr);
+      vertices_i=asurface->vertices;
+      if(asurface->dataflag==1){
+        tvertices_i=asurface->tvertices;
+        color8 = asurface->color8;
+      }
+      triangles_i=asurface->triangles;
+      triangles1_i=asurface->triangles1;
+      triangles2_i=asurface->triangles2;
+      norm=asurface->norm;
+  	  vertexnorm=asurface->vertexnorm;
+      for(j=0;j<ntriangles;j++){
+        if(nvertices<256){
+          i1=3*triangles1_i[3*j];
+          i2=3*triangles1_i[3*j+1];
+          i3=3*triangles1_i[3*j+2];
+        }
+        else if(nvertices>=256&&nvertices<65536){
+          i1=3*triangles2_i[3*j];
+          i2=3*triangles2_i[3*j+1];
+          i3=3*triangles2_i[3*j+2];
+        }
+        else{
+          i1=3*triangles_i[3*j];
+          i2=3*triangles_i[3*j+1];
+          i3=3*triangles_i[3*j+2];
+        }
+        v1=vertices_i+i1;
+        v2=vertices_i+i2;
+        v3=vertices_i+i3;
+        for(k=0;k<3;k++){
+          vv1[k]=offset[k]+factor*v1[k];
+          vv2[k]=offset[k]+factor*v2[k];
+          vv3[k]=offset[k]+factor*v3[k];
+        }
+        if(asurface->dataflag==1){
+          tval1=color8[i1/3];
+          tval2=color8[i2/3];
+          tval3=color8[i3/3];
+        }
+	    	if(isonormtype==1
+          ||(isonormtype==0&&isoi->compression_type==1)
+          ){
+          if(isoi->compression_type==1){
+            norm1 = isoi->normaltable + 3*asurface->s_norm[i1/3];
+            norm2 = isoi->normaltable + 3*asurface->s_norm[i2/3];
+            norm3 = isoi->normaltable + 3*asurface->s_norm[i3/3];
+          }
+          else{
+            norm1 = vertexnorm+i1;
+	  	      norm2 = vertexnorm+i2;
+		        norm3 = vertexnorm+i3;
+          }
+          if(asurface->dataflag==1){
+            glNormal3sv(norm1);
+            glColor4fv(rgb_full[tval1]);
+            glVertex3fv(vv1);
+
+  		      glNormal3sv(norm2);
+            glColor4fv(rgb_full[tval2]);
+            glVertex3fv(vv2);
+
+   		      glNormal3sv(norm3);
+            glColor4fv(rgb_full[tval3]);
+            glVertex3fv(vv3);
+          }
+          else{
+            glNormal3sv(norm1);
+            glVertex3fv(vv1);
+
+  		      glNormal3sv(norm2);
+            glVertex3fv(vv2);
+
+   		      glNormal3sv(norm3);
+            glVertex3fv(vv3);
+          }
+        }
+		    else{
+          if(asurface->dataflag==1){
+            glNormal3sv(norm);
+            glColor4fv(rgb_full[tval1]);
+            glVertex3fv(vv1);
+
+            glColor4fv(rgb_full[tval2]);
+            glVertex3fv(vv2);
+
+            glColor4fv(rgb_full[tval3]);
+            glVertex3fv(vv3);
+          }
+          else{
+            glNormal3sv(norm);
+            glVertex3fv(vv1);
+            glVertex3fv(vv2);
+            glVertex3fv(vv3);
+          }
+          norm += 3;
+        }
+      }
+    }
+    glEnd();
+    if(asurface->dataflag==1)glDisable(GL_COLOR_MATERIAL);
+
+    glPopAttrib();
+
+    if(tranflag==DRAW_TRANSPARENT)transparentoff();
+    if(cullfaces==1)glEnable(GL_CULL_FACE);
+  }
+
+  if(visAIso==2){
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels-1;
+
+    glPushAttrib(GL_LIGHTING_BIT);
+    antialias(1);
+    glLineWidth(isolinewidth);
+    glBegin(GL_LINES);
+    for(i=0;i<nisolevels;i++){
+      asurface++;
+      if(asurface->dataflag==1)tvertices_i=asurface->tvertices;
+      if(showlevels[i]==0)continue;
+      icolor=i;
+      if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
+      if(setbw==0){
+        iso_color_ptr = iso_colors+4*icolor;
+      }
+      else{
+        float greylevel;
+
+        greylevel=color2bw(iso_colors+4*icolor);
+        iso_color_tmp[0]=greylevel;
+        iso_color_tmp[1]=greylevel;
+        iso_color_tmp[2]=greylevel;
+        iso_color_ptr=iso_color_tmp;
+      }
+      glColor3fv(iso_color_ptr);
+      nvertices=asurface->nvertices;
+      ntriangles=asurface->ntriangles/3;
+      vertices_i=asurface->vertices;
+      triangles_i=asurface->triangles;
+      triangles1_i=asurface->triangles1;
+      triangles2_i=asurface->triangles2;
+      for(j=0;j<ntriangles;j++){
+        if(nvertices<256){
+          i1=3*triangles1_i[3*j];
+          i2=3*triangles1_i[3*j+1];
+          i3=3*triangles1_i[3*j+2];
+        }
+        else if(nvertices>=256&&nvertices<65536){
+          i1=3*triangles2_i[3*j];
+          i2=3*triangles2_i[3*j+1];
+          i3=3*triangles2_i[3*j+2];
+        }
+        else{
+          i1=3*triangles_i[3*j];
+          i2=3*triangles_i[3*j+1];
+          i3=3*triangles_i[3*j+2];
+        }
+        v1=vertices_i+i1;
+        v2=vertices_i+i2;
+        v3=vertices_i+i3;
+        for(k=0;k<3;k++){
+          vv1[k]=offset[k]+factor*v1[k];
+          vv2[k]=offset[k]+factor*v2[k];
+          vv3[k]=offset[k]+factor*v3[k];
+        }
+        if(asurface->dataflag==1){
+          tval1=tvertices_i[i1/3]/256;
+          if(tval1>255)tval1=255;
+          tval2=tvertices_i[i2/3]/256;
+          if(tval2>255)tval2=255;
+          tval3=tvertices_i[i3/3]/256;
+          if(tval3>255)tval3=255;
+        }
+        if(asurface->dataflag==1){
+          glColor4fv(rgb_full[tval1]);
+          glVertex3fv(vv1);
+          glColor4fv(rgb_full[tval2]);
+          glVertex3fv(vv2);
+          glVertex3fv(vv2);
+          glColor4fv(rgb_full[tval3]);
+          glVertex3fv(vv3);
+          glVertex3fv(vv3);
+          glColor4fv(rgb_full[tval1]);
+          glVertex3fv(vv1);
+        }
+        else{
+          glVertex3fv(vv1);
+          glVertex3fv(vv2);
+          glVertex3fv(vv2);
+          glVertex3fv(vv3);
+          glVertex3fv(vv3);
+          glVertex3fv(vv1);
+        }
+      }
+    }
+    glEnd();
+    antialias(0);
+    glPopAttrib();
+
+  }
+
+  if(showisonormals==1){
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
+
+    antialias(1);
+    glLineWidth(isolinewidth);
+    glBegin(GL_LINES);
+    for(i=0;i<nisolevels;i++){
+      asurface++;
+      if(showlevels[i]==0)continue;
+      glColor3f((float)1.,(float)1.,(float)1.);
+      nvertices=asurface->nvertices;
+      ntriangles=asurface->ntriangles/3;
+      vertices_i=asurface->vertices;
+      if(asurface->dataflag==1)tvertices_i=asurface->tvertices;
+      triangles_i=asurface->triangles;
+      triangles1_i=asurface->triangles1;
+      triangles2_i=asurface->triangles2;
+      norm=asurface->norm;
+  	  vertexnorm=asurface->vertexnorm;
+      for(j=0;j<ntriangles;j++){
+        if(nvertices<256){
+          i1=3*triangles1_i[3*j];
+          i2=3*triangles1_i[3*j+1];
+          i3=3*triangles1_i[3*j+2];
+        }
+        else if(nvertices>=256&&nvertices<65536){
+          i1=3*triangles2_i[3*j];
+          i2=3*triangles2_i[3*j+1];
+          i3=3*triangles2_i[3*j+2];
+        }
+        else{
+          i1=3*triangles_i[3*j];
+          i2=3*triangles_i[3*j+1];
+          i3=3*triangles_i[3*j+2];
+        }
+        v1=vertices_i+i1;
+        v2=vertices_i+i2;
+        v3=vertices_i+i3;
+        for(k=0;k<3;k++){
+          vv1[k]=offset[k]+factor*v1[k];
+          vv2[k]=offset[k]+factor*v2[k];
+          vv3[k]=offset[k]+factor*v3[k];
+        }
+	    	if(isonormtype==1
+          ||(isonormtype==0&&isoi->compression_type==1)
+          ){
+          if(isoi->compression_type==1){
+            norm1 = isoi->normaltable + 3*asurface->s_norm[i1/3];
+            norm2 = isoi->normaltable + 3*asurface->s_norm[i2/3];
+            norm3 = isoi->normaltable + 3*asurface->s_norm[i3/3];
+          }
+          else{
+            norm1 = vertexnorm+i1;
+	  	      norm2 = vertexnorm+i2;
+		        norm3 = vertexnorm+i3;
+          }
+          for(k=0;k<3;k++){
+            vv1n[k]=vv1[k]+norm1[k]/(8.*32768.)/4.0;
+            vv2n[k]=vv2[k]+norm2[k]/(8.*32768.)/4.0;
+            vv3n[k]=vv3[k]+norm3[k]/(8.*32768.)/4.0;
+          }
+
+          glVertex3fv(vv1);
+          glVertex3fv(vv1n);
+          glVertex3fv(vv2);
+          glVertex3fv(vv2n);
+          glVertex3fv(vv3);
+          glVertex3fv(vv3n);
+        }
+		    else{
+          for(k=0;k<3;k++){
+            vv1n[k]=vv1[k]+norm[k]/(8.*32768.)/4.0;
+            vv2n[k]=vv2[k]+norm[k]/(8.*32768.)/4.0;
+            vv3n[k]=vv3[k]+norm[k]/(8.*32768.)/4.0;
+          }
+          glVertex3fv(vv1);
+          glVertex3fv(vv1n);
+          glVertex3fv(vv2);
+          glVertex3fv(vv2n);
+          glVertex3fv(vv3);
+          glVertex3fv(vv3n);
+          norm += 3;
+        }
+
+      }
+    }
+    glEnd();
+    antialias(0);
+  }
+
+  if(visAIso==3){
+    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels - 1;
+
+    antialias(1);
+    glPointSize(isopointsize);
+    glBegin(GL_POINTS);
+    for(i=0;i<nisolevels;i++){
+      asurface++;
+      if(showlevels[i]==0)continue;
+      icolor=i;
+      if(icolor>n_iso_colors-1)icolor=n_iso_colors-1;
+      if(setbw==0){
+        iso_color_ptr = iso_colors+4*icolor;
+      }
+      else{
+        float greylevel;
+
+        greylevel=color2bw(iso_colors+4*icolor);
+        iso_color_tmp[0]=greylevel;
+        iso_color_tmp[1]=greylevel;
+        iso_color_tmp[2]=greylevel;
+        iso_color_ptr=iso_color_tmp;
+      }
+      glColor3fv(iso_color_ptr);
+      nvertices=asurface->nvertices;
+      ntriangles=asurface->ntriangles/3;
+      vertices_i=asurface->vertices;
+      if(asurface->dataflag==1)tvertices_i=asurface->tvertices;
+      triangles_i=asurface->triangles;
+      triangles1_i=asurface->triangles1;
+      triangles2_i=asurface->triangles2;
+      for(j=0;j<nvertices;j++){
+        v1=vertices_i+3*j;
+        for(k=0;k<3;k++){
+          vv1[k]=offset[k]+factor*v1[k];
+        }
+        if(asurface->dataflag==1){
+          tval1=tvertices_i[j]/256;
+          if(tval1>255)tval1=255;
+          glColor4fv(rgb_full[tval1]);
+          glVertex3fv(vv1);
+        }
+        else{
+          glVertex3fv(vv1);
+        }
+      }
+      asurface++;
+    }
+    glEnd();
+    antialias(0);
+  }
+}
+
+/* ------------------ update_isotri_list ------------------------ */
+
+void update_isotri_list(isosurface *asurface, iso *isoi){
+  int ilev,itri;
+  isosurface *asurfi;
+  int nopaque, ntransparent;
+  isotri **isotri_list;
+  int *showlevels;
+  mesh *meshi;
+  int nlevels;
+  int timestep;
+  float *colorptr;
+  
+  nopaque=0;
+  ntransparent=0;
+  
+  CheckMemory;
+  meshi = meshinfo + isoi->blocknumber;
+  nlevels=meshi->nisolevels;
+  showlevels=meshi->showlevels;
+  timestep=meshi->iiso;
+  isoi->isoupdate_timestep=timestep;
+  isotri_list=isoi->isotri_list_full;
+  
+  if(transparent_state==ALL_TRANSPARENT){
+    isoi->isotri_list_opaque=NULL;
+    isoi->isotri_list_tran=isotri_list;
+    for(ilev=0;ilev<nlevels;ilev++){
+      if(showlevels[ilev]==0)continue;
+      asurfi = asurface + ilev;
+      ntransparent += asurfi->niso_triangles;
+      for(itri=0;itri<asurfi->niso_triangles;itri++){
+        *isotri_list++=asurfi->iso_triangles+itri;
+      }
+      colorptr=isoi->colorlevels[ilev];
+      colorptr[3]=transparentlevel;
+    }
+  }
+  else if(transparent_state==MIN_SOLID){
+    isoi->isotri_list_opaque=isotri_list;
+    for(ilev=0;ilev<1;ilev++){
+      if(showlevels[ilev]==0)continue;
+      asurfi = asurface + ilev;
+      nopaque += asurfi->niso_triangles;
+      for(itri=0;itri<asurfi->niso_triangles;itri++){
+        *isotri_list++=asurfi->iso_triangles+itri;
+      }
+      colorptr=isoi->colorlevels[ilev];
+      colorptr[3]=1.0;
+    }
+    isoi->isotri_list_tran=isotri_list;
+    for(ilev=1;ilev<nlevels;ilev++){
+      if(showlevels[ilev]==0)continue;
+      asurfi = asurface + ilev;
+      ntransparent += asurfi->niso_triangles;
+      for(itri=0;itri<asurfi->niso_triangles;itri++){
+        *isotri_list++=asurfi->iso_triangles+itri;
+      }
+      colorptr=isoi->colorlevels[ilev];
+      colorptr[3]=transparentlevel;
+    }
+  }
+  else if(transparent_state==MAX_SOLID){
+    isoi->isotri_list_tran=isotri_list;
+    for(ilev=0;ilev<nlevels-1;ilev++){
+      if(showlevels[ilev]==0)continue;
+      asurfi = asurface + ilev;
+      ntransparent += asurfi->niso_triangles;
+      for(itri=0;itri<asurfi->niso_triangles;itri++){
+        *isotri_list++=asurfi->iso_triangles+itri;
+      }
+      colorptr=isoi->colorlevels[ilev];
+      colorptr[3]=transparentlevel;
+    }
+    isoi->isotri_list_opaque=isotri_list;
+    for(ilev=nlevels-1;ilev<nlevels;ilev++){
+      if(showlevels[ilev]==0)continue;
+      asurfi = asurface + ilev;
+      nopaque += asurfi->niso_triangles;
+      for(itri=0;itri<asurfi->niso_triangles;itri++){
+        *isotri_list++=asurfi->iso_triangles+itri;
+      }
+      colorptr=isoi->colorlevels[ilev];
+      colorptr[3]=1.0;
+    }
+  }
+  else if(transparent_state==ALL_SOLID){
+    isoi->isotri_list_opaque=isotri_list;
+    isoi->isotri_list_tran=NULL;
+    for(ilev=0;ilev<nlevels;ilev++){
+      if(showlevels[ilev]==0)continue;
+      asurfi = asurface + ilev;
+      nopaque += asurfi->niso_triangles;
+      for(itri=0;itri<asurfi->niso_triangles;itri++){
+        *isotri_list++=asurfi->iso_triangles+itri;
+      }
+      colorptr=isoi->colorlevels[ilev];
+      colorptr[3]=1.0;
+    }
+  }
+  isoi->nisotri_opaque=nopaque;
+  isoi->nisotri_tran=ntransparent;
+  if(sort_transparency==1)sort_iso_triangles(modelview_scratch);
+
+  CheckMemory;
+}
+
+
+/* ------------------ unloadiso ------------------------ */
+
+void unloadisoBAK(mesh *meshi){
+  isosurface *asurface;
+  int n,j;
+  iso *ib;
+  int nloaded=0;
+  int i;
+  mesh *meshi2;
+
+  if(meshi->isofilenum==-1)return;
+  ib = isoinfo + meshi->isofilenum;
+  if(meshi->nisosteps>0&&meshi->nisolevels>0){
+    asurface=meshi->animatedsurfaces;
+    CheckMemoryOff;
+    if(ib->compression_type==0){
+      for(n=0;n<meshi->nisosteps;n++){
+        for(j=0;j<meshi->nisolevels;j++){
+          FREEMEMORY(asurface->triangles);
+          FREEMEMORY(asurface->triangles1);
+          FREEMEMORY(asurface->triangles2);
+          FREEMEMORY(asurface->vertices);
+          FREEMEMORY(asurface->norm);
+          FREEMEMORY(asurface->vertexnorm);
+          asurface++;
+        }
+      }
+    }
+    CheckMemoryOn;
+    FREEMEMORY(meshi->isotimes);
+    FREEMEMORY(meshi->animatedsurfaces);
+    FREEMEMORY(meshi->showlevels);
+  }
+  meshi->nisosteps=0;
+  FREEMEMORY(ib->comp_bufferframe);
+  FREEMEMORY(ib->full_bufferframe);
+  FREEMEMORY(ib->comp_buffer);
+  FREEMEMORY(ib->normaltable);
+  ib->loaded=0;
+  ib->display=0;
+  plotstate=getplotstate(DYNAMIC_PLOTS);
+  meshi->isofilenum=-1;
+  for(i=0;i<nmeshes;i++){
+    meshi2 = meshinfo+i;
+    if(meshi2->isofilenum!=-1)nloaded++;
+  }
+  if(nloaded==0){
+    ReadIsoFile=0;
+  }
+
+  updatetimes();
+  updatemenu=1;
+  IDLE();
+
+  return;
+}
+
+
+
+

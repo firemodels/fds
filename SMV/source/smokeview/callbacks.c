@@ -461,6 +461,7 @@ void motion(int xm, int ym){
   reset_glui_view(-1);
 
   GLUTPOSTREDISPLAY
+  if(sort_transparency==1)sort_iso_triangles(modelview_scratch);
   if( colordrag==1&&(showtime==1 || showplot3d==1)){
     int temp;
     int ifactor;
@@ -2162,6 +2163,7 @@ void Idle(void){
   char buffer[256];
   float elapsed_time;
 
+  CheckMemory;
   glutSetWindow(mainwindow_id);
   updateShow();
   thistime = glutGet(GLUT_ELAPSED_TIME);

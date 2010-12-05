@@ -21,7 +21,8 @@ int SUB_portfrustum(int quad,
                    GLdouble fleft, GLdouble fright, GLdouble fdown, GLdouble fup, GLdouble fnear, GLdouble ffar,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
-
+EXTERNCPP void sort_iso_triangles(float *mm);
+EXTERNCPP void update_isotri_list(isosurface *asurface, iso *isoi);
 EXTERNCPP void update_evac_parms(void);
 EXTERNCPP void update_slice_menu_show(void);
 EXTERNCPP void update_slicedir_count(void);
@@ -381,7 +382,7 @@ EXTERNCPP void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostre
 				 int *nisosteps, int isoframestep, float *tmin, float *tmax, int endian);
 #endif
 EXTERNCPP void array2string(float *array, int narray, char *string);
-EXTERNCPP void getisolevels(const char *isofile, int dataflag, float **levelsptr, int *nisolevels);
+EXTERNCPP void getisolevels(const char *isofile, int dataflag, float **levelsptr, float ***colorlevelsptr, int *nisolevels);
 EXTERNCPP void getcisolevels(const char *isofile, float **levelsptr, int *nisolevels);
 EXTERNCPP void getsmoothblockparms(mesh *gb, smoothblockage *sb);
 EXTERNCPP void MakeIsoBlockages(mesh *gb, smoothblockage *sb);

@@ -425,6 +425,28 @@ int edgelist2[15][16]={
   }
 }
 
+/* ------------------ calcNormal2f ------------------------ */
+
+void calcNormal2f(const float *v1, const float *v2, const float *v3, 
+                 float *out, float *area){
+  float u[3], v[3];
+  int i;
+
+
+  for(i=0;i<3;i++){
+    u[i]=v2[i]-v1[i];
+    v[i]=v3[i]-v1[i];
+  }
+
+  out[0] = u[1]*v[2] - u[2]*v[1];
+  out[1] = u[2]*v[0] - u[0]*v[2];
+  out[2] = u[0]*v[1] - u[1]*v[0];
+  *area = sqrt((double)(out[0]*out[0]+out[1]*out[1]+out[2]*out[2]))/2.0;
+
+  ReduceToUnit(out);
+
+}
+
 /* ------------------ calcNormal2 ------------------------ */
 
 void calcNormal2(const unsigned short *v1, 

@@ -29,6 +29,15 @@
 /* iso-surface definitions */
 
 typedef struct {
+  float xyz[3],norm[3],*color;
+} isovert;
+
+typedef struct {
+  isovert *v1, *v2, *v3;
+  float norm[3], distance, **color;
+} isotri;
+
+typedef struct {
   float level;
   float *color;
   int dataflag;
@@ -38,6 +47,12 @@ typedef struct {
   int normtype, defined, plottype;
   int *triangles;
   int *closestnodes;
+  
+  isotri *iso_triangles; // new isosurface data structures
+  int niso_triangles, niso_triangles_opaque, niso_triangles_transparent; // new isosurface datastructures
+  isovert *iso_vertices;
+  int niso_vertices;
+  
   unsigned short *triangles2;
   unsigned char *triangles1;
   unsigned short *vertices, *tvertices;
@@ -146,6 +161,10 @@ SV_EXTERN void calcNormal(const float *v1, const float *v2, const float *v3, flo
 SV_EXTERN void calcNormal2(const unsigned short *v1, 
                            const unsigned short *v2, 
                            const unsigned short *v3, 
+                           float *out, float *area);
+SV_EXTERN void calcNormal2f(const float *v1, 
+                           const float *v2, 
+                           const float *v3, 
                            float *out, float *area);
 SV_EXTERN int GetNormalSurface(isosurface *surfacedata);
 #endif

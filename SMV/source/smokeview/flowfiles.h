@@ -377,7 +377,10 @@ typedef struct {
   float tmin,tmax;
   float valmin_data, valmax_data;
   int extreme_min, extreme_max;
-  float *levels;
+  isotri **isotri_list_full, **isotri_list_opaque, **isotri_list_tran;
+  int nisotri_list, nisotri_opaque, nisotri_tran, iisotri_opqaue, iisotri_tran;
+  int isoupdate_timestep;
+  float *levels, **colorlevels;
   int nlevels;
   char menulabel[128];
 
