@@ -14,6 +14,9 @@
 #include "threader.h"
 #include "string_util.h"
 
+SVEXTERN isotri SVDECL(**iso_trans,NULL),SVDECL(**iso_opaques,NULL);
+SVEXTERN int SVDECL(niso_trans,0),SVDECL(niso_opaques,0);
+SVEXTERN int SVDECL(niso_tris_max,0);
 SVEXTERN int SVDECL(sort_transparency,1);
 SVEXTERN int SVDECL(object_outlines,0);
 SVEXTERN int SVDECL(usemenu,1),SVDECL(show_evac_slices,0);

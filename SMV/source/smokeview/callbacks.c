@@ -461,7 +461,8 @@ void motion(int xm, int ym){
   reset_glui_view(-1);
 
   GLUTPOSTREDISPLAY
-  if(sort_transparency==1)sort_iso_triangles(modelview_scratch);
+  //***
+  if(showiso==1&&sort_transparency==1&&niso_trans>0)sort_iso_triangles(modelview_scratch);
   if( colordrag==1&&(showtime==1 || showplot3d==1)){
     int temp;
     int ifactor;
@@ -2497,7 +2498,7 @@ void update_current_mesh(mesh *meshi){
   iso *isoi;
 
   current_mesh=meshi;
-  if(isoinfo!=NULL&&current_mesh->isofilenum==-1){
+  if(isoinfo!=NULL&&current_mesh->isofilenum!=-1){
     loaded_isomesh=NULL;
     for(i=0;i<niso_files;i++){
       isoi = isoinfo + i;

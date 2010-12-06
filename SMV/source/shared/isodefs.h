@@ -35,6 +35,7 @@ typedef struct {
 typedef struct {
   isovert *v1, *v2, *v3;
   float norm[3], distance, **color;
+  float xyzmid[3];
 } isotri;
 
 typedef struct {
@@ -134,7 +135,7 @@ SV_EXTERN void DrawIsosurface(const isosurface *isodata);
 SV_EXTERN void freesurface(isosurface *surfacedata);
 SV_EXTERN void InitIsosurface(isosurface *surfacedata, float level, float *color, int colorindex);
 SV_EXTERN int ResizeSurface(isosurface *surfacedata, int incvert, int inctrilist, int incnorm);
-SV_EXTERN void GetIsobox(const float *x, 
+SV_EXTERN int GetIsobox(const float *x, 
                const float *y, 
                const float *z, 
                const float *vals, 
@@ -150,7 +151,7 @@ int GetIsosurface(isosurface *surface,
                   const float *data, 
                   const float *tdata, 
                   const char *iblank_cell, 
-                  float level,
+                  float level, float dlevel,
                   const float *xplt, int nx, 
                   const float *yplt, int ny, 
                   const float *zplt, int nz

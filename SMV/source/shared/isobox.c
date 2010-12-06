@@ -25,7 +25,7 @@ char isobox_revision[]="$Revision$";
 
 /* ------------------ GetIsobox ------------------------ */
 
-void GetIsobox(const float *x, 
+int GetIsobox(const float *x, 
                const float *y, 
                const float *z, 
                const float *vals, 
@@ -302,7 +302,7 @@ int edgelist2[15][16]={
 
   *nvert = 0;
   *ntriangles = 0;
-  if(vmin>level||vmax<level)return;
+  if(vmin>level||vmax<level)return *ntriangles;
 
 /* determine which of 256 cases this is */
 
@@ -349,11 +349,11 @@ int edgelist2[15][16]={
     zzval[izmax[n]] = z[1];
   }
 
-  if(casenum<=0||casenum>=255)return; /* no iso-surface */
+  if(casenum<=0||casenum>=255)return 0; /* no iso-surface */
 
   case2 = &(cases[casenum][0]);
   type = case2[8];
-  if(type==0)return;
+  if(type==0)return *ntriangles;
 
   if(compcase[type]==-1){thistype=sign;}
   else{thistype=1;}
@@ -423,6 +423,7 @@ int edgelist2[15][16]={
   for(n=0;n<npath;n++){
     triangles[n] = path[n];
   }
+  return *ntriangles;
 }
 
 /* ------------------ calcNormal2f ------------------------ */
@@ -522,7 +523,7 @@ int GetIsosurface(isosurface *surface,
                   const float *data, 
                   const float *tdata, 
                   const char *iblank_cell, 
-                  float level,
+                  float level, float dlevel,
                   const float *xplt, int nx, 
                   const float *yplt, int ny, 
                   const float *zplt, int nz
@@ -894,7 +895,8 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
     v1=newtriangles[3*i];
     v2=newtriangles[3*i+1];
     v3=newtriangles[3*i+2];
-    if(cs[v1]!=cs[v2]&&cs[v1]!=cs[v3]&&cs[v2]!=cs[v3]){
+    if(cs[v1]>=0&&cs[v2]>=0&&cs[v3]>=0&&
+       cs[v1]!=cs[v2]&&cs[v1]!=cs[v3]&&cs[v2]!=cs[v3]){
       newtriangles2[nn++]=v1;
       newtriangles2[nn++]=v2;
       newtriangles2[nn++]=v3;
@@ -1007,8 +1009,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
 
 }
 
-
-/* ------------------ UpdateIsosurface ------------------------ */
+/* ------------------ MergeIsosurface ------------------------ */
 
 int MergeIsosurface(isosurface *to_surface, isosurface *from_surface){
   int return_val;
@@ -1610,9 +1611,24 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
   if(isostream==NULL)return;
   *error = 0;
   for(i=0;i<*nlevels;i++){
+    float dlevel;
+
+    dlevel=-1.0;
+    if(*nlevels>1){
+      if(i==0){
+        dlevel=abs(level[1]-level[0]);
+      }
+      else if(i==*nlevels-1){
+        dlevel=abs(level[*nlevels-1]-level[*nlevels-2]);
+      }
+      else{
+        dlevel=min(abs(level[i+1]-level[i]),abs(level[i]-level[i-1]));
+      }
+    }
+         
     InitIsosurface(&surface,level[i],NULL,i);
     surface.dataflag=0;
-    if(GetIsosurface(&surface,data,NULL,(const char *)iblank,level[i],xplt,*nx,yplt,*ny,zplt,*nz)!=0){
+    if(GetIsosurface(&surface,data,NULL,(const char *)iblank,level[i],dlevel,xplt,*nx,yplt,*ny,zplt,*nz)!=0){
       *error=1;
       return;
     }
@@ -1664,9 +1680,22 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
   if(isostream==NULL)return;
   *error = 0;
   for(i=0;i<*nlevels;i++){
+    float level;
+    
+    if(*nlevels>1){
+      if(i==0){
+        dlevel=abs(level[1]-level[0]);
+      }
+      else if(i==*nlevels-1){
+        dlevel=abs(level[*nlevels-1]-level[*nlevels-2]);
+      }
+      else{
+        dlevel=min(abs(level[i]-level[i-1]),abs(level[i+1]-level[i]));
+      }
+    }
     InitIsosurface(&surface,level[i],NULL,i);
     surface.dataflag=dataflag;
-    if(GetIsosurface(&surface,data,tdata,(const char *)iblank,level[i],xplt,*nx,yplt,*ny,zplt,*nz)!=0){
+    if(GetIsosurface(&surface,data,tdata,(const char *)iblank,level[i],dlevel,xplt,*nx,yplt,*ny,zplt,*nz)!=0){
       *error=1;
       return;
     }

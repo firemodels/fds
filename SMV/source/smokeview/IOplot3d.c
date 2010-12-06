@@ -1283,6 +1283,8 @@ void updatesurface(void){
 
   if(unload_qdata==1)return;
   for(i=0;i<nmeshes;i++){
+    float dlevel=-1.0;
+    
     meshi = meshinfo+i;
     if(meshi->plot3dfilenum==-1)continue;
 
@@ -1312,7 +1314,7 @@ void updatesurface(void){
     isolevelindex2=colorindex;
     freesurface(currentsurfptr);
     InitIsosurface(currentsurfptr, level, rgb_plot3d_contour[colorindex],-999);
-    GetIsosurface(currentsurfptr,qdata+(plotn-1)*plot3dsize,NULL,iblank_cell,level,
+    GetIsosurface(currentsurfptr,qdata+(plotn-1)*plot3dsize,NULL,iblank_cell,level,dlevel,
       xplt,ibar+1,yplt,jbar+1,zplt,kbar+1);
     GetNormalSurface(currentsurfptr);
     CompressIsosurface(currentsurfptr,1,
@@ -1328,7 +1330,7 @@ void updatesurface(void){
       level2 = p3min[plotn-1] + colorindex2*(p3max[plotn-1]-p3min[plotn-1])/((float)nrgb-2.0f);
       freesurface(currentsurf2ptr);
       InitIsosurface(currentsurf2ptr, level2, rgb_plot3d_contour[colorindex2],-999);
-      GetIsosurface(currentsurf2ptr,qdata+(plotn-1)*plot3dsize,NULL,iblank_cell,level2,
+      GetIsosurface(currentsurf2ptr,qdata+(plotn-1)*plot3dsize,NULL,iblank_cell,level2,dlevel,
         xplt,ibar+1,yplt,jbar+1,zplt,kbar+1);
       GetNormalSurface(currentsurf2ptr);
       CompressIsosurface(currentsurf2ptr,1,

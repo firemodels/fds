@@ -22,7 +22,7 @@ int SUB_portfrustum(int quad,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
 EXTERNCPP void sort_iso_triangles(float *mm);
-EXTERNCPP void update_isotri_list(isosurface *asurface, iso *isoi);
+EXTERNCPP void Update_Isotris(void);
 EXTERNCPP void update_evac_parms(void);
 EXTERNCPP void update_slice_menu_show(void);
 EXTERNCPP void update_slicedir_count(void);
@@ -499,8 +499,8 @@ EXTERNCPP mesh *get_mesh(float xyz[3]);
 EXTERNCPP void initmesh(mesh *gb);
 EXTERNCPP void updateglui(void);
 EXTERNCPP void updateslicelist(int index);
-EXTERNCPP void drawiso(const mesh *gb,int tranflag);
-EXTERNCPP void drawtiso(const mesh *gb,int tranflag);
+EXTERNCPP void drawiso(int tranflag);
+EXTERNCPP void drawtiso(mesh *meshi,int tranflag);
 EXTERNCPP void drawplot3d(mesh *gb);
 EXTERNCPP void drawplot3d_texture(mesh *gb);
 EXTERNCPP void updateshowstep(int val, int slicedir);
