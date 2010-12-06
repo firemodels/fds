@@ -613,21 +613,21 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       ELSE
          RHOP(II,JJ,KK) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM0*TMP(II,JJ,KK))
       ENDIF
-      ! second-order extrapolation of first ghost cell value to second ghost cell (see also THERMAL_BC for YYP)
-      SELECT CASE(IOR)
-         CASE(-1)
-            RHOP(II+1,JJ,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II-1,JJ,KK))
-         CASE( 1)
-            RHOP(II-1,JJ,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II+1,JJ,KK))
-         CASE(-2)
-            RHOP(II,JJ+1,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ-1,KK))
-         CASE( 2)
-            RHOP(II,JJ-1,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ+1,KK))
-         CASE(-3)
-            RHOP(II,JJ,KK+1) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ,KK-1))
-         CASE( 3)
-            RHOP(II,JJ,KK-1) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ,KK+1))
-      END SELECT
+      !! second-order extrapolation of first ghost cell value to second ghost cell (see also THERMAL_BC for YYP)
+      !SELECT CASE(IOR)
+      !   CASE(-1)
+      !      RHOP(II+1,JJ,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II-1,JJ,KK))
+      !   CASE( 1)
+      !      RHOP(II-1,JJ,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II+1,JJ,KK))
+      !   CASE(-2)
+      !      RHOP(II,JJ+1,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ-1,KK))
+      !   CASE( 2)
+      !      RHOP(II,JJ-1,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ+1,KK))
+      !   CASE(-3)
+      !      RHOP(II,JJ,KK+1) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ,KK-1))
+      !   CASE( 3)
+      !      RHOP(II,JJ,KK-1) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ,KK+1))
+      !END SELECT
    ENDIF
  
 ENDDO WALL_CELL_LOOP
