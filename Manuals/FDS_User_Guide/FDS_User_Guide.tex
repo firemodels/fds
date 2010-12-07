@@ -1742,7 +1742,7 @@ walked next door.
 Whether
 the calculation is to be run on a single processor, or on multiple processors,
 the rules of prescribing multiple meshes are similar, with some issues to keep in mind. The most important rule of mesh alignment is that
-abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}. 
+abutting cells ought to have the same cross sectional area, or integral ratios, as shown in Fig.~\ref{fig:meshes}.
 \begin{figure}[p]
 \begin{picture}(325,600)(0,-20)
 \setlength{\unitlength}{0.02in}
@@ -5863,7 +5863,7 @@ fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules ar
 a given mesh cell at a given time step. This section provides a brief explanation of these rules and the parameters that control them.
 
 In an LES simulation, the consumption rate of gaseous fuel is given by the expression:
-\be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad   
+\be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad
    s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \ee
 Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter equal to 1.
 
@@ -7434,7 +7434,7 @@ To learn how to create and remove obstructions multiple times, see Section~\ref{
 
 \begin{warning}
 An obstruction that makes up the boundary of a ``pressure zone'' (see Section~\ref{info:ZONE}) {\em can} be created or
-removed. 
+removed.
 \end{warning}
 
 
@@ -9533,11 +9533,10 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct PLOT3D\_QUANTITY(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
 {\ct PLOT3D\_SPEC\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
 {\ct PLOT3D\_VELO\_INDEX}           & Integer~Quint & See Section~\ref{info:velocity}                                  &       &  0      \\ \hline
-%{\ct RENDER\_FILE}                  & Character    & Name of render file from dxf2fds  &           &                                   \\ \hline
+{\ct RENDER\_FILE}                  & Character    & See Smokeview User's Guide        &           &                                   \\ \hline
 {\ct SMOKE3D}                       & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                      \\ \hline
 {\ct SMOKE3D\_QUANTITY}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
-%{\ct SMOKE3D\_COMPRESSION}          & Character    & Type of compression for S3D file  &           & {\ct 'RLE'}                      \\ \hline
 {\ct STATE\_FILE}                   & Logical      & Flag for state relation file      &           & {\ct .FALSE.}                     \\ \hline
 %{\ct TIMING}                        & Logical      & General purpose timing flag       &           & {\ct .FALSE.}                      \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Flag for status (notready) file   &           & {\ct .FALSE.}                     \\ \hline
