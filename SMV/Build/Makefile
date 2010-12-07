@@ -320,6 +320,21 @@ intel_linux_64 : exe       = smv5_linux_64
 intel_linux_64 : $(obj)
 	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
+# ------------- Linux 64 ----------------
+# 64 bit linux (fire79)
+
+intel_linux_64_profile : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
+intel_linux_64_profile : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
+intel_linux_64_profile : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend -p
+intel_linux_64_profile : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64 -p
+intel_linux_64_profile : CC        = icc 
+intel_linux_64_profile : CPP       = icpc
+intel_linux_64_profile : FC        = ifort
+intel_linux_64_profile : exe       = smv5_linux_64p
+
+intel_linux_64_profile : $(obj)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS) -p
+
 #-------------- Clean Target to remove Object and Module files -----------
 
 .PHONY : clean
