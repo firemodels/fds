@@ -1,4 +1,4 @@
-&HEAD CHID= 'LLNL_20', TITLE= '1986 LLNL Enclosure Fire Test 20' /
+&HEAD CHID= 'LLNL_11', TITLE= '1986 LLNL Enclosure Fire Test 11' /
 
 
 
@@ -6,11 +6,11 @@
 
 
 
-&TIME T_BEGIN=-20., T_END=6000. /
+&TIME T_BEGIN=-20., T_END=4000. /
 
 
 
-&MISC TMPA=16., SURF_DEFAULT='Wall' /
+&MISC TMPA=18., SURF_DEFAULT='Wall' /
 
 
 Fire
@@ -115,7 +115,7 @@ Construction
        THICKNESS=0.1 /
 
 
-&OBST XB=0.0,6.0,0.0,4.0,3.0,3.0, SURF_ID='Drop Ceiling' /
+ OBST XB=0.0,6.0,0.0,4.0,3.0,3.0, SURF_ID='Drop Ceiling' /
 
 
 &HOLE XB=5.2,5.6,1.8,2.2,2.9,3.1 /

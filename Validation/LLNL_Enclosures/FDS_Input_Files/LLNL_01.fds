@@ -1,4 +1,4 @@
-&HEAD CHID= 'LLNL_20', TITLE= '1986 LLNL Enclosure Fire Test 20' /
+&HEAD CHID= 'LLNL_01', TITLE= '1986 LLNL Enclosure Fire Test 01' /
 
 
 
@@ -6,11 +6,11 @@
 
 
 
-&TIME T_BEGIN=-20., T_END=6000. /
+&TIME T_BEGIN=-20., T_END=500. /
 
 
 
-&MISC TMPA=16., SURF_DEFAULT='Wall' /
+&MISC TMPA=23., SURF_DEFAULT='Wall' /
 
 
 Fire
@@ -23,6 +23,7 @@ Fire
 &REAC ID= 'Methane'
 
       FYI= 'C_1 H_4'
+
 
       SOOT_YIELD=0
 
@@ -115,7 +116,7 @@ Construction
        THICKNESS=0.1 /
 
 
-&OBST XB=0.0,6.0,0.0,4.0,3.0,3.0, SURF_ID='Drop Ceiling' /
+ OBST XB=0.0,6.0,0.0,4.0,3.0,3.0, SURF_ID='Drop Ceiling' /
 
 
 &HOLE XB=5.2,5.6,1.8,2.2,2.9,3.1 /
@@ -163,7 +164,7 @@ Ventilation
 
 &SURF ID='EXHAUST'
       COLOR='BLUE'
-      VOLUME_FLUX=0.2 /
+      LEAK_PATH=1,0  /
 
 
 
@@ -191,7 +192,7 @@ Output
 
 
 
-&DUMP DT_DEVC=10., DT_PL3D=1000. /
+&DUMP DT_DEVC=10., DT_PL3D=100. /
 
 
 &DEVC XB=4.4,4.6,1.8,2.0,0.0,4.5, ID='West_All_TCs', QUANTITY='TEMPERATURE', STATISTICS='MEAN' /
