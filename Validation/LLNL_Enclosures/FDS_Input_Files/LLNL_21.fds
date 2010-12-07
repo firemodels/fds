@@ -1,4 +1,4 @@
-&HEAD CHID= 'LLNL_20', TITLE= '1986 LLNL Enclosure Fire Test 20' /
+&HEAD CHID= 'LLNL_21', TITLE= '1986 LLNL Enclosure Fire Test 21' /
 
 
 
@@ -10,7 +10,7 @@
 
 
 
-&MISC TMPA=16., SURF_DEFAULT='Wall' /
+&MISC TMPA=23., SURF_DEFAULT='Wall' /
 
 
 Fire
@@ -163,7 +163,7 @@ Ventilation
 
 &SURF ID='EXHAUST'
       COLOR='BLUE'
-      VOLUME_FLUX=0.2 /
+      VOLUME_FLUX=0.1 /
 
 
 
