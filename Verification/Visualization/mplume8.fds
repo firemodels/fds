@@ -2,15 +2,15 @@
 
   same as plume5c except there is a 4 mesh case
 
-&MESH IJK=16,8,8, XB=0.0,1.6,0.0,0.8,0.0,0.8 /
-&MESH IJK=16,8,8, XB=0.0,1.6,0.0,0.8,0.8,1.6 /
-&MESH IJK=16,8,8, XB=0.0,1.6,0.0,0.8,1.6,2.4 /
-&MESH IJK=16,8,8, XB=0.0,1.6,0.0,0.8,2.4,3.2 /
+&MESH ID='Front Z1 mesh', IJK=16,8,8, XB=0.0,1.6,0.0,0.8,0.0,0.8 /
+&MESH ID='Front Z2 mesh', IJK=16,8,8, XB=0.0,1.6,0.0,0.8,0.8,1.6 /
+&MESH ID='Front Z3 mesh', IJK=16,8,8, XB=0.0,1.6,0.0,0.8,1.6,2.4 /
+&MESH ID='Front Z4 mesh', IJK=16,8,8, XB=0.0,1.6,0.0,0.8,2.4,3.2 /
 
-&MESH IJK=16,8,8, XB=0.0,1.6,0.8,1.6,0.0,0.8 /
-&MESH IJK=16,8,8, XB=0.0,1.6,0.8,1.6,0.8,1.6 /
-&MESH IJK=16,8,8, XB=0.0,1.6,0.8,1.6,1.6,2.4 /
-&MESH IJK=16,8,8, XB=0.0,1.6,0.8,1.6,2.4,3.2 /
+&MESH ID='Back Z1 mesh', IJK=16,8,8, XB=0.0,1.6,0.8,1.6,0.0,0.8 /
+&MESH ID='Back Z2 mesh', IJK=16,8,8, XB=0.0,1.6,0.8,1.6,0.8,1.6 /
+&MESH ID='Back Z3 mesh', IJK=16,8,8, XB=0.0,1.6,0.8,1.6,1.6,2.4 /
+&MESH ID='Back Z4 mesh', IJK=16,8,8, XB=0.0,1.6,0.8,1.6,2.4,3.2 /
 
 &DUMP NFRAMES=400 /
 
@@ -77,6 +77,7 @@
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=620.0 /  Show 3D contours of temperature at 620 C
 &ISOF QUANTITY='MIXTURE_FRACTION',VALUE(1)=0.07 /  Show 3D contours of mixture fraction at 0.07
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0, COLOR_QUANTITY='VELOCITY' /  Show 3D contours of temperature at 200 C
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0,400.0 /  Show 3D contours of temperature at 200 C
 
 &PART ID='tracers',MASSLESS=.TRUE.,
    QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY'
