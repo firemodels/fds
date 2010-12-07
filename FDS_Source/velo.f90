@@ -127,12 +127,7 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
          DO I=1,IBAR
             !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_COMPUTE_VISCOSITY_03'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (TWO_D) THEN
-               DELTA = SQRT(DX(I)*DZ(K))
-            ELSE
-               DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
-            ENDIF
-            IF (USE_MAX_FILTER_WIDTH) DELTA=MAX(DX(I),DY(J),DZ(K))
+            
             DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
             DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
             DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
@@ -147,8 +142,18 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
             S23 = 0.5_EB*(DVDZ+DWDY)
             SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
             
-            IF (DYNSMAG .AND. .NOT.EVACUATION_ONLY(NM)) CS = C_DYNSMAG(I,J,K)
-            MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
+            IF (DYNSMAG .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*CSD2_DYNSMAG(I,J,K)*SS
+            ELSE
+               IF (TWO_D) THEN
+                  DELTA = SQRT(DX(I)*DZ(K))
+               ELSE
+                  DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
+               ENDIF
+               IF (USE_MAX_FILTER_WIDTH) DELTA=MAX(DX(I),DY(J),DZ(K))
+               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
+            ENDIF
+            
          ENDDO
       ENDDO
    ENDDO
