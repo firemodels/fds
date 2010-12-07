@@ -1255,6 +1255,7 @@ int hide_slice2(slice *sdi,slice *sdj){
   return 1;
 }
 
+#define MAX( a, b ) ( ((a) > (b)) ? (a) : (b) )
 /* ------------------ new_multi ------------------------ */
 
 int new_multi(slice *sdold,slice *sd){
@@ -1266,7 +1267,7 @@ int new_multi(slice *sdold,slice *sd){
   // sd->delta in physical units
   // sd->xmin/xmax etc are in scaled units
   // convert from physical to scaled units using xyzmaxdiff 
-    delta = max(sdold->delta,sd->delta)/xyzmaxdiff;
+    delta = MAX(sdold->delta,sd->delta)/xyzmaxdiff;
     if(fabs(sd->xmin-sdold->xmin)<delta&&fabs(sd->xmax-sdold->xmax)<delta // test whether two slices are identical
 	   &&fabs(sd->ymin-sdold->ymin)<delta&&fabs(sd->ymax-sdold->ymax)<delta
 	   &&fabs(sd->zmin-sdold->zmin)<delta&&fabs(sd->zmax-sdold->zmax)<delta
