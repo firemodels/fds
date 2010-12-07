@@ -266,36 +266,16 @@ both at NIST and beyond. This volume provides a survey of verification work cond
 
 \label{acksection}
 
-FDS is supported financially via internal funding at both NIST and
-VTT, Finland. In addition, support is provided by other agencies of
-the US Federal Government:
+The following individuals contributed to the verification process of FDS.
 \begin{itemize}
-\item The US Nuclear Regulatory Commission Office of Research has funded key
-validation experiments, the preparation of the FDS manuals, and the
-development of various sub-models that are of importance in the area
-of nuclear power plant safety. Special thanks to Mark Salley and Jason
-Dreisbach for their efforts and support.  The Office of Nuclear
-Material Safety and Safeguards, another branch of the US NRC, has
-supported modeling studies of tunnel fires under the direction of
-Chris Bajwa and Allen Hansen.
-\item The Micro-Gravity Combustion Program of the National Aeronautics and Space
-Administration (NASA) has supported several projects that directly or indirectly benefited FDS development.
-\item The US Forest Service has supported the development of sub-models in FDS designed to simulate the spread of
-fire in the Wildland Urban Interface (WUI). Special thanks to Mark Finney and Tony Bova for their support.
-\item The Minerals Management Service of the US Department of the Interior funded research at NIST aimed at
-characterizing the burning behavior of oil spilled on the open sea or ice. Part of this research led to the development
-of the ALOFT (A Large Outdoor Fire plume Trajectory) model, a forerunner of FDS. Special thanks to Joe Mullin for his
-encouragement of the modeling efforts.
-\end{itemize}
-\noindent The following individuals and organizations played a role in the verification process of FDS.
-\begin{itemize}
-\item Thanks to Chris Lautenburger and Carlos Fernandez-Pello for their assistance with the ``two-reaction'' test case.
+\item Chris Lautenburger and Carlos Fernandez-Pello contributed the ``two-reaction'' test case.
 \item Matthias M\"{u}nch of the Freie Universit\"{a}t Berlin provided useful test cases for the basic flow solver.
 \item Susanne Kilian of hhpberlin (Germany) helped to debug the improved pressure solver.
 \item Clara Cruz, a student at the University of Puerto Rico and Summer Undergraduate Fellow at NIST, helped developed useful Matlab scripts to automate
 the process of compiling this Guide.
 \item Bryan Klein of NIST developed the source code version control system that is an essential part of the verification process.
 \item Anna Matala of VTT, Finland, designed the ``surf mass'' pyrolysis cases.
+\item Craig Weinschenk, a student at the University of Texas, worked out the analytical solution to the TC heating case.
 \item Danielle Antonellis, a student at Worcester Polytechnic Institute and Summer Undergraduate Fellow at NIST, added the pulsating scalar verification test case.
 \end{itemize}
 
@@ -1505,16 +1485,50 @@ co-ordinate systems.
 
 \clearpage
 
+
+\section{Transient Thermocouple Response (\texorpdfstring{{\bf TC\_heating}}{TC\_heating}) }
+\label{TC_view_factor}
+
+A thermocouple is placed in the center of a 1~m cube with walls set to 600~$^\circ$C and gas temperature set to 20~$^\circ$C. 
+The heat transfer coefficient is set to zero to eliminate convective heating. The gas temperature remains at 20~$^{\circ}$C because there is no convective heat transfer from the walls. 
+The thermocouple heats up according to the equation:
+\be
+\label{eq: rad}
+  \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, V_{\hbox{\tiny TC}} \frac{dT_{\hbox{\tiny TC}}}{dt}=\epsilon_{\hbox{\tiny TC}} \, \sigma \, A_{\hbox{\tiny TC}} 
+  \left(T_s^{4}-T_{\hbox{\tiny TC}}^4 \right)
+\ee
+whose analytical solution is:
+\be
+\label{eq: rad_sol}
+t=\left.\frac{\ln(x+1) - \ln(1-x) + 2 \tan^{-1}(x)}{4 \, \beta \, T_s^3}\right|_{T_{\hbox{\tiny TC}}(0)}^{T_{\hbox{\tiny TC}}(t)}
+\quad ; \quad \beta=\frac{\epsilon_{\hbox{\tiny TC}} \, \sigma A_{\hbox{\tiny TC}}}{\rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, V_{\hbox{\tiny TC}}} \quad ; \quad 
+  x=\frac{T_{\hbox{\tiny TC}}}{T_s}
+\ee
+Figure~\ref{TC_heating} displays the thermocouple response compared to the analytical solution.
+\noindent
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/TC_heating}
+\end{center}
+\caption[Transient thermocouple heating.]{Increasing temperature of a thermocouple surrounded by walls at 600~$^\circ$C.}
+\label{TC_heating}
+\end{figure}
+
+
+
+
+\clearpage
+
 \section{Radiation and Thermocouples (\texorpdfstring{{\bf TC\_view\_factor}}{TC\_view\_factor}) }
 \label{TC_view_factor}
 
-This case tests the radiation solver using the simple thermocouple model in FDS. 
+This case tests the radiation solver using the simple thermocouple model in FDS.
 Suppose that a small, thermally-thin metal bead is at the center of a 1~m cube. The left half of the cube boundary surface is
-at 20~$^\circ$C, the right half at 500~$^\circ$C. Assume that there is no convective heat transfer to the bead; only radiation. Assume everything has an emissivity of 1. The 
-bead temperature ought to rise to a steady value of 
+at 20~$^\circ$C, the right half at 500~$^\circ$C. Assume that there is no convective heat transfer to the bead; only radiation. Assume everything has an emissivity of 1. The
+bead temperature ought to rise to a steady value of
 \be
    T_{\hbox{\tiny TC}} = \left( \frac{T_1^4 + T_2^4}{2} \right)^\frac{1}{4} -273.15 = \left( \frac{293.15^4 + 773.15^4}{2} \right)^\frac{1}{4} -273.15 = 380.3 \quad ^\circ \hbox{C}
-   \label{ideal_TC} 
+   \label{ideal_TC}
 \ee
 The thermocouple model in FDS uses the integrated intensity divided by 4, $U/4$, as the average heat flux to the bead surface. In the absence of convection, the steady value of the bead temperature ought to be
 \be
@@ -1914,8 +1928,8 @@ convective heat transfer has been turned off, and the correct steady-state tempe
 
 \section{Simple phase change reaction (\texorpdfstring{{\bf pcm\_slab}}{pcm\_slab})}
 
-This is a verification test case for a phase change problem where a semi-infinite layer of liquid in the region $x>0$ 
-is cooled down by setting the surface $x=0$ to a constant temperature $T_0$ 
+This is a verification test case for a phase change problem where a semi-infinite layer of liquid in the region $x>0$
+is cooled down by setting the surface $x=0$ to a constant temperature $T_0$
 below the freezing temperature $T_f$. Initially, the material is at temperature $T_i > T_f$. The position of the boundary between frozen and melt layers
 is denoted by $x_f$. The heat conduction equations for the two regions are
 \begin{eqnarray}
@@ -1926,7 +1940,7 @@ with boundary conditions
 \begin{eqnarray}
 T_s(x,0)   &= & T_i \nonumber \\
 T_s(0,t)   &= & T_0 \nonumber \\
-T_s(x_f,t) &= & T_f \nonumber 
+T_s(x_f,t) &= & T_f \nonumber
 \end{eqnarray}
 The analytical solutions for the phase interface location and temperature are \cite{Carslaw:1}
 \be
@@ -1937,22 +1951,22 @@ x_f(t) = 2 \lambda \sqrt{\alpha_l t}
 \frac{T_i-T_s(x,t)}{T_i - T_f} &=& \frac{\erfc(x/2\sqrt{\alpha t})}{\erfc(x_f/2\sqrt{\alpha t})}\mbox{,}\;\; (x > x_f)
 \end{eqnarray}
 where $\lambda = x_f /2\sqrt{\alpha t}$ is obtained as a root of the (complicated)
-trancendential equation, given in \cite{Carslaw:1}. 
+trancendential equation, given in \cite{Carslaw:1}.
 
 In the test case, the thickness of the layer cannot be infinite. For practical purposes, a 50 cm thick layer was found to be sufficient.
-The fixed-temperature boundary condition, which is formally not available for the condenced-phase heat transfer solver, 
-is implemented as convection to $T_0$ ambient with very high convection coefficient. 
-For material properties, we choose $\rho_s = \rho_l =$ 1000 kg/m$^3$, 
+The fixed-temperature boundary condition, which is formally not available for the condenced-phase heat transfer solver,
+is implemented as convection to $T_0$ ambient with very high convection coefficient.
+For material properties, we choose $\rho_s = \rho_l =$ 1000 kg/m$^3$,
 $k_s = k_l = 2$ W/Km, $c_s = c_l = 2$ kJ/kgK, $H_{r,\alpha\beta}=300$ kJ/kg, $T_f = 0^\circ$C, $T_i = +15^\circ$C,
-and $T_0 = -15^\circ$C, which leads to a {\em Stefan number} 
+and $T_0 = -15^\circ$C, which leads to a {\em Stefan number}
 \be
 \hbox{St}=\frac{c_s\left(T_i - T_0\right)}{H_{r,\alpha\beta}} = 0.1
 \ee
-and $\lambda = 0.189$. 
+and $\lambda = 0.189$.
 
 Analytical and simulated results are compared in the figures below. Left side shows the position of the phase boundary.
-From FDS results, two estimates of $x_f$ are determined because in the nummerical solution, the boundary of the two phases is not perfectly sharp. 
-''FDS min'' is the largest $x$ for which $\rho_s > 990$ kg/m$^3$ and ''FDS max'' is the largest $x$ for which $\rho_s > 0$ kg/m$^3$. The right hand side 
+From FDS results, two estimates of $x_f$ are determined because in the nummerical solution, the boundary of the two phases is not perfectly sharp.
+''FDS min'' is the largest $x$ for which $\rho_s > 990$ kg/m$^3$ and ''FDS max'' is the largest $x$ for which $\rho_s > 0$ kg/m$^3$. The right hand side
 figure shows temperatures at three depths from the surface: 1 cm, 5 cm and 10 cm.
 \begin{figure}[ht!]
 \noindent
@@ -2296,23 +2310,24 @@ Finally, note that in this example that a water droplet will evaporate until the
 \section{Duct Flow Losses (HVAC\_flow\_loss)}
 
 Steady-state flow in a duct is given by
-
 \be \frac{K \rho \, u^2}{2} = \Delta p \label {HVAC_steady_state}\ee
+where K is the loss coefficient for the duct and $\Delta P$ is the pressure drop across the duct.  A simple duct network is created from three 0.1~m$^2$ ducts connected with a tee.  One of the ducts is assigned a constant flow rate of 0.3~m$^3$/s.  The other two ducts are given loss coefficients of 4 and 16 and are given inlets at the same elevation.  Based on the above equation, it can be seen that since the ducts have the same conditions at their nodes (both connected to the same tee and both connected to ambient at the same elevation), that once steady state is reached that the velocities in the three ducts should be 3~m/s, 2~m/s, and 1~m/s.
 
-where K is the loss coefficient for the duct and $\Delta P$ is the pressure drop across the duct.  A simple duct network is created from three 0.1 m$^2$ ducts connected with a tee.  One of the ducts is assigned a constant flow rate of 0.3 m$^3$/s.  The other two ducts are given loss cofficients of 4 and 16 and are given inlets at the same elevation.  Based on the above equation, it can be seen that since the ducts have the same conditions at their nodes (both connected to the same tee and both connected to ambient at the same elevation), that once steady state is reached that the velocities in the three ducts should be 3 m/s, 2 m/s, and 1 m/s.
-
-\begin{figure}[t]
+\begin{figure}[ht]
    \begin{center}
       \includegraphics[height=3.00in]{SCRIPT_FIGURES/HVAC_flow_loss.pdf}
-i      \caption{\label{fig_HVAC_loss} \small Duct velocities with varied duct flow loss.}
+     \caption{\label{fig_HVAC_loss} \small Duct velocities with varied duct flow loss.}
    \end{center}
 \end{figure}
 
+\clearpage
+
+
 \section{HVAC Mass Conservation (HVAC\_mass\_conservation)}
 
-A 1 m x 1 m x 1 m compartment is initialized with the lower half of the compartment being filled with a species called {\ct SPEC1} having the same molecular weight as air, see Figure~\ref{fig_HVAC_mass}.   An HVAC system of two ducts is created with one duct taking suction from the lower half (red vent) and discharging into the upper half (blue vent), and the second duct taking suction from the upper half (green vent) and discharging into the lower half (yellow vent).  The two ducts are assigned the same volume flow rate.  It is expected that the total mass in the compartment will be conserved, that the mass of the second species will be conserved (at 50 \% of the total mass), and that at the start of the computation a slice file of species will show pure ambient being discharged in the lower half and pure {\ct SPEC1} being discharged in the upper half.
+A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compartment being filled with a species called {\ct SPEC1} having the same molecular weight as air, see Figure~\ref{fig_HVAC_mass}.   An HVAC system of two ducts is created with one duct taking suction from the lower half (red vent) and discharging into the upper half (blue vent), and the second duct taking suction from the upper half (green vent) and discharging into the lower half (yellow vent).  The two ducts are assigned the same volume flow rate.  It is expected that the total mass in the compartment will be conserved, that the mass of the second species will be conserved (at 50 \% of the total mass), and that at the start of the computation a slice file of species will show pure ambient being discharged in the lower half and pure {\ct SPEC1} being discharged in the upper half.
 
-\begin{figure}[t]
+\begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_conservation} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_mass_conservation.pdf} }
@@ -2321,9 +2336,11 @@ A 1 m x 1 m x 1 m compartment is initialized with the lower half of the compartm
    \label{fig_HVAC_mass}
 \end{figure}
 
+\clearpage
+
 \section{HVAC Energy Conservation and Pressure (HVAC\_energy\_pressure)}
 
-A 1 m x 1 m x 1 m compartment is divided into two equal compartments by a vertical wall, see Figure~\ref{fig_HVAC_e_p}.  The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 kJ/kg/K and a specific enthalpy of 298.15 kJ/kg at the reference temperature of 298.15 K.  The left side of the comparment is initialized to twice the ambient temperature.  A simple HVAC system of two 0.1 m$^2$ ducts is created.  The first duct takes suction from the lower left half and discharges into the lower right half, and this duct is given a fixed volume flow rate 0.1 m$^3$/s.  The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 43.6 Pa based on Eq.~\ref{HVAC_steady_state}
+A 1~m by 1~m by 1~m box is divided into two equal compartments by a vertical wall, see Figure~\ref{fig_HVAC_e_p}.  The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 kJ/kg/K and a specific enthalpy of 298.15 kJ/kg at the reference temperature of 298.15~K.  The left side of the compartment is initialized to twice the ambient temperature.  A simple HVAC system of two 0.1 m$^2$ ducts is created.  The first duct takes suction from the lower left half and discharges into the lower right half, and this duct is given a fixed volume flow rate 0.1 m$^3$/s.  The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 43.6 Pa based on Eq.~\ref{HVAC_steady_state}
 
 \begin{figure}[ht]
 \noindent
@@ -2337,11 +2354,13 @@ A 1 m x 1 m x 1 m compartment is divided into two equal compartments by a vertic
 \label{fig_HVAC_e_p}
 \end{figure}
 
+\clearpage
+
 \section{Multiple zone leakage (leak\_test\_2)}
 
-Two compartments are defined: A 5 m x 4 m x 3. 2 m comparment containing a second 3.6 m x 2.4 m x 2.4 m compartment, see Figure~\ref{fig_HVAC_leak_fan}.  The interior compartment is connected to the exterior compartment both by a fan (quadratic fan curve with a maximum volumetric flow of 0.005 m$^3$/s and a maximum pressure of 1000 Pa) and by an 0.0001 m$^2$ leakage path.  The interior compartment is also connected to the ambient by an 0.0001 m$^2$ leakage path.  The fan is defined with a 1 s tanh ramp to reach full power.  When the simulation starts the fan will begin to remove air from the outer comparment and discharge it into the inner compartment.  As the pressure rises, the leakage flows will slowly increase until the leakage flow is equal to the flow from the fan.  Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two comparments will decrease until the pressure of the interior compartment is equal to that of the ambient.  At this point in time, no more leakage flow will occur to the ambient and the fan flow will equal intra-compartment leakage flow.  Given the leakage area and the fan curve, this will occur when the pressure difference between the two compartments is 598 Pa.
+Two compartments are defined: A 5 m x 4 m x 3. 2 m compartment containing a second 3.6 m x 2.4 m x 2.4 m compartment, see Figure~\ref{fig_HVAC_leak_fan}.  The interior compartment is connected to the exterior compartment both by a fan (quadratic fan curve with a maximum volumetric flow of 0.005 m$^3$/s and a maximum pressure of 1000 Pa) and by an 0.0001 m$^2$ leakage path.  The interior compartment is also connected to the ambient by an 0.0001 m$^2$ leakage path.  The fan is defined with a 1 s tanh ramp to reach full power.  When the simulation starts the fan will begin to remove air from the outer compartment and discharge it into the inner compartment.  As the pressure rises, the leakage flows will slowly increase until the leakage flow is equal to the flow from the fan.  Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments will decrease until the pressure of the interior compartment is equal to that of the ambient.  At this point in time, no more leakage flow will occur to the ambient and the fan flow will equal intra-compartment leakage flow.  Given the leakage area and the fan curve, this will occur when the pressure difference between the two compartments is 598 Pa.
 
-\begin{figure}[t]
+\begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2_vector} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2.pdf} }
@@ -2350,15 +2369,17 @@ Two compartments are defined: A 5 m x 4 m x 3. 2 m comparment containing a secon
    \label{fig_HVAC_leak_fan}
 \end{figure}
 
+\clearpage
+
 \section{ASHRAE Sample Problem 7}
 
-ASRHAE sample problem 7 ~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Figure~\ref{ASHRAE7_schematic} consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components were defined as well as the fan flow rate.  Pressure drops and flow rates in the remaining components can be computed by hand.  
-Steckler {\em et al.}~\cite{Steckler:NBSIR_82-2520} mapped the doorway/window flows in 55 
+ASRHAE Sample Problem 7~\cite{ASHRAE} is a simple HVAC system that represents an exhaust system for a machine shop where particulate matter from three pieces of equipment are removed by a dust collector.  The network, shown in Figure~\ref{ASHRAE7_schematic} consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components were defined as well as the fan flow rate.  Pressure drops and flow rates in the remaining components can be computed by hand.
 
-\begin{figure}[p]
+
+\begin{figure}[ht]
 \begin{center}
 \begin{tabular}{l}
-\includegraphics[width=5.0in]{FIGURES/HVAC/ashrae_7.pdf}
+\includegraphics[width=5.0in]{SCRIPT_FIGURES/ashrae_7_dotplot.pdf}
 \end{tabular}
 \end{center}
 \caption {HVAC network for ASHRAE sample problem 7}
