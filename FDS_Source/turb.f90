@@ -387,7 +387,7 @@ CALL EX2G3D(S33,ARRAY_LO,ARRAY_HI,-1.E10_EB,1.E10_EB)
 CALL EX2G3D(S12,ARRAY_LO,ARRAY_HI,-1.E10_EB,1.E10_EB)
 CALL EX2G3D(S13,ARRAY_LO,ARRAY_HI,-1.E10_EB,1.E10_EB)
 CALL EX2G3D(S23,ARRAY_LO,ARRAY_HI,-1.E10_EB,1.E10_EB)
-CALL EX2G3D(SS,ARRAY_LO,ARRAY_HI,-1.E10_EB,1.E10_EB)
+CALL EX2G3D(SS, ARRAY_LO,ARRAY_HI,-1.E10_EB,1.E10_EB)
 
 ! test filter the strain rate
 
@@ -752,31 +752,40 @@ FILTER_SELECT: IF (.TRUE.) THEN
    PHIBAR = PHI
 
   ! filter in x:
-   DO K = N_LO(3),N_HI(3)
-      DO J = N_LO(2),N_HI(2)
-         PHI1(N_LO(1):N_HI(1)) = PHIBAR(N_LO(1):N_HI(1),J,K)
-         CALL TOPHAT_FILTER_1D(PHI2(N_LO(1):N_HI(1)),PHI1(N_LO(1):N_HI(1)),N_LO(1),N_HI(1))
-         PHIBAR(N_LO(1):N_HI(1),J,K) = PHI2(N_LO(1):N_HI(1))
+   DO K = ARRAY_LO(3),ARRAY_HI(3)
+      DO J = ARRAY_LO(2),ARRAY_HI(2)
+         PHI1(ARRAY_LO(1):ARRAY_HI(1)) = PHIBAR(ARRAY_LO(1):ARRAY_HI(1),J,K)
+         CALL TOPHAT_FILTER_1D(PHI2(ARRAY_LO(1):ARRAY_HI(1)), &
+                               PHI1(ARRAY_LO(1):ARRAY_HI(1)), &
+                               ARRAY_LO(1),ARRAY_HI(1),       &
+                               PHI_MIN,PHI_MAX)
+         PHIBAR(ARRAY_LO(1):ARRAY_HI(1),J,K) = PHI2(ARRAY_LO(1):ARRAY_HI(1))
       ENDDO
    ENDDO
 
    IF (.NOT.TWO_D) THEN
       ! filter in y:
-      DO K = N_LO(3),N_HI(3)
-         DO I = N_LO(1),N_HI(1)
-            PHI1(N_LO(2):N_HI(2)) = PHIBAR(I,N_LO(2):N_HI(2),K)
-            CALL TOPHAT_FILTER_1D(PHI2(N_LO(2):N_HI(2)),PHI1(N_LO(2):N_HI(2)),N_LO(2),N_HI(2))
-            PHIBAR(I,N_LO(2):N_HI(2),K) = PHI2(N_LO(2):N_HI(2))
+      DO K = ARRAY_LO(3),ARRAY_HI(3)
+         DO I = ARRAY_LO(1),ARRAY_HI(1)
+            PHI1(ARRAY_LO(2):ARRAY_HI(2)) = PHIBAR(I,ARRAY_LO(2):ARRAY_HI(2),K)
+            CALL TOPHAT_FILTER_1D(PHI2(ARRAY_LO(2):ARRAY_HI(2)), &
+                                  PHI1(ARRAY_LO(2):ARRAY_HI(2)), &
+                                  ARRAY_LO(2),ARRAY_HI(2),       &
+                                  PHI_MIN,PHI_MAX)
+            PHIBAR(I,ARRAY_LO(2):ARRAY_HI(2),K) = PHI2(ARRAY_LO(2):ARRAY_HI(2))
          ENDDO
       ENDDO
    ENDIF
 
    ! filter in z:
-   DO J = N_LO(2),N_HI(2)
-      DO I = N_LO(1),N_HI(1)
-         PHI1(N_LO(3):N_HI(3)) = PHIBAR(I,J,N_LO(3):N_HI(3))
-         CALL TOPHAT_FILTER_1D(PHI2(N_LO(3):N_HI(3)),PHI1(N_LO(3):N_HI(3)),N_LO(3),N_HI(3))
-         PHIBAR(I,J,N_LO(3):N_HI(3)) = PHI2(N_LO(3):N_HI(3))
+   DO J = ARRAY_LO(2),ARRAY_HI(2)
+      DO I = ARRAY_LO(1),ARRAY_HI(1)
+         PHI1(ARRAY_LO(3):ARRAY_HI(3)) = PHIBAR(I,J,ARRAY_LO(3):ARRAY_HI(3))
+         CALL TOPHAT_FILTER_1D(PHI2(ARRAY_LO(3):ARRAY_HI(3)), &
+                               PHI1(ARRAY_LO(3):ARRAY_HI(3)), &
+                               ARRAY_LO(3),ARRAY_HI(3),       &
+                               PHI_MIN,PHI_MAX)
+         PHIBAR(I,J,ARRAY_LO(3):ARRAY_HI(3)) = PHI2(ARRAY_LO(3):ARRAY_HI(3))
       ENDDO
    ENDDO
 
@@ -801,36 +810,33 @@ ELSE FILTER_SELECT
       ENDDO
    ENDDO
    PHIBAR = PHI_TMP
+   CALL EX2G3D(PHIBAR,ARRAY_LO,ARRAY_HI,PHI_MIN,PHI_MAX) ! fill ghost cells
 
 ENDIF FILTER_SELECT
-
-CALL EX2G3D(PHIBAR,ARRAY_LO,ARRAY_HI,PHI_MIN,PHI_MAX) ! fill ghost cells
 
 END SUBROUTINE TEST_FILTER
 
 
-SUBROUTINE TOPHAT_FILTER_1D(UBAR,U,N_LO,N_HI)
+SUBROUTINE TOPHAT_FILTER_1D(UBAR,U,N_LO,N_HI,U_MIN,U_MAX)
 IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: N_LO,N_HI
-REAL(EB), INTENT(IN) :: U(N_LO:N_HI)
+REAL(EB), INTENT(IN) :: U(N_LO:N_HI),U_MIN,U_MAX
 REAL(EB), INTENT(OUT) :: UBAR(N_LO:N_HI)
 INTEGER :: J
-!REAL(EB), POINTER, DIMENSION(:) :: UU
-REAL(EB),PARAMETER:: W(-1:1) = (/0.25_EB,0.5_EB,0.25_EB/)   ! trapezoid rule
-!REAL(EB),PARAMETER::W(-1:1) = (/ONSI,TWTH,ONSI/)           ! Simpson's rule
-
-
-!UU => WORK
-!UU(N_LO:N_HI) = U
+!REAL(EB),PARAMETER:: W(-1:1) = (/0.25_EB,0.5_EB,0.25_EB/)   ! trapezoid rule
+!REAL(EB),PARAMETER:: W(-1:1) = (/ONSI,TWTH,ONSI/)           ! Simpson's rule
 
 ! Filter the u field to obtain ubar
 DO J=N_LO+1,N_HI-1
-   UBAR(J) = DOT_PRODUCT(W(-1:1),U(J-1:J+1))
+   !UBAR(J) = DOT_PRODUCT(W(-1:1),U(J-1:J+1))
+   UBAR(J) = 0.5_EB*U(J) + 0.25_EB*(U(J-1)+U(J+1)) ! 20% faster
 ENDDO
 ! set boundary values (not ideal, but fast and simple)
-UBAR(N_LO) = UBAR(N_LO+1)
-UBAR(N_HI) = UBAR(N_HI-1)
+!UBAR(N_LO) = UBAR(N_LO+1)
+!UBAR(N_HI) = UBAR(N_HI-1)
+UBAR(N_LO) = MIN(U_MAX,MAX(U_MIN,2._EB*UBAR(N_LO+1)-UBAR(N_LO+2)))
+UBAR(N_HI) = MIN(U_MAX,MAX(U_MIN,2._EB*UBAR(N_HI-1)-UBAR(N_HI-2)))
 
 END SUBROUTINE TOPHAT_FILTER_1D
 
