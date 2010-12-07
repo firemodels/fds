@@ -134,6 +134,11 @@ intel_linux_32 : obj = fds5_intel_linux_32
 intel_linux_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
+#
+# to profile FDS:
+# 1.  build FDS using intel_linux_32_profile target
+# 2.  run case as usual
+# 3.  type: gprof fds5_linux_32_profile > results.out
 intel_linux_32_profile : FFLAGS = -m32 -O2 -static -vec_report0 -p
 intel_linux_32_profile : CFLAGS = -m32 -O2 -Dpp_noappend -vec_report0 -p
 intel_linux_32_profile : FCOMPL = ifort
