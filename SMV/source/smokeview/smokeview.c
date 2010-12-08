@@ -1462,7 +1462,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       drawiso(DRAW_SOLID);
     }
     else{
-      drawtiso(meshi,DRAW_SOLID);
+      drawiso(DRAW_SOLID);
+//      drawtiso(meshi,DRAW_SOLID);
     }
 
     //  nothing transparent should be drawn before this portion of the code
@@ -1472,7 +1473,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       drawiso(DRAW_TRANSPARENT);
     }
     else{
-      drawtiso(meshi,DRAW_TRANSPARENT);
+      drawiso(DRAW_TRANSPARENT);
+//      drawtiso(meshi,DRAW_TRANSPARENT);
     }
   }
 

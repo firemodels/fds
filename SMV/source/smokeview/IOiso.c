@@ -659,6 +659,11 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
               ib->colorlevels[ilevel]=iso_colors+4*ilevel;
             }
             isotrii->color=ib->colorlevels+ilevel;
+            if(ib->dataflag==0){
+              isotrii->v1->color=*isotrii->color;
+              isotrii->v2->color=*isotrii->color;
+              isotrii->v3->color=*isotrii->color;
+            }
           }
           FREEMEMORY(triangles_i);
         }
@@ -826,20 +831,9 @@ void unloadiso(mesh *meshi){
 
 void drawiso(int tranflag){
   int i;
- // int i, j,k;
-  //float vv1[3],vv2[3],vv3[3];
-  //float vv1n[3],vv2n[3],vv3n[3];
   isosurface *asurface;
- // short *norm;
- // unsigned short *v1, *v2, *v3, tval1=0, tval2=0, tval3=0;
-//  unsigned short *vertices_i=NULL,*tvertices_i=NULL;
-//  int nvertices;
- // int i1, i2, i3;
- // short *norm1,*norm2,*norm3,*vertexnorm;
   float *iso_colors;
   int n_iso_colors;
- // int icolor;
- // int ntriangles;
   int *showlevels, nisolevels;
   iso *isoi=NULL;
   float iso_color_tmp[4];
@@ -856,12 +850,7 @@ void drawiso(int tranflag){
     isoi = isoinfo + meshi->isofilenum;
   }
 
-  if(isoi->dataflag==1){
-    iso_lighting=0;
-  }
-  else{
-    iso_lighting=1;
-  }
+  iso_lighting=1;
 
   showlevels=meshi->showlevels;
   nisolevels=meshi->nisolevels;
@@ -908,23 +897,25 @@ void drawiso(int tranflag){
     for(i=0;i<niso_list_start;i++){
       isotri *tri;
       float *colorptr;
+      isovert *v1, *v2, *v3;
         
       tri=iso_list_start[i];
 
-      colorptr=*(tri->color);
-      if(colorptr!=colorptr_old){
-        glColor4fv(colorptr);
-        colorptr_old=colorptr;
-      }
-   
-      glNormal3fv(tri->v1->norm);
-      glVertex3fv(tri->v1->xyz);
+      v1 = tri->v1;
+      v2 = tri->v2;
+      v3 = tri->v3;
+
+      glColor4fv(v1->color);
+      glNormal3fv(v1->norm);
+      glVertex3fv(v1->xyz);
         
-      glNormal3fv(tri->v2->norm);
-      glVertex3fv(tri->v2->xyz);
+      glColor4fv(v2->color);
+      glNormal3fv(v2->norm);
+      glVertex3fv(v2->xyz);
         
-      glNormal3fv(tri->v3->norm);
-      glVertex3fv(tri->v3->xyz);
+      glColor4fv(v3->color);
+      glNormal3fv(v3->norm);
+      glVertex3fv(v3->xyz);
     }
     glEnd();
 
@@ -944,37 +935,45 @@ void drawiso(int tranflag){
     glBegin(GL_LINES);
     for(i=0;i<niso_trans;i++){
       isotri *tri;
+      float *xyz1, *xyz2, *xyz3;
         
       tri=iso_trans[i];
 
-      //glColor4fv(*(tri->color));
-      
+      xyz1 = tri->v1->xyz;
+      xyz2 = tri->v2->xyz;
+      xyz3 = tri->v3->xyz;
+
       glColor3fv(*tri->color);
-      glVertex3fv(tri->v1->xyz);
-      glVertex3fv(tri->v2->xyz);
+
+      glVertex3fv(xyz1);
+      glVertex3fv(xyz2);
         
-      glVertex3fv(tri->v2->xyz);
-      glVertex3fv(tri->v3->xyz);
+      glVertex3fv(xyz2);
+      glVertex3fv(xyz3);
         
-      glVertex3fv(tri->v3->xyz);
-      glVertex3fv(tri->v1->xyz);
+      glVertex3fv(xyz3);
+      glVertex3fv(xyz1);
     }
     for(i=0;i<niso_opaques;i++){
       isotri *tri;
+      float *xyz1, *xyz2, *xyz3;
         
       tri=iso_opaques[i];
 
-      //glColor4fv(*(tri->color));
-      
+      xyz1 = tri->v1->xyz;
+      xyz2 = tri->v2->xyz;
+      xyz3 = tri->v3->xyz;
+
       glColor3fv(*tri->color);
-      glVertex3fv(tri->v1->xyz);
-      glVertex3fv(tri->v2->xyz);
+
+      glVertex3fv(xyz1);
+      glVertex3fv(xyz2);
         
-      glVertex3fv(tri->v2->xyz);
-      glVertex3fv(tri->v3->xyz);
+      glVertex3fv(xyz2);
+      glVertex3fv(xyz3);
         
-      glVertex3fv(tri->v3->xyz);
-      glVertex3fv(tri->v1->xyz);
+      glVertex3fv(xyz3);
+      glVertex3fv(xyz1);
     }
     glEnd();
     antialias(0);
@@ -990,27 +989,35 @@ void drawiso(int tranflag){
     glBegin(GL_POINTS);
     for(i=0;i<niso_trans;i++){
       isotri *tri;
+      float *xyz1, *xyz2, *xyz3;
         
       tri=iso_trans[i];
 
-      //glColor4fv(*(tri->color));
+      xyz1 = tri->v1->xyz;
+      xyz2 = tri->v2->xyz;
+      xyz3 = tri->v3->xyz;
       
       glColor3fv(*tri->color);
-      glVertex3fv(tri->v1->xyz);
-      glVertex3fv(tri->v2->xyz);
-      glVertex3fv(tri->v3->xyz);
+
+      glVertex3fv(xyz1);
+      glVertex3fv(xyz2);
+      glVertex3fv(xyz3);
     }
     for(i=0;i<niso_opaques;i++){
       isotri *tri;
+      float *xyz1, *xyz2, *xyz3;
         
       tri=iso_opaques[i];
 
-      //glColor4fv(*(tri->color));
+      xyz1 = tri->v1->xyz;
+      xyz2 = tri->v2->xyz;
+      xyz3 = tri->v3->xyz;
       
       glColor3fv(*tri->color);
-      glVertex3fv(tri->v1->xyz);
-      glVertex3fv(tri->v2->xyz);
-      glVertex3fv(tri->v3->xyz);
+
+      glVertex3fv(xyz1);
+      glVertex3fv(xyz2);
+      glVertex3fv(xyz3);
     }
     glEnd();
     antialias(0);
@@ -2066,6 +2073,7 @@ int compare_iso_triangles( const void *arg1, const void *arg2 ){
 void sort_iso_triangles(float *mm){
   int itri;
   int newflag;
+  int dosort=0;
 
   if(niso_trans==0)return;
   newflag=1-iso_trans[0]->v1->flag;
@@ -2113,8 +2121,9 @@ void sort_iso_triangles(float *mm){
       v3->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
     }
     tri->distance=(v1->distance+v2->distance+v3->distance);
+    if(itri>0&&dosort==0&&tri->distance>iso_trans[itri-1]->distance)dosort==1;
   }
-  qsort((isotri **)iso_trans,(size_t)niso_trans,sizeof(isotri **),compare_iso_triangles);
+  if(dosort==1)qsort((isotri **)iso_trans,(size_t)niso_trans,sizeof(isotri **),compare_iso_triangles);
 }
 
 
