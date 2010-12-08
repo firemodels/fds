@@ -1071,26 +1071,32 @@ SORT_QUEUE: DO
 
       SELECT CASE(IOR)
          CASE(-1)
+            IF (III==0) CYCLE SEARCH_LOOP
             II = III-1
             JJ = JJJ
             KK = KKK
          CASE( 1)
+            IF (III==M%IBP1) CYCLE SEARCH_LOOP
             II = III+1
             JJ = JJJ
             KK = KKK
          CASE(-2)
+            IF (JJJ==0) CYCLE SEARCH_LOOP
             II = III
             JJ = JJJ-1
             KK = KKK
          CASE( 2)
+            IF (JJJ==M%JBP1) CYCLE SEARCH_LOOP
             II = III
             JJ = JJJ+1
             KK = KKK
          CASE(-3)
+            IF (KKK==0) CYCLE SEARCH_LOOP
             II = III
             JJ = JJJ
             KK = KKK-1
          CASE( 3)
+            IF (KKK==M%KBP1) CYCLE SEARCH_LOOP
             II = III
             JJ = JJJ
             KK = KKK+1
