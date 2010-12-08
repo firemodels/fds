@@ -911,7 +911,7 @@ DROPLET_LOOP: DO I=1,NLP
    ENDIF
 
     ! Drag reduction model, except for particles associated with a SURF line
-
+   WAKE_VEL=1.0_EB
    IF (PC%SURF_INDEX<1) THEN
       DROP_DEN      = AVG_DROP_DEN(II,JJ,KK,PC%EVAP_INDEX) 
       DROP_VOL_FRAC = DROP_DEN/PC%DENSITY 
@@ -1382,7 +1382,7 @@ IF(WE>2.0) THEN
     C_DRAGNEW=1.0/(3.0*RE)*(DC_DRAGSTAR*(8*RE+72-72*fSN)+72*fSN)
     C_DRAGNEW=MIN(8.0_EB/3.0_EB,C_DRAGNEW) ! Bounded from above by drag of a disintegrating drop
     C_DRAGNEW=MAX(C_DRAG,C_DRAGNEW)
-    ! Absorb effect the of larger projected surface area into C_DRAG.
+    ! Absorb the effect of the larger projected surface area into C_DRAG.
     ! Particle movement routines use projected area of a sphere,
     ! calculate the ratio of projected surface areas of a sphere and an
     ! ellipsoid of the same volume with aspect ratio E.
