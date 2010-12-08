@@ -31,6 +31,7 @@
 typedef struct {
   float xyz[3],norm[3],*color,distance;
   int flag;
+  float texturecolor;
 } isovert;
 
 typedef struct {

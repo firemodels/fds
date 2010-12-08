@@ -610,6 +610,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
               if(tcolor>1.0)tcolor=1.0;
               colorindex = (unsigned char)(tcolor*255);
               isoverti->color = rgb_iso+4*colorindex;
+              isoverti->texturecolor=tcolor;
             }
             FREEMEMORY(tvertices_i);
           }
@@ -876,6 +877,12 @@ void drawiso(int tranflag){
     iso_specular[3] = 1.0;
     if(tranflag==DRAW_TRANSPARENT)transparenton();
 
+    if(usetexturebar==1){
+      glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+      glEnable(GL_TEXTURE_1D);
+      glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
+    }
+
     glPushAttrib(GL_LIGHTING_BIT);
     if(iso_lighting==1){
       glEnable(GL_LIGHTING);
@@ -905,21 +912,38 @@ void drawiso(int tranflag){
       v2 = tri->v2;
       v3 = tri->v3;
 
-      glColor4fv(v1->color);
+      if(usetexturebar==1){
+        glTexCoord1f(v1->texturecolor);
+      }
+      else{
+        glColor4fv(v1->color);
+      }
       glNormal3fv(v1->norm);
       glVertex3fv(v1->xyz);
         
-      glColor4fv(v2->color);
+      if(usetexturebar==1){
+        glTexCoord1f(v2->texturecolor);
+      }
+      else{
+        glColor4fv(v2->color);
+      }
       glNormal3fv(v2->norm);
       glVertex3fv(v2->xyz);
         
-      glColor4fv(v3->color);
+      if(usetexturebar==1){
+        glTexCoord1f(v3->texturecolor);
+      }
+      else{
+        glColor4fv(v3->color);
+      }
       glNormal3fv(v3->norm);
       glVertex3fv(v3->xyz);
     }
     glEnd();
 
     glPopAttrib();
+    if(usetexturebar==1)glDisable(GL_TEXTURE_1D);
+
 
     if(tranflag==DRAW_TRANSPARENT)transparentoff();
     if(cullfaces==1)glEnable(GL_CULL_FACE);

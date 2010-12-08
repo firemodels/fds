@@ -1458,24 +1458,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
     meshi=loaded_isomesh;
     isoi = isoinfo + meshi->isofilenum;
-    if(isoi->dataflag==0||usetexturebar==0){
-      drawiso(DRAW_SOLID);
-    }
-    else{
-      drawiso(DRAW_SOLID);
-//      drawtiso(meshi,DRAW_SOLID);
-    }
+
+    drawiso(DRAW_SOLID);
 
     //  nothing transparent should be drawn before this portion of the code
     //    (ie draw all opaque objects first then draw transparent objects
 
-    if(isoi->dataflag==0||usetexturebar==0){
-      drawiso(DRAW_TRANSPARENT);
-    }
-    else{
-      drawiso(DRAW_TRANSPARENT);
-//      drawtiso(meshi,DRAW_TRANSPARENT);
-    }
+    drawiso(DRAW_TRANSPARENT);
   }
 
 /* ++++++++++++++++++++++++ draw transparent faces +++++++++++++++++++++++++ */
