@@ -14,9 +14,11 @@
 #include "threader.h"
 #include "string_util.h"
 
+SVEXTERN isotri SVDECL(***iso_trans_list,NULL),SVDECL(***iso_opaques_list,NULL);
+SVEXTERN int SVDECL(*niso_trans_list,NULL),SVDECL(*niso_opaques_list,NULL);
+SVEXTERN int SVDECL(niso_timesteps,0);
 SVEXTERN isotri SVDECL(**iso_trans,NULL),SVDECL(**iso_opaques,NULL);
 SVEXTERN int SVDECL(niso_trans,0),SVDECL(niso_opaques,0);
-SVEXTERN int SVDECL(niso_tris_max,0);
 SVEXTERN int SVDECL(sort_transparency,1);
 SVEXTERN int SVDECL(object_outlines,0);
 SVEXTERN int SVDECL(usemenu,1),SVDECL(show_evac_slices,0);
@@ -414,7 +416,7 @@ SVEXTERN int nlabels,visLabels,nlabelssmv;
 SVEXTERN int ntarg_files;
 SVEXTERN int showallslicevectors;
 SVEXTERN float framerate;
-SVEXTERN int ntimes, itime, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;
+SVEXTERN int ntimes, itimes, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;
 SVEXTERN int npqq, nopart;
 SVEXTERN int uindex, vindex, windex;
 

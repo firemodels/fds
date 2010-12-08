@@ -2692,7 +2692,7 @@ void drawslice_texture(const slice *sd){
   else if(sd->idir==2){
    if(meshi->mesh_offset_ptr!=NULL){
      glPushMatrix();
-     glTranslatef(times[itime]/10.0,0.0,0.0);
+     glTranslatef(times[itimes]/10.0,0.0,0.0);
    }
    constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
@@ -4775,7 +4775,7 @@ void output_Slicedata(void){
     i=slice_loaded_list[ii];
     sd = sliceinfo + i;
     if(sd->display==0||sd->type!=islicetype)continue;
-    if(sd->slicetimes[0]>times[itime])continue;
+    if(sd->slicetimes[0]>times[itimes])continue;
 
     if(sd->qslicedata==NULL){
       printf("  Slice data unavailble for output\n");
@@ -4787,14 +4787,14 @@ void output_Slicedata(void){
     if(ext!=NULL){
       ext[0]=0;
     }
-    sprintf(flabel,"%i",itime);
+    sprintf(flabel,"%i",itimes);
     trim(flabel);
     strcat(datafile,"_sf_");
     strcat(datafile,flabel);
     strcat(datafile,".csv");
     fileout = fopen(datafile,"a");
     if(fileout==NULL)continue;
-    if(times!=NULL)fprintf(fileout,"%f\n",times[itime]);
+    if(times!=NULL)fprintf(fileout,"%f\n",times[itimes]);
     switch (sd->idir){
       case 1:
         fprintf(fileout,"%i,%i\n",sd->ks2+1-sd->ks1,sd->js2+1-sd->js1);
@@ -4855,14 +4855,14 @@ void init_Slicedata(void){
     i=slice_loaded_list[ii];
     sd = sliceinfo + i;
     if(sd->display==0||sd->type!=islicetype)continue;
-    if(sd->slicetimes[0]>times[itime])continue;
+    if(sd->slicetimes[0]>times[itimes])continue;
 
     strcpy(datafile,sd->file);
     ext = strstr(datafile,".");
     if(ext!=NULL){
       ext[0]=0;
     }
-    sprintf(flabel,"%i",itime);
+    sprintf(flabel,"%i",itimes);
     trim(flabel);
     strcat(datafile,"_sf_");
     strcat(datafile,flabel);

@@ -540,25 +540,31 @@ void IsoShowMenu(int value){
     break;
    case 94:
     transparent_state=ALL_SOLID;
+    Update_Isotris(1);
     break;
    case 95:
     transparent_state=ALL_TRANSPARENT;
+    Update_Isotris(1);
     break;
    case 96:
     transparent_state=MIN_SOLID;
+    Update_Isotris(1);
     break;
    case 97:
     transparent_state=MAX_SOLID;
+    Update_Isotris(1);
     break;
    case 98:
     for(i=0;i<nisolevels;i++){
       showlevels[i]=0;
     }
+    Update_Isotris(1);
     break;
    case 99:
     for(i=0;i<nisolevels;i++){
       showlevels[i]=1;
     }
+    Update_Isotris(1);
     break;
    default:
     if(value>99&&value<999&&value-100<nisolevels){
@@ -1303,7 +1309,7 @@ void RenderMenu(int value){
       keyboard('t',0,0);
     }
     RenderState(1);
-    itime=0;
+    itimes=0;
     for(i=0;i<nslice_files;i++){
       sd=sliceinfo+i;
       sd->islice=0;

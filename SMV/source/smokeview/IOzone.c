@@ -610,7 +610,7 @@ void drawroomdata(void){
   unsigned char *izonetubase;
   int i;
 
-  if(zonet[0]>times[itime])return;
+  if(zonet[0]>times[itimes])return;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
 

@@ -364,7 +364,7 @@ void drawTargets(void){
   int i, j;
 
   time_val=0.0;
-  if(times!=NULL)time_val = times[itime];
+  if(times!=NULL)time_val = times[itimes];
   for(j=0;j<ntarg_files;j++){
     if(targinfo[j].loaded==0||targinfo[j].display==0)continue;
     switch (targinfo[j].type){
@@ -383,7 +383,7 @@ void drawTargets(void){
        for(i=0;i<ntargets;i++){
          unsigned char *color;
 
-         j = targtimeslist[itime];
+         j = targtimeslist[itimes];
          color = target_positions[i].color;
          xtarget=(target_positions[i].x[j]-xbar0)/xyzmaxdiff;;
          ytarget=(target_positions[i].y[j]-ybar0)/xyzmaxdiff;

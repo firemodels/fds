@@ -2000,7 +2000,7 @@ void draw_faces(){
         }
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
-        if(showtimelist!=NULL&&showtimelist[itime]==0)continue;
+        if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
         if(showedit==0){
           new_color=facei->color;
         }
@@ -2070,7 +2070,7 @@ void draw_faces(){
         }
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
-        if(showtimelist!=NULL&&showtimelist[itime]==0)continue;
+        if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
         if(showedit==0){
           new_color=facei->color;
         }
@@ -2134,7 +2134,7 @@ void draw_faces(){
         facei = meshi->face_outlines[i];
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
-        if(showtimelist!=NULL&&showtimelist[itime]==0&&facei->type2==BLOCK_face)continue;
+        if(showtimelist!=NULL&&showtimelist[itimes]==0&&facei->type2==BLOCK_face)continue;
         if(blocklocation==BLOCKlocation_grid){
           vertices = facei->approx_vertex_coords;
         }
@@ -2160,7 +2160,7 @@ void draw_faces(){
           glVertex3fv(vertices+9);
           glVertex3fv(vertices+9);
           glVertex3fv(vertices+0);
-          if(showtimelist!=NULL&&showtimelist[itime]==0){
+          if(showtimelist!=NULL&&showtimelist[itimes]==0){
             glVertex3fv(vertices+0);
             glVertex3fv(vertices+6);
             glVertex3fv(vertices+3);
@@ -2183,7 +2183,7 @@ void draw_faces(){
         facei=meshi->face_textures[i];
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
-        if(showtimelist!=NULL&&showtimelist[itime]==0)continue;
+        if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
         texti=facei->textureinfo;
         if(blocklocation==BLOCKlocation_grid){
            vertices = facei->approx_vertex_coords;
@@ -2303,7 +2303,7 @@ void draw_transparent_faces(){
     }
     showtimelist_handle = facei->showtimelist_handle;
     showtimelist = *showtimelist_handle;
-    if(showtimelist!=NULL&&showtimelist[itime]==0)continue;
+    if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
     if(showedit==0){
       new_color=facei->color;
     }
@@ -2375,7 +2375,7 @@ void draw_transparent_faces(){
       }
       showtimelist_handle = facei->showtimelist_handle;
       showtimelist = *showtimelist_handle;
-      if(showtimelist!=NULL&&showtimelist[itime]==0)continue;
+      if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
       new_color=facei->color;
       if(
          fabs(new_color[0]-old_color[0])>0.0001||

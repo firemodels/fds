@@ -393,7 +393,7 @@ void mouse(int button, int state, int x, int y){
       else{
         xleft=xtimeleft;
       }
-      itime=(int)((xtemp*x/((screenWidth-dwinWW))-xleft)*(ntimes-1)/(xtimeright-xleft));
+      itimes=(int)((xtemp*x/((screenWidth-dwinWW))-xleft)*(ntimes-1)/(xtimeright-xleft));
       checktimebound();
       timedrag=1;
       stept=0;
@@ -523,7 +523,7 @@ void motion(int xm, int ym){
 	  xxleft = xtimeleft;
     if(fontindex==LARGE_FONT)xxleft=xtimeleft+0.11;
     if(screenHeight-ym<50&&ntimes>0&&visTimeLabels==1&&showtime==1){
-      itime=(int)((xtemp*xm/((screenWidth-dwinWW))-xxleft)*(ntimes-1)/(xtimeright-xxleft));
+      itimes=(int)((xtemp*xm/((screenWidth-dwinWW))-xxleft)*(ntimes-1)/(xtimeright-xxleft));
       checktimebound();
       timedrag=1;
     }
@@ -1123,7 +1123,7 @@ void keyboard_2(unsigned char key, int x, int y){
         force_redisplay=1;
       }
       else{
-        itime_save=itime;
+        itime_save=itimes;
         ShowVSliceMenu(HIDE_ALL);
       }
     }
@@ -1133,7 +1133,7 @@ void keyboard_2(unsigned char key, int x, int y){
         force_redisplay=1;
       }
       else{
-        itime_save=itime;
+        itime_save=itimes;
         ShowHideSliceMenu(HIDE_ALL);
       }
     }
@@ -1177,7 +1177,7 @@ void keyboard_2(unsigned char key, int x, int y){
       if(ntimes>0){
         float timeval;
 
-        timeval=times[itime];
+        timeval=times[itimes];
         fprintf(scriptoutstream,"SETTIMEVAL\n");
         fprintf(scriptoutstream," %f\n",timeval);
       }
@@ -1273,7 +1273,7 @@ void keyboard_2(unsigned char key, int x, int y){
    }
 
   if(plotstate==DYNAMIC_PLOTS){
-    if(timedrag==0)itime += skip*FlowDir;
+    if(timedrag==0)itimes += skip*FlowDir;
     checktimebound();
     IDLE();
 
@@ -2088,10 +2088,10 @@ void Display(void){
         }
     
         if(plotstate==DYNAMIC_PLOTS && ntimes > 0){
-          if(itime>=0&&itime<ntimes&&
-            ((render_frame[itime] == 0&&showstereo==0)||(render_frame[itime]<2&&showstereo!=0))
+          if(itimes>=0&&itimes<ntimes&&
+            ((render_frame[itimes] == 0&&showstereo==0)||(render_frame[itimes]<2&&showstereo!=0))
             ){
-            render_frame[itime]++;
+            render_frame[itimes]++;
             renderdoublenow=1;
           }
         }
@@ -2191,8 +2191,8 @@ void Idle(void){
       }
     }
     if(benchmark==1||benchmark_flag==1){
-      if(itime==0)bench_starttime=thistime/1000.0;
-      if(itime==ntimes-1){
+      if(itimes==0)bench_starttime=thistime/1000.0;
+      if(itimes==ntimes-1){
         bench_stoptime=thistime/1000.0;
         ibenchrate=10*((float)ntimes/(bench_stoptime-bench_starttime))+0.5;
         framerate=(float)ibenchrate/10.0;
@@ -2223,19 +2223,19 @@ void Idle(void){
             ){
             elapsed_time = gmod(elapsed_time,times[ntimes-1]-times[0])+times[0];
           }
-          itime = interval_search(times,ntimes,elapsed_time,itime);
+          itimes = interval_search(times,ntimes,elapsed_time,itimes);
         }
         else{
           if(script_render_flag==0){
-            itime+=FlowDir;
+            itimes+=FlowDir;
           }
           else{
-            itime=script_itime;
+            itimes=script_itime;
           }
         }
       }
       if(stept==1&&timedrag==0&&RenderGif!=0){
-        itime+=RenderSkip*FlowDir;
+        itimes+=RenderSkip*FlowDir;
       }
 
 // if toggling time display with H then show the frame that was visible
@@ -2245,12 +2245,12 @@ void Idle(void){
       }
       else{
         if(itime_save>=0){
-          itime=itime_save;
+          itimes=itime_save;
         }
       }
 #ifdef pp_SHOOTER
       if(shooter_firstframe==1&&visShooter!=0&&shooter_active==1){
-        itime=0;
+        itimes=0;
       }
 #endif
       checktimebound();
@@ -2258,7 +2258,7 @@ void Idle(void){
     }
     redisplay=1;
   }
-  if(showtime==1&&stept==0&&itimeold!=itime){
+  if(showtime==1&&stept==0&&itimeold!=itimes){
     changetime=1;
     checktimebound();
     UpdateTimeLabels();
@@ -2278,28 +2278,28 @@ void update_framenumber(int changetime){
   particle *parti;
   slice *sd;
 
-  if(force_redisplay==1||(itimeold!=itime&&changetime==1)){
+  if(force_redisplay==1||(itimeold!=itimes&&changetime==1)){
     force_redisplay=0;
-    itimeold=itime;
+    itimeold=itimes;
 //    redisplay=1;
     if(showsmoke==1||showevac==1){
       for(i=0;i<npart_files;i++){
         parti = partinfo+i;
         if(parti->loaded==1){
           if(parti->ptimeslist==NULL)continue;
-          parti->iframe=parti->ptimeslist[itime];
+          parti->iframe=parti->ptimeslist[itimes];
         }
       }
     }
     if(hrrinfo!=NULL&&hrrinfo->loaded==1&&hrrinfo->display==1&&hrrinfo->timeslist!=NULL){
-      hrrinfo->itime=hrrinfo->timeslist[itime];
+      hrrinfo->itime=hrrinfo->timeslist[itimes];
     }
     if(showslice==1||showvslice==1){
       for(ii=0;ii<nslice_loaded;ii++){
         i = slice_loaded_list[ii];
         sd = sliceinfo+i;
         if(sd->slicetimeslist==NULL)continue;
-        sd->islice=sd->slicetimeslist[itime];
+        sd->islice=sd->slicetimeslist[itimes];
       }
     }
     if(show3dsmoke==1){
@@ -2308,7 +2308,7 @@ void update_framenumber(int changetime){
       for(i=0;i<nsmoke3d_files;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
-        smoke3di->iframe=smoke3di->timeslist[itime];
+        smoke3di->iframe=smoke3di->timeslist[itimes];
         if(smoke3di->iframe!=smoke3di->lastiframe){
           smoke3di->lastiframe=smoke3di->iframe;
           updatesmoke3d(smoke3di);
@@ -2325,7 +2325,7 @@ void update_framenumber(int changetime){
         patchi=patchinfo + meshi->patchfilenum;
         if(meshi->patchtimes==NULL)continue;
         if(meshi->patchtimeslist==NULL)continue;
-        meshi->ipatch=meshi->patchtimeslist[itime];
+        meshi->ipatch=meshi->patchtimeslist[itimes];
         if(patchi->compression_type==0){
           meshi->ipqqi = meshi->ipqq + meshi->ipatch*meshi->npatchsize;
         }
@@ -2348,7 +2348,7 @@ void update_framenumber(int changetime){
 
         if(meshi->isotimes==NULL)continue;
         if(meshi->isotimeslist==NULL)continue;
-        meshi->iiso=meshi->isotimeslist[itime];
+        meshi->iiso=meshi->isotimeslist[itimes];
 
         if(isoi->compression_type==1){
           isosurface *asurface;
@@ -2368,7 +2368,7 @@ void update_framenumber(int changetime){
 
         meshi = meshinfo+i;
         if(meshi->showsmoothtimelist!=NULL){
-          sb=meshi->showsmoothtimelist[itime];
+          sb=meshi->showsmoothtimelist[itimes];
           if(sb==NULL)continue;
           meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
           meshi->smoothblockagecolors=sb->smoothblockagecolors;
@@ -2377,7 +2377,7 @@ void update_framenumber(int changetime){
       }
     }
     if(showzone==1){
-      izone=zonetlist[itime];
+      izone=zonetlist[itimes];
     }
   }
 
@@ -2482,7 +2482,7 @@ void reset_gltime(void){
   int inttime;
 
   if(showtime!=1)return;
-  reset_frame=itime;
+  reset_frame=itimes;
   inttime  = glutGet(GLUT_ELAPSED_TIME);
   reset_time = (float)inttime/1000.0;
   if(times!=NULL&&ntimes>0){

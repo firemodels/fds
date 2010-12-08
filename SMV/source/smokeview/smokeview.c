@@ -701,7 +701,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->path_timeslist!=NULL){
       if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
         touri = tourinfo + selectedtour_index;
-        iframe = touri->path_timeslist[itime];
+        iframe = touri->path_timeslist[itimes];
         if(keyframe_snap==1&&selected_frame!=NULL){
           pj=&selected_frame->nodeval;
         }
@@ -756,7 +756,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->path_timeslist!=NULL){
       if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
         touri = tourinfo + selectedtour_index;
-        iframe = touri->path_timeslist[itime];
+        iframe = touri->path_timeslist[itimes];
         if(keyframe_snap==1&&selected_frame!=NULL){
           pj=&selected_frame->nodeval;
         }
@@ -846,7 +846,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
       if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->path_timeslist!=NULL){
         if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
           touri = tourinfo + selectedtour_index;
-          iframe = touri->path_timeslist[itime];
+          iframe = touri->path_timeslist[itimes];
           if(keyframe_snap==1&&selected_frame!=NULL){
             pj=&selected_frame->nodeval;
           }
@@ -913,7 +913,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 #endif
     }
     if(nface_transparent>0)sort_transparent_faces(modelview_scratch);
-    if(showiso==1)Update_Isotris();
+    if(showiso==1)Update_Isotris(0);
 
     glScalef(mscale[0],mscale[1],mscale[2]);
     ExtractFrustum();
@@ -1587,7 +1587,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       i=slice_loaded_list[ii];
       sd = sliceinfo + i;
       if(sd->display==0||sd->type!=islicetype)continue;
-      if(sd->slicetimes[0]>times[itime])continue;
+      if(sd->slicetimes[0]>times[itimes])continue;
       if(sd->compression_type==1||sd->compression_type==2){
 #ifdef USE_ZLIB
         uncompress_slicedataframe(sd,sd->islice);
@@ -1680,7 +1680,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       v = vd->v;
       w = vd->w;
       if(u==NULL&&v==NULL&&w==NULL)continue;
-      if(sliceinfo[vd->ival].slicetimes[0]>times[itime])continue;
+      if(sliceinfo[vd->ival].slicetimes[0]>times[itimes])continue;
 #define VAL val
       if(VAL->compression_type==1){
 #ifdef USE_ZLIB
@@ -2012,20 +2012,20 @@ void updateShow(void){
 
   RenderTime=0;
   if(times!=NULL){
-    if(settmin_p==1&&times[itime]<tmin_p)visTimeSmoke=0;
-    if(settmax_p==1&&times[itime]>tmax_p)visTimeSmoke=0;
+    if(settmin_p==1&&times[itimes]<tmin_p)visTimeSmoke=0;
+    if(settmax_p==1&&times[itimes]>tmax_p)visTimeSmoke=0;
 
-    if(settmin_s==1&&times[itime]<tmin_s)visTimeSlice=0;
-    if(settmax_s==1&&times[itime]>tmax_s)visTimeSlice=0;
+    if(settmin_s==1&&times[itimes]<tmin_s)visTimeSlice=0;
+    if(settmax_s==1&&times[itimes]>tmax_s)visTimeSlice=0;
 
-    if(settmin_i==1&&times[itime]<tmin_i)visTimeIso=0;
-    if(settmax_i==1&&times[itime]>tmax_i)visTimeIso=0;
+    if(settmin_i==1&&times[itimes]<tmin_i)visTimeIso=0;
+    if(settmax_i==1&&times[itimes]>tmax_i)visTimeIso=0;
 
-    if(settmin_b==1&&times[itime]<tmin_b)visTimePatch=0;
-    if(settmax_b==1&&times[itime]>tmax_b)visTimePatch=0;
+    if(settmin_b==1&&times[itimes]<tmin_b)visTimePatch=0;
+    if(settmax_b==1&&times[itimes]>tmax_b)visTimePatch=0;
 
-    if(settmin_z==1&&times[itime]<tmin_z)visTimeZone=0;
-    if(settmax_z==1&&times[itime]>tmax_z)visTimeZone=0;
+    if(settmin_z==1&&times[itimes]<tmin_z)visTimeZone=0;
+    if(settmax_z==1&&times[itimes]>tmax_z)visTimeZone=0;
 
   }
 
@@ -2795,7 +2795,7 @@ void updatetimes(void){
     if(ntimes==0)FREEMEMORY(times);
     if(ntimes>0)ResizeMemory((void **)&times,ntimes*sizeof(float));
   
-  izone=0; itime=0;
+  izone=0; itimes=0;
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;
     meshi->ipatch=0;
@@ -2945,7 +2945,7 @@ void drawTimeBar(void){
   glEnd();
 
   if(ntimes != 1){
-    xxright = xleft + (float)itime*(xright-xleft)/(ntimes-1);
+    xxright = xleft + (float)itimes*(xright-xleft)/(ntimes-1);
   }
   else{
     xxright=xright;
@@ -3126,7 +3126,7 @@ void UpdateTimeLabels(void){
   time0 = timeoffset;
 
 
-  if(times!=NULL)time0 = timeoffset + times[itime];
+  if(times!=NULL)time0 = timeoffset + times[itimes];
   if(vishmsTimelabel==1){
     hour = time0/3600;
     min = time0/60.0 - 60*hour;
@@ -3153,7 +3153,7 @@ void UpdateTimeLabels(void){
       sprintf(timelabel,"Time: %4.1f",time0);
     }
   }
-  sprintf(framelabel,"Frame: %i",itime);
+  sprintf(framelabel,"Frame: %i",itimes);
   if(hrrinfo!=NULL&&hrrinfo->display==1&&hrrinfo->loaded==1){
     float hrr;
 
@@ -3882,8 +3882,8 @@ void checktimebound(void){
   blockagedata *bc;
   particle *parti;
 
-  if(timedrag==0&&itime>ntimes-1||timedrag==1&&itime<0){
-    izone=0;itime=0;iframe=iframebeg;
+  if(timedrag==0&&itimes>ntimes-1||timedrag==1&&itimes<0){
+    izone=0;itimes=0;iframe=iframebeg;
     for(i=0;i<nslice_files;i++){
       sd=sliceinfo+i;
       sd->islice=0;
@@ -3898,8 +3898,8 @@ void checktimebound(void){
       meshi->iiso=0;
     }
   }
-  if(timedrag==0&&itime<0||timedrag==1&&itime>ntimes-1){
-    izone=nzonet-1;itime=ntimes-1;
+  if(timedrag==0&&itimes<0||timedrag==1&&itimes>ntimes-1){
+    izone=nzonet-1;itimes=ntimes-1;
     for(i=0;i<npart_files;i++){
       parti=partinfo+i;
       parti->iframe=parti->nframes-1;
@@ -3925,7 +3925,7 @@ void checktimebound(void){
     for(j=0;j<meshi->nbptrs;j++){
       bc=meshi->blockageinfoptrs[j];
       if(bc->showtimelist==NULL)continue;
-      bc->show=bc->showtimelist[itime];
+      bc->show=bc->showtimelist[itimes];
     }
   }
 }

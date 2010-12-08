@@ -72,9 +72,9 @@ void drawtrees(void){
 
     state=0;
     if(showtime==1&&times!=NULL){
-      ASSERT(itime>=0)
-      if(treei->time_char>0.0&&times[itime]>treei->time_char)state=1;
-      if(treei->time_complete>0.0&&times[itime]>treei->time_complete)state=2;
+      ASSERT(itimes>=0)
+      if(treei->time_char>0.0&&times[itimes]>treei->time_char)state=1;
+      if(treei->time_complete>0.0&&times[itimes]>treei->time_complete)state=2;
     }
 
     glPushMatrix();
@@ -771,7 +771,7 @@ float *get_terraincolor(terraincell *ti){
     return rgb_terrain[index];
   }
   
-  sv_time = times[itime];
+  sv_time = times[itimes];
   ter_time = ti->time;
   ileft = ti->interval;
 

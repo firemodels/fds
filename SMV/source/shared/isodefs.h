@@ -29,7 +29,8 @@
 /* iso-surface definitions */
 
 typedef struct {
-  float xyz[3],norm[3],*color;
+  float xyz[3],norm[3],*color,distance;
+  int flag;
 } isovert;
 
 typedef struct {

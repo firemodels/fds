@@ -1892,7 +1892,7 @@ void drawPart(const particle *parti){
   ipframe=parti->iframe;
   rgb_smoke = rgb_part;
 
-  if(parti->ptimes[0]>times[itime])return;
+  if(parti->ptimes[0]>times[itimes])return;
 
   if(parti->version==1){
     drawPart5(parti);

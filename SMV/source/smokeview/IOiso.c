@@ -12,6 +12,7 @@
 #else
 #include <GL/glut.h>
 #endif
+#include <math.h>
 #include "egz_stdio.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
@@ -567,6 +568,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
             xyz[0]=offset[0]+factor*(*verti++); 
             xyz[1]=offset[1]+factor*(*verti++); 
             xyz[2]=offset[2]+factor*(*verti++); 
+            isoverti->flag=0;
             
             vertnorm=isoverti->norm;
             vertnorm[0]=0.0;
@@ -649,6 +651,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
             isotrii->xyzmid[0]=(isotrii->v1->xyz[0]+isotrii->v2->xyz[0]+isotrii->v3->xyz[0])/3.0;
             isotrii->xyzmid[1]=(isotrii->v1->xyz[1]+isotrii->v2->xyz[1]+isotrii->v3->xyz[1])/3.0;
             isotrii->xyzmid[2]=(isotrii->v1->xyz[2]+isotrii->v2->xyz[2]+isotrii->v3->xyz[2])/3.0;
+            isotrii->distance=-1.0;
             if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
               ib->colorlevels[ilevel]=hrrpuv_iso_color;
             }
@@ -889,6 +892,7 @@ void drawiso(int tranflag){
       glEnable(GL_LIGHTING);
       glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
       glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,iso_shininess);
+      glEnable(GL_COLOR_MATERIAL);
     }
     glBegin(GL_TRIANGLES);
 
@@ -909,7 +913,7 @@ void drawiso(int tranflag){
 
       colorptr=*(tri->color);
       if(colorptr!=colorptr_old){
-        glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,colorptr);
+        glColor4fv(colorptr);
         colorptr_old=colorptr;
       }
    
@@ -2061,23 +2065,54 @@ int compare_iso_triangles( const void *arg1, const void *arg2 ){
 
 void sort_iso_triangles(float *mm){
   int itri;
-  
+  int newflag;
+
   if(niso_trans==0)return;
+  newflag=1-iso_trans[0]->v1->flag;
   for(itri=0;itri<niso_trans;itri++){
     isotri *tri;
     float xyzeye[3];
     float *xyz;
-      
+    isovert *v1, *v2, *v3;
+
     tri = iso_trans[itri];
-    xyz=tri->xyzmid;
-      
-    xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
-    xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
-    xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
-    xyzeye[0]/=mscale[0];
-    xyzeye[1]/=mscale[1];
-    xyzeye[2]/=mscale[2];
-    tri->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+    v1 = tri->v1;
+    v2 = tri->v2;
+    v3 = tri->v3;
+    if(v1->flag!=newflag){
+      v1->flag=newflag;
+      xyz = v1->xyz;
+      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
+      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
+      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
+      xyzeye[0]/=mscale[0];
+      xyzeye[1]/=mscale[1];
+      xyzeye[2]/=mscale[2];
+      v1->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+    }
+    if(v2->flag!=newflag){
+      v2->flag=newflag;
+      xyz = v2->xyz;
+      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
+      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
+      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
+      xyzeye[0]/=mscale[0];
+      xyzeye[1]/=mscale[1];
+      xyzeye[2]/=mscale[2];
+      v2->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+    }
+    if(v3->flag!=newflag){
+      v3->flag=newflag;
+      xyz = v3->xyz;
+      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
+      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
+      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
+      xyzeye[0]/=mscale[0];
+      xyzeye[1]/=mscale[1];
+      xyzeye[2]/=mscale[2];
+      v3->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+    }
+    tri->distance=(v1->distance+v2->distance+v3->distance);
   }
   qsort((isotri **)iso_trans,(size_t)niso_trans,sizeof(isotri **),compare_iso_triangles);
 }
@@ -3057,143 +3092,179 @@ void drawisoBAK(const mesh *meshi,int tranflag){
 
 /* ------------------ update_isotri_list ------------------------ */
 
-void Update_Isotris(void){
+void Update_Isotris(int flag){
   int ilev,itri;
   isosurface *asurfi;
   isotri **iso_trans_tmp,**iso_opaques_tmp;
   int *showlevels;
   mesh *meshi;
-  int timestep;
   float *colorptr;
-  int i;
   isosurface *asurface;
   int ntris;
   iso *loaded_iso;
 
-  if(loaded_isomesh->isofilenum==-1)return;
+  if(loaded_isomesh==NULL||loaded_isomesh->isofilenum==-1)return;
   loaded_iso=isoinfo + loaded_isomesh->isofilenum;
-  if(loaded_iso->isoupdate_timestep==loaded_isomesh->iiso)return;
-  loaded_iso->isoupdate_timestep=loaded_isomesh->iiso;
+ 
+  if(iso_trans_list==NULL||iso_opaques_list==NULL){
+    int iitime;
 
-  CheckMemory;
-  ntris=0;
-  for(i=0;i<niso_files;i++){
-    iso *isoi;
-    int ilev;
+    niso_timesteps=loaded_isomesh->nisosteps;
+    if(iso_trans_list==NULL){
+      int i;
+
+      NewMemory((void **)&niso_trans_list,niso_timesteps*sizeof(int));
+      NewMemory((void **)&iso_trans_list,niso_timesteps*sizeof(isotri **));
+      for(i=0;i<niso_timesteps;i++){
+        iso_trans_list[i]=NULL;
+      }
+    }
+    if(iso_opaques_list==NULL){
+      int i;
+
+      NewMemory((void **)&niso_opaques_list,niso_timesteps*sizeof(int));
+      NewMemory((void **)&iso_opaques_list,niso_timesteps*sizeof(isotri **));
+      for(i=0;i<niso_timesteps;i++){
+        iso_opaques_list[i]=NULL;
+      }
+    }
+    for(iitime=0;iitime<niso_timesteps;iitime++){
+      int i;
+
+      ntris=0;
+      for(i=0;i<niso_files;i++){
+        iso *isoi;
+        int ilev;
     
-    isoi = isoinfo+i;
-    if(isoi->loaded==0||isoi->display==0)continue;
+        isoi = isoinfo+i;
+        if(isoi->loaded==0||isoi->display==0)continue;
 
-    meshi = meshinfo + isoi->blocknumber;
-    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
-    for(ilev=0;ilev<meshi->nisolevels;ilev++){
-      asurfi = asurface + ilev;
-      ntris+=asurfi->niso_triangles;
+        meshi = meshinfo + isoi->blocknumber;
+        asurface = meshi->animatedsurfaces + iitime*meshi->nisolevels;
+        for(ilev=0;ilev<meshi->nisolevels;ilev++){
+          asurfi = asurface + ilev;
+          ntris+=asurfi->niso_triangles;
+        }
+      }
+      if(ntris>0){
+        NewMemory((void **)&iso_trans,ntris*sizeof(isotri *));
+        iso_trans_list[iitime]=iso_trans;
+        NewMemory((void **)&iso_opaques,ntris*sizeof(isotri *));
+        iso_opaques_list[iitime]=iso_opaques;
+      }
+    }
+    flag=1;
+  }
+  if(flag==1){
+    int iitime;
+
+    for(iitime=0;iitime<niso_timesteps;iitime++){
+      niso_trans_list[iitime]=-1;
+      niso_opaques_list[iitime]=-1;
     }
   }
-  if(ntris>niso_tris_max){
-    niso_tris_max=ntris;
-    if(iso_trans==NULL){
-      NewMemory((void **)&iso_trans,niso_tris_max*sizeof(isotri *));
-    }
-    else{
-      ResizeMemory((void **)&iso_trans,niso_tris_max*sizeof(isotri *));
-    }
-    if(iso_opaques==NULL){
-      NewMemory((void **)&iso_opaques,niso_tris_max*sizeof(isotri *));
-    }
-    else{
-      ResizeMemory((void **)&iso_opaques,niso_tris_max*sizeof(isotri *));
-    }
-  }
 
-  iso_trans_tmp=iso_trans;
-  iso_opaques_tmp=iso_opaques;
-  niso_trans=0;
-  niso_opaques=0;
-  for(i=0;i<niso_files;i++){
-    iso *isoi;
+  iso_trans=iso_trans_list[loaded_isomesh->iiso];
+  iso_opaques=iso_opaques_list[loaded_isomesh->iiso];
+  niso_trans=niso_trans_list[loaded_isomesh->iiso];
+  niso_opaques=niso_opaques_list[loaded_isomesh->iiso];
+
+  if(niso_trans==-1||niso_opaques==-1){
+    int i;
+
+    flag=1;
+    iso_trans_tmp=iso_trans;
+    iso_opaques_tmp=iso_opaques;
+    niso_trans=0;
+    niso_opaques=0;
+    for(i=0;i<niso_files;i++){
+      iso *isoi;
     
-    isoi = isoinfo+i;
-    if(isoi->loaded==0||isoi->display==0)continue;
+      isoi = isoinfo+i;
+      if(isoi->loaded==0||isoi->display==0)continue;
   
-    CheckMemory;
-    meshi = meshinfo + isoi->blocknumber;
-    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
-    showlevels=meshi->showlevels;
-    timestep=meshi->iiso;
+      CheckMemory;
+      meshi = meshinfo + isoi->blocknumber;
+      asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
+      showlevels=meshi->showlevels;
   
-    if(transparent_state==ALL_TRANSPARENT){
-      for(ilev=0;ilev<meshi->nisolevels;ilev++){
-        if(showlevels[ilev]==0)continue;
-        asurfi = asurface + ilev;
-        niso_trans += asurfi->niso_triangles;
-        for(itri=0;itri<asurfi->niso_triangles;itri++){
-          *iso_trans_tmp++=asurfi->iso_triangles+itri;
+      if(transparent_state==ALL_TRANSPARENT){
+        for(ilev=0;ilev<meshi->nisolevels;ilev++){
+          if(showlevels[ilev]==0)continue;
+          asurfi = asurface + ilev;
+          niso_trans += asurfi->niso_triangles;
+          for(itri=0;itri<asurfi->niso_triangles;itri++){
+            *iso_trans_tmp++=asurfi->iso_triangles+itri;
+          }
+          colorptr=isoi->colorlevels[ilev];
+          colorptr[3]=transparentlevel;
         }
-        colorptr=isoi->colorlevels[ilev];
-        colorptr[3]=transparentlevel;
       }
-    }
-    else if(transparent_state==MIN_SOLID){
-      for(ilev=0;ilev<1;ilev++){
-        if(showlevels[ilev]==0)continue;
-        asurfi = asurface + ilev;
-        niso_opaques += asurfi->niso_triangles;
-        for(itri=0;itri<asurfi->niso_triangles;itri++){
-          *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+      else if(transparent_state==MIN_SOLID){
+        for(ilev=0;ilev<1;ilev++){
+          if(showlevels[ilev]==0)continue;
+          asurfi = asurface + ilev;
+          niso_opaques += asurfi->niso_triangles;
+          for(itri=0;itri<asurfi->niso_triangles;itri++){
+            *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+          }
+          colorptr=isoi->colorlevels[ilev];
+          colorptr[3]=1.0;
         }
-        colorptr=isoi->colorlevels[ilev];
-        colorptr[3]=1.0;
-      }
-      for(ilev=1;ilev<meshi->nisolevels;ilev++){
-        if(showlevels[ilev]==0)continue;
-        asurfi = asurface + ilev;
-        niso_trans += asurfi->niso_triangles;
-        for(itri=0;itri<asurfi->niso_triangles;itri++){
-          *iso_trans_tmp++=asurfi->iso_triangles+itri;
+        for(ilev=1;ilev<meshi->nisolevels;ilev++){
+          if(showlevels[ilev]==0)continue;
+          asurfi = asurface + ilev;
+          niso_trans += asurfi->niso_triangles;
+          for(itri=0;itri<asurfi->niso_triangles;itri++){
+            *iso_trans_tmp++=asurfi->iso_triangles+itri;
+          }
+          colorptr=isoi->colorlevels[ilev];
+          colorptr[3]=transparentlevel;
         }
-        colorptr=isoi->colorlevels[ilev];
-        colorptr[3]=transparentlevel;
       }
-    }
-    else if(transparent_state==MAX_SOLID){
-      for(ilev=0;ilev<meshi->nisolevels-1;ilev++){
-        if(showlevels[ilev]==0)continue;
-        asurfi = asurface + ilev;
-        niso_trans += asurfi->niso_triangles;
-        for(itri=0;itri<asurfi->niso_triangles;itri++){
-          *iso_trans_tmp++=asurfi->iso_triangles+itri;
-        } 
-        colorptr=isoi->colorlevels[ilev];
-        colorptr[3]=transparentlevel;
-      }
-      for(ilev=meshi->nisolevels-1;ilev<meshi->nisolevels;ilev++){
-        if(showlevels[ilev]==0)continue;
-        asurfi = asurface + ilev;
-        niso_opaques += asurfi->niso_triangles;
-        for(itri=0;itri<asurfi->niso_triangles;itri++){
-          *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+      else if(transparent_state==MAX_SOLID){
+        for(ilev=0;ilev<meshi->nisolevels-1;ilev++){
+          if(showlevels[ilev]==0)continue;
+          asurfi = asurface + ilev;
+          niso_trans += asurfi->niso_triangles;
+          for(itri=0;itri<asurfi->niso_triangles;itri++){
+            *iso_trans_tmp++=asurfi->iso_triangles+itri;
+          } 
+          colorptr=isoi->colorlevels[ilev];
+          colorptr[3]=transparentlevel;
         }
-        colorptr=isoi->colorlevels[ilev];
-        colorptr[3]=1.0;
-      }
-    }
-    else if(transparent_state==ALL_SOLID){
-      for(ilev=0;ilev<meshi->nisolevels;ilev++){
-        CheckMemory;
-        if(showlevels[ilev]==0)continue;
-        asurfi = asurface + ilev;
-        niso_opaques += asurfi->niso_triangles;
-        for(itri=0;itri<asurfi->niso_triangles;itri++){
-          *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+        for(ilev=meshi->nisolevels-1;ilev<meshi->nisolevels;ilev++){
+          if(showlevels[ilev]==0)continue;
+          asurfi = asurface + ilev;
+          niso_opaques += asurfi->niso_triangles;
+          for(itri=0;itri<asurfi->niso_triangles;itri++){
+            *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+          }
+          colorptr=isoi->colorlevels[ilev];
+          colorptr[3]=1.0;
         }
-        colorptr=isoi->colorlevels[ilev];
-        colorptr[3]=1.0;
+      }
+      else if(transparent_state==ALL_SOLID){
+        for(ilev=0;ilev<meshi->nisolevels;ilev++){
+          CheckMemory;
+          if(showlevels[ilev]==0)continue;
+          asurfi = asurface + ilev;
+          niso_opaques += asurfi->niso_triangles;
+          for(itri=0;itri<asurfi->niso_triangles;itri++){
+            *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+          }
+          colorptr=isoi->colorlevels[ilev];
+          colorptr[3]=1.0;
+        }
       }
     }
   }
-  if(sort_transparency==1&&niso_trans>0)sort_iso_triangles(modelview_scratch);
+
+  if(sort_transparency==1&&niso_trans>0){
+    sort_iso_triangles(modelview_scratch);
+  }
+  niso_trans_list[loaded_isomesh->iiso]=niso_trans;
+  niso_opaques_list[loaded_isomesh->iiso]=niso_opaques;
 
   CheckMemory;
 }

@@ -37,10 +37,10 @@ void Render(int view_mode){
     &&render_double==0
     ){
     if(plotstate==DYNAMIC_PLOTS && ntimes > 0){
-     if(itime>=0&&itime<ntimes&&
-       ((render_frame[itime] == 0&&showstereo==0)||(render_frame[itime]<2&&showstereo!=0))
+     if(itimes>=0&&itimes<ntimes&&
+       ((render_frame[itimes] == 0&&showstereo==0)||(render_frame[itimes]<2&&showstereo!=0))
        ){
-       render_frame[itime]++;
+       render_frame[itimes]++;
        RenderFrame(view_mode);
      }
      else{
@@ -146,7 +146,7 @@ void RenderFrame(int view_mode){
       strcpy(renderfile_suffix,"_s");
     }
     else{
-      image_num=itime/RenderSkip;
+      image_num=itimes/RenderSkip;
       strcpy(renderfile_suffix,"_");
     }
     switch (view_mode){
@@ -277,7 +277,7 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
     strcpy(renderfile2,fdsprefix);
   }
   if(RenderTime==1){
-      sprintf(renderfile,"%s_%04i",renderfile2,itime/RenderSkip);
+      sprintf(renderfile,"%s_%04i",renderfile2,itimes/RenderSkip);
   }
   if(RenderTime==0){
       sprintf(renderfile,"%s_s%04i",renderfile2,seqnum);

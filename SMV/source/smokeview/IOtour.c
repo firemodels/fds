@@ -296,7 +296,7 @@ void drawtours(void){
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
 
-          iframe = touri->path_timeslist[itime];
+          iframe = touri->path_timeslist[itimes];
           pj = touri->pathnodes + iframe;
           if(keyframe_snap==1)pj = pj->keysnap;
 
@@ -317,7 +317,7 @@ void drawtours(void){
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
 
-          iframe = touri->path_timeslist[itime];
+          iframe = touri->path_timeslist[itimes];
           pj = touri->pathnodes + iframe;
           if(keyframe_snap==1)pj = pj->keysnap;
 
@@ -335,7 +335,7 @@ void drawtours(void){
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
 
-          iframe = touri->path_timeslist[itime];
+          iframe = touri->path_timeslist[itimes];
           pj = touri->pathnodes + iframe;
           if(keyframe_snap==1)pj = pj->keysnap;
           eye = pj->eye;

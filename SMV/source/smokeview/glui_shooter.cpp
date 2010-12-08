@@ -239,7 +239,7 @@ extern "C" void glui_shooter_setup(int main_window){
 
 void SHOOTER_CB(int var){
   float pi,ang;
-  if(shooter_firstframe==1)itime=0;
+  if(shooter_firstframe==1)itimes=0;
   switch (var){
     case SHOOTER_LOADPLOT3D:
       printf("Loading PLOT3D data at time: %f\n",plot3dtimelist[shooter_itime]);

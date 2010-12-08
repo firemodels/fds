@@ -1315,7 +1315,7 @@ void script_settimeval(scriptdata *scripti){
     if(timeval>times[ntimes-1]-0.0001)timeval=times[ntimes-1]-0.0001;
     for(i=0;i<ntimes-1;i++){
       if(times[i]<=timeval&&timeval<times[i+1]){
-        itime=i;
+        itimes=i;
         script_itime=i;
         stept=1;
         force_redisplay=1;
@@ -1351,7 +1351,7 @@ void settimeval(float timeval){
         thigh=(times[i]+times[i+1])/2.0;
       }
       if(tlow<=timeval&&timeval<thigh){
-        itime=i;
+        itimes=i;
         stept=1;
         force_redisplay=1;
         update_framenumber(0);

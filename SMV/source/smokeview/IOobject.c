@@ -624,10 +624,10 @@ void draw_devices(void){
         prop->vars_indep_index[j]=j;
       }
     }
-    if(showtime==1&&itime>=0&&itime<ntimes&&devicei->showstatelist!=NULL){
+    if(showtime==1&&itimes>=0&&itimes<ntimes&&devicei->showstatelist!=NULL){
       int state;
 
-      state=devicei->showstatelist[itime];
+      state=devicei->showstatelist[itimes];
       draw_SVOBJECT(devicei->object,state,prop,0);
     }
     else{
@@ -947,7 +947,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
         float time_val=0.0;
 
         if(ntimes>0){
-          time_val=times[itime];
+          time_val=times[itimes];
         }
 
         val_result=time_val;
@@ -964,7 +964,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
         val2=arg[1];
 
         if(ntimes>0){
-          time_val=times[itime];
+          time_val=times[itimes];
         }
 
         val_result=val1*time_val+val2;
