@@ -485,6 +485,9 @@ CONTAINS
     CHARACTER(60), DIMENSION(51) :: KNOWN_DOOR_NAMES
     REAL(EB), DIMENSION(51) :: KNOWN_DOOR_PROBS
 
+    INTEGER, DIMENSION(:), ALLOCATABLE :: TMP_AVATAR_TYPE_INDEX
+    CHARACTER(60), DIMENSION(:), ALLOCATABLE :: TMP_AVATAR_TYPE_NAME, TMP_AVATAR_TYPE_PROP
+
     INTEGER :: ii,jj,kk
 
     INTEGER :: size_rnd
@@ -695,7 +698,6 @@ CONTAINS
           END IF
           READ(LU_INPUT, EXIT, END=26, IOSTAT=IOS)
           IF (VENT_FFIELD /= 'null') DEFINE_MESH = .FALSE. ! Old input, user gives the door flow meshes
-          EVAC_EXITS(N)%I_EMESH_EXITS = 0  ! Default, for "no flow field" exits
 
           ! Old input used COLOR_INDEX, next lines are needed for that
           IF (MYID==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX.NE.-1) WRITE (LU_ERR,'(A,A)') &
@@ -777,7 +779,6 @@ CONTAINS
           ! 
           ! Save the information needed in READ_MESH, etc.
           IF (DEFINE_MESH .AND. .NOT.EVAC_FDS6) N_DOOR_MESHES = N_DOOR_MESHES + 1
-          IF (DEFINE_MESH) EVAC_EXITS(N)%I_EMESH_EXITS = N_TMP  ! Default, for "no flow field" exits
           EMESH_EXITS(N_TMP)%NEXIT       = N     ! N is the exit line index (including count only ones)
           EMESH_EXITS(N_TMP)%IOR         = IOR
           EMESH_EXITS(N_TMP)%IS_EXIT     = .TRUE.
@@ -812,7 +813,6 @@ CONTAINS
           READ(LU_INPUT, DOOR, END=27, IOSTAT=IOS)
           IF (VENT_FFIELD /= 'null') DEFINE_MESH = .FALSE. ! Old input, user gives the door flow meshes
           IF (TO_NODE     == 'null') DEFINE_MESH = .FALSE. ! This is more or less like an entry.
-          EVAC_DOORS(N)%I_EMESH_EXITS = 0  ! Default, for "no flow field" exits
 
           ! Old input used COLOR_INDEX, next lines are needed for that
           IF (MYID==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX.NE.-1) WRITE (LU_ERR,'(A,A)') &
@@ -888,7 +888,7 @@ CONTAINS
           ! 
           ! Save the information needed in READ_MESH, etc.
           IF (DEFINE_MESH .AND. .NOT.EVAC_FDS6) N_DOOR_MESHES = N_DOOR_MESHES + 1
-          IF (DEFINE_MESH) EVAC_DOORS(N)%I_EMESH_EXITS = N_TMP  ! Default, for "no flow field" exits
+          ! Default, for "no flow field" exits
           EMESH_EXITS(N_TMP)%NEXIT       = N     ! N is the door line index (including all doors)
           EMESH_EXITS(N_TMP)%IOR         = IOR
           EMESH_EXITS(N_TMP)%IS_EXIT     = .FALSE.
@@ -1054,6 +1054,12 @@ CONTAINS
 
     CALL COUNT_EVAC_NODES(2)
     N_AVATAR_TYPE = 1 ! The default type index is one and the default name is 'Human'.
+    ALLOCATE(TMP_AVATAR_TYPE_NAME(N_ENTRYS+NPC_EVAC),STAT=IZERO) ! etries first then evac lines
+    CALL ChkMemErr('READ_EVAC','TMP_AVATAR_TYPE_NAME',IZERO)
+    ALLOCATE(TMP_AVATAR_TYPE_INDEX(N_ENTRYS+NPC_EVAC),STAT=IZERO)
+    CALL ChkMemErr('READ_EVAC','TMP_AVATAR_TYPE_INDEX',IZERO)
+    ALLOCATE(TMP_AVATAR_TYPE_PROP(N_ENTRYS+NPC_EVAC),STAT=IZERO) ! etries first then evac lines
+    CALL ChkMemErr('READ_EVAC','TMP_AVATAR_TYPE_PROP',IZERO)
     CALL READ_PERS
     CALL READ_STRS
     CALL READ_EXIT
@@ -1066,6 +1072,9 @@ CONTAINS
     CALL READ_EVSS
     CALL READ_EDEV
 
+    DEALLOCATE(TMP_AVATAR_TYPE_PROP)
+    DEALLOCATE(TMP_AVATAR_TYPE_INDEX)
+    DEALLOCATE(TMP_AVATAR_TYPE_NAME)
     IF (MYID /= MAX(0,EVAC_PROCESS)) RETURN
 
     CALL CHECK_EVAC_NODES
@@ -1286,7 +1295,19 @@ CONTAINS
          CASE Default
             EVAC_AVATAR_RGB(1:3,1) = (/ 39, 64,139/)  ! ROYAL BLUE 4
          END SELECT
-         !
+
+      ELSE ! IMODE_IF = 2
+         ALLOCATE(EMESH_INDEX(MAX(1,NMESHES)), STAT=IZERO)
+         CALL ChkMemErr('READ_EVAC','EMESH_INDEX',IZERO) 
+         EMESH_INDEX = 0
+         N_EGRIDS = 0
+         DO N = 1, NMESHES
+            IF (EVACUATION_ONLY(N) .AND. EVACUATION_GRID(N)) THEN
+               N_EGRIDS = N_EGRIDS + 1
+               EMESH_INDEX(N) = N_EGRIDS
+            END IF
+         END  DO
+
          ! Allocate quantities for EVAC, PERS, EXIT types
          !
          EVAC_PROC_IF: IF (MYID==MAX(0,EVAC_PROCESS)) THEN
@@ -1387,20 +1408,7 @@ CONTAINS
 
          END IF EVAC_PROC_IF
 
-      ELSE ! IMODE_IF = 2
-         ALLOCATE(EMESH_INDEX(MAX(1,NMESHES)), STAT=IZERO)
-         CALL ChkMemErr('READ_EVAC','EMESH_INDEX',IZERO) 
-         EMESH_INDEX = 0
-
          EVAC_PROC_IF_2: IF (MYID==MAX(0,EVAC_PROCESS)) THEN
-            N_EGRIDS = 0
-            DO N = 1, NMESHES
-               IF (EVACUATION_ONLY(N) .AND. EVACUATION_GRID(N)) THEN
-                  N_EGRIDS = N_EGRIDS + 1
-                  EMESH_INDEX(N) = N_EGRIDS
-               END IF
-            END  DO
-
             N_NODES = N_ENTRYS + N_EXITS + N_DOORS + N_CORRS + N_EGRIDS + N_STRS
             IF (N_NODES > 0) THEN
                ALLOCATE(EVAC_Node_List(1:N_NODES),STAT=IZERO)
@@ -1982,6 +1990,7 @@ CONTAINS
          CALL RANDOM_SEED(put=seed_rnd)
          DEALLOCATE(seed_rnd)
       END IF
+      ! Fds uses a constant key to initialize the generator, but it is better for humans to use a random key.
 
       SELECT CASE (COLOR_METHOD)
       CASE (-1:5)
@@ -2105,12 +2114,13 @@ CONTAINS
       ! Read the EXIT lines
       !
       ! Local variables
-      INTEGER nm, i1, i2, j1, j2, i, ii, iii
+      INTEGER nm, i1, i2, j1, j2, i, ii, iii, N_TMP
       LOGICAL L_TMP
       TYPE (EVAC_EXIT_TYPE), POINTER :: PEX=>NULL()
       TYPE (EVAC_STRS_TYPE),  POINTER :: STRP=>NULL()
       TYPE (MESH_TYPE), POINTER :: M=>NULL()
       !
+      N_TMP = 0
       READ_EXIT_LOOP: DO N = 1, N_EXITS
          !
          ID            = 'null'
@@ -2127,6 +2137,7 @@ CONTAINS
          CHECK_FLOW    = .FALSE.
          COUNT_ONLY    = .FALSE.
          COUNT_DENSITY = .FALSE.
+         DEFINE_MESH   = .TRUE.
          SHOW          = .TRUE.
          MAX_FLOW      = 0.0_EB
          WIDTH         = 0.0_EB
@@ -2146,6 +2157,8 @@ CONTAINS
          END IF
          READ(LU_INPUT,EXIT,END=26,IOSTAT=IOS)
          !
+         IF (VENT_FFIELD /= 'null') DEFINE_MESH = .FALSE. ! Old input, user gives the door flow meshes
+         IF (COUNT_ONLY) DEFINE_MESH = .FALSE.
          ! Old input used COLOR_INDEX, next lines are needed for that
          IF (MYID==MAX(0,EVAC_PROCESS) .AND. COLOR_INDEX.NE.-1) WRITE (LU_ERR,'(A,A)') &
               ' WARNING: keyword COLOR_INDEX is replaced by COLOR at EXIT line ',TRIM(ID)
@@ -2173,9 +2186,14 @@ CONTAINS
 
          PEX=>EVAC_EXITS(N)
 
+         IF (.NOT. COUNT_ONLY) N_TMP = N_TMP + 1 ! real exits + door index (not count_only ones)
+         IF (DEFINE_MESH) EVAC_EXITS(N)%I_EMESH_EXITS = N_TMP
+
+         EVAC_EXITS(N)%I_EMESH_EXITS = 0  ! Default, for "no flow field" exits
          PEX%RGB = RGB
          IF (COLOR_METHOD == 4 .AND. .NOT.COUNT_ONLY) PEX%Avatar_Color_Index = i_avatar_color
 
+         IF (DEFINE_MESH) EVAC_EXITS(N)%I_EMESH_EXITS = N_TMP
          IF (TRIM(ID) /= 'null') THEN
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_EXITS(I)%ID)) THEN
@@ -2529,11 +2547,12 @@ CONTAINS
       ! Read the DOOR lines
       !
       ! Local variables
-      INTEGER nm, i1, i2, j1, j2, i, ii, iii
+      INTEGER nm, i1, i2, j1, j2, i, ii, iii, N_TMP
       LOGICAL L_TMP
       TYPE (EVAC_DOOR_TYPE), POINTER :: PDX=>NULL()
       TYPE (MESH_TYPE), POINTER :: M=>NULL()
       !
+      N_TMP = N_EXITS - N_CO_EXITS
       READ_DOOR_LOOP: DO N = 1, N_DOORS
          !
          ID            = 'null'
@@ -2547,6 +2566,7 @@ CONTAINS
          EVAC_MESH     = 'null'
          TO_NODE       = 'null'
          CHECK_FLOW    = .FALSE.
+         DEFINE_MESH   = .TRUE.
          EXIT_SIGN     = .TRUE.
          SHOW          = .TRUE.
          MAX_FLOW      = 0.0_EB
@@ -2568,6 +2588,8 @@ CONTAINS
          END IF
          READ(LU_INPUT,DOOR,END=27,IOSTAT=IOS)
          !
+         IF (VENT_FFIELD /= 'null') DEFINE_MESH = .FALSE. ! Old input, user gives the door flow meshes
+
          IF (TO_NODE == 'null') EXIT_SIGN = .FALSE. ! This is more or less like an entry.
          IF (TO_NODE == 'null') KEEP_XY = .FALSE. ! This is more or less like an entry.
 
@@ -2593,6 +2615,9 @@ CONTAINS
          IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_DOOR_LOOP
 
          PDX=>EVAC_DOORS(N)
+
+         N_TMP = N_TMP + 1 ! real exits + door index (not count_only ones)
+         IF (DEFINE_MESH) EVAC_DOORS(N)%I_EMESH_EXITS = N_TMP
 
          PDX%RGB = RGB
          IF (COLOR_METHOD == 4) PDX%Avatar_Color_Index = i_avatar_color
@@ -3604,6 +3629,30 @@ CONTAINS
             i_avatar_color = i_avatar_color + 1
             EVAC_AVATAR_RGB(1:3,i_avatar_color) = AVATAR_RGB
          END IF
+
+         TMP_AVATAR_TYPE_INDEX(N) = 0       ! Defaults for entries that do not generate new agents
+         TMP_AVATAR_TYPE_NAME(N)  = 'null'
+         TMP_AVATAR_TYPE_PROP(N)  = TRIM(PROP_ID)
+         IF (MAX_FLOW > 0.0_EB .OR. TRIM(MAX_HUMANS_RAMP)/='null') THEN
+            IF (TRIM(AVATAR_TYPE) == 'null' .OR. TRIM(AVATAR_TYPE) == 'Human') THEN
+               TMP_AVATAR_TYPE_INDEX(N) = 1
+               TMP_AVATAR_TYPE_NAME(N) = TRIM('Human')
+            ELSE
+               TMP_AVATAR_TYPE_NAME(N)  = TRIM(AVATAR_TYPE)
+               TMP_AVATAR_TYPE_INDEX(N) = 0
+               Avatar_Type_Loop1: DO I = 1, N-1 
+                  IF (TRIM(TMP_AVATAR_TYPE_NAME(N)) == TRIM(TMP_AVATAR_TYPE_NAME(I))) THEN
+                     TMP_AVATAR_TYPE_INDEX(N) = TMP_AVATAR_TYPE_INDEX(I)
+                     EXIT Avatar_Type_Loop1
+                  END IF
+               END DO Avatar_Type_Loop1
+               IF (TMP_AVATAR_TYPE_INDEX(N) == 0) THEN  ! New type found
+                  N_AVATAR_TYPE = N_AVATAR_TYPE + 1
+                  TMP_AVATAR_TYPE_INDEX(N) = N_AVATAR_TYPE
+               END IF
+            END IF
+         END IF
+
          IF (MYID /= MAX(0,EVAC_PROCESS)) CYCLE READ_ENTR_LOOP
 
          IF (RESTART) THEN
@@ -3634,28 +3683,6 @@ CONTAINS
          END IF
          IF (COLOR_METHOD == 0 .AND. (MAX_FLOW > 0.0_EB .OR. Trim(MAX_HUMANS_RAMP)/='null')) &
               PNX%Avatar_Color_Index = i_avatar_color
-
-         PNX%AVATAR_TYPE_INDEX = 0       ! Defaults for entries that do not generate new agents
-         PNX%AVATAR_TYPE_NAME  = 'null'
-         IF (MAX_FLOW > 0.0_EB .OR. TRIM(MAX_HUMANS_RAMP)/='null') THEN
-            IF (TRIM(AVATAR_TYPE) == 'null' .OR. TRIM(AVATAR_TYPE) == 'Human') THEN
-               PNX%AVATAR_TYPE_INDEX = 1
-               PNX%AVATAR_TYPE_NAME = TRIM('Human')
-            ELSE
-               PNX%AVATAR_TYPE_NAME  = TRIM(AVATAR_TYPE)
-               PNX%AVATAR_TYPE_INDEX = 0
-               Avatar_Type_Loop1: DO I = 1, N-1 
-                  IF (TRIM(PNX%AVATAR_TYPE_NAME) == TRIM(EVAC_ENTRYS(I)%AVATAR_TYPE_NAME)) THEN
-                     PNX%AVATAR_TYPE_INDEX = EVAC_ENTRYS(I)%AVATAR_TYPE_INDEX
-                     EXIT Avatar_Type_Loop1
-                  END IF
-               END DO Avatar_Type_Loop1
-               IF (PNX%AVATAR_TYPE_INDEX == 0) THEN  ! New type found
-                  N_AVATAR_TYPE = N_AVATAR_TYPE + 1
-                  PNX%AVATAR_TYPE_INDEX = N_AVATAR_TYPE
-               END IF
-            END IF
-         END IF
 
          IF (EVAC_MESH /= 'null') THEN
             MESH_ID = EVAC_MESH
@@ -4014,6 +4041,32 @@ CONTAINS
             MAX_FLOW = 0.0_EB
          END IF
 
+         TMP_AVATAR_TYPE_PROP(N+N_ENTRYS) = TRIM(PROP_ID)
+         IF (TRIM(AVATAR_TYPE) == 'null' .OR. TRIM(AVATAR_TYPE) == 'Human') THEN
+            TMP_AVATAR_TYPE_INDEX(N+N_ENTRYS) = 1
+            TMP_AVATAR_TYPE_NAME(N+N_ENTRYS) = TRIM('Human')
+         ELSE
+            TMP_AVATAR_TYPE_NAME(N+N_ENTRYS)  = TRIM(AVATAR_TYPE)
+            TMP_AVATAR_TYPE_INDEX(N+N_ENTRYS) = 0
+            Avatar_Type_Loop: DO I = 1+N_ENTRYS, N-1+N_ENTRYS
+               IF (TRIM(TMP_AVATAR_TYPE_NAME(N+N_ENTRYS)) == TRIM(TMP_AVATAR_TYPE_NAME(I))) THEN
+                  TMP_AVATAR_TYPE_INDEX(N+N_ENTRYS) = TMP_AVATAR_TYPE_INDEX(I)
+                  EXIT Avatar_Type_Loop
+               END IF
+            END DO Avatar_Type_Loop
+            Avatar_Type_Loop2: DO I = 1, N_ENTRYS
+               IF (TRIM(TMP_AVATAR_TYPE_NAME(N+N_ENTRYS)) == TRIM(TMP_AVATAR_TYPE_NAME(I)) .AND. &
+                    TMP_AVATAR_TYPE_INDEX(N+N_ENTRYS) == 0) THEN
+                  TMP_AVATAR_TYPE_INDEX(N+N_ENTRYS) = TMP_AVATAR_TYPE_INDEX(I)
+                  EXIT Avatar_Type_Loop2
+               END IF
+            END DO Avatar_Type_Loop2
+            IF (TMP_AVATAR_TYPE_INDEX(N+N_ENTRYS) == 0) THEN  ! New type found
+               N_AVATAR_TYPE = N_AVATAR_TYPE + 1
+               TMP_AVATAR_TYPE_INDEX(N+N_ENTRYS) = N_AVATAR_TYPE
+            END IF
+         END IF
+
          HPT=>EVAC_EVACS(N)
 
          HPT%RGB = RGB
@@ -4023,31 +4076,6 @@ CONTAINS
             MESH_ID = EVAC_MESH
             IF (MYID==MAX(0,EVAC_PROCESS)) WRITE (LU_ERR,'(A,A)') &
                  ' WARNING: keyword EVAC_MESH is replaced by MESH_ID at EVAC line ', TRIM(ID)
-         END IF
-
-         IF (TRIM(AVATAR_TYPE) == 'null' .OR. TRIM(AVATAR_TYPE) == 'Human') THEN
-            HPT%AVATAR_TYPE_INDEX = 1
-            HPT%AVATAR_TYPE_NAME = TRIM('Human')
-         ELSE
-            HPT%AVATAR_TYPE_NAME  = TRIM(AVATAR_TYPE)
-            HPT%AVATAR_TYPE_INDEX = 0
-            Avatar_Type_Loop: DO I = 1, N-1 
-               IF (TRIM(HPT%AVATAR_TYPE_NAME) == TRIM(EVAC_EVACS(I)%AVATAR_TYPE_NAME)) THEN
-                  HPT%AVATAR_TYPE_INDEX = EVAC_EVACS(I)%AVATAR_TYPE_INDEX
-                  EXIT Avatar_Type_Loop
-               END IF
-            END DO Avatar_Type_Loop
-            Avatar_Type_Loop2: DO I = 1, N_ENTRYS
-               IF (TRIM(HPT%AVATAR_TYPE_NAME) == TRIM(EVAC_ENTRYS(I)%AVATAR_TYPE_NAME) .AND. &
-                    HPT%AVATAR_TYPE_INDEX == 0) THEN
-                  HPT%AVATAR_TYPE_INDEX = EVAC_ENTRYS(I)%AVATAR_TYPE_INDEX
-                  EXIT Avatar_Type_Loop2
-               END IF
-            END DO Avatar_Type_Loop2
-            IF (HPT%AVATAR_TYPE_INDEX == 0) THEN  ! New type found
-               N_AVATAR_TYPE = N_AVATAR_TYPE + 1
-               HPT%AVATAR_TYPE_INDEX = N_AVATAR_TYPE
-            END IF
          END IF
 
          IF (TRIM(ID) /= 'null') THEN
@@ -4255,18 +4283,11 @@ CONTAINS
       CALL ChkMemErr('READ_EVAC','EVAC_CLASS_PROP',IZERO)
       EVAC_CLASS_NAME(1) = TRIM('Human')
       EVAC_CLASS_PROP = TRIM('null')
-      DO N = 1, N_ENTRYS
-         IF (EVAC_ENTRYS(N)%AVATAR_TYPE_INDEX > 0) THEN
-            I = EVAC_ENTRYS(N)%AVATAR_TYPE_INDEX
-            EVAC_CLASS_NAME(I) = TRIM(EVAC_ENTRYS(N)%AVATAR_TYPE_NAME)
-            IF (TRIM(EVAC_ENTRYS(N)%PROP_ID) /= 'null') EVAC_CLASS_PROP(I) = TRIM(EVAC_ENTRYS(N)%PROP_ID)
-         END IF
-      END DO
-      DO N = 1, NPC_EVAC
-         IF (EVAC_EVACS(N)%AVATAR_TYPE_INDEX > 0) THEN
-            I = EVAC_EVACS(N)%AVATAR_TYPE_INDEX
-            EVAC_CLASS_NAME(I) = TRIM(EVAC_EVACS(N)%AVATAR_TYPE_NAME)
-            IF (TRIM(EVAC_EVACS(N)%PROP_ID) /= 'null') EVAC_CLASS_PROP(I) = TRIM(EVAC_EVACS(N)%PROP_ID)
+      DO N = 1, N_ENTRYS + NPC_EVAC
+         IF (TMP_AVATAR_TYPE_INDEX(N) > 0) THEN
+            I = TMP_AVATAR_TYPE_INDEX(N)
+            EVAC_CLASS_NAME(I) = TRIM(TMP_AVATAR_TYPE_NAME(N))
+            IF (TRIM(TMP_AVATAR_TYPE_PROP(N)) /= 'null') EVAC_CLASS_PROP(I) = TRIM(TMP_AVATAR_TYPE_PROP(N))
          END IF
       END DO
       DO N = 1, N_EVAC
@@ -6943,7 +6964,6 @@ CONTAINS
                          EXIT LOOP_EXITS
                       END IF
                    END DO LOOP_EXITS
-                   write(lu_err,*)'*** write eff NM, JJ: ',NM_TIM, JJ_NOW, TRIM(EMESH_EXITS(JJ_NOW)%ID)
                 END IF
 
                 WRITE (LU_EVACEFF) IBAR_TMP, JBAR_TMP, KBAR_TMP
@@ -7391,8 +7411,6 @@ CONTAINS
                       END IF
                    END IF
                 END IF
-                IF (COLOR_METHOD == 5 .AND. HR%I_Door_Mode == 1) HR%COLOR_INDEX = 2 ! non-visible color
-                IF (COLOR_METHOD == 5 .AND. HR%I_Door_Mode >= 2) HR%COLOR_INDEX = 1 ! visible color
                 IF (RN > EXP(-DTSP/DT_GROUP_DOOR) ) THEN
                    I_TARGET_OLD = HR%I_TARGET 
                    N_CHANGE_TRIALS = N_CHANGE_TRIALS + 1
@@ -7428,8 +7446,6 @@ CONTAINS
                       ELSE
                          HR%I_Door_Mode = 1   ! Use flow field towards the door
                       END IF
-                      IF (COLOR_METHOD == 5 .AND. HR%I_Door_Mode == 1) HR%COLOR_INDEX = 2 ! non-visible color
-                      IF (COLOR_METHOD == 5 .AND. HR%I_Door_Mode >= 2) HR%COLOR_INDEX = 1 ! visible color
                    END IF
 
                    ! HR%I_DoorAlgo: 1 rational agents, 2 known doors, 3 herding, 0 main evac mesh ff
@@ -9782,7 +9798,6 @@ CONTAINS
                UBAR = (1.0_EB-(XI-II+1))*MFF%U(II-1,JJ,1) + (XI-II+1)*MFF%U(II,JJ,1)
                VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
             END IF EVAC_FDS6_IF_1
-            IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 4  ! red
             Is_InFront = .FALSE. ; Is_XB_Visible = .FALSE. ; Is_XYZ_Visible = .FALSE.
             IF (HR%I_Door_Mode > 2) Is_XB_Visible = .TRUE.
             IF (HR%I_Door_Mode == 2 .OR. HR%I_Door_Mode == 4) Is_XYZ_Visible = .TRUE.
@@ -9928,11 +9943,9 @@ CONTAINS
                ! If XYZ is on the right then the angle is negative, i.e., positive direction is anti-clockwise.
                IF (ANGLE_XYZ < -20.0_EB .AND. HR%DensityR > 1.0_EB .AND. Is_XYZ_Visible) THEN
                   Is_XYZ_Visible = .FALSE.
-                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
                END IF
                IF (ANGLE_XYZ >  20.0_EB .AND. HR%DensityL > 1.0_EB .AND. Is_XYZ_Visible) THEN
                   Is_XYZ_Visible = .FALSE.
-                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
                END IF
 
                D_NEW = SQRT((0.5_EB*(X1+X2)-HR%X)**2 + (0.5_EB*(Y1+Y2)-HR%Y)**2)
@@ -9950,11 +9963,9 @@ CONTAINS
                DOOR_DIST = SQRT((0.5_EB*(X1+X1)-HR%X)**2+(0.5_EB*(Y1+Y1)-HR%Y)**2)
                IF (ANGLE_XB < -20.0_EB .AND. HR%DensityR > 1.0_EB .AND. Is_XB_Visible .AND. DOOR_DIST > DOOR_WIDTH) THEN
                   Is_XB_Visible = .FALSE.
-                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
                END IF
                IF (ANGLE_XB >  20.0_EB .AND. HR%DensityL > 1.0_EB .AND. Is_XB_Visible .AND. DOOR_DIST > DOOR_WIDTH) THEN
                   Is_XB_Visible = .FALSE.
-                  IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 5  ! green
                END IF
                !IF (ANGLE_XB < -0.0_EB .AND. HR%DensityR > 1.0_EB .AND. HR%DensityL < 0.5_EB) Is_XB_Visible = .FALSE.
                !IF (ANGLE_XB >  0.0_EB .AND. HR%DensityL > 1.0_EB .AND. HR%DensityR < 0.5_EB) Is_XB_Visible = .FALSE.
@@ -9963,11 +9974,9 @@ CONTAINS
                   IF (Is_InFront .AND. Is_XB_Visible) THEN
                      ! perpendicular to the door plane, i.e., straight
                      UBAR = REAL(MOD(DOOR_IOR,2),EB) ; VBAR = REAL(DOOR_IOR/2,EB)
-                     IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 1  ! black, in front, i.e., straight
                   ELSE
                      ! Aim towards XYZ
                      UBAR = X_XYZ-HR%X ; VBAR = Y_XYZ-HR%Y
-                     IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 2  ! yellow, xyz
                   END IF
                ELSEIF (Is_XB_Visible) THEN
                   ! D_TMP>0 and xyz not visible .OR. D_TMP<0 for all cases (d_tmp<0: between xb and xyz)
@@ -9975,11 +9984,9 @@ CONTAINS
                   IF (Is_InFront) THEN
                      ! perpendicular to the door plane, i.e., straight
                      UBAR = REAL(MOD(DOOR_IOR,2),EB) ; VBAR = REAL(DOOR_IOR/2,EB)
-                     IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 1  ! black, in front, i.e., straight
                   ELSE
                      ! Aim towards XB, towards the "door posts", if not in front
                      UBAR = X_TARGET-HR%X ; VBAR = Y_TARGET-HR%Y
-                     IF (COLOR_METHOD == 5) HR%COLOR_INDEX = 3  ! blue, xb
                   END IF
                END IF
             END IF
@@ -10024,7 +10031,6 @@ CONTAINS
                UBAR = (1.0_EB-(XI-II+1))*MFF%U(II-1,JJ,1) + (XI-II+1)*MFF%U(II,JJ,1)
                VBAR = (1.0_EB-(YJ-JJ+1))*MFF%V(II,JJ-1,1) + (YJ-JJ+1)*MFF%V(II,JJ,1)
             END IF EVAC_FDS6_IF_2
-            IF (COLOR_METHOD == 5) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR  ! cyan, normal flow field stuff
          END IF If_BeeLine
       END IF If_Strs_Mesh2
 
