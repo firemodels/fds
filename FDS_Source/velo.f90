@@ -1398,7 +1398,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ENDIF
          
          ! Throw out edge orientations that need not be processed
-!if (nm==1 .and. ii==4 .and. jj==1 .and. iec==2 .and. kk==4) write(0,*) nom(icd),IOR,BOUNDARY_TYPE(IWM),BOUNDARY_TYPE(IWP)
    
          IF (BOUNDARY_TYPE(IWM)==NULL_BOUNDARY .AND. BOUNDARY_TYPE(IWP)==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
