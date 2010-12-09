@@ -174,6 +174,13 @@ IF (N_SPECIES>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    M%RSUM = RSUM0
 ENDIF
 
+! Allocate reaction divergence
+IF (N_REACTIONS > 0) THEN
+   ALLOCATE(M%D_REACTION(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','D_REACTION',IZERO) 
+   M%D_REACTION = 0._EB
+ENDIF
+
 ! Allocate water mass arrays if sprinklers are present
  
 IF (DROPLET_FILE) PARTICLE_TAG = NM

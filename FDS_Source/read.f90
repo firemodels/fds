@@ -2876,10 +2876,11 @@ T_LOOP_1: DO J=1,5000
       Y2CP_C(J)    = SUM(Y2Y_C(:) * CP_TMP(:))
       IF (J>1) THEN
          Y2H_G_C(J)   = Y2H_G_C(J-1) + 0.5_EB*(Y2CP_C(J)+Y2CP_C(J-1)) 
-         Y2CPBAR_C(J) = (Y2CPBAR_C(J-1)*(REAL(J,EB)-1._EB)+Y2CP_C(J))/REAL(J,EB)
+         Y2CPBAR_C(J) = Y2H_G_C(J)/REAL(J,EB)
       ELSE
+         Y2H_G_C(0)   =  SUM(Y2Y_C(:)* H_TMP(:))
          Y2H_G_C(J)   =  SUM(Y2Y_C(:)* H_TMP(:)) + Y2CP_C(J) 
-         Y2CPBAR_C(J) =   Y2H_G_C(J)
+         Y2CPBAR_C(J) =  Y2H_G_C(J)
       ENDIF
       Y2MU_C(J)    = SUM(Y2Y_C(1:N_STATE_SPECIES) * MU_TMP(1:N_STATE_SPECIES))
       Y2K_C(J)     = SUM(Y2Y_C(1:N_STATE_SPECIES) * K_TMP(1:N_STATE_SPECIES))      
@@ -2924,26 +2925,28 @@ T_LOOP_1: DO J=1,5000
       Y2CP_C(J) = CP_TMP(SPECIES(0)%INDEX)
       IF (J>1) THEN
          Y2H_G_C(J)   = Y2H_G_C(J-1) + 0.5_EB*(Y2CP_C(J)+Y2CP_C(J-1)) 
-         Y2CPBAR_C(J) = (Y2CPBAR_C(J-1)*REAL(J-1,EB)+Y2CP_C(J))/REAL(J,EB)
+         Y2CPBAR_C(J) = Y2H_G_C(J)/REAL(J,EB)
       ELSE
-         Y2H_G_C(J)   =   H_TMP(SPECIES(0)%INDEX) + Y2CP_C(J) 
-         Y2CPBAR_C(J) =   Y2H_G_C(J)
+         Y2H_G_C(0 )  = H_TMP(SPECIES(0)%INDEX)
+         Y2H_G_C(J)   = H_TMP(SPECIES(0)%INDEX) + Y2CP_C(J) 
+         Y2CPBAR_C(J) = Y2H_G_C(J)
       ENDIF
-      Y2MU_C(J)    = MU_TMP(SPECIES(0)%INDEX)
-      Y2K_C(J)     = K_TMP(SPECIES(0)%INDEX)
+      Y2MU_C(J)= MU_TMP(SPECIES(0)%INDEX)
+      Y2K_C(J) = K_TMP(SPECIES(0)%INDEX)
    ENDIF
    ! Assemble coefficients for both primitive and mixture fraction species
    SPECIES_LOOP_2: DO N=1,N_SPECIES
       Y2CP(J,N)    = SUM(Y2Y(:,N) * CP_TMP(:))
       IF (J>1) THEN
          Y2H_G(J,N)   = Y2H_G(J-1,N) +0.5_EB*(Y2CP(J,N)+Y2CP(J-1,N)) 
-         Y2CPBAR(J,N) = (Y2CPBAR(J-1,N)*REAL(J-1,EB)+Y2CP(J,N))/REAL(J,EB)   
+         Y2CPBAR(J,N) = Y2H_G(J,N) /REAL(J,EB)   
       ELSE
+         Y2H_G(J,0)   = SUM(Y2Y(:,N) * H_TMP(:))
          Y2H_G(J,N)   = SUM(Y2Y(:,N) * H_TMP(:)) + Y2CP(J,N) 
          Y2CPBAR(J,N) = Y2H_G(J,N)
       ENDIF      
-      Y2MU(J,N)    = SUM(Y2Y(:,N) * MU_TMP(:))
-      Y2K(J,N)     = SUM(Y2Y(:,N) * K_TMP(:))
+      Y2MU(J,N) = SUM(Y2Y(:,N) * MU_TMP(:))
+      Y2K(J,N)  = SUM(Y2Y(:,N) * K_TMP(:))
       IF (MIXTURE_FRACTION) THEN
          IF (SPECIES(N)%MODE==MIXTURE_FRACTION_SPECIES) THEN
             Y2D(J,N-I_Z_MIN+1) = SUM(Y2Y(1:N_STATE_SPECIES,N) * D_TMP(1:N_STATE_SPECIES))
@@ -2951,7 +2954,6 @@ T_LOOP_1: DO J=1,5000
       ENDIF
    ENDDO SPECIES_LOOP_2
 ENDDO T_LOOP_1
-
 Y2CP_C(0) = Y2CP_C(1)
 Y2CP(0,:) = Y2CP(1,:)
 Y2CPBAR_C(0) = Y2CP_C(1)
@@ -3013,8 +3015,8 @@ END SUBROUTINE PROC_SPEC
 SUBROUTINE PROC_PART
 USE PHYSICAL_FUNCTIONS, ONLY : JANAF_TABLE_LIQUID, GET_SPECIFIC_ENTHALPY
 CHARACTER(30) :: SPEC_ID
-INTEGER :: N, J, REF_TEMP
-REAL(EB) :: H_L,H_V,YY_GET(1:N_SPECIES),H_G_S,H_G_S_REF,H_L_REF,TMP_REF,TMP_MELT,TMP_V
+INTEGER :: N, J, ITMP
+REAL(EB) :: H_L,H_V,YY_GET(1:N_SPECIES),H_G_S,H_G_S_REF,H_L_REF,TMP_REF,TMP_MELT,TMP_V,TMP_WGT
 TYPE(PARTICLE_CLASS_TYPE), POINTER :: PC
 
 IF (N_PART == 0) RETURN
@@ -3041,8 +3043,7 @@ DO N=1,N_PART
          PC%H_L(J) = (REAL(J,EB)-PC%TMP_MELT)*PC%C_P(J)
       ELSE
          CALL JANAF_TABLE_LIQUID (J,PC%C_P(J),H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SPEC_ID)
-         IF (J==1) THEN
-            PC%H_L(J) = H_L + PC%C_P(J)
+         IF (J==1) THEN         
             IF (PC%C_P(J) < 0._EB .AND. .NOT.PC%TREE) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(PC%ID),' requires CP, H_V, TMP_MELT, TMP_V, and T_REF'
                CALL SHUTDOWN(MESSAGE)
@@ -3050,14 +3051,15 @@ DO N=1,N_PART
             IF (PC%H_V_REFERENCE_TEMPERATURE < 0._EB) PC%H_V_REFERENCE_TEMPERATURE=TMP_REF
             IF (PC%TMP_V < 0._EB) PC%TMP_V = TMP_V
             IF (PC%TMP_MELT < 0._EB) PC%TMP_MELT = TMP_MELT
+            PC%H_L(J) = H_L + PC%C_P(J)
          ELSE
-            PC%H_L(J) = PC%H_L(J-1) + PC%C_P(J)
+            PC%H_L(J) = PC%H_L(J-1) + 0.5_EB*(PC%C_P(J)+PC%C_P(J-1))
          ENDIF
       ENDIF
       IF (J==1) THEN
-         PC%C_P_BAR(J) = PC%C_P(J)
+         PC%C_P_BAR(J) =  PC%H_L(J)
       ELSE
-         PC%C_P_BAR(J) = (PC%C_P_BAR(J-1) * REAL(J-1,EB) + PC%C_P(J)) / REAL(J,EB)
+         PC%C_P_BAR(J) = PC%H_L(J) / REAL(J,EB)
       ENDIF
    ENDDO
 
@@ -3065,15 +3067,15 @@ DO N=1,N_PART
 
    IF (PC%SPEC_INDEX>0) THEN
       IF(PC%H_V(1) > 0._EB) H_V = PC%H_V(1)
-      REF_TEMP = NINT(PC%H_V_REFERENCE_TEMPERATURE)
-      H_L_REF = PC%H_L(REF_TEMP)
+      ITMP = INT(PC%H_V_REFERENCE_TEMPERATURE)
+      TMP_WGT  = PC%H_V_REFERENCE_TEMPERATURE - REAL(ITMP,EB)
+      H_L_REF = PC%H_L(ITMP)+TMP_WGT*(PC%H_L(ITMP+1)-PC%H_L(ITMP))
       YY_GET = 0._EB
       YY_GET(PC%SPEC_INDEX) = 1._EB
-      CALL GET_SPECIFIC_ENTHALPY(YY_GET,H_G_S_REF,REAL(REF_TEMP,EB))      
-      PC%H_V_CORRECTOR = H_V - H_G_S_REF + H_L_REF
+      CALL GET_SPECIFIC_ENTHALPY(YY_GET,H_G_S_REF,PC%H_V_REFERENCE_TEMPERATURE)      
       DO J=1,5000
          CALL GET_SPECIFIC_ENTHALPY(YY_GET,H_G_S,REAL(J,EB))
-         PC%H_V(J) = H_V + PC%H_V_CORRECTOR + (H_G_S-H_G_S_REF) - (PC%H_L(J)-H_L_REF)
+         PC%H_V(J) = H_V + (H_G_S-H_G_S_REF) - (PC%H_L(J)-H_L_REF)
       ENDDO
    ENDIF
 
@@ -7619,7 +7621,7 @@ MESH_LOOP_2: DO NM=1,NMESHES
       J2 = VT%J2
       K1 = VT%K1
       K2 = VT%K2
-
+ 
       VT%GHOST_CELLS_ONLY = .TRUE.
  
       SELECT CASE(ABS(VT%IOR))
