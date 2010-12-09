@@ -1402,7 +1402,7 @@ SUBROUTINE PARTICLE_MASS_ENERGY_TRANSFER(T,NM)
 ! Mass and energy transfer between gas and droplets
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_AVERAGE_SPECIFIC_HEAT,GET_MOLECULAR_WEIGHT,GET_SPECIFIC_GAS_CONSTANT,&
-                               GET_SPECIFIC_ENTHALPY,SURFACE_DENSITY
+                               GET_SPECIFIC_ENTHALPY,SURFACE_DENSITY,GET_SPECIFIC_HEAT
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL(),DROP_RAD=>NULL(),DROP_TMP=>NULL(),MVAP_TOT=>NULL(),DROP_AREA=>NULL()
@@ -1413,7 +1413,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
-            CP,H_NEW,YY_GET(1:N_SPECIES),M_GAS_NEW,MW_GAS,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_REF,&
+            CP,H_NEW,YY_GET(1:N_SPECIES),YY_GET2(1:N_SPECIES),M_GAS_NEW,MW_GAS,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_REF,&
             TMP_G_NEW,DT_SUM,DCPDT,TMP_WGT
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,N_SUBSTEPS,ITMP,IBC,ITCOUNT
 INTEGER, INTENT(IN) :: NM
@@ -1556,7 +1556,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
          DT_SUM = 0._EB
 
          TIME_ITERATION_LOOP: DO WHILE (DT_SUM < DT)
-
             IF (N_SPECIES==0) THEN
                MW_GAS = SPECIES(0)%MW
             ELSE
@@ -1727,28 +1726,27 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP
                M_VAP = PC%ADJUST_EVAPORATION*M_VAP
             ENDIF
-
             ! Update gas temperature and determine new subtimestep
-            DELTA_H_G = (H_L + H_V - PC%H_V_CORRECTOR)
+            DELTA_H_G = -Q_CON_GAS+M_VAP*(H_V )!- 2011649.919_EB)
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP_G)            
             H_G_OLD = M_GAS*CP*TMP_G
             M_GAS_NEW = M_GAS + WGT*M_VAP
             TMP_G_NEW = TMP_G
-            H_NEW = H_G_OLD + (DELTA_H_G * M_VAP - Q_CON_GAS) * WGT 
+            H_NEW = H_G_OLD + DELTA_H_G*WGT!(DELTA_H_G * M_VAP - Q_CON_GAS) * WGT 
             IF (H_NEW > 0._EB) THEN
-               YY_GET = YY_GET * M_GAS/M_GAS_NEW               
-               YY_GET(IGAS) = YY_GET(IGAS) + WGT*M_VAP/M_GAS_NEW
+               YY_GET2 = YY_GET * M_GAS/M_GAS_NEW               
+               YY_GET2(IGAS) = YY_GET2(IGAS) + WGT*M_VAP/M_GAS_NEW
                TMP_G_I = TMP_G
                TEMPITER = .TRUE.
                ITCOUNT = 0
                ITERATE_TEMP: DO WHILE (TEMPITER)
                   TEMPITER=.FALSE.
-                  CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,TMP_G_I)
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET2,CP2,TMP_G_I)
                   IF (TMP_G_I < 4999._EB) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP_G_I+1)
+                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET2,CP,TMP_G_I-1._EB)
                      DCPDT = CP-CP2                     
                   ELSE
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP_G_I-1)                  
+                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET2,CP,TMP_G_I-1._EB)                  
                      DCPDT = CP2-CP
                   ENDIF
                   ! Compute approximation of d(cp)/dT                  
@@ -1775,25 +1773,25 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                ENDIF
                CYCLE TIME_ITERATION_LOOP
             ENDIF
-
             ! Update gas cell density, temperature, and mass fractions
 
             RHO(II,JJ,KK) = M_GAS_NEW*RVC
-            YY(II,JJ,KK,:) = YY_GET(:)
-            CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(II,JJ,KK))
+            YY(II,JJ,KK,:) = YY_GET2(:)
+            CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET2,RSUM(II,JJ,KK))
             TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP_G_NEW))
 
             ! Compute change in enthalpy between gas and liquid
-
+            CALL GET_SPECIFIC_HEAT(YY_GET,H_G_OLD,TMP_G)
+            H_G_OLD = H_G_OLD * TMP_G * M_GAS
             YY_GET = 0._EB
             YY_GET(IGAS) = 1._EB
+            DELTA_H_G = H_L + H_V
             CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,TMP_G)
-            DELTA_H_G = (DELTA_H_G - CP2 * TMP_G) 
-            
+            DELTA_H_G = DELTA_H_G - CP2 * TMP_G     
             ! Compute contribution to the divergence
 
             D_LAGRANGIAN(II,JJ,KK) =  D_LAGRANGIAN(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
-                                      (M_VAP*DELTA_H_G- Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP 
+                                      (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP 
 
             ! Keep track of total mass evaporated in cell
 
