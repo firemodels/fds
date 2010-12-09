@@ -1,5 +1,5 @@
 % McDermott
-% 4-22-2001 (modified 7-1-2009)
+% 4-22-2001 (modified 12-9-2010)
 % plotspec.m
 %
 % Read and plot energy spectra for Comte-Bellot and Corrsin data
@@ -9,7 +9,7 @@
 % chid = CHID from FDS input file
 % N = number of cells in 1D
 %
-% Example>> plotspec('csmag_32',32)
+% Example: >> plotspec('csmag_32',32)
 
 function [] = plotspec(chid,N)
 
@@ -27,19 +27,44 @@ L = 9*2*pi/100; % box length (m)
 k0 = 2*pi/L;
 kc = 1/2*N*k0;
 
-% Gather the FDS results
-M1 = load([chid,'_spec_000.dat']);
-M2 = load([chid,'_spec_028.dat']);
-M3 = load([chid,'_spec_066.dat']);
-k  = M1(:,1); % wavenumber (1/m)
-E1 = M1(:,2); % kinetic energy (per unit mass) per wavenumber (m^3/s^2)
-E2 = M2(:,2);
-E3 = M3(:,2);
+% find the files
+for j=0:100
+    jlast=j;
+    filename = [chid,'_uvw_',num2str(j,'%3.3i'),'.csv'];
+    fid = fopen(filename);
+    if fid~=-1
+        uvw_file1 = filename;
+        fclose(fid);
+        break
+    end
+end
+
+for j=jlast+1:100
+    jlast=j;
+    filename = [chid,'_uvw_',num2str(j,'%3.3i'),'.csv'];
+    fid = fopen(filename);
+    if fid~=-1
+        uvw_file2 = filename;
+        fclose(fid);
+        break
+    end
+end
+
+for j=jlast+1:100
+    jlast=j;
+    filename = [chid,'_uvw_',num2str(j,'%3.3i'),'.csv'];
+    fid = fopen(filename);
+    if fid~=-1
+        uvw_file3 = filename;
+        fclose(fid);
+        break
+    end
+end
 
 % Plot the FDS data
-H(1)=loglog(k,E1,'k.-','MarkerSize',15); hold on
-H(2)=loglog(k,E2,'r.-','MarkerSize',15);
-H(3)=loglog(k,E3,'b.-','MarkerSize',15);
+H(1) = plotspec_uvw(uvw_file1,'k.-'); hold on
+H(2) = plotspec_uvw(uvw_file2,'r.-');
+H(3) = plotspec_uvw(uvw_file3,'b.-');
 
 % Gather the Comte-Bellot/Corrsin data
 CBC = load('cbcdata.txt');
