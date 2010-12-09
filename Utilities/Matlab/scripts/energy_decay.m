@@ -79,18 +79,18 @@ set(gcf,'DefaultLineLineWidth',Line_Width)
 if strcmp(chid,'csmag_32')
     M = csvread('mu0_32_devc.csv',2,0);
     t = M(:,1);
-    ke = M(:,2)/(L^3);
+    ke = M(:,2);
     H(1)=plot(t,ke,'k-.'); hold on
     
     M = csvread('csmag0_32_devc.csv',2,0);
     t = M(:,1);
-    ke = M(:,2)/(L^3);
+    ke = M(:,2);
     H(2)=plot(t,ke,'k--'); hold on
 end
 
 M = csvread([chid,'_devc.csv'],2,0);
 t = M(:,1);
-ke = M(:,2)/(L^3);
+ke = M(:,2);
 H(3)=plot(t,ke,'k-'); hold on
 
 set(gca,'FontName',Font_Name)
