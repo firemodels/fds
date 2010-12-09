@@ -4157,11 +4157,12 @@ int PointInFrustum( float *xvec){
    y=xvec[1];
    z=xvec[2];
 
-   for( p = 0; p < 6; p++ ){
-     if( frustum[p][0]*x + frustum[p][1]*y + frustum[p][2]*z + frustum[p][3] <= 0 ){
-         return 0;
-     }
-   }
+   if( frustum[0][0]*x + frustum[0][1]*y + frustum[0][2]*z + frustum[0][3] <= 0 )return 0;
+   if( frustum[1][0]*x + frustum[1][1]*y + frustum[1][2]*z + frustum[1][3] <= 0 )return 0;
+   if( frustum[2][0]*x + frustum[2][1]*y + frustum[2][2]*z + frustum[2][3] <= 0 )return 0;
+   if( frustum[3][0]*x + frustum[3][1]*y + frustum[3][2]*z + frustum[3][3] <= 0 )return 0;
+   if( frustum[4][0]*x + frustum[4][1]*y + frustum[4][2]*z + frustum[4][3] <= 0 )return 0;
+   if( frustum[5][0]*x + frustum[5][1]*y + frustum[5][2]*z + frustum[5][3] <= 0 )return 0;
    return 1;
 }
 

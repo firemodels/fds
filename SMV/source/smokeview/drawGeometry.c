@@ -18,6 +18,7 @@
 
 // svn revision character string
 char drawGeometry_revision[]="$Revision$";
+int comparecolorfaces( const void *arg1, const void *arg2 );
 
 cadgeom *current_cadgeom;
 
@@ -1597,6 +1598,12 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     faceptr->approx_center_coord[1]=0.0;
     faceptr->approx_center_coord[2]=0.0;
     faceptr->dist2eye=0.0;
+    faceptr->xmin=xx2[bfi[0]]+offset[0];
+    faceptr->ymin=yy2[bfi[0]]+offset[1];
+    faceptr->zmin=zz2[bfi[0]]+offset[2];
+    faceptr->xmax=xx2[bfi[0]]+offset[0];
+    faceptr->ymax=yy2[bfi[0]]+offset[1];
+    faceptr->zmax=zz2[bfi[0]]+offset[2];
     for(k=0;k<4;k++){
       float xvert, yvert, zvert;
 
@@ -1617,6 +1624,12 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       faceptr->exact_vertex_coords[3*k+0]=xx2[jjj]+offset[0];
       faceptr->exact_vertex_coords[3*k+1]=yy2[jjj]+offset[1];
       faceptr->exact_vertex_coords[3*k+2]=zz2[jjj]+offset[2];
+      if(faceptr->exact_vertex_coords[3*k+0]<faceptr->xmin)faceptr->xmin=faceptr->exact_vertex_coords[3*k+0];
+      if(faceptr->exact_vertex_coords[3*k+0]>faceptr->xmax)faceptr->xmax=faceptr->exact_vertex_coords[3*k+0];
+      if(faceptr->exact_vertex_coords[3*k+1]<faceptr->ymin)faceptr->ymin=faceptr->exact_vertex_coords[3*k+1];
+      if(faceptr->exact_vertex_coords[3*k+1]>faceptr->ymax)faceptr->ymax=faceptr->exact_vertex_coords[3*k+1];
+      if(faceptr->exact_vertex_coords[3*k+2]<faceptr->zmin)faceptr->zmin=faceptr->exact_vertex_coords[3*k+2];
+      if(faceptr->exact_vertex_coords[3*k+2]>faceptr->zmax)faceptr->zmax=faceptr->exact_vertex_coords[3*k+2];
     }
     faceptr->approx_center_coord[0]/=4.0;
     faceptr->approx_center_coord[1]/=4.0;
@@ -1690,14 +1703,26 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
         faceptr->exact_texture_coords[2*k+0]=xe_texture[k]/t_width; 
         faceptr->exact_texture_coords[2*k+1]=ye_texture[k]/t_height;
       }
-
     }
-
-
     faceptr++;
   }
+}
 
+/* ------------------ clip_face ------------------------ */
 
+int clip_face(facedata *facei){
+  float *xyz;
+  int i;
+
+  if(xyz_clipplane==0)return 0;
+  xyz = facei->exact_vertex_coords;
+  if(clip_x==1&&xbar0+xyzmaxdiff*facei->xmax<clip_x_val)return 1;
+  if(clip_X==1&&xbar0+xyzmaxdiff*facei->xmin>clip_X_val)return 1;
+  if(clip_y==1&&ybar0+xyzmaxdiff*facei->ymax<clip_y_val)return 1;
+  if(clip_Y==1&&ybar0+xyzmaxdiff*facei->ymin>clip_Y_val)return 1;
+  if(clip_z==1&&zbar0+xyzmaxdiff*facei->zmax<clip_z_val)return 1;
+  if(clip_Z==1&&zbar0+xyzmaxdiff*facei->zmin>clip_Z_val)return 1;
+  return 0;
 }
 
 /* ------------------ update_facelists ------------------------ */
@@ -1784,6 +1809,7 @@ void update_facelists(void){
       if(showonly_hiddenfaces==1&&facej->hidden==0)continue;
       if(facej->thinface==1)continue;
       if(facej->bc!=NULL&&facej->bc->prop!=NULL&&facej->bc->prop->blockvis==0)continue;
+      if(clip_face(facej)==1)continue;
 
       vent_offset = 6*meshi->nbptrs;
       outline_offset = vent_offset + meshi->nvents;
@@ -1929,6 +1955,15 @@ void update_facelists(void){
     nface_normals_double += n_normals_double;
     nface_transparent_double += n_transparent_double;
     nface_outlines += n_outlines;
+    if(n_normals_single>1){
+      qsort((facedata **)meshi->face_normals_single,(size_t)n_normals_single,sizeof(facedata *),comparecolorfaces);
+    }
+    if(n_normals_double>1){
+      qsort((facedata **)meshi->face_normals_double,(size_t)n_normals_double,sizeof(facedata *),comparecolorfaces);
+    }
+    if(n_outlines>1){
+      qsort((facedata **)meshi->face_outlines,(size_t)n_outlines,sizeof(facedata *),comparecolorfaces);
+    }
   }
 }
 
@@ -1974,19 +2009,19 @@ void draw_faces(){
   facedata *facei;
   float *vertices,*tvertices;
   texture *texti;
-  float old_color[4]={(float)-1.0,(float)-1.0,(float)-1.0,(float)-1.0};
-  float *new_color;
+  float *new_color,*old_color=NULL;
   int **showtimelist_handle, *showtimelist;
   float up_color[4]={0.9,0.9,0.9,1.0};
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
+  int color_swaps=0;
 
   if(nface_normals_single>0){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
     glEnable(GL_COLOR_MATERIAL);
-    glBegin(GL_QUADS);
+    glBegin(GL_TRIANGLES);
     for(j=0;j<nmeshes;j++){
       meshi=meshinfo + j;
       if(meshi->blockvis==0)continue;
@@ -2028,21 +2063,16 @@ void draw_faces(){
             }
           }
         }
-        if(
-           fabs(new_color[0]-old_color[0])>0.0001||
-           fabs(new_color[1]-old_color[1])>0.0001||
-           fabs(new_color[2]-old_color[2])>0.0001||
-           fabs(new_color[3]-old_color[3])>0.0001
-           ){
-          old_color[0]=new_color[0];
-          old_color[1]=new_color[1];
-          old_color[2]=new_color[2];
-          old_color[3]=new_color[3];
+        if(new_color!=old_color){
+          old_color=new_color;
           glColor4fv(old_color);
+          color_swaps++;
         }
         glNormal3fv(facei->normal);
         glVertex3fv(vertices+0);
         glVertex3fv(vertices+3);
+        glVertex3fv(vertices+6);
+        glVertex3fv(vertices+0);
         glVertex3fv(vertices+6);
         glVertex3fv(vertices+9);
       }
@@ -2051,6 +2081,7 @@ void draw_faces(){
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
+  printf("debug: single faces=%i color mode swaps=%i\n",nface_normals_single,color_swaps);
   if(nface_normals_double>0){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -2098,16 +2129,8 @@ void draw_faces(){
             }
           }
         }
-        if(
-           fabs(new_color[0]-old_color[0])>0.0001||
-           fabs(new_color[1]-old_color[1])>0.0001||
-           fabs(new_color[2]-old_color[2])>0.0001||
-           fabs(new_color[3]-old_color[3])>0.0001
-           ){
-          old_color[0]=new_color[0];
-          old_color[1]=new_color[1];
-          old_color[2]=new_color[2];
-          old_color[3]=new_color[3];
+        if(new_color!=old_color){
+          old_color=new_color;
           glColor4fv(old_color);
         }
         glNormal3fv(facei->normal);
@@ -2223,6 +2246,18 @@ void draw_faces(){
   }
 }
 
+/* ------------------ comparecolorfaces ------------------------ */
+
+int comparecolorfaces( const void *arg1, const void *arg2 ){
+  facedata *facei, *facej;
+
+  facei = *(facedata **)arg1;
+  facej = *(facedata **)arg2;
+
+  if(facei->color<facej->color)return  1;
+  if(facei->color>facej->color)return -1;
+  return 0;
+}
 
 /* ------------------ compareisonodes ------------------------ */
 

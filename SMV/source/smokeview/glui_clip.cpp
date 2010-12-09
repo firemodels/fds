@@ -215,26 +215,32 @@ void CLIP_CB(int var){
   case CLIP_xlower:
     if(clip_x==0)SPINNER_clip_xlower->disable();
     if(clip_x==1)SPINNER_clip_xlower->enable();
+    updatefacelists=1;
     break;
   case CLIP_ylower:
     if(clip_y==0)SPINNER_clip_ylower->disable();
     if(clip_y==1)SPINNER_clip_ylower->enable();
+    updatefacelists=1;
     break;
   case CLIP_zlower:
     if(clip_z==0)SPINNER_clip_zlower->disable();
     if(clip_z==1)SPINNER_clip_zlower->enable();
+    updatefacelists=1;
     break;
   case CLIP_xupper:
     if(clip_X==0)SPINNER_clip_xupper->disable();
     if(clip_X==1)SPINNER_clip_xupper->enable();
+    updatefacelists=1;
     break;
   case CLIP_yupper:
     if(clip_Y==0)SPINNER_clip_yupper->disable();
     if(clip_Y==1)SPINNER_clip_yupper->enable();
+    updatefacelists=1;
     break;
   case CLIP_zupper:
     if(clip_Z==0)SPINNER_clip_zupper->disable();
     if(clip_Z==1)SPINNER_clip_zupper->enable();
+    updatefacelists=1;
     break;
   case CLIP_all:
     update_clipplanes();
@@ -268,21 +274,27 @@ void CLIP_CB(int var){
     break;
   case SPINNER_xlower:
     SPINNER_clip_xupper->set_float_limits(clip_x_val,xclip_max,GLUI_LIMIT_CLAMP);
+    updatefacelists=1;
     break;
   case SPINNER_xupper:
     SPINNER_clip_xlower->set_float_limits(xclip_min,clip_X_val,GLUI_LIMIT_CLAMP);
+    updatefacelists=1;
     break;
   case SPINNER_ylower:
     SPINNER_clip_yupper->set_float_limits(clip_y_val,yclip_max,GLUI_LIMIT_CLAMP);
+    updatefacelists=1;
     break;
   case SPINNER_yupper:
     SPINNER_clip_ylower->set_float_limits(yclip_min,clip_Y_val,GLUI_LIMIT_CLAMP);
+    updatefacelists=1;
     break;
   case SPINNER_zlower:
     SPINNER_clip_zupper->set_float_limits(clip_z_val,zclip_max,GLUI_LIMIT_CLAMP);
+    updatefacelists=1;
     break;
   case SPINNER_zupper:
     SPINNER_clip_zlower->set_float_limits(zclip_min,clip_Z_val,GLUI_LIMIT_CLAMP);
+    updatefacelists=1;
     break;
   default:
     ASSERT(0);

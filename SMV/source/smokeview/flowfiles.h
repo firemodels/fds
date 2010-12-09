@@ -227,6 +227,7 @@ typedef struct {
   float dist2eye;
   int meshindex, blockageindex;
   int imin, imax, jmin, jmax, kmin, kmax;
+  float xmin, xmax, ymin, ymax, zmin, zmax;
   int dir,hidden;
   int del;
   int invisible;
