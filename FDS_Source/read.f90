@@ -6805,6 +6805,11 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
    ! Re-order coordinates, if necessary
 
    CALL CHECK_XB(XB)
+      
+   IF (ALL(EVACUATION_ONLY)) THEN
+      DEVC_ID    = 'null'
+      CTRL_ID    = 'null'
+   END IF
 
    ! Loop over all the meshes to determine where the HOLE is
  
@@ -7298,6 +7303,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
  
       CALL CHECK_XB(XB)
       
+      IF (ALL(EVACUATION_ONLY)) THEN
+         DEVC_ID    = 'null'
+         CTRL_ID    = 'null'
+      END IF
+
       VT=>VENTS(N)
       
       IF (XB(1)==XB(2)) VT%TOTAL_INPUT_AREA = (XB(4)-XB(3))*(XB(6)-XB(5))
