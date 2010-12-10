@@ -5981,7 +5981,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
       CALL CHECK_XB(XB)
 
-      IF (ALL(EVACUATION_ONLY)) THEN
+      IF (EVACUATION_ONLY(NM)) THEN
          DEVC_ID    = 'null'
          CTRL_ID    = 'null'
          PROP_ID    = 'null'
@@ -7012,7 +7012,7 @@ READ_HOLE_LOOP: DO N=1,N_HOLE_O
           
                   ! If the HOLE is to be created or removed, save it in OBSTRUCTION(NN), the original OBST that was broken up
          
-                  DEVC_OR_CTRL: IF (DEVC_ID/='null' .OR. CTRL_ID/='null') THEN
+                  DEVC_OR_CTRL: IF ((DEVC_ID/='null' .OR. CTRL_ID/='null') .AND. .NOT.EVACUATION_ONLY(NM)) THEN
          
                      OBSTRUCTION(NN) = TEMP_OBST(0)
                      OB => OBSTRUCTION(NN)
@@ -7303,7 +7303,7 @@ MESH_LOOP_1: DO NM=1,NMESHES
  
       CALL CHECK_XB(XB)
       
-      IF (ALL(EVACUATION_ONLY)) THEN
+      IF (EVACUATION_ONLY(NM)) THEN
          DEVC_ID    = 'null'
          CTRL_ID    = 'null'
       END IF
