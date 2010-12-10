@@ -6690,6 +6690,7 @@ void initmesh(mesh *meshi){
   meshi->cull_smoke3d=NULL;
   meshi->smokedir_old=-100;
 #endif
+  meshi->cullgeominfo=NULL;
   meshi->is_bottom=1;
   meshi->blockvis=1;
   meshi->zcell=NULL;

@@ -305,7 +305,7 @@ int rgbsize=0;
 
 /* ------------------ get_world_eyepos ------------------------ */
 
-void get_world_eyepos(float *mm, float eyepos[3]){
+void get_world_eyepos(float *mm, float user_eyepos[3],float scaled_eyepos[3]){
     /*
       ( m0 m4 m8  m12 ) (x)    (0)
       ( m1 m5 m9  m13 ) (y)    (0)
@@ -322,12 +322,12 @@ void get_world_eyepos(float *mm, float eyepos[3]){
       m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
     */
 
-  eyepos[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
-  eyepos[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
-  eyepos[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
-  eyepos[0] = xbar0 + xyzmaxdiff*eyepos[0];
-  eyepos[1] = ybar0 + xyzmaxdiff*eyepos[1];
-  eyepos[2] = zbar0 + xyzmaxdiff*eyepos[2];
+  scaled_eyepos[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
+  scaled_eyepos[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
+  scaled_eyepos[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
+  user_eyepos[0] = xbar0 + xyzmaxdiff*scaled_eyepos[0];
+  user_eyepos[1] = ybar0 + xyzmaxdiff*scaled_eyepos[1];
+  user_eyepos[2] = zbar0 + xyzmaxdiff*scaled_eyepos[2];
 }
 
 /* ----------------------- getsmokesensors ----------------------------- */

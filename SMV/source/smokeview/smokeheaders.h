@@ -84,6 +84,7 @@ EXTERNCPP int createnulllabel(flowlabels *flowlabel);
 #ifdef pp_CULL
 EXTERNCPP void initcull(int cullflag);
 EXTERNCPP void initcullplane(int cullflag);
+EXTERNCPP void initcullgeom(int cullflag);
 EXTERNCPP void setPixelCount(void);
 EXTERNCPP void setPixelCountOrthog(mesh *meshi);
 EXTERNCPP void getPixelCount(void);
@@ -298,7 +299,7 @@ EXTERNCPP void mergesmoke3dcolors(void);
 EXTERNCPP void setsmokecolorflags(void);
 EXTERNCPP void sort_transparent_faces(float *mm);
 EXTERNCPP void getsmokedir(float *mm);
-EXTERNCPP void get_world_eyepos(float *mm, float eyepos[3]);
+EXTERNCPP void get_world_eyepos(float *mm, float user_eyepos[3], float scaled_eyepos[3]);
 EXTERNCPP void ExtractFrustum(void);
 EXTERNCPP int RectangleInFrustum( float *x11, float *x12, float *x22, float *x21);
 EXTERNCPP unsigned char adjustalpha(unsigned char alpha, float factor);

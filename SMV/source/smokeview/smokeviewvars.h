@@ -590,7 +590,7 @@ SVEXTERN float texture_origin[3];
 
 SVEXTERN unsigned char rgb_below_min[3], rgb_above_max[3];
 SVEXTERN int colorbar_select_index,update_colorbar_select_index;
-SVEXTERN float world_eyepos[3];
+SVEXTERN float world_eyepos[3],scaled_eyepos[3];
 SVEXTERN int tour_usecurrent;
 SVEXTERN int visVentLines, visVentSolid;
 SVEXTERN int isZoneFireModel;

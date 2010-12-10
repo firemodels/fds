@@ -464,6 +464,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 #ifdef pp_CULL
     if(cullactive==1)initcull(cullsmoke);
 #endif
+//  if(cullactive==1)initcullgeom(cullsmoke);
   IDLE();
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
@@ -6114,6 +6115,83 @@ void initcull(int cullflag){
   }
   NewMemory( (void **)&cullplaneinfo,ncullplaneinfo*sizeof(cullplanedata));
   NewMemory( (void **)&sort_cullplaneinfo,ncullplaneinfo*sizeof(cullplanedata *));
+}
+
+/* ------------------ initcullgeom ------------------------ */
+
+void initcullgeom(int cullgeomflag){
+  culldata *culli;
+  int imesh;
+
+  for(imesh=0;imesh<nmeshes;imesh++){
+    mesh *meshi;
+    int iskip, jskip, kskip;
+    int ibeg, iend, jbeg, jend, kbeg, kend;
+    float xbeg, xend, ybeg, yend, zbeg, zend;
+    int i, j, k;
+    int nx, ny, nz;
+
+    meshi=meshinfo+imesh;
+
+    get_cullskips(meshi,cullgeomflag,&iskip,&jskip,&kskip);
+    nx = meshi->ibar/iskip + 1;
+    ny = meshi->jbar/jskip + 1;
+    nz = meshi->kbar/kskip + 1;
+    meshi->ncullgeominfo = nx*ny*nz;
+
+    FREEMEMORY(meshi->cullgeominfo);
+    NewMemory( (void **)&meshi->cullgeominfo,nx*ny*nz*sizeof(culldata));
+    culli=meshi->cullgeominfo;
+
+    for(k=0;k<nz;k++){
+      kbeg = k*kskip;
+      kend = kbeg + kskip;
+      if(kend>meshi->kbar)kend=meshi->kbar;
+      zbeg = meshi->zplt[kbeg];
+      zend = meshi->zplt[kend];
+      for(j=0;j<ny;j++){
+        jbeg = j*jskip;
+        jend = jbeg + jskip;
+        if(jend>meshi->jbar)jend=meshi->jbar;
+        ybeg = meshi->yplt[jbeg];
+        yend = meshi->yplt[jend];
+        for(i=0;i<nx;i++){
+          ibeg = i*iskip;
+          iend = ibeg + iskip;
+          if(iend>meshi->ibar)iend=meshi->ibar;
+          xbeg = meshi->xplt[ibeg];
+          xend = meshi->xplt[iend];
+
+          culli->ibeg=ibeg;
+          culli->iend=iend;
+
+          culli->jbeg=jbeg;
+          culli->jend=jend;
+
+          culli->kbeg=kbeg;
+          culli->kend=kend;
+
+          culli->xbeg=xbeg;
+          culli->xend=xend;
+
+          culli->ybeg=ybeg;
+          culli->yend=yend;
+
+          culli->zbeg=zbeg;
+          culli->zend=zend;
+
+          culli->iskip=iskip;
+          culli->jskip=jskip;
+          culli->kskip=kskip;
+
+          culli->npixels=0;
+          culli->npixels_old=-1;
+
+          culli++;
+        }
+      }
+    }
+  }
 }
 
 /* ------------------ setPixelCount ------------------------ */

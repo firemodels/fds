@@ -2015,6 +2015,7 @@ void draw_faces(){
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
   int color_swaps=0;
+  int faces_drawn=0;
 
   if(nface_normals_single>0){
     glEnable(GL_LIGHTING);
@@ -2026,12 +2027,35 @@ void draw_faces(){
       meshi=meshinfo + j;
       if(meshi->blockvis==0)continue;
       for(i=0;i<meshi->nface_normals_single;i++){
+        float *facepos;
+
         facei = meshi->face_normals_single[i];
         if(blocklocation==BLOCKlocation_grid){
           vertices = facei->approx_vertex_coords;
         }
         else{
           vertices = facei->exact_vertex_coords;
+        }
+        facepos=vertices;
+        switch(facei->dir){
+          case UP_X:
+            if(scaled_eyepos[0]<facepos[0])continue;
+            break;
+          case DOWN_X:
+            if(scaled_eyepos[0]>facepos[0])continue;
+            break;
+          case UP_Y:
+            if(scaled_eyepos[1]<facepos[1])continue;
+            break;
+          case DOWN_Y:
+            if(scaled_eyepos[1]>facepos[1])continue;
+            break;
+          case UP_Z:
+            if(scaled_eyepos[2]<facepos[2])continue;
+            break;
+          case DOWN_Z:
+            if(scaled_eyepos[2]>facepos[2])continue;
+            break;
         }
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
@@ -2075,13 +2099,14 @@ void draw_faces(){
         glVertex3fv(vertices+0);
         glVertex3fv(vertices+6);
         glVertex3fv(vertices+9);
+        faces_drawn++;
       }
     }
     glEnd();
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
-  printf("debug: single faces=%i color mode swaps=%i\n",nface_normals_single,color_swaps);
+  printf("single side faces: total num=%i num drawn=%i color mode swaps=%i\n",nface_normals_single,faces_drawn,color_swaps);
   if(nface_normals_double>0){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);

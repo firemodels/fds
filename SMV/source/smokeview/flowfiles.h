@@ -515,6 +515,9 @@ typedef struct mesh_ {
   char *label;
   int smokeloaded;
 
+  int ncullgeominfo;
+  struct _culldata *cullgeominfo;
+
 #ifdef pp_CULL
   int ncullinfo;
   struct _culldata *cullinfo;

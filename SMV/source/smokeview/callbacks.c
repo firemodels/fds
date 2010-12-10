@@ -758,6 +758,7 @@ void keyboard_2(unsigned char key, int x, int y){
       initcull(cullsmoke);
       print_gpu_cull_state();
     }
+//    initcullgeom(cullsmoke);
     return;    
   }
 #endif
@@ -1901,6 +1902,7 @@ void Display(void){
 #ifdef pp_CULL
     if(update_initcull==1)initcull(cullsmoke);
 #endif
+//   if(update_initcull==1)initcullgeom(cullsmoke);
    if(update_streaks==1&&ReadPartFile==1){
      void ParticleStreakShowMenu(int var);
 
