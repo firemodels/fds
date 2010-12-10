@@ -604,15 +604,6 @@ NOT_EVAC_IF_1: IF (.NOT.EVACUATION_ONLY(NM)) THEN
    CALL ChkMemErr('INIT','UVW_SAVE',IZERO) 
    M%UVW_SAVE = 0._EB
    
-   IF (OLD_PRESSURE_SCHEME .AND. ITERATE_PRESSURE) THEN
-      ALLOCATE(M%DH(M%N_EXTERNAL_WALL_CELLS),STAT=IZERO)
-      CALL ChkMemErr('INIT','DH',IZERO)
-      M%DH=0._EB
-      ALLOCATE(M%DHS(M%N_EXTERNAL_WALL_CELLS),STAT=IZERO)
-      CALL ChkMemErr('INIT','DHS',IZERO)
-      M%DHS=0._EB
-   ENDIF
-
 ENDIF NOT_EVAC_IF_1
 
 ! Allocate arrays for turbulent inflow boundary conditions (experimental)
