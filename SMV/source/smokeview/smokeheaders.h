@@ -640,6 +640,7 @@ EXTERNCPP void update_hidden_faces(void);
 EXTERNCPP void update_selectfaces(void);
 EXTERNCPP void update_selectblocks(void);
 EXTERNCPP void draw_faces(void);
+EXTERNCPP void draw_facesOLD(void);
 EXTERNCPP void drawselect_faces(void);
 EXTERNCPP void allocate_faces(void);
 EXTERNCPP void update_facelists(void);

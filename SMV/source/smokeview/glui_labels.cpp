@@ -102,6 +102,7 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_fontsize 7
 #define LABELS_ticks 8
 #define LABELS_sensorsize 20
+#define LABELS_drawface 24
 
 #define LABELS_particleshow    10
 #define LABELS_sliceshow       11
@@ -143,6 +144,9 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_framerate=glui_labels->add_checkbox_to_panel(panel_label1,"Frame Rate",&visFramerate,LABELS_label,Labels_CB);
 #ifdef pp_memstatus
   CHECKBOX_labels_availmemory=glui_labels->add_checkbox_to_panel(panel_label1,"Memory Load",&visAvailmemory,LABELS_label,Labels_CB);
+#endif
+#ifdef pp_BETA
+  glui_labels->add_checkbox_to_panel(panel_label1,"Use experimental blockage drawing algorithm",&use_new_drawface,LABELS_drawface,Labels_CB);
 #endif
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(panel_label1,"Text labels",&visLabels,LABELS_label,Labels_CB);
   glui_labels->add_button_to_panel(panel_label1,"Show All",LABELS_showall,Labels_CB);
@@ -418,6 +422,9 @@ extern "C" void show_glui_labels(void){
 void Labels_CB(int var){
   updatemenu=1;
   switch (var){
+  case LABELS_drawface:
+    updatefacelists=1;
+    break;
   case LABELS_sensorsize:
     if(sensorrelsize<sensorrelsizeMIN){
       sensorrelsize=sensorrelsizeMIN;

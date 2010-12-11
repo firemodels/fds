@@ -243,6 +243,7 @@ void CLIP_CB(int var){
     updatefacelists=1;
     break;
   case CLIP_all:
+    updatefacelists=1;
     update_clipplanes();
     if(xyz_clipplane!=0){
       for(i=0;i<6;i++){

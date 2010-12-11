@@ -228,7 +228,7 @@ typedef struct {
   int meshindex, blockageindex;
   int imin, imax, jmin, jmax, kmin, kmax;
   float xmin, xmax, ymin, ymax, zmin, zmax;
-  int dir,hidden;
+  int dir,hidden,dup;
   int del;
   int invisible;
   int transparent;
@@ -502,6 +502,12 @@ typedef struct mesh_ {
   int nface_textures, nface_outlines, nfaces;
   int nface_normals_single, nface_normals_double, nface_transparent_double;
   facedata *faceinfo, **face_normals_single, **face_normals_double, **face_transparent_double, **face_textures, **face_outlines;
+  facedata **face_normals_single_DOWN_X,**face_normals_single_UP_X;
+  facedata **face_normals_single_DOWN_Y,**face_normals_single_UP_Y;
+  facedata **face_normals_single_DOWN_Z,**face_normals_single_UP_Z;
+  int nface_normals_single_DOWN_X,nface_normals_single_UP_X;
+  int nface_normals_single_DOWN_Y,nface_normals_single_UP_Y;
+  int nface_normals_single_DOWN_Z,nface_normals_single_UP_Z;
 
 
   int itextureoffset;

@@ -19,6 +19,8 @@
 // svn revision character string
 char drawGeometry_revision[]="$Revision$";
 int comparecolorfaces( const void *arg1, const void *arg2 );
+int comparesinglefaces( const void *arg1, const void *arg2 );
+int comparesinglefaces0( const void *arg1, const void *arg2 );
 
 cadgeom *current_cadgeom;
 
@@ -1955,8 +1957,107 @@ void update_facelists(void){
     nface_normals_double += n_normals_double;
     nface_transparent_double += n_transparent_double;
     nface_outlines += n_outlines;
+
+    if(use_new_drawface==0)continue;
+
+    meshi->nface_normals_single_DOWN_X=0;
+    meshi->nface_normals_single_UP_X=0;
+    meshi->nface_normals_single_DOWN_Y=0;
+    meshi->nface_normals_single_UP_Y=0;
+    meshi->nface_normals_single_DOWN_Z=0;
+    meshi->nface_normals_single_UP_Z=0;
     if(n_normals_single>1){
-      qsort((facedata **)meshi->face_normals_single,(size_t)n_normals_single,sizeof(facedata *),comparecolorfaces);
+      int iface;
+      int istartD=-1,istartU=-1;
+      int jstartD=-1,jstartU=-1;
+      int kstartD=-1,kstartU=-1;
+      int nhidden;
+
+      nhidden=0;
+      qsort((facedata **)meshi->face_normals_single,(size_t)n_normals_single,sizeof(facedata *),comparesinglefaces0);
+      meshi->face_normals_single[0]->dup=0;
+      for(iface=1;iface<meshi->nface_normals_single;iface++){
+        facedata *facei;
+        facedata *faceim1;
+
+        facei=meshi->face_normals_single[iface];
+        facei->dup=0;
+        faceim1 = meshi->face_normals_single[iface-1];
+        if(
+          faceim1->imin==facei->imin&&faceim1->imax==facei->imax&&
+          faceim1->jmin==facei->jmin&&faceim1->jmax==facei->jmax&&
+          faceim1->kmin==facei->kmin&&faceim1->kmax==facei->kmax&&faceim1->dir!=facei->dir){
+          if(*(faceim1->showtimelist_handle)==NULL)faceim1->dup=1;
+          if(*(facei->showtimelist_handle)==NULL){
+            facei->dup=1;
+            nhidden++;
+          }
+        }
+      }
+      if(nhidden>0){
+        n_normals_single=0;
+        for(iface=0;iface<meshi->nface_normals_single;iface++){
+          facedata *facei  ;
+
+          facei=meshi->face_normals_single[iface];
+          if(facei->dup==0)meshi->face_normals_single[n_normals_single++]=facei;
+        }
+        meshi->nface_normals_single=n_normals_single;
+      }
+#ifdef pp_BETA
+      printf("faces removed=%i\n",nhidden);
+#endif      
+
+      qsort((facedata **)meshi->face_normals_single,(size_t)n_normals_single,sizeof(facedata *),comparesinglefaces);
+      for(iface=0;iface<meshi->nface_normals_single;iface++){
+        facedata *facei;
+
+        facei=meshi->face_normals_single[iface];
+        switch(facei->dir){
+          case DOWN_X:
+            if(istartD==-1){
+              meshi->face_normals_single_DOWN_X=meshi->face_normals_single+iface;
+              istartD=0;
+            }
+            meshi->nface_normals_single_DOWN_X++;
+            break;
+          case UP_X:
+            if(istartU==-1){
+              meshi->face_normals_single_UP_X=meshi->face_normals_single+iface;
+              istartU=0;
+            }
+            meshi->nface_normals_single_UP_X++;
+            break;
+          case DOWN_Y:
+            if(jstartD==-1){
+              meshi->face_normals_single_DOWN_Y=meshi->face_normals_single+iface;
+              jstartD=0;
+            }
+            meshi->nface_normals_single_DOWN_Y++;
+            break;
+          case UP_Y:
+            if(jstartU==-1){
+              meshi->face_normals_single_UP_Y=meshi->face_normals_single+iface;
+              jstartU=0;
+            }
+            meshi->nface_normals_single_UP_Y++;
+            break;
+          case DOWN_Z:
+            if(kstartD==-1){
+              meshi->face_normals_single_DOWN_Z=meshi->face_normals_single+iface;
+              kstartD=0;
+            }
+            meshi->nface_normals_single_DOWN_Z++;
+            break;
+          case UP_Z:
+            if(kstartU==-1){
+              meshi->face_normals_single_UP_Z=meshi->face_normals_single+iface;
+              kstartU=0;
+            }
+            meshi->nface_normals_single_UP_Z++;
+            break;
+        }
+      }
     }
     if(n_normals_double>1){
       qsort((facedata **)meshi->face_normals_double,(size_t)n_normals_double,sizeof(facedata *),comparecolorfaces);
@@ -2001,6 +2102,44 @@ void drawselect_faces(){
   return;
 }
 
+#define DRAWFACE(DEFfacetest,DEFeditcolor)    \
+        float *facepos;\
+        facei = face_START[i];\
+        if(blocklocation==BLOCKlocation_grid){\
+          vertices = facei->approx_vertex_coords;\
+        }\
+        else{\
+          vertices = facei->exact_vertex_coords;\
+        }\
+        facepos=vertices;\
+        if(DEFfacetest)break;\
+ \
+        showtimelist_handle = facei->showtimelist_handle;\
+        showtimelist = *showtimelist_handle;\
+        if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;\
+        if(showedit==0){\
+          new_color=facei->color;\
+        }\
+        else{\
+          if(visNormalEditColors==0)new_color=block_ambient2;\
+          if(visNormalEditColors==1)new_color=facei->color;\
+          if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){\
+            new_color=DEFeditcolor;\
+          }\
+        }\
+        if(new_color!=old_color){\
+          old_color=new_color;\
+          glColor4fv(old_color);\
+          color_swaps++;\
+        }\
+        glVertex3fv(vertices+0);\
+        glVertex3fv(vertices+3);\
+        glVertex3fv(vertices+6);\
+        glVertex3fv(vertices+0);\
+        glVertex3fv(vertices+6);\
+        glVertex3fv(vertices+9);\
+        faces_drawn++;
+
 /* ------------------ drawfaces ------------------------ */
 
 void draw_faces(){
@@ -2024,89 +2163,65 @@ void draw_faces(){
     glEnable(GL_COLOR_MATERIAL);
     glBegin(GL_TRIANGLES);
     for(j=0;j<nmeshes;j++){
+      facedata **face_START;
       meshi=meshinfo + j;
       if(meshi->blockvis==0)continue;
-      for(i=0;i<meshi->nface_normals_single;i++){
-        float *facepos;
 
-        facei = meshi->face_normals_single[i];
-        if(blocklocation==BLOCKlocation_grid){
-          vertices = facei->approx_vertex_coords;
-        }
-        else{
-          vertices = facei->exact_vertex_coords;
-        }
-        facepos=vertices;
-        switch(facei->dir){
-          case UP_X:
-            if(scaled_eyepos[0]<facepos[0])continue;
-            break;
-          case DOWN_X:
-            if(scaled_eyepos[0]>facepos[0])continue;
-            break;
-          case UP_Y:
-            if(scaled_eyepos[1]<facepos[1])continue;
-            break;
-          case DOWN_Y:
-            if(scaled_eyepos[1]>facepos[1])continue;
-            break;
-          case UP_Z:
-            if(scaled_eyepos[2]<facepos[2])continue;
-            break;
-          case DOWN_Z:
-            if(scaled_eyepos[2]>facepos[2])continue;
-            break;
-        }
-        showtimelist_handle = facei->showtimelist_handle;
-        showtimelist = *showtimelist_handle;
-        if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
-        if(showedit==0){
-          new_color=facei->color;
-        }
-        else{
-          if(visNormalEditColors==0)new_color=block_ambient2;
-          if(visNormalEditColors==1)new_color=facei->color;
-          if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
-            new_color=highlight_color;
-            switch (xyz_dir){
-             case XDIR:
-              if(facei->dir==UP_X)new_color=up_color;
-              if(facei->dir==DOWN_X)new_color=down_color;
-              break;
-             case YDIR:
-              if(facei->dir==UP_Y)new_color=up_color;
-              if(facei->dir==DOWN_Y)new_color=down_color;
-              break;
-             case ZDIR:
-              if(facei->dir==UP_Z)new_color=up_color;
-              if(facei->dir==DOWN_Z)new_color=down_color;
-              break;
-             default:
-              ASSERT(FFALSE);
-              break;
-            }
-          }
-        }
-        if(new_color!=old_color){
-          old_color=new_color;
-          glColor4fv(old_color);
-          color_swaps++;
-        }
-        glNormal3fv(facei->normal);
-        glVertex3fv(vertices+0);
-        glVertex3fv(vertices+3);
-        glVertex3fv(vertices+6);
-        glVertex3fv(vertices+0);
-        glVertex3fv(vertices+6);
-        glVertex3fv(vertices+9);
-        faces_drawn++;
+      // DOWN_X faces
+
+      glNormal3f(-1.0,0.0,0.0);
+      face_START=meshi->face_normals_single_DOWN_X;
+      for(i=0;i<meshi->nface_normals_single_DOWN_X;i++){
+        DRAWFACE(scaled_eyepos[0]>facepos[0],down_color)
+      }
+
+      // UP_X faces
+
+      glNormal3f(1.0,0.0,0.0);
+      face_START=meshi->face_normals_single_UP_X;
+      for(i=0;i<meshi->nface_normals_single_UP_X;i++){
+        DRAWFACE(scaled_eyepos[0]<facepos[0],up_color)
+      }
+
+      // DOWN_Y faces
+
+      glNormal3f(0.0,-1.0,0.0);
+      face_START=meshi->face_normals_single_DOWN_Y;
+      for(i=0;i<meshi->nface_normals_single_DOWN_Y;i++){
+        DRAWFACE(scaled_eyepos[1]>facepos[1],down_color)
+      }
+
+      // UP_Y faces
+
+      glNormal3f(0.0,1.0,0.0);
+      face_START=meshi->face_normals_single_UP_Y;
+      for(i=0;i<meshi->nface_normals_single_UP_Y;i++){
+        DRAWFACE(scaled_eyepos[1]<facepos[1],up_color)
+      }
+
+      // DOWN_Z faces
+
+      glNormal3f(0.0,0.0,-1.0);
+      face_START=meshi->face_normals_single_DOWN_Z;
+      for(i=0;i<meshi->nface_normals_single_DOWN_Z;i++){
+        DRAWFACE(scaled_eyepos[2]>facepos[2],down_color)
+      }
+
+      // UP_Z faces
+
+      glNormal3f(0.0,0.0,1.0);
+      face_START=meshi->face_normals_single_UP_Z;
+      for(i=0;i<meshi->nface_normals_single_UP_Z;i++){
+        DRAWFACE(scaled_eyepos[2]<facepos[2],up_color)
       }
     }
     glEnd();
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
-  printf("single side faces: total num=%i num drawn=%i color mode swaps=%i\n",nface_normals_single,faces_drawn,color_swaps);
+#ifdef pp_BETA  
+  printf("faces=%i num drawn=%i color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
+#endif  
   if(nface_normals_double>0){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -2279,6 +2394,116 @@ int comparecolorfaces( const void *arg1, const void *arg2 ){
   facei = *(facedata **)arg1;
   facej = *(facedata **)arg2;
 
+  if(facei->color<facej->color)return  1;
+  if(facei->color>facej->color)return -1;
+  return 0;
+}
+
+
+/* ------------------ comparesinglefaces ------------------------ */
+
+int comparesinglefaces0( const void *arg1, const void *arg2 ){
+  facedata *facei, *facej;
+  int dirs[6];
+  facei = *(facedata **)arg1;
+  facej = *(facedata **)arg2;
+
+  dirs[DOWN_X]=1;
+  dirs[UP_X]=1;
+  dirs[DOWN_Y]=2;
+  dirs[UP_Y]=2;
+  dirs[DOWN_Z]=3;
+  dirs[UP_Z]=3;
+  if(dirs[facei->dir]<dirs[facej->dir])return -1;
+  if(dirs[facei->dir]>dirs[facej->dir])return 1;
+  switch(facei->dir){
+    case DOWN_X:
+    case UP_X:
+      if(facei->imin<facej->imin)return -1;
+      if(facei->imin>facej->imin)return 1;
+      if(facei->jmin<facej->jmin)return -1;
+      if(facei->jmin>facej->jmin)return 1;
+      if(facei->kmin<facej->kmin)return -1;
+      if(facei->kmin>facej->kmin)return 1;
+      if(facei->imax<facej->imax)return -1;
+      if(facei->imax>facej->imax)return 1;
+      if(facei->jmax<facej->jmax)return -1;
+      if(facei->jmax>facej->jmax)return 1;
+      if(facei->kmax<facej->kmax)return -1;
+      if(facei->kmax>facej->kmax)return 1;
+      break;
+    case DOWN_Y:
+    case UP_Y:
+      if(facei->jmin<facej->jmin)return -1;
+      if(facei->jmin>facej->jmin)return 1;
+      if(facei->imin<facej->imin)return -1;
+      if(facei->imin>facej->imin)return 1;
+      if(facei->kmin<facej->kmin)return -1;
+      if(facei->kmin>facej->kmin)return 1;
+      if(facei->jmax<facej->jmax)return -1;
+      if(facei->jmax>facej->jmax)return 1;
+      if(facei->imax<facej->imax)return -1;
+      if(facei->imax>facej->imax)return 1;
+      if(facei->kmax<facej->kmax)return -1;
+      if(facei->kmax>facej->kmax)return 1;
+      break;
+    case DOWN_Z:
+    case UP_Z:
+      if(facei->kmin<facej->kmin)return -1;
+      if(facei->kmin>facej->kmin)return 1;
+      if(facei->imin<facej->imin)return -1;
+      if(facei->imin>facej->imin)return 1;
+      if(facei->jmin<facej->jmin)return -1;
+      if(facei->jmin>facej->jmin)return 1;
+      if(facei->kmax<facej->kmax)return -1;
+      if(facei->kmax>facej->kmax)return 1;
+      if(facei->imax<facej->imax)return -1;
+      if(facei->imax>facej->imax)return 1;
+      if(facei->jmax<facej->jmax)return -1;
+      if(facei->jmax>facej->jmax)return 1;
+      break;
+  }
+  if(facei->color<facej->color)return  1;
+  if(facei->color>facej->color)return -1;
+  return 0;
+}
+
+/* ------------------ comparesinglefaces ------------------------ */
+
+int comparesinglefaces( const void *arg1, const void *arg2 ){
+  facedata *facei, *facej;
+
+  facei = *(facedata **)arg1;
+  facej = *(facedata **)arg2;
+
+  if(facei->dir<facej->dir)return -1;
+  if(facei->dir>facej->dir)return 1;
+  switch(facei->dir){
+    case DOWN_X:   // sort DOWN data from big to small
+      if(facei->imin<facej->imin)return 1;
+      if(facei->imin>facej->imin)return -1;
+      break;
+    case UP_X:     // sort UP data from small to big
+      if(facei->imin<facej->imin)return -1;
+      if(facei->imin>facej->imin)return 1;
+      break;
+    case DOWN_Y:
+      if(facei->jmin<facej->jmin)return 1;
+      if(facei->jmin>facej->jmin)return -1;
+      break;
+    case UP_Y:
+      if(facei->jmin<facej->jmin)return -1;
+      if(facei->jmin>facej->jmin)return 1;
+      break;
+    case DOWN_Z:
+      if(facei->kmin<facej->kmin)return 1;
+      if(facei->kmin>facej->kmin)return -1;
+      break;
+    case UP_Z:
+      if(facei->kmin<facej->kmin)return -1;
+      if(facei->kmin>facej->kmin)return 1;
+      break;
+  }
   if(facei->color<facej->color)return  1;
   if(facei->color>facej->color)return -1;
   return 0;
@@ -4304,7 +4529,12 @@ void drawBlockages(int mode, int trans_flag){
       }
     }
     else{
-      draw_faces();
+      if(use_new_drawface==1){
+        draw_faces();
+      }
+      else{
+        draw_facesOLD();
+      }
     }
   }
 
@@ -4390,6 +4620,255 @@ void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawi
     *drawing_vent_transparent=1;
   }
 }
+
+/* ------------------ drawfacesBAK ------------------------ */
+
+void draw_facesOLD(){
+  int i,j;
+  mesh *meshi;
+  facedata *facei;
+  float *vertices,*tvertices;
+  texture *texti;
+  float *new_color,*old_color=NULL;
+  int **showtimelist_handle, *showtimelist;
+  float up_color[4]={0.9,0.9,0.9,1.0};
+  float down_color[4]={0.1,0.1,0.1,1.0};
+  float highlight_color[4]={1.0,0.0,0.0,1.0};
+  int color_swaps=0;
+  int faces_drawn=0;
+  if(nface_normals_single>0){
+    glEnable(GL_LIGHTING);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glEnable(GL_COLOR_MATERIAL);
+    glBegin(GL_TRIANGLES);
+    for(j=0;j<nmeshes;j++){
+      meshi=meshinfo + j;
+      if(meshi->blockvis==0)continue;
+      for(i=0;i<meshi->nface_normals_single;i++){
+        facei = meshi->face_normals_single[i];
+        if(blocklocation==BLOCKlocation_grid){
+          vertices = facei->approx_vertex_coords;
+        }
+        else{
+          vertices = facei->exact_vertex_coords;
+        }
+        showtimelist_handle = facei->showtimelist_handle;
+        showtimelist = *showtimelist_handle;
+        if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
+        if(showedit==0){
+          new_color=facei->color;
+        }
+        else{
+          if(visNormalEditColors==0)new_color=block_ambient2;
+          if(visNormalEditColors==1)new_color=facei->color;
+          if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
+            new_color=highlight_color;
+            switch (xyz_dir){
+             case XDIR:
+              if(facei->dir==UP_X)new_color=up_color;
+              if(facei->dir==DOWN_X)new_color=down_color;
+              break;
+             case YDIR:
+              if(facei->dir==UP_Y)new_color=up_color;
+              if(facei->dir==DOWN_Y)new_color=down_color;
+              break;
+             case ZDIR:
+              if(facei->dir==UP_Z)new_color=up_color;
+              if(facei->dir==DOWN_Z)new_color=down_color;
+              break;
+             default:
+              ASSERT(FFALSE);
+              break;
+            }
+          }
+        }
+        if(new_color!=old_color){
+          old_color=new_color;
+          glColor4fv(old_color);
+          color_swaps++;
+        }
+        glNormal3fv(facei->normal);
+        glVertex3fv(vertices+0);
+        glVertex3fv(vertices+3);
+        glVertex3fv(vertices+6);
+        glVertex3fv(vertices+0);
+        glVertex3fv(vertices+6);
+        glVertex3fv(vertices+9);
+        faces_drawn++;
+      }
+    }
+    glEnd();
+    glDisable(GL_COLOR_MATERIAL);
+    glDisable(GL_LIGHTING);
+  }
+#ifdef pp_BETA
+  printf("faces=%i num drawn=%i color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
+#endif
+  if(nface_normals_double>0){
+    glEnable(GL_LIGHTING);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glEnable(GL_COLOR_MATERIAL);
+    if(cullfaces==1)glDisable(GL_CULL_FACE);
+    glBegin(GL_QUADS);
+    for(j=0;j<nmeshes;j++){
+      meshi=meshinfo + j;
+      for(i=0;i<meshi->nface_normals_double;i++){
+        facei = meshi->face_normals_double[i];
+        if(blocklocation==BLOCKlocation_grid){
+          vertices = facei->approx_vertex_coords;
+        }
+        else{
+          vertices = facei->exact_vertex_coords;
+        }
+        showtimelist_handle = facei->showtimelist_handle;
+        showtimelist = *showtimelist_handle;
+        if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
+        if(showedit==0){
+          new_color=facei->color;
+        }
+        else{
+          if(visNormalEditColors==0)new_color=block_ambient2;
+          if(visNormalEditColors==1)new_color=facei->color;
+          if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
+            new_color=highlight_color;
+            switch (xyz_dir){
+             case XDIR:
+              if(facei->dir==UP_X)new_color=up_color;
+              if(facei->dir==DOWN_X)new_color=down_color;
+              break;
+             case YDIR:
+              if(facei->dir==UP_Y)new_color=up_color;
+              if(facei->dir==DOWN_Y)new_color=down_color;
+              break;
+             case ZDIR:
+              if(facei->dir==UP_Z)new_color=up_color;
+              if(facei->dir==DOWN_Z)new_color=down_color;
+              break;
+             default:
+              ASSERT(FFALSE);
+              break;
+            }
+          }
+        }
+        if(new_color!=old_color){
+          old_color=new_color;
+          glColor4fv(old_color);
+        }
+        glNormal3fv(facei->normal);
+        glVertex3fv(vertices+0);
+        glVertex3fv(vertices+3);
+        glVertex3fv(vertices+6);
+        glVertex3fv(vertices+9);
+      }
+    }
+    glEnd();
+    if(cullfaces==1)glEnable(GL_CULL_FACE);
+    glDisable(GL_COLOR_MATERIAL);
+    glDisable(GL_LIGHTING);
+  }
+  if(nface_outlines>0){
+    glDisable(GL_LIGHTING);
+    antialias(1);
+    glLineWidth(linewidth);
+    glBegin(GL_LINES);
+    for(j=0;j<nmeshes;j++){
+      meshi = meshinfo + j;
+      if(meshi->blockvis==0)continue;
+      for(i=0;i<meshi->nface_outlines;i++){
+        facei = meshi->face_outlines[i];
+        showtimelist_handle = facei->showtimelist_handle;
+        showtimelist = *showtimelist_handle;
+        if(showtimelist!=NULL&&showtimelist[itimes]==0&&facei->type2==BLOCK_face)continue;
+        if(blocklocation==BLOCKlocation_grid){
+          vertices = facei->approx_vertex_coords;
+        }
+        else{
+          vertices = facei->exact_vertex_coords;
+        }
+        if(facei->type2!=OUTLINE_FRAME_face||highlight_flag==1){
+          glEnd();
+          if(nmeshes>1&&facei->type2==OUTLINE_FRAME_face&&
+            highlight_mesh==facei->meshindex&&highlight_flag==1){
+            glLineWidth(highlight_linewidth);
+          }
+          else{
+            glLineWidth(*facei->linewidth);
+          }
+          glBegin(GL_LINES);
+          glColor3fv(facei->linecolor);
+          glVertex3fv(vertices+0);
+          glVertex3fv(vertices+3);
+          glVertex3fv(vertices+3);
+          glVertex3fv(vertices+6);
+          glVertex3fv(vertices+6);
+          glVertex3fv(vertices+9);
+          glVertex3fv(vertices+9);
+          glVertex3fv(vertices+0);
+          if(showtimelist!=NULL&&showtimelist[itimes]==0){
+            glVertex3fv(vertices+0);
+            glVertex3fv(vertices+6);
+            glVertex3fv(vertices+3);
+            glVertex3fv(vertices+9);
+          }
+        }
+      }
+    }
+    glEnd();
+    antialias(0);
+  }
+  if(nface_textures>0){
+    glEnable(GL_LIGHTING);
+    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glEnable(GL_TEXTURE_2D);
+    for(j=0;j<nmeshes;j++){
+      meshi = meshinfo + j;
+      if(meshi->blockvis==0)continue;
+      for(i=0;i<meshi->nface_textures;i++){
+        facei=meshi->face_textures[i];
+        showtimelist_handle = facei->showtimelist_handle;
+        showtimelist = *showtimelist_handle;
+        if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
+        texti=facei->textureinfo;
+        if(blocklocation==BLOCKlocation_grid){
+           vertices = facei->approx_vertex_coords;
+          tvertices = facei->approx_texture_coords;
+        }
+        else{
+           vertices = facei->exact_vertex_coords;
+          tvertices = facei->exact_texture_coords;
+        }
+
+        if(facei->type2==BLOCK_face&&cullfaces==0)glDisable(GL_CULL_FACE);
+
+
+        glBindTexture(GL_TEXTURE_2D,texti->name);
+        glBegin(GL_QUADS);
+
+        glNormal3fv(facei->normal);
+        glTexCoord2fv(tvertices);
+        glVertex3fv(vertices);
+
+        glTexCoord2fv(tvertices+2);
+        glVertex3fv(vertices+3);
+
+        glTexCoord2fv(tvertices+4);
+        glVertex3fv(vertices+6);
+
+        glTexCoord2fv(tvertices+6);
+        glVertex3fv(vertices+9);
+        glEnd();
+      }
+      if(cullfaces==1)glEnable(GL_CULL_FACE);
+
+
+    }
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+  }
+}
+
 
   
 
