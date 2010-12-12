@@ -1,7 +1,10 @@
 &HEAD CHID= 'LLNL_16', TITLE= '1986 LLNL Enclosure Fire Test 16' /
 &MESH IJK=30,20,30, XB=0,6,0,4,0,4.5 /
 &TIME T_BEGIN=-20., T_END=6000. /
-&MISC TMPA=21. SURF_DEFAULT='Wall' /Fire
+&MISC TMPA=21. SURF_DEFAULT='Wall' /
+
+Fire
+
 &RADI RADIATIVE_FRACTION=0.20 /
 
 &REAC ID= 'Methane'
@@ -20,9 +23,9 @@
 &RAMP ID='fire', T=   0., F=0. /
 &RAMP ID='fire', T=  10., F=1. /
 
-&OBST XB=2.7,3.2,1.7,2.2,0.0,0.2, 
+&OBST XB=2.7,3.2,1.7,2.2,0.0,0.2, SURF_IDS='BURNER','Duct','Duct' / 
 
-SURF_IDS='BURNER','Duct','Duct' / Construction
+Construction
 
 &MATL ID= 'Wall Aluminum Silicate'
    	FYI= 'Al_2 O_3 Si O_2 Refractory'
