@@ -1,0 +1,5 @@
+Test,Time,Fuel Flow,Air Flow,Pressure,O2,CO2,West Upper TCs,West Middle TCs,West Bottom TCs,West TC Average,East TC Average,Exit Duct TC
+No.,s,g/s,g/s,Pa,%,%,C,C,C,C,C,C
+53,0,0,214,-67,20.98,0.04,41,41,39,40,40,41
+53,500,4,202,-43,17.91,1.71,64,189,121,123,125,63
+53,1000,4,197,-55,15.82,2.8,77,209,134,139,140,71
