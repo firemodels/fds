@@ -1548,24 +1548,21 @@ pressure zone is found by integrating Eq.~(\ref{eqn_divfromeos2}) over the zone 
 Equation~(\ref{concon2}) is essentially a consistency condition, ensuring that blowing air or starting a fire within a sealed
 compartment leads to an appropriate decrease in the divergence within the volume.
 
-In the event that the barrier separating two pressure zones should rupture, Eq.~(\ref{concon2}) is modified so that the pressure in the
+In the event that a barrier separating two pressure zones should rupture, Eq.~(\ref{concon2}) is modified so that the pressure in the
 newly connected zones is driven towards an equilibrium pressure:
 \be
-   \bp_{eq} = \frac{ \sum_m V_m }{ \sum_m V_m/\bp_m }
+  \bp_{eq} = \sum_m \bp_m \int_{\Omega_m} {\cal P} \, dV  \Big/  \sum_m \int_{\Omega_m} {\cal P} \, dV \approx \frac{ \sum_m V_m }{ \sum_m (V_m/\bp_m) }
 \ee
 Note that
 \be
   \int_{\Omega_m} {\cal P} \, dV \approx  \frac{ V_m}{\gamma \bp_m }
 \ee
-which allows us to write an expression for the equilibrium pressure using quantities that have already been calculated:
+The net volume term in Eq.~(\ref{concon2}) is modified to force the pressure within each connected zone towards equilibrium:
 \be
-  \bp_{eq} = \sum_m \bp_m \int_{\Omega_m} {\cal P} \, dV  \Big/  \sum_m \int_{\Omega_m} {\cal P} \, dV
+\int_{\partial \Omega_m} \bu \cdot d\bS = \int_{\partial \Omega_m'} \bu \cdot d\bS + r \, \frac{ \bp_m - \bp_{eq} }{ \dt} \; \int_{\Omega_m} {\cal P} \, dV
 \ee
-The pressure in connected zones is driven towards the equilibrium at each time step according to
-\be
-   \dod{\bp_m}{t} = r \, \frac{ \bp_{eq} - \bp_m}{\dt}
-\ee
-where $r$ is a relaxation factor of 0.2, a somewhat arbitrary value designed to slow down the fairly rapid pressure equilibration.
+The term $\partial \Omega_m'$ indicates the portion of the boundary of the pressure zone that is not an interface to another pressure zone.
+The constant, $r$, is a relaxation factor of 0.2, a somewhat arbitrary value designed to slow down the fairly rapid pressure equilibration.
 
 
 \subsection{Enthalpy and Specific Heat}
@@ -2408,7 +2405,7 @@ extinction is still an area of active research in the combustion
 community.
 
 Simple empirical rules can be used to predict local
-extinction based on the species and temperature present in the flame sheet.  The FDS extinction model consists of two steps. The first step, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second step uses the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur.  This is done by computing the enthalpy of the local gas mixture at both the local temperature and at the limiting flame temperature.  If the local heat release is less than the enthalpy difference between the limiting flame temperature and the local temperature, then combustion will not occur. 
+extinction based on the species and temperature present in the flame sheet.  The FDS extinction model consists of two steps. The first step, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second step uses the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur.  This is done by computing the enthalpy of the local gas mixture at both the local temperature and at the limiting flame temperature.  If the local heat release is less than the enthalpy difference between the limiting flame temperature and the local temperature, then combustion will not occur.
 
 Note that once the local state of the gases falls into the ``No Burn'' zone,
 the state relations (Fig.~\ref{staterelations}) are no longer valid for
@@ -2431,6 +2428,14 @@ oxygen co-exist, a reaction occurs if conditions are favorable in the sense show
 If a reaction occurs, $Z_1$ is converted to $Z_2$ representing the
 conversion of fuel to products. The heat release rate of the fire is obtained by multiplying the fuel consumption rate by the
 heat of combustion.
+
+\begin{figure}
+\begin{minipage}[t]{4.1in}
+\includegraphics[height=4.in]{FIGURES/Extinction_Criteria}
+\caption{Conditions under which combustion can be supported.}
+\label{plotsupp}
+\end{minipage}
+\end{figure}
 
 If it is assumed that the yields of CO and soot are fixed, Eq.~(\ref{Z1first}) and Eq.~(\ref{Z2first}) can be simplified further:
 \begin{eqnarray} Z_1 &=& \frac{Y_\F}{Y_\F^I} \\*[.1in]
@@ -2560,21 +2565,17 @@ determined as it is in the single step reaction case.  The second step, however,
 
 \subsubsection{One-Step, Fast Reaction}
 
-When the mixture fraction is divided into two components, $Z_1$ and $Z_2$, there is one chemical
-reaction that converts $Z_1$ to $Z_2$.  Recall from Section~\ref{extinction}
-that this represents single-step combustion with the possibility of local extinction.  From the mixture fraction
-variables one can determine the amount of fuel and oxygen present in a grid cell.  Ideally, we could use these values
-in a finite-rate computation to determine the heat release rate; however, for most computations, the
-grid resolution is too coarse to resolve the flame.  Thus, flame temperatures will not be realized and a
-finite-rate computation will not succeed.
+For a one-step, infinitely-fast reaction, the fuel in a given grid cell, $Z_1$, is converted to products, $Z_2$, at a rate determined by a 
+characteristic mixing time.  Recall from Section~\ref{extinction}
+that this represents single-step combustion with the possibility of local extinction.  It is assumed that the 
+grid resolution is too coarse to resolve the flame sheet and compute directly the reaction rate.  
 Instead, if any grid cell surrounding one containing both fuel and oxygen satisfies the ``Burn'' criteria depicted in Fig.~\ref{plotsupp},
-combustion is assumed to occur.  The heat release rate is computed as
-\be \dq''' = \frac{ \rho \min \left( Y_\F , Y_\OTWO/s \right) }{\tau} \, \Delta H  \quad ; \quad s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }   \ee
-Here, $\tau$ is a mixing time scale~\cite{Raman:CF} given by
-\be \tau = \frac{ C \; (\dx \, \dy \, \dz)^{\frac{2}{3}} }{D_{\hbox{\tiny LES}} }  \label{mixtime} \ee
-The coefficient, $C$, is taken as 0.1 in FDS by default, based on comparisons to various flame height correlations.
+combustion is assumed to occur.  The consumption rate of fuel gases is given by~\cite{Poinsot:TNC}
+\be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad
+   s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \label{EDC} \ee
+Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter equal to 1.
 
-While the mixing time scale given in Eq.~(\ref{mixtime}) is an easily computed and robust subgrid-scale model of
+While the reaction rate given in Eq.~(\ref{EDC}) is an easily computed and robust subgrid-scale model of
 turbulent combustion, there is still a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
 this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
 is sometimes too coarse to expect the simple mixing time model to work effectively.
@@ -3427,19 +3428,19 @@ the heat conduction equation consists of the heats of reaction
 
 \subsection{Phase-Change Materials}
 
-Simple phase change problems, such as freezing or melting, are usually modelled as a Stefan-problems, 
-where the boundary between two phases is described as a sharp interface at constant phase-change temperature $T_f$. 
+Simple phase change problems, such as freezing or melting, are usually modelled as a Stefan-problems,
+where the boundary between two phases is described as a sharp interface at constant phase-change temperature $T_f$.
 The location of the phase boundary $x_f$ is governed by the equation
 \be
 k_{s,1} \dod{T_{s,1}}{x}-k_{s,2}\dod{T_{s,2}}{x} = \rho_s H_{r,\alpha\beta} \dod{x_f}{t}
 \ee
-where 1 and 2 refer to the materials on the two sides of the boundary. In the context of the fixed-grid finite-difference method, it is more convenient 
-to allow a small deviation from $T_f$ and solve the amount of mass reacting during the time step $\Delta t$ 
+where 1 and 2 refer to the materials on the two sides of the boundary. In the context of the fixed-grid finite-difference method, it is more convenient
+to allow a small deviation from $T_f$ and solve the amount of mass reacting during the time step $\Delta t$
 from the energy required to convert the mass from phase to another
 \be
 \dot{m}''' \Delta t = \frac{\rho_s c_s(T_s-T_f)}{H_{r,\alpha\beta}}
 \ee
-This reaction can be implemented by setting $T_{thr,\alpha\beta} = T_f$ and $A_{\alpha\beta} = c_s$ and turning on a specific 
+This reaction can be implemented by setting $T_{thr,\alpha\beta} = T_f$ and $A_{\alpha\beta} = c_s$ and turning on a specific
 {\em phase-change reaction} mode. The reaction rate given by Eq.~\ref{Arrhenius} is then divided by factor $H_{r,\alpha\beta}\Delta t$.
 
 \subsection{Liquid Fuels}
@@ -4163,7 +4164,7 @@ If any convergence check fails, the solution is re-iterated with new extrapolate
 
 \section{Surface Leakage}
 
-With rare exceptions, walls, floors, and ceilings are not air tight.  Gaps around windows and doors and openings for electrical, mechanical, and other systems provide for small flow paths through surfaces.  These flow paths can be modeled as an equivalent HVAC system where each leakage path is a single duct.  The area of the duct is total leakage area and the terminal nodes of the duct can be considered the entire area of the surfaces defined as participatig in that flow path.  
+With rare exceptions, walls, floors, and ceilings are not air tight.  Gaps around windows and doors and openings for electrical, mechanical, and other systems provide for small flow paths through surfaces.  These flow paths can be modeled as an equivalent HVAC system where each leakage path is a single duct.  The area of the duct is total leakage area and the terminal nodes of the duct can be considered the entire area of the surfaces defined as participatig in that flow path.
 
 \section{HVAC Boundary Conditions (Coupling the HVAC solver to the FDS solver)}
 
