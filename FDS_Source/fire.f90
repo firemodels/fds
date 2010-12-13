@@ -242,19 +242,7 @@ DO K=1,KBAR
             MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(MIN(TAU_D,TAU_U,TAU_G),TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
 
          ENDIF LES_IF
-         
-         ! chemical time scale
-
-         CHEM_IF: IF (CHECK_CHEMICAL_TIME_SCALE) THEN
-            TAU_CHEM = 0._EB ! infinitely fast chemistry
-            YY_GET(:) = YY(I,J,K,:)
-            CALL GET_CONDUCTIVITY(YY_GET,KP,TMP(I,J,K))
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP(I,J,K))  
-            S_L = LAMINAR_FLAME_SPEED(TMPA,RN%O2_F_RATIO/(Y_O2_0/Y_FU_0))
-            IF (S_L>0._EB) TAU_CHEM = KP/(RHO(I,J,K)*CP*S_L*S_L)
-            MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIX_TIME(I,J,K))           
-         ENDIF CHEM_IF
-         
+                  
          IF (FIXED_MIX_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_MIX_TIME
          
          Y_LIMITER = MIN( Y_FU_0, Y_O2_0/RN%O2_F_RATIO, BETA_EDC*Y_P_0 )
