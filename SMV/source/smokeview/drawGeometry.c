@@ -2090,7 +2090,7 @@ void update_facelists(void){
         if(
           faceim1->imin==facei->imin&&faceim1->imax==facei->imax&&
           faceim1->jmin==facei->jmin&&faceim1->jmax==facei->jmax&&
-          faceim1->kmin==facei->kmin&&faceim1->kmax==facei->kmax&&faceim1->dir!=facei->dir){
+          faceim1->kmin==facei->kmin&&faceim1->kmax==facei->kmax&&faceim1->dir!=facei->dir&&facei->thinface==0){
           if(*(faceim1->showtimelist_handle)==NULL)faceim1->dup=1;
           if(*(facei->showtimelist_handle)==NULL){
             facei->dup=1;
