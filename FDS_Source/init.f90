@@ -419,7 +419,7 @@ DO N=1,N_INIT
    ENDIF PATCH_VELOCITY_IF
 ENDDO
 
-M%RHOS    = M%RHO
+M%RHOS = M%RHO
 
 ! Compute molecular weight term RSUM=R0*SUM(Y_i/M_i)
 
@@ -436,7 +436,7 @@ ENDIF
 
 ! Allocate and Initialize Mesh-Dependent Radiation Arrays
 
-M%QR    = 0._EB
+M%QR = 0._EB
 IF (.NOT.EVACUATION_ONLY(NM)) THEN
    M%KAPPA = KAPPA0
    M%UII   = 4._EB*SIGMA*TMPA4
