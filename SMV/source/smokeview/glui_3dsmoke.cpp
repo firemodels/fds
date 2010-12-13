@@ -397,11 +397,9 @@ void SMOKE_3D_CB(int var){
 #ifdef pp_CULL
   case CULL_PORTSIZE:
     initcull(cullsmoke);
-//    initcullgeom(cullsmoke);
     break;
   case CULL_SMOKE:
     initcull(cullsmoke);
-//    initcullgeom(cullsmoke);
     break;
 #endif
 #ifdef pp_GPU

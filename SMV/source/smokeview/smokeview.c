@@ -890,6 +890,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     matmatmult(inverse_modelview_setup,modelview_scratch,modelview_current);
 
     get_world_eyepos(modelview_scratch, world_eyepos,scaled_eyepos);
+
     if(nsmoke3d_files>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
       sniffErrors("after getsmokedir");
@@ -911,6 +912,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
     glScalef(mscale[0],mscale[1],mscale[2]);
     ExtractFrustum();
+    set_cull_vis();
   }
 }
 
@@ -4030,7 +4032,7 @@ int getplotstate(int choice){
 
 void ExtractFrustum(void){
 
-/* code from:  http://www.markmorley.com/opengl/frustumculling.html */
+/* code from:  http://www.crownandcutlass.com/features/technicaldetails/frustum.html */
    float   proj[16];
    float   modl[16];
    float   clip[16];
@@ -4144,12 +4146,8 @@ void ExtractFrustum(void){
 
 /* ------------------ PointInFrustum ------------------------ */
 
-int PointInFrustum( float *xvec){
+int PointInFrustum( float x, float y, float z){
    int p;
-   float x, y, z;
-   x=xvec[0];
-   y=xvec[1];
-   z=xvec[2];
 
    if( frustum[0][0]*x + frustum[0][1]*y + frustum[0][2]*z + frustum[0][3] <= 0 )return 0;
    if( frustum[1][0]*x + frustum[1][1]*y + frustum[1][2]*z + frustum[1][3] <= 0 )return 0;

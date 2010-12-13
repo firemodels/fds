@@ -233,6 +233,7 @@ typedef struct {
   int invisible;
   int transparent;
   int patchpresent;
+  struct _culldata *cullport;
   int **showtimelist_handle;
   int thinface;
   int show_bothsides, is_interior;
@@ -426,9 +427,8 @@ typedef struct mesh_ {
   float *block_zdist;
   int zdist_flag;
   unsigned char *iblank_smoke3d;
-  blockagedata **blockageinfoptrs,**deletelist,**carveblockptrs;
+  blockagedata **blockageinfoptrs;
   int *obst_bysize;
-  int ndeletelist,ncarveblocks;
   ventdata *ventinfo;
   int nvents,ndummyvents;
   int nbptrs;
@@ -521,7 +521,7 @@ typedef struct mesh_ {
   char *label;
   int smokeloaded;
 
-  int ncullgeominfo;
+  int ncullgeominfo,nxyzgeomcull[3],nxyzskipgeomcull[3];
   struct _culldata *cullgeominfo;
 
 #ifdef pp_CULL
@@ -542,6 +542,7 @@ typedef struct _culldata {
   float xbeg, xend, ybeg, yend, zbeg, zend;
   int   ibeg, iend, jbeg, jend, kbeg, kend;
   int iskip, jskip, kskip;
+  int vis;
   mesh *cull_mesh;
   int npixels,npixels_old;
 } culldata;

@@ -62,7 +62,9 @@ void Render(int view_mode){
     }
   }
 
-  if(render_double==0)sniffErrors("after render");
+  if(render_double==0){
+    sniffErrors("after render");
+  }
 
   if(RenderOnceNow==1||RenderOnceNowL==1||RenderOnceNowR==1){
     if(render_double==0)RenderFrame(view_mode); 

@@ -53,8 +53,10 @@ SVEXTERN int render_double,render_double_state,render_double_menu,render_from_me
 SVEXTERN int usetexturebar;
 SVEXTERN int show_smokelighting;
 SVEXTERN int sb_atstart;
+SVEXTERN int SVDECL(cullgeom_portsize,16);
+SVEXTERN int SVDECL(update_initcullgeom,1),SVDECL(cullgeom,1);
 #ifdef pp_CULL
-SVEXTERN int cullactive, show_cullports, cull_portsize;
+SVEXTERN int cullactive, SVDECL(show_cullports,0), SVDECL(cull_portsize,16);
 SVEXTERN int cullsmoke, ncullplaneinfo;
 SVEXTERN cullplanedata *cullplaneinfo;
 SVEXTERN cullplanedata **sort_cullplaneinfo;
@@ -443,7 +445,7 @@ SVEXTERN int slicefilenum;
 SVEXTERN int partfilenum,zonefilenum;
 SVEXTERN int targfilenum;
 
-SVEXTERN int update_makeiblank_smoke3d, update_initcull;
+SVEXTERN int update_makeiblank_smoke3d, SVDECL(update_initcull,0);
 SVEXTERN int setPDIM;
 SVEXTERN int menustatus;
 SVEXTERN int visTimeZone, visTimeSmoke, visTimeSlice, visTimePatch, visTimeIso, visTimeEvac;

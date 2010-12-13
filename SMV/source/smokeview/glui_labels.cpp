@@ -26,6 +26,10 @@ int nevacloaded,nplot3dloaded,nsmoke3dloaded,nisoloaded,nsliceloaded,nvsliceload
 
 GLUI *glui_labels=NULL;
 
+#ifdef pp_BETA
+GLUI_Spinner *SPINNER_cullgeom_portsize=NULL;
+GLUI_Checkbox *CHECKBOX_cullgeom=NULL;
+#endif
 GLUI_Spinner *SPINNER_tick_xmin=NULL;
 GLUI_Spinner *SPINNER_tick_ymin=NULL;
 GLUI_Spinner *SPINNER_tick_zmin=NULL;
@@ -103,6 +107,9 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_ticks 8
 #define LABELS_sensorsize 20
 #define LABELS_drawface 24
+#ifdef pp_BETA
+#define LABELS_cullblockages 25
+#endif
 
 #define LABELS_particleshow    10
 #define LABELS_sliceshow       11
@@ -145,10 +152,17 @@ extern "C" void glui_labels_setup(int main_window){
 #ifdef pp_memstatus
   CHECKBOX_labels_availmemory=glui_labels->add_checkbox_to_panel(panel_label1,"Memory Load",&visAvailmemory,LABELS_label,Labels_CB);
 #endif
-#ifdef pp_BETA
-  glui_labels->add_checkbox_to_panel(panel_label1,"Use experimental blockage drawing algorithm",&use_new_drawface,LABELS_drawface,Labels_CB);
-#endif
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(panel_label1,"Text labels",&visLabels,LABELS_label,Labels_CB);
+#ifdef pp_BETA
+// controls to set face drawing port sizes
+//  glui_labels->add_checkbox_to_panel(panel_label1,"Fast blockage drawing",&use_new_drawface,
+//    LABELS_drawface,Labels_CB);
+//  CHECKBOX_cullgeom=glui_labels->add_checkbox_to_panel(panel_label1,"Cull blockages",&cullgeom,
+//    LABELS_drawface,Labels_CB);
+//  SPINNER_cullgeom_portsize=glui_labels->add_spinner_to_panel(panel_label1,"Cull blockage portsize",GLUI_SPINNER_INT,&cullgeom_portsize,
+//    LABELS_drawface,Labels_CB);
+//  SPINNER_cullgeom_portsize->set_int_limits(3,100,GLUI_LIMIT_CLAMP);
+#endif
   glui_labels->add_button_to_panel(panel_label1,"Show All",LABELS_showall,Labels_CB);
   glui_labels->add_button_to_panel(panel_label1,"Hide All",LABELS_hideall,Labels_CB);
 
@@ -422,9 +436,25 @@ extern "C" void show_glui_labels(void){
 void Labels_CB(int var){
   updatemenu=1;
   switch (var){
+#ifdef pp_BETA
   case LABELS_drawface:
-    updatefacelists=1;
+    if(use_new_drawface==1){
+      CHECKBOX_cullgeom->enable();
+      if(cullgeom==1){
+        SPINNER_cullgeom_portsize->enable();
+      }
+      else{
+        SPINNER_cullgeom_portsize->disable();
+      }
+    }
+    else{
+      CHECKBOX_cullgeom->disable();
+      SPINNER_cullgeom_portsize->disable();
+    }
+    update_initcullgeom=1;
+    set_cull_vis();
     break;
+#endif    
   case LABELS_sensorsize:
     if(sensorrelsize<sensorrelsizeMIN){
       sensorrelsize=sensorrelsizeMIN;

@@ -1727,6 +1727,109 @@ int clip_face(facedata *facei){
   return 0;
 }
 
+/* ------------------ set_cull_vis ------------------------ */
+
+void set_cull_vis(void){
+  int imesh;
+#ifdef pp_BETA
+  int nports;
+  int ntotal;
+#endif
+
+  if(update_initcullgeom==1){
+    initcullgeom(cullgeom);
+    update_facelists();
+  }
+#ifdef pp_BETA
+  nports=0;
+  ntotal=0;
+#endif
+  for(imesh=0;imesh<nmeshes;imesh++){
+    int iport;
+    mesh *meshi;
+
+    meshi = meshinfo + imesh;
+#ifdef pp_BETA
+    ntotal+=meshi->ncullgeominfo;
+#endif    
+    for(iport=0;iport<meshi->ncullgeominfo;iport++){
+      culldata *culli;
+      float xx[2], yy[2], zz[2];
+
+      culli = meshi->cullgeominfo+iport;
+      culli->vis=0;
+     // printf("nports=%i\n",meshi->ncullgeominfo);
+
+      xx[0] = (culli->xbeg-xbar0)/xyzmaxdiff;
+      xx[1] = (culli->xend-xbar0)/xyzmaxdiff;
+      yy[0] = (culli->ybeg-ybar0)/xyzmaxdiff;
+      yy[1] = (culli->yend-ybar0)/xyzmaxdiff;
+      zz[0] = (culli->zbeg-zbar0)/xyzmaxdiff;
+      zz[1] = (culli->zend-zbar0)/xyzmaxdiff;
+      
+      if(PointInFrustum(xx[0],yy[0],zz[0])==1){
+        culli->vis=1;
+#ifdef pp_BETA        
+        nports++;
+#endif        
+        continue;
+      }
+      if(PointInFrustum(xx[1],yy[0],zz[0])==1){
+        culli->vis=1;
+#ifdef pp_BETA        
+        nports++;
+#endif        
+        continue;
+      }
+      if(PointInFrustum(xx[0],yy[1],zz[0])==1){
+        culli->vis=1;
+#ifdef pp_BETA        
+        nports++;
+#endif        
+        continue;
+      }
+      if(PointInFrustum(xx[1],yy[1],zz[0])==1){
+        culli->vis=1;
+#ifdef pp_BETA        
+        nports++;
+#endif        
+        continue;
+      }
+      if(PointInFrustum(xx[0],yy[0],zz[1])==1){
+        culli->vis=1;
+#ifdef pp_BETA        
+        nports++;
+#endif        
+        continue;
+      }
+      if(PointInFrustum(xx[1],yy[0],zz[1])==1){
+        culli->vis=1;
+#ifdef pp_BETA        
+        nports++;
+#endif        
+        continue;
+      }
+      if(PointInFrustum(xx[0],yy[1],zz[1])==1){
+        culli->vis=1;
+#ifdef pp_BETA        
+        nports++;
+#endif        
+        continue;
+      }
+      if(PointInFrustum(xx[1],yy[1],zz[1])==1){
+        culli->vis=1;
+#ifdef pp_BETA        
+        nports++;
+#endif        
+        continue;
+      }
+    }
+  }
+#ifdef pp_BETA
+  printf("ports=%i ports visible=%i\n",ntotal,nports); 
+#endif
+}
+
 /* ------------------ update_facelists ------------------------ */
 
 void update_facelists(void){
@@ -1767,6 +1870,7 @@ void update_facelists(void){
     for(j=0;j<meshi->nfaces;j++){
       facej = meshi->faceinfo + j;
       facej->patchpresent=0;
+      facej->cullport=NULL;
     }
 
     local_showpatch=0;
@@ -2013,6 +2117,7 @@ void update_facelists(void){
         facedata *facei;
 
         facei=meshi->face_normals_single[iface];
+        facei->cullport=get_face_port(meshi,facei);
         switch(facei->dir){
           case DOWN_X:
             if(istartD==-1){
@@ -2104,7 +2209,10 @@ void drawselect_faces(){
 
 #define DRAWFACE(DEFfacetest,DEFeditcolor)    \
         float *facepos;\
+        culldata *cullport;\
         facei = face_START[i];\
+        cullport=facei->cullport;\
+        if(cullport!=NULL&&cullport->vis==0)continue;\
         if(blocklocation==BLOCKlocation_grid){\
           vertices = facei->approx_vertex_coords;\
         }\
@@ -2220,7 +2328,7 @@ void draw_faces(){
     glDisable(GL_LIGHTING);
   }
 #ifdef pp_BETA  
-  printf("faces=%i num drawn=%i color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
+  printf("faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
 #endif  
   if(nface_normals_double>0){
     glEnable(GL_LIGHTING);
@@ -4703,7 +4811,7 @@ void draw_facesOLD(){
     glDisable(GL_LIGHTING);
   }
 #ifdef pp_BETA
-  printf("faces=%i num drawn=%i color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
+  printf("faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
 #endif
   if(nface_normals_double>0){
     glEnable(GL_LIGHTING);
@@ -4870,6 +4978,171 @@ void draw_facesOLD(){
 }
 
 
+/* ------------------ initcullgeom ------------------------ */
+
+void initcullgeom(int cullgeomflag){
+  culldata *culli;
+  int imesh;
+
+  printf("initcullgeom\n");
+  update_initcullgeom=0;
+  updatefacelists=1;
+  for(imesh=0;imesh<nmeshes;imesh++){
+    mesh *meshi;
+    int iskip, jskip, kskip;
+    int ibeg, iend, jbeg, jend, kbeg, kend;
+    float xbeg, xend, ybeg, yend, zbeg, zend;
+    int i, j, k;
+    int nx, ny, nz;
+    int *nxyzgeomcull, *nxyzskipgeomcull;
+
+    meshi=meshinfo+imesh;
+
+    get_cullskips(meshi,cullgeomflag,cullgeom_portsize,&iskip,&jskip,&kskip);
+    nx = (meshi->ibar-1)/iskip + 1;
+    ny = (meshi->jbar-1)/jskip + 1;
+    nz = (meshi->kbar-1)/kskip + 1;
+    meshi->ncullgeominfo = nx*ny*nz;
+
+    nxyzgeomcull=meshi->nxyzgeomcull;
+    nxyzskipgeomcull=meshi->nxyzskipgeomcull;
+
+    nxyzgeomcull[0]=nx;
+    nxyzgeomcull[1]=ny;
+    nxyzgeomcull[2]=nz;
+
+    nxyzskipgeomcull[0]=iskip;
+    nxyzskipgeomcull[1]=jskip;
+    nxyzskipgeomcull[2]=kskip;
+
+
+    FREEMEMORY(meshi->cullgeominfo);
+    NewMemory( (void **)&meshi->cullgeominfo,nx*ny*nz*sizeof(culldata));
+    culli=meshi->cullgeominfo;
+
+    for(k=0;k<nz;k++){
+      kbeg = k*kskip;
+      kend = kbeg + kskip;
+      if(kend>meshi->kbar)kend=meshi->kbar;
+      zbeg = meshi->zplt[kbeg];
+      zend = meshi->zplt[kend];
+      for(j=0;j<ny;j++){
+        jbeg = j*jskip;
+        jend = jbeg + jskip;
+        if(jend>meshi->jbar)jend=meshi->jbar;
+        ybeg = meshi->yplt[jbeg];
+        yend = meshi->yplt[jend];
+        for(i=0;i<nx;i++){
+          ibeg = i*iskip;
+          iend = ibeg + iskip;
+          if(iend>meshi->ibar)iend=meshi->ibar;
+          xbeg = meshi->xplt[ibeg];
+          xend = meshi->xplt[iend];
+
+          culli->ibeg=ibeg;
+          culli->iend=iend;
+
+          culli->jbeg=jbeg;
+          culli->jend=jend;
+
+          culli->kbeg=kbeg;
+          culli->kend=kend;
+
+          culli->xbeg=xbeg;
+          culli->xend=xend;
+
+          culli->ybeg=ybeg;
+          culli->yend=yend;
+
+          culli->zbeg=zbeg;
+          culli->zend=zend;
+
+          culli->iskip=iskip;
+          culli->jskip=jskip;
+          culli->kskip=kskip;
+
+          culli->npixels=0;
+          culli->npixels_old=-1;
+
+          culli++;
+        }
+      }
+    }
+  }
+}
+
+/* ------------------ get_cullskips ------------------------ */
+
+void get_cullskips(mesh *meshi, int cullflag, int cull_portsize_local, int *iiskip, int *jjskip, int *kkskip){
+  int iskip, jskip, kskip;
+
+  if(cullflag==1){
+    iskip = cull_portsize_local;
+    if(iskip<3)iskip=3;
+    if(iskip>meshi->ibar+1)iskip=meshi->ibar+1;
+
+    jskip = cull_portsize_local;
+    if(jskip<3)jskip=3;
+    if(jskip>meshi->jbar+1)jskip=meshi->jbar+1;
+
+    kskip = cull_portsize_local;
+    if(kskip<3)kskip=3;
+    if(kskip>meshi->kbar+1)kskip=meshi->kbar+1;
+  }
+  else{
+    iskip = meshi->ibar+1;
+    jskip = meshi->jbar+1;
+    kskip = meshi->kbar+1;
+  }
+  *iiskip=iskip;
+  *jjskip=jskip;
+  *kkskip=kskip;
+}
+
+
+/* ------------------ get_face_port ------------------------ */
+
+culldata *get_face_port(mesh *meshi, facedata *facei){
+  int ii1, jj1, kk1;
+  int ii2, jj2, kk2;
+  int nx, ny, nz;
+  int ixyz;
+  culldata *return_cull;
+  int *skip,*nxyz;
+
+  skip=meshi->nxyzskipgeomcull;
+  nxyz=meshi->nxyzgeomcull;
+  nx=nxyz[0];
+  ny=nxyz[1];
+  nz=nxyz[2];
+
+  ii1=facei->imin/skip[0];
+  if(facei->imax!=facei->imin){
+    ii2=(facei->imax-1)/skip[0];
+    if(ii1!=ii2)return NULL;
+  }
+  if(ii1<0||ii1>nx)return NULL;
+
+  jj1=facei->jmin/skip[1];
+  if(facei->jmin!=facei->jmax){
+    jj2=(facei->jmax-1)/skip[1];
+    if(jj1!=jj2)return NULL;
+  }
+  if(jj1<0||jj1>ny)return NULL;
+
+  kk1=facei->kmin/skip[2];
+  if(facei->kmin!=facei->kmax){
+    kk2=(facei->kmax-1)/skip[2];
+    if(kk1!=kk2)return NULL;
+  }
+  if(kk1<0||kk1>nz)return NULL;
+
+
+  ixyz = ii1 + jj1*nx + kk1*nx*ny;
+  return_cull = meshi->cullgeominfo + ixyz;
+  
+  return return_cull;
+}
   
 
   

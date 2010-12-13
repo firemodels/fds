@@ -3693,8 +3693,7 @@ typedef struct {
       nbtemp=tempval;
       meshi->blockageinfoptrs=NULL;
       if(
-        NewMemory((void **)&meshi->blockageinfoptrs,sizeof(blockagedata *)*nbtemp)==0||
-        NewMemory((void **)&meshi->deletelist,sizeof(blockagedata *)*nbtemp)==0
+        NewMemory((void **)&meshi->blockageinfoptrs,sizeof(blockagedata *)*nbtemp)==0
         )return 2;
 
 
@@ -3703,7 +3702,6 @@ typedef struct {
         int s_num[6];
 
         meshi->blockageinfoptrs[nn]=NULL;
-        meshi->deletelist[nn]=NULL;
         NewMemory((void **)&meshi->blockageinfoptrs[nn],sizeof(blockagedata));
         bc=meshi->blockageinfoptrs[nn];
         initobst(bc,surfacedefault,nn+1,iobst-1);
@@ -5312,6 +5310,7 @@ typedef struct {
   }
   CheckMemory;
 
+  initcullgeom(cullgeom);
   init_evac_prop();
 
   update_inilist();
@@ -6792,10 +6791,6 @@ void initmesh(mesh *meshi){
   meshi->zheat=NULL;
   meshi->theat=NULL;
   meshi->blockageinfoptrs=NULL;
-  meshi->deletelist=NULL;
-  meshi->carveblockptrs=NULL;
-  meshi->ncarveblocks=0;
-  meshi->ndeletelist=0;
   meshi->nsmoothblockagecolors=0;
 
   meshi->surface_tempmax=SURFACE_TEMPMAX;
