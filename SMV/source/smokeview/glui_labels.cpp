@@ -155,8 +155,8 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(panel_label1,"Text labels",&visLabels,LABELS_label,Labels_CB);
 #ifdef pp_BETA
 // controls to set face drawing port sizes
-//  glui_labels->add_checkbox_to_panel(panel_label1,"Fast blockage drawing",&use_new_drawface,
-//    LABELS_drawface,Labels_CB);
+//  glui_labels->add_checkbox_to_panel(panel_label1,"Fast blockage drawing",&use_new_drawface);
+  glui_labels->add_checkbox_to_panel(panel_label1,"Fast blockage drawing",&use_new_drawface,LABELS_drawface,Labels_CB);
 //  CHECKBOX_cullgeom=glui_labels->add_checkbox_to_panel(panel_label1,"Cull blockages",&cullgeom,
 //    LABELS_drawface,Labels_CB);
 //  SPINNER_cullgeom_portsize=glui_labels->add_spinner_to_panel(panel_label1,"Cull blockage portsize",GLUI_SPINNER_INT,&cullgeom_portsize,
@@ -438,6 +438,7 @@ void Labels_CB(int var){
   switch (var){
 #ifdef pp_BETA
   case LABELS_drawface:
+    /*
     if(use_new_drawface==1){
       CHECKBOX_cullgeom->enable();
       if(cullgeom==1){
@@ -453,6 +454,8 @@ void Labels_CB(int var){
     }
     update_initcullgeom=1;
     set_cull_vis();
+    */
+    updatefacelists=1;
     break;
 #endif    
   case LABELS_sensorsize:
