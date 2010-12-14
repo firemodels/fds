@@ -1680,7 +1680,7 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
   if(isostream==NULL)return;
   *error = 0;
   for(i=0;i<*nlevels;i++){
-    float level;
+    float dlevel;
     
     if(*nlevels>1){
       if(i==0){

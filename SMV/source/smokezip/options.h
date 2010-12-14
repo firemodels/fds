@@ -9,6 +9,8 @@
 #pragma float_control( precise, on)
 #pragma float_control( except, on )
 #endif
+#pragma warning (disable:695)		
+#pragma warning (disable:2557)		
 #pragma warning (disable:4996)		
 #pragma warning (disable:4701)		
 #pragma warning (disable:4310)		
