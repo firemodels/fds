@@ -23,7 +23,6 @@ echo Using SVN revision %smv_revision% to build a 32 bit Windows Smokeview
 
 %svn_drive%
 cd %svn_root%\smv\source\smokeview
-svn -r %smv_revision% update
 
 cd %svn_root%\smv\Build\INTEL_WIN_TEST_32
 erase *.obj
