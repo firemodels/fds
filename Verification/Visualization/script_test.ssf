@@ -1,7 +1,7 @@
 // note: The RENDERDIR pathname has been changed to point
 //       to where the Smokeview User guide script figures are kept
 RENDERDIR
- ..\..\Manuals\SMV_5_User_Guide\SCRIPT_FIGURES
+ ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
 LOADINIFILE
  script_test.ini
 SETVIEWPOINT
