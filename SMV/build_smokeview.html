@@ -3,25 +3,13 @@
 <TITLE>Build Smokeview</TITLE>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
-<h2>Build Smokeview</h2>
+<h2>Build Smokeview Release</h2>
 <a href="../FDS_Compilation/build_fds.html">Build FDS</a> -
 Build Smokeview -
 <a href="../Utilities/build_other.html">Build Bundle</a>
 
 <hr size="1">
 
-<h3>Verify Smokeview</h3>
-<ul>
-<li><a href="scripts/Update_REPOS_latest4SMV_svn.bat">Update Linux and Mac repositories to the latest revision.</a> (Use Smartsvn to update the Windows repository)
-<li><a href="scripts/RUN_smv_test_cases.bat">Run test cases</a> Run FDS cases used to test smokeview (allow several hours to complete).  
-This step does not need to be performed every time.
-<li><a href="scripts/MAKE_SMV_UG_figures.bat">Create figures</a> Run Smokeview scripts to generate figures for the User and Verification Guides.
-<li><a href="scripts/MAKE_SMV_UVG.bat">Generate the Smokeview User and Verification Guides</a>
-<li><a href="scripts/VIEW_SMV_UG.bat">View the Smokeview Users Guide</a> 
-<li><a href="scripts/VIEW_SMV_VG.bat">View the Smokeview Verification Guide</a>
-</ul>
-
-<h3>Build, Package and Upload Smokeview</h3>
 <ul>
 <li>Get the SVN revision number of the Smokeview source directory.
 <li>Increment the version number (<tt>SMVVERSION</tt> found in <tt>options.h</tt> .
@@ -30,9 +18,10 @@ Add a dummy comment in <tt>main.c</tt> to force a repository update.
 <li>Rebuild a Windows release version of Smokeview.
 <li>Regenerate test cases and Smokeview user's guide using instructions above under <strong>Verify Smokeview</strong>. 
 Rebuilding the User's guide ensures that the proper Smokeview version information appears in the guide.
+</ul>
 
-<p><li>Build Utilities
-<table border=on>
+<h3>Build Utilities</h3>
+<p><table border=on>
 <tr><th></th><th>smokediff</th><th>smokezip</th><th>background</th><th>fds2ascii</th></tr>
 <tr>
 <th align=center>win32/<a href="scripts/Makeallwin32.bat">build all</a></th>
@@ -72,19 +61,22 @@ Rebuilding the User's guide ensures that the proper Smokeview version informatio
 </table>
 
 
-<p><li>Build Smokeview
-<table border=on>
+<h3>Build Smokeview</h3>
+<p>Update the <a href="scripts/Update_smv_svn_num_win.bat">(Windows)</a> or <a href="scripts/Update_smv_svn_num.bat">(Linux/OSX)</a> Smokeview source
+to the revision specified </a> in the <a href="scripts/EDIT_setup.bat">configuration file.</a><br>
+
+<p><table border=on>
+
 <tr>
 <th>Test Version</th>
 <th>Release Version</th>
 </tr>
+
 <tr>
 <td valign=top>
 Test smokeview's are generated to test a particular fix usually as a result of a bug reported in the issue tracker.  
 The test suite is typically not run. 
 <ul>
-<li><a href="scripts/EDIT_setup.bat">Update configuration file</a> 
-Update the smv_revision and smv_version environment variables in the <tt>fds_smv_env.bat</tt> file.
 <li><a href="scripts/EDIT_notes.bat">Edit test release notes</a> 
 
 <p><table border=on>
@@ -117,10 +109,7 @@ Update the smv_revision and smv_version environment variables in the <tt>fds_smv
 <tr>
 <td><a href="scripts/INSTALLtestwin32.bat">Install</a></td>
 <td><a href="scripts/INSTALLtestwin64.bat">Install</a></td>
-<td>-</td>
-<td>-</td>
-<td>-</td>
-<td>-</td>
+<td align=center colspan=4>-</td>
 </tr>
 </table>
 </ul>
@@ -171,23 +160,29 @@ Update the smv_revision and smv_version environment variables in the <tt>fds_smv
 <tr>
 <td><a href="scripts/INSTALLreleasewin32.bat">Install</a></td>
 <td><a href="scripts/INSTALLreleasewin64.bat">Install</a></td>
-<td>-</td>
-<td>-</td>
-<td>-</td>
-<td>-</td>
+<td align=center colspan=4>-</td>
 </tr>
 </table>
 </tr>
 </table>
+
+<h3>Verify Smokeview</h3>
+<ul>
+<li><a href="scripts/Update_REPOS_latest4SMV_svn.bat">Update Linux and Mac repositories to the latest revision.</a> (Use Smartsvn to update the Windows repository)
+<li>Run FDS cases used to test smokeview.
+<li>Run Smokeview scripts to generate figures for the User and Verification Guides.
+<li><a href="scripts/MAKE_SMV_UVG.bat">Generate the Smokeview User and Verification Guides</a>
+<li><a href="scripts/VIEW_SMV_UG.bat">View the Smokeview Users Guide</a> 
+<li><a href="scripts/VIEW_SMV_VG.bat">View the Smokeview Verification Guide</a>
 </ul>
+
+
 <h3>Other</h3>
 <ul>
 <li><a href="scripts/EDIT_build_smokeview.bat">Edit this page</a> 
 <li><a href="scripts/EDIT_setup.bat">Edit <tt>configuration file</tt></a> 
 <li><a href="scripts/COPYhome2config.bat"><tt>configuration file</tt> ===>> <tt>REPOSITORY</tt></a>
 <li><a href="scripts/TEST_setup.bat">Show <tt>configuration file settings</tt></a> 
-<li><a href="scripts/Update_smv_svn_num.bat">Update the Smokeview source to the revision specified </a>
-in the <a href="scripts/EDIT_setup.bat">configuration file.</a><br>(Use Smartsvn to update the Windows repository)
 <li><a href="http://code.google.com/p/fds-smv/downloads/list">Check download page</a>
 <li><a href="../FDS_Compilation/getting_started.html">Getting Started - setting up build scripts</a>
 <li><a href="scripts/EDIT_device_dist.bat">Edit <tt>FDS5/BIN/objects.svo</tt></a> 
