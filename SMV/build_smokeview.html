@@ -62,8 +62,12 @@ Rebuilding the User's guide ensures that the proper Smokeview version informatio
 
 
 <h3>Build Smokeview</h3>
-<p>Update the <a href="scripts/Update_smv_svn_num_win.bat">(Windows)</a> or <a href="scripts/Update_smv_svn_num.bat">(Linux/OSX)</a> Smokeview source
-to the revision specified </a> in the <a href="scripts/EDIT_setup.bat">configuration file.</a><br>
+<ul>
+<li>Update <a href="scripts/Update_REPOS_latest4SMV_svn.bat">Linux and OSX</a> repositories to the latest revision.
+<li>Update <a href="scripts/Update_smv_svn_num_win.bat">(Windows)</a> or <a href="scripts/Update_smv_svn_num.bat">(Linux/OSX)</a> Smokeview source
+to the revision specified in the configuration file.
+<li>Update <a href="scripts/EDIT_setup.bat">configuration file.</a>
+</ul>
 
 <p><table border=on>
 
@@ -74,41 +78,39 @@ to the revision specified </a> in the <a href="scripts/EDIT_setup.bat">configura
 
 <tr>
 <td valign=top>
-Test smokeview's are generated to test a particular fix usually as a result of a bug reported in the issue tracker.  
-The test suite is typically not run. 
 <ul>
-<li><a href="scripts/EDIT_notes.bat">Edit test release notes</a> 
+<li><a href="scripts/EDIT_notes.bat">Update test release notes</a> 
 
 <p><table border=on>
-<tr><th colspan=6>Build, Package and Upload Smokeview Test</th></tr>
-<tr><th>win32</th><th>win64</th><th>Linux 32</th><th>Linux 64</th><th>OSX 32</th><th>OSX 64</th></tr>
+<tr><th colspan=6 align=center>Build, Package and Upload Smokeview Test</th></tr>
+<tr><th align=center>win32</th><th>win64</th><th align=center>Linux 32</th><th align=center>Linux 64</th><th align=center>OSX 32</th><th align=center>OSX 64</th></tr>
 <tr>
-<td><a href="scripts/MAKEtestsmvwin32.bat">Build</a></td>
-<td><a href="scripts/MAKEtestsmvwin64.bat">Build 64 on 64</a><br>
-    <a href="scripts/MAKEtestsmvwin64on32.bat">Build 64 on 32</a></td>
-<td><a href="scripts/MAKEtestsmvlinux32.bat">Build</a></td>
-<td><a href="scripts/MAKEtestsmvlinux64.bat">Build</a></td>
-<td><a href="scripts/MAKEtestsmvosx32.bat">Build</a></td>
-<td><a href="scripts/MAKEtestsmvosx64.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEtestsmvwin32.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEtestsmvwin64.bat">Build 64/64</a><br>
+    <a href="scripts/MAKEtestsmvwin64on32.bat">Build 64/32</a></td>
+<td align=center><a href="scripts/MAKEtestsmvlinux32.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEtestsmvlinux64.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEtestsmvosx32.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEtestsmvosx64.bat">Build</a></td>
 </tr>
 <tr>
-<td><a href="scripts/MAKEtestdistwin32.bat">Package</a></td>
-<td><a href="scripts/MAKEtestdistwin64.bat">Package</a></td>
-<td><a href="scripts/MAKEtestdistlinux32.bat">Package</a></td>
-<td><a href="scripts/MAKEtestdistlinux64.bat">Package</a></td>
-<td><a href="scripts/MAKEtestdistosx32.bat">Package</a></td>
-<td><a href="scripts/MAKEtestdistosx64.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEtestdistwin32.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEtestdistwin64.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEtestdistlinux32.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEtestdistlinux64.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEtestdistosx32.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEtestdistosx64.bat">Package</a></td>
 </tr>
-<tr><td><a href="scripts/UPLOADtestwin32.bat">Upload</a></td>
-    <td><a href="scripts/UPLOADtestwin64.bat">Upload</a></td>
-    <td><a href="scripts/UPLOADtestlinux32.bat">Upload</a></td>
-    <td><a href="scripts/UPLOADtestlinux64.bat">Upload</a></td>
-    <td><a href="scripts/UPLOADtestosx32.bat">Upload</a></td>
-    <td><a href="scripts/UPLOADtestosx64.bat">Upload</a></td>
+<tr><td align=center><a href="scripts/UPLOADtestwin32.bat">Upload</a></td>
+    <td align=center><a href="scripts/UPLOADtestwin64.bat">Upload</a></td>
+    <td align=center><a href="scripts/UPLOADtestlinux32.bat">Upload</a></td>
+    <td align=center><a href="scripts/UPLOADtestlinux64.bat">Upload</a></td>
+    <td align=center><a href="scripts/UPLOADtestosx32.bat">Upload</a></td>
+    <td align=center><a href="scripts/UPLOADtestosx64.bat">Upload</a></td>
 </tr>
 <tr>
-<td><a href="scripts/INSTALLtestwin32.bat">Install</a></td>
-<td><a href="scripts/INSTALLtestwin64.bat">Install</a></td>
+<td align=center><a href="scripts/INSTALLtestwin32.bat">Install</a></td>
+<td align=center><a href="scripts/INSTALLtestwin64.bat">Install</a></td>
 <td align=center colspan=4>-</td>
 </tr>
 </table>
@@ -123,43 +125,41 @@ The test suite is typically not run.
 <a href="scripts/COPY_smv_vg.bat">Verification guide</a>, 
 to the All_PDF_Files directory for distribution.
 <li>Commit updated release notes and User's guide to the repository so that that the <em>packagers</em> have access to them on all platforms.
-<li><a href="scripts/EDIT_setup.bat">Update configuration file</a> 
-Update the smv_revision and smv_version environment variables in the <tt>fds_smv_env.bat</tt> file.
 
 <p><table border=on>
 <tr><th colspan=6>Build, Package and Upload Smokeview Release</th></tr>
 <tr><th>win32</th><th>win64</th><th>Linux 32</th><th>Linux 64</th><th>OSX 32</th><th>OSX 64</th></tr>
 
 <tr>
-<td><a href="scripts/MAKEsmvwin32.bat">Build</a></td>
-<td><a href="scripts/MAKEsmvwin64.bat">Build 64 on 64</a><br>
+<td align=center><a href="scripts/MAKEsmvwin32.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEsmvwin64.bat">Build 64 on 64</a><br>
     <a href="scripts/MAKEsmvwin64on32.bat">Build 64 on 32</a></td>
-<td><a href="scripts/MAKEsmvlinux32.bat">Build</a></td>
-<td><a href="scripts/MAKEsmvlinux64.bat">Build</a></td>
-<td><a href="scripts/MAKEsmvosx32.bat">Build</a></td>
-<td><a href="scripts/MAKEsmvosx64.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEsmvlinux32.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEsmvlinux64.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEsmvosx32.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEsmvosx64.bat">Build</a></td>
 </tr>
 
 <tr>
-<td><a href="scripts/MAKEdistwin32.bat">Package</a></td>
-<td><a href="scripts/MAKEdistwin64.bat">Package</a></td>
-<td><a href="scripts/MAKEdistlinux32.bat">Package</a></td>
-<td><a href="scripts/MAKEdistlinux64.bat">Package</a></td>
-<td><a href="scripts/MAKEdistosx32.bat">Package</a></td>
-<td><a href="scripts/MAKEdistosx64.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEdistwin32.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEdistwin64.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEdistlinux32.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEdistlinux64.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEdistosx32.bat">Package</a></td>
+<td align=center><a href="scripts/MAKEdistosx64.bat">Package</a></td>
 </tr>
 
 <tr>
-<td><a href="scripts/UPLOADreleasewin32.bat">Upload</a></td>
-<td><a href="scripts/UPLOADreleasewin64.bat">Upload</a></td>
-<td><a href="scripts/UPLOADreleaselinux32.bat">Upload</a></td>
-<td><a href="scripts/UPLOADreleaselinux64.bat">Upload</a></td>
-<td><a href="scripts/UPLOADreleaseosx32.bat">Upload</a></td>
-<td><a href="scripts/UPLOADreleaseosx64.bat">Upload</a></td>
+<td align=center><a href="scripts/UPLOADreleasewin32.bat">Upload</a></td>
+<td align=center><a href="scripts/UPLOADreleasewin64.bat">Upload</a></td>
+<td align=center><a href="scripts/UPLOADreleaselinux32.bat">Upload</a></td>
+<td align=center><a href="scripts/UPLOADreleaselinux64.bat">Upload</a></td>
+<td align=center><a href="scripts/UPLOADreleaseosx32.bat">Upload</a></td>
+<td align=center><a href="scripts/UPLOADreleaseosx64.bat">Upload</a></td>
 </tr>
 <tr>
-<td><a href="scripts/INSTALLreleasewin32.bat">Install</a></td>
-<td><a href="scripts/INSTALLreleasewin64.bat">Install</a></td>
+<td align=center><a href="scripts/INSTALLreleasewin32.bat">Install</a></td>
+<td align=center><a href="scripts/INSTALLreleasewin64.bat">Install</a></td>
 <td align=center colspan=4>-</td>
 </tr>
 </table>
@@ -168,7 +168,6 @@ Update the smv_revision and smv_version environment variables in the <tt>fds_smv
 
 <h3>Verify Smokeview</h3>
 <ul>
-<li><a href="scripts/Update_REPOS_latest4SMV_svn.bat">Update Linux and Mac repositories to the latest revision.</a> (Use Smartsvn to update the Windows repository)
 <li>Run FDS cases used to test smokeview.
 <li>Run Smokeview scripts to generate figures for the User and Verification Guides.
 <li><a href="scripts/MAKE_SMV_UVG.bat">Generate the Smokeview User and Verification Guides</a>
