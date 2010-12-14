@@ -2,7 +2,7 @@
 // put rendered files in specified directory
 
 RENDERDIR
- ..\..\Manuals\SMV_5_User_Guide\SCRIPT_FIGURES
+ ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
 
 // render 3D smoke
 
