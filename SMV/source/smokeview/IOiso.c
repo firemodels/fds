@@ -805,8 +805,26 @@ void unloadiso(mesh *meshi){
   FREEMEMORY(ib->full_bufferframe);
   FREEMEMORY(ib->comp_buffer);
   FREEMEMORY(ib->normaltable);
-  FREEMEMORY(iso_trans);
-  FREEMEMORY(iso_opaques);
+
+  if(iso_trans_list!=NULL){
+    int i;
+
+    for(i=0;i<niso_timesteps;i++){
+      FREEMEMORY(iso_trans_list[i]);
+    }
+    FREEMEMORY(niso_trans_list);
+    FREEMEMORY(iso_trans_list);
+  }
+  if(iso_opaques_list!=NULL){
+      int i;
+
+      for(i=0;i<niso_timesteps;i++){
+        FREEMEMORY(iso_opaques_list[i]);
+      }
+    FREEMEMORY(niso_opaques_list);
+    FREEMEMORY(iso_opaques_list);
+  }
+
   niso_trans=0;
   niso_opaques=0;
   ib->loaded=0;
@@ -877,7 +895,7 @@ void drawiso(int tranflag){
     iso_specular[3] = 1.0;
     if(tranflag==DRAW_TRANSPARENT)transparenton();
 
-    if(usetexturebar==1){
+    if(usetexturebar==1&&isoi->dataflag==1){
       glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
       glEnable(GL_TEXTURE_1D);
       glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
@@ -901,48 +919,60 @@ void drawiso(int tranflag){
       niso_list_start=niso_opaques;
     }
     CheckMemory;
-    for(i=0;i<niso_list_start;i++){
-      isotri *tri;
-      float *colorptr;
-      isovert *v1, *v2, *v3;
+    if(usetexturebar==1&&isoi->dataflag==1){
+      for(i=0;i<niso_list_start;i++){
+        isotri *tri;
+        float *colorptr;
+        isovert *v1, *v2, *v3;
         
-      tri=iso_list_start[i];
+        tri=iso_list_start[i];
 
-      v1 = tri->v1;
-      v2 = tri->v2;
-      v3 = tri->v3;
+        v1 = tri->v1;
+        v2 = tri->v2;
+        v3 = tri->v3;
 
-      if(usetexturebar==1){
         glTexCoord1f(v1->texturecolor);
-      }
-      else{
-        glColor4fv(v1->color);
-      }
-      glNormal3fv(v1->norm);
-      glVertex3fv(v1->xyz);
+        glNormal3fv(v1->norm);
+        glVertex3fv(v1->xyz);
         
-      if(usetexturebar==1){
         glTexCoord1f(v2->texturecolor);
-      }
-      else{
-        glColor4fv(v2->color);
-      }
-      glNormal3fv(v2->norm);
-      glVertex3fv(v2->xyz);
+        glNormal3fv(v2->norm);
+        glVertex3fv(v2->xyz);
         
-      if(usetexturebar==1){
         glTexCoord1f(v3->texturecolor);
+        glNormal3fv(v3->norm);
+        glVertex3fv(v3->xyz);
       }
-      else{
+    }
+    else{
+      for(i=0;i<niso_list_start;i++){
+        isotri *tri;
+        float *colorptr;
+        isovert *v1, *v2, *v3;
+        
+        tri=iso_list_start[i];
+
+        v1 = tri->v1;
+        v2 = tri->v2;
+        v3 = tri->v3;
+
+        glColor4fv(v1->color);
+        glNormal3fv(v1->norm);
+        glVertex3fv(v1->xyz);
+        
+        glColor4fv(v2->color);
+        glNormal3fv(v2->norm);
+        glVertex3fv(v2->xyz);
+        
         glColor4fv(v3->color);
+        glNormal3fv(v3->norm);
+        glVertex3fv(v3->xyz);
       }
-      glNormal3fv(v3->norm);
-      glVertex3fv(v3->xyz);
     }
     glEnd();
 
     glPopAttrib();
-    if(usetexturebar==1)glDisable(GL_TEXTURE_1D);
+    if(usetexturebar==1&&isoi->dataflag==1)glDisable(GL_TEXTURE_1D);
 
 
     if(tranflag==DRAW_TRANSPARENT)transparentoff();
