@@ -1,7 +1,7 @@
-&HEAD CHID= 'LLNL_51', TITLE= '1986 LLNL Enclosure Fire Test 51'/
+&HEAD CHID= 'LLNL_57', TITLE= '1986 LLNL Enclosure Fire Test 57'/
 &MESH IJK=30,20,30, XB=0,6,0,4,0,4.5 /
-&TIME T_BEGIN=-20., T_END=3000. /
-&MISC TMPA=33. SURF_DEFAULT='Wall' /Fire
+&TIME T_BEGIN=-20., T_END=5000. /
+&MISC TMPA=29. SURF_DEFAULT='Wall' /Fire
 &RADI RADIATIVE_FRACTION=0.20 /
 
 &REAC ID= 'Methane'
@@ -20,7 +20,7 @@
 &RAMP ID='fire', T=   0., F=0. /
 &RAMP ID='fire', T=  10., F=1. /
 
-&OBST XB=2.7,3.2,1.7,2.2,0.0,0.92, 
+&OBST XB=2.7,3.2,1.7,2.2,0.0,0.2, 
 
 SURF_IDS='BURNER','Duct','Duct' / Construction
 
@@ -82,7 +82,7 @@ Ventilation
 
 &SURF ID='EXHAUST'
       COLOR='BLUE'
-      LEAK_PATH=1,0/
+      VOLUME_FLUX=0.22 /
 
 &OBST XB=0.6,1.0,0.0,0.5,0.6,0.6, SURF_ID='Duct' / Inlet duct work
 &OBST XB=0.6,1.0,0.0,0.1,1.0,1.0, SURF_ID='Duct' /
@@ -106,9 +106,10 @@ Ventilation
 &OBST XB=0.6,1.0,1.8,1.8,2.9,3.1, SURF_ID='Duct' /
 &HOLE XB=0.65,.95,1.85,2.15,2.9,3.1
 
+&OBST XB=0.6,1.0,1.8,2.2,2.85,2.85, SURF_ID='Duct'/ Grating
 
 &VENT XB=0.6,1.0,0.0,0.0,0.6,1.0, SURF_ID='Inlet' / 
-&VENT XB=4.4,5.2,0.0,0.0,0.0,2.0, SURF_ID='OPEN' / Door (closed in forced ventilation tests)
+ VENT XB=4.4,5.2,0.0,0.0,0.0,2.0, SURF_ID='OPEN' / Door (closed in forced ventilation tests)
 &VENT XB=6.0,6.0,1.6,2.4,3.3,3.9, SURF_ID='EXHAUST' / 
 
 Output
