@@ -20,7 +20,7 @@
 &RAMP ID='fire', T=   0., F=0. /
 &RAMP ID='fire', T=  10., F=1. /
 
-&OBST XB=2.7,3.2,1.7,2.2,0.0,.92, 
+&OBST XB=2.7,3.2,1.7,2.2,0.0,0.2, 
 
 SURF_IDS='BURNER','Duct','Duct' / Construction
 
