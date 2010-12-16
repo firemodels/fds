@@ -1230,7 +1230,7 @@ END MODULE TURBULENCE
 !
 !! Restrict fine mesh to coarse mesh for embedded cells
 !
-!SPECIES_LOOP: DO N=0,N_SPECIES
+!SPECIES_LOOP: DO N=0,N_GAS_SPECIES
 !
 !   ! x-direction fluxes
 !
@@ -1461,13 +1461,13 @@ END MODULE TURBULENCE
 !IF (PREDICTOR) THEN
 !   RHO1 => M1%RHOS
 !   RHO2 => M2%RHOS
-!   IF (N_SPECIES>0) YY1  => M1%YYS
-!   IF (N_SPECIES>0) YY2  => M2%YYS
+!   IF (N_GAS_SPECIES>0) YY1  => M1%YYS
+!   IF (N_GAS_SPECIES>0) YY2  => M2%YYS
 !ELSEIF (CORRECTOR) THEN
 !   RHO1 => M1%RHO
 !   RHO2 => M2%RHO
-!   IF (N_SPECIES>0) YY1  => M1%YY
-!   IF (N_SPECIES>0) YY2  => M2%YY
+!   IF (N_GAS_SPECIES>0) YY1  => M1%YY
+!   IF (N_GAS_SPECIES>0) YY2  => M2%YY
 !ENDIF
 !
 !DO K = K_LO,K_HI
@@ -1493,9 +1493,9 @@ END MODULE TURBULENCE
 !   ENDDO
 !ENDDO
 !
-!IF (N_SPECIES>0) THEN
+!IF (N_GAS_SPECIES>0) THEN
 !
-!   SPECIES_LOOP: DO N=1,N_SPECIES
+!   SPECIES_LOOP: DO N=1,N_GAS_SPECIES
 !   
 !      DO K = K_LO,K_HI
 !         KK_0 = KK_LO + (K-K_LO)*NRZ
@@ -2002,7 +2002,7 @@ END MODULE TURBULENCE
 !
 !! Set fine mesh boundary value to corresponding coarse mesh value
 !
-!SPECIES_LOOP: DO N=1,N_SPECIES
+!SPECIES_LOOP: DO N=1,N_GAS_SPECIES
 !
 !   DO K = K_LO,K_HI
 !      KK_0 = KK_LO + (K-K_LO)*NRZ
@@ -2020,7 +2020,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II_0,JJ,KK) = RHOP1(I,J,K)
 !                  TMP2(II_0,JJ,KK) = TMP1(I,J,K)
 !                  HH2(II_0,JJ,KK) = HH1(I,J,K)
-!                  IF (N_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
+!                  IF (N_GAS_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2034,7 +2034,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II_0,JJ,KK) = RHOP1(I,J,K)
 !                  TMP2(II_0,JJ,KK) = TMP1(I,J,K)
 !                  HH2(II_0,JJ,KK) = HH1(I,J,K)
-!                  IF (N_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
+!                  IF (N_GAS_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2056,7 +2056,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II,JJ_0,KK) = RHOP1(I,J,K)
 !                  TMP2(II,JJ_0,KK) = TMP1(I,J,K)
 !                  HH2(II,JJ_0,KK) = HH1(I,J,K)
-!                  IF (N_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
+!                  IF (N_GAS_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2070,7 +2070,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II,JJ_0,KK) = RHOP1(I,J,K)
 !                  TMP2(II,JJ_0,KK) = TMP1(I,J,K)
 !                  HH2(II,JJ_0,KK) = HH1(I,J,K)
-!                  IF (N_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
+!                  IF (N_GAS_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2092,7 +2092,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II,JJ,KK_0) = RHOP1(I,J,K)
 !                  TMP2(II,JJ,KK_0) = TMP1(I,J,K)
 !                  HH2(II,JJ,KK_0) = HH1(I,J,K)
-!                  IF (N_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
+!                  IF (N_GAS_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2106,7 +2106,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II,JJ,KK_0) = RHOP1(I,J,K)
 !                  TMP2(II,JJ,KK_0) = TMP1(I,J,K)
 !                  HH2(II,JJ,KK_0) = HH1(I,J,K)
-!                  IF (N_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
+!                  IF (N_GAS_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
