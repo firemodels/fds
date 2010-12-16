@@ -12,6 +12,7 @@ USE COMPRESSDEFS
 USE MESH_POINTERS
 USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
+USE OUTPUT_DATA
 USE TYPES
 
 IMPLICIT NONE
@@ -310,15 +311,6 @@ DO N=1,N_PROF
    WRITE(FN_PROF(N),CFORM) TRIM(CHID),'_prof_',N,'.csv'
 ENDDO
 
-! State Relation File(s)
-
-IF (STATE_FILE) THEN
-   ALLOCATE(LU_STATE(1))
-   ALLOCATE(FN_STATE(1))
-   LU_STATE(1) = GET_FILE_NUMBER()
-   WRITE(FN_STATE(1),'(A,A)') TRIM(CHID),'_state.csv'
-ENDIF
-
 ! Vegetation File(s) for Fuel Element model
 
 IF (N_TREES_OUT > 0) THEN
@@ -483,7 +475,7 @@ SUBROUTINE INITIALIZE_GLOBAL_DUMPS
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT
 USE CONTROL_VARIABLES
-REAL(EB) :: ZZ,Y_MF(1:N_Y_ARRAY),MW_MF,TNOW,Z_F,Y_VECTOR(1:N_SPECIES)
+REAL(EB) :: ZZ,Y_MF(1:N_Y_ARRAY),MW_MF,TNOW,Z_F,Y_VECTOR(1:N_GAS_SPECIES)
 INTEGER :: NN,IZ,I,N
 CHARACTER(30), DIMENSION(20) :: LABEL
 !CHARACTER(100) :: MESSAGE
@@ -643,93 +635,6 @@ DO N=1,N_TREES_OUT
  ENDIF
 ENDDO
  
-! Write out info about mixture fraction-based state relationships for all mixture fraction SPECies
- 
-IF (MIXTURE_FRACTION .AND. STATE_FILE) THEN
-   OPEN(LU_STATE(1),FILE=FN_STATE(1),FORM='FORMATTED',STATUS='REPLACE')
-   WRITE(TCFORM,'(A,I4.4,A)') "(",N_STATE_SPECIES+1,"(A,','),A)"
-   WRITE(LU_STATE(1),TCFORM) ('kg/kg',NN=1,N_STATE_SPECIES+1),'g/mol'
-   LABEL(1) = 'Z'
-   LABEL(2:2+N_STATE_SPECIES-1) = MF_SPEC_FORMULA(1:N_STATE_SPECIES)
-   LABEL(2+N_STATE_SPECIES) = 'Wgt'
-   WRITE(LU_STATE(1),TCFORM) LABEL(1:N_STATE_SPECIES+2)
-   Y_VECTOR=0._EB
-   SOOT_DEP_IF: IF (SOOT_DEPOSITION) THEN
-      IF (CO_PRODUCTION) THEN
-         Z_F = REACTION(2)%Z_F
-         DO IZ=0,1000
-            ZZ = IZ/REAL(1000,EB)
-            IF (ZZ<Z_F) THEN
-               Y_VECTOR(I_Z_MIN)   = 0._EB
-               Y_VECTOR(I_Z_MIN+1) = ZZ * REACTION(2)%CO_YIELD / MW_CO/REACTION(1)%NU(CO_INDEX)*REACTION(1)%MW_FUEL
-               Y_VECTOR(I_Z_MAX)   = ZZ * REACTION(2)%SOOT_YIELD   
-               Y_VECTOR(I_Z_MIN+2) = ZZ - Y_VECTOR(I_Z_MIN+1) - Y_VECTOR(I_Z_MAX)
-            ELSE
-               Y_VECTOR(I_Z_MIN)   = REACTION(2)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
-               Y_VECTOR(I_Z_MIN+1) = (ZZ-Y_VECTOR(I_Z_MIN))*REACTION(2)%CO_YIELD/MW_CO/REACTION(1)%NU(CO_INDEX)*REACTION(1)%MW_FUEL
-               Y_VECTOR(I_Z_MAX)   = (ZZ - Y_VECTOR(I_Z_MIN)) * REACTION(2)%SOOT_YIELD
-               Y_VECTOR(I_Z_MIN+2) = ZZ - Y_VECTOR(I_Z_MIN) - Y_VECTOR(I_Z_MIN+1) - Y_VECTOR(I_Z_MAX)
-            ENDIF
-            CALL GET_MASS_FRACTION_ALL(Y_VECTOR,Y_MF)
-            CALL GET_MOLECULAR_WEIGHT(Y_VECTOR,MW_MF)
-            WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:N_STATE_SPECIES),MW_MF
-         ENDDO
-      ELSE
-         Z_F = REACTION(1)%Z_F
-         DO IZ=0,1000
-            ZZ = IZ/REAL(1000,EB)
-            IF (ZZ<Z_F) THEN
-               Y_VECTOR(I_Z_MIN)   = 0._EB
-               Y_VECTOR(I_Z_MAX)   = ZZ * REACTION(1)%SOOT_YIELD   
-               Y_VECTOR(I_Z_MIN+1) = ZZ * (1._EB - REACTION(1)%SOOT_YIELD)
-            ELSE
-               Y_VECTOR(I_Z_MIN)   = REACTION(1)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
-               Y_VECTOR(I_Z_MAX)   = (ZZ - Y_VECTOR(I_Z_MIN)) * REACTION(1)%SOOT_YIELD
-               Y_VECTOR(I_Z_MIN+1) = (ZZ - Y_VECTOR(I_Z_MIN)) * (1._EB - REACTION(1)%SOOT_YIELD)
-            ENDIF
-            CALL GET_MASS_FRACTION_ALL(Y_VECTOR,Y_MF)
-            CALL GET_MOLECULAR_WEIGHT(Y_VECTOR,MW_MF)
-            WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:N_STATE_SPECIES),MW_MF
-         ENDDO  
-      ENDIF 
-   ELSE SOOT_DEP_IF
-      IF (CO_PRODUCTION) THEN
-         Z_F = REACTION(2)%Z_F
-         DO IZ=0,1000
-            ZZ = IZ/REAL(1000,EB)
-            IF (ZZ<Z_F) THEN
-               Y_VECTOR(I_Z_MIN) = 0._EB
-               Y_VECTOR(I_Z_MIN+1) = ZZ * REACTION(2)%CO_YIELD / MW_CO/REACTION(1)%NU(CO_INDEX)*REACTION(1)%MW_FUEL   
-               Y_VECTOR(I_Z_MIN+2) = ZZ - Y_VECTOR(I_Z_MIN+1)
-            ELSE
-               Y_VECTOR(I_Z_MIN) = REACTION(2)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
-               Y_VECTOR(I_Z_MIN+1) = (ZZ-Y_VECTOR(I_Z_MIN))*REACTION(2)%CO_YIELD/MW_CO/REACTION(1)%NU(CO_INDEX)*REACTION(1)%MW_FUEL
-               Y_VECTOR(I_Z_MIN+2) = ZZ - Y_VECTOR(I_Z_MIN) - Y_VECTOR(I_Z_MIN+1)
-            ENDIF
-            CALL GET_MASS_FRACTION_ALL(Y_VECTOR,Y_MF)
-            CALL GET_MOLECULAR_WEIGHT(Y_VECTOR,MW_MF)
-            WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:N_STATE_SPECIES),MW_MF
-         ENDDO
-      ELSE
-         Z_F = REACTION(1)%Z_F
-         DO IZ=0,1000
-            ZZ = IZ/REAL(1000,EB)
-            IF (ZZ<Z_F) THEN
-               Y_VECTOR(I_Z_MIN) = 0._EB
-               Y_VECTOR(I_Z_MIN+1) = ZZ
-            ELSE
-               Y_VECTOR(I_Z_MIN) = REACTION(1)%Y_F_INLET*(ZZ-Z_F)/(1._EB-Z_F)
-               Y_VECTOR(I_Z_MIN+1) = ZZ - Y_VECTOR(I_Z_MIN)
-            ENDIF
-            CALL GET_MASS_FRACTION_ALL(Y_VECTOR,Y_MF)
-            CALL GET_MOLECULAR_WEIGHT(Y_VECTOR,MW_MF)
-            WRITE(LU_STATE(1),'(10(ES12.4,","),ES12.4)') ZZ,Y_MF(1:N_STATE_SPECIES),MW_MF
-         ENDDO  
-      ENDIF
-   ENDIF SOOT_DEP_IF
-   CLOSE(LU_STATE(1))
-ENDIF
-
 ! Open species mass file
  
 IF_DUMP_SPECIES_INFO: IF (MASS_FILE) THEN
@@ -737,25 +642,16 @@ IF_DUMP_SPECIES_INFO: IF (MASS_FILE) THEN
       OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
    ELSE
       OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='REPLACE')
-      IF (MIXTURE_FRACTION) THEN
-         LABEL(1) = 'Time'
-         LABEL(2) = 'Total'
-         LABEL(3:3+N_STATE_SPECIES-1) = MF_SPEC_ID(1:N_STATE_SPECIES)
-         NN = 3+N_STATE_SPECIES-1
-         DO N=1,N_SPECIES
-            IF (SPECIES(N)%MODE==GAS_SPECIES .AND. SPECIES(N)%INDEX > N_STATE_SPECIES) THEN
-               NN = NN+1
-               LABEL(NN) = SPECIES(N)%ID
-            ENDIF
-         ENDDO
-         WRITE(TCFORM,'(A,I4.4,A)') "(",NN-1,"(A,','),A)"
-         WRITE(LU_MASS,TCFORM) 's',('kg',N=1,NN-1)
-         WRITE(LU_MASS,TCFORM) (TRIM(LABEL(N)),N=1,NN)
-      ELSE
-         WRITE(TCFORM,'(A,I4.4,A)') "(",N_SPECIES+1,"(A,','),A)"
-         WRITE(LU_MASS,TCFORM) 's',('kg',N=0,N_SPECIES)
-         WRITE(LU_MASS,TCFORM)'FDS Time','Total',(TRIM(SPECIES(N)%ID),N=1,N_SPECIES)
+      LABEL(1) = 'Time'
+      LABEL(2) = 'Total'
+      NN=2
+      IF (N_GAS_SPECIES/=0) THEN
+         LABEL(3:3+N_SPECIES-N_MIX_SPECIES-1) = SPECIES(1:N_SPECIES-N_MIX_SPECIES)%ID
+         NN = 3+N_SPECIES-N_MIX_SPECIES-1
       ENDIF
+      WRITE(TCFORM,'(A,I4.4,A)') "(",NN-1,"(A,','),A)"
+      WRITE(LU_MASS,TCFORM) 's',('kg',N=1,NN-1)
+      WRITE(LU_MASS,TCFORM) (TRIM(LABEL(N)),N=1,NN)
    ENDIF
 ENDIF IF_DUMP_SPECIES_INFO
 
@@ -921,7 +817,7 @@ SMOKE3D_INITIALIZATION: IF (SMOKE3D .AND..NOT.EVACUATION_ONLY(NM)) THEN
    IF (.NOT.APPEND .AND. SMOKE3D_QUANTITY_INDEX/=11) THEN
       IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
       M%N_STRINGS = M%N_STRINGS + 1
-      IF(USE_HRRPUV_MAX_SMV.EQ.1)THEN
+      IF(USE_HRRPUV_MAX_SMV==1)THEN
          WRITE(M%STRING(M%N_STRINGS),'(A,I6,1X,E13.6)') 'VSMOKE3D',NM,HRRPUV_MAX_SMV
       ELSE
          WRITE(M%STRING(M%N_STRINGS),'(A,I6)') 'SMOKE3D',NM
@@ -1381,6 +1277,7 @@ EVAC_ONLY4: IF (ANY(EVACUATION_GRID)) THEN
    ENDDO EVAC_DO1
    
 ENDIF EVAC_ONLY4
+
 
 ! Figure out the outline for multiblock cases
  
@@ -2296,8 +2193,9 @@ USE SCARC_SOLVER, ONLY: SCARC_METHOD,SCARC_CG_PRECON,SCARC_BICG_PRECON, SCARC_SM
                         SCARC_BICG_EPS,SCARC_MG_EPS,SCARC_CG_NIT,SCARC_BICG_NIT,SCARC_MG_NIT
 
 INTEGER :: NM,I,NN,N,NR,NL,NS
-REAL(EB) SD
+REAL(EB) :: SD,REAC_NU(1:N_SPECIES)
 CHARACTER(30) :: QUANTITY
+TYPE(SPECIES_MIXTURE_TYPE),POINTER :: SM=>NULL()
  
 ! Write out preliminary stuff to error file (unit 0)
  
@@ -2352,139 +2250,156 @@ IF (LES) THEN
    WRITE(LU_OUTPUT,'(A)')        '   LES Calculation'
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Smagorinsky Constant          ',CSMAG
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number      ',PR
-   IF (N_SPECIES>0._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number      ',SC
+   IF (N_GAS_SPECIES>0._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number      ',SC
 ENDIF
 WRITE(LU_OUTPUT,'(A,F8.2)')   '   Ambient Temperature (C)       ',TMPA-TMPM
  
 ! Print out information about species
- 
 WRITE(LU_OUTPUT,'(//A)') ' Species Information'
-SPEC_LOOP: DO N=0,N_SPECIES
-   IF (N==0 .AND. MIXTURE_FRACTION) CYCLE SPEC_LOOP
+SPEC_LOOP: DO N=1,N_SPECIES
    SS => SPECIES(N)
    WRITE(LU_OUTPUT,'(/3X,A)') SS%ID
    SELECT CASE(SS%MODE)
-      CASE (MIXTURE_FRACTION_SPECIES)
-         WRITE(LU_OUTPUT,'( 3X,A)') 'Mixture Fraction Variable'
+      CASE (LUMPED_SPECIES)
+         WRITE(LU_OUTPUT,'( 3X,A)') 'Lumped Species Variable'
       CASE (GAS_SPECIES)
          WRITE(LU_OUTPUT,'( 3X,A)') 'Gas Species'
       CASE (AEROSOL_SPECIES)            
          WRITE(LU_OUTPUT,'( 3X,A)') 'Aerosol'
    END SELECT
-   IF (N==0) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
-   IF (SS%MW <  1000._EB .AND. SS%MODE==GAS_SPECIES) &    
-      WRITE(LU_OUTPUT,'(A,F8.2)')   '   Molecular Weight (g/mol)      ',SS%MW
-   IF (SS%MW >= 1000._EB .AND. SS%MODE==GAS_SPECIES) &    
-      WRITE(LU_OUTPUT,'(A,F8.2)')   '   Density (kg/m^3)              ',SS%MW*P_INF/(TMPA*R0)
-   WRITE(LU_OUTPUT,'(A,F8.3)')   '   Initial Mass Fraction         ',SS%YY0
-   IF (N==0) THEN
+   IF (SS%LUMPED_SPECIES_ONLY) WRITE(LU_OUTPUT,'( 3X,A)') 'Lumped species component only'
+   IF (N==I_BACKGROUND) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
+   IF (SS%MW <  1000._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Molecular Weight (g/mol)      ',SS%MW
+   IF (SS%MW >= 1000._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Density (kg/m^3)              ',SS%MW*P_INF/(TMPA*R0)
+   IF (N==I_BACKGROUND) THEN
+      WRITE(LU_OUTPUT,'(A,F8.3)')   '   Initial Mass Fraction         ',1._EB - SUM(YY_AMBIENT)
+   ELSE
+      WRITE(LU_OUTPUT,'(A,F8.3)')   '   Initial Mass Fraction         ',SS%YY0
+   ENDIF
+   IF (N==I_BACKGROUND) THEN
       IF (DNS .AND. SS%MODE==GAS_SPECIES) THEN
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient: ',Y2MU_C(NINT(TMPA))*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                          500 C: ',Y2MU_C(773)*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1000 C: ',Y2MU_C(1273)*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1500 C: ',Y2MU_C(1773)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Viscosity (kg/m/s)   Ambient: ',Y2MU_C(NINT(TMPA))*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2MU_C(773)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2MU_C(1273)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2MU_C(1773)*SPECIES(0)%MW
       ENDIF
       IF (DNS .AND. SS%MODE==GAS_SPECIES) THEN
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient: ',Y2K_C(NINT(TMPA))*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                          500 C: ',Y2K_C(773)*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1000 C: ',Y2K_C(1273)*SPECIES(0)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1500 C: ',Y2K_C(1773)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Therm. Cond. (W/m/K) Ambient: ',Y2K_C(NINT(TMPA))*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2K_C(773)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2K_C(1273)*SPECIES(0)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2K_C(1773)*SPECIES(0)%MW
       ENDIF
       IF (DNS .AND. SS%MODE==GAS_SPECIES) THEN
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',Y2CP_C(NINT(TMPA))
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                          500 C: ',Y2CP_C(773)
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1000 C: ',Y2CP_C(1273)
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1500 C: ',Y2CP_C(1773)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',Y2CP_C(NINT(TMPA))
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2CP_C(773)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2CP_C(1273)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2CP_C(1773)
       ENDIF
    ELSE   
+      IF (SS%Y_INDEX < 0) CYCLE SPEC_LOOP
       IF (DNS .AND. SS%MODE==GAS_SPECIES) THEN
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient: ',&
-                                           (Y2MU_C(NINT(TMPA))+Y2MU(NINT(TMPA),N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                          500 C: ',(Y2MU_C(773)+Y2MU(773,N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1000 C: ',(Y2MU_C(1273)+Y2MU(1273,N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1500 C: ',(Y2MU_C(1773)+Y2MU(1773,N))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Viscosity (kg/m/s)   Ambient: ',&
+                                           (Y2MU_C(NINT(TMPA))+Y2MU(NINT(TMPA),SPECIES(N)%Y_INDEX))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',(Y2MU_C(773)+Y2MU(773,SPECIES(N)%Y_INDEX))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',(Y2MU_C(1273)+Y2MU(1273,SPECIES(N)%Y_INDEX))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',(Y2MU_C(1773)+Y2MU(1773,SPECIES(N)%Y_INDEX))*SPECIES(N)%MW
       ENDIF
       IF (DNS .AND. SS%MODE==GAS_SPECIES) THEN
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient: ',&
-                                           (Y2K_C(NINT(TMPA))+Y2K(NINT(TMPA),N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                          500 C: ',(Y2K_C( 773)+Y2K( 773,N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1000 C: ',(Y2K_C(1273)+Y2K(1273,N))*SPECIES(N)%MW
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1500 C: ',(Y2K_C(1773)+Y2K(1773,N))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Therm. Cond. (W/m/K) Ambient: ',&
+                                           (Y2K_C(NINT(TMPA))+Y2K(NINT(TMPA),SPECIES(N)%Y_INDEX))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',(Y2K_C( 773)+Y2K( 773,SPECIES(N)%Y_INDEX))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',(Y2K_C(1273)+Y2K(1273,SPECIES(N)%Y_INDEX))*SPECIES(N)%MW
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',(Y2K_C(1773)+Y2K(1773,SPECIES(N)%Y_INDEX))*SPECIES(N)%MW
       ENDIF
       IF (DNS .AND. SS%MODE==GAS_SPECIES) THEN
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',Y2CP_C(NINT(TMPA))+Y2CP(NINT(TMPA),N)
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                          500 C: ',Y2CP_C( 773)+Y2CP( 773,N)
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1000 C: ',Y2CP_C(1273)+Y2CP(1273,N)
-         WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1500 C: ',Y2CP_C(1773)+Y2CP(1773,N)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Spec. Heat (J/kg/K)  Ambient: ',Y2CP_C(NINT(TMPA))+Y2CP(NINT(TMPA),SPECIES(N)%Y_INDEX)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',Y2CP_C( 773)+Y2CP( 773,SPECIES(N)%Y_INDEX)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',Y2CP_C(1273)+Y2CP(1273,SPECIES(N)%Y_INDEX)
+         WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',Y2CP_C(1773)+Y2CP(1773,SPECIES(N)%Y_INDEX)
       ENDIF
    ENDIF
    IF (N>0 .AND. DNS .AND. SS%MODE==GAS_SPECIES) THEN
-      WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient: ',SS%D(NINT(TMPA))
-      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                          500 C: ',SS%D( 773)
-      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1000 C: ',SS%D(1273)
-      WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1500 C: ',SS%D(1773)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '   Diff. Coeff. (m^2/s) Ambient: ',SS%D(NINT(TMPA))
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                          500 C: ',SS%D( 773)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1000 C: ',SS%D(1273)
+      WRITE(LU_OUTPUT,'(A,ES8.2)')  '                         1500 C: ',SS%D(1773)
    ENDIF
 ENDDO SPEC_LOOP
+
+!Write lumped species summart
+IF (N_MIX_SPECIES > 0) THEN
+   WRITE(LU_OUTPUT,'(//A)') ' Lumped Species Information'
+   DO N=1,N_MIX_SPECIES
+      SM=>SPECIES_MIXTURE(N)
+      WRITE(LU_OUTPUT,'(/3X,A)') SM%ID
+      WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
+      DO NN = 1, SM%N_SUB_SPECIES
+         WRITE(LU_OUTPUT,'( 3X,A30,A,ES10.4,8X,ES10.4)') SM%SPEC_ID(NN),' ',SM%MASS_FRACTION(NN),SM%VOLUME_FRACTION(NN)
+      ENDDO
+   ENDDO
+ENDIF
  
 ! Print out Stoichiometric parameters for mixture fraction model
- 
 IF (N_REACTIONS>0) WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
 REACTION_LOOP: DO N=1,N_REACTIONS
    RN => REACTION(N)
+   IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
+   IF (RN%NAME/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%NAME
+   
    SELECT CASE(RN%MODE)
-      CASE(MIXTURE_FRACTION_REACTION)
-         IF (CO_PRODUCTION) THEN
-            SELECT CASE(N)
-               CASE(1)
-                  WRITE(LU_OUTPUT,'(/3X,A)') 'Incomplete (CO Production) Reaction'
-               CASE(2)
-                  WRITE(LU_OUTPUT,'(/3X,A)') 'Complete (CO2 Production) Reaction'
-               CASE(3)
-                  WRITE(LU_OUTPUT,'(/3X,A)') 'Null (Extinction) Reaction'               
-             END SELECT
-         ELSE
-            SELECT CASE(N)
-               CASE(1)
-                  WRITE(LU_OUTPUT,'(/3X,A)') 'Complete (CO2 Production) Reaction'
-               CASE(2)
-                  WRITE(LU_OUTPUT,'(/3X,A)') 'Null (Extinction) Reaction'               
-             END SELECT
-         ENDIF
-         WRITE(LU_OUTPUT,'(3X,A)')  'Mixture Fraction Reaction'
-      CASE(FINITE_RATE_REACTION)
-         WRITE(LU_OUTPUT,'(/3X,A)') RN%NAME
+      CASE(FINITE_RATE)
          WRITE(LU_OUTPUT,'(3X,A)')  'Finte Rate Reaction'
-   END SELECT
-   IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(3X,A)') RN%FYI
-   WRITE(LU_OUTPUT,'(A,F8.2)')  '   Molecular Weight, Fuel (g/mol)',RN%MW_FUEL
-   WRITE(LU_OUTPUT,'(A,F8.0)')  '   Heat of Combustion (kJ/kg)    ',RN%HEAT_OF_COMBUSTION/1000._EB
-   SELECT CASE (RN%MODE)
-      CASE (MIXTURE_FRACTION_REACTION)
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., O_2           ',RN%NU(O2_INDEX)
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., CO_2          ',RN%NU(CO2_INDEX)
-         IF (H2O_INDEX > 0 .AND. H2O_INDEX <=N_STATE_SPECIES) &
-            WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., H2O           ',RN%NU(H2O_INDEX)
-         IF (SOOT_INDEX > 0 .AND. SOOT_INDEX <=N_STATE_SPECIES) &
-            WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., Soot          ',RN%NU(SOOT_INDEX)
-         IF (CO_INDEX > 0 .AND. CO_INDEX <=N_STATE_SPECIES)  &
-            WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., CO            ',RN%NU(CO_INDEX)  
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., N_2           ',RN%NU(N2_INDEX)           
-         IF (OTHER_INDEX > 0 .AND. OTHER_INDEX <=N_STATE_SPECIES) &
-            WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoich. Coeff., Other         ',RN%NU(OTHER_INDEX)
-         WRITE(LU_OUTPUT,'(A,F8.3)')  '   Stoichiometric Value of Z     ',RN%Z_F
-      CASE (FINITE_RATE_REACTION)
-         DO NN=1,N_SPECIES
-            WRITE(LU_OUTPUT,'(A,A15,F8.3)')  '   Stoich. Coeff. ',TRIM(SPECIES(NN)%ID),RN%NU(NN) 
+         WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
+         WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
+         IF (ABS(RN%NU(0)) > ZERO_P)  WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(0)%ID,RN%NU(0) 
+         DO NN=1,RN%N_SPECIES
+            IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
+            WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(Y2SPEC(RN%SPECIES(NN)))%ID,RN%NU(NN) 
          ENDDO
-         DO NN=1,N_SPECIES
-            IF(RN%N(NN)==-999._EB) THEN
-               WRITE(LU_OUTPUT,'(A,A15,F8.3)')  '    Rate Exponent ',TRIM(SPECIES(NN)%ID),0. 
-            ELSE
-               WRITE(LU_OUTPUT,'(A,A15,F8.3)')  '    Rate Exponent ',TRIM(SPECIES(NN)%ID),RN%N(NN) 
-            ENDIF
+         IF (N_MIX_SPECIES > 0 .AND. ((RN%NU(0)/=0._EB .AND. I_BACKGROUND > N_SPECIES - N_MIX_SPECIES) .OR. &
+                                       ANY(RN%SPECIES > N_SPECIES - N_MIX_SPECIES))) THEN     
+            WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
+            WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
+            DO NN=1,N_SPECIES
+               IF (ABS(RN%NU_SPECIES(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+            ENDDO
+         ENDIF         
+         WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
+         IF (ABS(RN%N(NN)) >=ZERO_P)  WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(0)%ID,RN%N(0)          
+         DO NN=1,RN%N_SPECIES
+            IF (RN%N(NN) <=-999._EB) CYCLE
+            WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(Y2SPEC(RN%SPECIES(NN)))%ID,RN%N(NN) 
          ENDDO
+         WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
+         WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+      CASE (MIXING_CONTROLLED)
+         WRITE(LU_OUTPUT,'(3X,A)')  'Mixing Controlled Reaction'
+         WRITE(LU_OUTPUT,'(//3X,A)') 'Tracked Species'
+         WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
+         IF (ABS(RN%NU(0)) > ZERO_P) WRITE(LU_OUTPUT,'( 3X,A30,A1,F9.4)') SPECIES(0)%ID,' ',RN%NU(0)          
+         DO NN=1,RN%N_SPECIES
+            IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
+            WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(Y2SPEC(RN%SPECIES(NN)))%ID,RN%NU(NN) 
+         ENDDO
+         IF (N_MIX_SPECIES > 0 .AND. ((RN%NU(0)/=0._EB .AND. I_BACKGROUND > N_SPECIES - N_MIX_SPECIES) .OR. &
+                                       ANY(RN%SPECIES > N_SPECIES - N_MIX_SPECIES))) THEN     
+            WRITE(LU_OUTPUT,'(//3X,A)') 'Detailed Species'
+            WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
+            DO NN=1,N_SPECIES - N_MIX_SPECIES
+               IF (ABS(RN%NU_SPECIES(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+            ENDDO
+         ENDIF
+         WRITE(LU_OUTPUT,'(A,F12.3)')  '   Heat of Combustion (kJ/kg)  ',RN%HEAT_OF_COMBUSTION/1000._EB        
+      CASE (MIXED)          
+         WRITE(LU_OUTPUT,'(3X,A)')  'Combined Mixing Controlled + Finite Rate Reaction'
    END SELECT
 ENDDO REACTION_LOOP
+
+IF (SIMPLE_CHEMISTRY .AND. CO_PRODUCTION) THEN
+   WRITE(LU_OUTPUT,'(//A,F8.0)')  '   Complete Heat of Combustion (kJ/kg)    ',REACTION(1)%HEAT_OF_COMBUSTION/1000._EB + &
+      REACTION(2)%HEAT_OF_COMBUSTION*MW_CO/MW_FUEL*(REACTION(1)%NU(3)*SPECIES_MIXTURE(3)%VOLUME_FRACTION(CO_INDEX) - &
+                                      REACTION(1)%NU(3)*REACTION(2)%NU(3)*SPECIES_MIXTURE(4)%VOLUME_FRACTION(CO_INDEX))/1.E3_EB
+ENDIF
 
 ! Print out information about materials
  
@@ -2518,8 +2433,8 @@ MATL_LOOP: DO N=1,N_MATL
                             '        Residue: ',TRIM(ML%RESIDUE_MATL_NAME(NN)),', Material Index: ', &
                                                      ML%RESIDUE_MATL_INDEX(NN),', Yield: ',ML%NU_RESIDUE(NN)
       WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
-      DO NS = 1,N_SPECIES
-      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES(NS)%ID,': ',ML%NU_GAS(NN,NS)
+      DO NS = 1,N_GAS_SPECIES
+      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES(Y2SPEC(NS))%ID,': ',ML%NU_GAS(NN,NS)
       ENDDO
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NN)
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (kJ/kmol): ',ML%E(NN)/1000.
@@ -2534,8 +2449,8 @@ MATL_LOOP: DO N=1,N_MATL
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
       WRITE(LU_OUTPUT,'(A)')      '     Liquid evaporation reaction'
       WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
-      DO NS = 1,N_SPECIES
-      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES(NS)%ID,': ',ML%NU_GAS(1,NS)
+      DO NS = 1,N_GAS_SPECIES
+      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES(Y2SPEC(NS))%ID,': ',ML%NU_GAS(1,NS)
       ENDDO      
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL-TMPM
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1)/1000.
@@ -2601,8 +2516,8 @@ SURFLOOP: DO N=0,N_SURF
    IF (SF%VEL/=0._EB)             WRITE(LU_OUTPUT,'(A,F8.3)') '     Normal Velocity (m/s)       ', SF%VEL
    IF (SF%MASS_FLUX_TOTAL/=0._EB) WRITE(LU_OUTPUT,'(A,F8.3)') '     Total Mass Flux (kg/m^2/s)  ', SF%MASS_FLUX_TOTAL
    IF (SF%VOLUME_FLUX/=0._EB)     WRITE(LU_OUTPUT,'(A,F8.3)') '     Volume Flux (m**3/s)        ', SF%VOLUME_FLUX
-   IF (N_SPECIES>0 .AND. .NOT.MIXTURE_FRACTION) THEN
-      DO NN=1,N_SPECIES
+   IF (N_GAS_SPECIES>0 .AND. .NOT.SIMPLE_CHEMISTRY) THEN
+      DO NN=1,N_GAS_SPECIES
          IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU_OUTPUT,'(A,I1,A,8X,F6.3)') &
                   '     Species ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
          IF (SF%MASS_FLUX(NN)/=0._EB) WRITE(LU_OUTPUT,'(A,I1,A,2X,F6.3)') &
@@ -2610,7 +2525,26 @@ SURFLOOP: DO N=0,N_SURF
       ENDDO
    ENDIF
  
-   IF (MIXTURE_FRACTION) THEN
+   IF (N_GAS_SPECIES>0) THEN
+      DO NN=1,N_GAS_SPECIES
+         IF (SIMPLE_CHEMISTRY .AND. NN==I_FUEL) THEN
+            IF (CO_PRODUCTION) THEN
+               IF (SF%MASS_FLUX(NN)>0._EB) WRITE(LU_OUTPUT,'(A,F8.1)') '     HRR Per Unit Area (kW/m2)     ', &
+                     SF%MASS_FLUX(NN)*REACTION(2)%HEAT_OF_COMBUSTION* REACTION(2)%Y_F_INLET*0.001_EB
+            ELSE
+               IF (SF%MASS_FLUX(NN)>0._EB) WRITE(LU_OUTPUT,'(A,F8.1)') '     HRR Per Unit Area (kW/m2)     ', &
+                     SF%MASS_FLUX(NN)*REACTION(1)%HEAT_OF_COMBUSTION* REACTION(1)%Y_F_INLET*0.001_EB
+            ENDIF
+         ELSE
+            IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU_OUTPUT,'(A,I1,A,8X,F6.3)') &
+                     '     Species ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
+            IF (SF%MASS_FLUX(NN)/=0._EB) WRITE(LU_OUTPUT,'(A,I1,A,2X,F6.3)') &
+                     '     Species ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
+         ENDIF
+      ENDDO
+   ENDIF
+   
+   IF (SIMPLE_CHEMISTRY) THEN
       IF (CO_PRODUCTION) THEN
          IF (SF%MASS_FLUX(I_FUEL)>0._EB) WRITE(LU_OUTPUT,'(A,F8.1)') '     HRR Per Unit Area (kW/m2)     ', &
                SF%MASS_FLUX(I_FUEL)*REACTION(2)%HEAT_OF_COMBUSTION* REACTION(2)%Y_F_INLET*0.001_EB
@@ -2752,7 +2686,7 @@ WRITE_RADIATION: IF (RADIATION) THEN
    IF (NUMBER_SPECTRAL_BANDS>1) THEN
       WRITE(LU_OUTPUT,'(A,I4)')  '   Number of spectral bands is ', NUMBER_SPECTRAL_BANDS
    ELSE
-      IF (MIXTURE_FRACTION) THEN
+      IF (SIMPLE_CHEMISTRY) THEN
          WRITE(LU_OUTPUT,'(A,I4)')  '   Using gray gas absorption.'
          WRITE(LU_OUTPUT,'(A,F6.3,A)')'   Mean beam length ',PATH_LENGTH,' m'
       ELSE
@@ -2863,9 +2797,9 @@ DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ENDIF
    IF (RADIATION .AND. BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) WRITE(LU_CORE(NM)) WALL(IW)%ILW
 ENDDO
-IF (N_SPECIES>0) WRITE(LU_CORE(NM)) YY
-IF (N_SPECIES>0) WRITE(LU_CORE(NM)) DEL_RHO_D_DEL_Y
-IF (N_SPECIES>0) WRITE(LU_CORE(NM)) YY_F
+IF (N_GAS_SPECIES>0) WRITE(LU_CORE(NM)) YY
+IF (N_GAS_SPECIES>0) WRITE(LU_CORE(NM)) DEL_RHO_D_DEL_Y
+IF (N_GAS_SPECIES>0) WRITE(LU_CORE(NM)) YY_F
 IF (DROPLET_FILE) THEN
    WRITE(LU_CORE(NM)) NLP,NLPDIM
    WRITE(LU_CORE(NM)) DROPLET(1:NLP)
@@ -2910,7 +2844,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP
    M2=>MESHES(NM)%OMESH(NOM)
    WRITE(LU_CORE(NM)) M2%RHO,M2%RHOS,M2%U,M2%V,M2%W,M2%H
-   IF (N_SPECIES>0) WRITE(LU_CORE(NM)) M2%YY,M2%YYS
+   IF (N_GAS_SPECIES>0) WRITE(LU_CORE(NM)) M2%YY,M2%YYS
    WRITE(LU_CORE(NM)) M2%IJKW
 ENDDO OTHER_MESH_LOOP
 CLOSE(LU_CORE(NM))
@@ -3009,9 +2943,9 @@ DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ENDIF
    IF (RADIATION .AND. BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) READ(LU_RESTART(NM)) WALL(IW)%ILW
 ENDDO
-IF (N_SPECIES>0) READ(LU_RESTART(NM))  YY
-IF (N_SPECIES>0) READ(LU_RESTART(NM))  DEL_RHO_D_DEL_Y
-IF (N_SPECIES>0) READ(LU_RESTART(NM))  YY_F
+IF (N_GAS_SPECIES>0) READ(LU_RESTART(NM))  YY
+IF (N_GAS_SPECIES>0) READ(LU_RESTART(NM))  DEL_RHO_D_DEL_Y
+IF (N_GAS_SPECIES>0) READ(LU_RESTART(NM))  YY_F
 IF (DROPLET_FILE) THEN
    READ(LU_RESTART(NM)) NLP,NLPDIM
    DEALLOCATE(MESHES(NM)%DROPLET)
@@ -3062,7 +2996,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP
    M2=>MESHES(NM)%OMESH(NOM)
    READ(LU_RESTART(NM)) M2%RHO,M2%RHOS,M2%U,M2%V,M2%W,M2%H
-   IF (N_SPECIES>0) READ(LU_RESTART(NM)) M2%YY,M2%YYS
+   IF (N_GAS_SPECIES>0) READ(LU_RESTART(NM)) M2%YY,M2%YYS
    READ(LU_RESTART(NM)) M2%IJKW
 ENDDO OTHER_MESH_LOOP
 
@@ -3870,7 +3804,6 @@ END SUBROUTINE DUMP_SLCF
 SUBROUTINE UPDATE_DEVICES(T,NM)
 
 ! Update the value of all sensing DEVICEs,any control function outputs, and associated output quantities
-
 USE MEMORY_FUNCTIONS, ONLY : RE_ALLOCATE_STRINGS
 USE EVAC, ONLY: N_DOORS, N_EXITS, N_ENTRYS, EVAC_DOORS, EVAC_EXITS, EVAC_ENTRYS, EVAC_EXIT_TYPE, EVAC_DOOR_TYPE, EVAC_ENTR_TYPE
 REAL(EB), INTENT(IN) :: T
@@ -4204,8 +4137,8 @@ REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: II,JJ,KK,IND,IND2,NM,VELO_INDEX
 REAL(EB) :: FLOW,HMFAC,H_TC,TMP_TC,RE_D,NUSSELT,AREA,VEL, &
             Q_SUM,TMP_G,UU,VV,WW,VEL2,Y_MF_INT,EXT_COEF,MASS_EXT_COEF, &
-            VELSR,WATER_VOL_FRAC,RHS,Y_E,DT_C,DT_E,T_RATIO,Y_E_LAG, H_G,H_G_SUM,CP,YY_GET(1:N_SPECIES), &
-            DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,R_Y_H2O,YY_G(1:N_SPECIES),R_DN,SGN
+            VELSR,WATER_VOL_FRAC,RHS,Y_E,DT_C,DT_E,T_RATIO,Y_E_LAG, H_G,H_G_SUM,CP,YY_GET(1:N_GAS_SPECIES), &
+            DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,R_Y_H2O,YY_G(1:N_GAS_SPECIES),R_DN,SGN
 REAL(FB) :: TMPUP,TMPLOW,ZINT,TMP_WGT,DELTA
 INTEGER :: N,I,J,K,NN,IL,III,JJJ,KKK,IPC,IW,SPEC_INDEX,PART_INDEX,ITMP,IP,JP,KP,FLOW_INDEX
 CHARACTER(100) :: MESSAGE
@@ -4219,7 +4152,7 @@ IF (SPEC_INDEX<0) THEN
    R_Y_H2O = 0._EB
    IF (DRY .AND. H2O_INDEX > 0) THEN
       CALL GET_MASS_FRACTION(YY_GET,H2O_INDEX,Y_H2O)
-      R_Y_H2O = RCON_MF(H2O_INDEX) * Y_H2O
+      R_Y_H2O = SPECIES(H2O_INDEX)%RCON * Y_H2O
       IF (-SPEC_INDEX==H2O_INDEX) Y_SPECIES=0._EB
    ENDIF
 ELSEIF (SPEC_INDEX>0) THEN
@@ -4296,7 +4229,7 @@ SELECT CASE(IND)
       ENDIF
       X_EQUIL  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(TMP(II,JJ,KK),TMP_BOIL))))
       Y_MF_INT=0._EB
-      IF (MIXTURE_FRACTION) THEN
+      IF (SIMPLE_CHEMISTRY) THEN
          YY_GET(:) = YY(II,JJ,KK,:)
          CALL GET_MASS_FRACTION(YY_GET,H2O_INDEX,Y_MF_INT)
       ELSE
@@ -4353,7 +4286,7 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = SQRT(CSD2_DYNSMAG(III,JJJ,KKK))/DELTA
       
    CASE(31)  ! SPECIFIC HEAT
-      IF (N_SPECIES>0) THEN
+      IF (N_GAS_SPECIES>0) THEN
          YY_GET(:) = YY(II,JJ,KK,:)
          CALL GET_SPECIFIC_HEAT(YY_GET,CP,TMP(II,JJ,KK))
       ELSE
@@ -4367,7 +4300,7 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = Q(II,JJ,KK)*0.001_EB*(DX(II)*DY(JJ)*DZ(KK))**ONTH
    CASE(33)  ! CONDUCTIVITY
       IF (DNS) THEN
-         IF (N_SPECIES > 0 ) THEN
+         IF (N_GAS_SPECIES > 0 ) THEN
             YY_GET(:) = YY(II,JJ,KK,:)
             CALL GET_CONDUCTIVITY(YY_GET,GAS_PHASE_OUTPUT ,TMP(II,JJ,KK))     
          ELSE
@@ -4380,7 +4313,7 @@ SELECT CASE(IND)
       ENDIF
             
    CASE(40)  ! MOLECULAR WEIGHT
-      IF (N_SPECIES>0) THEN
+      IF (N_GAS_SPECIES>0) THEN
          YY_GET(:) = YY(II,JJ,KK,:)
          CALL GET_MOLECULAR_WEIGHT(YY_GET,GAS_PHASE_OUTPUT)
       ELSE
@@ -4398,7 +4331,7 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = ICYC
       
    CASE(46:48)  ! SPECIFIC ENTHALPY and ENTHALPY and AVERAGE SPECIFIC HEAT
-      IF (N_SPECIES>0) THEN
+      IF (N_GAS_SPECIES>0) THEN
          YY_GET(:) = YY(II,JJ,KK,:)
          CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP(II,JJ,KK))
       ELSE
@@ -4478,23 +4411,23 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = 0.5_EB*(RHO(II,JJ,KK)*Y_SPECIES+RHO(II,JJ,KK+1)*Y_SPECIES2)*W(II,JJ,KK)
    CASE(94)  ! VOLUME FRACTION
       IF (SPEC_INDEX<0) THEN
-         GAS_PHASE_OUTPUT = RCON_MF(-SPEC_INDEX)*Y_SPECIES/RSUM(II,JJ,KK)/(1._EB-R_Y_H2O/RSUM(II,JJ,KK))
+         GAS_PHASE_OUTPUT =  SPECIES(-SPEC_INDEX)%RCON*Y_SPECIES/RSUM(II,JJ,KK)/(1._EB-R_Y_H2O/RSUM(II,JJ,KK))
       ELSEIF (SPEC_INDEX>0) THEN
-         GAS_PHASE_OUTPUT = SPECIES(SPEC_INDEX)%RCON*Y_SPECIES/RSUM(II,JJ,KK)
+         GAS_PHASE_OUTPUT = SPECIES(Y2SPEC(SPEC_INDEX))%RCON*Y_SPECIES/RSUM(II,JJ,KK)
       ENDIF
    CASE(95)  ! VISIBILITY
-      IF (SPEC_INDEX>0) MEC = SPECIES(SPEC_INDEX)%MASS_EXTINCTION_COEFFICIENT
+      IF (SPEC_INDEX>0) MEC = SPECIES(Y2SPEC(SPEC_INDEX))%MASS_EXTINCTION_COEFFICIENT
       IF (SPEC_INDEX<0) MEC = MASS_EXTINCTION_COEFFICIENT
       EXT_COEF = Y_SPECIES*RHO(II,JJ,KK)*MEC
       GAS_PHASE_OUTPUT = VISIBILITY_FACTOR/MAX(EC_LL,EXT_COEF)
    CASE(96)  ! SOOT VOLUME FRACTION
       GAS_PHASE_OUTPUT = Y_SPECIES*RHO(II,JJ,KK)/RHO_SOOT
    CASE(97)  ! EXTINCTION COEFFICIENT
-      IF (SPEC_INDEX>0) MEC = SPECIES(SPEC_INDEX)%MASS_EXTINCTION_COEFFICIENT
+      IF (SPEC_INDEX>0) MEC = SPECIES(Y2SPEC(SPEC_INDEX))%MASS_EXTINCTION_COEFFICIENT
       IF (SPEC_INDEX<0) MEC = MASS_EXTINCTION_COEFFICIENT
       GAS_PHASE_OUTPUT = Y_SPECIES*RHO(II,JJ,KK)*MEC
    CASE(98)  ! OPTICAL DENSITY
-      IF (SPEC_INDEX>0) MEC = SPECIES(SPEC_INDEX)%MASS_EXTINCTION_COEFFICIENT
+      IF (SPEC_INDEX>0) MEC = SPECIES(Y2SPEC(SPEC_INDEX))%MASS_EXTINCTION_COEFFICIENT
       IF (SPEC_INDEX<0) MEC = MASS_EXTINCTION_COEFFICIENT
       GAS_PHASE_OUTPUT = Y_SPECIES*RHO(II,JJ,KK)*MEC/2.3_EB
 
@@ -4596,7 +4529,7 @@ SELECT CASE(IND)
                      HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
                   CASE(3)
                      TMP_TC = 0.5_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
-                     IF (N_SPECIES>0) THEN
+                     IF (N_GAS_SPECIES>0) THEN
                         YY_G =0.5_EB*(YY(I,J,K,:)+YY(IP,JP,KP,:))
                         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_G,H_G_SUM,TMP_TC)
                         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_G,H_G,TMPA)
@@ -4639,7 +4572,7 @@ SELECT CASE(IND)
       IF (PY%SPEC_INDEX==0) THEN
          MASS_EXT_COEF = MASS_EXTINCTION_COEFFICIENT
       ELSE
-         MASS_EXT_COEF = SPECIES(PY%SPEC_INDEX)%MASS_EXTINCTION_COEFFICIENT
+         MASS_EXT_COEF = SPECIES(PY%Y_INDEX)%MASS_EXTINCTION_COEFFICIENT
       ENDIF
       DO NN=1,DV%N_PATH
          I = DV%I_PATH(NN)
@@ -4693,7 +4626,7 @@ SELECT CASE(IND)
          MASS_EXT_COEF = MASS_EXTINCTION_COEFFICIENT
       ELSE
          Y_E = YY(I,J,K,PY%SPEC_INDEX) 
-         MASS_EXT_COEF = SPECIES(PY%SPEC_INDEX)%MASS_EXTINCTION_COEFFICIENT
+         MASS_EXT_COEF = SPECIES(PY%Y_INDEX)%MASS_EXTINCTION_COEFFICIENT
       ENDIF
       VEL2 = 0.25_EB*( (U(I,J,K)+U(I-1,J,K))**2 + (V(I,J,K)+V(I,J-1,K))**2 + (W(I,J,K)+W(I,J,K-1))**2 )
       VEL  = MAX(SQRT(VEL2),1.0E-10_EB)
@@ -4866,10 +4799,9 @@ END FUNCTION GAS_PHASE_OUTPUT
 REAL(EB) FUNCTION SOLID_PHASE_OUTPUT(NM,IWX,INDX,SPEC_INDEX,PART_INDEX)
 
 ! Compute Solid Phase DEVICE Output Quantities
- 
 USE PHYSICAL_FUNCTIONS, ONLY: SURFACE_DENSITY, GET_MASS_FRACTION
 INTEGER, INTENT(IN) :: IWX,INDX,SPEC_INDEX,PART_INDEX,NM
-REAL(EB) :: CONCORR,U2,V2,W2,HQ2,FLUX,DFLUXDT,SOLID_PHASE_OUTPUT_OLD,YY_GET(1:N_SPECIES),Y_SPECIES
+REAL(EB) :: CONCORR,U2,V2,W2,HQ2,FLUX,DFLUXDT,SOLID_PHASE_OUTPUT_OLD,YY_GET(1:N_GAS_SPECIES),Y_SPECIES
 INTEGER :: IOR,II1,II2,II,JJ,KK,IIG,JJG,KKG,NN
 
 IF (BOUNDARY_TYPE(IWX)==NULL_BOUNDARY) THEN
@@ -4952,7 +4884,7 @@ SELECT CASE(INDX)
       SOLID_PHASE_OUTPUT = ( QRADIN(IWX)/(E_WALL(IWX)+1.0E-10_EB) + QCONF(IWX) )*0.001_EB
    CASE(20) ! MASS FLUX
       IF (SPEC_INDEX<0) THEN
-         YY_GET(:) = ABS(MASSFLUX(IWX,1:N_SPECIES))
+         YY_GET(:) = ABS(MASSFLUX(IWX,1:N_GAS_SPECIES))
          FLUX = SUM(YY_GET)
          IF (FLUX > 0._EB) THEN
             YY_GET(:) = YY_GET/FLUX
@@ -5048,13 +4980,12 @@ END FUNCTION SOLID_PHASE_OUTPUT
 REAL(EB) FUNCTION HVAC_OUTPUT(IND,SPEC_INDEX,DUCT_INDEX,NODE_INDEX)
 
 ! Compute HVAC Output Quantities
-
 USE MEMORY_FUNCTIONS, ONLY: REALLOCATE
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D,EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION,GET_MOLECULAR_WEIGHT
 USE CONTROL_VARIABLES, ONLY: CONTROL
 INTEGER, INTENT(IN) :: SPEC_INDEX,IND,DUCT_INDEX,NODE_INDEX
-REAL(EB) :: Y_H2O,YY_G(1:N_SPECIES),MW,Y_SPECIES
+REAL(EB) :: Y_H2O,YY_G(1:N_GAS_SPECIES),MW,Y_SPECIES
 
 SELECT CASE(IND)
    CASE DEFAULT
@@ -5086,9 +5017,9 @@ SELECT CASE(IND)
       ELSE
          CALL GET_MOLECULAR_WEIGHT(YY_G,MW)
          IF (SPEC_INDEX<0) THEN
-            HVAC_OUTPUT = RCON_MF(-SPEC_INDEX)/R0*MW*Y_SPECIES/(1._EB-Y_H2O*MW/MW_H2O)
+            HVAC_OUTPUT = SPECIES(-SPEC_INDEX)%RCON/R0*MW*Y_SPECIES/(1._EB-Y_H2O*MW/MW_H2O)
          ELSEIF (SPEC_INDEX>0) THEN
-            HVAC_OUTPUT = Y_SPECIES*MW/SPECIES(SPEC_INDEX)%MW
+            HVAC_OUTPUT = Y_SPECIES*MW/SPECIES(Y2SPEC(SPEC_INDEX))%MW
          ENDIF
       ENDIF
    CASE(306)  ! Duct Density
@@ -5118,9 +5049,9 @@ SELECT CASE(IND)
       ELSE
          CALL GET_MOLECULAR_WEIGHT(YY_G,MW)
          IF (SPEC_INDEX<0) THEN
-            HVAC_OUTPUT = RCON_MF(-SPEC_INDEX)/R0*MW*Y_SPECIES/(1._EB-Y_H2O*MW/MW_H2O)
+            HVAC_OUTPUT = SPECIES(-SPEC_INDEX)%RCON/R0*MW*Y_SPECIES/(1._EB-Y_H2O*MW/MW_H2O)
          ELSEIF (SPEC_INDEX>0) THEN
-            HVAC_OUTPUT = Y_SPECIES*MW/SPECIES(SPEC_INDEX)%MW
+            HVAC_OUTPUT = Y_SPECIES*MW/SPECIES(Y2SPEC(SPEC_INDEX))%MW
          ENDIF
       ENDIF   
    
@@ -5481,7 +5412,7 @@ SUBROUTINE UPDATE_HRR(NM)
 ! Compute the total heat release rate and the radiative loss part
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_AVERAGE_SPECIFIC_HEAT
-REAL(EB) :: VC,TMP_N,RHO_N,U_N,H_G,H_G_REF,YY_N(1:N_SPECIES),E_DIFF,TMP_WGT,TMP_WGT_REF
+REAL(EB) :: VC,TMP_N,RHO_N,U_N,H_G,H_G_REF,YY_N(1:N_GAS_SPECIES),E_DIFF,TMP_WGT,TMP_WGT_REF
 INTEGER, INTENT(IN) :: NM
 INTEGER :: IOR,I,J,K,IW,IIG,JJG,KKG,ITMP,ITMP_REF
 
@@ -5539,15 +5470,15 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       CASE(-3) 
          U_N =  W(IIG,JJG,KKG)
    END SELECT
-   IF (N_SPECIES>0) THEN
+   IF (N_GAS_SPECIES>0) THEN
       YY_N = YY_F(IW,:)
       CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,H_G,TMP_N)
-      CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,H_G_REF,TMPM)
+      CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,H_G_REF,TMPM)     
    ELSE
       ITMP = MIN(4999,INT(TMP_N))
       TMP_WGT = TMP_N - ITMP
       H_G = Y2CPBAR_C(ITMP)+TMP_WGT*(Y2CPBAR_C(ITMP+1)-Y2CPBAR_C(ITMP))
-      H_G_REF = Y2CPBAR_C(ITMP_REF)+TMP_WGT_REF*(Y2CPBAR_C(ITMP_REF+1)-Y2CPBAR_C(ITMP_REF))
+      H_G_REF = Y2CPBAR_C(ITMP_REF)+TMP_WGT_REF*(Y2CPBAR_C(ITMP_REF+1)-Y2CPBAR_C(ITMP_REF))      
    ENDIF
    H_G = H_G * TMP_N - H_G_REF * TMPM
    IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) CHRR(NM) = CHRR(NM) + (QCONF(IW)+QRADIN(IW)-QRADOUT(IW))*AW(IW)
@@ -5610,7 +5541,7 @@ IF(CENTERED_HRR_TIME)THEN
   !
   !   [stime-DT_HRR, stime]    if t>= T_BEGIN+DT_HRR,      so center of window is stime - DT_HRR/2
   !   [T_BEGIN, T_BEGIN+stime] if stime <= T_BEGIN+DT_HRR, so center of window is T_BEGIN+stime/2 
-  IF(STIME.GE.T_BEGIN+DT_HRR)THEN
+  IF(STIME>=T_BEGIN+DT_HRR)THEN
     HRR_TIME = STIME - DT_HRR/2.0
    ELSE
     HRR_TIME = T_BEGIN+STIME/2.0
@@ -5671,7 +5602,7 @@ SUBROUTINE UPDATE_MASS(NM)
 ! Compute the total masses of various gases
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL
-REAL(EB) :: VC,Y_MF_INT(1:N_Y_ARRAY),YY_GET(1:N_SPECIES)
+REAL(EB) :: VC,Y_MF_INT(1:N_Y_ARRAY),YY_GET(1:N_GAS_SPECIES)
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I,J,K
  
@@ -5690,7 +5621,7 @@ DO K=1,KBAR
          ENDIF
          VC = DX(I)*RC(I)*DY(J)*DZ(K)
          MINT(0,NM) = MINT(0,NM) + VC*RHO(I,J,K)
-         IF (N_SPECIES>0) THEN
+         IF (N_GAS_SPECIES>0) THEN
             YY_GET(:) = YY(I,J,K,:)
             CALL GET_MASS_FRACTION_ALL(YY_GET,Y_MF_INT)            
             MINT(1:N_Y_ARRAY,NM) = MINT(1:N_Y_ARRAY,NM) + RHO(I,J,K)*Y_MF_INT(1:N_Y_ARRAY)*VC
@@ -5719,12 +5650,12 @@ MINT_TOTAL(:) = 0._EB
 DO NM=1,NMESHES
    IF (MINT_TIME_INTERVAL(NM)>0._EB) MINT_TOTAL(0:N_Y_ARRAY)=MINT_TOTAL(0:N_Y_ARRAY)+MINT_SUM(0:N_Y_ARRAY,NM)/MINT_TIME_INTERVAL(NM)
 ENDDO
-IF (MIXTURE_FRACTION) THEN
+IF (N_GAS_SPECIES==0) THEN
+   WRITE(TCFORM,'(A)') "(ES15.7E3,',',ES15.7E3)"
+   WRITE(LU_MASS,TCFORM) STIME,MINT_TOTAL(0)
+ELSE
    WRITE(TCFORM,'(A,I4.4,A)') "(",N_Y_ARRAY+1,"(ES15.7E3,','),ES15.7E3)"
    WRITE(LU_MASS,TCFORM) STIME,(MINT_TOTAL(N),N=0,N_Y_ARRAY)
-ELSE
-   WRITE(TCFORM,'(A,I4.4,A)') "(",N_Y_ARRAY,"(ES15.7E3,','),ES15.7E3)"
-   WRITE(LU_MASS,TCFORM) STIME,(MINT_TOTAL(N),N=0,N_Y_ARRAY-1)
 ENDIF 
  
 END SUBROUTINE DUMP_MASS
@@ -5734,7 +5665,6 @@ END SUBROUTINE DUMP_MASS
 SUBROUTINE DUMP_BNDF(T,NM)
 
 ! Dump boundary quantities into CHID_nn.bf file
- 
 REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
 INTEGER :: ISUM,IG,JG,KG,IOR,NF,IND,I,J,K,I1,I2,J1,J2,K1,K2,IC,IW,N
@@ -6028,7 +5958,7 @@ FLOOP: DO NF=1,N_BNDF
    PP  = 100._FB
    PPN = 100._FB
 
-   IF (INC(IOR,0).NE.0) THEN
+   IF (INC(IOR,0)/=0) THEN
       KG=1 
       DO J=1,JBAR
          DO I=1,IBAR
@@ -6053,7 +5983,7 @@ FLOOP: DO NF=1,N_BNDF
  
       IOR=3
  
-      IF (INC(IOR,N).NE.0) THEN
+      IF (INC(IOR,N)/=0) THEN
  
          K=K2+1
          DO J=J1,J2
@@ -6071,19 +6001,19 @@ FLOOP: DO NF=1,N_BNDF
       DO J=0,JBAR
          DO I=0,IBAR
             ISUM=0
-            IF(I.NE.0.AND.J.NE.0)THEN
+            IF(I/=0.AND.J/=0)THEN
               PPN(I,J) = PPN(I,J) + PP(I,J)
               ISUM = ISUM + 1
             ENDIF
-            IF(I.NE.IBAR.AND.J.NE.0)THEN
+            IF(I/=IBAR.AND.J/=0)THEN
               PPN(I,J) = PPN(I,J) + PP(I+1,J)
               ISUM = ISUM + 1
             ENDIF
-            IF(I.NE.0.AND.J.NE.JBAR)THEN
+            IF(I/=0.AND.J/=JBAR)THEN
               PPN(I,J) = PPN(I,J) + PP(I,J+1)
               ISUM = ISUM + 1
             ENDIF
-            IF(I.NE.IBAR.AND.J.NE.JBAR)THEN
+            IF(I/=IBAR.AND.J/=JBAR)THEN
               PPN(I,J) = PPN(I,J) + PP(I+1,J+1)
               ISUM = ISUM + 1
             ENDIF
