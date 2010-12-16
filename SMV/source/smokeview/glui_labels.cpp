@@ -162,6 +162,7 @@ extern "C" void glui_labels_setup(int main_window){
 //  SPINNER_cullgeom_portsize=glui_labels->add_spinner_to_panel(panel_label1,"Cull blockage portsize",GLUI_SPINNER_INT,&cullgeom_portsize,
 //    LABELS_drawface,Labels_CB);
 //  SPINNER_cullgeom_portsize->set_int_limits(3,100,GLUI_LIMIT_CLAMP);
+  glui_labels->add_checkbox_to_panel(panel_label1,"Sort transparent faces",&sorttransparentfaces,LABELS_drawface,Labels_CB);
 #endif
   glui_labels->add_button_to_panel(panel_label1,"Show All",LABELS_showall,Labels_CB);
   glui_labels->add_button_to_panel(panel_label1,"Hide All",LABELS_hideall,Labels_CB);

@@ -907,7 +907,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
       }
 #endif
     }
-    if(nface_transparent>0)sort_transparent_faces(modelview_scratch);
+    if(nface_transparent>0&&sorttransparentfaces==1)sort_transparent_faces(modelview_scratch);
     if(showiso==1)Update_Isotris(0);
 
     glScalef(mscale[0],mscale[1],mscale[2]);
