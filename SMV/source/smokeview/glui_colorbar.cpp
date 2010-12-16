@@ -94,6 +94,7 @@ int cb_usecolorbar_extreme;
 #define COLORBAR_EXTREME 16
 
 extern "C" void colorbar_global2local(void);
+extern "C" void add_colorbar_list2(int index, char *label);
 
 void COLORBAR_CB(int var);
 
@@ -436,6 +437,7 @@ void COLORBAR_CB(int var){
     cbi = colorbarinfo + colorbartype;  //addcolorbar resizes (and possibly moves) colorbarinfo
     LISTBOX_colorbar->add_item(colorbartype,cbi->label);
     LISTBOX_colorbar->set_int_val(colorbartype);
+    add_colorbar_list2(colorbartype,cbi->label);
     COLORBAR_CB(COLORBAR_LIST);
     break;
   case COLORBAR_DELETE:

@@ -295,6 +295,12 @@ extern "C" void update_colorbar_list2(void){
   LISTBOX_colorbar2->set_int_val(selectedcolorbar_index2);
 }
 
+/* ------------------ add_colorbar_list2 ------------------------ */
+
+extern "C" void add_colorbar_list2(int index, char *label){
+  LISTBOX_colorbar2->add_item(index,label);
+}
+
 /* ------------------ update_update_extreme2 ------------------------ */
 
 extern "C" void update_extreme2(void){
