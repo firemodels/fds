@@ -22,6 +22,7 @@
 	A		= 1E20
 	E 		= 1.6E5
 	N_S		= 1
+    SPEC_ID='fuel_gas'
 	NU_GAS(1,1)	= 1.0
 	HEAT_OF_REACTION= 1000
 	HEAT_OF_COMBUSTION(1) = 12000/

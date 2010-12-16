@@ -22,7 +22,8 @@
 	A		= 1E20
 	E 		= 1.6E5
 	N_S		= 1
-	NU_GAS(1,1)	= 0.5
+    SPEC_ID='fuel_gas'
+    NU_GAS(1,1)	= 0.5
 	NU_RESIDUE	= 0.5
 	RESIDUE 	= 'CHAR'
 	HEAT_OF_REACTION= 1000
