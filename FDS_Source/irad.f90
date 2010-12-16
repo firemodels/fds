@@ -92,7 +92,7 @@ L1000: DO KK=1,NOM
 
    L200: DO I=1,4
 
-      IF(SPECIE(I)==0._EB) CYCLE L200
+      IF(SPECIE(I) <= ZERO_P) CYCLE L200
  
       ! LOOP 100 IS FOR EACH ELEMENT ALONG PATH
       ! (CALCULATION PROCEEDS IN ACCORDANCE WITH THE SLG MODEL, TABLE 5-18, IN NASA SP-3080._EB)
@@ -108,7 +108,7 @@ L1000: DO KK=1,NOM
          GC(I)=GC(I)+GAMMA(I,7)*P(I)*AZORCT
       ENDIF
 
-      IF(P(I)==0._EB) THEN
+      IF(P(I)<=ZERO_P) THEN
          XSTAR=1.E-34_EB
          AC=1._EB
          AD=1._EB
@@ -140,7 +140,7 @@ L1000: DO KK=1,NOM
 ! FUNCTION AS RECOMMENDED BY BROSMER AND TIEN (JQSRT 33,P 521).  THE
 ! ERROR FUNCTION IS FOUND FROM ITS SERIES EXPANSION.
  
-            IF((I==3._EB).AND.(XC<=10)) THEN
+            IF((I==3).AND.(XC<=10)) THEN
                AOM=XC
                XX=.5_EB*SQRTPI*XC
                IF(XX<=3._EB) THEN
@@ -171,7 +171,7 @@ L1000: DO KK=1,NOM
 
    ! DETERMINE OPTICAL DEPTH OF SOOT
 
-   IF (SPECIE(5)==0._EB) THEN
+   IF (SPECIE(5)<=ZERO_P) THEN
       XPART=0._EB
    ELSE
       CALL POD(OMEGA)
@@ -182,7 +182,7 @@ L1000: DO KK=1,NOM
 
    XTOT=0._EB
    DO I=1,4
-      IF(SPECIE(I)==0._EB) X(I)=0._EB
+      IF(SPECIE(I)<=ZERO_P) X(I)=0._EB
       XTOT=X(I)+XTOT
    ENDDO
    XTOT=XTOT+XPART
@@ -217,7 +217,7 @@ ABSHRT=0._EB
 ABIL=0._EB
 ABIS=0._EB
 
-IF(.NOT.(SPECIE(5)==0._EB .AND. TWALL==0._EB)) THEN
+IF(.NOT.(SPECIE(5)<=ZERO_P .AND. TWALL<=ZERO_P)) THEN
    KMAX=INT(OMMIN)
    DO KK=5,KMAX,5
       OMEGA=FLOAT(KK)
@@ -268,7 +268,7 @@ ENDDO
 
 AP0=(AP0+AB(NOM)*(AMBDA(NM)-AMBDA(NOM))/2._EB *PLANCK(RCT,AMBDA(NOM)))*5.5411E7_EB/RCT4
 
-IF(TWALL==RCT.OR.TWALL==0._EB) THEN
+IF(ABS(TWALL-RCT)<=ZERO_P.OR.TWALL<=ZERO_P) THEN
    AIWALL=AP0
    LTERM = MAX(1E-10_EB,(5.5411E7_EB*Q-RCT**4)/(-RCT4))
    AMEAN=-1._EB/DD*DLOG(LTERM)
@@ -392,7 +392,7 @@ ELSE
                SDSTRG=(.5_EB*G)**.5_EB*(SQRT(SMINUS)+SQRT(SPLUS))/D+SDSTRG
             ENDDO L201
          ENDDO L202
-         IF(SDWEAK==0._EB) THEN
+         IF(SDWEAK<=ZERO_P) THEN
             SDWEAK=0._EB
             GDINV=1._EB
             GDDINV=1._EB
@@ -426,10 +426,10 @@ ELSE
          GAM=B-A*(V3+1._EB)
          IF(L==2) THEN
             OMVV3=3728._EB-5._EB*V-47._EB*V3
-            IF(V==0._EB)OMVV3=3715._EB-47._EB*V3
+            IF(V<=ZERO_P) OMVV3=3715._EB-47._EB*V3
          ELSE
             OMVV3=3598._EB-18._EB*V-47._EB*V3
-            IF(V==0._EB)OMVV3=3613._EB-47._EB*V3
+            IF(V<=ZERO_P) OMVV3=3613._EB-47._EB*V3
          ENDIF
          DELTA=A*(OMEGA-OMVV3)
          IF(GAM*GAM<=DELTA) CYCLE L102
@@ -464,7 +464,7 @@ ELSE
          L=2
       ENDDO L120
 !CALCULATE ABSORPTION COEF AND LINE SPACING PARAMETER FOR 4.3 MICRON BAND
-      IF(SDWEAK==0._EB) THEN
+      IF(SDWEAK<=ZERO_P) THEN
          SDWEAK=0._EB
          GDINV=1._EB
          GDDINV=1._EB
@@ -537,7 +537,7 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
                SDSTRG=(.5_EB*G)**.5_EB*(SMINUS**.5+SPLUS**.5)/D+SDSTRG
             ENDDO L201A
          ENDDO L202A
-         IF(SDWEAK==0._EB) THEN
+         IF(SDWEAK<=ZERO_P) THEN
             SDWEAK=0._EB
             GDINV=1._EB
             GDDINV=1._EB
@@ -571,10 +571,10 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
                GAM=B-A*(V3+1._EB)
                IF(L==2) THEN
                   OMVV3=3728._EB-5._EB*V-47._EB*V3
-                  IF(V==0._EB)OMVV3=3715._EB-47._EB*V3
+                  IF(V<=ZERO_P)OMVV3=3715._EB-47._EB*V3
                   ELSE
                   OMVV3=3598._EB-18._EB*V-47._EB*V3
-                  IF(V==0._EB)OMVV3=3613._EB-47._EB*V3
+                  IF(V<=ZERO_P)OMVV3=3613._EB-47._EB*V3
                ENDIF
                DELTA=A*(OMEGA-OMVV3)
                IF(GAM*GAM<=DELTA) CYCLE L102A
@@ -609,7 +609,7 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
          L=2
       ENDDO L120A
 !CALCULATE ABSORPTION COEF AND LINE SPACING PARAMETER FOR 4.3 MICRON BAND
-      IF(SDWEAK==0._EB) THEN
+      IF(SDWEAK<=ZERO_P) THEN
          SDWEAK=0._EB
          GDINV=1._EB
          GDDINV=1._EB
@@ -675,7 +675,7 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
       END SELECT
       TW=TT*WW
       SDWEAK=SD15(I,J)*(1._EB-TT-WW+TW)+SD15(I+1,J)*(TT-TW)  +SD15(I,J+1)*(WW-TW)+SD15(I+1,J+1)*TW
-      IF(SDWEAK==0._EB) THEN
+      IF(SDWEAK<=ZERO_P) THEN
          SDWEAK=0._EB
          GDINV=1._EB
          GDDINV=1._EB
@@ -2339,7 +2339,7 @@ LAMBDALOOP: DO NLAMBDA = 1, NWATERK
       PFOR = 0._EB
       DO J = 1,NMIEANG
          DO I = J,NMIEANG
-            IF (MUD0(I,J)== MUDPI(I,J)) THEN
+            IF (ABS(MUD0(I,J)-MUDPI(I,J))<=ZERO_P) THEN
                CALL INTERPOLATE1D(XMU2,PHSFUN,MUD0(I,J),FTMP)
                PFOR(I,J) = PI*FTMP
             ELSE

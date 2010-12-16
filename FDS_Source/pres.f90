@@ -175,7 +175,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
  
          IF (VENT_INDEX(IW)>0) THEN
             VT => VENTS(VENT_INDEX(IW))
-            IF (TW(IW) == T_BEGIN .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
+            IF (ABS(TW(IW)-T_BEGIN)<=ZERO_P .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
                TSI = T
             ELSE
                TSI = T - T_BEGIN
