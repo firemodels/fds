@@ -801,7 +801,7 @@ ENDIF
 ! ----------------------------------------------------------------------------------
 ! print debug information if requested
 ! ----------------------------------------------------------------------------------
-IF (SCARC_DEBUG.ge.2) THEN
+IF (SCARC_DEBUG>=2) THEN
    WRITE(SCARC_LU,*) ' ======================= SCARC_INIT_MESHES3D =========='
    WRITE(SCARC_LU,*) '==========> LEVEL ', ILEVEL
    WRITE(SCARC_LU,*) 'SL(',ILEVEL,')%IBAR=',SL%IBAR
@@ -939,7 +939,7 @@ DO IW = 1, M%N_EXTERNAL_WALL_CELLS
 !IF (M%IJKW(9,IW)/=0) M%PRESSURE_BC_INDEX(IW)=INTERNAL
 
    NOM=M%IJKW(9,IW)
-   IF (NOM.NE.0) THEN
+   IF (NOM/=0) THEN
       SLMAX%IOR_FACE(NM,NOM)= M%IJKW(4,IW)
       SLMAX%IOR_FACE(NOM,NM)=-M%IJKW(4,IW)
       IF (SCARC_DEBUG>=2) THEN
@@ -1108,7 +1108,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
       ENDIF
 
 
-      IF (SCARC_DEBUG.ge.2) THEN
+      IF (SCARC_DEBUG>=2) THEN
          WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
          WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
          WRITE(SCARC_LU,*) 'IW2_HI=',IW2_HI
@@ -1170,7 +1170,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
             !STOP
          ENDIF
    
-         IF (SCARC_DEBUG.ge.2) THEN
+         IF (SCARC_DEBUG>=2) THEN
             WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
             WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
             WRITE(SCARC_LU,*) 'IW2_HI=',IW2_HI
@@ -1241,7 +1241,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
             SLLO%PRESSURE_BC_INDEX(IW_LO)=NEUMANN
          ENDIF
 
-         IF (SCARC_DEBUG.ge.2) THEN
+         IF (SCARC_DEBUG>=2) THEN
             WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
             WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
             WRITE(SCARC_LU,*) 'IW2_HI=',IW2_HI
@@ -1303,7 +1303,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
 !                  STOP
             ENDIF
       
-            IF (SCARC_DEBUG.ge.2) THEN
+            IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
                WRITE(SCARC_LU,*) 'IW2_HI=',IW2_HI
@@ -1374,7 +1374,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
             SLLO%PRESSURE_BC_INDEX(IW_LO)=NEUMANN
          ENDIF
 
-         IF (SCARC_DEBUG.ge.2) THEN
+         IF (SCARC_DEBUG>=2) THEN
             WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
             WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
             WRITE(SCARC_LU,*) 'IW2_HI=',IW2_HI
@@ -1435,7 +1435,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
                !STOP
             ENDIF
       
-            IF (SCARC_DEBUG.ge.2) THEN
+            IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
                WRITE(SCARC_LU,*) 'IW2_HI=',IW2_HI
@@ -1506,7 +1506,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
             SLLO%PRESSURE_BC_INDEX(IW_LO)=NEUMANN
          ENDIF
 
-         IF (SCARC_DEBUG.ge.2) THEN
+         IF (SCARC_DEBUG>=2) THEN
             WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
             WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
             WRITE(SCARC_LU,*) 'IW2_HI=',IW2_HI
@@ -1532,7 +1532,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
            
             IDIFF=IMIN2_HI-IMIN1_HI
 
-         IF (SCARC_DEBUG.ge.2) THEN
+         IF (SCARC_DEBUG>=2) THEN
             WRITE(SCARC_LU,*) 
             WRITE(SCARC_LU,*) 'IMIN1_HI=',IMIN1_HI
             WRITE(SCARC_LU,*) 'IMIN2_HI=',IMIN2_HI
@@ -1575,7 +1575,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
                !STOP
             ENDIF
       
-            IF (SCARC_DEBUG.ge.2) THEN
+            IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
                WRITE(SCARC_LU,*) 'IW2_HI=',IW2_HI
@@ -1645,7 +1645,7 @@ INIT_NBR_LEVEL2D: DO ILEVEL=S%NLMAX-1,S%NLMIN,-1
          KMIN=0
          KMAX=S%MKBAR(NOM)/IREFINE+1
 
-         IF (SCARC_DEBUG.ge.6) THEN
+         IF (SCARC_DEBUG>=6) THEN
             WRITE(SCARC_LU,*) '============== NOM=',NOM
             WRITE(SCARC_LU,*) 'NIC:'
             DO JM=1,NMESHES
@@ -1875,7 +1875,7 @@ DO IW = 1, M%N_EXTERNAL_WALL_CELLS
    !IF (M%IJKW(9,IW)/=0) M%PRESSURE_BC_INDEX(IW)=INTERNAL
 
    NOM=M%IJKW(9,IW)
-   IF (NOM.NE.0) THEN
+   IF (NOM/=0) THEN
       SLMAX%IOR_FACE(NM,NOM)= M%IJKW(4,IW)
       SLMAX%IOR_FACE(NOM,NM)=-M%IJKW(4,IW)
       IF (SCARC_DEBUG>=2) THEN
@@ -2183,7 +2183,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
             ENDIF
 
 
-            IF (SCARC_DEBUG.ge.2) THEN
+            IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
                WRITE(SCARC_LU,*) 'IW2_HI=',IW2_HI
@@ -2266,7 +2266,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                   !STOP
                ENDIF
          
-               IF (SCARC_DEBUG.ge.2) THEN
+               IF (SCARC_DEBUG>=2) THEN
                   WRITE(SCARC_LU,*) ' 1: =========== IOR= 1'
                   WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                   WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -2372,7 +2372,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                SLLO%PRESSURE_BC_INDEX(IW_LO)=NEUMANN
             ENDIF
 
-            IF (SCARC_DEBUG.ge.2) THEN
+            IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) ' 1: =========== IOR= -1'
                WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -2457,7 +2457,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
 !                  STOP
                ENDIF
          
-               IF (SCARC_DEBUG.ge.2) THEN
+               IF (SCARC_DEBUG>=2) THEN
                   WRITE(SCARC_LU,*) ' 1: =========== IOR= -1'
                   WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                   WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -2562,7 +2562,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                SLLO%PRESSURE_BC_INDEX(IW_LO)=NEUMANN
             ENDIF
 
-            IF (SCARC_DEBUG.ge.2) THEN
+            IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) ' 1: =========== IOR= 2'
                WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -2646,7 +2646,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                   !STOP
                ENDIF
          
-               IF (SCARC_DEBUG.ge.2) THEN
+               IF (SCARC_DEBUG>=2) THEN
                   WRITE(SCARC_LU,*) ' 1: =========== IOR= 2'
                   WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                   WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -2751,7 +2751,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                SLLO%PRESSURE_BC_INDEX(IW_LO)=NEUMANN
             ENDIF
 
-            IF (SCARC_DEBUG.ge.2) THEN
+            IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) ' 1: =========== IOR= -2'
                WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -2835,7 +2835,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                   !STOP
                ENDIF
          
-               IF (SCARC_DEBUG.ge.2) THEN
+               IF (SCARC_DEBUG>=2) THEN
                   WRITE(SCARC_LU,*) ' 1: =========== IOR= -2'
                   WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                   WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -2940,7 +2940,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                SLLO%PRESSURE_BC_INDEX(IW_LO)=NEUMANN
             ENDIF
 
-            IF (SCARC_DEBUG.ge.2) THEN
+            IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) ' 1: =========== IOR= 3'
                WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -3023,7 +3023,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                   !STOP
                ENDIF
          
-               IF (SCARC_DEBUG.ge.2) THEN
+               IF (SCARC_DEBUG>=2) THEN
                   WRITE(SCARC_LU,*) ' 1: =========== IOR= -3'
                   WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                   WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -3128,7 +3128,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                SLLO%PRESSURE_BC_INDEX(IW_LO)=NEUMANN
             ENDIF
 
-            IF (SCARC_DEBUG.ge.2) THEN
+            IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) ' 1: =========== IOR= 3'
                WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -3176,7 +3176,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                IDIFF=IMIN2_HI-IMIN1_HI
                JDIFF=JMIN3_HI-JMIN1_HI
 
-            IF (SCARC_DEBUG.ge.2) THEN
+            IF (SCARC_DEBUG>=2) THEN
                WRITE(SCARC_LU,*) 
                WRITE(SCARC_LU,*) 'IMIN1_HI=',IMIN1_HI
                WRITE(SCARC_LU,*) 'IMIN2_HI=',IMIN2_HI
@@ -3227,7 +3227,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
                   !STOP
                ENDIF
          
-               IF (SCARC_DEBUG.ge.2) THEN
+               IF (SCARC_DEBUG>=2) THEN
                   WRITE(SCARC_LU,*) ' 1: =========== IOR= -3'
                   WRITE(SCARC_LU,*) ' 1: =========== K_LO=',K_LO,': J_LO=',J_LO
                   WRITE(SCARC_LU,*) 'IW1_HI=',IW1_HI
@@ -3322,7 +3322,7 @@ IF (SCARC_METHOD == 'MG' .OR. SCARC_CG_PRECON =='MG' .OR. SCARC_BICG_PRECON == '
          KMIN=0
          KMAX=S%MKBAR(NOM)/IREFINE+1
 
-         IF (SCARC_DEBUG.ge.6) THEN
+         IF (SCARC_DEBUG>=6) THEN
             WRITE(SCARC_LU,*) '============== NOM=',NOM
             WRITE(SCARC_LU,*) 'NIC:'
             DO JM=1,NMESHES
@@ -3719,7 +3719,7 @@ OSLEVEL_LOOP3D: DO NOM=1,NMESHES
 
             IREFINE=IREFINE*2
 
-            IF (MOD(OS%SLEVEL(ILEVEL+1)%N_EXTERNAL_WALL_CELLS,IREFINE).NE.0) THEN
+            IF (MOD(OS%SLEVEL(ILEVEL+1)%N_EXTERNAL_WALL_CELLS,IREFINE)/=0) THEN
                WRITE(*,*) 'N_EXTERNAL_WALL_CELLS cannot be divided by 2!'         ! only temporarily
                STOP
             ENDIF
@@ -6914,24 +6914,24 @@ DO K = 1, SL%KBAR
    DO I = 1, SL%IBAR
       IC = (K-1) * SL%IBAR + I
 
-      IF (K-1<1      .and.X(I,1,K-1).gt.1.0E-14_EB) then
+      IF (K-1<1      .and.X(I,1,K-1)>1.0E-14_EB) then
         WRITE(SCARC_LU,*) 'A:WRONG: X(',I,',1,',K-1,')=',X(I,1,K-1), SL%AG(IC,2)
         !stop
       ENDIF
-      IF (K+1>SL%KBAR.and.X(I,1,K+1).gt.1.0E-14_EB) then
+      IF (K+1>SL%KBAR.and.X(I,1,K+1)>1.0E-14_EB) then
         WRITE(SCARC_LU,*) 'B:WRONG: X(',I,',1,',K+1,')=',X(I,1,K+1), SL%AG(IC,5)
         !stop
       ENDIF
-      IF (I-1<1      .and.X(I-1,1,K).gt.1.0E-14_EB) then
+      IF (I-1<1      .and.X(I-1,1,K)>1.0E-14_EB) then
         WRITE(SCARC_LU,*) 'C:WRONG: X(',I-1,',1,',K,')=',X(I-1,1,K), SL%AG(IC,3)
         !stop
       ENDIF
-      IF (I+1>SL%IBAR.and.X(I+1,1,K).gt.1.0E-14_EB) then
+      IF (I+1>SL%IBAR.and.X(I+1,1,K)>1.0E-14_EB) then
         WRITE(SCARC_LU,*) 'D:WRONG: X(',I+1,',1,',K,')=',X(I+1,1,K), SL%AG(IC,4)
         !stop
       ENDIF
 
-      IF (K-1<=0.and.X(I,1,K-1).gt.1.0E-14_EB) stop
+      IF (K-1<=0.and.X(I,1,K-1)>1.0E-14_EB) stop
       Y (I, 1, K) =    A1 * (  SL%AG(IC, 1)*X(I  , 1, K  ) &
                              + SL%AG(IC, 2)*X(I  , 1, K-1) &
                              + SL%AG(IC, 3)*X(I-1, 1, K  ) &
@@ -7000,7 +7000,7 @@ ENDIF
 !!! Perform 3D-matrix-vector-multiplication
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 DO K = 1, SL%KBAR
-IF (SCARC_DEBUG .GE. 6) write (SCARC_LU,*) '-------------------------------------'
+IF (SCARC_DEBUG >= 6) write (SCARC_LU,*) '-------------------------------------'
 
    DO J = 1, SL%JBAR
       DO I = 1, SL%IBAR
@@ -7013,12 +7013,12 @@ IF (SCARC_DEBUG .GE. 6) write (SCARC_LU,*) '------------------------------------
                          +   SL%AG(IC, 6) *X (I  , J+1, K  )   &
                          +   SL%AG(IC, 7) *X (I  , J  , K+1) ) &
                     + A2 * Y (I, J, K)
-IF (SCARC_DEBUG .GE. 6) write (SCARC_LU, '(a,i2,a,i2,a,i2,a,i3,a,7f6.0,a,f22.16)') &
+IF (SCARC_DEBUG >= 6) write (SCARC_LU, '(a,i2,a,i2,a,i2,a,i3,a,7f6.0,a,f22.16)') &
                        '(', I, ',', J, ',', K, '):A(', IC, '):', &
                        (SL%AG(IC, LL), LL=1, 7),  ' -> Y=', Y (I, J, K)
 
       ENDDO
-IF (SCARC_DEBUG .GE. 6) write (SCARC_LU,*) '-------------------------------------'
+IF (SCARC_DEBUG >= 6) write (SCARC_LU,*) '-------------------------------------'
    ENDDO
 ENDDO
  

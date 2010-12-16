@@ -14,7 +14,7 @@ CHARACTER(255), PARAMETER :: radiid='$Id$'
 CHARACTER(255), PARAMETER :: radirev='$Revision$'
 CHARACTER(255), PARAMETER :: radidate='$Date$'
 
-PUBLIC INIT_RADIATION,COMPUTE_RADIATION,GET_REV_radi
+PUBLIC INIT_RADIATION,COMPUTE_RADIATION,GET_KAPPA,GET_REV_radi
  
 CONTAINS
  
@@ -136,6 +136,7 @@ ENDDO
 ! Set (wall normal)*(angle vector) value
  
 DO N = 1,NRA
+   DLN( 0,N) = 0._EB !prevent undefined variable errors
    DLN(-1,N) = -DLX(N)
    DLN( 1,N) =  DLX(N)
    DLN(-2,N) = -DLY(N)
@@ -285,7 +286,7 @@ ENDIF INIT_WIDE_BAND
 !
 !-------------------------------------------------------------------------
 
-MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_FUEL /= 0 .OR. I_CO2 /= 0 .OR. I_WATER /=0) THEN 
+MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .OR. CO2_INDEX /= 0 .OR. H2O_INDEX /=0) THEN 
 
    KAPPA_ARRAY = .TRUE.
 
@@ -301,77 +302,42 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
    ! Using RadCal, create look-up tables for the absorption coefficients for all gas species, mixture fraction or aerosols
 
    N_KAPPA_ARRAY=0
-   IF (MIXTURE_FRACTION) THEN
       IF (FUEL_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
       IF (CO2_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
       IF (CO_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
       IF (H2O_INDEX /= 0 .OR. I_WATER /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
       IF (SOOT_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
-   ELSE
-      IF (I_FUEL /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
-      IF (I_CO2 /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
-      IF (I_CO /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
-      IF (I_WATER /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
-      IF (I_SOOT /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
-   ENDIF
    Y2KAPPA_T = 42
    Y2KAPPA_M = 50
+   NS = 0
    ALLOCATE (Y2KAPPA_M4(N_KAPPA_ARRAY),STAT=IZERO)
    CALL ChkMemErr('RADI','Y2KAPPA_M4',IZERO)
    ALLOCATE (KAPPA_INDEX(N_KAPPA_ARRAY),STAT=IZERO)
    CALL ChkMemErr('RADI','KAPPA_INDEX',IZERO)
-   IF (MIXTURE_FRACTION) THEN
-      Y2KAPPA_M4(1) = REAL(Y2KAPPA_M,EB)**4/REACTION(1)%MW_FUEL
-      KAPPA_INDEX(1) = FUEL_INDEX
-      Y2KAPPA_M4(2) = REAL(Y2KAPPA_M,EB)**4/MW_CO2
-      KAPPA_INDEX(2) = CO2_INDEX
-      NS = 2
-      IF (CO_INDEX > 0) THEN
-         NS = NS + 1
-         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_CO
-         KAPPA_INDEX(NS) = CO_INDEX
-      ENDIF      
-      IF (H2O_INDEX > 0 .OR. I_WATER > 0) THEN
-         NS = NS + 1
-         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_H2O
-         IF (H2O_INDEX > 0) THEN
-            KAPPA_INDEX(NS) = H2O_INDEX
-         ELSE
-            KAPPA_INDEX(NS) = I_WATER + N_STATE_SPECIES
-         ENDIF
-      ENDIF      
-      IF (SOOT_INDEX > 0) THEN
-         NS = NS + 1
-         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4*5._EB
-         KAPPA_INDEX(NS) = SOOT_INDEX
-      ENDIF
-   ELSE
-      NS = 0
-      IF (I_FUEL /= 0) THEN
-         NS = NS + 1
-         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/SPECIES(I_FUEL)%MW
-         KAPPA_INDEX(NS) = I_FUEL
-      ENDIF
-      IF (I_CO2 /= 0) THEN
-         NS = NS + 1
-         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_CO2
-         KAPPA_INDEX(NS) = I_CO2         
-      ENDIF
-      IF (I_CO /= 0) THEN
-         NS = NS + 1
-         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_CO
-         KAPPA_INDEX(NS) = I_CO         
-      ENDIF
-      IF (I_WATER /= 0) THEN
-         NS = NS + 1
-         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_H2O
-         KAPPA_INDEX(NS) = I_WATER
-      ENDIF
-      IF (I_SOOT /= 0) THEN
-         NS = NS + 1
-         Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4*5._EB
-         KAPPA_INDEX(NS) = I_SOOT
-      ENDIF
+   IF (FUEL_INDEX > 0) THEN
+      NS = NS + 1
+      Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_FUEL
+      KAPPA_INDEX(NS) = FUEL_INDEX
+   ENDIF
+   IF (CO2_INDEX > 0) THEN
+      NS = NS + 1
+      Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_CO2
+      KAPPA_INDEX(NS) = CO2_INDEX
+   ENDIF
+   IF (CO_INDEX > 0) THEN
+      NS = NS + 1
+      Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_CO
+      KAPPA_INDEX(NS) = CO_INDEX
+   ENDIF      
+   IF (H2O_INDEX > 0) THEN
+      NS = NS + 1
+      Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_H2O
+      KAPPA_INDEX(NS) = H2O_INDEX
+   ENDIF      
+   IF (SOOT_INDEX > 0) THEN
+      NS = NS + 1
+      Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4*5._EB
+      KAPPA_INDEX(NS) = SOOT_INDEX
    ENDIF
    ALLOCATE (Y2KAPPA(N_KAPPA_ARRAY,0:Y2KAPPA_M,0:Y2KAPPA_T,NSB),STAT=IZERO)
    CALL ChkMemErr('RADI','Y2KAPPA',IZERO)
@@ -394,7 +360,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
             KAPPA_SPECIES: DO NS = 1, 5
                SELECT CASE(NS)
                   CASE(1) ! FUEL
-                     IF(MIXTURE_FRACTION .OR. I_FUEL /=0) THEN
+                     IF(FUEL_INDEX > 0) THEN
                         N = N + 1
                         SVF    = 0._EB
                         SPECIE = 0._EB
@@ -410,7 +376,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         ENDIF
                      ENDIF
                   CASE(2) ! CO2
-                     IF(MIXTURE_FRACTION .OR. I_CO2 /=0) THEN
+                     IF(CO2_INDEX > 0) THEN
                         N = N + 1
                         SVF    = 0._EB
                         SPECIE = 0._EB
@@ -426,7 +392,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         ENDIF
                      ENDIF
                   CASE(3) ! CO
-                     IF((MIXTURE_FRACTION .AND. CO_INDEX > 0) .OR. I_CO /=0) THEN
+                     IF(CO_INDEX > 0) THEN
                         N = N + 1
                         SVF    = 0._EB
                         SPECIE = 0._EB
@@ -442,7 +408,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         ENDIF
                      ENDIF
                   CASE(4) ! H2O
-                     IF((MIXTURE_FRACTION .AND. H2O_INDEX > 0) .OR. I_WATER /=0) THEN
+                     IF(H2O_INDEX > 0) THEN
                         N = N + 1
                         SVF    = 0._EB
                         SPECIE = 0._EB
@@ -458,7 +424,7 @@ MAKE_KAPPA_ARRAYS: IF (MIXTURE_FRACTION .OR. I_SOOT /= 0 .OR. I_CO /= 0 .OR. I_F
                         ENDIF
                      ENDIF
                   CASE(5) !Soot
-                     IF((MIXTURE_FRACTION .AND. SOOT_INDEX > 0).OR. I_SOOT /=0) THEN
+                     IF(SOOT_INDEX > 0) THEN
                         N = N + 1
                         RCRHO = MW_AIR*P_INF/(R0*RCT)
                         YY = YY * 0.2_EB
@@ -495,7 +461,7 @@ DROPLETS: IF (N_EVAP_INDICES>0) THEN
       PC => PARTICLE_CLASS(J)
       IF ((.NOT. PC%FUEL) .AND. (.NOT. PC%WATER)) CYCLE GET_PC_RADI
       IF (PC%FUEL) THEN  ! Tuntomo, Tien and Park, Comb. Sci. and Tech., 84, 133-140, 1992
-         PC%WQABS(:,1) = (/0,10,16,28,52,98,191,386,792,1629,3272,6163, &
+         PC%WQABS(0:30,1) = (/0,10,16,28,52,98,191,386,792,1629,3272,6163, &
             10389,15588,20807,23011,22123,22342,22200,22241,21856, &
             22795,23633,24427,25285,26207,27006,27728,28364,28866, &
             29260/)!,29552,29748,30000/)
@@ -556,7 +522,7 @@ INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
             I_UIID, N_UPDATES, IBND, TYY, NOM, IBC,EVAP_INDEX,NRA, I_DROP
-REAL(EB) :: XID,YJD,ZKD,YY_GET(1:N_SPECIES),KAPPA_PART,SURFACE_AREA
+REAL(EB) :: XID,YJD,ZKD,YY_GET(1:N_GAS_SPECIES),KAPPA_PART,SURFACE_AREA
 INTEGER :: IPC,IID,JJD,KKD,ID
 LOGICAL :: UPDATE_INTENSITY
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KFST4=>NULL(), IL=>NULL(), UIIOLD=>NULL(), KAPPAW=>NULL(), &
@@ -1229,7 +1195,7 @@ FUNCTION GET_KAPPA(Y_IN,TYY,IBND)
 ! Returns the radiative absorption
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT
-REAL(EB), INTENT(INOUT) :: Y_IN(1:N_SPECIES)
+REAL(EB), INTENT(INOUT) :: Y_IN(1:N_GAS_SPECIES)
 REAL(EB) :: KAPPA_TEMP,INT_FAC,GET_KAPPA,Y_MF(1:N_Y_ARRAY),MWA
 INTEGER, INTENT(IN) :: IBND,TYY
 INTEGER :: LBND,UBND,N
@@ -1238,8 +1204,8 @@ CALL GET_MASS_FRACTION_ALL(Y_IN,Y_MF)
 CALL GET_MOLECULAR_WEIGHT(Y_IN,MWA)
 GET_KAPPA = 0._EB
 DO N = 1, N_KAPPA_ARRAY
-   IF ((MIXTURE_FRACTION .AND. KAPPA_INDEX(N)==SOOT_INDEX) .OR. &
-       (.NOT. MIXTURE_FRACTION .AND. KAPPA_INDEX(N)==I_SOOT)) THEN
+   IF ((SIMPLE_CHEMISTRY .AND. KAPPA_INDEX(N)==SOOT_INDEX) .OR. &
+       (.NOT. SIMPLE_CHEMISTRY .AND. KAPPA_INDEX(N)==I_SOOT)) THEN
       INT_FAC = MAX(0._EB,(Y_MF(KAPPA_INDEX(N))*Y2KAPPA_M4(N)))**0.25_EB
    ELSE
       INT_FAC = MAX(0._EB,(Y_MF(KAPPA_INDEX(N))*MWA*Y2KAPPA_M4(N)))**0.25_EB

@@ -38,10 +38,10 @@ Q_UPPER = HRRPUA_SHEET/CELL_SIZE + HRRPUV_AVERAGE
 
 ! Choose between mixture fraction formulation or finite-rate chemistry
 
-IF (MIXTURE_FRACTION) THEN
-   CALL COMBUSTION_MF   
+IF (SIMPLE_CHEMISTRY) THEN
+   CALL COMBUSTION_SIMPLE_CHEMISTRY
 ELSE
-   CALL COMBUSTION_FR
+   CALL COMBUSTION_GENERAL
 ENDIF
 
 ! Mirror Q across external boundaries -- for Smokeview visualization only
@@ -52,15 +52,15 @@ TUSED(10,NM)=TUSED(10,NM)+SECOND()-TNOW
 
 CONTAINS
 
-SUBROUTINE COMBUSTION_MF
+SUBROUTINE COMBUSTION_SIMPLE_CHEMISTRY
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_SPECIFIC_GAS_CONSTANT,GET_AVERAGE_SPECIFIC_HEAT,GET_CONDUCTIVITY,&
                                GET_MOLECULAR_WEIGHT,GET_SPECIFIC_HEAT,GET_MASS_FRACTION_ALL
 REAL(EB) :: Y_FU_0,Y_P_0,Y_LIMITER,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DELTA,DELTA2,ACCEL, & 
-            Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,F_TO_CO,DELTAH_CO,DYCO,HFAC_CO,RHOX, &
-            X_FU,X_O2,X_FU_0,X_O2_0,X_FU_S,X_O2_S,X_FU_N,X_O2_N,CO_TO_O2,CRIT_FLAME_TMPA, &
-            Y_FU_MAX,TMP_F_MIN,Y_F_CORR,Z_2_MIN,Z_2_MIN_FAC,WGT,OMWGT,Q_BOUND_1,Q_BOUND_2,Q_BOUND_3,YY_GET(1:N_SPECIES), &
-            ZETA,CS2,H_F_0,H_F_N,H_G_0,H_G_N,DYAIR,DELTAH_F,TAU_D,TAU_U,TAU_G,EPSK,KSGS,KP,CP,S_L, TMP_WGT,&
+            Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,DELTAH_CO,DYCO,HFAC_CO,RHOX, &
+            X_FU,X_O2,X_FU_0,X_O2_0,X_FU_S,X_O2_S,X_FU_N,X_O2_N,CO_TO_O2,CRIT_FLAME_TMPA, O2_F_RATIO,Y_CO_FAC,&
+            Y_FU_MAX,TMP_F_MIN,Y_F_CORR,Q_BOUND_1,Q_BOUND_2,YY_GET(1:N_GAS_SPECIES), &
+            H_F_0,H_F_N,H_G_0,H_G_N,DYAIR,DELTAH_F,TAU_D,TAU_U,TAU_G,EPSK,KSGS,KP,CP,S_L,&
             DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS2,S12,S13,S23,Y_SPECIES_OLD(1:N_Y_ARRAY),Y_SPECIES_DIFF(1:N_Y_ARRAY),MW
 REAL(EB), PARAMETER :: Y_FU_MIN=1.E-10_EB,Y_O2_MIN=1.E-10_EB,X_O2_MIN=1.E-16_EB,X_FU_MIN=1.E-16_EB,Y_CO_MIN=1.E-10_EB, &
                        M_MIN=0.1_EB,M_MAX=0.3_EB
@@ -78,6 +78,7 @@ MIX_TIME =  DT
 Q        =  0._EB
 !$OMP END WORKSHARE
 D_REACTION = 0._EB
+
 ! Compute and save O2 in all cells
 
 !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,YY_GET)
@@ -85,8 +86,7 @@ D_REACTION = 0._EB
       DO J=0,JBP1
          DO I=0,IBP1
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            YY_GET(:) = YY(I,J,K,:)
-            CALL GET_MASS_FRACTION(YY_GET,O2_INDEX,Y_O2(I,J,K))   
+            Y_O2(I,J,K) = MIN(1._EB,MAX(0._EB,1._EB-SUM(YY(I,J,K,:))))*SPECIES_MIXTURE(1)%MASS_FRACTION(O2_INDEX)
          ENDDO
       ENDDO
    ENDDO
@@ -102,15 +102,11 @@ ENDIF
 !$OMP SINGLE
 
 ! Compute the (fast) reaction of fuel to either CO or CO2
-IF (CO_PRODUCTION) THEN
-   DELTAH_F = REACTION(2)%HEAT_OF_COMBUSTION
-ELSE
-   DELTAH_F = REACTION(1)%HEAT_OF_COMBUSTION
-ENDIF
-
 
 RN => REACTION(1)
+DELTAH_F = RN%HEAT_OF_COMBUSTION
 HFAC_F  = RN%HEAT_OF_COMBUSTION/DT
+O2_F_RATIO = RN%NU(0)*SPECIES_MIXTURE(1)%MW*SPECIES_MIXTURE(1)%VOLUME_FRACTION(O2_INDEX)/(RN%NU(1)*SPECIES_MIXTURE(2)%MW)
 
 UU => US
 VV => VS
@@ -126,11 +122,34 @@ DO K=1,KBAR
       DO I=1,IBAR
          IC = CELL_INDEX(I,J,K)
          IF (SOLID(IC)) CYCLE
-         Y_FU_0  = MAX(0._EB,MIN(1._EB,YY(I,J,K,I_FUEL)))*RN%Y_F_INLET
+         Y_FU_0  = MAX(0._EB,MIN(1._EB,YY(I,J,K,I_FUEL)))*SPECIES_MIXTURE(2)%MASS_FRACTION(FUEL_INDEX)
          IF (Y_FU_0<=Y_FU_MIN) CYCLE
          Y_O2_0  = Y_O2(I,J,K)
          IF (Y_O2_0<=Y_O2_MIN) CYCLE
-         Y_P_0 = MAX(Y_P_MIN_EDC,SUM(YY(I,J,K,I_Z_MIN+1:I_Z_MAX)))
+         IF (CO_PRODUCTION) THEN
+            IF (SOOT_DEPOSITION) THEN
+               Y_P_0 = YY(I,J,K,I_PROG_CO)*RN%NU(1)*SPECIES_MIXTURE(2)%MW/ &
+                          (RN%NU(1)*SPECIES_MIXTURE(2)%MW+RN%NU(0)*SPECIES_MIXTURE(1)%MW) + YY(I,J,K,I_PROG_SOOT) + &
+                       YY(I,J,K,I_PROG_F)*REACTION(2)%NU(1)*SPECIES_MIXTURE(2)%MW/&
+                          (REACTION(2)%NU(1)*SPECIES_MIXTURE(2)%MW+REACTION(2)%NU(1)*SPECIES_MIXTURE(1)%MW)
+            ELSE
+               Y_P_0 = YY(I,J,K,I_PROG_CO)*RN%NU(1)*SPECIES_MIXTURE(2)%MW/&
+                          (RN%NU(1)*SPECIES_MIXTURE(2)%MW+RN%NU(0)*SPECIES_MIXTURE(1)%MW)  + & 
+                       YY(I,J,K,I_PROG_F)*REACTION(2)%NU(1)*SPECIES_MIXTURE(2)%MW/&
+                          (REACTION(2)%NU(1)*SPECIES_MIXTURE(2)%MW+REACTION(2)%NU(1)*SPECIES_MIXTURE(1)%MW)
+
+            ENDIF
+         ELSE
+            IF (SOOT_DEPOSITION) THEN
+               Y_P_0 = YY(I,J,K,I_PROG_F)*RN%NU(1)**SPECIES_MIXTURE(2)%MW/&
+                         (RN%NU(1)*SPECIES_MIXTURE(2)%MW+RN%NU(0)*SPECIES_MIXTURE(1)%MW) + YY(I,J,K,I_PROG_SOOT)
+            ELSE
+               Y_P_0 = YY(I,J,K,I_PROG_F)*RN%NU(1)*SPECIES_MIXTURE(2)%MW/&
+                          (RN%NU(1)*SPECIES_MIXTURE(2)%MW+RN%NU(0)*SPECIES_MIXTURE(1)%MW)
+            ENDIF
+         ENDIF
+
+         Y_P_0 = MAX(Y_P_MIN_EDC,Y_P_0)
          
          IF_SUPPRESSION: IF (SUPPRESSION) THEN  ! Get maximum O2 in the current and neighboring cells to see if flame viable
 
@@ -183,7 +202,7 @@ DO K=1,KBAR
             ! Evaluate empirical extinction criteria
             IF (EXTINCTION2) THEN
                IF (TMP(I,J,K) < RN%AUTO_IGNITION_TEMPERATURE) CYCLE
-               DYF = MIN(Y_FU_0,Y_O2_0/RN%O2_F_RATIO) 
+               DYF = MIN(Y_FU_0,Y_O2_0/O2_F_RATIO) 
                YY_GET = 0._EB
                YY_GET(I_FUEL) = 1._EB
                CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_F_0,TMP(I,J,K))
@@ -193,29 +212,29 @@ DO K=1,KBAR
                YY_GET = YY_GET / (1._EB - Y_FU_0)
                CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_0,TMP(I,J,K))            
                CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,H_G_N,RN%CRIT_FLAME_TMP)
-               DYAIR = DYF * (1._EB - Y_FU_0) / Y_O2_0 * RN%O2_F_RATIO
+               DYAIR = DYF * (1._EB - Y_FU_0) / Y_O2_0 * O2_F_RATIO
                IF ( (DYF*H_F_0 + DYAIR*H_G_0)*TMP(I,J,K) + DYF*DELTAH_F < (DYF*H_F_N + DYAIR*H_G_N)*RN%CRIT_FLAME_TMP) CYCLE
             ELSE
                Y_O2_CORR = RN%Y_O2_LL*(RN%CRIT_FLAME_TMP-TMP_MIN)/(RN%CRIT_FLAME_TMP-CRIT_FLAME_TMPA)
                Y_F_CORR  = RN%Y_F_LFL*(RN%CRIT_FLAME_TMP-TMP_F_MIN)/(RN%CRIT_FLAME_TMP-CRIT_FLAME_TMPA)
-               IF (Y_O2_MAX < Y_O2_CORR .OR. Y_FU_MAX*RN%Y_F_INLET < Y_F_CORR) CYCLE
+               IF (Y_O2_MAX < Y_O2_CORR .OR. Y_FU_MAX**SPECIES_MIXTURE(1)%MASS_FRACTION(FUEL_INDEX) < Y_F_CORR) CYCLE
             ENDIF
 
          ENDIF IF_SUPPRESSION
-         
-         LES_IF: IF (LES) THEN
-            
-            IF (USE_MAX_FILTER_WIDTH) THEN
-               DELTA=MAX(DX(I),DY(J),DZ(K))
+
+         IF (USE_MAX_FILTER_WIDTH) THEN
+            DELTA=MAX(DX(I),DY(J),DZ(K))
+         ELSE
+            IF (.NOT.TWO_D) THEN
+               DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
             ELSE
-               IF (.NOT.TWO_D) THEN
-                  DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
-               ELSE
-                  DELTA = SQRT(DX(I)*DZ(K))
-               ENDIF
+               DELTA = SQRT(DX(I)*DZ(K))
             ENDIF
- 
-            TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)   ! diffusive time scale
+         ENDIF
+
+         TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)   ! diffusive time scale         
+
+         LES_IF: IF (LES) THEN
             
             ! compute local filtered strain
 
@@ -240,38 +259,42 @@ DO K=1,KBAR
             TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
 
             MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(MIN(TAU_D,TAU_U,TAU_G),TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
-
+         ELSE LES_IF
+         !DNS Mix Time
+            MIX_TIME(I,J,K)= TAU_D
          ENDIF LES_IF
-                  
+         
          IF (FIXED_MIX_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_MIX_TIME
          
-         Y_LIMITER = MIN( Y_FU_0, Y_O2_0/RN%O2_F_RATIO, BETA_EDC*Y_P_0 )
+         Y_LIMITER = MIN( Y_FU_0, Y_O2_0/O2_F_RATIO, BETA_EDC*Y_P_0 )
          DYF = Y_LIMITER*(1._EB-EXP(-DT/MIX_TIME(I,J,K)))
          Q_BOUND_1 = DYF*RHO(I,J,K)*HFAC_F
          
          Q_BOUND_2 = Q_UPPER
          Q_NEW = MIN(Q_BOUND_1,Q_BOUND_2)
-         DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)         
+         DYF = Q_NEW /(RHO(I,J,K)*HFAC_F*RN%Y_F_INLET)
+         
          Q(I,J,K)  = Q_NEW
          !YY_GET = YY(I,J,K,:)
          !CALL GET_MASS_FRACTION_ALL(YY_GET,Y_SPECIES_OLD)
          !CALL GET_MOLECULAR_WEIGHT(YY_GET,MW)
-         !CALL GET_SPECIFIC_HEAT(YY_GET,H_G_0,TMP(I,J,K))
+         !CALL GET_SPECIFIC_HEAT(YY_GET,H_G_0,TMP(I,J,K))         
          YY(I,J,K,I_FUEL) = YY(I,J,K,I_FUEL) - DYF
+         IF (CO_PRODUCTION) Y_O2_NEW(I,J,K) = Y_O2_NEW(I,J,K) - DYF * O2_F_RATIO
+         DYF = -DYF/(RN%NU(1)*SPECIES_MIXTURE(2)%MW)
          IF (CO_PRODUCTION) THEN
             IF (SOOT_DEPOSITION) THEN
-               YY(I,J,K,I_PROG_CO)   = YY(I,J,K,I_PROG_CO)   + DYF * (1._EB - RN%SOOT_YIELD)
-               YY(I,J,K,I_PROG_SOOT) = YY(I,J,K,I_PROG_SOOT) + DYF * RN%SOOT_YIELD
+               YY(I,J,K,I_PROG_CO)   = YY(I,J,K,I_PROG_CO)   + DYF*SPECIES_MIXTURE(3)%MW*RN%NU(2)   
+               YY(I,J,K,I_PROG_SOOT) = YY(I,J,K,I_PROG_SOOT) + DYF*SPECIES_MIXTURE(5)%MW*RN%NU(3)   
             ELSE
-               YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) + DYF            
-            ENDIF
-            Y_O2_NEW(I,J,K) = Y_O2_NEW(I,J,K) - DYF * RN%O2_F_RATIO
+               YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) + DYF*SPECIES_MIXTURE(3)%MW*RN%NU(2)      
+            ENDIF           
          ELSE
             IF (SOOT_DEPOSITION) THEN
-               YY(I,J,K,I_PROG_F)    = YY(I,J,K,I_PROG_F)    + DYF * (1._EB - RN%SOOT_YIELD)
-               YY(I,J,K,I_PROG_SOOT) = YY(I,J,K,I_PROG_SOOT) + DYF * RN%SOOT_YIELD
+               YY(I,J,K,I_PROG_F)    = YY(I,J,K,I_PROG_F)    + DYF*SPECIES_MIXTURE(3)%MW*RN%NU(2)   
+               YY(I,J,K,I_PROG_SOOT) = YY(I,J,K,I_PROG_SOOT) + DYF*SPECIES_MIXTURE(4)%MW*RN%NU(3)   
             ELSE
-               YY(I,J,K,I_PROG_F)  = YY(I,J,K,I_PROG_F)  + DYF            
+               YY(I,J,K,I_PROG_F)  = YY(I,J,K,I_PROG_F) + DYF*SPECIES_MIXTURE(3)%MW*RN%NU(2)   
             ENDIF
          ENDIF
          !YY_GET = YY(I,J,K,:)
@@ -282,11 +305,10 @@ DO K=1,KBAR
          !DO NS = 1, N_Y_ARRAY
          !   H_G_N = Y2CPBAR_C(ITMP)+Y2CPBAR(ITMP,NS)+TMP_WGT*(Y2CPBAR_C(ITMP+1)+Y2CPBAR(ITMP+1,NS)-Y2CPBAR_C(ITMP)-Y2CPBAR(ITMP,NS))
          !   D_REACTION(I,J,K) = D_REACTION(I,J,K) + (MW/MF_MW(NS))*Y_SPECIES_DIFF(NS)/DT! - H_G_N/H_G_0)*Y_SPECIES_DIFF(NS)/DT
-         !ENDDO
+         !ENDDO        
       ENDDO
    ENDDO
 ENDDO
-
 !$OMP END DO
 
 ! Optional second (slow) reaction to convert CO to CO_2
@@ -294,12 +316,11 @@ ENDDO
 CONVERT_CO: IF (CO_PRODUCTION) THEN 
    !$OMP SINGLE
    RN => REACTION(2)
-   DELTAH_CO = (REACTION(2)%HEAT_OF_COMBUSTION - REACTION(1)%HEAT_OF_COMBUSTION) * &
-                REACTION(1)%MW_FUEL/((REACTION(1)%NU(CO_INDEX)-REACTION(2)%NU(CO_INDEX))*MW_CO)
-   F_TO_CO   = REACTION(1)%MW_FUEL/(REACTION(1)%NU(CO_INDEX)*MW_CO)  
-   HFAC_CO   = DELTAH_CO/DT
-   CO_TO_O2  = MW_O2/(MW_CO*2._EB)
-   Z_2_MIN_FAC = F_TO_CO * REACTION(2)%CO_YIELD / REACTION(1)%Y_F_INLET
+   DELTAH_CO = RN%HEAT_OF_COMBUSTION
+   HFAC_CO   = DELTAH_CO/DT   
+   CO_TO_O2  =  MW_O2/MW_CO*0.5_EB
+   Y_CO_FAC = SPECIES_MIXTURE(4)%VOLUME_FRACTION(CO_INDEX)/&
+              (SPECIES_MIXTURE(4)%VOLUME_FRACTION(CO2_INDEX)+SPECIES_MIXTURE(4)%VOLUME_FRACTION(CO_INDEX))
    A  = RN%BOF 
    NODETS = 20
    DTT    = DT/REAL(NODETS,EB)
@@ -313,18 +334,16 @@ CONVERT_CO: IF (CO_PRODUCTION) THEN
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
             Y_O2_0  = Y_O2_NEW(I,J,K)
-            Y_CO_0  = MAX(0._EB,YY(I,J,K,I_PROG_CO))*RN%Y_F_INLET / F_TO_CO 
+            Y_CO_0  = MAX(0._EB,YY(I,J,K,I_PROG_CO))*SPECIES_MIXTURE(3)%MASS_FRACTION(CO_INDEX)
             IF (Y_CO_0<=Y_CO_MIN .OR. Y_O2_0<=Y_O2_MIN) CYCLE
 
             ! Get max conversion allowed
 
-            Z_2_MIN = Z_2_MIN_FAC * (YY(I,J,K,I_PROG_CO)+YY(I,J,K,I_PROG_F))
-            IF (YY(I,J,K,I_PROG_CO) < Z_2_MIN) CYCLE
-            IF ((TMP(I,J,K) < 500._EB .AND. Q(I,J,K)==0._EB) .OR. Q(I,J,K)>=Q_UPPER) CYCLE
+            IF ((TMP(I,J,K) < RN%THRESHOLD_TEMP .AND. Q(I,J,K) <= ZERO_P) .OR. Q(I,J,K)>=Q_UPPER) CYCLE
 
             ! Compute slow reaction
 
-            IF (Q(I,J,K)/=0._EB) THEN
+            IF (Q(I,J,K) > 0._EB) THEN
                DYCO = MIN(Y_CO_0,Y_O2_0/CO_TO_O2)*MIN(1._EB,DT/MIX_TIME(I,J,K))
             ELSE
                RHOX = 1000._EB*RHO(I,J,K)
@@ -364,18 +383,15 @@ CONVERT_CO: IF (CO_PRODUCTION) THEN
             ENDIF
             Q_OLD = Q(I,J,K)
             Q_NEW = MIN(Q_UPPER-Q_OLD,DYCO*RHO(I,J,K)*HFAC_CO)
-            DYCO = Q_NEW/(RHO(I,J,K)*HFAC_CO*RN%Y_F_INLET) * F_TO_CO
-            IF (YY(I,J,K,I_PROG_CO) - DYCO < Z_2_MIN) THEN
-               Q_NEW = Q_NEW*(YY(I,J,K,I_PROG_CO)-Z_2_MIN)/DYCO
-               DYCO  = YY(I,J,K,I_PROG_CO) - Z_2_MIN
-            ENDIF
+            DYCO = Q_NEW/(RHO(I,J,K)*HFAC_CO) / SPECIES_MIXTURE(3)%MASS_FRACTION(CO_INDEX)
             Q(I,J,K)   = Q_OLD + Q_NEW
 !            YY_GET = YY(I,J,K,:)
 !            CALL GET_MASS_FRACTION_ALL(YY_GET,Y_SPECIES_OLD)
 !            CALL GET_MOLECULAR_WEIGHT(YY_GET,MW)
-!            CALL GET_SPECIFIC_HEAT(YY_GET,H_G_0,TMP(I,J,K))
-            YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) - DYCO
-            YY(I,J,K,I_PROG_F)  = YY(I,J,K,I_PROG_F)  + DYCO
+!            CALL GET_SPECIFIC_HEAT(YY_GET,H_G_0,TMP(I,J,K))            
+            YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) -DYCO
+            DYCO = DYCO / SPECIES_MIXTURE(3)%MW
+            YY(I,J,K,I_PROG_F)  = YY(I,J,K,I_PROG_F)  + DYCO * SPECIES_MIXTURE(4)%MW * RN%NU(2)
 !            YY_GET = YY(I,J,K,:)
 !            CALL GET_MASS_FRACTION_ALL(YY_GET,Y_SPECIES_DIFF)
 !            Y_SPECIES_DIFF = Y_SPECIES_DIFF - Y_SPECIES_OLD
@@ -384,7 +400,7 @@ CONVERT_CO: IF (CO_PRODUCTION) THEN
 !            DO NS = 1, N_Y_ARRAY
 !               H_G_N = Y2CPBAR_C(ITMP)+Y2CPBAR(ITMP,NS)+TMP_WGT*(Y2CPBAR_C(ITMP+1)+Y2CPBAR(ITMP+1,NS)-Y2CPBAR_C(ITMP)-Y2CPBAR(ITMP,NS))
 !               D_REACTION(I,J,K) = D_REACTION(I,J,K) + (MW/MF_MW(NS) - H_G_N/H_G_0)*Y_SPECIES_DIFF(NS)/DT
-!            ENDDO                                    
+!            ENDDO                                               
          ENDDO
       ENDDO
    ENDDO
@@ -392,12 +408,13 @@ CONVERT_CO: IF (CO_PRODUCTION) THEN
 
 ENDIF CONVERT_CO
 
-! Compute new mixture molecular weight and divergence term
+! Compute new mixture molecular weight
 
 !$OMP DO COLLAPSE(3) PRIVATE(YY_GET)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
+         IF (Q(I,J,K) < ZERO_P) CYCLE      
          YY_GET(:) = YY(I,J,K,:)
          CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
       ENDDO
@@ -406,203 +423,424 @@ ENDDO
 !$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
-END SUBROUTINE COMBUSTION_MF
+END SUBROUTINE COMBUSTION_SIMPLE_CHEMISTRY
 
+SUBROUTINE COMBUSTION_GENERAL
+! Generic combustion routine for multi step reactions with kinetics either mixing controlled, finite rate, or a temperature threshhold 
+! mixed approach
+USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT
+INTEGER :: I,J,K,NS,NR,I_TS,MIX_INDEX,NODETS
+REAL(EB):: ETRM1(1:N_REACTIONS),ETRM,X_I(0:N_GAS_SPECIES),X_0(0:N_GAS_SPECIES),X_S(0:N_GAS_SPECIES),X_N(0:N_GAS_SPECIES),&
+           Q_NR,DT_FAC,DT_FAC2,MIX_TIME,&
+           DELTA,TAU_D,TAU_G,TAU_U,DUDX,DVDY,DWDZ,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,S12,S13,S23,SS2,EPSK,KSGS, &
+           TMPD,DT_ODE,X_MIN,YY_GET(1:N_GAS_SPECIES),QFAC
+LOGICAL :: NO_REACTION,MIX_TIME_CALC,CALC_ETRM(1:N_REACTIONS)
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
+TYPE (REACTION_TYPE),POINTER :: RN
 
+IF (LES) THEN
+   UU => US
+   VV => VS
+   WW => WS      
+ENDIF
 
-SUBROUTINE COMBUSTION_FR
-
-! Finite-Rate Combustion
-
-REAL(EB) :: TMPD,ETRM,&
-            DX_FDT,DTT,YYNEW,WFAC,QFAC,&
-            X_O2_MIN,X_FU_MIN,X_FU_S,X_O2_S
-REAL(EB), DIMENSION(1:N_REACTIONS,0:N_SPECIES) :: MPUE
-REAL(EB), DIMENSION(1:N_REACTIONS) :: HFAC_F, A, ETRM1, X_FU,X_O2, &
-           DYF,Q_NR,X_FU_N,X_O2_N
-INTEGER :: NODETS,N,I,J,K,II,NR
-LOGICAL :: NO_REACTION
-
-!$OMP PARALLEL
-!$OMP WORKSHARE
-Q =  0._EB
-!$OMP END WORKSHARE
-
-!$OMP SINGLE
-DO NR=1,N_REACTIONS
-   RN => REACTION(NR)
-   HFAC_F(NR) = RN%HEAT_OF_COMBUSTION/DT
-   DO N=1,N_SPECIES
-      MPUE(NR,N) = SPECIES(N)%MW*RN%NU(N)/ABS(RN%EPUMO2*SPECIES(RN%I_OXIDIZER)%MW*RN%NU(RN%I_OXIDIZER))
-   ENDDO
-   A(NR) = RN%BOF
-ENDDO 
-NODETS = 20
-DTT    = DT/REAL(NODETS,EB)
-X_O2_MIN = 1.E-14_EB
-X_FU_MIN = 1.E-14_EB
-!$OMP END SINGLE
-
-!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DYF,TMPD,NR,ETRM1,NO_REACTION,II,X_O2_N,X_FU_N,Q_NR,RN,X_O2,X_FU,ETRM,N) &
-!$OMP PRIVATE(DX_FDT,X_FU_S,X_O2_S,QFAC,YYNEW)
+NODETS=20
+DT_ODE = DT/REAL(NODETS,EB)         
+X_MIN = 1.E-15_EB
+Q = 0._EB
 DO K=1,KBAR
    DO J=1,JBAR
-      ILOOP3: DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP3
-         DYF = 0._EB
-         !Convert mass fractions to concentrations
+      ILOOP: DO I=1,IBAR
+         CALC_ETRM = .FALSE.
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
          TMPD = TMP(I,J,K)
-         DO NR = 1, N_REACTIONS
-            ETRM1(NR) = A(NR)*EXP(-REACTION(NR)%E/(R0*TMPD))
-         ENDDO
-         NO_REACTION = .FALSE.
-         ODE_LOOP: DO II=1,NODETS
-            X_O2_N  = 0._EB
-            X_FU_N = 0._EB
-            REACTION_LOOP: DO NR=1,N_REACTIONS
-               Q_NR(NR) = 0._EB
+         DO NS = 1,N_GAS_SPECIES
+            X_I(NS) = MAX(0._EB,YY(I,J,K,NS))/SPECIES(Y2SPEC(NS))%MW*RHO(I,J,K)*1.E-3_EB
+         ENDDO  
+         X_I(0) = MAX(0._EB,(1._EB - SUM(YY(I,J,K,:))))/SPECIES(0)%MW*RHO(I,J,K)*1.E-3_EB
+         X_0 = X_I
+         ETRM1 = 0._EB
+         MIX_TIME_CALC = .FALSE.
+         MIX_INDEX = -1         
+         ODE_LOOP: DO I_TS = 1,NODETS
+            NO_REACTION = .TRUE.
+            REACTION_LOOP: DO NR = 1, N_REACTIONS
                RN => REACTION(NR)
-               X_O2(NR) = YY(I,J,K,RN%I_OXIDIZER)*1000._EB*RHO(I,J,K)/SPECIES(RN%I_OXIDIZER)%MW*1.E-6_EB
-               X_FU(NR) = YY(I,J,K,RN%I_FUEL)*1000._EB    *RHO(I,J,K)/RN%MW_FUEL*1.E-6_EB
-               IF (X_FU(NR)<=X_FU_MIN .OR. X_O2(NR)<=X_O2_MIN) THEN
-                  IF (NR == 1) THEN
-                     NO_REACTION = .TRUE.
-                  ELSE
-                     NO_REACTION = NO_REACTION .AND. .TRUE.
-                  ENDIF
-                  CYCLE REACTION_LOOP
-               ELSE
-                  NO_REACTION = .FALSE.
-               ENDIF
+               Q_NR = 0._EB
+               DO NS = 0,RN%N_SPECIES
+                  IF (X_0(RN%SPECIES(NS)) < X_MIN .AND. RN%NU(NS) < 0._EB) CYCLE REACTION_LOOP
+                  CALC_ETRM(NR) = .TRUE.
+               ENDDO
+               ! Compute rate constant based on type of reaction
+               COMPUTE_RATE_CONSTANT_1: IF (I_TS==1 .OR. CALC_ETRM(NR)) THEN
+                  CALC_ETRM(NR) = .FALSE.
+                  MIX_OR_FINITE: IF (RN%MODE==MIXING_CONTROLLED .OR. &
+                     (RN%MODE==MIXED .AND. RN%THRESHOLD_TEMP>TMPD .AND. Q(I,J,K)>0._EB)) THEN
+                  !Mixing controlled reaction
+                     IF (MIX_INDEX > 0) THEN
+                        ETRM1(NR) = ETRM1(MIX_INDEX)
+                     ELSEIF (FIXED_MIX_TIME>0._EB) THEN
+                        ETRM1(NR)= FIXED_MIX_TIME/DT                        
+                     ELSEIF (TMPD < RN%AUTO_IGNITION_TEMPERATURE) THEN
+                        ETRM1(NR) = 0._EB
+                        CYCLE REACTION_LOOP   
+                     ELSE                     
+                        IF (DNS .AND. .NOT. MIX_TIME_CALC) THEN
+                           MIX_TIME_CALC=.TRUE.
+                           IF (USE_MAX_FILTER_WIDTH) THEN
+                              DELTA=MAX(DX(I),DY(J),DZ(K))
+                           ELSE
+                              IF (.NOT.TWO_D) THEN
+                                 DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
+                              ELSE
+                                 DELTA = SQRT(DX(I)*DZ(K))
+                              ENDIF
+                           ENDIF                
+                           MIX_TIME =  SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)   ! diffusive time scale
+                        ENDIF
+                        LES_IF: IF (LES .AND. .NOT. MIX_TIME_CALC) THEN  
+                           MIX_TIME_CALC=.TRUE.           
+                           IF (USE_MAX_FILTER_WIDTH) THEN
+                              DELTA=MAX(DX(I),DY(J),DZ(K))
+                           ELSE
+                              IF (.NOT.TWO_D) THEN
+                                 DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
+                              ELSE
+                                 DELTA = SQRT(DX(I)*DZ(K))
+                              ENDIF
+                           ENDIF
+                
+                           TAU_D = SC*RHO(I,J,K)*DELTA**2/MU(I,J,K)   ! diffusive time scale
+                           
+                           ! compute local filtered strain
+
+                           DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
+                           DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
+                           DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
+                           DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
+                           DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
+                           DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
+                           DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
+                           DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
+                           DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
+                           S12 = 0.5_EB*(DUDY+DVDX)
+                           S13 = 0.5_EB*(DUDZ+DWDX)
+                           S23 = 0.5_EB*(DVDZ+DWDY)
+                           SS2 = 2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2))
+                           
+                           EPSK = MU(I,J,K)/RHO(I,J,K)*SS2       ! ke dissipation rate, assumes production=dissipation
+                           KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH  ! estimate of subgrid ke, from Kolmogorov spectrum
+
+                           TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB)   ! advective time scale
+                           TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
+
+                           MIX_TIME=MAX(TAU_CHEM,MIN(MIN(TAU_D,TAU_U,TAU_G),TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
+                           ETRM1(NR) = 1._EB/MIX_TIME
+                        ELSE LES_IF
+                           ETRM1(NR) = 1._EB
+                        ENDIF LES_IF               
+                        MIX_INDEX = NR   
+                     ENDIF                                    
+                  ELSE MIX_OR_FINITE
+                  !Finite Rate reaction
+                     ETRM1(NR) = RN%BOF*EXP(-RN%E/(R0*TMPD))
+                  ENDIF MIX_OR_FINITE                  
+               ENDIF COMPUTE_RATE_CONSTANT_1
+               IF (ETRM1(NR) > ZERO_P) NO_REACTION = .FALSE.
                ETRM = ETRM1(NR)
+               COMPUTE_RATE_CONSTANT_2:  IF (RN%MODE==MIXING_CONTROLLED .OR. (RN%MODE==MIXED .AND. RN%THRESHOLD_TEMP > TMPD)) THEN
 
-               ! Local flame extinction criteria
+               ! Mixing controlled reaction
+                  SPEC_LOOP_1: DO NS=0,RN%N_SPECIES
+                     IF (RN%NU(NS) >= 0._EB) CYCLE SPEC_LOOP_1
+                     ETRM = MIN(ETRM, -ETRM1(NR) * X_0(RN%SPECIES(NS)) / RN%NU(NS))
+                  END DO SPEC_LOOP_1
+               ELSE COMPUTE_RATE_CONSTANT_2
 
-               SPEC_LOOP: DO N=1,N_SPECIES
-                  IF (N==RN%I_FUEL .OR. N==RN%I_OXIDIZER .OR. RN%N(N)==-999._EB) CYCLE SPEC_LOOP
-                  IF (YY(I,J,K,N) < 1.E-20_EB) CYCLE SPEC_LOOP
-                  ETRM = ETRM * (YY(I,J,K,N)*1000._EB*RHO(I,J,K)/SPECIES(N)%MW*1.E-6_EB)**RN%N(N)
-               ENDDO SPEC_LOOP
+               ! Finite rate reaction
+             
+                  SPEC_LOOP_2: DO NS=0,RN%N_SPECIES
+                     IF (RN%NU(NS) >= 0._EB .OR. RN%N(NS)<=-998._EB) CYCLE SPEC_LOOP_2
+                     ETRM = ETRM * X_0(RN%SPECIES(NS))**RN%N(NS)
+                  ENDDO SPEC_LOOP_2
+               ENDIF COMPUTE_RATE_CONSTANT_2
 
                ! Solve the simple ODE to deplete fuel and oxidizer due to reaction
+               DT_FAC = 1._EB
 
-               DX_FDT= -ETRM*X_FU(NR)**RN%N_F*X_O2(NR)**RN%N_O
-               X_FU_S = X_FU(NR) + DTT*DX_FDT
-               X_O2_S = X_O2(NR) + DTT*DX_FDT*RN%NU(RN%I_OXIDIZER)/RN%NU(RN%I_FUEL)
-               IF (X_O2_S<X_O2_MIN) THEN
-                  X_O2_S = X_O2_MIN 
-                  X_FU_S = MAX(0.0_EB,X_FU(NR)-(X_O2(NR)-X_O2_S)*RN%NU(RN%I_FUEL)/RN%NU(RN%I_OXIDIZER))
-               ENDIF  
-               IF (X_FU_S<X_FU_MIN) THEN
-                  X_FU_S = X_FU_MIN
-                  X_O2_S = MAX(0.0_EB,X_O2(NR)-(X_FU(NR)-X_FU_S)*RN%NU(RN%I_OXIDIZER)/RN%NU(RN%I_FUEL))
-               ENDIF
-               DX_FDT= -ETRM*X_FU_S**RN%N_F*X_O2_S**RN%N_O
-               X_FU_N(NR) = .5_EB*(X_FU(NR)+X_FU_S+DTT*DX_FDT)
-               X_O2_N(NR) = .5_EB*(X_O2(NR)+X_O2_S+DTT*DX_FDT*RN%NU(RN%I_OXIDIZER)/RN%NU(RN%I_FUEL))
-               IF (X_O2_N(NR)<X_O2_MIN) &
-                  X_FU_N(NR) = MAX(0.0_EB,0.5_EB*((X_FU(NR)+X_FU_S)-(X_O2(NR)+X_O2_S)*RN%NU(RN%I_FUEL)/RN%NU(RN%I_OXIDIZER)))
-               IF (X_FU_N(NR)<X_FU_MIN) X_FU_N(NR) = X_FU_MIN
-               DYF(NR) = MAX(-X_FU(NR),X_FU_N(NR)-X_FU(NR))*RN%MW_FUEL*0.001_EB*1.E6_EB
-               Q_NR(NR) = -DYF(NR) * HFAC_F(NR)
-               IF (Q(I,J,K) + Q_NR(NR) > Q_UPPER) THEN
-                  QFAC = (1._EB - (Q(I,J,K) + Q_NR(NR) - Q_UPPER) / Q_NR(NR))
-                  DYF(NR) = DYF(NR) * QFAC
-                  Q_NR(NR) = Q_NR(NR) * QFAC
-                  Q(I,J,K) = Q_UPPER
-               ENDIF   
-               DO N=1,N_SPECIES
-                  YYNEW = YY(I,J,K,N) + DT*MPUE(NR,N)*Q_NR(NR)/RHO(I,J,K)
-                  YY(I,J,K,N) = MAX(YYMIN(N),YYNEW)
+               DO NS = 0,RN%N_SPECIES  
+                  X_S(RN%SPECIES(NS)) = X_0(RN%SPECIES(NS)) + DT_ODE*ETRM*RN%NU(NS)
+                  IF (X_S(RN%SPECIES(NS)) < 0._EB) THEN
+                     DT_FAC = MIN(DT_FAC,-X_0(RN%SPECIES(NS))/(DT_ODE*ETRM*RN%NU(NS)))
+                  ENDIF                 
                ENDDO
-               IF (Q(I,J,K)==Q_UPPER) EXIT ODE_LOOP
-               Q(I,J,K) = Q(I,J,K) + Q_NR(NR)
+               IF (DT_FAC < 1._EB) THEN
+                  DO NS = 0,RN%N_SPECIES
+                     X_S(RN%SPECIES(NS)) = X_0(RN%SPECIES(NS)) + DT_FAC*DT_ODE*ETRM*RN%NU(NS)
+                  ENDDO
+               ENDIF
+
+               COMPUTE_RATE_CONSTANT_3:  IF (RN%MODE==MIXING_CONTROLLED .OR. (RN%MODE==MIXED .AND. RN%THRESHOLD_TEMP > TMPD)) THEN
+               ! Mixing controlled reaction
+                  SPEC_LOOP_3: DO NS=1,RN%N_SPECIES
+                     IF (RN%NU(NS) >= 0._EB) CYCLE SPEC_LOOP_3
+                     ETRM = MIN(ETRM, -ETRM1(NR) * X_S(RN%SPECIES(NS)) / RN%NU(NS))
+                  END DO SPEC_LOOP_3
+               ELSE COMPUTE_RATE_CONSTANT_3
+               ! Finite rate reaction
+                  ETRM = ETRM1(NR)               
+                  SPEC_LOOP_4: DO NS=0,RN%N_SPECIES
+                     IF (RN%NU(NS) >= 0._EB .OR. RN%N(NS)<=-998._EB) CYCLE SPEC_LOOP_4
+                     IF (X_S(RN%SPECIES(NS)) <=0._EB) THEN
+                        ETRM = 0._EB
+                        EXIT SPEC_LOOP_4
+                     ENDIF
+                     ETRM = ETRM * X_S(RN%SPECIES(NS))**RN%N(NS)
+                  ENDDO SPEC_LOOP_4
+               ENDIF COMPUTE_RATE_CONSTANT_3
+
+               DT_FAC2 = 1._EB
+               DO NS = 0,RN%N_SPECIES
+                  X_N(RN%SPECIES(NS)) = 0.5_EB*(X_0(RN%SPECIES(NS))+ X_S(RN%SPECIES(NS)) + DT_FAC*DT_ODE*ETRM*RN%NU(NS))
+                  IF (X_N(RN%SPECIES(NS)) < 0._EB) THEN
+                     DT_FAC2 = MIN(DT_FAC2, -0.5_EB*(X_0(RN%SPECIES(NS))+X_S(RN%SPECIES(NS)))/&
+                                         (DT_ODE*ETRM*RN%NU(NS)) )
+                  ENDIF                 
+               ENDDO
+
+               IF (DT_FAC2 < 1._EB) THEN
+                  DO NS = 0,RN%N_SPECIES
+                     X_N(RN%SPECIES(NS)) = 0.5_EB*(X_0(RN%SPECIES(NS))+ X_S(RN%SPECIES(NS)) + DT_FAC2*DT_ODE*ETRM*RN%NU(NS))
+                  ENDDO
+               ENDIF               
+               IF (RN%FUEL_INDEX==0) THEN
+                  Q_NR = RN%HEAT_OF_COMBUSTION*(X_0(RN%FUEL_INDEX)-X_N(RN%FUEL_INDEX))*1.E3_EB* &
+                         SPECIES(0)%MW/DT                         
+               ELSE
+                  Q_NR = RN%HEAT_OF_COMBUSTION*(X_0(RN%FUEL_INDEX)-X_N(RN%FUEL_INDEX))*1.E3_EB* &
+                         SPECIES(Y2SPEC(RN%FUEL_INDEX))%MW/DT
+               ENDIF             
+               IF (Q(I,J,K) + Q_NR > Q_UPPER) THEN
+                  QFAC = (1._EB - (Q(I,J,K) + Q_NR - Q_UPPER) / Q_NR)
+                  X_N = X_0 + (X_N - X_0) *QFAC
+                  Q(I,J,K) = Q_UPPER
+                  EXIT ODE_LOOP
+               ELSE
+                  Q(I,J,K) = Q(I,J,K)+Q_NR
+               ENDIF               
+               X_0 = X_N
             ENDDO REACTION_LOOP
-            IF (NO_REACTION) EXIT ODE_LOOP
-            NO_REACTION = .FALSE.
-
+            IF (NO_REACTION) EXIT ODE_LOOP            
          ENDDO ODE_LOOP
-      ENDDO ILOOP3
+
+         IF (Q(I,J,K) > 0._EB) THEN
+            X_N = X_N - X_I
+            DO NS = 1, N_GAS_SPECIES
+               YY(I,J,K,NS) = YY(I,J,K,NS)+X_N(NS)*1.E3_EB*SPECIES(Y2SPEC(NS))%MW/RHO(I,J,K)
+            END DO
+            YY_GET(:) = YY(I,J,K,:)
+            CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K)) 
+         ENDIF
+
+      ENDDO ILOOP
    ENDDO
-ENDDO
-!$OMP END DO
+ENDDO                      
 
-! Adjust the average molecular weight term, R*Sum(Yi/Mi)
+END SUBROUTINE COMBUSTION_GENERAL
 
-!$OMP WORKSHARE
-RSUM = SPECIES(0)%RCON
-!$OMP END WORKSHARE
-!$OMP END PARALLEL
-SLOOP: DO N=1,N_SPECIES
-   IF (SPECIES(N)%MODE/=GAS_SPECIES) CYCLE SLOOP         
-   WFAC = SPECIES(N)%RCON - SPECIES(0)%RCON
-   !$OMP PARALLEL WORKSHARE
-   RSUM(:,:,:) = RSUM(:,:,:) + WFAC*YY(:,:,:,N)
-   !$OMP END PARALLEL WORKSHARE
-ENDDO SLOOP
+!!!SUBROUTINE COMBUSTION_FINITE_RATE
+!!!
+!!!! Finite-Rate Combustion
+!!!
+!!!REAL(EB) :: TMPD,ETRM,&
+!!!            DX_FDT,DTT,YYNEW,WFAC,QFAC,&
+!!!            X_O2_MIN,X_FU_MIN,X_FU_S,X_O2_S
+!!!REAL(EB), DIMENSION(1:N_REACTIONS,0:N_GAS_SPECIES) :: MPUE
+!!!REAL(EB), DIMENSION(1:N_REACTIONS) :: HFAC_F, A, ETRM1, X_FU,X_O2, &
+!!!           DYF,Q_NR,X_FU_N,X_O2_N
+!!!INTEGER :: NODETS,N,I,J,K,II,NR
+!!!LOGICAL :: NO_REACTION
+!!!
+!!!!$OMP PARALLEL
+!!!!$OMP WORKSHARE
+!!!Q =  0._EB
+!!!!$OMP END WORKSHARE
+!!!
+!!!!$OMP SINGLE
+!!!DO NR=1,N_REACTIONS
+!!!   RN => REACTION(NR)
+!!!   HFAC_F(NR) = RN%HEAT_OF_COMBUSTION/DT
+!!!   DO N=1,N_GAS_SPECIES
+!!!      MPUE(NR,N) = SPECIES(Y2SPEC(N))%MW*RN%NU(N)/ABS(RN%EPUMO2*SPECIES(RN%I_OXIDIZER)%MW*RN%NU(RN%I_OXIDIZER))
+!!!   ENDDO
+!!!   A(NR) = RN%BOF
+!!!ENDDO 
+!!!NODETS = 20
+!!!DTT    = DT/REAL(NODETS,EB)
+!!!X_O2_MIN = 1.E-14_EB
+!!!X_FU_MIN = 1.E-14_EB
+!!!!$OMP END SINGLE
+!!!
+!!!!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DYF,TMPD,NR,ETRM1,NO_REACTION,II,X_O2_N,X_FU_N,Q_NR,RN,X_O2,X_FU,ETRM,N) &
+!!!!$OMP PRIVATE(DX_FDT,X_FU_S,X_O2_S,QFAC,YYNEW)
+!!!DO K=1,KBAR
+!!!   DO J=1,JBAR
+!!!      ILOOP3: DO I=1,IBAR
+!!!         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP3
+!!!         DYF = 0._EB
+!!!         !Convert mass fractions to concentrations
+!!!         TMPD = TMP(I,J,K)
+!!!         DO NR = 1, N_REACTIONS
+!!!            ETRM1(NR) = A(NR)*EXP(-REACTION(NR)%E/(R0*TMPD))
+!!!         ENDDO
+!!!         NO_REACTION = .FALSE.
+!!!         ODE_LOOP: DO II=1,NODETS
+!!!            X_O2_N  = 0._EB
+!!!            X_FU_N = 0._EB
+!!!            REACTION_LOOP: DO NR=1,N_REACTIONS
+!!!               Q_NR(NR) = 0._EB
+!!!               RN => REACTION(NR)
+!!!               X_O2(NR) = YY(I,J,K,RN%I_OXIDIZER)*1000._EB*RHO(I,J,K)/SPECIES(RN%I_OXIDIZER)%MW*1.E-6_EB
+!!!               X_FU(NR) = YY(I,J,K,RN%I_FUEL)*1000._EB    *RHO(I,J,K)/RN%MW_FUEL*1.E-6_EB
+!!!               IF (X_FU(NR)<=X_FU_MIN .OR. X_O2(NR)<=X_O2_MIN) THEN
+!!!                  IF (NR == 1) THEN
+!!!                     NO_REACTION = .TRUE.
+!!!                  ELSE
+!!!                     NO_REACTION = NO_REACTION .AND. .TRUE.
+!!!                  ENDIF
+!!!                  CYCLE REACTION_LOOP
+!!!               ELSE
+!!!                  NO_REACTION = .FALSE.
+!!!               ENDIF
+!!!               ETRM = ETRM1(NR)
+!!!
+!!!               ! Local flame extinction criteria
+!!!
+!!!               SPEC_LOOP: DO N=1,N_GAS_SPECIES
+!!!                  IF (N==RN%I_FUEL .OR. N==RN%I_OXIDIZER .OR. RN%N(N)==-999._EB) CYCLE SPEC_LOOP
+!!!                  IF (YY(I,J,K,N) < 1.E-20_EB) CYCLE SPEC_LOOP
+!!!                  ETRM = ETRM * (YY(I,J,K,N)*1000._EB*RHO(I,J,K)/SPECIES(Y2SPEC(N))%MW*1.E-6_EB)**RN%N(N)
+!!!               ENDDO SPEC_LOOP
+!!!
+!!!               ! Solve the simple ODE to deplete fuel and oxidizer due to reaction
+!!!
+!!!               DX_FDT= -ETRM*X_FU(NR)**RN%N_F*X_O2(NR)**RN%N_O
+!!!               X_FU_S = X_FU(NR) + DTT*DX_FDT
+!!!               X_O2_S = X_O2(NR) + DTT*DX_FDT*RN%NU(RN%I_OXIDIZER)/RN%NU(RN%I_FUEL)
+!!!               IF (X_O2_S<X_O2_MIN) THEN
+!!!                  X_O2_S = X_O2_MIN 
+!!!                  X_FU_S = MAX(0.0_EB,X_FU(NR)-(X_O2(NR)-X_O2_S)*RN%NU(RN%I_FUEL)/RN%NU(RN%I_OXIDIZER))
+!!!               ENDIF  
+!!!               IF (X_FU_S<X_FU_MIN) THEN
+!!!                  X_FU_S = X_FU_MIN
+!!!                  X_O2_S = MAX(0.0_EB,X_O2(NR)-(X_FU(NR)-X_FU_S)*RN%NU(RN%I_OXIDIZER)/RN%NU(RN%I_FUEL))
+!!!               ENDIF
+!!!               DX_FDT= -ETRM*X_FU_S**RN%N_F*X_O2_S**RN%N_O
+!!!               X_FU_N(NR) = .5_EB*(X_FU(NR)+X_FU_S+DTT*DX_FDT)
+!!!               X_O2_N(NR) = .5_EB*(X_O2(NR)+X_O2_S+DTT*DX_FDT*RN%NU(RN%I_OXIDIZER)/RN%NU(RN%I_FUEL))
+!!!               IF (X_O2_N(NR)<X_O2_MIN) &
+!!!                  X_FU_N(NR) = MAX(0.0_EB,0.5_EB*((X_FU(NR)+X_FU_S)-(X_O2(NR)+X_O2_S)*RN%NU(RN%I_FUEL)/RN%NU(RN%I_OXIDIZER)))
+!!!               IF (X_FU_N(NR)<X_FU_MIN) X_FU_N(NR) = X_FU_MIN
+!!!               DYF(NR) = MAX(-X_FU(NR),X_FU_N(NR)-X_FU(NR))*RN%MW_FUEL*0.001_EB*1.E6_EB
+!!!               Q_NR(NR) = -DYF(NR) * HFAC_F(NR)
+!!!               IF (Q(I,J,K) + Q_NR(NR) > Q_UPPER) THEN
+!!!                  QFAC = (1._EB - (Q(I,J,K) + Q_NR(NR) - Q_UPPER) / Q_NR(NR))
+!!!                  DYF(NR) = DYF(NR) * QFAC
+!!!                  Q_NR(NR) = Q_NR(NR) * QFAC
+!!!                  Q(I,J,K) = Q_UPPER
+!!!               ENDIF   
+!!!               DO N=1,N_GAS_SPECIES
+!!!                  YYNEW = YY(I,J,K,N) + DT*MPUE(NR,N)*Q_NR(NR)/RHO(I,J,K)
+!!!                  YY(I,J,K,N) = MAX(YYMIN(N),YYNEW)
+!!!               ENDDO
+!!!               IF (Q(I,J,K)==Q_UPPER) EXIT ODE_LOOP
+!!!               Q(I,J,K) = Q(I,J,K) + Q_NR(NR)
+!!!            ENDDO REACTION_LOOP
+!!!            IF (NO_REACTION) EXIT ODE_LOOP
+!!!            NO_REACTION = .FALSE.
+!!!
+!!!         ENDDO ODE_LOOP
+!!!      ENDDO ILOOP3
+!!!   ENDDO
+!!!ENDDO
+!!!!$OMP END DO
+!!!
+!!!! Adjust the average molecular weight term, R*Sum(Yi/Mi)
+!!!
+!!!!$OMP WORKSHARE
+!!!RSUM = SPECIES(0)%RCON
+!!!!$OMP END WORKSHARE
+!!!!$OMP END PARALLEL
+!!!SLOOP: DO N=1,N_GAS_SPECIES
+!!!   IF (SPECIES(Y2SPEC(N))%MODE/=GAS_SPECIES) CYCLE SLOOP         
+!!!   WFAC = SPECIES(Y2SPEC(N))%RCON - SPECIES(0)%RCON
+!!!   !$OMP PARALLEL WORKSHARE
+!!!   RSUM(:,:,:) = RSUM(:,:,:) + WFAC*YY(:,:,:,N)
+!!!   !$OMP END PARALLEL WORKSHARE
+!!!ENDDO SLOOP
+!!!
+!!!END SUBROUTINE COMBUSTION_FINITE_RATE
 
-END SUBROUTINE COMBUSTION_FR
-
-SUBROUTINE COMBUSTION_FR2
-USE PHYSICAL_FUNCTIONS, ONLY:GET_SPECIFIC_GAS_CONSTANT
-! Finite-Rate Combustion
-
-REAL(EB) :: TMPD,ETRM1(N_REACTIONS),Y_MIN,Y_MIN_MIN,X_REAC(N_REAC_SPECIES),YY_GET(N_SPECIES),RHOP,Q_TMP
-INTEGER :: NODETS,N,I,J,K,II,NR,NS
-LOGICAL :: NO_REACTION
-
-Q =  0._EB
-Y_MIN     = 1.E-14_EB
-
-DO K=1,KBAR
-   DO J=1,JBAR
-      ILOOP3: DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP3
-         TMPD = TMP(I,J,K)
-         CALL RATE_CONSTANT(TMPD,ETRM1)
-         NO_REACTION = .TRUE.
-! See if all rate constants or all reactant species are near zero         
-         REACLOOP: DO NR = 1, N_REACTIONS
-            IF (ETRM1(NR) < 1.E-30_EB) CYCLE REACLOOP
-            Y_MIN_MIN = Y_MIN
-            RN => REACTION(NR)
-            SPECLOOP: DO NS = 1, RN%N_SPECIES
-               IF (RN%NU(NS) < 0._EB) EXIT SPECLOOP
-               Y_MIN_MIN = MIN(Y_MIN_MIN,YY(I,J,K,RN%SPECIES(NS)))
-            ENDDO SPECLOOP
-            IF (Y_MIN_MIN >=Y_MIN) NO_REACTION=.FALSE.
-         ENDDO REACLOOP
-         IF (NO_REACTION) CYCLE ILOOP3
-         RHOP = RHO(I,J,K)
-         YY_GET = YY(I,J,K,:)
-         DO NS = 1,N_REAC_SPECIES
-            X_REAC(NS) = YY_GET(REAC_SPECIES(NS)%SPEC_INDEX)/SPECIES(REAC_SPECIES(NS)%SPEC_INDEX)%MW*RHOP
-         ENDDO
-         CALL RK5AS(X_REAC,ETRM1,Q_TMP,DT)
-         DO NS = 1,N_REAC_SPECIES
-            YY_GET(REAC_SPECIES(NS)%SPEC_INDEX) = X_REAC(NS) * SPECIES(REAC_SPECIES(NS)%SPEC_INDEX)%MW / RHOP
-         ENDDO
-         YY(I,J,K,:) = YY_GET
-         Q(I,J,K) = Q_TMP
-      ENDDO ILOOP3
-   ENDDO
-ENDDO
-
-! Adjust the average molecular weight term, R*Sum(Yi/Mi)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         YY_GET(:) = YY(I,J,K,:)
-         CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
-      ENDDO
-   ENDDO
-ENDDO
-
-END SUBROUTINE COMBUSTION_FR2
+!!!SUBROUTINE COMBUSTION_FINITE_RATE2
+!!!USE PHYSICAL_FUNCTIONS, ONLY:GET_SPECIFIC_GAS_CONSTANT
+!!!! Finite-Rate Combustion
+!!!
+!!!REAL(EB) :: TMPD,ETRM1(N_REACTIONS),Y_MIN,Y_MIN_MIN,X_REAC(N_REAC_SPECIES),YY_GET(N_GAS_SPECIES),RHOP,Q_TMP
+!!!INTEGER :: NODETS,N,I,J,K,II,NR,NS
+!!!LOGICAL :: NO_REACTION
+!!!
+!!!Q =  0._EB
+!!!Y_MIN     = 1.E-14_EB
+!!!
+!!!DO K=1,KBAR
+!!!   DO J=1,JBAR
+!!!      ILOOP3: DO I=1,IBAR
+!!!         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP3
+!!!         TMPD = TMP(I,J,K)
+!!!         CALL RATE_CONSTANT(TMPD,ETRM1)
+!!!         NO_REACTION = .TRUE.
+!!!! See if all rate constants or all reactant species are near zero         
+!!!         REACLOOP: DO NR = 1, N_REACTIONS
+!!!            IF (ETRM1(NR) < 1.E-30_EB) CYCLE REACLOOP
+!!!            Y_MIN_MIN = Y_MIN
+!!!            RN => REACTION(NR)
+!!!            SPECLOOP: DO NS = 1, RN%N_SPECIES
+!!!               IF (RN%NU(NS) < 0._EB) EXIT SPECLOOP
+!!!               Y_MIN_MIN = MIN(Y_MIN_MIN,YY(I,J,K,RN%SPECIES(NS)))
+!!!            ENDDO SPECLOOP
+!!!            IF (Y_MIN_MIN >=Y_MIN) NO_REACTION=.FALSE.
+!!!         ENDDO REACLOOP
+!!!         IF (NO_REACTION) CYCLE ILOOP3
+!!!         RHOP = RHO(I,J,K)
+!!!         YY_GET = YY(I,J,K,:)
+!!!         DO NS = 1,N_REAC_SPECIES
+!!!            X_REAC(NS) = YY_GET(REAC_SPECIES(NS)%SPEC_INDEX)/SPECIES(REAC_SPECIES(NS)%SPEC_INDEX)%MW*RHOP
+!!!         ENDDO
+!!!         CALL RK5AS(X_REAC,ETRM1,Q_TMP,DT)
+!!!         DO NS = 1,N_REAC_SPECIES
+!!!            YY_GET(REAC_SPECIES(NS)%SPEC_INDEX) = X_REAC(NS) * SPECIES(REAC_SPECIES(NS)%SPEC_INDEX)%MW / RHOP
+!!!         ENDDO
+!!!         YY(I,J,K,:) = YY_GET
+!!!         Q(I,J,K) = Q_TMP
+!!!      ENDDO ILOOP3
+!!!   ENDDO
+!!!ENDDO
+!!!
+!!!! Adjust the average molecular weight term, R*Sum(Yi/Mi)
+!!!DO K=1,KBAR
+!!!   DO J=1,JBAR
+!!!      DO I=1,IBAR
+!!!         YY_GET(:) = YY(I,J,K,:)
+!!!         CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
+!!!      ENDDO
+!!!   ENDDO
+!!!ENDDO
+!!!
+!!!END SUBROUTINE COMBUSTION_FINITE_RATE2
 
 SUBROUTINE RK5AS(X,KR,Q,DT)
 !Adaptive time step, 5th order RK, chemical kinetics scheme
-REAL(EB), INTENT(INOUT) :: X(N_SPECIES)
+REAL(EB), INTENT(INOUT) :: X(N_GAS_SPECIES)
 REAL(EB), INTENT(IN) :: KR(N_REACTIONS)
 REAL(EB), PARAMETER :: B21=0.2_EB,&
             B31=0.075_EB,B32=0.225_EB,&

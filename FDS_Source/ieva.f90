@@ -7849,7 +7849,7 @@ Contains
     !    then if QINCR is TRUE,
     !      F(X-TOL(X)) <= Y <= F(X+TOL(X))
     !    and if QINCR is FALSE
-    !      F(X-TOL(X)) .GE. Y .GE. F(X+TOL(X))
+    !      F(X-TOL(X)) >= Y >= F(X+TOL(X))
     !
     !    Compares F(X) with Y for the input value of X then uses QINCR
     !    to determine whether to step left or right to bound the
@@ -10502,7 +10502,7 @@ Contains
     !        of its accuracy.  Iteration cannot be performed in this
     !        case. If X0 <= 0, this can occur only when P or Q is 
     !        approximately 0. If X0 is positive then this can occur when A is
-    !        exceedingly close to X and A is extremely large (say A .GE. 1.E20).
+    !        exceedingly close to X and A is extremely large (say A >= 1.E20).
     !
     Implicit None
 
@@ -13539,11 +13539,11 @@ Contains
 
     Do i = 1, n_rnd
        p = rnd_vec(i)
-       If ( mode .Eq. 3 ) Then   ! Discrete density
+       If ( mode == 3 ) Then   ! Discrete density
           ! Next if statement is needed if the first point of the given
           ! density is not equal to zero (interpolation routine can not
           ! interpolate below the first value...)
-          If ( p .Lt. yi(1) ) Then
+          If ( p < yi(1) ) Then
              rnd_vec(i) = x_user(1)
           Else
              Call Interpolate1d(npts, yi, invdist, p, x)
@@ -13735,23 +13735,23 @@ Contains
     p_peak = (peak-a)/(b-a)  ! cdf at the 'peak'
     xkk1 = y_peak/(peak-a)   ! derivate 1
     xkk2 = y_peak/(b-peak)  ! derivate 2
-    If ( imode .Eq. 1 ) Then   ! cdf
-       If ( x .Le. a ) Then
+    If ( imode == 1 ) Then   ! cdf
+       If ( x <= a ) Then
           p = 0.0_EB
-       Else If ( x .Le. peak ) Then
+       Else If ( x <= peak ) Then
           p = 0.5_EB*(x-a)*(x-a)*xkk1
-       Else If ( x .Lt. b ) Then
+       Else If ( x < b ) Then
           y2 = y_peak - (x-peak)*xkk2
           p = p_peak + (x-peak)*0.5_EB*(y_peak+y2)
        Else 
           p = 1.0_EB
        End If
-    Else If (imode .Eq. 2 ) Then   ! inverse cdf
-       If ( p .Le. 0.0_EB ) Then
+    Else If (imode == 2 ) Then   ! inverse cdf
+       If ( p <= 0.0_EB ) Then
           x = a
-       Else If ( p .Le. p_peak ) Then
+       Else If ( p <= p_peak ) Then
           x = a + Sqrt( 2.0_EB*p / xkk1 )
-       Else If ( p .Lt. 1.0_EB ) Then
+       Else If ( p < 1.0_EB ) Then
           x = b - Sqrt( 2.0_EB*(1.0_EB-p)/xkk2)
        Else 
           x = b
@@ -13790,20 +13790,20 @@ Contains
     Integer imode
     Real(EB) p, x, alpha, lambda
 
-    If ( (alpha .Le. 0.0_EB) .Or. (lambda .Le. 0.0_EB ) ) Then
+    If ( (alpha <= 0.0_EB) .Or. (lambda <= 0.0_EB ) ) Then
        Call SHUTDOWN('ieva.f90: Subroutine cdfwei 1')
        ! Stop
     End If
-    If ( imode .Eq. 1 ) Then   ! cdf
-       If ( x .Le. 0.0_EB ) Then
+    If ( imode == 1 ) Then   ! cdf
+       If ( x <= 0.0_EB ) Then
           p = 0.0_EB  !  Weibull defined: x > 0
        Else
           p = 1.0_EB - Exp(-((lambda*x)**alpha))
        End If
-    Else If (imode .Eq. 2 ) Then   ! inverse cdf
-       If ( p .Le. 0.0_EB ) Then
+    Else If (imode == 2 ) Then   ! inverse cdf
+       If ( p <= 0.0_EB ) Then
           x = 0
-       Else If ( p .Lt. 1.0_EB ) Then
+       Else If ( p < 1.0_EB ) Then
           x = (1.0_EB/lambda)*((-Log(1.0_EB-p))**(1.0_EB/alpha))
        Else 
           x = Huge(p)  ! largest positive number
@@ -13843,21 +13843,21 @@ Contains
     Real(EB) p, x, alpha
     ! Local variables
 
-    If ( alpha .Le. 0.0_EB ) Then
+    If ( alpha <= 0.0_EB ) Then
        Call SHUTDOWN('ieva.f90: Subroutine cdfgum 1')
        ! Stop
     End If
-    If ( imode .Eq. 1 ) Then   ! cdf
-       If ( x .Lt. 0.0_EB ) Then
+    If ( imode == 1 ) Then   ! cdf
+       If ( x < 0.0_EB ) Then
           p = Exp( -1.0_EB/Exp(alpha*x) ) ! numerically better
           !          p = Exp( -1.0_EB*Exp(-alpha*x) )
        Else
           p = Exp( -1.0_EB*Exp(-alpha*x) )
        End If
-    Else If (imode .Eq. 2 ) Then   ! inverse cdf
-       If ( p .Le. 0.0_EB ) Then
+    Else If (imode == 2 ) Then   ! inverse cdf
+       If ( p <= 0.0_EB ) Then
           x = -Huge(p)  ! smallest possible value
-       Else If ( p .Lt. 1.0_EB ) Then
+       Else If ( p < 1.0_EB ) Then
           x = (-1.0_EB/alpha)*Log(-1.0_EB*Log(p))
        Else 
           x = Huge(p)  ! largest positive number
@@ -13910,7 +13910,7 @@ Contains
 
     invdist = 0.0_EB
 
-    If ( mode .Eq. 1 ) Then
+    If ( mode == 1 ) Then
        ! Calculate the distribution (trapezoidal rule)
        sum  = 0.0_EB
        Do i = 2, npts
@@ -13925,7 +13925,7 @@ Contains
        ! Make the inverse of the distribution
        yi      = invdist
        invdist = x_user
-    Else If ( mode .Eq. 3 ) Then
+    Else If ( mode == 3 ) Then
        ! Now a discrere distribution density is given:
        ! It is assumed that before the first point the density is zero and
        ! after the last given point the density is also zero
@@ -13960,9 +13960,9 @@ Contains
     !
     jl = 0
     ju = nx+1
-    Do While ( (ju-jl) .Gt. 1 )
+    Do While ( (ju-jl) > 1 )
        jm = ( ju + jl )/2
-       If ( (x(nx) .Gt. x(1) ) .Eqv. ( x_user .Gt. x(jm) ) ) Then
+       If ( (x(nx) > x(1) ) .Eqv. ( x_user > x(jm) ) ) Then
           jl = jm
        Else
           ju = jm
@@ -13971,9 +13971,9 @@ Contains
     !
     ! Interpolate between JL and JL+1
     !
-    If ( jl .Ge. nx ) Then
+    If ( jl >= nx ) Then
        ans = y(nx)
-    Else If ( jl .Lt. 1 ) Then
+    Else If ( jl < 1 ) Then
        ans = y(1)
     Else
        ans = y(jl) + (x_user-x(jl)) * (y(jl+1)-y(jl)) &
