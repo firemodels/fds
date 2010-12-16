@@ -1135,41 +1135,44 @@ mass transport equations. The temperature is found from the
 density and background pressure via the equation of state.
 
 
-
+\clearpage
 
 \section{Solution Procedure}
 
+This section describes the basic time-marching algorithm of FDS.
 FDS uses a second-order accurate finite-difference approximation to the governing equations on a series of connected recti-linear meshes.
 The flow variables are updated in time using an explicit second-order Runge-Kutta scheme.
 This section describes how this algorithm is used to advance in time the density, species mass fractions, velocity components, and
 background and perturbation pressure. Let $\rho^n$, $Y_\alpha^n$, $\bu^n$, $\bp_m^n$ and $\cH^n$ denote these variables at the $n$th time step.
 
 \begin{enumerate}
-\item Compute the ``patch-average'' velocity field $\bar{\mathbf{u}}^n$ (see Section \ref{app_pressure_correction}).
+\item Compute the ``patch-average'' velocity field $\bar{\mathbf{u}}^n$ to force normal components of velocity to match at mesh interface boundaries (see Section \ref{app_pressure_correction}). Note that this change in the velocity field creates an error in the divergence which is to be corrected when the velocities
+    are advanced in time.
 
 \item Estimate $\rho$, $Y_\alpha$, and $\bp_m$ at the next time step with an explicit Euler step. For
 example, the density is estimated by
 \be \frac{\rho^*-\rho^n}{\dt} + \nabla \cdot \rho^n \bar{\bu}^n = 0 \ee
 
-\item Exchange\footnote{In this context, the word ``exchange'' implies that information is to be passed from one mesh to another via MPI (Message Passing Interface) routines.}
-values of $\rho^*$ and $Y_\alpha^*$ at mesh boundaries.
+\item Exchange values of density and mass fraction, $\rho^*$ and $Y_\alpha^*$, at mesh boundaries. The word ``exchange'' implies that information is to be passed from one mesh to another via MPI (Message Passing Interface) calls.
 
 \item Apply boundary conditions for $\rho^*$ and $Y_\alpha^*$.
 
-\item Compute the divergence, $\nabla \cdot \bar{\bu}^*$, using the estimated thermodynamic quantities. Note that at this stage, the velocity field has
-not been estimated at the next time step, only its divergence.
+\item Compute the divergence, $\widehat{\nabla \cdot \bu^*}$, using the estimated thermodynamic quantities. Note that the hat symbol implies that the estimated velocity field, $\bu^*$, has not been computed yet. The calculation of the pressure field in the next step shall ensure that the divergence of the updated velocity field is the same as that which is
+    computed here.
 
 \item Solve the Poisson equation for the pressure fluctuation with a direct solver on each individual mesh:
-\be \nabla^2 \cH^n = - \left[ \frac{ \nabla \cdot \bu^* -
-  \nabla \cdot \bar{\bu}^n }{\dt} \right] - \nabla \cdot \bar{\bF}^n  \ee
-Note that the vector $\bar{\bF}^n = \bF(\rho^n,\bar{\bu}^n)$ is computed using patch-averaged velocities and that the divergence of the patch-averaged field is computed explicitly.
+\be \nabla^2 \cH^n = - \left[ \frac{ \widehat{\nabla \cdot \bu^*} -
+  \widehat{\nabla \cdot \bu^n} - \nabla \cdot (\bar{\bu}^n - \bu^n) }{\dt} \right] - \nabla \cdot \bar{\bF}^n  \ee
+Note that the vector $\bar{\bF}^n = \bF(\rho^n,\bar{\bu}^n)$ is computed using patch-averaged velocities. Note also that the term
+$\nabla \cdot (\bar{\bu}^n - \bu^n)$ corrects the error in the divergence introduced by the averaging of velocity components at 
+mesh interfaces.
 
 \item Estimate the velocity at the next time step
 \be
 \frac{\bu^* - \bar{\bu}^n}{\dt} +  \bar{\bF}^n + \nabla {\cal H}^n = 0
 \ee
-Note that the divergence of the estimated velocity field is identically
-equal to the estimated divergence, $\nabla \cdot \bu^*$, that
+Note that the divergence of the estimated velocity field, $\nabla \cdot \bu^*$, is identically
+equal to the divergence, $\widehat{\nabla \cdot \bu^*}$, that
 was derived from the estimated thermodynamic quantities.
 
 \item Check the time step at this point to ensure that
@@ -1196,14 +1199,15 @@ This concludes the ``Predictor'' stage of the time step.  At this point, values 
 
 \item Apply boundary conditions for $\rho^n$ and $Y_\alpha^n$.
 
-\item Compute the divergence $\nabla \cdot \bu^{n+1}$ from the corrected thermodynamic quantities. Note again that the velocity field has not been corrected at the point.
+\item Compute the divergence, $\widehat{\nabla \cdot \bu^{n+1}}$ from the corrected thermodynamic quantities.
 
 \item Compute the pressure fluctuation using estimated quantities
 \be
 \label{eqn_corrector_poisson2}
-\nabla^2{\cal H}^* = - \left[ \frac{ \nabla\cdot\bu^{n+1} - \ha \left( \nabla\cdot\bar{\bu}^* + \nabla\cdot\bar{\bu}^n \right) }{\dt/2} \right]
+\nabla^2{\cal H}^* = - \left[ \frac{ \widehat{\nabla\cdot\bu^{n+1}} - \ha \left( \widehat{\nabla\cdot \bu^*} + \widehat{\nabla\cdot \bu^n} \right) }{\dt/2} \right]
    - \nabla \cdot \bar{\mathbf{F}}^*
 \ee
+Note that the same type of correction is made for the divergence error at mesh boundaries.
 
 \item Update the velocity via the second part of the Runge-Kutta scheme
 \be
@@ -2208,26 +2212,23 @@ each successive approximation of the pressure gradient at the solid wall.
 
 
 
-\subsection{Interpolated Boundary Conditions}
+\subsection{Boundary Conditions at Mesh Interfaces}
 \label{app_pressure_correction}
 
-The time advancement scheme for multiple meshes involves averaging of the velocity components at a patch boundary in
-order to maintain stability. It is extremely important to note that -- because of the staggered grid storage
-arrangement -- two values of the numerical solution for the velocity exist at a given point on a mesh interface.
-Consider meshes $m$ (left) and $om$ (right) which are joined side by side in the $x$ direction. The values $u^{(m)}_{I,jk}$
-and $u^{(om)}_{0,jk}$ therefore live at the same physical location, but are advanced separately (and by different processes)
+The time advancement scheme for multiple meshes involves averaging the normal components of velocity at the mesh interface in
+order to drive the two velocities fields closer into alignment. Because FDS uses a staggered grid, the normal components of velocity co-exist on the mesh interface.
+Consider meshes $(l)$ (left) and $(r)$ (right) which are joined side by side in the $x$ direction. The values $u^{(l)}_{I,jk}$
+and $u^{(r)}_{0,jk}$ live at the same physical location, but are advanced separately (and by different processes)
 during the course of the algorithm.
-In the ideal circumstance these velocities are identical, as is the case if the PDEs
-are enforced at the mesh interface.  To improve the speed of our parallel algorithm, our strategy is instead to keep
-the difference between these values small while still enforcing global volume conservation.
-Our strategy recovers the ideal case in the limit $\delta t \rightarrow 0$.
+Ideally, these velocities should be identical, but they are not because of errors associated with solving the pressure separately on each mesh.  
+To improve the speed of our parallel algorithm, our strategy is to minimize the difference between these values.
 While the primitive velocity components are indeed unique to a given mesh, for each mesh we may define the
-discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which includes ghost cell data and is identical at all overlapping mesh points.
-To do this we simply average the coincident values of the velocity components at the mesh interfaces and inject the
-ghost cell values from the neighboring mesh.  For instance, considering the same side-by-side meshes $m$ and $om$ as before,
+discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which is identical at all overlapping mesh points.
+To do this we simply average the coincident values of the normal velocity component at the mesh interfaces.  
+For instance, considering the same side-by-side meshes $(l)$ and $(r)$ as before,
 \be
 \label{eqn_patchave_ufield}
-\bar{u}^{(m)}_{I,jk} = \bar{u}^{(om)}_{0,jk} \equiv \frac{1}{2} \left( u^{(m)}_{I,jk} + u^{(om)}_{0,jk} \right)
+\bar{u}^{(l)}_{I,jk} = \bar{u}^{(r)}_{0,jk} \equiv \frac{1}{2} \left( u^{(l)}_{I,jk} + u^{(r)}_{0,jk} \right)
 \ee
 for all patch boundary cells $j$ and $k$. Here, for simplicity, we are only considering the case in which the
 cell sizes are equivalent for the adjoining meshes (coarse-fine mesh interfaces are currently handled by the code,
@@ -2239,43 +2240,27 @@ which may now be written as
 \label{eqn_RK1}
 \mathbf{u}^* = \bar{\mathbf{u}}^n - \dt \left( \mathbf{F}(\bar{\mathbf{u}}^n) + {\nabla\cH}^n \right)
 \end{equation}
-Note that (\ref{eqn_RK1}) updates a $\bar{\mathbf{u}}$ field to a $\mathbf{u}$ field.
-Though this is perfectly legitimate, we should be aware of the following issues.
-First, the patch-averaging procedure is slightly dissipative.  But as long as we are accurate, this numerical
-dissipation is minimal and acceptable (much smaller than
-physical [molecular, viscous] dissipation).  Second, we must now think of the time update in terms of a
-projection scheme in order to repair the damage made to the
-divergence by the averaging procedure (after the averaging procedure, the divergence for mesh boundary cells
-no longer exactly matches the divergence obtained from the equation of state).
-In practical terms, this means that the Poisson equation for the pressure fluctuation (in the predictor step) is given by
+Note that (\ref{eqn_RK1}) updates a $\bar{\mathbf{u}}$ field to a $\mathbf{u}$ field. In other words, the normal components
+of velocity at the interface are no longer expected to match because the individual pressure fields do not match exactly
+at the interface. However, the error introduced in the divergence by the velocity averaging procedure is corrected by the time
+derivative of divergence in the pressure equation:
 \be
 \label{eqn_poisson_stg1}
-\nabla^2 {\cH}^n = -\left(\frac{ \nabla\cdot\mathbf{u}^* - \nabla\cdot\bar{\mathbf{u}}^n}{\delta t}\right) -
+\nabla^2 {\cH}^n = -\left(\frac{ \nabla \cdot \bu^* - \nabla \cdot \bu^n - \nabla \cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) -
   \mathbf{F}(\bar{\mathbf{u}}^n)
 \ee
-In Eq.~(\ref{eqn_poisson_stg1}), note that $\mathbf{F}$ is computed using the patch-averaged velocity field.
-Further, only the $\nabla\cdot\mathbf{u}^*$ term is obtained from the equation of state (\ref{eqn_divfromeos}).
-The divergence of the patch-averaged field, $\nabla\cdot\bar{\mathbf{u}}^n$, is obtained by explicitly
-applying the discrete divergence operator to $\bar{\mathbf{u}}^n$.
-Similarly, in the corrector Poisson equation,
-only the $\nabla\cdot\mathbf{u}^{n+1}$ term is obtained from the equation of state;
-$\nabla\cdot\bar{\mathbf{u}}^*$ and $\nabla\cdot\bar{\mathbf{u}}^n$ are obtained explicitly:
-\begin{equation}
-\label{eqn_poisson_stg2}
-\nabla^2 {\cH}^* = -\left(\frac{ \nabla\cdot\mathbf{u}^{n+1} -
-    \ha \left( \nabla\cdot\bar{\mathbf{u}}^* + \nabla\cdot\bar{\mathbf{u}}^n \right)}{\dt/2}\right) -
-    \mathbf{F}(\bar{\mathbf{u}}^*)
-\end{equation}
-Finally, the velocity corrector step is
-\be
-\label{eqn_RK2}
-\bu^{n+1} = \ha \left[ \bar{\bu}^n + \bar{\bu}^* - \dt \left( \mathbf{F}(\bar{\mathbf{u}}^*) + \nabla{\cH}^* \right)  \right]
-\ee
-The benefit of the averaging procedure is that $\mathbf{F}$ is now the same on each mesh
-for a given location along a mesh interface, since all force terms are determined using the patch-averaged field.
+The extra term in the time derivative, $\nabla \cdot (\bar{\bu}^n - \bu^n)$, ``corrects'' the divergence error. 
+The benefit to averaging the normal components of velocity at mesh interfaces is that $\mathbf{F}$ is the same on each side of the interface, 
+since all force terms are determined using the patch-averaged field.
 This also means that stress tensors computed at a mesh interface (which are buried in $\mathbf{F}$) are symmetric;
 this symmetry is a requirement for angular momentum conservation.  Thus, the patch-averaging procedure prevents the
 production of spurious vorticity at mesh interfaces.
+
+The boundary condition for the pressure term, $\cal H$, at mesh interfaces is a Dirichlet condition.
+\be
+   \cH_{I+\ha,jk}^{(l)} = \cH_{\ha,jk}^{(r)} \equiv \frac{\cH_{I,jk}^{(l)} + \cH_{1,jk}^{(r)} }{2} + \frac{\dx}{4 \, \dt} ( u_{I,jk}^{(l)} - u_{0,jk}^{(r)} )
+\ee
+The second term on the right hand side is used in an optional iterative scheme to drive the updated normal velocity components closer together. 
 
 
 
@@ -2565,10 +2550,10 @@ determined as it is in the single step reaction case.  The second step, however,
 
 \subsubsection{One-Step, Fast Reaction}
 
-For a one-step, infinitely-fast reaction, the fuel in a given grid cell, $Z_1$, is converted to products, $Z_2$, at a rate determined by a 
+For a one-step, infinitely-fast reaction, the fuel in a given grid cell, $Z_1$, is converted to products, $Z_2$, at a rate determined by a
 characteristic mixing time.  Recall from Section~\ref{extinction}
-that this represents single-step combustion with the possibility of local extinction.  It is assumed that the 
-grid resolution is too coarse to resolve the flame sheet and compute directly the reaction rate.  
+that this represents single-step combustion with the possibility of local extinction.  It is assumed that the
+grid resolution is too coarse to resolve the flame sheet and compute directly the reaction rate.
 Instead, if any grid cell surrounding one containing both fuel and oxygen satisfies the ``Burn'' criteria depicted in Fig.~\ref{plotsupp},
 combustion is assumed to occur.  The consumption rate of fuel gases is given by~\cite{Poinsot:TNC}
 \be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad
