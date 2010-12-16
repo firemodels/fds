@@ -208,7 +208,7 @@ INTEGER:: LDIMF, MDIMF
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
 
-IF (SAVE(1)/=0._EB) RETURN
+IF (ABS(SAVE(1))>=ZERO_P) RETURN
 
 !                               GET PARAMETERS FOR H3CZSS FROM SAVE
 !                               ARRAY WHERE THEY WERE STORED IN
@@ -379,7 +379,7 @@ CASE(5)   ; GO TO 750
 END SELECT
 
 650 CONTINUE
-IF (ELMBDA/=0._EB) GO TO 750
+IF (ABS(ELMBDA)>=ZERO_P) GO TO 750
 ISING = 1
 660 CONTINUE
 PERT = 0._EB 
@@ -510,10 +510,10 @@ END IF
 IF (LPEROD==0) THEN
   DO  I = 1,L
     
-    IF (A(I)/=A(1)) GO TO 110
-    IF (B(I)/=B(1)) GO TO 110
-    IF (C(I)/=A(1)) GO TO 110
-    IF (D(I)/=D(1)) GO TO 110
+    IF (ABS(A(I)-A(1))>=ZERO_P) GO TO 110
+    IF (ABS(B(I)-B(1))>=ZERO_P) GO TO 110
+    IF (ABS(C(I)-A(1))>=ZERO_P) GO TO 110
+    IF (ABS(D(I)-D(1))>=ZERO_P) GO TO 110
     
   END DO
   
@@ -559,7 +559,7 @@ REAL(EB)   F(LDIMF,MDIMF,*), SAVE(-3:*), W(*)
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
 
-IF (SAVE(1)/=0._EB) RETURN
+IF (ABS(SAVE(1))>=ZERO_P) RETURN
 
 CALL FSH02S(LDIMF,MDIMF,F,SAVE,W)
 
@@ -4521,7 +4521,7 @@ END IF
 !MCG      SAVE(IERROR) = 5._EB 
 !MCG  END IF
 
-IF (RS/=0.0_EB .AND. LBDCND>=5) THEN
+IF (ABS(RS)>=ZERO_P .AND. LBDCND>=5) THEN
   IERROR = IERROR + 1
   SAVE(IERROR) = 6._EB
 END IF
@@ -4547,7 +4547,7 @@ END IF
 !MCG      SAVE(IERROR) = 10.
 !MCG  END IF
 
-IF (TF==PI .AND. (MBDCND==2.OR.MBDCND==3.OR. MBDCND==6)) THEN
+IF (ABS(TF-PI)<=ZERO_P .AND. (MBDCND==2.OR.MBDCND==3.OR. MBDCND==6)) THEN
   IERROR = IERROR + 1
   SAVE(IERROR) = 11._EB 
 END IF
@@ -4813,7 +4813,7 @@ REAL(EB) HY(0:*)
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
 
-IF (SAVE(1)/=0._EB) RETURN
+IF (ABS(SAVE(1))>=ZERO_P) RETURN
 
 !                               GET PARAMETERS FOR H3CSSS FROM SAVE
 !                               ARRAY WHERE THEY WERE STORED IN
@@ -5046,7 +5046,7 @@ CASE(5)   ; GO TO 770
 END SELECT
 
 640 CONTINUE
-IF (ELMBDA==0._EB) THEN
+IF (ABS(ELMBDA)<=ZERO_P) THEN
   GO TO 650
 ELSE
   GO TO 770
@@ -5232,7 +5232,7 @@ REAL(EB)   F(LDIMF,MDIMF,*)
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
 
-IF (SAVE(1)/=0._EB) RETURN
+IF (ABS(SAVE(1))>=ZERO_P) RETURN
 
 CALL FSH15S(LDIMF,MDIMF,F,SAVE,W)
 
@@ -5649,7 +5649,7 @@ DO  K = 1,IDEG
 !                               Y(K,M) = CVMGZ(0.,D(K,M)/Y(K,M),Y(K,M))
 !                               ON A CRAY-1
   
-  IF (Y(K,M)/=0._EB) Y(K,M) = D(K,M)/Y(K,M)
+  IF (ABS(Y(K,M))>=ZERO_P) Y(K,M) = D(K,M)/Y(K,M)
 END DO
 DO  I = M - 1,1,-1
   DO  K = 1,IDEG
@@ -6423,7 +6423,7 @@ DO  L = 1,N
   
   G = D(M)
   
-  IF (G==0.0_EB) G = B
+  IF (ABS(G)<=ZERO_P) G = B
   H = G
   S = 0.0_EB
   MML = M - L
@@ -6439,7 +6439,7 @@ DO  L = 1,N
     D(I+1) = H + S* (H+D(I))
     G = D(I) - E2(I)/G
     
-    IF (G==0.0_EB) G = B
+    IF (ABS(G)<=ZERO_P) G = B
     H = G*P/R
   END DO
   
@@ -6448,12 +6448,12 @@ DO  L = 1,N
   
 !                               GUARD AGAINST UNDERFLOWED H
   
-  IF (H==0.0_EB) GO TO 170
+  IF (ABS(H)<=ZERO_P) GO TO 170
   
   IF (ABS(E2(L))<=ABS(C/H)) GO TO 170
   E2(L) = H*E2(L)
   
-  IF (E2(L)/=0.0_EB) GO TO 140
+  IF (ABS(E2(L))>=ZERO_P) GO TO 140
   170     CONTINUE
   P = D(L) + F
   
@@ -6672,7 +6672,7 @@ REAL(EB) H(*)
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
 
-IF (SAVE(1)/=0._EB) RETURN
+IF (ABS(SAVE(1))>=ZERO_P) RETURN
 
 !                               GET PARAMETERS FOR H2CCSS FROM SAVE
 !                               ARRAY WHERE THEY WERE STORED IN
@@ -6781,7 +6781,7 @@ END SELECT
 
 640 CONTINUE
 
-IF (ELMBDA/=0._EB) GO TO 750
+IF (ABS(ELMBDA)>=ZERO_P) GO TO 750
 ISING = 1
 660 CONTINUE
 PERT = 0._EB 
@@ -6895,10 +6895,10 @@ END IF
 IF (LPEROD==0) THEN
   DO  I = 1,L
     
-    IF (A(I)/=A(1)) GO TO 110
-    IF (B(I)/=B(1)) GO TO 110
-    IF (C(I)/=A(1)) GO TO 110
-    IF (D(I)/=D(1)) GO TO 110
+    IF (ABS(A(I)-A(1))>=ZERO_P) GO TO 110
+    IF (ABS(B(I)-B(1))>=ZERO_P) GO TO 110
+    IF (ABS(C(I)-A(1))>=ZERO_P) GO TO 110
+    IF (ABS(D(I)-D(1))>=ZERO_P) GO TO 110
     
   END DO
   
@@ -6951,7 +6951,7 @@ REAL(EB) F(LDIMF,*)
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
 
-IF (SAVE(1)/=0._EB) RETURN
+IF (ABS(SAVE(1))>=ZERO_P) RETURN
 
 !                               DEBUG PRINTOUTS UNDER CONTROL OF
 !                               PARAMETER LVLPRN
@@ -7016,12 +7016,12 @@ IF (LBDCND<1 .OR. LBDCND>6) THEN
   SAVE(IERROR) = 4._EB 
 END IF
 
-IF (RS==0.0_EB .AND. LBDCND<=4) THEN
+IF (ABS(RS)<=ZERO_P .AND. LBDCND<=4) THEN
   IERROR = IERROR + 1
   SAVE(IERROR) = 5._EB 
 END IF
 
-IF (RS==0.0_EB .AND. XMU/=0._EB) THEN
+IF (ABS(RS)<=ZERO_P .AND. ABS(XMU)>=ZERO_P) THEN
   IERROR = IERROR + 1
   SAVE(IERROR) = 6._EB 
 END IF
@@ -7176,7 +7176,7 @@ REAL(EB) W(*)
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
 
-IF (SAVE(1)/=0._EB) RETURN
+IF (ABS(SAVE(1))>=ZERO_P) RETURN
 
 !                               GET PARAMETERS FOR H2CYSS FROM SAVE
 !                               ARRAYWHERE THEY WERE STORED IN
@@ -7282,14 +7282,14 @@ CASE(5)   ; GO TO 770
 END SELECT
 
 640 CONTINUE
-IF (ELMBDA==0._EB) THEN
+IF (ABS(ELMBDA)<=ZERO_P) THEN
   GO TO 650
 ELSE
   GO TO 770
 END IF
 
 650 CONTINUE
-IF (XMU==0._EB) THEN
+IF (ABS(XMU)<=ZERO_P) THEN
   GO TO 665
 ELSE
   GO TO 770

@@ -708,7 +708,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             !   FDS_LEAK_AREA(IPZ,IOPZ,NM) = FDS_LEAK_AREA(IPZ,IOPZ,NM) + AW(IW)
             !ENDIF
             ENDIF EVAC_IF_NOT
-            IF (TW(IW)==T_BEGIN .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
+            IF (ABS(TW(IW)-T_BEGIN) < ZERO_P .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                TSI = T + DT
             ELSE
                TSI = T + DT - TW(IW)
@@ -738,7 +738,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             ! Special Cases
             IF (BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .AND. IOR>0) UWS(IW) = -UWS(IW)  ! One-way flow through POROUS plate
             IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) UWS(IW) = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*UW0(IW)
-            IF (SURFACE(IBC)%MASS_FLUX_TOTAL /= 0._EB) THEN
+            IF (ABS(SURFACE(IBC)%MASS_FLUX_TOTAL) >=ZERO_P) THEN
                !!IIG = IJKW(6,IW) ??
                !!JJG = IJKW(7,IW) ??
                !!KKG = IJKW(8,IW) ??
@@ -919,7 +919,8 @@ DO IPZ=1,N_ZONE
             IF (IOPZ==IOPZ2) CYCLE
             IF (CONNECTED_ZONES(IOPZ,IOPZ2,NM)) THEN
                IF (IOPZ2/=0) ASUM(IOPZ,IOPZ2,NM) = MAX(ASUM(IOPZ,IOPZ2,NM),ASUM(IOPZ2,IOPZ,NM))
-               IF (ASUM(IOPZ,IOPZ2,NM)>0._EB .AND. USUM_ADD(IOPZ)/=0._EB) RF=MIN(RF,10._EB*ASUM(IOPZ,IOPZ2,NM)/ABS(USUM_ADD(IOPZ)))
+               IF (ASUM(IOPZ,IOPZ2,NM)>0._EB .AND. ABS(USUM_ADD(IOPZ))>=ZERO_P) &
+                  RF=MIN(RF,10._EB*ASUM(IOPZ,IOPZ2,NM)/ABS(USUM_ADD(IOPZ)))
             ENDIF
          ENDDO
       ENDIF
@@ -938,7 +939,7 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
 
    ! Compute change in background pressure
  
-   IF (PSUM(IPZ,NM)/=0._EB) THEN
+   IF (ABS(PSUM(IPZ,NM)) > ZERO_P) THEN
       D_PBAR_DT_P(IPZ) = (DSUM(IPZ,NM) - USUM(IPZ,NM))/PSUM(IPZ,NM)
       P_ZONE(IPZ)%DPSTAR = D_PBAR_DT_P(IPZ)
    ENDIF

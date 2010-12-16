@@ -2361,7 +2361,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
             WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
             WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
             DO NN=1,N_SPECIES
-               IF (ABS(RN%NU_SPECIES(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+               IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
             ENDDO
          ENDIF         
          WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
@@ -2386,7 +2386,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
             WRITE(LU_OUTPUT,'(//3X,A)') 'Detailed Species'
             WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
             DO NN=1,N_SPECIES - N_MIX_SPECIES
-               IF (ABS(RN%NU_SPECIES(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+               IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
             ENDDO
          ENDIF
          WRITE(LU_OUTPUT,'(A,F12.3)')  '   Heat of Combustion (kJ/kg)  ',RN%HEAT_OF_COMBUSTION/1000._EB        

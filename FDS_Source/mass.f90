@@ -406,8 +406,8 @@ SUBROUTINE DENSITY(NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
-USE GLOBAL_CONSTANTS, ONLY: N_GAS_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY,PREDICTOR,CORRECTOR, &
-                            CHANGE_TIME_STEP,TMPA,N_ZONE, &
+USE GLOBAL_CONSTANTS, ONLY: N_GAS_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY, &
+                            PREDICTOR,CORRECTOR,CHANGE_TIME_STEP,TMPA,N_ZONE, &
                             GAS_SPECIES, R0,SOLID_PHASE_ONLY,TUSED, &
                             RSUM0,DEBUG_OPENMP,CLIP_MASS_FRACTION
 REAL(EB) :: DTRATIO,OMDTRATIO,TNOW,YY_GET(1:N_GAS_SPECIES)
@@ -783,7 +783,7 @@ DO K=1,KBAR
             RHODELTA(I,J,K) = RMIN - RHOP(I,J,K)
             CYCLE CHECK_LOOP
          ELSE
-            IF(SUM-ISUM*RHO00 /= 0._EB) THEN
+            IF(ABS(SUM-ISUM*RHO00) >=ZERO_P) THEN
                CONST = (RHOMIN-RHO00)/(SUM-ISUM*RHO00)
                IF (LC(-1)) THEN
                   CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I-1,J,K)
@@ -879,7 +879,7 @@ DO K=1,KBAR
             RHODELTA(I,J,K) = RMAX - RHOP(I,J,K)
             CYCLE CHECK_LOOP2
          ELSE
-            IF(SUM-ISUM*RHO00 /= 0._EB) THEN         
+            IF(ABS(SUM-ISUM*RHO00) >=ZERO_P) THEN         
                CONST = (RMAX-RHO00)/(SUM-ISUM*RHO00)
                IF (LC(-1)) THEN
                   CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I-1,J,K)
@@ -1081,7 +1081,7 @@ SPECIESLOOP: DO N=1,N_GAS_SPECIES
                   IF (YMIN <= YYMIN(N)) YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMIN - Y00  
                   CYCLE CHECK_LOOP
                ELSE
-                  IF (SUM/=0._EB) THEN
+                  IF (ABS(SUM)>=ZERO_P) THEN
                      YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMIN - Y00
                      CONST = MIN(1._EB,RHY0/SUM)
                      IF (LC(-1)) YYDELTA(I-1,J,K) = YYDELTA(I-1,J,K) - RHYMI*CONST/RHOP(I-1,J,K)
@@ -1204,7 +1204,7 @@ SPECIESLOOP: DO N=1,N_GAS_SPECIES
                   IF(YMAX >= YYMAX(N)) YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMAX - Y00
                   CYCLE CHECK_LOOP2
                ELSE
-                  IF (SUM/=0._EB) THEN
+                  IF (ABS(SUM)>=ZERO_P) THEN
                      YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMAX - Y00               
                      CONST = MIN(1._EB,RHY0/SUM)
                      IF (LC(-1)) YYDELTA(I-1,J,K) = YYDELTA(I-1,J,K) + RHYMI*CONST/RHOP(I-1,J,K)
