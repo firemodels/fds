@@ -534,7 +534,6 @@ typedef struct mesh_ {
 
 } mesh;
 
-#ifdef pp_CULL
 
 /* --------------------------  culldata ------------------------------------ */
 
@@ -547,6 +546,7 @@ typedef struct _culldata {
   int npixels,npixels_old;
 } culldata;
 
+#ifdef pp_CULL
 /* --------------------------  cullplanedata ------------------------------------ */
 
 typedef struct {
