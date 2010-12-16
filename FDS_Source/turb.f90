@@ -507,7 +507,7 @@ DO K = 1,KBAR
          ! calculate the effective viscosity
 
          ! handle the case where we divide by zero, note MMHAT is positive semi-definite
-         IF (MMHAT(I,J,K) == 0._EB) THEN
+         IF (ABS(MMHAT(I,J,K)) <=ZERO_P) THEN
             CSD2_DYNSMAG(I,J,K) = 0._EB
          ELSE
             CSD2_DYNSMAG(I,J,K) = MLHAT(I,J,K)/MMHAT(I,J,K) ! (Cs*Delta)**2
@@ -703,7 +703,7 @@ INTEGER, INTENT(IN) :: N_LO,N_HI
 REAL(EB), INTENT(IN) :: U(N_LO:N_HI),U_MIN,U_MAX
 REAL(EB), INTENT(OUT) :: UBAR(N_LO:N_HI)
 INTEGER :: J
-REAL(EB),PARAMETER:: W(-1:1) = (/0.25_EB,0.5_EB,0.25_EB/)   ! trapezoid rule
+!REAL(EB),PARAMETER:: W(-1:1) = (/0.25_EB,0.5_EB,0.25_EB/)   ! trapezoid rule
 !REAL(EB),PARAMETER:: W(-1:1) = (/ONSI,TWTH,ONSI/)           ! Simpson's rule
 
 ! Filter the u field to obtain ubar
@@ -726,7 +726,7 @@ IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: KSGS
-INTEGER :: I,J,K,N_LO(3),N_HI(3),ARRAY_LO(3),ARRAY_HI(3)
+INTEGER :: I,J,K,N_LO(3),N_HI(3)!,ARRAY_LO(3),ARRAY_HI(3)
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,UP,VP,WP,UP_HAT,VP_HAT,WP_HAT
 
 CALL POINT_TO_MESH(NM)
@@ -734,8 +734,8 @@ CALL POINT_TO_MESH(NM)
 N_LO = 1
 N_HI = (/IBAR,JBAR,KBAR/)
 
-ARRAY_LO = 0
-ARRAY_HI = (/IBP1,JBP1,KBP1/)
+!ARRAY_LO = 0
+!ARRAY_HI = (/IBP1,JBP1,KBP1/)
 
 IF (PREDICTOR) THEN
    UU=>US
@@ -2802,10 +2802,10 @@ REAL(EB), DIMENSION(3), PARAMETER :: E1=(/1._EB,0._EB,0._EB/),E2=(/0._EB,1._EB,0
 ! find a vector PP in the tangent plane of the surface and orthogonal to U_VELO-U_SURF
 U_RELA = U_VELO-U_SURF
 CALL CROSS_PRODUCT(PP,NN,U_RELA) ! PP = NN x U_RELA
-IF (NORM2(PP)==0._EB) THEN
+IF (ABS(NORM2(PP))<=ZERO_P) THEN
    ! tangent vector is completely arbitrary, just perpendicular to NN
-   IF (NN(1)/=0._EB .OR.  NN(2)/=0._EB) PP = (/NN(2),-NN(1),0._EB/)
-   IF (NN(1)==0._EB .AND. NN(2)==0._EB) PP = (/NN(3),0._EB,-NN(1)/)
+   IF (ABS(NN(1))>=ZERO_P .OR.  ABS(NN(2))>=ZERO_P) PP = (/NN(2),-NN(1),0._EB/)
+   IF (ABS(NN(1))<=ZERO_P .AND. ABS(NN(2))<=ZERO_P) PP = (/NN(3),0._EB,-NN(1)/)
 ENDIF
 PP = PP/NORM2(PP) ! normalize to unit vector
 CALL CROSS_PRODUCT(SS,PP,NN) ! define the streamwise unit vector SS
@@ -2873,7 +2873,7 @@ IF (DNS) THEN
    ETA = U_NORM + RRHO*MU/DN
    AA  = -(0.5_EB*DUSDS + TWTH*ETA/DN)
    BB  = ONSI*DUSDN*ETA - (U_NORM*0.5_EB*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
-   IF (AA/=0._EB) THEN
+   IF (ABS(AA)>=ZERO_P) THEN
       U_STRM = ((AA*U_STRM + BB)*EXP(AA*DT) - BB)/AA
    ELSE
       VELTAN3D = U_INT
@@ -2890,7 +2890,7 @@ ELSE
       AA  = -(0.5_EB*DUSDS + TWTH*U_NORM/DN + ETA)
       BB  = -(U_NORM*ONTH*DUSDN + RRHO*( DPDS + TSN/(2._EB*DN) ))
       !print *,MU*RRHO*DT/(DN**2)
-      IF (AA/=0._EB) THEN
+      IF (ABS(AA)>=ZERO_P) THEN
          U_STRM = ((AA*U_STRM_0 + BB)*EXP(AA*DT) - BB)/AA
       ELSE
          VELTAN3D = U_INT
