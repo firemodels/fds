@@ -1,5 +1,5 @@
 RENDERDIR
- ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
+ ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/HVAC
 LOADFILE
 HVAC_energy_pressure_01.sf
 SETTIMEVAL

@@ -18,24 +18,7 @@
 
 &TIME T_END=1.0 /
 
- specify soot density using MASS_FRACTION(2)
- 
-
- define fuel so that it only contains carbon and yields 100% soot
- so that MASS_FRACTION(2) may be used directly to define soot density
-
-&REAC ID         = 'CARBONSOOT'
-      FYI        = 'ficticious fuel, 100% soot'
-      SOOT_YIELD = 1.0
-      SOOT_H_FRACTION = 0.0
-      N          = 0.0
-      C          = 1.0
-      H          = 0.0
-      O          = 0.0 
-      MASS_EXTINCTION_COEFFICIENT=8700.0
- /
-
-&INIT MASS_FRACTION(2)=0.00007967 DENSITY=1.0/
+&SPEC ID='SOOT',MASS_FRACTION_0=0.00007967 /
 
 &OBST XB=0.0,2.5, 0.45,0.5,0.0,4.0, RGB=255,255,255 / 
 &OBST XB=0.0,4.0, 1.05,1.1,0.0,4.0, RGB=255,255,255 / 
@@ -52,9 +35,9 @@
 &DEVC XYZ=7.75,4.05,2.00, QUANTITY='visibility', ID='vis5' PROP_ID='smoketest' /
 &DEVC XYZ=9.25,5.05,2.00, QUANTITY='visibility', ID='vis6' PROP_ID='smoketest' /
 
-&SLCF PBX=5.0, QUANTITY='soot density' /
-&SLCF PBY=5.0, QUANTITY='soot density' /
-&SLCF PBZ=2.0, QUANTITY='soot density' /
+&SLCF PBX=5.0, QUANTITY='DENSITY',SPEC_ID='SOOT' /
+&SLCF PBY=5.0, QUANTITY='DENSITY',SPEC_ID='SOOT' /
+&SLCF PBZ=2.0, QUANTITY='DENSITY',SPEC_ID='SOOT' /
 
 &TAIL /
 
