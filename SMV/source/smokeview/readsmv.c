@@ -3832,7 +3832,6 @@ typedef struct {
               blocktype -= 8;
             }
           }
-
           if(s_color[3]<0.999){
             bc->transparent=1;
           }
@@ -3870,6 +3869,7 @@ typedef struct {
           }
         }
 
+        bc->dup=0;
         bc->colorindex=colorindex;
         bc->type=blocktype;
 
@@ -5310,6 +5310,7 @@ typedef struct {
   }
   CheckMemory;
 
+  remove_dup_blockages();
   initcullgeom(cullgeom);
   init_evac_prop();
 

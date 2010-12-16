@@ -1239,7 +1239,7 @@ void update_faces(void){
       ASSERT(faceptr->color!=NULL);
       faceptr++;
     }
-    meshi->nfaces=6*meshi->nbptrs+meshi->nvents+12;
+    meshi->nfaces=faceptr-meshi->faceinfo;
   }
   update_hidden_faces();
   update_facelists();
@@ -2049,8 +2049,8 @@ void update_facelists(void){
          ASSERT(FFALSE);
          break;
       }
-
     }
+
     meshi->nface_textures = n_textures;
     meshi->nface_normals_single  = n_normals_single;
     meshi->nface_normals_double  = n_normals_double;
@@ -2088,6 +2088,7 @@ void update_facelists(void){
         facei->dup=0;
         faceim1 = meshi->face_normals_single[iface-1];
         if(
+          facei->imax-facei->imin<=1&&facei->jmax-facei->jmin<=1&&facei->kmax-facei->kmin<=1&& // only hide duplicate one cell faces
           faceim1->imin==facei->imin&&faceim1->imax==facei->imax&&
           faceim1->jmin==facei->jmin&&faceim1->jmax==facei->jmax&&
           faceim1->kmin==facei->kmin&&faceim1->kmax==facei->kmax&&faceim1->dir!=facei->dir&&facei->thinface==0){
@@ -5099,7 +5100,6 @@ void get_cullskips(mesh *meshi, int cullflag, int cull_portsize_local, int *iisk
   *kkskip=kskip;
 }
 
-
 /* ------------------ get_face_port ------------------------ */
 
 culldata *get_face_port(mesh *meshi, facedata *facei){
@@ -5142,6 +5142,83 @@ culldata *get_face_port(mesh *meshi, facedata *facei){
   return_cull = meshi->cullgeominfo + ixyz;
   
   return return_cull;
+}
+
+/* ------------------ blockagecompare ------------------------ */
+
+int blockagecompare( const void *arg1, const void *arg2 ){
+  blockagedata *bc1, *bc2;
+  int *ijk1, *ijk2;
+
+  bc1 = *(blockagedata **)arg1;
+  bc2 = *(blockagedata **)arg2;
+
+  ijk1 = bc1->ijk;
+  ijk2 = bc2->ijk;
+
+  if(ijk1[0]<ijk2[0])return -1;
+  if(ijk1[0]>ijk2[0])return 1;
+  if(ijk1[1]<ijk2[1])return -1;
+  if(ijk1[1]>ijk2[1])return 1;
+  if(ijk1[2]<ijk2[2])return -1;
+  if(ijk1[2]>ijk2[2])return 1;
+  if(ijk1[3]<ijk2[3])return -1;
+  if(ijk1[3]>ijk2[3])return 1;
+  if(ijk1[4]<ijk2[4])return -1;
+  if(ijk1[4]>ijk2[4])return 1;
+  if(ijk1[5]<ijk2[5])return -1;
+  if(ijk1[5]>ijk2[5])return 1;
+  return 0;
+}
+
+/* ------------------ remove_dup_blockages ------------------------ */
+
+void remove_dup_blockages(void){
+  int i;
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+
+    if(meshi->nbptrs>1){
+      blockagedata **bclist;
+      int jj,j;
+      int ndups=0;
+
+
+      bclist=meshi->blockageinfoptrs;
+      qsort(bclist,(size_t)meshi->nbptrs,sizeof(blockagedata *),blockagecompare);
+      for(j=1;j<meshi->nbptrs;j++){
+        blockagedata *bc, *bcm1;
+        int *ijk1, *ijk2;
+      
+        bc = bclist[j];
+        bcm1 = bclist[j-1];
+        ijk1=bcm1->ijk;
+        ijk2=bc->ijk;
+        if(ijk1[1]-ijk1[0]>1)continue; // only consider removing one cell blockages
+        if(ijk1[3]-ijk1[2]>1)continue;
+        if(ijk1[5]-ijk1[4]>1)continue;
+        if(ijk1[0]!=ijk2[0]||ijk1[1]!=ijk2[1])continue;
+        if(ijk1[2]!=ijk2[2]||ijk1[3]!=ijk2[3])continue;
+        if(ijk1[4]!=ijk2[4]||ijk1[5]!=ijk2[5])continue;
+        bcm1->dup=1;
+        bc->dup=2;
+        ndups++;
+      }
+      jj=0;
+      for(j=0;j<meshi->nbptrs;j++){
+        blockagedata *bc, *bcm1;
+        int *ijk1, *ijk2;
+      
+        bc=bclist[j];
+        if(bc->dup==1)continue;
+        bclist[jj++]=bc;
+      }
+      meshi->nbptrs=jj;
+    }
+  }
 }
   
 

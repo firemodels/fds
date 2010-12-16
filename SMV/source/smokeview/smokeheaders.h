@@ -21,6 +21,7 @@ int SUB_portfrustum(int quad,
                    GLdouble fleft, GLdouble fright, GLdouble fdown, GLdouble fup, GLdouble fnear, GLdouble ffar,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
+EXTERNCPP void remove_dup_blockages(void);
 EXTERNCPP void sort_iso_triangles(float *mm);
 EXTERNCPP void Update_Isotris(int flag);
 EXTERNCPP void update_evac_parms(void);

@@ -262,7 +262,7 @@ typedef struct _blockagedata {
   int surf_index[6],surf_indexORIG[6];
   int patchvis[7];
   int usecolorindex;
-  int id;
+  int id,dup;
   int is_wuiblock;
   int hole;
   int nnodes;
