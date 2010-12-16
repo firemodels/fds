@@ -272,7 +272,7 @@ HEAT_FLUX_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS+N_VIRTUAL_WA
                   END SELECT
                   RHO_F(IW)     = RHO_F(IW) + 0.5_EB*ARO*(OM_RHOP(IIO,JJO,KKO)-RHO_G)
                   IF (N_GAS_SPECIES>0) RHO_YY_F(1:N_GAS_SPECIES) = RHO_YY_F(1:N_GAS_SPECIES) + &
-                                   0.5_EB*ARO*(OM_RHOP(IIO,JJO,KKO)*OM_YYP(IIO,JJO,KKO,1:N_GAS_SPECIES)-RHO_G*YY_G_ALL(1:N_GAS_SPECIES))
+                     0.5_EB*ARO*(OM_RHOP(IIO,JJO,KKO)*OM_YYP(IIO,JJO,KKO,1:N_GAS_SPECIES)-RHO_G*YY_G_ALL(1:N_GAS_SPECIES))
                ENDDO
             ENDDO
          ENDDO
@@ -282,21 +282,6 @@ HEAT_FLUX_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS+N_VIRTUAL_WA
          ELSE
             YY_F(IW,1:N_GAS_SPECIES)      = RHO_YY_F(1:N_GAS_SPECIES)/RHO_F(IW)
             YYP(II,JJ,KK,1:N_GAS_SPECIES) = 2._EB*YY_F(IW,1:N_GAS_SPECIES) - YY_G_ALL(1:N_GAS_SPECIES)
-            ! use second-order extrapolation of first ghost cell value to second ghost cell (see also DENSITY_BC for RHOP)
-            !SELECT CASE(IOR)
-            !   CASE(-1)
-            !      YYP(II+1,JJ,KK,1:N_GAS_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_GAS_SPECIES)-YYP(II-1,JJ,KK,1:N_GAS_SPECIES)))
-            !   CASE( 1)
-            !      YYP(II-1,JJ,KK,1:N_GAS_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_GAS_SPECIES)-YYP(II+1,JJ,KK,1:N_GAS_SPECIES)))
-            !   CASE(-2)
-            !      YYP(II,JJ+1,KK,1:N_GAS_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_GAS_SPECIES)-YYP(II,JJ-1,KK,1:N_GAS_SPECIES)))
-            !   CASE( 2)
-            !      YYP(II,JJ-1,KK,1:N_GAS_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_GAS_SPECIES)-YYP(II,JJ+1,KK,1:N_GAS_SPECIES)))
-            !   CASE(-3)
-            !      YYP(II,JJ,KK+1,1:N_GAS_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_GAS_SPECIES)-YYP(II,JJ,KK-1,1:N_GAS_SPECIES)))
-            !   CASE( 3)
-            !      YYP(II,JJ,KK-1,1:N_GAS_SPECIES) = MIN(1._EB,MAX(0._EB,2._EB*YYP(II,JJ,KK,1:N_GAS_SPECIES)-YYP(II,JJ,KK+1,1:N_GAS_SPECIES)))
-            !END SELECT
             YY_GET(1:N_GAS_SPECIES) = MAX(0._EB,YYP(II,JJ,KK,1:N_GAS_SPECIES))
             CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM_W)
             TMP(II,JJ,KK) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM_W*RHOP(II,JJ,KK))
@@ -624,21 +609,6 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       ELSE
          RHOP(II,JJ,KK) = PBAR_P(KK,PRESSURE_ZONE_WALL(IW))/(RSUM0*TMP(II,JJ,KK))
       ENDIF
-      !! second-order extrapolation of first ghost cell value to second ghost cell (see also THERMAL_BC for YYP)
-      !SELECT CASE(IOR)
-      !   CASE(-1)
-      !      RHOP(II+1,JJ,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II-1,JJ,KK))
-      !   CASE( 1)
-      !      RHOP(II-1,JJ,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II+1,JJ,KK))
-      !   CASE(-2)
-      !      RHOP(II,JJ+1,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ-1,KK))
-      !   CASE( 2)
-      !      RHOP(II,JJ-1,KK) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ+1,KK))
-      !   CASE(-3)
-      !      RHOP(II,JJ,KK+1) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ,KK-1))
-      !   CASE( 3)
-      !      RHOP(II,JJ,KK-1) = MAX(RHOMIN,2._EB*RHOP(II,JJ,KK)-RHOP(II,JJ,KK+1))
-      !END SELECT
    ENDIF
  
 ENDDO WALL_CELL_LOOP

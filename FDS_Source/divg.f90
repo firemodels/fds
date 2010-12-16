@@ -139,7 +139,8 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
                !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_01'
                ITMP = MIN(4999,INT(TMP(I,J,K)))
                TMP_WGT = TMP(I,J,K) - ITMP
-               RHO_D(I,J,K) = RHOP(I,J,K)*(SPECIES(Y2SPEC(N))%D(ITMP)+TMP_WGT*(SPECIES(Y2SPEC(N))%D(ITMP+1)-SPECIES(Y2SPEC(N))%D(ITMP)))
+               RHO_D(I,J,K) = &
+                  RHOP(I,J,K)*(SPECIES(Y2SPEC(N))%D(ITMP)+TMP_WGT*(SPECIES(Y2SPEC(N))%D(ITMP+1)-SPECIES(Y2SPEC(N))%D(ITMP)))
             ENDDO 
          ENDDO
       ENDDO
