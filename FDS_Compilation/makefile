@@ -470,6 +470,7 @@ mpi_gnu_osx_32 : setup $(obj_mpi)
 
 smvv.o : isob.o
 cons.o : prec.o
+mpis.o : prec.o
 type.o : prec.o cons.o
 devc.o : prec.o
 pois.o : prec.o cons.o
@@ -499,6 +500,7 @@ main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o v
 
 smvv.obj : isob.obj
 cons.obj : prec.obj
+mpis.obj : prec.obj
 type.obj : prec.obj cons.obj
 devc.obj : prec.obj
 pois.obj : prec.obj cons.obj
