@@ -7947,12 +7947,15 @@ MESH_LOOP_1: DO NM=1,NMESHES
 
       IF (XB(1)==XB(2)) THEN
          IF (VT%J1==VT%J2 .OR. VT%K1==VT%K2) REJECT_VENT=.TRUE.
+         IF (VT%I1>IBAR .OR. VT%I2<0)        REJECT_VENT=.TRUE.
       ENDIF
       IF (XB(3)==XB(4)) THEN
          IF (VT%I1==VT%I2 .OR. VT%K1==VT%K2) REJECT_VENT=.TRUE.
+         IF (VT%J1>JBAR .OR. VT%J2<0)        REJECT_VENT=.TRUE.
       ENDIF
       IF (XB(5)==XB(6)) THEN
          IF (VT%I1==VT%I2 .OR. VT%J1==VT%J2) REJECT_VENT=.TRUE.
+         IF (VT%K1>KBAR .OR. VT%K2<0)        REJECT_VENT=.TRUE.
       ENDIF
 
       ! Evacuation criteria
@@ -8112,12 +8115,12 @@ MESH_LOOP_2: DO NM=1,NMESHES
  
       VT => VENTS(N)
  
-      I1 = VT%I1
-      I2 = VT%I2
-      J1 = VT%J1
-      J2 = VT%J2
-      K1 = VT%K1
-      K2 = VT%K2
+      I1 = MAX(0,VT%I1)
+      I2 = MIN(IBAR,VT%I2)
+      J1 = MAX(0,VT%J1)
+      J2 = MIN(JBAR,VT%J2)
+      K1 = MAX(0,VT%K1)
+      K2 = MIN(KBAR,VT%K2)
  
       IF (VT%IOR==0) THEN
          IF (I1==      0 .AND. I2==0) VT%IOR =  1
