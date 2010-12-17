@@ -5462,9 +5462,9 @@ READ_SURF_LOOP: DO N=0,N_SURF
    SF%THERMALLY_THICK = .FALSE.
    IF (SF%N_LAYERS > 0) THEN
       SF%THERMALLY_THICK = .TRUE.
-      SF%TMP_INNER                    = TMP_INNER + TMPM
-      SF%TMP_FRONT                    = TMP_INNER(1) + TMPM
-      SF%TMP_BACK                     = TMP_BACK  + TMPM
+      SF%TMP_INNER = TMP_INNER + TMPM
+      IF (SF%TMP_INNER(1)>0._EB)           SF%TMP_FRONT = SF%TMP_INNER(1)
+      IF (SF%TMP_INNER(SF%N_LAYERS)>0._EB) SF%TMP_BACK  = SF%TMP_INNER(SF%N_LAYERS)
       ALLOCATE(SF%N_LAYER_CELLS(SF%N_LAYERS))            ! The number of cells in each layer
       ALLOCATE(SF%MIN_DIFFUSIVITY(SF%N_LAYERS))          ! The smallest diffusivity of materials in each layer
       ALLOCATE(SF%MATL_NAME(SF%N_MATL))                  ! The list of all material names associated with the surface
@@ -5475,7 +5475,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
       SF%TMP_INNER                  = SF%TMP_FRONT
       SF%TMP_BACK                   = SF%TMP_FRONT
    ENDIF
-   TMPMIN        = MIN(TMPMIN,SF%TMP_FRONT,MINVAL(SF%TMP_INNER),SF%TMP_BACK)
 
    ! Store the names and indices of all materials associated with the surface
 
@@ -5511,6 +5510,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    ! Thermal boundary conditions
+
    IF (SF%ADIABATIC .AND. (SF%NET_HEAT_FLUX < 1.E12_EB .OR. SF%CONVECTIVE_HEAT_FLUX/=0._EB)) THEN
          WRITE(MESSAGE,'(A,I3)') 'ERROR: SURF '//TRIM(SF%ID)//&
                                  ' cannot have both ADIABATIC and NET_HEAT_FLUX or CONVECTIVE_HEAT_FLUX'
@@ -5522,6 +5522,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ENDIF
    
    SF%THERMAL_BC_INDEX = SPECIFIED_TEMPERATURE
+
    IF (SF%ADIABATIC) THEN
                                        SF%THERMAL_BC_INDEX = NET_FLUX_BC
                                        SF%NET_HEAT_FLUX = 0._EB
@@ -5673,9 +5674,9 @@ TEXTURE_MAP             = 'null'
 TEXTURE_WIDTH           = 1._EB
 TEXTURE_HEIGHT          = 1._EB
 THICKNESS               = -1._EB
-TMP_BACK                = TMPA-TMPM
-TMP_FRONT               = TMPA-TMPM 
-TMP_INNER               = TMPA-TMPM
+TMP_BACK                = -TMPM-1._EB
+TMP_FRONT               = -TMPM-1._EB
+TMP_INNER               = -TMPM-1._EB
 TRANSPARENCY            = 1._EB
 VEL_T                   = 0._EB
 VEL                     = 0._EB
