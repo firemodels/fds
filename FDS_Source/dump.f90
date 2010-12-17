@@ -2514,7 +2514,7 @@ SURFLOOP: DO N=0,N_SURF
       IF (SF%GEOMETRY==SURF_SPHERICAL)   WRITE(LU_OUTPUT,'(A)') '     Assumed spherical symmetry'
    ENDIF THICK
  
-   IF (SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE) &
+   IF (SF%THERMAL_BC_INDEX==SPECIFIED_TEMPERATURE .AND. SF%TMP_FRONT>0._EB) &
                                   WRITE(LU_OUTPUT,'(A,F8.1)') '     Wall or Vent Temperature (C)', SF%TMP_FRONT - TMPM
    IF (SF%VEL/=0._EB)             WRITE(LU_OUTPUT,'(A,F8.3)') '     Normal Velocity (m/s)       ', SF%VEL
    IF (SF%MASS_FLUX_TOTAL/=0._EB) WRITE(LU_OUTPUT,'(A,F8.3)') '     Total Mass Flux (kg/m^2/s)  ', SF%MASS_FLUX_TOTAL

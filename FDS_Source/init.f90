@@ -299,10 +299,6 @@ DO K=0,M%KBP1
    M%RHO(:,:,K) = M%RHO_0(K)
    M%TMP(:,:,K) = M%TMP_0(K)
 ENDDO
-!! fill second ghost cell ------------
-!M%RHO(:,:,-1)       = M%RHO_0(0)
-!M%RHO(:,:,M%KBP1+1) = M%RHO_0(M%KBP1)
-! -----------------------------------
 M%RHOS    = M%RHO
 IF (.NOT.EVACUATION_ONLY(NM)) M%FRHO    = 0._EB
 M%U       = U0
@@ -334,7 +330,9 @@ IF (EVACUATION_ONLY(NM)) THEN
    M%H       = 0._EB
 ENDIF
 IF (N_GAS_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) M%DEL_RHO_D_DEL_Y = 0._EB
+
 ! Viscosity
+
 IF (N_GAS_SPECIES > 0) THEN
    YY_GET(1:N_GAS_SPECIES) = YY_AMBIENT(1:N_GAS_SPECIES)
    CALL GET_VISCOSITY(YY_GET,MU_N,TMPA)
