@@ -2035,6 +2035,11 @@ SELECT CASE(GAS_NAME)
       EPSOK= 71.4_EB  
       MW=28._EB
       FORMULA='N2'
+   CASE('NITROGEN OXIDE')
+      SIGMA=3.467_EB 
+      EPSOK= 232.4_EB  
+      MW=46._EB
+      FORMULA='NO2'      
    CASE('OXYGEN')          
       SIGMA=3.467_EB 
       EPSOK=106.7_EB  
