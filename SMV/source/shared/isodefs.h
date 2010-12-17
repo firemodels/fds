@@ -56,8 +56,6 @@ typedef struct {
   isovert *iso_vertices;
   int niso_vertices;
   
-  unsigned short *triangles2;
-  unsigned char *triangles1;
   unsigned short *vertices, *tvertices;
   unsigned char *color8;
   int *sortedlist,*rank;
