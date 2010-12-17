@@ -5986,8 +5986,8 @@ If the simulation does not involve the mixture fraction model -- either because 
 desired or if a finite rate reaction(s) is being specified (see Section~\ref{info:finite}) -- you can
 specify that the background gas species be something other than air. For a gas mixture comprised of
 $n$ species, FDS only solves transport equations for $n-1$ because it also solves an equation for
-total mass conservation. To set the properties of the implicitly defined {\ct BACKGROUND\_SPECIES}, use the
-{\ct MISC} line. If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW},
+total mass conservation. To set the properties of the background species, use the
+{\ct SPEC} line with the {\ct BACKGROUND\_SPECIES} and if needed {\ct BACKGROUND\_SPECIES\_ONLY} keywords.  If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW},
 and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEAT},
 {\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.
 If either {\ct SPECIFIC\_HEAT} or {\ct ENTHALPY} is specified, then both must be specified.
@@ -6006,29 +6006,37 @@ properties do not need to be given for those species.
 Species &   Mol.~Wgt.        & $\sigma$  & $\epsilon/k$   & Liquid \\
         &   (g/mol)          & (\AA)     & (K)            &        \\ \hline
 \hline
-{\ct AIR}              & 29   & 3.711     & 78.6           &        \\ \hline
-{\ct ARGON}            & 40   & 3.42      & 124.0          &        \\ \hline
-{\ct CARBON DIOXIDE}   & 44   & 3.941     &195.2           &        \\ \hline
-{\ct CARBON MONOXIDE}  & 28   & 3.690     & 91.7           &        \\ \hline
-{\ct ETHANOL}          & 46   & 4.530     &362.6           &    Y   \\ \hline
-{\ct ETHYLENE}         & 28   & 4.163     &224.7           &        \\ \hline
-{\ct HELIUM}           &  4   & 2.551     & 10.22          &        \\ \hline
-{\ct HYDROGEN}         &  2   & 2.827     & 59.7           &        \\ \hline
-{\ct HYDROGEN BROMIDE} & 81   & 3.353     &449.0           &        \\ \hline
-{\ct HYDROGEN CHLORIDE}& 36   & 3.339     &344.7           &        \\ \hline
-{\ct HYDROGEN CYANIDE} & 26   & 3.63      &569.1           &        \\ \hline
-{\ct HYDROGEN FLOURIDE}& 20   & 3.148     &330.0           &        \\ \hline
-{\ct METHANE}          & 16   & 3.758     &148.6           &        \\ \hline
-{\ct METHANOL}         & 32   & 3.626     &481.8           &    Y   \\ \hline
-{\ct N-HEXANE}         & 86   & 4.524     &199.41          &    Y   \\ \hline
-{\ct N-HEPTANE}        &100   & 4.701     &205.75          &    Y   \\ \hline
-{\ct N-OCTANE}         &114   & 4.892     &231.16          &        \\ \hline
-{\ct N-DECANE}         &142   & 5.233     &226.46          &        \\ \hline
-{\ct NITROGEN}         & 28   & 3.798     & 71.4           &        \\ \hline
-{\ct OXYGEN}           & 32   & 3.467     &106.7           &        \\ \hline
-{\ct PROPANE}          & 44   & 5.118     &237.1           &        \\ \hline
-{\ct TOLUENE}          & 92   & 5.698     &480.0           &        \\ \hline
-{\ct WATER VAPOR}      & 18   & 2.641     &809.1           &    Y   \\ \hline
+{\ct ACETYLENE}          & 24   & 4.033     &231.8           &        \\ \hline
+{\ct AIR}                & 29   & 3.711     & 78.6           &    Y   \\ \hline
+{\ct ARGON}              & 40   & 3.42      &124.0           &    Y   \\ \hline
+{\ct CARBON DIOXIDE}     & 44   & 3.941     &195.2           &        \\ \hline
+{\ct CARBON MONOXIDE}    & 28   & 3.690     & 91.7           &    Y   \\ \hline
+{\ct ETHANE}             & 30   & 4.443     &215.7           &    Y   \\ \hline
+{\ct ETHANOL}            & 46   & 4.530     &362.6           &    Y   \\ \hline
+{\ct ETHYLENE}           & 28   & 4.163     &224.7           &    Y   \\ \hline
+{\ct HELIUM}             &  4   & 2.551     & 10.22          &    Y   \\ \hline
+{\ct HYDROGEN}           &  2   & 2.827     & 59.7           &    Y   \\ \hline
+{\ct HYDROGEN BROMIDE}   & 81   & 3.353     &449.0           &    Y   \\ \hline
+{\ct HYDROGEN CHLORIDE}  & 36   & 3.339     &344.7           &    Y   \\ \hline
+{\ct HYDROGEN CYANIDE}   & 26   & 3.63      &569.1           &    Y   \\ \hline
+{\ct HYDROGEN FLOURIDE}  & 20   & 3.148     &330.0           &    Y   \\ \hline
+{\ct ISOPROPANOL}        & 60   & 4.549     &576.7           &    Y   \\ \hline
+{\ct METHANE}            & 16   & 3.758     &148.6           &    Y   \\ \hline
+{\ct METHANOL}           & 32   & 3.626     &481.8           &    Y   \\ \hline
+{\ct N-BUTANE}           & 58   & 4.687     &531.4           &    Y   \\ \hline
+{\ct N-DECANE}           &142   & 5.233     &226.46          &        \\ \hline
+{\ct N-HEPTANE}          &100   & 4.701     &205.75          &    Y   \\ \hline
+{\ct N-HEXANE}           & 86   & 5.949     &399.3           &    Y   \\ \hline
+{\ct N-OCTANE}           &114   & 4.892     &231.16          &    Y   \\ \hline
+{\ct NITROGEN}           & 28   & 3.798     & 71.4           &    Y   \\ \hline
+{\ct NITROGEN OXIDE}     & 46   & 3.467     &232.4           &    Y   \\ \hline
+{\ct OXYGEN}             & 32   & 3.467     &106.7           &    Y   \\ \hline
+{\ct PROPANE}            & 44   & 5.118     &237.1           &    Y   \\ \hline
+{\ct PROPYLENE}          & 42   & 4.678     &298.9           &    Y   \\ \hline
+{\ct SOOT}               & 12   & 3.798     & 71.4           &        \\ \hline
+{\ct SULFUR HEXAFLUORIDE}&146   & 5.128     &146.            &        \\ \hline
+{\ct TOLUENE}            & 92   & 5.698     &480.0           &    Y   \\ \hline
+{\ct WATER VAPOR}        & 18   & 2.641     &809.1           &    Y   \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -6045,7 +6053,7 @@ absorptivity.
 The yields of fuel and water gases are usually specified
 with the parameters {\ct NU\_FUEL} and {\ct NU\_WATER} on the {\ct MATL} line.
 However, the yield of any explicitly-defined (via the {\ct SPEC} line) gas species
-can be specified using the parameter {\ct NU\_GAS(j,k)}, where {\ct j} refers to the {\ct j}'th reaction
+can be specified using the parameters {\ct NU\_GAS(j,k)} and {\ct SPEC\_ID(j,k)}, where {\ct j} refers to the {\ct j}'th reaction
 of the material and {\ct k} refers to the {\ct k}'th explicitly-defined gas species.
 {\ct NU\_GAS} can also be used to specify the yields of the
 mixture fraction and water vapor, assuming each is implicitly-defined and its order in the list of
@@ -6078,6 +6086,7 @@ mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted t
       E                       = 1.51E5
       N_S                     = 1.0
       NU_RESIDUE              = 0.18
+      SPEC_ID(1,1:4) = 'PYROLYZATE','OXYGEN','WATER VAPOR','CARBON DIOXIDE'
       NU_GAS(1,1:4)           = 0.82,0,0,0
       HEAT_OF_REACTION        = 430.
       HEAT_OF_COMBUSTION      = 14500.
@@ -6129,6 +6138,49 @@ cannot participate in the reaction. This means that {\ct N\_S(0)} is not a valid
 \end{description}
 
 \end{enumerate}
+
+\section{Species mixtures (Lumped Species): The \texorpdfstring{{\tt SMIX}}{SMIX} Namelist Group}
+\label{info:SMIX}
+
+In many simulations there are sets of species that are created and transported in the same manner.  In this case, tracking each species individually uses computational resources and time that need not be spent.  For example, one could use the {\ct SPEC} namelist group to define the background species of air as a combination of nitrogen, oxygen, water vapor, and carbon dioxide.  However, this would require tracking three species each of which would require memory and time.  Alternatively, if one could create a lumped species that represented that composition and tracked only that species, then both time and memory could be saved.  This can be accomplished with the {\ct SMIX} namelist group.  
+
+The following inputs:
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID = 'NITROGEN',BACKGROUND=.TRUE.,BACKGROUND_ONLY=.TRUE./
+&SPEC ID = 'OXYGEN', MASS_FRACTION_0 = 0.23054 /
+&SPEC ID = 'WATER VAPOR', MASS_FRACTION = 0.00626/
+&SPEC ID = 'CARBON DIOXIDE', MASS_FRACTION = 0.00046 /
+\end{verbatim} \normalsize
+
+are equivalent to these inputs using {\ct SMIX}
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID = 'NITROGEN',LUMPED_SPECIES_ONLY=.TRUE./
+&SPEC ID = 'OXYGEN',LUMPED_SPECIES_ONLY=.TRUE./
+&SPEC ID = 'WATER VAPO'R,LUMPED_SPECIES_ONLY=.TRUE./
+&SPEC ID = 'CARBON DIOXIDE',LUMPED_SPECIES_ONLY=.TRUE./
+
+&SMIX ID = 'AIR', BACKGROUND=.TURE.,
+      SPEC_ID ='NITROGEN','OXYGEN','WATER VAPOR','CARBON DIOXIDE'
+      MASS_FRACTION = 0.7624,0.23054,0.00046,0.76274/
+\end{verbatim} \normalsize
+
+The keyword {\ct LUMPED\_SPECIES\_ONLY} on {\ct SPEC} denotes that the species is only present as part of a lumped species.  When this flag is set, FDSwill not allocate space to track that species individually.
+
+The available inputs for {\ct SMIX} are:
+
+\begin{description}
+\item[{\ct BACKGROUND}] Denotes that this lumped species is to be used as the background species.  The {\ct BACKGROUND} lumped species must be defined first.
+\item[{\ct ID}] Character string identitfying the name of the species.  If no {\ct ID} is given the background lumped species will be named LUMPED SPECIES 0 and any remaining lumped species will be named LUMPED SPECIES N where N is the position of the the input following any background lumped species.
+label the {\ct SPEC\_ID} Character array containing the names of the species that make up the lumped species.  This name should not unique over all {\ct SMIX} and {\ct SPEC} inputs.
+\item[{\ct MASS\_FRACTION}] The mass fractions of the species making up the lumped species.  FDS will normalize the values to 1.  Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
+\item[{\ct VOLUME\_FRACTION}]  The volume fractions of the species making up the lumped species.  FDS will normalize the values to 1.  Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
+\end{description}
+
+Any FDS input that requires a {\ct SPEC\_ID} can also use the {\ct ID} of an {\ct SMIX}.  
 
 
 \clearpage
@@ -9820,7 +9872,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct \footnotesize ALLOW\_UNDERSIDE\_DROPLETS} & Logical & See Section~\ref{info:controlling_droplets}    &               & {\ct .FALSE.}    \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE} & Real & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
-{\ct BACKGROUND\_SPECIES}       & Character     & See Section~\ref{info:SPEC}                   &               & {\ct 'AIR'}       \\ \hline
 {\ct BAROCLINIC}                & Logical       & Baroclinic torque correction                  &               & {\ct .TRUE.}     \\ \hline
 {\ct BNDF\_DEFAULT}             & Logical       & See Section~\ref{info:BNDF}                   &               & {\ct .TRUE.}      \\ \hline
 {\ct CFL\_MAX}                  & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
@@ -9835,7 +9886,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VERTICAL}               & Real          & See Section~\ref{info:convection}             &               & 1.31             \\ \hline
 {\ct CSMAG}                     & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
 %{\ct COMPUTE\_VISCOSITY\_TWICE} & Logical       & Compute twice per time step                   &               & {\ct .TRUE.}     \\ \hline
-{\ct CONDUCTIVITY}              & Real          & See Section~\ref{info:SPEC}                   &  W/m/K        &                   \\ \hline
 %{\ct CONSTANT\_PROPERTIES}      & Logical       & Use exact fluid properties, not from table    &               & {\ct .FALSE.}     \\ \hline
 {\ct CO\_PRODUCTION}            & Logical       & See Section~\ref{info:combustion}             &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                       & Logical       & Direct Numerical Simulation                   &               & {\ct .FALSE.}     \\ \hline
@@ -9857,7 +9907,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}         &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES}                       & Logical       & Large Eddy Simulation                         &               & {\ct .TRUE.}      \\ \hline
-{\ct MW}                        & Real          & Molecular Weight (Section~\ref{info:SPEC})    &  g/mol        &                   \\ \hline
 {\ct NOISE}                     & Logical       & Toggle initial noise on and off               &               & {\ct .TRUE.}      \\ \hline
 %{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution             &               & 7                 \\ \hline
 {\ct OVERWRITE}                 & Logical       & Prevevts overwriting of output files               &               & {\ct .TRUE.}      \\ \hline
@@ -9883,7 +9932,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
 %{\ct TURB\_INIT}                & Logical       & Write `ini\_salsa.dat' for turb_init.exe      &               & {\ct .FALSE.}     \\ \hline
 {\ct U0,V0,W0}                  & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
-{\ct VISCOSITY}                 & Real          & See Section~\ref{info:SPEC}                   &  kg/m/s       &                   \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
 {\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
 \end{longtable}
@@ -10330,12 +10378,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ABSORBING}                     & Logical     & Absorbs radiation                           &                   & {\ct .FALSE.} \\ \hline
+{\ct BACKGROUND}                    & Logical     & Use this species as the background species             & {\ct .FALSE.} \\ \hline
+{\ct BACKGROUND\_ONLY}              & Logical     & Species is only used for the background species             &                   & {\ct .FALSE.} \\ \hline
 {\ct CONDUCTIVITY}                  & Real        & Conductivity, $k$                           & W/m/K             &     \\ \hline
 {\ct DIFFUSIVITY}                   & Real        & Diffusivity,  $D$                           & m$^2$/s           &     \\ \hline
 {\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
 {\ct FORMULA }                      & Character   & Smokeview label                             &                   &     \\ \hline
 {\ct FYI}                           & Character   & Comment String                              &                   &     \\ \hline
 {\ct ID }                           & Character   & Name of species                             &                   &     \\ \hline
+{\ct LUMPED\_SPECIES\_ONLY}         & Logical     & Species is only part of an {\ct SMIX}    &                   & {\ct .FALSE.} \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0   \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & Initial mass fraction                       &                   & 0   \\ \hline
 {\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.  \\ \hline
@@ -10349,6 +10400,32 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
+\section{\texorpdfstring{{\tt SMIX}}{SMIX} (Species Mixture (Lumped Species) Parameters)}
+
+
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Species Parameters]{For more information see Section~\ref{info:SMIX}.}
+\label{tbl:SMIX} \\
+\hline
+\multicolumn{5}{|c|}{{\ct SMIX} (Species Mixture (Lumped Species) Parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct SMIX} (Species Mixture (Lumped Species) Parameters)} \\
+\hline \hline
+\endhead
+{\ct BACKGROUND}                    & Logical     & Mixture is background species                           &                   & {\ct .FALSE.} \\ \hline
+{\ct ID}                            & Character   & Name of species                           &                   &     \\ \hline
+{\ct SPEC\_ID}                      & Character Array & IDs of {\ct SPEC}ies that make up the mixture             &           &     \\ \hline
+{\ct MASS\_FRACTION}                & Real Array  & Mass fraction of mixture components                     &                   & 0   \\ \hline
+{\ct VOLUME\_FRACTION}              & Real Array  & Volune fraction of mixture components                             &                   &     \\ \hline
+\end{longtable}
+
+
+\vspace{\baselineskip}
 
 \section{\texorpdfstring{{\tt SURF}}{SURF} (Surface Properties)}
 
