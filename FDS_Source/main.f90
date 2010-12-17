@@ -409,6 +409,9 @@ IF (USE_MPI) THEN
    CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 ENDIF
 
+! If there are zones and HVAC pass PSUM
+IF (HVAC_SOLVE .AND. N_ZONE>0) CALL EXCHANGE_DIVERGENCE_INFO
+
 ! Make an initial dump of global output quantities
 
 IF (.NOT.RESTART) THEN
