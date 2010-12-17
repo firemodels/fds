@@ -328,7 +328,6 @@ int getmaxrevision(void){
   MAXREV(assert_revision);
   MAXREV(CNV3dsmoke_revision);
   MAXREV(CNVboundary_revision);
-  MAXREV(CNViso_revision);
   MAXREV(CNVpart_revision);
   MAXREV(CNVslice_revision);
   MAXREV(CNVplot3d_revision);

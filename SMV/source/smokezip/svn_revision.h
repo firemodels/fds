@@ -5,7 +5,6 @@
 extern char assert_revision[];
 extern char CNV3dsmoke_revision[];
 extern char CNVboundary_revision[];
-extern char CNViso_revision[];
 extern char CNVpart_revision[];
 extern char CNVslice_revision[];
 extern char CNVplot3d_revision[];

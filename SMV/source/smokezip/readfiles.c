@@ -230,21 +230,6 @@ int readsmv(char *smvfile){
     }
   }
 
-  // allocate memory for isosurface file info
-
-  if(niso_files>0){
-    iso *isoi;
-    int i;
-
-    NewMemory((void **)&isoinfo,niso_files*sizeof(iso));
-    for(i=0;i<niso_files;i++){
-      isoi = isoinfo + i;
-      isoi->file=NULL;
-      isoi->filebase=NULL;
-      isoi->isolevels=NULL;
-    }
-  }
-
   // allocate memory for particle file info
 
 #ifdef pp_PART
@@ -825,76 +810,6 @@ int readsmv(char *smvfile){
       }
       continue;
     }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ ISOF ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"ISOF",4) == 1){
-
-      int version=0;
-      int blocknumber=0;
-      char *buffer2;
-      int len;
-      int filesize;
-      iso *isoi;
-
-      CheckMemory;
-      trim(buffer);
-      len=strlen(buffer);
-      if(len>4){
-        buffer2=buffer+4;
-        sscanf(buffer2,"%i %i",&blocknumber,&version);
-        blocknumber--;
-      }
-
-      CheckMemory;
-      isoi = isoinfo + iiso;
-      isoi->unit_start=unit_start++;
-      iiso_seq++;
-      isoi->seq_id = iiso_seq;
-      isoi->autozip = 0;
-      isoi->version=version;
-      isoi->dataflag=0;
-      isoi->blocknumber=blocknumber;
-      isoi->file=NULL;
-      isoi->filebase=NULL;
-      isoi->inuse=0;
-      isoi->compressed=0;
-
-      if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
-      trim(buffer);
-      buffer2=trim_front(buffer);
-      if(strlen(buffer2)<=0)break;
-      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
-        int filelen;
-
-        filelen = strlen(buffer2)+lensourcedir+1;
-        NewMemory((void **)&isoi->file,filelen);
-        NewMemory((void **)&isoi->filebase,strlen(buffer2)+1);
-        STRCPY(isoi->filebase,buffer2);
-        if(sourcedir!=NULL){
-          STRCPY(isoi->file,sourcedir);
-          STRCAT(isoi->file,buffer2);
-        }
-        else{
-          STRCPY(isoi->file,buffer2);
-        }
-        if(readlabels(&isoi->label,streamsmv)==2){
-          printf("*** Warning: problem reading SLCF entry\n");
-          break;
-        }
-        isoi->filesize=filesize;
-        iiso++;
-      }
-      else{
-        printf("*** Warning: the file, %s, does not exist.\n",buffer);
-        if(readlabels(&isoinfo[iiso].label,streamsmv)==2)break;
-        niso_files--;
-      }
-      continue;
-    }
-
   }
   {
     int i;
@@ -1160,20 +1075,6 @@ void readini2(char *inifile){
       }
       continue;
     }
-    if(match(buffer,"ISOAUTO",7)==1){
-      int n3dsmokes=0;
-      int i;
-      int seq_id;
-
-      fgets(buffer,BUFFERSIZE,stream);
-      sscanf(buffer,"%i",&n3dsmokes);
-      for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,BUFFERSIZE,stream);
-        sscanf(buffer,"%i",&seq_id);
-        get_startup_iso(seq_id);
-      }
-      continue;
-    }
     if(match(buffer,"S3DAUTO",7)==1){
       int n3dsmokes=0;
       int i;
@@ -1234,23 +1135,6 @@ void readini2(char *inifile){
 
       if(smoke3di->seq_id==seq_id){
         smoke3di->autozip=1;
-        return;
-      }
-    }
-  }
-
-
- /* ------------------ get_startup_iso ------------------------ */
-
-  void get_startup_iso(int seq_id){
-    int i;
-    for(i=0;i<niso_files;i++){
-      iso *isoi;
-
-      isoi = isoinfo + i;
-
-      if(isoi->seq_id==seq_id){
-        isoi->autozip=1;
         return;
       }
     }

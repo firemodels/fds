@@ -120,7 +120,6 @@ int main(int argc, char **argv){
   sliceinfo=NULL;
   nmeshes=0;
   niso_files=0;
-  isoinfo=NULL;
 
   patchinfo=NULL;
   smoke3dinfo=NULL;
@@ -392,17 +391,6 @@ int main(int argc, char **argv){
 
   if(readsmv(smvfile)!=0)return 1;
 
-  if(doiso==1&&niso_files>0){
-    for(i=0;i<niso_files;i++){
-      iso *isoi;
-
-      isoi = isoinfo + i;
-      if(isoi->blocknumber<0||isoi->blocknumber>=nmeshes){
-        doiso=0;
-        break;
-      }
-    }
-  }
 #ifdef pp_PLOT3D
   if(nplot3d_files>0){
     plot3dinfo[0].dup=0;
@@ -530,7 +518,6 @@ void *compress_all(void *arg){
   if(doit_boundary==1)compress_patches(thread_index);
   if(doit_slice==1)compress_slices(thread_index);
   if(doit_smoke3d==1)compress_smoke3ds(thread_index);
-  if(doiso==1&&doit_iso==1)compress_isos(thread_index);
 #ifdef pp_PLOT3D
   if(doit_plot3d==1)compress_plot3ds(thread_index);
 #endif
@@ -798,23 +785,6 @@ void print_summary(void){
       label=&patchi->label;
       printf("%s (%s)\n  %s\n",patchi->file,label->longlabel,patchi->summary);
       printf("  using: min=%f %s, max=%f %s \n\n",patchi->valmin,label->unit,patchi->valmax,label->unit);
-    }
-  }
-
-  nsum=0;
-  for(i=0;i<niso_files;i++){
-    iso *isoi;
-
-    isoi = isoinfo + i;
-    if(isoi->compressed==1)nsum++;
-  }
-  if(nsum>0){
-    for(i=0;i<niso_files;i++){
-      iso *isoi;
-
-      isoi = isoinfo + i;
-      if(isoi->compressed==0)continue;
-      printf("%s\n  %s\n\n",isoi->file,isoi->summary);
     }
   }
 

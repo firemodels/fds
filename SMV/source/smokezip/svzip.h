@@ -80,26 +80,6 @@ typedef struct {
   int dup;
 } patch;
 
-/* --------------------------  iso ------------------------------------ */
-
-typedef struct {
-  int blocknumber;
-  int unit_start;
-  char summary[1024];
-  int compressed;
-  int inuse;
-  char *file, *filebase;
-  flowlabels label;
-  int filesize;
-  int seq_id, autozip;
-  int dup;
-  int version;
-  int dataflag;
-  float tmin, tmax;
-  float *isolevels;
-  int nisolevels,nisosteps;
-} iso;
-
 /* --------------------------  slice ------------------------------------ */
 
 typedef struct {
@@ -249,7 +229,6 @@ float rand_1d(float xmin, float xmax);
 void rand_2d(float xy[2], float xmin, float xmax, float ymin, float ymax);
 void rand_3d(float xyz[3], float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 void get_startup_slice(int seq_id);
-void get_startup_iso(int seq_id);
 void get_startup_smoke(int seq_id);
 void get_startup_patch(int seq_id);
 int getrevision(char *svn);
@@ -382,7 +361,6 @@ EXTERN int npatch_files;
 EXTERN int nslice_files, niso_files, nplot3d_files;
 
 EXTERN slice *sliceinfo;
-EXTERN iso *isoinfo;
 EXTERN plot3d *plot3dinfo;
 
 EXTERN int nmeshes;
