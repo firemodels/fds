@@ -93,7 +93,7 @@ Ventilation
 &OBST XB=0.6,1.0,0.1,0.1,1.0,3.5, SURF_ID='Duct' /
 &OBST XB=0.6,0.6,0.1,0.5,1.0,3.5, SURF_ID='Duct' /
 &OBST XB=1.0,1.0,0.1,0.5,1.0,3.5, SURF_ID='Duct' /
-&HOLE XB=0.65,.95,.15,.45,2.9,3.1
+&HOLE XB=0.6,1.0,0.1,0.5,2.9,3.1 /
 
 &OBST XB=0.6,1.0,0.1,2.2,3.5,3.5, SURF_ID='Duct' /
 &OBST XB=0.6,1.0,0.5,1.8,3.1,3.1, SURF_ID='Duct' /
@@ -104,7 +104,7 @@ Ventilation
 &OBST XB=0.6,0.6,1.8,2.2,2.9,3.1, SURF_ID='Duct' /
 &OBST XB=1.0,1.0,1.8,2.2,2.9,3.1, SURF_ID='Duct' /
 &OBST XB=0.6,1.0,1.8,1.8,2.9,3.1, SURF_ID='Duct' /
-&HOLE XB=0.65,.95,1.85,2.15,2.9,3.1
+&HOLE XB=0.6,1.0,1.8,2.2,2.9,3.1 /
 
 
 &VENT XB=0.6,1.0,0.0,0.0,0.6,1.0, SURF_ID='Inlet' / 
