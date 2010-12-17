@@ -1,7 +1,6 @@
 #!/bin/csh -f
 
 $RUNFDS Atmospheric_Effects lee_waves             fire41
-$RUNFDS Transient_Inflow linear_ramp_inflow_4mesh fire73
 $RUNFDS Atmospheric_Effects stack_effect          fire41
 $RUNFDS Controls activate_vents                   fire53
 $RUNFDS Controls control_test                     fire54
@@ -205,12 +204,5 @@ $RUNFDS Scalar_Analytical_Solution compression_wave_FL4_128 fire72
 
 $RUNFDS Scalar_Analytical_Solution move_slug                fire73
 $RUNFDS Scalar_Analytical_Solution move_slug_fl1            fire73
-
-$RUNFDS Transient_Inflow linear_ramp_inflow_1mesh fire73
-$RUNFDS Transient_Inflow linear_ramp_inflow_2mesh fire73
-$RUNFDS Transient_Inflow linear_ramp_inflow_4mesh fire73
-
-
-
 
 
