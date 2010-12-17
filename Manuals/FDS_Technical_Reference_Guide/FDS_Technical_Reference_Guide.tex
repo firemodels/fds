@@ -547,13 +547,7 @@ ASTM E 1355~\cite{ASTM:E1355}.
 
 \subsection{Type of Model}
 
-FDS is a Computational Fluid Dynamics (CFD) model of fire-driven fluid flow.
-The model solves numerically a form of the Navier-Stokes equations appropriate
-for low-speed, thermally-driven flow with an emphasis on smoke and heat transport
-from fires. The partial derivatives of the conservation equations of mass, momentum and energy are approximated
-as finite differences, and the solution is updated in time on a three-dimensional, rectilinear grid.
-Thermal radiation is computed using a finite volume technique on the same grid as the flow solver.
-Lagrangian particles are used to simulate smoke movement, sprinkler discharge, and fuel sprays.
+FDS is a Computational Fluid Dynamics (CFD) model of fire-driven fluid flow. The model numerically solves a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The partial derivatives in the conservation equations for mass, momentum and energy are approximated by finite differences, and the solution is updated in time on a three-dimensional, rectilinear grid. Thermal radiation is computed using a finite volume technique on the same grid as the flow solver. Lagrangian particles are used to simulate smoke movement, sprinkler discharge, and fuel sprays.
 
 Smokeview is a companion program to FDS that produces images and animations of the results. In recent years, its developer, Glenn Forney, has
 added to Smokeview the ability to visualize fire and smoke in a fairly realistic way. In a sense, Smokeview now is, via its three-dimensional
@@ -1007,7 +1001,7 @@ or superior accuracy to its empirical counterpart.
 likely to be rejected. Also, the various routines in FDS are expected to consume CPU time in proportion to their overall importance. For example, the
 radiation transport algorithm consumes about 25~\% of the CPU time, consistent with the fact that about one-fourth to one-third of the fire's energy
 is emitted as thermal radiation.
-\item[Simpler Algorithm:] If a new algorithm does what the old one did using less lines of code, it is almost always accepted, so long as
+\item[Simpler Algorithm:] If a new algorithm does what the old one did using fewer lines of code, it is almost always accepted, so long as
 it does not decrease functionality.
 \item[Increased or Comparable Accuracy:] The validation experiments that are part of this guide serve as the metric for new routines. It is
 not enough for a new algorithm to perform well in a few cases. It must show clear improvement across the suite of experiments. If the accuracy is
@@ -1050,9 +1044,9 @@ of velocity $\bu=[u,v,w]^T$, the temperature $T$, and the pressure $p$.
 \subsection{Mass and Species Transport}
 
 Mass conservation can be expressed either in terms of the density, $\rho$,
-\be \dod{\rho}{t} + \nabla \cdot \rho \bu  =  \dm_b'''  \label{mass} \ee
+\be \dod{\rho}{t} + \nabla\!\cdot (\rho \bu)  =  \dm_b'''  \label{mass} \ee
 or in terms of the individual gaseous species, $Y_\alpha$:
-\be \dod{ }{t}(\rho Y_\alpha) + \nabla \cdot \rho Y_\alpha \bu = \nabla \cdot \rho D_\alpha \nabla Y_\alpha + \dm_\alpha''' + \dm_{b,\alpha}''' \label{species} \ee
+\be \dod{ }{t}(\rho Y_\alpha) + \nabla\!\cdot (\rho Y_\alpha \bu) = \nabla\!\cdot (\rho D_\alpha \nabla Y_\alpha) + \dm_\alpha''' + \dm_{b,\alpha}''' \label{species} \ee
 Here $\dm_b'''=\sum_\alpha \dm_{b,\alpha}'''$ is the production rate of species by evaporating droplets or particles.
 Summing these equations over all species yields the original mass conservation equation because
 $\sum Y_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{b,\alpha}'''=\dm_b'''$, by definition, and because it is assumed
@@ -1063,76 +1057,48 @@ diffusive fluxes is zero.
 \subsection{Momentum Transport}
 
 The momentum equation in conservative form is written:
-\be \dod{}{t} (\rho \bu) + \nabla \cdot \rho \bu \bu
-+ \nabla p = \rho \bg + \bof_b
-+ \nabla \cdot \btau_{ij}   \label{momentum} \ee
-The term $\bu \bu$ is a diadic tensor.  In matrix notation, with $\bu=[u,v,w]^T$, the diadic is given by the tensor product of the
-vectors $\bu$ and $\bu^T$. The term $\nabla \cdot \rho \bu \bu$ is thus a vector formed by applying the vector operator $\nabla = (\dod{}{x},\dod{}{y},\dod{}{z})$ to the tensor.
-The force term $\bof_b$ in the momentum equation represents external forces such as
-the drag exerted by liquid droplets. The stress tensor $\btau_{ij}$ is defined:
-\be \btau_{ij} = \mu \left( 2 \; \bS_{ij}
-   - \frac{2}{3} \bdelta_{ij} (\nabla \cdot \bu) \right) \quad ; \quad
+\be \dod{}{t} (\rho \bu) + \nabla\!\cdot (\rho \bu \bu) = 
+- \nabla p + \nabla\!\cdot \btau_{ij} + \rho \bg + \bof_b \label{momentum} \ee
+where $\bg$ is the gravity vector and $\bof_b$ represents external forces such as the drag exerted by liquid droplets. The deviatoric (trace free) stress tensor $\btau_{ij}$ is:
+\be \btau_{ij} = 2 \mu \left( \bS_{ij} - \frac{1}{3} \bdelta_{ij} (\nabla \cdot \bu) \right) \quad ; \quad
    \bdelta_{ij}=\left\{ \begin{array}{ll} 1 & i=j \\ 0 & i\ne j \end{array} \right.   \quad ; \quad
    \bS_{ij} = \frac{1}{2} \left( \dod{u_i}{x_j}+\dod{u_j}{x_i} \right) \quad i,j=1,2,3   \ee
-The term $\bS_{ij}$ is the symmetric rate-of-strain tensor, written using conventional tensor notation.
-The symbol $\mu$ is the dynamic viscosity of the fluid.
+The term $\bS_{ij}$ is the symmetric rate-of-strain tensor, written using conventional tensor notation. The symbol $\mu$ is the dynamic viscosity of the fluid.
 
-The overall computation can either be treated as a
-Direct Numerical Simulation (DNS), in which the dissipative terms are computed directly,
-or as a Large Eddy Simulation (LES), in which the large-scale eddies are computed
-directly and the subgrid-scale dissipative processes are modeled. The numerical algorithm is
-designed so that LES becomes DNS as the grid is refined.
-Most applications of FDS are LES. For example, in simulating the flow of smoke through a large, multi-room enclosure, it
-is not possible to resolve the combustion and transport processes directly.
-However, for small-scale combustion experiments,
-it is possible to compute the transport and combustion processes directly.
+The overall computation can either be treated as a Direct Numerical Simulation (DNS), in which the dissipative terms are computed directly, or as a Large Eddy Simulation (LES), in which the large-scale eddies are computed directly and the subgrid-scale dissipative processes are modeled. The numerical algorithm is designed so that LES becomes DNS as the grid is refined. Most applications of FDS require LES. For example, in simulating the flow of smoke through a large, multi-room enclosure, it is not possible to resolve the combustion and transport processes directly. However, for small-scale combustion experiments, it is possible to compute the transport and combustion processes directly.
 
-Chapter~\ref{momentum_chapter} contains a detailed description of the numerical solution of the momentum and
-pressure equations. For the purpose of outlining the solution procedure below, it is sufficient to
-consider the momentum equation written as:
+Chapter~\ref{momentum_chapter} contains a detailed description of the numerical solution of the momentum and pressure equations. For the purpose of outlining the solution procedure below, it is sufficient to consider the momentum equation written as:
 \be \dod{\bu}{t} + \bF + \nabla {\cal H} = 0  \label{momentum2} \ee
 and the pressure equation as
-\be \nabla^2 {\cal H} = -\dod{ }{t} (\nabla \cdot \bu) - \nabla \cdot \bF    \label{simplephi2} \ee
+\be \nabla^2 {\cal H} = -\dod{ }{t} (\nabla\!\cdot \bu) - \nabla\!\cdot \bF    \label{simplephi2} \ee
 which is obtained by taking the divergence of the momentum equation.
 
 
 \subsection{Energy Transport}
 
 The energy conservation equation is written in terms of the {\em sensible enthalpy}, $h_s$:
-\be \dod{ }{t}(\rho h_s) + \nabla \cdot \rho h_s \bu = \frac{\mbox{D}p}{\mbox{D}t}  + \dq''' - \dq_b'''
-        - \nabla \cdot \dbq'' + \epsilon \label{energy} \ee
+\be \dod{ }{t}(\rho h_s) + \nabla\!\cdot (\rho h_s \bu) = \frac{\mbox{D}p}{\mbox{D}t}  + \dq''' - \dq_b'''
+        - \nabla\!\cdot \dbq'' + \epsilon \label{energy} \ee
 The sensible enthalpy is a function of the temperature:
 \be
-  h_s = \sum_\alpha Y_\alpha h_{s,\alpha} \quad ; \quad h_{s,\alpha}(T)=\int_{T_0}^T c_{p,\alpha}(T') \, dT'
+  h_s = \sum_\alpha Y_\alpha h_{s,\alpha} \quad ; \quad h_{s,\alpha}(T)=\int_{T_0}^T c_{p,\alpha}(T') \,\mbox{d}T'
 \ee
-Note the use of the material derivative, $D(\,)/Dt=\partial(\,) /\partial t + \bu \cdot \nabla (\,)$. The term
+Note the use of the material derivative, $\mbox{D}(\,)/\mbox{D}t\equiv\partial(\,) /\partial t + \bu \cdot \nabla (\,)$. The term
 $\dq'''$ is the heat release rate per unit volume from a chemical reaction. The term $\dq_b'''$ is the energy transferred to the evaporating droplets.
 The term $\dbq''$ represents the conductive and radiative heat fluxes:
 \be \dbq'' = -k \nabla T - \sum_\alpha h_{s,\alpha} \rho D_\alpha \nabla Y_\alpha + \dbq_r'' \ee
-where $k$ is the thermal conductivity.
+where $k$ is the thermal conductivity. The viscous dissipation, $\epsilon$, which shows up as a source term in the thermal energy equation, is often neglected for low-speed flows.  Further discussion on the energy equation can be found in Appendix \ref{app_divergence}.
 
 
 
 
 \subsection{Equation of State}
 
+The ideal gas equation of state is
 \be p = \frac{\rho \R T}{\bW}  \label{basicstate} \ee
-An approximate form of the Navier-Stokes equations appropriate for
-low Mach number applications is used in the model.
-The approximation involves the filtering out of acoustic waves while
-allowing for large variations in temperature and density~\cite{Rehm:1}.
-This gives the equations an elliptic character, consistent with low speed,
-thermal convective processes. In practice, this means that the spatially resolved pressure, $p(x,y,z)$, is
-replaced by an ``average'' or ``background'' pressure, $\bp_m(z,t)$, that is only a function of time
-and height above the ground.
+An approximate form of the Navier-Stokes equations appropriate for low Mach number applications is used in the model. The approximation involves the filtering out of acoustic waves while allowing for large variations in temperature and density~\cite{Rehm:1}. This gives the equations an elliptic character, consistent with low speed, thermal convective processes. In practice, this means that the spatially resolved pressure, $p(x,y,z)$, is replaced by an ``average'' or ``background'' pressure, $\bp_m(z,t)$, that is only a function of time and height above the ground.
 \be \bp_m(z,t) = \rho T {\cal R} \sum_\alpha  Y_\alpha/W_\alpha \ee
-Taking the material derivative of the background pressure and substituting the result into the
-energy conservation equation yields an expression for the velocity divergence, $\nabla \dot \bu$, that is an important
-term in the numerical algorithm because it effectively eliminates the need to solve a transport equation for the
-specific enthalpy.
-The source terms from the energy conservation equation are incorporated into the divergence, which appears in the
-mass transport equations. The temperature is found from the
-density and background pressure via the equation of state.
+Taking the material derivative of the background pressure and substituting the result into the energy conservation equation yields an expression for the velocity divergence, $\nabla\!\cdot \bu$, that is an important term in the numerical algorithm. The source terms from the energy conservation equation are incorporated into the divergence, which appears in the mass transport equations. The temperature is found from the density and background pressure via the equation of state.
 
 
 \clearpage
@@ -1151,28 +1117,28 @@ background and perturbation pressure. Let $\rho^n$, $Y_\alpha^n$, $\bu^n$, $\bp_
 
 \item Estimate $\rho$, $Y_\alpha$, and $\bp_m$ at the next time step with an explicit Euler step. For
 example, the density is estimated by
-\be \frac{\rho^*-\rho^n}{\dt} + \nabla \cdot \rho^n \bar{\bu}^n = 0 \ee
+\be \frac{\rho^*-\rho^n}{\dt} + \nabla\!\cdot \rho^n \bar{\bu}^n = 0 \ee
 
-\item Exchange values of density and mass fraction, $\rho^*$ and $Y_\alpha^*$, at mesh boundaries. The word ``exchange'' implies that information is to be passed from one mesh to another via MPI (Message Passing Interface) calls.
+\item Exchange values of density and mass fraction, $\rho^*$ and $Y_\alpha^*$, at mesh boundaries. The word ``exchange'' implies that information is to be passed from one mesh to another, if necessary via MPI (Message Passing Interface) calls.
 
 \item Apply boundary conditions for $\rho^*$ and $Y_\alpha^*$.
 
-\item Compute the divergence, $\widehat{\nabla \cdot \bu^*}$, using the estimated thermodynamic quantities. Note that the hat symbol implies that the estimated velocity field, $\bu^*$, has not been computed yet. The calculation of the pressure field in the next step shall ensure that the divergence of the updated velocity field is the same as that which is
+\item Compute the divergence, $\widehat{\nabla\!\cdot \bu^*}$, using the estimated thermodynamic quantities. Note that the hat symbol implies that the estimated velocity field, $\bu^*$, has not been computed yet. The calculation of the pressure field in the next step shall ensure that the divergence of the updated velocity field is the same as that which is
     computed here.
 
 \item Solve the Poisson equation for the pressure fluctuation with a direct solver on each individual mesh:
-\be \nabla^2 \cH^n = - \left[ \frac{ \widehat{\nabla \cdot \bu^*} -
-  \widehat{\nabla \cdot \bu^n} - \nabla \cdot (\bar{\bu}^n - \bu^n) }{\dt} \right] - \nabla \cdot \bar{\bF}^n  \ee
+\be \nabla^2 \cH^n = - \left[ \frac{ \widehat{\nabla\!\cdot \bu^*} -
+  \widehat{\nabla\!\cdot \bu^n} - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\dt} \right] - \nabla\!\cdot \bar{\bF}^n  \ee
 Note that the vector $\bar{\bF}^n = \bF(\rho^n,\bar{\bu}^n)$ is computed using patch-averaged velocities. Note also that the term
-$\nabla \cdot (\bar{\bu}^n - \bu^n)$ corrects the error in the divergence introduced by the averaging of velocity components at 
+$\nabla\!\cdot (\bar{\bu}^n - \bu^n)$ corrects the error in the divergence introduced by the averaging of velocity components at
 mesh interfaces.
 
 \item Estimate the velocity at the next time step
 \be
 \frac{\bu^* - \bar{\bu}^n}{\dt} +  \bar{\bF}^n + \nabla {\cal H}^n = 0
 \ee
-Note that the divergence of the estimated velocity field, $\nabla \cdot \bu^*$, is identically
-equal to the divergence, $\widehat{\nabla \cdot \bu^*}$, that
+Note that the divergence of the estimated velocity field, $\nabla\!\cdot \bu^*$, is identically
+equal to the divergence, $\widehat{\nabla\!\cdot \bu^*}$, that
 was derived from the estimated thermodynamic quantities.
 
 \item Check the time step at this point to ensure that
@@ -1192,20 +1158,20 @@ This concludes the ``Predictor'' stage of the time step.  At this point, values 
 
 \item Apply the second part of the Runge-Kutta update to the mass variables. For example, the density is corrected
 \be
-\frac{\rho^{n+1} - \ha \left(\rho^n + \rho^* \right)}{\dt/2} +  \nabla \cdot \rho^* \bar{\bu}^* = 0
+\frac{\rho^{n+1} - \ha \left(\rho^n + \rho^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* \bar{\bu}^* = 0
 \ee
 
 \item Exchange values of $\rho^n$ and $Y_\alpha^n$ at mesh boundaries.
 
 \item Apply boundary conditions for $\rho^n$ and $Y_\alpha^n$.
 
-\item Compute the divergence, $\widehat{\nabla \cdot \bu^{n+1}}$ from the corrected thermodynamic quantities.
+\item Compute the divergence, $\widehat{\nabla\!\cdot \bu^{n+1}}$ from the corrected thermodynamic quantities.
 
 \item Compute the pressure fluctuation using estimated quantities
 \be
 \label{eqn_corrector_poisson2}
 \nabla^2{\cal H}^* = - \left[ \frac{ \widehat{\nabla\cdot\bu^{n+1}} - \ha \left( \widehat{\nabla\cdot \bu^*} + \widehat{\nabla\cdot \bu^n} \right) }{\dt/2} \right]
-   - \nabla \cdot \bar{\mathbf{F}}^*
+   - \nabla\!\cdot \bar{\mathbf{F}}^*
 \ee
 Note that the same type of correction is made for the divergence error at mesh boundaries.
 
@@ -1307,12 +1273,12 @@ It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 
 \section{Combination of the Mass and Energy Equations via the Divergence}
 
-Because of the low Mach number assumption, the divergence of the flow, $\nabla \cdot \bu$, plays a very important role in the overall solution scheme. The divergence is obtained by taking the material (substantial) derivative
+Because of the low Mach number assumption, the divergence of the flow, $\nabla\!\cdot \bu$, plays a very important role in the overall solution scheme. The divergence is obtained by taking the material (substantial) derivative
 of the modified Equation of State~(\ref{state}), and then substituting terms from the mass
 and energy conservation equations. As shown in Appendix \ref{app_divergence}, for the $m$th zone with background pressure $\bp_m$, the divergence may be written as
 \begin{equation}
 \label{eqn_divfromeos}
-\nabla \cdot \bu = {\cal D} - {\cal P}\; \dod{\bp_m}{t}
+\nabla\!\cdot \bu = {\cal D} - {\cal P}\; \dod{\bp_m}{t}
 \end{equation}
 where
 \begin{equation}
@@ -1331,7 +1297,7 @@ and
 \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T)  \right]
 \end{align}
 Contributions to the divergence of the flow include the heat release rate of the fire, $\dq'''$, heat losses to evaporating droplets,
-$\dq_b'''$, the net heat flux from thermal conduction and radiation, $\nabla \cdot \dbq''$, updrafts of air over considerable heights of
+$\dq_b'''$, the net heat flux from thermal conduction and radiation, $\nabla\!\cdot \dbq''$, updrafts of air over considerable heights of
 the atmosphere, the net mass flux from gas species diffusion and production, and global pressure changes. The change in the background
 pressure with time, $\partial \bp_m/\partial t$, is non-zero only if
 it assumed that the compartment is tightly sealed, in which case the background pressure, $\bp_m$, can no longer be assumed constant due to
@@ -1347,107 +1313,47 @@ compartment leads to an appropriate decrease in the divergence within the volume
 \clearpage
 \section{Numerical Method}
 
-Due to the use of the low Mach number approximation, the
-mass and energy equations are combined through the divergence. The
-divergence of the flow field contains
-many of the fire-specific source terms described above.
+Due to the use of the low Mach number approximation, the mass and energy equations are combined through the divergence. The divergence of the flow field contains many of the fire-specific source terms described above.
 
 \subsection{Discretizing the Convective and Diffusive Transport Terms}
 
-The density at the center of the $ijk$th cell
-is updated in time with the following predictor-corrector scheme. In the
-predictor step, the density at the $(n+1)$st time level is estimated
-based on information at the $n$th level
-\be  \frac{\rho_{ijk}^{(n+1)_e}-\rho_{ijk}^n}{\dt}
-    + (\bu \cdot \nabla \rho)_{ijk}^n = -\rho_{ijk}^n (\nabla \cdot \bu)^n_{ijk} \ee
-Following the prediction of the velocity and background pressure
-at the $(n+1)$st time level, the density is corrected
-\be \frac{\rho_{ijk}^{(n+1)}-\ha\left(\rho_{ijk}^n
-     +\rho_{ijk}^{(n+1)_e}\right)} {\ha \dt}
-    + (\bu \cdot \nabla \rho)_{ijk}^{(n+1)_e}
-    = -\rho_{ijk}^{(n+1)_e} (\nabla \cdot \bu)^{(n+1)_e}_{ijk} \ee
+The density at the center of the $ijk$th cell is updated in time with the following predictor-corrector scheme. Advection terms are written in ``flux divergence'' form. In the predictor step, the density at the $(n+1)$st time level is estimated based on information at the $n$th level
+\be  \frac{\rho_{ijk}^{*}-\rho_{ijk}^n}{\dt}
+    + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^n = 0
+\ee 
+The quantity $\overline{\rho}^{FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}.
+ 
+Following the prediction of the velocity and background pressure at the $(n+1)$st time level, the density is corrected via
+\be \frac{\rho_{ijk}^{n+1}-\ha\left(\rho_{ijk}^n
+     +\rho_{ijk}^{*}\right)} {\ha \dt}
+    + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^{*}
+    = 0 \ee
 The species conservation equations are differenced the same way, with the addition of the diffusion term (including turbulent diffusion):
-\be  \frac{(\rho Y_\alpha)_{ijk}^{(n+1)_e}-(\rho Y_\alpha)_{ijk}^n}{\dt}
-    + \cdots  = \cdots +
-    (\nabla \cdot \rho D_\alpha \nabla Y_\alpha)_{ijk}^n \ee
+\be  \frac{(\rho Y_\alpha)_{ijk}^{*}-(\rho Y_\alpha)_{ijk}^n}{\dt}
+  + \nabla\!\cdot(\overline{\rho Y_\alpha}^{FL} \mathbf{u})_{ijk}^n
+  = \nabla\!\cdot (\rho D_\alpha \nabla Y_\alpha)_{ijk}^n \ee
 at the predictor step, and
-\be \frac{(\rho Y_\alpha)_{ijk}^{(n+1)}-\ha\left((\rho Y_\alpha)_{ijk}^n
-     +(\rho Y_\alpha)_{ijk}^{(n+1)_e}\right)} {\ha \dt}
-    + \cdots = \cdots
-    + (\nabla \cdot \rho D_\alpha \nabla Y_\alpha)_{ijk}^{(n+1)_e} \ee
-at the corrector step.  Mass source terms due to chemistry or evaporation, for example, are time split and applied after the corrector step (see Section \ref{sec_time_splitting}).
+\be \frac{(\rho Y_\alpha)_{ijk}^{n+1}-\ha\left((\rho Y_\alpha)_{ijk}^n
+     +(\rho Y_\alpha)_{ijk}^{*}\right)} {\ha \dt}
+    + \nabla\!\cdot(\overline{\rho Y_\alpha}^{FL} \mathbf{u})_{ijk}^*
+    = \nabla\!\cdot (\rho D_\alpha \nabla Y_\alpha)_{ijk}^{*} \ee
+at the corrector step.
 
-The convective terms are written as upwind-biased differences in the
-predictor step and downwind-biased differences in the corrector step~\cite{Continillo:1}.
-In the definition to follow, the symbol $\pm$ means $+$ in the predictor
-step and $-$ in the corrector step. The opposite is true for $\mp$.
-\begin{eqnarray}
-(\bu\cdot\nabla \rho)_{ijk} &\equiv&
-\frac{1\mp\epsilon_u}{2} u_{ijk}  \frac{\rho_{i+1,jk} -\rho_{ijk}}{\dx} +
-\frac{1\pm\epsilon_u}{2} u_{i-1,jk}  \frac{\rho_{ijk} -\rho_{i-1,jk}}{\dx}+
-\nonumber \\
-& & \frac{1\mp\epsilon_v}{2} v_{ijk}  \frac{\rho_{i,j+1,k} -\rho_{ijk}}{\dy} +
-\frac{1\pm\epsilon_v}{2} v_{i,j-1,k}  \frac{\rho_{ijk} -\rho_{i,j-1,k}}{\dy}+
-\nonumber \\
-& & \frac{1\mp\epsilon_w}{2} w_{ijk}  \frac{\rho_{ij,k+1} -\rho_{ijk}}{\dz} +
-\frac{1\pm\epsilon_w}{2} w_{ij,k-1}  \frac{\rho_{ijk} -\rho_{ij,k-1}}{\dz}
-\end{eqnarray}
-The convective term in the species transport equation, $(\bu\cdot\nabla \rho Y_\alpha)_{ijk}$ is differenced
-the exact same way.
-Note that without the inclusion of the $\epsilon$'s, these are simple
-central difference approximations. The $\epsilon$'s are local Courant numbers,
-$\epsilon_u = u \dt/\dx$, $\epsilon_v = v \dt/\dy$, and
-$\epsilon_w = w \dt/\dz$, where the velocity components are those that
-immediately follow.
-Their role is to bias the differencing upwind at the predictor step. Where the local Courant number is
-near unity, the difference becomes nearly fully upwinded. Where the local Courant
-number is much less than unity, the differencing is
-more centralized.
-
-
-\subsection{Flux Correction}
-\label{sec_flux_correction}
-
-The second-order finite-differencing scheme used in FDS cannot fully resolve sharp gradients on a relatively coarse grid.
-Instead, steep gradients cause local {\em over-shoots} and {\em under-shoots} of quantities like temperature, density and species mass fraction.
-For mass fraction in particular, this can result in a solution where the mass
-fraction exceeds its permissible limits ({\em i.e.} the numerical method transports into or out of a grid
-cell more mass than is physically possible).  The overall numerical scheme is still mass conserving,
-but non-physical in regions of high gradients.  This problem can be reduced, but not eliminated,
-by using higher order numerical methods.  These methods are, however, more expensive.  Another
-solution is to perform a flux transport correction.  This involves examining the solution and
-locating regions where a non-physical solution exists and then redistributing mass to correct it.
-Typically this results in some increased numerical diffusion; however, this is partially mitigated
-since at any one time step, the correction is applied to a small number of cells.
-
-The flux correction scheme (see Appendix \ref{app_boundedness} for details) is performed in both the predictor and corrector steps after updating the species mass
-fractions, $Y_\alpha$.  For each species, two loops are performed over each computational mesh.  The first loop searches for
-and corrects under-shoots, and the second loop searches for and corrects over-shoots.  An under-shoot occurs if the
-mass fraction of a species is less than its permissible minimum, typically 0,  or if there was an outflux of that
-species in the prior time step, $\nabla \, \rho Y_{\alpha,ijk} \, < \, 0$ , and the new species mass fraction
-is less than all of its surrounding cells.  An over-shoot occurs if the
-mass fraction of a species is greater than its permissible maximum,  or if there was an influx of that
-species in the prior time step, $\nabla \, \rho Y_{\alpha,ijk} \, > \, 0$ , and the new species mass fraction
-is greater than all of its surrounding cells.  In each loop a temporary array is used to store the corrected values
-which are then applied globally at the end of each loop.  Using a temporary array rather than a cell by cell
-immediate correction ensures that cells requiring correction are not bypassed due to the sweep direction of the loop.
-Under-shoots are corrected first because in a typical mixture fraction computation it is more likely to have an under-shoot
-with a value less than the absolute minimum for the species than it is for an over-shoot to exceed the absolute maximum
-for the species.
+Mass source terms due to chemistry, evaporation, or pyrolysis are time split and applied after the corrector step (see Section \ref{sec_time_splitting}).
 
 
 \subsection{Flux Limiters}
 \label{sec_flux_limiters}
 
-The reader may think of a \emph{flux limiter} as a form of interpolation scheme which depends on the local state of the flow field and scalar data. Simple linear interpolation of the cell-centered scalar data to the cell face would result in a central differencing scheme.  Such purely centered schemes are known to generate intolerable levels of dispersion error (spurious wiggles) leading to unphysical results such as negative densities or mass fractions outside the range of [0,1].  To address this issue, FDS has relied on a \emph{flux correction} scheme (see Section \ref{sec_flux_correction}) which adds a sufficient amount of numerical diffusion to maintain boundedness.  There is, however, more to the problem.
+A \emph{flux limiter} is a form of interpolation scheme which depends on the local state of the flow field and scalar data. Simple linear interpolation of the cell-centered scalar data to the cell face would result in a central differencing scheme.  Such purely centered schemes are known to generate intolerable levels of dispersion error (spurious wiggles) leading to unphysical results such as negative densities or mass fractions outside the range of [0,1].  To address this issue, FDS has relied on a \emph{flux correction} scheme (see Appendix \ref{app_boundedness}) which adds a sufficient amount of numerical diffusion to maintain boundedness.  There is, however, more to the problem.
 
 For uniform flow velocity, a fundamental property of the exact solution to the equations governing scalar transport is that the total variation of the scalar field (the sum of the absolute values of the scalar differences between neighboring cells) is preserved or diminished (never increased).  In other words, no new extrema are created.  Numerical schemes which preserve this property are referred to as total variation diminishing (TVD) schemes.  The practical importance of using a TVD scheme for fire modelling is that such a scheme is able to accurately track coherent vortex structure in turbulent flames and does not develop spurious reaction zones.
 
 FDS employs two popular second-order TVD schemes as options for scalar transport: Superbee and CHARM.  Superbee \cite{Roe:1986} is recommended for LES because it more accurately preserves the scalar variance for coarse grid solutions which are not expected to be smooth.  Due to the gradient steepening applied in Superbee, however, the convergence degrades at small grid spacing for smooth solutions (the method will revert to a stair-step pattern instead of the exact solution).  CHARM \cite{Zhou:1995}, though slightly more dissipative than Superbee, is convergent, and is therefore the better choice for DNS calculations where the flame front is well resolved.
 
-When a flux limiter is chosen for scalar transport (set {\ct FLUX\_LIMITER=1-4} on {\ct MISC}), FDS formulates the density and species advection terms in ``flux divergence'' form.  For example, the predictor step of the continuity equation is discretized as
+When a flux limiter is chosen for scalar transport (set {\ct FLUX\_LIMITER=1-4} on {\ct MISC}; 2 by default for LES, 4 for DNS), FDS formulates the density and species advection terms in ``flux divergence'' form.  For example, the predictor step of the continuity equation is discretized as
 \be  \frac{\rho_{ijk}^{(n+1)_e}-\rho_{ijk}^n}{\dt}
-    + \nabla \cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^n = 0
+    + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^n = 0
 \ee
 In 1D, we would have
 \be  \frac{\rho_{i}^{(n+1)_e}-\rho_{i}^n}{\dt}
@@ -1503,7 +1409,7 @@ After the corrector step for the transport scheme, source terms are applied to t
 
 The divergence (see Eq.~(\ref{eqn_divfromeos})) in the $m$th pressure zone in both the predictor and corrector step
 is discretized
-\be (\nabla \cdot \bu)_{ijk} = \frac{\R}{\bW c_p \bp_m} \left( \dq_{ijk}''' + (\nabla \cdot k \nabla T)_{ijk}
+\be (\nabla\!\cdot \bu)_{ijk} = \frac{\R}{\bW c_p \bp_m} \left( \dq_{ijk}''' + (\nabla\!\cdot k \nabla T)_{ijk}
     + \ldots \right) + \frac{1}{\bp_n} \left( \frac{\R}{\bW c_p} -1 \right)
       \left( \dod{\bp_m}{t} - w_{ijk} \rho_{0,k} g \right) \label{divdis} \ee
 The thermal and material diffusion terms are pure central differences,
@@ -1511,7 +1417,7 @@ with no upwind or downwind bias, thus they are differenced the same
 way in both the predictor and corrector steps. For example, the thermal
 conduction term is differenced as follows:
 \begin{eqnarray}
-(\nabla \cdot k \nabla T)_{ijk} &=&
+(\nabla\!\cdot k \nabla T)_{ijk} &=&
               \frac{1}{\dx}
          \left[k_{i+\ha,jk}\frac{T_{i+1,jk}-T_{ijk}}{\dx}
               -k_{i-\ha,jk}\frac{T_{ijk}-T_{i-1,jk}}{\dx}\right]+  \nonumber \\
@@ -1539,7 +1445,7 @@ To descibe how the background pressure of the $m$th pressure zone, $\bp_m$, is u
 divergence written in compact notation:
 \begin{equation}
 \label{eqn_divfromeos2}
-\nabla \cdot \bu = {\cal D} - {\cal P}\; \dod{\bp_m}{t}
+\nabla\!\cdot \bu = {\cal D} - {\cal P}\; \dod{\bp_m}{t}
 \end{equation}
 The terms $\mathcal{D}$ and $\mathcal{P}$ are defined by Eqs.~(\ref{eqn_fdsD1}) and (\ref{eqn_fdsP1}), respectively. The subscript $m$ refers to the
 number of the {\em pressure zone}; that is, a volume within the computational domain that is allowed to have its own background pressure rise. A closed room
@@ -1692,7 +1598,7 @@ pressure.
 \section{Simplifying the Momentum Equation}
 
 First, we start with the non-conservative form of the momentum equation introduced above
-\be \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla \cdot \btau_{ij}  \ee
+\be \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \ee
 Next, we make the following substitutions:
 \begin{enumerate}
 \item Subtract the hydrostatic pressure gradient of the $n$th pressure zone, $\rho_n(z,t) \bg$, from both sides. Note that
@@ -1705,7 +1611,7 @@ $\nabla p=\rho_n \bg + \nabla \tp$.
 \end{enumerate}
 Now the momentum equation can be written
 \be \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg
-+ \bof_b + \nabla \cdot \btau_{ij} \Big]  \label{momeq} \ee
++ \bof_b + \nabla\!\cdot \btau_{ij} \Big]  \label{momeq} \ee
 It is convenient to write this equation in the form:
 \be \dod{\bu}{t} + \bF + \nabla \cH = 0 \label{simple_momentum_equation} \ee
 The vector $\bF$ is referred to collectively as the momentum flux terms, and the term $\nabla \cH$ is referred to as the
@@ -1783,9 +1689,9 @@ F_{\z,ijk} &=  \left(
 \end{align}
 \noindent The components of the viscous stress tensor are:
 \begin{align}
-\tau_{xx,ijk} &= \mu_{ijk} \left( \ft (\nabla \cdot \bu)_{ijk} - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\
-\tau_{yy,ijk} &= \mu_{ijk} \left( \ft (\nabla \cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\
-\tau_{zz,ijk} &= \mu_{ijk} \left( \ft (\nabla \cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} \right)  \\
+\tau_{xx,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\
+\tau_{yy,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\
+\tau_{zz,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} \right)  \\
 \tau_{xy,ijk} &= \tau_{yx,ijk}
         = \mu_{i+\ha,j+\ha,k} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy}
                          + \frac{v_{i+1,jk} -v_{ijk}}{\dx} \right) \\
@@ -1809,7 +1715,7 @@ The subscript $i+\ha$ indicates that a variable is an average of its
 values at the $i$th and the $(i+1)$th cell.
 By construction, the divergence defined in Eq.~(\ref{divdis})
 is identically equal to the divergence defined by
-\be (\nabla \cdot \bu)_{ijk} = \frac{u_{ijk}-u_{i-1,jk}}{\dx} +
+\be (\nabla\!\cdot \bu)_{ijk} = \frac{u_{ijk}-u_{i-1,jk}}{\dx} +
                                \frac{v_{ijk}-v_{i,j-1,k}}{\dy} +
                                \frac{w_{ijk}-w_{ij,k-1}}{\dz}   \ee
 The equivalence of the two definitions of the divergence is a result
@@ -1843,7 +1749,7 @@ the rate at which kinetic energy is converted to thermal energy by viscosity:
 \begin{align}
 \epsilon &\equiv \btau_{ij} \cdot \nabla \bu \quad =  \quad
    \mu \left( 2 \; \bS_{ij} \cdot \bS_{ij}
-                  - \frac{2}{3} (\nabla \cdot \bu)^2 \right)  \nonumber \\
+                  - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)  \nonumber \\
   &= \mu \left[ 2 \left(\dod{u}{x}\right)^2
  + 2 \left(\dod{v}{y}\right)^2 + 2 \left(\dod{w}{z}\right)^2 + \right. \nonumber \\
 &  \left.
@@ -1855,12 +1761,12 @@ the fire. To understand where this term originates, form an evolution equation f
 taking the dot product of the momentum equation (\ref{momentum}) with the velocity vector\footnote{In this section
 it is convenient to work with the Lagrangian form of the conservation equations. }:
 \be \rho \, \frac{\mbox{D}\bu}{\mbox{D}t} \cdot \bu = \rho  \, \frac{\mbox{D}\left(|\bu|^2/2\right)}{\mbox{D}t} =
-    \rho \bof_b \cdot \bu - \nabla p \cdot \bu + \nabla \cdot (\btau_{ij} \cdot \bu) - \epsilon \ee
+    \rho \bof_b \cdot \bu - \nabla p \cdot \bu + \nabla\!\cdot (\btau_{ij} \cdot \bu) - \epsilon \ee
 As mentioned above $\epsilon$ is a negligible quantity in the energy equation. However, its functional form
 is useful in representing the dissipation of kinetic energy from the resolved flow field.
 Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the viscosity $\mu$ is modeled
 \be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
-   \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
+   \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla\!\cdot \overline{\bu})^2 \right)^\ha \ee
 where $C_s$ is an empirical constant and $\Delta$ is a length on the
 order of the size of a grid cell.
 The bar above the various quantities denotes that these are the resolved values, meaning
@@ -1909,7 +1815,7 @@ where $C_s$ is an empirical constant, $\Delta=(\dx\,\dy\,\dz)^\ot$, and
        + \left( \dod{u}{y} + \dod{v}{x} \right)^2
        + \left( \dod{u}{z} + \dod{w}{x} \right)^2
        + \left( \dod{v}{z} + \dod{w}{y} \right)^2
-       - \frac{2}{3} (\nabla \cdot \bu)^2  \ee
+       - \frac{2}{3} (\nabla\!\cdot \bu)^2  \ee
 The quantity $|S|$ consists of second order spatial differences
 averaged at cell centers. For example
 \begin{eqnarray}
@@ -2077,9 +1983,9 @@ calculations with grid cells smaller than 5~mm.
 An elliptic partial differential equation (known as a Poisson equation) is obtained by
 taking the divergence of the momentum equation
 \be \nabla^2 {\cal H} =
-     -\dod{(\nabla \cdot \bu)}{t} - \nabla \cdot \bF
+     -\dod{(\nabla\!\cdot \bu)}{t} - \nabla\!\cdot \bF
     \quad ; \quad \bF = - \bu\times\bo - \tp \nabla \left( \frac{1}{\rho} \right) - \frac{1}{\rho}
-    \Big( (\rho-\rho_0) \bg + \bof_b + \nabla \cdot \btau_{ij} \Big)
+    \Big( (\rho-\rho_0) \bg + \bof_b + \nabla\!\cdot \btau_{ij} \Big)
    \label{pe}\ee
 Note that the pressure $\tp$ appears on both sides of Eq.~(\ref{pe}). The
 pressure on the right hand side is taken from the previous time step of the
@@ -2100,7 +2006,7 @@ Poisson equation for the modified pressure, $\hp$, is:
 \frac{\hp_{ij,k+1}-2\hp_{ijk}+\hp_{ij,k-1}}{\dz^2} \nonumber \\ =
     -\frac{F_{\x,ijk} - F_{\x,i-1,jk}}{\dx}
     -\frac{F_{\y,ijk} - F_{\y,i,j-1,k}}{\dy}
-    -\frac{F_{\z,ijk} - F_{\z,ij,k-1}}{\dz} - \dod{ }{t}(\nabla \cdot \bu)_{ijk}
+    -\frac{F_{\z,ijk} - F_{\z,ij,k-1}}{\dz} - \dod{ }{t}(\nabla\!\cdot \bu)_{ijk}
 \end{eqnarray}
 The lack of a superscript implies that all quantities are to be
 evaluated at the same time level.
@@ -2111,14 +2017,14 @@ elliptic equation solver FISHPAK, was originally developed at the National Cente
 Research (NCAR) in Boulder, Colorado.}.
 To ensure that the divergence of the fluid is consistent with the definition
 given in Eq.~(\ref{eqn_divfromeos}), the time derivative of the divergence is defined
-\be \dod{ }{t}(\nabla \cdot \bu)_{ijk} \equiv
-          \frac{(\nabla \cdot \bu)_{ijk}^*
-              - (\nabla \cdot \bu)_{ijk}^n}{\dt} \ee
+\be \dod{ }{t}(\nabla\!\cdot \bu)_{ijk} \equiv
+          \frac{(\nabla\!\cdot \bu)_{ijk}^*
+              - (\nabla\!\cdot \bu)_{ijk}^n}{\dt} \ee
 at the predictor step, and then
-\be \dod{ }{t}(\nabla \cdot \bu)_{ijk} \equiv
-         \frac{(\nabla \cdot \bu)_{ijk}^{n+1} -
-         \ha \left[ (\nabla \cdot \bu)_{ijk}^*
-       + (\nabla \cdot \bu)_{ijk}^n \right]}{\dt/2} \ee
+\be \dod{ }{t}(\nabla\!\cdot \bu)_{ijk} \equiv
+         \frac{(\nabla\!\cdot \bu)_{ijk}^{n+1} -
+         \ha \left[ (\nabla\!\cdot \bu)_{ijk}^*
+       + (\nabla\!\cdot \bu)_{ijk}^n \right]}{\dt/2} \ee
 at the corrector step. The discretization of the divergence is
 given in Eq.~(\ref{divdis}).
 
@@ -2220,11 +2126,11 @@ order to drive the two velocities fields closer into alignment. Because FDS uses
 Consider meshes $(l)$ (left) and $(r)$ (right) which are joined side by side in the $x$ direction. The values $u^{(l)}_{I,jk}$
 and $u^{(r)}_{0,jk}$ live at the same physical location, but are advanced separately (and by different processes)
 during the course of the algorithm.
-Ideally, these velocities should be identical, but they are not because of errors associated with solving the pressure separately on each mesh.  
+Ideally, these velocities should be identical, but they are not because of errors associated with solving the pressure separately on each mesh.
 To improve the speed of our parallel algorithm, our strategy is to minimize the difference between these values.
 While the primitive velocity components are indeed unique to a given mesh, for each mesh we may define the
 discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which is identical at all overlapping mesh points.
-To do this we simply average the coincident values of the normal velocity component at the mesh interfaces.  
+To do this we simply average the coincident values of the normal velocity component at the mesh interfaces.
 For instance, considering the same side-by-side meshes $(l)$ and $(r)$ as before,
 \be
 \label{eqn_patchave_ufield}
@@ -2246,11 +2152,11 @@ at the interface. However, the error introduced in the divergence by the velocit
 derivative of divergence in the pressure equation:
 \be
 \label{eqn_poisson_stg1}
-\nabla^2 {\cH}^n = -\left(\frac{ \nabla \cdot \bu^* - \nabla \cdot \bu^n - \nabla \cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) -
+\nabla^2 {\cH}^n = -\left(\frac{ \nabla\!\cdot \bu^* - \nabla\!\cdot \bu^n - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) -
   \mathbf{F}(\bar{\mathbf{u}}^n)
 \ee
-The extra term in the time derivative, $\nabla \cdot (\bar{\bu}^n - \bu^n)$, ``corrects'' the divergence error. 
-The benefit to averaging the normal components of velocity at mesh interfaces is that $\mathbf{F}$ is the same on each side of the interface, 
+The extra term in the time derivative, $\nabla\!\cdot (\bar{\bu}^n - \bu^n)$, ``corrects'' the divergence error.
+The benefit to averaging the normal components of velocity at mesh interfaces is that $\mathbf{F}$ is the same on each side of the interface,
 since all force terms are determined using the patch-averaged field.
 This also means that stress tensors computed at a mesh interface (which are buried in $\mathbf{F}$) are symmetric;
 this symmetry is a requirement for angular momentum conservation.  Thus, the patch-averaging procedure prevents the
@@ -2260,7 +2166,7 @@ The boundary condition for the pressure term, $\cal H$, at mesh interfaces is a 
 \be
    \cH_{I+\ha,jk}^{(l)} = \cH_{\ha,jk}^{(r)} \equiv \frac{\cH_{I,jk}^{(l)} + \cH_{1,jk}^{(r)} }{2} + \frac{\dx}{4 \, \dt} ( u_{I,jk}^{(l)} - u_{0,jk}^{(r)} )
 \ee
-The second term on the right hand side is used in an optional iterative scheme to drive the updated normal velocity components closer together. 
+The second term on the right hand side is used in an optional iterative scheme to drive the updated normal velocity components closer together.
 
 
 
@@ -2351,7 +2257,7 @@ and the carbon-carrying products of combustion:
    Z = \frac{1}{Y_F^I} \left( Y_\F + \frac{W_\F}{\hbox{x} W_\COTWO} \, Y_\COTWO + \frac{W_\F}{\hbox{x} W_\CO} \, Y_\CO  + \frac{W_\F}{\hbox{x} W_\So} \, Y_\So  \right)
 \label{Zdef} \ee
 Note that x is the number of carbon atoms in the fuel molecule. The mixture fraction satisfies the conservation equation
-\be \rho \DoD{Z}{t} = \nabla \cdot \rho D \nabla Z \label{Zeqn} \ee
+\be \rho \DoD{Z}{t} = \nabla\!\cdot \rho D \nabla Z \label{Zeqn} \ee
 obtained by taking a linear combination of the transport equations for the fuel and the carbon carrying products.
 If it is assumed that combustion occurs so rapidly that the fuel and oxygen cannot
 co-exist, then both simultaneously vanish at a flame surface:
@@ -2661,7 +2567,7 @@ Energy transport consists of convection, conduction and
 radiation. Convection of heat is accomplished via the solution of the
 basic conservation equations. Gains and losses of heat via conduction
 and radiation are represented by the divergence of the heat flux
-vector in the energy equation, $\nabla \cdot \dbq''$. This section
+vector in the energy equation, $\nabla\!\cdot \dbq''$. This section
 describes the equations associated with the radiative part, $\dbq''_r$.
 
 \section{Radiation Transport Equation}
@@ -2804,7 +2710,7 @@ release rate in accordance with measured values.
 The radiant heat flux vector $\dbq_r''$ is defined
 \be \dbq_r''(\bx) = \int_{4\pi} \; \bs' \, I(\bx,\bs') \; d\bs'   \ee
 The gas phase contribution to the radiative loss term in the energy equation is
-\be -\nabla \cdot \dbq_r''(\bx)(\mbox{gas}) =
+\be -\nabla\!\cdot \dbq_r''(\bx)(\mbox{gas}) =
     \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_b(\bx) \right]  \quad ; \quad
     U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'
 \ee
@@ -2815,7 +2721,7 @@ difference between that which is absorbed and that which is emitted.
 \section{Numerical Method}
 \label{radnumericalmethodsection}
 
-This section describes how $\nabla \cdot \dbq_r''$ (the radiative loss
+This section describes how $\nabla\!\cdot \dbq_r''$ (the radiative loss
 term) is computed at all gas-phase cells, and how the
 the radiative heat flux $\dq_r''$ is computed at solid boundaries.
 
@@ -3777,7 +3683,7 @@ becomes
 where the source function is based on the average droplet
 temperature within a cell. The droplet contribution to the radiative
 loss term is
-\be -\nabla \cdot \dbq_r''(\bx)(\mbox{droplets}) =
+\be -\nabla\!\cdot \dbq_r''(\bx)(\mbox{droplets}) =
     \kappa_d(\bx) \, \left[ U(\bx) - 4 \pi \, I_{b,d}(\bx) \right]
 \ee
 For each individual droplet, the radiative heating/cooling power is
@@ -3927,7 +3833,7 @@ a cylindrical, spherical or cartesian coordinate system.
 
 It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation
 equation. For a grid cell with indices $ijk$, the source term is:
-\be (-\nabla \cdot \dot{\bq}_r'')_{ijk} = \sum \left[ \kappa_p \left( U_{ijk} - 4 \sigma \, T_p^4 \right) \right] \ee
+\be (-\nabla\!\cdot \dot{\bq}_r'')_{ijk} = \sum \left[ \kappa_p \left( U_{ijk} - 4 \sigma \, T_p^4 \right) \right] \ee
 where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
 \be \kappa_p = \frac{A}{4 \, \dx \dy \dz} \ee
 where $A$ is the surface area of the particle and $\dx \dy \dz$ is the volume of the cell.
@@ -4718,7 +4624,7 @@ which corresponds to Eq. (9.46) in \cite{Sagaut:2001}.
 
 Second-order central differencing of the advection term in the scalar transport equation leads to dispersion errors (spurious wiggles) and these errors, if left untreated, can lead to scalar fields which are physically not realizable, e.g., negative densities.  To prevent this, FDS employs a boundedness correction to the scalar fields after the explicit transport step.  The correction, which we describe below, acts locally and effectively adds the minimum amount of diffusion necessary to prevent boundedness violations.  It is stressed that this correction does not make the scalar transport scheme total variation diminishing (TVD); it only serves to correct for boundedness. Similar schemes are employed by others (see e.g. \cite{Herrmann:2005}).
 
-Optionally, the user may invoke TVD transport schemes by setting {\tt FLUX\_LIMITER}=\{1-4\} on {\tt MISC} (1=first-order upwinding (Godunov), 2=Superbee \cite{Roe:1986} (recommended for LES), 3=MINMOD, 4=CHARM \cite{Zhou:1995} (recommended for DNS)). These TVD schemes are applied during the transport step and each can be shown to be TVD in 1D under certain CFL constraints.  However, except for Godunov's scheme, the TVD proofs do not extend to 3D \cite{Toro}.  Still, these schemes do a much better job than pure central differencing at mitigating dispersion error.  If the TVD schemes are applied, FDS still runs through the boundedness check in case any small violations are not prevented by the flux limiter.
+By default, FDS employs a TVD transport scheme (Superbee \cite{Roe:1986} for LES and CHARM \cite{Zhou:1995} for DNS). These TVD schemes are applied during the transport step and each can be shown to be TVD in 1D under certain CFL constraints.  However, except for Godunov's scheme ({\ct FLUX\_LIMITER=1}), the TVD proofs do not extend to 3D \cite{Toro}.  Still, these schemes do a much better job than pure central differencing at mitigating dispersion error.  Note that even though TVD schemes are applied, by default FDS still runs through the boundedness check in case any small violations are not prevented by the flux limiter.
 
 \subsubsection{A simple case}
 
@@ -4816,7 +4722,7 @@ defining
 
 \subsubsection{The Dynamic Procedure}
 
-We will now discuss the dynamic procedure for determining $C_s$, the Smagorinsky constant.  The procedure itself is a series of explicit filtering operations leading to a simple algebraic relationship for $C_s(\mathbf{x},t)$ (see Eq.~(\ref{eqn_lengthscale}) below).  The FDS implementation basically follows the works of Germano et al. \cite{Germano:1991}, Moin et al. \cite{Moin:1991}, and Pino Martin et al. \cite{PinoMartin:2000}.  
+We will now discuss the dynamic procedure for determining $C_s$, the Smagorinsky constant.  The procedure itself is a series of explicit filtering operations leading to a simple algebraic relationship for $C_s(\mathbf{x},t)$ (see Eq.~(\ref{eqn_lengthscale}) below).  The FDS implementation basically follows the works of Germano et al. \cite{Germano:1991}, Moin et al. \cite{Moin:1991}, and Pino Martin et al. \cite{PinoMartin:2000}.
 
 To derive the procedure, first, we apply a ``test'' filter of width $\hat{\Delta}>\Delta$ to the LES equations to obtain
 \begin{equation}
@@ -4879,7 +4785,7 @@ We can now compute $L_{ij}$ and $M_{ij}^D$ from known LES quantities.  If we rig
 \left(C_s \Delta\right)^2 = \frac{ L_{ij}^D M_{ij}^D }{ M_{ij}^D M_{ij}^D } \,\mbox{.}
 \end{equation}
 
-\subsubsection{Notes on implementation} 
+\subsubsection{Notes on implementation}
 
 \begin{enumerate}
 \item
