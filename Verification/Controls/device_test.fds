@@ -16,7 +16,7 @@ Test various devices and actions upon activation.
 &OBST XB=2.1,2.2,0.1,0.2,0.2,0.3, COLOR='BLUE',   DEVC_ID='smoke_2' / Block in Mesh 1 tied to SD in Mesh 2
 
 &PART ID='smoke', MASSLESS=.TRUE., SAMPLING_FACTOR=1 /
-&PART ID='water', WATER=.TRUE.,    SAMPLING_FACTOR=5 /
+&PART ID='water', SPEC_ID='WATER VAPOR', SAMPLING_FACTOR=5 /
 
 &PROP ID='Acme Smoke'
       QUANTITY='CHAMBER OBSCURATION' /

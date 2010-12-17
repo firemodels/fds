@@ -27,9 +27,13 @@ $RUNFDS Flowfields sawtooth                       fire58
 $RUNFDS Flowfields tangential_velocity            fire59
 $RUNFDS Flowfields symmetry_test                  fire59
 $RUNFDS Flowfields low_flux_hot_gas_filling       fire51
+$RUNFDS HVAC door_crack                           fire68
+$RUNFDS HVAC fan_test                             fire61
 $RUNFDS HVAC HVAC_flow_loss                       fire52
 $RUNFDS HVAC HVAC_mass_conservation               fire53
 $RUNFDS HVAC HVAC_energy_pressure                 fire54
+$RUNFDS HVAC leak_test_2                          fire62
+$RUNFDS HVAC leak_test                            fire63
 $RUNFDS Heat_Transfer adiabatic_net_flux          fire51
 $RUNFDS Heat_Transfer heat_conduction_a           fire52
 $RUNFDS Heat_Transfer heat_conduction_b           fire53
@@ -46,12 +50,8 @@ $RUNFDS NS_Analytical_Solution ns2d_64            fire64
 $RUNFDS NS_Analytical_Solution ns2d_64_nupt1      fire65
 $RUNFDS NS_Analytical_Solution ns2d_8             fire66
 $RUNFDS NS_Analytical_Solution ns2d_8_nupt1       fire67
-$RUNFDS Pressure_Effects door_crack               fire68
-$RUNFDS Pressure_Effects fan_test                 fire61
 $RUNFDS Pressure_Effects isentropic               fire61
 $RUNFDS Pressure_Effects isentropic2              fire61
-$RUNFDS Pressure_Effects leak_test_2              fire62
-$RUNFDS Pressure_Effects leak_test                fire63
 $RUNFDS Pressure_Effects pressure_boundary        fire64
 $RUNFDS Pressure_Effects pressure_rise            fire65
 $RUNFDS Pressure_Effects zone_break               fire66
