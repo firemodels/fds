@@ -361,11 +361,8 @@ typedef struct {
 
 typedef struct {
   int seq_id, autoload;
-  int compression_type;
-  char *comp_file, *reg_file, *size_file;
+  char *reg_file, *size_file;
   short *normaltable;
-  unsigned char *comp_buffer, *full_bufferframe, *comp_bufferframe;
-  int nfull_bufferframe, ncomp_bufferframe, maxfull_buffer;
   int nnormaltable; 
   char *file;
   int dataflag;

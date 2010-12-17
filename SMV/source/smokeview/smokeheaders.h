@@ -270,7 +270,7 @@ EXTERNCPP void free_skybox(void);
 EXTERNCPP void draw_skybox(void);
 EXTERNCPP void loadskytexture(char *filebase, texture *texti);
 #ifdef USE_ZLIB
-EXTERNCPP void uncompress_isodataframe(isosurface *asurface, int n);
+EXTERNCPP void uncompress_isodataframe(isosurface *asurface_in, isosurface *asurface_out, int n, mesh *meshi);
 EXTERNCPP void uncompress_patchdataframe(mesh *meshi,int iframe);
 #endif
 EXTERNCPP void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata, 
@@ -389,7 +389,7 @@ EXTERNCPP void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostre
 #endif
 EXTERNCPP void array2string(float *array, int narray, char *string);
 EXTERNCPP void getisolevels(const char *isofile, int dataflag, float **levelsptr, float ***colorlevelsptr, int *nisolevels);
-EXTERNCPP void getcisolevels(const char *isofile, float **levelsptr, int *nisolevels);
+
 EXTERNCPP void getsmoothblockparms(mesh *gb, smoothblockage *sb);
 EXTERNCPP void MakeIsoBlockages(mesh *gb, smoothblockage *sb);
 
@@ -506,7 +506,6 @@ EXTERNCPP void initmesh(mesh *gb);
 EXTERNCPP void updateglui(void);
 EXTERNCPP void updateslicelist(int index);
 EXTERNCPP void drawiso(int tranflag);
-EXTERNCPP void drawtiso(mesh *meshi,int tranflag);
 EXTERNCPP void drawplot3d(mesh *gb);
 EXTERNCPP void drawplot3d_texture(mesh *gb);
 EXTERNCPP void updateshowstep(int val, int slicedir);

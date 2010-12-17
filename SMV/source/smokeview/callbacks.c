@@ -2350,16 +2350,6 @@ void update_framenumber(int changetime){
         if(meshi->isotimes==NULL)continue;
         if(meshi->isotimeslist==NULL)continue;
         meshi->iiso=meshi->isotimeslist[itimes];
-
-        if(isoi->compression_type==1){
-          isosurface *asurface;
-          asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels-1;
-          CheckMemory;
-#ifdef USE_ZLIB
-          uncompress_isodataframe(asurface,meshi->nisolevels);
-#endif
-          CheckMemory;
-        }
       }
     }
     if(ntotal_smooth_blockages>0){

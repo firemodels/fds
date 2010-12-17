@@ -4761,9 +4761,6 @@ typedef struct {
       isoi->levels=NULL;
 
       isoi->normaltable=NULL;
-      isoi->comp_buffer=NULL;
-      isoi->comp_bufferframe=NULL;
-      isoi->full_bufferframe=NULL;
       isoi->color_label.longlabel=NULL;
       isoi->color_label.shortlabel=NULL;
       isoi->color_label.unit=NULL;
@@ -4775,29 +4772,12 @@ typedef struct {
       NewMemory((void **)&isoi->reg_file,(unsigned int)(len+1));
       STRCPY(isoi->reg_file,bufptr);
 
-      NewMemory((void **)&isoi->comp_file,(unsigned int)(len+4+1));
-      STRCPY(isoi->comp_file,bufptr);
-      STRCAT(isoi->comp_file,".svz");
-
       NewMemory((void **)&isoi->size_file,(unsigned int)(len+3+1));
       STRCPY(isoi->size_file,bufptr);
       STRCAT(isoi->size_file,".sz");
 
-      if(STAT(isoi->comp_file,&statbuffer)==0){
+      if(STAT(isoi->reg_file,&statbuffer2)==0){
         get_isolevels=1;
-        isoi->compression_type=1;
-        niso_compressed++;
-        isoi->file=isoi->comp_file;
-        if(readlabels(&isoi->surface_label,stream)==2)return 2;
-        getcisolevels(isoi->file,&isoi->levels,&isoi->nlevels);
-        if(dataflag==1){
-          if(readlabels(&isoi->color_label,stream)==2)return 2;
-        }
-        iiso++;
-      }
-      else if(STAT(isoi->reg_file,&statbuffer2)==0){
-        get_isolevels=1;
-        isoi->compression_type=0;
         isoi->file=isoi->reg_file;
         if(readlabels(&isoi->surface_label,stream)==2)return 2;
         getisolevels(isoi->file,dataflag,&isoi->levels,&isoi->colorlevels,&isoi->nlevels);
