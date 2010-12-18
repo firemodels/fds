@@ -9,6 +9,7 @@
 # 3. Then run the batch file Run_All.bat
 
 
+$RUNFDS Visualization capecod                     fire47
 $RUNFDS Visualization colorbar                    fire47
 $RUNFDS Visualization colorconv                   fire53
 $RUNFDS Visualization objects_elem                fire53
