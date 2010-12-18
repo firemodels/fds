@@ -27,6 +27,7 @@ erase SCRIPT_FIGURES\*.png
 smokeview -version > SCRIPT_FIGURES\smokeview.version
 
 cd %vis%
+smokeview -runscript capecod
 smokeview -runscript colorbar
 smokeview -runscript colorconv
 smokeview -runscript objects_elem
