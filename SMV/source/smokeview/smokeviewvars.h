@@ -473,7 +473,7 @@ SVEXTERN int visBlocks;
 SVEXTERN int smooth_block_solid;
 SVEXTERN int visSmoothAsNormal,visTransparentBlockage;
 SVEXTERN int visBlocksSave;
-SVEXTERN int blocklocation;
+SVEXTERN int blocklocation,blocklocation_save;
 SVEXTERN int ncadgeom;
 SVEXTERN int visFloor, visFrame;
 SVEXTERN int visNormalEditColors;
