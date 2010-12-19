@@ -1758,7 +1758,6 @@ void set_cull_vis(void){
 
       culli = meshi->cullgeominfo+iport;
       culli->vis=0;
-     // printf("nports=%i\n",meshi->ncullgeominfo);
 
       xx[0] = (culli->xbeg-xbar0)/xyzmaxdiff;
       xx[1] = (culli->xend-xbar0)/xyzmaxdiff;
@@ -1825,7 +1824,7 @@ void set_cull_vis(void){
       }
     }
   }
-#ifdef pp_BETA
+#ifdef pp_GEOMPRINT
   printf("ports=%i ports visible=%i\n",ntotal,nports); 
 #endif
 }
@@ -2109,7 +2108,7 @@ void update_facelists(void){
         }
         meshi->nface_normals_single=n_normals_single;
       }
-#ifdef pp_BETA
+#ifdef pp_GEOMPRINT
       printf("faces removed=%i\n",nhidden);
 #endif      
 
@@ -2328,7 +2327,7 @@ void draw_faces(){
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
-#ifdef pp_BETA  
+#ifdef pp_GEOMPRINT
   printf("faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
 #endif  
   if(nface_normals_double>0){
@@ -4811,7 +4810,7 @@ void draw_facesOLD(){
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
   }
-#ifdef pp_BETA
+#ifdef pp_GEOMPRINT
   printf("faces=%i, faces drawn=%i, color switches=%i\n",nface_normals_single,faces_drawn,color_swaps);
 #endif
   if(nface_normals_double>0){

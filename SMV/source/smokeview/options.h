@@ -98,6 +98,7 @@
 //*** turn on options available on all platforms
 
 //#define pp_HIDEMULTI
+//#define pp_GEOMPRINT
 #define pp_MESSAGE
 #define pp_DRAWISO
 #define EGZ
