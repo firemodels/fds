@@ -52,12 +52,6 @@
 #define pp_MEMDEBUG
 #endif
 
-#ifdef pp_ALPHA
-#undef pp_release
-#define SMZVERSION "experimental"
-//#define pp_RLETEST
-#endif
-
 #ifdef pp_BETA
 #undef pp_release
 #define SMZVERSION "test"
