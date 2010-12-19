@@ -9,6 +9,9 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <math.h>
+#ifdef WIN32
+#include <direct.h>
+#endif
 #include "MALLOC.h"
 #include "string_util.h"
 
@@ -132,25 +135,36 @@ char *getdir(char *progname){
   return progpath;
 }
 
-
 /* ------------------ lastname ------------------------ */
 
 char *lastname(char *argi){
   size_t i,nargi;
   char *origargi;
-  nargi=strlen(argi);
-  origargi=argi;
-  argi = argi+nargi-1;
-  for(i=0;i<nargi;i++){
-    if(strncmp(argi,dirseparator,1)==0){
-      if(i!=0){return argi+1;}
-      else{
-        return NULL;
-      }
+  char *lastdirsep;
+  char *dir, *filename, cwdpath[1000];
+
+#ifdef WIN32
+#define CHDIR _chdir
+#define GETCWD _getcwd
+#define SEP '\\'
+#else
+#define CHDIR chdir
+#define GETCWD getcwd
+#define SEP '//'
+#endif
+
+  filename=argi;
+  lastdirsep=strrchr(argi,SEP);
+  if(lastdirsep!=NULL){
+    dir=argi;
+    filename=lastdirsep+1;
+    lastdirsep[0]=0;
+    GETCWD(cwdpath,1000);
+    if(strcmp(cwdpath,dir)!=0){
+      CHDIR(dir);
     }
-    argi--;
   }
-  return origargi;
+  return filename;
 }
 
 /* ------------------ trim ------------------------ */
