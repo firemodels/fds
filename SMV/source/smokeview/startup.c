@@ -1803,13 +1803,7 @@ void initvars1(void){
     strcat(TITLEBASE,svn_version);
     strcat(TITLEBASE,")");
 #endif
-#ifdef pp_ALPHA
-    strcat(TITLEBASE," (");
-    strcat(TITLEBASE,svn_version);
-    strcat(TITLEBASE,")");
-#endif
     strcat(TITLEBASE," - ");
-
   }
 #ifdef _DEBUG
   STRCPY(TITLE,TITLEBASE);

@@ -6322,8 +6322,7 @@ updatemenu=0;
   glutAddSubMenu("Max Frame Rate",frameratemenu);
   glutAddSubMenu("Render",rendermenu);
   if(showfontmenu==1)glutAddSubMenu("Font Size",fontmenu);
-//  glutAddSubMenu("Aperture",aperturemenu);
-#ifdef pp_ALPHA
+#ifdef pp_BENCHMARK
   glutAddMenuEntry("Benchmark",1);
 #endif
   if(trainer_active==1)glutAddMenuEntry("Trainer Menu",2);

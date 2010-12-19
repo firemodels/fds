@@ -17,23 +17,19 @@
 #ifdef pp_BETA
 #define SMVVERSION "Test"
 #undef pp_release
+#endif
+
+
+//*** turn on options that are being tested
+
+#ifdef pp_BETA
 #define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
+// #define pp_BENCHMARK
 #endif
 
 #ifdef _DEBUG  // comment out following line if debugging REALLY large cases (to avoid memory checks)
 #define pp_MEMDEBUG
-#endif
-
-#ifdef pp_ALPHA
-#define SMVVERSION "Experimental"
-#undef pp_release
-#endif
-
-#ifdef pp_ALPHA2
-#define pp_ALPHA
-#define SMVVERSION "Experimental Full"
-#undef pp_release
 #endif
 
 #ifdef pp_release

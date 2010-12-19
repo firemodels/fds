@@ -3788,8 +3788,8 @@ void usage(char **argv){
 
     labelptr=label+2;
     strcpy(label,"");
-#ifdef pp_ALPHA
-    strcat(label,", pp_ALPHA");
+#ifdef pp_BENCHMARK
+    strcat(label,", pp_BENCHMARK");
 #endif
 #ifdef pp_COMPRESS
     strcat(label,", pp_COMPRESS");
