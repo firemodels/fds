@@ -103,15 +103,7 @@
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB
-//#define NO_GLUTPOSTDISPLAY
 #define pp_THREAD
-
-#ifdef NO_GLUTPOSTDISPLAY
-#define GLUTPOSTREDISPLAY
-#else
-#define GLUTPOSTREDISPLAY glutPostRedisplay();
-#endif
-
 
 //*** turn on options available in test versions of smokeview 
 

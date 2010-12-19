@@ -1833,7 +1833,7 @@ void update_rotation_index(int val){
 
   update_meshlist1(val);
 
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 
 }
 

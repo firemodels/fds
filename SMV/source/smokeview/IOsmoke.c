@@ -5971,7 +5971,7 @@ void initcullplane(int cullflag){
     qsort((cullplanedata *)sort_cullplaneinfo,(size_t)ncullplaneinfo,
        sizeof(cullplanedata *),cullplane_compare);
   }
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ cullplane_compare ------------------------ */

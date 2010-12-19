@@ -312,7 +312,7 @@ void mouse(int button, int state, int x, int y){
     updatemenu=1;
   }
   glui_move_mode=-1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(state==GLUT_UP){
     eye_xyz0[0]=eye_xyz[0];
     eye_xyz0[1]=eye_xyz[1];
@@ -349,7 +349,7 @@ void mouse(int button, int state, int x, int y){
         mouse_select_device(button, state, x, y);
       }
     }
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     if( showtime==1 || showplot3d==1){
       int temp;
       int yy;
@@ -440,7 +440,7 @@ void mouse(int button, int state, int x, int y){
     xm0=x; 
     ym0=y;
   }
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(blockageSelect==1){
     Display();
   }
@@ -460,7 +460,7 @@ void motion(int xm, int ym){
   
   reset_glui_view(-1);
 
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   //***
   if(showiso==1&&sort_transparency==1&&niso_trans>0)sort_iso_triangles(modelview_scratch);
   if( colordrag==1&&(showtime==1 || showplot3d==1)){
@@ -645,7 +645,7 @@ void keyboard_2(unsigned char key, int x, int y){
   mesh *gbsave,*gbi;
   int i;
 
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   key2 = (char)key;
   if(key2!='L'&&key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='A'
 #ifdef pp_CULL
@@ -1301,7 +1301,7 @@ void keyboard_2(unsigned char key, int x, int y){
 
 void keyboard(unsigned char key, int x, int y){
   keyboard_2(key,x,y);
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   updatemenu=1;
 }
 
@@ -1439,7 +1439,7 @@ void specialkeyboard(int key, int x, int y){
 #define P3_MODE 1
   int keymode=EYE_MODE;
 
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 
   switch (cursorPlot3D){
     case 0:
@@ -1636,7 +1636,7 @@ void training_move(int  mode){
   eye_xyz0[1]=eye_xyz[1];
   eye_xyz0[2]=eye_xyz[2];
   update_translate();
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 
 } 
 
@@ -1882,7 +1882,7 @@ void Display(void){
         glui_script_enable();
       }
     }
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
 
   if(update_fire_line==1){
@@ -2148,7 +2148,7 @@ void Display(void){
       camera_current->cos_direction_angle = cos(PI*camera_current->direction_angle/180.0);
       camera_current->sin_direction_angle = sin(PI*camera_current->direction_angle/180.0);
     }
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
 
 }
@@ -2267,7 +2267,7 @@ void Idle(void){
 
   update_framenumber(changetime);
   if(redisplay==1){
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
 }
 

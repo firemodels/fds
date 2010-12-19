@@ -117,7 +117,7 @@ extern "C" void update_smoke3dflags(void){
 #ifdef pp_CULL
   SMOKE_3D_CB(CULL_SMOKE);
 #endif
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ glui_3dsmoke_setup ------------------------ */
@@ -364,7 +364,7 @@ void SMOKE_3D_CB(int var){
     for(i=0;i<nmeshes;i++){
       SPINNER_smoke3d_hrrpuv_cutoffptr[i]->set_float_val(global_hrrpuv_cutoff);
     }
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     force_redisplay=1;
     IDLE();
     break;
@@ -375,7 +375,7 @@ void SMOKE_3D_CB(int var){
   case FIRE_CUTOFF:
   case FIRE_ALPHA:
   case SMOKE_SHADE:
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     force_redisplay=1;
     IDLE();
     break;
@@ -383,13 +383,13 @@ void SMOKE_3D_CB(int var){
   case SMOKE_RTHICK:
   
     smoke3d_thick = log_base2(smoke3d_rthick);
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     force_redisplay=1;
     IDLE();
     break;
 #else
   case SMOKE_THICK:
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     force_redisplay=1;
     IDLE();
     break;

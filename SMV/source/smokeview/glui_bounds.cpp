@@ -992,7 +992,7 @@ void PLOT3D_CB(int var){
   case PLOTISO:
     visiso = 1 - visiso;
     handleiso();
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     break;
   case PLOTISOTYPE:
     updatemenu=1;
@@ -1007,7 +1007,7 @@ void PLOT3D_CB(int var){
     }
     updatecolors(-1);
     updatemenu=1;
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     break;
   case FILETYPEINDEX:
    p3min[list_p3_index_old]=p3min_temp;

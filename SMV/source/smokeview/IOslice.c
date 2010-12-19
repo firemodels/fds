@@ -750,7 +750,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     }
   }
   push_slice_loadstack(slicefilenumber);
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 /* ------------------ outputslicebounds ------------------------ */
 /*

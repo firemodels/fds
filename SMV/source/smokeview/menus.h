@@ -90,7 +90,7 @@ void TrainerViewMenu(int value){
     ASSERT(FFALSE);
   }
   updatemenu=1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ MainMenu ------------------------ */
@@ -110,7 +110,7 @@ void MainMenu(int value){
     trainer_mode=1-trainer_mode;
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY  
+  glutPostRedisplay();  
 }
 
 /* ------------------ sv_MainMenu ------------------------ */
@@ -145,7 +145,7 @@ void StaticVariableMenu(int value){
   }
   updateallplotslices();
   updatemenu=1;  
-  GLUTPOSTREDISPLAY  
+  glutPostRedisplay();  
   updateplot3dlistindex();
 }
 
@@ -166,7 +166,7 @@ void IsoVariableMenu(int value){
     updateplotslice(2);
     updateplotslice(3);
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     updateplot3dlistindex();
   }
 }
@@ -175,7 +175,7 @@ void IsoVariableMenu(int value){
 
 void LabelMenu(int value){
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   ASSERTFLAG(visColorLabels);
   ASSERTFLAG(visTimeLabels);
   ASSERTFLAG(visTitle0);
@@ -366,7 +366,7 @@ void LightingMenu(int value){
     }
     UpdateLIGHTS=1;
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
 }
 
 /* ------------------ ColorBarMenu ------------------------ */
@@ -374,7 +374,7 @@ void LightingMenu(int value){
 void ColorBarMenu(int value){
   if(value==-999)return;
   updatemenu=1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value<0){
     switch (value){
     case -2:
@@ -477,7 +477,7 @@ void Smoke3DShowMenu(int value){
   int i;
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value<0){
     switch (value){
     case SHOW_ALL:
@@ -609,7 +609,7 @@ void IsoShowMenu(int value){
   update_iso_showlevels();
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ ShowVSliceMenu ------------------------ */
@@ -619,7 +619,7 @@ void ShowVSliceMenu(int value){
   slice *sd;
   int i;
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value==SHOW_ALL){
     for(i=0;i<nvslice;i++){
       vd = vsliceinfo + i;
@@ -690,7 +690,7 @@ void ShowHideSliceMenu(int value){
   int i;
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value<0){
     switch (value){
     case SHOW_ALL:
@@ -755,7 +755,7 @@ void ShowMultiSliceMenu(int value){
   int i;
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   switch (value){
   case SHOW_ALL:
   case HIDE_ALL:
@@ -803,7 +803,7 @@ void ShowMultiSliceMenu(int value){
 
 void ShowHideMenu(int value){
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   switch (value){
   case 13:
     if(plotstate==DYNAMIC_PLOTS){
@@ -859,7 +859,7 @@ void ShowHideMenu(int value){
 void ViewpointMenu(int value){
   if(value==999)return;
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   switch (value){
   case TOGGLE_TITLE_SAFE:
     if(titlesafe_offset==0){
@@ -1003,7 +1003,7 @@ void ZoomMenu(int value){
   if(value==999)return;
   updatemenu=1;  
   if(opengldefined==1){
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
   zoomindex=value;
   if(zoomindex==-1){
@@ -1052,7 +1052,7 @@ void ZoomMenu(int value){
 void ApertureMenu(int value){
   updatemenu=1;  
   if(opengldefined==1){
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
   apertureindex=value;
   if(apertureindex<0)apertureindex=0;
@@ -1065,7 +1065,7 @@ void ApertureMenu(int value){
 void FontMenu(int value){
   updatemenu=1;  
   if(opengldefined==1){
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
   switch (value){
   case SMALL_FONT:
@@ -1124,7 +1124,7 @@ void UnitsMenu(int value){
 
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ OptionMenu ------------------------ */
@@ -1132,7 +1132,7 @@ void UnitsMenu(int value){
 void OptionMenu(int value){
   if(value==999)return;
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value==1){
     Labels_CB(17); // run the benchmark
   }
@@ -1192,7 +1192,7 @@ void ResetMenu(int value){
   //updatezoommenu=1; // updating zoom causes a bug when restoring views from the menu
                       // kept commented code in for future reference
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ RenderState ------------------------ */
@@ -1235,7 +1235,7 @@ void RenderMenu(int value){
   updatemenu=1;
   if(value>=10000)return;
   if(opengldefined==1){
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
   switch (value){
   case Render320:
@@ -1349,7 +1349,7 @@ void EvacShowMenu(int value){
     parti = partinfo + value;
     parti->display = 1 - parti->display;
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     plotstate=getplotstate(DYNAMIC_PLOTS);
     return;
   }
@@ -1393,7 +1393,7 @@ void EvacShowMenu(int value){
   }
   updatemenu=1;  
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 
 }
 
@@ -1416,7 +1416,7 @@ void ParticleShowMenu(int value){
     parti = partinfo + value;
     parti->display = 1 - parti->display;
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     plotstate=getplotstate(DYNAMIC_PLOTS);
     return;
   }
@@ -1520,7 +1520,7 @@ void ParticleShowMenu(int value){
   }
   updatemenu=1;  
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ FrameRateMenu ------------------------ */
@@ -1564,7 +1564,7 @@ void FrameRateMenu(int value){
   frameratevalue=value;
   updatemenu=1;  
   if(opengldefined==1){
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
   reset_gltime();
 }
@@ -1600,7 +1600,7 @@ void IsoSurfaceTypeMenu(int value){
     }
     update_glui_plot3dtype();
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
 }
 
@@ -1609,7 +1609,7 @@ void IsoSurfaceTypeMenu(int value){
 void IsoSurfaceMenu(int value){
   if(ReadPlot3dFile==1){
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     if(value==1){
       updateshowstep(0,ISO);
     }
@@ -1627,7 +1627,7 @@ void LevelMenu(int value){
     updateshowstep(1,ISO);
     updatesurface();
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
 }
 
@@ -1679,13 +1679,13 @@ void VectorSkipMenu(int value){
     visVector=1-visVector;
     if(vectorspresent==0)visVector=0;
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     return;
   }
   vectorskip=value;
   visVector=1;
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ TextureShowMenu ------------------------ */
@@ -1742,7 +1742,7 @@ void TextureShowMenu(int value){
     }
   }
   updatemenu=1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 
 }
 
@@ -1819,7 +1819,7 @@ void Plot3DShowMenu(int value){
     updatesurface();
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 
@@ -1870,7 +1870,7 @@ void GridSliceMenu(int value){
   }
   togglegridstate(visGrid);
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 #ifdef pp_COMPRESS
@@ -1951,7 +1951,7 @@ void SmokeviewiniMenu(int value){
     break;
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ PeriodicReloads ------------------------ */
@@ -1972,7 +1972,7 @@ void ScriptMenu(int value){
 
   if(value==999)return;
   updatemenu=1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   switch (value){
     case START_RECORDING_SCRIPT:
       get_newscriptfilename(newscriptfilename);
@@ -2114,7 +2114,7 @@ void LoadUnloadMenu(int value){
     //plotstate=DYNAMIC_PLOTS;
     //visSmoke=1;
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
   if(value==RELOADALL){
     LOCK_COMPRESS
@@ -2173,7 +2173,7 @@ void LoadUnloadMenu(int value){
   //  plotstate=DYNAMIC_PLOTS;
   //  visSmoke=1;
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
   if(value==2&&smvfilename!=NULL){
 #ifdef _DEBUG
@@ -2208,7 +2208,7 @@ void LoadUnloadMenu(int value){
   }
 #endif
   if(value==SHOWFILES){
-    GLUTPOSTREDISPLAY  
+    glutPostRedisplay();  
     showfiles=1-showfiles;
     updatemenu=1;
     updateslicemenulabels();
@@ -2251,7 +2251,7 @@ void TourMenu(int value){
   if(value==-999)return;
   touring=0;
   updatemenu=1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   switch (value){
   case -12:
     add_new_tour();
@@ -2435,7 +2435,7 @@ void TargetMenu(int value){
     }
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ EvacMenu ------------------------ */
@@ -2480,7 +2480,7 @@ void EvacMenu(int value){
     }
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -2538,7 +2538,7 @@ void ParticleStreakShowMenu(int value){
 
   }
   updatemenu=1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ Particle5ShowMenu ------------------------ */
@@ -2671,7 +2671,7 @@ void ParticlePropShowMenu(int value){
 
   }
   updatemenu=1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ ParticleMenu ------------------------ */
@@ -2719,7 +2719,7 @@ void ParticleMenu(int value){
     }
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -2743,7 +2743,7 @@ void ZoneMenu(int value){
     }
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ UnloadVSliceMenu ------------------------ */
@@ -2752,7 +2752,7 @@ void UnloadVSliceMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value>=0){
     readvslice(value,UNLOAD,&errorcode);
   }
@@ -2777,7 +2777,7 @@ void UnloadPatchMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value>=0){
     readpatch(value,UNLOAD,&errorcode);
   }
@@ -2794,7 +2794,7 @@ void UnloadIsoMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value>=0){
     readiso("",value,UNLOAD,&errorcode);
   }
@@ -2811,7 +2811,7 @@ void UnloadPlot3dMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value>=0){
     readplot3d("",value,UNLOAD,&errorcode);
   }
@@ -2828,7 +2828,7 @@ void UnloadEvacMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value>=0){
     readpart("",value,UNLOAD,&errorcode);
   }
@@ -2846,7 +2846,7 @@ void UnloadPartMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value>=0){
     readpart("",value,UNLOAD,&errorcode);
   }
@@ -2875,7 +2875,7 @@ void LoadVSliceMenu(int value){
   else if(value==-20){
     showallslicevectors=1-showallslicevectors;
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
   else if(value>=0){
     vslice *vslicei;
@@ -2927,7 +2927,7 @@ void UnloadSliceMenu(int value){
   int errorcode,i;
 
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value>=0){
     readslice("",value,UNLOAD,&errorcode);
   }
@@ -3050,7 +3050,7 @@ void LoadSmoke3DMenu(int value){
     }
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3083,7 +3083,7 @@ void HideAllSlices(void){
     sliceinfo[i].display=0;
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3141,7 +3141,7 @@ void ShowAllSlices(char *type1, char *type2){
     }
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3169,7 +3169,7 @@ void LoadTerrainMenu(int value){
     }
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ UnLoadTerrainMenu ------------------------ */
@@ -3187,7 +3187,7 @@ void UnloadTerrainMenu(int value){
     }
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 
 }
 
@@ -3239,7 +3239,7 @@ void LoadSliceMenu(int value){
     }
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3253,7 +3253,7 @@ void LoadMultiVSliceMenu(int value){
   if(value==-20){
     showallslicevectors=1-showallslicevectors;
     updatemenu=1;  
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
     return;
   }
   if(value>=0){
@@ -3334,7 +3334,7 @@ void Plot3DListMenu(int value){
 
 void update_menu(void){
   updatemenu=1; 
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3370,7 +3370,7 @@ void LoadPlot3dMenu(int value){
     loadplot3dall=0;
   }
   updatemenu=1; 
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3417,7 +3417,7 @@ void LoadIsoMenu(int value){
     script_iso=0;
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3479,7 +3479,7 @@ void LoadPatchMenu(int value){
     }
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
@@ -3494,7 +3494,7 @@ void ShowPatchMenu(int value){
 
   updatemenu=1;  
   updatefacelists=1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   if(value>=1000){
     patchi=patchinfo+value-1000;
     if(patchi->type==ipatchtype){
@@ -3615,7 +3615,7 @@ void VentMenu(int value){
   }
   updatefacelists=1;
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ BlockageMenu ------------------------ */
@@ -3685,7 +3685,7 @@ void BlockageMenu(int value){
  // updatefaces=1;
   updatefacelists=1;
   updatehiddenfaces=1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ sv_BlockageMenu ------------------------ */
@@ -3700,14 +3700,14 @@ void svWINAPI sv_BlockageMenu(int value){
 void RotateTypeMenu(int value){
   eyeview = value;
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ TitleMenu ------------------------ */
 
 void TitleMenu(int value){
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   ASSERTFLAG(visTitle0);
   ASSERTFLAG(visTitle1);
   ASSERTFLAG(visTitle2);
@@ -3769,7 +3769,7 @@ void PropMenu(int value){
 
       }
 
-      GLUTPOSTREDISPLAY
+      glutPostRedisplay();
     }
   }
 }
@@ -3816,7 +3816,7 @@ void ShowObjectsMenu(int value){
     }
   }
   updatemenu=1;
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ ZoneShowMenu ------------------------ */
@@ -3878,7 +3878,7 @@ void ZoneShowMenu(int value){
     ASSERT(FFALSE);
   }
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ GeometryMenu ------------------------ */
@@ -3949,7 +3949,7 @@ void GeometryMenu(int value){
   }
   updatefacelists=1;
   updatemenu=1;  
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ MENU_vslice ------------------------ */
@@ -4065,7 +4065,7 @@ updatemenu=0;
   in_menu=1;
 #endif
   update_showhidebuttons();
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   cmesh=current_mesh;
 
   menulabel = a_menulabel;

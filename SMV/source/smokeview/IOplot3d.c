@@ -417,7 +417,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     FREEMEMORY(meshi->qdata);
   }
   update_glui_plot3d();
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ update_plot3dtitle ------------------------ */

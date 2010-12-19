@@ -183,7 +183,7 @@ void ResizeWindow(int width, int height){
     }
   }
   glutReshapeWindow(width,height);
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
     
 /* ------------------ sv_update ------------------------ */

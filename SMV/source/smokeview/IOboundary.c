@@ -943,7 +943,7 @@ void readpatch(int ifile, int flag, int *errorcode){
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
 
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ nodeinblockage ------------------------ */

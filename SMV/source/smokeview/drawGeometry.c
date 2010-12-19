@@ -1861,7 +1861,7 @@ void update_facelists(void){
   nface_outlines=0;
   nface_transparent=0;
   if(opengldefined==1){
-    GLUTPOSTREDISPLAY
+    glutPostRedisplay();
   }
   for(i=0;i<nmeshes;i++){
     meshi = meshinfo + i;

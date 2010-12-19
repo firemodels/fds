@@ -967,7 +967,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   }
   printf(" (overhead: %.2f s)\n",delta_time0-delta_time);
 
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ------------------ update_all_partvis2 ------------------------ */
@@ -1333,7 +1333,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   updatemenu=1;
   IDLE();
 
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
 }
 
 /* ----------------------- drawselect_avatars ----------------------------- */

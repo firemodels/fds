@@ -1484,6 +1484,6 @@ int run_script(void){
       script_setviewpoint(scripti);
       break;
   }
-  GLUTPOSTREDISPLAY
+  glutPostRedisplay();
   return returnval;
 }
