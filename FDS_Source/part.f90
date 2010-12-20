@@ -1457,7 +1457,6 @@ IF (N_EVAP_INDICES>0) THEN
 ENDIF
 
 ! Loop over all types of evaporative species
-
 EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
    FILM_THICKNESS => WALL_WORK2
@@ -1504,7 +1503,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
       FTPR     = PC%FTPR
       TMP_MELT = PC%TMP_MELT
       TMP_BOIL = PC%TMP_V
-      IGAS     = SPECIES(PC%SPEC_INDEX)%Y_INDEX
+      IGAS     = PC%Y_INDEX
       MW_DROP  = SPECIES(IGAS)%MW
       H_V_REF  = PC%H_V(NINT(PC%H_V_REFERENCE_TEMPERATURE))
       H_L_REF  = PC%C_P_BAR(NINT(TMP_MELT))*TMP_MELT
@@ -1778,6 +1777,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             ! Update gas cell density, temperature, and mass fractions
 
             RHO(II,JJ,KK) = M_GAS_NEW*RVC
+
             YY(II,JJ,KK,:) = YY_GET2(:)
             CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET2,RSUM(II,JJ,KK))
             TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP_G_NEW))
@@ -1798,7 +1798,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             ! Keep track of total mass evaporated in cell
 
             MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
-
             ! Update droplet quantities
 
             DR%R   = (M_DROP/FTPR)**ONTH

@@ -7757,16 +7757,21 @@ CONTAINS
              ! [MASS_EXTINCTION_COEFFICIENT] = m2/kg
              ! K = MASS_EXTINCTION_COEFFICIENT*SOOT_DENS*1.0E-6
              ! VISIBILITY = 3/K  [m]
-             SMOKE_BETA  = -0.057_EB
-             SMOKE_ALPHA = 0.706_EB
-             SMOKE_SPEED_FAC = 1.0_EB + (SMOKE_BETA/SMOKE_ALPHA)* &
-                  MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS
-             IF (MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS > 3.0_EB/SMOKE_MIN_SPEED_VISIBILITY) THEN
-                SMOKE_SPEED_FAC = MIN(SMOKE_SPEED_FAC, SMOKE_SPEED_FAC*( 2.0_EB - &
-                     ( MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS - & 
-                     3.0_EB/SMOKE_MIN_SPEED_VISIBILITY ) / (3.0_EB/SMOKE_MIN_SPEED_VISIBILITY) ) )
-             END IF
-             SMOKE_SPEED_FAC = MAX(SMOKE_SPEED_FAC, SMOKE_MIN_SPEED)
+             IF (SOOT_INDEX > 0) THEN
+               SMOKE_BETA  = -0.057_EB
+               SMOKE_ALPHA = 0.706_EB
+               SMOKE_SPEED_FAC = 1.0_EB + (SMOKE_BETA/SMOKE_ALPHA)* &
+                     SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS
+               IF (SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS > &
+                  3.0_EB/SMOKE_MIN_SPEED_VISIBILITY) THEN
+                  SMOKE_SPEED_FAC = MIN(SMOKE_SPEED_FAC, SMOKE_SPEED_FAC*( 2.0_EB - &
+                        (SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*HUMAN_GRID(II,JJ)%SOOT_DENS - & 
+                        3.0_EB/SMOKE_MIN_SPEED_VISIBILITY ) / (3.0_EB/SMOKE_MIN_SPEED_VISIBILITY) ) )
+               END IF             
+               SMOKE_SPEED_FAC = MAX(SMOKE_SPEED_FAC, SMOKE_MIN_SPEED)
+             ELSE
+                SMOKE_SPEED_FAC = 1._EB
+             ENDIF
 
              ! Check the smoke density for the detection by smoke
              IF (.NOT.L_DEAD .AND. HUMAN_GRID(II,JJ)%SOOT_DENS > TDET_SMOKE_DENS) THEN
@@ -13403,7 +13408,11 @@ CONTAINS
 
     ! Same cell: sees always each other
     IF (ABS(i_r2-i_r1)+ABS(j_r2-j_r1) < 1) THEN
-       ave_K = MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS
+       IF (SOOT_INDEX > 0) THEN
+          ave_K = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS       
+       ELSE
+          ave_K = 0._EB
+       ENDIF       
        max_fed = M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
        RETURN
     END IF
@@ -13413,7 +13422,11 @@ CONTAINS
        ! Now y is the main direction
 
        ! Add the last cell (r1) to the average
-       ave_K = Mass_extinction_coefficient*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS/(ABS(j_r1-j_r2)+1)
+       IF (SOOT_INDEX > 0) THEN
+          ave_K = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS/(ABS(j_r1-j_r2)+1)   
+       ELSE
+          ave_K = 0._EB
+       ENDIF       
        max_fed =  M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
 
        i_old = i_r1 ; j_old = j_r1
@@ -13443,11 +13456,19 @@ CONTAINS
           ! from (i,j)==>(inew,jnew): iw1 and iw2 are zero, iw does not matter
           IF ((i==i_old .AND. iw/=0) .OR. (i/=i_old .AND. (iw1/=0 .OR. iw2/=0)) .AND. (idoor /= itarget)) THEN
              See_door = .FALSE.
-             ave_K = MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS
+            IF (SOOT_INDEX > 0) THEN
+               ave_K = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS 
+            ELSE
+               ave_K = 0._EB
+            ENDIF       
              max_fed = M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
-             EXIT MainLoopY
+             EXIT MainLoopY          
           END IF
-          ave_K = ave_K + MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i,j)%SOOT_DENS/(ABS(j_r1-j_r2)+1)
+          IF (SOOT_INDEX > 0) THEN
+            ave_K = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i,j)%SOOT_DENS/(ABS(j_r1-j_r2)+1) 
+          ELSE
+            ave_K = 0._EB
+          ENDIF       
           max_fed = MAX(max_fed, M%HUMAN_GRID(i,j)%FED_CO_CO2_O2)
           i_old = i ; j_old = j
        END DO MainLoopY
@@ -13455,7 +13476,11 @@ CONTAINS
     ELSE
        ! Now x is the main direction
        ! Add the first cell (r1) to the average
-       ave_K = Mass_extinction_coefficient*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS/(ABS(i_r1-i_r2)+1)
+       IF (SOOT_INDEX > 0) THEN
+          ave_K = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS/(ABS(i_r1-i_r2)+1)
+       ELSE
+          ave_K = 0._EB
+       ENDIF       
        max_fed =  M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
        i_old = i_r1 ; j_old = j_r1
        x = 0.0_EB 
@@ -13484,11 +13509,19 @@ CONTAINS
           ! from (i,j)==>(inew,jnew): iw1 and iw2 are zero, iw does not matter
           IF ((j==j_old .AND. iw/=0) .OR. (j/=j_old .AND. (iw1/=0 .OR. iw2/=0)) .AND. (idoor /= itarget)) THEN
              See_door = .FALSE.
-             ave_K = MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS
+             IF (SOOT_INDEX > 0) THEN
+                ave_K = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS
+             ELSE
+                ave_K = 0._EB
+             ENDIF       
              max_fed = M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
              EXIT MainLoopX
           END IF
-          ave_K = ave_K + MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i,j)%SOOT_DENS/(ABS(i_r1-i_r2)+1)
+          IF (SOOT_INDEX > 0) THEN
+             ave_K = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT*1.0E-6_EB*M%HUMAN_GRID(i,j)%SOOT_DENS/(ABS(i_r1-i_r2)+1)
+          ELSE
+             ave_K = 0._EB
+          ENDIF       
           max_fed = MAX(max_fed, M%HUMAN_GRID(i,j)%FED_CO_CO2_O2)
           i_old = i ; j_old = j
        END DO MainLoopX
