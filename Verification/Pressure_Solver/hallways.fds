@@ -11,7 +11,7 @@ Test multiple mesh and parallel processing features.
 &TIME T_END=300.0 /
 
 &SURF ID='FIRE', HRRPUA=1000., PART_ID='smoke', COLOR='EMERALD GREEN' /
-
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &VENT XB=3.0,3.0,3.0,4.0,3.0,4.0, SURF_ID='OPEN' /
 &VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='FIRE' /
 

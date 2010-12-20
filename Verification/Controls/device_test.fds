@@ -8,7 +8,7 @@ Test various devices and actions upon activation.
 &TIME T_END=60.0 /
 
 &SURF ID='FIRE', HRRPUA=500., PART_ID='smoke', DT_INSERT=0.05 /
-
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &VENT XB=3.0,4.0,4.0,4.0,0.0,1.0, SURF_ID='OPEN' /
 &VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='FIRE' /
 

@@ -6,7 +6,8 @@ A simple two-dimensional case demonstrating how to model stack effect in buildin
 
 &TIME T_END=100.0 / 
 
-&MISC RADIATION=.FALSE., LAPSE_RATE=0.0, TMPA=10. /
+&RADI RADIATION=.FALSE.
+&MISC LAPSE_RATE=0.0, TMPA=10. /
 &INIT XB=20.0,80.0,-2.0,2.0,0.0,304.0, TEMPERATURE=20. /
 
 &OBST XB=19.0,20.0,-1.0,1.0,  0.0,  2.0 /  Left Facade

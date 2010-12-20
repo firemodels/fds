@@ -42,17 +42,8 @@ Verification test for
       DT_ISOF=1000000.0 /
 
 &MISC TMPA=20.0, 
-      NOISE=.FALSE.,
-      RADIATION=.FALSE. /
-
-
-&REAC ID         = 'POLYURETHANE'
-      SOOT_YIELD = 0.0
-      CO_YIELD   = 0.0
-      N          = 1.0
-      C          = 6.3
-      H          = 7.1
-      O          = 2.1  /
+      NOISE=.FALSE./
+&RADI RADIATION=.FALSE. /
 
 &SPEC ID='NITROGEN',BACKGROUND=.TRUE.,BACKGROUND_ONLY=.TRUE./
 &SPEC ID='CARBON DIOXIDE' /

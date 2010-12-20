@@ -5,7 +5,7 @@ This case just demonstrates how to do a time-dependent pressure boundary
 &MESH IJK=200,20,20, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
 
 &TIME T_END=30. /
-
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &SURF ID='FIRE', HRRPUA=1000., COLOR='RED' /
 &VENT XB=4.7,5.3,0.2,0.8,0.0,0.0, SURF_ID='FIRE' /
 

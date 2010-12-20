@@ -6,13 +6,13 @@ Using default value of extinction coefficient, 45.6 % at T_END.
 &HEAD CHID='aspiration_detector', TITLE='Test of aspiration detector, SVN $Revision$' /
 
 &MESH IJK = 10,10,10, XB=-1.,1.,-1.,1.,-1.,1. /
-&MISC RADIATION=.FALSE./
+&RADI RADIATION=.FALSE./
 &TIME T_END=200. /
 &DUMP NFRAMES=200 DT_PL3D = 10000. /
 
 &DUMP MASS_FILE=.TRUE./
 
-&REAC SOOT_YIELD=0.001/
+&REAC C=3,H=8,SOOT_YIELD=0.001,FUEL='PROPANE'/
 
 &SURF ID='FLOWIN',SPEC_ID(1)='LUMPED SPECIES 1',MASS_FLUX(1)=1.,COLOR='PURPLE'/
 &SURF ID='FLOWOUT',MASS_FLUX_TOTAL=1.,COLOR='GREEN'/

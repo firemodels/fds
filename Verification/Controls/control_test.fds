@@ -9,7 +9,7 @@ Test of control functions:
 &MESH XB=-1,1,-1,1,0,2, IJK=20,20,20 /
 &TIME T_END=10/
 &SURF ID='FIRE', HRRPUA=1000. /
-
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &OBST XB=-1,-0.5,-1,-0.5,1.5,2.0, CTRL_ID='all test', COLOR='CYAN' /
 
 &VENT MB='XMAX', SURF_ID='OPEN' /

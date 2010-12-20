@@ -7,7 +7,7 @@
 
 &MISC SURF_DEFAULT='GYPSUM BOARD' /
 &SURF ID='BURNER', HRRPUA=3000., PART_ID='smoke' /
-
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &MATL ID            = 'GYPSUM PLASTER'
       FYI           = 'Quintiere, Fire Behavior'
       CONDUCTIVITY  = 0.48

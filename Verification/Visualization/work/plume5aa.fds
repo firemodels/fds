@@ -9,7 +9,7 @@
 &DUMP NFRAMES=200 /
 
 &SURF ID='BURNER',HRRPUA=600.0,PART_ID='tracers' /  Ignition source
-
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &VENT XB=0.5,1.1,0.5,1.1,0.1,0.1,SURF_ID='BURNER' /  fire source on kitchen stove
 &OBST XB=0.5,1.1,0.5,1.1,0.0,0.1 /
 
