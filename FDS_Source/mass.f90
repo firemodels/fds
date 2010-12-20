@@ -424,16 +424,15 @@ PREDICTOR_STEP: SELECT CASE (PREDICTOR)
 
 CASE(.TRUE.) PREDICTOR_STEP
 
-   !$OMP PARALLEL PRIVATE(DTRATIO,OMDTRATIO)
+   !$OMP PARALLEL
 
    IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
 
-      !$OMP DO COLLAPSE(4) PRIVATE(N,K,J,I)
+      !$OMP DO COLLAPSE(4) PRIVATE(N,K,J,I) SCHEDULE(DYNAMIC)
       DO N=1,N_GAS_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  !!$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_01'
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   YYS(I,J,K,N) = RHO(I,J,K)*YY(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N)
                ENDDO
@@ -444,14 +443,15 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ELSE
 
+      !$OMP SINGLE
       DTRATIO   = DT/DT_PREV
       OMDTRATIO = 1._EB - DTRATIO
-      !$OMP DO COLLAPSE(4) PRIVATE(N,K,J,I)
+      !$OMP END SINGLE
+      !$OMP DO COLLAPSE(4) PRIVATE(N,K,J,I SCHEDULE(DYNAMIC)
       DO N=1,N_GAS_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  !!$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_02'
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   YYS(I,J,K,N) = OMDTRATIO*RHO(I,J,K) *YY(I,J,K,N) + DTRATIO*RHOS(I,J,K)*YYS(I,J,K,N)
                ENDDO
@@ -469,7 +469,6 @@ CASE(.TRUE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_03'
             RHOS(I,J,K) = RHO(I,J,K)-DT*FRHO(I,J,K)
          ENDDO
       ENDDO
@@ -482,7 +481,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    
    ! Extract mass fraction from RHO * YY
 
-   !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I)
+   !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I) SCHEDULE(DYNAMIC)
    DO N=1,N_GAS_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
@@ -517,9 +516,8 @@ CASE(.TRUE.) PREDICTOR_STEP
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR   
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_06'
                YY_GET(:) = YYS(I,J,K,:)
-               CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
+               CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K)) !INTENT: IN,OUT
             ENDDO
          ENDDO
       ENDDO
@@ -533,7 +531,6 @@ CASE(.TRUE.) PREDICTOR_STEP
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_08'
                TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHOS(I,J,K))
             ENDDO
          ENDDO
@@ -544,7 +541,6 @@ CASE(.TRUE.) PREDICTOR_STEP
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_09'
                TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
             ENDDO
          ENDDO
@@ -563,12 +559,11 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Correct species mass fraction at next time step (YY here actually means YY*RHO)
 
-   !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I)
+   !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I) SCHEDULE(DYNAMIC)
    DO N=1,N_GAS_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               !!$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_10'
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                YY(I,J,K,N) = .5_EB*(RHO(I,J,K)*YY(I,J,K,N) + RHOS(I,J,K)*YYS(I,J,K,N) - DT*DEL_RHO_D_DEL_Y(I,J,K,N) ) 
             ENDDO
@@ -583,7 +578,6 @@ CASE(.FALSE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_11'
             RHO(I,J,K) = .5_EB*(RHO(I,J,K)+RHOS(I,J,K)-DT*FRHO(I,J,K))
          ENDDO
       ENDDO
@@ -596,12 +590,11 @@ CASE(.FALSE.) PREDICTOR_STEP
    
    ! Extract Y_n from rho*Y_n
 
-   !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I)
+   !$OMP PARALLEL DO COLLAPSE(4) PRIVATE(N,K,J,I) SCHEDULE(DYNAMIC)
    DO N=1,N_GAS_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               !!$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_14'
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                YY(I,J,K,N) = YY(I,J,K,N)/RHO(I,J,K)
             ENDDO
@@ -632,9 +625,8 @@ CASE(.FALSE.) PREDICTOR_STEP
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR   
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_15'
                YY_GET(:) = YY(I,J,K,:)
-               CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K))
+               CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET,RSUM(I,J,K)) !INTENT: IN,OUT
             ENDDO
          ENDDO
       ENDDO
@@ -648,7 +640,6 @@ CASE(.FALSE.) PREDICTOR_STEP
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_17'
                TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHO(I,J,K))
             ENDDO
          ENDDO
@@ -659,7 +650,6 @@ CASE(.FALSE.) PREDICTOR_STEP
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_MASS_DENS_18'
                TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
             ENDDO
          ENDDO
@@ -730,6 +720,7 @@ RHODELTA = 0._EB
 !$OMP END WORKSHARE
 !$OMP END PARALLEL
 
+!!$OMP SCHEDULE(DYNAMIC) &
 !!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,IC,RMIN,SUM,ISUM,LC,RHO00,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,CONST,CONST2)
 DO K=1,KBAR
    DO J=1,JBAR
@@ -826,7 +817,8 @@ RHOP(1:IBAR,1:JBAR,1:KBAR) = MAX(RHOMIN,RHOP(1:IBAR,1:JBAR,1:KBAR)+RHODELTA(1:IB
 RHODELTA = 0._EB
 !$OMP END PARALLEL WORKSHARE
 
-!!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,IC,RMAX,SUM,ISUM,LC,RHO00,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,CONST,CONST2)
+!!$OMP SCHEDULE(DYNAMIC) &
+!!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,IC,RMAX,SUM,ISUM,LC,RHO00,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,CONST,CONST2) &
 DO K=1,KBAR
    DO J=1,JBAR
       CHECK_LOOP2: DO I=1,IBAR
@@ -951,7 +943,7 @@ SPECIESLOOP: DO N=1,N_GAS_SPECIES
    ! Do undershoots
 
    !!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,IC,IW_A,Y00,SUM,ISUM,LC,YMIN,YMI,YPI,YMJ,YPJ,YMK,YPK) &
-   !!$OMP PRIVATE(RHY0,RHYPI,RHYMI,RHYPJ,RHYMJ,RHYPK,RHYMK,CONST)
+   !!$OMP PRIVATE(RHY0,RHYPI,RHYMI,RHYPJ,RHYMJ,RHYPK,RHYMK,CONST) SCHEDULE(DYNAMIC)
    DO K=1,KBAR
       DO J=1,JBAR
          CHECK_LOOP: DO I=1,IBAR
@@ -1105,7 +1097,7 @@ SPECIESLOOP: DO N=1,N_GAS_SPECIES
 
    ! Do overshoots
    !!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,IC,IW_A,Y00,SUM,ISUM,LC,YMIN,YMI,YPI,YMK,YPK,YMJ,YPJ,YMAX) &
-   !!$OMP PRIVATE(RHY0,RHYPI,RHYMI,RHYPJ,RHYMJ,RHYPK,RHYMK,CONST)
+   !!$OMP PRIVATE(RHY0,RHYPI,RHYMI,RHYPJ,RHYMJ,RHYPK,RHYMK,CONST) SCHEDULE(DYNAMIC)
    DO K=1,KBAR
       DO J=1,JBAR
          CHECK_LOOP2: DO I=1,IBAR
