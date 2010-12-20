@@ -11,7 +11,7 @@ A simple two-dimensional case testing data to color conversion
 
 &TIME T_END=1000.0 / 
 
-&MISC RADIATION=.FALSE. /
+&RADI RADIATION=.FALSE. /
 &INIT XB= 0.0, 50.0,-2.0,2.0,0.0,100.0, TEMPERATURE=20. /
 &INIT XB=50.0,100.0,-2.0,2.0,0.0,100.0, TEMPERATURE=100. /
 

@@ -10,7 +10,7 @@ The case is meant as a teaching tool and to test functionality.
 &MISC SURF_DEFAULT='WALL' /
 
 &SURF ID='BURNER', HRRPUA=1000., PART_ID='smoke' /
-
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
       SPECIFIC_HEAT         = 1.0
@@ -75,7 +75,6 @@ The case is meant as a teaching tool and to test functionality.
 
 &SLCF PBX=2.60,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBX=2.60,QUANTITY='HRRPUV' /
-&SLCF PBX=2.60,QUANTITY='MIXTURE FRACTION' /
 
 
 &TAIL /
