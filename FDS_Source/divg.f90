@@ -136,7 +136,6 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_01'
                ITMP = MIN(4999,INT(TMP(I,J,K)))
                TMP_WGT = TMP(I,J,K) - ITMP
                RHO_D(I,J,K) = &
@@ -155,10 +154,9 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_02'
                YSUM = SUM(YYP(I,J,K,:)) - SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
                ZZ_GET = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
-               CALL GET_DIFFUSIVITY(ZZ_GET,YSUM,RHO_D(I,J,K),TMP(I,J,K))
+               CALL GET_DIFFUSIVITY(ZZ_GET,YSUM,RHO_D(I,J,K),TMP(I,J,K)) !INTENT: IN,IN,OUT,IN
                RHO_D(I,J,K) = RHOP(I,J,K)*RHO_D(I,J,K)
             ENDDO
          ENDDO
@@ -178,7 +176,6 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_03'
             DYDX = (YYP(I+1,J,K,N)-YYP(I,J,K,N))*RDXN(I)
             RHO_D_DYDX(I,J,K) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DYDX
             DYDY = (YYP(I,J+1,K,N)-YYP(I,J,K,N))*RDYN(J)
@@ -237,23 +234,21 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_05'
-               
                ! H_RHO_D_DYDX
                TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
-               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G)               
+               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G) !INTENT: IN,OUT,IN              
                HDIFF = H_G*TMP_G
                H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
                
                ! H_RHO_D_DYDY
                TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
-               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G)               
+               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G) !INTENT: IN,OUT,IN              
                HDIFF = H_G*TMP_G
                H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
                
                ! H_RHO_D_DYDZ
                TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
-               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G)               
+               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G) !INTENT: IN,OUT,IN
                HDIFF = H_G*TMP_G
                H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
             ENDDO
@@ -271,7 +266,7 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
          KKG = IJKW(8,IW)
          IOR  = IJKW(4,IW)
          TMP_G = 0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW))      
-         CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G)               
+         CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G) !INTENT: IN,OUT,IN
          HDIFF = H_G*TMP_G
          RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
          SELECT CASE(IOR)
@@ -298,7 +293,6 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
-                     !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_07'
                      DP(I,J,K) = DP(I,J,K) + (H_RHO_D_DYDX(I,J,K)-H_RHO_D_DYDX(I-1,J,K))*RDX(I) + &
                                              (H_RHO_D_DYDY(I,J,K)-H_RHO_D_DYDY(I,J-1,K))*RDY(J) + &
                                              (H_RHO_D_DYDZ(I,J,K)-H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
@@ -311,10 +305,9 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
             !$OMP SINGLE
             J = 1
             !$OMP END SINGLE
-            !$OMP DO COLLAPSE(2) PRIVATE(K,I) FIRSTPRIVATE(J)
+            !$OMP DO COLLAPSE(2) PRIVATE(K,I)
             DO K=1,KBAR
                DO I=1,IBAR
-                  !!$ IF ((K == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_08'
                   DP(I,J,K) = DP(I,J,K) + (R(I)*H_RHO_D_DYDX(I,J,K)-R(I-1)*H_RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
                                           (     H_RHO_D_DYDZ(I,J,K)-       H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
                ENDDO
@@ -331,7 +324,6 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_09'
                   DEL_RHO_D_DEL_Y(I,J,K,N) = (RHO_D_DYDX(I,J,K)-RHO_D_DYDX(I-1,J,K))*RDX(I) + &
                                              (RHO_D_DYDY(I,J,K)-RHO_D_DYDY(I,J-1,K))*RDY(J) + &
                                              (RHO_D_DYDZ(I,J,K)-RHO_D_DYDZ(I,J,K-1))*RDZ(K)
@@ -346,7 +338,6 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
          !$OMP DO COLLAPSE(2) PRIVATE(K,I)
          DO K=1,KBAR
             DO I=1,IBAR
-               !!$ IF ((K == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_10'
                DEL_RHO_D_DEL_Y(I,J,K,N) = (R(I)*RHO_D_DYDX(I,J,K)-R(I-1)*RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
                                           (     RHO_D_DYDZ(I,J,K)-       RHO_D_DYDZ(I,J,K-1))*RDZ(K)
             ENDDO
@@ -361,8 +352,7 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_11'               
-               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP(I,J,K))          
+               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP(I,J,K)) !INTENT: IN,OUT,IN
                HDIFF = H_G*TMP(I,J,K)
                DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
             ENDDO
@@ -396,10 +386,9 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_12'
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   YY_GET(:) = YYP(I,J,K,:)
-                  CALL GET_CONDUCTIVITY(YY_GET,KP(I,J,K),TMP(I,J,K))    
+                  CALL GET_CONDUCTIVITY(YY_GET,KP(I,J,K),TMP(I,J,K)) !INTENT: INOUT,OUT,IN
                ENDDO
             ENDDO
          ENDDO
@@ -409,7 +398,6 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_13'
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = MIN(4999,INT(TMP(I,J,K)))
                   TMP_WGT = TMP(I,J,K) - ITMP
@@ -443,7 +431,7 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                   DO I=1,IBAR
                      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                      YY_GET(:) = YYP(I,J,K,:)
-                     CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,TMP(I,J,K))  
+                     CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,TMP(I,J,K)) !INTENT: IN,OUT,IN
                      KP(I,J,K) = MU(I,J,K)*CP_MF*RPR  
                   ENDDO
                ENDDO
@@ -491,7 +479,6 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_14'
             DTDX = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
             KDTDX(I,J,K) = .5_EB*(KP(I+1,J,K)+KP(I,J,K))*DTDX
             DTDY = (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
@@ -545,7 +532,6 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_15'
                   DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
                              (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
                              (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
@@ -559,7 +545,6 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_16'
                   DELKDELT = & 
                   (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
                        (KDTDZ(I,J,K)-       KDTDZ(I,J,K-1))*RDZ(K)
@@ -583,7 +568,6 @@ IF (N_GAS_SPECIES==0 .OR. EVACUATION_ONLY(NM)) THEN
       IF (EVACUATION_ONLY(NM)) CYCLE
       DO J=1,JBAR
          DO I=1,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_17'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             ITMP = MIN(4999,INT(TMP(I,J,K)))
             TMP_WGT = TMP(I,J,K) - ITMP
@@ -598,10 +582,9 @@ ELSE
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_18'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             YY_GET(:) = YYP(I,J,K,:)
-            CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,TMP(I,J,K))
+            CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,TMP(I,J,K)) !INTENT: IN,OUT,IN
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_MF
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
@@ -619,7 +602,6 @@ DO N=1,N_GAS_SPECIES
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !!$ IF ((N == 1) .AND. (K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_19'
             DP(I,J,K) = DP(I,J,K) + (SPECIES(Y2SPEC(N))%RCON-SPECIES(0)%RCON)/(RSUM(I,J,K)*RHOP(I,J,K))*DEL_RHO_D_DEL_Y(I,J,K,N)
          ENDDO
       ENDDO
@@ -635,7 +617,6 @@ IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_20'
             DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
          ENDDO
       ENDDO
@@ -652,7 +633,6 @@ IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_20'
             DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
          ENDDO
       ENDDO
@@ -667,7 +647,6 @@ IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_21'
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,PRESSURE_ZONE(I,J,K)))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*GVEC(3)*RHO_0(K)
          ENDDO
@@ -680,11 +659,11 @@ ENDIF
 
 PREDICT_NORMALS: IF (PREDICTOR) THEN
  
-   !$OMP WORKSHARE
+   !!$OMP WORKSHARE
    !FDS_LEAK_AREA(:,:,NM) = 0._EB
-   !$OMP END WORKSHARE
+   !!$OMP END WORKSHARE
 
-   !$OMP DO PRIVATE(IW,IOR,IBC,SF,IPZ,IOPZ,TSI,TIME_RAMP_FACTOR,DELTA_P,PRES_RAMP_FACTOR,II,JJ,KK,VT) 
+   !$OMP DO PRIVATE(IW,IOR,IBC,SF,TSI,TIME_RAMP_FACTOR,DELTA_P,PRES_RAMP_FACTOR,II,JJ,KK,VT) 
    WALL_LOOP3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_22'
       IOR = IJKW(4,IW)
@@ -951,7 +930,6 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_25'
             IF (PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE 
             IF (SOLID(CELL_INDEX(I,J,K)))    CYCLE
             DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,IPZ))*D_PBAR_DT_P(IPZ)
@@ -967,7 +945,6 @@ ENDDO PRESSURE_ZONE_LOOP
 !$OMP PARALLEL 
 !$OMP DO PRIVATE(IC,I,J,K) 
 SOLID_LOOP: DO IC=1,CELL_COUNT
-   !!$ IF ((IC == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_26'
    IF (.NOT.SOLID(IC)) CYCLE SOLID_LOOP
    I = I_CELL(IC)
    J = J_CELL(IC)
@@ -980,7 +957,6 @@ ENDDO SOLID_LOOP
 
 !$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IIG,JJG,KKG) 
 BC_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_27'
    IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE BC_LOOP
    II = IJKW(1,IW)
    JJ = IJKW(2,IW)
