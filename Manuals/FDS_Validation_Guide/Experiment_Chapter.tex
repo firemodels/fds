@@ -7,56 +7,503 @@ general understanding of the model simulations. Anyone wishing to use the experi
 or other publications for a comprehensive description.
 
 
+\section{ATF Corridors Experiments}
 
-\section{VTT Large Hall Tests}
+A series of eighteen experiments were conducted in a two-story structure with long hallways and a connecting stairway
+in the large burn room of the ATF Fire Research Laboratory in Ammendale, Maryland, in 2008~\cite{Sheppard:Corridors}.
+The test enclosure consisted of two 17.0~m long hallways connected by a
+stairway consisting of two staircases and an intermediary landing.
+There was a door at the opposite end of the first floor hallway, which was closed during all tests.
+The end of the second floor hallway was open with a soffit near the ceiling.
 
-The experiments are described in Ref.~\cite{Hostikka:VTT2104}. The series consisted of 8 experiments, but because of replicates only three unique fire
-scenarios. The experiments were undertaken to study the movement of smoke in a large hall with a sloped ceiling. The tests were conducted inside the
-VTT Fire Test Hall, with dimensions of 19~m high by 27~m long by 14~m wide. Each test involved a single heptane pool fire, ranging from 2~MW to 4~MW.
-Four types of predicted output were used in the present evaluation -- the HGL temperature and depth, average flame height and the plume
-temperature. Three vertical arrays of thermocouples (TC), plus two thermocouples in the plume, were compared to FDS predictions. The HGL
-temperature and height were reduced from an average of the three TC
-arrays using the standard algorithm described in
-Chapter~\ref{HGL:Chapter}. The ceiling jet temperature was not
-considered, because the ceiling in the test hall is not flat, and the
-standard model algorithm is not appropriate for this geometry.
+The walls and ceilings of the test structure were constructed of 1.2~cm gypsum wallboard.
+The flooring throughout the structure, including the stairwell landing floor, consisted of one layer of 1.3~cm thick cement board on one
+layer of 1.9~cm thick plywood supported by wood joists. The first set of stairs, which had eight risers, led from the first floor up to the landing area.
+The second set of stairs, which had nine risers, led from the landing area up to the second floor.
+The stairs were constructed of 2.5~cm thick clear pine lumber. The two set of stairs were separated by an approximately 0.42~m wide gap in the middle of the stairwell.
+This gap was separated from the stairs by a 0.91~m tall barrier constructed of a single piece of gypsum board.
+The flue space was open to the first floor.  The flue space was separated from the second floor by a 0.9~m tall barrier constructed of gypsum board.
+There was a metal exterior type door at the end of the first floor near the burner.  The door was closed during all experiments.
 
-The VTT test report lacks some information needed to model the experiments, which is why some information was based on private communications with the
-principal investigator, Simo Hostikka.
+The fire source was a natural gas diffusion burner.  The burner surface was horizontal, square and 0.45~m on each side, its surface was 0.37~m above the floor, and it was filled with gravel.  The burner was located near the end of the first floor away from the stairs. A diagram of the test structure is displayed in Figure~\ref{ATF Drawing}.
+
+
+\begin{sidewaysfigure}[h]
+\begin{center}
+\includegraphics[height=6.5in]{FIGURES/ATF_Corridors/ATF}
+\end{center}
+\caption{Geometry of the ATF Corriodrs Experiments}
+\label{ATF Drawing}
+\end{sidewaysfigure}
+
+\clearpage
+
+
+
+\section{Beyler Hood Experiments}
+
+Craig Beyler performed a large number of experiments involving a variety of fuels, fire sizes, burner diameters, and
+burner distances beneath a hood~\cite{Beyler:Hood}.  The hood consisted of concentric cylinders separated
+by an air gap.  The inner cylinder was shorter than the outer and this allowed combustion products to be removed
+uniformly from the hood perimeter.  The exhaust gases were then analyzed to determine species concentrations.
+The burner could be raised and lowered with respect to the bottom edge of the hood.  Based on the published
+measurement uncertainties, species errors are estimated at 6~\%.
+
+
+
+\section{BRE Spray Test for Radiation Attenuation}
+
+Murrel {\em et al.}~\cite{Murrel:1995} measured the attenuation of thermal radiation passing through a water
+spray using a heat flux gauge. The radiation was produced by a heat panel, one meter square, at 900~$^\circ$C. The horizontal distance
+from the radiation panel to the spray nozzle was 2 m and to the measurement point 4 m. The nozzles were positioned at
+a height 0.24 m above the panel upper edge. The heat flux gauge was positioned at the line passing through the center
+of the panel. The attenuation of radiation was defined as $(q_0-q_s)/q_0$, where $q_0$ is the initial radiative heat flux,
+measured without a spray, and $q_s$ is the heat flux measured during the spray operation.
+
+Experimental results are used from three full-cone type nozzles, labeled A, B and D. The opening angles of the nozzles were between 90 and 108 degrees.
+The purpose of the simulation is to compare the measured and simulated attenuation of radiation at different flow conditions. The nozzles were
+specified in terms of median droplet size and mean vertical velocity using PDPA measurement in a single position, 0.7 m below the nozzle. The droplet
+boundary conditions were determined by assuming $d_m \propto p^{-1/3}$ and $v \propto p^{1/2}$ type of dependences between the droplet size, speed
+and pressure.
+
+
+
+\section{Bryant Doorway Velocity Measurements}
+
+Rodney Bryant of the Fire Research Division at NIST performed a series of velocity measurements of the gas
+velocity within the doorway of a standard ISO~9705 compartment for fires ranging from
+34~kW to 511~kW~\cite{Bryant:FSJ2009,Bryant:EF2009,Bryant:CS2010}. A doorway
+served as the only vent for the enclosure. It included a jamb of 30~cm extending outward
+to facilitate the laser measurements. The entire compartment was elevated 0.3~m off the floor of the laboratory.
+
+The measurements were made using both bi-directional probes and PIV (Particle Image Velocimetry). The PIV measurements only cover the
+lower two-thirds of the doorway because of difficulties in seeding the hot outflow gases. The bi-directional probe measurements span the
+entire height of the doorway, but Bryant reports that
+these measurements were up to 20~\% greater than the PIV measurements in certain regions of
+the flow. Consequently, only the PIV data was used for comparison to the
+model.
+
+
+\section{Cable Response to Live Fire -- CAROLFIRE}
+
+CAROLFIRE was a project sponsored by the U.S. Nuclear Regulatory Commission to study the fire-induced thermal
+response and functional behavior of electrical cables~\cite{CAROLFIRE}.
+The primary objective of CAROLFIRE was to characterize the various modes of electrical
+failure ({\em e.g.} hot shorts, shorts to ground) within bundles of power, control and instrument cables.
+A secondary objective of the project was to test a simple model to predict \underline{th}ermally-\underline{i}nduced
+\underline{e}lectrical \underline{f}ailure (THIEF). The measurements used for these purposes were conducted at Sandia National Laboratories and are described in
+Volume II of the CAROLFIRE test report. In brief, there were two series of experiments. The first were conducted within
+a heated cylindrical enclosure known as the Penlight apparatus. Single and bundled cables were exposed to various heat fluxes and the
+electrical failure modes recorded. The second series of experiments involved cables within trays in a semi-enclosed space under which a gas-fueled burner
+created a hot layer to force cable failure.
+
+Petra Andersson and Patrick Van Hees of the Swedish National Testing and Research Institute
+(SP) proposed that a cable's thermally-induced electrical failure can be predicted
+via a one-dimensional heat transfer calculation, under the assumption that the cable can
+be treated as a homogenous cylinder~\cite{Andersson:2005}. Their results for PVC
+cables were encouraging and suggested that the simplification of the analysis is reasonable and
+that it should extend to other types of cables.
+The assumptions underlying the THIEF model are as follows:
+\begin{enumerate}
+\item The heat penetration into a cable of circular cross section is largely in the radial direction.
+This greatly simplifies the analysis, and it is also conservative because it is assumed that
+the cable is completely surrounded by the heat source.
+\item The cable is homogenous in composition. In reality, a cable is constructed of several
+different types of polymeric materials, cellulosic fillers, and a conducting metal, most
+often copper.
+\item The thermal properties – conductivity, specific heat, and density – of the assumed
+homogenous cable are independent of temperature. In reality, both the thermal
+conductivity and specific heat of polymers are temperature-dependent, but this
+information is very difficult to obtain from manufacturers. More discussion of this
+assumption is found below.
+\item It is assumed that no decomposition reactions occur within the cable during its heating,
+and ignition and burning are not considered in the model. In fact, thermoplastic cables
+melt, thermosets form a char layer, and both off-gas volatiles up to and beyond the point
+of electrical failure.
+\item Electrical failure occurs when the temperature just inside the cable jacket reaches an
+experimentally determined value.
+\end{enumerate}
+Because the CAROLFIRE Penlight experiments tested single cables that were heated uniformly
+on all sides, the one-dimensional THIEF model accurately predicted the times for the
+temperature inside the cable jacket to reach ``threshold'' values that are typically observed when
+the cable fails electrically.
+
+
+
+
+
+\section{FM Parallel Panel Experiments}
+
+Patricia Beaulieu made heat flux measurements within a set of vertical parallel panels as part of a cooperative research
+program between Worcester Polytechnic Institute and FM Global (Factory Mutual)~\cite{Beaulieu:FM}. The experimental
+apparatus consisted of two vertical parallel
+panels, 2.4~m high and 0.6~m wide, with a sand burner at the base. The objective of the project was to measure the flame spread
+rate over various composite wall lining materials, but there were also experiments conducted with inert walls for the purpose of measuring the
+heat flux from two fuels, propane and propylene, at heat release rates of 30~kW, 60~kW, and 100~kW.
+
+
+
+\section{FM/SNL Test Series}
+
+The Factory Mutual and Sandia National Laboratories (FM/SNL) test series was a series of 25 fire
+tests conducted in 1985 for the U.S. Nuclear Regulatory Commission (NRC) by Factory Mutual Research Corporation (FMRC), under
+the direction of Sandia National Laboratories (SNL)~\cite{Nowlen:NUREG4681,Nowlen:NUREG4527}. The primary purpose of these tests was to
+provide data with which to validate computer models for various types of compartments typical of nuclear power plants. The
+experiments were conducted in an enclosure measuring approximately 18~m long x 12~m wide x 6~m high, constructed at the FMRC fire test facility in Rhode Island.
+All of the tests involved forced ventilation to simulate typical power plant operations. Four of
+the tests were conducted with a full-scale control room mockup in place. Parameters varied
+during the experiments included fire intensity, enclosure ventilation rate, and fire location.
+
+The current study used data from three experiments (Tests 4, 5, and 21). In these tests, the fire
+source was a propylene gas burner with a diameter of approximately 0.9 m, with its rim
+located approximately 0.1 m above the floor. For Tests 4 and 5, the burner was positioned on the longitudinal axis centerline, 6.1 m from
+the nearest wall. For Test 21, the fire source was placed within a simulated electrical
+cabinet.
+
+Following is supplemental information provided by the test director, Steve Nowlen of Sandia National Laboratory:
 \begin{description}
-\item[Surface Materials:] The walls and ceiling of the test hall consist of a 1~mm thick layer of sheet metal on top of a 5~cm layer of
-mineral wool. The floor was constructed of concrete. The report does not provide thermal properties of these materials.
-\item[Natural Ventilation:] In Cases~1 and 2, all doors were closed, and ventilation was restricted to infiltration through the building envelope. Precise
-information on air infiltration during these tests is not available. The scientists who conducted the experiments recommend a leakage area of about 2~m$^2$,
-distributed uniformly throughout the enclosure. By contrast, in Case~3, the doors located in each end wall (Doors 1 and 2, respectively)
-were open to the external ambient environment. These doors are each 0.8~m wide by 4~m high, and are located such that their centers
-are 9.3~m from the south wall.
-\item[Mechanical Ventilation:] The test hall has a single mechanical exhaust duct, located in the roof space, running along the center of the building. This
-duct had a circular section with a diameter of 1~m, and opened horizontally to the hall at a distance of 12~m from the floor and 10.5~m from the west wall.
-Mechanical exhaust ventilation was operational for Case~3, with a constant volume flow rate of 11~m$^3$/s drawn through
-the exhaust duct.
-\item[Heat Release Rate:] Each test used a single liquid fuel pan with its center located 16~m from the west
-wall and 7.4~m from the south wall. For all tests, the fuel was heptane in a circular steel pan that was partially filled with water. The
-pan had a diameter of 1.17~m for Case~1 and 1.6~m for Cases~2 and 3. In each case, the fuel surface was 1~m above the
-floor. The trays were placed on load cells, and the HRR was calculated from the mass loss rate. For the three cases,
-the fuel mass loss rate was averaged from individual replicate tests. In the HRR estimation, the heat of combustion (taken as 44,600~kJ/kg) and the
-combustion efficiency for n-heptane was used. Hostikka suggests a value of 0.8 for the combustion efficiency.
-Tewarson reports a value of 0.93 for a 10~cm pool fire~\cite{SFPE:Tewarson}. For the calculations reported in the current
-study, a combustion efficiency of 0.85 is assumed. In general, an uncertainty of 15~\% has been assumed for the reported HRR of most of the large
-scale fire experiments used.
-\item[Radiative Fraction:] The radiative fraction was assumed to be 0.35, similar to many smoky hydrocarbons.
+\item[Heat Release Rate:] The HRR was determined using oxygen consumption calorimetry in the exhaust stack with
+a correction applied for the carbon dioxide in the upper layer of the compartment. The
+uncertainty of the fuel mass flow was not documented. All three tests selected for this study had
+the same target peak heat release rate of 516~kW following a 4~min ``t-squared'' growth
+profile. The test report contains time histories of the measured HRR, for which the average,
+sustained HRR following the ramp up for Tests 4, 5, and 21 have been estimated as 510~kW, 480~kW, and 470~kW, respectively.
+Once reached, the peak HRR was maintained essentially constant
+during a steady-burn period of 6~min in Tests~4 and 5, and 16~min in Test~21. Note that in Test 21, Nowlen reports a
+``significant'' loss of effluent from the exhaust hood that could lead to an under-estimate of the HRR towards the end of the experiment.
+\item[Radiative Fraction:] The radiative fraction was not measured during the experiment, but
+in this study it is assumed to equal 0.35, which is typical for a smoky hydrocarbons.
+It was further assumed that the radiative fraction was about the same in
+Test~21 as the other tests, as fuel burning must have occurred outside of the electrical cabinet in
+which the burner was placed.
+\item[Measurements:] Four types of measurements were conducted during the FM/SNL test series that are used in the
+current model evaluation study, including the HGL temperature and depth, and the ceiling jet and
+plume temperatures. Aspirated thermocouples (TCs) were used to make all of the temperature
+measurements. Generally, aspirated TC measurements are preferable to bare-bead TC measurements,
+as systematic radiative exchange measurement error is reduced.
+\item[HGL Depth and Temperature:] Data from all of the vertical TC trees were used when reducing
+the HGL height and temperature. For the FM/SNL Tests 4 and 5, Sectors 1, 2, and 3 were used,
+all weighted evenly. For Test 21, Sectors 1 and 3 were used, evenly weighted. Sector 2 was
+partially within the fire plume in Test 21.
 \end{description}
-A diagram of the test structure is displayed in Figure~\ref{VTT_Drawing}.
+
+A diagram of the test structure is displayed in Figure~\ref{FM_SNL_Drawing}.
+
 \begin{sidewaysfigure}[p]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/VTT/VTT_Drawing}
+\includegraphics[height=6.5in]{FIGURES/FM_SNL/FM_SNL_Drawing}
 \end{center}
-\caption{Geometry of the VTT Large Fire Test Hall.}
-\label{VTT_Drawing}
+\caption{Geometry of the FM/SNL Experiments.}
+\label{FM_SNL_Drawing}
+\end{sidewaysfigure}
+
+\clearpage
+
+
+\section{Hamins Methane Burner Experiments}
+
+Anthony Hamins {\em et al.} performed a series of tests on circular gas
+burners measuring the radial and vertical radiative heat flux profiles
+outside the flame region. The tests are described
+in~\cite{Hostikka:3}. Tests at three burner diameters, 0.10 m, 0.38 m
+and 1.0 m are used for validation.
+
+
+
+
+\section{McCaffrey Plume Experiments}
+
+In 1979, at the National Bureau of Standards (now NIST), Bernard McCaffrey measured centerline temperature and velocity profiles above a porous, refractory burner. There were five distinct heat release rates, ranging from 14~kW to 57~kW. The fuel was natural gas. The burner was square, 0.3~m on each side. The results of the experiments are reported in Reference~\cite{McCaffrey:NBSIR_79-1910}.
+
+
+\section{NBS Multi-Room Test Series}
+
+The National Bureau of Standards (NBS, which is now called the National Institute of Standards
+and Technology, NIST) Multi-Room Test Series consisted of 45 fire tests representing
+9 different sets of conditions were conducted in a three-room suite. The experiments were
+conducted in 1985 and are described in detail in Ref.~\cite{Peacock:NBS_Multi-Room}. The suite consisted of two relatively
+small rooms, connected via a relatively long corridor. The fire source, a gas burner, was located
+against the rear wall of one of the small compartments.
+Fire tests of 100~kW, 300~kW and 500~kW were conducted. For the current study, only three 100~kW fire experiments have been used,
+including Test~100A from Set~1, Test~100O from Set~2, and Test~100Z from Set~4. These tests
+were selected because they had been used in prior validation studies, and because these tests had the
+steadiest values of measured heat release rate during the steady-burn period.
+
+Following is additional information provided by the test director, Richard Peacock of NIST:
+\begin{description}
+\item[Heat Release Rate:] In the two tests for which
+the door was open, the HRR during the steady-burn period measured via oxygen consumption
+calorimetry was 110~kW with an uncertainty of about 15~\%, consistent with the replicate
+measurements made during the experimental series and the uncertainty typical of oxygen
+consumption calorimetry. It was assumed that the closed door test (Test~100O) had the same HRR as the open
+door tests.
+\item[Radiative Fraction:] Natural gas was used as the fuel in
+Test~100A. In Tests~100O and 100Z, acetylene was added to the natural gas to increase the
+smoke yield, and as a consequence, the radiative fraction increased. The radiative fraction of
+natural gas has been studied previously, whereas the radiative fraction of the acetylene/natural
+gas mixture has not been studied. The radiative fraction for the natural gas fire was assigned a
+value of 0.20, whereas a value of 0.30 was assigned for the natural gas/acetylene fires.
+\item[Measurements:] Only two types of measurements conducted during the NBS test series were used in the
+evaluation considered here, because there was less confidence in the other measurements.
+The measurements considered here were the HGL temperature and depth, in which bare bead
+TCs were used to make these measurements. Single point measurements of temperature within
+the burn room were not used in the evaluation of plume or ceiling jet algorithms. This is because
+the geometry was not consistent in either case with the assumptions used in the model algorithms
+of plumes or jets. Specifically, the burner was mounted against a wall, and the room width-to-height
+ratio was less than that assumed by the various ceiling jet correlations.
+\end{description}
+
+A diagram of the test structure is displayed in Figure~\ref{NBS_Drawing}.
+
+\begin{sidewaysfigure}[p]
+\begin{center}
+\includegraphics[height=6.5in]{FIGURES/NBS/NBS_Drawing}
+\end{center}
+\caption{Geometry of the NBS Multi-Room Experiments.}
+\label{NBS_Drawing}
+\end{sidewaysfigure}
+
+
+
+
+
+\clearpage
+
+\section{NIST/NRC Test Series}
+
+These experiments, sponsored by the US NRC and conducted at NIST, consisted of 15 large-scale experiments performed in June 2003. All 15 tests were
+included in the validation study. The experiments are documented in Ref.~\cite{Hamins:SP1013-1}. The fire sizes ranged from 350 kW to 2.2 MW in a compartment with dimensions
+21.7~m by 7.1~m by 3.8~m high, designed to represent a compartment in a nuclear power plant containing power and control cables.
+The walls and ceiling were covered with two layers of marinate boards, each layer 0.0125~m thick. The floor
+was covered with one layer of gypsum board on top of a layer of plywood. Thermo-physical and optical properties of the marinate
+and other materials used in the compartment are given in Ref.~\cite{Hamins:SP1013-1}. The room had one door and a mechanical air injection and extraction
+system. Ventilation conditions, the fire size, and fire location were varied. Numerous measurements (approximately 350 per test) were made including
+gas and surface temperatures, heat fluxes and gas velocities.
+
+Following are some notes provided by Anthony Hamins, who conducted the experiments:
+\begin{description}
+\item[Natural Ventilation:] The compartment had a 2~m by 2~m door in the middle of the west wall. Some of the tests had a closed door and no mechanical
+ventilation (Tests 2, 7, 8, 13, and 17), and in those tests the measured compartment leakage was an important consideration. The test report lists leakage
+areas based on measurements performed prior to Tests 1, 2, 7, 8, and 13. For the closed door tests, the leakage area used in the simulations was
+based on the last available measurement. The chronological order of the tests differed from the numerical order.
+For Test 4, the leakage area measured before Test 2 was used. For Tests 10 and 16, the leakage area
+measured before Test 7 was used.
+\item[Mechanical Ventilation:] The mechanical ventilation and exhaust was used during Tests 4, 5, 10, and 16, providing about 5 air changes per hour. The
+door was closed during Test 4 and open during Tests 5, 10, and 16. The supply duct was positioned on the south wall, about 2~m off the floor. An
+exhaust duct of equal area to the supply duct was positioned on the opposite wall at a comparable location. The flow rates through the supply and
+exhaust ducts were measured in detail during breaks in the testing, in the absence of a fire. During the tests, the flows were monitored with single
+bi-directional probes during the tests themselves.
+\item[Heat Release Rate:] A single nozzle was used to spray liquid hydrocarbon fuels onto a 1~m by 2~m fire pan that was about 0.1~m deep. The test plan
+originally called for the use of two nozzles to provide the fuel spray. Experimental observation suggested that the fire was less unsteady with the
+use of a single nozzle. In addition, it was observed that the actual extent of the liquid pool was well-approximated by a 1~m circle in the
+center of the pan. For safety reasons, the fuel flow was terminated when the lower-layer oxygen concentration
+dropped to approximately 15~\% by volume.
+The fuel used in 14 of the tests was heptane, while toluene was used for one test. The HRR was
+determined using oxygen consumption calorimetry. The recommended uncertainty values
+were 17~\% for all of the tests.
+\item[Radiative Fraction:]  The value of the radiative fraction and its
+uncertainty were reported as 0.44 and 0.40 for heptane and toluene, respectively.
+\end{description}
+
+A diagram of the test structure is displayed in Figure~\ref{NIST_NRC_Drawing}.
+
+\begin{sidewaysfigure}[p]
+\begin{center}
+\includegraphics[height=6.5in]{FIGURES/NIST_NRC/NIST_NRC_Drawing}
+\end{center}
+\caption{Geometry of the NIST/NRC Experiments.}
+\label{NIST_NRC_Drawing}
 \end{sidewaysfigure}
 
 
 \clearpage
+
+
+\section{NIST Reduced Scale Enclosure Experiments}
+
+The CO production test series used the NIST Reduced Scale Enclosure (RSE)~\cite{Bryner:1}.  The RSE is a
+40~\% scaled version of the ISO 9705 compartment.
+It measures 0.98 m wide by 1.46 m deep by 0.98 m tall.  The compartment contains a door centered on the small
+face that measures 0.48 m wide by 0.81 m tall.  A 15 cm diameter natural gas burner was positioned in the
+center of the compartment.  The burner was on a stand so that its top was 15~cm above the floor.
+Species measurements were made inside the upper layer of the compartment at the front near the door
+and near the rear of the compartment.
+
+
+\section{NRCC Facade Heat Flux Measurements}
+
+A series of experiments was conducted by the Fire Research Section of the Institute for Research in Construction, National Research Council of Canada (NRCC),
+to measure the heat flux to a mock exterior building facade due to a fire within a compartment~\cite{Oleszkiewicz:ASME,Oleszkiewicz:FireTech}. The experiments selected for model
+validation were conducted using a series of propane line burners within a compartment whose interior dimensions were 5.95~m wide, 4.4~m deep, and 2.75~m high (see
+Fig.~\ref{NRCC_Facade_Drawing}). There
+were five different door/window sizes:
+\begin{enumerate}
+\item 0.94 m by 2.00 m high
+\item 0.94 m by 2.70 m high (door)
+\item 2.60 m by 1.37 m high (shown in Fig.~\ref{NRCC_Facade_Drawing})
+\item 2.60 m by 2.00 m high
+\item 2.60 m by 2.70 m high (door)
+\end{enumerate}
+There were four fire sizes: 5.5~MW, 6.9~MW, 8.6~MW, and 10.3~MW. In all, 19 experiments were conducted, with the exception of the 10.3~MW fire with Window~1. In each
+experiment, heat flux measurements were made 0.5~m, 1.5~m, 2.5~m, and 3.5~m above the top of the door/window.
+
+\begin{sidewaysfigure}[p]
+\begin{center}
+\includegraphics[height=6.5in]{FIGURES/NRCC_Facade/NRCC_Facade-1}
+\end{center}
+\caption{Geometry of the NRCC Facade Experiments}
+\label{NRCC_Facade_Drawing}
+\end{sidewaysfigure}
+
+
+\section{NRL Confined Space Experiments}
+
+The U.S. Naval Research Laboratory (NRL) performed a multi-year series of experiments inside of a four level, 23 compartment test facility with 20 doors and ceiling vents whose exterior boundaries were airtight~\cite{Confined_JFPE}.  Three HVAC systems were installed in the facility: a supply air system that takes suction from a fan room and discharges the air to the remainder of the facility, an exhaust system that takes suction from the facility and discharges it to the fan room, and a smoke control control system that takes suction from an upper level compartment and discharges it to the ambient (see Figure~\ref{confined_HVAC}).  A second set of HVAC ducts directly connected the second level with the fourth level (see Figure~\ref{confined_bypass}).
+
+\begin{figure}[ht]
+\begin{center}
+%\includegraphics[width=5.in]{FIGURES/HVAC/confined_space_hvac_layout.pdf}
+\end{center}
+\caption{Confined space HVAC system layouts}
+\label{confined_HVAC}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+%\includegraphics[width=5.in]{FIGURES/HVAC/confined_space_bypass.pdf}
+\end{center}
+\caption{Confined space bypass ducts}
+\label{confined_bypass}
+\end{figure}
+
+The test facility was instrumented with gas thermocouples, surface thermocouples, optical density meters, gas sampling lines (CO$_2$, CO, and O$_2$), and velocity probes in a small number of doors, vents, and HVAC ducts.  Test variables included the number of opened doors and hatches, the number of vent openings to the ambient, the fire location, the fire size, and the operation of the HVAC systems.  All the fires were diesel pool fires.
+
+\clearpage
+
+\section{NRL/HAI Wall Heat Flux Measurements}
+
+Back, Beyler, DiNenno and Tatem~\cite{Back:IAFSS4} measured the heat flux from 9 different sized propane fires set up against a wall composed
+of gypsum board. The experiments were sponsored by the Naval Research Laboratory and conducted by Hughes Associates, Inc., of Baltimore, Maryland. The
+square sand burner ranged in size from 0.28~m to 0.70~m, and the fires ranged in size from 50~kW to 520~kW.
+
+
+
+
+
+
+
+
+\section{Restivo Compartment Air Flow Experiment}
+
+Velocity measurements for forced airflow within a 9~m by 3~m by 3~m high compartment were made by Restivo~\cite{Restivo:1979}. These measurements
+have been widely used to validate CFD models designed for indoor air quality applications. It was also used to assess early versions of
+FDS~\cite{Emmerich:1,Emmerich:2,Musser:1}. In the experiment, air was forced into the compartment through a 16.8~cm vertical slot along the ceiling
+running the width of the compartment with a velocity of 0.455~m/s. A passive exhaust was located near the floor on the opposite wall, with
+conditions specified such that there was no buildup of pressure in the enclosure. The component
+of velocity in the lengthwise direction was measured in four arrays: two vertical arrays located 3~m and 6~m  from the inlet along the
+centerline of the room, and two horizontal arrays located 8.4~cm above the floor and below the ceiling, respectively.
+These measurements were taken using hot-wire anemometers. While data on the specific
+instrumentation used are not readily available, hot-wire systems tend to have limitations at low velocities,
+with typical thresholds of approximately 0.1~m/s.
+
+
+\section{Sandia Plume Experiments}
+
+The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facility \cite{OHern:2005,Blanchat:2001} at Sandia National Laboratories in Albuquerque, New Mexico, is designed specifically for validating models of buoyant fire plumes.  The plume source is 1 m in diameter surrounded by a 0.5 m steel `ground plane'.  PIV/PLIF techniques are used to obtain instantaneous joint scalar and velocity fields.  O'Hern {\em et al.} \cite{OHern:2005} studied a turbulent buoyant helium plume in the FLAME facility.  Earlier work to model this experiment was performed by DesJardin {\em et al.} \cite{DesJardin:2004}. Tieszen {\em et al.} \cite{Tieszen:2004,Tieszen:2002} studied methane and hydrogen pool fires.
+
+
+\section{Smyth Slot Burner Experiment}
+
+Kermit Smyth {\em et al.} conducted diffusion flame experiments at NIST using a methane/air Wolfhard-Parker slot burner.  The experiments are described in
+detail in Refs.~\cite{Norton:1,Smyth:1}.  The Wolfhard-Parker slot burner consists of an 8~mm wide
+central slot flowing fuel surrounded by two 16~mm wide slots flowing dry air with 1~mm separations between the slots.
+The slots are 41~mm in length.  Measurements were made of all major species and a number of minor species along with temperature
+and velocity.  Experimental uncertainties have been reported as 5~\% for temperature  and 10~\% to 20~\%
+for the major species.
+
+
+\section{SP Adiabatic Surface Temperature Experiments}
+
+In 2008, three compartment experiments were performed at SP Technical Research Institute of Sweden under the sponsorship of Brandforsk, the Swedish Fire Research Board~\cite{Wickstrom_AST}. The
+objective of the experiments was to demonstrate how plate thermometer measurements in the vicinity of a simple steel beam can be used to supply the boundary conditions
+for a multi-dimensional heat conduction calculation for the beam. The adiabatic surface temperature was derived from the plate temperatures and used by TASEF, a finite-element
+thermal-structural program.
+
+The experiments were performed inside a standard compartment designed for corner fire testing (ISO 9705).
+The compartment is 3.6~m deep, 2.4~m wide and 2.4~m high and includes a door opening 0.8~m by 2.0~m. The room was constructed of 20~cm thick light weight concrete
+blocks with a density of 600~kg/m$^3$ $\pm 100$~kg/m$^3$.
+The heat source was a gas burner run at a constant power of 450~kW. The top of the burner, with a square opening 30~cm by 30~cm, was placed 65~cm above the floor, 2.5~cm from the walls.
+A single steel beam was suspended 20~cm below the ceiling
+along the centerline of the compartment. There were three measurement stations along the beam at lengths of 0.9~m (Position A), 1.8~m (Position B), and
+2.7~m (Position C) from the far wall where the fire was either positioned in the corner (Tests 1 and 2), or the center (Test 3). The beam in Test 1 was
+a rectangular steel tube filled with an insulation material. The beam in Tests 2 and 3 was an I-beam.
+
+
+
+
+
+
+
+
+\section{Steckler Compartment Experiments}
+
+Steckler, Quintiere and Rinkinen performed a set of 55 compartment fire tests at NBS in 1979. The compartment was 2.8~m by 2.8~m by 2.13~m high\footnote{The test report
+gives the height of the compartment as 2.18~m. This is a misprint. The compartment was 2.13~m high.}, with a single door of
+various widths, or alternatively a single window with various heights. A 30~cm diameter methane burner was used to generate fires with heat release rates of
+31.6~kW, 62.9~kW, 105.3~kW and 158~kW. Vertical profiles of velocity and temperature were measured in the doorway, along with a single vertical profile of temperature
+within the compartment.
+A full description and results are reported in Reference~\cite{Steckler:NBSIR_82-2520}. The basic test matrix is listed in Table~\ref{Steckler_Table}. Note that the
+test report does not include a detailed description of the compartment. However, an internal report\footnote{ {\em Technical Research Report, Fire Induced Flows
+Through Room Openings - Flow Coefficients}, Project 203005-003, Armstrong Cork Company, Lancaster, Pennsylvania, May, 1981.} by the test sponsor, Armstrong Cork Company,
+reports that the compartment floor was composed of 19~mm calcium silicate board on top of 12.7~mm plywood on wood joists. The walls and ceiling consisted of
+12.7~mm ceramic fiber insulation board over 0.66~mm aluminum sheet attached to wood studs.
+
+\begin{table}[h!]
+\caption{Summary of Steckler compartment experiments.}
+\begin{center}
+\begin{tabular}{|c|c|c|c|c||c|c|c|c|c|}
+\hline
+        & Opening   & Opening       &  HRR       & Burner       &       & Opening   & Opening     &  HRR         & Burner        \\
+Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width     & Height      & $\dot{Q}$    & Location      \\
+        & (m)       & (m)           & (kW)       &              &       & (m)       &  (m)        & (kW)         &                \\ \hline \hline
+10      & 0.24      & 1.83          &  62.9      & Center       & 224   & 0.74      & 0.92        &  62.9         & Back Corner         \\ \hline
+11      & 0.36      & 1.83          &  62.9      & Center       & 324   & 0.74      & 0.92        &  62.9         & Back Corner         \\ \hline
+12      & 0.49      & 1.83          &  62.9      & Center       & 220   & 0.74      & 1.83        &  31.6         & Back Corner         \\ \hline
+612     & 0.49      & 1.83          &  62.9      & Center       & 221   & 0.74      & 1.83        &  105.3        & Back Corner         \\ \hline
+13      & 0.62      & 1.83          &  62.9      & Center       & 514   & 0.24      & 1.83        &  62.9         & Back Wall           \\ \hline
+14      & 0.74      & 1.83          &  62.9      & Center       & 544   & 0.36      & 1.83        &  62.9         & Back Wall           \\ \hline
+18      & 0.74      & 1.83          &  62.9      & Center       & 512   & 0.49      & 1.83        &  62.9         & Back Wall           \\ \hline
+710     & 0.74      & 1.83          &  62.9      & Center       & 542   & 0.62      & 1.83        &  62.9         & Back Wall           \\ \hline
+810     & 0.74      & 1.83          &  62.9      & Center       & 610   & 0.74      & 1.83        &  62.9         & Back Wall           \\ \hline
+16      & 0.86      & 1.83          &  62.9      & Center       & 510   & 0.74      & 1.83        &  62.9         & Back Wall           \\ \hline
+17      & 0.99      & 1.83          &  62.9      & Center       & 540   & 0.86      & 1.83        &  62.9         & Back Wall           \\ \hline
+22      & 0.74      & 1.38          &  62.9      & Center       & 517   & 0.99      & 1.83        &  62.9         & Back Wall           \\ \hline
+23      & 0.74      & 0.92          &  62.9      & Center       & 622   & 0.74      & 1.38        &  62.9         & Back Wall           \\ \hline
+30      & 0.74      & 0.92          &  62.9      & Center       & 522   & 0.74      & 1.38        &  62.9         & Back Wall           \\ \hline
+41      & 0.74      & 0.46          &  62.9      & Center       & 524   & 0.74      & 0.92        &  62.9         & Back Wall           \\ \hline
+19      & 0.74      & 1.83          &  31.6      & Center       & 541   & 0.74      & 0.46        &  62.9         & Back Wall           \\ \hline
+20      & 0.74      & 1.83          &  105.3     & Center       & 520   & 0.74      & 1.83        &  31.6         & Back Wall           \\ \hline
+21      & 0.74      & 1.83          &  158.0     & Center       & 521   & 0.74      & 1.83        &  105.3        & Back Wall           \\ \hline
+114     & 0.24      & 1.83          &  62.9      & Back Corner  & 513   & 0.74      & 1.83        &  158.0        & Back Wall           \\ \hline
+144     & 0.36      & 1.83          &  62.9      & Back Corner  & 160   & 0.74      & 1.83        &  62.9         & Center$^*$          \\ \hline
+212     & 0.49      & 1.83          &  62.9      & Back Corner  & 163   & 0.74      & 1.83        &  62.9         & Back Corner$^*$     \\ \hline
+242     & 0.62      & 1.83          &  62.9      & Back Corner  & 164   & 0.74      & 1.83        &  62.9         & Back Wall$^*$       \\ \hline
+410     & 0.74      & 1.83          &  62.9      & Back Corner  & 165   & 0.74      & 1.83        &  62.9         & Left Wall$^*$       \\ \hline
+210     & 0.74      & 1.83          &  62.9      & Back Corner  & 162   & 0.74      & 1.83        &  62.9         & Right Wall$^*$      \\ \hline
+310     & 0.74      & 1.83          &  62.9      & Back Corner  & 167   & 0.74      & 1.83        &  62.9         & Front Center$^*$    \\ \hline
+240     & 0.86      & 1.83          &  62.9      & Back Corner  & 161   & 0.74      & 1.83        &  62.9         & Doorway$^*$         \\ \hline
+116     & 0.99      & 1.83          &  62.9      & Back Corner  & 166   & 0.74      & 1.83        &  62.9         & Front Corner$^*$    \\ \hline
+122     & 0.74      & 1.38          &  62.9      & Back Corner  &  \multicolumn{5}{r|}{$^*$ Raised burner}                   \\ \hline
+\end{tabular}
+\end{center}
+\label{Steckler_Table}
+\end{table}
+
+
+\clearpage
+
+
+
 
 
 \section{UL/NFPRF Sprinkler, Vent, and Draft Curtain Study}
@@ -67,7 +514,7 @@ In 1997, a series of 34 heptane spray burner experiments was conducted at the La
 of 12 10~MW experiments. The objective of the experiments was to characterize the temperature and flow field for fire
 scenarios with a controlled heat release rate in the presence of sprinklers, draft curtains, and smoke \& heat vents.
 The Large Scale Fire Test Facility at UL contains a 37~m by 37~m (120~ft by 120~ft) main fire test cell, equipped with a 30.5~m by 30.5~m (100~ft by
-100~ft) adjustable height ceiling. The layout of the experiments is shown in Figs.~\ref{layout} and \ref{burnerlayoutA}. 
+100~ft) adjustable height ceiling. The layout of the experiments is shown in Figs.~\ref{layout} and \ref{burnerlayoutA}.
 
 \begin{figure}[p]
 \begin{center}
@@ -131,7 +578,7 @@ are spaced 3~m apart. The number beside each sprinkler location indicates the ch
 are 4~ft by 8~ft. The boxed letters A, B, C and D indicate burner positions. Corresponding to each burner position is a vertical array of
 thermocouples. Thermocouples 1--9 hang 7, 22, 36, 50, 64, 78, 92, 106 and 120~in from the ceiling, respectively, above Position A. Thermocouples 10
 and 11 are positioned above and below the ceiling tile directly above Position B, followed by 12--20 that hang at the same levels below the ceiling
-as 1--9. The same pattern is followed at Positions C and D, with thermocouples 21--31 at C and 32--42 at D.} 
+as 1--9. The same pattern is followed at Positions C and D, with thermocouples 21--31 at C and 32--42 at D.}
 \label{layout}
 \end{figure}
 
@@ -221,7 +668,7 @@ reached or the first sprinkler activated. After either of these events, the fire
 steady state, {\em i.e.} the temperatures recorded near the ceilings remained steady and no more sprinkler activations occurred.
 The heat release rate from the burner was confirmed by placing it under the large product calorimeter at UL, ramping up the flow of heptane in the
 same manner as in the tests, and measuring the total and convective heat release rates. It was found that the convective heat release rate was
-0.65$\pm$0.02 of the total. 
+0.65$\pm$0.02 of the total.
 \item[Instrumentation:] The instrumentation for the tests consisted of thermocouples, gas analysis equipment, and pressure transducers. The locations of the instrumentation
 are referenced in the plan view of the facility (Fig.~\ref{layout}).
 Temperature measurements were recorded at 104 locations. Type K 0.0625~in diameter Inconel sheathed thermocouples were positioned to measure (i)
@@ -229,61 +676,98 @@ temperatures near the ceiling, (ii) temperatures of the ceiling jet, and (iii) t
 \end{description}
 
 
-
-
 \clearpage
 
-\section{NIST/NRC Test Series}
 
-These experiments, sponsored by the US NRC and conducted at NIST, consisted of 15 large-scale experiments performed in June 2003. All 15 tests were
-included in the validation study. The experiments are documented in Ref.~\cite{Hamins:SP1013-1}. The fire sizes ranged from 350 kW to 2.2 MW in a compartment with dimensions
-21.7~m by 7.1~m by 3.8~m high, designed to represent a compartment in a nuclear power plant containing power and control cables.
-The walls and ceiling were covered with two layers of marinate boards, each layer 0.0125~m thick. The floor
-was covered with one layer of gypsum board on top of a layer of plywood. Thermo-physical and optical properties of the marinate
-and other materials used in the compartment are given in Ref.~\cite{Hamins:SP1013-1}. The room had one door and a mechanical air injection and extraction
-system. Ventilation conditions, the fire size, and fire location were varied. Numerous measurements (approximately 350 per test) were made including
-gas and surface temperatures, heat fluxes and gas velocities.
+\section{Ulster SBI Corner Heat Flux Measurements}
 
-Following are some notes provided by Anthony Hamins, who conducted the experiments:
-\begin{description}
-\item[Natural Ventilation:] The compartment had a 2~m by 2~m door in the middle of the west wall. Some of the tests had a closed door and no mechanical
-ventilation (Tests 2, 7, 8, 13, and 17), and in those tests the measured compartment leakage was an important consideration. The test report lists leakage
-areas based on measurements performed prior to Tests 1, 2, 7, 8, and 13. For the closed door tests, the leakage area used in the simulations was
-based on the last available measurement. The chronological order of the tests differed from the numerical order.
-For Test 4, the leakage area measured before Test 2 was used. For Tests 10 and 16, the leakage area
-measured before Test 7 was used.
-\item[Mechanical Ventilation:] The mechanical ventilation and exhaust was used during Tests 4, 5, 10, and 16, providing about 5 air changes per hour. The
-door was closed during Test 4 and open during Tests 5, 10, and 16. The supply duct was positioned on the south wall, about 2~m off the floor. An
-exhaust duct of equal area to the supply duct was positioned on the opposite wall at a comparable location. The flow rates through the supply and
-exhaust ducts were measured in detail during breaks in the testing, in the absence of a fire. During the tests, the flows were monitored with single
-bi-directional probes during the tests themselves.
-\item[Heat Release Rate:] A single nozzle was used to spray liquid hydrocarbon fuels onto a 1~m by 2~m fire pan that was about 0.1~m deep. The test plan
-originally called for the use of two nozzles to provide the fuel spray. Experimental observation suggested that the fire was less unsteady with the
-use of a single nozzle. In addition, it was observed that the actual extent of the liquid pool was well-approximated by a 1~m circle in the
-center of the pan. For safety reasons, the fuel flow was terminated when the lower-layer oxygen concentration
-dropped to approximately 15~\% by volume.
-The fuel used in 14 of the tests was heptane, while toluene was used for one test. The HRR was
-determined using oxygen consumption calorimetry. The recommended uncertainty values
-were 17~\% for all of the tests.
-\item[Radiative Fraction:]  The value of the radiative fraction and its
-uncertainty were reported as 0.44 and 0.40 for heptane and toluene, respectively.
-\end{description}
+Zhang {\em et al.}~\cite{Zhang:IAFSS9} measured the heat flux and flame heights from
+fires in the single burning item (SBI) enclosure at the University of Ulster, Northern Ireland.
+Thin steel plate probes were used to measure the surface heat flux, and flame
+heights were determined by analyzing the instantaneous images extracted from the videos of the
+experiments by a CCD camera. Three heat release rates were used -- 30~kW, 45~kW, and 60~kW.
 
-A diagram of the test structure is displayed in Figure~\ref{NIST_NRC_Drawing}.
+
+
+\section{Vettori Flat Ceiling Experiments}
+
+Vettori~\cite{Vettori:1} analyzed a series of 45 experiments conducted at NIST that were intended to compare the effects of different ceiling configurations on the activation times of quick response residential pendent sprinklers. The two ceiling configurations used consisted of an obstructed ceiling, with parallel beams 0.038~m wide by 0.24~m deep placed 0.41~m on center, and a smooth ceiling configuration, in which the beams were covered by a sheet of gypsum board.  In addition to the two ceiling configurations, there were also three fire growth rates and three burner locations used -- a total of 18 test configurations. The fire growth rate was provided by a computer controlled methane gas burner to mimic a standard t-squared fire growth rate with either a slow, medium, or fast ramp up. The burner was placed in a corner of the room, then against an adjacent wall, and then in a location removed from any wall. Measurements were taken to record sprinkler activation time, temperatures at varying heights and locations within the room, and the ceiling jet velocities at several other locations.  A diagram of the test structure is displayed in Figure~\ref{Vettori_Drawing}.
 
 \begin{sidewaysfigure}[p]
 \begin{center}
-\includegraphics[height=6.5in]{FIGURES/NIST_NRC/NIST_NRC_Drawing}
+\includegraphics[height=6.5in]{FIGURES/Vettori_Flat_Ceiling/Vettori_Flat Ceiling.pdf}
 \end{center}
-\caption{Geometry of the NIST/NRC Experiments.}
-\label{NIST_NRC_Drawing}
+\caption{Geometry of the Vettori Flat Ceiling.}
+\label{Vettori_Drawing}
 \end{sidewaysfigure}
 
 
+\section{Vettori Sloped Ceiling Experiments}
 
+Vettori~\cite{Vettori:2} performed a series of 72 compartment experiments to assess the effects of ceiling beams and slopes on the activation times of quick-response residential pendent sprinklers. There were 36 experiments (2 replicates of each) combining the following parameters:
+\begin{itemize}
+\item Flat, 13$^\circ$, or 24$^\circ$ Sloped Ceiling
+\item Smooth or Obstructed Ceiling
+\item Fast or Slow Growth Fire
+\item Corner, Side Wall, or Detached Burner Location
+\end{itemize}
 
 
 \clearpage
+
+
+\section{VTT Large Hall Tests}
+
+The experiments are described in Ref.~\cite{Hostikka:VTT2104}. The series consisted of 8 experiments, but because of replicates only three unique fire
+scenarios. The experiments were undertaken to study the movement of smoke in a large hall with a sloped ceiling. The tests were conducted inside the
+VTT Fire Test Hall, with dimensions of 19~m high by 27~m long by 14~m wide. Each test involved a single heptane pool fire, ranging from 2~MW to 4~MW.
+Four types of predicted output were used in the present evaluation -- the HGL temperature and depth, average flame height and the plume
+temperature. Three vertical arrays of thermocouples (TC), plus two thermocouples in the plume, were compared to FDS predictions. The HGL
+temperature and height were reduced from an average of the three TC
+arrays using the standard algorithm described in
+Chapter~\ref{HGL:Chapter}. The ceiling jet temperature was not
+considered, because the ceiling in the test hall is not flat, and the
+standard model algorithm is not appropriate for this geometry.
+
+The VTT test report lacks some information needed to model the experiments, which is why some information was based on private communications with the
+principal investigator, Simo Hostikka.
+\begin{description}
+\item[Surface Materials:] The walls and ceiling of the test hall consist of a 1~mm thick layer of sheet metal on top of a 5~cm layer of
+mineral wool. The floor was constructed of concrete. The report does not provide thermal properties of these materials.
+\item[Natural Ventilation:] In Cases~1 and 2, all doors were closed, and ventilation was restricted to infiltration through the building envelope. Precise
+information on air infiltration during these tests is not available. The scientists who conducted the experiments recommend a leakage area of about 2~m$^2$,
+distributed uniformly throughout the enclosure. By contrast, in Case~3, the doors located in each end wall (Doors 1 and 2, respectively)
+were open to the external ambient environment. These doors are each 0.8~m wide by 4~m high, and are located such that their centers
+are 9.3~m from the south wall.
+\item[Mechanical Ventilation:] The test hall has a single mechanical exhaust duct, located in the roof space, running along the center of the building. This
+duct had a circular section with a diameter of 1~m, and opened horizontally to the hall at a distance of 12~m from the floor and 10.5~m from the west wall.
+Mechanical exhaust ventilation was operational for Case~3, with a constant volume flow rate of 11~m$^3$/s drawn through
+the exhaust duct.
+\item[Heat Release Rate:] Each test used a single liquid fuel pan with its center located 16~m from the west
+wall and 7.4~m from the south wall. For all tests, the fuel was heptane in a circular steel pan that was partially filled with water. The
+pan had a diameter of 1.17~m for Case~1 and 1.6~m for Cases~2 and 3. In each case, the fuel surface was 1~m above the
+floor. The trays were placed on load cells, and the HRR was calculated from the mass loss rate. For the three cases,
+the fuel mass loss rate was averaged from individual replicate tests. In the HRR estimation, the heat of combustion (taken as 44,600~kJ/kg) and the
+combustion efficiency for n-heptane was used. Hostikka suggests a value of 0.8 for the combustion efficiency.
+Tewarson reports a value of 0.93 for a 10~cm pool fire~\cite{SFPE:Tewarson}. For the calculations reported in the current
+study, a combustion efficiency of 0.85 is assumed. In general, an uncertainty of 15~\% has been assumed for the reported HRR of most of the large
+scale fire experiments used.
+\item[Radiative Fraction:] The radiative fraction was assumed to be 0.35, similar to many smoky hydrocarbons.
+\end{description}
+A diagram of the test structure is displayed in Figure~\ref{VTT_Drawing}.
+\begin{sidewaysfigure}[p]
+\begin{center}
+\includegraphics[height=6.5in]{FIGURES/VTT/VTT_Drawing}
+\end{center}
+\caption{Geometry of the VTT Large Fire Test Hall.}
+\label{VTT_Drawing}
+\end{sidewaysfigure}
+
+
+\clearpage
+
+
+
 
 
 \section{WTC Spray Burner Test Series}
@@ -317,484 +801,6 @@ liquid fuel droplets.
 
 
 
-\section{FM/SNL Test Series}
-
-The Factory Mutual and Sandia National Laboratories (FM/SNL) test series was a series of 25 fire
-tests conducted in 1985 for the U.S. Nuclear Regulatory Commission (NRC) by Factory Mutual Research Corporation (FMRC), under
-the direction of Sandia National Laboratories (SNL)~\cite{Nowlen:NUREG4681,Nowlen:NUREG4527}. The primary purpose of these tests was to
-provide data with which to validate computer models for various types of compartments typical of nuclear power plants. The
-experiments were conducted in an enclosure measuring approximately 18~m long x 12~m wide x 6~m high, constructed at the FMRC fire test facility in Rhode Island.
-All of the tests involved forced ventilation to simulate typical power plant operations. Four of
-the tests were conducted with a full-scale control room mockup in place. Parameters varied
-during the experiments included fire intensity, enclosure ventilation rate, and fire location.
-
-The current study used data from three experiments (Tests 4, 5, and 21). In these tests, the fire
-source was a propylene gas burner with a diameter of approximately 0.9 m, with its rim
-located approximately 0.1 m above the floor. For Tests 4 and 5, the burner was positioned on the longitudinal axis centerline, 6.1 m from
-the nearest wall. For Test 21, the fire source was placed within a simulated electrical
-cabinet.
-
-Following is supplemental information provided by the test director, Steve Nowlen of Sandia National Laboratory:
-\begin{description}
-\item[Heat Release Rate:] The HRR was determined using oxygen consumption calorimetry in the exhaust stack with
-a correction applied for the carbon dioxide in the upper layer of the compartment. The
-uncertainty of the fuel mass flow was not documented. All three tests selected for this study had
-the same target peak heat release rate of 516~kW following a 4~min ``t-squared'' growth
-profile. The test report contains time histories of the measured HRR, for which the average,
-sustained HRR following the ramp up for Tests 4, 5, and 21 have been estimated as 510~kW, 480~kW, and 470~kW, respectively.
-Once reached, the peak HRR was maintained essentially constant
-during a steady-burn period of 6~min in Tests~4 and 5, and 16~min in Test~21. Note that in Test 21, Nowlen reports a
-``significant'' loss of effluent from the exhaust hood that could lead to an under-estimate of the HRR towards the end of the experiment.
-\item[Radiative Fraction:] The radiative fraction was not measured during the experiment, but
-in this study it is assumed to equal 0.35, which is typical for a smoky hydrocarbons.
-It was further assumed that the radiative fraction was about the same in
-Test~21 as the other tests, as fuel burning must have occurred outside of the electrical cabinet in
-which the burner was placed.
-\item[Measurements:] Four types of measurements were conducted during the FM/SNL test series that are used in the
-current model evaluation study, including the HGL temperature and depth, and the ceiling jet and
-plume temperatures. Aspirated thermocouples (TCs) were used to make all of the temperature
-measurements. Generally, aspirated TC measurements are preferable to bare-bead TC measurements,
-as systematic radiative exchange measurement error is reduced.
-\item[HGL Depth and Temperature:] Data from all of the vertical TC trees were used when reducing
-the HGL height and temperature. For the FM/SNL Tests 4 and 5, Sectors 1, 2, and 3 were used,
-all weighted evenly. For Test 21, Sectors 1 and 3 were used, evenly weighted. Sector 2 was
-partially within the fire plume in Test 21.
-\end{description}
-
-A diagram of the test structure is displayed in Figure~\ref{FM_SNL_Drawing}.
-
-\begin{sidewaysfigure}[p]
-\begin{center}
-\includegraphics[height=6.5in]{FIGURES/FM_SNL/FM_SNL_Drawing}
-\end{center}
-\caption{Geometry of the FM/SNL Experiments.}
-\label{FM_SNL_Drawing}
-\end{sidewaysfigure}
-
-\clearpage
-
-\section{NBS Multi-Room Test Series}
-
-The National Bureau of Standards (NBS, which is now called the National Institute of Standards
-and Technology, NIST) Multi-Room Test Series consisted of 45 fire tests representing
-9 different sets of conditions were conducted in a three-room suite. The experiments were
-conducted in 1985 and are described in detail in Ref.~\cite{Peacock:NBS_Multi-Room}. The suite consisted of two relatively
-small rooms, connected via a relatively long corridor. The fire source, a gas burner, was located
-against the rear wall of one of the small compartments.
-Fire tests of 100~kW, 300~kW and 500~kW were conducted. For the current study, only three 100~kW fire experiments have been used,
-including Test~100A from Set~1, Test~100O from Set~2, and Test~100Z from Set~4. These tests
-were selected because they had been used in prior validation studies, and because these tests had the
-steadiest values of measured heat release rate during the steady-burn period.
-
-Following is additional information provided by the test director, Richard Peacock of NIST:
-\begin{description}
-\item[Heat Release Rate:] In the two tests for which
-the door was open, the HRR during the steady-burn period measured via oxygen consumption
-calorimetry was 110~kW with an uncertainty of about 15~\%, consistent with the replicate
-measurements made during the experimental series and the uncertainty typical of oxygen
-consumption calorimetry. It was assumed that the closed door test (Test~100O) had the same HRR as the open
-door tests.
-\item[Radiative Fraction:] Natural gas was used as the fuel in
-Test~100A. In Tests~100O and 100Z, acetylene was added to the natural gas to increase the
-smoke yield, and as a consequence, the radiative fraction increased. The radiative fraction of
-natural gas has been studied previously, whereas the radiative fraction of the acetylene/natural
-gas mixture has not been studied. The radiative fraction for the natural gas fire was assigned a
-value of 0.20, whereas a value of 0.30 was assigned for the natural gas/acetylene fires.
-\item[Measurements:] Only two types of measurements conducted during the NBS test series were used in the
-evaluation considered here, because there was less confidence in the other measurements.
-The measurements considered here were the HGL temperature and depth, in which bare bead
-TCs were used to make these measurements. Single point measurements of temperature within
-the burn room were not used in the evaluation of plume or ceiling jet algorithms. This is because
-the geometry was not consistent in either case with the assumptions used in the model algorithms
-of plumes or jets. Specifically, the burner was mounted against a wall, and the room width-to-height
-ratio was less than that assumed by the various ceiling jet correlations.
-\end{description}
-
-A diagram of the test structure is displayed in Figure~\ref{NBS_Drawing}.
-
-\begin{sidewaysfigure}[p]
-\begin{center}
-\includegraphics[height=6.5in]{FIGURES/NBS/NBS_Drawing}
-\end{center}
-\caption{Geometry of the NBS Multi-Room Experiments.}
-\label{NBS_Drawing}
-\end{sidewaysfigure}
-
-
-
-
-\clearpage
-
-\section{Steckler Compartment Experiments}
-
-Steckler, Quintiere and Rinkinen performed a set of 55 compartment fire tests at NBS in 1979. The compartment was 2.8~m by 2.8~m by 2.13~m high\footnote{The test report
-gives the height of the compartment as 2.18~m. This is a misprint. The compartment was 2.13~m high.}, with a single door of
-various widths, or alternatively a single window with various heights. A 30~cm diameter methane burner was used to generate fires with heat release rates of
-31.6~kW, 62.9~kW, 105.3~kW and 158~kW. Vertical profiles of velocity and temperature were measured in the doorway, along with a single vertical profile of temperature
-within the compartment.
-A full description and results are reported in Reference~\cite{Steckler:NBSIR_82-2520}. The basic test matrix is listed in Table~\ref{Steckler_Table}. Note that the
-test report does not include a detailed description of the compartment. However, an internal report\footnote{ {\em Technical Research Report, Fire Induced Flows
-Through Room Openings - Flow Coefficients}, Project 203005-003, Armstrong Cork Company, Lancaster, Pennsylvania, May, 1981.} by the test sponsor, Armstrong Cork Company,
-reports that the compartment floor was composed of 19~mm calcium silicate board on top of 12.7~mm plywood on wood joists. The walls and ceiling consisted of
-12.7~mm ceramic fiber insulation board over 0.66~mm aluminum sheet attached to wood studs.
-
-\begin{table}[h!]
-\caption{Summary of Steckler compartment experiments.}
-\begin{center}
-\begin{tabular}{|c|c|c|c|c||c|c|c|c|c|}
-\hline
-        & Opening   & Opening       &  HRR       & Burner       &       & Opening   & Opening     &  HRR         & Burner        \\
-Test    & Width     & Height        & $\dot{Q}$  & Location     & Test  & Width     & Height      & $\dot{Q}$    & Location      \\
-        & (m)       & (m)           & (kW)       &              &       & (m)       &  (m)        & (kW)         &                \\ \hline \hline
-10      & 0.24      & 1.83          &  62.9      & Center       & 224   & 0.74      & 0.92        &  62.9         & Back Corner         \\ \hline
-11      & 0.36      & 1.83          &  62.9      & Center       & 324   & 0.74      & 0.92        &  62.9         & Back Corner         \\ \hline
-12      & 0.49      & 1.83          &  62.9      & Center       & 220   & 0.74      & 1.83        &  31.6         & Back Corner         \\ \hline
-612     & 0.49      & 1.83          &  62.9      & Center       & 221   & 0.74      & 1.83        &  105.3        & Back Corner         \\ \hline
-13      & 0.62      & 1.83          &  62.9      & Center       & 514   & 0.24      & 1.83        &  62.9         & Back Wall           \\ \hline
-14      & 0.74      & 1.83          &  62.9      & Center       & 544   & 0.36      & 1.83        &  62.9         & Back Wall           \\ \hline
-18      & 0.74      & 1.83          &  62.9      & Center       & 512   & 0.49      & 1.83        &  62.9         & Back Wall           \\ \hline
-710     & 0.74      & 1.83          &  62.9      & Center       & 542   & 0.62      & 1.83        &  62.9         & Back Wall           \\ \hline
-810     & 0.74      & 1.83          &  62.9      & Center       & 610   & 0.74      & 1.83        &  62.9         & Back Wall           \\ \hline
-16      & 0.86      & 1.83          &  62.9      & Center       & 510   & 0.74      & 1.83        &  62.9         & Back Wall           \\ \hline
-17      & 0.99      & 1.83          &  62.9      & Center       & 540   & 0.86      & 1.83        &  62.9         & Back Wall           \\ \hline
-22      & 0.74      & 1.38          &  62.9      & Center       & 517   & 0.99      & 1.83        &  62.9         & Back Wall           \\ \hline
-23      & 0.74      & 0.92          &  62.9      & Center       & 622   & 0.74      & 1.38        &  62.9         & Back Wall           \\ \hline
-30      & 0.74      & 0.92          &  62.9      & Center       & 522   & 0.74      & 1.38        &  62.9         & Back Wall           \\ \hline
-41      & 0.74      & 0.46          &  62.9      & Center       & 524   & 0.74      & 0.92        &  62.9         & Back Wall           \\ \hline
-19      & 0.74      & 1.83          &  31.6      & Center       & 541   & 0.74      & 0.46        &  62.9         & Back Wall           \\ \hline
-20      & 0.74      & 1.83          &  105.3     & Center       & 520   & 0.74      & 1.83        &  31.6         & Back Wall           \\ \hline
-21      & 0.74      & 1.83          &  158.0     & Center       & 521   & 0.74      & 1.83        &  105.3        & Back Wall           \\ \hline
-114     & 0.24      & 1.83          &  62.9      & Back Corner  & 513   & 0.74      & 1.83        &  158.0        & Back Wall           \\ \hline
-144     & 0.36      & 1.83          &  62.9      & Back Corner  & 160   & 0.74      & 1.83        &  62.9         & Center$^*$          \\ \hline
-212     & 0.49      & 1.83          &  62.9      & Back Corner  & 163   & 0.74      & 1.83        &  62.9         & Back Corner$^*$     \\ \hline
-242     & 0.62      & 1.83          &  62.9      & Back Corner  & 164   & 0.74      & 1.83        &  62.9         & Back Wall$^*$       \\ \hline
-410     & 0.74      & 1.83          &  62.9      & Back Corner  & 165   & 0.74      & 1.83        &  62.9         & Left Wall$^*$       \\ \hline
-210     & 0.74      & 1.83          &  62.9      & Back Corner  & 162   & 0.74      & 1.83        &  62.9         & Right Wall$^*$      \\ \hline
-310     & 0.74      & 1.83          &  62.9      & Back Corner  & 167   & 0.74      & 1.83        &  62.9         & Front Center$^*$    \\ \hline
-240     & 0.86      & 1.83          &  62.9      & Back Corner  & 161   & 0.74      & 1.83        &  62.9         & Doorway$^*$         \\ \hline
-116     & 0.99      & 1.83          &  62.9      & Back Corner  & 166   & 0.74      & 1.83        &  62.9         & Front Corner$^*$    \\ \hline
-122     & 0.74      & 1.38          &  62.9      & Back Corner  &  \multicolumn{5}{r|}{$^*$ Raised burner}                   \\ \hline
-\end{tabular}
-\end{center}
-\label{Steckler_Table}
-\end{table}
-
-
-\clearpage
-
-\section{Bryant Doorway Velocity Measurements}
-
-Rodney Bryant of the Fire Research Division at NIST performed a series of velocity measurements of the gas
-velocity within the doorway of a standard ISO~9705 compartment for fires ranging from
-34~kW to 511~kW~\cite{Bryant:FSJ2009,Bryant:EF2009,Bryant:CS2010}. A doorway
-served as the only vent for the enclosure. It included a jamb of 30~cm extending outward
-to facilitate the laser measurements. The entire compartment was elevated 0.3~m off the floor of the laboratory.
-
-The measurements were made using both bi-directional probes and PIV (Particle Image Velocimetry). The PIV measurements only cover the
-lower two-thirds of the doorway because of difficulties in seeding the hot outflow gases. The bi-directional probe measurements span the
-entire height of the doorway, but Bryant reports that
-these measurements were up to 20~\% greater than the PIV measurements in certain regions of
-the flow. Consequently, only the PIV data was used for comparison to the
-model.
-
-
-\section{SP Adiabatic Surface Temperature Experiments}
-
-In 2008, three compartment experiments were performed at SP Technical Research Institute of Sweden under the sponsorship of Brandforsk, the Swedish Fire Research Board~\cite{Wickstrom_AST}. The
-objective of the experiments was to demonstrate how plate thermometer measurements in the vicinity of a simple steel beam can be used to supply the boundary conditions
-for a multi-dimensional heat conduction calculation for the beam. The adiabatic surface temperature was derived from the plate temperatures and used by TASEF, a finite-element
-thermal-structural program.
-
-The experiments were performed inside a standard compartment designed for corner fire testing (ISO 9705).
-The compartment is 3.6~m deep, 2.4~m wide and 2.4~m high and includes a door opening 0.8~m by 2.0~m. The room was constructed of 20~cm thick light weight concrete
-blocks with a density of 600~kg/m$^3$ $\pm 100$~kg/m$^3$.
-The heat source was a gas burner run at a constant power of 450~kW. The top of the burner, with a square opening 30~cm by 30~cm, was placed 65~cm above the floor, 2.5~cm from the walls.
-A single steel beam was suspended 20~cm below the ceiling
-along the centerline of the compartment. There were three measurement stations along the beam at lengths of 0.9~m (Position A), 1.8~m (Position B), and
-2.7~m (Position C) from the far wall where the fire was either positioned in the corner (Tests 1 and 2), or the center (Test 3). The beam in Test 1 was
-a rectangular steel tube filled with an insulation material. The beam in Tests 2 and 3 was an I-beam.
-
-
-
-\section{ATF Corridors Experiments}
-
-A series of eighteen experiments were conducted in a two-story structure with long hallways and a connecting stairway
-in the large burn room of the ATF Fire Research Laboratory in Ammendale, Maryland, in 2008~\cite{Sheppard:Corridors}.
-The test enclosure consisted of two 17.0~m long hallways connected by a
-stairway consisting of two staircases and an intermediary landing.
-There was a door at the opposite end of the first floor hallway, which was closed during all tests.
-The end of the second floor hallway was open with a soffit near the ceiling.
-
-The walls and ceilings of the test structure were constructed of 1.2~cm gypsum wallboard.
-The flooring throughout the structure, including the stairwell landing floor, consisted of one layer of 1.3~cm thick cement board on one
-layer of 1.9~cm thick plywood supported by wood joists. The first set of stairs, which had eight risers, led from the first floor up to the landing area.
-The second set of stairs, which had nine risers, led from the landing area up to the second floor.
-The stairs were constructed of 2.5~cm thick clear pine lumber. The two set of stairs were separated by an approximately 0.42~m wide gap in the middle of the stairwell.
-This gap was separated from the stairs by a 0.91~m tall barrier constructed of a single piece of gypsum board.
-The flue space was open to the first floor.  The flue space was separated from the second floor by a 0.9~m tall barrier constructed of gypsum board.
-There was a metal exterior type door at the end of the first floor near the burner.  The door was closed during all experiments.
-
-The fire source was a natural gas diffusion burner.  The burner surface was horizontal, square and 0.45~m on each side, its surface was 0.37~m above the floor, and it was filled with gravel.  The burner was located near the end of the first floor away from the stairs. A diagram of the test structure is displayed in Figure~\ref{ATF Drawing}.
-
-
-\begin{sidewaysfigure}[h]
-\begin{center}
-\includegraphics[height=6.5in]{FIGURES/ATF_Corridors/ATF}
-\end{center}
-\caption{Geometry of the ATF Corriodrs Experiments}
-\label{ATF Drawing}
-\end{sidewaysfigure}
-
-\clearpage
-
-
-\section{McCaffrey Plume Experiments}
-
-In 1979, at the National Bureau of Standards (now NIST), Bernard McCaffrey measured centerline temperature and velocity profiles above a porous, refractory burner. There were five distinct heat release rates, ranging from 14~kW to 57~kW. The fuel was natural gas. The burner was square, 0.3~m on each side. The results of the experiments are reported in Reference~\cite{McCaffrey:NBSIR_79-1910}.
-
-
-\section{Sandia Plume Experiments}
-
-The Fire Laboratory for Accreditation of Models by Experimentation (FLAME) facility \cite{OHern:2005,Blanchat:2001} at Sandia National Laboratories in Albuquerque, New Mexico, is designed specifically for validating models of buoyant fire plumes.  The plume source is 1 m in diameter surrounded by a 0.5 m steel `ground plane'.  PIV/PLIF techniques are used to obtain instantaneous joint scalar and velocity fields.  O'Hern {\em et al.} \cite{OHern:2005} studied a turbulent buoyant helium plume in the FLAME facility.  Earlier work to model this experiment was performed by DesJardin {\em et al.} \cite{DesJardin:2004}. Tieszen {\em et al.} \cite{Tieszen:2004,Tieszen:2002} studied methane and hydrogen pool fires.
-
-\section{Smyth Slot Burner Experiment}
-
-Kermit Smyth {\em et al.} conducted diffusion flame experiments at NIST using a methane/air Wolfhard-Parker slot burner.  The experiments are described in
-detail in Refs.~\cite{Norton:1,Smyth:1}.  The Wolfhard-Parker slot burner consists of an 8~mm wide
-central slot flowing fuel surrounded by two 16~mm wide slots flowing dry air with 1~mm separations between the slots.
-The slots are 41~mm in length.  Measurements were made of all major species and a number of minor species along with temperature
-and velocity.  Experimental uncertainties have been reported as 5~\% for temperature  and 10~\% to 20~\%
-for the major species.
-
-
-\section{Beyler Hood Experiments}
-
-Craig Beyler performed a large number of experiments involving a variety of fuels, fire sizes, burner diameters, and
-burner distances beneath a hood~\cite{Beyler:Hood}.  The hood consisted of concentric cylinders separated
-by an air gap.  The inner cylinder was shorter than the outer and this allowed combustion products to be removed
-uniformly from the hood perimeter.  The exhaust gases were then analyzed to determine species concentrations.
-The burner could be raised and lowered with respect to the bottom edge of the hood.  Based on the published
-measurement uncertainties, species errors are estimated at 6~\%.
-
-
-\section{NIST Reduced Scale Enclosure Experiments}
-
-The CO production test series used the NIST Reduced Scale Enclosure (RSE)~\cite{Bryner:1}.  The RSE is a
-40~\% scaled version of the ISO 9705 compartment.
-It measures 0.98 m wide by 1.46 m deep by 0.98 m tall.  The compartment contains a door centered on the small
-face that measures 0.48 m wide by 0.81 m tall.  A 15 cm diameter natural gas burner was positioned in the
-center of the compartment.  The burner was on a stand so that its top was 15~cm above the floor.
-Species measurements were made inside the upper layer of the compartment at the front near the door
-and near the rear of the compartment.
-
-
-\section{Hamins Methane Burner Experiments}
-
-Anthony Hamins {\em et al.} performed a series of tests on circular gas
-burners measuring the radial and vertical radiative heat flux profiles
-outside the flame region. The tests are described
-in~\cite{Hostikka:3}. Tests at three burner diameters, 0.10 m, 0.38 m
-and 1.0 m are used for validation.
-
-
-\section{Restivo Compartment Air Flow Experiment}
-
-Velocity measurements for forced airflow within a 9~m by 3~m by 3~m high compartment were made by Restivo~\cite{Restivo:1979}. These measurements
-have been widely used to validate CFD models designed for indoor air quality applications. It was also used to assess early versions of
-FDS~\cite{Emmerich:1,Emmerich:2,Musser:1}. In the experiment, air was forced into the compartment through a 16.8~cm vertical slot along the ceiling
-running the width of the compartment with a velocity of 0.455~m/s. A passive exhaust was located near the floor on the opposite wall, with
-conditions specified such that there was no buildup of pressure in the enclosure. The component
-of velocity in the lengthwise direction was measured in four arrays: two vertical arrays located 3~m and 6~m  from the inlet along the
-centerline of the room, and two horizontal arrays located 8.4~cm above the floor and below the ceiling, respectively.
-These measurements were taken using hot-wire anemometers. While data on the specific
-instrumentation used are not readily available, hot-wire systems tend to have limitations at low velocities,
-with typical thresholds of approximately 0.1~m/s.
-
-
-
-
-\section{NRL/HAI Wall Heat Flux Measurements}
-
-Back, Beyler, DiNenno and Tatem~\cite{Back:IAFSS4} measured the heat flux from 9 different sized propane fires set up against a wall composed
-of gypsum board. The experiments were sponsored by the Naval Research Laboratory and conducted by Hughes Associates, Inc., of Baltimore, Maryland. The
-square sand burner ranged in size from 0.28~m to 0.70~m, and the fires ranged in size from 50~kW to 520~kW.
-
-\section{Ulster SBI Corner Heat Flux Measurements}
-
-Zhang {\em et al.}~\cite{Zhang:IAFSS9} measured the heat flux and flame heights from
-fires in the single burning item (SBI) enclosure at the University of Ulster, Northern Ireland.
-Thin steel plate probes were used to measure the surface heat flux, and flame
-heights were determined by analyzing the instantaneous images extracted from the videos of the
-experiments by a CCD camera. Three heat release rates were used -- 30~kW, 45~kW, and 60~kW.
-
-
-\section{FM Parallel Panel Experiments}
-
-Patricia Beaulieu made heat flux measurements within a set of vertical parallel panels as part of a cooperative research
-program between Worcester Polytechnic Institute and FM Global (Factory Mutual)~\cite{Beaulieu:FM}. The experimental
-apparatus consisted of two vertical parallel
-panels, 2.4~m high and 0.6~m wide, with a sand burner at the base. The objective of the project was to measure the flame spread
-rate over various composite wall lining materials, but there were also experiments conducted with inert walls for the purpose of measuring the
-heat flux from two fuels, propane and propylene, at heat release rates of 30~kW, 60~kW, and 100~kW.
-
-
-\section{NRCC Facade Heat Flux Measurements}
-
-A series of experiments was conducted by the Fire Research Section of the Institute for Research in Construction, National Research Council of Canada (NRCC),
-to measure the heat flux to a mock exterior building facade due to a fire within a compartment~\cite{Oleszkiewicz:ASME,Oleszkiewicz:FireTech}. The experiments selected for model
-validation were conducted using a series of propane line burners within a compartment whose interior dimensions were 5.95~m wide, 4.4~m deep, and 2.75~m high (see
-Fig.~\ref{NRCC_Facade_Drawing}). There
-were five different door/window sizes:
-\begin{enumerate}
-\item 0.94 m by 2.00 m high
-\item 0.94 m by 2.70 m high (door)
-\item 2.60 m by 1.37 m high (shown in Fig.~\ref{NRCC_Facade_Drawing})
-\item 2.60 m by 2.00 m high
-\item 2.60 m by 2.70 m high (door)
-\end{enumerate}
-There were four fire sizes: 5.5~MW, 6.9~MW, 8.6~MW, and 10.3~MW. In all, 19 experiments were conducted, with the exception of the 10.3~MW fire with Window~1. In each
-experiment, heat flux measurements were made 0.5~m, 1.5~m, 2.5~m, and 3.5~m above the top of the door/window.
-
-\begin{sidewaysfigure}[p]
-\begin{center}
-\includegraphics[height=6.5in]{FIGURES/NRCC_Facade/NRCC_Facade-1}
-\end{center}
-\caption{Geometry of the NRCC Facade Experiments}
-\label{NRCC_Facade_Drawing}
-\end{sidewaysfigure}
-
-%\section{INERIS Hydrogen Dispersion Experiment}
-%
-%A series of experiments was conducted by the Institut National de l'Environnement Industriel et des Risques (INERIS)~\cite{INERIS} to study the release of small amounts of hydrogen in
-%a confined space. The experimental setup consisted of a 1~g/s vertical hydrogen release for 240~s from an orifice of 20~mm
-%diameter in a rectangular room (garage) of dimensions 3.78~m by 7.2~m by 2.88~m. Two small openings (50~mm diameter) at the front
-%and bottom side of the room assured constant pressure conditions. Hydrogen concentrations were measured as a function of time
-%during both the release phase and the subsequent diffusion phase (5160~s) at various heights in the garage.
-
-
-%\section{Helium Release in a Reduced Scale Garage Geometry}
-%
-%FDS simulations were performed to predict the helium release and dispersion in a reduced scale garage geometry. An
-%approximately quarter scale two-car residential garage with interior dimensions of 1.5~m by 1.5~m by 0.745~m was
-%constructed with 1.25~cm thick plexiglas. Helium gas (used as a surrogate for hydrogen, due to safety concerns) was release
-%through a burner that 20.7~cm tall and the exit diameter was 3.6~cm. Helium flow through the burner was controlled through a  mass
-%flow controller and the specified flow rate for 1~hour and 4~hour releases were 14.95~L/min and 3.74~L/min,
-%respectively (flow rate was scaled to represent the emptying of a 5~kg of hydrogen fuel tank in 1 or 4 hours).
-%Idealized leaks were chosen to have areas that provide minimum ventilation
-%requirements for residential garages. The leaks consisted of either a single 2.4~cm square opening in the center of one face, or
-%two equal openings (each opening was 2.15~cm square) centered horizontally, at the top and bottom of the front face.
-
-
-
-\section{Cable Response to Live Fire -- CAROLFIRE}
-
-CAROLFIRE was a project sponsored by the U.S. Nuclear Regulatory Commission to study the fire-induced thermal
-response and functional behavior of electrical cables~\cite{CAROLFIRE}.
-The primary objective of CAROLFIRE was to characterize the various modes of electrical
-failure ({\em e.g.} hot shorts, shorts to ground) within bundles of power, control and instrument cables.
-A secondary objective of the project was to test a simple model to predict \underline{th}ermally-\underline{i}nduced
-\underline{e}lectrical \underline{f}ailure (THIEF). The measurements used for these purposes were conducted at Sandia National Laboratories and are described in
-Volume II of the CAROLFIRE test report. In brief, there were two series of experiments. The first were conducted within
-a heated cylindrical enclosure known as the Penlight apparatus. Single and bundled cables were exposed to various heat fluxes and the
-electrical failure modes recorded. The second series of experiments involved cables within trays in a semi-enclosed space under which a gas-fueled burner
-created a hot layer to force cable failure.
-
-Petra Andersson and Patrick Van Hees of the Swedish National Testing and Research Institute
-(SP) proposed that a cable's thermally-induced electrical failure can be predicted
-via a one-dimensional heat transfer calculation, under the assumption that the cable can
-be treated as a homogenous cylinder~\cite{Andersson:2005}. Their results for PVC
-cables were encouraging and suggested that the simplification of the analysis is reasonable and
-that it should extend to other types of cables.
-The assumptions underlying the THIEF model are as follows:
-\begin{enumerate}
-\item The heat penetration into a cable of circular cross section is largely in the radial direction.
-This greatly simplifies the analysis, and it is also conservative because it is assumed that
-the cable is completely surrounded by the heat source.
-\item The cable is homogenous in composition. In reality, a cable is constructed of several
-different types of polymeric materials, cellulosic fillers, and a conducting metal, most
-often copper.
-\item The thermal properties – conductivity, specific heat, and density – of the assumed
-homogenous cable are independent of temperature. In reality, both the thermal
-conductivity and specific heat of polymers are temperature-dependent, but this
-information is very difficult to obtain from manufacturers. More discussion of this
-assumption is found below.
-\item It is assumed that no decomposition reactions occur within the cable during its heating,
-and ignition and burning are not considered in the model. In fact, thermoplastic cables
-melt, thermosets form a char layer, and both off-gas volatiles up to and beyond the point
-of electrical failure.
-\item Electrical failure occurs when the temperature just inside the cable jacket reaches an
-experimentally determined value.
-\end{enumerate}
-Because the CAROLFIRE Penlight experiments tested single cables that were heated uniformly
-on all sides, the one-dimensional THIEF model accurately predicted the times for the
-temperature inside the cable jacket to reach ``threshold'' values that are typically observed when
-the cable fails electrically.
-
-\section{BRE Spray Test for Radiation Attenuation}
-
-Murrel {\em et al.}~\cite{Murrel:1995} measured the attenuation of thermal radiation passing through a water
-spray using a heat flux gauge. The radiation was produced by a heat panel, one meter square, at 900~$^\circ$C. The horizontal distance
-from the radiation panel to the spray nozzle was 2 m and to the measurement point 4 m. The nozzles were positioned at
-a height 0.24 m above the panel upper edge. The heat flux gauge was positioned at the line passing through the center
-of the panel. The attenuation of radiation was defined as $(q_0-q_s)/q_0$, where $q_0$ is the initial radiative heat flux,
-measured without a spray, and $q_s$ is the heat flux measured during the spray operation.
-
-Experimental results are used from three full-cone type nozzles, labeled A, B and D. The opening angles of the nozzles were between 90 and 108 degrees.
-The purpose of the simulation is to compare the measured and simulated attenuation of radiation at different flow conditions. The nozzles were
-specified in terms of median droplet size and mean vertical velocity using PDPA measurement in a single position, 0.7 m below the nozzle. The droplet
-boundary conditions were determined by assuming $d_m \propto p^{-1/3}$ and $v \propto p^{1/2}$ type of dependences between the droplet size, speed
-and pressure.
-
-\section{Vettori Flat Ceiling Experiments}
-
-Vettori~\cite{Vettori:1} analyzed a series of 45 experiments conducted at NIST that were intended to compare the effects of different ceiling configurations on the activation times of quick response residential pendent sprinklers. The two ceiling configurations used consisted of an obstructed ceiling, with parallel beams 0.038~m wide by 0.24~m deep placed 0.41~m on center, and a smooth ceiling configuration, in which the beams were covered by a sheet of gypsum board.  In addition to the two ceiling configurations, there were also three fire growth rates and three burner locations used -- a total of 18 test configurations. The fire growth rate was provided by a computer controlled methane gas burner to mimic a standard t-squared fire growth rate with either a slow, medium, or fast ramp up. The burner was placed in a corner of the room, then against an adjacent wall, and then in a location removed from any wall. Measurements were taken to record sprinkler activation time, temperatures at varying heights and locations within the room, and the ceiling jet velocities at several other locations.  A diagram of the test structure is displayed in Figure~\ref{Vettori_Drawing}.
-
-\begin{sidewaysfigure}[p]
-\begin{center}
-\includegraphics[height=6.5in]{FIGURES/Vettori_Flat_Ceiling/Vettori_Flat Ceiling.pdf}
-\end{center}
-\caption{Geometry of the Vettori Flat Ceiling.}
-\label{Vettori_Drawing}
-\end{sidewaysfigure}
-
-\clearpage
-
-\section{Vettori Sloped Ceiling Experiments}
-
-Vettori~\cite{Vettori:2} performed a series of 72 compartment experiments to assess the effects of ceiling beams and slopes on the activation times of quick-response residential pendent sprinklers. There were 36 experiments (2 replicates of each) combining the following parameters:
-\begin{itemize}
-\item Flat, 13$^\circ$, or 24$^\circ$ Sloped Ceiling
-\item Smooth or Obstructed Ceiling
-\item Fast or Slow Growth Fire
-\item Corner, Side Wall, or Detached Burner Location
-\end{itemize}
-
-
-\clearpage
-
-\section{Confined Space Experiments}
-
-NRL performed a multi-year series of experiments inside of a four level, 23 compartment test facility with 20 doors and ceiling vents whose exterior boundaries were airtight~\cite{Confined_JFPE}.  Three HVAC systems were installed in the facility: a supply air system which takes suction from a fan room and discharges the air to the remainder of the facility, an exhaust sytem which takes suction from the facility and discharges it to the fan room, and a smoke control control system which takes suction from an upper level compartment and discharges it to the ambient, Figure~\ref{confined_HVAC}.  A second set of HVAC ducts directly connected the second level with the fourth level, Figure~\ref{confined_bypass}.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=5.in]{FIGURES/HVAC/confined_space_hvac_layout.pdf}
-\end{center}
-\caption{Confined space HVAC system layouts}
-\label{confined_HVAC}
-\end{figure}
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=5.in]{FIGURES/HVAC/confined_space_bypass.pdf}
-\end{center}
-\caption{Confined space bypass ducts}
-\label{confined_bypass}
-\end{figure}
-
-The test facility was instrumented with gas thermocouples, surface thermocouples, optical density meters, gas sampling lines (CO$_2$, CO, and O$_2$), and velocity probes in a small number of doors, vents, and HVAC ducts.  Test variables included the number of opened doors and hatches, the number of vent openings to the ambient, the fire location, the fire size, and the operation of the HVAC systems.  All the fires were diesel pool fires.
-
-\clearpage
 
 
 \section{Summary of Experiments}
@@ -803,40 +809,51 @@ This section presents a summary of all the experiments described in this chapter
 outlines the range of applicability of the validation performed to date. The parameters are explained below:
 
 \begin{description}
-\item[Heat Release Rate, $\dot{Q}$,] is the range of peak heat release rates of the fires in the test series.
-\item[Fire Plume Parameter, $Q^*$,] is a useful non-dimensional quantity for plume correlations and flame height estimates.
-\be Q^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2} \ee
-\item[Global Equivalence Ratio, $\phi$,] is the ratio of the mass flux of fuel to the mass flux of oxygen into the compartment, divided by the stoichiometric value.
+\item[Heat Release Rate, $\dQ$,] is the range of peak heat release rates of the fires in the test series.
 \item[Fire Diameter, $D$,] is the equivalent diameter of the base of the fire.
+\item[Fire Froude Number, $\dQ^*$,] is a useful non-dimensional quantity for plume correlations and flame height estimates. 
+\be Q^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2} \ee
 \item[Characteristic Fire Diameter, $D^*$,] is a useful length scale that incorporates the heat release rate of the fire.
 \be D^* = \left( \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g}} \right)^{2/5}  \ee
-\item[Non-dimensional Ceiling Height, $H/D^*$,] reports the actual ceiling height, $H$, in terms of the fire's characteristic length scale. This is a useful
-parameter in assessing the role that the fire plume plays in the simulation. A large value represents a relatively small fire in a relatively high space.
-\item[Non-dimensional Ceiling Jet Radius, $r_{cj}/H$,] is mainly used in empirical correlations. It is not as useful for CFD.
-\item[Non-dimensional Radiation Radius, $r_{rad}/D$,] is an appropriate measure of whether the radiation measurement is {\em near-field} or {\em far-field}.
+\item[Flame Height, $L_f$,] is the height of the visible flame, based on Heskestad's correlation:
+\be L_f = D \, \left( 3.7 \, (\dQ^*)^{2/5} - 1.02 \right) \ee
+\item[Global Equivalence Ratio, $\phi$,] is the ratio of the mass flux of fuel to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio.
+\be \phi = \frac{\dm_f}{r\, \dm{\hbox{\tiny O$_2$}}} \equiv  \frac{\dQ \, \hbox{(kW)}}{13,100 \, \hbox{(kJ/kg)} \; \dm_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dm_{\hbox{\tiny O$_2$}} = \left\{
+   \begin{array}{r@{\quad:\quad}l}
+      \ha \, 0.23 \, A_0 \sqrt{H_0} & \hbox{Natural Ventilation} \\
+      0.23 \, \rho \, \dot{V}       & \hbox{Mechanical Ventilation} \end{array} \right.
+\ee
+Here, $r$ is the stoichiometric ratio, $A_0$ is the area of the compartment opening, $H_0$ is the height of the opening, $\rho$ is the density of air, and $\dot{V}$ is the
+volume flow of air into the compartment. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
+\item[Flame Height relative to Ceiling Height, $L_f/H$,] is a convenient way to express the physical size of the fire relative to the size of the room.
+\item[Relative Distance along the Ceiling, $r_{cj}/H$,] indicates the distance from the fire plume of a sprinkler, smoke detector, {\em etc.}, relative to the
+compartment height, $H$.
+\item[Relative Distance from the Fire, $r_t/D$,] indicates whether a ``target'' is near or far from the fire.
 \end{description}
 
 
-\begin{table}[ht!]
+\begin{sidewaystable}[p]
 \caption{Summary of the major experimental parameters. }
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|c|c|c|}
 \hline
-Test Series     & $\dot{Q}$     & $Q^*$     & $\phi$    & $D$       & $D^*$     & $H/D*$    & $r_{cj}/H$    & $r_{rad}/D$       \\
+Test Series     & $\dot{Q}$     & $\dQ^*$   & $\phi$    & $D$       & $D^*$     & $H/D^*$   & $r_{cj}/H$    & $r_t/D$          \\
                 & (kW)          &           &           & (m)       & (m)       &           &               &                   \\ \hline \hline
 ATF Corridors   & 50-500        & 0.25-2.5  &  N/A      & 0.5       & 0.3-0.7   &  8.0-3.4  &   7           &  N/A              \\ \hline
+Bryant Doorway  & 500           & 0.6       &  0.04-0.4 & 0.9       & 1.0-1.3   &  8.4      &   1.2-1.6     &  N/A              \\ \hline
 FM/SNL          & 500           & 0.6       &  0.04-0.4 & 0.9       & 1.0-1.3   &  8.4      &   1.2-1.6     &  N/A              \\ \hline
 NBS Multi-Room  & 100           & 1.4       &  0.04     & 0.34      & 1.0-1.3   &  5.6      &   N/A         &  N/A              \\ \hline
 NIST/NRC        & 400-2300      & 0.4-2.1   &  0.1-0.6  & 1.0       & 1.0-1.3   &  2.9-5.7  &   1.3-1.7     &  2.2-5.7          \\ \hline
 NIST RSE        & 600           & 62        &  0.83     & 0.15      & 0.8       &  1.3      &   N/A         &  N/A              \\ \hline
+SP AST          & 600           & 62        &  0.83     & 0.15      & 0.8       &  1.3      &   N/A         &  N/A              \\ \hline
 Steckler        & 63            & 1.1       &  0.02     & 0.30      & 0.32      &  6.7      &   N/A         &  N/A              \\ \hline
 UL/NFPRF        & 4400          & 3.9       &  0.11     & 1.0       & 1.7       &  4.4      &   0.86        &  N/A              \\ \hline
-VTT             & 1800-3600     & 1.0       &  0.10     & 1.2-1.6   & 1.0-1.3   &  12-16    &   N/A         &  N/A              \\ \hline
+VTT Large Hall  & 1800-3600     & 1.0       &  0.10     & 1.2-1.6   & 1.0-1.3   &  12-16    &   N/A         &  N/A              \\ \hline
 WTC             & 3000          & 2.7       &  0.33     & 1.0       & 1.5       &  2.6      &   0.52        &  1.0              \\ \hline
 \end{tabular}
 \end{center}
 \label{Test_Parameters}
-\end{table}
+\end{sidewaystable}
 
 
 
