@@ -4,8 +4,8 @@ echo Creating figures for the Smokeview User's and Verification guides
 
 set vis="%CD%\..\Visualization"
 set wui="%CD%\..\Wui"
-set smvug="%CD%\..\..\Manuals\SMV_5_User_Guide"
-set smvvg="%CD%\..\..\Manuals\SMV_5_Verification_Guide"
+set smvug="%CD%\..\..\Manuals\SMV_User_Guide"
+set smvvg="%CD%\..\..\Manuals\SMV_Verification_Guide"
 
 cd %smvug%
 

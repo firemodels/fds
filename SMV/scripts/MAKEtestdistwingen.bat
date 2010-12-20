@@ -39,12 +39,14 @@ copy ..\bin\smv5_win_test_%platform%.exe %smvdir%\smokeview.exe
 if "%platform%"=="32" echo copying smokediff.exe
 if "%platform%"=="32" copy ..\..\Utilities\smokediff\INTEL_WIN_%platform%\smokediff.exe %smvdir%\smokediff.exe
 if "%platform%"=="64" echo copying smokediff_win_64.exe
-if "%platform%"=="64" copy ..\..\Utilities\smokediff\INTEL_WIN_%platform%\smokediff_win_64.exe %smvdir%\smokediff_win_64.exe
+if "%platform%"=="64" copy ..\..\Utilities\smokediff\INTEL_WIN_%platform%\smokediff_win_64.exe %smvdir%\smokediff.exe
+Rem if "%platform%"=="64" copy ..\..\Utilities\smokediff\INTEL_WIN_%platform%\smokediff_win_64.exe %smvdir%\smokediff_win_64.exe
 
 if "%platform%"=="32" echo copying smokezip.exe
 if "%platform%"=="32" copy ..\..\Utilities\smokezip\INTEL_WIN_%platform%\smokezip.exe %smvdir%\smokezip.exe
 if "%platform%"=="64" echo copying smokezip_win_64.exe
-if "%platform%"=="64" copy ..\..\Utilities\smokezip\INTEL_WIN_%platform%\smokezip_win_64.exe %smvdir%\smokezip_win_64.exe
+if "%platform%"=="64" copy ..\..\Utilities\smokezip\INTEL_WIN_%platform%\smokezip_win_64.exe %smvdir%\smokezip.exe
+Rem if "%platform%"=="64" copy ..\..\Utilities\smokezip\INTEL_WIN_%platform%\smokezip_win_64.exe %smvdir%\smokezip_win_64.exe
 
 if "%platform%"=="32" echo copying background.exe
 if "%platform%"=="32" copy ..\..\Utilities\background\INTEL_WIN_32\background.exe %smvdir%\background.exe
