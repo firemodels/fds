@@ -49,7 +49,7 @@
       THICKNESS(1:2) = 0.002,0.1 
       TMP_INNER      = 600.0
 /
-
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &SURF ID='BURNER1',HRRPUA=600.0,PART_ID='lava' /  Ignition source
 &SURF ID='BURNER2',HRRPUA=600.0,PART_ID='bubbles' /  Ignition source
 
@@ -70,7 +70,6 @@
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=100.0 /  Show 3D contours of temperature at 100 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0 /  Show 3D contours of temperature at 200 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=620.0 /  Show 3D contours of temperature at 620 C
-&ISOF QUANTITY='MIXTURE_FRACTION',VALUE(1)=0.07 /  Show 3D contours of mixture fraction at 0.07
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0, COLOR_QUANTITY='VELOCITY' /  Show 3D contours of temperature at 200 C
 
 &PROP ID='lava_props'   SMOKEVIEW_PARAMETERS(1:5)='D=0.2','L=0.3','VELMAX=4.5','W=.1','H=.1' SMOKEVIEW_ID(1:4)='sphere','veltube','velegg','face_eye' /

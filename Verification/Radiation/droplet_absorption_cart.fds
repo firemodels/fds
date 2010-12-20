@@ -33,7 +33,7 @@ value of dT should be equal to the time averaged Q_abs.
 &SURF ID='HOT'
       TMP_FRONT = 1000.
       TAU_T = 0.0 /
-
+&SPEC ID='WATER VAPOR'/
 &PART ID='drops'
       STATIC = .TRUE.
       SPEC_ID='WATER VAPOR'

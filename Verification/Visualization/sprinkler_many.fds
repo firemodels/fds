@@ -14,7 +14,7 @@ test of video cards ability to display many (15*15*31=6975 to be exact) sprinkle
 &VENT XB=0.0,1.6,0.0,0.0,0.0,3.2,SURF_ID='OPEN'/
 &VENT XB=0.0,1.6,1.6,1.6,0.0,3.2,SURF_ID='OPEN'/
 &VENT XB=0.0,1.6,0.0,1.6,3.2,3.2,SURF_ID='OPEN'/
-
+&SPEC ID='WATER VAPOR'/
 &PART ID='water',SPEC_ID='WATER VAPOR',    SAMPLING_FACTOR=1 /
 
 &PROP ID='Acme Sprinkler'

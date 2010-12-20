@@ -16,7 +16,9 @@ REM  5) repeaset setp 3.  Value noted should remain the same.
 
 &TIME TWFIN=10.0 / 
 
-&MISC RADIATION=.FALSE., LAPSE_RATE=10.0, TMPA=10. /
+&MISC  LAPSE_RATE=10.0, TMPA=10. /
+
+&RADI RADIATION=.FALSE./
 
 &SLCF PBY=0.6, QUANTITY='TEMPERATURE' /
         

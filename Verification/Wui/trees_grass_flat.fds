@@ -11,7 +11,7 @@ cTRNZ IDERIV=2,CC=0.,PC=0.0 /
 
 &TIME TWFIN=60. /
 
-&MISC RADIATION=.TRUE.,BAROCLINIC=.TRUE.,TERRAIN_CASE=.FALSE.,WIND_ONLY=.FALSE. /
+&MISC BAROCLINIC=.TRUE.,TERRAIN_CASE=.FALSE.,WIND_ONLY=.FALSE. /
 
 - Specify parameters for combustion of fuel gases from pyrolysis of the solid fuel(s)
 &REAC ID='WOOD'
@@ -269,8 +269,7 @@ cTRNZ IDERIV=2,CC=0.,PC=0.0 /
 
 -- two-dimensional slice files
 &SLCF PBY= 0,   QUANTITY='TEMPERATURE',VECTOR=.TRUE. / 
-&SLCF PBY= 0, QUANTITY='water vapor' / H2O from combustion
-&SLCF PBY= 0, QUANTITY='WATER VAPOR' / H2O from veg drying
+&SLCF PBY= 0, QUANTITY='MASS FRACTION',SPEC_ID='WATER VAPOR' /
 
 &BNDF QUANTITY='HEAT_FLUX' /
 &BNDF QUANTITY='RADIATIVE_FLUX' /

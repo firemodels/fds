@@ -26,6 +26,8 @@ value of dT should be equal to the time averaged Q_abs.
 
 &DUMP NFRAMES=100, DT_PL3D=10000. /
 
+&SPEC ID='WATER VAPOR'/
+
 &RADI RADTMP=1000.
       NUMBER_RADIATION_ANGLES = 40
       TIME_STEP_INCREMENT=1 
