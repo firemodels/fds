@@ -10,15 +10,15 @@ Build FDS -
 
 <hr size="1">
 
-<h3>Build, Package and Upload FDS</h3>
-
 <ul>
-<li><a href="Scripts/Update_REPOS_latest_svn.bat">Update Linux and OSX repositories to the latest version.</a> (Use Smartsvn to update the Windows repository)
-<li>Get the SVN revision number of the FDS source directory (using Smartsvn).
-<li><a href="Scripts/EDIT_setup.bat">Update FDS version string and revision number</a> in fds_smv_set.bat
+<li>Update <a href="Scripts/EDIT_setup.bat">configuration file</a>
+<li>Update <a href="Scripts/Update_FDSwin_svn_num.bat">Windows</a> or <a href="Scripts/Update_FDS_svn_num.bat">Linux/OSX</a> FDS source to the revision specified in the configuration file.
+<li>Update <a href="Scripts/Update_REPOS_latest_svn.bat">Linux and OSX</a> repositories to the latest revision.
 </ul>
 
 <p><table border=on>
+<tr><th colspan=6>Build, Package and Upload FDS</th></tr>
+
 <tr><th>win32</th><th>win64</th><th>Linux32</th><th>Linux64</th><th>OSX32</th><th>OSX64</th></tr>
 <tr>
 <td align="center"><a href="Scripts/CLEAN_FDS_Intel_win_32.bat">Clean</a></td>
@@ -66,8 +66,6 @@ Build FDS -
 <h3>Other</h3>
 <ul>
 <li> <a href="Scripts/EDIT_build_fds.bat">Edit this page</a>
-<li><a href="Scripts/Update_FDS_svn_num.bat">Update FDS source (Linux and OSX) to the revision specified </a> 
-in the <a href="Scripts/EDIT_setup.bat"><tt>fds_smv_env.bat</tt> configuration file.</a> <br> Use Smartsvn to update the FDS source on Windows
 <li><a href="../FDS_Compilation/getting_started.html">Getting Started - setting up build scripts</a>
 
 </ul>
