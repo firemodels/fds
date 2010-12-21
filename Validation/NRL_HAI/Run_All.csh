@@ -10,8 +10,8 @@ $RUNFDS Current_Results NRL_HAI_3 fire67 &
 $RUNFDS Current_Results NRL_HAI_4 fire68 &
 $RUNFDS Current_Results NRL_HAI_5 fire68 &
 $RUNFDS Current_Results NRL_HAI_6 fire68 &
-$RUNFDS Current_Results NRL_HAI_7 fire59 &
-$RUNFDS Current_Results NRL_HAI_8 fire59 &
-$RUNFDS Current_Results NRL_HAI_9 fire59 &
+$RUNFDS Current_Results NRL_HAI_7 fire66 &
+$RUNFDS Current_Results NRL_HAI_8 fire66 &
+$RUNFDS Current_Results NRL_HAI_9 fire66 &
 
 echo FDS cases submitted

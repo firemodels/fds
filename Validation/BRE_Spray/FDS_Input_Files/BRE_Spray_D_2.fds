@@ -1,5 +1,5 @@
 &HEAD CHID = 'BRE_Spray_D_2' TITLE='Radiation atten. test (Murrel et al. 1995)' /
- MESH IJK = 60,30,45, XB = -2,2,-1,1,0,3 /
+&SPEC ID='WATER VAPOR' /
 &MESH IJK = 40,20,30, XB = -2,2,-1,1,0,3 /
 &TIME T_END=15.,DT = 0.05 /
 &DUMP DT_PL3D = 30.0 DT_DEVC = 0.1 /
@@ -18,10 +18,10 @@
  SPRAY_ANGLE = 0 54
  SMOKEVIEW_ID='sprinkler_upright' /
 &PART  ID='water drops', 
- WATER = .TRUE., 
+ SPEC_ID='WATER VAPOR', 
  DIAMETER = 349.228231433004 /
 &RADI NUMBER_RADIATION_ANGLES = 1000  /
-&MISC FLUXMAX = 1000000 /
+ 
 &DEVC XYZ = 2.0,0.00,1.50,  QUANTITY = 'GAUGE HEAT FLUX', ID = 'flux' IOR = -1 /
 &DEVC XYZ = 0.0,0.00,1.50, QUANTITY = 'PDPA', PROP_ID = 'pdpa_d32' ID = 'd32' /
 &DEVC XYZ = 0.0,0.00,1.50, QUANTITY = 'PDPA', PROP_ID = 'pdpa_w' ID = 'w' /

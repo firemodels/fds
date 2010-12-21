@@ -6,6 +6,8 @@
 
 &MISC TMPA=26./
 
+
+
 %%Burner Detached
 &OBST XB=3.3, 4, 2.25, 3.25, 0.00, 0.30 /
 &VENT XB=3.4, 4, 2.65, 3.25, 0.30, 0.30, SURF_ID='BURNER' /
