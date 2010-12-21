@@ -8,6 +8,7 @@
 
 &DUMP DT_PL3D = 100000. /
 
+&SPEC ID='WATER VAPOR'/
 &PART ID='water drops', 
       SPEC_ID='WATER VAPOR', 
       DIAMETER=1000. /
