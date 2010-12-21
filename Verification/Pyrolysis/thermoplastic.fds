@@ -15,7 +15,7 @@ representative of any particular material.
 
 &MISC SOLID_PHASE_ONLY=.TRUE. / 
 
-&REAC ID='NO REACTION', C=1,Y_O2_INFTY=0.0001 /  No gas phase reaction with 1% O2 concentration
+&REAC ID='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
 
 &DUMP DT_PL3D=10000000. /  No Plot3D output
 
