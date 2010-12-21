@@ -3440,6 +3440,10 @@ PART_LOOP: DO N=1,N_PART
       ENDIF
    ENDDO
 
+   PC%C_P(0) = PC%C_P(1)
+   PC%H_L(0) = PC%H_L(1)
+   PC%C_P_BAR(0) = PC%H_L(1)
+
    ! Determine the properties of the droplet
    IF (PC%SPEC_INDEX>0) THEN
       IF(PC%H_V(1) > 0._EB) H_V = PC%H_V(1)
@@ -3454,6 +3458,7 @@ PART_LOOP: DO N=1,N_PART
          PC%H_V(J) = H_V + (H_G_S-H_G_S_REF) - (PC%H_L(J)-H_L_REF)
       ENDDO
    ENDIF
+   PC%H_V(0) = PC%H_V(1)
 ENDDO PART_LOOP
 
 END SUBROUTINE PROC_PART
@@ -3655,7 +3660,10 @@ READ_PART_LOOP: DO N=1,N_PART
             PC%Y_INDEX = SPECIES(NN)%Y_INDEX 
          ENDIF
       ENDDO
-      IF(PC%SPEC_INDEX < 0) WRITE(MESSAGE,'(A,A,A)') 'ERROR: PART SPEC_ID ',TRIM(PC%SPEC_ID),' not found'
+      IF(PC%SPEC_INDEX < 0) THEN
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR: PART SPEC_ID ',TRIM(PC%SPEC_ID),' not found'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
    ENDIF
    IF ((MELTING_TEMPERATURE > -300._EB .OR. SPECIFIC_HEAT > 0._EB .OR. HEAT_OF_VAPORIZATION > 0._EB .OR. &
         H_V_REFERENCE_TEMPERATURE > -300._EB .OR. HEAT_OF_COMBUSTION > 0._EB) .AND. TRIM(SPEC_ID)=='null') THEN
