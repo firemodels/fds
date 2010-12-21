@@ -2438,7 +2438,8 @@ RN%NAME               = ID
 RN%FUEL               = FUEL    
 RN%Y_O2_LL            = X_O2_LL
 RN%Y_F_LFL            = Y_F_LFL
-
+IF (C<0) C=0
+IF (H<0) H=0
 !Fuel and Soot Molecular weights
 MW_SOOT = MW_C * (1._EB - SOOT_H_FRACTION) + MW_H * SOOT_H_FRACTION   
 MW_FUEL = C * MW_C + H * MW_H + O * MW_O + N * MW_N + OTHER * MW_OTHER
