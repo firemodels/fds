@@ -5747,6 +5747,11 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       SF%PYROLYSIS_MODEL = PYROLYSIS_SPECIFIED
    ENDIF
 
+   IF (BURNING .AND. N_REACTIONS==0) THEN
+      WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' indicates burning, but there is no REAC line'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+
    ! Make decisions based on whether there is forced ventilation at the surface
 
    BLOWING  = .FALSE.
