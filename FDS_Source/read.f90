@@ -1422,7 +1422,7 @@ END SUBROUTINE READ_MULT
 SUBROUTINE READ_MISC
 USE PHYSICAL_FUNCTIONS, ONLY : AMBIENT_WATER_VAPOR
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
-REAL(EB) :: C_HORIZONTAL,C_VERTICAL,FORCE_VECTOR(3)=0._EB,H_FIXED
+REAL(EB) :: C_HORIZONTAL,C_VERTICAL,FORCE_VECTOR(3)=0._EB,H_FIXED,XVAP
 CHARACTER(30) :: RAMP_GX,RAMP_GY,RAMP_GZ
 LOGICAL :: PRESSURE_CORRECTION=.FALSE.
 NAMELIST /MISC/ PR,SC,TMPA,GVEC,PRESSURE_RELAX_FACTOR,RELAXATION_FACTOR,FYI, &
@@ -1590,7 +1590,12 @@ TMPA4 = TMPA**4
 ! Humidity (40% by default, but limited for high temps)
  
 IF (HUMIDITY < 0._EB) THEN
-   HUMIDITY = 40._EB*MIN(1._EB,AMBIENT_WATER_VAPOR(40._EB,313.15_EB)/AMBIENT_WATER_VAPOR(40._EB,TMPA))
+   XVAP = AMBIENT_WATER_VAPOR(40._EB,TMPA)
+   IF (XVAP > 0._EB) THEN
+      HUMIDITY = 40._EB*MIN(1._EB,AMBIENT_WATER_VAPOR(40._EB,313.15_EB)/XVAP)
+   ELSE
+      HUMIDITY = 40._EB
+   ENDIF
 ENDIF
 
 ! Miscellaneous
@@ -1825,7 +1830,6 @@ I_H2      = 0
 
 ! Count SPEC lines and check for errors
 N_SPEC_READ = 0
-
 REWIND(LU_INPUT)
 COUNT_SPEC_LOOP: DO
    LUMPED_SPECIES_ONLY=.FALSE.
@@ -1927,7 +1931,6 @@ IF (I_BACKGROUND == 0) THEN
 ENDIF
 
 ! Allocate species-related arrays
-
 ALLOCATE(SPECIES(0:N_SPECIES),STAT=IZERO)
 CALL ChkMemErr('READ','SPECIES',IZERO)
 
@@ -1935,7 +1938,7 @@ SPECIES(1:N_SPECIES)%ID = SPECIES_ID(1:N_SPECIES)
 IF (OTHER_INDEX > 0) SPECIES(OTHER_INDEX)%MW = MW_OTHER
 IF (SIMPLE_CHEMISTRY) SPECIES(1:N_LUMPED_SPECIES)%LUMPED_SPECIES_ONLY=.TRUE.
 ! Loop through all species and assign properties
-N2 = 0 
+N2 = 0
 REWIND(LU_INPUT)
 SPEC_LOOP: DO N=1,N_SPEC_READ
    ! Set default values for all species
@@ -1968,8 +1971,8 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
             WRITE(LU_ERR,'(A)') 'WARNING: Specified WATER VAPOR mass fraction will be in addition to the HUMDITY amount in'
             WRITE(LU_ERR,'(A)') 'the background species mixture'
             SPECIES(H2O_INDEX)%YY0 = MASS_FRACTION_0
-         ENDIF         
-         N2 = N2 + 1
+         ENDIF       
+         N2 = N2 + 1  
          CYCLE
       ELSE
          H2O_INDEX = N
@@ -1983,7 +1986,7 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
             WRITE(LU_ERR,'(A)') 'the background species mixture'
             SPECIES(CO2_INDEX)%YY0 = MASS_FRACTION_0
          ENDIF
-         N2 = N2 + 1
+         N2 = N2 + 1  
          CYCLE
       ELSE
          CO2_INDEX = N
@@ -1994,7 +1997,7 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
          SPECIES(CO_INDEX)%LUMPED_SPECIES_ONLY = LUMPED_SPECIES_ONLY
          IF (.NOT. LUMPED_SPECIES_ONLY .AND. SIMPLE_CHEMISTRY .AND. MASS_FRACTION_0 > 0) &
             SPECIES(CO_INDEX)%YY0 = MASS_FRACTION_0    
-         N2 = N2 + 1
+         N2 = N2 + 1  
          CYCLE
       ELSE
          CO_INDEX = N
@@ -2008,7 +2011,7 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
             WRITE(LU_ERR,'(A)') 'the background species mixture'
             SPECIES(N2_INDEX)%YY0 = MASS_FRACTION_0
          ENDIF
-         N2 = N2 + 1
+         N2 = N2 + 1  
          CYCLE
       ELSE
          N2_INDEX = N
@@ -2022,7 +2025,7 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
             WRITE(LU_ERR,'(A)') 'the background species mixture and it will not participate in combustion'
             SPECIES(O2_INDEX)%YY0 = MASS_FRACTION_0
          ENDIF
-         N2 = N2 + 1
+         N2 = N2 + 1  
          CYCLE
       ELSE
          O2_INDEX = N
@@ -2033,7 +2036,7 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
          SPECIES(H2_INDEX)%LUMPED_SPECIES_ONLY = LUMPED_SPECIES_ONLY
          IF (.NOT. LUMPED_SPECIES_ONLY .AND. SIMPLE_CHEMISTRY .AND. MASS_FRACTION_0 > 0) &
             SPECIES(H2_INDEX)%YY0 = MASS_FRACTION_0    
-         N2 = N2 + 1
+         N2 = N2 + 1  
          CYCLE
       ELSE
          H2_INDEX = N
@@ -2044,7 +2047,7 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
          SPECIES(SOOT_INDEX)%LUMPED_SPECIES_ONLY = LUMPED_SPECIES_ONLY
          IF (.NOT. LUMPED_SPECIES_ONLY .AND. SIMPLE_CHEMISTRY .AND. MASS_FRACTION_0 > 0) &
             SPECIES(SOOT_INDEX)%YY0 = MASS_FRACTION_0    
-         N2 = N2 + 1
+         N2 = N2 + 1  
          CYCLE
       ELSE
          SOOT_INDEX = N
@@ -2066,7 +2069,11 @@ SPEC_LOOP: DO N=1,N_SPEC_READ
    IF (ID=='SOOT') MODE = AEROSOL_SPECIES
 
    ! Fill up the SPECIES array
-   SS => SPECIES(N)
+   IF (SIMPLE_CHEMISTRY) THEN
+      SS => SPECIES(N_LUMPED_SPECIES + N - N2)
+   ELSE
+      SS => SPECIES(N)
+   ENDIF
 
    SS%MU_USER = VISCOSITY
    SS%K_USER  = CONDUCTIVITY
@@ -3302,7 +3309,10 @@ DO J = 1,5000
    DO N = 1,N_SPECIES-N_MIX_SPECIES
       SS => SPECIES(N)
       CALL CALC_GAS_PROPS(J,N,D_TMP(N),MU_TMP(N),K_TMP(N),CP_TMP(N),H_TMP(N),SS%ISFUEL)
-      IF (SS%ISFUEL .AND. FUEL_INDEX <=0) FUEL_INDEX = N
+      IF (SS%ISFUEL .AND. FUEL_INDEX <=0) THEN
+         FUEL_INDEX = N
+         MW_FUEL = SPECIES(N)%MW
+      ENDIF
       SS%D(J) = D_TMP(N)
    ENDDO
    DO N = 1,N_GAS_SPECIES
