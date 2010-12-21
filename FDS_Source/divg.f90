@@ -626,8 +626,7 @@ ENDIF
 
 
 ! Add contribution of evaporating droplets
- 
-!$OMP PARALLEL
+
 IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=1,KBAR
