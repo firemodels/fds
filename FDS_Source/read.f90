@@ -2139,6 +2139,7 @@ DO N = 1,N_SPECIES
          I_O2 = SPECIES(N)%Y_INDEX
       CASE('SOOT')
          I_SOOT = SPECIES(N)%Y_INDEX
+         IF(SIMPLE_CHEMISTRY) SS%MW = MW_SOOT
       CASE('NITROGEN')
          I_N2 = SPECIES(N)%Y_INDEX
       CASE('HYDROGEN')
@@ -9363,8 +9364,8 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                CALL SHUTDOWN(MESSAGE)
             ENDIF
          ELSE
-            IF (.NOT.SIMPLE_CHEMISTRY) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a fire or smoke source'
+            IF (SOOT_INDEX <=0) THEN
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
          ENDIF
