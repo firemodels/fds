@@ -439,7 +439,7 @@ Maryland. After graduating, he won a National Research Council
 Post-Doctoral Fellowship at the Building and Fire Research Laboratory
 of NIST, where he developed the combustion algorithm within FDS. He is
 currently funded by the Fire Research Grants Program.  He is the principal developer
-of the multi-parameter mixture fraction combustion model and control
+of the lumped species framework, combustion models, and device and control
 logic within FDS.
 \end{description}
 
@@ -623,19 +623,10 @@ Numerical Simulation (DNS) if the underlying numerical mesh is fine
 enough. LES is the default mode of operation.
 
 \item[Combustion Model]
-For most applications, FDS uses a single step chemical reaction whose products are tracked via
-a two-parameter mixture fraction model.  The mixture fraction is a conserved
-scalar quantity that represents the mass fraction of one or more components of the gas at
-a given point in the flow field.  By default, two components of the mixture fraction are explicitly
-computed. The first is the mass fraction of unburned fuel and
-the second is the mass fraction of burned fuel ({\em i.e.} the mass of the combustion products
-that originated as fuel).  A two-step chemical reaction with a three parameter
-mixture fraction decomposition can also be used with the first step being oxidation of fuel
-to carbon monoxide and the second step the oxidation of carbon monoxide to carbon dioxide.
-The three mixture fraction components for the two step reaction
-are unburned fuel, mass of fuel that has completed the first reaction step, and the mass
-of fuel that has completed the second reaction step.  The mass fractions of all of the major
-reactants and products can be derived from the mixture fraction parameters by means of
+For most applications, FDS uses a single step, mixing controlled chemical reaction which uses three lumped species (a species representing a group of species).  These lumped species are air, fuel plus an optional diluent, and products. By default the last two lumped species are explicitly
+computed. A two-step chemical reaction with an additional lumped species can also be used with the first step being oxidation of fuel to carbon monoxide and the second step the oxidation of carbon monoxide to carbon dioxide.
+The four lumped species for the two step reaction are air, fuel plus an optional diluent, and products of incomplete combustion (i.e. products of the first step), and prodcuts of complete combustion (i.e. products of the second step).  The mass fractions of all of the major
+reactants and products can be derived from the lumped species by means of
 ``state relations.''  Lastly, a multiple-step finite rate model is also available.
 
 \item[Radiation Transport] Radiative heat transfer is included in the
@@ -1390,7 +1381,7 @@ Validation Suite} removed for clarity.
 ...
 &BNDF QUANTITY='GAUGE HEAT FLUX' /
 ...
-&DEVC XYZ=6.04,0.28,3.65, QUANTITY='oxygen', ID='EO2_FDS' /
+&DEVC XYZ=6.04,0.28,3.65, QUANTITY='OXYGEN', ID='EO2_FDS' /
 ...
 &TAIL / End of file.
 \end{verbatim}
@@ -3575,8 +3566,7 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely
 on the availability of material properties and the appropriateness of the underlying pyrolysis model. This
 section provides a description of the parameters that describe a burning solid material when the burning rate is known. In other
-words, you use these parameters to {\em specify} the burning rate.
-
+words, you use these parameters to {\em specify} the burning rate.  Note that all pyrolysis models in FDS require the user to explicitly define the gas phase reac \ref {info:REAC}
 
 \subsection{A Gas Burner with a Specified Heat Release Rate}
 
@@ -3604,20 +3594,13 @@ An alternative to {\ct HRRPUA} with the exact same functionality is
 {\ct MLRPUA}, except this parameter
 specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
 {\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line. With either,
-the stoichiometry of the gas phase reaction is set by the
-parameters on the {\ct REAC} line. All of the
-species associated with the combustion process are accounted for
-by way of the mixture fraction variable and should not be
-explicitly prescribed. The exception to this rule is
-where a non-reacting gas is introduced into the domain that merely serves
-as a diluent, like CO$_2$ from an extinguisher or H$_2$O from evaporated
-sprinkler droplets (see Section~\ref{info:SPEC} for details).
+the stoichiometry of the gas phase reaction is set by the simple chemistry input
+parameters on the {\ct REAC} line. 
 If a finite rate combustion model is desired instead of the default mixture
 fraction model, see Section~\ref{info:finite}.
 
 \begin{warning}
-Specifying {\ct HRRPUA} or {\ct MLRPUA} automatically invokes the mixture fraction
-combustion model.
+Specifying {\ct HRRPUA} or {\ct MLRPUA} requires the use of the simple chemistry inputs for {\ct REAC}.
 \end{warning}
 
 
@@ -4326,7 +4309,7 @@ the {\bf known} species. If the sum of the gaseous yields (Section~\ref{nu_gas})
 This is a silly example of a solid block of ``foam'' that is pyrolyzed
 until it is completely consumed. The heat flux is generated by placing
 hot surfaces around the box. There is no combustion.  In the first
-example (box\_burn\_away1), the released gas is fuel (mixture fraction)
+example (box\_burn\_away1), the released gas is fuel ('LUMPED SPECIES 1')
 and in the second example (box\_burn\_away2) it is an additional
 species called 'GAS'. In the third and fourth examples
 (box\_burn\_away3 and 4), the
@@ -5623,20 +5606,20 @@ will depend upon the type of TABL and those requirements are provided in the app
 
 A common source of confusion in FDS is the distinction between gas phase {\em combustion} and solid phase {\em pyrolysis}. The former
 refers to the reaction of fuel vapor and oxygen; the latter the generation of fuel vapor at a solid or liquid surface. Whereas there
-can be many types of combustibles in an FDS fire simulation, there can only be one gaseous fuel. The reason is cost. It is expensive to
+can be many types of combustibles in an FDS fire simulation, in the simple chemistry, mixing controlled combustion model there can only be one gaseous fuel. The reason is cost. It is expensive to
 solve transport equations for multiple gaseous fuels. Consequently, the burning rates of solids and liquids are automatically adjusted by
 FDS to account for the difference in the heats of combustion of the various combustibles. In effect, you specify a single gas phase
 reaction as a surrogate for all the potential fuel sources.
 
-The gas phase reaction can be described in two ways. By default, a so-called {\em mixture fraction} model is used to account for the evolution of
+The gas phase reaction can be described in two ways. By default, a so-called {\em mixture controlled} model is used to account for the evolution of
 the fuel gas from its surface of origin through the combustion process. The alternative is what is referred to as the {\em finite-rate}
 approach, where all of the individual gas species involved in the combustion process are defined and tracked individually, and the combustion process
 is modeled as one or more finite-rate reactions of these species. This is a
-costlier and more complicated approach than the {\em mixture fraction} model. This chapter describes both methods, with an emphasis on the more
-commonly used mixture fraction model.
+costlier and more complicated approach than the {\em mixing controlled} model. This chapter describes both methods, with an emphasis on the more
+commonly used mixing controlled model.
 
 
-\section{Mixture Fraction Combustion: The \texorpdfstring{{\tt REAC}}{REAC} Namelist Group}
+\section{Combustion: The \texorpdfstring{{\tt REAC}}{REAC} Namelist Group}
 \label{info:REAC}
 
 
@@ -5646,32 +5629,26 @@ Heat Release Rate Per Unit Area, {\ct HRRPUA}, on a
 This essentially creates a gas burner whose fuel flow rate you explicitly control. The other way to model a fire is to specify solid phase
 thermal and pyrolysis properties on one or more {\ct MATL} lines, assemble these materials via a {\ct SURF} line, and then apply this
 boundary condition to obstructions or vents. In this case the burning rate of the fuel depends on the net heat feedback to the surface.
-In both cases, however, the mixture fraction combustion model is used by default. In fact, the mere presence of these
-parameters automatically invokes the mixture fraction model\footnote{There is an exception to this rule. It is possible to use the finite-rate
-combustion model in conjuction with a pyrolysis model that generates the specified gaseous fuel species.}.
-Do not specify explicitly gas species like
-oxygen if you have also specified the heat release rate per unit area, {\ct HRRPUA}, or solid phase reaction rates.
 
-\subsection{Basics}
+In both cases, the combustion reaction must be specified.  This is done using the {\ct REAC} namelist group.  The simplest approach to this is treat the fuel as simple mixture of C, H, O, and N that reacts in either one or two steps based using mixing controlled combustion.  A slightly more complex approach is to define a set of gas species and mixing controlled reactions.  The most complex approach is to define a set of gas species and reactions that use temperature dependent kinetics.  For most FDS users, the mixing controlled combustion model with simple chemistry will be the model of choice.
 
-The stoichiometry of the gas phase combustion reaction or reactions is specified using the {\ct REAC} namelist group. For the default mixture fraction
-model, only a single {\ct REAC} line is needed. If the {\ct REAC} line is not found in the input file, propane will
-be used as the surrogate fuel, and all burning rates will be adjusted accordingly.
-If you only specify the fire's heat release
-rate with {\ct HRRPUA}, then the reaction parameters may not
-require adjusting, and no {\ct REAC} line need be added to the input file.
-However, if you know something about the predominant fuel gas, you might want to consider
-specifying, at the very least, the basic stoichiometry via the {\ct REAC} line.
+\subsection{Mixing Controlled Reactions with Simple Chemistry}
 
-Using the mixture fraction model, each reaction is assumed to be of the form:
+This approach to combustion considers a single fuel species that is composed primarily of C,H,O, and N that reacts with oxygen in one or two mixing controlled steps to form water vapor and carbon dioxide with the fuel nitrogen becoming nitrogen gas.  
+
+The chemical composition of the fuel is specified using the {\ct REAC} namelist group. For the default mixture fraction
+model, only a single {\ct REAC} line is needed. If combustion is desired, a {\ct REAC} line must be specified and there is no default fuel chemistry.  The user is responsible for defined the fuel chemistry and the post-combustion yields of CO and soot.
+
+Using the simple chemistry model, each reaction is assumed to be of the form:
 \be \mathrm{C_xH_yO_zN_vOther_w + \nu_{O_2} \; O_2 \rightarrow
     \nu_{CO_2} \; CO_2 + \nu_{H_2O} \; H_2O +
     \nu_{CO}   \; CO   + \nu_{soot} \; Soot + \nu_{N_2} \; N_2 + \nu_{H_2} \; H_2 +
     \nu_{Other} \; Other } \ee
+
 You need only specify the chemical formula of the fuel along with
 the yields of CO, soot, and H$_2$, and the amount of hydrogen in the soot, H$_{frac}$.
 For completeness you can specify the N$_2$ content of
-the fuel and the presence of other species. FDS will use that information internally to
+the fuel and the presence of and OTHER species. FDS will use that information internally to
 determine the amount of combustion products that are formed:
 \begin{eqnarray*}
 \mathrm{ \nu_{O_2}  }    &=& \mathrm{ \nu_{CO_2} + \frac{\nu_{CO}}{2} + \frac{\nu_{H_2O}}{2} - \frac{\hbox{z}}{2}  } \\
@@ -5684,7 +5661,8 @@ determine the amount of combustion products that are formed:
 \mathrm{ \nu_{other}}    &=& \mathrm{ w } \\
 \mathrm{ W_s        }    &=& \mathrm{ H_{frac} \, W_H + (1-H_{frac}) \, W_C }
 \end{eqnarray*}
-The following parameters may be prescribed on the {\ct REAC} line.
+
+The following parameters may be prescribed on the {\ct REAC} line when using simple chemistry with mixing controlled reactions.
 Note that the various {\ct YIELD}s are for well-ventilated, post-flame conditions. There are options to
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
@@ -5692,19 +5670,18 @@ the post-flame yields for CO, soot and any other species listed below.
 \item[{\ct FUEL}] A character string that identifies fuel species for the reaction. When using the mixture fraction, specifying a fuel will cause FDS to use the thermophyscial properties for that fuel when computing quantites such as specific heat or viscosity.  This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N, OTHER}. Table~\ref{tab:gasspecies} provides a listing of the available species.  By default, FDS uses the gas thermophysical properties of {\ct ETHYLENE} for the fuel.
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
 label the {\ct REAC} line to more easily identify the fuel species.
-\item[{\ct C, H, O, N, OTHER}] The fuel chemical formula. All numbers are positive.
-(Mixture Fraction only, default values are those of propane)
+\item[{\ct C, H, O, N, OTHER}] The fuel chemical formula. All numbers are positive.  One of either C or H must be specified.
 \item[{\ct MW\_OTHER}] Average molecular weight for {\ct OTHER} (g/mol).
 (Mixture Fraction only, default is the molecular weight of N$_2$, 28 g/mol)
-\item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Mixture Fraction only, default 0.232428)
-\item[{\ct Y\_F\_INLET}] Mass fraction of fuel in fuel stream (Mixture Fraction only, default 1.0)
+\item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232428)
+\item[{\ct Y\_F\_INLET}] Mass fraction of fuel in fuel stream (Default 1.0)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_s$.
 Note that this parameter does not apply to the processes of soot growth and oxidation,
-but rather to the net production of the smoke particulate from the fire.  (Mixture Fraction only, default 0.01)
+but rather to the net production of the smoke particulate from the fire.  (Default is 0.0)
 \item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.
-(Mixture Fraction only, default 0.1)
+(default 0.1)
 \item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon
-monoxide, $y_{CO}$. (Mixture Fraction only, default 0.0)
+monoxide, $y_{CO}$. (Default 0.0)
 \item[{\ct H2\_YIELD}] The fraction of fuel mass converted into hydrogen, $y_{H_2}$. (Mixture Fraction only, default 0.0)
 \item[{\ct HEAT\_OF\_COMBUSTION}] $\Delta H$ (kJ/kg). The amount of
 energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
@@ -5717,7 +5694,7 @@ specified that FDS will ignore the value for {\ct EPUMO2}.
 values represent values for complete combustion ({\ct .TRUE.}) or for incomplete combustion ({\ct .FALSE.}),
 i.e. the values account for the specified $y_{CO}$, $y_{H_2}$, and $y_s$.  If {\ct IDEAL=.TRUE.}, then
 FDS will internally adjust $\Delta H$ to account for products of incomplete combustion. The default value is {\ct .FALSE.}
-\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.  Note that if this parameter is used, then some form of ignition source must be present in order for combution to begin. (Mixture Fraction only, default 0.0 K)
+\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.  Note that if this parameter is used, then some form of ignition source must be present in order for combution to begin. (Default 0.0 K)
 \end{description}
 
 \noindent
@@ -6052,8 +6029,8 @@ absorptivity.
 The yields of fuel and water gases are usually specified
 with the parameters {\ct NU\_FUEL} and {\ct NU\_WATER} on the {\ct MATL} line.
 However, the yield of any explicitly-defined (via the {\ct SPEC} line) gas species
-can be specified using the parameters {\ct NU\_GAS(j,k)} and {\ct SPEC\_ID(j,k)}, where {\ct j} refers to the {\ct j}'th reaction
-of the material and {\ct k} refers to the {\ct k}'th explicitly-defined gas species.
+can be specified using the parameters {\ct NU\_GAS(j,k)} and {\ct SPEC\_ID(k)}, where {\ct j} refers to the {\ct j}'th reaction
+of the material and {\ct k} refers to the {\ct k}'th gas species in {\ct SPEC\_ID(k)}.
 {\ct NU\_GAS} can also be used to specify the yields of the
 mixture fraction and water vapor, assuming each is implicitly-defined and its order in the list of
 species is obtained from the output file {\bf CHID.out}.
@@ -6085,7 +6062,7 @@ mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted t
       E                       = 1.51E5
       N_S                     = 1.0
       NU_RESIDUE              = 0.18
-      SPEC_ID(1,1:4) = 'PYROLYZATE','OXYGEN','WATER VAPOR','CARBON DIOXIDE'
+      SPEC_ID(1:4) = 'PYROLYZATE','OXYGEN','WATER VAPOR','CARBON DIOXIDE'
       NU_GAS(1,1:4)           = 0.82,0,0,0
       HEAT_OF_REACTION        = 430.
       HEAT_OF_COMBUSTION      = 14500.
@@ -6093,13 +6070,10 @@ mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted t
 \end{verbatim} \normalsize
 
 
-
-
 \subsection{Special Topic: Finite-Rate Combustion}
 \label{info:finite}
 
-Usually, FDS uses mixture fraction concepts to describe combustion. However, FDS can also explicitly track gas species and
-reactions that can occur between them. This section describes how to do this.
+Usually, FDS uses a mixing controlled combustion model. However, FDS can also compute reaction rates constants using an Arrhenius model. This section describes how to do this.
 
 \begin{enumerate}
 \item It is strongly recommended that finite-rate reactions be invoked only
@@ -6108,8 +6082,7 @@ Note: you may use the finite-rate reaction scheme in an
 LES calculation, but because the temperature in a large scale calculation
 is smeared out over a mesh cell, some of the reaction parameters may need
 to be modified to account for the lower temperatures.
-\item The {\ct BACKGROUND\_SPECIES} on the {\ct MISC} line is normally
-set to be {\ct 'NITROGEN'}.
+\item The background species, if unspecified on a {\ct SPEC} line, is normally set to be {\ct 'AIR'}.
 \item The namelist group {\ct SPEC} is used to specify each additional
 species. Do not enter a {\ct SPEC} line for the background species.
 \item Read Section~\ref{info:SPEC} for a description of the boundary
@@ -6117,37 +6090,67 @@ conditions for the gas species.
 \item The {\ct REAC} namelist group is used to designate the fuel and the reaction rate
 parameters.  For a finite-rate reaction you can specify multiple {\ct REAC} lines.  Note that
 FDS will evaluate the reactions in the order they are listed in the input file. %Jason add tech man ref
+\end{enumerate}
+
+The inputs to use the finite rate model are given below:
+
 \begin{description}
-\item[{\ct FUEL}] Character string indicating which of the listed
-optional gas species is the fuel.
-\item[{\ct OXIDIZER}] Character string indicating which of the listed
-optional gas species is the oxidizer.
+\item[{\ct FUEL}] Character string indicating which of the listed gas species is the fuel.
 \item[{\ct BOF}] Pre-exponential factor in one-step chemical reaction in
 units of cm$^3$/mole/s.
 \item[{\ct E}] Activation energy for one-step chemical reaction in
 units of kJ/kmol.
-\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where
-negative values indicate reactants and positive values indicate products.  Note that the background species
-cannot participate in the reaction. This means that {\ct NU(0)} is not a valid input parameter.
+\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where negative values indicate reactants and positive values indicate products.
 \item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}.
-Note that it is possible that a given {\ct SPEC} can be assigned a value of {\ct N\_S} greater than zero and a value of {\ct NU} equal to zero. In other words,
-the rate equation can be dependent on a species that does not participate directly in the reaction.  Note also that the background species
-cannot participate in the reaction. This means that {\ct N\_S(0)} is not a valid input parameter.
-\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion the chemical reaction in units of kJ/kg. (Default 40,000 kJ/kg)
+\item[{\ct SPEC\_ID}] Array containing the names of the species that participate in the reaction. Note that it is possible that a given {\ct SPEC} can be assigned a value of {\ct N\_S} greater than zero and a value of {\ct NU} equal to zero. In other words,
+the rate equation can be dependent on a species that does not participate directly in the reaction.
+\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
 \end{description}
 
-\end{enumerate}
+
+
+\subsection{Special Topic: Mixing Controlled Combustion}
+\label{info:mixing}
+
+In a typical simulation the mixing controlled combustion model is used in conjunction with simple chemistry as described in \ref{info:REAC}.  The mixing controlled combustion model can also be used with user defined species.  The inputs for the mixing controlled combustion model are:
+
+\begin{description}
+\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.  Note that if this parameter is used, then some form of ignition source must be present in order for combution to begin. (Default 0.0 K)
+\item[{\ct FUEL}] Character string indicating which of the listed gas species is the fuel.
+\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where negative values indicate reactants and positive values indicate products.
+\item[{\ct SPEC\_ID}] Array containing the names of the species that participate in the reaction. 
+\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
+\end{description}
+
+\subsection{Special Topic: Mixed-Mode Combustion}
+\label{info:mixedmode}
+
+In a typical calculation, flame temperatures are not likely to be resolved well enough to allow for a finte rate reaction to be computed.  However, the temperatures in a layer environment are likely to support a finite rate reaction for slow reactions (e.g. carbon monoxide oxidation in a hot layer).  A mixed-mode combustion model can be used for this situation.  To enable this model, specify the finite rate reaction inputs described in the previous section as well as the input parameter {\ct THRESHOLD\_TEMPERATURE} and .  During a simluation, if there is heat release from other reactions, then a mixed-mode reaction will be evaluated as mixing controlled reaction.  If there is no heat release from other reactions and the local temperature exceeds the {\ct THRESHOLD\_TEMPERATURE}, then the mixed-mode reaction will be evaluated as a finte rate reaction.
+
+\begin{description}
+\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.  Note that if this parameter is used, then some form of ignition source must be present in order for combution to begin. (Default 0.0 K)
+\item[{\ct BOF}] Pre-exponential factor in one-step chemical reaction in
+units of cm$^3$/mole/s.
+\item[{\ct E}] Activation energy for one-step chemical reaction in
+units of kJ/kmol.
+\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where negative values indicate reactants and positive values indicate products.
+\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}.
+\item[{\ct SPEC\_ID}] Array containing the names of the species that participate in the reaction. Note that it is possible that a given {\ct SPEC} can be assigned a value of {\ct N\_S} greater than zero and a value of {\ct NU} equal to zero. In other words,
+the rate equation can be dependent on a species that does not participate directly in the reaction.
+\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
+\item[{\ct THRESHOLD\_TEMPERATURE}] The temperature at which finite rate combustion will be computed when there is no heat release from other reactions. (Default 0.0 K)
+\end{description}
 
 \section{Species mixtures (Lumped Species): The \texorpdfstring{{\tt SMIX}}{SMIX} Namelist Group}
 \label{info:SMIX}
 
-In many simulations there are sets of species that are created and transported in the same manner.  In this case, tracking each species individually uses computational resources and time that need not be spent.  For example, one could use the {\ct SPEC} namelist group to define the background species of air as a combination of nitrogen, oxygen, water vapor, and carbon dioxide.  However, this would require tracking three species each of which would require memory and time.  Alternatively, if one could create a lumped species that represented that composition and tracked only that species, then both time and memory could be saved.  This can be accomplished with the {\ct SMIX} namelist group.  
+In many simulations there are sets of species that are created and transported in the same manner. In this case, tracking each species individually uses computational resources and time that need not be spent. For example, one could use the {\ct SPEC} namelist group to define the background species of air as a combination of nitrogen, oxygen, water vapor, and carbon dioxide. However, this would require tracking three species each of which would require memory and time. Alternatively, if one could create a lumped species that represented that composition and tracked only that species, then both time and memory could be saved. This can be accomplished with the {\ct SMIX} namelist group.
 
 The following inputs:
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID = 'NITROGEN',BACKGROUND=.TRUE.,BACKGROUND_ONLY=.TRUE./
+&SPEC ID = 'NITROGEN',BACKGROUND_ONLY=.TRUE./
 &SPEC ID = 'OXYGEN', MASS_FRACTION_0 = 0.23054 /
 &SPEC ID = 'WATER VAPOR', MASS_FRACTION = 0.00626/
 &SPEC ID = 'CARBON DIOXIDE', MASS_FRACTION = 0.00046 /
@@ -6586,26 +6589,16 @@ as obstructions or clutter. Setting {\ct STATIC=.TRUE.} only makes sense in conj
 
 \subsection{Water Droplets}
 
-{\ct WATER=.TRUE.} declares that the liquid droplets evaporate
-into {\ct 'WATER VAPOR'}, a separate gas species that is {\em automatically} added to the calculation by this command.
-By default, {\ct WATER=.FALSE.}, even though the default
-properties of droplets are that of water. Setting {\ct WATER=.TRUE.} instructs FDS to add {\ct 'WATER VAPOR'} as an explicitly defined species,
-and it also invokes appropriate constants
-related to the absorption of thermal radiation by the water droplets.
-It also causes the droplets to be colored blue in Smokeview.
+If the droplets are defined with {\ct SPEC\_ID='WATER VAPOR'}, then the particles will be assigned the thermophysical properties of water, the radiation absorption properties of water, and will be colored blue in Smokeview.
 
 If the liquid droplets are to evaporate into some other gaseous species, you must explicitly define the species via the {\ct SPEC} namelist group (see Section~\ref{info:SPEC}), and then
 designate the appropriate {\ct SPEC\_ID} on the {\ct PART} line.
 
-
 \subsection{Fuel Droplets}
 
-{\ct FUEL=.TRUE.} indicates that the liquid droplets evaporate
-into fuel gas and burn. In this case, add the {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) of the fuel to the {\ct PART} line. Fuel droplets are colored yellow by default in Smokeview.
-This feature only works for a mixture fraction-based combustion calculation, in which case the droplets evaporate into an equivalent amount of fuel
-vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}.
+If the droplets evaporate into the {\ct FUEL} identified on {\ct REAC} then they will be colored yellow by default in Smokeview and any resulting fuel vapor will burn according to the combustion model specified on the {\ct REAC} line.  The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}.
 If a spray nozzle is used to generate the fuel droplets, its characteristics are specified
-in the same way as those for a sprinkler.
+in the same way as those for a sprinkler.  If the fuel species is present in the liquid properties table as a fuel, then the droplets will be given fuel radiation absorption properties.
 
 \subsubsection{Example Case: spray\_burner}
 
@@ -6619,10 +6612,12 @@ parameters are given here:
 
 \footnotesize
 \begin{verbatim}
+&REAC FUEL='N-HEPTANE',C=7,H=16,SOOT_YIELD=0.01,HEAT_OF_COMBUSTION=44500./
+
 &DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
 &DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
 
-&PART ID='heptane droplets', FUEL=.TRUE., VAPORIZATION_TEMPERATURE=98.,
+&PART ID='heptane droplets', SPEC_ID='N-HEPTANE',VAPORIZATION_TEMPERATURE=98.,
       HEAT_OF_VAPORIZATION=316., SPECIFIC_HEAT=2.25, DENSITY=688.,
       QUANTITIES(1:2)='DIAMETER','DROPLET_TEMPERATURE',
       DIAMETER=1000., HEAT_OF_COMBUSTION=44500., SAMPLING_FACTOR=1 /
@@ -6657,13 +6652,6 @@ The HRR curve for this example is given in Fig.~\ref{spray_burner}.
 \label{spray_burner}
 \end{figure}
 
-Note that {\ct FUEL=.TRUE.} automatically
-invokes a mixture fraction calculation in which fuel
-from the evaporating fuel droplets is burned according to the overall reaction scheme. Because the default mixture fraction
-combustion model assumes that fuel and oxygen burn when mixed (assuming that the oxygen concentration is above an empirically
-determined threshold), there is no need to specify an ignition source. For most liquid fuels, the small amount of evaporation
-at ambient temperature is enough to start the combustion process. In some sense, there is an implicit pilot flame.
-
 Note also that this feature is subject to mesh
 dependence. If the mesh cells are too coarse, the
 evaporating fuel can be diluted to such a degree that it
@@ -6672,14 +6660,13 @@ fuel and the amount of fuel being ejected from the
 nozzle. Always test your burner at the resolution of your overall simulation.
 
 
-
 \subsection{Solid Particles that do not Evaporate}
 
 Unless you declare {\ct MASSLESS=.TRUE.} on the {\ct PART} line, it is assumed that the particle or droplet has mass and thermal properties that govern its
 heating and evaporation. To prevent evaporation, set {\ct EVAPORATE=.FALSE.} The particles will still heat up due to convection, but they will not
 shrink and no additional gaseous species need to be declared.
 
-Note that the absorption of thermal radiation by water ({\ct WATER=.TRUE.}) or fuel droplets ({\ct FUEL=.TRUE.}) is
+Note that the absorption of thermal radiation by water or fuel droplets is
 handled in FDS with fairly well-established physical sub-models, the details
 of which are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 However, for arbitrary particles or droplets, there is no assumed radiative absorption.
@@ -7160,7 +7147,7 @@ Heskestad Ionization          & ---         & ---          &  1.8               
 
 By default, FDS assumes that the smoke from a fire is generated in direct proportion to the heat release rate. A value
 of {\ct SOOT\_YIELD=0.01} on the {\ct REAC} line means that the smoke generation rate is 0.01 of the fuel burning rate. The
-``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the mixture fraction.
+``smoke'' in this case is not explicitly tracked by FDS, but rather is assumed to be a function of the combustion products lumped species.
 
 Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of
 the HRR (or even in lieu of an actual fire, like a smouldering source). You might also want to define a mass extinction coefficient for the
@@ -7182,9 +7169,9 @@ the ``SMOKE3D'' feature in Smokeview. Use the following lines:
 \normalsize
 \noindent
 The same smoke detector model is used that was described above. Only now, the mass fraction of your species {\ct 'MY SMOKE'} is used in the
-algorithm, rather than that associated with the mixture fraction. Note that your species will not participate in the radiation calculation. It
+algorithm, rather than that associated with the lumped species. Note that your species will not participate in the radiation calculation. It
 will merely serve as a surrogate for smoke. Note also that if you specify explicitly a smoke surrogate, you should set {\ct SOOT\_YIELD=0} on the
-{\ct REAC} line to prevent FDS from including smoke as a mixture fraction species.
+{\ct REAC} line to prevent FDS from including smoke as a component of the combustion product lumped species.
 
 
 
@@ -7217,8 +7204,8 @@ where $output_i$ is the FDS output for the beam detector of the $i$th path and t
 \subsubsection{Example Case: {\bf beam\_detector}}
 
 A 10~m by 10~m by 4~m compartment is filled with smoke, represented as 0.006~kg/kg of
-the mixture fraction species variable, {\ct MIXTURE\_FRACTION\_2}\footnote{In its default mode, the mixture fraction combustion
-model requires transport equations for two gas species -- {\ct MIXTURE\_FRACTION\_1} and {\ct MIXTURE\_FRACTION\_2}. The first
+the lumped species variable, {\ct LUMPEDS SPECIES 1} footnote{In its default mode, the mixing controlled combustion
+model requires transport equations for two gas species -- {\ct LUMPED SPECIES 1} and {\ct LUMPED SPECIES 2}. The first
 is just the fuel gas, the second is a combination of the products of combustion.}. The default soot yield is
 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$.
 Using the default mass extinction coefficient of
@@ -7260,12 +7247,12 @@ used to specify the central detector:
 
 \footnotesize
 \begin{verbatim}
-&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot1', DEVC_ID='asp1',
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='SOOT', ID='soot1', DEVC_ID='asp1',
       FLOWRATE=0.1, DELAY=20 /
-&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='soot2', DEVC_ID='asp1',
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='SOOT', ID='soot2', DEVC_ID='asp1',
       FLOWRATE=0.2, DELAY=10 /
  ...
-&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='soot', ID='sootN', DEVC_ID='asp1',
+&DEVC XYZ=..., QUANTITY='DENSITY', SPEC_ID='SOOT', ID='sootN', DEVC_ID='asp1',
       FLOWRATE=0.3, DELAY=30 /
 
 &DEVC XYZ=..., QUANTITY='ASPIRATION', ID='asp1', BYPASS_FLOWRATE=0.4, SETPOINT=0.02 /
@@ -7936,9 +7923,6 @@ output of heat release rate and associated quantities.
 \item[{\ct MASS\_FILE}] If {\ct .TRUE.}, produce an output file listing the total masses of all gas species as a function of time.
 It is {\ct .FALSE.} by default because the calculation
 of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} controls the frequency of output.
-\item[{\ct STATE\_FILE}] If {\ct .TRUE.}, produce an output file listing the species mass fractions associated with the mixture fraction,
-assuming complete combustion. It is {\ct .FALSE.} by default,
-and only makes sense for calculations involving the mixture fraction model.
 \item[{\ct MAXIMUM\_DROPLETS}] Maximum number of Lagrangian particles that can be included on any
 mesh at any given time. (Default 500000)
 \item[{\ct SMOKE3D}] If {\ct .FALSE.}, do not produce an animation of the smoke and fire. It is {\ct .TRUE.} by default.
@@ -8278,9 +8262,9 @@ obtained elsewhere.
 
 \label{info:SMOKE3D}
 
-When you do a fire simulation using the default mixture fraction combustion model, FDS automatically creates two output files that are rendered by
-Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'MASS FRACTION'} of {\ct 'soot'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume)
-are used in the visualization. You have the option of rendering any other species mass fraction instead of {\ct 'soot'}, so long as the
+When you do a fire simulation, FDS automatically creates two output files that are rendered by
+Smokeview as realistic looking smoke and fire. By default, the output quantities are the {\ct 'MASS FRACTION'} of {\ct 'SOOT'} and {\ct 'HRRPUV'} (Heat Release Rate Per Unit Volume)
+are used in the visualization. You have the option of rendering any other species mass fraction instead of {\ct 'SOOT'}, so long as the
 {\ct MASS\_EXTINCTION\_COEFFICIENT} (either from the {\ct REAC} line, or over-ridden by the value on the {\ct SPEC} line) is appropriate in
 describing the attenuation of visible light by the specified gas species.
 The alternative gas species is given by {\ct SMOKE3D\_QUANTITY} on the {\ct DUMP} line.
@@ -8288,7 +8272,7 @@ If the specified quantity requires the additional specification of a particular 
 use {\ct SMOKE3D\_SPEC\_ID} to provide the {\ct SPEC\_ID}.
 See the Smokeview User's Guide for more details on how these quantities are rendered.
 
-Here is an example of how to control the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default mixture fraction model.
+Here is an example of how to control the smoke species. Normally, you do not need to do this as the ``smoke'' is an assumed part of the default combustion model when a non-zero {\ct SOOT\_YIELD} is defined.
 
 \footnotesize
 \begin{verbatim}
@@ -8386,7 +8370,7 @@ where $R_1 = $~1~m.
 \label{info:visibility}
 \label{info:obscuration}
 
-If you are performing a fire calculation using the mixture fraction
+If you are performing a fire calculation using the simple chemistry
 approach, the smoke is tracked along with all other major products of
 combustion. The most useful quantity for assessing visibility in a
 space is the {\em light extinction coefficient},
@@ -8417,7 +8401,7 @@ capability of the present version of the model.
 Three parameter control smoke production and visibility; each
 parameter is input on the {\ct REAC} line. The first parameter
 is {\ct SOOT\_YIELD}, which is the fraction of fuel mass that
-is converted to soot if the mixture fraction model is being used. The second parameter is called the
+is converted to soot if the simple chemistry approach is being used. The second parameter is called the
 {\ct MASS\_EXTINCTION\_COEFFICIENT}, and it is the $K_m$ in
 Eq.~(\ref{mec}). The default value is 8700~m$^2$/kg, a value
 suggested for flaming combustion of wood and plastics\footnote{For most flaming fuels, a suggested value for $K_m$ is 8700~m$^2$/kg~$\pm$~1100~m$^2$/kg at a
@@ -8429,11 +8413,11 @@ The gas phase output quantity {\ct 'EXTINCTION COEFFICIENT'} is $K$. A similar q
 {\ct 'OPTICAL DENSITY'}, $K/2.3$, the result of using $\log_{10}$ in the definition
 \be D \equiv - \frac{1}{L} \, \log_{10} \left( \frac{I}{I_0} \right) = K \, \log_{10} e   \ee
 The visibility $S$ is output via the keyword {\ct VISIBILITY}. Note
-that, by default, the visibility is associated with the smoke that is implicitly defined by the mixture fraction
+that, by default, the visibility is associated with the smoke that is implicitly defined by the simple chemistry
 model. However, this quantity can also be associated with an
 explicitly defined species via the inclusion of a {\ct SPEC\_ID}.
 In other words, you can specify the output quantity {\ct 'VISIBILITY'} along with a {\ct SPEC\_ID}.
-This does not require that you do a mixture fraction calculation; only that you have specified the given species via a separate
+This does not require that you do a simple chemistry calculation; only that you have specified the given species via a separate
 {\ct SPEC} line. You can
 specify a unique {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line as well.
 
@@ -8926,13 +8910,13 @@ Thus, you can either paint values of $C_p$ at all surface points, or create a si
 During actual experiments, species such as CO and CO$_2$ are typically measured ``dry''; that is, the water
 vapor is removed from the gas sample prior to analysis.  For easier comparison of FDS predictions with measured data,
 you can specify the logical parameter {\ct DRY} on a {\ct DEVC} line that reports the {\ct 'MASS FRACTION'} or
-{\ct 'VOLUME FRACTION'} of a species when using the mixture fraction combustion model.  For example, the first line reports
+{\ct 'VOLUME FRACTION'} of a species.  For example, the first line reports
 the actual volume fraction of CO, and the second line reports the output of a gas analyzer in a typical experiment.
 
 \footnotesize
 \begin{verbatim}
-&DEVC ID='wet CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='carbon monoxide' /
-&DEVC ID='dry CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='carbon monoxide', DRY=.TRUE. /
+&DEVC ID='wet CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE'/
+&DEVC ID='dry CO', XYZ=..., QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE', DRY=.TRUE. /
 \end{verbatim}
 \normalsize
 
@@ -9155,7 +9139,7 @@ through a horizontal plane, like the total amount entrained in a fire plume. Use
 
 \footnotesize
 \begin{verbatim}
-&DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z', SPEC_ID='carbon monoxide',
+&DEVC ID='CO_flow', XB=-5,5,-5,5,2,2, QUANTITY='MASS FLUX Z', SPEC_ID='CARBON MONOXIDE',
       STATISTICS='AREA INTEGRAL' /
 \end{verbatim}
 \normalsize
@@ -9724,6 +9708,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MULT\_ID }                 & Character         & See Section~\ref{info:MULT}                       &               &               \\ \hline
 {\ct NUMBER\_INITIAL\_DROPLETS} & Integer           & See Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
 {\ct PART\_ID}                  & Character         & See Section~\ref{info:initial_droplets}           &               &               \\ \hline
+{\ct SPEC\_ID}                  & Character         & {\ct ID}s of species in {\ct MASS\_FRACTION}          &               &               \\ \hline
 {\ct TEMPERATURE}               & Real              & Initial value of temperature                      & $^\circ$C     & {\ct TMPA}    \\ \hline
 {\ct XB(6)}                     & Real Sextuplet    & Coordinates                                       & m             &               \\ \hline
 \end{longtable}
@@ -9808,6 +9793,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PYROLYSIS\_RANGE}        & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
 {\ct REFERENCE\_TEMPERATURE}  & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &        \\ \hline
 {\ct RESIDUE}                 & Character   & {\ct IDs} of residue {\ct MATL}           &                   &        \\ \hline
+{\ct SPEC\_ID}          & Character        & {\ct IDs} of gas species in {\ct NU\_GAS}           &                   &        \\ \hline
 {\ct SPECIFIC\_HEAT}          & Real        & Specific heat                             & kJ/kg/K           & 0.     \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat                 &                   &        \\ \hline
 \end{longtable}
@@ -9886,7 +9872,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CSMAG}                     & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
 %{\ct COMPUTE\_VISCOSITY\_TWICE} & Logical       & Compute twice per time step                   &               & {\ct .TRUE.}     \\ \hline
 %{\ct CONSTANT\_PROPERTIES}      & Logical       & Use exact fluid properties, not from table    &               & {\ct .FALSE.}     \\ \hline
-{\ct CO\_PRODUCTION}            & Logical       & See Section~\ref{info:combustion}             &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                       & Logical       & Direct Numerical Simulation                   &               & {\ct .FALSE.}     \\ \hline
 %{\ct DYNSMAG}                   & Logical       & Dynamic Smagorinsky model                     &               & {\ct .FALSE.}     \\ \hline
 %{\ct DSMAG\_FREQ}               & Integer       & Call DYNSMAG every DSMAG_FREQ time steps      &               & 1                 \\ \hline
@@ -9914,7 +9899,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct PERIODIC\_TEST}           & Integer       & Initial condition for verification test       &               & 0                 \\ \hline
 {\ct POROUS\_FLOOR}             & Logical       & See Section~\ref{info:sprinklers}             &               & {\ct .TRUE.}      \\ \hline
 %{\ct PROJECTION}                & Logical       & Use formal projection method (eliminates initial divergence errors) &               & {\ct .FALSE.}     \\ \hline
-{\ct RADIATION}                 & Logical       & Radiation calculation flag                    &               & {\ct .TRUE.}      \\ \hline
 {\ct RAMP\_GX}                  & Character     & Time function, $x$ comp. of gravity           &               &                   \\ \hline
 {\ct RAMP\_GY}                  & Character     & Time function, $y$ comp. of gravity           &               &                   \\ \hline
 {\ct RAMP\_GZ}                  & Character     & Time function, $z$ comp. of gravity           &               &                   \\ \hline
@@ -9924,7 +9908,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SC}                        & Real          & Schmidt number (LES only)                     &               & 0.5               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}        & Logical       & See Section~\ref{solid_phase_verification}    &               & {\ct .FALSE.}     \\ \hline
 {\ct STRATIFICATION}            & Logical       & See Section~\ref{info:stratification}         &               & {\ct .TRUE.}      \\ \hline
-{\ct SUPPRESSION}               & Logical       & See Section~\ref{info:combustion}             &               & {\ct .TRUE.}      \\ \hline
 {\ct SURF\_DEFAULT}             & Character     & Default SURFace type                          &               & {\ct 'INERT'}     \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & See Section~\ref{info:texture_map}            & m             & (0.,0.,0.)        \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST}                   &               & {\ct .FALSE.}     \\ \hline
@@ -10051,7 +10034,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DRAG\_LAW}                     & Character       & Geometry for drag correlation           &           & {\ct 'SPHERE'}\\ \hline
 {\ct EVAPORATE}                     & Logical         & Assume liquid evaporation               &           & {\ct .TRUE.}  \\ \hline
 {\ct FYI}                           & Character       & Comment String                          &           &               \\ \hline
-{\ct FUEL}                          & Logical         & Liquid Fuel                             &           & {\ct .FALSE.} \\ \hline
 %{\ct GAMMA}                         & Real            & Specific heat ratio for vapor           &           & 1.4           \\ \hline
 {\ct GAMMA\_D}                      & Real            & Size distribution parameter             &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}          & Real            & Heat of Combustion                      & kJ/kg     &               \\ \hline
@@ -10076,7 +10058,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct TREE}                          & Logical         & Particles are leaves                    &           & {\ct .FALSE.} \\ \hline
 {\ct USER\_DRAG\_COEFFICIENT}       & Real            & Constant drag coefficient               &           & -1.           \\ \hline
 {\ct VERTICAL\_VELOCITY}            & Real            & Droplet speed, vertical                 & m/s       &  0.5          \\ \hline
-{\ct WATER}                         & Logical         & Water Droplet                           &           & {\ct .FALSE.} \\ \hline
 \end{longtable}
 
 
@@ -10223,6 +10204,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NMIEANG                  } & Integer  & Number of polar angles              &                   & 15            \\ \hline
 {\ct NUMBER\_RADIATION\_ANGLES} & Integer  & Number of solid angles              &                   & 104           \\ \hline
 {\ct PATH\_LENGTH }             & Real     & Path length for radiation calc.     &   m               &               \\ \hline
+{\ct RADIATION}                 & Logical  & Radiation calculation flag          &               & {\ct .TRUE.}      \\ \hline
 {\ct RADIATIVE\_FRACTION}       & Real     & Radiative Loss Fraction             &                   & 0.35          \\ \hline
 {\ct RADTMP                   } & Real     & Assumed radiative source temp.      & $^\circ$C         & 900           \\ \hline
 {\ct TIME\_STEP\_INCREMENT}     & Integer  & Number time steps skipped           &                   & 3             \\ \hline
@@ -10285,6 +10267,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)          &   cm$^3$/mol/s    &     \\ \hline
 {\ct BETA\_EDC}                           & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
 {\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
+{\ct CO\_PRODUCTION}                      & Logical       & See Section~\ref{info:combustion}             &                   & {\ct .FALSE.}     \\ \hline
 {\ct CO\_YIELD}                           & Real        & Fraction of CO from the fuel                  & kg/kg             & 0        \\ \hline
 {\ct \tiny CRITICAL\_FLAME\_TEMPERATURE}  & Real        & Suppression criterion                         &   $^\circ$C       & 1427    \\ \hline
 {\ct E}                                   & Real        & Activation Energy (Finite Rate)               &   kJ/kmol         &     \\ \hline
@@ -10309,6 +10292,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct OXIDIZER}                            & Character   & Name of Oxidizer (Finite Rate)                &                   &         \\ \hline
 {\ct SOOT\_YIELD}                         & Real        & Fraction of soot from the fuel                & kg/kg             & 0.01    \\ \hline
 {\ct SOOT\_H\_FRACTION}                   & Real        & Atom fraction of hydrogen in soot             &                   & 0.1    \\ \hline
+{\ct SUPPRESSION}                         & Logical       & See Section~\ref{info:combustion}             &                   & {\ct .TRUE.}      \\ \hline
 {\ct VISIBILITY\_FACTOR}                  & Real        & Visibility parameter                          &                   &     3   \\ \hline
 {\ct X\_O2\_LL}                           & Real        & Lower Oxygen Limit                            &  mol/mol          & 0.15    \\ \hline
 {\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner                  &  kg/kg            & 1.0     \\ \hline
@@ -10485,6 +10469,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
 {\ct RGB(3)}                          & Int.~Triplet    & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                       & Real            & Wall roughness height             & m                   & 0.                      \\ \hline
+{\ct SPEC\_ID}                        & Character       & Species for {\ct MASS\_FLUX} or {\ct MASS\_FRACTION}             &                    &                       \\ \hline
 {\ct SPREAD\_RATE}                    & Real            & See Section~\ref{info:spread}     & m/s                 & 0.0                     \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
 {\ct SURFACE\_DENSITY}                & Real            & See Section~\ref{info:BURN_AWAY}  & kg/m$^2$            & 0.0                     \\ \hline
