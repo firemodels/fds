@@ -75,7 +75,6 @@ Median Droplet Diameter was estimated from Weber number correlation
 
 &SLCF PBX=4.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBX=4.0,QUANTITY='HRRPUV' /
-&SLCF PBX=4.0,QUANTITY='MIXTURE FRACTION' /
 
 &BNDF QUANTITY='WALL TEMPERATURE' /
 &BNDF QUANTITY='CPUA', PART_ID='heptane droplets' /

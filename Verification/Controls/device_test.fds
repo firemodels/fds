@@ -17,7 +17,7 @@ Test various devices and actions upon activation.
 
 &PART ID='smoke', MASSLESS=.TRUE., SAMPLING_FACTOR=1 /
 &PART ID='water', SPEC_ID='WATER VAPOR', SAMPLING_FACTOR=5 /
-
+&SPEC ID='WATER VAPOR',LUMPED_SPECIES_ONLY=.FALSE./
 &PROP ID='Acme Smoke'
       QUANTITY='CHAMBER OBSCURATION' /
 
