@@ -30,7 +30,7 @@ The gas species here is additional SPEC.
       BURN_AWAY            = .TRUE.
       BACKING              = 'EXPOSED' /
 
-REAC ID='NO REACTION', C=1,Y_O2_INFTY=0.0001 /  
+REAC ID='NO REACTION', C=1, X_O2_LL=1. /  
 
 &DUMP SMOKE3D = .FALSE. 
       DT_HRR = 0.01
