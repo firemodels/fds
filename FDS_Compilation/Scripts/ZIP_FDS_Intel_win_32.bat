@@ -37,7 +37,7 @@ cd ..
 echo.
 echo creating self-extracting archive
 if exist %fdsroot%.exe erase %fdsroot%.exe
-wzipse32 %fdsroot%.zip -d "C:\Program Files\nist\FDS"
+wzipse32 %fdsroot%.zip -runasadmin -d "C:\Program Files\fds\fds5\bin"
 
 echo %fdsroot%.exe located in %cd%
 pause
