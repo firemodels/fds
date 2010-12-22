@@ -98,8 +98,8 @@ intel_linux_32 : $(obj)
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend
-intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX
+intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend -D pp_LINUX64
+intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
 intel_linux_64 : FORTLIBDIR = $(LINUX64FORTLIBDIR)
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
@@ -126,8 +126,8 @@ intel_osx_32 : $(obj)
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
-intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX
-intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX
+intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64
+intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64
 intel_osx_64 : FORTLIBDIR = $(OSX64FORTLIBDIR)
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icc
