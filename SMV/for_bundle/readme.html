@@ -21,6 +21,71 @@
 
 <ul>
 
+<li>5.6.2 (build 7438) - December 22, 2010
+
+<p>Smokeview change log
+<ol>
+
+<li>enhancement - improve geometry drawing for large cases by culling (not drawing)
+<ol>
+  <li> hidden one cell-sized faces generated when using the FDS BURN_AWAY option, 
+  <li> faces occuring outside the view frustum and 
+  <li> faces that face away from the user -
+  (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1287&can=1&sort=-id">Issue 1287</a>)
+  </ol>
+
+<li>enhancement - improve display of semi-transparent isosurfaces by sorting underlying triangles and displaying them back to front
+
+<li>enhancement - improve smokeview objects
+<ol>
+<li>add an <em>include</em> command for drawing smokeview objects allowing one to build complicated objects using simpler ones.
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1267&can=1&sort=-id">Issue 1267</a>)
+<li>add a command to draw a hemisphere object,
+<li>add an option to draw smokeview objects using outlines
+</ol>
+
+<li>enhancement - add the command line option -update_bounds to compute boundary file bounds
+
+<li>enhancement - provide options to color evac vector data with constant or non-constant (data based) colors - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1251&can=1&sort=-id">Issue 1251</a>)
+
+<li>usability - change and simplify the method used to parse the command line so that smokeview may be run from a web page
+
+<li>usability - add an option to turn off transparent face sorting in order to speed up geometry drawing - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1287&can=1&sort=-id">Issue 1287</a>)
+
+<li> usability - change default display of cell centered slice files to be cell centered rather than interpolated
+
+<li> usability - improve menu display for EVAC cases - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1251&can=1&sort=-id">Issue 1251</a>)
+
+<li>usability - display "load x", "load y" and/or "load z" menus only if there are more than one x, y, z slice files present
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1252&can=1&sort=-id">Issue 1252</a>)
+
+<li>usability - output mesh names (ID tag on &MESH line) rather than a mesh index in various menus.  If ID tag is missing then output a mesh index as usual - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1250&can=1&sort=-id">Issue 1250</a>)
+<li>usability = clean up command line options and usage message
+<li>usability - remove OpenGL and GLUT initialization when using the -update_bounds option (so that smokeview can update bounds on terminals that do not have OpenGL).
+
+<li>fix - fix problem with BLOCKLOCATION .ini keyword
+<li>fix - fix problem with colorbar dialog box when creating a new colorbar - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1290&can=1&sort=-id">Issue 1290</a>)
+
+<li>fix - fix multi-slice menu display - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1282&can=1&sort=-id">Issue 1282</a>)
+
+<li>fix - scale colors by 255 when reading dxf2fds generated cad files - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1280&can=1&sort=-id">Issue 1280</a>)
+</ol>
+
+<p>Smokezip change log
+<ol>
+<li>code cleanup - remove isosurface compression capability
+<li>fix - eliminate memory allocations for zero size buffers - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1268&can=1&sort=-id">Issue 1268</a>)
+
+</ol>
+
 <li>5.6 (build 7032) - October 29, 2010
 <p>Smokeview change log
 
