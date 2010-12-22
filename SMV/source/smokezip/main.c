@@ -54,7 +54,6 @@ int main(int argc, char **argv){
 #else
   doit_plot3d=0;
 #endif
-  doit_iso=1;
 #ifdef pp_PART2
   doit_particle=0;
 #endif
@@ -82,7 +81,6 @@ int main(int argc, char **argv){
   endianswitch=-1;
   overwrite_b=0;
   overwrite_s=0;
-  overwrite_iso=0;
   get_bounds=0;
   get_slice_bounds=0;
   get_plot3d_bounds=0;
@@ -98,7 +96,6 @@ int main(int argc, char **argv){
   smoke3dzipstep=1;
   boundzipstep=1;
   slicezipstep=1;
-  isozipstep=1;
   filesremoved=0;
 #ifdef WIN32
   strcpy(dirseparator,"\\");
@@ -119,7 +116,6 @@ int main(int argc, char **argv){
   nslice_files=0;
   sliceinfo=NULL;
   nmeshes=0;
-  niso_files=0;
 
   patchinfo=NULL;
   smoke3dinfo=NULL;
@@ -200,9 +196,6 @@ int main(int argc, char **argv){
           doit_particle=0;
         }
 #endif
-        else if(strcmp(arg,"-ni")==0){
-          doit_iso=0;
-        }
         else if(strcmp(arg,"-ns")==0){
           doit_slice=0;
         }
@@ -235,16 +228,12 @@ int main(int argc, char **argv){
         overwrite_b=1;
         overwrite_s=1;
         overwrite_slice=1;
-        overwrite_iso=1;
 #ifdef pp_PLOT3D
         overwrite_plot3d=1;
 #endif
 #ifdef pp_PART2
         overwrite_part=1;
 #endif
-        break;
-      case 'i':
-        overwrite_iso=1;
         break;
       case 'c':
         cleanfiles=1;
@@ -274,7 +263,6 @@ int main(int argc, char **argv){
           sscanf(arg2,"%i",&frameskip);
           if(frameskip>0){
             slicezipstep=frameskip;
-            isozipstep=frameskip;
             smoke3dzipstep=frameskip;
             boundzipstep=frameskip;
           }
@@ -675,7 +663,6 @@ void usage(char *prog){
   printf("  -2  - overwrites 2d slice compressed files\n");
   printf("  -3  - overwrites 3d smoke files\n");
   printf("  -b  - overwrites boundary compressed files\n");
-  printf("  -i  - overwrites iso-surface compressed files\n");
 #ifdef pp_PLOT3D
   printf("  -p  - overwrites PLOT3D files\n");
 #endif
@@ -704,7 +691,6 @@ void usage(char *prog){
 #ifdef pp_PLOT3D
   printf("  -np - do not compress PLOT3D files\n");
 #endif
-  printf("  -ni - do not compress isosurface files\n");
   printf("  -ns - do not compress slice files\n");
 #ifdef pp_PART2
   printf("  -nP - do not compress particle files\n");

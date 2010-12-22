@@ -241,7 +241,6 @@ int getendian(void);
 int convert_slice(slice *slicei, int *thread_index);
 slice *getslice(char *string);
 void *compress_slices(void *arg);
-void *compress_isos(void *arg);
 int plot3ddup(plot3d *plot3dj, int iplot3d);
 int slicedup(slice *slicej, int islice);
 void *compress_plot3ds(void *arg);
@@ -345,7 +344,7 @@ STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian,
 //************* variables
 //***********************
 
-EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d, doit_iso;
+EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d;
 #ifdef pp_PART2
 EXTERN int doit_particle;
 #endif
@@ -358,7 +357,7 @@ EXTERN mesh *meshinfo;
 EXTERN smoke3d *smoke3dinfo;
 EXTERN int npatch_files;
 
-EXTERN int nslice_files, niso_files, nplot3d_files;
+EXTERN int nslice_files, nplot3d_files;
 
 EXTERN slice *sliceinfo;
 EXTERN plot3d *plot3dinfo;
@@ -377,14 +376,12 @@ EXTERN int maxpart5propinfo, npart5propinfo;
 #endif
 EXTERN int nsmoke3d_files;
 EXTERN int endianswitch,overwrite_b,overwrite_s;
-EXTERN int overwrite_iso;
 EXTERN int cleanfiles;
 EXTERN char *destdir,*sourcedir;
 EXTERN int lensourcedir,lendestdir;
 EXTERN char dirseparator[3];
 EXTERN char pp[2];
 EXTERN int smoke3dzipstep, boundzipstep, slicezipstep;
-EXTERN int isozipstep,doiso;
 EXTERN int filesremoved;
 EXTERN int endf, syst;
 EXTERN char endianfilebase[1024];

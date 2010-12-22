@@ -19,7 +19,7 @@ int readsmv(char *smvfile){
   
   FILE *streamsmv;
   int unit_start=15;
-  int iiso,igrid,ipdim, iiso_seq;
+  int igrid,ipdim;
   int ipatch,ipatch_seq;
   int iplot3d, iplot3d_seq;
   int ismoke3d, ismoke3d_seq;
@@ -116,15 +116,6 @@ int readsmv(char *smvfile){
     }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ ISOF ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"ISOF",4) == 1){
-      niso_files++;
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ GRID ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
@@ -199,10 +190,8 @@ int readsmv(char *smvfile){
 
   if(nmeshes>0&&nmeshes==ipdim){
     NewMemory((void **)&meshinfo,nmeshes*sizeof(mesh));
-    doiso=1;
   }
   else{
-    doiso=0;
   }
   // allocate memory for slice file info
 
@@ -270,8 +259,6 @@ int readsmv(char *smvfile){
   iplot3d_seq=0;
   islice=0;
   islice_seq=0;
-  iiso=0;
-  iiso_seq=0;
   ipdim=0;
   igrid=0;
   ismoke3d=0;
@@ -1019,12 +1006,6 @@ void readini2(char *inifile){
 	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&slicezipstep);
 	    if(slicezipstep<1)slicezipstep=1;
-      continue;
-    }
-    if(frameskip<1&&match(buffer,"ISOZIPSTEP",10)==1){
-	    fgets(buffer,BUFFERSIZE,stream);
-	    sscanf(buffer,"%i",&isozipstep);
-	    if(isozipstep<1)isozipstep=1;
       continue;
     }
     if(frameskip<1&&match(buffer,"SMOKE3DZIPSTEP",14)==1){
