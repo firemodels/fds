@@ -7,7 +7,7 @@ set OSXHOST=$3
 set SMOKEVIEWDIR=$SVNROOT/SMV/bin
 set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/INTEL_OSX_32
 set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/INTEL_OSX_32
-set FORBUNDLE=$SVNROOT/SMV/for_bundle
+set FORBUNDLE=~/$SVNROOT/SMV/for_bundle
 set OSXDIR=smv_$version\_osx32
 
 cd $FORBUNDLE
