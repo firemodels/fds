@@ -1046,13 +1046,13 @@ int UpdateIsosurface(isosurface *surface,
     if(tvert!=NULL)ts = surface->tvert + noldvert;
     cn = surface->closestnodes + noldvert;
 
-    memcpy(xs,xvert,nvert*sizeof(float));
-    memcpy(ys,yvert,nvert*sizeof(float));
-    memcpy(zs,zvert,nvert*sizeof(float));
+    memcpy(xs,(void *)xvert,nvert*sizeof(float));
+    memcpy(ys,(void *)yvert,nvert*sizeof(float));
+    memcpy(zs,(void *)zvert,nvert*sizeof(float));
     if(tvert!=NULL&&ts!=NULL){
-      memcpy(ts,tvert,nvert*sizeof(float));
+      memcpy(ts,(void *)tvert,nvert*sizeof(float));
     }
-    memcpy(cn,closestnodes,nvert*sizeof(int));
+    memcpy(cn,(void *)closestnodes,nvert*sizeof(int));
 
     surface->nvertices = noldvert + nvert;
   }
