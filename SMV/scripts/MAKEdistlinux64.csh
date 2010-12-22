@@ -3,7 +3,9 @@ set version=$1
 set revision=$2
 set SVNROOT=~/FDS-SMV
 
-set BINDIR=$SVNROOT/SMV/bin
+set SMOKEVIEWDIR=$SVNROOT/SMV/bin
+set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/INTEL_LINUX_64
+set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/INTEL_LINUX_64
 set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set LINUXDIR=smv_$version\_linux64
 
@@ -14,9 +16,9 @@ mkdir -p $LINUXDIR
 mkdir -p $LINUXDIR/Documentation
 cp readme.html $LINUXDIR/Documentation/release_notes.html
 cp $FORBUNDLE/objects.svo $LINUXDIR/.
-cp $BINDIR/smokediff_linux_64 $LINUXDIR/.
-cp $BINDIR/smv5_linux_64 $LINUXDIR/.
-cp $BINDIR/smokezip_linux_64 $LINUXDIR/.
+cp $SMOKEDIFFDIR/smokediff_linux_64 $LINUXDIR/.
+cp $SMOKEVIEWDIR/smv5_linux_64 $LINUXDIR/.
+cp $SMOKEZIPDIR/smokezip_linux_64 $LINUXDIR/.
 rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
 tar cvf $LINUXDIR.tar $LINUXDIR/.
 gzip $LINUXDIR.tar
