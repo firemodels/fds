@@ -39,6 +39,14 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#ifdef pp_LINUX64
+#define pp_LINUX
+#endif
+
+#ifdef pp_OSX64
+#define pp_OSX
+#endif
+
 #define EGZ
 #define USE_ZLIB
 

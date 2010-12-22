@@ -58,6 +58,14 @@
 
 #endif
 
+#ifdef pp_LINUX64
+#define pp_LINUX
+#endif
+
+#ifdef pp_OSX64
+#define pp_OSX
+#endif
+
 //*** turn on BIT64 if compiled on a 64 bit platform
 
 #ifdef X64

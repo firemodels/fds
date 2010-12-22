@@ -299,11 +299,21 @@ void version(void){
     printf("Platform: WIN32\n");
 #endif
 #endif
+#ifndef pp_OSX64
 #ifdef pp_OSX
-    printf("Platform: OS X\n");
+    printf("Platform: OSX\n");
 #endif
+#endif
+#ifdef pp_OSX64
+    printf("Platform: OSX64\n");
+#endif
+#ifndef pp_LINUX64
 #ifdef pp_LINUX
     printf("Platform: LINUX\n");
+#endif
+#endif
+#ifdef pp_LINUX64
+    printf("Platform: LINUX64\n");
 #endif
 
 }
