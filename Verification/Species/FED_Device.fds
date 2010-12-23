@@ -57,18 +57,18 @@ Verification test for
 Region 1: O2 effect
 
  Concentrations for this test case:
-    CO2: 0.000 mol/mol
-    CO:  0.000 mol/mol (1000 ppm)
-    O2:  0.120 mol/mol
-    N2:  0.880 mol/mol
+    CO2: 0.000000 mol/mol
+    CO:  0.000000 mol/mol (1000 ppm)
+    O2:  0.118424 mol/mol
+    N2:  0.881576 mol/mol
 
  Mass Fractions (Rest is 'air': 0.21 mol/mol O2 + 0.79 mol/mol N2)
-    CO2: 0.000000 g/g
-    CO:  0.000000 g/g
-    O2:  0.000000 g/g
-    N2:  0.421347 g/g
+    CO2: 0.00000 g/g
+    CO:  0.00000 g/g
+    O2:  0.13309 g/g
+    N2:  0.86691 g/g
 
-&INIT XB = 0,2,0,2,0,2, 	SPEC_ID='OXYGEN',MASS_FRACTION(1)=0.134831/
+&INIT XB = 0,2,0,2,0,2, 	SPEC_ID='OXYGEN',MASS_FRACTION(1)=0.13309/
 
 &DEVC XYZ= 1.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON DIOXIDE',  ID='CO2 1'/
 &DEVC XYZ= 1.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID='CARBON MONOXIDE', ID='CO 1' /
@@ -81,16 +81,16 @@ Region 2: CO effect
  Wanted concentrations for this test case:
     CO2: 0.000 mol/mol
     CO:  0.001 mol/mol (1000 ppm)
-    O2:  0.210 mol/mol
-    N2:  0.790 mol/mol
+    O2:  0.207 mol/mol
+    N2:  0.792 mol/mol
 
     Mass Fractions (Rest is 'air': 0.21 mol/mol O2 + 0.79 mol/mol N2)
     CO2: 0.000000 g/g
     CO:  0.000971 g/g
-    O2:  0.000000 g/g
-    N2:  0.000000 g/g
+    O2:  0.229777 g/g
+    N2:  0.792252 g/g
 
-&INIT XB = 2,4,0,2,0,2, 	SPEC_ID='CARBON MONOXIDE','OXYGEN',MASS_FRACTION(1:2)=0.000971,0.232783/
+&INIT XB = 2,4,0,2,0,2, 	SPEC_ID='CARBON MONOXIDE','OXYGEN',MASS_FRACTION(1:2)=0.000971,0.229777/
 
 &DEVC XYZ= 3.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON DIOXIDE',  ID='CO2 CO'/
 &DEVC XYZ= 3.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON MONOXIDE', ID='CO CO' /
@@ -102,19 +102,19 @@ Region 2: CO effect
 Region 3: CO and CO2 effect
 
  Wanted concentrations for this test case:
-    CO2: 0.034305 mol/mol
-    CO:  0.001 mol/mol (1000 ppm)
-    O2:  0.210 mol/mol
-    N2:  0.762 mol/mol
+    CO2: 0.034243 mol/mol
+    CO:  0.000998 mol/mol (1000 ppm)
+    O2:  0.197541 mol/mol
+    N2:  0.767217 mol/mol
 
     Mass Fractions (Rest is 'air': 0.21 mol/mol O2 + 0.79 mol/mol N2)
-    CO2: 0.05135685 g/g
-    CO:  0.00095268 g/g
-    O2:  0.01088775 g/g
-    N2:  0.00000000 g/g
+    CO2: 0.051357 g/g
+    CO:  0.000953 g/g
+    O2:  0.215465 g/g
+    N2:  0.732226 g/g
 
 &INIT XB = 4,6,0,2,0,2,	SPEC_ID='CARBON DIOXIDE','CARBON MONOXIDE','OXYGEN',
-                        MASS_FRACTION(1:3)=0.05136,0.000953,0.228658 /
+                        MASS_FRACTION(1:3)=0.051357,0.000953,0.215465/
 
 &DEVC XYZ= 5.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON DIOXIDE',  ID='CO2 CO2+CO'/
 &DEVC XYZ= 5.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON MONOXIDE', ID='CO CO2+CO' /
@@ -128,17 +128,17 @@ Region 4: All gases
  Wanted concentrations for this test case:
     CO2: 0.020 mol/mol
     CO:  0.001 mol/mol (1000 ppm)
-    O2:  0.150 mol/mol
-    N2:  0.829 mol/mol (the rest)
+    O2:  0.148 mol/mol
+    N2:  0.831 mol/mol (the rest)
 
     Mass Fractions (Rest is 'air': 0.21 mol/mol O2 + 0.79 mol/mol N2)
     CO2: 0.030429 g/g
     CO:  0.000968 g/g
-    O2:  0.000000 g/g
-    N2:  0.256084 g/g
+    O2:  0.163879 g/g
+    N2:  0.804724 g/g
 
 &INIT XB = 6,8,0,2,0,2,	SPEC_ID='CARBON DIOXIDE','CARBON MONOXIDE','OXYGEN',
-                        MASS_FRACTION(1:3)=0.30429,0.000968,0.165975 /
+                        MASS_FRACTION(1:3)=0.030429,0.000968,0.163879 /
 
 &DEVC XYZ= 7.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON DIOXIDE',  ID='CO2 All'/
 &DEVC XYZ= 7.0,1.0,1.0, QUANTITY='VOLUME FRACTION', SPEC_ID= 'CARBON MONOXIDE', ID='CO All' /
