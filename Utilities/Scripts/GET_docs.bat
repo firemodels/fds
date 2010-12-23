@@ -26,10 +26,10 @@ set docbasedir=%togoogle%\%zipbase%\
 
 mkdir %docbasedir%
 
-copy %mandir%\FDS_5_Technical_Reference_Guide.pdf %docbasedir%\.
-copy %mandir%\FDS_5_User_Guide.pdf %docbasedir%\.
-copy %mandir%\FDS_5_Validation_Guide.pdf %docbasedir%\.
-copy %mandir%\FDS_5_Verification_Guide.pdf %docbasedir%\.
+copy %mandir%\FDS_Technical_Reference_Guide.pdf %docbasedir%\.
+copy %mandir%\FDS_User_Guide.pdf %docbasedir%\.
+copy %mandir%\FDS_Validation_Guide.pdf %docbasedir%\.
+copy %mandir%\FDS_Verification_Guide.pdf %docbasedir%\.
 
 copy %mandir%\SMV_User_Guide.pdf %docbasedir%\.
 
