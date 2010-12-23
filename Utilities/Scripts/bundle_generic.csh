@@ -114,10 +114,10 @@ scp -q $fdshost\:$fds2asciiroot/$fds2asciidir/$fds2ascii $bundledir/bin/.
 
 echo Copying documentation
 cp $bundle_setup/Overview.html $bundledir/Documentation/.
-cp $mandir/FDS_5_User_Guide.pdf $bundledir/Documentation/.
+cp $mandir/FDS_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_Technical_Reference_Guide.pdf $bundledir/Documentation/.
-cp $mandir/FDS_5_Technical_Reference_Guide.pdf $bundledir/Documentation/.
+cp $mandir/FDS_Technical_Reference_Guide.pdf $bundledir/Documentation/.
 
 echo Copy objects.svo
 cp $forbundle/objects.svo $bundledir/bin/objects.svo
