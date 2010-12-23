@@ -2273,7 +2273,7 @@ SPEC_LOOP: DO N=1,N_SPECIES
       CASE (AEROSOL_SPECIES)            
          WRITE(LU_OUTPUT,'( 3X,A)') 'Aerosol'
    END SELECT
-   IF (SS%LUMPED_SPECIES_ONLY) WRITE(LU_OUTPUT,'( 3X,A)') 'Lumped species component only'
+   IF (SS%Y_INDEX==0 .AND. N/=I_BACKGROUND) WRITE(LU_OUTPUT,'( 3X,A)') 'Lumped species component only'
    IF (N==I_BACKGROUND) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
    IF (SS%MW <  1000._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Molecular Weight (g/mol)      ',SS%MW
    IF (SS%MW >= 1000._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Density (kg/m^3)              ',SS%MW*P_INF/(TMPA*R0)
@@ -2389,7 +2389,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          DO NN=1,RN%N_SPECIES
             IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
             WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(Y2SPEC(RN%SPECIES(NN)))%ID,RN%NU(NN) 
-         ENDDO
+         ENDDO        
          IF (N_MIX_SPECIES > 0 .AND. ((ABS(RN%NU(0))>ZERO_P .AND. I_BACKGROUND > N_SPECIES - N_MIX_SPECIES) .OR. &
                                        ANY(RN%SPECIES > N_SPECIES - N_MIX_SPECIES))) THEN     
             WRITE(LU_OUTPUT,'(//3X,A)') 'Detailed Species'
