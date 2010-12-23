@@ -278,13 +278,15 @@ DO K=1,KBAR
          !CALL GET_MASS_FRACTION_ALL(YY_GET,Y_SPECIES_OLD)
          !CALL GET_MOLECULAR_WEIGHT(YY_GET,MW)
          !CALL GET_SPECIFIC_HEAT(YY_GET,H_G_0,TMP(I,J,K))         
+
          YY(I,J,K,I_FUEL) = YY(I,J,K,I_FUEL) - DYF
          IF (CO_PRODUCTION) Y_O2_NEW(I,J,K) = Y_O2_NEW(I,J,K) - DYF * O2_F_RATIO
+
          DYF = -DYF/(RN%NU(1)*SPECIES_MIXTURE(2)%MW)
          IF (CO_PRODUCTION) THEN
             IF (SOOT_DEPOSITION) THEN
                YY(I,J,K,I_PROG_CO)   = YY(I,J,K,I_PROG_CO)   + DYF*SPECIES_MIXTURE(3)%MW*RN%NU(2)   
-               YY(I,J,K,I_PROG_SOOT) = YY(I,J,K,I_PROG_SOOT) + DYF*SPECIES_MIXTURE(5)%MW*RN%NU(3)   
+               YY(I,J,K,I_PROG_SOOT) = YY(I,J,K,I_PROG_SOOT) + DYF*SPECIES_MIXTURE(4)%MW*RN%NU(3)   
             ELSE
                YY(I,J,K,I_PROG_CO) = YY(I,J,K,I_PROG_CO) + DYF*SPECIES_MIXTURE(3)%MW*RN%NU(2)      
             ENDIF           
@@ -296,6 +298,7 @@ DO K=1,KBAR
                YY(I,J,K,I_PROG_F)  = YY(I,J,K,I_PROG_F) + DYF*SPECIES_MIXTURE(3)%MW*RN%NU(2)   
             ENDIF
          ENDIF
+
          !YY_GET = YY(I,J,K,:)
          !CALL GET_MASS_FRACTION_ALL(YY_GET,Y_SPECIES_DIFF)
          !Y_SPECIES_DIFF = Y_SPECIES_DIFF - Y_SPECIES_OLD
