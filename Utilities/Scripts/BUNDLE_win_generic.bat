@@ -193,10 +193,10 @@ copy "%bundleinfo%\FDS_Release_Notes.htm" "%out_guides%\FDS_Release_Notes.htm"
 echo.
 echo Copying Documentation to the Documentation directory
 
-copy %in_pdf%\FDS_5_User_Guide.pdf               %out_guides%\.
-copy %in_pdf%\SMV_5_User_Guide.pdf               %out_guides%\.
-copy %in_pdf%\SMV_5_Technical_Reference_Guide.pdf %out_guides%\.
-copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_guides%\.
+copy %in_pdf%\FDS_User_Guide.pdf               %out_guides%\.
+copy %in_pdf%\SMV_User_Guide.pdf               %out_guides%\.
+copy %in_pdf%\SMV_Technical_Reference_Guide.pdf %out_guides%\.
+copy %in_pdf%\FDS_Technical_Reference_Guide.pdf %out_guides%\.
 copy "%in_smv%\readme.html"                      "%out_guides%\Smokeview_release_notes.html"
 
 echo.

@@ -48,11 +48,11 @@ copy %in_smv%\smokeview.ini %out_bin%\.
 echo.
 echo Copying files to Documentation directory
 
-copy %in_pdf%\FDS_5_Technical_Reference_Guide.pdf %out_doc%\.
-copy %in_pdf%\FDS_5_Validation_Guide.pdf          %out_doc%\.
+copy %in_pdf%\FDS_Technical_Reference_Guide.pdf %out_doc%\.
+copy %in_pdf%\FDS_Validation_Guide.pdf          %out_doc%\.
 copy %in_pdf%\SMV_User_Guide.pdf                %out_doc%\.
-copy %in_pdf%\FDS_5_User_Guide.pdf                %out_doc%\.
-copy %in_pdf%\FDS_5_Verification_Guide.pdf        %out_doc%\.
+copy %in_pdf%\FDS_User_Guide.pdf                %out_doc%\.
+copy %in_pdf%\FDS_Verification_Guide.pdf        %out_doc%\.
 
 echo.
 echo Creating Examples directory
