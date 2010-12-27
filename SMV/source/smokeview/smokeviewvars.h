@@ -591,7 +591,7 @@ SVEXTERN int ntotal_smooth_blockages;
 SVEXTERN float veclengths[NVECLENGTHS];
 SVEXTERN float texture_origin[3];
 
-SVEXTERN int SVDECL(use_new_drawface,1);
+SVEXTERN int SVDECL(use_new_drawface,0);
 SVEXTERN unsigned char rgb_below_min[3], rgb_above_max[3];
 SVEXTERN int colorbar_select_index,update_colorbar_select_index;
 SVEXTERN float world_eyepos[3],scaled_eyepos[3];

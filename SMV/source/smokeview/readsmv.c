@@ -7273,6 +7273,11 @@ int readini2(char *inifile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
+    if(match(buffer,"USENEWDRAWFACE",14)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&use_new_drawface);
+      if(use_new_drawface!=0)use_new_drawface=1;
+    }
     if(match(buffer,"TLOAD",5)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i %f %i %i",&use_tload_begin,&tload_begin,&use_tload_end,&tload_end,&use_tload_skip,&tload_skip);
@@ -9746,6 +9751,8 @@ void writeini(int flag){
   fprintf(fileout," %f\n",ventlinewidth);
   fprintf(fileout,"SMOOTHLINES\n");
   fprintf(fileout," %i\n",antialiasflag);
+  fprintf(fileout,"USENEWDRAWFACE\n");
+  fprintf(fileout," %i\n",use_new_drawface);
 
   fprintf(fileout,"\nOFFSETS\n");
   fprintf(fileout,"-------\n\n");
