@@ -327,7 +327,7 @@ the products are necessarily those best suited for the intended purpose.
 \begin{description}
 \item[Kevin McGrattan] is a mathematician in the Building and Fire Research Laboratory (BFRL) of NIST. He received a bachelors of science degree from the School of Engineering and Applied Science of Columbia University in 1987 and a doctorate at the Courant Institute of New York University in 1991. He joined the NIST staff in 1992 and has since worked on the development of fire models, most notably the Fire Dynamics Simulator.
 \item[Simo Hostikka] is a Senior Research Scientist at VTT Technical Research Centre of Finland. He received a master of science (technology) degree in 1997 and a doctorate in 2008 from the Department of Engineering Physics and Mathematics of the Helsinki University of Technology.  He is the principal developer of the radiation and solid phase sub-models within FDS.
-\item[Jason Floyd] is a Senior Engineer at Hughes Associates, Inc., in Baltimore, Maryland. He received a bachelors of science and Ph.D. in the Nuclear Engineering Program of the University of Maryland. After graduating, he won a National Research Council Post-Doctoral Fellowship at the Building and Fire Research Laboratory of NIST, where he developed the combustion algorithm within FDS. He is currently funded by NIST under grant 70NANB8H8161 from the Fire Research Grants Program (15 USC 278f). He is the principal developer of the multi-parameter mixture fraction combustion model and control logic within FDS.
+\item[Jason Floyd] is a Senior Engineer at Hughes Associates, Inc., in Baltimore, Maryland. He received a bachelors of science and Ph.D. in the Nuclear Engineering Program of the University of Maryland. After graduating, he won a National Research Council Post-Doctoral Fellowship at the Building and Fire Research Laboratory of NIST, where he developed the combustion algorithm within FDS. He is currently funded by NIST under grant 70NANB8H8161 from the Fire Research Grants Program (15 USC 278f). He is a principal developer of the combustion model and control logic within FDS.
 \item[Randall McDermott] joined the research staff of the Building and Fire Research Lab in 2008. He received a B.S.~degree from the University of Tulsa in Chemical Engineering in 1994 and a doctorate at the University of Utah in 2005. His research interests include subgrid-scale models and numerical methods for large-eddy simulation, adaptive mesh refinement, immersed boundary methods, and Lagrangian particle methods.
 \item[William (Ruddy) Mell] is an applied mathematician in BFRL. He holds a B.S. degree from the University of Minnesota (1994) and doctorate from the University of Washington (1994). His research interests include the development of large eddy simulation methods and sub-models applicable to the physics of large fires in buildings, vegetation, and the wildland-urban interface.
 \end{description}
@@ -724,14 +724,11 @@ Large Eddy Simulation (LES). It is possible to perform a Direct
 Numerical Simulation (DNS) if the underlying numerical grid is fine
 enough. LES is the default mode of operation.
 \item[Combustion Model]
-For most applications, FDS uses a combustion model based on the mixture fraction concept.
-The mixture fraction is a conserved scalar quantity
-that is defined as the
-fraction of gas at a given point in the flow field that originates as fuel.
-Unlike versions of FDS prior to 5, the reaction of fuel and oxygen is not necessarily instantaneous and complete, and there are
+For most applications, FDS uses a combustion model based on the mixing limited, infinitely fast reaction of lumped species.
+Lumped species are conserved scalar quantities that represent a mixture of species such as air which is a mixture of nitrogren, oxygen, water vapor, and carbon dioxide.  In FDS versions prior to 6, these lumped species were referred to as mixture fraction parameters.  As with FDS 5, the reaction of fuel and oxygen is not necessarily instantaneous and complete, and there are
 several optional schemes that are designed to predict the extent of combustion in under-ventilated spaces.
 The mass fractions of all of the major reactants and products can
-be derived from the mixture fraction by means of ``state relations,''
+be derived from the lumped species by means of ``state relations,''
 expressions arrived at by a
 combination of simplified analysis and measurement.
 \item[Radiation Transport] Radiative heat transfer is included in the
@@ -806,10 +803,8 @@ Current research is aimed at improving this situation, but it is safe to say tha
 modeling fire growth and spread will always require a higher level of
 user skill and judgment than that required for modeling the transport of smoke and heat from specified fires.
 \item[Combustion]
-For most applications, FDS uses a mixture fraction-based combustion model.
-The mixture fraction is a conserved scalar quantity that is defined as the
-fraction of gas at a given point in the flow field that originated as fuel.
-In its simplest form, the model assumes that combustion is mixing-controlled, and that the
+For most applications, FDS uses a mixing-controlled, lumped species based combustion model.
+Lumped species are conserved scalar quantities that represent mixtures of gas species.  For most applications, these mixtures are air, fuel plus an optional diluent, and combustion products.  In its simplest form, the model assumes that combustion is mixing-controlled, and that the
 reaction of fuel and oxygen is infinitely fast, regardless of the temperature.
 For large-scale, well-ventilated
 fires, this is a good assumption. However, if a fire is in an
@@ -932,7 +927,7 @@ electronic form and made freely available via the Internet and yearly-released c
 \label{JustAA}
 The technical approach and assumptions of the model have been presented in
 the peer-reviewed scientific literature and at technical conferences cited in the previous section.
-The major assumptions of the model, for example the large eddy simulation technique and the mixture fraction combustion
+The major assumptions of the model, for example the large eddy simulation technique and the combustion
 model, have undergone a roughly 40 year development and are now documented in popular introductory text books.
 More specific sub-models, like the sprinkler spray routine or the various pyrolysis models, have yet to be developed to
 this extent. As a consequence, all documents produced by NIST staff are required to go
@@ -2174,115 +2169,41 @@ The second term on the right hand side is used in an optional iterative scheme t
 
 \label{combustionsection}
 
-There are two types of combustion models used in FDS. The default model makes use of
-the mixture fraction, a quantity representing the fuel and the products of combustion.
-For the second model, individual gas species react according to
+There are two approaches to modeling a chemical reaction within FDS.  The first approach is a mixing-controlled combustion model.  In this approach, the reaction rate is computed based on the local mixing.  That is fuel and air react inifintely fast at the rate that the underlying gas transport mixes them together.  For the second model, individual gas species react according to
 specified Arrhenius reaction parameters. This latter model is most often used in a
 direct numerical simulation (DNS) where the diffusion of fuel and oxygen can be
 modeled directly.
 However, most often for large eddy simulations (LES), where the grid is not
 fine enough to resolve the diffusion of fuel and oxygen,
-the mixture fraction-based combustion model is assumed.
+the mixing-controlled combustion model is assumed.
 
-\section{Mixture Fraction Combustion Model}
+\section{Mixing-Controlled Combustion Model}
 
-Given a volume containing a mixture of gas species, a mixture fraction can be defined that
-is the ratio of the mass of a subset of the species to the total mass present in the volume.
-In combustion, the mixture fraction is a conserved quantity traditionally defined as the (mass) fraction of the
-gas mixture that originates in
-the fuel stream. Thus, at a burner surface the mixture fraction is 1 and in fresh air it is 0.
-In a region where combustion has occurred this fraction will be comprised of any unburned fuel and
-that portion of the combustion products that came from the fuel.
-The mixture fraction is a function of space and time, commonly denoted $Z(\bx,t)$.
-If it can be assumed that, upon mixing, the reaction of fuel and oxygen occurs rapidly and completely,
-the combustion process is referred to as ``mixing-controlled.'' This implies that all species of
-interest can be described in terms of the mixture fraction alone.
-The correspondence between the
-mass fraction of an individual species and the mixture fraction is called its ``state relation.''
-FDS versions 2 through 4 assumed that the gas mixture could be uniquely determined by the mixture fraction alone,
-an assumption that implies that fuel and oxygen react instantaneously upon mixing.
+For an infinitely-fast reaction, reactant species in a given grid cell are converted to product species at a rate determined by a
+characteristic mixing time.  It is assumed that the
+grid resolution is too coarse to resolve the flame sheet and compute directly the reaction rate.  Instead, if any grid cell contains all the reactants of the the chemical reaction and the temperature of the grid cell meets certain criteria, the consumption rate of fuel is given by~\cite{Poinsot:TNC}
+\be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad
+   s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \label{EDC} \ee
+Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter equal to 1.
 
-For many applications, ``mixed is burned'' is a reasonable
-assumption. However, for fire scenarios where it cannot be assumed
-that fuel and oxygen react completely upon mixing, for example in
-under-ventilated compartments. The mixture fraction itself remains a
-valid quantity, but it can no longer be assumed that it completely
-defines the composition of the gas mixture. If fuel and oxygen are to
-mix and not burn, at least two scalar variables are needed to describe
-the extent to which the fuel and oxygen react.  The strategy for
-moving beyond the ``mixed is burned'' model is as follows. Instead of
-solving a single transport equation for the mixture fraction $Z$,
-multiple transport equations are solved for components of the mixture
-fraction $Z_\alpha$. Fuel mass is still conserved, since $\sum
-Z_\alpha=Z$. For example, if $Z_1$ represents the (unburned) fuel mass
-fraction, $Y_\F$, and we define $Z_2 = Z-Z_1$, then $Z_2$ is the mass
-fraction of burned fuel and is the component of $Z$ that originates
-from the combustion products.  With this approach it is possible to
-account for the mixing of fuel and oxygen without burning. In the
-sections to follow, various multi-step reaction mechanisms are
-discussed using this system of accounting. First, however, the
-single-step mixture fraction model is described.
+While the reaction rate given in Eq.~(\ref{EDC}) is an easily computed and robust subgrid-scale model of
+turbulent combustion, there is still a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
+this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
+is sometimes too coarse to expect the simple mixing time model to work effectively.
+A scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
+heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses by default a value of 2500~kW/m$^3$ as an upper bound\footnote{Note that
+for DNS, FDS imposes a less restrictive upper bound on the local heat release rate per unit volume. It is
+\be \dq_{\max}''' = 200/\dx + 2500 \quad \hbox{kW/m}^3 \ee
+The value of 200~kW/m$^2$ is an upper bound on the heat release rate per unit area of flame sheet.}
+on the local value of the heat release rate per unit volume. Typically, this bound only affects fires whose value of $Q^*$
+is less than one\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the
+area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
 
-
-
-\subsection{A Single-Step, Instantaneous Reaction}
-
-Consider a simple, one-step reaction of fuel and oxygen:
-\be  \mathrm{C_xH_yO_zN_aM_b} +  \nu_\OTWO \, \mathrm{O_2}  \rightarrow  \nu_\COTWO \, \mathrm{CO_2} + \nu_\HTWOO \, \mathrm{H_2O} + \nu_\CO \, \mathrm{CO} +
-     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2} + \nu_\M \mathrm{M}  \label{stoich} \ee
-Note that the nitrogen in the fuel molecule is assumed to form $\mathrm{N_2}$ only. Addition product species can be
-specified as some number of moles of an average molecular weight species $\mathrm{M}$.  These products are presumed to
-not consume oxygen during their formation.  Soot is assumed to be a mixture of carbon and hydrogen with the hydrogen atomic
-fraction given by $X_\Hy$. The stoichiometric coefficient, $\nu_\So$, represents the amount of fuel that is converted to soot. It is related to the
-{\em soot yield}, $y_\So$, via the relation:
-\be
-   \nu_\So = \frac{W_\F}{W_\So} \; y_\So  \quad ; \quad  W_\So = X_\Hy W_\Hy + (1 - X_\Hy) W_\C  \label{soot_yield}
-\ee
-Likewise, the stoichiometric coefficient of CO, $\nu_\CO$, is related to the CO {\em yield}, $y_\CO$, via:
-\be
-   \nu_\CO = \frac{W_\F}{W_\CO} \; y_\CO  \label{CO_yield}
-\ee
-The yields of soot and CO are based on ``well-ventilated'' or ``post-flame'' measurements. The increased production of CO and soot in an under-ventilated
-compartment will be addressed in the following sections.
-
-The traditional way of expressing the mixture fraction, $Z$, is as a linear combination of fuel and oxygen mass fractions:
-\be
-   Z = \frac{ s \, Y_F - (Y_\OTWO-Y_\OTWO^\infty) }{s \, Y_\F^I + Y_\OTWO^\infty} \quad ; \quad  s= \frac{\nu_\OTWO W_\OTWO}{\nu_F W_F} \quad ; \quad \nu_F=1  \label{Z_trad}
-\ee
-where $Y_\F^I$ is the fuel mass fraction in fuel stream.\footnote{It is assumed throughout that nitrogen is the only possible diluent in the fuel stream, and its mass
-fraction is denoted by $Y_\NTWO^I$.}
-However, the mixture fraction can also be defined in terms of the mass fraction of fuel
-and the carbon-carrying products of combustion:
-\be
-   Z = \frac{1}{Y_F^I} \left( Y_\F + \frac{W_\F}{\hbox{x} W_\COTWO} \, Y_\COTWO + \frac{W_\F}{\hbox{x} W_\CO} \, Y_\CO  + \frac{W_\F}{\hbox{x} W_\So} \, Y_\So  \right)
-\label{Zdef} \ee
-Note that x is the number of carbon atoms in the fuel molecule. The mixture fraction satisfies the conservation equation
-\be \rho \DoD{Z}{t} = \nabla\!\cdot \rho D \nabla Z \label{Zeqn} \ee
-obtained by taking a linear combination of the transport equations for the fuel and the carbon carrying products.
-If it is assumed that combustion occurs so rapidly that the fuel and oxygen cannot
-co-exist, then both simultaneously vanish at a flame surface:
-\be Z(\bx,t) = Z_f \quad ; \quad
-Z_f = \frac{Y_\OTWO^\infty}{s \, Y_\F^I + Y_\OTWO^\infty}   \label{flamesheet} \ee
-and all species can be related to $Z$ via the  ``state relations'' shown in Fig.~\ref{staterelations}.
-\begin{figure}
-\begin{minipage}[t]{4.1in}
-\includegraphics[height=4.in]{FIGURES/State_Relations_3_Full_Labelled}
-\caption{State relations for methane.}
-\label{staterelations}
-\end{minipage}
-\end{figure}
-In versions of FDS prior to 5, this one-step, instantaneous reaction of fuel and oxygen was assumed. However, starting in version 5, a more
-generalized formulation has been implemented and is described next. For this reason, it is more convenient to work with the definition of $Z$ in
-Eq.~(\ref{Zdef}). The traditional definition, Eq.~(\ref{Z_trad}), is more convenient when it is assumed that fuel and oxygen cannot co-exist and that
-the combustion occurs at an infinitely thin flame sheet.
-
-
-\subsection{A Single-Step Reaction, but with Local Extinction}
+\subsection{A Mixing-Controlled Reaction, but with Local Extinction}
 
 \label{extinction}
 
-The physical limitation of the single-step reaction model described in the previous section is that it assumes fuel and
-oxygen burn instantaneously when mixed. For large-scale, well-ventilated
+The physical limitation of the mixing-controlled reaction model described in the previous section is that it assumes that fuel and oxygen burn instantaneously when mixed. For large-scale, well-ventilated
 fires, this is a good assumption. However, if a fire is in an
 under-ventilated compartment, or if a suppression agent like water
 mist or CO$_2$ is introduced, or if the shear layer between fuel and oxidizing streams
@@ -2298,74 +2219,82 @@ community.
 Simple empirical rules can be used to predict local
 extinction based on the species and temperature present in the flame sheet.  The FDS extinction model consists of two steps. The first step, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second step uses the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur.  This is done by computing the enthalpy of the local gas mixture at both the local temperature and at the limiting flame temperature.  If the local heat release is less than the enthalpy difference between the limiting flame temperature and the local temperature, then combustion will not occur.
 
-Note that once the local state of the gases falls into the ``No Burn'' zone,
-the state relations (Fig.~\ref{staterelations}) are no longer valid for
-values of $Z$ below stoichiometric, since now some fuel may be mixed
-with the other combustion products. Essentially, there
-are now two reactions to consider -- the ``null'' reaction, where fuel and oxygen simply mix and do not burn;
-and the ``complete'' reaction,
-where fuel and oxygen react and form products according to Eq.~(\ref{stoich}). Note that the term ``complete'' does not imply that
-no soot or CO is formed, but rather that their respective production rates are proportional to the fuel consumption rate.
+  
+\subsection{Simplified Chemistry}
 
-With the definition of the mixture fraction, Eq.~(\ref{Zdef}), in mind, consider a partitioning of $Z$ into the following components:
-\begin{eqnarray}  Z_1 &=& \frac{Y_\F}{Y_F^I}  \label{Z1first}  \\*[.1in]
-                  Z_2 &=& \frac{1}{Y_F^I} \left( \frac{W_\F}{\hbox{x} \, W_\COTWO } \,  Y_\COTWO  + \frac{W_\F}{\hbox{x} \, W_\CO } \, Y_\CO  +
-                  \frac{W_\F}{\hbox{x} \, W_\So }  \label{Z2first} \, Y_\So \right)
+\label{simplechemistry}
+
+Most ordinary combustibles can be represented by the simple single-step reaction:
+
+\be  \mathrm{C_xH_yO_zN_a} +  \nu_\OTWO \, \mathrm{O_2}  \rightarrow  \nu_\COTWO \, \mathrm{CO_2} + \nu_\HTWOO \, \mathrm{H_2O} + \nu_\CO \, \mathrm{CO} +
+     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2}  \label{stoich} 
+\ee
+Note that the nitrogen in the fuel molecule is assumed to form $\mathrm{N_2}$ only. Soot is assumed to be a mixture of carbon and hydrogen with the hydrogen atomic
+fraction given by $X_\Hy$. The stoichiometric coefficient, $\nu_\So$, represents the amount of fuel that is converted to soot. It is related to the
+{\em soot yield}, $y_\So$, via the relation:
+\be
+   \nu_\So = \frac{W_\F}{W_\So} \; y_\So  \quad ; \quad  W_\So = X_\Hy W_\Hy + (1 - X_\Hy) W_\C  \label{soot_yield}
+\ee
+Likewise, the stoichiometric coefficient of CO, $\nu_\CO$, is related to the CO {\em yield}, $y_\CO$, via:
+\be
+   \nu_\CO = \frac{W_\F}{W_\CO} \; y_\CO  \label{CO_yield}
+\ee
+The yields of soot and CO are based on ``well-ventilated'' or ``post-flame'' measurements. The increased production of CO and soot in an under-ventilated
+compartment will be addressed in the following sections.
+
+This reaction can also be represented as:
+
+\be  \mathrm{Fuel} +  \nu_\mathrm{Air} \, \mathrm{Air}  \rightarrow  \mathrm{Products}\label{stoichair}
+\ee
+
+Air is a lumped species consiting of a mixture of nitrogen, oxgyen, water vapor, and carbon dioxide (carbon dioxide is included to attenuate radiation over large distances and water vapor is included for attenuation and to support simulations with sprinklers).  Products is a lumped species consisting of all the products listed in \ref{stoich} plus the nitrogen, water vapor, and carbon dioxide from the Air that reacted with the fuel.  If we allow for the presence of a diluent gas in the fuel stream, then the Fuel becomes a lumped species consisting of fuel and diluent.  We name these species $Z_0$ for Air, $Z_1$ for Fuel, and $Z_2$ for Products.  When using simple chemistry, FDS tracks the last two species explicitly and $Z_0$ is implicitly tracked as the background species.  The mass fractions of the component gases in these species are given as:
+
+$Z_0$: Air
+
+\begin{eqnarray}
+Y_{\NTWO}(Z_0) & = & Y_\NTWO^\infty\\*[.1in]
+Y_{\OTWO}(Z_0) & = & Y_\OTWO^\infty\\*[.1in]
+Y_{\COTWO}(Z_0) & = & Y_\COTWO^\infty\\*[.1in]
+Y_{\HTWOO}(Z_0) & = & Y_\HTWOO^\infty
 \end{eqnarray}
-such that $Z=Z_1+Z_2$. Transport equations are required for both $Z_1$ and $Z_2$.
-At the burner surface, $Z_1$ is assigned the mass flux of fuel,
-while the mass flux for $Z_2$ is zero. In other words, no combustion products are generated at the fuel source. Where fuel and
-oxygen co-exist, a reaction occurs if conditions are favorable in the sense shown by Fig.~\ref{plotsupp}.
-If a reaction occurs, $Z_1$ is converted to $Z_2$ representing the
-conversion of fuel to products. The heat release rate of the fire is obtained by multiplying the fuel consumption rate by the
-heat of combustion.
 
-\begin{figure}
-\begin{minipage}[t]{4.1in}
-\includegraphics[height=4.in]{FIGURES/Extinction_Criteria}
-\caption{Conditions under which combustion can be supported.}
-\label{plotsupp}
-\end{minipage}
-\end{figure}
+$Z_1$: Fuel
 
-If it is assumed that the yields of CO and soot are fixed, Eq.~(\ref{Z1first}) and Eq.~(\ref{Z2first}) can be simplified further:
-\begin{eqnarray} Z_1 &=& \frac{Y_\F}{Y_\F^I} \\*[.1in]
-                 Z_2 &=& \frac{W_\F}{\big[\hbox{x}-\nu_\CO-(1-X_\Hy) \nu_\So \big] \, W_\COTWO } \frac{Y_\COTWO}{Y_\F^I}
+\begin{eqnarray}
+Y_{\NTWO}(Z_1) & = & Y_\NTWO^I\\*[.1in]
+Y_{\F}(Z_1) & = & Y_\F^I
 \end{eqnarray}
-In this way, CO$_2$ becomes the surrogate for all combustion products.
 
-Since the mixture fraction variables result from linear combinations of the species transport equations, the converse
-is also true -- that species mass fractions are linear combinations of the mixture fraction variables.
-The mass fractions of the species in the mixture, $Y_{\alpha}(Z_1,Z_2)$, are found via:
+$Z_2$: Products
 
-\parbox{2.5in}{
-\begin{eqnarray*}  Y_\F     &=& Y_\F^I \; Z_1  \\*[.1in]
-                  Y_\NTWO  &=& (1 - Z) \; Y_\NTWO^\infty  + Y_\NTWO^I \; Z_1 + \frac{\nu_\NTWO W_\NTWO}{W_\F} \; Y_\F^I \; Z_2  \\*[.1in]
-                  Y_\OTWO  &=& (1 - Z) \; Y_\OTWO^\infty - \frac{\nu_\OTWO W_\OTWO}{W_\F} \; Y_\F^I \; Z_2 \\*[.1in]
-                  Y_\COTWO &=& \frac{\nu_\COTWO W_\COTWO}{W_\F} \; Y_\F^I \; Z_2 \end{eqnarray*} }
-\hfill \parbox{3.5in}{\begin{eqnarray}
-                  Y_\HTWOO &=& \frac{\nu_\HTWOO W_\HTWOO}{W_\F} \; Y_\F^I \; Z_2 \\*[.1in]
-                  Y_\CO    &=& \frac{\nu_\CO W_\CO}{W_\F} \; Y_\F^I \; Z_2  \\*[.1in]
-                  Y_\So    &=& \frac{\nu_\So W_\So}{W_\F} \; Y_\F^I \; Z_2 \\*[.1in]
-                  Y_\M     &=& \frac{\nu_\M W_\M}{W_\F} \; Y_\F^I \; Z_2
-\end{eqnarray} }
+\begin{eqnarray}
+Y_{\NTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\NTWO^\infty +\nu_{\NTWO} W_{\NTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\COTWO^\infty +\nu_{\COTWO} W_{\COTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\CO}(Z_2) & = & \frac{\nu_{\CO} W_{\CO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\So}(Z_2) & = & \frac{\nu_{\So} W_{\So}}{W_F + \nu_{Air} W_{Air}}
+\end{eqnarray}
 
-\noindent
-The stoichiometric coefficients are defined:
+Species yields of combinations of $Z_0$, $Z_1$, and $Z_2$ are given as:
+
+\BE
+Y_\alpha(Z_0,Z_1,Z_2)=Y_\alpha(Z_0) (1 - Z_1 - Z_2)+Y_\alpha(Z_1) Z_1 + Y_\alpha(Z_2) Z_2
+\ee
+
+The stoichimetric coefficients in the $Z_2$ species yields are:
 
 \parbox{2.5in}{
 \begin{eqnarray*}  \nu_\NTWO  &=& \frac{\hbox{a}}{2}\\*[.1in]
                   \nu_\OTWO  &=& \nu_\COTWO + \frac{\nu_\CO+\nu_\HTWOO-\hbox{z}}{2}\\*[.1in]
                   \nu_\COTWO &=& \hbox{x} - \nu_\CO - (1-X_\Hy) \nu_\So  \\*[.1in]
-                  \nu_\M     &=& \hbox{b}  \end{eqnarray*} }
+\end{eqnarray*} }
 \hfill \parbox{3.5in}{\begin{eqnarray}
                   \nu_\HTWOO &=& \frac{\hbox{y}}{2}- X_\Hy \nu_\So\\*[.1in]
                   \nu_\CO    &=& \frac{W_\F}{W_\CO} \; y_\CO \\*[.1in]
                   \nu_\So    &=& \frac{W_\F}{W_\So} \; y_\So
 \end{eqnarray} }
-Remember that x is the number of carbon atoms and z is the number of oxygen atoms in the fuel molecule.
-It is important to note that the definitions of $Z_1$ and $Z_2$, unlike in the single parameter model,
-do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
+Remember that x is the number of carbon atoms, y is the number of hydrogen atoms, z is the number of oxygen atoms, and a is the number of nitrogen atoms in the fuel molecule.
+It is important to note that the definitions of $Z_0$,$Z_1$, and $Z_2$ do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
 
 
 \subsection{CO Production (Two-Step Reaction with Extinction)}
@@ -2383,8 +2312,8 @@ than would otherwise be predicted with a single set of fixed yields that are bas
 production of CO and its eventual oxidation at the flame envelope or within a hot upper layer,
 an additional reaction is now needed:
 \begin{eqnarray}
-\mathrm{C_xH_yO_zN_aM_b} +  \nu_\OTWO' \mathrm{O_2}  &\rightarrow&  \nu_\HTWOO \mathrm{H_2O} + (\nu_\CO'+ \nu_\CO) \, \mathrm{CO} +
-     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2} + \nu_\M \mathrm{M}  \\*[.1in]
+\mathrm{C_xH_yO_zN_a} +  \nu_\OTWO' \mathrm{O_2}  &\rightarrow&  \nu_\HTWOO \mathrm{H_2O} + (\nu_\CO'+ \nu_\CO) \, \mathrm{CO} +
+     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2}   \\*[.1in]
 \nu_\CO' \; \Big[ \mathrm{CO} + \ha \mathrm{O_2}  &\rightarrow&  \mathrm{CO_2}  \Big]
 \label{3reac} \end{eqnarray}
 The brackets around the second reaction are there merely to emphasize that the sum of the two reactions equal Eq.~(\ref{stoich}).
@@ -2397,26 +2326,53 @@ still does not contain the necessary kinetic mechanism to predict the ``post-fla
 measured value of the post-flame CO yield. Rather, the proposed model includes the production of large amounts of CO in the first step of a two-step
 reaction, followed by a partial conversion to CO$_2$ if there is a sufficient amount of oxygen present.
 
-To describe the composition of the gas species, the mixture fraction, $Z$, must now be decomposed into three components:
-\begin{eqnarray}  Z_1 &=& \frac{Y_\F}{Y_\F^I}   \\*[.1in]
-                  Z_2 &=& \frac{W_\F}{\big[\hbox{x}-(1-X_\Hy) \nu_\So \big] \, W_\CO }    \;  \frac{Y_\CO}{Y_\F^I} \\*[.1in]
-                  Z_3 &=& \frac{W_\F}{\big[\hbox{x}-(1-X_\Hy) \nu_\So \big] \, W_\COTWO } \;  \frac{Y_\COTWO}{Y_\F^I}  \end{eqnarray}
-Here, $\hbox{x}-(1-X_\Hy) \nu_\So$ represents the number of carbon atoms in the fuel molecule that are oxidized; that is, the carbon atoms that are not converted to soot.
-The decomposition of $Z$ into three components is numerically convenient. However, the recovery of the
-individual species mass fractions requires some care.  The mass fraction of any species in the mixture,
-$Y_\alpha(Z_1,Z_2,Z_3)$, is still found via linear combinations of the mixture fraction variables:
+To describe the composition of the gas species, an additional lumped species is required bringing the total to four lumped species.  We can rewrite the above two step reaction as:
 
-\parbox{2.5in}{
-\begin{eqnarray*}  Y_\F    &=& Z_1 \; Y_\F^I   \\*[.1in]
-                  Y_\NTWO  &=& (1 - Z) \; Y_\NTWO^\infty  + Y_\NTWO^I \; Z_1 + \frac{\nu_\NTWO W_\NTWO}{W_\F} \; Y_\F^I \; (Z_2+Z_3)  \\*[.1in]
-                  Y_\OTWO  &=& (1 - Z) \; Y_\OTWO^\infty  - \frac{W_\OTWO \; Y_\F^I}{W_\F} (\nu_\OTWO'  \; Z_2 +\nu_\OTWO  \; Z_3) \\*[.1in]
-                  Y_\COTWO &=& \frac{\nu_\COTWO W_\COTWO}{W_\F} \; Y_\F^I \; Z_3 \end{eqnarray*} }
-\hfill \parbox{3.5in}{\begin{eqnarray}
-                  Y_\HTWOO &=& \frac{\nu_\HTWOO W_\HTWOO}{W_\F} \; Y_\F^I \; (Z_2 + Z_3) \\*[.1in]
-                  Y_\CO    &=& \frac{(\nu_\CO+\nu_\CO') W_\COTWO}{W_\F} \; Y_\F^I \; Z_2 \\*[.1in]
-                  Y_\So    &=& \frac{\nu_\So W_\So}{W_\F} \; Y_\F^I \; (Z_2 + Z_3) \\*[.1in]
-                  Y_\M     &=& \frac{\nu_\M W_\M}{W_\F} \; Y_\F^I \; (Z_2 + Z_3)
-\end{eqnarray} }
+\begin{eqnarray}
+Fuel + \nu_{Air,1} Air &\rightarrow&  Incomplete \; Products\\*[.1in]
+Incomplete \; Products + \nu_{Air,2} Air &\rightarrow&  Complete \; Products
+\label{4lumped}
+\end{eqnarray}
+
+It can be seen from this that the four lumped species are: $Z_0$ for Air, $Z_1$ for Fuel, $Z_2$ for the products of incomplete combustion, and $Z_3$ for the products of copmlete combustion.  The species yields are:
+
+$Z_0$: Air
+
+\begin{eqnarray}
+Y_{\NTWO}(Z_0) & = & Y_\NTWO^\infty\\*[.1in]
+Y_{\OTWO}(Z_0) & = & Y_\OTWO^\infty\\*[.1in]
+Y_{\COTWO}(Z_0) & = & Y_\COTWO^\infty\\*[.1in]
+Y_{\HTWOO}(Z_0) & = & Y_\HTWOO^\infty
+\end{eqnarray}
+
+$Z_1$: Fuel
+
+\begin{eqnarray}
+Y_{\NTWO}(Z_1) & = & Y_\NTWO^I\\*[.1in]
+Y_{\F}(Z_1) & = & Y_\F^I
+\end{eqnarray}
+
+$Z_2$: Products of Incomplete Combustion
+
+\begin{eqnarray}
+Y_{\NTWO}(Z_2) & = & \frac{\nu_{Air,1} W_{Air} Y_\NTWO^\infty +\nu_{\NTWO} W_{\NTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air} Y_\COTWO^\infty}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\HTWOO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\CO}(Z_2) & = & \frac{\nu_{\CO'} W_{\CO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\So}(Z_2) & = & \frac{\nu_{\So} W_{\So}}{W_F + \nu_{Air} W_{Air}}
+\end{eqnarray}
+
+$Z_3$: Products of Complete Combustion
+
+\begin{eqnarray}
+Y_{\NTWO}(Z_2) & = & \frac{\nu_{Air,2} W_{Air}  Y_\NTWO^\infty +\nu_{\NTWO} W_{\NTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\COTWO^\infty +\nu_{\COTWO} W_{\COTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\CO}(Z_2) & = & \frac{\nu_\CO W_{\CO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\So}(Z_2) & = & \frac{\nu_{\So} W_{\So}}{W_F + \nu_{Air} W_{Air}}
+\end{eqnarray}
+
+
 The stoichiometric coefficients are defined:
 
 \parbox{2.5in}{
@@ -2440,7 +2396,7 @@ expected of the modeler are the fuel composition, the soot and CO yields, and th
 The discussion of the various multi-step reactions above is essentially book-keeping, the accounting of the gas
 molecules formed in the combustion process. But what of the heat released?
 
-When the gas constituents are characterized by two mixture fraction variables, there is a single step reaction that
+When the gas constituents are characterized by three lumped species variables, there is a single step reaction that
 converts fuel and oxygen into a
 fixed, predefined set of combustion products. Combustion is either allowed or
 disallowed\footnote{Note that the user has control over the parameters associated with local gas phase extinction.}
@@ -2449,40 +2405,15 @@ If combustion is allowed to occur in a grid
 cell, the single-step reaction is assumed to be infinitely fast, and the rate of fuel consumption is controlled
 only by the mixing rate of fuel and oxygen. This rate is modeled as described below.
 
-In the case of the two-step, three parameter mixture fraction model, the first step converts the
+In the case of the two-step, four lumped species model, the first step converts the
 fuel to CO and other combustion products, and the second step oxidizes the CO into CO$_2$.  The first step is
 determined as it is in the single step reaction case.  The second step, however, is assumed to be rate-dependent.
 
 
 \subsubsection{One-Step, Fast Reaction}
 
-For a one-step, infinitely-fast reaction, the fuel in a given grid cell, $Z_1$, is converted to products, $Z_2$, at a rate determined by a
-characteristic mixing time.  Recall from Section~\ref{extinction}
-that this represents single-step combustion with the possibility of local extinction.  It is assumed that the
-grid resolution is too coarse to resolve the flame sheet and compute directly the reaction rate.
-Instead, if any grid cell surrounding one containing both fuel and oxygen satisfies the ``Burn'' criteria depicted in Fig.~\ref{plotsupp},
-combustion is assumed to occur.  The consumption rate of fuel gases is given by~\cite{Poinsot:TNC}
-\be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad
-   s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \label{EDC} \ee
-Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter equal to 1.
 
-While the reaction rate given in Eq.~(\ref{EDC}) is an easily computed and robust subgrid-scale model of
-turbulent combustion, there is still a need, in certain situations, to put an upper bound on the local heat release rate per unit volume. The reason for
-this is that FDS is applied over length scales ranging from millimeters to tens of meters, and the resolution of the numerical grid
-is sometimes too coarse to expect the simple mixing time model to work effectively.
-A scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the
-heat release rate of a fire is approximately 1200~kW/m$^3$. FDS uses by default a value of 2500~kW/m$^3$ as an upper bound\footnote{Note that
-for DNS, FDS imposes a less restrictive upper bound on the local heat release rate per unit volume. It is
-\be \dq_{\max}''' = 200/\dx + 2500 \quad \hbox{kW/m}^3 \ee
-The value of 200~kW/m$^2$ is an upper bound on the heat release rate per unit area of flame sheet.}
-on the local value of the heat release rate per unit volume. Typically, this bound only affects fires whose value of $Q^*$
-is less than one\footnote{The non-dimensional quantity, $Q^*$, is a measure of the fire's heat release rate divided by the
-area of its base. It is expressed as $Q^*=\dQ/(\rho_\infty c_p T_\infty \sqrt{g D} D^2)$.}.
 
-Once the heat release rate is computed, the mixture fraction variables are updated:
-\be {Z_1}^{n+1} = {Z_1}^n - \frac {\dq''' {\Delta t}}{\rho  \Delta H}  \quad ; \quad  {Z_2}^{n+1} =
-{Z_2}^n + \frac {\dq''' {\Delta t}}{\rho  \Delta H} \ee
-Note that the total fuel mass is conserved in this process; $Z=Z_1+Z_2$ is still a conserved quantity.
 
 
 \subsubsection{Two-Step, Fast-Slow Reaction}
@@ -2526,7 +2457,7 @@ implementation of any of these one-step reaction schemes is still very
 much a research exercise because it is not universally accepted that
 combustion phenomena can be represented by such a simple mechanism.
 Improved predictions of the heat release rate may be possible by considering a multi-step set of reactions.
-However, each additional gas species defined in the computation incurs a roughly 5~\% increase in the CPU time.
+However, each additional gas species defined in the computation incurs a roughly 5~\% increase in the CPU time.  The use of lumped species may be able reduce this added computational expense.
 
 For finite-rate chemistry, it is assumed that the chemical reaction
 time scale is much shorter than any convective or diffusive
