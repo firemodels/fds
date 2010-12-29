@@ -2029,8 +2029,6 @@ guide.
 as opposed to the default Large Eddy Simulation (LES). This feature is appropriate only for simulations that use mesh cells that are
 on the order of a millimeter or less in size, or for diagnostic purposes.
 \item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
-\item[{\ct HUMIDITY}] Relative humidity, in units of \%. This need only be specified if there is a source of water in the simulation other than the fire
-itself. Otherwise, water vapor is not explicitly tracked. Default 40~\%.
 \item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the
 development of a perfectly symmetric flow when the boundary
 and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.}
@@ -5674,6 +5672,7 @@ label the {\ct REAC} line to more easily identify the fuel species.
 \item[{\ct MW\_OTHER}] Average molecular weight for {\ct OTHER} (g/mol).
 (Mixture Fraction only, default is the molecular weight of N$_2$, 28 g/mol)
 \item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232428)
+\item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default 0.0058)
 \item[{\ct Y\_F\_INLET}] Mass fraction of fuel in fuel stream (Default 1.0)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_s$.
 Note that this parameter does not apply to the processes of soot growth and oxidation,
@@ -5695,6 +5694,7 @@ values represent values for complete combustion ({\ct .TRUE.}) or for incomplete
 i.e. the values account for the specified $y_{CO}$, $y_{H_2}$, and $y_s$.  If {\ct IDEAL=.TRUE.}, then
 FDS will internally adjust $\Delta H$ to account for products of incomplete combustion. The default value is {\ct .FALSE.}
 \item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.  Note that if this parameter is used, then some form of ignition source must be present in order for combution to begin. (Default 0.0 K)
+\item[{\ct HUMIDITY}] Relative humidity of the background air species, in units of \%. (Default 40~\%).
 \end{description}
 
 \noindent
@@ -6022,6 +6022,7 @@ will be computed.  The keyword {\ct ABSORBING} can be specified on the {\ct SPEC
 species is not in the recognized list, then it will be assumed to be a fuel when invoking RADCAL to compute its
 absorptivity.
 
+The optional parameter {\ct HUMIDTY} can be specified with the species {\ct WATER VAPOR}.  {\ct HUMIDITY} is the relative humidity of water vapor in \% and is 40 \% by default.
 
 \subsection{Special Topic: Yields of Gaseous Species (NU\_GAS)}
 \label{nu_gas}
@@ -6141,7 +6142,7 @@ the rate equation can be dependent on a species that does not participate direct
 \item[{\ct THRESHOLD\_TEMPERATURE}] The temperature at which finite rate combustion will be computed when there is no heat release from other reactions. (Default 0.0 K)
 \end{description}
 
-\section{Species mixtures (Lumped Species): The \texorpdfstring{{\tt SMIX}}{SMIX} Namelist Group}
+\section{Species Mixtures (Lumped Species): The \texorpdfstring{{\tt SMIX}}{SMIX} Namelist Group}
 \label{info:SMIX}
 
 In many simulations there are sets of species that are created and transported in the same manner. In this case, tracking each species individually uses computational resources and time that need not be spent. For example, one could use the {\ct SPEC} namelist group to define the background species of air as a combination of nitrogen, oxygen, water vapor, and carbon dioxide. However, this would require tracking three species each of which would require memory and time. Alternatively, if one could create a lumped species that represented that composition and tracked only that species, then both time and memory could be saved. This can be accomplished with the {\ct SMIX} namelist group.
@@ -9888,7 +9889,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}         & m             & 0.                  \\ \hline
 {\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
 {\ct H\_EDDY}                   & Logical       & See Section~\ref{info:convection}             &               & {\ct .FALSE.}     \\ \hline
-{\ct HUMIDITY}                  & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}         &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES}                       & Logical       & Large Eddy Simulation                         &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE}                     & Logical       & Toggle initial noise on and off               &               & {\ct .TRUE.}      \\ \hline
@@ -10279,6 +10279,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_OF\_COMBUSTION}                & Real        & Energy per Unit Mass Fuel                     & kJ/kg             &         \\ \hline
 {\ct HRRPUA\_SHEET}                       & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^2$          & 0 (LES); 200 (DNS)    \\ \hline
 {\ct HRRPUV\_AVERAGE}                     & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^3$          & 2500 (LES); 0 (DNS)    \\ \hline
+{\ct HUMIDITY}                            & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
 {\ct ID}                                  & Character   & Identifier                                    &                   &     \\ \hline
 {\ct IDEAL}                               & Logical     & Adjust for minor product yields               &                   & {\ct .FALSE.}    \\ \hline
 {\ct \tiny MASS\_EXTINCTION\_COEFFICIENT} & Real        & Visibility parameter                          &  m$^2$/kg         & 8700.    \\ \hline
@@ -10295,6 +10296,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SUPPRESSION}                         & Logical       & See Section~\ref{info:combustion}             &                   & {\ct .TRUE.}      \\ \hline
 {\ct VISIBILITY\_FACTOR}                  & Real        & Visibility parameter                          &                   &     3   \\ \hline
 {\ct X\_O2\_LL}                           & Real        & Lower Oxygen Limit                            &  mol/mol          & 0.15    \\ \hline
+{\ct Y\_CO2\_INFTY}                       & Real        & Ambient carbon dioxide mass fraction (dry air)               &  kg/kg            & 0.0058 \\ \hline
 {\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner                  &  kg/kg            & 1.0     \\ \hline
 {\ct Y\_F\_LFL}                           & Real        & Lower Fuel limit (mass fraction)              &  kg/kg            & 0.0     \\ \hline
 {\ct Y\_O2\_INFTY}                        & Real        & Ambient oxygen mass fraction                  &  kg/kg            & 0.232428\\ \hline
@@ -10368,6 +10370,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
 {\ct FORMULA }                      & Character   & Smokeview label                             &                   &     \\ \hline
 {\ct FYI}                           & Character   & Comment String                              &                   &     \\ \hline
+{\ct HUMIDITY}                      & Real        & Relative Humidity                             & \%                & 40.  \\ \hline
 {\ct ID }                           & Character   & Name of species                             &                   &     \\ \hline
 {\ct LUMPED\_SPECIES\_ONLY}         & Logical     & Species is only part of an {\ct SMIX}    &                   & {\ct .FALSE.} \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0   \\ \hline
