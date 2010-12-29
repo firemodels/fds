@@ -1,6 +1,7 @@
 #!/bin/csh -f
 
 set smokeview=../SMV/bin/smv5_osx_32
+#set smokeview=../SMV/bin/smv5_linux_32
 
 echo
 echo erasing User Guide scripted figures generated previously
