@@ -2587,9 +2587,9 @@ IF (SM_CO2>0) SM%VOLUME_FRACTION(SM_CO2) = SM%MASS_FRACTION(SM_CO2)/MW_CO2
 IF (SM_H2O>0) SM%VOLUME_FRACTION(SM_H2O) = SM%MASS_FRACTION(SM_H2O)/MW_H2O
 
 SM%MW = 1._EB/SUM(SM%VOLUME_FRACTION)
+MW_AIR = SM%MW
 SM%RSUM = R0/SM%MW
 SM%VOLUME_FRACTION = SM%VOLUME_FRACTION / SUM(SM%VOLUME_FRACTION)
-
 SM => SPECIES_MIXTURE(2)
 
 SM%MASS_FRACTION(SM_FUEL) = Y_F_INLET
@@ -9980,68 +9980,11 @@ IF (QUANTITY=='EXTINCTION COEFFICIENT' .AND. SPEC_ID=='null' .AND. SIMPLE_CHEMIS
 IF (QUANTITY=='SOOT VOLUME FRACTION'   .AND. SPEC_ID=='null' .AND. SIMPLE_CHEMISTRY) SPEC_ID='SOOT'
 IF (QUANTITY=='VISIBILITY'             .AND. SPEC_ID=='null' .AND. SIMPLE_CHEMISTRY) SPEC_ID='SOOT'
 
-IF (SPEC_ID=='fuel')            SPEC_ID='FUEL'
-IF (SPEC_ID=='nitrogen')        SPEC_ID='NITROGEN'
-IF (SPEC_ID=='oxygen')          SPEC_ID='OXYGEN'
-IF (SPEC_ID=='water vapor')     SPEC_ID='WATER VAPOR'
-IF (SPEC_ID=='carbon dioxide')  SPEC_ID='CARBON DIOXIDE'
-IF (SPEC_ID=='carbon monoxide') SPEC_ID='CARBON MONOXIDE'
-IF (SPEC_ID=='hydrogen')        SPEC_ID='HYDROGEN'
-IF (SPEC_ID=='soot')            SPEC_ID='SOOT'
-
 SPEC_INDEX = 0
 PART_INDEX = 0
 DUCT_INDEX = 0
 NODE_INDEX = 0
 OUTPUT2_INDEX = 0
-
-! Convert old mixture fraction based quantities
-
-IF (QUANTITY=='fuel'.OR.QUANTITY=='fuel mass fraction') THEN
-   SPEC_ID = 'FUEL'
-   IF (QUANTITY=='fuel')               QUANTITY   = 'VOLUME FRACTION'
-   IF (QUANTITY=='fuel mass fraction') QUANTITY   = 'MASS FRACTION'
-ENDIF
-IF (QUANTITY=='oxygen'.OR.QUANTITY=='oxygen mass fraction') THEN
-   SPEC_ID = 'OXYGEN'
-   IF (QUANTITY=='oxygen')               QUANTITY   = 'VOLUME FRACTION'
-   IF (QUANTITY=='oxygen mass fraction') QUANTITY   = 'MASS FRACTION'
-ENDIF
-IF (QUANTITY=='nitrogen'.OR.QUANTITY=='nitrogen mass fraction') THEN
-   SPEC_ID = 'NITROGEN'
-   IF (QUANTITY=='nitrogen')               QUANTITY   = 'VOLUME FRACTION'
-   IF (QUANTITY=='nitrogen mass fraction') QUANTITY   = 'MASS FRACTION'
-ENDIF
-IF (QUANTITY=='water vapor'.OR.QUANTITY=='water vapor mass fraction') THEN
-   SPEC_ID = 'WATER VAPOR'
-   IF (QUANTITY=='water vapor')               QUANTITY   = 'VOLUME FRACTION'
-   IF (QUANTITY=='water vapor mass fraction') QUANTITY   = 'MASS FRACTION'
-ENDIF
-IF (QUANTITY=='carbon dioxide'.OR.QUANTITY=='carbon dioxide mass fraction') THEN
-   SPEC_ID = 'CARBON DIOXIDE'
-   IF (QUANTITY=='carbon dioxide')               QUANTITY   = 'VOLUME FRACTION'
-   IF (QUANTITY=='carbon dioxide mass fraction') QUANTITY   = 'MASS FRACTION'
-ENDIF
-IF (QUANTITY=='carbon monoxide'.OR.QUANTITY=='carbon monoxide mass fraction') THEN
-   SPEC_ID = 'CARBON MONOXIDE'
-   IF (QUANTITY=='carbon monoxide')               QUANTITY   = 'VOLUME FRACTION'
-   IF (QUANTITY=='carbon monoxide mass fraction') QUANTITY   = 'MASS FRACTION'
-ENDIF
-IF (QUANTITY=='hydrogen'.OR.QUANTITY=='hydrogen mass fraction') THEN
-   SPEC_ID = 'HYDROGEN'
-   IF (QUANTITY=='hydrogen')               QUANTITY   = 'VOLUME FRACTION'
-   IF (QUANTITY=='hydrogen mass fraction') QUANTITY   = 'MASS FRACTION'
-ENDIF
-IF (QUANTITY=='soot'.OR.QUANTITY=='soot mass fraction') THEN
-   SPEC_ID = 'SOOT'
-   IF (QUANTITY=='soot')               QUANTITY   = 'VOLUME FRACTION'
-   IF (QUANTITY=='soot mass fraction') QUANTITY   = 'MASS FRACTION'
-ENDIF
-IF (QUANTITY=='other'.OR.QUANTITY=='other mass fraction') THEN
-   SPEC_ID = 'OTHER'
-   IF (QUANTITY=='other')               QUANTITY   = 'VOLUME FRACTION'
-   IF (QUANTITY=='other mass fraction') QUANTITY   = 'MASS FRACTION'
-ENDIF
 
 ! Assign SPEC_INDEX when SPEC_ID is specified
 
@@ -10058,12 +10001,12 @@ IF (TRIM(SPEC_ID)/='null' .AND. SPEC_INDEX==0) THEN
    IF (SIMPLE_CHEMISTRY) THEN
       IF (TRIM(SPEC_ID)=='FUEL' .OR. TRIM(SPEC_ID)==REACTION(1)%FUEL) THEN
          SPEC_INDEX=FUEL_INDEX
-      ELSE
-         WRITE(MESSAGE,'(A,A,A)') 'ERROR: ',TRIM(SPEC_ID),' is neither explicitly specified nor part of the mixture fraction model'
+      ELSE         
+         WRITE(MESSAGE,'(A,A,A)') 'ERROR: ',TRIM(SPEC_ID),' is neither explicitly specified nor part of the simple chemistry model'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
    ELSE
-      WRITE(MESSAGE,'(A,A,A)')  'ERROR: ',TRIM(SPEC_ID),' is neither explicitly specified nor part of the mixture fraction model'
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR: ',TRIM(SPEC_ID),' is not explicitly specified'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 ENDIF 
@@ -10181,33 +10124,6 @@ DO NS=1,N_PART
       PART_INDEX = NS
    ENDIF
 ENDDO
-
-! Convert various old mixture fraction based names
-
-IF (QUANTITY=='visibility') THEN
-   QUANTITY = 'VISIBILITY'
-   SPEC_ID = 'SOOT'
-   SPEC_INDEX = SOOT_INDEX
-ENDIF
-IF (QUANTITY=='extinction coefficient') THEN
-   QUANTITY = 'EXTINCTION COEFFICIENT'
-   SPEC_ID = 'SOOT'
-   SPEC_INDEX = SOOT_INDEX
-ENDIF
-IF (QUANTITY=='optical depth') THEN
-   QUANTITY = 'OPTICAL DENSITY'
-   SPEC_INDEX = SOOT_INDEX
-ENDIF
-IF (QUANTITY=='soot density') THEN
-   QUANTITY = 'DENSITY'
-   SPEC_ID = 'SOOT'
-   SPEC_INDEX = SOOT_INDEX
-ENDIF
-IF (QUANTITY=='soot volume fraction') THEN
-   QUANTITY = 'SOOT VOLUME FRACTION'
-   SPEC_ID = 'SOOT'
-   SPEC_INDEX = SOOT_INDEX
-ENDIF
 
 IF (TRIM(SPEC_ID)=='SOOT' .AND. SPEC_INDEX == 0) THEN
    WRITE(MESSAGE,'(A,A)')  'ERROR: No SOOT species specified for QUANTITY=',TRIM(QUANTITY)
