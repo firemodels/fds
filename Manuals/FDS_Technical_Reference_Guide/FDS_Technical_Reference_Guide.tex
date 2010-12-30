@@ -1052,7 +1052,7 @@ diffusive fluxes is zero.
 \subsection{Momentum Transport}
 
 The momentum equation in conservative form is written:
-\be \dod{}{t} (\rho \bu) + \nabla\!\cdot (\rho \bu \bu) = 
+\be \dod{}{t} (\rho \bu) + \nabla\!\cdot (\rho \bu \bu) =
 - \nabla p + \nabla\!\cdot \btau_{ij} + \rho \bg + \bof_b \label{momentum} \ee
 where $\bg$ is the gravity vector and $\bof_b$ represents external forces such as the drag exerted by liquid droplets. The deviatoric (trace free) stress tensor $\btau_{ij}$ is:
 \be \btau_{ij} = 2 \mu \left( \bS_{ij} - \frac{1}{3} \bdelta_{ij} (\nabla \cdot \bu) \right) \quad ; \quad
@@ -1315,9 +1315,9 @@ Due to the use of the low Mach number approximation, the mass and energy equatio
 The density at the center of the $ijk$th cell is updated in time with the following predictor-corrector scheme. Advection terms are written in ``flux divergence'' form. In the predictor step, the density at the $(n+1)$st time level is estimated based on information at the $n$th level
 \be  \frac{\rho_{ijk}^{*}-\rho_{ijk}^n}{\dt}
     + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^n = 0
-\ee 
+\ee
 The quantity $\overline{\rho}^{FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}.
- 
+
 Following the prediction of the velocity and background pressure at the $(n+1)$st time level, the density is corrected via
 \be \frac{\rho_{ijk}^{n+1}-\ha\left(\rho_{ijk}^n
      +\rho_{ijk}^{*}\right)} {\ha \dt}
@@ -2219,7 +2219,7 @@ community.
 Simple empirical rules can be used to predict local
 extinction based on the species and temperature present in the flame sheet.  The FDS extinction model consists of two steps. The first step, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second step uses the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur.  This is done by computing the enthalpy of the local gas mixture at both the local temperature and at the limiting flame temperature.  If the local heat release is less than the enthalpy difference between the limiting flame temperature and the local temperature, then combustion will not occur.
 
-  
+
 \subsection{Simplified Chemistry}
 
 \label{simplechemistry}
@@ -2227,7 +2227,7 @@ extinction based on the species and temperature present in the flame sheet.  The
 Most ordinary combustibles can be represented by the simple single-step reaction:
 
 \be  \mathrm{C_xH_yO_zN_a} +  \nu_\OTWO \, \mathrm{O_2}  \rightarrow  \nu_\COTWO \, \mathrm{CO_2} + \nu_\HTWOO \, \mathrm{H_2O} + \nu_\CO \, \mathrm{CO} +
-     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2}  \label{stoich} 
+     \nu_\So \, \mathrm{S}  + \nu_\NTWO \, \mathrm{N_2}  \label{stoich}
 \ee
 Note that the nitrogen in the fuel molecule is assumed to form $\mathrm{N_2}$ only. Soot is assumed to be a mixture of carbon and hydrogen with the hydrogen atomic
 fraction given by $X_\Hy$. The stoichiometric coefficient, $\nu_\So$, represents the amount of fuel that is converted to soot. It is related to the
@@ -2247,41 +2247,34 @@ This reaction can also be represented as:
 \be  \mathrm{Fuel} +  \nu_\mathrm{Air} \, \mathrm{Air}  \rightarrow  \mathrm{Products}\label{stoichair}
 \ee
 
-Air is a lumped species consiting of a mixture of nitrogen, oxgyen, water vapor, and carbon dioxide (carbon dioxide is included to attenuate radiation over large distances and water vapor is included for attenuation and to support simulations with sprinklers).  Products is a lumped species consisting of all the products listed in \ref{stoich} plus the nitrogen, water vapor, and carbon dioxide from the Air that reacted with the fuel.  If we allow for the presence of a diluent gas in the fuel stream, then the Fuel becomes a lumped species consisting of fuel and diluent.  We name these species $Z_0$ for Air, $Z_1$ for Fuel, and $Z_2$ for Products.  When using simple chemistry, FDS tracks the last two species explicitly and $Z_0$ is implicitly tracked as the background species.  The mass fractions of the component gases in these species are given as:
+Air is a lumped species consisting of a mixture of nitrogen, oxygen, water vapor, and carbon dioxide (carbon dioxide is included to attenuate radiation over large distances and water vapor is included for attenuation and to support simulations with sprinklers).  Products is a lumped species consisting of all the products listed in \ref{stoich} plus the nitrogen, water vapor, and carbon dioxide from the Air that reacted with the fuel.  If we allow for the presence of a diluent gas in the fuel stream, then the Fuel becomes a lumped species consisting of fuel and diluent.  We name these species $Z_0$ for Air, $Z_1$ for Fuel, and $Z_2$ for Products.  When using simple chemistry, $Z_1$ and $Z_2$ are tracked explicitly and $Z_0$ is tracked implicitly as the background species.  The mass fractions of the component gases in these species are given as:
 
+\noindent 
 $Z_0$: Air
-
 \begin{eqnarray}
 Y_{\NTWO}(Z_0) & = & Y_\NTWO^\infty\\*[.1in]
 Y_{\OTWO}(Z_0) & = & Y_\OTWO^\infty\\*[.1in]
 Y_{\COTWO}(Z_0) & = & Y_\COTWO^\infty\\*[.1in]
 Y_{\HTWOO}(Z_0) & = & Y_\HTWOO^\infty
 \end{eqnarray}
-
 $Z_1$: Fuel
-
 \begin{eqnarray}
 Y_{\NTWO}(Z_1) & = & Y_\NTWO^I\\*[.1in]
 Y_{\F}(Z_1) & = & Y_\F^I
 \end{eqnarray}
-
 $Z_2$: Products
-
 \begin{eqnarray}
 Y_{\NTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\NTWO^\infty +\nu_{\NTWO} W_{\NTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
 Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\COTWO^\infty +\nu_{\COTWO} W_{\COTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\HTWOO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
 Y_{\CO}(Z_2) & = & \frac{\nu_{\CO} W_{\CO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
 Y_{\So}(Z_2) & = & \frac{\nu_{\So} W_{\So}}{W_F + \nu_{Air} W_{Air}}
 \end{eqnarray}
-
 Species yields of combinations of $Z_0$, $Z_1$, and $Z_2$ are given as:
-
-\BE
-Y_\alpha(Z_0,Z_1,Z_2)=Y_\alpha(Z_0) (1 - Z_1 - Z_2)+Y_\alpha(Z_1) Z_1 + Y_\alpha(Z_2) Z_2
+\be
+Y_\alpha(Z_0,Z_1,Z_2)=Y_\alpha(Z_0) \, (1 - Z_1 - Z_2) + Y_\alpha(Z_1) \, Z_1 + Y_\alpha(Z_2) \, Z_2
 \ee
-
-The stoichimetric coefficients in the $Z_2$ species yields are:
+The stoichiometric coefficients in the $Z_2$ species yields are:
 
 \parbox{2.5in}{
 \begin{eqnarray*}  \nu_\NTWO  &=& \frac{\hbox{a}}{2}\\*[.1in]
@@ -2334,7 +2327,7 @@ Incomplete \; Products + \nu_{Air,2} Air &\rightarrow&  Complete \; Products
 \label{4lumped}
 \end{eqnarray}
 
-It can be seen from this that the four lumped species are: $Z_0$ for Air, $Z_1$ for Fuel, $Z_2$ for the products of incomplete combustion, and $Z_3$ for the products of copmlete combustion.  The species yields are:
+It can be seen from this that the four lumped species are: $Z_0$ for Air, $Z_1$ for Fuel, $Z_2$ for the products of incomplete combustion, and $Z_3$ for the products of complete combustion.  The species yields are:
 
 $Z_0$: Air
 
@@ -2356,7 +2349,7 @@ $Z_2$: Products of Incomplete Combustion
 
 \begin{eqnarray}
 Y_{\NTWO}(Z_2) & = & \frac{\nu_{Air,1} W_{Air} Y_\NTWO^\infty +\nu_{\NTWO} W_{\NTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air} Y_\COTWO^\infty}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air} Y_\COTWO^\infty}{W_F + \nu_{Air} W_{Air}} \\*[.1in]
 Y_{\HTWOO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
 Y_{\CO}(Z_2) & = & \frac{\nu_{\CO'} W_{\CO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
 Y_{\So}(Z_2) & = & \frac{\nu_{\So} W_{\So}}{W_F + \nu_{Air} W_{Air}}
@@ -2367,7 +2360,7 @@ $Z_3$: Products of Complete Combustion
 \begin{eqnarray}
 Y_{\NTWO}(Z_2) & = & \frac{\nu_{Air,2} W_{Air}  Y_\NTWO^\infty +\nu_{\NTWO} W_{\NTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
 Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\COTWO^\infty +\nu_{\COTWO} W_{\COTWO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
-Y_{\COTWO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
+Y_{\HTWOO}(Z_2) & = & \frac{\nu_{Air} W_{Air}  Y_\HTWOO^\infty +\nu_{\HTWOO} W_{\HTWOO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
 Y_{\CO}(Z_2) & = & \frac{\nu_\CO W_{\CO}}{W_F + \nu_{Air} W_{Air}}\\*[.1in]
 Y_{\So}(Z_2) & = & \frac{\nu_{\So} W_{\So}}{W_F + \nu_{Air} W_{Air}}
 \end{eqnarray}
