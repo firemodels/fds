@@ -28,12 +28,12 @@
 &OBST XB=0.0,10.0,5.05,5.3,0.0,4.0, RGB=255,255,255 / 
 
 &PROP ID='smoketest' SMOKEVIEW_ID='smokesensor' /
-&DEVC XYZ=1.75,0.45,2.00, QUANTITY='visibility', ID='vis1' PROP_ID='smoketest' /
-&DEVC XYZ=3.25,1.05,2.00, QUANTITY='visibility', ID='vis2' PROP_ID='smoketest' /
-&DEVC XYZ=4.75,2.05,2.00, QUANTITY='visibility', ID='vis3' PROP_ID='smoketest' /
-&DEVC XYZ=6.25,3.05,2.00, QUANTITY='visibility', ID='vis4' PROP_ID='smoketest' /
-&DEVC XYZ=7.75,4.05,2.00, QUANTITY='visibility', ID='vis5' PROP_ID='smoketest' /
-&DEVC XYZ=9.25,5.05,2.00, QUANTITY='visibility', ID='vis6' PROP_ID='smoketest' /
+&DEVC XYZ=1.75,0.45,2.00, QUANTITY='VISIBILITY', SPEC_ID='SOOT', ID='vis1' PROP_ID='smoketest' /
+&DEVC XYZ=3.25,1.05,2.00, QUANTITY='VISIBILITY', SPEC_ID='SOOT', ID='vis2' PROP_ID='smoketest' /
+&DEVC XYZ=4.75,2.05,2.00, QUANTITY='VISIBILITY', SPEC_ID='SOOT', ID='vis3' PROP_ID='smoketest' /
+&DEVC XYZ=6.25,3.05,2.00, QUANTITY='VISIBILITY', SPEC_ID='SOOT', ID='vis4' PROP_ID='smoketest' /
+&DEVC XYZ=7.75,4.05,2.00, QUANTITY='VISIBILITY', SPEC_ID='SOOT', ID='vis5' PROP_ID='smoketest' /
+&DEVC XYZ=9.25,5.05,2.00, QUANTITY='VISIBILITY', SPEC_ID='SOOT', ID='vis6' PROP_ID='smoketest' /
 
 &SLCF PBX=5.0, QUANTITY='DENSITY',SPEC_ID='SOOT' /
 &SLCF PBY=5.0, QUANTITY='DENSITY',SPEC_ID='SOOT' /

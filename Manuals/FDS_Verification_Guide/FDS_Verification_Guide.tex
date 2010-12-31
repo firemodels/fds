@@ -1488,31 +1488,31 @@ co-ordinate systems.
 
 
 \section{Transient Thermocouple Response (\texorpdfstring{{\bf TC\_heating}}{TC\_heating}) }
-\label{TC_view_factor}
+\label{TC_heating}
 
-A thermocouple is placed in the center of a 1~m cube with walls set to 600~$^\circ$C and gas temperature set to 20~$^\circ$C. 
-The heat transfer coefficient is set to zero to eliminate convective heating. The gas temperature remains at 20~$^{\circ}$C because there is no convective heat transfer from the walls. 
+A thermocouple is placed in the center of a 1~m cube with walls set to 600~$^\circ$C and gas temperature set to 20~$^\circ$C.
+The heat transfer coefficient is set to zero to eliminate convective heating. The gas temperature remains at 20~$^{\circ}$C because there is no convective heat transfer from the walls.
 The thermocouple heats up according to the equation:
 \be
 \label{eq: rad}
-  \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, V_{\hbox{\tiny TC}} \frac{dT_{\hbox{\tiny TC}}}{dt}=\epsilon_{\hbox{\tiny TC}} \, \sigma \, A_{\hbox{\tiny TC}} 
+  \rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, V_{\hbox{\tiny TC}} \frac{dT_{\hbox{\tiny TC}}}{dt}=\epsilon_{\hbox{\tiny TC}} \, \sigma \, A_{\hbox{\tiny TC}}
   \left(T_s^{4}-T_{\hbox{\tiny TC}}^4 \right)
 \ee
 whose analytical solution is:
 \be
 \label{eq: rad_sol}
 t=\left.\frac{\ln(x+1) - \ln(1-x) + 2 \tan^{-1}(x)}{4 \, \beta \, T_s^3}\right|_{T_{\hbox{\tiny TC}}(0)}^{T_{\hbox{\tiny TC}}(t)}
-\quad ; \quad \beta=\frac{\epsilon_{\hbox{\tiny TC}} \, \sigma A_{\hbox{\tiny TC}}}{\rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, V_{\hbox{\tiny TC}}} \quad ; \quad 
+\quad ; \quad \beta=\frac{\epsilon_{\hbox{\tiny TC}} \, \sigma A_{\hbox{\tiny TC}}}{\rho_{\hbox{\tiny TC}} \, c_{\hbox{\tiny TC}} \, V_{\hbox{\tiny TC}}} \quad ; \quad
   x=\frac{T_{\hbox{\tiny TC}}}{T_s}
 \ee
-Figure~\ref{TC_heating} displays the thermocouple response compared to the analytical solution.
+Figure~\ref{TC_heating_plot} displays the thermocouple response compared to the analytical solution.
 \noindent
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/TC_heating}
 \end{center}
 \caption[Transient thermocouple heating.]{Increasing temperature of a thermocouple surrounded by walls at 600~$^\circ$C.}
-\label{TC_heating}
+\label{TC_heating_plot}
 \end{figure}
 
 
@@ -2356,6 +2356,40 @@ A 1~m by 1~m by 1~m box is divided into two equal compartments by a vertical wal
 \end{figure}
 
 \clearpage
+
+
+\section{Leakage: {\bf leak\_test} and {\bf leak\_test\_2}}
+
+In the following examples, both leaks and fans are demonstrated. A simple compartment (3.6~m by 2.4~m by 2.4~m) has a small fan at one end and
+one leak under the door at the other end. It is
+assumed for this example that the compartment is contained within a larger compartment that is perfectly sealed. The fan draws air into the
+compartment from the plenum space, increasing the pressure inside and decreasing it outside.  A steady state is achieved when the volume flow into
+and out of the compartment falls into balance.
+
+The volume flow rate of the fan is given by the ``fan curve'' \be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
+U_{\hbox{\footnotesize max}} \;
+   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
+   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
+where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.16$~m$^2$, $U_{\hbox{\scriptsize max}}=0.1$~m/s, and $\Delta
+p_{\hbox{\scriptsize max}}=1000$~Pa. The volume flow due to the leak is given by: \be \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}}
+\sqrt{ \frac{ 2 \Delta p}{ \rho_\infty} } \ee where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho_\infty=1.2$~kg/m$^3$. After 5~min the
+pressure difference is 938.2~Pa. The theoretical value, obtained by equating the fan and leak volume flow rates and solving for $\Delta_p$, is
+938.9~Pa. The slight difference is due to the fact that the solid boundaries within the interior of the computational domain admit a slight volume
+flux related to details of the numerical solver.
+
+Just for fun, we add another leak to the compartment, only this time the leak is to the exterior of the entire computational domain, an infinite void
+at ambient pressure. Now the fan flow rate ought to balance the sum of the flow rates from the two leaks. After 5~min, the pressure difference is
+935.2~Pa. The two cases are summarized in Fig.~\ref{leak_test}.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test_2}
+\end{tabular*}
+\caption[Pressure rise in sealed compartment.]{Output of the leak test cases.}
+\label{leak_test}
+\end{figure}
+
 
 \section{Multiple zone leakage (leak\_test\_2)}
 
