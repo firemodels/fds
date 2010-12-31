@@ -46,7 +46,7 @@ MODULE EVAC
   PUBLIC EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, EMESH_NM, EMESH_NFIELDS, &
        EMESH_INDEX, EVAC_FDS6, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, EVAC_EMESH_STAIRS_TYPE, EMESH_STAIRS
   !
-  CHARACTER(255):: EVAC_VERSION = '2.4.0'
+  CHARACTER(255):: EVAC_VERSION = '2.4.1'
   CHARACTER(255) :: EVAC_COMPILE_DATE
   INTEGER :: EVAC_MODULE_REV
   !
@@ -612,8 +612,9 @@ CONTAINS
        CALL ChkMemErr('READ_EVAC','EMESH_ID',IZERO) 
        ALLOCATE(EMESH_NM(     MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_NM',IZERO) 
-       ALLOCATE(EMESH_NFIELDS(MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
+       ALLOCATE(EMESH_NFIELDS(MAX(1,N_EGRIDS_TMP+N_STRS)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_NFIELDS',IZERO) 
+       EMESH_NFIELDS = 0
        ALLOCATE(EMESH_XB(6,   MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_XB',IZERO) 
        ALLOCATE(EMESH_IJK(3,  MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
@@ -3247,6 +3248,9 @@ CONTAINS
          STRP%ID          = ID
          STRP%XB          = XB
          ii = 0
+         IF (EVAC_FDS6 .AND. TRIM(MESH_ID) == 'null') THEN
+            MESH_ID = 'Emesh_' // TRIM(ID)
+         END IF
          STRP_MeshLoop: DO I = 1, NMESHES
             IF (.NOT. EVACUATION_ONLY(I)) CYCLE
             IF (.NOT. EVACUATION_GRID(I)) CYCLE
@@ -3256,6 +3260,14 @@ CONTAINS
                EXIT STRP_MeshLoop
             END IF
          END DO STRP_MeshLoop
+         IF (ii == 0) THEN
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: STRS ',TRIM(STRP%ID),' no mesh ',TRIM(MESH_ID),' found'
+            CALL SHUTDOWN(MESSAGE)
+         END IF
+         IF (ii > 1) THEN
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: STRS ',TRIM(STRP%ID),' no unique mesh ',TRIM(MESH_ID),' found'
+            CALL SHUTDOWN(MESSAGE)
+         END IF
 
          ! Count number of cores
          STRP%N_CORES = 0
@@ -7393,6 +7405,11 @@ CONTAINS
                    I_TARGET_OLD = HR%I_TARGET 
                    N_CHANGE_TRIALS = N_CHANGE_TRIALS + 1
                    CALL CHANGE_TARGET_DOOR(NM,NM,I,J,J1,I_EGRID,1,HR%X,HR%Y,I_TARGET,COLOR_INDEX,I_NEW_FFIELD,HR)
+                   IF (ABS(I_TARGET_OLD) > 0) THEN
+                      IF (.NOT.Is_Visible_Door(ABS(I_TARGET_OLD)) .AND. .NOT.Is_Known_Door(ABS(I_TARGET_OLD))) THEN
+                         I_TARGET_OLD = 0
+                      END IF
+                   END IF
                    IF (I_TARGET /= 0) THEN  ! One should put this inside change_target_door 
                       IF (Is_BeeLine_Door(ABS(I_TARGET),2))   HR%SeeDoorXYZ1=.TRUE.
                       IF (Is_BeeLine_Door(ABS(I_TARGET),3))   HR%SeeDoorXYZ2=.TRUE.
@@ -7457,6 +7474,12 @@ CONTAINS
                             ! Check, that the persons are seeing each other, i.e., there are no walls between.
                             PP_SEE_EACH = SEE_EACH_OTHER(NM_SEE, HR%X, HR%Y, HRE%X, HRE%Y)
                             IF (.NOT. PP_SEE_EACH) CYCLE Other_Agent_Loop
+                            IF (ABS(HRE%I_TARGET) > 0) THEN
+                               IF (.NOT.Is_Visible_Door(ABS(HRE%I_TARGET)) .AND. &
+                                    .NOT.Is_Known_Door(ABS(HRE%I_TARGET))) THEN
+                                  CYCLE Other_Agent_Loop ! Too much smoke
+                               END IF
+                            END IF
                             IF (ABS(HRE%I_Target) > 0 .AND. P2P_DIST < TIM_DIST) THEN
                                IF (ABS(HRE%I_TARGET) <= N_DOORS) THEN
                                   x11 = 0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%X1 + &
@@ -7620,6 +7643,7 @@ CONTAINS
                          END IF
                          COLOR_INDEX = HR%COLOR_INDEX
                          IF (COLOR_METHOD == 4) THEN
+                            COLOR_INDEX = EVAC_AVATAR_NCOLOR ! default, cyan
                             IF (ABS(I_TARGET)>0 .AND. ABS(I_TARGET)<=N_DOORS ) &
                                  COLOR_INDEX = EVAC_DOORS(ABS(I_TARGET))%Avatar_Color_Index
                             IF (ABS(I_TARGET)>N_DOORS .AND. ABS(I_TARGET)<=N_DOORS+N_EXITS) &
@@ -8558,7 +8582,10 @@ CONTAINS
                 SIN_THETA(III) = SIN(PI*THETAS(III)/180._EB)
                 U_THETA(III) = COS_THETA(III)*UBAR - SIN_THETA(III)*VBAR
                 V_THETA(III) = SIN_THETA(III)*UBAR + COS_THETA(III)*VBAR
+                CALL RANDOM_NUMBER(RN)
+                SUM_SUUNTA(III) = 0.000001_EB*RN ! left/right symmetry trick. Now the order of the sectors do not matter.
              END DO
+             SUM_SUUNTA(N_SECTORS+1) = 0.1_EB ! prefer straight ahead a little bit
              COS_THETA(N_SECTORS+1) = 1.0_EB ! V0 direction
              SIN_THETA(N_SECTORS+1) = 0.0_EB
              THETAS(N_SECTORS+1)    = 0.0_EB
@@ -8603,8 +8630,8 @@ CONTAINS
                 END IF
                 IF (ANGLE_HRE == 2.0_EB*PI) ANGLE_HRE = 0.0_EB  ! Agent HRE angle is [0,2PI)
                 ANGLE_HRE = ANGLE_HR - ANGLE_HRE
-                IF (ANGLE_HRE >= PI) ANGLE_HRE = 2.0_EB*PI - ANGLE_HRE
-                IF (ANGLE_HRE <= -PI) ANGLE_HRE = 2.0_EB*PI + ANGLE_HRE
+                IF (ANGLE_HRE >  PI) ANGLE_HRE = ANGLE_HRE - 2.0_EB*PI
+                IF (ANGLE_HRE < -PI) ANGLE_HRE = ANGLE_HRE + 2.0_EB*PI
                 ! If HRE is on the right hand side of HR then the angle is negative, 
                 ! i.e., positive direction is anti-clockwise.
                 ANGLE_HRE = -180.0_EB*ANGLE_HRE/PI  ! Degrees
@@ -8641,31 +8668,32 @@ CONTAINS
                    IF (ANGLE_HRE == 2.0_EB*PI) ANGLE_HRE = 0.0_EB  ! Agent HRE angle is [0,2PI)
                    ANGLE_HRE = ANGLE_HR - ANGLE_HRE
                    
-                   IF (ANGLE_HRE >= PI) ANGLE_HRE = 2.0_EB*PI - ANGLE_HRE
-                   IF (ANGLE_HRE <= -PI) ANGLE_HRE = 2.0_EB*PI + ANGLE_HRE
+                   IF (ANGLE_HRE >  PI) ANGLE_HRE = ANGLE_HRE - 2.0_EB*PI
+                   IF (ANGLE_HRE < -PI) ANGLE_HRE = ANGLE_HRE + 2.0_EB*PI
                    ! Agent hre is at this angle when measured from HR
                    ! If HRE is on the right hand side of HR then the angle is negative,
                    ! i.e., positive direction is anti-clockwise (as usual).
                    ANGLE_HRE = -180.0_EB*ANGLE_HRE/PI  ! Degrees
+                   ANGLE_HR  = -180.0_EB*ANGLE_HR /PI  ! Degrees
                    
                    V_HRE = (HRE%X-HR%X)*UBAR + (HRE%Y-HR%Y)*VBAR
                    V_HRE = V_HRE/SQRT((HRE%X-HR%X)**2+(HRE%Y-HR%Y)**2) ! COS R_HRE VS V0
-                   V_HRE = MAX(0.5_EB,V_HRE)  ! LOOK FURTHER AHEAD THAN SIDEWAYS
+                   V_HRE = MAX(0.5_EB,V_HRE)  ! Look further ahead than sideways
                    EVEL = MAX(0.2_EB,MIN(1.0_EB,SQRT(HR%U**2+HR%V**2)/HR%SPEED))
                    TIM_DIST = MAX(0.2_EB,MIN(EVEL,V_HRE))*P2P_SUUNTA_MAX + HR%RADIUS + HRE%RADIUS
                    EVEL = MAX(0.5_EB,MIN(1.0_EB,SQRT(HR%U**2+HR%V**2)/HR%SPEED))
-                   V_HRE = MAX(0.5_EB,MIN(EVEL,V_HRE))*P2P_SUUNTA_MAX ! LOOK FURTHER AHEAD THAN SIDEWAYS
+                   V_HRE = MAX(0.5_EB,MIN(EVEL,V_HRE))*P2P_SUUNTA_MAX ! Look further ahead than sideways
                    IF (P2P_DIST < (V_HRE+HR%RADIUS+HRE%RADIUS) ) THEN
-                      VR_2R = HRE%UBAR*UBAR+HRE%VBAR*VBAR ! COUNTERFLOW OR NOT?
-                      ! WHICH SECTOR IF ANY
+                      VR_2R = HRE%UBAR*UBAR + HRE%VBAR*VBAR ! Counterflow or not?
+                      ! Which sector if any
                       III = INT((ANGLE_HRE-(THETA_START-1.5_EB*THETA_STEP))/THETA_STEP)
                       IF (III > 0 .AND. III < N_SECTORS+1) THEN
                          ! (UBAR,VBAR) are unit vectors
                          IF (P2P_DIST < TIM_DIST) N_SUUNTA(III) = N_SUUNTA(III) + 1
                          IF (P2P_DIST < TIM_DIST .AND. VR_2R <= -0.2_EB) N_SUUNTACF(III) = N_SUUNTACF(III) + 1
-                         IF (VR_2R > 0.0_EB) THEN ! SAME DIRECTION
-                            V_HRE = HRE%U*UBAR + HRE%V*VBAR  ! HRE SPEED ALONG THE V0 DIRECTION
-                            V_HR  = MAX(0.0_EB,HR%U*UBAR + HR%V*VBAR)  ! HR SPEED ALONG THE V0 DIRECTION
+                         IF (VR_2R > 0.0_EB) THEN ! Same direction
+                            V_HRE = HRE%U*UBAR + HRE%V*VBAR  ! HRE speed along the v0 direction
+                            V_HR  = MAX(0.0_EB,HR%U*UBAR + HR%V*VBAR)  ! HR speed along the v0 direction
                             V_HRE = CONST_DF + FAC_DF*(MIN(HR%V0_FAC*HR%SPEED,V_HRE) - &
                                  MIN(HR%V0_FAC*HR%SPEED,V_HR))
                          ELSE ! Counterflow
@@ -13460,7 +13488,7 @@ CONTAINS
              max_fed = M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
              EXIT MainLoopY
           END IF
-          ave_K = EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*M%HUMAN_GRID(i,j)%SOOT_DENS/(ABS(j_r1-j_r2)+1) 
+          ave_K = ave_K +  EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*M%HUMAN_GRID(i,j)%SOOT_DENS/(ABS(j_r1-j_r2)+1)
           max_fed = MAX(max_fed, M%HUMAN_GRID(i,j)%FED_CO_CO2_O2)
           i_old = i ; j_old = j
        END DO MainLoopY
@@ -13501,7 +13529,7 @@ CONTAINS
              max_fed = M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
              EXIT MainLoopX
           END IF
-          ave_K = EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*M%HUMAN_GRID(i,j)%SOOT_DENS/(ABS(i_r1-i_r2)+1)
+          ave_K = ave_K + EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*M%HUMAN_GRID(i,j)%SOOT_DENS/(ABS(i_r1-i_r2)+1)
           max_fed = MAX(max_fed, M%HUMAN_GRID(i,j)%FED_CO_CO2_O2)
           i_old = i ; j_old = j
        END DO MainLoopX
@@ -13820,7 +13848,7 @@ CONTAINS
     REAL(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o
     REAL(EB) :: X1, Y1, X2, Y2, DOOR_WIDTH, X_XYZ, Y_XYZ
     INTEGER :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index, DOOR_IOR
-    INTEGER :: i, i_o, izero, nm_tmp, I_Agent_Type, NM_SEE
+    INTEGER :: i, i_o, izero, nm_tmp, I_Agent_Type, NM_SEE, I_Old_Target
     CHARACTER(30) :: name_old_ffield, name_new_ffield
     LOGICAL :: PP_see_door
     REAL(EB) :: T_tmp, T_tmp1, Width
@@ -13843,6 +13871,7 @@ CONTAINS
 
     I_Agent_Type = HR%I_DoorAlgo
     i_old_ffield = HR%I_FFIELD
+    I_Old_Target = HR%I_Target
     IF (i_old_ffield > 0) THEN
        name_old_ffield = TRIM(MESH_NAME(i_old_ffield))
     ELSE
@@ -14231,6 +14260,7 @@ CONTAINS
              i_new_ffield = EVAC_EXITS(i_tmp-N_DOORS)%I_VENT_FFIELD
           END IF
           color_index = 1
+          I_Target = i_tmp
        ELSE
           ! No visible known doors available, try non-visible known doors
           i_tmp   = 0
@@ -14280,6 +14310,7 @@ CONTAINS
                 i_new_ffield = EVAC_EXITS(i_tmp-N_DOORS)%I_VENT_FFIELD
              END IF
              color_index = 2
+             I_Target = -i_tmp
           ELSE
              ! Known doors with no smoke have not been found.
              ! Try visible, not known door with no smoke.
@@ -14326,6 +14357,7 @@ CONTAINS
                    i_new_ffield = EVAC_EXITS(i_tmp-N_DOORS)%I_VENT_FFIELD
                 END IF
                 color_index = 3
+                I_Target = i_tmp
              ELSE
                 ! Now we have some smoke and some visible or known doors
                 i_tmp   = 0
@@ -14370,6 +14402,8 @@ CONTAINS
                          ELSE
                             l2_tmp = (ABS(x1_old-x_o)+ABS(y1_old-y_o))*0.5_EB/(3.0_EB/K_ave_Door(i))
                          END IF
+                         IF (L2_tmp >= 1.0_EB) Is_Visible_Door(i) = .FALSE.  ! Too much smoke
+                         IF (L2_tmp >= 1.0_EB) Is_Known_Door(i)   = .FALSE.  ! Too much smoke
                       END IF
                       IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD2*L2_tmp
                       IF (L2_tmp < L2_min) THEN
@@ -14391,6 +14425,8 @@ CONTAINS
                    IF (Is_Known_Door(i_tmp) .AND. Is_Visible_Door(i_tmp)) color_index = 4
                    IF (Is_Known_Door(i_tmp) .AND. .NOT. Is_Visible_Door(i_tmp)) color_index = 5
                    IF (.NOT. Is_Known_Door(i_tmp) .AND. Is_Visible_Door(i_tmp)) color_index = 6
+                   I_Target = i_tmp
+                   IF (.NOT.Is_Visible_Door(i_tmp)) I_Target = -i_tmp
                 ELSE    ! no match 
                    ! No door found (or too much smoke), use the main evac mesh ffield by default.
                    ! Note: Now there is a herding algorithm and it is also used for "normal" agents
@@ -14399,6 +14435,7 @@ CONTAINS
                    !       evacuation mesh flow field.  Exception: If agents came from a door/entr
                    !       to the room then they continue about 3 m away from the door and stop there.
                    i_tmp = 0
+                   I_Target = i_tmp
                    IF (imode /= 2) THEN
                       i_new_ffield    = nm_tmp
                       name_new_ffield = TRIM(MESH_NAME(i_new_ffield))
@@ -14436,6 +14473,7 @@ CONTAINS
     ELSE ! No known/visible door
        i_tmp = 0 ! no door found
        color_index = EVAC_AVATAR_NCOLOR ! default, cyan
+       I_Target = i_tmp
        IF (imode == 2) THEN   ! check_target_node calls
           I_Target = 0
           i_new_ffield = I_Field
@@ -14481,7 +14519,7 @@ CONTAINS
        IF (imode < 2) I_Target = -i_tmp
     END IF
     IF (j > 0) Group_Known_Doors(j)%I_Target = HR%I_Target
-    IF ( (i_new_ffield /= i_old_ffield) .OR. (imode == 0) ) THEN
+    IF ( (i_new_ffield /= i_old_ffield) .OR. (imode == 0) .OR. (EVAC_FDS6 .AND. (I_Target /= I_Old_Target))) THEN
        ! Change the field of this group/agent.
        IF ( j == 0 ) THEN
           ! Group index=0: 'lost souls' or lonely agents
