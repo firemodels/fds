@@ -385,7 +385,7 @@ Note that this Guide does not provide the background theory for FDS. A four volu
 collectively as the FDS Technical Reference Guide~\cite{FDS_Math_Guide}, contains details about the governing
 equations and numerical methods, model verification, experimental validation, and configuration management.
 The FDS User's Guide contains limited information on how to operate Smokeview, the companion
-visualization program for FDS. Its full capability is described in the Smokeview User's Guide~\cite{Smokeview_Users_Guide_5}.
+visualization program for FDS. Its full capability is described in the Smokeview User's Guide~\cite{Smokeview_Users_Guide}.
 
 
 \chapter{Disclaimer}
@@ -599,7 +599,7 @@ Verification and Validation of the model are discussed in the FDS Verification~\
 Smokeview is a separate visualization program that is used to display the
 results of an FDS simulation.
 A detailed description of Smokeview is found in
-a separate user's guide~\cite{Smokeview_Users_Guide_5}.
+a separate user's guide~\cite{Smokeview_Users_Guide}.
 
 
 \section{Features of FDS}
@@ -682,7 +682,7 @@ Smokeview has a simple menu-driven interface. FDS does not. However, there are v
 that have been developed to generate the text file containing the input parameters needed by FDS.
 
 This guide describes how to obtain FDS and Smokeview and how to use FDS.
-A separate document~\cite{Smokeview_Users_Guide_5} describes how to use Smokeview. Other tools related to
+A separate document~\cite{Smokeview_Users_Guide} describes how to use Smokeview. Other tools related to
 FDS and Smokeview can be found at the web site.
 
 \section{How to Acquire FDS and Smokeview}
@@ -2616,7 +2616,7 @@ outline of its base:
 
 \footnotesize
 \begin{verbatim}
-&HEAD CHID='pyramid', TITLE='Simple demo of multiplier function' /
+&HEAD CHID='pyramid', TITLE='Simple demo of multiplier function, SVN $Revision$' /
 &MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 &TIME T_END=0. /
 &MULT ID='south', DXB=0.01,-.01,0.01,0.01,0.01,0.01, N_LOWER=0, N_UPPER=39 /
@@ -2627,6 +2627,9 @@ outline of its base:
 &OBST XB=0.10,0.90,0.89,0.90,0.10,0.11, MULT_ID='north', COLOR='BLUE' /
 &OBST XB=0.10,0.11,0.11,0.89,0.10,0.11, MULT_ID='west',  COLOR='GREEN' /
 &OBST XB=0.89,0.90,0.11,0.89,0.10,0.11, MULT_ID='east',  COLOR='CYAN' /
+&MULT ID='holes', DX=0.15, DZ=0.1, I_UPPER=1, K_UPPER=1 /
+&HOLE XB=0.40,0.45,0.00,1.00,0.15,0.20, MULT_ID='holes' /
+&TAIL /
 \end{verbatim}
 \normalsize
 
@@ -3593,7 +3596,7 @@ An alternative to {\ct HRRPUA} with the exact same functionality is
 specifies the Mass Loss Rate of fuel gas Per Unit Area in kg/m$^2$/s. Do not specify both
 {\ct HRRPUA} and {\ct MLRPUA} on the same {\ct SURF} line. With either,
 the stoichiometry of the gas phase reaction is set by the simple chemistry input
-parameters on the {\ct REAC} line. 
+parameters on the {\ct REAC} line.
 If a finite rate combustion model is desired instead of the default mixture
 fraction model, see Section~\ref{info:finite}.
 
@@ -5374,37 +5377,7 @@ required by the {\ct POROUS} surface. The attribute {\ct PERMIT\_HOLE=.FALSE.} t
 they are embedded within the Partition Wall.
 
 
-\subsubsection{Example Cases: {\bf leak\_test} and {\bf leak\_test\_2}}
 
-In the following examples, both leaks and fans are demonstrated. A simple compartment (3.6~m by 2.4~m by 2.4~m) has a small fan at one end and
-one leak under the door at the other end. It is
-assumed for this example that the compartment is contained within a larger compartment that is perfectly sealed. The fan draws air into the
-compartment from the plenum space, increasing the pressure inside and decreasing it outside.  A steady state is achieved when the volume flow into
-and out of the compartment falls into balance.
-
-The volume flow rate of the fan is given by the ``fan curve'' \be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
-U_{\hbox{\footnotesize max}} \;
-   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
-   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
-where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.16$~m$^2$, $U_{\hbox{\scriptsize max}}=0.1$~m/s, and $\Delta
-p_{\hbox{\scriptsize max}}=1000$~Pa. The volume flow due to the leak is given by: \be \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}}
-\sqrt{ \frac{ 2 \Delta p}{ \rho_\infty} } \ee where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho_\infty=1.2$~kg/m$^3$. After 5~min the
-pressure difference is 938.2~Pa. The theoretical value, obtained by equating the fan and leak volume flow rates and solving for $\Delta_p$, is
-938.9~Pa. The slight difference is due to the fact that the solid boundaries within the interior of the computational domain admit a slight volume
-flux related to details of the numerical solver.
-
-Just for fun, we add another leak to the compartment, only this time the leak is to the exterior of the entire computational domain, an infinite void
-at ambient pressure. Now the fan flow rate ought to balance the sum of the flow rates from the two leaks. After 5~min, the pressure difference is
-935.2~Pa. The two cases are summarized in Fig.~\ref{leak_test}.
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test_2}
-\end{tabular*}
-\caption[Pressure rise in sealed compartment.]{Output of the leak test cases.}
-\label{leak_test}
-\end{figure}
 
 
 
@@ -5632,7 +5605,7 @@ In both cases, the combustion reaction must be specified.  This is done using th
 
 \subsection{Mixing Controlled Reactions with Simple Chemistry}
 
-This approach to combustion considers a single fuel species that is composed primarily of C,H,O, and N that reacts with oxygen in one or two mixing controlled steps to form water vapor and carbon dioxide with the fuel nitrogen becoming nitrogen gas.  
+This approach to combustion considers a single fuel species that is composed primarily of C,H,O, and N that reacts with oxygen in one or two mixing controlled steps to form water vapor and carbon dioxide with the fuel nitrogen becoming nitrogen gas.
 
 The chemical composition of the fuel is specified using the {\ct REAC} namelist group. For the default mixture fraction
 model, only a single {\ct REAC} line is needed. If combustion is desired, a {\ct REAC} line must be specified and there is no default fuel chemistry.  The user is responsible for defined the fuel chemistry and the post-combustion yields of CO and soot.
@@ -6119,7 +6092,7 @@ In a typical simulation the mixing controlled combustion model is used in conjun
 \item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.  Note that if this parameter is used, then some form of ignition source must be present in order for combution to begin. (Default 0.0 K)
 \item[{\ct FUEL}] Character string indicating which of the listed gas species is the fuel.
 \item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where negative values indicate reactants and positive values indicate products.
-\item[{\ct SPEC\_ID}] Array containing the names of the species that participate in the reaction. 
+\item[{\ct SPEC\_ID}] Array containing the names of the species that participate in the reaction.
 \item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
 \end{description}
 
@@ -6183,7 +6156,7 @@ label the {\ct SPEC\_ID} Character array containing the names of the species tha
 \item[{\ct VOLUME\_FRACTION}]  The volume fractions of the species making up the lumped species.  FDS will normalize the values to 1.  Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
 \end{description}
 
-Any FDS input that requires a {\ct SPEC\_ID} can also use the {\ct ID} of an {\ct SMIX}.  
+Any FDS input that requires a {\ct SPEC\_ID} can also use the {\ct ID} of an {\ct SMIX}.
 
 
 \clearpage
@@ -10262,12 +10235,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
 \hline \hline
 \endhead
-{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Auto ignition temperature (MIxture Fraction)          &   K           &  0
-   \\ \hline
+{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Auto ignition temperature                     &   K               &  0  \\ \hline
 {\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)          &   cm$^3$/mol/s    &     \\ \hline
 {\ct BETA\_EDC}                           & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
 {\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
-{\ct CO\_PRODUCTION}                      & Logical       & See Section~\ref{info:combustion}             &                   & {\ct .FALSE.}     \\ \hline
+{\ct CO\_PRODUCTION}                      & Logical     & See Section~\ref{info:combustion}             &                   & {\ct .FALSE.}     \\ \hline
 {\ct CO\_YIELD}                           & Real        & Fraction of CO from the fuel                  & kg/kg             & 0        \\ \hline
 {\ct \tiny CRITICAL\_FLAME\_TEMPERATURE}  & Real        & Suppression criterion                         &   $^\circ$C       & 1427    \\ \hline
 {\ct E}                                   & Real        & Activation Energy (Finite Rate)               &   kJ/kmol         &     \\ \hline
@@ -10296,7 +10268,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SUPPRESSION}                         & Logical       & See Section~\ref{info:combustion}             &                   & {\ct .TRUE.}      \\ \hline
 {\ct VISIBILITY\_FACTOR}                  & Real        & Visibility parameter                          &                   &     3   \\ \hline
 {\ct X\_O2\_LL}                           & Real        & Lower Oxygen Limit                            &  mol/mol          & 0.15    \\ \hline
-{\ct Y\_CO2\_INFTY}                       & Real        & Ambient carbon dioxide mass fraction (dry air)               &  kg/kg            & 0.0058 \\ \hline
+{\ct Y\_CO2\_INFTY}                       & Real        & Ambient carbon dioxide mass fraction          &  kg/kg            & 0.0058 \\ \hline
 {\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner                  &  kg/kg            & 1.0     \\ \hline
 {\ct Y\_F\_LFL}                           & Real        & Lower Fuel limit (mass fraction)              &  kg/kg            & 0.0     \\ \hline
 {\ct Y\_O2\_INFTY}                        & Real        & Ambient oxygen mass fraction                  &  kg/kg            & 0.232428\\ \hline
@@ -10363,16 +10335,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ABSORBING}                     & Logical     & Absorbs radiation                           &                   & {\ct .FALSE.} \\ \hline
-{\ct BACKGROUND}                    & Logical     & Use this species as the background species             & {\ct .FALSE.} \\ \hline
-{\ct BACKGROUND\_ONLY}              & Logical     & Species is only used for the background species             &                   & {\ct .FALSE.} \\ \hline
+{\ct BACKGROUND}                    & Logical     & Background species                          & {\ct .FALSE.} \\ \hline
+{\ct BACKGROUND\_ONLY}              & Logical     & Species is only background                  &                   & {\ct .FALSE.} \\ \hline
 {\ct CONDUCTIVITY}                  & Real        & Conductivity, $k$                           & W/m/K             &     \\ \hline
 {\ct DIFFUSIVITY}                   & Real        & Diffusivity,  $D$                           & m$^2$/s           &     \\ \hline
 {\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
 {\ct FORMULA }                      & Character   & Smokeview label                             &                   &     \\ \hline
 {\ct FYI}                           & Character   & Comment String                              &                   &     \\ \hline
-{\ct HUMIDITY}                      & Real        & Relative Humidity                             & \%                & 40.  \\ \hline
+{\ct HUMIDITY}                      & Real        & Relative Humidity                           & \%                & 40.  \\ \hline
 {\ct ID }                           & Character   & Name of species                             &                   &     \\ \hline
-{\ct LUMPED\_SPECIES\_ONLY}         & Logical     & Species is only part of an {\ct SMIX}    &                   & {\ct .FALSE.} \\ \hline
+{\ct LUMPED\_SPECIES\_ONLY}         & Logical     & Species is only part of an {\ct SMIX}       &                   & {\ct .FALSE.} \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0   \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & Initial mass fraction                       &                   & 0   \\ \hline
 {\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.  \\ \hline
@@ -10472,7 +10444,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
 {\ct RGB(3)}                          & Int.~Triplet    & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                       & Real            & Wall roughness height             & m                   & 0.                      \\ \hline
-{\ct SPEC\_ID}                        & Character       & Species for {\ct MASS\_FLUX} or {\ct MASS\_FRACTION}             &                    &                       \\ \hline
+{\ct SPEC\_ID}                        & Character       & Species Identifier                &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                    & Real            & See Section~\ref{info:spread}     & m/s                 & 0.0                     \\ \hline
 {\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
 {\ct SURFACE\_DENSITY}                & Real            & See Section~\ref{info:BURN_AWAY}  & kg/m$^2$            & 0.0                     \\ \hline

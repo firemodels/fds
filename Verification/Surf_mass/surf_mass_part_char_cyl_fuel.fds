@@ -57,7 +57,7 @@
 	QUANTITY = 'DENSITY', 
 	ID = 'density', 
 	STATISTICS = 'VOLUME INTEGRAL',
-	SPEC_ID = 'fuel'/
+	SPEC_ID='FUEL' /
 
 &DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 , 
 	QUANTITY = 'MPUV', 

@@ -40,6 +40,7 @@ $smokeview -runscript symmetry_test
 cd ../HVAC
 $smokeview -runscript HVAC_mass_conservation
 $smokeview -runscript HVAC_energy_pressure
+$smokeview -runscript leak_test_2
 
 cd ../Miscellaneous
 $smokeview -runscript pyramid
@@ -49,7 +50,6 @@ $smokeview -runscript ns2d_64
 
 cd ../Pressure_Effects
 $smokeview -runscript pressure_boundary
-$smokeview -runscript leak_test_2
 
 cd ../Scalar_Analytical_Solution
 $smokeview -runscript move_slug
