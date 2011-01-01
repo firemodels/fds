@@ -948,7 +948,7 @@ int readsmv(char *file, char *file2){
   int factor=256*128;
   int setGRID=0;
   int idummy;
-  int nbtemp,nvents;
+  int nvents;
   int tempval;
   int iv1, iv2;
   int jv1, jv2;
@@ -1232,10 +1232,19 @@ int readsmv(char *file, char *file2){
   freecadinfo();
 
   updateindexcolors=0;
-  ntrnx=0;ntrny=0;ntrnz=0;nmeshes=0;npdim=0;nvent=0;nobst=0,noffset=0;nsurfaces=0;
+  ntrnx=0;
+  ntrny=0;
+  ntrnz=0;
+  nmeshes=0;
+  npdim=0;
+  nvent=0;
+  nobst=0;
+  noffset=0;
+  nsurfaces=0;
   nvent_transparent=0;
 
-  nvents=0; setPDIM=0;
+  nvents=0; 
+  setPDIM=0;
   endian = getendian();
   endian_native = getendian();
   endian_data=endian_native;
@@ -1303,7 +1312,7 @@ int readsmv(char *file, char *file2){
       stream=stream2;\
       continue
 
-  nbtemp=0; nvents=0; igrid=0; ioffset=0;
+  nvents=0; igrid=0; ioffset=0;
   ntc_total=0, nspr_total=0, nheat_total=0;
   printf("reading input file\n");
   printf("   pass 1\n");
@@ -1671,7 +1680,13 @@ int readsmv(char *file, char *file2){
   */
 
   if(nmeshes==0&&ntrnx==0&&ntrny==0&&ntrnz==0&&npdim==0&&nobst==0&&nvent==0&&noffset==0){
-    nmeshes=1;ntrnx=1;ntrny=1;ntrnz=1;npdim=1;nobst=1;noffset=1;
+    nmeshes=1;
+    ntrnx=1;
+    ntrny=1;
+    ntrnz=1;
+    npdim=1;
+    nobst=1;
+    noffset=1;
   }
   else{
   if(nmeshes>1){
@@ -1857,7 +1872,7 @@ int readsmv(char *file, char *file2){
 
   // read in device (.svo) definitions
 
-    init_object_defs();
+  init_object_defs();
 
   if(npropinfo>0){
     npropinfo=0;
@@ -1898,6 +1913,47 @@ int readsmv(char *file, char *file2){
         BREAK;
       }
       if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
+    }
+
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ OBST ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"OBST",4) == 1&&autoterrain==1){
+      int nobsts=0;
+      mesh *meshi;
+      unsigned char *is_block_terrain;
+      
+      iobst++;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&nobsts);
+
+
+      meshi=meshinfo+iobst-1;
+
+      if(nobsts<=0)continue;
+
+      NewMemory((void **)&meshi->is_block_terrain,nobsts*sizeof(unsigned char));
+      is_block_terrain=meshi->is_block_terrain;
+
+      for(nn=0;nn<nobsts;nn++){
+        fgets(buffer,255,stream);
+      }
+      for(nn=0;nn<nobsts;nn++){
+        int ijk2[6],colorindex=0,blocktype=-1;
+
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i %i %i %i %i %i",ijk2,ijk2+1,ijk2+2,ijk2+3,ijk2+4,ijk2+5,&colorindex,&blocktype);
+        if(blocktype>=0&&(blocktype&8)==8){
+          is_block_terrain[nn]=1;
+        }
+        else{
+          is_block_terrain[nn]=0;
+        }
+      }
+      continue;
     }
 
     /*
@@ -3216,7 +3272,7 @@ typedef struct {
     }
   }
 
-  nbtemp=0; nvents=0;
+  nvents=0;
   itrnx=0, itrny=0, itrnz=0, igrid=0, ipdim=0, iobst=0, ivent=0;
   ioffset=0;
   npartclassinfo=0;
@@ -3672,35 +3728,49 @@ typedef struct {
     ++++++++++++++++++++++ OBST ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-
-    // note - OBST lines for autoterran==1 are processed in pass 4
-    //        because Smokeview needs info from pass 3
-
-    if(match(buffer,"OBST",4) == 1&&autoterrain==0){
+    if(match(buffer,"OBST",4) == 1){
       mesh *meshi;
       propdata *prop;
       char *proplabel;
+      int n_blocks=0;
+      int n_blocks_normal=0;
+      unsigned char *is_block_terrain=NULL;
+      int iblock;
 
       CheckMemoryOff;
       iobst++;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&tempval);
+      sscanf(buffer,"%i",&n_blocks);
 
       meshi=meshinfo+iobst-1;
-      if(tempval<=0)tempval=0;
-      meshi->nbptrs=tempval;
-      if(tempval==0)continue;
-      nbtemp=tempval;
+      if(n_blocks<=0)n_blocks=0;
+      meshi->nbptrs=n_blocks;
+      n_blocks_normal=n_blocks;
+      if(n_blocks==0)continue;
+
+      if(autoterrain==1){
+        is_block_terrain=meshi->is_block_terrain;
+        n_blocks_normal=0;
+        for(iblock=0;iblock<n_blocks;iblock++){
+          if(is_block_terrain[iblock]==0)n_blocks_normal++;
+        }
+        meshi->nbptrs=n_blocks_normal;
+      }
       meshi->blockageinfoptrs=NULL;
-      if(
-        NewMemory((void **)&meshi->blockageinfoptrs,sizeof(blockagedata *)*nbtemp)==0
-        )return 2;
+      if(n_blocks_normal>0){
+        NewMemory((void **)&meshi->blockageinfoptrs,sizeof(blockagedata *)*n_blocks_normal);
+      }
 
-
-      ntotal_blockages+=nbtemp;
-      for(nn=0;nn<nbtemp;nn++){
+      ntotal_blockages+=n_blocks_normal;
+      nn=-1;
+      for(iblock=0;iblock<n_blocks;iblock++){
         int s_num[6];
 
+        if(autoterrain==1&&meshi->is_block_terrain!=NULL&&meshi->is_block_terrain[iblock]==1){
+          fgets(buffer,255,stream);
+          continue;
+        }
+        nn++;
         meshi->blockageinfoptrs[nn]=NULL;
         NewMemory((void **)&meshi->blockageinfoptrs[nn],sizeof(blockagedata));
         bc=meshi->blockageinfoptrs[nn];
@@ -3776,8 +3846,14 @@ typedef struct {
 #define COLOR_INVISIBLE -2
 
 #define BLOCK_OUTLINE 2
+      nn=-1;
+      for(iblock=0;iblock<n_blocks;iblock++){
+        if(autoterrain==1&&meshi->is_block_terrain!=NULL&&meshi->is_block_terrain[iblock]==1){
+          fgets(buffer,255,stream);
+          continue;
+        }
+        nn++;
 
-      for(nn=0;nn<nbtemp;nn++){
         bc=meshi->blockageinfoptrs[nn];
         colorindex=-1;
         blocktype=-1;
@@ -3794,7 +3870,7 @@ typedef struct {
         blocktype: 0 regular block
                    2 outline
                    3 smoothed block
-                   (note: if blocktype&8 == 1 then this is a "terrain" blockage
+                   (note: if blocktype&8 == 8 then this is a "terrain" blockage
                          if so then subtract 8 and set bc->is_wuiblock=1)
         r g b           colors used if colorindex==-3
         */
@@ -3804,11 +3880,9 @@ typedef struct {
         sscanf(buffer,"%i %i %i %i %i %i %i %i",
           ijk,ijk+1,ijk+2,ijk+3,ijk+4,ijk+5,
           &colorindex,&blocktype);
-        if(blocktype>0){
-          if((blocktype&8)==1){
-            bc->is_wuiblock=1;
-            blocktype -= 8;
-          }
+        if(blocktype>0&&(blocktype&8)==8){
+          bc->is_wuiblock=1;
+          blocktype -= 8;
         }
 
         /* custom color */
@@ -3826,11 +3900,9 @@ typedef struct {
           sscanf(buffer,"%i %i %i %i %i %i %i %i %f %f %f %f",
             ijk,ijk+1,ijk+2,ijk+3,ijk+4,ijk+5,
             &colorindex,&blocktype,s_color,s_color+1,s_color+2,s_color+3);
-          if(blocktype>0){
-            if((blocktype&8)==1){
-              bc->is_wuiblock=1;
-              blocktype -= 8;
-            }
+          if(blocktype>0&&(blocktype&8)==8){
+            bc->is_wuiblock=1;
+            blocktype -= 8;
           }
           if(s_color[3]<0.999){
             bc->transparent=1;
@@ -5223,27 +5295,35 @@ typedef struct {
     if(match(buffer,"OBST",4) == 1&&autoterrain==1){
       mesh *meshi;
       int nxcell;
+      int n_blocks;
+      int iblock;
 
       nobst++;
       iobst++;
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&tempval);
+      sscanf(buffer,"%i",&n_blocks);
 
 
-      if(tempval<=0)tempval=0;
-      if(tempval==0)continue;
-      nbtemp=tempval;
+      if(n_blocks<=0)n_blocks=0;
+      if(n_blocks==0)continue;
 
       meshi=meshinfo+iobst-1;
 
-      for(nn=0;nn<nbtemp;nn++){
+      for(nn=0;nn<n_blocks;nn++){
         fgets(buffer,255,stream);
       }
       nxcell = meshi->ibar;
-      for(nn=0;nn<nbtemp;nn++){
+      nn=-1;
+      for(iblock=0;iblock<n_blocks;iblock++){
         int ijk2[5],kmax;
         int ii, jj;
         float zval;
+
+        if(meshi->is_block_terrain!=NULL&&meshi->is_block_terrain[iblock]==0){
+          fgets(buffer,255,stream);
+          continue;
+        }
+        nn++;
 
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %i %i %i %i",ijk2,ijk2+1,ijk2+2,ijk2+3,ijk2+4,&kmax);
@@ -5261,6 +5341,7 @@ typedef struct {
           }
         }
       }
+      FREEMEMORY(meshi->is_block_terrain);
       continue;
     }
   }

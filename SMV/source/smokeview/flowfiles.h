@@ -429,6 +429,7 @@ typedef struct mesh_ {
   ventdata *ventinfo;
   int nvents,ndummyvents;
   int nbptrs;
+  unsigned char *is_block_terrain;
   unsigned char *iqdata;
   float *qdata, *udata, *vdata, *wdata;
   unsigned char *yzcolorbase, *xzcolorbase, *xycolorbase; 
