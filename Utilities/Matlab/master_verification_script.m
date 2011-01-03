@@ -18,13 +18,13 @@ clear all
 
 addpath 'scripts'
 
-[saved_data,drange] = dataplot('verification');
+s[saved_data,drange] = dataplot('verification');
 
 %run scripts/turb_model
 run scripts/wall_model
 run scripts/pyrolysis
 run scripts/birch_tga
-%run scripts/water_ice_water
+run scripts/water_ice_water
 run scripts/pcm_slab
 run scripts/pulsating
 run scripts/compression_wave
