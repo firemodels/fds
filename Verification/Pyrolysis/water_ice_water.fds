@@ -1,10 +1,10 @@
 &HEAD CHID='water_ice_water',TITLE='Phase change test: freeze-melt water, SVN $Revision: 3324 $' / 
 
-&MESH IJK = 3,1,4, XB = -2,2,-0.5,0.5,0,1 /  Laskentahila
+&MESH IJK=3,1,4, XB=-2,2,-0.5,0.5,0,1 / 
 
-&TIME TWFIN=1200., WALL_INCREMENT = 1 DT = 1.0 /
+&TIME TWFIN=1200., WALL_INCREMENT=1, DT=1.0 /
 
-&MISC TMPA = 10. /
+&MISC TMPA=10., SOLID_PHASE_ONLY=.TRUE. /
 
 &CLIP MINIMUM_TEMPERATURE = -273.15 /
 
@@ -21,10 +21,10 @@
 &VENT XB = -1,1,-0.5,0.5,0.0,0.0, SURF_ID = 'SAMPLE' /
 
 &SURF ID = 'SAMPLE'
-        H_FIXED = 50. 
-	BACKING = 'INSULATED' 
-	THICKNESS = 0.00001
-	MATL_ID = 'LIQUID_WATER' /
+      H_FIXED = 50. 
+      BACKING = 'INSULATED' 
+      THICKNESS = 0.00001
+      MATL_ID = 'LIQUID_WATER' /
 
 &MATL	ID = 'LIQUID_WATER'
 	DENSITY = 1000.
