@@ -26,7 +26,13 @@ The gas species here is mixture fraction fuel, burning rate specified.
       HRRPUA               = 2200.
       BACKING              = 'EXPOSED' /      
 
-&REAC ID='NO REACTION', C=1, X_O2_LL=1. ,Y_CO2_INFTY=0.,HUMIDITY=0., HEAT_OF_COMBUSTION=40000. /  
+&REAC ID='ETHYLENE'
+      FYI='C_2 H_4'
+      C=2.
+      H=4.
+      SOOT_YIELD=0.00
+      HEAT_OF_COMBUSTION = 40000.
+      AUTO_IGNITION_TEMPERATURE = 1500. / 
 
 &DUMP SMOKE3D = .FALSE. 
       DT_HRR = 0.01
