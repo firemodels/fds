@@ -205,4 +205,10 @@ $RUNFDS Scalar_Analytical_Solution compression_wave_FL4_128 fire72
 $RUNFDS Scalar_Analytical_Solution move_slug                fire73
 $RUNFDS Scalar_Analytical_Solution move_slug_fl1            fire73
 
+$RUNFDS Turbulence csmag0_32                                fire74
+$RUNFDS Turbulence csmag_32                                 fire74
+$RUNFDS Turbulence csmag_64                                 fire74
+$RUNFDS Turbulence dsmag_32                                 fire74
+$RUNFDS Turbulence dsmag_64                                 fire74
+$RUNFDS Turbulence mu0_32                                   fire74
 
