@@ -32,7 +32,7 @@ The gas species here is mixture fraction fuel, burning rate specified.
       H=4.
       SOOT_YIELD=0.00
       HEAT_OF_COMBUSTION = 40000.
-      AUTO_IGNITION_TEMPERATURE = 1500. / 
+      AUTO_IGNITION_TEMPERATURE = 15000. / 
 
 &DUMP SMOKE3D = .FALSE. 
       DT_HRR = 0.01
