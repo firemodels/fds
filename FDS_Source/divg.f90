@@ -838,7 +838,7 @@ SUBROUTINE DIVERGENCE_PART_2(NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
 REAL(EB) :: RDT,TNOW,P_EQ,P_EQ_NUM,P_EQ_DEN,RF
 REAL(EB), POINTER, DIMENSION(:) :: D_PBAR_DT_P
 INTEGER :: IW,IOR,II,JJ,KK,IIG,JJG,KKG,IC,I,J,K,IPZ,IOPZ,IOPZ2
@@ -990,38 +990,81 @@ ENDDO BC_LOOP
 
 ! Compute time derivative of the divergence, dD/dt
 
-IF (PREDICTOR) THEN
-   !$OMP WORKSHARE
-   DDDT = (DS-D)*RDT
-   !$OMP END WORKSHARE
-ELSE
+TRUE_PROJECTION: IF (PROJECTION) THEN
+
    !$OMP SINGLE
-   D_NEW => WORK1
+   DIV=>WORK1
    !$OMP END SINGLE
-   !$OMP WORKSHARE
-   D_NEW = DP
-   DDDT  = (2._EB*D_NEW-DS-D)*RDT
-   D     = D_NEW
-   !$OMP END WORKSHARE
-ENDIF
+   IF (PREDICTOR) THEN
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K = 1,KBAR
+         DO J = 1,JBAR
+            DO I = 1,IBAR
+               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_28'
+               DIV(I,J,K) = (R(I)*U(I,J,K)-R(I-1)*U(I-1,J,K))*RDX(I)*RRN(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + &
+                            (W(I,J,K)-W(I,J,K-1))*RDZ(K)
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+      !$OMP WORKSHARE
+      DDDT = (DP-DIV)*RDT
+      !$OMP END WORKSHARE
+   ELSEIF (CORRECTOR) THEN
+      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+      DO K = 1,KBAR
+         DO J = 1,JBAR
+            DO I = 1,IBAR
+               !!$ IF ((K == 1) .AND. (J == 1) .AND. (I == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_29'
+               DIV(I,J,K) = (R(I)*U(I,J,K) -R(I-1)*U(I-1,J,K)) *RDX(I)*RRN(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + &
+                            (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
+                          + (R(I)*US(I,J,K)-R(I-1)*US(I-1,J,K))*RDX(I)*RRN(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + &
+                            (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+      !$OMP WORKSHARE
+      D = DDDT
+      DDDT = (2._EB*DP-DIV)*RDT
+      !$OMP END WORKSHARE
+   ENDIF
+   
+ELSE TRUE_PROJECTION
 
-! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
+   IF (PREDICTOR) THEN
+      !$OMP WORKSHARE
+      DDDT = (DS-D)*RDT
+      !$OMP END WORKSHARE
+   ELSE
+      !$OMP SINGLE
+      D_NEW => WORK1
+      !$OMP END SINGLE
+      !$OMP WORKSHARE
+      D_NEW = DP
+      DDDT  = (2._EB*D_NEW-DS-D)*RDT
+      D     = D_NEW
+      !$OMP END WORKSHARE
+   ENDIF
+   
+   ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
+   
+   NO_SCARC_IF: IF (PRES_METHOD /='SCARC') THEN
+      !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG)
+      !!$OMP DO PRIVATE(IW,IIG,JJG,KKG)
+      DO IW=1,N_EXTERNAL_WALL_CELLS
+         IF (IJKW(9,IW)==0) CYCLE
+         IIG = IJKW(6,IW)
+         JJG = IJKW(7,IW)
+         KKG = IJKW(8,IW)
+         IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
+         IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
+      ENDDO
+      !!$OMP END DO
+      !$OMP END SINGLE
+   ENDIF NO_SCARC_IF
 
-NO_SCARC_IF: IF (PRES_METHOD /='SCARC') THEN
-   !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG)
-   !!$OMP DO PRIVATE(IW,IIG,JJG,KKG)
-   DO IW=1,N_EXTERNAL_WALL_CELLS
-      IF (IJKW(9,IW)==0) CYCLE
-      IIG = IJKW(6,IW)
-      JJG = IJKW(7,IW)
-      KKG = IJKW(8,IW)
-      IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
-      IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
-   ENDDO
-   !!$OMP END DO
-   !$OMP END SINGLE
-ENDIF NO_SCARC_IF
-
+ENDIF TRUE_PROJECTION
 !$OMP END PARALLEL
    
 TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
