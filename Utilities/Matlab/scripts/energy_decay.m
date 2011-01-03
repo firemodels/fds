@@ -14,8 +14,7 @@
 function [] = energy_decay(chid,N)
 
 close all
-addpath('../../../Validation/Decaying_Isotropic_Turbulence/Experimental_Data')
-addpath('../../../Validation/Decaying_Isotropic_Turbulence/FDS_Output_Files')
+addpath('../../../Verification/Turbulence')
 
 L = 0.56549; % \approx 9*(2*pi)/100;
 
