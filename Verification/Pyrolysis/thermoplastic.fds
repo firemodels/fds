@@ -25,14 +25,12 @@ The plastic properties and surface designation
       CONDUCTIVITY=0.21
       SPECIFIC_HEAT=1.5
       DENSITY=1190.
+      EMISSIVITY = 1.0
       N_REACTIONS=1
       NU_FUEL=1.
       HEAT_OF_REACTION=1500.
       HEAT_OF_COMBUSTION=25000.
       REFERENCE_TEMPERATURE=330. /
-      CONDUCTIVITY=0.25
-      SPECIFIC_HEAT=1.0
-      DENSITY=500.
 
 &SURF ID='PMMA SLAB'
       COLOR='BLACK'
