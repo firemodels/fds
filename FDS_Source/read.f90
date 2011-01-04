@@ -5331,11 +5331,11 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    SF%N_MATL     = N_LIST2
    SF%THERMALLY_THICK = .FALSE.
-   IF (SF%N_LAYERS > 0) THEN
+   IF (SF%N_LAYERS > 0) THEN    
       SF%THERMALLY_THICK = .TRUE.
-      SF%TMP_INNER                    = TMP_INNER + TMPM
-      IF (SF%TMP_INNER(1)>0._EB)      SF%TMP_FRONT = SF%TMP_INNER(1)
-      IF (TMP_BACK>0._EB)             SF%TMP_BACK  = TMP_BACK  + TMPM
+      SF%TMP_INNER                             = TMP_INNER + TMPM
+      IF (SF%TMP_INNER(1)>=0._EB) SF%TMP_FRONT = SF%TMP_INNER(1)
+      SF%TMP_BACK                              = TMP_BACK + TMPM
       ALLOCATE(SF%N_LAYER_CELLS(SF%N_LAYERS))            ! The number of cells in each layer
       ALLOCATE(SF%MIN_DIFFUSIVITY(SF%N_LAYERS))          ! The smallest diffusivity of materials in each layer
       ALLOCATE(SF%MATL_NAME(SF%N_MATL))                  ! The list of all material names associated with the surface
@@ -5346,7 +5346,12 @@ READ_SURF_LOOP: DO N=0,N_SURF
       SF%TMP_INNER                  = SF%TMP_FRONT
       SF%TMP_BACK                   = SF%TMP_FRONT
    ENDIF
-   TMPMIN        = MIN(TMPMIN,SF%TMP_FRONT,SF%TMP_BACK)  
+   DO NN = 1,SF%N_LAYERS
+      IF (TMP_INNER(NN)>= -TMPM) TMPMIN = MIN(TMPMIN,TMP_INNER(NN)+TMPM)
+   ENDDO
+   IF (TMP_FRONT >= -TMPM) TMPMIN = MIN(TMPMIN,TMP_FRONT+TMPM)
+   IF (TMP_BACK >= -TMPM) TMPMIN = MIN(TMPMIN,TMP_BACK+TMPM)
+   IF (ASSUMED_GAS_TEMPERATURE >= 0._EB) TMPMIN = MIN(TMPMIN,ASSUMED_GAS_TEMPERATURE)
 
    ! Store the names and indices of all materials associated with the surface
 
@@ -5544,8 +5549,7 @@ TEXTURE_MAP             = 'null'
 TEXTURE_WIDTH           = 1._EB
 TEXTURE_HEIGHT          = 1._EB
 THICKNESS               = -1._EB
-TMP_BACK                = TMPA-TMPM
-!TMP_BACK                = -TMPM-1._EB
+TMP_BACK                = -TMPM-1._EB
 TMP_FRONT               = -TMPM-1._EB
 TMP_INNER               = -TMPM-1._EB
 TRANSPARENCY            = 1._EB
