@@ -10,40 +10,6 @@ Build Smokeview -
 
 <hr size="1">
 
-<h3>Build Utilities</h3>
-<p><table border=on>
-<tr><th></th><th>smokediff</th><th>smokezip</th><th>background</th><th>fds2ascii</th></tr>
-<tr>
-<th align=center>win32/<a href="scripts/Makeallwin32.bat">build all</a></th>
-<td align=center><a href="scripts/MAKEsmdwin32.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEsmzwin32.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEbgwin32.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEf2awin32.bat">Build</a></td>
-</tr>
-<tr>
-<th>win64/<a href="scripts/Makeallwin64.bat">build all</a></th>
-<td align=center><a href="scripts/MAKEsmdwin64.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEsmzwin64.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEbgwin64.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEf2awin64.bat">Build</a></td>
-</tr>
-<tr>
-<th>Linux/<a href="scripts/Makealllinux.bat">build all</a></th>
-<td align=center><a href="scripts/MAKEsmdlinux.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEsmzlinux.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEbglinux.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEf2alinux.bat">Build</a></td>
-</tr>
-<tr>
-<th>OSX/<a href="scripts/Makeallosx.bat">build all</a></th>
-<td align=center><a href="scripts/MAKEsmdosx.bat">Build</a></td>
-<td align=center><a href="scripts/MAKEsmzosx.bat">Build</a></td>
-<td align=center>-</td>
-<td align=center><a href="scripts/MAKEf2aosx.bat">Build</a></td>
-</tr>
-</table>
-
-
 <h3>Build Smokeview</h3>
 <ul>
 <li>Update <a href="scripts/EDIT_setup.bat">configuration file.</a>
@@ -146,6 +112,39 @@ to All_PDF_Files
 </tr>
 </table>
 
+<h3>Build Utilities</h3>
+<p><table border=on>
+<tr><th></th><th>smokediff</th><th>smokezip</th><th>background</th><th>fds2ascii</th></tr>
+<tr>
+<th align=center>win32/<a href="scripts/Makeallwin32.bat">build all</a></th>
+<td align=center><a href="scripts/MAKEsmdwin32.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEsmzwin32.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEbgwin32.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEf2awin32.bat">Build</a></td>
+</tr>
+<tr>
+<th>win64/<a href="scripts/Makeallwin64.bat">build all</a></th>
+<td align=center><a href="scripts/MAKEsmdwin64.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEsmzwin64.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEbgwin64.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEf2awin64.bat">Build</a></td>
+</tr>
+<tr>
+<th>Linux/<a href="scripts/Makealllinux.bat">build all</a></th>
+<td align=center><a href="scripts/MAKEsmdlinux.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEsmzlinux.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEbglinux.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEf2alinux.bat">Build</a></td>
+</tr>
+<tr>
+<th>OSX/<a href="scripts/Makeallosx.bat">build all</a></th>
+<td align=center><a href="scripts/MAKEsmdosx.bat">Build</a></td>
+<td align=center><a href="scripts/MAKEsmzosx.bat">Build</a></td>
+<td align=center>-</td>
+<td align=center><a href="scripts/MAKEf2aosx.bat">Build</a></td>
+</tr>
+</table>
+
 <h3>Verify Smokeview</h3>
 <ul>
 <li>Run FDS cases used to test smokeview.
@@ -162,11 +161,8 @@ to All_PDF_Files
 <li><a href="scripts/EDIT_setup.bat">Edit <tt>configuration file</tt></a> 
 <li><a href="scripts/COPYhome2config.bat"><tt>configuration file</tt> ===>> <tt>REPOSITORY</tt></a>
 <li><a href="scripts/TEST_setup.bat">Show <tt>configuration file settings</tt></a> 
-<li><a href="http://code.google.com/p/fds-smv/downloads/list">Check download page</a>
+<li><a href="scripts/EDIT_device_dist.bat">Edit <tt>REPOSITORY/.../objects.svo</tt></a> 
 <li><a href="../FDS_Compilation/getting_started.html">Getting Started - setting up build scripts</a>
-<li><a href="scripts/EDIT_device_dist.bat">Edit <tt>FDS5/BIN/objects.svo</tt></a> 
-<li><a href="scripts/COPY_device_dist.bat">   <tt>FDS5/BIN/objects.svo</tt>   ===>> <tt>REPOSITORY</tt></a> 
-<li><a href="scripts/COPY_device_bundle.bat"> <tt>REPOSITORY/objects.svo</tt> ===>> <tt>FDS5/BIN/objects.svo</tt></a> 
 </ul>
 
 <p><hr>

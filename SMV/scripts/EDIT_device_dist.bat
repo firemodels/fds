@@ -21,5 +21,6 @@ goto:eof
 
 call %envfile%
 
-cd %ProgramFiles%\FDS\FDS5\bin
+%svn_drive%
+cd %svn_root%\SMV\for_bundle
 start wordpad objects.svo 
