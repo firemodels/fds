@@ -14,7 +14,7 @@ setenv BASEDIR `pwd`
 #setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds.csh
 
 # To run the "background" version of this script, 
-# comment the line above contaiing RUNFDS
+# comment the line above containing RUNFDS
 # uncomment the two lines below containing RUNFDS and BACKGROUND
 
 setenv RUNFDS $SVNROOT/Utilities/Scripts/runfds_bg.csh
@@ -26,9 +26,3 @@ echo FDS cases submitted
 
 ./FDS_Cases.csh
 
-cd $BASEDIR/scripts
-
-./SMV_Cases.csh
-
-cd $BASEDIR/scripts
-./run_wui_tree_test.csh
