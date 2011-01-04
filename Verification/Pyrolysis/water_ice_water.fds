@@ -1,24 +1,21 @@
 &HEAD CHID='water_ice_water',TITLE='Phase change test: freeze-melt water, SVN $Revision: 3324 $' / 
 
-&MESH IJK=3,1,4, XB=-2,2,-0.5,0.5,0,1 / 
+&MESH IJK=3,1,4, XB=-1.5,1.5,-0.5,0.5,0,4 / 
 
 &TIME TWFIN=1200., WALL_INCREMENT=1, DT=1.0 /
 
-&MISC TMPA=10., SOLID_PHASE_ONLY=.TRUE. /
-
-&CLIP MINIMUM_TEMPERATURE = -273.15 /
+&MISC TMPA=10. /
 
 &RADI NUMBER_RADIATION_ANGLES = 20 /
-&REAC ID='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
+
 &DUMP DT_PL3D = 10000000. /
 
 &VENT MB='XMIN', SURF_ID='HOT' /
 &VENT MB='XMAX', SURF_ID='HOT' /
 &VENT MB='ZMAX', SURF_ID='HOT' /
-&VENT XB = -2,-1,-0.5,0.5,0.0,0.0, SURF_ID = 'HOT' /
-&VENT XB = 1,2,-0.5,0.5,0.0,0.0, SURF_ID = 'HOT' /
-
-&VENT XB = -1,1,-0.5,0.5,0.0,0.0, SURF_ID = 'SAMPLE' /
+&VENT XB = -1.5,-0.5,-0.5,0.5,0.0,0.0, SURF_ID = 'HOT' /
+&VENT XB =  0.5, 1.5,-0.5,0.5,0.0,0.0, SURF_ID = 'HOT' /
+&VENT XB = -0.5, 0.5,-0.5,0.5,0.0,0.0, SURF_ID = 'SAMPLE' /
 
 &SURF ID = 'SAMPLE'
       H_FIXED = 50. 
@@ -29,7 +26,7 @@
 &MATL	ID = 'LIQUID_WATER'
 	DENSITY = 1000.
 	CONDUCTIVITY = 0.60
-	SPECIFIC_HEAT = 4.19 
+	SPECIFIC_HEAT = 4.19  
 	N_REACTIONS = 1
 	PCR(1) = .TRUE.
 	RESIDUE(1) = 'ICE_WATER'
@@ -79,7 +76,7 @@ http://www.its.caltech.edu/~atomic/snowcrystals/ice/ice.htm
 
 &PROF XYZ = 0,0,0, IOR = 3, QUANTITY = 'LIQUID_WATER' /
 
-&DEVC XYZ = 0.0,0.0,1.0,IOR = -3, QUANTITY = 'WALL TEMPERATURE' ID='Wall'/
+&DEVC XYZ = 0.0,0.0,4.0,IOR = -3, QUANTITY = 'WALL TEMPERATURE' ID='Wall'/
 &DEVC XYZ = 0.0,0.0,0.0,IOR = 3, QUANTITY = 'WALL TEMPERATURE' ID='Sample'/
 
 &TAIL /
