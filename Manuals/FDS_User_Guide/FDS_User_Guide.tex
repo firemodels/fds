@@ -4441,15 +4441,16 @@ the material are conveyed via the {\ct MATL} line:
       CONDUCTIVITY=0.21
       SPECIFIC_HEAT=1.5
       DENSITY=1190.
+      EMISSIVITY = 1.0
       N_REACTIONS=1
-      NU_FUEL=1.
+      NU_FUEL=1.0
       HEAT_OF_REACTION=1500.
       HEAT_OF_COMBUSTION=25000.
       REFERENCE_TEMPERATURE=330. /
 \end{verbatim} \normalsize
 
 \noindent
-Notice that in addition to $k$, $\rho$ and $c$, there is one reaction specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_FUEL=1.}).
+Notice that in addition to $k$, $\rho$, $c$ and $\epsilon$, there is one reaction specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_FUEL=1.}).
 The phase change from solid to gas {\em consumes} energy at a rate of 1,500~kJ/kg. Although not relevant in this example, the burning of these fuel gases would {\em produce} energy at a rate of 25,000~kJ/kg. The reaction nominally takes place at 330~$^\circ$C, a necessary parameter for the pyrolysis model described above.
 
 The plots shown in Fig.~\ref{thermoplastic} contain the results of the FDS simulation along with
