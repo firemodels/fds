@@ -22,14 +22,14 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 wiw_M = csvread('water_ice_water_devc.csv',2);
 wiw_m = csvread('water_ice_water_prof_01.csv',2);
 
-h=plot(wiw_M(1:500,3),wiw_m(1:500,5),wiw_M(501:1000,3),wiw_m(501:1000,5),'r-');
+h=plot(wiw_M(1:500,3),wiw_m(1:500,5),'b-',wiw_M(501:1000,3),wiw_m(501:1000,5),'r-');
 
 % Plot attributes
     
 set(gca,'FontName',Font_Name)
 xlabel('Temperature ($^\circ$C)','Interpreter','LaTeX','FontSize',Label_Font_Size)
 ylabel('Liquid concentration (kg/m$^3$)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-legend('Cooling','Heating')
+legend('Cooling (freezing)','Heating (melting)')
 axis([-10 10 0 1000])
 set(h,'LineStyle','-')
 
