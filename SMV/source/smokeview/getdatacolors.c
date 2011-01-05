@@ -1380,7 +1380,7 @@ void drawColorBars(void){
   bottom[2]=labeltop-3*dyfont;
   bottom[3]=labeltop-4*dyfont;
   if(showiso_colorbar==1||showevac_colorbar==1||
-    (showsmoke==1&&parttype!=0)||showslice==1||showvslice==1||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
+    (showsmoke==1&&parttype!=0)||showslice==1||(showvslice==1&&vslicecolorbarflag==1)||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
     sniffErrors("before colorbar");
     CheckMemory;
     if(showplot3d==1&&p3cont2d!=SHADED_CONTOURS){
@@ -1529,7 +1529,7 @@ void drawColorBars(void){
       ileft++;
     }
   }
-  if(showslice==1||showvslice==1){
+  if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
     leftslice=ileft;
     ileft++;
   }
@@ -1574,7 +1574,7 @@ void drawColorBars(void){
       outputBarText(right[leftsmoke],bottom[3],color1,partscale);
     }
   }
-  if(showslice==1||showvslice==1){
+  if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
     sb = slicebounds + islicetype;
     strcpy(unitlabel,sb->label->unit);
     getunitinfo(sb->label->unit,&sliceunitclass,&sliceunittype);
@@ -1736,7 +1736,7 @@ void drawColorBars(void){
       outputBarText(right[leftsmoke],vert_position,color1,partcolorlabel_ptr);
     }
   }
-  if(showslice==1||showvslice==1){
+  if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
     sb=slicebounds+islicetype;
     tttmin = sb->levels256[0];
     tttmax = sb->levels256[255];

@@ -153,7 +153,6 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_availmemory=glui_labels->add_checkbox_to_panel(panel_label1,"Memory Load",&visAvailmemory,LABELS_label,Labels_CB);
 #endif
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(panel_label1,"Text labels",&visLabels,LABELS_label,Labels_CB);
-#ifdef pp_BETA
 // controls to set face drawing port sizes
 //  glui_labels->add_checkbox_to_panel(panel_label1,"Fast blockage drawing",&use_new_drawface);
   glui_labels->add_checkbox_to_panel(panel_label1,"Fast blockage drawing",&use_new_drawface,LABELS_drawface,Labels_CB);
@@ -163,7 +162,6 @@ extern "C" void glui_labels_setup(int main_window){
 //    LABELS_drawface,Labels_CB);
 //  SPINNER_cullgeom_portsize->set_int_limits(3,100,GLUI_LIMIT_CLAMP);
   glui_labels->add_checkbox_to_panel(panel_label1,"Sort transparent faces",&sorttransparentfaces,LABELS_drawface,Labels_CB);
-#endif
   glui_labels->add_button_to_panel(panel_label1,"Show All",LABELS_showall,Labels_CB);
   glui_labels->add_button_to_panel(panel_label1,"Hide All",LABELS_hideall,Labels_CB);
 

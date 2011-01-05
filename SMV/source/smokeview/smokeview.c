@@ -1962,7 +1962,7 @@ void updateLights(int pos){
 
 void updateShow(void){
   int i,evacflag,sliceflag,vsliceflag,partflag,patchflag,isoflag,smoke3dflag,tisoflag;
-  int slicecolorbarflag, vslicecolorbarflag;
+  int slicecolorbarflag;
 
 #ifdef pp_SHOOTER
   int shooter_flag;
@@ -2068,10 +2068,10 @@ void updateShow(void){
 
       i=slice_loaded_list[ii];
       sd = sliceinfo+i;
-	  slicemesh = meshinfo + sd->blocknumber;
+      slicemesh = meshinfo + sd->blocknumber;
       if(sd->display==0||sd->type!=islicetype)continue;
-	  if(sd->constant_color==NULL&&show_evac_colorbar==0&&slicemesh->mesh_type!=0)continue;
-	  if(sd->constant_color!=NULL)continue;
+      if(sd->constant_color==NULL&&show_evac_colorbar==0&&slicemesh->mesh_type!=0)continue;
+      if(sd->constant_color!=NULL)continue;
       if(sd->nsteps>0){
         slicecolorbarflag=1;
         break;
@@ -2127,15 +2127,15 @@ void updateShow(void){
     }
     for(i=0;i<nvslice;i++){
       mesh *slicemesh;
-	  slice *sd;
+      slice *sd;
 
       vd = vsliceinfo+i;
-	  sd = sliceinfo + vd->ival;
-	  slicemesh = meshinfo + sd->blocknumber;
+      sd = sliceinfo + vd->ival;
+      slicemesh = meshinfo + sd->blocknumber;
       if(vd->loaded==0||vd->display==0)continue;
       if(sliceinfo[vd->ival].type!=islicetype)continue;
-	  if(sd->constant_color==NULL&&show_evac_colorbar==0&&slicemesh->mesh_type!=0)continue;
-	  if(sd->constant_color!=NULL)continue;
+      if(sd->constant_color==NULL&&show_evac_colorbar==0&&slicemesh->mesh_type!=0)continue;
+      if(sd->constant_color!=NULL)continue;
       vslicecolorbarflag=1;
       break;
     }

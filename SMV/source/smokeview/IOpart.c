@@ -1504,7 +1504,6 @@ void drawPart5(const particle *parti){
 
                 evac_token=evac_tokens[n++];
                 if(evac_token!=NULL)evac_token->evac_var=height[j];  //:SZ
-                printf("height[%i]=%f\n",j,height[j]);
 
                 evac_token=evac_tokens[n++];
                 if(evac_token!=NULL)evac_token->evac_var=255*colorptr[0]; //:R
