@@ -3,7 +3,7 @@
 <TITLE>Build Smokeview</TITLE>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
-<h2>Build Smokeview Release</h2>
+<h2>Build Smokeview</h2>
 <a href="../FDS_Compilation/build_fds.html">Build FDS</a> -
 Build Smokeview -
 <a href="../Utilities/build_other.html">Build Bundle</a>
@@ -21,14 +21,15 @@ to the revision specified in the configuration file.
 <p><table border=on>
 
 <tr>
-<th>Test Version</th>
-<th>Release Version</th>
+<th>Test</th>
+<th>Release</th>
 </tr>
 
 <tr>
 <td valign=top>
 <ul>
-<li><a href="scripts/EDIT_notes.bat">Update test release notes</a> 
+<li><a href="scripts/EDIT_notes.bat">Update test notes</a> 
+</ul>
 
 <p><table border=on>
 <tr><th colspan=6 align=center>Build, Package and Upload Smokeview Test</th></tr>
@@ -62,9 +63,12 @@ to the revision specified in the configuration file.
 <td align=center colspan=4>-</td>
 </tr>
 </table>
-</ul>
 </td>
+
 <td>
+<table>
+<tr>
+<td align=left>
 <ul>
 <li><a href="scripts/EDIT_release_notes.bat">Update release notes</a> - Commit updated release notes
 <li>Copy 
@@ -72,6 +76,11 @@ to the revision specified in the configuration file.
 <a href="scripts/COPY_smv_tg.bat">Technical Reference guide</a>,
 <a href="scripts/COPY_smv_vg.bat">Verification guide</a> 
 to All_PDF_Files
+</ul>
+</td>
+</tr>
+<tr>
+<td align=center>
 
 <p><table border=on>
 <tr><th colspan=6>Build, Package and Upload Smokeview Release</th></tr>
@@ -107,6 +116,9 @@ to All_PDF_Files
 <td align=center><a href="scripts/INSTALLreleasewin32.bat">Install</a></td>
 <td align=center><a href="scripts/INSTALLreleasewin64.bat">Install</a></td>
 <td align=center colspan=4>-</td>
+</tr>
+</table>
+</td>
 </tr>
 </table>
 </tr>
