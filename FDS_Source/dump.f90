@@ -2594,7 +2594,7 @@ PROPERTY_LOOP: DO N=1,N_PROP
          WRITE(LU_OUTPUT,'(A,F8.2)') '     C-Factor (m/s)^1/2          ', PY%C_FACTOR
          WRITE(LU_OUTPUT,'(A,F8.1)') '     Activation Temperature (C)  ', PY%ACTIVATION_TEMPERATURE
          WRITE(LU_OUTPUT,'(A,F8.2)') '     Flow Rate (L/min)           ', PY%FLOW_RATE
-         WRITE(LU_OUTPUT,'(A,F8.2)') '     K-Factor (L/min/atm**0.5)   ', PY%K_FACTOR
+         WRITE(LU_OUTPUT,'(A,F8.2)') '     K-Factor (L/min/bar**0.5)   ', PY%K_FACTOR
          WRITE(LU_OUTPUT,'(A,A   )') '     Particle Class              ', TRIM(PY%PART_ID)
       CASE('LINK TEMPERATURE')
          WRITE(LU_OUTPUT,'(A,F8.1)') '     RTI (m-s)^1/2               ', PY%RTI

@@ -6845,7 +6845,7 @@ Properties associated with sprinklers included in the {\ct PROP} group are:
 \item[{\ct INITIAL\_TEMPERATURE}] of the link in units of $^\circ$C. (Default {\ct TMPA})
 \item[{\ct FLOW\_RATE}] in units of L/min.
 An alternative is to provide the {\ct K\_FACTOR} in units of L/min/bar$^\ha$ and the
-{\ct OPERATING\_PRESSURE} in units of atm.
+{\ct OPERATING\_PRESSURE} in units of bar.
 The flow rate is then given by $ \dm_w = K \sqrt{p}$. Note that 1 bar is equivalent to
 14.5~psi, 1 gpm is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is
 equivalent to 14.41~L/min/bar$^\ha$.
@@ -6943,7 +6943,7 @@ value and below that when more and more sprinklers are activated. The pipe press
 droplet velocity and droplet size distribution.
 
 In FDS, the varying pipe pressure can be specified on a {\ct PROP} line using {\ct PRESSURE\_RAMP}. On each {\ct RAMP} line,
-the number of open sprinklers or nozzles is associated with certain pipe pressure (atm). For example:
+the number of open sprinklers or nozzles is associated with certain pipe pressure (bar). For example:
 
 \footnotesize
 \begin{verbatim}
@@ -6962,8 +6962,8 @@ the number of open sprinklers or nozzles is associated with certain pipe pressur
 \end{verbatim}
 \normalsize
 \noindent
-These lines would indicate that the pressure is 16.0 atm when the first sprinkler having properties of {\ct My nozzle}
-activates, 10.0 atm when two sprinklers are active, and 8.0 atm when three or more sprinklers are active. When counting the
+These lines would indicate that the pressure is 16.0 bar when the first sprinkler having properties of {\ct My nozzle}
+activates, 10.0 bar when two sprinklers are active, and 8.0 bar when three or more sprinklers are active. When counting the
 number of active sprinklers, FDS accounts for all active sprinklers or nozzles with {\ct PART\_ID} associated with them.
 
 When pressure ramps are used, both {\ct FLOW\_RATE} and {\ct DROPLET\_VELOCITY} are associated with the
@@ -10131,10 +10131,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GAUGE\_TEMPERATURE}                & Real          & See Section~\ref{info:heat_flux}          & $^\circ$C             & {\ct TMPA}\\ \hline
 {\ct ID}                                & Character     & IDentifier                                &                       &           \\ \hline
 {\ct INITIAL\_TEMPERATURE}              & Real          & Initial link temperature                  & $^\circ$C             & {\ct TMPA}\\ \hline
-{\ct K\_FACTOR}                         & Real          & Flow parameter                            & L/min/atm$^{1/2}$     & 1.        \\ \hline
+{\ct K\_FACTOR}                         & Real          & Flow parameter                            & L/min/bar$^{1/2}$     & 1.        \\ \hline
 {\ct LENGTH}                            & Real          & Smoke detector parameter                  &                       & 1.8       \\ \hline
 {\ct OFFSET}                            & Real          & Droplet offset distance                   & m                     & 0.05      \\ \hline
-{\ct OPERATING\_PRESSURE}               & Real          & Sprinkler pipe pressure                   & atm                   & 1.        \\ \hline
+{\ct OPERATING\_PRESSURE}               & Real          & Sprinkler pipe pressure                   & bar                   & 1.        \\ \hline
 {\ct ORIFICE\_DIAMETER}                 & Real          & Nozzle orifice diameter                   & m                     & 0.0       \\ \hline
 {\ct PART\_ID}                          & Character     & Name of associated PART line              &                       &           \\ \hline
 {\ct PDPA\_END}                         & Real          & See Section~\ref{PDPA}                    & s                     & {\ct T\_END} \\ \hline
@@ -10830,7 +10830,7 @@ called {\bf CHID\_hrr.csv}. The format of the file is as follows
 
 \footnotesize
 \begin{verbatim}
-s,kW,kW,kW,kW,kg/s,atm,atm
+s,kW,kW,kW,kW,kg/s,Pa,Pa, ...
 FDS_HRR_Time,HRR,RAD_LOSS,CONV_LOSS,COND_LOSS,BURN_RATE,ZONE_01,ZONE_02, ...
  0.0000000E+000, 0.0000000E+000, ...
  3.5355338E-001, 0.0000000E+000, ...
