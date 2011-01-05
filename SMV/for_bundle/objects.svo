@@ -573,7 +573,6 @@ OBJECTDEF // object for tree trunk
 $CANOPY_R $CANOPY_G $CANOPY_B setrgb
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
 
-
 OBJECTDEF // object for tree trunk
  TRUNK
  :TRUNK_BASE_H :TRUNK_D :TRUNK_H :R=138 :G=69 :B=18
@@ -586,6 +585,28 @@ OBJECTDEF // object for tree canopy
 $R $G $B setrgb
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
    
+OBJECTDEF // object for tree canopy
+ MCANOPY
+ :CANOPY_BASE_H :CANOPY_D :CANOPY_H
+255 0 0 setrgb
+ 0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
+ NEWFRAME
+ :CANOPY_BASE_H :CANOPY_D :CANOPY_H
+0 255 0 setrgb
+ 0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
+ NEWFRAME
+ :CANOPY_BASE_H :CANOPY_D :CANOPY_H
+0 0 255 setrgb
+ 0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
+ NEWFRAME
+ :CANOPY_BASE_H :CANOPY_D :CANOPY_H
+255 255 0 setrgb
+ 0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
+ NEWFRAME
+ :CANOPY_BASE_H :CANOPY_D :CANOPY_H
+255 0 255 setrgb
+ 0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
+
    // ************ avatar object definitions ********************
 
 AVATARDEF
