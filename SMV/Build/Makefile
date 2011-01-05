@@ -202,7 +202,7 @@ intel_win_test_32 : FC        = ifort
 intel_win_test_32 : exe       = smv5_win_test_32
 
 intel_win_test_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(SMVLIBS) 
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS)
 
 # ------------- OSX test 32 ----------------
 #  OSX running snow leopard (bluesky)
