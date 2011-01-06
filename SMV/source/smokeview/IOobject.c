@@ -145,6 +145,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWVENT      217
 #define SV_DRAWCUBEC     218
 #define SV_DRAWHSPHERE   219
+#define SV_DRAWTRIBLOCK   220
 
 #define SV_DRAWCUBE_NUMARGS      1
 #define SV_DRAWSPHERE_NUMARGS    1
@@ -166,6 +167,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWVENT_NUMARGS 2
 #define SV_DRAWCUBEC_NUMARGS      1
 #define SV_DRAWHSPHERE_NUMARGS    1
+#define SV_DRAWTRIBLOCK_NUMARGS    2
 
 #define SV_DRAWCUBE_NUMOUTARGS      0
 #define SV_DRAWSPHERE_NUMOUTARGS    0
@@ -187,6 +189,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_DRAWVENT_NUMOUTARGS 0
 #define SV_DRAWCUBEC_NUMOUTARGS      0
 #define SV_DRAWHSPHERE_NUMOUTARGS    0
+#define SV_DRAWTRIBLOCK_NUMOUTARGS    0
 
 #define SV_PUSH       300
 #define SV_POP        301
@@ -246,6 +249,7 @@ void drawcircle(float diameter, unsigned char *rgbcolor);
 void drawpoint(unsigned char *rgbcolor);
 void drawsphere(float diameter, unsigned char *rgbcolor);
 void drawhsphere(float diameter, unsigned char *rgbcolor);
+void drawtriblock(float size, float height, unsigned char *rgbcolor);
 void drawtsphere(int texture_index, float diameter, unsigned char *rgbcolor);
 void drawcube(float size, unsigned char *rgbcolor);
 void drawcubec(float size, unsigned char *rgbcolor);
@@ -1225,6 +1229,10 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
       drawhsphere(arg[0],rgbptr);
       rgbptr=NULL;
       break;
+    case SV_DRAWTRIBLOCK:
+      drawtriblock(arg[0],arg[1],rgbptr);
+      rgbptr=NULL;
+      break;
     case SV_DRAWCIRCLE:
       drawcircle(arg[0],rgbptr);
       rgbptr=NULL;
@@ -1763,7 +1771,6 @@ void drawcube(float size, unsigned char *rgbcolor){
 
 }
 
-
 /* ----------------------- drawcube ----------------------------- */
 
 void drawcubec(float size, unsigned char *rgbcolor){
@@ -1846,6 +1853,88 @@ void drawcubec(float size, unsigned char *rgbcolor){
     glEnd();
   }
 
+}
+
+/* ----------------------- drawcube ----------------------------- */
+
+void drawtriblock(float s, float h, unsigned char *rgbcolor){
+  float sd2;
+  float ny=0.0, nz=1.0, denom;
+
+  sd2 = s/2.0;
+  if(object_outlines==0){
+    denom = sqrt(h*h+sd2*sd2);
+    if(denom>0.0){
+      ny = h/denom;
+      nz = sd2/denom;
+    }
+    glBegin(GL_TRIANGLES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+    glNormal3f( 0.0, 0.0,-1.0);
+    glVertex3f( 0.0, 0.0, 0.0);  // 1
+    glVertex3f( 0.0,   s, 0.0);  // 4
+    glVertex3f(   s,   s, 0.0);  // 3
+    glVertex3f( 0.0, 0.0, 0.0);  // 1
+    glVertex3f(   s,   s, 0.0);  // 3
+    glVertex3f(   s, 0.0, 0.0);  // 2
+
+    glNormal3f(-1.0, 0.0, 0.0);
+    glVertex3f( 0.0, 0.0, 0.0);  // 1
+    glVertex3f( 0.0, sd2,   h);  // 6
+    glVertex3f( 0.0,   s, 0.0);  // 4
+
+    glNormal3f( 1.0, 0.0, 0.0);
+    glVertex3f(   s, 0.0, 0.0);  // 2
+    glVertex3f(   s,   s, 0.0);  // 3
+    glVertex3f(   s, sd2,   h);  // 5
+
+    glNormal3f( 0.0, -ny,  nz);
+    glVertex3f( 0.0, 0.0, 0.0);  // 1
+    glVertex3f(   s, sd2,   h);  // 5
+    glVertex3f( 0.0, sd2,   h);  // 6
+    glVertex3f( 0.0, 0.0, 0.0);  // 1
+    glVertex3f(   s, 0.0, 0.0);  // 2
+    glVertex3f(   s, sd2,   h);  // 5
+
+    glNormal3f( 0.0,  ny,  nz);
+    glVertex3f(   s,   s, 0.0);  // 3
+    glVertex3f( 0.0, sd2,   h);  // 6
+    glVertex3f(   s, sd2,   h);  // 5
+    glVertex3f(   s,   s, 0.0);  // 3
+    glVertex3f( 0.0,   s, 0.0);  // 4
+    glVertex3f( 0.0, sd2,   h);  // 6
+
+    glEnd();
+  }
+  else{
+    glBegin(GL_LINES);
+    if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
+
+    glVertex3f( 0.0, 0.0, 0.0);  // 1
+    glVertex3f(   s, 0.0, 0.0);  // 2
+    glVertex3f(   s, 0.0, 0.0);  // 2
+    glVertex3f(   s,   s, 0.0);  // 3
+    glVertex3f(   s,   s, 0.0);  // 3
+    glVertex3f( 0.0,   s, 0.0);  // 4
+    glVertex3f( 0.0,   s, 0.0);  // 4
+    glVertex3f( 0.0, 0.0, 0.0);  // 1
+
+    glVertex3f( 0.0, 0.0, 0.0);  // 1
+    glVertex3f( 0.0, sd2,   h);  // 6
+    glVertex3f( 0.0, sd2,   h);  // 6
+    glVertex3f( 0.0,   s, 0.0);  // 4
+
+    glVertex3f(   s, 0.0, 0.0);  // 2
+    glVertex3f(   s, sd2,   h);  // 5
+    glVertex3f(   s, sd2,   h);  // 5
+    glVertex3f(   s,   s, 0.0);  // 3
+
+    glVertex3f( 0.0, sd2,   h);  // 6
+    glVertex3f(   s, sd2,   h);  // 5
+
+    glEnd();
+  }
 }
 
 /* ----------------------- drawvent ----------------------------- */
@@ -3583,6 +3672,11 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     op=SV_DRAWHSPHERE;
     num_op=SV_DRAWHSPHERE_NUMARGS;
     num_outop=SV_DRAWHSPHERE_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"drawtriblock")==0){
+    op=SV_DRAWTRIBLOCK;
+    num_op=SV_DRAWTRIBLOCK_NUMARGS;
+    num_outop=SV_DRAWTRIBLOCK_NUMOUTARGS;
   }
   else if(STRCMP(token,"drawline")==0){
     op=SV_DRAWLINE;
