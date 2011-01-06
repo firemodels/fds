@@ -14,23 +14,23 @@
 
 % font properties
 Font_Name       = 'Times';
-Key_Font_Size   = 12;
-Title_Font_Size = 14;
-Label_Font_Size = 14;
+Key_Font_Size   = 14;
+Title_Font_Size = 16;
+Label_Font_Size = 16;
 
 % line properties
-Line_Width      = 1.5;
+Line_Width      = 2.0;
 
 % plot properties
 Plot_Units      = 'inches';
-Plot_Width      = 4.5;
-Plot_Height     = 3.15;
-Plot_X          = 0.75;
-Plot_Y          = 0.75;
+Plot_Width      = 5.0;
+Plot_Height     = 3.4;
+Plot_X          = 1.2;
+Plot_Y          = 0.8;
 
 % paper properties
 Paper_Units     = 'inches';
-Paper_Width     = 6.0;
+Paper_Width     = 6.5;
 Paper_Height    = 4.5;
 
 % print properties
