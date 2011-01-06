@@ -1,7 +1,6 @@
-&HEAD CHID='wui_test1',TITLE='Plume whirl case SVN $Revision: 7448 $' /
+&HEAD CHID='wui_test1',TITLE='WUI object test SVN $Revision: 7448 $' /
 
-  same as plume5a except there is a blockage in the middle of the scene to block the flow
-  The purpose of this case is to demonstrate the curved flow (via streak lines) that results.
+  Test mcanopy and mhouse smokeview objects used in WUI simulations
 
 &MESH IJK=16,16,32, XB=0.0,1.6,0.0,1.6,0.0,3.2 /
 
@@ -56,6 +55,9 @@
 
 &PROP ID='tree' SMOKEVIEW_PARAMETERS(1:3)='CANOPY_BASE_H=0.2' 'CANOPY_D=0.4' 'CANOPY_H=0.6' SMOKEVIEW_ID='mcanopy' /
 &DEVC XYZ=0.4,0.4,0.5, QUANTITY='TEMPERATURE' PROP_ID='tree' /
+
+&PROP ID='house' SMOKEVIEW_PARAMETERS(1:4)='LENGTH=0.2' 'DEPTH=0.2' 'HEIGHT1=0.1' 'HEIGHT2=0.1' SMOKEVIEW_ID='mhouse' /
+&DEVC XYZ=1.2,0.4,0.5, QUANTITY='TEMPERATURE' PROP_ID='house' /
 
 &VENT XB=0.2,0.4,0.7,0.9,0.2,0.2,SURF_ID='BURNER' /  fire source on kitchen stove
 
