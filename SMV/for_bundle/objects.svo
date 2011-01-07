@@ -581,10 +581,16 @@ OBJECTDEF // object for tree trunk
  
 OBJECTDEF // object for tree canopy
  CANOPY
- :CANOPY_BASE_H :CANOPY_D :CANOPY_H :R=25 :G=128 :B=0
+:R=25 :G=128 :B=0 :CANOPY_BASE_H :CANOPY_D :CANOPY_H 
 $R $G $B setrgb
  0.0 0.0 $CANOPY_BASE_H translate $CANOPY_D $CANOPY_H drawcone
-   
+
+OBJECTDEF // object for house
+ HOUSE
+ :R=0 :G=255 :B=0 :LENGTH=0.2 :DEPTH=0.2 :HEIGHT1=0.1 :HEIGHT2=0.05
+$R $G $B setrgb
+$LENGTH $DEPTH 1.0 scalexyz push 1.0 1.0 $HEIGHT1 scalexyz 1.0 drawcubec pop  0.0 0.0 $HEIGHT1 translate 1.0 $HEIGHT2 drawtriblock
+
 OBJECTDEF // object for house
  MHOUSE
  :LENGTH=0.2 :DEPTH=0.2 :HEIGHT1=0.1 :HEIGHT2=0.05
