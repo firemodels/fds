@@ -1,7 +1,8 @@
 &HEAD CHID = 'BRE_Spray_B_1' TITLE='Radiation atten. test (Murrel et al. 1995)' /
-&SPEC ID='WATER VAPOR' /
+ MESH IJK = 60,30,45, XB = -2,2,-1,1,0,3 /
 &MESH IJK = 40,20,30, XB = -2,2,-1,1,0,3 /
 &TIME T_END=15.,DT = 0.05 /
+&SPEC ID = 'WATER VAPOR' /
 &DUMP DT_PL3D = 30.0 DT_DEVC = 0.1 /
 &DEVC  XYZ = 0.0, 0.0,2.24, 
  PROP_ID =  'Nozzle'
@@ -14,22 +15,22 @@
  DT_INSERT  = 0.01
  DROPLETS_PER_SECOND = 10000
  PART_ID  = 'water drops'
- DROPLET_VELOCITY = 6
+ DROPLET_VELOCITY = 7
  SPRAY_ANGLE = 0 45
  SMOKEVIEW_ID='sprinkler_upright' /
 &PART  ID='water drops', 
- SPEC_ID='WATER VAPOR', 
- DIAMETER = 390 /
+ SPEC_ID = 'WATER VAPOR'
+ DIAMETER = 450 /
 &RADI NUMBER_RADIATION_ANGLES = 1000  /
- 
 &DEVC XYZ = 2.0,0.00,1.50,  QUANTITY = 'GAUGE HEAT FLUX', ID = 'flux' IOR = -1 /
 &DEVC XYZ = 0.0,0.00,1.50, QUANTITY = 'PDPA', PROP_ID = 'pdpa_d32' ID = 'd32' /
 &DEVC XYZ = 0.0,0.00,1.50, QUANTITY = 'PDPA', PROP_ID = 'pdpa_w' ID = 'w' /
 &DEVC XYZ = 0.0,0.00,1.50, QUANTITY = 'W-VELOCITY' ID = 'w-Gas' /
 &PROP ID = 'pdpa_d32'
+ QUANTITY = 'DIAMETER'
  PDPA_START = 3
- PDPA_M = 4
- PDPA_N = 3
+ PDPA_M = 3
+ PDPA_N = 2
  PDPA_RADIUS = 0.05 /
 &PROP ID = 'pdpa_w'
  PDPA_START = 3
