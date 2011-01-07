@@ -1681,7 +1681,6 @@ REAL(EB) :: RADTMP,PATH_LENGTH,RADIATIVE_FRACTION
 REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC,WL_LOW,WL_HIGH
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS, WQSCA
 INTEGER  :: NRDMIE, NLMBDMIE, NDG=50
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: KWR
 REAL(EB) DGROUP_A, DGROUP_B, WEIGH_CYL
 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN
@@ -1699,12 +1698,14 @@ INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 !     DLB       Mean Bottom-component of rayn vector (cylindrical case)
 !     DLM       Mirroring indexes
 !     DLN       Wall normal matrix
+!     DMN       Array of droplet diameters for the lookup of absorption and scattering properties
 !     DPHI0     Opening angle of the cylindrical domain
 !     E_WALL    Wall emissivity
 !     ILW       Radiation intensities on solid mirrors and mesh interfaces.
 !               Intensity integrals (band specific or angle increment) for solid and open walls
 !     INRAD_W   Incident radiative heat flux on a cell (QRADIN = E_WALL*INRAD_W)
-!     KWR       Array of droplet radii for Mie-calculations
+!     R50       Array of droplet radii corresponding to the median diameters of the distributions used in the generation
+!               of DMN, WQABS and WQSCA arrays.
 !     NDG       Number of droplet radii in WQABS and WQSCA arrays
 !     NLMBDMIE  Number of wave lengths in Mie calculations
 !     NMIEANG   Number of angle bins in forward scattering integration
@@ -2092,10 +2093,12 @@ BANDLOOP: DO IBND = 1,NSB
 
    DRGROUPLOOP: DO ND = 1, NDG
 
-      PC%KWR(ND) = EXP(DGROUP_A*REAL(ND,EB) + DGROUP_B)
-      CALL DROPLET_SIZE_DISTRIBUTION(2._EB*PC%KWR(ND),RDDIST,FDDIST,NRDINT, GAMMA,SIGMA)     
+      PC%R50(ND) = EXP(DGROUP_A*REAL(ND,EB) + DGROUP_B)
+      CALL DROPLET_SIZE_DISTRIBUTION(2._EB*PC%R50(ND),RDDIST,FDDIST,NRDINT, GAMMA,SIGMA)     
 
-      !     Calculate integration weights for droplet radius
+      !     Calculate integration weights using trapezoidal rule 
+      !     rdwght(n) = 0.5*f(n)*[r(n+1)-r(n-1)] = 0.5*{[f(n+1)-f(n-1)]/[r(n+1)-r(n-1)]}*[r(n+1)-r(n-1)]
+      !               = 0.5*[f(n+1)-f(n-1)]
 
       RDWGHT(0) = 0.5_EB*(FDDIST(1)-FDDIST(0))
       DO I = 1,NRDINT-1
@@ -2103,6 +2106,16 @@ BANDLOOP: DO IBND = 1,NSB
       ENDDO
       RDWGHT(NRDINT) = 0.5_EB*(FDDIST(NRDINT)-FDDIST(NRDINT-1))
 
+      ! calculate mean droplet diameter to be used for property lookup
+
+      ASUM = 0._EB
+      PC%DMN(ND) = 0._EB
+      DO I = 0,NRDINT
+         PC%DMN(ND) = PC%DMN(ND) + RDWGHT(I)*PI*(2._EB*RDDIST(I))**3
+         ASUM       = ASUM       + RDWGHT(I)*PI*(2._EB*RDDIST(I))**2
+      ENDDO
+      PC%DMN(ND) = PC%DMN(ND)/ASUM
+         
       !     Loop over wavelengths
 
       IBSUM = 0._EB
@@ -2116,23 +2129,34 @@ BANDLOOP: DO IBND = 1,NSB
 
          !     Loop over droplet size distribution
 
-         DO I = 0,NRDINT
+!         DO I = 0,NRDINT
+!
+!            !     Integrate effective scattering cross section 
+!            !     = scattering cross section * (1-forward fraction)
+!
+!            CALL INTERPOLATE1D(RDMIE,QSCA(:,J),RDDIST(I),AVAL)
+!            CALL INTERPOLATE1D(RDMIE,CHI_F(:,J),RDDIST(I),BVAL)
+!            BVAL = (1._EB-BVAL)
+!            AVAL = AVAL*BVAL*PI*RDDIST(I)**2
+!            ASUM = ASUM + RDWGHT(I)*AVAL
+!
+!            !     Integrate absorption cross sections
+!
+!            CALL INTERPOLATE1D(RDMIE,QABS(:,J),RDDIST(I),BVAL)
+!            BVAL = BVAL*PI*RDDIST(I)**2
+!            BSUM = BSUM + RDWGHT(I)*BVAL
+!         ENDDO
+  
+         ! Properties simply at d32 - Elizabeth's idea
 
-            !     Integrate effective scattering cross section 
-            !     = scattering cross section * (1-forward fraction)
+         CALL INTERPOLATE1D(RDMIE,QSCA(:,J),PC%DMN(ND)/2._EB,AVAL)
+         CALL INTERPOLATE1D(RDMIE,CHI_F(:,J),PC%DMN(ND)/2._EB,BVAL)
+         BVAL = (1._EB-BVAL)
+         ASUM = AVAL*BVAL
+         CALL INTERPOLATE1D(RDMIE,QABS(:,J),PC%DMN(ND)/2._EB,BVAL)
+         BSUM = BVAL
+         ! End Elizabeth's 
 
-            CALL INTERPOLATE1D(RDMIE,QSCA(:,J),RDDIST(I),AVAL)
-            CALL INTERPOLATE1D(RDMIE,CHI_F(:,J),RDDIST(I),BVAL)
-            BVAL = (1._EB-BVAL)
-            AVAL = AVAL*BVAL*PI*RDDIST(I)**2
-            ASUM = ASUM + RDWGHT(I)*AVAL
-
-            !     Integrate absorption cross sections
-
-            CALL INTERPOLATE1D(RDMIE,QABS(:,J),RDDIST(I),BVAL)
-            BVAL = BVAL*PI*RDDIST(I)**2
-            BSUM = BSUM + RDWGHT(I)*BVAL
-         ENDDO
          PC%WQSCA(ND,IBND) = PC%WQSCA(ND,IBND) + ASUM*LMBDWGHT(J)*IB
          PC%WQABS(ND,IBND) = PC%WQABS(ND,IBND) + BSUM*LMBDWGHT(J)*IB
       ENDDO
@@ -2144,8 +2168,11 @@ BANDLOOP: DO IBND = 1,NSB
 
       !     Transform cross sections back to efficiency factors
 
-      PC%WQSCA(ND,IBND)  = PC%WQSCA(ND,IBND)/(PI*PC%KWR(ND)**2)
-      PC%WQABS(ND,IBND)  = PC%WQABS(ND,IBND)/(PI*PC%KWR(ND)**2)
+!      PC%WQSCA(ND,IBND)  = PC%WQSCA(ND,IBND)/(PI*PC%R50(ND)**2)
+!      PC%WQABS(ND,IBND)  = PC%WQABS(ND,IBND)/(PI*PC%R50(ND)**2)
+!     For d32-based properties, no need to divide by drop area
+!      PC%WQSCA(ND,IBND)  = PC%WQSCA(ND,IBND)/(PI*(PC%DMN(ND)/2._EB)**2)
+!      PC%WQABS(ND,IBND)  = PC%WQABS(ND,IBND)/(PI*(PC%DMN(ND)/2._EB)**2)
 
 ENDDO DRGROUPLOOP
 ENDDO BANDLOOP
