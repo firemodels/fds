@@ -606,7 +606,7 @@ IF (N_CTRL>0) THEN
          WRITE(TCFORM,'(A,I4.4,A)') "(",N_CTRL,"(A,','),A)"
          WRITE(LU_CTRL(1),TCFORM) 's',('status',N=1,N_CTRL)
             WRITE(TCFORM,'(A,I4.4,A)') "(A,",N_CTRL,"(',',3A))"
-            WRITE(LU_CTRL(I),TCFORM) 'FDS Time',('"',TRIM(CONTROL(N)%ID),'"',N=1,N_CTRL)
+            WRITE(LU_CTRL(1),TCFORM) 'FDS Time',('"',TRIM(CONTROL(N)%ID),'"',N=1,N_CTRL)
       ENDIF
    ENDIF
 ENDIF
