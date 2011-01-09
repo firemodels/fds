@@ -4011,6 +4011,18 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    VALUE = DV%CONVERSION_FACTOR*VALUE
 
+   ! Record initial value and then subtract from computed value
+
+   IF (DV%INITIAL_VALUE<-1.E9_EB) THEN
+      IF (DV%CHANGE_ONLY) THEN
+         DV%INITIAL_VALUE = VALUE
+      ELSE
+         DV%INITIAL_VALUE = 0._EB
+      ENDIF
+   ENDIF
+
+   VALUE = VALUE - DV%INITIAL_VALUE
+
    ! Update the running average and/or instantaneous device value
 
    DV%INSTANT_VALUE = VALUE
