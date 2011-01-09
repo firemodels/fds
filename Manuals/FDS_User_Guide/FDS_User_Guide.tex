@@ -6776,7 +6776,7 @@ For other devices, the {\ct ORIENTATION} would only change the way the device is
 \label{info:out:DEVC}
 
 Each device has a {\ct QUANTITY} associated with it.
-The output file for all {\ct DEVC} quantities is a comma-delimited
+The time history of each {\ct DEVC} quantity is output to a comma-delimited
 ASCII file called {\bf CHID\_devc.csv}
 (See Section~\ref{out:DEVC} for output file format).
 This file can be imported into most spread sheet software packages.
@@ -6784,9 +6784,13 @@ If the number of {\ct DEVC} lines exceeds 256, the limit of some spreadsheet
 applications, the output file will be split into appropriately sized smaller
 files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.} on the {\ct DUMP} line.
 
-By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds. This time increment is specified on the {\ct DUMP} line. Also, by default,
+By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds.
+This time increment is specified on the {\ct DUMP} line. Also, by default,
 a time-averaged value is written out for each quantity of interest. To prevent FDS from time-averaging the {\ct DEVC} output, add
 {\ct TIME\_AVERAGED=.FALSE.} to the {\ct DEVC} line.
+
+A useful option for the {\ct DEVC} line is to add {\ct CHANGE\_ONLY=.TRUE.}, which will indicate that only the change in
+the initial value of the {\ct QUANTITY} is to be output. This can be useful for verification and validation studies.
 
 
 \begin{warning}
@@ -9460,6 +9464,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hline \hline
 \endhead
 {\ct BYPASS\_FLOWRATE} & Real            & Aspiration smoke detector parameter                              & kg/s  & 0             \\ \hline
+{\ct CHANGE\_ONLY}     & Logical         & See Section~\ref{info:out:DEVC}                                  &       & {\ct .FALSE.} \\ \hline
 {\ct CTRL\_ID}         & Character       & Associated {\ct CTRL} line                                       &       &               \\ \hline
 {\ct DELAY}            & Real            & Transport time for an aspiration detector                        & s     & 0             \\ \hline
 {\ct DEVC\_ID}         & Character       & Associated {\ct DEVC} line for aspiration detector               &       &               \\ \hline
