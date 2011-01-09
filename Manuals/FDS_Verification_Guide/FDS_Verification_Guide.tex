@@ -2270,26 +2270,24 @@ F & 150 & 1600 \tabularnewline
 \section{Water Droplet Evaporation (\texorpdfstring{{\bf water\_evaporation}}{water\_evaporation}) }
 \label{water_evaporation}
 
-The test case called {\bf water\_evaporation} involves stationary
-water droplets in a box with dimensions of 1~m on a side. The walls of the box
-are assumed adiabatic, meaning that there are no leaks or heat losses. The air
-within the box is stirred to maintain uniform conditions. Initially, the air temperature is 20~$^\circ$C,
-the median volumetric diameter of the droplets is 100~$\mu$m,
-the water temperature is 90~$^\circ$C, and the total mass of water droplets is 0.2~kg.
-It is expected that a steady-state will be achieved after about 5~s.
-Figure~\ref{water_evaporation_plots} displays the average enthalpy, humidity, density, pressure, temperature and mass of water of the gas. The horizontal lines denote the
-expected initial and steady-state values, respectively.
-The plot of enthalpy includes the gas (reference temperature is 0~K) and the liquid water droplets (reference temperature is 0~$^\circ$C).
-The decrease in the enthalpy of the water droplets should equal the increase in the enthalpy of the gas minus the work performed due to increasing pressure. It is the internal
-energy of the system that is conserved. The internal energy can be expressed in terms of the enthalpy, pressure and density:
+The test case called {\bf water\_evaporation} involves stationary water droplets in a box with dimensions of 1~m on a side. The walls of the box are
+assumed adiabatic, meaning that there are no leaks or heat losses. The air within the box is stirred to maintain uniform conditions. Initially, the
+air temperature is 200~$^\circ$C, the median volumetric diameter of the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C, and the total
+mass of water droplets is 0.01~kg. The initial mass fraction of water vapor is 0. It is expected that the droplets will all evaporate within about 10~s. Figure~\ref{water_evaporation_plots} displays
+the average enthalpy, humidity, density, pressure, temperature and mass of water vapor of the gas within the box. The solid horizontal lines denote the expected
+steady-state values. The plot of enthalpy displays the change in enthalpy of both the droplets and the gas. The change in the enthalpy of the water droplets should equal the change in the enthalpy of the gas minus the work
+performed due to pressure. It is the internal energy of the system that is conserved. The internal energy can be expressed in terms of the
+enthalpy, pressure and density:
 \be e = h - \frac{p}{\rho} \ee
 In differential form:
-\be de = dh - \frac{1}{\rho} \; dp - p \; d \left(\frac{1}{\rho} \right) = dh - v \; dp - p \; dv \ee
+\be de = dh - \frac{1}{\rho} \; dp - p \; d \left(\frac{1}{\rho}
+\right) = dh - v \; dp - p \; dv \ee
 Multiplying by mass and noting that the volume, $V$, is constant yields:
 \be dE = dH - V \; dp \ee
-The enthalpy decrease of the liquid water droplets is equal to the enthalpy gain of the gas (both expressed in kJ) minus the pressure increase times the volume in units of kPa
-and m$^3$, respectively.
-Finally, note that in this example that a water droplet will evaporate until the vapor pressure at the droplet surface is in equilibrium with the vapor pressure in the surrounding air. Thus, the relative humidity should be equal to 100~\%, but since FDS does not currently compute condensation, a slight overshoot is not unexpected.
+The enthalpy
+decrease of the liquid water droplets is equal to the enthalpy gain of the gas (both expressed in kJ) minus the
+pressure increase times the volume in
+units of kPa and m$^3$, respectively. 
 
 \begin{figure}[ht]
 \noindent
