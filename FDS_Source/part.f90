@@ -857,6 +857,13 @@ DROPLET_LOOP: DO I=1,NLP
    KK = FLOOR(ZK+1._EB)
    IC = CELL_INDEX(II,JJ,KK)
 
+   X_OLD = DR%X
+   Y_OLD = DR%Y
+   Z_OLD = DR%Z
+   U_OLD = DR%U
+   V_OLD = DR%V
+   W_OLD = DR%W
+
    ! Throw out particles that are inside a solid obstruction
 
    IF (SOLID(IC)) THEN
@@ -890,7 +897,7 @@ DROPLET_LOOP: DO I=1,NLP
       CYCLE DROPLET_LOOP
    ENDIF
 
-   ! Calculate the particle Reynolds number
+   ! Calculate the particle drag coefficient
 
    RVC    = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
    UREL   = DR%U - UBAR
@@ -909,15 +916,14 @@ DROPLET_LOOP: DO I=1,NLP
    ENDIF
    DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
 
-   ! Get the drag coefficient
-
    IF (PC%DRAG_LAW==USER_DRAG) THEN
       C_DRAG = PC%USER_DRAG_COEFFICIENT
    ELSE
       C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
    ENDIF
 
-    ! Drag reduction model, except for particles associated with a SURF line
+   ! Drag reduction model, except for particles associated with a SURF line
+
    WAKE_VEL=1.0_EB
    IF (PC%SURF_INDEX<1) THEN
       DROP_DEN      = AVG_DROP_DEN(II,JJ,KK,PC%EVAP_INDEX) 
@@ -928,21 +934,17 @@ DROPLET_LOOP: DO I=1,NLP
   ! Secondary break-up model
 
    BREAKUP: IF (PC%BREAKUP) THEN
-     
       ! Use undisturbed wake velocity for breakup calculations
       WAKE_VEL    = WAKE_VEL*QREL
       RE_WAKE     = RHO_G*WAKE_VEL   *2._EB*RD/MU_AIR
       WE_G        = RHO_G*WAKE_VEL**2*2._EB*RD/PC%SURFACE_TENSION
-
       ! Shape Deformation
-      C_DRAG=SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
-
+      C_DRAG = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
       ! Breakup conditions according to WAVE model by Reitz (1987)
       T_BU_BAG    = T_END-T_BEGIN
       T_BU_STRIP  = T_END-T_BEGIN
       IF (WE_G >= 12.0_EB)               T_BU_BAG   = 1.72_EB*B_1*SQRT(PC%DENSITY*RDC/(2._EB*PC%SURFACE_TENSION))
       IF (WE_G/SQRT(RE_WAKE) >= 1.0_EB)  T_BU_STRIP = B_1*(RD/WAKE_VEL)*SQRT(PC%DENSITY/RHO_G)
-
       ! droplet age is larger than smallest characteristic breakup time
       AGE_IF: IF ((T-DR%T) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
          IF (PC%MONODISPERSE) THEN
@@ -965,7 +967,6 @@ DROPLET_LOOP: DO I=1,NLP
          DR%R     = RD
          RDS      = RD*RD
          RDC      = RD*RDS
-
          ! Redo wake reduction and shape deformation for the new drop
          ! Drag reduction, except for particles associated with a SURF line
          WAKE_VEL = 1.0_EB
@@ -974,20 +975,18 @@ DROPLET_LOOP: DO I=1,NLP
             DROP_VOL_FRAC = DROP_DEN/PC%DENSITY 
             IF (DROP_VOL_FRAC > PC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,DR%RE,C_DRAG,WAKE_VEL)
          ENDIF
-
          ! Change in drag coefficient due to deformation of droplet shape (WE_G > 2)
          WAKE_VEL = WAKE_VEL*QREL
          RE_WAKE  = RHO_G*WAKE_VEL   *2._EB*RD/MU_AIR
          WE_G     = RHO_G*WAKE_VEL**2*2._EB*RD/PC%SURFACE_TENSION
          ! Shape Deformation
          C_DRAG   = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
-
       ENDIF AGE_IF
    ENDIF BREAKUP
 
-   ! Gas-Particle Momentum Transfer
+   ! Move airborne, non-stationary particles
          
-   PARTICLE_STATIC_IF: IF (.NOT.PC%STATIC) THEN
+   PARTICLE_NON_STATIC_IF: IF (.NOT.PC%STATIC .AND. DR%IOR==0) THEN
 
       FP_MASS = (RHO_G/RVC)/NDPC(II,JJ,KK) ! fluid parcel mass
       DR_MASS = PC%DENSITY*FOTH*PI*RDC     ! droplet mass
@@ -998,13 +997,6 @@ DROPLET_LOOP: DO I=1,NLP
       OPA   = 1._EB+ALPHA
       BDTOA = BETA*DT/OPA
                
-      X_OLD = DR%X
-      Y_OLD = DR%Y
-      Z_OLD = DR%Z
-      U_OLD = DR%U
-      V_OLD = DR%V
-      W_OLD = DR%W
-            
       DR%U = ( U_OLD + (U_OLD+ALPHA*UBAR)*BDTOA )/OBDT
       DR%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT
       DR%W = ( W_OLD + (W_OLD+ALPHA*WBAR)*BDTOA )/OBDT
@@ -1033,17 +1025,28 @@ DROPLET_LOOP: DO I=1,NLP
          DR%Z = Z_OLD + (W_OLD + GVEC(3)*DT)*DT
       ENDIF
                
-   ELSE PARTICLE_STATIC_IF ! particle velocity is zero
+   ENDIF PARTICLE_NON_STATIC_IF 
 
+   ! Drag calculation for stationary, airborne particles
+
+   PARTICLE_STATIC_IF: IF (PC%STATIC .AND. DR%IOR==0) THEN
       BETA = 0.5_EB*RVC*C_DRAG*(DR%PWT*PI*RDS)*QREL
       OBDT = 1._EB+BETA*DT
-
       DR%A_X = UBAR*(1._EB/OBDT-1._EB)*RDT 
       DR%A_Y = VBAR*(1._EB/OBDT-1._EB)*RDT
       DR%A_Z = WBAR*(1._EB/OBDT-1._EB)*RDT
-            
    ENDIF PARTICLE_STATIC_IF
-         
+
+   ! Move particles/droplets attached to solids
+
+   SOLID_IF: IF (DR%IOR/=0) THEN
+      DR%A_X = 0._EB 
+      DR%A_Y = 0._EB 
+      DR%A_Z = 0._EB 
+      DR%X = X_OLD + U_OLD*DT
+      DR%Y = Y_OLD + V_OLD*DT
+      DR%Z = Z_OLD + W_OLD*DT
+   ENDIF SOLID_IF
 
    ! If the particle does not move, but does drag, go on to the next particle
 
@@ -1128,7 +1131,7 @@ DROPLET_LOOP: DO I=1,NLP
       IF (KKN<KK .AND. BOUNDARY_TYPE(IWM3)==SOLID_BOUNDARY) THEN
          DR%IOR= 3
          HIT_SOLID = .TRUE.
-         STEP_FRACTION(DR%IOR) = MAX(0._EB,(Z(KKN)-Z_OLD+0.05_EB*DZ(KKN))/(DR%Z-Z_OLD))
+         STEP_FRACTION(DR%IOR) = MAX(0._EB,(Z(KK-1)-Z_OLD+0.05_EB*DZ(KK-1))/(DR%Z-Z_OLD))
       ENDIF
       IF (IIN>II .AND. BOUNDARY_TYPE(IWP1)==SOLID_BOUNDARY) THEN
          DR%IOR=-1
@@ -1138,7 +1141,7 @@ DROPLET_LOOP: DO I=1,NLP
       IF (IIN<II .AND. BOUNDARY_TYPE(IWM1)==SOLID_BOUNDARY) THEN
          DR%IOR= 1
          HIT_SOLID = .TRUE.
-         STEP_FRACTION(DR%IOR) = MAX(0._EB,(X(IIN)-X_OLD+0.05_EB*DX(IIN))/(DR%X-X_OLD))
+         STEP_FRACTION(DR%IOR) = MAX(0._EB,(X(II-1)-X_OLD+0.05_EB*DX(II-1))/(DR%X-X_OLD))
       ENDIF
       IF (JJN>JJ .AND. BOUNDARY_TYPE(IWP2)==SOLID_BOUNDARY) THEN
          DR%IOR=-2
@@ -1148,7 +1151,7 @@ DROPLET_LOOP: DO I=1,NLP
       IF (JJN<JJ .AND. BOUNDARY_TYPE(IWM2)==SOLID_BOUNDARY) THEN
          DR%IOR= 2
          HIT_SOLID = .TRUE.
-         STEP_FRACTION(DR%IOR) = MAX(0._EB,(Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD))
+         STEP_FRACTION(DR%IOR) = MAX(0._EB,(Y(JJ-1)-Y_OLD+0.05_EB*DY(JJ-1))/(DR%Y-Y_OLD))
       ENDIF
 
       IF (DR%IOR/=0 .AND. .NOT.ALLOW_SURFACE_DROPLETS) THEN
@@ -1193,7 +1196,7 @@ DROPLET_LOOP: DO I=1,NLP
          IF (KKN<KK .AND. BOUNDARY_TYPE(IWP3)==SOLID_BOUNDARY) THEN
             DR%IOR= 3
             HIT_SOLID = .TRUE.
-            STEP_FRACTION(DR%IOR) = MAX(0._EB,(Z(KKN)-Z_OLD+0.05_EB*DZ(KKN))/(DR%Z-Z_OLD))
+            STEP_FRACTION(DR%IOR) = MAX(0._EB,(Z(KK-1)-Z_OLD+0.05_EB*DZ(KK-1))/(DR%Z-Z_OLD))
          ENDIF
          IF (IIN>II .AND. BOUNDARY_TYPE(IWM1)==SOLID_BOUNDARY) THEN
             DR%IOR=-1
@@ -1203,7 +1206,7 @@ DROPLET_LOOP: DO I=1,NLP
          IF (IIN<II .AND. BOUNDARY_TYPE(IWP1)==SOLID_BOUNDARY) THEN
             DR%IOR= 1
             HIT_SOLID = .TRUE.
-            STEP_FRACTION(DR%IOR) = MAX(0._EB,(X(IIN)-X_OLD+0.05_EB*DX(IIN))/(DR%X-X_OLD))
+            STEP_FRACTION(DR%IOR) = MAX(0._EB,(X(II-1)-X_OLD+0.05_EB*DX(II-1))/(DR%X-X_OLD))
          ENDIF
          IF (JJN>JJ .AND. BOUNDARY_TYPE(IWM2)==SOLID_BOUNDARY) THEN
             DR%IOR=-2
@@ -1213,7 +1216,7 @@ DROPLET_LOOP: DO I=1,NLP
          IF (JJN<JJ .AND. BOUNDARY_TYPE(IWP2)==SOLID_BOUNDARY) THEN
             DR%IOR= 2
             HIT_SOLID = .TRUE.
-            STEP_FRACTION(DR%IOR) = MAX(0._EB,(Y(JJN)-Y_OLD+0.05_EB*DY(JJN))/(DR%Y-Y_OLD))
+            STEP_FRACTION(DR%IOR) = MAX(0._EB,(Y(JJ-1)-Y_OLD+0.05_EB*DY(JJ-1))/(DR%Y-Y_OLD))
          ENDIF
 
          IML = MINLOC(STEP_FRACTION,DIM=1)
