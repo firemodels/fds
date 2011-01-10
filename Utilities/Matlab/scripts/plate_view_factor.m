@@ -7,7 +7,14 @@ clear all
 
 addpath('../../../Verification/Radiation')
 
+% set the plot style parameters
+
 plot_style
+set(gcf,'DefaultLineLineWidth',Line_Width)
+WPos = get(gcf,'Position');
+set(gcf,'Position',[WPos(1) WPos(2) 640,420]);
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 % Collect data
 
@@ -41,25 +48,22 @@ Flux_cyl(3) = max(M(:,2));
 
 % Plot data
 
-%2D
-
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gcf,'DefaultLineLineWidth',Line_Width)
-set(gca,'FontName',Font_Name)
-
-h=plot(NRA,Exact_Flux_2D*[1 1 1],'r-',NRA,Flux_2D,'ro--');
+h=plot(NRA,Exact_Flux_2D*[1 1 1],'r-',NRA,Flux_2D,'ro');
 hold on
-h=plot(NRA,Exact_Flux_cart*[1 1 1],'b-',NRA,Flux_cart,'bo--');
-h=plot(NRA,Exact_Flux_cyl*[1 1 1],'g-',NRA,Flux_cyl,'go--');
+h=plot(NRA,Exact_Flux_cart*[1 1 1],'b-',NRA,Flux_cart,'bs');
+h=plot(NRA,Exact_Flux_cyl*[1 1 1],'g-',NRA,Flux_cyl,'gd');
 
-axis([20 110 40 120])
 set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+
+axis([20 110 30 120])
 xlabel('Number radiation angles','Interpreter','LaTeX','FontSize',Label_Font_Size)
 ylabel('Radiative heat flux (kW/m$^2$)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-title('Radiative heat flux (plate\_view\_factor)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-legend('Exact 2D','FDS 2D','Exact cart.','FDS cart.','Exact cyl.','FDS cyl.',...
-   'Location','SouthEast')
+Plot_Title='Radiative heat flux (plate\_view\_factor)';
+text(30,113,Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
+leg=legend('Exact 2D','FDS 2D','Exact cart.','FDS cart.','Exact cyl.','FDS cyl.',...
+   'Location','SouthEast');
+set(leg,'FontSize',Key_Font_Size);
 
 % print pdf
 set(gcf,'Visible',Figure_Visibility);
