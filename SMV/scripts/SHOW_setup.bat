@@ -45,7 +45,7 @@ echo.
 echo *** Linux/OSX User/Host names
 
 echo.
-echo linux_hostname=%linux_hostname%
+echo LINUXHOST=%LINUXHOST%
 echo OSXHOST=%OSXHOST%
 echo LINUXCOMPILE=%OSXHOST%
 echo linux_username=%linux_username%

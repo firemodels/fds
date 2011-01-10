@@ -14,12 +14,12 @@ set linux_svn_root=FDS-SMV
 
 Rem ---------- User/Host names -----------------
 
-set linux_hostname=acrux.cfr.nist.gov
+set LINUXHOST=acrux.cfr.nist.gov
 set OSXHOST=bluesky.cfr.nist.gov
 set LINUXCOMPILE=fire79
 
 set linux_username=%username%
-set svn_logon=%linux_username%@%linux_hostname%
+set svn_logon=%linux_username%@%LINUXHOST%
 
 Rem ----------- for uploading to Google Code -----------------
 
