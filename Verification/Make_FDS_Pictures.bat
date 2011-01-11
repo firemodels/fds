@@ -46,10 +46,3 @@ smokeview -runscript cascade
 cd ..\Visualization
 smokeview -runscript objects_static
 smokeview -runscript objects_dynamic
-
-
-Rem generate Smokeview figures
-cd ..\scripts
-call Make_SMV_Pictures
-
-
