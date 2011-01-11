@@ -3279,7 +3279,7 @@ DO J = 1,5000
       Y2CP_C(J) = CP_TMP(1)
       IF (J>1) THEN
          Y2H_G_C(J)   = Y2H_G_C(J-1) + 0.5_EB*(Y2CP_C(J)+Y2CP_C(J-1)) 
-         Y2CPBAR_C(J) = (Y2CPBAR_C(J-1)*REAL(J-1,EB)+Y2CP_C(J))/REAL(J,EB)
+         Y2CPBAR_C(J) = Y2H_G_C(J)/REAL(J,EB)
       ELSE
          Y2H_G_C(0 )  = H_TMP(1)      
          Y2H_G_C(J)   = H_TMP(1) + Y2CP_C(J) 
