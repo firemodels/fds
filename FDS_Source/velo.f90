@@ -2120,9 +2120,9 @@ ENDDO WALL_LOOP
 
 UVWMAX = MAX(UVWMAX,IBM_UVWMAX) ! for moving immersed boundary method
 IF (CHECK_GR) THEN ! resolve gravity waves
-   UVWMAX = MAX(UVWMAX, SQRT(ABS(GVEC(1))*MAXVAL(RDX)), &
-                        SQRT(ABS(GVEC(2))*MAXVAL(RDY)), &
-                        SQRT(ABS(GVEC(3))*MAXVAL(RDZ))  )
+   UVWMAX = MAX(UVWMAX, SQRT(ABS(GVEC(1))*MAXVAL(RDX,MASK=.NOT.EVACUATION_ONLY)), &
+                        SQRT(ABS(GVEC(2))*MAXVAL(RDY,MASK=.NOT.EVACUATION_ONLY)), &
+                        SQRT(ABS(GVEC(3))*MAXVAL(RDZ,MASK=.NOT.EVACUATION_ONLY))  )
 ENDIF
 
 CFL = DT*UVWMAX
