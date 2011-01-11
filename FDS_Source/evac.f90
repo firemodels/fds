@@ -492,9 +492,6 @@ CONTAINS
 
     INTEGER :: ii,jj,kk
 
-    INTEGER :: size_rnd
-    INTEGER, DIMENSION(8) :: t_rnd
-    INTEGER, DIMENSION(:), ALLOCATABLE :: seed_rnd
     INTEGER :: IJK(3), MPI_PROCESS, LEVEL, NMESHES_READ
     LOGICAL :: EVACUATION, EVAC_HUMANS, SYNCHRONIZE, CYLINDRICAL, NO_EVAC_MESHES
     REAL(EB) :: EVAC_Z_OFFSET
@@ -681,6 +678,84 @@ CONTAINS
        REWIND(LU_INPUT)
 
 
+       ! Read the STRS line
+       READ_STRS_LOOP: DO N = 1, N_STRS
+          !
+          ! Set MESH defaults
+          IJK(1)= 10
+          IJK(2)= 10
+          IJK(3)= 1
+          ID                          = 'null'
+          XB                          = 0._EB
+          XB_CORE                     = 0._EB
+          XB_CORES                    = 0._EB
+          XB_LANDINGS                 = 0._EB
+          MESH_ID                     = 'null'
+          N_LANDINGS                  = 0
+          VERTICAL_LANDING_SEPARATION = 0._EB
+          EVAC_Z_OFFSET               = 1.0_EB
+          !
+          CALL CHECKREAD('STRS',LU_INPUT,IOS)
+          IF (IOS == 1) THEN
+             EXIT READ_STRS_LOOP
+          END IF
+          READ(LU_INPUT,STRS,END=32,IOSTAT=IOS)
+
+          ! Reorder XB coordinates if necessary
+          CALL CHECK_XB(XB)
+
+          ! Colors, integer RGB(3), e.g., (23,255,0)
+          IF (ANY(RGB < 0) .AND. COLOR=='null') COLOR = 'BLACK'
+          IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
+
+          ! Count number of cores
+          N_CORES = 0
+          DO I = 1,500
+             IF (ANY(XB_CORES(I,:)/=0._EB)) N_CORES = N_CORES + 1
+          ENDDO
+
+          IF (N_LANDINGS>500) THEN
+             WRITE(MESSAGE,'(A,A,A)') 'ERROR: STRS ',TRIM(ID),' N_LANDINGS > 500'
+             CALL SHUTDOWN(MESSAGE)
+          END IF
+          !N_LANDINGS = N_LANDINGS
+          !N_NODES = 2*N_LANDINGS - 1
+
+          IF (N_CORES == 0) THEN
+             N_CORES = 1
+             XB_CORES(1,1:4) = XB_CORE(1:4)
+             XB_CORES(1,5) = XB(5)
+             XB_CORES(1,6) = XB(6)
+             IF (ALL(XB_CORE==0._EB)) THEN
+                WRITE(MESSAGE,'(3A)') 'ERROR: STRS object ', TRIM(ID), ' has no XB_CORE defined.'
+                CALL SHUTDOWN(MESSAGE)
+             ENDIF
+          ELSE
+             ! For now, just the first one is used (this is under construction)
+             XB_CORES(1,1:6) = XB_CORES(1,1:6)
+             !   XB_CORE(1:N_CORES,1:6) = XB_CORES(1:N_CORES,1:6)
+          ENDIF
+          DEFINE_MESH = .TRUE.
+          IF (TRIM(MESH_ID)/='null') DEFINE_MESH = .FALSE.
+
+          EMESH_STAIRS(N)%IBAR = IJK(1)
+          EMESH_STAIRS(N)%JBAR = IJK(2)
+          EMESH_STAIRS(N)%KBAR = IJK(3) ! kbar = 1 is forced in read_mesh (for now)
+          EMESH_STAIRS(N)%EVAC_Z_OFFSET = EVAC_Z_OFFSET  ! Not yet used properly in read_mesh???
+
+          EMESH_STAIRS(N)%N_CORES = N_CORES
+          EMESH_STAIRS(N)%N_LANDINGS = N_LANDINGS
+          EMESH_STAIRS(N)%NSTRS = N
+          EMESH_STAIRS(N)%RGB = RGB
+          EMESH_STAIRS(N)%ID = TRIM(ID)
+          EMESH_STAIRS(N)%DEFINE_MESH = DEFINE_MESH
+          EMESH_STAIRS(N)%XB = XB
+          EMESH_STAIRS(N)%XB_CORE(1:6) = XB_CORES(1,1:6)
+
+       END DO READ_STRS_LOOP
+32     REWIND(LU_INPUT)
+
+
        N_TMP = 0    ! N_TMP is exit+door index without count only exits
        READ_EXIT_LOOP_0: DO N = 1, N_EXITS
           DEFINE_MESH   = .TRUE.
@@ -748,6 +823,21 @@ CONTAINS
                 END IF
              END IF
           END DO PEX_MeshLoop_0
+          PEX_StrsLoop_0: DO I = 1, N_STRS
+             IF (Is_Within_Bounds(XB(1), XB(2), XB(3), XB(4), XB(5), XB(6), &
+                  EMESH_STAIRS(I)%XB(1), EMESH_STAIRS(I)%XB(2), EMESH_STAIRS(I)%XB(3), &
+                  EMESH_STAIRS(I)%XB(4), EMESH_STAIRS(I)%XB(5), EMESH_STAIRS(I)%XB(6), &
+                  0._EB, 0._EB, 0._EB)) THEN
+                IF (TRIM(MESH_ID) == 'null' .OR. TRIM(MESH_ID) == ('Emesh_' // TRIM(EMESH_STAIRS(I)%ID))) THEN
+                   II = II + 1
+                   ! N_TMP is exit+door index without count only exits
+                   ! N is the exit index, I is the main evacuation mesh index
+                   EMESH_EXITS(N_TMP)%EMESH = 0
+                   DEFINE_MESH = .FALSE.
+                END IF
+             END IF
+          END DO PEX_StrsLoop_0
+
           IF (II == 0 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' problem with IMESH, no mesh found'
              CALL SHUTDOWN(MESSAGE)
@@ -857,6 +947,21 @@ CONTAINS
                 END IF
              END IF
           END DO PDX_MeshLoop_0
+          PDX_StrsLoop_0: DO I = 1, N_STRS
+             IF (Is_Within_Bounds(XB(1), XB(2), XB(3), XB(4), XB(5), XB(6), &
+                  EMESH_STAIRS(I)%XB(1), EMESH_STAIRS(I)%XB(2), EMESH_STAIRS(I)%XB(3), &
+                  EMESH_STAIRS(I)%XB(4), EMESH_STAIRS(I)%XB(5), EMESH_STAIRS(I)%XB(6), &
+                  0._EB, 0._EB, 0._EB)) THEN
+                IF (TRIM(MESH_ID) == 'null' .OR. TRIM(MESH_ID) == ('Emesh_' // TRIM(EMESH_STAIRS(I)%ID))) THEN
+                   II = II + 1
+                   ! N_TMP is exit+door index without count only exits
+                   ! N is the exit index, I is the main evacuation mesh index
+                   DEFINE_MESH = .FALSE.
+                   EMESH_EXITS(N_TMP)%EMESH = 0
+                END IF
+             END IF
+          END DO PDX_StrsLoop_0
+
           IF (II == 0 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
              WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(ID), ' problem with IMESH, no mesh found'
              CALL SHUTDOWN(MESSAGE)
@@ -906,81 +1011,6 @@ CONTAINS
        END DO READ_DOOR_LOOP_0
 27     CONTINUE
        REWIND(LU_INPUT)
-
-       ! Read the STRS line
-       READ_STRS_LOOP: DO N = 1, N_STRS
-          !
-          ! Set MESH defaults
-          IJK(1)= 10
-          IJK(2)= 10
-          IJK(3)= 1
-          ID                          = 'null'
-          XB                          = 0._EB
-          XB_CORE                     = 0._EB
-          XB_CORES                    = 0._EB
-          XB_LANDINGS                 = 0._EB
-          MESH_ID                     = 'null'
-          N_LANDINGS                  = 0
-          VERTICAL_LANDING_SEPARATION = 0._EB
-          EVAC_Z_OFFSET               = 1.0_EB
-          !
-          CALL CHECKREAD('STRS',LU_INPUT,IOS)
-          IF (IOS == 1) THEN
-             EXIT READ_STRS_LOOP
-          END IF
-          READ(LU_INPUT,STRS,END=32,IOSTAT=IOS)
-
-          ! Reorder XB coordinates if necessary
-          CALL CHECK_XB(XB)
-
-          ! Colors, integer RGB(3), e.g., (23,255,0)
-          IF (ANY(RGB < 0) .AND. COLOR=='null') COLOR = 'BLACK'
-          IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
-
-          ! Count number of cores
-          N_CORES = 0
-          DO I = 1,500
-             IF (ANY(XB_CORES(I,:)/=0._EB)) N_CORES = N_CORES + 1
-          ENDDO
-
-          IF (N_LANDINGS>500) THEN
-             WRITE(MESSAGE,'(A,A,A)') 'ERROR: STRS ',TRIM(ID),' N_LANDINGS > 500'
-             CALL SHUTDOWN(MESSAGE)
-          END IF
-          !N_LANDINGS = N_LANDINGS
-          !N_NODES = 2*N_LANDINGS - 1
-
-          IF (N_CORES == 0) THEN
-             N_CORES = 1
-             XB_CORES(1,1:4) = XB_CORE(1:4)
-             XB_CORES(1,5) = XB(5)
-             XB_CORES(1,6) = XB(6)
-             IF (ALL(XB_CORE==0._EB)) THEN
-                WRITE(MESSAGE,'(3A)') 'ERROR: STRS object ', TRIM(ID), ' has no XB_CORE defined.'
-                CALL SHUTDOWN(MESSAGE)
-             ENDIF
-          ELSE
-             ! For now, just the first one is used (this is under construction)
-             XB_CORES(1,1:6) = XB_CORES(1,1:6)
-             !   XB_CORE(1:N_CORES,1:6) = XB_CORES(1:N_CORES,1:6)
-          ENDIF
-
-          EMESH_STAIRS(N)%IBAR = IJK(1)
-          EMESH_STAIRS(N)%JBAR = IJK(2)
-          EMESH_STAIRS(N)%KBAR = IJK(3) ! kbar = 1 is forced in read_mesh (for now)
-          EMESH_STAIRS(N)%EVAC_Z_OFFSET = EVAC_Z_OFFSET  ! Not yet used properly in read_mesh???
-
-          EMESH_STAIRS(N)%N_CORES = N_CORES
-          EMESH_STAIRS(N)%N_LANDINGS = N_LANDINGS
-          EMESH_STAIRS(N)%NSTRS = N
-          EMESH_STAIRS(N)%RGB = RGB
-          EMESH_STAIRS(N)%ID = TRIM(ID)
-          EMESH_STAIRS(N)%DEFINE_MESH = .TRUE.
-          EMESH_STAIRS(N)%XB = XB
-          EMESH_STAIRS(N)%XB_CORE(1:6) = XB_CORES(1,1:6)
-
-       END DO READ_STRS_LOOP
-32     REWIND(LU_INPUT)
 
        RETURN  ! imode=1: Initialization call to READ_EVAC
     END IF IF_IMODE_1
@@ -1986,17 +2016,6 @@ CONTAINS
          SMOKE_MIN_SPEED_VISIBILITY = 0.01_EB  ! No divisions by zero
       END IF
 
-      IF (.NOT. NOT_RANDOM .AND. MYID==MAX(0,EVAC_PROCESS)) THEN    ! Initialize the generator randomly
-         CALL RANDOM_SEED(size=size_rnd)
-         ALLOCATE(seed_rnd(size_rnd),STAT=IZERO)
-         CALL ChkMemErr('READ_EVAC','seed_rnd',IZERO)
-         CALL DATE_AND_TIME(values = t_rnd)
-         seed_rnd = 100.0_EB*t_rnd(7) + t_rnd(8)/10.0_EB
-         CALL RANDOM_SEED(put=seed_rnd)
-         DEALLOCATE(seed_rnd)
-      END IF
-      ! Fds uses a constant key to initialize the generator, but it is better for humans to use a random key.
-
       SELECT CASE (COLOR_METHOD)
       CASE (-1:5)
          CONTINUE
@@ -2153,13 +2172,11 @@ CONTAINS
          PEX=>EVAC_EXITS(N)
 
          IF (.NOT. COUNT_ONLY) N_TMP = N_TMP + 1 ! real exits + door index (not count_only ones)
-         IF (DEFINE_MESH) EVAC_EXITS(N)%I_EMESH_EXITS = N_TMP
 
          EVAC_EXITS(N)%I_EMESH_EXITS = 0  ! Default, for "no flow field" exits
          PEX%RGB = RGB
          IF (COLOR_METHOD == 4 .AND. .NOT.COUNT_ONLY) PEX%Avatar_Color_Index = i_avatar_color
 
-         IF (DEFINE_MESH) EVAC_EXITS(N)%I_EMESH_EXITS = N_TMP
          IF (TRIM(ID) /= 'null') THEN
             DO I = 1, N-1
                IF (TRIM(ID) == TRIM(EVAC_EXITS(I)%ID)) THEN
@@ -2192,6 +2209,17 @@ CONTAINS
                END IF
             END IF
          END DO PEX_MeshLoop
+         PEX_StrsLoop: DO I = 1, N_STRS
+            IF (Is_Within_Bounds(XB(1), XB(2), XB(3), XB(4), XB(5), XB(6), &
+                 EMESH_STAIRS(I)%XB(1), EMESH_STAIRS(I)%XB(2), EMESH_STAIRS(I)%XB(3), &
+                 EMESH_STAIRS(I)%XB(4), EMESH_STAIRS(I)%XB(5), EMESH_STAIRS(I)%XB(6), &
+                 0._EB, 0._EB, 0._EB)) THEN
+               IF (TRIM(MESH_ID) == 'null' .OR. TRIM(MESH_ID) == ('Emesh_' // TRIM(EMESH_STAIRS(I)%ID))) THEN
+                  DEFINE_MESH = .FALSE.
+               END IF
+            END IF
+         END DO PEX_StrsLoop
+         
          IF (PEX%IMESH == 0) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: EXIT ',TRIM(ID), ' problem with IMESH, no mesh found'
             CALL SHUTDOWN(MESSAGE)
@@ -2201,6 +2229,7 @@ CONTAINS
             CALL SHUTDOWN(MESSAGE)
          END IF
 
+         IF (DEFINE_MESH) EVAC_EXITS(N)%I_EMESH_EXITS = N_TMP
          NM = PEX%IMESH
          M => MESHES(PEX%IMESH)
 
@@ -2583,7 +2612,6 @@ CONTAINS
          PDX=>EVAC_DOORS(N)
 
          N_TMP = N_TMP + 1 ! real exits + door index (not count_only ones)
-         IF (DEFINE_MESH) EVAC_DOORS(N)%I_EMESH_EXITS = N_TMP
 
          PDX%RGB = RGB
          IF (COLOR_METHOD == 4) PDX%Avatar_Color_Index = i_avatar_color
@@ -2633,6 +2661,18 @@ CONTAINS
                END IF
             END IF
          END DO PDX_MeshLoop
+         PDX_StrsLoopB: DO I = 1, N_STRS
+            IF (Is_Within_Bounds(XB(1), XB(2), XB(3), XB(4), XB(5), XB(6), &
+                 EMESH_STAIRS(I)%XB(1), EMESH_STAIRS(I)%XB(2), EMESH_STAIRS(I)%XB(3), &
+                 EMESH_STAIRS(I)%XB(4), EMESH_STAIRS(I)%XB(5), EMESH_STAIRS(I)%XB(6), &
+                 0._EB, 0._EB, 0._EB)) THEN
+               IF (TRIM(MESH_ID) == 'null' .OR. TRIM(MESH_ID) == ('Emesh_' // TRIM(EMESH_STAIRS(I)%ID))) THEN
+                  DEFINE_MESH = .FALSE.
+               END IF
+            END IF
+         END DO PDX_StrsLoopB
+
+         IF (DEFINE_MESH) EVAC_DOORS(N)%I_EMESH_EXITS = N_TMP
          PDX_StrsLoop: DO I = 1, N_STRS
             IF (TRIM(PDX%TO_NODE) == TRIM(EVAC_STRS(I)%ID)) THEN
                PDX%IMESH2 = EVAC_STRS(I)%IMESH
@@ -4887,7 +4927,8 @@ CONTAINS
          STRP%NODES_IN = NODES_TMP(1:STRP%N_NODES_IN)
          ! Create List of outgoing nodes for stairs
          NODES_TMP = 0
-         DO I = NMESHES+1,N_NODES
+         DO I = 1, N_NODES
+            IF (EVAC_NODE_List(I)%Node_type == 'Floor') CYCLE
             IF (EVAC_NODE_List(I)%Node_type == 'Entry') CYCLE
             IF (EVAC_NODE_List(I)%Node_type == 'Stair') CYCLE
             ! count only exits should not be counted here
@@ -4946,6 +4987,9 @@ CONTAINS
     REAL(FB) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4, T_TMP, DT_TMP
     REAL(FB) TMPOUT5, TMPOUT6, TMPOUT7, TMPOUT8
     CHARACTER(60), ALLOCATABLE, DIMENSION(:) :: CTEMP
+    INTEGER :: size_rnd
+    INTEGER, DIMENSION(8) :: t_rnd
+    INTEGER, DIMENSION(:), ALLOCATABLE :: seed_rnd
     !
     TYPE (MESH_TYPE), POINTER :: MFF =>NULL()
     TYPE (DEVICE_TYPE), POINTER :: DV =>NULL()
@@ -5008,6 +5052,16 @@ CONTAINS
        WRITE(LU_EVACOUT,FMT='(A,F14.8,A)') ' FDS+Evac Vis_Door_Crit   :', ABS(FED_DOOR_CRIT), ' m'
     END IF
     IF (NOT_RANDOM ) WRITE(LU_EVACOUT,FMT='(A)') ' FDS+Evac Random seed is not used.'
+    IF (.NOT. NOT_RANDOM) THEN    ! Initialize the generator randomly
+       CALL RANDOM_SEED(size=size_rnd)
+       ALLOCATE(seed_rnd(size_rnd),STAT=IZERO)
+       CALL ChkMemErr('READ_EVAC','seed_rnd',IZERO)
+       CALL DATE_AND_TIME(values = t_rnd)
+       seed_rnd = 100.0_EB*t_rnd(7) + t_rnd(8)/10.0_EB
+       CALL RANDOM_SEED(put=seed_rnd)
+       DEALLOCATE(seed_rnd)
+    END IF
+      ! Fds uses a constant key to initialize the generator, but it is better for humans to use a random key.
     IF (Fed_Door_Crit < 0) THEN
        ! Visibility S = 3/K, K is extinction coeff.
        FED_DOOR_CRIT = 3.0_EB/FED_DOOR_CRIT ! Extinction coeff (1/m)
@@ -7377,30 +7431,30 @@ CONTAINS
 
              ! If the group is not yet together, they are not moving towards the exit.
              IF (GROUP_LIST(J)%COMPLETE == 0) CYCLE CHANGE_DOOR_LOOP
-
+             
              ! Agents start to move towards the exit after the pre-evacuation (reaction) time.
-             IF (J == 0 .AND. T < HR%TPRE+HR%TDET .AND. HR%I_Target/=0) CYCLE CHANGE_DOOR_LOOP   ! LONELY AGENTS
-             IF (J > 0 .AND. T < GROUP_LIST(J)%TPRE + GROUP_LIST(J)%TDOOR) CYCLE CHANGE_DOOR_LOOP ! GROUPS
 
              IF (GROUP_LIST(J)%GROUP_I_FFIELDS(I_EGRID) == 0) THEN
                 ! Test if this group/agent should update the exit door (exp. distribution)
-                CALL RANDOM_NUMBER(RN)
                 IF (ABS(HR%I_TARGET) > 0) THEN
                    ! Check, if the target door is closed.
                    IF (ABS(HR%I_TARGET) <= N_DOORS) THEN
                       IF (ABS(EVAC_DOORS(ABS(HR%I_TARGET))%IMODE)==2 .AND. &
                            .NOT.EVAC_DOORS(ABS(HR%I_TARGET))%TARGET_WHEN_CLOSED) THEN
                          HR%I_TARGET = 0
-                         RN = 2.0_EB ! update door, present one is closed
+                         !RN = 2.0_EB ! update door, present one is closed
                       END IF
                    ELSE
                       IF (ABS(EVAC_EXITS(ABS(HR%I_TARGET)-N_DOORS)%IMODE)==2 .AND. &
                            .NOT.EVAC_EXITS(ABS(HR%I_TARGET)-N_DOORS)%TARGET_WHEN_CLOSED) THEN
                          HR%I_TARGET = 0
-                         RN = 2.0_EB ! update door, present one is closed
+                         !RN = 2.0_EB ! update door, present one is closed
                       END IF
                    END IF
                 END IF
+                IF (J == 0 .AND. T < HR%TPRE+HR%TDET .AND. HR%I_Target/=0) CYCLE CHANGE_DOOR_LOOP   ! LONELY AGENTS
+                IF (J > 0 .AND. T < GROUP_LIST(J)%TPRE + GROUP_LIST(J)%TDOOR) CYCLE CHANGE_DOOR_LOOP ! GROUPS
+                CALL RANDOM_NUMBER(RN)
                 IF (RN > EXP(-DTSP/DT_GROUP_DOOR) ) THEN
                    I_TARGET_OLD = HR%I_TARGET 
                    N_CHANGE_TRIALS = N_CHANGE_TRIALS + 1
@@ -7474,23 +7528,13 @@ CONTAINS
                             ! Check, that the persons are seeing each other, i.e., there are no walls between.
                             PP_SEE_EACH = SEE_EACH_OTHER(NM_SEE, HR%X, HR%Y, HRE%X, HRE%Y)
                             IF (.NOT. PP_SEE_EACH) CYCLE Other_Agent_Loop
-                            IF (ABS(HRE%I_TARGET) > 0) THEN
-                               IF (.NOT.Is_Visible_Door(ABS(HRE%I_TARGET)) .AND. &
-                                    .NOT.Is_Known_Door(ABS(HRE%I_TARGET))) THEN
-                                  CYCLE Other_Agent_Loop ! Too much smoke
-                               END IF
-                            END IF
                             IF (ABS(HRE%I_Target) > 0 .AND. P2P_DIST < TIM_DIST) THEN
                                IF (ABS(HRE%I_TARGET) <= N_DOORS) THEN
-                                  x11 = 0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%X1 + &
-                                       EVAC_DOORS(ABS(HRE%I_TARGET))%X2)
-                                  y11 = 0.5_EB*(EVAC_DOORS(ABS(HRE%I_TARGET))%Y1 + &
-                                       EVAC_DOORS(ABS(HRE%I_TARGET))%Y2)
+                                  x11 = EVAC_DOORS(ABS(HRE%I_TARGET))%X
+                                  y11 = EVAC_DOORS(ABS(HRE%I_TARGET))%Y
                                ELSE
-                                  x11 = 0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X1 + &
-                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X2)
-                                  y11 = 0.5_EB*(EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y1 + &
-                                       EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y2)
+                                  x11 = EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X
+                                  y11 = EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y
                                END IF
                                PP_SEE_DOOR = SEE_DOOR(NM, 0, 1, HR%X, HR%Y, x11, y11, tmp1, tmp2)
                                IF (PP_SEE_DOOR) THEN
@@ -7512,6 +7556,9 @@ CONTAINS
                                END IF
                             END IF
                             IF (P2P_DIST > R_HERDING**2) CYCLE Other_Agent_Loop
+                            ! If not yet moving phase, do not follow others
+                            IF (J == 0 .AND. T < HR%TPRE+HR%TDET) CYCLE Other_Agent_Loop
+                            IF (J > 0 .AND. T < GROUP_LIST(J)%TPRE + GROUP_LIST(J)%TDOOR) CYCLE Other_Agent_Loop
                             IF (P2P_DIST <= HERDING_LIST_P2PMAX) THEN
                                ! Dot product used to check if the other agent is walking towards the agent
                                IF (HERDING_LIST_N < 5) THEN
@@ -7579,18 +7626,17 @@ CONTAINS
                             END IF
                             HR%I_FFIELD = I_New_FField
                             HR%FFIELD_NAME = TRIM(MESH_NAME(I_New_FField))
-                            IF (ABS(I_TMP) > 0) HR%I_Door_Mode = 1
-                            IF (ABS(I_TMP) > 0 .AND. Is_BeeLine_Door(MAX(1,ABS(I_TMP)),1)) HR%I_Door_Mode = 2
-                            IF (ABS(I_TMP) > 0 .AND. Is_BeeLineXB_Door(MAX(1,ABS(I_TMP)),1)) HR%I_Door_Mode = HR%I_Door_Mode + 2
+                            HR%I_Door_Mode = 1
+                            IF (Is_BeeLine_Door(ABS(I_TMP),1)) HR%I_Door_Mode = 2
+                            IF (Is_BeeLineXB_Door(ABS(I_TMP),1)) HR%I_Door_Mode = HR%I_Door_Mode + 2
                             IF (HR%D_Walls <= 4.0_EB .AND. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
                          ELSE
                             IF (ABS(I_TARGET_OLD)>0) THEN  ! Go to the old target door
                                I_TARGET = I_TARGET_OLD
                                I_New_FField = I_OLD_FFIELD
-                               IF (ABS(I_TARGET) > 0) HR%I_Door_Mode = 1
-                               IF (ABS(I_TARGET) > 0 .AND. Is_BeeLine_Door(MAX(1,ABS(I_TARGET)),1)) HR%I_Door_Mode = 2
-                               IF (ABS(I_TARGET) > 0 .AND. Is_BeeLineXB_Door(MAX(1,ABS(I_TARGET)),1)) &
-                                    HR%I_Door_Mode = HR%I_Door_Mode + 2
+                               HR%I_Door_Mode = 1
+                               IF (Is_BeeLine_Door(ABS(I_TARGET),1)) HR%I_Door_Mode = 2
+                               IF (Is_BeeLineXB_Door(ABS(I_TARGET),1)) HR%I_Door_Mode = HR%I_Door_Mode + 2
                                IF (HR%D_Walls <= 4.0_EB .AND. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
                             ELSE  ! no target door set, set the default flow field
                                I_TARGET = 0
@@ -10004,15 +10050,21 @@ CONTAINS
                N_END = N_EXITS - N_CO_EXITS + N_DOORS
                IF (N==0) THEN
                   DEFAULT_TARGET: DO JJ_NOW = 1, N_END
-                     IF (EMESH_EXITS(JJ_NOW)%MAINMESH == NM) THEN
+                     IF (EMESH_EXITS(JJ_NOW)%MAINMESH == NM .AND. EMESH_EXITS(JJ_NOW)%DEFINE_MESH) THEN
+                        IF (HR%I_Door_Mode < 0 .AND. .NOT.EMESH_EXITS(JJ_NOW)%IS_EXIT) THEN
+                           IF (EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%NODE_TYPE == 'Door') THEN
+                              IF (Trim(EVAC_NODE_LIST(ABS(HR%I_Door_Mode))%ID) == TRIM(EMESH_EXITS(JJ_NOW)%ID)) &
+                                   CYCLE DEFAULT_TARGET
+                           END IF
+                        END IF
                         N = JJ_NOW
-                        EXIT
+                        EXIT DEFAULT_TARGET
                      END IF
                   END DO DEFAULT_TARGET
                   IF (EMESH_EXITS(N)%IS_EXIT) THEN
-                     N = EMESH_EXITS(N)%NEXIT + N_DOORS ! I_Targer index
+                     N = EMESH_EXITS(N)%NEXIT + N_DOORS ! I_Target index
                   ELSE
-                     N = EMESH_EXITS(N)%NEXIT  ! I_Targer index
+                     N = EMESH_EXITS(N)%NEXIT  ! I_Target index
                   END IF
                END IF
 
@@ -10030,8 +10082,10 @@ CONTAINS
                      write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                   END IF
                END IF
-               IF (EMESH_EXITS(JJ_NOW)%MAINMESH /= NM) write(lu_err,*)'*** find direction error: ',JJ_NOW,NM, &
-                    EMESH_EXITS(JJ_NOW)%MAINMESH,' ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+               IF (EMESH_EXITS(JJ_NOW)%MAINMESH /= NM) THEN
+                  write(lu_err,*)'*** find direction error: ',JJ_NOW,NM, &
+                       EMESH_EXITS(JJ_NOW)%MAINMESH,' ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
+               END IF
                UBAR = (1.0_EB-(XI-II+1))*EMESH_EXITS(JJ_NOW)%U_EVAC(II-1,JJ) + (XI-II+1)*EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)
                VBAR = (1.0_EB-(YJ-JJ+1))*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ-1) + (YJ-JJ+1)*EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)
             ELSE ! EVAC_FDS6_IF_2
@@ -11010,6 +11064,7 @@ CONTAINS
                      END IF
                      MESHES(IMESH2)%N_HUMANS = MESHES(IMESH2)%N_HUMANS + 1
                      MESHES(IMESH2)%HUMAN(MESHES(IMESH2)%N_HUMANS) = HR
+                     MESHES(IMESH2)%HUMAN(MESHES(IMESH2)%N_HUMANS)%IOR = HUMAN_NO_TARGET
                      WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4)') ' Agent n:o', &
                           HR%ILABEL, ' out at ', T, ' s, corr ', TRIM(PCX%ID), ' FED ', HR%INTDOSE
                   END IF            ! Target is door or entry
@@ -11024,7 +11079,7 @@ CONTAINS
                           HR%ILABEL, ' exits ', T, ' s, corr ', TRIM(PCX%ID), HR%INTDOSE
                   END IF
                ELSE
-                  ! CAn not move to the next node, so do not allow to move inside
+                  ! Can not move to the next node, so do not allow to move inside
                   ! the DOOR ==> keep old position and put velocity to zero.
                   HR%X = HR%X_OLD
                   HR%Y = HR%Y_OLD
@@ -11043,7 +11098,6 @@ CONTAINS
 
             ! Here person is removed from the corridor (linked list)
             IF (HR%IOR > 0) THEN
-               MESHES(IMESH2)%HUMAN(MESHES(IMESH2)%N_HUMANS)%IOR = HUMAN_NO_TARGET
                PCX%N_INSIDE = PCX%N_INSIDE - 1
                IF (ASSOCIATED(NOW_LL%NEXT)) THEN
                   TMP_LL => NOW_LL%NEXT 
@@ -11327,6 +11381,7 @@ CONTAINS
                IF (j > 0) I_Target = Group_Known_Doors(j)%I_Target
             ELSE
 
+               HR%I_Target = 0
                CALL Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, xx, yy, I_Target, color_index, new_ffield_i, HR)
 
                new_ffield_name = TRIM(MESH_NAME(new_ffield_i))
@@ -13482,7 +13537,7 @@ CONTAINS
           ! from (i,j)==>(i,jnew):    iw and iw2 are zero, iw1 does not matter
           !                           ic=ic2 ==> iw=iw2
           ! from (i,j)==>(inew,jnew): iw1 and iw2 are zero, iw does not matter
-          IF ((i==i_old .AND. iw/=0) .OR. (i/=i_old .AND. (iw1/=0 .OR. iw2/=0)) .AND. (idoor /= itarget)) THEN
+          IF ((i==i_old .AND. iw/=0) .OR. (i/=i_old .AND. (iw1/=0 .OR. iw2/=0))) THEN
              See_door = .FALSE.
              ave_K = EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS 
              max_fed = M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
@@ -13523,7 +13578,7 @@ CONTAINS
           ! from (i,j)==>(inew,j):    iw and iw2 are zero, iw1 does not matter
           !                           ic=ic2 ==> iw=iw2
           ! from (i,j)==>(inew,jnew): iw1 and iw2 are zero, iw does not matter
-          IF ((j==j_old .AND. iw/=0) .OR. (j/=j_old .AND. (iw1/=0 .OR. iw2/=0)) .AND. (idoor /= itarget)) THEN
+          IF ((j==j_old .AND. iw/=0) .OR. (j/=j_old .AND. (iw1/=0 .OR. iw2/=0))) THEN
              See_door = .FALSE.
              ave_K = EVAC_MASS_EXTINCTION_COEFF*1.0E-6_EB*M%HUMAN_GRID(i_r1,j_r1)%SOOT_DENS
              max_fed = M%HUMAN_GRID(i_r1,j_r1)%FED_CO_CO2_O2
@@ -13844,13 +13899,13 @@ CONTAINS
     TYPE (HUMAN_TYPE), POINTER :: HR
     !
     ! Local variables
-    REAL(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn
-    REAL(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o
+    REAL(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn, max_fed2, ave_K2
+    REAL(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o, XBx, XBy
     REAL(EB) :: X1, Y1, X2, Y2, DOOR_WIDTH, X_XYZ, Y_XYZ
     INTEGER :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index, DOOR_IOR
     INTEGER :: i, i_o, izero, nm_tmp, I_Agent_Type, NM_SEE, I_Old_Target
     CHARACTER(30) :: name_old_ffield, name_new_ffield
-    LOGICAL :: PP_see_door
+    LOGICAL :: PP_see_door, PP_see_doorXB
     REAL(EB) :: T_tmp, T_tmp1, Width
     INTEGER :: N_queue, ii
     TYPE (EVACUATION_TYPE), POINTER :: HPT =>NULL()
@@ -13862,11 +13917,6 @@ CONTAINS
     ELSE
        ! This is for check_target_node
        nm_tmp = nm2
-    END IF
-    IF (EVAC_FDS6) THEN
-       NM_SEE = NMESHES - N_EGRIDS + EMESH_INDEX(NM_TMP)
-    ELSE
-       NM_SEE = NM_TMP
     END IF
 
     I_Agent_Type = HR%I_DoorAlgo
@@ -14083,6 +14133,20 @@ CONTAINS
        Is_BeeLineXB_Door = .FALSE.
     END IF
 
+    DO i = 1, N_DOORS
+       IF (ABS(EVAC_DOORS(I)%IMODE)==2 .AND. .NOT.EVAC_DOORS(I)%TARGET_WHEN_CLOSED) THEN
+          Is_Visible_Door(i) = .FALSE.
+          Is_Known_Door(i) = .FALSE.
+       END IF
+    END DO
+    DO i = 1, N_EXITS
+       IF ( (ABS(EVAC_EXITS(i)%IMODE)==2) .AND. .NOT. EVAC_EXITS(i)%COUNT_ONLY .AND. &
+            .NOT.EVAC_EXITS(I)%TARGET_WHEN_CLOSED) THEN
+          Is_Visible_Door(N_DOORS+i) = .FALSE.
+          Is_Known_Door(N_DOORS+i) = .FALSE.
+       END IF
+    END DO
+
     ! Find the visible doors.
     DO i = 1, N_DOORS + N_EXITS
        IF ( Is_Visible_Door(i) ) THEN
@@ -14100,6 +14164,7 @@ CONTAINS
              DOOR_IOR = EVAC_EXITS(i-N_DOORS)%IOR
              DOOR_WIDTH = EVAC_EXITS(i-N_DOORS)%WIDTH
           END IF
+          XBx = 0.5_EB*(X1+X2) ; XBy = 0.5_EB*(Y1+Y2)  ! Mid point of XB
           ! Find the door post positions
           IF (ABS(DOOR_IOR)==1)THEN
              Y1 = Y1+MIN(0.3_EB,0.5_EB*DOOR_WIDTH) ; Y2 = Y2-MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
@@ -14141,9 +14206,18 @@ CONTAINS
           END IF
           PP_see_door = See_each_other(nm_tmp, x1_old, y1_old, x11, y11)
           Is_BeeLine_Door(i,1) = PP_see_door
+          !PP_see_door = See_door(nm_tmp, i, HR%I_Target, x1_old, y1_old, XBx, YBy, ave_K, max_fed)
           PP_see_door = See_door(nm_tmp, i, HR%I_Target, x1_old, y1_old, x11, y11, ave_K, max_fed)
+          PP_see_doorXB = See_door(nm_tmp, i, HR%I_Target, x1_old, y1_old, XBx, XBy, ave_K2, max_fed2)
+          IF (PP_see_doorXB .AND. .NOT.PP_see_door) THEN
+             max_fed = max_fed2 ; ave_K = ave_K2
+          END IF
+          IF (PP_see_doorXB .AND. PP_see_door) THEN
+             max_fed = MIN(max_fed, max_fed2) ; ave_K = MIN(ave_K, ave_K2)
+          END IF
+          PP_see_door = PP_see_door .OR. PP_see_doorXB
           FED_max_Door(i) = max_fed
-          K_ave_Door(i) = ave_K 
+          K_ave_Door(i) = ave_K
 
           ! Note: a DOOR is not counted as visible door, if it does not have an
           ! EXIT_SIGN, unless it is already been a target door for this agent/group.
@@ -14167,28 +14241,22 @@ CONTAINS
 
     ! Now: Is_Visible_Door correct floor + is visible
     ! Now: Is_Known_Door correct floor + known door
-    ! The target door is visible if it was visible at previous time.
+
     ! If the current target door is visible then it is considered to be known.
+    ! If there would be other known doors then this door would not be chosen if
+    ! it was not known door.  And if there are no known doors at all then the
+    ! one that have already be chosen is better known that the others.
     ! Note: I_Target < 0: not visible, >0: visible
-    IF (ANY(Is_Visible_Door) .AND. imode == 1) THEN
+    IF (imode == 1) THEN
        DO i = 1, N_DOORS + N_EXITS
           IF (ABS(HR%I_Target) == i .AND. Is_Visible_Door(i)) Is_Known_Door(i) = .TRUE.
        END DO
     END IF
+    ! If no visible nor known doors then the present target door is the only option so it 
+    ! is set to be known.
+    IF (ABS(HR%I_Target)>0 .AND. .NOT.(ANY(Is_Visible_Door) .OR. ANY(Is_Known_Door))) &
+         Is_Known_Door(ABS(HR%I_Target)) = .TRUE.
 
-    DO i = 1, N_DOORS
-       IF (ABS(EVAC_DOORS(I)%IMODE)==2 .AND. .NOT.EVAC_DOORS(I)%TARGET_WHEN_CLOSED) THEN
-          Is_Visible_Door(i) = .FALSE.
-          Is_Known_Door(i) = .FALSE.
-       END IF
-    END DO
-    DO i = 1, N_EXITS
-       IF ( (ABS(EVAC_EXITS(i)%IMODE)==2) .AND. .NOT. EVAC_EXITS(i)%COUNT_ONLY .AND. &
-            .NOT.EVAC_EXITS(I)%TARGET_WHEN_CLOSED) THEN
-          Is_Visible_Door(N_DOORS+i) = .FALSE.
-          Is_Known_Door(N_DOORS+i) = .FALSE.
-       END IF
-    END DO
 
     IF (ANY(Is_Known_Door) .OR. ANY(Is_Visible_Door)) THEN
        i_tmp   = 0
@@ -14511,7 +14579,7 @@ CONTAINS
     IF (ABS(i_tmp) > 0 .AND. Is_BeeLineXB_Door(MAX(1,ABS(i_tmp)),1)) HR%I_Door_Mode = HR%I_Door_Mode + 2
 !    IF (ABS(i_tmp) > 0 .AND. .NOT.Is_BeeLine_Door(MAX(1,ABS(i_tmp))) .AND. &
 !        .NOT.Is_BeeLineXB_Door(MAX(1,ABS(i_tmp)))) HR%I_Door_Mode = 1
-    IF (i_tmp == 0) HR%I_Door_Mode = 0
+    IF (i_tmp == 0 .AND. .NOT.HR%I_Door_Mode < 0) HR%I_Door_Mode = 0
     IF (imode < 2) I_Target = i_tmp
     IF (i_tmp > 0 .AND. .NOT. Is_Visible_Door(MAX(1,i_tmp))) THEN
        ! I_Target > 0: visible, < 0: not visible
