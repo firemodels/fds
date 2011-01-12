@@ -5724,7 +5724,12 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
          ELSE
             RN => REACTION(1)
          ENDIF
-         SF%MASS_FLUX(I_FUEL) = SF%HRRPUA/ (RN%HOC_COMPLETE*SPECIES_MIXTURE(2)%MASS_FRACTION(FUEL_INDEX))
+         DO NN=1,SPECIES_MIXTURE(2)%N_SUB_SPECIES
+            IF (SPECIES_MIXTURE(2)%SPEC_INDEX(NN)==FUEL_INDEX) THEN
+               SF%MASS_FLUX(I_FUEL) = SF%HRRPUA/ (RN%HOC_COMPLETE*SPECIES_MIXTURE(2)%MASS_FRACTION(NN))
+               EXIT
+            ENDIF
+         ENDDO
       ENDIF
       IF (SF%MLRPUA>0._EB) SF%MASS_FLUX(I_FUEL) = SF%MLRPUA
       ! Adjust burning rate according to the difference of heats of combustion
