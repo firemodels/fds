@@ -1878,18 +1878,20 @@ SPEC_READ_LOOP: DO N=1,N_SPEC_READ
    SELECT CASE (ID)
       CASE('WATER VAPOR')
          H2O_INDEX = N
-         IF (.NOT. LUMPED_SPECIES_ONLY) I_WATER = SS%Y_INDEX
-         IF (MASS_FRACTION_0<0._EB) THEN           
-            ! Humidity (40% by default, but limited for high temps)
-            IF (HUMIDITY < 0._EB) THEN
-               XVAP = AMBIENT_WATER_VAPOR(40._EB,TMPA)
-               IF (XVAP > 0._EB) THEN
-                  HUMIDITY = 40._EB*MIN(1._EB,AMBIENT_WATER_VAPOR(40._EB,313.15_EB)/XVAP)
-               ELSE
-                  HUMIDITY = 40._EB
+         IF (.NOT. LUMPED_SPECIES_ONLY) THEN
+            I_WATER = SS%Y_INDEX
+            IF (MASS_FRACTION_0<0._EB) THEN           
+               ! Humidity (40% by default, but limited for high temps)
+               IF (HUMIDITY < 0._EB) THEN
+                  XVAP = AMBIENT_WATER_VAPOR(40._EB,TMPA)
+                  IF (XVAP > 0._EB) THEN
+                     HUMIDITY = 40._EB*MIN(1._EB,AMBIENT_WATER_VAPOR(40._EB,313.15_EB)/XVAP)
+                  ELSE
+                     HUMIDITY = 40._EB
+                  ENDIF
                ENDIF
+               MASS_FRACTION_0 = AMBIENT_WATER_VAPOR(HUMIDITY,TMPA)
             ENDIF
-            MASS_FRACTION_0 = AMBIENT_WATER_VAPOR(HUMIDITY,TMPA)
          ENDIF
       CASE('CARBON DIOXIDE')
          CO2_INDEX = N
@@ -2381,8 +2383,6 @@ MW_FUEL = C * MW_C + H * MW_H + O * MW_O + N * MW_N
 !Set species indices for lumped species lookup and add species SPECIES array if needed
 
 IF (TRIM(FUEL)=='null') FUEL='ETHYLENE'
-
-IF (N_GAS_SPECIES==0) N_SPECIES = 0
 
 SM_FUEL = 1
 SM_O2 = 2
