@@ -59,21 +59,23 @@ for p = 1:8
    [fds_data] = csvread(FDS_File,2);
    
    % Collect data
-   i1 = find(fds_data(:,1)>=0.4,1,'first');
-   i2 = find(fds_data(:,1)<=0.5,1,'last');
+   % initial flux between t = 0.1 and 0.2 s
+   i1 = find(fds_data(:,1)>=0.1,1,'first');
+   i2 = find(fds_data(:,1)<=0.2,1,'last');
    FDS_Flux_0(n,p) = mean(fds_data(i1:i2,3));
-   i1 = find(fds_data(:,1)>=5,1,'first');
-   i2 = find(fds_data(:,1)>0.5,1,'last');
-   FDS_Flux(n,p) = mean(fds_data(i1:i2,3));
+   % spray properties at t = 9 s.
+   i2 = find(fds_data(:,1)<9,1,'last')-1;
    FDS_d32(n,p) = fds_data(i2,4)*1E6;
    dmax = max(dmax,FDS_d32(n,p));
    FDS_w(n,p) = -1*fds_data(i2,5);
    wmax = max(wmax,FDS_w(n,p));
+   % Final flux as mean between t=10 and 15 s.
+   i1 = find(fds_data(:,1)>=10,1,'first');
+   i2 = find(fds_data(:,1)>10,1,'last')-1;
+   FDS_Flux(n,p) = mean(fds_data(i1:i2,3));
    FDS_Attenuation(n,p) = 100*(FDS_Flux_0(n,p)-FDS_Flux(n,p))/FDS_Flux_0(n,p);
    amax = max(amax,FDS_Attenuation(n,p));
 
-   
-  
 end
 
 % plot dv50
@@ -195,5 +197,5 @@ set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/BRE_Spray/BRE_Spray_Attenuation');
 
-close all
+%close all
 %EOF

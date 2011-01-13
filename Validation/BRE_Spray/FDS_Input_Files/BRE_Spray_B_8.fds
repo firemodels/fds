@@ -1,53 +1,68 @@
+
 &HEAD CHID = 'BRE_Spray_B_8' TITLE='Radiation atten. test (Murrel et al. 1995)' /
- MESH IJK = 60,30,45, XB = -2,2,-1,1,0,3 /
+
+ MESH IJK = 80, 40, 60 XB = -2,2,-1,1,0,3 /
 &MESH IJK = 40,20,30, XB = -2,2,-1,1,0,3 /
+
+
 &TIME T_END=15.,DT = 0.05 /
 &SPEC ID = 'WATER VAPOR' /
 &DUMP DT_PL3D = 30.0 DT_DEVC = 0.1 /
+
 &DEVC  XYZ = 0.0, 0.0,2.24, 
  PROP_ID =  'Nozzle'
  QUANTITY = 'TIME'
  SETPOINT = 0.5 /
+
 &PROP  ID = 'Nozzle'
  OFFSET  = 0.1
  OPERATING_PRESSURE  = 8
  K_FACTOR  = 1.149
- DT_INSERT  = 0.01
+ DT_INSERT  = 0.001
  DROPLETS_PER_SECOND = 10000
  PART_ID  = 'water drops'
- DROPLET_VELOCITY = 19.7989898732233
- SPRAY_ANGLE = 0 45
- SMOKEVIEW_ID='sprinkler_upright' /
+ DROPLET_VELOCITY = 36
+ SPRAY_ANGLE = 0 50
+ SMOKEVIEW_ID='nozzle' /
+
 &PART  ID='water drops', 
  SPEC_ID = 'WATER VAPOR'
- DIAMETER = 225 /
+ DIAMETER = 200
+
 &RADI NUMBER_RADIATION_ANGLES = 1000  /
+
+
 &DEVC XYZ = 2.0,0.00,1.50,  QUANTITY = 'GAUGE HEAT FLUX', ID = 'flux' IOR = -1 /
-&DEVC XYZ = 0.0,0.00,1.50, QUANTITY = 'PDPA', PROP_ID = 'pdpa_d32' ID = 'd32' /
-&DEVC XYZ = 0.0,0.00,1.50, QUANTITY = 'PDPA', PROP_ID = 'pdpa_w' ID = 'w' /
-&DEVC XYZ = 0.0,0.00,1.50, QUANTITY = 'W-VELOCITY' ID = 'w-Gas' /
-&PROP ID = 'pdpa_d32'
+&DEVC XYZ = 0.0,0.00,1.20, QUANTITY = 'PDPA', PROP_ID = 'pdpa_d43' ID = 'd43' /
+&DEVC XYZ = 0.0,0.00,1.20, QUANTITY = 'PDPA', PROP_ID = 'pdpa_w' ID = 'w' /
+
+&PROP ID = 'pdpa_d43'
  QUANTITY = 'DIAMETER'
- PDPA_START = 3
- PDPA_M = 3
- PDPA_N = 2
+ PDPA_START = 2
+ PDPA_M = 4
+ PDPA_N = 3
  PDPA_RADIUS = 0.05 /
+
 &PROP ID = 'pdpa_w'
- PDPA_START = 3
+ PDPA_START = 2
  QUANTITY = 'W-VELOCITY'
  PDPA_M = 0
  PDPA_N = 0
  PDPA_RADIUS = 0.05 /
+
+
  SLCF PBY=0.0,QUANTITY='TEMPERATURE'/
  SLCF PBY=0.0,QUANTITY='INTEGRATED INTENSITY' /
  SLCF PBY=0.0,QUANTITY='MPUV' PART_ID = 'water drops' /
  SLCF PBY=0.0,QUANTITY='ADD' PART_ID = 'water drops' /
  SLCF PBY=0.0,QUANTITY='WATER VAPOR' /
+
  Geometry
 &VENT XB = -2.0,-2.0,-0.5,0.5,2.0,3.0, SURF_ID = 'OPEN' /
 &VENT XB = -2.0,-2.0,-0.5,0.5,0.0,1.0, SURF_ID = 'OPEN'  /
 &VENT XB = -2.0,-2.0,-2.0,-0.5,0.0,3.0, SURF_ID = 'OPEN'  /
 &VENT XB = -2.0,-2.0, 0.5,2.0,0.0,3.0, SURF_ID = 'OPEN'  /
+
 &VENT XB = 2.0,2.0,-0.5,0.5,2.0,3.0, SURF_ID = 'OPEN' /
 &VENT XB = 2.0,2.0,-0.5,0.5,0.0,1.0, SURF_ID = 'OPEN'  /
 &VENT XB = 2.0,2.0,-2.0,-0.5,0.0,3.0, SURF_ID = 'OPEN'  /
@@ -56,10 +71,25 @@
 &VENT MB = 'YMAX', SURF_ID = 'OPEN' /
 &VENT MB = 'ZMAX', SURF_ID = 'OPEN' /
 &VENT MB = 'ZMIN', SURF_ID = 'OPEN' /
- #
-&VENT XB = -2.0,-2.0,-0.5,0.5,1.0,2.0, SURF_ID = 'HOT' /
-&SURF ID='HOT',TMP_FRONT = 900.0, TAU_T = 0.0, COLOR = 'RED' H_FIXED = 0. /
- #
+
+&VENT XB = -2.0,-2.0,-0.5,0.5,1.0,2.0, SURF_ID = 'HOT'  /
+&SURF ID='HOT',TMP_FRONT = 900.0, COLOR = 'RED' H_FIXED = 0. RAMP_T = 'HOT' /
+&RAMP ID = 'HOT' T = 0 F = 1. /
+&RAMP ID = 'HOT' T = 0.2 F = 1. /
+&RAMP ID = 'HOT' T = 0.3 F = 0. /
+&RAMP ID = 'HOT' T = 9. F = 0. /
+&RAMP ID = 'HOT' T = 9.1 F = 1. /
+
 &VENT XB = 2.0,2.0,-0.5,0.5,1.0,2.0, SURF_ID = 'COOL',  /
 &SURF ID='COOL',TMP_FRONT = 20.0, COLOR = 'BLUE' /
+
 &TAIL /
+
+
+
+
+
+
+
+
+
