@@ -19,7 +19,7 @@ SUBROUTINE DIVERGENCE_PART_1(T,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY: GET_DIFFUSIVITY,GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT_DIFF, &
-                              GET_AVERAGE_SPECIFIC_HEAT
+                              GET_AVERAGE_SPECIFIC_HEAT,GET_CONDUCTIVITY_BG,GET_SPECIFIC_HEAT_BG,GET_AVERAGE_SPECIFIC_HEAT_BG
 USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6
 
 ! Compute contributions to the divergence term
@@ -29,8 +29,8 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
           RHO_D_DYDX,RHO_D_DYDY,RHO_D_DYDZ,RHO_D,RHOP,H_RHO_D_DYDX,H_RHO_D_DYDY,H_RHO_D_DYDZ,RTRM
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW, YSUM,YY_GET(1:N_GAS_SPECIES),ZZ_GET(1:I_Z_MAX- I_Z_MIN + 1), &
-            HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,CP_MF,DELTA_P,PRES_RAMP_FACTOR,&
-            H_G,TMP_G,TMP_WGT
+            HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
+            CP,CPBAR,CPBAR_DIFF,TMP_G,TMP_WGT
 TYPE(SURFACE_TYPE), POINTER :: SF
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,I,J,K,IPZ,IOPZ
 TYPE(VENTS_TYPE), POINTER :: VT
@@ -119,6 +119,13 @@ ENDIF
 
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
  
+IF (LES .AND. N_GAS_SPECIES > 0) THEN
+   RHO_D => WORK4
+   !$OMP WORKSHARE
+   RHO_D = MU*RSC
+   !$OMP END WORKSHARE
+ENDIF
+
 SPECIES_LOOP: DO N=1,N_GAS_SPECIES
 
    IF (EVACUATION_ONLY(NM)) Cycle SPECIES_LOOP
@@ -162,12 +169,6 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
          ENDDO
       ENDDO
       !$OMP END DO
-   ENDIF
-
-   IF (LES) THEN
-      !$OMP WORKSHARE
-      RHO_D = MU*RSC
-      !$OMP END WORKSHARE
    ENDIF
    
    ! Compute rho*D del Y
@@ -219,102 +220,98 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
    !!$OMP END DO
    !$OMP END SINGLE
 
-   ! Compute del dot h_n*rho*D del Y_n only for non-mixture fraction cases
+   ! Compute del dot h_n*rho*D del Y_n (part of del dot qdot")
  
-!   SPECIES_DIFFUSION: IF (.NOT.SIMPLE_CHEMISTRY) THEN
-   SPECIES_DIFFUSION: IF (SPECIES(Y2SPEC(N))%MODE/=LUMPED_SPECIES) THEN
+   !$OMP SINGLE
+   H_RHO_D_DYDX => WORK4
+   H_RHO_D_DYDY => WORK5
+   H_RHO_D_DYDZ => WORK6
+   !$OMP END SINGLE
 
-      !$OMP SINGLE
-      H_RHO_D_DYDX => WORK4
-      H_RHO_D_DYDY => WORK5
-      H_RHO_D_DYDZ => WORK6
-      !$OMP END SINGLE
-
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,TMP_G,H_G,HDIFF)
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-               ! H_RHO_D_DYDX
-               TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
-               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G) !INTENT: IN,OUT,IN              
-               HDIFF = H_G*TMP_G
-               H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
-               
-               ! H_RHO_D_DYDY
-               TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
-               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G) !INTENT: IN,OUT,IN              
-               HDIFF = H_G*TMP_G
-               H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
-               
-               ! H_RHO_D_DYDZ
-               TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
-               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G) !INTENT: IN,OUT,IN
-               HDIFF = H_G*TMP_G
-               H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
-            ENDDO
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,TMP_G,H_G,HDIFF)
+   DO K=0,KBAR
+      DO J=0,JBAR
+         DO I=0,IBAR
+            ! H_RHO_D_DYDX
+            TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
+            CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,CPBAR_DIFF,TMP_G) !INTENT: IN,OUT,IN              
+            HDIFF = CPBAR_DIFF*TMP_G
+            H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
+            
+            ! H_RHO_D_DYDY
+            TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
+            CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,CPBAR_DIFF,TMP_G) !INTENT: IN,OUT,IN              
+            HDIFF = CPBAR_DIFF*TMP_G
+            H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
+            
+            ! H_RHO_D_DYDZ
+            TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
+            CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,CPBAR_DIFF,TMP_G) !INTENT: IN,OUT,IN
+            HDIFF = CPBAR_DIFF*TMP_G
+            H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
          ENDDO
       ENDDO
-      !$OMP END DO
+   ENDDO
+   !$OMP END DO
 
-      !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,H_G,HDIFF,RHO_D_DYDN)
-      !!$OMP DO PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,H_G,HDIFF,RHO_D_DYDN)
-      WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-         !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_06'
-         IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2
-         IIG = IJKW(6,IW)
-         JJG = IJKW(7,IW)
-         KKG = IJKW(8,IW)
-         IOR  = IJKW(4,IW)
-         TMP_G = 0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW))      
-         CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP_G) !INTENT: IN,OUT,IN
-         HDIFF = H_G*TMP_G
-         RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
-         SELECT CASE(IOR)
-            CASE( 1) 
-               H_RHO_D_DYDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DYDN
-            CASE(-1) 
-               H_RHO_D_DYDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
-            CASE( 2) 
-               H_RHO_D_DYDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DYDN
-            CASE(-2) 
-               H_RHO_D_DYDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
-            CASE( 3) 
-               H_RHO_D_DYDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DYDN
-            CASE(-3) 
-               H_RHO_D_DYDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
-         END SELECT
-      ENDDO WALL_LOOP2
-      !!$OMP END DO
-      !$OMP END SINGLE
- 
-      CYLINDER: SELECT CASE(CYLINDRICAL)
-         CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
-            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-            DO K=1,KBAR
-               DO J=1,JBAR
-                  DO I=1,IBAR
-                     DP(I,J,K) = DP(I,J,K) + (H_RHO_D_DYDX(I,J,K)-H_RHO_D_DYDX(I-1,J,K))*RDX(I) + &
-                                             (H_RHO_D_DYDY(I,J,K)-H_RHO_D_DYDY(I,J-1,K))*RDY(J) + &
-                                             (H_RHO_D_DYDZ(I,J,K)-H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
-                  ENDDO
-               ENDDO
-            ENDDO
-            !$OMP END DO
+   !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,H_G,HDIFF,RHO_D_DYDN)
+   !!$OMP DO PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,H_G,HDIFF,RHO_D_DYDN)
+   WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_06'
+      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2
+      IIG = IJKW(6,IW)
+      JJG = IJKW(7,IW)
+      KKG = IJKW(8,IW)
+      IOR  = IJKW(4,IW)
+      TMP_G = 0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW))      
+      CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,CPBAR_DIFF,TMP_G) !INTENT: IN,OUT,IN
+      HDIFF = CPBAR_DIFF*TMP_G
+      RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
+      SELECT CASE(IOR)
+         CASE( 1) 
+            H_RHO_D_DYDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DYDN
+         CASE(-1) 
+            H_RHO_D_DYDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
+         CASE( 2) 
+            H_RHO_D_DYDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DYDN
+         CASE(-2) 
+            H_RHO_D_DYDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
+         CASE( 3) 
+            H_RHO_D_DYDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DYDN
+         CASE(-3) 
+            H_RHO_D_DYDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
+      END SELECT
+   ENDDO WALL_LOOP2
+   !!$OMP END DO
+   !$OMP END SINGLE
 
-         CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
-            !$OMP SINGLE
-            J = 1
-            !$OMP END SINGLE
-            !$OMP DO COLLAPSE(2) PRIVATE(K,I)
-            DO K=1,KBAR
+   CYLINDER: SELECT CASE(CYLINDRICAL)
+      CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+         DO K=1,KBAR
+            DO J=1,JBAR
                DO I=1,IBAR
-                  DP(I,J,K) = DP(I,J,K) + (R(I)*H_RHO_D_DYDX(I,J,K)-R(I-1)*H_RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                          (     H_RHO_D_DYDZ(I,J,K)-       H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+                  DP(I,J,K) = DP(I,J,K) + (H_RHO_D_DYDX(I,J,K)-H_RHO_D_DYDX(I-1,J,K))*RDX(I) + &
+                                          (H_RHO_D_DYDY(I,J,K)-H_RHO_D_DYDY(I,J-1,K))*RDY(J) + &
+                                          (H_RHO_D_DYDZ(I,J,K)-H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
                ENDDO
             ENDDO
-            !$OMP END DO
-      END SELECT CYLINDER
-   ENDIF SPECIES_DIFFUSION
+         ENDDO
+         !$OMP END DO
+
+      CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
+         !$OMP SINGLE
+         J = 1
+         !$OMP END SINGLE
+         !$OMP DO COLLAPSE(2) PRIVATE(K,I)
+         DO K=1,KBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + (R(I)*H_RHO_D_DYDX(I,J,K)-R(I-1)*H_RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                       (     H_RHO_D_DYDZ(I,J,K)-       H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+            ENDDO
+         ENDDO
+         !$OMP END DO
+   END SELECT CYLINDER
 
    ! Compute del dot rho*D del Y_n or del dot rho D del Z
  
@@ -352,8 +349,8 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,H_G,TMP(I,J,K)) !INTENT: IN,OUT,IN
-               HDIFF = H_G*TMP(I,J,K)
+               CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,CPBAR_DIFF,TMP(I,J,K)) !INTENT: IN,OUT,IN
+               HDIFF = CPBAR_DIFF*TMP(I,J,K)
                DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
             ENDDO
          ENDDO
@@ -401,7 +398,7 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   ITMP = MIN(4999,INT(TMP(I,J,K)))
                   TMP_WGT = TMP(I,J,K) - ITMP
-                  KP(I,J,K) = (Y2K_C(ITMP)+TMP_WGT*(Y2K_C(ITMP+1)-Y2K_C(ITMP)))*SPECIES(0)%MW
+                  CALL GET_CONDUCTIVITY_BG(KP(I,J,K),TMP(I,J,K)) !INTENT: OUT,IN
                ENDDO
             ENDDO
          ENDDO
@@ -431,8 +428,8 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                   DO I=1,IBAR
                      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                      YY_GET(:) = YYP(I,J,K,:)
-                     CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,TMP(I,J,K)) !INTENT: IN,OUT,IN
-                     KP(I,J,K) = MU(I,J,K)*CP_MF*RPR  
+                     CALL GET_SPECIFIC_HEAT(YY_GET,CP,TMP(I,J,K)) !INTENT: IN,OUT,IN
+                     KP(I,J,K) = MU(I,J,K)*CP*RPR  
                   ENDDO
                ENDDO
             ENDDO
@@ -443,9 +440,8 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                DO J=1,JBAR
                   DO I=1,IBAR
                      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                     ITMP = MIN(4999,INT(TMP(I,J,K)))
-                     TMP_WGT = TMP(I,J,K) - ITMP
-                     KP(I,J,K) = MU(I,J,K)*(Y2CP_C(ITMP)+TMP_WGT*(Y2CP_C(ITMP+1)-Y2CP_C(ITMP)))*RPR
+                     CALL GET_SPECIFIC_HEAT_BG(CP,TMP(I,J,K)) !INTENT: OUT,IN
+                     KP(I,J,K) = MU(I,J,K)*CP*RPR  
                   ENDDO
                ENDDO
             ENDDO
@@ -569,9 +565,8 @@ IF (N_GAS_SPECIES==0 .OR. EVACUATION_ONLY(NM)) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ITMP = MIN(4999,INT(TMP(I,J,K)))
-            TMP_WGT = TMP(I,J,K) - ITMP
-            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM0/(Y2CP_C(ITMP)+TMP_WGT*(Y2CP_C(ITMP+1)-Y2CP_C(ITMP)))
+            CALL GET_SPECIFIC_HEAT_BG(CP,TMP(I,J,K)) !INTENT: OUT,IN
+            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
       ENDDO 
@@ -584,8 +579,8 @@ ELSE
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             YY_GET(:) = YYP(I,J,K,:)
-            CALL GET_SPECIFIC_HEAT(YY_GET,CP_MF,TMP(I,J,K)) !INTENT: IN,OUT,IN
-            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP_MF
+            CALL GET_SPECIFIC_HEAT(YY_GET,CP,TMP(I,J,K)) !INTENT: IN,OUT,IN
+            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
       ENDDO 
