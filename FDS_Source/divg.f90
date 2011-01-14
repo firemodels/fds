@@ -119,20 +119,19 @@ ENDIF
 
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
  
-IF (LES .AND. N_GAS_SPECIES > 0) THEN
+IF (N_GAS_SPECIES > 0) THEN
    RHO_D => WORK4
-   !$OMP WORKSHARE
-   RHO_D = MU*RSC
-   !$OMP END WORKSHARE
+   IF (LES) THEN
+      !$OMP WORKSHARE
+      RHO_D = MU*RSC
+      !$OMP END WORKSHARE
+   ENDIF
 ENDIF
 
 SPECIES_LOOP: DO N=1,N_GAS_SPECIES
 
    IF (EVACUATION_ONLY(NM)) Cycle SPECIES_LOOP
  
-   ! Compute rho*D
- 
-   RHO_D => WORK4
 
    !$OMP PARALLEL SHARED(RHO_D) 
    IF (DNS .AND. SPECIES(Y2SPEC(N))%MODE/=LUMPED_SPECIES) THEN
@@ -221,7 +220,7 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
    !$OMP END SINGLE
 
    ! Compute del dot h_n*rho*D del Y_n (part of del dot qdot")
- 
+   SPECIES_DIFFUSION: IF (SPECIES(Y2SPEC(N))%MODE/=LUMPED_SPECIES) THEN 
    !$OMP SINGLE
    H_RHO_D_DYDX => WORK4
    H_RHO_D_DYDY => WORK5
@@ -312,7 +311,7 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
          ENDDO
          !$OMP END DO
    END SELECT CYLINDER
-
+   ENDIF SPECIES_DIFFUSION
    ! Compute del dot rho*D del Y_n or del dot rho D del Z
  
    CYLINDER2: SELECT CASE(CYLINDRICAL)
@@ -395,9 +394,6 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  ITMP = MIN(4999,INT(TMP(I,J,K)))
-                  TMP_WGT = TMP(I,J,K) - ITMP
                   CALL GET_CONDUCTIVITY_BG(KP(I,J,K),TMP(I,J,K)) !INTENT: OUT,IN
                ENDDO
             ENDDO
