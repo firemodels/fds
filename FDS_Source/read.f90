@@ -3195,10 +3195,6 @@ ALLOCATE(Y2CPBAR_C(0:5000))
 CALL ChkMemErr('READ','Y2CPBAR_C',IZERO)    
 Y2CPBAR_C = 0._EB   
 
-ALLOCATE(Y2H_G_C(0:5000))
-CALL ChkMemErr('READ','Y2H_G_C',IZERO)    
-Y2H_G_C = 0._EB   
-
 ALLOCATE(Y2K_C(0:5000))
 CALL ChkMemErr('READ','Y2K_C',IZERO)    
 Y2K_C = 0._EB   
@@ -3214,10 +3210,6 @@ Y2CP = 0._EB
 ALLOCATE(Y2CPBAR(0:5000,N_GAS_SPECIES))     
 CALL ChkMemErr('READ','Y2CPBAR',IZERO)    
 Y2CPBAR = 0._EB   
-
-ALLOCATE(Y2H_G(0:5000,N_GAS_SPECIES))           
-CALL ChkMemErr('READ','YH_GC',IZERO)    
-Y2H_G = 0._EB   
 
 ALLOCATE(Y2K(0:5000,N_GAS_SPECIES))      
 CALL ChkMemErr('READ','Y2K',IZERO)    
@@ -3247,48 +3239,29 @@ DO J = 1,5000
       ENDIF
       SS%D(J) = D_TMP(N)
    ENDDO
+   Y2CP_C(J)    = SUM(Y2Y_C(:) * CP_TMP(:))
+   IF (J>1) THEN
+      Y2CPBAR_C(J) = (Y2CPBAR_C(J-1)*(REAL(J,EB)-1._EB)+0.5_EB*(Y2CP_C(J)+Y2CP_C(J-1)))/REAL(J,EB)
+   ELSE
+      Y2CP_C(0) = Y2CP_C(J)
+      Y2CPBAR_C(0) = SUM(Y2Y_C(:) * H_TMP(:))
+      Y2CPBAR_C(1) = Y2CPBAR_C(0)+Y2CP_C(1)
+   ENDIF
+   Y2MU_C(J)    = SUM(Y2Y_C(:) * MU_TMP(:))
+   Y2K_C(J)     = SUM(Y2Y_C(:) * K_TMP(:))      
+   IF (N_MIX_SPECIES > 0)  Y2D_C(J)     = SUM(Y2Y_C(:) * D_TMP(:))            
    DO N = 1,N_GAS_SPECIES
       Y2CP(J,N)    = SUM(Y2Y(:,N) * CP_TMP(:))
       IF (J>1) THEN
-         Y2H_G(J,N)   = Y2H_G(J-1,N) +0.5_EB*(Y2CP(J,N)+Y2CP(J-1,N)) 
-         Y2CPBAR(J,N) = Y2H_G(J,N)/REAL(J,EB)   
+         Y2CPBAR(J,N) = (Y2CPBAR(J-1,N)*(REAL(J,EB)-1._EB)+0.5_EB*(Y2CP(J,N)+Y2CP(J-1,N)))/REAL(J,EB)
       ELSE
-         Y2H_G(J,N)   = SUM(Y2Y(:,N) * H_TMP(:)) + Y2CP(J,N) 
-         Y2CPBAR(J,N) = Y2H_G(J,N)
+         Y2CPBAR(0,N) = SUM(Y2Y(:,N) * H_TMP(:))
+         Y2CPBAR(J,N) = Y2CPBAR(0,N) + Y2CP(J,N)  
       ENDIF
       Y2MU(J,N)    = SUM(Y2Y(:,N) * MU_TMP(:))
       Y2K(J,N)     = SUM(Y2Y(:,N) * K_TMP(:)) 
       IF (SPECIES(N)%MODE==LUMPED_SPECIES) Y2D(J,N-I_Z_MIN+1) = SUM(Y2Y(:,N) * D_TMP(:))
    END DO
-   IF (N_MIX_SPECIES > 0) THEN
-      Y2CP_C(J)    = SUM(Y2Y_C(:) * CP_TMP(:))
-      IF (J>1) THEN
-         Y2H_G_C(J)   = Y2H_G_C(J-1) + 0.5_EB*(Y2CP_C(J)+Y2CP_C(J-1)) 
-         Y2CPBAR_C(J) = Y2H_G_C(J)/REAL(J,EB)
-      ELSE
-         Y2H_G_C(0)  = SUM(Y2Y_C(:) * H_TMP(:))
-         Y2H_G_C(J)   = Y2H_G_C(0) + Y2CP_C(J) 
-         Y2CPBAR_C(J) = Y2H_G_C(J)
-      ENDIF
-      Y2MU_C(J)    = SUM(Y2Y_C(:) * MU_TMP(:))
-      Y2K_C(J)     = SUM(Y2Y_C(:) * K_TMP(:))      
-      Y2D_C(J)     = SUM(Y2Y_C(:) * D_TMP(:))            
-   ELSE
-      SS => SPECIES(0)
-      CALL CALC_GAS_PROPS(J,0,D_TMP(1),MU_TMP(1),K_TMP(1),CP_TMP(1),H_TMP(1),SS%ISFUEL)
-      SS%D(J) = D_TMP(1)
-      Y2CP_C(J) = CP_TMP(1)
-      IF (J>1) THEN
-         Y2H_G_C(J)   = Y2H_G_C(J-1) + 0.5_EB*(Y2CP_C(J)+Y2CP_C(J-1)) 
-         Y2CPBAR_C(J) = Y2H_G_C(J)/REAL(J,EB)
-      ELSE
-         Y2H_G_C(0 )  = H_TMP(1)      
-         Y2H_G_C(J)   = H_TMP(1) + Y2CP_C(J) 
-         Y2CPBAR_C(J) = Y2H_G_C(J)
-      ENDIF
-      Y2MU_C(J)    = MU_TMP(1)
-      Y2K_C(J)     = K_TMP(1)      
-   ENDIF
 ENDDO
 
 DEALLOCATE(D_TMP)
@@ -3297,10 +3270,6 @@ DEALLOCATE(CP_TMP)
 DEALLOCATE(H_TMP)
 DEALLOCATE(K_TMP)
 
-Y2CP_C(0) = Y2CP_C(1)
-Y2CP(0,:) = Y2CP(1,:)
-Y2CPBAR_C(0) = Y2CP_C(1)
-Y2CPBAR(0,:) = Y2CPBAR(1,:)
 Y2K_C(0) = Y2K_C(1)
 Y2K(0,:)  = Y2K(1,:)
 Y2MU_C(0)=Y2MU_C(1)
@@ -3319,11 +3288,11 @@ END SUBROUTINE PROC_SPEC
 
  
 SUBROUTINE PROC_PART
-USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_ENTHALPY
+USE PHYSICAL_FUNCTIONS, ONLY : GET_AVERAGE_SPECIFIC_HEAT
 USE PROPERTY_DATA, ONLY: JANAF_TABLE_LIQUID
 CHARACTER(30) :: SPEC_ID
 INTEGER :: N, J, ITMP
-REAL(EB) :: H_L,H_V,YY_GET(1:N_GAS_SPECIES),H_G_S,H_G_S_REF,H_L_REF,TMP_REF,TMP_MELT,TMP_V,TMP_WGT
+REAL(EB) :: H_L,H_V,YY_GET(1:N_GAS_SPECIES),CPBAR,H_G_S,H_G_S_REF,H_L_REF,TMP_REF,TMP_MELT,TMP_V,TMP_WGT
 TYPE(PARTICLE_CLASS_TYPE), POINTER :: PC=>NULL()
 
 IF (N_PART == 0) RETURN
@@ -3383,9 +3352,11 @@ PART_LOOP: DO N=1,N_PART
       H_L_REF = PC%H_L(ITMP)+TMP_WGT*(PC%H_L(ITMP+1)-PC%H_L(ITMP))
       YY_GET = 0._EB
       YY_GET(PC%Y_INDEX) = 1._EB
-      CALL GET_SPECIFIC_ENTHALPY(YY_GET,H_G_S_REF,PC%H_V_REFERENCE_TEMPERATURE)      
+      CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CPBAR,PC%H_V_REFERENCE_TEMPERATURE)      
+      H_G_S_REF = CPBAR*PC%H_V_REFERENCE_TEMPERATURE     
       DO J=1,5000
-         CALL GET_SPECIFIC_ENTHALPY(YY_GET,H_G_S,REAL(J,EB))
+         CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CPBAR,REAL(J,EB))
+         H_G_S = CPBAR*REAL(J,EB)
          PC%H_V(J) = H_V + (H_G_S-H_G_S_REF) - (PC%H_L(J)-H_L_REF)
       ENDDO
    ENDIF
