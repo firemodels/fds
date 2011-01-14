@@ -562,7 +562,7 @@ IF (N_GAS_SPECIES==0 .OR. EVACUATION_ONLY(NM)) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             CALL GET_SPECIFIC_HEAT_BG(CP,TMP(I,J,K)) !INTENT: OUT,IN
-            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP
+            RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM0/CP
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
       ENDDO 
