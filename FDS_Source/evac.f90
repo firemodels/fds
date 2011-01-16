@@ -13903,7 +13903,7 @@ CONTAINS
     REAL(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o, XBx, XBy
     REAL(EB) :: X1, Y1, X2, Y2, DOOR_WIDTH, X_XYZ, Y_XYZ
     INTEGER :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index, DOOR_IOR
-    INTEGER :: i, i_o, izero, nm_tmp, I_Agent_Type, NM_SEE, I_Old_Target
+    INTEGER :: i, i_o, izero, nm_tmp, I_Agent_Type, I_Old_Target
     CHARACTER(30) :: name_old_ffield, name_new_ffield
     LOGICAL :: PP_see_door, PP_see_doorXB
     REAL(EB) :: T_tmp, T_tmp1, Width
