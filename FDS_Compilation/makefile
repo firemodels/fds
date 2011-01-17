@@ -165,11 +165,12 @@ mpi_intel_linux_32 : setup $(obj_mpi)
 
 mpi_intel_linux_64 : FFLAGS = -m64 -O3 -vec_report0
 mpi_intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
+mpi_intel_linux_64 : LFLAGS = -shared-intel
 mpi_intel_linux_64 : FCOMPL = mpif77
 mpi_intel_linux_64 : CCOMPL = icc
 mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) $(LFLAGS)
 
 intel_linux_32_db : FFLAGS = -m32 -check all -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0 -ftrapuv -debug full
 intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend -vec_report0
@@ -197,11 +198,12 @@ mpi_intel_linux_32_db : setup $(obj_mpi)
 
 mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
 mpi_intel_linux_64_db : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
+mpi_intel_linux_64_db : LFLAGS = -shared-intel
 mpi_intel_linux_64_db : FCOMPL = mpif77
 mpi_intel_linux_64_db : CCOMPL = icc
 mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) $(LFLAGS)
 
 # 32 bit
 intel_osx_32 : FFLAGS = -O2  -m32 -heap-arrays -static-intel -vec_report0
