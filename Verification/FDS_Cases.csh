@@ -212,3 +212,6 @@ $RUNFDS Turbulence dsmag_32                                 fire74
 $RUNFDS Turbulence dsmag_64                                 fire74
 $RUNFDS Turbulence mu0_32                                   fire74
 
+$RUNFDS Visualization objects_dynamic                       fire74
+$RUNFDS Visualization objects_static                        fire74
+
