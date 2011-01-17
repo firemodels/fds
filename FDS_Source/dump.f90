@@ -4173,7 +4173,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION, FED,GET_SPECIFIC_HEAT,GET_AVERA
 USE CONTROL_VARIABLES, ONLY: CONTROL
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: II,JJ,KK,IND,IND2,NM,VELO_INDEX
-REAL(EB) :: FLOW,HMFAC,H_TC,TMP_TC,RE_D,NUSSELT,AREA,VEL, &
+REAL(EB) :: FLOW,HMFAC,H_TC,TMP_TC,RE_D,NUSSELT,AREA,VEL,K_G,&
             Q_SUM,TMP_G,UU,VV,WW,VEL2,Y_MF_INT,EXT_COEF,MASS_EXT_COEF,&
             VELSR,WATER_VOL_FRAC,RHS,DT_C,DT_E,T_RATIO,Y_E_LAG, H_G,H_G_SUM,CPBAR,CP,YY_GET(1:N_GAS_SPECIES), &
             DHOR,X_EQUIL,MW_RATIO,Y_EQUIL,TMP_BOIL,EXPON,Y_SPECIES,MEC,Y_SPECIES2,Y_H2O,R_Y_H2O,YY_G(1:N_GAS_SPECIES),R_DN,SGN
@@ -4344,7 +4344,16 @@ SELECT CASE(IND)
             CALL GET_CONDUCTIVITY_BG(GAS_PHASE_OUTPUT ,TMP(II,JJ,KK))     
          ENDIF
       ELSE
-         GAS_PHASE_OUTPUT  = MU(II,JJ,KK)*CPOPR
+         IF (CP_FTMP) THEN
+            IF (N_GAS_SPECIES > 0) THEN
+               CALL GET_SPECIFIC_HEAT(YY_G,CP,TMP(I,J,K))
+            ELSE
+               CALL GET_SPECIFIC_HEAT_BG(CP,TMP(I,J,K))
+            ENDIF
+            GAS_PHASE_OUTPUT = MU(I,J,K)*CP*RPR                       
+         ELSE
+            GAS_PHASE_OUTPUT = MU(I,J,K)*CPOPR
+         ENDIF
       ENDIF
             
    CASE(40)  ! MOLECULAR WEIGHT
@@ -4375,7 +4384,6 @@ SELECT CASE(IND)
       GAS_PHASE_OUTPUT = CPBAR*0.001_EB
       IF (IND <48) GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT * TMP(II,JJ,KK)
       IF (IND==47) GAS_PHASE_OUTPUT = GAS_PHASE_OUTPUT * RHO(II,JJ,KK)
-
    CASE(50)  ! MTR (measure of turbulence resolution)
       IF (.NOT.CHECK_KINETIC_ENERGY) THEN
          WRITE(MESSAGE,'(A)') "ERROR: Cannot DUMP MTR, CHECK_KINETIC_ENERGY=.FALSE."
@@ -4536,18 +4544,18 @@ SELECT CASE(IND)
                   WRITE(MESSAGE,'(A)') "ERROR: MASS OR HEAT FLOW not appropriate at solid boundary"
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
-               IF (SPEC_INDEX > 0) THEN
-                  YY_GET(:) = YY(I,J,K,:)
-                  CALL GET_MASS_FRACTION(YY_GET,SPEC_INDEX,Y_SPECIES)
-                  YY_GET(:) = YY(IP,JP,KP,:)
-                  CALL GET_MASS_FRACTION(YY_GET,SPEC_INDEX,Y_SPECIES2)
-               ELSE
-                  Y_SPECIES2 = 1._EB
-               ENDIF
                SELECT CASE(FLOW_INDEX)
                   CASE(1) 
                      HMFAC = 1._EB
                   CASE(2)
+                     IF (SPEC_INDEX > 0) THEN
+                        YY_GET(:) = YY(I,J,K,:)
+                        CALL GET_MASS_FRACTION(YY_GET,SPEC_INDEX,Y_SPECIES)
+                        YY_GET(:) = YY(IP,JP,KP,:)
+                        CALL GET_MASS_FRACTION(YY_GET,SPEC_INDEX,Y_SPECIES2)
+                     ELSE
+                        Y_SPECIES2 = 1._EB
+                     ENDIF                  
                      HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
                   CASE(3)
                      TMP_TC = 0.5_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
@@ -4573,7 +4581,27 @@ SELECT CASE(IND)
                   CASE(117:119)
                      FLOW = FLOW - MIN(0._EB,VEL)*HMFAC*AREA
                END SELECT
-               IF (FLOW_INDEX==3) FLOW = FLOW - AREA*MU(I,J,K)*CPOPR*(TMP(IP,JP,KP)-TMP(I,J,K))*R_DN*0.001
+               IF (FLOW_INDEX==3) THEN
+                  IF (DNS) THEN
+                     IF (N_GAS_SPECIES > 0 ) THEN
+                        CALL GET_CONDUCTIVITY(YY_G,K_G,TMP(II,JJ,KK))     
+                     ELSE
+                        CALL GET_CONDUCTIVITY_BG(K_G,TMP(II,JJ,KK))     
+                     ENDIF
+                  ELSE
+                     IF (CP_FTMP) THEN
+                        IF (N_GAS_SPECIES > 0) THEN
+                           CALL GET_SPECIFIC_HEAT(YY_G,CP,TMP(I,J,K))
+                        ELSE
+                           CALL GET_SPECIFIC_HEAT_BG(CP,TMP(I,J,K))
+                        ENDIF
+                        K_G = MU(I,J,K)*CP*RPR                       
+                     ELSE
+                        K_G = MU(I,J,K)*CPOPR
+                     ENDIF
+                  ENDIF
+                  FLOW = FLOW - AREA*K_G*(TMP(IP,JP,KP)-TMP(I,J,K))*R_DN*0.001
+               ENDIF
             ENDDO
          ENDDO
       ENDDO
@@ -5485,12 +5513,12 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF (N_GAS_SPECIES>0) THEN
       YY_N = YY_F(IW,:)
       CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,CPBAR,TMP_N)
-      CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,CPBAR_REF,TMPM)     
+      CALL GET_AVERAGE_SPECIFIC_HEAT(YY_N,CPBAR_REF,TMPA)     
    ELSE
       CALL GET_AVERAGE_SPECIFIC_HEAT_BG(CPBAR,TMP_N)
-      CALL GET_AVERAGE_SPECIFIC_HEAT_BG(CPBAR_REF,TMPM)     
+      CALL GET_AVERAGE_SPECIFIC_HEAT_BG(CPBAR_REF,TMPA)     
    ENDIF
-   H_G = CPBAR * TMP_N - CPBAR_REF * TMPM
+   H_G = CPBAR * TMP_N - CPBAR_REF * TMPA
    IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) CHRR(NM) = CHRR(NM) + (QCONF(IW)+QRADIN(IW)-QRADOUT(IW))*AW(IW)
    IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
       E_DIFF = QRADIN(IW)-QRADOUT(IW)
