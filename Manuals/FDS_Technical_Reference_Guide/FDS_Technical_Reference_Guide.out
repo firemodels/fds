@@ -1,0 +1,109 @@
+\BOOKMARK [0][]{chapter*.1}{Preface}{}
+\BOOKMARK [0][]{chapter*.2}{Disclaimer}{}
+\BOOKMARK [0][]{chapter*.3}{About the Authors}{}
+\BOOKMARK [0][]{chapter*.4}{Acknowledgments}{}
+\BOOKMARK [0][]{chapter.1}{Introduction}{}
+\BOOKMARK [0][]{chapter.2}{Model Overview}{}
+\BOOKMARK [1][]{section.2.1}{Basic Description of FDS}{chapter.2}
+\BOOKMARK [2][]{subsection.2.1.1}{Type of Model}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.2}{Version History}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.3}{Model Developers}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.4}{Intended Uses}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.5}{Input Parameters}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.6}{Output Quantities}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.7}{Governing Equations, Assumptions and Numerics}{section.2.1}
+\BOOKMARK [2][]{subsection.2.1.8}{Limitations}{section.2.1}
+\BOOKMARK [1][]{section.2.2}{Peer Review Process}{chapter.2}
+\BOOKMARK [2][]{subsection.2.2.1}{Survey of the Relevant Fire and Combustion Literature}{section.2.2}
+\BOOKMARK [2][]{subsection.2.2.2}{Review of the Theoretical Basis of the Model}{section.2.2}
+\BOOKMARK [1][]{section.2.3}{Development Process}{chapter.2}
+\BOOKMARK [0][]{chapter.3}{Governing Equations and Solution Procedure}{}
+\BOOKMARK [1][]{section.3.1}{Governing Equations}{chapter.3}
+\BOOKMARK [2][]{subsection.3.1.1}{Mass and Species Transport}{section.3.1}
+\BOOKMARK [2][]{subsection.3.1.2}{Momentum Transport}{section.3.1}
+\BOOKMARK [2][]{subsection.3.1.3}{Energy Transport}{section.3.1}
+\BOOKMARK [2][]{subsection.3.1.4}{Equation of State}{section.3.1}
+\BOOKMARK [1][]{section.3.2}{Solution Procedure}{chapter.3}
+\BOOKMARK [1][]{section.3.3}{Spatial Discretization}{chapter.3}
+\BOOKMARK [0][]{chapter.4}{Mass and Species Transport Equations}{}
+\BOOKMARK [1][]{section.4.1}{The Low Mach Number Assumption}{chapter.4}
+\BOOKMARK [1][]{section.4.2}{Combination of the Mass and Energy Equations via the Divergence}{chapter.4}
+\BOOKMARK [1][]{section.4.3}{Numerical Method}{chapter.4}
+\BOOKMARK [2][]{subsection.4.3.1}{Discretizing the Convective and Diffusive Transport Terms}{section.4.3}
+\BOOKMARK [2][]{subsection.4.3.2}{Flux Limiters}{section.4.3}
+\BOOKMARK [2][]{subsection.4.3.3}{Time Splitting for Mass Source Terms}{section.4.3}
+\BOOKMARK [2][]{subsection.4.3.4}{Discretizing the Divergence}{section.4.3}
+\BOOKMARK [2][]{subsection.4.3.5}{Enthalpy and Specific Heat}{section.4.3}
+\BOOKMARK [2][]{subsection.4.3.6}{Coupling the Gas and Solid Phase}{section.4.3}
+\BOOKMARK [2][]{subsection.4.3.7}{Mass and Energy Transfer at Interpolated Mesh Boundaries}{section.4.3}
+\BOOKMARK [0][]{chapter.5}{Momentum Transport and Pressure}{}
+\BOOKMARK [1][]{section.5.1}{Simplifying the Momentum Equation}{chapter.5}
+\BOOKMARK [1][]{section.5.2}{Large Eddy Simulation \(LES\)}{chapter.5}
+\BOOKMARK [1][]{section.5.3}{Direct Numerical Simulation \(DNS\)}{chapter.5}
+\BOOKMARK [1][]{section.5.4}{Velocity Boundary Conditions}{chapter.5}
+\BOOKMARK [2][]{subsection.5.4.1}{Smooth Walls}{section.5.4}
+\BOOKMARK [2][]{subsection.5.4.2}{Rough Walls}{section.5.4}
+\BOOKMARK [2][]{subsection.5.4.3}{The Transition Region}{section.5.4}
+\BOOKMARK [1][]{section.5.5}{Time Step and Stability Constraints}{chapter.5}
+\BOOKMARK [1][]{section.5.6}{The Equation for Pressure \(Poisson Equation\)}{chapter.5}
+\BOOKMARK [2][]{subsection.5.6.1}{Open Boundary Conditions}{section.5.6}
+\BOOKMARK [2][]{subsection.5.6.2}{Solid Boundary Conditions}{section.5.6}
+\BOOKMARK [2][]{subsection.5.6.3}{Boundary Conditions at Mesh Interfaces}{section.5.6}
+\BOOKMARK [0][]{chapter.6}{Combustion}{}
+\BOOKMARK [1][]{section.6.1}{Mixing-Controlled Combustion Model}{chapter.6}
+\BOOKMARK [2][]{subsection.6.1.1}{A Mixing-Controlled Reaction, but with Local Extinction}{section.6.1}
+\BOOKMARK [2][]{subsection.6.1.2}{Simplified Chemistry}{section.6.1}
+\BOOKMARK [2][]{subsection.6.1.3}{CO Production \(Two-Step Reaction with Extinction\)}{section.6.1}
+\BOOKMARK [2][]{subsection.6.1.4}{Heat Release Rate}{section.6.1}
+\BOOKMARK [1][]{section.6.2}{Finite-Rate, Multiple-Step Combustion Model}{chapter.6}
+\BOOKMARK [0][]{chapter.7}{Thermal Radiation}{}
+\BOOKMARK [1][]{section.7.1}{Radiation Transport Equation}{chapter.7}
+\BOOKMARK [1][]{section.7.2}{Spatial, angular and spectral discretization}{chapter.7}
+\BOOKMARK [1][]{section.7.3}{Emission source term}{chapter.7}
+\BOOKMARK [1][]{section.7.4}{Absorption by the gaseous phase}{chapter.7}
+\BOOKMARK [1][]{section.7.5}{Numerical Method}{chapter.7}
+\BOOKMARK [1][]{section.7.6}{Boundary Conditions}{chapter.7}
+\BOOKMARK [0][]{chapter.8}{Solid Phase}{}
+\BOOKMARK [1][]{section.8.1}{The Heat Conduction Equation for a Solid}{chapter.8}
+\BOOKMARK [2][]{subsection.8.1.1}{Numerical Model}{section.8.1}
+\BOOKMARK [2][]{subsection.8.1.2}{Radiation Heat Transfer to Solids}{section.8.1}
+\BOOKMARK [2][]{subsection.8.1.3}{Convective Heat Transfer to Solids}{section.8.1}
+\BOOKMARK [2][]{subsection.8.1.4}{Component-Averaged Thermal Properties}{section.8.1}
+\BOOKMARK [1][]{section.8.2}{Pyrolysis Models}{chapter.8}
+\BOOKMARK [2][]{subsection.8.2.1}{Specified Heat Release Rate}{section.8.2}
+\BOOKMARK [2][]{subsection.8.2.2}{Solid Fuels}{section.8.2}
+\BOOKMARK [2][]{subsection.8.2.3}{Phase-Change Materials}{section.8.2}
+\BOOKMARK [2][]{subsection.8.2.4}{Liquid Fuels}{section.8.2}
+\BOOKMARK [0][]{chapter.9}{Lagrangian Particles}{}
+\BOOKMARK [1][]{section.9.1}{Droplet/Particle Transport in the Gas Phase}{chapter.9}
+\BOOKMARK [1][]{section.9.2}{Droplet Size Distribution}{chapter.9}
+\BOOKMARK [1][]{section.9.3}{Heating and Evaporation of Liquid Droplets}{chapter.9}
+\BOOKMARK [1][]{section.9.4}{Absorption and Scattering of Thermal Radiation by Droplets}{chapter.9}
+\BOOKMARK [2][]{subsection.9.4.1}{Absorption and scattering coefficients}{section.9.4}
+\BOOKMARK [2][]{subsection.9.4.2}{In-scattering term}{section.9.4}
+\BOOKMARK [2][]{subsection.9.4.3}{RTE solved}{section.9.4}
+\BOOKMARK [2][]{subsection.9.4.4}{Heat absorbed by droplets}{section.9.4}
+\BOOKMARK [1][]{section.9.5}{Fire Suppression by Water}{chapter.9}
+\BOOKMARK [2][]{subsection.9.5.1}{Droplet Transport on a Surface}{section.9.5}
+\BOOKMARK [2][]{subsection.9.5.2}{Reduction of Pyrolysis Rate due to Water}{section.9.5}
+\BOOKMARK [1][]{section.9.6}{Beyond Droplets \205 Using Lagrangian Particles to Model Complex Objects}{chapter.9}
+\BOOKMARK [0][]{chapter.10}{Fire Detection Devices}{}
+\BOOKMARK [1][]{section.10.1}{Sprinklers}{chapter.10}
+\BOOKMARK [1][]{section.10.2}{Heat Detectors}{chapter.10}
+\BOOKMARK [1][]{section.10.3}{Smoke Detectors}{chapter.10}
+\BOOKMARK [0][]{chapter.11}{Heating, Ventilation, and Air Conditioning \(HVAC\)}{}
+\BOOKMARK [1][]{section.11.1}{HVAC Governing Equations}{chapter.11}
+\BOOKMARK [1][]{section.11.2}{HVAC Solution Procedure}{chapter.11}
+\BOOKMARK [1][]{section.11.3}{Surface Leakage}{chapter.11}
+\BOOKMARK [1][]{section.11.4}{HVAC Boundary Conditions \(Coupling the HVAC solver to the FDS solver\)}{chapter.11}
+\BOOKMARK [2][]{subsection.11.4.1}{Boundary Conditions for the HVAC Solver}{section.11.4}
+\BOOKMARK [2][]{subsection.11.4.2}{Boundary Conditions for the FDS Hydrodynamic Solver}{section.11.4}
+\BOOKMARK [0][]{chapter.12}{Conclusion}{}
+\BOOKMARK [0][]{section*.19}{Bibliography}{}
+\BOOKMARK [0][]{section*.19}{References}{}
+\BOOKMARK [0][]{appendix.A}{Nomenclature}{}
+\BOOKMARK [0][]{appendix.B}{Derivation of the Velocity Divergence Constraint}{}
+\BOOKMARK [0][]{appendix.C}{A Simple Model of Flame Extinction}{}
+\BOOKMARK [0][]{appendix.D}{Derivation of the Werner Wengle Wall Model}{}
+\BOOKMARK [0][]{appendix.E}{Scalar Boundedness Correction}{}
+\BOOKMARK [0][]{appendix.F}{The Dynamic Smagorinsky Model}{}
