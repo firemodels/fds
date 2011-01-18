@@ -1,7 +1,7 @@
 @echo off
 set svn_drive=d:
 
-set BASEDIR=%CD%
+set BASEDIR="%CD%"
 set SVNROOT=%BASEDIR%\..\
 
 Rem Choose one of the following four FDS "definitions" by commenting all lines but one.
