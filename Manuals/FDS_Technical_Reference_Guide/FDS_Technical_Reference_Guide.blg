@@ -1,0 +1,11 @@
+This is BibTeX, Version 0.99cThe top-level auxiliary file: C:\fds-smv\Manuals\FDS_Technical_Reference_Guide\FDS_Technical_Reference_Guide.aux
+The style file: unsrt.bst
+Database file #1: ../Bibliography/FDS_refs.bib
+Database file #2: ../Bibliography/FDS_general.bib
+Database file #3: ../Bibliography/FDS_mathcomp.bib
+Repeated entry---line 37 of file ../Bibliography/FDS_mathcomp.bib
+ : @article{Sweet:1
+ :                 ,
+I'm skipping whatever remains of this entry
+Warning--I didn't find a database entry for "Smokeview_Users_Guide_5"
+(There was 1 error message)
