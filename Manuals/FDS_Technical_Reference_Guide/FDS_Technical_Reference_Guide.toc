@@ -1,0 +1,127 @@
+\contentsline {chapter}{Preface}{i}{chapter*.1}
+\contentsline {chapter}{Disclaimer}{iii}{chapter*.2}
+\contentsline {chapter}{About the Authors}{v}{chapter*.3}
+\contentsline {chapter}{Acknowledgments}{vii}{chapter*.4}
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}
+\contentsline {subsubsection}{Howard Baum, NIST Fellow Emeritus}{1}{section*.6}
+\contentsline {chapter}{\numberline {2}Model Overview}{5}{chapter.2}
+\contentsline {section}{\numberline {2.1}Basic Description of FDS}{5}{section.2.1}
+\contentsline {subsection}{\numberline {2.1.1}Type of Model}{5}{subsection.2.1.1}
+\contentsline {subsection}{\numberline {2.1.2}Version History}{5}{subsection.2.1.2}
+\contentsline {subsection}{\numberline {2.1.3}Model Developers}{6}{subsection.2.1.3}
+\contentsline {subsection}{\numberline {2.1.4}Intended Uses}{6}{subsection.2.1.4}
+\contentsline {subsection}{\numberline {2.1.5}Input Parameters}{7}{subsection.2.1.5}
+\contentsline {subsection}{\numberline {2.1.6}Output Quantities}{7}{subsection.2.1.6}
+\contentsline {subsection}{\numberline {2.1.7}Governing Equations, Assumptions and Numerics}{8}{subsection.2.1.7}
+\contentsline {subsection}{\numberline {2.1.8}Limitations}{9}{subsection.2.1.8}
+\contentsline {section}{\numberline {2.2}Peer Review Process}{11}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Survey of the Relevant Fire and Combustion Literature}{11}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Review of the Theoretical Basis of the Model}{12}{subsection.2.2.2}
+\contentsline {section}{\numberline {2.3}Development Process}{14}{section.2.3}
+\contentsline {chapter}{\numberline {3}Governing Equations and Solution Procedure}{15}{chapter.3}
+\contentsline {section}{\numberline {3.1}Governing Equations}{15}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Mass and Species Transport}{15}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}Momentum Transport}{16}{subsection.3.1.2}
+\contentsline {subsection}{\numberline {3.1.3}Energy Transport}{16}{subsection.3.1.3}
+\contentsline {subsection}{\numberline {3.1.4}Equation of State}{17}{subsection.3.1.4}
+\contentsline {section}{\numberline {3.2}Solution Procedure}{18}{section.3.2}
+\contentsline {section}{\numberline {3.3}Spatial Discretization}{19}{section.3.3}
+\contentsline {chapter}{\numberline {4}Mass and Species Transport Equations}{21}{chapter.4}
+\contentsline {section}{\numberline {4.1}The Low Mach Number Assumption}{21}{section.4.1}
+\contentsline {section}{\numberline {4.2}Combination of the Mass and Energy Equations via the Divergence}{22}{section.4.2}
+\contentsline {section}{\numberline {4.3}Numerical Method}{24}{section.4.3}
+\contentsline {subsection}{\numberline {4.3.1}Discretizing the Convective and Diffusive Transport Terms}{24}{subsection.4.3.1}
+\contentsline {subsection}{\numberline {4.3.2}Flux Limiters}{24}{subsection.4.3.2}
+\contentsline {paragraph}{Special Case}{26}{section*.7}
+\contentsline {paragraph}{Remark}{26}{section*.8}
+\contentsline {paragraph}{Remark}{26}{section*.9}
+\contentsline {subsection}{\numberline {4.3.3}Time Splitting for Mass Source Terms}{26}{subsection.4.3.3}
+\contentsline {subsection}{\numberline {4.3.4}Discretizing the Divergence}{26}{subsection.4.3.4}
+\contentsline {subsection}{\numberline {4.3.5}Enthalpy and Specific Heat}{27}{subsection.4.3.5}
+\contentsline {subsection}{\numberline {4.3.6}Coupling the Gas and Solid Phase}{28}{subsection.4.3.6}
+\contentsline {subsection}{\numberline {4.3.7}Mass and Energy Transfer at Interpolated Mesh Boundaries}{29}{subsection.4.3.7}
+\contentsline {chapter}{\numberline {5}Momentum Transport and Pressure}{31}{chapter.5}
+\contentsline {section}{\numberline {5.1}Simplifying the Momentum Equation}{31}{section.5.1}
+\contentsline {section}{\numberline {5.2}Large Eddy Simulation (LES)}{33}{section.5.2}
+\contentsline {section}{\numberline {5.3}Direct Numerical Simulation (DNS)}{35}{section.5.3}
+\contentsline {section}{\numberline {5.4}Velocity Boundary Conditions}{36}{section.5.4}
+\contentsline {subsection}{\numberline {5.4.1}Smooth Walls}{36}{subsection.5.4.1}
+\contentsline {subsection}{\numberline {5.4.2}Rough Walls}{38}{subsection.5.4.2}
+\contentsline {subsection}{\numberline {5.4.3}The Transition Region}{38}{subsection.5.4.3}
+\contentsline {section}{\numberline {5.5}Time Step and Stability Constraints}{39}{section.5.5}
+\contentsline {section}{\numberline {5.6}The Equation for Pressure (Poisson Equation)}{40}{section.5.6}
+\contentsline {subsection}{\numberline {5.6.1}Open Boundary Conditions}{40}{subsection.5.6.1}
+\contentsline {subsection}{\numberline {5.6.2}Solid Boundary Conditions}{41}{subsection.5.6.2}
+\contentsline {subsection}{\numberline {5.6.3}Boundary Conditions at Mesh Interfaces}{42}{subsection.5.6.3}
+\contentsline {chapter}{\numberline {6}Combustion}{45}{chapter.6}
+\contentsline {section}{\numberline {6.1}Mixing-Controlled Combustion Model}{45}{section.6.1}
+\contentsline {subsection}{\numberline {6.1.1}A Mixing-Controlled Reaction, but with Local Extinction}{46}{subsection.6.1.1}
+\contentsline {subsection}{\numberline {6.1.2}Simplified Chemistry}{46}{subsection.6.1.2}
+\contentsline {subsection}{\numberline {6.1.3}CO Production (Two-Step Reaction with Extinction)}{48}{subsection.6.1.3}
+\contentsline {subsection}{\numberline {6.1.4}Heat Release Rate}{50}{subsection.6.1.4}
+\contentsline {subsubsection}{One-Step, Fast Reaction}{50}{section*.12}
+\contentsline {subsubsection}{Two-Step, Fast-Slow Reaction}{50}{section*.13}
+\contentsline {section}{\numberline {6.2}Finite-Rate, Multiple-Step Combustion Model}{51}{section.6.2}
+\contentsline {chapter}{\numberline {7}Thermal Radiation}{53}{chapter.7}
+\contentsline {section}{\numberline {7.1}Radiation Transport Equation}{53}{section.7.1}
+\contentsline {section}{\numberline {7.2}Spatial, angular and spectral discretization}{53}{section.7.2}
+\contentsline {section}{\numberline {7.3}Emission source term}{55}{section.7.3}
+\contentsline {section}{\numberline {7.4}Absorption by the gaseous phase}{56}{section.7.4}
+\contentsline {section}{\numberline {7.5}Numerical Method}{56}{section.7.5}
+\contentsline {section}{\numberline {7.6}Boundary Conditions}{59}{section.7.6}
+\contentsline {chapter}{\numberline {8}Solid Phase}{61}{chapter.8}
+\contentsline {section}{\numberline {8.1}The Heat Conduction Equation for a Solid}{61}{section.8.1}
+\contentsline {subsection}{\numberline {8.1.1}Numerical Model}{61}{subsection.8.1.1}
+\contentsline {subsection}{\numberline {8.1.2}Radiation Heat Transfer to Solids}{63}{subsection.8.1.2}
+\contentsline {subsection}{\numberline {8.1.3}Convective Heat Transfer to Solids}{63}{subsection.8.1.3}
+\contentsline {subsection}{\numberline {8.1.4}Component-Averaged Thermal Properties}{64}{subsection.8.1.4}
+\contentsline {section}{\numberline {8.2}Pyrolysis Models}{64}{section.8.2}
+\contentsline {subsection}{\numberline {8.2.1}Specified Heat Release Rate}{64}{subsection.8.2.1}
+\contentsline {subsection}{\numberline {8.2.2}Solid Fuels}{65}{subsection.8.2.2}
+\contentsline {subsection}{\numberline {8.2.3}Phase-Change Materials}{66}{subsection.8.2.3}
+\contentsline {subsection}{\numberline {8.2.4}Liquid Fuels}{66}{subsection.8.2.4}
+\contentsline {chapter}{\numberline {9}Lagrangian Particles}{69}{chapter.9}
+\contentsline {section}{\numberline {9.1}Droplet/Particle Transport in the Gas Phase}{69}{section.9.1}
+\contentsline {section}{\numberline {9.2}Droplet Size Distribution}{70}{section.9.2}
+\contentsline {section}{\numberline {9.3}Heating and Evaporation of Liquid Droplets}{71}{section.9.3}
+\contentsline {section}{\numberline {9.4}Absorption and Scattering of Thermal Radiation by Droplets}{73}{section.9.4}
+\contentsline {subsection}{\numberline {9.4.1}Absorption and scattering coefficients}{73}{subsection.9.4.1}
+\contentsline {subsection}{\numberline {9.4.2}In-scattering term}{74}{subsection.9.4.2}
+\contentsline {subsection}{\numberline {9.4.3}RTE solved}{74}{subsection.9.4.3}
+\contentsline {subsection}{\numberline {9.4.4}Heat absorbed by droplets}{75}{subsection.9.4.4}
+\contentsline {section}{\numberline {9.5}Fire Suppression by Water}{76}{section.9.5}
+\contentsline {subsection}{\numberline {9.5.1}Droplet Transport on a Surface}{76}{subsection.9.5.1}
+\contentsline {subsection}{\numberline {9.5.2}Reduction of Pyrolysis Rate due to Water}{76}{subsection.9.5.2}
+\contentsline {section}{\numberline {9.6}Beyond Droplets -- Using Lagrangian Particles to Model Complex Objects}{77}{section.9.6}
+\contentsline {chapter}{\numberline {10}Fire Detection Devices}{79}{chapter.10}
+\contentsline {section}{\numberline {10.1}Sprinklers}{79}{section.10.1}
+\contentsline {section}{\numberline {10.2}Heat Detectors}{79}{section.10.2}
+\contentsline {section}{\numberline {10.3}Smoke Detectors}{79}{section.10.3}
+\contentsline {chapter}{\numberline {11}Heating, Ventilation, and Air Conditioning (HVAC)}{83}{chapter.11}
+\contentsline {section}{\numberline {11.1}HVAC Governing Equations}{83}{section.11.1}
+\contentsline {section}{\numberline {11.2}HVAC Solution Procedure}{84}{section.11.2}
+\contentsline {section}{\numberline {11.3}Surface Leakage}{85}{section.11.3}
+\contentsline {section}{\numberline {11.4}HVAC Boundary Conditions (Coupling the HVAC solver to the FDS solver)}{86}{section.11.4}
+\contentsline {subsection}{\numberline {11.4.1}Boundary Conditions for the HVAC Solver}{86}{subsection.11.4.1}
+\contentsline {subsection}{\numberline {11.4.2}Boundary Conditions for the FDS Hydrodynamic Solver}{86}{subsection.11.4.2}
+\contentsline {chapter}{\numberline {12}Conclusion}{89}{chapter.12}
+\contentsline {chapter}{Bibliography}{91}{section*.19}
+\contentsline {chapter}{References}{95}{section*.19}
+\contentsline {chapter}{\numberline {A}Nomenclature}{97}{appendix.A}
+\contentsline {chapter}{\numberline {B}Derivation of the Velocity Divergence Constraint}{99}{appendix.B}
+\contentsline {subsubsection}{Continuity Equation}{99}{section*.20}
+\contentsline {subsubsection}{Equation of State}{99}{section*.21}
+\contentsline {subsubsection}{Species Transport Equation}{100}{section*.22}
+\contentsline {subsubsection}{Enthalpy Transport Equation}{101}{section*.23}
+\contentsline {subsubsection}{Relating Enthalpy, Temperature, and Species}{101}{section*.24}
+\contentsline {subsubsection}{Assembling Terms}{102}{section*.25}
+\contentsline {subsubsection}{FDS Notation}{103}{section*.26}
+\contentsline {chapter}{\numberline {C}A Simple Model of Flame Extinction}{105}{appendix.C}
+\contentsline {subsubsection}{Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}{105}{section*.27}
+\contentsline {chapter}{\numberline {D}Derivation of the Werner Wengle Wall Model}{107}{appendix.D}
+\contentsline {chapter}{\numberline {E}Scalar Boundedness Correction}{111}{appendix.E}
+\contentsline {subsubsection}{A simple case}{111}{section*.28}
+\contentsline {subsubsection}{Realistic cases}{112}{section*.29}
+\contentsline {chapter}{\numberline {F}The Dynamic Smagorinsky Model}{113}{appendix.F}
+\contentsline {subsubsection}{The Dynamic Procedure}{113}{section*.30}
+\contentsline {subsubsection}{Notes on implementation}{115}{section*.31}
