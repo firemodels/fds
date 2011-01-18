@@ -1,0 +1,42 @@
+#!/bin/bash -f
+EXPECTED_ARGS=2
+
+if [ $# -ne $EXPECTED_ARGS ]
+then
+  echo "Usage: qfds.sh fds_command casename.fds"
+  echo " fds_command - full path to fds command name"
+  echo "casename.fds - fds case"
+  echo 
+  exit
+fi
+fds=$1
+in=$2
+
+infile=${in%.*}
+fulldir=`pwd`
+
+out=$fulldir/$infile.err
+outlog=$fulldir/$infile.log
+
+scriptfile=/tmp/script.$$
+if ! [ -e $fulldir/$in ]; then
+  echo "The fds input file, $fulldir/$in, does not exit. Run aborted."
+  exit
+fi
+if ! [ -e $fds ]; then
+  echo "The FDS program name, $fds, does not exit. Run aborted."
+  exit
+fi
+
+cat << EOF > $scriptfile
+#!/bin/bash -f
+#PBS -N $infile
+#PBS -e $out
+#PBS -o $outlog
+cd $fulldir
+$fds $in 
+EOF
+chmod +x $scriptfile
+echo Running $in 
+qsub $scriptfile
+rm $scriptfile
