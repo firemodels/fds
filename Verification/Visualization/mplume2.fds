@@ -1,10 +1,9 @@
 &HEAD CHID='mplume2',TITLE='Plume whirl case SVN $Revision: 4861 $' /
 
-  same as plume5c except there is a 4 mesh case
+  same as plume5c except there is a 128 mesh case
 
-&MESH IJK=16,8,32, XB=0.0,1.6,0.0,0.8,0.0,3.2 /
-
-&MESH IJK=16,8,32, XB=0.0,1.6,0.8,1.6,0.0,3.2 /
+&MESH IJK=128,128,128, XB=0.0,1.6,0.0,1.6,0.0,1.6/
+&MESH IJK=128,128,128, XB=0.0,1.6,0.0,1.6,1.6,3.2/
 
 &DUMP NFRAMES=400 /
 
@@ -70,10 +69,11 @@
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0 /  Show 3D contours of temperature at 200 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=620.0 /  Show 3D contours of temperature at 620 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0, COLOR_QUANTITY='VELOCITY' /  Show 3D contours of temperature at 200 C
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0,400.0 /  Show 3D contours of temperature at 200 C
 
 &PART ID='tracers',MASSLESS=.TRUE.,
    QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY'
    SAMPLING_FACTOR=10 /  Description of massless tracer particles. Apply at a
                                                              solid surface with the PART_ID='tracers'
 
-&SLCF PBY=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBY=0.81,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
