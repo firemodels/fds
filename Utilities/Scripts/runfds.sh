@@ -5,7 +5,8 @@ infile=$2
 
 fulldir=$BASEDIR/$dir
 in=$infile.fds
-out=$infile.err
+outerr=$fulldir/$infile.err
+outlog=$fulldir/$infile.log
 stopfile=$infile.stop
 
 scriptfile=$scratchdir/script.$$
@@ -31,10 +32,10 @@ if [ -e $fulldir/$stopfile ]; then
 fi
 cat << EOF > $scriptfile
 #!/bin/bash -f
+#PBS -N $infile
+#PBS -e $outerr
+#PBS -o $outlog
 cd $fulldir
-#$ -N Ver_'$infile'
-#$ -wd $fulldir
-#$ -e $out -o /dev/null 
 $FDS $in 
 EOF
 chmod +x $scriptfile
