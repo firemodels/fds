@@ -125,8 +125,8 @@ If (EX) Then
    read(FID,*)
    read(FID,*)
    nt = 0
-   do while (.not.eof(FID))
-      read(FID,*) (M(i), i=1,ncol)
+   do 
+      read(FID,*,END=999) (M(i), i=1,ncol)
       If (M(1) >= mintime) Then
          nt = nt + 1
          Ra1 = 0.0
@@ -143,6 +143,7 @@ If (EX) Then
          RaV = RaV + 0.5*(Ra1+Ra2)
       Endif
    enddo
+999 CONTINUE
    close(FID)
    ! time averages
    RaR = RaR / real(nt)
