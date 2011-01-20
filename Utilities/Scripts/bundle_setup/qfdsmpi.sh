@@ -4,7 +4,7 @@ EXPECTED_ARGS=3
 if [ $# -ne $EXPECTED_ARGS ]
 then
   echo "Usage: qfdsmpi.sh nthreads fds_command casename.fds"
-  echo "    nthreads - number of threads"
+  echo "    nthreads - number of threads (usually number of &mesh lines)"
   echo " fds_command - full path to fds command name"
   echo "casename.fds - fds case"
   echo 
@@ -13,7 +13,8 @@ fi
 nthreads=$1
 fds=$2
 in=$3
-nnodes=$(echo "($nthreads-1)/8+1" | bc)
+nprocs=8
+nnodes=$(echo "($nthreads-1)/$nprocs+1" | bc)
 if test $nnodes -le 0
 then
 nnodes=1
