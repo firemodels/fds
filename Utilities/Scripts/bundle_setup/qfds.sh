@@ -36,12 +36,15 @@ cat << EOF > $scriptfile
 #\$ -N $infile
 #\$ -e $out
 #\$ -o $outlog
+
+cd $fulldir
+
 echo Time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 echo Processors:
 echo \`cat \$PBS_NODEFILE\`
-cd $fulldir
+
 $fds $in 
 EOF
 chmod +x $scriptfile
