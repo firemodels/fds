@@ -32,9 +32,8 @@ if [ -e $fulldir/$stopfile ]; then
 fi
 cat << EOF > $scriptfile
 #!/bin/bash -f
-#PBS -N $infile
-#PBS -e $outerr
-#PBS -o $outlog
+#PBS -N $infile -e $outerr -o $outlog
+#\$ -N $infile -e $outerr -o $outlog
 cd $fulldir
 $FDS $in 
 EOF
