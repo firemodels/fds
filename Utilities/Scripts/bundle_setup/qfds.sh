@@ -39,11 +39,10 @@ cat << EOF > $scriptfile
 
 cd $fulldir
 
-echo Time: \`date\`
+echo Start time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
-echo Processors:
-echo \`cat \$PBS_NODEFILE\`
+echo Processors: \`cat \$PBS_NODEFILE\`
 
 $fds $in 
 EOF

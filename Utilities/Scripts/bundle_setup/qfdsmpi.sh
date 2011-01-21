@@ -48,11 +48,10 @@ cat << EOF > $scriptfile
 #\$ -l nodes=$nnodes:ppn=$nprocs
 
 cd $fulldir
-echo Time: \`date\`
+echo Start time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
-echo Processors:
-echo \`cat \$PBS_NODEFILE\`
+echo Processors: \`cat \$PBS_NODEFILE\`
 
 mpirun -np $nthreads $fds $in
 EOF
