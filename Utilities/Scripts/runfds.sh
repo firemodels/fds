@@ -37,6 +37,7 @@ cat << EOF > $scriptfile
 #!/bin/bash -f
 #\$ -S /bin/bash
 #\$ -N VV_$infile -e $outerr -o $outlog
+#PBS -N VV_$infile -e $outerr -o $outlog
 cd $fulldir
 
 echo Time: \`date\`
@@ -44,6 +45,8 @@ echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 
 $FDS $in 
+# if we want to delete the log file then we need to do it here
+# (after running FDS and before end of script)
 EOF
 chmod +x $scriptfile
 echo Running $in 
