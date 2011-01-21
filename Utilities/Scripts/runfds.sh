@@ -30,18 +30,18 @@ fi
 if [ -e $fulldir/$stopfile ]; then
  rm $fulldir/$stopfile
 fi
+if [ -e $outlog ]; then
+ rm $outlog
+fi
 cat << EOF > $scriptfile
 #!/bin/bash -f
-#PBS -N $infile -e $outerr -o $outlog
-#\$ -N $infile -e $outerr -o $outlog
-
+#\$ -S /bin/bash
+#\$ -N VV_$infile -e $outerr -o $outlog
 cd $fulldir
 
 echo Time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
-echo Processors:
-echo \`cat \$PBS_NODEFILE\`
 
 $FDS $in 
 EOF
