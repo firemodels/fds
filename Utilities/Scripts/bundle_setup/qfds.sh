@@ -27,6 +27,9 @@ if ! [ -e $fds ]; then
   echo "The FDS program name, $fds, does not exit. Run aborted."
   exit
 fi
+if ! [ -e $outlog ]; then
+  rm $outlog
+fi
 
 cat << EOF > $scriptfile
 #!/bin/bash -f
@@ -42,11 +45,10 @@ cd $fulldir
 echo Start time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
-echo Processors: \`cat \$PBS_NODEFILE\`
 
 $fds $in 
 EOF
 chmod +x $scriptfile
 echo Running $in 
 qsub $scriptfile
-#rm $scriptfile
+rm $scriptfile
