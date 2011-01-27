@@ -1,23 +1,28 @@
 #!/bin/bash -f
-EXPECTED_ARGS=3
+EXPECTED_ARGS=4
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
-  echo "Usage: qfdsmpi.sh nthreads fds_command casename.fds"
+  echo "Usage: qfdsmpi2.sh nthreads nprocs fds_command casename.fds"
   echo ""
   echo "Runs a parallel FDS case on a Linux cluster using the "
   echo "PBS/SGE qsub batch queuing command"
   echo ""
   echo "    nthreads - number of threads (usually number of &mesh lines)"
+  echo "      nprocs - number of processes/threads per node"
   echo " fds_command - full path to fds command name"
   echo "casename.fds - fds case"
   echo 
   exit
 fi
 nthreads=$1
-fds=$2
-in=$3
+nprocs=$2
+fds=$3
+in=$4
+if test $nprocs -gt 8
+then
 nprocs=8
+fi
 nnodes=$(echo "($nthreads-1)/$nprocs+1" | bc)
 if test $nnodes -le 0
 then
@@ -63,5 +68,5 @@ mpirun -np $nthreads $fds $in
 EOF
 chmod +x $scriptfile
 echo Running $in 
-#qsub $scriptfile
-#rm $scriptfile
+qsub $scriptfile
+rm $scriptfile

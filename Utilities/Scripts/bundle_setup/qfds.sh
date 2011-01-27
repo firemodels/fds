@@ -4,8 +4,12 @@ EXPECTED_ARGS=2
 if [ $# -ne $EXPECTED_ARGS ]
 then
   echo "Usage: qfds.sh fds_command casename.fds"
-  echo " fds_command - full path to fds command name"
-  echo "casename.fds - fds case"
+  echo ""
+  echo "Runs a serial FDS case on a Linux cluster using the "
+  echo "PBS/SGE qsub batch queuing command"
+  echo ""
+  echo "  fds_command - full path to fds command name"
+  echo " casename.fds - fds case"
   echo 
   exit
 fi
