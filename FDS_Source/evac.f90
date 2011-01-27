@@ -380,7 +380,7 @@ MODULE EVAC
   !
   !
   LOGICAL :: NOT_RANDOM, EVAC_FDS6=.FALSE.
-  INTEGER :: I_FRIC_SW, COLOR_METHOD, COLOR_METHOD_TMP, I_AVATAR_COLOR
+  INTEGER :: I_FRIC_SW, COLOR_METHOD, COLOR_METHOD_TMP, I_AVATAR_COLOR, MAX_HUMANS_DIM
   REAL(EB) :: EVAC_MASS_EXTINCTION_COEFF
   REAL(EB) ::  FAC_A_WALL, FAC_B_WALL, LAMBDA_WALL, &
        NOISEME, NOISETH, NOISECM, RADIUS_COMPLETE_0, &
@@ -392,7 +392,7 @@ MODULE EVAC
        CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
        CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, FAC_DOOR_QUEUE, FAC_DOOR_ALPHA,&
        FAC_DOOR_WAIT, CF_MIN_B, FAC_DOOR_OLD, FAC_DOOR_OLD2, R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, &
-       DOT_HERDING, EVAC_DELTA_SEE, MAX_HUMANS_DIM
+       DOT_HERDING, EVAC_DELTA_SEE, C_HAWK, R_HAWK_DOVE
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -563,7 +563,7 @@ CONTAINS
          FAC_DOOR_QUEUE, FAC_DOOR_ALPHA, FAC_DOOR_WAIT, CF_MIN_B, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, FAC_DOOR_OLD, FAC_DOOR_OLD2, &
          R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, DOT_HERDING, EVAC_FDS6, EVAC_DELTA_SEE, &
-         MAX_HUMANS_DIM
+         MAX_HUMANS_DIM, C_HAWK, R_HAWK_DOVE
     !
     NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, INPUT_ID, &
          PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH, PROB
@@ -1527,6 +1527,10 @@ CONTAINS
       WR_HERDING      =  0.0_EB  ! Herding agents: Weight at the distance r=R_HERDING
       DOT_HERDING     = -0.2_EB  ! Herding agents: dot product parameter (do not count agents that are heading towards)
       I_HERDING_TYPE  = 0       ! Herding agents: >1 do not move if no door (0 default ffield)
+      ! Hawk - Dove game: Just an academic exercise at this moment, works only for a simple geometries.
+      ! Hawk - Dove game parameters: If C_HAWK < 0 then no game is played, i.e., normal FDS+Evac
+      C_HAWK = -2.0_EB  ! 0-1 range: all are hawks, >1 more and more doves ( c/(2*alpha*Delta) )
+      R_HAWK_DOVE = 0.5_EB ! cut-off radius, play against the agents which are inside the radius
 
       OUTPUT_SPEED         = .FALSE.
       OUTPUT_DENSITY       = .FALSE.
@@ -7127,6 +7131,9 @@ CONTAINS
          ANGLE_HR, V_HR, V_HRE, P2P_SUUNTA_MAX, ANGLE_OLD, HR_X, HR_Y, D_NEW, D_SHIFT, COMMITMENT
     INTEGER :: I_SUUNTA_MAX, N_SUUNTA_BACK, N_SUUNTA_BACKCF, I_COUNT_DENSITY, I_COUNT_DENSITYR, I_COUNT_DENSITYL
     INTEGER, DIMENSION(N_SECTORS+1) :: N_SUUNTA, N_SUUNTACF
+    REAL(EB) :: U_i_Hawk, U_I_Dove, x_o, y_o, T_tmp, T_tmp1, Width, p_i
+    INTEGER :: N_queue, N_i_Hawk, N_I_Dove
+    LOGICAL :: L_DO_GAME
 
     TYPE (MESH_TYPE),        POINTER :: MFF=>NULL()
     TYPE (EVAC_STRS_TYPE),   POINTER :: STRP=>NULL()
@@ -7536,7 +7543,7 @@ CONTAINS
                                   x11 = EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%X
                                   y11 = EVAC_EXITS(ABS(HRE%I_TARGET)-N_DOORS)%Y
                                END IF
-                               PP_SEE_DOOR = SEE_DOOR(NM, 0, 1, HR%X, HR%Y, x11, y11, tmp1, tmp2)
+                               PP_SEE_DOOR = SEE_DOOR(NM, HR%X, HR%Y, x11, y11, tmp1, tmp2)
                                IF (PP_SEE_DOOR) THEN
                                   EVEL  = SQRT((HR%X-x11)**2  + (HR%Y-y11)**2)  ! L2 norm
                                   EVEL2 = SQRT((HRE%X-x11)**2 + (HRE%Y-y11)**2) ! L2 norm
@@ -8482,6 +8489,54 @@ CONTAINS
              P2P_SUUNTA_MAX = P2P_DIST_MAX
           END IF
 
+          ! Initialize hawk - dove game utility functions for the current agent (HR%)
+          L_DO_GAME = .FALSE.
+          U_i_Hawk = 0.0_EB ; U_i_Dove = 0.0_EB
+          N_i_Hawk = 0      ; N_i_Dove = 0
+          Hawk_Dove_Game: IF (C_HAWK >= 0.0_EB .AND. T > HR%TPRE+HR%TDET .AND. HR%I_Target>0) THEN
+             ! Hawk - Dove game, only for visible target doors/exits (i_target>0)
+             CALL RANDOM_NUMBER(RN)
+             Play_This_Time_Step: IF (RN > EXP(-DTSP/TAU_CHANGE_DOOR)) THEN
+                L_DO_GAME = .TRUE.
+                I_TMP = ABS(HR%I_TARGET)
+                P2P_SUUNTA_MAX = MAX(P2P_DIST_MAX, P2P_SUUNTA_MAX, R_HAWK_DOVE+2.0_EB*HR%RADIUS)
+                IF (I_TMP <= N_DOORS) THEN
+                   x_o = 0.5_EB*(EVAC_DOORS(I_TMP)%X1 + EVAC_DOORS(I_TMP)%X2)
+                   y_o = 0.5_EB*(EVAC_DOORS(I_TMP)%Y1 + EVAC_DOORS(I_TMP)%Y2)
+                   T_tmp1 = 50.0_EB*SQRT((X1-x_o)**2 + (Y1-y_o)**2)/EVAC_DOORS(I_TMP)%R_NTARGET + 1.0_EB
+                   ii = MIN(50,MAX(1,INT(T_tmp1)-1))
+                   N_queue = EVAC_DOORS(I_TMP)%NTARGET(ii)
+                   Width = EVAC_DOORS(I_TMP)%Width
+                ELSE  ! The target is an exit
+                   I_TMP = I_TMP - N_DOORS ! The exit index
+                   x_o = 0.5_EB*(EVAC_EXITS(I_TMP)%X1 + EVAC_EXITS(I_TMP)%X2)
+                   y_o = 0.5_EB*(EVAC_EXITS(I_TMP)%Y1 + EVAC_EXITS(I_TMP)%Y2)
+                   T_tmp1 = 50.0_EB*SQRT((X1-x_o)**2 + (Y1-y_o)**2)/EVAC_EXITS(I_TMP)%R_NTARGET + 1.0_EB
+                   ii = MIN(50,MAX(1,INT(T_tmp1)-1))
+                   N_queue = EVAC_EXITS(I_TMP)%NTARGET(ii)
+                   Width = EVAC_EXITS(I_TMP)%Width
+                END IF
+                IF (ABS(FAC_DOOR_QUEUE) > 0.001_EB) THEN
+                   ! Queueing time is included
+                   T_tmp  = SQRT((x_o-X1)**2 + (y_o-Y1)**2)
+                   T_tmp1 = MIN(1.5_EB*Pi*T_tmp**2/(ABS(FAC_DOOR_QUEUE)*Width), REAL(N_queue,EB)/(ABS(FAC_DOOR_QUEUE)*Width))
+                   ! T_tmp1 is the estimated queueing time, maximum is 3 p/m2 density and a semi circle
+                   IF (FAC_DOOR_QUEUE < -0.001_EB) THEN
+                      ! Estimated time is the longer one of the queueing and walking times
+                      T_tmp = MAX((T_tmp/HR%Speed), T_tmp1)
+                   ELSE
+                      ! Estimated time is the queueing time plus the walking time
+                      ! Door selection algorithm: alpha*t_walk + (1-alpha)*t_queue
+                      T_tmp = (FAC_DOOR_ALPHA*(T_tmp/HR%Speed) +  (1.0_EB-FAC_DOOR_ALPHA)*T_tmp1) / &
+                           MAX(1.0_EB-FAC_DOOR_ALPHA,FAC_DOOR_ALPHA)
+                   END IF
+                ELSE
+                   ! No queueing time, just the walking time
+                   T_tmp = SQRT((x_o-X1)**2 + (y_o-Y1)**2) / HR%Speed
+                END IF
+             END IF Play_This_Time_Step
+          END IF Hawk_Dove_Game
+
           ! Speed up the dead agent loop, only contact forces are needed.
           IF (L_DEAD) P2P_DIST_MAX = 0.0_EB
           IF (L_DEAD) P2P_SUUNTA_MAX = 0.0_EB
@@ -8653,6 +8708,14 @@ CONTAINS
              IF (NM_STRS_MESH .AND. ABS(HRE%STR_SUB_INDX - HR%STR_SUB_INDX)>1) CYCLE P2PLOOP
 
              P2P_DIST = ((HRE%X-X1)**2 + (HRE%Y-Y1)**2)
+             Hawk_Dove_Game1: IF (L_DO_GAME .AND. P2P_DIST+(HR%RADIUS+HRE%RADIUS)**2 < R_HAWK_DOVE) THEN
+                ! Hawk - Dove game
+                IF (HRE%A > 500.0_EB) THEN
+                   N_i_Dove = N_i_Dove + 1
+                ELSE
+                   N_i_Hawk = N_i_Hawk + 1
+                END IF
+             END IF Hawk_Dove_Game1
              IF (P2P_DIST < (MIN(MAX(P2P_DIST_MAX,P2P_SUUNTA_MAX),1.5_EB)+HR%RADIUS+HRE%RADIUS)**2) THEN
                 I_COUNT_DENSITY = I_COUNT_DENSITY + 1
                 EVEL = SQRT(HR%UBAR**2 + HR%VBAR**2)
@@ -8917,6 +8980,25 @@ CONTAINS
              HR%DENSITYR = 0.0_EB
              HR%DENSITYL = 0.0_EB
           END IF
+          Hawk_Dove_Game2: IF (L_DO_GAME) THEN
+             ! Hawk - Dove game
+             IF (N_i_Dove + N_i_Hawk > 0) THEN
+                p_i = REAL(N_i_Hawk,EB)/REAL(N_i_Dove + N_i_Hawk,EB)
+                U_i_Hawk = (p_i*C_Hawk/T_tmp) - (1.0_EB-p_i)
+                U_i_Dove = p_i
+                IF (HR%A <= 500.0_EB .AND. U_i_Dove < U_i_Hawk) THEN   ! Was a hawk
+                   HR%A = 10.0_EB*HR%A ; HR%TAU = 2.0_EB*HR%TAU
+                END IF
+                IF (HR%A >  500.0_EB .AND. U_i_Hawk < U_i_Dove) THEN   ! Was a dove
+                   HR%A =  0.1_EB*HR%A ; HR%TAU = 0.5_EB*HR%TAU
+                END IF
+             ELSE
+                ! No neighbors, set to a dove if it is a hawk
+                IF (HR%A <= 500.0_EB) THEN 
+                   HR%A = 10.0_EB*HR%A ; HR%TAU = 2.0_EB*HR%TAU
+                END IF
+             END IF
+          END IF Hawk_Dove_Game2
           TUSED(14,NM)=TUSED(14,NM)+SECOND()-TNOW14
           ! ========================================================
           ! Person-person interaction forces ends here
@@ -9542,7 +9624,7 @@ CONTAINS
       TYPE (EVAC_STRS_TYPE), POINTER :: STRP=>NULL()
       INTEGER :: I_TARGET_TMP, INODE, I_TARGET_OLD, III, N_QUEUE, JJ_NOW, N_END
       REAL(EB) :: DIST_TO_DOOR, DIST_TO_DOOR_TMP, X_NODE, Y_NODE, WIDTH, T_TMP1
-      REAL(EB) :: ANGLE_HR, ANGLE_XYZ, ANGLE_XB, D_NEW
+      REAL(EB) :: ANGLE_HR, ANGLE_XYZ, ANGLE_XB, D_NEW, RN
 
       HR=>HUMAN(I)
       KKZ = 1
@@ -13451,20 +13533,18 @@ CONTAINS
     END IF
   END FUNCTION See_each_other
   !
-  LOGICAL FUNCTION See_door(nm, idoor, itarget, r1_x, r1_y, r2_x, r2_y, ave_K, max_fed)
+  LOGICAL FUNCTION See_door(nm, r1_x, r1_y, r2_x, r2_y, ave_K, max_fed)
     ! This function returns true, if the two points have a line-of-sight.
     ! This function does use smoke information, i.e., it sees if
     ! there are obstacles and/or too much smoke between the two points.
     ! Inputs:  nm: mesh index, r1 an r2 should belong to the same mesh
-    !          idoor: index of the  door/exit
-    !          itarget: the current target door of the agent
     !          (r1_x,r1_y): co-ordinates of the agent
     !          (r2_x,r2_y): co-ordinates of the door
     ! Outputs: ave_K: average extinction coefficient of the path
     !          max_fed: maximum level of FED at the path
     !
     ! Passed variables
-    INTEGER, INTENT(IN) :: nm, idoor, itarget
+    INTEGER, INTENT(IN) :: nm
     REAL(EB), INTENT(IN) :: r1_x, r1_y, r2_x, r2_y
     REAL(EB), INTENT(OUT) :: ave_K, max_fed
     !
@@ -14206,9 +14286,8 @@ CONTAINS
           END IF
           PP_see_door = See_each_other(nm_tmp, x1_old, y1_old, x11, y11)
           Is_BeeLine_Door(i,1) = PP_see_door
-          !PP_see_door = See_door(nm_tmp, i, HR%I_Target, x1_old, y1_old, XBx, YBy, ave_K, max_fed)
-          PP_see_door = See_door(nm_tmp, i, HR%I_Target, x1_old, y1_old, x11, y11, ave_K, max_fed)
-          PP_see_doorXB = See_door(nm_tmp, i, HR%I_Target, x1_old, y1_old, XBx, XBy, ave_K2, max_fed2)
+          PP_see_door = See_door(nm_tmp, x1_old, y1_old, x11, y11, ave_K, max_fed)
+          PP_see_doorXB = See_door(nm_tmp, x1_old, y1_old, XBx, XBy, ave_K2, max_fed2)
           IF (PP_see_doorXB .AND. .NOT.PP_see_door) THEN
              max_fed = max_fed2 ; ave_K = ave_K2
           END IF
