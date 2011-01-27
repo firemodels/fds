@@ -1,0 +1,679 @@
+\chapter{Nomenclature}
+\label{nomenclature}
+
+\begin{tabbing}
+$A_s$ \hspace{1in}        \= droplet surface area \\
+$A_{\alpha\beta}$          \> pre-exponential factor for solid phase Arrhenius reaction \\
+$B$                       \> pre-exponential factor for gas phase Arrhenius reaction \\
+$C$                       \> Sprinkler C-Factor \\
+$C_D$                     \> drag coefficient \\
+$C_s$                     \> Smagorinsky constant (LES)  \\
+$c_s$             \> Solid material specific heat \\
+$c_p$                     \> constant pressure specific heat \\
+$D$                       \> diffusion coefficient   \\
+$d_m$                     \> median volumetric droplet diameter \\
+$E$                       \> activation energy \\
+$\bof_b$                  \> external force vector (excluding gravity) \\
+$g$                       \> acceleration of gravity \\
+$\bg$                     \> gravity vector, normally $(0,0,-g)$ \\
+$\cal H$                  \> total pressure divided by the density \\
+$H_{r,\alpha\beta}$   \> heat of reaction for a solid phase reaction \\
+$h$                       \> enthalpy; heat transfer coefficient   \\
+$h_\alpha$                \> enthalpy of species $\alpha$   \\
+$h_\alpha^0$              \> heat of formation of species $\alpha$   \\
+$I$                       \> radiation intensity   \\
+$I_b$                     \> radiation blackbody intensity   \\
+$k$                       \> thermal conductivity; suppression decay factor \\
+$\dm_{b,\alpha}'''$       \> mass production rate of species $\alpha$ by evaporating droplets/particles \\
+$\dm_f''$                 \> fuel mass flux \\
+$\dm_\alpha'''$           \> mass production rate of species $\alpha$ per unit volume \\
+$\dm_w''$                 \> water mass flux  \\
+$m_w''$                   \> water mass per unit area \\
+$\NU$                     \> Nusselt number \\
+$\PR$                     \> Prandtl number \\
+$p$                       \> pressure \\
+$\bp_0$                   \> atmospheric pressure profile \\
+$\bp_m$                   \> background pressure of $m$th pressure zone \\
+$\tp$                     \> pressure perturbation \\
+$\dbq''$                  \> heat flux vector \\
+$\dq'''$                  \> heat release rate per unit volume \\
+$\dq_r''$                 \> radiative flux to a solid surface \\
+$\dq_c''$                 \> convective flux to a solid surface \\
+$\dQ$                     \> total heat release rate \\
+$Q^*$                     \> characteristic fire size \\
+$\R$                      \> universal gas constant \\
+$\RE$                     \> Reynolds number \\
+$r_d$                     \> droplet radius \\
+$r_{\alpha\beta}$     \> solid phase reaction rate \\
+$\hbox{RTI}$              \> Response Time Index of sprinkler \\
+$\bs$                     \> unit vector in direction of radiation intensity\\
+$\SC$                     \> Schmidt number \\
+$\SH$                     \> Sherwood number \\
+$S_\alpha$        \> solid component production rate \\
+$T$                       \> temperature \\
+$t$                       \> time           \\
+$U$                       \> integrated radiant intensity \\
+$\bu=(u,v,w)$             \> velocity vector  \\
+$W_\alpha$                \> molecular weight of gas species $\alpha$ \\
+$\bW$                     \> molecular weight of the gas mixture \\
+$\WE$                     \> Weber number \\
+$\bx=(x,y,z)$             \> position vector  \\
+$X_\alpha$                \> volume fraction of species $\alpha$   \\
+$Y_\alpha$                \> mass fraction of species $\alpha$   \\
+$Y_\OTWO^\infty$          \> mass fraction of oxygen in the ambient   \\
+$Y_\F^I$                  \> mass fraction of fuel in the fuel stream   \\
+$y_s$                     \> soot yield \\
+$Z$                       \> mixture fraction   \\
+$Z_f$                     \> stoichiometric value of the mixture fraction   \\
+$\gamma$                  \> ratio of specific heats; Rosin-Rammler exponent \\
+$\Delta H$                \> heat of combustion \\
+$\Delta H_\OTWO$          \> energy released per unit mass oxygen consumed \\
+$\delta$                  \> wall thickness \\
+$\epsilon$                \> dissipation rate \\
+$\kappa$                  \> absorption coefficient \\
+$\mu$                     \> dynamic viscosity \\
+$\nu_\alpha$              \> stoichiometric coefficient, species $\alpha$ \\
+$\nu_s$           \> yield of solid residue in solid phase reaction \\
+$\nu_g,\gamma$    \> yield of gaseous species $\gamma$ in solid phase reaction \\
+$\rho$                    \> density \\
+$\btau_{ij}$              \> viscous stress tensor \\
+$\chi_r$                  \> radiative loss fraction \\
+$\sigma$                  \> Stefan-Boltzmann constant; constant in droplet size distribution; surface tension \\
+$\sigma_d$                \> droplet scattering coefficient \\
+$\sigma_s$                \> scattering coefficient \\
+$\bo=(\omx,\omy,\omz)$    \> vorticity vector \\
+\end{tabbing}
+
+
+
+
+
+\chapter{Derivation of the Velocity Divergence Constraint}
+\label{app_divergence}
+
+In this appendix we derive the divergence of the velocity field as presented in Eq.~(\ref{eqn_divfromeos}). Note that the constitutive relationships presented here for the mass diffusion and thermal heat fluxes are valid for direct numerical simulations (i.e., well-resolved calculations). The minor modifications required of the transport coefficients for large-eddy simulation are presented in Section~\ref{LES}.  We start the derivation by rearranging the continuity equation. Next, we differentiate the equation of state to reveal the relationship between transport equations for mass and energy. We then show how the transport equations may be combined to yield the velocity divergence constraint.  In the last section we present the final result in FDS notation.
+
+\subsubsection{Continuity Equation}
+\label{continuity}
+
+Let $\rho$ denote the fluid mass density; let $\mathbf{u} = [u,v,w]^T$ denote the fluid mass-average velocity; and let $\dot{m}_b^{\tripleprime}$
+denote a bulk source of mass per unit volume (which may come from the evaporation of water droplets, for example).
+The continuity equation may be rearranged to yield the following divergence constraint on the velocity
+\begin{equation}
+\label{eqn_divconstraint1}
+\Div \mathbf{u} = \frac{1}{\rho} \left( \dot{m}_b^{\tripleprime} -  \frac{\mbox{D} \rho}{\mbox{D} t} \right)
+\end{equation}
+where $\mbox{D}(\,\,\,)/\mbox{D} t \equiv \partial (\,\,\,)/\partial t + \mathbf{u}\cdot\nabla(\,\,\,)$ is the material derivative.
+
+\subsubsection{Equation of State}
+\label{EOS}
+
+We consider the transport of $n_s$ species mass fractions $Y_\alpha$ for $\alpha = \{1,\ldots,n_s\}$, $n_s-1$ of which are independent.
+The molecular weight of a given species is denoted $W_\alpha$ and the molecular weight of the mixture, $\overline{W}$, is given by
+\begin{equation}
+\label{eqn_mixmolewt}
+\overline{W} = \left( \sum_{\alpha} \frac{Y_\alpha}{W_\alpha} \right)^{-1}
+\end{equation}
+where as a shorthand notation, which is used throughout this document, we write $\sum_\alpha$ for $\sum_{\alpha = 1}^{n_s}$.
+Let $\overline{p}_i(\mathbf{x},t)$ denote the hydrostatic pressure in the $i$th zone of the domain, which in general we take to be a function of space and time.
+In practice, however, $\overline{p}_i = \overline{p}_i(t)$ for closed (i.e., sealed or pressurized) domains and $\overline{p}_i = \overline{p}_i(z)$,
+where $z$ represents the coordinate aligned with the gravity vector, for large, open domains (e.g., forest fires large enough to interact with the stratified atmosphere).
+The divergence constraint derived below is based on the ideal gas equation of state (EOS), which, for low-Mach flows, we write as
+\begin{equation}
+\label{eqn_idealgaslaw}
+\overline{p}_i = \frac{\rho \mathcal{R} T}{\overline{W}}
+\end{equation}
+where $\mathcal{R} = 8.3145$~kJ/(kmol K) is the gas law constant.
+
+Differentiating the EOS (\ref{eqn_idealgaslaw}) we obtain
+\begin{equation}
+\label{eqn_DEOS1}
+\frac{\mbox{D} \overline{p}_i}{\mbox{D} t} = \rho \mathcal{R} T \frac{\mbox{D}}{\mbox{D} t}\left(\frac{1}{\overline{W}}\right) +
+\frac{\rho \mathcal{R}}{\overline{W}} \frac{\mbox{D} T}{\mbox{D} t} + \frac{\mathcal{R}T}{\overline{W}} \frac{\mbox{D} \rho}{\mbox{D} t}
+\end{equation}
+which rearranges to
+\begin{equation}
+\label{eqn_DEOS2}
+\frac{\mbox{D} \rho}{\mbox{D} t} = \frac{\overline{W}}{\mathcal{R}T} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} -
+\rho \overline{W} \frac{\mbox{D}}{\mbox{D} t}\left(\frac{1}{\overline{W}}\right) - \frac{\rho}{T} \frac{\mbox{D} T}{\mbox{D} t}
+\end{equation}
+
+
+\subsubsection{Species Transport Equation}
+\label{species_transport}
+
+The species transport equation plays a role in both the second and third terms on the RHS of (\ref{eqn_DEOS2}).  Including the bulk mass source, the evolution of species mass fractions is governed by
+\begin{equation}
+\label{eqn_speciestransport}
+\frac{\partial \left(\rho Y_\alpha\right)}{\partial t} + \Div \left(\rho Y_\alpha \mathbf{u}\right)  = - \Div \mathbf{J}_{\alpha} + \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b,\alpha}^{\tripleprime}
+\end{equation}
+where $\mathbf{J}_{\alpha}$ is the diffusive mass flux vector for species $\alpha$ (relative to the mass-average velocity),
+$\dot{m}_\alpha^{\tripleprime}$ is the chemical mass production rate of $\alpha$ per unit volume [kg-$\alpha$ produced /(sec m$^3$)],
+and $\dot{m}_{b,\alpha}^{\tripleprime}$ is the bulk mass source of $\alpha$ per unit volume [kg-$\alpha$ introduced /(sec m$^3$)].  Note that
+\begin{equation}
+\label{eqn_bulksum}
+\sum_\alpha \dot{m}_{b,\alpha}^{\tripleprime} = \dot{m}_b^{\tripleprime}
+\end{equation}
+and
+\begin{equation}
+\label{eqn_massconservation}
+\sum_\alpha \dot{m}_\alpha^{\tripleprime} = 0
+\end{equation}
+Additionally, by construction, the $i$th component of the species diffusive fluxes sum to zero,
+\begin{equation}
+\label{eqn_sumdiffflux}
+\sum_\alpha J_{\alpha,i} = 0
+\end{equation}
+Thus, as must be the case, summing (\ref{eqn_speciestransport}) over $\alpha$ yields the continuity equation.
+
+It is convenient to work in terms of the material derivative of the mass fraction.  Care must be exercised in obtaining this expression because the continuity equation is of a non-standard form.
+Expanding (\ref{eqn_speciestransport}) we obtain
+\begin{eqnarray}
+\label{eqn_speciesexpansion}
+\rho\frac{\partial Y_\alpha}{\partial t} + Y_\alpha \frac{\partial \rho}{\partial t} + \rho \mathbf{u}\cdot \nabla Y_\alpha + Y_\alpha \Div \left(\rho \mathbf{u}\right) &=&
+- \Div \mathbf{J}_{\alpha} + \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b,\alpha}^{\tripleprime} \,\mbox{,} \nonumber\vspace{0.3cm}\\
+\rho \frac{\mbox{D} Y_\alpha}{\mbox{D} t} + Y_\alpha \underbrace{\left[ \frac{\partial \rho}{\partial t} + \Div \left(\rho \mathbf{u}\right) \right]}_{\displaystyle \dot{m}_b^{\tripleprime}} &=& \mbox{}
+\end{eqnarray}
+Thus, the material derivative of the mass fraction can be written as
+\begin{equation}
+\label{eqn_matdermassfrac}
+\frac{\mbox{D} Y_\alpha}{\mbox{D} t} = \frac{1}{\rho}\left(  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b,\alpha}^{\tripleprime} -
+Y_\alpha \dot{m}_b^{\tripleprime}  - \Div \mathbf{J}_{\alpha} \right)
+= \frac{1}{\rho}\left(  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right)
+\end{equation}
+where in the second step we use the identity $\dot{m}_{b,\alpha}^{\tripleprime} = Y_\alpha \dot{m}_{b}^{\tripleprime}$ with $Y_{b,\alpha}$ being the
+mass fraction of $\alpha$ in the bulk prior to its introduction into the fluid mixture.
+
+Utilizing (\ref{eqn_mixmolewt}) and (\ref{eqn_matdermassfrac}) we obtain
+\begin{eqnarray}
+\label{eqn_transportexpression}
+\frac{\mbox{D}}{\mbox{D} t}\left(\frac{1}{\overline{W}}\right) &=& \frac{\mbox{D}}{\mbox{D} t}\left(\sum_\alpha \frac{Y_\alpha}{W_\alpha} \right) \,\mbox{,} \nonumber \vspace{0.3cm}\\
+&=& \sum_\alpha \frac{1}{W_\alpha} \frac{\mbox{D}Y_\alpha }{\mbox{D} t} \,\mbox{,} \nonumber \vspace{0.3cm}\\
+&=& \frac{1}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left(  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right)  \,\mbox{,}
+\end{eqnarray}
+which is needed in the second term on the RHS of (\ref{eqn_DEOS2}).
+
+
+\subsubsection{Enthalpy Transport Equation}
+\label{enthalpy_definitions}
+
+The specific sensible enthalpy of species $\alpha$ relative to reference temperature $T_0$ is
+\begin{equation}
+\label{eqn_sensible}
+h_{s,\alpha}(T) = \int_{T_0}^{T} c_{p,\alpha}(T^\prime) \,\dif T^\prime \,\mbox{,}
+\end{equation}
+where the specific heat of $\alpha$ is
+\begin{equation}
+\label{eqn_specificheat}
+c_{p,\alpha} \equiv \frac{\partial h_{s,\alpha}}{\partial T} \,\mbox{.}
+\end{equation}
+The specific sensible enthalpy of the mixture is then given by
+\begin{equation}
+\label{eqn_chemsensmix}
+h_s(\mathbf{Y},T) = \sum_\alpha Y_\alpha h_{s,\alpha}(T) \,\mbox{.}
+\end{equation}
+
+Neglecting viscous heating and the effect of the fluctuating pressure on dilation work (both assumptions are valid for low-Mach flows), the transport equation for the sensible enthalpy is
+\begin{equation}
+\label{eqn_enthalpytransport}
+\rho \frac{\mbox{D} h_s }{\mbox{D} t} = -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div \dot{\mathbf{q}}^{\prime\prime} - \dq_b''' + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s ) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2
+\end{equation}
+where $\Delta h^0_\alpha$ is the heat of formation of $\alpha$ at reference temperature $T_0$, $h_{s,b}$ is the specific sensible enthalpy of the bulk mass source, $\dot{q}_b^{\tripleprime}$ is a volumetric heat sink due to convective heat transfer to the bulk phase, and $\dot{\mathbf{q}}^{\prime\prime}$ is the heat flux vector which contains contributions from conduction, molecular diffusion of sensible enthalpy, and radiation,
+\begin{equation}
+\label{eqn_heatflux}
+\dot{\mathbf{q}}^{\prime\prime} = -k \nabla T + \sum_\alpha h_{s,\alpha} \mathbf{J}_{\alpha} + \dot{\mathbf{q}}^{\prime\prime}_{r}
+\end{equation}
+Here $k$ is the thermal conductivity of the mixture and $\dot{\mathbf{q}}^{\prime\prime}_{r}$ is the radiant heat flux.  The last term in (\ref{eqn_enthalpytransport}) accounts for the kinetic energy associated with the instantaneous mixing of the bulk and gas-phase momentum.
+
+
+\subsubsection{Relating Enthalpy, Temperature, and Species}
+\label{eqn_enthalpy_temperature}
+
+Using the chain rule of calculus, we may expand the derivative of the sensible enthalpy $h_s(\mathbf{Y},T)$ to obtain
+\begin{equation}
+\label{eqn_chainrule}
+\frac{\mbox{D} h_s}{\mbox{D} t} = \left(\frac{\partial h_s}{\partial T}\right) \frac{\mbox{D} T }{\mbox{D} t} +
+\sum_\alpha \left( \frac{\partial h_s}{\partial Y_\alpha} \right) \frac{\mbox{D} Y_\alpha }{\mbox{D} t}
+\end{equation}
+Note that since $h_s = \sum_\alpha Y_\alpha h_{s,\alpha}$ we have
+\begin{equation}
+\label{eqn_dhdY}
+\frac{\partial h_s}{\partial Y_\alpha} = \frac{\partial}{\partial Y_\alpha} \sum_\beta (Y_\beta h_{s,\beta} )
+= \sum_\beta h_{s,\beta} \,\delta_{\alpha \beta} = h_{s,\alpha}
+\end{equation}
+where $\delta_{\alpha \beta}$ is the Kronecker delta. Also,
+\begin{equation}
+\label{eqn_dhdT}
+\frac{\partial h_s}{\partial T} = \frac{\partial}{\partial T} \sum_\alpha Y_\alpha h_{s,\alpha} =
+\sum_\alpha Y_\alpha \left(\frac{\partial h_{s,\alpha}}{\partial T}\right) = \sum_\alpha Y_\alpha c_{p,\alpha} \equiv c_p
+\end{equation}
+defining the specific heat of the mixture.  Thus, by rearranging (\ref{eqn_chainrule}) and utilizing (\ref{eqn_dhdY}) and (\ref{eqn_dhdT}) we obtain
+\begin{equation}
+\label{eqn_DTDt1}
+\frac{\mbox{D} T}{\mbox{D} t} = \frac{1}{c_p} \left[ \frac{\mbox{D} h_s}{\mbox{D} t} - \sum_\alpha h_{s,\alpha} \frac{\mbox{D} Y_\alpha}{\mbox{D} t} \right]
+\end{equation}
+Utilizing (\ref{eqn_matdermassfrac}) and (\ref{eqn_enthalpytransport}) in (\ref{eqn_DTDt1}) yields
+\begin{eqnarray}
+\frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p}   \left[  -\sum_\alpha \Delta h^0_\alpha \dot{m}_{\alpha}^{\tripleprime} + \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} - \dq_b''' + \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s )  + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2\right.   \nonumber \vspace{0.3cm} \\
+& &  \quad\quad\,\, \left. - \sum_\alpha h_{s,\alpha} \Big\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \Big\}  \right]
+\label{eqn_DTDt2}
+\end{eqnarray}
+Note that $\sum_\alpha h_{s,\alpha} \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s ) = \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} (h_{s,\alpha}[T_b] - h_{s,\alpha}[T]) \approx \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T)$, leaving
+\begin{equation}
+\label{eqn_DTDt}
+\frac{\mbox{D} T}{\mbox{D} t} = \frac{1}{\rho c_p} \left[\frac{\mbox{D} \overline{p}_i }{\mbox{D} t}
+- \Div\dot{\mathbf{q}}^{\prime\prime} - \dq_b''' - \sum_\alpha \Delta h^0_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right] \,\mbox{.} \nonumber \vspace{0.3cm} \\
+\end{equation}
+
+\subsubsection{Assembling Terms}
+\label{putting_it_all_together}
+
+We now have all the pieces we need to construct the divergence constraint which we introduced in Eq. (\ref{eqn_divconstraint1}).  Using (\ref{eqn_DEOS2}) in (\ref{eqn_divconstraint1}) we obtain
+\begin{eqnarray}
+\label{eqn_divconstraint2}
+\Div\mathbf{u} &=& \frac{1}{\rho} \left( \dot{m}_b^{\tripleprime} -  \left[ \frac{\overline{W}}{\mathcal{R}T} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} -
+\rho \overline{W} \frac{\mbox{D}}{\mbox{D} t}\left(\frac{1}{\overline{W}}\right) - \frac{\rho}{T} \frac{\mbox{D} T}{\mbox{D} t} \right] \right)  \nonumber \vspace{0.3cm} \\
+&=& \frac{1}{\rho} \,\dot{m}_b^{\tripleprime} -  \frac{1}{\overline{p}_i} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} + \overline{W} \frac{\mbox{D}}{\mbox{D} t}\left(\frac{1}{\overline{W}}\right) +
+\frac{1}{T} \frac{\mbox{D} T}{\mbox{D} t}
+\end{eqnarray}
+where in the second step the EOS (\ref{eqn_idealgaslaw}) is used to simplify the second term on the RHS.
+Using (\ref{eqn_transportexpression}) and (\ref{eqn_DTDt}) in (\ref{eqn_divconstraint2}) yields
+\begin{eqnarray}
+\label{eqn_divconstraint3}
+\Div\mathbf{u} &=& \frac{1}{\rho} \,\dot{m}_b^{\tripleprime} -  \frac{1}{\overline{p}_i} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} + \overline{W} \left[\frac{1}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
+&+&  \frac{1}{T} \left[ \frac{1}{\rho c_p} \left\{ \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} -\dq_b''' - \sum_\alpha \Delta h^0_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right\} \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
+\end{eqnarray}
+Note that $\overline{W} \sum_\alpha (Y_\alpha/W_\alpha) = 1$ and also $\overline{W} \sum_\alpha (Y_{b,\alpha}/W_\alpha) = \overline{W}/\overline{W}_b$,
+where $\overline{W}_b$ is the molecular weight of the bulk mixture prior to its introduction into the fluid mixture.  Equation (\ref{eqn_divconstraint3}) thus simplifies to
+\begin{eqnarray}
+\label{eqn_divconstraint_final}
+\Div\mathbf{u}  &=& \left(\frac{1}{\rho c_p T}  -  \frac{1}{\overline{p}_i}\right) \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} + \frac{1}{\rho} \left[ \dot{m}_b^{\tripleprime} \frac{\overline{W}}{\overline{W}_b} +  \overline{W}\sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime}
+- \Div\mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
+&+&  \frac{1}{\rho c_p T} \left[ - \sum_\alpha \Delta h^0_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) - \Div \dot{\mathbf{q}}^{\prime\prime} -\dq_b''' + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
+\end{eqnarray}
+
+
+\subsubsection{FDS Notation}
+\label{fds_notation}
+
+The following relationships are used to rearrange (\ref{eqn_divconstraint_final}) into
+the form shown in the FDS Technical Reference Guide. We employ the binary form of Fick's law using mixture-averaged diffusivities $D_\alpha$ as a constitutive relation for the diffusive flux,
+\begin{equation}
+\label{eqn_fickslaw}
+\mathbf{J}_{\alpha} = - \rho D_\alpha \nabla Y_\alpha \,\mbox{.}
+\end{equation}
+Note that summation is not implied over repeated suffixes.
+The heat release rate per unit volume is defined by
+\begin{equation}
+\label{eqn_heatrelease}
+\dot{q}^\tripleprime \equiv -\sum_\alpha \dot{m}_{\alpha}^\tripleprime \Delta h^0_\alpha \,\mbox{.}
+\end{equation}
+Taking the $z$ direction to be aligned with the gravity vector we have $\partial \overline{p}_i/\partial z = -\rho_i g$,
+where $g = 9.8$ m/s$^2$ and $\rho_i$ is a specified background density for the $i$th zone.
+Thus, the material derivative of the background pressure may be written as
+\begin{eqnarray}
+\label{eqn_expandp0}
+\frac{\mbox{D}\overline{p}_i}{\mbox{D}t} &=& \frac{\partial \overline{p}_i}{\partial t} - w \rho_i g \,\mbox{.}
+\end{eqnarray}
+Hence, utilizing (\ref{eqn_fickslaw}), (\ref{eqn_heatrelease}), and (\ref{eqn_expandp0}), and noting $1/(\rho T) = \mathcal{R}/(\overline{W} \overline{p}_i)$ from the EOS,
+for the $i$th zone we may write the divergence (\ref{eqn_divconstraint_final}) as
+\begin{equation}
+\label{eqn_fds_divcontraint}
+\Div \mathbf{u} = \mathcal{D} - \mathcal{P} \frac{\partial \overline{p}_i}{\partial t}
+\end{equation}
+where
+\begin{equation}
+\label{eqn_fdsP}
+\mathcal{P} = \frac{1}{\overline{p}_i}\left( 1 - \frac{\overline{p}_i}{\rho \,c_p T} \right) = \frac{1}{\overline{p}_i}\left( 1 - \frac{\mathcal{R}}{\overline{W} c_p}  \right)
+\end{equation}
+and
+\begin{eqnarray}
+\label{eqn_fdsD}
+\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} +
+                \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) +
+                \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  +
+                \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
+&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} -
+                \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) +
+                \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
+\end{eqnarray}
+Equations (\ref{eqn_fdsP}) and (\ref{eqn_fdsD}) correspond to (\ref{eqn_fdsP1}) and (\ref{eqn_fdsD1}) in the FDS Tech Guide.  Though, note that at present the bulk kinetic energy term is not included in the code.
+
+A brief remark on the of the sensible enthalpy $h_{s,\alpha}$ vs. the [chemical + sensible] enthalpy $h_\alpha = \Delta h_\alpha^0 + h_{s,\alpha}$:
+The definition of the heat flux vector $\dot{\mathbf{q}}^{\prime\prime}$ can be a key source of confusion.
+When transporting the sensible enthalpy only, as we are doing here, the heat flux vector does not account for the molecular transport of the
+chemical enthalpy (the enthalpy of formation).  If we were working in terms of the [chemical + sensible] enthalpy we would not have
+a ``heat of reaction'' $\dot{q}^{\tripleprime}$, the heat flux vector would account for the transport of both the chemical and the sensible enthalpies,
+and the sensible enthalpies in (\ref{eqn_fdsD}) would be replaced by the [chemical + sensible] enthalpy $h_{\alpha}$.
+
+
+
+
+
+
+\chapter{A Simple Model of Flame Extinction}
+
+\subsubsection{Frederick W. Mowrer, Department of Fire Protection Engineering, University of Maryland}
+
+\label{mowrer_model}
+
+
+A diffusion flame immersed in a vitiated atmosphere will extinguish before consuming all the
+available oxygen from the atmosphere.  The classic example of this behavior is a candle burning
+within an inverted jar.  This same concept has been applied within FDS
+to determine the conditions under which the local ambient oxygen concentration will no longer
+support a diffusion flame.  In this appendix, the critical adiabatic flame temperature
+concept is used to estimate the local ambient oxygen concentration at which extinction will
+occur.
+
+Consider a control volume characterized
+by a bulk temperature, $T_m$, a mass, $m$, an average specific heat, $\overline{c_p}$, and an oxygen mass
+fraction, $Y_\OTWO$.  Complete combustion of the oxygen within the control volume would release a
+quantity of energy given by:
+\be
+   Q = m \, Y_\OTWO \, \left( \frac{\Delta H}{r_\OTWO}  \right)  \label{bbb}
+\ee
+where $\Delta H/r_\OTWO$ has a relatively constant value of
+approximately 13100~kJ/kg for most fuels of interest for fire applications.\footnote{C. Huggett, ``Estimation of the Rate of Heat Release by Means of Oxygen
+Consumption,'' {\em Fire and Materials}, Vol.~12, pp.~61-65, 1980.}
+Under adiabatic conditions, the energy released by combustion of the available oxygen within
+the control volume would raise the bulk temperature of the gases within the control volume by an
+amount equal to:
+\be
+   Q = m \, \overline{c_p} \, (T_f - T_m)  \label{eee}
+\ee
+The average specific heat of the gases within the control volume can be calculated based on the
+composition of the combustion products as:
+\be
+   \overline{c_p} = \frac{1}{(T_f-T_m)} \, \sum_\alpha \int_{T_m}^{T_f} c_{p,\alpha} (T) \, dT
+\ee
+To simplify the analysis, the combustion products are assumed to have an average specific heat
+of 1.2~kJ/kg/K over the temperature range of interest, a value similar to that of nitrogen, the primary
+component of the products.
+The relationship between the oxygen mass fraction within the control volume and the adiabatic
+temperature rise of the control volume is evaluated by equating Eqs.~(\ref{bbb}) and (\ref{eee}):
+\be
+   Y_\OTWO = \frac{ \overline{c_p} (T_f-T_m) }{\Delta H/r_\OTWO}
+\ee
+If the critical adiabatic flame temperature is assumed to have a constant value of approximately
+1700~K for hydrocarbon diffusion flames, as suggested by Beyler,\footnote{C. Beyler, ``Flammability Limits of Premixed and Diffusion Flames,''
+{\em SFPE Handbook of Fire Protection Engineering} (3rd Ed.), National Fire
+Protection Association, Quincy, MA, 2003.} then the relationship
+between the limiting oxygen mass fraction and the bulk temperature of a control volume is given
+by:
+\be
+   Y_{\OTWO,lim} = \frac{ \overline{c_p} (T_{f,lim}-T_m) }{\Delta H/r_\OTWO} \approx  \frac{ 1.2 \, (1700-T_m) }{ 13100}  \label{extinction_model}
+\ee
+For a control volume at a temperature of 300~K, i.e., near room temperature, the limiting oxygen
+mass fraction would evaluate to $Y_{\OTWO,lim}=0.128$.  This value is consistent with the measurements
+of Morehart, Zukoski and Kubota,\footnote{Morehart, J., Zukoski, E., and Kubota, T., ``Characteristics of Large Diffusion Flames
+Burning in a Vitiated Atmosphere,'' {\em Third International Symposium on Fire Safety
+Science}, Elsevier Science Publishers, pp.~575-583, 1991.} who measured the oxygen concentration at extinction of flames by dilution of air
+with combustion products. They found that flames self-extinguished at oxygen concentrations of 12.4~\% to 14.3~\%. Note that their results
+are expressed as volume, not mass, fractions. Beyler's chapter in the SFPE Handbook references other researchers who measured oxygen
+concentrations at extinction ranging from 12~\% to 15~\%. The default value in FDS is 15~\%.
+
+
+
+\chapter{Derivation of the Werner Wengle Wall Model}
+%\subsubsection{R. McDermott, BFRL}
+\label{app_WWderivation}
+
+To obtain (\ref{eqn_tauwturb}) we take the first off-wall value of the streamwise velocity to be
+\begin{equation}
+\label{eqn_meanu}
+\tilde{u} = \frac{1}{\Delta z} \int_0^{\Delta z} u(z) \,\mbox{d}z \,\mbox{,}
+\end{equation}
+and then substitute the WW profile for $u(z)$ and integrate.
+
+Let $z_m$ denote the dimensional distance from wall where $z^+ = 11.81$.  Equation (\ref{eqn_meanu}) becomes
+\begin{eqnarray}
+\label{eqn_uint}
+\tilde{u} &=& \frac{1}{\Delta z} \left[ \int_0^{z_m} u(z) \,\mbox{d}z + \int_{z_m}^{\Delta z} u(z) \,\mbox{d}z \right] \,\mbox{,} \nonumber\vspace{0.2cm}\\
+&=& \frac{1}{\Delta z} \left[ \int_0^{z_m} u^+ u^* \,\mbox{d}z + \int_{z_m}^{\Delta z} u^+ u^* \,\mbox{d}z \right] \,\mbox{,} \nonumber\vspace{0.2cm}\\
+&=& \frac{1}{\Delta z} \left[ \int_0^{z_m} z^+ u^* \,\mbox{d}z + \int_{z_m}^{\Delta z} A(z^+)^B u^* \,\mbox{d}z \right] \,\mbox{,} \nonumber\vspace{0.2cm}\\
+&=& \frac{1}{\Delta z} \left[ \int_0^{z_m} \frac{z}{\ell} u^* \,\mbox{d}z + \int_{z_m}^{\Delta z} A\left(\frac{z}{\ell}\right)^B u^* \,\mbox{d}z \right] \,\mbox{,} \nonumber\vspace{0.2cm}\\
+&=& \frac{1}{\Delta z} \left[ \int_0^{z_m} \frac{z\bar{\rho}u^*}{\bar{\mu}} u^* \,\mbox{d}z + \int_{z_m}^{\Delta z} A\left(\frac{z\bar{\rho}u^*}{\bar{\mu}}\right)^B u^* \,\mbox{d}z \right] \,\mbox{,} \nonumber\vspace{0.2cm}\\
+&=& \frac{1}{\Delta z} \left[ \underbrace{\int_0^{z_m} \frac{\tau_w}{\bar{\mu}} z\,\mbox{d}z}_{I} + \underbrace{\int_{z_m}^{\Delta z} A\left(\frac{\bar{\rho}}{\bar{\mu}}\right)^B \left(\frac{\tau_w}{\bar{\rho}}\right)^{\frac{1+B}{2}} z^B\,\mbox{d}z}_{II} \right] \,\mbox{.}
+\end{eqnarray}
+
+We will integrate $I$ and $II$ separately.  First, however, we must find a way to eliminate the unknown $z_m$.  To do this we equate (\ref{eqn_wwlam}) and (\ref{eqn_wwturb}) at the point where the viscous and power law regions intersect, i.e. $z^+ = 11.81 \equiv z_m^+ = z_m \bar{\rho}u^*/\bar{\mu}$.
+\begin{eqnarray}
+\label{eqn_derivezm}
+u^+(z_m^+) = A(z_m^+)^B &=& z_m^+ \nonumber\\
+A &=& (z_m^+)^{1-B} \nonumber\\
+A^{\frac{1}{1-B}} &=& z_m^+ = \frac{z_m\bar{\rho}u^*}{\bar{\mu}} \nonumber\\
+z_m &=& \frac{\bar{\mu}A^{\frac{1}{1-B}}}{\bar{\rho}u^*} \nonumber\\
+z_m &=& \frac{(\bar{\mu}/\bar{\rho})A^{\frac{1}{1-B}}}{\sqrt{\tau_w/\bar{\rho}}} \,\mbox{.}
+\end{eqnarray}
+We now have $z_m$ in terms of $\tau_w$ and otherwise known values.
+
+Integrating section $I$ of (\ref{eqn_uint}) we find
+\begin{eqnarray}
+\label{eqn_intI}
+\int_0^{z_m} \frac{\tau_w}{\bar{\mu}} z\,\mbox{d}z &=& \frac{\tau_w}{2\bar{\mu}} \left[ z^2 \right]_0^{z_m} \nonumber\\
+&=& \frac{\tau_w}{2\bar{\mu}} z_m^2 \nonumber\\
+&=& \frac{\tau_w}{2\bar{\mu}} \frac{(\bar{\mu}/\bar{\rho})^2A^{\frac{2}{1-B}}}{\tau_w/\bar{\rho}} \nonumber\\
+&=& \frac{\bar{\mu} A^{\frac{2}{1-B}}}{2\bar{\rho}} \,\mbox{.}
+\end{eqnarray}
+
+Integrating section $II$ yields
+\begin{eqnarray}
+\label{eqn_intII}
+\int_{z_m}^{\Delta z} A\left(\frac{\bar{\rho}}{\bar{\mu}}\right)^B \left(\frac{\tau_w}{\bar{\rho}}\right)^{\frac{1+B}{2}} z^B\,\mbox{d}z &=& \left\{A\left(\frac{\bar{\rho}}{\bar{\mu}}\right)^B \left(\frac{\tau_w}{\bar{\rho}}\right)^{\frac{1+B}{2}}\right\} \frac{1}{1+B} \left[z^{1+B}\right]_{z_m}^{\Delta z} \nonumber\\
+&=& \left\{ \quad \right\} \frac{1}{1+B} \left[{\Delta z}^{1+B} - {z_m}^{1+B}\right] \nonumber\\
+&=& \left\{ \quad \right\} \frac{1}{1+B} \left[{\Delta z}^{1+B} - \left(\frac{(\bar{\mu}/\bar{\rho})A^{\frac{1}{1-B}}}{\sqrt{\tau_w/\bar{\rho}}}\right)^{1+B}\right] \nonumber\\
+&=& \left\{ \frac{A}{1+B} \left(\frac{\bar{\rho}}{\bar{\mu}}\right)^B \left(\frac{\tau_w}{\bar{\rho}}\right)^{\frac{1+B}{2}} \right\} \left[{\Delta z}^{1+B} - \frac{(\bar{\mu}/\bar{\rho})^{1+B} A^{\frac{1+B}{1-B}}}{\left(\frac{\tau_w}{\bar{\rho}}\right)^{\frac{1+B}{2}}}\right] \nonumber\\
+&=& \frac{A}{1+B} \left(\frac{\bar{\rho}}{\bar{\mu}}\right)^B \left(\frac{\tau_w}{\bar{\rho}}\right)^{\frac{1+B}{2}} {\Delta z}^{1+B} - \frac{(\bar{\mu}/\bar{\rho})}{1+B} A^{\frac{2}{1-B}} \,\mbox{.}
+\end{eqnarray}
+
+Plugging (\ref{eqn_intI}) and (\ref{eqn_intII}) back into (\ref{eqn_uint}) gives
+\begin{eqnarray}
+\label{eqn_combineint}
+\tilde{u} &=& \frac{1}{\Delta z} \left[ \frac{\bar{\mu} A^{\frac{2}{1-B}}}{2\bar{\rho}} + \frac{A}{1+B} \left(\frac{\bar{\rho}}{\bar{\mu}}\right)^B \left(\frac{\tau_w}{\bar{\rho}}\right)^{\frac{1+B}{2}} {\Delta z}^{1+B} - \frac{(\bar{\mu}/\bar{\rho})}{1+B} A^{\frac{2}{1-B}} \right] \nonumber\\
+&=& \frac{1}{2} \left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right) A^{\frac{2}{1-B}} - \frac{1}{1+B} \left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right) A^{\frac{2}{1-B}} + \frac{A}{1+B} \left(\frac{\bar{\rho}\Delta z}{\bar{\mu}}\right)^B \left(\frac{\tau_w}{\bar{\rho}}\right)^{\frac{1+B}{2}} \,\mbox{.}
+\end{eqnarray}
+Rearranging for $\tau_w$ we find
+\begin{eqnarray}
+\label{eqn_rearrangefortauw}
+\left(\frac{\tau_w}{\bar{\rho}}\right)^{\frac{1+B}{2}} &=& \frac{1+B}{A}\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^B \left[ \left( \frac{1}{1+B} - \frac{1}{2}\right)\left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)A^{\frac{2}{1-B}} + \tilde{U} \right] \nonumber\\
+&=& \frac{1-B}{2} A^{\frac{1+B}{1-B}} \left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^{1+B}  + \frac{1+B}{A} \left(\frac{\bar{\mu}}{\bar{\rho}\Delta z }\right)^B \tilde{U} \nonumber\\
+\tau_w &=& \bar{\rho} \left[ \frac{1-B}{2} A^{\frac{1+B}{1-B}} \left(\frac{\bar{\mu}}{\bar{\rho}\Delta z}\right)^{1+B}  + \frac{1+B}{A} \left(\frac{\bar{\mu}}{\bar{\rho}\Delta z }\right)^B \tilde{u} \right]^{\frac{2}{1+B}} \,\mbox{,}
+\end{eqnarray}
+which corresponds to Eq. (9.46) in \cite{Sagaut:2001}.
+
+
+
+\chapter{Scalar Boundedness Correction}
+\label{app_boundedness}
+
+Second-order central differencing of the advection term in the scalar transport equation leads to dispersion errors (spurious wiggles) and these errors, if left untreated, can lead to scalar fields which are physically not realizable, e.g., negative densities.  To prevent this, FDS employs a boundedness correction to the scalar fields after the explicit transport step.  The correction, which we describe below, acts locally and effectively adds the minimum amount of diffusion necessary to prevent boundedness violations.  It is stressed that this correction does not make the scalar transport scheme total variation diminishing (TVD); it only serves to correct for boundedness. Similar schemes are employed by others (see e.g. \cite{Herrmann:2005}).
+
+By default, FDS employs a TVD transport scheme (Superbee \cite{Roe:1986} for LES and CHARM \cite{Zhou:1995} for DNS). These TVD schemes are applied during the transport step and each can be shown to be TVD in 1D under certain CFL constraints.  However, except for Godunov's scheme ({\ct FLUX\_LIMITER=1}), the TVD proofs do not extend to 3D \cite{Toro}.  Still, these schemes do a much better job than pure central differencing at mitigating dispersion error.  Note that even though TVD schemes are applied, by default FDS still runs through the boundedness check in case any small violations are not prevented by the flux limiter.
+
+\subsubsection{A simple case}
+
+For simplicity we start by considering a minimum boundedness violation for density in 1D.  That is, somewhere we have $\rho < \rho_{min}$.  Let $\rho_i^*$ denote the resulting density from the explicit transport step for cell $i$ with volume $V_i$.  Our goal is to find a correction $\delta \rho_i$ which:
+\begin{enumerate}[{(}a{)}]
+\item satisfies boundedness, $\rho_i = \rho_i^* + \delta \rho_i \ge \rho_{min}$ for all $i$
+\item conserves mass, $\sum_i \delta \rho_i V_i = 0$
+\item minimizes data variation, $\sum_i |\delta \rho_i|$ is minimized (i.e., we change the field as little as possible)
+\end{enumerate}
+
+As mentioned, the basic idea is to apply a linear smoothing operator $\cal L$ to the density field in regions where boundedness violations have occurred. So, the correction may be viewed as an explicit diffusion step applied to the uncorrected field with diffusion coefficient $c$:
+\begin{equation}
+\rho = \rho^* + c {\cal L} \rho^*
+\end{equation}
+To make matters simple, let us envision for the moment that the density in cell $i$ is negative but that the densities in cells $i-1$ and $i+1$ are both safely in bounds (this actually is what happens most of the time with dispersion error).  We therefore want a correction that takes mass away from $i-1$ and $i+1$ and moves it to $i$ to make up the deficit.  We know that for cell $i$ the minimum change in mass and therefore the minimum correction that will satisfy boundedness is $\delta \rho_i = \rho_{min} - \rho_i^*$.  The operator $\cal L$ takes the form of the standard discrete Laplacian.  The correction for cell $i$ is simply
+\begin{eqnarray}
+\label{eqn_rhocor}
+\rho_i &=& \rho_i^* + \delta \rho_i \nonumber\\
+&=& \rho_i^* + \rho_{min} - \rho_i^* \nonumber\\
+&=&  \rho_i^* + c_i (\rho_{i-1}^* - 2 \rho_i^* + \rho_{i+1}^*)
+\end{eqnarray}
+Comparing the second and third lines, we find that the diffusion coefficient is given by
+\begin{equation}
+\label{eqn_diffcoef}
+c_i = \frac{\rho_{min} - \rho_i^*}{\rho_{i-1}^* - 2 \rho_i^* + \rho_{i+1}^*}
+\end{equation}
+Based on the third line of (\ref{eqn_rhocor}), the correction for cell $i$ may be thought of as the sum to two mass fluxes from its neighboring cells.  The change in mass of cell $i$ is $\delta m_i = \delta \rho_i V_i$ and is balanced by changes in mass for cells $i-1$ and $i+1$:
+\begin{eqnarray}
+\delta m_{i-1} &=& - c_i (\rho_{i-1}^* - \rho_i^*) V_i \nonumber\\
+\delta m_{i+1} &=& - c_i (\rho_{i+1}^* - \rho_i^*) V_i \nonumber
+\end{eqnarray}
+In this case the sum of the mass corrections is zero, as desired:
+\begin{eqnarray}
+\sum_{j=i-1}^{i+1} \delta m_j &=& \delta \rho_{i-1} V_{i-1} + \delta \rho_i V_i + \delta \rho_{i+1}V_{i+1} \nonumber\\
+&=& - c_i (\rho_{i-1}^* - \rho_i^*) V_i + c_i (\rho_{i-1}^* - 2 \rho_i^* + \rho_{i+1}^*) V_i - c_i (\rho_{i+1}^* - \rho_i^*) V_i \nonumber\\
+&=& 0 \nonumber
+\end{eqnarray}
+
+\subsubsection{Realistic cases}
+
+The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for multi-dimensional aspects of the problem and for the possibility that neighboring cells may both be out of bounds.  Here again we examine the case of a minimum density boundedness violation. Consider the cell $n = \{i,j,k\}$ in a 3D flow with volume $V_n$ and density $\rho_n^*$ obtained from the transport scheme.  Let ${\sf N}$ denote the set of cells containing $n$ and its neighbors excluding diagonal neighbors (in other words, only include cells which share a face with $n$).  We want to correct any boundedness violations for the $n$th cell via
+\begin{equation}
+\label{eqn_rhocor2}
+\rho_n = \rho_n^* + \delta \rho_n
+\end{equation}
+Let $\delta \rho_{mn}$ denote the density change for cell $m$ in ${\sf N}$ (the neighborhood of $n$) due to a boundedness violation in $n$. We obtain the final correction for cell $n$ by
+\begin{equation}
+\label{eqn_sumdrho}
+\delta \rho_n = \sum_{m\in{\sf N}} \delta \rho_{nm}
+\end{equation}
+where
+\begin{equation}
+\label{eqn_rhomn}
+\delta \rho_{mn} = \left\{ \begin{array}{ll}  \displaystyle \max(0,\rho_{min} - \rho_n^*) & \mbox{if} \quad m=n  \\ \displaystyle -c_n( \max[\rho_{min},\rho_m^*] - \max[\rho_{min},\rho_n^*])\frac{V_n}{V_m} & \mbox{if} \quad m\ne n \end{array} \right.
+\end{equation}
+The smoothing parameter in (\ref{eqn_rhomn}) is obtained from
+\begin{equation}
+\label{eqn_realc}
+c_n = \frac{\max(0,\rho_{min} - \rho_n^*)}{ \sum_{s\in {\sf N},s\ne n} ( \max[\rho_{min},\rho_s^*] - \max[\rho_{min},\rho_n^*] )}
+\end{equation}
+
+
+\chapter{The Dynamic Smagorinsky Model}
+%\subsubsection{R. McDermott}
+\label{app_dynsmag}
+
+The ``subgrid-scale'' (SGS) stress, which accounts for momentum transport by unresolved eddies, emerges from decomposition of the advection term when deriving the LES equations.  It is defined as
+\begin{equation}
+\label{eqn_tau_sgs}
+\tau_{ij}^{sgs} \equiv \bar{\rho}(\widetilde{u_i u_j} - \tilde{u}_i \tilde{u}_j) \,\mbox{.}
+\end{equation}
+The deviatoric (trace free) part of the SGS stress is modeled by gradient diffusion in analogy with the viscous stress,
+\begin{equation}
+\label{eqn_tau_sgs_deviatoric}
+\tau_{ij}^{sgs} - \frac{1}{3}\tau_{kk}^{sgs} \equiv \tau_{ij}^{sgs,D} = -2 \mu_t \left(\tilde{S}_{ij} - \frac{1}{3}\tilde{S}_{kk}\delta_{ij}\right) =  -2 \mu_t \left(\tilde{S}_{ij} - \frac{1}{3} (\nabla\!\cdot\tilde{\mathbf{u}}) \delta_{ij}\right) \,\mbox{.}
+\end{equation}
+In FDS, the turbulent viscosity is obtained from the Smagorinsky model,
+\begin{equation}
+\label{eqn_mu_turb}
+\mu_t = \bar{\rho}(C_s \Delta)^2 |\tilde{S}| \,\mbox{,}
+\end{equation}
+where $C_s$ is the model constant and $\Delta$ is the filter width taken as the geometric average of the local mesh spacing; for example, in 3D, $\Delta = (\delta x \,\delta y \,\delta z)^{1/3}$.  Note that the quantity $(C_s \Delta)$ is the local ``mixing length'' and that $|\tilde{S}|$ provides the time scale for turbulent diffusion.
+
+In preparation for the dynamic procedure, we rewrite the model for the deviatoric SGS stress as
+\begin{equation}
+\label{eqn_tau_sgs_deviatoric2}
+\tau_{ij}^{sgs,D} = -2 (C_s \Delta)^2 \beta_{ij} \,\mbox{,}
+\end{equation}
+defining
+\begin{equation}
+\label{eqn_beta}
+\beta_{ij} = \bar{\rho} |\tilde{S}| \left(\tilde{S}_{ij} - \frac{1}{3} \tilde{S}_{kk} \delta_{ij} \right)  \,\mbox{.}
+\end{equation}
+
+
+\subsubsection{The Dynamic Procedure}
+
+We will now discuss the dynamic procedure for determining $C_s$, the Smagorinsky constant.  The procedure itself is a series of explicit filtering operations leading to a simple algebraic relationship for $C_s(\mathbf{x},t)$ (see Eq.~(\ref{eqn_lengthscale}) below).  The FDS implementation basically follows the works of Germano et al. \cite{Germano:1991}, Moin et al. \cite{Moin:1991}, and Pino Martin et al. \cite{PinoMartin:2000}.
+
+To derive the procedure, first, we apply a ``test'' filter of width $\hat{\Delta}>\Delta$ to the LES equations to obtain
+\begin{equation}
+\label{eqn_testfiltns}
+\frac{\partial \widehat{\overline{\rho u_i}}}{\partial t} + \frac{\partial \widehat{\overline{\rho u_i u_j}}}{\partial x_j} = -\frac{\partial \widehat{\overline{\sigma}}_{ij}}{\partial x_j} \,\mbox{,}
+\end{equation}
+where $\sigma_{ij}$ is the total stress tensor. The $\,\,\breve{}\,\,$ is adopted from Pino Martin et al.~\cite{PinoMartin:2000} for the Favre test filter, $\widehat{\overline{\rho}} \breve{ \widetilde{u} } \equiv \widehat{ \overline{ \rho u }}$, allowing us to rewrite Eq.~(\ref{eqn_testfiltns}) as
+\begin{eqnarray}
+\label{eqn_testfavrefiltns}
+\frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u}}_i}{\partial t} + \frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u_i u_j}}}{\partial x_j} &=& -\frac{\partial \widehat{\overline{\sigma}}_{ij}}{\partial x_j} \,\mbox{,} \nonumber\\
+\frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u}}_i}{\partial t} + \frac{\partial \widehat{\overline{\rho}} \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j}{\partial x_j} &=& -\frac{\partial \widehat{\overline{\sigma}}_{ij}}{\partial x_j} - \frac{\partial T_{ij}}{\partial x_j}\,\mbox{,}
+\end{eqnarray}
+where the ``subtest'' stress is defined as
+\begin{equation}
+\label{eqn_subteststress}
+T_{ij} \equiv \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) \,\mbox{.}
+\end{equation}
+
+The deviatoric part of the subtest stress is modeled as,
+\begin{equation}
+\label{eqn_devtest}
+T_{ij} - \frac{1}{3}T_{kk}\delta_{ij} \equiv T_{ij}^D = -2 \left( C_s \widehat{\Delta} \right)^2 \widehat{\overline{\rho}} |\breve{\widetilde{S}}|\left(\breve{\widetilde{S}}_{ij} - \frac{1}{3} \breve{\widetilde{S}}_{kk}\delta_{ij}\right)  \,\mbox{.}
+\end{equation}
+By applying the Germano identity \cite{Germano:1991}, we obtain the Leonard stress,
+\begin{eqnarray}
+L_{ij} = T_{ij} - \widehat{\tau_{ij}^{sgs}} &=& \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) - \widehat{ \overline{\rho} \left( \widetilde{u_i u_j} - \widetilde{u}_i \widetilde{u}_j \right)} \,\mbox{,} \nonumber\\
+&=&  \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) - \widehat{\overline{\rho}} \left( \breve{\widetilde{u_i u_j}} - \breve{\widetilde{u}_i \widetilde{u}_j} \right) \,\mbox{,} \nonumber \\
+\label{eqn_germano} &=&  \widehat{\overline{\rho}} \left( \breve{\widetilde{u}_i \widetilde{u}_j} - \breve{\widetilde{u}}_i \breve{\widetilde{u}}_j \right) \,\mbox{.}
+\end{eqnarray}
+Using the Favre definitions, Eq.~(\ref{eqn_germano}) may be rearranged to the form typically seen in the literature,
+\begin{eqnarray}
+L_{ij} &=&  \widehat{\overline{\rho} \frac{\overline{\rho u_i}}{\overline{\rho}} \frac{\overline{\rho u_j}}{\overline{\rho}}} - \widehat{\overline{\rho}} \frac{ \widehat{\overline{\rho u_i}}}{\widehat{\overline{\rho}}} \frac{\widehat{\overline{\rho u_j}}}{\widehat{\overline{\rho}}} \,\mbox{,} \nonumber \\
+&=& \widehat{\frac{\overline{\rho u_i}\, \overline{\rho u_j}}{\overline{\rho}}} - \frac{ \widehat{\overline{\rho u_i}} \,\widehat{\overline{\rho u_j}}}{\widehat{\overline{\rho}}} \,\mbox{,} \nonumber \\
+\label{eqn_leonard} &=& \widehat{\overline{\rho} \widetilde{u}_i \widetilde{u}}_j - \frac{ \widehat{\overline{\rho} \widetilde{u}}_i \widehat{\overline{\rho} \widetilde{u}}_j }{ \widehat{\overline{\rho}} } \,\mbox{.}
+\end{eqnarray}
+\LaTeX\,has a hard time covering the entire term with the ``wide'' version of the hat, but please note that the entire first term of Equation \ref{eqn_leonard} is test filtered. The Leonard term is computable from resolved LES values.
+
+If we now look at the \emph{model} for the Germano identity (the deviatoric part) we have,
+\begin{equation}
+\label{eqn_germanomodel}
+L_{ij}^D = T_{ij}^D - \widehat{\tau_{ij}^{sgs,D}} \approx - 2\left(C_s \widehat{\Delta}\right)^2 \widehat{\overline{\rho}} |\breve{\widetilde{S}}| \left( \breve{\widetilde{S}}_{ij} - \frac{1}{3} \breve{\widetilde{S}}_{kk} \delta_{ij} \right) +  2 \left(C_s \Delta \right)^2 \widehat{\beta}_{ij} \,\mbox{.}
+\end{equation}
+Note that the entire last term should be test filtered, since $C_s$ is not necessarily uniform.  However, without pulling the length scale out of the filter operation it is difficult to compute a value for $C_s$.
+
+We now rearrange (\ref{eqn_germanomodel}) to facilitate coding,
+\begin{equation}
+\label{eqn_codemodel}
+L_{ij}^D = \left(C_s \Delta\right)^2 M_{ij}^D \,\mbox{,}
+\end{equation}
+where,
+\begin{equation}
+\label{eqn_Mij}
+M_{ij}^D = 2\left(\widehat{\beta}_{ij} - \alpha \widehat{\overline{\rho}} |\breve{\widetilde{S}}| \left( \breve{\widetilde{S}}_{ij} - \frac{1}{3}\breve{\widetilde{S}}_{kk} \delta_{ij} \right) \right) \,\mbox{,}
+\end{equation}
+and $\alpha = (\widehat{\Delta}/\Delta)^2$.  For a test filter two times the grid width it appears we should have $\alpha = 4$.  However, as discussed by Lund \cite{Lund:1997}, the method of discrete quadrature significantly affects the results. If using the trapezoid rule, as we do in FDS, then $\alpha = 6$.
+
+We can now compute $L_{ij}$ and $M_{ij}^D$ from known LES quantities.  If we right multiply Eq.~(\ref{eqn_codemodel}) by $M_{ij}^D$, we obtain our desired result:
+\begin{equation}
+\label{eqn_lengthscale}
+\left(C_s \Delta\right)^2 = \frac{ L_{ij}^D M_{ij}^D }{ M_{ij}^D M_{ij}^D } \,\mbox{.}
+\end{equation}
+
+\subsubsection{Notes on implementation}
+
+\begin{enumerate}
+\item
+It is unnecessary to compute the deviatoric part of the Leonard term.  This is because, fortunately, $L_{ij} M_{ij}^D = L_{ij}^D M_{ij}^D$.  Here's the proof (thanks to Stas Borodai of Reaction Engineering International):
+\begin{eqnarray}
+L_{ij} M_{ij}^D &=& L_{ij} \left( M_{ij} - \frac{1}{3}M_{kk}\delta_{ij} \right) \,\mbox{,} \nonumber \\
+&=& L_{ij} M_{ij} - \frac{1}{3} L_{ij}\delta_{ij} M_{kk} \,\mbox{,} \nonumber \\
+\label{eqn_LMD} &=& L_{ij} M_{ij} - \frac{1}{3} L_{qq} M_{kk} \,\mbox{.}
+\end{eqnarray}
+\begin{eqnarray}
+L_{ij}^D M_{ij}^D &=& \left( L_{ij} - \frac{1}{3}L_{qq}\delta_{ij} \right) \left( M_{ij} - \frac{1}{3}M_{kk}\delta_{ij} \right) \,\mbox{,} \nonumber \\
+&=& L_{ij} M_{ij} - \frac{1}{3} L_{ij}\delta_{ij} M_{kk} - \frac{1}{3} M_{ij}\delta_{ij} L_{qq} + \frac{1}{9} \delta_{ij} \delta_{ij} L_{qq} M_{kk} \,\mbox{,} \nonumber \\
+&=& L_{ij} M_{ij} - \frac{1}{3} M_{kk} L_{qq} - \frac{1}{3} L_{qq} M_{kk} + \frac{1}{3} M_{kk} L_{qq} \,\mbox{,} \nonumber \\
+\label{eqn_LDMD} &=& L_{ij} M_{ij} - \frac{1}{3} L_{qq} M_{kk} \,\mbox{.}
+\end{eqnarray}
+Equations (\ref{eqn_LMD}) and (\ref{eqn_LDMD}) are equal and so there is no need to go to the trouble of subtracting the isotropic part out of $L_{ij}$.
+\item
+The length scale should be averaged over some homogeneous region to maintain stability,
+\begin{equation}
+\label{eqn_finallengthscale}
+\left(C_s \Delta\right)^2 = \frac{ \langle L_{ij} M_{ij}^D \rangle}{ \langle M_{ij}^D M_{ij}^D \rangle } \,\mbox{.}
+\end{equation}
+In FDS, the brackets denote a spatial average over the test filter width.  If the denominator is zero, the constant is set to zero.
+\item
+It is common practice to ``clip'' the eddy viscosity.  In theory, a negative value of the eddy viscosity produces backscatter of energy from unresolved to resolved motions.  If this sounds dangerous from a stability perspective, it is.  The simple solution is to set $C_s = 0$, if $\langle L_{ij}M_{ij}^D \rangle < 0$.
+\end{enumerate}
