@@ -1,7 +1,15 @@
 #!/bin/bash -f
 scratchdir=$SVNROOT/Utilities/Scripts/tmp
-dir=$1
-infile=$2
+nthreads=$1
+dir=$2
+infile=$3
+nprocs=8
+nnodes=$(echo "($nthreads-1)/$nprocs+1" | bc)
+if test $nnodes -le 0
+then
+nnodes=1
+fi
+
 
 fulldir=$BASEDIR/$dir
 in=$infile.fds
@@ -35,16 +43,24 @@ if [ -e $outlog ]; then
 fi
 cat << EOF > $scriptfile
 #!/bin/bash -f
+#PBS -N VV_$infile(MPI)
+#PBS -l nodes=$nnodes:ppn=$nprocs
+#PBS -S /bin/bash
+#PBS -e $outerr
+#PBS -o $outlog
+#\$ -N VV_$infile(MPI)
+#\$ -l nodes=$nnodes:ppn=$nprocs
 #\$ -S /bin/bash
-#\$ -N VV_$infile -e $outerr -o $outlog
-#PBS -N VV_$infile -e $outerr -o $outlog
+#\$ -e $outerr
+#\$ -o $outlog
+
 cd $fulldir
 
 echo Time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 
-$FDS $in 
+mpirun -np $nthreads $FDS $in 
 EOF
 chmod +x $scriptfile
 echo Running $in 
