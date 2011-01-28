@@ -4631,72 +4631,6 @@ and after 10~minutes, the flames can be seen flowing out.
 
 \newpage
 
-\subsubsection{Example Case: cable\_tray}
-
-A common combustible in industrial settings are power, control, and
-instrument cables. The cables may be bundled in a variety of conduits; the most
-common of which is a ladder-like ``tray.'' From the point of view of FDS,
-the pile of cables in a tray is a composite of a variety of plastics, insulators,
-and metal, usually copper. Here is one way to describe a tray of cables:
-
-\footnotesize
-\begin{verbatim}
-&MATL ID                    = 'PLASTIC'
-      CONDUCTIVITY          = 0.2
-      SPECIFIC_HEAT         = 1.5
-      DENSITY               = 1500.
-      N_REACTIONS           = 1
-      HEAT_OF_REACTION      = 3000.
-      HEAT_OF_COMBUSTION    = 25000.
-      REFERENCE_TEMPERATURE = 400.
-      NU_FUEL               = 1.0 /
-
-&MATL ID            = 'COPPER'
-      SPECIFIC_HEAT = 0.38
-      CONDUCTIVITY  = 387.
-      DENSITY       = 8940.   /
-
-&SURF ID                        = 'Loose Cable'
-      COLOR                     = 'IVORY BLACK'
-      MATL_ID(1,1:2)            = 'PLASTIC','COPPER'
-      MATL_MASS_FRACTION(1,1:2) = 0.4,0.6
-      BACKING                   = 'EXPOSED'
-      THICKNESS                 = 0.02 /
-
-&OBST XB=-2.00, 2.00,-0.14, 0.14, 0.51, 0.55, SURF_ID='Loose Cable' /
-
-&OBST XB=-2.00, 2.00,-0.15,-0.15, 0.50, 0.60, SURF_ID='SHEET METAL' / Tray Side
-&OBST XB=-2.00, 2.00, 0.15, 0.15, 0.50, 0.60, SURF_ID='SHEET METAL' / Tray Side
-&OBST XB=-1.95,-1.90,-0.15, 0.15, 0.50, 0.50, SURF_ID='SHEET METAL' / Rung
-&OBST XB=-1.60,-1.55,-0.15, 0.15, 0.50, 0.50, SURF_ID='SHEET METAL' / Rung
-...
-&OBST XB= 1.90, 1.95,-0.15, 0.15, 0.50, 0.50, SURF_ID='SHEET METAL' / Rung
-\end{verbatim} \normalsize
-
-\noindent
-The pile of cables is assumed to be a solid slab, 28~cm wide and 2~cm
-deep. The tray is slightly wider and deeper, and because it is listed second in
-the input file, its surface properties take precedence wherever the
-cable slab and tray coincide. The mesh cells in this example are 5~cm on a side, but the
-heat transfer within the cable slab are governed by the 2~cm {\ct THICKNESS}.
-The slab is 60~\% copper, by mass. Note that we are not assuming multiple
-layers in this example -- the slab is a single layer composite of plastic
-and copper. The plastic burns at about 400~$^\circ$, but the copper remains. Thus,
-the cable does not ``burn away.''
-
-The point of this test case is merely to propose a simple model of flame
-spread along a tray of assorted cable. Detailed thermo-physical property data for
-industrial-grade cable is usually not available, and even if it were, it
-would probably not improve upon the given model. The properties given in this example
-are almost completely fabricated. What is important here are the
-{\ct HEAT\_OF\_REACTION} and {\ct REFERENCE\_TEMPERATURE}, obtained in
-most cases by a bench-scale measurement device like the cone calorimeter.
-
-
-
-
-
-
 
 
 
@@ -9273,7 +9207,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 \endhead
 {\ct ADD}                                       & Average Droplet Diameter                          & $\mu$m         & D,I,P,S      \\ \hline
 {\ct ADT}                                       & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
-%{\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
+{\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
 {\ct DROPLET PHASE}                             & Orientation of droplet                            &                & PA           \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
