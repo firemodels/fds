@@ -39,7 +39,8 @@ if ! [ -e $fds ]; then
   echo "The FDS program name, $fds, does not exit. Run aborted."
   exit
 fi
-if ! [ -e $outlog ]; then
+if [ -e $outlog ]; then
+  echo "Removing log file: $outlog"
   rm $outlog
 fi
 
@@ -63,5 +64,5 @@ mpirun -np $nthreads $fds $in
 EOF
 chmod +x $scriptfile
 echo Running $in 
-#qsub $scriptfile
-#rm $scriptfile
+qsub $scriptfile
+rm $scriptfile
