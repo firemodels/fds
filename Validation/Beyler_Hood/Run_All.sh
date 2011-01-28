@@ -4,7 +4,8 @@ export SVNROOT=`pwd`/../..
 export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
 export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
 export BASEDIR=`pwd`
-export INDIR=FDS_Input_Files
+export INDIR=Current_Results
+
 # uncomment following line to stop all cases
 # export STOPFDS=1
 
