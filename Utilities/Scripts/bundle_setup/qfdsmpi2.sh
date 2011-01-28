@@ -45,6 +45,7 @@ if ! [ -e $fds ]; then
   exit
 fi
 if ! [ -e $outlog ]; then
+  echo "Removing log file: $outlog"
   rm $outlog
 fi
 
