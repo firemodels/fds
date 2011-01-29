@@ -5216,7 +5216,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
                   EXIT
                ENDIF
                IF (NNN==N_SPECIES) THEN
-                  WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: Problem with SURF:',TRIM(SF%ID),' SPEC ',&
+                  WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Problem with SURF:',TRIM(SF%ID),' SPEC ',&
                      TRIM(SPEC_ID(NN)),' not found'
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
