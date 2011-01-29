@@ -17,12 +17,13 @@ fi
 nthreads=$1
 fds=$2
 in=$3
-nprocs=8
-nnodes=$(echo "($nthreads-1)/$nprocs+1" | bc)
-if test $nnodes -le 0
+if test $nthreads -le 0
 then
-nnodes=1
+echo "Number of threads specified is $nthreads . Must be bigger than 0."
+exit
 fi
+nnodes=$(echo "($nthreads-1)/8+1" | bc)
+nprocs=$(echo "($nthreads-1)/$nnodes+1" | bc)
 
 infile=${in%.*}
 fulldir=`pwd`

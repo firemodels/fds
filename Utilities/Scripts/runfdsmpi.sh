@@ -1,15 +1,33 @@
 #!/bin/bash -f
+EXPECTED_ARGS=3
+
+if [ $# -ne $EXPECTED_ARGS ]
+then
+  echo "Usage: runfdsmpi.sh nthreads dir casename"
+  echo ""
+  echo "Runs a parallel FDS case on a Linux cluster using the "
+  echo "PBS/SGE qsub batch queuing command"
+  echo ""
+  echo "nthreads - number of threads (usually number of &mesh lines)"
+  echo "     dir - directory containing FDS case"
+  echo "casename - fds case (without .fds extension)"
+  echo
+  exit
+fi
+
 scratchdir=$SVNROOT/Utilities/Scripts/tmp
 nthreads=$1
 dir=$2
 infile=$3
-nprocs=8
-nnodes=$(echo "($nthreads-1)/$nprocs+1" | bc)
-if test $nnodes -le 0
-then
-nnodes=1
-fi
 
+if test $nthreads -le 0
+then
+echo "Number of threads specified is $nthreads . Must be bigger than 0."
+echo "Run aborted."
+exit
+fi
+nnodes=$(echo "($nthreads-1)/8+1" | bc)
+nprocs=$(echo "($nthreads-1)/$nnodes+1" | bc)
 
 fulldir=$BASEDIR/$dir
 in=$infile.fds
