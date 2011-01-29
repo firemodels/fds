@@ -453,7 +453,7 @@ CASE(.TRUE.) PREDICTOR_STEP
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  YYS(I,J,K,N) = OMDTRATIO*RHO(I,J,K) *YY(I,J,K,N) + DTRATIO*RHOS(I,J,K)*YYS(I,J,K,N)
+                  YYS(I,J,K,N) = OMDTRATIO*RHO(I,J,K)*YY(I,J,K,N) + DTRATIO*RHOS(I,J,K)*YYS(I,J,K,N)
                ENDDO
            ENDDO
          ENDDO
