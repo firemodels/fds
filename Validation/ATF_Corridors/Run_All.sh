@@ -12,7 +12,7 @@ export INDIR=Current_Results
 # uncomment following line to stop all cases
 # export STOPFDS=1
 
-cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR
+/bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
 $RUNFDSMPI 3 $INDIR ATF_Corridors_050_kW
 $RUNFDSMPI 3 $INDIR ATF_Corridors_100_kW
