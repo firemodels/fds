@@ -135,7 +135,7 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
             DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
             DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
 
-            IF (VREMAN_EDDY_VISCOSITY) THEN
+            VREMAN_IF: IF (VREMAN_EDDY_VISCOSITY) THEN
 
                ! A. W. Vreman. An eddy-viscosity subgrid-scale model for
                ! turbulent shear flow: Algebraic theory and applications. Phys.
@@ -175,7 +175,7 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
                MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*NU_EDDY
                CYCLE
             
-            ENDIF
+            ENDIF VREMAN_IF
 
             S12 = 0.5_EB*(DUDY+DVDX)
             S13 = 0.5_EB*(DUDZ+DWDX)
