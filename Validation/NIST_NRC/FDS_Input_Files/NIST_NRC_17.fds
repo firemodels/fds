@@ -13,8 +13,7 @@
 &ZONE LEAK_AREA(0)=0.0833 /
 
 &RADI RADIATIVE_FRACTION=0.40 /
-&REAC ID         = 'TOLUENE'
-      FUEL='TOLUENE'
+&REAC FUEL       = 'TOLUENE'
       FYI        = 'Toluene, C_7 H_8'
       C          = 7.
       H          = 8.
@@ -27,7 +26,7 @@
 &OBST XB= 9.8, 9.8, 3.1, 4.1, 0.0, 0.1, SURF_ID='STEEL SHEET' /
 &OBST XB=11.8,11.8, 3.1, 4.1, 0.0, 0.1, SURF_ID='STEEL SHEET' /
 
-&PART ID='toluene droplets',SPEC_ID='N-HEPTANE',DENSITY=871.,
+&PART ID='toluene droplets',SPEC_ID='TOLUENE',DENSITY=871.,
       QUANTITIES(1:2)='DROPLET_DIAMETER','DROPLET_TEMPERATURE',
       DIAMETER=500.,HEAT_OF_COMBUSTION=40300.,
       SAMPLING_FACTOR=1 /
