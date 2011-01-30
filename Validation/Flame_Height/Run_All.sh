@@ -9,7 +9,7 @@ export INDIR=Current_Results
 # uncomment following line to stop all cases
 # export STOPFDS=1
 
-cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR
+/bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
 $RUNFDS $INDIR Qs=10000_RI=05 
 $RUNFDS $INDIR Qs=1000_RI=05  

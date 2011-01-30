@@ -12,6 +12,8 @@ export INDIR=Current_Results
 # uncomment following line to stop all cases
 #export STOPFDS=1
 
+/bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
+
 $RUNFDSMPI 2 $INDIR  NBS_100A
 $RUNFDSMPI 2 $INDIR  NBS_100O
 $RUNFDSMPI 3 $INDIR  NBS_100Z
