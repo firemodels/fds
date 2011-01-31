@@ -24,11 +24,18 @@ endif
 
 echo Using Fortran located at: $IFORT_COMPILER11
 source $IFORT_COMPILER11/bin/ifortvars.csh $platform
+set mpibin=
 if ("$platform" == "ia32") then
-set path = (/usr/local/lam7i/bin $path)
+set mpibin = /shared/openmpi_32/bin
 endif
 if ("$platform" == "intel64") then
-set path = (/usr/local/lam7i_64/bin $path)
+if ($?INFINIBAND) then
+set mpibin = /shared/openmpi_ib64/bin
+else
+set mpibin = /shared/openmpi_64/bin
 endif
+endif
+echo "Using MPI distribution located at:$mpibin"
+set path = ($mpibin $path)
 
 exit 0

@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 EXPECTED_ARGS=3
 
 if [ $# -ne $EXPECTED_ARGS ]
@@ -60,7 +60,7 @@ if [ -e $outlog ]; then
  rm $outlog
 fi
 cat << EOF > $scriptfile
-#!/bin/bash -f
+#!/bin/bash
 #PBS -N VV_$infile(MPI)
 #PBS -l nodes=$nnodes:ppn=$nprocs
 #PBS -S /bin/bash
@@ -77,8 +77,8 @@ cd $fulldir
 echo Time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
-
-mpirun -np $nthreads $FDS $in 
+export LD_LIBRARY_PATH=$MPIDIST/lib:$FORTLIB:$LD_LIBRARY_PATH
+$MPIDIST/bin/mpirun -np $nthreads $FDS $in 
 EOF
 chmod +x $scriptfile
 echo Running $in 
