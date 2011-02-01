@@ -67,7 +67,7 @@ cat << EOF > $scriptfile
 #PBS -e $outerr
 #PBS -o $outlog
 #\$ -N VV_$infile(MPI)
-#\$ -l nodes=$nnodes:ppn=$nprocs
+#\$ -pe mpi $nthreads
 #\$ -S /bin/bash
 #\$ -e $outerr
 #\$ -o $outlog
