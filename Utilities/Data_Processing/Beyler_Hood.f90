@@ -52,16 +52,16 @@ OPEN(12,FILE='Beyler_Hood_FDS.csv')
 WRITE(12,'(a)') "FDS Q (5 cm),FDS CO2 (5 cm),FDS CO (5 cm),FDS O2 (5 cm),FDS C3H8 (5 cm),FDS Q (-10 cm),FDS CO2 (-10 cm)," // &
             "FDS CO (-10 cm),FDS O2 (-10 cm),FDS C3H8 (-10 cm),FDS Q (0 cm),FDS CO2 (0 cm),FDS CO (0 cm),FDS O2 (0 cm)," // &
             "FDS C3H8 (0 cm)"
-WRITE(12,"(14(e9.3,','),e9.3)")  7.92,co2ave(1),coave(1),o2ave(1),fave(1), &
+WRITE(12,"(14(e10.3,','),e10.3)")  7.92,co2ave(1),coave(1),o2ave(1),fave(1), &
                                  8.21,co2ave(5),coave(5),o2ave(5),fave(5), & 
                                  8.21,co2ave(9),coave(9),o2ave(9),fave(9)
-WRITE(12,"(14(e9.3,','),e9.3)") 13.53,co2ave(2),coave(2),o2ave(2),fave(2), &
+WRITE(12,"(14(e10.3,','),e10.3)") 13.53,co2ave(2),coave(2),o2ave(2),fave(2), &
                                 13.53,co2ave(6),coave(6),o2ave(6),fave(6), &
                                 13.53,co2ave(10),coave(10),o2ave(10),fave(10)
-WRITE(12,"(14(e9.3,','),e9.3)") 18.25,co2ave(3),coave(3),o2ave(3),fave(3), &
+WRITE(12,"(14(e10.3,','),e10.3)") 18.25,co2ave(3),coave(3),o2ave(3),fave(3), &
                                 18.25,co2ave(7),coave(7),o2ave(7),fave(7), &
                                 18.25,co2ave(11),coave(11),o2ave(11),fave(11)
-WRITE(12,"(14(e9.3,','),e9.3)") 24.3,co2ave(4),coave(4),o2ave(4),fave(4), &
+WRITE(12,"(14(e10.3,','),e10.3)") 24.3,co2ave(4),coave(4),o2ave(4),fave(4), &
                                 24.3,co2ave(8),coave(8),o2ave(8),fave(8), &
                                 31.52,co2ave(12),coave(12),o2ave(12),fave(12)                        
 CLOSE (12)
