@@ -36,8 +36,8 @@ outlog=$fulldir/$infile.log
 stopfile=$infile.stop
 
 scriptfile=$scratchdir/script.$$
-if ! [ -e $FDS ];  then
-  echo "The file $FDS does not exit. Run aborted"
+if ! [ -e $FDSMPI ];  then
+  echo "The file $FDSMPI does not exit. Run aborted"
   exit
 fi
 if ! [ -d $fulldir ]; then
@@ -78,7 +78,7 @@ echo Time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 export LD_LIBRARY_PATH=$MPIDIST/lib:$FORTLIB:$LD_LIBRARY_PATH
-$MPIDIST/bin/mpirun -np $nthreads $FDS $in 
+$MPIDIST/bin/mpirun -np $nthreads $FDSMPI $in 
 EOF
 chmod +x $scriptfile
 echo Running $in 

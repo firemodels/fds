@@ -172,6 +172,15 @@ mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) $(LFLAGS)
 
+mpi_intel_linux_64ib : FFLAGS = -m64 -O3 -vec_report0
+mpi_intel_linux_64ib : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
+mpi_intel_linux_64ib : LFLAGS = -shared-intel
+mpi_intel_linux_64ib : FCOMPL = mpif77
+mpi_intel_linux_64ib : CCOMPL = icc
+mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
+mpi_intel_linux_64ib : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) $(LFLAGS)
+
 intel_linux_32_db : FFLAGS = -m32 -check all -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0 -ftrapuv -debug full
 intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend -vec_report0
 intel_linux_32_db : FCOMPL = ifort
