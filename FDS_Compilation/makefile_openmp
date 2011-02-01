@@ -93,7 +93,7 @@ openmp_intel_win_32 : FCOMPL = ifort
 openmp_intel_win_32 : CCOMPL = icl
 openmp_intel_win_32 : FOPENMPFLAGS = /Qopenmp /Qopenmp-link:static
 openmp_intel_win_32 : FOPTIMIZATIONFLAGS = -O2
-openmp_intel_win_32 : obj = fds5_openmp
+openmp_intel_win_32 : obj = fds_openmp
 openmp_intel_win_32 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) /F100000000 $(objwin_serial)
 
@@ -105,7 +105,7 @@ openmp_mpi_intel_win_32 : FOPENMPFLAGS = /Qopenmp /Qopenmp-link:static
 openmp_mpi_intel_win_32 : FOPTIMIZATIONFLAGS = -O2
 openmp_mpi_intel_win_32 : FCOMPL = ifort
 openmp_mpi_intel_win_32 : CCOMPL = icl
-openmp_mpi_intel_win_32 : obj = fds5_openmp_mpi
+openmp_mpi_intel_win_32 : obj = fds_openmp_mpi
 openmp_mpi_intel_win_32 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) /F100000000 $(objwin_mpi) $(MPILIB)
 
@@ -115,7 +115,7 @@ openmp_intel_win_64 : FCOMPL = ifort
 openmp_intel_win_64 : CCOMPL = cl
 openmp_intel_win_64 : FOPENMPFLAGS = /Qopenmp /Qopenmp-link:static
 openmp_intel_win_64 : FOPTIMIZATIONFLAGS = -O2
-openmp_intel_win_64 : obj = fds5_win_64_openmp
+openmp_intel_win_64 : obj = fds_win_64_openmp
 openmp_intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) /F100000000 $(objwin_serial)
 
@@ -127,7 +127,7 @@ openmp_intel_linux_32 : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_intel_linux_32 : FOPTIMIZATIONFLAGS = -O3
 openmp_intel_linux_32 : FCOMPL = ifort
 openmp_intel_linux_32 : CCOMPL = icc
-openmp_intel_linux_32 : obj = fds5_openmp_intel_linux_32
+openmp_intel_linux_32 : obj = fds_openmp_intel_linux_32
 openmp_intel_linux_32 : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
@@ -138,7 +138,7 @@ openmp_intel_linux_32_db : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_intel_linux_32_db : FOPTIMIZATIONFLAGS = -O0
 openmp_intel_linux_32_db : FCOMPL = ifort
 openmp_intel_linux_32_db : CCOMPL = icc
-openmp_intel_linux_32_db : obj = fds5_openmp_intel_linux_32_db
+openmp_intel_linux_32_db : obj = fds_openmp_intel_linux_32_db
 openmp_intel_linux_32_db : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
@@ -148,7 +148,7 @@ openmp_intel_linux_32_tcheck : FOPENMPFLAGS = -openmp -tcheck
 openmp_intel_linux_32_tcheck : FOPTIMIZATIONFLAGS = -O0
 openmp_intel_linux_32_tcheck : FCOMPL = ifort
 openmp_intel_linux_32_tcheck : CCOMPL = icc
-openmp_intel_linux_32_tcheck : obj = fds5_openmp_intel_linux_32_tcheck
+openmp_intel_linux_32_tcheck : obj = fds_openmp_intel_linux_32_tcheck
 openmp_intel_linux_32_tcheck : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
@@ -158,7 +158,7 @@ openmp_mpi_intel_linux_32 : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_mpi_intel_linux_32 : FOPTIMIZATIONFLAGS = -O3
 openmp_mpi_intel_linux_32 : FCOMPL = mpif90 -fc=ifort
 openmp_mpi_intel_linux_32 : CCOMPL = icc
-openmp_mpi_intel_linux_32 : obj = fds5_openmp_mpi_intel_linux_32
+openmp_mpi_intel_linux_32 : obj = fds_openmp_mpi_intel_linux_32
 openmp_mpi_intel_linux_32 : setup $(obj_mpi)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
@@ -169,7 +169,7 @@ openmp_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_intel_linux_64 : FOPTIMIZATIONFLAGS = -O3
 openmp_intel_linux_64 : FCOMPL = ifort
 openmp_intel_linux_64 : CCOMPL = icc
-openmp_intel_linux_64 : obj = fds5_openmp_intel_linux_64
+openmp_intel_linux_64 : obj = fds_openmp_intel_linux_64
 openmp_intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
@@ -180,7 +180,7 @@ openmp_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_intel_linux_64_db : FOPTIMIZATIONFLAGS = -O0
 openmp_intel_linux_64_db : FCOMPL = ifort
 openmp_intel_linux_64_db : CCOMPL = icc
-openmp_intel_linux_64_db : obj = fds5_openmp_intel_linux_64_db
+openmp_intel_linux_64_db : obj = fds_openmp_intel_linux_64_db
 openmp_intel_linux_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
@@ -190,7 +190,7 @@ openmp_intel_linux_64_tcheck : FOPENMPFLAGS = -openmp -tcheck
 openmp_intel_linux_64_tcheck : FOPTIMIZATIONFLAGS = -O0
 openmp_intel_linux_64_tcheck : FCOMPL = ifort
 openmp_intel_linux_64_tcheck : CCOMPL = icc
-openmp_intel_linux_64_tcheck : obj = fds5_openmp_intel_linux_64_tcheck
+openmp_intel_linux_64_tcheck : obj = fds_openmp_intel_linux_64_tcheck
 openmp_intel_linux_64_tcheck : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
@@ -200,7 +200,7 @@ openmp_mpi_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_mpi_intel_linux_64 : FOPTIMIZATIONFLAGS = -O3
 openmp_mpi_intel_linux_64 : FCOMPL = mpif90 -fc=ifort
 openmp_mpi_intel_linux_64 : CCOMPL = icc
-openmp_mpi_intel_linux_64 : obj = fds5_openmp_mpi_intel_linux_64
+openmp_mpi_intel_linux_64 : obj = fds_openmp_mpi_intel_linux_64
 openmp_mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
