@@ -7,7 +7,7 @@
 # Note: you only need to define those MPI variables (if any) for
 #       which you wish to build FDS versions for.
 
-export IFORT_COMPILER11=/opt/intel/Compiler/11.1/069
+export IFORT_COMPILER11=/opt/intel/composerxe
 export MPIDIST32=/shared/openmpi_32
 export MPIDIST64=/shared/openmpi_64
 export MPIDIST64IB=/shared/openmpi_64ib
