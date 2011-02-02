@@ -230,13 +230,14 @@ intel_osx_32 : obj = fds_intel_osx_32
 intel_osx_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_32 : FFLAGS  = -O2 -m32 -heap-arrays -static-intel -L/opt/openmpi32/lib -vec_report0
+mpi_intel_osx_32 : FFLAGS  = -O2 -m32 -heap-arrays -vec_report0
 mpi_intel_osx_32 : CFLAGS  = -O2 -m32 -Dpp_noappend -Dpp_OSX -vec_report0
-mpi_intel_osx_32 : FCOMPL  = /opt/openmpi32/bin/mpif77
+mpi_intel_osx_32 : LFLAGS  = -L$(MPIDIST32)/lib -static-intel
+mpi_intel_osx_32 : FCOMPL  = $(MPIDIST32)/bin/mpif77
 mpi_intel_osx_32 : CCOMPL  = icc
 mpi_intel_osx_32 : obj = fds_mpi_intel_osx_32
 mpi_intel_osx_32 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
 intel_osx_32_db : FFLAGS = -check -warn unused -O0 -m32 -g -traceback -fpe:0 -fltconsistency -FR -WB -vec_report0
 intel_osx_32_db : CFLAGS = -O0 -m32 -g -traceback -Dpp_noappend -Dpp_OSX -vec_report0
@@ -263,13 +264,14 @@ intel_osx_64 : obj = fds_intel_osx_64
 intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -static-intel -L/opt/openmpi64/lib -vec_report0
+mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -vec_report0
 mpi_intel_osx_64 : CFLAGS  = -O2 -m64 -Dpp_noappend -Dpp_OSX -vec_report0
-mpi_intel_osx_64 : FCOMPL  = /opt/openmpi64/bin/mpif77
+mpi_intel_osx_64 : LFLAGS  = -L$(MPIDIST64)/lib -static-intel
+mpi_intel_osx_64 : FCOMPL  = $(MPIDIST64)/bin/mpif77
 mpi_intel_osx_64 : CCOMPL  = icc
 mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
 mpi_intel_osx_64 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
 intel_osx_64_db : FFLAGS = -check -warn unused -O0 -m64 -g -traceback -save-temps -fpe:0 -fltconsistency -fp-stack-check -FR -WB -vec_report0
 intel_osx_64_db : CFLAGS = -O0 -g -traceback -m64 -Dpp_noappend -Dpp_OSX -vec_report0
