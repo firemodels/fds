@@ -1,8 +1,5 @@
 #!/bin/bash
 
-platform=$1
-option=$2
-
 # To build FDS and/or run the various VV scripts do the following:
 # 1.  Copy SET_FDSENV.sh to SET_MYFDSENV.sh
 # 2.  In SET_MYFDSENV.sh edit lines below defining locations of
@@ -22,6 +19,9 @@ export LIB32=/shared/LIB32
 # shouldn't need to edit any lines below
 
 # --------- define environment for building FDS ------------------
+
+platform=$1
+option=$2
 
 if [ "$option" == "build" ]
 then
