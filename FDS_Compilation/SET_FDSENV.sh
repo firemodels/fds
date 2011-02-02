@@ -14,6 +14,9 @@ export IFORT_COMPILER11=/opt/intel/composerxe-2011.1.107/
 export MPIDIST32=/shared/openmpi_32
 export MPIDIST64=/shared/openmpi_64
 export MPIDIST64IB=/shared/openmpi_64ib
+export LIB64=/shared/LIB64
+export LIB32=/shared/LIB32
+
 
 #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # shouldn't need to edit any lines below
@@ -49,6 +52,7 @@ then
 export FDS=$SVNROOT/FDS_Compilation/intel_linux_64_ib/fds_intel_linux_64_ib
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64_ib/fds_mpi_intel_linux_64_ib
 export MPIDIST=$MPIDIST64IB
+export FORTLIB=$LIB64
 fi
 
 if [ "$platform" == "intel64" ]
@@ -56,6 +60,7 @@ then
 export FDS=$SVNROOT/FDS_Compilation/mpi_intel_linux/fds_intel_linux_64
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
 export MPIDIST=$MPIDIST64
+export FORTLIB=$LIB64
 fi
 
 if [ "$platform" == "ia32" ]
@@ -63,6 +68,7 @@ then
 export FDS=$SVNROOT/FDS_Compilation/intel_linux_32/fds_intel_linux_32
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_32/fds_mpi_intel_linux_32
 export MPIDIST=$MPIDIST32
+export FORTLIB=$LIB32
 fi
 export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
 fi
@@ -83,5 +89,6 @@ echo "platform: $platform"
 echo "serial FDS: $FDS"
 echo "parallel FDS: $FDSMPI"
 echo "MPI distribution: $MPIDIST"
+echo "Runtime libraries: $FORTLIB"
 echo ""
 fi
