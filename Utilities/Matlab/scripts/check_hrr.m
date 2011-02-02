@@ -18,7 +18,7 @@ DDIR = '../../Validation/Flame_Height/FDS_Output_Files/';
 M = csvread([DDIR,'box_height.csv'],1,0);
 Qs = M(:,1);
 Q = M(:,2);
-RI = {'_RI=05','','_RI=20'};
+RI = {'_RI=05','_RI=10','_RI=20'};
 QI = {'p1','p2','p5','1','2','5','10','20','50','100','200','500','1000','2000','5000','10000'};
 
 K(4)=loglog(Qs,Q,'k-'); hold on

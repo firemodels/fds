@@ -18,10 +18,10 @@ scatplot(saved_data,drange)
 beyler_hood
 check_hrr
 sandia_helium_plume
-sandia_methane_fire
+% sandia_methane_fire
 BRE_spray
-Cup_burner
+% Cup_burner
 vettori_flat
-vettori_sloped
+% vettori_sloped
  
 display('validation scripts completed successfully!')
