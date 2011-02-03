@@ -82,6 +82,7 @@ then
 echo ""
 echo "*** FDS build environment ***"
 echo "platform: $platform"
+echo "Fortran compiler: $IFORT_COMPILER11"
 echo "MPI distribution: $MPIDIST"
 echo ""
 fi
