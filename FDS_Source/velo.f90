@@ -146,7 +146,7 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
                A_IJ(1,2)=DVDX; A_IJ(2,2)=DVDY; A_IJ(3,2)=DVDZ
                A_IJ(1,3)=DWDX; A_IJ(2,3)=DWDY; A_IJ(3,3)=DWDZ
 
-               AA=0._EB
+               AA=1.E-10_EB
                DO JJ=1,3
                   DO II=1,3
                      AA = AA + A_IJ(II,JJ)*A_IJ(II,JJ)
@@ -166,11 +166,7 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
                   + B_IJ(1,1)*B_IJ(3,3) - B_IJ(1,3)**2 &
                   + B_IJ(2,2)*B_IJ(3,3) - B_IJ(2,3)**2    ! Vreman, Eq. (8)
  
-               IF (ABS(AA)>ZERO_P) THEN
-                  NU_EDDY = C_EDDY*SQRT(BB/AA)  ! Vreman, Eq. (5)
-               ELSE
-                  NU_EDDY=0._EB
-               ENDIF
+               NU_EDDY = C_EDDY*SQRT(BB/AA)  ! Vreman, Eq. (5)
     
                MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*NU_EDDY
                CYCLE
@@ -2222,12 +2218,7 @@ IF ((CFL<CFL_MAX.AND.VN<VN_MAX) .OR. LOCK_TIME_STEP) THEN
       IF (.NOT.RESTRICT_TIME_STEP) DT_NEXT =     1.1_EB*DT
    ENDIF
 ELSE
-   IF (ABS(UVWMAX)<=ZERO_P) UVWMAX = 1._EB
-   IF (MUTRM>ZERO_P) THEN
-      DT = 0.9_EB*MIN( CFL_MAX/UVWMAX , VN_MAX/(2._EB*R_DX2*MUTRM) )
-   ELSE
-      DT  = 0.9_EB*CFL_MAX/UVWMAX
-   ENDIF
+   DT = 0.9_EB*MIN( CFL_MAX/MAX(UVWMAX,1.E-10_EB) , VN_MAX/(2._EB*R_DX2*MAX(MUTRM,1.E-10_EB)) )
    CHANGE_TIME_STEP(NM) = .TRUE.
 ENDIF
 
