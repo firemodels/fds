@@ -127,30 +127,27 @@ temperature inside the cable jacket to reach ``threshold'' values that are typic
 the cable fails electrically.
 
 
-\section{CSTB Tunnel tests}
+\section{CSTB Tunnel Experiments}
 
-Between 2005 and 2008, CSTB cooperated with domestic authorities (DSC, CETU) and the PPRIME Institute to carry out a test campaign in a tunnel, some of the tests involving water mist system application~\cite{Meyrand}. The first aim was to improve the understanding of the interaction between water mist and tunnel fire. The second aim was to constitute a database for further (numerical) research. Even if there are still some difficulties in properly scaling the thermal radiation attenuation by the sprays and the water droplet size, a one third scale was selected with the  objective of studying fire phenomena in a more realistic way than with the laboratory scale and in a more affordable and cheaper way than with real scale experiments. Twenty-eight tests were also conducted (8 without water mist and 20 with water mist) by varying the fire load (heptane pool, wood crib and wood pallet), the longitudinal velocity value to study the two ventilation regimes (sub-critical and supercritical), the use of tarpaulin over the fire load.\\
-This tunnel is 43~m long, with a semi-circular cross section around 4~m$^2$ in surface. Walls are covered by fire resistant mortar cement with well-know thermal characteristics. Floor is made of concrete. A ventilation device is mounted at the downstream side of the tunnel. It allows controlling the longitudinal air flow, by extracting a roughly constant gas volume flux. In addition to the fuel mass, few parameters were measured : gaseous phase temperature, air flow velocity, radiative heat flux and air composition (CO, CO$_2$ and O$_2$ concentration). Sensors are located on 11 sections.
+Between 2005 and 2008, the French building research laboratory, Centre Scientifique et Technique du B\^{a}timent (CSTB), conducted fire experiments in a tunnel, some of which
+involved water mist systems~\cite{Meyrand}. The first aim was to improve the understanding of the interaction between water mist and a tunnel fire. 
+The second was to develop a database for model validation. A one-third scale was selected with the objective of studying realistic fire phenomena in an affordable way. 
+Twenty-eight experiments were conducted 
+(8 without water mist and 20 with water mist) with variations in the fuel (heptane pool, wood crib and wood pallet), the longitudinal velocity (with and without back layering), 
+and obstructions near the fire.
 
-\begin{table}[h!]
-	\centering
-		\begin{tabular}{|c|c|c|c|c|}
-			\hline
-																		& Air temperature	      &	Air velocity	&	Heat flux	&	Air composition	\\
-			\hline
-			Upstream the fire location		&	9 - 3				      		&	5							&	7					&	 - \\		
-			\hline
-			Downstream the fire location	&	4	-	8	-	12	-	24			&	18						&	7					&	22 \\
-			\hline
-		\end{tabular}
-		\caption{Position of the measurement sections - Distances are measured from the centre of the fire load (in meters)}
-\end{table}
+This tunnel is 43~m long, with a semi-circular cross section whose area is approximately 4~m$^2$. The walls are covered by a fire resistant mortar cement 
+with well known thermal properties. The floor is made of concrete. A fan is mounted at the downstream side of the tunnel. 
+Measurements were made of the following: fuel mass, gas temperature, air velocity, radiative heat flux and gas composition (CO, CO$_2$ and O$_2$ concentration). 
+Sensors were located at 11 positions.  
 
-Positions of sensors are mentioned in the input file by the distance from the centre of the fire load in meters. x-axis refers to longitudinal direction, y-axis refers to transversal direction and z-axis refers to height (the origine being at the floor level). \\
+Tests 2 and 27 have been selected because neither exhibited back layering. The longitudinal velocity in Test~2 was approximately 2.2~m/s and 3.1~m/s in Test~27. All of the
+combusted 
+The fire load consists of a 0.5~$m^2$ area heptane pool. 
+In test 27, a water mist system is manually activated 300~s after ignition. The test duration corresponds to the complete burning of initial heptane quantity. 
+Following are some notes concerning the heat release rate and the water mist system :\\
 
-The two tests 2 and 27 of the campaign which are available in the repertory, have been conducted in a supercritical regime, longitudinal velocity being around 2.2~m/s for test~2 and 3.1~m/s for test~27. It means that all the combustion gases are transported downstream the fire location. The fire load consists of a 0.5~$m^2$ area heptane pool. In test 27, a water mist system is manually activated 300~s after ignition. The test duration corresponds to the complete burning of initial heptane quantity. Following are some notes concerning the heat release rate and the water mist system :\\
-
-\textbf{Heat Release Rate :} 
+\textbf{Heat Release Rate :}
 In test~2, the HRR is only deduced from fuel weight loss monitoring. The HRR evolution illustrates the different stages of fire development: the growth phase, the steady state phase, the sharp peak and the decay phase. The experimental data are not given during this last stage because of heptane boiling which alters the HRR computation with the fuel weight loss method. \\
 In test~27, it is deduced from fuel weight loss monitoring and by oxygen consumption monitoring. The also deduced HRR is almost the same before water mist system activation. After that, deduced HRR are clearly different. This is due to the water spray above the fire that disturbs the heptane pool weight monitoring. For that reason, HRR after the mitigation activation is only deduced by oxygen consumption monitoring.\\
 Test~27 is interesting because it is characterized by a very low injected water flow rate. The main consequence is that HRR reaches a higher value during the mitigation period [300-600~s] than at the activation time 300 s. This evolution has been attributed to a first cooling stage when HRR first drops and then when it further increases, potentially due to various effects: turbulence enhancement, or a typical effect already observed in pool fires when the fuel volume tends to zero which involves a sharp peak because all the substrate reaches the boiling point.
@@ -244,15 +241,15 @@ and 1.0 m are used for validation.
 %Lechene {\em et al.}~\cite{Lechene} measured the attenuation of thermal radiation passing through a water
 %spray using a heat flux gauge. The radiation was produced by a 30x35~$cm^2$ heat panel whose emission is close
 %to a black body at 500~$^\circ$C. The horizontal distance
-%from the radiation panel to the spray nozzle was 1.5 m and to the measurement point 3 m. The heat flux gauge was positioned at the line passing through the center of the panel. 
+%from the radiation panel to the spray nozzle was 1.5 m and to the measurement point 3 m. The heat flux gauge was positioned at the line passing through the center of the panel.
 %Water mist is produced by seven nozzles arranged in a row, 10 cm apart one other. They are positioned at 1.5~m high. The heat panel is translated vertically during the campain, the distance between the panel upper edge
-%and the nozzle row varying between 20 and 100~cm. 
+%and the nozzle row varying between 20 and 100~cm.
 %
-%The attenuation of radiation is defined as previously in BRE tests. 
+%The attenuation of radiation is defined as previously in BRE tests.
 %
 %The purpose of the simulation is to compare the measured and simulated attenuation of radiation at different heigts.
 %The water mist nozzle has been characterized by Lechene by measuring the spray
-%angles and the water flow rate. The droplet size is set by using PDPA measurement in a single position, 20 cm below the injection point. 
+%angles and the water flow rate. The droplet size is set by using PDPA measurement in a single position, 20 cm below the injection point.
 
 \section{McCaffrey Plume Experiments}
 
@@ -854,7 +851,7 @@ outlines the range of applicability of the validation performed to date. The par
 \begin{description}
 \item[Heat Release Rate, $\dQ$,] is the range of peak heat release rates of the fires in the test series.
 \item[Fire Diameter, $D$,] is the equivalent diameter of the base of the fire.
-\item[Fire Froude Number, $\dQ^*$,] is a useful non-dimensional quantity for plume correlations and flame height estimates. 
+\item[Fire Froude Number, $\dQ^*$,] is a useful non-dimensional quantity for plume correlations and flame height estimates.
 \be Q^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2} \ee
 \item[Characteristic Fire Diameter, $D^*$,] is a useful length scale that incorporates the heat release rate of the fire.
 \be D^* = \left( \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g}} \right)^{2/5}  \ee
