@@ -66,8 +66,6 @@ specified in terms of median droplet size and mean vertical velocity using PDPA 
 boundary conditions were determined by assuming $d_m \propto p^{-1/3}$ and $v \propto p^{1/2}$ type of dependences between the droplet size, speed
 and pressure.
 
-
-
 \section{Bryant Doorway Velocity Measurements}
 
 Rodney Bryant of the Fire Research Division at NIST performed a series of velocity measurements of the gas
@@ -128,6 +126,39 @@ on all sides, the one-dimensional THIEF model accurately predicted the times for
 temperature inside the cable jacket to reach ``threshold'' values that are typically observed when
 the cable fails electrically.
 
+
+\section{CSTB Tunnel tests}
+
+Between 2005 and 2008, CSTB cooperated with domestic authorities (DSC, CETU) and the PPRIME Institute to carry out a test campaign in a tunnel, some of the tests involving water mist system application~\cite{Meyrand}. The first aim was to improve the understanding of the interaction between water mist and tunnel fire. The second aim was to constitute a database for further (numerical) research. Even if there are still some difficulties in properly scaling the thermal radiation attenuation by the sprays and the water droplet size, a one third scale was selected with the  objective of studying fire phenomena in a more realistic way than with the laboratory scale and in a more affordable and cheaper way than with real scale experiments. Twenty-eight tests were also conducted (8 without water mist and 20 with water mist) by varying the fire load (heptane pool, wood crib and wood pallet), the longitudinal velocity value to study the two ventilation regimes (sub-critical and supercritical), the use of tarpaulin over the fire load.\\
+This tunnel is 43~m long, with a semi-circular cross section around 4~m$^2$ in surface. Walls are covered by fire resistant mortar cement with well-know thermal characteristics. Floor is made of concrete. A ventilation device is mounted at the downstream side of the tunnel. It allows controlling the longitudinal air flow, by extracting a roughly constant gas volume flux. In addition to the fuel mass, few parameters were measured : gaseous phase temperature, air flow velocity, radiative heat flux and air composition (CO, CO$_2$ and O$_2$ concentration). Sensors are located on 11 sections.
+
+\begin{table}[h!]
+	\centering
+		\begin{tabular}{|c|c|c|c|c|}
+			\hline
+																		& Air temperature	      &	Air velocity	&	Heat flux	&	Air composition	\\
+			\hline
+			Upstream the fire location		&	9 - 3				      		&	5							&	7					&	 - \\		
+			\hline
+			Downstream the fire location	&	4	-	8	-	12	-	24			&	18						&	7					&	22 \\
+			\hline
+		\end{tabular}
+		\caption{Position of the measurement sections - Distances are measured from the centre of the fire load (in meters)}
+\end{table}
+
+Positions of sensors are mentioned in the input file by the distance from the centre of the fire load in meters. x-axis refers to longitudinal direction, y-axis refers to transversal direction and z-axis refers to height (the origine being at the floor level). \\
+
+The two tests 2 and 27 of the campaign which are available in the repertory, have been conducted in a supercritical regime, longitudinal velocity being around 2.2~m/s for test~2 and 3.1~m/s for test~27. It means that all the combustion gases are transported downstream the fire location. The fire load consists of a 0.5~$m^2$ area heptane pool. In test 27, a water mist system is manually activated 300~s after ignition. The test duration corresponds to the complete burning of initial heptane quantity. Following are some notes concerning the heat release rate and the water mist system :\\
+
+\textbf{Heat Release Rate :} 
+In test~2, the HRR is only deduced from fuel weight loss monitoring. The HRR evolution illustrates the different stages of fire development: the growth phase, the steady state phase, the sharp peak and the decay phase. The experimental data are not given during this last stage because of heptane boiling which alters the HRR computation with the fuel weight loss method. \\
+In test~27, it is deduced from fuel weight loss monitoring and by oxygen consumption monitoring. The also deduced HRR is almost the same before water mist system activation. After that, deduced HRR are clearly different. This is due to the water spray above the fire that disturbs the heptane pool weight monitoring. For that reason, HRR after the mitigation activation is only deduced by oxygen consumption monitoring.\\
+Test~27 is interesting because it is characterized by a very low injected water flow rate. The main consequence is that HRR reaches a higher value during the mitigation period [300-600~s] than at the activation time 300 s. This evolution has been attributed to a first cooling stage when HRR first drops and then when it further increases, potentially due to various effects: turbulence enhancement, or a typical effect already observed in pool fires when the fuel volume tends to zero which involves a sharp peak because all the substrate reaches the boiling point.
+The main consequence of this HRR evolution is that mitigation does not induce an overwhelming gas cooling. It also allows well studying the fire environment when the mitigation system is activated. For information, during the test campaign in the midscale tunnel, test~9 was performed in similar conditions than the present test but with a higher number of nozzles (14). Fire was also suppressed in less than 1~minute which does not allow studying surrounding conditions during mitigation.\\
+
+\textbf{Water mist system :}
+The water mist system is composed of six nozzles located on the same row on the centre line of the tunnel.
+Nozzles are located between 4~m upstream and 3.5~m downstream the fire location, 1.5~m apart one other. The operating pressure is around 90~bars. The water flow rate injected at each nozzle is close to 5.5 L/min, corresponding to a total mist discharge rate around 33~L/min. The Lagrangian particles submodel has been calibrated by simulating the Phase Doppler Analysis.
 
 
 
@@ -208,8 +239,20 @@ outside the flame region. The tests are described
 in~\cite{Hostikka:3}. Tests at three burner diameters, 0.10 m, 0.38 m
 and 1.0 m are used for validation.
 
+%\section{LEMTA Spray Test for Radiation Attenuation}
 
-
+%Lechene {\em et al.}~\cite{Lechene} measured the attenuation of thermal radiation passing through a water
+%spray using a heat flux gauge. The radiation was produced by a 30x35~$cm^2$ heat panel whose emission is close
+%to a black body at 500~$^\circ$C. The horizontal distance
+%from the radiation panel to the spray nozzle was 1.5 m and to the measurement point 3 m. The heat flux gauge was positioned at the line passing through the center of the panel. 
+%Water mist is produced by seven nozzles arranged in a row, 10 cm apart one other. They are positioned at 1.5~m high. The heat panel is translated vertically during the campain, the distance between the panel upper edge
+%and the nozzle row varying between 20 and 100~cm. 
+%
+%The attenuation of radiation is defined as previously in BRE tests. 
+%
+%The purpose of the simulation is to compare the measured and simulated attenuation of radiation at different heigts.
+%The water mist nozzle has been characterized by Lechene by measuring the spray
+%angles and the water flow rate. The droplet size is set by using PDPA measurement in a single position, 20 cm below the injection point. 
 
 \section{McCaffrey Plume Experiments}
 
