@@ -9262,7 +9262,8 @@ of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\
 {\ct DUCT VOLUME FRACTION}                      & Volume fraction of a species in a duct    &  mol/mol              \\ \hline
 {\ct NODE DENSITY}                              & Density of the flow through a node        &  kg/m$^3$             \\ \hline
 {\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node      &  kg/kg                \\ \hline
-{\ct NODE Pressure}                             & Pressure of a node                        &       Pa              \\ \hline
+{\ct NODE PRESSURE}                             & Pressure of a node                        &       Pa              \\ \hline
+{\ct NODE PRESSURE DIFFERENCE}                  & Pressure difference between two nodes                        &       Pa              \\ \hline
 {\ct NODE TEMPERATURE}                          & Temperature of the flow though a node     & $^\circ$C             \\ \hline
 {\ct NODE VOLUME FRACTION}                      & Volume fraction of a species in a node    &  mol/mol              \\ \hline
 \end{longtable}
@@ -9412,7 +9413,7 @@ Only prescribe those parameters which are necessary to describe the desired scen
 {\ct INITIAL\_STATE}   & Logical         & Initial state of device                                          &       & {\ct .FALSE.} \\ \hline
 {\ct LATCH}            & Logical         & Device cannot change state multiple times                        &       & {\ct .TRUE.}  \\ \hline
 {\ct MATL\_ID}         & Character       & Material identifier (if needed)                                  &       &               \\ \hline
-{\ct NODE\_ID}         & Character       & Associated {\ct HVAC} line for a node output                     &       &               \\ \hline
+{\ct NODE\_ID}         & Character(2)    & Associated {\ct HVAC} line for a node output                     &       &               \\ \hline
 {\ct ORIENTATION}      & Real Triplet    & Direction vector                                                 &       & 0,0,-1        \\ \hline
 {\ct PART\_ID}         & Character       & Particle identifier (if needed)                                  &       &               \\ \hline
 {\ct POINTS}           & Integer         & See Section~\ref{info:line_file}                                 &       & 1             \\ \hline
