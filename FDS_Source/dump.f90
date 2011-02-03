@@ -2270,7 +2270,8 @@ WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
 IF (LES) THEN
    WRITE(LU_OUTPUT,'(A)')        '   LES Calculation'
-   WRITE(LU_OUTPUT,'(A,F8.2)')   '   Smagorinsky Constant          ',CSMAG
+   IF (.NOT.DYNSMAG) WRITE(LU_OUTPUT,'(A,F8.2)')  '   Smagorinsky Constant          ',CSMAG
+   IF (     DYNSMAG) WRITE(LU_OUTPUT,'(A)')       '   Dynamic Smagorinsky Model'
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number      ',PR
    IF (N_GAS_SPECIES>0._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number      ',SC
 ENDIF
