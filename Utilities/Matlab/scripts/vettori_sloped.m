@@ -6,20 +6,22 @@ clear all; close all; clc;
 addpath('../../Validation/Vettori_Sloped_Ceiling');
 
 %Import sorting information
-[A,B,C] =xlsread('../../Validation/Vettori_Sloped_Ceiling/Experimental_Data/Vettori_Sloped_Guide.csv');
+M = importdata('../../Validation/Vettori_Sloped_Ceiling/Experimental_Data/Vettori_Sloped_Guide.csv');
+
+B = M.textdata;
 
 for n=1:72
-%Name FDS results file
-file = ['../../Validation/Vettori_Sloped_Ceiling/FDS_Output_Files/Vettori_Sloped_',char(B(n+1,14)),'.out'];
-
-%Import FDS Data
-%An error will occur at this point if within the simulated time the
-%sprinkler never activated. It is advised that excess time be provided to
-%compensate for this issue and ensure that all sprinklers activate.
-fds_data(:,n) = vettori_sloped_function(file);
-
-%Import Experimental Data
-E(n,:)=A(n,8:11);
+    %Name FDS results file
+    file = ['../../Validation/Vettori_Sloped_Ceiling/FDS_Output_Files/Vettori_Sloped_',char(B(n+1,14)),'.out'];
+    
+    %Import FDS Data
+    %An error will occur at this point if within the simulated time the
+    %sprinkler never activated. It is advised that excess time be provided to
+    %compensate for this issue and ensure that all sprinklers activate.
+    fds_data(:,n) = vettori_sloped_function(file);
+    
+    %Import Experimental Data
+    E(n,:)=str2num(char(B(n+1,8:11)));
 end
 
 %Orient Experimental Data
