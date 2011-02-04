@@ -312,7 +312,7 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
          END SELECT
          IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
          IF ((SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
-			 (SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY       .OR. &
+             (SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY       .OR. &
               ANY(SURFACE(IBC)%LEAK_PATH>0._EB)) .AND. UWS(IW)<0._EB) .AND. YY_F(IW,N)>0._EB) THEN
             ! recreate diffusive flux from divg b/c UWP based on old RHODW
             RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
@@ -334,7 +334,8 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
                FZ(II,JJ,KK-1) = UN*RHO_F(IW)*YY_F(IW,N)
          END SELECT
          
-         ! overwrite first off-wall advective flux if necessary
+         ! Overwrite first off-wall advective flux if necessary
+
          OFF_WALL_SELECT_2: SELECT CASE(IOR)
             CASE( 1) OFF_WALL_SELECT_2
                !      ghost          FX/UU(II+1)
