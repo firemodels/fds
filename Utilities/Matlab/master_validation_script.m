@@ -12,6 +12,8 @@ clear all
 
 addpath 'scripts'
 
+flame_height
+
 [saved_data,drange] = dataplot('validation');
 
 scatplot(saved_data,drange)
