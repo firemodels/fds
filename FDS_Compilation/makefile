@@ -222,13 +222,14 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
 # 32 bit
-intel_osx_32 : FFLAGS = -O2  -m32 -heap-arrays -static-intel -vec_report0
+intel_osx_32 : FFLAGS = -O2  -m32 -heap-arrays -vec_report0
 intel_osx_32 : CFLAGS = -O2 -m32 -Dpp_noappend -Dpp_OSX -vec_report0
+intel_osx_32 : LFLAGS = -static-intel
 intel_osx_32 : FCOMPL = ifort
 intel_osx_32 : CCOMPL = icc
 intel_osx_32 : obj = fds_intel_osx_32
 intel_osx_32 : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
 mpi_intel_osx_32 : FFLAGS  = -O2 -m32 -heap-arrays -vec_report0
 mpi_intel_osx_32 : CFLAGS  = -O2 -m32 -Dpp_noappend -Dpp_OSX -vec_report0
@@ -256,13 +257,17 @@ intel_osx_mpi_32_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
 # 64 bit
-intel_osx_64 : FFLAGS = -O2 -m64 -heap-arrays -static-intel
+# temporary fix for 64 bit osx build problem
+# un-comment following line if building intel_osx_64 target
+#irad.o:	FFLAGS = -O0 -m64 -heap-arrays
+intel_osx_64 : FFLAGS = -O2 -m64 -heap-arrays
 intel_osx_64 : CFLAGS = -O2 -m64 -Dpp_noappend -Dpp_OSX -vec_report0
+intel_osx_64 : LFLAGS = -static-intel
 intel_osx_64 : FCOMPL = ifort
 intel_osx_64 : CCOMPL = icc
 intel_osx_64 : obj = fds_intel_osx_64
 intel_osx_64 : setup $(obj_serial)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
 mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -vec_report0
 mpi_intel_osx_64 : CFLAGS  = -O2 -m64 -Dpp_noappend -Dpp_OSX -vec_report0
@@ -273,8 +278,8 @@ mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
 mpi_intel_osx_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
-intel_osx_64_db : FFLAGS = -check -warn unused -O0 -m64 -g -traceback -save-temps -fpe:0 -fltconsistency -fp-stack-check -FR -WB -vec_report0
-intel_osx_64_db : CFLAGS = -O0 -g -traceback -m64 -Dpp_noappend -Dpp_OSX -vec_report0
+intel_osx_64_db : FFLAGS = -check -warn unused -O2 -m64 -g -traceback -save-temps -fpe:0 -fltconsistency -fp-stack-check -FR -WB -vec_report0
+intel_osx_64_db : CFLAGS = -O2 -g -traceback -m64 -Dpp_noappend -Dpp_OSX -vec_report0
 intel_osx_64_db : FCOMPL = ifort
 intel_osx_64_db : CCOMPL = icc
 intel_osx_64_db : obj = fds_intel_osx_64_db
