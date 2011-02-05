@@ -9,7 +9,7 @@ set fdsroot=$scp_fds_smvroot/FDS_Compilation
 set smokediffroot=$scp_fds_smvroot/Utilities/smokediff
 set smokeziproot=$scp_fds_smvroot/Utilities/smokezip
 set googledir=$fds_smvroot/Utilities/to_google
-set bundledir=$bundlebase/FDS/FDS5
+set bundledir=$bundlebase/FDS/FDS6
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
 set mandir=$fds_smvroot/Manuals/All_PDF_Files
 set smvbindir=$scp_fds_smvroot/SMV/bin
@@ -61,11 +61,11 @@ scp -q $fdshost\:$smokeziproot/$smokezipdir/$smokezip $bundledir/bin/.
 
 # FDS 
 
-echo copying $fds5 from $fds5dir on $fdshost
-scp -q $fdshost\:$fdsroot/$fds5dir/$fds5 $bundledir/bin/$fds5out
+echo copying $fds from $fdsdir on $fdshost
+scp -q $fdshost\:$fdsroot/$fdsdir/$fds $bundledir/bin/$fdsout
 
-echo copying $fds5mpi from $fds5dir on $fdshost
-scp -q $fdshost\:$fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/$fds5mpiout
+echo copying $fdsmpi from $fdsdir on $fdshost
+scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
 
 cat <<EOF > $fullmanifest
 <html>
@@ -83,8 +83,8 @@ echo  >> $fullmanifest
 echo Versions:>> $fullmanifest
 echo  >> $fullmanifest
 
-echo ------fds5-------------------- >> $fullmanifest
-ssh -q $runhost " echo 0 | $fdsroot/$fds5dir/$fds5" >>& $fullmanifest
+echo ------fds-------------------- >> $fullmanifest
+ssh -q $runhost " echo 0 | $fdsroot/$fdsdir/$fds" >>& $fullmanifest
 
 echo  >> $fullmanifest
 echo ------fds2ascii-------------------- >> $fullmanifest

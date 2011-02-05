@@ -13,18 +13,18 @@ setenv manifest manifest_linux_64.html
 setenv INTELLIB lib64
 setenv smokezipdir INTEL_LINUX_64
 setenv smokediffdir INTEL_LINUX_64
-setenv fds5dir intel_linux_64
-setenv fds5mpidir mpi_intel_linux_64
+setenv fdsdir intel_linux_64
+setenv fdsmpidir mpi_intel_linux_64
 
 setenv smokeview smv5_linux_64
 setenv smokezip smokezip_linux_64
 setenv smokediff smokediff_linux_64
 
-setenv fds5 fds5_intel_linux_64
-setenv fds5mpi fds5_mpi_intel_linux_64
+setenv fds fds_intel_linux_64
+setenv fdsmpi fds_mpi_intel_linux_64
 
-setenv fds5out fds5_linux_64
-setenv fds5mpiout fds5_mpi_linux_64
+setenv fdsout fds_linux_64
+setenv fdsmpiout fds_mpi_linux_64
 
 setenv fds2ascii fds2ascii_linux_64
 setenv fds2asciidir intel_linux_64
