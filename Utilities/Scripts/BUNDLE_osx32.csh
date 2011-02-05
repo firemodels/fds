@@ -13,18 +13,18 @@ setenv manifest manifest_osx_32.html
 
 setenv smokezipdir INTEL_OSX_32
 setenv smokediffdir INTEL_OSX_32
-setenv fds5dir intel_osx_32
-setenv fds5mpidir mpi_intel_osx_32
+setenv fdsdir intel_osx_32
+setenv fdsmpidir mpi_intel_osx_32
 
 setenv smokeview smv5_osx_32
 setenv smokezip smokezip_osx_32
 setenv smokediff smokediff_osx_32
 
-setenv fds5 fds5_intel_osx_32
-setenv fds5mpi fds5_mpi_intel_osx_32
+setenv fds fds_intel_osx_32
+setenv fdsmpi fds_mpi_intel_osx_32
 
-setenv fds5out fds5_osx_32
-setenv fds5mpiout fds5_mpi_osx_32
+setenv fdsout fds_osx_32
+setenv fdsmpiout fds_mpi_osx_32
 
 setenv fds2ascii fds2ascii_osx_32
 setenv fds2asciidir intel_osx_32
