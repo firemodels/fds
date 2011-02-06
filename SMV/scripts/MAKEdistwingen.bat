@@ -27,7 +27,7 @@ set BUILDDIR=INTEL_WIN_%platform%
 
 set version=%smv_version%
 set bundledir=%svn_root%\smv\for_bundle
-set smvbuild=%svn_root%\smv\bin
+set smvbuild=%svn_root%\SMV\Build\%BUILDDIR%
 set svzipbuild=%svn_root%\Utilities\smokezip\%BUILDDIR%
 set svdiffbuild=%svn_root%\Utilities\smokediff\%BUILDDIR%
 set bgbuild=%svn_root%\Utilities\background\%BUILDDIR%
@@ -41,21 +41,17 @@ echo filling distribution directory
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
-echo copying smv5_win_%platform%.exe
-copy %smvbuild%\smv5_win_%platform%.exe %smvdir%\smokeview.exe
+echo copying smokeview_win_%platform%.exe
+copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\.
 
-if "%platform%"=="32" echo copying smokezip.exe
-if "%platform%"=="32" copy %svzipbuild%\smokezip.exe %smvdir%\smokezip.exe
-if "%platform%"=="64" echo copying smokezip_win_64.exe
-if "%platform%"=="64" copy %svzipbuild%\smokezip_win_64.exe %smvdir%\smokezip_win_64.exe
+echo copying smokezip_win_%platform%.exe
+copy %svzipbuild%\smokezip_win_%platform%.exe %smvdir%\.
 
-if "%platform%"=="32" echo copying smokediff.exe
-if "%platform%"=="32" copy %svdiffbuild%\smokediff.exe %smvdir%\smokediff.exe
-if "%platform%"=="64" echo copying smokediff_64.exe
-if "%platform%"=="64" copy %svdiffbuild%\smokediff_win_64.exe %smvdir%\smokediff_win_64.exe
+echo copying smokediff_win_%platform%.exe
+copy %svdiffbuild%\smokediff_win_%platform%.exe %smvdir%\.
 
 echo copying background.exe
-copy %bgbuild%\background.exe %smvdir%\background.exe
+copy %bgbuild%\background.exe %smvdir%\.
 
 echo copying smokeview.ini
 copy smokeview.ini %smvdir%\smokeview.ini
@@ -83,7 +79,7 @@ wzzip -a -r -P %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-wzipse32 %zipbase%.zip -runasadmin -d "c:\program files\fds\fds5\bin"
+wzipse32 %zipbase%.zip -runasadmin -d "c:\program files\fds\fds6\bin"
 copy %zipbase%.exe ..\.
 
 echo win%platform% Smokeview bundle built

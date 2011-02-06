@@ -20,7 +20,7 @@ FILTERF =
 # The variable VPATH defines the source code directory relative to the current directory
 
 VPATH = $(SOURCE_DIR)/smokeview:$(SOURCE_DIR)/shared
-bin = $(SOURCE_DIR)/../bin
+bin = .
 
 # BUILD_DIR defined directory containing this Makefile
 
