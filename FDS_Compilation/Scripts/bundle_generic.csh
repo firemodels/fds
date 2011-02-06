@@ -7,7 +7,7 @@ set scp_fds_smvroot=$fds_smvroot
 set fds_smvroot=~/$fds_smvroot
 set fdsroot=$scp_fds_smvroot/FDS_Compilation
 set googledir=$fds_smvroot/Utilities/to_google
-set bundledir=$bundlebase/FDS/FDS5
+set bundledir=$bundlebase/FDS/FDS6
 
 cd $googledir
 rm -rf $bundlebase
@@ -18,11 +18,11 @@ mkdir $bundledir/bin
 
 # FDS 
 
-echo copying $fds5 from $fds5dir on $fdshost
-scp -q $fdshost\:$fdsroot/$fds5dir/$fds5 $bundledir/bin/$fds5out
+echo copying $fds from $fdsdir on $fdshost
+scp -q $fdshost\:$fdsroot/$fdsdir/$fds $bundledir/bin/$fdsout
 
-echo copying $fds5mpi from $fds5dir on $fdshost
-scp -q $fdshost\:$fdsroot/$fds5mpidir/$fds5mpi $bundledir/bin/$fds5mpiout
+echo copying $fdsmpi from $fdsdir on $fdshost
+scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
 
 echo Building archive
 rm -rf $googledir/$bundlebase.tar
