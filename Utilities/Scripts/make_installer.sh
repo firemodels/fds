@@ -105,7 +105,7 @@ fi
 
 # add FDS bin to path
 
-echo "set PATH (\`pwd\`/bin \\\$PATH)" >> ~/.cshrc_fds
+echo "set path=(\`pwd\`/bin \\\$path)" >> ~/.cshrc_fds
 echo "export PATH=\\\$PATH:\`pwd\`/bin" >> ~/.bashrc_fds
 
 cd \$THISDIR
@@ -124,4 +124,4 @@ __TARFILE_FOLLOWS__
 EOF
 chmod +x $INSTALLER
 cat $FDSTAR >> $INSTALLER
-echo "The installer, $INSTALLER, has been created."
+echo "Installer created."
