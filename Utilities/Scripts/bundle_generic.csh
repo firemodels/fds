@@ -9,7 +9,7 @@ set fdsroot=$scp_fds_smvroot/FDS_Compilation
 set smokediffroot=$scp_fds_smvroot/Utilities/smokediff
 set smokeziproot=$scp_fds_smvroot/Utilities/smokezip
 set googledir=$fds_smvroot/Utilities/to_google
-set bundledir=$bundlebase/FDS/FDS6
+set bundledir=$bundlebase
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
 set mandir=$fds_smvroot/Manuals/All_PDF_Files
 set smvbindir=$scp_fds_smvroot/SMV/bin
@@ -22,8 +22,6 @@ set makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
 
 cd $googledir
 rm -rf $bundlebase
-mkdir $bundlebase
-mkdir $bundlebase/FDS
 mkdir $bundledir
 mkdir $bundledir/bin
 mkdir $bundledir/Documentation
