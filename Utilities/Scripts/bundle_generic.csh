@@ -18,6 +18,7 @@ set texturedir=$forbundle/textures
 set fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
 set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
 set fullmanifest=$googledir/$bundledir/bin/$manifest
+set makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
 
 cd $googledir
 rm -rf $bundlebase
@@ -162,3 +163,6 @@ cd $googledir/$bundlebase
 tar cf ../$bundlebase.tar --exclude='*.csv' .
 echo Compressing archive
 gzip    ../$bundlebase.tar
+echo Creating installer
+cd ..
+$makeinstaller $FORTLIB $bundlebase.tar.gz $bundlebase.sh
