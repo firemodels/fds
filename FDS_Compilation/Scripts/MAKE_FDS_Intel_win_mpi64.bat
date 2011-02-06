@@ -21,6 +21,6 @@ call %envfile%
 
 cd %svn_root%\FDS_Compilation\mpi_intel_win_64
 
-.\make_fds
+.\make_fds_from_webpage
 
 pause
