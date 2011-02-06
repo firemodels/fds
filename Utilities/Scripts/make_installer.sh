@@ -1,6 +1,6 @@
 #!/bin/bash
-LIB=$1
-FDSTAR=$2
+FORTLIB=$1
+FDS_TAR=$2
 INSTALLER=$3
 
 cat << EOF > $INSTALLER
@@ -96,11 +96,11 @@ echo "# variables for use by FDS" >> ~/.bashrc_fds
 echo "" >> ~/.bashrc_fds
 if [ "a\$LD_LIBRARY_PATH" = "a" ]
 then
-echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/$LIB" >> ~/.cshrc_fds
-echo "export LD_LIBRARY_PATH=\`pwd\`/bin/$LIB" >> ~/.bashrc_fds
+echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/$FORTLIB" >> ~/.cshrc_fds
+echo "export LD_LIBRARY_PATH=\`pwd\`/bin/$FORTLIB" >> ~/.bashrc_fds
 else
-echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/$LIB:\\\$LD_LIBRARY_PATH" >> ~/.cshrc_fds
-echo "export LD_LIBRARY_PATH=\`pwd\`/bin/$LIB:\\\$LD_LIBRARY_PATH" >> ~/.bashrc_fds
+echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/$FORTLIB:\\\$LD_LIBRARY_PATH" >> ~/.cshrc_fds
+echo "export LD_LIBRARY_PATH=\`pwd\`/bin/$FORTLIB:\\\$LD_LIBRARY_PATH" >> ~/.bashrc_fds
 fi
 
 # add FDS bin to path
@@ -110,10 +110,12 @@ echo "export PATH=\\\$PATH:\`pwd\`/bin" >> ~/.bashrc_fds
 
 cd \$THISDIR
 echo ""
-echo "Add the following line to your .cshrc file"
+echo "If you use the csh or tcsh shell,"
+echo "add the following line to your .cshrc file:"
 echo "source ~/.cshrc_fds"
 echo ""
-echo "Add the following line to your .bashrc file"
+echo "If you use the bash or sh shell,"
+echo "add the following line to your .bashrc file:"
 echo "source ~/.bashrc_fds"
 echo ""
 echo "Installation complete."
@@ -123,5 +125,5 @@ exit 0
 __TARFILE_FOLLOWS__
 EOF
 chmod +x $INSTALLER
-cat $FDSTAR >> $INSTALLER
+cat $FDS_TAR >> $INSTALLER
 echo "Installer created."

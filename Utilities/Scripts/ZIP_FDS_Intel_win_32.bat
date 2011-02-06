@@ -22,8 +22,8 @@ cd %svn_root%\Utilities\Makefile
 set fdsroot=fds_%fds_version%_%fds_revision%_win32
 set togoogle=%svn_root%\Utilities\to_google\%fdsroot%
 mkdir %togoogle%
-copy Intel_Win_32\fds5_win_32.exe %togoogle%\fds5.exe
-copy Mpi_Intel_Win_32\fds5_win_mpi_32.exe %togoogle%\fds5_mpi.exe
+copy Intel_Win_32\fds_win_32.exe %togoogle%\fds6.exe
+copy Mpi_Intel_Win_32\fds_win_mpi_32.exe %togoogle%\fds6_mpi.exe
 
 echo.
 echo winzipping distribution directory

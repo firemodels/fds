@@ -29,6 +29,6 @@ if exist ..\%testdir%.zip erase ..\%testdir%.zip
 wzzip -a -r -P ..\%testdir%.zip *
 if exist ..\%testdir%.exe erase ..\%testdir%.exe
 Rem wzipse32 ..\%testdir%.zip -d "c:\program files\nist\Examples"
-wzipse32 ..\%testdir%.zip -d "c:\program files\fds5\Examples"
+wzipse32 ..\%testdir%.zip -d "c:\program files\fds6\Examples"
 erase ..\%testdir%.zip
 pause

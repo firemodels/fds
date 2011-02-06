@@ -33,8 +33,8 @@ plink %svn_logon% %scriptdir%/bundle_osx_32.csh %linux_svn_root% %linux_svn_root
 
 echo.
 echo downloading 32 bit OSX fds files
-pscp %svn_logon%:%scriptdir%/../to_google/fds5_intel_osx_32 %fdsrootdir%\fds5_intel_osx_32
-pscp %svn_logon%:%scriptdir%/../to_google/fds5_mpi_intel_osx_32 %fdsrootdir%\fds5_mpi_intel_osx_32
+pscp %svn_logon%:%scriptdir%/../to_google/fds_intel_osx_32 %fdsrootdir%\fds_intel_osx_32
+pscp %svn_logon%:%scriptdir%/../to_google/fds_mpi_intel_osx_32 %fdsrootdir%\fds_mpi_intel_osx_32
 
 echo.
 echo winzipping distribution directory
