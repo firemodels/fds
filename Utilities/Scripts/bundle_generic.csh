@@ -34,8 +34,8 @@ echo Copying program files
 # share libraries for INTEL build
 if $?INTELLIB then
 cp $bundle_setup/README_LINUX.html $bundledir/bin/.
-cp -r $bundle_setup/$INTELLIB $bundledir/bin/.
-set SETLDPATH="setenv LD_LIBRARY_PATH $bundle_setup/$INTELLIB;" 
+cp -r $INTELLIB $bundledir/bin/.
+set SETLDPATH="setenv LD_LIBRARY_PATH $INTELLIB;" 
 else
 set SETLDPATH=
 endif
