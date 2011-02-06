@@ -32,8 +32,8 @@ plink %svn_logon% %scriptdir%/bundle_linux_32.csh %scriptdir%
 
 echo.
 echo downloading 32 bit linux fds files
-pscp %svn_logon%:%scriptdir%/../to_google/fds5_intel_linux_32 %fdsrootdir%\fds5_intel_linux_32
-pscp %svn_logon%:%scriptdir%/../to_google/fds5_mpi_intel_linux_32 %fdsrootdir%\fds5_mpi_intel_linux_32
+pscp %svn_logon%:%scriptdir%/../to_google/fds_intel_linux_32 %fdsrootdir%\fds_intel_linux_32
+pscp %svn_logon%:%scriptdir%/../to_google/fds_mpi_intel_linux_32 %fdsrootdir%\fds_mpi_intel_linux_32
 
 echo.
 echo winzipping distribution directory
