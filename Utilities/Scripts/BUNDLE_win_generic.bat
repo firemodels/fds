@@ -9,19 +9,17 @@ set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_smokediff=%svn_root%\Utilities\smokediff
 set in_smokezip=%svn_root%\Utilities\smokezip
 set in_background=%svn_root%\Utilities\background
-set in_smv=%svn_root%\SMV\for_bundle\
+set in_smv=%svn_root%\SMV\Build\INTEL_WIN_%platform
 
-set FDSDIR=FDS6
-set fdsname=fds6
 set to_google=%svn_root%\Utilities\to_google
 set out_bundle=%to_google%\%basename%\FDS
-set out_bin=%out_bundle%\%FDSDIR%\bin
+set out_bin=%out_bundle%\FDS6\bin
 set out_textures=%out_bin%\textures
-set out_uninstall=%out_bundle%\%FDSDIR%\Uninstall
-set out_doc=%out_bundle%\%FDSDIR%\Documentation
+set out_uninstall=%out_bundle%\FDS6\Uninstall
+set out_doc=%out_bundle%\FDS6\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
-set out_examples=%out_bundle%\%FDSDIR%\Examples
+set out_examples=%out_bundle%\FDS6\Examples
 
 set manifest=%out_bin%\manifest.html
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
@@ -31,6 +29,7 @@ Rem erase the temporary bundle directory if it already exists
 if exist %out_bundle% rmdir /s /q %out_bundle%
 echo making directories
 mkdir %out_bundle%
+mkdir %out_bundle%\FDS6
 mkdir %out_bin%
 mkdir %out_textures%
 mkdir %out_doc%
@@ -39,46 +38,24 @@ mkdir %out_web%
 mkdir %out_examples%
 mkdir %out_uninstall%
 
-Rem Copy FDS, Smokeview and other needed files to the bin  directory
-
-if "%platform%"=="32" set fds=%fdsname%.exe
-if "%platform%"=="32" set fdsmpi=%fdsname%_mpi.exe
-if "%platform%"=="64" set fds=fds6_win_64.exe
-if "%platform%"=="64" set fdsmpi=fds6_mpi_win_64.exe
-
 echo.
-if "%platform%"=="32" echo copying fds_win_%platform%.exe
-if "%platform%"=="32" copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds6.exe
+echo copying fds_win_%platform%.exe
+copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\.
 
-if "%platform%"=="32" echo copying fds_mpi_win_%platform%.exe
-if "%platform%"=="32" copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds6_mpi.exe
+echo copying fds_mpi_win_%platform%.exe
+copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\.
 
-if "%platform%"=="64" echo copying fds_win_%platform%.exe
-if "%platform%"=="64" copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds6_win_%platform%.exe
+echo copying smokeview_win_%platform%.exe
+copy %in_smv%\smokeview_win_%platform%.exe   %out_bin%\.
 
-if "%platform%"=="64" echo copying fds_mpi_win_%platform%.exe
-if "%platform%"=="64" copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds6_mpi_win_%platform%.exe
+echo copying smokediff_win_%platform%.exe
+copy %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\.
 
-echo copying smokeview%platform%_release.exe
-copy %in_smv%\smokeview%platform%_release.exe   %out_bin%\smokeview.exe
+echo copying smokezip_win_%platform%.exe
+copy %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe     %out_bin%\.
 
-if "%platform%"=="32" echo copying smokediff.exe
-if "%platform%"=="32" copy smokediff.exe     %out_bin%\smokediff.exe
-
-if "%platform%"=="64" echo copying smokediff_64.exe
-if "%platform%"=="64" copy %in_smokediff%\intel_win_64\smokediff_win_64.exe   %out_bin%\smokediff_win_64.exe
-
-if "%platform%"=="32" echo copying smokezip.exe
-if "%platform%"=="32" copy %in_smokezip%\intel_win_32\smokezip.exe     %out_bin%\smokezip.exe
-
-if "%platform%"=="64" echo copying smokezip_win_64.exe
-if "%platform%"=="64" copy %in_smokezip%\intel_win_64\smokezip_win_64.exe   %out_bin%\smokezip_win_64.exe
-
-if "%platform%"=="32" echo copying fds2ascii_win_32.exe
-if "%platform%"=="32" copy %in_fds2ascii%\intel_win_32\fds2ascii_win_32.exe     %out_bin%\fds2ascii.exe
-
-if "%platform%"=="64" echo copying fds2ascii_win_64.exe
-if "%platform%"=="64" copy %in_fds2ascii%\intel_win_64\fds2ascii_win_64.exe     %out_bin%\fds2ascii_win_64.exe
+echo copying fds2ascii_win_%platform%.exe
+copy %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\.
 
 echo copying background.exe
 copy %in_background%\intel_win_%platform%\background.exe %out_bin%\background.exe
@@ -99,58 +76,30 @@ echo. >> %manifest%
 echo Versions:>> %manifest%
 echo. >> %manifest%
 
-if "%platform%"=="64" GOTO endif_32
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds6.exe 2>> %manifest%
+echo | %out_bin%\fds_win_%platform%.exe 2>> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds6_mpi.exe 2>> %manifest%
+echo | %out_bin%\fds_mpi_win_%platform%.exe 2>> %manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\fds2ascii.exe -v >>%manifest%
+%out_bin%\fds2ascii_win_%platform%.exe -v >>%manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\smokeview.exe -v >> %manifest%
+%out_bin%\smokeview_win_%platform%.exe -v >> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\smokediff.exe -v >> %manifest%
+%out_bin%\smokediff_win_%platform%.exe -v >> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\smokezip.exe -v >> %manifest%
-
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-%out_bin%\background.exe -v >> %manifest%
-:endif_32
-
-if "%platform%"=="32" GOTO endif_64 
-echo -------------------------- >> %manifest%
-echo | %out_bin%\fds6_win_64.exe 2>> %manifest%
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-
-echo | %out_bin%\fds6_mpi_win_64.exe 2>> %manifest%
-
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-%out_bin%\fds2ascii_win_64.exe -v >> %manifest%
-
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-%out_bin%\smokeview.exe -v >> %manifest%
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-%out_bin%\smokediff_win_64.exe >> %manifest%
-echo. >> %manifest%
-echo -------------------------- >> %manifest%
-%out_bin%\smokezip_win_64.exe >> %manifest%
+%out_bin%\smokezip_win_%platform%.exe -v >> %manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
 %out_bin%\background.exe -v >> %manifest%
-:endif_64
+
 echo ^</body^> >> %manifest%
 echo ^</html^> >> %manifest%
 
@@ -222,10 +171,10 @@ svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Ve
 
 echo.
 echo Copying wrapup scripts for use in final installation
-copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\%FDSDIR%\wrapup_fds_install.bat"
+copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\FDS6\wrapup_fds_install.bat"
 
-copy "%bundleinfo%\shortcut.exe" "%out_bundle%\%FDSDIR%\shortcut.exe"
-"%bundleinfo%\set_path.exe" "%out_bundle%\%FDSDIR%\set_path.exe"
+copy "%bundleinfo%\shortcut.exe" "%out_bundle%\FDS6\shortcut.exe"
+"%bundleinfo%\set_path.exe" "%out_bundle%\FDS6\set_path.exe"
 
 echo.
 echo Compressing FDS/Smokeview distribution
@@ -243,7 +192,7 @@ cd %to_google%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
-wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\Program Files\FDS\%FDSDIR%" -c wrapup_fds_install.bat
+wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\Program Files\FDS\FDS6" -c wrapup_fds_install.bat
 Rem wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -mokcancel %bundleinfo%\message.txt %basename%.zip -c wrapup_fds_install.bat
 
 start explorer %manifest%
