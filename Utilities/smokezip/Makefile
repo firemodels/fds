@@ -54,7 +54,7 @@ ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5 /iface:stdref
 ms_win_32 : CC        = cl
 ms_win_32 : CPP       = cl
 ms_win_32 : FC        = ifort
-ms_win_32 : exe       = smokezip.exe
+ms_win_32 : exe       = smokezip_win_32.exe
 ms_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib  $(LIB_DIR)/lib_win_intel_32/pthreadVC.lib
 
@@ -66,7 +66,7 @@ intel_win_32 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf /iface:stdre
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
-intel_win_32 : exe       = smokezip.exe
+intel_win_32 : exe       = smokezip_win_32.exe
 
 intel_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_32/zlib.lib $(LIB_DIR)/lib_win_intel_32/pthreadVC.lib
