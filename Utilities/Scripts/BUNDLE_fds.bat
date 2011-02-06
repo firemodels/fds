@@ -37,7 +37,7 @@ mkdir %out_doc%
 
 echo.
 echo Copying files to bin directory
-copy %in_fds%\fds5.exe %out_bin%\.
+copy %in_fds%\fds6.exe %out_bin%\.
 copy %in_smv%\smokeview.exe %out_bin%\.
 copy %in_smv%\objects.svo %out_bin%\.
 copy %in_smv%\pthreadVC.dll %out_bin%\.

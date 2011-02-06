@@ -11,15 +11,17 @@ set in_smokezip=%svn_root%\Utilities\smokezip
 set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV\for_bundle\
 
+set FDSDIR=FDS6
+set fdsname=fds6
 set to_google=%svn_root%\Utilities\to_google
 set out_bundle=%to_google%\%basename%\FDS
-set out_bin=%out_bundle%\FDS5\bin
+set out_bin=%out_bundle%\%FDSDIR%\bin
 set out_textures=%out_bin%\textures
-set out_uninstall=%out_bundle%\FDS5\Uninstall
-set out_doc=%out_bundle%\FDS5\Documentation
+set out_uninstall=%out_bundle%\%FDSDIR%\Uninstall
+set out_doc=%out_bundle%\%FDSDIR%\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
-set out_examples=%out_bundle%\FDS5\Examples
+set out_examples=%out_bundle%\%FDSDIR%\Examples
 
 set manifest=%out_bin%\manifest.html
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
@@ -39,23 +41,23 @@ mkdir %out_uninstall%
 
 Rem Copy FDS, Smokeview and other needed files to the bin  directory
 
-if "%platform%"=="32" set fds5=fds5.exe
-if "%platform%"=="32" set fds5mpi=fds5_mpi.exe
-if "%platform%"=="64" set fds5=fds5_win_64.exe
-if "%platform%"=="64" set fds5mpi=fds5_mpi_win_64.exe
+if "%platform%"=="32" set fds=%fdsname%.exe
+if "%platform%"=="32" set fdsmpi=%fdsname%_mpi.exe
+if "%platform%"=="64" set fds=fds6_win_64.exe
+if "%platform%"=="64" set fdsmpi=fds6_mpi_win_64.exe
 
 echo.
-if "%platform%"=="32" echo copying fds5_win_%platform%.exe
-if "%platform%"=="32" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\fds5.exe
+if "%platform%"=="32" echo copying fds_win_%platform%.exe
+if "%platform%"=="32" copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds6.exe
 
-if "%platform%"=="32" echo copying fds5_mpi_win_%platform%.exe
-if "%platform%"=="32" copy %fdsmpidir%\fds5_mpi_win_%platform%.exe  %out_bin%\fds5_mpi.exe
+if "%platform%"=="32" echo copying fds_mpi_win_%platform%.exe
+if "%platform%"=="32" copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds6_mpi.exe
 
-if "%platform%"=="64" echo copying fds5_win_%platform%.exe
-if "%platform%"=="64" copy %fdsdir%\fds5_win_%platform%.exe         %out_bin%\.
+if "%platform%"=="64" echo copying fds_win_%platform%.exe
+if "%platform%"=="64" copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds6_win_%platform%.exe
 
-if "%platform%"=="64" echo copying fds5_mpi_win_%platform%.exe
-if "%platform%"=="64" copy %fdsmpidir%\fds5_mpi_win_%platform%.exe  %out_bin%\.
+if "%platform%"=="64" echo copying fds_mpi_win_%platform%.exe
+if "%platform%"=="64" copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds6_mpi_win_%platform%.exe
 
 echo copying smokeview%platform%_release.exe
 copy %in_smv%\smokeview%platform%_release.exe   %out_bin%\smokeview.exe
@@ -99,10 +101,10 @@ echo. >> %manifest%
 
 if "%platform%"=="64" GOTO endif_32
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds5.exe 2>> %manifest%
+echo | %out_bin%\fds6.exe 2>> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds5_mpi.exe 2>> %manifest%
+echo | %out_bin%\fds6_mpi.exe 2>> %manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
@@ -125,11 +127,11 @@ echo -------------------------- >> %manifest%
 
 if "%platform%"=="32" GOTO endif_64 
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds5_win_64.exe 2>> %manifest%
+echo | %out_bin%\fds6_win_64.exe 2>> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
 
-echo | %out_bin%\fds5_mpi_win_64.exe 2>> %manifest%
+echo | %out_bin%\fds6_mpi_win_64.exe 2>> %manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
@@ -177,8 +179,8 @@ copy %in_smv%\textures\*.png          %out_textures%\.
 
 echo.
 echo Copying Uninstaller to Uninstall directory
-echo copying uninstall_fds5.bat
-copy "%bundleinfo%\uninstall_fds5.bat"             "%out_uninstall%\Uninstall.bat"
+echo copying uninstall_fds.bat
+copy "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\Uninstall.bat"
 
 echo copying set_path.exe
 copy "%bundleinfo%\set_path.exe"         "%out_uninstall%\set_path.exe"
@@ -218,26 +220,19 @@ echo.
 echo Getting the Verification cases from the repository
 svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
 
-Rem echo.
-Rem echo Make a generic copy of the installation directory
-Rem if exist "%out_bundle%\..\..\FDS_SMOKEVIEW\" rmdir /s /q "%out_bundle%\..\..\FDS_SMOKEVIEW\"
-Rem mkdir "%out_bundle%\..\..\FDS_SMOKEVIEW\"
-Rem xcopy /E "%out_bundle%\..\FDS\*" "%out_bundle%\..\..\FDS_SMOKEVIEW\"
-Rem if exist "%out_bundle%\..\..\FDS_SMOKEVIEW\FDS5\Uninstall" rmdir /s /q "%out_bundle%\..\..\FDS_SMOKEVIEW\FDS5\Uninstall"
-
 echo.
 echo Copying wrapup scripts for use in final installation
-copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\FDS5\wrapup_fds_install.bat"
+copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\%FDSDIR%\wrapup_fds_install.bat"
 
-copy "%bundleinfo%\shortcut.exe" "%out_bundle%\FDS5\shortcut.exe"
-"%bundleinfo%\set_path.exe" "%out_bundle%\FDS5\set_path.exe"
+copy "%bundleinfo%\shortcut.exe" "%out_bundle%\%FDSDIR%\shortcut.exe"
+"%bundleinfo%\set_path.exe" "%out_bundle%\%FDSDIR%\set_path.exe"
 
 echo.
 echo Compressing FDS/Smokeview distribution
 
 cd %to_google%
 if exist %basename%.zip erase %basename%.zip
-cd %basename%\fds\fds5\
+cd %basename%\fds6\
 wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * > winzip.out
 
 Rem create an installation file from the zipped bundle directory
@@ -248,7 +243,7 @@ cd %to_google%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
-wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\Program Files\FDS\FDS5" -c wrapup_fds_install.bat
+wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\Program Files\FDS\%FDSDIR%" -c wrapup_fds_install.bat
 Rem wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -mokcancel %bundleinfo%\message.txt %basename%.zip -c wrapup_fds_install.bat
 
 start explorer %manifest%

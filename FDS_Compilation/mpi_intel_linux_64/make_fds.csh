@@ -4,7 +4,7 @@ set dir=`pwd`
 set target=$dir:t
 
 
-source ../SET_MYFDSENV.sh ib64
+source ../Scripts/set_fort.csh intel64
 if ($status == 1) exit
 
 echo Building $target
