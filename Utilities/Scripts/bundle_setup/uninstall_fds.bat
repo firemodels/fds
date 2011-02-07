@@ -20,7 +20,7 @@ Rem ftype smvDoc=
 
 echo. 
 echo Removing the FDS entry from the Start menu.
-rmdir /q /s "%USERPROFILE%\Start Menu\Programs\FDS5"
+rmdir /q /s "%USERPROFILE%\Start Menu\Programs\FDS6"
 
 
 cd ..
