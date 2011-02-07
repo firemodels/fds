@@ -1,35 +1,40 @@
 @echo off
 
+set fdsversion=FDS6
+
 set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
-set basename=FDS_%fds_version%_SMV_%smv_version%_win%platform%
+set basename=FDS_%fds_version%_SMV_%smv_version%_win_%platform%
 
 set in_pdf=%svn_root%\Manuals\All_PDF_Files
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_smokediff=%svn_root%\Utilities\smokediff
 set in_smokezip=%svn_root%\Utilities\smokezip
 set in_background=%svn_root%\Utilities\background
-set in_smv=%svn_root%\SMV\Build\INTEL_WIN_%platform
+set in_smv=%svn_root%\SMV\Build\INTEL_WIN_%platform%
+set in_for_bundle=%svn_root%\SMV\for_bundle
 
 set to_google=%svn_root%\Utilities\to_google
-set out_bundle=%to_google%\%basename%\FDS
-set out_bin=%out_bundle%\FDS6\bin
+set basedir=%to_google%\%basename%
+set out_bundle=%basedir%\FDS
+set out_bin=%out_bundle%\%fdsversion%\bin
 set out_textures=%out_bin%\textures
-set out_uninstall=%out_bundle%\FDS6\Uninstall
-set out_doc=%out_bundle%\FDS6\Documentation
+set out_uninstall=%out_bundle%\%fdsversion%\Uninstall
+set out_doc=%out_bundle%\%fdsversion%\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
-set out_examples=%out_bundle%\FDS6\Examples
+set out_examples=%out_bundle%\%fdsversion%\Examples
 
 set manifest=%out_bin%\manifest.html
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 
 Rem erase the temporary bundle directory if it already exists
 
-if exist %out_bundle% rmdir /s /q %out_bundle%
+if exist %basedir% rmdir /s /q %basedir%
 echo making directories
+mkdir %basedir%
 mkdir %out_bundle%
-mkdir %out_bundle%\FDS6
+mkdir %out_bundle%\%fdsversion%
 mkdir %out_bin%
 mkdir %out_textures%
 mkdir %out_doc%
@@ -105,26 +110,29 @@ echo ^</html^> >> %manifest%
 
 echo.
 echo Copying auxillary files to the bin directory
-copy %in_smv%\objects.svo             %out_bin%\.
+
+echo copying objects.svo
+copy %in_for_bundle%\objects.svo             %out_bin%\.
 
 if "%platform%"=="32" echo copying pthreadVC.dll
-if "%platform%"=="32" copy %in_smv%\pthreadVC.dll           %out_bin%\.
+if "%platform%"=="32" copy %in_for_bundle%\pthreadVC.dll           %out_bin%\.
 
 if "%platform%"=="64" echo copying pthreadVC2_x64.dll
-if "%platform%"=="64" copy %in_smv%\pthreadVC2_x64.dll         %out_bin%\.
+if "%platform%"=="64" copy %in_for_bundle%\pthreadVC2_x64.dll         %out_bin%\.
 
 if "%platform%"=="32" echo copying glew32.dll
-if "%platform%"=="32" copy %in_smv%\glew32.dll              %out_bin%\.
+if "%platform%"=="32" copy %in_for_bundle%\glew32.dll              %out_bin%\.
 
 if "%platform%"=="64" echo copying glew32_x64.dll
-if "%platform%"=="64" copy %in_smv%\glew32_x64.dll              %out_bin%\.
+if "%platform%"=="64" copy %in_for_bundle%\glew32_x64.dll              %out_bin%\.
 
+echo copying smokeview.ini
+copy %in_for_bundle%\smokeview.ini           %out_bin%\.
 
-copy %in_smv%\smokeview.ini           %out_bin%\.
 echo.
 echo Copying textures to the bin\textures directory
-copy %in_smv%\textures\*.jpg          %out_textures%\.
-copy %in_smv%\textures\*.png          %out_textures%\.
+copy %in_for_bundle%\textures\*.jpg          %out_textures%\.
+copy %in_for_bundle%\textures\*.png          %out_textures%\.
 
 echo.
 echo Copying Uninstaller to Uninstall directory
@@ -138,26 +146,49 @@ Rem Include documentation in the bundle only if the variable, docs_include_in_bu
 Rem is not set to 0.  This variable is defined in the fds_smv_env.bat setup  file
 
 echo.
-echo Copy converted FDS release notes
+echo copying FDS_Release_Notes.htm
 copy "%bundleinfo%\FDS_Release_Notes.htm" "%out_guides%\FDS_Release_Notes.htm"
 
 echo.
-echo Copying Documentation to the Documentation directory
+echo copying Documentation to the Documentation directory
 
-copy %in_pdf%\FDS_User_Guide.pdf               %out_guides%\.
-copy %in_pdf%\SMV_User_Guide.pdf               %out_guides%\.
+echo copying FDS_User_Guide.pdf
+copy %in_pdf%\FDS_User_Guide.pdf %out_guides%\.
+
+echo copying SMV_User_Guide.pdf
+copy %in_pdf%\SMV_User_Guide.pdf %out_guides%\.
+
+echo copying SMV_Technical_Reference_Guide.pdf
 copy %in_pdf%\SMV_Technical_Reference_Guide.pdf %out_guides%\.
+
+echo copying FDS_Technical_Reference_Guide.pdf
 copy %in_pdf%\FDS_Technical_Reference_Guide.pdf %out_guides%\.
-copy "%in_smv%\readme.html"                      "%out_guides%\Smokeview_release_notes.html"
+
+echo copying readme.html
+copy "%in_for_bundle%\readme.html" "%out_guides%\Smokeview_release_notes.html"
 
 echo.
-echo Copying web page shortcuts
+echo copying web page shortcuts
+
+echo copying Overview.html
 copy "%bundleinfo%\Overview.html"             "%out_doc%\Overview.html"
+
+echo copying FDS_Web_Site.url
 copy "%bundleinfo%\FDS_Web_Site.url"          "%out_web%\Official_Web_Site.url"
+
+echo copying Updates.url
 copy "%bundleinfo%\Updates.url"               "%out_web%\Software_Updates.url"
+
+echo copying Docs.url
 copy "%bundleinfo%\Docs.url"               "%out_web%\Documentation_Updates.url"
+
+echo copying FDS_Development_Web_Site.url
 copy "%bundleinfo%\FDS_Development_Web_Site.url" "%out_web%\Developer_Web_Site.url"
+
+echo copying discussion_group.url
 copy "%bundleinfo%\discussion_group.url"          "%out_web%\Discussion_Group.url"
+
+echo copying issue_tracker.url
 copy "%bundleinfo%\issue_tracker.url"          "%out_web%\Issue_Tracker.url"
 
 Rem Copy readme_examples file to Examples directory to let user download all examples
@@ -165,23 +196,29 @@ Rem Copy readme_examples file to Examples directory to let user download all exa
 echo.
 echo Copying readme_examples.html to the Examples directory
 copy %bundleinfo%\readme_examples.html "%out_examples%\Examples notes.html"
+
 echo.
 echo Getting the Verification cases from the repository
 svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples%
 
 echo.
 echo Copying wrapup scripts for use in final installation
-copy "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\FDS6\wrapup_fds_install.bat"
 
-copy "%bundleinfo%\shortcut.exe" "%out_bundle%\FDS6\shortcut.exe"
-"%bundleinfo%\set_path.exe" "%out_bundle%\FDS6\set_path.exe"
+echo copying wrapup_fds_install_%platform%.bat
+copy "%bundleinfo%\wrapup_fds_install_%platform%.bat" "%out_bundle%\%fdsversion%\wrapup_fds_install.bat
+
+echo copying shortcut.exe
+copy "%bundleinfo%\shortcut.exe" "%out_bundle%\%fdsversion%\shortcut.exe"
+
+echo copying set_path.exe
+copy "%bundleinfo%\set_path.exe" "%out_bundle%\%fdsversion%\set_path.exe"
 
 echo.
 echo Compressing FDS/Smokeview distribution
 
 cd %to_google%
 if exist %basename%.zip erase %basename%.zip
-cd %basename%\fds6\
+cd %out_bundle%\%fdsversion%\
 wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * > winzip.out
 
 Rem create an installation file from the zipped bundle directory
@@ -192,7 +229,7 @@ cd %to_google%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
-wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\Program Files\FDS\FDS6" -c wrapup_fds_install.bat
+wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\Program Files\FDS\%fdsversion%" -c wrapup_fds_install.bat
 Rem wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -mokcancel %bundleinfo%\message.txt %basename%.zip -c wrapup_fds_install.bat
 
 start explorer %manifest%
