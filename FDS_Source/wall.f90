@@ -1393,7 +1393,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS+N_VIRTUAL_WA
          ELSE
             QDXKF = (HEAT_TRANS_COEF(IW)*(TMP_G   - 0.5_EB*TMP_F(IW)) + QRADIN(IW) + 3.*E_WALL(IW)*SIGMA*TMP_F(IW)**4 + Q_WATER_F) &
                   /(DXKF+RFACF)
-            QDXKB = (HTCB*               (TMP_BACK - 0.5_EB*TMP_B(IW)) + QRADINB    + 3.*E_WALLB   *SIGMA*TMP_B(IW)**4 + Q_WATER_B) &
+            QDXKB = (HTCB*               (TMP_BACK - 0.5_EB*TMP_B(IW)) + QRADINB   + 3.*E_WALLB   *SIGMA*TMP_B(IW)**4 + Q_WATER_B) &
                   /(DXKB+RFACB)
          ENDIF
          CCS(1)   = CCS(1)   - BBS(1)  *QDXKF
