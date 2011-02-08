@@ -18,7 +18,8 @@ setenv fdsmpidir mpi_intel_osx_64
 
 setenv FORTLIB LIB64
 
-setenv smokeview smv5_osx_64
+setenv smokeviewdir INTEL_OSX_64
+setenv smokeview smokeview_osx_64
 setenv smokezip smokezip_osx_64
 setenv smokediff smokediff_osx_64
 

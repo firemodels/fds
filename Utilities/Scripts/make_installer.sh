@@ -1,11 +1,26 @@
 #!/bin/bash
+EXPECTED_ARGS=3
+
+if [ $# -ne $EXPECTED_ARGS ]
+then
+  echo "Usage: make_installer.sh FORTLIB FDS_TAR INSTALLER"
+  echo ""
+  echo "Creates an FDS/Smokeview installer sh script. "
+  echo ""
+  echo "  FORTLIB - directory containing run-time libraries"
+  echo "  FDS_TAR - compressed tar file contining distribution"
+  echo "  INSTALLER - .sh script containing self-extracting installer"
+  echo
+  exit
+fi
+
 FORTLIB=$1
 FDS_TAR=$2
 INSTALLER=$3
 
 cat << EOF > $INSTALLER
 #!/bin/bash
-FDS_root=~/FDS6
+FDS_root=~/FDS/FDS6
 
 #
 # get FDS root directory
@@ -24,11 +39,11 @@ fi
 if [ ! -d \$FDS_root ]
 then
 echo "creating directory \$FDS_root"
-mkdir \$FDS_root>&/dev/null
+mkdir -p \$FDS_root>&/dev/null
 else
 while true; do
     echo "The directory, \$FDS_root, already exists."
-    read -p "Do you wish to overwrite it? (yes/no)" yn
+    read -p "Do you wish to overwrite contents? (yes/no)" yn
     case \$yn in
         [Yy]* ) break;;
         [Nn]* ) echo "Installation cancelled";exit;;
