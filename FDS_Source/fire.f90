@@ -30,6 +30,8 @@ IF (EVACUATION_ONLY(NM)) RETURN
 
 TNOW=SECOND()
 
+IF (INIT_HRRPUV) RETURN
+
 CALL POINT_TO_MESH(NM)
 
 ! Upper bounds on local HRR per unit volume
