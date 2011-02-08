@@ -17,7 +17,8 @@ setenv smokediffdir INTEL_OSX_32
 setenv fdsdir intel_osx_32
 setenv fdsmpidir mpi_intel_osx_32
 
-setenv smokeview smv5_osx_32
+setenv smokeviewdir INTEL_OSX_32
+setenv smokeview smokeview_osx_32
 setenv smokezip smokezip_osx_32
 setenv smokediff smokediff_osx_32
 

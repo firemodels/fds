@@ -17,7 +17,8 @@ setenv smokediffdir INTEL_LINUX_64
 setenv fdsdir intel_linux_64
 setenv fdsmpidir mpi_intel_linux_64
 
-setenv smokeview smv5_linux_64
+setenv smokeviewdir INTEL_LINUX_64
+setenv smokeview smokeview_linux_64
 setenv smokezip smokezip_linux_64
 setenv smokediff smokediff_linux_64
 

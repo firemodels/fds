@@ -12,7 +12,7 @@ set googledir=$fds_smvroot/Utilities/to_google
 set bundledir=$bundlebase
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
 set mandir=$fds_smvroot/Manuals/All_PDF_Files
-set smvbindir=$scp_fds_smvroot/SMV/bin
+set smvbindir=$scp_fds_smvroot/SMV/Build/$smokeviewdir
 set forbundle=$fds_smvroot/SMV/for_bundle
 set texturedir=$forbundle/textures
 set fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
@@ -152,6 +152,7 @@ cat <<EOF>>$fullmanifest
 EOF
 
 cp $fullmanifest ~/$manifest
+cp $fullmanifest $googledir//$manifest
 cat $fullmanifest | Mail -s " $PLATFORM" `whoami`
 
 echo Building archive
