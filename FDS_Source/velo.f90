@@ -53,11 +53,11 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS,S12,S13,S23,DELTA,CS,YY_GET(1:N_GAS_SPECIES), &
-            DAMPING_FACTOR,MU_WALL,YPLUS,TMP_WGT,AA,A_IJ(3,3),BB,B_IJ(3,3),NU_EDDY
+            DAMPING_FACTOR,MU_WALL,YPLUS,TMP_WGT,AA,A_IJ(3,3),BB,B_IJ(3,3),NU_EDDY,RHOT,RHOB,DRHODZ,DELTA_G
 INTEGER :: I,J,K,ITMP,IIG,JJG,KKG,II,JJ,KK,IW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP=>NULL()
-REAL(EB), PARAMETER :: APLUS=26._EB,C_EDDY=0.07_EB
+REAL(EB), PARAMETER :: APLUS=26._EB,C_EDDY=0.07_EB,C_GRAV=2._EB
  
 CALL POINT_TO_MESH(NM)
  
@@ -124,6 +124,13 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+
+            IF (TWO_D) THEN
+               DELTA=SQRT(DX(I)*DZ(K))
+            ELSE
+               DELTA=(DX(I)*DY(J)*DZ(K))**ONTH
+            ENDIF
+            IF (USE_MAX_FILTER_WIDTH) DELTA=MAX(DX(I),DY(J),DZ(K))
             
             DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
             DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
@@ -169,27 +176,34 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
                NU_EDDY = C_EDDY*SQRT(BB/AA)  ! Vreman, Eq. (5)
     
                MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*NU_EDDY
-               CYCLE
             
+            ELSE VREMAN_IF
+
+               S12 = 0.5_EB*(DUDY+DVDX)
+               S13 = 0.5_EB*(DUDZ+DWDX)
+               S23 = 0.5_EB*(DVDZ+DWDY)
+               SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
+            
+               IF (DYNSMAG .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+                  MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*CSD2_DYNSMAG(I,J,K)*SS
+               ELSE
+                  MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
+               ENDIF
+
             ENDIF VREMAN_IF
 
-            S12 = 0.5_EB*(DUDY+DVDX)
-            S13 = 0.5_EB*(DUDZ+DWDX)
-            S23 = 0.5_EB*(DVDZ+DWDY)
-            SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
-            
-            IF (DYNSMAG .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*CSD2_DYNSMAG(I,J,K)*SS
-            ELSE
-               IF (TWO_D) THEN
-                  DELTA = SQRT(DX(I)*DZ(K))
-               ELSE
-                  DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
+            BUOYANCY_IF: IF (BUOYANCY_PRODUCTION .AND. GRAV>0._EB) THEN
+               RHOT=RHOP(I,J,K)
+               RHOB=RHOP(I,J,K)
+               IF (.NOT.SOLID(CELL_INDEX(I,J,K+1))) RHOT=0.5_EB*(RHOP(I,J,K)+RHOP(I,J,K+1))
+               IF (.NOT.SOLID(CELL_INDEX(I,J,K-1))) RHOB=0.5_EB*(RHOP(I,J,K)+RHOP(I,J,K-1))
+               DRHODZ = MAX(1.E-10_EB,RDZ(K)*(RHOT-RHOB))
+               DELTA_G = 2._EB/GRAV*(RHOP(I,J,K)*CS**2*SS/DRHODZ/C_GRAV)**2
+               IF (DELTA > DELTA_G) THEN
+                  MU(I,J,K) = C_GRAV*DELTA**3*SQRT(GRAV/(2._EB*DELTA))*DRHODZ
                ENDIF
-               IF (USE_MAX_FILTER_WIDTH) DELTA=MAX(DX(I),DY(J),DZ(K))
-               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
-            ENDIF
-            
+            ENDIF BUOYANCY_IF
+
          ENDDO
       ENDDO
    ENDDO

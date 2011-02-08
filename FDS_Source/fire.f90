@@ -65,7 +65,7 @@ REAL(EB) :: Y_FU_0,Y_P_0,Y_LIMITER,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DE
             DYAIR,DELTAH_F,TAU_D,TAU_U,TAU_G,EPSK,KSGS,CPBAR_F_0,CPBAR_F_N,CPBAR_G_0,CPBAR_G_N,&
             DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS2,S12,S13,S23, &
             Y_SPECIES_OLD(1:N_Y_ARRAY),Y_SPECIES_DIFF(1:N_Y_ARRAY),MW, &
-            WK,WKM1,WKP1,DDRHOW,H_G_0,H_G_N
+            H_G_0,H_G_N
 REAL(EB), PARAMETER :: Y_FU_MIN=1.E-10_EB,Y_O2_MIN=1.E-10_EB,X_O2_MIN=1.E-16_EB,X_FU_MIN=1.E-16_EB,Y_CO_MIN=1.E-10_EB
 INTEGER :: NODETS,I,J,K,II,JJ,KK,IOR,IC,IW!,ITMP,NS
 REAL(EB), POINTER, DIMENSION(:,:,:) :: Y_O2=>NULL(),Y_O2_NEW=>NULL(), &
@@ -257,17 +257,7 @@ DO K=1,KBAR
             SS2 = 2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2))
             
             ! ke dissipation rate, assumes production=dissipation
-            
-            IF (BUOYANCY_PRODUCTION) THEN
-               WK=0.5_EB*(WW(I,J,K)+WW(I,J,MAX(K-1,0)))
-               WKP1=0.5_EB*(WW(I,J,MIN(K+1,KBAR))+WW(I,J,K))
-               WKM1=0.5_EB*(WW(I,J,MAX(K-1,0))+WW(I,J,MAX(K-2,0)))
-               DDRHOW = RDZ(K)*RDZ(K)*(RHO(I,J,MAX(K-1,1))*WKM1 - 2._EB*RHO(I,J,K)*WK + RHO(I,J,MIN(K+1,KBAR))*WKP1)
-               ! gravity term comes from a Taylor expansion of the subgrid ke production
-               EPSK = MAX(0._EB,(MU(I,J,K)*SS2 - GVEC(3)*(DELTA**2)/24._EB*DDRHOW)/RHO(I,J,K))
-            ELSE
-               EPSK = MU(I,J,K)*SS2/RHO(I,J,K)
-            ENDIF
+            EPSK = MU(I,J,K)*(SS2-TWTH*(DUDX+DVDY+DWDZ)**2)/RHO(I,J,K)
 
             KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH  ! estimate of subgrid ke, from Kolmogorov spectrum
 
