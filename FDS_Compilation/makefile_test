@@ -33,6 +33,41 @@ objwin_mpi = $(obj_mpi:.o=.obj)
 
 # General Purpose Rules
 
+objects_serial_linux = $(obj_serial)
+objects_mpi_linux = $(obj_mpi)
+
+no_target:
+	@echo \******** You did not specify a make target \********
+	@echo Please read the comments at the top of the makefile
+
+
+
+.SUFFIXES: .c .f90 .o .obj
+
+# Windows Intel Compiler, version 11
+
+#*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
+#    ..\Scripts\iclvars ia32
+#    ..\Scripts\ifortvars ia32
+ 
+#*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
+#    ..\Scripts\iclvars intel64
+#    ..\Scripts\ifortvars intel64
+
+intel_win : 
+# Check for platform-setup
+# If PLATFORM=32bit the filename contains "32" and the stacksize for 32bit is set.
+# If PLATFORM=64bit the filename contains "64" and the stacksize for 64bit is set
+ifeq ($(PLATFORM),32bit)
+PLATFORM_FLAG = 32
+STACK_WIN_INTEL = /F100000000
+endif
+ifeq ($(PLATFORM),64bit)
+PLATFORM_FLAG = 64
+STACK_WIN_INTEL = /F1000000000
+endif
+
+
 # If you want to compile FDS with isob.c file, run the make-utilty with this syntax (Intel-Win only):
 # make target COMPILE_ISOB=TRUE , e.g. make intel_win_32_debug COMPILE_ISOB=TRUE
 # on all other targets, the compilation of isob.c is default
@@ -42,316 +77,98 @@ objects_mpi_win = $(objwin_mpi)
 else
 objects_serial_win = $(objwinf_serial)
 objects_mpi_win = $(objwinf_mpi)
-isob_win32_lib = ../win32lib/isob.obj
-isob_win64_lib = ../win64lib/isob.obj
+isob_win_lib = ../win$(PLATFORM_FLAG)lib/isob.obj
 endif
 
-objects_serial_linux = $(obj_serial)
-objects_mpi_linux = $(obj_mpi)
 
-no_target:
-	@echo \******** You did not specify a make target \********
-	@echo Please read the comments at the top of the makefile
+# Check for MPI
+# If MPI=TRUE setup library paths and use MPI-objects to build FDS.
+# Also the filename now includes "_mpi"
+ifeq ($(MPI),TRUE)
+MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
+MPIINCLUDE = /I "c:\program files\mpich2\include"
+MPI_NAME = _mpi
+ifeq ($(COMPILE_ISOB),TRUE)
+objects = $(objects_mpi_win)
+endif
+else
+objects = $(objects_serial_win)
+endif
 
-.SUFFIXES: .c .f90 .o .obj
 
-# Windows Intel Compiler, version 11
+# Check for BUILD
+# If BUILD=RELEASE optimized flags are used to compile, 
+# if BUILD=DEBUG debug flags are used and the filename ends with "_db"
+ifeq ($(BUILD),RELEASE)
+FFLAGS = -O2
+CFLAGS = -O2 -Dpp_noappend
+endif
+ifeq ($(BUILD),DEBUG)
+FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f95
+CFLAGS = -Dpp_noappend
+BUILD_NAME = _db
+endif
 
- #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
- #    ..\Scripts\iclvars ia32
- #    ..\Scripts\ifortvars ia32
 
-# Define the stack reserve amount for Intel Compiler on Windows
-STACK_WIN_INTEL32 = /F100000000
-STACK_WIN_INTEL64 = /F1000000000
+# Check for OpenMP
+# If OPENMP=TRUE some files are compiled with the OpenMP-flag and the filename contains "_openmp"
+ifeq ($(OPENMP),TRUE)
+FOPENMPFLAGS = /Qopenmp
+OPENMP_NAME = _openmp
+endif
 
-intel_win_32_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f95
-intel_win_32_db : CFLAGS = -Dpp_noappend
-intel_win_32_db : FFLAGS_CONS = $(FFLAGS)
-intel_win_32_db : FFLAGS_CTRL = $(FFLAGS)
-intel_win_32_db : FFLAGS_DATA = $(FFLAGS)
-intel_win_32_db : FFLAGS_DEVC = $(FFLAGS)
-intel_win_32_db : FFLAGS_DIVG = $(FFLAGS)
-intel_win_32_db : FFLAGS_DUMP = $(FFLAGS)
-intel_win_32_db : FFLAGS_EVAC = $(FFLAGS)
-intel_win_32_db : FFLAGS_FIRE = $(FFLAGS)
-intel_win_32_db : FFLAGS_FUNC = $(FFLAGS)
-intel_win_32_db : FFLAGS_HVAC = $(FFLAGS)
-intel_win_32_db : FFLAGS_IEVA = $(FFLAGS)
-intel_win_32_db : FFLAGS_INIT = $(FFLAGS)
-intel_win_32_db : FFLAGS_IRAD = $(FFLAGS)
-intel_win_32_db : FFLAGS_MAIN = $(FFLAGS)
-intel_win_32_db : FFLAGS_MASS = $(FFLAGS)
-intel_win_32_db : FFLAGS_MESH = $(FFLAGS)
-intel_win_32_db : FFLAGS_MPIP = $(FFLAGS)
-intel_win_32_db : FFLAGS_MPIS = $(FFLAGS)
-intel_win_32_db : FFLAGS_PART = $(FFLAGS)
-intel_win_32_db : FFLAGS_POIS = $(FFLAGS)
-intel_win_32_db : FFLAGS_PREC = $(FFLAGS)
-intel_win_32_db : FFLAGS_PRES = $(FFLAGS)
-intel_win_32_db : FFLAGS_RADI = $(FFLAGS)
-intel_win_32_db : FFLAGS_READ = $(FFLAGS)
-intel_win_32_db : FFLAGS_SCRC = $(FFLAGS)
-intel_win_32_db : FFLAGS_SMVV = $(FFLAGS)
-intel_win_32_db : FFLAGS_TURB = $(FFLAGS)
-intel_win_32_db : FFLAGS_TYPE = $(FFLAGS)
-intel_win_32_db : FFLAGS_VEGE = $(FFLAGS)
-intel_win_32_db : FFLAGS_VELO = $(FFLAGS)
-intel_win_32_db : FFLAGS_WALL = $(FFLAGS)
-intel_win_32_db : FFLAGS_LINKER = $(FFLAGS)
-intel_win_32_db : FCOMPL = ifort
-intel_win_32_db : CCOMPL = cl
-intel_win_32_db : obj = fds_win_32_db
-intel_win_32_db : $(objects_serial_win)
-	$(FCOMPL) -o $(obj) $(FFLAGS_LINKER)  $(STACK_WIN_INTEL32) $(objects_serial_win) $(isob_win32_lib)
+intel_win : FFLAGS += $(MPIINCLUDE)
+#intel_win : CFLAGS = -O2 -Dpp_noappend
+intel_win : FFLAGS_CONS = $(FFLAGS)
+intel_win : FFLAGS_CTRL = $(FFLAGS)
+intel_win : FFLAGS_DATA = $(FFLAGS)
+intel_win : FFLAGS_DEVC = $(FFLAGS)
+intel_win : FFLAGS_DIVG = $(FFLAGS)
+intel_win : FFLAGS_DUMP = $(FFLAGS)
+intel_win : FFLAGS_EVAC = $(FFLAGS)
+intel_win : FFLAGS_FIRE = $(FFLAGS)
+intel_win : FFLAGS_FUNC = $(FFLAGS) $(FOPENMPFLAGS)
+intel_win : FFLAGS_HVAC = $(FFLAGS)
+intel_win : FFLAGS_IEVA = $(FFLAGS)
+intel_win : FFLAGS_INIT = $(FFLAGS)
+intel_win : FFLAGS_IRAD = $(FFLAGS)
+intel_win : FFLAGS_MAIN = $(FFLAGS)
+intel_win : FFLAGS_MASS = $(FFLAGS)
+intel_win : FFLAGS_MESH = $(FFLAGS)
+intel_win : FFLAGS_MPIP = $(FFLAGS)
+intel_win : FFLAGS_MPIS = $(FFLAGS)
+intel_win : FFLAGS_PART = $(FFLAGS)
+intel_win : FFLAGS_POIS = $(FFLAGS)
+intel_win : FFLAGS_PREC = $(FFLAGS)
+intel_win : FFLAGS_PRES = $(FFLAGS)
+intel_win : FFLAGS_RADI = $(FFLAGS)
+intel_win : 
+# Demonstrate how to setup a special flag for compiling read.f90
+# If a BUILD=RELEASE every time read.f90 is compiled with /Od flag instead of -02.
+# All other files are compiled with -O2.
+# In case of BUILD=DEBUG the debug flags are used
+ifeq ($(BUILD),RELEASE)
+FFLAGS_READ = /Od $(MPIINCLUDE)
+else
+FFLAGS_READ = $(FFLAGS)
+endif
+intel_win : FFLAGS_SCRC = $(FFLAGS)
+intel_win : FFLAGS_SMVV = $(FFLAGS)
+intel_win : FFLAGS_TURB = $(FFLAGS)
+intel_win : FFLAGS_TYPE = $(FFLAGS)
+intel_win : FFLAGS_VEGE = $(FFLAGS)
+intel_win : FFLAGS_VELO = $(FFLAGS)
+intel_win : FFLAGS_WALL = $(FFLAGS)
+intel_win : FFLAGS_LINKER = $(FFLAGS)
+intel_win : FCOMPL = ifort
+intel_win : CCOMPL = cl
+intel_win : obj = fds$(OPENMP_NAME)$(MPI_NAME)_win_$(PLATFORM_FLAG)$(BUILD_NAME)
+intel_win : $(objects)
+	$(FCOMPL) -o $(obj) $(FFLAGS_LINKER) $(STACK_WIN_INTEL) $(objects) $(isob_win_lib) $(MPILIB)
 
-intel_win_32 : FFLAGS = -O2 /Qvec_report0
-intel_win_32 : CFLAGS = -O2 -Dpp_noappend
-intel_win_32 : FFLAGS_CONS = $(FFLAGS)
-intel_win_32 : FFLAGS_CTRL = $(FFLAGS)
-intel_win_32 : FFLAGS_DATA = $(FFLAGS)
-intel_win_32 : FFLAGS_DEVC = $(FFLAGS)
-intel_win_32 : FFLAGS_DIVG = $(FFLAGS)
-intel_win_32 : FFLAGS_DUMP = $(FFLAGS)
-intel_win_32 : FFLAGS_EVAC = $(FFLAGS)
-intel_win_32 : FFLAGS_FIRE = $(FFLAGS)
-intel_win_32 : FFLAGS_FUNC = $(FFLAGS)
-intel_win_32 : FFLAGS_HVAC = $(FFLAGS)
-intel_win_32 : FFLAGS_IEVA = $(FFLAGS)
-intel_win_32 : FFLAGS_INIT = $(FFLAGS)
-intel_win_32 : FFLAGS_IRAD = $(FFLAGS)
-intel_win_32 : FFLAGS_MAIN = $(FFLAGS)
-intel_win_32 : FFLAGS_MASS = $(FFLAGS)
-intel_win_32 : FFLAGS_MESH = $(FFLAGS)
-intel_win_32 : FFLAGS_MPIP = $(FFLAGS)
-intel_win_32 : FFLAGS_MPIS = $(FFLAGS)
-intel_win_32 : FFLAGS_PART = $(FFLAGS)
-intel_win_32 : FFLAGS_POIS = $(FFLAGS)
-intel_win_32 : FFLAGS_PREC = $(FFLAGS)
-intel_win_32 : FFLAGS_PRES = $(FFLAGS)
-intel_win_32 : FFLAGS_RADI = $(FFLAGS)
-intel_win_32 : FFLAGS_READ = $(FFLAGS)
-intel_win_32 : FFLAGS_SCRC = $(FFLAGS)
-intel_win_32 : FFLAGS_SMVV = $(FFLAGS)
-intel_win_32 : FFLAGS_TURB = $(FFLAGS)
-intel_win_32 : FFLAGS_TYPE = $(FFLAGS)
-intel_win_32 : FFLAGS_VEGE = $(FFLAGS)
-intel_win_32 : FFLAGS_VELO = $(FFLAGS)
-intel_win_32 : FFLAGS_WALL = $(FFLAGS)
-intel_win_32 : FFLAGS_LINKER = $(FFLAGS)
-intel_win_32 : FCOMPL = ifort
-intel_win_32 : CCOMPL = cl
-intel_win_32 : obj = fds_win_32
-intel_win_32 : $(objects_serial_win)
-	$(FCOMPL) -o $(obj) $(FFLAGS_LINKER)  $(STACK_WIN_INTEL32) $(objects_serial_win) $(isob_win32_lib)
 
-intel_win_32all : FFLAGS = -O2 /Qvec_report0
-intel_win_32all : CFLAGS = -O2 -Dpp_noappend
-intel_win_32all : FFLAGS_CONS = $(FFLAGS)
-intel_win_32all : FFLAGS_CTRL = $(FFLAGS)
-intel_win_32all : FFLAGS_DATA = $(FFLAGS)
-intel_win_32all : FFLAGS_DEVC = $(FFLAGS)
-intel_win_32all : FFLAGS_DIVG = $(FFLAGS)
-intel_win_32all : FFLAGS_DUMP = $(FFLAGS)
-intel_win_32all : FFLAGS_EVAC = $(FFLAGS)
-intel_win_32all : FFLAGS_FIRE = $(FFLAGS)
-intel_win_32all : FFLAGS_FUNC = $(FFLAGS)
-intel_win_32all : FFLAGS_HVAC = $(FFLAGS)
-intel_win_32all : FFLAGS_IEVA = $(FFLAGS)
-intel_win_32all : FFLAGS_INIT = $(FFLAGS)
-intel_win_32all : FFLAGS_IRAD = $(FFLAGS)
-intel_win_32all : FFLAGS_MAIN = $(FFLAGS)
-intel_win_32all : FFLAGS_MASS = $(FFLAGS)
-intel_win_32all : FFLAGS_MESH = $(FFLAGS)
-intel_win_32all : FFLAGS_MPIP = $(FFLAGS)
-intel_win_32all : FFLAGS_MPIS = $(FFLAGS)
-intel_win_32all : FFLAGS_PART = $(FFLAGS)
-intel_win_32all : FFLAGS_POIS = $(FFLAGS)
-intel_win_32all : FFLAGS_PREC = $(FFLAGS)
-intel_win_32all : FFLAGS_PRES = $(FFLAGS)
-intel_win_32all : FFLAGS_RADI = $(FFLAGS)
-intel_win_32all : FFLAGS_READ = $(FFLAGS)
-intel_win_32all : FFLAGS_SCRC = $(FFLAGS)
-intel_win_32all : FFLAGS_SMVV = $(FFLAGS)
-intel_win_32all : FFLAGS_TURB = $(FFLAGS)
-intel_win_32all : FFLAGS_TYPE = $(FFLAGS)
-intel_win_32all : FFLAGS_VEGE = $(FFLAGS)
-intel_win_32all : FFLAGS_VELO = $(FFLAGS)
-intel_win_32all : FFLAGS_WALL = $(FFLAGS)
-intel_win_32all : FFLAGS_LINKER = $(FFLAGS)
-intel_win_32all : FCOMPL = ifort
-intel_win_32all : CCOMPL = cl
-intel_win_32all : obj = fds_win_32
-intel_win_32all : $(objects_serial_win)
-	$(FCOMPL) -o $(obj) $(FFLAGS_LINKER)  $(STACK_WIN_INTEL32) $(objects_serial_win)
 
-mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
-mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
-mpi_intel_win_32 : FFLAGS = -O2 /I $(MPIINCLUDE)
-mpi_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
-mpi_intel_win_32 : FFLAGS_CONS = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_CTRL = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_DATA = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_DEVC = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_DIVG = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_DUMP = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_EVAC = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_FIRE = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_FUNC = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_HVAC = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_IEVA = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_INIT = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_IRAD = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_MAIN = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_MASS = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_MESH = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_MPIP = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_MPIS = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_PART = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_POIS = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_PREC = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_PRES = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_RADI = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_READ = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_SCRC = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_SMVV = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_TURB = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_TYPE = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_VEGE = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_VELO = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_WALL = $(FFLAGS)
-mpi_intel_win_32 : FFLAGS_LINKER = $(FFLAGS)
-mpi_intel_win_32 : FCOMPL = ifort
-mpi_intel_win_32 : CCOMPL = cl
-mpi_intel_win_32 : obj = fds_mpi_win_32
-mpi_intel_win_32 : $(objects_mpi_win)
-	$(FCOMPL) -o $(obj) $(FFLAGS_LINKER)  $(STACK_WIN_INTEL32) $(objects_mpi_win) $(isob_win32_lib) $(MPILIB)
 
- #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
- #    ..\Scripts\iclvars intel64
- #    ..\Scripts\ifortvars intel64
-
-intel_win_64 : FFLAGS = -O2 /Qvec_report0
-intel_win_64 : CFLAGS = -O2 -Dpp_noappend
-intel_win_64 : FFLAGS_CONS = $(FFLAGS)
-intel_win_64 : FFLAGS_CTRL = $(FFLAGS)
-intel_win_64 : FFLAGS_DATA = $(FFLAGS)
-intel_win_64 : FFLAGS_DEVC = $(FFLAGS)
-intel_win_64 : FFLAGS_DIVG = $(FFLAGS)
-intel_win_64 : FFLAGS_DUMP = $(FFLAGS)
-intel_win_64 : FFLAGS_EVAC = $(FFLAGS)
-intel_win_64 : FFLAGS_FIRE = $(FFLAGS)
-intel_win_64 : FFLAGS_FUNC = $(FFLAGS)
-intel_win_64 : FFLAGS_HVAC = $(FFLAGS)
-intel_win_64 : FFLAGS_IEVA = $(FFLAGS)
-intel_win_64 : FFLAGS_INIT = $(FFLAGS)
-intel_win_64 : FFLAGS_IRAD = $(FFLAGS)
-intel_win_64 : FFLAGS_MAIN = $(FFLAGS)
-intel_win_64 : FFLAGS_MASS = $(FFLAGS)
-intel_win_64 : FFLAGS_MESH = $(FFLAGS)
-intel_win_64 : FFLAGS_MPIP = $(FFLAGS)
-intel_win_64 : FFLAGS_MPIS = $(FFLAGS)
-intel_win_64 : FFLAGS_PART = $(FFLAGS)
-intel_win_64 : FFLAGS_POIS = $(FFLAGS)
-intel_win_64 : FFLAGS_PREC = $(FFLAGS)
-intel_win_64 : FFLAGS_PRES = $(FFLAGS)
-intel_win_64 : FFLAGS_RADI = $(FFLAGS)
-intel_win_64 : FFLAGS_READ = $(FFLAGS)
-intel_win_64 : FFLAGS_SCRC = $(FFLAGS)
-intel_win_64 : FFLAGS_SMVV = $(FFLAGS)
-intel_win_64 : FFLAGS_TURB = $(FFLAGS)
-intel_win_64 : FFLAGS_TYPE = $(FFLAGS)
-intel_win_64 : FFLAGS_VEGE = $(FFLAGS)
-intel_win_64 : FFLAGS_VELO = $(FFLAGS)
-intel_win_64 : FFLAGS_WALL = $(FFLAGS)
-intel_win_64 : FFLAGS_LINKER = $(FFLAGS)
-intel_win_64 : FCOMPL = ifort
-intel_win_64 : CCOMPL = cl
-intel_win_64 : obj = fds_win_64
-intel_win_64 : $(objects_serial_win)
-	$(FCOMPL) -o $(obj) $(FFLAGS_LINKER) $(LFLAGS) $(STACK_WIN_INTEL64) $(objects_serial_win) $(isob_win64_lib)
-
-intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f95
-intel_win_64_db : CFLAGS = -O2 -Dpp_noappend
-intel_win_64_db : FFLAGS_CONS = $(FFLAGS)
-intel_win_64_db : FFLAGS_CTRL = $(FFLAGS)
-intel_win_64_db : FFLAGS_DATA = $(FFLAGS)
-intel_win_64_db : FFLAGS_DEVC = $(FFLAGS)
-intel_win_64_db : FFLAGS_DIVG = $(FFLAGS)
-intel_win_64_db : FFLAGS_DUMP = $(FFLAGS)
-intel_win_64_db : FFLAGS_EVAC = $(FFLAGS)
-intel_win_64_db : FFLAGS_FIRE = $(FFLAGS)
-intel_win_64_db : FFLAGS_FUNC = $(FFLAGS)
-intel_win_64_db : FFLAGS_HVAC = $(FFLAGS)
-intel_win_64_db : FFLAGS_IEVA = $(FFLAGS)
-intel_win_64_db : FFLAGS_INIT = $(FFLAGS)
-intel_win_64_db : FFLAGS_IRAD = $(FFLAGS)
-intel_win_64_db : FFLAGS_MAIN = $(FFLAGS)
-intel_win_64_db : FFLAGS_MASS = $(FFLAGS)
-intel_win_64_db : FFLAGS_MESH = $(FFLAGS)
-intel_win_64_db : FFLAGS_MPIP = $(FFLAGS)
-intel_win_64_db : FFLAGS_MPIS = $(FFLAGS)
-intel_win_64_db : FFLAGS_PART = $(FFLAGS)
-intel_win_64_db : FFLAGS_POIS = $(FFLAGS)
-intel_win_64_db : FFLAGS_PREC = $(FFLAGS)
-intel_win_64_db : FFLAGS_PRES = $(FFLAGS)
-intel_win_64_db : FFLAGS_RADI = $(FFLAGS)
-intel_win_64_db : FFLAGS_READ = $(FFLAGS)
-intel_win_64_db : FFLAGS_SCRC = $(FFLAGS)
-intel_win_64_db : FFLAGS_SMVV = $(FFLAGS)
-intel_win_64_db : FFLAGS_TURB = $(FFLAGS)
-intel_win_64_db : FFLAGS_TYPE = $(FFLAGS)
-intel_win_64_db : FFLAGS_VEGE = $(FFLAGS)
-intel_win_64_db : FFLAGS_VELO = $(FFLAGS)
-intel_win_64_db : FFLAGS_WALL = $(FFLAGS)
-intel_win_64_db : FFLAGS_LINKER = $(FFLAGS)
-intel_win_64_db : FCOMPL = ifort
-intel_win_64_db : CCOMPL = cl
-intel_win_64_db : obj = fds_win_64_db
-intel_win_64_db : $(objects_serial_win)
-	$(FCOMPL) -o $(obj) $(FFLAGS_LINKER) $(LFLAGS) $(STACK_WIN_INTEL64) $(objects_serial_win) $(isob_win64_lib)
-
-mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
-mpi_intel_win_64 : MPIINCLUDE = "c:\program files\mpich2\include"
-mpi_intel_win_64 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE)
-mpi_intel_win_64 : CFLAGS = -O2 -Dpp_noappend
-mpi_intel_win_64 : FFLAGS_CONS = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_CTRL = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_DATA = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_DEVC = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_DIVG = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_DUMP = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_EVAC = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_FIRE = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_FUNC = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_HVAC = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_IEVA = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_INIT = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_IRAD = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_MAIN = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_MASS = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_MESH = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_MPIP = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_MPIS = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_PART = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_POIS = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_PREC = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_PRES = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_RADI = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_READ = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_SCRC = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_SMVV = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_TURB = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_TYPE = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_VEGE = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_VELO = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_WALL = $(FFLAGS)
-mpi_intel_win_64 : FFLAGS_LINKER = $(FFLAGS)
-mpi_intel_win_64 : FCOMPL = ifort
-mpi_intel_win_64 : CCOMPL = cl
-mpi_intel_win_64 : obj = fds_mpi_win_64
-mpi_intel_win_64 : $(objects_mpi_win)
-	$(FCOMPL) -o $(obj) $(FFLAGS_LINKER) $(LFLAGS) $(STACK_WIN_INTEL64) $(objects_mpi_win) $(isob_win64_lib) $(MPILIB)
 
 # Intel Compiler for Linux, version 11
 
