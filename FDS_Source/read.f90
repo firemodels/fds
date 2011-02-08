@@ -8361,7 +8361,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
             IN%TEMPERATURE   = TEMPERATURE + TMPM
             IN%DENSITY       = DENSITY
             IN%SHAPE         = SHAPE
-            IN%HRRPUV        = HRRPUV
+            IN%HRRPUV        = HRRPUV*1000._EB
             IF (HRRPUV > ZERO_P) INIT_HRRPUV = .TRUE.
             IF (DENSITY     > 0._EB) RHOMAX = MAX(RHOMAX,IN%DENSITY)
 
