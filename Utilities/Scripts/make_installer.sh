@@ -80,24 +80,16 @@ SKIP=\`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' \$0\`
 
 THIS=\`pwd\`/\$0
 THISDIR=\`pwd\`
-echo "Preliminaries complete."
-while true; do
-    read -p "Do you wish to proceed with the installation? (yes/no)" yn
-    case \$yn in
-        [Yy]* ) break;;
-        [Nn]* ) echo "Installation cancelled";exit;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
 
 # now copy installation files into the FDS_root directory
 
 echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
-tail -n +\$SKIP \$THIS | tar -xzv
+tail -n +\$SKIP \$THIS | tar -xz
 echo "Copy complete."
 
-echo "Setting path and LD_LIBRARY_PATH environment variables."
+echo "Setting path and LD_LIBRARY_PATH environment variables"
+echo "in .bashrc_fds and .cshrc_fds"
 
 echo "" > ~/.cshrc_fds
 echo "#/bin/csh -f" >> ~/.cshrc_fds
@@ -113,6 +105,8 @@ echo "" >> ~/.bashrc_fds
 echo "# Setting PATH and LD_LIBRARY_PATH environment" >> ~/.bashrc_fds
 echo "# variables for use by FDS" >> ~/.bashrc_fds
 echo "" >> ~/.bashrc_fds
+echo "setenv FDSBINDIR \`pwd\`/bin" >> ~/.cshrc_fds
+echo "export FDSBINDIR=\`pwd\`/bin" >> ~/.bashrc_fds
 if [ "a\$LD_LIBRARY_PATH" = "a" ]
 then
 echo "if ( \"\\\$platform\" == \"intel64\" ) then" >> ~/.cshrc_fds
