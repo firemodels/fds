@@ -3,7 +3,7 @@ EXPECTED_ARGS=4
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
-  echo "Usage: qfdsmpi.sh nthreads fds_command casename.fds"
+  echo "Usage: qfdsmpi.sh nthreads platform fds_command casename.fds"
   echo ""
   echo "Runs a parallel FDS case on a Linux cluster using the "
   echo "PBS/SGE qsub batch queuing command"
