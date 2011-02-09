@@ -214,7 +214,7 @@ intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -D pp_BETA
 intel_osx_test_32 : CC        = icc 
 intel_osx_test_32 : CPP       = icpc
 intel_osx_test_32 : FC        = ifort
-intel_osx_test_32 : exe       = smv_osx_test_32
+intel_osx_test_32 : exe       = smokeview_osx_test_32
 
 intel_osx_test_32 : $(obj)
 	icpc -m32 -o $(bin)/$(exe) -static-intel $(obj) -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
@@ -229,7 +229,7 @@ intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
 intel_osx_32 : CC        = icc 
 intel_osx_32 : CPP       = icpc
 intel_osx_32 : FC        = ifort
-intel_osx_32 : exe       = smv_osx_32
+intel_osx_32 : exe       = smokeview_osx_32
 
 intel_osx_32 : $(obj)
 	icpc -m32 -o $(bin)/$(exe) -static-intel $(obj)  -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
@@ -245,7 +245,7 @@ intel_osx_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -D pp_BETA
 intel_osx_test_64 : CC        = icc 
 intel_osx_test_64 : CPP       = icpc
 intel_osx_test_64 : FC        = ifort
-intel_osx_test_64 : exe       = smv_osx_test_64
+intel_osx_test_64 : exe       = smokeview_osx_test_64
 
 intel_osx_test_64 : $(obj)
 	icpc -m64 -o $(bin)/$(exe) -static-intel $(obj)  -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
@@ -260,7 +260,7 @@ intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64
 intel_osx_64 : CC        = icc 
 intel_osx_64 : CPP       = icpc
 intel_osx_64 : FC        = ifort
-intel_osx_64 : exe       = smv_osx_64
+intel_osx_64 : exe       = smokeview_osx_64
 
 intel_osx_64 : $(obj)
 	icpc -m64 -o $(bin)/$(exe) -static-intel $(obj)  -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
@@ -272,7 +272,7 @@ depend : CFLAGS    = -MM
 depend : CC        = gcc
 depend : CPP       = g++
 depend : FC        = gfortran
-depend : exe       = smv_linux_32
+depend : exe       = smokeview_linux_32
 
 depend : $(obj)
 
@@ -286,7 +286,7 @@ gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
 gcc_linux_32 : CC        = gcc
 gcc_linux_32 : CPP       = g++
 gcc_linux_32 : FC        = gfortran
-gcc_linux_32 : exe       = smv_linux_32
+gcc_linux_32 : exe       = smokeview_linux_32
 
 gcc_linux_32 : $(obj)
 	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lgfortran $(SYSTEMLIBS)
@@ -301,7 +301,7 @@ intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -vec_report0 -D pp_LINUX
 intel_linux_32_dbg : CC        = icc 
 intel_linux_32_dbg : CPP       = icpc
 intel_linux_32_dbg : FC        = ifort
-intel_linux_32_dbg : exe       = smv_linux_32_dbg
+intel_linux_32_dbg : exe       = smokeview_linux_32_dbg
 
 intel_linux_32_dbg : $(obj)
 	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore $(SYSTEMLIBS)
@@ -316,7 +316,7 @@ intel_linux_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_LINUX
 intel_linux_test_32 : CC        = icc 
 intel_linux_test_32 : CPP       = icpc
 intel_linux_test_32 : FC        = ifort
-intel_linux_test_32 : exe       = smv_linux_test_32
+intel_linux_test_32 : exe       = smokeview_linux_test_32
 
 intel_linux_test_32 : $(obj)
 	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
@@ -332,7 +332,7 @@ intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
 intel_linux_32 : CC        = icc 
 intel_linux_32 : CPP       = icpc
 intel_linux_32 : FC        = ifort
-intel_linux_32 : exe       = smv_linux_32
+intel_linux_32 : exe       = smokeview_linux_32
 
 intel_linux_32 : $(obj)
 	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
@@ -347,7 +347,7 @@ intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_LINUX64
 intel_linux_64_dbg : CC        = icc 
 intel_linux_64_dbg : CPP       = icpc
 intel_linux_64_dbg : FC        = ifort
-intel_linux_64_dbg : exe       = smv_linux_64_dbg
+intel_linux_64_dbg : exe       = smokeview_linux_64_dbg
 
 intel_linux_64_dbg : $(obj)
 	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
@@ -362,7 +362,7 @@ intel_linux_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64 -D pp_BETA
 intel_linux_test_64 : CC        = icc 
 intel_linux_test_64 : CPP       = icpc
 intel_linux_test_64 : FC        = ifort
-intel_linux_test_64 : exe       = smv_linux_test_64
+intel_linux_test_64 : exe       = smokeview_linux_test_64
 
 intel_linux_test_64 : $(obj)
 	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
@@ -377,7 +377,7 @@ intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
 intel_linux_64 : CC        = icc 
 intel_linux_64 : CPP       = icpc
 intel_linux_64 : FC        = ifort
-intel_linux_64 : exe       = smv_linux_64
+intel_linux_64 : exe       = smokeview_linux_64
 
 intel_linux_64 : $(obj)
 	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
@@ -392,7 +392,7 @@ intel_linux_64_profile : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64 -p
 intel_linux_64_profile : CC        = icc 
 intel_linux_64_profile : CPP       = icpc
 intel_linux_64_profile : FC        = ifort
-intel_linux_64_profile : exe       = smv_linux_64p
+intel_linux_64_profile : exe       = smokeview_linux_64p
 
 intel_linux_64_profile : $(obj)
 	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS) -p
