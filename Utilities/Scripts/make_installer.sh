@@ -1,5 +1,5 @@
 #!/bin/bash
-EXPECTED_ARGS=3
+EXPECTED_ARGS=2
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
@@ -7,16 +7,14 @@ then
   echo ""
   echo "Creates an FDS/Smokeview installer sh script. "
   echo ""
-  echo "  FORTLIB - directory containing run-time libraries"
   echo "  FDS_TAR - compressed tar file contining distribution"
   echo "  INSTALLER - .sh script containing self-extracting installer"
   echo
   exit
 fi
 
-FORTLIB=$1
-FDS_TAR=$2
-INSTALLER=$3
+FDS_TAR=$1
+INSTALLER=$2
 
 cat << EOF > $INSTALLER
 #!/bin/bash
@@ -102,20 +100,50 @@ echo "Copy complete."
 echo "Setting path and LD_LIBRARY_PATH environment variables."
 
 echo "" > ~/.cshrc_fds
+echo "#/bin/csh -f" >> ~/.cshrc_fds
+echo "set platform=\\\$1" >> ~/.cshrc_fds
+echo "" >> ~/.cshrc_fds
 echo "# Setting PATH and LD_LIBRARY_PATH environment" >> ~/.cshrc_fds
 echo "# variables for use by FDS" >> ~/.cshrc_fds
 echo "" >> ~/.cshrc_fds
-echo "" > ~/.bashrc_fds
+
+echo "#/bin/bash" > ~/.bashrc_fds
+echo "platform=\\\$1" >> ~/.bashrc_fds
+echo "" >> ~/.bashrc_fds
 echo "# Setting PATH and LD_LIBRARY_PATH environment" >> ~/.bashrc_fds
 echo "# variables for use by FDS" >> ~/.bashrc_fds
 echo "" >> ~/.bashrc_fds
 if [ "a\$LD_LIBRARY_PATH" = "a" ]
 then
-echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/$FORTLIB" >> ~/.cshrc_fds
-echo "export LD_LIBRARY_PATH=\`pwd\`/bin/$FORTLIB" >> ~/.bashrc_fds
+echo "if ( \"\\\$platform\" == \"intel64\" ) then" >> ~/.cshrc_fds
+echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/LIB64" >> ~/.cshrc_fds
+echo "endif" >> ~/.cshrc_fds
+
+echo "if ( \"\\\$platform\" == \"ia32\" ) then" >> ~/.cshrc_fds
+echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/LIB32" >> ~/.cshrc_fds
+echo "endif" >> ~/.cshrc_fds
+
+echo "if [ \"\\\$platform\" == \"intel64\" ]" >> ~/.bashrc_fds
+echo "then" >> ~/.bashrc_fds
+echo "export LD_LIBRARY_PATH=\`pwd\`/bin/LIB64" >> ~/.bashrc_fds
+echo "fi" >> ~/.bashrc_fds
+
+echo "if [ \"\\\$platform\" == \"ia32\" ]" >> ~/.bashrc_fds
+echo "then" >> ~/.bashrc_fds
+echo "export LD_LIBRARY_PATH=\`pwd\`/bin/LIB32" >> ~/.bashrc_fds
+echo "fi" >> ~/.bashrc_fds
 else
 echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/$FORTLIB:\\\$LD_LIBRARY_PATH" >> ~/.cshrc_fds
-echo "export LD_LIBRARY_PATH=\`pwd\`/bin/$FORTLIB:\\\$LD_LIBRARY_PATH" >> ~/.bashrc_fds
+
+echo "if [ \"\\\$platform\" == \"intel64\" ]" >> ~/.bashrc_fds
+echo "then" >> ~/.bashrc_fds
+echo "export LD_LIBRARY_PATH=\`pwd\`/bin/LIB64:\\\$LD_LIBRARY_PATH" >> ~/.bashrc_fds
+echo "fi" >> ~/.bashrc_fds
+
+echo "if [ \"\\\$platform\" == \"ia32\" ]" >> ~/.bashrc_fds
+echo "then" >> ~/.bashrc_fds
+echo "export LD_LIBRARY_PATH=\`pwd\`/bin/LIB32:\\\$LD_LIBRARY_PATH" >> ~/.bashrc_fds
+echo "fi" >> ~/.bashrc_fds
 fi
 
 # add FDS bin to path
