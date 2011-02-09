@@ -11,7 +11,6 @@ setenv smvhost acrux.cfr.nist.gov
 setenv manifest manifest_linux_64.html
 
 setenv INTELLIB /shared/LIB64
-setenv FORTLIB LIB64
 setenv smokezipdir INTEL_LINUX_64
 setenv smokediffdir INTEL_LINUX_64
 setenv fdsdir intel_linux_64

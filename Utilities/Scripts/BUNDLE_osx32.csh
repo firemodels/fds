@@ -11,7 +11,6 @@ setenv OSXBUNDLE
 
 setenv manifest manifest_osx_32.html
 
-setenv FORTLIB LIB32
 setenv smokezipdir INTEL_OSX_32
 setenv smokediffdir INTEL_OSX_32
 setenv fdsdir intel_osx_32
