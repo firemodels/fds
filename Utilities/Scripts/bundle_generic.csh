@@ -164,4 +164,4 @@ echo Compressing archive
 gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
-$makeinstaller $FORTLIB $bundlebase.tar.gz $bundlebase.sh
+$makeinstaller $bundlebase.tar.gz $bundlebase.sh
