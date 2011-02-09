@@ -1,5 +1,5 @@
 #!/bin/bash -f
-EXPECTED_ARGS=3
+EXPECTED_ARGS=4
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
@@ -9,14 +9,16 @@ then
   echo "PBS/SGE qsub batch queuing command"
   echo ""
   echo "    nthreads - number of threads (usually number of &mesh lines)"
+  echo "    platform - ia32 or intel64"
   echo " fds_command - full path to fds command name"
   echo "casename.fds - fds case"
   echo 
   exit
 fi
 nthreads=$1
-fds=$2
-in=$3
+platform=$2
+fds=$3
+in=$4
 if test $nthreads -le 0
 then
 echo "Number of threads specified is $nthreads . Must be bigger than 0."
@@ -61,6 +63,7 @@ echo Start time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 
+source ~/.bashrc_fds $platform
 mpirun -np $nthreads $fds $in
 EOF
 chmod +x $scriptfile
