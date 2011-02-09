@@ -68,7 +68,8 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
        parameter (MPI_DISTRIBUTE_DFLT_DARG=-1)
        complex(DPC) :: MPI_BOTTOM, MPI_ARGV_NULL
        complex(DPC) :: MPI_ARGVS_NULL, MPI_ERRCODES_IGNORE
-       complex(DPC) :: MPI_STATUS_IGNORE, MPI_STATUSES_IGNORE
+       integer :: MPI_STATUS_IGNORE, MPI_STATUSES_IGNORE
+     ! complex(DPC) :: MPI_STATUS_IGNORE, MPI_STATUSES_IGNORE
        common/mpi_bottom/MPI_BOTTOM
        common/mpi_argv_null/MPI_ARGV_NULL
        common/mpi_argvs_null/MPI_ARGVS_NULL
@@ -308,7 +309,7 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
   end interface mpi_startall
 
   interface mpi_waitall
-     module procedure mpi_waitall_int0, mpi_waitall_int1
+     module procedure mpi_waitall_int0, mpi_waitall_int1, mpi_waitall_int1b
   end interface mpi_waitall
 
   contains
@@ -1511,6 +1512,14 @@ subroutine mpi_waitall_int1 ( icount, irequest, istatus, ierror )
   integer, dimension(:,:) :: istatus
   dummy = icount + irequest(1) + istatus(1,1) + ierror
 end subroutine
+subroutine mpi_waitall_int1b ( icount, irequest, istatus, ierror )
+  integer:: icount
+  integer:: ierror
+  integer, dimension(:)   :: irequest
+  integer :: istatus
+  dummy = icount + irequest(1) + istatus + ierror
+end subroutine
+
 
 
 subroutine mpi_get_processor_name(pname, pnamelen, ierror)
