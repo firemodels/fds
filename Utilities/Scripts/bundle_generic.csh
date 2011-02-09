@@ -66,6 +66,13 @@ scp -q $fdshost\:$fdsroot/$fdsdir/$fds $bundledir/bin/$fdsout
 echo copying $fdsmpi from $fdsdir on $fdshost
 scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
 
+# qfds scripts
+
+echo copying qfds.sh to $bundledir/bin
+cp $bundle_setup/qfds.sh $bundledir/bin/.
+echo copying qfdsmpi.sh to $bundledir/bin
+cp $bundle_setup/qfdsmpi.sh $bundledir/bin/.
+
 cat <<EOF > $fullmanifest
 <html>
 <head>
