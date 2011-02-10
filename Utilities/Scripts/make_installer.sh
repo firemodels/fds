@@ -20,6 +20,44 @@ cat << EOF > $INSTALLER
 #!/bin/bash
 FDS_root=~/FDS/FDS6
 
+# record the name of this script and the name of the directory 
+# it will be run in
+
+THIS=\`pwd\`/\$0
+THISDIR=\`pwd\`
+
+# Find the beginning of the included FDS tar file so that it can be
+# subsequently un-tar'd
+ 
+SKIP=\`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' \$0\`
+
+# extract tar.gz file from this script if option 1 is 'extract'
+
+if [ \$# -eq 1 ]
+then
+option=\$1
+if [ "\$option" == "extract" ]
+then
+name=\$0
+THAT=\${name%.*}.tar.gz
+if [ -e \$THAT ]
+then
+while true; do
+    echo "The file, \$THAT, already exists."
+    read -p "Do you wish to overwrite it? (yes/no)" yn
+    case \$yn in
+        [Yy]* ) break;;
+        [Nn]* ) echo "Extraction cancelled";exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+fi
+echo Extracting the compressed tar file contained in this installer to \$THAT
+tail -n +\$SKIP \$THIS > \$THAT
+exit 0
+fi
+fi
+
 #
 # get FDS root directory
 #
@@ -51,6 +89,7 @@ done
 fi
   
 # did we succeed?
+
 if [ ! -d \$FDS_root ]
 then
 echo "\`whoami\` does not have permission to create \$FDS_root."
@@ -70,16 +109,6 @@ echo "FDS installation aborted."
 exit 0
 fi
 rm \$FDS_root/temp.\$\$
-
-# Find the beginning of the included FDS tar file
-# so it can be subsequently un-tar'd
- 
-SKIP=\`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' \$0\`
-
-# record the name of this script and the name of the directory it will be run in
-
-THIS=\`pwd\`/\$0
-THISDIR=\`pwd\`
 
 # now copy installation files into the FDS_root directory
 
