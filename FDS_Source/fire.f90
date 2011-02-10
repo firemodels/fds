@@ -264,7 +264,7 @@ DO K=1,KBAR
             TAU_U = DELTA/SQRT(2._EB*KSGS+1.E-10_EB)   ! advective time scale
             TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
 
-            MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(MIN(TAU_D,TAU_U,TAU_G),TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
+            MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
          ELSE LES_IF
          !DNS Mix Time
             MIX_TIME(I,J,K)= TAU_D
