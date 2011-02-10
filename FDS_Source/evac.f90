@@ -57,6 +57,7 @@ MODULE EVAC
      REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB,T_START=0._EB, Angle=0._EB
      REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
      REAL(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
+     REAL(EB) :: TIME_FALL_DOWN=0._EB
      CHARACTER(60) :: CLASS_NAME='null', ID='null', AVATAR_TYPE_NAME='null'
      CHARACTER(30) :: GRID_NAME='null', PROP_ID='null'
      LOGICAL :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE.
@@ -392,7 +393,9 @@ MODULE EVAC
        CONST_CF, FAC_CF, FAC_1_WALL, FAC_2_WALL, FAC_V0_DIR, FAC_V0_NOCF, FAC_NOCF, &
        CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, FAC_DOOR_QUEUE, FAC_DOOR_ALPHA,&
        FAC_DOOR_WAIT, CF_MIN_B, FAC_DOOR_OLD, FAC_DOOR_OLD2, R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, &
-       DOT_HERDING, EVAC_DELTA_SEE, C_HAWK, R_HAWK_DOVE
+       DOT_HERDING, EVAC_DELTA_SEE, C_HAWK, R_HAWK_DOVE, A_HAWK_T_FACTOR, HERDING_TAU_FACTOR, &
+       ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, &
+       F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, TIME_FALL_DOWN
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -405,6 +408,7 @@ MODULE EVAC
   !
   INTEGER :: n_dead=0, icyc_old=0, n_change_doors=0, n_change_trials=0
   REAL(EB) :: fed_max_alive, fed_max
+  INTEGER, DIMENSION(:,:), ALLOCATABLE :: N_HawkDoveCount
   !
   ! Stairs constants
   INTEGER :: STRS_LANDING_TYPE=1, STRS_STAIR_TYPE=2
@@ -530,7 +534,7 @@ CONTAINS
          COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
          AVATAR_COLOR, AVATAR_RGB, SHOW, PRE_EVAC_DIST, DET_EVAC_DIST, &
          PRE_MEAN,PRE_PARA,PRE_PARA2,PRE_LOW,PRE_HIGH, &
-         DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE, AVATAR_TYPE, PROP_ID
+         DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE, AVATAR_TYPE, PROP_ID, TIME_FALL_DOWN
     NAMELIST /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR, SHOW
 
     NAMELIST /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
@@ -563,7 +567,9 @@ CONTAINS
          FAC_DOOR_QUEUE, FAC_DOOR_ALPHA, FAC_DOOR_WAIT, CF_MIN_B, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, FAC_DOOR_OLD, FAC_DOOR_OLD2, &
          R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, DOT_HERDING, EVAC_FDS6, EVAC_DELTA_SEE, &
-         MAX_HUMANS_DIM, C_HAWK, R_HAWK_DOVE
+         MAX_HUMANS_DIM, C_HAWK, R_HAWK_DOVE, A_HAWK_T_FACTOR, HERDING_TAU_FACTOR, &
+         ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, &
+         F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN
     !
     NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, INPUT_ID, &
          PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH, PROB
@@ -1526,11 +1532,29 @@ CONTAINS
       W0_HERDING      = 10.0_EB  ! Herding agents: Weight at the distance r=0 (linear function)
       WR_HERDING      =  0.0_EB  ! Herding agents: Weight at the distance r=R_HERDING
       DOT_HERDING     = -0.2_EB  ! Herding agents: dot product parameter (do not count agents that are heading towards)
-      I_HERDING_TYPE  = 0       ! Herding agents: >1 do not move if no door (0 default ffield)
+      HERDING_TAU_FACTOR=0.1 ! If no herding agents close, how probable it is to use the information
+                             ! from the agents further away, a probability 0.0-1.0 range.
+                             ! If =1.0 then this is done everytime, when the agents chooses a door
+                             ! and this is done every TAU_CHANGE_DOOR second on the average.
+      I_HERDING_TYPE  = 0    ! Herding agents: >1 do not move if no door (0 default ffield)
       ! Hawk - Dove game: Just an academic exercise at this moment, works only for a simple geometries.
       ! Hawk - Dove game parameters: If C_HAWK < 0 then no game is played, i.e., normal FDS+Evac
-      C_HAWK = -2.0_EB  ! 0-1 range: all are hawks, >1 more and more doves ( c/(2*alpha*Delta) )
-      R_HAWK_DOVE = 0.5_EB ! cut-off radius, play against the agents which are inside the radius
+      ! Hawk - Dove game: Only rational agents play (AGENT_TYPE=1 on EVAC/ENTR namelist)
+      ! U_i(Hawk) = p_i*c/(2*Delta*alpha*T_i) - (1-p_i), U_i(Dove) = p_i
+      C_HAWK       = -2.0_EB ! Ctilde_Hawk = c/(2*alpha*Delta): 0-1 always hawks, >1 more and more doves
+      ALPHA_HAWK   =  1.0_EB ! 
+      DELTA_HAWK   =  1.0_EB !
+      EPSILON_HAWK =  0.0_EB ! 2*Alpha*Delta*T_i < Epsilon then dove, i.e., hawk should be at least better than epsilon
+      THETA_HAWK   =  1.0_EB ! random force factor for hawks: Gaussian theta = theta*theta_hawk
+      R_HAWK_DOVE  =  0.5_EB ! cut-off radius, play against the agents which are inside the skin-skin distance
+      A_HAWK_T_FACTOR=0.0_EB ! linear growth factor of the alpha parameter (the threath parameter)
+                             ! alpha = alpha_0*(1+A_HAWK_T_FACTOR*simulation_time)
+      ! Paramters of the fall down algorithm
+      F_MIN_FALL           = 2000.0_EB
+      F_MAX_FALL           = 9000.0_EB
+      D_OVERLAP_FALL       = 0.05_EB
+      TAU_FALL_DOWN        = 1.0_EB
+      A_FAC_FALLEN         = 1.0_EB
 
       OUTPUT_SPEED         = .FALSE.
       OUTPUT_DENSITY       = .FALSE.
@@ -4010,6 +4034,7 @@ CONTAINS
          SHOW                     = .TRUE.
          TIME_START               = -99.0_EB
          TIME_STOP                = -99.0_EB
+         TIME_FALL_DOWN           = HUGE(TIME_FALL_DOWN)
          GN_MIN                   = 1
          GN_MAX                   = 1      
          PRE_EVAC_DIST = -1  ! If Tpre given on EVAC namelist, override PERS
@@ -4155,6 +4180,7 @@ CONTAINS
          HPT%T_START    = TIME_START
          HPT%I_AGENT_TYPE = AGENT_TYPE
          HPT%PROP_ID    = TRIM(PROP_ID)
+         HPT%TIME_FALL_DOWN = TIME_FALL_DOWN
 
          HPT%GN_MIN = GN_MIN
          HPT%GN_MAX = GN_MAX
@@ -5654,23 +5680,45 @@ CONTAINS
           ! first row: units (or variable class)
           ! second row: variable name
           ! third row-: data
-          WRITE (tcform,'(a,i4.4,a)') "(",n_cols+(j_density-j_ntargets),"(a,','),a)"
-          WRITE (LU_EVACCSV,tcform) 's','AgentsInside', &
-               ('AgentsInsideMesh', i=1,n_egrids), &
-               ('AgentsInsideCorr', i=1,n_corrs), &
-               ('ExitCounter', i=1,N_EXITS), &
-               ('DoorCounter', i=1,N_DOORS), &
-               ('TargetExitCounter', i=1,N_EXITS-n_co_exits), &
-               ('TargetDoorCounter', i=1,N_DOORS), &
-               ('DensityCounter', i=1,j_density-j_ntargets)
-          WRITE (LU_EVACCSV,tcform) 'EVAC_Time','AllAgents', &
-               (TRIM(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
-               (TRIM(EVAC_CORRS(i)%ID), i=1,n_corrs), &
-               (TRIM(EVAC_EXITS(i)%ID), i=1,N_EXITS), &
-               (TRIM(EVAC_DOORS(i)%ID), i=1,N_DOORS), &
-               (TRIM(CTEMP(i)), i=1,N_EXITS-n_co_exits), &
-               (TRIM(EVAC_DOORS(i)%ID), i=1,N_DOORS), &
-               (TRIM(CTEMP(i)), i=j_ntargets+1,j_density)
+          IF (C_HAWK >= 0.0_EB) THEN
+             WRITE (tcform,'(a,i4.4,a,i4.4,a)') "(",n_cols+(j_density-j_ntargets),"(a,','),a,", n_egrids*4, "(',',a))"
+             WRITE (LU_EVACCSV,tcform) 's','AgentsInside', &
+                  ('AgentsInsideMesh', i=1,n_egrids), &
+                  ('AgentsInsideCorr', i=1,n_corrs), &
+                  ('ExitCounter', i=1,N_EXITS), &
+                  ('DoorCounter', i=1,N_DOORS), &
+                  ('TargetExitCounter', i=1,N_EXITS-n_co_exits), &
+                  ('TargetDoorCounter', i=1,N_DOORS), &
+                  ('DensityCounter', i=1,j_density-j_ntargets), &
+                  (('HawkDoveCounter',j=1,4), i=1,n_egrids)
+             WRITE (LU_EVACCSV,tcform) 'EVAC_Time','AllAgents', &
+                  (TRIM(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
+                  (TRIM(EVAC_CORRS(i)%ID), i=1,n_corrs), &
+                  (TRIM(EVAC_EXITS(i)%ID), i=1,N_EXITS), &
+                  (TRIM(EVAC_DOORS(i)%ID), i=1,N_DOORS), &
+                  (TRIM(CTEMP(i)), i=1,N_EXITS-n_co_exits), &
+                  (TRIM(EVAC_DOORS(i)%ID), i=1,N_DOORS), &
+                  (TRIM(CTEMP(i)), i=j_ntargets+1,j_density), &
+                  ('Hawk1','Dove1','Hawk2','Dove2', i=1,n_egrids)
+          ELSE
+             WRITE (tcform,'(a,i4.4,a)') "(",n_cols+(j_density-j_ntargets),"(a,','),a)"
+             WRITE (LU_EVACCSV,tcform) 's','AgentsInside', &
+                  ('AgentsInsideMesh', i=1,n_egrids), &
+                  ('AgentsInsideCorr', i=1,n_corrs), &
+                  ('ExitCounter', i=1,N_EXITS), &
+                  ('DoorCounter', i=1,N_DOORS), &
+                  ('TargetExitCounter', i=1,N_EXITS-n_co_exits), &
+                  ('TargetDoorCounter', i=1,N_DOORS), &
+                  ('DensityCounter', i=1,j_density-j_ntargets)
+             WRITE (LU_EVACCSV,tcform) 'EVAC_Time','AllAgents', &
+                  (TRIM(EVAC_Node_List(i)%GRID_NAME), i=1,n_egrids), &
+                  (TRIM(EVAC_CORRS(i)%ID), i=1,n_corrs), &
+                  (TRIM(EVAC_EXITS(i)%ID), i=1,N_EXITS), &
+                  (TRIM(EVAC_DOORS(i)%ID), i=1,N_DOORS), &
+                  (TRIM(CTEMP(i)), i=1,N_EXITS-n_co_exits), &
+                  (TRIM(EVAC_DOORS(i)%ID), i=1,N_DOORS), &
+                  (TRIM(CTEMP(i)), i=j_ntargets+1,j_density)
+          END IF
        END IF
        DEALLOCATE(CTEMP)
     END IF APPEND_IF
@@ -6042,6 +6090,12 @@ CONTAINS
              CALL CLASS_PROPERTIES(HR,PCP,HR%IEL)
              HR%I_Target = 0
              HR%I_DoorAlgo = HPT%I_AGENT_TYPE
+             CALL RANDOM_NUMBER(RN)
+             HR%F_FallDown = F_MIN_FALL + RN*(F_MAX_FALL - F_MIN_FALL) 
+             HR%T_FallenDown = HPT%TIME_FALL_DOWN
+             ! HR%T_FallenDown = HUGE(HR%T_FallenDown)
+             HR%Angle_FallenDown = 0.0_EB
+             HR%SizeFac_FallenDown = 0.0_EB
 
              !
              BLK_LOOP:  DO
@@ -6376,6 +6430,13 @@ CONTAINS
     ALLOCATE(Color_Tmp(MAX(1,i33_dim)),STAT=IZERO)
     CALL ChkMemErr('Initialize_Evacuation','Color_Tmp',IZERO) 
 
+    ! Counters for Hawk - Dove game
+    IF (C_HAWK >= 0.0_EB) THEN
+       ALLOCATE(N_HawkDoveCount(4,MAX(1,n_egrids)),STAT=IZERO)
+       CALL ChkMemErr('Initialize_Evacuation','N_HawkDoveCount',IZERO) 
+       N_HawkDoveCount = 0
+    END IF
+
     i_egrid = 0
     IF (N_DOORS >0) EVAC_DOORS(:)%R_NTARGET = 5.0_EB
     IF (N_EXITS >0) EVAC_EXITS(:)%R_NTARGET = 5.0_EB
@@ -6510,9 +6571,17 @@ CONTAINS
        IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EVACUATION_GRID(NOM)) ) CYCLE
        TNOW=SECOND()
        M => MESHES(NOM)
-       I_EGRID = I_EGRID+1
+       I_EGRID = I_EGRID + 1
        DO I = 1, M%N_HUMANS
           HR => M%HUMAN(I)
+          IF (C_HAWK >= 0.0_EB) THEN
+             ! Hawk - Dove game counters, initial values
+             ! (1,emesh) hawks; (2,emesh) doves; (3,emesh) dummy hawks; (4,emesh) dymmy doves
+             IF (HR%A <= 500.0_EB .AND. HR%I_DoorAlgo==1) N_HawkDoveCount(1,I_EGRID) = N_HawkDoveCount(1,I_EGRID) + 1
+             IF (HR%A >  500.0_EB .AND. HR%I_DoorAlgo==1) N_HawkDoveCount(2,I_EGRID) = N_HawkDoveCount(2,I_EGRID) + 1
+             IF (HR%A <= 500.0_EB .AND. HR%I_DoorAlgo==2) N_HawkDoveCount(3,I_EGRID) = N_HawkDoveCount(3,I_EGRID) + 1
+             IF (HR%A >  500.0_EB .AND. HR%I_DoorAlgo==2) N_HawkDoveCount(4,I_EGRID) = N_HawkDoveCount(4,I_EGRID) + 1
+          END IF
 
           ! Check spectator stands, correct the z-coordinate
           HR%Z = 0.5_EB*(M%ZS+M%ZF)  ! The agent is not on any incline
@@ -7092,7 +7161,7 @@ CONTAINS
     !
     REAL(EB) ::  SCAL_PROD_OVER_RSQR, U_NEW, V_NEW, VMAX_TIMO, COSPHIFAC, &
          SPEED_MAX, DELTA_MIN, DT_SUM, C_YEFF, LAMBDAW, B_WALL, A_WALL, &
-         T, CONTACT_F, SOCIAL_F, SMOKE_BETA, SMOKE_ALPHA, SMOKE_SPEED_FAC, tmp1, tmp2
+         T, CONTACT_F, SOCIAL_F, SMOKE_BETA, SMOKE_ALPHA, SMOKE_SPEED_FAC, tmp1, tmp2, CONTACT_FX, CONTACT_FY
     INTEGER :: IIE, JJE, IIO, JJO, III, JJJ, I_EGRID, I_TMP
     REAL(EB) :: X_NOW, Y_NOW, D_HUMANS, D_WALLS, DTSP_NEW, FAC_TIM, DT_GROUP_DOOR, X11, Y11, SPEED, TPRE
     LOGICAL PP_SEE_EACH, L_FIRST_PASS, USE_FED, PP_SEE_DOOR
@@ -7132,8 +7201,8 @@ CONTAINS
     INTEGER :: I_SUUNTA_MAX, N_SUUNTA_BACK, N_SUUNTA_BACKCF, I_COUNT_DENSITY, I_COUNT_DENSITYR, I_COUNT_DENSITYL
     INTEGER, DIMENSION(N_SECTORS+1) :: N_SUUNTA, N_SUUNTACF
     REAL(EB) :: U_i_Hawk, U_I_Dove, x_o, y_o, T_tmp, T_tmp1, Width, p_i
-    INTEGER :: N_queue, N_i_Hawk, N_I_Dove
-    LOGICAL :: L_DO_GAME
+    INTEGER :: N_queue, N_i_Hawk, N_I_Dove, N_i_Hawk2, N_I_Dove2
+    LOGICAL :: L_DO_GAME, L_FALLEN_DOWN, L_HRE_FALLEN_DOWN
 
     TYPE (MESH_TYPE),        POINTER :: MFF=>NULL()
     TYPE (EVAC_STRS_TYPE),   POINTER :: STRP=>NULL()
@@ -7622,7 +7691,7 @@ CONTAINS
                          END IF
                          IF (I_TARGET_OLD==0 .AND. I_TMP==0 .AND. ABS(HR%I_Target2) > 0 .AND. T > HR%TPRE+HR%TDET) THEN
                             CALL RANDOM_NUMBER(RN)
-                            IF (RN > 0.9_EB) I_TMP = HR%I_Target2
+                            IF (RN <= HERDING_TAU_FACTOR) I_TMP = HR%I_Target2
                          END IF
                          IF (ABS(I_TMP) > 0) THEN  ! Found neighbors
                             I_TARGET = I_TMP
@@ -7775,6 +7844,7 @@ CONTAINS
        TNOW15=SECOND()
        D_HUMANS_MIN = HUGE(D_HUMANS_MIN)
        D_WALLS_MIN  = HUGE(D_WALLS_MIN)
+       IF (C_HAWK >= 0.0_EB) N_HawkDoveCount(:,I_EGRID) = 0
 
        EVAC_MOVE_LOOP: DO I=1, N_HUMANS
           HR=>HUMAN(I)
@@ -7788,8 +7858,18 @@ CONTAINS
           GATH    = NOISETH
           GACM    = NOISECM
           EVEL = SQRT(HR%U**2 + HR%V**2)
+          L_FALLEN_DOWN = .FALSE.
+          IF (HR%T_FallenDown < T) THEN
+             L_FALLEN_DOWN = .TRUE.
+             GATH = 0.0_EB
+             A_WALL = 0.0_EB
+          END IF
           L_DEAD  = .FALSE.
           IF ( HR%INTDOSE >= 1.0_EB  ) THEN
+             IF (.NOT. L_FALLEN_DOWN) THEN
+                HR%T_FallenDown = T
+                L_FALLEN_DOWN = .TRUE.
+             END IF
              L_DEAD = .TRUE.
              ! No random force for a dead person.
              GATH = 0.0_EB
@@ -7806,6 +7886,7 @@ CONTAINS
           ELSE
              FED_MAX_ALIVE = MAX(FED_MAX_ALIVE,HR%INTDOSE)
           END IF
+          IF (L_FALLEN_DOWN) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           FED_MAX = MAX(FED_MAX,HR%INTDOSE)  ! DEAD OR ALIVE
           HR_TAU      = HR%TAU
           HR_TAU_INER = HR%TAU_INER
@@ -7815,6 +7896,21 @@ CONTAINS
                   HR%COMMITMENT*CF_FAC_TAUS*HR_TAU + (1.0_EB-HR%COMMITMENT)*HR_TAU)
              HR_TAU_INER = MAX(CF_MIN_TAU_INER, &
                   HR%COMMITMENT*CF_FAC_TAUS*HR_TAU_INER + (1.0_EB-HR%COMMITMENT)*HR_TAU_INER)
+          END IF
+          IF (C_HAWK >= 0.0_EB)THEN
+             IF (HR%A <= 500.0_EB) THEN
+                ! Hawk - dove game: more random noise for hawks
+                GATH = GATH*THETA_HAWK
+                ! DoseCrit1 = hr%a   modified, no sharp transition, HRA_dove  => HRA_hawk in one second
+                IF (HR%I_DoorAlgo==1) HR%DoseCrit1 = MAX(HR%A, HR%DoseCrit1-9.0_EB*HR%A*DTSP)
+                IF (HR%I_DoorAlgo==1) N_HawkDoveCount(1,I_EGRID) = N_HawkDoveCount(1,I_EGRID) + 1
+                IF (HR%I_DoorAlgo==2) N_HawkDoveCount(3,I_EGRID) = N_HawkDoveCount(3,I_EGRID) + 1
+             ELSE
+                ! DoseCrit1 = hr%a   modified, no sharp transition, HRA_hawk  => HRA_dove in one second
+                IF (HR%I_DoorAlgo==1) HR%DoseCrit1 = MIN(HR%A, HR%DoseCrit1+0.9_EB*HR%A*DTSP)
+                IF (HR%I_DoorAlgo==1) N_HawkDoveCount(2,I_EGRID) = N_HawkDoveCount(2,I_EGRID) + 1
+                IF (HR%I_DoorAlgo==2) N_HawkDoveCount(4,I_EGRID) = N_HawkDoveCount(4,I_EGRID) + 1
+             END IF
           END IF
           !
           ! In which grid cell is the agent?
@@ -8105,6 +8201,12 @@ CONTAINS
           IF ( ABS(OMEGA_NEW) > OMEGA_MAX ) THEN
              OMEGA_NEW = SIGN(OMEGA_MAX,OMEGA_NEW)
           END IF
+          IF (TAU_FALL_DOWN >= 0.0_EB .AND. L_FALLEN_DOWN) THEN
+            T_tmp = MIN(TAU_FALL_DOWN, T - HR%T_FallenDown) ! 0 - tau_fall_down
+            U_NEW = (TAU_FALL_DOWN - T_tmp)*U_NEW/TAU_FALL_DOWN
+            V_NEW = (TAU_FALL_DOWN - T_tmp)*V_NEW/TAU_FALL_DOWN
+            OMEGA_NEW = (TAU_FALL_DOWN - T_tmp)*OMEGA_NEW/TAU_FALL_DOWN
+          END IF
 
           ! ========================================================
           ! Step 3:  The new coordinates are calculated using the new velocities.
@@ -8379,11 +8481,13 @@ CONTAINS
           HR_A = HR%A
           HR_B = HR%B
 
-          CONTACT_F = 0.0_EB
+          CONTACT_F  = 0.0_EB
+          CONTACT_FX = 0.0_EB
+          CONTACT_FY = 0.0_EB
           SOCIAL_F  = 0.0_EB
           LAMBDAW = LAMBDA_WALL
-          A_WALL  = FAC_A_WALL*HR%A
-          B_WALL  = FAC_B_WALL*HR%B
+          A_WALL  = FAC_A_WALL*HR_A
+          B_WALL  = FAC_B_WALL*HR_B
           GAME    = NOISEME
           GATH    = NOISETH
           GACM    = NOISECM
@@ -8392,8 +8496,18 @@ CONTAINS
           I_COUNT_DENSITYL = 0
           D_HUMANS = HUGE(D_HUMANS)
           D_WALLS  = HUGE(D_WALLS)
+          L_FALLEN_DOWN = .FALSE.
+          IF (HR%T_FallenDown < T) THEN
+             L_FALLEN_DOWN = .TRUE.
+             GATH = 0.0_EB
+             A_WALL = 0.0_EB
+          END IF
           L_DEAD  = .FALSE.
           IF (HR%INTDOSE >= 1.0_EB) THEN
+             IF (.NOT. L_FALLEN_DOWN) THEN
+                HR%T_FallenDown = T
+                L_FALLEN_DOWN = .TRUE.
+             END IF
              L_DEAD = .TRUE.
              ! No random force for a dead person.
              GATH = 0.0_EB
@@ -8408,12 +8522,16 @@ CONTAINS
              HR%TPRE = HUGE(HR%TPRE)
              HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           END IF
+          IF (L_FALLEN_DOWN) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           HR_TAU = HR%TAU
           HR_TAU_INER = HR%TAU_INER
           ! =======================================================
           ! Speed dependent social force
           ! =======================================================
-          HR_A =  HR%A*MAX(0.5_EB,(SQRT(HR%U**2+HR%V**2)/HR%SPEED))
+          IF (C_HAWK >= 0.0_EB .AND. HR%I_DoorAlgo==1) THEN
+             HR_A = HR%DoseCrit1
+          END IF
+          HR_A =  HR_A*MAX(0.5_EB,(SQRT(HR%U**2+HR%V**2)/HR%SPEED))
           A_WALL = MIN(A_WALL, FAC_A_WALL*HR_A)
 
           ! Counterflow: increase motivation to go ahead and decrease social force
@@ -8424,19 +8542,25 @@ CONTAINS
                   HR%COMMITMENT*CF_FAC_TAUS*HR_TAU + (1.0_EB-HR%COMMITMENT)*HR_TAU)
              HR_TAU_INER = MAX(CF_MIN_TAU_INER, &
                   HR%COMMITMENT*CF_FAC_TAUS*HR_TAU_INER + (1.0_EB-HR%COMMITMENT)*HR_TAU_INER)
-             HR_A =  HR%A*MAX(CF_MIN_A,EVEL)
-             HR_B =  HR%B*MAX(CF_MIN_B,EVEL)
              A_WALL = MIN(A_WALL, CF_FAC_A_WALL*FAC_A_WALL*HR_A)
+             HR_A =  HR_A*MAX(CF_MIN_A,EVEL)
+             HR_B =  HR_B*MAX(CF_MIN_B,EVEL)
+          END IF
+          ! Hawk - dove game: more random noise for hawks
+          IF (C_HAWK >= 0.0_EB .AND. HR%I_DoorAlgo==1 .AND. HR%A <= 500.0_EB) THEN
+             GATH = GATH*THETA_HAWK
           END IF
 
           ! Psychological force: Cut-off when acceleration below 0.0001 m/s**2
-          P2P_DIST_MAX = HR%B*LOG(HR%A/0.0001_EB)
+          ! P2P_DIST_MAX = HR%B*LOG(HR%A/0.0001_EB)
+          P2P_DIST_MAX = HR_B*LOG(HR_A/0.0001_EB)
           P2P_DIST_MAX = MIN(P2P_DIST_MAX, 5.0_EB)  ! 5.0 m is the maximum range of pp-force
           IF ( HR%SUMFORCES2 > 0.1_EB ) THEN
              ! If large pressure then short range forces only (speed up)
-             P2P_DIST_MAX = MIN( P2P_DIST_MAX, -HR%B*LOG(HR%SUMFORCES2/(100.0_EB*HR%A)) )
+             ! P2P_DIST_MAX = MIN( P2P_DIST_MAX, -HR%B*LOG(HR%SUMFORCES2/(100.0_EB*HR%A)) )
+             P2P_DIST_MAX = MIN( P2P_DIST_MAX, -HR_B*LOG(HR%SUMFORCES2/(100.0_EB*HR_A)) )
           END IF
-          P2P_DIST_MAX = MAX(P2P_DIST_MAX, 3.0_EB*HR%B)
+          P2P_DIST_MAX = MAX(P2P_DIST_MAX, 3.0_EB*HR_B)
           ! Next is the max distance for the collision avoidance, counterflow, etc.
 
           ! In which grid cell is the agent, new coordinates:
@@ -8491,15 +8615,17 @@ CONTAINS
 
           ! Initialize hawk - dove game utility functions for the current agent (HR%)
           L_DO_GAME = .FALSE.
-          U_i_Hawk = 0.0_EB ; U_i_Dove = 0.0_EB
-          N_i_Hawk = 0      ; N_i_Dove = 0
-          Hawk_Dove_Game: IF (C_HAWK >= 0.0_EB .AND. T > HR%TPRE+HR%TDET .AND. HR%I_Target>0) THEN
+          U_i_Hawk  = 0.0_EB ; U_i_Dove  = 0.0_EB
+          N_i_Hawk  = 0      ; N_i_Dove  = 0
+          N_i_Hawk2 = 0      ; N_i_Dove2 = 0
+          Hawk_Dove_Game: IF (C_HAWK >= 0.0_EB .AND. T > HR%TPRE+HR%TDET .AND. HR%I_Target>0 .AND. HR%I_DoorAlgo==1) THEN
              ! Hawk - Dove game, only for visible target doors/exits (i_target>0)
              CALL RANDOM_NUMBER(RN)
-             Play_This_Time_Step: IF (RN > EXP(-DTSP/TAU_CHANGE_DOOR)) THEN
+             IF (L_DEAD .OR. L_FALLEN_DOWN) RN = -1.0_EB ! Do not play
+             Play_This_Time_Step: IF (RN > EXP(-DTSP/DT_GROUP_DOOR)) THEN
                 L_DO_GAME = .TRUE.
                 I_TMP = ABS(HR%I_TARGET)
-                P2P_SUUNTA_MAX = MAX(P2P_DIST_MAX, P2P_SUUNTA_MAX, R_HAWK_DOVE+2.0_EB*HR%RADIUS)
+                P2P_SUUNTA_MAX = MAX(P2P_DIST_MAX, P2P_SUUNTA_MAX, 2.0_EB*R_HAWK_DOVE+2.0_EB*HR%RADIUS)
                 IF (I_TMP <= N_DOORS) THEN
                    x_o = 0.5_EB*(EVAC_DOORS(I_TMP)%X1 + EVAC_DOORS(I_TMP)%X2)
                    y_o = 0.5_EB*(EVAC_DOORS(I_TMP)%Y1 + EVAC_DOORS(I_TMP)%Y2)
@@ -8519,7 +8645,7 @@ CONTAINS
                 IF (ABS(FAC_DOOR_QUEUE) > 0.001_EB) THEN
                    ! Queueing time is included
                    T_tmp  = SQRT((x_o-X1)**2 + (y_o-Y1)**2)
-                   T_tmp1 = MIN(1.5_EB*Pi*T_tmp**2/(ABS(FAC_DOOR_QUEUE)*Width), REAL(N_queue,EB)/(ABS(FAC_DOOR_QUEUE)*Width))
+                   T_tmp1 = REAL(N_queue,EB)/(ABS(FAC_DOOR_QUEUE)*Width)
                    ! T_tmp1 is the estimated queueing time, maximum is 3 p/m2 density and a semi circle
                    IF (FAC_DOOR_QUEUE < -0.001_EB) THEN
                       ! Estimated time is the longer one of the queueing and walking times
@@ -8538,8 +8664,8 @@ CONTAINS
           END IF Hawk_Dove_Game
 
           ! Speed up the dead agent loop, only contact forces are needed.
-          IF (L_DEAD) P2P_DIST_MAX = 0.0_EB
-          IF (L_DEAD) P2P_SUUNTA_MAX = 0.0_EB
+          IF (L_DEAD .OR. L_FALLEN_DOWN) P2P_DIST_MAX = 0.0_EB
+          IF (L_DEAD .OR. L_FALLEN_DOWN) P2P_SUUNTA_MAX = 0.0_EB
 
           BLOCK_LIST = 0
           I_DX = INT((2.0_EB*0.3_EB+MAX(P2P_SUUNTA_MAX,P2P_DIST_MAX))/DX(IIN)) + 1
@@ -8586,7 +8712,7 @@ CONTAINS
                 ! in front of the doors/exits are not optimal.  Close to a door it
                 ! would be better to use an ad-hoc movement direction, something
                 ! like is done in the STRS staircase model.
-                IF (.NOT.L_DEAD .AND. ESS%USE_V0) THEN
+                IF (.NOT.(L_DEAD .OR. L_FALLEN_DOWN) .AND. ESS%USE_V0) THEN
                    EVEL = SQRT(ESS%UBAR0**2 + ESS%VBAR0**2)
                    IF (HR%I_FFIELD == ESS%I_VENT_FFIELD .OR. ESS%I_VENT_FFIELD == 0 .AND. EVEL > 1.0E-12_EB) THEN
                       UBAR = ESS%UBAR0/EVEL
@@ -8704,11 +8830,13 @@ CONTAINS
              ! I: Index of the current agent (outer loop), IE: Index of the other agent (inner loop)
              IF (BLOCK_LIST(IE) == I) CYCLE P2PLOOP  ! No self interaction
              HRE => HUMAN(BLOCK_LIST(IE))
+             L_HRE_FALLEN_DOWN = .FALSE.
+             IF (HRE%T_FallenDown < T) L_HRE_FALLEN_DOWN = .TRUE.
              ! In stairs, only consider humans at the same, next and previous sub nodes (landings, stairs)
              IF (NM_STRS_MESH .AND. ABS(HRE%STR_SUB_INDX - HR%STR_SUB_INDX)>1) CYCLE P2PLOOP
 
              P2P_DIST = ((HRE%X-X1)**2 + (HRE%Y-Y1)**2)
-             Hawk_Dove_Game1: IF (L_DO_GAME .AND. P2P_DIST+(HR%RADIUS+HRE%RADIUS)**2 < R_HAWK_DOVE) THEN
+             Hawk_Dove_Game1: IF (L_DO_GAME .AND. P2P_DIST-(HR%RADIUS+HRE%RADIUS)**2 < R_HAWK_DOVE**2) THEN
                 ! Hawk - Dove game
                 IF (HRE%A > 500.0_EB) THEN
                    N_i_Dove = N_i_Dove + 1
@@ -8716,6 +8844,14 @@ CONTAINS
                    N_i_Hawk = N_i_Hawk + 1
                 END IF
              END IF Hawk_Dove_Game1
+             Hawk_Dove_Game1B: IF (L_DO_GAME .AND. P2P_DIST-(HR%RADIUS+HRE%RADIUS)**2 < 4.0_EB*R_HAWK_DOVE**2) THEN
+                ! Hawk - Dove game
+                IF (HRE%A > 500.0_EB) THEN
+                   N_i_Dove2 = N_i_Dove2 + 1
+                ELSE
+                   N_i_Hawk2 = N_i_Hawk2 + 1
+                END IF
+             END IF Hawk_Dove_Game1B
              IF (P2P_DIST < (MIN(MAX(P2P_DIST_MAX,P2P_SUUNTA_MAX),1.5_EB)+HR%RADIUS+HRE%RADIUS)**2) THEN
                 I_COUNT_DENSITY = I_COUNT_DENSITY + 1
                 EVEL = SQRT(HR%UBAR**2 + HR%VBAR**2)
@@ -8854,9 +8990,10 @@ CONTAINS
              ! ========================================================
              ! Add psychological (social) force term
              ! ========================================================
-             IF (.NOT. L_DEAD) THEN
+             IF (.NOT. (L_DEAD .OR. L_FALLEN_DOWN)) THEN
                 FC_X = 0.0_EB
                 FC_Y = 0.0_EB
+                IF (L_HRE_FALLEN_DOWN) COSPHIFAC = A_FAC_FALLEN * COSPHIFAC
                 ! Use the closest circles to calculate the psychological force
                 DO III = 1, 3
                    DO JJJ = 4, 6
@@ -8912,7 +9049,8 @@ CONTAINS
              ! ========================================================
              ! Add contact force terms
              ! ========================================================
-             IF ( P2P_DIST <= (HR%RADIUS+HRE%RADIUS) ) THEN
+             ! No contact forces for fallen down agent due to other agents (wall contact forces are calculated)
+             IF ( (P2P_DIST <= (HR%RADIUS+HRE%RADIUS)) .AND. .NOT.L_FALLEN_DOWN) THEN
                 ! Calculate the velocities of the shoulder cirles
                 V_TMP(4) = HRE%V + SIN(HRE%ANGLE)*HRE%OMEGA*HRE%D_SHOULDER
                 V_TMP(5) = HRE%V
@@ -8933,13 +9071,23 @@ CONTAINS
                       ELSE
                          D_HUMANS = MIN( (TIM_DIST-(R_TMP(III)+R_TMP(JJJ))) /0.01_EB , D_HUMANS)
                       END IF
-                      IF (TIM_DIST <= R_TMP(III)+R_TMP(JJJ) ) THEN
+                      IF (TAU_FALL_DOWN >= 0.0_EB .AND. TIM_DIST <= R_TMP(III)+R_TMP(JJJ)-D_OVERLAP_FALL) THEN
+                         ! Circles are touching each others more than D_OVERLAP_FALL => Fall down
+                         L_FALLEN_DOWN = .TRUE.
+                         HR%T_FallenDown = T
+                         HR%Angle_FallenDown = HR%angle
+                         HR%SizeFac_FallenDown = 0.0_EB
+                      END IF
+                      ! No contact forces for standing-fallen down
+                      IF (TIM_DIST <= R_TMP(III)+R_TMP(JJJ) .AND. .NOT.L_HRE_FALLEN_DOWN) THEN
                          ! Circles are touching each others
                          FC_X =(X_TMP(III)-X_TMP(JJJ))*C_YEFF*((R_TMP(III)+R_TMP(JJJ))-TIM_DIST)/TIM_DIST
                          FC_Y =(Y_TMP(III)-Y_TMP(JJJ))*C_YEFF*((R_TMP(III)+R_TMP(JJJ))-TIM_DIST)/TIM_DIST
                          FC_X = FC_X - FC_DAMPING*(U_TMP(III)-U_TMP(JJJ))*(X_TMP(III)-X_TMP(JJJ))/TIM_DIST
                          FC_Y = FC_Y - FC_DAMPING*(V_TMP(III)-V_TMP(JJJ))*(Y_TMP(III)-Y_TMP(JJJ))/TIM_DIST
                          CONTACT_F = CONTACT_F + SQRT(FC_X**2 + FC_Y**2)
+                         CONTACT_FX = CONTACT_FX + FC_X
+                         CONTACT_FY = CONTACT_FY + FC_Y
                          P2P_U = P2P_U + FC_X
                          P2P_V = P2P_V + FC_Y
                          P2P_TORQUE = P2P_TORQUE + FC_Y*(X_TMP(III)-HR%X) - FC_X*(Y_TMP(III)-HR%Y)
@@ -8966,6 +9114,8 @@ CONTAINS
                             P2P_TORQUE = P2P_TORQUE - FC_X*( (Y_TMP(III) + &
                                  (R_TMP(III)/R_TMP(JJJ))*(Y_TMP(JJJ)-Y_TMP(III)) ) - HR%Y ) 
                          END IF
+                         CONTACT_FX = CONTACT_FX + FC_X
+                         CONTACT_FY = CONTACT_FY + FC_Y
                       END IF
                    END DO
                 END DO
@@ -8982,21 +9132,42 @@ CONTAINS
           END IF
           Hawk_Dove_Game2: IF (L_DO_GAME) THEN
              ! Hawk - Dove game
+             IF (N_i_Dove + N_i_Hawk == 0) THEN
+                N_i_Dove = N_i_Dove2 ; N_i_Hawk = N_i_Hawk2
+             END IF
              IF (N_i_Dove + N_i_Hawk > 0) THEN
                 p_i = REAL(N_i_Hawk,EB)/REAL(N_i_Dove + N_i_Hawk,EB)
-                U_i_Hawk = (p_i*C_Hawk/T_tmp) - (1.0_EB-p_i)
+                ! U_i_Hawk = (p_i*C_Hawk/T_tmp) - (1.0_EB-p_i)
+                ! Time dependent (linearly growing) threath parameter alpha, in the final version
+                ! the threath is estimated from the smoke consentration etc, but for the development
+                ! of the game, a simple linear function is introduced.
+                U_i_Hawk = p_i*C_Hawk/(2.0_EB*Delta_Hawk*Alpha_Hawk*(1.0_EB+A_HAWK_T_FACTOR*(T-T_BEGIN))* &
+                     T_tmp) - (1.0_EB-p_i)
                 U_i_Dove = p_i
-                IF (HR%A <= 500.0_EB .AND. U_i_Dove < U_i_Hawk) THEN   ! Was a hawk
+                IF (HR%A <= 500.0_EB .AND. (U_i_Dove < U_i_Hawk .OR. &
+                     2.0_EB*Alpha_Hawk*Delta_Hawk*T_tmp < Epsilon_Hawk)) THEN   ! Was a hawk
+                   ! DoseCrit1 = hr%a   modified, no sharp transition
+                   ! DoseCrit2 = hr%tau modified, now sharp transition
+                   HR%DoseCrit1 = MAX(HR%A,  HR%DoseCrit1) ! Starting value for hawk => dove transition
+                   HR%DoseCrit2 = MAX(HR%TAU,HR%DoseCrit2) ! Starting value for hawk => dove transition
                    HR%A = 10.0_EB*HR%A ; HR%TAU = 2.0_EB*HR%TAU
+                   HR%DoseCrit2 = HR%TAU ! sharp transition
                 END IF
-                IF (HR%A >  500.0_EB .AND. U_i_Hawk < U_i_Dove) THEN   ! Was a dove
+                IF (HR%A >  500.0_EB .AND. U_i_Hawk < U_i_Dove .AND. &
+                    2.0_EB*Alpha_Hawk*Delta_Hawk*T_tmp >= Epsilon_Hawk ) THEN   ! Was a dove
+                   ! DoseCrit1 = hr%a   modified, no sharp transition
+                   ! DoseCrit2 = hr%tau modified, now sharp transition
+                   HR%DoseCrit1 = MIN(HR%A,  HR%DoseCrit1) ! Starting value for hawk => dove transition
+                   HR%DoseCrit2 = MIN(HR%TAU,HR%DoseCrit2) ! Starting value for hawk => dove transition
                    HR%A =  0.1_EB*HR%A ; HR%TAU = 0.5_EB*HR%TAU
+                   HR%DoseCrit2 = HR%TAU ! sharp transition
                 END IF
              ELSE
                 ! No neighbors, set to a dove if it is a hawk
-                IF (HR%A <= 500.0_EB) THEN 
-                   HR%A = 10.0_EB*HR%A ; HR%TAU = 2.0_EB*HR%TAU
-                END IF
+                ! It is better looking if the status is not changed.u_i_
+                !IF (HR%A <= 500.0_EB) THEN 
+                !   HR%A = 10.0_EB*HR%A ; HR%TAU = 2.0_EB*HR%TAU
+                !END IF
              END IF
           END IF Hawk_Dove_Game2
           TUSED(14,NM)=TUSED(14,NM)+SECOND()-TNOW14
@@ -9137,18 +9308,19 @@ CONTAINS
           HR%ANGLE_OLD = ANGLE_OLD
           HR%COMMITMENT = COMMITMENT
 
-          CALL WALL_SOCIALFORCES(NM, X_TMP, Y_TMP, R_TMP, P2P_DIST_MAX, D_XY, P2P_U, P2P_V, SOCIAL_F, FOUNDWALL_XY)
+          IF (.NOT.L_FALLEN_DOWN .AND. .NOT.L_DEAD) &
+               CALL WALL_SOCIALFORCES(NM, X_TMP, Y_TMP, R_TMP, P2P_DIST_MAX, D_XY, P2P_U, P2P_V, SOCIAL_F, FOUNDWALL_XY)
 
           CALL WALL_CONTACTFORCES(NM, X_TMP(1), Y_TMP(1), R_TMP(1), U_TMP(1), V_TMP(1), D_XY, &
-               P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY)
+               P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
           CALL WALL_CONTACTFORCES(NM, X_TMP(2), Y_TMP(2), R_TMP(2), U_TMP(2), V_TMP(2), D_XY, &
-               P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY)
+               P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
           CALL WALL_CONTACTFORCES(NM, X_TMP(3), Y_TMP(3), R_TMP(3), U_TMP(3), V_TMP(3), D_XY, &
-               P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY)
+               P2P_U, P2P_V, P2P_TORQUE, CONTACT_F, D_WALLS, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
 
           ! Add forces from the door case
           CALL DOOR_FORCES(NM, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, P2P_DIST_MAX, D_XY,&
-               P2P_U, P2P_V, SOCIAL_F, CONTACT_F, P2P_TORQUE, FOUNDWALL_XY)
+               P2P_U, P2P_V, SOCIAL_F, CONTACT_F, P2P_TORQUE, FOUNDWALL_XY, CONTACT_FX, CONTACT_FY)
       
           IF (NM_STRS_MESH .AND. ABS(HR%SKIP_WALL_FORCE_IOR)>0 .AND. I_STRS_DOOR>0) THEN
              IF (I_STRS_DOOR > N_DOORS) THEN
@@ -9160,7 +9332,7 @@ CONTAINS
              END IF
              ! x1, y1 agent,  x11, y11, coordiantes of the corner
              CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
-                  CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT)
+                  CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT, CONTACT_FX, CONTACT_FY)
              IF (I_STRS_DOOR > N_DOORS) THEN
                 X11 = EVAC_EXITS(I_STRS_DOOR-N_DOORS)%X2
                 Y11 = EVAC_EXITS(I_STRS_DOOR-N_DOORS)%Y2
@@ -9170,7 +9342,7 @@ CONTAINS
              END IF
              ! x1, y1 agent,  x11, y11, coordiantes of the corner
              CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
-                  CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT)
+                  CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT, CONTACT_FX, CONTACT_FY)
           END IF
 
           ! Add wall corner - person forces
@@ -9219,7 +9391,7 @@ CONTAINS
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
-                        CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT)
+                        CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT, CONTACT_FX, CONTACT_FY)
                    EXIT LOOP_PXPY
                 END IF
              END DO LOOP_PXPY
@@ -9270,7 +9442,7 @@ CONTAINS
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
-                        CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT)
+                        CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT, CONTACT_FX, CONTACT_FY)
                    EXIT LOOP_MXPY
                 END IF
              END DO LOOP_MXPY
@@ -9321,7 +9493,7 @@ CONTAINS
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
-                        CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT)
+                        CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT, CONTACT_FX, CONTACT_FY)
                    EXIT LOOP_PXMY
                 END IF
              END DO LOOP_PXMY
@@ -9372,7 +9544,7 @@ CONTAINS
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
-                        CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT)
+                        CONTACT_F, P2P_TORQUE, D_WALLS, X_TMP, Y_TMP, R_TMP, U_TMP, V_TMP, ISTAT, CONTACT_FX, CONTACT_FY)
                    EXIT LOOP_MXMY
                 END IF
              END DO LOOP_MXMY
@@ -9388,6 +9560,16 @@ CONTAINS
           HR%SUMFORCES  = CONTACT_F
           HR%SUMFORCES2 = SOCIAL_F + CONTACT_F
           HR%TORQUE = P2P_TORQUE
+
+          ! Fall down algorithm: Check the resultant contact force
+          IF (TAU_FALL_DOWN >= 0.0_EB) THEN
+             IF (.NOT.L_FALLEN_DOWN .AND. SQRT(CONTACT_FX**2+CONTACT_FY**2) > HR%F_FallDown) THEN
+                L_FALLEN_DOWN = .TRUE.
+                HR%T_FallenDown = T
+                HR%Angle_FallenDown = HR%angle
+                HR%SizeFac_FallenDown = 0.0_EB
+             END IF
+          END IF
 
           IF ( T <= T_BEGIN ) THEN
              IF ( ABS(P2P_U)/HR%MASS > 550.0_EB ) P2P_U =550.0_EB*HR%MASS*P2P_U/ABS(P2P_U)
@@ -9513,6 +9695,12 @@ CONTAINS
           ! Check that angular velocity is not too large
           IF ( ABS(OMEGA_NEW) > OMEGA_MAX ) THEN
              OMEGA_NEW = SIGN(OMEGA_MAX,OMEGA_NEW)
+          END IF
+          IF (TAU_FALL_DOWN >= 0.0_EB .AND. L_FALLEN_DOWN) THEN
+            T_tmp = MIN(TAU_FALL_DOWN, T - HR%T_FallenDown) ! 0 - tau_fall_down
+            U_NEW = (TAU_FALL_DOWN - T_tmp)*U_NEW/TAU_FALL_DOWN
+            V_NEW = (TAU_FALL_DOWN - T_tmp)*V_NEW/TAU_FALL_DOWN
+            OMEGA_NEW = (TAU_FALL_DOWN - T_tmp)*OMEGA_NEW/TAU_FALL_DOWN
           END IF
 
           HR%U = U_NEW
@@ -10186,7 +10374,7 @@ CONTAINS
             UBAR = HR%UBAR ; VBAR = HR%VBAR
          END IF
       END IF
-      IF (L_DEAD) THEN
+      IF (L_DEAD .OR. L_FALLEN_DOWN) THEN
          UBAR = 0.0_EB; VBAR = 0.0_EB
       END IF
       IF (I_HERDING_TYPE>1 .AND. HR%I_Target==0 .AND. HR%I_DoorAlgo>0 .AND. .NOT.V0_IS_SET_ZERO) THEN
@@ -10730,13 +10918,23 @@ CONTAINS
                END IF
             END SELECT
             IF (HR%IOR > 0) THEN
-               IF (.NOT. PEX%COUNT_ONLY) WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4,A,I4,2I3)') &
-                    ' Agent n:o', HR%ILABEL, ' out at ', T, ' s, exit ', TRIM(PEX%ID), &
-                    ', FED=', HR%INTDOSE, ', Color_i=', HR%COLOR_INDEX, HR%I_Target, HR%I_DoorAlgo
-               IF (PEX%COUNT_ONLY .AND. ABS(PEX%IOR)<3) WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4,A,I4,2I3)') &
-                    ' Agent n:o', HR%ILABEL, ' counted at ', T, ' s, counter ', TRIM(PEX%ID), &
-                    ', FED=', HR%INTDOSE, ', Color_i=', HR%COLOR_INDEX, HR%I_Target, HR%I_DoorAlgo
-               IF (HR%IOR == 2) HR%IOR = HUMAN_NO_TARGET
+               IF (C_HAWK >= 0.0_EB) THEN
+                  IF (.NOT. PEX%COUNT_ONLY) WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.1,A,3I3)') &
+                       ' Agent n:o', HR%ILABEL, ' out at ', T, ' s, exit ', TRIM(PEX%ID), &
+                       ', A=', HR%A, ', AgentType=', HR%I_DoorAlgo, HR%COLOR_INDEX, HR%I_Target
+                  IF (PEX%COUNT_ONLY .AND. ABS(PEX%IOR)<3) WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.1,A,3I3)') &
+                       ' Agent n:o', HR%ILABEL, ' counted at ', T, ' s, counter ', TRIM(PEX%ID), &
+                       ', A=', HR%A, ', AgentType=', HR%I_DoorAlgo, HR%COLOR_INDEX, HR%I_Target
+                  IF (HR%IOR == 2) HR%IOR = HUMAN_NO_TARGET
+               ELSE
+                  IF (.NOT. PEX%COUNT_ONLY) WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4,A,I4,2I3)') &
+                       ' Agent n:o', HR%ILABEL, ' out at ', T, ' s, exit ', TRIM(PEX%ID), &
+                       ', FED=', HR%INTDOSE, ', Color_i=', HR%COLOR_INDEX, HR%I_Target, HR%I_DoorAlgo
+                  IF (PEX%COUNT_ONLY .AND. ABS(PEX%IOR)<3) WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4,A,I4,2I3)') &
+                       ' Agent n:o', HR%ILABEL, ' counted at ', T, ' s, counter ', TRIM(PEX%ID), &
+                       ', FED=', HR%INTDOSE, ', Color_i=', HR%COLOR_INDEX, HR%I_Target, HR%I_DoorAlgo
+                  IF (HR%IOR == 2) HR%IOR = HUMAN_NO_TARGET
+               END IF
             END IF
          END DO HUMLOOP
       END DO PEXLOOP
@@ -10949,9 +11147,15 @@ CONTAINS
                   PDX%ICOUNT = PDX%ICOUNT + 1
                   IF (PDX%T_FIRST <= T_BEGIN) PDX%T_FIRST = T
 
-                  WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4,A,I4,2I3)') &
-                       ' Agent n:o', HR%ILABEL, ' out at ', T, ' s, door ', TRIM(PDX%ID), &
-                       ' FED ', HR%INTDOSE, ', Color_i=', HR%COLOR_INDEX, HR%I_Target, HR%I_DoorAlgo
+                  IF (C_HAWK >= 0.0_EB) THEN
+                     WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.1,A,3I3)') &
+                          ' Agent n:o', HR%ILABEL, ' out at ', T, ' s, door ', TRIM(PDX%ID), &
+                          ' A=', HR%A, ', AgentType=', HR%I_DoorAlgo, HR%COLOR_INDEX, HR%I_Target
+                  ELSE
+                     WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,A,A,F8.4,A,I4,2I3)') &
+                          ' Agent n:o', HR%ILABEL, ' out at ', T, ' s, door ', TRIM(PDX%ID), &
+                          ' FED ', HR%INTDOSE, ', Color_i=', HR%COLOR_INDEX, HR%I_Target, HR%I_DoorAlgo
+                  END IF
 
                ELSE    ! ISTAT = 1 ==> DO NOT MOVE TO NODE
                   ! Can not move to the next node, so do not allow to move inside
@@ -11752,6 +11956,11 @@ CONTAINS
       HR%I_Target = 0
       HR%I_DoorAlgo = PNX%I_AGENT_TYPE
       HR%I_Door_Mode = 0 ! Default, no target door yet
+      CALL RANDOM_NUMBER(RN)
+      HR%F_FallDown = F_MIN_FALL + RN*(F_MAX_FALL - F_MIN_FALL) 
+      HR%T_FallenDown = HUGE(HR%T_FallenDown)
+      HR%Angle_FallenDown = 0.0_EB
+      HR%SizeFac_FallenDown = 0.0_EB
       !
       IF (ABS(ior) == 1) irnmax = INT(PNX%Width*4.0_EB)
       IF (ABS(ior) == 2) irnmax = INT(PNX%Width*4.0_EB)
@@ -11919,7 +12128,7 @@ CONTAINS
     END SUBROUTINE ENTRY_HUMAN
 
     SUBROUTINE Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
-         Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+         Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat, CONTACT_FX, CONTACT_FY)
       IMPLICIT NONE
 
       ! Corner point - agent social and contact forces and torques
@@ -11942,7 +12151,7 @@ CONTAINS
       ! Passed variables
       REAL(EB), INTENT(IN) :: x1, y1, x11, y11, p2p_dist_max
       REAL(EB), DIMENSION(6), INTENT(IN) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
-      REAL(EB), INTENT(INOUT) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, d_walls
+      REAL(EB), INTENT(INOUT) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, d_walls, CONTACT_FX, CONTACT_FY
       INTEGER, INTENT(OUT) :: istat
       !
       ! Local variables
@@ -11971,6 +12180,7 @@ CONTAINS
       ELSE
          CosPhiFac = 1.0_EB
       END IF
+      IF (L_DEAD .OR. L_FALLEN_DOWN) CosPhiFac = 0.0_EB
       P2P_U = P2P_U + (X1-x11)*A_Wall*CosPhiFac*EXP(-(dist-HR%Radius)/B_Wall) / dist
       P2P_V = P2P_V + (Y1-y11)*A_Wall*CosPhiFac*EXP(-(dist-HR%Radius)/B_Wall) / dist
       Social_F = Social_F + ABS(A_Wall*CosPhiFac*EXP(-(dist-HR%Radius)/B_Wall))
@@ -11996,6 +12206,7 @@ CONTAINS
             !Only radial contact forces, i.e., pressure calculation
             Contact_F = Contact_F + SQRT(Fc_x**2 + Fc_y**2)
             ! Tangential contact force:
+            ! I_FRIC_SW >= 1 is the default and it is now the only one supported
                Fc_x = Fc_x - k_fric*( (1.0_EB-FricFac)*(r_tmp(iii)-dist)+FricFac ) *(y_tmp(iii)-y11)* &
                     ( (y_tmp(iii)-y11)*u_tmp(iii) - (x_tmp(iii)-x11)*v_tmp(iii) )/dist**2
                Fc_y = Fc_y + k_fric*( (1.0_EB-FricFac)*(r_tmp(iii)-dist)+FricFac ) *(x_tmp(iii)-x11)* &
@@ -12003,13 +12214,15 @@ CONTAINS
             P2P_Torque = P2P_Torque + Fc_y*(x11-x_tmp(iii)) - Fc_x*(y11-y_tmp(iii))
             P2P_U = P2P_U + Fc_x
             P2P_V = P2P_V + Fc_y
+            Contact_FX = Contact_FX + Fc_x
+            Contact_FY = Contact_FY + Fc_y
          END IF
       END DO
 
     END SUBROUTINE Corner_Forces
 
     SUBROUTINE Door_Forces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, p2p_dist_max, d_xy,&
-         P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, FoundWall_xy)
+         P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, FoundWall_xy, CONTACT_FX, CONTACT_FY)
       IMPLICIT NONE
       !
       ! This routine adds forces from the door posts. (VENTs with VEL>0)
@@ -12033,7 +12246,7 @@ CONTAINS
       REAL(EB), DIMENSION(4), INTENT(IN) :: d_xy
       LOGICAL, DIMENSION(4), INTENT(IN) :: FoundWall_xy
       REAL(EB), DIMENSION(6), INTENT(IN) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
-      REAL(EB), INTENT(INOUT) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque
+      REAL(EB), INTENT(INOUT) :: P2P_U, P2P_V, Social_F, Contact_F, P2P_Torque, CONTACT_FX, CONTACT_FY
       !
       ! Local variables
       INTEGER :: is, idir, iin, jjn, istat
@@ -12059,11 +12272,11 @@ CONTAINS
                x11 = VENTS(ii)%x1
                y11 = VENTS(ii)%y1
                CALL Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
-                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat, CONTACT_FX, CONTACT_FY)
                x11 = VENTS(ii)%x2
                y11 = VENTS(ii)%y2
                CALL Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
-                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat, CONTACT_FX, CONTACT_FY)
             END IF
          CASE(+1)  ! wall at -x direction
             IF (.NOT.FoundWall_xy(1) .AND. ABS(VENTS(ii)%x1-d_xy(1))<0.01_EB .AND. &
@@ -12072,11 +12285,11 @@ CONTAINS
                x11 = VENTS(ii)%x1
                y11 = VENTS(ii)%y1
                CALL Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
-                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat, CONTACT_FX, CONTACT_FY)
                x11 = VENTS(ii)%x2
                y11 = VENTS(ii)%y2
                CALL Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
-                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat, CONTACT_FX, CONTACT_FY)
             END IF
          CASE(-2)  ! wall at +y direction
             IF (.NOT.FoundWall_xy(4) .AND. ABS(VENTS(ii)%y1-d_xy(4))<0.01_EB .AND. &
@@ -12085,11 +12298,11 @@ CONTAINS
                x11 = VENTS(ii)%x1
                y11 = VENTS(ii)%y1
                CALL Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
-                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat, CONTACT_FX, CONTACT_FY)
                x11 = VENTS(ii)%x2
                y11 = VENTS(ii)%y2
                CALL Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
-                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat, CONTACT_FX, CONTACT_FY)
             END IF
          CASE(+2)  ! wall at -y direction
             IF (.NOT.FoundWall_xy(3) .AND. ABS(VENTS(ii)%y1-d_xy(3))<0.01_EB .AND. &
@@ -12098,11 +12311,11 @@ CONTAINS
                x11 = VENTS(ii)%x1
                y11 = VENTS(ii)%y1
                CALL Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
-                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat, CONTACT_FX, CONTACT_FY)
                x11 = VENTS(ii)%x2
                y11 = VENTS(ii)%y2
                CALL Corner_Forces(x1, y1, x11, y11, p2p_dist_max, P2P_U, P2P_V, Social_F, &
-                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat)
+                    Contact_F, P2P_Torque, d_walls, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, istat, CONTACT_FX, CONTACT_FY)
             END IF
          END SELECT
       END DO
@@ -12216,7 +12429,7 @@ CONTAINS
     END SUBROUTINE Wall_SocialForces
 
     SUBROUTINE Wall_ContactForces(nm, x_tmp, y_tmp, r_tmp, u_tmp, v_tmp, d_xy,&
-         P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy)
+         P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, FoundWall_xy, CONTACT_FX, CONTACT_FY)
       IMPLICIT NONE
       !
       ! wall - agent contact forces
@@ -12239,7 +12452,7 @@ CONTAINS
       REAL(EB), INTENT(IN) :: x_tmp, y_tmp, r_tmp, u_tmp, v_tmp
       REAL(EB), DIMENSION(4), INTENT(IN) :: d_xy
       LOGICAL, DIMENSION(4), INTENT(IN) :: FoundWall_xy
-      REAL(EB), INTENT(INOUT) :: P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls
+      REAL(EB), INTENT(INOUT) :: P2P_U, P2P_V, P2P_Torque, Contact_F, d_walls, CONTACT_FX, CONTACT_FY
       !
       ! Local variables
       INTEGER :: is, idir
@@ -12271,6 +12484,8 @@ CONTAINS
          ELSE
             Fc_y = Fc_y - HR%Gamma*v_tmp
          END IF
+         Contact_FX = Contact_FX + Fc_x
+         Contact_FY = Contact_FY + Fc_y
          P2P_Torque = P2P_Torque + Fc_y*(d_xy(idir)-HR%X) - Fc_x*(y_tmp-HR%Y)
          P2P_U = P2P_U + Fc_x
          P2P_V = P2P_V + Fc_y
@@ -12302,6 +12517,8 @@ CONTAINS
          ELSE
             Fc_y = Fc_y - HR%Gamma*v_tmp
          END IF
+         Contact_FX = Contact_FX + Fc_x
+         Contact_FY = Contact_FY + Fc_y
          P2P_Torque = P2P_Torque + Fc_y*(d_xy(idir)-HR%X) - Fc_x*(y_tmp-HR%Y)
          P2P_U = P2P_U + Fc_x
          P2P_V = P2P_V + Fc_y
@@ -12333,6 +12550,8 @@ CONTAINS
          ELSE
             Fc_x = Fc_x - HR%Gamma*u_tmp
          END IF
+         Contact_FX = Contact_FX + Fc_x
+         Contact_FY = Contact_FY + Fc_y
          P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(d_xy(idir)-HR%Y)
          P2P_U = P2P_U + Fc_x
          P2P_V = P2P_V + Fc_y
@@ -12364,6 +12583,8 @@ CONTAINS
          ELSE
             Fc_x = Fc_x - HR%Gamma*u_tmp
          END IF
+         Contact_FX = Contact_FX + Fc_x
+         Contact_FY = Contact_FY + Fc_y
          P2P_Torque = P2P_Torque + Fc_y*(x_tmp-HR%X) - Fc_x*(d_xy(idir)-HR%Y)
          P2P_U = P2P_U + Fc_x
          P2P_V = P2P_V + Fc_y
@@ -13404,23 +13625,47 @@ CONTAINS
     ELSE
        ! Do not write the 'fed' columns
        IF (ii_density > ii_ntargets) THEN
-          WRITE(tcform,'(a,i4.4,a,a,i4.4,a)') "(ES13.5E3,", n_cols, "(',',i8)", "," , &
-               ii_density-ii_ntargets, "(',',ES13.5E3))"
-          WRITE (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
-               (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
-               (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
-               (EVAC_EXITS(i)%ICOUNT, i = 1,N_EXITS), &
-               (EVAC_DOORS(i)%ICOUNT, i = 1,N_DOORS), &
-               (NINT(ITEMP(i)), i = 1,N_EXITS-n_co_exits+N_DOORS), &
-               (ITEMP(i), i = ii_ntargets+1,ii_density)
+          IF (C_HAWK >= 0.0_EB) THEN
+             WRITE(tcform,'(a,i4.4,a,a,i4.4,a,i4.4,a)') "(ES13.5E3,", n_cols, "(',',i8)", "," , &
+                  ii_density-ii_ntargets, "(',',ES13.5E3),", n_egrids*4, "(',',i8))"
+             WRITE (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
+                  (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
+                  (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
+                  (EVAC_EXITS(i)%ICOUNT, i = 1,N_EXITS), &
+                  (EVAC_DOORS(i)%ICOUNT, i = 1,N_DOORS), &
+                  (NINT(ITEMP(i)), i = 1,N_EXITS-n_co_exits+N_DOORS), &
+                  (ITEMP(i), i = ii_ntargets+1,ii_density), &
+                  ((N_HawkDoveCount(ii,i),ii=1,4),i=1,n_egrids)
+          ELSE
+             WRITE(tcform,'(a,i4.4,a,a,i4.4,a)') "(ES13.5E3,", n_cols, "(',',i8)", "," , &
+                  ii_density-ii_ntargets, "(',',ES13.5E3))"
+             WRITE (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
+                  (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
+                  (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
+                  (EVAC_EXITS(i)%ICOUNT, i = 1,N_EXITS), &
+                  (EVAC_DOORS(i)%ICOUNT, i = 1,N_DOORS), &
+                  (NINT(ITEMP(i)), i = 1,N_EXITS-n_co_exits+N_DOORS), &
+                  (ITEMP(i), i = ii_ntargets+1,ii_density)
+          END IF
        ELSE
-          WRITE(tcform,'(a,i4.4,a)') "(ES13.5E3,",n_cols, "(',',i8),i8)"
-          WRITE (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
-               (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
-               (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
-               (EVAC_EXITS(i)%ICOUNT, i = 1,N_EXITS), &
-               (EVAC_DOORS(i)%ICOUNT, i = 1,N_DOORS), &
-               (NINT(ITEMP(i)), i = 1,N_EXITS-n_co_exits+N_DOORS)
+          IF (C_HAWK >= 0.0_EB) THEN
+             WRITE(tcform,'(a,i4.4,a,i4.4,a)') "(ES13.5E3,",n_cols, "(',',i8),", n_egrids*4,"(',',i8))"
+             WRITE (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
+                  (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
+                  (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
+                  (EVAC_EXITS(i)%ICOUNT, i = 1,N_EXITS), &
+                  (EVAC_DOORS(i)%ICOUNT, i = 1,N_DOORS), &
+                  (NINT(ITEMP(i)), i = 1,N_EXITS-n_co_exits+N_DOORS), &
+                  ((N_HawkDoveCount(ii,i),ii=1,4), i=1,n_egrids)
+          ELSE
+             WRITE(tcform,'(a,i4.4,a)') "(ES13.5E3,",n_cols, "(',',i8),i8)"
+             WRITE (LU_EVACCSV,fmt=tcform) Tin, n_tot_humans, &
+                  (MESHES(EVAC_Node_List(i)%IMESH)%N_HUMANS, i=1,n_egrids), &
+                  (EVAC_CORRS(i)%n_inside, i = 1,n_corrs), &
+                  (EVAC_EXITS(i)%ICOUNT, i = 1,N_EXITS), &
+                  (EVAC_DOORS(i)%ICOUNT, i = 1,N_DOORS), &
+                  (NINT(ITEMP(i)), i = 1,N_EXITS-n_co_exits+N_DOORS)
+          END IF
        END IF
     END IF
     DEALLOCATE(ITEMP)
