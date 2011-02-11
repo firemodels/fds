@@ -1434,7 +1434,7 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
             CP,H_NEW,YY_GET(1:N_GAS_SPECIES),YY_GET2(1:N_GAS_SPECIES),M_GAS_NEW,MW_GAS,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,&
-            H_L_REF,TMP_G_NEW,DT_SUM,DCPDT,TMP_WGT
+            H_L_REF,TMP_G_NEW,DT_SUM,DCPDT,TMP_WGT,X_EQUIL,Y_EQUIL
 INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,N_SUBSTEPS,ITMP,IBC,ITCOUNT
 INTEGER, INTENT(IN) :: NM
 LOGICAL :: TEMPITER
@@ -1606,7 +1606,12 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT ! limit to avoid diveregence errors
             K_AIR  = CPOPR*MU_AIR
             IF (IGAS>0) THEN
-               Y_GAS = YY(II,JJ,KK,IGAS)
+               IF (PC%SPEC_INDEX > N_SPECIES-N_MIX_SPECIES) THEN
+                  Y_GAS = YY(II,JJ,KK,IGAS)
+               ELSE
+                  YY_GET = YY(II,JJ,KK,:)
+                  CALL GET_MASS_FRACTION(YY_GET,PC%SPEC_INDEX,Y_GAS)
+               ENDIF
             ELSE
                Y_GAS = 0._EB
             ENDIF
@@ -1614,7 +1619,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             V2 = 0.5_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))
             W2 = 0.5_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))
             VEL_REL = SQRT((U2-DR%U)**2+(V2-DR%V)**2+(W2-DR%W)**2)
-
             ! Set variables for heat transfer on solid
 
             SOLID_OR_GAS_PHASE: IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
@@ -1786,6 +1790,30 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                CYCLE TIME_ITERATION_LOOP
             ENDIF
+            ITMP     = INT(TMP_G_NEW)
+            TMP_WGT  = TMP_G_NEW - AINT(TMP_G_NEW)
+            H_V      = PC%H_V(ITMP)+TMP_WGT*(PC%H_V(ITMP+1)-PC%H_V(ITMP))
+            DHOR     = H_V*MW_DROP/R0 
+            X_EQUIL  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(TMP_G_NEW,TMP_BOIL))))
+            Y_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
+            !Limit supersaturation
+            IF (Y_GAS < Y_EQUIL) THEN
+               IF (PC%SPEC_INDEX > N_SPECIES-N_MIX_SPECIES) THEN
+                  Y_GAS = YY_GET2(IGAS)
+               ELSE
+                  CALL GET_MASS_FRACTION(YY_GET2,PC%SPEC_INDEX,Y_GAS)
+               ENDIF
+               IF (Y_GAS/Y_EQUIL > 1.02_EB) THEN
+                  DT_SUBSTEP = DT_SUBSTEP * 0.5_EB            
+                  N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
+                  IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
+                     CALL SHUTDOWN('Numerical instability in particle energy transport')
+                  ENDIF
+                  CYCLE TIME_ITERATION_LOOP
+               ENDIF
+            ENDIF
+            
+            !Limit gas temperature change
             IF (ABS(TMP_G_NEW/TMP_G - 1._EB) > 0.05_EB) THEN
                DT_SUBSTEP = DT_SUBSTEP * 0.5_EB            
                N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
