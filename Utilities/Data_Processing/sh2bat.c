@@ -2,7 +2,8 @@
 // $Revision$
 // $Author$
 
-// convert the FDS cases Linux/OSX csh script to an equivalent Windows bat version 
+// convert the Linux/OSX script containing a list FDS cases 
+// to an equivalent Windows bat version 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,9 +84,9 @@ int main(int argc, char **argv){
 
 void usage(char *prog){
   fprintf(stderr,"%s file_in file_out\n\n",prog);
-  fprintf(stderr,"  convert the csh script file file_in to a windows bat file equivalent by\n");
-  fprintf(stderr,"  ignoring lines beginning with the csh comment character # and converting \n");
-  fprintf(stderr,"  the csh symbol $RUNFDS to the DOS symbol %RUNFDS% \n");
+  fprintf(stderr,"  convert the Linux/OSX script file file_in to a windows bat file equivalent by\n");
+  fprintf(stderr,"  ignoring lines beginning with the comment character # and converting \n");
+  fprintf(stderr,"  the Linux/OSX symbol $RUNFDS to the DOS symbol %RUNFDS% \n");
 }
 
 /* ------------------ trim ------------------------ */
