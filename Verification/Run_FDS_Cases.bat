@@ -30,7 +30,7 @@ Rem -------------------------
 Rem run FDS veriication cases
 Rem -------------------------
 echo creating FDS case list from FDS_Cases.csh
-..\Utilities\Data_Processing\csh2bat FDS_Cases.csh FDS_Cases.bat
+..\Utilities\Data_Processing\sh2bat FDS_Cases.sh FDS_Cases.bat
 
 echo running FDS cases
 call FDS_Cases.bat
