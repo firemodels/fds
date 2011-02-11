@@ -10,7 +10,7 @@ export BASEDIR=`pwd`
 # uncomment following line to stop all cases
 #export STOPFDS=1
 
-./FDS_Cases.csh
+./FDS_Cases.sh
 
 echo FDS cases submitted
 
