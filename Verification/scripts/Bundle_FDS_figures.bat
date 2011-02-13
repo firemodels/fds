@@ -6,11 +6,11 @@ set version_tag=2010_0618_r6356
 
 cd to_google
 
-set indir=..\..\Manuals
+set indir=..\..\..\Manuals
 set outdir=fdsfigures_%version_tag%
-set FDSUG=FDS_5_User_Guide\SCRIPT_FIGURES
-set FDSVG=FDS_5_Verification_Guide\SCRIPT_FIGURES
-set FDSTG=FDS_5_Technical_Reference_Guide\SCRIPT_FIGURES
+set FDSUG=FDS_User_Guide\SCRIPT_FIGURES
+set FDSVG=FDS_Verification_Guide\SCRIPT_FIGURES
+set FDSTG=FDS_Technical_Reference_Guide\SCRIPT_FIGURES
 
 echo.
 echo filling FDS figures directory
