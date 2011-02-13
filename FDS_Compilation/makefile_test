@@ -44,7 +44,12 @@ no_target:
 
 .SUFFIXES: .c .f90 .o .obj
 
-# Windows Intel Compiler, version 11
+# ************************************ #
+#                                      #
+#                WINDOWS               #
+#  Intel Compiler for WIN, version 11  #
+#                                      #
+# ************************************ #
 
 #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
 #    ..\Scripts\iclvars ia32
@@ -118,47 +123,7 @@ OPENMP_NAME = _openmp
 endif
 
 intel_win : FFLAGS += $(MPIINCLUDE)
-#intel_win : CFLAGS = -O2 -Dpp_noappend
-intel_win : FFLAGS_CONS = $(FFLAGS)
-intel_win : FFLAGS_CTRL = $(FFLAGS)
-intel_win : FFLAGS_DATA = $(FFLAGS)
-intel_win : FFLAGS_DEVC = $(FFLAGS)
-intel_win : FFLAGS_DIVG = $(FFLAGS)
-intel_win : FFLAGS_DUMP = $(FFLAGS)
-intel_win : FFLAGS_EVAC = $(FFLAGS)
-intel_win : FFLAGS_FIRE = $(FFLAGS)
-intel_win : FFLAGS_FUNC = $(FFLAGS) $(FOPENMPFLAGS)
-intel_win : FFLAGS_HVAC = $(FFLAGS)
-intel_win : FFLAGS_IEVA = $(FFLAGS)
-intel_win : FFLAGS_INIT = $(FFLAGS)
-intel_win : FFLAGS_IRAD = $(FFLAGS)
-intel_win : FFLAGS_MAIN = $(FFLAGS)
-intel_win : FFLAGS_MASS = $(FFLAGS)
-intel_win : FFLAGS_MESH = $(FFLAGS)
-intel_win : FFLAGS_MPIP = $(FFLAGS)
-intel_win : FFLAGS_MPIS = $(FFLAGS)
-intel_win : FFLAGS_PART = $(FFLAGS)
-intel_win : FFLAGS_POIS = $(FFLAGS)
-intel_win : FFLAGS_PREC = $(FFLAGS)
-intel_win : FFLAGS_PRES = $(FFLAGS)
-intel_win : FFLAGS_RADI = $(FFLAGS)
-intel_win : 
-# Demonstrate how to setup a special flag for compiling read.f90
-# If a BUILD=RELEASE every time read.f90 is compiled with /Od flag instead of -02.
-# All other files are compiled with -O2.
-# In case of BUILD=DEBUG the debug flags are used
-ifeq ($(BUILD),RELEASE)
-FFLAGS_READ = /Od $(MPIINCLUDE)
-else
-FFLAGS_READ = $(FFLAGS)
-endif
-intel_win : FFLAGS_SCRC = $(FFLAGS)
-intel_win : FFLAGS_SMVV = $(FFLAGS)
-intel_win : FFLAGS_TURB = $(FFLAGS)
-intel_win : FFLAGS_TYPE = $(FFLAGS)
-intel_win : FFLAGS_VEGE = $(FFLAGS)
-intel_win : FFLAGS_VELO = $(FFLAGS)
-intel_win : FFLAGS_WALL = $(FFLAGS)
+#intel_win : CFLAGS = -O2 -Dpp_noappend #already defined in BUILD
 intel_win : FFLAGS_LINKER = $(FFLAGS)
 intel_win : FCOMPL = ifort
 intel_win : CCOMPL = cl
@@ -169,423 +134,77 @@ intel_win : $(objects)
 
 
 
+# ************************************ #
+#                                      #
+#                 LINUX                #
+# Intel Compiler for Linux, version 11 #
+#                                      #
+# ************************************ #
 
-# Intel Compiler for Linux, version 11
+intel_linux : 
+# Check for platform-setup
+# If PLATFORM=32bit the filename contains "32" and the stacksize for 32bit is set.
+# If PLATFORM=64bit the filename contains "64" and the stacksize for 64bit is set
+ifeq ($(PLATFORM),32bit)
+PLATFORM_FLAG = 32
+endif
+ifeq ($(PLATFORM),64bit)
+PLATFORM_FLAG = 64
+endif
 
-intel_linux_32 : FFLAGS = -m32 -O3 -static -vec_report0
-intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
-intel_linux_32 : LFLAGS = -static-intel
-intel_linux_32 : FFLAGS_CONS = $(FFLAGS)
-intel_linux_32 : FFLAGS_CTRL = $(FFLAGS)
-intel_linux_32 : FFLAGS_DATA = $(FFLAGS)
-intel_linux_32 : FFLAGS_DEVC = $(FFLAGS)
-intel_linux_32 : FFLAGS_DIVG = $(FFLAGS)
-intel_linux_32 : FFLAGS_DUMP = $(FFLAGS)
-intel_linux_32 : FFLAGS_EVAC = $(FFLAGS)
-intel_linux_32 : FFLAGS_FIRE = $(FFLAGS)
-intel_linux_32 : FFLAGS_FUNC = $(FFLAGS)
-intel_linux_32 : FFLAGS_HVAC = $(FFLAGS)
-intel_linux_32 : FFLAGS_IEVA = $(FFLAGS)
-intel_linux_32 : FFLAGS_INIT = $(FFLAGS)
-intel_linux_32 : FFLAGS_IRAD = $(FFLAGS)
-intel_linux_32 : FFLAGS_MAIN = $(FFLAGS)
-intel_linux_32 : FFLAGS_MASS = $(FFLAGS)
-intel_linux_32 : FFLAGS_MESH = $(FFLAGS)
-intel_linux_32 : FFLAGS_MPIP = $(FFLAGS)
-intel_linux_32 : FFLAGS_MPIS = $(FFLAGS)
-intel_linux_32 : FFLAGS_PART = $(FFLAGS)
-intel_linux_32 : FFLAGS_POIS = $(FFLAGS)
-intel_linux_32 : FFLAGS_PREC = $(FFLAGS)
-intel_linux_32 : FFLAGS_PRES = $(FFLAGS)
-intel_linux_32 : FFLAGS_RADI = $(FFLAGS)
-intel_linux_32 : FFLAGS_READ = $(FFLAGS)
-intel_linux_32 : FFLAGS_SCRC = $(FFLAGS)
-intel_linux_32 : FFLAGS_SMVV = $(FFLAGS)
-intel_linux_32 : FFLAGS_TURB = $(FFLAGS)
-intel_linux_32 : FFLAGS_TYPE = $(FFLAGS)
-intel_linux_32 : FFLAGS_VEGE = $(FFLAGS)
-intel_linux_32 : FFLAGS_VELO = $(FFLAGS)
-intel_linux_32 : FFLAGS_WALL = $(FFLAGS)
-intel_linux_32 : FFLAGS_LINKER = $(FFLAGS)
-intel_linux_32 : FCOMPL = ifort
-intel_linux_32 : CCOMPL = icc
-intel_linux_32 : obj = fds_intel_linux_32
-intel_linux_32 : $(objects_serial_linux)
-	$(FCOMPL) $(FFLAGS_LINKER) $(LFLAGS) -o $(obj) $(objects_serial_linux)
 
-#
-# to profile FDS:
-# 1.  build FDS using intel_linux_32_profile target
-# 2.  run case as usual
-# 3.  type: gprof fds_linux_32_profile > results.out
-intel_linux_32_profile : FFLAGS = -m32 -O2 -static -vec_report0 -p
-intel_linux_32_profile : CFLAGS = -m32 -O2 -Dpp_noappend -vec_report0 -p
-intel_linux_32_profile : LFLAGS = -static-intel
-intel_linux_32_profile : FFLAGS_CONS = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_CTRL = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_DATA = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_DEVC = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_DIVG = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_DUMP = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_EVAC = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_FIRE = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_FUNC = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_HVAC = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_IEVA = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_INIT = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_IRAD = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_MAIN = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_MASS = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_MESH = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_MPIP = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_MPIS = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_PART = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_POIS = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_PREC = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_PRES = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_RADI = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_READ = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_SCRC = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_SMVV = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_TURB = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_TYPE = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_VEGE = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_VELO = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_WALL = $(FFLAGS)
-intel_linux_32_profile : FFLAGS_LINKER = $(FFLAGS)
-intel_linux_32_profile : FCOMPL = ifort
-intel_linux_32_profile : CCOMPL = icc
-intel_linux_32_profile : obj = fds_intel_linux_32_profile
-intel_linux_32_profile : $(objects_serial_linux)
-	$(FCOMPL) $(FFLAGS_LINKER) $(LFLAGS) -o $(obj) $(objects_serial_linux)
+# Check for MPI
+# If MPI=TRUE setup library paths and use MPI-objects to build FDS.
+# Also the filename now includes "_mpi"
+ifeq ($(MPI),TRUE)
+MPI_NAME = _mpi
+objects = $(obj_mpi)
+FCOMPL = mpif77
+else
+objects = $(obj_serial)
+FCOMPL = ifort
+endif
 
-intel_linux_64 : FFLAGS = -m64 -O3 -static -vec_report0
-intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
-intel_linux_64 : LFLAGS = -static-intel
-intel_linux_64 : FFLAGS_CONS = $(FFLAGS)
-intel_linux_64 : FFLAGS_CTRL = $(FFLAGS)
-intel_linux_64 : FFLAGS_DATA = $(FFLAGS)
-intel_linux_64 : FFLAGS_DEVC = $(FFLAGS)
-intel_linux_64 : FFLAGS_DIVG = $(FFLAGS)
-intel_linux_64 : FFLAGS_DUMP = $(FFLAGS)
-intel_linux_64 : FFLAGS_EVAC = $(FFLAGS)
-intel_linux_64 : FFLAGS_FIRE = $(FFLAGS)
-intel_linux_64 : FFLAGS_FUNC = $(FFLAGS)
-intel_linux_64 : FFLAGS_HVAC = $(FFLAGS)
-intel_linux_64 : FFLAGS_IEVA = $(FFLAGS)
-intel_linux_64 : FFLAGS_INIT = $(FFLAGS)
-intel_linux_64 : FFLAGS_IRAD = $(FFLAGS)
-intel_linux_64 : FFLAGS_MAIN = $(FFLAGS)
-intel_linux_64 : FFLAGS_MASS = $(FFLAGS)
-intel_linux_64 : FFLAGS_MESH = $(FFLAGS)
-intel_linux_64 : FFLAGS_MPIP = $(FFLAGS)
-intel_linux_64 : FFLAGS_MPIS = $(FFLAGS)
-intel_linux_64 : FFLAGS_PART = $(FFLAGS)
-intel_linux_64 : FFLAGS_POIS = $(FFLAGS)
-intel_linux_64 : FFLAGS_PREC = $(FFLAGS)
-intel_linux_64 : FFLAGS_PRES = $(FFLAGS)
-intel_linux_64 : FFLAGS_RADI = $(FFLAGS)
-intel_linux_64 : FFLAGS_READ = $(FFLAGS)
-intel_linux_64 : FFLAGS_SCRC = $(FFLAGS)
-intel_linux_64 : FFLAGS_SMVV = $(FFLAGS)
-intel_linux_64 : FFLAGS_TURB = $(FFLAGS)
-intel_linux_64 : FFLAGS_TYPE = $(FFLAGS)
-intel_linux_64 : FFLAGS_VEGE = $(FFLAGS)
-intel_linux_64 : FFLAGS_VELO = $(FFLAGS)
-intel_linux_64 : FFLAGS_WALL = $(FFLAGS)
-intel_linux_64 : FFLAGS_LINKER = $(FFLAGS)
-intel_linux_64 : FCOMPL = ifort
-intel_linux_64 : CCOMPL = icc
-intel_linux_64 : obj = fds_intel_linux_64
-intel_linux_64 : $(objects_serial_linux)
-	$(FCOMPL) $(FFLAGS_LINKER) $(LFLAGS) -o $(obj) $(objects_serial_linux)
 
-mpi_intel_linux_32 : FFLAGS = -m32 -O3 -vec_report0
-mpi_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
-mpi_intel_linux_32 : LFLAGS = -static-intel
-mpi_intel_linux_32 : FFLAGS_CONS = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_CTRL = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_DATA = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_DEVC = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_DIVG = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_DUMP = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_EVAC = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_FIRE = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_FUNC = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_HVAC = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_IEVA = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_INIT = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_IRAD = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_MAIN = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_MASS = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_MESH = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_MPIP = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_MPIS = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_PART = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_POIS = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_PREC = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_PRES = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_RADI = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_READ = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_SCRC = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_SMVV = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_TURB = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_TYPE = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_VEGE = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_VELO = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_WALL = $(FFLAGS)
-mpi_intel_linux_32 : FFLAGS_LINKER = $(FFLAGS)
-mpi_intel_linux_32 : FCOMPL = mpif77
-mpi_intel_linux_32 : CCOMPL = icc
-mpi_intel_linux_32 : obj = fds_mpi_intel_linux_32
-mpi_intel_linux_32 : $(objects_mpi_linux)
-	$(FCOMPL) $(FFLAGS_LINKER) $(LFLAGS) -o $(obj) $(objects_mpi_linux)
+# Check for BUILD
+# If BUILD=RELEASE optimized flags are used to compile, 
+# if BUILD=DEBUG debug flags are used and the filename ends with "_db"
+ifeq ($(BUILD),RELEASE)
+FFLAGS = -m32 -O3 -static -vec_report0
+CFLAGS = -m32 -O -Dpp_noappend -vec_report0
+endif
+ifeq ($(BUILD),DEBUG)
+FFLAGS = -check all -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0 -ftrapuv -debug full
+CFLAGS = -Dpp_noappend -vec_report0
+BUILD_NAME = _db
+endif
+ifeq ($(BUILD),PROFILE)
+FFLAGS = -O2 -static -vec_report0 -p
+CFLAGS = -O2 -Dpp_noappend -vec_report0 -p
+BUILD_NAME = _profile
+endif
 
-mpi_intel_linux_64 : FFLAGS = -m64 -O3 -vec_report0
-mpi_intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
-mpi_intel_linux_64 : LFLAGS = -static-intel
-mpi_intel_linux_64 : FFLAGS_CONS = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_CTRL = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_DATA = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_DEVC = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_DIVG = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_DUMP = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_EVAC = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_FIRE = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_FUNC = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_HVAC = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_IEVA = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_INIT = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_IRAD = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_MAIN = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_MASS = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_MESH = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_MPIP = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_MPIS = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_PART = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_POIS = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_PREC = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_PRES = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_RADI = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_READ = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_SCRC = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_SMVV = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_TURB = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_TYPE = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_VEGE = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_VELO = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_WALL = $(FFLAGS)
-mpi_intel_linux_64 : FFLAGS_LINKER = $(FFLAGS)
-mpi_intel_linux_64 : FCOMPL = mpif77
-mpi_intel_linux_64 : CCOMPL = icc
-mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
-mpi_intel_linux_64 : $(objects_mpi_linux)
-	$(FCOMPL) $(FFLAGS_LINKER) $(LFLAGS) -o $(obj) $(objects_mpi_linux)
 
-mpi_intel_linux_64ib : FFLAGS = -m64 -O3 -vec_report0
-mpi_intel_linux_64ib : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
-mpi_intel_linux_64ib : LFLAGS = -static-intel
-mpi_intel_linux_64ib : FFLAGS_CONS = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_CTRL = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_DATA = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_DEVC = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_DIVG = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_DUMP = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_EVAC = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_FIRE = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_FUNC = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_HVAC = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_IEVA = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_INIT = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_IRAD = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_MAIN = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_MASS = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_MESH = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_MPIP = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_MPIS = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_PART = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_POIS = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_PREC = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_PRES = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_RADI = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_READ = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_SCRC = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_SMVV = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_TURB = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_TYPE = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_VEGE = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_VELO = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_WALL = $(FFLAGS)
-mpi_intel_linux_64ib : FFLAGS_LINKER = $(FFLAGS)
-mpi_intel_linux_64ib : FCOMPL = mpif77
-mpi_intel_linux_64ib : CCOMPL = icc
-mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
-mpi_intel_linux_64ib : $(objects_mpi_linux)
-	$(FCOMPL) $(FFLAGS_LINKER) $(LFLAGS) -o $(obj) $(objects_mpi_linux)
+# Check for OpenMP
+# If OPENMP=TRUE some files are compiled with the OpenMP-flag and the filename contains "_openmp"
+ifeq ($(OPENMP),TRUE)
+FOPENMPFLAGS = -openmp -openmp-link static
+OPENMP_NAME = _openmp
+endif
 
-intel_linux_32_db : FFLAGS = -m32 -check all -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0 -ftrapuv -debug full
-intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend -vec_report0
-intel_linux_32_db : LFLAGS = -static-intel
-intel_linux_32_db : FFLAGS_CONS = $(FFLAGS)
-intel_linux_32_db : FFLAGS_CTRL = $(FFLAGS)
-intel_linux_32_db : FFLAGS_DATA = $(FFLAGS)
-intel_linux_32_db : FFLAGS_DEVC = $(FFLAGS)
-intel_linux_32_db : FFLAGS_DIVG = $(FFLAGS)
-intel_linux_32_db : FFLAGS_DUMP = $(FFLAGS)
-intel_linux_32_db : FFLAGS_EVAC = $(FFLAGS)
-intel_linux_32_db : FFLAGS_FIRE = $(FFLAGS)
-intel_linux_32_db : FFLAGS_FUNC = $(FFLAGS)
-intel_linux_32_db : FFLAGS_HVAC = $(FFLAGS)
-intel_linux_32_db : FFLAGS_IEVA = $(FFLAGS)
-intel_linux_32_db : FFLAGS_INIT = $(FFLAGS)
-intel_linux_32_db : FFLAGS_IRAD = $(FFLAGS)
-intel_linux_32_db : FFLAGS_MAIN = $(FFLAGS)
-intel_linux_32_db : FFLAGS_MASS = $(FFLAGS)
-intel_linux_32_db : FFLAGS_MESH = $(FFLAGS)
-intel_linux_32_db : FFLAGS_MPIP = $(FFLAGS)
-intel_linux_32_db : FFLAGS_MPIS = $(FFLAGS)
-intel_linux_32_db : FFLAGS_PART = $(FFLAGS)
-intel_linux_32_db : FFLAGS_POIS = $(FFLAGS)
-intel_linux_32_db : FFLAGS_PREC = $(FFLAGS)
-intel_linux_32_db : FFLAGS_PRES = $(FFLAGS)
-intel_linux_32_db : FFLAGS_RADI = $(FFLAGS)
-intel_linux_32_db : FFLAGS_READ = $(FFLAGS)
-intel_linux_32_db : FFLAGS_SCRC = $(FFLAGS)
-intel_linux_32_db : FFLAGS_SMVV = $(FFLAGS)
-intel_linux_32_db : FFLAGS_TURB = $(FFLAGS)
-intel_linux_32_db : FFLAGS_TYPE = $(FFLAGS)
-intel_linux_32_db : FFLAGS_VEGE = $(FFLAGS)
-intel_linux_32_db : FFLAGS_VELO = $(FFLAGS)
-intel_linux_32_db : FFLAGS_WALL = $(FFLAGS)
-intel_linux_32_db : FFLAGS_LINKER = $(FFLAGS)
-intel_linux_32_db : FCOMPL = ifort
-intel_linux_32_db : CCOMPL = icc
-intel_linux_32_db : obj = fds_intel_linux_32_db
-intel_linux_32_db : $(objects_serial_linux)
-	$(FCOMPL) $(FFLAGS_LINKER) $(LFLAGS) -o $(obj) $(objects_serial_linux)
+intel_linux : FFLAGS += -m$(PLATFORM_FLAG)
+#intel_linux : CFLAGS = -O2 -Dpp_noappend #already defined in BUILD
+intel_linux : FFLAGS_LINKER = $(FFLAGS) -static-intel
+#intel_linux : FCOMPL = ifort #already defined in MPI (ifort or mpif77)
+intel_linux : CCOMPL = icc
+intel_linux : obj = fds_intel_linux$(OPENMP_NAME)$(MPI_NAME)_$(PLATFORM_FLAG)$(BUILD_NAME)
+intel_linux : $(objects)
+	$(FCOMPL) -o $(obj) $(FFLAGS_LINKER) $(objects)
 
-intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -static -vec_report0
-intel_linux_64_db : CFLAGS = -m64 -Dpp_noappend -vec_report0
-intel_linux_64_db : LFLAGS = -static-intel
-intel_linux_64_db : FFLAGS_CONS = $(FFLAGS)
-intel_linux_64_db : FFLAGS_CTRL = $(FFLAGS)
-intel_linux_64_db : FFLAGS_DATA = $(FFLAGS)
-intel_linux_64_db : FFLAGS_DEVC = $(FFLAGS)
-intel_linux_64_db : FFLAGS_DIVG = $(FFLAGS)
-intel_linux_64_db : FFLAGS_DUMP = $(FFLAGS)
-intel_linux_64_db : FFLAGS_EVAC = $(FFLAGS)
-intel_linux_64_db : FFLAGS_FIRE = $(FFLAGS)
-intel_linux_64_db : FFLAGS_FUNC = $(FFLAGS)
-intel_linux_64_db : FFLAGS_HVAC = $(FFLAGS)
-intel_linux_64_db : FFLAGS_IEVA = $(FFLAGS)
-intel_linux_64_db : FFLAGS_INIT = $(FFLAGS)
-intel_linux_64_db : FFLAGS_IRAD = $(FFLAGS)
-intel_linux_64_db : FFLAGS_MAIN = $(FFLAGS)
-intel_linux_64_db : FFLAGS_MASS = $(FFLAGS)
-intel_linux_64_db : FFLAGS_MESH = $(FFLAGS)
-intel_linux_64_db : FFLAGS_MPIP = $(FFLAGS)
-intel_linux_64_db : FFLAGS_MPIS = $(FFLAGS)
-intel_linux_64_db : FFLAGS_PART = $(FFLAGS)
-intel_linux_64_db : FFLAGS_POIS = $(FFLAGS)
-intel_linux_64_db : FFLAGS_PREC = $(FFLAGS)
-intel_linux_64_db : FFLAGS_PRES = $(FFLAGS)
-intel_linux_64_db : FFLAGS_RADI = $(FFLAGS)
-intel_linux_64_db : FFLAGS_READ = $(FFLAGS)
-intel_linux_64_db : FFLAGS_SCRC = $(FFLAGS)
-intel_linux_64_db : FFLAGS_SMVV = $(FFLAGS)
-intel_linux_64_db : FFLAGS_TURB = $(FFLAGS)
-intel_linux_64_db : FFLAGS_TYPE = $(FFLAGS)
-intel_linux_64_db : FFLAGS_VEGE = $(FFLAGS)
-intel_linux_64_db : FFLAGS_VELO = $(FFLAGS)
-intel_linux_64_db : FFLAGS_WALL = $(FFLAGS)
-intel_linux_64_db : FFLAGS_LINKER = $(FFLAGS)
-intel_linux_64_db : FCOMPL = ifort
-intel_linux_64_db : CCOMPL = icc
-intel_linux_64_db : obj = fds_intel_linux_64_db
-intel_linux_64_db : $(objects_serial_linux)
-	$(FCOMPL) $(FFLAGS_LINKER) $(LFLAGS) -o $(obj) $(objects_serial_linux)
 
-mpi_intel_linux_32_db : FFLAGS = -m32 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency  -vec_report0
-mpi_intel_linux_32_db : CFLAGS = -m32 -Dpp_noappend -vec_report0
-mpi_intel_linux_32_db : LFLAGS = -static-intel
-mpi_intel_linux_32_db : FFLAGS_CONS = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_CTRL = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_DATA = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_DEVC = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_DIVG = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_DUMP = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_EVAC = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_FIRE = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_FUNC = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_HVAC = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_IEVA = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_INIT = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_IRAD = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_MAIN = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_MASS = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_MESH = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_MPIP = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_MPIS = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_PART = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_POIS = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_PREC = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_PRES = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_RADI = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_READ = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_SCRC = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_SMVV = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_TURB = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_TYPE = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_VEGE = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_VELO = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_WALL = $(FFLAGS)
-mpi_intel_linux_32_db : FFLAGS_LINKER = $(FFLAGS)
-mpi_intel_linux_32_db : FCOMPL = mpif77
-mpi_intel_linux_32_db : CCOMPL = icc
-mpi_intel_linux_32_db : obj = fds_mpi_intel_linux_32_db
-mpi_intel_linux_32_db : $(objects_mpi_linux)
-	$(FCOMPL) $(FFLAGS_LINKER) $(LFLAGS) -o $(obj) $(objects_mpi_linux)
 
-mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0
-mpi_intel_linux_64_db : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
-mpi_intel_linux_64_db : LFLAGS = -static-intel
-mpi_intel_linux_64_db : FFLAGS_CONS = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_CTRL = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_DATA = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_DEVC = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_DIVG = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_DUMP = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_EVAC = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_FIRE = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_FUNC = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_HVAC = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_IEVA = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_INIT = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_IRAD = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_MAIN = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_MASS = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_MESH = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_MPIP = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_MPIS = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_PART = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_POIS = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_PREC = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_PRES = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_RADI = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_READ = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_SCRC = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_SMVV = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_TURB = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_TYPE = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_VEGE = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_VELO = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_WALL = $(FFLAGS)
-mpi_intel_linux_64_db : FFLAGS_LINKER = $(FFLAGS)
-mpi_intel_linux_64_db : FCOMPL = mpif77
-mpi_intel_linux_64_db : CCOMPL = icc
-mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
-mpi_intel_linux_64_db : $(objects_serial_linux)
-	$(FCOMPL) $(FFLAGS_LINKER) $(LFLAGS) -o $(obj) $(objects_mpi_linux)
+
+
 
 # 32 bit
 intel_osx_32 : FFLAGS = -O2  -m32 -heap-arrays -vec_report0
@@ -1855,69 +1474,69 @@ main.o : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90
 
 # *** Object dependencies for Windows ***
 prec.obj : prec.f90
-	$(FCOMPL) -c $(FFLAGS_PREC) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 isob.obj : isob.c
 	$(CCOMPL) -c $(CFLAGS) $<
 smvv.obj : smvv.f90 isob.c
-	$(FCOMPL) -c $(FFLAGS_SMVV) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 cons.obj : cons.f90 prec.f90
-	$(FCOMPL) -c $(FFLAGS_CONS) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 mpis.obj : mpis.f90 prec.f90
-	$(FCOMPL) -c $(FFLAGS_MPIS) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 mpip.obj : mpip.f90
-	$(FCOMPL) -c $(FFLAGS_MPIP) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 type.obj : type.f90 prec.f90 cons.f90
-	$(FCOMPL) -c $(FFLAGS_TYPE) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 devc.obj : devc.f90 prec.f90
-	$(FCOMPL) -c $(FFLAGS_DEVC) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 pois.obj : pois.f90 prec.f90 cons.f90
-	$(FCOMPL) -c $(FFLAGS_POIS) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 mesh.obj : mesh.f90 prec.f90 type.f90
-	$(FCOMPL) -c $(FFLAGS_MESH) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 data.obj : data.f90 prec.f90 type.f90 func.f90 cons.f90 mesh.f90
-	$(FCOMPL) -c $(FFLAGS_DATA) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 func.obj : func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90
-	$(FCOMPL) -c $(FFLAGS_FUNC) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 ctrl.obj : ctrl.f90 prec.f90 cons.f90 type.f90 mesh.f90 func.f90
-	$(FCOMPL) -c $(FFLAGS_CTRL) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 turb.obj : turb.f90 func.f90 prec.f90 cons.f90 mesh.f90
-	$(FCOMPL) -c $(FFLAGS_TURB) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 scrc.obj : scrc.f90 prec.f90 cons.f90 mesh.f90 func.f90 pois.f90
-	$(FCOMPL) -c $(FFLAGS_SCRC) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 irad.obj : irad.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-	$(FCOMPL) -c $(FFLAGS_IRAD) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 ieva.obj : ieva.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-	$(FCOMPL) -c $(FFLAGS_IEVA) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 fire.obj : fire.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90
-	$(FCOMPL) -c $(FFLAGS_FIRE) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 hvac.obj : hvac.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 ctrl.f90
-	$(FCOMPL) -c $(FFLAGS_HVAC) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 wall.obj : wall.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 hvac.f90
-	$(FCOMPL) -c $(FFLAGS_WALL) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 velo.obj : velo.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
-	$(FCOMPL) -c $(FFLAGS_VELO) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 evac.obj : evac.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 ieva.f90 data.f90
-	$(FCOMPL) -c $(FFLAGS_EVAC) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 divg.obj : divg.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 scrc.f90 evac.f90
-	$(FCOMPL) -c $(FFLAGS_DIVG) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 mass.obj : mass.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 turb.f90
-	$(FCOMPL) -c $(FFLAGS_MASS) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 radi.obj : radi.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 irad.f90
-	$(FCOMPL) -c $(FFLAGS_RADI) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 pres.obj : pres.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 pois.f90 velo.f90 scrc.f90
-	$(FCOMPL) -c $(FFLAGS_PRES) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 part.obj : part.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 data.f90
-	$(FCOMPL) -c $(FFLAGS_PART) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 vege.obj : vege.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 part.f90
-	$(FCOMPL) -c $(FFLAGS_VEGE) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 read.obj: read.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 ctrl.f90 irad.f90 evac.f90 hvac.f90 scrc.f90 data.f90 
-	$(FCOMPL) -c $(FFLAGS_READ) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 init.obj : init.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 irad.f90 pois.f90 data.f90 
-	$(FCOMPL) -c $(FFLAGS_INIT) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 dump.obj : dump.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 evac.f90 smvv.f90 isob.c turb.f90 scrc.f90 data.f90
-	$(FCOMPL) -c $(FFLAGS_DUMP) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 main.obj : main.f90 func.f90 prec.f90 cons.f90 type.f90 mesh.f90 devc.f90 smvv.f90 isob.c mass.f90 divg.f90 velo.f90 wall.f90 fire.f90 irad.f90 ieva.f90 radi.f90 evac.f90 part.f90 vege.f90 dump.f90 read.f90 init.f90 pres.f90 pois.f90 ctrl.f90 turb.f90 hvac.f90 scrc.f90 data.f90 
-	$(FCOMPL) -c $(FFLAGS_MAIN) $<
+	$(FCOMPL) -c $(FFLAGS) $<
 
 #*** Clean Target to remove Object and Module files ***
 
