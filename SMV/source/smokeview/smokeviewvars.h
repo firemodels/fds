@@ -14,6 +14,7 @@
 #include "threader.h"
 #include "string_util.h"
 
+SVEXTERN int SVDECL(showdeviceval,0);
 SVEXTERN int SVDECL(sorttransparentfaces,0);
 SVEXTERN isotri SVDECL(***iso_trans_list,NULL),SVDECL(***iso_opaques_list,NULL);
 SVEXTERN int SVDECL(*niso_trans_list,NULL),SVDECL(*niso_opaques_list,NULL);
@@ -710,7 +711,7 @@ SVEXTERN FILE *scriptoutstream;
 SVEXTERN char *scriptinifilename2;
 SVEXTERN char *logfilename;
 SVEXTERN char *flushfile, *chidfilebase;
-SVEXTERN char *hrrfilename;
+SVEXTERN char *hrrfilename,*devcfilename;
 SVEXTERN hrrdata *hrrinfo;
 SVEXTERN char *smokezippath;
 SVEXTERN char *INI_fds_filein, *fds_filein, *fds_fileout,*fds_fileout2;

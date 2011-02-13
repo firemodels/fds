@@ -19,18 +19,6 @@
 // svn revision character string
 char IOhrr_revision[]="$Revision$";
 
-/* ------------------ stripcommas ------------------------ */
-
-void stripcommas(char *buffer){
-  int i;
-  char *c;
-
-  for(i=0;i<strlen(buffer);i++){
-    c=buffer+i;
-    if(*c==',')*c=' ';
-  }
-}
-
 /* ------------------ printhrr ------------------------ */
 
 void printhrr(void){

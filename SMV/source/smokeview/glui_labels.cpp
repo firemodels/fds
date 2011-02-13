@@ -162,6 +162,7 @@ extern "C" void glui_labels_setup(int main_window){
 //    LABELS_drawface,Labels_CB);
 //  SPINNER_cullgeom_portsize->set_int_limits(3,100,GLUI_LIMIT_CLAMP);
   glui_labels->add_checkbox_to_panel(panel_label1,"Sort transparent faces",&sorttransparentfaces,LABELS_drawface,Labels_CB);
+  glui_labels->add_checkbox_to_panel(panel_label1,"Show device values",&showdeviceval);
   glui_labels->add_button_to_panel(panel_label1,"Show All",LABELS_showall,Labels_CB);
   glui_labels->add_button_to_panel(panel_label1,"Hide All",LABELS_hideall,Labels_CB);
 

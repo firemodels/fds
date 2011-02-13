@@ -649,6 +649,9 @@ typedef struct _device{
   int active;
   int screenijk[3], visval;
   char label[30], *labelptr;
+  char quantity[30], unit[30];
+  float *times, *vals;
+  int ival,nvals;
   mesh *device_mesh;
   texture  *textureinfo;
   char *texturefile;

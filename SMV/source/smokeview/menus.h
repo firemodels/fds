@@ -2090,6 +2090,9 @@ void LoadUnloadMenu(int value){
     if(hrrfilename!=NULL){
       readhrr(UNLOAD, &errorcode);
     }
+    if(devcfilename!=NULL){
+      readdevc(UNLOAD);
+    }
     for(i=0;i<nslice_files;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
@@ -2120,6 +2123,9 @@ void LoadUnloadMenu(int value){
     LOCK_COMPRESS
     if(hrrfilename!=NULL){
       readhrr(LOAD, &errorcode);
+    }
+    if(devcfilename!=NULL){
+      readdevc(LOAD);
     }
     islicetype_save=islicetype;
     for(i=0;i<nslice_files;i++){

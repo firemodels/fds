@@ -135,7 +135,8 @@ EXTERNCPP void updateplotslice_mesh(mesh *mesh_in, int slicedir);
 
 EXTERNCPP void printhrr(void);
 EXTERNCPP void readhrr(int flag, int *errorcode);
-EXTERNCPP char *get_chid(char *file);
+EXTERNCPP void readdevc(int flag);
+EXTERNCPP char *get_chid(char *file, char *buffer);
 EXTERNCPP void setColorbarClipPlanes(int flag);
 EXTERNCPP void addcolorbar(int icolorbar);
 EXTERNCPP void ReloadMenu(int value);

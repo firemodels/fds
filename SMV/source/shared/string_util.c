@@ -18,6 +18,91 @@
 // svn revision character string
 char string_util_revision[]="$Revision$";
 
+/* ----------------------- fparsecsv ----------------------------- */
+
+void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens){
+  int nt=0;
+  char *token;
+
+  token=strtok(buffer,",");
+  while(token!=NULL&&nt<ncols){
+    sscanf(token,"%f",&vals[nt++]);
+    token=strtok(NULL,",");
+  }
+  *ntokens=nt;
+}
+
+/* ----------------------- parsecsv ----------------------------- */
+
+void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens){
+  int nt=0;
+  char *token;
+
+  token=strtok(buffer,",");
+  while(token!=NULL&&nt<ncols){
+    tokens[nt++]=token;
+    token=strtok(NULL,",");
+  }
+  *ntokens=nt;
+}
+
+/* ------------------ getrowcols ------------------------ */
+
+void getrowcols(FILE *stream, int *nrows, int *ncols){
+  char buffer[1024];
+  int nnrows=0,nncols=0;
+
+  while(!feof(stream)){
+    if(fgets(buffer,1024,stream)==NULL)break;
+    if(nnrows==0){
+      nncols=getcols(buffer);
+    }
+    nnrows++;
+  }
+  *nrows=nnrows;
+  *ncols=nncols;
+}
+
+/* ------------------ getcols ------------------------ */
+
+int getcols(char *buffer){
+  char buffer2[1024];
+  int ncols=0;
+  char *comma;
+
+  strcpy(buffer2,buffer);
+  trim(buffer2);
+  comma=strtok(buffer2,",");
+
+  while(comma!=NULL){
+    ncols++;
+    comma=strtok(NULL,",");
+  }
+  return ncols;
+}
+
+/* ------------------ stripquotes ------------------------ */
+
+void stripquotes(char *buffer){
+  int i;
+  char *c;
+
+  for(i=0;i<strlen(buffer);i++){
+    c=buffer+i;
+    if(*c=='"')*c=' ';
+  }
+}
+/* ------------------ stripcommas ------------------------ */
+
+void stripcommas(char *buffer){
+  int i;
+  char *c;
+
+  for(i=0;i<strlen(buffer);i++){
+    c=buffer+i;
+    if(*c==',')*c=' ';
+  }
+}
 
 /* ------------------ file_modtime ------------------------ */
 
@@ -379,10 +464,9 @@ int STRCMP(const char *s1, const char *s2){
 
 /* ------------------ get_chid ------------------------ */
 
-char *get_chid(char *file){
+char *get_chid(char *file, char *buffer){
   FILE *stream;
   char *chidptr,*c;
-  char buffer[1024];
   unsigned int i;
   int found1st, found2nd;
 

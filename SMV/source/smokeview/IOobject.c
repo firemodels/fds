@@ -518,6 +518,82 @@ void draw_devices_val(void){
   glPopMatrix();
 }
 
+#define IN_INTERVAL(IVAL) \
+  if(time>=devicei->times[IVAL]&&time<=devicei->times[IVAL+1]){\
+    if(time-devicei->times[IVAL]<devicei->times[IVAL+1]-time){\
+      devicei->val=devicei->vals[IVAL];\
+    }\
+    else{\
+      devicei->val=devicei->vals[IVAL+1];\
+    }\
+    devicei->ival=IVAL;\
+    return devicei->val;\
+  }
+
+/* ----------------------- get_devices_val ----------------------------- */
+
+float get_device_val(float time, device *devicei){
+  int nvals;
+  int i, ival;
+
+  nvals = devicei->nvals;
+  ival = devicei->ival;
+
+  IN_INTERVAL(ival);
+  if(ival<nvals-1){
+    IN_INTERVAL(ival+1);
+  }
+  if(ival>0){
+    IN_INTERVAL(ival-1);
+  }
+
+  if(time<=devicei->times[0]){
+    devicei->val=devicei->vals[0];
+    devicei->ival=0;
+  }
+  else if(time>=devicei->times[nvals-1]){
+    devicei->val=devicei->vals[nvals-1];
+    devicei->ival=nvals-2;
+  }
+  else{
+    int low, mid, high;
+
+    low = 0;
+    high = nvals-1;
+    mid = (low+high)/2;
+
+    while (high>low){
+      mid = (low+high)/2;
+      if(time>devicei->times[mid]){
+        low=mid;
+      }
+      else{
+        high=mid;
+      }
+    }
+    devicei->ival=low;
+    if(time-devicei->times[low]<devicei->times[low+1]-time){
+      devicei->val=devicei->vals[low];
+    }
+    else{
+      devicei->val=devicei->vals[low+1];
+    }
+  }
+
+  return devicei->val;
+}
+
+  /* ----------------------- output_device_val ----------------------------- */
+
+void output_device_val(device *devicei){
+  char label[1000];
+  float val;
+
+  val=get_device_val(times[itimes],devicei);
+  sprintf(label,"%s %.1f\n",devicei->label,val);
+  output3Text(foregroundcolor,0.0,0.0,0.0,label);
+}
+
   /* ----------------------- draw_devices ----------------------------- */
 
 void draw_devices(void){
@@ -631,6 +707,9 @@ void draw_devices(void){
     if(showtime==1&&itimes>=0&&itimes<ntimes&&devicei->showstatelist!=NULL){
       int state;
 
+      if(showdeviceval==1){
+        output_device_val(devicei);
+      }
       state=devicei->showstatelist[itimes];
       draw_SVOBJECT(devicei->object,state,prop,0);
     }
@@ -4176,6 +4255,129 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
   return buffer_ptr;
 }
 
+/* ----------------------- getdevice ----------------------------- */
+
+device *getdevice(char *label){
+  int i;
+
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+
+    devicei = deviceinfo + i;
+    if(strcmp(devicei->label,label)==0)return devicei;
+  }
+  return NULL;
+}
+
+/* ----------------------- readdevc ----------------------------- */
+
+void readdevc(int flag){
+  FILE *stream;
+  int nrows, ncols;
+  int irow, icol;
+  float *vals;
+  int i;
+  char buffer[1024],buffer2[1024];
+  char **devcunits, **devclabels;
+  device **devices;
+  int ntokens;
+
+// unload data
+
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+
+    devicei = deviceinfo + i;
+    if(i==0){
+      FREEMEMORY(devicei->times);
+    }
+    else{
+      devicei->times=NULL;
+    }
+    FREEMEMORY(devicei->vals);
+  }
+  if(flag==UNLOAD)return;
+
+  // find number of rows and columns
+
+  stream=fopen(devcfilename,"r");
+  if(stream==NULL)return;
+  getrowcols(stream,&nrows,&ncols);
+  if(nrows<=0||ncols<=0){
+    fclose(stream);
+    return;
+  }
+  rewind(stream);
+
+  NewMemory((void **)&vals,ncols*sizeof(float));
+  NewMemory((void **)&devcunits,ncols*sizeof(char *));
+  NewMemory((void **)&devclabels,ncols*sizeof(char *));
+  NewMemory((void **)&devices,ncols*sizeof(device *));
+
+  for(i=0;i<ndeviceinfo;i++){
+    device *devicei;
+
+    devicei = deviceinfo + i;
+    if(i==0){
+      NewMemory((void **)&devicei->times,nrows*sizeof(float));
+    }
+    else{
+      devicei->times=deviceinfo->times;
+    }
+    NewMemory((void **)&devicei->vals,nrows*sizeof(float));
+  }
+
+  fgets(buffer,1024,stream);
+  parsecsv(buffer,devcunits,ncols,&ntokens);
+  for(i=0;i<ntokens;i++){
+    trim(devcunits[i]);
+    devcunits[i]=trim_front(devcunits[i]);
+  }
+
+  fgets(buffer2,1024,stream);
+  stripquotes(buffer2);
+  parsecsv(buffer2,devclabels,ncols,&ntokens);
+  for(i=0;i<ntokens;i++){
+    trim(devclabels[i]);
+    devclabels[i]=trim_front(devclabels[i]);
+  }
+
+  for(i=1;i<ntokens;i++){
+    device *devicei;
+    int j;
+
+    devicei = getdevice(devclabels[i]);
+    devices[i]=devicei;
+    if(devicei!=NULL){
+      strcpy(devicei->unit,devcunits[i]);
+      devicei->nvals=nrows-2;
+    }
+    else{
+      devicei->nvals=0;
+    }
+  }
+
+  for(irow=2;irow<nrows;irow++){
+    int icol=0;
+
+    fgets(buffer,1024,stream);
+    fparsecsv(buffer,vals,ncols,&ntokens);
+    deviceinfo->times[irow-2]=vals[icol];
+    for(icol=1;icol<ncols;icol++){
+      device *devicei;
+
+      devicei = devices[icol];
+      if(devicei==NULL)continue;
+      devicei->vals[irow-2]=vals[icol];
+    }
+  }
+
+  FREEMEMORY(vals);
+  FREEMEMORY(devcunits);
+  FREEMEMORY(devclabels)
+  FREEMEMORY(devices);
+}
+
 /* ----------------------- read_object_defs ----------------------------- */
 
 int read_object_defs(char *file){
@@ -5025,6 +5227,7 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
   devicei->state0=state0;
   devicei->nparams=nparams;
   devicei->params=params;
+  devicei->ival=0;
   if(nparams>0&&params!=NULL){
     for(i=0;i<nparams;i++){
       devicei->params[i]=params[i];

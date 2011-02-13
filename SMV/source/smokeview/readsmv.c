@@ -2810,8 +2810,6 @@ typedef struct {
         }
       }
 
-
-
       if(NewMemory((void **)&zonei->file,(unsigned int)(len+1))==0)return 2;
       if(last_name!=NULL&&full_name!=NULL){
         filename=last_name;
@@ -2923,14 +2921,28 @@ typedef struct {
       int nparams=0, nparams_textures=0;
       char *labelptr, *prop_id;
       char prop_buffer[255];
+      char quant_buffer[255];
+      char *quant;
 
       devicei = deviceinfo + ndeviceinfo;
       devicei->type=DEVICE_DEVICE;
       fgets(buffer,255,stream);
+
+      strcpy(devicei->quantity,"");
+      quant=strchr(buffer,'%');
+      if(quant!=NULL){
+        *quant=0;
+        quant++;
+        trim(quant);
+        strcpy(devicei->quantity,trim_front(quant));
+      }
+
       trim(buffer);
       strcpy(devicei->label,trim_front(buffer));
       devicei->object = get_SVOBJECT_type(buffer,missing_device);
       devicei->params=NULL;
+      devicei->times=NULL;
+      devicei->vals=NULL;
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
         xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
@@ -4518,8 +4530,9 @@ typedef struct {
       }
       if(chidfilebase==NULL){
         char *chidptr=NULL;
+        char buffer_chid[1024];
 
-        if(fds_filein!=NULL)chidptr=get_chid(fds_filein);
+        if(fds_filein!=NULL)chidptr=get_chid(fds_filein,buffer_chid);
         if(chidptr!=NULL){
           NewMemory((void **)&chidfilebase,(unsigned int)(strlen(chidptr)+1));
           STRCPY(chidfilebase,chidptr);
@@ -4531,6 +4544,14 @@ typedef struct {
         STRCAT(hrrfilename,"_hrr.csv");
         if(STAT(hrrfilename,&statbuffer)!=0){
           FREEMEMORY(hrrfilename);
+        }
+      }
+      if(chidfilebase!=NULL){
+        NewMemory((void **)&devcfilename,(unsigned int)(strlen(chidfilebase)+9+1));
+        STRCPY(devcfilename,chidfilebase);
+        STRCAT(devcfilename,"_devc.csv");
+        if(STAT(devcfilename,&statbuffer)!=0){
+          FREEMEMORY(devcfilename);
         }
       }
       continue;
@@ -5382,6 +5403,9 @@ typedef struct {
   }
   if(hrrfilename!=NULL){
     readhrr(LOAD, &errorcode);
+  }
+  if(devcfilename!=NULL){
+    readdevc(LOAD);
   }
 
   init_multi_threading();

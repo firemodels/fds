@@ -2,6 +2,12 @@
 // $Revision$
 // $Author$
 
+EXTERNCPP void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens);
+EXTERNCPP void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens);
+EXTERNCPP void stripquotes(char *buffer);
+EXTERNCPP void stripcommas(char *buffer);
+EXTERNCPP void getrowcols(FILE *stream, int *nrows, int *ncols);
+EXTERNCPP int getcols(char *buffer);
 EXTERNCPP int can_write_to_dir(char *dir);
 EXTERNCPP int file_exists(char *filename);
 EXTERNCPP char *which(char *progname);
@@ -21,7 +27,7 @@ EXTERNCPP void scalefloat2string(float floatfrom, char *stringto, const float *s
 EXTERNCPP void num2string(char *string, float tval,float range);
 EXTERNCPP char *trim_string(char *buffer);
 EXTERNCPP int STRCMP(const char *s1, const char *s2);
-EXTERNCPP char *get_chid(char *file);
+EXTERNCPP char *get_chid(char *file, char *buffer);
 #ifdef pp_GPU
 EXTERNCPP int log_base2(float xx);
 #endif
