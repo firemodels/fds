@@ -22,6 +22,15 @@ fulldir=`pwd`
 out=$fulldir/$infile.err
 outlog=$fulldir/$infile.log
 
+stopfile=${in%.*}.stop
+if [ $STOPFDS ]; then
+ echo "stopping case: $infile"
+ touch $stopfile
+ exit
+fi
+if [ -e $stopfile ]; then
+  rm $stopfile
+fi
 scriptfile=/tmp/script.$$
 if ! [ -e $fulldir/$in ]; then
   echo "The fds input file, $fulldir/$in, does not exit. Run aborted."
