@@ -25,6 +25,9 @@ $RUNFDS Flowfields sawtooth
 $RUNFDS Flowfields tangential_velocity
 $RUNFDS Flowfields symmetry_test
 $RUNFDS Flowfields low_flux_hot_gas_filling
+$RUNFDS HVAC ashrae7_fixed_flow
+$RUNFDS HVAC ashrae7_quadratic
+$RUNFDS HVAC ashrae7_table
 $RUNFDS HVAC door_crack
 $RUNFDS HVAC fan_test
 $RUNFDS HVAC HVAC_flow_loss
