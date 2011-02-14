@@ -35,6 +35,8 @@ cp = 1;
 T_inf = 293;
 g = 9.81;
 D = 1.13;
+f=0.99;
+Qdot=[151 303 756 1513 3025 7564 15127 30255 75636 151273 302545 756363 1512725 3025450 7563625 15127250];
 
 for i=1:16 % hrr loop
     for j=1:3 % resolution loop
@@ -42,16 +44,20 @@ for i=1:16 % hrr loop
         M = csvread(filename{i,j},2,0);
         z = M(:,1); dz = z(2)-z(1);
         hrrpul = M(:,2);
-        Qdot = sum(hrrpul)*dz;
-        Qstar = Qdot/(rho_inf*cp*T_inf*sqrt(g)*D^(5/2));
+        Qdot_line = sum(hrrpul)*dz;
+        Qstar = Qdot(i)/(rho_inf*cp*T_inf*sqrt(g)*D^(5/2));
         LfD = 3.7*Qstar^(2/5)-1.02; % Heskestad correlation Lf/D
         
         % determine flame height
         for n=1:length(z)
-            hrr(n) = sum(hrrpul(1:n))*dz; % cummulative heat release
+            hrr(n) = sum(hrrpul(1:n))*dz*Qdot(i)/Qdot_line; % cummulative heat release
         end
-        k = find(hrr>.99*Qdot,1);
-        L(j) = z(k-1)+dz*(.99*Qdot-hrr(k-1))/(hrr(k)-hrr(k-1));
+        k = find(hrr>f*Qdot(i),1);
+        if (k>1) 
+            L(j) = z(k-1)+dz*(f*Qdot(i)-hrr(k-1))/(hrr(k)-hrr(k-1));
+        else
+            L(j) = dz*f*Qdot(i)/hrr(k);
+        end
         
     end % resolution loop
     
@@ -60,9 +66,11 @@ for i=1:16 % hrr loop
     
 end % hrr loop
 
+fclose('all');
+
 header1 = {'Q*','L/D (RI=5)','L/D (RI=10)','L/D (RI=20)'};
 filename1 = '../../Validation/Flame_Height/FDS_Output_Files/FDS_Flame_Height.csv';
-fid = fopen(filename1,'w');
+fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s\n',header1{:});
 for i=1:16
     fprintf(fid,'%f, %f, %f, %f\n',W(i,:));
@@ -71,7 +79,7 @@ fclose(fid);
   
 header2 = {'Q*','L/D'};
 filename2 = '../../Validation/Flame_Height/Experimental_Data/Heskestad_Correlation.csv';
-fid = fopen(filename2,'w');
+fid = fopen(filename2,'wt');
 fprintf(fid,'%s, %s\n',header2{:});
 for i=1:16
     fprintf(fid,'%f, %f\n',H(i,:));
