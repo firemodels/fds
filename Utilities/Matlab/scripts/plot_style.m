@@ -19,7 +19,7 @@ Title_Font_Size = 16;
 Label_Font_Size = 16;
 
 % line properties
-Line_Width      = 2.0;
+Line_Width      = 1.0;
 
 % plot properties
 Plot_Units      = 'inches';
