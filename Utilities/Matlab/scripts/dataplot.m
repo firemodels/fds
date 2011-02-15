@@ -29,15 +29,15 @@
 
 function [saved_data,drange] = dataplot(varargin)
 
-if nargin<1|nargin>2; 
+if nargin<1||nargin>2; 
     display('Error in argument list')
 end
 if nargin>=1
-    if strcmp(varargin{1},'verification')|strcmp(varargin{1},'Verification')
+    if strcmp(varargin{1},'verification')||strcmp(varargin{1},'Verification')
         cfil = [pwd,'/verification_data_config_matlab.csv'];
         vdir = [pwd,'/../../Verification/'];
         plotdir = [pwd,'/../../Manuals/'];
-    elseif strcmp(varargin{1},'validation')|strcmp(varargin{1},'Validation')
+    elseif strcmp(varargin{1},'validation')||strcmp(varargin{1},'Validation')
         cfil = [pwd,'/validation_data_config_matlab.csv'];
         vdir = [pwd,'/../../Validation/'];
         plotdir = [pwd,'/../../Manuals/'];
@@ -120,7 +120,6 @@ for i=drange
                 K(j) = loglog(X,Y,char(style(j))); hold on
             end
         end
-
         % plot the FDS or model data (d2)
        
         [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
