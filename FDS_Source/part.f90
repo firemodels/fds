@@ -1683,7 +1683,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                DY_DTMP_DROP = 0._EB
                Y_DROP       = 0._EB
             ENDIF
-
             ! Update the droplet temperature semi_implicitly
     
             DENOM = 1._EB + (H_HEAT + H_WALL + H_MASS*RHO_G*H_V*DY_DTMP_DROP)*DT_SUBSTEP*A_DROP/(2._EB*M_DROP*C_DROP) 
@@ -1790,11 +1789,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                CYCLE TIME_ITERATION_LOOP
             ENDIF
-            ITMP     = INT(TMP_G_NEW)
-            TMP_WGT  = TMP_G_NEW - AINT(TMP_G_NEW)
+            ITMP     = INT(TMP_DROP_NEW)
+            TMP_WGT  = TMP_DROP_NEW - AINT(TMP_DROP_NEW)
             H_V      = PC%H_V(ITMP)+TMP_WGT*(PC%H_V(ITMP+1)-PC%H_V(ITMP))
             DHOR     = H_V*MW_DROP/R0 
-            X_EQUIL  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(TMP_G_NEW,TMP_BOIL))))
+            X_EQUIL  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(TMP_DROP_NEW,TMP_BOIL))))
             Y_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
             !Limit supersaturation
             IF (Y_GAS < Y_EQUIL) THEN
