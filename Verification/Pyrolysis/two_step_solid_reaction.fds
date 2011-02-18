@@ -93,7 +93,7 @@ I = 1,2,3 in any of the internal wall points.
 
 &MISC SOLID_PHASE_ONLY = .TRUE. /
 
-&DUMP DT_PL3D=10000000., NFRAMES=200 /
+&DUMP NFRAMES=200 /
 
 &SURF ID='TEST'
       STRETCH_FACTOR = 1.0
@@ -108,8 +108,8 @@ I = 1,2,3 in any of the internal wall points.
       A = 0.389
       E = 0.
       N_S = 1.
-      NU_RESIDUE = 1.0
-      RESIDUE = 'MAT_B'/
+      NU_MATL = 1.0
+      MATL_ID = 'MAT_B'/
 
 &MATL ID = 'MAT_B'
       CONDUCTIVITY=0.1
@@ -119,8 +119,8 @@ I = 1,2,3 in any of the internal wall points.
       A = 0.262
       E = 0.
       N_S = 1.
-      NU_RESIDUE = 1.0
-      RESIDUE = 'MAT_C'/
+      NU_MATL = 1.0
+      MATL_ID = 'MAT_C'/
 
 &MATL ID = 'MAT_C'
       CONDUCTIVITY=0.1

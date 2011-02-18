@@ -1,15 +1,15 @@
 &HEAD CHID='birch_tga_1step_20', TITLE='TGA TEST of evaporation' / 
 
-&MESH IJK = 3,1,4, XB = -2,2,-0.5,0.5,0,1 /  
+&MESH IJK=3,1,4, XB=-2,2,-0.5,0.5,0,1 /  
 
-&TIME TWFIN=2400., WALL_INCREMENT = 1 DT = 1.0 /  
+&TIME TWFIN=2400., WALL_INCREMENT=1, DT=1.0 /  
 
 &MISC SOLID_PHASE_ONLY=.TRUE. /
 
 &RADI NUMBER_RADIATION_ANGLES = 20 /
-&REAC ID='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
-&DUMP DT_PL3D = 10000000. /
+&REAC FUEL='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
 
+&SPEC ID='WATER VAPOR' /
 
 &VENT MB='XMIN', SURF_ID='HOT' /
 &VENT MB='XMAX', SURF_ID='HOT' /
@@ -37,9 +37,8 @@
 	A 		= 1E13
 	E 		= 1.0E5
 	N_S             = 1
-	NU_RESIDUE 	= 0.0
-	NU_FUEL 	= 0.0
-	NU_WATER        = 1.0
+        SPEC_ID         = 'WATER VAPOR'
+	NU_SPEC         = 1.0
 	HEAT_OF_REACTION = 2260. /
 
 &MATL ID = 'BIRCH'
@@ -51,10 +50,10 @@
 	A		= 2.75E12
 	E 		= 1.75E5
 	N_S		= 1.0
-	NU_RESIDUE	= 0.171619
-	NU_FUEL 	= 0.828381
-	NU_WATER	= 0.0
-	RESIDUE		= 'CHAR'
+        SPEC_ID         = 'FUEL'
+	NU_SPEC 	= 0.828381
+	MATL_ID		= 'CHAR'
+        NU_MATL         = 0.171619
 	HEAT_OF_REACTION= 218.
 	HEAT_OF_COMBUSTION = 40000.0 /
 
