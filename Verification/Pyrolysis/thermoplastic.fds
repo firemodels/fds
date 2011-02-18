@@ -15,9 +15,7 @@ representative of any particular material.
 
 &MISC SOLID_PHASE_ONLY=.TRUE. / 
 
-&REAC ID='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
-
-&DUMP DT_PL3D=10000000. /  No Plot3D output
+&REAC FUEL='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
 
 The plastic properties and surface designation
 
@@ -26,8 +24,9 @@ The plastic properties and surface designation
       SPECIFIC_HEAT=1.5
       DENSITY=1190.
       EMISSIVITY = 1.0
-      N_REACTIONS=1
-      NU_FUEL=1.
+      N_REACTIONS = 1
+      NU_SPEC = 1.
+      SPEC_ID = 'FUEL'
       HEAT_OF_REACTION=1500.
       HEAT_OF_COMBUSTION=25000.
       REFERENCE_TEMPERATURE=330. /

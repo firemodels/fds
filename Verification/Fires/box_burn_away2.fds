@@ -19,8 +19,8 @@ The gas species here is additional SPEC.
       SPECIFIC_HEAT        = 1.0
       DENSITY              = 20.
       N_REACTIONS          = 1
-      SPEC_ID(1)           = 'GAS'
-      NU_GAS(1,1)          = 1.
+      SPEC_ID              = 'GAS'
+      NU_SPEC              = 1.
       REFERENCE_TEMPERATURE= 200. /
 
 &SURF ID                   = 'FOAM SLAB'

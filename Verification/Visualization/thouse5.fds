@@ -11,6 +11,8 @@
 &VENT XB=0.0,6.4,3.60,8.00,0.0,0.0,SURF_ID='CARPET' /
 &VENT XB=0.0,6.4,0.0,3.60,0.0,0.0,SURF_ID='PINE' /
 
+&SPEC ID='WATER VAPOR' /
+
 &MATL ID            = 'GYPSUM PLASTER'
       FYI           = 'Quintiere, Fire Behavior'
       CONDUCTIVITY  = 0.48
@@ -23,7 +25,8 @@
       CONDUCTIVITY          = 0.1
       DENSITY               = 100.0
       N_REACTIONS           = 1
-      NU_FUEL               = 1.
+      NU_SPEC               = 1.
+      SPEC_ID               = 'FUEL'
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
@@ -34,7 +37,8 @@
       CONDUCTIVITY          = 0.05
       DENSITY               = 40.0
       N_REACTIONS           = 1
-      NU_FUEL               = 1.
+      NU_SPEC               = 1.
+      SPEC_ID               = 'FUEL'
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
@@ -73,8 +77,8 @@ Reaction 1: CELLULOSE is converted to "ACTIVE" solid fuel
       A                = 2.8E19
       E                = 2.424E5
       HEAT_OF_REACTION = 0.
-      NU_RESIDUE       = 1.0
-      RESIDUE          = 'ACTIVE'/
+      NU_MATL          = 1.0
+      MATL_ID          = 'ACTIVE'/
 
 Reaction 2: "ACTIVE" solid is converted to CHAR and FUEL gases
 Reaction 3: "ACTIVE" solid is converted FUEL gases
@@ -88,9 +92,10 @@ Reaction 3: "ACTIVE" solid is converted FUEL gases
       A(1:2)                = 1.3E10,  3.23E14
       E(1:2)                = 1.505E5, 1.965E5
       HEAT_OF_REACTION(1:2) = 418.,    418.
-      NU_RESIDUE(1:2)       = 0.35,    0.0
-      NU_FUEL(1:2)          = 0.65,    1.0
-      RESIDUE(1)            = 'CHAR' /  The arguments (1:2) refer to the 2 REACTIONS
+      NU_SPEC(1,1:2)        = 0.65,    1.0
+      SPEC_ID(1,1:2)        = 'FUEL',  'FUEL'
+      NU_MATL               = 0.35
+      MATL_ID               = 'CHAR' /  
 
 Water evaporation from original wood
 
@@ -102,7 +107,8 @@ Water evaporation from original wood
       N_REACTIONS      = 1
       A                = 1E20
       E                = 1.62E+05
-      NU_WATER         = 1.0
+      NU_SPEC          = 1.0
+      SPEC_ID          = 'WATER VAPOR'
       HEAT_OF_REACTION = 2260. /
 
 &MATL ID               = 'LIGNIN'

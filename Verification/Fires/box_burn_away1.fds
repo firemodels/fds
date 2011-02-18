@@ -17,7 +17,8 @@ The gas species is mixture fraction fuel.
       SPECIFIC_HEAT        = 1.0
       DENSITY              = 20.
       N_REACTIONS          = 1
-      NU_FUEL              = 1.
+      NU_SPEC              = 1.
+      SPEC_ID              = 'FUEL'
       REFERENCE_TEMPERATURE= 200. /
 
 &SURF ID                   = 'FOAM SLAB'
@@ -27,7 +28,7 @@ The gas species is mixture fraction fuel.
       BURN_AWAY            = .TRUE.
       BACKING              = 'EXPOSED' /
 
-&REAC ID='NO REACTION', C=1, H = 4. AUTO_IGNITION_TEMPERATURE = 15000. /
+&REAC FUEL='NO REACTION', C=1, H = 4. AUTO_IGNITION_TEMPERATURE = 15000. /
 
 &DUMP SMOKE3D=.FALSE., DT_PL3D=10000., MASS_FILE=.TRUE. /
 

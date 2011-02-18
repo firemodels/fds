@@ -3750,20 +3750,13 @@ multiple material components are undergoing individual reactions at distinct tem
 reactions for each material is 10 and the chain of consecutive
 reactions may contain up to 20 steps.
 
-For a given {\ct MATL}, the $j$th reaction can produce a (single) solid whose name is {\ct RESIDUE(j)},
-plus water vapor, and/or fuel gas. For example, the evaporation of water
-from a solid material is described by the ``reaction'' that converts
-liquid water to water vapor. This reaction occurs in the neighborhood of 100~$^\circ$C and
-produces only water vapor. It does not produce a solid {\ct RESIDUE}
-nor fuel gas. However, a pyrolyzing solid might undergo a reaction
-that produces a solid {\ct RESIDUE}, water vapor, {\em and} fuel gas, all as part of the single reaction step.
-This information is conveyed
-to FDS via the {\em yields}: {\ct NU\_RESIDUE(j)}, {\ct NU\_WATER(j)},
-and {\ct NU\_FUEL(j)}, respectively. The integer {\ct j} indicates to which
-reaction the parameters apply. If, like the evaporation of water,
-only water vapor is produced, set {\ct NU\_WATER(j)=1.0} and the other
-two to zero. The yields are all zero by default. If {\ct NU\_RESIDUE(j)} is non-zero, then you {\em must} indicate what the
-solid residue is via {\ct RESIDUE(j)}, the {\ct ID} of another {\ct MATL} that is also listed in the input file. Ideally, the sum of the
+For a given {\ct MATL}, the $j$th reaction can produce other solid materials whose names are designated with {\ct MATL\_ID(i,j)}, and gas
+species whose names are designated with {\ct SPEC\_ID(i,j)}. Note that the index, $i$, runs from 1 to the number of material or gaseous species. This index
+does {\em not} correspond to the order in which the {\ct MATL} or {\ct SPEC} lines are listed in the input file.
+For a given reaction, the relative amounts of solid or gaseous products are input
+to FDS via the {\em yields}: {\ct NU\_MATL(i,j)} and {\ct NU\_SPEC(i,j)}, respectively.
+The yields are all zero by default. If {\ct NU\_MATL(i,j)} or {\ct NU\_SPEC(i,j)} is non-zero, then you {\em must} indicate what the
+solid residue is via {\ct MATL\_ID(j)}, the {\ct ID} of another {\ct MATL} that is also listed in the input file. Ideally, the sum of the
 yields should add to 1, meaning that the mass of the reactant is
 conserved. However, there are times when it is convenient to have the
 yields sum to something less than one. For example, the spalling or
@@ -3772,8 +3765,42 @@ energy but does not produce any ``product'' because the concrete is
 assumed to have either fallen off the surface in chunks or pulverized
 powder. The concrete's mass is not conserved {\em in the model}
 because it has essentially disappeared from that particular surface.
-A more general way to specify gaseous yields is to use the parameter {\ct NU\_GAS},
-as explained in Section~\ref{nu_gas}.
+
+For consistency, the {\ct HEAT\_OF\_COMBUSTION(j)} can also be specified for each reaction, $j$. These values are
+used only if the corresponding heats of combustion for the gaseous species are greater than zero.
+
+In the example below, the pyrolysis of wood is included within a simulation that uses
+a finite-rate reaction instead of the default mixture fraction model. Notice in this case that
+all of the gas species (except for the background nitrogen) are explicitly defined, and as a result, FDS
+needs to be told explicitly what gaseous species are produced by the solid phase reactions. In this case, 82~\% of the
+mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted to solid {\ct 'CHAR'}.
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID = 'PYROLYZATE', MW=53.6 /
+&SPEC ID = 'OXYGEN', MASS_FRACTION_0 = 0.23 /
+&SPEC ID = 'WATER VAPOR' /
+&SPEC ID = 'CARBON DIOXIDE' /
+
+&MATL ID                    = 'WOOD'
+      EMISSIVITY            = 0.9
+      CONDUCTIVITY          = 0.2
+      SPECIFIC_HEAT         = 1.3
+      DENSITY               = 570.
+      N_REACTIONS           = 1
+      A(1)                  = 1.89E10
+      E(1)                  = 1.51E5
+      N_S(1)                = 1.0
+      MATL_ID(1,1)          = 'CHAR'
+      NU_MATL(1,1)          = 0.18
+      SPEC_ID(1:4,1)        = 'PYROLYZATE','OXYGEN','WATER VAPOR','CARBON DIOXIDE'
+      NU_SPEC(1:4,1)        = 0.82,0,0,0
+      HEAT_OF_REACTION(1)   = 430.
+      HEAT_OF_COMBUSTION(1) = 14500. /
+\end{verbatim} \normalsize
+
+\noindent Note that the indices associated with the parameters are not needed {\em in this case}, but they are shown to emphasize that, in general, there can
+be multiple reactions with corresponding kinetic parameters and products.
 
 \subsubsection{The Reaction Rates}
 
@@ -3787,7 +3814,7 @@ a material undergoing one or more reactions is:
 \ee
 The term, $r_{ij}$, defines the rate of reaction at the temperature, $T_s$, of the $i$th material undergoing its $j$th reaction.
 The second term on the right of the equation represents the contributions of other materials producing the $i$th material as a residue with a yield
-of $\nu_{s,i'j}$. This term is denoted by {\ct NU\_RESIDUE(j)} on the $i'$-th {\ct MATL} line.
+of $\nu_{s,i'j}$. This term is denoted by {\ct NU\_MATL(:,j)} on the $i'$-th {\ct MATL} line.
 $\rho_{s,i}$ is the density of the $i$th material component of the layer, defined as the mass of the $i$th material component
 divided by the volume of the layer.  $\rho_{s0}$ is the initial
 density of the layer. Thus, $Y_{s,i}=\rho_{s,i}/\rho_{s0}$ is a quantity that
@@ -3883,22 +3910,24 @@ For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} wou
 \begin{verbatim}
 &MATL ID                       = 'My Fuel'
       ...
-      HEAT_OF_COMBUSTION       = ...
       N_REACTIONS              = 1
-      NU_FUEL(1)               = 1.
-      NU_RESIDUE(1)            = 0.
+      SPEC_ID(1,1)             = 'FUEL'
+      NU_SPEC(1,1)             = 1.
       REFERENCE_TEMPERATURE(1) = 300.
       REFERENCE_RATE(1)        = 0.002
       HEATING_RATE(1)          = 5.
+      HEAT_OF_COMBUSTION(1)    = ...
       HEAT_OF_REACTION(1)      = ... /
 \end{verbatim}
 \normalsize
 
 \noindent
-Note that the argument {\ct (1)} has been added to the reaction parameters to
+Note that the indices have been added to the reaction parameters to
 emphasize the fact that these parameters are stored in arrays of
 length equal to {\ct N\_REACTIONS}. If there is only one reaction, you
 need not include the {\ct (1)}, but it is a good habit to get into.
+Note also that if the default combustion model is used, you can denote that the reaction
+produces fuel gas using the name {\ct 'FUEL'}. 
 Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released
 per unit mass of fuel gas that mixes with oxygen and combusts.  This
 has nothing to do with the pyrolysis process, so why is it specified
@@ -3915,15 +3944,10 @@ If, for example, the {\ct HEAT\_OF\_COMBUSTION} specified on the {\ct REAC} line
 specified on the {\ct MATL} line, the mass of contained within wall
 cell will be decremented by that determined by the pyrolysis model,
 but the mass added to gas phase would be reduced by 50~\%. A different
-value of heat of combustion can be specified for each reaction and
-each gaseous species using the notation {\ct HEAT\_OF\_COMBUSTION(j,s)}, as explained in Section~\ref{nu_gas}.
+value of heat of combustion can be specified for each reaction, $j$, via the parameter {\ct HEAT\_OF\_COMBUSTION(j)}.
 
 
-\begin{warning}
-\noindent Note that versions of FDS from 5.0 through 5.3 used a slightly different definition of
-{\ct REFERENCE\_TEMPERATURE} and {\ct REFERENCE\_RATE}. This will lead to different results when using the
-different versions of the model.
-\end{warning}
+
 
 \subsubsection{Multiple Solid Phase Reactions}
 
@@ -4002,7 +4026,8 @@ Those interested in testing potential solid phase reaction mechanisms ought to u
       REFERENCE_TEMPERATURE = 100.
       PYROLYSIS_RANGE       = 10.
       HEATING_RATE          = 5.
-      NU_WATER              = 1.
+      SPEC_ID               = 'WATER VAPOR'
+      NU_SPEC               = 1.
       HEAT_OF_REACTION      = 2500. /
 
 &MATL ID                    = 'stuff'
@@ -4014,9 +4039,10 @@ Those interested in testing potential solid phase reaction mechanisms ought to u
       REFERENCE_TEMPERATURE = 300.
       PYROLYSIS_RANGE       = 80.
       HEATING_RATE          = 5.
-      NU_FUEL               = 0.8
-      NU_RESIDUE            = 0.2
-      RESIDUE               = 'ash'
+      NU_SPEC               = 0.8
+      SPEC_ID               = 'FUEL'
+      NU_MATL               = 0.2
+      MATL_ID               = 'ash'
       HEAT_OF_REACTION      = 1000. /
 
 &MATL ID                    = 'ash'
@@ -4107,8 +4133,8 @@ the blue line and heating phase by the red line.
       SPECIFIC_HEAT = 4.19
       N_REACTIONS = 1
       PCR(1) = .TRUE.
-      RESIDUE(1) = 'ICE_WATER'
-      NU_RESIDUE(1) = 1.
+      MATL_ID(1,1) = 'ICE_WATER'
+      NU_MATL(1,1) = 1.
       A(1) = 2.0
       E(1) = 0.
       N_S(1) = 0.0
@@ -4123,8 +4149,8 @@ the blue line and heating phase by the red line.
       SPECIFIC_HEAT_RAMP = 'CS_ICE'
       N_REACTIONS = 1
       PCR(1) = .TRUE.
-      RESIDUE(1) = 'LIQUID_WATER'
-      NU_RESIDUE(1) = 1.
+      MATL_ID(1,1) = 'LIQUID_WATER'
+      NU_MATL(1,1) = 1.
       A(1) = 2.0
       E(1) = 0.
       N_S(1) = 0.0
@@ -4184,7 +4210,8 @@ properties are not all traceable to a measurement.
 \begin{verbatim}
 &MATL ID                     = 'ETHANOL LIQUID'
       EMISSIVITY             = 1.0
-      NU_FUEL                = 0.97
+      SPEC_ID                = 'FUEL'
+      NU_SPEC                = 0.97
       HEAT_OF_REACTION       = 880.
       CONDUCTIVITY           = 0.17
       SPECIFIC_HEAT          = 2.45
@@ -4219,7 +4246,7 @@ properties are not all traceable to a measurement.
 The inclusion of {\ct BOILING\_TEMPERATURE} on the {\ct MATL} line tells FDS to use its liquid
 pyrolysis model. It also automatically sets {\ct N\_REACTIONS=1}, that is, the only ``reaction'' is the
 phase change from liquid to gaseous fuel. Thus, {\ct HEAT\_OF\_REACTION} in this case is the latent
-heat of vaporization. The gaseous fuel yield, {\ct NU\_FUEL}, is 0.97 instead of 1 to account for
+heat of vaporization. The gaseous fuel yield, {\ct NU\_SPEC}, is 0.97 instead of 1 to account for
 impurities in the liquid that do not take part in the combustion process.
 
 The thermal conductivity, density and specific heat are used to
@@ -4302,7 +4329,7 @@ like {\ct HRRPUA}.
 to determine the combustible mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted
 object. This parameter over-rides all other parameters from which a combustible mass would be calculated.
 \item The mass of the object is based on the densities of the all material components ({\ct MATL}), but it is only consumed by mass fluxes of
-the {\bf known} species. If the sum of the gaseous yields (Section~\ref{nu_gas}) is less than one, it will take longer to consume the mass.
+the {\bf known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
 \end{itemize}
 
 \subsubsection{Example Case: box\_burn\_away}
@@ -4443,15 +4470,17 @@ the material are conveyed via the {\ct MATL} line:
       DENSITY=1190.
       EMISSIVITY = 1.0
       N_REACTIONS=1
-      NU_FUEL=1.0
+      SPEC_ID='FUEL'
+      NU_SPEC=1.0
       HEAT_OF_REACTION=1500.
       HEAT_OF_COMBUSTION=25000.
       REFERENCE_TEMPERATURE=330. /
 \end{verbatim} \normalsize
 
 \noindent
-Notice that in addition to $k$, $\rho$, $c$ and $\epsilon$, there is one reaction specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_FUEL=1.}).
-The phase change from solid to gas {\em consumes} energy at a rate of 1,500~kJ/kg. Although not relevant in this example, the burning of these fuel gases would {\em produce} energy at a rate of 25,000~kJ/kg. The reaction nominally takes place at 330~$^\circ$C, a necessary parameter for the pyrolysis model described above.
+Notice that in addition to $k$, $\rho$, $c$ and $\epsilon$, there is one reaction specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_SPEC=1.}).
+The phase change from solid to gas {\em consumes} energy at a rate of 1,500~kJ/kg. Although not relevant in this example, the burning of these fuel gases 
+would {\em produce} energy at a rate of 25,000~kJ/kg. The reaction nominally takes place at 330~$^\circ$C, a necessary parameter for the pyrolysis model described above.
 
 The plots shown in Fig.~\ref{thermoplastic} contain the results of the FDS simulation along with
 what is referred to as ``simple theory.'' By this, we mean that if all of the external heat flux were
@@ -4534,9 +4563,10 @@ happen:
       A(1:2)                = 1.3E10,  3.23E14
       E(1:2)                = 1.505E5, 1.965E5
       HEAT_OF_REACTION(1:2) = 418.,    418.
-      NU_RESIDUE(1:2)       = 0.35,    0.0
-      NU_FUEL(1:2)          = 0.65,    1.0
-      RESIDUE(1)            = 'CHAR' /
+      MATL_ID(1,1)          = 'CHAR'
+      NU_MATL(1,1)          = 0.35
+      SPEC_ID(1,1:2)        = 'FUEL', 'FUEL'
+      NU_SPEC(1,1:2)        = 0.65,    1.0 /
 \end{verbatim} \normalsize
 
 \noindent Notice that the reaction parameters are arrays containing the appropriate information for each reaction,
@@ -4576,7 +4606,8 @@ At the very least, we want the upholstery to be described as fabric covering foa
       CONDUCTIVITY          = 0.1
       DENSITY               = 100.0
       N_REACTIONS           = 1
-      NU_FUEL               = 1.
+      SPEC_ID               = 'FUEL'
+      NU_SPEC               = 1.
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
@@ -4587,7 +4618,8 @@ At the very least, we want the upholstery to be described as fabric covering foa
       CONDUCTIVITY          = 0.05
       DENSITY               = 40.0
       N_REACTIONS           = 1
-      NU_FUEL               = 1.
+      SPEC_ID               = 'FUEL'
+      NU_SPEC               = 1.
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
@@ -5932,51 +5964,7 @@ absorptivity.
 
 The optional parameter {\ct HUMIDTY} can be specified with the species {\ct WATER VAPOR}.  {\ct HUMIDITY} is the relative humidity of water vapor in \% and is 40 \% by default.
 
-\subsection{Special Topic: Yields of Gaseous Species (NU\_GAS)}
-\label{nu_gas}
 
-The yields of fuel and water gases are usually specified
-with the parameters {\ct NU\_FUEL} and {\ct NU\_WATER} on the {\ct MATL} line.
-However, the yield of any explicitly-defined (via the {\ct SPEC} line) gas species
-can be specified using the parameters {\ct NU\_GAS(j,k)} and {\ct SPEC\_ID(k)}, where {\ct j} refers to the {\ct j}'th reaction
-of the material and {\ct k} refers to the {\ct k}'th gas species in {\ct SPEC\_ID(k)}.
-{\ct NU\_GAS} can also be used to specify the yields of the
-mixture fraction and water vapor, assuming each is implicitly-defined and its order in the list of
-species is obtained from the output file {\bf CHID.out}.
-
-For consistency, the {\ct HEAT\_OF\_COMBUSTION(j)} can also be specified for each reaction. These values are
-used only if the corresponding heats of combustion for the gaseous
-species are greater than zero.
-
-In the example below, the pyrolysis of wood is included within a simulation that uses
-a finite-rate reaction instead of the default mixture fraction model. Notice in this case that
-all of the gas species (except for the background nitrogen) are explicitly defined, and as a result, FDS
-needs to be told explicitly what gaseous species are produced by the solid phase reactions. In this case, 82~\% of the
-mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted to solid {\ct 'CHAR'}.
-
-\footnotesize
-\begin{verbatim}
-&SPEC ID = 'PYROLYZATE', MW=53.6 /
-&SPEC ID = 'OXYGEN', MASS_FRACTION_0 = 0.23 /
-&SPEC ID = 'WATER VAPOR' /
-&SPEC ID = 'CARBON DIOXIDE' /
-
-&MATL ID = 'WOOD'
-      EMISSIVITY              = 0.9
-      CONDUCTIVITY            = 0.2
-      SPECIFIC_HEAT           = 1.3
-      DENSITY                 = 570.
-      N_REACTIONS             = 1
-      A                       = 1.89E10
-      E                       = 1.51E5
-      N_S                     = 1.0
-      NU_RESIDUE              = 0.18
-      SPEC_ID(1:4) = 'PYROLYZATE','OXYGEN','WATER VAPOR','CARBON DIOXIDE'
-      NU_GAS(1,1:4)           = 0.82,0,0,0
-      HEAT_OF_REACTION        = 430.
-      HEAT_OF_COMBUSTION      = 14500.
-      RESIDUE                 = 'CHAR' /
-\end{verbatim} \normalsize
 
 
 \subsection{Special Topic: Finite-Rate Combustion}
@@ -9680,36 +9668,34 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\
 \hline \hline
 \endhead
-{\ct A}                       & Real array  & Pre-exponential factors                   &    1/s            &        \\ \hline
-{\ct ABSORPTION\_COEFFICIENT} & Real        & Absorption Coefficient                    &    1/m            & 50000. \\ \hline
-{\ct BOILING\_TEMPERATURE}    & Real        & Boiling temperature                       & $^\circ$C         & 5000.  \\ \hline
-{\ct CONDUCTIVITY}            & Real        & Thermal conductivity                      & W/m/K             & 0.     \\ \hline
-{\ct CONDUCTIVITY\_RAMP}      & Character   & Ramp ID for conductivity                  &                   &        \\ \hline
-{\ct DENSITY}                 & Real        & Solid mass per unit volume                & kg/m$^3$          & 0.     \\ \hline
-{\ct E}                       & Real array  & Activation energies                       & kJ/kmol           &        \\ \hline
-{\ct EMISSIVITY    }          & Real        & Emissivity                                &                   & 0.9    \\ \hline
-{\ct FYI}                     & Character   & Comment String (has no effect)            &                   &        \\ \hline
-{\ct HEATING\_RATE}           & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
-{\ct HEAT\_OF\_COMBUSTION(:)} & Real array  & Heats of Combustion for each reaction     & kJ/kg             &        \\ \hline
-{\ct HEAT\_OF\_REACTION(:)}   & Real array  & Heats of Reaction for each reaction       & kJ/kg             & 0.     \\ \hline
-{\ct INITIAL\_VAPOR\_FLUX}    & Real        & Initial evaporation rate                  & m$^2$/(sm$^2$)    & 0.0005   \\ \hline
-{\ct ID     }                 & Character   & IDentifier                                &                   &        \\ \hline
-{\ct THRESHOLD\_SIGN}         & Real array  & See Section~\ref{info:solid_pyrolysis}    &                   & 1.0    \\ \hline
-{\ct THRESHOLD\_TEMPERATURE}  & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15 \\ \hline
-{\ct N\_REACTIONS}            & Character   & Number of Reactions                       &                   & 0      \\ \hline
-{\ct N\_S}                    & Real array  & See Section~\ref{info:solid_pyrolysis}    &                   & 1.     \\ \hline
-{\ct N\_T}                    & Real array  & See Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
-{\ct NU\_FUEL}                & Real array  & Fuel gas yields                           & kg/kg             & 0.     \\ \hline
-{\ct NU\_GAS(:,II)}           & Real array  & Yields of species {\ct II}                & kg/kg             & 0.     \\ \hline
-{\ct NU\_RESIDUE}             & Real array  & Residue yields                            & kg/kg             & 0.     \\ \hline
-{\ct NU\_WATER}               & Real array  & Water vapor yields                        & kg/kg             & 0.     \\ \hline
-{\ct PCR(:)}                  & Logical array & Phase-change reaction (\ref{info:solid_pyrolysis}) &         & {\ct.FALSE.}\\ \hline
-{\ct PYROLYSIS\_RANGE}        & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
-{\ct REFERENCE\_TEMPERATURE}  & Real array  & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &        \\ \hline
-{\ct RESIDUE}                 & Character   & {\ct IDs} of residue {\ct MATL}           &                   &        \\ \hline
-{\ct SPEC\_ID}          & Character        & {\ct IDs} of gas species in {\ct NU\_GAS}           &                   &        \\ \hline
-{\ct SPECIFIC\_HEAT}          & Real        & Specific heat                             & kJ/kg/K           & 0.     \\ \hline
-{\ct SPECIFIC\_HEAT\_RAMP}    & Character   & Ramp ID for specific heat                 &                   &        \\ \hline
+{\ct A(:)}                          & Real array    & Pre-exponential factors                   &    1/s            &        \\ \hline
+{\ct ABSORPTION\_COEFFICIENT}       & Real          & Absorption Coefficient                    &    1/m            & 50000. \\ \hline
+{\ct BOILING\_TEMPERATURE}          & Real          & Boiling temperature                       & $^\circ$C         & 5000.  \\ \hline
+{\ct CONDUCTIVITY}                  & Real          & Thermal conductivity                      & W/m/K             & 0.     \\ \hline
+{\ct CONDUCTIVITY\_RAMP}            & Character     & Ramp ID for conductivity                  &                   &        \\ \hline
+{\ct DENSITY}                       & Real          & Solid mass per unit volume                & kg/m$^3$          & 0.     \\ \hline
+{\ct E(:)}                          & Real array    & Activation energies                       & kJ/kmol           &        \\ \hline
+{\ct EMISSIVITY    }                & Real          & Emissivity                                &                   & 0.9    \\ \hline
+{\ct FYI}                           & Character     & Comment String (has no effect)            &                   &        \\ \hline
+{\ct HEATING\_RATE(:)}              & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
+{\ct HEAT\_OF\_COMBUSTION(:)}       & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kg             &        \\ \hline
+{\ct HEAT\_OF\_REACTION(:)}         & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.     \\ \hline
+{\ct INITIAL\_VAPOR\_FLUX}          & Real          & Initial evaporation rate                  & m$^2$/(sm$^2$)    & 0.0005   \\ \hline
+{\ct ID     }                       & Character     & IDentifier                                &                   &        \\ \hline
+{\ct MATL\_ID(:,:)}                 & Character     & See Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
+{\ct N\_REACTIONS}                  & Character     & Number of Reactions                       &                   & 0      \\ \hline
+{\ct N\_S(:)}                       & Real array    & See Section~\ref{info:solid_pyrolysis}    &                   & 1.     \\ \hline
+{\ct N\_T(:)}                       & Real array    & See Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
+{\ct NU\_MATL(:,:)}                 & Real array    & See Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
+{\ct NU\_SPEC(:,:)}                 & Real array    & See Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
+{\ct PCR(:)}                        & Logical array & See Section~\ref{info:solid_pyrolysis})   &                   & {\ct.FALSE.}\\ \hline
+{\ct PYROLYSIS\_RANGE(:)}           & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
+{\ct REFERENCE\_TEMPERATURE(:)}     & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &        \\ \hline
+{\ct SPEC\_ID(:,:)}                 & Character     & See Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real          & Specific heat                             & kJ/kg/K           & 0.     \\ \hline
+{\ct SPECIFIC\_HEAT\_RAMP}          & Character     & Ramp ID for specific heat                 &                   &        \\ \hline
+{\ct THRESHOLD\_SIGN(:)}            & Real array    & See Section~\ref{info:solid_pyrolysis}    &                   & 1.0    \\ \hline
+{\ct THRESHOLD\_TEMPERATURE(:)}     & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15 \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -10175,7 +10161,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
 \hline \hline
 \endhead
-{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & Auto ignition temperature                     &   K               &  0  \\ \hline
+{\ct \tiny AUTO\_IGNITION\_TEMPERATURE}   & Real        & Auto ignition temperature                     &   K               &  0  \\ \hline
 {\ct BOF}                                 & Real        & Pre-exponential Factor (Finite Rate)          &   cm$^3$/mol/s    &     \\ \hline
 {\ct BETA\_EDC}                           & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
 {\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
@@ -10561,6 +10547,33 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 
+
+\vspace{\baselineskip}
+
+
+\section{Modifications of Input Parameters from FDS 5 to FDS 6}
+
+
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[List of changes to input parameters for FDS 6]{Changes to input parameters, FDS version 5 to 6.}
+\label{tbl:Changes} \\
+\hline
+FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
+\hline 
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
+\hline
+\endhead
+{\ct NU\_FUEL}          & {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct NU\_GAS}           & {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct NU\_RESIDUE}       & {\ct MATL}        & {\ct NU\_MATL}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct NU\_WATER}         & {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct RESIDUE}           & {\ct MATL}        & {\ct MATL\_ID}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+\end{longtable}
 
 
 

@@ -65,9 +65,10 @@ cable rack made with particles
       HEAT_OF_REACTION      = 4000.
       HEAT_OF_COMBUSTION    = 19000.
       REFERENCE_TEMPERATURE = 450.
-      RESIDUE               = 'CHAR'
-      NU_RESIDUE            = 0.40
-      NU_FUEL               = 0.60 /
+      MATL_ID               = 'CHAR'
+      NU_MATL               = 0.40
+      SPEC_ID               = 'FUEL'
+      NU_SPEC               = 0.60 /
 
 &MATL ID                    = 'CHAR'
       CONDUCTIVITY          = 0.25
