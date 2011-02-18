@@ -3039,7 +3039,17 @@ INTEGER, INTENT(IN) :: NM
  
 IF (EVACUATION_ONLY(NM)) RETURN
  
+! Waste a few calls to RANDOM_NUMBER to avoid generating the exact same sequence on each mesh
+
+DO I=1,NM
+   CALL RANDOM_NUMBER(RN)
+ENDDO
+
+! Point to local mesh variables
+
 CALL POINT_TO_MESH(NM)
+
+! Add random vorticity to cells that are not bounding solid surfaces
 
 VFAC = 0.005_EB
  
