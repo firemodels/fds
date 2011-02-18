@@ -2453,22 +2453,24 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A,F8.2)') '     Absorption coefficient (1/m) ',ML%KAPPA_S
    ENDIF
    IF (ML%PYROLYSIS_MODEL==PYROLYSIS_SOLID) THEN
-   DO NN=1,ML%N_REACTIONS
-      WRITE(LU_OUTPUT,'(A,I2)')   '     Reaction ', NN
-      IF (ML%NU_RESIDUE(NN) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,I2,A,F6.3)') &
-                            '        Residue: ',TRIM(ML%RESIDUE_MATL_NAME(NN)),', Material Index: ', &
-                                                     ML%RESIDUE_MATL_INDEX(NN),', Yield: ',ML%NU_RESIDUE(NN)
+   DO NR=1,ML%N_REACTIONS
+      WRITE(LU_OUTPUT,'(A,I2)')   '     Reaction ', NR
+      DO NN=1,ML%N_RESIDUE(NR)
+         IF (ML%NU_RESIDUE(NN,NR) > 0._EB) WRITE(LU_OUTPUT,'(A,A,A,I2,A,F6.3)') &
+                               '        Residue: ',TRIM(ML%RESIDUE_MATL_NAME(NN,NR)),', Material Index: ', &
+                                                        ML%RESIDUE_MATL_INDEX(NN,NR),', Yield: ',ML%NU_RESIDUE(NN,NR)
+      ENDDO
       WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
       DO NS = 1,N_GAS_SPECIES
-      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES(Y2SPEC(NS))%ID,': ',ML%NU_GAS(NN,NS)
+      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES(Y2SPEC(NS))%ID,': ',ML%NU_GAS(NS,NR)
       ENDDO
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NN)
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (kJ/kmol): ',ML%E(NN)/1000.
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NN)/1000.
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NN)
-      IF (ML%TMP_THR(NN)>0._EB) THEN
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        Threshold temperature (C): ',ML%TMP_THR(NN)-TMPM
-      WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T        : ',ML%N_T(NN)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'        A (1/s)    : ',ML%A(NR)
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'        E (kJ/kmol): ',ML%E(NR)/1000.
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg): ',ML%H_R(NR)/1000.
+      WRITE(LU_OUTPUT,'(A,F8.2)') '        N_S        : ',ML%N_S(NR)
+      IF (ML%TMP_THR(NR)>0._EB) THEN
+      WRITE(LU_OUTPUT,'(A,F8.2)') '        Threshold temperature (C): ',ML%TMP_THR(NR)-TMPM
+      WRITE(LU_OUTPUT,'(A,F8.2)') '        N_T        : ',ML%N_T(NR)
       ENDIF
    ENDDO
    ENDIF
@@ -2476,7 +2478,7 @@ MATL_LOOP: DO N=1,N_MATL
       WRITE(LU_OUTPUT,'(A)')      '     Liquid evaporation reaction'
       WRITE(LU_OUTPUT,'(A)')      '        Gaseous Yields:'
       DO NS = 1,N_GAS_SPECIES
-      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES(Y2SPEC(NS))%ID,': ',ML%NU_GAS(1,NS)
+      WRITE(LU_OUTPUT,'(A,A,A,F8.2)')'        ',SPECIES(Y2SPEC(NS))%ID,': ',ML%NU_GAS(NS,1)
       ENDDO      
       WRITE(LU_OUTPUT,'(A,F8.2)') '        Boiling temperature (C): ',ML%TMP_BOIL-TMPM
       WRITE(LU_OUTPUT,'(A,ES9.2)')'        H_R (kJ/kg)            : ',ML%H_R(1)/1000.
