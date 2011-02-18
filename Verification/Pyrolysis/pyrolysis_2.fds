@@ -7,8 +7,8 @@
 &MISC SOLID_PHASE_ONLY=.TRUE. /
 
 &RADI NUMBER_RADIATION_ANGLES = 20 /
-&REAC C=1, X_O2_LL=1.0, HUMIDITY=0., Y_CO2_INFTY=0. /  No gas phase reaction
-&DUMP DT_PL3D=10000000., DT_DEVC=60. /
+&REAC FUEL='NO REACTION', C=1, X_O2_LL=1.0, HUMIDITY=0., Y_CO2_INFTY=0. /  No gas phase reaction
+&DUMP DT_DEVC=60. /
 
 &VENT MB='XMIN', SURF_ID='HOT' /
 &VENT MB='XMAX', SURF_ID='HOT' /
@@ -27,27 +27,29 @@
       MATL_MASS_FRACTION(1,1:2) = 0.9,0.1 /
 
 &MATL ID                    = 'water'
-      EMISSIVITY 	          = 1.0
-      DENSITY 	          = 1000.
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 1000.
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 4.184 
-      N_REACTIONS	          = 1
+      N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 100.
       PYROLYSIS_RANGE       = 10.
-      NU_WATER              = 1.
+      NU_SPEC               = 1.
+      SPEC_ID               = 'FUEL'
       HEAT_OF_REACTION      = 2500. /  
 
 &MATL ID                    = 'stuff'
       EMISSIVITY            = 1.0
-      DENSITY 	          = 500.
+      DENSITY 	            = 500.
       CONDUCTIVITY          = 0.20
       SPECIFIC_HEAT         = 1.0 
       N_REACTIONS           = 1
       REFERENCE_TEMPERATURE = 300.
       PYROLYSIS_RANGE       = 80.
-      NU_FUEL 	          = 0.8
-      NU_RESIDUE            = 0.2
-      RESIDUE               = 'ash'
+      NU_SPEC 	            = 0.8
+      SPEC_ID               = 'FUEL'
+      NU_MATL               = 0.2
+      MATL_ID               = 'ash'
       HEAT_OF_REACTION      = 1000. /
 
 &MATL ID                    = 'ash'

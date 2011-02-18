@@ -8,8 +8,6 @@
 
 &RADI NUMBER_RADIATION_ANGLES = 20 /
 
-&DUMP DT_PL3D = 10000000. /
-
 &VENT MB='XMIN', SURF_ID='HOT' /
 &VENT MB='XMAX', SURF_ID='HOT' /
 &VENT MB='ZMAX', SURF_ID='HOT' /
@@ -23,36 +21,36 @@
       THICKNESS = 0.00001
       MATL_ID = 'LIQUID_WATER' /
 
-&MATL	ID = 'LIQUID_WATER'
-	DENSITY = 1000.
-	CONDUCTIVITY = 0.60
-	SPECIFIC_HEAT = 4.19  
-	N_REACTIONS = 1
-	PCR(1) = .TRUE.
-	RESIDUE(1) = 'ICE_WATER'
-        NU_RESIDUE(1) = 1.
-	A(1) = 2.0
-	E(1) = 0.
-	N_S(1) = 0.0
-        N_T(1) = 1.0
-        THRESHOLD_SIGN = -1
-        THRESHOLD_TEMPERATURE(1) = 2.
-	HEAT_OF_REACTION(1) = -333. /
+&MATL ID = 'LIQUID_WATER'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.60
+      SPECIFIC_HEAT = 4.19  
+      N_REACTIONS = 1
+      PCR(1) = .TRUE.
+      MATL_ID = 'ICE_WATER'
+      NU_MATL    = 1.
+      A(1) = 2.0
+      E(1) = 0.
+      N_S(1) = 0.0
+      N_T(1) = 1.0
+      THRESHOLD_SIGN = -1
+      THRESHOLD_TEMPERATURE(1) = 2.
+      HEAT_OF_REACTION(1) = -333. /
 
-&MATL   ID = 'ICE_WATER'
-	DENSITY = 1000.
-	CONDUCTIVITY_RAMP = 'KS_ICE'
-	SPECIFIC_HEAT_RAMP = 'CS_ICE' 
-	N_REACTIONS = 1
-	PCR(1) = .TRUE.
-	RESIDUE(1) = 'LIQUID_WATER'
-        NU_RESIDUE(1) = 1.
-	A(1) = 2.0
-	E(1) = 0.
-	N_S(1) = 0.0
-        N_T(1) = 1.0
-        THRESHOLD_TEMPERATURE(1) = -2.
-	HEAT_OF_REACTION(1) = 333. /
+&MATL ID = 'ICE_WATER'
+      DENSITY = 1000.
+      CONDUCTIVITY_RAMP = 'KS_ICE'
+      SPECIFIC_HEAT_RAMP = 'CS_ICE' 
+      N_REACTIONS = 1
+      PCR(1) = .TRUE.
+      MATL_ID = 'LIQUID_WATER'
+      NU_MATL    = 1.
+      A(1) = 2.0
+      E(1) = 0.
+      N_S(1) = 0.0
+      N_T(1) = 1.0
+      THRESHOLD_TEMPERATURE(1) = -2.
+      HEAT_OF_REACTION(1) = 333. /
 
 http://www.its.caltech.edu/~atomic/snowcrystals/ice/ice.htm
 

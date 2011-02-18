@@ -29,8 +29,8 @@ The emissivity is measured using EMISSIVITY output quantity.
       A = 0.1
       E = 0.
       N_S = 0.
-      NU_RESIDUE = 1.0
-      RESIDUE = 'MAT_B'/
+      NU_MATL    = 1.0
+      MATL_ID = 'MAT_B'/
 
 &MATL ID = 'MAT_B'
       EMISSIVITY = 0.0

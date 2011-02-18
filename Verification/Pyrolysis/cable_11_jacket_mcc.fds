@@ -7,8 +7,7 @@
 &MISC SOLID_PHASE_ONLY=.TRUE. /
 
 &RADI NUMBER_RADIATION_ANGLES=20 /
-&REAC ID='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
-&DUMP DT_PL3D = 10000000. /
+&REAC FUEL='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
 
 &VENT MB='XMIN', SURF_ID='HOT' /
 &VENT MB='XMAX', SURF_ID='HOT' /
@@ -36,9 +35,10 @@
       REFERENCE_TEMPERATURE = 300.
       REFERENCE_RATE        = 0.0063 
       HEATING_RATE          = 60.
-      NU_RESIDUE            = 0.49
-      RESIDUE               = 'char'
-      NU_FUEL               = 0.51
+      NU_MATL               = 0.49
+      MATL_ID               = 'char'
+      NU_SPEC               = 0.51
+      SPEC_ID               = 'FUEL'
       HEAT_OF_COMBUSTION    = 15471.
       HEAT_OF_REACTION      = 1000. /
 
@@ -51,9 +51,10 @@
       REFERENCE_TEMPERATURE = 345.
       REFERENCE_RATE        = 0.1567
       HEATING_RATE          = 60.
-      NU_RESIDUE            = 0.49
-      RESIDUE               = 'char'
-      NU_FUEL               = 0.51
+      NU_MATL               = 0.49
+      MATL_ID               = 'char'
+      NU_SPEC               = 0.51
+      SPEC_ID               = 'FUEL'
       HEAT_OF_COMBUSTION    = 15471.
       HEAT_OF_REACTION      = 1000. /
 
@@ -66,9 +67,10 @@
       REFERENCE_TEMPERATURE = 450.
       REFERENCE_RATE        = 0.0127
       HEATING_RATE          = 60.
-      NU_RESIDUE            = 0.49
-      RESIDUE               = 'char'
-      NU_FUEL               = 0.51
+      NU_MATL               = 0.49
+      MATL_ID               = 'char'
+      NU_SPEC               = 0.51
+      SPEC_ID               = 'FUEL'
       HEAT_OF_COMBUSTION    = 15471.
       HEAT_OF_REACTION      = 1000. /
 
