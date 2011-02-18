@@ -252,6 +252,39 @@ char *lastname(char *argi){
   return filename;
 }
 
+/* ------------------ get_zonefilename ------------------------ */
+
+char *get_zonefilename(char *bufptr){
+  char *full_name, *last_name, *filename;
+  STRUCTSTAT statbuffer;
+
+  full_name=bufptr;
+  if(STAT(full_name,&statbuffer)!=0)full_name=NULL;
+
+  last_name=lastname(bufptr);
+  if(STAT(last_name,&statbuffer)!=0)last_name=NULL;
+
+  if(last_name!=NULL&&full_name!=NULL){
+    if(strcmp(last_name,full_name)==0){
+      last_name=NULL;
+    }
+  }
+
+  if(last_name!=NULL&&full_name!=NULL){
+    filename=last_name;
+  }
+  else if(last_name==NULL&&full_name!=NULL){
+    filename=full_name;
+  }
+  else if(last_name!=NULL&&full_name==NULL){
+    filename=last_name;
+  }
+  else{
+    filename=NULL;
+  }
+  return filename;
+}
+
 /* ------------------ trim ------------------------ */
 
 void trim(char *line){

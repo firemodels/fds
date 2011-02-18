@@ -1131,8 +1131,13 @@ int readsmv(char *file, char *file2){
 
   if(nzone>0){
     for(i=0;i<nzone;i++){
-      for(n=0;n<4;n++)freelabels(&zoneinfo[i].label[n]);
-      FREEMEMORY(zoneinfo[i].file);
+      zonedata *zonei;
+
+      zonei = zoneinfo + i;
+      for(n=0;n<4;n++){
+        freelabels(&zonei->label[n]);
+      }
+      FREEMEMORY(zonei->file);
     }
     FREEMEMORY(zoneinfo);
   }
@@ -1823,7 +1828,7 @@ int readsmv(char *file, char *file2){
   }
   FREEMEMORY(zoneinfo);
   if(nzone>0){
-    if(NewMemory((void **)&zoneinfo,nzone*sizeof(zone))==0)return 2;
+    if(NewMemory((void **)&zoneinfo,nzone*sizeof(zonedata))==0)return 2;
   }
   FREEMEMORY(zventinfo);
   if(nzvents>0){
@@ -2786,7 +2791,8 @@ typedef struct {
   */
     if(match(buffer,"ZONE",4) == 1){
       char *last_name,*full_name,*filename;
-      zone *zonei;
+      zonedata *zonei;
+      char buffer_csv[1000],*buffer_csvptr;
 
       zonei = zoneinfo + izone;
       if(fgets(buffer,255,stream)==NULL){
@@ -2798,32 +2804,17 @@ typedef struct {
       zonei->loaded=0;
       zonei->display=0;
 
-      full_name=bufptr;
-      if(STAT(full_name,&statbuffer)!=0)full_name=NULL;
-
-      last_name=lastname(buffer);
-      if(STAT(last_name,&statbuffer)!=0)last_name=NULL;
-
-      if(full_name!=NULL&&last_name!=NULL){
-        if(strcmp(last_name,full_name)==0){
-          last_name=NULL;
-        }
-      }
-
-      if(NewMemory((void **)&zonei->file,(unsigned int)(len+1))==0)return 2;
-      if(last_name!=NULL&&full_name!=NULL){
-        filename=last_name;
-      }
-      else if(last_name==NULL&&full_name!=NULL){
-        filename=full_name;
-      }
-      else if(last_name!=NULL&&full_name==NULL){
-        filename=last_name;
+      buffer_csvptr=buffer_csv;
+      strcpy(buffer_csv,bufptr);
+      strcat(buffer_csv,".csv");
+      filename=get_zonefilename(buffer_csvptr);
+      if(filename!=NULL){
+        zonei->csv=1;
       }
       else{
-        filename=NULL;
+        zonei->csv=0;
+        filename=get_zonefilename(bufptr);
       }
-      if(filename!=NULL)STRCPY(zonei->file,filename);
 
       if(filename==NULL){
         for(n=0;n<4;n++){
@@ -2834,6 +2825,9 @@ typedef struct {
         nzone--;
       }
       else{
+        len=strlen(filename);
+        NewMemory((void **)&zonei->file,(unsigned int)(len+1));
+        STRCPY(zonei->file,filename);
         for(n=0;n<4;n++){
           if(readlabels(&zonei->label[n],stream)==2){
             return 2;
@@ -3551,21 +3545,26 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"FIRE",4)==1){
+      firedata *firei;
+
       ifire++;
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
       }
-      sscanf(buffer,"%i %f %f %f",&roomnumber,&fireinfo[ifire-1].x,
-        &fireinfo[ifire-1].y,&fireinfo[ifire-1].z);
+      firei = fireinfo + ifire - 1;
+      sscanf(buffer,"%i %f %f %f",&roomnumber,&firei->x,&firei->y,&firei->z);
       if(roomnumber>=1&&roomnumber<=nrooms){
-        fireinfo[ifire-1].valid=1;
-        fireinfo[ifire-1].roomnumber=roomnumber;
-        fireinfo[ifire-1].absx=roominfo[roomnumber-1].x0+fireinfo[ifire-1].x;
-        fireinfo[ifire-1].absy=roominfo[roomnumber-1].y0+fireinfo[ifire-1].y;
-        fireinfo[ifire-1].absz=roominfo[roomnumber-1].z0+fireinfo[ifire-1].z;
+        roomdata *roomi;
+  
+        roomi = roominfo + roomnumber - 1;
+        firei->valid=1;
+        firei->roomnumber=roomnumber;
+        firei->absx=roomi->x0+firei->x;
+        firei->absy=roomi->y0+firei->y;
+        firei->absz=roomi->z0+firei->z;
       }
       else{
-        fireinfo[ifire-1].valid=0;
+        firei->valid=0;
       }
       continue;
     }
@@ -5405,7 +5404,7 @@ typedef struct {
     readhrr(LOAD, &errorcode);
   }
   if(devcfilename!=NULL){
-    readdevc(LOAD);
+    read_device_data(devcfilename,LOAD);
   }
 
   init_multi_threading();
@@ -5847,10 +5846,13 @@ typedef struct {
     roomi->dz=roomi->dz/xyzmaxdiff;
   }
   for(n=0;n<nfires;n++){
-    fireinfo[n].absx=(fireinfo[n].absx-xbar0)/xyzmaxdiff;
-    fireinfo[n].absy=(fireinfo[n].absy-ybar0)/xyzmaxdiff;
-    fireinfo[n].absz=(fireinfo[n].absz-zbar0)/xyzmaxdiff;
-    fireinfo[n].dz=fireinfo[n].dz/xyzmaxdiff;
+    firedata *firen;
+
+    firen = fireinfo + n;
+    firen->absx=(firen->absx-xbar0)/xyzmaxdiff;
+    firen->absy=(firen->absy-ybar0)/xyzmaxdiff;
+    firen->absz=(firen->absz-zbar0)/xyzmaxdiff;
+    firen->dz=firen->dz/xyzmaxdiff;
   }
   for(n=0;n<nzvents;n++){
     zvent *zvi;
@@ -8799,6 +8801,11 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&visHZone);
       continue;
       }
+    if(match(buffer,"SHOWODZONE",10)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&visODZone);
+      continue;
+      }
     if(match(buffer,"SHOWHAZARDCOLORS",16)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&sethazardcolor);
@@ -10412,6 +10419,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",viszonefire);
   fprintf(fileout,"SHOWHZONE\n");
   fprintf(fileout," %i\n",visHZone);
+  fprintf(fileout,"SHOWODZONE\n");
+  fprintf(fileout," %i\n",visODZone);
   fprintf(fileout,"SHOWVZONE\n");
   fprintf(fileout," %i\n",visVZone);
   fprintf(fileout,"SHOWHAZARDCOLORS\n");

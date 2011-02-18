@@ -1226,13 +1226,12 @@ void script_loadfile(scriptdata *scripti){
     }
   }
   for(i=0;i<nzone;i++){
-    zone *zonei;
+    zonedata *zonei;
     char *file;
 
     zonei = zoneinfo + i;
-    file = zonei->file;
-    if(strcmp(file,scripti->cval)==0){
-      readzone(file,i,LOAD,&errorcode);
+    if(strcmp(zonei->file,scripti->cval)==0){
+      readzone(i,LOAD,&errorcode);
       return;
     }
   }

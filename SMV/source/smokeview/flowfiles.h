@@ -1070,11 +1070,12 @@ typedef struct {
   int seq_id, autoload;
   char *file,*basefile;
   int loaded,display;
+  int csv;
   flowlabels label[4];
   int setvalmin, setvalmax;
   float valmin, valmax;
   char scale[31];
-} zone;
+} zonedata;
 
 /* --------------------------  roomdata ------------------------------------ */
 
@@ -1083,7 +1084,7 @@ typedef struct {
   float dx,dy,dz;
   float x0,y0,z0;
   float x1,y1,z1;
-  float pfloor, ylay, tl, tu, rho_L, rho_U;
+  float pfloor, ylay, tl, tu, rho_L, rho_U, od_L, od_U;
   int itl, itu;
 } roomdata;
 

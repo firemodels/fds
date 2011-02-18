@@ -21,6 +21,13 @@ int SUB_portfrustum(int quad,
                    GLdouble fleft, GLdouble fright, GLdouble fdown, GLdouble fup, GLdouble fnear, GLdouble ffar,
                    GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
                    );
+EXTERNCPP device *getdevice(char *label);
+EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires, 
+                              float *zonet, float *zoneqfire, 
+                              float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
+                              float **zoneodl, float **zoneodu,
+                              int *error);
+EXTERNCPP void getzonesizecsv(int *nzonet, int *nroom2, int *nfires, int *error);
 EXTERNCPP void remove_dup_blockages(void);
 EXTERNCPP void sort_iso_triangles(float *mm);
 EXTERNCPP void Update_Isotris(int flag);
@@ -135,7 +142,7 @@ EXTERNCPP void updateplotslice_mesh(mesh *mesh_in, int slicedir);
 
 EXTERNCPP void printhrr(void);
 EXTERNCPP void readhrr(int flag, int *errorcode);
-EXTERNCPP void readdevc(int flag);
+EXTERNCPP void read_device_data(char *file, int flag);
 EXTERNCPP char *get_chid(char *file, char *buffer);
 EXTERNCPP void setColorbarClipPlanes(int flag);
 EXTERNCPP void addcolorbar(int icolorbar);
@@ -692,7 +699,7 @@ EXTERNCPP char *newtextptr(char ***texture_list,int *n_texture_list,char *textur
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
 EXTERNCPP void readpatch(int ifile, int flag, int *errorcode);
 EXTERNCPP void readpart(char *file, int ifile, int flag, int *errorcode);
-EXTERNCPP void readzone(char *file, int ifile, int flag, int *errorcode);
+EXTERNCPP void readzone(int ifile, int flag, int *errorcode);
 EXTERNCPP void readvslice(int ivslice, int flag, int *errorcode);
 
 EXTERNCPP void smooth_blockages(void);

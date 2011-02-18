@@ -4269,9 +4269,9 @@ device *getdevice(char *label){
   return NULL;
 }
 
-/* ----------------------- readdevc ----------------------------- */
+/* ----------------------- read_device_data ----------------------------- */
 
-void readdevc(int flag){
+void read_device_data(char *file, int loadstatus){
   FILE *stream;
   int nrows, ncols;
   int irow, icol;
@@ -4296,11 +4296,11 @@ void readdevc(int flag){
     }
     FREEMEMORY(devicei->vals);
   }
-  if(flag==UNLOAD)return;
+  if(loadstatus==UNLOAD)return;
 
   // find number of rows and columns
 
-  stream=fopen(devcfilename,"r");
+  stream=fopen(file,"r");
   if(stream==NULL)return;
   getrowcols(stream,&nrows,&ncols);
   if(nrows<=0||ncols<=0){

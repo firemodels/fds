@@ -3929,7 +3929,7 @@ int getplotstate(int choice){
   particle *parti;
   targ *targi;
   iso *isoi;
-  zone *zonei;
+  zonedata *zonei;
   smoke3d *smoke3di;
   tourdata *touri;
   int ii;

@@ -223,7 +223,7 @@ void svWINAPI sv_unload(void){
       readiso("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nzone;i++){
-      readzone("",i,UNLOAD,&errorcode);
+      readzone(i,UNLOAD,&errorcode);
     }
     for(i=0;i<nsmoke3d_files;i++){
       readsmoke3d(i,UNLOAD,&errorcode);

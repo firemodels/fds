@@ -2091,7 +2091,7 @@ void LoadUnloadMenu(int value){
       readhrr(UNLOAD, &errorcode);
     }
     if(devcfilename!=NULL){
-      readdevc(UNLOAD);
+      read_device_data(devcfilename,UNLOAD);
     }
     for(i=0;i<nslice_files;i++){
       readslice("",i,UNLOAD,&errorcode);
@@ -2109,7 +2109,7 @@ void LoadUnloadMenu(int value){
       readiso("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nzone;i++){
-      readzone("",i,UNLOAD,&errorcode);
+      readzone(i,UNLOAD,&errorcode);
     }
     for(i=0;i<nsmoke3d_files;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
@@ -2125,7 +2125,7 @@ void LoadUnloadMenu(int value){
       readhrr(LOAD, &errorcode);
     }
     if(devcfilename!=NULL){
-      readdevc(LOAD);
+      read_device_data(devcfilename,LOAD);
     }
     islicetype_save=islicetype;
     for(i=0;i<nslice_files;i++){
@@ -2735,17 +2735,17 @@ void ZoneMenu(int value){
   int i,errorcode;
   if(value>=0){
     if(scriptoutstream!=NULL){
-      char *file;
+      zonedata *zonei;
 
-      file = zoneinfo[value].file;
+      zonei = zoneinfo + value;
       fprintf(scriptoutstream,"LOADFILE\n");
-      fprintf(scriptoutstream," %s\n",file);
+      fprintf(scriptoutstream," %s\n",zonei->file);
     }
-    readzone(zoneinfo[value].file,value,LOAD,&errorcode);
+    readzone(value,LOAD,&errorcode);
   }
   else{
     for(i=0;i<nzone;i++){
-      readzone("",i,UNLOAD,&errorcode);
+      readzone(i,UNLOAD,&errorcode);
     }
   }
   updatemenu=1;  
@@ -3835,22 +3835,29 @@ void ZoneShowMenu(int value){
   case 1:
     visVZone=0;
     visHZone=1;
+    visODZone=0;
     break;
   case 2:
     visVZone=1;
     visHZone=0;
+    visODZone=0;
     break;
   case 3:
     visVZone=1; 
     visHZone=1;
+    visODZone=0;
     break;
   case 4:
     visVZone=0; 
     visHZone=0;
+    visODZone=0;
     break;
   case 5:
   case 6:
     sethazardcolor=1-sethazardcolor;
+    break;
+  case 7:
+    visODZone=1-visODZone;
     break;
   case 11:         //solid
     visVentSolid=1;
@@ -5069,6 +5076,8 @@ updatemenu=0;
       if(visHZone==0)glutAddMenuEntry("  Horizontal",1);
       if(visVZone==1)glutAddMenuEntry("  *Vertical",2);
       if(visVZone==0)glutAddMenuEntry("  Vertical",2);
+      if(visODZone==0)glutAddMenuEntry("  Smoke",7);
+      if(visODZone==1)glutAddMenuEntry("  *Smoke",7);
       if(visHZone==0&&visVZone==0){
         glutAddMenuEntry("  *Hide",4);
       }
@@ -7641,17 +7650,20 @@ updatemenu=0;
     if(nzone>0){
       CREATEMENU(zonemenu,ZoneMenu);
       for(i=0;i<nzone;i++){
+        zonedata *zonei;
+
+        zonei = zoneinfo + i;
         if(zonefilenum==i){
           STRCPY(menulabel,check);
-          STRCAT(menulabel,zoneinfo[i].file);  
+          STRCAT(menulabel,zonei->file);  
         }
-        else{STRCPY(menulabel,zoneinfo[i].file);}
+        else{STRCPY(menulabel,zonei->file);}
         STRCAT(menulabel,", ");
         for(n=0;n<3;n++){
-          STRCAT(menulabel,zoneinfo[i].label[n].shortlabel);
+          STRCAT(menulabel,zonei->label[n].shortlabel);
           STRCAT(menulabel,", ");
         }
-        STRCAT(menulabel,zoneinfo[i].label[3].shortlabel);
+        STRCAT(menulabel,zonei->label[3].shortlabel);
         glutAddMenuEntry(menulabel,i);
       }
       glutAddMenuEntry("Unload",-1);

@@ -2,6 +2,7 @@
 // $Revision$
 // $Author$
 
+EXTERNCPP char *get_zonefilename(char *buffer);
 EXTERNCPP void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens);
 EXTERNCPP void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens);
 EXTERNCPP void stripquotes(char *buffer);
