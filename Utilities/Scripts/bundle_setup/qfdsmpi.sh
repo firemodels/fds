@@ -42,13 +42,18 @@ if ! [ -e $fds ]; then
   echo "The FDS program name, $fds, does not exit. Run aborted."
   exit
 fi
+if ! [ -e ~/.bashrc_fds ]; then
+  echo "The environment file, ~/.bashrc_fds, does not exit. Run aborted."
+  exit
+fi
+source ~/.bashrc_fds $platform
 if [ -e $outlog ]; then
   echo "Removing log file: $outlog"
   rm $outlog
 fi
 
 cat << EOF > $scriptfile
-#!/bin/bash -f
+#!/bin/bash
 #PBS -N $infile(MPI)
 #PBS -e $out
 #PBS -o $outlog
@@ -57,16 +62,14 @@ cat << EOF > $scriptfile
 #\$ -e $out
 #\$ -o $outlog
 #\$ -l nodes=$nnodes:ppn=$nprocs
-
 cd $fulldir
 echo Start time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 
-source ~/.bashrc_fds $platform
-mpirun -np $nthreads $fds $in
+$MPIDIST/bin/mpirun -np $nthreads $fds $in
 EOF
 chmod +x $scriptfile
 echo Running $in 
-qsub $scriptfile
+qsub -V $scriptfile
 rm $scriptfile
