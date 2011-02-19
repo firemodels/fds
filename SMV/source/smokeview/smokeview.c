@@ -891,6 +891,9 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
     get_world_eyepos(modelview_scratch, world_eyepos,scaled_eyepos);
 
+    if(nrooms>0){
+      getzonesmokedir(modelview_scratch);
+    }
     if(nsmoke3d_files>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
       sniffErrors("after getsmokedir");

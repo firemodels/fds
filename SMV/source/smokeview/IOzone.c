@@ -179,6 +179,97 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
   FREEMEMORY(zoneodu_devs);
 }
 
+/* ------------------ getsmokedir ------------------------ */
+
+void getzonesmokedir(float *mm){
+    /*
+      ( m0 m4 m8  m12 ) (x)    (0)
+      ( m1 m5 m9  m13 ) (y)    (0)
+      ( m2 m6 m10 m14 ) (z)  = (0)
+      ( m3 m7 m11 m15 ) (1)    (1)
+
+       ( m0 m4  m8 )      (m12)
+   Q=  ( m1 m5  m9 )  u = (m13)
+       ( m2 m6 m10 )      (m14)
+      
+      (Q   u) (x)     (0)      
+      (v^T 1) (y)   = (1)
+       
+      m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
+    */
+  int i,ii,j;
+  float norm[3],scalednorm[3];
+  float normdir[3];
+  float absangle,cosangle,minangle;
+  int iminangle;
+  float pi;
+
+  pi=4.0*atan(1.0);
+
+  xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
+  xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
+  xyzeyeorig[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
+  
+  for(j=0;j<nrooms;j++){
+    roomdata *roomj;
+    
+    roomj = roominfo + j;
+    roomj->wall_angles=roomj->angles+3;
+
+    minangle=1000.0;
+    iminangle=-10;
+
+    for(i=-3;i<=3;i++){
+      if(i==0)continue;
+      ii = i;
+      if(i<0)ii=-i;
+      norm[0]=0.0;
+      norm[1]=0.0;
+      norm[2]=0.0;
+      switch (ii){
+      case 1:
+        if(i<0)norm[0]=-1.0;
+        if(i>0)norm[0]=1.0;
+        break;
+      case 2:
+        if(i<0)norm[1]=-1.0;
+        if(i>0)norm[1]=1.0;
+        break;
+      case 3:
+        if(i<0)norm[2]=-1.0;
+        if(i>0)norm[2]=1.0;
+        break;
+      default:
+        ASSERT(FFALSE);
+        break;
+      }
+      scalednorm[0]=norm[0]*mscale[0];
+      scalednorm[1]=norm[1]*mscale[1];
+      scalednorm[2]=norm[2]*mscale[2];
+
+      normdir[0] = mm[0]*scalednorm[0] + mm[4]*scalednorm[1] + mm[8]*scalednorm[2];
+      normdir[1] = mm[1]*scalednorm[0] + mm[5]*scalednorm[1] + mm[9]*scalednorm[2];
+      normdir[2] = mm[2]*scalednorm[0] + mm[6]*scalednorm[1] + mm[10]*scalednorm[2];
+
+      cosangle = normdir[2]/sqrt(normdir[0]*normdir[0]+normdir[1]*normdir[1]+normdir[2]*normdir[2]);
+      if(cosangle>1.0)cosangle=1.0;
+      if(cosangle<-1.0)cosangle=-1.0;
+      roomj->wall_angles[i]=180.0*cosangle/pi;
+
+      absangle=acos(cosangle)*180.0/pi;
+      if(absangle<0.0)absangle=-absangle;
+      if(absangle<minangle){
+        iminangle=i;
+        minangle=absangle;
+        roomj->norm[0]=norm[0];
+        roomj->norm[1]=norm[1];
+        roomj->norm[2]=norm[2];
+      }
+    }
+    roomj->smokedir=iminangle;
+  }
+}
+
 /* ------------------ readzone ------------------------ */
 
 void readzone(int ifile, int flag, int *errorcode){
@@ -791,29 +882,140 @@ void drawventdata(void){
 
 void drawzonesmoke(roomdata *roomi){
   float xroom0, yroom0, zroom0, xroom, yroom, zroom;
-  float ylay,dy;
+  float ylay;
+
+  float odu, odl;
 
   float color4[4]={1.0,0.0,0.0,1.0};
 
   xroom0 = roomi->x0;
   yroom0 = roomi->y0;
-  xroom = roomi->x1;
-  yroom = roomi->y1;
   zroom0 = roomi->z0;
-  zroom = roomi->z1;
-  ylay = roomi->ylay;
-  dy = roomi->dy/2.;
-  glBegin(GL_QUADS);
-  glColor4f(1.0,0.0,0.0,1.0);
-  glVertex3f(xroom0,yroom0+dy,ylay+zroom0);
-  glVertex3f(xroom,yroom0+dy,ylay+zroom0);
-  glVertex3f(xroom, yroom0+dy,zroom);
-  glVertex3f(xroom0,yroom0+dy,zroom);
-  glColor4f(0.0,0.0,1.0,1.0);
-  glVertex3f(xroom0, yroom0+dy,zroom0);
-  glVertex3f(xroom,yroom0+dy,zroom0);
-  glVertex3f(xroom,yroom0+dy,ylay+zroom0);
-  glVertex3f(xroom0,yroom0+dy,ylay+zroom0);
+  xroom  = roomi->x1;
+  yroom  = roomi->y1;
+  zroom  = roomi->z1;
+  ylay   = roomi->ylay;
+
+  glBegin(GL_TRIANGLES);
+  switch (roomi->smokedir) {
+    int i; 
+    float dx,dy,dz,dzu,dzl,odz;
+
+    case -1:
+    case 1:
+      odl = roomi->od_L*(xroom-xroom0)*xyzmaxdiff/10.0;
+      odl = exp(-odl);
+
+      odu = roomi->od_U*(xroom-xroom0)*xyzmaxdiff/10.0;
+      odu = exp(-odu);
+
+      odz = roomi->od_U*(zroom-zroom0)*xyzmaxdiff;
+      odz = exp(-odu);
+
+      dx = (xroom-xroom0)/10.0;
+
+      for(i=0;i<10;i++){
+        glColor4f(0.0,0.0,0.0,odu);
+        glVertex3f(xroom0+i*dx,yroom0,zroom0+ylay); // 1
+        glVertex3f(xroom0+i*dx,yroom, zroom0+ylay); // 2
+        glVertex3f(xroom0+i*dx,yroom, zroom);       // 3
+ 
+        glVertex3f(xroom0+i*dx,yroom0,zroom0+ylay); // 1
+        glVertex3f(xroom0+i*dx,yroom, zroom);       // 3
+        glVertex3f(xroom0+i*dx,yroom0,zroom);       // 4
+
+        glColor4f(0.0,0.0,0.0,odl);
+        glVertex3f(xroom0+i*dx,yroom0,zroom0);      // 1
+        glVertex3f(xroom0+i*dx,yroom, zroom0);      // 2
+        glVertex3f(xroom0+i*dx,yroom, zroom0+ylay); // 3
+
+        glVertex3f(xroom0+i*dx,yroom0,zroom0);      // 1
+        glVertex3f(xroom0+i*dx,yroom, zroom0+ylay); // 3
+        glVertex3f(xroom0+i*dx,yroom0,zroom0+ylay); // 4
+      }
+      glColor4f(0.0,0.0,0.0,odz);
+      glVertex3f(xroom0,yroom0,zroom0+ylay); //  1
+      glVertex3f(xroom, yroom0, zroom0+ylay); // 2
+      glVertex3f(xroom, yroom, zroom0+ylay); //  3
+      glVertex3f(xroom0, yroom, zroom0+ylay); // 4
+
+      glVertex3f(xroom0,yroom0,zroom0+ylay); //  1
+      glVertex3f(xroom, yroom, zroom0+ylay); //  3
+      glVertex3f(xroom0, yroom, zroom0+ylay); // 4
+      break;
+    case -2:
+    case 2:
+      odl = roomi->od_L*(yroom-yroom0)*xyzmaxdiff/10.0;
+      odl = exp(-odl);
+
+      odu = roomi->od_U*(yroom-yroom0)*xyzmaxdiff/10.0;
+      odu = exp(-odu);
+
+      odz = roomi->od_U*(zroom-zroom0)*xyzmaxdiff;
+      odz = exp(-odu);
+
+      dy = (float)(yroom-yroom0)/10.0;
+      for(i=0;i<10;i++){
+        glColor4f(0.0,0.0,0.0,odu);
+        glVertex3f(xroom0,yroom0+i*dy,zroom0+ylay);  // 1
+        glVertex3f(xroom, yroom0+i*dy,zroom0+ylay);  // 2
+        glVertex3f(xroom, yroom0+i*dy,zroom);        // 3
+
+        glVertex3f(xroom0,yroom0+i*dy,zroom0+ylay);  // 1
+        glVertex3f(xroom, yroom0+i*dy,zroom);        // 3
+        glVertex3f(xroom0,yroom0+i*dy,zroom);        // 4
+
+        glColor4f(0.0,0.0,0.0,odl);
+        glVertex3f(xroom0, yroom0+i*dy,zroom0);      // 1
+        glVertex3f(xroom,  yroom0+i*dy,zroom0);      // 2
+        glVertex3f(xroom,  yroom0+i*dy,zroom0+ylay); // 3
+
+        glVertex3f(xroom0, yroom0+i*dy,zroom0);      // 1
+        glVertex3f(xroom,  yroom0+i*dy,zroom0+ylay); // 3
+        glVertex3f(xroom0, yroom0+i*dy,zroom0+ylay); // 4
+      }
+      glColor4f(0.0,0.0,0.0,odz);
+      glVertex3f(xroom0,yroom0,zroom0+ylay); //  1
+      glVertex3f(xroom, yroom0, zroom0+ylay); // 2
+      glVertex3f(xroom, yroom, zroom0+ylay); //  3
+      glVertex3f(xroom0, yroom, zroom0+ylay); // 4
+
+      glVertex3f(xroom0,yroom0,zroom0+ylay); //  1
+      glVertex3f(xroom, yroom, zroom0+ylay); //  3
+      glVertex3f(xroom0, yroom, zroom0+ylay); // 4
+      break;
+    case -3:
+    case 3:
+      odl = roomi->od_L*ylay*xyzmaxdiff/10.0;
+      odl = exp(-odl);
+
+      odu = roomi->od_U*(zroom-zroom0-ylay)*xyzmaxdiff/10.0;
+      odu = exp(-odu);
+
+      dzu = (zroom-zroom0-ylay)/10;;
+      dzl = ylay/10.0;
+      for(i=0;i<10;i++){
+        glColor4f(0.0,0.0,0.0,odu);
+        glVertex3f(xroom0,yroom0,zroom0+ylay+i*dzu); //  1
+        glVertex3f(xroom, yroom0, zroom0+ylay+i*dzu); // 2
+        glVertex3f(xroom, yroom, zroom0+ylay+i*dzu); //  3
+
+        glVertex3f(xroom0,yroom0,zroom0+ylay+i*dzu); //  1
+        glVertex3f(xroom, yroom, zroom0+ylay+i*dzu); //  3
+        glVertex3f(xroom0, yroom, zroom0+ylay+i*dzu); // 4
+      }
+      for(i=0;i<10;i++){
+        glColor4f(0.0,0.0,0.0,odl);
+        glVertex3f(xroom0,yroom0,zroom0+i*dzl); //  1
+        glVertex3f(xroom, yroom0, zroom0+i*dzl); // 2
+        glVertex3f(xroom, yroom, zroom0+i*dzl); //  3
+
+        glVertex3f(xroom0,yroom0,zroom0+i*dzl); //  1
+        glVertex3f(xroom, yroom, zroom0+i*dzl); //  3
+        glVertex3f(xroom0, yroom, zroom0+i*dzl); // 4
+      }
+      break;
+  }
   glEnd();
 }
 
