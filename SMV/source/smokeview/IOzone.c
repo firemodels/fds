@@ -198,11 +198,12 @@ void getzonesmokedir(float *mm){
       m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
     */
   int i,ii,j;
-  float norm[3],scalednorm[3];
-  float normdir[3];
+  float norm[3];
   float absangle,cosangle,minangle;
   int iminangle;
   float pi;
+  float eyedir[3];
+  float cosdir;
 
   pi=4.0*atan(1.0);
 
@@ -214,7 +215,6 @@ void getzonesmokedir(float *mm){
     roomdata *roomj;
     
     roomj = roominfo + j;
-    roomj->wall_angles=roomj->angles+3;
 
     minangle=1000.0;
     iminangle=-10;
@@ -228,42 +228,70 @@ void getzonesmokedir(float *mm){
       norm[2]=0.0;
       switch (ii){
       case 1:
-        if(i<0)norm[0]=-1.0;
-        if(i>0)norm[0]=1.0;
+        if(i<0){
+          norm[0]=-1.0;
+          eyedir[0]=roomj->x0;
+        }
+        else{
+          norm[0]=1.0;
+          eyedir[0]=roomj->x0+roomj->dx;
+        }
+        eyedir[1]=roomj->y0+roomj->dy/2.0;
+        eyedir[2]=roomj->z0+roomj->dz/2.0;
         break;
       case 2:
-        if(i<0)norm[1]=-1.0;
-        if(i>0)norm[1]=1.0;
+        eyedir[0]=roomj->x0+roomj->dx/2.0;
+        if(i<0){
+          norm[1]=-1.0;
+          eyedir[1]=roomj->y0;
+        }
+        else{
+          norm[1]=1.0;
+          eyedir[1]=roomj->y0+roomj->dy;
+        }
+        eyedir[2]=roomj->z0+roomj->dz/2.0;
         break;
       case 3:
-        if(i<0)norm[2]=-1.0;
-        if(i>0)norm[2]=1.0;
+        eyedir[0]=roomj->x0+roomj->dx/2.0;
+        eyedir[1]=roomj->y0+roomj->dy/2.0;
+        if(i<0){
+          norm[2]=-1.0;
+          eyedir[2]=roomj->z0;
+        }
+        else{
+          norm[2]=1.0;
+          eyedir[2]=roomj->z0+roomj->dz;
+        }
         break;
       default:
         ASSERT(FFALSE);
         break;
       }
-      scalednorm[0]=norm[0]*mscale[0];
-      scalednorm[1]=norm[1]*mscale[1];
-      scalednorm[2]=norm[2]*mscale[2];
+      eyedir[0]=xyzeyeorig[0]-eyedir[0];
+      eyedir[1]=xyzeyeorig[1]-eyedir[1];
+      eyedir[2]=xyzeyeorig[2]-eyedir[2];
+      normalize(eyedir,3);
+      cosdir = (eyedir[0]*norm[0]+eyedir[1]*norm[1]+eyedir[2]*norm[2]);
+      if(cosdir>1.0)cosdir=1.0;
+      if(cosdir<-1.0)cosdir=-1.0;
+      cosdir=acos(cosdir)*180.0/pi;
+      if(cosdir<0.0)cosdir=-cosdir;
+      roomj->angles[3+i]=cosdir;
 
-      normdir[0] = mm[0]*scalednorm[0] + mm[4]*scalednorm[1] + mm[8]*scalednorm[2];
-      normdir[1] = mm[1]*scalednorm[0] + mm[5]*scalednorm[1] + mm[9]*scalednorm[2];
-      normdir[2] = mm[2]*scalednorm[0] + mm[6]*scalednorm[1] + mm[10]*scalednorm[2];
-
-      cosangle = normdir[2]/sqrt(normdir[0]*normdir[0]+normdir[1]*normdir[1]+normdir[2]*normdir[2]);
-      if(cosangle>1.0)cosangle=1.0;
-      if(cosangle<-1.0)cosangle=-1.0;
-      roomj->wall_angles[i]=180.0*cosangle/pi;
-
-      absangle=acos(cosangle)*180.0/pi;
+      absangle=cosdir;
       if(absangle<0.0)absangle=-absangle;
       if(absangle<minangle){
         iminangle=i;
         minangle=absangle;
-        roomj->norm[0]=norm[0];
-        roomj->norm[1]=norm[1];
-        roomj->norm[2]=norm[2];
+      }
+    }
+    for(i=-3;i<=3;i++){
+      if(i==0)continue;
+      if(roomj->angles[i+3]<90.0){
+        roomj->drawsides[i+3]=1;
+      }
+      else{
+        roomj->drawsides[i+3]=0;
       }
     }
     roomj->smokedir=iminangle;
