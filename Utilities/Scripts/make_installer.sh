@@ -27,7 +27,7 @@ THIS=\`pwd\`/\$0
 THISDIR=\`pwd\`
 
 CSHFDS=/tmp/cshrc_fds.\$\$
-BASHFDS=/tmp/bash_fds.\$\$
+BASHFDS=/tmp/bashrc_fds.\$\$
 
 # Find the beginning of the included FDS tar file so that it can be
 # subsequently un-tar'd
@@ -115,13 +115,11 @@ rm \$FDS_root/temp.\$\$
 
 # now copy installation files into the FDS_root directory
 
+echo
 echo "Copying FDS installation files to"  \$FDS_root
 cd \$FDS_root
 tail -n +\$SKIP \$THIS | tar -xz
 echo "Copy complete."
-
-echo "Setting path and LD_LIBRARY_PATH environment variables"
-echo "in .bashrc_fds and .cshrc_fds"
 
 cat << CSHRC > \$CSHFDS
 #/bin/csh -f
@@ -191,16 +189,35 @@ export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
 
 BASH
 
+echo
+echo Creating .bashrc_fds and .cshrc_fds startup files.
+if [ -e ~/.cshrc_fds ]
+then
+echo Backing up .cshrc_fds to .cshrc_fds.BAK_\$\$
+cp ~/.cshrc_fds ~/.cshrc_fds.BAK_\$\$
+fi
+
+if [ -e ~/.bashrc_fds ]
+then
+echo Backing up .bashrc_fds to .bashrc_fds.BAK_\$\$
+cp ~/.bashrc_fds ~/.bashrc_fds.BAK_\$\$
+fi
+
+cp \$BASHFDS ~/.bashrc_fds
+rm \$BASHFDS
+
+cp \$CSHFDS ~/.cshrc_fds
+rm \$CSHFDS
 
 cd \$THISDIR
 echo ""
-echo "If you use the csh or tcsh shell,"
-echo "add the following line to your .cshrc file:"
+echo "Add the following line to the startup file .cshrc"
 echo "source ~/.cshrc_fds"
+echo "if you use the csh or tcsh shell"
 echo ""
-echo "If you use the bash or sh shell,"
-echo "add the following line to your .bashrc file:"
-echo "source ~/.bashrc_fds"
+echo "Add the following line to the startup file .bashrc"
+echo "source ~/.bash_fds"
+echo "if you use the bash or sh shell."
 echo ""
 echo "Installation complete."
 exit 0
