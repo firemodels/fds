@@ -26,6 +26,9 @@ FDS_root=~/FDS/FDS6
 THIS=\`pwd\`/\$0
 THISDIR=\`pwd\`
 
+CSHFDS=/tmp/cshrc_fds.\$\$
+BASHFDS=/tmp/bash_fds.\$\$
+
 # Find the beginning of the included FDS tar file so that it can be
 # subsequently un-tar'd
  
@@ -79,7 +82,7 @@ mkdir -p \$FDS_root>&/dev/null
 else
 while true; do
     echo "The directory, \$FDS_root, already exists."
-    read -p "Do you wish to overwrite contents? (yes/no)" yn
+    read -p "Do you wish to overwrite it? (yes/no)" yn
     case \$yn in
         [Yy]* ) break;;
         [Nn]* ) echo "Installation cancelled";exit;;
@@ -120,59 +123,74 @@ echo "Copy complete."
 echo "Setting path and LD_LIBRARY_PATH environment variables"
 echo "in .bashrc_fds and .cshrc_fds"
 
-echo "" > ~/.cshrc_fds
-echo "#/bin/csh -f" >> ~/.cshrc_fds
-echo "set platform=\\\$1" >> ~/.cshrc_fds
-echo "" >> ~/.cshrc_fds
-echo "# Setting PATH and LD_LIBRARY_PATH environment" >> ~/.cshrc_fds
-echo "# variables for use by FDS" >> ~/.cshrc_fds
-echo "" >> ~/.cshrc_fds
+cat << CSHRC > \$CSHFDS
+#/bin/csh -f
+set platform=\\\$1
 
-echo "#/bin/bash" > ~/.bashrc_fds
-echo "platform=\\\$1" >> ~/.bashrc_fds
-echo "" >> ~/.bashrc_fds
-echo "# Setting PATH and LD_LIBRARY_PATH environment" >> ~/.bashrc_fds
-echo "# variables for use by FDS" >> ~/.bashrc_fds
-echo "" >> ~/.bashrc_fds
-echo "setenv FDSBINDIR \`pwd\`/bin" >> ~/.cshrc_fds
-echo "export FDSBINDIR=\`pwd\`/bin" >> ~/.bashrc_fds
-if [ "a\$LD_LIBRARY_PATH" = "a" ]
-then
-echo "if ( \"\\\$platform\" == \"intel64\" ) then" >> ~/.cshrc_fds
-echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/LIB64" >> ~/.cshrc_fds
-echo "endif" >> ~/.cshrc_fds
+# Setting PATH and LD_LIBRARY_PATH environment
+# variables for use by FDS
+setenv FDSBINDIR \`pwd\`/bin
+if ( "\\\$platform" == "intel64" ) then
+setenv LD_LIBRARY_PATH \\\`pwd\\\`/bin/LIB64
+endif
 
-echo "if ( \"\\\$platform\" == \"ia32\" ) then" >> ~/.cshrc_fds
-echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/LIB32" >> ~/.cshrc_fds
-echo "endif" >> ~/.cshrc_fds
-
-echo "if [ \"\\\$platform\" == \"intel64\" ]" >> ~/.bashrc_fds
-echo "then" >> ~/.bashrc_fds
-echo "export LD_LIBRARY_PATH=\`pwd\`/bin/LIB64" >> ~/.bashrc_fds
-echo "fi" >> ~/.bashrc_fds
-
-echo "if [ \"\\\$platform\" == \"ia32\" ]" >> ~/.bashrc_fds
-echo "then" >> ~/.bashrc_fds
-echo "export LD_LIBRARY_PATH=\`pwd\`/bin/LIB32" >> ~/.bashrc_fds
-echo "fi" >> ~/.bashrc_fds
-else
-echo "setenv LD_LIBRARY_PATH \`pwd\`/bin/$FORTLIB:\\\$LD_LIBRARY_PATH" >> ~/.cshrc_fds
-
-echo "if [ \"\\\$platform\" == \"intel64\" ]" >> ~/.bashrc_fds
-echo "then" >> ~/.bashrc_fds
-echo "export LD_LIBRARY_PATH=\`pwd\`/bin/LIB64:\\\$LD_LIBRARY_PATH" >> ~/.bashrc_fds
-echo "fi" >> ~/.bashrc_fds
-
-echo "if [ \"\\\$platform\" == \"ia32\" ]" >> ~/.bashrc_fds
-echo "then" >> ~/.bashrc_fds
-echo "export LD_LIBRARY_PATH=\`pwd\`/bin/LIB32:\\\$LD_LIBRARY_PATH" >> ~/.bashrc_fds
-echo "fi" >> ~/.bashrc_fds
-fi
+if ( "\\\$platform" == "ia32" ) then
+setenv LD_LIBRARY_PATH \\\`pwd\\\`/bin/LIB32
+endif
 
 # add FDS bin to path
 
-echo "set path=(\`pwd\`/bin \\\$path)" >> ~/.cshrc_fds
-echo "export PATH=\\\$PATH:\`pwd\`/bin" >> ~/.bashrc_fds
+set path=(\$FDSBINDIR \\\$path)
+
+CSHRC
+
+cat << BASH > \$BASHFDS
+#/bin/bash
+platform=\\\$1
+
+# define FDS bin directory location
+
+export FDSBINDIR=\`pwd\`/bin
+
+# define openmpi library locations:
+#   32/64 bit gigabit ethernet
+#   64 bit infiniband
+
+MPIDIST32=/shared/openmpi_32
+MPIDIST64=/shared/openmpi_64
+MPIDIST64IB=/shared/openmpi_64ib
+
+# environment for 64 bit gigabit ethernet
+
+if [ "\\\$platform" == "intel64" ]
+then
+export MPIDIST=\\\$MPIDIST64
+FORTLIB=\\\$FDSBINDIR/LIB64
+fi
+
+# environment for 32 bit gigabit ethernet
+
+if [ "\\\$platform" == "ia32" ]
+then
+export MPIDIST=\\\$MPIDIST32
+FORTLIB=\\\$FDSBINDIR/LIB32
+fi
+
+# environment for 64 bit infiniband
+
+if [ "\\\$platform" == "ib64" ]
+then
+export MPIDIST=\\\$MPIDIST64IB
+FORTLIB=\\\$FDSBINDIR/LIB64
+fi
+
+# Update LD_LIBRARY_PATH and PATH variables
+
+export LD_LIBRARY_PATH=\\\$MPIDIST/lib:\\\$FORTLIB
+export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
+
+BASH
+
 
 cd \$THISDIR
 echo ""
