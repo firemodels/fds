@@ -915,7 +915,7 @@ SUBROUTINE CHECK_MASS_FRACTION
 
 ! Redistribute species mass from cells below or above the cut-off limits
 
-USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_GAS_SPECIES,YYMIN,YYMAX,POROUS_BOUNDARY,DEBUG_OPENMP
+USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_GAS_SPECIES,POROUS_BOUNDARY,DEBUG_OPENMP
 REAL(EB) :: SUM,CONST,RHYMI,RHYPI,RHYMJ,RHYPJ,RHYMK,RHYPK,RHY0,YMI,YPI,YMJ,YPJ,YMK,YPK,Y00,YMIN,YMAX
 INTEGER  :: IC,N,ISUM, IW_A(-3:3),I,J,K
 LOGICAL  :: LC(-3:3)
@@ -954,7 +954,7 @@ SPECIESLOOP: DO N=1,N_GAS_SPECIES
             SUM   = 0._EB
             ISUM  = 0
             LC    = .FALSE.
-            YMIN  = YYMAX(N) 
+            YMIN  = 1._EB 
             IF (IW_A(-1) == 0) THEN
                YMI = YYP(I-1,J,K,N)
                LC(-1) = .TRUE.
@@ -1022,8 +1022,8 @@ SPECIESLOOP: DO N=1,N_GAS_SPECIES
                ENDIF
             ENDIF           
             YMIN = MIN(YMI,YPI,YMJ,YPJ,YMK,YPK)
-            YMIN = MAX(YMIN,YYMIN(N))
-            IF ((DEL_RHO_D_DEL_Y(I,J,K,N) > 0._EB .AND. Y00 < YMIN) .OR. Y00 < YYMIN(N)) THEN
+            YMIN = MAX(YMIN,0._EB)
+            IF ((DEL_RHO_D_DEL_Y(I,J,K,N) > 0._EB .AND. Y00 < YMIN) .OR. Y00 < 0._EB) THEN
                RHY0  = RHOP(I,J,K)  *(YMIN - Y00)
                IF (LC(-1) .AND. YMI>YMIN) THEN
                   RHYMI = RHOP(I-1,J,K)*(YMI - YMIN)
@@ -1069,7 +1069,7 @@ SPECIESLOOP: DO N=1,N_GAS_SPECIES
                   LC( 3) = .FALSE.
                ENDIF                
                IF (ISUM==0) THEN
-                  IF (YMIN <= YYMIN(N)) YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMIN - Y00  
+                  IF (YMIN <= 0._EB) YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMIN - Y00  
                   CYCLE CHECK_LOOP
                ELSE
                   IF (ABS(SUM)>=ZERO_P) THEN
@@ -1108,7 +1108,7 @@ SPECIESLOOP: DO N=1,N_GAS_SPECIES
             SUM   = 0._EB
             ISUM  = 0
             LC    = .FALSE.
-            YMIN  = YYMAX(N) 
+            YMIN  = 1._EB 
             IF (IW_A(-1) == 0) THEN
                YMI = YYP(I-1,J,K,N)
                LC(-1) = .TRUE.
@@ -1146,8 +1146,8 @@ SPECIESLOOP: DO N=1,N_GAS_SPECIES
                YPK = YY_F(IW_A( 3),N)  
             ENDIF           
             YMAX = MAX(YMI,YPI,YMJ,YPJ,YMK,YPK)
-            YMAX = MIN(YMAX,YYMAX(N))            
-            IF ((DEL_RHO_D_DEL_Y(I,J,K,N) < 0._EB .AND. Y00 > YMAX) .OR. Y00 > YYMAX(N)) THEN
+            YMAX = MIN(YMAX,1._EB)            
+            IF ((DEL_RHO_D_DEL_Y(I,J,K,N) < 0._EB .AND. Y00 > YMAX) .OR. Y00 > 1._EB) THEN
                RHY0  = RHOP(I,J,K)  *(Y00 - YMAX)
                IF (LC(-1) .AND. YMI<YMAX) THEN
                   RHYMI = RHOP(I-1,J,K)*(YMAX - YMI)
@@ -1192,7 +1192,7 @@ SPECIESLOOP: DO N=1,N_GAS_SPECIES
                   LC( 3) = .FALSE.
                ENDIF                      
                IF (ISUM==0) THEN
-                  IF(YMAX >= YYMAX(N)) YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMAX - Y00
+                  IF(YMAX >= 1._EB) YYDELTA(I,J,K) = YYDELTA(I,J,K) + YMAX - Y00
                   CYCLE CHECK_LOOP2
                ELSE
                   IF (ABS(SUM)>=ZERO_P) THEN
