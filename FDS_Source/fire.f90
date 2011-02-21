@@ -769,7 +769,7 @@ END SUBROUTINE COMBUSTION_GENERAL
 !!!               ENDIF   
 !!!               DO N=1,N_GAS_SPECIES
 !!!                  YYNEW = YY(I,J,K,N) + DT*MPUE(NR,N)*Q_NR(NR)/RHO(I,J,K)
-!!!                  YY(I,J,K,N) = MAX(YYMIN(N),YYNEW)
+!!!                  YY(I,J,K,N) = MAX(0._EB,YYNEW)
 !!!               ENDDO
 !!!               IF (Q(I,J,K)==Q_UPPER) EXIT ODE_LOOP
 !!!               Q(I,J,K) = Q(I,J,K) + Q_NR(NR)
