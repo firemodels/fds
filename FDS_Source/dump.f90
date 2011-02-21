@@ -87,7 +87,9 @@ INTEGER :: NFIELDS, I1, I2, I2_NOW, K, N_END
 TNOW = SECOND()
 
 EVACUATION_DUMP: IF (ANY(EVACUATION_GRID) .AND. EVACUATION_ONLY(NM)) THEN
+
    ! Dump the EVAC flowfieds for all EVAC meshes
+
    L_READ_EFF = BTEST(I_EVAC,2) ! Is the EFF file read in or (re)calculated?
    IF (EVAC_FDS6 .AND. EVACUATION_GRID(NM) .AND. ABS(ICYC)==EVAC_TIME_ITERATIONS) THEN
       TTMP = EVAC_DT_FLOWFIELD*EMESH_NFIELDS(EMESH_INDEX(NM))*EVAC_TIME_ITERATIONS/&
@@ -123,7 +125,9 @@ EVACUATION_DUMP: IF (ANY(EVACUATION_GRID) .AND. EVACUATION_ONLY(NM)) THEN
       END IF
    END IF
    IF (.NOT.EVAC_FDS6) CALL DUMP_SLCF(T-TTMP,NM,0)
+
 ELSE
+
    IF (T>=PART_CLOCK(NM).AND.DROPLET_FILE) THEN
       IF (SYNCHRONIZE) THEN
          CALL DUMP_PART(T,NM)
@@ -162,7 +166,6 @@ ELSE
          IF (SLCF_CLOCK(NM)>=T) EXIT
       ENDDO
    ENDIF
-   !!new!!
    IF (T>=SL3D_CLOCK(NM) .OR. PROCESS_STOP_STATUS/=NO_STOP) THEN
       CALL DUMP_SLCF(T,NM,2)
       DO
@@ -170,7 +173,6 @@ ELSE
          IF (SL3D_CLOCK(NM)>=T) EXIT
       ENDDO
    ENDIF
-   !!!!!!!
    IF (T>=BNDF_CLOCK(NM)) THEN
       IF (SYNCHRONIZE) THEN
          CALL DUMP_BNDF(T,NM)
@@ -5338,15 +5340,7 @@ LOGICAL :: OPN
 ! Determine the time to write into file
 
 STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
-DEVC_TIME=STIME
-
-IF (CENTERED_DEVC_TIME) THEN
-   IF (STIME>T_BEGIN+DT_DEVC) THEN
-      DEVC_TIME = STIME - DT_DEVC/2.0
-   ELSE
-      DEVC_TIME = T_BEGIN + STIME/2.0
-   ENDIF
-ENDIF
+DEVC_TIME = STIME
 
 ! Load time and line device values into arrays
 
@@ -5645,17 +5639,6 @@ ENDDO
 WRITE(TCFORM,'(A,I4.4,A)') "(",5+N_ZONE,"(ES15.7E3,','),ES15.7E3)"
 
 HRR_TIME=STIME
-IF(CENTERED_HRR_TIME)THEN
-  ! if flag is set then output time at center of averaging window, assume averaging windows is
-  !
-  !   [stime-DT_HRR, stime]    if t>= T_BEGIN+DT_HRR,      so center of window is stime - DT_HRR/2
-  !   [T_BEGIN, T_BEGIN+stime] if stime <= T_BEGIN+DT_HRR, so center of window is T_BEGIN+stime/2 
-  IF(STIME>=T_BEGIN+DT_HRR)THEN
-    HRR_TIME = STIME - DT_HRR/2.0
-   ELSE
-    HRR_TIME = T_BEGIN+STIME/2.0
-  ENDIF
-ENDIF
 
 WRITE(LU_HRR,TCFORM) HRR_TIME,0.001_EB*HRR_TOTAL, .001_EB*RHRR_TOTAL,.001_EB*FHRR_TOTAL,.001_EB*CHRR_TOTAL, & 
                      MLR_TOTAL,(MESHES(1)%PBAR(1,I),I=1,N_ZONE)
