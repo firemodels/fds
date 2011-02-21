@@ -122,6 +122,51 @@ ENDDO
 END SUBROUTINE NS_ANALYTICAL_SOLUTION
 
 
+REAL(EB) FUNCTION WANNIER_FLOW(X,Y,I)
+IMPLICIT NONE
+
+! References:
+! 
+! G.H. Wannier. A contribution to the hydrodynamics of lubrication. Quart. Appl.
+! Math. 8(1) (1950).
+!
+! T. Ye, R. Mittal, H.S. Udaykumar, and W. Shyy. An Accurate
+! Cartesian Grid Method for Viscous Incompressible Flows with Complex Immersed
+! Boundaries. J. Comp. Phys. 156:209-240 (1999). Appendix 2
+!
+! Comments:
+!
+! The current solution considers only nonspinning cylinders
+
+REAL(EB), INTENT(IN) :: X,Y ! position
+INTEGER, INTENT(IN) :: I ! velocity component
+REAL(EB), PARAMETER :: R=0.5_EB,H=1._EB,VEL=1._EB
+REAL(EB) :: S,GAMM,ALPH,BETA,F,A,B,C,D
+
+S = SQRT(H**2-R**2)
+GAMM = (H+S)/(H-S)
+ALPH = X**2+(S+Y)**2
+BETA = X**2+(S-Y)**2
+F = VEL/LOG(GAMM)
+A = -F*H
+B = 2._EB*(H+S)*F
+C = 2._EB*(H-S)*F
+D = -VEL
+
+SELECT CASE(I)
+   CASE(1)
+      WANNIER_FLOW=-2._EB*(A+F*Y)/ALPH*((S+Y)+ALPH/BETA*(S-Y))-D-F*LOG(ALPH/BETA) &  
+                   +B/ALPH*((S+2._EB*Y)-2._EB*Y*(S+Y)**2/ALPH) &
+                   -C/BETA*((S-2._EB*Y)+2._EB*Y*(S-Y)**2/BETA) ! Eq. (33)
+   CASE(2)
+      WANNIER_FLOW=2._EB*X/(ALPH*BETA)*(A+F*Y)*(BETA-ALPH) &
+                   -2._EB*B*X*Y*(S+Y)/ALPH**2 &
+                   -2._EB*C*X*Y*(S-Y)/BETA**2 ! Eq. (34)
+END SELECT
+
+END FUNCTION WANNIER_FLOW
+
+
 SUBROUTINE COMPRESSION_WAVE(NM,T,ITEST)
 IMPLICIT NONE
 
