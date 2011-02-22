@@ -7,6 +7,9 @@
 #include <stdlib.h> 
 #include <string.h>
 #include <math.h>
+#ifdef pp_GPU
+#include <GL/glew.h>
+#endif
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
@@ -915,6 +918,7 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
   float factor_L, factor_U, factor;
   float ylay;
   float thick;
+  float odl, odu;
 
   x0 = roomi->x0;
   x1 = roomi->x1;
@@ -922,6 +926,8 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
   y1 = roomi->y1;
   z0 = roomi->z0;
   z1 = roomi->z1;
+  odl = roomi->od_L;
+  odu = roomi->od_U;
   alpha_min = (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0) + (z1-z0)*(z1-z0);
   alpha_min = 2.0*sqrt(alpha_min);
   ylay = roomi->z0 + roomi->ylay;
@@ -968,34 +974,166 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
     }
   }
   alpha_ylay = (ylay - xyz[2])/dz;
-  if(xyz[2]<ylay){
+
+  if(xyzeyeorig[2]>ylay&&xyz[2]>ylay){
     if(alpha_ylay>0.0&&alpha_ylay<alpha_min){
-      factor_U=(alpha_min-alpha_ylay)/roomi->od_U;
-      factor_L=alpha_ylay/roomi->od_L;
+      factor_U=alpha_ylay/odu;
+      factor_L=(alpha_min-alpha_ylay)/odl;
     }
     else{
-      factor_U=0.0;
-      factor_L=alpha_min/roomi->od_L;
-    }
-  }
-  else{
-    if(alpha_ylay>0.0&&alpha_ylay<alpha_min){
-      factor_L=(alpha_min-alpha_ylay)/roomi->od_L;
-      factor_U=alpha_ylay/roomi->od_U;
-    }
-    else{
-      factor_U=alpha_min/roomi->od_L;
+      factor_U=alpha_min/odu;
       factor_L=0.0;
     }
   }
+  if(xyzeyeorig[2]>ylay&&xyz[2]<=ylay){
+    factor_U=0.0;
+    factor_L=alpha_min/odl;
+  }
+  if(xyzeyeorig[2]<=ylay&&xyz[2]>ylay){
+    factor_U=alpha_min/odu;
+    factor_L=0.0;
+  }
+  if(xyzeyeorig[2]<=ylay&&xyz[2]<=ylay){
+    if(alpha_ylay>0.0&&alpha_ylay<alpha_min){
+      factor_U=(alpha_min-alpha_ylay)/odu;
+      factor_L=alpha_ylay/odl;
+    }
+    else{
+      factor_U=0.0;
+      factor_L=alpha_min/odl;
+    }
+  }
+
   factor = (factor_U+factor_L)*L*xyzmaxdiff;
   thick = 1.0-exp(-factor);
   return thick;
 }
 
+#ifdef pp_GPU
+/* ------------------ drawzonesmokeGPU ------------------------ */
+
+void drawzonesmokeGPU(roomdata *roomi){
+#define NROWS 100
+#define NCOLS 100
+  int iwall;
+  float xyz[3];
+  float dx, dy, dz;
+  int drawit=0;
+  
+  glUniform3f(GPU_xyzeyeorig,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
+  glUniform1f(GPU_xyzmaxdiff,xyzmaxdiff);
+  glUniform1f(GPU_xmin,roomi->x0);
+  glUniform1f(GPU_xmax,roomi->x1);
+  glUniform1f(GPU_ymin,roomi->y0);
+  glUniform1f(GPU_ymax,roomi->y1);
+  glUniform1f(GPU_zmin,roomi->z0);
+  glUniform1f(GPU_zmax,roomi->z1);
+  glUniform1f(GPU_zlay,roomi->z0+roomi->ylay);
+  glUniform1f(GPU_odl,roomi->od_L);
+  glUniform1f(GPU_odu,roomi->od_U);
+
+  for(iwall=-3;iwall<=3;iwall++){
+    int i,j;
+    float x1, x2, y1, y2, z1, z2;
+
+    if(iwall==0)continue;
+    if(roomi->drawsides[iwall+3]==0)continue;
+
+    glUniform1i(GPU_zonedir,iwall);
+    glBegin(GL_TRIANGLES);
+
+    switch (iwall){
+      case 1:
+      case -1:
+        dy = roomi->dy/(NCOLS-1);
+        dz = roomi->dz/(NROWS-1);
+        if(iwall<0){
+          x1 = roomi->x0;
+        }
+        else{
+          x1=roomi->x1;
+        }
+        for(i=0;i<NCOLS-1;i++){
+          y1 = roomi->y0 + i*dy;
+          y2 = y1 + dy;
+          for(j=0;j<NROWS-1;j++){
+            z1 = roomi->z0 + j*dz;
+            z2 = z1 + dz;
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x1,y2,z1);
+            glVertex3f(x1,y2,z2);
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x1,y2,z2);
+            glVertex3f(x1,y1,z2);
+          }
+        }
+        break;
+      case 2:
+      case -2:
+        dx = roomi->dx/(NCOLS-1);
+        dz = roomi->dz/(NROWS-1);
+        if(iwall<0){
+          y1=roomi->y0;
+        }
+        else{
+          y1=roomi->y1;
+        }
+        for(i=0;i<NCOLS-1;i++){
+          x1 = roomi->x0 + i*dx;
+          x2 = x1 + dx;
+          for(j=0;j<NROWS-1;j++){
+            z1 = roomi->z0 + j*dz;
+            z2 = z1 + dz;
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y1,z1);
+            glVertex3f(x2,y1,z2);
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y1,z2);
+            glVertex3f(x1,y1,z2);
+          }
+        }
+        break;
+      case 3:
+      case -3:
+        dx = roomi->dx/(NCOLS-1);
+        dy = roomi->dy/(NROWS-1);
+        if(iwall<0){
+          z1=roomi->z0;
+        }
+        else{
+          z1=roomi->z1;
+        }
+        for(i=0;i<NCOLS-1;i++){
+          x1 = roomi->x0 + i*dx;
+          x2 = x1 + dx;
+          for(j=0;j<NROWS-1;j++){
+            y1 = roomi->y0 + j*dy;
+            y2 = y1 + dy;
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y1,z1);
+            glVertex3f(x2,y2,z1);
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y2,z1);
+            glVertex3f(x1,y2,z1);
+          }
+        }
+        break;
+    }
+    glEnd();
+  }
+
+}
+
+#endif
 /* ------------------ drawzonesmoke ------------------------ */
 
-void drawzonesmoke2(roomdata *roomi){
+void drawzonesmoke(roomdata *roomi){
 #define NROWS 100
 #define NCOLS 100
   float vxyz[4][NROWS][NCOLS];
@@ -1120,125 +1258,6 @@ void drawzonesmoke2(roomdata *roomi){
   }
 }
 
-/* ------------------ drawzonesmoke ------------------------ */
-
-void drawzonesmoke(roomdata *roomi){
-  float xroom0, yroom0, zroom0, xroom, yroom, zroom;
-  float ylay;
-
-#define NSLICES 30
-
-  float odu, odl;
-
-  float color4[4]={1.0,0.0,0.0,1.0};
-
-  xroom0 = roomi->x0;
-  yroom0 = roomi->y0;
-  zroom0 = roomi->z0;
-  xroom  = roomi->x1;
-  yroom  = roomi->y1;
-  zroom  = roomi->z1;
-  ylay   = roomi->ylay;
-
-  glBegin(GL_TRIANGLES);
-  switch (roomi->smokedir) {
-    int i; 
-    float dx,dy,dz,dzu,dzl,odz;
-
-    case -1:
-    case 1:
-      odl = (xroom-xroom0)*xyzmaxdiff/NSLICES;
-      odl = 1.0-exp(-odl/roomi->od_L);
-
-      odu = (xroom-xroom0)*xyzmaxdiff/NSLICES;
-      odu = 1.0-exp(-odu/roomi->od_U);
-
-      dx = (xroom-xroom0)/NSLICES;
-
-      for(i=0;i<NSLICES;i++){
-        glColor4f(0.0,0.0,0.0,odu);
-        glVertex3f(xroom0+i*dx,yroom0,zroom0+ylay); // 1
-        glVertex3f(xroom0+i*dx,yroom, zroom0+ylay); // 2
-        glVertex3f(xroom0+i*dx,yroom, zroom);       // 3
- 
-        glVertex3f(xroom0+i*dx,yroom0,zroom0+ylay); // 1
-        glVertex3f(xroom0+i*dx,yroom, zroom);       // 3
-        glVertex3f(xroom0+i*dx,yroom0,zroom);       // 4
-
-        glColor4f(0.0,0.0,0.0,odl);
-        glVertex3f(xroom0+i*dx,yroom0,zroom0);      // 1
-        glVertex3f(xroom0+i*dx,yroom, zroom0);      // 2
-        glVertex3f(xroom0+i*dx,yroom, zroom0+ylay); // 3
-
-        glVertex3f(xroom0+i*dx,yroom0,zroom0);      // 1
-        glVertex3f(xroom0+i*dx,yroom, zroom0+ylay); // 3
-        glVertex3f(xroom0+i*dx,yroom0,zroom0+ylay); // 4
-      }
-      break;
-    case -2:
-    case 2:
-      odl = (yroom-yroom0)*xyzmaxdiff/NSLICES;
-      odl = 1.0-exp(-odl/roomi->od_L);
-
-      odu = (yroom-yroom0)*xyzmaxdiff/NSLICES;
-      odu = 1.0-exp(-odu/roomi->od_U);
-
-      dy = (float)(yroom-yroom0)/NSLICES;
-      for(i=0;i<NSLICES;i++){
-        glColor4f(0.0,0.0,0.0,odu);
-        glVertex3f(xroom0,yroom0+i*dy,zroom0+ylay);  // 1
-        glVertex3f(xroom, yroom0+i*dy,zroom0+ylay);  // 2
-        glVertex3f(xroom, yroom0+i*dy,zroom);        // 3
-
-        glVertex3f(xroom0,yroom0+i*dy,zroom0+ylay);  // 1
-        glVertex3f(xroom, yroom0+i*dy,zroom);        // 3
-        glVertex3f(xroom0,yroom0+i*dy,zroom);        // 4
-
-        glColor4f(0.0,0.0,0.0,odl);
-        glVertex3f(xroom0, yroom0+i*dy,zroom0);      // 1
-        glVertex3f(xroom,  yroom0+i*dy,zroom0);      // 2
-        glVertex3f(xroom,  yroom0+i*dy,zroom0+ylay); // 3
-
-        glVertex3f(xroom0, yroom0+i*dy,zroom0);      // 1
-        glVertex3f(xroom,  yroom0+i*dy,zroom0+ylay); // 3
-        glVertex3f(xroom0, yroom0+i*dy,zroom0+ylay); // 4
-      }
-      break;
-    case -3:
-    case 3:
-      odl = ylay*xyzmaxdiff/NSLICES;
-      odl = 1.0-exp(-odl/roomi->od_L);
-
-      odu = (zroom-zroom0-ylay)*xyzmaxdiff/NSLICES;
-      odu = 1.0-exp(-odu/roomi->od_U);
-
-      dzu = (zroom-zroom0-ylay)/NSLICES;
-      dzl = ylay/NSLICES;
-      for(i=0;i<NSLICES;i++){
-        glColor4f(0.0,0.0,0.0,odu);
-        glVertex3f(xroom0,yroom0,zroom0+ylay+i*dzu); //  1
-        glVertex3f(xroom, yroom0, zroom0+ylay+i*dzu); // 2
-        glVertex3f(xroom, yroom, zroom0+ylay+i*dzu); //  3
-
-        glVertex3f(xroom0,yroom0,zroom0+ylay+i*dzu); //  1
-        glVertex3f(xroom, yroom, zroom0+ylay+i*dzu); //  3
-        glVertex3f(xroom0, yroom, zroom0+ylay+i*dzu); // 4
-      }
-      for(i=0;i<NSLICES;i++){
-        glColor4f(0.0,0.0,0.0,odl);
-        glVertex3f(xroom0,yroom0,zroom0+i*dzl); //  1
-        glVertex3f(xroom, yroom0, zroom0+i*dzl); // 2
-        glVertex3f(xroom, yroom, zroom0+i*dzl); //  3
-
-        glVertex3f(xroom0,yroom0,zroom0+i*dzl); //  1
-        glVertex3f(xroom, yroom, zroom0+i*dzl); //  3
-        glVertex3f(xroom0, yroom, zroom0+i*dzl); // 4
-      }
-      break;
-  }
-  glEnd();
-}
-
 /* ------------------ drawroomdata ------------------------ */
 
 void drawroomdata(void){
@@ -1272,6 +1291,11 @@ void drawroomdata(void){
     zonecolorbase=izonetubase;
   }
 
+#ifdef pp_GPU
+   if(usegpu==1){
+     LoadZoneSmokeShaders();
+   }
+#endif
   for(i=0;i<nrooms;i++){
     roomdata *roomi;
 
@@ -1294,7 +1318,16 @@ void drawroomdata(void){
     dy = roomi->dy/2.;
 
     if(visODZone==1&&zoneodl!=NULL&&zoneodu!=NULL){
+#ifdef pp_GPU
+      if(usegpu==1){
+        drawzonesmokeGPU(roomi);
+      }
+      else{
+        drawzonesmoke(roomi);
+      }
+#else
       drawzonesmoke(roomi);
+#endif
     }
     else{
       if(visHZone==1){
@@ -1317,6 +1350,11 @@ void drawroomdata(void){
       }
     }
   }
+#ifdef pp_GPU
+  if(usegpu==1){
+    UnloadZoneSmokeShaders();
+  }
+#endif
 
   if(viszonefire==1){
     glColor3f(0.7f,0.7f,0.7f);

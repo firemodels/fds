@@ -105,6 +105,8 @@ void createDepthTexture( void );
 EXTERNCPP int init_shaders(void);
 EXTERNCPP void LoadSmokeShaders(void);
 EXTERNCPP void UnloadSmokeShaders(void);
+EXTERNCPP void LoadZoneSmokeShaders(void);
+EXTERNCPP void UnloadZoneSmokeShaders(void);
 #endif
 EXTERNCPP void initspheresegs(int nlat, int nlong);
 EXTERNCPP mesh *getmesh(float *xyz);

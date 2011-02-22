@@ -762,9 +762,11 @@ void keyboard_2(unsigned char key, int x, int y){
   }
 #endif
 #ifdef pp_GPU
-  if(nsmoke3d_files>0&&strncmp((const char *)&key2,"G",1)==0){
+  if((nsmoke3d_files>0||nrooms>0)&&strncmp((const char *)&key2,"G",1)==0){
     if(gpuactive==1)usegpu=1-usegpu;
-    update_smoke3dflags();
+    if(nsmoke3d_files>0){
+      update_smoke3dflags();
+    }
     print_gpu_cull_state();
     return;    
   }
