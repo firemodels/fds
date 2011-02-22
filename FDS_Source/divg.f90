@@ -21,6 +21,7 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY: GET_DIFFUSIVITY,GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT_DIFF, &
                               GET_AVERAGE_SPECIFIC_HEAT,GET_CONDUCTIVITY_BG,GET_SPECIFIC_HEAT_BG,GET_AVERAGE_SPECIFIC_HEAT_BG
 USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6
+USE TURBULENCE, ONLY: WANNIER_FLOW 
 
 ! Compute contributions to the divergence term
  
@@ -711,12 +712,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             ! Special Cases
             IF (BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .AND. IOR>0) UWS(IW) = -UWS(IW)  ! One-way flow through POROUS plate
             IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) UWS(IW) = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*UW0(IW)
-            IF (ABS(SURFACE(IBC)%MASS_FLUX_TOTAL) >=ZERO_P) THEN
-               !!IIG = IJKW(6,IW) ??
-               !!JJG = IJKW(7,IW) ??
-               !!KKG = IJKW(8,IW) ??
-               UWS(IW) = UWS(IW)*RHOA/RHO_F(IW)
-            ENDIF
+            IF (ABS(SURFACE(IBC)%MASS_FLUX_TOTAL)>=ZERO_P) UWS(IW) = UWS(IW)*RHOA/RHO_F(IW)
             IF (VENT_INDEX(IW)>0) THEN 
                VT=>VENTS(VENT_INDEX(IW))
                IF (VT%N_EDDY>0) THEN ! Synthetic Eddy Method
@@ -767,6 +763,17 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                CASE(-3)
                   UWS(IW) =  W(II,JJ,KK-1)
             END SELECT
+            WANNIER_BC: IF (PERIODIC_TEST==5) THEN
+               SELECT CASE(IOR)
+                  CASE( 1)
+                     UWS(IW) = -WANNIER_FLOW(X(II),ZC(KK),1)
+                  CASE(-1)
+                     UWS(IW) =  WANNIER_FLOW(X(II-1),ZC(KK),1)
+                  CASE(-3)
+                     UWS(IW) =  WANNIER_FLOW(XC(II),Z(KK-1),2)
+               END SELECT
+            ENDIF WANNIER_BC
+
       END SELECT WALL_CELL_TYPE
    ENDDO WALL_LOOP3
    !$OMP END DO
