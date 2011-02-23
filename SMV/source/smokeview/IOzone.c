@@ -202,11 +202,10 @@ void getzonesmokedir(float *mm){
     */
   int i,ii,j;
   float norm[3];
-  float absangle,cosangle,minangle;
-  int iminangle;
   float pi;
   float eyedir[3];
   float cosdir;
+  float angles[7];
 
   pi=4.0*atan(1.0);
 
@@ -219,8 +218,19 @@ void getzonesmokedir(float *mm){
     
     roomj = roominfo + j;
 
-    minangle=1000.0;
-    iminangle=-10;
+    roomj->zoneinside=0;
+    if(
+      xyzeyeorig[0]>roomj->x0&&xyzeyeorig[0]<roomj->x1&&
+      xyzeyeorig[1]>roomj->y0&&xyzeyeorig[1]<roomj->y1&&
+      xyzeyeorig[2]>roomj->z0&&xyzeyeorig[2]<roomj->z1
+      ){
+      for(i=-3;i<=3;i++){
+        if(i==0)continue;
+        roomj->drawsides[i+3]=1;
+      }
+      roomj->zoneinside=1;
+      continue;
+    }
 
     for(i=-3;i<=3;i++){
       if(i==0)continue;
@@ -279,25 +289,17 @@ void getzonesmokedir(float *mm){
       if(cosdir<-1.0)cosdir=-1.0;
       cosdir=acos(cosdir)*180.0/pi;
       if(cosdir<0.0)cosdir=-cosdir;
-      roomj->angles[3+i]=cosdir;
-
-      absangle=cosdir;
-      if(absangle<0.0)absangle=-absangle;
-      if(absangle<minangle){
-        iminangle=i;
-        minangle=absangle;
-      }
+      angles[3+i]=cosdir;
     }
     for(i=-3;i<=3;i++){
       if(i==0)continue;
-      if(roomj->angles[i+3]<90.0){
+      if(angles[i+3]<90.0){
         roomj->drawsides[i+3]=1;
       }
       else{
         roomj->drawsides[i+3]=0;
       }
     }
-    roomj->smokedir=iminangle;
   }
 }
 
@@ -928,8 +930,7 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
   z1 = roomi->z1;
   odl = roomi->od_L;
   odu = roomi->od_U;
-  alpha_min = (x1-x0)*(x1-x0) + (y1-y0)*(y1-y0) + (z1-z0)*(z1-z0);
-  alpha_min = 2.0*sqrt(alpha_min);
+  alpha_min = 100000.0;
   ylay = roomi->z0 + roomi->ylay;
 
   dx = xyz[0] - xyzeyeorig[0];
@@ -937,6 +938,8 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
   dz = xyz[2] - xyzeyeorig[2];
   L = sqrt(dx*dx+dy*dy+dz*dz);
 
+  alpha_ylay = (ylay - xyz[2])/dz;
+  if(roomi->zoneinside==0){
   if(dir!=-1){
     alpha =  (x0 - xyz[0])/dx;
     if(alpha>0.0&&alpha<alpha_min){
@@ -973,8 +976,6 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
       alpha_min=alpha;
     }
   }
-  alpha_ylay = (ylay - xyz[2])/dz;
-
   if(xyzeyeorig[2]>ylay&&xyz[2]>ylay){
     if(alpha_ylay>0.0&&alpha_ylay<alpha_min){
       factor_U=alpha_ylay/odu;
@@ -1003,6 +1004,25 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
       factor_L=alpha_min/odl;
     }
   }
+  }
+  else{
+    if(xyzeyeorig[2]>ylay&&xyz[2]>ylay){
+      factor_U=1.0/odu;
+      factor_L=0.0;
+    }
+    if(xyzeyeorig[2]>ylay&&xyz[2]<=ylay){
+      factor_U=(1.0+alpha_ylay)/odu;
+      factor_L=-alpha_ylay/odl;
+    }
+    if(xyzeyeorig[2]<=ylay&&xyz[2]>ylay){
+      factor_U=-alpha_ylay/odu;
+      factor_L=(1.0+alpha_ylay)/odl;
+    }
+    if(xyzeyeorig[2]<=ylay&&xyz[2]<=ylay){
+      factor_U=0.0;
+      factor_L=1.0/odl;
+    }
+  }
 
   factor = (factor_U+factor_L)*L*xyzmaxdiff;
   thick = 1.0-exp(-factor);
@@ -1013,21 +1033,17 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
 /* ------------------ drawzonesmokeGPU ------------------------ */
 
 void drawzonesmokeGPU(roomdata *roomi){
-#define NROWS 100
-#define NCOLS 100
+#define NROWS_GPU 2
+#define NCOLS_GPU 2
   int iwall;
   float xyz[3];
   float dx, dy, dz;
-  int drawit=0;
   
-  glUniform3f(GPU_xyzeyeorig,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
+  glUniform3f(GPU_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
+  glUniform1i(GPU_zoneinside,roomi->zoneinside);
   glUniform1f(GPU_xyzmaxdiff,xyzmaxdiff);
-  glUniform1f(GPU_xmin,roomi->x0);
-  glUniform1f(GPU_xmax,roomi->x1);
-  glUniform1f(GPU_ymin,roomi->y0);
-  glUniform1f(GPU_ymax,roomi->y1);
-  glUniform1f(GPU_zmin,roomi->z0);
-  glUniform1f(GPU_zmax,roomi->z1);
+  glUniform3f(GPU_boxmin,roomi->x0,roomi->y0,roomi->z0);
+  glUniform3f(GPU_boxmax,roomi->x1,roomi->y1,roomi->z1);
   glUniform1f(GPU_zlay,roomi->z0+roomi->ylay);
   glUniform1f(GPU_odl,roomi->od_L);
   glUniform1f(GPU_odu,roomi->od_U);
@@ -1036,8 +1052,7 @@ void drawzonesmokeGPU(roomdata *roomi){
     int i,j;
     float x1, x2, y1, y2, z1, z2;
 
-    if(iwall==0)continue;
-    if(roomi->drawsides[iwall+3]==0)continue;
+    if(iwall==0||roomi->drawsides[iwall+3]==0)continue;
 
     glUniform1i(GPU_zonedir,iwall);
     glBegin(GL_TRIANGLES);
@@ -1045,18 +1060,18 @@ void drawzonesmokeGPU(roomdata *roomi){
     switch (iwall){
       case 1:
       case -1:
-        dy = roomi->dy/(NCOLS-1);
-        dz = roomi->dz/(NROWS-1);
+        dy = roomi->dy/(NCOLS_GPU-1);
+        dz = roomi->dz/(NROWS_GPU-1);
         if(iwall<0){
           x1 = roomi->x0;
         }
         else{
           x1=roomi->x1;
         }
-        for(i=0;i<NCOLS-1;i++){
+        for(i=0;i<NCOLS_GPU-1;i++){
           y1 = roomi->y0 + i*dy;
           y2 = y1 + dy;
-          for(j=0;j<NROWS-1;j++){
+          for(j=0;j<NROWS_GPU-1;j++){
             z1 = roomi->z0 + j*dz;
             z2 = z1 + dz;
 
@@ -1072,21 +1087,22 @@ void drawzonesmokeGPU(roomdata *roomi){
         break;
       case 2:
       case -2:
-        dx = roomi->dx/(NCOLS-1);
-        dz = roomi->dz/(NROWS-1);
+        dx = roomi->dx/(NCOLS_GPU-1);
+        dz = roomi->dz/(NROWS_GPU-1);
         if(iwall<0){
           y1=roomi->y0;
         }
         else{
           y1=roomi->y1;
         }
-        for(i=0;i<NCOLS-1;i++){
+        for(i=0;i<NCOLS_GPU-1;i++){
           x1 = roomi->x0 + i*dx;
           x2 = x1 + dx;
-          for(j=0;j<NROWS-1;j++){
+          for(j=0;j<NROWS_GPU-1;j++){
             z1 = roomi->z0 + j*dz;
             z2 = z1 + dz;
 
+            if(roomi->zoneinside==0){
             glVertex3f(x1,y1,z1);
             glVertex3f(x2,y1,z1);
             glVertex3f(x2,y1,z2);
@@ -1094,26 +1110,37 @@ void drawzonesmokeGPU(roomdata *roomi){
             glVertex3f(x1,y1,z1);
             glVertex3f(x2,y1,z2);
             glVertex3f(x1,y1,z2);
+            }
+            else{
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y1,z2);
+            glVertex3f(x2,y1,z1);
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x1,y1,z2);
+            glVertex3f(x2,y1,z2);
+            }
           }
         }
         break;
       case 3:
       case -3:
-        dx = roomi->dx/(NCOLS-1);
-        dy = roomi->dy/(NROWS-1);
+        dx = roomi->dx/(NCOLS_GPU-1);
+        dy = roomi->dy/(NROWS_GPU-1);
         if(iwall<0){
           z1=roomi->z0;
         }
         else{
           z1=roomi->z1;
         }
-        for(i=0;i<NCOLS-1;i++){
+        for(i=0;i<NCOLS_GPU-1;i++){
           x1 = roomi->x0 + i*dx;
           x2 = x1 + dx;
-          for(j=0;j<NROWS-1;j++){
+          for(j=0;j<NROWS_GPU-1;j++){
             y1 = roomi->y0 + j*dy;
             y2 = y1 + dy;
 
+            if(roomi->zoneinside==0){
             glVertex3f(x1,y1,z1);
             glVertex3f(x2,y1,z1);
             glVertex3f(x2,y2,z1);
@@ -1121,6 +1148,16 @@ void drawzonesmokeGPU(roomdata *roomi){
             glVertex3f(x1,y1,z1);
             glVertex3f(x2,y2,z1);
             glVertex3f(x1,y2,z1);
+            }
+            else{
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y2,z1);
+            glVertex3f(x2,y1,z1);
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x1,y2,z1);
+            glVertex3f(x2,y2,z1);
+            }
           }
         }
         break;
@@ -1140,7 +1177,6 @@ void drawzonesmoke(roomdata *roomi){
   int iwall;
   float xyz[3];
   float dx, dy, dz;
-  int drawit=0;
   
   for(iwall=-3;iwall<=3;iwall++){
     int i,j;

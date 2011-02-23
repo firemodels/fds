@@ -76,11 +76,10 @@ SVEXTERN unsigned int GPU_depthtexture;
 SVEXTERN int i_hrrcutoff;
 
 SVEXTERN int GPU_zonedir;
-SVEXTERN int GPU_xyzeyeorig;
+SVEXTERN int GPU_zoneinside;
+SVEXTERN int GPU_eyepos;
 SVEXTERN int GPU_xyzmaxdiff;
-SVEXTERN int GPU_xmin, GPU_xmax;
-SVEXTERN int GPU_ymin, GPU_ymax;
-SVEXTERN int GPU_zmin, GPU_zmax;
+SVEXTERN int GPU_boxmin, GPU_boxmax;
 SVEXTERN int GPU_zlay;
 SVEXTERN int GPU_odl, GPU_odu;
 #endif

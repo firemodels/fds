@@ -22,110 +22,103 @@ void printInfoLog(GLhandleARB obj);
 
 int setZoneSmokeShaders() {
   GLint error_code;
-/*  if(dir!=-2){
-    alpha =  (y0 - xyz[1])/dy;
-    if(alpha>0.0&&alpha<alpha_min){
-      alpha_min=alpha;
-    }
-  }
-  if(dir!=2){
-    alpha =  (y1 - xyz[1])/dy;
-    if(alpha>0.0&&alpha<alpha_min){
-      alpha_min=alpha;
-    }
-  }
-*/
   const GLchar *FragmentShaderSource[]={
-    "uniform int zonedir;"
-    "uniform vec3 xyzeyeorig;"
+    "uniform int zonedir,zoneinside;"
+    "uniform vec3 eyepos;"
     "uniform float xyzmaxdiff;"
-    "uniform float xmin, xmax;"
-    "uniform float ymin, ymax;"
-    "uniform float zmin, zmax;"
+    "uniform vec3 boxmin, boxmax;"
     "uniform float zlay;"
     "uniform float odl, odu;"
-    "varying vec3 pos;"
+    "varying vec3 fragpos;"
     "void main(){"
-      "float L,opacity,alpha,alpha_min,alpha_zlay;"
-      "float factor_U, factor_L, zeye;"
-      "L=distance(pos,xyzeyeorig)*xyzmaxdiff;"
-      "alpha_min=distance(vec3(xmin,ymin,zmin),vec3(xmax,ymax,zmax));"
-      "if(zonedir!=-1){"
-      "  alpha = (xmin-pos.x)/(pos.x - xyzeyeorig.x);"
-      "  if(alpha>0.0&&alpha<alpha_min){"
-      "    alpha_min=alpha;"
-      "  }"
-      "}"
-      "if(zonedir!=1){"
-      "  alpha = (xmax-pos.x)/(pos.x - xyzeyeorig.x);"
-      "  if(alpha>0.0&&alpha<alpha_min){"
-      "    alpha_min=alpha;"
-      "  }"
-      "}"
-      "if(zonedir!=-2){"
-      "  alpha = (ymin-pos.y)/(pos.y - xyzeyeorig.y);"
-      "  if(alpha>0.0&&alpha<alpha_min){"
-      "    alpha_min=alpha;"
-      "  }"
-      "}"
-      "if(zonedir!=2){"
-      "  alpha = (ymax-pos.y)/(pos.y - xyzeyeorig.y);"
-      "  if(alpha>0.0&&alpha<alpha_min){"
-      "    alpha_min=alpha;"
-      "  }"
-      "}"
-      "if(zonedir!=-3){"
-      "  alpha = (zmin-pos.z)/(pos.z - xyzeyeorig.z);"
-      "  if(alpha>0.0&&alpha<alpha_min){"
-      "    alpha_min=alpha;"
-      "  }"
-      "}"
-      "if(zonedir!=3){"
-      "  alpha = (zmax-pos.z)/(pos.z - xyzeyeorig.z);"
-      "  if(alpha>0.0&&alpha<alpha_min){"
-      "    alpha_min=alpha;"
-      "  }"
-      "}"
-      "zeye=xyzeyeorig.z;"
-      "alpha_zlay = (zlay-pos.z)/(pos.z - xyzeyeorig.z);"
-      "if(zeye>zlay&&pos.z>zlay){"
-      "  if(alpha_zlay>0.0&&alpha_zlay<alpha_min){"
-      "    factor_U=alpha_zlay/odu;"
-      "    factor_L=(alpha_min-alpha_zlay)/odl;"
-      "  }"
-      "  else{"
-      "    factor_U=alpha_min/odu;"
-      "    factor_L=0.0;"
-      "  }"
-      "}"
-      "if(zeye>zlay&&pos.z<=zlay){"
-      "  factor_U=0.0;"
-      "  factor_L=alpha_min/odl;"
-      "}"
-      "if(zeye<=zlay&&pos.z>zlay){"
-      "  factor_U=alpha_min/odu;"
-      "  factor_L=0.0;"
-      "}"
-      "if(zeye<=zlay&&pos.z<=zlay){"
-      "  if(alpha_zlay>0.0&&alpha_zlay<alpha_min){"
-      "    factor_U=(alpha_min-alpha_zlay)/odu;"
-      "    factor_L=alpha_zlay/odl;"
-      "  }"
-      "  else{"
-      "    factor_U=0.0;"
-      "    factor_L=alpha_min/odl;"
-      "  }"
-      "}"
-     "opacity = 1.0-exp(-(factor_L+factor_U)*L);"
-     "gl_FragColor = vec4(0.0,0.0,0.0,opacity);"
-     "}"
+    "  float L,opacity,alpha,alpha_min,alpha_zlay;"
+    "  float factor_U, factor_L, zeye;"
+    "  L=distance(fragpos,eyepos)*xyzmaxdiff;"
+    "  alpha_min=1000000.0;"
+    "  zeye=eyepos.z;"
+    "  alpha_zlay = (zlay-fragpos.z)/(fragpos.z - eyepos.z);"
+    "  if(zoneinside==0){"
+    "    alpha = (boxmin.x-fragpos.x)/(fragpos.x - eyepos.x);"
+    "    if(zonedir!=-1&&alpha>0.0&&alpha<alpha_min){"
+    "      alpha_min=alpha;"
+    "    }"
+    "    alpha = (boxmax.x-fragpos.x)/(fragpos.x - eyepos.x);"
+    "    if(zonedir!=1&&alpha>0.0&&alpha<alpha_min){"
+    "      alpha_min=alpha;"
+    "    }"
+    "    alpha = (boxmin.y-fragpos.y)/(fragpos.y - eyepos.y);"
+    "    if(zonedir!=-2&&alpha>0.0&&alpha<alpha_min){"
+    "      alpha_min=alpha;"
+    "    }"
+    "    alpha = (boxmax.y-fragpos.y)/(fragpos.y - eyepos.y);"
+    "    if(zonedir!=2&&alpha>0.0&&alpha<alpha_min){"
+    "      alpha_min=alpha;"
+    "    }"
+    "    alpha = (boxmin.z-fragpos.z)/(fragpos.z - eyepos.z);"
+    "    if(zonedir!=-3&&alpha>0.0&&alpha<alpha_min){"
+    "      alpha_min=alpha;"
+    "    }"
+    "    alpha = (boxmax.z-fragpos.z)/(fragpos.z - eyepos.z);"
+    "    if(zonedir!=3&&alpha>0.0&&alpha<alpha_min){"
+    "      alpha_min=alpha;"
+    "    }"
+    "    if(zeye>zlay&&fragpos.z>zlay){"
+    "      if(alpha_zlay>0.0&&alpha_zlay<alpha_min){"
+    "        factor_U=alpha_zlay/odu;"
+    "        factor_L=(alpha_min-alpha_zlay)/odl;"
+    "      }"
+    "      else{"
+    "        factor_U=alpha_min/odu;"
+    "        factor_L=0.0;"
+    "      }"
+    "    }"
+    "    if(zeye>zlay&&fragpos.z<=zlay){"
+    "      factor_U=0.0;"
+    "      factor_L=alpha_min/odl;"
+    "    }"
+    "    if(zeye<=zlay&&fragpos.z>zlay){"
+    "      factor_U=alpha_min/odu;"
+    "      factor_L=0.0;"
+    "    }"
+    "    if(zeye<=zlay&&fragpos.z<=zlay){"
+    "      if(alpha_zlay>0.0&&alpha_zlay<alpha_min){"
+    "        factor_U=(alpha_min-alpha_zlay)/odu;"
+    "        factor_L=alpha_zlay/odl;"
+    "      }"
+    "      else{"
+    "        factor_U=0.0;"
+    "        factor_L=alpha_min/odl;"
+    "      }"
+    "    }"
+    "  }" // end inside=0
+    "  if(zoneinside==1){"
+    "    if(zeye>zlay&&fragpos.z>zlay){"
+    "      factor_U=1.0/odu;"
+    "      factor_L=0.0;"
+    "    }"
+    "    if(zeye>zlay&&fragpos.z<=zlay){"
+    "      factor_U=(1.0+alpha_zlay)/odu;"
+    "      factor_L=-alpha_zlay/odl;"
+    "    }"
+    "    if(zeye<=zlay&&fragpos.z>zlay){"
+    "      factor_U=-alpha_zlay/odu;"
+    "      factor_L=(1.0+alpha_zlay)/odl;"
+    "    }"
+    "    if(zeye<=zlay&&fragpos.z<=zlay){"
+    "      factor_U=0.0;"
+    "      factor_L=1.0/odl;"
+    "    }"
+    "  }" // end inside=1
+    "  opacity = 1.0-exp(-(factor_L+factor_U)*L);"
+    "  gl_FragColor = vec4(0.3,0.3,0.3,opacity);"
+    "}" // end of main
   };
 
   const GLchar *VertexShaderSource[]={
-    "varying vec3 pos;"
+    "varying vec3 fragpos;"
     "void main()"
     "{"
-    "pos=gl_Vertex;"
+    "fragpos=gl_Vertex;"
   "  gl_Position = ftransform();"
   "}"
 };
@@ -174,15 +167,12 @@ int setZoneSmokeShaders() {
   }
   printInfoLog(p_smoke);
 #endif
+  GPU_zoneinside = glGetUniformLocation(p_zonesmoke,"zoneinside");
   GPU_zonedir = glGetUniformLocation(p_zonesmoke,"zonedir");
-  GPU_xyzeyeorig = glGetUniformLocation(p_zonesmoke,"xyzeyeorig");
+  GPU_eyepos = glGetUniformLocation(p_zonesmoke,"eyepos");
   GPU_xyzmaxdiff = glGetUniformLocation(p_zonesmoke,"xyzmaxdiff");
-  GPU_xmin = glGetUniformLocation(p_zonesmoke,"xmin");
-  GPU_xmax = glGetUniformLocation(p_zonesmoke,"xmax");
-  GPU_ymin = glGetUniformLocation(p_zonesmoke,"ymin");
-  GPU_ymax = glGetUniformLocation(p_zonesmoke,"ymax");
-  GPU_zmin = glGetUniformLocation(p_zonesmoke,"zmin");
-  GPU_zmax = glGetUniformLocation(p_zonesmoke,"zmax");
+  GPU_boxmin = glGetUniformLocation(p_zonesmoke,"boxmin");
+  GPU_boxmax = glGetUniformLocation(p_zonesmoke,"boxmax");
   GPU_zlay = glGetUniformLocation(p_zonesmoke,"zlay");
   GPU_odl = glGetUniformLocation(p_zonesmoke,"odl");
   GPU_odu = glGetUniformLocation(p_zonesmoke,"odu");

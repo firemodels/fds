@@ -1084,11 +1084,10 @@ typedef struct {
   float dx,dy,dz;
   float x0,y0,z0;
   float x1,y1,z1;
-  int smokedir;
-  float angles[7];
   int drawsides[7];
   float pfloor, ylay, tl, tu, rho_L, rho_U, od_L, od_U;
   int itl, itu;
+  int zoneinside;
 } roomdata;
 
 /* --------------------------  zvent ------------------------------------ */
