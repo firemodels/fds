@@ -1459,8 +1459,8 @@ of loosely and densely packed radiating spheres.}
 \section{Radiation Absorbed by Liquid Droplets (\texorpdfstring{{\bf droplet\_absorption}}{droplet\_absorption}) }
 \label{droplet_absorption}
 
-This case tests the conservation of energy that is absorbed by liquid droplets. We want to make sure that the 
-absorbed thermal radiation is accurately converted into internal energy of the droplets. The average droplet temperature $\overline{T_d}$ is 
+This case tests the conservation of energy that is absorbed by liquid droplets. We want to make sure that the
+absorbed thermal radiation is accurately converted into internal energy of the droplets. The average droplet temperature $\overline{T_d}$ is
 increased by the radiation energy absorbed by all the droplets, $\dot{Q}_r$, according to the following equation:
 \be
 m \, c_p \frac{d \overline{T_d}}{dt} = \dot{Q}_r
@@ -1471,7 +1471,7 @@ If the radiative intensity remains constant during the time step, the average dr
 \be
 \overline{T_d} = T_0 + \frac{\Delta t \, \dot{Q}_r }{m \, c_p}
 \ee
-By setting $T_0=0$~$^\circ$C, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1.0$~kJ/kg, the final value of $\overline{T_d}$ should equal 
+By setting $T_0=0$~$^\circ$C, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1.0$~kJ/kg, the final value of $\overline{T_d}$ should equal
 $\dot{Q}_r$. Figure~\ref{droplet_absorption_figures} shows comparisons of the predicted average droplet temperature and the expected value in cartesian and cylindrical
 coordinate systems.
 \noindent
@@ -2270,12 +2270,16 @@ F & 150 & 1600 \tabularnewline
 \section{Water Droplet Evaporation (\texorpdfstring{{\bf water\_evaporation}}{water\_evaporation}) }
 \label{water_evaporation}
 
-The test case called {\bf water\_evaporation} involves stationary water droplets in a box with dimensions of 1~m on a side. The walls of the box are
-assumed adiabatic, meaning that there are no leaks or heat losses. The air within the box is stirred to maintain uniform conditions. Initially, the
+The test cases called {\bf water\_evaporation\_x} involve stationary water droplets in a box with dimensions of 1~m on a side. The walls of the box are
+assumed adiabatic, meaning that there are no leaks or heat losses. The air within the box is stirred to maintain uniform conditions. 
+
+There are several different test cases. In the first case, the initial
 air temperature is 200~$^\circ$C, the median volumetric diameter of the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C, and the total
-mass of water droplets is 0.01~kg. The initial mass fraction of water vapor is 0. It is expected that the droplets will all evaporate within about 10~s. Figure~\ref{water_evaporation_plots} displays
+mass of water droplets is 0.01~kg. The initial mass fraction of water vapor is 0. 
+It is expected that the droplets will all evaporate within about 10~s. Figure~\ref{water_evaporation_1_plots} displays
 the average enthalpy, humidity, density, pressure, temperature and mass of water vapor of the gas within the box. The solid horizontal lines denote the expected
-steady-state values. The plot of enthalpy displays the change in enthalpy of both the droplets and the gas. The change in the enthalpy of the water droplets should equal the change in the enthalpy of the gas minus the work
+steady-state values. The plot of enthalpy displays the change in enthalpy of both the droplets and the gas. 
+The change in the enthalpy of the water droplets should equal the change in the enthalpy of the gas minus the work
 performed due to pressure. It is the internal energy of the system that is conserved. The internal energy can be expressed in terms of the
 enthalpy, pressure and density:
 \be e = h - \frac{p}{\rho} \ee
@@ -2292,15 +2296,15 @@ units of kPa and m$^3$, respectively.
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_enthalpy} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_humidity} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_density} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_temperature} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_pressure} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_water_mass}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_enthalpy} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_humidity} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_density} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_temperature} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_pressure} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_water_mass}
 \end{tabular*}
-\caption[Sample case {\bf water\_evaporation}.]{Output of the test case called {\bf water\_evaporation}.}
-\label{water_evaporation_plots}
+\caption[Sample case {\bf water\_evaporation\_1}.]{Output of the test case called {\bf water\_evaporation\_1}.}
+\label{water_evaporation_1_plots}
 \end{figure}
 
 
