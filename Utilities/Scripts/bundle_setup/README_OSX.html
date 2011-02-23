@@ -20,13 +20,22 @@ These libraries may be obtained from the FDS/Smokeview download site.
 </ul>
 <li>Uncompress and untar the downloaded library archive.
 <li>Define the environmental variable <tt>DYLD_LIBRARY_PATH</tt> to point the lib directory within the library.
-<p>Example: If you place the 32 bit library in your home directory and use csh or tcsh as your command shell you would use the command
-<p><tt>setenv DYLD_LIBRARY_PATH ~/openmpi-1.3.3_32/lib</tt>
 </ul>
+<h3>Examples</h3>
+<ul>
+<li>If you use the bash command shell (default on the Mac) add the following lines to your .bash_profile file<br>
+<tt>export DYLD_LIBRARY_PATH=~/openmpi-1.3.3_32/lib</tt><br>
+<tt>export PATH=~/openmpi-1.3.3_32/bin:$PATH</tt><br>
+<li>If you use the csh or tcsh as your command shell add the following linee to your .cshrc file<br>
+<tt>setenv DYLD_LIBRARY_PATH ~/openmpi-1.3.3_32/lib</tt><br>
+<tt>setenv PATH ~/openmpi-1.3.3_32/bin $PATH</tt><br?
+</ul>
+If you installed the 64 bit Openmpi libraries, change 32 to 64 in the above.
+
+
 
 <hr>
 <p><address>
-<A HREF="http://www.bfrl.nist.gov" >Building and Fire Research Laboratory</A><BR>
 <a href="http://www.nist.gov" >National Institute of Standards and Technology</a><br>
 Gaithersburg, MD 20899
 </address>
