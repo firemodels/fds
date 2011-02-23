@@ -1,6 +1,6 @@
-&HEAD CHID='Main_Control_Room', TITLE='Cabinet fire in MCR affecting visibility of operators.'/
+&HEAD CHID='Main_Control_Room_Purge', TITLE='Cabinet fire in MCR affecting visibility of operators.'/
 
-&MESH IJK=123,81,25, XB=0.0, 24.6, 0.0, 16.2, 0.0, 5.2 /
+&MESH IJK=82,54,18, XB=0.0, 24.6, 0.0, 16.2, 0.0, 5.2 /
 
 &TIME T_BEGIN=-60.0, T_END=3600.0 /
 
@@ -60,7 +60,7 @@ Fire
 &RAMP ID='fire', T= 690, F=0.9184 /
 &RAMP ID='fire', T= 720, F=1.0000 /
 &RAMP ID='fire', T=1200, F=1.0000 /
-&RAMP ID='fire', T=1920, F=0.0000 /
+&RAMP ID='fire', T=2340, F=0.0000 /
 
 &OBST XB= 1.5, 1.5, 3.0, 5.0, 0.0, 2.4, SURF_ID = 'CABINET' / cabinet side
 &OBST XB= 2.5, 2.5, 3.0, 5.0, 0.0, 2.4, SURF_ID = 'CABINET' / cabinet side
@@ -95,37 +95,37 @@ Ventilation
       RAMP_V	     = 'PURGE' / 
 
 &RAMP ID='PURGE', T=-60.0, F=0.0 /
-&RAMP ID='PURGE', T=  1.0, F=1.0 /
-&RAMP ID='PURGE', T=120.0, F=1.0 /
+&RAMP ID='PURGE', T=  1.0, F=5.0 /
+&RAMP ID='PURGE', T=120.0, F=5.0 /
 &RAMP ID='PURGE', T=121.0, F=5.0 /
 
 &OBST XB=  3.4,  4.0,  3.0,  3.6, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB=  3.4,  4.0,  3.0,  3.6, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
+&OBST XB=  3.4,  4.0,  3.0,  3.6, 2.7, 2.7, SURF_ID = 'DUCT STEEL' /
 &HOLE XB=  3.6,  3.8,  3.2,  3.4, 2.7, 2.9 /
 &VENT XB=  3.4,  4.0,  3.0,  3.6, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB=  3.4,  4.0,  8.6,  9.2, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB=  3.4,  4.0,  8.6,  9.2, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
+&OBST XB=  3.4,  4.0,  8.6,  9.2, 2.7, 2.7, SURF_ID = 'DUCT STEEL' /
 &HOLE XB=  3.6,  3.8,  8.8,  9.0, 2.7, 2.9 /
 &VENT XB=  3.4,  4.0,  8.6,  9.2, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB= 12.0, 12.6,  3.0,  3.6, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB= 12.0, 12.6,  3.0,  3.6, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 12.0, 12.6,  3.0,  3.6, 2.7, 2.7, SURF_ID = 'DUCT STEEL' /
 &HOLE XB= 12.2, 12.4,  3.2,  3.4, 2.7, 2.9 /
 &VENT XB= 12.0, 12.6,  3.0,  3.6, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB= 12.0, 12.6,  8.6,  9.2, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB= 12.0, 12.6,  8.6,  9.2, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 12.0, 12.6,  8.6,  9.2, 2.7, 2.7, SURF_ID = 'DUCT STEEL' /
 &HOLE XB= 12.2, 12.4,  8.8,  9.0, 2.7, 2.9 /
 &VENT XB= 12.0, 12.6,  8.6,  9.2, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB= 20.6, 21.2,  3.0,  3.6, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB= 20.6, 21.2,  3.0,  3.6, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 20.6, 21.2,  3.0,  3.6, 2.7, 2.7, SURF_ID = 'DUCT STEEL' /
 &HOLE XB= 20.8, 21.0,  3.2,  3.4, 2.7, 2.9 /
 &VENT XB= 20.6, 21.2,  3.0,  3.6, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB= 20.6, 21.2,  8.6,  9.2, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB= 20.6, 21.2,  8.6,  9.2, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
+&OBST XB= 20.6, 21.2,  8.6,  9.2, 2.7, 2.7, SURF_ID = 'DUCT STEEL' /
 &HOLE XB= 20.8, 21.0,  8.8,  9.0, 2.7, 2.9 /
 &VENT XB= 20.6, 21.2,  8.6,  9.2, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
@@ -209,7 +209,7 @@ Miscellaneous construction
 
 Human target
 
-&OBST XB= 11.0, 11.2,  5.4,  5.6, 1.6, 1.8 / Head of operator
+&OBST XB= 10.8, 11.1,  5.4,  5.7, 1.5, 1.8 / Head of operator
 
 Output
 
@@ -217,7 +217,7 @@ Output
 
 &DEVC ID='HGL_Temp_FDS',   XB=11.4,11.4,5.8,5.8,0.0,5.2, QUANTITY='UPPER TEMPERATURE' /
 &DEVC ID='HGL_Height_FDS', XB=11.4,11.4,5.8,5.8,0.0,5.2, QUANTITY='LAYER HEIGHT' /
-&DEVC ID='Heat_Flux_FDS', XYZ=11.1,5.5,1.8, IOR=3, QUANTITY='GAUGE HEAT FLUX' /
+&DEVC ID='Heat_Flux_FDS', XYZ=11.0,5.5,1.8, IOR=3, QUANTITY='GAUGE HEAT FLUX' /
 &DEVC ID='OD_FDS', XYZ=11.4,5.8,1.8, QUANTITY='OPTICAL DENSITY' /
 
 &PROP ID='Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8, ACTIVATION_OBSCURATION = 3.28 /
