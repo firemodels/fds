@@ -3927,7 +3927,7 @@ emphasize the fact that these parameters are stored in arrays of
 length equal to {\ct N\_REACTIONS}. If there is only one reaction, you
 need not include the {\ct (1)}, but it is a good habit to get into.
 Note also that if the default combustion model is used, you can denote that the reaction
-produces fuel gas using the name {\ct 'FUEL'}. 
+produces fuel gas using the name {\ct 'FUEL'}.
 Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released
 per unit mass of fuel gas that mixes with oxygen and combusts.  This
 has nothing to do with the pyrolysis process, so why is it specified
@@ -4479,7 +4479,7 @@ the material are conveyed via the {\ct MATL} line:
 
 \noindent
 Notice that in addition to $k$, $\rho$, $c$ and $\epsilon$, there is one reaction specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_SPEC=1.}).
-The phase change from solid to gas {\em consumes} energy at a rate of 1,500~kJ/kg. Although not relevant in this example, the burning of these fuel gases 
+The phase change from solid to gas {\em consumes} energy at a rate of 1,500~kJ/kg. Although not relevant in this example, the burning of these fuel gases
 would {\em produce} energy at a rate of 25,000~kJ/kg. The reaction nominally takes place at 330~$^\circ$C, a necessary parameter for the pyrolysis model described above.
 
 The plots shown in Fig.~\ref{thermoplastic} contain the results of the FDS simulation along with
@@ -6041,45 +6041,55 @@ the rate equation can be dependent on a species that does not participate direct
 \section{Species Mixtures (Lumped Species): The \texorpdfstring{{\tt SMIX}}{SMIX} Namelist Group}
 \label{info:SMIX}
 
-In many simulations there are sets of species that are created and transported in the same manner. In this case, tracking each species individually uses computational resources and time that need not be spent. For example, one could use the {\ct SPEC} namelist group to define the background species of air as a combination of nitrogen, oxygen, water vapor, and carbon dioxide. However, this would require tracking three species each of which would require memory and time. Alternatively, if one could create a lumped species that represented that composition and tracked only that species, then both time and memory could be saved. This can be accomplished with the {\ct SMIX} namelist group.
+In many simulations there are sets of species that are created and transported in the same manner. 
+In this case, tracking each species individually uses computational resources and time that need not be spent. 
+For example, one could use the {\ct SPEC} namelist group to define the background species of air as a combination of nitrogen, oxygen, water vapor, and carbon dioxide. 
+However, this would require tracking three species each of which would require memory and time. 
+Alternatively, if one could create a lumped species that represented that composition and tracked only that species, 
+then both time and memory could be saved. This can be accomplished with the {\ct SMIX} namelist group.
 
 The following inputs:
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID = 'NITROGEN',BACKGROUND_ONLY=.TRUE./
-&SPEC ID = 'OXYGEN', MASS_FRACTION_0 = 0.23054 /
-&SPEC ID = 'WATER VAPOR', MASS_FRACTION = 0.00626/
-&SPEC ID = 'CARBON DIOXIDE', MASS_FRACTION = 0.00046 /
+&SPEC ID='NITROGEN', BACKGROUND_ONLY=.TRUE./
+&SPEC ID='OXYGEN', MASS_FRACTION_0 = 0.23054 /
+&SPEC ID='WATER VAPOR', MASS_FRACTION = 0.00626 /
+&SPEC ID='CARBON DIOXIDE', MASS_FRACTION = 0.00046 /
 \end{verbatim} \normalsize
 
 are equivalent to these inputs using {\ct SMIX}
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID = 'NITROGEN',LUMPED_SPECIES_ONLY=.TRUE./
-&SPEC ID = 'OXYGEN',LUMPED_SPECIES_ONLY=.TRUE./
-&SPEC ID = 'WATER VAPO'R,LUMPED_SPECIES_ONLY=.TRUE./
-&SPEC ID = 'CARBON DIOXIDE',LUMPED_SPECIES_ONLY=.TRUE./
+&SPEC ID='NITROGEN', LUMPED_SPECIES_ONLY=.TRUE. /
+&SPEC ID='OXYGEN', LUMPED_SPECIES_ONLY=.TRUE./
+&SPEC ID='WATER VAPOR', LUMPED_SPECIES_ONLY=.TRUE. /
+&SPEC ID='CARBON DIOXIDE', LUMPED_SPECIES_ONLY=.TRUE. /
 
-&SMIX ID = 'AIR', BACKGROUND=.TURE.,
-      SPEC_ID ='NITROGEN','OXYGEN','WATER VAPOR','CARBON DIOXIDE'
-      MASS_FRACTION = 0.7624,0.23054,0.00046,0.76274/
+&SMIX ID='AIR', BACKGROUND=.TRUE.,
+      SPEC_ID='NITROGEN','OXYGEN','WATER VAPOR','CARBON DIOXIDE'
+      MASS_FRACTION=0.7624,0.23054,0.00046,0.76274 /
 \end{verbatim} \normalsize
 
-The keyword {\ct LUMPED\_SPECIES\_ONLY} on {\ct SPEC} denotes that the species is only present as part of a lumped species.  When this flag is set, FDSwill not allocate space to track that species individually.
+\noindent
+The keyword {\ct LUMPED\_SPECIES\_ONLY} denotes that the species is only present as part of a lumped species.  
+When this flag is set, FDS will not allocate space to track that species individually.
 
 The available inputs for {\ct SMIX} are:
 
 \begin{description}
 \item[{\ct BACKGROUND}] Denotes that this lumped species is to be used as the background species.  The {\ct BACKGROUND} lumped species must be defined first.
-\item[{\ct ID}] Character string identitfying the name of the species.  If no {\ct ID} is given the background lumped species will be named LUMPED SPECIES 0 and any remaining lumped species will be named LUMPED SPECIES N where N is the position of the the input following any background lumped species.
+\item[{\ct ID}] Character string identifying the name of the species.  If no {\ct ID} is given the background lumped species will be named LUMPED SPECIES 0 
+and any remaining lumped species will be named LUMPED SPECIES N where N is the position of the the input following any background lumped species.
 label the {\ct SPEC\_ID} Character array containing the names of the species that make up the lumped species.  This name should not unique over all {\ct SMIX} and {\ct SPEC} inputs.
-\item[{\ct MASS\_FRACTION}] The mass fractions of the species making up the lumped species.  FDS will normalize the values to 1.  Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
-\item[{\ct VOLUME\_FRACTION}]  The volume fractions of the species making up the lumped species.  FDS will normalize the values to 1.  Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
+\item[{\ct MASS\_FRACTION}] The mass fractions of the species making up the lumped species.  FDS will normalize the values to 1.  
+Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
+\item[{\ct VOLUME\_FRACTION}]  The volume fractions of the species making up the lumped species.  FDS will normalize the values to 1.  
+Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
 \end{description}
 
-Any FDS input that requires a {\ct SPEC\_ID} can also use the {\ct ID} of an {\ct SMIX}.
+\noindent Any FDS input that requires a {\ct SPEC\_ID} can also use the {\ct ID} of an {\ct SMIX}.
 
 
 \clearpage
@@ -6711,8 +6721,10 @@ This time increment is specified on the {\ct DUMP} line. Also, by default,
 a time-averaged value is written out for each quantity of interest. To prevent FDS from time-averaging the {\ct DEVC} output, add
 {\ct TIME\_AVERAGED=.FALSE.} to the {\ct DEVC} line.
 
-A useful option for the {\ct DEVC} line is to add {\ct CHANGE\_ONLY=.TRUE.}, which will indicate that only the change in
+A useful option for the {\ct DEVC} line is to add {\ct RELATIVE=.TRUE.}, which will indicate that only the change in
 the initial value of the {\ct QUANTITY} is to be output. This can be useful for verification and validation studies.
+
+You can change the values of the output by multiplying by {\ct CONVERSION\_FACTOR} and changing the character string {\ct UNITS}.
 
 
 \begin{warning}
@@ -7053,7 +7065,7 @@ of {\ct SOOT\_YIELD=0.01} on the {\ct REAC} line means that the smoke generation
 Suppose, however, that you want to define your own ``smoke'' and that you want to specify its production rate independently of
 the HRR (or even in lieu of an actual fire, like a smouldering source). You might also want to define a mass extinction coefficient for the
 smoke and an assumed molecular weight (as it will be tracked like a gas species). Finally, you also want to visualize the smoke using
-the ``SMOKE3D'' feature in Smokeview. Use the following lines:
+the {\ct SMOKE3D} feature in Smokeview. Use the following lines:
 
 \footnotesize
 \begin{verbatim}
@@ -8424,6 +8436,9 @@ output quantity for heat flux means heat is being transferred into the surface.
 \subsection{Droplet Output Quantities}
 \label{info:part_output}
 
+This section lists various output quantities associated with droplets and particles. Note whether or not the quantity is appropriate for the gas or
+solid surfaces.
+
 \subsubsection{Droplet Quantities on Solid Surfaces}
 
 It is possible to record various properties of droplets and particles. Some of the output quantities are associated with solid boundaries. For example,
@@ -8493,6 +8508,8 @@ bucket_test_fds2ascii.csv
 \normalsize \noindent
 Note that there really is no need to time-average the results. The quantity is inherently accumulating. Also, the
 ``orientation'' refers to direction of the surface. In this case, we're interested in the positive $z$ direction, or 3.
+
+Note also that if you desire that the droplets be counted more than once towards the summation of {\ct AMPUA}, set {\ct RECOUNT\_DRIP=.TRUE.} on any {\ct BNDF} line.
 
 
 
@@ -9272,6 +9289,8 @@ a solid surface triggers the code to assume the material to be thermally-thick, 
 properties be specified as well. Simply prescribing as many properties as possible from a handbook is bad practice.
 Only prescribe those parameters which are necessary to describe the desired scenario.
 
+Note that you may use the character string {\ct FYI} on any namelist line to make a note or comment.
+
 
 \clearpage
 
@@ -9292,10 +9311,9 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \hline \hline
 \endhead
 {\ct CELL\_CENTERED}    & Logical     & Do not do corner averaging              &           & {\ct .FALSE.}   \\ \hline
-{\ct FYI}               & Character   & Comment String (has no effect)          &           &                 \\ \hline
 {\ct PART\_ID}          & Character   & Particle identifier (if needed)         &           &                 \\ \hline
 {\ct PROP\_ID}          & Character   & Property identifier (if needed)         &           &                 \\ \hline
-{\ct RECOUNT\_DRIP}     & Logical     & Adds mass to AWMPUA for each drop impact& .FALSE.   &                 \\ \hline
+{\ct RECOUNT\_DRIP}     & Logical     & See Section \ref{info:part_output}      &           & {\ct .FALSE.}   \\ \hline
 {\ct QUANTITY}          & Character   & Quantity to visualize                   &           &                 \\ \hline
 {\ct SPEC\_ID}          & Character   & Species identifier (if needed)          &           &                 \\ \hline
 \end{longtable}
@@ -9321,14 +9339,10 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\
 \hline \hline
 \endhead
-{\ct FYI}                     & Character      & Comment String (has no effect)   &            &     \\ \hline
-{\ct MAXIMUM\_DENSITY}        & Real           & Maximum Gas Density              & kg/m$^3$   &     \\ \hline
-{\ct MAXIMUM\_MASS\_FRACTION} & Real Array     & Maximum Gas Mass Fraction        & kg/kg      &     \\ \hline
-{\ct MAXIMUM\_TEMPERATURE}    & Real           & Maximum Gas Temperature          & $^\circ$C  &     \\ \hline
-{\ct MINIMUM\_DENSITY}        & Real           & Minimum Gas Density              & kg/m$^3$   &     \\ \hline
-{\ct MINIMUM\_MASS\_FRACTION} & Real Array     & Minimum Gas Mass Fraction        & kg/kg      &     \\ \hline
-{\ct MINIMUM\_TEMPERATURE}    & Real           & Maximum Gas Temperature          & $^\circ$C  &     \\ \hline
-%\end{tabular*}
+{\ct MAXIMUM\_DENSITY}              & Real           & Maximum Gas Density              & kg/m$^3$   &     \\ \hline
+{\ct MAXIMUM\_TEMPERATURE}          & Real           & Maximum Gas Temperature          & $^\circ$C  &     \\ \hline
+{\ct MINIMUM\_DENSITY}              & Real           & Minimum Gas Density              & kg/m$^3$   &     \\ \hline
+{\ct MINIMUM\_TEMPERATURE}          & Real           & Maximum Gas Temperature          & $^\circ$C  &     \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -9386,40 +9400,42 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\
 \hline \hline
 \endhead
-{\ct BYPASS\_FLOWRATE} & Real            & Aspiration smoke detector parameter                              & kg/s  & 0             \\ \hline
-{\ct CHANGE\_ONLY}     & Logical         & See Section~\ref{info:out:DEVC}                                  &       & {\ct .FALSE.} \\ \hline
-{\ct CTRL\_ID}         & Character       & Associated {\ct CTRL} line                                       &       &               \\ \hline
-{\ct DELAY}            & Real            & Transport time for an aspiration detector                        & s     & 0             \\ \hline
-{\ct DEVC\_ID}         & Character       & Associated {\ct DEVC} line for aspiration detector               &       &               \\ \hline
-{\ct DUCT\_ID}         & Character       & Associated {\ct HVAC} line for a duct output                     &       &               \\ \hline
-{\ct DEPTH}            & Real            & Depth into surface for internal wall temp                        & m     & 0             \\ \hline
-{\ct FLOWRATE}         & Real            & Suction flow rate for an aspiration detector                     & kg/s  & 0             \\ \hline
-{\ct FYI}              & Character       & Comment String (has no effect)                                   &       &               \\ \hline
-{\ct HIDE\_COORDINATES}& Logical         & See Section~\ref{info:line_file}                                 &       & {\ct .FALSE.} \\ \hline
-{\ct IOR}              & Integer         & Index of Orientation ($\pm$1,$\pm$2,$\pm$3)                      &       &               \\ \hline
-{\ct ID}               & Character       & Identifying label for output                                     &       &               \\ \hline
-{\ct INITIAL\_STATE}   & Logical         & Initial state of device                                          &       & {\ct .FALSE.} \\ \hline
-{\ct LATCH}            & Logical         & Device cannot change state multiple times                        &       & {\ct .TRUE.}  \\ \hline
-{\ct MATL\_ID}         & Character       & Material identifier (if needed)                                  &       &               \\ \hline
-{\ct NODE\_ID}         & Character(2)    & Associated {\ct HVAC} line for a node output                     &       &               \\ \hline
-{\ct ORIENTATION}      & Real Triplet    & Direction vector                                                 &       & 0,0,-1        \\ \hline
-{\ct PART\_ID}         & Character       & Particle identifier (if needed)                                  &       &               \\ \hline
-{\ct POINTS}           & Integer         & See Section~\ref{info:line_file}                                 &       & 1             \\ \hline
-{\ct PROP\_ID}         & Character       & Associated {\ct PROP}erty line                                   &       &               \\ \hline
-{\ct QUANTITY}         & Character       & Name of Quantity to output                                       &       &               \\ \hline
-{\ct ROTATION}         & Real Triplet    & Rotation Angle                                                   & deg   & 0             \\ \hline
-{\ct SETPOINT}         & Real            & Value at which device changes state                              &       &               \\ \hline
-{\ct SPEC\_ID}         & Character       & Species identifier (if needed)                                   &       &               \\ \hline
-{\ct STATISTICS}       & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
-{\ct SURF\_ID}         & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
-{\ct TIME\_AVERAGED}   & Logical         & See Section~\ref{info:out:DEVC}                                  &       &  {\ct .TRUE.} \\ \hline
-{\ct TRIP\_DIRECTION}  & Integer         & Sign of derivative at first state change                         &       &  1            \\ \hline
-{\ct VELO\_INDEX}      & Integer         & See Section~\ref{info:velocity}                                  &       &  0            \\ \hline
-{\ct XB(6)}            & Real Sextuplet  & Coordinates of non-point measurement                             & m     &               \\ \hline
-{\ct X\_ID}            & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-x}   \\ \hline
-{\ct Y\_ID}            & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-y}   \\ \hline
-{\ct Z\_ID}            & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-z}   \\ \hline
-{\ct XYZ}              & Real Triplet    & Physical coordinates                                             & m     &               \\ \hline
+{\ct BYPASS\_FLOWRATE}      & Real            & See Section~\ref{info:aspiration_detector}                       & kg/s  & 0             \\ \hline
+{\ct CONVERSION\_FACTOR}    & Real            & See Section~\ref{info:out:DEVC}                                  &       & 1             \\ \hline
+{\ct CTRL\_ID}              & Character       & Associated {\ct CTRL} line                                       &       &               \\ \hline
+{\ct DELAY}                 & Real            & See Section~\ref{info:aspiration_detector}                       & s     & 0             \\ \hline
+{\ct DEPTH}                 & Real            & Depth into surface for internal wall temp                        & m     & 0             \\ \hline
+{\ct DEVC\_ID}              & Character       & See Section~\ref{info:aspiration_detector}                       &       &               \\ \hline
+{\ct DRY}                   & Logical         & See Section~\ref{info:dry}                                       &       & {\ct .FALSE.} \\ \hline
+{\ct DUCT\_ID}              & Character       & See Section~\ref{info:HVAC}                                      &       &               \\ \hline
+{\ct FLOWRATE}              & Real            & See Section~\ref{info:aspiration_detector}                       & kg/s  & 0             \\ \hline
+{\ct HIDE\_COORDINATES}     & Logical         & See Section~\ref{info:line_file}                                 &       & {\ct .FALSE.} \\ \hline
+{\ct IOR}                   & Integer         & Index of Orientation ($\pm$1,$\pm$2,$\pm$3)                      &       &               \\ \hline
+{\ct ID}                    & Character       & Identifying label for output                                     &       &               \\ \hline
+{\ct INITIAL\_STATE}        & Logical         & Initial state of device                                          &       & {\ct .FALSE.} \\ \hline
+{\ct LATCH}                 & Logical         & Device cannot change state multiple times                        &       & {\ct .TRUE.}  \\ \hline
+{\ct MATL\_ID}              & Character       & Material identifier (if needed)                                  &       &               \\ \hline
+{\ct NODE\_ID}              & Character(2)    & See Section~\ref{info:HVAC}                                      &       &               \\ \hline
+{\ct ORIENTATION}           & Real Triplet    & Direction vector                                                 &       & 0,0,-1        \\ \hline
+{\ct PART\_ID}              & Character       & Particle identifier (if needed)                                  &       &               \\ \hline
+{\ct POINTS}                & Integer         & See Section~\ref{info:line_file}                                 &       & 1             \\ \hline
+{\ct PROP\_ID}              & Character       & Associated {\ct PROP}erty line                                   &       &               \\ \hline
+{\ct QUANTITY}              & Character       & Name of Quantity to output                                       &       &               \\ \hline
+{\ct RELATIVE}              & Logical         & See Section~\ref{info:out:DEVC}                                  &       & {\ct .FALSE.} \\ \hline
+{\ct ROTATION}              & Real Triplet    & Rotation Angle                                                   & deg   & 0             \\ \hline
+{\ct SETPOINT}              & Real            & Value at which device changes state                              &       &               \\ \hline
+{\ct SPEC\_ID}              & Character       & Species identifier (if needed)                                   &       &               \\ \hline
+{\ct STATISTICS}            & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
+{\ct SURF\_ID}              & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
+{\ct TIME\_AVERAGED}        & Logical         & See Section~\ref{info:out:DEVC}                                  &       &  {\ct .TRUE.} \\ \hline
+{\ct TRIP\_DIRECTION}       & Integer         & Sign of derivative at first state change                         &       &  1            \\ \hline
+{\ct UNITS}                 & Character       & See Section~\ref{info:out:DEVC}                                  &       &               \\ \hline
+{\ct VELO\_INDEX}           & Integer         & See Section~\ref{info:velocity}                                  &       &  0            \\ \hline
+{\ct XB(6)}                 & Real Sextuplet  & Coordinates of non-point measurement                             & m     &               \\ \hline
+{\ct X\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-x}   \\ \hline
+{\ct Y\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-y}   \\ \hline
+{\ct Z\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-z}   \\ \hline
+{\ct XYZ(3)}                & Real Triplet    & Physical coordinates                                             & m     &               \\ \hline
 \end{longtable}
 
 
@@ -9443,38 +9459,41 @@ Only prescribe those parameters which are necessary to describe the desired scen
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Limit text output to 255 columns              &           & {\ct .TRUE.}                      \\ \hline
-{\ct CTRL\_COLUMN\_LIMIT}           & Integer      & Number of columns in {\ct CTRL} file &        & 254                      \\ \hline
-{\ct DEVC\_COLUMN\_LIMIT}           & Integer      & Number of columns in {\ct DEVC} file &        & 254                      \\ \hline
-{\ct DT\_BNDF}                      & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES} \\ \hline
-%{\ct DEBUG}                         & Logical      & General purpose diagnostic flag   &           & {\ct .FALSE.}                      \\ \hline
-{\ct DT\_CTRL}                      & Real         & Control status dump interval      &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_DEVC}                      & Real         & Device output dump interval       &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_DEVC\_LINE}                & Real         & See Section~\ref{info:line_file}  &           & 1       \\ \hline
-{\ct DT\_FLUSH}                     & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_HRR}                       & Real         & Heat release dump interval        &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_ISOF}                      & Real         & Iso-surface dump interval         &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_MASS}                      & Real         & Mass diagnostic dump interval     &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_PART}                      & Real         & Particle dump interval            &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_PL3D}                      & Real         & PLOT3D dump interval              &  s        & $\Delta t${\ct /5}         \\ \hline
-{\ct DT\_PROF}                      & Real         & Profile dump interval             &  s        & $\Delta t${\ct /NFRAMES}   \\ \hline
-{\ct DT\_RESTART}                   & Real         & Restart core dump interval        &  s        & 1000000.                          \\ \hline
-{\ct DT\_SLCF}                      & Real         & Slice dump interval               &  s        & $\Delta t${\ct /NFRAMES}    \\ \hline
-{\ct FLUSH\_FILE\_BUFFERS}          & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .TRUE.}                      \\ \hline
-{\ct MASS\_FILE}                    & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                     \\ \hline
-{\ct MAXIMUM\_DROPLETS}             & Integer      & Max particles per mesh            &           & 500000                            \\ \hline
-{\ct NFRAMES}                       & Integer      & Number of Frames of output data   &           & 1000                              \\ \hline
-{\ct PLOT3D\_QUANTITY(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
-{\ct PLOT3D\_SPEC\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                   \\ \hline
-{\ct PLOT3D\_VELO\_INDEX}           & Integer~Quint & See Section~\ref{info:velocity}                                  &       &  0      \\ \hline
-{\ct RENDER\_FILE}                  & Character    & See Smokeview User's Guide        &           &                                   \\ \hline
-{\ct SMOKE3D}                       & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                      \\ \hline
-{\ct SMOKE3D\_QUANTITY}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
-{\ct SMOKE3D\_SPEC\_ID}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                       \\ \hline
-{\ct STATE\_FILE}                   & Logical      & Flag for state relation file      &           & {\ct .FALSE.}                     \\ \hline
-%{\ct TIMING}                        & Logical      & General purpose timing flag       &           & {\ct .FALSE.}                      \\ \hline
-{\ct STATUS\_FILES}                 & Logical      & Flag for status (notready) file   &           & {\ct .FALSE.}                     \\ \hline
-{\ct WRITE\_XYZ}                    & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}                     \\ \hline
+{\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                   \\ \hline
+{\ct CTRL\_COLUMN\_LIMIT}           & Integer      & No.~columns in {\ct CTRL} file    &           & 254                            \\ \hline
+{\ct DEVC\_COLUMN\_LIMIT}           & Integer      & No.~columns in {\ct DEVC} file    &           & 254                            \\ \hline
+{\ct DEBUG}                         & Logical      & Flag to monitor MPI calls         &           & {\ct .FALSE.}                  \\ \hline
+{\ct DT\_BNDF}                      & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
+{\ct DT\_CTRL}                      & Real         & Control status dump interval      &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_DEVC}                      & Real         & Device output dump interval       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_DEVC\_LINE}                & Real         & See Section~\ref{info:line_file}  &           & 1                              \\ \hline
+{\ct DT\_FLUSH}                     & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_HRR}                       & Real         & Heat release dump interval        &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_ISOF}                      & Real         & Iso-surface dump interval         &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_MASS}                      & Real         & Mass diagnostic dump interval     &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_PART}                      & Real         & Particle dump interval            &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_PL3D}                      & Real         & PLOT3D dump interval              &  s        & $\Delta t${\ct /5}             \\ \hline
+{\ct DT\_PROF}                      & Real         & Profile dump interval             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_RESTART}                   & Real         & Restart core dump interval        &  s        & 1000000.                       \\ \hline
+{\ct DT\_SLCF}                      & Real         & 2-D slice dump interval           &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_SL3D}                      & Real         & 3-D slice dump interval           &  s        & $\Delta t${\ct /5}             \\ \hline
+{\ct DT\_VEG}                       & Real         & Vegetation dump interval          &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct FLUSH\_FILE\_BUFFERS}          & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .TRUE.}                   \\ \hline
+{\ct MASS\_FILE}                    & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                  \\ \hline
+{\ct MAXIMUM\_DROPLETS}             & Integer      & Max particles per mesh            &           & 500000                         \\ \hline
+{\ct NFRAMES}                       & Integer      & Number of Frames of output data   &           & 1000                           \\ \hline
+{\ct PLOT3D\_QUANTITY(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
+{\ct PLOT3D\_PART\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
+{\ct PLOT3D\_SPEC\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
+{\ct PLOT3D\_VELO\_INDEX}           & Int.~Quint   & See Section~\ref{info:velocity}   &           &  0                             \\ \hline
+{\ct RENDER\_FILE}                  & Character    & See Smokeview User's Guide        &           &                                \\ \hline
+{\ct SMOKE3D}                       & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                   \\ \hline
+{\ct SMOKE3D\_QUANTITY}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                                \\ \hline
+{\ct SMOKE3D\_SPEC\_ID}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                                \\ \hline
+{\ct STATUS\_FILES}                 & Logical      & Flag for status (notready) file   &           & {\ct .FALSE.}                  \\ \hline
+{\ct TIMING}                        & Logical      & Flag for timing MPI exchanges     &           & {\ct .FALSE.}                  \\ \hline
+{\ct VELOCITY\_ERROR\_FILE}         & Logical      & Diagnostic file for pressure      &           & {\ct .FALSE.}                  \\ \hline
+{\ct WRITE\_XYZ}                    & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}                  \\ \hline
 \end{longtable}
 
 \noindent
@@ -9502,7 +9521,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CHID}      & Character   & Job Identification String      &           & {\ct 'output'} \\ \hline
-{\ct FYI}       & Character   & Comment String (has no effect) &           &                            \\ \hline
 {\ct TITLE}     & Character   & Title for job                  &           &                            \\ \hline
 \end{longtable}
 
@@ -9530,7 +9548,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR    }    & Character         & Color name of obstruction color                           &       &           \\ \hline
 {\ct CTRL\_ID}     & Character         & {\ct ID} of {\ct ConTRoL} to control hole's existence     &       &           \\ \hline
 {\ct DEVC\_ID}     & Character         & {\ct ID} of {\ct DEViCe} to control hole's existence      &       &           \\ \hline
-{\ct FYI}          & Character         & Comment String (has no effect)                            &       &           \\ \hline
 {\ct MULT\_ID }    & Character         & See Section~\ref{info:MULT}                               &       &           \\ \hline
 {\ct RGB(3)   }    & Integer Triplet   & Color indices (0 - 255) for resulting obstruction(s)      &       &           \\ \hline
 {\ct TRANSPARENCY} & Real              & Transparency of obstruction                               &       &           \\ \hline
@@ -9637,7 +9654,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\
 \hline \hline
 \endhead
-{\ct FYI}                   & Character     & Comment String (has no effect)        &       &         \\ \hline
 %{\ct COLOR\_QUANTITY}       & Character     & Secondary quantity to color surface   &       &         \\ \hline
 %{\ct COLOR\_SPEC\_ID}       & Character     & Species indicator (if needed)         &       &         \\ \hline
 {\ct QUANTITY}              & Character     & Quantity to visualize                 &       &         \\ \hline
@@ -9676,7 +9692,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DENSITY}                       & Real          & Solid mass per unit volume                & kg/m$^3$          & 0.     \\ \hline
 {\ct E(:)}                          & Real array    & Activation energies                       & kJ/kmol           &        \\ \hline
 {\ct EMISSIVITY    }                & Real          & Emissivity                                &                   & 0.9    \\ \hline
-{\ct FYI}                           & Character     & Comment String (has no effect)            &                   &        \\ \hline
 {\ct HEATING\_RATE(:)}              & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
 {\ct HEAT\_OF\_COMBUSTION(:)}       & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kg             &        \\ \hline
 {\ct HEAT\_OF\_REACTION(:)}         & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.     \\ \hline
@@ -9723,7 +9738,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CYLINDRICAL} & Logical                     & 2-D Axi-symmetric calculation               &    & {\ct .FALSE.}    \\ \hline
 {\ct ID}          & Character                   & MESH IDentifier                             &    &                  \\ \hline
 {\ct IJK}         & Integer Triplet             & No. cells in $x$, $y$, and $z$ directions   &    & 10               \\ \hline
-{\ct FYI}         & Character                   & Comment String (has no effect)              &    &                  \\ \hline
 %{\ct LEVEL}        & Integer                    & Level in EMBedded mesh hierarchy            &    & 0                \\ \hline
 {\ct MPI\_PROCESS} & Integer                    & See Section~\ref{info:multimesh}            &    &    \\ \hline
 {\ct RGB}         & Integer Triplet             & Color indices (0-255)                       &    & 0,0,0            \\ \hline
@@ -9783,7 +9797,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct FLUX\_LIMITER}             & Integer       & Scalar transport scheme                       &               & -1                \\ \hline
 %{\ct FORCE\_VECTOR(3)}          & Real          & Uniform volumetric momentum source vector     &               & 0.                \\ \hline
 %{\ct FREEZE\_VELOCITY}          & Logical       & Do not update momentum equation               &               & {\ct .FALSE.}     \\ \hline
-{\ct FYI}                       & Character     & Comment String (has no effect)                &               &                   \\ \hline
 %{\ct GAMMA}                     & Real          & Ratio of specific heats                       &               & 1.4               \\ \hline
 {\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}         & m             & 0.                  \\ \hline
 {\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
@@ -9884,7 +9897,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID }           & Character           & {\ct ID} of Controlling {\ct ConTRoL} &    &               \\ \hline
 {\ct DEVC\_ID }           & Character           & {\ct ID} of Controlling {\ct DEViCe}  &    &               \\ \hline
 %{\ct EVACUATION}          & Logical             & Only use for Evac case                &    & {\ct .FALSE.} \\ \hline
-{\ct FYI}                 & Character           & Comment String (has no effect)        &    &               \\ \hline
 %{\ct MESH\_ID}            & Character           & Only include in given mesh            &    &               \\ \hline
 {\ct MULT\_ID }           & Character           & See Section~\ref{info:MULT}           &    &               \\ \hline
 {\ct OUTLINE}             & Logical             & Draw as Outline                       &    & {\ct .FALSE.} \\ \hline
@@ -9932,7 +9944,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DIAMETER}                      & Real            & Median Volumetric Diameter              & $\mu$m    & 500.          \\ \hline
 {\ct DRAG\_LAW}                     & Character       & Geometry for drag correlation           &           & {\ct 'SPHERE'}\\ \hline
 {\ct EVAPORATE}                     & Logical         & Assume liquid evaporation               &           & {\ct .TRUE.}  \\ \hline
-{\ct FYI}                           & Character       & Comment String                          &           &               \\ \hline
 %{\ct GAMMA}                         & Real            & Specific heat ratio for vapor           &           & 1.4           \\ \hline
 {\ct GAMMA\_D}                      & Real            & Size distribution parameter             &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}          & Real            & Heat of Combustion                      & kJ/kg     &               \\ \hline
@@ -10005,7 +10016,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct IOR}      & Real             & Orientation of wall surface      &            &     \\ \hline
 {\ct ID}       & Character        & Identifier                       &            &     \\ \hline
-{\ct FYI}      & Character        & Comment String (has no effect)   &            &     \\ \hline
 {\ct QUANTITY} & Character        & Name of output quantity          &            &     \\ \hline
 {\ct XYZ}      & Real Triplet     & Coordinates of wall surface      & m          &     \\ \hline
 \end{longtable}
@@ -10133,7 +10143,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct CTRL\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &     \\ \hline
 {\ct DEVC\_ID}                      & Character     & See Section~\ref{info:RAMPDEVC}       &                       &     \\ \hline
 {\ct F}                             & Real          & Function value                    &                       &     \\ \hline
-{\ct FYI}                           & Character     & Comment String (has no effect)    &                       &     \\ \hline
 %{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Points in interpolation function  &                       &  5000   \\ \hline
 {\ct ID}                            & Character     & Identifier                        &                       &     \\ \hline
 {\ct T}                             & Real          & Time (or Temperature)             & s (or $^\circ$C)      &     \\ \hline
@@ -10171,13 +10180,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct E}                                   & Real        & Activation Energy (Finite Rate)               &   kJ/kmol         &     \\ \hline
 {\ct EPUMO2}                              & Real        & Energy per Unit Mass Oxygen                   &   kJ/kg           & 13100    \\ \hline
 {\ct FUEL}                                & Character   & Name of Fuel (Finite Rate)                    &                   & {\ct ETHYLENE}\\ \hline
-{\ct FYI}                                 & Character   & Comment String (has no effect)                &                   &     \\ \hline
 {\ct H}                                   & Real        & Hydrogen atoms in fuel                        &                   & 8    \\ \hline
 {\ct H2\_YIELD}                           & Real        & Fraction of H$_2$ from the fuel               & kg/kg             & 0        \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}                & Real        & Energy per Unit Mass Fuel                     & kJ/kg             &         \\ \hline
-{\ct HRRPUA\_SHEET}                       & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^2$          & 0 (LES); 200 (DNS)    \\ \hline
-{\ct HRRPUV\_AVERAGE}                     & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^3$          & 2500 (LES); 0 (DNS)    \\ \hline
-{\ct HUMIDITY}                            & Real          & Relative Humidity                             & \%            & 40.               \\ \hline
+{\ct HRRPUA\_SHEET}                       & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^2$          &         \\ \hline
+{\ct HRRPUV\_AVERAGE}                     & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^3$          &         \\ \hline
+{\ct HUMIDITY}                            & Real        & Relative Humidity                             & \%                & 40.               \\ \hline
 {\ct ID}                                  & Character   & Identifier                                    &                   &     \\ \hline
 {\ct IDEAL}                               & Logical     & Adjust for minor product yields               &                   & {\ct .FALSE.}    \\ \hline
 {\ct \tiny MASS\_EXTINCTION\_COEFFICIENT} & Real        & Visibility parameter                          &  m$^2$/kg         & 8700.    \\ \hline
@@ -10222,7 +10230,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CELL\_CENTERED}    & Logical           & Show raw data with no averaging        &           & {\ct .FALSE.}    \\ \hline
-{\ct FYI}               & Character         & Comment String (has no effect)         &           &     \\ \hline
 %{\ct MAXIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
 %{\ct MINIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Save only slices in this mesh          &           &     \\ \hline
@@ -10261,24 +10268,23 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ABSORBING}                     & Logical     & Absorbs radiation                           &                   & {\ct .FALSE.} \\ \hline
-{\ct BACKGROUND}                    & Logical     & Background species                          & {\ct .FALSE.} \\ \hline
+{\ct BACKGROUND}                    & Logical     & Background species                          &                   & {\ct .FALSE.} \\ \hline
 {\ct BACKGROUND\_ONLY}              & Logical     & Species is only background                  &                   & {\ct .FALSE.} \\ \hline
-{\ct CONDUCTIVITY}                  & Real        & Conductivity, $k$                           & W/m/K             &     \\ \hline
-{\ct DIFFUSIVITY}                   & Real        & Diffusivity,  $D$                           & m$^2$/s           &     \\ \hline
-{\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
-{\ct FORMULA }                      & Character   & Smokeview label                             &                   &     \\ \hline
-{\ct FYI}                           & Character   & Comment String                              &                   &     \\ \hline
-{\ct HUMIDITY}                      & Real        & Relative Humidity                           & \%                & 40.  \\ \hline
-{\ct ID }                           & Character   & Name of species                             &                   &     \\ \hline
-{\ct LUMPED\_SPECIES\_ONLY}         & Logical     & Species is only part of an {\ct SMIX}       &                   & {\ct .FALSE.} \\ \hline
-{\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0   \\ \hline
-{\ct MASS\_FRACTION\_0}             & Real        & Initial mass fraction                       &                   & 0   \\ \hline
-{\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.  \\ \hline
-{\ct REFERENCE\_TEMPERATURE}        & Real        & See Section~\ref{gas_species_props}         & $^\circ$C         & 25.  \\ \hline
-{\ct SPECIFIC\_ENTHALPY}            & Real        & Specific Enthalpy                           & kJ/kg             &      \\ \hline
-{\ct SPECIFIC\_HEAT}                & Real        & Specific Heat                               & kJ/kg/K           &      \\ \hline
-{\ct SIGMALJ}                       & Real        & Leonard-Jones Parameter                     &                   & 0   \\ \hline
-{\ct VISCOSITY}                     & Real        & Dynamic Viscosity, $\mu$                    & kg/m/s            &     \\ \hline
+{\ct CONDUCTIVITY}                  & Real        & Conductivity, $k$                           & W/m/K             &               \\ \hline
+{\ct DIFFUSIVITY}                   & Real        & Diffusivity,  $D$                           & m$^2$/s           &               \\ \hline
+{\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0             \\ \hline
+{\ct FORMULA }                      & Character   & Smokeview label                             &                   &               \\ \hline
+{\ct HUMIDITY}                      & Real        & Relative Humidity                           & \%                & 40.           \\ \hline
+{\ct ID }                           & Character   & Name of species                             &                   &               \\ \hline
+{\ct LUMPED\_SPECIES\_ONLY}         & Logical     & See Section~\ref{info:SMIX}                 &                   & {\ct .FALSE.} \\ \hline
+{\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
+{\ct MASS\_FRACTION\_0}             & Real        & Initial mass fraction                       &                   & 0             \\ \hline
+{\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.           \\ \hline
+{\ct REFERENCE\_TEMPERATURE}        & Real        & See Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
+{\ct SPECIFIC\_ENTHALPY}            & Real        & Specific Enthalpy                           & kJ/kg             &               \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real        & Specific Heat                               & kJ/kg/K           &               \\ \hline
+{\ct SIGMALJ}                       & Real        & Leonard-Jones Parameter                     &                   & 0             \\ \hline
+{\ct VISCOSITY}                     & Real        & Dynamic Viscosity, $\mu$                    & kg/m/s            &               \\ \hline
 \end{longtable}
 
 
@@ -10301,11 +10307,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SMIX} (Species Mixture (Lumped Species) Parameters)} \\
 \hline \hline
 \endhead
-{\ct BACKGROUND}                    & Logical     & Mixture is background species                           &                   & {\ct .FALSE.} \\ \hline
-{\ct ID}                            & Character   & Name of species                           &                   &     \\ \hline
-{\ct SPEC\_ID}                      & Character Array & IDs of {\ct SPEC}ies that make up the mixture             &           &     \\ \hline
-{\ct MASS\_FRACTION}                & Real Array  & Mass fraction of mixture components                     &                   & 0   \\ \hline
-{\ct VOLUME\_FRACTION}              & Real Array  & Volune fraction of mixture components                             &                   &     \\ \hline
+{\ct BACKGROUND}                    & Logical           & Mixture is background species                         &                   & {\ct .FALSE.} \\ \hline
+{\ct ID}                            & Character         & Name of species                                       &                   &               \\ \hline
+{\ct SPEC\_ID(:)}                   & Character Array   & IDs of {\ct SPEC}ies that make up the mixture         &                   &               \\ \hline
+{\ct MASS\_FRACTION(:)}             & Real Array        & Mass fraction of mixture components                   &                   & 0             \\ \hline
+{\ct VOLUME\_FRACTION(:)}           & Real Array        & Volume fraction of mixture components                 &                   &               \\ \hline
 \end{longtable}
 
 
@@ -10339,7 +10345,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EMISSIVITY\_BACK}                & Real            & Emissivity (back)                 &                     &                         \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & See Section~\ref{info:WALL_MODEL} &                     & {\ct .FALSE.}           \\ \hline
-{\ct FYI}                             & Character       & Comment String                    &                     &                         \\ \hline
 {\ct GEOMETRY}                        & Character       & Geometry type                     &                     & {\ct 'CARTESIAN'}       \\ \hline
 {\ct H\_FIXED}                        & Real            & See Section~\ref{info:convection} & W/m$^2$/K           &                         \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION }         & Real            & For specified HRR only            & kJ/kg               & 0.                      \\ \hline
@@ -10415,7 +10420,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ID}          & Character   & IDentifier                         &             &     \\ \hline
-{\ct FYI}         & Character   & Comment String (has no effect)     &             &     \\ \hline
 {\ct TABLE\_DATA} & Real Array  & Data for one row of the table      &             &     \\ \hline
 \end{longtable}
 
@@ -10441,7 +10445,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct DT}                        & Real       & Initial time step                             & s           &                 \\ \hline
-{\ct FYI}                       & Character  & Comment String (has no effect)                &             &                 \\ \hline
 {\ct LOCK\_TIME\_STEP}          & Logical    & Do not allow time step changes                &             & {\ct .FALSE.}   \\ \hline
 {\ct RESTRICT\_TIME\_STEP}      & Logical    & Do not allow time step to exceed initial      &             & {\ct .TRUE.}    \\ \hline
 {\ct SYNCHRONIZE}               & Logical    & Sync time step of multiple meshes             &             & {\ct .TRUE.}    \\ \hline
@@ -10470,7 +10473,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CC    }            & Real          & Computational coordinate           & m            &     \\ \hline
-{\ct FYI}               & Character     & Comment String (has no effect)     &              &     \\ \hline
 {\ct IDERIV}            & Integer       & Order of polynomial transformation &              &     \\ \hline
 {\ct MESH\_NUMBER}      & Integer       & Number of mesh to transform        &              &     \\ \hline
 {\ct PC    }            & Real          & Physical coordinate or derivative  &              &     \\ \hline
@@ -10502,7 +10504,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DEVC\_ID }             & Character         & {\ct ID} of Controlling Device                                &             &                     \\ \hline
 {\ct DYNAMIC\_PRESSURE}     & Real              & See Section~\ref{info:pressure_boundary}                      & Pa          &  0.0                \\ \hline
 %{\ct EVACUATION    }        & Logical           & Vent to be used in Evac calc                                  &             &  {\ct .FALSE.}      \\ \hline
-{\ct FYI}                   & Character         & Comment String (has no effect)                                &             &                     \\ \hline
 {\ct IOR}                   & Integer           & Orientation Index                                             &             &                     \\ \hline
 {\ct MASS\_FRACTION(N)}     & Real Array        & Mass Fraction of species {\ct N} at {\ct OPEN} vent           & kg/kg       &                     \\ \hline
 {\ct MB    }                & Character         & Mesh Boundary                                                 &             &                     \\ \hline
@@ -10548,10 +10549,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 
 
-\vspace{\baselineskip}
+\newpage
 
 
 \section{Modifications of Input Parameters from FDS 5 to FDS 6}
+
+This section describes the changes in the input parameters between FDS version~5 and version~6. Table~\ref{tbl:Changes} lists in alphabetical order parameters from
+FDS~5 that have changed. Note that this table does not list new parameters in FDS~6.
 
 
 \setlength\LTleft{0pt}
@@ -10561,18 +10565,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \label{tbl:Changes} \\
 \hline
 FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
-\hline 
+\hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
 FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
 \hline
 \endhead
-{\ct NU\_FUEL}          & {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct NU\_GAS}           & {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct NU\_RESIDUE}       & {\ct MATL}        & {\ct NU\_MATL}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct NU\_WATER}         & {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct RESIDUE}           & {\ct MATL}        & {\ct MATL\_ID}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MAXIMUM\_MASS\_FRACTION}   & {\ct CLIP}    & Eliminated                                  &                     &                                              \\ \hline
+{\ct MINIMUM\_MASS\_FRACTION}   & {\ct CLIP}    & Eliminated                                  &                     &                                              \\ \hline
+{\ct NU\_FUEL}                  & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct NU\_GAS}                   & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct NU\_RESIDUE}               & {\ct MATL}    & {\ct NU\_MATL}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct NU\_WATER}                 & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct RESIDUE}                   & {\ct MATL}    & {\ct MATL\_ID}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct STATE\_FILE}               & {\ct DUMP}    & Eliminated                                  &                     &                                              \\ \hline
 \end{longtable}
 
 
@@ -10988,7 +10995,7 @@ the graphics packages referred to in this document are
 not included with the source code, but are commercially available.}.
 
 
-\section{Boundary Files}%Kevin
+\section{Boundary Files}
 \label{out:BNDF}
 The boundary files defined under the namelist group {\ct BNDF} are
 named {\bf CHID\_$n$.bf} ($n$=0001,0002...),
