@@ -30,7 +30,8 @@ nprocs=$(echo "($nthreads-1)/$nnodes+1" | bc)
 infile=${in%.*}
 fulldir=`pwd`
 
-out=$fulldir/$infile.err
+err=$fulldir/$infile.err
+err2=$fulldir/$infile.err2
 outlog=$fulldir/$infile.log
 
 scriptfile=/tmp/script.$$
@@ -55,11 +56,11 @@ fi
 cat << EOF > $scriptfile
 #!/bin/bash
 #PBS -N $infile(MPI)
-#PBS -e $out
+#PBS -e $out2
 #PBS -o $outlog
 #PBS -l nodes=$nnodes:ppn=$nprocs
 #\$ -N $infile(MPI)
-#\$ -e $out
+#\$ -e $out2
 #\$ -o $outlog
 #\$ -l nodes=$nnodes:ppn=$nprocs
 cd $fulldir
@@ -67,7 +68,7 @@ echo Start time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 
-$MPIDIST/bin/mpirun -np $nthreads $fds $in
+$MPIDIST/bin/mpirun -np $nthreads $fds $in 2>$err
 EOF
 chmod +x $scriptfile
 echo Running $in 

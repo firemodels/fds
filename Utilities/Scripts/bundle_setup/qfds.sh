@@ -19,7 +19,8 @@ in=$2
 infile=${in%.*}
 fulldir=`pwd`
 
-out=$fulldir/$infile.err
+err=$fulldir/$infile.err
+err2=$fulldir/$infile.err2
 outlog=$fulldir/$infile.log
 
 stopfile=${in%.*}.stop
@@ -48,10 +49,10 @@ fi
 cat << EOF > $scriptfile
 #!/bin/bash -f
 #PBS -N $infile
-#PBS -e $out
+#PBS -e $err2
 #PBS -o $outlog
 #\$ -N $infile
-#\$ -e $out
+#\$ -e $err2
 #\$ -o $outlog
 
 cd $fulldir
@@ -60,7 +61,7 @@ echo Start time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 
-$fds $in 
+$fds $in 2>$err
 EOF
 chmod +x $scriptfile
 echo Running $in 
