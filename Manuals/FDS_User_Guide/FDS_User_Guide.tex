@@ -5858,7 +5858,7 @@ the index 1 refers to the first, and only, gas species that is specified in the 
 \label{gas_filling}
 \end{figure}
 
-There are three ways in which a species can be used in an FDS computation: it can be tracked as a seperate species, it can be the background species, or it can only exist as part of a lumped species defined with {\ct SMIX}.  If a species only exists as part of one or more lumped species, the parameter {\ct LUMPED\_SPECIES\_ONLY=.TRUE.} should be set.  This tells FDS not allocate space for the species in the array of tracked gasses.  If a species is to be used as the background species, the parameter {\ct BACKGROUND=.TRUE.} should be set.  This also tells FDS not allocate space for the species in the array of tracked gasses. A species with {\ct LUMPED\_SPECIES\_ONLY=.TRUE.} cannot be used as an individual species and it cannot be used as the background species; however, the background species and an individual species can also be used as part of one or more lumped species.
+There are three ways in which a species can be used in an FDS computation: it can be tracked as a seperate species, it can be the background species, or it can only exist as part of a lumped species defined with {\ct SMIX}.  If a species only exists as part of one or more lumped species, the parameter {\ct SMIX\_COMPONENT\_ONLY=.TRUE.} should be set.  This tells FDS not allocate space for the species in the array of tracked gasses.  If a species is to be used as the background species, the parameter {\ct BACKGROUND=.TRUE.} should be set.  This also tells FDS not allocate space for the species in the array of tracked gasses. A species with {\ct SMIX\_COMPONENT\_ONLY=.TRUE.} cannot be used as an individual species and it cannot be used as the background species; however, the background species and an individual species can also be used as part of one or more lumped species.
 
 \subsection{Special Topic: Gas Species Properties}
 
@@ -6050,7 +6050,7 @@ are equivalent to these inputs using {\ct SMIX}
 \end{verbatim} \normalsize
 
 \noindent
-The keyword {\ct LUMPED\_SPECIES\_ONLY} denotes that the species is only present as part of a lumped species.  
+The keyword {\ct SMIX\_COMPONENT\_ONLY} denotes that the species is only present as part of a lumped species.  
 When this flag is set, FDS will not allocate space to track that species individually.
 
 The available inputs for {\ct SMIX} are:
@@ -10282,11 +10282,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FORMULA }                      & Character   & Smokeview label                             &                   &               \\ \hline
 {\ct HUMIDITY}                      & Real        & Relative Humidity                           & \%                & 40.           \\ \hline
 {\ct ID }                           & Character   & Name of species                             &                   &               \\ \hline
-{\ct LUMPED\_SPECIES\_ONLY}         & Logical     & See Section~\ref{info:SMIX}                 &                   & {\ct .FALSE.} \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & Initial mass fraction                       &                   & 0             \\ \hline
 {\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.           \\ \hline
 {\ct REFERENCE\_TEMPERATURE}        & Real        & See Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
+{\ct SMIX\_COMPONENT\_ONLY}         & Logical     & See Section~\ref{info:SMIX}                 &                   & {\ct .FALSE.} \\ \hline
 {\ct SPECIFIC\_ENTHALPY}            & Real        & Specific Enthalpy                           & kJ/kg             &               \\ \hline
 {\ct SPECIFIC\_HEAT}                & Real        & Specific Heat                               & kJ/kg/K           &               \\ \hline
 {\ct SIGMALJ}                       & Real        & Leonard-Jones Parameter                     &                   & 0             \\ \hline
