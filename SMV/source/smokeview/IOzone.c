@@ -1353,7 +1353,7 @@ void drawroomdata(void){
     zroom = roomi->z1;
     dy = roomi->dy/2.;
 
-    if(visODZone==1&&zoneodl!=NULL&&zoneodu!=NULL){
+    if(sethazardcolor==2&&visSZone==1&&zoneodl!=NULL&&zoneodu!=NULL){
 #ifdef pp_GPU
       if(usegpu==1){
         drawzonesmokeGPU(roomi);

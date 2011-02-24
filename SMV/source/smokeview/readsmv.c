@@ -8796,14 +8796,14 @@ int readini2(char *inifile, int localfile){
       if(viszonefire!=0)viszonefire=1;
       continue;
     }
+    if(match(buffer,"SHOWSZONE",9)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&visSZone);
+      continue;
+      }
     if(match(buffer,"SHOWHZONE",9)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visHZone);
-      continue;
-      }
-    if(match(buffer,"SHOWODZONE",10)==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visODZone);
       continue;
       }
     if(match(buffer,"SHOWHAZARDCOLORS",16)==1){
@@ -10417,10 +10417,10 @@ void writeini(int flag){
   fprintf(fileout,"----\n\n");
   fprintf(fileout,"SHOWZONEFIRE\n");
   fprintf(fileout," %i\n",viszonefire);
+  fprintf(fileout,"SHOWSZONE\n");
+  fprintf(fileout," %i\n",visSZone);
   fprintf(fileout,"SHOWHZONE\n");
   fprintf(fileout," %i\n",visHZone);
-  fprintf(fileout,"SHOWODZONE\n");
-  fprintf(fileout," %i\n",visODZone);
   fprintf(fileout,"SHOWVZONE\n");
   fprintf(fileout," %i\n",visVZone);
   fprintf(fileout,"SHOWHAZARDCOLORS\n");

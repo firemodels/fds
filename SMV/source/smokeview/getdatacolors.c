@@ -1380,7 +1380,11 @@ void drawColorBars(void){
   bottom[2]=labeltop-3*dyfont;
   bottom[3]=labeltop-4*dyfont;
   if(showiso_colorbar==1||showevac_colorbar==1||
-    (showsmoke==1&&parttype!=0)||showslice==1||(showvslice==1&&vslicecolorbarflag==1)||showpatch==1||(showzone==1&&sethazardcolor==0)||showplot3d==1){
+    (showsmoke==1&&parttype!=0)||showslice==1||
+    (showvslice==1&&vslicecolorbarflag==1)||
+    showpatch==1||
+    (showzone==1&&sethazardcolor==0)||
+    showplot3d==1){
     sniffErrors("before colorbar");
     CheckMemory;
     if(showplot3d==1&&p3cont2d!=SHADED_CONTOURS){

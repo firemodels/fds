@@ -3835,29 +3835,40 @@ void ZoneShowMenu(int value){
   case 1:
     visVZone=0;
     visHZone=1;
-    visODZone=0;
+    visZone=1;
     break;
   case 2:
     visVZone=1;
     visHZone=0;
-    visODZone=0;
+    visZone=1;
     break;
   case 3:
     visVZone=1; 
     visHZone=1;
-    visODZone=0;
+    visZone=1;
     break;
   case 4:
     visVZone=0; 
     visHZone=0;
-    visODZone=0;
+    visSZone=0;
+    visZone=0;
     break;
   case 5:
+    sethazardcolor=1;
+    visSZone=0;
+    if(visVZone==0&&visHZone==0)visVZone=1;
+    visZone=1;
+    break;
   case 6:
-    sethazardcolor=1-sethazardcolor;
+    sethazardcolor=0;
+    visSZone=0;
+    if(visVZone==0&&visHZone==0)visVZone=1;
+    visZone=1;
     break;
   case 7:
-    visODZone=1-visODZone;
+    sethazardcolor=2;
+    visSZone=1;
+    visZone=1;
     break;
   case 11:         //solid
     visVentSolid=1;
@@ -5064,21 +5075,38 @@ updatemenu=0;
     CREATEMENU(zoneshowmenu,ZoneShowMenu);
     glutAddMenuEntry("Layers",999);
     if(ReadZoneFile==1){
-      if(sethazardcolor==1){
-        glutAddMenuEntry("  Colors: *Hazard",5);
-        glutAddMenuEntry("  Colors: Temperature",6);
+      glutAddMenuEntry("  2D smoke colored by:",999);
+      switch (sethazardcolor){
+        case 0:
+          glutAddMenuEntry("    *temperature",6);
+          glutAddMenuEntry("    hazard",5);
+          break;
+        case 1:
+          glutAddMenuEntry("    temperature",6);
+          glutAddMenuEntry("    *hazard",5);
+          break;
+        case 2:
+          glutAddMenuEntry("    temperature",6);
+          glutAddMenuEntry("    hazard",5);
+          break;
       }
-      else{
-        glutAddMenuEntry("  Colors: Hazard",5);
-        glutAddMenuEntry("  Colors: *Temperature",6);
+      if(sethazardcolor!=2){
+        glutAddMenuEntry("  2D smoke drawn:",999);
+        if(visHZone==1)glutAddMenuEntry("    *horizontally",1);
+        if(visHZone==0)glutAddMenuEntry("    horizontally",1);
+        if(visVZone==1)glutAddMenuEntry("    *vertically",2);
+        if(visVZone==0)glutAddMenuEntry("    vertically",2);
+        }
+      switch (sethazardcolor){
+        case 0:
+        case 1:
+          glutAddMenuEntry("  3D smoke",7);
+          break;
+        case 2:
+          glutAddMenuEntry("  *3D smoke",7);
+          break;
       }
-      if(visHZone==1)glutAddMenuEntry("  *Horizontal",1);
-      if(visHZone==0)glutAddMenuEntry("  Horizontal",1);
-      if(visVZone==1)glutAddMenuEntry("  *Vertical",2);
-      if(visVZone==0)glutAddMenuEntry("  Vertical",2);
-      if(visODZone==0)glutAddMenuEntry("  Smoke",7);
-      if(visODZone==1)glutAddMenuEntry("  *Smoke",7);
-      if(visHZone==0&&visVZone==0){
+      if(visZone==0){
         glutAddMenuEntry("  *Hide",4);
       }
       else{

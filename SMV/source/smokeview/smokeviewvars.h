@@ -487,7 +487,7 @@ SVEXTERN int ncadgeom;
 SVEXTERN int visFloor, visFrame;
 SVEXTERN int visNormalEditColors;
 SVEXTERN int visWalls, visGrid, visCeiling, cursorPlot3D;
-SVEXTERN int SVDECL(visVZone,1), SVDECL(visHZone,0), SVDECL(viszonefire,1), SVDECL(visODZone,0);
+SVEXTERN int SVDECL(visVZone,1), SVDECL(visHZone,0), SVDECL(viszonefire,1), SVDECL(visSZone,0);
 SVEXTERN int visSensor, visSensorNorm, hasSensorNorm, visSprink, visHeat;
 SVEXTERN int visVents;
 SVEXTERN int partframestep, sliceframestep, boundframestep;
