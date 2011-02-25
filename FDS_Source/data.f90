@@ -1657,7 +1657,31 @@ SELECT CASE (SPEC_ID)
               0.000000000002963585_EB*TE**4-1.655321E-16_EB*TE**5+104.9238_EB*LOG(TE) !kJ/mol/K
          CP = CP / 146._EB * 1000._EB !J/kg/K
       ENDIF
-      H = 102305.59191_EB !J/kg      
+      H = 102305.59191_EB !J/kg   
+   CASE('FORMALDEHYDE')
+      TE = MAX(TE,175._EB)
+      CP = -1147.201_EB+169062500_EB/TE**3-5034450._EB/TE**2+68548.35_EB/TE-0.1448912_EB*TE+0.00002890129_EB*TE**2 -&
+             0.000000004187057_EB*TE**3+0.0000000000003534827_EB*TE**4-1.289128E-17_EB*TE**5+183.1773_EB*LOG(TE)!J/mol/K
+      CP = CP / 30._EB * 1000._EB !J/kg/K
+      H = 580062.72682_EB !J/kg            
+   CASE('SULFUR DIOXIDE')
+      IF (TE < 100._EB) THEN
+         CP = 518.3438_EB+TE*0.055261_EB!J/kg/K
+      ELSE
+         CP = 388.9189_EB-445841.6_EB/TE**2+14473.77_EB/TE-0.0875575_EB*TE+0.0000251145_EB*TE**2-0.00000000487155_EB*TE**3+&
+              0.0000000000005234599_EB*TE**4-2.334958E-17_EB*TE**5+71.83284_EB*LOG(TE) !J/mol/K
+         CP = CP / 146._EB * 1000._EB !J/kg/K
+      ENDIF
+      H = 335120.8188_EB !J/kg         
+   CASE('NITROUS OXIDE')
+      IF (TE < 100._EB) THEN
+         CP = 656.1590909_EB+TE*0.107857955_EB!J/kg/K
+      ELSE
+         CP = 135.4775_EB-37971.38_EB/TE**2+3432.027_EB/TE-0.01912358_EB*TE+0.000001548166_EB*TE**2+0.0000000002536593_EB*TE**3-&
+              7.117205E-14_EB*TE**4+4.652381E-18_EB*TE**5+29.57471_EB*LOG(TE)!J/mol/K
+         CP = CP / 146._EB * 1000._EB !J/kg/K
+      ENDIF
+      H = 254813.7971_EB !J/kg         
 END SELECT       
 
 END SUBROUTINE JANAF_TABLE
@@ -1900,6 +1924,28 @@ SELECT CASE (SPEC_ID)
       T_MELT = 88._EB !K
       T_BOIL = 225.41_EB !K      
       FUEL = .TRUE.
+   CASE('FORMALDEHYDE')
+      CP = 1180._EB !J/kg/K
+      H_L = -213580._EB !J/kg      
+      H_V = 776505.2933_EB !J/kg
+      T_REF = 181._EB !K
+      T_MELT = 181._EB !K
+      T_BOIL = 254._EB !K      
+   CASE('SULFUR DIOXIDE')
+      CP = 1359.14286_EB !J/kg/K
+      H_L = -267955.0148_EB !J/kg      
+      H_V = 389370._EB !J/kg
+      T_REF = 197.15_EB !K
+      T_MELT = 197.15_EB !K
+      T_BOIL = 263.05_EB !K       
+   CASE('NITROUS OXIDE')
+      T = MIN(184.67_EB,MAX(182.29_EB,REAL(I_TMP,EB)))
+      CP = 187.7_EB+8.5_EB*T !J/kg/K
+      H_L = -316668.6829_EB !J/kg      
+      H_V = 376140._EB !J/kg
+      T_REF = 182.29_EB !K
+      T_MELT = 182.29_EB !K
+      T_BOIL = 184.67_EB !K                       
    !CASE('ACETYLENE') sublimation
    !CASE('SULFUR HEXAFLUORIDE') sublimation
    CASE DEFAULT
@@ -1971,6 +2017,11 @@ SELECT CASE(GAS_NAME)
       MW=28._EB
       ABSORBING = .TRUE.
       FORMULA='C2H2'
+   CASE('FORMALDEHYDE')!Methanol as surrogate        
+      SIGMA=3.626_EB 
+      EPSOK=481.8_EB 
+      MW=30._EB
+      FORMULA='CH2O'
    CASE('HELIUM')          
       SIGMA=2.551_EB 
       EPSOK= 10.22_EB 
@@ -2050,11 +2101,16 @@ SELECT CASE(GAS_NAME)
       EPSOK= 71.4_EB  
       MW=28._EB
       FORMULA='N2'
-   CASE('NITROGEN DIOXIDE')
-      SIGMA=3.467_EB 
-      EPSOK= 232.4_EB  
+   CASE('NITROGEN DIOXIDE') !Paul, P. DRFM, SAND98-8203
+      SIGMA=3.922_EB 
+      EPSOK= 204.88_EB  
       MW=46._EB
       FORMULA='NO2'      
+   CASE('NITROUS OXIDE')
+      SIGMA=3.828_EB 
+      EPSOK= 232.4_EB  
+      MW=44._EB
+      FORMULA='N2O'      
    CASE('OXYGEN')          
       SIGMA=3.467_EB 
       EPSOK=106.7_EB  
@@ -2077,6 +2133,11 @@ SELECT CASE(GAS_NAME)
       EPSOK= 71.4_EB  
       MW=12._EB
       FORMULA='C'
+   CASE('SULFUR DIOXIDE')
+      SIGMA=4.112_EB
+      EPSOK=335.4_EB 
+      MW=64._EB
+      FORMULA='SF6'             
    CASE('SULFUR HEXAFLUORIDE')
       SIGMA=5.128_EB
       EPSOK=222.1_EB 
