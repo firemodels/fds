@@ -8,7 +8,7 @@ export SMV=~/bin/smv5_linux_64
 export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export BASEDIR=`pwd`
 
-./FDS_PCases.sh
+./FDS_Pictures.sh
 
 echo FDS cases submitted
 
