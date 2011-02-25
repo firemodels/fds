@@ -11,12 +11,29 @@ export BASEDIR=`pwd`
 export SMVUG=$SVNROOT/Manuals/SMV_User_Guide
 export SMVVG=$SVNROOT/Manuals/SMV_Verification_Guide
 
+if ! [ -e $SMV ]; then
+  echo "The file $SMV does not exist. Run aborted."
+  exit
+fi
+if ! [ -e $SMOKEZIP ]; then
+  echo "The file $SMOKEZIP does not exist. Run aborted."
+  exit
+fi
+if ! [ -e $SMOKEDIFF ]; then
+  echo "The file $SMOKEDIFF does not exist. Run aborted."
+  exit
+fi
+if ! [ -e $BACKGROUND ]; then
+  echo "The file $BACKGROUND does not exist. Run aborted."
+  exit
+fi
+
 
 cd $SMVUG
 rm SCRIPT_FIGURES/*.png
 rm SCRIPT_FIGURES/*.help
 rm SCRIPT_FIGURES/*.version
-
+source ~/.bashrc_fds intel64
 $SMV -help > SCRIPT_FIGURES\smokeview.help
 $SMV -version > SCRIPT_FIGURES\smokeview.version
 $SMOKEZIP -help > SCRIPT_FIGURES\smokezip.help
