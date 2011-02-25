@@ -5776,11 +5776,11 @@ The available inputs for {\ct SMIX} are:
 \begin{description}
 \item[{\ct BACKGROUND}] Denotes that this lumped species is to be used as the background species.  The {\ct BACKGROUND} lumped species must be defined first.
 \item[{\ct ID}] Character string identifying the name of the species.  If no {\ct ID} is given the background lumped species will be named LUMPED SPECIES 0
-and any remaining lumped species will be named LUMPED SPECIES N where N is the position of the the input following any background lumped species.
-label the {\ct SPEC\_ID} Character array containing the names of the species that make up the lumped species.  This name should not unique over all {\ct SMIX} and {\ct SPEC} inputs.
-\item[{\ct MASS\_FRACTION}] The mass fractions of the species making up the lumped species.  FDS will normalize the values to 1.
+and any remaining lumped species will be named LUMPED SPECIES N where N is the position of the the input following any background lumped species.   This name should not unique over all {\ct SMIX} and {\ct SPEC} inputs.
+\item[{\ct SPEC\_ID}] Character array containing the names of the species that make up the lumped species. 
+\item[{\ct MASS\_FRACTION}] The mass fractions of the species making up the lumped species in the order listed by {\ct SPEC\_ID}.  FDS will normalize the values to 1.
 Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
-\item[{\ct VOLUME\_FRACTION}]  The volume fractions of the species making up the lumped species.  FDS will normalize the values to 1.
+\item[{\ct VOLUME\_FRACTION}]  The volume fractions of the species making up the lumped species in the order listed by {\ct SPEC\_ID}.  FDS will normalize the values to 1.
 Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
 \end{description}
 
@@ -5863,7 +5863,7 @@ but rather to the net production of the smoke particulate from the fire.  (Defau
 (default 0.1)
 \item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon
 monoxide, $y_{CO}$. (Default 0.0)
-\item[{\ct H2\_YIELD}] The fraction of fuel mass converted into hydrogen, $y_{H_2}$. (Mixture Fraction only, default 0.0)
+\item[{\ct H2\_YIELD}] The fraction of fuel mass converted into hydrogen, $y_{H_2}$. (Default 0.0)
 \item[{\ct HEAT\_OF\_COMBUSTION}] $\Delta H$ (kJ/kg). The amount of
 energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
 specified, it is assumed to be
@@ -5999,14 +5999,16 @@ The background species can be specified as NU(0).
 \end{description}
 
 The addition of the {\ct SMIX} namelist group means that there are three ways in which a simple, mixing controlled reaction could be defined.
-The following three sets on inputs are equivalent:
+The following three sets of inputs are equivalent:
 
+Simple chemsitry:
 
 \footnotesize
 \begin{verbatim}
 &REAC FUEL='METHANE', C=1, H=4, HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
 
+Primitive species:
 
 \footnotesize
 \begin{verbatim}
@@ -6019,6 +6021,8 @@ The following three sets on inputs are equivalent:
       NU=-1,-2,1,2, HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
 
+
+User defined lumped species:
 
 \footnotesize
 \begin{verbatim}
