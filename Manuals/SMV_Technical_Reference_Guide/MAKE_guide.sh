@@ -1,0 +1,5 @@
+#!/bin/bash
+pdflatex SMV_Technical_Reference_Guide
+bibtex SMV_Technical_Reference_Guide
+pdflatex SMV_Technical_Reference_Guide
+pdflatex SMV_Technical_Reference_Guide
