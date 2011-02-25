@@ -14,7 +14,7 @@
 
 % font properties
 Font_Name       = 'Times';
-Key_Font_Size   = 14;
+Key_Font_Size   = 12;
 Title_Font_Size = 16;
 Label_Font_Size = 16;
 
