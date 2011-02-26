@@ -224,15 +224,16 @@ intel_osx_test_32 : $(obj)
 
 intel_osx_32 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_32
 intel_osx_32 : FORTLIBDIR  = $(OSX32FORTLIBDIR)
-intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
-intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
+intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX -mmaccosx-version-min=10.4
+intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -mmaccosx-version-min=10.4
+intel_osx_32 : LFLAGS    = -static-intel -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT
 intel_osx_32 : CC        = icc 
 intel_osx_32 : CPP       = icpc
 intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokeview_osx_32
 
 intel_osx_32 : $(obj)
-	icpc -m32 -o $(bin)/$(exe) -static-intel $(obj)  -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+	icpc -m32 -o $(bin)/$(exe) $(LFLAGS) $(obj)  -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
 
 # ------------- OSX 64 ----------------
@@ -255,15 +256,16 @@ intel_osx_test_64 : $(obj)
 
 intel_osx_64 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_64
 intel_osx_64 : FORTLIBDIR  = $(OSX64FORTLIBDIR)
-intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64
-intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64
+intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -mmaccox-version-min=10.4
+intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -mmacosx-version-min=10.4
+intel_osx_64 : LFLAGS    = -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64 : CC        = icc 
 intel_osx_64 : CPP       = icpc
 intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokeview_osx_64
 
 intel_osx_64 : $(obj)
-	icpc -m64 -o $(bin)/$(exe) -static-intel $(obj)  -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+	icpc -m64 -o $(bin)/$(exe) $(LFLAGS) $(obj)  -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
 # ------------- make depend ----------------
 
